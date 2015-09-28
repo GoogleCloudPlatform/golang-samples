@@ -3,10 +3,10 @@
 1. Sign one of the contributor license agreements below.
 1. Get the package:
 
-    `go get -d github.com/GoogleCloudPlatform/golang-samples`.
+    `go get -d github.com/GoogleCloudPlatform/golang-samples`
 1. Change into the checked out source:
 
-    `cd $GOPATH/src/github.com/GoogleCloudPlatform/golang-samples`.
+    `cd $GOPATH/src/github.com/GoogleCloudPlatform/golang-samples`
 1. Fork the repo.
 1. Set your fork as a remote:
 
@@ -20,7 +20,7 @@ Before we can accept your pull requests you'll need to sign a Contributor
 License Agreement (CLA):
 
 - **If you are an individual writing original source code** and **you own the
-- intellectual property**, then you'll need to sign an [individual CLA][indvcla].
+intellectual property**, then you'll need to sign an [individual CLA][indvcla].
 - **If you work for a company that wants to allow you to contribute your work**,
 then you'll need to sign a [corporate CLA][corpcla].
 
