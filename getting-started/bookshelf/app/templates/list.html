@@ -1,0 +1,24 @@
+{{/*
+  Copyright 2015 Google Inc. All rights reserved.
+  Use of this source code is governed by the Apache 2.0
+  license that can be found in the LICENSE file.
+*/}}
+<h3>Books</h3>
+<a href="/books/add" class="btn btn-success btn-sm">
+  <i class="glyphicon glyphicon-plus"></i>
+  <span>Add book</span>
+</a>
+
+{{range .}}
+<div class="media">
+  <div class="media-left">
+    <img src="{{if .ImageURL}}{{.ImageURL}}{{else}}https://placekitten.com/g/200/300{{end}}">
+  </div>
+  <div class="media-body">
+    <h4><a href="/books/{{.ID}}">{{.Title}}</a></h4>
+    <p>{{.Author}}</p>
+  </div>
+</div>
+{{else}}
+<p>No books found.</p>
+{{end}}

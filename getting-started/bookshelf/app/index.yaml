@@ -1,0 +1,14 @@
+# To create these indexes, run:
+#    $ gcloud preview datastore create-indexes index.yaml
+#
+# It will take some time for the indices to be created.
+
+indexes:
+
+# This index enables filtering by "CreatedByID" and sort by "Title".
+- kind: Book
+  properties:
+  - name: CreatedByID
+    direction: asc
+  - name: Title
+    direction: asc

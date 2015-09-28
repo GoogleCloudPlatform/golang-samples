@@ -1,0 +1,33 @@
+{{/*
+  Copyright 2015 Google Inc. All rights reserved.
+  Use of this source code is governed by the Apache 2.0
+  license that can be found in the LICENSE file.
+*/}}
+<h3>{{if .}}Edit{{else}}Add{{end}} book</h3>
+
+<form method="post" enctype="multipart/form-data" action="/books{{if .}}/{{.ID}}{{end}}">
+  <div class="form-group">
+    <label for="title">Title</label>
+    <input class="form-control" name="title" id="title" value="{{.Title}}">
+  </div>
+  <div class="form-group">
+    <label for="author">Author</label>
+    <input class="form-control" name="author" id="author" value="{{.Author}}">
+  </div>
+  <div class="form-group">
+    <label for="publishedDate">Date Published</label>
+    <input class="form-control" name="publishedDate" id="publishedDate" value="{{.PublishedDate}}">
+  </div>
+  <div class="form-group">
+    <label for="description">Description</label>
+    <input class="form-control" name="description" id="description" value="{{.Description}}">
+  </div>
+  <div class="form-group">
+    <label for="image">Cover Image</label>
+    <input class="form-control" name="image" id="image" type="file">
+  </div>
+  <button class="btn btn-success">Save</button>
+  <input type="hidden" name="imageURL" value="{{.ImageURL}}">
+  <input type="hidden" name="createdBy" value="{{.CreatedBy}}">
+  <input type="hidden" name="createdByID" value="{{.CreatedByID}}">
+</form>

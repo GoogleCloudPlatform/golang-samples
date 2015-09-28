@@ -1,0 +1,23 @@
+runtime: go
+vm: true
+api_version: 1
+
+resources:
+  cpu: .5
+  memory_gb: 1.3
+  disk_size_gb: 10
+
+automatic_scaling:
+  min_num_instances: 1
+  max_num_instances: 5
+  cool_down_period_sec: 60
+  cpu_utilization:
+    target_utilization: 0.5
+
+env_variables:
+  OAUTH2_CALLBACK: https://<your-project-id>.appspot.com/oauth2callback
+
+beta_settings:
+  # NOTE: userinfo.email is required by the Datastore API.
+  service_account_scopes: >
+    https://www.googleapis.com/auth/userinfo.email

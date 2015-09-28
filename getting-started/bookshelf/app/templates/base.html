@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+{{/*
+  Copyright 2015 Google Inc. All rights reserved.
+  Use of this source code is governed by the Apache 2.0
+  license that can be found in the LICENSE file.
+*/}}
+<html>
+<head>
+<title>Bookshelf - Go on Google Cloud Platform</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+</head>
+<body>
+<div class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <div class="navbar-brand">Bookshelf</div>
+    </div>
+
+    <ul class="nav navbar-nav">
+      <li><a href="/books">Books</a></li>
+      {{if .AuthEnabled}}
+        <li><a href="/books/mine">My Books</a></li>
+      {{end}}
+    </ul>
+
+    <!-- [START auth] -->
+    {{if .AuthEnabled}}
+      {{if .Profile}}
+      <form method="post" action="{{.LogoutURL}}" class="navbar-form navbar-right">
+        <button class="btn btn-default">Log out</button>
+      </form>
+      <div class="navbar-text navbar-right">
+        {{if .Profile.Image.Url}}
+          <img class="img-circle" width="24" src="{{.Profile.Image.Url}}">
+        {{end}}
+        <span>{{.Profile.DisplayName}}</span>
+      </div>
+      {{else}}
+      <div class="navbar-text navbar-right">
+        <a href="{{.LoginURL}}">Log in</a>
+      </div>
+      {{end}}
+    {{end}}
+    <!-- [END auth] -->
+  </div>
+</div>
+<div class="container">
+  {{template "body" .Data}}
+</div>
+</body>
+</html>
