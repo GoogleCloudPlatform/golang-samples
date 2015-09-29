@@ -1,18 +1,21 @@
-## Google Cloud Platform Go Samples
+# Google Cloud Platform Go Samples
 
-This repository holds sample code written in Go that demonstrates the Google Cloud Platform.
+[![Build Status](https://travis-ci.org/GoogleCloudPlatform/golang-samples.svg?branch=master)](https://travis-ci.org/GoogleCloudPlatform/golang-samples)
 
+This repository holds sample code written in Go that demonstrates the Google
+Cloud Platform.
 
-This repository holds the samples used in the Go on [cloud.google.com](https://cloud.google.com).
+Some samples have accompanying guides on
+[cloud.google.com](https://cloud.google.com). See respective README files for
+details.
 
-See our other [Google Cloud Platform github
-repos](https://github.com/GoogleCloudPlatform) for sample applications and
-scaffolding for other frameworks and use cases.
+## Contributing changes.
 
-## Contributing changes
+Entirely new samples are not accepted. Bug fixes are welcome, either as pull
+requests or as GitHub issues.
 
-* See [CONTRIBUTING.md](CONTRIBUTING.md)
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to contribute.
 
 ## Licensing
 
-* See [LICENSE](LICENSE)
+Code in this repository is licensed under the Apache 2.0. See [LICENSE](LICENSE).
