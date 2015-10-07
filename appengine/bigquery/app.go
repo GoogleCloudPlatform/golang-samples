@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // This App Engine application uses its default service account to list all
-// the BigQuery projects accessible via the BigQuery REST API.
+// the BigQuery datasets accessible via the BigQuery REST API.
 package sample
 
 import (
@@ -28,20 +28,25 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	// create a new App Engine context from the request.
 	c := appengine.NewContext(r)
 
-	// obtain the list of project names.
-	names, err := projects(c)
+	// obtain the list of dataset names.
+	names, err := datasets(c)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// print it to the output.
-	fmt.Fprintln(w, strings.Join(names, "\n"))
+	w.Header().Set("Content-Type", "text")
+
+	if len(names) == 0 {
+		fmt.Fprintf(w, "no datasets visible")
+	} else {
+		fmt.Fprintf(w, "datasets:\n\t"+strings.Join(names, "\n\t"))
+	}
 }
 
-// projects returns a list with the names of all the Big Query projects visible
+// datasets returns a list with the ids of all the Big Query datasets visible
 // with the given context.
-func projects(c context.Context) ([]string, error) {
+func datasets(c context.Context) ([]string, error) {
 	// create a new authenticated HTTP client over urlfetch.
 	client := &http.Client{
 		Transport: &oauth2.Transport{
@@ -56,16 +61,17 @@ func projects(c context.Context) ([]string, error) {
 		return nil, fmt.Errorf("create service: %v", err)
 	}
 
-	// list the projects.
-	list, err := bq.Projects.List().Do()
-	if err != nil {
-		return nil, fmt.Errorf("list projects: %v", err)
-	}
+	// obtain the current application id, the BigQuery id is the same.
+	appID := appengine.AppID(c)
 
-	// prepare the list of names.
-	var names []string
-	for _, p := range list.Projects {
-		names = append(names, p.FriendlyName)
+	// prepare the list of ids.
+	var ids []string
+	datasets, err := bq.Datasets.List(appID).Do()
+	if err != nil {
+		return nil, fmt.Errorf("could not list datasets for %q: %v", appID, err)
 	}
-	return names, nil
+	for _, d := range datasets.Datasets {
+		ids = append(ids, d.Id)
+	}
+	return ids, nil
 }
