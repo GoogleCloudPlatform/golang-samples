@@ -7,9 +7,7 @@ If you don’t know what BigQuery or App Engine are this post is probably not
 for you … yet! Instead you should have a look at the docs for [BigQuery][1],
 and [App Engine][2], two of my favorite products of [Google Cloud Platform][0].
 
-<div style="text-align:center">
-[![Google Cloud Platform Logo](https://cloud.google.com/_static/images/new-gcp-logo.png)](http://cloud.google.com)
-</div>
+[![Google Cloud Platform Logo](https://cloud.google.com/_static/images/new-gcp-logo.png)][0]
 
 The solution for this is quite simple, but I think there’s enough
 moving pieces than a blog post was required. Let’s assume that the list will
