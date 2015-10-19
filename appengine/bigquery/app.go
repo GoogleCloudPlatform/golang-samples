@@ -30,10 +30,10 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// create a new App Engine context from the request.
-	c := appengine.NewContext(r)
+	ctx := appengine.NewContext(r)
 
 	// obtain the list of dataset names.
-	names, err := datasets(c)
+	names, err := datasets(ctx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
