@@ -20,11 +20,15 @@ import (
 )
 
 func init() {
-	// all requests are handled by handler.
 	http.HandleFunc("/", handle)
 }
 
 func handle(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		http.NotFound(w, r)
+		return
+	}
+
 	// create a new App Engine context from the request.
 	c := appengine.NewContext(r)
 
@@ -46,23 +50,23 @@ func handle(w http.ResponseWriter, r *http.Request) {
 
 // datasets returns a list with the ids of all the Big Query datasets visible
 // with the given context.
-func datasets(c context.Context) ([]string, error) {
+func datasets(ctx context.Context) ([]string, error) {
 	// create a new authenticated HTTP client over urlfetch.
 	client := &http.Client{
 		Transport: &oauth2.Transport{
-			Source: google.AppEngineTokenSource(c, bigquery.BigqueryScope),
-			Base:   &urlfetch.Transport{Context: c},
+			Source: google.AppEngineTokenSource(ctx, bigquery.BigqueryScope),
+			Base:   &urlfetch.Transport{Context: ctx},
 		},
 	}
 
 	// create the BigQuery service.
 	bq, err := bigquery.New(client)
 	if err != nil {
-		return nil, fmt.Errorf("create service: %v", err)
+		return nil, fmt.Errorf("could not create service: %v", err)
 	}
 
 	// obtain the current application id, the BigQuery id is the same.
-	appID := appengine.AppID(c)
+	appID := appengine.AppID(ctx)
 
 	// prepare the list of ids.
 	var ids []string
