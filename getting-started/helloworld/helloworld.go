@@ -11,6 +11,7 @@ import (
 
 func main() {
 	http.HandleFunc("/", handler)
+	log.Print("Listening on port 8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
