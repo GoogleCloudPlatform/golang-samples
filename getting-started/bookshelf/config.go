@@ -27,8 +27,7 @@ var (
 	DB          BookDatabase
 	OAuthConfig *oauth2.Config
 
-	StorageCtx    context.Context
-	StorageBucket string
+	StorageBucket *storage.BucketHandle
 
 	SessionStore sessions.Store
 
@@ -67,7 +66,7 @@ func init() {
 	// [END mongo]
 
 	// [START datastore]
-	// To use Cloud Datastore, uncomment the block comment below and add your
+	// To use Cloud Datastore, uncomment the following lines and update the
 	// project ID.
 	// More options can be set, see the google package docs for details:
 	// http://godoc.org/golang.org/x/oauth2/google
@@ -81,10 +80,9 @@ func init() {
 
 	// [START storage]
 	// To configure Cloud Storage, uncomment the following lines and update the
-	// project ID and bucket name.
+	// bucket name.
 	//
-	// StorageBucket = "<your-storage-bucket>"
-	// StorageCtx, err = cloudContext("<your-project-id>")
+	// StorageBucket, err = configureStorage("<your-storage-bucket>")
 	// [END storage]
 
 	if err != nil {
@@ -149,6 +147,15 @@ func configureDatastoreDB(projectID string) (BookDatabase, error) {
 		return nil, err
 	}
 	return newDatastoreDB(client)
+}
+
+func configureStorage(bucketID string) (*storage.BucketHandle, error) {
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return client.Bucket(bucketID), nil
 }
 
 func cloudContext(projectID string) (context.Context, error) {

@@ -15,6 +15,8 @@ import (
 	"path"
 	"strconv"
 
+	"golang.org/x/net/context"
+
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/satori/go.uuid"
@@ -198,14 +200,15 @@ func uploadFileFromForm(r *http.Request) (url string, err error) {
 		return "", err
 	}
 
-	if bookshelf.StorageBucket == "" {
+	if bookshelf.StorageBucket == nil {
 		return "", errors.New("storage bucket is missing - check config.go")
 	}
 
 	// random filename, retaining existing extension.
 	name := uuid.NewV4().String() + path.Ext(fh.Filename)
 
-	w := storage.NewWriter(bookshelf.StorageCtx, bookshelf.StorageBucket, name)
+	ctx := context.Background()
+	w := bookshelf.StorageBucket.Object(name).NewWriter(ctx)
 	w.ACL = []storage.ACLRule{{storage.AllUsers, storage.RoleReader}}
 	w.ContentType = fh.Header.Get("Content-Type")
 
