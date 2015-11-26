@@ -60,7 +60,7 @@ func main() {
 				log.Printf("Failed to create task: %v", err)
 				break
 			}
-			fmt.Println("Created new task with ID %d", key.ID())
+			fmt.Printf("Created new task with ID %d\n", key.ID())
 
 		case "done":
 			if n == 0 {
@@ -72,7 +72,7 @@ func main() {
 				log.Printf("Failed to mark task done: %v", err)
 				break
 			}
-			fmt.Println("Task %d marked done", n)
+			fmt.Printf("Task %d marked done\n", n)
 
 		case "list":
 			tasks, err := ListTasks(ctx, client)
@@ -92,7 +92,7 @@ func main() {
 				log.Printf("Failed to delete task: %v", err)
 				break
 			}
-			fmt.Println("Task %d deleted", n)
+			fmt.Printf("Task %d deleted\n", n)
 
 		default:
 			log.Printf("Unknown command %q", cmd)
@@ -188,9 +188,9 @@ func PrintTasks(w io.Writer, tasks []*Task) {
 	fmt.Fprintf(tw, "ID\tDescription\tStatus")
 	for _, t := range tasks {
 		if t.Done {
-			fmt.Fprintf(tw, "%d\t%s\tdone", t.id, t.Desc)
+			fmt.Fprintf(tw, "%d\t%s\tdone\n", t.id, t.Desc)
 		} else {
-			fmt.Fprintf(tw, "%d\t%s\tcreated %v", t.id, t.Desc, t.Created)
+			fmt.Fprintf(tw, "%d\t%s\tcreated %v\n", t.id, t.Desc, t.Created)
 		}
 	}
 	tw.Flush()
