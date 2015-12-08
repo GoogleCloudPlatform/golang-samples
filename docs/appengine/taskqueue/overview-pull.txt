@@ -1,0 +1,40 @@
+// [START adding_tasks_to_a_pull_queue]
+import "google.golang.org/appengine/taskqueue"
+
+t := &taskqueue.Task{
+    Payload: []byte("hello world"),
+    Method:  "PULL",
+}
+err := taskqueue.Add(ctx, t, "pull-queue")
+// [END adding_tasks_to_a_pull_queue]
+
+// [START leasing_tasks_1]
+import "google.golang.org/appengine/taskqueue"
+
+tasks, err := taskqueue.Lease(ctx, 100, "pull-queue", 3600)
+// [END leasing_tasks_1]
+
+// [START leasing_tasks_2]
+import "google.golang.org/appengine/taskqueue"
+
+_, err := taskqueue.Add(ctx, &taskqueue.Task{Payload: []byte("parse1"), Method: "PULL", Tag: "parse"})
+_, err := taskqueue.Add(ctx, &taskqueue.Task{Payload: []byte("parse2"), Method: "PULL", Tag: "parse"})
+_, err := taskqueue.Add(ctx, &taskqueue.Task{Payload: []byte("render1"), Method: "PULL", Tag: "render"})
+_, err := taskqueue.Add(ctx, &taskqueue.Task{Payload: []byte("render2"), Method: "PULL", Tag: "render"})
+
+// leases render tasks, but not parse
+tasks, err := taskqueue.LeaseByTag(ctx, 100, "pull-queue", 3600, "render")
+
+// Leases up to 100 tasks that have same tag.
+// Tag is that of "oldest" task by ETA.
+tasks, err := taskqueue.LeaseByTag(ctx, 100, "pull-queue", 3600, "")
+// [END leasing_tasks_2]
+
+// [START deleting_tasks_1]
+import "google.golang.org/appengine/taskqueue"
+
+tasks, err := taskqueue.Lease(ctx, 100, "pull-queue", 3600)
+// Perform some work with the tasks here
+
+taskqueue.DeleteMulti(ctx, tasks, "pull-queue")
+// [END deleting_tasks_1]

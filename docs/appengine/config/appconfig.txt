@@ -1,0 +1,102 @@
+// [START about_app_yaml_example]
+application: myapp
+version: alpha-001
+runtime: go
+api_version: go1
+
+handlers:
+- url: /stylesheets
+  static_dir: stylesheets
+
+- url: /(.*\.(gif|png|jpg))$
+  static_files: static/\1
+  upload: static/.*\.(gif|png|jpg)$
+
+- url: /.*
+  script: _go_app
+// [END about_app_yaml_example]
+
+// [START handlers_example]
+handlers:
+- url: /images
+  static_dir: static/images
+
+- url: /.*
+  script: _go_app
+// [END handlers_example]
+
+// [START script_example]
+handlers:
+
+# The root URL (/) is handled by the Go application. No other URLs match this pattern.
+- url: /
+  script: _go_app
+
+# The URL /index.html is also handled by the Go application.
+- url: /index\.html
+  script: _go_app
+
+# A regular expression indicating that it should be handled by the Go application.
+- url: /browse/(books|videos|tools)
+  script: _go_app
+
+# All other URLs are handled by the Go application.
+- url: /.*
+  script: _go_app
+// [END script_example]
+
+// [START login_example]
+handlers:
+
+- url: /profile/.*
+  script: _go_app
+  login: required
+
+- url: /admin/.*
+  script: _go_app
+  login: admin
+
+- url: /.*
+  script: _go_app
+// [END login_example]
+
+//[START auth_fail_action_example]
+handlers:
+- url: /secure_api/.*
+  script: _go_app
+  login: required
+  auth_fail_action: unauthorized
+//[END auth_fail_action_example]
+
+//[START expiration_example]
+application: myapp
+version: alpha-001
+runtime: go
+api_version: go1
+
+default_expiration: "4d 5h"
+
+handlers:
+  # ...
+//[END expiration_example]
+
+//[START secure_urls]
+handlers:
+- url: /youraccount/.*
+  script: _go_app
+  login: required
+  secure: always
+//[END secure_urls]
+
+//[START inbound_services]
+inbound_services:
+- warmup
+//[END inbound_services]
+
+//[START os_getenv_example]
+import "os"
+//...
+if v := os.Getenv("MY_VAR"); v != "" {
+  //...
+}
+//[END os_getenv_example]

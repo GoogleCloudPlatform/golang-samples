@@ -1,0 +1,6 @@
+// [START App_Engine_Example]
+/path/to/AppEngSDK/dev_appserver.py . --appidentity_email_address <your_app_email_address>@developer.gserviceaccount.com --appidentity_private_key_path pem_file.pem
+// [END App_Engine_Example]
+// [START Managed_VM_Example]
+/path/to/CloudSDK/gcloud app run ./app.yaml --appidentity-email-address <your_app_email_address>@developer.gserviceaccount.com --appidentity-private-key-path pem_file.pem
+// [END Managed_VM_Example]

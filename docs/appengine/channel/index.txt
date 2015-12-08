@@ -1,0 +1,163 @@
+// [START create_channel_1]
+package tictactoe
+
+import (
+    "errors"
+    "html/template"
+    "net/http"
+    "strconv"
+    "strings"
+
+    "golang.org/x/net/context"
+
+    "google.golang.org/appengine"
+    "google.golang.org/appengine/channel"
+    "google.golang.org/appengine/datastore"
+    "google.golang.org/appengine/log"
+    "google.golang.org/appengine/user"
+)
+
+func init() {
+    http.HandleFunc("/", main)
+    http.HandleFunc("/move", move)
+}
+
+type Game struct {
+    UserX  string
+    UserO  string
+    MoveX  bool
+    Board  string
+    Winner string
+}
+
+var mainTemplate = template.Must(template.ParseFiles("main.html"))
+
+func main(w http.ResponseWriter, r *http.Request) {
+    ctx := appengine.NewContext(r)
+    u := user.Current(ctx) // assumes 'login: required' set in app.yaml
+    key := r.FormValue("gamekey")
+
+    newGame := key == ""
+    if newGame {
+        key = u.ID
+    }
+    err := datastore.RunInTransaction(ctx, func(ctx context.Context) error {
+        k := datastore.NewKey(ctx, "Game", key, 0, nil)
+        g := new(Game)
+        if newGame {
+            // No game specified.
+            // Create a new game and make this user the 'X' player.
+            g.UserX = u.ID
+            g.MoveX = true
+            g.Board = strings.Repeat(" ", 9)
+        } else {
+            // Game key specified, load it from the Datastore.
+            if err := datastore.Get(ctx, k, g); err != nil {
+                return err
+            }
+            if g.UserO != "" {
+                // Both players already in game, skip the Put below.
+                return nil
+            }
+            if g.UserX != u.ID {
+                // This game has no 'O' player.
+                // Make the current user the 'O' player.
+                g.UserO = u.ID
+            }
+        }
+        // Store the created or updated Game to the Datastore.
+        _, err := datastore.Put(ctx, k, g)
+        return err
+    }, nil)
+    if err != nil {
+        http.Error(w, "Couldn't load Game", http.StatusInternalServerError)
+        log.Errorf(ctx, "setting up: %v", err)
+        return
+    }
+
+    tok, err := channel.Create(ctx, u.ID+key)
+    if err != nil {
+        http.Error(w, "Couldn't create Channel", http.StatusInternalServerError)
+        log.Errorf(ctx, "channel.Create: %v", err)
+        return
+    }
+
+    err = mainTemplate.Execute(w, map[string]string{
+        "token":    tok,
+        "me":       u.ID,
+        "game_key": key,
+    })
+    if err != nil {
+        log.Errorf(ctx, "mainTemplate: %v", err)
+    }
+}
+// [END create_channel_1]
+
+// [START create_channel_2]
+<body>
+  <script>
+    channel = new goog.appengine.Channel('{{.token}}');
+    socket = channel.open();
+    socket.onopen = onOpened;
+    socket.onmessage = onMessage;
+    socket.onerror = onError;
+    socket.onclose = onClose;
+  </script>
+</body>
+// [END create_channel_2]
+
+// [START validate_message]
+func move(w http.ResponseWriter, r *http.Request) {
+    ctx := appengine.NewContext(r)
+
+    // Get the user and their proposed move.
+    u := user.Current(ctx)
+    pos, err := strconv.Atoi(r.FormValue("i"))
+    if err != nil {
+        http.Error(w, "Invalid move", http.StatusBadRequest)
+        return
+    }
+    key := r.FormValue("gamekey")
+
+    g := new(Game)
+    err = datastore.RunInTransaction(ctx, func(ctx context.Context) error {
+        // Retrieve the game from the Datastore.
+        k := datastore.NewKey(ctx, "Game", key, 0, nil)
+        if err := datastore.Get(ctx, k, g); err != nil {
+            return err
+        }
+
+        // Make the move (mutating g).
+        if !g.Move(u.ID, pos) {
+            return errors.New("Invalid move")
+        }
+
+        // Update the Datastore.
+        _, err := datastore.Put(ctx, k, g)
+        return err
+    }, nil)
+    if err != nil {
+        http.Error(w, "Couldn't make move", http.StatusInternalServerError)
+        log.Errorf(ctx, "move: %v", err)
+        return
+    }
+
+    // Send the game state to both clients.
+    for _, uID := range []string{g.UserX, g.UserO} {
+        err := channel.SendJSON(ctx, uID+key, g)
+        if err != nil {
+            log.Errorf(ctx, "sending Game: %v", err)
+        }
+    }
+}
+
+func (g *Game) Move(uID string, pos int) (ok bool) {
+    // validate the move and update the board
+    // (implementation omitted in this example)
+}
+// [END validate_message]
+
+// [START channel_presence]
+// In the handler for _ah/channel/connected/
+clientID := r.FormValue("from")
+// [END channel_presence]

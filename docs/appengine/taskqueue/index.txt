@@ -1,0 +1,29 @@
+// [START tasks_within_transactions]
+import (
+    "golang.org/x/net/context"
+
+    "google.golang.org/appengine/datastore"
+    "google.golang.org/appengine/taskqueue"
+)
+
+func f(ctx context.Context) {
+    err := datastore.RunInTransaction(ctx, func(ctx context.Context) error {
+        t := taskqueue.NewPOSTTask("/worker", url.Values{
+            // ...
+        })
+        // Use the transaction's context when invoking taskqueue.Add.
+        _, err := taskqueue.Add(ctx, t, "")
+        // ...
+    })
+    // ...
+}
+// [END tasks_within_transactions]
+
+// [START deleting_tasks]
+// Purge entire queue...
+err := taskqueue.Purge(ctx, "queue1")
+
+// Delete an individual task...
+t := &taskqueue.Task{Name: "foo"}
+err := taskqueue.Delete(ctx, t, "queue1")
+// [END deleting_tasks]
