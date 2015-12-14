@@ -66,21 +66,3 @@ instance_class: B8
 manual_scaling:
   instances: 1
 // [END example_3]
-
-// [START communication_between_modules_1]
-import "google.golang.org/appengine"
-
-module := appengine.ModuleName(ctx)
-instance := appengine.InstanceID()
-// [END communication_between_modules_1]
-
-// [START communication_between_modules_2]
-import "google.golang.org/appengine"
-
-hostname, err := appengine.ModuleHostname(ctx, "my-backend", "", "")
-if err != nil {
-    // ...
-}
-url = "http://" + hostname + "/"
-// ...
-// [END communication_between_modules_2]

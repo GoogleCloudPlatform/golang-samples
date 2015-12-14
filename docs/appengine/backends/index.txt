@@ -1,3 +1,5 @@
+// NOTE: Backends are deprecated. The google.golang.org/appengine package does not support backends.
+
 // [START shutdown]
 func init() {
     http.HandleFunc("/_ah/stop", shutdownHandler)
