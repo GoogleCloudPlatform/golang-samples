@@ -1,0 +1,4 @@
+// [START intro_2]
+inbound_services:
+- mail
+// [END intro_2]

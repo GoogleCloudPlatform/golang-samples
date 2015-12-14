@@ -1,5 +1,8 @@
+package sample
+
 // [START intro_1]
 import (
+	"bytes"
 	"fmt"
 	"net/http"
 
@@ -29,17 +32,18 @@ Please confirm your email address by clicking on the link below:
 
 %s
 `
+
 // [END intro_1]
 
-// [START intro_2]
-inbound_services:
-- mail
-// [END intro_2]
+func createConfirmationURL(r *http.Request) string {
+	return ""
+}
 
 // [START intro_3]
 func init() {
 	http.HandleFunc("/_ah/mail/", incomingMail)
 }
+
 // [END intro_3]
 
 // [START intro_4]
@@ -53,4 +57,5 @@ func incomingMail(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Infof(ctx, "Received mail: %v", b)
 }
+
 // [END intro_4]
