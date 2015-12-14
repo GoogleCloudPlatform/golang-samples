@@ -1,0 +1,4 @@
+// [START selecting_the_runtime]
+runtime: go
+api_version: go1
+// [END selecting_the_runtime]

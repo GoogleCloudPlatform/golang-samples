@@ -1,49 +1,3 @@
-// [START uploading_a_blob_1]
-ctx := appengine.NewContext(r)
-uploadURL, err := blobstore.UploadURL(ctx, "/upload", nil)
-if err != nil {
-	serveError(ctx, w, err)
-	return
-}
-w.Header().Set("Content-Type", "text/html")
-err = rootTemplate.Execute(w, uploadURL)
-if err != nil {
-	log.Errorf(ctx, "%v", err)
-}
-// [END uploading_a_blob_1]
-
-// [START uploading_a_blob_2]
-var rootTemplate = template.Must(template.New("root").Parse(rootTemplateHTML))
-
-const rootTemplateHTML = `
-<html><body>
-<form action="{{.}}" method="POST" enctype="multipart/form-data">
-Upload File: <input type="file" name="file"><br>
-<input type="submit" name="submit" value="Submit">
-</form></body></html>
-`
-// [END uploading_a_blob_2]
-
-// [START uploading_a_blob_3]
-ctx := appengine.NewContext(r)
-blobs, _, err := blobstore.ParseUpload(r)
-if err != nil {
-	serveError(ctx, w, err)
-	return
-}
-file := blobs["file"]
-if len(file) == 0 {
-	log.Errorf(ctx, "no file uploaded")
-	http.Redirect(w, r, "/", http.StatusFound)
-	return
-}
-http.Redirect(w, r, "/serve/?blobKey="+string(file[0].BlobKey), http.StatusFound)
-// [END uploading_a_blob_3]
-
-// [START serving_a_blob]
-blobstore.Send(w, appengine.BlobKey(r.FormValue("blobKey")))
-// [END serving_a_blob]
-
 // [START complete_sample_application]
 package blobstore_example
 
@@ -115,21 +69,5 @@ func init() {
 	http.HandleFunc("/serve/", handleServe)
 	http.HandleFunc("/upload", handleUpload)
 }
-// [END complete_sample_application]
 
-// [START writing_files_to_the_Blobstore]
-var k appengine.BlobKey
-w, err := blobstore.Create(ctx, "application/octet-stream")
-if err != nil {
-	return k, err
-}
-_, err = w.Write([]byte("... some data ..."))
-if err != nil {
-	return k, err
-}
-err = w.Close()
-if err != nil {
-	return k, err
-}
-return w.Key()
-// [END writing_files_to_the_Blobstore]
+// [END complete_sample_application]

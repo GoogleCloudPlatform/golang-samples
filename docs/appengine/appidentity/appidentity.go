@@ -4,7 +4,6 @@ package sample
 import (
 	"net/http"
 
-	"google.golang.org/appengine"
 	"google.golang.org/appengine/urlfetch"
 
 	"golang.org/x/net/context"
@@ -33,4 +32,5 @@ func shortenURL(ctx context.Context, url string) (string, error) {
 	}
 	return resp.Id, nil
 }
+
 // [END asserting_identity_to_Google_APIs]
