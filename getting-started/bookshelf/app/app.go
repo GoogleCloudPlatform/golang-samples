@@ -223,7 +223,7 @@ func uploadFileFromForm(r *http.Request) (url string, err error) {
 	}
 
 	const publicURL = "https://storage.googleapis.com/%s/%s"
-	return fmt.Sprintf(publicURL, bookshelf.StorageBucket, name), nil
+	return fmt.Sprintf(publicURL, bookshelf.StorageBucketName, name), nil
 }
 
 // createHandler adds a book to the database.

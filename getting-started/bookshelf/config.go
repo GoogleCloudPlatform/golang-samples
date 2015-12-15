@@ -27,7 +27,8 @@ var (
 	DB          BookDatabase
 	OAuthConfig *oauth2.Config
 
-	StorageBucket *storage.BucketHandle
+	StorageBucket     *storage.BucketHandle
+	StorageBucketName string
 
 	SessionStore sessions.Store
 
@@ -82,7 +83,8 @@ func init() {
 	// To configure Cloud Storage, uncomment the following lines and update the
 	// bucket name.
 	//
-	// StorageBucket, err = configureStorage("<your-storage-bucket>")
+	// StorageBucketName = "<your-storage-bucket>"
+	// StorageBucket, err = configureStorage(StorageBucketName)
 	// [END storage]
 
 	if err != nil {
