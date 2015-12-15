@@ -1,0 +1,11 @@
+// [START securing_urls]
+application: hello-tasks
+version: 1
+runtime: go
+api_version: go1
+
+handlers:
+- url: /tasks/process
+  script: _go_app
+  login: admin
+// [END securing_urls]
