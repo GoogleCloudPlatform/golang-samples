@@ -1,0 +1,22 @@
+// [START exploding_index_example_2]
+indexes:
+- kind: Widget
+  properties:
+  - name: X
+  - name: Y
+  - name: Date
+// [END exploding_index_example_2]
+
+
+// [START exploding_index_example_4]
+indexes:
+- kind: Widget
+  properties:
+  - name: X
+  - name: Date
+- kind: Widget
+  properties:
+  - name: Y
+  - name: Date
+// [END exploding_index_example_4]
+

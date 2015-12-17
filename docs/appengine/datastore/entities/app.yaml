@@ -1,0 +1,4 @@
+// [START deleting_entities_in_bulk_via_the_Administration_Console]
+builtins:
+- datastore_admin: on
+// [END deleting_entities_in_bulk_via_the_Administration_Console]

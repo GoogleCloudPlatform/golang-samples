@@ -21,50 +21,6 @@ SELECT * FROM Person WHERE LastName = "Blair"
                   ORDER BY FirstName, Height ASC
 // [END queries_and_indexes_example_4]
 
-// [START unindexed_properties]
-type Person struct {
-    Name string
-    Age  int `datastore:",noindex"`
-}
-// [END unindexed_properties]
-
 // [START exploding_index_example_1]
 SELECT * FROM Widget WHERE X=1 AND Y=2 ORDER BY Date
 // [END exploding_index_example_1]
-
-// [START exploding_index_example_2]
-indexes:
-- kind: Widget
-  properties:
-  - name: X
-  - name: Y
-  - name: Date
-// [END exploding_index_example_2]
-
-// [START exploding_index_example_3]
-type Widget struct {
-    X    []int
-    Y    []string
-    Date time.Time
-}
-
-e2 := &Widget{
-    X:    []int{1, 2, 3, 4},
-    Y:    []string{'red', 'green', 'blue'},
-    Date: time.Now(),
-}
-k := datastore.NewIncompleteKey(ctx, "Widget", nil)
-_, err := datastore.Put(ctx, k, e2)
-// [END exploding_index_example_3]
-
-// [START exploding_index_example_4]
-indexes:
-- kind: Widget
-  properties:
-  - name: X
-  - name: Date
-- kind: Widget
-  properties:
-  - name: Y
-  - name: Date
-// [END exploding_index_example_4]
