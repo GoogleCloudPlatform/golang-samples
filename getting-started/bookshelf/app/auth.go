@@ -119,8 +119,11 @@ func oauthCallbackHandler(w http.ResponseWriter, r *http.Request) *appError {
 	}
 
 	session.Values[oauthTokenSessionKey] = tok
-	session.Values[googleProfileSessionKey] = profile
-	session.Save(r, w)
+	// Strip the profile to only the fields we need. Otherwise the struct is too big.
+	session.Values[googleProfileSessionKey] = stripProfile(profile)
+	if err := session.Save(r, w); err != nil {
+		return appErrorf(err, "could not save session: %v", err)
+	}
 
 	http.Redirect(w, r, redirectURL, http.StatusFound)
 	return nil
@@ -144,7 +147,9 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) *appError {
 		return appErrorf(err, "could not get default session: %v", err)
 	}
 	session.Options.MaxAge = -1 // Clear session.
-	session.Save(r, w)
+	if err := session.Save(r, w); err != nil {
+		return appErrorf(err, "could not save session: %v", err)
+	}
 	redirectURL := r.FormValue("redirect")
 	if redirectURL == "" {
 		redirectURL = "/"
@@ -169,4 +174,16 @@ func profileFromSession(r *http.Request) *plus.Person {
 		return nil
 	}
 	return profile
+}
+
+// stripProfile returns a subset of a plus.Person.
+func stripProfile(p *plus.Person) *plus.Person {
+	return &plus.Person{
+		Id:          p.Id,
+		DisplayName: p.DisplayName,
+		Image:       p.Image,
+		Etag:        p.Etag,
+		Name:        p.Name,
+		Url:         p.Url,
+	}
 }
