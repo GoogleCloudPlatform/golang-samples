@@ -14,8 +14,3 @@ automatic_scaling:
   cool_down_period_sec: 60
   cpu_utilization:
     target_utilization: 0.75
-
-beta_settings:
-  # NOTE: userinfo.email is required by the Datastore API.
-  service_account_scopes: >
-    https://www.googleapis.com/auth/userinfo.email
