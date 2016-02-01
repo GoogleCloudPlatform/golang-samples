@@ -5,6 +5,7 @@ Before you can run or deploy this sample, you will need to configure a Pub/Sub t
 1. Enable the Cloud Pub/Sub API in the [Google Developers Console](https://console.developers.google.com/project/_/apiui/apiview/pubsub/overview).
 
 2. Create a topic and subscription.
+
         $ gcloud alpha pubsub topics create [your-topic-name]
         $ gcloud alpha pubsub subscriptions create [your-subscription-name] \
             --topic [your-topic-name] \
