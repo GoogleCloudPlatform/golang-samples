@@ -90,7 +90,7 @@ func subscribe() {
 			log.Printf("[ID %d] Processing.", id)
 			go func() {
 				if err := update(id); err != nil {
-					log.Printf("[ID %d] could not update: %v", err)
+					log.Printf("[ID %d] could not update: %v", id, err)
 					return
 				}
 
