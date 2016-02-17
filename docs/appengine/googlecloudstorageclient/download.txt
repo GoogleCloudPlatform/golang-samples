@@ -5,7 +5,5 @@ export GOPATH=$HOME/go
 // [START Go_install]
 go get -u golang.org/x/oauth2
 go get -u google.golang.org/cloud/storage
-// [END Go_install]
-// [START Go_get_managed_vms]
 go get -u google.golang.org/appengine/...
-// [END Go_get_managed_vms]
+// [END Go_install]
