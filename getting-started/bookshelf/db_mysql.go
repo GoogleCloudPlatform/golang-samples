@@ -163,7 +163,7 @@ func (db *mysqlDB) ListBooks() ([]*Book, error) {
 	}
 	defer rows.Close()
 
-	books := make([]*Book, 0)
+	var books []*Book
 	for rows.Next() {
 		book, err := scanBook(rows)
 		if err != nil {
@@ -193,7 +193,7 @@ func (db *mysqlDB) ListBooksCreatedBy(userID string) ([]*Book, error) {
 	}
 	defer rows.Close()
 
-	books := make([]*Book, 0)
+	var books []*Book
 	for rows.Next() {
 		book, err := scanBook(rows)
 		if err != nil {

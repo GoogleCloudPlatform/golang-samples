@@ -40,10 +40,10 @@ func handle(w http.ResponseWriter, r *http.Request) {
 
 func trackEvent(r *http.Request, category, action, label string, value *uint) error {
 	if gaPropertyID == "" {
-		return errors.New("analytics: GA_TRACKING_ID environment variable.")
+		return errors.New("analytics: GA_TRACKING_ID environment variable is missing")
 	}
 	if category == "" || action == "" {
-		return errors.New("analytics: category and action are required.")
+		return errors.New("analytics: category and action are required")
 	}
 
 	v := url.Values{

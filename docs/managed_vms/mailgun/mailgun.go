@@ -56,7 +56,7 @@ func sendSimpleMessageHandler(w http.ResponseWriter, r *http.Request) {
 		/* To */ "bar@example.com", "YOU@"+mailgunDomain,
 	))
 	if err != nil {
-		msg := fmt.Sprintf("Could not send message: %v, ID %d, %+v", err, id, msg)
+		msg := fmt.Sprintf("Could not send message: %v, ID %v, %+v", err, id, msg)
 		http.Error(w, msg, http.StatusInternalServerError)
 		return
 	}
@@ -79,7 +79,7 @@ func sendComplexMessageHandler(w http.ResponseWriter, r *http.Request) {
 
 	msg, id, err := mailgunClient.Send(message)
 	if err != nil {
-		msg := fmt.Sprintf("Could not send message: %v, ID %d, %+v", err, id, msg)
+		msg := fmt.Sprintf("Could not send message: %v, ID %v, %+v", err, id, msg)
 		http.Error(w, msg, http.StatusInternalServerError)
 		return
 	}

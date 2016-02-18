@@ -71,7 +71,7 @@ func (db *memoryDB) DeleteBook(id int64) error {
 	defer db.mu.Unlock()
 
 	if _, ok := db.books[id]; !ok {
-		return fmt.Errorf("memorydb: could not delete book with ID %d, does not exist.", id)
+		return fmt.Errorf("memorydb: could not delete book with ID %d, does not exist", id)
 	}
 	delete(db.books, id)
 	return nil
@@ -103,7 +103,7 @@ func (db *memoryDB) ListBooks() ([]*Book, error) {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
-	books := make([]*Book, 0)
+	var books []*Book
 	for _, b := range db.books {
 		books = append(books, b)
 	}
