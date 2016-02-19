@@ -6,6 +6,7 @@ go:
 # - tip # NOTE: disabled - see https://github.com/travis-ci/gimme/issues/38
 
 install:
+  - go get -t -v ./...
   - go get golang.org/x/tools/cmd/vet
   - go get github.com/golang/lint/golint
 
