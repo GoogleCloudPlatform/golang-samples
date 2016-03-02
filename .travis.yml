@@ -1,16 +1,21 @@
 language: go
 
 go:
-  - 1.5.3
-  - 1.6
-# - tip # NOTE: disabled - see https://github.com/travis-ci/gimme/issues/38
+- 1.5.3
+- 1.6
+#- tip # NOTE: disabled - see https://github.com/travis-ci/gimme/issues/38
+
+before_install:
+- openssl aes-256-cbc -K $encrypted_e44ee91b46d4_key -iv $encrypted_e44ee91b46d4_iv -in key.json.enc -out key.json -d
 
 install:
-  - go get -t -v ./...
-  - go get golang.org/x/tools/cmd/vet
-  - go get github.com/golang/lint/golint
+- go get -t -v ./...
+- go get golang.org/x/tools/cmd/vet
+- go get github.com/golang/lint/golint
 
 script:
-  - go test -v ./...
-  - go vet ./...
-  - GOFMT=$(gofmt -d -s .) && echo $GOFMT && test -z "$GOFMT"
+- GOOGLE_APPLICATION_CREDENTIALS="$(pwd)/key.json"
+  GOLANG_SAMPLES_PROJECT_ID=golang-samples-tests
+  go test -v ./...
+- go vet ./...
+- GOFMT=$(gofmt -d -s .) && echo $GOFMT && test -z "$GOFMT"
