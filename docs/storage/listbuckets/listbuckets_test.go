@@ -5,31 +5,19 @@
 package main
 
 import (
-	"os"
 	"testing"
+
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestListBuckets(t *testing.T) {
-	t.Skip("TODO(cbro): make this test run in golang-samples")
+	tc := testutil.SystemTest(t)
 
-	buckets, err := ListBuckets(os.Getenv("TEST_PROJECT_ID"))
+	buckets, err := ListBuckets(tc.ProjectID)
 	if err != nil {
-		t.Errorf("Error while listing buckets: %s", err)
+		t.Errorf("error while listing buckets: %s", err)
 	}
 	if len(buckets) <= 0 {
-		t.Error("No bucket returned")
+		t.Error("want non-empty list of buckets")
 	}
-
-	foundBucket := false
-	expectedBucket := os.Getenv("TEST_BUCKET_NAME")
-	for _, bucket := range buckets {
-		if bucket.Name == expectedBucket {
-			foundBucket = true
-			break
-		}
-	}
-	if !foundBucket {
-		t.Errorf("Expected bucket %s", expectedBucket)
-	}
-
 }

@@ -8,17 +8,17 @@ import (
 	"fmt"
 	"log"
 	"os"
-)
-import (
+
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
-	storage "google.golang.org/api/storage/v1"
+	"google.golang.org/api/storage/v1"
 )
 
-// ListBuckets returns a slice of all the buckets in the given projectId.
-// [START ListBuckets]
-func ListBuckets(projectId string) ([]*storage.Bucket, error) {
+// ListBuckets returns a slice of all the buckets for a given project.
+func ListBuckets(projectID string) ([]*storage.Bucket, error) {
+
 	// Create the client that uses Application Default Credentials
+	// See https://developers.google.com/identity/protocols/application-default-credentials
 	client, err := google.DefaultClient(
 		oauth2.NoContext,
 		"https://www.googleapis.com/auth/devstorage.read_only")
@@ -32,11 +32,7 @@ func ListBuckets(projectId string) ([]*storage.Bucket, error) {
 		return nil, err
 	}
 
-	// Create the request to list buckets for the project id
-	request := service.Buckets.List(projectId)
-
-	// Execute the request
-	buckets, err := request.Do()
+	buckets, err := service.Buckets.List(projectID).Do()
 	if err != nil {
 		return nil, err
 	}
@@ -44,13 +40,16 @@ func ListBuckets(projectId string) ([]*storage.Bucket, error) {
 	return buckets.Items, nil
 }
 
-// [END ListBuckets]
-
-// main will simply retrieve a list of buckets and print them.
 func main() {
-	buckets, err := ListBuckets(os.Getenv("TEST_PROJECT_ID"))
+	if len(os.Args) < 2 {
+		fmt.Println("usage: listbuckets <projectID>")
+		os.Exit(1)
+	}
+	project := os.Args[1]
+
+	buckets, err := ListBuckets(project)
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Fatal(err)
 	}
 
 	// Print out the results

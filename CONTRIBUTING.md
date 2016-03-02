@@ -14,6 +14,16 @@
 1. Make changes, commit to your fork.
 1. Send a pull request with your changes.
 
+# Testing
+
+## Running system tests
+
+Set the `GOLANG_SAMPLES_PROJECT_ID` environment variable to a suitable test project.
+
+Tests are authenticated using [Application Default Credentials](https://developers.google.com/identity/protocols/application-default-credentials).
+
+Ensure you are logged in using `gcloud login` or set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable to the path of your credentials file.
+
 ## Contributor License Agreements
 
 Before we can accept your pull requests you'll need to sign a Contributor
