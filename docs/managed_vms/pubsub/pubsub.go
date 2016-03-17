@@ -14,19 +14,13 @@ import (
 	"sync"
 
 	"google.golang.org/appengine"
-	"google.golang.org/cloud"
 	"google.golang.org/cloud/pubsub"
 
 	"golang.org/x/net/context"
-	"golang.org/x/oauth2/google"
 )
 
 var (
-	pubsubCtx context.Context
-
-	// Pub/Sub topic to publish messages to. Populated by the PUBSUB_TOPIC
-	// environment variable.
-	topic string
+	topic *pubsub.TopicHandle
 
 	// Messages received by this instance.
 	messagesMu sync.Mutex
@@ -38,29 +32,19 @@ const maxMessages = 10
 func main() {
 	ctx := context.Background()
 
-	// Set this in app.yaml when running in production.
-	projectID := os.Getenv("GCLOUD_PROJECT")
-	topic = os.Getenv("PUBSUB_TOPIC")
-
-	var err error
-	pubsubCtx, err = pubsubContext(ctx, projectID)
+	client, err := pubsub.NewClient(ctx, os.Getenv("GCLOUD_PROJECT"))
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// Create topic if it doesn't exist.
+	topic, _ = client.NewTopic(ctx, os.Getenv("PUBSUB_TOPIC"))
 
 	http.HandleFunc("/", listHandler)
 	http.HandleFunc("/pubsub/publish", publishHandler)
 	http.HandleFunc("/pubsub/push", pushHandler)
 
 	appengine.Main()
-}
-
-func pubsubContext(ctx context.Context, projectID string) (context.Context, error) {
-	httpClient, err := google.DefaultClient(ctx, pubsub.ScopePubSub)
-	if err != nil {
-		return nil, err
-	}
-	return cloud.WithContext(ctx, projectID, httpClient), nil
 }
 
 type pushRequest struct {
@@ -98,11 +82,13 @@ func listHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func publishHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
+
 	msg := &pubsub.Message{
 		Data: []byte(r.FormValue("payload")),
 	}
 
-	if _, err := pubsub.Publish(pubsubCtx, topic, msg); err != nil {
+	if _, err := topic.Publish(ctx, msg); err != nil {
 		http.Error(w, fmt.Sprintf("Could not publish message: %v", err), 500)
 		return
 	}
