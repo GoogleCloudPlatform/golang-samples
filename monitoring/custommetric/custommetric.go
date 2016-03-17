@@ -75,7 +75,7 @@ func writeTimeSeriesValue(s *monitoring.Service, projectResource string, metricT
 		},
 		MetricKind: "GAUGE",
 		ValueType:  "INT64",
-		Points: []*monitoring.Point{
+		Points: {
 			&monitoring.Point{
 				Interval: &monitoring.TimeInterval{
 					StartTime: now,
