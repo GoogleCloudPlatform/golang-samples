@@ -33,7 +33,7 @@ func listMonitoredResourceDescriptors(s *monitoring.Service, project string) err
 // listMetricDescriptors lists the metrics specified by the metric constant.
 func listMetricDescriptors(s *monitoring.Service, projectResource string) error {
 	resp, err := s.Projects.MetricDescriptors.List(projectResource).
-		Filter(fmt.Sprintf("metric.name=%q", metric)).
+		Filter(fmt.Sprintf("metric.type=%q", metric)).
 		Do()
 	if err != nil {
 		return fmt.Errorf("Could not list metric descriptors: %v", err)
