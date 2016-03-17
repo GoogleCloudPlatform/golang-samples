@@ -31,8 +31,8 @@ go get the code and change into the directory:
 
 To run the example that prints the environment, run:
 
-    go run listresources/*.go
+    go run listresources/*.go <your-project-id>
 
 To run the example that creates a custom metric and writes to it, run:
 
-    go run custommetric/*.go
+    go run custommetric/*.go <your-project-id>
