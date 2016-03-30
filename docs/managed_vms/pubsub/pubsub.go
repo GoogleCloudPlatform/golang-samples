@@ -32,19 +32,27 @@ const maxMessages = 10
 func main() {
 	ctx := context.Background()
 
-	client, err := pubsub.NewClient(ctx, os.Getenv("GCLOUD_PROJECT"))
+	client, err := pubsub.NewClient(ctx, mustGetenv("GCLOUD_PROJECT"))
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Create topic if it doesn't exist.
-	topic, _ = client.NewTopic(ctx, os.Getenv("PUBSUB_TOPIC"))
+	topic, _ = client.NewTopic(ctx, mustGetenv("PUBSUB_TOPIC"))
 
 	http.HandleFunc("/", listHandler)
 	http.HandleFunc("/pubsub/publish", publishHandler)
 	http.HandleFunc("/pubsub/push", pushHandler)
 
 	appengine.Main()
+}
+
+func mustGetenv(k string) string {
+	v := os.Getenv(k)
+	if v == "" {
+		log.Fatalf("%s environment variable not set.", k)
+	}
+	return v
 }
 
 type pushRequest struct {

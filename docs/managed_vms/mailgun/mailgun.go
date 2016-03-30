@@ -40,12 +40,12 @@ func init() {
 		mustGetenv("MAILGUN_PUBLIC_KEY"))
 }
 
-func mustGetenv(n string) string {
-	e := os.Getenv(n)
-	if e == "" {
-		log.Fatalf("%s environment variable not set.", n)
+func mustGetenv(k string) string {
+	v := os.Getenv(k)
+	if v == "" {
+		log.Fatalf("%s environment variable not set.", k)
 	}
-	return e
+	return v
 }
 
 func sendSimpleMessageHandler(w http.ResponseWriter, r *http.Request) {

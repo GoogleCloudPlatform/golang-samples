@@ -30,22 +30,18 @@ func main() {
 }
 
 var (
-	twilioClient *twirest.TwilioClient
-	twilioNumber string
+	twilioClient = twirest.NewClient(
+		mustGetenv("TWILIO_ACCOUNT_SID"),
+		mustGetenv("TWILIO_AUTH_TOKEN"))
+	twilioNumber = mustGetenv("TWILIO_NUMBER")
 )
 
-func init() {
-	twilioSID := os.Getenv("TWILIO_ACCOUNT_SID")
-	twilioToken := os.Getenv("TWILIO_AUTH_TOKEN")
-	if twilioSID == "" || twilioToken == "" {
-		log.Fatal("TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN environment variables must be set.")
+func mustGetenv(k string) string {
+	v := os.Getenv(k)
+	if v == "" {
+		log.Fatalf("%s environment variable not set.", k)
 	}
-
-	twilioNumber = os.Getenv("TWILIO_NUMBER")
-	if twilioNumber == "" {
-		log.Fatal("TWILIO_NUMBER environment variable must be set.")
-	}
-	twilioClient = twirest.NewClient(twilioSID, twilioToken)
+	return v
 }
 
 func receiveCallHandler(w http.ResponseWriter, r *http.Request) {

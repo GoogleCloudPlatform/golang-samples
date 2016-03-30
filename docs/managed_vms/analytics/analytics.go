@@ -7,6 +7,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net"
 	"net/http"
 	"net/url"
@@ -17,7 +18,15 @@ import (
 	"google.golang.org/appengine"
 )
 
-var gaPropertyID = os.Getenv("GA_TRACKING_ID")
+var gaPropertyID = mustGetenv("GA_TRACKING_ID")
+
+func mustGetenv(k string) string {
+	v := os.Getenv(k)
+	if v == "" {
+		log.Fatalf("%s environment variable not set.", k)
+	}
+	return v
+}
 
 func main() {
 	http.HandleFunc("/", handle)
