@@ -2,7 +2,7 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// Sample mailjet is a demonstration on sending an e-mail from App Engine flexible environment.
+// Sample mailjet is a demonstration on sending an e-mail from App Engine standard environment.
 package main
 
 import (
@@ -12,6 +12,7 @@ import (
 	"os"
 
 	"google.golang.org/appengine"
+	"google.golang.org/appengine/urlfetch"
 )
 
 // [START import]
@@ -19,20 +20,15 @@ import "github.com/mailjet/mailjet-apiv3-go"
 
 // [END import]
 
-func main() {
-	http.HandleFunc("/send", sendEmail)
+func init() {
+	// Check env variables are set.
+	mustGetenv("MJ_APIKEY_PUBLIC")
+	mustGetenv("MJ_APIKEY_PRIVATE")
 
-	appengine.Main()
+	http.HandleFunc("/send", sendEmail)
 }
 
-var (
-	mailjetClient = mailjet.NewMailjetClient(
-		mustGetenv("MJ_APIKEY_PUBLIC"),
-		mustGetenv("MJ_APIKEY_PRIVATE"),
-	)
-
-	fromEmail = mustGetenv("MJ_FROM_EMAIL")
-)
+var fromEmail = mustGetenv("MJ_FROM_EMAIL")
 
 func mustGetenv(k string) string {
 	v := os.Getenv(k)
@@ -43,6 +39,15 @@ func mustGetenv(k string) string {
 }
 
 func sendEmail(w http.ResponseWriter, r *http.Request) {
+	ctx := appengine.NewContext(r)
+
+	mailjetClient := mailjet.NewMailjetClient(
+		mustGetenv("MJ_APIKEY_PUBLIC"),
+		mustGetenv("MJ_APIKEY_PRIVATE"),
+	)
+
+	mailjetClient.SetClient(urlfetch.Client(ctx))
+
 	to := r.FormValue("to")
 	if to == "" {
 		http.Error(w, "Missing 'to' parameter.", http.StatusBadRequest)
