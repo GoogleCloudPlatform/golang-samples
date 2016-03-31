@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Sample mailjet is a demonstration on sending an e-mail from App Engine standard environment.
-package main
+package mailjet
 
 import (
 	"fmt"
