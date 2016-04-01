@@ -5,17 +5,17 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/GoogleCloudPlatform/golang-samples/internal/aeintegrate"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-
-	"google.golang.org/appengine/aeintegrate"
 )
 
 func TestHelloWorld(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 
 	helloworld := &aeintegrate.App{
-		Name: "hw",
-		Dir:  tc.Path("docs", "managed_vms", "helloworld"),
+		Name:      "hw",
+		Dir:       tc.Path("docs", "managed_vms", "helloworld"),
+		ProjectID: tc.ProjectID,
 	}
 
 	bodyShouldContain(t, helloworld, "/", "Hello world!")
@@ -25,8 +25,9 @@ func TestDatastore(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 
 	datastore := &aeintegrate.App{
-		Name: "ds",
-		Dir:  tc.Path("docs", "managed_vms", "datastore"),
+		Name:      "ds",
+		Dir:       tc.Path("docs", "managed_vms", "datastore"),
+		ProjectID: tc.ProjectID,
 		//Env: map[string]string{
 		//"GCLOUD_PROJECT": project,
 		//},
@@ -39,8 +40,9 @@ func TestMemcache(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 
 	memcache := &aeintegrate.App{
-		Name: "mem",
-		Dir:  tc.Path("docs", "managed_vms", "memcache"),
+		Name:      "mem",
+		Dir:       tc.Path("docs", "managed_vms", "memcache"),
+		ProjectID: tc.ProjectID,
 	}
 
 	bodyShouldContain(t, memcache, "/", "Count")

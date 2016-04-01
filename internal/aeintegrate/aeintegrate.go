@@ -38,7 +38,6 @@
 package aeintegrate
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -48,7 +47,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
-	"sync"
 	"time"
 
 	"golang.org/x/net/context"
@@ -62,42 +60,6 @@ import (
 // runID is an identifier that changes between runs.
 var runID = time.Now().Format("20060102-150405")
 
-// Access this using "projectID()"
-var projectAndError = &struct {
-	once sync.Once
-	p    string
-	err  error
-}{}
-
-// ProjectID returns the Project ID, which is detected via `gcloud config list`.
-func ProjectID() (string, error) {
-	projectAndError.once.Do(func() {
-		cmd := exec.Command(gcloudBin(), "--quiet", "config", "list", "--format=json")
-		out, err := cmd.CombinedOutput()
-		if err != nil {
-			projectAndError.err = fmt.Errorf("could not detect project ID: %v `%s`", err, out)
-		}
-
-		c := &struct {
-			C struct {
-				Project string `json:"project"`
-			} `json:"core"`
-		}{}
-
-		if err := json.Unmarshal(out, c); err != nil {
-			projectAndError.err = fmt.Errorf("could not detect project ID: %v `%s`", err, out)
-		}
-
-		if c.C.Project == "" {
-			projectAndError.err = errors.New("could not detect project ID: not set with gcloud")
-		}
-
-		projectAndError.p = c.C.Project
-	})
-
-	return projectAndError.p, projectAndError.err
-}
-
 // App describes an App Engine application.
 type App struct {
 	// Name is an ID, used for logging and to generate a unique version to this run.
@@ -108,6 +70,9 @@ type App struct {
 
 	// The configuration (app.yaml) file, relative to Dir. Defaults to "app.yaml".
 	AppYaml string
+
+	// The project to deploy to.
+	ProjectID string
 
 	// Additional runtime environment variable overrides for the app.
 	// NOTE: does not yet work in gcloud.
@@ -140,11 +105,15 @@ func (p *App) URL(path string) (string, error) {
 	if !p.deployed {
 		return "", errors.New("URL called before Deploy")
 	}
-	projectID, err := ProjectID()
-	if err != nil {
-		return "", err
+	return fmt.Sprintf("https://%s-dot-%s-dot-%s.appspot.com%s", p.version(), p.module, p.ProjectID, path), nil
+}
+
+// version returns the version that the app will be deployed to.
+func (p *App) validate() error {
+	if p.ProjectID == "" {
+		return errors.New("Project ID missing")
 	}
-	return fmt.Sprintf("https://%s-dot-%s-dot-%s.appspot.com%s", p.version(), p.module, projectID, path), nil
+	return nil
 }
 
 // version returns the version that the app will be deployed to.
@@ -155,8 +124,8 @@ func (p *App) version() string {
 // Deploy deploys the application to App Engine. If the deployment fails, it tries to clean up the failed deployment.
 func (p *App) Deploy() error {
 	// Don't deploy unless we're certain everything is ready for deployment
-	// (i.e. project ID is valid, admin client is authenticated and authorized)
-	if _, err := ProjectID(); err != nil {
+	// (i.e. admin client is authenticated and authorized)
+	if err := p.validate(); err != nil {
 		return err
 	}
 	if _, err := p.Module(); err != nil {
@@ -203,7 +172,10 @@ func (p *App) deployCmd() *exec.Cmd {
 	// NOTE: if the "preview" and/or "app" modules are not available, and this is
 	// run in parallel, such as from AppGroup.Deploy, gcloud will attempt to
 	// install those components multiple times and will eventually fail on IO.
-	args := []string{gcloudBin, "--quiet", "preview", "app", "deploy", p.appyaml(),
+	args := []string{gcloudBin,
+		"--quiet",
+		"preview", "app", "deploy", p.appyaml(),
+		"--project", p.ProjectID,
 		"--version", p.version(),
 		"--no-promote",
 	}
@@ -260,13 +232,12 @@ func (p *App) setupAdmin() error {
 		return err
 	}
 
-	projectID, err := ProjectID()
-	if err != nil {
+	if err := p.validate(); err != nil {
 		return err
 	}
 
 	// Check that the user is authenticated, etc.
-	_, err = p.adminService.Apps.Get(projectID).Do()
+	_, err = p.adminService.Apps.Get(p.ProjectID).Do()
 	return err
 }
 
@@ -279,15 +250,15 @@ func (p *App) Cleanup() error {
 		return errors.New("Cleanup called before Deploy")
 	}
 
-	projectID, err := ProjectID()
-	if err != nil {
+	if err := p.validate(); err != nil {
 		return err
 	}
 
 	log.Printf("(%s) Cleaning up.", p.Name)
 
+	var err error
 	for try := 0; try < 10; try++ {
-		_, err = p.adminService.Apps.Modules.Versions.Delete(projectID, p.module, p.version()).Do()
+		_, err = p.adminService.Apps.Modules.Versions.Delete(p.ProjectID, p.module, p.version()).Do()
 		if err == nil {
 			log.Printf("(%s) Succesfully cleaned up.", p.Name)
 			break
@@ -304,4 +275,3 @@ func gcloudBin() string {
 	}
 	return bin
 }
-
