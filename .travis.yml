@@ -1,5 +1,11 @@
 language: go
 
+# Don't build other branches that are being used for PRs.
+# Currently only the master branch is used in this repo.
+branches:
+  only:
+    - master
+
 go:
 - 1.5.3
 - 1.6
