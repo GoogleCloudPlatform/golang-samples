@@ -10,8 +10,7 @@
 //
 // aedeploy (go get google.golang.org/appengine/cmd/aedeploy) and gcloud
 // (https://cloud.google.com/sdk) must be installed. You must be authorized via
-// the gcloud command-line tool (`gcloud auth login`) and the project ID must be
-// set via `gcloud config set project`.
+// the gcloud command-line tool (`gcloud auth login`).
 //
 // You may specify the locations of aedeploy and/or gcloud via the AEDEPLOY_BIN
 // and GCLOUD_BIN environment variables, respectively.
