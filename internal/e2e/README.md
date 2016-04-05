@@ -12,16 +12,10 @@ Prerequisites:
 
 Before running tests:
 
-    $ gcloud config project set $PROJECT_ID
     $ gcloud auth login
-
-Running via Docker:
-
-    $ docker build -f integration_test_Dockerfile -t goaev2itest .
-    $ docker run -v ~/.config/gcloud:/root/.config/gcloud goaev2itest
 
 Running without Docker:
 
-    $ go test
+    $ GOLANG_SAMPLES_E2E_TEST=1 go test -v
 
 [gcloud]: https://cloud.google.com/sdk/
