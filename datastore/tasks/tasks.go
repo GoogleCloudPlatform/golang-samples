@@ -185,7 +185,7 @@ func DeleteTask(ctx context.Context, client *datastore.Client, taskID int64) err
 func PrintTasks(w io.Writer, tasks []*Task) {
 	// Use a tab writer to help make results pretty.
 	tw := tabwriter.NewWriter(w, 8, 8, 1, ' ', 0) // Min cell size of 8.
-	fmt.Fprintf(tw, "ID\tDescription\tStatus")
+	fmt.Fprintf(tw, "ID\tDescription\tStatus\n")
 	for _, t := range tasks {
 		if t.Done {
 			fmt.Fprintf(tw, "%d\t%s\tdone\n", t.id, t.Desc)
