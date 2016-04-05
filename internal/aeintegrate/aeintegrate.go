@@ -46,7 +46,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"golang.org/x/net/context"
@@ -75,7 +74,6 @@ type App struct {
 	ProjectID string
 
 	// Additional runtime environment variable overrides for the app.
-	// NOTE: does not yet work in gcloud.
 	Env map[string]string
 
 	deployed bool // Whether the app has been deployed.
@@ -83,6 +81,9 @@ type App struct {
 	module string // The Module ID (read from the app.yaml)
 
 	adminService *appengine.Service // Used during clean up to delete the deployed version.
+
+	// A temporary configuration file that includes modifications (e.g. environment variables)
+	tempAppYaml string
 }
 
 // Deployed reports whether the application has been deployed.
@@ -137,7 +138,13 @@ func (p *App) Deploy() error {
 
 	log.Printf("(%s) Deploying...", p.Name)
 
-	out, err := p.deployCmd().CombinedOutput()
+	cmd, err := p.deployCmd()
+	if err != nil {
+		log.Printf("(%s) Could not get deploy command: %v", p.Name, err)
+		return err
+	}
+
+	out, err := cmd.CombinedOutput()
 	// TODO: add a flag for verbose output (e.g. when running with binary created with `go test -c`)
 	if err != nil {
 		log.Printf("(%s) Output from deploy:", p.Name)
@@ -160,7 +167,71 @@ func (p *App) appyaml() string {
 	return appyaml
 }
 
-func (p *App) deployCmd() *exec.Cmd {
+// envappyaml writes the temporary configuration file if it does not exist already,
+// then returns the path of the temporary config file.
+func (p *App) envappyaml() (string, error) {
+	if p.tempAppYaml != "" {
+		return p.tempAppYaml, nil
+	}
+
+	base := p.appyaml()
+	tmp := "aeintegrate." + base
+
+	if len(p.Env) == 0 {
+		err := os.Symlink(filepath.Join(p.Dir, base), filepath.Join(p.Dir, tmp))
+		if err != nil {
+			return "", err
+		}
+		p.tempAppYaml = tmp
+		return p.tempAppYaml, nil
+	}
+
+	baseContents, err := ioutil.ReadFile(filepath.Join(p.Dir, base))
+	if err != nil {
+		return "", err
+	}
+
+	var c yaml.MapSlice
+	if err := yaml.Unmarshal(baseContents, &c); err != nil {
+		return "", err
+	}
+
+	for _, e := range c {
+		k, ok := e.Key.(string)
+		if !ok || k != "env_variables" {
+			continue
+		}
+
+		vals, ok := e.Value.(yaml.MapSlice)
+		if !ok {
+			return "", fmt.Errorf("expected MapSlice for env_variables")
+		}
+
+		for _, kv := range vals {
+			k, ok := kv.Key.(string)
+			if !ok {
+				return "", fmt.Errorf("env_variables/%#v should be a string", kv.Key)
+			}
+			if val, ok := p.Env[k]; ok {
+				kv.Value = val
+			}
+		}
+	}
+
+	out, err := yaml.Marshal(c)
+	if err != nil {
+		return "", err
+	}
+
+	if err := ioutil.WriteFile(filepath.Join(p.Dir, tmp), out, 0755); err != nil {
+		return "", err
+	}
+
+	p.tempAppYaml = tmp
+	return p.tempAppYaml, nil
+}
+
+func (p *App) deployCmd() (*exec.Cmd, error) {
 	gcloudBin := os.Getenv("GCLOUD_BIN")
 	if gcloudBin == "" {
 		gcloudBin = "gcloud"
@@ -169,29 +240,25 @@ func (p *App) deployCmd() *exec.Cmd {
 	if aedeploy == "" {
 		aedeploy = "aedeploy"
 	}
-	// NOTE: if the "preview" and/or "app" modules are not available, and this is
-	// run in parallel, such as from AppGroup.Deploy, gcloud will attempt to
-	// install those components multiple times and will eventually fail on IO.
+
+	appyaml, err := p.envappyaml()
+	if err != nil {
+		return nil, err
+	}
+
+	// NOTE: if the "preview" and/or "app" components are not available, and this is
+	// run in parallel, gcloud will attempt to install those components multiple
+	// times and will eventually fail on IO.
 	args := []string{gcloudBin,
 		"--quiet",
-		"preview", "app", "deploy", p.appyaml(),
+		"preview", "app", "deploy", appyaml,
 		"--project", p.ProjectID,
 		"--version", p.version(),
 		"--no-promote",
 	}
 	cmd := exec.Command(aedeploy, args...)
 	cmd.Dir = p.Dir
-
-	if len(p.Env) != 0 {
-		cmd.Env = os.Environ()
-		keys := make([]string, 0)
-		for k, v := range p.Env {
-			cmd.Env = append(cmd.Env, k+"="+v)
-			keys = append(keys, k)
-		}
-		args = append(args, "--env-vars", strings.Join(keys, ","))
-	}
-	return cmd
+	return cmd, nil
 }
 
 // Module returns the Module ID, which is read from the app.yaml file.
@@ -252,6 +319,13 @@ func (p *App) Cleanup() error {
 
 	if err := p.validate(); err != nil {
 		return err
+	}
+
+	if p.tempAppYaml != "" {
+		if err := os.Remove(filepath.Join(p.Dir, p.tempAppYaml)); err != nil {
+			// Continue trying to clean up, even if the temp yaml file didn't get removed.
+			log.Print(err)
+		}
 	}
 
 	log.Printf("(%s) Cleaning up.", p.Name)

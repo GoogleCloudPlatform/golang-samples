@@ -28,9 +28,9 @@ func TestDatastore(t *testing.T) {
 		Name:      "ds",
 		Dir:       tc.Path("docs", "managed_vms", "datastore"),
 		ProjectID: tc.ProjectID,
-		//Env: map[string]string{
-		//"GCLOUD_PROJECT": project,
-		//},
+		Env: map[string]string{
+			"GCLOUD_DATASET_ID": tc.ProjectID,
+		},
 	}
 
 	bodyShouldContain(t, datastore, "/", "Succesfully stored")
