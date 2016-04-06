@@ -4,7 +4,7 @@
 
 // Package aeintegrate facilitates end-to-end testing against the production Google App Engine.
 //
-// This is a specialized tool that might be used in addition to unit tests. It
+// This is a specialized tool that could be used in addition to unit tests. It
 // calls the `gcloud app` command directly, which is in preview/beta, so expect
 // any tests using this package to spontaneously break.
 //
@@ -131,7 +131,7 @@ func (p *App) Deploy() error {
 	if _, err := p.Module(); err != nil {
 		return fmt.Errorf("could not get module id: %v", err)
 	}
-	if err := p.setupAdmin(); err != nil {
+	if err := p.initAdminService(); err != nil {
 		return fmt.Errorf("could not setup admin service: %v", err)
 	}
 
@@ -150,30 +150,29 @@ func (p *App) Deploy() error {
 		os.Stderr.Write(out)
 		// Try to clean up resources.
 		p.Cleanup()
-	} else if err == nil {
-		p.deployed = true
-		log.Printf("(%s) Deploy successful.", p.Name)
+		return err
 	}
-	return err
+	p.deployed = true
+	log.Printf("(%s) Deploy successful.", p.Name)
+	return nil
 }
 
-// appyaml returns the path of the config file.
-func (p *App) appyaml() string {
-	appyaml := p.AppYaml
-	if appyaml == "" {
-		appyaml = "app.yaml"
+// appYaml returns the path of the config file.
+func (p *App) appYaml() string {
+	if p.AppYaml != "" {
+		return p.AppYaml
 	}
-	return appyaml
+	return "app.yaml"
 }
 
-// envappyaml writes the temporary configuration file if it does not exist already,
+// envAppYaml writes the temporary configuration file if it does not exist already,
 // then returns the path of the temporary config file.
-func (p *App) envappyaml() (string, error) {
+func (p *App) envAppYaml() (string, error) {
 	if p.tempAppYaml != "" {
 		return p.tempAppYaml, nil
 	}
 
-	base := p.appyaml()
+	base := p.appYaml()
 	tmp := "aeintegrate." + base
 
 	if len(p.Env) == 0 {
@@ -185,13 +184,12 @@ func (p *App) envappyaml() (string, error) {
 		return p.tempAppYaml, nil
 	}
 
-	baseContents, err := ioutil.ReadFile(filepath.Join(p.Dir, base))
+	b, err := ioutil.ReadFile(filepath.Join(p.Dir, base))
 	if err != nil {
 		return "", err
 	}
-
 	var c yaml.MapSlice
-	if err := yaml.Unmarshal(baseContents, &c); err != nil {
+	if err := yaml.Unmarshal(b, &c); err != nil {
 		return "", err
 	}
 
@@ -209,20 +207,19 @@ func (p *App) envappyaml() (string, error) {
 		for _, kv := range vals {
 			k, ok := kv.Key.(string)
 			if !ok {
-				return "", fmt.Errorf("env_variables/%#v should be a string", kv.Key)
+				return "", fmt.Errorf("expected string for env_variables/%#v", kv.Key)
 			}
-			if val, ok := p.Env[k]; ok {
-				kv.Value = val
+			if v, ok := p.Env[k]; ok {
+				kv.Value = v
 			}
 		}
 	}
 
-	out, err := yaml.Marshal(c)
+	b, err = yaml.Marshal(c)
 	if err != nil {
 		return "", err
 	}
-
-	if err := ioutil.WriteFile(filepath.Join(p.Dir, tmp), out, 0755); err != nil {
+	if err := ioutil.WriteFile(filepath.Join(p.Dir, tmp), b, 0755); err != nil {
 		return "", err
 	}
 
@@ -240,7 +237,7 @@ func (p *App) deployCmd() (*exec.Cmd, error) {
 		aedeploy = "aedeploy"
 	}
 
-	appyaml, err := p.envappyaml()
+	appYaml, err := p.envAppYaml()
 	if err != nil {
 		return nil, err
 	}
@@ -248,14 +245,12 @@ func (p *App) deployCmd() (*exec.Cmd, error) {
 	// NOTE: if the "preview" and/or "app" components are not available, and this is
 	// run in parallel, gcloud will attempt to install those components multiple
 	// times and will eventually fail on IO.
-	args := []string{gcloudBin,
+	cmd := exec.Command(aedeploy, gcloudBin,
 		"--quiet",
-		"preview", "app", "deploy", appyaml,
+		"preview", "app", "deploy", appYaml,
 		"--project", p.ProjectID,
 		"--version", p.version(),
-		"--no-promote",
-	}
-	cmd := exec.Command(aedeploy, args...)
+		"--no-promote")
 	cmd.Dir = p.Dir
 	return cmd, nil
 }
@@ -266,16 +261,15 @@ func (p *App) Module() (string, error) {
 		return p.module, nil
 	}
 
-	b, err := ioutil.ReadFile(filepath.Join(p.Dir, p.appyaml()))
+	b, err := ioutil.ReadFile(filepath.Join(p.Dir, p.appYaml()))
 	if err != nil {
 		return "", err
 	}
 
-	s := &struct {
+	var s struct {
 		Module string `yaml:"module"`
-	}{}
-
-	if err := yaml.Unmarshal(b, s); err != nil {
+	}
+	if err := yaml.Unmarshal(b, &s); err != nil {
 		return "", err
 	}
 
@@ -284,20 +278,18 @@ func (p *App) Module() (string, error) {
 	}
 
 	p.module = s.Module
-	return p.module, err
+	return p.module, nil
 }
 
-// setupAdmin populates p.adminService and checks that the user is authenticated and project ID is valid.
-func (p *App) setupAdmin() error {
+// initAdminService populates p.adminService and checks that the user is authenticated and project ID is valid.
+func (p *App) initAdminService() error {
 	c, err := google.DefaultClient(context.Background(), appengine.CloudPlatformScope)
 	if err != nil {
 		return err
 	}
-
 	if p.adminService, err = appengine.New(c); err != nil {
 		return err
 	}
-
 	if err := p.validate(); err != nil {
 		return err
 	}
@@ -338,13 +330,8 @@ func (p *App) Cleanup() error {
 		}
 		time.Sleep(time.Second)
 	}
-	return err
-}
-
-func gcloudBin() string {
-	bin := os.Getenv("GCLOUD_BIN")
-	if bin == "" {
-		return "gcloud"
+	if err != nil {
+		err = fmt.Errorf("could not delete app module version %v/%v: %v", p.module, p.version(), err)
 	}
-	return bin
+	return err
 }

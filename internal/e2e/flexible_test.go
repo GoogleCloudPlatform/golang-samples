@@ -2,6 +2,8 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
+// Package e2e contains end-to-end tests for Go programs running on Google Cloud Platform.
+// See README.md for details on running the tests.
 package e2e
 
 import (
