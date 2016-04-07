@@ -6,23 +6,69 @@
 package testutil
 
 import (
+	"errors"
+	"fmt"
+	"go/build"
 	"os"
+	"path/filepath"
 	"testing"
 )
 
-type Config struct {
+var noProjectID = errors.New("GOLANG_SAMPLES_PROJECT_ID not set")
+
+type Context struct {
 	ProjectID string
+	Dir       string
 }
 
-// SystemTest gets the project ID for the test environment.
+func (tc Context) Path(p ...string) string {
+	p = append([]string{tc.Dir}, p...)
+	return filepath.Join(p...)
+}
+
+// SystemTest gets the test context.
 // The test is skipped if the GOLANG_SAMPLES_PROJECT_ID environment variable is not set.
-func SystemTest(t *testing.T) Config {
-	projectID := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
-	if projectID == "" {
-		t.Skip("GOLANG_SAMPLES_PROJECT_ID not set")
+func SystemTest(t *testing.T) Context {
+	tc, err := context()
+	if err == noProjectID {
+		t.Skip(err)
+	} else if err != nil {
+		t.Fatal(err)
 	}
 
-	return Config{
-		ProjectID: projectID,
+	return tc
+}
+
+// EndToEndTest gets the test context, and sets the test as Parallel.
+// The test is skipped if the GOLANG_SAMPLES_E2E_TEST environment variable is not set.
+func EndToEndTest(t *testing.T) Context {
+	if os.Getenv("GOLANG_SAMPLES_E2E_TEST") == "" {
+		t.Skip("GOLANG_SAMPLES_E2E_TEST not set")
 	}
+
+	tc, err := context()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Parallel()
+
+	return tc
+}
+
+func context() (Context, error) {
+	tc := Context{}
+
+	tc.ProjectID = os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
+	if tc.ProjectID == "" {
+		return tc, noProjectID
+	}
+
+	pkg, err := build.Import("github.com/GoogleCloudPlatform/golang-samples", "", build.FindOnly)
+	if err != nil {
+		return tc, fmt.Errorf("Could not find golang-samples on GOPATH: %v", err)
+	}
+	tc.Dir = pkg.Dir
+
+	return tc, nil
 }
