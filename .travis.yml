@@ -22,7 +22,6 @@ before_install:
 
 install:
 - go get -t -v ./...
-- go get golang.org/x/tools/cmd/vet
 
 script:
 - go test -v ./...
