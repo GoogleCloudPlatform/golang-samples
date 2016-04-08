@@ -11,6 +11,15 @@ go:
 - 1.6
 #- tip # NOTE: disabled - see https://github.com/travis-ci/gimme/issues/38
 
+before_cache:
+- rm -rf $GOPATH/src/github.com/GoogleCloudPlatform/golang-samples
+- rm -rf $GOPATH/pkg/**/github.com/GoogleCloudPlatform/golang-samples
+
+cache:
+  directories:
+    - $GOPATH/src
+    - $GOPATH/pkg
+
 before_install:
 - if [ $SYSTEM_TESTS ]; then
     openssl aes-256-cbc -K $encrypted_e44ee91b46d4_key -iv $encrypted_e44ee91b46d4_iv -in key.json.enc -out key.json -d;
@@ -21,7 +30,8 @@ before_install:
   fi
 
 install:
-- go get -t -v ./...
+# Install all external dependencies, ensuring they are updated.
+- go get -t -u -v $(go list -f '{{join .Imports "\n"}}' ./... | sort | uniq | grep -v golang-samples)
 
 script:
 - go test -v ./...
