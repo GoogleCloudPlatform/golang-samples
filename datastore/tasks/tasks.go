@@ -155,7 +155,7 @@ func MarkDone(ctx context.Context, client *datastore.Client, taskID int64) error
 func ListTasks(ctx context.Context, client *datastore.Client) ([]*Task, error) {
 	var tasks []*Task
 
-	// Create a query to fetch all queries, ordered by "created".
+	// Create a query to fetch all Task entities, ordered by "created".
 	query := datastore.NewQuery("Task").Order("created")
 	keys, err := client.GetAll(ctx, query, &tasks)
 	if err != nil {
