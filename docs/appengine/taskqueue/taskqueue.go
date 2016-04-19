@@ -38,10 +38,12 @@ func f(ctx context.Context) {
 func example() {
 	var ctx context.Context
 
-	// [START deleting_tasks]
+	// [START purging_tasks]
 	// Purge entire queue...
 	err := taskqueue.Purge(ctx, "queue1")
+	// [END purging_tasks]
 
+	// [START deleting_tasks]
 	// Delete an individual task...
 	t := &taskqueue.Task{Name: "foo"}
 	err = taskqueue.Delete(ctx, t, "queue1")
