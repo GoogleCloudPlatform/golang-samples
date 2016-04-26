@@ -1,0 +1,10 @@
+runtime: go
+api_version: go1
+
+inbound_services:
+  - warmup
+
+handlers:
+  - url: /_ah/warmup
+    script: _go_app
+    login: admin
