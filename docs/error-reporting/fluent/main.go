@@ -2,6 +2,8 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
+// TODO(cbro): find a better sample - panic, defer, recover should not be present.
+
 package main
 
 import (
@@ -14,17 +16,18 @@ import (
 
 var logger *fluent.Fluent
 
-func init() {
-	// Initializes a Fluentd logger.
+func main() {
 	var err error
-	logger, err = fluent.New(
-		fluent.Config{FluentPort: 24224, FluentHost: "localhost"})
+	logger, err = fluent.New(fluent.Config{
+		FluentHost: "localhost",
+		FluentPort: 24224,
+	})
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
-	// Registers a handler.
 	http.HandleFunc("/demo", demoHandler)
+	http.ListenAndServe(":8080", nil)
 }
 
 func report(stackTrace string, r *http.Request) {
@@ -43,15 +46,14 @@ func report(stackTrace string, r *http.Request) {
 			},
 		},
 	}
-	err := logger.Post("myapp.errors", payload)
-	if err != nil {
-		log.Fatal(err)
+	if err := logger.Post("myapp.errors", payload); err != nil {
+		log.Print(err)
 	}
 }
 
-// Handler for the incomming requests.
+// Handler for the incoming requests.
 func demoHandler(w http.ResponseWriter, r *http.Request) {
-	// How to handle an error.
+	// How to handle a panic.
 	defer func() {
 		if e := recover(); e != nil {
 			stack := make([]byte, 1<<16)
@@ -60,12 +62,7 @@ func demoHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	// Error is generated here.
+	// Panic is triggered.
 	x := 0
 	log.Println(100500 / x)
-}
-
-// Http server starts serving requests.
-func main() {
-	http.ListenAndServe(":8080", nil)
 }
