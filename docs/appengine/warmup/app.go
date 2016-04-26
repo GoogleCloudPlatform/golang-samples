@@ -2,7 +2,8 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-package sample
+// Sample warmup demonstrates usage of the /_ah/warmup handler.
+package warmup
 
 import (
 	"net/http"
@@ -18,7 +19,8 @@ func init() {
 func warmupHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
 
-	// Do things using ctx.
+	// Perform warmup tasks, including ones that require a context,
+	// such as retrieving data from Datastore.
 
 	log.Infof(ctx, "warmup done")
 }
