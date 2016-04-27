@@ -44,7 +44,6 @@ before_install:
     export PATH="$PATH:$PWD/google-cloud-sdk/bin";
     ./testing/travis/configure_gcloud.bash;
   fi
-- env
 
 install:
 # Install all external dependencies, ensuring they are updated.
