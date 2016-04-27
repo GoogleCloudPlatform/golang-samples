@@ -12,6 +12,11 @@ and read it back.
 
 ## Prerequisites to run locally:
 
+Set up a Google Cloud Project using the [Google Cloud Console](https://console.cloud.google.com).
+
+Set up your Google Cloud Project for Stack Driver using the instructions on [setting up Stack Driver](https://cloud.google.com/monitoring/accounts/guide#setup-account). Note that if you see the error message 
+`The project is not the requisite Stackdriver service tier.` then you likely missed this step.
+
 Create local credentials by running the following command and following the oauth2 flow:
 
     gcloud beta auth application-default login
