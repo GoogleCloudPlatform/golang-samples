@@ -11,12 +11,11 @@ import (
 	"net/http"
 	"strings"
 
-	"golang.org/x/net/context"
-	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/google"
 	"google.golang.org/api/bigquery/v2"
 	"google.golang.org/appengine"
-	"google.golang.org/appengine/urlfetch"
+
+	"golang.org/x/net/context"
+	"golang.org/x/oauth2/google"
 )
 
 func init() {
@@ -29,50 +28,48 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// create a new App Engine context from the request.
+	// Create a new App Engine context from the request.
 	ctx := appengine.NewContext(r)
 
-	// obtain the list of dataset names.
+	// Get the list of dataset names.
 	names, err := datasets(ctx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	w.Header().Set("Content-Type", "text")
+	w.Header().Set("Content-Type", "text/plain")
 
 	if len(names) == 0 {
-		fmt.Fprintf(w, "no datasets visible")
+		fmt.Fprintf(w, "No datasets visible")
 	} else {
-		fmt.Fprintf(w, "datasets:\n\t"+strings.Join(names, "\n\t"))
+		fmt.Fprintf(w, "Datasets:\n\t"+strings.Join(names, "\n\t"))
 	}
 }
 
-// datasets returns a list with the ids of all the Big Query datasets visible
+// datasets returns a list with the IDs of all the Big Query datasets visible
 // with the given context.
 func datasets(ctx context.Context) ([]string, error) {
-	// create a new authenticated HTTP client over urlfetch.
-	client := &http.Client{
-		Transport: &oauth2.Transport{
-			Source: google.AppEngineTokenSource(ctx, bigquery.BigqueryScope),
-			Base:   &urlfetch.Transport{Context: ctx},
-		},
+	// Create a new authenticated HTTP client over urlfetch.
+	hc, err := google.DefaultClient(ctx, bigquery.BigqueryScope)
+	if err != nil {
+		return nil, fmt.Errorf("could not create http client: %v", err)
 	}
 
-	// create the BigQuery service.
-	bq, err := bigquery.New(client)
+	// Create the BigQuery service.
+	bq, err := bigquery.New(hc)
 	if err != nil {
 		return nil, fmt.Errorf("could not create service: %v", err)
 	}
 
-	// obtain the current application id, the BigQuery id is the same.
-	appID := appengine.AppID(ctx)
+	// Get the current application ID, which is the same as the project ID.
+	projectID := appengine.AppID(ctx)
 
-	// prepare the list of ids.
+	// Return a list of IDs.
 	var ids []string
-	datasets, err := bq.Datasets.List(appID).Do()
+	datasets, err := bq.Datasets.List(projectID).Do()
 	if err != nil {
-		return nil, fmt.Errorf("could not list datasets for %q: %v", appID, err)
+		return nil, fmt.Errorf("could not list datasets for %q: %v", projectID, err)
 	}
 	for _, d := range datasets.Datasets {
 		ids = append(ids, d.Id)
