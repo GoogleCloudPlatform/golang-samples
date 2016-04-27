@@ -12,16 +12,21 @@ import (
 	"os"
 	"time"
 
-	"golang.org/x/oauth2"
+	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
+
 	"google.golang.org/api/monitoring/v3"
 )
 
 const metric = "compute.googleapis.com/instance/cpu/usage_time"
 
+func projectResource(projectID string) string {
+	return "projects/" + projectID
+}
+
 // listMonitoredResourceDescriptor lists all the resources available to be monitored in the API.
-func listMonitoredResourceDescriptors(s *monitoring.Service, project string) error {
-	resp, err := s.Projects.MonitoredResourceDescriptors.List(project).Do()
+func listMonitoredResourceDescriptors(s *monitoring.Service, projectID string) error {
+	resp, err := s.Projects.MonitoredResourceDescriptors.List(projectResource(projectID)).Do()
 	if err != nil {
 		return fmt.Errorf("Could not list time series: %v", err)
 	}
@@ -31,8 +36,8 @@ func listMonitoredResourceDescriptors(s *monitoring.Service, project string) err
 }
 
 // listMetricDescriptors lists the metrics specified by the metric constant.
-func listMetricDescriptors(s *monitoring.Service, projectResource string) error {
-	resp, err := s.Projects.MetricDescriptors.List(projectResource).
+func listMetricDescriptors(s *monitoring.Service, projectID string) error {
+	resp, err := s.Projects.MetricDescriptors.List(projectResource(projectID)).
 		Filter(fmt.Sprintf("metric.type=%q", metric)).
 		Do()
 	if err != nil {
@@ -45,11 +50,11 @@ func listMetricDescriptors(s *monitoring.Service, projectResource string) error 
 
 // listTimesSeries lists all the timeseries created for metric created in a 5
 // minute interval an hour ago
-func listTimeSeries(s *monitoring.Service, projectResource string) error {
+func listTimeSeries(s *monitoring.Service, projectID string) error {
 	startTime := time.Now().UTC().Add(-time.Hour)
 	endTime := startTime.Add(5 * time.Minute)
 
-	resp, err := s.Projects.TimeSeries.List(projectResource).
+	resp, err := s.Projects.TimeSeries.List(projectResource(projectID)).
 		PageSize(3).
 		Filter(fmt.Sprintf("metric.type=\"%s\"", metric)).
 		IntervalStartTime(startTime.Format(time.RFC3339)).
@@ -63,40 +68,44 @@ func listTimeSeries(s *monitoring.Service, projectResource string) error {
 	return nil
 }
 
-func main() {
-	// walk through the basic calls of the Monitoring API
-	client, err := google.DefaultClient(
-		oauth2.NoContext,
-		monitoring.CloudPlatformScope,
-		monitoring.MonitoringScope,
-		monitoring.MonitoringReadScope,
-		monitoring.MonitoringWriteScope,
-	)
+func createService(ctx context.Context) (*monitoring.Service, error) {
+	hc, err := google.DefaultClient(ctx, monitoring.MonitoringScope)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
+	s, err := monitoring.New(hc)
+	if err != nil {
+		return nil, err
+	}
+	return s, nil
+}
+
+func main() {
 	if len(os.Args) < 2 {
-		fmt.Println("Usage: auth.go <project_id>")
+		fmt.Println("Usage: listresources <project_id>")
 		return
 	}
-	projectResource := "projects/" + os.Args[1]
-	s, err := monitoring.New(client)
+
+	ctx := context.Background()
+	s, err := createService(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if err := listMonitoredResourceDescriptors(s, projectResource); err != nil {
+	projectID := os.Args[1]
+
+	if err := listMonitoredResourceDescriptors(s, projectID); err != nil {
 		log.Fatal(err)
 	}
-	if err := listMetricDescriptors(s, projectResource); err != nil {
+	if err := listMetricDescriptors(s, projectID); err != nil {
 		log.Fatal(err)
 	}
-	if err := listTimeSeries(s, projectResource); err != nil {
+	if err := listTimeSeries(s, projectID); err != nil {
 		log.Fatal(err)
 	}
 }
 
-// printResource prints out our API response objects as JSON.
+// formatResource marshals a response objects as JSON.
 func formatResource(resource interface{}) []byte {
 	b, err := json.MarshalIndent(resource, "", "    ")
 	if err != nil {
