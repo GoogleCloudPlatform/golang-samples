@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"go/build"
+	"log"
 	"os"
 	"path/filepath"
 	"testing"
@@ -24,6 +25,19 @@ type Context struct {
 func (tc Context) Path(p ...string) string {
 	p = append([]string{tc.Dir}, p...)
 	return filepath.Join(p...)
+}
+
+// ContextMain gets a test context from a TestMain function.
+// Useful for initializing global variables before running parallel system tests.
+// ok is false if the project is not set up properly for system tests.
+func ContextMain(m *testing.M) (tc Context, ok bool) {
+	c, err := context()
+	if err == noProjectID {
+		return c, false
+	} else if err != nil {
+		log.Fatal(err)
+	}
+	return c, true
 }
 
 // SystemTest gets the test context.
