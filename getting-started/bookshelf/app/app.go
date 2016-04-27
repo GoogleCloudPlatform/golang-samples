@@ -230,11 +230,11 @@ func uploadFileFromForm(r *http.Request) (url string, err error) {
 func createHandler(w http.ResponseWriter, r *http.Request) *appError {
 	book, err := bookFromForm(r)
 	if err != nil {
-		return appErrorf(err, "could not add book: %v", err)
+		return appErrorf(err, "could not parse book from form: %v", err)
 	}
 	id, err := bookshelf.DB.AddBook(book)
 	if err != nil {
-		return appErrorf(err, "could not add book: %v", err)
+		return appErrorf(err, "could not save book: %v", err)
 	}
 	go publishUpdate(id)
 	http.Redirect(w, r, fmt.Sprintf("/books/%d", id), http.StatusFound)
