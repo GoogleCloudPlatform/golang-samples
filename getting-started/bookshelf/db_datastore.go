@@ -21,9 +21,8 @@ type datastoreDB struct {
 var _ BookDatabase = &datastoreDB{}
 
 // newDatastoreDB creates a new BookDatabase backed by Cloud Datastore.
-// See the cloud and google packages for details on creating a suitable context:
-// https://godoc.org/google.golang.org/cloud
-// https://godoc.org/golang.org/x/oauth2/google
+// See the datastore and google packages for details on creating a suitable Client:
+// https://godoc.org/google.golang.org/cloud/datastore
 func newDatastoreDB(client *datastore.Client) (BookDatabase, error) {
 	ctx := context.Background()
 	// Verify that we can communicate and authenticate with the datastore service.
