@@ -6,10 +6,12 @@ branches:
   only:
     - master
 
-go:
-- 1.5.3
-- 1.6
-#- tip # NOTE: disabled - see https://github.com/travis-ci/gimme/issues/38
+matrix:
+  include:
+    - go: 1.5.4
+    - go: 1.6.2
+      env: ALLOW_E2E=true # Don't run e2e tests more than once.
+    # NOTE: no tip, see https://github.com/travis-ci/gimme/issues/38
 
 before_cache:
 - rm -rf $GOPATH/src/github.com/GoogleCloudPlatform/golang-samples
@@ -28,6 +30,21 @@ before_install:
   else
     echo "Not running system tests.";
   fi
+- if [ $ALLOW_E2E ]; then
+    curl -s https://api.travis-ci.org/builds/$TRAVIS_BUILD_ID | jq . | tee /tmp/build.json;
+    export NIGHTLY=$(jq '.event_type=="api" and (.message|contains("CIAEON=true"))' < /tmp/build.json);
+    export FORCE_E2E=$(jq '.message|contains("FORCE_E2E=true")' < /tmp/build.json);
+    if [ $NIGHTLY = "true" ] || [ $FORCE_E2E = "true" ]; then
+      export GOLANG_SAMPLES_E2E_TEST=true;
+    fi;
+  fi
+- if [ $GOLANG_SAMPLES_E2E_TEST ]; then
+    echo "This test run will run end-to-end tests.";
+    go get -u google.golang.org/appengine/cmd/aedeploy;
+    export PATH="$PATH:$PWD/google-cloud-sdk/bin";
+    ./testing/travis/configure_gcloud.bash;
+  fi
+- env
 
 install:
 # Install all external dependencies, ensuring they are updated.
