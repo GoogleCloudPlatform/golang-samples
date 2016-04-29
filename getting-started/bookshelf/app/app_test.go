@@ -23,7 +23,7 @@ var wt *webtest.W
 func TestMain(m *testing.M) {
 	serv := httptest.NewServer(nil)
 	wt = webtest.New(nil, serv.Listener.Addr().String())
-	addHandlers()
+	registerHandlers()
 
 	os.Exit(m.Run())
 }

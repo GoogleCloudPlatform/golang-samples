@@ -36,11 +36,11 @@ var (
 )
 
 func main() {
-	addHandlers()
+	registerHandlers()
 	appengine.Main()
 }
 
-func addHandlers() {
+func registerHandlers() {
 	// Use gorilla/mux for rich routing.
 	// See http://www.gorillatoolkit.org/pkg/mux
 	r := mux.NewRouter()
