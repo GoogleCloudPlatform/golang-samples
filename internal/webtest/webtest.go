@@ -53,7 +53,7 @@ func (w *W) WaitForNet() {
 
 // GetBody performs a GET request to a given path.
 func (w *W) GetBody(path string) (body string, resp *http.Response, err error) {
-	resp, err := w.Get(path)
+	resp, err = w.Get(path)
 	if err != nil {
 		return "", resp, err
 	}
