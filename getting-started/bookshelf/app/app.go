@@ -21,6 +21,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/satori/go.uuid"
 
+	"google.golang.org/appengine"
 	"google.golang.org/cloud/pubsub"
 	"google.golang.org/cloud/storage"
 
@@ -35,6 +36,11 @@ var (
 )
 
 func main() {
+	registerHandlers()
+	appengine.Main()
+}
+
+func registerHandlers() {
 	// Use gorilla/mux for rich routing.
 	// See http://www.gorillatoolkit.org/pkg/mux
 	r := mux.NewRouter()
@@ -80,8 +86,6 @@ func main() {
 	// Log all requests using the standard Apache format.
 	http.Handle("/", handlers.CombinedLoggingHandler(os.Stderr, r))
 	// [END request_logging]
-
-	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
 // listHandler displays a list with summaries of books in the database.
@@ -250,13 +254,13 @@ func updateHandler(w http.ResponseWriter, r *http.Request) *appError {
 
 	book, err := bookFromForm(r)
 	if err != nil {
-		return appErrorf(err, "could not update book: %v", err)
+		return appErrorf(err, "could not parse book from form: %v", err)
 	}
 	book.ID = id
 
 	err = bookshelf.DB.UpdateBook(book)
 	if err != nil {
-		return appErrorf(err, "could not update book: %v", err)
+		return appErrorf(err, "could not save book: %v", err)
 	}
 	go publishUpdate(book.ID)
 	http.Redirect(w, r, fmt.Sprintf("/books/%d", book.ID), http.StatusFound)
