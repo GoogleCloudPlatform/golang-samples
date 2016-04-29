@@ -69,15 +69,15 @@ func authInfoHandler(w http.ResponseWriter, r *http.Request) {
 
 // errorf writes a swagger-compliant error response.
 func errorf(w http.ResponseWriter, code int, format string, a ...interface{}) {
-	var error struct {
+	var out struct {
 		Code    int    `json:"code"`
 		Message string `json:"message"`
 	}
 
-	error.Code = code
-	error.Message = fmt.Sprintf(format, a...)
+	out.Code = code
+	out.Message = fmt.Sprintf(format, a...)
 
-	b, err := json.Marshal(error)
+	b, err := json.Marshal(out)
 	if err != nil {
 		http.Error(w, `{"code": 500, "message": "Could not format JSON for original message."}`, 500)
 		return
