@@ -6,8 +6,10 @@
 package main
 
 import (
+	"bytes"
 	"crypto/rsa"
 	"crypto/x509"
+	"encoding/json"
 	"encoding/pem"
 	"errors"
 	"flag"
@@ -24,20 +26,38 @@ import (
 )
 
 var (
-	host           = flag.String("host", "", "The API host. Required.")
-	apiKey         = flag.String("api-key", "", "Your API key. Required.")
-	serviceAccount = flag.String("service-account", "", "Path to service account JSON file. Required.")
+	host   = flag.String("host", "", "The API host. Required.")
+	apiKey = flag.String("api-key", "", "Your API key. Required.")
+
+	echo           = flag.String("echo", "", "Message to echo. Cannot be used with -service-account")
+	serviceAccount = flag.String("service-account", "", "Path to service account JSON file. Cannot be used with -echo.")
 )
 
 func main() {
 	flag.Parse()
 
-	if *apiKey == "" || *host == "" || *serviceAccount == "" {
+	if *apiKey == "" || *host == "" {
+		flag.PrintDefaults()
+		os.Exit(1)
+	}
+	if *serviceAccount == "" && *echo == "" {
+		fmt.Fprint(os.Stderr, "Provide one of -echo or -service-account.")
+		flag.PrintDefaults()
+		os.Exit(1)
+	}
+	if *serviceAccount != "" && *echo != "" {
+		fmt.Fprint(os.Stderr, "Provide only one of -echo or -service-account.")
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
 
-	resp, err := doJWT()
+	var resp *http.Response
+	var err error
+	if *echo != "" {
+		resp, err = doEcho()
+	} else if *serviceAccount != "" {
+		resp, err = doJWT()
+	}
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -46,6 +66,18 @@ func main() {
 		log.Fatal(err)
 	}
 	os.Stdout.Write(b)
+}
+
+// doEcho performs an authenticated echo request using an API key.
+func doEcho() (*http.Response, error) {
+	msg := map[string]string{
+		"message": *echo,
+	}
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(msg); err != nil {
+		return nil, err
+	}
+	return http.Post(*host+"/echo?key="+*apiKey, "application/json", &buf)
 }
 
 // doJWT performs an authenticated request using the credentials in the service account file.
