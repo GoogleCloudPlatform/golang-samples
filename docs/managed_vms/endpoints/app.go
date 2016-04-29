@@ -1,3 +1,8 @@
+// Copyright 2016 Google Inc. All rights reserved.
+// Use of this source code is governed by the Apache 2.0
+// license that can be found in the LICENSE file.
+
+// Sample endpoints demonstrates a Cloud Endpoints API.
 package main
 
 import (
@@ -26,6 +31,7 @@ func main() {
 	appengine.Main()
 }
 
+// echoHandler reads a JSON object from the body, and writes it back out.
 func echoHandler(w http.ResponseWriter, r *http.Request) {
 	var msg interface{}
 	if err := json.NewDecoder(r.Body).Decode(&msg); err != nil {
@@ -45,6 +51,7 @@ func echoHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
+// authInfoHandler reads authentication info provided by the Endpoints proxy.
 func authInfoHandler(w http.ResponseWriter, r *http.Request) {
 	encodedInfo := r.Header.Get("X-Endpoint-API-UserInfo")
 	if encodedInfo == "" {
