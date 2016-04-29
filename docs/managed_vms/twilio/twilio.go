@@ -2,6 +2,7 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
+// Sample twilio demonstrates sending and receiving SMS, receiving calls via Twilio from App Engine flexible environment.
 package main
 
 import (

@@ -4,6 +4,7 @@
 
 // TODO(cbro): find a better sample - panic, defer, recover should not be present.
 
+// Sample fluent demonstrates integration of fluent and Cloud Error reporting.
 package main
 
 import (

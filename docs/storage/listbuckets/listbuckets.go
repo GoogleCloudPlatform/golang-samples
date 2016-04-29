@@ -2,6 +2,7 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
+// Command listbuckets lists the Google Cloud buckets for a given project ID.
 package main
 
 import (
@@ -9,19 +10,19 @@ import (
 	"log"
 	"os"
 
-	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/google"
 	"google.golang.org/api/storage/v1"
+
+	"golang.org/x/net/context"
+	"golang.org/x/oauth2/google"
 )
 
 // ListBuckets returns a slice of all the buckets for a given project.
 func ListBuckets(projectID string) ([]*storage.Bucket, error) {
+	ctx := context.Background()
 
 	// Create the client that uses Application Default Credentials
 	// See https://developers.google.com/identity/protocols/application-default-credentials
-	client, err := google.DefaultClient(
-		oauth2.NoContext,
-		"https://www.googleapis.com/auth/devstorage.read_only")
+	client, err := google.DefaultClient(ctx, storage.DevstorageReadOnlyScope)
 	if err != nil {
 		return nil, err
 	}
