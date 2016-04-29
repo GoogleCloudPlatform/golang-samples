@@ -14,6 +14,9 @@ import (
 	"time"
 )
 
+// BuildMain builds the main package in the current working directory.
+// If it doesn't build, t.Fatal is called.
+// Test methods calling BuildMain should run Runner.Cleanup.
 func BuildMain(t *testing.T) *Runner {
 	wd, err := os.Getwd()
 	if err != nil {
@@ -37,22 +40,27 @@ func BuildMain(t *testing.T) *Runner {
 	return r
 }
 
+// Runner holds the result of `go build`
 type Runner struct {
 	t   *testing.T
 	tmp string
 	bin string
 }
 
+// Built reports whether the build was successful.
 func (r *Runner) Built() bool {
 	return r.bin != ""
 }
 
+// Cleanup removes the built binary.
 func (r *Runner) Cleanup() {
 	if err := os.RemoveAll(r.tmp); err != nil {
 		r.t.Error(err)
 	}
 }
 
+// Run runs the built binary with the given environment.
+// After f returns, the running process is shut down.
 func (r *Runner) Run(env map[string]string, f func()) {
 	if !r.Built() {
 		r.t.Error("Tried to run when binary not built.")
@@ -87,7 +95,7 @@ func (r *Runner) Run(env map[string]string, f func()) {
 
 	select {
 	case <-time.After(5 * time.Second):
-		r.t.Error("Timed out with SIGINT, hard killing.")
+		r.t.Error("Timed out with SIGINT, trying SIGKILL.")
 		if err := cmd.Process.Kill(); err != nil {
 			r.t.Error(err)
 		}
