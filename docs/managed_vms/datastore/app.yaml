@@ -8,10 +8,3 @@ automatic_scaling:
 env_variables:
   GCLOUD_DATASET_ID: your-project-id
 #[END env_variables]
-
-# Temporary workaround to authorize this application to access Cloud Datastore.
-# Remove when cloud/datastore is backed by datastore/v1beta3.
-beta_settings:
-  service_account_scopes: >
-    https://www.googleapis.com/auth/userinfo.email,
-    https://www.googleapis.com/auth/cloud-platform
