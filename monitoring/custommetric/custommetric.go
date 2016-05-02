@@ -17,16 +17,22 @@ import (
 	"os"
 	"time"
 
-	"golang.org/x/oauth2"
+	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
+
 	"google.golang.org/api/monitoring/v3"
 )
 
-// createCustomMetric creates a custom metric specified by metricName.
-func createCustomMetric(s *monitoring.Service, projectResource string, metricType string, metricName string) error {
+const metricType = "custom.googleapis.com/custom_measurement"
+
+func projectResource(projectID string) string {
+	return "projects/" + projectID
+}
+
+// createCustomMetric creates a custom metric specified by the metric type.
+func createCustomMetric(s *monitoring.Service, projectID, metricType string) error {
 	ld := monitoring.LabelDescriptor{Key: "environment", ValueType: "STRING", Description: "An arbitrary measurement"}
 	md := monitoring.MetricDescriptor{
-		Name:        metricName,
 		Type:        metricType,
 		Labels:      []*monitoring.LabelDescriptor{&ld},
 		MetricKind:  "GAUGE",
@@ -35,7 +41,7 @@ func createCustomMetric(s *monitoring.Service, projectResource string, metricTyp
 		Description: "An arbitrary measurement",
 		DisplayName: "Custom Metric",
 	}
-	resp, err := s.Projects.MetricDescriptors.Create(projectResource, &md).Do()
+	resp, err := s.Projects.MetricDescriptors.Create(projectResource(projectID), &md).Do()
 	if err != nil {
 		return fmt.Errorf("Could not create custom metric: %v", err)
 	}
@@ -45,8 +51,8 @@ func createCustomMetric(s *monitoring.Service, projectResource string, metricTyp
 }
 
 // getCustomMetric reads the custom metric created.
-func getCustomMetric(s *monitoring.Service, projectResource string, metricType string, metricName string) (*monitoring.ListMetricDescriptorsResponse, error) {
-	resp, err := s.Projects.MetricDescriptors.List(projectResource).
+func getCustomMetric(s *monitoring.Service, projectID, metricType string) (*monitoring.ListMetricDescriptorsResponse, error) {
+	resp, err := s.Projects.MetricDescriptors.List(projectResource(projectID)).
 		Filter(fmt.Sprintf("metric.type=\"%s\"", metricType)).Do()
 	if err != nil {
 		return nil, fmt.Errorf("Could not get custom metric: %v", err)
@@ -57,7 +63,7 @@ func getCustomMetric(s *monitoring.Service, projectResource string, metricType s
 }
 
 // writeTimeSeriesValue writes a value for the custom metric created
-func writeTimeSeriesValue(s *monitoring.Service, projectResource string, metricType string, metricName string) error {
+func writeTimeSeriesValue(s *monitoring.Service, projectID, metricType string) error {
 	now := time.Now().UTC().Format(time.RFC3339Nano)
 	timeseries := monitoring.TimeSeries{
 		Metric: &monitoring.Metric{
@@ -93,18 +99,18 @@ func writeTimeSeriesValue(s *monitoring.Service, projectResource string, metricT
 	}
 
 	log.Printf("writeTimeseriesRequest: %s\n", formatResource(createTimeseriesRequest))
-	_, err := s.Projects.TimeSeries.Create(projectResource, &createTimeseriesRequest).Do()
+	_, err := s.Projects.TimeSeries.Create(projectResource(projectID), &createTimeseriesRequest).Do()
 	if err != nil {
 		return fmt.Errorf("Could not write time series value, %v ", err)
 	}
 	return nil
 }
 
-// readTimeSeriesValue reads the TimeSeries for the value specified by metricName in a time window from the last 5 minutes.
-func readTimeSeriesValue(s *monitoring.Service, projectResource string, metricType string, metricName string) error {
+// readTimeSeriesValue reads the TimeSeries for the value specified by metric type in a time window from the last 5 minutes.
+func readTimeSeriesValue(s *monitoring.Service, projectID, metricType string) error {
 	startTime := time.Now().UTC().Add(time.Minute * -5)
 	endTime := time.Now().UTC()
-	resp, err := s.Projects.TimeSeries.List(projectResource).
+	resp, err := s.Projects.TimeSeries.List(projectResource(projectID)).
 		Filter(fmt.Sprintf("metric.type=\"%s\"", metricType)).
 		IntervalStartTime(startTime.Format(time.RFC3339Nano)).
 		IntervalEndTime(endTime.Format(time.RFC3339Nano)).
@@ -116,56 +122,65 @@ func readTimeSeriesValue(s *monitoring.Service, projectResource string, metricTy
 	return nil
 }
 
-func main() {
-	client, err := google.DefaultClient(
-		oauth2.NoContext,
-		"https://www.googleapis.com/auth/cloud-platform",
-		"https://www.googleapis.com/auth/monitoring",
-		"https://www.googleapis.com/auth/monitoring.read",
-		"https://www.googleapis.com/auth/monitoring.write",
-	)
+func createService(ctx context.Context) (*monitoring.Service, error) {
+	hc, err := google.DefaultClient(ctx, monitoring.MonitoringScope)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
+	s, err := monitoring.New(hc)
+	if err != nil {
+		return nil, err
+	}
+	return s, nil
+}
+
+func main() {
+	rand.Seed(time.Now().UTC().UnixNano())
+
 	if len(os.Args) < 2 {
-		fmt.Println("Usage: auth.go <project_id>")
+		fmt.Println("Usage: custommetric <project_id>")
 		return
 	}
-	projectResource := "projects/" + os.Args[1]
-	svc, err := monitoring.New(client)
+
+	ctx := context.Background()
+	s, err := createService(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	metricType := "custom.googleapis.com/custom_measurement"
-	metricName := projectResource + "/metricDescriptors/" + metricType
+	projectID := os.Args[1]
 
 	// Create the metric.
-	if err := createCustomMetric(svc, projectResource, metricType, metricName); err != nil {
+	if err := createCustomMetric(s, projectID, metricType); err != nil {
 		log.Fatal(err)
 	}
 
-	var resp *monitoring.ListMetricDescriptorsResponse
 	// Wait until the new metric can be read back.
-	for resp == nil || resp.MetricDescriptors == nil {
-		var err error
-		resp, err = getCustomMetric(svc, projectResource, metricType, metricName)
+	for {
+		resp, err := getCustomMetric(s, projectID, metricType)
 		if err != nil {
 			log.Fatal(err)
 		}
+		if len(resp.MetricDescriptors) != 0 {
+			break
+		}
 		time.Sleep(2 * time.Second)
 	}
-	rand.Seed(time.Now().UTC().UnixNano())
-	// write a TimeSeries value for that metric
-	if err := writeTimeSeriesValue(svc, projectResource, metricType, metricName); err != nil {
+
+	// Write a TimeSeries value for that metric
+	if err := writeTimeSeriesValue(s, projectID, metricType); err != nil {
 		log.Fatal(err)
 	}
+
 	time.Sleep(2 * time.Second)
+
 	// Read the TimeSeries for the last 5 minutes for that metric.
-	readTimeSeriesValue(svc, projectResource, metricType, metricName)
+	if err := readTimeSeriesValue(s, projectID, metricType); err != nil {
+		log.Fatal(err)
+	}
 }
 
-// printResource prints out our API response objects as JSON.
+// formatResource marshals a response objects as JSON.
 func formatResource(resource interface{}) []byte {
 	b, err := json.MarshalIndent(resource, "", "    ")
 	if err != nil {

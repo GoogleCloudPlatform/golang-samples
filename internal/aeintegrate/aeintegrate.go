@@ -199,19 +199,24 @@ func (p *App) envAppYaml() (string, error) {
 			continue
 		}
 
-		vals, ok := e.Value.(yaml.MapSlice)
+		yamlVals, ok := e.Value.(yaml.MapSlice)
 		if !ok {
 			return "", fmt.Errorf("expected MapSlice for env_variables")
 		}
 
-		for _, kv := range vals {
-			k, ok := kv.Key.(string)
-			if !ok {
-				return "", fmt.Errorf("expected string for env_variables/%#v", kv.Key)
+	ENTRY:
+		for mapKey, newVal := range p.Env {
+			for i, kv := range yamlVals {
+				yamlKey, ok := kv.Key.(string)
+				if !ok {
+					return "", fmt.Errorf("expected string for env_variables/%#v", kv.Key)
+				}
+				if yamlKey == mapKey {
+					yamlVals[i].Value = newVal
+					break ENTRY
+				}
 			}
-			if v, ok := p.Env[k]; ok {
-				kv.Value = v
-			}
+			return "", fmt.Errorf("could not find key %s in env_variables", mapKey)
 		}
 	}
 
