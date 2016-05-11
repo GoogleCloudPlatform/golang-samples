@@ -6,7 +6,6 @@
 
 // A simple command-line task list manager to demonstrate using the
 // google.golang.org/cloud/datastore package.
-
 package main
 
 import (

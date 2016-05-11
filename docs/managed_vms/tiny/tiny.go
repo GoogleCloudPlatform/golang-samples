@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Sample tiny demonstrates overall program structure:
-// use of the main package and calling appengine.Main from the main function.
+// a main package with a main function that calls appengine.Main.
 package main
 
 import "google.golang.org/appengine"

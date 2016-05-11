@@ -2,6 +2,7 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
+// Sample helloworld is a basic App Engine flexible app.
 package main
 
 import (

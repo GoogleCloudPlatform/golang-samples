@@ -2,6 +2,8 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
+// Sample pubsub_worker demonstrates the use of the Cloud Pub/Sub API to communicate between two modules.
+// See https://cloud.google.com/go/getting-started/using-pub-sub
 package main
 
 import (
