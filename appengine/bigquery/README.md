@@ -2,16 +2,26 @@
 
 This code has been written to support this [blog post][1].
 
+### Prerequisites
+
+* [Go App Engine SDK][2].
+
+### Deploy and run
+
 You can run this application locally or deploy it to App Engine app servers.
-To do so you will need the `goapp` tool included in the [Go App Engine SDK][2].
 
-- get all the dependencies for this code snippet
+1. Get the dependencies:
 
-	goapp get .
+        goapp get .
 
-- deploy to App Engine servers
 
-	goapp deploy --application=[your-application-id] .
+1. Run the app locally:
+
+        dev_appserver.py -A [your-project-id] .
+
+1. Deploy the app:
+
+        goapp deploy --application=[your-project-id] -version=[choose-a-version] .
 
 [1]: https://medium.com/@francesc/accessing-bigquery-from-app-engine-d01823de81ee
 [2]: https://cloud.google.com/appengine/downloads?hl=en

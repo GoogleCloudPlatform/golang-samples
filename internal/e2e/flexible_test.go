@@ -30,8 +30,6 @@ func TestHelloWorld(t *testing.T) {
 func TestDatastore(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 
-	t.Skip("does not work with v1beta3 yet - internal bug 28008919")
-
 	datastore := &aeintegrate.App{
 		Name:      "ds",
 		Dir:       tc.Path("docs", "managed_vms", "datastore"),
@@ -41,7 +39,7 @@ func TestDatastore(t *testing.T) {
 		},
 	}
 
-	bodyShouldContain(t, datastore, "/", "Succesfully stored")
+	bodyShouldContain(t, datastore, "/", "Successfully stored")
 }
 
 func TestMemcache(t *testing.T) {
