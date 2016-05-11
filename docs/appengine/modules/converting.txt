@@ -12,7 +12,7 @@ backends:
 
 // [START sample_2]
 application: myapp
-module: memdb
+service: memdb
 version: uno
 instance_class: B8
 manual_scaling:
@@ -21,20 +21,20 @@ manual_scaling:
 
 // [START sample_3]
 application: myapp
-module: worker
+service: worker
 version: uno
-# For failfast functionality, please use the ‘X-AppEngine-FailFast’ header on requests made to this module.
+# For failfast functionality, please use the ‘X-AppEngine-FailFast’ header on requests made to this service.
 manual_scaling:
   instances: 1
 handlers:
-# If a module has an /_ah/start handler, it should be listed first.
+# If a service has an /_ah/start handler, it should be listed first.
 - url: /_ah/start
   script: _go_app
 // [END sample_3]
 
 // [START sample_4]
 application: myapp
-module: cmdline
+service: cmdline
 version: uno
 basic_scaling:
   max_instances: 1
