@@ -7,6 +7,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -14,8 +15,6 @@ import (
 	"os"
 	"strings"
 	"sync"
-
-	"golang.org/x/net/context"
 
 	"google.golang.org/api/books/v1"
 	"google.golang.org/cloud/pubsub"
@@ -29,18 +28,18 @@ var (
 	countMu sync.Mutex
 	count   int
 
-	booksClient *books.Service
-	pubSubCtx   context.Context
+	booksClient  *books.Service
+	subscription *pubsub.SubscriptionHandle
 )
 
 func main() {
-	var err error
+	ctx := context.Background()
 
-	pubSubCtx, err = bookshelf.PubSubCtx()
-	if err != nil {
-		log.Fatal(err)
+	if bookshelf.PubsubClient == nil {
+		log.Fatal("You must configure the Pub/Sub client in config.go before running pubsub_worker.")
 	}
 
+	var err error
 	booksClient, err = books.New(http.DefaultClient)
 	if err != nil {
 		log.Fatalf("could not access Google Books API: %v", err)
@@ -48,8 +47,10 @@ func main() {
 
 	// ignore returned errors, which will be "already exists". If they're fatal
 	// errors, then following calls (e.g. in the subscribe function) will also fail.
-	pubsub.CreateTopic(pubSubCtx, bookshelf.PubSubTopic)
-	pubsub.CreateSub(pubSubCtx, subName, bookshelf.PubSubTopic, 0, "")
+	bookshelf.PubsubClient.NewTopic(ctx, bookshelf.PubsubTopicID)
+	bookshelf.PubsubClient.NewSubscription(ctx, subName, bookshelf.PubsubClient.Topic(bookshelf.PubsubTopicID), 0, nil)
+
+	subscription = bookshelf.PubsubClient.Subscription(subName)
 
 	// Start worker goroutine.
 	go subscribe()
@@ -71,39 +72,37 @@ func main() {
 }
 
 func subscribe() {
+	ctx := context.Background()
+	it, err := subscription.Pull(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
 	for {
-		// Pull up to 10 messages (maybe fewer) from the subscription.
-		// Blocks for an indeterminate amount of time.
-		msgs, err := pubsub.PullWait(pubSubCtx, subName, 10)
+		msg, err := it.Next()
 		if err != nil {
 			log.Fatalf("could not pull: %v", err)
 		}
+		var id int64
+		if err := json.Unmarshal(msg.Data, &id); err != nil {
+			log.Printf("could not decode message data: %#v", msg)
+			msg.Done(true)
+			continue
+		}
 
-		for _, m := range msgs {
-			msg := m
-
-			var id int64
-			if err := json.Unmarshal(msg.Data, &id); err != nil {
-				log.Printf("could not decode message data: %#v", msg)
-				go pubsub.Ack(pubSubCtx, subName, msg.AckID)
-				continue
+		log.Printf("[ID %d] Processing.", id)
+		go func() {
+			if err := update(id); err != nil {
+				log.Printf("[ID %d] could not update: %v", id, err)
+				return
 			}
 
-			log.Printf("[ID %d] Processing.", id)
-			go func() {
-				if err := update(id); err != nil {
-					log.Printf("[ID %d] could not update: %v", id, err)
-					return
-				}
+			countMu.Lock()
+			count++
+			countMu.Unlock()
 
-				countMu.Lock()
-				count++
-				countMu.Unlock()
-
-				pubsub.Ack(pubSubCtx, subName, msg.AckID)
-				log.Printf("[ID %d] ACK", id)
-			}()
-		}
+			msg.Done(true)
+			log.Printf("[ID %d] ACK", id)
+		}()
 	}
 }
 

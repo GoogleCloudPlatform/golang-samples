@@ -286,23 +286,18 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) *appError {
 // publishUpdate notifies Pub/Sub subscribers that the book identified with
 // the given ID has been added/modified.
 func publishUpdate(bookID int64) {
-	if !bookshelf.PubSubEnabled() {
+	if bookshelf.PubsubClient == nil {
 		return
 	}
 
-	pubSubCtx, err := bookshelf.PubSubCtx()
-	if err != nil {
-		log.Print(err)
-		return
-	}
+	ctx := context.Background()
 
 	b, err := json.Marshal(bookID)
 	if err != nil {
 		return
 	}
-	_, err = pubsub.Publish(pubSubCtx, bookshelf.PubSubTopic, &pubsub.Message{
-		Data: b,
-	})
+	topic := bookshelf.PubsubClient.Topic(bookshelf.PubsubTopicID)
+	_, err = topic.Publish(ctx, &pubsub.Message{Data: b})
 	log.Printf("Published update to Pub/Sub for Book ID %d: %v", bookID, err)
 }
 
