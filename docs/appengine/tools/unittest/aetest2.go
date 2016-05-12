@@ -1,50 +1,19 @@
-// [START package_example_1]
+// Copyright 2011 Google Inc. All rights reserved.
+// Use of this source code is governed by the Apache 2.0
+// license that can be found in the LICENSE file.
+
 package newsletter
-
-import (
-	"reflect"
-	"testing"
-
-	"google.golang.org/appengine/mail"
-)
-
-func TestComposeNewsletter(t *testing.T) {
-	want := &mail.Message{
-		Sender:  "newsletter@appspot.com",
-		To:      []string{"User <user@example.com>"},
-		Subject: "Weekly App Engine Update",
-		Body:    "Don't forget to test your code!",
-	}
-	if msg := composeNewsletter(); !reflect.DeepEqual(msg, want) {
-		t.Errorf("composeMessage() = %+v, want %+v", msg, want)
-	}
-}
-// [END package_example_1]
-
-// [START utility_example_1]
-import (
-	"testing"
-
-	"google.golang.org/appengine/aetest"
-)
-
-func TestMyFunction(t *testing.T) {
-	ctx, done err := aetest.NewContext()
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer done()
-
-	// Run code and tests requiring the context.Context using ctx.
-}
-// [END utility_example_1]
 
 // [START utility_example_2]
 import (
+	"errors"
 	"testing"
+
+	"golang.org/x/net/context"
 
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/aetest"
+	"google.golang.org/appengine/datastore"
 )
 
 func TestMyFunction(t *testing.T) {
@@ -68,7 +37,12 @@ func TestMyFunction(t *testing.T) {
 
 	// Run code and tests with *http.Request req1 and req2,
 	// and context.Context c1 and c2.
+	// [START_EXCLUDE]
+	check(t, c1)
+	check(t, c2)
+	// [END_EXCLUDE]
 }
+
 // [END utility_example_2]
 
 // [START datastore_example_1]
@@ -96,4 +70,13 @@ func TestWithdrawLowBal(t *testing.T) {
 		t.Errorf("Balance %d, want %d", bal, want)
 	}
 }
+
 // [END datastore_example_1]
+
+type BankAccount struct {
+	Balance int
+}
+
+func withdraw(ctx context.Context, foo string, bar, baz int) error {
+	return errors.New("insufficient funds")
+}
