@@ -7,7 +7,6 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -15,6 +14,8 @@ import (
 	"os"
 	"strings"
 	"sync"
+
+	"golang.org/x/net/context"
 
 	"google.golang.org/api/books/v1"
 	"google.golang.org/cloud/pubsub"
