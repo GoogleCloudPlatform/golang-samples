@@ -30,7 +30,7 @@ var (
 	count   int
 
 	booksClient  *books.Service
-	subscription *pubsub.SubscriptionHandle
+	subscription *pubsub.Subscription
 )
 
 func main() {
@@ -48,10 +48,8 @@ func main() {
 
 	// ignore returned errors, which will be "already exists". If they're fatal
 	// errors, then following calls (e.g. in the subscribe function) will also fail.
-	bookshelf.PubsubClient.NewTopic(ctx, bookshelf.PubsubTopicID)
-	bookshelf.PubsubClient.NewSubscription(ctx, subName, bookshelf.PubsubClient.Topic(bookshelf.PubsubTopicID), 0, nil)
-
-	subscription = bookshelf.PubsubClient.Subscription(subName)
+	topic, _ := bookshelf.PubsubClient.NewTopic(ctx, bookshelf.PubsubTopicID)
+	subscription, _ = bookshelf.PubsubClient.NewSubscription(ctx, subName, topic, 0, nil)
 
 	// Start worker goroutine.
 	go subscribe()
@@ -94,6 +92,7 @@ func subscribe() {
 		go func() {
 			if err := update(id); err != nil {
 				log.Printf("[ID %d] could not update: %v", id, err)
+				msg.Done(false) // NACK
 				return
 			}
 
@@ -101,7 +100,7 @@ func subscribe() {
 			count++
 			countMu.Unlock()
 
-			msg.Done(true)
+			msg.Done(true) // ACK
 			log.Printf("[ID %d] ACK", id)
 		}()
 	}
