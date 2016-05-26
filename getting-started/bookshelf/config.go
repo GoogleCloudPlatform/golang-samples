@@ -17,7 +17,6 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 
-	"google.golang.org/cloud"
 	"google.golang.org/cloud/datastore"
 	"google.golang.org/cloud/pubsub"
 	"google.golang.org/cloud/storage"
@@ -32,13 +31,13 @@ var (
 
 	SessionStore sessions.Store
 
-	pubSubCtx context.Context
+	PubsubClient *pubsub.Client
 
 	// Force import of mgo library.
 	_ mgo.Session
 )
 
-const PubSubTopic = "fill-book-details"
+const PubsubTopicID = "fill-book-details"
 
 func init() {
 	var err error
@@ -113,33 +112,12 @@ func init() {
 	// [START pubsub]
 	// To configure Pub/Sub, uncomment the following lines and update the project ID.
 	//
-	// pubSubCtx, err = cloudContext("<your-project-id>")
+	// PubsubClient, err = configurePubsub("<your-project-id>")
 	// [END pubsub]
 
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-func PubSubEnabled() bool {
-	return pubSubCtx != nil
-}
-
-// PubSubCtx returns the Pub/Sub context, or an error if Pub/Sub is not
-// configured or misconfigured.
-func PubSubCtx() (context.Context, error) {
-	if pubSubCtx == nil {
-		return nil, errors.New("You must configure Pub/Sub in bookshelf/config.go " +
-			"before running the Pub/Sub worker.")
-	}
-
-	if _, ok := DB.(*memoryDB); ok {
-		return nil, errors.New("Pub/Sub worker doesn't work with the in-memory DB " +
-			"(worker does not share its memory as the main app). Configure another " +
-			"database in bookshelf/config.go first (e.g. MySQL, Cloud Datastore, etc)")
-	}
-
-	return pubSubCtx, nil
 }
 
 func configureDatastoreDB(projectID string) (BookDatabase, error) {
@@ -160,13 +138,28 @@ func configureStorage(bucketID string) (*storage.BucketHandle, error) {
 	return client.Bucket(bucketID), nil
 }
 
-func cloudContext(projectID string) (context.Context, error) {
+func configurePubsub(projectID string) (*pubsub.Client, error) {
+	if _, ok := DB.(*memoryDB); ok {
+		return nil, errors.New("Pub/Sub worker doesn't work with the in-memory DB " +
+			"(worker does not share its memory as the main app). Configure another " +
+			"database in bookshelf/config.go first (e.g. MySQL, Cloud Datastore, etc)")
+	}
+
 	ctx := context.Background()
-	httpClient, err := google.DefaultClient(ctx, storage.ScopeFullControl, pubsub.ScopePubSub)
+	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
 		return nil, err
 	}
-	return cloud.WithContext(ctx, projectID, httpClient), nil
+
+	// Create the topic if it doesn't exist.
+	if exists, err := client.Topic(PubsubTopicID).Exists(ctx); err != nil {
+		return nil, err
+	} else if !exists {
+		if _, err := client.NewTopic(ctx, PubsubTopicID); err != nil {
+			return nil, err
+		}
+	}
+	return client, nil
 }
 
 func configureOAuthClient(clientID, clientSecret string) *oauth2.Config {

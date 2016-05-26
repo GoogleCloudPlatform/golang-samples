@@ -21,7 +21,7 @@ import (
 )
 
 var (
-	topic *pubsub.TopicHandle
+	topic *pubsub.Topic
 
 	// Messages received by this instance.
 	messagesMu sync.Mutex
