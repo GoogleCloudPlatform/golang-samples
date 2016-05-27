@@ -55,3 +55,4 @@ Note: samples under `docs/appengine` are not shown because they mostly do not ru
 |[getting-started/helloworld](getting-started/helloworld)|Sample helloworld is a basic App Engine flexible app.|
 |[monitoring/custommetric](monitoring/custommetric)|Command custommetric creates a custom metric and writes TimeSeries value to it.|
 |[monitoring/listresources](monitoring/listresources)|Command listresources lists the Google Cloud Monitoring v3 Environment against an authenticated user.|
+|[vision/label](vision/label)|Command label uses the Vision API's label detection capabilities to find a label based on an image's content.|
