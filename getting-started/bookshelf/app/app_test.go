@@ -88,15 +88,15 @@ func TestEditBook(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if want, got := bookPath, resp.Request.URL.Path; want != got {
-		t.Errorf("want %s, got %s", want, got)
+	if got, want := resp.Request.URL.Path, bookPath; got != want {
+		t.Errorf("got %s, want %s", got, want)
 	}
 
 	bodyContains(t, wt, bookPath, "simpsons")
 	bodyContains(t, wt, bookPath, "homer")
 
 	if err := bookshelf.DB.DeleteBook(id); err != nil {
-		t.Fatal(err)
+		t.Fatalf("got err %v, want nil", err)
 	}
 }
 
@@ -116,9 +116,10 @@ func TestAddAndDelete(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	gotPath := resp.Request.URL.Path
-	if !strings.HasPrefix(gotPath, "/books/") {
-		t.Fatalf("expected to be redirected to book page, got %s", gotPath)
+	if wantPrefix := "/books/"; !strings.HasPrefix(gotPath, wantPrefix) {
+		t.Fatalf("redirect: got %q, want prefix %q", gotPath, wantPrefix)
 	}
 
 	bodyContains(t, wt, gotPath, "simpsons")

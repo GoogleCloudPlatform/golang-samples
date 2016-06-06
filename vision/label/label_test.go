@@ -15,9 +15,9 @@ func TestLabel(t *testing.T) {
 
 	labels, err := findLabels("../testdata/cat.jpg")
 	if err != nil {
-		t.Fatalf("expected nil err, got %v", err)
+		t.Fatalf("got %v, want nil err", err)
 	}
 	if len(labels) == 0 {
-		t.Fatalf("expected non-empty slice of labels")
+		t.Fatalf("want non-empty slice of labels")
 	}
 }
