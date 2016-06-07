@@ -70,8 +70,8 @@ func TestList(t *testing.T) {
 	}
 
 	foundTask := listAndGetTask(t, desc)
-	if k.ID() != foundTask.id {
-		t.Errorf("k.ID: want %d, got %d", k.ID(), foundTask.id)
+	if got, want := foundTask.id, k.ID(); got != want {
+		t.Errorf("k.ID: got %d, want %d", got, want)
 	}
 
 	if err := MarkDone(ctx, client, foundTask.id); err != nil {
@@ -80,7 +80,7 @@ func TestList(t *testing.T) {
 
 	foundTask = listAndGetTask(t, desc)
 	if !foundTask.Done {
-		t.Error("foundTask.Done: want true, got false")
+		t.Error("foundTask.Done: got false, want true")
 	}
 
 	if err := DeleteTask(ctx, client, foundTask.id); err != nil {

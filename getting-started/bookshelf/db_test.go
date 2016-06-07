@@ -37,8 +37,8 @@ func testDB(t *testing.T, db BookDatabase) {
 	if err != nil {
 		t.Error(err)
 	}
-	if want, got := b.Description, gotBook.Description; want != got {
-		t.Errorf("Update description: want %q, got %q", want, got)
+	if got, want := gotBook.Description, b.Description; got != want {
+		t.Errorf("Update description: got %q, want %q", got, want)
 	}
 
 	if err := db.DeleteBook(id); err != nil {
@@ -46,7 +46,7 @@ func testDB(t *testing.T, db BookDatabase) {
 	}
 
 	if _, err := db.GetBook(id); err == nil {
-		t.Error("want err, got nil")
+		t.Error("want non-nil err")
 	}
 }
 

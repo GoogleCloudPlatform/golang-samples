@@ -17,8 +17,7 @@ func TestListInstances(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
 	if len(instances) == 0 {
-		t.Fatalf("expected non-zero SQL instances in project %q", tc.ProjectID)
+		t.Fatalf("want non-zero SQL instances in project %q", tc.ProjectID)
 	}
 }

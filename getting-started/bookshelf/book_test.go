@@ -12,8 +12,8 @@ func TestCreatedByName(t *testing.T) {
 		CreatedBy:   "Homer Simpson",
 	}
 
-	if want, got := b.CreatedBy, b.CreatedByDisplayName(); want != got {
-		t.Errorf("want %q, got %q", want, got)
+	if got, want := b.CreatedByDisplayName(), b.CreatedBy; got != want {
+		t.Errorf("got %q, want %q", got, want)
 	}
 }
 
@@ -24,7 +24,7 @@ func TestAnonymous(t *testing.T) {
 	}
 	b.SetCreatorAnonymous()
 
-	if want, got := "Anonymous", b.CreatedByDisplayName(); want != got {
-		t.Errorf("want %q, got %q", want, got)
+	if got, want := b.CreatedByDisplayName(), "Anonymous"; got != want {
+		t.Errorf("got %q, want %q", got, want)
 	}
 }
