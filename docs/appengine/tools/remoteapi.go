@@ -23,7 +23,7 @@ func main() {
 	hc, err := google.DefaultClient(ctx,
 		"https://www.googleapis.com/auth/appengine.apis",
 		"https://www.googleapis.com/auth/userinfo.email",
-		"https://www.googleapis.com/auth/cloud.platform",
+		"https://www.googleapis.com/auth/cloud-platform",
 	)
 	if err != nil {
 		log.Fatal(err)
