@@ -15,7 +15,10 @@ import (
 )
 
 // [START import]
-import "gopkg.in/sendgrid/sendgrid-go.v2"
+import (
+	sendgrid "github.com/sendgrid/sendgrid-go"
+	"github.com/sendgrid/sendgrid-go/helpers/mail"
+)
 
 // [END import]
 
@@ -25,24 +28,27 @@ func main() {
 	appengine.Main()
 }
 
-var sendgridClient *sendgrid.SGClient
+var sendgridKey string
 
 func init() {
-	sendgridKey := os.Getenv("SENDGRID_API_KEY")
+	sendgridKey = os.Getenv("SENDGRID_API_KEY")
 	if sendgridKey == "" {
 		log.Fatal("SENDGRID_API_KEY environment variable not set.")
 	}
-	sendgridClient = sendgrid.NewSendGridClientWithApiKey(sendgridKey)
 }
 
 func sendMailHandler(w http.ResponseWriter, r *http.Request) {
-	m := sendgrid.NewMail()
-	m.AddTo("example@email.com")
-	m.SetSubject("Email From SendGrid")
-	m.SetHTML("Through AppEngine")
-	m.SetFrom("sendgrid@appengine.com")
+	to := &mail.Email{Address: "example@email.com"}
+	from := &mail.Email{Address: "sendgrid@appengine.com"}
+	subject := "Email from SendGrid"
+	content := mail.NewContent("text/plain", "Through App Engine")
 
-	if err := sendgridClient.Send(m); err != nil {
+	body := mail.NewV3MailInit(from, subject, to, content)
+
+	req := sendgrid.GetRequest(sendgridKey, "/v3/mail/send", "")
+	req.Method = "POST"
+	req.Body = mail.GetRequestBody(body)
+	if _, err := sendgrid.API(req); err != nil {
 		http.Error(w, fmt.Sprintf("could not send mail: %v", err), http.StatusInternalServerError)
 		return
 	}
