@@ -25,7 +25,6 @@ gcloud components update
 gcloud config set disable_prompts True
 gcloud config set project $GOLANG_SAMPLES_PROJECT_ID
 gcloud config set app/promote_by_default false
-gcloud config set app/use_cloud_build true
 gcloud auth activate-service-account --key-file "$GOOGLE_APPLICATION_CREDENTIALS"
 
 # Diagnostic information.
