@@ -1,0 +1,10 @@
+runtime: go
+api_version: go1
+
+handlers:
+- url: /.*
+  script: _go_app
+
+env_variables:
+  CLOUDSQL_PROJECT_ID: your-project-id
+  CLOUDSQL_INSTANCE: your-instance-name
