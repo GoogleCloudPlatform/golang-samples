@@ -6,6 +6,8 @@ package bookshelf
 
 import (
 	"fmt"
+	"os"
+	"strconv"
 	"testing"
 	"time"
 
@@ -16,6 +18,8 @@ import (
 )
 
 func testDB(t *testing.T, db BookDatabase) {
+	defer db.Close()
+
 	b := &Book{
 		Author:      "testy mc testface",
 		Title:       fmt.Sprintf("t-%d", time.Now().Unix()),
@@ -65,6 +69,35 @@ func TestDatastoreDB(t *testing.T) {
 	defer client.Close()
 
 	db, err := newDatastoreDB(client)
+	if err != nil {
+		t.Fatal(err)
+	}
+	testDB(t, db)
+}
+
+func TestMySQLDB(t *testing.T) {
+	t.Parallel()
+
+	host := os.Getenv("GOLANG_SAMPLES_MYSQL_HOST")
+	port := os.Getenv("GOLANG_SAMPLES_MYSQL_PORT")
+
+	if host == "" {
+		t.Skip("GOLANG_SAMPLES_MYSQL_HOST not set.")
+	}
+	if port == "" {
+		port = "3306"
+	}
+
+	p, err := strconv.Atoi(port)
+	if err != nil {
+		t.Fatalf("Could not parse port: %v", err)
+	}
+
+	db, err := newMySQLDB(MySQLConfig{
+		Username: "root",
+		Host:     host,
+		Port:     p,
+	})
 	if err != nil {
 		t.Fatal(err)
 	}

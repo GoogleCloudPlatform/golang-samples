@@ -54,7 +54,7 @@ type MySQLConfig struct {
 }
 
 // dataStoreName returns a connection string suitable for sql.Open.
-func (c MySQLConfig) dataStoreName() string {
+func (c MySQLConfig) dataStoreName(databaseName string) string {
 	var cred string
 	// [username[:password]@]
 	if c.Username != "" {
@@ -65,28 +65,27 @@ func (c MySQLConfig) dataStoreName() string {
 		cred = cred + "@"
 	}
 
-	return fmt.Sprintf("%stcp([%s]:%d)/", cred, c.Host, c.Port)
+	return fmt.Sprintf("%stcp([%s]:%d)/%s", cred, c.Host, c.Port, databaseName)
 }
 
 // newMySQLDB creates a new BookDatabase backed by a given MySQL server.
 func newMySQLDB(config MySQLConfig) (BookDatabase, error) {
-	conn, err := sql.Open("mysql", config.dataStoreName())
-	if err != nil {
+	// Check database and table exists. If not, create it.
+	if err := config.ensureTableExists(); err != nil {
 		return nil, err
 	}
+
+	conn, err := sql.Open("mysql", config.dataStoreName("library"))
+	if err != nil {
+		return nil, fmt.Errorf("mysql: could not get a connection: %v", err)
+	}
+	if err := conn.Ping(); err != nil {
+		conn.Close()
+		return nil, fmt.Errorf("mysql: could not establish a good connection: %v", err)
+	}
+
 	db := &mysqlDB{
 		conn: conn,
-	}
-
-	// Check the connection.
-	if conn.Ping() == driver.ErrBadConn {
-		return nil, fmt.Errorf("mysql: could not connect to the database. " +
-			"could be bad address, or this address is not whitelisted for access.")
-	}
-
-	// Check table exists. If not, create it.
-	if err := db.ensureTableExists(); err != nil {
-		return nil, err
 	}
 
 	// Prepared statements. The actual SQL queries are in the code near the
@@ -115,7 +114,7 @@ func newMySQLDB(config MySQLConfig) (BookDatabase, error) {
 
 // Close closes the database, freeing up any resources.
 func (db *mysqlDB) Close() {
-	db.Close()
+	db.conn.Close()
 }
 
 // rowScanner is implemented by sql.Row and sql.Rows
@@ -269,20 +268,30 @@ func (db *mysqlDB) UpdateBook(b *Book) error {
 }
 
 // ensureTableExists checks the table exists. If not, it creates it.
-func (db *mysqlDB) ensureTableExists() error {
-	_, err := db.conn.Exec("USE library")
+func (config MySQLConfig) ensureTableExists() error {
+	conn, err := sql.Open("mysql", config.dataStoreName(""))
 	if err != nil {
+		return fmt.Errorf("mysql: could not get a connection: %v", err)
+	}
+	defer conn.Close()
+
+	// Check the connection.
+	if conn.Ping() == driver.ErrBadConn {
+		return fmt.Errorf("mysql: could not connect to the database. " +
+			"could be bad address, or this address is not whitelisted for access.")
+	}
+
+	if _, err := conn.Exec("USE library"); err != nil {
 		// MySQL error 1049 is "database does not exist"
 		if mErr, ok := err.(*mysql.MySQLError); ok && mErr.Number == 1049 {
-			return db.createTable()
+			return createTable(conn)
 		}
 	}
 
-	_, err = db.conn.Exec("DESCRIBE books")
-	if err != nil {
+	if _, err := conn.Exec("DESCRIBE books"); err != nil {
 		// MySQL error 1146 is "table does not exist"
 		if mErr, ok := err.(*mysql.MySQLError); ok && mErr.Number == 1146 {
-			return db.createTable()
+			return createTable(conn)
 		}
 		// Unknown error.
 		return fmt.Errorf("mysql: could not connect to the database: %v", err)
@@ -291,9 +300,9 @@ func (db *mysqlDB) ensureTableExists() error {
 }
 
 // createTable creates the table, and if necessary, the database.
-func (db *mysqlDB) createTable() error {
+func createTable(conn *sql.DB) error {
 	for _, stmt := range createTableStatements {
-		_, err := db.conn.Exec(stmt)
+		_, err := conn.Exec(stmt)
 		if err != nil {
 			return err
 		}
