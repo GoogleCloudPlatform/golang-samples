@@ -215,7 +215,7 @@ func uploadFileFromForm(r *http.Request) (url string, err error) {
 
 	ctx := context.Background()
 	w := bookshelf.StorageBucket.Object(name).NewWriter(ctx)
-	w.ACL = []storage.ACLRule{{storage.AllUsers, storage.RoleReader}}
+	w.ACL = []storage.ACLRule{{Entity: storage.AllUsers, Role: storage.RoleReader}}
 	w.ContentType = fh.Header.Get("Content-Type")
 
 	// Entries are immutable, be aggressive about caching (1 day).

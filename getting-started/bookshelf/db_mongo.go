@@ -49,7 +49,7 @@ func (db *mongoDB) Close() {
 // GetBook retrieves a book by its ID.
 func (db *mongoDB) GetBook(id int64) (*Book, error) {
 	b := &Book{}
-	if err := db.c.Find(bson.D{{"id", id}}).One(b); err != nil {
+	if err := db.c.Find(bson.D{{Name: "id", Value: id}}).One(b); err != nil {
 		return nil, err
 	}
 	return b, nil
@@ -84,12 +84,12 @@ func (db *mongoDB) AddBook(b *Book) (id int64, err error) {
 
 // DeleteBook removes a given book by its ID.
 func (db *mongoDB) DeleteBook(id int64) error {
-	return db.c.Remove(bson.D{{"id", id}})
+	return db.c.Remove(bson.D{{Name: "id", Value: id}})
 }
 
 // UpdateBook updates the entry for a given book.
 func (db *mongoDB) UpdateBook(b *Book) error {
-	return db.c.Update(bson.D{{"id", b.ID}}, b)
+	return db.c.Update(bson.D{{Name: "id", Value: b.ID}}, b)
 }
 
 // ListBooks returns a list of books, ordered by title.
@@ -105,7 +105,7 @@ func (db *mongoDB) ListBooks() ([]*Book, error) {
 // the user who created the book entry.
 func (db *mongoDB) ListBooksCreatedBy(userID string) ([]*Book, error) {
 	var result []*Book
-	if err := db.c.Find(bson.D{{"createdbyid", userID}}).Sort("title").All(&result); err != nil {
+	if err := db.c.Find(bson.D{{Name: "createdbyid", Value: userID}}).Sort("title").All(&result); err != nil {
 		return nil, err
 	}
 	return result, nil
