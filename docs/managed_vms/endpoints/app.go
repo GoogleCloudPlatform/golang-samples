@@ -26,6 +26,8 @@ func main() {
 		HandlerFunc(authInfoHandler)
 	r.Path("/auth/info/googleidtoken").Methods("GET").
 		HandlerFunc(authInfoHandler)
+	r.Path("/auth/info/firebase").Methods("GET", "OPTIONS").
+		Handler(corsHandler(authInfoHandler))
 
 	http.Handle("/", r)
 	appengine.Main()
@@ -49,6 +51,18 @@ func echoHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write(b)
+}
+
+// corsHandler wraps a HTTP handler and applies the appropriate responses for Cross-Origin Resource Sharing.
+type corsHandler http.HandlerFunc
+
+func (h corsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	if r.Method == "OPTIONS" {
+		w.Header().Set("Access-Control-Allow-Headers", "Authorization")
+		return
+	}
+	h(w, r)
 }
 
 // authInfoHandler reads authentication info provided by the Endpoints proxy.
