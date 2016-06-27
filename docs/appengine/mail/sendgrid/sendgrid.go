@@ -36,7 +36,11 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	req.Method = "POST"
 	req.Body = mail.GetRequestBody(body)
 
-	hreq := rest.BuildRequestObject(req)
+	hreq, err := rest.BuildRequestObject(req)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("could not build mail request: %v", err), http.StatusInternalServerError)
+		return
+	}
 	resp, err := hc.Do(hreq)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("could not send mail: %v", err), http.StatusInternalServerError)
