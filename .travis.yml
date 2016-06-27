@@ -51,8 +51,6 @@ install:
 - go get -u -v $(go list -f '{{join .Imports "\n"}}' ./... | sort | uniq | grep -v golang-samples)
 
 script:
-- go test -v $(go list ./... | grep -v sendgrid)
-  # NOTE(cbro): sendgrid v3 client doesn't work on GAE standard.
-  # See https://github.com/sendgrid/sendgrid-go/issues/63
+- go test -v ./...
 - go vet ./...
 - diff -u <(echo -n) <(gofmt -d -s .)
