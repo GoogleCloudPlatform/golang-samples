@@ -15,7 +15,7 @@ import (
 )
 
 // [START import]
-import "github.com/sendgrid/sendgrid-go"
+import "gopkg.in/sendgrid/sendgrid-go.v2"
 
 // [END import]
 
