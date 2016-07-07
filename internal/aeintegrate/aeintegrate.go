@@ -5,8 +5,7 @@
 // Package aeintegrate facilitates end-to-end testing against the production Google App Engine.
 //
 // This is a specialized tool that could be used in addition to unit tests. It
-// calls the `gcloud app` command directly, which is in preview/beta, so expect
-// any tests using this package to spontaneously break.
+// calls the `gcloud app` command directly.
 //
 // aedeploy (go get google.golang.org/appengine/cmd/aedeploy) and gcloud
 // (https://cloud.google.com/sdk) must be installed. You must be authorized via
@@ -247,12 +246,12 @@ func (p *App) deployCmd() (*exec.Cmd, error) {
 		return nil, err
 	}
 
-	// NOTE: if the "preview" and/or "app" components are not available, and this is
-	// run in parallel, gcloud will attempt to install those components multiple
+	// NOTE: if the "app" component is not available, and this is run in parallel,
+	// gcloud will attempt to install those components multiple
 	// times and will eventually fail on IO.
 	cmd := exec.Command(aedeploy, gcloudBin,
 		"--quiet",
-		"preview", "app", "deploy", appYaml,
+		"app", "deploy", appYaml,
 		"--project", p.ProjectID,
 		"--version", p.version(),
 		"--no-promote")

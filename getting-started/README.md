@@ -16,21 +16,21 @@ Please refer to the guide for full instructions on how to run the samples.
 
     $ cd $GOPATH/src/github.com/GoogleCloudPlatform/golang-samples/getting-started/helloworld
     $ go run helloworld.go
-    $ aedeploy gcloud preview app deploy app.yaml --set-default --docker-build=remote
+    $ aedeploy gcloud app deploy app.yaml --set-default --docker-build=remote
 
 ## Run and deploy "Bookshelf"
 
     $ cd $GOPATH/src/github.com/GoogleCloudPlatform/golang-samples/getting-started/bookshelf/app
     $ vim ../config.go
     $ go run *.go
-    $ aedeploy gcloud preview app deploy app.yaml --set-default --docker-build=remote
+    $ aedeploy gcloud app deploy app.yaml --set-default --docker-build=remote
 
 ## Run and deploy "Bookshelf pub/sub worker"
 
     $ cd $GOPATH/src/github.com/GoogleCloudPlatform/golang-samples/getting-started/bookshelf/pubsub_worker
     $ vim ../config.go
     $ go run *.go
-    $ aedeploy gcloud preview app deploy app.yaml --set-default --docker-build=remote
+    $ aedeploy gcloud app deploy app.yaml --set-default --docker-build=remote
 
 ## Contributing
 

@@ -3,9 +3,9 @@
 Prerequisites:
 
 * Install the [Google Cloud SDK](https://cloud.google.com/sdk/).
-* Install the `preview` and `app` commands. You can do this via:
+* Install the `app` command. You can do this via:
 
-        $ gcloud --quiet help preview app
+        $ gcloud --quiet help app
 
 * Install aedeploy:
 
