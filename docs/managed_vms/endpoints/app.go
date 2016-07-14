@@ -28,6 +28,8 @@ func main() {
 		HandlerFunc(authInfoHandler)
 	r.Path("/auth/info/firebase").Methods("GET", "OPTIONS").
 		Handler(corsHandler(authInfoHandler))
+	r.Path("/auth/info/auth0").Methods("GET").
+		HandlerFunc(authInfoHandler)
 
 	http.Handle("/", r)
 	appengine.Main()
