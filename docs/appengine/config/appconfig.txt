@@ -100,3 +100,12 @@ if v := os.Getenv("MY_VAR"); v != "" {
   //...
 }
 //[END os_getenv_example]
+
+//[START redirect_http_response_code]
+handlers:
+- url: /youraccount/.*
+  script: _go_app
+  login: required
+  secure: always
+  redirect_http_response_code: 301
+//[END redirect_http_response_code]
