@@ -35,8 +35,10 @@ func main() {
 }
 
 func forceTraceHandler(w http.ResponseWriter, r *http.Request) {
-	if h := r.Header.Get("X-Cloud-Trace-Context"); h == "" {
-		r.Header.Set("X-Cloud-Trace-Context", generateTraceID()+"/0;o=1")
+	if h := "X-Cloud-Trace-Context"; r.Header.Get(h) == "" {
+		// Generate a trace header.
+		// https://cloud.google.com/trace/docs/faq
+		r.Header.Set(h, generateTraceID()+"/0;o=1")
 	}
 	http.DefaultServeMux.ServeHTTP(w, r)
 }
