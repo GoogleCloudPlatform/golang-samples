@@ -36,15 +36,12 @@ func TestEntity(t *testing.T) {
 	if err != nil {
 		t.Fatalf("got %v, want nil err", err)
 	}
-	found := false
 	for _, e := range res.Entities {
 		if e.Name == "Homer Simpson" {
-			found = true
+			return // found
 		}
 	}
-	if !found {
-		t.Errorf("got %+v; want Homer in Entities", res)
-	}
+	t.Errorf("got %+v; want Homer in Entities", res)
 }
 
 func TestSyntax(t *testing.T) {
@@ -56,18 +53,15 @@ func TestSyntax(t *testing.T) {
 		t.Fatalf("got %v, want nil err", err)
 	}
 
-	found := false
 	for _, tok := range res.Tokens {
 		if tok.Lemma == "gopher" {
-			found = true
 			if tok.PartOfSpeech.Tag != "NOUN" {
 				t.Errorf("PartOfSpeech: got %+v, want NOUN", tok.PartOfSpeech.Tag)
 			}
+			return // found
 		}
 	}
-	if !found {
-		t.Errorf("got %+v; want gopher in Tokens", res)
-	}
+	t.Errorf("got %+v; want gopher in Tokens", res)
 }
 
 func newClient(t *testing.T) *language.Service {
