@@ -11,6 +11,11 @@ matrix:
     - go: 1.5.4
     - go: 1.6.3
       env: ALLOW_E2E=true # Don't run e2e tests more than once.
+    - go: 1.7beta2
+    - go: 1.7rc1
+    - go: 1.7rc2
+    - go: 1.7rc3
+    - go: 1.7rc4
     - go: 1.7rc5
     # NOTE: no tip, see https://github.com/travis-ci/gimme/issues/38
 
