@@ -15,10 +15,11 @@ import (
 	"strings"
 	"sync"
 
+	"cloud.google.com/go/pubsub"
+
 	"golang.org/x/net/context"
 
 	"google.golang.org/api/books/v1"
-	"google.golang.org/cloud/pubsub"
 
 	"github.com/GoogleCloudPlatform/golang-samples/getting-started/bookshelf"
 )

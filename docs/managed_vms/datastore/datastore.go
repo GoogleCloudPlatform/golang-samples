@@ -12,10 +12,11 @@ import (
 	"os"
 	"time"
 
+	"cloud.google.com/go/datastore"
+
 	"golang.org/x/net/context"
 
 	"google.golang.org/appengine"
-	"google.golang.org/cloud/datastore"
 )
 
 var datastoreClient *datastore.Client

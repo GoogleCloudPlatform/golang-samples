@@ -19,8 +19,9 @@ import (
 	"text/tabwriter"
 	"time"
 
+	"cloud.google.com/go/datastore"
+
 	"golang.org/x/net/context"
-	"google.golang.org/cloud/datastore"
 )
 
 func main() {

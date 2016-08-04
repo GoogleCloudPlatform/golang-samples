@@ -14,8 +14,9 @@ import (
 	"os"
 	"sync"
 
+	"cloud.google.com/go/pubsub"
+
 	"google.golang.org/appengine"
-	"google.golang.org/cloud/pubsub"
 
 	"golang.org/x/net/context"
 )
