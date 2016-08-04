@@ -1,6 +1,6 @@
 # Cloud Natural Language API Go samples
 
-This directory contains [Cloud Natural Language API](https://cloud.google.com/language/) Go samples.
+This directory contains [Cloud Natural Language API](https://cloud.google.com/natural-language/) Go samples.
 
 ## Samples
 
