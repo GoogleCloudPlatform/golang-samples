@@ -9,6 +9,10 @@ import (
 	"log"
 	"os"
 
+	"cloud.google.com/go/datastore"
+	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/storage"
+
 	"gopkg.in/mgo.v2"
 
 	"github.com/gorilla/sessions"
@@ -16,10 +20,6 @@ import (
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
-
-	"google.golang.org/cloud/datastore"
-	"google.golang.org/cloud/pubsub"
-	"google.golang.org/cloud/storage"
 )
 
 var (

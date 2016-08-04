@@ -17,6 +17,9 @@ import (
 	"path"
 	"strconv"
 
+	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/storage"
+
 	"golang.org/x/net/context"
 
 	"github.com/gorilla/handlers"
@@ -24,8 +27,6 @@ import (
 	"github.com/satori/go.uuid"
 
 	"google.golang.org/appengine"
-	"google.golang.org/cloud/pubsub"
-	"google.golang.org/cloud/storage"
 
 	"github.com/GoogleCloudPlatform/golang-samples/getting-started/bookshelf"
 )
