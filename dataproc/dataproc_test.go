@@ -1,26 +1,109 @@
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// Copyright 2016 Google Inc. All rights reserved.
+// Use of this source code is governed by the Apache 2.0
+// license that can be found in the LICENSE file.
 
-// Tests for the Cloud Dataproc Go code sample
 package main
 
-// This testing suite uses the flags defined in the main package file
-// and will fail to work properly unless proper flags are specified
 import (
+	"regexp"
+	"strings"
 	"testing"
+
+	"golang.org/x/net/context"
+	"golang.org/x/oauth2/google"
+
+	dataproc "google.golang.org/api/dataproc/v1"
+	storage "cloud.google.com/go/storage"
+
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-// Tests the main() function of the Cloud Dataproc code sample
-func TestMain(t *testing.T) {
-	main()
+func TestCreateCluster(t *testing.T) {
+	testutil.SystemTest(t)
+	dc := newDataprocClient(t)
+
+	_, err := createCluster(dc, *clusterName, *region, *projectID, *zoneID)
+	if err != nil {
+		t.Fatalf("createCluster - got %v, want nil err", err)
+	}
 }
 
+func TestWaitForCluster(t *testing.T) {
+	testutil.SystemTest(t)
+	dc := newDataprocClient(t)
+
+	_, err := waitForCluster(dc, *clusterName)
+	if err != nil {
+		t.Fatalf("waitForCluster - got %v, want nil err", err)
+	}
+}
+
+func TestJobFunctionality(t *testing.T) {
+	testutil.SystemTest(t)
+	dc := newDataprocClient(t)
+	sc := newStorageClient(t)
+
+	jobId, err := submitJob(dc, sc, *pysparkFile, *projectID, *bucketName, *clusterName)
+	if err != nil {
+		t.Fatalf("submitJob - got %v, want nil err", err)
+	}
+	_, err = waitForJob(dc, jobId, *projectID, *region)
+	if err != nil {
+		t.Fatalf("waitForJob - got %v, want nil err", err)
+	}
+
+	clusterData, err := getClusterDataByName(dc, *clusterName)
+	if err != nil {
+		t.Fatalf("getClusterDataByName - got %v, want nil err", err)
+	}
+	r := regexp.MustCompile("^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[8|9|aA|bB][a-f0-9]{3}-[a-f0-9]{12}$")
+	if r.MatchString(clusterData[1]) != true {
+		t.Fatalf("getClusterDataByName - cluster uuid")
+	}
+	if strings.Contains(clusterData[3], "dataproc-") != true {
+		t.Fatalf("getClusterDataByName - invalid bucket metadata for cluster")
+	}
+
+	output, err := getJobOutput(sc, *projectID, clusterData[1], clusterData[3], jobId)
+	if err != nil {
+		t.Fatalf("getJobOutput - got %v, want nil err", err)
+	}
+	if strings.Contains(string(output), "['Hello,', 'dog', 'elephant', 'panther', 'world!']") != true {
+		t.Fatalf("getJobOutput - unexpected job output")
+	}
+
+}
+
+func TestDeleteCluster(t *testing.T) {
+	testutil.SystemTest(t)
+	c := newDataprocClient(t)
+
+	_, err := deleteCluster(c, *projectID, *region, *clusterName)
+	if err != nil {
+		t.Fatalf("deleteCluster - got %v, want nil err", err)
+	}
+}
+
+func newDataprocClient(t *testing.T) *dataproc.Service {
+	ctx := context.Background()
+	hc, err := google.DefaultClient(ctx, dataproc.CloudPlatformScope)
+	if err != nil {
+		t.Fatalf("DefaultClient: %v", err)
+	}
+	client, err := dataproc.New(hc)
+	if err != nil {
+		t.Fatalf("dataproc.New: %v", err)
+	}
+	return client
+}
+
+func newStorageClient(t *testing.T) *storage.Client {
+	ctx := context.Background()
+	sc, err := storage.NewClient(ctx)
+
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+
+	return sc
+}
