@@ -13,8 +13,9 @@ import (
 	"net/url"
 	"os"
 
+	"cloud.google.com/go/storage"
+
 	"google.golang.org/appengine"
-	"google.golang.org/cloud/storage"
 
 	"golang.org/x/net/context"
 )
