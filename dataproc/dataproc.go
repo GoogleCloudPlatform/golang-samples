@@ -18,8 +18,8 @@ import (
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
 
-	dataproc "google.golang.org/api/dataproc/v1"
 	storage "cloud.google.com/go/storage"
+	dataproc "google.golang.org/api/dataproc/v1"
 )
 
 const (
@@ -29,8 +29,9 @@ const (
 	// Allows for full access to Google Cloud Platform products
 	scope = "https://www.googleapis.com/auth/cloud-platform"
 
-	// Compute URI base
-	computeUriBase = "https://www.googleapis.com/compute/v1/projects/%s/zones/%s"
+	// URI to Google Cloud Compute Engine instances within a zone, region, and project
+	// https://cloud.google.com/dataproc/reference/rest/v1/projects.regions.clusters
+	computeURIFormat = "https://www.googleapis.com/compute/v1/projects/%s/zones/%s"
 )
 
 var (
@@ -43,14 +44,22 @@ var (
 )
 
 // clusterConfig defines the confuration of a cluster including its project, name, and region.
-type clusterConfig struct{
-		bucket,
-    project,
-		region,
-		state,
-		name,
-		uuid,
-		zone string
+type clusterConfig struct {
+	project string
+	region  string
+	name    string
+	zone    string
+}
+
+// clusterDetails defines the details of a created Cloud Dataproc cluster
+type clusterDetails struct {
+	bucket  string
+	name    string
+	project string
+	region  string
+	state   string
+	uuid    string
+	zone    string
 }
 
 func main() {
@@ -62,7 +71,6 @@ func main() {
 		log.Fatal("Incorrect arguments specified see 'go-dataproc -help' for help")
 	}
 
-	// Create a new Cloud Dataproc service
 	ctx := context.Background()
 	client, err := google.DefaultClient(ctx, scope)
 	if err != nil {
@@ -73,59 +81,63 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Create a new Google Clout Storage service
-	storageService, err := storage.NewClient(ctx)
+	storageClient, err := storage.NewClient(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Create a new clusterConfig to hold details about this cluster
-	cluster := clusterConfig{project: *projectID, region: *region, name: *clusterName, zone: *zoneID}
+	configuration := clusterConfig{project: *projectID, region: *region, name: *clusterName, zone: *zoneID}
 
 	// Create a cluster
-	if _, err := createCluster(service, &cluster); err != nil {
+	if err := createCluster(service, configuration); err != nil {
 		log.Fatal(err)
 	}
 	log.Println("Cluster created")
 
-	// Wait on the cluster to become active
 	log.Println("Waiting for cluster to be ready")
-	if _, err = waitForCluster(service, &cluster); err != nil {
+	if _, err = waitForCluster(service, configuration); err != nil {
+		log.Fatal(err)
+	}
+
+	// Get the cluster's details
+	cluster, err := getClusterDetails(service, configuration)
+	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Submit a job to the cluster
 	log.Println("Submitting job")
-	jobID, err := submitJob(service, storageService, *pysparkFile, *bucketName, &cluster)
+	jobID, err := submitJob(service, storageClient, *pysparkFile, *bucketName, cluster)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Wait for the job to complete
 	log.Println("Waiting for job to complete")
-	if _, err = waitForJob(service, jobID, &cluster); err != nil {
+	if _, err = waitForJob(service, jobID, cluster); err != nil {
 		log.Fatal(err)
 	}
 	log.Println("Job is finished")
 
-	output, err := getJobOutput(storageService, jobID, &cluster)
+	output, err := getJobOutput(storageClient, jobID, cluster)
 	if err != nil {
 		log.Fatal(err)
 	}
 	log.Printf("Job output:\n%s\n", output)
 
 	// Delete the cluster
-	if _, err = deleteCluster(service, &cluster); err != nil {
+	if _, err := deleteCluster(service, cluster); err != nil {
 		log.Fatal(err)
 	}
 	log.Println("Cluster deleted")
 }
 
 // createCluster creates a Cloud Dataproc cluster with the given name and region.
-func createCluster(service *dataproc.Service, cluster *clusterConfig) (response string, err error) {
+func createCluster(service *dataproc.Service, cluster clusterConfig) (err error) {
 	// Create a gceConfig object for the cluster
 	gceConfig := dataproc.GceClusterConfig{
-		ZoneUri: fmt.Sprintf(computeUriBase, cluster.project, cluster.zone),
+		ZoneUri: fmt.Sprintf(computeURIFormat, cluster.project, cluster.zone),
 	}
 
 	// Create a (Dataproc API) clusterConfig for the cluster
@@ -141,22 +153,19 @@ func createCluster(service *dataproc.Service, cluster *clusterConfig) (response 
 	}
 
 	// Create the cluster
-	res, err := service.Projects.Regions.Clusters.Create(cluster.project, cluster.region, &clusterSpec).Do()
-
-	return fmt.Sprintf("%s", res), err
+	_, err = service.Projects.Regions.Clusters.Create(cluster.project, cluster.region, &clusterSpec).Do()
+	return err
 }
 
 // deleteCluster deletes the Cloud Dataproc cluster with the given project, region, and name.
-func deleteCluster(service *dataproc.Service, cluster *clusterConfig) (response string, err error) {
-	// Delete the cluster
+func deleteCluster(service *dataproc.Service, cluster clusterDetails) (response string, err error) {
 	res, err := service.Projects.Regions.Clusters.Delete(cluster.project, cluster.region, cluster.name).Do()
 
 	return fmt.Sprintf("%s", res), err
 }
 
 // getJobOutput returns the text from the job (raw driver output) with the given project, cluser name, bucket id, and job id.
-func getJobOutput(storageClient *storage.Client, job string, cluster *clusterConfig) (output []byte, err error) {
-
+func getJobOutput(storageClient *storage.Client, job string, cluster clusterDetails) (output []byte, err error) {
 	// Format the object name based on the Cloud Dataproc service's GCS logging
 	// see https://cloud.google.com/dataproc/concepts/driver-output for details
 	object := fmt.Sprintf("google-cloud-dataproc-metainfo/%s/jobs/%s/driveroutput.000000000", cluster.uuid, job)
@@ -180,7 +189,7 @@ func getJobStatus(service *dataproc.Service, jobID string, project string, regio
 }
 
 // listClusters lists all clusters in the current project.
-func listClusters(service *dataproc.Service, project string, region string) (clusters [][]string, err error) {
+func listClusters(service *dataproc.Service, project string, region string) (clusters []clusterDetails, err error) {
 	// List all clusters in a project for a given region
 	res, err := service.Projects.Regions.Clusters.List(project, region).Do()
 	if err != nil {
@@ -188,20 +197,26 @@ func listClusters(service *dataproc.Service, project string, region string) (clu
 	}
 
 	for _, c := range res.Clusters {
-		clusterDetails := []string{
-			c.ClusterName,
-			c.ClusterUuid,
-			c.Status.State,
-			c.Config.ConfigBucket,
-		}
-		clusters = append(clusters, clusterDetails)
+		regionURIParts := strings.Split(c.Config.GceClusterConfig.NetworkUri, "/")
+		region := regionURIParts[len(regionURIParts)-3]
+		zoneURIParts := strings.Split(c.Config.GceClusterConfig.ZoneUri, "/")
+		zoneID := zoneURIParts[len(zoneURIParts)-1]
+		details := clusterDetails{
+			bucket:  c.Config.ConfigBucket,
+			name:    c.ClusterName,
+			uuid:    c.ClusterUuid,
+			project: c.ProjectId,
+			region:  region,
+			state:   c.Status.State,
+			zone:    zoneID}
+		clusters = append(clusters, details)
 	}
 
 	return clusters, err
 }
 
 // submitJob submits a PySpark job with the given file path to a PySpark file, project, bucket, and cluster.
-func submitJob(service *dataproc.Service, storageClient *storage.Client, filepath string, bucket string, cluster *clusterConfig) (jobID string, err error) {
+func submitJob(service *dataproc.Service, storageClient *storage.Client, filepath string, bucket string, cluster clusterDetails) (jobID string, err error) {
 	// Read the file from disk
 	file, err := ioutil.ReadFile(filepath)
 	if err != nil {
@@ -209,8 +224,8 @@ func submitJob(service *dataproc.Service, storageClient *storage.Client, filepat
 	}
 
 	// Upload the file to GCS
-	job_filename_parts := strings.Split(filepath, "/")
-	filename := job_filename_parts[len(job_filename_parts)-1]
+	jobFilenameParts := strings.Split(filepath, "/")
+	filename := jobFilenameParts[len(jobFilenameParts)-1]
 
 	ctx := context.Background()
 	wc := storageClient.Bucket(bucket).Object(filename).NewWriter(ctx)
@@ -248,34 +263,32 @@ func submitJob(service *dataproc.Service, storageClient *storage.Client, filepat
 	return jobID, err
 }
 
-// updateClusterMetadata geta metadata and updates the given clusterConfig.
-func updateClusterMetadata(service *dataproc.Service, cluster *clusterConfig) (err error) {
+// getClusterDetails gets details about the cluster in the specified cluster config.
+func getClusterDetails(service *dataproc.Service, cluster clusterConfig) (details clusterDetails, err error) {
 	// Get a list of clusters
 	clusters, err := listClusters(service, cluster.project, cluster.region)
 	if err != nil {
-		return err
+		return details, err
 	}
 
 	// Find the cluster requested in the list
 	for _, c := range clusters {
-		if c[0] == cluster.name {
-			cluster.bucket = c[3]
-			cluster.state = c[2]
-			cluster.uuid = c[1]
-			return nil
+		if c.name == cluster.name {
+			return c, nil
 		}
 	}
 
-	return errors.New("cluster not found")
+	return details, errors.New("cluster not found")
 }
 
 // waitForCluster waits for a cluster transition from "starting" to "running" with the given name.
-func waitForCluster(service *dataproc.Service, cluster *clusterConfig) (running bool, err error) {
+func waitForCluster(service *dataproc.Service, cluster clusterConfig) (running bool, err error) {
 	for {
-		if err := updateClusterMetadata(service, cluster); err != nil {
+		details, err := getClusterDetails(service, cluster)
+		if err != nil {
 			return false, err
 		}
-		if cluster.state == "RUNNING" {
+		if details.state == "RUNNING" {
 			return true, nil
 		}
 
@@ -285,7 +298,7 @@ func waitForCluster(service *dataproc.Service, cluster *clusterConfig) (running 
 }
 
 // waitForJob waits for a job to finish with the given job id, project, and region.
-func waitForJob(service *dataproc.Service, jobID string, cluster *clusterConfig) (finished bool, err error) {
+func waitForJob(service *dataproc.Service, jobID string, cluster clusterDetails) (finished bool, err error) {
 	for {
 		jobStatus, err := getJobStatus(service, jobID, cluster.project, cluster.region)
 		if err != nil {

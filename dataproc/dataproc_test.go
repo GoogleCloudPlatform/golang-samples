@@ -12,8 +12,8 @@ import (
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
 
-	dataproc "google.golang.org/api/dataproc/v1"
 	storage "cloud.google.com/go/storage"
+	dataproc "google.golang.org/api/dataproc/v1"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
@@ -24,7 +24,7 @@ func TestCreateCluster(t *testing.T) {
 
 	cluster := clusterConfig{project: *projectID, region: *region, name: *clusterName, zone: *zoneID}
 
-	_, err := createCluster(dc, &cluster)
+	err := createCluster(dc, cluster)
 	if err != nil {
 		t.Fatalf("createCluster - got %v, want nil err", err)
 	}
@@ -36,21 +36,22 @@ func TestWaitForCluster(t *testing.T) {
 
 	cluster := clusterConfig{project: *projectID, region: *region, name: *clusterName, zone: *zoneID}
 
-	_, err := waitForCluster(dc, &cluster)
+	_, err := waitForCluster(dc, cluster)
 	if err != nil {
 		t.Fatalf("waitForCluster - got %v, want nil err", err)
 	}
 }
 
-func TestUpdateClusterMetadata(t *testing.T) {
+func TestGetClusterDetails(t *testing.T) {
 	testutil.SystemTest(t)
 	dc := newDataprocClient(t)
 
-	cluster := clusterConfig{project: *projectID, region: *region, name: *clusterName, zone: *zoneID}
-
-	if err := updateClusterMetadata(dc, &cluster); err != nil {
-		t.Fatalf("updateClusterMetadata - got %v, want nil err", err)
+	configuration := clusterConfig{project: *projectID, region: *region, name: *clusterName, zone: *zoneID}
+	cluster, err := getClusterDetails(dc, configuration)
+	if err != nil {
+		t.Fatalf("getClusterDetails - got %v, want nil err", err)
 	}
+
 	r := regexp.MustCompile("^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[8|9|aA|bB][a-f0-9]{3}-[a-f0-9]{12}$")
 	if r.MatchString(cluster.uuid) != true {
 		t.Fatalf("updateClusterMetadata - cluster uuid")
@@ -65,22 +66,19 @@ func TestJobFunctionality(t *testing.T) {
 	dc := newDataprocClient(t)
 	sc := newStorageClient(t)
 
-	cluster := clusterConfig{project: *projectID, region: *region, name: *clusterName, zone: *zoneID}
+	configuration := clusterConfig{project: *projectID, region: *region, name: *clusterName, zone: *zoneID}
+	cluster, err := getClusterDetails(dc, configuration)
 
-	jobId, err := submitJob(dc, sc, *pysparkFile, *bucketName, &cluster)
+	jobId, err := submitJob(dc, sc, *pysparkFile, *bucketName, cluster)
 	if err != nil {
 		t.Fatalf("submitJob - got %v, want nil err", err)
 	}
-	_, err = waitForJob(dc, jobId, &cluster)
+	_, err = waitForJob(dc, jobId, cluster)
 	if err != nil {
 		t.Fatalf("waitForJob - got %v, want nil err", err)
 	}
 
-	if err := updateClusterMetadata(dc, &cluster); err != nil {
-		t.Fatalf("updateClusterMetadata - got %v, want nil err", err)
-	}
-
-	output, err := getJobOutput(sc, jobId, &cluster)
+	output, err := getJobOutput(sc, jobId, cluster)
 	if err != nil {
 		t.Fatalf("getJobOutput - got %v, want nil err", err)
 	}
@@ -92,11 +90,12 @@ func TestJobFunctionality(t *testing.T) {
 
 func TestDeleteCluster(t *testing.T) {
 	testutil.SystemTest(t)
-	c := newDataprocClient(t)
+	dc := newDataprocClient(t)
 
-	cluster := clusterConfig{project: *projectID, region: *region, name: *clusterName, zone: *zoneID}
+	configuration := clusterConfig{project: *projectID, region: *region, name: *clusterName, zone: *zoneID}
+	cluster, err := getClusterDetails(dc, configuration)
 
-	_, err := deleteCluster(c, &cluster)
+	_, err = deleteCluster(dc, cluster)
 	if err != nil {
 		t.Fatalf("deleteCluster - got %v, want nil err", err)
 	}
