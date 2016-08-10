@@ -12,7 +12,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"os"
 	"strings"
 	"time"
 
@@ -43,6 +42,17 @@ var (
 	zoneID      = flag.String("zone", "", "Cloud Platform zone")
 )
 
+// clusterConfig defines the confuration of a cluster including its project, name, and region.
+type clusterConfig struct{
+		bucket,
+    project,
+		region,
+		state,
+		name,
+		uuid,
+		zone string
+}
+
 func main() {
 	// Parse command line arguments
 	flag.Parse()
@@ -52,145 +62,107 @@ func main() {
 		log.Fatal("Incorrect arguments specified see 'go-dataproc -help' for help")
 	}
 
-	// Create a new Dataproc service
-	service, err := getDataprocService()
+	// Create a new Cloud Dataproc service
+	ctx := context.Background()
+	client, err := google.DefaultClient(ctx, scope)
+	if err != nil {
+		log.Fatal(err)
+	}
+	service, err := dataproc.New(client)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Create a new storage service
-	storageService, err := getStorageService()
+	// Create a new Google Clout Storage service
+	storageService, err := storage.NewClient(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// Create a new clusterConfig to hold details about this cluster
+	cluster := clusterConfig{project: *projectID, region: *region, name: *clusterName, zone: *zoneID}
 
 	// Create a cluster
-	_, err = createCluster(service, *clusterName, *region, *projectID, *zoneID)
-	if err != nil {
+	if _, err := createCluster(service, &cluster); err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Cluster created")
+	log.Println("Cluster created")
 
 	// Wait on the cluster to become active
-	fmt.Println("Waiting for cluster to be ready")
-	_, err = waitForCluster(service, *clusterName)
-	if err != nil {
+	log.Println("Waiting for cluster to be ready")
+	if _, err = waitForCluster(service, &cluster); err != nil {
 		log.Fatal(err)
 	}
 
 	// Submit a job to the cluster
-	fmt.Println("Submitting job")
-	jobId, err := submitJob(service, storageService, *pysparkFile, *projectID, *bucketName, *clusterName)
+	log.Println("Submitting job")
+	jobID, err := submitJob(service, storageService, *pysparkFile, *bucketName, &cluster)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Wait for the job to complete
-	fmt.Println("Waiting for job to complete")
-	_, err = waitForJob(service, jobId, *projectID, *region)
-	if err != nil {
+	log.Println("Waiting for job to complete")
+	if _, err = waitForJob(service, jobID, &cluster); err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Job is finished")
+	log.Println("Job is finished")
 
-	// Get the job output
-	clusterData, err := getClusterDataByName(service, *clusterName)
+	output, err := getJobOutput(storageService, jobID, &cluster)
 	if err != nil {
 		log.Fatal(err)
 	}
-	output, err := getJobOutput(storageService, *projectID, clusterData[1], clusterData[3], jobId)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("Job output:\n%s\n", string(output))
+	log.Printf("Job output:\n%s\n", output)
 
 	// Delete the cluster
-	_, err = deleteCluster(service, *projectID, *region, *clusterName)
-	if err != nil {
+	if _, err = deleteCluster(service, &cluster); err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Cluster deleted")
-	fmt.Printf("Done...")
-}
-
-// getDataprocService creates and returns a Cloud Dataproc service object.
-func getDataprocService() (service *dataproc.Service, err error) {
-	ctx := context.Background()
-	client, err := google.DefaultClient(ctx, scope)
-
-	// Create a new Dataproc service
-	service, err = dataproc.New(client)
-
-	return service, err
-}
-
-// getStorageService creates and returns a Cloud Storage service object.
-func getStorageService() (service *storage.Client, err error) {
-	ctx := context.Background()
-	client, err := storage.NewClient(ctx)
-
-	return client, err
+	log.Println("Cluster deleted")
 }
 
 // createCluster creates a Cloud Dataproc cluster with the given name and region.
-func createCluster(service *dataproc.Service, name string, region string,
-	project string, zone string) (response string, err error) {
+func createCluster(service *dataproc.Service, cluster *clusterConfig) (response string, err error) {
 	// Create a gceConfig object for the cluster
 	gceConfig := dataproc.GceClusterConfig{
-		ZoneUri: fmt.Sprintf(computeUriBase, project, zone),
+		ZoneUri: fmt.Sprintf(computeUriBase, cluster.project, cluster.zone),
 	}
 
-	// Create a cluserConfig for the cluster
+	// Create a (Dataproc API) clusterConfig for the cluster
 	clusterConfig := dataproc.ClusterConfig{
 		GceClusterConfig: &gceConfig,
 	}
 
 	// Create a cluster object
-	cluster := dataproc.Cluster{
-		ClusterName: name,
-		ProjectId:   project,
+	clusterSpec := dataproc.Cluster{
+		ClusterName: cluster.name,
+		ProjectId:   cluster.project,
 		Config:      &clusterConfig,
 	}
 
 	// Create the cluster
-	res, err := service.Projects.Regions.Clusters.Create(project, region, &cluster).Do()
+	res, err := service.Projects.Regions.Clusters.Create(cluster.project, cluster.region, &clusterSpec).Do()
+
 	return fmt.Sprintf("%s", res), err
 }
 
 // deleteCluster deletes the Cloud Dataproc cluster with the given project, region, and name.
-func deleteCluster(service *dataproc.Service, project string, region string, name string) (response string, err error) {
+func deleteCluster(service *dataproc.Service, cluster *clusterConfig) (response string, err error) {
 	// Delete the cluster
-	res, err := service.Projects.Regions.Clusters.Delete(project, region, name).Do()
+	res, err := service.Projects.Regions.Clusters.Delete(cluster.project, cluster.region, cluster.name).Do()
 
 	return fmt.Sprintf("%s", res), err
 }
 
-// getClusterDataByName returns metadata about the cluster with the given name.
-func getClusterDataByName(service *dataproc.Service, name string) (clusterData []string, err error) {
-	// Get a list of clusters
-	clusters, err := listClusters(service)
-	if err != nil {
-		return nil, err
-	}
-
-	// Find the cluster requested in the list
-	for _, item := range clusters {
-		if item[0] == name {
-			return item, err
-		}
-	}
-
-	return nil, errors.New("Cluster not found")
-}
-
 // getJobOutput returns the text from the job (raw driver output) with the given project, cluser name, bucket id, and job id.
-func getJobOutput(storageClient *storage.Client, project string, cluster string, bucket string, job string) (output []byte, err error) {
+func getJobOutput(storageClient *storage.Client, job string, cluster *clusterConfig) (output []byte, err error) {
 
-	// Format the object name
-	object := fmt.Sprintf("google-cloud-dataproc-metainfo/%s/jobs/%s/driveroutput.000000000", cluster, job)
+	// Format the object name based on the Cloud Dataproc service's GCS logging
+	// see https://cloud.google.com/dataproc/concepts/driver-output for details
+	object := fmt.Sprintf("google-cloud-dataproc-metainfo/%s/jobs/%s/driveroutput.000000000", cluster.uuid, job)
 
 	// Read the file
-	rc, err := storageClient.Bucket(bucket).Object(object).NewReader(context.Background())
+	rc, err := storageClient.Bucket(cluster.bucket).Object(object).NewReader(context.Background())
 	output, err = ioutil.ReadAll(rc)
 	rc.Close()
 
@@ -198,24 +170,29 @@ func getJobOutput(storageClient *storage.Client, project string, cluster string,
 }
 
 // getJobStatus returns the status of the job with the given job id, project, and region.
-func getJobStatus(service *dataproc.Service, jobId string, project string, region string) (status string, err error) {
-	//Get the Job's status
-	res, err := service.Projects.Regions.Jobs.Get(project, region, jobId).Do()
-
-	return res.Status.State, err
+func getJobStatus(service *dataproc.Service, jobID string, project string, region string) (status string, err error) {
+	// Get the Job's status
+	res, err := service.Projects.Regions.Jobs.Get(project, region, jobID).Do()
+	if err != nil {
+		return "", err
+	}
+	return res.Status.State, nil
 }
 
 // listClusters lists all clusters in the current project.
-func listClusters(service *dataproc.Service) (clusters [][]string, err error) {
+func listClusters(service *dataproc.Service, project string, region string) (clusters [][]string, err error) {
 	// List all clusters in a project for a given region
-	res, err := service.Projects.Regions.Clusters.List(*projectID, *region).Do()
+	res, err := service.Projects.Regions.Clusters.List(project, region).Do()
+	if err != nil {
+		return nil, err
+	}
 
-	for _, item := range res.Clusters {
+	for _, c := range res.Clusters {
 		clusterDetails := []string{
-			item.ClusterName,
-			item.ClusterUuid,
-			item.Status.State,
-			item.Config.ConfigBucket,
+			c.ClusterName,
+			c.ClusterUuid,
+			c.Status.State,
+			c.Config.ConfigBucket,
 		}
 		clusters = append(clusters, clusterDetails)
 	}
@@ -224,9 +201,10 @@ func listClusters(service *dataproc.Service) (clusters [][]string, err error) {
 }
 
 // submitJob submits a PySpark job with the given file path to a PySpark file, project, bucket, and cluster.
-func submitJob(service *dataproc.Service, storageClient *storage.Client, filepath string, project string, bucket string, cluster string) (jobId string, err error) {
-	// Error if the file does not exist
-	if _, err := os.Stat(filepath); os.IsNotExist(err) {
+func submitJob(service *dataproc.Service, storageClient *storage.Client, filepath string, bucket string, cluster *clusterConfig) (jobID string, err error) {
+	// Read the file from disk
+	file, err := ioutil.ReadFile(filepath)
+	if err != nil {
 		return "", err
 	}
 
@@ -238,10 +216,6 @@ func submitJob(service *dataproc.Service, storageClient *storage.Client, filepat
 	wc := storageClient.Bucket(bucket).Object(filename).NewWriter(ctx)
 	wc.ContentType = "text/plain"
 	wc.ACL = []storage.ACLRule{{storage.AllUsers, storage.RoleReader}}
-	file, err := ioutil.ReadFile(filepath)
-	if err != nil {
-		return "", err
-	}
 	if _, err := wc.Write(file); err != nil {
 		return "", err
 	}
@@ -251,15 +225,15 @@ func submitJob(service *dataproc.Service, storageClient *storage.Client, filepat
 
 	// Submit the PySpark job
 	placement := dataproc.JobPlacement{
-		ClusterName: cluster,
+		ClusterName: cluster.name,
 	}
 	pySparkJob := dataproc.PySparkJob{
 		MainPythonFileUri: "gs://" + bucket + "/" + filename,
 	}
-	jobID := "test-job-" + fmt.Sprintf("%v", time.Now().Unix())
+	jobID = "test-job-" + fmt.Sprintf("%v", time.Now().Unix())
 	jobReference := dataproc.JobReference{
 		JobId:     jobID,
-		ProjectId: project,
+		ProjectId: cluster.project,
 	}
 	job := dataproc.Job{
 		Placement:  &placement,
@@ -270,43 +244,60 @@ func submitJob(service *dataproc.Service, storageClient *storage.Client, filepat
 		Job: &job,
 	}
 
-	_, err = service.Projects.Regions.Jobs.Submit(*projectID, "global", &jobRequest).Do()
+	_, err = service.Projects.Regions.Jobs.Submit(cluster.project, cluster.region, &jobRequest).Do()
 	return jobID, err
 }
 
-// waitForCluster waits for a cluster transition from "starting" t0 "running" with the given name.
-func waitForCluster(service *dataproc.Service, name string) (running bool, err error) {
-	for running == false {
-		clusterData, err := getClusterDataByName(service, name)
-		if err != nil {
+// updateClusterMetadata geta metadata and updates the given clusterConfig.
+func updateClusterMetadata(service *dataproc.Service, cluster *clusterConfig) (err error) {
+	// Get a list of clusters
+	clusters, err := listClusters(service, cluster.project, cluster.region)
+	if err != nil {
+		return err
+	}
+
+	// Find the cluster requested in the list
+	for _, c := range clusters {
+		if c[0] == cluster.name {
+			cluster.bucket = c[3]
+			cluster.state = c[2]
+			cluster.uuid = c[1]
+			return nil
+		}
+	}
+
+	return errors.New("cluster not found")
+}
+
+// waitForCluster waits for a cluster transition from "starting" to "running" with the given name.
+func waitForCluster(service *dataproc.Service, cluster *clusterConfig) (running bool, err error) {
+	for {
+		if err := updateClusterMetadata(service, cluster); err != nil {
 			return false, err
 		}
-		if clusterData[2] == "RUNNING" {
-			running = true
+		if cluster.state == "RUNNING" {
+			return true, nil
 		}
 
 		// Sleep for one second
 		time.Sleep(1000 * time.Millisecond)
 	}
-	return running, err
 }
 
 // waitForJob waits for a job to finish with the given job id, project, and region.
-func waitForJob(service *dataproc.Service, jobId string, project string, region string) (finished bool, err error) {
-	for finished == false {
-		jobStatus, err := getJobStatus(service, jobId, project, region)
+func waitForJob(service *dataproc.Service, jobID string, cluster *clusterConfig) (finished bool, err error) {
+	for {
+		jobStatus, err := getJobStatus(service, jobID, cluster.project, cluster.region)
 		if err != nil {
 			return false, err
 		}
 		if jobStatus == "DONE" {
-			finished = true
+			return true, nil
 		} else if jobStatus == "ERROR" {
-			finished = true
-			err = errors.New("Job finished with an error")
+			return true, errors.New("Job errored")
 		}
 
-		// Sleep for one second
-		time.Sleep(1000 * time.Millisecond)
+		time.Sleep(time.Second)
 	}
 
 	return finished, err

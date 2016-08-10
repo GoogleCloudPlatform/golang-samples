@@ -22,7 +22,9 @@ func TestCreateCluster(t *testing.T) {
 	testutil.SystemTest(t)
 	dc := newDataprocClient(t)
 
-	_, err := createCluster(dc, *clusterName, *region, *projectID, *zoneID)
+	cluster := clusterConfig{project: *projectID, region: *region, name: *clusterName, zone: *zoneID}
+
+	_, err := createCluster(dc, &cluster)
 	if err != nil {
 		t.Fatalf("createCluster - got %v, want nil err", err)
 	}
@@ -32,9 +34,29 @@ func TestWaitForCluster(t *testing.T) {
 	testutil.SystemTest(t)
 	dc := newDataprocClient(t)
 
-	_, err := waitForCluster(dc, *clusterName)
+	cluster := clusterConfig{project: *projectID, region: *region, name: *clusterName, zone: *zoneID}
+
+	_, err := waitForCluster(dc, &cluster)
 	if err != nil {
 		t.Fatalf("waitForCluster - got %v, want nil err", err)
+	}
+}
+
+func TestUpdateClusterMetadata(t *testing.T) {
+	testutil.SystemTest(t)
+	dc := newDataprocClient(t)
+
+	cluster := clusterConfig{project: *projectID, region: *region, name: *clusterName, zone: *zoneID}
+
+	if err := updateClusterMetadata(dc, &cluster); err != nil {
+		t.Fatalf("updateClusterMetadata - got %v, want nil err", err)
+	}
+	r := regexp.MustCompile("^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[8|9|aA|bB][a-f0-9]{3}-[a-f0-9]{12}$")
+	if r.MatchString(cluster.uuid) != true {
+		t.Fatalf("updateClusterMetadata - cluster uuid")
+	}
+	if strings.Contains(cluster.bucket, "dataproc-") != true {
+		t.Fatalf("updateClusterMetadata - invalid bucket metadata for cluster")
 	}
 }
 
@@ -43,28 +65,22 @@ func TestJobFunctionality(t *testing.T) {
 	dc := newDataprocClient(t)
 	sc := newStorageClient(t)
 
-	jobId, err := submitJob(dc, sc, *pysparkFile, *projectID, *bucketName, *clusterName)
+	cluster := clusterConfig{project: *projectID, region: *region, name: *clusterName, zone: *zoneID}
+
+	jobId, err := submitJob(dc, sc, *pysparkFile, *bucketName, &cluster)
 	if err != nil {
 		t.Fatalf("submitJob - got %v, want nil err", err)
 	}
-	_, err = waitForJob(dc, jobId, *projectID, *region)
+	_, err = waitForJob(dc, jobId, &cluster)
 	if err != nil {
 		t.Fatalf("waitForJob - got %v, want nil err", err)
 	}
 
-	clusterData, err := getClusterDataByName(dc, *clusterName)
-	if err != nil {
-		t.Fatalf("getClusterDataByName - got %v, want nil err", err)
-	}
-	r := regexp.MustCompile("^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[8|9|aA|bB][a-f0-9]{3}-[a-f0-9]{12}$")
-	if r.MatchString(clusterData[1]) != true {
-		t.Fatalf("getClusterDataByName - cluster uuid")
-	}
-	if strings.Contains(clusterData[3], "dataproc-") != true {
-		t.Fatalf("getClusterDataByName - invalid bucket metadata for cluster")
+	if err := updateClusterMetadata(dc, &cluster); err != nil {
+		t.Fatalf("updateClusterMetadata - got %v, want nil err", err)
 	}
 
-	output, err := getJobOutput(sc, *projectID, clusterData[1], clusterData[3], jobId)
+	output, err := getJobOutput(sc, jobId, &cluster)
 	if err != nil {
 		t.Fatalf("getJobOutput - got %v, want nil err", err)
 	}
@@ -78,7 +94,9 @@ func TestDeleteCluster(t *testing.T) {
 	testutil.SystemTest(t)
 	c := newDataprocClient(t)
 
-	_, err := deleteCluster(c, *projectID, *region, *clusterName)
+	cluster := clusterConfig{project: *projectID, region: *region, name: *clusterName, zone: *zoneID}
+
+	_, err := deleteCluster(c, &cluster)
 	if err != nil {
 		t.Fatalf("deleteCluster - got %v, want nil err", err)
 	}
