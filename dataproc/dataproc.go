@@ -263,9 +263,8 @@ func submitJob(service *dataproc.Service, storageClient *storage.Client, filepat
 	return jobID, err
 }
 
-// getClusterDetails gets details about the cluster in the specified cluster config.
+// getClusterDetails returns details about a cluster with the specified cluster config.
 func getClusterDetails(service *dataproc.Service, cluster clusterConfig) (details clusterDetails, err error) {
-	// Get a list of clusters
 	clusters, err := listClusters(service, cluster.project, cluster.region)
 	if err != nil {
 		return details, err
