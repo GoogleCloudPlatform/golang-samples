@@ -80,8 +80,6 @@ func writeTimeSeriesValue(s *monitoring.Service, projectID, metricType string) e
 			},
 			Type: "gce_instance",
 		},
-		MetricKind: "GAUGE",
-		ValueType:  "INT64",
 		Points: []*monitoring.Point{
 			{
 				Interval: &monitoring.TimeInterval{
