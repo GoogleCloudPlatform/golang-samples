@@ -34,3 +34,6 @@ Send a JWT authed request:
 ```
 go run client/main.go -api-key=AIza....  -host=https://my-app.appspot.com -service-account=path_to_service_account.json
 ```
+
+For more details about auth, check out the documentation for [authenticating
+users](https://cloud.google.com/endpoints/docs/authenticating-users).
