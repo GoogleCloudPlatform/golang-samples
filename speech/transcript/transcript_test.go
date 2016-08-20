@@ -8,6 +8,8 @@ import (
 	"io/ioutil"
 	"testing"
 
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+
 	"golang.org/x/net/context"
 	"google.golang.org/api/option"
 	"google.golang.org/api/transport"
@@ -15,8 +17,9 @@ import (
 )
 
 func TestRecognize(t *testing.T) {
-	ctx := context.Background()
+	testutil.SystemTest(t)
 
+	ctx := context.Background()
 	conn, err := transport.DialGRPC(ctx,
 		option.WithEndpoint("speech.googleapis.com:443"),
 		option.WithScopes("https://www.googleapis.com/auth/cloud-platform"),
@@ -45,12 +48,12 @@ func TestRecognize(t *testing.T) {
 		t.Fatalf("got error from response: %v", err)
 	}
 	if len(resp.Results) < 1 {
-		t.Fatal("want results; got none")
+		t.Fatal("got no results; want at least one")
 	}
 	if len(resp.Results[0].Alternatives) < 1 {
-		t.Fatal("want alternatives; got none")
+		t.Fatal("got no alternatives; want at least one")
 	}
 	if got, want := resp.Results[0].Alternatives[0].Transcript, "quit"; got != want {
-		t.Errorf("want transcript: %q; got %q", want, got)
+		t.Errorf("got transcript: %q; want %q", got, want)
 	}
 }
