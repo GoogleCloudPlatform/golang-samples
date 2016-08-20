@@ -53,6 +53,8 @@ Note: samples under `docs/appengine` are not shown because they mostly do not ru
 |[getting-started/bookshelf/app](getting-started/bookshelf/app)|Sample bookshelf is a fully-featured app demonstrating several Google Cloud APIs, including Datastore, Cloud SQL, Cloud Storage.|
 |[getting-started/bookshelf/pubsub_worker](getting-started/bookshelf/pubsub_worker)|Sample pubsub_worker demonstrates the use of the Cloud Pub/Sub API to communicate between two modules.|
 |[getting-started/helloworld](getting-started/helloworld)|Sample helloworld is a basic App Engine flexible app.|
+|[language/analyze](language/analyze)|Command analyze performs sentiment, entity, and syntax analysis on a string of text via the Cloud Natural Language API.|
 |[monitoring/custommetric](monitoring/custommetric)|Command custommetric creates a custom metric and writes TimeSeries value to it.|
 |[monitoring/listresources](monitoring/listresources)|Command listresources lists the Google Cloud Monitoring v3 Environment against an authenticated user.|
+|[speech/transcript](speech/transcript)|Command transcript reads an audio file and outputs the transcript for it.|
 |[vision/label](vision/label)|Command label uses the Vision API's label detection capabilities to find a label based on an image's content.|
