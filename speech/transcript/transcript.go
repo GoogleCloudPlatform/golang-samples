@@ -15,7 +15,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/api/option"
 	"google.golang.org/api/transport"
-	speech "google.golang.org/genproto/googleapis/cloud/speech/v1"
+	speech "google.golang.org/genproto/googleapis/cloud/speech/v1beta1"
 )
 
 const usage = `Usage: transcript <audiofile>
@@ -57,25 +57,21 @@ func main() {
 	}
 
 	// Print the results.
-	for _, resp := range rresp.Responses {
-		if resp.Error != nil {
-			fmt.Fprintf(os.Stderr, "error in recognize response: %v\n", resp.Error)
-			continue
-		}
-		for _, result := range resp.Results {
-			for _, alt := range result.Alternatives {
-				fmt.Printf("\"%v\" (confidence=%3f)\n", alt.Transcript, alt.Confidence)
-			}
+	for _, result := range rresp.Results {
+		for _, alt := range result.Alternatives {
+			fmt.Printf("\"%v\" (confidence=%3f)\n", alt.Transcript, alt.Confidence)
 		}
 	}
 }
 
-func recognize(ctx context.Context, client speech.SpeechClient, data *[]byte) (*speech.NonStreamingRecognizeResponse, error) {
-	return client.NonStreamingRecognize(ctx, &speech.RecognizeRequest{
-		InitialRequest: &speech.InitialRecognizeRequest{
-			Encoding:   speech.InitialRecognizeRequest_LINEAR16,
+func recognize(ctx context.Context, client speech.SpeechClient, data *[]byte) (*speech.SyncRecognizeResponse, error) {
+	return client.SyncRecognize(ctx, &speech.SyncRecognizeRequest{
+		Config: &speech.RecognitionConfig{
+			Encoding:   speech.RecognitionConfig_LINEAR16,
 			SampleRate: 16000,
 		},
-		AudioRequest: &speech.AudioRequest{Content: *data},
+		Audio: &speech.RecognitionAudio{
+			AudioSource: &speech.RecognitionAudio_Content{Content: *data},
+		},
 	})
 }
