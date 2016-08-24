@@ -49,7 +49,7 @@ import (
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
 
-	appengine "google.golang.org/api/appengine/v1beta4"
+	appengine "google.golang.org/api/appengine/v1"
 
 	"gopkg.in/yaml.v2"
 )
@@ -78,7 +78,7 @@ type App struct {
 
 	module string // The Module ID (read from the app.yaml)
 
-	adminService *appengine.Service // Used during clean up to delete the deployed version.
+	adminService *appengine.APIService // Used during clean up to delete the deployed version.
 
 	// A temporary configuration file that includes modifications (e.g. environment variables)
 	tempAppYaml string
@@ -327,7 +327,7 @@ func (p *App) Cleanup() error {
 
 	var err error
 	for try := 0; try < 10; try++ {
-		_, err = p.adminService.Apps.Modules.Versions.Delete(p.ProjectID, p.module, p.version()).Do()
+		_, err = p.adminService.Apps.Services.Versions.Delete(p.ProjectID, p.module, p.version()).Do()
 		if err == nil {
 			log.Printf("(%s) Succesfully cleaned up.", p.Name)
 			break
