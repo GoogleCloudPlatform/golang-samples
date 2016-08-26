@@ -28,7 +28,8 @@ handlers:
 // [START script_example]
 handlers:
 
-# The root URL (/) is handled by the Go application. No other URLs match this pattern.
+# The root URL (/) is handled by the Go application. 
+# No other URLs match this pattern.
 - url: /
   script: _go_app
 
@@ -36,7 +37,8 @@ handlers:
 - url: /index\.html
   script: _go_app
 
-# A regular expression indicating that it should be handled by the Go application.
+# A regular expression indicating that it should be handled 
+# by the Go application.
 - url: /browse/(books|videos|tools)
   script: _go_app
 
