@@ -28,12 +28,22 @@ Deploy the application:
 
 ## Running the client
 
-Send an echo request:
+### Send an echo request using an API key
+
+First, [create a project API key](https://console.developers.google.com/apis/credentials).
+
+Then, run:
+
 ```
 go run client/main.go -api-key=AIza.... -host=https://my-app.appspot.com -echo message
 ```
 
-Send a JWT authed request:
+### Send a request using JWT authentication
+
+First, [download a Service Account JSON key file](https://developers.google.com/identity/protocols/OAuth2ServiceAccount#creatinganaccount).
+
+Then, run:
+
 ```
-go run client/main.go -api-key=AIza....  -host=https://my-app.appspot.com -service-account=path_to_service_account.json
+go run client/main.go -host=https://my-app.appspot.com -service-account=path_to_service_account.json
 ```
