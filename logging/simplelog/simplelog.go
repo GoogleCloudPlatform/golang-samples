@@ -1,4 +1,4 @@
-// iample simplelog writes some entries, lists them, then deletes the log.
+// Sample simplelog writes some entries, lists them, then deletes the log.
 package main
 
 import (
@@ -82,8 +82,8 @@ func writeEntry(client *logging.Client) {
 	logger := client.Logger(name)
 	defer logger.Flush() // Ensure the entry is written.
 
-	stdlog := logger.StandardLogger(logging.Info)
-	stdlog.Printf("stdlog is a standard library log.Logger with INFO severity.")
+	infolog := logger.StandardLogger(logging.Info)
+	infolog.Printf("infolog is a standard Go log.Logger with INFO severity.")
 	// [END write_log_entry]
 }
 
