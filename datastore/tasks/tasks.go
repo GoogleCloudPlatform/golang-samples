@@ -34,7 +34,7 @@ func main() {
 	client, err := datastore.NewClient(ctx, projID)
 	// [END build_service]
 	if err != nil {
-		log.Fatalf("Failed to create datastore client: %v", client)
+		log.Fatalf("Could not create datastore client: %v", err)
 	}
 
 	// Print welcome message.
