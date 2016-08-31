@@ -26,41 +26,47 @@ func main() {
 		fmt.Fprintf(os.Stderr, "GCLOUD_PROJECT environment variable must be set.\n")
 		os.Exit(1)
 	}
-	c, err := pubsub.NewClient(ctx, proj)
+	client, err := pubsub.NewClient(ctx, proj)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Could not create pubsub Client: %v", err)
 	}
 	// [END auth]
 
 	// List all the topics from the project.
-	list(c)
+	fmt.Println("Listing all topics from the project:")
+	for _, t := range list(client) {
+		fmt.Printf("%v\n", t.Name())
+	}
 
 	const topic = "example-topic"
 	// Create a new topic called example-topic.
-	create(c, topic)
+	create(client, topic)
 
 	// Publish a text message on the created topic.
-	publish(c, topic, "hello world!")
+	publish(client, topic, "hello world!")
 
 	// Delete the topic.
-	delete(c, topic)
+	delete(client, topic)
 }
 
-func create(c *pubsub.Client, topic string) {
+func create(client *pubsub.Client, topic string) {
 	ctx := context.Background()
 	// [START create_topic]
-	t, err := c.NewTopic(ctx, topic)
+	t, err := client.NewTopic(ctx, topic)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Could not create a new topic: %v", err)
 	}
-	fmt.Printf("topic created: %v\n", t.Name())
+	fmt.Printf("Topic created: %v\n", t.Name())
 	// [END create_topic]
 }
 
-func list(c *pubsub.Client) {
-	// [START list_topics]
+func list(client *pubsub.Client) []*pubsub.Topic {
 	ctx := context.Background()
-	it := c.Topics(ctx)
+
+	// [START list_topics]
+	var topics []*pubsub.Topic
+
+	it := client.Topics(ctx)
 	for {
 		topic, err := it.Next()
 		if err == pubsub.Done {
@@ -69,34 +75,36 @@ func list(c *pubsub.Client) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(topic.Name())
+		topics = append(topics, topic)
 	}
+
+	return topics
 	// [END list_topics]
 }
 
-func delete(c *pubsub.Client, topic string) {
+func delete(client *pubsub.Client, topic string) {
 	ctx := context.Background()
 	// [START delete_topic]
-	t := c.Topic(topic)
+	t := client.Topic(topic)
 	if err := t.Delete(ctx); err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("deleted topic: %v\n", t.Name())
+	fmt.Printf("Deleted topic: %v\n", t.Name())
 	// [END delete_topic]
 }
 
-func publish(c *pubsub.Client, topic, msg string) {
+func publish(client *pubsub.Client, topic, msg string) {
 	ctx := context.Background()
 	// [START publish]
-	t := c.Topic(topic)
+	t := client.Topic(topic)
 	msgIDs, err := t.Publish(ctx, &pubsub.Message{
 		Data: []byte(msg),
 	})
 	if err != nil {
-		log.Fatalf("failed to publish the message: %v", err)
+		log.Fatalf("Failed to publish the message: %v", err)
 	}
 	for _, id := range msgIDs {
-		fmt.Printf("published a message; msg ID: %v\n", id)
+		fmt.Printf("Published a message; msg ID: %v\n", id)
 	}
 	// [END publish]
 }
