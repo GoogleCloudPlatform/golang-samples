@@ -22,12 +22,11 @@ import (
 )
 
 func main() {
+	if len(os.Args) == 2 {
+		usage("Missing command.")
+	}
 	if len(os.Args) != 3 {
-		if len(os.Args) == 2 {
-			usage("Missing command.")
-		} else {
-			usage("")
-		}
+		usage("")
 	}
 
 	projID := os.Args[1]
