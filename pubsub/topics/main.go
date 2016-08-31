@@ -21,9 +21,9 @@ import (
 func main() {
 	ctx := context.Background()
 	// [START auth]
-	proj := os.Getenv("GCLOUD_PROJECT")
+	proj := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	if proj == "" {
-		fmt.Fprintf(os.Stderr, "GCLOUD_PROJECT environment variable must be set.\n")
+		fmt.Fprintf(os.Stderr, "GOOGLE_CLOUD_PROJECT environment variable must be set.\n")
 		os.Exit(1)
 	}
 	client, err := pubsub.NewClient(ctx, proj)
