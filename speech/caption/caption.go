@@ -2,7 +2,7 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// Command transcript reads an audio file and outputs the transcript for it.
+// Command caption reads an audio file and outputs the transcript for it.
 package main
 
 import (
@@ -18,7 +18,7 @@ import (
 	speech "google.golang.org/genproto/googleapis/cloud/speech/v1beta1"
 )
 
-const usage = `Usage: transcript <audiofile>
+const usage = `Usage: caption <audiofile>
 
 Audio file is required to be 16-bit signed little-endian encoded
 with a sample rate of 16000.

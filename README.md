@@ -30,6 +30,7 @@ Note: samples under `docs/appengine` are not shown because they mostly do not ru
 |Path|Description|
 |---|---|
 |[appengine/bigquery](appengine/bigquery)|This App Engine application uses its default service account to list all the BigQuery datasets accessible via the BigQuery REST API.|
+|[bigquery/syncquery](bigquery/syncquery)|Command syncquery queries a Google BigQuery dataset.|
 |[datastore/tasks](datastore/tasks)|A simple command-line task list manager to demonstrate using the google.golang.org/cloud/datastore package.|
 |[docs/error-reporting/fluent](docs/error-reporting/fluent)|Sample fluent demonstrates integration of fluent and Cloud Error reporting.|
 |[docs/managed_vms/analytics](docs/managed_vms/analytics)|Sample analytics demonstrates Google Analytics calls from App Engine flexible environment.|
@@ -56,5 +57,5 @@ Note: samples under `docs/appengine` are not shown because they mostly do not ru
 |[language/analyze](language/analyze)|Command analyze performs sentiment, entity, and syntax analysis on a string of text via the Cloud Natural Language API.|
 |[monitoring/custommetric](monitoring/custommetric)|Command custommetric creates a custom metric and writes TimeSeries value to it.|
 |[monitoring/listresources](monitoring/listresources)|Command listresources lists the Google Cloud Monitoring v3 Environment against an authenticated user.|
-|[speech/transcript](speech/transcript)|Command transcript reads an audio file and outputs the transcript for it.|
+|[speech/caption](speech/caption)|Command caption reads an audio file and outputs the transcript for it.|
 |[vision/label](vision/label)|Command label uses the Vision API's label detection capabilities to find a label based on an image's content.|
