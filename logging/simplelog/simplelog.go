@@ -18,11 +18,16 @@ import (
 )
 
 func main() {
-	if len(os.Args) != 2 {
-		fmt.Println("Usage: simplelog <project-id>")
-		os.Exit(2)
+	if len(os.Args) != 3 {
+		if len(os.Args) == 2 {
+			usage("Missing command.")
+		} else {
+			usage("")
+		}
 	}
+
 	projID := os.Args[1]
+	command := os.Args[2]
 
 	// [START setup]
 	ctx := context.Background()
@@ -40,29 +45,34 @@ func main() {
 	}
 	// [END setup]
 
-	log.Print("Writing some log entries.")
-	writeEntry(client)
-	structuredWrite(client)
+	switch command {
+	case "write":
+		log.Print("Writing some log entries.")
+		writeEntry(client)
+		structuredWrite(client)
 
-	// It takes some time for the log entries to appear.
-	time.Sleep(5 * time.Second)
+	case "read":
+		log.Print("Fetching and printing log entries.")
+		entries, err := getEntries(client, projID)
+		if err != nil {
+			log.Fatalf("Could not get entries: %v", err)
+		}
+		log.Printf("Found %d entries.", len(entries))
+		for _, entry := range entries {
+			fmt.Printf("Entry: %6s @%s: %v\n",
+				entry.Severity,
+				entry.Timestamp.Format(time.RFC3339),
+				entry.Payload)
+		}
 
-	log.Print("Fetching and printing log entries.")
-	entries, err := getEntries(client, projID)
-	if err != nil {
-		log.Fatalf("Could not get entries: %v", err)
-	}
-	log.Printf("Found %d entries.", len(entries))
-	for _, entry := range entries {
-		fmt.Printf("Entry: %6s @%s: %v\n",
-			entry.Severity,
-			entry.Timestamp.Format(time.RFC3339),
-			entry.Payload)
-	}
+	case "delete":
+		log.Print("Deleting log.")
+		if err := deleteLog(client); err != nil {
+			log.Fatalf("Could not delete log: %v", err)
+		}
 
-	log.Print("Deleting log.")
-	if err := deleteLog(client); err != nil {
-		log.Fatalf("Could not delete log: %v", err)
+	default:
+		usage("Unknown command.")
 	}
 }
 
@@ -131,4 +141,12 @@ func getEntries(client *logging.Client, projID string) ([]*logging.Entry, error)
 	}
 	return entries, nil
 	// [END list_log_entries]
+}
+
+func usage(msg string) {
+	if msg != "" {
+		fmt.Fprintln(os.Stderr, msg)
+	}
+	fmt.Fprintln(os.Stderr, "usage: simplelog <project-id> [write|read|delete]")
+	os.Exit(2)
 }
