@@ -68,18 +68,18 @@ func main() {
 	}
 }
 
-func list(c *pubsub.Client) ([]*pubsub.Subscription, error) {
+func list(client *pubsub.Client) ([]*pubsub.Subscription, error) {
 	ctx := context.Background()
 	// [START get_all_subscriptions]
 	var subs []*pubsub.Subscription
-	it := c.Subscriptions(ctx)
+	it := client.Subscriptions(ctx)
 	for {
 		s, err := it.Next()
 		if err == pubsub.Done {
 			break
 		}
 		if err != nil {
-			return nil, fmt.Errorf("Failed to list subscriptions: %v", err)
+			return nil, err
 		}
 		subs = append(subs, s)
 	}
@@ -87,36 +87,35 @@ func list(c *pubsub.Client) ([]*pubsub.Subscription, error) {
 	return subs, nil
 }
 
-func pullMsgs(c *pubsub.Client, name string, topic *pubsub.Topic) error {
+func pullMsgs(client *pubsub.Client, name string, topic *pubsub.Topic) error {
 	ctx := context.Background()
 
-	const n = 10
 	// publish 10 messages on the topic.
-	for i := 0; i < n; i++ {
+	for i := 0; i < 10; i++ {
 		_, err := topic.Publish(ctx, &pubsub.Message{
 			Data: []byte(fmt.Sprintf("hello world #%d", i)),
 		})
 		if err != nil {
-			return fmt.Errorf("Failed to publish message #%d: %v", i, err)
+			return err
 		}
 	}
 
 	// [START pull_messages]
-	sub := c.Subscription(name)
+	sub := client.Subscription(name)
 	it, err := sub.Pull(ctx)
 	if err != nil {
-		return fmt.Errorf("Failed to pull from subsription: %v", err)
+		return err
 	}
 	defer it.Stop()
 
 	// Consume 10 messages.
-	for i := 0; i < n; i++ {
+	for i := 0; i < 10; i++ {
 		msg, err := it.Next()
 		if err == pubsub.Done {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("Failed when iterating on messages: %v", err)
+			return err
 		}
 		fmt.Printf("Got message: %q\n", string(msg.Data))
 		msg.Done(true)
@@ -125,24 +124,24 @@ func pullMsgs(c *pubsub.Client, name string, topic *pubsub.Topic) error {
 	return nil
 }
 
-func create(c *pubsub.Client, name string, topic *pubsub.Topic) error {
+func create(client *pubsub.Client, name string, topic *pubsub.Topic) error {
 	ctx := context.Background()
 	// [START create_subscription]
-	sub, err := c.NewSubscription(ctx, name, topic, 10*time.Second, nil)
+	sub, err := client.NewSubscription(ctx, name, topic, 20*time.Second, nil)
 	if err != nil {
-		return fmt.Errorf("Failed to create a new subscription: %v", err)
+		return err
 	}
 	fmt.Printf("Created subscription: %v\n", sub)
 	// [END create_subscription]
 	return nil
 }
 
-func delete(c *pubsub.Client, name string) error {
+func delete(client *pubsub.Client, name string) error {
 	ctx := context.Background()
 	// [START delete_subscription]
-	sub := c.Subscription(name)
+	sub := client.Subscription(name)
 	if err := sub.Delete(ctx); err != nil {
-		return fmt.Errorf("Failed to delete the subscription: %v\n", err)
+		return err
 	}
 	fmt.Println("Subscription deleted.")
 	// [END delete_subscription]
