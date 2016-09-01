@@ -34,33 +34,44 @@ func main() {
 
 	// List all the topics from the project.
 	fmt.Println("Listing all topics from the project:")
-	for _, t := range list(client) {
+	topics, err := list(client)
+	if err != nil {
+		log.Fatalf("Failed to list topics: %v", err)
+	}
+	for _, t := range topics {
 		fmt.Printf("%v\n", t.Name())
 	}
 
 	const topic = "example-topic"
 	// Create a new topic called example-topic.
-	create(client, topic)
+	if err := create(client, topic); err != nil {
+		log.Fatalf("Failed to create a topic: %v", err)
+	}
 
 	// Publish a text message on the created topic.
-	publish(client, topic, "hello world!")
+	if err := publish(client, topic, "hello world!"); err != nil {
+		log.Fatalf("Failed to publish: %v", err)
+	}
 
 	// Delete the topic.
-	delete(client, topic)
+	if err := delete(client, topic); err != nil {
+		log.Fatalf("Failed to delete the topic: %v", err)
+	}
 }
 
-func create(client *pubsub.Client, topic string) {
+func create(client *pubsub.Client, topic string) error {
 	ctx := context.Background()
 	// [START create_topic]
 	t, err := client.NewTopic(ctx, topic)
 	if err != nil {
-		log.Fatalf("Could not create a new topic: %v", err)
+		return err
 	}
 	fmt.Printf("Topic created: %v\n", t.Name())
 	// [END create_topic]
+	return nil
 }
 
-func list(client *pubsub.Client) []*pubsub.Topic {
+func list(client *pubsub.Client) ([]*pubsub.Topic, error) {
 	ctx := context.Background()
 
 	// [START list_topics]
@@ -73,27 +84,28 @@ func list(client *pubsub.Client) []*pubsub.Topic {
 			break
 		}
 		if err != nil {
-			log.Fatal(err)
+			return nil, err
 		}
 		topics = append(topics, topic)
 	}
 
-	return topics
+	return topics, nil
 	// [END list_topics]
 }
 
-func delete(client *pubsub.Client, topic string) {
+func delete(client *pubsub.Client, topic string) error {
 	ctx := context.Background()
 	// [START delete_topic]
 	t := client.Topic(topic)
 	if err := t.Delete(ctx); err != nil {
-		log.Fatal(err)
+		return err
 	}
 	fmt.Printf("Deleted topic: %v\n", t.Name())
 	// [END delete_topic]
+	return nil
 }
 
-func publish(client *pubsub.Client, topic, msg string) {
+func publish(client *pubsub.Client, topic, msg string) error {
 	ctx := context.Background()
 	// [START publish]
 	t := client.Topic(topic)
@@ -101,10 +113,11 @@ func publish(client *pubsub.Client, topic, msg string) {
 		Data: []byte(msg),
 	})
 	if err != nil {
-		log.Fatalf("Failed to publish the message: %v", err)
+		return err
 	}
 	for _, id := range msgIDs {
 		fmt.Printf("Published a message; msg ID: %v\n", id)
 	}
 	// [END publish]
+	return nil
 }
