@@ -6,8 +6,6 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"strings"
 	"sync"
 	"testing"
 
@@ -84,9 +82,9 @@ func TestList(t *testing.T) {
 		t.Fatalf("failed to list subscriptions: %v", err)
 	}
 	var ok bool
+	s := c.Subscription(subName)
 	for _, sub := range subs {
-		fmt.Println(sub.Name())
-		if strings.HasSuffix(sub.Name(), subName) {
+		if s.Name() == sub.Name() {
 			ok = true
 			break
 		}
