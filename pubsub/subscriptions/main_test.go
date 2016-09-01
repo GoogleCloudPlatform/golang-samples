@@ -101,7 +101,7 @@ func TestDelete(t *testing.T) {
 	if err := delete(c, subName); err != nil {
 		t.Fatalf("failed to delete subscription (%q): %v", subName, err)
 	}
-	ok, err := c.Topic(subName).Exists(context.Background())
+	ok, err := c.Subscription(subName).Exists(context.Background())
 	if err != nil {
 		t.Fatalf("failed to check if sub exists: %v", err)
 	}
