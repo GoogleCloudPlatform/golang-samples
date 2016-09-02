@@ -62,7 +62,7 @@ func main() {
 func create(client *pubsub.Client, topic string) error {
 	ctx := context.Background()
 	// [START create_topic]
-	t, err := client.NewTopic(ctx, topic)
+	t, err := client.CreateTopic(ctx, topic)
 	if err != nil {
 		return err
 	}

@@ -40,7 +40,7 @@ func setup(t *testing.T) *pubsub.Client {
 			t.Fatalf("failed to check if topic exists: %v", err)
 		}
 		if !ok {
-			if topic, err = client.NewTopic(netctx, topicName); err != nil {
+			if topic, err = client.CreateTopic(netctx, topicName); err != nil {
 				t.Fatalf("failed to create the topic: %v", err)
 			}
 		}
