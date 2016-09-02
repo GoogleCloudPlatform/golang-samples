@@ -43,13 +43,7 @@ func main() {
 		fmt.Printf("%v\n", sub.Name())
 	}
 
-	const topic = "example-topic"
-	// Create a topic to subscribe to.
-	t, err := client.NewTopic(ctx, topic)
-	if err != nil {
-		log.Fatalf("Failed to create the topic: %v", err)
-	}
-	defer t.Delete(ctx) // cleanup when finished using t.
+	t := createTopicIfNotExists(client)
 
 	const sub = "example-subscription"
 	// Create a new subscription.
@@ -146,4 +140,25 @@ func delete(client *pubsub.Client, name string) error {
 	fmt.Println("Subscription deleted.")
 	// [END delete_subscription]
 	return nil
+}
+
+func createTopicIfNotExists(c *pubsub.Client) *pubsub.Topic {
+	ctx := context.Background()
+
+	const topic = "example-topic"
+	// Create a topic to subscribe to.
+	t := c.Topic(topic)
+	ok, err := t.Exists(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if ok {
+		return t
+	}
+
+	t, err = c.NewTopic(ctx, topic)
+	if err != nil {
+		log.Fatalf("Failed to create the topic: %v", err)
+	}
+	return t
 }
