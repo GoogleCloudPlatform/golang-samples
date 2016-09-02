@@ -155,7 +155,7 @@ func configurePubsub(projectID string) (*pubsub.Client, error) {
 	if exists, err := client.Topic(PubsubTopicID).Exists(ctx); err != nil {
 		return nil, err
 	} else if !exists {
-		if _, err := client.NewTopic(ctx, PubsubTopicID); err != nil {
+		if _, err := client.CreateTopic(ctx, PubsubTopicID); err != nil {
 			return nil, err
 		}
 	}
