@@ -121,7 +121,7 @@ func pullMsgs(client *pubsub.Client, name string, topic *pubsub.Topic) error {
 func create(client *pubsub.Client, name string, topic *pubsub.Topic) error {
 	ctx := context.Background()
 	// [START create_subscription]
-	sub, err := client.NewSubscription(ctx, name, topic, 20*time.Second, nil)
+	sub, err := client.CreateSubscription(ctx, name, topic, 20*time.Second, nil)
 	if err != nil {
 		return err
 	}
@@ -156,7 +156,7 @@ func createTopicIfNotExists(c *pubsub.Client) *pubsub.Topic {
 		return t
 	}
 
-	t, err = c.NewTopic(ctx, topic)
+	t, err = c.CreateTopic(ctx, topic)
 	if err != nil {
 		log.Fatalf("Failed to create the topic: %v", err)
 	}
