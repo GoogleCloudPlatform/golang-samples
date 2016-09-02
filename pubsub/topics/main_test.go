@@ -5,8 +5,9 @@
 package main
 
 import (
-	"context"
 	"testing"
+
+	"golang.org/x/net/context"
 
 	"cloud.google.com/go/pubsub"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
