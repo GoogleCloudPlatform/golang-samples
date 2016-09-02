@@ -5,11 +5,12 @@
 package main
 
 import (
-	"context"
 	"sync"
 	"testing"
 
 	"cloud.google.com/go/pubsub"
+	"golang.org/x/net/context"
+
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
