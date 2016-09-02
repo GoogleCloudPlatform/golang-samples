@@ -6,11 +6,12 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"os"
 	"time"
+
+	"golang.org/x/net/context"
 
 	// [START imports]
 	// NOTE: This will become cloud.google.com/go/logging soon.
