@@ -44,6 +44,9 @@ before_install:
     export PATH="$PATH:$PWD/google-cloud-sdk/bin";
     ./testing/travis/configure_gcloud.bash;
   fi
+- grep -R '"context"$' * && { echo "Use golang.org/x/net/context"; false; } || true
+- go vet ./...
+- diff -u <(echo -n) <(gofmt -d -s .)
 
 install:
 # Install all external dependencies, ensuring they are updated.
@@ -51,5 +54,3 @@ install:
 
 script:
 - go test -v ./...
-- go vet ./...
-- diff -u <(echo -n) <(gofmt -d -s .)

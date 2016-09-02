@@ -19,6 +19,9 @@ export GOPATH=/gopath
 diff -u <(echo -n) <(gofmt -d -s .)
 go vet ./...
 
+# Check use of Go 1.7 context package
+grep -R '"context"$' * && { echo "Use golang.org/x/net/context"; false; } || true
+
 # Update imports from the cached image.
 go get -u -v $(go list -f '{{join .Imports "\n"}}' ./... | sort | uniq | grep -v golang-samples)
 
