@@ -1,0 +1,5 @@
+FROM golang:1.6
+
+ENV GOPATH=/gopath
+
+RUN go get -v github.com/GoogleCloudPlatform/golang-samples/...

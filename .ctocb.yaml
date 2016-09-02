@@ -1,0 +1,7 @@
+dir: /gopath/src/github.com/GoogleCloudPlatform/golang-samples
+
+builds:
+  - name: gcr.io/golang-samples-tests/go16
+  - name: gcr.io/golang-samples-tests/go17
+
+run: ["./testing/all.bash"]
