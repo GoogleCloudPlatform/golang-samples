@@ -16,10 +16,10 @@ import (
 const topicName = "golang-samples-topic-example"
 
 func setup(t *testing.T) *pubsub.Client {
-	netctx := context.Background()
-	ctx := testutil.SystemTest(t)
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
 
-	client, err := pubsub.NewClient(netctx, ctx.ProjectID)
+	client, err := pubsub.NewClient(ctx, tc.ProjectID)
 	if err != nil {
 		t.Fatalf("failed to create client: %v", err)
 	}
@@ -56,7 +56,7 @@ func TestList(t *testing.T) {
 		}
 	}
 	if !ok {
-		t.Errorf("got %+v; want the list with topic = %q", topics, topicName)
+		t.Errorf("got %+v; want a list with topic = %q", topics, topicName)
 	}
 }
 

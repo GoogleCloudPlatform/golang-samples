@@ -24,10 +24,10 @@ const (
 var once sync.Once // guards cleanup related operations that needs to be executed only for once.
 
 func setup(t *testing.T) *pubsub.Client {
-	netctx := context.Background()
-	ctx := testutil.SystemTest(t)
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
 
-	client, err := pubsub.NewClient(netctx, ctx.ProjectID)
+	client, err := pubsub.NewClient(ctx, tc.ProjectID)
 	if err != nil {
 		t.Fatalf("failed to create client: %v", err)
 	}
@@ -36,24 +36,24 @@ func setup(t *testing.T) *pubsub.Client {
 	once.Do(func() {
 		// create a topic to subscribe to.
 		topic = client.Topic(topicName)
-		ok, err := topic.Exists(netctx)
+		ok, err := topic.Exists(ctx)
 		if err != nil {
 			t.Fatalf("failed to check if topic exists: %v", err)
 		}
 		if !ok {
-			if topic, err = client.CreateTopic(netctx, topicName); err != nil {
+			if topic, err = client.CreateTopic(ctx, topicName); err != nil {
 				t.Fatalf("failed to create the topic: %v", err)
 			}
 		}
 
 		// delete the sub if already exists
 		sub := client.Subscription(subName)
-		ok, err = sub.Exists(netctx)
+		ok, err = sub.Exists(ctx)
 		if err != nil {
 			t.Fatalf("failed to check if sub exists: %v", err)
 		}
 		if ok {
-			if err := client.Subscription(subName).Delete(netctx); err != nil {
+			if err := client.Subscription(subName).Delete(ctx); err != nil {
 				t.Fatalf("failed to cleanup the topic (%q): %v", subName, err)
 			}
 		}
