@@ -52,7 +52,7 @@ func TestSimplelog(t *testing.T) {
 	}
 
 	if got, want := len(entries), 2; got != want {
-		t.Fatalf("len(entries): got %d; want %d", got, want)
+		t.Fatalf("len(entries) = %d; want %d", got, want)
 	}
 
 	wantContain := map[string]*logging.Entry{
