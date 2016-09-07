@@ -1,4 +1,4 @@
-# Google Cloud Endpoints sample for Google App Engine Flexible Environment
+# Google Cloud Endpoints sample for Google App Engine flexible environment
 
 ## Deploying the backend
 
