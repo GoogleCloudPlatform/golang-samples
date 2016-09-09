@@ -54,6 +54,8 @@ func TestCustomMetric(t *testing.T) {
 		t.Error(err)
 	}
 
+	time.Sleep(2 * time.Second)
+
 	if err := readTimeSeriesValue(s, hc.ProjectID, metricType); err != nil {
 		t.Error(err)
 	}
