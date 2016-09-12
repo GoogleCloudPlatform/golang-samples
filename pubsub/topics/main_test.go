@@ -13,7 +13,7 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-const topicName = "golang-samples-topic-example"
+const topicName = "golang-samples-topic-example-topic"
 
 func setup(t *testing.T) *pubsub.Client {
 	ctx := context.Background()
