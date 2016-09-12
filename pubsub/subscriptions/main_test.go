@@ -81,7 +81,8 @@ func TestList(t *testing.T) {
 
 	var ok bool
 	var subs []*pubsub.Subscription
-	for attempts := 0; !ok && attempts < 5; attempts++ {
+outer:
+	for attempts := 0; attempts < 5; attempts++ {
 		var err error
 		subs, err = list(c)
 		if err != nil {
@@ -91,7 +92,7 @@ func TestList(t *testing.T) {
 		for _, sub := range subs {
 			if s.Name() == sub.Name() {
 				ok = true
-				break
+				break outer
 			}
 		}
 		time.Sleep(2 * time.Second)
