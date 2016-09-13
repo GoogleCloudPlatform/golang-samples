@@ -15,11 +15,7 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-var bucketName string
-
-func init() {
-	bucketName = fmt.Sprintf("golang-example-bucketmgr-%d", time.Now().Unix())
-}
+var bucketName = fmt.Sprintf("golang-example-buckets-%d", time.Now().Unix())
 
 func setup(t *testing.T) *storage.Client {
 	ctx := context.Background()
