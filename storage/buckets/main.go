@@ -35,7 +35,7 @@ func main() {
 	// [END setup]
 
 	// Give the bucket a unique name.
-	name := fmt.Sprintf("golang-example-bucketmgr-%d", time.Now().Unix())
+	name := fmt.Sprintf("golang-example-buckets-%d", time.Now().Unix())
 	if err := create(client, projectID, name); err != nil {
 		log.Fatal(err)
 	}
