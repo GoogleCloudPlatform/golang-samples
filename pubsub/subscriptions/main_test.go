@@ -7,6 +7,7 @@ package main
 import (
 	"sync"
 	"testing"
+	"time"
 
 	"cloud.google.com/go/pubsub"
 	"golang.org/x/net/context"
@@ -78,20 +79,30 @@ func TestCreate(t *testing.T) {
 func TestList(t *testing.T) {
 	c := setup(t)
 
-	subs, err := list(c)
-	if err != nil {
-		t.Fatalf("failed to list subscriptions: %v", err)
-	}
 	var ok bool
-	s := c.Subscription(subName)
-	for _, sub := range subs {
-		if s.Name() == sub.Name() {
-			ok = true
-			break
+	var subs []*pubsub.Subscription
+outer:
+	for attempts := 0; attempts < 5; attempts++ {
+		var err error
+		subs, err = list(c)
+		if err != nil {
+			t.Fatalf("failed to list subscriptions: %v", err)
 		}
+		s := c.Subscription(subName)
+		for _, sub := range subs {
+			if s.Name() == sub.Name() {
+				ok = true
+				break outer
+			}
+		}
+		time.Sleep(2 * time.Second)
 	}
 	if !ok {
-		t.Fatalf("got %+v; want a list with subscription %q", subs, subName)
+		subNames := make([]string, len(subs))
+		for i, sub := range subs {
+			subNames[i] = sub.Name()
+		}
+		t.Fatalf("got %+v; want a list with subscription %q", subNames, subName)
 	}
 }
 

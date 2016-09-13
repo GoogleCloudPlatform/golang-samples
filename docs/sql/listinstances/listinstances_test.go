@@ -13,11 +13,9 @@ import (
 func TestListInstances(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	instances, err := ListInstances(tc.ProjectID)
+	// Just check the call succeeds.
+	_, err := ListInstances(tc.ProjectID)
 	if err != nil {
 		t.Fatal(err)
-	}
-	if len(instances) == 0 {
-		t.Fatalf("want non-zero SQL instances in project %q", tc.ProjectID)
 	}
 }
