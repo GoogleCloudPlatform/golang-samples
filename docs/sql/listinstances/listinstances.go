@@ -6,14 +6,16 @@
 package listinstances
 
 import (
-	"golang.org/x/oauth2"
+	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/sqladmin/v1beta4"
 )
 
 func ListInstances(projectId string) ([]*sqladmin.DatabaseInstance, error) {
+	ctx := context.Background()
+
 	// Create an http.Client that uses Application Default Credentials.
-	hc, err := google.DefaultClient(oauth2.NoContext, sqladmin.SqlserviceAdminScope)
+	hc, err := google.DefaultClient(ctx, sqladmin.SqlserviceAdminScope)
 	if err != nil {
 		return nil, err
 	}
