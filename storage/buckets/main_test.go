@@ -7,8 +7,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"strings"
-	"sync"
 	"testing"
 	"time"
 
@@ -19,7 +17,9 @@ import (
 
 var bucketName string
 
-var setupOnce sync.Once
+func init() {
+	bucketName = fmt.Sprintf("golang-example-bucketmgr-%d", time.Now().Unix())
+}
 
 func setup(t *testing.T) *storage.Client {
 	ctx := context.Background()
@@ -28,9 +28,6 @@ func setup(t *testing.T) *storage.Client {
 	if err != nil {
 		t.Fatalf("failed to create client: %v", err)
 	}
-	setupOnce.Do(func() {
-		bucketName = fmt.Sprintf("golang-example-bucketmgr-%d", time.Now().Unix())
-	})
 	return client
 }
 
@@ -40,7 +37,6 @@ func TestCreate(t *testing.T) {
 	if err := create(c, tc.ProjectID, bucketName); err != nil {
 		t.Fatalf("failed to create bucket (%q): %v", bucketName, err)
 	}
-	time.Sleep(3 * time.Second) // for eventual consistency
 }
 
 func TestList(t *testing.T) {
@@ -51,14 +47,18 @@ func TestList(t *testing.T) {
 		t.Fatal(err)
 	}
 	var ok bool
-	for _, b := range buckets {
-		if b == bucketName {
-			ok = true
-			break
+outer:
+	for attempt := 0; attempt < 5; attempt++ { // for eventual consistency
+		for _, b := range buckets {
+			if b == bucketName {
+				ok = true
+				break outer
+			}
 		}
+		time.Sleep(2 * time.Second)
 	}
 	if !ok {
-		t.Errorf("got bucket list: %+v; want %q in the list", strings.Join(buckets, "\n"), bucketName)
+		t.Errorf("got bucket list: %v; want %q in the list", buckets, bucketName)
 	}
 }
 
