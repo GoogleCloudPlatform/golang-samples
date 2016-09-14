@@ -39,7 +39,7 @@ func main() {
 		log.Fatalf("Failed to list topics: %v", err)
 	}
 	for _, t := range topics {
-		fmt.Printf("%v\n", t.Name())
+		fmt.Println(t)
 	}
 
 	const topic = "example-topic"
@@ -66,7 +66,7 @@ func create(client *pubsub.Client, topic string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Topic created: %v\n", t.Name())
+	fmt.Printf("Topic created: %v\n", t)
 	// [END create_topic]
 	return nil
 }
@@ -100,7 +100,7 @@ func delete(client *pubsub.Client, topic string) error {
 	if err := t.Delete(ctx); err != nil {
 		return err
 	}
-	fmt.Printf("Deleted topic: %v\n", t.Name())
+	fmt.Printf("Deleted topic: %v\n", t)
 	// [END delete_topic]
 	return nil
 }

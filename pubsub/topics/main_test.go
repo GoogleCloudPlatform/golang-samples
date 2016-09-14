@@ -13,7 +13,7 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-const topicName = "golang-samples-topic-example"
+const topicID = "golang-samples-topic-example"
 
 func setup(t *testing.T) *pubsub.Client {
 	ctx := context.Background()
@@ -28,15 +28,15 @@ func setup(t *testing.T) *pubsub.Client {
 
 func TestCreate(t *testing.T) {
 	c := setup(t)
-	if err := create(c, topicName); err != nil {
+	if err := create(c, topicID); err != nil {
 		t.Fatalf("failed to create a topic: %v", err)
 	}
-	ok, err := c.Topic(topicName).Exists(context.Background())
+	ok, err := c.Topic(topicID).Exists(context.Background())
 	if err != nil {
 		t.Fatalf("failed to check if sub exists: %v", err)
 	}
 	if !ok {
-		t.Fatalf("got none; want topic = %q", topicName)
+		t.Fatalf("got none; want topic = %q", topicID)
 	}
 }
 
@@ -47,16 +47,15 @@ func TestList(t *testing.T) {
 		t.Fatalf("failed to list topics: %v", err)
 	}
 	var ok bool
-	topic := c.Topic(topicName)
 	for _, t := range topics {
 		// TODO(jbd): Fix HasSuffix when
-		if t.Name() == topic.Name() {
+		if t.ID() == topicID {
 			ok = true
 			break
 		}
 	}
 	if !ok {
-		t.Errorf("got %+v; want a list with topic = %q", topics, topicName)
+		t.Errorf("got %+v; want a list with topic = %q", topics, topicID)
 	}
 }
 
@@ -64,21 +63,21 @@ func TestPublish(t *testing.T) {
 	// Nothing much to do here, unless we are consuming.
 	// TODO(jbd): Merge topics and subscriptions programs maybe?
 	c := setup(t)
-	if err := publish(c, topicName, "hello world"); err != nil {
+	if err := publish(c, topicID, "hello world"); err != nil {
 		t.Errorf("failed to publish message: %v", err)
 	}
 }
 
 func TestDelete(t *testing.T) {
 	c := setup(t)
-	if err := delete(c, topicName); err != nil {
-		t.Fatalf("failed to delete subscription (%q): %v", topicName, err)
+	if err := delete(c, topicID); err != nil {
+		t.Fatalf("failed to delete subscription (%q): %v", topicID, err)
 	}
-	ok, err := c.Topic(topicName).Exists(context.Background())
+	ok, err := c.Topic(topicID).Exists(context.Background())
 	if err != nil {
 		t.Fatalf("failed to check if sub exists: %v", err)
 	}
 	if ok {
-		t.Fatalf("got sub = %q; want none", topicName)
+		t.Fatalf("got sub = %q; want none", topicID)
 	}
 }

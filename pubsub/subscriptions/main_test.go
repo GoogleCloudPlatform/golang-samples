@@ -18,8 +18,8 @@ import (
 var topic *pubsub.Topic
 
 const (
-	subName   = "golang-samples-subscription"
-	topicName = "golang-samples-topic"
+	subID   = "golang-samples-subscription"
+	topicID = "golang-samples-topic"
 )
 
 var once sync.Once // guards cleanup related operations that needs to be executed only for once.
@@ -36,26 +36,26 @@ func setup(t *testing.T) *pubsub.Client {
 	// Cleanup resources from the previous failed tests.
 	once.Do(func() {
 		// create a topic to subscribe to.
-		topic = client.Topic(topicName)
+		topic = client.Topic(topicID)
 		ok, err := topic.Exists(ctx)
 		if err != nil {
 			t.Fatalf("failed to check if topic exists: %v", err)
 		}
 		if !ok {
-			if topic, err = client.CreateTopic(ctx, topicName); err != nil {
+			if topic, err = client.CreateTopic(ctx, topicID); err != nil {
 				t.Fatalf("failed to create the topic: %v", err)
 			}
 		}
 
 		// delete the sub if already exists
-		sub := client.Subscription(subName)
+		sub := client.Subscription(subID)
 		ok, err = sub.Exists(ctx)
 		if err != nil {
 			t.Fatalf("failed to check if sub exists: %v", err)
 		}
 		if ok {
-			if err := client.Subscription(subName).Delete(ctx); err != nil {
-				t.Fatalf("failed to cleanup the topic (%q): %v", subName, err)
+			if err := client.Subscription(subID).Delete(ctx); err != nil {
+				t.Fatalf("failed to cleanup the topic (%q): %v", subID, err)
 			}
 		}
 	})
@@ -64,15 +64,15 @@ func setup(t *testing.T) *pubsub.Client {
 
 func TestCreate(t *testing.T) {
 	c := setup(t)
-	if err := create(c, subName, topic); err != nil {
+	if err := create(c, subID, topic); err != nil {
 		t.Fatalf("failed to create a subscription: %v", err)
 	}
-	ok, err := c.Subscription(subName).Exists(context.Background())
+	ok, err := c.Subscription(subID).Exists(context.Background())
 	if err != nil {
 		t.Fatalf("failed to check if sub exists: %v", err)
 	}
 	if !ok {
-		t.Fatalf("got none; want sub = %q", subName)
+		t.Fatalf("got none; want sub = %q", subID)
 	}
 }
 
@@ -88,9 +88,8 @@ outer:
 		if err != nil {
 			t.Fatalf("failed to list subscriptions: %v", err)
 		}
-		s := c.Subscription(subName)
 		for _, sub := range subs {
-			if s.Name() == sub.Name() {
+			if sub.ID() == subID {
 				ok = true
 				break outer
 			}
@@ -100,22 +99,22 @@ outer:
 	if !ok {
 		subNames := make([]string, len(subs))
 		for i, sub := range subs {
-			subNames[i] = sub.Name()
+			subNames[i] = sub.ID()
 		}
-		t.Fatalf("got %+v; want a list with subscription %q", subNames, subName)
+		t.Fatalf("got %+v; want a list with subscription %q", subNames, subID)
 	}
 }
 
 func TestDelete(t *testing.T) {
 	c := setup(t)
-	if err := delete(c, subName); err != nil {
-		t.Fatalf("failed to delete subscription (%q): %v", subName, err)
+	if err := delete(c, subID); err != nil {
+		t.Fatalf("failed to delete subscription (%q): %v", subID, err)
 	}
-	ok, err := c.Subscription(subName).Exists(context.Background())
+	ok, err := c.Subscription(subID).Exists(context.Background())
 	if err != nil {
 		t.Fatalf("failed to check if sub exists: %v", err)
 	}
 	if ok {
-		t.Fatalf("got sub = %q; want none", subName)
+		t.Fatalf("got sub = %q; want none", subID)
 	}
 }
