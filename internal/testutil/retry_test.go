@@ -14,9 +14,7 @@ func TestRetry(t *testing.T) {
 		if r.Attempt == 2 {
 			return
 		}
-
-		// Retry once.
-		r.Retry()
+		r.Fail()
 	})
 }
 
@@ -31,7 +29,7 @@ func TestRetryAttempts(t *testing.T) {
 		if r.Attempt == 5 {
 			return
 		}
-		r.Retry()
+		r.Fail()
 	})
 
 	if attempts != 5 {

@@ -14,81 +14,56 @@ import (
 	"time"
 )
 
-func Flaky(t *testing.T, max int, sleep time.Duration, f func(r *R)) bool {
-	for attempt := 1; attempt <= max; attempt++ {
+// Flaky runs function f for up to maxAttempts times until f returns successfully, and reports whether f was run successfully.
+// It will sleep for the given period between invocations of f.
+// Use the provided *testutil.R instead of a *testing.T from the function.
+func Flaky(t *testing.T, maxAttempts int, sleep time.Duration, f func(r *R)) bool {
+	for attempt := 1; attempt <= maxAttempts; attempt++ {
 		r := &R{t: t, Attempt: attempt, log: &bytes.Buffer{}}
 
-		last := attempt == max
-		done := make(chan bool)
-		go func() {
-			defer close(done)
-			f(r)
-		}()
-		<-done
-		success := !r.retry && !r.fail
+		f(r)
 
-		if success || last || r.fail {
-			state := "FAIL"
-			if success {
-				state = "SUCCESS"
-				if r.log.Len() == 0 {
-					return true
-				}
+		// successful, no need to log anything.
+		if !r.failed {
+			if r.log.Len() != 0 {
+				t.Logf("Success after %d attempts:%s", attempt, r.log.String())
 			}
-			t.Logf("Attempt %d: %s%s", attempt, state, r.log.String())
-			if !success {
-				t.Fail()
-			}
-		}
-		if success {
 			return true
 		}
-		if !r.retry {
-			break
+
+		if attempt == maxAttempts {
+			t.Logf("FAILED after %d attempts:%s", attempt, r.log.String())
+			t.Fail()
 		}
+
 		time.Sleep(sleep)
 	}
 	return false
 }
 
+// R is passed to each run of a flaky test run, manages state and accumulates log statements.
 type R struct {
+	// The number of current attempt.
 	Attempt int
 
-	t     *testing.T
-	retry bool
-	fail  bool
-	log   *bytes.Buffer
+	t      *testing.T
+	failed bool
+	log    *bytes.Buffer
 }
 
-func (r *R) Retry() {
-	r.retry = true
-}
-
-func (r *R) RetryNow() {
-	r.retry = true
-	runtime.Goexit()
-}
-
-func (r *R) FailNow() {
-	r.fail = true
-	runtime.Goexit()
-}
-
+// Fail marks the run as failed, and will retry once the function returns.
 func (r *R) Fail() {
-	r.fail = true
+	r.failed = true
 }
 
-func (r *R) Retryf(s string, v ...interface{}) {
-	r.logf(s, v...)
-	r.Retry()
-}
-
-func (r *R) Fatalf(s string, v ...interface{}) {
+// Failf is equivalent to Logf followed by Fail.
+func (r *R) Failf(s string, v ...interface{}) {
 	r.logf(s, v...)
 	r.Fail()
-	runtime.Goexit()
 }
 
+// Logf formats its arguments and records it in the error log.
+// The text is only printed for the final unsuccessful run or the first successful run.
 func (r *R) Logf(s string, v ...interface{}) {
 	r.logf(s, v...)
 }
