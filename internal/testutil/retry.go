@@ -19,11 +19,10 @@ import (
 // Use the provided *testutil.R instead of a *testing.T from the function.
 func Flaky(t *testing.T, maxAttempts int, sleep time.Duration, f func(r *R)) bool {
 	for attempt := 1; attempt <= maxAttempts; attempt++ {
-		r := &R{t: t, Attempt: attempt, log: &bytes.Buffer{}}
+		r := &R{Attempt: attempt, log: &bytes.Buffer{}}
 
 		f(r)
 
-		// successful, no need to log anything.
 		if !r.failed {
 			if r.log.Len() != 0 {
 				t.Logf("Success after %d attempts:%s", attempt, r.log.String())
@@ -46,7 +45,6 @@ type R struct {
 	// The number of current attempt.
 	Attempt int
 
-	t      *testing.T
 	failed bool
 	log    *bytes.Buffer
 }
