@@ -40,7 +40,7 @@ func main() {
 		log.Fatal(err)
 	}
 	for _, sub := range subs {
-		fmt.Printf("%v\n", sub.Name())
+		fmt.Println(sub)
 	}
 
 	t := createTopicIfNotExists(client)
