@@ -8,18 +8,18 @@ import (
 	"testing"
 
 	"golang.org/x/net/context"
-	"golang.org/x/oauth2/google"
 
-	language "google.golang.org/api/language/v1beta1"
+	language "cloud.google.com/go/language/apiv1beta1"
+	languagepb "google.golang.org/genproto/googleapis/cloud/language/v1beta1"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestSentiment(t *testing.T) {
 	testutil.SystemTest(t)
-	c := newClient(t)
+	ctx, c := newClient(t)
 
-	res, err := analyzeSentiment(c, "I am very happy.")
+	res, err := analyzeSentiment(ctx, c, "I am very happy.")
 	if err != nil {
 		t.Fatalf("got %v, want nil err", err)
 	}
@@ -30,9 +30,9 @@ func TestSentiment(t *testing.T) {
 
 func TestEntity(t *testing.T) {
 	testutil.SystemTest(t)
-	c := newClient(t)
+	ctx, c := newClient(t)
 
-	res, err := analyzeEntities(c, "Homer Simpson likes donuts.")
+	res, err := analyzeEntities(ctx, c, "Homer Simpson likes donuts.")
 	if err != nil {
 		t.Fatalf("got %v, want nil err", err)
 	}
@@ -46,16 +46,16 @@ func TestEntity(t *testing.T) {
 
 func TestSyntax(t *testing.T) {
 	testutil.SystemTest(t)
-	c := newClient(t)
+	ctx, c := newClient(t)
 
-	res, err := analyzeSyntax(c, "If you bend the gopher, his belly folds.")
+	res, err := analyzeSyntax(ctx, c, "If you bend the gopher, his belly folds.")
 	if err != nil {
 		t.Fatalf("got %v, want nil err", err)
 	}
 
 	for _, tok := range res.Tokens {
 		if tok.Lemma == "gopher" {
-			if tok.PartOfSpeech.Tag != "NOUN" {
+			if tok.PartOfSpeech.Tag != languagepb.PartOfSpeech_NOUN {
 				t.Errorf("PartOfSpeech: got %+v, want NOUN", tok.PartOfSpeech.Tag)
 			}
 			return // found
@@ -64,15 +64,11 @@ func TestSyntax(t *testing.T) {
 	t.Errorf("got %+v; want gopher in Tokens", res)
 }
 
-func newClient(t *testing.T) *language.Service {
+func newClient(t *testing.T) (context.Context, *language.Client) {
 	ctx := context.Background()
-	hc, err := google.DefaultClient(ctx, language.CloudPlatformScope)
+	client, err := language.NewClient(ctx)
 	if err != nil {
-		t.Fatalf("DefaultClient: %v", err)
+		t.Fatalf("language.NewClient: %v", err)
 	}
-	client, err := language.New(hc)
-	if err != nil {
-		t.Fatalf("language.New: %v", err)
-	}
-	return client
+	return ctx, client
 }
