@@ -59,6 +59,8 @@ outer:
 }
 
 func TestDelete(t *testing.T) {
+	testutil.SystemTest(t)
+
 	c := setup(t)
 	if err := delete(c, bucketName); err != nil {
 		t.Fatalf("failed to delete bucket (%q): %v", bucketName, err)
