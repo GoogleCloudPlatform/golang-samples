@@ -12,10 +12,12 @@ import (
 	"log"
 	"os"
 
+	// [START imports]
 	"golang.org/x/net/context"
-	"google.golang.org/api/option"
-	"google.golang.org/api/transport"
-	speech "google.golang.org/genproto/googleapis/cloud/speech/v1beta1"
+
+	speech "cloud.google.com/go/speech/apiv1beta1"
+	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1beta1"
+	// [END imports]
 )
 
 const usage = `Usage: caption <audiofile>
@@ -31,47 +33,49 @@ func main() {
 		os.Exit(2)
 	}
 
-	ctx := context.Background()
-	conn, err := transport.DialGRPC(ctx,
-		option.WithEndpoint("speech.googleapis.com:443"),
-		option.WithScopes("https://www.googleapis.com/auth/cloud-platform"),
-	)
+	// Perform the request.
+	resp, err := recognize(os.Args[1])
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer conn.Close()
 
-	c := speech.NewSpeechClient(conn)
-	// TODO(jbd): switch to the bidirectional streaming api
-	// and send data in small chunks.
-	data, err := ioutil.ReadFile(os.Args[1])
+	// [START print]
+	// Print the results.
+	for _, result := range resp.Results {
+		for _, alt := range result.Alternatives {
+			fmt.Printf("\"%v\" (confidence=%3f)\n", alt.Transcript, alt.Confidence)
+		}
+	}
+	// [END print]
+}
+
+func recognize(file string) (*speechpb.SyncRecognizeResponse, error) {
+	ctx := context.Background()
+
+	// [START init]
+	client, err := speech.NewClient(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// [END init]
+
+	// [START request]
+	data, err := ioutil.ReadFile(file)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Send the contents of the audio file with the encoding and
 	// and sample rate information to be transcripted.
-	rresp, err := recognize(ctx, c, &data)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Print the results.
-	for _, result := range rresp.Results {
-		for _, alt := range result.Alternatives {
-			fmt.Printf("\"%v\" (confidence=%3f)\n", alt.Transcript, alt.Confidence)
-		}
-	}
-}
-
-func recognize(ctx context.Context, client speech.SpeechClient, data *[]byte) (*speech.SyncRecognizeResponse, error) {
-	return client.SyncRecognize(ctx, &speech.SyncRecognizeRequest{
-		Config: &speech.RecognitionConfig{
-			Encoding:   speech.RecognitionConfig_LINEAR16,
+	resp, err := client.SyncRecognize(ctx, &speechpb.SyncRecognizeRequest{
+		Config: &speechpb.RecognitionConfig{
+			Encoding:   speechpb.RecognitionConfig_LINEAR16,
 			SampleRate: 16000,
 		},
-		Audio: &speech.RecognitionAudio{
-			AudioSource: &speech.RecognitionAudio_Content{Content: *data},
+		Audio: &speechpb.RecognitionAudio{
+			AudioSource: &speechpb.RecognitionAudio_Content{Content: data},
 		},
 	})
+	// [END request]
+	return resp, err
 }
