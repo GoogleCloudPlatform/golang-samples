@@ -2,7 +2,7 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// Sample pubsub demonstrates use of the google.golang.org/cloud/pubsub package from App Engine flexible environment.
+// Sample pubsub demonstrates use of the cloud.google.com/go/pubsub package from App Engine flexible environment.
 package main
 
 import (

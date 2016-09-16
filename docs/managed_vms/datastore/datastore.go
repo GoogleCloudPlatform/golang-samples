@@ -2,7 +2,7 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// Sample datastore demonstrates use of the google.golang.org/cloud/datastore package from App Engine flexible.
+// Sample datastore demonstrates use of the cloud.google.com/go/datastore package from App Engine flexible.
 package main
 
 import (
