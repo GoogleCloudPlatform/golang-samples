@@ -8,25 +8,28 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 
-	"golang.org/x/net/context"
-
+	// [START imports]
 	"cloud.google.com/go/vision"
+	"golang.org/x/net/context"
+	// [END imports]
 )
 
 // findLabels gets labels from the Vision API for an image at the given file path.
 func findLabels(file string) ([]string, error) {
+	// [START init]
 	ctx := context.Background()
 
 	// Create the client.
 	client, err := vision.NewClient(ctx)
 	if err != nil {
-		log.Fatalf("Could not create client: %v", err)
+		return nil, err
 	}
+	// [END init]
 
+	// [START request]
 	// Open the file.
 	f, err := os.Open(file)
 	if err != nil {
@@ -42,11 +45,14 @@ func findLabels(file string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
+	// [END request]
+	// [START transform]
 	labels := make([]string, 0)
 	for _, annotation := range annotations {
 		labels = append(labels, annotation.Description)
 	}
 	return labels, nil
+	// [END transform]
 }
 
 func main() {
