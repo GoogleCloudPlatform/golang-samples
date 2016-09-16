@@ -47,7 +47,7 @@ func findLabels(file string) ([]string, error) {
 	}
 	// [END request]
 	// [START transform]
-	labels := make([]string, 0)
+	var labels []string
 	for _, annotation := range annotations {
 		labels = append(labels, annotation.Description)
 	}
