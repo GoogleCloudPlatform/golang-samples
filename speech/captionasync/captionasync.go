@@ -2,13 +2,13 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// Command captionasync sends an audio data to the Google Speech API
+// Command captionasync sends audio data to the Google Speech API
 // and pulls the operation status and the transcript.
 package main
 
 import (
 	"context"
-	"flag"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -29,7 +29,6 @@ with a sample rate of 16000.
 `
 
 func main() {
-	flag.Parse()
 	if len(os.Args) < 2 {
 		fmt.Fprintln(os.Stderr, usage)
 		os.Exit(2)
@@ -99,7 +98,7 @@ func wait(client *speech.Client, opName string) (*speechpb.AsyncRecognizeRespons
 			return nil, err
 		}
 		if op.Done {
-			break // operation done
+			break
 		}
 		time.Sleep(500 * time.Millisecond)
 	}
@@ -116,5 +115,5 @@ func wait(client *speech.Client, opName string) (*speechpb.AsyncRecognizeRespons
 	}
 
 	// should never happen.
-	panic("unreachable")
+	return nil, errors.New("no response")
 }
