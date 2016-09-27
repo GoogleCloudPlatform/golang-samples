@@ -30,7 +30,7 @@ go run analyze.go entities "Renee French designed the Go gopher."
 
 Prints something like this:
 
-```json
+```
 entities: <
   name: "Renee French"
   type: PERSON
