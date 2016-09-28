@@ -13,7 +13,6 @@ import (
 	"cloud.google.com/go/logging"
 	"cloud.google.com/go/logging/logadmin"
 	"golang.org/x/net/context"
-	"google.golang.org/api/option"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
@@ -26,7 +25,7 @@ func TestSimplelog(t *testing.T) {
 	if err != nil {
 		t.Fatalf("logging.NewClient: %v", err)
 	}
-	adminClient, err := logadmin.NewClient(ctx, tc.ProjectID, option.WithScopes(logging.AdminScope))
+	adminClient, err := logadmin.NewClient(ctx, tc.ProjectID)
 	if err != nil {
 		t.Fatalf("logadmin.NewClient: %v", err)
 	}

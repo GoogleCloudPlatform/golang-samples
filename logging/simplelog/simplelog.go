@@ -11,14 +11,13 @@ import (
 	"os"
 	"time"
 
+	// [START imports]
 	"golang.org/x/net/context"
 
-	// [START imports]
 	"cloud.google.com/go/logging"
 	"cloud.google.com/go/logging/logadmin"
 
 	"google.golang.org/api/iterator"
-	"google.golang.org/api/option"
 	// [END imports]
 )
 
@@ -40,10 +39,7 @@ func main() {
 		log.Fatalf("Failed to create logging client: %v", err)
 	}
 
-	adminClient, err := logadmin.NewClient(ctx, projID,
-		// Admin scope is required to delete logs.
-		option.WithScopes(logging.AdminScope),
-	)
+	adminClient, err := logadmin.NewClient(ctx, projID)
 	if err != nil {
 		log.Fatalf("Failed to create logadmin client: %v", err)
 	}
@@ -135,7 +131,7 @@ func getEntries(adminClient *logadmin.Client, projID string) ([]*logging.Entry, 
 		// Only get entries from the log-example log.
 		logadmin.Filter(fmt.Sprintf(`logName = "projects/%s/logs/%s"`, projID, name)),
 		// Get most recent entries first.
-		logadmin.OrderBy("timestamp desc"),
+		logadmin.NewestFirst(),
 	)
 
 	// Fetch the most recent 20 entries.
