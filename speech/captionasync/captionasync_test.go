@@ -7,9 +7,10 @@ package main
 import (
 	"testing"
 
+	"golang.org/x/net/context"
+
 	speech "cloud.google.com/go/speech/apiv1beta1"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"golang.org/x/net/context"
 )
 
 func TestRecognize(t *testing.T) {
