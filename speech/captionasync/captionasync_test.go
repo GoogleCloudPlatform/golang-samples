@@ -5,11 +5,11 @@
 package main
 
 import (
-	"context"
 	"testing"
 
 	speech "cloud.google.com/go/speech/apiv1beta1"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"golang.org/x/net/context"
 )
 
 func TestRecognize(t *testing.T) {
