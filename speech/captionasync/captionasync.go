@@ -7,7 +7,6 @@
 package main
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -16,6 +15,8 @@ import (
 	"time"
 
 	"github.com/gogo/protobuf/proto"
+
+	"golang.org/x/net/context"
 
 	speech "cloud.google.com/go/speech/apiv1beta1"
 	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1beta1"

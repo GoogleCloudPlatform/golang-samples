@@ -5,8 +5,9 @@
 package main
 
 import (
-	"context"
 	"testing"
+
+	"golang.org/x/net/context"
 
 	speech "cloud.google.com/go/speech/apiv1beta1"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"

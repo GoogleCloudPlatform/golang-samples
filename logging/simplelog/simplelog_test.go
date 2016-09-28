@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"cloud.google.com/go/preview/logging"
+	"cloud.google.com/go/logging"
+	"cloud.google.com/go/logging/logadmin"
 	"golang.org/x/net/context"
-	"google.golang.org/api/option"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
@@ -21,9 +21,13 @@ func TestSimplelog(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 
-	client, err := logging.NewClient(ctx, tc.ProjectID, option.WithScopes(logging.AdminScope))
+	client, err := logging.NewClient(ctx, tc.ProjectID)
 	if err != nil {
-		t.Fatalf("NewClient: %v", err)
+		t.Fatalf("logging.NewClient: %v", err)
+	}
+	adminClient, err := logadmin.NewClient(ctx, tc.ProjectID)
+	if err != nil {
+		t.Fatalf("logadmin.NewClient: %v", err)
 	}
 	defer func() {
 		if err := client.Close(); err != nil {
@@ -32,7 +36,7 @@ func TestSimplelog(t *testing.T) {
 	}()
 
 	defer func() {
-		if err := deleteLog(client); err != nil {
+		if err := deleteLog(adminClient); err != nil {
 			t.Errorf("deleteLog: %v", err)
 		}
 	}()
@@ -46,7 +50,7 @@ func TestSimplelog(t *testing.T) {
 
 	time.Sleep(5 * time.Second)
 
-	entries, err := getEntries(client, tc.ProjectID)
+	entries, err := getEntries(adminClient, tc.ProjectID)
 	if err != nil {
 		t.Fatalf("getEntries: %v", err)
 	}
