@@ -6,11 +6,11 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"os"
 
+	"golang.org/x/net/context"
 	"google.golang.org/api/iterator"
 
 	"cloud.google.com/go/logging/logadmin"
@@ -43,7 +43,7 @@ func main() {
 			log.Fatalf("Could not list log sinks: %v", err)
 		}
 		for _, sink := range sinks {
-			fmt.Printf("Sink: %v\n", sink.ID)
+			fmt.Printf("Sink: %v\n", sink)
 		}
 	case "create":
 		if err := createSink(client); err != nil {
@@ -62,11 +62,11 @@ func main() {
 	}
 }
 
-func listSinks(client *logadmin.Client) ([]*logadmin.Sink, error) {
+func listSinks(client *logadmin.Client) ([]string, error) {
 	// [START list_log_sinks]
 	ctx := context.Background()
 
-	var sinks []*logadmin.Sink
+	var sinks []string
 	it := client.Sinks(ctx)
 	for {
 		sink, err := it.Next()
@@ -76,7 +76,7 @@ func listSinks(client *logadmin.Client) ([]*logadmin.Sink, error) {
 		if err != nil {
 			return nil, err
 		}
-		sinks = append(sinks, sink)
+		sinks = append(sinks, sink.ID)
 	}
 	// [END list_log_sinks]
 	return sinks, nil
