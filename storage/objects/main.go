@@ -83,11 +83,10 @@ func write(client *storage.Client, bucket, object string) error {
 	if err != nil {
 		return err
 	}
+	defer f.Close()
+
 	wc := client.Bucket(bucket).Object(object).NewWriter(ctx)
 	if _, err = io.Copy(wc, f); err != nil {
-		return err
-	}
-	if err := f.Close(); err != nil {
 		return err
 	}
 	if err := wc.Close(); err != nil {
@@ -104,11 +103,10 @@ func read(client *storage.Client, bucket, object string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rc.Close()
+
 	data, err := ioutil.ReadAll(rc)
 	if err != nil {
-		return nil, err
-	}
-	if err := rc.Close(); err != nil {
 		return nil, err
 	}
 	return data, nil

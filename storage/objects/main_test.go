@@ -5,13 +5,13 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"testing"
 	"time"
 
 	"cloud.google.com/go/storage"
+	"golang.org/x/net/context"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
