@@ -5,6 +5,8 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
+	"time"
 
 	"golang.org/x/net/context"
 
@@ -126,5 +128,26 @@ func deleteObjectACL(client *storage.Client, bucket, object string) error {
 	if err := acl.Delete(ctx, storage.AllAuthenticatedUsers); err != nil {
 		return err
 	}
+	return nil
+}
+
+func signedURL(client *storage.Client, bucket, object string) error {
+	// Download a p12 service account private key from the Google Developers Console.
+	// And convert it to PEM by running the command below:
+	//	$ openssl pkcs12 -in key.p12 -passin pass:notasecret -out my-private-key.pem -nodes
+	pkey, err := ioutil.ReadFile("my-private-key.pem")
+	if err != nil {
+		return err
+	}
+	url, err := storage.SignedURL(bucket, object, &storage.SignedURLOptions{
+		GoogleAccessID: "xxx@developer.gserviceaccount.com",
+		PrivateKey:     pkey,
+		Method:         "GET",
+		Expires:        time.Now().Add(48 * time.Hour),
+	})
+	if err != nil {
+		return err
+	}
+	fmt.Println(url)
 	return nil
 }
