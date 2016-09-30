@@ -98,6 +98,8 @@ func TestObjects(t *testing.T) {
 	if err := client.Bucket(bucket).Delete(ctx); err != nil {
 		t.Fatalf("cleanup of bucket failed: %v", err)
 	}
+
+	time.Sleep(4 * time.Second) // For eventual consistency.
 	if err := delete(client, dstBucket, object+"-copy"); err != nil {
 		t.Errorf("cannot to delete copy object: %v", err)
 	}
