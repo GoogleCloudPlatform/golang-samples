@@ -11,6 +11,8 @@ import (
 	"cloud.google.com/go/storage"
 )
 
+// TODO(jbd): Add START and END tags once the names are finalized.
+
 func addBucketACL(client *storage.Client, bucket string) error {
 	ctx := context.Background()
 

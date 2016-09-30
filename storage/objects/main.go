@@ -170,12 +170,12 @@ func copyToBucket(client *storage.Client, dstBucket, srcBucket, srcObject string
 
 func delete(client *storage.Client, bucket, object string) error {
 	ctx := context.Background()
-	// [START download_file]
+	// [START delete_file]
 	o := client.Bucket(bucket).Object(object)
 	if err := o.Delete(ctx); err != nil {
 		return err
 	}
-	// [END download_file]
+	// [END delete_file]
 	return nil
 }
 
