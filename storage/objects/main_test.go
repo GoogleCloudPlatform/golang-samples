@@ -59,6 +59,36 @@ func TestObjects(t *testing.T) {
 	if err != nil {
 		t.Errorf("cannot copy object to bucket: %v", err)
 	}
+	if err := addBucketACL(client, bucket); err != nil {
+		t.Errorf("cannot add bucket acl: %v", err)
+	}
+	if err := addDefaultBucketACL(client, bucket); err != nil {
+		t.Errorf("cannot add bucket deafult acl: %v", err)
+	}
+	if err := bucketACL(client, bucket); err != nil {
+		t.Errorf("cannot get bucket acl: %v", err)
+	}
+	if err := bucketACLFiltered(client, bucket, storage.AllAuthenticatedUsers); err != nil {
+		t.Errorf("cannot filter bucket acl: %v", err)
+	}
+	if err := deleteDefaultBucketACL(client, bucket); err != nil {
+		t.Errorf("cannot delete bucket default acl: %v", err)
+	}
+	if err := deleteBucketACL(client, bucket); err != nil {
+		t.Errorf("cannot delete bucket acl: %v", err)
+	}
+	if err := addObjectACL(client, bucket, object); err != nil {
+		t.Errorf("cannot add object acl: %v", err)
+	}
+	if err := objectACL(client, bucket, object); err != nil {
+		t.Errorf("cannot get object acl: %v", err)
+	}
+	if err := objectACLFiltered(client, bucket, object, storage.AllAuthenticatedUsers); err != nil {
+		t.Errorf("cannot filter object acl: %v", err)
+	}
+	if err := deleteObjectACL(client, bucket, object); err != nil {
+		t.Errorf("cannot delete object acl: %v", err)
+	}
 	if err := delete(client, bucket, object); err != nil {
 		t.Errorf("cannot to delete object: %v", err)
 	}
