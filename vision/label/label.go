@@ -6,59 +6,53 @@
 package main
 
 import (
-	"encoding/base64"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
+	// [START imports]
+	"cloud.google.com/go/vision"
 	"golang.org/x/net/context"
-	"golang.org/x/oauth2/google"
-
-	"google.golang.org/api/vision/v1"
+	// [END imports]
 )
 
 // findLabels gets labels from the Vision API for an image at the given file path.
 func findLabels(file string) ([]string, error) {
+	// [START init]
 	ctx := context.Background()
 
-	// Authenticate to generate a vision service.
-	client, err := google.DefaultClient(ctx, vision.CloudPlatformScope)
+	// Create the client.
+	client, err := vision.NewClient(ctx)
 	if err != nil {
 		return nil, err
 	}
-	service, err := vision.New(client)
+	// [END init]
+
+	// [START request]
+	// Open the file.
+	f, err := os.Open(file)
+	if err != nil {
+		return nil, err
+	}
+	image, err := vision.NewImageFromReader(f)
 	if err != nil {
 		return nil, err
 	}
 
-	// Read the image.
-	b, err := ioutil.ReadFile(file)
+	// Perform the request.
+	annotations, err := client.DetectLabels(ctx, image, 10)
 	if err != nil {
 		return nil, err
 	}
-
-	// Construct a label request, encoding the image in base64.
-	req := &vision.AnnotateImageRequest{
-		Image: &vision.Image{
-			Content: base64.StdEncoding.EncodeToString(b),
-		},
-		Features: []*vision.Feature{{Type: "LABEL_DETECTION"}},
-	}
-	batch := &vision.BatchAnnotateImagesRequest{
-		Requests: []*vision.AnnotateImageRequest{req},
-	}
-	res, err := service.Images.Annotate(batch).Do()
-	if err != nil {
-		return nil, err
-	}
-
-	labels := make([]string, 0)
-	for _, annotation := range res.Responses[0].LabelAnnotations {
+	// [END request]
+	// [START transform]
+	var labels []string
+	for _, annotation := range annotations {
 		labels = append(labels, annotation.Description)
 	}
 	return labels, nil
+	// [END transform]
 }
 
 func main() {

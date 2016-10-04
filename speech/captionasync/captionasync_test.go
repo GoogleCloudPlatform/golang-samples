@@ -7,20 +7,35 @@ package main
 import (
 	"testing"
 
+	"golang.org/x/net/context"
+
+	speech "cloud.google.com/go/speech/apiv1beta1"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestRecognize(t *testing.T) {
 	testutil.SystemTest(t)
 
-	resp, err := recognize("./quit.raw")
+	ctx := context.Background()
+	client, err := speech.NewClient(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	opName, err := send(client, "./quit.raw")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if opName == "" {
+		t.Fatal("got no op name; want one")
+	}
+	resp, err := wait(client, opName)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if len(resp.Results) == 0 {
 		t.Fatal("got no results; want at least one")
 	}
-
 	result := resp.Results[0]
 	if len(result.Alternatives) < 1 {
 		t.Fatal("got no alternatives; want at least one")
