@@ -15,7 +15,7 @@ import (
 	"cloud.google.com/go/datastore"
 )
 
-type Entity struct {
+type Task struct {
 	Value string
 }
 
@@ -32,20 +32,20 @@ func main() {
 	}
 
 	// The kind of the entity to retrieve
-	kind := "Person"
+	kind := "Task"
 	// The name/ID of the entity to retrieve
-	name := "Bob"
+	name := "sampletask1"
 	// The Datastore key for the entity
 	key := datastore.NewKey(ctx, kind, name, 0, nil)
 
-	entity := new(Entity)
+	task := new(Task)
 
-	// Retrieves the entity
-	if err := client.Get(ctx, key, entity); err != nil {
-		log.Fatalf("Failed to get entity: %v", err)
+	// Retrieves the task
+	if err := client.Get(ctx, key, task); err != nil {
+		log.Fatalf("Failed to get task: %v", err)
 	}
 
-	fmt.Printf("Fetched entity: %v", key.String())
+	fmt.Printf("Fetched task: %v", key.String())
 }
 
 // [END datastore_quickstart]
