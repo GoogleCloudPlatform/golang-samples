@@ -16,7 +16,7 @@ import (
 )
 
 type Task struct {
-	Value string
+	Description string
 }
 
 func main() {
@@ -31,21 +31,23 @@ func main() {
 		log.Fatalf("Failed to create client: %v", err)
 	}
 
-	// The kind of the entity to retrieve
+	// The kind for the new entity
 	kind := "Task"
-	// The name/ID of the entity to retrieve
+	// The name/ID for the new entity
 	name := "sampletask1"
-	// The Datastore key for the entity
-	key := datastore.NewKey(ctx, kind, name, 0, nil)
+	// The Cloud Datastore key for the new entity
+	taskKey := datastore.NewKey(ctx, kind, name, 0, nil)
 
+	// Prepares the new entity
 	task := new(Task)
+	task.Description = "Buy milk"
 
-	// Retrieves the task
-	if err := client.Get(ctx, key, task); err != nil {
-		log.Fatalf("Failed to get task: %v", err)
+	// Saves the entity
+	if _, err := client.Put(ctx, taskKey, task); err != nil {
+		log.Fatalf("Failed to save task: %v", err)
 	}
 
-	fmt.Printf("Fetched task: %v", key.String())
+	fmt.Printf("Saved %v: %v", taskKey.String(), task.Description)
 }
 
 // [END datastore_quickstart]
