@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // [START datastore_quickstart]
-// Sample datastore_quickstart fetches an entity from Google Cloud Datastore.
+// Sample datastore_quickstart creates an entity in Google Cloud Datastore.
 package main
 
 import (
