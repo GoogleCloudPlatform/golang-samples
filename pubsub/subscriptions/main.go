@@ -16,6 +16,7 @@ import (
 	"golang.org/x/net/context"
 
 	"cloud.google.com/go/pubsub"
+	"google.golang.org/api/iterator"
 	// [END imports]
 )
 
@@ -69,7 +70,7 @@ func list(client *pubsub.Client) ([]*pubsub.Subscription, error) {
 	it := client.Subscriptions(ctx)
 	for {
 		s, err := it.Next()
-		if err == pubsub.Done {
+		if err == iterator.Done {
 			break
 		}
 		if err != nil {
@@ -105,7 +106,7 @@ func pullMsgs(client *pubsub.Client, name string, topic *pubsub.Topic) error {
 	// Consume 10 messages.
 	for i := 0; i < 10; i++ {
 		msg, err := it.Next()
-		if err == pubsub.Done {
+		if err == iterator.Done {
 			break
 		}
 		if err != nil {
