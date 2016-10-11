@@ -144,7 +144,7 @@ func move(client *storage.Client, bucket, object string) error {
 	src := client.Bucket(bucket).Object(object)
 	dst := client.Bucket(bucket).Object(dstName)
 
-	if _, err := src.CopyTo(ctx, dst, nil); err != nil {
+	if _, err := dst.CopierFrom(src).Run(ctx); err != nil {
 		return err
 	}
 	if err := src.Delete(ctx); err != nil {
@@ -161,7 +161,7 @@ func copyToBucket(client *storage.Client, dstBucket, srcBucket, srcObject string
 	src := client.Bucket(srcBucket).Object(srcObject)
 	dst := client.Bucket(dstBucket).Object(dstObject)
 
-	if _, err := src.CopyTo(ctx, dst, nil); err != nil {
+	if _, err := dst.CopierFrom(src).Run(ctx); err != nil {
 		return err
 	}
 	// [END copy_file]
