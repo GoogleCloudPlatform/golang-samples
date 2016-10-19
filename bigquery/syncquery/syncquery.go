@@ -35,7 +35,7 @@ func main() {
 	}
 }
 
-// Query returns a slice of the reults of a query.
+// Query returns a slice of the results of a query.
 func Query(proj, q string) ([]bigquery.ValueList, error) {
 	ctx := context.Background()
 
