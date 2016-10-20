@@ -16,4 +16,3 @@ env_variables:
 beta_settings:
     cloud_sql_instances: INSTANCE_CONNECTION_NAME
 #[END cloudsql_settings]
-
