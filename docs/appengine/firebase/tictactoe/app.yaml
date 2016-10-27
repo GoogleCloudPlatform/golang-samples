@@ -1,0 +1,13 @@
+runtime: go
+api_version: go1
+
+handlers:
+- url: /static
+  static_dir: static
+
+- url: /.*
+  script: _go_app
+  login: required
+
+env_variables:
+  FIREBASE_BASE: https://YOUR-PROJECT-ID.firebaseio.com
