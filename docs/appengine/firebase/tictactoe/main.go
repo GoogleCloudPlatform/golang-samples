@@ -111,7 +111,6 @@ func createToken(ctx context.Context, channelID string) (string, error) {
 	}
 	iat := time.Now().Unix()
 	jwt := map[string]interface{}{
-		"alg": "RS256",
 		"iss": iss,
 		"sub": iss,
 		"aud": "https://identitytoolkit.googleapis.com/google.identity.identitytoolkit.v1.IdentityToolkit",
