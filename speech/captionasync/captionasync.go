@@ -82,7 +82,7 @@ func send(client *speech.Client, filename string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return op.Name, nil
+	return op.Name(), nil
 }
 
 func wait(client *speech.Client, opName string) (*speechpb.AsyncRecognizeResponse, error) {
