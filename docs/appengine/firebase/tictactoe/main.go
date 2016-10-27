@@ -295,5 +295,5 @@ func handleError(w http.ResponseWriter, r *http.Request, message string, err err
 	}
 	ctx := appengine.NewContext(r)
 	http.Error(w, msg, 500)
-	log.Errorf(ctx, "%s", msg, err)
+	log.Errorf(ctx, "%s", msg)
 }
