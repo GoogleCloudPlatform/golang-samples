@@ -98,7 +98,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		FirebaseConfig: template.HTML(config),
 		Token:          tok,
 		GameKey:        gameKey,
-		GameLink:       r.URL.Host + "/?g=" + gameKey,
+		GameLink:       r.URL.Scheme + "://" + r.URL.Host + "/?g=" + gameKey,
 		Me:             u.ID,
 		ChannelID:      channelID,
 		InitialMessage: game,
