@@ -27,7 +27,8 @@ func NewGame() *Game {
 	return &g
 }
 
-func (g *Game) CheckWin() (winner string, win bool) {
+// CheckWin returns "X" or "O", depending on who won. It will be empty if the game was a draw.
+func (g *Game) CheckWin() (winner string, gameOver bool) {
 	// Check horizontal/vertical
 	for i := 0; i < 3; i++ {
 		if g.Board[i+0] != ' ' && g.Board[i+0] == g.Board[i+3] && g.Board[i+3] == g.Board[i+6] {

@@ -6,21 +6,13 @@
 package tictactoe
 
 import (
-	"encoding/base64"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"html/template"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"strconv"
-	"time"
-
-	"github.com/zabawaba99/firego"
 
 	"golang.org/x/net/context"
-	"golang.org/x/oauth2/google"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
@@ -109,68 +101,18 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func createToken(ctx context.Context, channelID string) (string, error) {
-	iss, err := appengine.ServiceAccount(ctx)
-	if err != nil {
-		return "", err
-	}
-	iat := time.Now().Unix()
-	jwt := map[string]interface{}{
-		"iss": iss,
-		"sub": iss,
-		"aud": "https://identitytoolkit.googleapis.com/google.identity.identitytoolkit.v1.IdentityToolkit",
-		"iat": iat,
-		"exp": iat + 3600, // 1 hour
-		"uid": channelID,
-	}
-	body, err := json.Marshal(jwt)
-	if err != nil {
-		return "", err
-	}
-	header := base64.StdEncoding.EncodeToString([]byte(`{"typ":"JWT","alg":"RS256"}`))
-	payload := append([]byte(header), byte('.'))
-	payload = append(payload, []byte(base64.StdEncoding.EncodeToString(body))...)
-	_, sig, err := appengine.SignBytes(ctx, payload)
-	if err != nil {
-		return "", err
-	}
-	return fmt.Sprintf("%s.%s", payload, base64.StdEncoding.EncodeToString(sig)), nil
-}
-
 func gameFromRequest(r *http.Request) (*Game, error) {
 	ctx := appengine.NewContext(r)
 
 	k, err := datastore.DecodeKey(r.FormValue("g"))
 	if err != nil {
-		return nil, fmt.Errorf("Invalid game ID: %v", err)
+		return nil, fmt.Errorf("invalid game ID: %v", err)
 	}
 	var g Game
 	if err := datastore.Get(ctx, k, &g); err != nil {
 		return nil, err
 	}
 	return &g, nil
-}
-
-func firebase(ctx context.Context) (*firego.Firebase, error) {
-	hc, err := google.DefaultClient(ctx,
-		"https://www.googleapis.com/auth/firebase.database",
-		"https://www.googleapis.com/auth/userinfo.email",
-	)
-	if err != nil {
-		return nil, err
-	}
-	base := os.Getenv("FIREBASE_BASE")
-	if base == "" {
-		// Check the environment variable for the base firebase URL.
-		//
-		// The config should look like:
-		//
-		// env_variables:
-		//    FIREBASE_BASE: https://app-id.firebase.io.com
-		//
-		return nil, errors.New("Missing FIREBASE_BASE environment variable.")
-	}
-	return firego.New(base, hc), nil
 }
 
 func moveHandler(w http.ResponseWriter, r *http.Request) {
@@ -208,11 +150,12 @@ func moveHandler(w http.ResponseWriter, r *http.Request) {
 	g.MoveX = !g.MoveX
 
 	if winner, isWon := g.CheckWin(); isWon {
-		if winner == "O" {
+		switch winner {
+		case "O":
 			g.Winner = g.UserO
-		} else if winner == "X" {
+		case "X":
 			g.Winner = g.UserX
-		} else {
+		default:
 			g.Winner = "No one"
 		}
 		g.WinningBoard = g.Board // TODO: implement patterns
@@ -234,6 +177,9 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fb, err := firebase(ctx)
+	if err != nil {
+		log.Errorf(ctx, "getFirebase: %v", err)
+	}
 
 	channelID := user.Current(ctx).ID + game.K.Encode()
 
@@ -274,7 +220,7 @@ func sendUpdate(ctx context.Context, g *Game) {
 		if err := chans.Child(channelID).Set(g); err != nil {
 			log.Errorf(ctx, "Updating UserO (%s): %v", channelID, err)
 		} else {
-			log.Infof(ctx, "Update O sent.")
+			log.Debugf(ctx, "Update O sent.")
 		}
 	}
 
@@ -283,17 +229,16 @@ func sendUpdate(ctx context.Context, g *Game) {
 		if err := chans.Child(channelID).Set(g); err != nil {
 			log.Errorf(ctx, "Updating UserX (%s): %v", channelID, err)
 		} else {
-			log.Infof(ctx, "Update X sent.")
+			log.Debugf(ctx, "Update X sent.")
 		}
 	}
 }
 
 func handleError(w http.ResponseWriter, r *http.Request, message string, err error) {
-	msg := message
 	if err != nil {
-		msg = fmt.Sprintf("%s: %v", message, err)
+		message = fmt.Sprintf("%s: %v", message, err)
 	}
 	ctx := appengine.NewContext(r)
-	http.Error(w, msg, 500)
-	log.Errorf(ctx, "%s", msg)
+	http.Error(w, message, 500)
+	log.Errorf(ctx, "%s", message)
 }
