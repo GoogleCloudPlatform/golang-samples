@@ -30,38 +30,31 @@ go run analyze.go entities "Renee French designed the Go gopher."
 
 Prints something like this:
 
-```json
-{
-    "entities": [
-        {
-            "mentions": [
-                {
-                    "text": {
-                        "content": "Renee French"
-                    }
-                }
-            ],
-            "name": "Renee French",
-            "salience": 0.51491237,
-            "type": "PERSON"
-        },
-        {
-            "mentions": [
-                {
-                    "text": {
-                        "beginOffset": 26,
-                        "content": "Go"
-                    }
-                }
-            ],
-            "metadata": {
-                "wikipedia_url": "http://en.wikipedia.org/wiki/Go_(programming_language)"
-            },
-            "name": "Go",
-            "salience": 0.31268582,
-            "type": "OTHER"
-        }
-    ],
-    "language": "en"
-}
+```
+entities: <
+  name: "Renee French"
+  type: PERSON
+  salience: 0.4693242
+  mentions: <
+    text: <
+      content: "Renee French"
+    >
+  >
+>
+entities: <
+  name: "Go"
+  type: ORGANIZATION
+  metadata: <
+    key: "wikipedia_url"
+    value: "http://en.wikipedia.org/wiki/Go_(programming_language)"
+  >
+  salience: 0.34126133
+  mentions: <
+    text: <
+      content: "Go"
+      begin_offset: 26
+    >
+  >
+>
+language: "en"
 ```
