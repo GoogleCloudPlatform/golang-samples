@@ -15,14 +15,13 @@ import (
 func TestSimpleApp(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	rows, err := Query(tc.ProjectID)
+	rows, err := query(tc.ProjectID)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	var b bytes.Buffer
-	err = PrintResults(&b, rows)
-	if err != nil {
+	if err := printResults(&b, rows); err != nil {
 		t.Fatal(err)
 	}
 

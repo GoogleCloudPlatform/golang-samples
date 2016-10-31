@@ -3,7 +3,6 @@
 // license that can be found in the LICENSE file.
 
 // Command simpleapp queries the Shakespeare sample dataset in Google BigQuery.
-// [START bigquery_simple_app_all]
 package main
 
 import (
@@ -25,19 +24,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	rows, err := Query(proj)
+	rows, err := query(proj)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatal(err)
 	}
-	err = PrintResults(os.Stdout, rows)
-	if err != nil {
-		log.Fatalln(err)
+	if err := printResults(os.Stdout, rows); err != nil {
+		log.Fatal(err)
 	}
 }
 
-// Query returns a slice of the results of a query.
-// [START bigquery_simple_app_query]
-func Query(proj string) (*bigquery.RowIterator, error) {
+// query returns a slice of the results of a query.
+func query(proj string) (*bigquery.RowIterator, error) {
 	ctx := context.Background()
 
 	client, err := bigquery.NewClient(ctx, proj)
@@ -46,21 +43,18 @@ func Query(proj string) (*bigquery.RowIterator, error) {
 	}
 
 	query := client.Query(
-		"SELECT " +
-			"APPROX_TOP_COUNT(corpus, 10) as title, " +
-			"COUNT(*) as unique_words " +
-			"FROM `publicdata.samples.shakespeare`;")
+		`SELECT
+		 APPROX_TOP_COUNT(corpus, 10) as title,
+		 COUNT(*) as unique_words
+		 FROM ` + "`publicdata.samples.shakespeare`;")
 	// Use standard SQL syntax for queries.
 	// See: https://cloud.google.com/bigquery/sql-reference/
 	query.QueryConfig.UseStandardSQL = true
 	return query.Read(ctx)
 }
 
-// [END bigquery_simple_app_query]
-
-// PrintResults prints results of a query to the Shakespeare dataset.
-// [START bigquery_simple_app_print]
-func PrintResults(w io.Writer, iter *bigquery.RowIterator) error {
+// printResults prints results from a query to the Shakespeare dataset.
+func printResults(w io.Writer, iter *bigquery.RowIterator) error {
 	for {
 		var row bigquery.ValueList
 		err := iter.Next(&row)
@@ -71,8 +65,6 @@ func PrintResults(w io.Writer, iter *bigquery.RowIterator) error {
 			return err
 		}
 
-		// TODO: use ValueLoader to load a struct instead of using the ValueList directly.
-		// See: https://github.com/GoogleCloudPlatform/google-cloud-go/issues/399
 		fmt.Fprintln(w, "titles:")
 		ts := row[0].([]bigquery.Value)
 		for _, t := range ts {
@@ -86,6 +78,3 @@ func PrintResults(w io.Writer, iter *bigquery.RowIterator) error {
 		fmt.Fprintf(w, "total unique words: %d\n", words)
 	}
 }
-
-// [END bigquery_simple_app_print]
-// [END bigquery_simple_app_all]
