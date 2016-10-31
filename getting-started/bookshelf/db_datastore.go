@@ -45,7 +45,6 @@ func (db *datastoreDB) Close() {
 }
 
 func (db *datastoreDB) datastoreKey(id int64) *datastore.Key {
-	ctx := context.Background()
 	return datastore.IDKey("Book", id, nil)
 }
 
