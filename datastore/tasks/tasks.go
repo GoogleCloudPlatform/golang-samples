@@ -123,7 +123,7 @@ func AddTask(ctx context.Context, client *datastore.Client, desc string) (*datas
 		Desc:    desc,
 		Created: time.Now(),
 	}
-	key := datastore.NewIncompleteKey(ctx, "Task", nil)
+	key := datastore.IncompleteKey("Task", nil)
 	return client.Put(ctx, key, task)
 }
 
@@ -133,7 +133,7 @@ func AddTask(ctx context.Context, client *datastore.Client, desc string) (*datas
 // MarkDone marks the task done with the given ID.
 func MarkDone(ctx context.Context, client *datastore.Client, taskID int64) error {
 	// Create a key using the given integer ID.
-	key := datastore.NewKey(ctx, "Task", "", taskID, nil)
+	key := datastore.IDKey("Task", taskID, nil)
 
 	// In a transaction load each task, set done to true and store.
 	_, err := client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
@@ -175,7 +175,7 @@ func ListTasks(ctx context.Context, client *datastore.Client) ([]*Task, error) {
 // [START delete_entity]
 // DeleteTask deletes the task with the given ID.
 func DeleteTask(ctx context.Context, client *datastore.Client, taskID int64) error {
-	return client.Delete(ctx, datastore.NewKey(ctx, "Task", "", taskID, nil))
+	return client.Delete(ctx, datastore.IDKey("Task", taskID, nil))
 }
 
 // [END delete_entity]
