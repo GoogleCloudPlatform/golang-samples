@@ -13,6 +13,7 @@ import (
 
 	"cloud.google.com/go/datastore"
 	"golang.org/x/net/context"
+	"google.golang.org/api/iterator"
 )
 
 type Task struct {
@@ -280,7 +281,7 @@ func ExampleQuery_basic() {
 	for {
 		var task Task
 		_, err := it.Next(&task)
-		if err == datastore.Done {
+		if err == iterator.Done {
 			break
 		}
 		if err != nil {
@@ -364,7 +365,7 @@ func ExampleQuery_Project() {
 	it := client.Run(ctx, query)
 	for {
 		var task Task
-		if _, err := it.Next(&task); err == datastore.Done {
+		if _, err := it.Next(&task); err == iterator.Done {
 			break
 		} else if err != nil {
 			log.Fatal(err)
@@ -509,7 +510,7 @@ func ExampleIterator_Cursor() {
 		tasks = append(tasks, task)
 		_, err = it.Next(&task)
 	}
-	if err != datastore.Done {
+	if err != iterator.Done {
 		log.Fatalf("Failed fetching results: %v", err)
 	}
 
