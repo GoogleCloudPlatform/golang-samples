@@ -5,6 +5,7 @@
 // Package display is a driver for Grove LCD RGB backlight display.
 //
 // More information about the display is at http://wiki.seeed.cc/Grove-LCD_RGB_Backlight/.
+// This package is ported from a reference Python package, see https://goo.gl/VI59c8.
 package display
 
 import (
@@ -51,6 +52,9 @@ const (
 	// addresses
 	lcdAddr = 0x3e
 	rgbAddr = 0x62
+
+	lcdFn  = 0x08
+	lcdTxt = 0x40
 )
 
 // Device represents an Grove LCD RGB Backlight device.
@@ -71,23 +75,16 @@ func Open(o driver.Opener) (*Device, error) {
 		return nil, fmt.Errorf("cannot open RGB device: %v", err)
 	}
 
-	time.Sleep(50 * time.Millisecond) // wake up time after opening
-
-	// LCD function set, try a few times
-	for i := 0; i < 3; i++ {
-		if err := lcd.Write([]byte{0x80, functionSet | displayOn | line1 | dots10}); err != nil {
-			return nil, err
-		}
-		time.Sleep(5 * time.Millisecond)
-	}
-
-	// direction: left to right
-	if err := lcd.Write([]byte{0x80, displayControl | displayOn}); err != nil {
+	// two lines, regular 10 dots font.
+	if err := lcd.Write([]byte{lcdFn, functionSet | displayOn | line2 | dots10}); err != nil {
 		return nil, err
 	}
-
+	// direction: left to right
+	if err := lcd.Write([]byte{lcdFn, displayControl | displayOn}); err != nil {
+		return nil, err
+	}
 	// display on
-	if err := lcd.Write([]byte{0x80, entryModeSet | entryLeft | entryShiftDecrement}); err != nil {
+	if err := lcd.Write([]byte{lcdFn, entryModeSet | entryLeft | entryShiftDecrement}); err != nil {
 		return nil, err
 	}
 
@@ -102,13 +99,13 @@ func (d *Device) SetText(text string) error {
 	time.Sleep(10 * time.Millisecond)
 
 	// num lines = 2
-	if err := d.lcd.Write([]byte{0x80, 0x20 | 0x08}); err != nil {
+	if err := d.lcd.Write([]byte{lcdFn, 0x20 | 0x08}); err != nil {
 		return err
 	}
 	time.Sleep(10 * time.Millisecond)
 
 	// return home
-	if err := d.lcd.Write([]byte{0x80, returnHome}); err != nil {
+	if err := d.lcd.Write([]byte{lcdFn, returnHome}); err != nil {
 		return err
 	}
 	time.Sleep(10 * time.Millisecond)
@@ -116,21 +113,23 @@ func (d *Device) SetText(text string) error {
 	var row int
 	var col int
 	for _, c := range text {
+		// If current col is larger than the width of display
+		// or there is a new line, break the line.
 		if c == '\n' || col == 16 {
 			col = 0
 			row++
 			if row == 2 {
 				return nil
 			}
-			// new line
-			if err := d.lcd.Write([]byte{0x80, 0xc0}); err != nil {
+			// new line command
+			if err := d.lcd.Write([]byte{lcdFn, 0xc0}); err != nil {
 				return err
 			}
 			if c == '\n' {
 				continue
 			}
 		}
-		if err := d.lcd.Write([]byte{0x40, byte(c)}); err != nil {
+		if err := d.lcd.Write([]byte{lcdTxt, byte(c)}); err != nil {
 			return err
 		}
 		col++
