@@ -16,6 +16,7 @@ import (
 	"golang.org/x/net/context"
 
 	"cloud.google.com/go/storage"
+	"google.golang.org/api/iterator"
 )
 
 func main() {
@@ -72,7 +73,7 @@ func list(client *storage.Client, projectID string) ([]string, error) {
 	it := client.Buckets(ctx, projectID)
 	for {
 		battrs, err := it.Next()
-		if err == storage.Done {
+		if err == iterator.Done {
 			break
 		}
 		if err != nil {

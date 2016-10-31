@@ -52,7 +52,7 @@ before_install:
     export PATH="$PATH:$PWD/google-cloud-sdk/bin";
     ./testing/travis/configure_gcloud.bash;
   fi
-- '! grep -R ''"context"$\'' * || { echo "Use golang.org/x/net/context"; false; }'
+- '! grep -R ''"context"$'' * || { echo "Use golang.org/x/net/context"; false; }'
 - go vet ./...
 - diff -u <(echo -n) <(gofmt -d -s .)
 
@@ -61,5 +61,7 @@ install:
 - go get -u -v $(go list -f '{{join .Imports "\n"}}' ./... | sort | uniq | grep -v golang-samples)
 
 script:
-- go test -v ./...
-- ./gimmeproj -project golang-samples-tests done $GOLANG_SAMPLES_PROJECT_ID
+- go test -v ./...;
+- if [ $SYSTEM_TESTS ]; then
+    ./gimmeproj -project golang-samples-tests done $GOLANG_SAMPLES_PROJECT_ID;
+  fi

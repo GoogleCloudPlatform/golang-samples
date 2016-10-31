@@ -11,6 +11,7 @@ import (
 	"os"
 
 	"cloud.google.com/go/bigquery"
+	"google.golang.org/api/iterator"
 
 	"golang.org/x/net/context"
 )
@@ -35,7 +36,7 @@ func main() {
 	}
 }
 
-// Query returns a slice of the reults of a query.
+// Query returns a slice of the results of a query.
 func Query(proj, q string) ([]bigquery.ValueList, error) {
 	ctx := context.Background()
 
@@ -52,13 +53,15 @@ func Query(proj, q string) ([]bigquery.ValueList, error) {
 
 	var rows []bigquery.ValueList
 
-	for iter.Next(ctx) {
+	for {
 		var row bigquery.ValueList
-		if err := iter.Get(&row); err != nil {
+		err := iter.Next(&row)
+		if err == iterator.Done {
+			return rows, nil
+		}
+		if err != nil {
 			return nil, err
 		}
 		rows = append(rows, row)
 	}
-
-	return rows, iter.Err()
 }
