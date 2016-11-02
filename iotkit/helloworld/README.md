@@ -48,8 +48,6 @@ the screenshot below. If you use 3.3V, the characters won't be displayed.
 
 ![Grove LCD RGB Backlight connection](https://i.imgur.com/8dnySQn.jpg)
 
-// TODO guidelines for the Grove shield
-
 ## Running the program
 
 Once the display is connected, you can return back to your Cloud9 IDE
