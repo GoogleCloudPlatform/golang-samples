@@ -78,7 +78,7 @@ func recordVisit(ctx context.Context, now time.Time, userIP string) error {
 		UserIP:    userIP,
 	}
 
-	k := datastore.NewIncompleteKey(ctx, "Visit", nil)
+	k := datastore.IncompleteKey("Visit", nil)
 
 	_, err := datastoreClient.Put(ctx, k, v)
 	return err

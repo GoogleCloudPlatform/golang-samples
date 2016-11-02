@@ -45,8 +45,7 @@ func (db *datastoreDB) Close() {
 }
 
 func (db *datastoreDB) datastoreKey(id int64) *datastore.Key {
-	ctx := context.Background()
-	return datastore.NewKey(ctx, "Book", "", id, nil)
+	return datastore.IDKey("Book", id, nil)
 }
 
 // GetBook retrieves a book by its ID.
@@ -64,7 +63,7 @@ func (db *datastoreDB) GetBook(id int64) (*Book, error) {
 // AddBook saves a given book, assigning it a new ID.
 func (db *datastoreDB) AddBook(b *Book) (id int64, err error) {
 	ctx := context.Background()
-	k := datastore.NewIncompleteKey(ctx, "Book", nil)
+	k := datastore.IncompleteKey("Book", nil)
 	k, err = db.client.Put(ctx, k, b)
 	if err != nil {
 		return 0, fmt.Errorf("datastoredb: could not put Book: %v", err)

@@ -28,36 +28,32 @@ type Task struct {
 }
 
 func ExampleNewIncompleteKey() {
-	ctx := context.Background()
 	// [START incomplete_key]
-	taskKey := datastore.NewIncompleteKey(ctx, "Task", nil)
+	taskKey := datastore.IncompleteKey("Task", nil)
 	// [END incomplete_key]
 	_ = taskKey // Use the task key for datastore operations.
 }
 
 func ExampleNewKey() {
-	ctx := context.Background()
 	// [START named_key]
-	taskKey := datastore.NewKey(ctx, "Task", "sampletask", 0, nil)
+	taskKey := datastore.NameKey("Task", "sampletask", nil)
 	// [END named_key]
 	_ = taskKey // Use the task key for datastore operations.
 }
 
 func ExampleNewKey_withParent() {
-	ctx := context.Background()
 	// [START key_with_parent]
-	parentKey := datastore.NewKey(ctx, "TaskList", "default", 0, nil)
-	taskKey := datastore.NewKey(ctx, "Task", "sampleTask", 0, parentKey)
+	parentKey := datastore.NameKey("TaskList", "default", nil)
+	taskKey := datastore.NameKey("Task", "sampleTask", parentKey)
 	// [END key_with_parent]
 	_ = taskKey // Use the task key for datastore operations.
 }
 
 func ExampleNewKey_withMultipleParents() {
-	ctx := context.Background()
 	// [START key_with_multilevel_parent]
-	userKey := datastore.NewKey(ctx, "User", "alice", 0, nil)
-	parentKey := datastore.NewKey(ctx, "TaskList", "default", 0, userKey)
-	taskKey := datastore.NewKey(ctx, "Task", "sampleTask", 0, parentKey)
+	userKey := datastore.NameKey("User", "alice", nil)
+	parentKey := datastore.NameKey("TaskList", "default", userKey)
+	taskKey := datastore.NameKey("Task", "sampleTask", parentKey)
 	// [END key_with_multilevel_parent]
 	_ = taskKey // Use the task key for datastore operations.
 }
@@ -66,8 +62,8 @@ func ExampleClient_Put() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	// [START entity_with_parent]
-	parentKey := datastore.NewKey(ctx, "TaskList", "default", 0, nil)
-	key := datastore.NewIncompleteKey(ctx, "Task", parentKey)
+	parentKey := datastore.NameKey("TaskList", "default", nil)
+	key := datastore.IncompleteKey("Task", parentKey)
 
 	task := Task{
 		Category:    "Personal",
@@ -145,7 +141,7 @@ func ExampleClient_Put_upsert() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	task := &Task{} // Populated with appropriate data.
-	key := datastore.NewIncompleteKey(ctx, "Task", nil)
+	key := datastore.IncompleteKey("Task", nil)
 	// [START upsert]
 	key, err := client.Put(ctx, key, task)
 	// [END upsert]
@@ -157,7 +153,7 @@ func ExampleTransaction_insert() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	task := Task{} // Populated with appropriate data.
-	taskKey := datastore.NewKey(ctx, "Task", "sampleTask", 0, nil)
+	taskKey := datastore.NameKey("Task", "sampleTask", nil)
 	// [START insert]
 	_, err := client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
 		// We first check that there is no entity stored with the given key.
@@ -176,7 +172,7 @@ func ExampleTransaction_insert() {
 func ExampleClient_Get() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
-	taskKey := datastore.NewKey(ctx, "Task", "sampleTask", 0, nil)
+	taskKey := datastore.NameKey("Task", "sampleTask", nil)
 	// [START lookup]
 	var task Task
 	err := client.Get(ctx, taskKey, &task)
@@ -187,7 +183,7 @@ func ExampleClient_Get() {
 func ExampleTransaction_update() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
-	taskKey := datastore.NewKey(ctx, "Task", "sampleTask", 0, nil)
+	taskKey := datastore.NameKey("Task", "sampleTask", nil)
 	// [START update]
 	tx, err := client.NewTransaction(ctx)
 	if err != nil {
@@ -210,7 +206,7 @@ func ExampleTransaction_update() {
 func ExampleClient_Delete() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
-	key := datastore.NewKey(ctx, "Task", "sampletask", 0, nil)
+	key := datastore.NameKey("Task", "sampletask", nil)
 	// [START delete]
 	err := client.Delete(ctx, key)
 	// [END delete]
@@ -236,8 +232,8 @@ func ExampleClient_PutMulti() {
 		},
 	}
 	keys := []*datastore.Key{
-		datastore.NewIncompleteKey(ctx, "Task", nil),
-		datastore.NewIncompleteKey(ctx, "Task", nil),
+		datastore.IncompleteKey("Task", nil),
+		datastore.IncompleteKey("Task", nil),
 	}
 
 	keys, err := client.PutMulti(ctx, keys, tasks)
@@ -307,9 +303,8 @@ func ExampleQuery_compositeFilter() {
 }
 
 func ExampleQuery_keyFilter() {
-	ctx := context.Background()
 	// [START key_filter]
-	key := datastore.NewKey(ctx, "Task", "someTask", 0, nil)
+	key := datastore.NameKey("Task", "someTask", nil)
 	query := datastore.NewQuery("Task").Filter("__key__ >", key)
 	// [END key_filter]
 	_ = query // Use client.Run or client.GetAll to execute the query.
@@ -345,9 +340,8 @@ func ExampleQuery_kindless() {
 }
 
 func ExampleQuery_Ancestor() {
-	ctx := context.Background()
 	// [START ancestor_query]
-	ancestor := datastore.NewKey(ctx, "TaskList", "default", 0, nil)
+	ancestor := datastore.NameKey("TaskList", "default", nil)
 	query := datastore.NewQuery("Task").Ancestor(ancestor)
 	// [END ancestor_query]
 	_ = query // Use client.Run or client.GetAll to execute the query.
@@ -522,9 +516,8 @@ func ExampleIterator_Cursor() {
 }
 
 func ExampleQuery_EventualConsistency() {
-	ctx := context.Background()
 	// [START eventual_consistent_query]
-	ancestor := datastore.NewKey(ctx, "TaskList", "default", 0, nil)
+	ancestor := datastore.NameKey("TaskList", "default", nil)
 	query := datastore.NewQuery("Task").Ancestor(ancestor).EventualConsistency()
 	// [END eventual_consistent_query]
 	_ = query // Use client.Run or client.GetAll to execute the query.
@@ -608,7 +601,7 @@ func Example_Client_RunInTransaction() {
 func ExampleTransaction_getOrCreate() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
-	key := datastore.NewKey(ctx, "Task", "sampletask", 0, nil)
+	key := datastore.NameKey("Task", "sampletask", nil)
 	// [START transactional_get_or_create]
 	_, err := client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
 		var task Task
@@ -637,7 +630,7 @@ func ExampleTransaction_runQuery() {
 	}
 	defer tx.Rollback() // Transaction only used for read.
 
-	ancestor := datastore.NewKey(ctx, "TaskList", "default", 0, nil)
+	ancestor := datastore.NameKey("TaskList", "default", nil)
 	query := datastore.NewQuery("Task").Ancestor(ancestor).Transaction(tx)
 	var tasks []Task
 	_, err = client.GetAll(ctx, query, &tasks)
@@ -709,7 +702,7 @@ func Example_metadataPropertiesForKind() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	// [START property_by_kind_run_query]
-	kindKey := datastore.NewKey(ctx, "__kind__", "Task", 0, nil)
+	kindKey := datastore.NameKey("__kind__", "Task", nil)
 	query := datastore.NewQuery("__property__").Ancestor(kindKey)
 
 	type Prop struct {
