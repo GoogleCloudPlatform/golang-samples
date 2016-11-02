@@ -17,7 +17,7 @@ Wireless, by running the command below.
 
     $ GOOS=linux GOARCH=arm GOARM=7 go build github.com/GoogleCloudPlatform/golang-samples/iotkit/helloworld
 
-The command below will generate a binary that can be executable on your board.
+The command below will generate a binary that can be executed on your board.
 
 ## Setting up the board
 
