@@ -52,7 +52,7 @@ before_install:
     export PATH="$PATH:$PWD/google-cloud-sdk/bin";
     ./testing/travis/configure_gcloud.bash;
   fi
-- '! grep -R ''"context"$\'' * || { echo "Use golang.org/x/net/context"; false; }'
+- '! grep -R ''"context"$'' * || { echo "Use golang.org/x/net/context"; false; }'
 - go vet ./...
 - diff -u <(echo -n) <(gofmt -d -s .)
 

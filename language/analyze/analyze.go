@@ -7,16 +7,19 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 	"strings"
 
-	"golang.org/x/net/context"
-	"golang.org/x/oauth2/google"
+	"github.com/golang/protobuf/proto"
 
-	language "google.golang.org/api/language/v1beta1"
+	"golang.org/x/net/context"
+
+	// [START imports]
+	language "cloud.google.com/go/language/apiv1beta1"
+	languagepb "google.golang.org/genproto/googleapis/cloud/language/v1beta1"
+	// [END imports]
 )
 
 func main() {
@@ -24,15 +27,13 @@ func main() {
 		usage("Missing command.")
 	}
 
+	// [START init]
 	ctx := context.Background()
-	hc, err := google.DefaultClient(ctx, language.CloudPlatformScope)
+	client, err := language.NewClient(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
-	client, err := language.New(hc)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// [END init]
 
 	text := strings.Join(os.Args[2:], " ")
 	if text == "" {
@@ -41,11 +42,11 @@ func main() {
 
 	switch os.Args[1] {
 	case "entities":
-		printResp(analyzeEntities(client, text))
+		printResp(analyzeEntities(ctx, client, text))
 	case "sentiment":
-		printResp(analyzeSentiment(client, text))
+		printResp(analyzeSentiment(ctx, client, text))
 	case "syntax":
-		printResp(analyzeSyntax(client, text))
+		printResp(analyzeSyntax(ctx, client, text))
 	default:
 		usage("Unknown command.")
 	}
@@ -57,48 +58,47 @@ func usage(msg string) {
 	os.Exit(2)
 }
 
-func analyzeEntities(s *language.Service, text string) (*language.AnalyzeEntitiesResponse, error) {
-	req := s.Documents.AnalyzeEntities(&language.AnalyzeEntitiesRequest{
-		Document: &language.Document{
-			Content: text,
-			Type:    "PLAIN_TEXT",
+func analyzeEntities(ctx context.Context, client *language.Client, text string) (*languagepb.AnalyzeEntitiesResponse, error) {
+	return client.AnalyzeEntities(ctx, &languagepb.AnalyzeEntitiesRequest{
+		Document: &languagepb.Document{
+			Source: &languagepb.Document_Content{
+				Content: text,
+			},
+			Type: languagepb.Document_PLAIN_TEXT,
 		},
-		EncodingType: "UTF8",
+		EncodingType: languagepb.EncodingType_UTF8,
 	})
-	return req.Do()
 }
 
-func analyzeSentiment(s *language.Service, text string) (*language.AnalyzeSentimentResponse, error) {
-	req := s.Documents.AnalyzeSentiment(&language.AnalyzeSentimentRequest{
-		Document: &language.Document{
-			Content: text,
-			Type:    "PLAIN_TEXT",
+func analyzeSentiment(ctx context.Context, client *language.Client, text string) (*languagepb.AnalyzeSentimentResponse, error) {
+	return client.AnalyzeSentiment(ctx, &languagepb.AnalyzeSentimentRequest{
+		Document: &languagepb.Document{
+			Source: &languagepb.Document_Content{
+				Content: text,
+			},
+			Type: languagepb.Document_PLAIN_TEXT,
 		},
 	})
-	return req.Do()
 }
 
-func analyzeSyntax(s *language.Service, text string) (*language.AnnotateTextResponse, error) {
-	req := s.Documents.AnnotateText(&language.AnnotateTextRequest{
-		Document: &language.Document{
-			Content: text,
-			Type:    "PLAIN_TEXT",
+func analyzeSyntax(ctx context.Context, client *language.Client, text string) (*languagepb.AnnotateTextResponse, error) {
+	return client.AnnotateText(ctx, &languagepb.AnnotateTextRequest{
+		Document: &languagepb.Document{
+			Source: &languagepb.Document_Content{
+				Content: text,
+			},
+			Type: languagepb.Document_PLAIN_TEXT,
 		},
-		Features: &language.Features{
+		Features: &languagepb.AnnotateTextRequest_Features{
 			ExtractSyntax: true,
 		},
-		EncodingType: "UTF8",
+		EncodingType: languagepb.EncodingType_UTF8,
 	})
-	return req.Do()
 }
 
-func printResp(v interface{}, err error) {
+func printResp(v proto.Message, err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	b, err := json.MarshalIndent(v, "", "    ")
-	if err != nil {
-		log.Fatal(err)
-	}
-	os.Stdout.Write(b)
+	proto.MarshalText(os.Stdout, v)
 }
