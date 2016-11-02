@@ -17,26 +17,26 @@ Wireless, by running the command below.
 
     $ GOOS=linux GOARCH=arm GOARM=7 go build github.com/GoogleCloudPlatform/golang-samples/iotkit/helloworld
 
-The command below will generate a binary that can executable on your board.
+The command below will generate a binary that can be executable on your board.
 
 ## Setting up the board
 
 Download [Debian 8.5 2016-05-13 4GB SD LXQT](https://beagleboard.org/latest-images)
-and write it to an microSD card.
+and write it to a microSD card.
 
 Put the microSD card into the SDcard slot and power the board to boot.
 Once the board boots, you will be able to see an unsecured Wifi network
 in the format of "BeagleBoneXXXX".
 
 Join to the "BeagleBoneXXXX" network from your laptop and visit
-[192.168.8.1:3000/ide.html](192.168.8.1:3000/ide.html) to launch the
+[192.168.8.1:3000/ide.html](http://192.168.8.1:3000/ide.html) to launch the
 Cloud9 IDE.
 
 Use "Files > Upload Local Files" to launch the uploader dialog.
 Drag and drop the "helloworld" binary and wait until the upload is finished.
 
-From the Cloud9 IDE terminal, run the following command the give the
-binary permissions to be executed.
+From the Cloud9 IDE terminal, run the following command to make the
+binary executable.
 
     $ chmod +x ./helloworld
 
