@@ -9,12 +9,15 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
+	"os"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
 
-func init() {
+func main() {
 	r := mux.NewRouter()
 
 	r.Path("/echo").Methods("POST").
@@ -30,6 +33,11 @@ func init() {
 		HandlerFunc(authInfoHandler)
 
 	http.Handle("/", r)
+	port := 8080
+	if portStr := os.Getenv("PORT"); portStr != "" {
+		port, _ = strconv.Atoi(portStr)
+	}
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), nil))
 }
 
 // echoHandler reads a JSON object from the body, and writes it back out.
