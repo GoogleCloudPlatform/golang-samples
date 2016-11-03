@@ -2,15 +2,18 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// +build !appengine,!appenginevm
-
 package main
 
 import (
+	"flag"
+	"fmt"
 	"log"
 	"net/http"
 )
 
+var port = flag.Int("port", 8080, "port to listen on")
+
 func main() {
-	log.Fatal(http.ListenAndServe(":8081", nil))
+	flag.Parse()
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *port), nil))
 }
