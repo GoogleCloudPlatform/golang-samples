@@ -1,6 +1,6 @@
 # Google Cloud Endpoints Sample for Go
 
-This sample demonstrates how to use Google Cloud Endpoints using Python.
+This sample demonstrates how to use Google Cloud Endpoints using Go.
 
 For a complete walkthrough showing how to run this sample in different
 environments, see the [Google Cloud Endpoints Quickstarts][1].
