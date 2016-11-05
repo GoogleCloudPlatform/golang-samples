@@ -89,6 +89,23 @@ func TestObjects(t *testing.T) {
 	if err := deleteObjectACL(client, bucket, object); err != nil {
 		t.Errorf("cannot delete object acl: %v", err)
 	}
+
+	key := []byte("my-secret-AES-256-encryption-key")
+	newKey := []byte("My-secret-AES-256-encryption-key")
+
+	if err := writeEncryptedObject(client, bucket, object, key); err != nil {
+		t.Errorf("cannot write an encrypted object: %v", err)
+	}
+	data, err = readEncryptedObject(client, bucket, object, key)
+	if err != nil {
+		t.Errorf("cannot read the encrypted object: %v", err)
+	}
+	if got, want := string(data), "top secret"; got != want {
+		t.Errorf("object content = %q; want %q", got, want)
+	}
+	if err := rotateEncryptionKey(client, bucket, object, key, newKey); err != nil {
+		t.Errorf("cannot encrypt the object with the new key: %v", err)
+	}
 	if err := delete(client, bucket, object); err != nil {
 		t.Errorf("cannot to delete object: %v", err)
 	}

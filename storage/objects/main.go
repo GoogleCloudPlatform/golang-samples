@@ -179,6 +179,59 @@ func delete(client *storage.Client, bucket, object string) error {
 	return nil
 }
 
+func writeEncryptedObject(client *storage.Client, bucket, object string, secretKey []byte) error {
+	ctx := context.Background()
+
+	// [START storage_upload_encrypted_file]
+	obj := client.Bucket(bucket).Object(object)
+	// Encrypt the object's contents.
+	wc := obj.Key(secretKey).NewWriter(ctx)
+	if _, err := wc.Write([]byte("top secret")); err != nil {
+		return err
+	}
+	if err := wc.Close(); err != nil {
+		return err
+	}
+	// [END storage_upload_encrypted_file]
+	return nil
+}
+
+func readEncryptedObject(client *storage.Client, bucket, object string, secretKey []byte) ([]byte, error) {
+	ctx := context.Background()
+
+	// [START storage_download_encrypted_file]
+	obj := client.Bucket(bucket).Object(object)
+	rc, err := obj.Key(secretKey).NewReader(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer rc.Close()
+
+	data, err := ioutil.ReadAll(rc)
+	if err != nil {
+		return nil, err
+	}
+	// [END storage_download_encrypted_file]
+	return data, nil
+}
+
+func rotateEncryptionKey(client *storage.Client, bucket, object string, key, newKey []byte) error {
+	ctx := context.Background()
+	// [START storage_rotate_encryption_key]
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	obj := client.Bucket(bucket).Object(object)
+	// obj is encrypted with key, we are encrypting it with the newKey.
+	_, err = obj.Key(newKey).CopierFrom(obj.Key(key)).Run(ctx)
+	if err != nil {
+		return err
+	}
+	// [END storage_rotate_encryption_key]
+	return nil
+}
+
 const helptext = `usage: objects -o=bucket:name [subcommand] <args...>
 
 subcommands:
