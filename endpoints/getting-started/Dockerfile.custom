@@ -1,0 +1,4 @@
+FROM golang:onbuild
+EXPOSE 8081
+ENV PORT 8081
+ENTRYPOINT ["go-wrapper", "run"]
