@@ -116,13 +116,27 @@ func list(client *storage.Client, bucket string) error {
 	return nil
 }
 
-func listByPrefix(client *storage.Client, bucket, prefix string) error {
+func listByPrefix(client *storage.Client, bucket, prefix, delim string) error {
 	ctx := context.Background()
 	// [START storage_list_files_with_prefix]
-	// Prefix is a string that filters results to objects whose
-	// names begin with it. For example, "log-2016" will only list objects
-	// whose names will start with "log-2016".
-	it := client.Bucket(bucket).Objects(ctx, &storage.Query{Prefix: prefix})
+	// Prefixes and delimiters can be used to emulate directory listings.
+	// Prefixes can be used filter objects starting with prefix.
+	// The delimiter argument can be used to restrict the results to only the
+	// objects in the given "directory". Without the delimeter, the entire  tree
+	// under the prefix is returned.
+	// For example, given these blobs:
+	//   /a/1.txt
+	//   /a/b/2.txt
+	//
+	// If you just specify prefix="/a", you'll get back:
+	//   /a/1.txt
+	//   /a/b/2.txt
+	// However, if you specify prefix="/a"" and delim="/", you'll get back:
+	//   /a/1.txt
+	it := client.Bucket(bucket).Objects(ctx, &storage.Query{
+		Prefix:    prefix,
+		Delimiter: delim,
+	})
 	for {
 		attrs, err := it.Next()
 		if err == iterator.Done {
