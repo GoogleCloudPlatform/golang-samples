@@ -119,6 +119,9 @@ func list(client *storage.Client, bucket string) error {
 func listByPrefix(client *storage.Client, bucket, prefix string) error {
 	ctx := context.Background()
 	// [START storage_list_files_with_prefix]
+	// Prefix is a string that filters results to objects whose
+	// names begin with it. For example, "log-2016" will only list objects
+	// whose names will start with "log-2016".
 	it := client.Bucket(bucket).Objects(ctx, &storage.Query{Prefix: prefix})
 	for {
 		attrs, err := it.Next()
