@@ -124,6 +124,7 @@ func listByPrefix(client *storage.Client, bucket, prefix, delim string) error {
 	// The delimiter argument can be used to restrict the results to only the
 	// objects in the given "directory". Without the delimeter, the entire  tree
 	// under the prefix is returned.
+	//
 	// For example, given these blobs:
 	//   /a/1.txt
 	//   /a/b/2.txt
@@ -131,6 +132,7 @@ func listByPrefix(client *storage.Client, bucket, prefix, delim string) error {
 	// If you just specify prefix="/a", you'll get back:
 	//   /a/1.txt
 	//   /a/b/2.txt
+	//
 	// However, if you specify prefix="/a"" and delim="/", you'll get back:
 	//   /a/1.txt
 	it := client.Bucket(bucket).Objects(ctx, &storage.Query{
