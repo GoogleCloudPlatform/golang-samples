@@ -17,6 +17,8 @@ import (
 	"os"
 	"strings"
 
+	"google.golang.org/api/iterator"
+
 	"golang.org/x/net/context"
 
 	"cloud.google.com/go/storage"
@@ -93,6 +95,42 @@ func write(client *storage.Client, bucket, object string) error {
 		return err
 	}
 	// [END upload_file]
+	return nil
+}
+
+func list(client *storage.Client, bucket string) error {
+	ctx := context.Background()
+	// [START storage_list_files]
+	it := client.Bucket(bucket).Objects(ctx, nil)
+	for {
+		attrs, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		fmt.Println(attrs.Name)
+	}
+	// [END storage_list_files]
+	return nil
+}
+
+func listByPrefix(client *storage.Client, bucket, prefix string) error {
+	ctx := context.Background()
+	// [START storage_list_files_with_prefix]
+	it := client.Bucket(bucket).Objects(ctx, &storage.Query{Prefix: prefix})
+	for {
+		attrs, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		fmt.Println(attrs.Name)
+	}
+	// [END storage_list_files_with_prefix]
 	return nil
 }
 
