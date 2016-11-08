@@ -17,6 +17,8 @@ import (
 	"os"
 	"strings"
 
+	"google.golang.org/api/iterator"
+
 	"golang.org/x/net/context"
 
 	"cloud.google.com/go/storage"
@@ -93,6 +95,61 @@ func write(client *storage.Client, bucket, object string) error {
 		return err
 	}
 	// [END upload_file]
+	return nil
+}
+
+func list(client *storage.Client, bucket string) error {
+	ctx := context.Background()
+	// [START storage_list_files]
+	it := client.Bucket(bucket).Objects(ctx, nil)
+	for {
+		attrs, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		fmt.Println(attrs.Name)
+	}
+	// [END storage_list_files]
+	return nil
+}
+
+func listByPrefix(client *storage.Client, bucket, prefix, delim string) error {
+	ctx := context.Background()
+	// [START storage_list_files_with_prefix]
+	// Prefixes and delimiters can be used to emulate directory listings.
+	// Prefixes can be used filter objects starting with prefix.
+	// The delimiter argument can be used to restrict the results to only the
+	// objects in the given "directory". Without the delimeter, the entire  tree
+	// under the prefix is returned.
+	//
+	// For example, given these blobs:
+	//   /a/1.txt
+	//   /a/b/2.txt
+	//
+	// If you just specify prefix="/a", you'll get back:
+	//   /a/1.txt
+	//   /a/b/2.txt
+	//
+	// However, if you specify prefix="/a"" and delim="/", you'll get back:
+	//   /a/1.txt
+	it := client.Bucket(bucket).Objects(ctx, &storage.Query{
+		Prefix:    prefix,
+		Delimiter: delim,
+	})
+	for {
+		attrs, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		fmt.Println(attrs.Name)
+	}
+	// [END storage_list_files_with_prefix]
 	return nil
 }
 

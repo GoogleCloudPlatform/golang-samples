@@ -33,6 +33,12 @@ func TestObjects(t *testing.T) {
 	ensureBucketExists(ctx, client, tc.ProjectID, bucket)
 	ensureBucketExists(ctx, client, tc.ProjectID, dstBucket)
 
+	if err := list(client, bucket); err != nil {
+		t.Fatalf("cannot list objects: %v", err)
+	}
+	if err := listByPrefix(client, bucket, "golang-example", ""); err != nil {
+		t.Fatalf("cannot list objects by prefix: %v", err)
+	}
 	if err := write(client, bucket, object); err != nil {
 		t.Fatalf("cannot write object: %v", err)
 	}
