@@ -36,7 +36,7 @@ func TestObjects(t *testing.T) {
 	if err := list(client, bucket); err != nil {
 		t.Fatalf("cannot list objects: %v", err)
 	}
-	if err := listByPrefix(client, bucket, "golang-example"); err != nil {
+	if err := listByPrefix(client, bucket, "golang-example", ""); err != nil {
 		t.Fatalf("cannot list objects by prefix: %v", err)
 	}
 	if err := write(client, bucket, object); err != nil {
