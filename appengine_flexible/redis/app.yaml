@@ -1,0 +1,9 @@
+runtime: go
+env: flex
+
+automatic_scaling:
+  min_num_instances: 1
+
+env_variables:
+  REDIS_ADDR: "<REDIS_HOST>:<REDIS_PORT>"
+  REDIS_PASSSWORD: ""
