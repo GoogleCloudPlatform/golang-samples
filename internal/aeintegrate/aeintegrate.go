@@ -71,12 +71,13 @@ type App struct {
 	// The project to deploy to.
 	ProjectID string
 
+	// The service/module to deploy to. Read only.
+	Service string
+
 	// Additional runtime environment variable overrides for the app.
 	Env map[string]string
 
 	deployed bool // Whether the app has been deployed.
-
-	module string // The Module ID (read from the app.yaml)
 
 	adminService *appengine.APIService // Used during clean up to delete the deployed version.
 
@@ -104,7 +105,7 @@ func (p *App) URL(path string) (string, error) {
 	if !p.deployed {
 		return "", errors.New("URL called before Deploy")
 	}
-	return fmt.Sprintf("https://%s-dot-%s-dot-%s.appspot.com%s", p.version(), p.module, p.ProjectID, path), nil
+	return fmt.Sprintf("https://%s-dot-%s-dot-%s.appspot-preview.com%s", p.version(), p.Service, p.ProjectID, path), nil
 }
 
 // version returns the version that the app will be deployed to.
@@ -127,8 +128,8 @@ func (p *App) Deploy() error {
 	if err := p.validate(); err != nil {
 		return err
 	}
-	if _, err := p.Module(); err != nil {
-		return fmt.Errorf("could not get module id: %v", err)
+	if err := p.readService(); err != nil {
+		return fmt.Errorf("could not read service: %v", err)
 	}
 	if err := p.initAdminService(); err != nil {
 		return fmt.Errorf("could not setup admin service: %v", err)
@@ -259,30 +260,30 @@ func (p *App) deployCmd() (*exec.Cmd, error) {
 	return cmd, nil
 }
 
-// Module returns the Module ID, which is read from the app.yaml file.
-func (p *App) Module() (string, error) {
-	if p.module != "" {
-		return p.module, nil
+// readService reads the service out of the app.yaml file.
+func (p *App) readService() error {
+	if p.Service != "" {
+		return nil
 	}
 
 	b, err := ioutil.ReadFile(filepath.Join(p.Dir, p.appYaml()))
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	var s struct {
-		Module string `yaml:"module"`
+		Service string `yaml:"service"`
 	}
 	if err := yaml.Unmarshal(b, &s); err != nil {
-		return "", err
+		return err
 	}
 
-	if s.Module == "" {
-		s.Module = "default"
+	if s.Service == "" {
+		s.Service = "default"
 	}
 
-	p.module = s.Module
-	return p.module, nil
+	p.Service = s.Service
+	return nil
 }
 
 // initAdminService populates p.adminService and checks that the user is authenticated and project ID is valid.
@@ -327,7 +328,7 @@ func (p *App) Cleanup() error {
 
 	var err error
 	for try := 0; try < 10; try++ {
-		_, err = p.adminService.Apps.Services.Versions.Delete(p.ProjectID, p.module, p.version()).Do()
+		_, err = p.adminService.Apps.Services.Versions.Delete(p.ProjectID, p.Service, p.version()).Do()
 		if err == nil {
 			log.Printf("(%s) Succesfully cleaned up.", p.Name)
 			break
@@ -335,7 +336,7 @@ func (p *App) Cleanup() error {
 		time.Sleep(time.Second)
 	}
 	if err != nil {
-		err = fmt.Errorf("could not delete app module version %v/%v: %v", p.module, p.version(), err)
+		err = fmt.Errorf("could not delete app module version %v/%v: %v", p.Service, p.version(), err)
 	}
 	return err
 }
