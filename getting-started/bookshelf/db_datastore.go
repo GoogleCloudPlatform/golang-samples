@@ -68,7 +68,7 @@ func (db *datastoreDB) AddBook(b *Book) (id int64, err error) {
 	if err != nil {
 		return 0, fmt.Errorf("datastoredb: could not put Book: %v", err)
 	}
-	return k.ID(), nil
+	return k.ID, nil
 }
 
 // DeleteBook removes a given book by its ID.
@@ -105,7 +105,7 @@ func (db *datastoreDB) ListBooks() ([]*Book, error) {
 	}
 
 	for i, k := range keys {
-		books[i].ID = k.ID()
+		books[i].ID = k.ID
 	}
 
 	return books, nil
@@ -131,7 +131,7 @@ func (db *datastoreDB) ListBooksCreatedBy(userID string) ([]*Book, error) {
 	}
 
 	for i, k := range keys {
-		books[i].ID = k.ID()
+		books[i].ID = k.ID
 	}
 
 	return books, nil

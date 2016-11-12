@@ -60,7 +60,7 @@ func main() {
 				log.Printf("Failed to create task: %v", err)
 				break
 			}
-			fmt.Printf("Created new task with ID %d\n", key.ID())
+			fmt.Printf("Created new task with ID %d\n", key.ID)
 
 		case "done":
 			if n == 0 {
@@ -164,7 +164,7 @@ func ListTasks(ctx context.Context, client *datastore.Client) ([]*Task, error) {
 
 	// Set the id field on each Task from the corresponding key.
 	for i, key := range keys {
-		tasks[i].id = key.ID()
+		tasks[i].id = key.ID
 	}
 
 	return tasks, nil

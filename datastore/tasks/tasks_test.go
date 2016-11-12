@@ -48,11 +48,11 @@ func TestAddMarkDelete(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := MarkDone(ctx, client, k.ID()); err != nil {
+	if err := MarkDone(ctx, client, k.ID); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := DeleteTask(ctx, client, k.ID()); err != nil {
+	if err := DeleteTask(ctx, client, k.ID); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -71,7 +71,7 @@ func TestList(t *testing.T) {
 	}
 
 	foundTask := listAndGetTask(t, desc)
-	if got, want := foundTask.id, k.ID(); got != want {
+	if got, want := foundTask.id, k.ID; got != want {
 		t.Errorf("k.ID: got %d, want %d", got, want)
 	}
 
