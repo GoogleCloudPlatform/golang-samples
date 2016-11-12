@@ -657,7 +657,7 @@ func Example_metadataNamespaces() {
 
 	namespaces := make([]string, 0, len(keys))
 	for _, k := range keys {
-		namespaces = append(namespaces, k.Name())
+		namespaces = append(namespaces, k.Name)
 	}
 	// [END namespace_run_query]
 }
@@ -674,7 +674,7 @@ func Example_metadataKinds() {
 
 	kinds := make([]string, 0, len(keys))
 	for _, k := range keys {
-		kinds = append(kinds, k.Name())
+		kinds = append(kinds, k.Name)
 	}
 	// [END kind_run_query]
 }
@@ -691,8 +691,8 @@ func Example_metadataProperties() {
 
 	props := make(map[string][]string) // Map from kind to slice of properties.
 	for _, k := range keys {
-		prop := k.Name()
-		kind := k.Parent().Name()
+		prop := k.Name
+		kind := k.Parent.Name
 		props[kind] = append(props[kind], prop)
 	}
 	// [END property_run_query]
