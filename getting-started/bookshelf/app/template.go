@@ -11,8 +11,6 @@ import (
 	"net/http"
 	"path/filepath"
 
-	"google.golang.org/api/plus/v1"
-
 	"github.com/GoogleCloudPlatform/golang-samples/getting-started/bookshelf"
 )
 
@@ -42,7 +40,7 @@ func (tmpl *appTemplate) Execute(w http.ResponseWriter, r *http.Request, data in
 	d := struct {
 		Data        interface{}
 		AuthEnabled bool
-		Profile     *plus.Person
+		Profile     *Profile
 		LoginURL    string
 		LogoutURL   string
 	}{
