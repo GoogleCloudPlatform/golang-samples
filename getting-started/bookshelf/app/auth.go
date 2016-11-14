@@ -35,7 +35,7 @@ const (
 func init() {
 	// Gob encoding for gorilla/sessions
 	gob.Register(&oauth2.Token{})
-	gob.Register(&plus.Person{})
+	gob.Register(&Profile{})
 }
 
 // loginHandler initiates an OAuth flow to authenticate the user.
@@ -160,7 +160,7 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) *appError {
 
 // profileFromSession retreives the Google+ profile from the default session.
 // Returns nil if the profile cannot be retreived (e.g. user is logged out).
-func profileFromSession(r *http.Request) *plus.Person {
+func profileFromSession(r *http.Request) *Profile {
 	session, err := bookshelf.SessionStore.Get(r, defaultSessionID)
 	if err != nil {
 		return nil
@@ -169,21 +169,22 @@ func profileFromSession(r *http.Request) *plus.Person {
 	if !ok || !tok.Valid() {
 		return nil
 	}
-	profile, ok := session.Values[googleProfileSessionKey].(*plus.Person)
+	profile, ok := session.Values[googleProfileSessionKey].(*Profile)
 	if !ok {
 		return nil
 	}
 	return profile
 }
 
+type Profile struct {
+	ID, DisplayName, ImageURL string
+}
+
 // stripProfile returns a subset of a plus.Person.
-func stripProfile(p *plus.Person) *plus.Person {
-	return &plus.Person{
-		Id:          p.Id,
+func stripProfile(p *plus.Person) *Profile {
+	return &Profile{
+		ID:          p.Id,
 		DisplayName: p.DisplayName,
-		Image:       p.Image,
-		Etag:        p.Etag,
-		Name:        p.Name,
-		Url:         p.Url,
+		ImageURL:    p.Image.Url,
 	}
 }

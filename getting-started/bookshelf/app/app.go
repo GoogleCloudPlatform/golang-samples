@@ -110,7 +110,7 @@ func listMineHandler(w http.ResponseWriter, r *http.Request) *appError {
 		return nil
 	}
 
-	books, err := bookshelf.DB.ListBooksCreatedBy(user.Id)
+	books, err := bookshelf.DB.ListBooksCreatedBy(user.ID)
 	if err != nil {
 		return appErrorf(err, "could not list books: %v", err)
 	}
@@ -187,7 +187,7 @@ func bookFromForm(r *http.Request) (*bookshelf.Book, error) {
 		if user != nil {
 			// Logged in.
 			book.CreatedBy = user.DisplayName
-			book.CreatedByID = user.Id
+			book.CreatedByID = user.ID
 		} else {
 			// Not logged in.
 			book.SetCreatorAnonymous()
