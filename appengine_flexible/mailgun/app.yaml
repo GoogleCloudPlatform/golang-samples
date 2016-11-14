@@ -1,0 +1,12 @@
+runtime: go
+env: flex
+
+automatic_scaling:
+  min_num_instances: 1
+
+# [START env_variables]
+env_variables:
+  MAILGUN_DOMAIN_NAME: your-mailgun-domain
+  MAILGUN_API_KEY: your-mailgun-api-key
+  MAILGUN_PUBLIC_KEY: your-mailgun-public-key
+# [END env_variables]

@@ -1,0 +1,10 @@
+runtime: go
+env: flex
+
+automatic_scaling:
+  min_num_instances: 1
+
+# [START env_variables]
+env_variables:
+  SENDGRID_API_KEY: your-sendgrid-api-key
+# [END env_variables]

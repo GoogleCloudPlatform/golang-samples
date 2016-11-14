@@ -1,0 +1,27 @@
+runtime: go
+env: flex
+
+automatic_scaling:
+  min_num_instances: 1
+
+#[START env]
+env_variables:
+  # See https://github.com/go-sql-driver/mysql
+  #
+  # Replace INSTANCE_CONNECTION_NAME with the same value as in the
+  # beta_settings section below.
+  MYSQL_CONNECTION: user:password@unix(/cloudsql/INSTANCE_CONNECTION_NAME)/dbname
+  #
+  # If you're testing locally using the Cloud SQL proxy with TCP,
+  # instead use the "tcp" dialer by setting the environment variable:
+  # MYSQL_CONNECTION=user:password@tcp(127.0.0.1:3306)/dbname
+#[END env]
+
+#[START cloudsql_settings]
+# Replace INSTANCE_CONNECTION_NAME with the value obtained when configuring your
+# Cloud SQL instance, available from the Google Cloud Console or from the Cloud SDK.
+# For SQL v2 instances, this should be in the form of "project:region:instance".
+# Cloud SQL v1 instances are not supported.
+beta_settings:
+  cloud_sql_instances: INSTANCE_CONNECTION_NAME
+#[END cloudsql_settings]
