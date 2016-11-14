@@ -1,5 +1,5 @@
 runtime: go
-vm: true
+env: flex
 
 automatic_scaling:
   min_num_instances: 1

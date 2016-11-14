@@ -1,5 +1,5 @@
 # [START runtime]
 runtime: go
 api_version: go1
-vm: true
+env: flex
 # [END runtime]

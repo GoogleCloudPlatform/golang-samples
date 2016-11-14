@@ -1,5 +1,5 @@
 runtime: go
-vm: true
+env: flex
 api_version: 1
 
 env_variables:

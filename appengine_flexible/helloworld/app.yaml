@@ -1,2 +1,2 @@
 runtime: go
-vm: true
+env: flex

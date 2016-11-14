@@ -1,5 +1,5 @@
 runtime: go
-vm: true
+env: flex
 
 beta_settings:
   # Enable Google Cloud Endpoints API management.
