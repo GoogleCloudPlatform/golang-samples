@@ -9,8 +9,8 @@ import (
 
 	"golang.org/x/net/context"
 
-	language "cloud.google.com/go/language/apiv1beta1"
-	languagepb "google.golang.org/genproto/googleapis/cloud/language/v1beta1"
+	language "cloud.google.com/go/language/apiv1"
+	languagepb "google.golang.org/genproto/googleapis/cloud/language/v1"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
@@ -23,8 +23,8 @@ func TestSentiment(t *testing.T) {
 	if err != nil {
 		t.Fatalf("got %v, want nil err", err)
 	}
-	if got := res.DocumentSentiment.Polarity; got <= 0 {
-		t.Errorf("sentiment polarity: got %f, want positive", got)
+	if got := res.DocumentSentiment.Score; got <= 0 {
+		t.Errorf("sentiment score: got %f, want positive", got)
 	}
 }
 
