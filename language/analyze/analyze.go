@@ -17,8 +17,8 @@ import (
 	"golang.org/x/net/context"
 
 	// [START imports]
-	language "cloud.google.com/go/language/apiv1beta1"
-	languagepb "google.golang.org/genproto/googleapis/cloud/language/v1beta1"
+	language "cloud.google.com/go/language/apiv1"
+	languagepb "google.golang.org/genproto/googleapis/cloud/language/v1"
 	// [END imports]
 )
 
