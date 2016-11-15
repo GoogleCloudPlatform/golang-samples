@@ -32,7 +32,7 @@ go vet ./...
 ! grep -R '"context"$' * || { echo "Use golang.org/x/net/context"; false; }
 
 # Update imports from the cached image.
-go get -u -v $(go list -f '{{join .Imports "\n"}}' ./... | sort | uniq | grep -v golang-samples)
+go get -u -v $(go list -f '{{join .Imports "\n"}}{{"\n"}}{{join .TestImports "\n"}}' ./... | sort | uniq | grep -v golang-samples)
 
 # Run all of the tests
 go test -v ./...

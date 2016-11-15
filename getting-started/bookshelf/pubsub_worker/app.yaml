@@ -1,7 +1,7 @@
 runtime: go
 env: flex
 api_version: 1
-module: worker
+service: worker
 
 resources:
   cpu: .5
