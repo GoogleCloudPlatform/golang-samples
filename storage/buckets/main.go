@@ -66,6 +66,20 @@ func create(client *storage.Client, projectID, bucketName string) error {
 	return nil
 }
 
+func createWithAttrs(client *storage.Client, projectID, bucketName string) error {
+	ctx := context.Background()
+	// [START create_bucket_with_storageclass_and_location]
+	bucket := client.Bucket(bucketName)
+	if err := bucket.Create(ctx, projectID, &storage.BucketAttrs{
+		StorageClass: "COLDLINE",
+		Location:     "asia",
+	}); err != nil {
+		return err
+	}
+	// [END create_bucket_with_storageclass_and_location]
+	return nil
+}
+
 func list(client *storage.Client, projectID string) ([]string, error) {
 	ctx := context.Background()
 	// [START list_buckets]
