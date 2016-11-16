@@ -35,6 +35,18 @@ func TestCreate(t *testing.T) {
 	}
 }
 
+func TestCreateWithAttrs(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	c := setup(t)
+	name := bucketName + "-attrs"
+	if err := createWithAttrs(c, tc.ProjectID, name); err != nil {
+		t.Fatalf("failed to create bucket (%q): %v", bucketName, err)
+	}
+	if err := delete(c, name); err != nil {
+		t.Fatalf("failed to delete bucket (%q): %v", bucketName, err)
+	}
+}
+
 func TestList(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	c := setup(t)
