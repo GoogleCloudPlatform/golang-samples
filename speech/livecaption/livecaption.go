@@ -80,12 +80,10 @@ func main() {
 			break
 		}
 		if err != nil {
-			// TODO: handle error
-			continue
+			log.Fatalf("stream.Recv error: %v", err)
 		}
-		if resp.Error != nil {
-			// TODO: handle error
-			continue
+		if err := resp.Error; err != nil {
+			log.Fatalf("Recieved error resp: %v", err)
 		}
 		for _, result := range resp.Results {
 			fmt.Printf("Result: %+v\n", result)
