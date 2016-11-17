@@ -70,11 +70,11 @@ func printResults(w io.Writer, iter *bigquery.RowIterator) error {
 		for _, t := range ts {
 			record := t.([]bigquery.Value)
 			title := record[0].(string)
-			cnt := record[1].(int)
+			cnt := record[1].(int64)
 			fmt.Fprintf(w, "\t%s: %d\n", title, cnt)
 		}
 
-		words := row[1].(int)
+		words := row[1].(int64)
 		fmt.Fprintf(w, "total unique words: %d\n", words)
 	}
 }
