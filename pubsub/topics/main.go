@@ -155,6 +155,9 @@ func addUsers(c *pubsub.Client, topicName string) {
 	if err := topic.IAM().SetPolicy(ctx, policy); err != nil {
 		log.Fatalf("SetPolicy: %v", err)
 	}
+	// NOTE: It may be necessary to retry this operation if IAM policies are
+	// being modified concurrently. SetPolicy will return an error if the policy
+	// was modified since it was retrieved.
 	// [END pubsub_set_topic_policy]
 }
 
