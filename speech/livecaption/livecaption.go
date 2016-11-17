@@ -16,10 +16,11 @@ import (
 	"log"
 	"os"
 
+	speech "cloud.google.com/go/speech/apiv1beta1"
 	"golang.org/x/net/context"
 	"google.golang.org/api/option"
 	"google.golang.org/api/transport"
-	speech "google.golang.org/genproto/googleapis/cloud/speech/v1beta1"
+	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1beta1"
 )
 
 func main() {
@@ -34,16 +35,20 @@ func main() {
 	defer conn.Close()
 
 	// [START speech_streaming_mic_recognize]
-	stream, err := speech.NewSpeechClient(conn).StreamingRecognize(ctx)
+	client, err := speech.NewClient(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
-	// send the initial configuration message.
-	if err := stream.Send(&speech.StreamingRecognizeRequest{
-		StreamingRequest: &speech.StreamingRecognizeRequest_StreamingConfig{
-			StreamingConfig: &speech.StreamingRecognitionConfig{
-				Config: &speech.RecognitionConfig{
-					Encoding:   speech.RecognitionConfig_LINEAR16,
+	stream, err := client.StreamingRecognize(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// Send the initial configuration message.
+	if err := stream.Send(&speechpb.StreamingRecognizeRequest{
+		StreamingRequest: &speechpb.StreamingRecognizeRequest_StreamingConfig{
+			StreamingConfig: &speechpb.StreamingRecognitionConfig{
+				Config: &speechpb.RecognitionConfig{
+					Encoding:   speechpb.RecognitionConfig_LINEAR16,
 					SampleRate: 16000,
 				},
 			},
@@ -53,19 +58,19 @@ func main() {
 	}
 
 	go func() {
-		// pipe stdin to the API
+		// Pipe stdin to the API.
 		buf := make([]byte, 1024)
 		for {
 			n, err := os.Stdin.Read(buf)
 			if err == io.EOF {
-				return // nothing else to pipe, kill this goroutine
+				return // Nothing else to pipe, returns from this goroutine.
 			}
 			if err != nil {
 				log.Printf("Could not read from stdin: %v", err)
 				continue
 			}
-			if err = stream.Send(&speech.StreamingRecognizeRequest{
-				StreamingRequest: &speech.StreamingRecognizeRequest_AudioContent{
+			if err = stream.Send(&speechpb.StreamingRecognizeRequest{
+				StreamingRequest: &speechpb.StreamingRecognizeRequest_AudioContent{
 					AudioContent: buf[:n],
 				},
 			}); err != nil {
