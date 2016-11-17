@@ -63,7 +63,7 @@ func main() {
 		for {
 			n, err := os.Stdin.Read(buf)
 			if err == io.EOF {
-				return // Nothing else to pipe, returns from this goroutine.
+				return // Nothing else to pipe, return from this goroutine.
 			}
 			if err != nil {
 				log.Printf("Could not read from stdin: %v", err)
