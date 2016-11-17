@@ -61,7 +61,7 @@ func main() {
 				return // nothing else to pipe, kill this goroutine
 			}
 			if err != nil {
-				log.Printf("Reading stdin error: %v", err)
+				log.Printf("Could not read from stdin: %v", err)
 				continue
 			}
 			if err = stream.Send(&speech.StreamingRecognizeRequest{
@@ -69,7 +69,7 @@ func main() {
 					AudioContent: buf[:n],
 				},
 			}); err != nil {
-				log.Printf("Sending audio error: %v", err)
+				log.Printf("Could not send audio: %v", err)
 			}
 		}
 	}()
@@ -80,10 +80,10 @@ func main() {
 			break
 		}
 		if err != nil {
-			log.Fatalf("stream.Recv error: %v", err)
+			log.Fatalf("Cannot stream results: %v", err)
 		}
 		if err := resp.Error; err != nil {
-			log.Fatalf("Recieved error resp: %v", err)
+			log.Fatalf("Could not recognize: %v", err)
 		}
 		for _, result := range resp.Results {
 			fmt.Printf("Result: %+v\n", result)
