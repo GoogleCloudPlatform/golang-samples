@@ -5,14 +5,13 @@
 package snippets
 
 import (
-	"context"
 	"fmt"
 	"testing"
 	"time"
 
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-
 	"cloud.google.com/go/bigquery"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"golang.org/x/net/context"
 )
 
 func TestAll(t *testing.T) {
