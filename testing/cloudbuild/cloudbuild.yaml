@@ -14,8 +14,6 @@ steps:
 # Run the tests
 - name: gcr.io/$PROJECT_ID/go17
   args: ['bash', 'testing/cloudbuild/run.bash']
-  env:
-  - "GCE_METADATA_HOST=metadata.google.internal"
 
 # Clean up the workdir.
 - name: debian
