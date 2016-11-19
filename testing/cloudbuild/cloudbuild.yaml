@@ -12,7 +12,7 @@ steps:
   args: ['cp', 'gs://golang-samples-secrets/golang-samples-tests-4fbf85dd0f24.json', 'key.json']
 
 # Run the tests
-- name: golang:1.7
+- name: gcr.io/$PROJECT_ID/go17
   args: ['bash', 'testing/cloudbuild/run.bash']
   env:
   - "GCE_METADATA_HOST=metadata.google.internal"

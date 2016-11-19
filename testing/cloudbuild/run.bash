@@ -17,8 +17,12 @@ trap "gimmeproj -project golang-samples-tests done $GOLANG_SAMPLES_PROJECT_ID" E
 
 set -x
 
-# Un-cache
-[[ -d /cache ]] && mv /cache/* .
+date
+
+if [[ -d /cache ]]; then
+  time mv /cache/* .
+  echo 'Uncached'
+fi
 
 # Re-organize files
 export GOPATH=$PWD/gopath
@@ -36,9 +40,9 @@ go vet ./...
 ! grep -R '"context"$' * || { echo "Use golang.org/x/net/context"; false; }
 
 # Download imports.
-go get -u -v $(go list -f '{{join .Imports "\n"}}{{"\n"}}{{join .TestImports "\n"}}' ./... | sort | uniq | grep -v golang-samples)
+time go get -u -v $(go list -f '{{join .Imports "\n"}}{{"\n"}}{{join .TestImports "\n"}}' ./... | sort | uniq | grep -v golang-samples)
 
-exit 0
+date
 
 # Run all of the tests
 go test -v ./...
