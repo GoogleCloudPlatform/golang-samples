@@ -27,8 +27,8 @@ steps:
 
 # Build the image with newly downloaded deps.
 - name: gcr.io/cloudbuild-report/cacher
-  args: ['gcr.io/$PROJECT_ID/go17']
   env:
+  - TAG=gcr.io/$PROJECT_ID/go17
   - BASE=golang
 
 images: ['gcr.io/$PROJECT_ID/go17']
