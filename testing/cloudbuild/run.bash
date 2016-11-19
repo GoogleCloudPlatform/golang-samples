@@ -19,7 +19,7 @@ set -x
 
 # Re-organize files
 export GOPATH=$PWD/gopath
-oldfiles="*"
+oldfiles=$(ls | grep -v '^gopath$')
 target=$GOPATH/src/github.com/GoogleCloudPlatform/golang-samples
 mkdir -p $target
 mv $oldfiles $target
