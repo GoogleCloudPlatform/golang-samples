@@ -18,11 +18,11 @@ trap "gimmeproj -project golang-samples-tests done $GOLANG_SAMPLES_PROJECT_ID" E
 set -x
 
 # Re-organize files
-export GOPATH=/gopath
-oldpwd=$PWD
+export GOPATH=$PWD/gopath
+oldfiles="*"
 target=$GOPATH/src/github.com/GoogleCloudPlatform/golang-samples
 mkdir -p $target
-mv * $target
+mv $oldfiles $target
 cd $target
 
 # Do the easy stuff first. Fail fast!
