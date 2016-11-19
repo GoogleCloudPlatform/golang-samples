@@ -7,7 +7,6 @@ package snippets
 
 import (
 	"fmt"
-	"time"
 
 	"cloud.google.com/go/bigquery"
 	"golang.org/x/net/context"
@@ -92,8 +91,6 @@ func insertRows(client *bigquery.Client, datasetID, tableID string) error {
 func copyTable(client *bigquery.Client, datasetID, srcID, dstID string) error {
 	ctx := context.Background()
 	// [START bigquery_copy_table]
-	const pollInterval = time.Second
-
 	dataset := client.Dataset(datasetID)
 	copier := dataset.Table(dstID).CopierFrom(dataset.Table(srcID))
 	copier.WriteDisposition = bigquery.WriteTruncate
@@ -102,18 +99,12 @@ func copyTable(client *bigquery.Client, datasetID, srcID, dstID string) error {
 		return err
 	}
 
-	for {
-		status, err := job.Status(ctx)
-		if err != nil {
-			return err
-		}
-		if status.Done() {
-			if status.Err() != nil {
-				return status.Err()
-			}
-			break
-		}
-		time.Sleep(pollInterval)
+	status, err := job.Wait(ctx)
+	if err != nil {
+		return err
+	}
+	if err := status.Err(); err != nil {
+		return err
 	}
 	// [END bigquery_copy_table]
 	return nil
