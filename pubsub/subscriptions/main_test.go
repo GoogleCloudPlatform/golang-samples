@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
 	"golang.org/x/net/context"
 
@@ -102,6 +103,25 @@ outer:
 			subNames[i] = sub.ID()
 		}
 		t.Fatalf("got %+v; want a list with subscription %q", subNames, subID)
+	}
+}
+
+func TestIAM(t *testing.T) {
+	c := setup(t)
+
+	perms := testPermissions(c, subID)
+	if len(perms) == 0 {
+		t.Fatalf("want non-zero perms")
+	}
+
+	addUsers(c, subID)
+
+	policy := getPolicy(c, subID)
+	if role, member := iam.Editor, "group:cloud-logs@google.com"; !policy.HasRole(member, role) {
+		t.Fatalf("want %q as viewer, got %v", member, policy)
+	}
+	if role, member := iam.Viewer, iam.AllUsers; !policy.HasRole(member, role) {
+		t.Fatalf("want %q as viewer, got %v", member, policy)
 	}
 }
 

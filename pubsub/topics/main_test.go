@@ -9,6 +9,7 @@ import (
 
 	"golang.org/x/net/context"
 
+	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
@@ -65,6 +66,25 @@ func TestPublish(t *testing.T) {
 	c := setup(t)
 	if err := publish(c, topicID, "hello world"); err != nil {
 		t.Errorf("failed to publish message: %v", err)
+	}
+}
+
+func TestIAM(t *testing.T) {
+	c := setup(t)
+
+	perms := testPermissions(c, topicID)
+	if len(perms) == 0 {
+		t.Fatalf("want non-zero perms")
+	}
+
+	addUsers(c, topicID)
+
+	policy := getPolicy(c, topicID)
+	if role, member := iam.Editor, "group:cloud-logs@google.com"; !policy.HasRole(member, role) {
+		t.Fatalf("want %q as viewer, got %v", member, policy)
+	}
+	if role, member := iam.Viewer, iam.AllUsers; !policy.HasRole(member, role) {
+		t.Fatalf("want %q as viewer, got %v", member, policy)
 	}
 }
 

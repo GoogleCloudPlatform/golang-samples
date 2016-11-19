@@ -14,6 +14,7 @@ import (
 	// [START imports]
 	"golang.org/x/net/context"
 
+	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
 	"google.golang.org/api/iterator"
 	// [END imports]
@@ -121,4 +122,60 @@ func publish(client *pubsub.Client, topic, msg string) error {
 	}
 	// [END publish]
 	return nil
+}
+
+func getPolicy(c *pubsub.Client, topicName string) *iam.Policy {
+	ctx := context.Background()
+
+	// [START pubsub_get_topic_policy]
+	policy, err := c.Topic(topicName).IAM().Policy(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, role := range policy.Roles() {
+		log.Print(policy.Members(role))
+	}
+	// [END pubsub_get_topic_policy]
+	return policy
+}
+
+func addUsers(c *pubsub.Client, topicName string) {
+	ctx := context.Background()
+
+	// [START pubsub_set_topic_policy]
+	topic := c.Topic(topicName)
+	policy, err := topic.IAM().Policy(ctx)
+	if err != nil {
+		log.Fatalf("GetPolicy: %v", err)
+	}
+	// Other valid prefixes are "serviceAccount:", "user:"
+	// See the documentation for more values.
+	policy.Add(iam.AllUsers, iam.Viewer)
+	policy.Add("group:cloud-logs@google.com", iam.Editor)
+	if err := topic.IAM().SetPolicy(ctx, policy); err != nil {
+		log.Fatalf("SetPolicy: %v", err)
+	}
+	// NOTE: It may be necessary to retry this operation if IAM policies are
+	// being modified concurrently. SetPolicy will return an error if the policy
+	// was modified since it was retrieved.
+	// [END pubsub_set_topic_policy]
+}
+
+func testPermissions(c *pubsub.Client, topicName string) []string {
+	ctx := context.Background()
+
+	// [START pubsub_test_topic_permissions]
+	topic := c.Topic(topicName)
+	perms, err := topic.IAM().TestPermissions(ctx, []string{
+		"pubsub.topics.publish",
+		"pubsub.topics.update",
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, perm := range perms {
+		log.Printf("Allowed: %v", perm)
+	}
+	// [END pubsub_test_topic_permissions]
+	return perms
 }
