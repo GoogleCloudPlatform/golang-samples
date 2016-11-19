@@ -17,6 +17,9 @@ trap "gimmeproj -project golang-samples-tests done $GOLANG_SAMPLES_PROJECT_ID" E
 
 set -x
 
+# Un-cache
+[[ -d /cache ]] && mv /cache/* .
+
 # Re-organize files
 export GOPATH=$PWD/gopath
 oldfiles=$(ls | grep -v '^gopath$')
