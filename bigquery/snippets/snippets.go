@@ -98,7 +98,6 @@ func copyTable(client *bigquery.Client, datasetID, srcID, dstID string) error {
 	if err != nil {
 		return err
 	}
-
 	status, err := job.Wait(ctx)
 	if err != nil {
 		return err
