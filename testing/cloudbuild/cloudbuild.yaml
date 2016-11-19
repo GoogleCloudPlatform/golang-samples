@@ -1,0 +1,15 @@
+steps:
+- name: 'gcr.io/cloudbuild-report/report'
+  env:
+  - "REPORT_ID=$BUILD_ID"
+  - "REPORT_PROJECT=$PROJECT_ID"
+  - "REPORT_ORG=GoogleCloudPlatform"
+  - "REPORT_REPO=golang-samples"
+
+- name: 'gcr.io/cloud-builders/gsutil'
+  args: ['cp', 'gs://golang-samples-secrets/golang-samples-tests-4fbf85dd0f24.json', 'key.json']
+
+- name: 'golang:1.7'
+  args: ['bash', 'testing/cloudbuild/run.bash']
+  env:
+  - "GCE_METADATA_HOST=metadata.google.internal"
