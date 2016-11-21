@@ -65,7 +65,7 @@ func TestAll(t *testing.T) {
 
 func deleteDataset(t *testing.T, ctx context.Context, datasetID string) {
 	tc := testutil.SystemTest(t)
-	hc, err := google.DefaultClient(ctx)
+	hc, err := google.DefaultClient(ctx, rawbq.CloudPlatformScope)
 	if err != nil {
 		t.Errorf("DefaultClient: %v", err)
 	}
