@@ -88,6 +88,91 @@ func insertRows(client *bigquery.Client, datasetID, tableID string) error {
 	return nil
 }
 
+func listRows(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_list_rows]
+	q := client.Query(fmt.Sprintf(`
+		SELECT name, count
+		FROM [%s.%s]
+		WHERE count >= 5
+	`, datasetID, tableID))
+	it, err := q.Read(ctx)
+	if err != nil {
+		return err
+	}
+
+	for {
+		var row bigquery.ValueList
+		err := it.Next(&row)
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		fmt.Println(row)
+	}
+	// [END bigquery_list_rows]
+	return nil
+}
+
+func asyncQuery(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_async_query]
+	q := client.Query(fmt.Sprintf(`
+		SELECT name, count
+		FROM [%s.%s]
+	`, datasetID, tableID))
+	job, err := q.Run(ctx)
+	if err != nil {
+		return err
+	}
+
+	// Wait until async querying is done.
+	status, err := job.Wait(ctx)
+	if err != nil {
+		return err
+	}
+	if err := status.Err(); err != nil {
+		return err
+	}
+
+	it, err := job.Read(ctx)
+	for {
+		var row bigquery.ValueList
+		err := it.Next(&row)
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		fmt.Println(row)
+	}
+	// [END bigquery_async_query]
+	return nil
+}
+
+func browseTable(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_browse_table]
+	table := client.Dataset(datasetID).Table(tableID)
+	it := table.Read(ctx)
+	for {
+		var row bigquery.ValueList
+		err := it.Next(&row)
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		fmt.Println(row)
+	}
+	// [END bigquery_browse_table]
+	return nil
+}
+
 func copyTable(client *bigquery.Client, datasetID, srcID, dstID string) error {
 	ctx := context.Background()
 	// [START bigquery_copy_table]
