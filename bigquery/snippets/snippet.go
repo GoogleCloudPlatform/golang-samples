@@ -84,7 +84,7 @@ func insertRows(client *bigquery.Client, datasetID, tableID string) error {
 	if err := u.Put(ctx, items); err != nil {
 		return err
 	}
-	// [ENDSTART bigquery_insert_stream]
+	// [END bigquery_insert_stream]
 	return nil
 }
 
