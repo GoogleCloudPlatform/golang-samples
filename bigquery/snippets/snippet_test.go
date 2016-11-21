@@ -36,6 +36,15 @@ func TestAll(t *testing.T) {
 	if err := insertRows(client, datasetID, tableID); err != nil {
 		t.Errorf("failed to insert rows: %v", err)
 	}
+	if err := listRows(client, datasetID, tableID); err != nil {
+		t.Errorf("failed to list rows: %v", err)
+	}
+	if err := browseTable(client, datasetID, tableID); err != nil {
+		t.Errorf("failed to list rows: %v", err)
+	}
+	if err := asyncQuery(client, datasetID, tableID); err != nil {
+		t.Errorf("failed to async query: %v", err)
+	}
 
 	dstTableID := fmt.Sprintf("golang_example_tabledst_%d", time.Now().Unix())
 	if err := copyTable(client, datasetID, tableID, dstTableID); err != nil {
