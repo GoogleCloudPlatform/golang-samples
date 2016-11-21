@@ -7,6 +7,8 @@ package snippets
 
 import (
 	"fmt"
+	"io"
+	"os"
 
 	"cloud.google.com/go/bigquery"
 	"golang.org/x/net/context"
@@ -68,6 +70,24 @@ func createTable(client *bigquery.Client, datasetID, tableID string) error {
 		return err
 	}
 	// [END bigquery_create_table]
+	return nil
+}
+
+func listTables(client *bigquery.Client, w io.Writer, datasetID string) error {
+	ctx := context.Background()
+	// [START bigquery_list_tables]
+	ts := client.Dataset(datasetID).Tables(ctx)
+	for {
+		t, err := ts.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "Table: %q\n", t.TableID)
+	}
+	// [END bigquery_list_tables]
 	return nil
 }
 
@@ -202,5 +222,62 @@ func deleteTable(client *bigquery.Client, datasetID, tableID string) error {
 		return err
 	}
 	// [END bigquery_delete_table]
+	return nil
+}
+
+func importFromGCS(client *bigquery.Client, datasetID, tableID, gcsURI string) error {
+	ctx := context.Background()
+	// [START bigquery_import_from_gcs]
+	// For example, "gs://data-bucket/path/to/data.csv"
+	gcsRef := bigquery.NewGCSReference(gcsURI)
+	gcsRef.AllowJaggedRows = true
+	// TODO: set other options on the GCSReference.
+
+	loader := client.Dataset(datasetID).Table(tableID).LoaderFrom(gcsRef)
+	loader.CreateDisposition = bigquery.CreateNever
+	// TODO: set other options on the Loader.
+
+	job, err := loader.Run(ctx)
+	if err != nil {
+		return err
+	}
+	status, err := job.Wait(ctx)
+	if err != nil {
+		return err
+	}
+	if err := status.Err(); err != nil {
+		return err
+	}
+	// [END bigquery_import_from_gcs]
+	return nil
+}
+
+func importFromFile(client *bigquery.Client, datasetID, tableID, filename string) error {
+	ctx := context.Background()
+	// [START bigquery_import_from_file]
+	f, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	source := bigquery.NewReaderSource(f)
+	source.AllowJaggedRows = true
+	// TODO: set other options on the GCSReference.
+
+	loader := client.Dataset(datasetID).Table(tableID).LoaderFrom(source)
+	loader.CreateDisposition = bigquery.CreateNever
+	// TODO: set other options on the Loader.
+
+	job, err := loader.Run(ctx)
+	if err != nil {
+		return err
+	}
+	status, err := job.Wait(ctx)
+	if err != nil {
+		return err
+	}
+	if err := status.Err(); err != nil {
+		return err
+	}
+	// [END bigquery_import_from_file]
 	return nil
 }
