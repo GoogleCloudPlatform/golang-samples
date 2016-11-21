@@ -1,0 +1,32 @@
+steps:
+# Update the GitHub status.
+- name: gcr.io/cloudbuild-report/report
+  env:
+  - REPORT_ID=$BUILD_ID
+  - REPORT_PROJECT=$PROJECT_ID
+  - REPORT_ORG=GoogleCloudPlatform
+  - REPORT_REPO=golang-samples
+
+# Get the credentials for integration tests.
+- name: gcr.io/cloud-builders/gsutil
+  args: ['cp', 'gs://golang-samples-secrets/golang-samples-tests-4fbf85dd0f24.json', 'key.json']
+
+# Run the tests
+- name: gcr.io/$PROJECT_ID/go17
+  args: ['bash', 'testing/cloudbuild/run.bash']
+
+# Clean up the workdir.
+- name: debian
+  args: ['bash', '-c',
+    'rm -rf
+    gopath/src/github.com/GoogleCloudPlatform/golang-samples
+    gopath/pkg/**/github.com/GoogleCloudPlatform/golang-samples'
+  ]
+
+# Build the image with newly downloaded deps.
+- name: gcr.io/cloudbuild-report/cacher
+  env:
+  - TAG=gcr.io/$PROJECT_ID/go17
+  - BASE=golang:1.7
+
+images: ['gcr.io/$PROJECT_ID/go17']
