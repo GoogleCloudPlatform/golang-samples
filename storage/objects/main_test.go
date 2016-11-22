@@ -116,19 +116,25 @@ func TestObjects(t *testing.T) {
 		t.Errorf("cannot to delete object: %v", err)
 	}
 
-	// Cleanup, this part won't be executed if Fatal happens.
-	// TODO(jbd): Implement garbage cleaning.
-	if err := client.Bucket(bucket).Delete(ctx); err != nil {
-		t.Fatalf("cleanup of bucket failed: %v", err)
-	}
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		// Cleanup, this part won't be executed if Fatal happens.
+		// TODO(jbd): Implement garbage cleaning.
+		if err := client.Bucket(bucket).Delete(ctx); err != nil {
+			r.Errorf("cleanup of bucket failed: %v", err)
+		}
+	})
 
-	time.Sleep(4 * time.Second) // For eventual consistency.
-	if err := delete(client, dstBucket, object+"-copy"); err != nil {
-		t.Errorf("cannot to delete copy object: %v", err)
-	}
-	if err := client.Bucket(dstBucket).Delete(ctx); err != nil {
-		t.Fatalf("cleanup of bucket failed: %v", err)
-	}
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		if err := delete(client, dstBucket, object+"-copy"); err != nil {
+			r.Errorf("cannot to delete copy object: %v", err)
+		}
+	})
+
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		if err := client.Bucket(dstBucket).Delete(ctx); err != nil {
+			r.Errorf("cleanup of bucket failed: %v", err)
+		}
+	})
 }
 
 func ensureBucketExists(ctx context.Context, client *storage.Client, projectID, bucket string) {
