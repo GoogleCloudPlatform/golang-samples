@@ -14,10 +14,10 @@ import (
 	"time"
 )
 
-// Flaky runs function f for up to maxAttempts times until f returns successfully, and reports whether f was run successfully.
+// Retry runs function f for up to maxAttempts times until f returns successfully, and reports whether f was run successfully.
 // It will sleep for the given period between invocations of f.
 // Use the provided *testutil.R instead of a *testing.T from the function.
-func Flaky(t *testing.T, maxAttempts int, sleep time.Duration, f func(r *R)) bool {
+func Retry(t *testing.T, maxAttempts int, sleep time.Duration, f func(r *R)) bool {
 	for attempt := 1; attempt <= maxAttempts; attempt++ {
 		r := &R{Attempt: attempt, log: &bytes.Buffer{}}
 
@@ -54,8 +54,8 @@ func (r *R) Fail() {
 	r.failed = true
 }
 
-// Failf is equivalent to Logf followed by Fail.
-func (r *R) Failf(s string, v ...interface{}) {
+// Errorf is equivalent to Logf followed by Fail.
+func (r *R) Errorf(s string, v ...interface{}) {
 	r.logf(s, v...)
 	r.Fail()
 }

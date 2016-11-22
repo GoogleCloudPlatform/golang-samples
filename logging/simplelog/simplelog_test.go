@@ -48,15 +48,15 @@ func TestSimplelog(t *testing.T) {
 	writeEntry(client)
 	structuredWrite(client)
 
-	testutil.Flaky(t, 10, time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		entries, err := getEntries(adminClient, tc.ProjectID)
 		if err != nil {
-			r.Failf("getEntries: %v", err)
+			r.Errorf("getEntries: %v", err)
 			return
 		}
 
 		if got, want := len(entries), 2; got != want {
-			r.Failf("len(entries) = %d; want %d", got, want)
+			r.Errorf("len(entries) = %d; want %d", got, want)
 			return
 		}
 
@@ -69,7 +69,7 @@ func TestSimplelog(t *testing.T) {
 		for want, entry := range wantContain {
 			msg := fmt.Sprintf("%s", entry.Payload)
 			if !strings.Contains(msg, want) {
-				r.Failf("want %q to contain %q", msg, want)
+				r.Errorf("want %q to contain %q", msg, want)
 			}
 		}
 	})

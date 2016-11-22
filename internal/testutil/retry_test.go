@@ -10,7 +10,7 @@ import (
 )
 
 func TestRetry(t *testing.T) {
-	Flaky(t, 5, time.Millisecond, func(r *R) {
+	Retry(t, 5, time.Millisecond, func(r *R) {
 		if r.Attempt == 2 {
 			return
 		}
@@ -20,7 +20,7 @@ func TestRetry(t *testing.T) {
 
 func TestRetryAttempts(t *testing.T) {
 	var attempts int
-	Flaky(t, 10, time.Millisecond, func(r *R) {
+	Retry(t, 10, time.Millisecond, func(r *R) {
 		r.Logf("This line should appear only once.")
 		r.Logf("attempt=%d", r.Attempt)
 		attempts = r.Attempt

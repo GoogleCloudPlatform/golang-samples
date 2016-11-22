@@ -45,10 +45,10 @@ func TestCreate(t *testing.T) {
 func TestList(t *testing.T) {
 	c := setup(t)
 
-	testutil.Flaky(t, 10, time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		topics, err := list(c)
 		if err != nil {
-			r.Failf("failed to list topics: %v", err)
+			r.Errorf("failed to list topics: %v", err)
 		}
 
 		for _, t := range topics {
@@ -61,7 +61,7 @@ func TestList(t *testing.T) {
 		for i, t := range topics {
 			topicNames[i] = t.ID()
 		}
-		r.Failf("got %+v; want a list with topic = %q", topicNames, topicID)
+		r.Errorf("got %+v; want a list with topic = %q", topicNames, topicID)
 	})
 }
 

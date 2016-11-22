@@ -80,10 +80,10 @@ func TestCreate(t *testing.T) {
 func TestList(t *testing.T) {
 	c := setup(t)
 
-	testutil.Flaky(t, 10, time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		subs, err := list(c)
 		if err != nil {
-			r.Failf("failed to list subscriptions: %v", err)
+			r.Errorf("failed to list subscriptions: %v", err)
 			return
 		}
 
@@ -97,7 +97,7 @@ func TestList(t *testing.T) {
 		for i, sub := range subs {
 			subNames[i] = sub.ID()
 		}
-		r.Failf("got %+v; want a list with subscription %q", subNames, subID)
+		r.Errorf("got %+v; want a list with subscription %q", subNames, subID)
 	})
 }
 
