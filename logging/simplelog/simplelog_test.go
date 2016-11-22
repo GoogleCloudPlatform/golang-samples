@@ -48,28 +48,29 @@ func TestSimplelog(t *testing.T) {
 	writeEntry(client)
 	structuredWrite(client)
 
-	time.Sleep(5 * time.Second)
-
-	entries, err := getEntries(adminClient, tc.ProjectID)
-	if err != nil {
-		t.Fatalf("getEntries: %v", err)
-	}
-
-	if got, want := len(entries), 2; got != want {
-		t.Fatalf("len(entries) = %d; want %d", got, want)
-	}
-
-	wantContain := map[string]*logging.Entry{
-		"Anything":                            entries[0],
-		"The payload can be any type!":        entries[0],
-		"infolog is a standard Go log.Logger": entries[1],
-	}
-
-	for want, entry := range wantContain {
-		msg := fmt.Sprintf("%s", entry.Payload)
-		if !strings.Contains(msg, want) {
-			t.Errorf("want %q to contain %q", msg, want)
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		entries, err := getEntries(adminClient, tc.ProjectID)
+		if err != nil {
+			r.Errorf("getEntries: %v", err)
+			return
 		}
-	}
 
+		if got, want := len(entries), 2; got != want {
+			r.Errorf("len(entries) = %d; want %d", got, want)
+			return
+		}
+
+		wantContain := map[string]*logging.Entry{
+			"Anything":                            entries[0],
+			"The payload can be any type!":        entries[0],
+			"infolog is a standard Go log.Logger": entries[1],
+		}
+
+		for want, entry := range wantContain {
+			msg := fmt.Sprintf("%s", entry.Payload)
+			if !strings.Contains(msg, want) {
+				r.Errorf("want %q to contain %q", msg, want)
+			}
+		}
+	})
 }
