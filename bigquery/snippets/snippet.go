@@ -281,3 +281,27 @@ func importFromFile(client *bigquery.Client, datasetID, tableID, filename string
 	// [END bigquery_import_from_file]
 	return nil
 }
+
+func exportToGCS(client *bigquery.Client, datasetID, tableID, gcsURI string) error {
+	ctx := context.Background()
+	// [START bigquery_export_gcs]
+	// For example, "gs://data-bucket/path/to/data.csv"
+	gcsRef := bigquery.NewGCSReference(gcsURI)
+	gcsRef.FieldDelimiter = ","
+
+	extractor := client.Dataset(datasetID).Table(tableID).ExtractorTo(gcsRef)
+	extractor.DisableHeader = true
+	job, err := extractor.Run(ctx)
+	if err != nil {
+		return err
+	}
+	status, err := job.Wait(ctx)
+	if err != nil {
+		return err
+	}
+	if err := status.Err(); err != nil {
+		return err
+	}
+	// [END bigquery_export_gcs]
+	return nil
+}
