@@ -12,10 +12,13 @@ import (
 	"time"
 
 	gocontext "golang.org/x/net/context"
+	"golang.org/x/oauth2/google"
 
 	"strings"
 
+	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/storage"
+	rawbq "google.golang.org/api/bigquery/v2"
 	"google.golang.org/api/iterator"
 )
 
@@ -26,11 +29,99 @@ var (
 
 const appPrefix = "golang_samples"
 
+// NextDataset returns the next unique dataset ID generated for the given namespace.
+func NextDataset(namespace string) string {
+	atomic.AddUint64(&idCounter, 1)
+	return fmt.Sprintf("%s_%s_dataset%d_%d", appPrefix, namespace, idCounter, time.Now().Unix())
+}
+
+// NextTable returns the next unique table ID generated for the given namespace
+func NextTable(namespace string) string {
+	atomic.AddUint64(&idCounter, 1)
+	return fmt.Sprintf("%s_%s_table%d_%d", appPrefix, namespace, idCounter, time.Now().Unix())
+}
+
+// NextBucket will return a new unique bucket name for the given namespace.
+func NextBucket(namespace string) string {
+	atomic.AddUint64(&idCounter, 1)
+	return fmt.Sprintf("%s_%s_bucket%d_%d", appPrefix, namespace, idCounter, time.Now().Unix())
+}
+
+// NextObject will return a new unique object name for the given namespace.
+func NextObject(namespace string) string {
+	atomic.AddUint64(&idCounter, 1)
+	return fmt.Sprintf("%s_%s_object%d_%d", appPrefix, namespace, idCounter, time.Now().Unix())
+}
+
+// CleanupDatasets deletes the given datasets and all expired
+// datasets belongs to the tests.
+func CleanupDatasets(t *testing.T, name ...string) {
+	ctx := gocontext.Background()
+	tc := SystemTest(t)
+
+	all := make(map[string]struct{})
+	for _, n := range name {
+		all[n] = struct{}{}
+	}
+
+	client, err := bigquery.NewClient(ctx, tc.ProjectID)
+	if err != nil {
+		t.Errorf("bigquery.NewClient: %v", err)
+		return
+	}
+
+	it := client.Datasets(ctx)
+	for {
+		dataset, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+
+		if err != nil {
+			t.Errorf("it.Next: %v", err)
+			continue // Ignore, will be cleaned up at the next time.
+		}
+		creation, ok := extractTime(dataset.DatasetID)
+		if ok && creation.Before(time.Now().Add(-expiry)) {
+			all[dataset.DatasetID] = struct{}{}
+		}
+
+	}
+	for d := range all {
+		deleteDataset(t, d)
+	}
+}
+
+func deleteDataset(t *testing.T, datasetID string) {
+	ctx := gocontext.Background()
+	tc := SystemTest(t)
+
+	hc, err := google.DefaultClient(ctx, rawbq.CloudPlatformScope)
+	if err != nil {
+		t.Errorf("DefaultClient: %v", err)
+	}
+	s, err := rawbq.New(hc)
+	if err != nil {
+		t.Errorf("bigquery.New: %v", err)
+	}
+	call := s.Datasets.Delete(tc.ProjectID, datasetID)
+	call.DeleteContents(true)
+	call.Context(ctx)
+	if err = call.Do(); err != nil {
+		t.Errorf("deleteDataset(%q): %v", datasetID, err)
+	}
+}
+
 // CleanupBuckets deletes all the expired and given buckets.
 // If a bucket contains objects, it first deletes all the objects.
 func CleanupBuckets(t *testing.T, name ...string) {
 	ctx := gocontext.Background()
 	tc := SystemTest(t)
+
+	all := make(map[string]struct{})
+	for _, n := range name {
+		all[n] = struct{}{}
+	}
 
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -47,11 +138,11 @@ func CleanupBuckets(t *testing.T, name ...string) {
 		bucket := b.Name
 		t, ok := extractTime(bucket)
 		if ok && t.Before(time.Now().Add(-expiry)) {
-			name = append(name, bucket)
+			all[bucket] = struct{}{}
 		}
 	}
 
-	for _, b := range name {
+	for b := range all {
 		bucket := client.Bucket(b)
 		it := bucket.Objects(ctx, nil)
 
@@ -68,33 +159,26 @@ func CleanupBuckets(t *testing.T, name ...string) {
 				t.Logf("Cannot iterate objects (bucket=%v): %v", b, err)
 				break
 			}
-			Retry(t, 10, time.Second, func(r *R) {
-				if err := bucket.Object(o.Name).Delete(ctx); err != nil {
-					// Ignore, will expire and deleted in the future.
-					r.Errorf("cannot clean up object (bucket=%v, object=%v): %v", b, o.Name, err)
-				}
-			})
-
+			deleteObject(ctx, t, bucket, o.Name)
 		}
-		Retry(t, 10, time.Second, func(r *R) {
-			if err := bucket.Delete(ctx); err != nil {
-				// Ignore, will expire and deleted in the future.
-				r.Errorf("cannot clean up bucket (bucket=%v): %v", b, err)
-			}
-		})
+		deleteBucket(ctx, t, bucket)
 	}
 }
 
-// NextBucket will return a new unique bucket name for the given namespace.
-func NextBucket(namespace string) string {
-	atomic.AddUint64(&idCounter, 1)
-	return fmt.Sprintf("%s_%s_bucket%d_%d", appPrefix, namespace, idCounter, time.Now().Unix())
+func deleteObject(ctx gocontext.Context, t *testing.T, bucket *storage.BucketHandle, name string) {
+	Retry(t, 10, time.Second, func(r *R) {
+		if err := bucket.Object(name).Delete(ctx); err != nil {
+			r.Errorf("cannot clean up object (bucket=%v, object=%v): %v", bucket, name, err)
+		}
+	})
 }
 
-// NextObject will return a new unique object name for the given namespace.
-func NextObject(namespace string) string {
-	atomic.AddUint64(&idCounter, 1)
-	return fmt.Sprintf("%s_%s_object%d_%d", appPrefix, namespace, idCounter, time.Now().Unix())
+func deleteBucket(ctx gocontext.Context, t *testing.T, bucket *storage.BucketHandle) {
+	Retry(t, 10, time.Second, func(r *R) {
+		if err := bucket.Delete(ctx); err != nil {
+			r.Errorf("cannot clean up bucket (bucket=%v): %v", bucket, err)
+		}
+	})
 }
 
 // BucketsMustExist makes sure the given list of buckets exists.
@@ -122,9 +206,6 @@ func BucketsMustExist(t *testing.T, name ...string) {
 	}
 }
 
-// extractTime extracts the timestamp of s, which must begin with prefix and
-// match the form generated by uniqueID. The second return value is true on
-// success, false if there was a problem.
 func extractTime(s string) (time.Time, bool) {
 	if !strings.HasPrefix(s, appPrefix) {
 		return time.Time{}, false
@@ -133,7 +214,7 @@ func extractTime(s string) (time.Time, bool) {
 	if i < 0 {
 		return time.Time{}, false
 	}
-	nanos, err := strconv.ParseInt(s[:i], 10, 64)
+	nanos, err := strconv.ParseInt(s[i+1:], 10, 64)
 	if err != nil {
 		return time.Time{}, false
 	}
