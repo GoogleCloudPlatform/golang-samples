@@ -2,9 +2,9 @@
 
 ## Deploying the backend
 
-### Update the `swagger.yaml` configuration file
+### Update the `openapi.yaml` configuration file
 
-Edit the `swagger.yaml` file and replace `YOUR-PROJECT-ID` with your project ID.
+Edit the `openapi.yaml` file and replace `YOUR-PROJECT-ID` with your project ID.
 
 The backend can be secured with several authentication schemes:
 
