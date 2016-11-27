@@ -6,5 +6,7 @@ handlers:
   script: _go_app
 
 env_variables:
-  CLOUDSQL_PROJECT_ID: your-project-id
-  CLOUDSQL_INSTANCE: your-instance-name
+  CLOUDSQL_CONNECTION_NAME: your-connection-name
+  CLOUDSQL_USER_NAME: your-user-name
+  CLOUDSQL_PASSWORD: your-password
+
