@@ -24,22 +24,28 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
+	
+	connectionName := os.Getenv("CLOUDSQL_CONNECTION_NAME")
+	user := os.Getenv("CLOUDSQL_USER_NAME")
+	password := os.Getenv("CLOUDSQL_PASSWORD")
 
-	projectID := os.Getenv("CLOUDSQL_PROJECT_ID")
-	instanceName := os.Getenv("CLOUDSQL_INSTANCE")
-
-	if projectID == "" {
+	
+	if connectionName == "" {
 		http.Error(w, "Missing project ID environment variable.", 500)
 		return
 	}
-	if instanceName == "" {
-		http.Error(w, "Missing instance name environment variable.", 500)
+				    
+				    
+	if user == "" {
+		http.Error(w, "Missing project ID environment variable.", 500)
 		return
 	}
 
+	// Don't return error for empty string for password
+	
 	w.Header().Set("Content-Type", "text/plain")
 
-	db, err := sql.Open("mysql", fmt.Sprintf("root@cloudsql(%s:%s)/", projectID, instanceName))
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@cloudsql(%s)/", user, password, connectionName))
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Could not open db: %v", err), 500)
 		return
