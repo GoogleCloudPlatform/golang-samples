@@ -6,5 +6,9 @@ handlers:
   script: _go_app
 
 env_variables:
-  CLOUDSQL_PROJECT_ID: your-project-id
-  CLOUDSQL_INSTANCE: your-instance-name
+  # Replace INSTANCE_CONNECTION_NAME with the value obtained when configuring your
+  # Cloud SQL instance, available from the Google Cloud Console or from the Cloud SDK.
+  # For SQL v2 instances, this should be in the form of "project:region:instance".
+  CLOUDSQL_CONNECTION_NAME: INSTANCE_CONNECTION_NAME
+  CLOUDSQL_USER: root
+  CLOUDSQL_PASSWORD: ''
