@@ -4,5 +4,5 @@ env: flex
 beta_settings:
   # Enable Google Cloud Endpoints API management.
   use_endpoints_api_management: true
-  # Specify the Swagger API specification.
+  # Specify the Open API specification.
   endpoints_swagger_spec_file: openapi.yaml
