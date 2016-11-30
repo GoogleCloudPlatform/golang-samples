@@ -122,7 +122,7 @@ func listRows(client *bigquery.Client, datasetID, tableID string) error {
 	}
 
 	for {
-		var row bigquery.ValueList
+		var row []bigquery.Value
 		err := it.Next(&row)
 		if err == iterator.Done {
 			break
@@ -159,7 +159,7 @@ func asyncQuery(client *bigquery.Client, datasetID, tableID string) error {
 
 	it, err := job.Read(ctx)
 	for {
-		var row bigquery.ValueList
+		var row []bigquery.Value
 		err := it.Next(&row)
 		if err == iterator.Done {
 			break
@@ -179,7 +179,7 @@ func browseTable(client *bigquery.Client, datasetID, tableID string) error {
 	table := client.Dataset(datasetID).Table(tableID)
 	it := table.Read(ctx)
 	for {
-		var row bigquery.ValueList
+		var row []bigquery.Value
 		err := it.Next(&row)
 		if err == iterator.Done {
 			break
