@@ -36,9 +36,11 @@ func TestSimplelog(t *testing.T) {
 	}()
 
 	defer func() {
-		if err := deleteLog(adminClient); err != nil {
-			t.Errorf("deleteLog: %v", err)
-		}
+		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+			if err := deleteLog(adminClient); err != nil {
+				r.Errorf("deleteLog: %v", err)
+			}
+		})
 	}()
 
 	client.OnError = func(err error) {
