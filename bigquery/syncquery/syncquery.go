@@ -37,7 +37,7 @@ func main() {
 }
 
 // Query returns a slice of the results of a query.
-func Query(proj, q string) ([]bigquery.ValueList, error) {
+func Query(proj, q string) ([][]bigquery.Value, error) {
 	ctx := context.Background()
 
 	client, err := bigquery.NewClient(ctx, proj)
@@ -51,10 +51,10 @@ func Query(proj, q string) ([]bigquery.ValueList, error) {
 		return nil, err
 	}
 
-	var rows []bigquery.ValueList
+	var rows [][]bigquery.Value
 
 	for {
-		var row bigquery.ValueList
+		var row []bigquery.Value
 		err := iter.Next(&row)
 		if err == iterator.Done {
 			return rows, nil
