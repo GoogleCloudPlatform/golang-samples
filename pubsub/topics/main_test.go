@@ -6,6 +6,7 @@ package main
 
 import (
 	"testing"
+	"time"
 
 	"golang.org/x/net/context"
 
@@ -43,21 +44,25 @@ func TestCreate(t *testing.T) {
 
 func TestList(t *testing.T) {
 	c := setup(t)
-	topics, err := list(c)
-	if err != nil {
-		t.Fatalf("failed to list topics: %v", err)
-	}
-	var ok bool
-	for _, t := range topics {
-		// TODO(jbd): Fix HasSuffix when
-		if t.ID() == topicID {
-			ok = true
-			break
+
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		topics, err := list(c)
+		if err != nil {
+			r.Errorf("failed to list topics: %v", err)
 		}
-	}
-	if !ok {
-		t.Errorf("got %+v; want a list with topic = %q", topics, topicID)
-	}
+
+		for _, t := range topics {
+			if t.ID() == topicID {
+				return // PASS
+			}
+		}
+
+		topicNames := make([]string, len(topics))
+		for i, t := range topics {
+			topicNames[i] = t.ID()
+		}
+		r.Errorf("got %+v; want a list with topic = %q", topicNames, topicID)
+	})
 }
 
 func TestPublish(t *testing.T) {

@@ -23,7 +23,7 @@ const (
 	topicID = "golang-samples-topic"
 )
 
-var once sync.Once // guards cleanup related operations that needs to be executed only for once.
+var once sync.Once // guards cleanup related operations in setup.
 
 func setup(t *testing.T) *pubsub.Client {
 	ctx := context.Background()
@@ -36,7 +36,7 @@ func setup(t *testing.T) *pubsub.Client {
 
 	// Cleanup resources from the previous failed tests.
 	once.Do(func() {
-		// create a topic to subscribe to.
+		// Create a topic.
 		topic = client.Topic(topicID)
 		ok, err := topic.Exists(ctx)
 		if err != nil {
@@ -48,7 +48,7 @@ func setup(t *testing.T) *pubsub.Client {
 			}
 		}
 
-		// delete the sub if already exists
+		// Delete the sub if already exists.
 		sub := client.Subscription(subID)
 		ok, err = sub.Exists(ctx)
 		if err != nil {
@@ -80,30 +80,25 @@ func TestCreate(t *testing.T) {
 func TestList(t *testing.T) {
 	c := setup(t)
 
-	var ok bool
-	var subs []*pubsub.Subscription
-outer:
-	for attempts := 0; attempts < 5; attempts++ {
-		var err error
-		subs, err = list(c)
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		subs, err := list(c)
 		if err != nil {
-			t.Fatalf("failed to list subscriptions: %v", err)
+			r.Errorf("failed to list subscriptions: %v", err)
+			return
 		}
+
 		for _, sub := range subs {
 			if sub.ID() == subID {
-				ok = true
-				break outer
+				return // PASS
 			}
 		}
-		time.Sleep(2 * time.Second)
-	}
-	if !ok {
+
 		subNames := make([]string, len(subs))
 		for i, sub := range subs {
 			subNames[i] = sub.ID()
 		}
-		t.Fatalf("got %+v; want a list with subscription %q", subNames, subID)
-	}
+		r.Errorf("got %+v; want a list with subscription %q", subNames, subID)
+	})
 }
 
 func TestIAM(t *testing.T) {
