@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
@@ -25,21 +26,13 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	projectID := os.Getenv("CLOUDSQL_PROJECT_ID")
-	instanceName := os.Getenv("CLOUDSQL_INSTANCE")
-
-	if projectID == "" {
-		http.Error(w, "Missing project ID environment variable.", 500)
-		return
-	}
-	if instanceName == "" {
-		http.Error(w, "Missing instance name environment variable.", 500)
-		return
-	}
+	connectionName := mustGetenv("CLOUDSQL_CONNECTION_NAME")
+	user := mustGetenv("CLOUDSQL_USER")
+	password := os.Getenv("CLOUDSQL_PASSWORD") // NOTE: password may be empty
 
 	w.Header().Set("Content-Type", "text/plain")
 
-	db, err := sql.Open("mysql", fmt.Sprintf("root@cloudsql(%s:%s)/", projectID, instanceName))
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@cloudsql(%s)/", user, password, connectionName))
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Could not open db: %v", err), 500)
 		return
@@ -63,4 +56,12 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(buf, "- %s\n", dbName)
 	}
 	w.Write(buf.Bytes())
+}
+
+func mustGetenv(k string) string {
+	v := os.Getenv(k)
+	if v == "" {
+		log.Panicf("%s environment variable not set.", k)
+	}
+	return v
 }
