@@ -2,5 +2,7 @@ runtime: go
 env: flex
 
 endpoints_api_service:
-  name: ENDPOINTS SERVICE-NAME # To be replaced.
-  config_id: ENDPOINTS CONFIG-ID # To be replaced.
+  # The following values are to be replaced by information from the output of
+  # 'gcloud service-management deploy openapi.yaml' command.
+  name: ENDPOINTS SERVICE-NAME
+  config_id: ENDPOINTS CONFIG-ID
