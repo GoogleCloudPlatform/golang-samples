@@ -40,7 +40,7 @@ spec:
       containers:
       # [START esp]
       - name: esp
-        image: b.gcr.io/endpoints/endpoints-runtime:0.3
+        image: gcr.io/endpoints-release/endpoints-runtime:1
         args: [
           "-p", "8081",
           "-a", "127.0.0.1:8080",
