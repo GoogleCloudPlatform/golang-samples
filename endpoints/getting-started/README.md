@@ -10,7 +10,7 @@ environments, see the [Google Cloud Endpoints Quickstarts][1].
 Simply run the backend using `go run`:
 
 ```bash
-go run main.go
+go run app.go
 ```
 
 ## Running the client
