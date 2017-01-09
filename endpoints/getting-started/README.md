@@ -32,7 +32,17 @@ First, [download a Service Account JSON key file](https://developers.google.com/
 Then, run:
 
 ```bash
-go run client/main.go -host=https://my-app.appspot.com -service-account=path_to_service_account.json
+go run client/main.go -host=https://my-app.appspot.com -service-account=path_to_service_account.json -jwt
+```
+
+### Send a request using Google ID authentication
+
+First, [download a Service Account JSON key file](https://developers.google.com/identity/protocols/OAuth2ServiceAccount#creatinganaccount).
+
+Then, run:
+
+```bash
+go run client/main.go -host=https://my-app.appspot.com -service-account=path_to_service_account.json -google-id
 ```
 
 [1]: https://cloud.google.com/endpoints/docs/quickstarts

@@ -18,6 +18,7 @@ import (
 	"log"
 	"net/http"
 	"net/http/httputil"
+	"net/url"
 	"os"
 	"time"
 
@@ -26,11 +27,18 @@ import (
 )
 
 var (
-	host   = flag.String("host", "", "The API host. Required.")
-	apiKey = flag.String("api-key", "", "Your API key. Required.")
+	host        = flag.String("host", "", "The API host. Required.")
+	apiKey      = flag.String("api-key", "", "Your API key. Required.")
+	useGoogleId = flag.Bool("google-id", false, "Use Google ID authentication.")
+	useJwt      = flag.Bool("jwt", false, "Use JWT authentication.")
 
 	echo           = flag.String("echo", "", "Message to echo. Cannot be used with -service-account")
 	serviceAccount = flag.String("service-account", "", "Path to service account JSON file. Cannot be used with -echo.")
+)
+
+const (
+	targetAudience     = "https://echo.endpoints.sample.google.com"
+	oauthTokenEndpoint = "https://www.googleapis.com/oauth2/v4/token"
 )
 
 func main() {
@@ -45,10 +53,17 @@ func main() {
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
-	if *serviceAccount != "" && *echo != "" {
-		fmt.Fprint(os.Stderr, "Provide only one of -echo or -service-account.")
-		flag.PrintDefaults()
-		os.Exit(1)
+	if *serviceAccount != "" {
+		if *echo != "" {
+			fmt.Fprint(os.Stderr, "Provide only one of -echo or -service-account.")
+			flag.PrintDefaults()
+			os.Exit(1)
+		}
+		if *useGoogleId == *useJwt {
+			fmt.Fprint(os.Stderr, "Use either -google-id or -jwt.")
+			flag.PrintDefaults()
+			os.Exit(1)
+		}
 	}
 
 	var resp *http.Response
@@ -56,7 +71,11 @@ func main() {
 	if *echo != "" {
 		resp, err = doEcho()
 	} else if *serviceAccount != "" {
-		resp, err = doJWT()
+		if *useGoogleId {
+			resp, err = doGoogleId()
+		} else if *useJwt {
+			resp, err = doJWT()
+		}
 	}
 	if err != nil {
 		log.Fatal(err)
@@ -66,6 +85,7 @@ func main() {
 		log.Fatal(err)
 	}
 	os.Stdout.Write(b)
+	os.Stdout.Write([]byte{'\n'})
 }
 
 // doEcho performs an authenticated echo request using an API key.
@@ -101,7 +121,7 @@ func doJWT() (*http.Response, error) {
 	jwt := &jws.ClaimSet{
 		Iss:   "jwt-client.endpoints.sample.google.com",
 		Sub:   "foo!",
-		Aud:   "echo.endpoints.sample.google.com",
+		Aud:   targetAudience,
 		Scope: "email",
 		Iat:   iat.Unix(),
 		Exp:   exp.Unix(),
@@ -118,6 +138,67 @@ func doJWT() (*http.Response, error) {
 
 	req, _ := http.NewRequest("GET", *host+"/auth/info/googlejwt?key="+*apiKey, nil)
 	req.Header.Add("Authorization", "Bearer "+msg)
+	return http.DefaultClient.Do(req)
+}
+
+func doGoogleId() (*http.Response, error) {
+	sa, err := ioutil.ReadFile(*serviceAccount)
+	if err != nil {
+		return nil, fmt.Errorf("could not read service account file: %v", err)
+	}
+	conf, err := google.JWTConfigFromJSON(sa)
+	if err != nil {
+		return nil, fmt.Errorf("could not parse service account JSON: %v", err)
+	}
+	rsaKey, err := parseKey(conf.PrivateKey)
+	if err != nil {
+		return nil, fmt.Errorf("could not get RSA key: %v", err)
+	}
+
+	iat := time.Now()
+	exp := iat.Add(time.Hour)
+
+	jwt := &jws.ClaimSet{
+		Iss: conf.Email,
+		Aud: oauthTokenEndpoint,
+		Iat: iat.Unix(),
+		Exp: exp.Unix(),
+		PrivateClaims: map[string]interface{}{
+			"target_audience": targetAudience,
+		},
+	}
+	jwsHeader := &jws.Header{
+		Algorithm: "RS256",
+		Typ:       "JWT",
+	}
+
+	msg, err := jws.Encode(jwsHeader, jwt, rsaKey)
+	if err != nil {
+		return nil, fmt.Errorf("could not encode JWT: %v", err)
+	}
+	resp, err := http.PostForm(oauthTokenEndpoint,
+		url.Values{
+			"grant_type": {"urn:ietf:params:oauth:grant-type:jwt-bearer"},
+			"assertion":  {msg},
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		b, _ := httputil.DumpResponse(resp, true)
+		return nil, fmt.Errorf("unable to get ID token: %v, %s", resp.StatusCode, b)
+	}
+	var token struct {
+		IdToken string `json:"id_token"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&token); err != nil {
+		return nil, fmt.Errorf("invalid JSON response from Google's token API: %v", err)
+	}
+
+	req, _ := http.NewRequest("GET", *host+"/auth/info/googleidtoken", nil)
+	req.Header.Add("Authorization", "Bearer "+token.IdToken)
 	return http.DefaultClient.Do(req)
 }
 
