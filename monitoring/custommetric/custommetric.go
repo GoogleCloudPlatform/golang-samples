@@ -63,6 +63,7 @@ func getCustomMetric(s *monitoring.Service, projectID, metricType string) (*moni
 }
 
 // writeTimeSeriesValue writes a value for the custom metric created
+// [START write_timeseries]
 func writeTimeSeriesValue(s *monitoring.Service, projectID, metricType string) error {
 	now := time.Now().UTC().Format(time.RFC3339Nano)
 	randVal := rand.Int63n(10)
@@ -104,6 +105,7 @@ func writeTimeSeriesValue(s *monitoring.Service, projectID, metricType string) e
 	}
 	return nil
 }
+// [END write_timeseries]
 
 // readTimeSeriesValue reads the TimeSeries for the value specified by metric type in a time window from the last 5 minutes.
 func readTimeSeriesValue(s *monitoring.Service, projectID, metricType string) error {
