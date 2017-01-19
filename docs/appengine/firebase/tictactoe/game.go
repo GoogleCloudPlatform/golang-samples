@@ -11,7 +11,7 @@ import (
 )
 
 type Game struct {
-	K            *datastore.Key `json:"-",datastore:"__key__"`
+	K            *datastore.Key `json:"-" datastore:"__key__"`
 	UserX        string         `json:"userX"`
 	UserO        string         `json:"userO"`
 	Board        string         `json:"board"`
