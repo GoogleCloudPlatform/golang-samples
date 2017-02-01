@@ -165,7 +165,7 @@ func detectText(w io.Writer, file string) error {
 	} else {
 		fmt.Fprintln(w, "Text:")
 		for _, annotation := range annotations {
-			fmt.Fprintln(w, annotation.Description)
+			fmt.Fprintf(w, "%q\n", annotation.Description)
 		}
 	}
 
@@ -385,7 +385,7 @@ func detectTextGCS(w io.Writer, file string) error {
 	} else {
 		fmt.Fprintln(w, "Text:")
 		for _, annotation := range annotations {
-			fmt.Fprintln(w, annotation.Description)
+			fmt.Fprintf(w, "%q\n", annotation.Description)
 		}
 	}
 
