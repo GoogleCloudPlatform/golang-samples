@@ -16,7 +16,7 @@ func TestLabel(t *testing.T) {
 	testutil.SystemTest(t)
 
 	var buf bytes.Buffer
-	err := findLabels(&buf, "../testdata/cat.jpg")
+	err := detectLabels(&buf, "../testdata/cat.jpg")
 	if err != nil {
 		t.Fatalf("got %v, want nil err", err)
 	}
