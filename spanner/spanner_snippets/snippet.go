@@ -1,19 +1,8 @@
-/*
-Copyright 2016 Google Inc. All Rights Reserved.
+// Copyright 2016 Google Inc. All rights reserved.
+// Use of this source code is governed by the Apache 2.0
+// license that can be found in the LICENSE file.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
+// Command spanner_snippets contains runnable snippet code for Cloud Spanner.
 package main
 
 import (
@@ -30,15 +19,16 @@ import (
 	"cloud.google.com/go/spanner/admin/database/apiv1"
 	"golang.org/x/net/context"
 	"google.golang.org/api/iterator"
-	"google.golang.org/api/option"
 
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
 type command func(ctx context.Context, w io.Writer, client *spanner.Client) error
+type adminCommand func(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error
 
 var (
-	commands = map[string]command{"write": write,
+	commands = map[string]command{
+		"write":               write,
 		"query":               query,
 		"read":                read,
 		"update":              update,
@@ -47,12 +37,9 @@ var (
 		"queryindex":          queryUsingIndex,
 		"readindex":           readUsingIndex,
 		"readstoringindex":    readStoringIndex,
-		"readonlytransaction": readOnlyTransaction}
-)
+		"readonlytransaction": readOnlyTransaction,
+	}
 
-type adminCommand func(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error
-
-var (
 	adminCommands = map[string]adminCommand{
 		"createdatabase":  createDatabase,
 		"addnewcolumn":    addNewColumn,
@@ -134,8 +121,7 @@ func query(ctx context.Context, w io.Writer, client *spanner.Client) error {
 }
 
 func read(ctx context.Context, w io.Writer, client *spanner.Client) error {
-	iter := client.Single().Read(
-		ctx, "Albums", spanner.AllKeys(),
+	iter := client.Single().Read(ctx, "Albums", spanner.AllKeys(),
 		[]string{"SingerId", "AlbumId", "AlbumTitle"})
 	defer iter.Stop()
 	for {
@@ -300,8 +286,7 @@ func queryUsingIndex(ctx context.Context, w io.Writer, client *spanner.Client) e
 }
 
 func readUsingIndex(ctx context.Context, w io.Writer, client *spanner.Client) error {
-	iter := client.Single().ReadUsingIndex(
-		ctx, "Albums", "AlbumsByAlbumTitle", spanner.AllKeys(),
+	iter := client.Single().ReadUsingIndex(ctx, "Albums", "AlbumsByAlbumTitle", spanner.AllKeys(),
 		[]string{"AlbumId", "AlbumTitle"})
 	defer iter.Stop()
 	for {
@@ -338,8 +323,7 @@ func addStoringIndex(ctx context.Context, w io.Writer, adminClient *database.Dat
 }
 
 func readStoringIndex(ctx context.Context, w io.Writer, client *spanner.Client) error {
-	iter := client.Single().ReadUsingIndex(
-		ctx, "Albums", "AlbumsByAlbumTitle2", spanner.AllKeys(),
+	iter := client.Single().ReadUsingIndex(ctx, "Albums", "AlbumsByAlbumTitle2", spanner.AllKeys(),
 		[]string{"AlbumId", "AlbumTitle", "MarketingBudget"})
 	defer iter.Stop()
 	for {
@@ -407,13 +391,13 @@ func readOnlyTransaction(ctx context.Context, w io.Writer, client *spanner.Clien
 	}
 }
 
-func createClients(ctx context.Context, db string, opts ...option.ClientOption) (*database.DatabaseAdminClient, *spanner.Client) {
-	adminClient, err := database.NewDatabaseAdminClient(ctx, opts...)
+func createClients(ctx context.Context, db string) (*database.DatabaseAdminClient, *spanner.Client) {
+	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	dataClient, err := spanner.NewClient(ctx, db, opts...)
+	dataClient, err := spanner.NewClient(ctx, db)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -421,12 +405,13 @@ func createClients(ctx context.Context, db string, opts ...option.ClientOption) 
 	return adminClient, dataClient
 }
 
-func run(ctx context.Context, adminClient *database.DatabaseAdminClient, dataClient *spanner.Client, w io.Writer, cmd string, db string) {
+func run(ctx context.Context, adminClient *database.DatabaseAdminClient, dataClient *spanner.Client, w io.Writer, cmd string, db string) error {
 	if adminCmdFn := adminCommands[cmd]; adminCmdFn != nil {
-		if err := adminCmdFn(ctx, w, adminClient, db); err != nil {
-			log.Fatal("%s failed with %v", cmd, err)
+		err := adminCmdFn(ctx, w, adminClient, db)
+		if err != nil {
+			fmt.Fprintf(w, "%s failed with %v", cmd, err)
 		}
-		return
+		return err
 	}
 
 	// Normal mode
@@ -434,35 +419,37 @@ func run(ctx context.Context, adminClient *database.DatabaseAdminClient, dataCli
 	if cmdFn == nil {
 		printUsageAndExit()
 	}
-	if err := cmdFn(ctx, w, dataClient); err != nil {
-		log.Fatalf("%q failed with %v", cmd, err)
+	err := cmdFn(ctx, w, dataClient)
+	if err != nil {
+		fmt.Fprintf(w, "%s failed with %v", cmd, err)
 	}
-}
-
-func printUsageAndExit() {
-	fmt.Fprintf(os.Stderr,
-		`Usage:
-                        go run spanner_sample.go <command> <database_name>
-			Command can be one of: createdatabase, write, query, read, update, writetransaction, addnewcolumn, querynewcolumn, addindex, queryindex, readindex, addstoringindex, readstoringindex, readonlytransaction`+"\n")
-
-	fmt.Fprintf(os.Stderr,
-		`Examples:
-                        go run spanner_sample.go createdatabase projects/my-project/instances/my-instance/databases/example-db
-                        go run spanner_sample.go write projects/my-project/instances/my-instance/databases/example-db`+"\n")
-	os.Exit(1)
+	return err
 }
 
 func main() {
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, `Usage: go run spanner_sample.go <command> <database_name>
+
+	Command can be one of: createdatabase, write, query, read, update,
+		writetransaction, addnewcolumn, querynewcolumn, addindex, queryindex, readindex,
+		addstoringindex, readstoringindex, readonlytransaction
+
+Examples:
+	go run spanner_sample.go createdatabase projects/my-project/instances/my-instance/databases/example-db
+	go run spanner_sample.go write projects/my-project/instances/my-instance/databases/example-db
+`)
+	}
+
 	flag.Parse()
 	if len(flag.Args()) != 2 {
-		printUsageAndExit()
+		flag.Usage()
+		os.Exit(2)
 	}
-	cmd := flag.Arg(0)
-	db := flag.Arg(1)
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
-	defer cancel()
+
+	cmd, db := flag.Arg(0), flag.Arg(1)
+	ctx, _ := context.WithTimeout(context.Background(), 1*time.Minute)
 	adminClient, dataClient := createClients(ctx, db)
-	defer adminClient.Close()
-	defer dataClient.Close()
-	run(ctx, adminClient, dataClient, os.Stdout, cmd, db)
+	if err := run(ctx, adminClient, dataClient, os.Stdout, cmd, db); err != nil {
+		os.Exit(1)
+	}
 }
