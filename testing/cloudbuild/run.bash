@@ -19,6 +19,8 @@ trap "gimmeproj -project golang-samples-tests done $GOLANG_SAMPLES_PROJECT_ID" E
 
 set -x
 
+export GOLANG_SAMPLES_SPANNER=projects/golang-samples-tests/instances/golang-samples-tests
+
 date
 
 if [[ -d /cache ]]; then

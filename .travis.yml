@@ -38,6 +38,7 @@ before_install:
       exit 1;
     fi;
     echo "Running tests in project $GOLANG_SAMPLES_PROJECT_ID";
+    export GOLANG_SAMPLES_SPANNER=projects/golang-samples-tests/instances/golang-samples-tests
   else
     echo "Not running system tests.";
   fi
