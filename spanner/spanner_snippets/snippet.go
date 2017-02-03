@@ -417,7 +417,8 @@ func run(ctx context.Context, adminClient *database.DatabaseAdminClient, dataCli
 	// Normal mode
 	cmdFn := commands[cmd]
 	if cmdFn == nil {
-		printUsageAndExit()
+		flag.Usage()
+		os.Exit(2)
 	}
 	err := cmdFn(ctx, w, dataClient)
 	if err != nil {
@@ -428,15 +429,15 @@ func run(ctx context.Context, adminClient *database.DatabaseAdminClient, dataCli
 
 func main() {
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, `Usage: go run spanner_sample.go <command> <database_name>
+		fmt.Fprintf(os.Stderr, `Usage: spanner_snippets <command> <database_name>
 
 	Command can be one of: createdatabase, write, query, read, update,
 		writetransaction, addnewcolumn, querynewcolumn, addindex, queryindex, readindex,
 		addstoringindex, readstoringindex, readonlytransaction
 
 Examples:
-	go run spanner_sample.go createdatabase projects/my-project/instances/my-instance/databases/example-db
-	go run spanner_sample.go write projects/my-project/instances/my-instance/databases/example-db
+	spanner_snippets createdatabase projects/my-project/instances/my-instance/databases/example-db
+	spanner_snippets write projects/my-project/instances/my-instance/databases/example-db
 `)
 	}
 
