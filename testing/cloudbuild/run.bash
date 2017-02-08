@@ -4,6 +4,8 @@ set -e
 
 mv key.json /tmp/key.json
 export GOOGLE_APPLICATION_CREDENTIALS=/tmp/key.json
+export GOLANG_SAMPLES_KMS_KEYRING=ring1
+export GOLANG_SAMPLES_KMS_CRYPTOKEY=key1
 
 curl https://storage.googleapis.com/gimme-proj/linux_amd64/gimmeproj > /bin/gimmeproj && chmod +x /bin/gimmeproj;
 gimmeproj version;
