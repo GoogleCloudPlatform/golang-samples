@@ -33,6 +33,6 @@ func TestCrypter(t *testing.T) {
 
 	decryptedText, err := decrypt(tc.ProjectID, keyRing, cryptoKey, cipherText)
 	if !bytes.Equal(decryptedText, plainText) {
-		t.Errorf("got output: %q; should be Hello KMS", string(decryptedText))
+		t.Errorf("decrypt: got %q; want %q", string(decryptedText), string(plainText))
 	}
 }
