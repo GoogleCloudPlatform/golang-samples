@@ -27,6 +27,8 @@ before_install:
 - if [ $SYSTEM_TESTS ]; then
     openssl aes-256-cbc -K $encrypted_e44ee91b46d4_key -iv $encrypted_e44ee91b46d4_iv -in key.json.enc -out key.json -d;
     export GOOGLE_APPLICATION_CREDENTIALS="$(pwd)/key.json";
+    export GOLANG_SAMPLES_KMS_KEYRING=ring1
+    export GOLANG_SAMPLES_KMS_CRYPTOKEY=key1
 
     curl https://storage.googleapis.com/gimme-proj/linux_amd64/gimmeproj > gimmeproj && chmod +x gimmeproj;
     ./gimmeproj version;
