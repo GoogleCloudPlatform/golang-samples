@@ -34,7 +34,7 @@ func main() {
 
 	input, err := ioutil.ReadFile(inPath)
 	if err != nil {
-		log.Fatal("Error reading file %q: %v", inPath, err)
+		log.Fatalf("Error reading file %q: %v", inPath, err)
 	}
 
 	var out []byte
