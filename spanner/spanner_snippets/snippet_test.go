@@ -41,7 +41,7 @@ func TestSample(t *testing.T) {
 	runCommand := func(t *testing.T, cmd string, dbName string) string {
 		var b bytes.Buffer
 		if err := run(context.Background(), adminClient, dataClient, &b, cmd, dbName); err != nil {
-			t.Errorf("run(%q, %q): %v", cmd, dbName)
+			t.Errorf("run(%q, %q): %v", cmd, dbName, err)
 		}
 		return b.String()
 	}
