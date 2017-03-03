@@ -290,7 +290,7 @@ func detectFacesGCS(w io.Writer, file string) error {
 		return err
 	}
 
-	image := vision.NewImageFromGCS(file)
+	image := vision.NewImageFromURI(file)
 	annotations, err := client.DetectFaces(ctx, image, 10)
 	if err != nil {
 		return err
@@ -301,10 +301,10 @@ func detectFacesGCS(w io.Writer, file string) error {
 	} else {
 		fmt.Fprintln(w, "Faces:")
 		for i, annotation := range annotations {
-			fmt.Fprintln(w, "  Face ", i)
-			fmt.Fprintln(w, "    Anger: ", annotation.Likelihoods.Anger)
-			fmt.Fprintln(w, "    Joy: ", annotation.Likelihoods.Joy)
-			fmt.Fprintln(w, "    Surprise: ", annotation.Likelihoods.Surprise)
+			fmt.Fprintln(w, "  Face", i)
+			fmt.Fprintln(w, "    Anger:", annotation.Likelihoods.Anger)
+			fmt.Fprintln(w, "    Joy:", annotation.Likelihoods.Joy)
+			fmt.Fprintln(w, "    Surprise:", annotation.Likelihoods.Surprise)
 		}
 	}
 
@@ -320,7 +320,7 @@ func detectLabelsGCS(w io.Writer, file string) error {
 		return err
 	}
 
-	image := vision.NewImageFromGCS(file)
+	image := vision.NewImageFromURI(file)
 	annotations, err := client.DetectLabels(ctx, image, 10)
 	if err != nil {
 		return err
@@ -347,7 +347,7 @@ func detectLandmarksGCS(w io.Writer, file string) error {
 		return err
 	}
 
-	image := vision.NewImageFromGCS(file)
+	image := vision.NewImageFromURI(file)
 	annotations, err := client.DetectLandmarks(ctx, image, 10)
 	if err != nil {
 		return err
@@ -374,7 +374,7 @@ func detectTextGCS(w io.Writer, file string) error {
 		return err
 	}
 
-	image := vision.NewImageFromGCS(file)
+	image := vision.NewImageFromURI(file)
 	annotations, err := client.DetectTexts(ctx, image, 10)
 	if err != nil {
 		return err
@@ -401,7 +401,7 @@ func detectPropertiesGCS(w io.Writer, file string) error {
 		return err
 	}
 
-	image := vision.NewImageFromGCS(file)
+	image := vision.NewImageFromURI(file)
 	props, err := client.DetectImageProps(ctx, image)
 	if err != nil {
 		return err
@@ -425,7 +425,7 @@ func detectSafeSearchGCS(w io.Writer, file string) error {
 		return err
 	}
 
-	image := vision.NewImageFromGCS(file)
+	image := vision.NewImageFromURI(file)
 	props, err := client.DetectSafeSearch(ctx, image)
 	if err != nil {
 		return err
@@ -449,7 +449,7 @@ func detectLogosGCS(w io.Writer, file string) error {
 		return err
 	}
 
-	image := vision.NewImageFromGCS(file)
+	image := vision.NewImageFromURI(file)
 	annotations, err := client.DetectLogos(ctx, image, 10)
 	if err != nil {
 		return err
