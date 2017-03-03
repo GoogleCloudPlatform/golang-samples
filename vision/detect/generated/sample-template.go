@@ -42,10 +42,10 @@ func detectFaces(w io.Writer, file string) error {
 	} else {
 		fmt.Fprintln(w, "Faces:")
 		for i, annotation := range annotations {
-			fmt.Fprintln(w, "  Face ", i)
-			fmt.Fprintln(w, "    Anger: ", annotation.Likelihoods.Anger)
-			fmt.Fprintln(w, "    Joy: ", annotation.Likelihoods.Joy)
-			fmt.Fprintln(w, "    Surprise: ", annotation.Likelihoods.Surprise)
+			fmt.Fprintln(w, "  Face", i)
+			fmt.Fprintln(w, "    Anger:", annotation.Likelihoods.Anger)
+			fmt.Fprintln(w, "    Joy:", annotation.Likelihoods.Joy)
+			fmt.Fprintln(w, "    Surprise:", annotation.Likelihoods.Surprise)
 		}
 	}
 

@@ -75,7 +75,7 @@ const gcsBoilerplate = `	ctx := context.Background()
 		return err
 	}
 
-	image := vision.NewImageFromGCS(file)
+	image := vision.NewImageFromURI(file)
 `
 
 const header = `// Copyright 2017 Google Inc. All rights reserved.
