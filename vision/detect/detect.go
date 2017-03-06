@@ -172,7 +172,37 @@ func detectText(w io.Writer, file string) error {
 	return nil
 }
 
-// detectProperties gets imge properties from the Vision API for an image at the given file path.
+// detectDocumentText gets the full document text from the Vision API for an image at the given file path.
+func detectDocumentText(w io.Writer, file string) error {
+	ctx := context.Background()
+
+	client, err := vision.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+
+	f, err := os.Open(file)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	image, err := vision.NewImageFromReader(f)
+	if err != nil {
+		return err
+	}
+	annotation, err := client.DetectDocumentText(ctx, image)
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprintln(w, "Text:")
+	fmt.Fprintf(w, "%q\n", annotation.Text)
+
+	return nil
+}
+
+// detectProperties gets image properties from the Vision API for an image at the given file path.
 func detectProperties(w io.Writer, file string) error {
 	ctx := context.Background()
 
@@ -205,7 +235,39 @@ func detectProperties(w io.Writer, file string) error {
 	return nil
 }
 
-// detectSafeSearch gets imge properties from the Vision API for an image at the given file path.
+// detectCropHints gets suggested croppings the Vision API for an image at the given file path.
+func detectCropHints(w io.Writer, file string) error {
+	ctx := context.Background()
+
+	client, err := vision.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+
+	f, err := os.Open(file)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	image, err := vision.NewImageFromReader(f)
+	if err != nil {
+		return err
+	}
+	hints, err := client.CropHints(ctx, image, nil)
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprintln(w, "Crop hints:")
+	for _, hint := range hints {
+		fmt.Fprintf(w, "%v\n", hint.BoundingPoly)
+	}
+
+	return nil
+}
+
+// detectSafeSearch gets image properties from the Vision API for an image at the given file path.
 func detectSafeSearch(w io.Writer, file string) error {
 	ctx := context.Background()
 
@@ -234,6 +296,53 @@ func detectSafeSearch(w io.Writer, file string) error {
 	fmt.Fprintln(w, "Medical:", props.Medical)
 	fmt.Fprintln(w, "Spoofed:", props.Spoof)
 	fmt.Fprintln(w, "Violence:", props.Violence)
+
+	return nil
+}
+
+// detectWeb gets image properties from the Vision API for an image at the given file path.
+func detectWeb(w io.Writer, file string) error {
+	ctx := context.Background()
+
+	client, err := vision.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+
+	f, err := os.Open(file)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	image, err := vision.NewImageFromReader(f)
+	if err != nil {
+		return err
+	}
+	web, err := client.DetectWeb(ctx, image)
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprintln(w, "Web properties:")
+	if len(web.FullMatchingImages) != 0 {
+		fmt.Fprintln(w, "\tFull image matches:")
+		for _, full := range web.FullMatchingImages {
+			fmt.Fprintf(w, "\t\t%s\n", full.URL)
+		}
+	}
+	if len(web.PagesWithMatchingImages) != 0 {
+		fmt.Fprintln(w, "\tPages with this image:")
+		for _, page := range web.PagesWithMatchingImages {
+			fmt.Fprintf(w, "\t\t%s\n", page.URL)
+		}
+	}
+	if len(web.WebEntities) != 0 {
+		fmt.Fprintln(w, "\tEntities:")
+		for _, entity := range web.WebEntities {
+			fmt.Fprintf(w, "\t\t%-12s %s\n", entity.ID, entity.Description)
+		}
+	}
 
 	return nil
 }
@@ -282,7 +391,7 @@ func init() {
 }
 
 // detectFaces gets faces from the Vision API for an image at the given file path.
-func detectFacesGCS(w io.Writer, file string) error {
+func detectFacesURI(w io.Writer, file string) error {
 	ctx := context.Background()
 
 	client, err := vision.NewClient(ctx)
@@ -312,7 +421,7 @@ func detectFacesGCS(w io.Writer, file string) error {
 }
 
 // detectLabels gets labels from the Vision API for an image at the given file path.
-func detectLabelsGCS(w io.Writer, file string) error {
+func detectLabelsURI(w io.Writer, file string) error {
 	ctx := context.Background()
 
 	client, err := vision.NewClient(ctx)
@@ -339,7 +448,7 @@ func detectLabelsGCS(w io.Writer, file string) error {
 }
 
 // detectLandmarks gets landmarks from the Vision API for an image at the given file path.
-func detectLandmarksGCS(w io.Writer, file string) error {
+func detectLandmarksURI(w io.Writer, file string) error {
 	ctx := context.Background()
 
 	client, err := vision.NewClient(ctx)
@@ -366,7 +475,7 @@ func detectLandmarksGCS(w io.Writer, file string) error {
 }
 
 // detectText gets text from the Vision API for an image at the given file path.
-func detectTextGCS(w io.Writer, file string) error {
+func detectTextURI(w io.Writer, file string) error {
 	ctx := context.Background()
 
 	client, err := vision.NewClient(ctx)
@@ -392,8 +501,29 @@ func detectTextGCS(w io.Writer, file string) error {
 	return nil
 }
 
-// detectProperties gets imge properties from the Vision API for an image at the given file path.
-func detectPropertiesGCS(w io.Writer, file string) error {
+// detectDocumentText gets the full document text from the Vision API for an image at the given file path.
+func detectDocumentTextURI(w io.Writer, file string) error {
+	ctx := context.Background()
+
+	client, err := vision.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+
+	image := vision.NewImageFromURI(file)
+	annotation, err := client.DetectDocumentText(ctx, image)
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprintln(w, "Text:")
+	fmt.Fprintf(w, "%q\n", annotation.Text)
+
+	return nil
+}
+
+// detectProperties gets image properties from the Vision API for an image at the given file path.
+func detectPropertiesURI(w io.Writer, file string) error {
 	ctx := context.Background()
 
 	client, err := vision.NewClient(ctx)
@@ -416,8 +546,31 @@ func detectPropertiesGCS(w io.Writer, file string) error {
 	return nil
 }
 
-// detectSafeSearch gets imge properties from the Vision API for an image at the given file path.
-func detectSafeSearchGCS(w io.Writer, file string) error {
+// detectCropHints gets suggested croppings the Vision API for an image at the given file path.
+func detectCropHintsURI(w io.Writer, file string) error {
+	ctx := context.Background()
+
+	client, err := vision.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+
+	image := vision.NewImageFromURI(file)
+	hints, err := client.CropHints(ctx, image, nil)
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprintln(w, "Crop hints:")
+	for _, hint := range hints {
+		fmt.Fprintf(w, "%v\n", hint.BoundingPoly)
+	}
+
+	return nil
+}
+
+// detectSafeSearch gets image properties from the Vision API for an image at the given file path.
+func detectSafeSearchURI(w io.Writer, file string) error {
 	ctx := context.Background()
 
 	client, err := vision.NewClient(ctx)
@@ -440,8 +593,46 @@ func detectSafeSearchGCS(w io.Writer, file string) error {
 	return nil
 }
 
+// detectWeb gets image properties from the Vision API for an image at the given file path.
+func detectWebURI(w io.Writer, file string) error {
+	ctx := context.Background()
+
+	client, err := vision.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+
+	image := vision.NewImageFromURI(file)
+	web, err := client.DetectWeb(ctx, image)
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprintln(w, "Web properties:")
+	if len(web.FullMatchingImages) != 0 {
+		fmt.Fprintln(w, "\tFull image matches:")
+		for _, full := range web.FullMatchingImages {
+			fmt.Fprintf(w, "\t\t%s\n", full.URL)
+		}
+	}
+	if len(web.PagesWithMatchingImages) != 0 {
+		fmt.Fprintln(w, "\tPages with this image:")
+		for _, page := range web.PagesWithMatchingImages {
+			fmt.Fprintf(w, "\t\t%s\n", page.URL)
+		}
+	}
+	if len(web.WebEntities) != 0 {
+		fmt.Fprintln(w, "\tEntities:")
+		for _, entity := range web.WebEntities {
+			fmt.Fprintf(w, "\t\t%-12s %s\n", entity.ID, entity.Description)
+		}
+	}
+
+	return nil
+}
+
 // detectLogos gets logos from the Vision API for an image at the given file path.
-func detectLogosGCS(w io.Writer, file string) error {
+func detectLogosURI(w io.Writer, file string) error {
 	ctx := context.Background()
 
 	client, err := vision.NewClient(ctx)

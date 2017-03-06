@@ -40,7 +40,7 @@ func main() {
 	gcs := string(tmpl)
 	gcs = strings.Replace(gcs, boilerplateSentinel, gcsBoilerplate, -1)
 	// Append suffix to function name.
-	gcs = strings.Replace(gcs, "(w io.Writer", "GCS(w io.Writer", -1)
+	gcs = strings.Replace(gcs, "(w io.Writer", "URI(w io.Writer", -1)
 	out.WriteString(gcs)
 
 	if err := ioutil.WriteFile("detect.go", out.Bytes(), 0640); err != nil {
@@ -48,7 +48,7 @@ func main() {
 	}
 }
 
-const boilerplateSentinel = "\t// Boilerplate is inserted by gen.go\n"
+const boilerplateSentinel = "\tvar client *vision.Client // Boilerplate is inserted by gen.go\n"
 
 const boilerplate = `	ctx := context.Background()
 
