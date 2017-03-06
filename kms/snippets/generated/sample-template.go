@@ -165,9 +165,10 @@ func addMemberRingPolicy(project, ring, role, member string) error {
 		return err
 	}
 
-	_, err = client.Projects.Locations.KeyRings.SetIamPolicy(parent, &cloudkms.SetIamPolicyRequest{
-		Policy: policy,
-	}).Do()
+	_, err = client.Projects.Locations.KeyRings.SetIamPolicy(
+		parent, &cloudkms.SetIamPolicyRequest{
+			Policy: policy,
+		}).Do()
 	if err != nil {
 		return err
 	}
@@ -211,9 +212,10 @@ func addMemberCryptoKeyPolicy(project, ring, key, role, member string) error {
 		return err
 	}
 
-	_, err = client.Projects.Locations.KeyRings.CryptoKeys.SetIamPolicy(parent, &cloudkms.SetIamPolicyRequest{
-		Policy: policy,
-	}).Do()
+	_, err = client.Projects.Locations.KeyRings.CryptoKeys.SetIamPolicy(
+		parent, &cloudkms.SetIamPolicyRequest{
+			Policy: policy,
+		}).Do()
 	if err != nil {
 		return err
 	}
