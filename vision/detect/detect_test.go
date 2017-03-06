@@ -23,13 +23,16 @@ func TestDetect(t *testing.T) {
 		wantContain string
 	}{
 		{"Labels", detectLabels, nil, "cat.jpg", "cat"},
-		{"Labels2", detectLabels, detectLabelsGCS, "wakeupcat.jpg", "whiskers"},
-		{"Faces", detectFaces, detectFacesGCS, "face_no_surprise.jpg", "Anger"},
-		{"Landmarks", detectLandmarks, detectLandmarksGCS, "landmark.jpg", "Palace"},
-		{"Logos", detectLogos, detectLogosGCS, "logos.png", "Google"},
-		{"Properties", detectProperties, detectPropertiesGCS, "landmark.jpg", "%"},
-		{"SafeSearch", detectSafeSearch, detectSafeSearchGCS, "wakeupcat.jpg", "Spoofed"},
-		{"Text", detectText, detectTextGCS, "text.jpg", "Preparing to install"},
+		{"Labels2", detectLabels, detectLabelsURI, "wakeupcat.jpg", "whiskers"},
+		{"Faces", detectFaces, detectFacesURI, "face_no_surprise.jpg", "Anger"},
+		{"Landmarks", detectLandmarks, detectLandmarksURI, "landmark.jpg", "Palace"},
+		{"Logos", detectLogos, detectLogosURI, "logos.png", "Google"},
+		{"Properties", detectProperties, detectPropertiesURI, "landmark.jpg", "%"},
+		{"SafeSearch", detectSafeSearch, detectSafeSearchURI, "wakeupcat.jpg", "Spoofed"},
+		{"Text", detectText, detectTextURI, "text.jpg", "Preparing to install"},
+		{"FullText", detectDocumentText, detectDocumentTextURI, "text.jpg", "Preparing to install"},
+		{"Crop", detectCropHints, detectCropHintsURI, "wakeupcat.jpg", "(0,0)"},
+		{"Web", detectWeb, detectWebURI, "wakeupcat.jpg", "Meme"},
 	}
 
 	for _, tt := range tests {

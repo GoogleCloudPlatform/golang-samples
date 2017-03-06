@@ -17,6 +17,7 @@ import (
 func main() {
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: %s <path-to-image>\n", filepath.Base(os.Args[0]))
+		fmt.Fprintf(os.Stderr, "Pass either a path to a local file, or a URI.\n")
 		fmt.Fprintf(os.Stderr, "Prefix a path with gs:// to refer to a file on GCS.\n")
 	}
 	flag.Parse()
@@ -27,26 +28,33 @@ func main() {
 		os.Exit(1)
 	}
 
-	path := args[0]
+	path := flag.Arg(0)
+	match := flag.Arg(1)
 
 	samples := []struct {
 		name       string
-		local, gcs func(io.Writer, string) error
+		local, uri func(io.Writer, string) error
 	}{
-		{"detectFaces", detectFaces, detectFacesGCS},
-		{"detectLabels", detectLabels, detectLabelsGCS},
-		{"detectLandmarks", detectLandmarks, detectLandmarksGCS},
-		{"detectText", detectText, detectTextGCS},
-		{"detectLogos", detectLogos, detectLogosGCS},
-		{"detectProperties", detectProperties, detectPropertiesGCS},
-		{"detectSafeSearch", detectSafeSearch, detectSafeSearchGCS},
+		{"detectFaces", detectFaces, detectFacesURI},
+		{"detectLabels", detectLabels, detectLabelsURI},
+		{"detectLandmarks", detectLandmarks, detectLandmarksURI},
+		{"detectText", detectText, detectTextURI},
+		{"detectDocumentText", detectDocumentText, detectDocumentTextURI},
+		{"detectLogos", detectLogos, detectLogosURI},
+		{"detectProperties", detectProperties, detectPropertiesURI},
+		{"detectCropHints", detectCropHints, detectCropHintsURI},
+		{"detectWeb", detectWeb, detectWebURI},
+		{"detectSafeSearch", detectSafeSearch, detectSafeSearchURI},
 	}
 
 	for _, sample := range samples {
+		if !strings.Contains(sample.name, match) {
+			continue
+		}
 		fmt.Println("---", sample.name)
 		var err error
-		if strings.HasPrefix(path, "gs://") {
-			err = sample.gcs(os.Stdout, path)
+		if strings.Contains(path, "://") {
+			err = sample.uri(os.Stdout, path)
 		} else {
 			err = sample.local(os.Stdout, path)
 		}

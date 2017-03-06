@@ -9,7 +9,7 @@
 // To re-generate, run:
 //   go generate
 // Boilerplate client code is inserted in the sections marked
-//   "Boilerplate is inserted by gen.go"
+// `	var client *vision.Client // Boilerplate is inserted by gen.go`
 
 package main
 
@@ -31,7 +31,7 @@ func init() {
 
 // detectFaces gets faces from the Vision API for an image at the given file path.
 func detectFaces(w io.Writer, file string) error {
-	// Boilerplate is inserted by gen.go
+	var client *vision.Client // Boilerplate is inserted by gen.go
 	annotations, err := client.DetectFaces(ctx, image, 10)
 	if err != nil {
 		return err
@@ -54,7 +54,7 @@ func detectFaces(w io.Writer, file string) error {
 
 // detectLabels gets labels from the Vision API for an image at the given file path.
 func detectLabels(w io.Writer, file string) error {
-	// Boilerplate is inserted by gen.go
+	var client *vision.Client // Boilerplate is inserted by gen.go
 	annotations, err := client.DetectLabels(ctx, image, 10)
 	if err != nil {
 		return err
@@ -74,7 +74,7 @@ func detectLabels(w io.Writer, file string) error {
 
 // detectLandmarks gets landmarks from the Vision API for an image at the given file path.
 func detectLandmarks(w io.Writer, file string) error {
-	// Boilerplate is inserted by gen.go
+	var client *vision.Client // Boilerplate is inserted by gen.go
 	annotations, err := client.DetectLandmarks(ctx, image, 10)
 	if err != nil {
 		return err
@@ -94,7 +94,7 @@ func detectLandmarks(w io.Writer, file string) error {
 
 // detectText gets text from the Vision API for an image at the given file path.
 func detectText(w io.Writer, file string) error {
-	// Boilerplate is inserted by gen.go
+	var client *vision.Client // Boilerplate is inserted by gen.go
 	annotations, err := client.DetectTexts(ctx, image, 10)
 	if err != nil {
 		return err
@@ -112,9 +112,23 @@ func detectText(w io.Writer, file string) error {
 	return nil
 }
 
-// detectProperties gets imge properties from the Vision API for an image at the given file path.
+// detectDocumentText gets the full document text from the Vision API for an image at the given file path.
+func detectDocumentText(w io.Writer, file string) error {
+	var client *vision.Client // Boilerplate is inserted by gen.go
+	annotation, err := client.DetectDocumentText(ctx, image)
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprintln(w, "Text:")
+	fmt.Fprintf(w, "%q\n", annotation.Text)
+
+	return nil
+}
+
+// detectProperties gets image properties from the Vision API for an image at the given file path.
 func detectProperties(w io.Writer, file string) error {
-	// Boilerplate is inserted by gen.go
+	var client *vision.Client // Boilerplate is inserted by gen.go
 	props, err := client.DetectImageProps(ctx, image)
 	if err != nil {
 		return err
@@ -129,9 +143,25 @@ func detectProperties(w io.Writer, file string) error {
 	return nil
 }
 
-// detectSafeSearch gets imge properties from the Vision API for an image at the given file path.
+// detectCropHints gets suggested croppings the Vision API for an image at the given file path.
+func detectCropHints(w io.Writer, file string) error {
+	var client *vision.Client // Boilerplate is inserted by gen.go
+	hints, err := client.CropHints(ctx, image, nil)
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprintln(w, "Crop hints:")
+	for _, hint := range hints {
+		fmt.Fprintf(w, "%v\n", hint.BoundingPoly)
+	}
+
+	return nil
+}
+
+// detectSafeSearch gets image properties from the Vision API for an image at the given file path.
 func detectSafeSearch(w io.Writer, file string) error {
-	// Boilerplate is inserted by gen.go
+	var client *vision.Client // Boilerplate is inserted by gen.go
 	props, err := client.DetectSafeSearch(ctx, image)
 	if err != nil {
 		return err
@@ -146,9 +176,40 @@ func detectSafeSearch(w io.Writer, file string) error {
 	return nil
 }
 
+// detectWeb gets image properties from the Vision API for an image at the given file path.
+func detectWeb(w io.Writer, file string) error {
+	var client *vision.Client // Boilerplate is inserted by gen.go
+	web, err := client.DetectWeb(ctx, image)
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprintln(w, "Web properties:")
+	if len(web.FullMatchingImages) != 0 {
+		fmt.Fprintln(w, "\tFull image matches:")
+		for _, full := range web.FullMatchingImages {
+			fmt.Fprintf(w, "\t\t%s\n", full.URL)
+		}
+	}
+	if len(web.PagesWithMatchingImages) != 0 {
+		fmt.Fprintln(w, "\tPages with this image:")
+		for _, page := range web.PagesWithMatchingImages {
+			fmt.Fprintf(w, "\t\t%s\n", page.URL)
+		}
+	}
+	if len(web.WebEntities) != 0 {
+		fmt.Fprintln(w, "\tEntities:")
+		for _, entity := range web.WebEntities {
+			fmt.Fprintf(w, "\t\t%-12s %s\n", entity.ID, entity.Description)
+		}
+	}
+
+	return nil
+}
+
 // detectLogos gets logos from the Vision API for an image at the given file path.
 func detectLogos(w io.Writer, file string) error {
-	// Boilerplate is inserted by gen.go
+	var client *vision.Client // Boilerplate is inserted by gen.go
 	annotations, err := client.DetectLogos(ctx, image, 10)
 	if err != nil {
 		return err
