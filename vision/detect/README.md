@@ -24,4 +24,6 @@ To build and run the sample:
 go run detect.go main.go ../testdata/cat.jpg
 
 go run detect.go main.go gs://...
+
+go run detect.go main.go https://...
 ```
