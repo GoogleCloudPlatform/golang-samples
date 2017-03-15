@@ -89,12 +89,9 @@ func pullMsgs(client *pubsub.Client, name string, topic *pubsub.Topic) error {
 
 	// publish 10 messages on the topic.
 	for i := 0; i < 10; i++ {
-		_, err := topic.Publish(ctx, &pubsub.Message{
+		topic.Publish(ctx, &pubsub.Message{
 			Data: []byte(fmt.Sprintf("hello world #%d", i)),
 		})
-		if err != nil {
-			return err
-		}
 	}
 
 	// [START pull_messages]
