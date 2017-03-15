@@ -114,6 +114,8 @@ func publish(client *pubsub.Client, topic, msg string) error {
 	result := t.Publish(ctx, &pubsub.Message{
 		Data: []byte(msg),
 	})
+	// Block until the result is returned and a server-generated
+	// ID is returned for the published message.
 	id, err := result.Get(ctx)
 	if err != nil {
 		return err

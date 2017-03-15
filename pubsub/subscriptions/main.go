@@ -13,13 +13,11 @@ import (
 	"time"
 
 	// [START imports]
-	"golang.org/x/net/context"
-
+	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
+	"golang.org/x/net/context"
 	"google.golang.org/api/iterator"
 	// [END imports]
-
-	"cloud.google.com/go/iam"
 )
 
 func main() {
@@ -88,10 +86,20 @@ func pullMsgs(client *pubsub.Client, name string, topic *pubsub.Topic) error {
 	ctx := context.Background()
 
 	// publish 10 messages on the topic.
+	var results []*pubsub.PublishResult
 	for i := 0; i < 10; i++ {
-		topic.Publish(ctx, &pubsub.Message{
+		res := topic.Publish(ctx, &pubsub.Message{
 			Data: []byte(fmt.Sprintf("hello world #%d", i)),
 		})
+		results = append(results, res)
+	}
+
+	// Check if all messages are published.
+	for _, r := range results {
+		_, err := r.Get(ctx)
+		if err != nil {
+			log.Printf("Publish error: %v", err)
+		}
 	}
 
 	// [START pull_messages]
