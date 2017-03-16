@@ -15,11 +15,10 @@ import (
 	// [START imports]
 	"golang.org/x/net/context"
 
+	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
 	"google.golang.org/api/iterator"
 	// [END imports]
-
-	"cloud.google.com/go/iam"
 )
 
 func main() {
@@ -87,11 +86,18 @@ func list(client *pubsub.Client) ([]*pubsub.Subscription, error) {
 func pullMsgs(client *pubsub.Client, name string, topic *pubsub.Topic) error {
 	ctx := context.Background()
 
-	// publish 10 messages on the topic.
+	// Publish 10 messages on the topic.
+	var results []*pubsub.PublishResult
 	for i := 0; i < 10; i++ {
-		_, err := topic.Publish(ctx, &pubsub.Message{
+		res := topic.Publish(ctx, &pubsub.Message{
 			Data: []byte(fmt.Sprintf("hello world #%d", i)),
 		})
+		results = append(results, res)
+	}
+
+	// Check that all messages were published.
+	for _, r := range results {
+		_, err := r.Get(ctx)
 		if err != nil {
 			return err
 		}

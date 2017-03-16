@@ -111,15 +111,16 @@ func publish(client *pubsub.Client, topic, msg string) error {
 	ctx := context.Background()
 	// [START publish]
 	t := client.Topic(topic)
-	msgIDs, err := t.Publish(ctx, &pubsub.Message{
+	result := t.Publish(ctx, &pubsub.Message{
 		Data: []byte(msg),
 	})
+	// Block until the result is returned and a server-generated
+	// ID is returned for the published message.
+	id, err := result.Get(ctx)
 	if err != nil {
 		return err
 	}
-	for _, id := range msgIDs {
-		fmt.Printf("Published a message; msg ID: %v\n", id)
-	}
+	fmt.Printf("Published a message; msg ID: %v\n", id)
 	// [END publish]
 	return nil
 }

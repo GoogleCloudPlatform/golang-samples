@@ -298,7 +298,7 @@ func publishUpdate(bookID int64) {
 		return
 	}
 	topic := bookshelf.PubsubClient.Topic(bookshelf.PubsubTopicID)
-	_, err = topic.Publish(ctx, &pubsub.Message{Data: b})
+	_, err = topic.Publish(ctx, &pubsub.Message{Data: b}).Get(ctx)
 	log.Printf("Published update to Pub/Sub for Book ID %d: %v", bookID, err)
 }
 
