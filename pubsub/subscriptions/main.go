@@ -86,7 +86,7 @@ func list(client *pubsub.Client) ([]*pubsub.Subscription, error) {
 func pullMsgs(client *pubsub.Client, name string, topic *pubsub.Topic) error {
 	ctx := context.Background()
 
-	// publish 10 messages on the topic.
+	// Publish 10 messages on the topic.
 	var results []*pubsub.PublishResult
 	for i := 0; i < 10; i++ {
 		res := topic.Publish(ctx, &pubsub.Message{
@@ -95,11 +95,11 @@ func pullMsgs(client *pubsub.Client, name string, topic *pubsub.Topic) error {
 		results = append(results, res)
 	}
 
-	// Check if all messages are published.
+	// Check that all messages were published.
 	for _, r := range results {
 		_, err := r.Get(ctx)
 		if err != nil {
-			log.Printf("Publish error: %v", err)
+			return err
 		}
 	}
 
