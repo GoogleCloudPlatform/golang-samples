@@ -13,9 +13,10 @@ import (
 	"time"
 
 	// [START imports]
+	"golang.org/x/net/context"
+
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
-	"golang.org/x/net/context"
 	"google.golang.org/api/iterator"
 	// [END imports]
 )
