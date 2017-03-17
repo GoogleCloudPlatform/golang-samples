@@ -18,13 +18,9 @@ See the documentation (currently under whitelist) for more information.
 
 ### Deploy
 
-First, install `aedeploy`:
-
-    go get -u google.golang.org/appengine/cmd/aedeploy
-
 Deploy the application:
 
-    aedeploy gcloud beta app deploy
+    gcloud beta app deploy
 
 ## Running the client
 

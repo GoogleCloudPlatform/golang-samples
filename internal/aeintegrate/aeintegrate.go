@@ -7,12 +7,10 @@
 // This is a specialized tool that could be used in addition to unit tests. It
 // calls the `gcloud app` command directly.
 //
-// aedeploy (go get google.golang.org/appengine/cmd/aedeploy) and gcloud
-// (https://cloud.google.com/sdk) must be installed. You must be authorized via
+// gcloud(https://cloud.google.com/sdk) must be installed. You must be authorized via
 // the gcloud command-line tool (`gcloud auth login`).
 //
-// You may specify the locations of aedeploy and/or gcloud via the AEDEPLOY_BIN
-// and GCLOUD_BIN environment variables, respectively.
+// You may specify the location of gcloud via the GCLOUD_BIN environment variable.
 //
 // Sample usage with `go test`:
 //
@@ -237,10 +235,6 @@ func (p *App) deployCmd() (*exec.Cmd, error) {
 	if gcloudBin == "" {
 		gcloudBin = "gcloud"
 	}
-	aedeploy := os.Getenv("AEDEPLOY_BIN")
-	if aedeploy == "" {
-		aedeploy = "aedeploy"
-	}
 
 	appYaml, err := p.envAppYaml()
 	if err != nil {
@@ -250,7 +244,7 @@ func (p *App) deployCmd() (*exec.Cmd, error) {
 	// NOTE: if the "app" component is not available, and this is run in parallel,
 	// gcloud will attempt to install those components multiple
 	// times and will eventually fail on IO.
-	cmd := exec.Command(aedeploy, gcloudBin,
+	cmd := exec.Command(gcloudBin,
 		"--quiet",
 		"app", "deploy", appYaml,
 		"--project", p.ProjectID,
