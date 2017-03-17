@@ -78,7 +78,7 @@ func subscribe() {
 		if err := json.Unmarshal(msg.Data, &id); err != nil {
 			log.Printf("could not decode message data: %#v", msg)
 			msg.Ack()
-			continue
+			return
 		}
 
 		log.Printf("[ID %d] Processing.", id)
