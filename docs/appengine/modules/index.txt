@@ -1,7 +1,5 @@
 // [START manual_scaling]
-application: simple-sample
-module: my_module
-version: uno
+service: my_service
 runtime: go
 api_version: go1
 instance_class: B8
@@ -10,9 +8,7 @@ manual_scaling:
 // [END manual_scaling]
 
 // [START basic_scaling]
-application: simple-sample
-module: my_module
-version: uno
+service: my_service
 runtime: go
 api_version: go1
 instance_class: B8
@@ -22,9 +18,7 @@ basic_scaling:
 // [END basic_scaling]
 
 // [START automatic_scaling]
-application: simple-sample
-module: my_module
-version: uno
+service: my_service
 runtime: go
 api_version: go1
 instance_class: F2
@@ -37,16 +31,12 @@ automatic_scaling:
 // [END automatic_scaling]
 
 // [START example_1]
-application: simple-sample
-version: uno
 runtime: go
 api_version: go1
 // [END example_1]
 
 // [START example_2]
-application: simple-sample
-module: mobile-frontend
-version: uno
+service: mobile-frontend
 runtime: go
 api_version: go1
 
@@ -56,9 +46,7 @@ automatic_scaling:
 // [END example_2]
 
 // [START example_3]
-application: simple-sample
-module: my-module
-version: uno
+service: my_service
 runtime: go
 api_version: go1
 
