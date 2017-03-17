@@ -52,8 +52,7 @@ before_install:
   fi
 - if [ $GOLANG_SAMPLES_E2E_TEST ]; then
     echo "This test run will run end-to-end tests.";
-    go get -u google.golang.org/appengine/cmd/aedeploy;
-    export PATH="$PATH:$PWD/google-cloud-sdk/bin";
+    export PATH="$PATH:/tmp/google-cloud-sdk/bin";
     ./testing/travis/configure_gcloud.bash;
   fi
 - '! grep -R ''"context"$'' * || { echo "Use golang.org/x/net/context"; false; }'
@@ -66,7 +65,7 @@ install:
 
 
 script:
-- go test -v ./...;
+- go test -timeout 20m -v ./...;
 - if [ $SYSTEM_TESTS ]; then
     ./gimmeproj -project golang-samples-tests done $GOLANG_SAMPLES_PROJECT_ID;
   fi

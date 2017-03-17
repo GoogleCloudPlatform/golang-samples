@@ -7,6 +7,8 @@ if [ $TRAVIS != "true" ]; then
   exit 1
 fi
 
+pushd /tmp
+
 # Get the SDK tar and untar it.
 TARFILE=google-cloud-sdk.tar.gz
 wget https://dl.google.com/dl/cloudsdk/release/$TARFILE
@@ -19,7 +21,8 @@ rm $TARFILE
   --path-update false \
   --command-completion false
 
-gcloud components update
+gcloud -q components update
+gcloud -q components install app-engine-go
 
 # Set config.
 gcloud config set disable_prompts True
@@ -29,3 +32,5 @@ gcloud auth activate-service-account --key-file "$GOOGLE_APPLICATION_CREDENTIALS
 
 # Diagnostic information.
 gcloud info
+
+popd
