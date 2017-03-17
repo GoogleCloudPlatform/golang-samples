@@ -65,7 +65,7 @@ install:
 
 
 script:
-- go test -v ./...;
+- go test -timeout 20m -v ./...;
 - if [ $SYSTEM_TESTS ]; then
     ./gimmeproj -project golang-samples-tests done $GOLANG_SAMPLES_PROJECT_ID;
   fi
