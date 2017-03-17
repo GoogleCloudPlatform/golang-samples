@@ -12,6 +12,7 @@ import (
 	"log"
 	"mime/multipart"
 	"net/http"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -22,6 +23,19 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/aeintegrate"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
+
+func init() {
+	// Workaround for Travis:
+	// https://docs.travis-ci.com/user/common-build-problems/#Build-times-out-because-no-output-was-received
+	if os.Getenv("TRAVIS") == "true" {
+		go func() {
+			for {
+				time.Sleep(5 * time.Minute)
+				log.Print("Still testing. Don't kill me!")
+			}
+		}()
+	}
+}
 
 // env:flex deployments are quite flaky when done in parallel.
 // Offset each deployment by some amount of time.
