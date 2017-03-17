@@ -73,37 +73,30 @@ func main() {
 
 func subscribe() {
 	ctx := context.Background()
-	it, err := subscription.Pull(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
-	for {
-		msg, err := it.Next()
-		if err != nil {
-			log.Fatalf("could not pull: %v", err)
-		}
+	err := subscription.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
 		var id int64
 		if err := json.Unmarshal(msg.Data, &id); err != nil {
 			log.Printf("could not decode message data: %#v", msg)
-			msg.Done(true)
+			msg.Ack()
 			continue
 		}
 
 		log.Printf("[ID %d] Processing.", id)
-		go func() {
-			if err := update(id); err != nil {
-				log.Printf("[ID %d] could not update: %v", id, err)
-				msg.Done(false) // NACK
-				return
-			}
+		if err := update(id); err != nil {
+			log.Printf("[ID %d] could not update: %v", id, err)
+			msg.Nack()
+			return
+		}
 
-			countMu.Lock()
-			count++
-			countMu.Unlock()
+		countMu.Lock()
+		count++
+		countMu.Unlock()
 
-			msg.Done(true) // ACK
-			log.Printf("[ID %d] ACK", id)
-		}()
+		msg.Ack()
+		log.Printf("[ID %d] ACK", id)
+	})
+	if err != nil {
+		log.Fatal(err)
 	}
 }
 
