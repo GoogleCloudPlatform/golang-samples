@@ -1,3 +1,4 @@
+timeout: 20m
 steps:
 # Update the GitHub status.
 - name: gcr.io/cloudbuild-report/report
