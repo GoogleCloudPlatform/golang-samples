@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sync"
 	"time"
 
 	// [START imports]
@@ -104,24 +105,25 @@ func pullMsgs(client *pubsub.Client, name string, topic *pubsub.Topic) error {
 	}
 
 	// [START pull_messages]
-	sub := client.Subscription(name)
-	it, err := sub.Pull(ctx)
-	if err != nil {
-		return err
-	}
-	defer it.Stop()
-
 	// Consume 10 messages.
-	for i := 0; i < 10; i++ {
-		msg, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return err
+	var mu sync.Mutex
+	received := 0
+	sub := client.Subscription(name)
+	cctx, cancel := context.WithCancel(ctx)
+	err := sub.Receive(cctx, func(ctx context.Context, msg *pubsub.Message) {
+		mu.Lock()
+		defer mu.Unlock()
+		if received >= 10 {
+			cancel()
+			msg.Nack()
+			return
 		}
 		fmt.Printf("Got message: %q\n", string(msg.Data))
-		msg.Done(true)
+		received++
+		msg.Ack()
+	})
+	if err != nil {
+		return err
 	}
 	// [END pull_messages]
 	return nil
