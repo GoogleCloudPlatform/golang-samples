@@ -20,12 +20,28 @@ import (
 func TestTranslateText(t *testing.T) {
 	testutil.SystemTest(t)
 
-	got, err := translateText("ja", "The Go Gopher is cute")
+	in := "The Go Gopher is cute"
+	got, err := translateText("ja", in)
 	if err != nil {
 		t.Fatalf("translateText: %v", err)
 	}
-	if want := "可愛い"; !strings.Contains(got, want) {
-		t.Errorf("translateText(Gophers are cute)=%q; want to contain %q", got, want)
+	if want := "ゴー"; !strings.Contains(got, want) {
+		t.Errorf("translateText(%q)=%q; want to contain %q", in, got, want)
+	}
+}
+
+func TestTranslateWithModel(t *testing.T) {
+	t.Skip("Project must be whitelisted")
+
+	testutil.SystemTest(t)
+
+	in := "The Go Gopher is cute"
+	got, err := translateTextWithModel("ja", in, "nmt")
+	if err != nil {
+		t.Fatalf("translateText: %v", err)
+	}
+	if want := "ゴー"; !strings.Contains(got, want) {
+		t.Errorf("translateText(%q)=%q; want to contain %q", in, got, want)
 	}
 }
 
