@@ -14,7 +14,6 @@ import (
 
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
-q
 	cloudkms "google.golang.org/api/cloudkms/v1"
 )
 
