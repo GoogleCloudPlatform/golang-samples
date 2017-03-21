@@ -16,7 +16,7 @@ import (
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
 
-	cloudkms "google.golang.org/api/cloudkms/v1beta1"
+	cloudkms "google.golang.org/api/cloudkms/v1"
 )
 
 func init() {
