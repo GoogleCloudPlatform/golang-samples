@@ -17,9 +17,9 @@ func main() {
 	ctx := context.Background()
 
 	// This database must exist.
-	databaseID := "projects/your-project-id/instances/your-instance-id/databases/your-database-id"
+	databaseName := "projects/your-project-id/instances/your-instance-id/databases/your-database-id"
 
-	client, err := spanner.NewClient(ctx, databaseID)
+	client, err := spanner.NewClient(ctx, databaseName)
 	if err != nil {
 		log.Fatalf("Failed to create client %v", err)
 	}
