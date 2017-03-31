@@ -19,8 +19,19 @@ const sentinel = "Google Inc. All rights reserved.\n" +
 
 const prefix = "// Copyright "
 
+var skip = map[string]bool{
+	// These files are based off the gRPC samples, and are under a BSD license.
+	"endpoints/getting-started-grpc/client/main.go":              true,
+	"endpoints/getting-started-grpc/server/main.go":              true,
+	"endpoints/getting-started-grpc/helloworld/helloworld.pb.go": true,
+}
+
 func TestLicense(t *testing.T) {
 	err := filepath.Walk(".", func(path string, fi os.FileInfo, err error) error {
+		if skip[path] {
+			return nil
+		}
+
 		if err != nil {
 			return err
 		}
