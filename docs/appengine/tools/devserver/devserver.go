@@ -1,9 +1,10 @@
 package devserver
 
 import (
-    "appengine"
     "fmt"
     "net/http"
+
+    "google.golang.org/appengine"
 )
 
 func init() {
@@ -11,5 +12,5 @@ func init() {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintf(w, `Development server? %t`, appengine.IsDevAppServer())
+    fmt.Fprintf(w, "IsDevAppServer: %v", appengine.IsDevAppServer())
 }
