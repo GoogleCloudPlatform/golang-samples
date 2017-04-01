@@ -10,7 +10,7 @@ Run the backend using `go run`:
 $ go run server/main.go
 ```
 
-Sent a request:
+Send a request from another terminal:
 
 ```bash
 $ go run client/main.go
@@ -60,14 +60,14 @@ gcloud container builds submit --tag gcr.io/YOUR_PROJECT_ID/go-grpc-hello:1.0 .
 
 1. Create an instance and SSH into it:
 
-    ```
+    ```bash
     gcloud compute instances create grpc-host --image-family gci-stable --image-project google-containers --tags=http-server
     gcloud compute ssh grpc-host
     ```
 
 1. Set some environment variables (you'll need to manually set the service config ID):
 
-    ```
+    ```bash
     GCLOUD_PROJECT=$(curl -s "http://metadata.google.internal/computeMetadata/v1/project/project-id" -H "Metadata-Flavor: Google")
     SERVICE_NAME=hellogrpc.endpoints.${GCLOUD_PROJECT}.cloud.goog
     SERVICE_CONFIG_ID=<Your Config ID>
@@ -75,19 +75,19 @@ gcloud container builds submit --tag gcr.io/YOUR_PROJECT_ID/go-grpc-hello:1.0 .
 
 1. Pull your credentials to access your private container registry:
 
-    ```
+    ```bash
     /usr/share/google/dockercfg_update.sh
     ```
 
 1. Run your gRPC server's container:
 
-    ```
-    docker run -d --name=grpc-hello gcr.io/${GCLOUD_PROJECT}/java-grpc-hello:1.0
+    ```bash
+    docker run -d --name=grpc-hello gcr.io/${GCLOUD_PROJECT}/go-grpc-hello:1.0
     ```
 
 1. Run Endpoints proxy:
 
-    ```
+    ```bash
     docker run --detach --name=esp \
         -p 80:9000 \
         --link=grpc-hello:grpc-hello \
@@ -100,11 +100,11 @@ gcloud container builds submit --tag gcr.io/YOUR_PROJECT_ID/go-grpc-hello:1.0 .
 
 1. Get the IP address of your secured gRPC server:
 
-    ```
+    ```bash
     gcloud compute instances list --filter=grpc-host
     ```
 
-1. Send it a request (see "Running the client" below)
+1. Send a request to the API server (see "Running the client" below)
 
 ### Deploy to GKE
 
@@ -124,16 +124,16 @@ If you haven't got a cluster, first [create one](https://cloud.google.com/contai
     kubectl get svc grpc-hello --watch
     ```
 
-1. Send it a request (see "Running the client" below)
+1. Send a request to the API server (see "Running the client" below)
 
 ## Running the client
 
 1. First, [create a project API key](https://console.developers.google.com/apis/credentials).
 
-1. Then, run:
+1. Then, after you have your server's IP address (via GKE's `kubectl get svc` or your GCE instance's IP), run:
 
     ```bash
-    go run client/main.go -api-key=AIza.... -addr=IP_ADDRESS:80 [message]
+    go run client/main.go -api-key=AIza.... -addr=YOUR_SERVER_IP_ADDRESS:80 [message]
     ```
 
 [1]: https://cloud.google.com/endpoints/docs/quickstarts
