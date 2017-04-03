@@ -17,15 +17,12 @@ import (
 )
 
 var topic *pubsub.Topic
-
-const (
-	subID   = "golang-samples-subscription"
-	topicID = "golang-samples-topic"
-)
+var subID string
 
 var once sync.Once // guards cleanup related operations in setup.
 
 func setup(t *testing.T) *pubsub.Client {
+
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 
@@ -33,6 +30,9 @@ func setup(t *testing.T) *pubsub.Client {
 	if err != nil {
 		t.Fatalf("failed to create client: %v", err)
 	}
+
+	subID = tc.ProjectID + "-test-sub"
+	topicID := tc.ProjectID + "-test-sub-topic"
 
 	// Cleanup resources from the previous failed tests.
 	once.Do(func() {

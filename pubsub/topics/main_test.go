@@ -15,11 +15,13 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-const topicID = "golang-samples-topic-example"
+var topicID string
 
 func setup(t *testing.T) *pubsub.Client {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
+
+	topicID = tc.ProjectID + "-test-topic"
 
 	client, err := pubsub.NewClient(ctx, tc.ProjectID)
 	if err != nil {
