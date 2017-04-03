@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: grpc-hello
+spec:
+  ports:
+  - port: 80
+    targetPort: 9000
+    protocol: TCP
+    name: http
+  selector:
+    app: grpc-hello
+  type: LoadBalancer
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: grpc-hello
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: grpc-hello
+    spec:
+      containers:
+      - name: esp
+        image: gcr.io/endpoints-release/endpoints-runtime:1
+        args: [
+          "-P", "9000",
+          "-a", "grpc://127.0.0.1:50051",
+          "-s", "hellogrpc.endpoints.<YOUR_PROJECT_ID>.cloud.goog", # replace <YOUR_PROJECT_ID>
+          "-v", "<SERVICE_CONFIG_ID>", # e.g. "2017-03-30r0"
+        ]
+        ports:
+          - containerPort: 9000
+      - name: echo
+        image: gcr.io/<YOUR_PROJECT_ID>/go-grpc-hello:1.0 # replace <YOUR_PROJECT_ID>
+        ports:
+          - containerPort: 50051
