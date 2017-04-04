@@ -9,7 +9,7 @@ import (
 
 	"golang.org/x/net/context"
 
-	speech "cloud.google.com/go/speech/apiv1beta1"
+	speech "cloud.google.com/go/speech/apiv1"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
