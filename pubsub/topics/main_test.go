@@ -79,20 +79,34 @@ func TestPublish(t *testing.T) {
 func TestIAM(t *testing.T) {
 	c := setup(t)
 
-	perms := testPermissions(c, topicID)
-	if len(perms) == 0 {
-		t.Fatalf("want non-zero perms")
-	}
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		perms, err := testPermissions(c, topicID)
+		if err != nil {
+			r.Errorf("testPermissions: %v", err)
+		}
+		if len(perms) == 0 {
+			r.Errorf("want non-zero perms")
+		}
+	})
 
-	addUsers(c, topicID)
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		if err := addUsers(c, topicID); err != nil {
+			r.Errorf("addUsers: %v", err)
+		}
+	})
 
-	policy := getPolicy(c, topicID)
-	if role, member := iam.Editor, "group:cloud-logs@google.com"; !policy.HasRole(member, role) {
-		t.Fatalf("want %q as viewer, got %v", member, policy)
-	}
-	if role, member := iam.Viewer, iam.AllUsers; !policy.HasRole(member, role) {
-		t.Fatalf("want %q as viewer, got %v", member, policy)
-	}
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		policy, err := getPolicy(c, topicID)
+		if err != nil {
+			r.Errorf("getPolicy: %v", err)
+		}
+		if role, member := iam.Editor, "group:cloud-logs@google.com"; !policy.HasRole(member, role) {
+			r.Errorf("want %q as viewer, got %v", member, policy)
+		}
+		if role, member := iam.Viewer, iam.AllUsers; !policy.HasRole(member, role) {
+			r.Errorf("want %q as viewer, got %v", member, policy)
+		}
+	})
 }
 
 func TestDelete(t *testing.T) {

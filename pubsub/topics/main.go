@@ -125,29 +125,29 @@ func publish(client *pubsub.Client, topic, msg string) error {
 	return nil
 }
 
-func getPolicy(c *pubsub.Client, topicName string) *iam.Policy {
+func getPolicy(c *pubsub.Client, topicName string) (*iam.Policy, error) {
 	ctx := context.Background()
 
 	// [START pubsub_get_topic_policy]
 	policy, err := c.Topic(topicName).IAM().Policy(ctx)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	for _, role := range policy.Roles() {
 		log.Print(policy.Members(role))
 	}
 	// [END pubsub_get_topic_policy]
-	return policy
+	return policy, nil
 }
 
-func addUsers(c *pubsub.Client, topicName string) {
+func addUsers(c *pubsub.Client, topicName string) error {
 	ctx := context.Background()
 
 	// [START pubsub_set_topic_policy]
 	topic := c.Topic(topicName)
 	policy, err := topic.IAM().Policy(ctx)
 	if err != nil {
-		log.Fatalf("GetPolicy: %v", err)
+		return err
 	}
 	// Other valid prefixes are "serviceAccount:", "user:"
 	// See the documentation for more values.
@@ -160,9 +160,10 @@ func addUsers(c *pubsub.Client, topicName string) {
 	// being modified concurrently. SetPolicy will return an error if the policy
 	// was modified since it was retrieved.
 	// [END pubsub_set_topic_policy]
+	return nil
 }
 
-func testPermissions(c *pubsub.Client, topicName string) []string {
+func testPermissions(c *pubsub.Client, topicName string) ([]string, error) {
 	ctx := context.Background()
 
 	// [START pubsub_test_topic_permissions]
@@ -172,11 +173,11 @@ func testPermissions(c *pubsub.Client, topicName string) []string {
 		"pubsub.topics.update",
 	})
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	for _, perm := range perms {
 		log.Printf("Allowed: %v", perm)
 	}
 	// [END pubsub_test_topic_permissions]
-	return perms
+	return perms, nil
 }
