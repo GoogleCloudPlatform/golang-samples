@@ -50,6 +50,7 @@ func main() {
 				Config: &speechpb.RecognitionConfig{
 					Encoding:        speechpb.RecognitionConfig_LINEAR16,
 					SampleRateHertz: 16000,
+					LanguageCode:    "en-US",
 				},
 			},
 		},

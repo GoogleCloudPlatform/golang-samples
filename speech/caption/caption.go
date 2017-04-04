@@ -71,6 +71,7 @@ func recognize(file string) (*speechpb.RecognizeResponse, error) {
 		Config: &speechpb.RecognitionConfig{
 			Encoding:        speechpb.RecognitionConfig_LINEAR16,
 			SampleRateHertz: 16000,
+			LanguageCode:    "en-US",
 		},
 		Audio: &speechpb.RecognitionAudio{
 			AudioSource: &speechpb.RecognitionAudio_Content{Content: data},
