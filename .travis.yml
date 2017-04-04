@@ -9,7 +9,7 @@ branches:
 matrix:
   include:
     - go: 1.6.3
-    - go: 1.7.4
+    - go: 1.7.5
     - go: 1.8
       env: ALLOW_E2E=true # Don't run e2e tests more than once.
     # NOTE: no tip, see https://github.com/travis-ci/gimme/issues/38
@@ -65,7 +65,7 @@ install:
 
 
 script:
-- go test -timeout 20m -v ./...;
+- travis_wait 20 go test -p 10 -timeout 20m -v ./...;
 - if [ $SYSTEM_TESTS ]; then
     ./gimmeproj -project golang-samples-tests done $GOLANG_SAMPLES_PROJECT_ID;
   fi
