@@ -39,7 +39,7 @@ func TestDetect(t *testing.T) {
 		var buf bytes.Buffer
 		err := tt.local(&buf, "../testdata/"+tt.path)
 		if err != nil {
-			t.Fatalf("got %v, want nil err", err)
+			t.Fatalf("Local %s(%q): got %v, want nil err", tt.name, tt.path, err)
 		}
 		if got := buf.String(); !strings.Contains(got, tt.wantContain) {
 			t.Errorf("Local %s(%q): got %q, want to contain %q", tt.name, tt.path, got, tt.wantContain)
@@ -54,7 +54,7 @@ func TestDetect(t *testing.T) {
 		var buf bytes.Buffer
 		err := tt.gcs(&buf, "gs://python-docs-samples-tests/vision/"+tt.path)
 		if err != nil {
-			t.Fatalf("got %v, want nil err", err)
+			t.Fatalf("GCS %s(%q): got %v, want nil err", tt.name, tt.path, err)
 		}
 		if got := buf.String(); !strings.Contains(got, tt.wantContain) {
 			t.Errorf("GCS %s(%q): got %q, want to contain %q", tt.name, tt.path, got, tt.wantContain)
