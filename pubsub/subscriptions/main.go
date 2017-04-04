@@ -174,44 +174,45 @@ func createTopicIfNotExists(c *pubsub.Client) *pubsub.Topic {
 	return t
 }
 
-func getPolicy(c *pubsub.Client, subName string) *iam.Policy {
+func getPolicy(c *pubsub.Client, subName string) (*iam.Policy, error) {
 	ctx := context.Background()
 
 	// [START pubsub_get_subscription_policy]
 	policy, err := c.Subscription(subName).IAM().Policy(ctx)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	for _, role := range policy.Roles() {
 		log.Printf("%q: %q", role, policy.Members(role))
 	}
 	// [END pubsub_get_subscription_policy]
-	return policy
+	return policy, nil
 }
 
-func addUsers(c *pubsub.Client, subName string) {
+func addUsers(c *pubsub.Client, subName string) error {
 	ctx := context.Background()
 
 	// [START pubsub_set_subscription_policy]
 	sub := c.Subscription(subName)
 	policy, err := sub.IAM().Policy(ctx)
 	if err != nil {
-		log.Fatalf("GetPolicy: %v", err)
+		return err
 	}
 	// Other valid prefixes are "serviceAccount:", "user:"
 	// See the documentation for more values.
 	policy.Add(iam.AllUsers, iam.Viewer)
 	policy.Add("group:cloud-logs@google.com", iam.Editor)
 	if err := sub.IAM().SetPolicy(ctx, policy); err != nil {
-		log.Fatalf("SetUser: %v", err)
+		return err
 	}
 	// NOTE: It may be necessary to retry this operation if IAM policies are
 	// being modified concurrently. SetPolicy will return an error if the policy
 	// was modified since it was retrieved.
 	// [END pubsub_set_subscription_policy]
+	return nil
 }
 
-func testPermissions(c *pubsub.Client, subName string) []string {
+func testPermissions(c *pubsub.Client, subName string) ([]string, error) {
 	ctx := context.Background()
 
 	// [START pubsub_test_subscription_permissions]
@@ -221,11 +222,11 @@ func testPermissions(c *pubsub.Client, subName string) []string {
 		"pubsub.subscriptions.update",
 	})
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	for _, perm := range perms {
 		log.Printf("Allowed: %v", perm)
 	}
 	// [END pubsub_test_subscription_permissions]
-	return perms
+	return perms, nil
 }

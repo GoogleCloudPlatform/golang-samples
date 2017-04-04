@@ -17,11 +17,7 @@ import (
 )
 
 var topic *pubsub.Topic
-
-const (
-	subID   = "golang-samples-subscription"
-	topicID = "golang-samples-topic"
-)
+var subID string
 
 var once sync.Once // guards cleanup related operations in setup.
 
@@ -33,6 +29,9 @@ func setup(t *testing.T) *pubsub.Client {
 	if err != nil {
 		t.Fatalf("failed to create client: %v", err)
 	}
+
+	subID = tc.ProjectID + "-test-sub"
+	topicID := tc.ProjectID + "-test-sub-topic"
 
 	// Cleanup resources from the previous failed tests.
 	once.Do(func() {
@@ -65,6 +64,7 @@ func setup(t *testing.T) *pubsub.Client {
 
 func TestCreate(t *testing.T) {
 	c := setup(t)
+
 	if err := create(c, subID, topic); err != nil {
 		t.Fatalf("failed to create a subscription: %v", err)
 	}
@@ -104,24 +104,39 @@ func TestList(t *testing.T) {
 func TestIAM(t *testing.T) {
 	c := setup(t)
 
-	perms := testPermissions(c, subID)
-	if len(perms) == 0 {
-		t.Fatalf("want non-zero perms")
-	}
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		perms, err := testPermissions(c, subID)
+		if err != nil {
+			r.Errorf("testPermissions: %v", err)
+		}
+		if len(perms) == 0 {
+			r.Errorf("want non-zero perms")
+		}
+	})
 
-	addUsers(c, subID)
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		if err := addUsers(c, subID); err != nil {
+			r.Errorf("addUsers: %v", err)
+		}
+	})
 
-	policy := getPolicy(c, subID)
-	if role, member := iam.Editor, "group:cloud-logs@google.com"; !policy.HasRole(member, role) {
-		t.Fatalf("want %q as viewer, got %v", member, policy)
-	}
-	if role, member := iam.Viewer, iam.AllUsers; !policy.HasRole(member, role) {
-		t.Fatalf("want %q as viewer, got %v", member, policy)
-	}
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		policy, err := getPolicy(c, subID)
+		if err != nil {
+			r.Errorf("getPolicy: %v", err)
+		}
+		if role, member := iam.Editor, "group:cloud-logs@google.com"; !policy.HasRole(member, role) {
+			r.Errorf("want %q as viewer, policy=%v", member, policy)
+		}
+		if role, member := iam.Viewer, iam.AllUsers; !policy.HasRole(member, role) {
+			r.Errorf("want %q as viewer, policy=%v", member, policy)
+		}
+	})
 }
 
 func TestDelete(t *testing.T) {
 	c := setup(t)
+
 	if err := delete(c, subID); err != nil {
 		t.Fatalf("failed to delete subscription (%q): %v", subID, err)
 	}
