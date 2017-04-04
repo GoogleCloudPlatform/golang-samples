@@ -107,10 +107,10 @@ func TestIAM(t *testing.T) {
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		perms, err := testPermissions(c, subID)
 		if err != nil {
-			t.Errorf("testPermissions: %v", err)
+			r.Errorf("testPermissions: %v", err)
 		}
 		if len(perms) == 0 {
-			t.Errorf("want non-zero perms")
+			r.Errorf("want non-zero perms")
 		}
 	})
 
