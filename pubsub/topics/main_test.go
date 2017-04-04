@@ -119,10 +119,10 @@ func TestIAM(t *testing.T) {
 			r.Errorf("getPolicy: %v", err)
 		}
 		if role, member := iam.Editor, "group:cloud-logs@google.com"; !policy.HasRole(member, role) {
-			r.Errorf("want %q as viewer, got %v", member, policy)
+			r.Errorf("want %q as viewer, policy=%v", member, policy)
 		}
 		if role, member := iam.Viewer, iam.AllUsers; !policy.HasRole(member, role) {
-			r.Errorf("want %q as viewer, got %v", member, policy)
+			r.Errorf("want %q as viewer, policy=%v", member, policy)
 		}
 	})
 }
