@@ -7,6 +7,8 @@ package snippets
 import (
 	"bytes"
 	"fmt"
+	"log"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -18,6 +20,19 @@ import (
 	"golang.org/x/oauth2/google"
 	rawbq "google.golang.org/api/bigquery/v2"
 )
+
+func init() {
+	// Workaround for Travis:
+	// https://docs.travis-ci.com/user/common-build-problems/#Build-times-out-because-no-output-was-received
+	if os.Getenv("TRAVIS") == "true" {
+		go func() {
+			for {
+				time.Sleep(5 * time.Minute)
+				log.Print("Still testing. Don't kill me!")
+			}
+		}()
+	}
+}
 
 func TestAll(t *testing.T) {
 	tc := testutil.SystemTest(t)
@@ -92,7 +107,7 @@ func deleteDataset(t *testing.T, ctx context.Context, datasetID string) {
 }
 
 func TestImportExport(t *testing.T) {
-	tc := testutil.SystemTest(t)
+	tc := testutil.EndToEndTest(t)
 	ctx := context.Background()
 
 	client, err := bigquery.NewClient(ctx, tc.ProjectID)
