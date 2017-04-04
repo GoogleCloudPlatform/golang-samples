@@ -211,7 +211,7 @@ func addUsers(c *pubsub.Client, subName string) {
 	// [END pubsub_set_subscription_policy]
 }
 
-func testPermissions(c *pubsub.Client, subName string) []string {
+func testPermissions(c *pubsub.Client, subName string) ([]string, error) {
 	ctx := context.Background()
 
 	// [START pubsub_test_subscription_permissions]
@@ -221,11 +221,11 @@ func testPermissions(c *pubsub.Client, subName string) []string {
 		"pubsub.subscriptions.update",
 	})
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	for _, perm := range perms {
 		log.Printf("Allowed: %v", perm)
 	}
 	// [END pubsub_test_subscription_permissions]
-	return perms
+	return perms, nil
 }

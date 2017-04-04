@@ -22,7 +22,6 @@ var subID string
 var once sync.Once // guards cleanup related operations in setup.
 
 func setup(t *testing.T) *pubsub.Client {
-
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 
@@ -65,6 +64,7 @@ func setup(t *testing.T) *pubsub.Client {
 
 func TestCreate(t *testing.T) {
 	c := setup(t)
+
 	if err := create(c, subID, topic); err != nil {
 		t.Fatalf("failed to create a subscription: %v", err)
 	}
@@ -104,10 +104,15 @@ func TestList(t *testing.T) {
 func TestIAM(t *testing.T) {
 	c := setup(t)
 
-	perms := testPermissions(c, subID)
-	if len(perms) == 0 {
-		t.Fatalf("want non-zero perms")
-	}
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		perms, err := testPermissions(c, subID)
+		if err != nil {
+			t.Errorf("testPermissions: %v", err)
+		}
+		if len(perms) == 0 {
+			t.Errorf("want non-zero perms")
+		}
+	})
 
 	addUsers(c, subID)
 
@@ -122,6 +127,7 @@ func TestIAM(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	c := setup(t)
+
 	if err := delete(c, subID); err != nil {
 		t.Fatalf("failed to delete subscription (%q): %v", subID, err)
 	}
