@@ -5,6 +5,7 @@
 package main
 
 import (
+	"sync"
 	"testing"
 	"time"
 
@@ -17,6 +18,8 @@ import (
 
 var topicID string
 
+var once sync.Once // guards cleanup related operations in setup.
+
 func setup(t *testing.T) *pubsub.Client {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
@@ -27,6 +30,21 @@ func setup(t *testing.T) *pubsub.Client {
 	if err != nil {
 		t.Fatalf("failed to create client: %v", err)
 	}
+
+	// Cleanup resources from the previous failed tests.
+	once.Do(func() {
+		topic := client.Topic(topicID)
+		ok, err := topic.Exists(ctx)
+		if err != nil {
+			t.Fatalf("failed to check if topic exists: %v", err)
+		}
+		if !ok {
+			return
+		}
+		if err := topic.Delete(ctx); err != nil {
+			t.Fatalf("failed to cleanup the topic (%q): %v", topicID, err)
+		}
+	})
 	return client
 }
 
