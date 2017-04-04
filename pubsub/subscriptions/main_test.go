@@ -114,15 +114,24 @@ func TestIAM(t *testing.T) {
 		}
 	})
 
-	addUsers(c, subID)
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		if err := addUsers(c, subID); err != nil {
+			r.Errorf("addUsers: %v", err)
+		}
+	})
 
-	policy := getPolicy(c, subID)
-	if role, member := iam.Editor, "group:cloud-logs@google.com"; !policy.HasRole(member, role) {
-		t.Fatalf("want %q as viewer, got %v", member, policy)
-	}
-	if role, member := iam.Viewer, iam.AllUsers; !policy.HasRole(member, role) {
-		t.Fatalf("want %q as viewer, got %v", member, policy)
-	}
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		policy, err := getPolicy(c, subID)
+		if err != nil {
+			r.Errorf("getPolicy: %v", err)
+		}
+		if role, member := iam.Editor, "group:cloud-logs@google.com"; !policy.HasRole(member, role) {
+			r.Errorf("want %q as viewer, policy=%v", member, policy)
+		}
+		if role, member := iam.Viewer, iam.AllUsers; !policy.HasRole(member, role) {
+			r.Errorf("want %q as viewer, policy=%v", member, policy)
+		}
+	})
 }
 
 func TestDelete(t *testing.T) {
