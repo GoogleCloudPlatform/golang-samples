@@ -5,6 +5,7 @@
 package main
 
 import (
+	"sync"
 	"testing"
 	"time"
 
@@ -15,16 +16,35 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-const topicID = "golang-samples-topic-example"
+var topicID string
+
+var once sync.Once // guards cleanup related operations in setup.
 
 func setup(t *testing.T) *pubsub.Client {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 
+	topicID = tc.ProjectID + "-test-topic"
+
 	client, err := pubsub.NewClient(ctx, tc.ProjectID)
 	if err != nil {
 		t.Fatalf("failed to create client: %v", err)
 	}
+
+	// Cleanup resources from the previous failed tests.
+	once.Do(func() {
+		topic := client.Topic(topicID)
+		ok, err := topic.Exists(ctx)
+		if err != nil {
+			t.Fatalf("failed to check if topic exists: %v", err)
+		}
+		if !ok {
+			return
+		}
+		if err := topic.Delete(ctx); err != nil {
+			t.Fatalf("failed to cleanup the topic (%q): %v", topicID, err)
+		}
+	})
 	return client
 }
 
@@ -77,20 +97,34 @@ func TestPublish(t *testing.T) {
 func TestIAM(t *testing.T) {
 	c := setup(t)
 
-	perms := testPermissions(c, topicID)
-	if len(perms) == 0 {
-		t.Fatalf("want non-zero perms")
-	}
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		perms, err := testPermissions(c, topicID)
+		if err != nil {
+			r.Errorf("testPermissions: %v", err)
+		}
+		if len(perms) == 0 {
+			r.Errorf("want non-zero perms")
+		}
+	})
 
-	addUsers(c, topicID)
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		if err := addUsers(c, topicID); err != nil {
+			r.Errorf("addUsers: %v", err)
+		}
+	})
 
-	policy := getPolicy(c, topicID)
-	if role, member := iam.Editor, "group:cloud-logs@google.com"; !policy.HasRole(member, role) {
-		t.Fatalf("want %q as viewer, got %v", member, policy)
-	}
-	if role, member := iam.Viewer, iam.AllUsers; !policy.HasRole(member, role) {
-		t.Fatalf("want %q as viewer, got %v", member, policy)
-	}
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		policy, err := getPolicy(c, topicID)
+		if err != nil {
+			r.Errorf("getPolicy: %v", err)
+		}
+		if role, member := iam.Editor, "group:cloud-logs@google.com"; !policy.HasRole(member, role) {
+			r.Errorf("want %q as viewer, policy=%v", member, policy)
+		}
+		if role, member := iam.Viewer, iam.AllUsers; !policy.HasRole(member, role) {
+			r.Errorf("want %q as viewer, policy=%v", member, policy)
+		}
+	})
 }
 
 func TestDelete(t *testing.T) {
