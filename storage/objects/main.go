@@ -98,7 +98,7 @@ func write(client *storage.Client, bucket, object string) error {
 	return nil
 }
 
-func list(client *storage.Client, bucket string) error {
+func list(w io.Writer, client *storage.Client, bucket string) error {
 	ctx := context.Background()
 	// [START storage_list_files]
 	it := client.Bucket(bucket).Objects(ctx, nil)
@@ -110,13 +110,13 @@ func list(client *storage.Client, bucket string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Println(attrs.Name)
+		fmt.Fprintln(w, attrs.Name)
 	}
 	// [END storage_list_files]
 	return nil
 }
 
-func listByPrefix(client *storage.Client, bucket, prefix, delim string) error {
+func listByPrefix(w io.Writer, client *storage.Client, bucket, prefix, delim string) error {
 	ctx := context.Background()
 	// [START storage_list_files_with_prefix]
 	// Prefixes and delimiters can be used to emulate directory listings.
@@ -147,7 +147,7 @@ func listByPrefix(client *storage.Client, bucket, prefix, delim string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Println(attrs.Name)
+		fmt.Fprintln(w, attrs.Name)
 	}
 	// [END storage_list_files_with_prefix]
 	return nil
