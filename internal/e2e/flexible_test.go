@@ -95,10 +95,6 @@ func TestStorage(t *testing.T) {
 
 	url, _ := storage.URL("/upload")
 	var body bytes.Buffer
-	req, err := http.NewRequest("POST", url, &body)
-	if err != nil {
-		t.Fatalf("NewRequest: %v", err)
-	}
 	const filename = "flexible-storage-e2e"
 	w := multipart.NewWriter(&body)
 	fw, err := w.CreateFormFile("file", filename)
@@ -107,6 +103,11 @@ func TestStorage(t *testing.T) {
 	}
 	fw.Write([]byte("hello"))
 	w.Close()
+
+	req, err := http.NewRequest("POST", url, &body)
+	if err != nil {
+		t.Fatalf("NewRequest: %v", err)
+	}
 	req.Header.Set("Content-Type", w.FormDataContentType())
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
