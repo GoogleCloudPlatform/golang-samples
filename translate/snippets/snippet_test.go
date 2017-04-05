@@ -25,8 +25,8 @@ func TestTranslateText(t *testing.T) {
 	if err != nil {
 		t.Fatalf("translateText: %v", err)
 	}
-	if want := "ゴー"; !strings.Contains(got, want) {
-		t.Errorf("translateText(%q)=%q; want to contain %q", in, got, want)
+	if jaGo, jaKawaii := "ゴー", "かわいい"; !(strings.Contains(got, jaGo) || strings.Contains(got, jaKawaii)) {
+		t.Errorf("translateText(%q)=%q; want to contain %q or %q", in, got, jaGo, jaKawaii)
 	}
 }
 
