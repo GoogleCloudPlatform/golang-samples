@@ -9,7 +9,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"time"
@@ -23,9 +22,9 @@ import (
 	longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 )
 
-const usage = `Usage: captionasync <audiofile>
+const usage = `Usage: captionasync gs://<path-to-audiofile>
 
-Audio file is required to be 16-bit signed little-endian encoded
+Audio file must be a 16-bit signed little-endian encoded
 with a sample rate of 16000.
 `
 
@@ -59,12 +58,8 @@ func main() {
 	}
 }
 
-func send(client *speech.Client, filename string) (string, error) {
+func send(client *speech.Client, gcsURI string) (string, error) {
 	ctx := context.Background()
-	data, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return "", err
-	}
 
 	// Send the contents of the audio file with the encoding and
 	// and sample rate information to be transcripted.
@@ -75,7 +70,7 @@ func send(client *speech.Client, filename string) (string, error) {
 			LanguageCode:    "en-US",
 		},
 		Audio: &speechpb.RecognitionAudio{
-			AudioSource: &speechpb.RecognitionAudio_Content{Content: data},
+			AudioSource: &speechpb.RecognitionAudio_Uri{Uri: gcsURI},
 		},
 	}
 

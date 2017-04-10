@@ -22,7 +22,7 @@ func TestRecognize(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	opName, err := send(client, "./quit.raw")
+	opName, err := send(client, "gs://python-docs-samples-tests/speech/audio.raw")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -40,7 +40,7 @@ func TestRecognize(t *testing.T) {
 	if len(result.Alternatives) < 1 {
 		t.Fatal("got no alternatives; want at least one")
 	}
-	if got, want := result.Alternatives[0].Transcript, "quit"; got != want {
+	if got, want := result.Alternatives[0].Transcript, "how old is the Brooklyn Bridge"; got != want {
 		t.Errorf("Transcript: got %q; want %q", got, want)
 	}
 }
