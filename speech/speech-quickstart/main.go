@@ -15,8 +15,8 @@ import (
 	// Imports the Google Cloud Speech API client package.
 	"golang.org/x/net/context"
 
-	speech "cloud.google.com/go/speech/apiv1beta1"
-	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1beta1"
+	speech "cloud.google.com/go/speech/apiv1"
+	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"
 )
 
 func main() {
@@ -40,8 +40,9 @@ func main() {
 	// Detects speech in the audio file.
 	resp, err := client.SyncRecognize(ctx, &speechpb.SyncRecognizeRequest{
 		Config: &speechpb.RecognitionConfig{
-			Encoding:   speechpb.RecognitionConfig_LINEAR16,
-			SampleRate: 16000,
+			Encoding:     speechpb.RecognitionConfig_LINEAR16,
+			SampleRate:   16000,
+			LanguageCode: "en-US",
 		},
 		Audio: &speechpb.RecognitionAudio{
 			AudioSource: &speechpb.RecognitionAudio_Content{Content: data},
