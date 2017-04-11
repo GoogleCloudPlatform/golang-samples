@@ -38,11 +38,11 @@ func main() {
 	}
 
 	// Detects speech in the audio file.
-	resp, err := client.SyncRecognize(ctx, &speechpb.SyncRecognizeRequest{
+	resp, err := client.Recognize(ctx, &speechpb.RecognizeRequest{
 		Config: &speechpb.RecognitionConfig{
-			Encoding:     speechpb.RecognitionConfig_LINEAR16,
-			SampleRate:   16000,
-			LanguageCode: "en-US",
+			Encoding:        speechpb.RecognitionConfig_LINEAR16,
+			SampleRateHertz: 16000,
+			LanguageCode:    "en-US",
 		},
 		Audio: &speechpb.RecognitionAudio{
 			AudioSource: &speechpb.RecognitionAudio_Content{Content: data},
