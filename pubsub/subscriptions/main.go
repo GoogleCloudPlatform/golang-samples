@@ -10,16 +10,16 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sync"
 	"time"
 
 	// [START imports]
 	"golang.org/x/net/context"
 
+	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
 	"google.golang.org/api/iterator"
 	// [END imports]
-
-	"cloud.google.com/go/iam"
 )
 
 func main() {
@@ -87,35 +87,43 @@ func list(client *pubsub.Client) ([]*pubsub.Subscription, error) {
 func pullMsgs(client *pubsub.Client, name string, topic *pubsub.Topic) error {
 	ctx := context.Background()
 
-	// publish 10 messages on the topic.
+	// Publish 10 messages on the topic.
+	var results []*pubsub.PublishResult
 	for i := 0; i < 10; i++ {
-		_, err := topic.Publish(ctx, &pubsub.Message{
+		res := topic.Publish(ctx, &pubsub.Message{
 			Data: []byte(fmt.Sprintf("hello world #%d", i)),
 		})
+		results = append(results, res)
+	}
+
+	// Check that all messages were published.
+	for _, r := range results {
+		_, err := r.Get(ctx)
 		if err != nil {
 			return err
 		}
 	}
 
 	// [START pull_messages]
-	sub := client.Subscription(name)
-	it, err := sub.Pull(ctx)
-	if err != nil {
-		return err
-	}
-	defer it.Stop()
-
 	// Consume 10 messages.
-	for i := 0; i < 10; i++ {
-		msg, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return err
+	var mu sync.Mutex
+	received := 0
+	sub := client.Subscription(name)
+	cctx, cancel := context.WithCancel(ctx)
+	err := sub.Receive(cctx, func(ctx context.Context, msg *pubsub.Message) {
+		mu.Lock()
+		defer mu.Unlock()
+		if received >= 10 {
+			cancel()
+			msg.Nack()
+			return
 		}
 		fmt.Printf("Got message: %q\n", string(msg.Data))
-		msg.Done(true)
+		received++
+		msg.Ack()
+	})
+	if err != nil {
+		return err
 	}
 	// [END pull_messages]
 	return nil
@@ -166,44 +174,45 @@ func createTopicIfNotExists(c *pubsub.Client) *pubsub.Topic {
 	return t
 }
 
-func getPolicy(c *pubsub.Client, subName string) *iam.Policy {
+func getPolicy(c *pubsub.Client, subName string) (*iam.Policy, error) {
 	ctx := context.Background()
 
 	// [START pubsub_get_subscription_policy]
 	policy, err := c.Subscription(subName).IAM().Policy(ctx)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	for _, role := range policy.Roles() {
 		log.Printf("%q: %q", role, policy.Members(role))
 	}
 	// [END pubsub_get_subscription_policy]
-	return policy
+	return policy, nil
 }
 
-func addUsers(c *pubsub.Client, subName string) {
+func addUsers(c *pubsub.Client, subName string) error {
 	ctx := context.Background()
 
 	// [START pubsub_set_subscription_policy]
 	sub := c.Subscription(subName)
 	policy, err := sub.IAM().Policy(ctx)
 	if err != nil {
-		log.Fatalf("GetPolicy: %v", err)
+		return err
 	}
 	// Other valid prefixes are "serviceAccount:", "user:"
 	// See the documentation for more values.
 	policy.Add(iam.AllUsers, iam.Viewer)
 	policy.Add("group:cloud-logs@google.com", iam.Editor)
 	if err := sub.IAM().SetPolicy(ctx, policy); err != nil {
-		log.Fatalf("SetUser: %v", err)
+		return err
 	}
 	// NOTE: It may be necessary to retry this operation if IAM policies are
 	// being modified concurrently. SetPolicy will return an error if the policy
 	// was modified since it was retrieved.
 	// [END pubsub_set_subscription_policy]
+	return nil
 }
 
-func testPermissions(c *pubsub.Client, subName string) []string {
+func testPermissions(c *pubsub.Client, subName string) ([]string, error) {
 	ctx := context.Background()
 
 	// [START pubsub_test_subscription_permissions]
@@ -213,11 +222,11 @@ func testPermissions(c *pubsub.Client, subName string) []string {
 		"pubsub.subscriptions.update",
 	})
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	for _, perm := range perms {
 		log.Printf("Allowed: %v", perm)
 	}
 	// [END pubsub_test_subscription_permissions]
-	return perms
+	return perms, nil
 }

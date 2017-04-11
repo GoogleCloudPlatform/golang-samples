@@ -45,7 +45,7 @@ spec:
           "-p", "8081",
           "-a", "127.0.0.1:8080",
           "-s", "SERVICE_NAME",
-          "-v", "SERVICE_VERSION",
+          "-v", "SERVICE_CONFIG_ID",
         ]
       # [END esp]
         ports:

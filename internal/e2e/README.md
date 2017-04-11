@@ -7,10 +7,6 @@ Prerequisites:
 
         $ gcloud --quiet help app
 
-* Install aedeploy:
-
-        $ go get google.golang.org/appengine/cmd/aedeploy
-
 Before running tests:
 
     $ gcloud auth login

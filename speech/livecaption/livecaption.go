@@ -16,11 +16,11 @@ import (
 	"log"
 	"os"
 
-	speech "cloud.google.com/go/speech/apiv1beta1"
+	speech "cloud.google.com/go/speech/apiv1"
 	"golang.org/x/net/context"
 	"google.golang.org/api/option"
 	"google.golang.org/api/transport"
-	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1beta1"
+	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"
 )
 
 func main() {
@@ -48,8 +48,9 @@ func main() {
 		StreamingRequest: &speechpb.StreamingRecognizeRequest_StreamingConfig{
 			StreamingConfig: &speechpb.StreamingRecognitionConfig{
 				Config: &speechpb.RecognitionConfig{
-					Encoding:   speechpb.RecognitionConfig_LINEAR16,
-					SampleRate: 16000,
+					Encoding:        speechpb.RecognitionConfig_LINEAR16,
+					SampleRateHertz: 16000,
+					LanguageCode:    "en-US",
 				},
 			},
 		},

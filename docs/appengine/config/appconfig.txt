@@ -1,6 +1,4 @@
 // [START about_app_yaml_example]
-application: myapp
-version: alpha-001
 runtime: go
 api_version: go1
 
@@ -71,8 +69,6 @@ handlers:
 //[END auth_fail_action_example]
 
 //[START expiration_example]
-application: myapp
-version: alpha-001
 runtime: go
 api_version: go1
 

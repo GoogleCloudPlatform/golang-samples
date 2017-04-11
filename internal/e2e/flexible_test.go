@@ -12,6 +12,7 @@ import (
 	"log"
 	"mime/multipart"
 	"net/http"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -22,6 +23,19 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/aeintegrate"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
+
+func init() {
+	// Workaround for Travis:
+	// https://docs.travis-ci.com/user/common-build-problems/#Build-times-out-because-no-output-was-received
+	if os.Getenv("TRAVIS") == "true" {
+		go func() {
+			for {
+				time.Sleep(5 * time.Minute)
+				log.Print("Still testing. Don't kill me!")
+			}
+		}()
+	}
+}
 
 // env:flex deployments are quite flaky when done in parallel.
 // Offset each deployment by some amount of time.
@@ -81,10 +95,6 @@ func TestStorage(t *testing.T) {
 
 	url, _ := storage.URL("/upload")
 	var body bytes.Buffer
-	req, err := http.NewRequest("POST", url, &body)
-	if err != nil {
-		t.Fatalf("NewRequest: %v", err)
-	}
 	const filename = "flexible-storage-e2e"
 	w := multipart.NewWriter(&body)
 	fw, err := w.CreateFormFile("file", filename)
@@ -93,6 +103,11 @@ func TestStorage(t *testing.T) {
 	}
 	fw.Write([]byte("hello"))
 	w.Close()
+
+	req, err := http.NewRequest("POST", url, &body)
+	if err != nil {
+		t.Fatalf("NewRequest: %v", err)
+	}
 	req.Header.Set("Content-Type", w.FormDataContentType())
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {

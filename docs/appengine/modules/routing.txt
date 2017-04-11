@@ -1,41 +1,38 @@
 // [START sample_1]
-application: simple-sample
-# No version required; this does routing independent of version.
-
 dispatch:
-  # Default module serves the typical web resources and all static resources.
+  # Default service serves the typical web resources and all static resources.
   - url: "*/favicon.ico"
-    module: default
+    service: default
 
-  # Default module serves simple hostname request.
+  # Default service serves simple hostname request.
   - url: "simple-sample.appspot.com/"
-    module: default
+    service: default
 
   # Send all mobile traffic to the mobile frontend.
   - url: "*/mobile/*"
-    module: mobile-frontend
+    service: mobile-frontend
 
   # Send all work to the one static backend.
   - url: "*/work/*"
-    module: static-backend
+    service: static-backend
 // [END sample_1]
 
 // [START sample_2]
-# Send any path that begins with “simple-sample.appspot.com/mobile” to the mobile-frontend module.
+# Send any path that begins with “simple-sample.appspot.com/mobile” to the mobile-frontend service.
 - url: "simple-sample.appspot.com/mobile*"
-  module: mobile-frontend
+  service: mobile-frontend
 
-# Send any domain/sub-domain with a path that starts with “work” to the static backend module.
+# Send any domain/sub-domain with a path that starts with “work” to the static backend service.
 - url: "*/work*"
-  module: static-backend
+  service: static-backend
 // [END sample_2]
 
 // [START sample_3]
 # Matches the path "/fun", but not "/fun2" or "/fun/other".
 - url: "*/fun"
-  module: mobile-frontend
+  service: mobile-frontend
 
 # Matches the hostname "customer1.myapp.com", but not "1.customer1.myapp.com".
 - url: "customer1.myapp.com/*"
-  module: static-backend
+  service: static-backend
 // [END sample_3]

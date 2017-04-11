@@ -4,6 +4,8 @@ set -e
 
 mv key.json /tmp/key.json
 export GOOGLE_APPLICATION_CREDENTIALS=/tmp/key.json
+export GOLANG_SAMPLES_KMS_KEYRING=ring1
+export GOLANG_SAMPLES_KMS_CRYPTOKEY=key1
 
 curl https://storage.googleapis.com/gimme-proj/linux_amd64/gimmeproj > /bin/gimmeproj && chmod +x /bin/gimmeproj;
 gimmeproj version;
@@ -16,6 +18,8 @@ echo "Running tests in project $GOLANG_SAMPLES_PROJECT_ID";
 trap "gimmeproj -project golang-samples-tests done $GOLANG_SAMPLES_PROJECT_ID" EXIT
 
 set -x
+
+export GOLANG_SAMPLES_SPANNER=projects/golang-samples-tests/instances/golang-samples-tests
 
 date
 
@@ -45,4 +49,4 @@ time go get -u -v $(go list -f '{{join .Imports "\n"}}{{"\n"}}{{join .TestImport
 date
 
 # Run all of the tests
-go test -v ./...
+go test -timeout 20m -v ./...
