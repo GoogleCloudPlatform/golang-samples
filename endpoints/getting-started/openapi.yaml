@@ -45,12 +45,8 @@ paths:
           description: "Authentication info."
           schema:
             $ref: "#/definitions/authInfoResponse"
-      x-security:
-      - google_jwt:
-          audiences:
-          # This must match the "aud" field in the JWT. You can add multiple
-          # audiences to accept JWTs from multiple clients.
-          - "echo.endpoints.sample.google.com"
+      security:
+      - google_jwt: []
   "/auth/info/googleidtoken":
     get:
       description: "Returns the requests' authentication information."
@@ -62,12 +58,8 @@ paths:
           description: "Authentication info."
           schema:
             $ref: "#/definitions/authInfoResponse"
-      x-security:
-      - google_id_token:
-          audiences:
-          # Your OAuth2 client's Client ID must be added here. You can add
-          # multiple client IDs to accept tokens from multiple clients.
-          - "YOUR-CLIENT-ID"
+      security:
+      - google_id_token: []
   "/auth/info/firebase":
     get:
       description: "Returns the requests' authentication information."
@@ -79,10 +71,8 @@ paths:
           description: "Authentication info."
           schema:
             $ref: "#/definitions/authInfoResponse"
-      x-security:
-      - firebase:
-          audiences:
-          - "YOUR-PROJECT-ID"
+      security:
+      - firebase: []
   "/auth/info/auth0":
     get:
       description: "Returns the requests' authentication information."
@@ -94,11 +84,8 @@ paths:
           description: "Authentication info."
           schema:
             $ref: "#/definitions/authInfoResponse"
-      x-security:
-      - auth0_jwk:
-          audiences:
-          # Replace with your client ID, found in the Auth0 console.
-          - "YOUR-CLIENT-ID"
+      security:
+      - auth0_jwk: []
 definitions:
   echoMessage:
     properties:
@@ -125,9 +112,11 @@ securityDefinitions:
     flow: "implicit"
     type: "oauth2"
     # This must match the 'iss' field in the JWT.
-    x-issuer: "jwt-client.endpoints.sample.google.com"
+    x-google-issuer: "jwt-client.endpoints.sample.google.com"
     # Update this with your service account's email address.
-    x-jwks_uri: "https://www.googleapis.com/service_accounts/v1/jwk/YOUR-SERVICE-ACCOUNT-EMAIL"
+    x-google-jwks_uri: "https://www.googleapis.com/service_accounts/v1/jwk/YOUR-SERVICE-ACCOUNT-EMAIL"
+    # This must match the "aud" field in the JWT. You can add multiple audiences to accept JWTs from multiple clients.
+    x-google-audiences: "echo.endpoints.sample.google.com"
   # This section configures authentication using Google OAuth2 ID Tokens.
   # ID Tokens can be obtained using OAuth2 clients, and can be used to access
   # your API on behalf of a particular user.
@@ -135,8 +124,9 @@ securityDefinitions:
     authorizationUrl: ""
     flow: "implicit"
     type: "oauth2"
-    x-google-issuer: "accounts.google.com"
-    x-google-jwks_uri: "https://www.googleapis.com/oauth2/v1/certs"
+    x-google-issuer: "https://accounts.google.com"
+    x-google-jwks_uri: "https://www.googleapis.com/oauth2/v3/certs"
+    x-google-audiences: "YOUR-CLIENT-ID"
   # This section configures authentication using Firebase Auth.
   firebase:
     authorizationUrl: ""
@@ -144,6 +134,7 @@ securityDefinitions:
     type: "oauth2"
     x-google-issuer: "https://securetoken.google.com/YOUR-PROJECT-ID"
     x-google-jwks_uri: "https://www.googleapis.com/service_accounts/v1/metadata/x509/securetoken@system.gserviceaccount.com"
+    x-google-audiences: "YOUR-PROJECT-ID"
       # This section configures authentication using Auth0 (https://auth0.com).
   auth0_jwk:
     # Update YOUR-ACCOUNT-NAME with your Auth0 account name.
@@ -153,3 +144,5 @@ securityDefinitions:
     x-google-issuer: "https://YOUR-ACCOUNT-NAME.auth0.com/"
     # Update this with your service account's email address.
     x-google-jwks_uri: "https://YOUR-ACCOUNT-NAME.auth0.com/.well-known/jwks.json"
+    # Replace with your client ID, found in the Auth0 console.
+    x-google-audiences: "YOUR-CLIENT-ID"
