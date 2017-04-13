@@ -64,7 +64,11 @@ func main() {
 		for {
 			n, err := os.Stdin.Read(buf)
 			if err == io.EOF {
-				return // Nothing else to pipe, return from this goroutine.
+				// Nothing else to pipe, close the stream.
+				if err := stream.CloseSend(); err != nil {
+					log.Printf("Could not close stream: %v", err)
+				}
+				return
 			}
 			if err != nil {
 				log.Printf("Could not read from stdin: %v", err)
