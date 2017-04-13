@@ -66,7 +66,7 @@ func main() {
 			if err == io.EOF {
 				// Nothing else to pipe, close the stream.
 				if err := stream.CloseSend(); err != nil {
-					log.Printf("Could not close stream: %v", err)
+					log.Fatalf("Could not close stream: %v", err)
 				}
 				return
 			}

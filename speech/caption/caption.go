@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 
 	// [START imports]
 	"golang.org/x/net/context"
@@ -22,8 +23,10 @@ import (
 
 const usage = `Usage: caption <audiofile>
 
-Audio file is required to be 16-bit signed little-endian encoded
+Audio file must be a 16-bit signed little-endian encoded
 with a sample rate of 16000.
+
+The path to the audio file may be a GCS URI (gs://...).
 `
 
 func main() {
@@ -33,8 +36,17 @@ func main() {
 		os.Exit(2)
 	}
 
+	var runFunc func(string) (*speechpb.RecognizeResponse, error)
+
+	path := os.Args[1]
+	if strings.Contains(path, "://") {
+		runFunc = recognizeGCS
+	} else {
+		runFunc = recognize
+	}
+
 	// Perform the request.
-	resp, err := recognize(os.Args[1])
+	resp, err := runFunc(os.Args[1])
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -47,6 +59,33 @@ func main() {
 		}
 	}
 	// [END print]
+}
+
+func recognizeGCS(gcsURI string) (*speechpb.RecognizeResponse, error) {
+	ctx := context.Background()
+
+	// [START init_gcs]
+	client, err := speech.NewClient(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// [END init_gcs]
+
+	// [START request_gcs]
+	// Send the request with the URI (gs://...)
+	// and sample rate information to be transcripted.
+	resp, err := client.Recognize(ctx, &speechpb.RecognizeRequest{
+		Config: &speechpb.RecognitionConfig{
+			Encoding:        speechpb.RecognitionConfig_LINEAR16,
+			SampleRateHertz: 16000,
+			LanguageCode:    "en-US",
+		},
+		Audio: &speechpb.RecognitionAudio{
+			AudioSource: &speechpb.RecognitionAudio_Uri{Uri: gcsURI},
+		},
+	})
+	// [END request_gcs]
+	return resp, err
 }
 
 func recognize(file string) (*speechpb.RecognizeResponse, error) {
