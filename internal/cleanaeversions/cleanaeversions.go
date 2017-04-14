@@ -115,7 +115,7 @@ func main() {
 			}
 			return nil
 		}); err != nil {
-			fmt.Fprintf(os.Stderr, "Could not list versions for %q: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Could not list versions for %q: %v\n", service, err)
 			os.Exit(1)
 		}
 	}
