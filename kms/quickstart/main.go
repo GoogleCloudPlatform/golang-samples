@@ -5,7 +5,7 @@
 // Sample quickstart is a basic program that uses Cloud KMS.
 package main
 
-// [START kms-quickstart]
+// [START kms_quickstart]
 import (
 	"fmt"
 	"log"
