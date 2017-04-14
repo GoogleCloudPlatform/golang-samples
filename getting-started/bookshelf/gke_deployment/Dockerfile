@@ -1,6 +1,18 @@
-# Dockerfile extending the generic Go image with application files for a
-# single application.
-FROM gcr.io/google_appengine/golang
+FROM golang:alpine
 
-COPY . /go/src/app
-RUN go-wrapper install -tags appenginevm
+RUN apk add --no-cache ca-certificates
+
+COPY . /go/src/bookshelf
+
+RUN set -ex \
+      && apk add --no-cache --virtual .build-deps \
+              git \
+      && go get -v bookshelf/... \
+      && apk del .build-deps
+
+RUN go build -o /app bookshelf/app
+RUN go build -o /pubsub_worker bookshelf/pubsub_worker
+
+WORKDIR /go/src/bookshelf/app
+
+CMD ["/app"]
