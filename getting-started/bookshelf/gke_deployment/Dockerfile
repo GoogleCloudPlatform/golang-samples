@@ -17,4 +17,5 @@ RUN go install $pkg/...
 # Needed for templates for the front-end app.
 WORKDIR $GOPATH/src/$pkg/app
 
-CMD ["app"]
+# Users of the image should invoke either of the commands.
+CMD echo "Use the app or pubsub_worker commands."; exit 1
