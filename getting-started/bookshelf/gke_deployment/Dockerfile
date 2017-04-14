@@ -1,18 +1,20 @@
 FROM golang:alpine
 
+ARG pkg=github.com/GoogleCloudPlatform/golang-samples/getting-started/bookshelf
+
 RUN apk add --no-cache ca-certificates
 
-COPY . /go/src/bookshelf
+COPY . $GOPATH/src/$pkg
 
 RUN set -ex \
       && apk add --no-cache --virtual .build-deps \
               git \
-      && go get -v bookshelf/... \
+      && go get -v $pkg/... \
       && apk del .build-deps
 
-RUN go build -o /app bookshelf/app
-RUN go build -o /pubsub_worker bookshelf/pubsub_worker
+RUN go install $pkg/...
 
-WORKDIR /go/src/bookshelf/app
+# Needed for templates for the front-end app.
+WORKDIR $GOPATH/src/$pkg/app
 
-CMD ["/app"]
+CMD ["app"]
