@@ -36,7 +36,8 @@ spec:
       containers:
       - name: bookshelf-worker
         # TODO: Replace [YOUR_PROJECT_ID] with your project ID.
-        image: gcr.io/[YOUR_PROJECT_ID]/bookshelf-worker:latest
+        image: gcr.io/[YOUR_PROJECT_ID]/bookshelf:latest
+        command: ["pubsub_worker"]
         # This setting makes nodes pull the docker image every time before
         # starting the pod. This is useful when debugging, but should be turned
         # off in production.
