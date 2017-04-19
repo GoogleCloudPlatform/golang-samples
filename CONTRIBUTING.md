@@ -14,9 +14,15 @@
 1. Make changes, commit to your fork.
 1. Send a pull request with your changes.
 
-# Testing
+## Style
 
-## Running system tests
+Ensure that your sample is formatted using
+[gofmt](https://golang.org/cmd/gofmt/) and that it passes [go
+vet](https://golang.org/cmd/vet/) without errors or warnings.
+
+## Testing
+
+### Running system tests
 
 Set the `GOLANG_SAMPLES_PROJECT_ID` environment variable to a suitable test project.
 
