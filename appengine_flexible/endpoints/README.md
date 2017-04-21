@@ -41,5 +41,15 @@ First, [download a Service Account JSON key file](https://developers.google.com/
 Then, run:
 
 ```
-go run client/main.go -host=https://my-app.appspot.com -service-account=path_to_service_account.json
+go run client/main.go -host=https://my-app.appspot.com -jwt -service-account=path_to_service_account.json
+```
+
+### Send a request using Google ID authentication
+
+First, [download a Service Account JSON key file](https://developers.google.com/identity/protocols/OAuth2ServiceAccount#creatinganaccount).
+
+Then, run:
+
+```
+go run client/main.go -host=https://my-app.appspot.com -google-id -service-account=path_to_service_account.json
 ```
