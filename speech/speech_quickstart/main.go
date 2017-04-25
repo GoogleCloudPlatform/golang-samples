@@ -49,7 +49,7 @@ func main() {
 		},
 	})
 	if err != nil {
-		log.Fatal("failed to recognize: %v", err)
+		log.Fatalf("failed to recognize: %v", err)
 	}
 
 	// Prints the results.
