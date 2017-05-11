@@ -141,6 +141,36 @@ func create(client *pubsub.Client, name string, topic *pubsub.Topic) error {
 	return nil
 }
 
+func createWithEndpoint(client *pubsub.Client, name string, topic *pubsub.Topic, endpoint string) error {
+	ctx := context.Background()
+	// [START create_push_subscription]
+
+	// For example, endpoint is "https://my-test-project.appspot.com/push".
+	sub, err := client.CreateSubscription(ctx, name, topic, 10*time.Second, &pubsub.PushConfig{
+		Endpoint: endpoint,
+	})
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Created subscription: %v\n", sub)
+	// [END create_push_subscription]
+	return nil
+}
+
+func updateEndpoint(client *pubsub.Client, name string, endpoint string) error {
+	ctx := context.Background()
+	// [START update_push_subscription]
+
+	// For example, endpoint is "https://my-test-project.appspot.com/push".
+	if err := client.Subscription(name).ModifyPushConfig(ctx, &pubsub.PushConfig{
+		Endpoint: endpoint,
+	}); err != nil {
+		return err
+	}
+	// [END update_push_subscription]
+	return nil
+}
+
 func delete(client *pubsub.Client, name string) error {
 	ctx := context.Background()
 	// [START delete_subscription]

@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	// [START imports]
 	"golang.org/x/net/context"
@@ -95,6 +96,27 @@ func list(client *pubsub.Client) ([]*pubsub.Topic, error) {
 	// [END list_topics]
 }
 
+func listSubscriptions(client *pubsub.Client, topicID string) ([]*pubsub.Subscription, error) {
+	ctx := context.Background()
+
+	// [START list_topic_subscriptions]
+	var subs []*pubsub.Subscription
+
+	it := client.Topic(topicID).Subscriptions(ctx)
+	for {
+		sub, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+		subs = append(subs, sub)
+	}
+	// [END list_topic_subscriptions]
+	return subs, nil
+}
+
 func delete(client *pubsub.Client, topic string) error {
 	ctx := context.Background()
 	// [START delete_topic]
@@ -122,6 +144,34 @@ func publish(client *pubsub.Client, topic, msg string) error {
 	}
 	fmt.Printf("Published a message; msg ID: %v\n", id)
 	// [END publish]
+	return nil
+}
+
+func publishWithSettings(client *pubsub.Client, topic string, msg []byte) error {
+	ctx := context.Background()
+	// [START publish_settings]
+	t := client.Topic(topic)
+	t.PublishSettings = pubsub.PublishSettings{
+		ByteThreshold:  5000,
+		CountThreshold: 10,
+		DelayThreshold: 100 * time.Millisecond,
+	}
+	result := t.Publish(ctx, &pubsub.Message{Data: msg})
+	// [END publish_settings]
+	_ = result
+	return nil
+}
+
+func publishSingleGoroutine(client *pubsub.Client, topic string, msg []byte) error {
+	ctx := context.Background()
+	// [START publish_single_goroutine]
+	t := client.Topic(topic)
+	t.PublishSettings = pubsub.PublishSettings{
+		NumGoroutines: 1,
+	}
+	result := t.Publish(ctx, &pubsub.Message{Data: msg})
+	// [END publish_single_goroutine]
+	_ = result
 	return nil
 }
 
