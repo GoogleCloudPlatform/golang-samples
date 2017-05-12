@@ -129,6 +129,38 @@ func pullMsgs(client *pubsub.Client, name string, topic *pubsub.Topic) error {
 	return nil
 }
 
+func pullMsgsError(client *pubsub.Client, name string) error {
+	ctx := context.Background()
+	// [START pull_messages_error]
+	// If the service returns a non-retryable error, Receive returns that error after
+	// all of the outstanding calls to the handler have returned.
+	err := client.Subscription(name).Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
+		fmt.Printf("Got message: %q\n", string(msg.Data))
+		msg.Ack()
+	})
+	if err != nil {
+		return err
+	}
+	// [END pull_messages_error]
+	return nil
+}
+
+func pullMsgsSettings(client *pubsub.Client, name string) error {
+	ctx := context.Background()
+	// [START pull_messages_settings]
+	sub := client.Subscription(name)
+	sub.ReceiveSettings.MaxOutstandingMessages = 10
+	err := sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
+		fmt.Printf("Got message: %q\n", string(msg.Data))
+		msg.Ack()
+	})
+	if err != nil {
+		return err
+	}
+	// [END pull_messages_settings]
+	return nil
+}
+
 func create(client *pubsub.Client, name string, topic *pubsub.Topic) error {
 	ctx := context.Background()
 	// [START create_subscription]

@@ -157,8 +157,14 @@ func publishWithSettings(client *pubsub.Client, topic string, msg []byte) error 
 		DelayThreshold: 100 * time.Millisecond,
 	}
 	result := t.Publish(ctx, &pubsub.Message{Data: msg})
+	// Block until the result is returned and a server-generated
+	// ID is returned for the published message.
+	id, err := result.Get(ctx)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Published a message; msg ID: %v\n", id)
 	// [END publish_settings]
-	_ = result
 	return nil
 }
 
@@ -170,8 +176,14 @@ func publishSingleGoroutine(client *pubsub.Client, topic string, msg []byte) err
 		NumGoroutines: 1,
 	}
 	result := t.Publish(ctx, &pubsub.Message{Data: msg})
+	// Block until the result is returned and a server-generated
+	// ID is returned for the published message.
+	id, err := result.Get(ctx)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Published a message; msg ID: %v\n", id)
 	// [END publish_single_goroutine]
-	_ = result
 	return nil
 }
 
