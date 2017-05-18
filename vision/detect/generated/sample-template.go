@@ -128,7 +128,7 @@ func detectDocumentText(w io.Writer, file string) error {
 // detectProperties gets image properties from the Vision API for an image at the given file path.
 func detectProperties(w io.Writer, file string) error {
 	var client *vision.ImageAnnotatorClient // Boilerplate is inserted by gen.go
-	props, err := client.DetectImageProperties(ctx, image, nil, nil)
+	props, err := client.DetectImageProperties(ctx, image, nil)
 	if err != nil {
 		return err
 	}
@@ -155,7 +155,9 @@ func detectCropHints(w io.Writer, file string) error {
 
 	fmt.Fprintln(w, "Crop hints:")
 	for _, hint := range res.CropHints {
-		fmt.Fprintf(w, "%v\n", hint.BoundingPoly)
+		for _, v := range hint.BoundingPoly.Vertices {
+			fmt.Fprintf(w, "(%d,%d)\n", v.X, v.Y)
+		}
 	}
 
 	return nil

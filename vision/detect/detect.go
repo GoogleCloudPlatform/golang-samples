@@ -221,7 +221,7 @@ func detectProperties(w io.Writer, file string) error {
 	if err != nil {
 		return err
 	}
-	props, err := client.DetectImageProperties(ctx, image, nil, nil)
+	props, err := client.DetectImageProperties(ctx, image, nil)
 	if err != nil {
 		return err
 	}
@@ -264,7 +264,9 @@ func detectCropHints(w io.Writer, file string) error {
 
 	fmt.Fprintln(w, "Crop hints:")
 	for _, hint := range res.CropHints {
-		fmt.Fprintf(w, "%v\n", hint.BoundingPoly)
+		for _, v := range hint.BoundingPoly.Vertices {
+			fmt.Fprintf(w, "(%d,%d)\n", v.X, v.Y)
+		}
 	}
 
 	return nil
@@ -534,7 +536,7 @@ func detectPropertiesURI(w io.Writer, file string) error {
 	}
 
 	image := vision.NewImageFromURI(file)
-	props, err := client.DetectImageProperties(ctx, image, nil, nil)
+	props, err := client.DetectImageProperties(ctx, image, nil)
 	if err != nil {
 		return err
 	}
@@ -568,7 +570,9 @@ func detectCropHintsURI(w io.Writer, file string) error {
 
 	fmt.Fprintln(w, "Crop hints:")
 	for _, hint := range res.CropHints {
-		fmt.Fprintf(w, "%v\n", hint.BoundingPoly)
+		for _, v := range hint.BoundingPoly.Vertices {
+			fmt.Fprintf(w, "(%d,%d)\n", v.X, v.Y)
+		}
 	}
 
 	return nil
