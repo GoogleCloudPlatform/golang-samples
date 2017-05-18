@@ -70,6 +70,21 @@ outer:
 	}
 }
 
+func TestIAM(t *testing.T) {
+	testutil.SystemTest(t)
+	c := setup(t)
+
+	if _, err := getPolicy(c, bucketName); err != nil {
+		t.Errorf("getPolicy: %#v", err)
+	}
+	if err := addUser(c, bucketName); err != nil {
+		t.Errorf("addUser: %v", err)
+	}
+	if err := removeUser(c, bucketName); err != nil {
+		t.Errorf("removeUser: %v", err)
+	}
+}
+
 func TestDelete(t *testing.T) {
 	testutil.SystemTest(t)
 

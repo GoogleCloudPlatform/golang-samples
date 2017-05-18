@@ -22,7 +22,7 @@ type Task struct {
 func main() {
 	ctx := context.Background()
 
-	// Setx your Google Cloud Platform project ID.
+	// Set your Google Cloud Platform project ID.
 	projectID := "YOUR_PROJECT_ID"
 
 	// Creates a client.

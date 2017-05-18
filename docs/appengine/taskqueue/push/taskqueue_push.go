@@ -70,7 +70,7 @@ func worker(w http.ResponseWriter, r *http.Request) {
 var handlerTemplate = template.Must(template.New("handler").Parse(handlerHTML))
 
 const handlerHTML = `
-{{repeat .}}
+{{range .}}
 <p>{{.Name}}: {{.Count}}</p>
 {{end}}
 <p>Start a new counter:</p>
