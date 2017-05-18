@@ -12,7 +12,7 @@ import (
 	"os"
 
 	// Imports the Google Cloud Vision API client package.
-	"cloud.google.com/go/vision"
+	"cloud.google.com/go/vision/apiv1"
 	"golang.org/x/net/context"
 )
 
@@ -20,7 +20,7 @@ func main() {
 	ctx := context.Background()
 
 	// Creates a client.
-	client, err := vision.NewClient(ctx)
+	client, err := vision.NewImageAnnotatorClient(ctx)
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
@@ -38,7 +38,7 @@ func main() {
 		log.Fatalf("Failed to create image: %v", err)
 	}
 
-	labels, err := client.DetectLabels(ctx, image, 10)
+	labels, err := client.DetectLabels(ctx, image, nil, 10)
 	if err != nil {
 		log.Fatalf("Failed to detect labels: %v", err)
 	}

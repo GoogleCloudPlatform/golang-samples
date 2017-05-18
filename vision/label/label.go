@@ -12,7 +12,7 @@ import (
 	"path/filepath"
 
 	// [START imports]
-	"cloud.google.com/go/vision"
+	"cloud.google.com/go/vision/apiv1"
 	"golang.org/x/net/context"
 	// [END imports]
 )
@@ -23,7 +23,7 @@ func findLabels(file string) ([]string, error) {
 	ctx := context.Background()
 
 	// Create the client.
-	client, err := vision.NewClient(ctx)
+	client, err := vision.NewImageAnnotatorClient(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func findLabels(file string) ([]string, error) {
 	}
 
 	// Perform the request.
-	annotations, err := client.DetectLabels(ctx, image, 10)
+	annotations, err := client.DetectLabels(ctx, image, nil, 10)
 	if err != nil {
 		return nil, err
 	}
