@@ -16,7 +16,6 @@ import (
 
 	vs "cloud.google.com/go/vision/apiv1"
 	"golang.org/x/net/context"
-	pb "google.golang.org/genproto/googleapis/cloud/vision/v1"
 )
 
 func init() {
@@ -24,7 +23,6 @@ func init() {
 	_ = context.Background()
 	_ = vs.ImageAnnotatorClient{}
 	_ = os.Open
-	_ = pb.AnnotateImageRequest{}
 }
 
 // detectFaces gets faces from the Vision API for an image at the given file path.
@@ -393,7 +391,6 @@ func init() {
 	_ = context.Background()
 	_ = vs.ImageAnnotatorClient{}
 	_ = os.Open
-	_ = pb.AnnotateImageRequest{}
 }
 
 // detectFaces gets faces from the Vision API for an image at the given file path.
