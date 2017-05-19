@@ -14,7 +14,7 @@ import (
 	"io"
 	"os"
 
-	"cloud.google.com/go/vision/apiv1"
+	vs "cloud.google.com/go/vision/apiv1"
 	"golang.org/x/net/context"
 	pb "google.golang.org/genproto/googleapis/cloud/vision/v1"
 )
@@ -22,7 +22,7 @@ import (
 func init() {
 	// Refer to these functions so that goimports is happy before boilerplate is inserted.
 	_ = context.Background()
-	_ = vision.ImageAnnotatorClient{}
+	_ = vs.ImageAnnotatorClient{}
 	_ = os.Open
 	_ = pb.AnnotateImageRequest{}
 }
@@ -31,7 +31,7 @@ func init() {
 func detectFaces(w io.Writer, file string) error {
 	ctx := context.Background()
 
-	client, err := vision.NewImageAnnotatorClient(ctx)
+	client, err := vs.NewImageAnnotatorClient(ctx)
 	if err != nil {
 		return err
 	}
@@ -42,7 +42,7 @@ func detectFaces(w io.Writer, file string) error {
 	}
 	defer f.Close()
 
-	image, err := vision.NewImageFromReader(f)
+	image, err := vs.NewImageFromReader(f)
 	if err != nil {
 		return err
 	}
@@ -68,7 +68,7 @@ func detectFaces(w io.Writer, file string) error {
 func detectLabels(w io.Writer, file string) error {
 	ctx := context.Background()
 
-	client, err := vision.NewImageAnnotatorClient(ctx)
+	client, err := vs.NewImageAnnotatorClient(ctx)
 	if err != nil {
 		return err
 	}
@@ -79,7 +79,7 @@ func detectLabels(w io.Writer, file string) error {
 	}
 	defer f.Close()
 
-	image, err := vision.NewImageFromReader(f)
+	image, err := vs.NewImageFromReader(f)
 	if err != nil {
 		return err
 	}
@@ -104,7 +104,7 @@ func detectLabels(w io.Writer, file string) error {
 func detectLandmarks(w io.Writer, file string) error {
 	ctx := context.Background()
 
-	client, err := vision.NewImageAnnotatorClient(ctx)
+	client, err := vs.NewImageAnnotatorClient(ctx)
 	if err != nil {
 		return err
 	}
@@ -115,7 +115,7 @@ func detectLandmarks(w io.Writer, file string) error {
 	}
 	defer f.Close()
 
-	image, err := vision.NewImageFromReader(f)
+	image, err := vs.NewImageFromReader(f)
 	if err != nil {
 		return err
 	}
@@ -140,7 +140,7 @@ func detectLandmarks(w io.Writer, file string) error {
 func detectText(w io.Writer, file string) error {
 	ctx := context.Background()
 
-	client, err := vision.NewImageAnnotatorClient(ctx)
+	client, err := vs.NewImageAnnotatorClient(ctx)
 	if err != nil {
 		return err
 	}
@@ -151,7 +151,7 @@ func detectText(w io.Writer, file string) error {
 	}
 	defer f.Close()
 
-	image, err := vision.NewImageFromReader(f)
+	image, err := vs.NewImageFromReader(f)
 	if err != nil {
 		return err
 	}
@@ -176,7 +176,7 @@ func detectText(w io.Writer, file string) error {
 func detectDocumentText(w io.Writer, file string) error {
 	ctx := context.Background()
 
-	client, err := vision.NewImageAnnotatorClient(ctx)
+	client, err := vs.NewImageAnnotatorClient(ctx)
 	if err != nil {
 		return err
 	}
@@ -187,7 +187,7 @@ func detectDocumentText(w io.Writer, file string) error {
 	}
 	defer f.Close()
 
-	image, err := vision.NewImageFromReader(f)
+	image, err := vs.NewImageFromReader(f)
 	if err != nil {
 		return err
 	}
@@ -206,7 +206,7 @@ func detectDocumentText(w io.Writer, file string) error {
 func detectProperties(w io.Writer, file string) error {
 	ctx := context.Background()
 
-	client, err := vision.NewImageAnnotatorClient(ctx)
+	client, err := vs.NewImageAnnotatorClient(ctx)
 	if err != nil {
 		return err
 	}
@@ -217,7 +217,7 @@ func detectProperties(w io.Writer, file string) error {
 	}
 	defer f.Close()
 
-	image, err := vision.NewImageFromReader(f)
+	image, err := vs.NewImageFromReader(f)
 	if err != nil {
 		return err
 	}
@@ -242,7 +242,7 @@ func detectProperties(w io.Writer, file string) error {
 func detectCropHints(w io.Writer, file string) error {
 	ctx := context.Background()
 
-	client, err := vision.NewImageAnnotatorClient(ctx)
+	client, err := vs.NewImageAnnotatorClient(ctx)
 	if err != nil {
 		return err
 	}
@@ -253,7 +253,7 @@ func detectCropHints(w io.Writer, file string) error {
 	}
 	defer f.Close()
 
-	image, err := vision.NewImageFromReader(f)
+	image, err := vs.NewImageFromReader(f)
 	if err != nil {
 		return err
 	}
@@ -276,7 +276,7 @@ func detectCropHints(w io.Writer, file string) error {
 func detectSafeSearch(w io.Writer, file string) error {
 	ctx := context.Background()
 
-	client, err := vision.NewImageAnnotatorClient(ctx)
+	client, err := vs.NewImageAnnotatorClient(ctx)
 	if err != nil {
 		return err
 	}
@@ -287,7 +287,7 @@ func detectSafeSearch(w io.Writer, file string) error {
 	}
 	defer f.Close()
 
-	image, err := vision.NewImageFromReader(f)
+	image, err := vs.NewImageFromReader(f)
 	if err != nil {
 		return err
 	}
@@ -309,7 +309,7 @@ func detectSafeSearch(w io.Writer, file string) error {
 func detectWeb(w io.Writer, file string) error {
 	ctx := context.Background()
 
-	client, err := vision.NewImageAnnotatorClient(ctx)
+	client, err := vs.NewImageAnnotatorClient(ctx)
 	if err != nil {
 		return err
 	}
@@ -320,7 +320,7 @@ func detectWeb(w io.Writer, file string) error {
 	}
 	defer f.Close()
 
-	image, err := vision.NewImageFromReader(f)
+	image, err := vs.NewImageFromReader(f)
 	if err != nil {
 		return err
 	}
@@ -356,7 +356,7 @@ func detectWeb(w io.Writer, file string) error {
 func detectLogos(w io.Writer, file string) error {
 	ctx := context.Background()
 
-	client, err := vision.NewImageAnnotatorClient(ctx)
+	client, err := vs.NewImageAnnotatorClient(ctx)
 	if err != nil {
 		return err
 	}
@@ -367,7 +367,7 @@ func detectLogos(w io.Writer, file string) error {
 	}
 	defer f.Close()
 
-	image, err := vision.NewImageFromReader(f)
+	image, err := vs.NewImageFromReader(f)
 	if err != nil {
 		return err
 	}
@@ -391,7 +391,7 @@ func detectLogos(w io.Writer, file string) error {
 func init() {
 	// Refer to these functions so that goimports is happy before boilerplate is inserted.
 	_ = context.Background()
-	_ = vision.ImageAnnotatorClient{}
+	_ = vs.ImageAnnotatorClient{}
 	_ = os.Open
 	_ = pb.AnnotateImageRequest{}
 }
@@ -400,12 +400,12 @@ func init() {
 func detectFacesURI(w io.Writer, file string) error {
 	ctx := context.Background()
 
-	client, err := vision.NewImageAnnotatorClient(ctx)
+	client, err := vs.NewImageAnnotatorClient(ctx)
 	if err != nil {
 		return err
 	}
 
-	image := vision.NewImageFromURI(file)
+	image := vs.NewImageFromURI(file)
 	annotations, err := client.DetectFaces(ctx, image, nil, 10)
 	if err != nil {
 		return err
@@ -428,12 +428,12 @@ func detectFacesURI(w io.Writer, file string) error {
 func detectLabelsURI(w io.Writer, file string) error {
 	ctx := context.Background()
 
-	client, err := vision.NewImageAnnotatorClient(ctx)
+	client, err := vs.NewImageAnnotatorClient(ctx)
 	if err != nil {
 		return err
 	}
 
-	image := vision.NewImageFromURI(file)
+	image := vs.NewImageFromURI(file)
 	annotations, err := client.DetectLabels(ctx, image, nil, 10)
 	if err != nil {
 		return err
@@ -455,12 +455,12 @@ func detectLabelsURI(w io.Writer, file string) error {
 func detectLandmarksURI(w io.Writer, file string) error {
 	ctx := context.Background()
 
-	client, err := vision.NewImageAnnotatorClient(ctx)
+	client, err := vs.NewImageAnnotatorClient(ctx)
 	if err != nil {
 		return err
 	}
 
-	image := vision.NewImageFromURI(file)
+	image := vs.NewImageFromURI(file)
 	annotations, err := client.DetectLandmarks(ctx, image, nil, 10)
 	if err != nil {
 		return err
@@ -482,12 +482,12 @@ func detectLandmarksURI(w io.Writer, file string) error {
 func detectTextURI(w io.Writer, file string) error {
 	ctx := context.Background()
 
-	client, err := vision.NewImageAnnotatorClient(ctx)
+	client, err := vs.NewImageAnnotatorClient(ctx)
 	if err != nil {
 		return err
 	}
 
-	image := vision.NewImageFromURI(file)
+	image := vs.NewImageFromURI(file)
 	annotations, err := client.DetectTexts(ctx, image, nil, 10)
 	if err != nil {
 		return err
@@ -509,12 +509,12 @@ func detectTextURI(w io.Writer, file string) error {
 func detectDocumentTextURI(w io.Writer, file string) error {
 	ctx := context.Background()
 
-	client, err := vision.NewImageAnnotatorClient(ctx)
+	client, err := vs.NewImageAnnotatorClient(ctx)
 	if err != nil {
 		return err
 	}
 
-	image := vision.NewImageFromURI(file)
+	image := vs.NewImageFromURI(file)
 	annotation, err := client.DetectDocumentText(ctx, image, nil)
 	if err != nil {
 		return err
@@ -530,12 +530,12 @@ func detectDocumentTextURI(w io.Writer, file string) error {
 func detectPropertiesURI(w io.Writer, file string) error {
 	ctx := context.Background()
 
-	client, err := vision.NewImageAnnotatorClient(ctx)
+	client, err := vs.NewImageAnnotatorClient(ctx)
 	if err != nil {
 		return err
 	}
 
-	image := vision.NewImageFromURI(file)
+	image := vs.NewImageFromURI(file)
 	props, err := client.DetectImageProperties(ctx, image, nil)
 	if err != nil {
 		return err
@@ -557,12 +557,12 @@ func detectPropertiesURI(w io.Writer, file string) error {
 func detectCropHintsURI(w io.Writer, file string) error {
 	ctx := context.Background()
 
-	client, err := vision.NewImageAnnotatorClient(ctx)
+	client, err := vs.NewImageAnnotatorClient(ctx)
 	if err != nil {
 		return err
 	}
 
-	image := vision.NewImageFromURI(file)
+	image := vs.NewImageFromURI(file)
 	res, err := client.CropHints(ctx, image, nil)
 	if err != nil {
 		return err
@@ -582,12 +582,12 @@ func detectCropHintsURI(w io.Writer, file string) error {
 func detectSafeSearchURI(w io.Writer, file string) error {
 	ctx := context.Background()
 
-	client, err := vision.NewImageAnnotatorClient(ctx)
+	client, err := vs.NewImageAnnotatorClient(ctx)
 	if err != nil {
 		return err
 	}
 
-	image := vision.NewImageFromURI(file)
+	image := vs.NewImageFromURI(file)
 	props, err := client.DetectSafeSearch(ctx, image, nil)
 	if err != nil {
 		return err
@@ -606,12 +606,12 @@ func detectSafeSearchURI(w io.Writer, file string) error {
 func detectWebURI(w io.Writer, file string) error {
 	ctx := context.Background()
 
-	client, err := vision.NewImageAnnotatorClient(ctx)
+	client, err := vs.NewImageAnnotatorClient(ctx)
 	if err != nil {
 		return err
 	}
 
-	image := vision.NewImageFromURI(file)
+	image := vs.NewImageFromURI(file)
 	web, err := client.DetectWeb(ctx, image, nil)
 	if err != nil {
 		return err
@@ -644,12 +644,12 @@ func detectWebURI(w io.Writer, file string) error {
 func detectLogosURI(w io.Writer, file string) error {
 	ctx := context.Background()
 
-	client, err := vision.NewImageAnnotatorClient(ctx)
+	client, err := vs.NewImageAnnotatorClient(ctx)
 	if err != nil {
 		return err
 	}
 
-	image := vision.NewImageFromURI(file)
+	image := vs.NewImageFromURI(file)
 	annotations, err := client.DetectLogos(ctx, image, nil, 10)
 	if err != nil {
 		return err

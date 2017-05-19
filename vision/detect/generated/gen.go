@@ -48,11 +48,11 @@ func main() {
 	}
 }
 
-const boilerplateSentinel = "\tvar client *vision.ImageAnnotatorClient // Boilerplate is inserted by gen.go\n"
+const boilerplateSentinel = "\tvar client *vs.ImageAnnotatorClient // Boilerplate is inserted by gen.go\n"
 
 const boilerplate = `	ctx := context.Background()
 
-	client, err := vision.NewImageAnnotatorClient(ctx)
+	client, err := vs.NewImageAnnotatorClient(ctx)
 	if err != nil {
 		return err
 	}
@@ -63,19 +63,19 @@ const boilerplate = `	ctx := context.Background()
 	}
 	defer f.Close()
 
-	image, err := vision.NewImageFromReader(f)
+	image, err := vs.NewImageFromReader(f)
 	if err != nil {
 		return err
 	}
 `
 const gcsBoilerplate = `	ctx := context.Background()
 
-	client, err := vision.NewImageAnnotatorClient(ctx)
+	client, err := vs.NewImageAnnotatorClient(ctx)
 	if err != nil {
 		return err
 	}
 
-	image := vision.NewImageFromURI(file)
+	image := vs.NewImageFromURI(file)
 `
 
 const header = `// Copyright 2017 Google Inc. All rights reserved.
