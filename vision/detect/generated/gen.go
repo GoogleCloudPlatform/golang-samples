@@ -48,11 +48,11 @@ func main() {
 	}
 }
 
-const boilerplateSentinel = "\tvar client *vision.Client // Boilerplate is inserted by gen.go\n"
+const boilerplateSentinel = "\tvar client *vision.ImageAnnotatorClient // Boilerplate is inserted by gen.go\n"
 
 const boilerplate = `	ctx := context.Background()
 
-	client, err := vision.NewClient(ctx)
+	client, err := vision.NewImageAnnotatorClient(ctx)
 	if err != nil {
 		return err
 	}
@@ -70,7 +70,7 @@ const boilerplate = `	ctx := context.Background()
 `
 const gcsBoilerplate = `	ctx := context.Background()
 
-	client, err := vision.NewClient(ctx)
+	client, err := vision.NewImageAnnotatorClient(ctx)
 	if err != nil {
 		return err
 	}
