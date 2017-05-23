@@ -11,11 +11,10 @@ import (
 	"net/http"
 	"strings"
 
-	"google.golang.org/api/bigquery/v2"
-	"google.golang.org/appengine"
-
+	"cloud.google.com/go/bigquery"
 	"golang.org/x/net/context"
-	"golang.org/x/oauth2/google"
+	"google.golang.org/api/iterator"
+	"google.golang.org/appengine"
 )
 
 func init() {
@@ -50,29 +49,25 @@ func handle(w http.ResponseWriter, r *http.Request) {
 // datasets returns a list with the IDs of all the Big Query datasets visible
 // with the given context.
 func datasets(ctx context.Context) ([]string, error) {
-	// Create a new authenticated HTTP client over urlfetch.
-	hc, err := google.DefaultClient(ctx, bigquery.BigqueryScope)
-	if err != nil {
-		return nil, fmt.Errorf("could not create http client: %v", err)
-	}
+	// Get the current application ID, which is the same as the project ID.
+	projectID := appengine.AppID(ctx)
 
 	// Create the BigQuery service.
-	bq, err := bigquery.New(hc)
+	bq, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
 		return nil, fmt.Errorf("could not create service: %v", err)
 	}
 
-	// Get the current application ID, which is the same as the project ID.
-	projectID := appengine.AppID(ctx)
-
 	// Return a list of IDs.
 	var ids []string
-	datasets, err := bq.Datasets.List(projectID).Do()
-	if err != nil {
-		return nil, fmt.Errorf("could not list datasets for %q: %v", projectID, err)
+	it := bq.Datasets(ctx)
+	for {
+		ds, err := it.Next()
+		if err == iterator.Done {
+			return ids, nil
+		} else if err != nil {
+			return nil, err
+		}
+		ids = append(ids, ds.DatasetID)
 	}
-	for _, d := range datasets.Datasets {
-		ids = append(ids, d.Id)
-	}
-	return ids, nil
 }
