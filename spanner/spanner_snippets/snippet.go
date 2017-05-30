@@ -167,8 +167,8 @@ func update(ctx context.Context, w io.Writer, client *spanner.Client) error {
 }
 
 func writeWithTransaction(ctx context.Context, w io.Writer, client *spanner.Client) error {
-	_, err := client.ReadWriteTransaction(ctx, func(txn *spanner.ReadWriteTransaction) error {
-		getBudget := func(ctx context.Context, txn *spanner.ReadWriteTransaction, key spanner.Key) (int64, error) {
+	_, err := client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
+		getBudget := func(key spanner.Key) (int64, error) {
 			row, err := txn.ReadRow(ctx, "Albums", key, []string{"MarketingBudget"})
 			if err != nil {
 				return 0, err
@@ -179,12 +179,12 @@ func writeWithTransaction(ctx context.Context, w io.Writer, client *spanner.Clie
 			}
 			return budget, nil
 		}
-		album2Budget, err := getBudget(ctx, txn, spanner.Key{2, 2})
+		album2Budget, err := getBudget(spanner.Key{2, 2})
 		if err != nil {
 			return err
 		}
 		if album2Budget >= 300000 {
-			album1Budget, err := getBudget(ctx, txn, spanner.Key{1, 1})
+			album1Budget, err := getBudget(spanner.Key{1, 1})
 			if err != nil {
 				return err
 			}
