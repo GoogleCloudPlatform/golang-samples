@@ -50,7 +50,7 @@ func main() {
 	// ignore returned errors, which will be "already exists". If they're fatal
 	// errors, then following calls (e.g. in the subscribe function) will also fail.
 	topic, _ := bookshelf.PubsubClient.CreateTopic(ctx, bookshelf.PubsubTopicID)
-	subscription, _ = bookshelf.PubsubClient.CreateSubscription(ctx, subName, pubsub.subscriptionConfig{Topic: topic})
+	subscription, _ = bookshelf.PubsubClient.CreateSubscription(ctx, subName, pubsub.SubscriptionConfig{Topic: topic})
 
 	// Start worker goroutine.
 	go subscribe()
