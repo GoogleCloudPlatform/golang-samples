@@ -26,8 +26,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	connectionName := mustGetenv("CLOUDSQL_CONNECTION_NAME")
-	user := mustGetenv("CLOUDSQL_USER")
+	connectionName := os.Getenv("CLOUDSQL_CONNECTION_NAME")
+	user := os.Getenv("CLOUDSQL_USER")
 	password := os.Getenv("CLOUDSQL_PASSWORD") // NOTE: password may be empty
 
 	w.Header().Set("Content-Type", "text/plain")
