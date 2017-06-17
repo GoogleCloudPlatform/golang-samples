@@ -18,9 +18,9 @@ import (
 )
 
 func main() {
-	proj := os.Getenv("GCLOUD_PROJECT")
+	proj := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	if proj == "" {
-		fmt.Println("GCLOUD_PROJECT environment variable must be set.")
+		fmt.Println("GOOGLE_CLOUD_PROJECT environment variable must be set.")
 		os.Exit(1)
 	}
 
