@@ -253,7 +253,12 @@ func queryUsingIndex(ctx context.Context, w io.Writer, client *spanner.Client) e
 	stmt := spanner.Statement{
 		SQL: `SELECT AlbumId, AlbumTitle, MarketingBudget
 			FROM Albums@{FORCE_INDEX=AlbumsByAlbumTitle}
-			WHERE AlbumTitle >= 'Aardvark' AND AlbumTitle < 'Goo'`}
+			WHERE AlbumTitle >= @start_title AND AlbumTitle < @end_title`,
+		Params: map[string]interface{}{
+			"start_title": "Aardvark",
+			"end_title":   "Goo",
+		},
+	}
 	iter := client.Single().Query(ctx, stmt)
 	defer iter.Stop()
 	for {
