@@ -199,11 +199,13 @@ func updateEndpoint(client *pubsub.Client, name string, endpoint string) error {
 	// [START update_push_subscription]
 
 	// For example, endpoint is "https://my-test-project.appspot.com/push".
-	if err := client.Subscription(name).ModifyPushConfig(ctx, pubsub.PushConfig{
-		Endpoint: endpoint,
-	}); err != nil {
+	subConfig, err := client.Subscription(name).Update(ctx, pubsub.SubscriptionConfigToUpdate{
+		PushConfig: &pubsub.PushConfig{Endpoint: endpoint},
+	})
+	if err != nil {
 		return err
 	}
+	fmt.Printf("Updated subscription config: %#v", subConfig)
 	// [END update_push_subscription]
 	return nil
 }
