@@ -46,14 +46,16 @@ func init() {
 	DB = newMemoryDB()
 
 	// [START cloudsql]
-	// To use MySQL, uncomment the following lines, and update the username,
-	// password and host.
-	//
-	// DB, err = newMySQLDB(MySQLConfig{
-	// 	Username: "",
+	// To use Cloud SQL, uncomment the following lines, and update the username,
+	// password and instance connection string. When running locally,
+	// localhost:3306 is used, and the instance name is ignored.
+	// DB, err = configureCloudSQL(cloudSQLConfig{
+	// 	Username: "root",
 	// 	Password: "",
-	// 	Host:     "",
-	// 	Port:     3306,
+	// 	// The connection name of the Cloud SQL v2 instance, i.e.,
+	// 	// "project:region:instance-id"
+	// 	// Cloud SQL v1 instances are not supported.
+	// 	Instance: "",
 	// })
 	// [END cloudsql]
 
@@ -174,4 +176,27 @@ func configureOAuthClient(clientID, clientSecret string) *oauth2.Config {
 		Scopes:       []string{"email", "profile"},
 		Endpoint:     google.Endpoint,
 	}
+}
+
+type cloudSQLConfig struct {
+	Username, Password, Instance string
+}
+
+func configureCloudSQL(config cloudSQLConfig) (BookDatabase, error) {
+	if os.Getenv("GAE_INSTANCE") != "" {
+		// Running in production.
+		return newMySQLDB(MySQLConfig{
+			Username:   config.Username,
+			Password:   config.Password,
+			UnixSocket: "/cloudsql/" + config.Instance,
+		})
+	}
+
+	// Running locally.
+	return newMySQLDB(MySQLConfig{
+		Username: config.Username,
+		Password: config.Password,
+		Host:     "localhost",
+		Port:     3306,
+	})
 }
