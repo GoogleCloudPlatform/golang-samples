@@ -15,11 +15,11 @@ import (
 	"strings"
 	"sync"
 
+	books "google.golang.org/api/books/v1"
+
 	"cloud.google.com/go/pubsub"
 
 	"golang.org/x/net/context"
-
-	"google.golang.org/api/books/v1"
 
 	"github.com/GoogleCloudPlatform/golang-samples/getting-started/bookshelf"
 )
@@ -50,7 +50,7 @@ func main() {
 	// ignore returned errors, which will be "already exists". If they're fatal
 	// errors, then following calls (e.g. in the subscribe function) will also fail.
 	topic, _ := bookshelf.PubsubClient.CreateTopic(ctx, bookshelf.PubsubTopicID)
-	subscription, _ = bookshelf.PubsubClient.CreateSubscription(ctx, subName, topic, 0, nil)
+	subscription, _ = bookshelf.PubsubClient.CreateSubscription(ctx, subName, pubsub.SubscriptionConfig{Topic: topic})
 
 	// Start worker goroutine.
 	go subscribe()

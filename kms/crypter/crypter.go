@@ -56,7 +56,7 @@ func main() {
 	}
 }
 
-func encrypt(projectID, keyRing, cryptoKey string, plainText []byte) ([]byte, error) {
+func encrypt(projectID, keyRing, cryptoKey string, plaintext []byte) ([]byte, error) {
 	ctx := context.Background()
 	client, err := google.DefaultClient(ctx, cloudkms.CloudPlatformScope)
 	if err != nil {
@@ -73,7 +73,7 @@ func encrypt(projectID, keyRing, cryptoKey string, plainText []byte) ([]byte, er
 
 	resp, err := cloudkmsService.Projects.Locations.KeyRings.CryptoKeys.
 		Encrypt(parentName, &cloudkms.EncryptRequest{
-			Plaintext: base64.StdEncoding.EncodeToString(plainText),
+			Plaintext: base64.StdEncoding.EncodeToString(plaintext),
 		}).Do()
 	if err != nil {
 		return nil, err
@@ -82,7 +82,7 @@ func encrypt(projectID, keyRing, cryptoKey string, plainText []byte) ([]byte, er
 	return base64.StdEncoding.DecodeString(resp.Ciphertext)
 }
 
-func decrypt(projectID, keyRing, cryptoKey string, cipherText []byte) ([]byte, error) {
+func decrypt(projectID, keyRing, cryptoKey string, ciphertext []byte) ([]byte, error) {
 	ctx := context.Background()
 	client, err := google.DefaultClient(ctx, cloudkms.CloudPlatformScope)
 	if err != nil {
@@ -99,7 +99,7 @@ func decrypt(projectID, keyRing, cryptoKey string, cipherText []byte) ([]byte, e
 
 	resp, err := cloudkmsService.Projects.Locations.KeyRings.CryptoKeys.
 		Decrypt(parentName, &cloudkms.DecryptRequest{
-			Ciphertext: base64.StdEncoding.EncodeToString(cipherText),
+			Ciphertext: base64.StdEncoding.EncodeToString(ciphertext),
 		}).Do()
 	if err != nil {
 		return nil, err

@@ -391,10 +391,16 @@ func ExampleQuery_Distinct() {
 		Order("Category").Order("Priority")
 	// [END distinct_query]
 	_ = query // Use client.Run or client.GetAll to execute the query.
+}
 
+func ExampleQuery_DistinctOn() {
 	// [START distinct_on_query]
-	// DISTINCT ON not supported in Go API
+	query := datastore.NewQuery("Task").
+		Project("Priority", "Category").
+		DistinctOn("Category").
+		Order("Category").Order("Priority")
 	// [END distinct_on_query]
+	_ = query // Use client.Run or client.GetAll to execute the query.
 }
 
 func ExampleQuery_Filter_arrayInequality() {

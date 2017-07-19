@@ -48,9 +48,20 @@ type MySQLConfig struct {
 	// Optional.
 	Username, Password string
 
-	// Required.
+	// Host of the MySQL instance.
+	//
+	// If set, UnixSocket should be unset.
 	Host string
+
+	// Port of the MySQL instance.
+	//
+	// If set, UnixSocket should be unset.
 	Port int
+
+	// UnixSocket is the filepath to a unix socket.
+	//
+	// If set, Host and Port should be unset.
+	UnixSocket string
 }
 
 // dataStoreName returns a connection string suitable for sql.Open.
@@ -65,6 +76,9 @@ func (c MySQLConfig) dataStoreName(databaseName string) string {
 		cred = cred + "@"
 	}
 
+	if c.UnixSocket != "" {
+		return fmt.Sprintf("%sunix(%s)/%s", cred, c.UnixSocket, databaseName)
+	}
 	return fmt.Sprintf("%stcp([%s]:%d)/%s", cred, c.Host, c.Port, databaseName)
 }
 

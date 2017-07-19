@@ -113,13 +113,13 @@ func pullMsgs(client *pubsub.Client, name string, topic *pubsub.Topic) error {
 	err := sub.Receive(cctx, func(ctx context.Context, msg *pubsub.Message) {
 		mu.Lock()
 		defer mu.Unlock()
+		received++
 		if received >= 10 {
 			cancel()
 			msg.Nack()
 			return
 		}
 		fmt.Printf("Got message: %q\n", string(msg.Data))
-		received++
 		msg.Ack()
 	})
 	if err != nil {
@@ -164,7 +164,10 @@ func pullMsgsSettings(client *pubsub.Client, name string) error {
 func create(client *pubsub.Client, name string, topic *pubsub.Topic) error {
 	ctx := context.Background()
 	// [START create_subscription]
-	sub, err := client.CreateSubscription(ctx, name, topic, 20*time.Second, nil)
+	sub, err := client.CreateSubscription(ctx, name, pubsub.SubscriptionConfig{
+		Topic:       topic,
+		AckDeadline: 20 * time.Second,
+	})
 	if err != nil {
 		return err
 	}
@@ -178,8 +181,10 @@ func createWithEndpoint(client *pubsub.Client, name string, topic *pubsub.Topic,
 	// [START create_push_subscription]
 
 	// For example, endpoint is "https://my-test-project.appspot.com/push".
-	sub, err := client.CreateSubscription(ctx, name, topic, 10*time.Second, &pubsub.PushConfig{
-		Endpoint: endpoint,
+	sub, err := client.CreateSubscription(ctx, name, pubsub.SubscriptionConfig{
+		Topic:       topic,
+		AckDeadline: 10 * time.Second,
+		PushConfig:  pubsub.PushConfig{Endpoint: endpoint},
 	})
 	if err != nil {
 		return err
@@ -194,11 +199,13 @@ func updateEndpoint(client *pubsub.Client, name string, endpoint string) error {
 	// [START update_push_subscription]
 
 	// For example, endpoint is "https://my-test-project.appspot.com/push".
-	if err := client.Subscription(name).ModifyPushConfig(ctx, &pubsub.PushConfig{
-		Endpoint: endpoint,
-	}); err != nil {
+	subConfig, err := client.Subscription(name).Update(ctx, pubsub.SubscriptionConfigToUpdate{
+		PushConfig: &pubsub.PushConfig{Endpoint: endpoint},
+	})
+	if err != nil {
 		return err
 	}
+	fmt.Printf("Updated subscription config: %#v", subConfig)
 	// [END update_push_subscription]
 	return nil
 }
