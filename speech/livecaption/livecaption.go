@@ -18,21 +18,11 @@ import (
 
 	speech "cloud.google.com/go/speech/apiv1"
 	"golang.org/x/net/context"
-	"google.golang.org/api/option"
-	"google.golang.org/api/transport"
 	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"
 )
 
 func main() {
 	ctx := context.Background()
-	conn, err := transport.DialGRPC(ctx,
-		option.WithEndpoint("speech.googleapis.com:443"),
-		option.WithScopes("https://www.googleapis.com/auth/cloud-platform"),
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer conn.Close()
 
 	// [START speech_streaming_mic_recognize]
 	client, err := speech.NewClient(ctx)

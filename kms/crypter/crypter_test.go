@@ -21,18 +21,18 @@ func TestCrypter(t *testing.T) {
 		t.Skip("GOLANG_SAMPLES_KMS_KEYRING and GOLANG_SAMPLES_KMS_CRYPTOKEY must be set")
 	}
 
-	plainText := []byte("Hello KMS")
-	cipherText, err := encrypt(tc.ProjectID, keyRing, cryptoKey, plainText)
+	plaintext := []byte("Hello KMS")
+	ciphertext, err := encrypt(tc.ProjectID, keyRing, cryptoKey, plaintext)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if bytes.Equal(cipherText, plainText) {
+	if bytes.Equal(ciphertext, plaintext) {
 		t.Errorf("Ciphertext is the same as plaintext")
 	}
 
-	decryptedText, err := decrypt(tc.ProjectID, keyRing, cryptoKey, cipherText)
-	if !bytes.Equal(decryptedText, plainText) {
-		t.Errorf("decrypt: got %q; want %q", string(decryptedText), string(plainText))
+	decryptedText, err := decrypt(tc.ProjectID, keyRing, cryptoKey, ciphertext)
+	if !bytes.Equal(decryptedText, plaintext) {
+		t.Errorf("decrypt: got %q; want %q", string(decryptedText), string(plaintext))
 	}
 }

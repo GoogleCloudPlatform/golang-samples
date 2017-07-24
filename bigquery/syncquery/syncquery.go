@@ -21,9 +21,9 @@ func main() {
 		fmt.Println("usage: ", os.Args[0], "'query text'")
 		os.Exit(1)
 	}
-	proj := os.Getenv("GCLOUD_PROJECT")
+	proj := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	if proj == "" {
-		fmt.Println("GCLOUD_PROJECT environment variable must be set.")
+		fmt.Println("GOOGLE_CLOUD_PROJECT environment variable must be set.")
 		os.Exit(1)
 	}
 

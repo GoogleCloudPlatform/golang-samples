@@ -52,10 +52,8 @@ workstations if the `gcloud beta auth application-default login` command fails, 
 Account by doing the following:
 
 * Go to API Manager -> Credentials
-* Click 'New Credentials', and create a Service Account or [click  here](https://console.cloud.google
-.com/project/_/apiui/credential/serviceaccount)
- Download the JSON for this service account, and set the `GOOGLE_APPLICATION_CREDENTIALS`
+* Click 'New Credentials', and create a Service Account or [click  here](https://console.cloud.google.com/project/_/apiui/credential/serviceaccount).
+* Download the JSON for this service account, and set the `GOOGLE_APPLICATION_CREDENTIALS`
  environment variable to point to the file containing the JSON credentials.
 
-
-    export GOOGLE_APPLICATION_CREDENTIALS=~/Downloads/<project-id>-0123456789abcdef.json
+```export GOOGLE_APPLICATION_CREDENTIALS=~/Downloads/<project-id>-0123456789abcdef.json```

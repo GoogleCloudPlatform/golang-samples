@@ -73,8 +73,8 @@ gcloud container builds submit --tag gcr.io/YOUR_PROJECT_ID/go-grpc-hello:1.0 .
 1. Set some environment variables (you'll need to manually set the service config ID):
 
     ```bash
-    GCLOUD_PROJECT=$(curl -s "http://metadata.google.internal/computeMetadata/v1/project/project-id" -H "Metadata-Flavor: Google")
-    SERVICE_NAME=hellogrpc.endpoints.${GCLOUD_PROJECT}.cloud.goog
+    GOOGLE_CLOUD_PROJECT=$(curl -s "http://metadata.google.internal/computeMetadata/v1/project/project-id" -H "Metadata-Flavor: Google")
+    SERVICE_NAME=hellogrpc.endpoints.${GOOGLE_CLOUD_PROJECT}.cloud.goog
     SERVICE_CONFIG_ID=<Your Config ID>
     ```
 
@@ -87,7 +87,7 @@ gcloud container builds submit --tag gcr.io/YOUR_PROJECT_ID/go-grpc-hello:1.0 .
 1. Run your gRPC server's container:
 
     ```bash
-    docker run -d --name=grpc-hello gcr.io/${GCLOUD_PROJECT}/go-grpc-hello:1.0
+    docker run -d --name=grpc-hello gcr.io/${GOOGLE_CLOUD_PROJECT}/go-grpc-hello:1.0
     ```
 
 1. Run Endpoints proxy:

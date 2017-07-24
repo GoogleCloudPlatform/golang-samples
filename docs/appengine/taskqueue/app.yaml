@@ -3,7 +3,9 @@ runtime: go
 api_version: go1
 
 handlers:
-- url: /tasks/process
+- url: /.*
+  script: _go_app
+- url: /worker/.*
   script: _go_app
   login: admin
 // [END securing_urls]

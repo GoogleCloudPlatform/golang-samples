@@ -113,13 +113,13 @@ func pullMsgs(client *pubsub.Client, name string, topic *pubsub.Topic) error {
 	err := sub.Receive(cctx, func(ctx context.Context, msg *pubsub.Message) {
 		mu.Lock()
 		defer mu.Unlock()
+		received++
 		if received >= 10 {
 			cancel()
 			msg.Nack()
 			return
 		}
 		fmt.Printf("Got message: %q\n", string(msg.Data))
-		received++
 		msg.Ack()
 	})
 	if err != nil {
@@ -129,15 +129,84 @@ func pullMsgs(client *pubsub.Client, name string, topic *pubsub.Topic) error {
 	return nil
 }
 
+func pullMsgsError(client *pubsub.Client, name string) error {
+	ctx := context.Background()
+	// [START pull_messages_error]
+	// If the service returns a non-retryable error, Receive returns that error after
+	// all of the outstanding calls to the handler have returned.
+	err := client.Subscription(name).Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
+		fmt.Printf("Got message: %q\n", string(msg.Data))
+		msg.Ack()
+	})
+	if err != nil {
+		return err
+	}
+	// [END pull_messages_error]
+	return nil
+}
+
+func pullMsgsSettings(client *pubsub.Client, name string) error {
+	ctx := context.Background()
+	// [START pull_messages_settings]
+	sub := client.Subscription(name)
+	sub.ReceiveSettings.MaxOutstandingMessages = 10
+	err := sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
+		fmt.Printf("Got message: %q\n", string(msg.Data))
+		msg.Ack()
+	})
+	if err != nil {
+		return err
+	}
+	// [END pull_messages_settings]
+	return nil
+}
+
 func create(client *pubsub.Client, name string, topic *pubsub.Topic) error {
 	ctx := context.Background()
 	// [START create_subscription]
-	sub, err := client.CreateSubscription(ctx, name, topic, 20*time.Second, nil)
+	sub, err := client.CreateSubscription(ctx, name, pubsub.SubscriptionConfig{
+		Topic:       topic,
+		AckDeadline: 20 * time.Second,
+	})
 	if err != nil {
 		return err
 	}
 	fmt.Printf("Created subscription: %v\n", sub)
 	// [END create_subscription]
+	return nil
+}
+
+func createWithEndpoint(client *pubsub.Client, name string, topic *pubsub.Topic, endpoint string) error {
+	ctx := context.Background()
+	// [START create_push_subscription]
+
+	// For example, endpoint is "https://my-test-project.appspot.com/push".
+	sub, err := client.CreateSubscription(ctx, name, pubsub.SubscriptionConfig{
+		Topic:       topic,
+		AckDeadline: 10 * time.Second,
+		PushConfig:  pubsub.PushConfig{Endpoint: endpoint},
+	})
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Created subscription: %v\n", sub)
+	// [END create_push_subscription]
+	return nil
+}
+
+func updateEndpoint(client *pubsub.Client, name string, endpoint string) error {
+	ctx := context.Background()
+	// [START update_push_subscription]
+
+	// For example, endpoint is "https://my-test-project.appspot.com/push".
+	subConfig, err := client.Subscription(name).Update(ctx, pubsub.SubscriptionConfigToUpdate{
+		PushConfig: &pubsub.PushConfig{Endpoint: endpoint},
+	})
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Updated subscription config: %#v", subConfig)
+	// [END update_push_subscription]
 	return nil
 }
 

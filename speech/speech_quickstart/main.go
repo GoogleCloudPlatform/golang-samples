@@ -48,6 +48,9 @@ func main() {
 			AudioSource: &speechpb.RecognitionAudio_Content{Content: data},
 		},
 	})
+	if err != nil {
+		log.Fatalf("failed to recognize: %v", err)
+	}
 
 	// Prints the results.
 	for _, result := range resp.Results {
