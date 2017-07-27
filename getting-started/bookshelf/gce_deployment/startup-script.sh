@@ -34,12 +34,12 @@ apt-get install -yq ca-certificates supervisor
 
 # Get the application tar from the GCS bucket.
 gsutil cp $BOOKSHELF_DEPLOY_LOCATION /app.tar
-mkdir /app
+mkdir -p /app
 tar -x -f /app.tar -C /app
 chmod +x /app/app
 
 # Create a goapp user. The application will run as this user.
-useradd -m -d /home/goapp goapp
+getent passwd goapp || useradd -m -d /home/goapp goapp
 chown -R goapp:goapp /app
 
 # Configure supervisor to run the Go app.
