@@ -179,7 +179,7 @@ func main() {
 	}
 }
 
-// formatResource marshals a response objects as JSON.
+// formatResource marshals a response object as JSON.
 func formatResource(resource interface{}) []byte {
 	b, err := json.MarshalIndent(resource, "", "    ")
 	if err != nil {
