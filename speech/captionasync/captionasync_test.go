@@ -76,3 +76,41 @@ func TestRecognizeGCS(t *testing.T) {
 		t.Errorf("Transcript: got %q; want %q", got, want)
 	}
 }
+
+func TestRecognizeGCSWordTimeOffsets(t *testing.T) {
+	testutil.SystemTest(t)
+
+	ctx := context.Background()
+	client, err := speech.NewClient(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	opName, err := sendGCS(client, "gs://python-docs-samples-tests/speech/audio.raw")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if opName == "" {
+		t.Fatal("got no op name; want one")
+	}
+	resp, err := wait(client, opName)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(resp.Results) == 0 {
+		t.Fatal("got no results; want at least one")
+	}
+	result := resp.Results[0]
+	if len(result.Alternatives) < 1 {
+		t.Fatal("got no alternatives; want at least one")
+	}
+	if got, want := result.Alternatives[0].Words[5].Word, "Bridge"; got != want {
+		t.Errorf("Transcript: got %q; want %q", got, want)
+	}
+	if got := result.Alternatives[0].Words[5].StartTime.Seconds; got <= 0 {
+		t.Errorf("Word start time: got %f, want positive", got)
+	}
+	if got := result.Alternatives[0].Words[5].EndTime.Seconds; got <= 0 {
+		t.Errorf("Word end time: got %f, want positive", got)
+	}
+}

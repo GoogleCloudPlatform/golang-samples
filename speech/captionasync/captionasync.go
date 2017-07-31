@@ -67,6 +67,14 @@ func main() {
 	for _, result := range resp.Results {
 		for _, alt := range result.Alternatives {
 			fmt.Printf("\"%v\" (confidence=%3f)\n", alt.Transcript, alt.Confidence)
+			for _, w := range alt.Words {
+				fmt.Printf(
+					"Word: \"%v\" (startTime=%3f, endTime=%3f)\n",
+					w.Word,
+					float64(w.StartTime.Seconds)+float64(w.StartTime.Nanos)*1e-9,
+					float64(w.EndTime.Seconds)+float64(w.EndTime.Nanos)*1e-9,
+				)
+			}
 		}
 	}
 }
@@ -139,9 +147,10 @@ func sendGCS(client *speech.Client, gcsURI string) (string, error) {
 	// and sample rate information to be transcripted.
 	req := &speechpb.LongRunningRecognizeRequest{
 		Config: &speechpb.RecognitionConfig{
-			Encoding:        speechpb.RecognitionConfig_LINEAR16,
-			SampleRateHertz: 16000,
-			LanguageCode:    "en-US",
+			Encoding:              speechpb.RecognitionConfig_LINEAR16,
+			SampleRateHertz:       16000,
+			LanguageCode:          "en-US",
+			EnableWordTimeOffsets: true,
 		},
 		Audio: &speechpb.RecognitionAudio{
 			AudioSource: &speechpb.RecognitionAudio_Uri{Uri: gcsURI},
