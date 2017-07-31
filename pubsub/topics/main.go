@@ -18,6 +18,8 @@ import (
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
 	"google.golang.org/api/iterator"
+	"google.golang.org/api/option"
+	"google.golang.org/grpc"
 	// [END imports]
 )
 
@@ -29,7 +31,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "GOOGLE_CLOUD_PROJECT environment variable must be set.\n")
 		os.Exit(1)
 	}
-	client, err := pubsub.NewClient(ctx, proj)
+	client, err := pubsub.NewClient(ctx, proj, option.WithGRPCDialOption(grpc.WithBlock()))
 	if err != nil {
 		log.Fatalf("Could not create pubsub Client: %v", err)
 	}
