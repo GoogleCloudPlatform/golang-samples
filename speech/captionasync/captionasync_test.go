@@ -108,9 +108,9 @@ func TestRecognizeGCSWordTimeOffsets(t *testing.T) {
 		t.Errorf("Transcript: got %q; want %q", got, want)
 	}
 	if got := result.Alternatives[0].Words[5].StartTime.Seconds; got <= 0 {
-		t.Errorf("Word start time: got %f, want positive", got)
+		t.Errorf("Word start time: got %d, want positive", got)
 	}
 	if got := result.Alternatives[0].Words[5].EndTime.Seconds; got <= 0 {
-		t.Errorf("Word end time: got %f, want positive", got)
+		t.Errorf("Word end time: got %d, want positive", got)
 	}
 }
