@@ -6,13 +6,12 @@
 package snippets
 
 import (
-	"context"
 	"fmt"
 	"log"
 
-	"google.golang.org/api/iterator"
-
 	"cloud.google.com/go/storage"
+	"golang.org/x/net/context"
+	"google.golang.org/api/iterator"
 )
 
 func adc() {
