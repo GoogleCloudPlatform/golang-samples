@@ -2,7 +2,8 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// Command caption reads an audio file and outputs the transcript for it.
+// Command caption sends audio data to the Google Speech API
+// and prints its transcript.
 package main
 
 import (
