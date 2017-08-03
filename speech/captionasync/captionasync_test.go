@@ -22,14 +22,7 @@ func TestRecognize(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	opName, err := send(client, "./quit.raw")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if opName == "" {
-		t.Fatal("got no op name; want one")
-	}
-	resp, err := wait(client, opName)
+	resp, err := send(client, "./quit.raw")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,14 +47,7 @@ func TestRecognizeGCS(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	opName, err := sendGCS(client, "gs://python-docs-samples-tests/speech/audio.raw")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if opName == "" {
-		t.Fatal("got no op name; want one")
-	}
-	resp, err := wait(client, opName)
+	resp, err := sendGCS(client, "gs://python-docs-samples-tests/speech/audio.raw")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -86,14 +72,7 @@ func TestRecognizeGCSWordTimeOffsets(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	opName, err := sendGCS(client, "gs://python-docs-samples-tests/speech/audio.raw")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if opName == "" {
-		t.Fatal("got no op name; want one")
-	}
-	resp, err := wait(client, opName)
+	resp, err := sendGCS(client, "gs://python-docs-samples-tests/speech/audio.raw")
 	if err != nil {
 		t.Fatal(err)
 	}
