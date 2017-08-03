@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Command captionasync sends audio data to the Google Speech API
-// and pulls the operation status and the transcript.
+// and prints its transcript.
 package main
 
 import (
@@ -58,14 +58,6 @@ func main() {
 	for _, result := range resp.Results {
 		for _, alt := range result.Alternatives {
 			fmt.Printf("\"%v\" (confidence=%3f)\n", alt.Transcript, alt.Confidence)
-			for _, w := range alt.Words {
-				fmt.Printf(
-					"Word: \"%v\" (startTime=%3f, endTime=%3f)\n",
-					w.Word,
-					float64(w.StartTime.Seconds)+float64(w.StartTime.Nanos)*1e-9,
-					float64(w.EndTime.Seconds)+float64(w.EndTime.Nanos)*1e-9,
-				)
-			}
 		}
 	}
 	// [END print]
@@ -105,10 +97,9 @@ func sendGCS(client *speech.Client, gcsURI string) (*speechpb.LongRunningRecogni
 	// and sample rate information to be transcripted.
 	req := &speechpb.LongRunningRecognizeRequest{
 		Config: &speechpb.RecognitionConfig{
-			Encoding:              speechpb.RecognitionConfig_LINEAR16,
-			SampleRateHertz:       16000,
-			LanguageCode:          "en-US",
-			EnableWordTimeOffsets: true,
+			Encoding:        speechpb.RecognitionConfig_LINEAR16,
+			SampleRateHertz: 16000,
+			LanguageCode:    "en-US",
 		},
 		Audio: &speechpb.RecognitionAudio{
 			AudioSource: &speechpb.RecognitionAudio_Uri{Uri: gcsURI},
