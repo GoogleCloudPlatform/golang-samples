@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // [START trace_quickstart]
+
 // Sample trace_quickstart creates traces incoming and outgoing requests.
 package main
 
@@ -27,12 +28,15 @@ func main() {
 		log.Fatalf("Failed to create client: %v", err)
 	}
 
-	httpClient := http.Client{
+	httpClient := &http.Client{
 		Transport: &trace.Transport{},
 	}
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req, _ := http.NewRequest("GET", "https://metadata/users", nil)
+
+		// The trace ID from the incoming request will be
+		// propagated to the outgoing request.
 		req = req.WithContext(r.Context())
 
 		// The outgoing request will be traced with r's trace ID.
