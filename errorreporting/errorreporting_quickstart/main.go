@@ -9,10 +9,10 @@
 package errorreporting_quickstart
 
 import (
-	"context"
 	"log"
 
 	"cloud.google.com/go/errors"
+	"golang.org/x/net/context"
 )
 
 func main() {
