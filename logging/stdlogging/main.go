@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // [START logging_stdlogging]
+
 // Sample stdlogging writes log.Logger logs to the Stackdriver Logging.
 package main
 
