@@ -11,7 +11,7 @@ package errorreporting_quickstart
 import (
 	"log"
 
-	"cloud.google.com/go/errors"
+	"cloud.google.com/go/errorreporting"
 	"golang.org/x/net/context"
 )
 
@@ -21,7 +21,7 @@ func main() {
 	// Sets your Google Cloud Platform project ID.
 	projectID := "YOUR_PROJECT_ID"
 
-	errorClient, err := errors.NewClient(ctx, projectID, "myservice", "v1.0", false)
+	errorClient, err := errorreporting.NewClient(ctx, projectID, "myservice", "v1.0", false)
 	if err != nil {
 		log.Fatal(err)
 	}
