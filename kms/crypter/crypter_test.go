@@ -15,14 +15,14 @@ import (
 func TestCrypter(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	keyRing := os.Getenv("GOLANG_SAMPLES_KMS_KEYRING")
-	cryptoKey := os.Getenv("GOLANG_SAMPLES_KMS_CRYPTOKEY")
-	if keyRing == "" || cryptoKey == "" {
+	keyRingID := os.Getenv("GOLANG_SAMPLES_KMS_KEYRING")
+	cryptoKeyID := os.Getenv("GOLANG_SAMPLES_KMS_CRYPTOKEY")
+	if keyRingID == "" || cryptoKeyID == "" {
 		t.Skip("GOLANG_SAMPLES_KMS_KEYRING and GOLANG_SAMPLES_KMS_CRYPTOKEY must be set")
 	}
 
 	plaintext := []byte("Hello KMS")
-	ciphertext, err := encrypt(tc.ProjectID, keyRing, cryptoKey, plaintext)
+	ciphertext, err := encrypt(tc.ProjectID, "global", keyRingID, cryptoKeyID, plaintext)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -31,8 +31,11 @@ func TestCrypter(t *testing.T) {
 		t.Errorf("Ciphertext is the same as plaintext")
 	}
 
-	decryptedText, err := decrypt(tc.ProjectID, keyRing, cryptoKey, ciphertext)
-	if !bytes.Equal(decryptedText, plaintext) {
-		t.Errorf("decrypt: got %q; want %q", string(decryptedText), string(plaintext))
+	gotPlaintext, err := decrypt(tc.ProjectID, "global", keyRingID, cryptoKeyID, ciphertext)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(gotPlaintext, plaintext) {
+		t.Errorf("decrypt: got %q; want %q", string(gotPlaintext), string(plaintext))
 	}
 }
