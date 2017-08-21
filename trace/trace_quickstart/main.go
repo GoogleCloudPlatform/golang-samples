@@ -2,6 +2,8 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
+// +build go1.7
+
 // [START trace_quickstart]
 
 // Sample trace_quickstart creates traces incoming and outgoing requests.
