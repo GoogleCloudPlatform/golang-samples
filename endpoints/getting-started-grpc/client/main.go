@@ -62,7 +62,7 @@ func main() {
 	c := pb.NewGreeterClient(conn)
 
 	ctx := context.Background()
-	ctx = metadata.NewContext(ctx, metadata.Pairs("x-api-key", *key))
+	ctx = metadata.NewOutgoingContext(ctx, metadata.Pairs("x-api-key", *key))
 
 	// Contact the server and print out its response.
 	name := defaultName
