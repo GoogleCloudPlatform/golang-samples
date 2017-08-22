@@ -15,7 +15,9 @@ import (
 	"golang.org/x/net/context"
 )
 
-func main() {
+var logger log.Logger
+
+func init() {
 	ctx := context.Background()
 
 	// Sets your Google Cloud Platform project ID.
@@ -24,18 +26,22 @@ func main() {
 	// Creates a client.
 	client, err := logging.NewClient(ctx, projectID)
 	if err != nil {
-		log.Fatalf("Failed to create client: %v", err)
+		log.Fatalf("Failed to create logging client: %v", err)
 	}
-	defer client.Close()
 
 	// Sets the name of the log to write to.
 	logName := "my-log"
 
-	logger := client.Logger(logName).StandardLogger(logging.Info)
+	logger = client.Logger(logName).StandardLogger(logging.Info)
+}
 
+func main() {
+	// Close flushes any pending messages and closes the client.
+	defer logger.Close()
+	
 	// Logs "hello world", log entry is visible at
 	// Stackdriver Logs.
-	logger.Println("hello world")
+	logger.Println("hello world")	
 }
 
 // [END logging_stdlogging]
