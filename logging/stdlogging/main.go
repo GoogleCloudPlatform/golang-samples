@@ -15,7 +15,9 @@ import (
 	"golang.org/x/net/context"
 )
 
-var logger log.Logger
+// logger is a Go standard library logger.
+var logger *log.Logger
+var logClient *logging.Client
 
 func init() {
 	ctx := context.Background()
@@ -33,15 +35,16 @@ func init() {
 	logName := "my-log"
 
 	logger = client.Logger(logName).StandardLogger(logging.Info)
+	logClient = client
 }
 
 func main() {
 	// Close flushes any pending messages and closes the client.
-	defer logger.Close()
-	
+	defer logClient.Close()
+
 	// Logs "hello world", log entry is visible at
 	// Stackdriver Logs.
-	logger.Println("hello world")	
+	logger.Println("hello world")
 }
 
 // [END logging_stdlogging]
