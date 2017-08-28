@@ -6,7 +6,7 @@
     `go get -d github.com/GoogleCloudPlatform/golang-samples`
 1. Change into the checked out source:
 
-    `cd $GOPATH/src/github.com/GoogleCloudPlatform/golang-samples`
+    `cd $(go env GOPATH)/src/github.com/GoogleCloudPlatform/golang-samples`
 1. Fork the repo.
 1. Set your fork as a remote:
 

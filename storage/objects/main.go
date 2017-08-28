@@ -40,7 +40,7 @@ func main() {
 	}
 	bucket, object := names[0], names[1]
 
-	if len(os.Args) < 2 {
+	if len(os.Args) < 3 {
 		usage("missing subcommand")
 	}
 
@@ -50,7 +50,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	switch os.Args[1] {
+	switch os.Args[2] {
 	case "write":
 		if err := write(client, bucket, object); err != nil {
 			log.Fatalf("Cannot write object: %v", err)
