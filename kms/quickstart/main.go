@@ -17,10 +17,10 @@ import (
 
 func main() {
 	projectID := "your-project-id"
-	// Location of the keyrings.
-	location := "global"
+	// Location of the key rings.
+	locationID := "global"
 
-	// Authorize the client using Aplication Default Credentials.
+	// Authorize the client using Application Default Credentials.
 	// See https://g.co/dv/identity/protocols/application-default-credentials
 	ctx := context.Background()
 	client, err := google.DefaultClient(ctx, cloudkms.CloudPlatformScope)
@@ -34,13 +34,13 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// The resource name of the keyrings.
-	parentName := fmt.Sprintf("projects/%s/locations/%s", projectID, location)
+	// The resource name of the key rings.
+	parentName := fmt.Sprintf("projects/%s/locations/%s", projectID, locationID)
 
 	// Make the RPC call.
 	response, err := kmsService.Projects.Locations.KeyRings.List(parentName).Do()
 	if err != nil {
-		log.Fatalf("Failed to list keyrings: %v", err)
+		log.Fatalf("Failed to list key rings: %v", err)
 	}
 
 	// Print the returned key rings.

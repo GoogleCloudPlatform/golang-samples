@@ -18,16 +18,17 @@ import (
 )
 
 func main() {
-	if len(os.Args) < 7 {
-		log.Fatal("usage: go run crypter.go {encrypt,decrypt} PROJECTID KEYRING CRYPTOKEY INFILE OUTFILE")
+	if len(os.Args) < 8 {
+		log.Fatal("usage: go run crypter.go {encrypt,decrypt} PROJECT LOCATION KEYRING CRYPTOKEY INFILE OUTFILE")
 	}
 	var (
-		command   = os.Args[1]
-		projectID = os.Args[2]
-		keyRing   = os.Args[3]
-		cryptoKey = os.Args[4]
-		inPath    = os.Args[5]
-		outPath   = os.Args[6]
+		command     = os.Args[1]
+		projectID   = os.Args[2]
+		locationID  = os.Args[3]
+		keyRingID   = os.Args[4]
+		cryptoKeyID = os.Args[5]
+		inPath      = os.Args[6]
+		outPath     = os.Args[7]
 	)
 
 	input, err := ioutil.ReadFile(inPath)
@@ -38,12 +39,12 @@ func main() {
 	var output []byte
 	switch command {
 	case "encrypt":
-		output, err = encrypt(projectID, keyRing, cryptoKey, input)
+		output, err = encrypt(projectID, locationID, keyRingID, cryptoKeyID, input)
 		if err != nil {
 			log.Fatalf("Error while encrypting: %v", err)
 		}
 	case "decrypt":
-		output, err = decrypt(projectID, keyRing, cryptoKey, input)
+		output, err = decrypt(projectID, locationID, keyRingID, cryptoKeyID, input)
 		if err != nil {
 			log.Fatalf("Error while decrypting: %v", err)
 		}
@@ -56,25 +57,25 @@ func main() {
 	}
 }
 
-func encrypt(projectID, keyRing, cryptoKey string, plaintext []byte) ([]byte, error) {
+func encrypt(projectID, locationID, keyRingID, cryptoKeyID string, plaintext []byte) ([]byte, error) {
 	ctx := context.Background()
 	client, err := google.DefaultClient(ctx, cloudkms.CloudPlatformScope)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	cloudkmsService, err := cloudkms.New(client)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	parentName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s",
-		projectID, "global", keyRing, cryptoKey)
+		projectID, locationID, keyRingID, cryptoKeyID)
 
-	resp, err := cloudkmsService.Projects.Locations.KeyRings.CryptoKeys.
-		Encrypt(parentName, &cloudkms.EncryptRequest{
-			Plaintext: base64.StdEncoding.EncodeToString(plaintext),
-		}).Do()
+	req := &cloudkms.EncryptRequest{
+		Plaintext: base64.StdEncoding.EncodeToString(plaintext),
+	}
+	resp, err := cloudkmsService.Projects.Locations.KeyRings.CryptoKeys.Encrypt(parentName, req).Do()
 	if err != nil {
 		return nil, err
 	}
@@ -82,25 +83,25 @@ func encrypt(projectID, keyRing, cryptoKey string, plaintext []byte) ([]byte, er
 	return base64.StdEncoding.DecodeString(resp.Ciphertext)
 }
 
-func decrypt(projectID, keyRing, cryptoKey string, ciphertext []byte) ([]byte, error) {
+func decrypt(projectID, locationID, keyRingID, cryptoKeyID string, ciphertext []byte) ([]byte, error) {
 	ctx := context.Background()
 	client, err := google.DefaultClient(ctx, cloudkms.CloudPlatformScope)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	cloudkmsService, err := cloudkms.New(client)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	parentName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s",
-		projectID, "global", keyRing, cryptoKey)
+		projectID, locationID, keyRingID, cryptoKeyID)
 
-	resp, err := cloudkmsService.Projects.Locations.KeyRings.CryptoKeys.
-		Decrypt(parentName, &cloudkms.DecryptRequest{
-			Ciphertext: base64.StdEncoding.EncodeToString(ciphertext),
-		}).Do()
+	req := &cloudkms.DecryptRequest{
+		Ciphertext: base64.StdEncoding.EncodeToString(ciphertext),
+	}
+	resp, err := cloudkmsService.Projects.Locations.KeyRings.CryptoKeys.Decrypt(parentName, req).Do()
 	if err != nil {
 		return nil, err
 	}
