@@ -74,10 +74,11 @@ func createDatabase(ctx context.Context, w io.Writer, adminClient *database.Data
 	if err != nil {
 		return err
 	}
-	if _, err := op.Wait(ctx); err == nil {
-		fmt.Fprintf(w, "Created database [%s]\n", db)
+	if _, err := op.Wait(ctx); err != nil {
+		return err
 	}
-	return err
+	fmt.Fprintf(w, "Created database [%s]\n", db)
+	return nil
 }
 
 func write(ctx context.Context, w io.Writer, client *spanner.Client) error {
@@ -151,10 +152,11 @@ func addNewColumn(ctx context.Context, w io.Writer, adminClient *database.Databa
 	if err != nil {
 		return err
 	}
-	if err := op.Wait(ctx); err == nil {
-		fmt.Fprintf(w, "Added MarketingBudget column\n")
+	if err := op.Wait(ctx); err != nil {
+		return err
 	}
-	return err
+	fmt.Fprintf(w, "Added MarketingBudget column\n")
+	return nil
 }
 
 func update(ctx context.Context, w io.Writer, client *spanner.Client) error {
@@ -243,10 +245,11 @@ func addIndex(ctx context.Context, w io.Writer, adminClient *database.DatabaseAd
 	if err != nil {
 		return err
 	}
-	if err := op.Wait(ctx); err == nil {
-		fmt.Fprintf(w, "Added index\n")
+	if err := op.Wait(ctx); err != nil {
+		return err
 	}
-	return err
+	fmt.Fprintf(w, "Added index\n")
+	return nil
 }
 
 func queryUsingIndex(ctx context.Context, w io.Writer, client *spanner.Client) error {
@@ -321,10 +324,11 @@ func addStoringIndex(ctx context.Context, w io.Writer, adminClient *database.Dat
 	if err != nil {
 		return err
 	}
-	if err := op.Wait(ctx); err == nil {
-		fmt.Fprintf(w, "Added storing index\n")
+	if err := op.Wait(ctx); err != nil {
+		return err
 	}
-	return err
+	fmt.Fprintf(w, "Added storing index\n")
+	return nil
 }
 
 func readStoringIndex(ctx context.Context, w io.Writer, client *spanner.Client) error {
