@@ -197,3 +197,44 @@ func removeUser(c *storage.Client, bucketName string) error {
 	// [END remove_bucket_iam_member]
 	return nil
 }
+
+func enableRequesterPays(c *storage.Client, bucketName string) error {
+	ctx := context.Background()
+
+	// [START enable_requester_pays]
+	bucket := c.Bucket(bucketName)
+	if _, err := bucket.Update(ctx, storage.BucketAttrsToUpdate{
+		RequesterPays: true,
+	}); err != nil {
+		return err
+	}
+	// [END enable_requester_pays]
+	return nil
+}
+
+func disableRequesterPays(c *storage.Client, bucketName string) error {
+	ctx := context.Background()
+
+	// [START disable_requester_pays]
+	bucket := c.Bucket(bucketName)
+	if _, err := bucket.Update(ctx, storage.BucketAttrsToUpdate{
+		RequesterPays: false,
+	}); err != nil {
+		return err
+	}
+	// [END disable_requester_pays]
+	return nil
+}
+
+func checkRequesterPays(c *storage.Client, bucketName string) error {
+	ctx := context.Background()
+
+	// [START get_requester_pays_status]
+	attrs, err := c.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Is requester pays enabled? %v\n", attrs.RequesterPays)
+	// [END get_requester_pays_status]
+	return nil
+}
