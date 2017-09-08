@@ -92,6 +92,7 @@ func TestObjects(t *testing.T) {
 	if err != nil {
 		t.Fatalf("cannot move object: %v", err)
 	}
+
 	// object1's new name.
 	object1 = object1 + "-rename"
 
@@ -199,3 +200,5 @@ func cleanBucket(t *testing.T, ctx context.Context, client *storage.Client, proj
 		t.Fatalf("Bucket.Create(%q): %v", bucket, err)
 	}
 }
+
+// TODO(jbd): Add test for composeUsingRequesterPays.

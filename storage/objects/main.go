@@ -289,10 +289,10 @@ func rotateEncryptionKey(client *storage.Client, bucket, object string, key, new
 	return nil
 }
 
-func composeUsingRequesterPays(c *storage.Client, srcObject, destObject, srcBucketName, destBucketName, billingProjectID string) error {
+func composeUsingRequesterPays(client *storage.Client, srcObject, destObject, srcBucketName, destBucketName, billingProjectID string) error {
 	ctx := context.Background()
 	// [START storage_download_file_requester_pays]
-	srcBucket := client.Bucket(bucketName)
+	srcBucket := client.Bucket(srcBucketName)
 	destBucket := client.Bucket(destBucketName).UserProject(billingProjectID)
 
 	src := srcBucket.Object(srcObject)
