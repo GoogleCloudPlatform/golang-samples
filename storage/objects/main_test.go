@@ -200,5 +200,3 @@ func cleanBucket(t *testing.T, ctx context.Context, client *storage.Client, proj
 		t.Fatalf("Bucket.Create(%q): %v", bucket, err)
 	}
 }
-
-// TODO(jbd): Add test for composeUsingRequesterPays.

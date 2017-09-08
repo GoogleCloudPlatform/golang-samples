@@ -289,23 +289,6 @@ func rotateEncryptionKey(client *storage.Client, bucket, object string, key, new
 	return nil
 }
 
-func composeUsingRequesterPays(client *storage.Client, srcObject, destObject, srcBucketName, destBucketName, billingProjectID string) error {
-	ctx := context.Background()
-	// [START storage_download_file_requester_pays]
-	srcBucket := client.Bucket(srcBucketName)
-	destBucket := client.Bucket(destBucketName).UserProject(billingProjectID)
-
-	src := srcBucket.Object(srcObject)
-	dest := destBucket.Object(destObject)
-
-	if _, err := dest.ComposerFrom(src).Run(ctx); err != nil {
-		return err
-	}
-	fmt.Printf("Copied file.txt using %v as billing project.\n", billingProjectID)
-	// [END storage_download_file_requester_pays]
-	return nil
-}
-
 const helptext = `usage: objects -o=bucket:name [subcommand] <args...>
 
 subcommands:
