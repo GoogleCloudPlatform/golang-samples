@@ -92,7 +92,6 @@ func TestObjects(t *testing.T) {
 	if err != nil {
 		t.Fatalf("cannot move object: %v", err)
 	}
-
 	// object1's new name.
 	object1 = object1 + "-rename"
 
