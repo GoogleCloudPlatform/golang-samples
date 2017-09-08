@@ -9,6 +9,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"time"
@@ -239,16 +240,24 @@ func checkRequesterPays(c *storage.Client, bucketName string) error {
 	return nil
 }
 
-func composeUsingRequesterPays(client *storage.Client, srcObject, destObject, srcBucketName, destBucketName, billingProjectID string) error {
+func downloadUsingRequesterPays(client *storage.Client, object, bucketName, localpath, billingProjectID string) error {
 	ctx := context.Background()
 	// [START storage_download_file_requester_pays]
-	srcBucket := client.Bucket(srcBucketName)
-	destBucket := client.Bucket(destBucketName).UserProject(billingProjectID)
+	bucket := client.Bucket(bucketName).UserProject(billingProjectID)
+	src := bucket.Object(object)
 
-	src := srcBucket.Object(srcObject)
-	dest := destBucket.Object(destObject)
-
-	if _, err := dest.ComposerFrom(src).Run(ctx); err != nil {
+	f, err := os.OpenFile(localpath, os.O_RDWR|os.O_CREATE, 0755)
+	if err != nil {
+		return err
+	}
+	rc, err := src.NewReader(ctx)
+	if err != nil {
+		return err
+	}
+	if _, err := io.Copy(f, rc); err != nil {
+		return err
+	}
+	if err := rc.Close(); err != nil {
 		return err
 	}
 	fmt.Printf("Copied file.txt using %v as billing project.\n", billingProjectID)
