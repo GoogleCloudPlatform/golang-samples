@@ -258,7 +258,7 @@ const deleteStatement = `DELETE FROM books WHERE id = ?`
 // DeleteBook removes a given book by its ID.
 func (db *mysqlDB) DeleteBook(id int64) error {
 	if id == 0 {
-		return errors.New("memorydb: book with unassigned ID passed into deleteBook")
+		return errors.New("mysql: book with unassigned ID passed into deleteBook")
 	}
 	_, err := execAffectingOneRow(db.delete, id)
 	return err
@@ -273,7 +273,7 @@ const updateStatement = `
 // UpdateBook updates the entry for a given book.
 func (db *mysqlDB) UpdateBook(b *Book) error {
 	if b.ID == 0 {
-		return errors.New("memorydb: book with unassigned ID passed into updateBook")
+		return errors.New("mysql: book with unassigned ID passed into updateBook")
 	}
 
 	_, err := execAffectingOneRow(db.update, b.Title, b.Author, b.PublishedDate,
