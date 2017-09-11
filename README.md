@@ -62,4 +62,5 @@ Note: samples under `docs/appengine` are not shown because they mostly do not ru
 |[pubsub/topics](pubsub/topics)|Command topics is a tool to manage Google Cloud Pub/Sub topics by using the Pub/Sub API.|
 |[speech/caption](speech/caption)|Command caption reads an audio file and outputs the transcript for it.|
 |[storage/buckets](storage/buckets)|Sample buckets creates a bucket, lists buckets and deletes a bucket using the Google Storage API.|
+|[vision/detect](vision/detect)|Command detect uses the Vision API's capabilities to detect several types of content (label, text, location, etc) for the given image.|
 |[vision/label](vision/label)|Command label uses the Vision API's label detection capabilities to find a label based on an image's content.|

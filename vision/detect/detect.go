@@ -193,7 +193,7 @@ func detectDocumentText(w io.Writer, file string) error {
 	if err != nil {
 		return err
 	}
-
+	
 	if annotation == nil {
 		fmt.Fprintln(w, "No text found.")
 	} else {
@@ -520,7 +520,7 @@ func detectDocumentTextURI(w io.Writer, file string) error {
 	if err != nil {
 		return err
 	}
-
+	
 	if annotation == nil {
 		fmt.Fprintln(w, "No text found.")
 	} else {
