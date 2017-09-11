@@ -194,8 +194,12 @@ func detectDocumentText(w io.Writer, file string) error {
 		return err
 	}
 
-	fmt.Fprintln(w, "Text:")
-	fmt.Fprintf(w, "%q\n", annotation.Text)
+	if annotation == nil {
+		fmt.Fprintln(w, "No text found.")
+	} else {
+		fmt.Fprintln(w, "Text:")
+		fmt.Fprintf(w, "%q\n", annotation.Text)
+	}
 
 	return nil
 }
