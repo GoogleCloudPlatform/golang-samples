@@ -25,7 +25,7 @@ func TestSyncLocal(t *testing.T) {
 	}
 
 	var out bytes.Buffer
-	if err := syncWords(client, &out, "./quit.raw"); err != nil {
+	if err := syncWords(client, &out, "../testdata/quit.raw"); err != nil {
 		t.Fatal(err)
 	}
 	if got, want := out.String(), `Word: "quit" (startTime=`; !strings.Contains(got, want) {

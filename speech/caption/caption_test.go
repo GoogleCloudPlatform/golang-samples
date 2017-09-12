@@ -13,7 +13,7 @@ import (
 func TestRecognize(t *testing.T) {
 	testutil.SystemTest(t)
 
-	resp, err := recognize("./quit.raw")
+	resp, err := recognize("../testdata/quit.raw")
 	if err != nil {
 		t.Fatal(err)
 	}

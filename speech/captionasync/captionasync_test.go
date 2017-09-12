@@ -22,7 +22,7 @@ func TestRecognize(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	resp, err := send(client, "./quit.raw")
+	resp, err := send(client, "../testdata/quit.raw")
 	if err != nil {
 		t.Fatal(err)
 	}
