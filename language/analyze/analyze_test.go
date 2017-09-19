@@ -12,6 +12,8 @@ import (
 	language "cloud.google.com/go/language/apiv1"
 	languagepb "google.golang.org/genproto/googleapis/cloud/language/v1"
 
+	languagev1beta2 "cloud.google.com/go/language/apiv1beta2"
+
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
@@ -26,6 +28,25 @@ func TestSentiment(t *testing.T) {
 	if got := res.DocumentSentiment.Score; got <= 0 {
 		t.Errorf("sentiment score: got %f, want positive", got)
 	}
+}
+
+func TestEntitySentiment(t *testing.T) {
+	testutil.SystemTest(t)
+	ctx, c := newBetaClient(t)
+
+	res, err := analyzeEntitySentiment(ctx, c, "Marvin Gaye is the best")
+	if err != nil {
+		t.Fatalf("got %v, want nil err", err)
+	}
+	for _, e := range res.Entities {
+		if e.Name == "Marvin Gaye" {
+			if got := e.Sentiment.Score; got <= 0 {
+				t.Errorf("Marvin Gaye sentiment score: got %f, want positive", got)
+			}
+			return // found
+		}
+	}
+	t.Errorf("got %+v; want Marvin Gaye in Entities", res)
 }
 
 func TestEntity(t *testing.T) {
@@ -67,6 +88,15 @@ func TestSyntax(t *testing.T) {
 func newClient(t *testing.T) (context.Context, *language.Client) {
 	ctx := context.Background()
 	client, err := language.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("language.NewClient: %v", err)
+	}
+	return ctx, client
+}
+
+func newBetaClient(t *testing.T) (context.Context, *languagev1beta2.Client) {
+	ctx := context.Background()
+	client, err := languagev1beta2.NewClient(ctx)
 	if err != nil {
 		t.Fatalf("language.NewClient: %v", err)
 	}
