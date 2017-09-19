@@ -25,7 +25,7 @@ Where `command` is `entities`, `sentiment`, or `syntax`.
 For example:
 
 ```bash
-go build analyze && ./analyze entities "Renee French designed the Go gopher."
+go build && ./analyze entities "Renee French designed the Go gopher."
 ```
 
 Prints something like this:
