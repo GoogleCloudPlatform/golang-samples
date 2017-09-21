@@ -93,3 +93,11 @@ func TestDelete(t *testing.T) {
 		t.Fatalf("failed to delete bucket (%q): %v", bucketName, err)
 	}
 }
+
+func TestSetCors(t *testing.T) {
+	testutil.SystemTest(t)
+	_, err := setCors(bucketName)
+	if err != nil {
+		t.Errorf("setCors: %v", err)
+	}
+}
