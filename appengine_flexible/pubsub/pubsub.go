@@ -34,7 +34,7 @@ const maxMessages = 10
 func main() {
 	ctx := context.Background()
 
-	client, err := pubsub.NewClient(ctx, mustGetenv("GCLOUD_PROJECT"))
+	client, err := pubsub.NewClient(ctx, mustGetenv("GOOGLE_CLOUD_PROJECT"))
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -17,7 +17,7 @@
 ## Run the sample
 
 ```bash
-go run analyze.go <command> <text>
+go build && ./analyze <command> <text>
 ```
 
 Where `command` is `entities`, `sentiment`, or `syntax`.
@@ -25,7 +25,7 @@ Where `command` is `entities`, `sentiment`, or `syntax`.
 For example:
 
 ```bash
-go run analyze.go entities "Renee French designed the Go gopher."
+go build && ./analyze entities "Renee French designed the Go gopher."
 ```
 
 Prints something like this:

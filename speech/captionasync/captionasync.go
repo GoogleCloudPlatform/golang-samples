@@ -3,25 +3,20 @@
 // license that can be found in the LICENSE file.
 
 // Command captionasync sends audio data to the Google Speech API
-// and pulls the operation status and the transcript.
+// and prints its transcript.
 package main
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"strings"
-	"time"
-
-	"github.com/golang/protobuf/proto"
 
 	"golang.org/x/net/context"
 
 	speech "cloud.google.com/go/speech/apiv1"
 	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"
-	longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 )
 
 const usage = `Usage: captionasync <audiofile>
@@ -38,7 +33,7 @@ func main() {
 		os.Exit(2)
 	}
 
-	var sendFunc func(*speech.Client, string) (string, error)
+	var sendFunc func(*speech.Client, string) (*speechpb.LongRunningRecognizeResponse, error)
 
 	path := os.Args[1]
 	if strings.Contains(path, "://") {
@@ -53,29 +48,26 @@ func main() {
 		log.Fatal(err)
 	}
 
-	opName, err := sendFunc(client, os.Args[1])
+	resp, err := sendFunc(client, os.Args[1])
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	resp, err := wait(client, opName)
-	if err != nil {
-		log.Fatal(err)
-	}
-
+	// [START print]
 	// Print the results.
 	for _, result := range resp.Results {
 		for _, alt := range result.Alternatives {
 			fmt.Printf("\"%v\" (confidence=%3f)\n", alt.Transcript, alt.Confidence)
 		}
 	}
+	// [END print]
 }
 
-func send(client *speech.Client, filename string) (string, error) {
+func send(client *speech.Client, filename string) (*speechpb.LongRunningRecognizeResponse, error) {
 	ctx := context.Background()
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	// Send the contents of the audio file with the encoding and
@@ -93,46 +85,12 @@ func send(client *speech.Client, filename string) (string, error) {
 
 	op, err := client.LongRunningRecognize(ctx, req)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return op.Name(), nil
+	return op.Wait(ctx)
 }
 
-func wait(client *speech.Client, opName string) (*speechpb.LongRunningRecognizeResponse, error) {
-	ctx := context.Background()
-
-	opClient := longrunningpb.NewOperationsClient(client.Connection())
-	var op *longrunningpb.Operation
-	var err error
-	for {
-		op, err = opClient.GetOperation(ctx, &longrunningpb.GetOperationRequest{
-			Name: opName,
-		})
-		if err != nil {
-			return nil, err
-		}
-		if op.Done {
-			break
-		}
-		time.Sleep(500 * time.Millisecond)
-	}
-
-	switch {
-	case op.GetError() != nil:
-		return nil, fmt.Errorf("recieved error in response: %v", op.GetError())
-	case op.GetResponse() != nil:
-		var resp speechpb.LongRunningRecognizeResponse
-		if err := proto.Unmarshal(op.GetResponse().Value, &resp); err != nil {
-			return nil, err
-		}
-		return &resp, nil
-	}
-
-	// should never happen.
-	return nil, errors.New("no response")
-}
-
-func sendGCS(client *speech.Client, gcsURI string) (string, error) {
+func sendGCS(client *speech.Client, gcsURI string) (*speechpb.LongRunningRecognizeResponse, error) {
 	ctx := context.Background()
 
 	// Send the contents of the audio file with the encoding and
@@ -150,7 +108,7 @@ func sendGCS(client *speech.Client, gcsURI string) (string, error) {
 
 	op, err := client.LongRunningRecognize(ctx, req)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return op.Name(), nil
+	return op.Wait(ctx)
 }

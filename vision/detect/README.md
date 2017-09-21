@@ -27,3 +27,12 @@ go run detect.go main.go gs://...
 
 go run detect.go main.go https://...
 ```
+
+## Modifiying the source code
+
+Do not edit the `detect.go` file directly. In order to modify it edit the code at `vision/detect/generated/sample-template.go` and run `go generate` at the command line:
+
+```bash
+cd vision/detect
+go generate
+```

@@ -43,12 +43,12 @@ func createKeyring(project, name string) error {
 	if err != nil {
 		return err
 	}
-	log.Print("Created keyring.")
+	log.Print("Created key ring.")
 
 	return nil
 }
 
-func createCryptoKey(project, ring, name string) error {
+func createCryptoKey(project, keyRing, key string) error {
 	ctx := context.Background()
 	authedClient, err := google.DefaultClient(ctx, cloudkms.CloudPlatformScope)
 	if err != nil {
@@ -59,13 +59,13 @@ func createCryptoKey(project, ring, name string) error {
 		return err
 	}
 	location := "global"
-	parent := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s", project, location, ring)
+	parent := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s", project, location, keyRing)
 	purpose := "ENCRYPT_DECRYPT"
 
 	_, err = client.Projects.Locations.KeyRings.CryptoKeys.Create(
 		parent, &cloudkms.CryptoKey{
 			Purpose: purpose,
-		}).CryptoKeyId(name).Do()
+		}).CryptoKeyId(key).Do()
 	if err != nil {
 		return err
 	}
@@ -74,7 +74,7 @@ func createCryptoKey(project, ring, name string) error {
 	return nil
 }
 
-func disableCryptoKeyVersion(project, ring, key, version string) error {
+func disableCryptoKeyVersion(project, keyRing, key, version string) error {
 	ctx := context.Background()
 	authedClient, err := google.DefaultClient(ctx, cloudkms.CloudPlatformScope)
 	if err != nil {
@@ -86,7 +86,7 @@ func disableCryptoKeyVersion(project, ring, key, version string) error {
 	}
 	location := "global"
 	parent := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeyVersions/%s",
-		project, location, ring, version)
+		project, location, keyRing, version)
 
 	_, err = client.Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions.Patch(
 		parent, &cloudkms.CryptoKeyVersion{
@@ -100,7 +100,7 @@ func disableCryptoKeyVersion(project, ring, key, version string) error {
 	return nil
 }
 
-func enableCryptoKeyVersion(project, ring, key, version string) error {
+func enableCryptoKeyVersion(project, keyRing, key, version string) error {
 	ctx := context.Background()
 	authedClient, err := google.DefaultClient(ctx, cloudkms.CloudPlatformScope)
 	if err != nil {
@@ -112,7 +112,7 @@ func enableCryptoKeyVersion(project, ring, key, version string) error {
 	}
 	location := "global"
 	parent := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeyVersions/%s",
-		project, location, ring, version)
+		project, location, keyRing, version)
 
 	_, err = client.Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions.Patch(
 		parent, &cloudkms.CryptoKeyVersion{
@@ -126,7 +126,7 @@ func enableCryptoKeyVersion(project, ring, key, version string) error {
 	return nil
 }
 
-func destroyCryptoKeyVersion(project, ring, key, version string) error {
+func destroyCryptoKeyVersion(project, keyRing, key, version string) error {
 	ctx := context.Background()
 	authedClient, err := google.DefaultClient(ctx, cloudkms.CloudPlatformScope)
 	if err != nil {
@@ -138,7 +138,7 @@ func destroyCryptoKeyVersion(project, ring, key, version string) error {
 	}
 	location := "global"
 	parent := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeyVersions/%s",
-		project, location, ring, version)
+		project, location, keyRing, version)
 
 	_, err = client.Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions.Destroy(
 		parent, &cloudkms.DestroyCryptoKeyVersionRequest{}).Do()
@@ -150,7 +150,7 @@ func destroyCryptoKeyVersion(project, ring, key, version string) error {
 	return nil
 }
 
-func restoreCryptoKeyVersion(project, ring, key, version string) error {
+func restoreCryptoKeyVersion(project, keyRing, key, version string) error {
 	ctx := context.Background()
 	authedClient, err := google.DefaultClient(ctx, cloudkms.CloudPlatformScope)
 	if err != nil {
@@ -162,7 +162,7 @@ func restoreCryptoKeyVersion(project, ring, key, version string) error {
 	}
 	location := "global"
 	parent := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeyVersions/%s",
-		project, location, ring, version)
+		project, location, keyRing, version)
 
 	_, err = client.Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions.Restore(
 		parent, &cloudkms.RestoreCryptoKeyVersionRequest{}).Do()
@@ -174,7 +174,7 @@ func restoreCryptoKeyVersion(project, ring, key, version string) error {
 	return nil
 }
 
-func getRingPolicy(project, ring string) error {
+func getRingPolicy(project, keyRing string) error {
 	ctx := context.Background()
 	authedClient, err := google.DefaultClient(ctx, cloudkms.CloudPlatformScope)
 	if err != nil {
@@ -186,7 +186,7 @@ func getRingPolicy(project, ring string) error {
 	}
 	location := "global"
 	parent := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s",
-		project, location, ring)
+		project, location, keyRing)
 
 	policy, err := client.Projects.Locations.KeyRings.GetIamPolicy(parent).Do()
 	if err != nil {
@@ -200,7 +200,7 @@ func getRingPolicy(project, ring string) error {
 	return nil
 }
 
-func addMemberRingPolicy(project, ring, role, member string) error {
+func addMemberRingPolicy(project, keyRing, role, member string) error {
 	ctx := context.Background()
 	authedClient, err := google.DefaultClient(ctx, cloudkms.CloudPlatformScope)
 	if err != nil {
@@ -212,7 +212,7 @@ func addMemberRingPolicy(project, ring, role, member string) error {
 	}
 	location := "global"
 	parent := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s",
-		project, location, ring)
+		project, location, keyRing)
 
 	policy, err := client.Projects.Locations.KeyRings.GetIamPolicy(parent).Do()
 	if err != nil {
@@ -237,7 +237,7 @@ func addMemberRingPolicy(project, ring, role, member string) error {
 	return nil
 }
 
-func getCryptoKeyPolicy(project, ring, key string) error {
+func getCryptoKeyPolicy(project, keyRing, key string) error {
 	ctx := context.Background()
 	authedClient, err := google.DefaultClient(ctx, cloudkms.CloudPlatformScope)
 	if err != nil {
@@ -249,7 +249,7 @@ func getCryptoKeyPolicy(project, ring, key string) error {
 	}
 	location := "global"
 	parent := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeyVersions/%s",
-		project, location, ring, key)
+		project, location, keyRing, key)
 
 	policy, err := client.Projects.Locations.KeyRings.CryptoKeys.GetIamPolicy(parent).Do()
 	if err != nil {
@@ -263,7 +263,7 @@ func getCryptoKeyPolicy(project, ring, key string) error {
 	return nil
 }
 
-func addMemberCryptoKeyPolicy(project, ring, key, role, member string) error {
+func addMemberCryptoKeyPolicy(project, keyRing, key, role, member string) error {
 	ctx := context.Background()
 	authedClient, err := google.DefaultClient(ctx, cloudkms.CloudPlatformScope)
 	if err != nil {
@@ -275,7 +275,7 @@ func addMemberCryptoKeyPolicy(project, ring, key, role, member string) error {
 	}
 	location := "global"
 	parent := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeyVersions/%s",
-		project, location, ring, key)
+		project, location, keyRing, key)
 
 	policy, err := client.Projects.Locations.KeyRings.CryptoKeys.GetIamPolicy(parent).Do()
 	if err != nil {

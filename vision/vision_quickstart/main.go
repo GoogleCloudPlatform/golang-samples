@@ -26,7 +26,7 @@ func main() {
 	}
 
 	// Sets the name of the image file to annotate.
-	filename := "vision/testdata/cat.jpg"
+	filename := "../testdata/cat.jpg"
 
 	file, err := os.Open(filename)
 	if err != nil {

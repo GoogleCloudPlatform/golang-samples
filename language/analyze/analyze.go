@@ -2,7 +2,7 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// Command analyze performs sentiment, entity, and syntax analysis
+// Command analyze performs sentiment, entity, entity sentiment, and syntax analysis
 // on a string of text via the Cloud Natural Language API.
 package main
 
@@ -47,6 +47,8 @@ func main() {
 		printResp(analyzeSentiment(ctx, client, text))
 	case "syntax":
 		printResp(analyzeSyntax(ctx, client, text))
+	case "entitysentiment":
+		printResp(analyzeEntitySentiment(ctx, betaClient(), text))
 	default:
 		usage("Unknown command.")
 	}
@@ -54,7 +56,7 @@ func main() {
 
 func usage(msg string) {
 	fmt.Fprintln(os.Stderr, msg)
-	fmt.Fprintln(os.Stderr, "usage: analyze [entities|sentiment|syntax] <text>")
+	fmt.Fprintln(os.Stderr, "usage: analyze [entities|sentiment|syntax|entitysentiment] <text>")
 	os.Exit(2)
 }
 
