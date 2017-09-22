@@ -36,7 +36,7 @@ Note: samples under `docs/appengine` are not shown because they mostly do not ru
 |[getting-started/bookshelf/pubsub_worker](getting-started/bookshelf/pubsub_worker)|Sample pubsub_worker demonstrates the use of the Cloud Pub/Sub API to communicate between two modules.|
 |[getting-started/helloworld](getting-started/helloworld)|Sample helloworld is a basic App Engine flexible app.|
 
-### Management
+### Logging and Monitoring (Stackdriver)
 
 |Path|Description|
 |---|---|
@@ -74,8 +74,6 @@ Note: samples under `docs/appengine` are not shown because they mostly do not ru
 |---|---|
 |[datastore/tasks](datastore/tasks)|A simple command-line task list manager to demonstrate using the cloud.google.com/go/datastore package.|
 |[storage/buckets](storage/buckets)|Sample buckets creates a bucket, lists buckets and deletes a bucket using the Google Storage API.|
-
-### Networking
 
 ### Big Data
 
