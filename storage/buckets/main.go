@@ -14,10 +14,12 @@ import (
 	"time"
 
 	"golang.org/x/net/context"
+	"golang.org/x/oauth2/google"
 
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/storage"
 	"google.golang.org/api/iterator"
+	apiStorage "google.golang.org/api/storage/v1"
 )
 
 func main() {
@@ -76,6 +78,13 @@ func main() {
 	if _, err := getPolicy(client, name); err != nil {
 		log.Fatal(err)
 	}
+
+	// set cors to bucket
+	bucket, err := setCors(name)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("set cors to bucket %s : %+v\n", name, bucket.Cors[0])
 
 	// delete the bucket
 	if err := delete(client, name); err != nil {
@@ -196,4 +205,41 @@ func removeUser(c *storage.Client, bucketName string) error {
 	// was modified since it was retrieved.
 	// [END remove_bucket_iam_member]
 	return nil
+}
+
+func setCors(bucketName string) (*apiStorage.Bucket, error) {
+	ctx := context.Background()
+
+	// [START storage_set_bucket_cors ]
+	dclient, err := google.DefaultClient(ctx, storage.ScopeFullControl)
+	if err != nil {
+		return nil, err
+	}
+	sservice, err := apiStorage.New(dclient)
+	if err != nil {
+		return nil, err
+	}
+
+	bucketService := sservice.Buckets
+
+	cors := &apiStorage.BucketCors{
+		MaxAgeSeconds:  60,
+		Method:         []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		Origin:         []string{"*"},
+		ResponseHeader: []string{"X-Response-Header-Key"},
+	}
+
+	bucket := &apiStorage.Bucket{
+		Cors: []*apiStorage.BucketCors{cors},
+	}
+
+	call := bucketService.Update(bucketName, bucket)
+	bucket, err = call.Context(ctx).Do()
+	if err != nil {
+		return nil, err
+	}
+
+	// [END storage_set_bucket_cors ]
+	return bucket, nil
+
 }
