@@ -18,7 +18,7 @@ import (
 func createDataset(client *bigquery.Client, datasetID string) error {
 	ctx := context.Background()
 	// [START bigquery_create_dataset]
-	if err := client.Dataset(datasetID).Create(ctx); err != nil {
+	if err := client.Dataset(datasetID).Create(ctx, &bigquery.DatasetMetadata{}); err != nil {
 		return err
 	}
 	// [END bigquery_create_dataset]

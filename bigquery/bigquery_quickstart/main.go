@@ -30,11 +30,8 @@ func main() {
 	// Sets the name for the new dataset.
 	datasetName := "my_new_dataset"
 
-	// Creates a Dataset instance.
-	dataset := client.Dataset(datasetName)
-
 	// Creates the new BigQuery dataset.
-	if err := dataset.Create(ctx); err != nil {
+	if err := client.Dataset(datasetName).Create(ctx, &bigquery.DatasetMetadata{}); err != nil {
 		log.Fatalf("Failed to create dataset: %v", err)
 	}
 
