@@ -15,17 +15,17 @@ import (
 
 	"google.golang.org/appengine"
 
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
 )
 
 var db *sql.DB
 
 func main() {
 	// Set this in app.yaml when running in production.
-	datastoreName := os.Getenv("MYSQL_CONNECTION")
+	datastoreName := os.Getenv("POSTGRES_CONNECTION")
 
 	var err error
-	db, err = sql.Open("mysql", datastoreName)
+	db, err = sql.Open("postgres", datastoreName)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -84,13 +84,13 @@ type visit struct {
 }
 
 func recordVisit(timestamp int64, userIP string) error {
-	stmt := "INSERT INTO visits (timestamp, userip) VALUES (?, ?)"
+	stmt := "INSERT INTO visits (timestamp, userip) VALUES ($1, $2)"
 	_, err := db.Exec(stmt, timestamp, userIP)
 	return err
 }
 
 func queryVisits(limit int64) ([]visit, error) {
-	rows, err := db.Query("SELECT timestamp, userip FROM visits ORDER BY timestamp DESC LIMIT ?", limit)
+	rows, err := db.Query("SELECT timestamp, userip FROM visits ORDER BY timestamp DESC LIMIT $1", limit)
 	if err != nil {
 		return nil, fmt.Errorf("Could not get recent visits: %v", err)
 	}
