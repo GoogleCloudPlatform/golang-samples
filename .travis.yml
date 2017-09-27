@@ -17,6 +17,8 @@ matrix:
 before_cache:
 - rm -rf $GOPATH/src/github.com/GoogleCloudPlatform/golang-samples/*
 - rm -rf $GOPATH/pkg/**/github.com/GoogleCloudPlatform/golang-samples
+- rm -rf $GOPATH/src/github.com
+- rm -rf $GOPATH/pkg/**/github.com
 
 cache:
   directories:
