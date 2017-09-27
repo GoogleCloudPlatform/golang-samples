@@ -103,7 +103,6 @@ func upload(ctx context.Context, r io.Reader, projectID, bucket, name string, pu
 	if err != nil {
 		return nil, nil, err
 	}
-	defer client.Close()
 
 	bh := client.Bucket(bucket)
 	// Next check if the bucket exists
