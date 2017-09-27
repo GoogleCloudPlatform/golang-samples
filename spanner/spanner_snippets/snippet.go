@@ -16,7 +16,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/spanner"
-	"cloud.google.com/go/spanner/admin/database/apiv1"
+	database "cloud.google.com/go/spanner/admin/database/apiv1"
 	"golang.org/x/net/context"
 	"google.golang.org/api/iterator"
 
@@ -38,6 +38,7 @@ var (
 		"readindex":           readUsingIndex,
 		"readstoringindex":    readStoringIndex,
 		"readonlytransaction": readOnlyTransaction,
+		"readstaledata":       readStaleData,
 	}
 
 	adminCommands = map[string]adminCommand{
@@ -400,6 +401,30 @@ func readOnlyTransaction(ctx context.Context, w io.Writer, client *spanner.Clien
 	}
 }
 
+func readStaleData(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	ro := client.ReadOnlyTransaction().WithTimestampBound(spanner.ExactStaleness(10 * time.Second))
+	defer ro.Close()
+
+	iter := ro.Read(ctx, "Albums", spanner.AllKeys(), []string{"SingerId", "AlbumId", "AlbumTitle"})
+	defer iter.Stop()
+	for {
+		row, err := iter.Next()
+		if err == iterator.Done {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		var singerID int64
+		var albumID int64
+		var albumTitle string
+		if err := row.Columns(&singerID, &albumID, &albumTitle); err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "%d %d %s\n", singerID, albumID, albumTitle)
+	}
+}
+
 func createClients(ctx context.Context, db string) (*database.DatabaseAdminClient, *spanner.Client) {
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
@@ -442,7 +467,7 @@ func main() {
 
 	Command can be one of: createdatabase, write, query, read, update,
 		writetransaction, addnewcolumn, querynewcolumn, addindex, queryindex, readindex,
-		addstoringindex, readstoringindex, readonlytransaction
+		addstoringindex, readstoringindex, readonlytransaction, readstaledata
 
 Examples:
 	spanner_snippets createdatabase projects/my-project/instances/my-instance/databases/example-db

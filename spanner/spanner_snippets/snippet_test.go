@@ -59,6 +59,7 @@ func TestSample(t *testing.T) {
 	// order since in many cases earlier commands setup the database for the subsequent commands.
 	runCommand(t, "createdatabase", dbName)
 	runCommand(t, "write", dbName)
+	writeTime := time.Now()
 
 	assertContains(runCommand(t, "read", dbName), "1 1 Total Junk")
 
@@ -91,4 +92,11 @@ func TestSample(t *testing.T) {
 	if strings.Count(out, "Total Junk") != 2 {
 		t.Errorf("got output %q; wanted it to contain 2 occurences of Total Junk", out)
 	}
+
+	// Wait at least 10 seconds since the write.
+	time.Sleep(time.Now().Add(11 * time.Second).Sub(writeTime))
+	out = runCommand(t, "readstaledata", dbName)
+	assertContains(out, "Go, Go, Go")
+	assertContains(out, "Forever Hold Your Peace")
+	assertContains(out, "Green")
 }
