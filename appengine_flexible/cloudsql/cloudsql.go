@@ -97,7 +97,6 @@ func queryVisits(limit int64) ([]visit, error) {
 	defer rows.Close()
 
 	var visits []visit
-
 	for rows.Next() {
 		var v visit
 		if err := rows.Scan(&v.timestamp, &v.userIP); err != nil {
