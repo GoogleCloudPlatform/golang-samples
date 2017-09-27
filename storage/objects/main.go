@@ -309,7 +309,7 @@ func downloadUsingRequesterPays(client *storage.Client, object, bucketName, loca
 	if err := rc.Close(); err != nil {
 		return err
 	}
-	fmt.Printf("Downloaded file.txt using %v as billing project.\n", billingProjectID)
+	fmt.Printf("Downloaded using %v as billing project.\n", billingProjectID)
 	// [END storage_download_file_requester_pays]
 	return nil
 }
