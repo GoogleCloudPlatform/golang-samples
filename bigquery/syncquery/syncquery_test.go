@@ -13,7 +13,7 @@ import (
 func TestQuery(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	rows, err := Query(tc.ProjectID, "SELECT corpus FROM publicdata:samples.shakespeare GROUP BY corpus;")
+	rows, err := Query(tc.ProjectID, "SELECT corpus FROM `publicdata.samples.shakespeare` GROUP BY corpus;")
 	if err != nil {
 		t.Fatal(err)
 	}
