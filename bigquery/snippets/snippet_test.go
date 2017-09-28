@@ -128,7 +128,9 @@ func TestImportExport(t *testing.T) {
 		&bigquery.FieldSchema{Name: "Year", Type: bigquery.IntegerFieldType},
 		&bigquery.FieldSchema{Name: "City", Type: bigquery.StringFieldType},
 	}
-	if err := client.Dataset(datasetID).Table(tableID).Create(ctx, schema); err != nil {
+	if err := client.Dataset(datasetID).Table(tableID).Create(ctx, &bigquery.TableMetadata{
+		Schema: schema,
+	}); err != nil {
 		t.Errorf("failed to create dataset: %v", err)
 	}
 	defer deleteDataset(t, ctx, datasetID)
