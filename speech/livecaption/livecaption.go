@@ -83,8 +83,9 @@ func main() {
 			log.Fatalf("Cannot stream results: %v", err)
 		}
 		if err := resp.Error; err != nil {
+			// Workaround while the API doesn't give a more informative error.
 			if err.Code == 3 || err.Code == 11 {
-				log.Fatal("Could not recognize: Speech recognition request exceeded limit of 60 seconds.")
+				log.Print("WARNING: Speech recognition request exceeded limit of 60 seconds.")
 			}
 			log.Fatalf("Could not recognize: %v", err)
 		}
