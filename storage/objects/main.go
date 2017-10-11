@@ -289,6 +289,33 @@ func rotateEncryptionKey(client *storage.Client, bucket, object string, key, new
 	return nil
 }
 
+func downloadUsingRequesterPays(client *storage.Client, object, bucketName, localpath, billingProjectID string) error {
+	ctx := context.Background()
+	// [START storage_download_file_requester_pays]
+	bucket := client.Bucket(bucketName).UserProject(billingProjectID)
+	src := bucket.Object(object)
+
+	f, err := os.OpenFile(localpath, os.O_RDWR|os.O_CREATE, 0755)
+	if err != nil {
+		return err
+	}
+	rc, err := src.NewReader(ctx)
+	if err != nil {
+		return err
+	}
+	if _, err := io.Copy(f, rc); err != nil {
+		return err
+	}
+	if err := rc.Close(); err != nil {
+		return err
+	}
+	fmt.Printf("Downloaded using %v as billing project.\n", billingProjectID)
+	// [END storage_download_file_requester_pays]
+	return nil
+}
+
+// TODO(jbd): Add test for downloadUsingRequesterPays.
+
 const helptext = `usage: objects -o=bucket:name [subcommand] <args...>
 
 subcommands:

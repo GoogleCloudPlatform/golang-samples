@@ -85,6 +85,21 @@ func TestIAM(t *testing.T) {
 	}
 }
 
+func TestRequesterPays(t *testing.T) {
+	testutil.SystemTest(t)
+	c := setup(t)
+
+	if err := enableRequesterPays(c, bucketName); err != nil {
+		t.Errorf("enableRequesterPay: %#v", err)
+	}
+	if err := disableRequesterPays(c, bucketName); err != nil {
+		t.Errorf("enableRequesterPay: %#v", err)
+	}
+	if err := checkRequesterPays(c, bucketName); err != nil {
+		t.Errorf("enableRequesterPay: %#v", err)
+	}
+}
+
 func TestDelete(t *testing.T) {
 	testutil.SystemTest(t)
 
