@@ -82,7 +82,7 @@ func validateRedirectURL(path string) (string, error) {
 		return "/", err
 	}
 	if parsedURL.IsAbs() {
-		return "/", errors.New("URL must be absolute")
+		return "/", errors.New("URL must not be absolute")
 	}
 	return path, nil
 }
