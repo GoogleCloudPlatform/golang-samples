@@ -8,9 +8,10 @@ branches:
 
 matrix:
   include:
-    - go: 1.7.5
-    - go: 1.8.4
-    - go: 1.9.1
+    - go: 1.6.x
+    - go: 1.7.x
+    - go: 1.8.x
+    - go: 1.9.x
       env: ALLOW_E2E=true # Don't run e2e tests more than once.
     # NOTE: no tip, see https://github.com/travis-ci/gimme/issues/38
 
