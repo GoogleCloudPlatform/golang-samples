@@ -5,6 +5,7 @@
 package main
 
 import (
+	"strings"
 	"testing"
 
 	"golang.org/x/net/context"
@@ -89,11 +90,16 @@ func TestClassify(t *testing.T) {
 	testutil.SystemTest(t)
 	ctx, c := newClient(t)
 
-	res, err := analyzeSyntax(ctx, c, "If you bend the gopher, his belly folds.")
+	res, err := classifyText(ctx, c, "Android is a mobile operating system developed by Google, based on the Linux kernel and designed primarily for touchscreen mobile devices such as smartphones and tablets.")
 	if err != nil {
 		t.Fatalf("got %v, want nil err", err)
 	}
-	printResp(res, err)
+	for _, category := range res.Categories {
+		if strings.Contains(category.GetName(), "Computers") {
+			return // found
+		}
+	}
+	t.Errorf("got %+v; want Computers in Categories", res)
 }
 
 func newClient(t *testing.T) (context.Context, *language.Client) {
