@@ -49,6 +49,8 @@ func main() {
 		printResp(analyzeSyntax(ctx, client, text))
 	case "entitysentiment":
 		printResp(analyzeEntitySentiment(ctx, betaClient(), text))
+	case "classify":
+		printResp(classifyText(ctx, client, text))
 	default:
 		usage("Unknown command.")
 	}
@@ -56,7 +58,7 @@ func main() {
 
 func usage(msg string) {
 	fmt.Fprintln(os.Stderr, msg)
-	fmt.Fprintln(os.Stderr, "usage: analyze [entities|sentiment|syntax|entitysentiment] <text>")
+	fmt.Fprintln(os.Stderr, "usage: analyze [entities|sentiment|syntax|entitysentiment|classify] <text>")
 	os.Exit(2)
 }
 
@@ -95,6 +97,17 @@ func analyzeSyntax(ctx context.Context, client *language.Client, text string) (*
 			ExtractSyntax: true,
 		},
 		EncodingType: languagepb.EncodingType_UTF8,
+	})
+}
+
+func classifyText(ctx context.Context, client *language.Client, text string) (*languagepb.ClassifyTextResponse, error) {
+	return client.ClassifyText(ctx, &languagepb.ClassifyTextRequest{
+		Document: &languagepb.Document{
+			Source: &languagepb.Document_Content{
+				Content: text,
+			},
+			Type: languagepb.Document_PLAIN_TEXT,
+		},
 	})
 }
 

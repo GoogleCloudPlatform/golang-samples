@@ -85,6 +85,17 @@ func TestSyntax(t *testing.T) {
 	t.Errorf("got %+v; want gopher in Tokens", res)
 }
 
+func TestClassify(t *testing.T) {
+	testutil.SystemTest(t)
+	ctx, c := newClient(t)
+
+	res, err := analyzeSyntax(ctx, c, "If you bend the gopher, his belly folds.")
+	if err != nil {
+		t.Fatalf("got %v, want nil err", err)
+	}
+	printResp(res, err)
+}
+
 func newClient(t *testing.T) (context.Context, *language.Client) {
 	ctx := context.Background()
 	client, err := language.NewClient(ctx)
