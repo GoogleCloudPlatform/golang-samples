@@ -95,6 +95,10 @@ func oauthCallbackHandler(w http.ResponseWriter, r *http.Request) *appError {
 		return appErrorf(err, "invalid state parameter. try logging in again.")
 	}
 
+	if oauthFlowSession.IsNew {
+		return appErrorf(err, "invalid session state. try logging in again.")
+	}
+
 	redirectURL, ok := oauthFlowSession.Values[oauthFlowRedirectKey].(string)
 	// Validate this callback request came from the app.
 	if !ok {
