@@ -2,8 +2,8 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// Sample cloudsql demonstrates connection to a Postgres Cloud SQL instance from App Engine standard.
-package cloudsql
+// Sample cloudsql_postgres demonstrates connection to a Cloud SQL for Postgres instance from App Engine standard.
+package main
 
 import (
 	"bytes"
@@ -13,11 +13,28 @@ import (
 	"net/http"
 	"os"
 
+	"google.golang.org/appengine"
+
 	_ "github.com/broady/gae-postgres"
 )
 
-func init() {
+var db *sql.DB
+
+func main() {
+	var (
+		connectionName = mustGetenv("CLOUDSQL_CONNECTION_NAME")
+		user           = mustGetenv("CLOUDSQL_USER")
+		password       = os.Getenv("CLOUDSQL_PASSWORD") // NOTE: password may be empty
+	)
+
+	var err error
+	db, err = sql.Open("gae-postgres", fmt.Sprintf("cloudsql=%s user=%s password='%s'", connectionName, user, password))
+	if err != nil {
+		log.Fatalf("Could not open db: %v", err)
+	}
+
 	http.HandleFunc("/", handler)
+	appengine.Main()
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -26,18 +43,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	connectionName := mustGetenv("CLOUDSQL_CONNECTION_NAME")
-	user := mustGetenv("CLOUDSQL_USER")
-	password := os.Getenv("CLOUDSQL_PASSWORD") // NOTE: password may be empty
-
 	w.Header().Set("Content-Type", "text/plain")
-
-	db, err := sql.Open("gae-postgres", fmt.Sprintf("user=%s password=%s cloudsql=%s", user, password, connectionName))
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Could not open db: %v", err), 500)
-		return
-	}
-	defer db.Close()
 
 	rows, err := db.Query("SELECT datname FROM pg_database")
 	if err != nil {
