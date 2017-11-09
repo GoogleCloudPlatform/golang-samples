@@ -93,8 +93,8 @@ func TestSample(t *testing.T) {
 		t.Errorf("got output %q; wanted it to contain 2 occurences of Total Junk", out)
 	}
 
-	// Wait at least 10 seconds since the write.
-	time.Sleep(time.Now().Add(11 * time.Second).Sub(writeTime))
+	// Wait at least 15 seconds since the write.
+	time.Sleep(time.Now().Add(16 * time.Second).Sub(writeTime))
 	out = runCommand(t, "readstaledata", dbName)
 	assertContains(out, "Go, Go, Go")
 	assertContains(out, "Forever Hold Your Peace")
