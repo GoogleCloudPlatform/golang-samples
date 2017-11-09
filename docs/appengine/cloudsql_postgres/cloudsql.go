@@ -1,8 +1,8 @@
-// Copyright 2016 Google Inc. All rights reserved.
+// Copyright 2017 Google Inc. All rights reserved.
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// Sample cloudsql demonstrates connection to a Cloud SQL instance from App Engine standard.
+// Sample cloudsql_postgres demonstrates connection to a Cloud SQL for Postgres instance from App Engine standard.
 package main
 
 import (
@@ -15,7 +15,7 @@ import (
 
 	"google.golang.org/appengine"
 
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/broady/gae-postgres"
 )
 
 var db *sql.DB
@@ -28,7 +28,7 @@ func main() {
 	)
 
 	var err error
-	db, err = sql.Open("mysql", fmt.Sprintf("%s:%s@cloudsql(%s)/", user, password, connectionName))
+	db, err = sql.Open("gae-postgres", fmt.Sprintf("cloudsql=%s user=%s password='%s'", connectionName, user, password))
 	if err != nil {
 		log.Fatalf("Could not open db: %v", err)
 	}
@@ -45,7 +45,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "text/plain")
 
-	rows, err := db.Query("SHOW DATABASES")
+	rows, err := db.Query("SELECT datname FROM pg_database")
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Could not query db: %v", err), 500)
 		return
