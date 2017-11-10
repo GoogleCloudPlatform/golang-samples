@@ -9,10 +9,8 @@ package main
 import (
 	"fmt"
 	"io"
-	//# if !gcs
-	"io/ioutil"
-	"os"
-	//# end
+	"io/ioutil" //# omit if gcs
+	"os"        //# omit if gcs
 
 	video "cloud.google.com/go/videointelligence/apiv1"
 	videopb "google.golang.org/genproto/googleapis/cloud/videointelligence/v1"
@@ -45,14 +43,9 @@ func boilerplate() error { //# omit
 
 	var fileBytes []byte              //# omit
 	_ = videopb.AnnotateVideoRequest{ //# omit
-
 		//# def input
-		//# if !gcs
-		InputContent: fileBytes,
-		//# end
-		//# if gcs
-		InputUri: file,
-		//# end
+		InputContent: fileBytes, //# omit if gcs
+		InputUri:     file,      //# omit if !gcs
 		//# enddef
 	} //# omit
 

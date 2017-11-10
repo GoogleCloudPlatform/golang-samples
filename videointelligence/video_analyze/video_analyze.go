@@ -7,6 +7,8 @@ package main
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
+	"os"
 
 	video "cloud.google.com/go/videointelligence/apiv1"
 	videopb "google.golang.org/genproto/googleapis/cloud/videointelligence/v1"
@@ -23,10 +25,22 @@ func label(w io.Writer, file string) error {
 		return err
 	}
 
+	f, err := os.Open(file)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	fileBytes, err := ioutil.ReadAll(f)
+	if err != nil {
+		return err
+	}
+
 	op, err := client.AnnotateVideo(ctx, &videopb.AnnotateVideoRequest{
 		Features: []videopb.Feature{
 			videopb.Feature_LABEL_DETECTION,
 		},
+		InputContent: fileBytes,
 	})
 	if err != nil {
 		return err
@@ -71,10 +85,22 @@ func shotChange(w io.Writer, file string) error {
 		return err
 	}
 
+	f, err := os.Open(file)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	fileBytes, err := ioutil.ReadAll(f)
+	if err != nil {
+		return err
+	}
+
 	op, err := client.AnnotateVideo(ctx, &videopb.AnnotateVideoRequest{
 		Features: []videopb.Feature{
 			videopb.Feature_SHOT_CHANGE_DETECTION,
 		},
+		InputContent: fileBytes,
 	})
 	if err != nil {
 		return err
@@ -105,10 +131,22 @@ func explicitContent(w io.Writer, file string) error {
 		return err
 	}
 
+	f, err := os.Open(file)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	fileBytes, err := ioutil.ReadAll(f)
+	if err != nil {
+		return err
+	}
+
 	op, err := client.AnnotateVideo(ctx, &videopb.AnnotateVideoRequest{
 		Features: []videopb.Feature{
 			videopb.Feature_EXPLICIT_CONTENT_DETECTION,
 		},
+		InputContent: fileBytes,
 	})
 	if err != nil {
 		return err
