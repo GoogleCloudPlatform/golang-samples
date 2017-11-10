@@ -16,7 +16,7 @@ import (
 )
 
 // label ...
-func label(w io.Writer, file string) error {
+func labelURI(w io.Writer, file string) error {
 	ctx := context.Background()
 	client, err := video.NewClient(ctx)
 	if err != nil {
@@ -27,6 +27,7 @@ func label(w io.Writer, file string) error {
 		Features: []videopb.Feature{
 			videopb.Feature_LABEL_DETECTION,
 		},
+		InputUri: file,
 	})
 	if err != nil {
 		return err
@@ -64,7 +65,7 @@ func label(w io.Writer, file string) error {
 }
 
 // shotChange ...
-func shotChange(w io.Writer, file string) error {
+func shotChangeURI(w io.Writer, file string) error {
 	ctx := context.Background()
 	client, err := video.NewClient(ctx)
 	if err != nil {
@@ -75,6 +76,7 @@ func shotChange(w io.Writer, file string) error {
 		Features: []videopb.Feature{
 			videopb.Feature_SHOT_CHANGE_DETECTION,
 		},
+		InputUri: file,
 	})
 	if err != nil {
 		return err
@@ -98,7 +100,7 @@ func shotChange(w io.Writer, file string) error {
 }
 
 // explicitContent ...
-func explicitContent(w io.Writer, file string) error {
+func explicitContentURI(w io.Writer, file string) error {
 	ctx := context.Background()
 	client, err := video.NewClient(ctx)
 	if err != nil {
@@ -109,6 +111,7 @@ func explicitContent(w io.Writer, file string) error {
 		Features: []videopb.Feature{
 			videopb.Feature_EXPLICIT_CONTENT_DETECTION,
 		},
+		InputUri: file,
 	})
 	if err != nil {
 		return err

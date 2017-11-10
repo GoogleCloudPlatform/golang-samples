@@ -2,6 +2,10 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
+// github.com/broady/preprocess
+//go:generate bash -c "cat template.go | preprocess | gofmt > video_analyze.go"
+//go:generate bash -c "cat template.go | preprocess gcs | sed -e 's/(w io.Writer/URI\\(w io.Writer/g' | gofmt > video_analyze_gcs.go"
+
 // Command video_analyze uses the Google Cloud Video Intelligence API to analyze a video.
 package main
 

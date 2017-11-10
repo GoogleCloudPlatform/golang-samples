@@ -21,10 +21,12 @@
 To build and run the sample:
 
 ```bash
-gsutil cp gs://demomaker/cat.mp4
-go run video_analyze.go main.go cat.mp4
+go build -o video_analyze
 
-go run video_analyze.go main.go gs://demomaker/cat.mp4
+gsutil cp gs://demomaker/cat.mp4
+./video_analyze cat.mp4
+
+./video_analyze gs://demomaker/cat.mp4
 ```
 
 ## Modifiying the source code
