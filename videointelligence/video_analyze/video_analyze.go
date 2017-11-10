@@ -132,7 +132,7 @@ func shotChange(w io.Writer, file string) error {
 		start, _ := ptypes.Duration(shot.StartTimeOffset)
 		end, _ := ptypes.Duration(shot.EndTimeOffset)
 
-		fmt.Fprintf(w, "Shot: %s to %s", start, end)
+		fmt.Fprintf(w, "Shot: %s to %s\n", start, end)
 	}
 
 	return nil
@@ -177,7 +177,7 @@ func explicitContent(w io.Writer, file string) error {
 
 	for _, frame := range result.Frames {
 		offset, _ := ptypes.Duration(frame.TimeOffset)
-		fmt.Fprintln(w, "%s - %s", offset, frame.PornographyLikelihood.String())
+		fmt.Fprintf(w, "%s - %s\n", offset, frame.PornographyLikelihood.String())
 	}
 
 	return nil
@@ -271,7 +271,7 @@ func shotChangeURI(w io.Writer, file string) error {
 		start, _ := ptypes.Duration(shot.StartTimeOffset)
 		end, _ := ptypes.Duration(shot.EndTimeOffset)
 
-		fmt.Fprintf(w, "Shot: %s to %s", start, end)
+		fmt.Fprintf(w, "Shot: %s to %s\n", start, end)
 	}
 
 	return nil
@@ -305,7 +305,7 @@ func explicitContentURI(w io.Writer, file string) error {
 
 	for _, frame := range result.Frames {
 		offset, _ := ptypes.Duration(frame.TimeOffset)
-		fmt.Fprintln(w, "%s - %s", offset, frame.PornographyLikelihood.String())
+		fmt.Fprintf(w, "%s - %s\n", offset, frame.PornographyLikelihood.String())
 	}
 
 	return nil
