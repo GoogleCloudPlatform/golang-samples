@@ -9,8 +9,8 @@ package main
 import (
 	"fmt"
 	"io"
-	"io/ioutil" //# omit if gcs
-	"os"        //# omit if gcs
+	"io/ioutil" //# include if !gcs
+	"os"        //# include if !gcs
 
 	video "cloud.google.com/go/videointelligence/apiv1"
 	videopb "google.golang.org/genproto/googleapis/cloud/videointelligence/v1"
@@ -20,14 +20,14 @@ import (
 )
 
 func boilerplate() error { //# omit
-	//# def newclient
+	//# def dorequest
 	ctx := context.Background()
 	client, err := video.NewClient(ctx)
 	if err != nil {
 		return err
 	}
-
 	//# if !gcs
+
 	f, err := os.Open(file)
 	if err != nil {
 		return err
@@ -39,17 +39,14 @@ func boilerplate() error { //# omit
 		return err
 	}
 	//# end
-	//# enddef
 
-	var fileBytes []byte              //# omit
-	_ = videopb.AnnotateVideoRequest{ //# omit
-		//# def input
-		InputContent: fileBytes, //# omit if gcs
-		InputUri:     file,      //# omit if !gcs
-		//# enddef
-	} //# omit
-
-	//# def opwait
+	op, err := client.AnnotateVideo(ctx, &videopb.AnnotateVideoRequest{
+		Features: []videopb.Feature{
+			__req.feature__,
+		},
+		InputContent: fileBytes, //# include if !gcs
+		InputUri:     file,      //# include if gcs
+	})
 	if err != nil {
 		return err
 	}
@@ -58,21 +55,13 @@ func boilerplate() error { //# omit
 		return err
 	}
 	//# enddef
-	_ = client //# omit
-	_ = resp   //# omit
+	_ = resp //# omit
 } //# omit
 
 // label ...
 func label(w io.Writer, file string) error {
-	var client *video.Client //# replace newclient
-
-	op, err := client.AnnotateVideo(ctx, &videopb.AnnotateVideoRequest{
-		Features: []videopb.Feature{
-			videopb.Feature_LABEL_DETECTION,
-		},
-		//# replace input
-	})
-	resp, _ := op.Wait() //# replace opwait
+	//# replace __req.feature__ videopb.Feature_LABEL_DETECTION
+	var resp *videopb.AnnotateVideoResponse //# template dorequest
 
 	printLabels := func(labels []*videopb.LabelAnnotation) {
 		for _, label := range labels {
@@ -103,15 +92,8 @@ func label(w io.Writer, file string) error {
 
 // shotChange ...
 func shotChange(w io.Writer, file string) error {
-	var client *video.Client //# replace newclient
-
-	op, err := client.AnnotateVideo(ctx, &videopb.AnnotateVideoRequest{
-		Features: []videopb.Feature{
-			videopb.Feature_SHOT_CHANGE_DETECTION,
-		},
-		//# replace input
-	})
-	resp, _ := op.Wait(ctx) //# replace opwait
+	//# replace __req.feature__ videopb.Feature_SHOT_CHANGE_DETECTION
+	var resp *videopb.AnnotateVideoResponse //# template dorequest
 
 	// A single video was processed. Get the first result.
 	result := resp.AnnotationResults[0].ShotAnnotations
@@ -128,15 +110,8 @@ func shotChange(w io.Writer, file string) error {
 
 // explicitContent ...
 func explicitContent(w io.Writer, file string) error {
-	var client *video.Client //# replace newclient
-
-	op, err := client.AnnotateVideo(ctx, &videopb.AnnotateVideoRequest{
-		Features: []videopb.Feature{
-			videopb.Feature_EXPLICIT_CONTENT_DETECTION,
-		},
-		//# replace input
-	})
-	resp, _ := op.Wait(ctx) //# replace opwait
+	//# replace __req.feature__ videopb.Feature_EXPLICIT_CONTENT_DETECTION
+	var resp *videopb.AnnotateVideoResponse //# template dorequest
 
 	// A single video was processed. Get the first result.
 	result := resp.AnnotationResults[0].ExplicitAnnotation
