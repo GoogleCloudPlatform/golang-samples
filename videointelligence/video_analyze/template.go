@@ -19,6 +19,12 @@ import (
 	"golang.org/x/net/context"
 )
 
+//# if gcs
+//# replace __SUFFIX__( URI(
+//# end
+//# if !gcs
+//# replace __SUFFIX__( (
+//# end
 func boilerplate() error { //# omit
 	//# def dorequest
 	ctx := context.Background()
@@ -59,7 +65,7 @@ func boilerplate() error { //# omit
 } //# omit
 
 // label ...
-func label(w io.Writer, file string) error {
+func label__SUFFIX__(w io.Writer, file string) error {
 	//# replace __req.feature__ videopb.Feature_LABEL_DETECTION
 	var resp *videopb.AnnotateVideoResponse //# template dorequest
 
@@ -91,7 +97,7 @@ func label(w io.Writer, file string) error {
 }
 
 // shotChange ...
-func shotChange(w io.Writer, file string) error {
+func shotChange__SUFFIX__(w io.Writer, file string) error {
 	//# replace __req.feature__ videopb.Feature_SHOT_CHANGE_DETECTION
 	var resp *videopb.AnnotateVideoResponse //# template dorequest
 
@@ -109,7 +115,7 @@ func shotChange(w io.Writer, file string) error {
 }
 
 // explicitContent ...
-func explicitContent(w io.Writer, file string) error {
+func explicitContent__SUFFIX__(w io.Writer, file string) error {
 	//# replace __req.feature__ videopb.Feature_EXPLICIT_CONTENT_DETECTION
 	var resp *videopb.AnnotateVideoResponse //# template dorequest
 
