@@ -3,7 +3,7 @@
 ## Authentication
 
 * Create a project with the [Google Cloud Console][cloud-console], and enable
-  the [Vision API][vision-api].
+  the [Video Intelligence API][video-api].
 * From the Cloud Console, create a service account,
   download its json credentials file, then set the 
   `GOOGLE_APPLICATION_CREDENTIALS` environment variable:
@@ -13,7 +13,7 @@
   ```
 
 [cloud-console]: https://console.cloud.google.com
-[vision-api]: https://console.cloud.google.com/apis/api/vision.googleapis.com/overview?project=_
+[video-api]: https://console.cloud.google.com/apis/api/videointelligence.googleapis.com/overview?project=_
 [adc]: https://cloud.google.com/docs/authentication#developer_workflow
 
 ## Run the sample
