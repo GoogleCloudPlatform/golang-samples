@@ -3,8 +3,8 @@
 // license that can be found in the LICENSE file.
 
 // github.com/broady/preprocess
-//go:generate bash -c "cat template.go | preprocess | gofmt > video_analyze.go"
-//go:generate bash -c "cat template.go | preprocess gcs | gofmt > video_analyze_gcs.go"
+//go:generate bash -c "cat gen/template.go | preprocess | gofmt > video_analyze.go"
+//go:generate bash -c "cat gen/template.go | preprocess gcs | gofmt > video_analyze_gcs.go"
 
 // Command video_analyze uses the Google Cloud Video Intelligence API to analyze a video.
 package main
