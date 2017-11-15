@@ -44,3 +44,14 @@ func TestAnalyze(t *testing.T) {
 		}
 	}
 }
+
+func TestGenerated(t *testing.T) {
+	testutil.Generated(t, "gen/template.go").
+		Goimports().
+		Matches("video_analyze.go")
+
+	testutil.Generated(t, "gen/template.go").
+		Labels("gcs").
+		Goimports().
+		Matches("video_analyze_gcs.go")
+}

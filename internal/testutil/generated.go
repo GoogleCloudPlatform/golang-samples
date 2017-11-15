@@ -14,9 +14,10 @@ import (
 )
 
 type genTest struct {
-	t        *testing.T
-	template string
-	labels   []string
+	t         *testing.T
+	template  string
+	labels    []string
+	goimports bool
 }
 
 func Generated(t *testing.T, templateFile string) genTest {
@@ -28,6 +29,11 @@ func Generated(t *testing.T, templateFile string) genTest {
 
 func (g genTest) Labels(labels ...string) genTest {
 	g.labels = labels
+	return g
+}
+
+func (g genTest) Goimports() genTest {
+	g.goimports = true
 	return g
 }
 
@@ -50,10 +56,12 @@ func (g genTest) Matches(outFile string) {
 		return
 	}
 
-	got, err = imports.Process(outFile, got, nil)
-	if err != nil {
-		g.t.Errorf("Goimports(%v): %v", outFile, err)
-		return
+	if g.goimports {
+		got, err = imports.Process(outFile, got, nil)
+		if err != nil {
+			g.t.Errorf("Goimports(%v): %v", outFile, err)
+			return
+		}
 	}
 
 	if !bytes.Equal(got, want) {
