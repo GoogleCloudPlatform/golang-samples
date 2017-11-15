@@ -34,19 +34,19 @@ func (g genTest) Labels(labels ...string) genTest {
 func (g genTest) Matches(outFile string) {
 	tmpl, err := ioutil.ReadFile(g.template)
 	if err != nil {
-		g.t.Error("ReadFile(%v): %v", g.template, err)
+		g.t.Errorf("ReadFile(%v): %v", g.template, err)
 		return
 	}
 
 	want, err := ioutil.ReadFile(outFile)
 	if err != nil {
-		g.t.Error("ReadFile(%v): %v", outFile, err)
+		g.t.Errorf("ReadFile(%v): %v", outFile, err)
 		return
 	}
 
 	got, err := preprocess.Process(bytes.NewReader(tmpl), g.labels, "//#")
 	if err != nil {
-		g.t.Error("Preprocess(%v, %v) == %q: %v", g.template, g.labels, err)
+		g.t.Errorf("Preprocess(%v, %v) == %q: %v", g.template, g.labels, err)
 		return
 	}
 
