@@ -17,7 +17,6 @@ import (
 	"golang.org/x/net/context"
 )
 
-// label ...
 func label(w io.Writer, file string) error {
 	ctx := context.Background()
 	client, err := video.NewClient(ctx)
@@ -77,7 +76,6 @@ func label(w io.Writer, file string) error {
 	return nil
 }
 
-// shotChange ...
 func shotChange(w io.Writer, file string) error {
 	ctx := context.Background()
 	client, err := video.NewClient(ctx)
@@ -123,7 +121,6 @@ func shotChange(w io.Writer, file string) error {
 	return nil
 }
 
-// explicitContent ...
 func explicitContent(w io.Writer, file string) error {
 	ctx := context.Background()
 	client, err := video.NewClient(ctx)

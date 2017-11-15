@@ -9,8 +9,8 @@ package main
 import (
 	"fmt"
 	"io"
-	"io/ioutil" //# include if !gcs
-	"os"        //# include if !gcs
+	"io/ioutil"
+	"os"
 
 	video "cloud.google.com/go/videointelligence/apiv1"
 	videopb "google.golang.org/genproto/googleapis/cloud/videointelligence/v1"
@@ -25,7 +25,7 @@ import (
 //# if !gcs
 //# replace __SUFFIX__( (
 //# end
-func boilerplate() error { //# omit
+func boilerplate() { //# omit
 	//# def dorequest
 	ctx := context.Background()
 	client, err := video.NewClient(ctx)
@@ -61,10 +61,8 @@ func boilerplate() error { //# omit
 		return err
 	}
 	//# enddef
-	_ = resp //# omit
 } //# omit
 
-// label ...
 func label__SUFFIX__(w io.Writer, file string) error {
 	//# replace __req.feature__ videopb.Feature_LABEL_DETECTION
 	var resp *videopb.AnnotateVideoResponse //# template dorequest
@@ -96,7 +94,6 @@ func label__SUFFIX__(w io.Writer, file string) error {
 	return nil
 }
 
-// shotChange ...
 func shotChange__SUFFIX__(w io.Writer, file string) error {
 	//# replace __req.feature__ videopb.Feature_SHOT_CHANGE_DETECTION
 	var resp *videopb.AnnotateVideoResponse //# template dorequest
@@ -114,7 +111,6 @@ func shotChange__SUFFIX__(w io.Writer, file string) error {
 	return nil
 }
 
-// explicitContent ...
 func explicitContent__SUFFIX__(w io.Writer, file string) error {
 	//# replace __req.feature__ videopb.Feature_EXPLICIT_CONTENT_DETECTION
 	var resp *videopb.AnnotateVideoResponse //# template dorequest

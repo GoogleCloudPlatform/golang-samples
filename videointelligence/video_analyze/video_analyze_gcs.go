@@ -15,7 +15,6 @@ import (
 	"golang.org/x/net/context"
 )
 
-// label ...
 func labelURI(w io.Writer, file string) error {
 	ctx := context.Background()
 	client, err := video.NewClient(ctx)
@@ -64,7 +63,6 @@ func labelURI(w io.Writer, file string) error {
 	return nil
 }
 
-// shotChange ...
 func shotChangeURI(w io.Writer, file string) error {
 	ctx := context.Background()
 	client, err := video.NewClient(ctx)
@@ -99,7 +97,6 @@ func shotChangeURI(w io.Writer, file string) error {
 	return nil
 }
 
-// explicitContent ...
 func explicitContentURI(w io.Writer, file string) error {
 	ctx := context.Background()
 	client, err := video.NewClient(ctx)

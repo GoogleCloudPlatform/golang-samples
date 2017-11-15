@@ -6,9 +6,10 @@ package gentest
 
 import (
 	"bytes"
-	"go/format"
 	"io/ioutil"
 	"testing"
+
+	"golang.org/x/tools/imports"
 
 	"github.com/broady/preprocess/lib/preprocess"
 )
@@ -44,9 +45,9 @@ func TestGen(t *testing.T) {
 			t.Errorf("%q: %v", tc.outFile, err)
 			continue
 		}
-		got, err = format.Source(got)
+		got, err = imports.Process(tc.outFile, got, nil)
 		if err != nil {
-			t.Errorf("gofmt %q: %v", err)
+			t.Errorf("gofmt %q: %v", tc.outFile, err)
 		}
 
 		if !bytes.Equal(got, want) {
