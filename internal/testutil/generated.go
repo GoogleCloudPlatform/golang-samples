@@ -46,7 +46,7 @@ func (g genTest) Matches(outFile string) {
 
 	got, err := preprocess.Process(bytes.NewReader(tmpl), g.labels, "//#")
 	if err != nil {
-		g.t.Errorf("Preprocess(%v, %v) == %q: %v", g.template, g.labels, err)
+		g.t.Errorf("Preprocess(%v, %v): %v", g.template, g.labels, err)
 		return
 	}
 
