@@ -2,11 +2,6 @@
 
 This sample demonstrates how to use Google Cloud Endpoints using Go and gRPC.
 
-For a complete walkthrough, see the following guides:
-
-* [Quickstart with gRPC on Container Engine](https://cloud.google.com/endpoints/docs/quickstart-grpc-container-engine)
-* [Quickstart with gRPC on Compute Engine](https://cloud.google.com/endpoints/docs/quickstart-grpc-compute-engine-docker)
-
 ## Test the code locally (optional)
 
 Run the backend using `go run`:
