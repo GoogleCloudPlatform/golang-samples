@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"os"
 
 	video "cloud.google.com/go/videointelligence/apiv1"
 	videopb "google.golang.org/genproto/googleapis/cloud/videointelligence/v1"
@@ -34,13 +33,7 @@ func boilerplate() { //# omit
 	}
 	//# if !gcs
 
-	f, err := os.Open(file)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	fileBytes, err := ioutil.ReadAll(f)
+	fileBytes, err := ioutil.ReadFile(file)
 	if err != nil {
 		return err
 	}
