@@ -31,7 +31,7 @@ func main() {
 	}
 
 	// Ensure the table exists.
-	// Running an SQL query also checks the connection to the MySQL server
+	// Running an SQL query also checks the connection to the PostgreSQL server
 	// is authenticated and valid.
 	if err := createTable(); err != nil {
 		log.Fatal(err)
