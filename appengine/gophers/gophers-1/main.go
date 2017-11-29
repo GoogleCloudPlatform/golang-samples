@@ -33,7 +33,7 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.FormValue("message") == "" {
 		body.Message = "No message provided"
-		Response(body).Status(http.StatusBadRequest).WriteJSON(w)
+		writeJSON(w, http.StatusBadRequest, body)
 		return
 	}
 
@@ -46,33 +46,17 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 
 	body.Message = fmt.Sprintf("Thank you for your submission, %s!", name)
 
-	Response(body).WriteJSON(w)
+	writeJSON(w, http.StatusOK, body)
 }
 
-func Response(payload interface{}) response {
-	return response{payload: payload}
-}
-
-type response struct {
-	status  int
-	payload interface{}
-}
-
-func (r response) Status(status int) response {
-	r.status = status
-	return r
-}
-
-func (r response) WriteJSON(w http.ResponseWriter) error {
+func writeJSON(w http.ResponseWriter, status int, payload interface{}) error {
 	w.Header().Set("Content-Type", "application/json")
-	b, err := json.MarshalIndent(r.payload, "", "\t")
+	b, err := json.MarshalIndent(payload, "", "\t")
 	if err != nil {
 		http.Error(w, `{"Error":"Could not marshal payload."}`, http.StatusInternalServerError)
 		return err
 	}
-	if r.status != 0 {
-		w.WriteHeader(r.status)
-	}
+	w.WriteHeader(status)
 	_, err = w.Write(b)
 	return err
 }
