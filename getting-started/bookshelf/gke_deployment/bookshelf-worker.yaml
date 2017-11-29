@@ -24,7 +24,7 @@ metadata:
 # The bookshelf frontend replica set ensures that at least 3
 # instances of the bookshelf app are running on the cluster.
 # For more info about Pods see:
-#   https://cloud.google.com/container-engine/docs/pods/
+#   https://kubernetes.io/docs/concepts/workloads/pods/pod-overview/
 spec:
   replicas: 2
   template:
