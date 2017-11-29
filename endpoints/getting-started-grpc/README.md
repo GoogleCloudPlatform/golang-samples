@@ -108,14 +108,14 @@ gcloud container builds submit --tag gcr.io/YOUR_PROJECT_ID/go-grpc-hello:1.0 .
 
 ### Deploy to GKE
 
-If you haven't got a cluster, first [create one](https://cloud.google.com/container-engine/docs/clusters/operations).
+If you haven't got a cluster, first [create one](https://cloud.google.com/kubernetes-engine/docs/how-to/creating-a-container-cluster).
 
-1. Edit `container-engine.yaml`. Replace `<YOUR_PROJECT_ID>` and `<SERVICE_CONFIG_ID>`.
+1. Edit `kubernetes-engine.yaml`. Replace `<YOUR_PROJECT_ID>` and `<SERVICE_CONFIG_ID>`.
 
 1. Create the deployment and service:
 
     ```
-    kubectl apply -f container-engine.yaml
+    kubectl apply -f kubernetes-engine.yaml
     ```
 
 1. Wait until the load balancer is active:

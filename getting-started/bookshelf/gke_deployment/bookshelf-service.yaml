@@ -12,12 +12,12 @@
 # limitations under the License.
 
 # The bookshelf service provides a load-balancing proxy over the bookshelf
-# frontend pods. By specifying the type as a 'LoadBalancer', Container Engine
+# frontend pods. By specifying the type as a 'LoadBalancer', Kubernetes Engine
 # will create an external HTTP load balancer.
 # For more information about Services see:
-#   https://cloud.google.com/container-engine/docs/services/
+#   https://cloud.google.com/kubernetes-engine/docs/services/
 # For more information about external HTTP load balancing see:
-#   https://cloud.google.com/container-engine/docs/load-balancer
+#   https://cloud.google.com/kubernetes-engine/docs/load-balancer
 apiVersion: v1
 kind: Service
 metadata:
