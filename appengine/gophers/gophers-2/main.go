@@ -1,10 +1,14 @@
 package main
 
 import (
-	"fmt"
+	"html/template"
 	"net/http"
 
 	"google.golang.org/appengine"
+)
+
+var (
+	indexTemplate = template.Must(template.ParseFiles("index.html"))
 )
 
 func main() {
@@ -18,5 +22,5 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintln(w, "Hello, gopher network!")
+	indexTemplate.Execute(w, nil)
 }

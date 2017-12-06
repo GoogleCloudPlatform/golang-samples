@@ -2,16 +2,17 @@
 <html>
 <head>
   <title>The Gopher Network</title>
-  <script src="/static/app.js"></script>
 </head>
 <body>
 
 <h1>The Gopher Network</h1>
 
-<div id="notice"></div>
+<img id="logo" src="/static/gcp-gopher.svg" width="100">
+
+{{with .Notice}}<div id="notice">{{.}}</div>{{end}}
 
 <form action="/create" method="post">
-  <div>Name: <input name="name"></div>
+  <div>Name: <input name="name" value="{{.Name}}"></div>
   <div>Message: <input name="message"></div>
   <input type="submit">
 </form>
