@@ -17,6 +17,7 @@ import (
 
 	"golang.org/x/net/context"
 )
+
 // [END bigquery_simple_app_deps]
 
 func main() {
@@ -53,7 +54,7 @@ func query(proj string) (*bigquery.RowIterator, error) {
 				CAST(id as STRING)) as url,
 			view_count
 		FROM ` + "`bigquery-public-data.stackoverflow.posts_questions` " +
-		`WHERE tags like '%google-bigquery%'
+			`WHERE tags like '%google-bigquery%'
 		ORDER BY view_count DESC
 		LIMIT 10;`)
 	return query.Read(ctx)
@@ -61,8 +62,8 @@ func query(proj string) (*bigquery.RowIterator, error) {
 
 // [START bigquery_simple_app_print]
 type StackOverflowRow struct {
-	URL string `bigquery:"url"`
-	ViewCount int64 `bigquery:"view_count"`
+	URL       string `bigquery:"url"`
+	ViewCount int64  `bigquery:"view_count"`
 }
 
 // printResults prints results from a query to the Stack Overflow public dataset.
@@ -80,4 +81,5 @@ func printResults(w io.Writer, iter *bigquery.RowIterator) error {
 		fmt.Fprintf(w, "url: %s views: %d\n", row.URL, row.ViewCount)
 	}
 }
+
 // [END bigquery_simple_app_print]
