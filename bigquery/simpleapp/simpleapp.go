@@ -56,15 +56,12 @@ func query(proj string) (*bigquery.RowIterator, error) {
 		`WHERE tags like '%google-bigquery%'
 		ORDER BY view_count DESC
 		LIMIT 10;`)
-	// Use standard SQL syntax for queries.
-	// See: https://cloud.google.com/bigquery/sql-reference/
-	query.QueryConfig.UseStandardSQL = true
 	return query.Read(ctx)
 }
 
 // [START bigquery_simple_app_print]
 type StackOverflowRow struct {
-	Url string `bigquery:"url"`
+	URL string `bigquery:"url"`
 	ViewCount int64 `bigquery:"view_count"`
 }
 
@@ -80,7 +77,7 @@ func printResults(w io.Writer, iter *bigquery.RowIterator) error {
 			return err
 		}
 
-		fmt.Fprintf(w, "url: %s views: %d\n", row.Url, row.ViewCount)
+		fmt.Fprintf(w, "url: %s views: %d\n", row.URL, row.ViewCount)
 	}
 }
 // [END bigquery_simple_app_print]
