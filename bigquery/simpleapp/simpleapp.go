@@ -2,9 +2,10 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// Command simpleapp queries the Shakespeare sample dataset in Google BigQuery.
+// Command simpleapp queries the Stack Overflow public dataset in Google BigQuery.
 package main
 
+// [START bigquery_simple_app_deps]
 import (
 	"fmt"
 	"io"
@@ -16,6 +17,8 @@ import (
 
 	"golang.org/x/net/context"
 )
+
+// [END bigquery_simple_app_deps]
 
 func main() {
 	proj := os.Getenv("GOOGLE_CLOUD_PROJECT")
@@ -35,28 +38,38 @@ func main() {
 
 // query returns a slice of the results of a query.
 func query(proj string) (*bigquery.RowIterator, error) {
+	// [START bigquery_simple_app_client]
 	ctx := context.Background()
 
 	client, err := bigquery.NewClient(ctx, proj)
 	if err != nil {
 		return nil, err
 	}
+	// [END bigquery_simple_app_client]
 
 	query := client.Query(
 		`SELECT
-		 APPROX_TOP_COUNT(corpus, 10) as title,
-		 COUNT(*) as unique_words
-		 FROM ` + "`publicdata.samples.shakespeare`;")
-	// Use standard SQL syntax for queries.
-	// See: https://cloud.google.com/bigquery/sql-reference/
-	query.QueryConfig.UseStandardSQL = true
+			CONCAT(
+				'https://stackoverflow.com/questions/',
+				CAST(id as STRING)) as url,
+			view_count
+		FROM ` + "`bigquery-public-data.stackoverflow.posts_questions`" + `
+		WHERE tags like '%google-bigquery%'
+		ORDER BY view_count DESC
+		LIMIT 10;`)
 	return query.Read(ctx)
 }
 
-// printResults prints results from a query to the Shakespeare dataset.
+// [START bigquery_simple_app_print]
+type StackOverflowRow struct {
+	URL       string `bigquery:"url"`
+	ViewCount int64  `bigquery:"view_count"`
+}
+
+// printResults prints results from a query to the Stack Overflow public dataset.
 func printResults(w io.Writer, iter *bigquery.RowIterator) error {
 	for {
-		var row []bigquery.Value
+		var row StackOverflowRow
 		err := iter.Next(&row)
 		if err == iterator.Done {
 			return nil
@@ -65,16 +78,8 @@ func printResults(w io.Writer, iter *bigquery.RowIterator) error {
 			return err
 		}
 
-		fmt.Fprintln(w, "titles:")
-		ts := row[0].([]bigquery.Value)
-		for _, t := range ts {
-			record := t.([]bigquery.Value)
-			title := record[0].(string)
-			cnt := record[1].(int64)
-			fmt.Fprintf(w, "\t%s: %d\n", title, cnt)
-		}
-
-		words := row[1].(int64)
-		fmt.Fprintf(w, "total unique words: %d\n", words)
+		fmt.Fprintf(w, "url: %s views: %d\n", row.URL, row.ViewCount)
 	}
 }
+
+// [END bigquery_simple_app_print]
