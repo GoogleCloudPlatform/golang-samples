@@ -25,7 +25,7 @@ func TestSimpleApp(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !strings.Contains(b.String(), "hamlet") {
-		t.Errorf("got output: %q; want it to contain hamlet", b.String())
+	if !strings.Contains(b.String(), "views:") {
+		t.Errorf("got output: %q; want it to contain views:", b.String())
 	}
 }
