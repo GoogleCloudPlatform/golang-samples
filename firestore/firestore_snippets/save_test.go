@@ -48,6 +48,18 @@ func TestSave(t *testing.T) {
 	must(updateDocCreateIfMissing)
 	must(updateDocMultiple)
 	must(updateDocNested)
+	if value, _, err := getField(ctx, client, "users", "frank", "favorites"); err != nil {
+		t.Fatal(err)
+	} else {
+		favorites := value.(map[string]interface{})
+		if got, want := favorites["color"], "Red"; got != want {
+			t.Errorf("users/frank/favorites.color = %#v; want %#v", got, want)
+		}
+		if got, want := favorites["food"], "Pizza"; got != want {
+			t.Errorf("users/frank/favorites.age = %#v; want %#v", got, want)
+		}
+	}
+
 	must(deleteDoc)
 
 	if _, exists, err := getField(ctx, client, "cities", "BJ", "capital"); err != nil {

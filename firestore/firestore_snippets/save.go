@@ -225,6 +225,12 @@ func deleteField(ctx context.Context, client *firestore.Client) error {
 		return err
 	}
 	// [END fs_delete_field]
+
+	// Use Set once this feature is implemented:
+	// https://github.com/GoogleCloudPlatform/google-cloud-go/issues/832
+	// Set(ctx, map[string]interface{}{
+	//	"capital": firestore.Delete,
+	//})
 	return nil
 }
 
