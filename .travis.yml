@@ -62,10 +62,17 @@ before_install:
 
 install:
 # Install all external dependencies, ensuring they are updated.
-- go get -u -v $(go list -f '{{join .Imports "\n"}}{{"\n"}}{{join .TestImports "\n"}}' ./... | sort | uniq | grep -v golang-samples)
+- GO_IMPORTS=$(go list -f '{{join .Imports "\n"}}{{"\n"}}{{join .TestImports "\n"}}' ./... | sort | uniq | grep -v golang-samples)
+- go get -u -v -d $GO_IMPORTS
+# pin go-sql-driver/mysql to v1.3 (which supports Go 1.6)
+- if go version | grep go1\.6\.; then
+    pushd $GOPATH/src/github.com/go-sql-driver/mysql;
+    git checkout v1.3;
+    popd;
+  fi
+- go install -v $GO_IMPORTS
 - go get -u -v github.com/rakyll/gotest
 - export CI=TRAVIS # for gotest to force colors
-
 
 script:
 - travis_wait 20 gotest -p 10 -timeout 20m -v ./...;
