@@ -35,19 +35,26 @@ package main
 
 import (
 	"flag"
+	"fmt"
+	"io/ioutil"
 	"log"
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	pb "google.golang.org/grpc/examples/helloworld/helloworld"
 	"google.golang.org/grpc/metadata"
+
+	googleoauth2 "golang.org/x/oauth2/google"
 )
 
 const defaultName = "world"
 
 var (
-	addr = flag.String("addr", "127.0.0.1:50051", "Address of grpc server.")
-	key  = flag.String("api-key", "", "API key.")
+	addr     = flag.String("addr", "127.0.0.1:50051", "Address of grpc server.")
+	key      = flag.String("api-key", "", "API key.")
+	token    = flag.String("token", "", "Authentication token.")
+	keyfile  = flag.String("keyfile", "", "Path to a Google service account key file.")
+	audience = flag.String("audience", "", "Audience.")
 )
 
 func main() {
@@ -61,8 +68,33 @@ func main() {
 	defer conn.Close()
 	c := pb.NewGreeterClient(conn)
 
+	if *keyfile != "" {
+		log.Printf("Authenticating using Google service account key in %s", *keyfile)
+		sakey, err := ioutil.ReadFile(*keyfile)
+		if err != nil {
+			log.Fatalf("Unable to read service account key file %s: %s", *keyfile, err)
+		}
+
+		tokenSource, err := googleoauth2.JWTAccessTokenSourceFromJSON(sakey, *audience)
+		if err != nil {
+			log.Fatalf("Error building JWT access token source: %v", err)
+		}
+		jwt, err := tokenSource.Token()
+		if err != nil {
+			log.Fatalf("Unable to generate JWT token: %v", err)
+		}
+		*token = jwt.AccessToken
+	}
+
 	ctx := context.Background()
-	ctx = metadata.NewOutgoingContext(ctx, metadata.Pairs("x-api-key", *key))
+	if *key != "" {
+		log.Printf("Using API key: %s", *key)
+		ctx = metadata.NewOutgoingContext(ctx, metadata.Pairs("x-api-key", *key))
+	}
+	if *token != "" {
+		log.Printf("Using authentication token: %s", *token)
+		ctx = metadata.NewOutgoingContext(ctx, metadata.Pairs("Authorization", fmt.Sprintf("Bearer %s", *token)))
+	}
 
 	// Contact the server and print out its response.
 	name := defaultName

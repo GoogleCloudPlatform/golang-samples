@@ -22,7 +22,11 @@ $ go run client/main.go
 1. First, generate `out.pb` from the proto file:
 
     ```bash
-    protoc --include_imports --include_source_info helloworld/helloworld.proto --descriptor_set_out out.pb
+    protoc \
+        --include_imports \
+        --include_source_info \
+        --descriptor_set_out out.pb \
+        helloworld/helloworld.proto
     ```
 
 1. Edit `api_config.yaml`. Replace `YOUR_PROJECT_ID`:
@@ -34,7 +38,7 @@ $ go run client/main.go
 1. Deploy your service:
 
     ```bash
-    gcloud service-management deploy out.pb api_config.yaml
+    gcloud endpoints services deploy out.pb api_config.yaml
     ```
 
     Your config ID should be printed out, it looks like `2017-03-30r0`.
@@ -43,7 +47,7 @@ $ go run client/main.go
     You can list the config IDs using this command:
 
     ```bash
-    gcloud service-management configs list --service hellogrpc.endpoints.YOUR_PROJECT_ID.cloud.goog
+    gcloud endpoints configs list --service hellogrpc.endpoints.YOUR_PROJECT_ID.cloud.goog
     ```
 
 ## Building the server's Docker container
@@ -82,20 +86,22 @@ gcloud container builds submit --tag gcr.io/YOUR_PROJECT_ID/go-grpc-hello:1.0 .
 1. Run your gRPC server's container:
 
     ```bash
-    docker run -d --name=grpc-hello gcr.io/${GOOGLE_CLOUD_PROJECT}/go-grpc-hello:1.0
+    docker run --detach --name=grpc-hello gcr.io/${GOOGLE_CLOUD_PROJECT}/go-grpc-hello:1.0
     ```
 
 1. Run Endpoints proxy:
 
     ```bash
-    docker run --detach --name=esp \
-        -p 80:9000 \
+    docker run \
+        --detach \
+        --name=esp \
+        --publish=80:9000 \
         --link=grpc-hello:grpc-hello \
         gcr.io/endpoints-release/endpoints-runtime:1 \
-        -s ${SERVICE_NAME} \
-        -v ${SERVICE_CONFIG_ID} \
-        -P 9000 \
-        -a grpc://grpc-hello:50051
+        --service=${SERVICE_NAME} \
+        --version=${SERVICE_CONFIG_ID} \
+        --http2_port=9000 \
+        --backend=grpc://grpc-hello:50051
     ```
 
 1. Get the IP address of your secured gRPC server:
@@ -133,7 +139,37 @@ If you haven't got a cluster, first [create one](https://cloud.google.com/kubern
 1. Then, after you have your server's IP address (via GKE's `kubectl get svc` or your GCE instance's IP), run:
 
     ```bash
-    go run client/main.go -api-key=AIza.... -addr=YOUR_SERVER_IP_ADDRESS:80 [message]
+    go run client/main.go --api-key=AIza.... --addr=YOUR_SERVER_IP_ADDRESS:80 [message]
     ```
 
 [1]: https://cloud.google.com/endpoints/docs/quickstarts
+
+## Configuring authentication and authenticating requests
+
+### Configuring Authentication
+
+This sample shows how to make requests authenticated by a service account using a signed JWT token.
+
+1. First, [create a service account](https://console.developers.google.com/apis/credentials)
+
+1. Edit `api_config_auth.yaml`. Replace `PROJECT_ID` and `SERVICE-ACCOUNT-ID`.
+
+1. Update the service configuration using `api_config_auth.yaml` instead of `api_config.yaml`:
+
+    ```bash
+    gcloud endpoints services deploy out.pb api_config_auth.yaml
+    ```
+
+### Authenticating requests
+
+1. First, [create and download a service account key](https://console.developers.google.com/apis/credentials) in JSON format.
+
+1. Then, run:
+
+    ```bash
+    go run client/main.go \
+        --keyfile=SERVICE_ACCOUNT_KEY.json \
+        --audience=hellogrpc.endpoints.PROJECT_ID.cloud.goog \
+        --addr=YOUR_SERVER_IP_ADDRESS:80 \
+        [message]
+    ```
