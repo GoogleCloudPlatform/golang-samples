@@ -35,19 +35,16 @@ func main() {
 	it := client.ListDataSources(ctx, req)
 	fmt.Println("Supported Data Sources:")
 	for {
-		resp, err := it.Next()
+		ds, err := it.Next()
 		if err == iterator.Done {
 			break
-		}
-		if err != nil {
-			// TODO: Handle error.
+		} else if err != nil {
 			log.Fatalf("Failed to list sources: %v", err)
 		}
-		// TODO: Use resp.
-		fmt.Println(resp.DisplayName)
-		fmt.Println("\tID: ", resp.DataSourceId)
-		fmt.Println("\tFull path: ", resp.Name)
-		fmt.Println("\tDescription: ", resp.Description)
+		fmt.Println(ds.DisplayName)
+		fmt.Println("\tID: ", ds.DataSourceId)
+		fmt.Println("\tFull path: ", ds.Name)
+		fmt.Println("\tDescription: ", ds.Description)
 	}
 }
 
