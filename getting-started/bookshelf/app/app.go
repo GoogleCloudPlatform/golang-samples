@@ -24,7 +24,7 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 
 	"google.golang.org/appengine"
 
@@ -212,7 +212,7 @@ func uploadFileFromForm(r *http.Request) (url string, err error) {
 	}
 
 	// random filename, retaining existing extension.
-	name := uuid.NewV4().String() + path.Ext(fh.Filename)
+	name := uuid.Must(uuid.NewV4().String()) + path.Ext(fh.Filename)
 
 	ctx := context.Background()
 	w := bookshelf.StorageBucket.Object(name).NewWriter(ctx)

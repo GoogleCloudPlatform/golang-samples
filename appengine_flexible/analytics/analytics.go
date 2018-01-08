@@ -14,7 +14,7 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 
 	"google.golang.org/appengine"
 )
@@ -65,7 +65,7 @@ func trackEvent(r *http.Request, category, action, label string, value *uint) er
 		//
 		// Depending on your application, this might want to be associated with the
 		// user in a cookie.
-		"cid": {uuid.NewV4().String()},
+		"cid": {uuid.Must(uuid.NewV4()).String()},
 		"t":   {"event"},
 		"ec":  {category},
 		"ea":  {action},
