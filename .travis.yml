@@ -18,6 +18,8 @@ matrix:
 before_cache:
 - rm -rf $GOPATH/src/github.com/GoogleCloudPlatform/golang-samples/*
 - rm -rf $GOPATH/pkg/**/github.com/GoogleCloudPlatform/golang-samples
+# go get -u won't work if we've pinned the version.
+- rm -rf $GOPATH/src/github.com/go-sql-driver/mysql
 
 cache:
   directories:
