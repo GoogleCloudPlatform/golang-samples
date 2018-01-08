@@ -38,7 +38,8 @@ func main() {
 		ds, err := it.Next()
 		if err == iterator.Done {
 			break
-		} else if err != nil {
+		}
+		if err != nil {
 			log.Fatalf("Failed to list sources: %v", err)
 		}
 		fmt.Println(ds.DisplayName)
