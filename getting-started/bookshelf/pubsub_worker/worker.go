@@ -51,7 +51,7 @@ func main() {
 	topic := bookshelf.PubsubClient.Topic(bookshelf.PubsubTopicID)
 	exists, err := topic.Exists(ctx)
 	if err != nil {
-		log.Fatal("Error checking for topic: %v", bookshelf.PubsubTopicID, err)
+		log.Fatalf("Error checking for topic: %v", err)
 	}
 	if !exists {
 		if _, err := bookshelf.PubsubClient.CreateTopic(ctx, bookshelf.PubsubTopicID); err != nil {
@@ -63,7 +63,7 @@ func main() {
 	subscription = bookshelf.PubsubClient.Subscription(subName)
 	exists, err = subscription.Exists(ctx)
 	if err != nil {
-		log.Fatal("Error checking for subscription: %v", subName, err)
+		log.Fatalf("Error checking for subscription: %v", err)
 	}
 	if !exists {
 		if _, err = bookshelf.PubsubClient.CreateSubscription(
