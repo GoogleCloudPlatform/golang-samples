@@ -1,8 +1,9 @@
-// Copyright 2017 Google LLC. All rights reserved.
+// Copyright 2017 Google Inc. All rights reserved.
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
 // [START bigquery_datatransfer_quickstart]
+
 // Sample bigquery-quickstart creates a Google BigQuery dataset.
 package main
 
@@ -10,10 +11,11 @@ import (
 	"fmt"
 	"log"
 
-	// Imports the BigQuery Data Transfer client package.
-	"cloud.google.com/go/bigquery/datatransfer/apiv1"
 	"golang.org/x/net/context"
 	"google.golang.org/api/iterator"
+
+	// Imports the BigQuery Data Transfer client package.
+	datatransfer "cloud.google.com/go/bigquery/datatransfer/apiv1"
 	datatransferpb "google.golang.org/genproto/googleapis/cloud/bigquery/datatransfer/v1"
 )
 
