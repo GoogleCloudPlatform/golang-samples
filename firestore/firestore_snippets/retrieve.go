@@ -141,7 +141,7 @@ func getCollections(ctx context.Context, client *firestore.Client) error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Found collection with id: %v\n", collRef.ID)
+		fmt.Printf("Found collection with id: %s\n", collRef.ID)
 	}
 	// [END fs_get_collections]
 	return nil
