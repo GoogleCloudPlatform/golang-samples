@@ -114,6 +114,9 @@ func main() {
 	if err := allDocs(ctx, client); err != nil {
 		log.Fatalf("Cannot retrieve all docs: %v", err)
 	}
+	if err := getCollections(ctx, client); err != nil {
+		log.Fatalf("Cannot get subcollections for document: %v", err)
+	}
 
 	if err := deleteCollection(ctx, client, client.Collection("cities"), 2); err != nil {
 		log.Fatalf("Cannot delete collectionL %v", err)

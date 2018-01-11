@@ -129,3 +129,20 @@ func allDocs(ctx context.Context, client *firestore.Client) error {
 	// [END fs_get_all_docs]
 	return nil
 }
+
+func getCollections(ctx context.Context, client *firestore.Client) error {
+	// [START fs_get_collections]
+	iter := client.Collection("cities").Doc("SF").Collections(ctx)
+	for {
+		collRef, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		fmt.Printf("Found collection with id: %s\n", collRef.ID)
+	}
+	// [END fs_get_collections]
+	return nil
+}
