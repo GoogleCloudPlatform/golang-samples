@@ -40,11 +40,10 @@ import (
 	"log"
 
 	"golang.org/x/net/context"
+	"golang.org/x/oauth2/google"
 	"google.golang.org/grpc"
 	pb "google.golang.org/grpc/examples/helloworld/helloworld"
 	"google.golang.org/grpc/metadata"
-
-	googleoauth2 "golang.org/x/oauth2/google"
 )
 
 const defaultName = "world"
@@ -70,12 +69,12 @@ func main() {
 
 	if *keyfile != "" {
 		log.Printf("Authenticating using Google service account key in %s", *keyfile)
-		sakey, err := ioutil.ReadFile(*keyfile)
+		keyBytes, err := ioutil.ReadFile(*keyfile)
 		if err != nil {
-			log.Fatalf("Unable to read service account key file %s: %s", *keyfile, err)
+			log.Fatalf("Unable to read service account key file %s: %v", *keyfile, err)
 		}
 
-		tokenSource, err := googleoauth2.JWTAccessTokenSourceFromJSON(sakey, *audience)
+		tokenSource, err := google.JWTAccessTokenSourceFromJSON(keyBytes, *audience)
 		if err != nil {
 			log.Fatalf("Error building JWT access token source: %v", err)
 		}
