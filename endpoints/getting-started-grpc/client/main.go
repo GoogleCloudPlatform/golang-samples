@@ -83,6 +83,8 @@ func main() {
 			log.Fatalf("Unable to generate JWT token: %v", err)
 		}
 		*token = jwt.AccessToken
+		// Note: the generated JWT token has a 1h TTL.
+		// Make sure to refresh the token before it expires (see jwt.Expiry).
 	}
 
 	ctx := context.Background()
