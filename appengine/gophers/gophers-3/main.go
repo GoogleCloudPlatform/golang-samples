@@ -7,16 +7,17 @@ import (
 
 	"google.golang.org/appengine"
 )
-
+// [START templ_variable]
 var (
 	indexTemplate = template.Must(template.ParseFiles("index.html"))
 )
-
+// [END templ_variable]
+// [START templ_params]
 type templateParams struct {
 	Notice string
 	Name   string
 }
-
+// [END templ_params]
 func main() {
 	http.HandleFunc("/", indexHandler)
 	appengine.Main()
@@ -27,7 +28,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
-
+// [START handling]
 	params := templateParams{}
 
 	if r.Method == "GET" {
@@ -54,5 +55,8 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	// TODO: save the message into a database.
 
 	params.Notice = fmt.Sprintf("Thank you for your submission, %s!", name)
+	// [END handling]
+	// [START execute]
 	indexTemplate.Execute(w, params)
+	// [END execute]
 }
