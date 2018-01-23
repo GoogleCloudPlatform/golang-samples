@@ -3,14 +3,14 @@ api_version: go1
 
 handlers:
 # [START static_handlers]
-# If the path is empty, show static file index.html
+# If the path is empty, show static index.html file
 - url: /
   static_files: index.html
   upload: index.html
   
-# Otherwise, find file in static-files directory
+# Otherwise, find file in static directory
 - url: /static
-  static_dir: static-files
+  static_dir: static
 # [END static_handlers]  
 - url: /.*
   script: _go_app
