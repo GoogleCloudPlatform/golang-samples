@@ -1,5 +1,6 @@
 package main
 
+// [START import]
 import (
 	"fmt"
 	"html/template"
@@ -7,6 +8,7 @@ import (
 
 	"google.golang.org/appengine"
 )
+// [END import]
 // [START templ_variable]
 var (
 	indexTemplate = template.Must(template.ParseFiles("index.html"))
