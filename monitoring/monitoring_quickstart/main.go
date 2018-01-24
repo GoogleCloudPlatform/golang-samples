@@ -71,6 +71,16 @@ func main() {
 	}); err != nil {
 		log.Fatalf("Failed to write time series data: %v", err)
 	}
+	
+	// Closes the client and flushes the data to StackDriver.
+        if err := client.Close(); err != nil {
+                log.Fatalf("Failed to close client: %v", err)
+        }
+
+	// Closes the client and flushes the data to StackDriver.
+	if err := client.Close(); err != nil {
+		log.Fatalf("Failed to close client: %v", err)
+	}
 
 	fmt.Printf("Done writing time series data.\n")
 }
