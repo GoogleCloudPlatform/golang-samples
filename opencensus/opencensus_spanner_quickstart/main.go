@@ -13,8 +13,7 @@ import (
 	"log"
 
 	"cloud.google.com/go/spanner"
-	ss "go.opencensus.io/exporter/stats/stackdriver"
-	ts "go.opencensus.io/exporter/trace/stackdriver"
+	"go.opencensus.io/exporter/stackdriver"
 	"go.opencensus.io/stats"
 	"go.opencensus.io/trace"
 	"golang.org/x/net/context"
@@ -28,16 +27,14 @@ func main() {
 	// Exporters use Application Default Credentials to authenticate.
 	// See https://developers.google.com/identity/protocols/application-default-credentials
 	// for more details.
-	statsExporter, err := ss.NewExporter(ss.Options{ProjectID: "your-project-id"})
+	exporter, err := stackdriver.NewExporter(stackdriver.Options{
+		ProjectID: "your-project-id",
+	})
 	if err != nil {
 		log.Fatal(err)
 	}
-	traceExporter, err := ts.NewExporter(ts.Options{ProjectID: "your-project-id"})
-	if err != nil {
-		log.Fatal(err)
-	}
-	stats.RegisterExporter(statsExporter)
-	trace.RegisterExporter(traceExporter)
+	stats.RegisterExporter(exporter)
+	trace.RegisterExporter(exporter)
 
 	// This database must exist.
 	databaseName := "projects/your-project-id/instances/your-instance-id/databases/your-database-id"
@@ -57,6 +54,5 @@ func main() {
 	}
 
 	// Make sure data is uploaded before program finishes.
-	statsExporter.Flush()
-	traceExporter.Flush()
+	exporter.Flush()
 }
