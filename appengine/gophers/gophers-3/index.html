@@ -11,7 +11,7 @@
 <!-- [START html_template] -->
 {{with .Notice}}<div id="notice">{{.}}</div>{{end}}
 
-<form action="/create" method="post">
+<form action="/" method="post">
   <div>Name: <input name="name" value="{{.Name}}"></div>
   <div>Message: <input name="message"></div>
   <input type="submit">
