@@ -1,14 +1,15 @@
 package main
 
-// [START import]
 import (
+	// [START import]
 	"fmt"
 	"html/template"
+	// [END import]
 	"net/http"
 
 	"google.golang.org/appengine"
 )
-// [END import]
+
 // [START templ_variable]
 var (
 	indexTemplate = template.Must(template.ParseFiles("index.html"))
