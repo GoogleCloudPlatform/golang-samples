@@ -47,7 +47,7 @@ func main() {
 		log.Fatalf("could not access Google Books API: %v", err)
 	}
 
-	// Create pubsub topic if it does not yet exist
+	// Create pubsub topic if it does not yet exist.
 	topic := bookshelf.PubsubClient.Topic(bookshelf.PubsubTopicID)
 	exists, err := topic.Exists(ctx)
 	if err != nil {
@@ -59,18 +59,14 @@ func main() {
 		}
 	}
 
-	// Create topic subscription if it does not yet exist
+	// Create topic subscription if it does not yet exist.
 	subscription = bookshelf.PubsubClient.Subscription(subName)
 	exists, err = subscription.Exists(ctx)
 	if err != nil {
 		log.Fatalf("Error checking for subscription: %v", err)
 	}
 	if !exists {
-		if _, err = bookshelf.PubsubClient.CreateSubscription(
-			ctx,
-			subName,
-			pubsub.SubscriptionConfig{Topic: topic},
-		); err != nil {
+		if _, err = bookshelf.PubsubClient.CreateSubscription(ctx, subName, pubsub.SubscriptionConfig{Topic: topic}); err != nil {
 			log.Fatalf("Failed to create subscription: %v", err)
 		}
 	}
