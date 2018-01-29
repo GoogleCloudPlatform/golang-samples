@@ -33,11 +33,6 @@ Upload File: <input type="file" name="file"><br>
 		serveError(ctx, w, err)
 		return
 	}
-	w.Header().Set("Content-Type", "text/html")
-	err = rootTemplate.Execute(w, uploadURL)
-	if err != nil {
-		log.Errorf(ctx, "%v", err)
-	}
 	// [END uploading_a_blob_1]
 }
 
