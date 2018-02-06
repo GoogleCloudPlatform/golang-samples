@@ -149,7 +149,6 @@ func TestImportExport(t *testing.T) {
 		t.Fatalf("Failed to ingest JSON sample with explicit schema: %v", err)
 	}
 
-
 	bucket := fmt.Sprintf("golang-example-bigquery-importexport-bucket-%d", time.Now().Unix())
 	const object = "values.csv"
 
