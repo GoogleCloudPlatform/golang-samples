@@ -305,3 +305,56 @@ func exportToGCS(client *bigquery.Client, datasetID, tableID, gcsURI string) err
 	// [END bigquery_export_gcs]
 	return nil
 }
+
+func importJsonExplicitSchema(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_load_table_gcs_json]
+	gcsRef := bigquery.NewGCSReference("gs://cloud-samples-data/bigquery/us-states/us-states.json")
+	gcsRef.SourceFormat = bigquery.JSON
+	gcsRef.Schema = bigquery.Schema{
+		{Name: "name", Type: bigquery.StringFieldType},
+		{Name: "post_abbr", Type: bigquery.StringFieldType},
+	}
+	loader := client.Dataset(datasetID).Table(tableID).LoaderFrom(gcsRef)
+	loader.WriteDisposition = bigquery.WriteEmpty
+
+	job, err := loader.Run(ctx)
+	if err != nil {
+		return err
+	}
+	status, err := job.Wait(ctx)
+	if err != nil {
+		return err
+	}
+
+	if status.Err() != nil {
+		return fmt.Errorf("Job completed with error: %v", status.Err())
+	}
+	// [END bigquery_load_table_gcs_json]
+	return nil
+}
+
+func importJsonAutodetectSchema(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_load_table_gcs_json_autodetect]
+	gcsRef := bigquery.NewGCSReference("gs://cloud-samples-data/bigquery/us-states/us-states.json")
+	gcsRef.SourceFormat = bigquery.JSON
+	gcsRef.AutoDetect = true
+	loader := client.Dataset(datasetID).Table(tableID).LoaderFrom(gcsRef)
+	loader.WriteDisposition = bigquery.WriteEmpty
+
+	job, err := loader.Run(ctx)
+	if err != nil {
+		return err
+	}
+	status, err := job.Wait(ctx)
+	if err != nil {
+		return err
+	}
+
+	if status.Err() != nil {
+		return fmt.Errorf("Job completed with error: %v", status.Err())
+	}
+	// [END bigquery_load_table_gcs_json_autodetect]
+	return nil
+}
