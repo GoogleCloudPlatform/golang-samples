@@ -316,8 +316,8 @@ func importJsonExplicitSchema(client *bigquery.Client, datasetID, tableID string
 		{Name: "post_abbr", Type: bigquery.StringFieldType},
 	}
 	loader := client.Dataset(datasetID).Table(tableID).LoaderFrom(gcsRef)
-
 	loader.WriteDisposition = bigquery.WriteEmpty
+
 	job, err := loader.Run(ctx)
 	if err != nil {
 		return err
@@ -328,7 +328,7 @@ func importJsonExplicitSchema(client *bigquery.Client, datasetID, tableID string
 	}
 
 	if status.Err() != nil {
-		fmt.Printf("Job completed with error: %v", status.Err())
+		return fmt.Errorf("Job completed with error: %v", status.Err())
 	}
 	// [END bigquery_load_table_gcs_json]
 	return nil
@@ -341,8 +341,8 @@ func importJsonAutodetectSchema(client *bigquery.Client, datasetID, tableID stri
 	gcsRef.SourceFormat = bigquery.JSON
 	gcsRef.AutoDetect = true
 	loader := client.Dataset(datasetID).Table(tableID).LoaderFrom(gcsRef)
-
 	loader.WriteDisposition = bigquery.WriteEmpty
+
 	job, err := loader.Run(ctx)
 	if err != nil {
 		return err
@@ -353,7 +353,7 @@ func importJsonAutodetectSchema(client *bigquery.Client, datasetID, tableID stri
 	}
 
 	if status.Err() != nil {
-		fmt.Printf("Job completed with error: %v", status.Err())
+		return fmt.Errorf("Job completed with error: %v", status.Err())
 	}
 	// [END bigquery_load_table_gcs_json_autodetect]
 	return nil
