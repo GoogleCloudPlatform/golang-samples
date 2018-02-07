@@ -175,6 +175,7 @@ func detectText(w io.Writer, file string) error {
 }
 
 // [START vision_detect_document]
+
 // detectDocumentText gets the full document text from the Vision API for an image at the given file path.
 func detectDocumentText(w io.Writer, file string) error {
 	ctx := context.Background()
@@ -304,6 +305,7 @@ func detectCropHints(w io.Writer, file string) error {
 }
 
 // [START vision_detect_safe_search]
+
 // detectSafeSearch gets image properties from the Vision API for an image at the given file path.
 func detectSafeSearch(w io.Writer, file string) error {
 	ctx := context.Background()
@@ -341,6 +343,7 @@ func detectSafeSearch(w io.Writer, file string) error {
 // [END vision_detect_safe_search]
 
 // [START vision_detect_web]
+
 // detectWeb gets image properties from the Vision API for an image at the given file path.
 func detectWeb(w io.Writer, file string) error {
 	ctx := context.Background()
@@ -549,6 +552,7 @@ func detectTextURI(w io.Writer, file string) error {
 }
 
 // [START vision_detect_document_uri]
+
 // detectDocumentText gets the full document text from the Vision API for an image at the given file path.
 func detectDocumentTextURI(w io.Writer, file string) error {
 	ctx := context.Background()
@@ -651,6 +655,7 @@ func detectCropHintsURI(w io.Writer, file string) error {
 }
 
 // [START vision_detect_safe_search_uri]
+
 // detectSafeSearch gets image properties from the Vision API for an image at the given file path.
 func detectSafeSearchURI(w io.Writer, file string) error {
 	ctx := context.Background()
@@ -679,6 +684,7 @@ func detectSafeSearchURI(w io.Writer, file string) error {
 // [END vision_detect_safe_search_uri]
 
 // [START vision_detect_web_uri]
+
 // detectWeb gets image properties from the Vision API for an image at the given file path.
 func detectWebURI(w io.Writer, file string) error {
 	ctx := context.Background()
