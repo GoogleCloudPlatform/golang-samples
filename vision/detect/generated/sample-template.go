@@ -22,6 +22,7 @@ import (
 	vision "cloud.google.com/go/vision/apiv1"
 	"golang.org/x/net/context"
 )
+
 // [END imports]
 
 func init() {
@@ -152,6 +153,7 @@ func detectDocumentText(w io.Writer, file string) error {
 
 	return nil
 }
+
 // [END vision_detect_document{REGION_TAG_PARAMETER}]
 
 // detectProperties gets image properties from the Vision API for an image at the given file path.
@@ -210,6 +212,7 @@ func detectSafeSearch(w io.Writer, file string) error {
 
 	return nil
 }
+
 // [END vision_detect_safe_search{REGION_TAG_PARAMETER}]
 
 // [START vision_detect_web{REGION_TAG_PARAMETER}]
@@ -249,6 +252,7 @@ func detectWeb(w io.Writer, file string) error {
 
 	return nil
 }
+
 // [END vision_detect_web{REGION_TAG_PARAMETER}]
 
 // detectLogos gets logos from the Vision API for an image at the given file path.
