@@ -199,6 +199,7 @@ func detectSafeSearch(w io.Writer, file string) error {
 	fmt.Fprintln(w, "Safe Search properties:")
 	fmt.Fprintln(w, "Adult:", props.Adult)
 	fmt.Fprintln(w, "Medical:", props.Medical)
+	fmt.Fprintln(w, "Racy:", props.Racy)
 	fmt.Fprintln(w, "Spoofed:", props.Spoof)
 	fmt.Fprintln(w, "Violence:", props.Violence)
 
