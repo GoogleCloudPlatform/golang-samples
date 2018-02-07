@@ -47,10 +47,29 @@ func main() {
 		log.Fatalf("could not access Google Books API: %v", err)
 	}
 
-	// ignore returned errors, which will be "already exists". If they're fatal
-	// errors, then following calls (e.g. in the subscribe function) will also fail.
-	topic, _ := bookshelf.PubsubClient.CreateTopic(ctx, bookshelf.PubsubTopicID)
-	subscription, _ = bookshelf.PubsubClient.CreateSubscription(ctx, subName, pubsub.SubscriptionConfig{Topic: topic})
+	// Create pubsub topic if it does not yet exist.
+	topic := bookshelf.PubsubClient.Topic(bookshelf.PubsubTopicID)
+	exists, err := topic.Exists(ctx)
+	if err != nil {
+		log.Fatalf("Error checking for topic: %v", err)
+	}
+	if !exists {
+		if _, err := bookshelf.PubsubClient.CreateTopic(ctx, bookshelf.PubsubTopicID); err != nil {
+			log.Fatalf("Failed to create topic: %v", err)
+		}
+	}
+
+	// Create topic subscription if it does not yet exist.
+	subscription = bookshelf.PubsubClient.Subscription(subName)
+	exists, err = subscription.Exists(ctx)
+	if err != nil {
+		log.Fatalf("Error checking for subscription: %v", err)
+	}
+	if !exists {
+		if _, err = bookshelf.PubsubClient.CreateSubscription(ctx, subName, pubsub.SubscriptionConfig{Topic: topic}); err != nil {
+			log.Fatalf("Failed to create subscription: %v", err)
+		}
+	}
 
 	// Start worker goroutine.
 	go subscribe()
