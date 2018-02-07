@@ -9,6 +9,7 @@
 
 package main
 
+// [START imports]
 import (
 	"fmt"
 	"io"
@@ -18,6 +19,8 @@ import (
 	vision "cloud.google.com/go/vision/apiv1"
 	"golang.org/x/net/context"
 )
+
+// [END imports]
 
 func init() {
 	// Refer to these functions so that goimports is happy before boilerplate is inserted.
@@ -171,6 +174,7 @@ func detectText(w io.Writer, file string) error {
 	return nil
 }
 
+// [START vision_detect_document]
 // detectDocumentText gets the full document text from the Vision API for an image at the given file path.
 func detectDocumentText(w io.Writer, file string) error {
 	ctx := context.Background()
@@ -226,6 +230,8 @@ func detectDocumentText(w io.Writer, file string) error {
 
 	return nil
 }
+
+// [END vision_detect_document]
 
 // detectProperties gets image properties from the Vision API for an image at the given file path.
 func detectProperties(w io.Writer, file string) error {
@@ -297,6 +303,7 @@ func detectCropHints(w io.Writer, file string) error {
 	return nil
 }
 
+// [START vision_detect_safe_search]
 // detectSafeSearch gets image properties from the Vision API for an image at the given file path.
 func detectSafeSearch(w io.Writer, file string) error {
 	ctx := context.Background()
@@ -331,6 +338,9 @@ func detectSafeSearch(w io.Writer, file string) error {
 	return nil
 }
 
+// [END vision_detect_safe_search]
+
+// [START vision_detect_web]
 // detectWeb gets image properties from the Vision API for an image at the given file path.
 func detectWeb(w io.Writer, file string) error {
 	ctx := context.Background()
@@ -383,6 +393,8 @@ func detectWeb(w io.Writer, file string) error {
 
 	return nil
 }
+
+// [END vision_detect_web]
 
 // detectLogos gets logos from the Vision API for an image at the given file path.
 func detectLogos(w io.Writer, file string) error {
@@ -536,6 +548,7 @@ func detectTextURI(w io.Writer, file string) error {
 	return nil
 }
 
+// [START vision_detect_document_uri]
 // detectDocumentText gets the full document text from the Vision API for an image at the given file path.
 func detectDocumentTextURI(w io.Writer, file string) error {
 	ctx := context.Background()
@@ -582,6 +595,8 @@ func detectDocumentTextURI(w io.Writer, file string) error {
 
 	return nil
 }
+
+// [END vision_detect_document_uri]
 
 // detectProperties gets image properties from the Vision API for an image at the given file path.
 func detectPropertiesURI(w io.Writer, file string) error {
@@ -635,6 +650,7 @@ func detectCropHintsURI(w io.Writer, file string) error {
 	return nil
 }
 
+// [START vision_detect_safe_search_uri]
 // detectSafeSearch gets image properties from the Vision API for an image at the given file path.
 func detectSafeSearchURI(w io.Writer, file string) error {
 	ctx := context.Background()
@@ -660,6 +676,9 @@ func detectSafeSearchURI(w io.Writer, file string) error {
 	return nil
 }
 
+// [END vision_detect_safe_search_uri]
+
+// [START vision_detect_web_uri]
 // detectWeb gets image properties from the Vision API for an image at the given file path.
 func detectWebURI(w io.Writer, file string) error {
 	ctx := context.Background()
@@ -703,6 +722,8 @@ func detectWebURI(w io.Writer, file string) error {
 
 	return nil
 }
+
+// [END vision_detect_web_uri]
 
 // detectLogos gets logos from the Vision API for an image at the given file path.
 func detectLogosURI(w io.Writer, file string) error {

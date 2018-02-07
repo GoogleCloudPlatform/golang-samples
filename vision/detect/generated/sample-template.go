@@ -12,6 +12,7 @@
 // `	var client *vision.Client // Boilerplate is inserted by gen.go`
 package main
 
+// [START imports]
 import (
 	"fmt"
 	"io"
@@ -21,6 +22,7 @@ import (
 	vision "cloud.google.com/go/vision/apiv1"
 	"golang.org/x/net/context"
 )
+// [END imports]
 
 func init() {
 	// Refer to these functions so that goimports is happy before boilerplate is inserted.
@@ -110,6 +112,7 @@ func detectText(w io.Writer, file string) error {
 	return nil
 }
 
+// [START vision_detect_document{REGION_TAG_PARAMETER}]
 // detectDocumentText gets the full document text from the Vision API for an image at the given file path.
 func detectDocumentText(w io.Writer, file string) error {
 	var client *vision.ImageAnnotatorClient // Boilerplate is inserted by gen.go
@@ -149,6 +152,7 @@ func detectDocumentText(w io.Writer, file string) error {
 
 	return nil
 }
+// [END vision_detect_document{REGION_TAG_PARAMETER}]
 
 // detectProperties gets image properties from the Vision API for an image at the given file path.
 func detectProperties(w io.Writer, file string) error {
@@ -188,6 +192,7 @@ func detectCropHints(w io.Writer, file string) error {
 	return nil
 }
 
+// [START vision_detect_safe_search{REGION_TAG_PARAMETER}]
 // detectSafeSearch gets image properties from the Vision API for an image at the given file path.
 func detectSafeSearch(w io.Writer, file string) error {
 	var client *vision.ImageAnnotatorClient // Boilerplate is inserted by gen.go
@@ -205,7 +210,9 @@ func detectSafeSearch(w io.Writer, file string) error {
 
 	return nil
 }
+// [END vision_detect_safe_search{REGION_TAG_PARAMETER}]
 
+// [START vision_detect_web{REGION_TAG_PARAMETER}]
 // detectWeb gets image properties from the Vision API for an image at the given file path.
 func detectWeb(w io.Writer, file string) error {
 	var client *vision.ImageAnnotatorClient // Boilerplate is inserted by gen.go
@@ -242,6 +249,7 @@ func detectWeb(w io.Writer, file string) error {
 
 	return nil
 }
+// [END vision_detect_web{REGION_TAG_PARAMETER}]
 
 // detectLogos gets logos from the Vision API for an image at the given file path.
 func detectLogos(w io.Writer, file string) error {
