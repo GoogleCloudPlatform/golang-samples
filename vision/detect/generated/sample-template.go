@@ -16,6 +16,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	vision "cloud.google.com/go/vision/apiv1"
 	"golang.org/x/net/context"
@@ -120,8 +121,30 @@ func detectDocumentText(w io.Writer, file string) error {
 	if annotation == nil {
 		fmt.Fprintln(w, "No text found.")
 	} else {
-		fmt.Fprintln(w, "Text:")
+		fmt.Fprintln(w, "Document Text:")
 		fmt.Fprintf(w, "%q\n", annotation.Text)
+
+		fmt.Fprintln(w, "Pages:\n")
+		for _, page := range(annotation.Pages) {
+			fmt.Fprintf(w, "\tConfidence: %f, Width: %d, Height: %d\n", page.Confidence, page.Width, page.Height)
+			fmt.Fprintln(w, "\tBlocks:")
+			for _, block := range(page.Blocks) {
+				fmt.Fprintf(w, "\t\tConfidence: %f, Block type: %v\n", block.Confidence, block.BlockType)
+				fmt.Fprintln(w, "\t\tParagraphs:")
+				for _, paragraph := range(block.Paragraphs) {
+					fmt.Fprintf(w, "\t\t\tConfidence: %f", paragraph.Confidence)
+					fmt.Fprintln(w, "\t\t\tWords:")
+					for _, word := range(paragraph.Words) {
+						symbols := make([]string, len(word.Symbols))
+						for i, s := range(word.Symbols) {
+							symbols[i] = s.Text
+						}
+						wordText := strings.Join(symbols, "")
+						fmt.Fprintf(w, "\t\t\t\tConfidence: %f, Symbols: %s\n", word.Confidence, wordText)
+					}
+				}
+			}
+		}
 	}
 
 	return nil
