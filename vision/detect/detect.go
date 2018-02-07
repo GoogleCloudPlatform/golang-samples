@@ -201,7 +201,7 @@ func detectDocumentText(w io.Writer, file string) error {
 		fmt.Fprintln(w, "Document Text:")
 		fmt.Fprintf(w, "%q\n", annotation.Text)
 
-		fmt.Fprintln(w, "Pages:\n")
+		fmt.Fprintln(w, "Pages:")
 		for _, page := range(annotation.Pages) {
 			fmt.Fprintf(w, "\tConfidence: %f, Width: %d, Height: %d\n", page.Confidence, page.Width, page.Height)
 			fmt.Fprintln(w, "\tBlocks:")
@@ -557,7 +557,7 @@ func detectDocumentTextURI(w io.Writer, file string) error {
 		fmt.Fprintln(w, "Document Text:")
 		fmt.Fprintf(w, "%q\n", annotation.Text)
 
-		fmt.Fprintln(w, "Pages:\n")
+		fmt.Fprintln(w, "Pages:")
 		for _, page := range(annotation.Pages) {
 			fmt.Fprintf(w, "\tConfidence: %f, Width: %d, Height: %d\n", page.Confidence, page.Width, page.Height)
 			fmt.Fprintln(w, "\tBlocks:")
