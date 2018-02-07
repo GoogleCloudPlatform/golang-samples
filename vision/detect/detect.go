@@ -350,6 +350,12 @@ func detectWeb(w io.Writer, file string) error {
 			fmt.Fprintf(w, "\t\t%-12s %s\n", entity.EntityId, entity.Description)
 		}
 	}
+	if len(web.BestGuessLabels) != 0 {
+		fmt.Fprintln(w, "\tBest guess labels:")
+		for _, label := range web.BestGuessLabels {
+			fmt.Fprintf(w, "\t\t%s\n", label.Label)
+		}
+	}
 
 	return nil
 }
@@ -639,6 +645,12 @@ func detectWebURI(w io.Writer, file string) error {
 		fmt.Fprintln(w, "\tEntities:")
 		for _, entity := range web.WebEntities {
 			fmt.Fprintf(w, "\t\t%-12s %s\n", entity.EntityId, entity.Description)
+		}
+	}
+	if len(web.BestGuessLabels) != 0 {
+		fmt.Fprintln(w, "\tBest guess labels:")
+		for _, label := range web.BestGuessLabels {
+			fmt.Fprintf(w, "\t\t%s\n", label.Label)
 		}
 	}
 
