@@ -31,6 +31,7 @@ func main() {
 
 	normal := string(tmpl)
 	normal = strings.Replace(normal, boilerplateSentinel, boilerplate, -1)
+	normal = strings.Replace(normal, regionTagParameter, standardRegionTagParameterValue, -1)
 	out.WriteString(normal)
 
 	// Don't do imports twice.
@@ -39,6 +40,7 @@ func main() {
 
 	gcs := string(tmpl)
 	gcs = strings.Replace(gcs, boilerplateSentinel, gcsBoilerplate, -1)
+	gcs = strings.Replace(gcs, regionTagParameter, gcsRegionTagParameterValue, -1)
 	// Append suffix to function name.
 	gcs = strings.Replace(gcs, "(w io.Writer", "URI(w io.Writer", -1)
 	out.WriteString(gcs)
@@ -49,6 +51,10 @@ func main() {
 }
 
 const boilerplateSentinel = "\tvar client *vision.ImageAnnotatorClient // Boilerplate is inserted by gen.go\n"
+
+const regionTagParameter = "{REGION_TAG_PARAMETER}"
+const standardRegionTagParameterValue = ""
+const gcsRegionTagParameterValue = "_uri"
 
 const boilerplate = `	ctx := context.Background()
 
