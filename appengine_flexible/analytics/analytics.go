@@ -65,7 +65,7 @@ func trackEvent(r *http.Request, category, action, label string, value *uint) er
 		//
 		// Depending on your application, this might want to be associated with the
 		// user in a cookie.
-		"cid": {uuid.Must(uuid.NewV4()).String()},
+		"cid": {uuid.Must(uuid.NewV4(), nil).String()},
 		"t":   {"event"},
 		"ec":  {category},
 		"ea":  {action},
