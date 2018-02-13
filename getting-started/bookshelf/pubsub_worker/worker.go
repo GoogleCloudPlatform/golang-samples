@@ -47,6 +47,7 @@ func main() {
 		log.Fatalf("could not access Google Books API: %v", err)
 	}
 
+	// [START pubsub_create_topic]
 	// Create pubsub topic if it does not yet exist.
 	topic := bookshelf.PubsubClient.Topic(bookshelf.PubsubTopicID)
 	exists, err := topic.Exists(ctx)
@@ -70,6 +71,7 @@ func main() {
 			log.Fatalf("Failed to create subscription: %v", err)
 		}
 	}
+	// [END pubsub_create_topic]
 
 	// Start worker goroutine.
 	go subscribe()
