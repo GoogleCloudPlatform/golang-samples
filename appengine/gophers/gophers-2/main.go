@@ -1,7 +1,6 @@
 package main
 
 import (
-	"html/template"
 	"net/http"
 
 	"google.golang.org/appengine"

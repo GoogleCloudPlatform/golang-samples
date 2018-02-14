@@ -16,18 +16,20 @@ import (
 var (
 	indexTemplate = template.Must(template.ParseFiles("index.html"))
 )
+
 // [START post_struct]
 type Post struct {
 	Author  string
 	Message string
 	Posted  time.Time
 }
+
 // [END post_struct]
 
 type templateParams struct {
 	Notice string
 
-	Name    string
+	Name string
 	// [START added_templateParams_fields]
 	Message string
 
@@ -50,7 +52,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
 	// [END new_context]
 	params := templateParams{}
-	
+
 	// [START new_query]
 	q := datastore.NewQuery("Post").Order("-Posted").Limit(20)
 	// [END new_query]
@@ -102,7 +104,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// [END add_post]
-	
+
 	// Prepend the post that was just added.
 	// [START prepend_post]
 	params.Posts = append([]Post{post}, params.Posts...)

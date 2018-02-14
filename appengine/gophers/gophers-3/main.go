@@ -14,12 +14,14 @@ import (
 var (
 	indexTemplate = template.Must(template.ParseFiles("index.html"))
 )
+
 // [END templ_variable]
 // [START templ_params]
 type templateParams struct {
 	Notice string
 	Name   string
 }
+
 // [END templ_params]
 func main() {
 	http.HandleFunc("/", indexHandler)
@@ -31,7 +33,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
-// [START handling]
+	// [START handling]
 	params := templateParams{}
 
 	if r.Method == "GET" {

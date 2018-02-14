@@ -7,12 +7,14 @@ import (
 
 	"google.golang.org/appengine" // Required external App Engine library
 )
+
 // [END import_statements]
 // [START main_func]
 func main() {
 	http.HandleFunc("/", indexHandler)
 	appengine.Main() // Starts the server to receive requests
 }
+
 // [END main_func]
 // [START indexHandler]
 func indexHandler(w http.ResponseWriter, r *http.Request) {
@@ -26,4 +28,5 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprintln(w, "Hello, Gopher Network!")
 }
+
 // [END indexHandler]
