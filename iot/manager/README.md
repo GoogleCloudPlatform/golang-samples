@@ -26,5 +26,13 @@ go run manager.go
 ```
 
 Before you can connect devices, you will need to generate public / private key
-credentials to register and connect. The `generate_keys.sh` script is included
-to demonstrate how to do this for a single device.
+credentials to register and connect.
+
+The following commands generate keys suitable for use on a single device.
+
+```bash
+openssl req -x509 -newkey rsa:2048 -days 3650 -keyout rsa_private.pem -nodes -out \
+    rsa_cert.pem -subj "/CN=unused"
+openssl ecparam -genkey -name prime256v1 -noout -out ec_private.pem
+openssl ec -in ec_private.pem -pubout -out ec_public.pem
+```
