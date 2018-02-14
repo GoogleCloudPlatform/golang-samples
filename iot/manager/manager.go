@@ -633,25 +633,25 @@ func (c command) usage() string {
 
 func main() {
 	registryManagementCommands := []command{
-		command{"createRegistry", createRegistry, []string{"cloud-region", "registry-id", "pubsub-topic"}},
-		command{"deleteRegistry", deleteRegistry, []string{"cloud-region", "registry-id"}},
-		command{"getRegistry", getRegistry, []string{"cloud-region", "registry-id"}},
-		command{"getRegistryIam", getRegistryIam, []string{"cloud-region", "registry-id"}},
-		command{"setRegistryIam", setRegistryIam, []string{"cloud-region", "registry-id", "member", "role"}},
+		{"createRegistry", createRegistry, []string{"cloud-region", "registry-id", "pubsub-topic"}},
+		{"deleteRegistry", deleteRegistry, []string{"cloud-region", "registry-id"}},
+		{"getRegistry", getRegistry, []string{"cloud-region", "registry-id"}},
+		{"getRegistryIam", getRegistryIam, []string{"cloud-region", "registry-id"}},
+		{"setRegistryIam", setRegistryIam, []string{"cloud-region", "registry-id", "member", "role"}},
 	}
 
 	deviceManagementCommands := []command{
-		command{"createEs", createEs, []string{"cloud-region", "registry-id", "device-id", "keyfile-path"}},
-		command{"createRsa", createRsa, []string{"cloud-region", "registry-id", "device-id", "keyfile-path"}},
-		command{"createUnauth", createUnauth, []string{"cloud-region", "registry-id", "device-id"}},
-		command{"deleteDevice", deleteDevice, []string{"cloud-region", "registry-id", "device-id"}},
-		command{"getDevice", getDevice, []string{"cloud-region", "registry-id", "device-id"}},
-		command{"getDeviceConfigs", getDeviceConfigs, []string{"cloud-region", "registry-id", "device-id"}},
-		command{"getDeviceStates", getDeviceStates, []string{"cloud-region", "registry-id", "device-id"}},
-		command{"listDevices", listDevices, []string{"cloud-region", "registry-id"}},
-		command{"patchDeviceEs", patchDeviceEs, []string{"cloud-region", "registry-id", "device-id", "keyfile-path"}},
-		command{"patchDeviceRsa", patchDeviceRsa, []string{"cloud-region", "registry-id", "device-id", "keyfile-path"}},
-		command{"setConfig", setConfig, []string{"cloud-region", "registry-id", "device-id", "config-data"}},
+		{"createEs", createEs, []string{"cloud-region", "registry-id", "device-id", "keyfile-path"}},
+		{"createRsa", createRsa, []string{"cloud-region", "registry-id", "device-id", "keyfile-path"}},
+		{"createUnauth", createUnauth, []string{"cloud-region", "registry-id", "device-id"}},
+		{"deleteDevice", deleteDevice, []string{"cloud-region", "registry-id", "device-id"}},
+		{"getDevice", getDevice, []string{"cloud-region", "registry-id", "device-id"}},
+		{"getDeviceConfigs", getDeviceConfigs, []string{"cloud-region", "registry-id", "device-id"}},
+		{"getDeviceStates", getDeviceStates, []string{"cloud-region", "registry-id", "device-id"}},
+		{"listDevices", listDevices, []string{"cloud-region", "registry-id"}},
+		{"patchDeviceEs", patchDeviceEs, []string{"cloud-region", "registry-id", "device-id", "keyfile-path"}},
+		{"patchDeviceRsa", patchDeviceRsa, []string{"cloud-region", "registry-id", "device-id", "keyfile-path"}},
+		{"setConfig", setConfig, []string{"cloud-region", "registry-id", "device-id", "config-data"}},
 	}
 
 	var commands []command
