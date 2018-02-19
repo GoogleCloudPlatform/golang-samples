@@ -432,7 +432,7 @@ func getDeviceConfigs(projectID string, region string, registry string, device s
 
 // getDeviceStates retrieves and lists device states
 func getDeviceStates(projectID string, region string, registry string, device string) ([]*cloudiot.DeviceState, error) {
-	// [START iot_get_device_configs]
+	// [START iot_get_device_states]
 	// Authorize the client using Application Default Credentials.
 	// See https://g.co/dv/identity/protocols/application-default-credentials
 	ctx := context.Background()
