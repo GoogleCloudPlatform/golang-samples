@@ -14,7 +14,7 @@ import (
 
 	"cloud.google.com/go/spanner"
 	"go.opencensus.io/exporter/stackdriver"
-	"go.opencensus.io/stats"
+	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
 	"golang.org/x/net/context"
 )
@@ -33,7 +33,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	stats.RegisterExporter(exporter)
+	view.RegisterExporter(exporter)
 	trace.RegisterExporter(exporter)
 
 	// This database must exist.
