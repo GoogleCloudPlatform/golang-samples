@@ -456,7 +456,7 @@ func getDeviceStates(projectID string, region string, registry string, device st
 	for _, state := range response.DeviceStates {
 		fmt.Println(state.UpdateTime, " : ", state.BinaryData)
 	}
-	// [END iot_get_device_configs]
+	// [END iot_get_device_states]
 
 	return response.DeviceStates, err
 }
