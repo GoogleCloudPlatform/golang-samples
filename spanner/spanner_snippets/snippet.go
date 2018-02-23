@@ -402,7 +402,7 @@ func readOnlyTransaction(ctx context.Context, w io.Writer, client *spanner.Clien
 }
 
 func readStaleData(ctx context.Context, w io.Writer, client *spanner.Client) error {
-	ro := client.ReadOnlyTransaction().WithTimestampBound(spanner.ExactStaleness(10 * time.Second))
+	ro := client.ReadOnlyTransaction().WithTimestampBound(spanner.ExactStaleness(15 * time.Second))
 	defer ro.Close()
 
 	iter := ro.Read(ctx, "Albums", spanner.AllKeys(), []string{"SingerId", "AlbumId", "AlbumTitle"})

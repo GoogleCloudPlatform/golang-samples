@@ -52,3 +52,14 @@ func analyzeSyntaxFromGCS(ctx context.Context, gcsURI string) (*languagepb.Annot
 		EncodingType: languagepb.EncodingType_UTF8,
 	})
 }
+
+func classifyTextFromGCS(ctx context.Context, gcsURI string) (*languagepb.ClassifyTextResponse, error) {
+	return client.ClassifyText(ctx, &languagepb.ClassifyTextRequest{
+		Document: &languagepb.Document{
+			Source: &languagepb.Document_GcsContentUri{
+				GcsContentUri: gcsURI,
+			},
+			Type: languagepb.Document_PLAIN_TEXT,
+		},
+	})
+}

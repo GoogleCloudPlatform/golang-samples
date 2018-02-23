@@ -33,12 +33,13 @@ Upload File: <input type="file" name="file"><br>
 		serveError(ctx, w, err)
 		return
 	}
+	// [END uploading_a_blob_1]
+
 	w.Header().Set("Content-Type", "text/html")
 	err = rootTemplate.Execute(w, uploadURL)
 	if err != nil {
 		log.Errorf(ctx, "%v", err)
 	}
-	// [END uploading_a_blob_1]
 }
 
 func sampleHandler2(w http.ResponseWriter, r *http.Request) {

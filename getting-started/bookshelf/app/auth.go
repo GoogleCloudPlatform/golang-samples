@@ -10,13 +10,13 @@ import (
 	"net/http"
 	"net/url"
 
+	plus "google.golang.org/api/plus/v1"
+
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
 
-	"github.com/satori/go.uuid"
-	"google.golang.org/api/plus/v1"
-
 	"github.com/GoogleCloudPlatform/golang-samples/getting-started/bookshelf"
+	uuid "github.com/satori/go.uuid"
 )
 
 const (
@@ -40,7 +40,7 @@ func init() {
 
 // loginHandler initiates an OAuth flow to authenticate the user.
 func loginHandler(w http.ResponseWriter, r *http.Request) *appError {
-	sessionID := uuid.NewV4().String()
+	sessionID := uuid.Must(uuid.NewV4()).String()
 
 	oauthFlowSession, err := bookshelf.SessionStore.New(r, sessionID)
 	if err != nil {
