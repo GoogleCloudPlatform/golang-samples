@@ -139,6 +139,16 @@ func TestImportExport(t *testing.T) {
 		t.Fatalf("failed to import from file: %v", err)
 	}
 
+	jsonTableExplicit := fmt.Sprintf("golang_example_dataset_importjson_explicit_%d", time.Now().Unix())
+	if err := importJsonExplicitSchema(client, datasetID, jsonTableExplicit); err != nil {
+		t.Fatalf("Failed to ingest JSON sample with explicit schema: %v", err)
+	}
+
+	jsonTableAutodetect := fmt.Sprintf("golang_example_dataset_importjson_autodetect_%d", time.Now().Unix())
+	if err := importJsonAutodetectSchema(client, datasetID, jsonTableAutodetect); err != nil {
+		t.Fatalf("Failed to ingest JSON sample with explicit schema: %v", err)
+	}
+
 	bucket := fmt.Sprintf("golang-example-bigquery-importexport-bucket-%d", time.Now().Unix())
 	const object = "values.csv"
 
