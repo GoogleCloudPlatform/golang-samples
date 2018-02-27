@@ -6,6 +6,7 @@ package main
 
 import (
 	dialogflow "cloud.google.com/go/dialogflow/apiv2"
+	"errors"
 	"flag"
 	"fmt"
 	"golang.org/x/net/context"
@@ -23,10 +24,10 @@ func main() {
 		fmt.Fprintf(os.Stderr, "<OPERATION> must be one of list, create, delete\n")
 	}
 
-	var project, session, context string
-	flag.StringVar(&project, "project-id", "", "Google Cloud Platform project ID")
-	flag.StringVar(&session, "session-id", "", "Dialogflow session ID")
-	flag.StringVar(&context, "context-id", "", "Dialogflow context ID")
+	var projectId, sessionId, contextId string
+	flag.StringVar(&projectId, "project-id", "", "Google Cloud Platform project ID")
+	flag.StringVar(&sessionId, "session-id", "", "Dialogflow session ID")
+	flag.StringVar(&contextId, "context-id", "", "Dialogflow context ID")
 
 	flag.Parse()
 
@@ -37,29 +38,49 @@ func main() {
 
 	operation := flag.Arg(0)
 
+	var err error
+
 	switch operation {
 	case "list":
-		listContexts(project, session)
+		fmt.Printf("Contexts under projects/%s/agent/sessions/%s:\n", projectId, sessionId)
+		var contexts []*dialogflowpb.Context
+		contexts, err = listContexts(projectId, sessionId)
+		if err != nil {
+			log.Fatal(err)
+		}
+		for _, context := range contexts {
+			fmt.Printf("Path: %s, Lifespan: %d\n", context.Name, context.LifespanCount)
+		}
 	case "create":
-		createContext(project, session, context)
+		fmt.Printf("Creating context projects/%s/agent/sessions/%s/contexts/%s...\n", projectId, sessionId, contextId)
+		err = createContext(projectId, sessionId, contextId)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("Done!\n")
 	case "delete":
-		deleteContext(project, session, context)
+		fmt.Printf("Deleting context projects/%s/agent/sessions/%s/contexts/%s...\n", projectId, sessionId, contextId)
+		err = deleteContext(projectId, sessionId, contextId)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("Done!\n")
 	default:
 		flag.Usage()
 		os.Exit(1)
 	}
 }
 
-func listContexts(projectId string, sessionId string) {
+func listContexts(projectId string, sessionId string) ([]*dialogflowpb.Context, error) {
 	ctx := context.Background()
 
-	contextsClient, err := dialogflow.NewContextsClient(ctx)
-	if (err != nil) {
-		log.Fatal(err)
+	contextsClient, clientErr := dialogflow.NewContextsClient(ctx)
+	if (clientErr != nil) {
+		return nil, clientErr
 	}
 
 	if (projectId == "" || sessionId == "") {
-		log.Fatalf("Received empty project (%s) or session (%s)", projectId, sessionId)
+		return nil, errors.New(fmt.Sprintf("Received empty project (%s) or session (%s)", projectId, sessionId))
 	}
 
 	parent := fmt.Sprintf("projects/%s/agent/sessions/%s", projectId, sessionId)
@@ -67,25 +88,27 @@ func listContexts(projectId string, sessionId string) {
 	request := dialogflowpb.ListContextsRequest{Parent: parent}
 
 	contextIterator := contextsClient.ListContexts(ctx, &request)
+	var contexts []*dialogflowpb.Context
 
-	fmt.Printf("Contexts under %s:\n", parent)
 
 	for context, status := contextIterator.Next(); status != iterator.Done; {
-		fmt.Printf("%v\n", context)
+		contexts = append(contexts, context)
 		context, status = contextIterator.Next()
 	}
+
+	return contexts, nil
 }
 
-func createContext(projectId string, sessionId string, contextId string) {
+func createContext(projectId string, sessionId string, contextId string) error {
 	ctx := context.Background()
 
 	contextsClient, clientErr := dialogflow.NewContextsClient(ctx)
 	if (clientErr != nil) {
-		log.Fatal(clientErr)
+		return clientErr
 	}
 
 	if (projectId == "" || sessionId == "" || contextId == "") {
-		log.Fatalf("Received empty project (%s) or session (%s) or context (%s)", projectId, sessionId, contextId)
+		return errors.New(fmt.Sprintf("Received empty project (%s) or session (%s) or context (%s)", projectId, sessionId, contextId))
 	}
 
 	parent := fmt.Sprintf("projects/%s/agent/sessions/%s", projectId, sessionId)
@@ -94,24 +117,24 @@ func createContext(projectId string, sessionId string, contextId string) {
 
 	request := dialogflowpb.CreateContextRequest{Parent: parent, Context: &target}
 
-	fmt.Printf("Creating context %s...\n", targetPath)
-	response, requestErr := contextsClient.CreateContext(ctx, &request)
+	_, requestErr := contextsClient.CreateContext(ctx, &request)
 	if (requestErr != nil) {
-		log.Fatal(requestErr)
+		return requestErr
 	}
-	fmt.Printf("Context created: %v\n", response)
+
+	return nil
 }
 
-func deleteContext(projectId string, sessionId string, contextId string) {
+func deleteContext(projectId string, sessionId string, contextId string) error {
 	ctx := context.Background()
 
 	contextsClient, clientErr := dialogflow.NewContextsClient(ctx)
 	if (clientErr != nil) {
-		log.Fatal(clientErr)
+		return clientErr
 	}
 
 	if (projectId == "" || sessionId == "" || contextId == "") {
-		log.Fatalf("Received empty project (%s) or session (%s) or context (%s)", projectId, sessionId, contextId)
+		return errors.New(fmt.Sprintf("Received empty project (%s) or session (%s) or context (%s)", projectId, sessionId, contextId))
 	}
 
 	parent := fmt.Sprintf("projects/%s/agent/sessions/%s", projectId, sessionId)
@@ -119,11 +142,10 @@ func deleteContext(projectId string, sessionId string, contextId string) {
 
 	request := dialogflowpb.DeleteContextRequest{Name: targetPath}
 
-	fmt.Printf("Deleting context %s...\n", targetPath)
-
 	requestErr := contextsClient.DeleteContext(ctx, &request)
 	if (requestErr != nil) {
-		log.Fatal(requestErr)
+		return requestErr
 	}
-	fmt.Printf("Context deleted: %s\n", targetPath)
+
+	return nil
 }
