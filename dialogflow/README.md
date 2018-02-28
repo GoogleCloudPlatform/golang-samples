@@ -17,7 +17,7 @@ Dialogflow samples using the Go client.
    instead.)
 
 2. This sample comes with a [sample
-   agent](https://github.com/dialogflow/dialogflow-python-client-v2/blob/master/samples/resources/RoomReservation.zip)
+   agent](./resources/RoomReservation.zip)
    which you can use to run the samples. Follow [these
    instructions](https://dialogflow.com/docs/best-practices/import-export-for-versions)
    to import the agent from the [Dialogflow
