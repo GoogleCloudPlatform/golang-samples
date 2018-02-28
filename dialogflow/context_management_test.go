@@ -43,8 +43,8 @@ func TestContextManagement(t *testing.T) {
 		t.Error("Unsuccessful intermediate listContexts")
 	}
 
-	if len(intermediateContexts) != len(initialContexts) + len(contextIDs) {
-		t.Errorf("len(intermediateContexts) = %d; want %d", len(intermediateContexts), len(initialContexts) + len(contextIDs) )
+	if len(intermediateContexts) != len(initialContexts)+len(contextIDs) {
+		t.Errorf("len(intermediateContexts) = %d; want %d", len(intermediateContexts), len(initialContexts)+len(contextIDs))
 	}
 
 	for _, contextID := range contextIDs {

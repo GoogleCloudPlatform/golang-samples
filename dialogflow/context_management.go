@@ -75,11 +75,11 @@ func listContexts(projectID string, sessionID string) ([]*dialogflowpb.Context, 
 	ctx := context.Background()
 
 	contextsClient, clientErr := dialogflow.NewContextsClient(ctx)
-	if (clientErr != nil) {
+	if clientErr != nil {
 		return nil, clientErr
 	}
 
-	if (projectID == "" || sessionID == "") {
+	if projectID == "" || sessionID == "" {
 		return nil, errors.New(fmt.Sprintf("Received empty project (%s) or session (%s)", projectID, sessionID))
 	}
 
@@ -89,7 +89,6 @@ func listContexts(projectID string, sessionID string) ([]*dialogflowpb.Context, 
 
 	contextIterator := contextsClient.ListContexts(ctx, &request)
 	var contexts []*dialogflowpb.Context
-
 
 	for context, status := contextIterator.Next(); status != iterator.Done; {
 		contexts = append(contexts, context)
@@ -103,11 +102,11 @@ func createContext(projectID string, sessionID string, contextID string) error {
 	ctx := context.Background()
 
 	contextsClient, clientErr := dialogflow.NewContextsClient(ctx)
-	if (clientErr != nil) {
+	if clientErr != nil {
 		return clientErr
 	}
 
-	if (projectID == "" || sessionID == "" || contextID == "") {
+	if projectID == "" || sessionID == "" || contextID == "" {
 		return errors.New(fmt.Sprintf("Received empty project (%s) or session (%s) or context (%s)", projectID, sessionID, contextID))
 	}
 
@@ -118,7 +117,7 @@ func createContext(projectID string, sessionID string, contextID string) error {
 	request := dialogflowpb.CreateContextRequest{Parent: parent, Context: &target}
 
 	_, requestErr := contextsClient.CreateContext(ctx, &request)
-	if (requestErr != nil) {
+	if requestErr != nil {
 		return requestErr
 	}
 
@@ -129,11 +128,11 @@ func deleteContext(projectID string, sessionID string, contextID string) error {
 	ctx := context.Background()
 
 	contextsClient, clientErr := dialogflow.NewContextsClient(ctx)
-	if (clientErr != nil) {
+	if clientErr != nil {
 		return clientErr
 	}
 
-	if (projectID == "" || sessionID == "" || contextID == "") {
+	if projectID == "" || sessionID == "" || contextID == "" {
 		return errors.New(fmt.Sprintf("Received empty project (%s) or session (%s) or context (%s)", projectID, sessionID, contextID))
 	}
 
@@ -143,7 +142,7 @@ func deleteContext(projectID string, sessionID string, contextID string) error {
 	request := dialogflowpb.DeleteContextRequest{Name: targetPath}
 
 	requestErr := contextsClient.DeleteContext(ctx, &request)
-	if (requestErr != nil) {
+	if requestErr != nil {
 		return requestErr
 	}
 
