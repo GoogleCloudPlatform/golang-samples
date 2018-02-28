@@ -23,13 +23,12 @@ func TestContextManagement(t *testing.T) {
 
 	contextIDs := [...]string{"context-1", "context-2"}
 
-	initialContexts, initialErr := listContexts(projectID, sessionID)
+	initialContexts, err := listContexts(projectID, sessionID)
 
-	if initialErr != nil {
+	if err != nil {
 		t.Error("Unsuccessful initial listContexts")
 	}
 
-	var err error
 	for _, contextID := range contextIDs {
 		err = createContext(projectID, sessionID, contextID)
 		if err != nil {
@@ -37,9 +36,9 @@ func TestContextManagement(t *testing.T) {
 		}
 	}
 
-	intermediateContexts, intermediateErr := listContexts(projectID, sessionID)
+	intermediateContexts, err := listContexts(projectID, sessionID)
 
-	if intermediateErr != nil {
+	if err != nil {
 		t.Error("Unsuccessful intermediate listContexts")
 	}
 
@@ -54,9 +53,9 @@ func TestContextManagement(t *testing.T) {
 		}
 	}
 
-	finalContexts, finalErr := listContexts(projectID, sessionID)
+	finalContexts, err := listContexts(projectID, sessionID)
 
-	if finalErr != nil {
+	if err != nil {
 		t.Error("Unsuccessful final listContexts")
 	}
 
