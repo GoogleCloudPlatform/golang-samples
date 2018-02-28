@@ -116,7 +116,7 @@ func getRegistry(projectID string, region string, registryID string) (*cloudiot.
 
 // getRegistryIam gets the IAM policy for a device registry.
 func getRegistryIam(projectID string, region string, registryID string) (*cloudiot.Policy, error) {
-	// [START iot_get_iam]
+	// [START iot_get_iam_policy]
 	// Authorize the client using Application Default Credentials.
 	// See https://g.co/dv/identity/protocols/application-default-credentials
 	ctx := context.Background()
@@ -144,7 +144,7 @@ func getRegistryIam(projectID string, region string, registryID string) (*cloudi
 			fmt.Fprintf(os.Stdout, "\tMember: %s\n", member)
 		}
 	}
-	// [END iot_get_iam]
+	// [END iot_get_iam_policy]
 
 	return response, err
 }
@@ -181,7 +181,7 @@ func listRegistries(projectID string, region string) ([]*cloudiot.DeviceRegistry
 
 // setRegistryIam sets the IAM policy for a device registry
 func setRegistryIam(projectID string, region string, registryID string, member string, role string) (*cloudiot.Policy, error) {
-	// [START iot_set_iam]
+	// [START iot_set_iam_policy]
 	// Authorize the client using Application Default Credentials.
 	// See https://g.co/dv/identity/protocols/application-default-credentials
 	ctx := context.Background()
@@ -211,7 +211,7 @@ func setRegistryIam(projectID string, region string, registryID string, member s
 	}
 
 	fmt.Println("Set policy!")
-	// [END iot_set_iam]
+	// [END iot_set_iam_policy]
 
 	return response, err
 }
@@ -220,7 +220,7 @@ func setRegistryIam(projectID string, region string, registryID string, member s
 
 // createEs creates a device in a registry with ES credentials
 func createEs(projectID string, region string, registry string, deviceID string, keyPath string) (*cloudiot.Device, error) {
-	// [START iot_create_es]
+	// [START iot_create_es_device]
 	// Authorize the client using Application Default Credentials.
 	// See https://g.co/dv/identity/protocols/application-default-credentials
 	ctx := context.Background()
@@ -257,14 +257,14 @@ func createEs(projectID string, region string, registry string, deviceID string,
 	}
 
 	fmt.Println("Successfully created device.")
-	// [END iot_create_es]
+	// [END iot_create_es_device]
 
 	return response, err
 }
 
 // createRsa creates a device in a registry with RS credentials
 func createRsa(projectID string, region string, registry string, deviceID string, keyPath string) (*cloudiot.Device, error) {
-	// [START iot_create_rsa]
+	// [START iot_create_rsa_device]
 	// Authorize the client using Application Default Credentials.
 	// See https://g.co/dv/identity/protocols/application-default-credentials
 	ctx := context.Background()
@@ -301,14 +301,14 @@ func createRsa(projectID string, region string, registry string, deviceID string
 	}
 
 	fmt.Println("Successfully created device.")
-	// [END iot_create_rsa]
+	// [END iot_create_rsa_device]
 
 	return response, err
 }
 
 // createUnauth creates a device in a registry without credentials
 func createUnauth(projectID string, region string, registry string, deviceID string) (*cloudiot.Device, error) {
-	// [START iot_create_unauth]
+	// [START iot_create_unauth_device]
 	// Authorize the client using Application Default Credentials.
 	// See https://g.co/dv/identity/protocols/application-default-credentials
 	ctx := context.Background()
@@ -331,7 +331,7 @@ func createUnauth(projectID string, region string, registry string, deviceID str
 	}
 
 	fmt.Println("Successfully created device.")
-	// [END iot_create_unauth]
+	// [END iot_create_unauth_device]
 
 	return response, err
 }
@@ -432,7 +432,7 @@ func getDeviceConfigs(projectID string, region string, registry string, device s
 
 // getDeviceStates retrieves and lists device states
 func getDeviceStates(projectID string, region string, registry string, device string) ([]*cloudiot.DeviceState, error) {
-	// [START iot_get_device_states]
+	// [START iot_get_device_state]
 	// Authorize the client using Application Default Credentials.
 	// See https://g.co/dv/identity/protocols/application-default-credentials
 	ctx := context.Background()
@@ -456,7 +456,7 @@ func getDeviceStates(projectID string, region string, registry string, device st
 	for _, state := range response.DeviceStates {
 		fmt.Println(state.UpdateTime, " : ", state.BinaryData)
 	}
-	// [END iot_get_device_states]
+	// [END iot_get_device_state]
 
 	return response.DeviceStates, err
 }
@@ -583,7 +583,7 @@ func patchDeviceRsa(projectID string, region string, registry string, deviceID s
 
 // setConfig sends a configuration change to a device.
 func setConfig(projectID string, region string, registry string, deviceID string, configData string) (*cloudiot.DeviceConfig, error) {
-	// [START iot_set_config]
+	// [START iot_set_device_config]
 	// Authorize the client using Application Default Credentials.
 	// See https://g.co/dv/identity/protocols/application-default-credentials
 	ctx := context.Background()
@@ -607,7 +607,7 @@ func setConfig(projectID string, region string, registry string, deviceID string
 	}
 
 	fmt.Fprintf(os.Stdout, "Config set!\nVersion now: %d", response.Version)
-	// [END iot_set_config]
+	// [END iot_set_device_config]
 
 	return response, err
 }
