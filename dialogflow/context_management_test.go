@@ -6,8 +6,6 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"os"
 	"testing"
 	"time"
 
@@ -15,57 +13,54 @@ import (
 )
 
 func TestContextManagement(t *testing.T) {
-	testutil.SystemTest(t)
+	tc := testutil.SystemTest(t)
 
-	projectId := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
-	if projectId == "" {
-		log.Fatal("Please pass a project ID using the GOLANG_SAMPLES_PROJECT_ID environment variable")
-	}
+	projectID := tc.ProjectID
 
-	sessionId := fmt.Sprintf("golang-samples-test-session-%v", time.Now())
+	sessionID := fmt.Sprintf("golang-samples-test-session-%v", time.Now())
 
-	parent := fmt.Sprintf("projects/%s/agents/sessions/%s", projectId, sessionId)
+	parent := fmt.Sprintf("projects/%s/agents/sessions/%s", projectID, sessionID)
 
-	contextIds := [...]string{"context-1", "context-2"}
+	contextIDs := [...]string{"context-1", "context-2"}
 
-	initialContexts, initialErr := listContexts(projectId, sessionId)
+	initialContexts, initialErr := listContexts(projectID, sessionID)
 
 	if initialErr != nil {
 		t.Error("Unsuccessful initial listContexts")
 	}
 
 	var err error
-	for _, contextId := range contextIds {
-		err = createContext(projectId, sessionId, contextId)
+	for _, contextID := range contextIDs {
+		err = createContext(projectID, sessionID, contextID)
 		if err != nil {
-			t.Errorf("Unsuccessful context creation: %s/contexts/%s", parent, contextId)
+			t.Errorf("Unsuccessful context creation: %s/contexts/%s", parent, contextID)
 		}
 	}
 
-	intermediateContexts, intermediateErr := listContexts(projectId, sessionId)
+	intermediateContexts, intermediateErr := listContexts(projectID, sessionID)
 
 	if intermediateErr != nil {
 		t.Error("Unsuccessful intermediate listContexts")
 	}
 
-	if len(intermediateContexts) != len(initialContexts) + len(contextIds) {
-		t.Errorf("Expected intermediateContexts to contain %d more values than initialContexts. Actual len(intermediateContexts): %d, actual len(initialContexts): %d", len(contextIds), len(intermediateContexts), len(initialContexts))
+	if len(intermediateContexts) != len(initialContexts) + len(contextIDs) {
+		t.Errorf("len(intermediateContexts) = %d; want %d", len(intermediateContexts), len(initialContexts) + len(contextIDs) )
 	}
 
-	for _, contextId := range contextIds {
-		err = deleteContext(projectId, sessionId, contextId)
+	for _, contextID := range contextIDs {
+		err = deleteContext(projectID, sessionID, contextID)
 		if err != nil {
-			t.Errorf("Unsuccessful context deletion %s/context/%s", parent, contextId)
+			t.Errorf("Unsuccessful context deletion %s/context/%s", parent, contextID)
 		}
 	}
 
-	finalContexts, finalErr := listContexts(projectId, sessionId)
+	finalContexts, finalErr := listContexts(projectID, sessionID)
 
 	if finalErr != nil {
 		t.Error("Unsuccessful final listContexts")
 	}
 
 	if len(finalContexts) != len(initialContexts) {
-		t.Errorf("Expected finalContexts to be of same length as initialContexts. Actual len(finalContexts): %d, actual len(initialContexts): %d", len(finalContexts), len(initialContexts))
+		t.Errorf("Actual len(finalContexts) = %d; want %d", len(finalContexts), len(initialContexts))
 	}
 }
