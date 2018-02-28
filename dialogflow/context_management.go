@@ -19,8 +19,10 @@ import (
 
 func main() {
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: %s -project-id <PROJECT ID> <OPERATION>\n", filepath.Base(os.Args[0]))
-		fmt.Fprintf(os.Stderr, "<PROJECT ID> must be your Google Cloud Platform project id\n")
+		fmt.Fprintf(os.Stderr, "Usage: %s -project-id <PROJECT ID> -session-id <SESSION ID> -context-id <CONTEXT ID> <OPERATION>\n", filepath.Base(os.Args[0]))
+		fmt.Fprintf(os.Stderr, "<PROJECT ID> must be your Google Cloud Platform project ID\n")
+		fmt.Fprintf(os.Stderr, "<SESSION ID> must be a Dialogflow session ID\n")
+		fmt.Fprintf(os.Stderr, "<CONTEXT ID> must be a Dialogflow context ID - only required for create and delete calls\n")
 		fmt.Fprintf(os.Stderr, "<OPERATION> must be one of list, create, delete\n")
 	}
 
