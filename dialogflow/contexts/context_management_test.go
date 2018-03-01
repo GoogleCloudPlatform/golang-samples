@@ -23,23 +23,23 @@ func TestContextManagement(t *testing.T) {
 
 	contextIDs := [...]string{"context-1", "context-2"}
 
-	initialContexts, err := listContexts(projectID, sessionID)
+	initialContexts, err := ListContexts(projectID, sessionID)
 
 	if err != nil {
-		t.Error("Unsuccessful initial listContexts")
+		t.Error("Unsuccessful initial ListContexts")
 	}
 
 	for _, contextID := range contextIDs {
-		err = createContext(projectID, sessionID, contextID)
+		err = CreateContext(projectID, sessionID, contextID)
 		if err != nil {
 			t.Errorf("Unsuccessful context creation: %s/contexts/%s", parent, contextID)
 		}
 	}
 
-	intermediateContexts, err := listContexts(projectID, sessionID)
+	intermediateContexts, err := ListContexts(projectID, sessionID)
 
 	if err != nil {
-		t.Error("Unsuccessful intermediate listContexts")
+		t.Error("Unsuccessful intermediate ListContexts")
 	}
 
 	if len(intermediateContexts) != len(initialContexts)+len(contextIDs) {
@@ -47,16 +47,16 @@ func TestContextManagement(t *testing.T) {
 	}
 
 	for _, contextID := range contextIDs {
-		err = deleteContext(projectID, sessionID, contextID)
+		err = DeleteContext(projectID, sessionID, contextID)
 		if err != nil {
 			t.Errorf("Unsuccessful context deletion %s/context/%s", parent, contextID)
 		}
 	}
 
-	finalContexts, err := listContexts(projectID, sessionID)
+	finalContexts, err := ListContexts(projectID, sessionID)
 
 	if err != nil {
-		t.Error("Unsuccessful final listContexts")
+		t.Error("Unsuccessful final ListContexts")
 	}
 
 	if len(finalContexts) != len(initialContexts) {

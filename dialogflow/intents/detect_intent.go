@@ -50,7 +50,7 @@ func main() {
 		fmt.Printf("Responses:\n")
 		for _, query := range inputs {
 			fmt.Printf("\nInput: %s\n", query)
-			response, err := detect_intent_text(projectID, sessionID, query, languageCode)
+			response, err := DetectIntentText(projectID, sessionID, query, languageCode)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -61,7 +61,7 @@ func main() {
 			log.Fatal("audio intent detection expects a single audio file as input")
 		}
 		audioFile := inputs[0]
-		response, err := detect_intent_audio(projectID, sessionID, audioFile, languageCode)
+		response, err := DetectIntentAudio(projectID, sessionID, audioFile, languageCode)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -71,7 +71,7 @@ func main() {
 			log.Fatal("audio intent detection expects a single audio file as input")
 		}
 		audioFile := inputs[0]
-		response, err := detect_intent_stream(projectID, sessionID, audioFile, languageCode)
+		response, err := DetectIntentStream(projectID, sessionID, audioFile, languageCode)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -83,7 +83,7 @@ func main() {
 	}
 }
 
-func detect_intent_text(projectID, sessionID, text, languageCode string) (string, error)  {
+func DetectIntentText(projectID, sessionID, text, languageCode string) (string, error)  {
 	ctx := context.Background()
 
 	sessionClient, err := dialogflow.NewSessionsClient(ctx)
@@ -111,7 +111,7 @@ func detect_intent_text(projectID, sessionID, text, languageCode string) (string
 	return fulfillmentText, nil
 }
 
-func detect_intent_audio(projectID, sessionID, audioFile, languageCode string) (string, error) {
+func DetectIntentAudio(projectID, sessionID, audioFile, languageCode string) (string, error) {
 	ctx := context.Background()
 
 	sessionClient, err := dialogflow.NewSessionsClient(ctx)
@@ -148,7 +148,7 @@ func detect_intent_audio(projectID, sessionID, audioFile, languageCode string) (
 	return fulfillmentText, nil
 }
 
-func detect_intent_stream(projectID, sessionID, audioFile, languageCode string) (string, error) {
+func DetectIntentStream(projectID, sessionID, audioFile, languageCode string) (string, error) {
 	ctx := context.Background()
 
 	sessionClient, err := dialogflow.NewSessionsClient(ctx)

@@ -46,7 +46,7 @@ func main() {
 	case "list":
 		fmt.Printf("Contexts under projects/%s/agent/sessions/%s:\n", projectID, sessionID)
 		var contexts []*dialogflowpb.Context
-		contexts, err = listContexts(projectID, sessionID)
+		contexts, err = ListContexts(projectID, sessionID)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -55,14 +55,14 @@ func main() {
 		}
 	case "create":
 		fmt.Printf("Creating context projects/%s/agent/sessions/%s/contexts/%s...\n", projectID, sessionID, contextID)
-		err = createContext(projectID, sessionID, contextID)
+		err = CreateContext(projectID, sessionID, contextID)
 		if err != nil {
 			log.Fatal(err)
 		}
 		fmt.Printf("Done!\n")
 	case "delete":
 		fmt.Printf("Deleting context projects/%s/agent/sessions/%s/contexts/%s...\n", projectID, sessionID, contextID)
-		err = deleteContext(projectID, sessionID, contextID)
+		err = DeleteContext(projectID, sessionID, contextID)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -73,7 +73,7 @@ func main() {
 	}
 }
 
-func listContexts(projectID string, sessionID string) ([]*dialogflowpb.Context, error) {
+func ListContexts(projectID string, sessionID string) ([]*dialogflowpb.Context, error) {
 	ctx := context.Background()
 
 	contextsClient, clientErr := dialogflow.NewContextsClient(ctx)
@@ -100,7 +100,7 @@ func listContexts(projectID string, sessionID string) ([]*dialogflowpb.Context, 
 	return contexts, nil
 }
 
-func createContext(projectID string, sessionID string, contextID string) error {
+func CreateContext(projectID string, sessionID string, contextID string) error {
 	ctx := context.Background()
 
 	contextsClient, clientErr := dialogflow.NewContextsClient(ctx)
@@ -126,7 +126,7 @@ func createContext(projectID string, sessionID string, contextID string) error {
 	return nil
 }
 
-func deleteContext(projectID string, sessionID string, contextID string) error {
+func DeleteContext(projectID string, sessionID string, contextID string) error {
 	ctx := context.Background()
 
 	contextsClient, clientErr := dialogflow.NewContextsClient(ctx)
