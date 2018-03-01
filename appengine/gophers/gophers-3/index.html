@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+<head>
+  <title>The Gopher Network</title>
+  <link rel="stylesheet" type="text/css" href="/static/style.css">
+</head>
+<body>
+
+<h1>The Gopher Network</h1>
+
+<img id="logo" src="/static/gcp-gopher.svg" width="100">
+<!-- [START html_template] -->
+{{with .Notice}}<div id="notice">{{.}}</div>{{end}}
+
+<form action="/" method="post">
+  <div>Name: <input name="name" value="{{.Name}}"></div>
+  <div>Message: <input name="message"></div>
+  <input type="submit">
+</form>
+<!-- [END html_template] -->
+
+</body>
+</html>

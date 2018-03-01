@@ -56,7 +56,7 @@ func (tmpl *appTemplate) Execute(w http.ResponseWriter, r *http.Request, data in
 	}
 
 	if err := tmpl.t.Execute(w, d); err != nil {
-		return appErrorf(err, "could not write template: %v")
+		return appErrorf(err, "could not write template: %v", err)
 	}
 	return nil
 }
