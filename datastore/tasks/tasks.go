@@ -5,7 +5,7 @@
 // [START all]
 
 // A simple command-line task list manager to demonstrate using the
-// cloud.google.com/go//datastore package.
+// cloud.google.com/go/datastore package.
 package main
 
 import (
