@@ -12,7 +12,6 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-
 func TestDetectIntentText(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -30,7 +29,6 @@ func TestDetectIntentText(t *testing.T) {
 		t.Error(err)
 	}
 }
-
 
 func TestDetectIntentAudio(t *testing.T) {
 	tc := testutil.SystemTest(t)
@@ -104,4 +102,3 @@ func TestDetectIntentStreamWithNonexistentFile(t *testing.T) {
 		t.Error("Expected due to non-existent file")
 	}
 }
-

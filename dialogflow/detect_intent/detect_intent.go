@@ -83,7 +83,7 @@ func main() {
 	}
 }
 
-func DetectIntentText(projectID, sessionID, text, languageCode string) (string, error)  {
+func DetectIntentText(projectID, sessionID, text, languageCode string) (string, error) {
 	ctx := context.Background()
 
 	sessionClient, err := dialogflow.NewSessionsClient(ctx)
@@ -174,7 +174,6 @@ func DetectIntentStream(projectID, sessionID, audioFile, languageCode string) (s
 		return "", err
 	}
 
-
 	f, err := os.Open(audioFile)
 	if err != nil {
 		return "", err
@@ -182,7 +181,7 @@ func DetectIntentStream(projectID, sessionID, audioFile, languageCode string) (s
 
 	defer f.Close()
 
-	go func () {
+	go func() {
 		audioBytes := make([]byte, 1024)
 
 		request := dialogflowpb.StreamingDetectIntentRequest{Session: sessionPath, QueryInput: &queryInput}
