@@ -82,6 +82,7 @@ func createDatabase(ctx context.Context, w io.Writer, adminClient *database.Data
 	fmt.Fprintf(w, "Created database [%s]\n", db)
 	return nil
 }
+
 // [END spanner_create_database]
 
 // [START spanner_insert_data]
@@ -103,6 +104,7 @@ func write(ctx context.Context, w io.Writer, client *spanner.Client) error {
 	_, err := client.Apply(ctx, m)
 	return err
 }
+
 // [END spanner_insert_data]
 
 // [START spanner_query_data]
@@ -126,6 +128,7 @@ func query(ctx context.Context, w io.Writer, client *spanner.Client) error {
 		fmt.Fprintf(w, "%d %d %s\n", singerID, albumID, albumTitle)
 	}
 }
+
 // [END spanner_query_data]
 
 // [START spanner_read_data]
@@ -149,6 +152,7 @@ func read(ctx context.Context, w io.Writer, client *spanner.Client) error {
 		fmt.Fprintf(w, "%d %d %s\n", singerID, albumID, albumTitle)
 	}
 }
+
 // [END spanner_read_data]
 
 // [START spanner_add_column]
@@ -168,6 +172,7 @@ func addNewColumn(ctx context.Context, w io.Writer, adminClient *database.Databa
 	fmt.Fprintf(w, "Added MarketingBudget column\n")
 	return nil
 }
+
 // [END spanner_add_column]
 
 // [START spanner_update_data]
@@ -179,6 +184,7 @@ func update(ctx context.Context, w io.Writer, client *spanner.Client) error {
 	})
 	return err
 }
+
 // [END spanner_update_data]
 
 // [START spanner_read_write_transaction]
@@ -217,6 +223,7 @@ func writeWithTransaction(ctx context.Context, w io.Writer, client *spanner.Clie
 	})
 	return err
 }
+
 // [END spanner_read_write_transaction]
 
 // [START spanner_query_data_with_new_column]
@@ -250,6 +257,7 @@ func queryNewColumn(ctx context.Context, w io.Writer, client *spanner.Client) er
 		fmt.Fprintf(w, "%d %d %s\n", singerID, albumID, budget)
 	}
 }
+
 // [END spanner_query_data_with_new_column]
 
 // [START spanner_create_index]
@@ -269,6 +277,7 @@ func addIndex(ctx context.Context, w io.Writer, adminClient *database.DatabaseAd
 	fmt.Fprintf(w, "Added index\n")
 	return nil
 }
+
 // [END spanner_create_index]
 
 // [START spanner_query_data_with_index]
@@ -312,6 +321,7 @@ func queryUsingIndex(ctx context.Context, w io.Writer, client *spanner.Client) e
 	}
 	return nil
 }
+
 // [END spanner_query_data_with_index]
 
 // [START spanner_read_data_with_index]
@@ -335,6 +345,7 @@ func readUsingIndex(ctx context.Context, w io.Writer, client *spanner.Client) er
 		fmt.Fprintf(w, "%d %s\n", albumID, albumTitle)
 	}
 }
+
 // [END spanner_read_data_with_index]
 
 // [START spanner_create_storing_index]
@@ -354,6 +365,7 @@ func addStoringIndex(ctx context.Context, w io.Writer, adminClient *database.Dat
 	fmt.Fprintf(w, "Added storing index\n")
 	return nil
 }
+
 // [END spanner_create_storing_index]
 
 // [START spanner_read_data_with_storing_index]
@@ -382,6 +394,7 @@ func readStoringIndex(ctx context.Context, w io.Writer, client *spanner.Client) 
 		fmt.Fprintf(w, "%d %s %s\n", albumID, albumTitle, budget)
 	}
 }
+
 // [END spanner_read_data_with_storing_index]
 
 // [START spanner_read_only_transaction]
@@ -427,6 +440,7 @@ func readOnlyTransaction(ctx context.Context, w io.Writer, client *spanner.Clien
 		fmt.Fprintf(w, "%d %d %s\n", singerID, albumID, albumTitle)
 	}
 }
+
 // [END spanner_read_only_transaction]
 
 // [START spanner_read_stale_data]
@@ -453,6 +467,7 @@ func readStaleData(ctx context.Context, w io.Writer, client *spanner.Client) err
 		fmt.Fprintf(w, "%d %d %s\n", singerID, albumID, albumTitle)
 	}
 }
+
 // [END spanner_read_stale_data]
 
 func createClients(ctx context.Context, db string) (*database.DatabaseAdminClient, *spanner.Client) {
