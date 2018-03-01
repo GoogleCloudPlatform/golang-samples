@@ -31,7 +31,7 @@ Note: samples under `docs/appengine` are not shown because they mostly do not ru
 |---|---|
 |[appengine/bigquery](appengine/bigquery)|This App Engine application uses its default service account to list all the BigQuery datasets accessible via the BigQuery REST API.|
 |[bigquery/syncquery](bigquery/syncquery)|Command syncquery queries a Google BigQuery dataset.|
-|[datastore/tasks](datastore/tasks)|A simple command-line task list manager to demonstrate using the cloud.google.com/go//datastore package.|
+|[datastore/tasks](datastore/tasks)|A simple command-line task list manager to demonstrate using the cloud.google.com/go/datastore package.|
 |[docs/error-reporting/fluent](docs/error-reporting/fluent)|Sample fluent demonstrates integration of fluent and Cloud Error reporting.|
 |[docs/managed_vms/analytics](docs/managed_vms/analytics)|Sample analytics demonstrates Google Analytics calls from App Engine flexible environment.|
 |[docs/managed_vms/cloudsql](docs/managed_vms/cloudsql)|Sample cloudsql demonstrates usage of Cloud SQL from App Engine flexible environment.|
