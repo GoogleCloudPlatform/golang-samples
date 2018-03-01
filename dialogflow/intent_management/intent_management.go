@@ -96,7 +96,9 @@ func main() {
 
 		fmt.Printf("Deleting intent projects/%s/agent/intents/%s...\n", projectID, intentID)
 		err = DeleteIntent(projectID, intentID)
-		if err != nil { log.Fatal(err) }
+		if err != nil {
+			log.Fatal(err)
+		}
 		fmt.Printf("Done!\n")
 	default:
 		flag.Usage()
@@ -131,7 +133,7 @@ func ListIntents(projectID string) ([]*dialogflowpb.Intent, error) {
 	return intents, nil
 }
 
-func CreateIntent(projectID , displayName string, trainingPhraseParts []string, messageTexts []string) error {
+func CreateIntent(projectID, displayName string, trainingPhraseParts []string, messageTexts []string) error {
 	ctx := context.Background()
 
 	intentsClient, clientErr := dialogflow.NewIntentsClient(ctx)
