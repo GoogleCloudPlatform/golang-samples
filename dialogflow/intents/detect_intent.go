@@ -175,14 +175,14 @@ func DetectIntentStream(projectID, sessionID, audioFile, languageCode string) (s
 	}
 
 
+	f, err := os.Open(audioFile)
+	if err != nil {
+		return "", err
+	}
+
+	defer f.Close()
+
 	go func () {
-		f, err := os.Open(audioFile)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		defer f.Close()
-
 		audioBytes := make([]byte, 1024)
 
 		request := dialogflowpb.StreamingDetectIntentRequest{Session: sessionPath, QueryInput: &queryInput}

@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 package main
-/*
+
 import (
 	"fmt"
 	"testing"
@@ -20,10 +20,88 @@ func TestDetectIntentText(t *testing.T) {
 
 	sessionID := fmt.Sprintf("golang-samples-test-session-%v", time.Now())
 
-	parent := fmt.Sprintf("projects/%s/agents/sessions/%s", projectID, sessionID)
-
 	text := "I'd like to book a room"
+
 	languageCode := "en-US"
 
-	detect_intent_text
-}*/
+	_, err := DetectIntentText(projectID, sessionID, text, languageCode)
+
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+
+func TestDetectIntentAudio(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	projectID := tc.ProjectID
+
+	sessionID := fmt.Sprintf("golang-samples-test-session-%v", time.Now())
+
+	audioFile := "../resources/book_a_room.wav"
+
+	languageCode := "en-US"
+
+	_, err := DetectIntentAudio(projectID, sessionID, audioFile, languageCode)
+
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestDetectIntentAudioWithNonexistentFile(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	projectID := tc.ProjectID
+
+	sessionID := fmt.Sprintf("golang-samples-test-session-%v", time.Now())
+
+	audioFile := "./this-file-should-not-exist.wav"
+
+	languageCode := "en-US"
+
+	_, err := DetectIntentAudio(projectID, sessionID, audioFile, languageCode)
+
+	if err == nil {
+		t.Error("Expected due to non-existent file")
+	}
+}
+
+func TestDetectIntentStream(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	projectID := tc.ProjectID
+
+	sessionID := fmt.Sprintf("golang-samples-test-session-%v", time.Now())
+
+	audioFile := "../resources/book_a_room.wav"
+
+	languageCode := "en-US"
+
+	_, err := DetectIntentAudio(projectID, sessionID, audioFile, languageCode)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+}
+
+func TestDetectIntentStreamWithNonexistentFile(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	projectID := tc.ProjectID
+
+	sessionID := fmt.Sprintf("golang-samples-test-session-%v", time.Now())
+
+	audioFile := "./this-file-should-not-exist.wav"
+
+	languageCode := "en-US"
+
+	_, err := DetectIntentStream(projectID, sessionID, audioFile, languageCode)
+
+	if err == nil {
+		t.Error("Expected due to non-existent file")
+	}
+}
+
