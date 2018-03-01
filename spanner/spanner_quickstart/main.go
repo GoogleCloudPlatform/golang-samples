@@ -2,6 +2,8 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
+// [START spanner_quickstart]
+
 // Sample spanner_quickstart is a basic program that uses Cloud Spanner.
 package main
 
@@ -40,3 +42,5 @@ func main() {
 	}
 	fmt.Printf("Got value %v\n", i)
 }
+
+// [END spanner_quickstart]

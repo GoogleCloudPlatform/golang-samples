@@ -50,6 +50,7 @@ var (
 )
 
 func createDatabase(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, db string) error {
+	// [START spanner_create_database]
 	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(db)
 	if matches == nil || len(matches) != 3 {
 		return fmt.Errorf("Invalid database id %s", db)
@@ -79,10 +80,12 @@ func createDatabase(ctx context.Context, w io.Writer, adminClient *database.Data
 		return err
 	}
 	fmt.Fprintf(w, "Created database [%s]\n", db)
+	// [END spanner_create_database]
 	return nil
 }
 
 func write(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	// [START spanner_insert_data]
 	singerColumns := []string{"SingerId", "FirstName", "LastName"}
 	albumColumns := []string{"SingerId", "AlbumId", "AlbumTitle"}
 	m := []*spanner.Mutation{
@@ -98,10 +101,12 @@ func write(ctx context.Context, w io.Writer, client *spanner.Client) error {
 		spanner.InsertOrUpdate("Albums", albumColumns, []interface{}{2, 3, "Terrified"}),
 	}
 	_, err := client.Apply(ctx, m)
+	// [END spanner_insert_data]
 	return err
 }
 
 func query(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	// [START spanner_query_data]
 	stmt := spanner.Statement{SQL: `SELECT SingerId, AlbumId, AlbumTitle FROM Albums`}
 	iter := client.Single().Query(ctx, stmt)
 	defer iter.Stop()
@@ -120,9 +125,11 @@ func query(ctx context.Context, w io.Writer, client *spanner.Client) error {
 		}
 		fmt.Fprintf(w, "%d %d %s\n", singerID, albumID, albumTitle)
 	}
+	// [END spanner_query_data]
 }
 
 func read(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	// [START spanner_read_data]
 	iter := client.Single().Read(ctx, "Albums", spanner.AllKeys(),
 		[]string{"SingerId", "AlbumId", "AlbumTitle"})
 	defer iter.Stop()
@@ -141,9 +148,11 @@ func read(ctx context.Context, w io.Writer, client *spanner.Client) error {
 		}
 		fmt.Fprintf(w, "%d %d %s\n", singerID, albumID, albumTitle)
 	}
+	// [END spanner_read_data]
 }
 
 func addNewColumn(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	// [START spanner_add_column]
 	op, err := adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
 		Database: database,
 		Statements: []string{
@@ -157,19 +166,23 @@ func addNewColumn(ctx context.Context, w io.Writer, adminClient *database.Databa
 		return err
 	}
 	fmt.Fprintf(w, "Added MarketingBudget column\n")
+	// [END spanner_add_column]
 	return nil
 }
 
 func update(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	// [START spanner_update_data]
 	cols := []string{"SingerId", "AlbumId", "MarketingBudget"}
 	_, err := client.Apply(ctx, []*spanner.Mutation{
 		spanner.Update("Albums", cols, []interface{}{1, 1, 100000}),
 		spanner.Update("Albums", cols, []interface{}{2, 2, 500000}),
 	})
+	// [END spanner_update_data]
 	return err
 }
 
 func writeWithTransaction(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	// [START spanner_read_write_transaction]
 	_, err := client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
 		getBudget := func(key spanner.Key) (int64, error) {
 			row, err := txn.ReadRow(ctx, "Albums", key, []string{"MarketingBudget"})
@@ -202,10 +215,12 @@ func writeWithTransaction(ctx context.Context, w io.Writer, client *spanner.Clie
 		}
 		return nil
 	})
+	// [END spanner_read_write_transaction]
 	return err
 }
 
 func queryNewColumn(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	// [START spanner_query_data_with_new_column]
 	stmt := spanner.Statement{SQL: `SELECT SingerId, AlbumId, MarketingBudget FROM Albums`}
 	iter := client.Single().Query(ctx, stmt)
 	defer iter.Stop()
@@ -234,9 +249,11 @@ func queryNewColumn(ctx context.Context, w io.Writer, client *spanner.Client) er
 		}
 		fmt.Fprintf(w, "%d %d %s\n", singerID, albumID, budget)
 	}
+	// [END spanner_query_data_with_new_column]
 }
 
 func addIndex(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	// [START spanner_create_index]
 	op, err := adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
 		Database: database,
 		Statements: []string{
@@ -250,10 +267,12 @@ func addIndex(ctx context.Context, w io.Writer, adminClient *database.DatabaseAd
 		return err
 	}
 	fmt.Fprintf(w, "Added index\n")
+	// [END spanner_create_index]
 	return nil
 }
 
 func queryUsingIndex(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	// [START spanner_query_data_with_index]
 	stmt := spanner.Statement{
 		SQL: `SELECT AlbumId, AlbumTitle, MarketingBudget
 			FROM Albums@{FORCE_INDEX=AlbumsByAlbumTitle}
@@ -291,10 +310,12 @@ func queryUsingIndex(ctx context.Context, w io.Writer, client *spanner.Client) e
 		}
 		fmt.Fprintf(w, "%d %s %s\n", albumID, albumTitle, budget)
 	}
+	// [END spanner_query_data_with_index]
 	return nil
 }
 
 func readUsingIndex(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	// [START spanner_read_data_with_index]
 	iter := client.Single().ReadUsingIndex(ctx, "Albums", "AlbumsByAlbumTitle", spanner.AllKeys(),
 		[]string{"AlbumId", "AlbumTitle"})
 	defer iter.Stop()
@@ -313,9 +334,11 @@ func readUsingIndex(ctx context.Context, w io.Writer, client *spanner.Client) er
 		}
 		fmt.Fprintf(w, "%d %s\n", albumID, albumTitle)
 	}
+	// [END spanner_read_data_with_index]
 }
 
 func addStoringIndex(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	// [START spanner_create_storing_index]
 	op, err := adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
 		Database: database,
 		Statements: []string{
@@ -329,10 +352,12 @@ func addStoringIndex(ctx context.Context, w io.Writer, adminClient *database.Dat
 		return err
 	}
 	fmt.Fprintf(w, "Added storing index\n")
+	// [END spanner_create_storing_index]
 	return nil
 }
 
 func readStoringIndex(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	// [START spanner_read_data_with_storing_index]
 	iter := client.Single().ReadUsingIndex(ctx, "Albums", "AlbumsByAlbumTitle2", spanner.AllKeys(),
 		[]string{"AlbumId", "AlbumTitle", "MarketingBudget"})
 	defer iter.Stop()
@@ -356,9 +381,11 @@ func readStoringIndex(ctx context.Context, w io.Writer, client *spanner.Client) 
 		}
 		fmt.Fprintf(w, "%d %s %s\n", albumID, albumTitle, budget)
 	}
+	// [END spanner_read_data_with_storing_index]
 }
 
 func readOnlyTransaction(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	// [START spanner_read_only_transaction]
 	ro := client.ReadOnlyTransaction()
 	defer ro.Close()
 	stmt := spanner.Statement{SQL: `SELECT SingerId, AlbumId, AlbumTitle FROM Albums`}
@@ -399,9 +426,11 @@ func readOnlyTransaction(ctx context.Context, w io.Writer, client *spanner.Clien
 		}
 		fmt.Fprintf(w, "%d %d %s\n", singerID, albumID, albumTitle)
 	}
+	// [END spanner_read_only_transaction]
 }
 
 func readStaleData(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	// [START spanner_read_stale_data]
 	ro := client.ReadOnlyTransaction().WithTimestampBound(spanner.ExactStaleness(15 * time.Second))
 	defer ro.Close()
 
@@ -423,6 +452,7 @@ func readStaleData(ctx context.Context, w io.Writer, client *spanner.Client) err
 		}
 		fmt.Fprintf(w, "%d %d %s\n", singerID, albumID, albumTitle)
 	}
+	// [END spanner_read_stale_data]
 }
 
 func createClients(ctx context.Context, db string) (*database.DatabaseAdminClient, *spanner.Client) {
