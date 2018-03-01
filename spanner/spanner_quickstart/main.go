@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Sample spanner_quickstart is a basic program that uses Cloud Spanner.
+
 // [START spanner_quickstart]
 package main
 

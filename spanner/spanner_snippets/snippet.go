@@ -80,8 +80,8 @@ func createDatabase(ctx context.Context, w io.Writer, adminClient *database.Data
 		return err
 	}
 	fmt.Fprintf(w, "Created database [%s]\n", db)
-	return nil
 	// [END spanner_create_database]
+	return nil
 }
 
 func write(ctx context.Context, w io.Writer, client *spanner.Client) error {
@@ -101,8 +101,8 @@ func write(ctx context.Context, w io.Writer, client *spanner.Client) error {
 		spanner.InsertOrUpdate("Albums", albumColumns, []interface{}{2, 3, "Terrified"}),
 	}
 	_, err := client.Apply(ctx, m)
-	return err
 	// [END spanner_insert_data]
+	return err
 }
 
 func query(ctx context.Context, w io.Writer, client *spanner.Client) error {
@@ -166,8 +166,8 @@ func addNewColumn(ctx context.Context, w io.Writer, adminClient *database.Databa
 		return err
 	}
 	fmt.Fprintf(w, "Added MarketingBudget column\n")
-	return nil
 	// [END spanner_add_column]
+	return nil
 }
 
 func update(ctx context.Context, w io.Writer, client *spanner.Client) error {
@@ -177,8 +177,8 @@ func update(ctx context.Context, w io.Writer, client *spanner.Client) error {
 		spanner.Update("Albums", cols, []interface{}{1, 1, 100000}),
 		spanner.Update("Albums", cols, []interface{}{2, 2, 500000}),
 	})
-	return err
 	// [END spanner_update_data]
+	return err
 }
 
 func writeWithTransaction(ctx context.Context, w io.Writer, client *spanner.Client) error {
@@ -215,8 +215,8 @@ func writeWithTransaction(ctx context.Context, w io.Writer, client *spanner.Clie
 		}
 		return nil
 	})
-	return err
 	// [END spanner_read_write_transaction]
+	return err
 }
 
 func queryNewColumn(ctx context.Context, w io.Writer, client *spanner.Client) error {
@@ -267,8 +267,8 @@ func addIndex(ctx context.Context, w io.Writer, adminClient *database.DatabaseAd
 		return err
 	}
 	fmt.Fprintf(w, "Added index\n")
-	return nil
 	// [END spanner_create_index]
+	return nil
 }
 
 func queryUsingIndex(ctx context.Context, w io.Writer, client *spanner.Client) error {
@@ -310,8 +310,8 @@ func queryUsingIndex(ctx context.Context, w io.Writer, client *spanner.Client) e
 		}
 		fmt.Fprintf(w, "%d %s %s\n", albumID, albumTitle, budget)
 	}
-	return nil
 	// [END spanner_query_data_with_index]
+	return nil
 }
 
 func readUsingIndex(ctx context.Context, w io.Writer, client *spanner.Client) error {
@@ -352,8 +352,8 @@ func addStoringIndex(ctx context.Context, w io.Writer, adminClient *database.Dat
 		return err
 	}
 	fmt.Fprintf(w, "Added storing index\n")
-	return nil
 	// [END spanner_create_storing_index]
+	return nil
 }
 
 func readStoringIndex(ctx context.Context, w io.Writer, client *spanner.Client) error {
