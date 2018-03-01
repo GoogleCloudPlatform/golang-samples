@@ -42,4 +42,5 @@ func main() {
 	}
 	fmt.Printf("Got value %v\n", i)
 }
+
 // [END spanner_quickstart]
