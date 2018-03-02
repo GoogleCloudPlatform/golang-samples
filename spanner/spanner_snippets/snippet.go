@@ -522,16 +522,16 @@ func readBatchData(ctx context.Context, w io.Writer, client *spanner.Client) err
 			if err := row.ToStruct(&s); err != nil {
 				return err
 			}
-			log.Printf("Partition (%d) %v", i, s)
+			fmt.Fprintf(w, "Partition (%d) %v\n", i, s)
 			recordCount++
 		}
 	}
-	log.Printf("Total partition count: %v", len(partitions))
-	log.Printf("Total record count: %v", recordCount)
+	fmt.Fprintf(w, "Total partition count: %v\n", len(partitions))
+	fmt.Fprintf(w, "Total record count: %v\n", recordCount)
 	return nil
 }
 
-// [START spanner_batch_client]
+// [END spanner_batch_client]
 
 func createClients(ctx context.Context, db string) (*database.DatabaseAdminClient, *spanner.Client) {
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
