@@ -17,6 +17,35 @@ import (
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2beta1"
 )
 
+func inspect(w io.Writer, client *dlp.Client, s string) {
+	rcr := &dlppb.InspectContentRequest{
+		InspectConfig: &dlppb.InspectConfig{
+			InfoTypes: []*dlppb.InfoType{
+				{
+					Name: "US_SOCIAL_SECURITY_NUMBER",
+				},
+			},
+			MinLikelihood: dlppb.Likelihood_LIKELIHOOD_UNSPECIFIED,
+		},
+		Items: []*dlppb.ContentItem{
+			{
+				Type: "text/plain",
+				DataItem: &dlppb.ContentItem_Data{
+					Data: []byte(s),
+				},
+			},
+		},
+	}
+	r, err := client.InspectContent(context.Background(), rcr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fs := r.GetResults()[0].GetFindings()
+	for _, f := range fs {
+		fmt.Fprintf(w, "%s\n", f.GetInfoType().GetName())
+	}
+}
+
 func redact(w io.Writer, client *dlp.Client, s string) {
 	rcr := &dlppb.RedactContentRequest{
 		InspectConfig: &dlppb.InspectConfig{
@@ -46,8 +75,7 @@ func redact(w io.Writer, client *dlp.Client, s string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	i := r.GetItems()[0]
-	fmt.Fprint(w, string(i.GetData()))
+	fmt.Fprintf(w, "%s\n", r.GetItems()[0].GetData())
 }
 
 func main() {
@@ -65,6 +93,8 @@ func main() {
 		os.Exit(1)
 	}
 	switch flag.Arg(0) {
+	case "inspect":
+		inspect(os.Stdout, client, flag.Arg(1))
 	case "redact":
 		redact(os.Stdout, client, flag.Arg(1))
 	}
