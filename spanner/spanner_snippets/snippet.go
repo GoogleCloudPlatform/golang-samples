@@ -495,7 +495,7 @@ func readBatchData(ctx context.Context, w io.Writer, client *spanner.Client) err
 	}
 	defer txn.Close()
 
-	// Singer represents the elements in a row from the Singers table.
+	// Singer represents a row in the Singers table.
 	type Singer struct {
 		SingerID   int64
 		FirstName  string
