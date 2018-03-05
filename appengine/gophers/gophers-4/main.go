@@ -8,14 +8,15 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
-	// [START imports]
-	"time"
-	
-	"google.golang.org/appengine/datastore"
-	"google.golang.org/appengine/log"
-	// [END imports]	
+
 	"google.golang.org/appengine"
 
+	// [START imports]
+	"time"
+
+	"google.golang.org/appengine/datastore"
+	"google.golang.org/appengine/log"
+	// [END imports]
 )
 
 var (
