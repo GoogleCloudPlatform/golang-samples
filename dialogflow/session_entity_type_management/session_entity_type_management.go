@@ -4,6 +4,7 @@
 
 package main
 
+// [START import_libraries]
 import (
 	dialogflow "cloud.google.com/go/dialogflow/apiv2"
 	"errors"
@@ -17,6 +18,7 @@ import (
 	"path/filepath"
 	"strings"
 )
+// [END import_libraries]
 
 func main() {
 	flag.Usage = func() {
@@ -124,6 +126,7 @@ func ListSessionEntityTypes(projectID, sessionID string) ([]*dialogflowpb.Sessio
 	return sessionEntityTypes, nil
 }
 
+// [START dialogflow_create_session_entity_type]
 func CreateSessionEntityType(projectID, sessionID, displayName, overrideMode string, values []string) (string, error) {
 	ctx := context.Background()
 
@@ -165,7 +168,9 @@ func CreateSessionEntityType(projectID, sessionID, displayName, overrideMode str
 
 	return name, nil
 }
+// [END dialogflow_create_session_entity_type]
 
+// [START dialogflow_delete_session_entity_type]
 func DeleteSessionEntityType(projectID, sessionID, displayName string) error {
 	ctx := context.Background()
 
@@ -190,3 +195,4 @@ func DeleteSessionEntityType(projectID, sessionID, displayName string) error {
 
 	return nil
 }
+// [END dialogflow_delete_session_entity_type]
