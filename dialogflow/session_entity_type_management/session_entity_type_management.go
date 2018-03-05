@@ -18,6 +18,7 @@ import (
 	"path/filepath"
 	"strings"
 )
+
 // [END import_libraries]
 
 func main() {
@@ -168,6 +169,7 @@ func CreateSessionEntityType(projectID, sessionID, displayName, overrideMode str
 
 	return name, nil
 }
+
 // [END dialogflow_create_session_entity_type]
 
 // [START dialogflow_delete_session_entity_type]
@@ -195,4 +197,5 @@ func DeleteSessionEntityType(projectID, sessionID, displayName string) error {
 
 	return nil
 }
+
 // [END dialogflow_delete_session_entity_type]

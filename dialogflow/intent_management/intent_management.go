@@ -18,6 +18,7 @@ import (
 	"path/filepath"
 	"strings"
 )
+
 // [END import_libraries]
 
 func main() {
@@ -176,6 +177,7 @@ func CreateIntent(projectID, displayName string, trainingPhraseParts, messageTex
 
 	return nil
 }
+
 // [END dialogflow_create_intent]
 
 // [START dialogflow_delete_intent]
@@ -203,4 +205,5 @@ func DeleteIntent(projectID, intentID string) error {
 
 	return nil
 }
+
 // [END dialogflow_delete_intent]

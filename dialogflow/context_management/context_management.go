@@ -17,6 +17,7 @@ import (
 	"os"
 	"path/filepath"
 )
+
 // [END import_libraries]
 
 func main() {
@@ -130,6 +131,7 @@ func CreateContext(projectID, sessionID, contextID string) error {
 
 	return nil
 }
+
 // [END dialogflow_create_context]
 
 // [START dialogflow_delete_context]
@@ -158,4 +160,5 @@ func DeleteContext(projectID, sessionID, contextID string) error {
 
 	return nil
 }
+
 // [END dialogflow_delete_context]

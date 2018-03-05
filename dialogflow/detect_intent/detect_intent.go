@@ -18,6 +18,7 @@ import (
 	"os"
 	"path/filepath"
 )
+
 // [END import_libraries]
 
 func main() {
@@ -114,6 +115,7 @@ func DetectIntentText(projectID, sessionID, text, languageCode string) (string, 
 	fulfillmentText := queryResult.GetFulfillmentText()
 	return fulfillmentText, nil
 }
+
 // [END dialogflow_detect_intent_text]
 
 // [START dialogflow_detect_intent_audio]
@@ -154,6 +156,7 @@ func DetectIntentAudio(projectID, sessionID, audioFile, languageCode string) (st
 	fulfillmentText := queryResult.GetFulfillmentText()
 	return fulfillmentText, nil
 }
+
 // [END dialogflow_detect_intent_audio]
 
 // [START dialogflow_detect_intent_streaming]
@@ -239,4 +242,5 @@ func DetectIntentStream(projectID, sessionID, audioFile, languageCode string) (s
 	fulfillmentText := queryResult.GetFulfillmentText()
 	return fulfillmentText, nil
 }
+
 // [END dialogflow_detect_intent_streaming]

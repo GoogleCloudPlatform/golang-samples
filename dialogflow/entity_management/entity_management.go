@@ -17,6 +17,7 @@ import (
 	"path/filepath"
 	"strings"
 )
+
 // [END import_libraries]
 
 func main() {
@@ -129,7 +130,6 @@ func CreateEntity(projectID, entityTypeID, entityValue string, synonyms []string
 	}
 	defer entityTypesClient.Close()
 
-
 	if projectID == "" || entityTypeID == "" {
 		return errors.New(fmt.Sprintf("Received empty project (%s) or entity type (%s)", projectID, entityTypeID))
 	}
@@ -152,6 +152,7 @@ func CreateEntity(projectID, entityTypeID, entityValue string, synonyms []string
 
 	return nil
 }
+
 // [END dialogflow_create_entity]
 
 // [START dialogflow_delete_entity]
@@ -163,7 +164,6 @@ func DeleteEntity(projectID, entityTypeID, entityValue string) error {
 		return clientErr
 	}
 	defer entityTypesClient.Close()
-
 
 	if projectID == "" || entityTypeID == "" {
 		return errors.New(fmt.Sprintf("Received empty project (%s) or entity type (%s)", projectID, entityTypeID))
@@ -185,4 +185,5 @@ func DeleteEntity(projectID, entityTypeID, entityValue string) error {
 
 	return nil
 }
+
 // [END dialogflow_delete_entity]

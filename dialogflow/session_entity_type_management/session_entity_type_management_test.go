@@ -25,7 +25,9 @@ func TestSessionEntityTypeManagement(t *testing.T) {
 	// Create and defer closure of entity types client used in this test
 	ctx := context.Background()
 	entityTypesClient, err := dialogflow.NewEntityTypesClient(ctx)
-	if err != nil {t.Error(err)}
+	if err != nil {
+		t.Error(err)
+	}
 	defer entityTypesClient.Close()
 
 	// Create and defer deletion of entity type used in this test
@@ -37,12 +39,13 @@ func TestSessionEntityTypeManagement(t *testing.T) {
 		entityType := dialogflowpb.EntityType{DisplayName: displayName, Kind: dialogflowpb.EntityType_KIND_MAP}
 		creationRequest := dialogflowpb.CreateEntityTypeRequest{Parent: parent, EntityType: &entityType}
 		response, err := entityTypesClient.CreateEntityType(ctx, &creationRequest)
-		if err != nil {t.Error(err)}
+		if err != nil {
+			t.Error(err)
+		}
 		entityName := response.GetName()
 		deletionRequest := dialogflowpb.DeleteEntityTypeRequest{Name: entityName}
 		defer entityTypesClient.DeleteEntityType(ctx, &deletionRequest)
 	}
-
 
 	var sessionEntityTypeNames []string
 

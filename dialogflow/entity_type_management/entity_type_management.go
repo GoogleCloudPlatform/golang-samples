@@ -17,6 +17,7 @@ import (
 	"os"
 	"path/filepath"
 )
+
 // [END import_libraries]
 
 func main() {
@@ -151,6 +152,7 @@ func CreateEntityType(projectID, displayName, kind string) (string, error) {
 
 	return response.GetName(), nil
 }
+
 // [END dialogflow_delete_entity_type]
 
 // [START dialogflow_delete_entity_type]
@@ -179,4 +181,5 @@ func DeleteEntityType(projectID, entityTypeID string) error {
 
 	return nil
 }
+
 // [END dialogflow_delete_entity_type]
