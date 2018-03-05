@@ -7,6 +7,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -50,10 +51,21 @@ func redact(w io.Writer, client *dlp.Client) {
 }
 
 func main() {
-	client, err := dlp.NewClient(context.Background())
+	ctx := context.Background()
+	client, err := dlp.NewClient(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer client.Close()
-	redact(os.Stdout, client)
+
+	flag.Parse()
+
+	if flag.NArg() == 0 || flag.NArg() > 1 {
+		fmt.Fprintf(os.Stderr, "Usage: %s CMD\n", os.Args[0])
+		os.Exit(1)
+	}
+	switch flag.Arg(0) {
+	case "redact":
+		redact(os.Stdout, client)
+	}
 }
