@@ -4,6 +4,7 @@
 
 package main
 
+// [START import_libraries]
 import (
 	dialogflow "cloud.google.com/go/dialogflow/apiv2"
 	"errors"
@@ -17,6 +18,7 @@ import (
 	"path/filepath"
 	"strings"
 )
+// [END import_libraries]
 
 func main() {
 	flag.Usage = func() {
@@ -134,6 +136,7 @@ func ListIntents(projectID string) ([]*dialogflowpb.Intent, error) {
 	return intents, nil
 }
 
+// [START dialogflow_create_intent]
 func CreateIntent(projectID, displayName string, trainingPhraseParts, messageTexts []string) error {
 	ctx := context.Background()
 
@@ -173,7 +176,9 @@ func CreateIntent(projectID, displayName string, trainingPhraseParts, messageTex
 
 	return nil
 }
+// [END dialogflow_create_intent]
 
+// [START dialogflow_delete_intent]
 func DeleteIntent(projectID, intentID string) error {
 	ctx := context.Background()
 
@@ -198,3 +203,4 @@ func DeleteIntent(projectID, intentID string) error {
 
 	return nil
 }
+// [END dialogflow_delete_intent]
