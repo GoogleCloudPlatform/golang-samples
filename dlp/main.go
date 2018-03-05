@@ -8,19 +8,15 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
+	"os"
 
 	dlp "cloud.google.com/go/dlp/apiv2beta1"
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2beta1"
 )
 
-func main() {
-	c, err := dlp.NewClient(context.Background())
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer c.Close()
-
+func redact(w io.Writer, client *dlp.Client) {
 	rcr := &dlppb.RedactContentRequest{
 		InspectConfig: &dlppb.InspectConfig{
 			InfoTypes: []*dlppb.InfoType{
@@ -45,10 +41,19 @@ func main() {
 			},
 		},
 	}
-	r, err := c.RedactContent(context.Background(), rcr)
+	r, err := client.RedactContent(context.Background(), rcr)
 	if err != nil {
 		log.Fatal(err)
 	}
 	i := r.GetItems()[0]
-	fmt.Println(string(i.GetData()))
+	fmt.Fprint(w, string(i.GetData()))
+}
+
+func main() {
+	client, err := dlp.NewClient(context.Background())
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+	redact(os.Stdout, client)
 }
