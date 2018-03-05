@@ -113,6 +113,7 @@ func ListIntents(projectID string) ([]*dialogflowpb.Intent, error) {
 	if clientErr != nil {
 		return nil, clientErr
 	}
+	defer intentsClient.Close()
 
 	if projectID == "" {
 		return nil, errors.New(fmt.Sprintf("Received empty project (%s)", projectID))
@@ -140,6 +141,7 @@ func CreateIntent(projectID, displayName string, trainingPhraseParts []string, m
 	if clientErr != nil {
 		return clientErr
 	}
+	defer intentsClient.Close()
 
 	if projectID == "" || displayName == "" {
 		return errors.New(fmt.Sprintf("Received empty project (%s) or intent (%s)", projectID, displayName))
@@ -179,6 +181,7 @@ func DeleteIntent(projectID string, intentID string) error {
 	if clientErr != nil {
 		return clientErr
 	}
+	defer intentsClient.Close()
 
 	if projectID == "" || intentID == "" {
 		return errors.New(fmt.Sprintf("Received empty project (%s) or intent (%s)", projectID, intentID))

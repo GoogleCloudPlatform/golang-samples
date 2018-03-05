@@ -90,6 +90,7 @@ func DetectIntentText(projectID, sessionID, text, languageCode string) (string, 
 	if err != nil {
 		return "", err
 	}
+	defer sessionClient.Close()
 
 	if projectID == "" || sessionID == "" {
 		return "", errors.New(fmt.Sprintf("Received empty project (%s) or session (%s)", projectID, sessionID))
@@ -118,6 +119,7 @@ func DetectIntentAudio(projectID, sessionID, audioFile, languageCode string) (st
 	if err != nil {
 		return "", err
 	}
+	defer sessionClient.Close()
 
 	if projectID == "" || sessionID == "" {
 		return "", errors.New(fmt.Sprintf("Received empty project (%s) or session (%s)", projectID, sessionID))
@@ -155,6 +157,7 @@ func DetectIntentStream(projectID, sessionID, audioFile, languageCode string) (s
 	if err != nil {
 		return "", err
 	}
+	defer sessionClient.Close()
 
 	if projectID == "" || sessionID == "" {
 		return "", errors.New(fmt.Sprintf("Received empty project (%s) or session (%s)", projectID, sessionID))

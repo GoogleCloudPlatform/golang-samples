@@ -103,6 +103,7 @@ func ListSessionEntityTypes(projectID, sessionID string) ([]*dialogflowpb.Sessio
 	if clientErr != nil {
 		return nil, clientErr
 	}
+	defer sessionEntityTypesClient.Close()
 
 	if projectID == "" || sessionID == "" {
 		return nil, errors.New(fmt.Sprintf("Received empty project (%s) or session (%s)", projectID, sessionID))
@@ -130,6 +131,7 @@ func CreateSessionEntityType(projectID string, sessionID string, displayName str
 	if clientErr != nil {
 		return "", clientErr
 	}
+	defer sessionEntityTypesClient.Close()
 
 	if projectID == "" || sessionID == "" || displayName == "" {
 		return "", errors.New(fmt.Sprintf("Received empty project (%s) or session (%s) or displayName (%s)", projectID, sessionID, displayName))
@@ -171,6 +173,7 @@ func DeleteSessionEntityType(projectID string, sessionID string, displayName str
 	if clientErr != nil {
 		return clientErr
 	}
+	defer sessionEntityTypesClient.Close()
 
 	if projectID == "" || sessionID == "" || displayName == "" {
 		return errors.New(fmt.Sprintf("Received empty project (%s) or sessionID (%s) or displayName (%s)", projectID, sessionID, displayName))

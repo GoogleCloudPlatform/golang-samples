@@ -80,6 +80,7 @@ func ListContexts(projectID string, sessionID string) ([]*dialogflowpb.Context, 
 	if clientErr != nil {
 		return nil, clientErr
 	}
+	defer contextsClient.Close()
 
 	if projectID == "" || sessionID == "" {
 		return nil, errors.New(fmt.Sprintf("Received empty project (%s) or session (%s)", projectID, sessionID))
@@ -107,6 +108,7 @@ func CreateContext(projectID string, sessionID string, contextID string) error {
 	if clientErr != nil {
 		return clientErr
 	}
+	defer contextsClient.Close()
 
 	if projectID == "" || sessionID == "" || contextID == "" {
 		return errors.New(fmt.Sprintf("Received empty project (%s) or session (%s) or context (%s)", projectID, sessionID, contextID))
@@ -133,6 +135,7 @@ func DeleteContext(projectID string, sessionID string, contextID string) error {
 	if clientErr != nil {
 		return clientErr
 	}
+	defer contextsClient.Close()
 
 	if projectID == "" || sessionID == "" || contextID == "" {
 		return errors.New(fmt.Sprintf("Received empty project (%s) or session (%s) or context (%s)", projectID, sessionID, contextID))

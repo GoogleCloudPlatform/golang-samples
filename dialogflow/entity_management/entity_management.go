@@ -99,6 +99,7 @@ func ListEntities(projectID string, entityTypeID string) ([]*dialogflowpb.Entity
 	if clientErr != nil {
 		return nil, clientErr
 	}
+	defer entityTypesClient.Close()
 
 	if projectID == "" || entityTypeID == "" {
 		return nil, errors.New(fmt.Sprintf("Received empty project (%s) or entity type (%s)", projectID, entityTypeID))
@@ -123,6 +124,8 @@ func CreateEntity(projectID string, entityTypeID string, entityValue string, syn
 	if clientErr != nil {
 		return clientErr
 	}
+	defer entityTypesClient.Close()
+
 
 	if projectID == "" || entityTypeID == "" {
 		return errors.New(fmt.Sprintf("Received empty project (%s) or entity type (%s)", projectID, entityTypeID))
@@ -154,6 +157,8 @@ func DeleteEntity(projectID string, entityTypeID string, entityValue string) err
 	if clientErr != nil {
 		return clientErr
 	}
+	defer entityTypesClient.Close()
+
 
 	if projectID == "" || entityTypeID == "" {
 		return errors.New(fmt.Sprintf("Received empty project (%s) or entity type (%s)", projectID, entityTypeID))
