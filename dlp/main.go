@@ -91,6 +91,16 @@ func infoTypes(w io.Writer, client *dlp.Client, s string) {
 	}
 }
 
+func categories(w io.Writer, client *dlp.Client) {
+	rcr := &dlppb.ListRootCategoriesRequest{}
+	r, err := client.ListRootCategories(context.Background(), rcr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, c := range r.GetCategories() {
+		fmt.Fprintf(w, "%s (%s)\n", c.GetName(), c.GetDisplayName())
+	}
+}
 func main() {
 	ctx := context.Background()
 	client, err := dlp.NewClient(ctx)
@@ -112,5 +122,8 @@ func main() {
 		redact(os.Stdout, client, flag.Arg(1))
 	case "infoTypes":
 		infoTypes(os.Stdout, client, flag.Arg(1))
+	case "categories":
+		categories(os.Stdout, client)
+
 	}
 }
