@@ -4,6 +4,7 @@
 
 package main
 
+// [START import_libraries]
 import (
 	dialogflow "cloud.google.com/go/dialogflow/apiv2"
 	"errors"
@@ -16,6 +17,7 @@ import (
 	"os"
 	"path/filepath"
 )
+// [END import_libraries]
 
 func main() {
 	flag.Usage = func() {
@@ -101,6 +103,7 @@ func ListContexts(projectID, sessionID string) ([]*dialogflowpb.Context, error) 
 	return contexts, nil
 }
 
+// [START dialogflow_create_context]
 func CreateContext(projectID, sessionID, contextID string) error {
 	ctx := context.Background()
 
@@ -127,7 +130,9 @@ func CreateContext(projectID, sessionID, contextID string) error {
 
 	return nil
 }
+// [END dialogflow_create_context]
 
+// [START dialogflow_delete_context]
 func DeleteContext(projectID, sessionID, contextID string) error {
 	ctx := context.Background()
 
@@ -153,3 +158,4 @@ func DeleteContext(projectID, sessionID, contextID string) error {
 
 	return nil
 }
+// [END dialogflow_delete_context]
