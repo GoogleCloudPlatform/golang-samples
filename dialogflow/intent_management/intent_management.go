@@ -134,7 +134,7 @@ func ListIntents(projectID string) ([]*dialogflowpb.Intent, error) {
 	return intents, nil
 }
 
-func CreateIntent(projectID, displayName string, trainingPhraseParts []string, messageTexts []string) error {
+func CreateIntent(projectID, displayName string, trainingPhraseParts, messageTexts []string) error {
 	ctx := context.Background()
 
 	intentsClient, clientErr := dialogflow.NewIntentsClient(ctx)
@@ -174,7 +174,7 @@ func CreateIntent(projectID, displayName string, trainingPhraseParts []string, m
 	return nil
 }
 
-func DeleteIntent(projectID string, intentID string) error {
+func DeleteIntent(projectID, intentID string) error {
 	ctx := context.Background()
 
 	intentsClient, clientErr := dialogflow.NewIntentsClient(ctx)

@@ -92,7 +92,7 @@ func main() {
 	}
 }
 
-func ListEntities(projectID string, entityTypeID string) ([]*dialogflowpb.EntityType_Entity, error) {
+func ListEntities(projectID, entityTypeID string) ([]*dialogflowpb.EntityType_Entity, error) {
 	ctx := context.Background()
 
 	entityTypesClient, clientErr := dialogflow.NewEntityTypesClient(ctx)
@@ -117,7 +117,7 @@ func ListEntities(projectID string, entityTypeID string) ([]*dialogflowpb.Entity
 	return entityType.GetEntities(), nil
 }
 
-func CreateEntity(projectID string, entityTypeID string, entityValue string, synonyms []string) error {
+func CreateEntity(projectID, entityTypeID, entityValue string, synonyms []string) error {
 	ctx := context.Background()
 
 	entityTypesClient, clientErr := dialogflow.NewEntityTypesClient(ctx)
@@ -150,7 +150,7 @@ func CreateEntity(projectID string, entityTypeID string, entityValue string, syn
 	return nil
 }
 
-func DeleteEntity(projectID string, entityTypeID string, entityValue string) error {
+func DeleteEntity(projectID, entityTypeID, entityValue string) error {
 	ctx := context.Background()
 
 	entityTypesClient, clientErr := dialogflow.NewEntityTypesClient(ctx)

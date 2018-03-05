@@ -73,7 +73,7 @@ func main() {
 	}
 }
 
-func ListContexts(projectID string, sessionID string) ([]*dialogflowpb.Context, error) {
+func ListContexts(projectID, sessionID string) ([]*dialogflowpb.Context, error) {
 	ctx := context.Background()
 
 	contextsClient, clientErr := dialogflow.NewContextsClient(ctx)
@@ -101,7 +101,7 @@ func ListContexts(projectID string, sessionID string) ([]*dialogflowpb.Context, 
 	return contexts, nil
 }
 
-func CreateContext(projectID string, sessionID string, contextID string) error {
+func CreateContext(projectID, sessionID, contextID string) error {
 	ctx := context.Background()
 
 	contextsClient, clientErr := dialogflow.NewContextsClient(ctx)
@@ -128,7 +128,7 @@ func CreateContext(projectID string, sessionID string, contextID string) error {
 	return nil
 }
 
-func DeleteContext(projectID string, sessionID string, contextID string) error {
+func DeleteContext(projectID, sessionID, contextID string) error {
 	ctx := context.Background()
 
 	contextsClient, clientErr := dialogflow.NewContextsClient(ctx)

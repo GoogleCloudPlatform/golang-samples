@@ -113,7 +113,7 @@ func ListEntityTypes(projectID string) ([]*dialogflowpb.EntityType, error) {
 	return entityTypes, nil
 }
 
-func CreateEntityType(projectID string, displayName string, kind string) (string, error) {
+func CreateEntityType(projectID, displayName, kind string) (string, error) {
 	ctx := context.Background()
 
 	entityTypesClient, clientErr := dialogflow.NewEntityTypesClient(ctx)
@@ -149,7 +149,7 @@ func CreateEntityType(projectID string, displayName string, kind string) (string
 	return response.GetName(), nil
 }
 
-func DeleteEntityType(projectID string, entityTypeID string) error {
+func DeleteEntityType(projectID, entityTypeID string) error {
 	ctx := context.Background()
 
 	entityTypesClient, clientErr := dialogflow.NewEntityTypesClient(ctx)

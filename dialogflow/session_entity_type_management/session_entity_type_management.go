@@ -124,7 +124,7 @@ func ListSessionEntityTypes(projectID, sessionID string) ([]*dialogflowpb.Sessio
 	return sessionEntityTypes, nil
 }
 
-func CreateSessionEntityType(projectID string, sessionID string, displayName string, overrideMode string, values []string) (string, error) {
+func CreateSessionEntityType(projectID, sessionID, displayName, overrideMode string, values []string) (string, error) {
 	ctx := context.Background()
 
 	sessionEntityTypesClient, clientErr := dialogflow.NewSessionEntityTypesClient(ctx)
@@ -166,7 +166,7 @@ func CreateSessionEntityType(projectID string, sessionID string, displayName str
 	return name, nil
 }
 
-func DeleteSessionEntityType(projectID string, sessionID string, displayName string) error {
+func DeleteSessionEntityType(projectID, sessionID, displayName string) error {
 	ctx := context.Background()
 
 	sessionEntityTypesClient, clientErr := dialogflow.NewSessionEntityTypesClient(ctx)
