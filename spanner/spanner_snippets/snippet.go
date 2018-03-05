@@ -503,7 +503,7 @@ func readBatchData(ctx context.Context, w io.Writer, client *spanner.Client) err
 		SingerInfo []byte
 	}
 	stmt := spanner.Statement{SQL: "SELECT SingerId, FirstName, LastName FROM Singers;"}
-	partitions, err := txn.PartitionQuery(ctx, spanner.PartitionOptions{}, stmt)
+	partitions, err := txn.PartitionQuery(ctx, stmt, spanner.PartitionOptions{})
 	if err != nil {
 		return err
 	}
