@@ -199,7 +199,7 @@ func PrintTasks(w io.Writer, tasks []*Task) {
 // [END format_results]
 
 func usage() {
-	fmt.Println(`Usage:
+	fmt.Print(`Usage:
 
   new <description>  Adds a task with a description <description>
   done <task-id>     Marks a task as done
