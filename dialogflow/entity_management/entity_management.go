@@ -4,6 +4,7 @@
 
 package main
 
+// [START import_libraries]
 import (
 	dialogflow "cloud.google.com/go/dialogflow/apiv2"
 	"errors"
@@ -16,6 +17,7 @@ import (
 	"path/filepath"
 	"strings"
 )
+// [END import_libraries]
 
 func main() {
 	flag.Usage = func() {
@@ -117,6 +119,7 @@ func ListEntities(projectID, entityTypeID string) ([]*dialogflowpb.EntityType_En
 	return entityType.GetEntities(), nil
 }
 
+// [START dialogflow_create_entity]
 func CreateEntity(projectID, entityTypeID, entityValue string, synonyms []string) error {
 	ctx := context.Background()
 
@@ -149,7 +152,9 @@ func CreateEntity(projectID, entityTypeID, entityValue string, synonyms []string
 
 	return nil
 }
+// [END dialogflow_create_entity]
 
+// [START dialogflow_delete_entity]
 func DeleteEntity(projectID, entityTypeID, entityValue string) error {
 	ctx := context.Background()
 
@@ -180,3 +185,4 @@ func DeleteEntity(projectID, entityTypeID, entityValue string) error {
 
 	return nil
 }
+// [END dialogflow_delete_entity]
