@@ -17,7 +17,7 @@ import (
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2beta1"
 )
 
-func redact(w io.Writer, client *dlp.Client) {
+func redact(w io.Writer, client *dlp.Client, s string) {
 	rcr := &dlppb.RedactContentRequest{
 		InspectConfig: &dlppb.InspectConfig{
 			InfoTypes: []*dlppb.InfoType{
@@ -37,7 +37,7 @@ func redact(w io.Writer, client *dlp.Client) {
 			{
 				Type: "text/plain",
 				DataItem: &dlppb.ContentItem_Data{
-					Data: []byte("My SSN is 500112233"),
+					Data: []byte(s),
 				},
 			},
 		},
@@ -60,12 +60,12 @@ func main() {
 
 	flag.Parse()
 
-	if flag.NArg() == 0 || flag.NArg() > 1 {
-		fmt.Fprintf(os.Stderr, "Usage: %s CMD\n", os.Args[0])
+	if flag.NArg() != 2 {
+		fmt.Fprintf(os.Stderr, `Usage: %s CMD "string"\n`, os.Args[0])
 		os.Exit(1)
 	}
 	switch flag.Arg(0) {
 	case "redact":
-		redact(os.Stdout, client)
+		redact(os.Stdout, client, flag.Arg(1))
 	}
 }
