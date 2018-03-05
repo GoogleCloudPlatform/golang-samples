@@ -78,6 +78,19 @@ func redact(w io.Writer, client *dlp.Client, s string) {
 	fmt.Fprintf(w, "%s\n", r.GetItems()[0].GetData())
 }
 
+func infoTypes(w io.Writer, client *dlp.Client, s string) {
+	rcr := &dlppb.ListInfoTypesRequest{
+		Category: s,
+	}
+	r, err := client.ListInfoTypes(context.Background(), rcr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, it := range r.GetInfoTypes() {
+		fmt.Fprintf(w, "%s\n", it.GetName())
+	}
+}
+
 func main() {
 	ctx := context.Background()
 	client, err := dlp.NewClient(ctx)
@@ -97,5 +110,7 @@ func main() {
 		inspect(os.Stdout, client, flag.Arg(1))
 	case "redact":
 		redact(os.Stdout, client, flag.Arg(1))
+	case "infoTypes":
+		infoTypes(os.Stdout, client, flag.Arg(1))
 	}
 }
