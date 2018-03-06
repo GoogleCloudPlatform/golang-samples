@@ -140,6 +140,54 @@ func mask(w io.Writer, client *dlp.Client, s string) {
 	}
 }
 
+func deidentifyFPE(w io.Writer, client *dlp.Client, s, wrappedKey, cryptoKeyName string) {
+	rcr := &dlppb.DeidentifyContentRequest{
+		DeidentifyConfig: &dlppb.DeidentifyConfig{
+			Transformation: &dlppb.DeidentifyConfig_InfoTypeTransformations{
+				InfoTypeTransformations: &dlppb.InfoTypeTransformations{
+					Transformations: []*dlppb.InfoTypeTransformations_InfoTypeTransformation{
+						{
+							InfoTypes: []*dlppb.InfoType{},
+							PrimitiveTransformation: &dlppb.PrimitiveTransformation{
+								Transformation: &dlppb.PrimitiveTransformation_CryptoReplaceFfxFpeConfig{
+									CryptoReplaceFfxFpeConfig: &dlppb.CryptoReplaceFfxFpeConfig{
+										CryptoKey: &dlppb.CryptoKey{
+											Source: &dlppb.CryptoKey_KmsWrapped{
+												KmsWrapped: &dlppb.KmsWrappedCryptoKey{
+													WrappedKey:    []byte(wrappedKey),
+													CryptoKeyName: cryptoKeyName,
+												},
+											},
+										},
+										Alphabet: &dlppb.CryptoReplaceFfxFpeConfig_CommonAlphabet{
+											CommonAlphabet: dlppb.CryptoReplaceFfxFpeConfig_ALPHA_NUMERIC,
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		Items: []*dlppb.ContentItem{
+			{
+				Type: "text/plain",
+				DataItem: &dlppb.ContentItem_Data{
+					Data: []byte(s),
+				},
+			},
+		},
+	}
+	r, err := client.DeidentifyContent(context.Background(), rcr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, i := range r.GetItems() {
+		fmt.Fprintf(w, "%s\n", i.GetData())
+	}
+}
+
 func main() {
 	ctx := context.Background()
 	client, err := dlp.NewClient(ctx)
@@ -150,10 +198,6 @@ func main() {
 
 	flag.Parse()
 
-	if flag.NArg() != 2 {
-		fmt.Fprintf(os.Stderr, `Usage: %s CMD "string"\n`, os.Args[0])
-		os.Exit(1)
-	}
 	switch flag.Arg(0) {
 	case "inspect":
 		inspect(os.Stdout, client, flag.Arg(1))
@@ -165,5 +209,10 @@ func main() {
 		categories(os.Stdout, client)
 	case "mask":
 		mask(os.Stdout, client, flag.Arg(1))
+	case "deidfpe":
+		deidentifyFPE(os.Stdout, client, flag.Arg(1), flag.Arg(2), flag.Arg(3))
+	default:
+		fmt.Fprintf(os.Stderr, `Usage: %s CMD "string"\n`, os.Args[0])
+		os.Exit(1)
 	}
 }
