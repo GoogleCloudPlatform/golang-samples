@@ -13,12 +13,13 @@ import (
 	"log"
 	"os"
 
-	dlp "cloud.google.com/go/dlp/apiv2beta1"
-	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2beta1"
+	dlp "cloud.google.com/go/dlp/apiv2"
+	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
-func inspect(w io.Writer, client *dlp.Client, s string) {
+func inspect(w io.Writer, client *dlp.Client, project, s string) {
 	rcr := &dlppb.InspectContentRequest{
+		Parent: "projects/" + project,
 		InspectConfig: &dlppb.InspectConfig{
 			InfoTypes: []*dlppb.InfoType{
 				{
@@ -27,12 +28,9 @@ func inspect(w io.Writer, client *dlp.Client, s string) {
 			},
 			MinLikelihood: dlppb.Likelihood_LIKELIHOOD_UNSPECIFIED,
 		},
-		Items: []*dlppb.ContentItem{
-			{
-				Type: "text/plain",
-				DataItem: &dlppb.ContentItem_Data{
-					Data: []byte(s),
-				},
+		Item: &dlppb.ContentItem{
+			DataItem: &dlppb.ContentItem_Value{
+				Value: s,
 			},
 		},
 	}
@@ -40,14 +38,12 @@ func inspect(w io.Writer, client *dlp.Client, s string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fs := r.GetResults()[0].GetFindings()
-	for _, f := range fs {
-		fmt.Fprintf(w, "%s\n", f.GetInfoType().GetName())
-	}
+	fmt.Fprintln(w, r.GetResult())
 }
 
-func redact(w io.Writer, client *dlp.Client, s string) {
-	rcr := &dlppb.RedactContentRequest{
+func redact(w io.Writer, client *dlp.Client, project, s string) {
+	rcr := &dlppb.DeidentifyContentRequest{
+		Parent: "projects/" + project,
 		InspectConfig: &dlppb.InspectConfig{
 			InfoTypes: []*dlppb.InfoType{
 				{
@@ -56,54 +52,51 @@ func redact(w io.Writer, client *dlp.Client, s string) {
 			},
 			MinLikelihood: dlppb.Likelihood_LIKELIHOOD_UNSPECIFIED,
 		},
-		ReplaceConfigs: []*dlppb.RedactContentRequest_ReplaceConfig{
-			{
-				InfoType:    &dlppb.InfoType{Name: "US_SOCIAL_SECURITY_NUMBER"},
-				ReplaceWith: "[redacted]",
-			},
-		},
-		Items: []*dlppb.ContentItem{
-			{
-				Type: "text/plain",
-				DataItem: &dlppb.ContentItem_Data{
-					Data: []byte(s),
+		DeidentifyConfig: &dlppb.DeidentifyConfig{
+			Transformation: &dlppb.DeidentifyConfig_InfoTypeTransformations{
+				InfoTypeTransformations: &dlppb.InfoTypeTransformations{
+					Transformations: []*dlppb.InfoTypeTransformations_InfoTypeTransformation{
+						{
+							InfoTypes: []*dlppb.InfoType{},
+							PrimitiveTransformation: &dlppb.PrimitiveTransformation{
+								Transformation: &dlppb.PrimitiveTransformation_RedactConfig{
+									RedactConfig: &dlppb.RedactConfig{},
+								},
+							},
+						},
+					},
 				},
 			},
 		},
+		Item: &dlppb.ContentItem{
+			DataItem: &dlppb.ContentItem_Value{
+				Value: s,
+			},
+		},
 	}
-	r, err := client.RedactContent(context.Background(), rcr)
+	r, err := client.DeidentifyContent(context.Background(), rcr)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Fprintf(w, "%s\n", r.GetItems()[0].GetData())
+	fmt.Fprintln(w, r.GetItem())
 }
 
-func infoTypes(w io.Writer, client *dlp.Client, s string) {
+func infoTypes(w io.Writer, client *dlp.Client, filter string) {
 	rcr := &dlppb.ListInfoTypesRequest{
-		Category: s,
+		Filter: filter,
 	}
 	r, err := client.ListInfoTypes(context.Background(), rcr)
 	if err != nil {
 		log.Fatal(err)
 	}
 	for _, it := range r.GetInfoTypes() {
-		fmt.Fprintf(w, "%s\n", it.GetName())
+		fmt.Fprintln(w, it.GetName())
 	}
 }
 
-func categories(w io.Writer, client *dlp.Client) {
-	rcr := &dlppb.ListRootCategoriesRequest{}
-	r, err := client.ListRootCategories(context.Background(), rcr)
-	if err != nil {
-		log.Fatal(err)
-	}
-	for _, c := range r.GetCategories() {
-		fmt.Fprintf(w, "%s (%s)\n", c.GetName(), c.GetDisplayName())
-	}
-}
-
-func mask(w io.Writer, client *dlp.Client, s string) {
+func mask(w io.Writer, client *dlp.Client, project, s string) {
 	rcr := &dlppb.DeidentifyContentRequest{
+		Parent: "projects/" + project,
 		DeidentifyConfig: &dlppb.DeidentifyConfig{
 			Transformation: &dlppb.DeidentifyConfig_InfoTypeTransformations{
 				InfoTypeTransformations: &dlppb.InfoTypeTransformations{
@@ -122,12 +115,9 @@ func mask(w io.Writer, client *dlp.Client, s string) {
 				},
 			},
 		},
-		Items: []*dlppb.ContentItem{
-			{
-				Type: "text/plain",
-				DataItem: &dlppb.ContentItem_Data{
-					Data: []byte(s),
-				},
+		Item: &dlppb.ContentItem{
+			DataItem: &dlppb.ContentItem_Value{
+				Value: s,
 			},
 		},
 	}
@@ -135,13 +125,12 @@ func mask(w io.Writer, client *dlp.Client, s string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	for _, i := range r.GetItems() {
-		fmt.Fprintf(w, "%s\n", i.GetData())
-	}
+	fmt.Fprintln(w, r.GetItem().GetValue())
 }
 
-func deidentifyFPE(w io.Writer, client *dlp.Client, s, wrappedKey, cryptoKeyName string) {
+func deidentifyFPE(w io.Writer, client *dlp.Client, project, s, wrappedKey, cryptoKeyName string) {
 	rcr := &dlppb.DeidentifyContentRequest{
+		Parent: "projects/" + project,
 		DeidentifyConfig: &dlppb.DeidentifyConfig{
 			Transformation: &dlppb.DeidentifyConfig_InfoTypeTransformations{
 				InfoTypeTransformations: &dlppb.InfoTypeTransformations{
@@ -170,12 +159,9 @@ func deidentifyFPE(w io.Writer, client *dlp.Client, s, wrappedKey, cryptoKeyName
 				},
 			},
 		},
-		Items: []*dlppb.ContentItem{
-			{
-				Type: "text/plain",
-				DataItem: &dlppb.ContentItem_Data{
-					Data: []byte(s),
-				},
+		Item: &dlppb.ContentItem{
+			DataItem: &dlppb.ContentItem_Value{
+				Value: s,
 			},
 		},
 	}
@@ -183,9 +169,7 @@ func deidentifyFPE(w io.Writer, client *dlp.Client, s, wrappedKey, cryptoKeyName
 	if err != nil {
 		log.Fatal(err)
 	}
-	for _, i := range r.GetItems() {
-		fmt.Fprintf(w, "%s\n", i.GetData())
-	}
+	fmt.Fprintln(w, r.GetItem().GetValue())
 }
 
 func main() {
@@ -196,21 +180,25 @@ func main() {
 	}
 	defer client.Close()
 
+	project := flag.String("project", "", "GCloud project ID")
 	flag.Parse()
+
+	if *project == "" {
+		flag.Usage()
+		os.Exit(1)
+	}
 
 	switch flag.Arg(0) {
 	case "inspect":
-		inspect(os.Stdout, client, flag.Arg(1))
+		inspect(os.Stdout, client, *project, flag.Arg(1))
 	case "redact":
-		redact(os.Stdout, client, flag.Arg(1))
+		redact(os.Stdout, client, *project, flag.Arg(1))
 	case "infoTypes":
 		infoTypes(os.Stdout, client, flag.Arg(1))
-	case "categories":
-		categories(os.Stdout, client)
 	case "mask":
-		mask(os.Stdout, client, flag.Arg(1))
+		mask(os.Stdout, client, *project, flag.Arg(1))
 	case "deidfpe":
-		deidentifyFPE(os.Stdout, client, flag.Arg(1), flag.Arg(2), flag.Arg(3))
+		deidentifyFPE(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3))
 	default:
 		fmt.Fprintf(os.Stderr, `Usage: %s CMD "string"\n`, os.Args[0])
 		os.Exit(1)
