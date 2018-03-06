@@ -122,14 +122,6 @@ func mask(w io.Writer, client *dlp.Client, s string) {
 				},
 			},
 		},
-		InspectConfig: &dlppb.InspectConfig{
-			InfoTypes: []*dlppb.InfoType{
-				{
-					Name: "US_SOCIAL_SECURITY_NUMBER",
-				},
-			},
-			MinLikelihood: dlppb.Likelihood_LIKELIHOOD_UNSPECIFIED,
-		},
 		Items: []*dlppb.ContentItem{
 			{
 				Type: "text/plain",
@@ -147,6 +139,7 @@ func mask(w io.Writer, client *dlp.Client, s string) {
 		fmt.Fprintf(w, "%s\n", i.GetData())
 	}
 }
+
 func main() {
 	ctx := context.Background()
 	client, err := dlp.NewClient(ctx)
