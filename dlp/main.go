@@ -14,6 +14,7 @@ import (
 	"os"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
+	"cloud.google.com/go/pubsub"
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
@@ -172,7 +173,42 @@ func deidentifyFPE(w io.Writer, client *dlp.Client, project, s, wrappedKey, cryp
 	fmt.Fprintln(w, r.GetItem().GetValue())
 }
 
-func riskNumerical(w io.Writer, client *dlp.Client, project, dataProject, datasetID, tableID, columnName string) {
+func setupPubSub(ctx context.Context, project, topic, sub string) (*pubsub.Subscription, error) {
+	client, err := pubsub.NewClient(ctx, project)
+	if err != nil {
+		return nil, fmt.Errorf("error creating PubSub client: %v", err)
+	}
+	defer client.Close()
+
+	t := client.Topic(topic)
+	if exists, err := t.Exists(ctx); err != nil {
+		return nil, fmt.Errorf("error checking PubSub topic: %v", err)
+	} else if !exists {
+		if t, err = client.CreateTopic(ctx, topic); err != nil {
+			return nil, fmt.Errorf("error creating PubSub topic: %v", err)
+		}
+	}
+
+	s := client.Subscription(sub)
+
+	if exists, err := s.Exists(ctx); err != nil {
+		return nil, fmt.Errorf("error checking for subscription: %v", err)
+	} else if !exists {
+		if s, err = client.CreateSubscription(ctx, sub, pubsub.SubscriptionConfig{Topic: t}); err != nil {
+			return nil, fmt.Errorf("failed to create subscription: %v", err)
+		}
+	}
+
+	return s, nil
+}
+
+func riskNumerical(w io.Writer, client *dlp.Client, project, dataProject, pubSubTopic, pubSubSub, datasetID, tableID, columnName string) {
+	ctx := context.Background()
+	s, err := setupPubSub(ctx, project, pubSubTopic, pubSubSub)
+	if err != nil {
+		log.Fatalf("Error setting up PubSub: %v\n", err)
+	}
+	topic := "projects/" + project + "/topics/" + pubSubTopic
 	rcr := &dlppb.CreateDlpJobRequest{
 		Parent: "projects/" + project,
 		Job: &dlppb.CreateDlpJobRequest_RiskJob{
@@ -191,6 +227,15 @@ func riskNumerical(w io.Writer, client *dlp.Client, project, dataProject, datase
 					DatasetId: datasetID,
 					TableId:   tableID,
 				},
+				Actions: []*dlppb.Action{
+					{
+						Action: &dlppb.Action_PubSub{
+							PubSub: &dlppb.Action_PublishToPubSub{
+								Topic: topic,
+							},
+						},
+					},
+				},
 			},
 		},
 	}
@@ -198,7 +243,33 @@ func riskNumerical(w io.Writer, client *dlp.Client, project, dataProject, datase
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Fprintln(w, j)
+	fmt.Fprintf(w, "Created job: %v\n", j)
+
+	ctx, cancel := context.WithCancel(ctx)
+	err = s.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
+		msg.Ack()
+		if msg.Attributes["DlpJobName"] == j.GetName() {
+			jr, err := client.GetDlpJob(ctx, &dlppb.GetDlpJobRequest{
+				Name: j.GetName(),
+			})
+			if err != nil {
+				log.Fatalf("Error getting completed job: %v\n", err)
+			}
+			n := jr.GetRiskDetails().GetNumericalStatsResult()
+			fmt.Fprintf(w, "Value range: [%v, %v]\n", n.GetMinValue(), n.GetMaxValue())
+			var tmp string
+			for p, v := range n.GetQuantileValues() {
+				if v.String() != tmp {
+					fmt.Fprintf(w, "Value at %v quantile: %v\n", p, v)
+					tmp = v.String()
+				}
+			}
+			cancel()
+		}
+	})
+	if err != nil {
+		log.Fatalf("Error receiving from PubSub: %v\n", err)
+	}
 }
 
 func main() {
@@ -229,7 +300,9 @@ func main() {
 	case "deidfpe":
 		deidentifyFPE(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3))
 	case "riskNumerical":
-		riskNumerical(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4))
+		// For example:
+		// dlp -project my-project riskNumerical bigquery-public-data risk-topic risk-sub nhtsa_traffic_fatalities accident_2015 state_number
+		riskNumerical(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), flag.Arg(5), flag.Arg(6))
 	default:
 		fmt.Fprintf(os.Stderr, `Usage: %s CMD "string"\n`, os.Args[0])
 		os.Exit(1)
