@@ -102,7 +102,7 @@ func categories(w io.Writer, client *dlp.Client) {
 	}
 }
 
-func deID(w io.Writer, client *dlp.Client, s string) {
+func mask(w io.Writer, client *dlp.Client, s string) {
 	rcr := &dlppb.DeidentifyContentRequest{
 		DeidentifyConfig: &dlppb.DeidentifyConfig{
 			Transformation: &dlppb.DeidentifyConfig_InfoTypeTransformations{
@@ -170,7 +170,7 @@ func main() {
 		infoTypes(os.Stdout, client, flag.Arg(1))
 	case "categories":
 		categories(os.Stdout, client)
-	case "deid":
-		deID(os.Stdout, client, flag.Arg(1))
+	case "mask":
+		mask(os.Stdout, client, flag.Arg(1))
 	}
 }
