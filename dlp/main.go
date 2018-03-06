@@ -172,6 +172,35 @@ func deidentifyFPE(w io.Writer, client *dlp.Client, project, s, wrappedKey, cryp
 	fmt.Fprintln(w, r.GetItem().GetValue())
 }
 
+func riskNumerical(w io.Writer, client *dlp.Client, project, dataProject, datasetID, tableID, columnName string) {
+	rcr := &dlppb.CreateDlpJobRequest{
+		Parent: "projects/" + project,
+		Job: &dlppb.CreateDlpJobRequest_RiskJob{
+			RiskJob: &dlppb.RiskAnalysisJobConfig{
+				PrivacyMetric: &dlppb.PrivacyMetric{
+					Type: &dlppb.PrivacyMetric_NumericalStatsConfig_{
+						NumericalStatsConfig: &dlppb.PrivacyMetric_NumericalStatsConfig{
+							Field: &dlppb.FieldId{
+								Name: columnName,
+							},
+						},
+					},
+				},
+				SourceTable: &dlppb.BigQueryTable{
+					ProjectId: dataProject,
+					DatasetId: datasetID,
+					TableId:   tableID,
+				},
+			},
+		},
+	}
+	j, err := client.CreateDlpJob(context.Background(), rcr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Fprintln(w, j)
+}
+
 func main() {
 	ctx := context.Background()
 	client, err := dlp.NewClient(ctx)
@@ -199,6 +228,8 @@ func main() {
 		mask(os.Stdout, client, *project, flag.Arg(1))
 	case "deidfpe":
 		deidentifyFPE(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3))
+	case "riskNumerical":
+		riskNumerical(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4))
 	default:
 		fmt.Fprintf(os.Stderr, `Usage: %s CMD "string"\n`, os.Args[0])
 		os.Exit(1)
