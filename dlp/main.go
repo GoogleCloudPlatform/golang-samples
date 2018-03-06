@@ -101,6 +101,52 @@ func categories(w io.Writer, client *dlp.Client) {
 		fmt.Fprintf(w, "%s (%s)\n", c.GetName(), c.GetDisplayName())
 	}
 }
+
+func deID(w io.Writer, client *dlp.Client, s string) {
+	rcr := &dlppb.DeidentifyContentRequest{
+		DeidentifyConfig: &dlppb.DeidentifyConfig{
+			Transformation: &dlppb.DeidentifyConfig_InfoTypeTransformations{
+				InfoTypeTransformations: &dlppb.InfoTypeTransformations{
+					Transformations: []*dlppb.InfoTypeTransformations_InfoTypeTransformation{
+						{
+							InfoTypes: []*dlppb.InfoType{},
+							PrimitiveTransformation: &dlppb.PrimitiveTransformation{
+								Transformation: &dlppb.PrimitiveTransformation_CharacterMaskConfig{
+									CharacterMaskConfig: &dlppb.CharacterMaskConfig{
+										MaskingCharacter: "*",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		InspectConfig: &dlppb.InspectConfig{
+			InfoTypes: []*dlppb.InfoType{
+				{
+					Name: "US_SOCIAL_SECURITY_NUMBER",
+				},
+			},
+			MinLikelihood: dlppb.Likelihood_LIKELIHOOD_UNSPECIFIED,
+		},
+		Items: []*dlppb.ContentItem{
+			{
+				Type: "text/plain",
+				DataItem: &dlppb.ContentItem_Data{
+					Data: []byte(s),
+				},
+			},
+		},
+	}
+	r, err := client.DeidentifyContent(context.Background(), rcr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, i := range r.GetItems() {
+		fmt.Fprintf(w, "%s\n", i.GetData())
+	}
+}
 func main() {
 	ctx := context.Background()
 	client, err := dlp.NewClient(ctx)
@@ -124,6 +170,7 @@ func main() {
 		infoTypes(os.Stdout, client, flag.Arg(1))
 	case "categories":
 		categories(os.Stdout, client)
-
+	case "deid":
+		deID(os.Stdout, client, flag.Arg(1))
 	}
 }
