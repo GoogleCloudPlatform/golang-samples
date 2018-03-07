@@ -10,15 +10,15 @@ import (
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
-func redact(w io.Writer, client *dlp.Client, minLikelihood dlppb.Likelihood, project, s string) {
+func redact(w io.Writer, client *dlp.Client, minLikelihood dlppb.Likelihood, infoTypes []string, project, s string) {
+	var i []*dlppb.InfoType
+	for _, it := range infoTypes {
+		i = append(i, &dlppb.InfoType{Name: it})
+	}
 	rcr := &dlppb.DeidentifyContentRequest{
 		Parent: "projects/" + project,
 		InspectConfig: &dlppb.InspectConfig{
-			InfoTypes: []*dlppb.InfoType{
-				{
-					Name: "US_SOCIAL_SECURITY_NUMBER",
-				},
-			},
+			InfoTypes:     i,
 			MinLikelihood: minLikelihood,
 		},
 		DeidentifyConfig: &dlppb.DeidentifyConfig{
