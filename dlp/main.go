@@ -14,7 +14,33 @@ import (
 	"strings"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
+	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
+
+type minLikelihoodFlag struct {
+	likelihood dlppb.Likelihood
+}
+
+func (m *minLikelihoodFlag) String() string {
+	return fmt.Sprint(m.likelihood)
+}
+
+func (m *minLikelihoodFlag) Set(s string) error {
+	l, ok := dlppb.Likelihood_value[s]
+	if !ok {
+		return fmt.Errorf("not a valid likelihood: %q", s)
+	}
+	m.likelihood = dlppb.Likelihood(l)
+	return nil
+}
+
+func minLikelihoodValues() string {
+	var s []string
+	for _, m := range dlppb.Likelihood_name {
+		s = append(s, m)
+	}
+	return strings.Join(s, ", ")
+}
 
 func main() {
 	ctx := context.Background()
@@ -25,6 +51,8 @@ func main() {
 	defer client.Close()
 
 	project := flag.String("project", "", "GCloud project ID")
+	var minLikelihood minLikelihoodFlag
+	flag.Var(&minLikelihood, "minLikelihood", fmt.Sprintf("Minimum likelihood value (%v).", minLikelihoodValues()))
 	flag.Parse()
 
 	if *project == "" {
@@ -34,9 +62,9 @@ func main() {
 
 	switch flag.Arg(0) {
 	case "inspect":
-		inspect(os.Stdout, client, *project, flag.Arg(1))
+		inspect(os.Stdout, client, minLikelihood.likelihood, *project, flag.Arg(1))
 	case "redact":
-		redact(os.Stdout, client, *project, flag.Arg(1))
+		redact(os.Stdout, client, minLikelihood.likelihood, *project, flag.Arg(1))
 	case "infoTypes":
 		infoTypes(os.Stdout, client, flag.Arg(1))
 	case "mask":

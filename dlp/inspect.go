@@ -10,7 +10,7 @@ import (
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
-func inspect(w io.Writer, client *dlp.Client, project, s string) {
+func inspect(w io.Writer, client *dlp.Client, minLikelihood dlppb.Likelihood, project, input string) {
 	rcr := &dlppb.InspectContentRequest{
 		Parent: "projects/" + project,
 		InspectConfig: &dlppb.InspectConfig{
@@ -19,11 +19,11 @@ func inspect(w io.Writer, client *dlp.Client, project, s string) {
 					Name: "US_SOCIAL_SECURITY_NUMBER",
 				},
 			},
-			MinLikelihood: dlppb.Likelihood_LIKELIHOOD_UNSPECIFIED,
+			MinLikelihood: minLikelihood,
 		},
 		Item: &dlppb.ContentItem{
 			DataItem: &dlppb.ContentItem_Value{
-				Value: s,
+				Value: input,
 			},
 		},
 	}
