@@ -10,7 +10,7 @@ import (
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
-func inspect(w io.Writer, client *dlp.Client, minLikelihood dlppb.Likelihood, project, input string) {
+func inspect(w io.Writer, client *dlp.Client, minLikelihood dlppb.Likelihood, maxFindings int32, includeQuote bool, project, input string) {
 	rcr := &dlppb.InspectContentRequest{
 		Parent: "projects/" + project,
 		InspectConfig: &dlppb.InspectConfig{
@@ -20,6 +20,10 @@ func inspect(w io.Writer, client *dlp.Client, minLikelihood dlppb.Likelihood, pr
 				},
 			},
 			MinLikelihood: minLikelihood,
+			Limits: &dlppb.InspectConfig_FindingLimits{
+				MaxFindingsPerRequest: maxFindings,
+			},
+			IncludeQuote: includeQuote,
 		},
 		Item: &dlppb.ContentItem{
 			DataItem: &dlppb.ContentItem_Value{

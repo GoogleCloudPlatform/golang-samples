@@ -52,6 +52,9 @@ func main() {
 
 	project := flag.String("project", "", "GCloud project ID")
 	languageCode := flag.String("languageCode", "en-US", "Language code (for infoTypes)")
+	maxFindings := flag.Int("maxFindings", 0, "Number of results (for inspect)")
+	includeQuote := flag.Bool("includeQuote", false, "Include a quote of findings (for inspect)")
+
 	var minLikelihood minLikelihoodFlag
 	flag.Var(&minLikelihood, "minLikelihood", fmt.Sprintf("Minimum likelihood value (%v).", minLikelihoodValues()))
 	flag.Parse()
@@ -63,7 +66,7 @@ func main() {
 
 	switch flag.Arg(0) {
 	case "inspect":
-		inspect(os.Stdout, client, minLikelihood.likelihood, *project, flag.Arg(1))
+		inspect(os.Stdout, client, minLikelihood.likelihood, int32(*maxFindings), *includeQuote, *project, flag.Arg(1))
 	case "redact":
 		redact(os.Stdout, client, minLikelihood.likelihood, *project, flag.Arg(1))
 	case "infoTypes":
