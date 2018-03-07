@@ -18,10 +18,15 @@ The [Data Loss Prevention API](https://cloud.google.com/dlp/docs/) provides prog
 
 ## Before you begin
 
-Before running the samples, make sure you've enabled the
-[DLP API](https://console.developers.google.com/apis/api/dlp.googleapis.com/overview),
-enabled the [PubSub API](https://console.developers.google.com/apis/api/pubsub.googleapis.com/overview)
-(for the risk examples), and set up [authentication](https://cloud.google.com/docs/authentication/getting-started).
+Before running the samples, make sure you've:
+
+* Enabled the [DLP API](https://console.developers.google.com/apis/api/dlp.googleapis.com/overview).
+* Enabled the [PubSub API](https://console.developers.google.com/apis/api/pubsub.googleapis.com/overview) (for the risk examples).
+* Set up [authentication](https://cloud.google.com/docs/authentication/getting-started).
+* Installed the sample application by running:
+  ```bash
+  go get -u github.com/GoogleCloudPlatform/golang-samples/dlp
+  ```
 
 ## Samples
 
@@ -40,10 +45,10 @@ go build
 ```
 Examples:
   ./dlp -project my-project inspect "My SSN is 111222333"
+```
 
 For more information, see https://cloud.google.com/dlp/docs. Full options are explained at
 https://cloud.google.com/dlp/docs/reference/rest/v2beta1/content/inspect#InspectConfig
-```
 
 [inspect_0_docs]: https://cloud.google.com/dlp/docs
 [inspect_0_code]: inspect.go
@@ -63,10 +68,10 @@ go build
 ```
 Examples:
   ./dlp -project my-project redact "My SSN is 111222333"
+```
 
 For more information, see https://cloud.google.com/dlp/docs. Full options are explained at
 https://cloud.google.com/dlp/docs/reference/rest/v2beta1/content/redact.
-```
 
 [redact_1_docs]: https://cloud.google.com/dlp/docs
 [redact_1_code]: redact.go
@@ -86,9 +91,9 @@ go build
 ```
 Examples:
   ./dlp -project my-project infoTypes supported_by=INSPECT
+```
 
 For more information, see https://cloud.google.com/dlp/docs
-```
 
 [metadata_2_docs]: https://cloud.google.com/dlp/docs
 [metadata_2_code]: metadata.go
@@ -110,9 +115,9 @@ go build
 Examples:
   ./dlp -project my-project mask "My SSN is 372819127"
   ./dlp -project my-project fpe "My SSN is 372819127" <YOUR_ENCRYPTED_AES_256_KEY> <YOUR_KEY_NAME>
+```
 
 For more information, see https://cloud.google.com/dlp/docs.
-```
 
 [deid_3_docs]: https://cloud.google.com/dlp/docs
 [deid_3_code]: deid.go
@@ -140,9 +145,9 @@ Examples:
   ./dlp -project my-project riskKAnonymity  bigquery-public-data risk-topic risk-sub nhtsa_traffic_fatalities accident_2015 state_number,county
   ./dlp -project my-project riskLDiversity  bigquery-public-data risk-topic risk-sub nhtsa_traffic_fatalities accident_2015 city state_number,county
   ./dlp -project my-project riskKMap        bigquery-public-data risk-topic risk-sub san_francisco bikeshare_trips USA zip_code
+```
 
 For more information, see https://cloud.google.com/dlp/docs.
-```
 
 [risk_4_docs]: https://cloud.google.com/dlp/docs
 [risk_4_code]: risk.go
