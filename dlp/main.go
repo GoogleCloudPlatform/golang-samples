@@ -173,13 +173,7 @@ func deidentifyFPE(w io.Writer, client *dlp.Client, project, s, wrappedKey, cryp
 	fmt.Fprintln(w, r.GetItem().GetValue())
 }
 
-func setupPubSub(ctx context.Context, project, topic, sub string) (*pubsub.Subscription, error) {
-	client, err := pubsub.NewClient(ctx, project)
-	if err != nil {
-		return nil, fmt.Errorf("error creating PubSub client: %v", err)
-	}
-	defer client.Close()
-
+func setupPubSub(ctx context.Context, client *pubsub.Client, project, topic, sub string) (*pubsub.Subscription, error) {
 	t := client.Topic(topic)
 	if exists, err := t.Exists(ctx); err != nil {
 		return nil, fmt.Errorf("error checking PubSub topic: %v", err)
@@ -204,7 +198,12 @@ func setupPubSub(ctx context.Context, project, topic, sub string) (*pubsub.Subsc
 
 func riskNumerical(w io.Writer, client *dlp.Client, project, dataProject, pubSubTopic, pubSubSub, datasetID, tableID, columnName string) {
 	ctx := context.Background()
-	s, err := setupPubSub(ctx, project, pubSubTopic, pubSubSub)
+	pClient, err := pubsub.NewClient(ctx, project)
+	if err != nil {
+		log.Fatalf("error creating PubSub client: %v", err)
+	}
+	defer pClient.Close()
+	s, err := setupPubSub(ctx, pClient, project, pubSubTopic, pubSubSub)
 	if err != nil {
 		log.Fatalf("Error setting up PubSub: %v\n", err)
 	}
@@ -272,6 +271,83 @@ func riskNumerical(w io.Writer, client *dlp.Client, project, dataProject, pubSub
 	}
 }
 
+func riskCategorical(w io.Writer, client *dlp.Client, project, dataProject, pubSubTopic, pubSubSub, datasetID, tableID, columnName string) {
+	ctx := context.Background()
+	pClient, err := pubsub.NewClient(ctx, project)
+	if err != nil {
+		log.Fatalf("error creating PubSub client: %v", err)
+	}
+	defer pClient.Close()
+	s, err := setupPubSub(ctx, pClient, project, pubSubTopic, pubSubSub)
+	if err != nil {
+		log.Fatalf("Error setting up PubSub: %v\n", err)
+	}
+	topic := "projects/" + project + "/topics/" + pubSubTopic
+	rcr := &dlppb.CreateDlpJobRequest{
+		Parent: "projects/" + project,
+		Job: &dlppb.CreateDlpJobRequest_RiskJob{
+			RiskJob: &dlppb.RiskAnalysisJobConfig{
+				PrivacyMetric: &dlppb.PrivacyMetric{
+					Type: &dlppb.PrivacyMetric_CategoricalStatsConfig_{
+						CategoricalStatsConfig: &dlppb.PrivacyMetric_CategoricalStatsConfig{
+							Field: &dlppb.FieldId{
+								Name: columnName,
+							},
+						},
+					},
+				},
+				SourceTable: &dlppb.BigQueryTable{
+					ProjectId: dataProject,
+					DatasetId: datasetID,
+					TableId:   tableID,
+				},
+				Actions: []*dlppb.Action{
+					{
+						Action: &dlppb.Action_PubSub{
+							PubSub: &dlppb.Action_PublishToPubSub{
+								Topic: topic,
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	j, err := client.CreateDlpJob(context.Background(), rcr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Fprintf(w, "Created job: %v\n", j)
+
+	ctx, cancel := context.WithCancel(ctx)
+	err = s.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
+		fmt.Fprintf(w, "Received PubSub %v\n", msg.Attributes["DlpJobName"])
+		msg.Ack()
+		if msg.Attributes["DlpJobName"] == j.GetName() {
+			jr, err := client.GetDlpJob(ctx, &dlppb.GetDlpJobRequest{
+				Name: j.GetName(),
+			})
+			if err != nil {
+				log.Fatalf("Error getting completed job: %v\n", err)
+			}
+			h := jr.GetRiskDetails().GetCategoricalStatsResult().GetValueFrequencyHistogramBuckets()
+			for i, b := range h {
+				fmt.Fprintf(w, "Histogram bucket %v\n", i)
+				fmt.Fprintf(w, "  Most common value occurs %v times\n", b.GetValueFrequencyUpperBound())
+				fmt.Fprintf(w, "  Least common value occurs %v times\n", b.GetValueFrequencyLowerBound())
+				fmt.Fprintf(w, "  %v unique values total\n", b.GetBucketSize())
+				for _, v := range b.GetBucketValues() {
+					fmt.Fprintf(w, "    Value %v occurs %v times\n", v.GetValue(), v.GetCount())
+				}
+			}
+			cancel()
+		}
+	})
+	if err != nil {
+		log.Fatalf("Error receiving from PubSub: %v\n", err)
+	}
+}
+
 func main() {
 	ctx := context.Background()
 	client, err := dlp.NewClient(ctx)
@@ -303,6 +379,10 @@ func main() {
 		// For example:
 		// dlp -project my-project riskNumerical bigquery-public-data risk-topic risk-sub nhtsa_traffic_fatalities accident_2015 state_number
 		riskNumerical(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), flag.Arg(5), flag.Arg(6))
+	case "riskCategorical":
+		// For example:
+		// dlp -project my-project riskCategorical bigquery-public-data risk-topic risk-sub nhtsa_traffic_fatalities accident_2015 state_number
+		riskCategorical(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), flag.Arg(5), flag.Arg(6))
 	default:
 		fmt.Fprintf(os.Stderr, `Usage: %s CMD "string"\n`, os.Args[0])
 		os.Exit(1)
