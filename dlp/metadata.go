@@ -10,9 +10,10 @@ import (
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
-func infoTypes(w io.Writer, client *dlp.Client, filter string) {
+func infoTypes(w io.Writer, client *dlp.Client, languageCode, filter string) {
 	rcr := &dlppb.ListInfoTypesRequest{
-		Filter: filter,
+		LanguageCode: languageCode,
+		Filter:       filter,
 	}
 	r, err := client.ListInfoTypes(context.Background(), rcr)
 	if err != nil {
