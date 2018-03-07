@@ -51,6 +51,7 @@ func main() {
 	defer client.Close()
 
 	project := flag.String("project", "", "GCloud project ID")
+	languageCode := flag.String("languageCode", "en-US", "Language code (for infoTypes)")
 	var minLikelihood minLikelihoodFlag
 	flag.Var(&minLikelihood, "minLikelihood", fmt.Sprintf("Minimum likelihood value (%v).", minLikelihoodValues()))
 	flag.Parse()
@@ -66,7 +67,7 @@ func main() {
 	case "redact":
 		redact(os.Stdout, client, minLikelihood.likelihood, *project, flag.Arg(1))
 	case "infoTypes":
-		infoTypes(os.Stdout, client, flag.Arg(1))
+		infoTypes(os.Stdout, client, *languageCode, flag.Arg(1))
 	case "mask":
 		mask(os.Stdout, client, *project, flag.Arg(1))
 	case "fpe":
