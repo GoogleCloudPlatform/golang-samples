@@ -16,6 +16,7 @@ import (
 
 	dlp "cloud.google.com/go/dlp/apiv2"
 	"cloud.google.com/go/pubsub"
+	"github.com/golang/protobuf/ptypes/empty"
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
@@ -524,6 +525,99 @@ func riskLDiversity(w io.Writer, client *dlp.Client, project, dataProject, pubSu
 	}
 }
 
+func riskKMap(w io.Writer, client *dlp.Client, project, dataProject, pubSubTopic, pubSubSub, datasetID, tableID, region string, columnNames ...string) {
+	ctx := context.Background()
+	pClient, err := pubsub.NewClient(ctx, project)
+	if err != nil {
+		log.Fatalf("Error creating PubSub client: %v", err)
+	}
+	defer pClient.Close()
+	s, err := setupPubSub(ctx, pClient, project, pubSubTopic, pubSubSub)
+	if err != nil {
+		log.Fatalf("Error setting up PubSub: %v\n", err)
+	}
+	topic := "projects/" + project + "/topics/" + pubSubTopic
+
+	// Build the QuasiID slice.
+	var q []*dlppb.PrivacyMetric_KMapEstimationConfig_TaggedField
+	for _, c := range columnNames {
+		q = append(q, &dlppb.PrivacyMetric_KMapEstimationConfig_TaggedField{
+			Field: &dlppb.FieldId{
+				Name: c,
+			},
+			Tag: &dlppb.PrivacyMetric_KMapEstimationConfig_TaggedField_Inferred{
+				Inferred: &empty.Empty{},
+			},
+		})
+	}
+
+	rcr := &dlppb.CreateDlpJobRequest{
+		Parent: "projects/" + project,
+		Job: &dlppb.CreateDlpJobRequest_RiskJob{
+			RiskJob: &dlppb.RiskAnalysisJobConfig{
+				PrivacyMetric: &dlppb.PrivacyMetric{
+					Type: &dlppb.PrivacyMetric_KMapEstimationConfig_{
+						KMapEstimationConfig: &dlppb.PrivacyMetric_KMapEstimationConfig{
+							QuasiIds:   q,
+							RegionCode: region,
+						},
+					},
+				},
+				SourceTable: &dlppb.BigQueryTable{
+					ProjectId: dataProject,
+					DatasetId: datasetID,
+					TableId:   tableID,
+				},
+				Actions: []*dlppb.Action{
+					{
+						Action: &dlppb.Action_PubSub{
+							PubSub: &dlppb.Action_PublishToPubSub{
+								Topic: topic,
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	j, err := client.CreateDlpJob(context.Background(), rcr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Fprintf(w, "Created job: %v\n", j)
+
+	ctx, cancel := context.WithCancel(ctx)
+	err = s.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
+		msg.Ack()
+		if msg.Attributes["DlpJobName"] == j.GetName() {
+			j, err := client.GetDlpJob(ctx, &dlppb.GetDlpJobRequest{
+				Name: j.GetName(),
+			})
+			if err != nil {
+				log.Fatalf("Error getting completed job: %v\n", err)
+			}
+			h := j.GetRiskDetails().GetKMapEstimationResult().GetKMapEstimationHistogram()
+			for i, b := range h {
+				fmt.Fprintf(w, "Histogram bucket %v\n", i)
+				fmt.Fprintf(w, "  Anonymity range: [%v,%v]\n", b.GetMaxAnonymity(), b.GetMaxAnonymity())
+				fmt.Fprintf(w, "  %v unique values total\n", b.GetBucketSize())
+				for _, v := range b.GetBucketValues() {
+					var qvs []string
+					for _, qv := range v.GetQuasiIdsValues() {
+						qvs = append(qvs, qv.String())
+					}
+					fmt.Fprintf(w, "    QuasiID values: %s\n", strings.Join(qvs, ", "))
+					fmt.Fprintf(w, "    Estimated anonymity: %v\n", v.GetEstimatedAnonymity())
+				}
+			}
+			cancel()
+		}
+	})
+	if err != nil {
+		log.Fatalf("Error receiving from PubSub: %v\n", err)
+	}
+}
+
 func main() {
 	ctx := context.Background()
 	client, err := dlp.NewClient(ctx)
@@ -567,6 +661,10 @@ func main() {
 		// For example:
 		// dlp -project my-project riskLDiversity bigquery-public-data risk-topic risk-sub nhtsa_traffic_fatalities accident_2015 city state_number,county
 		riskLDiversity(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), flag.Arg(5), flag.Arg(6), strings.Split(flag.Arg(7), ",")...)
+	case "riskKMap":
+		// For example:
+		// dlp -project my-project kMap bigquery-public-data san_francisco bikeshare_trips risk-topic risk-sub US_ZIP_5 zip_code
+		riskKMap(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), flag.Arg(5), flag.Arg(6), strings.Split(flag.Arg(7), ",")...)
 	default:
 		fmt.Fprintf(os.Stderr, `Usage: %s CMD "string"\n`, os.Args[0])
 		os.Exit(1)
