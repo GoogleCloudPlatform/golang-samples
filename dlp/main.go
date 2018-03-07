@@ -471,7 +471,7 @@ func main() {
 	case "riskKAnonymity":
 		// For example:
 		// dlp -project my-project riskKAnonymity bigquery-public-data risk-topic risk-sub nhtsa_traffic_fatalities accident_2015 state_number
-		riskKAnonymity(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), flag.Arg(5), flag.Arg(6))
+		riskKAnonymity(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), flag.Arg(5), strings.Split(flag.Arg(6), ",")...)
 	default:
 		fmt.Fprintf(os.Stderr, `Usage: %s CMD "string"\n`, os.Args[0])
 		os.Exit(1)
