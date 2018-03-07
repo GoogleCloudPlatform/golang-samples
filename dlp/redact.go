@@ -10,7 +10,7 @@ import (
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
-func redact(w io.Writer, client *dlp.Client, project, s string) {
+func redact(w io.Writer, client *dlp.Client, minLikelihood dlppb.Likelihood, project, s string) {
 	rcr := &dlppb.DeidentifyContentRequest{
 		Parent: "projects/" + project,
 		InspectConfig: &dlppb.InspectConfig{
@@ -19,7 +19,7 @@ func redact(w io.Writer, client *dlp.Client, project, s string) {
 					Name: "US_SOCIAL_SECURITY_NUMBER",
 				},
 			},
-			MinLikelihood: dlppb.Likelihood_LIKELIHOOD_UNSPECIFIED,
+			MinLikelihood: minLikelihood,
 		},
 		DeidentifyConfig: &dlppb.DeidentifyConfig{
 			Transformation: &dlppb.DeidentifyConfig_InfoTypeTransformations{

@@ -10,7 +10,7 @@ import (
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
-func mask(w io.Writer, client *dlp.Client, project, s string) {
+func mask(w io.Writer, client *dlp.Client, project, input string) {
 	rcr := &dlppb.DeidentifyContentRequest{
 		Parent: "projects/" + project,
 		DeidentifyConfig: &dlppb.DeidentifyConfig{
@@ -18,7 +18,7 @@ func mask(w io.Writer, client *dlp.Client, project, s string) {
 				InfoTypeTransformations: &dlppb.InfoTypeTransformations{
 					Transformations: []*dlppb.InfoTypeTransformations_InfoTypeTransformation{
 						{
-							InfoTypes: []*dlppb.InfoType{},
+							InfoTypes: []*dlppb.InfoType{}, // Match all info types.
 							PrimitiveTransformation: &dlppb.PrimitiveTransformation{
 								Transformation: &dlppb.PrimitiveTransformation_CharacterMaskConfig{
 									CharacterMaskConfig: &dlppb.CharacterMaskConfig{
@@ -33,7 +33,7 @@ func mask(w io.Writer, client *dlp.Client, project, s string) {
 		},
 		Item: &dlppb.ContentItem{
 			DataItem: &dlppb.ContentItem_Value{
-				Value: s,
+				Value: input,
 			},
 		},
 	}
