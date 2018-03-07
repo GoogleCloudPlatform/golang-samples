@@ -50,7 +50,7 @@ func main() {
 	}
 	defer client.Close()
 
-	project := flag.String("project", "", "GCloud project ID")
+	project := flag.String("project", "", "GCloud project ID (required)")
 	languageCode := flag.String("languageCode", "en-US", "Language code for infoTypes")
 	maxFindings := flag.Int("maxFindings", 0, "Number of results for inspect (default 0 (no limit))")
 	includeQuote := flag.Bool("includeQuote", false, "Include a quote of findings for inspect (default false)")
