@@ -51,13 +51,16 @@ func main() {
 	defer client.Close()
 
 	project := flag.String("project", "", "GCloud project ID")
-	languageCode := flag.String("languageCode", "en-US", "Language code (for infoTypes)")
-	maxFindings := flag.Int("maxFindings", 0, "Number of results (for inspect)")
-	includeQuote := flag.Bool("includeQuote", false, "Include a quote of findings (for inspect)")
+	languageCode := flag.String("languageCode", "en-US", "Language code for infoTypes")
+	maxFindings := flag.Int("maxFindings", 0, "Number of results for inspect (default 0 (no limit))")
+	includeQuote := flag.Bool("includeQuote", false, "Include a quote of findings for inspect (default false)")
+	infoTypesString := flag.String("infoTypes", "PHONE_NUMBER,EMAIL_ADDRESS,CREDIT_CARD_NUMBER,US_SOCIAL_SECURITY_NUMBER", "Info types to inspect or redact")
 
 	var minLikelihood minLikelihoodFlag
-	flag.Var(&minLikelihood, "minLikelihood", fmt.Sprintf("Minimum likelihood value (%v).", minLikelihoodValues()))
+	flag.Var(&minLikelihood, "minLikelihood", fmt.Sprintf("Minimum likelihood value [%v] (default %v)", minLikelihoodValues(), dlppb.Likelihood_name[0]))
 	flag.Parse()
+
+	infoTypesList := strings.Split(*infoTypesString, ",")
 
 	if *project == "" {
 		flag.Usage()
@@ -66,9 +69,9 @@ func main() {
 
 	switch flag.Arg(0) {
 	case "inspect":
-		inspect(os.Stdout, client, minLikelihood.likelihood, int32(*maxFindings), *includeQuote, *project, flag.Arg(1))
+		inspect(os.Stdout, client, minLikelihood.likelihood, int32(*maxFindings), *includeQuote, infoTypesList, *project, flag.Arg(1))
 	case "redact":
-		redact(os.Stdout, client, minLikelihood.likelihood, *project, flag.Arg(1))
+		redact(os.Stdout, client, minLikelihood.likelihood, infoTypesList, *project, flag.Arg(1))
 	case "infoTypes":
 		infoTypes(os.Stdout, client, *languageCode, flag.Arg(1))
 	case "mask":

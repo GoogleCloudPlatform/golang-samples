@@ -10,15 +10,15 @@ import (
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
-func inspect(w io.Writer, client *dlp.Client, minLikelihood dlppb.Likelihood, maxFindings int32, includeQuote bool, project, input string) {
+func inspect(w io.Writer, client *dlp.Client, minLikelihood dlppb.Likelihood, maxFindings int32, includeQuote bool, infoTypes []string, project, input string) {
+	var i []*dlppb.InfoType
+	for _, it := range infoTypes {
+		i = append(i, &dlppb.InfoType{Name: it})
+	}
 	rcr := &dlppb.InspectContentRequest{
 		Parent: "projects/" + project,
 		InspectConfig: &dlppb.InspectConfig{
-			InfoTypes: []*dlppb.InfoType{
-				{
-					Name: "US_SOCIAL_SECURITY_NUMBER",
-				},
-			},
+			InfoTypes:     i,
 			MinLikelihood: minLikelihood,
 			Limits: &dlppb.InspectConfig_FindingLimits{
 				MaxFindingsPerRequest: maxFindings,
