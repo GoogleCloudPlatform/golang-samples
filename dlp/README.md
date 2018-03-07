@@ -42,9 +42,9 @@ go build
 ./dlp -project <project> inspect <string>
 ```
 
+__Examples:__
 ```
-Examples:
-  ./dlp -project my-project inspect "My SSN is 111222333"
+./dlp -project my-project inspect "My SSN is 111222333"
 ```
 
 For more information, see https://cloud.google.com/dlp/docs. Full options are explained at
@@ -65,9 +65,9 @@ go build
 ./dlp -project <project> redact <string>
 ```
 
+__Examples:__
 ```
-Examples:
-  ./dlp -project my-project redact "My SSN is 111222333"
+./dlp -project my-project redact "My SSN is 111222333"
 ```
 
 For more information, see https://cloud.google.com/dlp/docs. Full options are explained at
@@ -88,9 +88,9 @@ go build
 ./dlp -project <project> infoTypes <filter>
 ```
 
+__Examples:__
 ```
-Examples:
-  ./dlp -project my-project infoTypes supported_by=INSPECT
+./dlp -project my-project infoTypes supported_by=INSPECT
 ```
 
 For more information, see https://cloud.google.com/dlp/docs
@@ -111,10 +111,10 @@ go build
 ./dlp -project <project> fpe <string> <wrappedKey> <keyName>
 ```
 
+__Examples:__
 ```
-Examples:
-  ./dlp -project my-project mask "My SSN is 372819127"
-  ./dlp -project my-project fpe "My SSN is 372819127" <YOUR_ENCRYPTED_AES_256_KEY> <YOUR_KEY_NAME>
+./dlp -project my-project mask "My SSN is 372819127"
+./dlp -project my-project fpe "My SSN is 372819127" <YOUR_ENCRYPTED_AES_256_KEY> <YOUR_KEY_NAME>
 ```
 
 For more information, see https://cloud.google.com/dlp/docs.
@@ -138,13 +138,13 @@ go build
 ./dlp -project <project> riskKMap        <dataProject> <PubSubTopicName> <PubSubSubscriptionName> <datasetID> <tableID> <region> <columnName>
 ```
 
+__Examples:__
 ```
-Examples:
-  ./dlp -project my-project riskNumerical   bigquery-public-data risk-topic risk-sub nhtsa_traffic_fatalities accident_2015 state_number
-  ./dlp -project my-project riskCategorical bigquery-public-data risk-topic risk-sub nhtsa_traffic_fatalities accident_2015 state_number
-  ./dlp -project my-project riskKAnonymity  bigquery-public-data risk-topic risk-sub nhtsa_traffic_fatalities accident_2015 state_number,county
-  ./dlp -project my-project riskLDiversity  bigquery-public-data risk-topic risk-sub nhtsa_traffic_fatalities accident_2015 city state_number,county
-  ./dlp -project my-project riskKMap        bigquery-public-data risk-topic risk-sub san_francisco bikeshare_trips USA zip_code
+./dlp -project my-project riskNumerical   bigquery-public-data risk-topic risk-sub nhtsa_traffic_fatalities accident_2015 state_number
+./dlp -project my-project riskCategorical bigquery-public-data risk-topic risk-sub nhtsa_traffic_fatalities accident_2015 state_number
+./dlp -project my-project riskKAnonymity  bigquery-public-data risk-topic risk-sub nhtsa_traffic_fatalities accident_2015 state_number,county
+./dlp -project my-project riskLDiversity  bigquery-public-data risk-topic risk-sub nhtsa_traffic_fatalities accident_2015 city state_number,county
+./dlp -project my-project riskKMap        bigquery-public-data risk-topic risk-sub san_francisco bikeshare_trips USA zip_code
 ```
 
 For more information, see https://cloud.google.com/dlp/docs.
