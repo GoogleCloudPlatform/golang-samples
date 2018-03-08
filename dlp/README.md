@@ -42,9 +42,23 @@ go build
 ./dlp -project <project> inspect <string>
 ```
 
+__Options:__
+```
+  -includeQuote
+        Include a quote of findings for inspect (default false)
+  -infoTypes string
+        Info types to inspect or redact (default "PHONE_NUMBER,EMAIL_ADDRESS,CREDIT_CARD_NUMBER,US_SOCIAL_SECURITY_NUMBER")
+  -maxFindings int
+        Number of results for inspect (default 0 (no limit))
+  -minLikelihood value
+        Minimum likelihood value [POSSIBLE, LIKELY, VERY_LIKELY, LIKELIHOOD_UNSPECIFIED, VERY_UNLIKELY, UNLIKELY] (default LIKELIHOOD_UNSPECIFIED)
+  -project string
+        GCloud project ID (required)
+```
+
 __Examples:__
 ```
-./dlp -project my-project inspect "My SSN is 111222333"
+./dlp -project my-project inspect "My SSN is 111222333 and my phone number is (123) 456-7890"
 ```
 
 For more information, see https://cloud.google.com/dlp/docs. Full options are explained at
@@ -63,6 +77,20 @@ __Usage:__
 ```bash
 go build
 ./dlp -project <project> redact <string>
+```
+
+__Options:__
+```
+  -includeQuote
+        Include a quote of findings for inspect (default false)
+  -infoTypes string
+        Info types to inspect or redact (default "PHONE_NUMBER,EMAIL_ADDRESS,CREDIT_CARD_NUMBER,US_SOCIAL_SECURITY_NUMBER")
+  -maxFindings int
+        Number of results for inspect (default 0 (no limit))
+  -minLikelihood value
+        Minimum likelihood value [POSSIBLE, LIKELY, VERY_LIKELY, LIKELIHOOD_UNSPECIFIED, VERY_UNLIKELY, UNLIKELY] (default LIKELIHOOD_UNSPECIFIED)
+  -project string
+        GCloud project ID (required)
 ```
 
 __Examples:__
@@ -88,6 +116,22 @@ go build
 ./dlp -project <project> infoTypes <filter>
 ```
 
+__Options:__
+```
+  -includeQuote
+        Include a quote of findings for inspect (default false)
+  -infoTypes string
+        Info types to inspect or redact (default "PHONE_NUMBER,EMAIL_ADDRESS,CREDIT_CARD_NUMBER,US_SOCIAL_SECURITY_NUMBER")
+  -languageCode string
+        Language code for infoTypes (default "en-US")
+  -maxFindings int
+        Number of results for inspect (default 0 (no limit))
+  -minLikelihood value
+        Minimum likelihood value [POSSIBLE, LIKELY, VERY_LIKELY, LIKELIHOOD_UNSPECIFIED, VERY_UNLIKELY, UNLIKELY] (default LIKELIHOOD_UNSPECIFIED)
+  -project string
+        GCloud project ID (required)
+```
+
 __Examples:__
 ```
 ./dlp -project my-project infoTypes supported_by=INSPECT
@@ -109,6 +153,22 @@ __Usage:__
 go build
 ./dlp -project <project> mask <string>
 ./dlp -project <project> fpe <string> <wrappedKey> <keyName>
+```
+
+__Options:__
+```
+  -includeQuote
+        Include a quote of findings for inspect (default false)
+  -infoTypes string
+        Info types to inspect or redact (default "PHONE_NUMBER,EMAIL_ADDRESS,CREDIT_CARD_NUMBER,US_SOCIAL_SECURITY_NUMBER")
+  -languageCode string
+        Language code for infoTypes (default "en-US")
+  -maxFindings int
+        Number of results for inspect (default 0 (no limit))
+  -minLikelihood value
+        Minimum likelihood value [POSSIBLE, LIKELY, VERY_LIKELY, LIKELIHOOD_UNSPECIFIED, VERY_UNLIKELY, UNLIKELY] (default LIKELIHOOD_UNSPECIFIED)
+  -project string
+        GCloud project ID (required)
 ```
 
 __Examples:__
@@ -136,6 +196,22 @@ go build
 ./dlp -project <project> riskKAnonymity  <dataProject> <PubSubTopicName> <PubSubSubscriptionName> <datasetID> <tableID> <commaSepColumnNames>
 ./dlp -project <project> riskLDiversity  <dataProject> <PubSubTopicName> <PubSubSubscriptionName> <datasetID> <tableID> <sensitiveColumnName> <commaSepColumnNames>
 ./dlp -project <project> riskKMap        <dataProject> <PubSubTopicName> <PubSubSubscriptionName> <datasetID> <tableID> <region> <columnName>
+```
+
+__Options:__
+```
+  -includeQuote
+        Include a quote of findings for inspect (default false)
+  -infoTypes string
+        Info types to inspect or redact (default "PHONE_NUMBER,EMAIL_ADDRESS,CREDIT_CARD_NUMBER,US_SOCIAL_SECURITY_NUMBER")
+  -languageCode string
+        Language code for infoTypes (default "en-US")
+  -maxFindings int
+        Number of results for inspect (default 0 (no limit))
+  -minLikelihood value
+        Minimum likelihood value [POSSIBLE, LIKELY, VERY_LIKELY, LIKELIHOOD_UNSPECIFIED, VERY_UNLIKELY, UNLIKELY] (default LIKELIHOOD_UNSPECIFIED)
+  -project string
+        GCloud project ID (required)
 ```
 
 __Examples:__
