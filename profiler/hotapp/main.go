@@ -55,13 +55,13 @@ func waitImpl() {
 	select {}
 }
 
+// Simulates a memory-hungry function. It calls an "impl" function to produce
+// a bit deeper stacks in the profiler visualization, merely for illustration
+// purpose.
 func alloc() {
 	allocImpl()
 }
 
-// Simulates a memory-hungry function. It calls an "impl" function to produce
-// a bit deeper stacks in the profiler visualization, merely for illustration
-// purpose.
 func allocImpl() {
 	// Allocate 64 MiB in 64 KiB chunks
 	for i := 0; i < 64*16; i++ {
@@ -69,6 +69,7 @@ func allocImpl() {
 	}
 }
 
+// Simulates a CPU-intensive computation.
 func busyloop() {
 	for {
 		load()
