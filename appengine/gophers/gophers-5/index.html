@@ -1,0 +1,113 @@
+<!doctype html>
+<html>
+<head>
+  <title>The Gopher Network</title>
+
+  <link type="text/css" rel="stylesheet" href="/static/style.css" />
+
+  <!-- See https://github.com/firebase/firebaseui-web. -->
+  <!-- [START init_firebase] -->
+  <!-- *******************************************************************************************
+       * TODO(DEVELOPER): Paste the initialization snippet from:
+       * Firebase Console > Overview > Add Firebase to your web app.
+       ***************************************************************************************** -->
+  <!-- [END init_firebase] -->
+
+  <!-- [START include_firebaseui] -->
+  <script src="https://cdn.firebase.com/libs/firebaseui/2.6.2/firebaseui.js"></script>
+  <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/2.6.2/firebaseui.css" />
+  <!-- [START include_firebaseui] -->
+  <!-- [START handle_login] -->
+  <script>
+    initApp = function() {
+      document.getElementById('sign-out').onclick = function() {
+        firebase.auth().signOut();
+      };
+      // FirebaseUI config.
+      var uiConfig = {
+        signInSuccessUrl: '/',
+        signInOptions: [
+          // Leave the lines as is for the providers you want to offer your users.
+          firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+          firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+          firebase.auth.TwitterAuthProvider.PROVIDER_ID,
+          firebase.auth.GithubAuthProvider.PROVIDER_ID,
+          firebase.auth.EmailAuthProvider.PROVIDER_ID,
+          firebase.auth.PhoneAuthProvider.PROVIDER_ID
+        ],
+        // Terms of service url.
+        tosUrl: '<your-tos-url>'
+      };
+
+      firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+          // User is signed in.
+          document.getElementById('sign-out').hidden = false;
+          document.getElementById('post-form').hidden = false;
+          var account = document.getElementById('account-details').textContent =
+            "Signed in as " + user.displayName + " (" + user.email + ")";
+          user.getIdToken().then(function(accessToken) {
+            // Add the token to the post form. The user info will be extracted
+            // from the token by the server.
+            document.getElementById('token').value = accessToken;
+          });
+        } else {
+          // User is signed out.
+          // Initialize the FirebaseUI Widget using Firebase.
+          var ui = new firebaseui.auth.AuthUI(firebase.auth());
+          // Show the Firebase login button.
+          ui.start('#firebaseui-auth-container', uiConfig);
+          // Update the login state indicators.
+          document.getElementById('sign-out').hidden = true;
+          document.getElementById('post-form').hidden = true;
+          document.getElementById('account-details').textContent = '';
+        }
+      }, function(error) {
+        console.log(error);
+      });
+    };
+
+    window.addEventListener('load', function() {
+      initApp()
+    });
+  </script>
+  <!-- [END handle_login] -->
+</head>
+<body>
+
+<h1>The Gopher Network</h1>
+
+<img id="logo" src="/static/gcp-gopher.svg" width="100">
+
+<!-- [START firebase_container] -->
+<div id="firebaseui-auth-container"></div>
+<!-- [END firebase_container] -->
+
+<!-- [START signin_status] -->
+<div id="sign-in"></div>
+<div>
+  <span id="account-details"></span>
+  <button id="sign-out" hidden=true>Sign Out</button>
+</div>
+<!-- [END signin_status] -->
+
+{{with .Notice}}<div id="notice">{{.}}</div>{{end}}
+
+<!-- [START token_input] -->
+<form id="post-form" action="/" method="post" hidden=true>
+  <div>Message: <input name="message" value="{{.Message}}"></div>
+  <input type="hidden" name="token" id="token">
+  <input type="submit">
+</form>
+<!-- [END token_input] -->
+
+{{with .Posts}}
+<ol>
+  {{range .}}
+  <li><cite>{{.Author}}</cite><p>{{.Message}}</p></li>
+  {{end}}
+</ol>
+{{end}}
+
+</body>
+</html>
