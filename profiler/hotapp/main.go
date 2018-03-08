@@ -17,7 +17,7 @@ import (
 	"cloud.google.com/go/profiler"
 )
 
-// There are several threads continuously fighting for this mutex.
+// There are several goroutines continuously fighting for this mutex.
 var mu sync.Mutex
 
 // Some allocated memory. Held in a global variable to protect it from GC.
@@ -29,6 +29,13 @@ func sleepLocked(d time.Duration) {
 	mu.Unlock()
 }
 
+// Simulates some work that contends over a shared mutex. It calls an "impl"
+// function to produce a bit deeper stacks in the profiler visualization,
+// merely for illustration purpose.
+func contention(d time.Duration) {
+	contentionImpl(d)
+}
+
 func contentionImpl(d time.Duration) {
 	for {
 		mu.Lock()
@@ -37,28 +44,29 @@ func contentionImpl(d time.Duration) {
 	}
 }
 
-func contention(d time.Duration) {
-	contentionImpl(d)
+// Waits forever simulating a goroutine that is consistently blocked on I/O.
+// It calls an "impl" function to produce a bit deeper stacks in the profiler
+// visualization, merely for illustration purpose.
+func wait() {
+	waitImpl()
 }
 
 func waitImpl() {
 	select {}
 }
 
-// Waits forever.
-func wait() {
-	waitImpl()
+func alloc() {
+	allocImpl()
 }
 
+// Simulates a memory-hungry function. It calls an "impl" function to produce
+// a bit deeper stacks in the profiler visualization, merely for illustration
+// purpose.
 func allocImpl() {
 	// Allocate 64 MiB in 64 KiB chunks
 	for i := 0; i < 64*16; i++ {
 		mem = append(mem, make([]byte, 64*1024))
 	}
-}
-
-func alloc() {
-	allocImpl()
 }
 
 func busyloop() {
