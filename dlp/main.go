@@ -106,8 +106,8 @@ func main() {
 		inspectGCSFile(os.Stdout, client, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4))
 	case "inspectBigquery":
 		inspectBigquery(os.Stdout, client, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), flag.Arg(5))
-	case "redact":
-		redact(os.Stdout, client, minLikelihood.l, infoTypesList, *project, flag.Arg(1))
+	case "redactImage":
+		redactImage(os.Stdout, client, minLikelihood.l, infoTypesList, *project, bytesType.bt, flag.Arg(1), flag.Arg(2))
 	case "infoTypes":
 		infoTypes(os.Stdout, client, *languageCode, flag.Arg(1))
 	case "mask":
