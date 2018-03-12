@@ -18,11 +18,11 @@ import (
 )
 
 type minLikelihoodFlag struct {
-	likelihood dlppb.Likelihood
+	l dlppb.Likelihood
 }
 
 func (m *minLikelihoodFlag) String() string {
-	return fmt.Sprint(m.likelihood)
+	return fmt.Sprint(m.l)
 }
 
 func (m *minLikelihoodFlag) Set(s string) error {
@@ -30,13 +30,38 @@ func (m *minLikelihoodFlag) Set(s string) error {
 	if !ok {
 		return fmt.Errorf("not a valid likelihood: %q", s)
 	}
-	m.likelihood = dlppb.Likelihood(l)
+	m.l = dlppb.Likelihood(l)
 	return nil
 }
 
 func minLikelihoodValues() string {
 	var s []string
 	for _, m := range dlppb.Likelihood_name {
+		s = append(s, m)
+	}
+	return strings.Join(s, ", ")
+}
+
+type bytesTypeFlag struct {
+	bt dlppb.ByteContentItem_BytesType
+}
+
+func (f *bytesTypeFlag) String() string {
+	return fmt.Sprint(f.bt)
+}
+
+func (f *bytesTypeFlag) Set(s string) error {
+	b, ok := dlppb.ByteContentItem_BytesType_value[s]
+	if !ok {
+		return fmt.Errorf("not a valid BytesType: %q", s)
+	}
+	f.bt = dlppb.ByteContentItem_BytesType(b)
+	return nil
+}
+
+func bytesTypeValues() string {
+	var s []string
+	for _, m := range dlppb.ByteContentItem_BytesType_name {
 		s = append(s, m)
 	}
 	return strings.Join(s, ", ")
@@ -58,6 +83,9 @@ func main() {
 
 	var minLikelihood minLikelihoodFlag
 	flag.Var(&minLikelihood, "minLikelihood", fmt.Sprintf("Minimum likelihood value [%v] (default %v)", minLikelihoodValues(), dlppb.Likelihood_name[0]))
+
+	var bytesType bytesTypeFlag
+	flag.Var(&bytesType, "bytesType", fmt.Sprintf("Bytes type of input file [%v] (default %v)", bytesTypeValues(), dlppb.ByteContentItem_BytesType_name[0]))
 	flag.Parse()
 
 	infoTypesList := strings.Split(*infoTypesString, ",")
@@ -69,9 +97,11 @@ func main() {
 
 	switch flag.Arg(0) {
 	case "inspect":
-		inspect(os.Stdout, client, minLikelihood.likelihood, int32(*maxFindings), *includeQuote, infoTypesList, *project, flag.Arg(1))
+		inspect(os.Stdout, client, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, *project, flag.Arg(1))
+	case "inspectFile":
+		inspectFile(os.Stdout, client, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, *project, bytesType.bt, flag.Arg(1))
 	case "redact":
-		redact(os.Stdout, client, minLikelihood.likelihood, infoTypesList, *project, flag.Arg(1))
+		redact(os.Stdout, client, minLikelihood.l, infoTypesList, *project, flag.Arg(1))
 	case "infoTypes":
 		infoTypes(os.Stdout, client, *languageCode, flag.Arg(1))
 	case "mask":
