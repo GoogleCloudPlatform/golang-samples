@@ -10,7 +10,7 @@ import (
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
-func mask(w io.Writer, client *dlp.Client, project, input string) {
+func mask(w io.Writer, client *dlp.Client, project, input, maskingCharacter string, numberToMask int32) {
 	rcr := &dlppb.DeidentifyContentRequest{
 		Parent: "projects/" + project,
 		DeidentifyConfig: &dlppb.DeidentifyConfig{
@@ -22,7 +22,8 @@ func mask(w io.Writer, client *dlp.Client, project, input string) {
 							PrimitiveTransformation: &dlppb.PrimitiveTransformation{
 								Transformation: &dlppb.PrimitiveTransformation_CharacterMaskConfig{
 									CharacterMaskConfig: &dlppb.CharacterMaskConfig{
-										MaskingCharacter: "*",
+										MaskingCharacter: maskingCharacter,
+										NumberToMask:     numberToMask,
 									},
 								},
 							},
