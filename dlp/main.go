@@ -75,7 +75,7 @@ func main() {
 	case "infoTypes":
 		infoTypes(os.Stdout, client, *languageCode, flag.Arg(1))
 	case "mask":
-		mask(os.Stdout, client, *project, flag.Arg(1))
+		mask(os.Stdout, client, *project, flag.Arg(1), "*", 0)
 	case "fpe":
 		deidentifyFPE(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3))
 	case "riskNumerical":
