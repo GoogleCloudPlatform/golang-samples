@@ -102,6 +102,8 @@ func main() {
 		inspectFile(os.Stdout, client, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, *project, bytesType.bt, flag.Arg(1))
 	case "inspectGCSFile":
 		inspectGCSFile(os.Stdout, client, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4))
+	case "inspectDatastore":
+		inspectGCSFile(os.Stdout, client, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4))
 	case "redact":
 		redact(os.Stdout, client, minLikelihood.l, infoTypesList, *project, flag.Arg(1))
 	case "infoTypes":
