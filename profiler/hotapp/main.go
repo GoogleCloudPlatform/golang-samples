@@ -72,10 +72,29 @@ func allocImpl() {
 // Simulates a CPU-intensive computation.
 func busyloop() {
 	for {
-		load()
+		foo1()
+		foo2()
 		// Yield so that some preemption happens.
 		runtime.Gosched()
 	}
+}
+
+func foo1() {
+	bar()
+	baz()
+}
+
+func foo2() {
+	bar()
+	baz()
+}
+
+func bar() {
+	load()
+}
+
+func baz() {
+	load()
 }
 
 func load() {
@@ -85,7 +104,7 @@ func load() {
 
 func main() {
 	err := profiler.Start(profiler.Config{
-		Service:        "hotapp",
+		Service:        "hotapp-service",
 		DebugLogging:   true,
 		MutexProfiling: true,
 	})
