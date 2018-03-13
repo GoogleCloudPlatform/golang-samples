@@ -28,6 +28,7 @@ import (
 )
 
 func mask(w io.Writer, client *dlp.Client, project, input, maskingCharacter string, numberToMask int32) {
+	// [START dlp_deidentify_masking]
 	rcr := &dlppb.DeidentifyContentRequest{
 		Parent: "projects/" + project,
 		DeidentifyConfig: &dlppb.DeidentifyConfig{
@@ -60,9 +61,11 @@ func mask(w io.Writer, client *dlp.Client, project, input, maskingCharacter stri
 		log.Fatal(err)
 	}
 	fmt.Fprintln(w, r.GetItem().GetValue())
+	// [END dlp_deidentify_masking]
 }
 
 func deidentifyDateShift(w io.Writer, client *dlp.Client, project string, lowerBoundDays, upperBoundDays int32, s string) {
+	// [START dlp_deidentify_date_shift]
 	rcr := &dlppb.DeidentifyContentRequest{
 		Parent: "projects/" + project,
 		DeidentifyConfig: &dlppb.DeidentifyConfig{
@@ -102,9 +105,11 @@ func deidentifyDateShift(w io.Writer, client *dlp.Client, project string, lowerB
 		log.Fatal(err)
 	}
 	fmt.Fprintln(w, r.GetItem().GetValue())
+	// [END dlp_deidentify_date_shift]
 }
 
 func deidentifyFPE(w io.Writer, client *dlp.Client, project, s, keyFileName, cryptoKeyName, surrogateInfoType string) {
+	// [START dlp_deidentify_fpe]
 	b, err := ioutil.ReadFile(keyFileName)
 	if err != nil {
 		log.Fatalf("error reading file: %v", err)
@@ -153,9 +158,11 @@ func deidentifyFPE(w io.Writer, client *dlp.Client, project, s, keyFileName, cry
 		log.Fatal(err)
 	}
 	fmt.Fprintln(w, r.GetItem().GetValue())
+	// [END dlp_deidentify_fpe]
 }
 
 func reidentifyFPE(w io.Writer, client *dlp.Client, project, s, keyFileName, cryptoKeyName, surrogateInfoType string) {
+	// [START reidentify_fpe]
 	b, err := ioutil.ReadFile(keyFileName)
 	if err != nil {
 		log.Fatalf("error reading file: %v", err)
@@ -216,4 +223,5 @@ func reidentifyFPE(w io.Writer, client *dlp.Client, project, s, keyFileName, cry
 		log.Fatal(err)
 	}
 	fmt.Fprintln(w, r.GetItem().GetValue())
+	// [END reidentify_fpe]
 }
