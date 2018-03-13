@@ -104,8 +104,30 @@ __Examples:__
 ./dlp -project my-project inspectGCSFile inspect-topic inspect-sub my-bucket my-file
 ```
 
-For more information, see https://cloud.google.com/dlp/docs. Full options are explained at
-https://cloud.google.com/dlp/docs/reference/rest/v2beta1/content/inspect#InspectConfig
+For more information, see https://cloud.google.com/dlp/docs.
+
+### Jobs
+
+View the [source code](jobs.go).
+
+[![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/golang-samples&page=editor&open_in_editor=dlp/jobs.go,dlp/README.md)
+
+__Usage:__
+```bash
+go build
+./dlp -project <project> [options] deleteJob <jobID>
+./dlp -project <project> [options] listJobs <filter> <jobType>
+```
+
+__Examples:__
+```
+./dlp -project my-project inspect "My SSN is 111222333 and my phone number is (123) 456-7890"
+    ./dlp -project my-project deleteJob /projects/my-project/dlpJobs/my-job
+    ./dlp -project my-project listJobs "" ""
+
+```
+
+For more information, see https://cloud.google.com/dlp/docs.
 
 ### Metadata
 
@@ -143,8 +165,7 @@ __Examples:__
 ./dlp -project my-project -bytesType IMAGE_PNG redactImage input.png output.png
 ```
 
-For more information, see https://cloud.google.com/dlp/docs. Full options are explained at
-https://cloud.google.com/dlp/docs/reference/rest/v2beta1/content/redact.
+For more information, see https://cloud.google.com/dlp/docs.
 
 ### Risk Analysis
 

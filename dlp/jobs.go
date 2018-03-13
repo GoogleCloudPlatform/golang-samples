@@ -42,7 +42,7 @@ func listJobs(w io.Writer, client *dlp.Client, project, filter, jobType string) 
 		if err != nil {
 			log.Fatalf("error getting jobs: %v", err)
 		}
-		fmt.Fprintf(w, "Job %v status: %v", j.GetName(), j.GetState())
+		fmt.Fprintf(w, "Job %v status: %v\n", j.GetName(), j.GetState())
 	}
 }
 
