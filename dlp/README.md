@@ -10,126 +10,113 @@ The [Data Loss Prevention API](https://cloud.google.com/dlp/docs/) provides prog
 
 * [Before you begin](#before-you-begin)
 * [Samples](#samples)
+  * [De-identify](#de-identify)
   * [Inspect](#inspect)
-  * [Redact](#redact)
   * [Metadata](#metadata)
-  * [DeID](#deid)
+  * [Redact](#redact)
   * [Risk Analysis](#risk-analysis)
+  * [Templates](#templates)
+  * [Triggers](#triggers)
 
 ## Before you begin
 
 Before running the samples, make sure you've:
 
-* Enabled the [DLP API](https://console.developers.google.com/apis/api/dlp.googleapis.com/overview).
-* Enabled the [PubSub API](https://console.developers.google.com/apis/api/pubsub.googleapis.com/overview) (for the risk examples).
-* Set up [authentication](https://cloud.google.com/docs/authentication/getting-started).
-* Installed the sample application by running:
-  ```bash
-  go get -u github.com/GoogleCloudPlatform/golang-samples/dlp
-  ```
+1.  Enabled the [DLP API](https://console.developers.google.com/apis/api/dlp.googleapis.com/overview).
+1.  Enabled the [PubSub API](https://console.developers.google.com/apis/api/pubsub.googleapis.com/overview).
+1.  Set up [authentication](https://cloud.google.com/docs/authentication/getting-started).
+1.  Installed the sample application by running:
+    ```bash
+    go get -u github.com/GoogleCloudPlatform/golang-samples/dlp
+    ```
 
 ## Samples
 
+Usage: `./dlp -project <my-project> [options] subcommand [args]`
+
+```
+Options:
+  -bytesType value
+    	Bytes type of input file for inspectFile and redactImage [IMAGE_SVG, TEXT_UTF8, BYTES_TYPE_UNSPECIFIED, IMAGE_JPEG, IMAGE_BMP, IMAGE_PNG] (default BYTES_TYPE_UNSPECIFIED)
+  -includeQuote
+    	Include a quote of findings for inspect* (default false)
+  -infoTypes string
+    	Info types to inspect*, redactImage, createTrigger, and createInspectTemplate (default "PHONE_NUMBER,EMAIL_ADDRESS,CREDIT_CARD_NUMBER,US_SOCIAL_SECURITY_NUMBER")
+  -languageCode string
+    	Language code for infoTypes (default "en-US")
+  -maxFindings int
+    	Number of results for inspect*, createTrigger, and createInspectTemplate (default 0 (no limit))
+  -minLikelihood value
+    	Minimum likelihood value for inspect*, redactImage, createTrigger, and createInspectTemplate [LIKELY, VERY_LIKELY, LIKELIHOOD_UNSPECIFIED, VERY_UNLIKELY, UNLIKELY, POSSIBLE] (default LIKELIHOOD_UNSPECIFIED)
+  -project string
+    	GCloud project ID (required)
+```
+
+Subcommands and their args are described below.
+
+### De-identify
+
+View the [source code](deid.go).
+
+[![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/golang-samples&page=editor&open_in_editor=dlp/deid.go,dlp/README.md)
+
+__Usage:__
+```bash
+go build
+./dlp -project <project> [options] dateShift <string>
+./dlp -project <project> [options] fpe <string> <wrappedKeyFileName> <cryptoKeyname> <surrogateInfoType>
+./dlp -project <project> [options] mask <string>
+./dlp -project <project> [options] reidentifyFPE <string> <wrappedKeyFileName> <cryptoKeyname> <surrogateInfoType>
+```
+
+__Examples:__
+```
+./dlp -project my-project dateShift "My birthday is January 1, 1970"
+./dlp -project my-project mask "My SSN is 111222333"
+ENC=$(./dlp -project my-project fpe "My SSN is 111222333" key.enc projects/my-project/locations/global/keyRings/my-key-ring/cryptoKeys/my-key randomstring)
+./dlp -project my-project reidentifyFPE "$ENC" key.enc projects/my-project/locations/global/keyRings/my-key-ring/cryptoKeys/my-key randomstring
+```
+
+For more information, see https://cloud.google.com/dlp/docs.
+
 ### Inspect
 
-View the [source code][inspect_0_code].
+View the [source code](inspect.go).
 
 [![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/golang-samples&page=editor&open_in_editor=dlp/inspect.go,dlp/README.md)
 
 __Usage:__
 ```bash
 go build
-./dlp -project <project> inspect <string>
-```
-
-__Options:__
-```
-  -includeQuote
-        Include a quote of findings for inspect (default false)
-  -infoTypes string
-        Info types to inspect or redact (default "PHONE_NUMBER,EMAIL_ADDRESS,CREDIT_CARD_NUMBER,US_SOCIAL_SECURITY_NUMBER")
-  -maxFindings int
-        Number of results for inspect (default 0 (no limit))
-  -minLikelihood value
-        Minimum likelihood value [POSSIBLE, LIKELY, VERY_LIKELY, LIKELIHOOD_UNSPECIFIED, VERY_UNLIKELY, UNLIKELY] (default LIKELIHOOD_UNSPECIFIED)
-  -project string
-        GCloud project ID (required)
+./dlp -project <project> [options] inspect <string>
+./dlp -project <project> [options] inspectBigquery <pubSubTopic> <pubSubSub> <dataProject> <datasetID> <tableID>
+./dlp -project <project> [options] inspectDatastore <pubSubTopic> <pubSubSub> <dataProject> <namespaceID> <kind>
+./dlp -project <project> [options] inspectFile <filename>
+./dlp -project <project> [options] inspectGCSFile <pubSubTopic> <pubSubSub> <bucketName> <fileName>
 ```
 
 __Examples:__
 ```
 ./dlp -project my-project inspect "My SSN is 111222333 and my phone number is (123) 456-7890"
+./dlp -project my-project inspectBigquery inspect-topic inspect-sub dataProject datasetID tableID
+./dlp -project my-project inspectDatastore inspect-topic inspect-sub my-data-project my-namespace my-kind
+./dlp -project my-project inspectFile my-file
+./dlp -project my-project inspectGCSFile inspect-topic inspect-sub my-bucket my-file
 ```
 
 For more information, see https://cloud.google.com/dlp/docs. Full options are explained at
 https://cloud.google.com/dlp/docs/reference/rest/v2beta1/content/inspect#InspectConfig
 
-[inspect_0_docs]: https://cloud.google.com/dlp/docs
-[inspect_0_code]: inspect.go
-
-### Redact
-
-View the [source code][redact_1_code].
-
-[![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/golang-samples&page=editor&open_in_editor=dlp/redact.go,dlp/README.md)
-
-__Usage:__
-```bash
-go build
-./dlp -project <project> redact <string>
-```
-
-__Options:__
-```
-  -includeQuote
-        Include a quote of findings for inspect (default false)
-  -infoTypes string
-        Info types to inspect or redact (default "PHONE_NUMBER,EMAIL_ADDRESS,CREDIT_CARD_NUMBER,US_SOCIAL_SECURITY_NUMBER")
-  -maxFindings int
-        Number of results for inspect (default 0 (no limit))
-  -minLikelihood value
-        Minimum likelihood value [POSSIBLE, LIKELY, VERY_LIKELY, LIKELIHOOD_UNSPECIFIED, VERY_UNLIKELY, UNLIKELY] (default LIKELIHOOD_UNSPECIFIED)
-  -project string
-        GCloud project ID (required)
-```
-
-__Examples:__
-```
-./dlp -project my-project redact "My SSN is 111222333"
-```
-
-For more information, see https://cloud.google.com/dlp/docs. Full options are explained at
-https://cloud.google.com/dlp/docs/reference/rest/v2beta1/content/redact.
-
-[redact_1_docs]: https://cloud.google.com/dlp/docs
-[redact_1_code]: redact.go
-
 ### Metadata
 
-View the [source code][metadata_2_code].
+View the [source code](metadata.go).
 
 [![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/golang-samples&page=editor&open_in_editor=dlp/metadata.go,dlp/README.md)
 
 __Usage:__
 ```bash
 go build
-./dlp -project <project> infoTypes <filter>
-```
-
-__Options:__
-```
-  -includeQuote
-        Include a quote of findings for inspect (default false)
-  -infoTypes string
-        Info types to inspect or redact (default "PHONE_NUMBER,EMAIL_ADDRESS,CREDIT_CARD_NUMBER,US_SOCIAL_SECURITY_NUMBER")
-  -languageCode string
-        Language code for infoTypes (default "en-US")
-  -maxFindings int
-        Number of results for inspect (default 0 (no limit))
-  -minLikelihood value
-        Minimum likelihood value [POSSIBLE, LIKELY, VERY_LIKELY, LIKELIHOOD_UNSPECIFIED, VERY_UNLIKELY, UNLIKELY] (default LIKELIHOOD_UNSPECIFIED)
-  -project string
-        GCloud project ID (required)
+./dlp -project <project> [options] infoTypes <filter>
 ```
 
 __Examples:__
@@ -137,81 +124,42 @@ __Examples:__
 ./dlp -project my-project infoTypes supported_by=INSPECT
 ```
 
-For more information, see https://cloud.google.com/dlp/docs
+For more information, see https://cloud.google.com/dlp/docs.
 
-[metadata_2_docs]: https://cloud.google.com/dlp/docs
-[metadata_2_code]: metadata.go
+### Redact
 
-### DeID
+View the [source code](redact.go).
 
-View the [source code][deid_3_code].
-
-[![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/golang-samples&page=editor&open_in_editor=dlp/deid.go,dlp/README.md)
+[![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/golang-samples&page=editor&open_in_editor=dlp/redact.go,dlp/README.md)
 
 __Usage:__
 ```bash
 go build
-./dlp -project <project> mask <string>
-./dlp -project <project> fpe <string> <wrappedKey> <keyName>
-```
-
-__Options:__
-```
-  -includeQuote
-        Include a quote of findings for inspect (default false)
-  -infoTypes string
-        Info types to inspect or redact (default "PHONE_NUMBER,EMAIL_ADDRESS,CREDIT_CARD_NUMBER,US_SOCIAL_SECURITY_NUMBER")
-  -languageCode string
-        Language code for infoTypes (default "en-US")
-  -maxFindings int
-        Number of results for inspect (default 0 (no limit))
-  -minLikelihood value
-        Minimum likelihood value [POSSIBLE, LIKELY, VERY_LIKELY, LIKELIHOOD_UNSPECIFIED, VERY_UNLIKELY, UNLIKELY] (default LIKELIHOOD_UNSPECIFIED)
-  -project string
-        GCloud project ID (required)
+./dlp -project <project> [options] redactImage <inputPath> <outputPath>
 ```
 
 __Examples:__
 ```
-./dlp -project my-project mask "My SSN is 372819127"
-./dlp -project my-project fpe "My SSN is 372819127" <YOUR_ENCRYPTED_AES_256_KEY> <YOUR_KEY_NAME>
+./dlp -project my-project -bytesType IMAGE_PNG redactImage input.png output.png
 ```
 
-For more information, see https://cloud.google.com/dlp/docs.
-
-[deid_3_docs]: https://cloud.google.com/dlp/docs
-[deid_3_code]: deid.go
+For more information, see https://cloud.google.com/dlp/docs. Full options are explained at
+https://cloud.google.com/dlp/docs/reference/rest/v2beta1/content/redact.
 
 ### Risk Analysis
 
-View the [source code][risk_4_code].
+View the [source code](risk.go).
 
 [![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/golang-samples&page=editor&open_in_editor=dlp/risk.go,dlp/README.md)
 
 __Usage:__
 ```bash
 go build
-./dlp -project <project> riskNumerical   <dataProject> <PubSubTopicName> <PubSubSubscriptionName> <datasetID> <tableID> <columnName>
-./dlp -project <project> riskCategorical <dataProject> <PubSubTopicName> <PubSubSubscriptionName> <datasetID> <tableID> <columnName>
-./dlp -project <project> riskKAnonymity  <dataProject> <PubSubTopicName> <PubSubSubscriptionName> <datasetID> <tableID> <commaSepColumnNames>
-./dlp -project <project> riskLDiversity  <dataProject> <PubSubTopicName> <PubSubSubscriptionName> <datasetID> <tableID> <sensitiveColumnName> <commaSepColumnNames>
-./dlp -project <project> riskKMap        <dataProject> <PubSubTopicName> <PubSubSubscriptionName> <datasetID> <tableID> <region> <columnName>
-```
-
-__Options:__
-```
-  -includeQuote
-        Include a quote of findings for inspect (default false)
-  -infoTypes string
-        Info types to inspect or redact (default "PHONE_NUMBER,EMAIL_ADDRESS,CREDIT_CARD_NUMBER,US_SOCIAL_SECURITY_NUMBER")
-  -languageCode string
-        Language code for infoTypes (default "en-US")
-  -maxFindings int
-        Number of results for inspect (default 0 (no limit))
-  -minLikelihood value
-        Minimum likelihood value [POSSIBLE, LIKELY, VERY_LIKELY, LIKELIHOOD_UNSPECIFIED, VERY_UNLIKELY, UNLIKELY] (default LIKELIHOOD_UNSPECIFIED)
-  -project string
-        GCloud project ID (required)
+./dlp -project <project> [options] riskCategorical <dataProject> <pubSubTopic> <pubSubSub> <datasetID> <tableID> <columnName>
+./dlp -project <project> [options] riskKAnonymity  <dataProject> <pubSubTopic> <pubSubSub> <datasetID> <tableID> <column,names>
+./dlp -project <project> [options] riskKMap        <dataProject> <pubSubTopic> <pubSubSub> <datasetID> <tableID> <region> <column,names>
+./dlp -project <project> [options] riskLDiversity  <dataProject> <pubSubTopic> <pubSubSub> <datasetID> <tableID> <sensitiveAttribute> <column,names>
+./dlp -project <project> [options] riskNumerical   <dataProject> <pubSubTopic> <pubSubSub> <datasetID> <tableID> <columnName>
 ```
 
 __Examples:__
@@ -225,8 +173,48 @@ __Examples:__
 
 For more information, see https://cloud.google.com/dlp/docs.
 
-[risk_4_docs]: https://cloud.google.com/dlp/docs
-[risk_4_code]: risk.go
+### Templates
+
+View the [source code](templates.go).
+
+[![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/golang-samples&page=editor&open_in_editor=dlp/templates.go,dlp/README.md)
+
+__Usage:__
+```bash
+go build
+./dlp -project <project> [options] createInspectTemplate <templateID> <displayName> <description>
+./dlp -project <project> [options] deleteInspectTemplate <fullTemplateID>
+./dlp -project <project> [options] listInspectTemplates
+```
+
+__Examples:__
+```bash
+./dlp -project my-project createInspectTemplate my-template "My Template" "My template description"
+./dlp -project my-project deleteInspectTemplate projects/my-project/inspectTemplates/my-template
+./dlp -project my-project listInspectTemplates
+```
+
+For more information, see https://cloud.google.com/dlp/docs.
+
+
+### Triggers
+View the [source code](triggers.go).
+
+[![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/golang-samples&page=editor&open_in_editor=dlp/triggers.go,dlp/README.md)
+
+__Usage:__
+```bash
+./dlp -project <project> [options] createTrigger <triggerID> <displayName> <description> <bucketName>
+./dlp -project <project> [options] deleteTrigger <fullTriggerID>
+./dlp -project <project> [options] listTriggers
+```
+
+__Examples:__
+```bash
+./dlp -project my-project createTrigger my-trigger "My Trigger" "My trigger description" my-bucket
+./dlp -project my-project deleteTrigger projects/my-project/jobTriggers/my-trigger
+./dlp -project my-project listTriggers
+```
 
 [shell_img]: http://gstatic.com/cloudssh/images/open-btn.png
 [shell_link]: https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/golang-samples&page=editor&open_in_editor=dlp/README.md
