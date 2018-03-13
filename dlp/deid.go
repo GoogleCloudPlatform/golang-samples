@@ -62,6 +62,48 @@ func mask(w io.Writer, client *dlp.Client, project, input, maskingCharacter stri
 	fmt.Fprintln(w, r.GetItem().GetValue())
 }
 
+func deidentifyDateShift(w io.Writer, client *dlp.Client, project string, lowerBoundDays, upperBoundDays int32, s string) {
+	rcr := &dlppb.DeidentifyContentRequest{
+		Parent: "projects/" + project,
+		DeidentifyConfig: &dlppb.DeidentifyConfig{
+			Transformation: &dlppb.DeidentifyConfig_InfoTypeTransformations{
+				InfoTypeTransformations: &dlppb.InfoTypeTransformations{
+					Transformations: []*dlppb.InfoTypeTransformations_InfoTypeTransformation{
+						{
+							InfoTypes: []*dlppb.InfoType{}, // Match all info types.
+							PrimitiveTransformation: &dlppb.PrimitiveTransformation{
+								Transformation: &dlppb.PrimitiveTransformation_DateShiftConfig{
+									DateShiftConfig: &dlppb.DateShiftConfig{
+										LowerBoundDays: lowerBoundDays,
+										UpperBoundDays: upperBoundDays,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		InspectConfig: &dlppb.InspectConfig{
+			InfoTypes: []*dlppb.InfoType{
+				{
+					Name: "DATE",
+				},
+			},
+		},
+		Item: &dlppb.ContentItem{
+			DataItem: &dlppb.ContentItem_Value{
+				Value: s,
+			},
+		},
+	}
+	r, err := client.DeidentifyContent(context.Background(), rcr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Fprintln(w, r.GetItem().GetValue())
+}
+
 func deidentifyFPE(w io.Writer, client *dlp.Client, project, s, keyFileName, cryptoKeyName, surrogateInfoType string) {
 	b, err := ioutil.ReadFile(keyFileName)
 	if err != nil {
