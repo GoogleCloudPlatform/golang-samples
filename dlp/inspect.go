@@ -170,7 +170,7 @@ func inspectGCSFile(w io.Writer, client *dlp.Client, project string, minLikeliho
 	}
 }
 
-func inspectDatastore(w io.Writer, client *dlp.Client, minLikelihood dlppb.Likelihood, maxFindings int32, includeQuote bool, infoTypes []string, project, pubSubTopic, pubSubSub, dataProject, namespaceID, kind string) {
+func inspectDatastore(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, maxFindings int32, includeQuote bool, infoTypes []string, pubSubTopic, pubSubSub, dataProject, namespaceID, kind string) {
 	var i []*dlppb.InfoType
 	for _, it := range infoTypes {
 		i = append(i, &dlppb.InfoType{Name: it})

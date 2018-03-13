@@ -23,9 +23,11 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sort"
 	"strings"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
+	"github.com/fatih/color"
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
@@ -103,6 +105,7 @@ func main() {
 	infoTypesList := strings.Split(*infoTypesString, ",")
 
 	if *project == "" {
+		fmt.Fprintf(os.Stderr, "Must provide a -project\n\n")
 		flag.Usage()
 		os.Exit(1)
 	}
@@ -115,7 +118,7 @@ func main() {
 	case "inspectGCSFile":
 		inspectGCSFile(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4))
 	case "inspectDatastore":
-		inspectGCSFile(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4))
+		inspectDatastore(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), flag.Arg(5))
 	case "inspectBigquery":
 		inspectBigquery(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), flag.Arg(5))
 	case "redactImage":
@@ -153,7 +156,82 @@ func main() {
 	case "deleteInspectTemplate":
 		deleteInspectTemplate(os.Stdout, client, flag.Arg(1))
 	default:
-		fmt.Fprintf(os.Stderr, "Unknown subcommand: %q\n\nUsage: %s CMD\n", flag.Arg(0), os.Args[0])
+		fmt.Fprintf(os.Stderr, "Unknown subcommand: %q\n\n", flag.Arg(0))
+		flag.Usage()
 		os.Exit(1)
+	}
+}
+
+func sortedKeys(m map[string]string) []string {
+	var l []string
+	for k := range m {
+		l = append(l, k)
+	}
+	sort.Strings(l)
+	return l
+}
+
+func sortedMapKeys(m map[string]map[string]string) []string {
+	var l []string
+	for k := range m {
+		l = append(l, k)
+	}
+	sort.Strings(l)
+	return l
+}
+
+var subcommands = map[string]map[string]string{
+	"inspect": {
+		"inspect":          "[options] string",
+		"inspectFile":      "[options] filename",
+		"inspectGCSFile":   "[options] pubSubTopic pubSubSub bucketName fileName ",
+		"inspectDatastore": "[options] pubSubTopic pubSubSub dataProject namespaceID kind",
+		"inspectBigquery":  "[options] pubSubTopic pubSubSub dataProject datasetID tableID",
+	},
+	"redact": {
+		"redactImage": "[options] inputPath outputPath",
+	},
+	"metadata": {
+		"infoTypes": "[options] filter",
+	},
+	"deidentify": {
+		"mask":          "[options] string",
+		"dateShift":     "[options] string",
+		"fpe":           "[options] string wrappedKeyFileName cryptoKeyname surrogateInfoType",
+		"reidentifyFPE": "[options] string wrappedKeyFileName cryptoKeyname surrogateInfoType",
+	},
+	"risk": {
+		"riskNumerical":   "[options] dataProject pubSubTopic pubSubSub datasetID tableID columnName",
+		"riskCategorical": "[options] dataProject pubSubTopic pubSubSub datasetID tableID columnName",
+		"riskKAnonymity":  "[options] dataProject pubSubTopic pubSubSub datasetID tableID column,names",
+		"riskLDiversity":  "[options] dataProject pubSubTopic pubSubSub datasetID tableID sensitiveAttribute column,names",
+		"riskKMap":        "[options] dataProject pubSubTopic pubSubSub datasetID tableID region column,names",
+	},
+	"triggers": {
+		"createTrigger": "[options] triggerID displayName description bucketName",
+		"listTriggers":  "[options]",
+		"deleteTrigger": "[options] fullTriggerID",
+	},
+	"templates": {
+		"createInspectTemplate": "[options] templateID displayName description",
+		"listInspectTemplates":  "[options]",
+		"deleteInspectTemplate": "[options] fullTemplateID",
+	},
+}
+
+func init() {
+	bold := color.New(color.Bold).FprintfFunc()
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage: %s -project <my-project> [options] subcommand [args]\n\n", os.Args[0])
+		bold(os.Stderr, "Subcommands:\n")
+		for _, c := range sortedMapKeys(subcommands) {
+			color.New(color.FgHiBlue, color.Bold).Fprintf(os.Stderr, "  %s\n", c)
+			for _, s := range sortedKeys(subcommands[c]) {
+				bold(os.Stderr, "    %s ", s)
+				fmt.Fprintf(os.Stderr, "%s\n", subcommands[c][s])
+			}
+		}
+		bold(os.Stderr, "\n\nOptions:\n")
+		flag.PrintDefaults()
 	}
 }
