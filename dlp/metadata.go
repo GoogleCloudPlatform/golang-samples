@@ -27,6 +27,7 @@ import (
 )
 
 func infoTypes(w io.Writer, client *dlp.Client, languageCode, filter string) {
+	// [START dlp_list_info_types]
 	rcr := &dlppb.ListInfoTypesRequest{
 		LanguageCode: languageCode,
 		Filter:       filter,
@@ -38,4 +39,5 @@ func infoTypes(w io.Writer, client *dlp.Client, languageCode, filter string) {
 	for _, it := range r.GetInfoTypes() {
 		fmt.Fprintln(w, it.GetName())
 	}
+	// [END dlp_list_info_types]
 }

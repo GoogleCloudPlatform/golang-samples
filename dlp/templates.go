@@ -29,6 +29,7 @@ import (
 )
 
 func createInspectTemplate(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, maxFindings int32, templateID, displayName, description string, infoTypes []string) {
+	// [START dlp_create_template]
 	var i []*dlppb.InfoType
 	for _, it := range infoTypes {
 		i = append(i, &dlppb.InfoType{Name: it})
@@ -53,9 +54,11 @@ func createInspectTemplate(w io.Writer, client *dlp.Client, project string, minL
 		log.Fatalf("error creating inspect template: %v", err)
 	}
 	fmt.Fprintf(w, "Successfully created inspect template: %v", r.GetName())
+	// [END dlp_create_template]
 }
 
 func listInspectTemplates(w io.Writer, client *dlp.Client, project string) {
+	// [START dlp_list_templates]
 	rcr := &dlppb.ListInspectTemplatesRequest{
 		Parent: "projects/" + project,
 	}
@@ -76,9 +79,11 @@ func listInspectTemplates(w io.Writer, client *dlp.Client, project string) {
 		fmt.Fprintf(w, "  Display Name: %q\n", t.GetDisplayName())
 		fmt.Fprintf(w, "  Description: %q\n", t.GetDescription())
 	}
+	// [END dlp_list_templates]
 }
 
 func deleteInspectTemplate(w io.Writer, client *dlp.Client, templateID string) {
+	// [START dlp_delete_template]
 	rcr := &dlppb.DeleteInspectTemplateRequest{
 		Name: templateID,
 	}
@@ -87,4 +92,5 @@ func deleteInspectTemplate(w io.Writer, client *dlp.Client, templateID string) {
 		log.Fatalf("error deleting inspect template: %v", err)
 	}
 	fmt.Fprintf(w, "Successfully deleted inspect template %v", templateID)
+	// [END dlp_delete_template]
 }
