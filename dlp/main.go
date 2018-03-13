@@ -170,7 +170,10 @@ func main() {
 		listJobs(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2))
 	case "deleteJob":
 		deleteJob(os.Stdout, client, flag.Arg(1))
+	case "quickstart":
+		quickstart(*project)
 	}
+
 }
 
 func sortedKeys(m map[string]string) []string {
