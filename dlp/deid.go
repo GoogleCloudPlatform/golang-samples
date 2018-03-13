@@ -46,7 +46,7 @@ func mask(w io.Writer, client *dlp.Client, project, input, maskingCharacter stri
 	fmt.Fprintln(w, r.GetItem().GetValue())
 }
 
-func deidentifyFPE(w io.Writer, client *dlp.Client, project, s, keyFileName, cryptoKeyName string) {
+func deidentifyFPE(w io.Writer, client *dlp.Client, project, s, keyFileName, cryptoKeyName, surrogateInfoType string) {
 	b, err := ioutil.ReadFile(keyFileName)
 	if err != nil {
 		log.Fatalf("error reading file: %v", err)
@@ -73,6 +73,9 @@ func deidentifyFPE(w io.Writer, client *dlp.Client, project, s, keyFileName, cry
 										Alphabet: &dlppb.CryptoReplaceFfxFpeConfig_CommonAlphabet{
 											CommonAlphabet: dlppb.CryptoReplaceFfxFpeConfig_ALPHA_NUMERIC,
 										},
+										SurrogateInfoType: &dlppb.InfoType{
+											Name: surrogateInfoType,
+										},
 									},
 								},
 							},
@@ -88,6 +91,57 @@ func deidentifyFPE(w io.Writer, client *dlp.Client, project, s, keyFileName, cry
 		},
 	}
 	r, err := client.DeidentifyContent(context.Background(), rcr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Fprintln(w, r.GetItem().GetValue())
+}
+
+func reidentifyFPE(w io.Writer, client *dlp.Client, project, s, keyFileName, cryptoKeyName, surrogateInfoType string) {
+	b, err := ioutil.ReadFile(keyFileName)
+	if err != nil {
+		log.Fatalf("error reading file: %v", err)
+	}
+	rcr := &dlppb.ReidentifyContentRequest{
+		Parent: "projects/" + project,
+		ReidentifyConfig: &dlppb.DeidentifyConfig{
+			Transformation: &dlppb.DeidentifyConfig_InfoTypeTransformations{
+				InfoTypeTransformations: &dlppb.InfoTypeTransformations{
+					Transformations: []*dlppb.InfoTypeTransformations_InfoTypeTransformation{
+						{
+							InfoTypes: []*dlppb.InfoType{},
+							PrimitiveTransformation: &dlppb.PrimitiveTransformation{
+								Transformation: &dlppb.PrimitiveTransformation_CryptoReplaceFfxFpeConfig{
+									CryptoReplaceFfxFpeConfig: &dlppb.CryptoReplaceFfxFpeConfig{
+										CryptoKey: &dlppb.CryptoKey{
+											Source: &dlppb.CryptoKey_KmsWrapped{
+												KmsWrapped: &dlppb.KmsWrappedCryptoKey{
+													WrappedKey:    b,
+													CryptoKeyName: cryptoKeyName,
+												},
+											},
+										},
+										Alphabet: &dlppb.CryptoReplaceFfxFpeConfig_CommonAlphabet{
+											CommonAlphabet: dlppb.CryptoReplaceFfxFpeConfig_ALPHA_NUMERIC,
+										},
+										SurrogateInfoType: &dlppb.InfoType{
+											Name: surrogateInfoType,
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		Item: &dlppb.ContentItem{
+			DataItem: &dlppb.ContentItem_Value{
+				Value: s,
+			},
+		},
+	}
+	r, err := client.ReidentifyContent(context.Background(), rcr)
 	if err != nil {
 		log.Fatal(err)
 	}
