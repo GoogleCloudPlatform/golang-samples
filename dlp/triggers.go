@@ -31,6 +31,7 @@ import (
 )
 
 func createTrigger(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, maxFindings int32, triggerID, displayName, description, bucketName string, scanPeriod int64, infoTypes []string) {
+	// [START dlp_create_trigger]
 	var i []*dlppb.InfoType
 	for _, it := range infoTypes {
 		i = append(i, &dlppb.InfoType{Name: it})
@@ -82,9 +83,11 @@ func createTrigger(w io.Writer, client *dlp.Client, project string, minLikelihoo
 		log.Fatalf("error creating job trigger: %v", err)
 	}
 	fmt.Fprintf(w, "Successfully created trigger: %v", r.GetName())
+	// [END dlp_create_trigger]
 }
 
 func listTriggers(w io.Writer, client *dlp.Client, project string) {
+	// [START dlp_list_triggers]
 	rcr := &dlppb.ListJobTriggersRequest{
 		Parent: "projects/" + project,
 	}
@@ -107,9 +110,11 @@ func listTriggers(w io.Writer, client *dlp.Client, project string) {
 		fmt.Fprintf(w, "  Status: %v\n", t.GetStatus())
 		fmt.Fprintf(w, "  Error Count: %v\n", len(t.GetErrors()))
 	}
+	// [END dlp_list_triggers]
 }
 
 func deleteTrigger(w io.Writer, client *dlp.Client, triggerID string) {
+	// [START dlp_delete_trigger]
 	rcr := &dlppb.DeleteJobTriggerRequest{
 		Name: triggerID,
 	}
@@ -118,4 +123,5 @@ func deleteTrigger(w io.Writer, client *dlp.Client, triggerID string) {
 		log.Fatalf("error deleting job: %v", err)
 	}
 	fmt.Fprintf(w, "Successfully deleted trigger %v", triggerID)
+	// [END dlp_delete_trigger]
 }

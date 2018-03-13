@@ -27,6 +27,7 @@ import (
 )
 
 func redactImage(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, infoTypes []string, bytesType dlppb.ByteContentItem_BytesType, inputPath, outputPath string) {
+	// [START dlp_redact_image]
 	var i []*dlppb.InfoType
 	for _, it := range infoTypes {
 		i = append(i, &dlppb.InfoType{Name: it})
@@ -63,4 +64,5 @@ func redactImage(w io.Writer, client *dlp.Client, project string, minLikelihood 
 		log.Fatal(err)
 	}
 	ioutil.WriteFile(outputPath, r.GetRedactedImage(), 0644)
+	// [END dlp_redact_image]
 }

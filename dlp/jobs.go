@@ -28,6 +28,7 @@ import (
 )
 
 func listJobs(w io.Writer, client *dlp.Client, project, filter, jobType string) {
+	// [START dlp_list_jobs]
 	rcr := &dlppb.ListDlpJobsRequest{
 		Parent: "projects/" + project,
 		Filter: filter,
@@ -44,9 +45,11 @@ func listJobs(w io.Writer, client *dlp.Client, project, filter, jobType string) 
 		}
 		fmt.Fprintf(w, "Job %v status: %v\n", j.GetName(), j.GetState())
 	}
+	// [END dlp_list_jobs]
 }
 
 func deleteJob(w io.Writer, client *dlp.Client, jobName string) {
+	// [START dlp_delete_job]
 	rcr := &dlppb.DeleteDlpJobRequest{
 		Name: jobName,
 	}
@@ -54,4 +57,5 @@ func deleteJob(w io.Writer, client *dlp.Client, jobName string) {
 	if err != nil {
 		log.Fatalf("error deleting job: %v", err)
 	}
+	// [END dlp_delete_job]
 }

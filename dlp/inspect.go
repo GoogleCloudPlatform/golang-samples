@@ -29,6 +29,7 @@ import (
 )
 
 func inspect(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, maxFindings int32, includeQuote bool, infoTypes []string, input string) {
+	// [START dlp_inspect_string]
 	var i []*dlppb.InfoType
 	for _, it := range infoTypes {
 		i = append(i, &dlppb.InfoType{Name: it})
@@ -54,9 +55,11 @@ func inspect(w io.Writer, client *dlp.Client, project string, minLikelihood dlpp
 		log.Fatal(err)
 	}
 	fmt.Fprintln(w, r.GetResult())
+	// [END dlp_inspect_string]
 }
 
 func inspectFile(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, maxFindings int32, includeQuote bool, infoTypes []string, bytesType dlppb.ByteContentItem_BytesType, fileName string) {
+	// [START dlp_inspect_file]
 	var i []*dlppb.InfoType
 	for _, it := range infoTypes {
 		i = append(i, &dlppb.InfoType{Name: it})
@@ -89,9 +92,11 @@ func inspectFile(w io.Writer, client *dlp.Client, project string, minLikelihood 
 		log.Fatal(err)
 	}
 	fmt.Fprintln(w, r.GetResult())
+	// [END dlp_inspect_file]
 }
 
 func inspectGCSFile(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, maxFindings int32, includeQuote bool, infoTypes []string, pubSubTopic, pubSubSub, bucketName, fileName string) {
+	// [START dlp_inspect_gcs]
 	var i []*dlppb.InfoType
 	for _, it := range infoTypes {
 		i = append(i, &dlppb.InfoType{Name: it})
@@ -168,9 +173,11 @@ func inspectGCSFile(w io.Writer, client *dlp.Client, project string, minLikeliho
 	if err != nil {
 		log.Fatalf("Error receiving from PubSub: %v\n", err)
 	}
+	// [END dlp_inspect_gcs]
 }
 
 func inspectDatastore(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, maxFindings int32, includeQuote bool, infoTypes []string, pubSubTopic, pubSubSub, dataProject, namespaceID, kind string) {
+	// [START dlp_inspect_datastore]
 	var i []*dlppb.InfoType
 	for _, it := range infoTypes {
 		i = append(i, &dlppb.InfoType{Name: it})
@@ -251,9 +258,11 @@ func inspectDatastore(w io.Writer, client *dlp.Client, project string, minLikeli
 	if err != nil {
 		log.Fatalf("Error receiving from PubSub: %v\n", err)
 	}
+	// [START dlp_inspect_datastore]
 }
 
 func inspectBigquery(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, maxFindings int32, includeQuote bool, infoTypes []string, pubSubTopic, pubSubSub, dataProject, datasetID, tableID string) {
+	// [START dlp_inspect_bigquery]
 	var i []*dlppb.InfoType
 	for _, it := range infoTypes {
 		i = append(i, &dlppb.InfoType{Name: it})
@@ -332,4 +341,5 @@ func inspectBigquery(w io.Writer, client *dlp.Client, project string, minLikelih
 	if err != nil {
 		log.Fatalf("Error receiving from PubSub: %v\n", err)
 	}
+	// [END dlp_inspect_bigquery]
 }
