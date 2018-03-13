@@ -91,15 +91,15 @@ func main() {
 
 	project := flag.String("project", "", "GCloud project ID (required)")
 	languageCode := flag.String("languageCode", "en-US", "Language code for infoTypes")
-	maxFindings := flag.Int("maxFindings", 0, "Number of results for inspect (default 0 (no limit))")
-	includeQuote := flag.Bool("includeQuote", false, "Include a quote of findings for inspect (default false)")
-	infoTypesString := flag.String("infoTypes", "PHONE_NUMBER,EMAIL_ADDRESS,CREDIT_CARD_NUMBER,US_SOCIAL_SECURITY_NUMBER", "Info types to inspect or redact")
+	maxFindings := flag.Int("maxFindings", 0, "Number of results for inspect*, createTrigger, and createInspectTemplate (default 0 (no limit))")
+	includeQuote := flag.Bool("includeQuote", false, "Include a quote of findings for inspect* (default false)")
+	infoTypesString := flag.String("infoTypes", "PHONE_NUMBER,EMAIL_ADDRESS,CREDIT_CARD_NUMBER,US_SOCIAL_SECURITY_NUMBER", "Info types to inspect*, redactImage, createTrigger, and createInspectTemplate")
 
 	var minLikelihood minLikelihoodFlag
-	flag.Var(&minLikelihood, "minLikelihood", fmt.Sprintf("Minimum likelihood value [%v] (default %v)", minLikelihoodValues(), dlppb.Likelihood_name[0]))
+	flag.Var(&minLikelihood, "minLikelihood", fmt.Sprintf("Minimum likelihood value for inspect*, redactImage, createTrigger, and createInspectTemplate [%v] (default %v)", minLikelihoodValues(), dlppb.Likelihood_name[0]))
 
 	var bytesType bytesTypeFlag
-	flag.Var(&bytesType, "bytesType", fmt.Sprintf("Bytes type of input file [%v] (default %v)", bytesTypeValues(), dlppb.ByteContentItem_BytesType_name[0]))
+	flag.Var(&bytesType, "bytesType", fmt.Sprintf("Bytes type of input file for inspectFile and redactImage [%v] (default %v)", bytesTypeValues(), dlppb.ByteContentItem_BytesType_name[0]))
 	flag.Parse()
 
 	infoTypesList := strings.Split(*infoTypesString, ",")
@@ -182,52 +182,54 @@ func sortedMapKeys(m map[string]map[string]string) []string {
 
 var subcommands = map[string]map[string]string{
 	"inspect": {
-		"inspect":          "[options] string",
-		"inspectFile":      "[options] filename",
-		"inspectGCSFile":   "[options] pubSubTopic pubSubSub bucketName fileName ",
-		"inspectDatastore": "[options] pubSubTopic pubSubSub dataProject namespaceID kind",
-		"inspectBigquery":  "[options] pubSubTopic pubSubSub dataProject datasetID tableID",
+		"inspect":          "<string>",
+		"inspectFile":      "<filename>",
+		"inspectGCSFile":   "<pubSubTopic> <pubSubSub> <bucketName> <fileName> ",
+		"inspectDatastore": "<pubSubTopic> <pubSubSub> <dataProject> <namespaceID> <kind>",
+		"inspectBigquery":  "<pubSubTopic> <pubSubSub> <dataProject> <datasetID> <tableID>",
 	},
 	"redact": {
-		"redactImage": "[options] inputPath outputPath",
+		"redactImage": "<inputPath> <outputPath>",
 	},
 	"metadata": {
-		"infoTypes": "[options] filter",
+		"infoTypes": "<filter>",
 	},
 	"deidentify": {
-		"mask":          "[options] string",
-		"dateShift":     "[options] string",
-		"fpe":           "[options] string wrappedKeyFileName cryptoKeyname surrogateInfoType",
-		"reidentifyFPE": "[options] string wrappedKeyFileName cryptoKeyname surrogateInfoType",
+		"mask":          "<string>",
+		"dateShift":     "<string>",
+		"fpe":           "<string> <wrappedKeyFileName> <cryptoKeyname> <surrogateInfoType>",
+		"reidentifyFPE": "<string> <wrappedKeyFileName> <cryptoKeyname> <surrogateInfoType>",
 	},
 	"risk": {
-		"riskNumerical":   "[options] dataProject pubSubTopic pubSubSub datasetID tableID columnName",
-		"riskCategorical": "[options] dataProject pubSubTopic pubSubSub datasetID tableID columnName",
-		"riskKAnonymity":  "[options] dataProject pubSubTopic pubSubSub datasetID tableID column,names",
-		"riskLDiversity":  "[options] dataProject pubSubTopic pubSubSub datasetID tableID sensitiveAttribute column,names",
-		"riskKMap":        "[options] dataProject pubSubTopic pubSubSub datasetID tableID region column,names",
+		"riskNumerical":   "<dataProject> <pubSubTopic> <pubSubSub> <datasetID> <tableID> <columnName>",
+		"riskCategorical": "<dataProject> <pubSubTopic> <pubSubSub> <datasetID> <tableID> <columnName>",
+		"riskKAnonymity":  "<dataProject> <pubSubTopic> <pubSubSub> <datasetID> <tableID> <column,names>",
+		"riskLDiversity":  "<dataProject> <pubSubTopic> <pubSubSub> <datasetID> <tableID> <sensitiveAttribute> <column,names>",
+		"riskKMap":        "<dataProject> <pubSubTopic> <pubSubSub> <datasetID> <tableID> <region> <column,names>",
 	},
 	"triggers": {
-		"createTrigger": "[options] triggerID displayName description bucketName",
-		"listTriggers":  "[options]",
-		"deleteTrigger": "[options] fullTriggerID",
+		"createTrigger": "<triggerID> <displayName> <description> <bucketName>",
+		"listTriggers":  "",
+		"deleteTrigger": "<fullTriggerID>",
 	},
 	"templates": {
-		"createInspectTemplate": "[options] templateID displayName description",
-		"listInspectTemplates":  "[options]",
-		"deleteInspectTemplate": "[options] fullTemplateID",
+		"createInspectTemplate": "<templateID> <displayName> <description>",
+		"listInspectTemplates":  "",
+		"deleteInspectTemplate": "<fullTemplateID>",
 	},
 }
 
 func init() {
 	bold := color.New(color.Bold).FprintfFunc()
+	blue := color.New(color.FgHiBlue, color.Bold).FprintfFunc()
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: %s -project <my-project> [options] subcommand [args]\n\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "Usage: %s -project <project> subcommand [args]\n\n", os.Args[0])
 		bold(os.Stderr, "Subcommands:\n")
 		for _, c := range sortedMapKeys(subcommands) {
-			color.New(color.FgHiBlue, color.Bold).Fprintf(os.Stderr, "  %s\n", c)
+			blue(os.Stderr, "  %s\n", c)
 			for _, s := range sortedKeys(subcommands[c]) {
-				bold(os.Stderr, "    %s ", s)
+				fmt.Fprintf(os.Stderr, "    %s -project <project> [options] ", os.Args[0])
+				bold(os.Stderr, "%s ", s)
 				fmt.Fprintf(os.Stderr, "%s\n", subcommands[c][s])
 			}
 		}
