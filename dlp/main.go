@@ -144,8 +144,14 @@ func main() {
 		listTriggers(os.Stdout, client, *project)
 	case "deleteTrigger":
 		deleteTrigger(os.Stdout, client, flag.Arg(1))
+	case "createInspectTemplate":
+		createInspectTemplate(os.Stdout, client, minLikelihood.l, int32(*maxFindings), *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), infoTypesList)
+	case "listInspectTemplates":
+		listInspectTemplates(os.Stdout, client, *project)
+	case "deleteInspectTemplate":
+		deleteInspectTemplate(os.Stdout, client, flag.Arg(1))
 	default:
-		fmt.Fprintf(os.Stderr, `Usage: %s CMD "string"\n`, os.Args[0])
+		fmt.Fprintf(os.Stderr, "Unknown subcommand: %q\n\nUsage: %s CMD\n", flag.Arg(0), os.Args[0])
 		os.Exit(1)
 	}
 }
