@@ -113,7 +113,9 @@ func main() {
 	case "mask":
 		mask(os.Stdout, client, *project, flag.Arg(1), "*", 0)
 	case "fpe":
-		deidentifyFPE(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3))
+		deidentifyFPE(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4))
+	case "reidentifyFPE":
+		reidentifyFPE(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4))
 	case "riskNumerical":
 		riskNumerical(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), flag.Arg(5), flag.Arg(6))
 	case "riskCategorical":
