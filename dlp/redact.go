@@ -26,7 +26,7 @@ import (
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
-func redactImage(w io.Writer, client *dlp.Client, minLikelihood dlppb.Likelihood, infoTypes []string, project string, bytesType dlppb.ByteContentItem_BytesType, inputPath, outputPath string) {
+func redactImage(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, infoTypes []string, bytesType dlppb.ByteContentItem_BytesType, inputPath, outputPath string) {
 	var i []*dlppb.InfoType
 	for _, it := range infoTypes {
 		i = append(i, &dlppb.InfoType{Name: it})

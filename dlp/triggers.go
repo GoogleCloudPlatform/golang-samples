@@ -30,7 +30,7 @@ import (
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
-func createTrigger(w io.Writer, client *dlp.Client, minLikelihood dlppb.Likelihood, maxFindings int32, project, triggerID, displayName, description, bucketName string, scanPeriod int64, infoTypes []string) {
+func createTrigger(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, maxFindings int32, triggerID, displayName, description, bucketName string, scanPeriod int64, infoTypes []string) {
 	var i []*dlppb.InfoType
 	for _, it := range infoTypes {
 		i = append(i, &dlppb.InfoType{Name: it})

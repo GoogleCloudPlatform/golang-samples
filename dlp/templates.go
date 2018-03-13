@@ -28,7 +28,7 @@ import (
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
-func createInspectTemplate(w io.Writer, client *dlp.Client, minLikelihood dlppb.Likelihood, maxFindings int32, project, templateID, displayName, description string, infoTypes []string) {
+func createInspectTemplate(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, maxFindings int32, templateID, displayName, description string, infoTypes []string) {
 	var i []*dlppb.InfoType
 	for _, it := range infoTypes {
 		i = append(i, &dlppb.InfoType{Name: it})
