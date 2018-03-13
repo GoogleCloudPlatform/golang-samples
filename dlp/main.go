@@ -138,6 +138,12 @@ func main() {
 		riskLDiversity(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), flag.Arg(5), flag.Arg(6), strings.Split(flag.Arg(7), ",")...)
 	case "riskKMap":
 		riskKMap(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), flag.Arg(5), flag.Arg(6), strings.Split(flag.Arg(7), ",")...)
+	case "createTrigger":
+		createTrigger(os.Stdout, client, minLikelihood.l, int32(*maxFindings), *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), 12, infoTypesList)
+	case "listTriggers":
+		listTriggers(os.Stdout, client, *project)
+	case "deleteTrigger":
+		deleteTrigger(os.Stdout, client, flag.Arg(1))
 	default:
 		fmt.Fprintf(os.Stderr, `Usage: %s CMD "string"\n`, os.Args[0])
 		os.Exit(1)
