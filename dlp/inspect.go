@@ -28,7 +28,7 @@ import (
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
-func inspect(w io.Writer, client *dlp.Client, minLikelihood dlppb.Likelihood, maxFindings int32, includeQuote bool, infoTypes []string, project, input string) {
+func inspect(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, maxFindings int32, includeQuote bool, infoTypes []string, input string) {
 	var i []*dlppb.InfoType
 	for _, it := range infoTypes {
 		i = append(i, &dlppb.InfoType{Name: it})
@@ -56,7 +56,7 @@ func inspect(w io.Writer, client *dlp.Client, minLikelihood dlppb.Likelihood, ma
 	fmt.Fprintln(w, r.GetResult())
 }
 
-func inspectFile(w io.Writer, client *dlp.Client, minLikelihood dlppb.Likelihood, maxFindings int32, includeQuote bool, infoTypes []string, project string, bytesType dlppb.ByteContentItem_BytesType, fileName string) {
+func inspectFile(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, maxFindings int32, includeQuote bool, infoTypes []string, bytesType dlppb.ByteContentItem_BytesType, fileName string) {
 	var i []*dlppb.InfoType
 	for _, it := range infoTypes {
 		i = append(i, &dlppb.InfoType{Name: it})
@@ -91,7 +91,7 @@ func inspectFile(w io.Writer, client *dlp.Client, minLikelihood dlppb.Likelihood
 	fmt.Fprintln(w, r.GetResult())
 }
 
-func inspectGCSFile(w io.Writer, client *dlp.Client, minLikelihood dlppb.Likelihood, maxFindings int32, includeQuote bool, infoTypes []string, project, pubSubTopic, pubSubSub, bucketName, fileName string) {
+func inspectGCSFile(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, maxFindings int32, includeQuote bool, infoTypes []string, pubSubTopic, pubSubSub, bucketName, fileName string) {
 	var i []*dlppb.InfoType
 	for _, it := range infoTypes {
 		i = append(i, &dlppb.InfoType{Name: it})
@@ -253,7 +253,7 @@ func inspectDatastore(w io.Writer, client *dlp.Client, minLikelihood dlppb.Likel
 	}
 }
 
-func inspectBigquery(w io.Writer, client *dlp.Client, minLikelihood dlppb.Likelihood, maxFindings int32, includeQuote bool, infoTypes []string, project, pubSubTopic, pubSubSub, dataProject, datasetID, tableID string) {
+func inspectBigquery(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, maxFindings int32, includeQuote bool, infoTypes []string, pubSubTopic, pubSubSub, dataProject, datasetID, tableID string) {
 	var i []*dlppb.InfoType
 	for _, it := range infoTypes {
 		i = append(i, &dlppb.InfoType{Name: it})

@@ -109,17 +109,17 @@ func main() {
 
 	switch flag.Arg(0) {
 	case "inspect":
-		inspect(os.Stdout, client, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, *project, flag.Arg(1))
+		inspect(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, flag.Arg(1))
 	case "inspectFile":
-		inspectFile(os.Stdout, client, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, *project, bytesType.bt, flag.Arg(1))
+		inspectFile(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, bytesType.bt, flag.Arg(1))
 	case "inspectGCSFile":
-		inspectGCSFile(os.Stdout, client, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4))
+		inspectGCSFile(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4))
 	case "inspectDatastore":
-		inspectGCSFile(os.Stdout, client, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4))
+		inspectGCSFile(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4))
 	case "inspectBigquery":
-		inspectBigquery(os.Stdout, client, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), flag.Arg(5))
+		inspectBigquery(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), flag.Arg(5))
 	case "redactImage":
-		redactImage(os.Stdout, client, minLikelihood.l, infoTypesList, *project, bytesType.bt, flag.Arg(1), flag.Arg(2))
+		redactImage(os.Stdout, client, *project, minLikelihood.l, infoTypesList, bytesType.bt, flag.Arg(1), flag.Arg(2))
 	case "infoTypes":
 		infoTypes(os.Stdout, client, *languageCode, flag.Arg(1))
 	case "mask":
@@ -141,13 +141,13 @@ func main() {
 	case "riskKMap":
 		riskKMap(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), flag.Arg(5), flag.Arg(6), strings.Split(flag.Arg(7), ",")...)
 	case "createTrigger":
-		createTrigger(os.Stdout, client, minLikelihood.l, int32(*maxFindings), *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), 12, infoTypesList)
+		createTrigger(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), 12, infoTypesList)
 	case "listTriggers":
 		listTriggers(os.Stdout, client, *project)
 	case "deleteTrigger":
 		deleteTrigger(os.Stdout, client, flag.Arg(1))
 	case "createInspectTemplate":
-		createInspectTemplate(os.Stdout, client, minLikelihood.l, int32(*maxFindings), *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), infoTypesList)
+		createInspectTemplate(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), flag.Arg(1), flag.Arg(2), flag.Arg(3), infoTypesList)
 	case "listInspectTemplates":
 		listInspectTemplates(os.Stdout, client, *project)
 	case "deleteInspectTemplate":
