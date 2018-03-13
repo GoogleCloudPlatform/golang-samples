@@ -111,6 +111,10 @@ func main() {
 	}
 
 	switch flag.Arg(0) {
+	default:
+		fmt.Fprintf(os.Stderr, "Unknown subcommand: %q\n\n", flag.Arg(0))
+		flag.Usage()
+		os.Exit(1)
 	case "inspect":
 		inspect(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, flag.Arg(1))
 	case "inspectFile":
@@ -121,10 +125,13 @@ func main() {
 		inspectDatastore(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), flag.Arg(5))
 	case "inspectBigquery":
 		inspectBigquery(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), flag.Arg(5))
+
 	case "redactImage":
 		redactImage(os.Stdout, client, *project, minLikelihood.l, infoTypesList, bytesType.bt, flag.Arg(1), flag.Arg(2))
+
 	case "infoTypes":
 		infoTypes(os.Stdout, client, *languageCode, flag.Arg(1))
+
 	case "mask":
 		mask(os.Stdout, client, *project, flag.Arg(1), "*", 0)
 	case "dateShift":
@@ -133,6 +140,7 @@ func main() {
 		deidentifyFPE(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4))
 	case "reidentifyFPE":
 		reidentifyFPE(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4))
+
 	case "riskNumerical":
 		riskNumerical(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), flag.Arg(5), flag.Arg(6))
 	case "riskCategorical":
@@ -143,22 +151,25 @@ func main() {
 		riskLDiversity(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), flag.Arg(5), flag.Arg(6), strings.Split(flag.Arg(7), ",")...)
 	case "riskKMap":
 		riskKMap(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), flag.Arg(5), flag.Arg(6), strings.Split(flag.Arg(7), ",")...)
+
 	case "createTrigger":
 		createTrigger(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), 12, infoTypesList)
 	case "listTriggers":
 		listTriggers(os.Stdout, client, *project)
 	case "deleteTrigger":
 		deleteTrigger(os.Stdout, client, flag.Arg(1))
+
 	case "createInspectTemplate":
 		createInspectTemplate(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), flag.Arg(1), flag.Arg(2), flag.Arg(3), infoTypesList)
 	case "listInspectTemplates":
 		listInspectTemplates(os.Stdout, client, *project)
 	case "deleteInspectTemplate":
 		deleteInspectTemplate(os.Stdout, client, flag.Arg(1))
-	default:
-		fmt.Fprintf(os.Stderr, "Unknown subcommand: %q\n\n", flag.Arg(0))
-		flag.Usage()
-		os.Exit(1)
+
+	case "listJobs":
+		listJobs(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2))
+	case "deleteJob":
+		deleteJob(os.Stdout, client, flag.Arg(1))
 	}
 }
 
@@ -216,6 +227,10 @@ var subcommands = map[string]map[string]string{
 		"createInspectTemplate": "<templateID> <displayName> <description>",
 		"listInspectTemplates":  "",
 		"deleteInspectTemplate": "<fullTemplateID>",
+	},
+	"jobs": {
+		"listJobs":  "<filter> <jobType>",
+		"deleteJob": "<jobID>",
 	},
 }
 
