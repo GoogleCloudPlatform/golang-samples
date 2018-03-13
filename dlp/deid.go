@@ -193,6 +193,18 @@ func reidentifyFPE(w io.Writer, client *dlp.Client, project, s, keyFileName, cry
 				},
 			},
 		},
+		InspectConfig: &dlppb.InspectConfig{
+			CustomInfoTypes: []*dlppb.CustomInfoType{
+				{
+					InfoType: &dlppb.InfoType{
+						Name: surrogateInfoType,
+					},
+					Type: &dlppb.CustomInfoType_SurrogateType_{
+						SurrogateType: &dlppb.CustomInfoType_SurrogateType{},
+					},
+				},
+			},
+		},
 		Item: &dlppb.ContentItem{
 			DataItem: &dlppb.ContentItem_Value{
 				Value: s,
