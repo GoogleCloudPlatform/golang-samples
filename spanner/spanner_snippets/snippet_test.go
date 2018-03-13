@@ -100,5 +100,5 @@ func TestSample(t *testing.T) {
 	assertContains(out, "Forever Hold Your Peace")
 	assertContains(out, "Green")
 
-	assertContains(runCommand(t, "readBatchData", dbName), "1 Marc Richards")
+	assertContains(runCommand(t, "readbatchdata", dbName), "1 Marc Richards")
 }
