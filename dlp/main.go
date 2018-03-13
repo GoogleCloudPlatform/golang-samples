@@ -124,6 +124,8 @@ func main() {
 		infoTypes(os.Stdout, client, *languageCode, flag.Arg(1))
 	case "mask":
 		mask(os.Stdout, client, *project, flag.Arg(1), "*", 0)
+	case "dateShift":
+		deidentifyDateShift(os.Stdout, client, *project, -2000, 2000, flag.Arg(1))
 	case "fpe":
 		deidentifyFPE(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4))
 	case "reidentifyFPE":
