@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
@@ -45,7 +46,11 @@ func mask(w io.Writer, client *dlp.Client, project, input, maskingCharacter stri
 	fmt.Fprintln(w, r.GetItem().GetValue())
 }
 
-func deidentifyFPE(w io.Writer, client *dlp.Client, project, s, wrappedKey, cryptoKeyName string) {
+func deidentifyFPE(w io.Writer, client *dlp.Client, project, s, keyFileName, cryptoKeyName string) {
+	b, err := ioutil.ReadFile(keyFileName)
+	if err != nil {
+		log.Fatalf("error reading file: %v", err)
+	}
 	rcr := &dlppb.DeidentifyContentRequest{
 		Parent: "projects/" + project,
 		DeidentifyConfig: &dlppb.DeidentifyConfig{
@@ -60,7 +65,7 @@ func deidentifyFPE(w io.Writer, client *dlp.Client, project, s, wrappedKey, cryp
 										CryptoKey: &dlppb.CryptoKey{
 											Source: &dlppb.CryptoKey_KmsWrapped{
 												KmsWrapped: &dlppb.KmsWrappedCryptoKey{
-													WrappedKey:    []byte(wrappedKey),
+													WrappedKey:    b,
 													CryptoKeyName: cryptoKeyName,
 												},
 											},
