@@ -17,11 +17,12 @@ limitations under the License.
 package main
 
 import (
-	"context"
 	"fmt"
 	"io"
 	"log"
 	"time"
+
+	"golang.org/x/net/context"
 
 	"github.com/golang/protobuf/ptypes/duration"
 
