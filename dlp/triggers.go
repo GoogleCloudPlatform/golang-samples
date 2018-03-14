@@ -32,11 +32,15 @@ import (
 )
 
 // [START dlp_create_trigger]
+// createTrigger creates a trigger with the given configuration.
 func createTrigger(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, maxFindings int32, triggerID, displayName, description, bucketName string, scanPeriod int64, infoTypes []string) {
+	// Convert the info type strings to a list of InfoTypes.
 	var i []*dlppb.InfoType
 	for _, it := range infoTypes {
 		i = append(i, &dlppb.InfoType{Name: it})
 	}
+
+	// Create a configured request.
 	req := &dlppb.CreateJobTriggerRequest{
 		Parent:    "projects/" + project,
 		TriggerId: triggerID,
@@ -44,6 +48,7 @@ func createTrigger(w io.Writer, client *dlp.Client, project string, minLikelihoo
 			DisplayName: displayName,
 			Description: description,
 			Status:      dlppb.JobTrigger_HEALTHY,
+			// Triggers control when the job will start.
 			Triggers: []*dlppb.JobTrigger_Trigger{
 				{
 					&dlppb.JobTrigger_Trigger_Schedule{
@@ -57,6 +62,7 @@ func createTrigger(w io.Writer, client *dlp.Client, project string, minLikelihoo
 					},
 				},
 			},
+			// Job configures the job to run when the trigger runs.
 			Job: &dlppb.JobTrigger_InspectJob{
 				InspectJob: &dlppb.InspectJobConfig{
 					InspectConfig: &dlppb.InspectConfig{
@@ -79,6 +85,7 @@ func createTrigger(w io.Writer, client *dlp.Client, project string, minLikelihoo
 			},
 		},
 	}
+	// Send the request.
 	r, err := client.CreateJobTrigger(context.Background(), req)
 	if err != nil {
 		log.Fatalf("error creating job trigger: %v", err)
@@ -89,10 +96,13 @@ func createTrigger(w io.Writer, client *dlp.Client, project string, minLikelihoo
 // [END dlp_create_trigger]
 
 // [START dlp_list_triggers]
+// listTriggers lists the triggers for the given project.
 func listTriggers(w io.Writer, client *dlp.Client, project string) {
+	// Create a configured request.
 	req := &dlppb.ListJobTriggersRequest{
 		Parent: "projects/" + project,
 	}
+	// Send the request and iterate over the results.
 	it := client.ListJobTriggers(context.Background(), req)
 	for {
 		t, err := it.Next()
@@ -117,6 +127,7 @@ func listTriggers(w io.Writer, client *dlp.Client, project string) {
 // [END dlp_list_triggers]
 
 // [START dlp_delete_trigger]
+// deleteTrigger deletes the given trigger.
 func deleteTrigger(w io.Writer, client *dlp.Client, triggerID string) {
 	req := &dlppb.DeleteJobTriggerRequest{
 		Name: triggerID,

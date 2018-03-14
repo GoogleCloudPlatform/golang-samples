@@ -118,7 +118,7 @@ func main() {
 		os.Exit(1)
 	case "inspect":
 		checkNArg(1)
-		inspect(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, flag.Arg(1))
+		inspectString(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, flag.Arg(1))
 	case "inspectFile":
 		checkNArg(1)
 		inspectFile(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, bytesType.bt, flag.Arg(1))
