@@ -115,7 +115,7 @@ func riskNumerical(w io.Writer, client *dlp.Client, project, dataProject, pubSub
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Fprintf(w, "Created job: %v\n", j)
+	fmt.Fprintf(w, "Created job: %v\n", j.GetName())
 
 	// Wait for the risk job to finish by waiting for a PubSub message.
 	ctx, cancel := context.WithCancel(ctx)
@@ -211,7 +211,7 @@ func riskCategorical(w io.Writer, client *dlp.Client, project, dataProject, pubS
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Fprintf(w, "Created job: %v\n", j)
+	fmt.Fprintf(w, "Created job: %v\n", j.GetName())
 
 	// Wait for the risk job to finish by waiting for a PubSub message.
 	ctx, cancel := context.WithCancel(ctx)
@@ -312,7 +312,7 @@ func riskKAnonymity(w io.Writer, client *dlp.Client, project, dataProject, pubSu
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Fprintf(w, "Created job: %v\n", j)
+	fmt.Fprintf(w, "Created job: %v\n", j.GetName())
 
 	// Wait for the risk job to finish by waiting for a PubSub message.
 	ctx, cancel := context.WithCancel(ctx)
@@ -420,7 +420,7 @@ func riskLDiversity(w io.Writer, client *dlp.Client, project, dataProject, pubSu
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Fprintf(w, "Created job: %v\n", j)
+	fmt.Fprintf(w, "Created job: %v\n", j.GetName())
 
 	// Wait for the risk job to finish by waiting for a PubSub message.
 	ctx, cancel := context.WithCancel(ctx)
@@ -536,7 +536,7 @@ func riskKMap(w io.Writer, client *dlp.Client, project, dataProject, pubSubTopic
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Fprintf(w, "Created job: %v\n", j)
+	fmt.Fprintf(w, "Created job: %v\n", j.GetName())
 
 	// Wait for the risk job to finish by waiting for a PubSub message.
 	ctx, cancel := context.WithCancel(ctx)

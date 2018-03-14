@@ -63,6 +63,7 @@ func deleteJob(w io.Writer, client *dlp.Client, jobName string) {
 	if err != nil {
 		log.Fatalf("error deleting job: %v", err)
 	}
+	fmt.Fprintf(w, "Successfully deleted job")
 }
 
 // [END dlp_delete_job]

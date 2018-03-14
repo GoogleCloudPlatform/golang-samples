@@ -121,7 +121,11 @@ func main() {
 		inspectString(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, flag.Arg(1))
 	case "inspectFile":
 		checkNArg(1)
-		inspectFile(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, bytesType.bt, flag.Arg(1))
+		f, err := os.Open(flag.Arg(1))
+		if err != nil {
+			log.Fatalf("error opening file: %v", err)
+		}
+		inspectFile(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, bytesType.bt, f)
 	case "inspectGCSFile":
 		checkNArg(4)
 		inspectGCSFile(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4))
