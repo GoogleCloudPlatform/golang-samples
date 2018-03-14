@@ -17,10 +17,11 @@ limitations under the License.
 package main
 
 import (
-	"context"
 	"io"
 	"io/ioutil"
 	"log"
+
+	"golang.org/x/net/context"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
