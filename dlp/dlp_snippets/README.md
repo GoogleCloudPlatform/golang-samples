@@ -58,7 +58,7 @@ Subcommands and their args are described below.
 
 View the [source code](deid.go).
 
-[![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/golang-samples&page=editor&open_in_editor=dlp/deid.go,dlp/README.md)
+[![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/golang-samples&page=editor&open_in_editor=dlp/dlp_snippets/deid.go,dlp/dlp_snippets/README.md)
 
 __Usage:__
 ```bash
@@ -83,7 +83,7 @@ For more information, see https://cloud.google.com/dlp/docs.
 
 View the [source code](inspect.go).
 
-[![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/golang-samples&page=editor&open_in_editor=dlp/inspect.go,dlp/README.md)
+[![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/golang-samples&page=editor&open_in_editor=dlp/dlp_snippets/inspect.go,dlp/dlp_snippets/README.md)
 
 __Usage:__
 ```bash
@@ -110,7 +110,7 @@ For more information, see https://cloud.google.com/dlp/docs.
 
 View the [source code](jobs.go).
 
-[![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/golang-samples&page=editor&open_in_editor=dlp/jobs.go,dlp/README.md)
+[![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/golang-samples&page=editor&open_in_editor=dlp_snippets/jobs.go,dlp/dlp_snippets/README.md)
 
 __Usage:__
 ```bash
@@ -133,7 +133,7 @@ For more information, see https://cloud.google.com/dlp/docs.
 
 View the [source code](metadata.go).
 
-[![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/golang-samples&page=editor&open_in_editor=dlp/metadata.go,dlp/README.md)
+[![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/golang-samples&page=editor&open_in_editor=dlp/dlp_snippets/metadata.go,dlp/dlp_snippets/README.md)
 
 __Usage:__
 ```bash
@@ -152,7 +152,7 @@ For more information, see https://cloud.google.com/dlp/docs.
 
 View the [source code](redact.go).
 
-[![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/golang-samples&page=editor&open_in_editor=dlp/redact.go,dlp/README.md)
+[![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/golang-samples&page=editor&open_in_editor=dlp/dlp_snippets/redact.go,dlp/dlp_snippets/README.md)
 
 __Usage:__
 ```bash
@@ -171,7 +171,7 @@ For more information, see https://cloud.google.com/dlp/docs.
 
 View the [source code](risk.go).
 
-[![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/golang-samples&page=editor&open_in_editor=dlp/risk.go,dlp/README.md)
+[![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/golang-samples&page=editor&open_in_editor=dlp/dlp_snippets/risk.go,dlp/dlp_snippets/README.md)
 
 __Usage:__
 ```bash
@@ -198,7 +198,7 @@ For more information, see https://cloud.google.com/dlp/docs.
 
 View the [source code](templates.go).
 
-[![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/golang-samples&page=editor&open_in_editor=dlp/templates.go,dlp/README.md)
+[![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/golang-samples&page=editor&open_in_editor=dlp/dlp_snippets/templates.go,dlp/dlp_snippets/README.md)
 
 __Usage:__
 ```bash
@@ -221,7 +221,7 @@ For more information, see https://cloud.google.com/dlp/docs.
 ### Triggers
 View the [source code](triggers.go).
 
-[![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/golang-samples&page=editor&open_in_editor=dlp/triggers.go,dlp/README.md)
+[![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/golang-samples&page=editor&open_in_editor=dlp/dlp_snippets/triggers.go,dlp/dlp_snippets/README.md)
 
 __Usage:__
 ```bash
@@ -238,4 +238,4 @@ __Examples:__
 ```
 
 [shell_img]: http://gstatic.com/cloudssh/images/open-btn.png
-[shell_link]: https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/golang-samples&page=editor&open_in_editor=dlp/README.md
+[shell_link]: https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/golang-samples&page=editor&open_in_editor=dlp/dlp_snippets/README.md
