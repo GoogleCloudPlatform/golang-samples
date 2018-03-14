@@ -49,7 +49,7 @@ func quickstart(project string) {
 	}
 
 	// Construct request.
-	rcr := &dlppb.InspectContentRequest{
+	req := &dlppb.InspectContentRequest{
 		Parent: "projects/" + project,
 		InspectConfig: &dlppb.InspectConfig{
 			InfoTypes:     infoTypes,
@@ -63,7 +63,7 @@ func quickstart(project string) {
 	}
 
 	// Run request.
-	r, err := client.InspectContent(context.Background(), rcr)
+	r, err := client.InspectContent(context.Background(), req)
 	if err != nil {
 		log.Fatal(err)
 	}

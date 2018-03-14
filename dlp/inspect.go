@@ -34,7 +34,7 @@ func inspect(w io.Writer, client *dlp.Client, project string, minLikelihood dlpp
 	for _, it := range infoTypes {
 		i = append(i, &dlppb.InfoType{Name: it})
 	}
-	rcr := &dlppb.InspectContentRequest{
+	req := &dlppb.InspectContentRequest{
 		Parent: "projects/" + project,
 		InspectConfig: &dlppb.InspectConfig{
 			InfoTypes:     i,
@@ -50,7 +50,7 @@ func inspect(w io.Writer, client *dlp.Client, project string, minLikelihood dlpp
 			},
 		},
 	}
-	r, err := client.InspectContent(context.Background(), rcr)
+	r, err := client.InspectContent(context.Background(), req)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -68,7 +68,7 @@ func inspectFile(w io.Writer, client *dlp.Client, project string, minLikelihood 
 	if err != nil {
 		log.Fatalf("error reading file: %v", err)
 	}
-	rcr := &dlppb.InspectContentRequest{
+	req := &dlppb.InspectContentRequest{
 		Parent: "projects/" + project,
 		InspectConfig: &dlppb.InspectConfig{
 			InfoTypes:     i,
@@ -87,7 +87,7 @@ func inspectFile(w io.Writer, client *dlp.Client, project string, minLikelihood 
 			},
 		},
 	}
-	r, err := client.InspectContent(context.Background(), rcr)
+	r, err := client.InspectContent(context.Background(), req)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -115,7 +115,7 @@ func inspectGCSFile(w io.Writer, client *dlp.Client, project string, minLikeliho
 	}
 	topic := "projects/" + project + "/topics/" + pubSubTopic
 
-	rcr := &dlppb.CreateDlpJobRequest{
+	req := &dlppb.CreateDlpJobRequest{
 		Parent: "projects/" + project,
 		Job: &dlppb.CreateDlpJobRequest_InspectJob{
 			InspectJob: &dlppb.InspectJobConfig{
@@ -148,7 +148,7 @@ func inspectGCSFile(w io.Writer, client *dlp.Client, project string, minLikeliho
 			},
 		},
 	}
-	j, err := client.CreateDlpJob(context.Background(), rcr)
+	j, err := client.CreateDlpJob(context.Background(), req)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -196,7 +196,7 @@ func inspectDatastore(w io.Writer, client *dlp.Client, project string, minLikeli
 	}
 	topic := "projects/" + project + "/topics/" + pubSubTopic
 
-	rcr := &dlppb.CreateDlpJobRequest{
+	req := &dlppb.CreateDlpJobRequest{
 		Parent: "projects/" + project,
 		Job: &dlppb.CreateDlpJobRequest_InspectJob{
 			InspectJob: &dlppb.InspectJobConfig{
@@ -233,7 +233,7 @@ func inspectDatastore(w io.Writer, client *dlp.Client, project string, minLikeli
 			},
 		},
 	}
-	j, err := client.CreateDlpJob(context.Background(), rcr)
+	j, err := client.CreateDlpJob(context.Background(), req)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -281,7 +281,7 @@ func inspectBigquery(w io.Writer, client *dlp.Client, project string, minLikelih
 	}
 	topic := "projects/" + project + "/topics/" + pubSubTopic
 
-	rcr := &dlppb.CreateDlpJobRequest{
+	req := &dlppb.CreateDlpJobRequest{
 		Parent: "projects/" + project,
 		Job: &dlppb.CreateDlpJobRequest_InspectJob{
 			InspectJob: &dlppb.InspectJobConfig{
@@ -316,7 +316,7 @@ func inspectBigquery(w io.Writer, client *dlp.Client, project string, minLikelih
 			},
 		},
 	}
-	j, err := client.CreateDlpJob(context.Background(), rcr)
+	j, err := client.CreateDlpJob(context.Background(), req)
 	if err != nil {
 		log.Fatal(err)
 	}

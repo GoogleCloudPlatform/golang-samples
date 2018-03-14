@@ -29,12 +29,12 @@ import (
 
 func listJobs(w io.Writer, client *dlp.Client, project, filter, jobType string) {
 	// [START dlp_list_jobs]
-	rcr := &dlppb.ListDlpJobsRequest{
+	req := &dlppb.ListDlpJobsRequest{
 		Parent: "projects/" + project,
 		Filter: filter,
 		Type:   dlppb.DlpJobType(dlppb.DlpJobType_value[jobType]),
 	}
-	it := client.ListDlpJobs(context.Background(), rcr)
+	it := client.ListDlpJobs(context.Background(), req)
 	for {
 		j, err := it.Next()
 		if err == iterator.Done {
@@ -50,10 +50,10 @@ func listJobs(w io.Writer, client *dlp.Client, project, filter, jobType string) 
 
 func deleteJob(w io.Writer, client *dlp.Client, jobName string) {
 	// [START dlp_delete_job]
-	rcr := &dlppb.DeleteDlpJobRequest{
+	req := &dlppb.DeleteDlpJobRequest{
 		Name: jobName,
 	}
-	err := client.DeleteDlpJob(context.Background(), rcr)
+	err := client.DeleteDlpJob(context.Background(), req)
 	if err != nil {
 		log.Fatalf("error deleting job: %v", err)
 	}
