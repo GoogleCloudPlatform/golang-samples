@@ -53,8 +53,8 @@ func setupPubSub(ctx context.Context, client *pubsub.Client, project, topic, sub
 	return s, nil
 }
 
+// [START dlp_numerical_stats]
 func riskNumerical(w io.Writer, client *dlp.Client, project, dataProject, pubSubTopic, pubSubSub, datasetID, tableID, columnName string) {
-	// [START dlp_numerical_stats]
 	ctx := context.Background()
 	pClient, err := pubsub.NewClient(ctx, project)
 	if err != nil {
@@ -127,11 +127,12 @@ func riskNumerical(w io.Writer, client *dlp.Client, project, dataProject, pubSub
 	if err != nil {
 		log.Fatalf("Error receiving from PubSub: %v\n", err)
 	}
-	// [END dlp_numerical_stats]
 }
 
+// [END dlp_numerical_stats]
+
+// [START dlp_categorical_stats]
 func riskCategorical(w io.Writer, client *dlp.Client, project, dataProject, pubSubTopic, pubSubSub, datasetID, tableID, columnName string) {
-	// [START dlp_categorical_stats]
 	ctx := context.Background()
 	pClient, err := pubsub.NewClient(ctx, project)
 	if err != nil {
@@ -205,11 +206,12 @@ func riskCategorical(w io.Writer, client *dlp.Client, project, dataProject, pubS
 	if err != nil {
 		log.Fatalf("Error receiving from PubSub: %v\n", err)
 	}
-	// [END dlp_categorical_stats]
 }
 
+// [END dlp_categorical_stats]
+
+// [START dlp_k_anonymity]
 func riskKAnonymity(w io.Writer, client *dlp.Client, project, dataProject, pubSubTopic, pubSubSub, datasetID, tableID string, columnNames ...string) {
-	// [START dlp_k_anonymity]
 	ctx := context.Background()
 	pClient, err := pubsub.NewClient(ctx, project)
 	if err != nil {
@@ -292,11 +294,12 @@ func riskKAnonymity(w io.Writer, client *dlp.Client, project, dataProject, pubSu
 	if err != nil {
 		log.Fatalf("Error receiving from PubSub: %v\n", err)
 	}
-	// [END dlp_k_anonymity]
 }
 
+// [END dlp_k_anonymity]
+
+// [START dlp_l_diversity]
 func riskLDiversity(w io.Writer, client *dlp.Client, project, dataProject, pubSubTopic, pubSubSub, datasetID, tableID, sensitiveAttribute string, columnNames ...string) {
-	// [START dlp_l_diversity]
 	ctx := context.Background()
 	pClient, err := pubsub.NewClient(ctx, project)
 	if err != nil {
@@ -385,11 +388,12 @@ func riskLDiversity(w io.Writer, client *dlp.Client, project, dataProject, pubSu
 	if err != nil {
 		log.Fatalf("Error receiving from PubSub: %v\n", err)
 	}
-	// [END dlp_l_diversity]
 }
 
+// [END dlp_l_diversity]
+
+// [START k_map]
 func riskKMap(w io.Writer, client *dlp.Client, project, dataProject, pubSubTopic, pubSubSub, datasetID, tableID, region string, columnNames ...string) {
-	// [START k_map]
 	ctx := context.Background()
 	pClient, err := pubsub.NewClient(ctx, project)
 	if err != nil {
@@ -480,5 +484,6 @@ func riskKMap(w io.Writer, client *dlp.Client, project, dataProject, pubSubTopic
 	if err != nil {
 		log.Fatalf("Error receiving from PubSub: %v\n", err)
 	}
-	// [END k_map]
 }
+
+// [END k_map]
