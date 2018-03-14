@@ -34,7 +34,7 @@ func createInspectTemplate(w io.Writer, client *dlp.Client, project string, minL
 	for _, it := range infoTypes {
 		i = append(i, &dlppb.InfoType{Name: it})
 	}
-	rcr := &dlppb.CreateInspectTemplateRequest{
+	req := &dlppb.CreateInspectTemplateRequest{
 		Parent:     "projects/" + project,
 		TemplateId: templateID,
 		InspectTemplate: &dlppb.InspectTemplate{
@@ -49,7 +49,7 @@ func createInspectTemplate(w io.Writer, client *dlp.Client, project string, minL
 			},
 		},
 	}
-	r, err := client.CreateInspectTemplate(context.Background(), rcr)
+	r, err := client.CreateInspectTemplate(context.Background(), req)
 	if err != nil {
 		log.Fatalf("error creating inspect template: %v", err)
 	}
@@ -59,10 +59,10 @@ func createInspectTemplate(w io.Writer, client *dlp.Client, project string, minL
 
 func listInspectTemplates(w io.Writer, client *dlp.Client, project string) {
 	// [START dlp_list_templates]
-	rcr := &dlppb.ListInspectTemplatesRequest{
+	req := &dlppb.ListInspectTemplatesRequest{
 		Parent: "projects/" + project,
 	}
-	it := client.ListInspectTemplates(context.Background(), rcr)
+	it := client.ListInspectTemplates(context.Background(), req)
 	for {
 		t, err := it.Next()
 		if err == iterator.Done {
@@ -84,10 +84,10 @@ func listInspectTemplates(w io.Writer, client *dlp.Client, project string) {
 
 func deleteInspectTemplate(w io.Writer, client *dlp.Client, templateID string) {
 	// [START dlp_delete_template]
-	rcr := &dlppb.DeleteInspectTemplateRequest{
+	req := &dlppb.DeleteInspectTemplateRequest{
 		Name: templateID,
 	}
-	err := client.DeleteInspectTemplate(context.Background(), rcr)
+	err := client.DeleteInspectTemplate(context.Background(), req)
 	if err != nil {
 		log.Fatalf("error deleting inspect template: %v", err)
 	}

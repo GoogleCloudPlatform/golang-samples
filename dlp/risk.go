@@ -65,7 +65,7 @@ func riskNumerical(w io.Writer, client *dlp.Client, project, dataProject, pubSub
 		log.Fatalf("Error setting up PubSub: %v\n", err)
 	}
 	topic := "projects/" + project + "/topics/" + pubSubTopic
-	rcr := &dlppb.CreateDlpJobRequest{
+	req := &dlppb.CreateDlpJobRequest{
 		Parent: "projects/" + project,
 		Job: &dlppb.CreateDlpJobRequest_RiskJob{
 			RiskJob: &dlppb.RiskAnalysisJobConfig{
@@ -95,7 +95,7 @@ func riskNumerical(w io.Writer, client *dlp.Client, project, dataProject, pubSub
 			},
 		},
 	}
-	j, err := client.CreateDlpJob(context.Background(), rcr)
+	j, err := client.CreateDlpJob(context.Background(), req)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -142,7 +142,7 @@ func riskCategorical(w io.Writer, client *dlp.Client, project, dataProject, pubS
 		log.Fatalf("Error setting up PubSub: %v\n", err)
 	}
 	topic := "projects/" + project + "/topics/" + pubSubTopic
-	rcr := &dlppb.CreateDlpJobRequest{
+	req := &dlppb.CreateDlpJobRequest{
 		Parent: "projects/" + project,
 		Job: &dlppb.CreateDlpJobRequest_RiskJob{
 			RiskJob: &dlppb.RiskAnalysisJobConfig{
@@ -172,7 +172,7 @@ func riskCategorical(w io.Writer, client *dlp.Client, project, dataProject, pubS
 			},
 		},
 	}
-	j, err := client.CreateDlpJob(context.Background(), rcr)
+	j, err := client.CreateDlpJob(context.Background(), req)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -227,7 +227,7 @@ func riskKAnonymity(w io.Writer, client *dlp.Client, project, dataProject, pubSu
 		q = append(q, &dlppb.FieldId{Name: c})
 	}
 
-	rcr := &dlppb.CreateDlpJobRequest{
+	req := &dlppb.CreateDlpJobRequest{
 		Parent: "projects/" + project,
 		Job: &dlppb.CreateDlpJobRequest_RiskJob{
 			RiskJob: &dlppb.RiskAnalysisJobConfig{
@@ -255,7 +255,7 @@ func riskKAnonymity(w io.Writer, client *dlp.Client, project, dataProject, pubSu
 			},
 		},
 	}
-	j, err := client.CreateDlpJob(context.Background(), rcr)
+	j, err := client.CreateDlpJob(context.Background(), req)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -314,7 +314,7 @@ func riskLDiversity(w io.Writer, client *dlp.Client, project, dataProject, pubSu
 		q = append(q, &dlppb.FieldId{Name: c})
 	}
 
-	rcr := &dlppb.CreateDlpJobRequest{
+	req := &dlppb.CreateDlpJobRequest{
 		Parent: "projects/" + project,
 		Job: &dlppb.CreateDlpJobRequest_RiskJob{
 			RiskJob: &dlppb.RiskAnalysisJobConfig{
@@ -345,7 +345,7 @@ func riskLDiversity(w io.Writer, client *dlp.Client, project, dataProject, pubSu
 			},
 		},
 	}
-	j, err := client.CreateDlpJob(context.Background(), rcr)
+	j, err := client.CreateDlpJob(context.Background(), req)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -414,7 +414,7 @@ func riskKMap(w io.Writer, client *dlp.Client, project, dataProject, pubSubTopic
 		})
 	}
 
-	rcr := &dlppb.CreateDlpJobRequest{
+	req := &dlppb.CreateDlpJobRequest{
 		Parent: "projects/" + project,
 		Job: &dlppb.CreateDlpJobRequest_RiskJob{
 			RiskJob: &dlppb.RiskAnalysisJobConfig{
@@ -443,7 +443,7 @@ func riskKMap(w io.Writer, client *dlp.Client, project, dataProject, pubSubTopic
 			},
 		},
 	}
-	j, err := client.CreateDlpJob(context.Background(), rcr)
+	j, err := client.CreateDlpJob(context.Background(), req)
 	if err != nil {
 		log.Fatal(err)
 	}

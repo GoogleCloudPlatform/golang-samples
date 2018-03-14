@@ -29,7 +29,7 @@ import (
 
 func mask(w io.Writer, client *dlp.Client, project, input, maskingCharacter string, numberToMask int32) {
 	// [START dlp_deidentify_masking]
-	rcr := &dlppb.DeidentifyContentRequest{
+	req := &dlppb.DeidentifyContentRequest{
 		Parent: "projects/" + project,
 		DeidentifyConfig: &dlppb.DeidentifyConfig{
 			Transformation: &dlppb.DeidentifyConfig_InfoTypeTransformations{
@@ -56,7 +56,7 @@ func mask(w io.Writer, client *dlp.Client, project, input, maskingCharacter stri
 			},
 		},
 	}
-	r, err := client.DeidentifyContent(context.Background(), rcr)
+	r, err := client.DeidentifyContent(context.Background(), req)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -66,7 +66,7 @@ func mask(w io.Writer, client *dlp.Client, project, input, maskingCharacter stri
 
 func deidentifyDateShift(w io.Writer, client *dlp.Client, project string, lowerBoundDays, upperBoundDays int32, s string) {
 	// [START dlp_deidentify_date_shift]
-	rcr := &dlppb.DeidentifyContentRequest{
+	req := &dlppb.DeidentifyContentRequest{
 		Parent: "projects/" + project,
 		DeidentifyConfig: &dlppb.DeidentifyConfig{
 			Transformation: &dlppb.DeidentifyConfig_InfoTypeTransformations{
@@ -100,7 +100,7 @@ func deidentifyDateShift(w io.Writer, client *dlp.Client, project string, lowerB
 			},
 		},
 	}
-	r, err := client.DeidentifyContent(context.Background(), rcr)
+	r, err := client.DeidentifyContent(context.Background(), req)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -114,7 +114,7 @@ func deidentifyFPE(w io.Writer, client *dlp.Client, project, s, keyFileName, cry
 	if err != nil {
 		log.Fatalf("error reading file: %v", err)
 	}
-	rcr := &dlppb.DeidentifyContentRequest{
+	req := &dlppb.DeidentifyContentRequest{
 		Parent: "projects/" + project,
 		DeidentifyConfig: &dlppb.DeidentifyConfig{
 			Transformation: &dlppb.DeidentifyConfig_InfoTypeTransformations{
@@ -153,7 +153,7 @@ func deidentifyFPE(w io.Writer, client *dlp.Client, project, s, keyFileName, cry
 			},
 		},
 	}
-	r, err := client.DeidentifyContent(context.Background(), rcr)
+	r, err := client.DeidentifyContent(context.Background(), req)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -167,7 +167,7 @@ func reidentifyFPE(w io.Writer, client *dlp.Client, project, s, keyFileName, cry
 	if err != nil {
 		log.Fatalf("error reading file: %v", err)
 	}
-	rcr := &dlppb.ReidentifyContentRequest{
+	req := &dlppb.ReidentifyContentRequest{
 		Parent: "projects/" + project,
 		ReidentifyConfig: &dlppb.DeidentifyConfig{
 			Transformation: &dlppb.DeidentifyConfig_InfoTypeTransformations{
@@ -218,7 +218,7 @@ func reidentifyFPE(w io.Writer, client *dlp.Client, project, s, keyFileName, cry
 			},
 		},
 	}
-	r, err := client.ReidentifyContent(context.Background(), rcr)
+	r, err := client.ReidentifyContent(context.Background(), req)
 	if err != nil {
 		log.Fatal(err)
 	}
