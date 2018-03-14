@@ -17,6 +17,7 @@ limitations under the License.
 package main
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -73,7 +74,10 @@ func redactImage(w io.Writer, client *dlp.Client, project string, minLikelihood 
 		log.Fatal(err)
 	}
 	// Write the output file.
-	ioutil.WriteFile(outputPath, r.GetRedactedImage(), 0644)
+	if err := ioutil.WriteFile(outputPath, r.GetRedactedImage(), 0644); err != nil {
+		log.Fatal(err)
+	}
+	fmt.Fprintf(w, "Wrote output to %s", outputPath)
 }
 
 // [END dlp_redact_image]

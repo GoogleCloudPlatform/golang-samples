@@ -67,7 +67,7 @@ func mask(w io.Writer, client *dlp.Client, project, input, maskingCharacter stri
 		log.Fatal(err)
 	}
 	// Print the result.
-	fmt.Fprintln(w, r.GetItem().GetValue())
+	fmt.Fprint(w, r.GetItem().GetValue())
 }
 
 // [END dlp_deidentify_masking]
@@ -119,7 +119,7 @@ func deidentifyDateShift(w io.Writer, client *dlp.Client, project string, lowerB
 		log.Fatal(err)
 	}
 	// Print the result.
-	fmt.Fprintln(w, r.GetItem().GetValue())
+	fmt.Fprint(w, r.GetItem().GetValue())
 }
 
 // [END dlp_deidentify_date_shift]
@@ -185,7 +185,7 @@ func deidentifyFPE(w io.Writer, client *dlp.Client, project, input, keyFileName,
 		log.Fatal(err)
 	}
 	// Print the result.
-	fmt.Fprintln(w, r.GetItem().GetValue())
+	fmt.Fprint(w, r.GetItem().GetValue())
 }
 
 // [END dlp_deidentify_fpe]
@@ -263,7 +263,7 @@ func reidentifyFPE(w io.Writer, client *dlp.Client, project, s, keyFileName, cry
 		log.Fatal(err)
 	}
 	// Print the result.
-	fmt.Fprintln(w, r.GetItem().GetValue())
+	fmt.Fprint(w, r.GetItem().GetValue())
 }
 
 // [END reidentify_fpe]
