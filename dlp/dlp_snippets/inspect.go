@@ -67,14 +67,14 @@ func inspectString(w io.Writer, client *dlp.Client, project string, minLikelihoo
 // [END dlp_inspect_string]
 
 // [START dlp_inspect_file]
-// inspectFile searches for the given info types in the given file (with the given bytesType).
-func inspectFile(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, maxFindings int32, includeQuote bool, infoTypes []string, bytesType dlppb.ByteContentItem_BytesType, fileName string) {
+// inspectFile searches for the given info types in the given Reader (with the given bytesType).
+func inspectFile(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, maxFindings int32, includeQuote bool, infoTypes []string, bytesType dlppb.ByteContentItem_BytesType, input io.Reader) {
 	// Convert the info type strings to a list of InfoTypes.
 	var i []*dlppb.InfoType
 	for _, it := range infoTypes {
 		i = append(i, &dlppb.InfoType{Name: it})
 	}
-	b, err := ioutil.ReadFile(fileName)
+	b, err := ioutil.ReadAll(input)
 	if err != nil {
 		log.Fatalf("error reading file: %v", err)
 	}
@@ -111,6 +111,7 @@ func inspectFile(w io.Writer, client *dlp.Client, project string, minLikelihood 
 // [END dlp_inspect_file]
 
 // [START dlp_inspect_gcs]
+// inspectGCSFile searches for the given info types in the given file.
 func inspectGCSFile(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, maxFindings int32, includeQuote bool, infoTypes []string, pubSubTopic, pubSubSub, bucketName, fileName string) {
 	// Convert the info type strings to a list of InfoTypes.
 	var i []*dlppb.InfoType
@@ -178,7 +179,7 @@ func inspectGCSFile(w io.Writer, client *dlp.Client, project string, minLikeliho
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Fprintf(w, "Created job: %v\n", j)
+	fmt.Fprintf(w, "Created job: %v\n", j.GetName())
 
 	// Wait for the inspect job to finish by waiting for a PubSub message.
 	ctx, cancel := context.WithCancel(ctx)
@@ -195,7 +196,11 @@ func inspectGCSFile(w io.Writer, client *dlp.Client, project string, minLikeliho
 		if err != nil {
 			log.Fatalf("Error getting completed job: %v\n", err)
 		}
-		for _, s := range jr.GetInspectDetails().GetResult().GetInfoTypeStats() {
+		r := jr.GetInspectDetails().GetResult().GetInfoTypeStats()
+		if len(r) == 0 {
+			fmt.Fprintf(w, "No results")
+		}
+		for _, s := range r {
 			fmt.Fprintf(w, "  Found %v instances of infoType %v\n", s.GetCount(), s.GetInfoType().GetName())
 		}
 		// Stop listening for more messages.
@@ -209,6 +214,7 @@ func inspectGCSFile(w io.Writer, client *dlp.Client, project string, minLikeliho
 // [END dlp_inspect_gcs]
 
 // [START dlp_inspect_datastore]
+// inspectDatastore searches for the given info types in the given dataset kind.
 func inspectDatastore(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, maxFindings int32, includeQuote bool, infoTypes []string, pubSubTopic, pubSubSub, dataProject, namespaceID, kind string) {
 	// Convert the info type strings to a list of InfoTypes.
 	var i []*dlppb.InfoType
@@ -280,7 +286,7 @@ func inspectDatastore(w io.Writer, client *dlp.Client, project string, minLikeli
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Fprintf(w, "Created job: %v\n", j)
+	fmt.Fprintf(w, "Created job: %v\n", j.GetName())
 
 	// Wait for the inspect job to finish by waiting for a PubSub message.
 	ctx, cancel := context.WithCancel(ctx)
@@ -297,7 +303,11 @@ func inspectDatastore(w io.Writer, client *dlp.Client, project string, minLikeli
 		if err != nil {
 			log.Fatalf("Error getting completed job: %v\n", err)
 		}
-		for _, s := range jr.GetInspectDetails().GetResult().GetInfoTypeStats() {
+		r := jr.GetInspectDetails().GetResult().GetInfoTypeStats()
+		if len(r) == 0 {
+			fmt.Fprintf(w, "No results")
+		}
+		for _, s := range r {
 			fmt.Fprintf(w, "  Found %v instances of infoType %v\n", s.GetCount(), s.GetInfoType().GetName())
 		}
 		// Stop listening for more messages.
@@ -311,6 +321,7 @@ func inspectDatastore(w io.Writer, client *dlp.Client, project string, minLikeli
 // [END dlp_inspect_datastore]
 
 // [START dlp_inspect_bigquery]
+// inspectBigquery searches for the given info types in the given Bigquery dataset table.
 func inspectBigquery(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, maxFindings int32, includeQuote bool, infoTypes []string, pubSubTopic, pubSubSub, dataProject, datasetID, tableID string) {
 	// Convert the info type strings to a list of InfoTypes.
 	var i []*dlppb.InfoType
@@ -380,7 +391,7 @@ func inspectBigquery(w io.Writer, client *dlp.Client, project string, minLikelih
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Fprintf(w, "Created job: %v\n", j)
+	fmt.Fprintf(w, "Created job: %v\n", j.GetName())
 
 	// Wait for the inspect job to finish by waiting for a PubSub message.
 	ctx, cancel := context.WithCancel(ctx)
@@ -397,7 +408,11 @@ func inspectBigquery(w io.Writer, client *dlp.Client, project string, minLikelih
 		if err != nil {
 			log.Fatalf("Error getting completed job: %v\n", err)
 		}
-		for _, s := range jr.GetInspectDetails().GetResult().GetInfoTypeStats() {
+		r := jr.GetInspectDetails().GetResult().GetInfoTypeStats()
+		if len(r) == 0 {
+			fmt.Fprintf(w, "No results")
+		}
+		for _, s := range r {
 			fmt.Fprintf(w, "  Found %v instances of infoType %v\n", s.GetCount(), s.GetInfoType().GetName())
 		}
 		// Stop listening for more messages.
