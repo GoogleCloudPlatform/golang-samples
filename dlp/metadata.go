@@ -28,11 +28,11 @@ import (
 
 func infoTypes(w io.Writer, client *dlp.Client, languageCode, filter string) {
 	// [START dlp_list_info_types]
-	rcr := &dlppb.ListInfoTypesRequest{
+	req := &dlppb.ListInfoTypesRequest{
 		LanguageCode: languageCode,
 		Filter:       filter,
 	}
-	r, err := client.ListInfoTypes(context.Background(), rcr)
+	r, err := client.ListInfoTypes(context.Background(), req)
 	if err != nil {
 		log.Fatal(err)
 	}

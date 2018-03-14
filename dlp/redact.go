@@ -47,7 +47,7 @@ func redactImage(w io.Writer, client *dlp.Client, project string, minLikelihood 
 		log.Fatalf("error reading file: %v", err)
 	}
 
-	rcr := &dlppb.RedactImageRequest{
+	req := &dlppb.RedactImageRequest{
 		Parent: "projects/" + project,
 		InspectConfig: &dlppb.InspectConfig{
 			InfoTypes:     i,
@@ -59,7 +59,7 @@ func redactImage(w io.Writer, client *dlp.Client, project string, minLikelihood 
 		},
 		ImageRedactionConfigs: ir,
 	}
-	r, err := client.RedactImage(context.Background(), rcr)
+	r, err := client.RedactImage(context.Background(), req)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -36,7 +36,7 @@ func createTrigger(w io.Writer, client *dlp.Client, project string, minLikelihoo
 	for _, it := range infoTypes {
 		i = append(i, &dlppb.InfoType{Name: it})
 	}
-	rcr := &dlppb.CreateJobTriggerRequest{
+	req := &dlppb.CreateJobTriggerRequest{
 		Parent:    "projects/" + project,
 		TriggerId: triggerID,
 		JobTrigger: &dlppb.JobTrigger{
@@ -78,7 +78,7 @@ func createTrigger(w io.Writer, client *dlp.Client, project string, minLikelihoo
 			},
 		},
 	}
-	r, err := client.CreateJobTrigger(context.Background(), rcr)
+	r, err := client.CreateJobTrigger(context.Background(), req)
 	if err != nil {
 		log.Fatalf("error creating job trigger: %v", err)
 	}
@@ -88,10 +88,10 @@ func createTrigger(w io.Writer, client *dlp.Client, project string, minLikelihoo
 
 func listTriggers(w io.Writer, client *dlp.Client, project string) {
 	// [START dlp_list_triggers]
-	rcr := &dlppb.ListJobTriggersRequest{
+	req := &dlppb.ListJobTriggersRequest{
 		Parent: "projects/" + project,
 	}
-	it := client.ListJobTriggers(context.Background(), rcr)
+	it := client.ListJobTriggers(context.Background(), req)
 	for {
 		t, err := it.Next()
 		if err == iterator.Done {
@@ -115,10 +115,10 @@ func listTriggers(w io.Writer, client *dlp.Client, project string) {
 
 func deleteTrigger(w io.Writer, client *dlp.Client, triggerID string) {
 	// [START dlp_delete_trigger]
-	rcr := &dlppb.DeleteJobTriggerRequest{
+	req := &dlppb.DeleteJobTriggerRequest{
 		Name: triggerID,
 	}
-	err := client.DeleteJobTrigger(context.Background(), rcr)
+	err := client.DeleteJobTrigger(context.Background(), req)
 	if err != nil {
 		log.Fatalf("error deleting job: %v", err)
 	}
