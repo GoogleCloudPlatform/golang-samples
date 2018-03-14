@@ -28,12 +28,16 @@ import (
 )
 
 // [START dlp_redact_image]
+// redactImage blacks out the identified portions of the input image (with type bytesType)
+// and stores the result in outputPath.
 func redactImage(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, infoTypes []string, bytesType dlppb.ByteContentItem_BytesType, inputPath, outputPath string) {
+	// Convert the info type strings to a list of InfoTypes.
 	var i []*dlppb.InfoType
 	for _, it := range infoTypes {
 		i = append(i, &dlppb.InfoType{Name: it})
 	}
 
+	// Convert the info type strings to a list of types to redact in the image.
 	var ir []*dlppb.RedactImageRequest_ImageRedactionConfig
 	for _, it := range infoTypes {
 		ir = append(ir, &dlppb.RedactImageRequest_ImageRedactionConfig{
@@ -43,27 +47,32 @@ func redactImage(w io.Writer, client *dlp.Client, project string, minLikelihood 
 		})
 	}
 
+	// Read the input file.
 	b, err := ioutil.ReadFile(inputPath)
 	if err != nil {
 		log.Fatalf("error reading file: %v", err)
 	}
 
+	// Create a configured request.
 	req := &dlppb.RedactImageRequest{
 		Parent: "projects/" + project,
 		InspectConfig: &dlppb.InspectConfig{
 			InfoTypes:     i,
 			MinLikelihood: minLikelihood,
 		},
+		// The item to analyze.
 		ByteItem: &dlppb.ByteContentItem{
 			Type: bytesType,
 			Data: b,
 		},
 		ImageRedactionConfigs: ir,
 	}
+	// Send the request.
 	r, err := client.RedactImage(context.Background(), req)
 	if err != nil {
 		log.Fatal(err)
 	}
+	// Write the output file.
 	ioutil.WriteFile(outputPath, r.GetRedactedImage(), 0644)
 }
 

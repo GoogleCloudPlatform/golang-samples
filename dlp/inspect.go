@@ -30,11 +30,14 @@ import (
 )
 
 // [START dlp_inspect_string]
-func inspect(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, maxFindings int32, includeQuote bool, infoTypes []string, input string) {
+// inspectStrings searches for the given infoTypes in the input.
+func inspectString(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, maxFindings int32, includeQuote bool, infoTypes []string, input string) {
+	// Convert the info type strings to a list of InfoTypes.
 	var i []*dlppb.InfoType
 	for _, it := range infoTypes {
 		i = append(i, &dlppb.InfoType{Name: it})
 	}
+	// Create a configured request.
 	req := &dlppb.InspectContentRequest{
 		Parent: "projects/" + project,
 		InspectConfig: &dlppb.InspectConfig{
@@ -45,23 +48,28 @@ func inspect(w io.Writer, client *dlp.Client, project string, minLikelihood dlpp
 			},
 			IncludeQuote: includeQuote,
 		},
+		// The item to analyze.
 		Item: &dlppb.ContentItem{
 			DataItem: &dlppb.ContentItem_Value{
 				Value: input,
 			},
 		},
 	}
+	// Send the request.
 	r, err := client.InspectContent(context.Background(), req)
 	if err != nil {
 		log.Fatal(err)
 	}
+	// Print the result.
 	fmt.Fprintln(w, r.GetResult())
 }
 
 // [END dlp_inspect_string]
 
 // [START dlp_inspect_file]
+// inspectFile searches for the given info types in the given file (with the given bytesType).
 func inspectFile(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, maxFindings int32, includeQuote bool, infoTypes []string, bytesType dlppb.ByteContentItem_BytesType, fileName string) {
+	// Convert the info type strings to a list of InfoTypes.
 	var i []*dlppb.InfoType
 	for _, it := range infoTypes {
 		i = append(i, &dlppb.InfoType{Name: it})
@@ -70,6 +78,7 @@ func inspectFile(w io.Writer, client *dlp.Client, project string, minLikelihood 
 	if err != nil {
 		log.Fatalf("error reading file: %v", err)
 	}
+	// Create a configured request.
 	req := &dlppb.InspectContentRequest{
 		Parent: "projects/" + project,
 		InspectConfig: &dlppb.InspectConfig{
@@ -80,6 +89,7 @@ func inspectFile(w io.Writer, client *dlp.Client, project string, minLikelihood 
 			},
 			IncludeQuote: includeQuote,
 		},
+		// The item to analyze.
 		Item: &dlppb.ContentItem{
 			DataItem: &dlppb.ContentItem_ByteItem{
 				ByteItem: &dlppb.ByteContentItem{
@@ -89,10 +99,12 @@ func inspectFile(w io.Writer, client *dlp.Client, project string, minLikelihood 
 			},
 		},
 	}
+	// Send the request.
 	r, err := client.InspectContent(context.Background(), req)
 	if err != nil {
 		log.Fatal(err)
 	}
+	// Print the result.
 	fmt.Fprintln(w, r.GetResult())
 }
 
@@ -100,6 +112,7 @@ func inspectFile(w io.Writer, client *dlp.Client, project string, minLikelihood 
 
 // [START dlp_inspect_gcs]
 func inspectGCSFile(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, maxFindings int32, includeQuote bool, infoTypes []string, pubSubTopic, pubSubSub, bucketName, fileName string) {
+	// Convert the info type strings to a list of InfoTypes.
 	var i []*dlppb.InfoType
 	for _, it := range infoTypes {
 		i = append(i, &dlppb.InfoType{Name: it})
@@ -107,21 +120,28 @@ func inspectGCSFile(w io.Writer, client *dlp.Client, project string, minLikeliho
 
 	ctx := context.Background()
 
+	// Create a PubSub Client used to listen for when the inspect job finishes.
 	pClient, err := pubsub.NewClient(ctx, project)
 	if err != nil {
 		log.Fatalf("Error creating PubSub client: %v", err)
 	}
 	defer pClient.Close()
+
+	// Create a PubSub subscription we can use to listen for messages.
 	s, err := setupPubSub(ctx, pClient, project, pubSubTopic, pubSubSub)
 	if err != nil {
 		log.Fatalf("Error setting up PubSub: %v\n", err)
 	}
+
+	// topic is the PubSub topic string where messages should be sent.
 	topic := "projects/" + project + "/topics/" + pubSubTopic
 
+	// Create a configured request.
 	req := &dlppb.CreateDlpJobRequest{
 		Parent: "projects/" + project,
 		Job: &dlppb.CreateDlpJobRequest_InspectJob{
 			InspectJob: &dlppb.InspectJobConfig{
+				// StorageConfig describes where to find the data.
 				StorageConfig: &dlppb.StorageConfig{
 					Type: &dlppb.StorageConfig_CloudStorageOptions{
 						CloudStorageOptions: &dlppb.CloudStorageOptions{
@@ -131,6 +151,7 @@ func inspectGCSFile(w io.Writer, client *dlp.Client, project string, minLikeliho
 						},
 					},
 				},
+				// InspectConfig describes what fields to look for.
 				InspectConfig: &dlppb.InspectConfig{
 					InfoTypes:     i,
 					MinLikelihood: minLikelihood,
@@ -139,6 +160,7 @@ func inspectGCSFile(w io.Writer, client *dlp.Client, project string, minLikeliho
 					},
 					IncludeQuote: includeQuote,
 				},
+				// Send a message to PubSub using Actions.
 				Actions: []*dlppb.Action{
 					{
 						Action: &dlppb.Action_PubSub{
@@ -151,27 +173,33 @@ func inspectGCSFile(w io.Writer, client *dlp.Client, project string, minLikeliho
 			},
 		},
 	}
+	// Create the inspect job.
 	j, err := client.CreateDlpJob(context.Background(), req)
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Fprintf(w, "Created job: %v\n", j)
 
+	// Wait for the inspect job to finish by waiting for a PubSub message.
 	ctx, cancel := context.WithCancel(ctx)
 	err = s.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
-		msg.Ack()
-		if msg.Attributes["DlpJobName"] == j.GetName() {
-			jr, err := client.GetDlpJob(ctx, &dlppb.GetDlpJobRequest{
-				Name: j.GetName(),
-			})
-			if err != nil {
-				log.Fatalf("Error getting completed job: %v\n", err)
-			}
-			for _, s := range jr.GetInspectDetails().GetResult().GetInfoTypeStats() {
-				fmt.Fprintf(w, "  Found %v instances of infoType %v\n", s.GetCount(), s.GetInfoType().GetName())
-			}
-			cancel()
+		// If this is the wrong job, do not process the result.
+		if msg.Attributes["DlpJobName"] != j.GetName() {
+			msg.Nack()
+			return
 		}
+		msg.Ack()
+		jr, err := client.GetDlpJob(ctx, &dlppb.GetDlpJobRequest{
+			Name: j.GetName(),
+		})
+		if err != nil {
+			log.Fatalf("Error getting completed job: %v\n", err)
+		}
+		for _, s := range jr.GetInspectDetails().GetResult().GetInfoTypeStats() {
+			fmt.Fprintf(w, "  Found %v instances of infoType %v\n", s.GetCount(), s.GetInfoType().GetName())
+		}
+		// Stop listening for more messages.
+		cancel()
 	})
 	if err != nil {
 		log.Fatalf("Error receiving from PubSub: %v\n", err)
@@ -182,6 +210,7 @@ func inspectGCSFile(w io.Writer, client *dlp.Client, project string, minLikeliho
 
 // [START dlp_inspect_datastore]
 func inspectDatastore(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, maxFindings int32, includeQuote bool, infoTypes []string, pubSubTopic, pubSubSub, dataProject, namespaceID, kind string) {
+	// Convert the info type strings to a list of InfoTypes.
 	var i []*dlppb.InfoType
 	for _, it := range infoTypes {
 		i = append(i, &dlppb.InfoType{Name: it})
@@ -189,21 +218,28 @@ func inspectDatastore(w io.Writer, client *dlp.Client, project string, minLikeli
 
 	ctx := context.Background()
 
+	// Create a PubSub Client used to listen for when the inspect job finishes.
 	pClient, err := pubsub.NewClient(ctx, project)
 	if err != nil {
 		log.Fatalf("Error creating PubSub client: %v", err)
 	}
 	defer pClient.Close()
+
+	// Create a PubSub subscription we can use to listen for messages.
 	s, err := setupPubSub(ctx, pClient, project, pubSubTopic, pubSubSub)
 	if err != nil {
 		log.Fatalf("Error setting up PubSub: %v\n", err)
 	}
+
+	// topic is the PubSub topic string where messages should be sent.
 	topic := "projects/" + project + "/topics/" + pubSubTopic
 
+	// Create a configured request.
 	req := &dlppb.CreateDlpJobRequest{
 		Parent: "projects/" + project,
 		Job: &dlppb.CreateDlpJobRequest_InspectJob{
 			InspectJob: &dlppb.InspectJobConfig{
+				// StorageConfig describes where to find the data.
 				StorageConfig: &dlppb.StorageConfig{
 					Type: &dlppb.StorageConfig_DatastoreOptions{
 						DatastoreOptions: &dlppb.DatastoreOptions{
@@ -217,6 +253,7 @@ func inspectDatastore(w io.Writer, client *dlp.Client, project string, minLikeli
 						},
 					},
 				},
+				// InspectConfig describes what fields to look for.
 				InspectConfig: &dlppb.InspectConfig{
 					InfoTypes:     i,
 					MinLikelihood: minLikelihood,
@@ -225,6 +262,7 @@ func inspectDatastore(w io.Writer, client *dlp.Client, project string, minLikeli
 					},
 					IncludeQuote: includeQuote,
 				},
+				// Send a message to PubSub using Actions.
 				Actions: []*dlppb.Action{
 					{
 						Action: &dlppb.Action_PubSub{
@@ -237,27 +275,33 @@ func inspectDatastore(w io.Writer, client *dlp.Client, project string, minLikeli
 			},
 		},
 	}
+	// Create the inspect job.
 	j, err := client.CreateDlpJob(context.Background(), req)
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Fprintf(w, "Created job: %v\n", j)
 
+	// Wait for the inspect job to finish by waiting for a PubSub message.
 	ctx, cancel := context.WithCancel(ctx)
 	err = s.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
-		msg.Ack()
-		if msg.Attributes["DlpJobName"] == j.GetName() {
-			jr, err := client.GetDlpJob(ctx, &dlppb.GetDlpJobRequest{
-				Name: j.GetName(),
-			})
-			if err != nil {
-				log.Fatalf("Error getting completed job: %v\n", err)
-			}
-			for _, s := range jr.GetInspectDetails().GetResult().GetInfoTypeStats() {
-				fmt.Fprintf(w, "  Found %v instances of infoType %v\n", s.GetCount(), s.GetInfoType().GetName())
-			}
-			cancel()
+		// If this is the wrong job, do not process the result.
+		if msg.Attributes["DlpJobName"] != j.GetName() {
+			msg.Nack()
+			return
 		}
+		msg.Ack()
+		jr, err := client.GetDlpJob(ctx, &dlppb.GetDlpJobRequest{
+			Name: j.GetName(),
+		})
+		if err != nil {
+			log.Fatalf("Error getting completed job: %v\n", err)
+		}
+		for _, s := range jr.GetInspectDetails().GetResult().GetInfoTypeStats() {
+			fmt.Fprintf(w, "  Found %v instances of infoType %v\n", s.GetCount(), s.GetInfoType().GetName())
+		}
+		// Stop listening for more messages.
+		cancel()
 	})
 	if err != nil {
 		log.Fatalf("Error receiving from PubSub: %v\n", err)
@@ -268,6 +312,7 @@ func inspectDatastore(w io.Writer, client *dlp.Client, project string, minLikeli
 
 // [START dlp_inspect_bigquery]
 func inspectBigquery(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, maxFindings int32, includeQuote bool, infoTypes []string, pubSubTopic, pubSubSub, dataProject, datasetID, tableID string) {
+	// Convert the info type strings to a list of InfoTypes.
 	var i []*dlppb.InfoType
 	for _, it := range infoTypes {
 		i = append(i, &dlppb.InfoType{Name: it})
@@ -275,21 +320,28 @@ func inspectBigquery(w io.Writer, client *dlp.Client, project string, minLikelih
 
 	ctx := context.Background()
 
+	// Create a PubSub Client used to listen for when the inspect job finishes.
 	pClient, err := pubsub.NewClient(ctx, project)
 	if err != nil {
 		log.Fatalf("Error creating PubSub client: %v", err)
 	}
 	defer pClient.Close()
+
+	// Create a PubSub subscription we can use to listen for messages.
 	s, err := setupPubSub(ctx, pClient, project, pubSubTopic, pubSubSub)
 	if err != nil {
 		log.Fatalf("Error setting up PubSub: %v\n", err)
 	}
+
+	// topic is the PubSub topic string where messages should be sent.
 	topic := "projects/" + project + "/topics/" + pubSubTopic
 
+	// Create a configured request.
 	req := &dlppb.CreateDlpJobRequest{
 		Parent: "projects/" + project,
 		Job: &dlppb.CreateDlpJobRequest_InspectJob{
 			InspectJob: &dlppb.InspectJobConfig{
+				// StorageConfig describes where to find the data.
 				StorageConfig: &dlppb.StorageConfig{
 					Type: &dlppb.StorageConfig_BigQueryOptions{
 						BigQueryOptions: &dlppb.BigQueryOptions{
@@ -301,6 +353,7 @@ func inspectBigquery(w io.Writer, client *dlp.Client, project string, minLikelih
 						},
 					},
 				},
+				// InspectConfig describes what fields to look for.
 				InspectConfig: &dlppb.InspectConfig{
 					InfoTypes:     i,
 					MinLikelihood: minLikelihood,
@@ -309,6 +362,7 @@ func inspectBigquery(w io.Writer, client *dlp.Client, project string, minLikelih
 					},
 					IncludeQuote: includeQuote,
 				},
+				// Send a message to PubSub using Actions.
 				Actions: []*dlppb.Action{
 					{
 						Action: &dlppb.Action_PubSub{
@@ -321,27 +375,33 @@ func inspectBigquery(w io.Writer, client *dlp.Client, project string, minLikelih
 			},
 		},
 	}
+	// Create the inspect job.
 	j, err := client.CreateDlpJob(context.Background(), req)
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Fprintf(w, "Created job: %v\n", j)
 
+	// Wait for the inspect job to finish by waiting for a PubSub message.
 	ctx, cancel := context.WithCancel(ctx)
 	err = s.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
-		msg.Ack()
-		if msg.Attributes["DlpJobName"] == j.GetName() {
-			jr, err := client.GetDlpJob(ctx, &dlppb.GetDlpJobRequest{
-				Name: j.GetName(),
-			})
-			if err != nil {
-				log.Fatalf("Error getting completed job: %v\n", err)
-			}
-			for _, s := range jr.GetInspectDetails().GetResult().GetInfoTypeStats() {
-				fmt.Fprintf(w, "  Found %v instances of infoType %v\n", s.GetCount(), s.GetInfoType().GetName())
-			}
-			cancel()
+		// If this is the wrong job, do not process the result.
+		if msg.Attributes["DlpJobName"] != j.GetName() {
+			msg.Nack()
+			return
 		}
+		msg.Ack()
+		jr, err := client.GetDlpJob(ctx, &dlppb.GetDlpJobRequest{
+			Name: j.GetName(),
+		})
+		if err != nil {
+			log.Fatalf("Error getting completed job: %v\n", err)
+		}
+		for _, s := range jr.GetInspectDetails().GetResult().GetInfoTypeStats() {
+			fmt.Fprintf(w, "  Found %v instances of infoType %v\n", s.GetCount(), s.GetInfoType().GetName())
+		}
+		// Stop listening for more messages.
+		cancel()
 	})
 	if err != nil {
 		log.Fatalf("Error receiving from PubSub: %v\n", err)

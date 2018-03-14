@@ -30,11 +30,15 @@ import (
 )
 
 // [START dlp_create_template]
+// createInspectTemplate creates a template with the given configuration.
 func createInspectTemplate(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, maxFindings int32, templateID, displayName, description string, infoTypes []string) {
+	// Convert the info type strings to a list of InfoTypes.
 	var i []*dlppb.InfoType
 	for _, it := range infoTypes {
 		i = append(i, &dlppb.InfoType{Name: it})
 	}
+
+	// Create a configured request.
 	req := &dlppb.CreateInspectTemplateRequest{
 		Parent:     "projects/" + project,
 		TemplateId: templateID,
@@ -50,20 +54,25 @@ func createInspectTemplate(w io.Writer, client *dlp.Client, project string, minL
 			},
 		},
 	}
+	// Send the request.
 	r, err := client.CreateInspectTemplate(context.Background(), req)
 	if err != nil {
 		log.Fatalf("error creating inspect template: %v", err)
 	}
+	// Print the result.
 	fmt.Fprintf(w, "Successfully created inspect template: %v", r.GetName())
 }
 
 // [END dlp_create_template]
 
 // [START dlp_list_templates]
+// listInspectTemplates lists the inspect templates in the project.
 func listInspectTemplates(w io.Writer, client *dlp.Client, project string) {
+	// Create a configured request.
 	req := &dlppb.ListInspectTemplatesRequest{
 		Parent: "projects/" + project,
 	}
+	// Send the request and iterate over the results.
 	it := client.ListInspectTemplates(context.Background(), req)
 	for {
 		t, err := it.Next()
@@ -86,6 +95,7 @@ func listInspectTemplates(w io.Writer, client *dlp.Client, project string) {
 // [END dlp_list_templates]
 
 // [START dlp_delete_template]
+// deleteInspectTemplate deletes the given template.
 func deleteInspectTemplate(w io.Writer, client *dlp.Client, templateID string) {
 	req := &dlppb.DeleteInspectTemplateRequest{
 		Name: templateID,

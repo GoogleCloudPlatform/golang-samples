@@ -29,12 +29,15 @@ import (
 )
 
 // [START dlp_list_jobs]
+// listJobs lists jobs matching the given optional filter and optional jobType.
 func listJobs(w io.Writer, client *dlp.Client, project, filter, jobType string) {
+	// Create a configured request.
 	req := &dlppb.ListDlpJobsRequest{
 		Parent: "projects/" + project,
 		Filter: filter,
 		Type:   dlppb.DlpJobType(dlppb.DlpJobType_value[jobType]),
 	}
+	// Send the request and iterate over the results.
 	it := client.ListDlpJobs(context.Background(), req)
 	for {
 		j, err := it.Next()
@@ -51,6 +54,7 @@ func listJobs(w io.Writer, client *dlp.Client, project, filter, jobType string) 
 // [END dlp_list_jobs]
 
 // [START dlp_delete_job]
+// deleteJob deletes the job with the given name.
 func deleteJob(w io.Writer, client *dlp.Client, jobName string) {
 	req := &dlppb.DeleteDlpJobRequest{
 		Name: jobName,
