@@ -117,62 +117,84 @@ func main() {
 		flag.Usage()
 		os.Exit(1)
 	case "inspect":
+		checkNArg(1)
 		inspect(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, flag.Arg(1))
 	case "inspectFile":
+		checkNArg(1)
 		inspectFile(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, bytesType.bt, flag.Arg(1))
 	case "inspectGCSFile":
+		checkNArg(4)
 		inspectGCSFile(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4))
 	case "inspectDatastore":
+		checkNArg(5)
 		inspectDatastore(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), flag.Arg(5))
 	case "inspectBigquery":
+		checkNArg(5)
 		inspectBigquery(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), flag.Arg(5))
 
 	case "redactImage":
+		checkNArg(2)
 		redactImage(os.Stdout, client, *project, minLikelihood.l, infoTypesList, bytesType.bt, flag.Arg(1), flag.Arg(2))
 
 	case "infoTypes":
+		checkNArg(1)
 		infoTypes(os.Stdout, client, *languageCode, flag.Arg(1))
 
 	case "mask":
+		checkNArg(1)
 		mask(os.Stdout, client, *project, flag.Arg(1), "*", 0)
 	case "dateShift":
+		checkNArg(1)
 		deidentifyDateShift(os.Stdout, client, *project, -2000, 2000, flag.Arg(1))
 	case "fpe":
+		checkNArg(4)
 		deidentifyFPE(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4))
 	case "reidentifyFPE":
+		checkNArg(4)
 		reidentifyFPE(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4))
 
 	case "riskNumerical":
+		checkNArg(6)
 		riskNumerical(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), flag.Arg(5), flag.Arg(6))
 	case "riskCategorical":
+		checkNArg(6)
 		riskCategorical(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), flag.Arg(5), flag.Arg(6))
 	case "riskKAnonymity":
+		checkNArg(6)
 		riskKAnonymity(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), flag.Arg(5), strings.Split(flag.Arg(6), ",")...)
 	case "riskLDiversity":
+		checkNArg(7)
 		riskLDiversity(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), flag.Arg(5), flag.Arg(6), strings.Split(flag.Arg(7), ",")...)
 	case "riskKMap":
+		checkNArg(7)
 		riskKMap(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), flag.Arg(5), flag.Arg(6), strings.Split(flag.Arg(7), ",")...)
 
 	case "createTrigger":
+		checkNArg(4)
 		createTrigger(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), 12, infoTypesList)
 	case "listTriggers":
+		checkNArg(0)
 		listTriggers(os.Stdout, client, *project)
 	case "deleteTrigger":
+		checkNArg(1)
 		deleteTrigger(os.Stdout, client, flag.Arg(1))
 
 	case "createInspectTemplate":
+		checkNArg(3)
 		createInspectTemplate(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), flag.Arg(1), flag.Arg(2), flag.Arg(3), infoTypesList)
 	case "listInspectTemplates":
+		checkNArg(0)
 		listInspectTemplates(os.Stdout, client, *project)
 	case "deleteInspectTemplate":
+		checkNArg(1)
 		deleteInspectTemplate(os.Stdout, client, flag.Arg(1))
 
 	case "listJobs":
+		checkNArg(2)
 		listJobs(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2))
 	case "deleteJob":
+		checkNArg(1)
 		deleteJob(os.Stdout, client, flag.Arg(1))
-	case "quickstart":
-		quickstart(*project)
 	}
 
 }
@@ -254,5 +276,25 @@ func init() {
 		}
 		bold(os.Stderr, "\n\nOptions:\n")
 		flag.PrintDefaults()
+	}
+}
+
+func findSubcommandArgs(s string) string {
+	for _, v := range subcommands {
+		if a, ok := v[s]; ok {
+			return a
+		}
+	}
+	return ""
+}
+
+// checkNArg ensures there are n arguments after the subcommand.
+func checkNArg(n int) {
+	if flag.NArg()-1 != n {
+		fmt.Fprintf(os.Stderr, "Error:  found %d args, expected %d\n", flag.NArg()-1, n)
+		fmt.Fprintf(os.Stderr, "Usage: %s -project %s [options] %s %s\n\n", os.Args[0], flag.Lookup("project").Value, flag.Arg(0), findSubcommandArgs(flag.Arg(0)))
+		fmt.Fprintf(os.Stderr, "Options:\n")
+		flag.PrintDefaults()
+		os.Exit(1)
 	}
 }
