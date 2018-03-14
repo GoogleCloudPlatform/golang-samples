@@ -28,8 +28,8 @@ import (
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
+// [START dlp_deidentify_masking]
 func mask(w io.Writer, client *dlp.Client, project, input, maskingCharacter string, numberToMask int32) {
-	// [START dlp_deidentify_masking]
 	req := &dlppb.DeidentifyContentRequest{
 		Parent: "projects/" + project,
 		DeidentifyConfig: &dlppb.DeidentifyConfig{
@@ -62,11 +62,12 @@ func mask(w io.Writer, client *dlp.Client, project, input, maskingCharacter stri
 		log.Fatal(err)
 	}
 	fmt.Fprintln(w, r.GetItem().GetValue())
-	// [END dlp_deidentify_masking]
 }
 
+// [END dlp_deidentify_masking]
+
+// [START dlp_deidentify_date_shift]
 func deidentifyDateShift(w io.Writer, client *dlp.Client, project string, lowerBoundDays, upperBoundDays int32, s string) {
-	// [START dlp_deidentify_date_shift]
 	req := &dlppb.DeidentifyContentRequest{
 		Parent: "projects/" + project,
 		DeidentifyConfig: &dlppb.DeidentifyConfig{
@@ -106,11 +107,12 @@ func deidentifyDateShift(w io.Writer, client *dlp.Client, project string, lowerB
 		log.Fatal(err)
 	}
 	fmt.Fprintln(w, r.GetItem().GetValue())
-	// [END dlp_deidentify_date_shift]
 }
 
+// [END dlp_deidentify_date_shift]
+
+// [START dlp_deidentify_fpe]
 func deidentifyFPE(w io.Writer, client *dlp.Client, project, s, keyFileName, cryptoKeyName, surrogateInfoType string) {
-	// [START dlp_deidentify_fpe]
 	b, err := ioutil.ReadFile(keyFileName)
 	if err != nil {
 		log.Fatalf("error reading file: %v", err)
@@ -159,11 +161,12 @@ func deidentifyFPE(w io.Writer, client *dlp.Client, project, s, keyFileName, cry
 		log.Fatal(err)
 	}
 	fmt.Fprintln(w, r.GetItem().GetValue())
-	// [END dlp_deidentify_fpe]
 }
 
+// [END dlp_deidentify_fpe]
+
+// [START reidentify_fpe]
 func reidentifyFPE(w io.Writer, client *dlp.Client, project, s, keyFileName, cryptoKeyName, surrogateInfoType string) {
-	// [START reidentify_fpe]
 	b, err := ioutil.ReadFile(keyFileName)
 	if err != nil {
 		log.Fatalf("error reading file: %v", err)
@@ -224,5 +227,6 @@ func reidentifyFPE(w io.Writer, client *dlp.Client, project, s, keyFileName, cry
 		log.Fatal(err)
 	}
 	fmt.Fprintln(w, r.GetItem().GetValue())
-	// [END reidentify_fpe]
 }
+
+// [END reidentify_fpe]

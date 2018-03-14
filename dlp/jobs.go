@@ -28,8 +28,8 @@ import (
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
+// [START dlp_list_jobs]
 func listJobs(w io.Writer, client *dlp.Client, project, filter, jobType string) {
-	// [START dlp_list_jobs]
 	req := &dlppb.ListDlpJobsRequest{
 		Parent: "projects/" + project,
 		Filter: filter,
@@ -46,11 +46,12 @@ func listJobs(w io.Writer, client *dlp.Client, project, filter, jobType string) 
 		}
 		fmt.Fprintf(w, "Job %v status: %v\n", j.GetName(), j.GetState())
 	}
-	// [END dlp_list_jobs]
 }
 
+// [END dlp_list_jobs]
+
+// [START dlp_delete_job]
 func deleteJob(w io.Writer, client *dlp.Client, jobName string) {
-	// [START dlp_delete_job]
 	req := &dlppb.DeleteDlpJobRequest{
 		Name: jobName,
 	}
@@ -58,5 +59,6 @@ func deleteJob(w io.Writer, client *dlp.Client, jobName string) {
 	if err != nil {
 		log.Fatalf("error deleting job: %v", err)
 	}
-	// [END dlp_delete_job]
 }
+
+// [END dlp_delete_job]

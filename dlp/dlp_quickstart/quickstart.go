@@ -1,3 +1,4 @@
+// dlp_quickstart is a basic example of using the Data Loss Prevention API.
 package main
 
 import (
@@ -10,9 +11,11 @@ import (
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
-func quickstart(project string) {
-	// [START dlp_quickstart]
+// [START dlp_quickstart]
+func main() {
 	ctx := context.Background()
+
+	projectID := "PROJECT_ID"
 
 	// Instantiates a DLP client.
 	client, err := dlp.NewClient(ctx)
@@ -51,7 +54,7 @@ func quickstart(project string) {
 
 	// Construct request.
 	req := &dlppb.InspectContentRequest{
-		Parent: "projects/" + project,
+		Parent: "projects/" + projectID,
 		InspectConfig: &dlppb.InspectConfig{
 			InfoTypes:     infoTypes,
 			MinLikelihood: minLikelihood,
@@ -80,5 +83,6 @@ func quickstart(project string) {
 		fmt.Println("\tInfo type: ", f.GetInfoType().GetName())
 		fmt.Println("\tLikelihood: ", f.GetLikelihood())
 	}
-	// [END dlp_quickstart]
 }
+
+// [END dlp_quickstart]
