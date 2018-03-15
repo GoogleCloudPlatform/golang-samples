@@ -91,7 +91,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Verify the token passed in by the user is valid.
-	t, err := auth.VerifyIDTokenAndCheckRevoked(ctx, r.FormValue("token"))
+	tok, err := auth.VerifyIDTokenAndCheckRevoked(ctx, r.FormValue("token"))
 	if err != nil {
 		params.Notice = "Couldn't authenticate. Try logging in again?"
 		params.Message = message // Preserve their message so they can try again.
@@ -99,7 +99,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Use the validated token to get the user's information.
-	u, err := auth.GetUser(ctx, t.UID)
+	user, err := auth.GetUser(ctx, tok.UID)
 	if err != nil {
 		params.Notice = "Couldn't authenticate. Try logging in again?"
 		params.Message = message // Preserve their message so they can try again.
@@ -111,8 +111,8 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 
 	// [START logged_in_post]
 	post := Post{
-		UserID:  u.UID, // Include UserID in case Author isn't unique.
-		Author:  u.DisplayName,
+		UserID:  user.UID, // Include UserID in case Author isn't unique.
+		Author:  user.DisplayName,
 		Message: message,
 		Posted:  time.Now(),
 	}

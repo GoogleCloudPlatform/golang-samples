@@ -19,7 +19,7 @@
   <!-- [START include_firebaseui] -->
   <!-- [START handle_login] -->
   <script>
-    initApp = function() {
+    window.addEventListener('load', function() {
       document.getElementById('sign-out').onclick = function() {
         firebase.auth().signOut();
       };
@@ -45,7 +45,7 @@
           document.getElementById('sign-out').hidden = false;
           document.getElementById('post-form').hidden = false;
           var account = document.getElementById('account-details').textContent =
-            "Signed in as " + user.displayName + " (" + user.email + ")";
+              'Signed in as ' + user.displayName + ' (' + user.email + ')';
           user.getIdToken().then(function(accessToken) {
             // Add the token to the post form. The user info will be extracted
             // from the token by the server.
@@ -64,11 +64,8 @@
         }
       }, function(error) {
         console.log(error);
+        alert('Unable to log in: ' + error)
       });
-    };
-
-    window.addEventListener('load', function() {
-      initApp()
     });
   </script>
   <!-- [END handle_login] -->
