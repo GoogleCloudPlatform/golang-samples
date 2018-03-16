@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+<head>
+  <title>The Gopher Network</title>
+
+  <link type="text/css" rel="stylesheet" href="/static/style.css" />
+
+  <!-- See https://github.com/firebase/firebaseui-web. -->
+  <!-- [START init_firebase] -->
+  <!-- *******************************************************************************************
+       * TODO(DEVELOPER): Paste the initialization snippet from:
+       * Firebase Console > Overview > Add Firebase to your web app.
+       ***************************************************************************************** -->
+  <!-- [END init_firebase] -->
+
+  <!-- [START include_firebaseui] -->
+  <script src="https://cdn.firebase.com/libs/firebaseui/2.6.2/firebaseui.js"></script>
+  <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/2.6.2/firebaseui.css" />
+  <!-- [END include_firebaseui] -->
+  <!-- [START index_js] -->
+  <script src="/static/index.js"></script>
+  <!-- [END index_js] -->
+</head>
+<body>
+
+<h1>The Gopher Network</h1>
+
+<img id="logo" src="/static/gcp-gopher.svg" width="100">
+
+<!-- [START firebase_container] -->
+<div id="firebaseui-auth-container"></div>
+<!-- [END firebase_container] -->
+
+<!-- [START signin_status] -->
+<div id="sign-in"></div>
+<div>
+  <span id="account-details"></span>
+  <button id="sign-out" hidden=true>Sign Out</button>
+</div>
+<!-- [END signin_status] -->
+
+{{with .Notice}}<div id="notice">{{.}}</div>{{end}}
+
+<!-- [START token_input] -->
+<form id="post-form" action="/" method="post" hidden=true>
+  <div>Message: <input name="message" value="{{.Message}}"></div>
+  <input type="hidden" name="token" id="token">
+  <input type="submit">
+</form>
+<!-- [END token_input] -->
+
+{{with .Posts}}
+<ol>
+  {{range .}}
+  <li><cite>{{.Author}}</cite><p>{{.Message}}</p></li>
+  {{end}}
+</ol>
+{{end}}
+
+</body>
+</html>
