@@ -8,40 +8,35 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
-
-	"google.golang.org/appengine"
-
-	// [START imports]
 	"time"
 
+	// [START imports]
+	firebase "firebase.google.com/go"
+	// [END imports]
+
+	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
-	// [END imports]
 )
 
 var (
 	indexTemplate = template.Must(template.ParseFiles("index.html"))
 )
 
-// [START post_struct]
 type Post struct {
-	Author  string
+	Author string
+	// [START new_post_field]
+	UserID string
+	// [END new_post_field]
 	Message string
 	Posted  time.Time
 }
 
-// [END post_struct]
-
 type templateParams struct {
-	Notice string
-
-	Name string
-	// [START added_templateParams_fields]
+	Notice  string
+	Name    string
 	Message string
-
-	Posts []Post
-	// [END added_templateParams_fields]
-
+	Posts   []Post
 }
 
 func main() {
@@ -54,15 +49,10 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
-	// [START new_context]
 	ctx := appengine.NewContext(r)
-	// [END new_context]
 	params := templateParams{}
 
-	// [START new_query]
 	q := datastore.NewQuery("Post").Order("-Posted").Limit(20)
-	// [END new_query]
-	// [START get_posts]
 	if _, err := q.GetAll(ctx, &params.Posts); err != nil {
 		log.Errorf(ctx, "Getting posts: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -70,24 +60,64 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		indexTemplate.Execute(w, params)
 		return
 	}
-	// [END get_posts]
 
 	if r.Method == "GET" {
 		indexTemplate.Execute(w, params)
 		return
 	}
-
 	// It's a POST request, so handle the form submission.
-	// [START new_post]
+
+	// [START firebase_token]
+	message := r.FormValue("message")
+
+	// Create a new Firebase App.
+	app, err := firebase.NewApp(ctx, &firebase.Config{
+		DatabaseURL:   "copy from Firebase Console > Overview > Add Firebase to your web app",
+		ProjectID:     "copy from Firebase Console > Overview > Add Firebase to your web app",
+		StorageBucket: "copy from Firebase Console > Overview > Add Firebase to your web app",
+	})
+	if err != nil {
+		params.Notice = "Couldn't authenticate. Try logging in again?"
+		params.Message = message // Preserve their message so they can try again.
+		indexTemplate.Execute(w, params)
+		return
+	}
+	// Create a new authenticator for the app.
+	auth, err := app.Auth(ctx)
+	if err != nil {
+		params.Notice = "Couldn't authenticate. Try logging in again?"
+		params.Message = message // Preserve their message so they can try again.
+		indexTemplate.Execute(w, params)
+		return
+	}
+	// Verify the token passed in by the user is valid.
+	tok, err := auth.VerifyIDTokenAndCheckRevoked(ctx, r.FormValue("token"))
+	if err != nil {
+		params.Notice = "Couldn't authenticate. Try logging in again?"
+		params.Message = message // Preserve their message so they can try again.
+		indexTemplate.Execute(w, params)
+		return
+	}
+	// Use the validated token to get the user's information.
+	user, err := auth.GetUser(ctx, tok.UID)
+	if err != nil {
+		params.Notice = "Couldn't authenticate. Try logging in again?"
+		params.Message = message // Preserve their message so they can try again.
+		indexTemplate.Execute(w, params)
+		return
+	}
+
+	// [END firebase_token]
+
+	// [START logged_in_post]
 	post := Post{
-		Author:  r.FormValue("name"),
-		Message: r.FormValue("message"),
+		UserID:  user.UID, // Include UserID in case Author isn't unique.
+		Author:  user.DisplayName,
+		Message: message,
 		Posted:  time.Now(),
 	}
-	// [END new_post]
-	if post.Author == "" {
-		post.Author = "Anonymous Gopher"
-	}
+	// [END logged_in_post]
+
 	params.Name = post.Author
 
 	if post.Message == "" {
@@ -96,10 +126,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		indexTemplate.Execute(w, params)
 		return
 	}
-	// [START new_key]
 	key := datastore.NewIncompleteKey(ctx, "Post", nil)
-	// [END new_key]
-	// [START add_post]
 	if _, err := datastore.Put(ctx, key, &post); err != nil {
 		log.Errorf(ctx, "datastore.Put: %v", err)
 
@@ -109,13 +136,9 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		indexTemplate.Execute(w, params)
 		return
 	}
-	// [END add_post]
 
 	// Prepend the post that was just added.
-	// [START prepend_post]
 	params.Posts = append([]Post{post}, params.Posts...)
-	// [END prepend_post]
-
 	params.Notice = fmt.Sprintf("Thank you for your submission, %s!", post.Author)
 	indexTemplate.Execute(w, params)
 }
