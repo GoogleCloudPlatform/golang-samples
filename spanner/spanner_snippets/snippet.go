@@ -39,6 +39,7 @@ var (
 		"readstoringindex":    readStoringIndex,
 		"readonlytransaction": readOnlyTransaction,
 		"readstaledata":       readStaleData,
+		"readbatchdata":       readBatchData,
 	}
 
 	adminCommands = map[string]adminCommand{
@@ -485,6 +486,53 @@ func readStaleData(ctx context.Context, w io.Writer, client *spanner.Client) err
 
 // [END spanner_read_stale_data]
 
+// [START spanner_batch_client]
+
+func readBatchData(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	txn, err := client.BatchReadOnlyTransaction(ctx, spanner.StrongRead())
+	if err != nil {
+		return err
+	}
+	defer txn.Close()
+
+	// Singer represents a row in the Singers table.
+	type Singer struct {
+		SingerID   int64
+		FirstName  string
+		LastName   string
+		SingerInfo []byte
+	}
+	stmt := spanner.Statement{SQL: "SELECT SingerId, FirstName, LastName FROM Singers;"}
+	partitions, err := txn.PartitionQuery(ctx, stmt, spanner.PartitionOptions{})
+	if err != nil {
+		return err
+	}
+	recordCount := 0
+	for i, p := range partitions {
+		iter := txn.Execute(ctx, p)
+		defer iter.Stop()
+		for {
+			row, err := iter.Next()
+			if err == iterator.Done {
+				break
+			} else if err != nil {
+				return err
+			}
+			var s Singer
+			if err := row.ToStruct(&s); err != nil {
+				return err
+			}
+			fmt.Fprintf(w, "Partition (%d) %v\n", i, s)
+			recordCount++
+		}
+	}
+	fmt.Fprintf(w, "Total partition count: %v\n", len(partitions))
+	fmt.Fprintf(w, "Total record count: %v\n", recordCount)
+	return nil
+}
+
+// [END spanner_batch_client]
+
 func createClients(ctx context.Context, db string) (*database.DatabaseAdminClient, *spanner.Client) {
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
@@ -527,7 +575,7 @@ func main() {
 
 	Command can be one of: createdatabase, write, query, read, update,
 		writetransaction, addnewcolumn, querynewcolumn, addindex, queryindex, readindex,
-		addstoringindex, readstoringindex, readonlytransaction, readstaledata
+		addstoringindex, readstoringindex, readonlytransaction, readstaledata, readbatchdata
 
 Examples:
 	spanner_snippets createdatabase projects/my-project/instances/my-instance/databases/example-db
