@@ -75,11 +75,11 @@ func createTrigger(w io.Writer, client *dlp.Client, project string, minLikelihoo
 		},
 	}
 	// Send the request.
-	r, err := client.CreateJobTrigger(context.Background(), req)
+	resp, err := client.CreateJobTrigger(context.Background(), req)
 	if err != nil {
 		log.Fatalf("error creating job trigger: %v", err)
 	}
-	fmt.Fprintf(w, "Successfully created trigger: %v", r.GetName())
+	fmt.Fprintf(w, "Successfully created trigger: %v", resp.GetName())
 }
 
 // [END dlp_create_trigger]

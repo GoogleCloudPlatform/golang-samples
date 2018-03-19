@@ -58,12 +58,12 @@ func redactImage(w io.Writer, client *dlp.Client, project string, minLikelihood 
 		ImageRedactionConfigs: ir,
 	}
 	// Send the request.
-	r, err := client.RedactImage(context.Background(), req)
+	resp, err := client.RedactImage(context.Background(), req)
 	if err != nil {
 		log.Fatal(err)
 	}
 	// Write the output file.
-	if err := ioutil.WriteFile(outputPath, r.GetRedactedImage(), 0644); err != nil {
+	if err := ioutil.WriteFile(outputPath, resp.GetRedactedImage(), 0644); err != nil {
 		log.Fatal(err)
 	}
 	fmt.Fprintf(w, "Wrote output to %s", outputPath)
