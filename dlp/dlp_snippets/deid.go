@@ -123,7 +123,7 @@ func deidentifyDateShift(w io.Writer, client *dlp.Client, project string, lowerB
 // value not found in your input.
 func deidentifyFPE(w io.Writer, client *dlp.Client, project, input, keyFileName, cryptoKeyName, surrogateInfoType string) {
 	// Read the key file.
-	b, err := ioutil.ReadFile(keyFileName)
+	keyBytes, err := ioutil.ReadFile(keyFileName)
 	if err != nil {
 		log.Fatalf("error reading file: %v", err)
 	}
@@ -142,7 +142,7 @@ func deidentifyFPE(w io.Writer, client *dlp.Client, project, input, keyFileName,
 										CryptoKey: &dlppb.CryptoKey{
 											Source: &dlppb.CryptoKey_KmsWrapped{
 												KmsWrapped: &dlppb.KmsWrappedCryptoKey{
-													WrappedKey:    b,
+													WrappedKey:    keyBytes,
 													CryptoKeyName: cryptoKeyName,
 												},
 											},
@@ -189,7 +189,7 @@ func deidentifyFPE(w io.Writer, client *dlp.Client, project, input, keyFileName,
 // the identifier used during deidentification.
 func reidentifyFPE(w io.Writer, client *dlp.Client, project, s, keyFileName, cryptoKeyName, surrogateInfoType string) {
 	// Read the key file.
-	b, err := ioutil.ReadFile(keyFileName)
+	keyBytes, err := ioutil.ReadFile(keyFileName)
 	if err != nil {
 		log.Fatalf("error reading file: %v", err)
 	}
@@ -208,7 +208,7 @@ func reidentifyFPE(w io.Writer, client *dlp.Client, project, s, keyFileName, cry
 										CryptoKey: &dlppb.CryptoKey{
 											Source: &dlppb.CryptoKey_KmsWrapped{
 												KmsWrapped: &dlppb.KmsWrappedCryptoKey{
-													WrappedKey:    b,
+													WrappedKey:    keyBytes,
 													CryptoKeyName: cryptoKeyName,
 												},
 											},
