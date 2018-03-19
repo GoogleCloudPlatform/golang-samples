@@ -45,12 +45,12 @@ func inspectString(w io.Writer, client *dlp.Client, project string, minLikelihoo
 		},
 	}
 	// Send the request.
-	r, err := client.InspectContent(context.Background(), req)
+	resp, err := client.InspectContent(context.Background(), req)
 	if err != nil {
 		log.Fatal(err)
 	}
 	// Print the result.
-	fmt.Fprintln(w, r.GetResult())
+	fmt.Fprintln(w, resp.GetResult())
 }
 
 // [END dlp_inspect_string]
@@ -90,12 +90,12 @@ func inspectFile(w io.Writer, client *dlp.Client, project string, minLikelihood 
 		},
 	}
 	// Send the request.
-	r, err := client.InspectContent(context.Background(), req)
+	resp, err := client.InspectContent(context.Background(), req)
 	if err != nil {
 		log.Fatal(err)
 	}
 	// Print the result.
-	fmt.Fprintln(w, r.GetResult())
+	fmt.Fprintln(w, resp.GetResult())
 }
 
 // [END dlp_inspect_file]
@@ -181,13 +181,13 @@ func inspectGCSFile(w io.Writer, client *dlp.Client, project string, minLikeliho
 			return
 		}
 		msg.Ack()
-		jr, err := client.GetDlpJob(ctx, &dlppb.GetDlpJobRequest{
+		resp, err := client.GetDlpJob(ctx, &dlppb.GetDlpJobRequest{
 			Name: j.GetName(),
 		})
 		if err != nil {
 			log.Fatalf("Error getting completed job: %v\n", err)
 		}
-		r := jr.GetInspectDetails().GetResult().GetInfoTypeStats()
+		r := resp.GetInspectDetails().GetResult().GetInfoTypeStats()
 		if len(r) == 0 {
 			fmt.Fprintf(w, "No results")
 		}
@@ -289,13 +289,13 @@ func inspectDatastore(w io.Writer, client *dlp.Client, project string, minLikeli
 			return
 		}
 		msg.Ack()
-		jr, err := client.GetDlpJob(ctx, &dlppb.GetDlpJobRequest{
+		resp, err := client.GetDlpJob(ctx, &dlppb.GetDlpJobRequest{
 			Name: j.GetName(),
 		})
 		if err != nil {
 			log.Fatalf("Error getting completed job: %v\n", err)
 		}
-		r := jr.GetInspectDetails().GetResult().GetInfoTypeStats()
+		r := resp.GetInspectDetails().GetResult().GetInfoTypeStats()
 		if len(r) == 0 {
 			fmt.Fprintf(w, "No results")
 		}
@@ -395,13 +395,13 @@ func inspectBigquery(w io.Writer, client *dlp.Client, project string, minLikelih
 			return
 		}
 		msg.Ack()
-		jr, err := client.GetDlpJob(ctx, &dlppb.GetDlpJobRequest{
+		resp, err := client.GetDlpJob(ctx, &dlppb.GetDlpJobRequest{
 			Name: j.GetName(),
 		})
 		if err != nil {
 			log.Fatalf("Error getting completed job: %v\n", err)
 		}
-		r := jr.GetInspectDetails().GetResult().GetInfoTypeStats()
+		r := resp.GetInspectDetails().GetResult().GetInfoTypeStats()
 		if len(r) == 0 {
 			fmt.Fprintf(w, "No results")
 		}

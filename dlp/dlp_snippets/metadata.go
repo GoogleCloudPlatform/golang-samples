@@ -23,11 +23,11 @@ func infoTypes(w io.Writer, client *dlp.Client, languageCode, filter string) {
 		LanguageCode: languageCode,
 		Filter:       filter,
 	}
-	r, err := client.ListInfoTypes(context.Background(), req)
+	resp, err := client.ListInfoTypes(context.Background(), req)
 	if err != nil {
 		log.Fatal(err)
 	}
-	for _, it := range r.GetInfoTypes() {
+	for _, it := range resp.GetInfoTypes() {
 		fmt.Fprintln(w, it.GetName())
 	}
 }

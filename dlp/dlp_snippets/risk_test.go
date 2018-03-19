@@ -60,7 +60,7 @@ func TestRiskLDiversity(t *testing.T) {
 
 func TestRiskKMap(t *testing.T) {
 	buf := new(bytes.Buffer)
-	riskKMap(buf, client, projectID, "bigquery-public-data", "dlp-test-topic", "dlp-test-sub", "san_francisco", "bikeshare_trips", "USA", "zip_code")
+	riskKMap(buf, client, projectID, "bigquery-public-data", "dlp-test-topic", "dlp-test-sub", "san_francisco", "bikeshare_trips", "US", "zip_code")
 	wants := []string{"Created job", "Histogram bucket", "Anonymity range"}
 	got := buf.String()
 	for _, want := range wants {

@@ -44,12 +44,12 @@ func createInspectTemplate(w io.Writer, client *dlp.Client, project string, minL
 		},
 	}
 	// Send the request.
-	r, err := client.CreateInspectTemplate(context.Background(), req)
+	resp, err := client.CreateInspectTemplate(context.Background(), req)
 	if err != nil {
 		log.Fatalf("error creating inspect template: %v", err)
 	}
 	// Print the result.
-	fmt.Fprintf(w, "Successfully created inspect template: %v", r.GetName())
+	fmt.Fprintf(w, "Successfully created inspect template: %v", resp.GetName())
 }
 
 // [END dlp_create_template]
