@@ -17,6 +17,7 @@ import (
 )
 
 // [START dlp_deidentify_masking]
+
 // mask deidentifies the input by masking all info types with maskingCharacter and
 // prints the result to w.
 func mask(w io.Writer, client *dlp.Client, project, input, maskingCharacter string, numberToMask int32) {
@@ -61,6 +62,7 @@ func mask(w io.Writer, client *dlp.Client, project, input, maskingCharacter stri
 // [END dlp_deidentify_masking]
 
 // [START dlp_deidentify_date_shift]
+
 // deidentifyDateShift shifts dates found in the input between lowerBoundDays and
 // upperBoundDays.
 func deidentifyDateShift(w io.Writer, client *dlp.Client, project string, lowerBoundDays, upperBoundDays int32, input string) {
@@ -113,6 +115,7 @@ func deidentifyDateShift(w io.Writer, client *dlp.Client, project string, lowerB
 // [END dlp_deidentify_date_shift]
 
 // [START dlp_deidentify_fpe]
+
 // deidentifyFPE deidentifies the input with FPE (Format Preserving Encryption).
 // keyFileName is the file name with the KMS wrapped key and cryptoKeyName is the
 // full KMS key resource name used to wrap the key. surrogateInfoType is an
@@ -179,6 +182,7 @@ func deidentifyFPE(w io.Writer, client *dlp.Client, project, input, keyFileName,
 // [END dlp_deidentify_fpe]
 
 // [START reidentify_fpe]
+
 // reidentify_fpe reidentifies the input with FPE (Format Preserving Encryption).
 // keyFileName is the file name with the KMS wrapped key and cryptoKeyName is the
 // full KMS key resource name used to wrap the key. surrogateInfoType is an

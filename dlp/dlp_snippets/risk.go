@@ -44,6 +44,7 @@ func setupPubSub(ctx context.Context, client *pubsub.Client, project, topic, sub
 }
 
 // [START dlp_numerical_stats]
+
 // riskNumerical computes the numerical risk of the given column.
 func riskNumerical(w io.Writer, client *dlp.Client, project, dataProject, pubSubTopic, pubSubSub, datasetID, tableID, columnName string) {
 	ctx := context.Background()
@@ -140,6 +141,7 @@ func riskNumerical(w io.Writer, client *dlp.Client, project, dataProject, pubSub
 // [END dlp_numerical_stats]
 
 // [START dlp_categorical_stats]
+
 // riskCategorical computes the categorical risk of the given data.
 func riskCategorical(w io.Writer, client *dlp.Client, project, dataProject, pubSubTopic, pubSubSub, datasetID, tableID, columnName string) {
 	ctx := context.Background()
@@ -237,6 +239,7 @@ func riskCategorical(w io.Writer, client *dlp.Client, project, dataProject, pubS
 // [END dlp_categorical_stats]
 
 // [START dlp_k_anonymity]
+
 // riskKAnonymity computes the risk of the given columns using K Anonymity.
 func riskKAnonymity(w io.Writer, client *dlp.Client, project, dataProject, pubSubTopic, pubSubSub, datasetID, tableID string, columnNames ...string) {
 	ctx := context.Background()
@@ -342,6 +345,7 @@ func riskKAnonymity(w io.Writer, client *dlp.Client, project, dataProject, pubSu
 // [END dlp_k_anonymity]
 
 // [START dlp_l_diversity]
+
 // riskLDiversity computes the L Diversity of the given columns.
 func riskLDiversity(w io.Writer, client *dlp.Client, project, dataProject, pubSubTopic, pubSubSub, datasetID, tableID, sensitiveAttribute string, columnNames ...string) {
 	ctx := context.Background()
@@ -453,6 +457,7 @@ func riskLDiversity(w io.Writer, client *dlp.Client, project, dataProject, pubSu
 // [END dlp_l_diversity]
 
 // [START k_map]
+
 // riskKMap runs K Map on the given data.
 func riskKMap(w io.Writer, client *dlp.Client, project, dataProject, pubSubTopic, pubSubSub, datasetID, tableID, region string, columnNames ...string) {
 	ctx := context.Background()
