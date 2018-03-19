@@ -37,7 +37,7 @@ func bytesTypeValues() string {
 }
 
 var (
-	project           = flag.String("project", "", "GCloud project ID (required)")
+	project           = flag.String("project", "", "Project ID (required)")
 	languageCode      = flag.String("languageCode", "en-US", "Language code for infoTypes")
 	infoTypesString   = flag.String("infoTypes", "PHONE_NUMBER,EMAIL_ADDRESS,CREDIT_CARD_NUMBER,US_SOCIAL_SECURITY_NUMBER", "Info types to inspect*, redactImage, createTrigger, and createInspectTemplate")
 	minLikelihoodFlag = flag.String("minLikelihood", "LIKELIHOOD_UNSPECIFIED", fmt.Sprintf("Minimum likelihood value for inspect*, redactImage, createTrigger, and createInspectTemplate [%v]", minLikelihoodValues()))
