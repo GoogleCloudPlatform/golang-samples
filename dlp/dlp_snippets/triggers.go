@@ -20,6 +20,7 @@ import (
 )
 
 // [START dlp_create_trigger]
+
 // createTrigger creates a trigger with the given configuration.
 func createTrigger(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, maxFindings int32, triggerID, displayName, description, bucketName string, scanPeriod int64, infoTypes []string) {
 	// Convert the info type strings to a list of InfoTypes.
@@ -84,6 +85,7 @@ func createTrigger(w io.Writer, client *dlp.Client, project string, minLikelihoo
 // [END dlp_create_trigger]
 
 // [START dlp_list_triggers]
+
 // listTriggers lists the triggers for the given project.
 func listTriggers(w io.Writer, client *dlp.Client, project string) {
 	// Create a configured request.
@@ -115,6 +117,7 @@ func listTriggers(w io.Writer, client *dlp.Client, project string) {
 // [END dlp_list_triggers]
 
 // [START dlp_delete_trigger]
+
 // deleteTrigger deletes the given trigger.
 func deleteTrigger(w io.Writer, client *dlp.Client, triggerID string) {
 	req := &dlppb.DeleteJobTriggerRequest{

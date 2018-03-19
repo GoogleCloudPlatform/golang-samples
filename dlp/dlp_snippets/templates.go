@@ -18,6 +18,7 @@ import (
 )
 
 // [START dlp_create_template]
+
 // createInspectTemplate creates a template with the given configuration.
 func createInspectTemplate(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, maxFindings int32, templateID, displayName, description string, infoTypes []string) {
 	// Convert the info type strings to a list of InfoTypes.
@@ -54,6 +55,7 @@ func createInspectTemplate(w io.Writer, client *dlp.Client, project string, minL
 // [END dlp_create_template]
 
 // [START dlp_list_templates]
+
 // listInspectTemplates lists the inspect templates in the project.
 func listInspectTemplates(w io.Writer, client *dlp.Client, project string) {
 	// Create a configured request.
@@ -83,6 +85,7 @@ func listInspectTemplates(w io.Writer, client *dlp.Client, project string) {
 // [END dlp_list_templates]
 
 // [START dlp_delete_template]
+
 // deleteInspectTemplate deletes the given template.
 func deleteInspectTemplate(w io.Writer, client *dlp.Client, templateID string) {
 	req := &dlppb.DeleteInspectTemplateRequest{
