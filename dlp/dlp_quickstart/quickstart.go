@@ -12,18 +12,19 @@ import (
 )
 
 // [START dlp_quickstart]
+
 func main() {
 	ctx := context.Background()
 
 	projectID := "PROJECT_ID"
 
-	// Instantiates a DLP client.
+	// Creates a DLP client.
 	client, err := dlp.NewClient(ctx)
 	if err != nil {
 		log.Fatalf("error creating DLP client: %v", err)
 	}
 
-	// The string to inspect
+	// The string to inspect.
 	input := "Robert Frost"
 
 	// The minimum likelihood required before returning a match.
@@ -67,16 +68,16 @@ func main() {
 	}
 
 	// Run request.
-	r, err := client.InspectContent(context.Background(), req)
+	resp, err := client.InspectContent(ctx, req)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fs := r.GetResult().GetFindings()
-	if len(fs) == 0 {
+	findings := resp.GetResult().GetFindings()
+	if len(findings) == 0 {
 		fmt.Println("No findings.")
 	}
 	fmt.Println("Findings:")
-	for _, f := range fs {
+	for _, f := range findings {
 		if includeQuote {
 			fmt.Println("\tQuote: ", f.GetQuote())
 		}
