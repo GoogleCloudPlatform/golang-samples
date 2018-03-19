@@ -189,7 +189,7 @@ __Examples:__
 ./dlp -project my-project riskCategorical bigquery-public-data risk-topic risk-sub nhtsa_traffic_fatalities accident_2015 state_number
 ./dlp -project my-project riskKAnonymity  bigquery-public-data risk-topic risk-sub nhtsa_traffic_fatalities accident_2015 state_number,county
 ./dlp -project my-project riskLDiversity  bigquery-public-data risk-topic risk-sub nhtsa_traffic_fatalities accident_2015 city state_number,county
-./dlp -project my-project riskKMap        bigquery-public-data risk-topic risk-sub san_francisco bikeshare_trips USA zip_code
+./dlp -project my-project riskKMap        bigquery-public-data risk-topic risk-sub san_francisco bikeshare_trips US zip_code
 ```
 
 For more information, see https://cloud.google.com/dlp/docs.

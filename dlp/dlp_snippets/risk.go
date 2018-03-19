@@ -115,13 +115,13 @@ func riskNumerical(w io.Writer, client *dlp.Client, project, dataProject, pubSub
 			return
 		}
 		msg.Ack()
-		jr, err := client.GetDlpJob(ctx, &dlppb.GetDlpJobRequest{
+		resp, err := client.GetDlpJob(ctx, &dlppb.GetDlpJobRequest{
 			Name: j.GetName(),
 		})
 		if err != nil {
 			log.Fatalf("Error getting completed job: %v\n", err)
 		}
-		n := jr.GetRiskDetails().GetNumericalStatsResult()
+		n := resp.GetRiskDetails().GetNumericalStatsResult()
 		fmt.Fprintf(w, "Value range: [%v, %v]\n", n.GetMinValue(), n.GetMaxValue())
 		var tmp string
 		for p, v := range n.GetQuantileValues() {
@@ -212,13 +212,13 @@ func riskCategorical(w io.Writer, client *dlp.Client, project, dataProject, pubS
 			return
 		}
 		msg.Ack()
-		jr, err := client.GetDlpJob(ctx, &dlppb.GetDlpJobRequest{
+		resp, err := client.GetDlpJob(ctx, &dlppb.GetDlpJobRequest{
 			Name: j.GetName(),
 		})
 		if err != nil {
 			log.Fatalf("Error getting completed job: %v\n", err)
 		}
-		h := jr.GetRiskDetails().GetCategoricalStatsResult().GetValueFrequencyHistogramBuckets()
+		h := resp.GetRiskDetails().GetCategoricalStatsResult().GetValueFrequencyHistogramBuckets()
 		for i, b := range h {
 			fmt.Fprintf(w, "Histogram bucket %v\n", i)
 			fmt.Fprintf(w, "  Most common value occurs %v times\n", b.GetValueFrequencyUpperBound())
