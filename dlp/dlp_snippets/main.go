@@ -20,46 +20,12 @@ import (
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
-type minLikelihoodFlag struct {
-	l dlppb.Likelihood
-}
-
-func (m *minLikelihoodFlag) String() string {
-	return fmt.Sprint(m.l)
-}
-
-func (m *minLikelihoodFlag) Set(s string) error {
-	l, ok := dlppb.Likelihood_value[s]
-	if !ok {
-		return fmt.Errorf("not a valid likelihood: %q", s)
-	}
-	m.l = dlppb.Likelihood(l)
-	return nil
-}
-
 func minLikelihoodValues() string {
 	var s []string
 	for _, m := range dlppb.Likelihood_name {
 		s = append(s, m)
 	}
 	return strings.Join(s, ", ")
-}
-
-type bytesTypeFlag struct {
-	bt dlppb.ByteContentItem_BytesType
-}
-
-func (f *bytesTypeFlag) String() string {
-	return fmt.Sprint(f.bt)
-}
-
-func (f *bytesTypeFlag) Set(s string) error {
-	b, ok := dlppb.ByteContentItem_BytesType_value[s]
-	if !ok {
-		return fmt.Errorf("not a valid BytesType: %q", s)
-	}
-	f.bt = dlppb.ByteContentItem_BytesType(b)
-	return nil
 }
 
 func bytesTypeValues() string {
@@ -70,6 +36,16 @@ func bytesTypeValues() string {
 	return strings.Join(s, ", ")
 }
 
+var (
+	project           = flag.String("project", "", "GCloud project ID (required)")
+	languageCode      = flag.String("languageCode", "en-US", "Language code for infoTypes")
+	infoTypesString   = flag.String("infoTypes", "PHONE_NUMBER,EMAIL_ADDRESS,CREDIT_CARD_NUMBER,US_SOCIAL_SECURITY_NUMBER", "Info types to inspect*, redactImage, createTrigger, and createInspectTemplate")
+	minLikelihoodFlag = flag.String("minLikelihood", "LIKELIHOOD_UNSPECIFIED", fmt.Sprintf("Minimum likelihood value for inspect*, redactImage, createTrigger, and createInspectTemplate [%v]", minLikelihoodValues()))
+	bytesTypeFlag     = flag.String("bytesType", "BYTES_TYPE_UNSPECIFIED", fmt.Sprintf("Bytes type of input file for inspectFile and redactImage [%v]", bytesTypeValues()))
+	maxFindings       = flag.Int("maxFindings", 0, "Number of results for inspect*, createTrigger, and createInspectTemplate (default 0 (no limit))")
+	includeQuote      = flag.Bool("includeQuote", false, "Include a quote of findings for inspect* (default false)")
+)
+
 func main() {
 	ctx := context.Background()
 	client, err := dlp.NewClient(ctx)
@@ -78,17 +54,6 @@ func main() {
 	}
 	defer client.Close()
 
-	project := flag.String("project", "", "GCloud project ID (required)")
-	languageCode := flag.String("languageCode", "en-US", "Language code for infoTypes")
-	maxFindings := flag.Int("maxFindings", 0, "Number of results for inspect*, createTrigger, and createInspectTemplate (default 0 (no limit))")
-	includeQuote := flag.Bool("includeQuote", false, "Include a quote of findings for inspect* (default false)")
-	infoTypesString := flag.String("infoTypes", "PHONE_NUMBER,EMAIL_ADDRESS,CREDIT_CARD_NUMBER,US_SOCIAL_SECURITY_NUMBER", "Info types to inspect*, redactImage, createTrigger, and createInspectTemplate")
-
-	var minLikelihood minLikelihoodFlag
-	flag.Var(&minLikelihood, "minLikelihood", fmt.Sprintf("Minimum likelihood value for inspect*, redactImage, createTrigger, and createInspectTemplate [%v] (default %v)", minLikelihoodValues(), dlppb.Likelihood_name[0]))
-
-	var bytesType bytesTypeFlag
-	flag.Var(&bytesType, "bytesType", fmt.Sprintf("Bytes type of input file for inspectFile and redactImage [%v] (default %v)", bytesTypeValues(), dlppb.ByteContentItem_BytesType_name[0]))
 	flag.Parse()
 
 	infoTypesList := strings.Split(*infoTypesString, ",")
@@ -99,6 +64,22 @@ func main() {
 		os.Exit(1)
 	}
 
+	minLikelihoodInt, ok := dlppb.Likelihood_value[*minLikelihoodFlag]
+	if !ok {
+		fmt.Fprintf(os.Stderr, "not a valid likelihood: %q\n", *minLikelihoodFlag)
+		fmt.Fprintf(os.Stderr, "must be one of [%s]\n", minLikelihoodValues())
+		os.Exit(1)
+	}
+	minLikelihood := dlppb.Likelihood(minLikelihoodInt)
+
+	bytesTypeInt, ok := dlppb.ByteContentItem_BytesType_value[*bytesTypeFlag]
+	if !ok {
+		fmt.Fprintf(os.Stderr, "not a valid BytesType: %q\n", *minLikelihoodFlag)
+		fmt.Fprintf(os.Stderr, "must be one of [%s]\n", bytesTypeValues())
+		os.Exit(1)
+	}
+	bytesType := dlppb.ByteContentItem_BytesType(bytesTypeInt)
+
 	switch flag.Arg(0) {
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown subcommand: %q\n\n", flag.Arg(0))
@@ -106,27 +87,27 @@ func main() {
 		os.Exit(1)
 	case "inspect":
 		checkNArg(1)
-		inspectString(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, flag.Arg(1))
+		inspectString(os.Stdout, client, *project, minLikelihood, int32(*maxFindings), *includeQuote, infoTypesList, flag.Arg(1))
 	case "inspectFile":
 		checkNArg(1)
 		f, err := os.Open(flag.Arg(1))
 		if err != nil {
 			log.Fatalf("error opening file: %v", err)
 		}
-		inspectFile(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, bytesType.bt, f)
+		inspectFile(os.Stdout, client, *project, minLikelihood, int32(*maxFindings), *includeQuote, infoTypesList, bytesType, f)
 	case "inspectGCSFile":
 		checkNArg(4)
-		inspectGCSFile(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4))
+		inspectGCSFile(os.Stdout, client, *project, minLikelihood, int32(*maxFindings), *includeQuote, infoTypesList, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4))
 	case "inspectDatastore":
 		checkNArg(5)
-		inspectDatastore(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), flag.Arg(5))
+		inspectDatastore(os.Stdout, client, *project, minLikelihood, int32(*maxFindings), *includeQuote, infoTypesList, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), flag.Arg(5))
 	case "inspectBigquery":
 		checkNArg(5)
-		inspectBigquery(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), *includeQuote, infoTypesList, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), flag.Arg(5))
+		inspectBigquery(os.Stdout, client, *project, minLikelihood, int32(*maxFindings), *includeQuote, infoTypesList, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), flag.Arg(5))
 
 	case "redactImage":
 		checkNArg(2)
-		redactImage(os.Stdout, client, *project, minLikelihood.l, infoTypesList, bytesType.bt, flag.Arg(1), flag.Arg(2))
+		redactImage(os.Stdout, client, *project, minLikelihood, infoTypesList, bytesType, flag.Arg(1), flag.Arg(2))
 
 	case "infoTypes":
 		checkNArg(1)
@@ -163,7 +144,7 @@ func main() {
 
 	case "createTrigger":
 		checkNArg(4)
-		createTrigger(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), 12, infoTypesList)
+		createTrigger(os.Stdout, client, *project, minLikelihood, int32(*maxFindings), flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), 12, infoTypesList)
 	case "listTriggers":
 		checkNArg(0)
 		listTriggers(os.Stdout, client, *project)
@@ -173,7 +154,7 @@ func main() {
 
 	case "createInspectTemplate":
 		checkNArg(3)
-		createInspectTemplate(os.Stdout, client, *project, minLikelihood.l, int32(*maxFindings), flag.Arg(1), flag.Arg(2), flag.Arg(3), infoTypesList)
+		createInspectTemplate(os.Stdout, client, *project, minLikelihood, int32(*maxFindings), flag.Arg(1), flag.Arg(2), flag.Arg(3), infoTypesList)
 	case "listInspectTemplates":
 		checkNArg(0)
 		listInspectTemplates(os.Stdout, client, *project)
