@@ -17,6 +17,7 @@ import (
 )
 
 // [START dlp_redact_image]
+
 // redactImage blacks out the identified portions of the input image (with type bytesType)
 // and stores the result in outputPath.
 func redactImage(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, infoTypes []string, bytesType dlppb.ByteContentItem_BytesType, inputPath, outputPath string) {

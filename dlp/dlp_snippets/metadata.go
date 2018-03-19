@@ -16,6 +16,7 @@ import (
 )
 
 // [START dlp_list_info_types]
+
 // infoTypes returns the info types in the given language and matching the given filter.
 func infoTypes(w io.Writer, client *dlp.Client, languageCode, filter string) {
 	req := &dlppb.ListInfoTypesRequest{
