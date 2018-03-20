@@ -9,10 +9,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
 func TestRedactImage(t *testing.T) {
+	testutil.SystemTest(t)
 	tests := []struct {
 		name      string
 		inputPath string

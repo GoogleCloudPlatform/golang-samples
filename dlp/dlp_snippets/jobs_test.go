@@ -10,9 +10,12 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestListJobs(t *testing.T) {
+	testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
 	listJobs(buf, client, projectID, "", "RISK_ANALYSIS_JOB")
 	s := buf.String()
@@ -31,6 +34,7 @@ func TestListJobs(t *testing.T) {
 var jobIDRegexp = regexp.MustCompile(`Job ([^ ]+) status.*`)
 
 func TestDeleteJob(t *testing.T) {
+	testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
 	listJobs(buf, client, projectID, "", "RISK_ANALYSIS_JOB")
 	s := buf.String()
