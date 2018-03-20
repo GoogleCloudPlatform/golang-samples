@@ -8,9 +8,12 @@ import (
 	"bytes"
 	"strings"
 	"testing"
+
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestRiskNumerical(t *testing.T) {
+	testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
 	riskNumerical(buf, client, projectID, "bigquery-public-data", "dlp-test-topic", "dlp-test-sub", "nhtsa_traffic_fatalities", "accident_2015", "state_number")
 	wants := []string{"Created job", "Value range", "Value at"}
@@ -23,6 +26,7 @@ func TestRiskNumerical(t *testing.T) {
 }
 
 func TestRiskCategorical(t *testing.T) {
+	testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
 	riskCategorical(buf, client, projectID, "bigquery-public-data", "dlp-test-topic", "dlp-test-sub", "nhtsa_traffic_fatalities", "accident_2015", "state_number")
 	wants := []string{"Created job", "Histogram bucket", "Most common value occurs"}
@@ -35,6 +39,7 @@ func TestRiskCategorical(t *testing.T) {
 }
 
 func TestRiskKAnonymity(t *testing.T) {
+	testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
 	riskKAnonymity(buf, client, projectID, "bigquery-public-data", "dlp-test-topic", "dlp-test-sub", "nhtsa_traffic_fatalities", "accident_2015", "state_number", "county")
 	wants := []string{"Created job", "Histogram bucket", "Size range"}
@@ -59,6 +64,7 @@ func TestRiskLDiversity(t *testing.T) {
 }
 
 func TestRiskKMap(t *testing.T) {
+	testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
 	riskKMap(buf, client, projectID, "bigquery-public-data", "dlp-test-topic", "dlp-test-sub", "san_francisco", "bikeshare_trips", "US", "zip_code")
 	wants := []string{"Created job", "Histogram bucket", "Anonymity range"}

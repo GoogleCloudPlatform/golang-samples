@@ -9,10 +9,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
 func TestTriggersSamples(t *testing.T) {
+	testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
 	createTrigger(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, "my-trigger", "My Trigger", "Test trigger", "my-bucket", 10, nil)
 	if got := buf.String(); !strings.Contains(got, "Successfully created trigger") {

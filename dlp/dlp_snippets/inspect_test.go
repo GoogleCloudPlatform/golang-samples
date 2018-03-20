@@ -12,11 +12,13 @@ import (
 	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/datastore"
 	"cloud.google.com/go/storage"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"golang.org/x/net/context"
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
 func TestInspectString(t *testing.T) {
+	testutil.SystemTest(t)
 	tests := []struct {
 		s    string
 		want bool
@@ -43,6 +45,7 @@ func TestInspectString(t *testing.T) {
 }
 
 func TestInspectFile(t *testing.T) {
+	testutil.SystemTest(t)
 	tests := []struct {
 		s    string
 		want bool
@@ -119,6 +122,7 @@ func writeObject(ctx context.Context, bucket *storage.BucketHandle, fileName, co
 }
 
 func TestInspectGCS(t *testing.T) {
+	testutil.SystemTest(t)
 	writeTestGCSFiles(t, projectID)
 	tests := []struct {
 		fileName string
@@ -178,6 +182,7 @@ func writeTestDatastoreFiles(t *testing.T, projectID string) {
 }
 
 func TestInspectDatastore(t *testing.T) {
+	testutil.SystemTest(t)
 	writeTestDatastoreFiles(t, projectID)
 	tests := []struct {
 		kind string
@@ -256,6 +261,7 @@ func uploadBigQuery(ctx context.Context, d *bigquery.Dataset, schema bigquery.Sc
 }
 
 func TestInspectBigquery(t *testing.T) {
+	testutil.SystemTest(t)
 	if err := createBigqueryTestFiles(projectID, bqDatasetID); err != nil {
 		t.Fatalf("error creating test BigQuery files: %v", err)
 	}

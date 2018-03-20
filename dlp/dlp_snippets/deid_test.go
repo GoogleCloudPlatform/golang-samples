@@ -7,9 +7,12 @@ package main
 import (
 	"bytes"
 	"testing"
+
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestMask(t *testing.T) {
+	testutil.SystemTest(t)
 	tests := []struct {
 		input            string
 		maskingCharacter string
@@ -42,6 +45,7 @@ func TestMask(t *testing.T) {
 }
 
 func TestDeidentifyDateShift(t *testing.T) {
+	testutil.SystemTest(t)
 	tests := []struct {
 		input      string
 		want       string
