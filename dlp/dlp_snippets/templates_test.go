@@ -9,10 +9,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
 func TestTemplateSamples(t *testing.T) {
+	testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
 	createInspectTemplate(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, "golang-samples-test-template", "Test Template", "Template for testing", nil)
 	got := buf.String()
