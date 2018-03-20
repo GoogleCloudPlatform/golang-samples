@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/garyburd/redigo/redis"
+	"github.com/gomodule/redigo/redis"
 
 	"google.golang.org/appengine"
 )
