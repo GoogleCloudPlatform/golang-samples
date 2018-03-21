@@ -19,7 +19,7 @@ import (
 
 // [START dlp_inspect_string]
 
-// inspectStrings searches for the given infoTypes in the input.
+// inspectString searches for the given infoTypes in the input.
 func inspectString(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, maxFindings int32, includeQuote bool, infoTypes []string, input string) {
 	// Convert the info type strings to a list of InfoTypes.
 	var i []*dlppb.InfoType
