@@ -2,7 +2,7 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// +build go1.7
+// +build go1.8
 
 // [START trace_quickstart]
 
@@ -13,25 +13,28 @@ import (
 	"log"
 	"net/http"
 
-	// Imports the Google Cloud Trace client package.
-	"cloud.google.com/go/trace"
-	"golang.org/x/net/context"
+	"go.opencensus.io/exporter/stackdriver"
+	"go.opencensus.io/exporter/stackdriver/propagation"
+	"go.opencensus.io/plugin/ochttp"
+	"go.opencensus.io/trace"
 )
 
 func main() {
-	ctx := context.Background()
-
-	// Sets your Google Cloud Platform project ID.
-	projectID := "YOUR_PROJECT_ID"
-
-	// Creates a client.
-	traceClient, err := trace.NewClient(ctx, projectID)
+	// Create an register a OpenCensus
+	// Stackdriver Trace exporter.
+	exporter, err := stackdriver.NewExporter(stackdriver.Options{
+		ProjectID: "YOUR_PROJECT_ID",
+	})
 	if err != nil {
-		log.Fatalf("Failed to create client: %v", err)
+		log.Fatal(err)
 	}
+	trace.RegisterExporter(exporter)
 
-	httpClient := &http.Client{
-		Transport: &trace.Transport{},
+	client := &http.Client{
+		Transport: &ochttp.Transport{
+			// Use Google Cloud propagation format.
+			Propagation: &propagation.HTTPFormat{},
+		},
 	}
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -42,12 +45,12 @@ func main() {
 		req = req.WithContext(r.Context())
 
 		// The outgoing request will be traced with r's trace ID.
-		if _, err := httpClient.Do(req); err != nil {
+		if _, err := client.Do(req); err != nil {
 			log.Fatal(err)
 		}
 	})
-	http.Handle("/foo", traceClient.HTTPHandler(handler))
-	log.Fatal(http.ListenAndServe(":6060", nil))
+	http.Handle("/foo", handler)
+	log.Fatal(http.ListenAndServe(":6060", &ochttp.Handler{}))
 }
 
 // [END trace_quickstart]
