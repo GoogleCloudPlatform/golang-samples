@@ -18,11 +18,15 @@
 
 ## Running system tests
 
-Set the `GOLANG_SAMPLES_PROJECT_ID` environment variable to a suitable test project.
+1. Set the `GOLANG_SAMPLES_PROJECT_ID` environment variable to a suitable test project.
+1. Ensure you are logged in using `gcloud login` or set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable to the path of your credentials file.
+   Tests are authenticated using [Application Default Credentials](https://developers.google.com/identity/protocols/application-default-credentials).
+1. Install the test dependencies:
 
-Tests are authenticated using [Application Default Credentials](https://developers.google.com/identity/protocols/application-default-credentials).
+    `go get -t -d github.com/GoogleCloudPlatform/golang-samples/...`
+1. Run the tests:
 
-Ensure you are logged in using `gcloud login` or set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable to the path of your credentials file.
+    `go test github.com/GoogleCloudPlatform/golang-samples/...`
 
 ## Contributor License Agreements
 
