@@ -1,4 +1,4 @@
-// Copyright 2016 Google Inc. All rights reserved.
+// Copyright 2018 Google Inc. All rights reserved.
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
@@ -40,13 +40,19 @@ var (
 		"readonlytransaction": readOnlyTransaction,
 		"readstaledata":       readStaleData,
 		"readbatchdata":       readBatchData,
+		"updatewithtimestamp": updateWithTimestamp,
+		"querywithtimestamp":  queryWithTimestamp,
+		"writewithtimestamp":  writeWithTimestamp,
+		"querynewtable":       queryNewTable,
 	}
 
 	adminCommands = map[string]adminCommand{
-		"createdatabase":  createDatabase,
-		"addnewcolumn":    addNewColumn,
-		"addindex":        addIndex,
-		"addstoringindex": addStoringIndex,
+		"createdatabase":           createDatabase,
+		"addnewcolumn":             addNewColumn,
+		"addindex":                 addIndex,
+		"addstoringindex":          addStoringIndex,
+		"addcommittimestamp":       addCommitTimestamp,
+		"createtablewithtimestamp": createTableWithTimestamp,
 	}
 )
 
@@ -68,9 +74,9 @@ func createDatabase(ctx context.Context, w io.Writer, adminClient *database.Data
 				SingerInfo BYTES(MAX)
 			) PRIMARY KEY (SingerId)`,
 			`CREATE TABLE Albums (
-				SingerId	INT64 NOT NULL,
-				AlbumId		INT64 NOT NULL,
-				AlbumTitle	STRING(MAX),
+				SingerId     INT64 NOT NULL,
+				AlbumId      INT64 NOT NULL,
+				AlbumTitle   STRING(MAX)
 			) PRIMARY KEY (SingerId, AlbumId),
 			INTERLEAVE IN PARENT Singers ON DELETE CASCADE`,
 		},
@@ -86,6 +92,34 @@ func createDatabase(ctx context.Context, w io.Writer, adminClient *database.Data
 }
 
 // [END spanner_create_database]
+
+// [START spanner_create_table_with_timestamp_column]
+
+func createTableWithTimestamp(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	op, err := adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
+		Database: database,
+		Statements: []string{
+			`CREATE TABLE Performances (
+				SingerId        INT64 NOT NULL,
+				VenueId         INT64 NOT NULL,
+				EventDate       Date,
+				Revenue         INT64,
+				LastUpdateTime  TIMESTAMP NOT NULL OPTIONS (allow_commit_timestamp=true)
+			) PRIMARY KEY (SingerId, VenueId, EventDate),
+			INTERLEAVE IN PARENT Singers ON DELETE CASCADE`,
+		},
+	})
+	if err != nil {
+		return err
+	}
+	if err := op.Wait(ctx); err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "Created Performances table in database [%s]\n", database)
+	return nil
+}
+
+// [END spanner_create_table_with_timestamp_column]
 
 // [START spanner_insert_data]
 
@@ -109,6 +143,21 @@ func write(ctx context.Context, w io.Writer, client *spanner.Client) error {
 }
 
 // [END spanner_insert_data]
+
+// [START spanner_insert_data_with_timestamp_column]
+
+func writeWithTimestamp(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	performanceColumns := []string{"SingerId", "VenueId", "EventDate", "Revenue", "LastUpdateTime"}
+	m := []*spanner.Mutation{
+		spanner.InsertOrUpdate("Performances", performanceColumns, []interface{}{1, 4, "2017-10-05", 11000, spanner.CommitTimestamp}),
+		spanner.InsertOrUpdate("Performances", performanceColumns, []interface{}{1, 19, "2017-11-02", 15000, spanner.CommitTimestamp}),
+		spanner.InsertOrUpdate("Performances", performanceColumns, []interface{}{2, 42, "2017-12-23", 7000, spanner.CommitTimestamp}),
+	}
+	_, err := client.Apply(ctx, m)
+	return err
+}
+
+// [END spanner_insert_data_with_timestamp_column]
 
 // [START spanner_query_data]
 
@@ -533,6 +582,127 @@ func readBatchData(ctx context.Context, w io.Writer, client *spanner.Client) err
 
 // [END spanner_batch_client]
 
+// [START spanner_add_timestamp_column]
+
+func addCommitTimestamp(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	op, err := adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
+		Database: database,
+		Statements: []string{
+			"ALTER TABLE Albums ADD COLUMN LastUpdateTime TIMESTAMP " +
+				"OPTIONS (allow_commit_timestamp=true)",
+		},
+	})
+	if err != nil {
+		return err
+	}
+	if err := op.Wait(ctx); err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "Added LastUpdateTime as a commit timestamp column in Albums table\n")
+	return nil
+}
+
+// [END spanner_add_timestamp_column]
+
+// [START spanner_update_data_with_timestamp_column]
+
+func updateWithTimestamp(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	cols := []string{"SingerId", "AlbumId", "MarketingBudget", "LastUpdateTime"}
+	_, err := client.Apply(ctx, []*spanner.Mutation{
+		spanner.Update("Albums", cols, []interface{}{1, 1, 1000000, spanner.CommitTimestamp}),
+		spanner.Update("Albums", cols, []interface{}{2, 2, 750000, spanner.CommitTimestamp}),
+	})
+	return err
+}
+
+// [END spanner_update_data_with_timestamp_column]
+
+// [START spanner_query_data_with_timestamp_column]
+
+func queryWithTimestamp(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	stmt := spanner.Statement{
+		SQL: `SELECT SingerId, AlbumId, MarketingBudget, LastUpdateTime
+	    FROM Albums ORDER BY LastUpdateTime DESC`}
+	iter := client.Single().Query(ctx, stmt)
+	defer iter.Stop()
+	for {
+		row, err := iter.Next()
+		if err == iterator.Done {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		var singerID, albumID int64
+		var marketingBudget spanner.NullInt64
+		var lastUpdateTime spanner.NullTime
+		if err := row.ColumnByName("SingerId", &singerID); err != nil {
+			return err
+		}
+		if err := row.ColumnByName("AlbumId", &albumID); err != nil {
+			return err
+		}
+		if err := row.ColumnByName("MarketingBudget", &marketingBudget); err != nil {
+			return err
+		}
+		budget := "NULL"
+		if marketingBudget.Valid {
+			budget = strconv.FormatInt(marketingBudget.Int64, 10)
+		}
+		if err := row.ColumnByName("LastUpdateTime", &lastUpdateTime); err != nil {
+			return err
+		}
+		timestamp := "NULL"
+		if lastUpdateTime.Valid {
+			timestamp = lastUpdateTime.String()
+		}
+		fmt.Fprintf(w, "%d %d %s %s\n", singerID, albumID, budget, timestamp)
+	}
+}
+
+// [END spanner_query_data_with_timestamp_column]
+
+func queryNewTable(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	stmt := spanner.Statement{
+		SQL: `SELECT SingerId, VenueId, EventDate, Revenue, LastUpdateTime FROM Performances
+		  ORDER BY LastUpdateTime DESC`}
+	iter := client.Single().Query(ctx, stmt)
+	defer iter.Stop()
+	for {
+		row, err := iter.Next()
+		if err == iterator.Done {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		var singerID, venueID int64
+		var revenue spanner.NullInt64
+		var eventDate, lastUpdateTime time.Time
+		if err := row.ColumnByName("SingerId", &singerID); err != nil {
+			return err
+		}
+		if err := row.ColumnByName("VenueId", &venueID); err != nil {
+			return err
+		}
+		if err := row.ColumnByName("EventDate", &eventDate); err != nil {
+			return err
+		}
+		if err := row.ColumnByName("Revenue", &revenue); err != nil {
+			return err
+		}
+		currentRevenue := "NULL"
+		if revenue.Valid {
+			currentRevenue = strconv.FormatInt(revenue.Int64, 10)
+		}
+		if err := row.ColumnByName("LastUpdateTime", &lastUpdateTime); err != nil {
+			return err
+		}
+
+		fmt.Fprintf(w, "%d %d %s %s %s\n", singerID, venueID, eventDate, currentRevenue, lastUpdateTime)
+	}
+}
+
 func createClients(ctx context.Context, db string) (*database.DatabaseAdminClient, *spanner.Client) {
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
@@ -575,7 +745,9 @@ func main() {
 
 	Command can be one of: createdatabase, write, query, read, update,
 		writetransaction, addnewcolumn, querynewcolumn, addindex, queryindex, readindex,
-		addstoringindex, readstoringindex, readonlytransaction, readstaledata, readbatchdata
+		addstoringindex, readstoringindex, readonlytransaction, readstaledata, readbatchdata,
+		addcommittimestamp, updatewithtimestamp, querywithtimestamp, createtablewithtimestamp,
+		writewithtimestamp, querynewtable
 
 Examples:
 	spanner_snippets createdatabase projects/my-project/instances/my-instance/databases/example-db
