@@ -101,4 +101,9 @@ func TestSample(t *testing.T) {
 	assertContains(out, "Green")
 
 	assertContains(runCommand(t, "readbatchdata", dbName), "1 Marc Richards")
+
+	runCommand(t, "addcommittimestamp", dbName)
+	runCommand(t, "updatewithtimestamp", dbName)
+	out = runCommand(t, "querywithtimestamp", dbName)
+	assertContains(out, "1000000")
 }
