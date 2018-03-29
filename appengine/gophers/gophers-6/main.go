@@ -5,7 +5,6 @@
 package main
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"html/template"
@@ -15,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"golang.org/x/net/context"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/delay"
@@ -30,13 +30,18 @@ var (
 	indexTemplate = template.Must(template.ParseFiles("index.html"))
 )
 
+type Label struct {
+	Description string
+	Score       float32
+}
+
 type Post struct {
 	Author   string
 	UserID   string
 	Message  string
 	Posted   time.Time
 	ImageURL string
-	Labels   string
+	Labels   []Label
 }
 
 type templateParams struct {
@@ -58,8 +63,7 @@ var labelFunc = delay.Func("label-image", func(ctx context.Context, id int64) er
 	// Get the post to label.
 	k := datastore.NewKey(ctx, "Post", "", id, nil)
 	post := Post{}
-	err := datastore.Get(ctx, k, &post)
-	if err != nil {
+	if err := datastore.Get(ctx, k, &post); err != nil {
 		log.Errorf(ctx, "getting Post to label: %v", err)
 		return err
 	}
@@ -84,15 +88,14 @@ var labelFunc = delay.Func("label-image", func(ctx context.Context, id int64) er
 		return err
 	}
 
-	stringLabels := []string{}
 	for _, l := range labels {
-		stringLabels = append(stringLabels, fmt.Sprintf("%s (%2.1f%%)", l.GetDescription(), l.GetScore()*100))
+		post.Labels = append(post.Labels, Label{
+			Description: l.GetDescription(),
+			Score:       l.GetScore(),
+		})
 	}
-	label := strings.Join(stringLabels, ", ")
-	log.Infof(ctx, "labels: %s", label)
 
 	// Update the database with the new labels.
-	post.Labels = label
 	if _, err := datastore.Put(ctx, k, &post); err != nil {
 		log.Errorf(ctx, "Failed to update image: %v", err)
 		return err
@@ -126,7 +129,7 @@ func uploadFileFromForm(ctx context.Context, r *http.Request) (url string, err e
 		return "", fmt.Errorf("not an image: %s", contentType)
 	}
 	// Reset f so subsequent calls to Read start from the beginning of the file.
-	f.Seek(0, io.SeekStart)
+	f.Seek(0, 0)
 
 	// Create a storage client.
 	client, err := storage.NewClient(ctx)
