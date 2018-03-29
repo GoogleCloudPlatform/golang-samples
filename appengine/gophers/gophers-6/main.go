@@ -5,7 +5,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"html/template"
 	"io"
@@ -27,9 +26,15 @@ import (
 )
 
 var (
+	firebaseConfig = &firebase.Config{
+		DatabaseURL:   "https://console.firebase.google.com > Overview > Add Firebase to your web app",
+		ProjectID:     "https://console.firebase.google.com > Overview > Add Firebase to your web app",
+		StorageBucket: "https://console.firebase.google.com > Overview > Add Firebase to your web app",
+	}
 	indexTemplate = template.Must(template.ParseFiles("index.html"))
 )
 
+// A Label is a description for a post's image.
 type Label struct {
 	Description string
 	Score       float32
@@ -103,14 +108,8 @@ var labelFunc = delay.Func("label-image", func(ctx context.Context, id int64) er
 	return nil
 })
 
-// storageBucketName is the Google Cloud Storage bucket to store uploaded images under.
-var storageBucketName = ""
-
 // uploadFileFromForm uploads a file if it's present in the "image" form field.
 func uploadFileFromForm(ctx context.Context, r *http.Request) (url string, err error) {
-	if storageBucketName == "" {
-		return "", errors.New("storage bucket is missing")
-	}
 	// Read the file from the form.
 	f, fh, err := r.FormFile("image")
 	if err == http.ErrMissingFile {
@@ -136,7 +135,7 @@ func uploadFileFromForm(ctx context.Context, r *http.Request) (url string, err e
 	if err != nil {
 		return "", err
 	}
-	storageBucket := client.Bucket(storageBucketName)
+	storageBucket := client.Bucket(firebaseConfig.StorageBucket)
 
 	// Random filename, retaining existing extension.
 	u, err := uuid.NewV4()
@@ -160,7 +159,7 @@ func uploadFileFromForm(ctx context.Context, r *http.Request) (url string, err e
 	}
 
 	const publicURL = "https://storage.googleapis.com/%s/%s"
-	return fmt.Sprintf(publicURL, storageBucketName, name), nil
+	return fmt.Sprintf(publicURL, firebaseConfig.StorageBucket, name), nil
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
@@ -195,11 +194,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create a new Firebase App.
-	app, err := firebase.NewApp(ctx, &firebase.Config{
-		DatabaseURL:   "copy from Firebase Console > Overview > Add Firebase to your web app",
-		ProjectID:     "copy from Firebase Console > Overview > Add Firebase to your web app",
-		StorageBucket: "copy from Firebase Console > Overview > Add Firebase to your web app",
-	})
+	app, err := firebase.NewApp(ctx, firebaseConfig)
 	if err != nil {
 		params.Notice = "Couldn't authenticate. Try logging in again?"
 		params.Message = message // Preserve their message so they can try again.
