@@ -152,6 +152,7 @@ func uploadFileFromForm(ctx context.Context, r *http.Request) (url string, err e
 	w.CacheControl = "public, max-age=86400"
 
 	if _, err := io.Copy(w, f); err != nil {
+		w.CloseWithError(err)
 		return "", err
 	}
 	if err := w.Close(); err != nil {
