@@ -244,6 +244,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		params.Notice = "Error saving image: " + err.Error()
+		params.Message = post.Message // Preserve their message so they can try again.
 		indexTemplate.Execute(w, params)
 		return
 	}
