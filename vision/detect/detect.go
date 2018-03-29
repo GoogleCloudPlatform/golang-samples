@@ -16,8 +16,10 @@ import (
 	"os"
 	"strings"
 
-	vision "cloud.google.com/go/vision/apiv1"
 	"golang.org/x/net/context"
+
+	vision "cloud.google.com/go/vision/apiv1"
+	visionpb "google.golang.org/genproto/googleapis/cloud/vision/v1"
 )
 
 // [END imports]
@@ -399,6 +401,49 @@ func detectWeb(w io.Writer, file string) error {
 
 // [END vision_detect_web]
 
+// [START vision_web_entities_include_geo_results]
+
+// detectWebGeo detects geographic metadata from the Vision API for an image at the given file path.
+func detectWebGeo(w io.Writer, file string) error {
+	ctx := context.Background()
+
+	client, err := vision.NewImageAnnotatorClient(ctx)
+	if err != nil {
+		return err
+	}
+
+	f, err := os.Open(file)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	image, err := vision.NewImageFromReader(f)
+	if err != nil {
+		return err
+	}
+	imageContext := &visionpb.ImageContext{
+		WebDetectionParams: &visionpb.WebDetectionParams{
+			IncludeGeoResults: true,
+		},
+	}
+	web, err := client.DetectWeb(ctx, image, imageContext)
+	if err != nil {
+		return err
+	}
+
+	if len(web.WebEntities) != 0 {
+		fmt.Fprintln(w, "Entities:")
+		for _, entity := range web.WebEntities {
+			fmt.Fprintf(w, "\t%-12s %s\n", entity.EntityId, entity.Description)
+		}
+	}
+
+	return nil
+}
+
+// [END vision_web_entities_include_geo_results]
+
 // detectLogos gets logos from the Vision API for an image at the given file path.
 func detectLogos(w io.Writer, file string) error {
 	ctx := context.Background()
@@ -730,6 +775,40 @@ func detectWebURI(w io.Writer, file string) error {
 }
 
 // [END vision_detect_web_uri]
+
+// [START vision_web_entities_include_geo_results_uri]
+
+// detectWebGeo detects geographic metadata from the Vision API for an image at the given file path.
+func detectWebGeoURI(w io.Writer, file string) error {
+	ctx := context.Background()
+
+	client, err := vision.NewImageAnnotatorClient(ctx)
+	if err != nil {
+		return err
+	}
+
+	image := vision.NewImageFromURI(file)
+	imageContext := &visionpb.ImageContext{
+		WebDetectionParams: &visionpb.WebDetectionParams{
+			IncludeGeoResults: true,
+		},
+	}
+	web, err := client.DetectWeb(ctx, image, imageContext)
+	if err != nil {
+		return err
+	}
+
+	if len(web.WebEntities) != 0 {
+		fmt.Fprintln(w, "Entities:")
+		for _, entity := range web.WebEntities {
+			fmt.Fprintf(w, "\t%-12s %s\n", entity.EntityId, entity.Description)
+		}
+	}
+
+	return nil
+}
+
+// [END vision_web_entities_include_geo_results_uri]
 
 // detectLogos gets logos from the Vision API for an image at the given file path.
 func detectLogosURI(w io.Writer, file string) error {
