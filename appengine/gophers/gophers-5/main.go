@@ -20,6 +20,11 @@ import (
 )
 
 var (
+	firebaseConfig = &firebase.Config{
+		DatabaseURL:   "https://console.firebase.google.com > Overview > Add Firebase to your web app",
+		ProjectID:     "https://console.firebase.google.com > Overview > Add Firebase to your web app",
+		StorageBucket: "https://console.firebase.google.com > Overview > Add Firebase to your web app",
+	}
 	indexTemplate = template.Must(template.ParseFiles("index.html"))
 )
 
@@ -71,11 +76,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	message := r.FormValue("message")
 
 	// Create a new Firebase App.
-	app, err := firebase.NewApp(ctx, &firebase.Config{
-		DatabaseURL:   "copy from Firebase Console > Overview > Add Firebase to your web app",
-		ProjectID:     "copy from Firebase Console > Overview > Add Firebase to your web app",
-		StorageBucket: "copy from Firebase Console > Overview > Add Firebase to your web app",
-	})
+	app, err := firebase.NewApp(ctx, firebaseConfig)
 	if err != nil {
 		params.Notice = "Couldn't authenticate. Try logging in again?"
 		params.Message = message // Preserve their message so they can try again.
