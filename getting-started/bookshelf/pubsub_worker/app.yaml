@@ -1,6 +1,6 @@
 runtime: go
 env: flex
-api_version: 1
+api_version: go1
 service: worker
 
 resources:
