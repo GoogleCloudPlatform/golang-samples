@@ -19,6 +19,8 @@ import (
 	"google.golang.org/appengine/log"
 )
 
+// [START new_variable]
+
 var (
 	firebaseConfig = &firebase.Config{
 		DatabaseURL:   "https://console.firebase.google.com > Overview > Add Firebase to your web app",
@@ -27,6 +29,8 @@ var (
 	}
 	indexTemplate = template.Must(template.ParseFiles("index.html"))
 )
+
+// [END new_variable]
 
 type Post struct {
 	Author string
