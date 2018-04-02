@@ -2,6 +2,8 @@ window.addEventListener('load', function () {
   document.getElementById('sign-out').onclick = function () {
     firebase.auth().signOut();
   };
+
+  // [START UIconfig_variable]
   // FirebaseUI config.
   var uiConfig = {
     signInSuccessUrl: '/',
@@ -17,7 +19,9 @@ window.addEventListener('load', function () {
     // Terms of service url.
     tosUrl: '<your-tos-url>'
   };
+  // [END UIconfig_variable]
 
+  // [START auth_request]
   firebase.auth().onAuthStateChanged(function (user) {
     if (user) {
       // User is signed in.
@@ -45,4 +49,5 @@ window.addEventListener('load', function () {
     console.log(error);
     alert('Unable to log in: ' + error)
   });
+  // [END auth_request]
 });
