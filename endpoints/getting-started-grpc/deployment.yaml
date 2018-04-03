@@ -30,7 +30,7 @@ spec:
           "-P", "9000",
           "-a", "grpc://127.0.0.1:50051",
           "-s", "hellogrpc.endpoints.<YOUR_PROJECT_ID>.cloud.goog", # replace <YOUR_PROJECT_ID>
-          "-v", "<SERVICE_CONFIG_ID>", # e.g. "2017-03-30r0"
+          "--rollout_strategy", "managed",
         ]
         ports:
           - containerPort: 9000
