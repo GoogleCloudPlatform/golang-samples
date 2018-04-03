@@ -60,7 +60,7 @@ gcloud container builds submit --tag gcr.io/YOUR_PROJECT_ID/go-grpc-hello:1.0 .
     gcloud compute ssh grpc-host
     ```
 
-1. Set some environment variables (you'll need to manually set the service config ID):
+1. Set some environment variables:
 
     ```bash
     GOOGLE_CLOUD_PROJECT=$(curl -s "http://metadata.google.internal/computeMetadata/v1/project/project-id" -H "Metadata-Flavor: Google")
@@ -142,7 +142,7 @@ This sample shows how to make requests authenticated by a service account using 
 
 1. First, [create a service account](https://console.developers.google.com/apis/credentials)
 
-1. Edit `api_config_auth.yaml`. Replace `PROJECT_ID`.
+1. Edit `api_config_auth.yaml`. Replace `PROJECT_ID` and `SERVICE-ACCOUNT-ID`.
 
 1. Update the service configuration using `api_config_auth.yaml` instead of `api_config.yaml`:
 
