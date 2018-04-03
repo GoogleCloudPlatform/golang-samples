@@ -19,8 +19,10 @@ import (
 	"os"
 	"strings"
 
-	vision "cloud.google.com/go/vision/apiv1"
 	"golang.org/x/net/context"
+
+	vision "cloud.google.com/go/vision/apiv1"
+	visionpb "google.golang.org/genproto/googleapis/cloud/vision/v1"
 )
 
 // [END imports]
@@ -257,6 +259,33 @@ func detectWeb(w io.Writer, file string) error {
 }
 
 // [END vision_detect_web{REGION_TAG_PARAMETER}]
+
+// [START vision_web_entities_include_geo_results{REGION_TAG_PARAMETER}]
+
+// detectWebGeo detects geographic metadata from the Vision API for an image at the given file path.
+func detectWebGeo(w io.Writer, file string) error {
+	var client *vision.ImageAnnotatorClient // Boilerplate is inserted by gen.go
+	imageContext := &visionpb.ImageContext{
+		WebDetectionParams: &visionpb.WebDetectionParams{
+			IncludeGeoResults: true,
+		},
+	}
+	web, err := client.DetectWeb(ctx, image, imageContext)
+	if err != nil {
+		return err
+	}
+
+	if len(web.WebEntities) != 0 {
+		fmt.Fprintln(w, "Entities:")
+		for _, entity := range web.WebEntities {
+			fmt.Fprintf(w, "\t%-12s %s\n", entity.EntityId, entity.Description)
+		}
+	}
+
+	return nil
+}
+
+// [END vision_web_entities_include_geo_results{REGION_TAG_PARAMETER}]
 
 // detectLogos gets logos from the Vision API for an image at the given file path.
 func detectLogos(w io.Writer, file string) error {

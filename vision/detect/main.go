@@ -44,6 +44,7 @@ func main() {
 		{"detectProperties", detectProperties, detectPropertiesURI},
 		{"detectCropHints", detectCropHints, detectCropHintsURI},
 		{"detectWeb", detectWeb, detectWebURI},
+		{"detectWebGeo", detectWebGeo, detectWebGeoURI},
 		{"detectSafeSearch", detectSafeSearch, detectSafeSearchURI},
 	}
 
