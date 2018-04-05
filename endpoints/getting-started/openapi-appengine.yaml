@@ -87,6 +87,7 @@ paths:
       - auth0_jwk: []
 definitions:
   echoMessage:
+    type: "object"
     properties:
       message:
         type: "string"
