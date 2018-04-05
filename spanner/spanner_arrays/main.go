@@ -67,16 +67,15 @@ func main() {
 	for {
 		row, err := it.Next()
 		if err == iterator.Done {
-			return
+			break
 		}
 		if err != nil {
 			log.Fatalf("failed to read results: %v", err)
 		}
 
 		var country Country
-		err = row.ToStruct(&country)
-		if err != nil {
-			log.Fatalf("failed to read row into Country struct: %s", err)
+		if err = row.ToStruct(&country); err != nil {
+			log.Fatalf("failed to read row into Country struct: %v", err)
 		}
 
 		var cities []string
@@ -145,9 +144,14 @@ func createDatabase(ctx context.Context, adminClient *database.DatabaseAdminClie
 		log.Fatalf("Invalid database id %s", db)
 	}
 
+	var (
+		projectID    = matches[1]
+		databaseName = matches[2]
+	)
+
 	op, err := adminClient.CreateDatabase(ctx, &adminpb.CreateDatabaseRequest{
-		Parent:          matches[1],
-		CreateStatement: fmt.Sprintf("CREATE DATABASE `%s`", matches[2]),
+		Parent:          databaseName,
+		CreateStatement: fmt.Sprintf("CREATE DATABASE `%s`", projectID),
 		ExtraStatements: []string{
 			`CREATE TABLE Countries (
 				CountryId 	INT64 NOT NULL,
@@ -170,11 +174,10 @@ func createDatabase(ctx context.Context, adminClient *database.DatabaseAdminClie
 	return err
 }
 
-func removeDatabase(ctx context.Context, adminClient *database.DatabaseAdminClient, db string) error {
-	err := adminClient.DropDatabase(ctx, &adminpb.DropDatabaseRequest{Database: db})
-	if err != nil {
+func removeDatabase(ctx context.Context, adminClient *database.DatabaseAdminClient, db string) {
+	if err := adminClient.DropDatabase(ctx, &adminpb.DropDatabaseRequest{Database: db}); err != nil {
 		log.Fatalf("Failed to remove database [%s]: %v", db, err)
+	} else {
+		log.Printf("Removed database [%s]", db)
 	}
-	log.Printf("Removed database [%s]", db)
-	return nil
 }
