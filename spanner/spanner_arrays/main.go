@@ -150,8 +150,8 @@ func createDatabase(ctx context.Context, adminClient *database.DatabaseAdminClie
 	)
 
 	op, err := adminClient.CreateDatabase(ctx, &adminpb.CreateDatabaseRequest{
-		Parent:          databaseName,
-		CreateStatement: fmt.Sprintf("CREATE DATABASE `%s`", projectID),
+		Parent:          projectID,
+		CreateStatement: fmt.Sprintf("CREATE DATABASE `%s`", databaseName),
 		ExtraStatements: []string{
 			`CREATE TABLE Countries (
 				CountryId 	INT64 NOT NULL,
