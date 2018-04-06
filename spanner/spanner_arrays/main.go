@@ -22,8 +22,9 @@ import (
 
 // Country describes a country and the cities inside it
 type Country struct {
-	Name   string
-	Cities []spanner.NullString
+	Name    string
+	Colours []spanner.NullString
+	Cities  []spanner.NullString
 }
 
 func main() {
@@ -60,7 +61,7 @@ func main() {
 	it := client.Single().Query(ctx, spanner.NewStatement(`
 		SELECT a.Name AS Name, ARRAY(
 			SELECT b.Name FROM Cities b WHERE a.CountryId = b.CountryId
-		) AS Cities FROM Countries a
+		) AS Cities, Colours FROM Countries a
 	`))
 	defer it.Stop()
 
@@ -83,7 +84,11 @@ func main() {
 			cities = append(cities, c.String())
 		}
 
-		log.Printf("%s: %s", country.Name, strings.Join(cities, ", "))
+		var colours []string
+		for _, c := range country.Colours {
+			colours = append(colours, c.String())
+		}
+		log.Printf("%s (%s): %s", country.Name, strings.Join(colours, ", "), strings.Join(cities, ", "))
 	}
 }
 
@@ -92,45 +97,54 @@ func loadPresets(ctx context.Context, db *spanner.Client) error {
 		spanner.InsertMap("Countries", map[string]interface{}{
 			"CountryId": 49,
 			"Name":      "Germany",
+			"Colours":   []string{"black", "red", "gold"},
 		}),
 		spanner.InsertMap("Cities", map[string]interface{}{
-			"CountryId": 49,
-			"CityId":    100,
-			"Name":      "Berlin",
+			"CountryId":  49,
+			"CityId":     100,
+			"Name":       "Berlin",
+			"Population": 3605000,
 		}),
 		spanner.InsertMap("Cities", map[string]interface{}{
-			"CountryId": 49,
-			"CityId":    101,
-			"Name":      "Hamburg",
+			"CountryId":  49,
+			"CityId":     101,
+			"Name":       "Hamburg",
+			"Population": 1739117,
 		}),
 		spanner.InsertMap("Cities", map[string]interface{}{
-			"CountryId": 49,
-			"CityId":    102,
-			"Name":      "Dresden",
+			"CountryId":  49,
+			"CityId":     102,
+			"Name":       "Dresden",
+			"Population": 486854,
 		}),
 		spanner.InsertMap("Countries", map[string]interface{}{
 			"CountryId": 44,
 			"Name":      "United Kingdom",
+			"Colours":   []string{"white", "red", "blue"},
 		}),
 		spanner.InsertMap("Cities", map[string]interface{}{
-			"CountryId": 44,
-			"CityId":    200,
-			"Name":      "London",
+			"CountryId":  44,
+			"CityId":     200,
+			"Name":       "London",
+			"Population": 8788000,
 		}),
 		spanner.InsertMap("Cities", map[string]interface{}{
-			"CountryId": 44,
-			"CityId":    201,
-			"Name":      "Liverpool",
+			"CountryId":  44,
+			"CityId":     201,
+			"Name":       "Liverpool",
+			"Population": 465700,
 		}),
 		spanner.InsertMap("Cities", map[string]interface{}{
-			"CountryId": 44,
-			"CityId":    202,
-			"Name":      "Bristol",
+			"CountryId":  44,
+			"CityId":     202,
+			"Name":       "Bristol",
+			"Population": 428100,
 		}),
 		spanner.InsertMap("Cities", map[string]interface{}{
-			"CountryId": 44,
-			"CityId":    203,
-			"Name":      "Newcastle",
+			"CountryId":  44,
+			"CityId":     203,
+			"Name":       "Newcastle",
+			"Population": 304636,
 		}),
 	}
 
@@ -155,12 +169,14 @@ func createDatabase(ctx context.Context, adminClient *database.DatabaseAdminClie
 		ExtraStatements: []string{
 			`CREATE TABLE Countries (
 				CountryId 	INT64 NOT NULL,
-				Name   		STRING(1024) NOT NULL
+				Name   		STRING(1024) NOT NULL,
+				Colours     ARRAY<STRING(1024)> NOT NULL
 			) PRIMARY KEY (CountryId)`,
 			`CREATE TABLE Cities (
 				CountryId	INT64 NOT NULL,
 				CityId		INT64 NOT NULL,
-				Name			STRING(MAX),
+				Name			STRING(MAX) NOT NULL,
+				Population  INT64 NOT NULL
 			) PRIMARY KEY (CountryId, CityId),
 			INTERLEAVE IN PARENT Countries ON DELETE CASCADE`,
 		},
