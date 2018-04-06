@@ -33,7 +33,7 @@ func TestDetect(t *testing.T) {
 		{"FullText", detectDocumentText, detectDocumentTextURI, "text.jpg", "Preparing to install"},
 		{"Crop", detectCropHints, detectCropHintsURI, "wakeupcat.jpg", "(0,0)"},
 		{"Web", detectWeb, detectWebURI, "wakeupcat.jpg", "Web properties"},
-		{"WebGeo", nil, detectWebGeoURI, "city.jpg", "Zepra"},
+		{"WebGeo", nil, detectWebGeoURI, "city.jpg", "Building"},
 	}
 
 	for _, tt := range tests {
