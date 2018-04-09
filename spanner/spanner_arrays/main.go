@@ -2,8 +2,8 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// Sample spanner_arrays is a basic program that queries Google's Cloud Spanner
-// and returns an array within the results.
+// Sample spanner_arrays is a demonstration program which queries Google's Cloud Spanner
+// and returns results containing arrays.
 package main
 
 import (
@@ -20,7 +20,7 @@ import (
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
-// Country describes a country and the cities inside it
+// Country describes a country and the cities inside it.
 type Country struct {
 	Name    string
 	Colours []spanner.NullString
@@ -33,7 +33,7 @@ func main() {
 	dsn := flag.String("database", "projects/your-project-id/instances/your-instance-id/databases/your-database-id", "Cloud Spanner database name")
 	flag.Parse()
 
-	// Connect to the Spanner Admin API
+	// Connect to the Spanner Admin API.
 	admin, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		log.Fatalf("failed to create database admin client: %v", err)
@@ -46,7 +46,7 @@ func main() {
 	}
 	defer removeDatabase(ctx, admin, *dsn)
 
-	// Connect to database
+	// Connect to database.
 	client, err := spanner.NewClient(ctx, *dsn)
 	if err != nil {
 		log.Fatalf("Failed to create client %v", err)
@@ -92,6 +92,7 @@ func main() {
 	}
 }
 
+// loadPresets inserts some demonstration data into the tables.
 func loadPresets(ctx context.Context, db *spanner.Client) error {
 	mx := []*spanner.Mutation{
 		spanner.InsertMap("Countries", map[string]interface{}{
@@ -152,6 +153,7 @@ func loadPresets(ctx context.Context, db *spanner.Client) error {
 	return err
 }
 
+// createDatabase uses the Spanner database administration client to create the tables used in this demonstration.
 func createDatabase(ctx context.Context, adminClient *database.DatabaseAdminClient, db string) error {
 	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(db)
 	if matches == nil || len(matches) != 3 {
@@ -190,6 +192,7 @@ func createDatabase(ctx context.Context, adminClient *database.DatabaseAdminClie
 	return err
 }
 
+// removeDatabase deletes the database which this demonstration program created.
 func removeDatabase(ctx context.Context, adminClient *database.DatabaseAdminClient, db string) {
 	if err := adminClient.DropDatabase(ctx, &adminpb.DropDatabaseRequest{Database: db}); err != nil {
 		log.Fatalf("Failed to remove database [%s]: %v", db, err)
