@@ -44,7 +44,7 @@ func createQuery(client *firestore.Client) {
 func createQueryTwo(client *firestore.Client) {
 	// [START fs_create_query_two]
 	query := client.Collection("cities").Where("state", "==", "CA")
-	// [END fs_create_qiery_two]
+	// [END fs_create_query_two]
 	_ = query
 }
 
