@@ -32,14 +32,16 @@ var (
 
 // [END new_variable]
 
+// [START new_post_field]
+
 type Post struct {
-	Author string
-	// [START new_post_field]
-	UserID string
-	// [END new_post_field]
+	Author  string
+	UserID  string
 	Message string
 	Posted  time.Time
 }
+
+// [END new_post_field]
 
 type templateParams struct {
 	Notice  string
