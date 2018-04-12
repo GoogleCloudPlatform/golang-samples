@@ -44,15 +44,23 @@ var (
 		"querywithtimestamp":  queryWithTimestamp,
 		"writewithtimestamp":  writeWithTimestamp,
 		"querynewtable":       queryNewTable,
+		"writetodocstable":    writeToDocumentsTable,
+		"updatedocstable":     updateDocumentsTable,
+		"querydocstable":      queryDocumentsTable,
+		"writewithhistory":    writeWithHistory,
+		"updatewithhistory":   updateWithHistory,
+		"querywithhistory":    queryWithHistory,
 	}
 
 	adminCommands = map[string]adminCommand{
-		"createdatabase":           createDatabase,
-		"addnewcolumn":             addNewColumn,
-		"addindex":                 addIndex,
-		"addstoringindex":          addStoringIndex,
-		"addcommittimestamp":       addCommitTimestamp,
-		"createtablewithtimestamp": createTableWithTimestamp,
+		"createdatabase":                  createDatabase,
+		"addnewcolumn":                    addNewColumn,
+		"addindex":                        addIndex,
+		"addstoringindex":                 addStoringIndex,
+		"addcommittimestamp":              addCommitTimestamp,
+		"createtablewithtimestamp":        createTableWithTimestamp,
+		"createtabledocswithtimestamp":    createTableDocumentsWithTimestamp,
+		"createtabledocswithhistorytable": createTableDocumentsWithHistoryTable,
 	}
 )
 
@@ -120,6 +128,55 @@ func createTableWithTimestamp(ctx context.Context, w io.Writer, adminClient *dat
 }
 
 // [END spanner_create_table_with_timestamp_column]
+
+func createTableDocumentsWithTimestamp(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	op, err := adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
+		Database: database,
+		Statements: []string{
+			`CREATE TABLE DocumentsWithTimestamp(
+				UserId INT64 NOT NULL,
+				DocumentId INT64 NOT NULL,
+			    Timestamp TIMESTAMP NOT NULL OPTIONS(allow_commit_timestamp=true),
+				Contents STRING(MAX) NOT NULL
+			) PRIMARY KEY(UserId, DocumentId)`,
+		},
+	})
+	if err != nil {
+		return err
+	}
+	if err := op.Wait(ctx); err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "Created DocumentsWithTimestamp table in database [%s]\n", database)
+	return nil
+}
+
+func createTableDocumentsWithHistoryTable(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	op, err := adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
+		Database: database,
+		Statements: []string{
+			`CREATE TABLE Documents(
+				UserId INT64 NOT NULL,
+				DocumentId INT64 NOT NULL,
+				Contents STRING(MAX) NOT NULL
+			) PRIMARY KEY(UserId, DocumentId)`,
+			`CREATE TABLE DocumentHistory(
+				UserId INT64 NOT NULL,
+				DocumentId INT64 NOT NULL,
+				Timestamp TIMESTAMP NOT NULL OPTIONS(allow_commit_timestamp=true),
+				PreviousContents STRING(MAX)
+			) PRIMARY KEY(UserId, DocumentId, Timestamp), INTERLEAVE IN PARENT Documents ON DELETE NO ACTION`,
+		},
+	})
+	if err != nil {
+		return err
+	}
+	if err := op.Wait(ctx); err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "Created Documents and DocumentHistory tables in database [%s]\n", database)
+	return nil
+}
 
 // [START spanner_insert_data]
 
@@ -703,6 +760,185 @@ func queryNewTable(ctx context.Context, w io.Writer, client *spanner.Client) err
 	}
 }
 
+func writeToDocumentsTable(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	documentsColumns := []string{"UserId", "DocumentId", "Timestamp", "Contents"}
+	m := []*spanner.Mutation{
+		spanner.InsertOrUpdate("DocumentsWithTimestamp", documentsColumns,
+			[]interface{}{1, 1, spanner.CommitTimestamp, "Hello World 1"}),
+		spanner.InsertOrUpdate("DocumentsWithTimestamp", documentsColumns,
+			[]interface{}{1, 2, spanner.CommitTimestamp, "Hello World 2"}),
+		spanner.InsertOrUpdate("DocumentsWithTimestamp", documentsColumns,
+			[]interface{}{1, 3, spanner.CommitTimestamp, "Hello World 3"}),
+		spanner.InsertOrUpdate("DocumentsWithTimestamp", documentsColumns,
+			[]interface{}{2, 4, spanner.CommitTimestamp, "Hello World 4"}),
+		spanner.InsertOrUpdate("DocumentsWithTimestamp", documentsColumns,
+			[]interface{}{2, 5, spanner.CommitTimestamp, "Hello World 5"}),
+		spanner.InsertOrUpdate("DocumentsWithTimestamp", documentsColumns,
+			[]interface{}{3, 6, spanner.CommitTimestamp, "Hello World 6"}),
+		spanner.InsertOrUpdate("DocumentsWithTimestamp", documentsColumns,
+			[]interface{}{3, 7, spanner.CommitTimestamp, "Hello World 7"}),
+		spanner.InsertOrUpdate("DocumentsWithTimestamp", documentsColumns,
+			[]interface{}{3, 8, spanner.CommitTimestamp, "Hello World 8"}),
+		spanner.InsertOrUpdate("DocumentsWithTimestamp", documentsColumns,
+			[]interface{}{3, 9, spanner.CommitTimestamp, "Hello World 9"}),
+		spanner.InsertOrUpdate("DocumentsWithTimestamp", documentsColumns,
+			[]interface{}{3, 10, spanner.CommitTimestamp, "Hello World 10"}),
+	}
+	_, err := client.Apply(ctx, m)
+	return err
+}
+
+func updateDocumentsTable(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	cols := []string{"UserId", "DocumentId", "Timestamp", "Contents"}
+	_, err := client.Apply(ctx, []*spanner.Mutation{
+		spanner.Update("DocumentsWithTimestamp", cols,
+			[]interface{}{1, 1, spanner.CommitTimestamp, "Hello World 1 Updated"}),
+		spanner.Update("DocumentsWithTimestamp", cols,
+			[]interface{}{1, 3, spanner.CommitTimestamp, "Hello World 3 Updated"}),
+		spanner.Update("DocumentsWithTimestamp", cols,
+			[]interface{}{2, 5, spanner.CommitTimestamp, "Hello World 5 Updated"}),
+		spanner.Update("DocumentsWithTimestamp", cols,
+			[]interface{}{3, 7, spanner.CommitTimestamp, "Hello World 7 Updated"}),
+		spanner.Update("DocumentsWithTimestamp", cols,
+			[]interface{}{3, 9, spanner.CommitTimestamp, "Hello World 9 Updated"}),
+	})
+	return err
+}
+
+func queryDocumentsTable(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	stmt := spanner.Statement{SQL: `SELECT UserId, DocumentId, Timestamp, Contents FROM DocumentsWithTimestamp
+		ORDER BY Timestamp DESC Limit 5`}
+	iter := client.Single().Query(ctx, stmt)
+	defer iter.Stop()
+	for {
+		row, err := iter.Next()
+		if err == iterator.Done {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		var userID, documentID int64
+		var timestamp time.Time
+		var contents string
+		if err := row.Columns(&userID, &documentID, &timestamp, &contents); err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "%d %d %s %s\n", userID, documentID, timestamp, contents)
+	}
+}
+
+func writeWithHistory(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	_, err := client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
+		documentsColumns := []string{"UserId", "DocumentId", "Contents"}
+		documentHistoryColumns := []string{"UserId", "DocumentId", "Timestamp", "PreviousContents"}
+		txn.BufferWrite([]*spanner.Mutation{
+			spanner.InsertOrUpdate("Documents", documentsColumns,
+				[]interface{}{1, 1, "Hello World 1"}),
+			spanner.InsertOrUpdate("Documents", documentsColumns,
+				[]interface{}{1, 2, "Hello World 2"}),
+			spanner.InsertOrUpdate("Documents", documentsColumns,
+				[]interface{}{1, 3, "Hello World 3"}),
+			spanner.InsertOrUpdate("Documents", documentsColumns,
+				[]interface{}{2, 4, "Hello World 4"}),
+			spanner.InsertOrUpdate("Documents", documentsColumns,
+				[]interface{}{2, 5, "Hello World 5"}),
+			spanner.InsertOrUpdate("DocumentHistory", documentHistoryColumns,
+				[]interface{}{1, 1, spanner.CommitTimestamp, "Hello World 1"}),
+			spanner.InsertOrUpdate("DocumentHistory", documentHistoryColumns,
+				[]interface{}{1, 2, spanner.CommitTimestamp, "Hello World 2"}),
+			spanner.InsertOrUpdate("DocumentHistory", documentHistoryColumns,
+				[]interface{}{1, 3, spanner.CommitTimestamp, "Hello World 3"}),
+			spanner.InsertOrUpdate("DocumentHistory", documentHistoryColumns,
+				[]interface{}{2, 4, spanner.CommitTimestamp, "Hello World 4"}),
+			spanner.InsertOrUpdate("DocumentHistory", documentHistoryColumns,
+				[]interface{}{2, 5, spanner.CommitTimestamp, "Hello World 5"}),
+		})
+		return nil
+	})
+	return err
+}
+
+func updateWithHistory(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	_, err := client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
+		// Create anonymous function "getContents" to read the current value of the Contents column for a given row.
+		getContents := func(key spanner.Key) (string, error) {
+			row, err := txn.ReadRow(ctx, "Documents", key, []string{"Contents"})
+			if err != nil {
+				return "", err
+			}
+			var content string
+			if err := row.Column(0, &content); err != nil {
+				return "", err
+			}
+			return content, nil
+		}
+		// Create two string arrays corresponding to the columns in each table.
+		documentsColumns := []string{"UserId", "DocumentId", "Contents"}
+		documentHistoryColumns := []string{"UserId", "DocumentId", "Timestamp", "PreviousContents"}
+		// Get row's Contents before updating.
+		previousContents, err := getContents(spanner.Key{1, 1})
+		if err != nil {
+			return err
+		}
+		// Update row's Contents while saving previous Contents in DocumentHistory table.
+		txn.BufferWrite([]*spanner.Mutation{
+			spanner.InsertOrUpdate("Documents", documentsColumns,
+				[]interface{}{1, 1, "Hello World 1 Updated"}),
+			spanner.InsertOrUpdate("DocumentHistory", documentHistoryColumns,
+				[]interface{}{1, 1, spanner.CommitTimestamp, previousContents}),
+		})
+		previousContents, err = getContents(spanner.Key{1, 3})
+		if err != nil {
+			return err
+		}
+		txn.BufferWrite([]*spanner.Mutation{
+			spanner.InsertOrUpdate("Documents", documentsColumns,
+				[]interface{}{1, 3, "Hello World 3 Updated"}),
+			spanner.InsertOrUpdate("DocumentHistory", documentHistoryColumns,
+				[]interface{}{1, 3, spanner.CommitTimestamp, previousContents}),
+		})
+		previousContents, err = getContents(spanner.Key{2, 5})
+		if err != nil {
+			return err
+		}
+		txn.BufferWrite([]*spanner.Mutation{
+			spanner.InsertOrUpdate("Documents", documentsColumns,
+				[]interface{}{2, 5, "Hello World 5 Updated"}),
+			spanner.InsertOrUpdate("DocumentHistory", documentHistoryColumns,
+				[]interface{}{2, 5, spanner.CommitTimestamp, previousContents}),
+		})
+		return nil
+	})
+	return err
+}
+
+func queryWithHistory(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	stmt := spanner.Statement{
+		SQL: `SELECT d.UserId, d.DocumentId, d.Contents, dh.Timestamp, dh.PreviousContents
+				FROM Documents d JOIN DocumentHistory dh
+				ON dh.UserId = d.UserId AND dh.DocumentId = d.DocumentId
+				ORDER BY dh.Timestamp DESC LIMIT 3`}
+	iter := client.Single().Query(ctx, stmt)
+	defer iter.Stop()
+	for {
+		row, err := iter.Next()
+		if err == iterator.Done {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		var userID, documentID int64
+		var timestamp time.Time
+		var contents, previousContents string
+		if err := row.Columns(&userID, &documentID, &contents, &timestamp, &previousContents); err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "%d %d %s %s %s\n", userID, documentID, contents, timestamp, previousContents)
+	}
+}
+
 func createClients(ctx context.Context, db string) (*database.DatabaseAdminClient, *spanner.Client) {
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
@@ -747,7 +983,9 @@ func main() {
 		writetransaction, addnewcolumn, querynewcolumn, addindex, queryindex, readindex,
 		addstoringindex, readstoringindex, readonlytransaction, readstaledata, readbatchdata,
 		addcommittimestamp, updatewithtimestamp, querywithtimestamp, createtablewithtimestamp,
-		writewithtimestamp, querynewtable
+		writewithtimestamp, querynewtable, createtabledocswithtimestamp, writetodocstable,
+		updatedocstable, querydocstable, createtabledocswithhistorytable, writewithhistory,
+		updatewithhistory, querywithhistory
 
 Examples:
 	spanner_snippets createdatabase projects/my-project/instances/my-instance/databases/example-db
