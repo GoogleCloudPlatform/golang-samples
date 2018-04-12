@@ -5,7 +5,8 @@
 package main
 
 import (
-	"fmt"
+	"log"
+	"os"
 	"testing"
 	"time"
 
@@ -15,21 +16,36 @@ import (
 	"golang.org/x/net/context"
 )
 
-var bucketName = fmt.Sprintf("golang-example-buckets-%d", time.Now().Unix())
+var (
+	c          *storage.Client
+	bucketName string
+)
 
-func setup(t *testing.T) *storage.Client {
+func TestMain(m *testing.M) {
 	ctx := context.Background()
 
-	client, err := storage.NewClient(ctx)
+	var err error
+	c, err = storage.NewClient(ctx)
 	if err != nil {
-		t.Fatalf("failed to create client: %v", err)
+		log.Fatalf("failed to create client: %v", err)
 	}
-	return client
+
+	tc, ok := testutil.ContextMain(m)
+	if !ok {
+		log.Println("Skipping tests: GOLANG_SAMPLES_PROJECT_ID must be set")
+		return
+	}
+
+	bucketName = tc.ProjectID + "-storage-tests"
+	// Clean up buckets before running tests.
+	delete(c, bucketName)
+	delete(c, bucketName+"-attrs")
+	// call flag.Parse() here if TestMain uses flags
+	os.Exit(m.Run())
 }
 
 func TestCreate(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	c := setup(t)
 	if err := create(c, tc.ProjectID, bucketName); err != nil {
 		t.Fatalf("failed to create bucket (%q): %v", bucketName, err)
 	}
@@ -37,19 +53,17 @@ func TestCreate(t *testing.T) {
 
 func TestCreateWithAttrs(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	c := setup(t)
 	name := bucketName + "-attrs"
 	if err := createWithAttrs(c, tc.ProjectID, name); err != nil {
-		t.Fatalf("failed to create bucket (%q): %v", bucketName, err)
+		t.Fatalf("failed to create bucket (%q): %v", name, err)
 	}
 	if err := delete(c, name); err != nil {
-		t.Fatalf("failed to delete bucket (%q): %v", bucketName, err)
+		t.Fatalf("failed to delete bucket (%q): %v", name, err)
 	}
 }
 
 func TestList(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	c := setup(t)
 	buckets, err := list(c, tc.ProjectID)
 	if err != nil {
 		t.Fatal(err)
@@ -71,9 +85,6 @@ outer:
 }
 
 func TestIAM(t *testing.T) {
-	testutil.SystemTest(t)
-	c := setup(t)
-
 	if _, err := getPolicy(c, bucketName); err != nil {
 		t.Errorf("getPolicy: %#v", err)
 	}
@@ -86,9 +97,6 @@ func TestIAM(t *testing.T) {
 }
 
 func TestRequesterPays(t *testing.T) {
-	testutil.SystemTest(t)
-	c := setup(t)
-
 	if err := enableRequesterPays(c, bucketName); err != nil {
 		t.Errorf("enableRequesterPay: %#v", err)
 	}
@@ -101,9 +109,6 @@ func TestRequesterPays(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	testutil.SystemTest(t)
-
-	c := setup(t)
 	if err := delete(c, bucketName); err != nil {
 		t.Fatalf("failed to delete bucket (%q): %v", bucketName, err)
 	}
