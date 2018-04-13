@@ -5,7 +5,6 @@
 package main
 
 import (
-	"log"
 	"testing"
 	"time"
 
@@ -27,7 +26,7 @@ func TestCreate(t *testing.T) {
 	var err error
 	storageClient, err = storage.NewClient(ctx)
 	if err != nil {
-		log.Fatalf("failed to create client: %v", err)
+		t.Fatalf("failed to create client: %v", err)
 	}
 
 	bucketName = tc.ProjectID + "-storage-buckets-tests"
