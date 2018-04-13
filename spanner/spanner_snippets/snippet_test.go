@@ -117,6 +117,6 @@ func TestSample(t *testing.T) {
 	runCommand(t, "writewithhistory", dbName)
 	runCommand(t, "updatewithhistory", dbName)
 
-	out := runCommand(t, "querywithhistory", dbName)
+	out = runCommand(t, "querywithhistory", dbName)
 	assertContains(out, "1 1 Hello World 1 Updated")
 }
