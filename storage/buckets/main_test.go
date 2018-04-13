@@ -41,7 +41,7 @@ func TestCreateWithAttrs(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	name := bucketName + "-attrs"
 	// Clean up bucket before running test.
-	deleteBucket(storageClient, bucketName+"-attrs")
+	deleteBucket(storageClient, name)
 	if err := createWithAttrs(storageClient, tc.ProjectID, name); err != nil {
 		t.Fatalf("failed to create bucket (%q): %v", name, err)
 	}
@@ -73,6 +73,7 @@ outer:
 }
 
 func TestIAM(t *testing.T) {
+	testutil.SystemTest(t)
 	if _, err := getPolicy(storageClient, bucketName); err != nil {
 		t.Errorf("getPolicy: %#v", err)
 	}
@@ -85,6 +86,7 @@ func TestIAM(t *testing.T) {
 }
 
 func TestRequesterPays(t *testing.T) {
+	testutil.SystemTest(t)
 	if err := enableRequesterPays(storageClient, bucketName); err != nil {
 		t.Errorf("enableRequesterPay: %#v", err)
 	}
@@ -97,6 +99,7 @@ func TestRequesterPays(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
+	testutil.SystemTest(t)
 	if err := deleteBucket(storageClient, bucketName); err != nil {
 		t.Fatalf("failed to delete bucket (%q): %v", bucketName, err)
 	}
