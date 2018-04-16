@@ -30,7 +30,6 @@ func updateDatasetDescription(client *bigquery.Client, datasetID string) error {
 	ctx := context.Background()
 	// [START bigquery_update_dataset_description]
 	ds := client.Dataset(datasetID)
-
 	original, err := ds.Metadata(ctx)
 	if err != nil {
 		return err
@@ -48,11 +47,16 @@ func updateDatasetDescription(client *bigquery.Client, datasetID string) error {
 
 func updateDatasetDefaultExpiration(client *bigquery.Client, datasetID string) error {
 	ctx := context.Background()
-	// [START bigquery_update_dataset_expiration]
+	// [START bigquery_update_dataset_expiration]\
+	ds := client.Dataset(datasetID)
+	original, err := ds.Metadata(ctx)
+	if err != nil {
+		return err
+	}
 	changes := bigquery.DatasetMetadataToUpdate{
 		DefaultTableExpiration: 24 * time.Hour,
 	}
-	if _, err := client.Dataset(datasetID).Update(ctx, changes, ""); err != nil {
+	if _, err := client.Dataset(datasetID).Update(ctx, changes, original.ETag); err != nil {
 		return err
 	}
 	// [END bigquery_update_dataset_expiration]
