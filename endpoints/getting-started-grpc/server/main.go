@@ -34,6 +34,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net"
 
@@ -43,8 +44,8 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-const (
-	port = ":50051"
+var (
+	addr = flag.String("addr", ":50051", "Network host:port to listen on for gRPC connections.")
 )
 
 // server is used to implement helloworld.GreeterServer.
@@ -52,11 +53,14 @@ type server struct{}
 
 // SayHello implements helloworld.GreeterServer
 func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
+	log.Printf("Handling SayHello request [%v] with context %v", in, ctx)
 	return &pb.HelloReply{Message: "Hello " + in.Name}, nil
 }
 
 func main() {
-	lis, err := net.Listen("tcp", port)
+	flag.Parse()
+
+	lis, err := net.Listen("tcp", *addr)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}

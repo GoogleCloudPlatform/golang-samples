@@ -5,7 +5,7 @@
 // [START all]
 
 // A simple command-line task list manager to demonstrate using the
-// cloud.google.com/go//datastore package.
+// cloud.google.com/go/datastore package.
 package main
 
 import (
@@ -199,7 +199,7 @@ func PrintTasks(w io.Writer, tasks []*Task) {
 // [END format_results]
 
 func usage() {
-	fmt.Println(`Usage:
+	fmt.Print(`Usage:
 
   new <description>  Adds a task with a description <description>
   done <task-id>     Marks a task as done

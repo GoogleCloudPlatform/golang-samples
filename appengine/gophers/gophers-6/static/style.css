@@ -1,0 +1,11 @@
+body {
+  font-family: Arial, sans-serif;
+  color: blue;
+}
+
+div.mdl-progress::after {
+  display: block;
+  content: 'Authenticating...';
+  margin: 30px auto;
+  text-align: center;
+}

@@ -27,21 +27,21 @@ type Task struct {
 	Collaborators   []string
 }
 
-func ExampleNewIncompleteKey() {
+func SnippetNewIncompleteKey() {
 	// [START incomplete_key]
 	taskKey := datastore.IncompleteKey("Task", nil)
 	// [END incomplete_key]
 	_ = taskKey // Use the task key for datastore operations.
 }
 
-func ExampleNewKey() {
+func SnippetNewKey() {
 	// [START named_key]
 	taskKey := datastore.NameKey("Task", "sampletask", nil)
 	// [END named_key]
 	_ = taskKey // Use the task key for datastore operations.
 }
 
-func ExampleNewKey_withParent() {
+func SnippetNewKey_withParent() {
 	// [START key_with_parent]
 	parentKey := datastore.NameKey("TaskList", "default", nil)
 	taskKey := datastore.NameKey("Task", "sampleTask", parentKey)
@@ -49,7 +49,7 @@ func ExampleNewKey_withParent() {
 	_ = taskKey // Use the task key for datastore operations.
 }
 
-func ExampleNewKey_withMultipleParents() {
+func SnippetNewKey_withMultipleParents() {
 	// [START key_with_multilevel_parent]
 	userKey := datastore.NameKey("User", "alice", nil)
 	parentKey := datastore.NameKey("TaskList", "default", userKey)
@@ -58,7 +58,7 @@ func ExampleNewKey_withMultipleParents() {
 	_ = taskKey // Use the task key for datastore operations.
 }
 
-func ExampleClient_Put() {
+func SnippetClient_Put() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	// [START entity_with_parent]
@@ -79,7 +79,7 @@ func ExampleClient_Put() {
 	_ = err // Make sure you check err.
 }
 
-func Example_properties() {
+func Snippet_properties() {
 	// [START properties]
 	type Task struct {
 		Category        string
@@ -101,7 +101,7 @@ func Example_properties() {
 	_ = task // Use the task in a datastore Put operation.
 }
 
-func Example_sliceProperties() {
+func Snippet_sliceProperties() {
 	// [START array_value]
 	type Task struct {
 		Tags          []string
@@ -115,7 +115,7 @@ func Example_sliceProperties() {
 	_ = task // Use the task in a datastore Put operation.
 }
 
-func Example_basicEntity() {
+func Snippet_basicEntity() {
 	// [START basic_entity]
 	type Task struct {
 		Category        string
@@ -137,7 +137,7 @@ func Example_basicEntity() {
 	_ = task // Use the task in a datastore Put operation.
 }
 
-func ExampleClient_Put_upsert() {
+func SnippetClient_Put_upsert() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	task := &Task{} // Populated with appropriate data.
@@ -149,7 +149,7 @@ func ExampleClient_Put_upsert() {
 	_ = key // key is the complete key for the newly stored task
 }
 
-func ExampleTransaction_insert() {
+func SnippetTransaction_insert() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	task := Task{} // Populated with appropriate data.
@@ -169,7 +169,7 @@ func ExampleTransaction_insert() {
 	_ = err // Make sure you check err.
 }
 
-func ExampleClient_Get() {
+func SnippetClient_Get() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	taskKey := datastore.NameKey("Task", "sampleTask", nil)
@@ -180,7 +180,7 @@ func ExampleClient_Get() {
 	_ = err // Make sure you check err.
 }
 
-func ExampleTransaction_update() {
+func SnippetTransaction_update() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	taskKey := datastore.NameKey("Task", "sampleTask", nil)
@@ -203,7 +203,7 @@ func ExampleTransaction_update() {
 	// [END update]
 }
 
-func ExampleClient_Delete() {
+func SnippetClient_Delete() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	key := datastore.NameKey("Task", "sampletask", nil)
@@ -213,7 +213,7 @@ func ExampleClient_Delete() {
 	_ = err // Make sure you check err.
 }
 
-func ExampleClient_PutMulti() {
+func SnippetClient_PutMulti() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	// [START batch_upsert]
@@ -242,7 +242,7 @@ func ExampleClient_PutMulti() {
 	_ = keys // keys now has the complete keys for the newly stored tasks.
 }
 
-func ExampleClient_GetMulti() {
+func SnippetClient_GetMulti() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	var taskKeys []*datastore.Key // Populated with incomplete keys.
@@ -253,7 +253,7 @@ func ExampleClient_GetMulti() {
 	_ = err // Make sure you check err.
 }
 
-func ExampleClient_DeleteMulti() {
+func SnippetClient_DeleteMulti() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	var taskKeys []*datastore.Key // Populated with incomplete keys.
@@ -263,7 +263,7 @@ func ExampleClient_DeleteMulti() {
 	_ = err // Make sure you check err.
 }
 
-func ExampleQuery_basic() {
+func SnippetQuery_basic() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	// [START basic_query]
@@ -288,21 +288,21 @@ func ExampleQuery_basic() {
 	// [END run_query]
 }
 
-func ExampleQuery_propertyFilter() {
+func SnippetQuery_propertyFilter() {
 	// [START property_filter]
 	query := datastore.NewQuery("Task").Filter("Done =", false)
 	// [END property_filter]
 	_ = query // Use client.Run or client.GetAll to execute the query.
 }
 
-func ExampleQuery_compositeFilter() {
+func SnippetQuery_compositeFilter() {
 	// [START composite_filter]
 	query := datastore.NewQuery("Task").Filter("Done =", false).Filter("Priority =", 4)
 	// [END composite_filter]
 	_ = query // Use client.Run or client.GetAll to execute the query.
 }
 
-func ExampleQuery_keyFilter() {
+func SnippetQuery_keyFilter() {
 	// [START key_filter]
 	key := datastore.NameKey("Task", "someTask", nil)
 	query := datastore.NewQuery("Task").Filter("__key__ >", key)
@@ -310,28 +310,28 @@ func ExampleQuery_keyFilter() {
 	_ = query // Use client.Run or client.GetAll to execute the query.
 }
 
-func ExampleQuery_sortAscending() {
+func SnippetQuery_sortAscending() {
 	// [START ascending_sort]
 	query := datastore.NewQuery("Task").Order("created")
 	// [END ascending_sort]
 	_ = query // Use client.Run or client.GetAll to execute the query.
 }
 
-func ExampleQuery_sortDescending() {
+func SnippetQuery_sortDescending() {
 	// [START descending_sort]
 	query := datastore.NewQuery("Task").Order("-created")
 	// [END descending_sort]
 	_ = query // Use client.Run or client.GetAll to execute the query.
 }
 
-func ExampleQuery_sortMulti() {
+func SnippetQuery_sortMulti() {
 	// [START multi_sort]
 	query := datastore.NewQuery("Task").Order("-priority").Order("created")
 	// [END multi_sort]
 	_ = query // Use client.Run or client.GetAll to execute the query.
 }
 
-func ExampleQuery_kindless() {
+func SnippetQuery_kindless() {
 	var lastSeenKey *datastore.Key
 	// [START kindless_query]
 	query := datastore.NewQuery("").Filter("__key__ >", lastSeenKey)
@@ -339,7 +339,7 @@ func ExampleQuery_kindless() {
 	_ = query // Use client.Run or client.GetAll to execute the query.
 }
 
-func ExampleQuery_Ancestor() {
+func SnippetQuery_Ancestor() {
 	// [START ancestor_query]
 	ancestor := datastore.NameKey("TaskList", "default", nil)
 	query := datastore.NewQuery("Task").Ancestor(ancestor)
@@ -347,7 +347,7 @@ func ExampleQuery_Ancestor() {
 	_ = query // Use client.Run or client.GetAll to execute the query.
 }
 
-func ExampleQuery_Project() {
+func SnippetQuery_Project() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	// [START projection_query]
@@ -370,7 +370,7 @@ func ExampleQuery_Project() {
 	// [END run_query_projection]
 }
 
-func ExampleQuery_KeysOnly() {
+func SnippetQuery_KeysOnly() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	// [START keys_only_query]
@@ -383,7 +383,7 @@ func ExampleQuery_KeysOnly() {
 	_ = keys // Keys contains keys for all stored tasks.
 }
 
-func ExampleQuery_Distinct() {
+func SnippetQuery_Distinct() {
 	// [START distinct_query]
 	query := datastore.NewQuery("Task").
 		Project("Priority", "PercentComplete").
@@ -393,7 +393,7 @@ func ExampleQuery_Distinct() {
 	_ = query // Use client.Run or client.GetAll to execute the query.
 }
 
-func ExampleQuery_DistinctOn() {
+func SnippetQuery_DistinctOn() {
 	// [START distinct_on_query]
 	query := datastore.NewQuery("Task").
 		Project("Priority", "Category").
@@ -403,7 +403,7 @@ func ExampleQuery_DistinctOn() {
 	_ = query // Use client.Run or client.GetAll to execute the query.
 }
 
-func ExampleQuery_Filter_arrayInequality() {
+func SnippetQuery_Filter_arrayInequality() {
 	// [START array_value_inequality_range]
 	query := datastore.NewQuery("Task").
 		Filter("Tag >", "learn").
@@ -412,7 +412,7 @@ func ExampleQuery_Filter_arrayInequality() {
 	_ = query // Use client.Run or client.GetAll to execute the query.
 }
 
-func ExampleQuery_Filter_arrayEquality() {
+func SnippetQuery_Filter_arrayEquality() {
 	// [START array_value_equality]
 	query := datastore.NewQuery("Task").
 		Filter("Tag =", "fun").
@@ -421,7 +421,7 @@ func ExampleQuery_Filter_arrayEquality() {
 	_ = query // Use client.Run or client.GetAll to execute the query.
 }
 
-func ExampleQuery_Filter_inequality() {
+func SnippetQuery_Filter_inequality() {
 	// [START inequality_range]
 	query := datastore.NewQuery("Task").
 		Filter("Created >", time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)).
@@ -430,7 +430,7 @@ func ExampleQuery_Filter_inequality() {
 	_ = query // Use client.Run or client.GetAll to execute the query.
 }
 
-func ExampleQuery_Filter_invalidInequality() {
+func SnippetQuery_Filter_invalidInequality() {
 	// [START inequality_invalid]
 	query := datastore.NewQuery("Task").
 		Filter("Created >", time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)).
@@ -439,7 +439,7 @@ func ExampleQuery_Filter_invalidInequality() {
 	_ = query // The query is invalid.
 }
 
-func ExampleQuery_Filter_mixed() {
+func SnippetQuery_Filter_mixed() {
 	// [START equal_and_inequality_range]
 	query := datastore.NewQuery("Task").
 		Filter("Priority =", 4).
@@ -450,7 +450,7 @@ func ExampleQuery_Filter_mixed() {
 	_ = query // Use client.Run or client.GetAll to execute the query.
 }
 
-func ExampleQuery_inequalitySort() {
+func SnippetQuery_inequalitySort() {
 	// [START inequality_sort]
 	query := datastore.NewQuery("Task").
 		Filter("Priority >", 3).
@@ -460,7 +460,7 @@ func ExampleQuery_inequalitySort() {
 	_ = query // Use client.Run or client.GetAll to execute the query.
 }
 
-func ExampleQuery_invalidInequalitySortA() {
+func SnippetQuery_invalidInequalitySortA() {
 	// [START inequality_sort_invalid_not_same]
 	query := datastore.NewQuery("Task").
 		Filter("Priority >", 3).
@@ -469,7 +469,7 @@ func ExampleQuery_invalidInequalitySortA() {
 	_ = query // The query is invalid.
 }
 
-func ExampleQuery_invalidInequalitySortB() {
+func SnippetQuery_invalidInequalitySortB() {
 	// [START inequality_sort_invalid_not_first]
 	query := datastore.NewQuery("Task").
 		Filter("Priority >", 3).
@@ -479,14 +479,14 @@ func ExampleQuery_invalidInequalitySortB() {
 	_ = query // The query is invalid.
 }
 
-func ExampleQuery_Limit() {
+func SnippetQuery_Limit() {
 	// [START limit]
 	query := datastore.NewQuery("Task").Limit(5)
 	// [END limit]
 	_ = query // Use client.Run or client.GetAll to execute the query.
 }
 
-func ExampleIterator_Cursor() {
+func SnippetIterator_Cursor() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	cursorStr := ""
@@ -521,7 +521,7 @@ func ExampleIterator_Cursor() {
 	_ = nextCursor // Use nextCursor.String as the next page's token.
 }
 
-func ExampleQuery_EventualConsistency() {
+func SnippetQuery_EventualConsistency() {
 	// [START eventual_consistent_query]
 	ancestor := datastore.NameKey("TaskList", "default", nil)
 	query := datastore.NewQuery("Task").Ancestor(ancestor).EventualConsistency()
@@ -529,14 +529,14 @@ func ExampleQuery_EventualConsistency() {
 	_ = query // Use client.Run or client.GetAll to execute the query.
 }
 
-func ExampleQuery_unindexed() {
+func SnippetQuery_unindexed() {
 	// [START unindexed_property_query]
 	query := datastore.NewQuery("Tasks").Filter("Description =", "A task description")
 	// [END unindexed_property_query]
 	_ = query // Use client.Run or client.GetAll to execute the query.
 }
 
-func Example_explodingProperties() {
+func Snippet_explodingProperties() {
 	// [START exploding_properties]
 	task := &Task{
 		Tags:          []string{"fun", "programming", "learn"},
@@ -547,7 +547,7 @@ func Example_explodingProperties() {
 	_ = task // Use the task in a datastore Put operation.
 }
 
-func Example_Transaction() {
+func Snippet_Transaction() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	var to, from *datastore.Key
@@ -579,7 +579,7 @@ func Example_Transaction() {
 	// [END transactional_update]
 }
 
-func Example_Client_RunInTransaction() {
+func Snippet_Client_RunInTransaction() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	var to, from *datastore.Key
@@ -604,7 +604,7 @@ func Example_Client_RunInTransaction() {
 	_ = err // Check error.
 }
 
-func ExampleTransaction_getOrCreate() {
+func SnippetTransaction_getOrCreate() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	key := datastore.NameKey("Task", "sampletask", nil)
@@ -626,7 +626,7 @@ func ExampleTransaction_getOrCreate() {
 	_ = err // Check error.
 }
 
-func ExampleTransaction_runQuery() {
+func SnippetTransaction_runQuery() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	// [START transactional_single_entity_group_read_only]
@@ -644,7 +644,7 @@ func ExampleTransaction_runQuery() {
 	_ = err // Check error.
 }
 
-func Example_metadataNamespaces() {
+func Snippet_metadataNamespaces() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	// [START namespace_run_query]
@@ -668,7 +668,7 @@ func Example_metadataNamespaces() {
 	// [END namespace_run_query]
 }
 
-func Example_metadataKinds() {
+func Snippet_metadataKinds() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	// [START kind_run_query]
@@ -685,7 +685,7 @@ func Example_metadataKinds() {
 	// [END kind_run_query]
 }
 
-func Example_metadataProperties() {
+func Snippet_metadataProperties() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	// [START property_run_query]
@@ -704,7 +704,7 @@ func Example_metadataProperties() {
 	// [END property_run_query]
 }
 
-func Example_metadataPropertiesForKind() {
+func Snippet_metadataPropertiesForKind() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	// [START property_by_kind_run_query]

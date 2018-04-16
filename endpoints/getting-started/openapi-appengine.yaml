@@ -6,7 +6,6 @@ info:
   version: "1.0.0"
 host: "YOUR-PROJECT-ID.appspot.com"
 # [END swagger]
-basePath: "/"
 consumes:
 - "application/json"
 produces:
@@ -88,6 +87,7 @@ paths:
       - auth0_jwk: []
 definitions:
   echoMessage:
+    type: "object"
     properties:
       message:
         type: "string"
