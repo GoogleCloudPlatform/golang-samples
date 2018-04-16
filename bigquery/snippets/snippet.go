@@ -47,7 +47,7 @@ func updateDatasetDescription(client *bigquery.Client, datasetID string) error {
 
 func updateDatasetDefaultExpiration(client *bigquery.Client, datasetID string) error {
 	ctx := context.Background()
-	// [START bigquery_update_dataset_expiration]\
+	// [START bigquery_update_dataset_expiration]
 	ds := client.Dataset(datasetID)
 	original, err := ds.Metadata(ctx)
 	if err != nil {
