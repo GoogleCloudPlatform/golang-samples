@@ -1,0 +1,50 @@
+#!/bin/bash
+
+set -e
+
+export GOOGLE_APPLICATION_CREDENTIALS=$KOKORO_KEYSTORE_DIR/71386_golang-samples-kokoro-service-account
+export GOLANG_SAMPLES_KMS_KEYRING=ring1
+export GOLANG_SAMPLES_KMS_CRYPTOKEY=key1
+
+curl https://storage.googleapis.com/gimme-proj/linux_amd64/gimmeproj > /bin/gimmeproj && chmod +x /bin/gimmeproj;
+gimmeproj version;
+export GOLANG_SAMPLES_PROJECT_ID=$(gimmeproj -project golang-samples-tests lease 20m);
+if [ -z "$GOLANG_SAMPLES_PROJECT_ID" ]; then
+  echo "Lease failed."
+  exit 1
+fi
+echo "Running tests in project $GOLANG_SAMPLES_PROJECT_ID";
+trap "gimmeproj -project golang-samples-tests done $GOLANG_SAMPLES_PROJECT_ID" EXIT
+
+set -x
+
+export GOLANG_SAMPLES_SPANNER=projects/golang-samples-tests/instances/golang-samples-tests
+
+date
+
+if [[ -d /cache ]]; then
+  time mv /cache/* .
+  echo 'Uncached'
+fi
+
+# Re-organize files
+export GOPATH=$PWD/gopath
+target=$GOPATH/src/github.com/GoogleCloudPlatform
+mkdir -p $target
+mv github/golang-samples $target
+cd $target/golang-samples
+
+# Do the easy stuff first. Fail fast!
+diff -u <(echo -n) <(gofmt -d -s .)
+go vet ./...
+
+# Check use of Go 1.7 context package
+! grep -R '"context"$' * || { echo "Use golang.org/x/net/context"; false; }
+
+# Download imports.
+time go get -u -v $(go list -f '{{join .Imports "\n"}}{{"\n"}}{{join .TestImports "\n"}}' ./... | sort | uniq | grep -v golang-samples)
+
+date
+
+# Run all of the tests
+go test -timeout 20m -v ./...
