@@ -62,6 +62,32 @@ func updateDatasetDefaultExpiration(client *bigquery.Client, datasetID string) e
 	return nil
 }
 
+func updateDatasetAccessControl(client *bigquery.Client, datasetID string) error {
+	ctx := context.Background()
+	// [START bigquery_update_dataset_access]
+	ds := client.Dataset(datasetID)
+	original, err := ds.Metadata(ctx)
+	if err != nil {
+		return err
+	}
+	// Append a new access control entry to the existing access list
+	changes := bigquery.DatasetMetadataToUpdate{
+		Access: append(original.Access, &bigquery.AccessEntry{
+			Role:       bigquery.ReaderRole,
+			EntityType: bigquery.UserEmailEntity,
+			Entity:     "sample.bigquery.dev@gmail.com"},
+		),
+	}
+
+	// Leverage the ETag for the update to assert there's been no modifications to the
+	// dataset since the metadata was originally read.
+	if _, err := ds.Update(ctx, changes, original.ETag); err != nil {
+		return err
+	}
+	// [END bigquery_update_dataset_access]
+	return nil
+}
+
 func deleteEmptyDataset(client *bigquery.Client, datasetID string) error {
 	ctx := context.Background()
 	// [START bigquery_delete_dataset]
