@@ -48,6 +48,10 @@ func TestAll(t *testing.T) {
 		t.Errorf("failed to create dataset: %v", err)
 	}
 
+	if err := updateDatasetAccessControl(client, datasetID); err != nil {
+		t.Errorf("Failed to update access control for dataset: %v", err)
+	}
+
 	// test empty dataset creation/ttl/delete
 	deletionDatasetID := fmt.Sprintf("%s_quickdelete", datasetID)
 	if err := createDataset(client, deletionDatasetID); err != nil {
