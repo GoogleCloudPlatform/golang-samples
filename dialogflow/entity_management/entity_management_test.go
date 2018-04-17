@@ -5,18 +5,20 @@
 package main
 
 import (
-	dialogflow "cloud.google.com/go/dialogflow/apiv2"
 	"fmt"
-	"golang.org/x/net/context"
-	dialogflowpb "google.golang.org/genproto/googleapis/cloud/dialogflow/v2"
 	"strings"
 	"testing"
 	"time"
+
+	dialogflow "cloud.google.com/go/dialogflow/apiv2"
+	"golang.org/x/net/context"
+	dialogflowpb "google.golang.org/genproto/googleapis/cloud/dialogflow/v2"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestEntityManagement(t *testing.T) {
+	t.Skip("flaky")
 	tc := testutil.SystemTest(t)
 
 	projectID := tc.ProjectID
