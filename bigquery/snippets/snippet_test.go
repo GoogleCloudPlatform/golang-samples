@@ -42,12 +42,29 @@ func TestAll(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	datasetID := fmt.Sprintf("golang_example_dataset_%d", time.Now().Unix())
 	if err := createDataset(client, datasetID); err != nil {
 		t.Errorf("failed to create dataset: %v", err)
 	}
+
+	// test empty dataset creation/ttl/delete
+	deletionDatasetID := fmt.Sprintf("%s_quickdelete", datasetID)
+	if err := createDataset(client, deletionDatasetID); err != nil {
+		t.Errorf("failed to create ephemeral dataset: %v", err)
+	}
+	if err = updateDatasetDefaultExpiration(client, deletionDatasetID); err != nil {
+		t.Errorf("failed to set default table TTL on ephemeral dataset: %v", err)
+	}
+	if err := deleteEmptyDataset(client, deletionDatasetID); err != nil {
+		t.Errorf("failed to delete ephemeral dataset: %v", err)
+	}
+
+	if err := updateDatasetDescription(client, datasetID); err != nil {
+		t.Errorf("failed to update dataset description: %v", err)
+	}
 	if err := listDatasets(client); err != nil {
-		t.Errorf("failed to create dataset: %v", err)
+		t.Errorf("failed to list dataset: %v", err)
 	}
 
 	tableID := fmt.Sprintf("golang_example_table_%d", time.Now().Unix())
@@ -140,12 +157,12 @@ func TestImportExport(t *testing.T) {
 	}
 
 	jsonTableExplicit := fmt.Sprintf("golang_example_dataset_importjson_explicit_%d", time.Now().Unix())
-	if err := importJsonExplicitSchema(client, datasetID, jsonTableExplicit); err != nil {
+	if err := importJSONExplicitSchema(client, datasetID, jsonTableExplicit); err != nil {
 		t.Fatalf("Failed to ingest JSON sample with explicit schema: %v", err)
 	}
 
 	jsonTableAutodetect := fmt.Sprintf("golang_example_dataset_importjson_autodetect_%d", time.Now().Unix())
-	if err := importJsonAutodetectSchema(client, datasetID, jsonTableAutodetect); err != nil {
+	if err := importJSONAutodetectSchema(client, datasetID, jsonTableAutodetect); err != nil {
 		t.Fatalf("Failed to ingest JSON sample with explicit schema: %v", err)
 	}
 
