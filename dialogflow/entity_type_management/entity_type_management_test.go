@@ -14,6 +14,7 @@ import (
 )
 
 func TestEntityTypeManagement(t *testing.T) {
+	t.Skip("flaky")
 	tc := testutil.SystemTest(t)
 
 	projectID := tc.ProjectID
