@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"time"
 
 	"cloud.google.com/go/bigquery"
 	"golang.org/x/net/context"
@@ -22,6 +23,53 @@ func createDataset(client *bigquery.Client, datasetID string) error {
 		return err
 	}
 	// [END bigquery_create_dataset]
+	return nil
+}
+
+func updateDatasetDescription(client *bigquery.Client, datasetID string) error {
+	ctx := context.Background()
+	// [START bigquery_update_dataset_description]
+	ds := client.Dataset(datasetID)
+	original, err := ds.Metadata(ctx)
+	if err != nil {
+		return err
+	}
+	changes := bigquery.DatasetMetadataToUpdate{
+		Description: "Updated Description.",
+	}
+	_, err = ds.Update(ctx, changes, original.ETag)
+	if err != nil {
+		return err
+	}
+	// [END bigquery_update_dataset_description]
+	return nil
+}
+
+func updateDatasetDefaultExpiration(client *bigquery.Client, datasetID string) error {
+	ctx := context.Background()
+	// [START bigquery_update_dataset_expiration]
+	ds := client.Dataset(datasetID)
+	original, err := ds.Metadata(ctx)
+	if err != nil {
+		return err
+	}
+	changes := bigquery.DatasetMetadataToUpdate{
+		DefaultTableExpiration: 24 * time.Hour,
+	}
+	if _, err := client.Dataset(datasetID).Update(ctx, changes, original.ETag); err != nil {
+		return err
+	}
+	// [END bigquery_update_dataset_expiration]
+	return nil
+}
+
+func deleteEmptyDataset(client *bigquery.Client, datasetID string) error {
+	ctx := context.Background()
+	// [START bigquery_delete_dataset]
+	if err := client.Dataset(datasetID).Delete(ctx); err != nil {
+		return fmt.Errorf("Failed to delete dataset: %v", err)
+	}
+	// [END bigquery_delete_dataset]
 	return nil
 }
 
@@ -306,7 +354,7 @@ func exportToGCS(client *bigquery.Client, datasetID, tableID, gcsURI string) err
 	return nil
 }
 
-func importJsonExplicitSchema(client *bigquery.Client, datasetID, tableID string) error {
+func importJSONExplicitSchema(client *bigquery.Client, datasetID, tableID string) error {
 	ctx := context.Background()
 	// [START bigquery_load_table_gcs_json]
 	gcsRef := bigquery.NewGCSReference("gs://cloud-samples-data/bigquery/us-states/us-states.json")
@@ -334,7 +382,7 @@ func importJsonExplicitSchema(client *bigquery.Client, datasetID, tableID string
 	return nil
 }
 
-func importJsonAutodetectSchema(client *bigquery.Client, datasetID, tableID string) error {
+func importJSONAutodetectSchema(client *bigquery.Client, datasetID, tableID string) error {
 	ctx := context.Background()
 	// [START bigquery_load_table_gcs_json_autodetect]
 	gcsRef := bigquery.NewGCSReference("gs://cloud-samples-data/bigquery/us-states/us-states.json")
