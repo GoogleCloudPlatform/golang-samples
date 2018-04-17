@@ -37,8 +37,7 @@ func updateDatasetDescription(client *bigquery.Client, datasetID string) error {
 	changes := bigquery.DatasetMetadataToUpdate{
 		Description: "Updated Description.",
 	}
-	_, err = ds.Update(ctx, changes, original.ETag)
-	if err != nil {
+	if _, err = ds.Update(ctx, changes, original.ETag); err != nil {
 		return err
 	}
 	// [END bigquery_update_dataset_description]
