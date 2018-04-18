@@ -106,4 +106,17 @@ func TestSample(t *testing.T) {
 	runCommand(t, "updatewithtimestamp", dbName)
 	out = runCommand(t, "querywithtimestamp", dbName)
 	assertContains(out, "1000000")
+
+	runCommand(t, "createtabledocswithtimestamp", dbName)
+	runCommand(t, "writetodocstable", dbName)
+	runCommand(t, "updatedocstable", dbName)
+
+	assertContains(runCommand(t, "querydocstable", dbName), "Hello World 1 Updated")
+
+	runCommand(t, "createtabledocswithhistorytable", dbName)
+	runCommand(t, "writewithhistory", dbName)
+	runCommand(t, "updatewithhistory", dbName)
+
+	out = runCommand(t, "querywithhistory", dbName)
+	assertContains(out, "1 1 Hello World 1 Updated")
 }
