@@ -78,7 +78,7 @@ func main() {
 	}
 
 	// delete the bucket
-	if err := delete(client, name); err != nil {
+	if err := deleteBucket(client, name); err != nil {
 		log.Fatal(err)
 	}
 	fmt.Printf("deleted bucket: %v\n", name)
@@ -127,7 +127,7 @@ func list(client *storage.Client, projectID string) ([]string, error) {
 	return buckets, nil
 }
 
-func delete(client *storage.Client, bucketName string) error {
+func deleteBucket(client *storage.Client, bucketName string) error {
 	ctx := context.Background()
 	// [START delete_bucket]
 	if err := client.Bucket(bucketName).Delete(ctx); err != nil {

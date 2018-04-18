@@ -42,33 +42,54 @@ func TestAll(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	datasetID := fmt.Sprintf("golang_example_dataset_%d", time.Now().Unix())
 	if err := createDataset(client, datasetID); err != nil {
-		t.Errorf("failed to create dataset: %v", err)
+		t.Errorf("createDataset(%q): %v", datasetID, err)
+	}
+
+	if err := updateDatasetAccessControl(client, datasetID); err != nil {
+		t.Errorf("updateDataSetAccessControl(%q): %v", datasetID, err)
+	}
+
+	// test empty dataset creation/ttl/delete
+	deletionDatasetID := fmt.Sprintf("%s_quickdelete", datasetID)
+	if err := createDataset(client, deletionDatasetID); err != nil {
+		t.Errorf("createDataset(%q): %v", deletionDatasetID, err)
+	}
+	if err = updateDatasetDefaultExpiration(client, deletionDatasetID); err != nil {
+		t.Errorf("updateDatasetDefaultExpiration(%q): %v", deletionDatasetID, err)
+	}
+	if err := deleteEmptyDataset(client, deletionDatasetID); err != nil {
+		t.Errorf("deleteEmptyDataset(%q): %v", deletionDatasetID, err)
+	}
+
+	if err := updateDatasetDescription(client, datasetID); err != nil {
+		t.Errorf("updateDatasetDescription(%q): %v", datasetID, err)
 	}
 	if err := listDatasets(client); err != nil {
-		t.Errorf("failed to create dataset: %v", err)
+		t.Errorf("listDatasets: %v", err)
 	}
 
 	tableID := fmt.Sprintf("golang_example_table_%d", time.Now().Unix())
 	if err := createTable(client, datasetID, tableID); err != nil {
-		t.Errorf("failed to create table: %v", err)
+		t.Errorf("createTable(dataset:%q  table:%q): %v", datasetID, tableID, err)
 	}
 	buf := &bytes.Buffer{}
 	if err := listTables(client, buf, datasetID); err != nil {
-		t.Errorf("failed to list tables: %v", err)
+		t.Errorf("listTables(%q): %v", datasetID, err)
 	}
 	if got := buf.String(); !strings.Contains(got, tableID) {
 		t.Errorf("want table list %q to contain table %q", got, tableID)
 	}
 	if err := insertRows(client, datasetID, tableID); err != nil {
-		t.Errorf("failed to insert rows: %v", err)
+		t.Errorf("insertRows(dataset:%q table:%q): %v", datasetID, tableID, err)
 	}
 	if err := listRows(client, datasetID, tableID); err != nil {
-		t.Errorf("failed to list rows: %v", err)
+		t.Errorf("listRows(dataset:%q table:%q): %v", datasetID, tableID, err)
 	}
 	if err := browseTable(client, datasetID, tableID); err != nil {
-		t.Errorf("failed to list rows: %v", err)
+		t.Errorf("browseTable(dataset:%q table:%q): %v", datasetID, tableID, err)
 	}
 	if err := asyncQuery(client, datasetID, tableID); err != nil {
 		t.Errorf("failed to async query: %v", err)
@@ -76,13 +97,13 @@ func TestAll(t *testing.T) {
 
 	dstTableID := fmt.Sprintf("golang_example_tabledst_%d", time.Now().Unix())
 	if err := copyTable(client, datasetID, tableID, dstTableID); err != nil {
-		t.Errorf("failed to copy table: %v", err)
+		t.Errorf("failed to copy table (dataset:%q src:%q dst:%q): %v", datasetID, tableID, dstTableID, err)
 	}
 	if err := deleteTable(client, datasetID, tableID); err != nil {
-		t.Errorf("failed to delete table: %v", err)
+		t.Errorf("deleteTable(dataset:%q table:%q): %v", datasetID, tableID, err)
 	}
 	if err := deleteTable(client, datasetID, dstTableID); err != nil {
-		t.Errorf("failed to delete table: %v", err)
+		t.Errorf("deleteTable(dataset:%q table:%q): %v", datasetID, dstTableID, err)
 	}
 
 	deleteDataset(t, ctx, datasetID)
@@ -140,12 +161,12 @@ func TestImportExport(t *testing.T) {
 	}
 
 	jsonTableExplicit := fmt.Sprintf("golang_example_dataset_importjson_explicit_%d", time.Now().Unix())
-	if err := importJsonExplicitSchema(client, datasetID, jsonTableExplicit); err != nil {
+	if err := importJSONExplicitSchema(client, datasetID, jsonTableExplicit); err != nil {
 		t.Fatalf("Failed to ingest JSON sample with explicit schema: %v", err)
 	}
 
 	jsonTableAutodetect := fmt.Sprintf("golang_example_dataset_importjson_autodetect_%d", time.Now().Unix())
-	if err := importJsonAutodetectSchema(client, datasetID, jsonTableAutodetect); err != nil {
+	if err := importJSONAutodetectSchema(client, datasetID, jsonTableAutodetect); err != nil {
 		t.Fatalf("Failed to ingest JSON sample with explicit schema: %v", err)
 	}
 
