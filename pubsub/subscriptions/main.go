@@ -111,14 +111,13 @@ func pullMsgs(client *pubsub.Client, name string, topic *pubsub.Topic) error {
 	sub := client.Subscription(name)
 	cctx, cancel := context.WithCancel(ctx)
 	err := sub.Receive(cctx, func(ctx context.Context, msg *pubsub.Message) {
-		mu.Lock()
-		defer mu.Unlock()
 		msg.Ack()
 		fmt.Printf("Got message: %q\n", string(msg.Data))
+		mu.Lock()
+		defer mu.Unlock()
 		received++
 		if received == 10 {
 			cancel()
-			return
 		}
 	})
 	if err != nil {
