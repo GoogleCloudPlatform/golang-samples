@@ -20,6 +20,7 @@ set -x
 
 export GOLANG_SAMPLES_SPANNER=projects/golang-samples-tests/instances/golang-samples-tests
 
+go version
 date
 
 if [[ -d /cache ]]; then
@@ -43,6 +44,13 @@ go vet ./...
 
 # Download imports.
 time go get -u -v $(go list -f '{{join .Imports "\n"}}{{"\n"}}{{join .TestImports "\n"}}' ./... | sort | uniq | grep -v golang-samples)
+
+# Pin go-sql-driver/mysql to v1.3 (which supports Go 1.6)
+if go version | grep go1\.6\.; then
+  pushd $GOPATH/src/github.com/go-sql-driver/mysql;
+  git checkout v1.3;
+  popd;
+fi
 
 date
 
