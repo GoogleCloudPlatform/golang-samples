@@ -36,8 +36,10 @@ mv github/golang-samples $target
 cd $target/golang-samples
 
 # Do the easy stuff first. Fail fast!
-diff -u <(echo -n) <(gofmt -d -s .)
-go vet ./...
+if [ $GOLANG_SAMPLES_GO_VET ]; then
+  diff -u <(echo -n) <(gofmt -d -s .)
+  go vet ./...
+fi
 
 # Check use of Go 1.7 context package
 ! grep -R '"context"$' * || { echo "Use golang.org/x/net/context"; false; }
