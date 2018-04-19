@@ -147,7 +147,7 @@ Administrative commands:
 // withPool runs the given function in a transaction, saving the state of the pool if the function returns with a non-nil error.
 func withPool(ctx context.Context, f func(pool *Pool) error) error {
 	_, err := datastore.RunInTransaction(ctx, func(tx *ds.Transaction) error {
-		key := ds.NewKey(ctx, "Pool", "pool", 0, nil)
+		key := ds.NameKey("Pool", "pool", nil)
 		var pool Pool
 		if err := tx.Get(key, &pool); err != nil {
 			if err == ds.ErrNoSuchEntity {
