@@ -45,7 +45,8 @@ fi
 ! grep -R '"context"$' * || { echo "Use golang.org/x/net/context"; false; }
 
 # Download imports.
-time go get -u -v $(go list -f '{{join .Imports "\n"}}{{"\n"}}{{join .TestImports "\n"}}' ./... | sort | uniq | grep -v golang-samples)
+GO_IMPORTS=$(go list -f '{{join .Imports "\n"}}{{"\n"}}{{join .TestImports "\n"}}' ./... | sort | uniq | grep -v golang-samples)
+time go get -u -v -d $GO_IMPORTS
 
 # Pin go-sql-driver/mysql to v1.3 (which supports Go 1.6)
 if go version | grep go1\.6\.; then
@@ -53,6 +54,8 @@ if go version | grep go1\.6\.; then
   git checkout v1.3;
   popd;
 fi
+
+go install -v $GO_IMPORTS
 
 date
 
