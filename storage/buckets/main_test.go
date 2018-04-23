@@ -88,13 +88,13 @@ func TestIAM(t *testing.T) {
 func TestRequesterPays(t *testing.T) {
 	testutil.SystemTest(t)
 	if err := enableRequesterPays(storageClient, bucketName); err != nil {
-		t.Errorf("enableRequesterPay: %#v", err)
+		t.Errorf("enableRequesterPays: %#v", err)
 	}
 	if err := disableRequesterPays(storageClient, bucketName); err != nil {
-		t.Errorf("enableRequesterPay: %#v", err)
+		t.Errorf("disableRequesterPays: %#v", err)
 	}
 	if err := checkRequesterPays(storageClient, bucketName); err != nil {
-		t.Errorf("enableRequesterPay: %#v", err)
+		t.Errorf("checkRequesterPays: %#v", err)
 	}
 }
 
