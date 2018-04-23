@@ -6,9 +6,11 @@ export GOOGLE_APPLICATION_CREDENTIALS=$KOKORO_KEYSTORE_DIR/71386_golang-samples-
 export GOLANG_SAMPLES_KMS_KEYRING=ring1
 export GOLANG_SAMPLES_KMS_CRYPTOKEY=key1
 
+TIMEOUT=25m
+
 curl https://storage.googleapis.com/gimme-proj/linux_amd64/gimmeproj > /bin/gimmeproj && chmod +x /bin/gimmeproj;
 gimmeproj version;
-export GOLANG_SAMPLES_PROJECT_ID=$(gimmeproj -project golang-samples-tests lease 20m);
+export GOLANG_SAMPLES_PROJECT_ID=$(gimmeproj -project golang-samples-tests lease $TIMEOUT);
 if [ -z "$GOLANG_SAMPLES_PROJECT_ID" ]; then
   echo "Lease failed."
   exit 1
@@ -60,4 +62,4 @@ go install -v $GO_IMPORTS
 date
 
 # Run all of the tests
-go test -timeout 20m -v ./...
+go test -timeout $TIMEOUT -v ./...
