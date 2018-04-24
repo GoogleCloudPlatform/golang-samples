@@ -195,7 +195,7 @@ func TestImportExport(t *testing.T) {
 		t.Errorf("exportSampleTableAsCompressedCSV(%q): %v", gcsURI, err)
 	}
 
-	// extract shakespear sample as newline-delimited JSON
+	// extract shakespeare sample as newline-delimited JSON
 	gcsURI = fmt.Sprintf("gs://%s/%s", bucket, "shakespeare.json")
 	if err := exportSampleTableAsJSON(client, gcsURI); err != nil {
 		t.Errorf("exportSampleTableAsJSON(%q): %v", gcsURI, err)
