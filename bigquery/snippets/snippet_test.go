@@ -19,6 +19,7 @@ import (
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
 	rawbq "google.golang.org/api/bigquery/v2"
+	"google.golang.org/api/iterator"
 )
 
 func init() {
@@ -201,10 +202,18 @@ func TestImportExport(t *testing.T) {
 		t.Errorf("exportSampleTableAsJSON(%q): %v", gcsURI, err)
 	}
 
-	// Cleanup the bucket and object.
-	if err := storageClient.Bucket(bucket).Object(object).Delete(ctx); err != nil {
-		t.Errorf("failed to cleanup the GCS object: %v", err)
+	// Walk the bucket and delete objects
+	it := storageClient.Bucket(bucket).Objects(ctx, nil)
+	for {
+		objAttrs, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err := storageClient.Bucket(bucket).Object(objAttrs.Name).Delete(ctx); err != nil {
+			t.Errorf("failed to cleanup the GCS object: %v", err)
+		}
 	}
+
 	time.Sleep(time.Second) // Give it a second, due to eventual consistency.
 	if err := storageClient.Bucket(bucket).Delete(ctx); err != nil {
 		t.Errorf("failed to cleanup the GCS bucket: %v", err)

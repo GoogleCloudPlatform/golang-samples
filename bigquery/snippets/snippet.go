@@ -392,7 +392,8 @@ func exportSampleTableAsCSV(client *bigquery.Client, gcsURI string) error {
 
 	extractor := client.DatasetInProject(srcProject, srcDataset).Table(srcTable).ExtractorTo(gcsRef)
 	extractor.DisableHeader = true
-	// run the job in the US location
+	// You can choose to run the job in a specific location for more complex data locality scenarios
+	// Ex: In this example, source dataset and GCS bucket are in the US
 	extractor.Location = "US"
 
 	job, err := extractor.Run(ctx)
