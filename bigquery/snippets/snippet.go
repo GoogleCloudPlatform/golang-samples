@@ -19,7 +19,10 @@ import (
 func createDataset(client *bigquery.Client, datasetID string) error {
 	ctx := context.Background()
 	// [START bigquery_create_dataset]
-	if err := client.Dataset(datasetID).Create(ctx, &bigquery.DatasetMetadata{}); err != nil {
+	meta := &bigquery.DatasetMetadata{
+		Location: "US", // Create the dataset in the US
+	}
+	if err := client.Dataset(datasetID).Create(ctx, meta); err != nil {
 		return err
 	}
 	// [END bigquery_create_dataset]
@@ -115,15 +118,15 @@ func listDatasets(client *bigquery.Client) error {
 
 // Item represents a row item.
 type Item struct {
-	Name  string
-	Count int
+	Name string
+	Age  int
 }
 
 // Save implements the ValueSaver interface.
 func (i *Item) Save() (map[string]bigquery.Value, string, error) {
 	return map[string]bigquery.Value{
-		"Name":  i.Name,
-		"Count": i.Count,
+		"Name": i.Name,
+		"Age":  i.Age,
 	}, "", nil
 }
 
@@ -148,7 +151,6 @@ func createTableExplicitSchema(client *bigquery.Client, datasetID, tableID strin
 	sampleSchema := bigquery.Schema{
 		{Name: "full_name", Type: bigquery.StringFieldType},
 		{Name: "age", Type: bigquery.IntegerFieldType},
-		{Name: "email_addrs", Type: bigquery.StringFieldType, Repeated: true},
 	}
 
 	metaData := &bigquery.TableMetadata{
@@ -188,7 +190,7 @@ func updateTableDescription(client *bigquery.Client, datasetID, tableID string) 
 		return err
 	}
 	newMeta := bigquery.TableMetadataToUpdate{
-		Description: "My new table description." // table expiration in 5 days
+		Description: "Updated description.", // table expiration in 5 days
 	}
 	_, err = tableRef.Update(ctx, newMeta, original.ETag)
 	if err != nil {
@@ -239,28 +241,26 @@ func listTables(client *bigquery.Client, w io.Writer, datasetID string) error {
 
 func insertRows(client *bigquery.Client, datasetID, tableID string) error {
 	ctx := context.Background()
-	// [START bigquery_insert_stream]
+	// [START bigquery_table_insert_rows]
 	u := client.Dataset(datasetID).Table(tableID).Uploader()
 	items := []*Item{
 		// Item implements the ValueSaver interface.
-		{Name: "n1", Count: 7},
-		{Name: "n2", Count: 2},
-		{Name: "n3", Count: 1},
+		{Name: "Phred Phlyntstone", Age: 32},
+		{Name: "Wylma Phlyntstone", Age: 29},
 	}
 	if err := u.Put(ctx, items); err != nil {
 		return err
 	}
-	// [END bigquery_insert_stream]
+	// [END bigquery_table_insert_rows]
 	return nil
 }
 
 func listRows(client *bigquery.Client, datasetID, tableID string) error {
 	ctx := context.Background()
-	// [START bigquery_list_rows]
 	q := client.Query(fmt.Sprintf(`
-		SELECT name, count
+		SELECT name, age
 		FROM %s.%s
-		WHERE count >= 5
+		WHERE age >= 20
 	`, datasetID, tableID))
 	it, err := q.Read(ctx)
 	if err != nil {
@@ -278,17 +278,19 @@ func listRows(client *bigquery.Client, datasetID, tableID string) error {
 		}
 		fmt.Println(row)
 	}
-	// [END bigquery_list_rows]
 	return nil
 }
 
-func asyncQuery(client *bigquery.Client, datasetID, tableID string) error {
+func basicQuery(client *bigquery.Client, datasetID, tableID string) error {
 	ctx := context.Background()
-	// [START bigquery_async_query]
-	q := client.Query(fmt.Sprintf(`
-		SELECT name, count
-		FROM %s.%s
-	`, datasetID, tableID))
+	// [START bigquery_query]
+	q := client.Query(
+		"SELECT name FROM `bigquery-public-data.usa_names.usa_1910_2013` " +
+			"WHERE state = \"TX\" " +
+			"LIMIT 100")
+	// Location must match that of the dataset(s) referenced in the query.
+	q.Location = "US"
+
 	job, err := q.Run(ctx)
 	if err != nil {
 		return err
@@ -315,7 +317,7 @@ func asyncQuery(client *bigquery.Client, datasetID, tableID string) error {
 		}
 		fmt.Println(row)
 	}
-	// [END bigquery_async_query]
+	// [END bigquery_query]
 	return nil
 }
 
@@ -419,47 +421,18 @@ func deleteTable(client *bigquery.Client, datasetID, tableID string) error {
 	return nil
 }
 
-func importFromGCS(client *bigquery.Client, datasetID, tableID, gcsURI string) error {
-	ctx := context.Background()
-	// [START bigquery_import_from_gcs]
-	// For example, "gs://data-bucket/path/to/data.csv"
-	gcsRef := bigquery.NewGCSReference(gcsURI)
-	gcsRef.AllowJaggedRows = true
-	// TODO: set other options on the GCSReference.
-
-	loader := client.Dataset(datasetID).Table(tableID).LoaderFrom(gcsRef)
-	loader.CreateDisposition = bigquery.CreateNever
-	// TODO: set other options on the Loader.
-
-	job, err := loader.Run(ctx)
-	if err != nil {
-		return err
-	}
-	status, err := job.Wait(ctx)
-	if err != nil {
-		return err
-	}
-	if err := status.Err(); err != nil {
-		return err
-	}
-	// [END bigquery_import_from_gcs]
-	return nil
-}
-
 func importFromFile(client *bigquery.Client, datasetID, tableID, filename string) error {
 	ctx := context.Background()
-	// [START bigquery_import_from_file]
+	// [START bigquery_load_from_file]
 	f, err := os.Open(filename)
 	if err != nil {
 		return err
 	}
 	source := bigquery.NewReaderSource(f)
-	source.AllowJaggedRows = true
-	// TODO: set other options on the GCSReference.
+	source.AutoDetect = true   // Allow BigQuery to determine schema
+	source.SkipLeadingRows = 1 // CSV has a single header line
 
 	loader := client.Dataset(datasetID).Table(tableID).LoaderFrom(source)
-	loader.CreateDisposition = bigquery.CreateNever
-	// TODO: set other options on the Loader.
 
 	job, err := loader.Run(ctx)
 	if err != nil {
@@ -472,31 +445,7 @@ func importFromFile(client *bigquery.Client, datasetID, tableID, filename string
 	if err := status.Err(); err != nil {
 		return err
 	}
-	// [END bigquery_import_from_file]
-	return nil
-}
-
-func exportToGCS(client *bigquery.Client, datasetID, tableID, gcsURI string) error {
-	ctx := context.Background()
-	// [START bigquery_export_gcs]
-	// For example, "gs://data-bucket/path/to/data.csv"
-	gcsRef := bigquery.NewGCSReference(gcsURI)
-	gcsRef.FieldDelimiter = ","
-
-	extractor := client.Dataset(datasetID).Table(tableID).ExtractorTo(gcsRef)
-	extractor.DisableHeader = true
-	job, err := extractor.Run(ctx)
-	if err != nil {
-		return err
-	}
-	status, err := job.Wait(ctx)
-	if err != nil {
-		return err
-	}
-	if err := status.Err(); err != nil {
-		return err
-	}
-	// [END bigquery_export_gcs]
+	// [END bigquery_load_from_file]
 	return nil
 }
 
@@ -589,6 +538,34 @@ func exportSampleTableAsJSON(client *bigquery.Client, gcsURI string) error {
 		return err
 	}
 	// [END bigquery_extract_table_json]
+	return nil
+}
+
+func importCSVExplicitSchema(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_load_table_gcs_csv]
+	gcsRef := bigquery.NewGCSReference("gs://cloud-samples-data/bigquery/us-states/us-states.csv")
+	gcsRef.SkipLeadingRows = 1
+	gcsRef.Schema = bigquery.Schema{
+		{Name: "name", Type: bigquery.StringFieldType},
+		{Name: "post_abbr", Type: bigquery.StringFieldType},
+	}
+	loader := client.Dataset(datasetID).Table(tableID).LoaderFrom(gcsRef)
+	loader.WriteDisposition = bigquery.WriteEmpty
+
+	job, err := loader.Run(ctx)
+	if err != nil {
+		return err
+	}
+	status, err := job.Wait(ctx)
+	if err != nil {
+		return err
+	}
+
+	if status.Err() != nil {
+		return fmt.Errorf("Job completed with error: %v", status.Err())
+	}
+	// [END bigquery_load_table_gcs_csv]
 	return nil
 }
 

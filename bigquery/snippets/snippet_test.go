@@ -19,6 +19,7 @@ import (
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
 	rawbq "google.golang.org/api/bigquery/v2"
+	"google.golang.org/api/iterator"
 )
 
 func init() {
@@ -85,6 +86,13 @@ func TestAll(t *testing.T) {
 		t.Errorf("createTableEmptySchema(dataset:%q table:%q): %v", datasetID, tblInferredSchema, err)
 	}
 
+	if err := updateTableDescription(client, datasetID, tblExplicitSchema); err != nil {
+		t.Errorf("updateTableDescription(dataset:%q table:%q): %v", datasetID, tblExplicitSchema, err)
+	}
+	if err := updateTableExpiration(client, datasetID, tblExplicitSchema); err != nil {
+		t.Errorf("updateTableExpiration(dataset:%q table:%q): %v", datasetID, tblExplicitSchema, err)
+	}
+
 	buf := &bytes.Buffer{}
 	if err := listTables(client, buf, datasetID); err != nil {
 		t.Errorf("listTables(%q): %v", datasetID, err)
@@ -109,14 +117,14 @@ func TestAll(t *testing.T) {
 	if err := browseTable(client, datasetID, tblInferredSchema); err != nil {
 		t.Errorf("browseTable(dataset:%q table:%q): %v", datasetID, tblInferredSchema, err)
 	}
-	if err := asyncQuery(client, datasetID, tblInferredSchema); err != nil {
-		t.Errorf("asyncQuery(dataset:%q table:%q): %v", datasetID, tblInferredSchema, err)
+	if err := basicQuery(client, datasetID, tblInferredSchema); err != nil {
+		t.Errorf("basicQuery(dataset:%q table:%q): %v", datasetID, tblInferredSchema, err)
 	}
 
-	if err := printTableMetadata(client, datasetID, tblInferredSchema); err != nil {
+	if err := printTableMetadataExtended(client, datasetID, tblInferredSchema); err != nil {
 		t.Errorf("printTableMetadata(dataset:%q table:%q): %v", datasetID, tblInferredSchema, err)
 	}
-	if err := printTableMetadata(client, datasetID, tblExplicitSchema); err != nil {
+	if err := printTableMetadataExtended(client, datasetID, tblExplicitSchema); err != nil {
 		t.Errorf("printTableMetadata(dataset:%q table:%q): %v", datasetID, tblExplicitSchema, err)
 	}
 
@@ -170,30 +178,26 @@ func TestImportExport(t *testing.T) {
 	if err := createDataset(client, datasetID); err != nil {
 		t.Errorf("createDataset(%q): %v", datasetID, err)
 	}
-	schema := bigquery.Schema{
-		&bigquery.FieldSchema{Name: "Year", Type: bigquery.IntegerFieldType},
-		&bigquery.FieldSchema{Name: "City", Type: bigquery.StringFieldType},
-	}
-	if err := client.Dataset(datasetID).Table(tableID).Create(ctx, &bigquery.TableMetadata{
-		Schema: schema,
-	}); err != nil {
-		t.Errorf("table creation failed (dataset:%q table:%q): %v", datasetID, tableID, err)
-	}
 	defer deleteDataset(t, ctx, datasetID)
 
-	filename := "testdata/olympics.csv"
+	filename := "testdata/people.csv"
 	if err := importFromFile(client, datasetID, tableID, filename); err != nil {
 		t.Fatalf("importFromFile(dataset:%q table:%q filename:%q): %v", datasetID, tableID, filename, err)
 	}
 
-	jsonTableExplicit := fmt.Sprintf("golang_example_dataset_importjson_explicit_%d", time.Now().Unix())
-	if err := importJSONExplicitSchema(client, datasetID, jsonTableExplicit); err != nil {
-		t.Fatalf("importJSONExplicitSchema(dataset:%q table:%q): %v", datasetID, jsonTableExplicit, err)
+	tblExplicitCSV := fmt.Sprintf("golang_example_dataset_importcsv_explicit_%d", time.Now().Unix())
+	if err := importCSVExplicitSchema(client, datasetID, tblExplicitCSV); err != nil {
+		t.Fatalf("importCSVExplicitSchema(dataset:%q table:%q): %v", datasetID, tblExplicitCSV, err)
 	}
 
-	jsonTableAutodetect := fmt.Sprintf("golang_example_dataset_importjson_autodetect_%d", time.Now().Unix())
-	if err := importJSONAutodetectSchema(client, datasetID, jsonTableAutodetect); err != nil {
-		t.Fatalf("importJSONAutodetectSchema(dataset:%q table:%q): %v", datasetID, jsonTableAutodetect, err)
+	tblExplicitJSON := fmt.Sprintf("golang_example_dataset_importjson_explicit_%d", time.Now().Unix())
+	if err := importJSONExplicitSchema(client, datasetID, tblExplicitJSON); err != nil {
+		t.Fatalf("importJSONExplicitSchema(dataset:%q table:%q): %v", datasetID, tblExplicitJSON, err)
+	}
+
+	tblAutodetectJSON := fmt.Sprintf("golang_example_dataset_importjson_autodetect_%d", time.Now().Unix())
+	if err := importJSONAutodetectSchema(client, datasetID, tblAutodetectJSON); err != nil {
+		t.Fatalf("importJSONAutodetectSchema(dataset:%q table:%q): %v", datasetID, tblAutodetectJSON, err)
 	}
 
 	bucket := fmt.Sprintf("golang-example-bigquery-importexport-bucket-%d", time.Now().Unix())
@@ -203,13 +207,8 @@ func TestImportExport(t *testing.T) {
 		t.Fatalf("cannot create bucket: %v", err)
 	}
 
-	gcsURI := fmt.Sprintf("gs://%s/%s", bucket, object)
-	if err := exportToGCS(client, datasetID, tableID, gcsURI); err != nil {
-		t.Errorf("exportToGCS(dataset:%q table:%q gcsuri:%q): %v", datasetID, tableID, gcsURI, err)
-	}
-
 	// extract shakespeare sample as CSV
-	gcsURI = fmt.Sprintf("gs://%s/%s", bucket, "shakespeare.csv")
+	gcsURI := fmt.Sprintf("gs://%s/%s", bucket, "shakespeare.csv")
 	if err := exportSampleTableAsCSV(client, gcsURI); err != nil {
 		t.Errorf("exportSampleTableAsCSV(%q): %v", gcsURI, err)
 	}
@@ -226,10 +225,18 @@ func TestImportExport(t *testing.T) {
 		t.Errorf("exportSampleTableAsJSON(%q): %v", gcsURI, err)
 	}
 
-	// Cleanup the bucket and object.
-	if err := storageClient.Bucket(bucket).Object(object).Delete(ctx); err != nil {
-		t.Errorf("failed to cleanup the GCS object: %v", err)
+	// Walk the bucket and delete objects
+	it := storageClient.Bucket(bucket).Objects(ctx, nil)
+	for {
+		objAttrs, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err := storageClient.Bucket(bucket).Object(objAttrs.Name).Delete(ctx); err != nil {
+			t.Errorf("failed to cleanup the GCS object: %v", err)
+		}
 	}
+
 	time.Sleep(time.Second) // Give it a second, due to eventual consistency.
 	if err := storageClient.Bucket(bucket).Delete(ctx); err != nil {
 		t.Errorf("failed to cleanup the GCS bucket: %v", err)
