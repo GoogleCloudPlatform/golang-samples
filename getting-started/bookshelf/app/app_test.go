@@ -81,7 +81,6 @@ func TestEditBook(t *testing.T) {
 	m := multipart.NewWriter(&body)
 	m.WriteField("title", "simpsons")
 	m.WriteField("author", "homer")
-	m.CreateFormFile("image", "")
 	m.Close()
 
 	resp, err := wt.Post(bookPath, "multipart/form-data; boundary="+m.Boundary(), &body)
@@ -109,7 +108,6 @@ func TestAddAndDelete(t *testing.T) {
 	m := multipart.NewWriter(&body)
 	m.WriteField("title", "simpsons")
 	m.WriteField("author", "homer")
-	m.CreateFormFile("image", "")
 	m.Close()
 
 	resp, err := wt.Post(bookPath, "multipart/form-data; boundary="+m.Boundary(), &body)
@@ -118,7 +116,7 @@ func TestAddAndDelete(t *testing.T) {
 	}
 
 	gotPath := resp.Request.URL.Path
-	if wantPrefix := "/books/"; !strings.HasPrefix(gotPath, wantPrefix) {
+	if wantPrefix := "/books"; !strings.HasPrefix(gotPath, wantPrefix) {
 		t.Fatalf("redirect: got %q, want prefix %q", gotPath, wantPrefix)
 	}
 
