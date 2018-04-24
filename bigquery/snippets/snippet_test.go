@@ -143,7 +143,7 @@ func TestImportExport(t *testing.T) {
 	datasetID := fmt.Sprintf("golang_example_dataset_importexport_%d", time.Now().Unix())
 	tableID := fmt.Sprintf("golang_example_dataset_importexport_%d", time.Now().Unix())
 	if err := createDataset(client, datasetID); err != nil {
-		t.Errorf("failed to create dataset: %v", err)
+		t.Errorf("createDataset(%q): %v", datasetID, err)
 	}
 	schema := bigquery.Schema{
 		&bigquery.FieldSchema{Name: "Year", Type: bigquery.IntegerFieldType},
@@ -152,22 +152,23 @@ func TestImportExport(t *testing.T) {
 	if err := client.Dataset(datasetID).Table(tableID).Create(ctx, &bigquery.TableMetadata{
 		Schema: schema,
 	}); err != nil {
-		t.Errorf("failed to create dataset: %v", err)
+		t.Errorf("table creation failed (dataset:%q table:%q): %v", datasetID, tableID, err)
 	}
 	defer deleteDataset(t, ctx, datasetID)
 
-	if err := importFromFile(client, datasetID, tableID, "testdata/olympics.csv"); err != nil {
-		t.Fatalf("failed to import from file: %v", err)
+	filename := "testdata/olympics.csv"
+	if err := importFromFile(client, datasetID, tableID, filename); err != nil {
+		t.Fatalf("importFromFile(dataset:%q table:%q filename:%q): %v", datasetID, tableID, filename, err)
 	}
 
 	jsonTableExplicit := fmt.Sprintf("golang_example_dataset_importjson_explicit_%d", time.Now().Unix())
 	if err := importJSONExplicitSchema(client, datasetID, jsonTableExplicit); err != nil {
-		t.Fatalf("Failed to ingest JSON sample with explicit schema: %v", err)
+		t.Fatalf("importJSONExplicitSchema(dataset:%q table:%q): %v", datasetID, jsonTableExplicit, err)
 	}
 
 	jsonTableAutodetect := fmt.Sprintf("golang_example_dataset_importjson_autodetect_%d", time.Now().Unix())
 	if err := importJSONAutodetectSchema(client, datasetID, jsonTableAutodetect); err != nil {
-		t.Fatalf("Failed to ingest JSON sample with explicit schema: %v", err)
+		t.Fatalf("importJSONAutodetectSchema(dataset:%q table:%q): %v", datasetID, jsonTableAutodetect, err)
 	}
 
 	bucket := fmt.Sprintf("golang-example-bigquery-importexport-bucket-%d", time.Now().Unix())
@@ -179,7 +180,19 @@ func TestImportExport(t *testing.T) {
 
 	gcsURI := fmt.Sprintf("gs://%s/%s", bucket, object)
 	if err := exportToGCS(client, datasetID, tableID, gcsURI); err != nil {
-		t.Errorf("failed to export to %v: %v", gcsURI, err)
+		t.Errorf("exportToGCS(dataset:%q table:%q gcsuri:%q): %v", datasetID, tableID, gcsURI, err)
+	}
+
+	// extract shakespeare sample as CSV
+	gcsURI = fmt.Sprintf("gs://%s/%s", bucket, "shakespeare.csv")
+	if err := exportSampleTableAsCSV(client, gcsURI); err != nil {
+		t.Errorf("exportSampleTableAsCSV(%q): %v", gcsURI, err)
+	}
+
+	// extract shakespear sample as newline-delimited JSON
+	gcsURI = fmt.Sprintf("gs://%s/%s", bucket, "shakespeare.json")
+	if err := exportSampleTableAsJSON(client, gcsURI); err != nil {
+		t.Errorf("exportSampleTableAsJSON(%q): %v", gcsURI, err)
 	}
 
 	// Cleanup the bucket and object.

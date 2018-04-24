@@ -379,6 +379,67 @@ func exportToGCS(client *bigquery.Client, datasetID, tableID, gcsURI string) err
 	return nil
 }
 
+func exportSampleTableAsCSV(client *bigquery.Client, gcsURI string) error {
+	ctx := context.Background()
+	// [START bigquery_extract_table]
+	srcProject := "bigquery-public-data"
+	srcDataset := "samples"
+	srcTable := "shakespeare"
+
+	// For example, gcsUri = "gs://mybucket/shakespeare.csv"
+	gcsRef := bigquery.NewGCSReference(gcsURI)
+	gcsRef.FieldDelimiter = ","
+
+	extractor := client.DatasetInProject(srcProject, srcDataset).Table(srcTable).ExtractorTo(gcsRef)
+	extractor.DisableHeader = true
+	// run the job in the US location
+	extractor.Location = "US"
+
+	job, err := extractor.Run(ctx)
+	if err != nil {
+		return err
+	}
+	status, err := job.Wait(ctx)
+	if err != nil {
+		return err
+	}
+	if err := status.Err(); err != nil {
+		return err
+	}
+	// [END bigquery_extract_table]
+	return nil
+}
+
+func exportSampleTableAsJSON(client *bigquery.Client, gcsURI string) error {
+	ctx := context.Background()
+	// [START bigquery_extract_table_json]
+	srcProject := "bigquery-public-data"
+	srcDataset := "samples"
+	srcTable := "shakespeare"
+
+	// For example, gcsUri = "gs://mybucket/shakespeare.json"
+	gcsRef := bigquery.NewGCSReference(gcsURI)
+	gcsRef.DestinationFormat = bigquery.JSON
+
+	extractor := client.DatasetInProject(srcProject, srcDataset).Table(srcTable).ExtractorTo(gcsRef)
+	// run the job in the US location
+	extractor.Location = "US"
+
+	job, err := extractor.Run(ctx)
+	if err != nil {
+		return err
+	}
+	status, err := job.Wait(ctx)
+	if err != nil {
+		return err
+	}
+	if err := status.Err(); err != nil {
+		return err
+	}
+	// [END bigquery_extract_table_json]
+	return nil
+}
+
 func importJSONExplicitSchema(client *bigquery.Client, datasetID, tableID string) error {
 	ctx := context.Background()
 	// [START bigquery_load_table_gcs_json]
