@@ -71,36 +71,54 @@ func TestAll(t *testing.T) {
 		t.Errorf("listDatasets: %v", err)
 	}
 
-	tableID := fmt.Sprintf("golang_example_table_%d", time.Now().Unix())
-	if err := createTable(client, datasetID, tableID); err != nil {
-		t.Errorf("createTable(dataset:%q  table:%q): %v", datasetID, tableID, err)
+	tblInferredSchema := fmt.Sprintf("golang_example_table_inferred_%d", time.Now().Unix())
+	tblExplicitSchema := fmt.Sprintf("golang_example_table_explicit_%d", time.Now().Unix())
+	tblEmptySchema := fmt.Sprintf("golang_example_table_emptyschema_%d", time.Now().Unix())
+
+	if err := createTableInferredSchema(client, datasetID, tblInferredSchema); err != nil {
+		t.Errorf("createTableInferredSchema(dataset:%q table:%q): %v", datasetID, tblInferredSchema, err)
 	}
+	if err := createTableExplicitSchema(client, datasetID, tblExplicitSchema); err != nil {
+		t.Errorf("createTableExplicitSchema(dataset:%q table:%q): %v", datasetID, tblInferredSchema, err)
+	}
+	if err := createTableEmptySchema(client, datasetID, tblEmptySchema); err != nil {
+		t.Errorf("createTableEmptySchema(dataset:%q table:%q): %v", datasetID, tblInferredSchema, err)
+	}
+
 	buf := &bytes.Buffer{}
 	if err := listTables(client, buf, datasetID); err != nil {
 		t.Errorf("listTables(%q): %v", datasetID, err)
 	}
-	if got := buf.String(); !strings.Contains(got, tableID) {
-		t.Errorf("want table list %q to contain table %q", got, tableID)
+	// Ensure all three tables are in the list
+	if got := buf.String(); !strings.Contains(got, tblInferredSchema) {
+		t.Errorf("want table list %q to contain table %q", got, tblInferredSchema)
 	}
-	if err := insertRows(client, datasetID, tableID); err != nil {
-		t.Errorf("insertRows(dataset:%q table:%q): %v", datasetID, tableID, err)
+	if got := buf.String(); !strings.Contains(got, tblExplicitSchema) {
+		t.Errorf("want table list %q to contain table %q", got, tblExplicitSchema)
 	}
-	if err := listRows(client, datasetID, tableID); err != nil {
-		t.Errorf("listRows(dataset:%q table:%q): %v", datasetID, tableID, err)
+	if got := buf.String(); !strings.Contains(got, tblEmptySchema) {
+		t.Errorf("want table list %q to contain table %q", got, tblEmptySchema)
 	}
-	if err := browseTable(client, datasetID, tableID); err != nil {
-		t.Errorf("browseTable(dataset:%q table:%q): %v", datasetID, tableID, err)
+
+	if err := insertRows(client, datasetID, tblInferredSchema); err != nil {
+		t.Errorf("insertRows(dataset:%q table:%q): %v", datasetID, tblInferredSchema, err)
 	}
-	if err := asyncQuery(client, datasetID, tableID); err != nil {
-		t.Errorf("failed to async query: %v", err)
+	if err := listRows(client, datasetID, tblInferredSchema); err != nil {
+		t.Errorf("listRows(dataset:%q table:%q): %v", datasetID, tblInferredSchema, err)
+	}
+	if err := browseTable(client, datasetID, tblInferredSchema); err != nil {
+		t.Errorf("browseTable(dataset:%q table:%q): %v", datasetID, tblInferredSchema, err)
+	}
+	if err := asyncQuery(client, datasetID, tblInferredSchema); err != nil {
+		t.Errorf("asyncQuery(dataset:%q table:%q): %v", datasetID, tblInferredSchema, err)
 	}
 
 	dstTableID := fmt.Sprintf("golang_example_tabledst_%d", time.Now().Unix())
-	if err := copyTable(client, datasetID, tableID, dstTableID); err != nil {
-		t.Errorf("failed to copy table (dataset:%q src:%q dst:%q): %v", datasetID, tableID, dstTableID, err)
+	if err := copyTable(client, datasetID, tblInferredSchema, dstTableID); err != nil {
+		t.Errorf("copyTable(dataset:%q src:%q dst:%q): %v", datasetID, tblInferredSchema, dstTableID, err)
 	}
-	if err := deleteTable(client, datasetID, tableID); err != nil {
-		t.Errorf("deleteTable(dataset:%q table:%q): %v", datasetID, tableID, err)
+	if err := deleteTable(client, datasetID, tblInferredSchema); err != nil {
+		t.Errorf("deleteTable(dataset:%q table:%q): %v", datasetID, tblInferredSchema, err)
 	}
 	if err := deleteTable(client, datasetID, dstTableID); err != nil {
 		t.Errorf("deleteTable(dataset:%q table:%q): %v", datasetID, dstTableID, err)

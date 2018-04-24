@@ -113,8 +113,6 @@ func listDatasets(client *bigquery.Client) error {
 	return nil
 }
 
-// [START bigquery_create_table]
-
 // Item represents a row item.
 type Item struct {
 	Name  string
@@ -129,11 +127,9 @@ func (i *Item) Save() (map[string]bigquery.Value, string, error) {
 	}, "", nil
 }
 
-// [END bigquery_create_table]
-
-func createTable(client *bigquery.Client, datasetID, tableID string) error {
+func createTableInferredSchema(client *bigquery.Client, datasetID, tableID string) error {
 	ctx := context.Background()
-	// [START bigquery_create_table]
+	// Demonstrates inferring a BigQuery schema from Go native types
 	schema, err := bigquery.InferSchema(Item{})
 	if err != nil {
 		return err
@@ -142,7 +138,44 @@ func createTable(client *bigquery.Client, datasetID, tableID string) error {
 	if err := table.Create(ctx, &bigquery.TableMetadata{Schema: schema}); err != nil {
 		return err
 	}
+	return nil
+}
+
+func createTableExplicitSchema(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_create_table]
+	// Represent email_addrs as an array of strings, rather than a single address
+	sampleSchema := bigquery.Schema{
+		{Name: "full_name", Type: bigquery.StringFieldType},
+		{Name: "age", Type: bigquery.IntegerFieldType},
+		{Name: "email_addrs", Type: bigquery.StringFieldType, Repeated: true},
+	}
+
+	metaData := &bigquery.TableMetadata{
+		Schema:         sampleSchema,
+		ExpirationTime: time.Now().AddDate(1, 0, 0), // Table will be automatically deleted in 1 year
+	}
+	tableRef := client.Dataset(datasetID).Table(tableID)
+	if err := tableRef.Create(ctx, metaData); err != nil {
+		return err
+	}
 	// [END bigquery_create_table]
+	return nil
+}
+
+func createTableEmptySchema(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_create_table_without_schema]
+	// Create the table as a partitioned table
+	metaData := &bigquery.TableMetadata{
+		TimePartitioning: &bigquery.TimePartitioning{
+			Expiration: time.Duration(24*365) * time.Hour, // 365 day partition expiry
+		},
+	}
+	if err := client.Dataset(datasetID).Table(tableID).Create(ctx, metaData); err != nil {
+		return err
+	}
+	// [END bigquery_create_table_without_schema]
 	return nil
 }
 
