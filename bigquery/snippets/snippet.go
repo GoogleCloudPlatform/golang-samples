@@ -179,6 +179,46 @@ func createTableEmptySchema(client *bigquery.Client, datasetID, tableID string) 
 	return nil
 }
 
+func updateTableDescription(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_update_table_description]
+	tableRef := client.Dataset(datasetID).Table(tableID)
+	original, err := tableRef.Metadata(ctx)
+	if err != nil {
+		return err
+	}
+	newMeta := bigquery.TableMetadataToUpdate{
+		Description: "My new table description." // table expiration in 5 days
+	}
+	_, err = tableRef.Update(ctx, newMeta, original.ETag)
+	if err != nil {
+		return err
+	}
+	// [END bigquery_update_table_description]
+	return nil
+
+}
+
+func updateTableExpiration(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_update_table_expiration]
+	tableRef := client.Dataset(datasetID).Table(tableID)
+	original, err := tableRef.Metadata(ctx)
+	if err != nil {
+		return err
+	}
+	newMeta := bigquery.TableMetadataToUpdate{
+		ExpirationTime: time.Now().Add(time.Duration(5*24) * time.Hour), // table expiration in 5 days
+	}
+	_, err = tableRef.Update(ctx, newMeta, original.ETag)
+	if err != nil {
+		return err
+	}
+	// [END bigquery_update_table_expiration]
+	return nil
+
+}
+
 func listTables(client *bigquery.Client, w io.Writer, datasetID string) error {
 	ctx := context.Background()
 	// [START bigquery_list_tables]
@@ -276,6 +316,54 @@ func asyncQuery(client *bigquery.Client, datasetID, tableID string) error {
 		fmt.Println(row)
 	}
 	// [END bigquery_async_query]
+	return nil
+}
+
+func printTableMetadataExtended(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_get_table]
+	// Demonstrates some of the information available in the metadata for a table.
+	meta, err := client.Dataset(datasetID).Table(tableID).Metadata(ctx)
+	if err != nil {
+		return err
+	}
+	// Print information about the table
+	fmt.Printf("Table ID: %s\n", tableID)
+	if len(meta.Name) > 0 {
+		fmt.Printf("Has Friendly Name: %s", meta.Name)
+	}
+
+	if len(meta.ViewQuery) > 0 {
+		// Table is a logical view, rather than a table with backing storage
+		fmt.Println("Table is a logical view")
+	} else {
+		if meta.ExternalDataConfig != nil {
+			// Table is federated against external data (GCS, BigTable, etc)
+			fmt.Printf("Table is externally federated against %s\n", meta.ExternalDataConfig.SourceFormat)
+		} else {
+			// Table is a normal managed table.
+			fmt.Printf("Table is managed by BigQuery, with %d rows and %d Bytes in managed storage.\n", meta.NumRows, meta.NumBytes)
+			if meta.StreamingBuffer != nil {
+				fmt.Printf("Table has active streaming buffer, with estimated %d bytes and %d rows in the buffer\n", meta.StreamingBuffer.EstimatedBytes, meta.StreamingBuffer.EstimatedRows)
+			}
+		}
+		// Its a table, walk the top-level schema
+		fmt.Printf("Defined schema has %d top-level fields\n", len(meta.Schema))
+		topLevelArrays := 0
+		topLevelRecords := 0
+		for _, f := range meta.Schema {
+			if f.Repeated {
+				topLevelArrays++
+			}
+			if f.Type == bigquery.RecordFieldType {
+				topLevelRecords++
+			}
+		}
+		if topLevelArrays > 0 || topLevelRecords > 0 {
+			fmt.Printf("Schema is complex.  %d fields are array-based, %d fields are record/structs.\n", topLevelArrays, topLevelRecords)
+		}
+	}
+	// [END bigquery_get_table]
 	return nil
 }
 

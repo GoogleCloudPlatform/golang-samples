@@ -113,6 +113,13 @@ func TestAll(t *testing.T) {
 		t.Errorf("asyncQuery(dataset:%q table:%q): %v", datasetID, tblInferredSchema, err)
 	}
 
+	if err := printTableMetadata(client, datasetID, tblInferredSchema); err != nil {
+		t.Errorf("printTableMetadata(dataset:%q table:%q): %v", datasetID, tblInferredSchema, err)
+	}
+	if err := printTableMetadata(client, datasetID, tblExplicitSchema); err != nil {
+		t.Errorf("printTableMetadata(dataset:%q table:%q): %v", datasetID, tblExplicitSchema, err)
+	}
+
 	dstTableID := fmt.Sprintf("golang_example_tabledst_%d", time.Now().Unix())
 	if err := copyTable(client, datasetID, tblInferredSchema, dstTableID); err != nil {
 		t.Errorf("copyTable(dataset:%q src:%q dst:%q): %v", datasetID, tblInferredSchema, dstTableID, err)
