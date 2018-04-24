@@ -410,6 +410,37 @@ func exportSampleTableAsCSV(client *bigquery.Client, gcsURI string) error {
 	return nil
 }
 
+func exportSampleTableAsCompressedCSV(client *bigquery.Client, gcsURI string) error {
+	ctx := context.Background()
+	// [START bigquery_extract_table_compressed]
+	srcProject := "bigquery-public-data"
+	srcDataset := "samples"
+	srcTable := "shakespeare"
+
+	// For example, gcsUri = "gs://mybucket/shakespeare.csv"
+	gcsRef := bigquery.NewGCSReference(gcsURI)
+	gcsRef.Compression = bigquery.Gzip
+
+	extractor := client.DatasetInProject(srcProject, srcDataset).Table(srcTable).ExtractorTo(gcsRef)
+	extractor.DisableHeader = true
+	// run the job in the US location
+	extractor.Location = "US"
+
+	job, err := extractor.Run(ctx)
+	if err != nil {
+		return err
+	}
+	status, err := job.Wait(ctx)
+	if err != nil {
+		return err
+	}
+	if err := status.Err(); err != nil {
+		return err
+	}
+	// [END bigquery_extract_table_compressed]
+	return nil
+}
+
 func exportSampleTableAsJSON(client *bigquery.Client, gcsURI string) error {
 	ctx := context.Background()
 	// [START bigquery_extract_table_json]

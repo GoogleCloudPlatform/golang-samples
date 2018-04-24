@@ -189,6 +189,12 @@ func TestImportExport(t *testing.T) {
 		t.Errorf("exportSampleTableAsCSV(%q): %v", gcsURI, err)
 	}
 
+	// extract shakespeare sample as GZIP-compressed CSV
+	gcsURI = fmt.Sprintf("gs://%s/%s", bucket, "shakespeare.csv.gz")
+	if err := exportSampleTableAsCompressedCSV(client, gcsURI); err != nil {
+		t.Errorf("exportSampleTableAsCompressedCSV(%q): %v", gcsURI, err)
+	}
+
 	// extract shakespear sample as newline-delimited JSON
 	gcsURI = fmt.Sprintf("gs://%s/%s", bucket, "shakespeare.json")
 	if err := exportSampleTableAsJSON(client, gcsURI); err != nil {
