@@ -424,7 +424,8 @@ func exportSampleTableAsCompressedCSV(client *bigquery.Client, gcsURI string) er
 
 	extractor := client.DatasetInProject(srcProject, srcDataset).Table(srcTable).ExtractorTo(gcsRef)
 	extractor.DisableHeader = true
-	// run the job in the US location
+	// You can choose to run the job in a specific location for more complex data locality scenarios
+	// Ex: In this example, source dataset and GCS bucket are in the US
 	extractor.Location = "US"
 
 	job, err := extractor.Run(ctx)
@@ -454,7 +455,8 @@ func exportSampleTableAsJSON(client *bigquery.Client, gcsURI string) error {
 	gcsRef.DestinationFormat = bigquery.JSON
 
 	extractor := client.DatasetInProject(srcProject, srcDataset).Table(srcTable).ExtractorTo(gcsRef)
-	// run the job in the US location
+	// You can choose to run the job in a specific location for more complex data locality scenarios
+	// Ex: In this example, source dataset and GCS bucket are in the US
 	extractor.Location = "US"
 
 	job, err := extractor.Run(ctx)
