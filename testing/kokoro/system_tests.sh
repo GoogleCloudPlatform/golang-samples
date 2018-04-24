@@ -37,12 +37,6 @@ mkdir -p $target
 mv github/golang-samples $target
 cd $target/golang-samples
 
-# Do the easy stuff first. Fail fast!
-if [ $GOLANG_SAMPLES_GO_VET ]; then
-  diff -u <(echo -n) <(gofmt -d -s .)
-  go vet ./...
-fi
-
 # Check use of Go 1.7 context package
 ! grep -R '"context"$' * || { echo "Use golang.org/x/net/context"; false; }
 
@@ -58,6 +52,12 @@ if go version | grep go1\.6\.; then
 fi
 
 go install -v $GO_IMPORTS
+
+# Do the easy stuff before running tests. Fail fast!
+if [ $GOLANG_SAMPLES_GO_VET ]; then
+  diff -u <(echo -n) <(gofmt -d -s .)
+  go vet ./...
+fi
 
 date
 
