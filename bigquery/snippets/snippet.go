@@ -321,9 +321,22 @@ func basicQuery(client *bigquery.Client, datasetID, tableID string) error {
 	return nil
 }
 
-func printTableMetadataExtended(client *bigquery.Client, datasetID, tableID string) error {
+func printTableMetadataSimple(client *bigquery.Client, datasetID, tableID string) error {
 	ctx := context.Background()
 	// [START bigquery_get_table]
+	meta, err := client.Dataset(datasetID).Table(tableID).Metadata(ctx)
+	if err != nil {
+		return err
+	}
+	// Print information about the table
+	fmt.Printf("Schema: %+v\n", meta.Schema)
+	fmt.Printf("Description: %s\n", meta.Description)
+	fmt.Printf("Row in managed storage: %d\n", meta.NumRows)
+	// [END bigquery_get_table]
+	return nil
+}
+func printTableMetadataExtended(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
 	// Demonstrates some of the information available in the metadata for a table.
 	meta, err := client.Dataset(datasetID).Table(tableID).Metadata(ctx)
 	if err != nil {
@@ -335,11 +348,11 @@ func printTableMetadataExtended(client *bigquery.Client, datasetID, tableID stri
 		fmt.Printf("Has Friendly Name: %s", meta.Name)
 	}
 
-	if len(meta.ViewQuery) > 0 {
+	if meta.Type == bigquery.ViewTable {
 		// Table is a logical view, rather than a table with backing storage
 		fmt.Println("Table is a logical view")
 	} else {
-		if meta.ExternalDataConfig != nil {
+		if meta.Type == bigquery.ExternalTable {
 			// Table is federated against external data (GCS, BigTable, etc)
 			fmt.Printf("Table is externally federated against %s\n", meta.ExternalDataConfig.SourceFormat)
 		} else {
@@ -365,7 +378,6 @@ func printTableMetadataExtended(client *bigquery.Client, datasetID, tableID stri
 			fmt.Printf("Schema is complex.  %d fields are array-based, %d fields are record/structs.\n", topLevelArrays, topLevelRecords)
 		}
 	}
-	// [END bigquery_get_table]
 	return nil
 }
 
@@ -421,7 +433,7 @@ func deleteTable(client *bigquery.Client, datasetID, tableID string) error {
 	return nil
 }
 
-func importFromFile(client *bigquery.Client, datasetID, tableID, filename string) error {
+func importCSVFromFile(client *bigquery.Client, datasetID, tableID, filename string) error {
 	ctx := context.Background()
 	// [START bigquery_load_from_file]
 	f, err := os.Open(filename)
@@ -446,98 +458,6 @@ func importFromFile(client *bigquery.Client, datasetID, tableID, filename string
 		return err
 	}
 	// [END bigquery_load_from_file]
-	return nil
-}
-
-func exportSampleTableAsCSV(client *bigquery.Client, gcsURI string) error {
-	ctx := context.Background()
-	// [START bigquery_extract_table]
-	srcProject := "bigquery-public-data"
-	srcDataset := "samples"
-	srcTable := "shakespeare"
-
-	// For example, gcsUri = "gs://mybucket/shakespeare.csv"
-	gcsRef := bigquery.NewGCSReference(gcsURI)
-	gcsRef.FieldDelimiter = ","
-
-	extractor := client.DatasetInProject(srcProject, srcDataset).Table(srcTable).ExtractorTo(gcsRef)
-	extractor.DisableHeader = true
-	// run the job in the US location
-	extractor.Location = "US"
-
-	job, err := extractor.Run(ctx)
-	if err != nil {
-		return err
-	}
-	status, err := job.Wait(ctx)
-	if err != nil {
-		return err
-	}
-	if err := status.Err(); err != nil {
-		return err
-	}
-	// [END bigquery_extract_table]
-	return nil
-}
-
-func exportSampleTableAsCompressedCSV(client *bigquery.Client, gcsURI string) error {
-	ctx := context.Background()
-	// [START bigquery_extract_table_compressed]
-	srcProject := "bigquery-public-data"
-	srcDataset := "samples"
-	srcTable := "shakespeare"
-
-	// For example, gcsUri = "gs://mybucket/shakespeare.csv"
-	gcsRef := bigquery.NewGCSReference(gcsURI)
-	gcsRef.Compression = bigquery.Gzip
-
-	extractor := client.DatasetInProject(srcProject, srcDataset).Table(srcTable).ExtractorTo(gcsRef)
-	extractor.DisableHeader = true
-	// run the job in the US location
-	extractor.Location = "US"
-
-	job, err := extractor.Run(ctx)
-	if err != nil {
-		return err
-	}
-	status, err := job.Wait(ctx)
-	if err != nil {
-		return err
-	}
-	if err := status.Err(); err != nil {
-		return err
-	}
-	// [END bigquery_extract_table_compressed]
-	return nil
-}
-
-func exportSampleTableAsJSON(client *bigquery.Client, gcsURI string) error {
-	ctx := context.Background()
-	// [START bigquery_extract_table_json]
-	srcProject := "bigquery-public-data"
-	srcDataset := "samples"
-	srcTable := "shakespeare"
-
-	// For example, gcsUri = "gs://mybucket/shakespeare.json"
-	gcsRef := bigquery.NewGCSReference(gcsURI)
-	gcsRef.DestinationFormat = bigquery.JSON
-
-	extractor := client.DatasetInProject(srcProject, srcDataset).Table(srcTable).ExtractorTo(gcsRef)
-	// run the job in the US location
-	extractor.Location = "US"
-
-	job, err := extractor.Run(ctx)
-	if err != nil {
-		return err
-	}
-	status, err := job.Wait(ctx)
-	if err != nil {
-		return err
-	}
-	if err := status.Err(); err != nil {
-		return err
-	}
-	// [END bigquery_extract_table_json]
 	return nil
 }
 
@@ -619,5 +539,98 @@ func importJSONAutodetectSchema(client *bigquery.Client, datasetID, tableID stri
 		return fmt.Errorf("Job completed with error: %v", status.Err())
 	}
 	// [END bigquery_load_table_gcs_json_autodetect]
+	return nil
+}
+
+func exportSampleTableAsCSV(client *bigquery.Client, gcsURI string) error {
+	ctx := context.Background()
+	// [START bigquery_extract_table]
+	srcProject := "bigquery-public-data"
+	srcDataset := "samples"
+	srcTable := "shakespeare"
+
+	// For example, gcsUri = "gs://mybucket/shakespeare.csv"
+	gcsRef := bigquery.NewGCSReference(gcsURI)
+	gcsRef.FieldDelimiter = ","
+
+	extractor := client.DatasetInProject(srcProject, srcDataset).Table(srcTable).ExtractorTo(gcsRef)
+	extractor.DisableHeader = true
+	// You can choose to run the job in a specific location for more complex data locality scenarios
+	// Ex: In this example, source dataset and GCS bucket are in the US
+	extractor.Location = "US"
+
+	job, err := extractor.Run(ctx)
+	if err != nil {
+		return err
+	}
+	status, err := job.Wait(ctx)
+	if err != nil {
+		return err
+	}
+	if err := status.Err(); err != nil {
+		return err
+	}
+	// [END bigquery_extract_table]
+	return nil
+}
+
+func exportSampleTableAsCompressedCSV(client *bigquery.Client, gcsURI string) error {
+	ctx := context.Background()
+	// [START bigquery_extract_table_compressed]
+	srcProject := "bigquery-public-data"
+	srcDataset := "samples"
+	srcTable := "shakespeare"
+
+	// For example, gcsUri = "gs://mybucket/shakespeare.csv"
+	gcsRef := bigquery.NewGCSReference(gcsURI)
+	gcsRef.Compression = bigquery.Gzip
+
+	extractor := client.DatasetInProject(srcProject, srcDataset).Table(srcTable).ExtractorTo(gcsRef)
+	extractor.DisableHeader = true
+	// You can choose to run the job in a specific location for more complex data locality scenarios
+	// Ex: In this example, source dataset and GCS bucket are in the US	extractor.Location = "US"
+	job, err := extractor.Run(ctx)
+	if err != nil {
+		return err
+	}
+	status, err := job.Wait(ctx)
+	if err != nil {
+		return err
+	}
+	if err := status.Err(); err != nil {
+		return err
+	}
+	// [END bigquery_extract_table_compressed]
+	return nil
+}
+
+func exportSampleTableAsJSON(client *bigquery.Client, gcsURI string) error {
+	ctx := context.Background()
+	// [START bigquery_extract_table_json]
+	srcProject := "bigquery-public-data"
+	srcDataset := "samples"
+	srcTable := "shakespeare"
+
+	// For example, gcsUri = "gs://mybucket/shakespeare.json"
+	gcsRef := bigquery.NewGCSReference(gcsURI)
+	gcsRef.DestinationFormat = bigquery.JSON
+
+	extractor := client.DatasetInProject(srcProject, srcDataset).Table(srcTable).ExtractorTo(gcsRef)
+	// You can choose to run the job in a specific location for more complex data locality scenarios
+	// Ex: In this example, source dataset and GCS bucket are in the US
+	extractor.Location = "US"
+
+	job, err := extractor.Run(ctx)
+	if err != nil {
+		return err
+	}
+	status, err := job.Wait(ctx)
+	if err != nil {
+		return err
+	}
+	if err := status.Err(); err != nil {
+		return err
+	}
+	// [END bigquery_extract_table_json]
 	return nil
 }

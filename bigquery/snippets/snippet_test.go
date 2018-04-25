@@ -124,7 +124,7 @@ func TestAll(t *testing.T) {
 	if err := printTableMetadataExtended(client, datasetID, tblInferredSchema); err != nil {
 		t.Errorf("printTableMetadata(dataset:%q table:%q): %v", datasetID, tblInferredSchema, err)
 	}
-	if err := printTableMetadataExtended(client, datasetID, tblExplicitSchema); err != nil {
+	if err := printTableMetadataSimple(client, datasetID, tblExplicitSchema); err != nil {
 		t.Errorf("printTableMetadata(dataset:%q table:%q): %v", datasetID, tblExplicitSchema, err)
 	}
 
@@ -181,8 +181,8 @@ func TestImportExport(t *testing.T) {
 	defer deleteDataset(t, ctx, datasetID)
 
 	filename := "testdata/people.csv"
-	if err := importFromFile(client, datasetID, tableID, filename); err != nil {
-		t.Fatalf("importFromFile(dataset:%q table:%q filename:%q): %v", datasetID, tableID, filename, err)
+	if err := importCSVFromFile(client, datasetID, tableID, filename); err != nil {
+		t.Fatalf("importCSVFromFile(dataset:%q table:%q filename:%q): %v", datasetID, tableID, filename, err)
 	}
 
 	tblExplicitCSV := fmt.Sprintf("golang_example_dataset_importcsv_explicit_%d", time.Now().Unix())
@@ -199,7 +199,6 @@ func TestImportExport(t *testing.T) {
 	if err := importJSONAutodetectSchema(client, datasetID, tblAutodetectJSON); err != nil {
 		t.Fatalf("importJSONAutodetectSchema(dataset:%q table:%q): %v", datasetID, tblAutodetectJSON, err)
 	}
-
 	bucket := fmt.Sprintf("golang-example-bigquery-importexport-bucket-%d", time.Now().Unix())
 	const object = "values.csv"
 
