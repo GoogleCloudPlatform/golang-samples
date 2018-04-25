@@ -2,8 +2,8 @@
 
 set -ex
 
-if [ $TRAVIS != "true" ]; then
-  echo "This should only be run from travis."
+if [ -z $KOKORO_BUILD_ARTIFACTS_SUBDIR ]; then
+  echo "This should only be run from Kokoro."
   exit 1
 fi
 
