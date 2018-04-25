@@ -53,7 +53,7 @@ func TestAll(t *testing.T) {
 		t.Errorf("updateDataSetAccessControl(%q): %v", datasetID, err)
 	}
 
-	// test empty dataset creation/ttl/delete
+	// Test empty dataset creation/ttl/delete.
 	deletionDatasetID := fmt.Sprintf("%s_quickdelete", datasetID)
 	if err := createDataset(client, deletionDatasetID); err != nil {
 		t.Errorf("createDataset(%q): %v", deletionDatasetID, err)
@@ -80,10 +80,10 @@ func TestAll(t *testing.T) {
 		t.Errorf("createTableInferredSchema(dataset:%q table:%q): %v", datasetID, tblInferredSchema, err)
 	}
 	if err := createTableExplicitSchema(client, datasetID, tblExplicitSchema); err != nil {
-		t.Errorf("createTableExplicitSchema(dataset:%q table:%q): %v", datasetID, tblInferredSchema, err)
+		t.Errorf("createTableExplicitSchema(dataset:%q table:%q): %v", datasetID, tblExplicitSchema, err)
 	}
 	if err := createTableEmptySchema(client, datasetID, tblEmptySchema); err != nil {
-		t.Errorf("createTableEmptySchema(dataset:%q table:%q): %v", datasetID, tblInferredSchema, err)
+		t.Errorf("createTableEmptySchema(dataset:%q table:%q): %v", datasetID, tblEmptySchema, err)
 	}
 
 	if err := updateTableDescription(client, datasetID, tblExplicitSchema); err != nil {
@@ -97,7 +97,7 @@ func TestAll(t *testing.T) {
 	if err := listTables(client, buf, datasetID); err != nil {
 		t.Errorf("listTables(%q): %v", datasetID, err)
 	}
-	// Ensure all three tables are in the list
+	// Ensure all three tables are in the list.
 	if got := buf.String(); !strings.Contains(got, tblInferredSchema) {
 		t.Errorf("want table list %q to contain table %q", got, tblInferredSchema)
 	}
@@ -108,6 +108,7 @@ func TestAll(t *testing.T) {
 		t.Errorf("want table list %q to contain table %q", got, tblEmptySchema)
 	}
 
+	// Stream data, read, query the inferred schema table.
 	if err := insertRows(client, datasetID, tblInferredSchema); err != nil {
 		t.Errorf("insertRows(dataset:%q table:%q): %v", datasetID, tblInferredSchema, err)
 	}
@@ -121,6 +122,7 @@ func TestAll(t *testing.T) {
 		t.Errorf("basicQuery(dataset:%q table:%q): %v", datasetID, tblInferredSchema, err)
 	}
 
+	// Print information about tables (extended and simple).
 	if err := printTableMetadataExtended(client, datasetID, tblInferredSchema); err != nil {
 		t.Errorf("printTableMetadata(dataset:%q table:%q): %v", datasetID, tblInferredSchema, err)
 	}
