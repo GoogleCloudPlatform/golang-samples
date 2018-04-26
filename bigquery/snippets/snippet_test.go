@@ -123,7 +123,7 @@ func TestAll(t *testing.T) {
 	}
 
 	// Print information about tables (extended and simple).
-	if err := printTableMetadataExtended(client, datasetID, tblInferredSchema); err != nil {
+	if err := printTableMetadataSimple(client, datasetID, tblInferredSchema); err != nil {
 		t.Errorf("printTableMetadata(dataset:%q table:%q): %v", datasetID, tblInferredSchema, err)
 	}
 	if err := printTableMetadataSimple(client, datasetID, tblExplicitSchema); err != nil {

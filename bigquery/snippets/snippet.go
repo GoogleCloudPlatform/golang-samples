@@ -168,13 +168,7 @@ func createTableExplicitSchema(client *bigquery.Client, datasetID, tableID strin
 func createTableEmptySchema(client *bigquery.Client, datasetID, tableID string) error {
 	ctx := context.Background()
 	// [START bigquery_create_table_without_schema]
-	// Create the table as a partitioned table
-	metaData := &bigquery.TableMetadata{
-		TimePartitioning: &bigquery.TimePartitioning{
-			Expiration: time.Duration(24*365) * time.Hour, // 365 day partition expiry
-		},
-	}
-	if err := client.Dataset(datasetID).Table(tableID).Create(ctx, metaData); err != nil {
+	if err := client.Dataset(datasetID).Table(tableID).Create(ctx, nil); err != nil {
 		return err
 	}
 	// [END bigquery_create_table_without_schema]
@@ -190,7 +184,7 @@ func updateTableDescription(client *bigquery.Client, datasetID, tableID string) 
 		return err
 	}
 	newMeta := bigquery.TableMetadataToUpdate{
-		Description: "Updated description.", // table expiration in 5 days
+		Description: "Updated description.",
 	}
 	_, err = tableRef.Update(ctx, newMeta, original.ETag)
 	if err != nil {
@@ -329,55 +323,10 @@ func printTableMetadataSimple(client *bigquery.Client, datasetID, tableID string
 		return err
 	}
 	// Print information about the table
-	fmt.Printf("Schema: %+v\n", meta.Schema)
+	fmt.Printf("Schema has %d top-level fields\n", len(meta.Schema))
 	fmt.Printf("Description: %s\n", meta.Description)
 	fmt.Printf("Row in managed storage: %d\n", meta.NumRows)
 	// [END bigquery_get_table]
-	return nil
-}
-func printTableMetadataExtended(client *bigquery.Client, datasetID, tableID string) error {
-	ctx := context.Background()
-	// Demonstrates some of the information available in the metadata for a table.
-	meta, err := client.Dataset(datasetID).Table(tableID).Metadata(ctx)
-	if err != nil {
-		return err
-	}
-	// Print information about the table
-	fmt.Printf("Table ID: %s\n", tableID)
-	if len(meta.Name) > 0 {
-		fmt.Printf("Has Friendly Name: %s", meta.Name)
-	}
-
-	if meta.Type == bigquery.ViewTable {
-		// Table is a logical view, rather than a table with backing storage
-		fmt.Println("Table is a logical view")
-	} else {
-		if meta.Type == bigquery.ExternalTable {
-			// Table is federated against external data (GCS, BigTable, etc)
-			fmt.Printf("Table is externally federated against %s\n", meta.ExternalDataConfig.SourceFormat)
-		} else {
-			// Table is a normal managed table.
-			fmt.Printf("Table is managed by BigQuery, with %d rows and %d Bytes in managed storage.\n", meta.NumRows, meta.NumBytes)
-			if meta.StreamingBuffer != nil {
-				fmt.Printf("Table has active streaming buffer, with estimated %d bytes and %d rows in the buffer\n", meta.StreamingBuffer.EstimatedBytes, meta.StreamingBuffer.EstimatedRows)
-			}
-		}
-		// Its a table, walk the top-level schema
-		fmt.Printf("Defined schema has %d top-level fields\n", len(meta.Schema))
-		topLevelArrays := 0
-		topLevelRecords := 0
-		for _, f := range meta.Schema {
-			if f.Repeated {
-				topLevelArrays++
-			}
-			if f.Type == bigquery.RecordFieldType {
-				topLevelRecords++
-			}
-		}
-		if topLevelArrays > 0 || topLevelRecords > 0 {
-			fmt.Printf("Schema is complex.  %d fields are array-based, %d fields are record/structs.\n", topLevelArrays, topLevelRecords)
-		}
-	}
 	return nil
 }
 
@@ -588,7 +537,9 @@ func exportSampleTableAsCompressedCSV(client *bigquery.Client, gcsURI string) er
 	extractor := client.DatasetInProject(srcProject, srcDataset).Table(srcTable).ExtractorTo(gcsRef)
 	extractor.DisableHeader = true
 	// You can choose to run the job in a specific location for more complex data locality scenarios
-	// Ex: In this example, source dataset and GCS bucket are in the US	extractor.Location = "US"
+	// Ex: In this example, source dataset and GCS bucket are in the USi
+	extractor.Location = "US"
+
 	job, err := extractor.Run(ctx)
 	if err != nil {
 		return err
