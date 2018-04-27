@@ -61,7 +61,6 @@ func query(proj string) (*bigquery.RowIterator, error) {
 		LIMIT 10;`)
 	return query.Read(ctx)
 	// [END bigquery_simple_app_query]
-
 }
 
 // [START bigquery_simple_app_print]
@@ -87,4 +86,4 @@ func printResults(w io.Writer, iter *bigquery.RowIterator) error {
 }
 
 // [END bigquery_simple_app_print]
-// [START bigquery_simple_app_all]
+// [END bigquery_simple_app_all]
