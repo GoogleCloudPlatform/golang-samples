@@ -72,25 +72,25 @@ func TestAll(t *testing.T) {
 		t.Errorf("listDatasets: %v", err)
 	}
 
-	tblInferredSchema := fmt.Sprintf("golang_example_table_inferred_%d", time.Now().Unix())
-	tblExplicitSchema := fmt.Sprintf("golang_example_table_explicit_%d", time.Now().Unix())
-	tblEmptySchema := fmt.Sprintf("golang_example_table_emptyschema_%d", time.Now().Unix())
+	inferred := fmt.Sprintf("golang_example_table_inferred_%d", time.Now().Unix())
+	explicit := fmt.Sprintf("golang_example_table_explicit_%d", time.Now().Unix())
+	empty := fmt.Sprintf("golang_example_table_emptyschema_%d", time.Now().Unix())
 
-	if err := createTableInferredSchema(client, datasetID, tblInferredSchema); err != nil {
-		t.Errorf("createTableInferredSchema(dataset:%q table:%q): %v", datasetID, tblInferredSchema, err)
+	if err := createTableInferredSchema(client, datasetID, inferred); err != nil {
+		t.Errorf("createTableInferredSchema(dataset:%q table:%q): %v", datasetID, inferred, err)
 	}
-	if err := createTableExplicitSchema(client, datasetID, tblExplicitSchema); err != nil {
-		t.Errorf("createTableExplicitSchema(dataset:%q table:%q): %v", datasetID, tblExplicitSchema, err)
+	if err := createTableExplicitSchema(client, datasetID, explicit); err != nil {
+		t.Errorf("createTableExplicitSchema(dataset:%q table:%q): %v", datasetID, explicit, err)
 	}
-	if err := createTableEmptySchema(client, datasetID, tblEmptySchema); err != nil {
-		t.Errorf("createTableEmptySchema(dataset:%q table:%q): %v", datasetID, tblEmptySchema, err)
+	if err := createTableEmptySchema(client, datasetID, empty); err != nil {
+		t.Errorf("createTableEmptySchema(dataset:%q table:%q): %v", datasetID, empty, err)
 	}
 
-	if err := updateTableDescription(client, datasetID, tblExplicitSchema); err != nil {
-		t.Errorf("updateTableDescription(dataset:%q table:%q): %v", datasetID, tblExplicitSchema, err)
+	if err := updateTableDescription(client, datasetID, explicit); err != nil {
+		t.Errorf("updateTableDescription(dataset:%q table:%q): %v", datasetID, explicit, err)
 	}
-	if err := updateTableExpiration(client, datasetID, tblExplicitSchema); err != nil {
-		t.Errorf("updateTableExpiration(dataset:%q table:%q): %v", datasetID, tblExplicitSchema, err)
+	if err := updateTableExpiration(client, datasetID, explicit); err != nil {
+		t.Errorf("updateTableExpiration(dataset:%q table:%q): %v", datasetID, explicit, err)
 	}
 
 	buf := &bytes.Buffer{}
@@ -98,44 +98,44 @@ func TestAll(t *testing.T) {
 		t.Errorf("listTables(%q): %v", datasetID, err)
 	}
 	// Ensure all three tables are in the list.
-	if got := buf.String(); !strings.Contains(got, tblInferredSchema) {
-		t.Errorf("want table list %q to contain table %q", got, tblInferredSchema)
+	if got := buf.String(); !strings.Contains(got, inferred) {
+		t.Errorf("want table list %q to contain table %q", got, inferred)
 	}
-	if got := buf.String(); !strings.Contains(got, tblExplicitSchema) {
-		t.Errorf("want table list %q to contain table %q", got, tblExplicitSchema)
+	if got := buf.String(); !strings.Contains(got, explicit) {
+		t.Errorf("want table list %q to contain table %q", got, explicit)
 	}
-	if got := buf.String(); !strings.Contains(got, tblEmptySchema) {
-		t.Errorf("want table list %q to contain table %q", got, tblEmptySchema)
+	if got := buf.String(); !strings.Contains(got, empty) {
+		t.Errorf("want table list %q to contain table %q", got, empty)
 	}
 
 	// Stream data, read, query the inferred schema table.
-	if err := insertRows(client, datasetID, tblInferredSchema); err != nil {
-		t.Errorf("insertRows(dataset:%q table:%q): %v", datasetID, tblInferredSchema, err)
+	if err := insertRows(client, datasetID, inferred); err != nil {
+		t.Errorf("insertRows(dataset:%q table:%q): %v", datasetID, inferred, err)
 	}
-	if err := listRows(client, datasetID, tblInferredSchema); err != nil {
-		t.Errorf("listRows(dataset:%q table:%q): %v", datasetID, tblInferredSchema, err)
+	if err := listRows(client, datasetID, inferred); err != nil {
+		t.Errorf("listRows(dataset:%q table:%q): %v", datasetID, inferred, err)
 	}
-	if err := browseTable(client, datasetID, tblInferredSchema); err != nil {
-		t.Errorf("browseTable(dataset:%q table:%q): %v", datasetID, tblInferredSchema, err)
+	if err := browseTable(client, datasetID, inferred); err != nil {
+		t.Errorf("browseTable(dataset:%q table:%q): %v", datasetID, inferred, err)
 	}
-	if err := basicQuery(client, datasetID, tblInferredSchema); err != nil {
-		t.Errorf("basicQuery(dataset:%q table:%q): %v", datasetID, tblInferredSchema, err)
+	if err := basicQuery(client, datasetID, inferred); err != nil {
+		t.Errorf("basicQuery(dataset:%q table:%q): %v", datasetID, inferred, err)
 	}
 
 	// Print information about tables (extended and simple).
-	if err := printTableMetadataSimple(client, datasetID, tblInferredSchema); err != nil {
-		t.Errorf("printTableMetadata(dataset:%q table:%q): %v", datasetID, tblInferredSchema, err)
+	if err := printTableMetadataSimple(client, datasetID, inferred); err != nil {
+		t.Errorf("printTableMetadata(dataset:%q table:%q): %v", datasetID, inferred, err)
 	}
-	if err := printTableMetadataSimple(client, datasetID, tblExplicitSchema); err != nil {
-		t.Errorf("printTableMetadata(dataset:%q table:%q): %v", datasetID, tblExplicitSchema, err)
+	if err := printTableMetadataSimple(client, datasetID, explicit); err != nil {
+		t.Errorf("printTableMetadata(dataset:%q table:%q): %v", datasetID, explicit, err)
 	}
 
 	dstTableID := fmt.Sprintf("golang_example_tabledst_%d", time.Now().Unix())
-	if err := copyTable(client, datasetID, tblInferredSchema, dstTableID); err != nil {
-		t.Errorf("copyTable(dataset:%q src:%q dst:%q): %v", datasetID, tblInferredSchema, dstTableID, err)
+	if err := copyTable(client, datasetID, inferred, dstTableID); err != nil {
+		t.Errorf("copyTable(dataset:%q src:%q dst:%q): %v", datasetID, inferred, dstTableID, err)
 	}
-	if err := deleteTable(client, datasetID, tblInferredSchema); err != nil {
-		t.Errorf("deleteTable(dataset:%q table:%q): %v", datasetID, tblInferredSchema, err)
+	if err := deleteTable(client, datasetID, inferred); err != nil {
+		t.Errorf("deleteTable(dataset:%q table:%q): %v", datasetID, inferred, err)
 	}
 	if err := deleteTable(client, datasetID, dstTableID); err != nil {
 		t.Errorf("deleteTable(dataset:%q table:%q): %v", datasetID, dstTableID, err)

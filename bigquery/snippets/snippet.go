@@ -20,7 +20,7 @@ func createDataset(client *bigquery.Client, datasetID string) error {
 	ctx := context.Background()
 	// [START bigquery_create_dataset]
 	meta := &bigquery.DatasetMetadata{
-		Location: "US", // Create the dataset in the US
+		Location: "US", // Create the dataset in the US.
 	}
 	if err := client.Dataset(datasetID).Create(ctx, meta); err != nil {
 		return err
@@ -73,7 +73,7 @@ func updateDatasetAccessControl(client *bigquery.Client, datasetID string) error
 	if err != nil {
 		return err
 	}
-	// Append a new access control entry to the existing access list
+	// Append a new access control entry to the existing access list.
 	changes := bigquery.DatasetMetadataToUpdate{
 		Access: append(original.Access, &bigquery.AccessEntry{
 			Role:       bigquery.ReaderRole,
@@ -132,7 +132,7 @@ func (i *Item) Save() (map[string]bigquery.Value, string, error) {
 
 func createTableInferredSchema(client *bigquery.Client, datasetID, tableID string) error {
 	ctx := context.Background()
-	// Demonstrates inferring a BigQuery schema from Go native types
+	// bigquery.InferSchema infers BQ schema from native Go types.
 	schema, err := bigquery.InferSchema(Item{})
 	if err != nil {
 		return err
@@ -147,7 +147,6 @@ func createTableInferredSchema(client *bigquery.Client, datasetID, tableID strin
 func createTableExplicitSchema(client *bigquery.Client, datasetID, tableID string) error {
 	ctx := context.Background()
 	// [START bigquery_create_table]
-	// Represent email_addrs as an array of strings, rather than a single address
 	sampleSchema := bigquery.Schema{
 		{Name: "full_name", Type: bigquery.StringFieldType},
 		{Name: "age", Type: bigquery.IntegerFieldType},
@@ -155,7 +154,7 @@ func createTableExplicitSchema(client *bigquery.Client, datasetID, tableID strin
 
 	metaData := &bigquery.TableMetadata{
 		Schema:         sampleSchema,
-		ExpirationTime: time.Now().AddDate(1, 0, 0), // Table will be automatically deleted in 1 year
+		ExpirationTime: time.Now().AddDate(1, 0, 0), // Table will be automatically deleted in 1 year.
 	}
 	tableRef := client.Dataset(datasetID).Table(tableID)
 	if err := tableRef.Create(ctx, metaData); err != nil {
@@ -186,8 +185,7 @@ func updateTableDescription(client *bigquery.Client, datasetID, tableID string) 
 	newMeta := bigquery.TableMetadataToUpdate{
 		Description: "Updated description.",
 	}
-	_, err = tableRef.Update(ctx, newMeta, original.ETag)
-	if err != nil {
+	if _, err = tableRef.Update(ctx, newMeta, original.ETag); err != nil {
 		return err
 	}
 	// [END bigquery_update_table_description]
@@ -204,10 +202,9 @@ func updateTableExpiration(client *bigquery.Client, datasetID, tableID string) e
 		return err
 	}
 	newMeta := bigquery.TableMetadataToUpdate{
-		ExpirationTime: time.Now().Add(time.Duration(5*24) * time.Hour), // table expiration in 5 days
+		ExpirationTime: time.Now().Add(time.Duration(5*24) * time.Hour), // table expiration in 5 days.
 	}
-	_, err = tableRef.Update(ctx, newMeta, original.ETag)
-	if err != nil {
+	if _, err = tableRef.Update(ctx, newMeta, original.ETag); err != nil {
 		return err
 	}
 	// [END bigquery_update_table_expiration]
@@ -322,7 +319,7 @@ func printTableMetadataSimple(client *bigquery.Client, datasetID, tableID string
 	if err != nil {
 		return err
 	}
-	// Print information about the table
+	// Print basic information about the table.
 	fmt.Printf("Schema has %d top-level fields\n", len(meta.Schema))
 	fmt.Printf("Description: %s\n", meta.Description)
 	fmt.Printf("Row in managed storage: %d\n", meta.NumRows)
@@ -390,8 +387,8 @@ func importCSVFromFile(client *bigquery.Client, datasetID, tableID, filename str
 		return err
 	}
 	source := bigquery.NewReaderSource(f)
-	source.AutoDetect = true   // Allow BigQuery to determine schema
-	source.SkipLeadingRows = 1 // CSV has a single header line
+	source.AutoDetect = true   // Allow BigQuery to determine schema.
+	source.SkipLeadingRows = 1 // CSV has a single header line.
 
 	loader := client.Dataset(datasetID).Table(tableID).LoaderFrom(source)
 
@@ -504,8 +501,8 @@ func exportSampleTableAsCSV(client *bigquery.Client, gcsURI string) error {
 
 	extractor := client.DatasetInProject(srcProject, srcDataset).Table(srcTable).ExtractorTo(gcsRef)
 	extractor.DisableHeader = true
-	// You can choose to run the job in a specific location for more complex data locality scenarios
-	// Ex: In this example, source dataset and GCS bucket are in the US
+	// You can choose to run the job in a specific location for more complex data locality scenarios.
+	// Ex: In this example, source dataset and GCS bucket are in the US.
 	extractor.Location = "US"
 
 	job, err := extractor.Run(ctx)
@@ -536,8 +533,8 @@ func exportSampleTableAsCompressedCSV(client *bigquery.Client, gcsURI string) er
 
 	extractor := client.DatasetInProject(srcProject, srcDataset).Table(srcTable).ExtractorTo(gcsRef)
 	extractor.DisableHeader = true
-	// You can choose to run the job in a specific location for more complex data locality scenarios
-	// Ex: In this example, source dataset and GCS bucket are in the USi
+	// You can choose to run the job in a specific location for more complex data locality scenarios.
+	// Ex: In this example, source dataset and GCS bucket are in the US.
 	extractor.Location = "US"
 
 	job, err := extractor.Run(ctx)
@@ -567,8 +564,8 @@ func exportSampleTableAsJSON(client *bigquery.Client, gcsURI string) error {
 	gcsRef.DestinationFormat = bigquery.JSON
 
 	extractor := client.DatasetInProject(srcProject, srcDataset).Table(srcTable).ExtractorTo(gcsRef)
-	// You can choose to run the job in a specific location for more complex data locality scenarios
-	// Ex: In this example, source dataset and GCS bucket are in the US
+	// You can choose to run the job in a specific location for more complex data locality scenarios.
+	// Ex: In this example, source dataset and GCS bucket are in the US.
 	extractor.Location = "US"
 
 	job, err := extractor.Run(ctx)
