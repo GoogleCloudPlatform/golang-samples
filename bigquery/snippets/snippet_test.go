@@ -187,19 +187,19 @@ func TestImportExport(t *testing.T) {
 		t.Fatalf("importCSVFromFile(dataset:%q table:%q filename:%q): %v", datasetID, tableID, filename, err)
 	}
 
-	tblExplicitCSV := fmt.Sprintf("golang_example_dataset_importcsv_explicit_%d", time.Now().Unix())
-	if err := importCSVExplicitSchema(client, datasetID, tblExplicitCSV); err != nil {
-		t.Fatalf("importCSVExplicitSchema(dataset:%q table:%q): %v", datasetID, tblExplicitCSV, err)
+	explicitCSV := fmt.Sprintf("golang_example_dataset_importcsv_explicit_%d", time.Now().Unix())
+	if err := importCSVExplicitSchema(client, datasetID, explicitCSV); err != nil {
+		t.Fatalf("importCSVExplicitSchema(dataset:%q table:%q): %v", datasetID, explicitCSV, err)
 	}
 
-	tblExplicitJSON := fmt.Sprintf("golang_example_dataset_importjson_explicit_%d", time.Now().Unix())
-	if err := importJSONExplicitSchema(client, datasetID, tblExplicitJSON); err != nil {
-		t.Fatalf("importJSONExplicitSchema(dataset:%q table:%q): %v", datasetID, tblExplicitJSON, err)
+	explicitJSON := fmt.Sprintf("golang_example_dataset_importjson_explicit_%d", time.Now().Unix())
+	if err := importJSONExplicitSchema(client, datasetID, explicitJSON); err != nil {
+		t.Fatalf("importJSONExplicitSchema(dataset:%q table:%q): %v", datasetID, explicitJSON, err)
 	}
 
-	tblAutodetectJSON := fmt.Sprintf("golang_example_dataset_importjson_autodetect_%d", time.Now().Unix())
-	if err := importJSONAutodetectSchema(client, datasetID, tblAutodetectJSON); err != nil {
-		t.Fatalf("importJSONAutodetectSchema(dataset:%q table:%q): %v", datasetID, tblAutodetectJSON, err)
+	autodetectJSON := fmt.Sprintf("golang_example_dataset_importjson_autodetect_%d", time.Now().Unix())
+	if err := importJSONAutodetectSchema(client, datasetID, autodetectJSON); err != nil {
+		t.Fatalf("importJSONAutodetectSchema(dataset:%q table:%q): %v", datasetID, autodetectJSON, err)
 	}
 	bucket := fmt.Sprintf("golang-example-bigquery-importexport-bucket-%d", time.Now().Unix())
 	const object = "values.csv"
