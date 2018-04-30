@@ -53,7 +53,7 @@ func TestAll(t *testing.T) {
 		t.Errorf("updateDataSetAccessControl(%q): %v", datasetID, err)
 	}
 
-	// test empty dataset creation/ttl/delete
+	// Test empty dataset creation/ttl/delete.
 	deletionDatasetID := fmt.Sprintf("%s_quickdelete", datasetID)
 	if err := createDataset(client, deletionDatasetID); err != nil {
 		t.Errorf("createDataset(%q): %v", deletionDatasetID, err)
@@ -72,36 +72,70 @@ func TestAll(t *testing.T) {
 		t.Errorf("listDatasets: %v", err)
 	}
 
-	tableID := fmt.Sprintf("golang_example_table_%d", time.Now().Unix())
-	if err := createTable(client, datasetID, tableID); err != nil {
-		t.Errorf("createTable(dataset:%q  table:%q): %v", datasetID, tableID, err)
+	inferred := fmt.Sprintf("golang_example_table_inferred_%d", time.Now().Unix())
+	explicit := fmt.Sprintf("golang_example_table_explicit_%d", time.Now().Unix())
+	empty := fmt.Sprintf("golang_example_table_emptyschema_%d", time.Now().Unix())
+
+	if err := createTableInferredSchema(client, datasetID, inferred); err != nil {
+		t.Errorf("createTableInferredSchema(dataset:%q table:%q): %v", datasetID, inferred, err)
 	}
+	if err := createTableExplicitSchema(client, datasetID, explicit); err != nil {
+		t.Errorf("createTableExplicitSchema(dataset:%q table:%q): %v", datasetID, explicit, err)
+	}
+	if err := createTableEmptySchema(client, datasetID, empty); err != nil {
+		t.Errorf("createTableEmptySchema(dataset:%q table:%q): %v", datasetID, empty, err)
+	}
+
+	if err := updateTableDescription(client, datasetID, explicit); err != nil {
+		t.Errorf("updateTableDescription(dataset:%q table:%q): %v", datasetID, explicit, err)
+	}
+	if err := updateTableExpiration(client, datasetID, explicit); err != nil {
+		t.Errorf("updateTableExpiration(dataset:%q table:%q): %v", datasetID, explicit, err)
+	}
+
 	buf := &bytes.Buffer{}
 	if err := listTables(client, buf, datasetID); err != nil {
 		t.Errorf("listTables(%q): %v", datasetID, err)
 	}
-	if got := buf.String(); !strings.Contains(got, tableID) {
-		t.Errorf("want table list %q to contain table %q", got, tableID)
+	// Ensure all three tables are in the list.
+	if got := buf.String(); !strings.Contains(got, inferred) {
+		t.Errorf("want table list %q to contain table %q", got, inferred)
 	}
-	if err := insertRows(client, datasetID, tableID); err != nil {
-		t.Errorf("insertRows(dataset:%q table:%q): %v", datasetID, tableID, err)
+	if got := buf.String(); !strings.Contains(got, explicit) {
+		t.Errorf("want table list %q to contain table %q", got, explicit)
 	}
-	if err := listRows(client, datasetID, tableID); err != nil {
-		t.Errorf("listRows(dataset:%q table:%q): %v", datasetID, tableID, err)
+	if got := buf.String(); !strings.Contains(got, empty) {
+		t.Errorf("want table list %q to contain table %q", got, empty)
 	}
-	if err := browseTable(client, datasetID, tableID); err != nil {
-		t.Errorf("browseTable(dataset:%q table:%q): %v", datasetID, tableID, err)
+
+	// Stream data, read, query the inferred schema table.
+	if err := insertRows(client, datasetID, inferred); err != nil {
+		t.Errorf("insertRows(dataset:%q table:%q): %v", datasetID, inferred, err)
 	}
-	if err := asyncQuery(client, datasetID, tableID); err != nil {
-		t.Errorf("failed to async query: %v", err)
+	if err := listRows(client, datasetID, inferred); err != nil {
+		t.Errorf("listRows(dataset:%q table:%q): %v", datasetID, inferred, err)
+	}
+	if err := browseTable(client, datasetID, inferred); err != nil {
+		t.Errorf("browseTable(dataset:%q table:%q): %v", datasetID, inferred, err)
+	}
+	if err := basicQuery(client, datasetID, inferred); err != nil {
+		t.Errorf("basicQuery(dataset:%q table:%q): %v", datasetID, inferred, err)
+	}
+
+	// Print information about tables (extended and simple).
+	if err := printTableMetadataSimple(client, datasetID, inferred); err != nil {
+		t.Errorf("printTableMetadata(dataset:%q table:%q): %v", datasetID, inferred, err)
+	}
+	if err := printTableMetadataSimple(client, datasetID, explicit); err != nil {
+		t.Errorf("printTableMetadata(dataset:%q table:%q): %v", datasetID, explicit, err)
 	}
 
 	dstTableID := fmt.Sprintf("golang_example_tabledst_%d", time.Now().Unix())
-	if err := copyTable(client, datasetID, tableID, dstTableID); err != nil {
-		t.Errorf("failed to copy table (dataset:%q src:%q dst:%q): %v", datasetID, tableID, dstTableID, err)
+	if err := copyTable(client, datasetID, inferred, dstTableID); err != nil {
+		t.Errorf("copyTable(dataset:%q src:%q dst:%q): %v", datasetID, inferred, dstTableID, err)
 	}
-	if err := deleteTable(client, datasetID, tableID); err != nil {
-		t.Errorf("deleteTable(dataset:%q table:%q): %v", datasetID, tableID, err)
+	if err := deleteTable(client, datasetID, inferred); err != nil {
+		t.Errorf("deleteTable(dataset:%q table:%q): %v", datasetID, inferred, err)
 	}
 	if err := deleteTable(client, datasetID, dstTableID); err != nil {
 		t.Errorf("deleteTable(dataset:%q table:%q): %v", datasetID, dstTableID, err)
@@ -146,32 +180,27 @@ func TestImportExport(t *testing.T) {
 	if err := createDataset(client, datasetID); err != nil {
 		t.Errorf("createDataset(%q): %v", datasetID, err)
 	}
-	schema := bigquery.Schema{
-		&bigquery.FieldSchema{Name: "Year", Type: bigquery.IntegerFieldType},
-		&bigquery.FieldSchema{Name: "City", Type: bigquery.StringFieldType},
-	}
-	if err := client.Dataset(datasetID).Table(tableID).Create(ctx, &bigquery.TableMetadata{
-		Schema: schema,
-	}); err != nil {
-		t.Errorf("table creation failed (dataset:%q table:%q): %v", datasetID, tableID, err)
-	}
 	defer deleteDataset(t, ctx, datasetID)
 
-	filename := "testdata/olympics.csv"
-	if err := importFromFile(client, datasetID, tableID, filename); err != nil {
-		t.Fatalf("importFromFile(dataset:%q table:%q filename:%q): %v", datasetID, tableID, filename, err)
+	filename := "testdata/people.csv"
+	if err := importCSVFromFile(client, datasetID, tableID, filename); err != nil {
+		t.Fatalf("importCSVFromFile(dataset:%q table:%q filename:%q): %v", datasetID, tableID, filename, err)
 	}
 
-	jsonTableExplicit := fmt.Sprintf("golang_example_dataset_importjson_explicit_%d", time.Now().Unix())
-	if err := importJSONExplicitSchema(client, datasetID, jsonTableExplicit); err != nil {
-		t.Fatalf("importJSONExplicitSchema(dataset:%q table:%q): %v", datasetID, jsonTableExplicit, err)
+	explicitCSV := fmt.Sprintf("golang_example_dataset_importcsv_explicit_%d", time.Now().Unix())
+	if err := importCSVExplicitSchema(client, datasetID, explicitCSV); err != nil {
+		t.Fatalf("importCSVExplicitSchema(dataset:%q table:%q): %v", datasetID, explicitCSV, err)
 	}
 
-	jsonTableAutodetect := fmt.Sprintf("golang_example_dataset_importjson_autodetect_%d", time.Now().Unix())
-	if err := importJSONAutodetectSchema(client, datasetID, jsonTableAutodetect); err != nil {
-		t.Fatalf("importJSONAutodetectSchema(dataset:%q table:%q): %v", datasetID, jsonTableAutodetect, err)
+	explicitJSON := fmt.Sprintf("golang_example_dataset_importjson_explicit_%d", time.Now().Unix())
+	if err := importJSONExplicitSchema(client, datasetID, explicitJSON); err != nil {
+		t.Fatalf("importJSONExplicitSchema(dataset:%q table:%q): %v", datasetID, explicitJSON, err)
 	}
 
+	autodetectJSON := fmt.Sprintf("golang_example_dataset_importjson_autodetect_%d", time.Now().Unix())
+	if err := importJSONAutodetectSchema(client, datasetID, autodetectJSON); err != nil {
+		t.Fatalf("importJSONAutodetectSchema(dataset:%q table:%q): %v", datasetID, autodetectJSON, err)
+	}
 	bucket := fmt.Sprintf("golang-example-bigquery-importexport-bucket-%d", time.Now().Unix())
 	const object = "values.csv"
 
@@ -179,13 +208,8 @@ func TestImportExport(t *testing.T) {
 		t.Fatalf("cannot create bucket: %v", err)
 	}
 
-	gcsURI := fmt.Sprintf("gs://%s/%s", bucket, object)
-	if err := exportToGCS(client, datasetID, tableID, gcsURI); err != nil {
-		t.Errorf("exportToGCS(dataset:%q table:%q gcsuri:%q): %v", datasetID, tableID, gcsURI, err)
-	}
-
 	// extract shakespeare sample as CSV
-	gcsURI = fmt.Sprintf("gs://%s/%s", bucket, "shakespeare.csv")
+	gcsURI := fmt.Sprintf("gs://%s/%s", bucket, "shakespeare.csv")
 	if err := exportSampleTableAsCSV(client, gcsURI); err != nil {
 		t.Errorf("exportSampleTableAsCSV(%q): %v", gcsURI, err)
 	}
