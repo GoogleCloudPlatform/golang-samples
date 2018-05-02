@@ -40,6 +40,13 @@ cd $target/golang-samples
 # Check use of Go 1.7 context package
 ! grep -R '"context"$' * || { echo "Use golang.org/x/net/context"; false; }
 
+if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* && -n $GOLANG_SAMPLES_GO_VET ]]; then
+  echo "This test run will run end-to-end tests.";
+  export GOLANG_SAMPLES_E2E_TEST=1
+  export PATH="$PATH:/tmp/google-cloud-sdk/bin";
+  ./testing/kokoro/configure_gcloud.bash;
+fi
+
 # Download imports.
 GO_IMPORTS=$(go list -f '{{join .Imports "\n"}}{{"\n"}}{{join .TestImports "\n"}}' ./... | sort | uniq | grep -v golang-samples)
 time go get -u -v -d $GO_IMPORTS
