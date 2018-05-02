@@ -1,8 +1,6 @@
 # Google Cloud Platform Go Samples
 
-[![Build Status](https://travis-ci.org/GoogleCloudPlatform/golang-samples.svg?branch=master)](https://travis-ci.org/GoogleCloudPlatform/golang-samples)
-
-Kokoro: [![Kokoro Build Status][kokoro_badge]][kokoro_link]
+[![Kokoro Build Status][kokoro_badge]][kokoro_link]
 
 This repository holds sample code written in Go that demonstrates the Google
 Cloud Platform.
