@@ -116,6 +116,39 @@ func listDatasets(client *bigquery.Client) error {
 	return nil
 }
 
+func printDatasetInfo(client *bigquery.Client, datasetID string) error {
+	ctx := context.Background()
+	// [START bigquery_get_dataset]
+	meta, err := client.Dataset(datasetID).Metadata(ctx)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Dataset ID: %s\n", datasetID)
+	fmt.Printf("Description: %s\n", meta.Description)
+	fmt.Println("Labels:")
+	for k, v := range meta.Labels {
+		fmt.Printf("\t%s: %s", k, v)
+	}
+	fmt.Println("Tables:")
+	it := client.Dataset(datasetID).Tables(ctx)
+
+	cnt := 0
+	for {
+		t, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		cnt++
+		fmt.Printf("\t%s\n", t.TableID)
+	}
+	if cnt == 0 {
+		fmt.Println("\tThis dataset does not contain any tables.")
+	}
+	// [END bigquery_get_dataset]
+	return nil
+}
+
 // Item represents a row item.
 type Item struct {
 	Name string
@@ -312,7 +345,67 @@ func basicQuery(client *bigquery.Client, datasetID, tableID string) error {
 	return nil
 }
 
-func printTableMetadataSimple(client *bigquery.Client, datasetID, tableID string) error {
+func queryWithDestination(client *bigquery.Client, destDatasetID, destTableID string) error {
+	ctx := context.Background()
+	// [START bigquery_query_destination_table]
+	destRef := client.Dataset(destDatasetID).Table(destTableID)
+	q := client.Query("SELECT 17 as my_col")
+	q.Location = "US" // Location must match the dataset(s) referenced in query.
+	q.QueryConfig.Dst = destRef
+
+	// Run job, then wait until asyncronous execution is complete.
+	job, err := q.Run(ctx)
+	if err != nil {
+		return err
+	}
+	status, err := job.Wait(ctx)
+	if err != nil {
+		return err
+	}
+	if err := status.Err(); err != nil {
+		return err
+	}
+	// At this point, the query has completed and results are persisted to the
+	// destination table.  You can also choose to read from the table.
+	it, err := job.Read(ctx)
+	for {
+		var row []bigquery.Value
+		err := it.Next(&row)
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		fmt.Println(row)
+	}
+	// [END bigquery_query_destination_table]
+	return nil
+}
+
+func queryLegacy(client *bigquery.Client, sqlString string) error {
+	ctx := context.Background()
+	// [START bigquery_query_legacy]
+	q := client.Query(sqlString)
+	q.UseLegacySQL = true
+
+	// Run job, then wait until asyncronous execution is complete.
+	job, err := q.Run(ctx)
+	if err != nil {
+		return err
+	}
+	status, err := job.Wait(ctx)
+	if err != nil {
+		return err
+	}
+	if err := status.Err(); err != nil {
+		return err
+	}
+	// [END bigquery_query_legacy]
+	return nil
+}
+
+func printTableInfo(client *bigquery.Client, datasetID, tableID string) error {
 	ctx := context.Background()
 	// [START bigquery_get_table]
 	meta, err := client.Dataset(datasetID).Table(tableID).Metadata(ctx)
