@@ -351,7 +351,7 @@ func queryWithDestination(client *bigquery.Client, destDatasetID, destTableID st
 
 	destRef := client.Dataset(destDatasetID).Table(destTableID)
 	q := client.Query("SELECT 17 as my_col")
-	q.Location = "US" // Location must match the dataset(s) referenced in query
+	q.Location = "US" // Location must match the dataset(s) referenced in query.
 	q.QueryConfig.Dst = destRef
 
 	// Run job, then wait until asyncronous execution is complete.
@@ -381,7 +381,6 @@ func queryWithDestination(client *bigquery.Client, destDatasetID, destTableID st
 		}
 		fmt.Println(row)
 	}
-
 	// [END bigquery_query_destination_table]
 	return nil
 }
@@ -404,7 +403,6 @@ func queryLegacy(client *bigquery.Client, sqlString string) error {
 	if err := status.Err(); err != nil {
 		return err
 	}
-
 	// [END bigquery_query_legacy]
 	return nil
 }

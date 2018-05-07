@@ -46,6 +46,8 @@ func TestAll(t *testing.T) {
 	if err := createDataset(client, datasetID); err != nil {
 		t.Errorf("createDataset(%q): %v", datasetID, err)
 	}
+	// Cleanup dataset at end of test.
+	defer client.Dataset(datasetID).DeleteWithContents(ctx)
 
 	if err := updateDatasetAccessControl(client, datasetID); err != nil {
 		t.Errorf("updateDataSetAccessControl(%q): %v", datasetID, err)
@@ -106,7 +108,6 @@ func TestAll(t *testing.T) {
 		t.Errorf("want table list %q to contain table %q", got, empty)
 	}
 
-	// Print dataset information
 	if err := printDatasetSimple(client, datasetID); err != nil {
 		t.Errorf("printDatasetSimple: %v", err)
 	}
@@ -155,8 +156,6 @@ func TestAll(t *testing.T) {
 		t.Errorf("deleteTable(dataset:%q table:%q): %v", datasetID, dstTableID, err)
 	}
 
-	// cleanup dataset
-	client.Dataset(datasetID).DeleteWithContents(ctx)
 }
 
 func TestImportExport(t *testing.T) {
