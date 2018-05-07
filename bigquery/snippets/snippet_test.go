@@ -108,8 +108,8 @@ func TestAll(t *testing.T) {
 		t.Errorf("want table list %q to contain table %q", got, empty)
 	}
 
-	if err := printDatasetSimple(client, datasetID); err != nil {
-		t.Errorf("printDatasetSimple: %v", err)
+	if err := printDatasetInfo(client, datasetID); err != nil {
+		t.Errorf("printDatasetInfo: %v", err)
 	}
 
 	// Stream data, read, query the inferred schema table.
@@ -138,11 +138,11 @@ func TestAll(t *testing.T) {
 	}
 
 	// Print information about tables (extended and simple).
-	if err := printTableMetadataSimple(client, datasetID, inferred); err != nil {
-		t.Errorf("printTableMetadata(dataset:%q table:%q): %v", datasetID, inferred, err)
+	if err := printTableInfo(client, datasetID, inferred); err != nil {
+		t.Errorf("printTableInfo(dataset:%q table:%q): %v", datasetID, inferred, err)
 	}
-	if err := printTableMetadataSimple(client, datasetID, explicit); err != nil {
-		t.Errorf("printTableMetadata(dataset:%q table:%q): %v", datasetID, explicit, err)
+	if err := printTableInfo(client, datasetID, explicit); err != nil {
+		t.Errorf("printTableInfo(dataset:%q table:%q): %v", datasetID, explicit, err)
 	}
 
 	dstTableID := fmt.Sprintf("golang_example_tabledst_%d", time.Now().Unix())

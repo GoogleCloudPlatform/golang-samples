@@ -116,7 +116,7 @@ func listDatasets(client *bigquery.Client) error {
 	return nil
 }
 
-func printDatasetSimple(client *bigquery.Client, datasetID string) error {
+func printDatasetInfo(client *bigquery.Client, datasetID string) error {
 	ctx := context.Background()
 	// [START bigquery_get_dataset]
 	meta, err := client.Dataset(datasetID).Metadata(ctx)
@@ -405,7 +405,7 @@ func queryLegacy(client *bigquery.Client, sqlString string) error {
 	return nil
 }
 
-func printTableMetadataSimple(client *bigquery.Client, datasetID, tableID string) error {
+func printTableInfo(client *bigquery.Client, datasetID, tableID string) error {
 	ctx := context.Background()
 	// [START bigquery_get_table]
 	meta, err := client.Dataset(datasetID).Table(tableID).Metadata(ctx)
