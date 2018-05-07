@@ -348,7 +348,6 @@ func basicQuery(client *bigquery.Client, datasetID, tableID string) error {
 func queryWithDestination(client *bigquery.Client, destDatasetID, destTableID string) error {
 	ctx := context.Background()
 	// [START bigquery_query_destination_table]
-
 	destRef := client.Dataset(destDatasetID).Table(destTableID)
 	q := client.Query("SELECT 17 as my_col")
 	q.Location = "US" // Location must match the dataset(s) referenced in query.
@@ -366,7 +365,6 @@ func queryWithDestination(client *bigquery.Client, destDatasetID, destTableID st
 	if err := status.Err(); err != nil {
 		return err
 	}
-
 	// At this point, the query has completed and results are persisted to the
 	// destination table.  You can also choose to read from the table.
 	it, err := job.Read(ctx)
