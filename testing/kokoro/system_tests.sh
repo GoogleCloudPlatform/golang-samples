@@ -48,16 +48,29 @@ if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* && -n $GOLANG_SAMPLES_GO
 fi
 
 # Download imports.
-GO_IMPORTS=$(go list -f '{{join .Imports "\n"}}{{"\n"}}{{join .TestImports "\n"}}' ./... | sort | uniq | grep -v golang-samples)
+GO_IMPORTS=$(go list -f '{{join .Imports "\n"}}{{"\n"}}{{join .TestImports "\n"}}' ./... | sort | uniq | grep -v golang-samples | grep -v golang.org/x/tools/imports)
 time go get -u -v -d $GO_IMPORTS
 
-# Pin go-sql-driver/mysql to v1.3 (which supports Go 1.6)
+# Manually clone golang.org/x/tools since it's incompatible with Go 1.6.
+mkdir -p $GOPATH/src/golang.org/x;
+pushd $GOPATH/src/golang.org/x;
+if [ ! -d tools ]; then
+  git clone https://go.googlesource.com/tools;
+fi
+popd;
+
+# Pin golang.org/x/tools and go-sql-driver/mysql to support Go 1.6.
 if go version | grep go1\.6\.; then
   pushd $GOPATH/src/github.com/go-sql-driver/mysql;
   git checkout v1.3;
   popd;
+
+  pushd $GOPATH/src/golang.org/x/tools;
+  git checkout 8e070db38e5c55da6a85c81878ab769bf5667848;
+  popd;
 fi
 
+go install golang.org/x/tools/imports;
 go install -v $GO_IMPORTS
 
 # Do the easy stuff before running tests. Fail fast!
