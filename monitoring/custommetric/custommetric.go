@@ -29,6 +29,8 @@ func projectResource(projectID string) string {
 	return "projects/" + projectID
 }
 
+// [START monitoring_create_metric]
+
 // createCustomMetric creates a custom metric specified by the metric type.
 func createCustomMetric(s *monitoring.Service, projectID, metricType string) error {
 	ld := monitoring.LabelDescriptor{Key: "environment", ValueType: "STRING", Description: "An arbitrary measurement"}
@@ -50,6 +52,10 @@ func createCustomMetric(s *monitoring.Service, projectID, metricType string) err
 	return nil
 }
 
+// [END monitoring_create_metric]
+
+// [START monitoring_list_descriptors]
+
 // getCustomMetric reads the custom metric created.
 func getCustomMetric(s *monitoring.Service, projectID, metricType string) (*monitoring.ListMetricDescriptorsResponse, error) {
 	resp, err := s.Projects.MetricDescriptors.List(projectResource(projectID)).
@@ -61,6 +67,10 @@ func getCustomMetric(s *monitoring.Service, projectID, metricType string) (*moni
 	log.Printf("getCustomMetric: %s\n", formatResource(resp))
 	return resp, nil
 }
+
+// [END monitoring_list_descriptors]
+
+// [START monitoring_write_timeseries]
 
 // writeTimeSeriesValue writes a value for the custom metric created
 func writeTimeSeriesValue(s *monitoring.Service, projectID, metricType string) error {
@@ -105,6 +115,10 @@ func writeTimeSeriesValue(s *monitoring.Service, projectID, metricType string) e
 	return nil
 }
 
+// [END monitoring_write_timeseries]
+
+// [START monitoring_read_timeseries_simple]
+
 // readTimeSeriesValue reads the TimeSeries for the value specified by metric type in a time window from the last 5 minutes.
 func readTimeSeriesValue(s *monitoring.Service, projectID, metricType string) error {
 	startTime := time.Now().UTC().Add(time.Minute * -5)
@@ -120,6 +134,8 @@ func readTimeSeriesValue(s *monitoring.Service, projectID, metricType string) er
 	log.Printf("readTimeseriesValue: %s\n", formatResource(resp))
 	return nil
 }
+
+// [END monitoring_read_timeseries_simple]
 
 func createService(ctx context.Context) (*monitoring.Service, error) {
 	hc, err := google.DefaultClient(ctx, monitoring.MonitoringScope)
