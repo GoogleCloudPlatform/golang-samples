@@ -17,8 +17,6 @@ import (
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"golang.org/x/net/context"
-	"golang.org/x/oauth2/google"
-	rawbq "google.golang.org/api/bigquery/v2"
 	"google.golang.org/api/iterator"
 )
 
@@ -48,6 +46,8 @@ func TestAll(t *testing.T) {
 	if err := createDataset(client, datasetID); err != nil {
 		t.Errorf("createDataset(%q): %v", datasetID, err)
 	}
+	// Cleanup dataset at end of test.
+	defer client.Dataset(datasetID).DeleteWithContents(ctx)
 
 	if err := updateDatasetAccessControl(client, datasetID); err != nil {
 		t.Errorf("updateDataSetAccessControl(%q): %v", datasetID, err)
@@ -108,6 +108,10 @@ func TestAll(t *testing.T) {
 		t.Errorf("want table list %q to contain table %q", got, empty)
 	}
 
+	if err := printDatasetInfo(client, datasetID); err != nil {
+		t.Errorf("printDatasetInfo: %v", err)
+	}
+
 	// Stream data, read, query the inferred schema table.
 	if err := insertRows(client, datasetID, inferred); err != nil {
 		t.Errorf("insertRows(dataset:%q table:%q): %v", datasetID, inferred, err)
@@ -122,12 +126,23 @@ func TestAll(t *testing.T) {
 		t.Errorf("basicQuery(dataset:%q table:%q): %v", datasetID, inferred, err)
 	}
 
-	// Print information about tables (extended and simple).
-	if err := printTableMetadataSimple(client, datasetID, inferred); err != nil {
-		t.Errorf("printTableMetadata(dataset:%q table:%q): %v", datasetID, inferred, err)
+	// Run query variations
+	persisted := fmt.Sprintf("golang_example_table_queryresult_%d", time.Now().Unix())
+	if err := queryWithDestination(client, datasetID, persisted); err != nil {
+		t.Errorf("queryWithDestination(dataset:%q table:%q): %v", datasetID, persisted, err)
 	}
-	if err := printTableMetadataSimple(client, datasetID, explicit); err != nil {
-		t.Errorf("printTableMetadata(dataset:%q table:%q): %v", datasetID, explicit, err)
+
+	sql := "SELECT 17 as foo"
+	if err := queryLegacy(client, sql); err != nil {
+		t.Errorf("queryLegacy: %v", err)
+	}
+
+	// Print information about tables (extended and simple).
+	if err := printTableInfo(client, datasetID, inferred); err != nil {
+		t.Errorf("printTableInfo(dataset:%q table:%q): %v", datasetID, inferred, err)
+	}
+	if err := printTableInfo(client, datasetID, explicit); err != nil {
+		t.Errorf("printTableInfo(dataset:%q table:%q): %v", datasetID, explicit, err)
 	}
 
 	dstTableID := fmt.Sprintf("golang_example_tabledst_%d", time.Now().Unix())
@@ -141,25 +156,6 @@ func TestAll(t *testing.T) {
 		t.Errorf("deleteTable(dataset:%q table:%q): %v", datasetID, dstTableID, err)
 	}
 
-	deleteDataset(t, ctx, datasetID)
-}
-
-func deleteDataset(t *testing.T, ctx context.Context, datasetID string) {
-	tc := testutil.SystemTest(t)
-	hc, err := google.DefaultClient(ctx, rawbq.CloudPlatformScope)
-	if err != nil {
-		t.Errorf("DefaultClient: %v", err)
-	}
-	s, err := rawbq.New(hc)
-	if err != nil {
-		t.Errorf("bigquery.New: %v", err)
-	}
-	call := s.Datasets.Delete(tc.ProjectID, datasetID)
-	call.DeleteContents(true)
-	call.Context(ctx)
-	if err := call.Do(); err != nil {
-		t.Errorf("deleteDataset(%q): %v", datasetID, err)
-	}
 }
 
 func TestImportExport(t *testing.T) {
@@ -180,7 +176,7 @@ func TestImportExport(t *testing.T) {
 	if err := createDataset(client, datasetID); err != nil {
 		t.Errorf("createDataset(%q): %v", datasetID, err)
 	}
-	defer deleteDataset(t, ctx, datasetID)
+	defer client.Dataset(datasetID).DeleteWithContents(ctx)
 
 	filename := "testdata/people.csv"
 	if err := importCSVFromFile(client, datasetID, tableID, filename); err != nil {
