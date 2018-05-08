@@ -70,7 +70,7 @@ if go version | grep go1\.6\.; then
   popd;
 fi
 
-go get github.com/tebeka/go2xunit
+go get github.com/jstemmer/go-junit-report
 go install golang.org/x/tools/imports;
 go install -v $GO_IMPORTS
 
@@ -85,4 +85,4 @@ date
 # Run all of the tests
 OUTFILE=gotest.out
 2>&1 go test -timeout $TIMEOUT -v ./... | tee $OUTFILE
-$GOPATH/bin/go2xunit -fail -input $OUTFILE -output sponge_log.xml
+cat $OUTFILE | $GOPATH/bin/go-junit-report -set-exit-code > sponge_log.xml
