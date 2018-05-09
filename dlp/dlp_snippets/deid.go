@@ -181,9 +181,9 @@ func deidentifyFPE(w io.Writer, client *dlp.Client, project, input, keyFileName,
 
 // [END dlp_deidentify_fpe]
 
-// [START reidentify_fpe]
+// [START dlp_reidentify_fpe]
 
-// reidentify_fpe reidentifies the input with FPE (Format Preserving Encryption).
+// reidentifyFPE reidentifies the input with FPE (Format Preserving Encryption).
 // keyFileName is the file name with the KMS wrapped key and cryptoKeyName is the
 // full KMS key resource name used to wrap the key. surrogateInfoType is an
 // the identifier used during deidentification.
@@ -258,4 +258,4 @@ func reidentifyFPE(w io.Writer, client *dlp.Client, project, s, keyFileName, cry
 	fmt.Fprint(w, r.GetItem().GetValue())
 }
 
-// [END reidentify_fpe]
+// [END dlp_reidentify_fpe]
