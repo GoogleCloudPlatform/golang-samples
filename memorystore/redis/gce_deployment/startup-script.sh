@@ -1,5 +1,5 @@
 #! /bin/bash
-# [START startup_script_sh]
+# [START memorystore_startup_script_sh]
 set -ex
 
 # Talk to the metadata server to get the project id and location of application binary.
@@ -41,4 +41,4 @@ EOF
 
 supervisorctl reread
 supervisorctl update
-# [END startup_script_sh]
+# [END memorystore_startup_script_sh]

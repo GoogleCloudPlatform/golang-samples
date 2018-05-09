@@ -2,7 +2,7 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// [START main_go]
+// [START memorystore_main_go]
 // A basic app that connects to a managed Redis instance.
 package main
 
@@ -38,4 +38,4 @@ func main() {
 	http.HandleFunc("/", incrementHandler)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
-// [END main_go]
+// [END memorystore_main_go]
