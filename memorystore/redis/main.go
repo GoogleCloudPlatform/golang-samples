@@ -38,4 +38,5 @@ func main() {
 	http.HandleFunc("/", incrementHandler)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
+
 // [END memorystore_main_go]
