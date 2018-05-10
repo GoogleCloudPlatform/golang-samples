@@ -13,7 +13,7 @@ import (
 	"log"
 
 	"cloud.google.com/go/spanner"
-	"go.opencensus.io/exporter/stackdriver"
+	"contrib.go.opencensus.io/exporter/stackdriver"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
 	"golang.org/x/net/context"
@@ -35,6 +35,12 @@ func main() {
 	}
 	view.RegisterExporter(exporter)
 	trace.RegisterExporter(exporter)
+
+	// Use trace.AlwaysSample() to always record traces. The
+	// default sampler skips some traces to conserve resources,
+	// but can make it hard to debug test traffic. So, remove
+	// the following line before pushing to production.
+	trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
 
 	// This database must exist.
 	databaseName := "projects/your-project-id/instances/your-instance-id/databases/your-database-id"

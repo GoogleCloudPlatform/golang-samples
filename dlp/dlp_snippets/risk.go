@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"strings"
+	"time"
 
 	"golang.org/x/net/context"
 
@@ -115,6 +116,7 @@ func riskNumerical(w io.Writer, client *dlp.Client, project, dataProject, pubSub
 			return
 		}
 		msg.Ack()
+		time.Sleep(500 * time.Millisecond)
 		resp, err := client.GetDlpJob(ctx, &dlppb.GetDlpJobRequest{
 			Name: j.GetName(),
 		})
@@ -212,6 +214,7 @@ func riskCategorical(w io.Writer, client *dlp.Client, project, dataProject, pubS
 			return
 		}
 		msg.Ack()
+		time.Sleep(500 * time.Millisecond)
 		resp, err := client.GetDlpJob(ctx, &dlppb.GetDlpJobRequest{
 			Name: j.GetName(),
 		})
@@ -314,6 +317,7 @@ func riskKAnonymity(w io.Writer, client *dlp.Client, project, dataProject, pubSu
 			return
 		}
 		msg.Ack()
+		time.Sleep(500 * time.Millisecond)
 		j, err := client.GetDlpJob(ctx, &dlppb.GetDlpJobRequest{
 			Name: j.GetName(),
 		})
@@ -423,6 +427,7 @@ func riskLDiversity(w io.Writer, client *dlp.Client, project, dataProject, pubSu
 			return
 		}
 		msg.Ack()
+		time.Sleep(500 * time.Millisecond)
 		j, err := client.GetDlpJob(ctx, &dlppb.GetDlpJobRequest{
 			Name: j.GetName(),
 		})
@@ -456,7 +461,7 @@ func riskLDiversity(w io.Writer, client *dlp.Client, project, dataProject, pubSu
 
 // [END dlp_l_diversity]
 
-// [START k_map]
+// [START dlp_k_map]
 
 // riskKMap runs K Map on the given data.
 func riskKMap(w io.Writer, client *dlp.Client, project, dataProject, pubSubTopic, pubSubSub, datasetID, tableID, region string, columnNames ...string) {
@@ -540,6 +545,7 @@ func riskKMap(w io.Writer, client *dlp.Client, project, dataProject, pubSubTopic
 			return
 		}
 		msg.Ack()
+		time.Sleep(500 * time.Millisecond)
 		j, err := client.GetDlpJob(ctx, &dlppb.GetDlpJobRequest{
 			Name: j.GetName(),
 		})
@@ -568,4 +574,4 @@ func riskKMap(w io.Writer, client *dlp.Client, project, dataProject, pubSubTopic
 	}
 }
 
-// [END k_map]
+// [END dlp_k_map]

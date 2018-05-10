@@ -1,6 +1,6 @@
 # Google Cloud Platform Go Samples
 
-[![Build Status](https://travis-ci.org/GoogleCloudPlatform/golang-samples.svg?branch=master)](https://travis-ci.org/GoogleCloudPlatform/golang-samples)
+[![Kokoro Build Status][kokoro_badge]][kokoro_link]
 
 This repository holds sample code written in Go that demonstrates the Google
 Cloud Platform.
@@ -101,3 +101,6 @@ Note: samples under `docs/appengine` are not shown because they mostly do not ru
 |Path|Description|
 |---|---|
 |[dlp](dlp)|Samples for the [Data Loss Prevention](https://cloud.google.com/dlp/) API.|
+
+[kokoro_badge]: https://storage.googleapis.com/cloud-devrel-kokoro-resources/go/golang-samples/system_tests-ubuntu.png
+[kokoro_link]: https://fusion.corp.google.com/projectanalysis/current/KOKORO/prod%3Acloud-devrel%2Fgo%2Fgolang-samples%2Fsystem_tests
