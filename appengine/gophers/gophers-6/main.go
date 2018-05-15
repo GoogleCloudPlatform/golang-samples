@@ -7,22 +7,25 @@ package main
 import (
 	"fmt"
 	"html/template"
-	"io"
 	"net/http"
-	"path"
-	"strings"
 	"time"
 
-	"golang.org/x/net/context"
+	firebase "firebase.google.com/go"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
-	"google.golang.org/appengine/delay"
 	"google.golang.org/appengine/log"
+
+	// [START new_imports]
+	"io"
+	"path"
+	"strings"
 
 	"cloud.google.com/go/storage"
 	vision "cloud.google.com/go/vision/apiv1"
-	firebase "firebase.google.com/go"
 	uuid "github.com/satori/go.uuid"
+	"golang.org/x/net/context"
+	"google.golang.org/appengine/delay"
+	// [END new_imports]
 )
 
 var (
@@ -34,11 +37,17 @@ var (
 	indexTemplate = template.Must(template.ParseFiles("index.html"))
 )
 
+// [START label_struct]
+
 // A Label is a description for a post's image.
 type Label struct {
 	Description string
 	Score       float32
 }
+
+// [END label_struct]
+
+// [START new_post_fields]
 
 type Post struct {
 	Author   string
@@ -48,6 +57,8 @@ type Post struct {
 	ImageURL string
 	Labels   []Label
 }
+
+// [END new_post_fields]
 
 type templateParams struct {
 	Notice  string
@@ -60,6 +71,8 @@ func main() {
 	http.HandleFunc("/", indexHandler)
 	appengine.Main()
 }
+
+// [START var_label_func]
 
 // labelFunc will be called asynchronously as a Cloud Task. labelFunc can
 // be executed by calling labelFunc.Call(ctx, postID). If an error is returned
@@ -107,6 +120,10 @@ var labelFunc = delay.Func("label-image", func(ctx context.Context, id int64) er
 	}
 	return nil
 })
+
+// [END var_label_func]
+
+// [START upload_image]
 
 // uploadFileFromForm uploads a file if it's present in the "image" form field.
 func uploadFileFromForm(ctx context.Context, r *http.Request) (url string, err error) {
@@ -162,6 +179,8 @@ func uploadFileFromForm(ctx context.Context, r *http.Request) (url string, err e
 	const publicURL = "https://storage.googleapis.com/%s/%s"
 	return fmt.Sprintf(publicURL, firebaseConfig.StorageBucket, name), nil
 }
+
+// [END upload_image}
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
@@ -235,6 +254,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	params.Name = post.Author
 
+	// [START image_URL]
 	// Get the image if there is one.
 	imageURL, err := uploadFileFromForm(ctx, r)
 	if err != nil {
@@ -244,7 +264,11 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		indexTemplate.Execute(w, params)
 		return
 	}
+	// [END image_URL]
+
+	// [START add_image_URL]
 	post.ImageURL = imageURL
+	// [END add_image_URL]
 
 	key := datastore.NewIncompleteKey(ctx, "Post", nil)
 	if key, err = datastore.Put(ctx, key, &post); err != nil {
@@ -256,6 +280,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// [START empty_image]
 	// Only look for labels if the post has an image.
 	if imageURL != "" {
 		// Run labelFunc. This will start a new Task in the background.
@@ -263,6 +288,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 			log.Errorf(ctx, "delay Call %v", err)
 		}
 	}
+	// [END empty_image]
 
 	// Prepend the post that was just added.
 	params.Posts = append([]Post{post}, params.Posts...)
