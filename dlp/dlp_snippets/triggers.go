@@ -40,7 +40,7 @@ func createTrigger(w io.Writer, client *dlp.Client, project string, minLikelihoo
 			// Triggers control when the job will start.
 			Triggers: []*dlppb.JobTrigger_Trigger{
 				{
-					&dlppb.JobTrigger_Trigger_Schedule{
+					Trigger: &dlppb.JobTrigger_Trigger_Schedule{
 						Schedule: &dlppb.Schedule{
 							Option: &dlppb.Schedule_RecurrencePeriodDuration{
 								RecurrencePeriodDuration: &duration.Duration{
