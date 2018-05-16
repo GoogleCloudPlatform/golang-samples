@@ -16,6 +16,7 @@ import (
 	"golang.org/x/net/context"
 )
 
+// [START video_analyze_labels_local]
 func label(w io.Writer, file string) error {
 	ctx := context.Background()
 	client, err := video.NewClient(ctx)
@@ -68,7 +69,9 @@ func label(w io.Writer, file string) error {
 
 	return nil
 }
+// [END video_analyze_labels_local]
 
+// [START video_analyze_shots]
 func shotChange(w io.Writer, file string) error {
 	ctx := context.Background()
 	client, err := video.NewClient(ctx)
@@ -107,7 +110,9 @@ func shotChange(w io.Writer, file string) error {
 
 	return nil
 }
+// [END video_analyze_shots]
 
+// [START video_analyze_explicit_content]
 func explicitContent(w io.Writer, file string) error {
 	ctx := context.Background()
 	client, err := video.NewClient(ctx)
@@ -144,3 +149,4 @@ func explicitContent(w io.Writer, file string) error {
 
 	return nil
 }
+// [END video_analyze_explicit_content]
