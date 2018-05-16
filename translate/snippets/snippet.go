@@ -38,6 +38,8 @@ func createClientWithKey() {
 	fmt.Printf("%#v", resp)
 }
 
+// [START translate_translate_text]
+
 func translateText(targetLanguage, text string) (string, error) {
 	ctx := context.Background()
 
@@ -59,6 +61,9 @@ func translateText(targetLanguage, text string) (string, error) {
 	return resp[0].Text, nil
 }
 
+// [END translate_translate_text]
+// [START translate_detect_language]
+
 func detectLanguage(text string) (*translate.Detection, error) {
 	ctx := context.Background()
 	client, err := translate.NewClient(ctx)
@@ -73,6 +78,10 @@ func detectLanguage(text string) (*translate.Detection, error) {
 	}
 	return &lang[0][0], nil
 }
+
+// [END translate_detect_language]
+// [START translate_list_codes]
+// [START translate_list_language_names]
 
 func listSupportedLanguages(w io.Writer, targetLanguage string) error {
 	ctx := context.Background()
@@ -100,6 +109,11 @@ func listSupportedLanguages(w io.Writer, targetLanguage string) error {
 	return nil
 }
 
+// [END translate_list_language_names]
+// [END translate_list_codes]
+
+// [START translate_text_with_model]
+
 func translateTextWithModel(targetLanguage, text, model string) (string, error) {
 	ctx := context.Background()
 
@@ -122,3 +136,5 @@ func translateTextWithModel(targetLanguage, text, model string) (string, error) 
 	}
 	return resp[0].Text, nil
 }
+
+// [END translate_text_with_model]
