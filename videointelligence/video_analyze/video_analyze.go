@@ -17,6 +17,7 @@ import (
 )
 
 // [START video_analyze_labels_local]
+
 func label(w io.Writer, file string) error {
 	ctx := context.Background()
 	client, err := video.NewClient(ctx)
