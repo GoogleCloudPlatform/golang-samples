@@ -70,6 +70,7 @@ func label(w io.Writer, file string) error {
 
 	return nil
 }
+
 // [END video_analyze_labels_local]
 
 func shotChange(w io.Writer, file string) error {
