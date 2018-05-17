@@ -13,6 +13,18 @@ Simply run the backend using `go run`:
 go run app.go
 ```
 
+## Deploying the backend to AppEngine Flex
+
+First, edit the `app.yaml` configuration file, and make sure to set the `endpoints_api_service.name` value to your service domain name.
+
+Then, deploy the app with:
+
+```bash
+gcloud beta app deploy
+```
+
+Note: make sure to use the beta version of gcloud, or else the *rollout_strategy* feature will be rejected.
+
 ## Running the client
 
 ### Send an echo request using an API key
