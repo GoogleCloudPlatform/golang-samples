@@ -12,18 +12,15 @@ import (
 	"os"
 	"time"
 
-	// [START imports]
 	"golang.org/x/net/context"
 
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
 	"google.golang.org/api/iterator"
-	// [END imports]
 )
 
 func main() {
 	ctx := context.Background()
-	// [START auth]
 	proj := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	if proj == "" {
 		fmt.Fprintf(os.Stderr, "GOOGLE_CLOUD_PROJECT environment variable must be set.\n")
@@ -33,7 +30,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Could not create pubsub Client: %v", err)
 	}
-	// [END auth]
 
 	// List all the topics from the project.
 	fmt.Println("Listing all topics from the project:")
@@ -64,20 +60,20 @@ func main() {
 
 func create(client *pubsub.Client, topic string) error {
 	ctx := context.Background()
-	// [START create_topic]
+	// [START pubsub_create_topic]
 	t, err := client.CreateTopic(ctx, topic)
 	if err != nil {
 		return err
 	}
 	fmt.Printf("Topic created: %v\n", t)
-	// [END create_topic]
+	// [END pubsub_create_topic]
 	return nil
 }
 
 func list(client *pubsub.Client) ([]*pubsub.Topic, error) {
 	ctx := context.Background()
 
-	// [START list_topics]
+	// [START pubsub_list_topics]
 	var topics []*pubsub.Topic
 
 	it := client.Topics(ctx)
@@ -93,13 +89,13 @@ func list(client *pubsub.Client) ([]*pubsub.Topic, error) {
 	}
 
 	return topics, nil
-	// [END list_topics]
+	// [END pubsub_list_topics]
 }
 
 func listSubscriptions(client *pubsub.Client, topicID string) ([]*pubsub.Subscription, error) {
 	ctx := context.Background()
 
-	// [START list_topic_subscriptions]
+	// [START pubsub_list_topic_subscriptions]
 	var subs []*pubsub.Subscription
 
 	it := client.Topic(topicID).Subscriptions(ctx)
@@ -113,25 +109,26 @@ func listSubscriptions(client *pubsub.Client, topicID string) ([]*pubsub.Subscri
 		}
 		subs = append(subs, sub)
 	}
-	// [END list_topic_subscriptions]
+	// [END pubsub_list_topic_subscriptions]
 	return subs, nil
 }
 
 func delete(client *pubsub.Client, topic string) error {
 	ctx := context.Background()
-	// [START delete_topic]
+	// [START pubsub_delete_topic]
 	t := client.Topic(topic)
 	if err := t.Delete(ctx); err != nil {
 		return err
 	}
 	fmt.Printf("Deleted topic: %v\n", t)
-	// [END delete_topic]
+	// [END pubsub_delete_topic]
 	return nil
 }
 
 func publish(client *pubsub.Client, topic, msg string) error {
 	ctx := context.Background()
-	// [START publish]
+	// [START pubsub_publish]
+	// [START pubsub_quickstart_publisher]
 	t := client.Topic(topic)
 	result := t.Publish(ctx, &pubsub.Message{
 		Data: []byte(msg),
@@ -143,13 +140,14 @@ func publish(client *pubsub.Client, topic, msg string) error {
 		return err
 	}
 	fmt.Printf("Published a message; msg ID: %v\n", id)
-	// [END publish]
+	// [END pubsub_publish]
+	// [END pubsub_quickstart_publisher]
 	return nil
 }
 
 func publishWithSettings(client *pubsub.Client, topic string, msg []byte) error {
 	ctx := context.Background()
-	// [START publish_settings]
+	// [START pubsub_publisher_batch_settings]
 	t := client.Topic(topic)
 	t.PublishSettings = pubsub.PublishSettings{
 		ByteThreshold:  5000,
@@ -164,13 +162,13 @@ func publishWithSettings(client *pubsub.Client, topic string, msg []byte) error 
 		return err
 	}
 	fmt.Printf("Published a message; msg ID: %v\n", id)
-	// [END publish_settings]
+	// [END pubsub_publisher_batch_settings]
 	return nil
 }
 
 func publishSingleGoroutine(client *pubsub.Client, topic string, msg []byte) error {
 	ctx := context.Background()
-	// [START publish_single_goroutine]
+	// [START pubsub_publisher_concurrency_control]
 	t := client.Topic(topic)
 	t.PublishSettings = pubsub.PublishSettings{
 		NumGoroutines: 1,
@@ -183,7 +181,7 @@ func publishSingleGoroutine(client *pubsub.Client, topic string, msg []byte) err
 		return err
 	}
 	fmt.Printf("Published a message; msg ID: %v\n", id)
-	// [END publish_single_goroutine]
+	// [END pubsub_publisher_concurrency_control]
 	return nil
 }
 
