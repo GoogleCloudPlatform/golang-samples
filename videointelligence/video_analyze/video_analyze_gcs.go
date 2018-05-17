@@ -16,6 +16,7 @@ import (
 )
 
 // [START video_analyze_labels_gcs]
+
 func labelURI(w io.Writer, file string) error {
 	ctx := context.Background()
 	client, err := video.NewClient(ctx)
@@ -66,6 +67,7 @@ func labelURI(w io.Writer, file string) error {
 // [END video_analyze_labels_gcs]
 
 // [START video_analyze_shots]
+
 func shotChangeURI(w io.Writer, file string) error {
 	ctx := context.Background()
 	client, err := video.NewClient(ctx)
@@ -102,6 +104,7 @@ func shotChangeURI(w io.Writer, file string) error {
 // [START video_analyze_shots]
 
 // [START video_analyze_explicit_content]
+
 func explicitContentURI(w io.Writer, file string) error {
 	ctx := context.Background()
 	client, err := video.NewClient(ctx)
