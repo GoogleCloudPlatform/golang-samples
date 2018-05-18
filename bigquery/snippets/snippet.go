@@ -319,7 +319,7 @@ func queryBasic(client *bigquery.Client) error {
 	return runAndRead(ctx, client, q)
 }
 
-func queryBasicDisableCache(client *bigquery.Client) error {
+func queryDisableCache(client *bigquery.Client) error {
 	ctx := context.Background()
 	// [START bigquery_query_no_cache]
 
@@ -362,7 +362,7 @@ func queryBasicDisableCache(client *bigquery.Client) error {
 func queryBatch(client *bigquery.Client, dstDatasetID, dstTableID string) error {
 	ctx := context.Background()
 	// [START bigquery_query_batch]
-	// Build an aggregate table
+	// Build an aggregate table.
 	q := client.Query(`
 		SELECT
   			corpus,
@@ -378,8 +378,8 @@ func queryBatch(client *bigquery.Client, dstDatasetID, dstTableID string) error 
 	if err != nil {
 		return err
 	}
-	// Job is started, and will progress without interaction.
-	// To demonstrate other work being done, we simply sleep here.
+	// Job is started and will progress without interaction.
+	// To simulate other work being done, sleep a few seconds.
 	time.Sleep(5 * time.Second)
 	status, err := job.Status(ctx)
 	if err != nil {
@@ -397,7 +397,7 @@ func queryBatch(client *bigquery.Client, dstDatasetID, dstTableID string) error 
 	}
 	// You can continue to monitor job progress until it reaches
 	// the Done state by polling periodically.  In this example,
-	// we simply print the latest status.
+	// we print the latest status.
 	fmt.Printf("Job %s in Location %s currently in state: %s\n", job.ID(), job.Location(), state)
 
 	// [END bigquery_query_batch]
@@ -409,8 +409,7 @@ func queryDryRun(client *bigquery.Client) error {
 	ctx := context.Background()
 	// [START bigquery_query_dry_run]
 
-	q := client.Query(
-		`
+	q := client.Query(`
 		SELECT 
 		   name,
 		   COUNT(*) as name_count
@@ -426,7 +425,7 @@ func queryDryRun(client *bigquery.Client) error {
 	if err != nil {
 		return err
 	}
-	//Dry run is not asynchronous, so get the latest status and statistics.
+	// Dry run is not asynchronous, so get the latest status and statistics.
 	status := job.LastStatus()
 	if err != nil {
 		return err
@@ -641,6 +640,7 @@ func copyTable(client *bigquery.Client, datasetID, srcID, dstID string) error {
 	return nil
 }
 
+// Create a quick table by issuing a CREATE TABLE AS SELECT query.
 func generateTableCTAS(client *bigquery.Client, datasetID, tableID string) error {
 	ctx := context.Background()
 	q := client.Query(
@@ -718,8 +718,8 @@ func deleteAndUndeleteTable(client *bigquery.Client, datasetID, tableID string) 
 	if _, err := ds.Table(tableID).Metadata(ctx); err != nil {
 		return err
 	}
-	// Table exists at the current time.  Record this so we can restore table to
-	// state at this time.
+	// Record the current time.  We'll use this as the snapshot time
+	// for recovering the table.
 	snapTime := time.Now()
 
 	// "Accidentally" delete the table.
@@ -957,8 +957,7 @@ func exportSampleTableAsJSON(client *bigquery.Client, gcsURI string) error {
 	return nil
 }
 
-// Many example functions differ only in the construction of the query.
-// Generalize the work of running a query to completion and printing results.
+// runAndRead executes a query then prints results.
 func runAndRead(ctx context.Context, client *bigquery.Client, q *bigquery.Query) error {
 	// [START bigquery_query]
 	// [START bigquery_query_destination_table]

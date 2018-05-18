@@ -130,7 +130,7 @@ func TestAll(t *testing.T) {
 	if err := queryBatch(client, datasetID, batchTable); err != nil {
 		t.Errorf("queryBatch(dataset:%q table:%q): %v", datasetID, batchTable, err)
 	}
-	if err := queryBasicDisableCache(client); err != nil {
+	if err := queryDisableCache(client); err != nil {
 		t.Errorf("queryBasicDisableCache: %v", err)
 	}
 	if err := queryDryRun(client); err != nil {
