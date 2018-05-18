@@ -452,20 +452,8 @@ func queryLegacy(client *bigquery.Client, sqlString string) error {
 	q := client.Query(sqlString)
 	q.UseLegacySQL = true
 
-	// Run job, then wait until asyncronous execution is complete.
-	job, err := q.Run(ctx)
-	if err != nil {
-		return err
-	}
-	status, err := job.Wait(ctx)
-	if err != nil {
-		return err
-	}
-	if err := status.Err(); err != nil {
-		return err
-	}
 	// [END bigquery_query_legacy]
-	return nil
+	return runAndRead(ctx, client, q)
 }
 
 func queryLegacyLargeResults(client *bigquery.Client, dstDatasetID, dstTableID string) error {
@@ -966,6 +954,7 @@ func runAndRead(ctx context.Context, client *bigquery.Client, q *bigquery.Query)
 	// [START bigquery_query]
 	// [START bigquery_query_destination_table]
 	// [START bigquery_query_legacy]
+	// [START bigquery_query_legacy_large_results]
 	// [START bigquery_query_params_arrays]
 	// [START bigquery_query_params_named]
 	// [START bigquery_query_params_positional]
@@ -996,6 +985,7 @@ func runAndRead(ctx context.Context, client *bigquery.Client, q *bigquery.Query)
 	}
 	// [END bigquery_query]
 	// [END bigquery_query_destination_table]
+	// [END bigquery_query_legacy]
 	// [END bigquery_query_legacy_large_results]
 	// [END bigquery_query_params_arrays]
 	// [END bigquery_query_params_named]
