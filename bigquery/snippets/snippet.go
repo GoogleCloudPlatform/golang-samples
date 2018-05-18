@@ -373,7 +373,7 @@ func queryBatch(client *bigquery.Client, dstDatasetID, dstTableID string) error 
 	q.Priority = bigquery.BatchPriority
 	q.QueryConfig.Dst = client.Dataset(dstDatasetID).Table(dstTableID)
 
-	// Run job, then wait until asynchronous execution is complete.
+	// Start the job.
 	job, err := q.Run(ctx)
 	if err != nil {
 		return err
@@ -408,7 +408,6 @@ func queryBatch(client *bigquery.Client, dstDatasetID, dstTableID string) error 
 func queryDryRun(client *bigquery.Client) error {
 	ctx := context.Background()
 	// [START bigquery_query_dry_run]
-
 	q := client.Query(`
 		SELECT 
 		   name,
@@ -439,10 +438,10 @@ func queryDryRun(client *bigquery.Client) error {
 func queryWithDestination(client *bigquery.Client, destDatasetID, destTableID string) error {
 	ctx := context.Background()
 	// [START bigquery_query_destination_table]
-	destRef := client.Dataset(destDatasetID).Table(destTableID)
+
 	q := client.Query("SELECT 17 as my_col")
 	q.Location = "US" // Location must match the dataset(s) referenced in query.
-	q.QueryConfig.Dst = destRef
+	q.QueryConfig.Dst = client.Dataset(destDatasetID).Table(destTableID)
 	// [END bigquery_query_destination_table]
 	return runAndRead(ctx, client, q)
 }
@@ -485,12 +484,17 @@ func queryWithArrayParams(client *bigquery.Client) error {
 	ctx := context.Background()
 	// [START bigquery_query_params_arrays]
 	q := client.Query(
-		`SELECT name, sum(number) as count 
+		`SELECT
+			name,
+			sum(number) as count 
         FROM ` + "`bigquery-public-data.usa_names.usa_1910_2013`" + `
-        WHERE gender = @gender
-        AND state IN UNNEST(@states)
-        GROUP BY name
-        ORDER BY count DESC
+		WHERE
+			gender = @gender
+        	AND state IN UNNEST(@states)
+		GROUP BY
+			name
+		ORDER BY
+			count DESC
 		LIMIT 10;`)
 	q.Parameters = []bigquery.QueryParameter{
 		{
