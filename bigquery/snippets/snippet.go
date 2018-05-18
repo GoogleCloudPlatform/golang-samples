@@ -470,13 +470,13 @@ func queryLegacy(client *bigquery.Client, sqlString string) error {
 
 func queryLegacyLargeResults(client *bigquery.Client, dstDatasetID, dstTableID string) error {
 	ctx := context.Background()
-	// [START bigquery_query_legacy]
+	// [START bigquery_query_legacy_large_results]
 	q := client.Query(
 		"SELECT corpus FROM [bigquery-public-data:samples.shakespeare] GROUP BY corpus;")
 	q.UseLegacySQL = true
 	q.AllowLargeResults = true
 	q.QueryConfig.Dst = client.Dataset(dstDatasetID).Table(dstTableID)
-	// [END bigquery_query_legacy]
+	// [END bigquery_query_legacy_large_results]
 	return runAndRead(ctx, client, q)
 }
 
@@ -996,7 +996,7 @@ func runAndRead(ctx context.Context, client *bigquery.Client, q *bigquery.Query)
 	}
 	// [END bigquery_query]
 	// [END bigquery_query_destination_table]
-	// [END bigquery_query_legacy]
+	// [END bigquery_query_legacy_large_results]
 	// [END bigquery_query_params_arrays]
 	// [END bigquery_query_params_named]
 	// [END bigquery_query_params_positional]
