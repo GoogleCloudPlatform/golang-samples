@@ -122,19 +122,48 @@ func TestAll(t *testing.T) {
 	if err := browseTable(client, datasetID, inferred); err != nil {
 		t.Errorf("browseTable(dataset:%q table:%q): %v", datasetID, inferred, err)
 	}
-	if err := basicQuery(client, datasetID, inferred); err != nil {
-		t.Errorf("basicQuery(dataset:%q table:%q): %v", datasetID, inferred, err)
+
+	if err := queryBasic(client); err != nil {
+		t.Errorf("queryBasic: %v", err)
+	}
+	batchTable := fmt.Sprintf("golang_example_batchresults_%d", time.Now().Unix())
+	if err := queryBatch(client, datasetID, batchTable); err != nil {
+		t.Errorf("queryBatch(dataset:%q table:%q): %v", datasetID, batchTable, err)
+	}
+	if err := queryDisableCache(client); err != nil {
+		t.Errorf("queryBasicDisableCache: %v", err)
+	}
+	if err := queryDryRun(client); err != nil {
+		t.Errorf("queryDryRun: %v", err)
+	}
+	sql := "SELECT 17 as foo"
+	if err := queryLegacy(client, sql); err != nil {
+		t.Errorf("queryLegacy: %v", err)
+	}
+	largeResults := fmt.Sprintf("golang_example_legacy_largeresults_%d", time.Now().Unix())
+	if err := queryLegacyLargeResults(client, datasetID, largeResults); err != nil {
+		t.Errorf("queryLegacyLargeResults(dataset:%q table:%q): %v", datasetID, largeResults, err)
+	}
+	if err := queryWithArrayParams(client); err != nil {
+		t.Errorf("queryWithArrayParams: %v", err)
+	}
+	if err := queryWithNamedParams(client); err != nil {
+		t.Errorf("queryWithNamedParams: %v", err)
+	}
+	if err := queryWithPositionalParams(client); err != nil {
+		t.Errorf("queryWithPositionalParams: %v", err)
+	}
+	if err := queryWithTimestampParam(client); err != nil {
+		t.Errorf("queryWithTimestampParam: %v", err)
+	}
+	if err := queryWithStructParam(client); err != nil {
+		t.Errorf("queryWithStructParam: %v", err)
 	}
 
 	// Run query variations
 	persisted := fmt.Sprintf("golang_example_table_queryresult_%d", time.Now().Unix())
 	if err := queryWithDestination(client, datasetID, persisted); err != nil {
 		t.Errorf("queryWithDestination(dataset:%q table:%q): %v", datasetID, persisted, err)
-	}
-
-	sql := "SELECT 17 as foo"
-	if err := queryLegacy(client, sql); err != nil {
-		t.Errorf("queryLegacy: %v", err)
 	}
 
 	// Print information about tables (extended and simple).
@@ -152,8 +181,13 @@ func TestAll(t *testing.T) {
 	if err := deleteTable(client, datasetID, inferred); err != nil {
 		t.Errorf("deleteTable(dataset:%q table:%q): %v", datasetID, inferred, err)
 	}
-	if err := deleteTable(client, datasetID, dstTableID); err != nil {
-		t.Errorf("deleteTable(dataset:%q table:%q): %v", datasetID, dstTableID, err)
+	if err := deleteAndUndeleteTable(client, datasetID, dstTableID); err != nil {
+		t.Errorf("undeleteTable(dataset:%q table:%q): %v", datasetID, dstTableID, err)
+	}
+
+	dstTableID = fmt.Sprintf("golang_multicopydest_%d", time.Now().Unix())
+	if err := copyMultiTable(client, datasetID, dstTableID); err != nil {
+		t.Errorf("copyMultiTable(dataset:%q table:%q): %v", datasetID, dstTableID, err)
 	}
 
 }
