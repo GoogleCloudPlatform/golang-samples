@@ -90,6 +90,10 @@ func explicit(jsonPath, projectID string) {
 // [START auth_cloud_explicit_app_engine]
 
 // explicitDefault finds the default credentials.
+//
+// It is very uncommon to need to explicitly get the default credentials in Go.
+// Most of the time, client libraries can use Application Default Credentials
+// without having to pass the credentials in directly. See implicit above.
 func explicitDefault(projectID string) {
 	ctx := context.Background()
 
