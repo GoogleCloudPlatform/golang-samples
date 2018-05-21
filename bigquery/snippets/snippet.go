@@ -632,7 +632,8 @@ func copyTable(client *bigquery.Client, datasetID, srcID, dstID string) error {
 	return nil
 }
 
-// Create a quick table by issuing a CREATE TABLE AS SELECT query.
+// generateTableCTAS creates a quick table by issuing a CREATE TABLE AS SELECT
+// query.
 func generateTableCTAS(client *bigquery.Client, datasetID, tableID string) error {
 	ctx := context.Background()
 	q := client.Query(
