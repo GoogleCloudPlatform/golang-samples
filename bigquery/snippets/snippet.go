@@ -302,6 +302,8 @@ func queryDisableCache(client *bigquery.Client) error {
 	q.DisableQueryCache = true
 	// Location must match that of the dataset(s) referenced in the query.
 	q.Location = "US"
+	// [END bigquery_query_no_cache]
+
 	return runAndRead(ctx, client, q)
 }
 
