@@ -33,6 +33,14 @@ func init() {
 	}
 }
 
+// uniqueName returns a more unique name for a resource id given a prefix string.
+// Does not leverage dashes or underscores, because datasets/tables can't have dashes
+// and storage buckets can't have underscores in the identifier.
+func uniqueName(prefix string) string {
+	t := time.Now()
+	return fmt.Sprintf("%s%d%d", prefix, t.Unix(), t.Nanosecond())
+}
+
 func TestAll(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
@@ -42,7 +50,7 @@ func TestAll(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	datasetID := fmt.Sprintf("golang_example_dataset_%d", time.Now().Unix())
+	datasetID := uniqueName("golang_example_dataset")
 	if err := createDataset(client, datasetID); err != nil {
 		t.Errorf("createDataset(%q): %v", datasetID, err)
 	}
@@ -54,7 +62,7 @@ func TestAll(t *testing.T) {
 	}
 
 	// Test empty dataset creation/ttl/delete.
-	deletionDatasetID := fmt.Sprintf("%s_quickdelete", datasetID)
+	deletionDatasetID := uniqueName("golang_example_quickdelete")
 	if err := createDataset(client, deletionDatasetID); err != nil {
 		t.Errorf("createDataset(%q): %v", deletionDatasetID, err)
 	}
@@ -72,9 +80,9 @@ func TestAll(t *testing.T) {
 		t.Errorf("listDatasets: %v", err)
 	}
 
-	inferred := fmt.Sprintf("golang_example_table_inferred_%d", time.Now().Unix())
-	explicit := fmt.Sprintf("golang_example_table_explicit_%d", time.Now().Unix())
-	empty := fmt.Sprintf("golang_example_table_emptyschema_%d", time.Now().Unix())
+	inferred := uniqueName("golang_example_table_inferred")
+	explicit := uniqueName("golang_example_table_explicit")
+	empty := uniqueName("golang_example_table_emptyschema")
 
 	if err := createTableInferredSchema(client, datasetID, inferred); err != nil {
 		t.Errorf("createTableInferredSchema(dataset:%q table:%q): %v", datasetID, inferred, err)
@@ -116,9 +124,6 @@ func TestAll(t *testing.T) {
 	if err := insertRows(client, datasetID, inferred); err != nil {
 		t.Errorf("insertRows(dataset:%q table:%q): %v", datasetID, inferred, err)
 	}
-	if err := listRows(client, datasetID, inferred); err != nil {
-		t.Errorf("listRows(dataset:%q table:%q): %v", datasetID, inferred, err)
-	}
 	if err := browseTable(client, datasetID, inferred); err != nil {
 		t.Errorf("browseTable(dataset:%q table:%q): %v", datasetID, inferred, err)
 	}
@@ -126,7 +131,7 @@ func TestAll(t *testing.T) {
 	if err := queryBasic(client); err != nil {
 		t.Errorf("queryBasic: %v", err)
 	}
-	batchTable := fmt.Sprintf("golang_example_batchresults_%d", time.Now().Unix())
+	batchTable := uniqueName("golang_example_batchresults")
 	if err := queryBatch(client, datasetID, batchTable); err != nil {
 		t.Errorf("queryBatch(dataset:%q table:%q): %v", datasetID, batchTable, err)
 	}
@@ -140,7 +145,7 @@ func TestAll(t *testing.T) {
 	if err := queryLegacy(client, sql); err != nil {
 		t.Errorf("queryLegacy: %v", err)
 	}
-	largeResults := fmt.Sprintf("golang_example_legacy_largeresults_%d", time.Now().Unix())
+	largeResults := uniqueName("golang_example_legacy_largeresults")
 	if err := queryLegacyLargeResults(client, datasetID, largeResults); err != nil {
 		t.Errorf("queryLegacyLargeResults(dataset:%q table:%q): %v", datasetID, largeResults, err)
 	}
@@ -161,7 +166,7 @@ func TestAll(t *testing.T) {
 	}
 
 	// Run query variations
-	persisted := fmt.Sprintf("golang_example_table_queryresult_%d", time.Now().Unix())
+	persisted := uniqueName("golang_example_table_queryresult")
 	if err := queryWithDestination(client, datasetID, persisted); err != nil {
 		t.Errorf("queryWithDestination(dataset:%q table:%q): %v", datasetID, persisted, err)
 	}
@@ -174,7 +179,7 @@ func TestAll(t *testing.T) {
 		t.Errorf("printTableInfo(dataset:%q table:%q): %v", datasetID, explicit, err)
 	}
 
-	dstTableID := fmt.Sprintf("golang_example_tabledst_%d", time.Now().Unix())
+	dstTableID := uniqueName("golang_example_tabledst")
 	if err := copyTable(client, datasetID, inferred, dstTableID); err != nil {
 		t.Errorf("copyTable(dataset:%q src:%q dst:%q): %v", datasetID, inferred, dstTableID, err)
 	}
@@ -185,7 +190,7 @@ func TestAll(t *testing.T) {
 		t.Errorf("undeleteTable(dataset:%q table:%q): %v", datasetID, dstTableID, err)
 	}
 
-	dstTableID = fmt.Sprintf("golang_multicopydest_%d", time.Now().Unix())
+	dstTableID = uniqueName("golang_multicopydest")
 	if err := copyMultiTable(client, datasetID, dstTableID); err != nil {
 		t.Errorf("copyMultiTable(dataset:%q table:%q): %v", datasetID, dstTableID, err)
 	}
@@ -205,8 +210,8 @@ func TestImportExport(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	datasetID := fmt.Sprintf("golang_example_dataset_importexport_%d", time.Now().Unix())
-	tableID := fmt.Sprintf("golang_example_dataset_importexport_%d", time.Now().Unix())
+	datasetID := uniqueName("golang_example_dataset_importexport")
+	tableID := uniqueName("golang_example_dataset_importexport")
 	if err := createDataset(client, datasetID); err != nil {
 		t.Errorf("createDataset(%q): %v", datasetID, err)
 	}
@@ -217,21 +222,21 @@ func TestImportExport(t *testing.T) {
 		t.Fatalf("importCSVFromFile(dataset:%q table:%q filename:%q): %v", datasetID, tableID, filename, err)
 	}
 
-	explicitCSV := fmt.Sprintf("golang_example_dataset_importcsv_explicit_%d", time.Now().Unix())
+	explicitCSV := uniqueName("golang_example_dataset_importcsv_explicit")
 	if err := importCSVExplicitSchema(client, datasetID, explicitCSV); err != nil {
 		t.Fatalf("importCSVExplicitSchema(dataset:%q table:%q): %v", datasetID, explicitCSV, err)
 	}
 
-	explicitJSON := fmt.Sprintf("golang_example_dataset_importjson_explicit_%d", time.Now().Unix())
+	explicitJSON := uniqueName("golang_example_dataset_importjson_explicit")
 	if err := importJSONExplicitSchema(client, datasetID, explicitJSON); err != nil {
 		t.Fatalf("importJSONExplicitSchema(dataset:%q table:%q): %v", datasetID, explicitJSON, err)
 	}
 
-	autodetectJSON := fmt.Sprintf("golang_example_dataset_importjson_autodetect_%d", time.Now().Unix())
+	autodetectJSON := uniqueName("golang_example_dataset_importjson_autodetect")
 	if err := importJSONAutodetectSchema(client, datasetID, autodetectJSON); err != nil {
 		t.Fatalf("importJSONAutodetectSchema(dataset:%q table:%q): %v", datasetID, autodetectJSON, err)
 	}
-	bucket := fmt.Sprintf("golang-example-bigquery-importexport-bucket-%d", time.Now().Unix())
+	bucket := uniqueName("golang-example-bigquery-importexport-bucket")
 	const object = "values.csv"
 
 	if err := storageClient.Bucket(bucket).Create(ctx, tc.ProjectID, nil); err != nil {
