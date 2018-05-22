@@ -103,7 +103,7 @@ func shotChangeURI(w io.Writer, file string) error {
 	return nil
 }
 
-// [START video_analyze_shots]
+// [END video_analyze_shots]
 
 // [START video_analyze_explicit_content]
 
