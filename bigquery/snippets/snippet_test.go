@@ -37,6 +37,8 @@ func TestAll(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 
+	buf := &bytes.Buffer{}
+
 	client, err := bigquery.NewClient(ctx, tc.ProjectID)
 	if err != nil {
 		t.Fatal(err)
@@ -51,6 +53,30 @@ func TestAll(t *testing.T) {
 
 	if err := updateDatasetAccessControl(client, datasetID); err != nil {
 		t.Errorf("updateDataSetAccessControl(%q): %v", datasetID, err)
+	}
+	if err := updateDatasetAddLabel(client, datasetID); err != nil {
+		t.Errorf("updateDatasetAddLabel: %v", err)
+	}
+	if err := getDatasetLabels(client, buf, datasetID); err != nil {
+		t.Errorf("getDatasetLabels(%q): %v", datasetID, err)
+	}
+	want := "color:green"
+	if got := buf.String(); !strings.Contains(got, want) {
+		t.Errorf("getDatasetLabel(%q) expected %q to contain %q", datasetID, got, want)
+	}
+
+	if err := updateDatasetAddLabel(client, datasetID); err != nil {
+		t.Errorf("updateDatasetAddLabel: %v", err)
+	}
+	buf.Reset()
+	if err := listDatasetsByLabel(client, buf); err != nil {
+		t.Errorf("listDatasetsByLabel: %v", err)
+	}
+	if got := buf.String(); !strings.Contains(got, datasetID) {
+		t.Errorf("listDatasetsByLabel expected %q to contain %q", got, want)
+	}
+	if err := updateDatasetDeleteLabel(client, datasetID); err != nil {
+		t.Errorf("updateDatasetDeleteLabel: %v", err)
 	}
 
 	// Test empty dataset creation/ttl/delete.
@@ -92,8 +118,14 @@ func TestAll(t *testing.T) {
 	if err := updateTableExpiration(client, datasetID, explicit); err != nil {
 		t.Errorf("updateTableExpiration(dataset:%q table:%q): %v", datasetID, explicit, err)
 	}
+	if err := updateTableAddLabel(client, datasetID, explicit); err != nil {
+		t.Errorf("updateTableAddLabel(dataset:%q table:%q): %v", datasetID, explicit, err)
+	}
+	if err := updateTableDeleteLabel(client, datasetID, explicit); err != nil {
+		t.Errorf("updateTableAddLabel(dataset:%q table:%q): %v", datasetID, explicit, err)
+	}
 
-	buf := &bytes.Buffer{}
+	buf.Reset()
 	if err := listTables(client, buf, datasetID); err != nil {
 		t.Errorf("listTables(%q): %v", datasetID, err)
 	}
@@ -188,6 +220,10 @@ func TestAll(t *testing.T) {
 	dstTableID = fmt.Sprintf("golang_multicopydest_%d", time.Now().Unix())
 	if err := copyMultiTable(client, datasetID, dstTableID); err != nil {
 		t.Errorf("copyMultiTable(dataset:%q table:%q): %v", datasetID, dstTableID, err)
+	}
+
+	if err := listJobs(client); err != nil {
+		t.Errorf("listJobs: %v", err)
 	}
 
 }

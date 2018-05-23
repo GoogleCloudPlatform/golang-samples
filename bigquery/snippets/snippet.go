@@ -91,6 +91,60 @@ func updateDatasetAccessControl(client *bigquery.Client, datasetID string) error
 	return nil
 }
 
+func getDatasetLabels(client *bigquery.Client, w io.Writer, datasetID string) error {
+	ctx := context.Background()
+	// [START bigquery_get_dataset_labels]
+	meta, err := client.Dataset(datasetID).Metadata(ctx)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "Dataset %s labels:\n", datasetID)
+	if meta.Labels == nil {
+		fmt.Fprintln(w, "dataset has no labels defined.")
+		return nil
+	}
+	for k, v := range meta.Labels {
+		fmt.Fprintf(w, "\t%s:%s\n", k, v)
+	}
+	// [END bigquery_get_dataset_labels]
+	return nil
+}
+
+func updateDatasetAddLabel(client *bigquery.Client, datasetID string) error {
+	ctx := context.Background()
+	// [START bigquery_label_dataset]
+	ds := client.Dataset(datasetID)
+	original, err := ds.Metadata(ctx)
+	if err != nil {
+		return err
+	}
+
+	meta := bigquery.DatasetMetadataToUpdate{}
+	meta.SetLabel("color", "green")
+	if _, err := ds.Update(ctx, meta, original.ETag); err != nil {
+		return err
+	}
+	// [END bigquery_label_dataset]
+	return nil
+}
+
+func updateDatasetDeleteLabel(client *bigquery.Client, datasetID string) error {
+	ctx := context.Background()
+	// [START bigquery_delete_label_dataset]
+	ds := client.Dataset(datasetID)
+	originalMeta, err := ds.Metadata(ctx)
+	if err != nil {
+		return err
+	}
+	newMeta := bigquery.DatasetMetadataToUpdate{}
+	newMeta.DeleteLabel("color")
+	if _, err := ds.Update(ctx, newMeta, originalMeta.ETag); err != nil {
+		return err
+	}
+	// [END bigquery_delete_label_dataset]
+	return nil
+}
+
 func deleteEmptyDataset(client *bigquery.Client, datasetID string) error {
 	ctx := context.Background()
 	// [START bigquery_delete_dataset]
@@ -113,6 +167,25 @@ func listDatasets(client *bigquery.Client) error {
 		fmt.Println(dataset.DatasetID)
 	}
 	// [END bigquery_list_datasets]
+	return nil
+}
+
+func listDatasetsByLabel(client *bigquery.Client, w io.Writer) error {
+	ctx := context.Background()
+	// [START bigquery_list_datasets_by_label]
+	it := client.Datasets(ctx)
+	it.Filter = "labels.color:green"
+	for {
+		dataset, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "dataset: %s\n", dataset.DatasetID)
+	}
+	// [END bigquery_list_datasets_by_label]
 	return nil
 }
 
@@ -146,6 +219,33 @@ func printDatasetInfo(client *bigquery.Client, datasetID string) error {
 		fmt.Println("\tThis dataset does not contain any tables.")
 	}
 	// [END bigquery_get_dataset]
+	return nil
+}
+
+func listJobs(client *bigquery.Client) error {
+	ctx := context.Background()
+	// [START bigquery_list_jobs]
+	it := client.Jobs(ctx)
+	for i := 0; i < 10; i++ {
+		j, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		state := "Unknown"
+		switch j.LastStatus().State {
+		case bigquery.Pending:
+			state = "Pending"
+		case bigquery.Running:
+			state = "Running"
+		case bigquery.Done:
+			state = "Done"
+		}
+		fmt.Printf("Job %s in state %s\n", j.ID(), state)
+	}
+	// [END bigquery_list_jobs]
 	return nil
 }
 
@@ -243,6 +343,60 @@ func updateTableExpiration(client *bigquery.Client, datasetID, tableID string) e
 	// [END bigquery_update_table_expiration]
 	return nil
 
+}
+
+func getTableLabels(client *bigquery.Client, w io.Writer, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_get_table_labels]
+	meta, err := client.Dataset(datasetID).Table(tableID).Metadata(ctx)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "Table %s labels:\n", datasetID)
+	if meta.Labels == nil {
+		fmt.Println("dataset has no labels defined.")
+		return nil
+	}
+	for k, v := range meta.Labels {
+		fmt.Fprintf(w, "\t%s:%s\n", k, v)
+	}
+	// [END bigquery_get_table_labels]
+	return nil
+}
+
+func updateTableAddLabel(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_label_table]
+	tbl := client.Dataset(datasetID).Table(tableID)
+	original, err := tbl.Metadata(ctx)
+	if err != nil {
+		return err
+	}
+
+	meta := bigquery.TableMetadataToUpdate{}
+	meta.SetLabel("color", "green")
+	if _, err := tbl.Update(ctx, meta, original.ETag); err != nil {
+		return err
+	}
+	// [END bigquery_label_table]
+	return nil
+}
+
+func updateTableDeleteLabel(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_delete_label_table]
+	tbl := client.Dataset(datasetID).Table(tableID)
+	originalMeta, err := tbl.Metadata(ctx)
+	if err != nil {
+		return err
+	}
+	newMeta := bigquery.TableMetadataToUpdate{}
+	newMeta.DeleteLabel("color")
+	if _, err := tbl.Update(ctx, newMeta, originalMeta.ETag); err != nil {
+		return err
+	}
+	// [END bigquery_delete_label_table]
+	return nil
 }
 
 func listTables(client *bigquery.Client, w io.Writer, datasetID string) error {
