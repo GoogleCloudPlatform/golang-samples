@@ -7,8 +7,6 @@ package snippets
 import (
 	"bytes"
 	"fmt"
-	"log"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -19,19 +17,6 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/api/iterator"
 )
-
-func init() {
-	// Workaround for Travis:
-	// https://docs.travis-ci.com/user/common-build-problems/#Build-times-out-because-no-output-was-received
-	if os.Getenv("TRAVIS") == "true" {
-		go func() {
-			for {
-				time.Sleep(5 * time.Minute)
-				log.Print("Still testing. Don't kill me!")
-			}
-		}()
-	}
-}
 
 func TestAll(t *testing.T) {
 	tc := testutil.SystemTest(t)
