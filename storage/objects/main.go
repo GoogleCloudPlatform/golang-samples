@@ -253,7 +253,7 @@ func writeEncryptedObject(client *storage.Client, bucket, object string, secretK
 	return nil
 }
 
-func uploadWithKMSKey(client *storage.Client, bucket, object string, keyName string) error {
+func writeWithKMSKey(client *storage.Client, bucket, object string, keyName string) error {
 	ctx := context.Background()
 
 	// [START storage_upload_with_kms_key]

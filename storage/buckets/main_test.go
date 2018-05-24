@@ -17,6 +17,7 @@ import (
 var (
 	storageClient *storage.Client
 	bucketName    string
+	kmsKeyName    string
 )
 
 func TestCreate(t *testing.T) {
@@ -30,6 +31,7 @@ func TestCreate(t *testing.T) {
 	}
 
 	bucketName = tc.ProjectID + "-storage-buckets-tests"
+	kmsKeyName = ""
 	// Clean up bucket before running tests.
 	deleteBucket(storageClient, bucketName)
 	if err := create(storageClient, tc.ProjectID, bucketName); err != nil {
@@ -102,5 +104,12 @@ func TestDelete(t *testing.T) {
 	testutil.SystemTest(t)
 	if err := deleteBucket(storageClient, bucketName); err != nil {
 		t.Fatalf("failed to delete bucket (%q): %v", bucketName, err)
+	}
+}
+
+func TestKMS(t *testing.T) {
+	testutil.SystemTest(t)
+	if err := enableDefaultKMSkey(storageClient, bucketName, kmsKeyName); err != nil {
+		t.Fatalf("failed to enable default kms key (%q): %v", bucketName, err)
 	}
 }

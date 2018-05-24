@@ -131,9 +131,13 @@ func TestObjects(t *testing.T) {
 
 	key := []byte("my-secret-AES-256-encryption-key")
 	newKey := []byte("My-secret-AES-256-encryption-key")
+	kmsKey := ""
 
 	if err := writeEncryptedObject(client, bucket, object1, key); err != nil {
 		t.Errorf("cannot write an encrypted object: %v", err)
+	}
+	if err := writeWithKMSKey(client, bucket, object1, kmsKey); err != nil {
+		t.Errorf("cannot write a KMS encrypted object: %v", err)
 	}
 	data, err = readEncryptedObject(client, bucket, object1, key)
 	if err != nil {
