@@ -253,6 +253,24 @@ func writeEncryptedObject(client *storage.Client, bucket, object string, secretK
 	return nil
 }
 
+func uploadWithKMSKey(client *storage.Client, bucket, object string, keyName string) error {
+	ctx := context.Background()
+
+	// [START storage_upload_with_kms_key]
+	obj := client.Bucket(bucket).Object(object)
+	// Encrypt the object's contents
+	wc := obj.NewWriter(ctx)
+	wc.KMSKeyName = keyName
+	if _, err := wc.Write([]byte("top secret")); err != nil {
+		return err
+	}
+	if err := wc.Close(); err != nil {
+		return err
+	}
+	// [END storage_upload_with_kms_key]
+	return nil
+}
+
 func readEncryptedObject(client *storage.Client, bucket, object string, secretKey []byte) ([]byte, error) {
 	ctx := context.Background()
 
