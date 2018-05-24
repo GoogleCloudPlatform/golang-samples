@@ -7,8 +7,6 @@ package snippets
 import (
 	"bytes"
 	"fmt"
-	"log"
-	"os"
 	"regexp"
 	"strings"
 	"testing"
@@ -21,30 +19,23 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-func init() {
-	// Workaround for Travis:
-	// https://docs.travis-ci.com/user/common-build-problems/#Build-times-out-because-no-output-was-received
-	if os.Getenv("TRAVIS") == "true" {
-		go func() {
-			for {
-				time.Sleep(5 * time.Minute)
-				log.Print("Still testing. Don't kill me!")
-			}
-		}()
-	}
-}
-
 // uniqueBQName returns a more unique name for a BigQuery resource.
 func uniqueBQName(prefix string) string {
 	t := time.Now()
-	return fmt.Sprintf("%s_%d_%d", sanitize(prefix, '_'), t.Unix(), t.Nanosecond())
+	return fmt.Sprintf("%s_%d", sanitize(prefix, '_'), t.Unix())
 }
 
 // uniqueBucketName returns a more unique name cloud storage bucket.
 func uniqueBucketName(prefix, projectID string) string {
 	t := time.Now()
-	return fmt.Sprintf("%s-%s-%d%d", sanitize(prefix, '-'), sanitize(projectID, '-'), t.Unix(), t.Nanosecond())
+	f := fmt.Sprintf("%s-%s-%d", sanitize(prefix, '-'), sanitize(projectID, '-'), t.Unix())
+	// bucket max name length is 63 chars, so we truncate.
+	if len(f) > 63 {
+		return f[:63]
+	}
+	return f
 }
+
 func sanitize(s string, allowedSeparator rune) string {
 	pattern := fmt.Sprintf("[^a-zA-Z0-9%s]", string(allowedSeparator))
 	reg, err := regexp.Compile(pattern)
@@ -53,7 +44,6 @@ func sanitize(s string, allowedSeparator rune) string {
 	}
 	return reg.ReplaceAllString(s, "")
 }
-
 func TestAll(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
@@ -249,7 +239,7 @@ func TestImportExport(t *testing.T) {
 	if err := importJSONAutodetectSchema(client, datasetID, autodetectJSON); err != nil {
 		t.Fatalf("importJSONAutodetectSchema(dataset:%q table:%q): %v", datasetID, autodetectJSON, err)
 	}
-	bucket := uniqueBucketName("golang-example-bigquery-importexport-bucket", tc.ProjectID)
+	bucket := uniqueBucketName("golang-example-bucket", tc.ProjectID)
 	const object = "values.csv"
 
 	if err := storageClient.Bucket(bucket).Create(ctx, tc.ProjectID, nil); err != nil {
