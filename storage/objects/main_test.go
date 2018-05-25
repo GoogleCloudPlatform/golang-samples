@@ -17,6 +17,8 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"os"
+	"fmt"
 )
 
 func TestObjects(t *testing.T) {
@@ -131,12 +133,16 @@ func TestObjects(t *testing.T) {
 
 	key := []byte("my-secret-AES-256-encryption-key")
 	newKey := []byte("My-secret-AES-256-encryption-key")
-	kmsKey := ""
+
+	// Create KMS key name
+	keyRingID := os.Getenv("GOLANG_SAMPLES_KMS_KEYRING")
+	cryptoKeyID := os.Getenv("GOLANG_SAMPLES_KMS_CRYPTOKEY")
+	kmsKeyName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", tc.ProjectID, "global", keyRingID, cryptoKeyID)
 
 	if err := writeEncryptedObject(client, bucket, object1, key); err != nil {
 		t.Errorf("cannot write an encrypted object: %v", err)
 	}
-	if err := writeWithKMSKey(client, bucket, object1, kmsKey); err != nil {
+	if err := writeWithKMSKey(client, bucket, object1, kmsKeyName); err != nil {
 		t.Errorf("cannot write a KMS encrypted object: %v", err)
 	}
 	data, err = readEncryptedObject(client, bucket, object1, key)

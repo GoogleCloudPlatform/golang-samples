@@ -12,12 +12,13 @@ import (
 
 	"cloud.google.com/go/storage"
 	"golang.org/x/net/context"
+	"os"
+	"fmt"
 )
 
 var (
 	storageClient *storage.Client
 	bucketName    string
-	kmsKeyName    string
 )
 
 func TestCreate(t *testing.T) {
@@ -31,7 +32,7 @@ func TestCreate(t *testing.T) {
 	}
 
 	bucketName = tc.ProjectID + "-storage-buckets-tests"
-	kmsKeyName = ""
+
 	// Clean up bucket before running tests.
 	deleteBucket(storageClient, bucketName)
 	if err := create(storageClient, tc.ProjectID, bucketName); err != nil {
@@ -108,7 +109,12 @@ func TestDelete(t *testing.T) {
 }
 
 func TestKMS(t *testing.T) {
-	testutil.SystemTest(t)
+	tc := testutil.SystemTest(t)
+	// Create KMS key name
+	keyRingID := os.Getenv("GOLANG_SAMPLES_KMS_KEYRING")
+	cryptoKeyID := os.Getenv("GOLANG_SAMPLES_KMS_CRYPTOKEY")
+	kmsKeyName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", tc.ProjectID, "global", keyRingID, cryptoKeyID)
+
 	if err := setDefaultKMSkey(storageClient, bucketName, kmsKeyName); err != nil {
 		t.Fatalf("failed to enable default kms key (%q): %v", bucketName, err)
 	}
