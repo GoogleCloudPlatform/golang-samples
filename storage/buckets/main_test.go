@@ -11,9 +11,9 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 
 	"cloud.google.com/go/storage"
+	"fmt"
 	"golang.org/x/net/context"
 	"os"
-	"fmt"
 )
 
 var (
@@ -110,7 +110,7 @@ func TestDelete(t *testing.T) {
 
 func TestKMS(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	// Create KMS key name
+
 	keyRingID := os.Getenv("GOLANG_SAMPLES_KMS_KEYRING")
 	cryptoKeyID := os.Getenv("GOLANG_SAMPLES_KMS_CRYPTOKEY")
 	kmsKeyName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", tc.ProjectID, "global", keyRingID, cryptoKeyID)

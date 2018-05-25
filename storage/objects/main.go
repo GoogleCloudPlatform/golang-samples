@@ -236,7 +236,7 @@ func delete(client *storage.Client, bucket, object string) error {
 	return nil
 }
 
-// Write an object encrypted with user-provided key to a bucket
+// writeEncryptedObject writes an object encrypted with user-provided AES key to a bucket.
 func writeEncryptedObject(client *storage.Client, bucket, object string, secretKey []byte) error {
 	ctx := context.Background()
 
@@ -254,7 +254,7 @@ func writeEncryptedObject(client *storage.Client, bucket, object string, secretK
 	return nil
 }
 
-// Write an object encrypted with KMS-provided key to a bucket
+// writeWithKMSKey writes an object encrypted with KMS-provided key to a bucket.
 func writeWithKMSKey(client *storage.Client, bucket, object string, keyName string) error {
 	ctx := context.Background()
 

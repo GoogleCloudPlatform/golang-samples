@@ -16,9 +16,9 @@ import (
 	"cloud.google.com/go/storage"
 	"golang.org/x/net/context"
 
+	"fmt"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"os"
-	"fmt"
 )
 
 func TestObjects(t *testing.T) {
@@ -134,7 +134,6 @@ func TestObjects(t *testing.T) {
 	key := []byte("my-secret-AES-256-encryption-key")
 	newKey := []byte("My-secret-AES-256-encryption-key")
 
-	// Create KMS key name
 	keyRingID := os.Getenv("GOLANG_SAMPLES_KMS_KEYRING")
 	cryptoKeyID := os.Getenv("GOLANG_SAMPLES_KMS_CRYPTOKEY")
 	kmsKeyName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", tc.ProjectID, "global", keyRingID, cryptoKeyID)
