@@ -279,32 +279,6 @@ func insertRows(client *bigquery.Client, datasetID, tableID string) error {
 	return nil
 }
 
-func listRows(client *bigquery.Client, datasetID, tableID string) error {
-	ctx := context.Background()
-	q := client.Query(fmt.Sprintf(`
-		SELECT name, age
-		FROM %s.%s
-		WHERE age >= 20
-	`, datasetID, tableID))
-	it, err := q.Read(ctx)
-	if err != nil {
-		return err
-	}
-
-	for {
-		var row []bigquery.Value
-		err := it.Next(&row)
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return err
-		}
-		fmt.Println(row)
-	}
-	return nil
-}
-
 func queryBasic(client *bigquery.Client) error {
 	ctx := context.Background()
 	// [START bigquery_query]
@@ -328,35 +302,9 @@ func queryDisableCache(client *bigquery.Client) error {
 	q.DisableQueryCache = true
 	// Location must match that of the dataset(s) referenced in the query.
 	q.Location = "US"
-
-	job, err := q.Run(ctx)
-	if err != nil {
-		return err
-	}
-
-	// Wait until async querying is done.
-	status, err := job.Wait(ctx)
-	if err != nil {
-		return err
-	}
-	if err := status.Err(); err != nil {
-		return err
-	}
-
-	it, err := job.Read(ctx)
-	for {
-		var row []bigquery.Value
-		err := it.Next(&row)
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return err
-		}
-		fmt.Println(row)
-	}
 	// [END bigquery_query_no_cache]
-	return nil
+
+	return runAndRead(ctx, client, q)
 }
 
 func queryBatch(client *bigquery.Client, dstDatasetID, dstTableID string) error {
@@ -409,13 +357,12 @@ func queryDryRun(client *bigquery.Client) error {
 	ctx := context.Background()
 	// [START bigquery_query_dry_run]
 	q := client.Query(`
-		SELECT 
-		   name,
-		   COUNT(*) as name_count
-		FROM ` + "`bigquery-public-data.usa_names.usa_1910_2013`" + `
-		WHERE state = 'WA' 
-		GROUP BY name
-		`)
+	SELECT
+		name,
+		COUNT(*) as name_count
+	FROM ` + "`bigquery-public-data.usa_names.usa_1910_2013`" + `
+	WHERE state = 'WA'
+	GROUP BY name`)
 	q.DryRun = true
 	// Location must match that of the dataset(s) referenced in the query.
 	q.Location = "US"
@@ -430,7 +377,6 @@ func queryDryRun(client *bigquery.Client) error {
 		return err
 	}
 	fmt.Printf("This query will process %d bytes\n", status.Statistics.TotalBytesProcessed)
-
 	// [END bigquery_query_dry_run]
 	return nil
 }
@@ -956,6 +902,7 @@ func runAndRead(ctx context.Context, client *bigquery.Client, q *bigquery.Query)
 	// [START bigquery_query_destination_table]
 	// [START bigquery_query_legacy]
 	// [START bigquery_query_legacy_large_results]
+	// [START bigquery_query_no_cache]
 	// [START bigquery_query_params_arrays]
 	// [START bigquery_query_params_named]
 	// [START bigquery_query_params_positional]
@@ -988,6 +935,7 @@ func runAndRead(ctx context.Context, client *bigquery.Client, q *bigquery.Query)
 	// [END bigquery_query_destination_table]
 	// [END bigquery_query_legacy]
 	// [END bigquery_query_legacy_large_results]
+	// [END bigquery_query_no_cache]
 	// [END bigquery_query_params_arrays]
 	// [END bigquery_query_params_named]
 	// [END bigquery_query_params_positional]
