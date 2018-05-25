@@ -109,7 +109,7 @@ func TestDelete(t *testing.T) {
 
 func TestKMS(t *testing.T) {
 	testutil.SystemTest(t)
-	if err := enableDefaultKMSkey(storageClient, bucketName, kmsKeyName); err != nil {
+	if err := setDefaultKMSkey(storageClient, bucketName, kmsKeyName); err != nil {
 		t.Fatalf("failed to enable default kms key (%q): %v", bucketName, err)
 	}
 }

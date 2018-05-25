@@ -239,7 +239,7 @@ func checkRequesterPays(c *storage.Client, bucketName string) error {
 	return nil
 }
 
-func enableDefaultKMSkey(c *storage.Client, bucketName string, keyName string) error {
+func setDefaultKMSkey(c *storage.Client, bucketName string, keyName string) error {
 	ctx := context.Background()
 
 	// [START storage_set_bucket_default_kms_key]
