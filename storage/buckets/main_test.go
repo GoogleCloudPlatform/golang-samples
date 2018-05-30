@@ -5,15 +5,15 @@
 package main
 
 import (
+	"fmt"
+	"os"
 	"testing"
 	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 
 	"cloud.google.com/go/storage"
-	"fmt"
 	"golang.org/x/net/context"
-	"os"
 )
 
 var (
@@ -113,8 +113,12 @@ func TestKMS(t *testing.T) {
 
 	keyRingID := os.Getenv("GOLANG_SAMPLES_KMS_KEYRING")
 	cryptoKeyID := os.Getenv("GOLANG_SAMPLES_KMS_CRYPTOKEY")
-	kmsKeyName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", tc.ProjectID, "global", keyRingID, cryptoKeyID)
 
+	if keyRingID == "" || cryptoKeyID == "" {
+		t.Skip("GOLANG_SAMPLES_KMS_KEYRING and GOLANG_SAMPLES_KMS_CRYPTOKEY must be set")
+	}
+
+	kmsKeyName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", tc.ProjectID, "global", keyRingID, cryptoKeyID)
 	if err := setDefaultKMSkey(storageClient, bucketName, kmsKeyName); err != nil {
 		t.Fatalf("failed to enable default kms key (%q): %v", bucketName, err)
 	}
