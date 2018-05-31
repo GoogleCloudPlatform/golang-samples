@@ -33,14 +33,14 @@ func updateDatasetDescription(client *bigquery.Client, datasetID string) error {
 	ctx := context.Background()
 	// [START bigquery_update_dataset_description]
 	ds := client.Dataset(datasetID)
-	original, err := ds.Metadata(ctx)
+	meta, err := ds.Metadata(ctx)
 	if err != nil {
 		return err
 	}
-	changes := bigquery.DatasetMetadataToUpdate{
+	update := bigquery.DatasetMetadataToUpdate{
 		Description: "Updated Description.",
 	}
-	if _, err = ds.Update(ctx, changes, original.ETag); err != nil {
+	if _, err = ds.Update(ctx, update, meta.ETag); err != nil {
 		return err
 	}
 	// [END bigquery_update_dataset_description]
@@ -51,14 +51,14 @@ func updateDatasetDefaultExpiration(client *bigquery.Client, datasetID string) e
 	ctx := context.Background()
 	// [START bigquery_update_dataset_expiration]
 	ds := client.Dataset(datasetID)
-	original, err := ds.Metadata(ctx)
+	meta, err := ds.Metadata(ctx)
 	if err != nil {
 		return err
 	}
-	changes := bigquery.DatasetMetadataToUpdate{
+	update := bigquery.DatasetMetadataToUpdate{
 		DefaultTableExpiration: 24 * time.Hour,
 	}
-	if _, err := client.Dataset(datasetID).Update(ctx, changes, original.ETag); err != nil {
+	if _, err := client.Dataset(datasetID).Update(ctx, update, meta.ETag); err != nil {
 		return err
 	}
 	// [END bigquery_update_dataset_expiration]
@@ -69,13 +69,13 @@ func updateDatasetAccessControl(client *bigquery.Client, datasetID string) error
 	ctx := context.Background()
 	// [START bigquery_update_dataset_access]
 	ds := client.Dataset(datasetID)
-	original, err := ds.Metadata(ctx)
+	meta, err := ds.Metadata(ctx)
 	if err != nil {
 		return err
 	}
 	// Append a new access control entry to the existing access list.
-	changes := bigquery.DatasetMetadataToUpdate{
-		Access: append(original.Access, &bigquery.AccessEntry{
+	update := bigquery.DatasetMetadataToUpdate{
+		Access: append(meta.Access, &bigquery.AccessEntry{
 			Role:       bigquery.ReaderRole,
 			EntityType: bigquery.UserEmailEntity,
 			Entity:     "sample.bigquery.dev@gmail.com"},
@@ -84,10 +84,64 @@ func updateDatasetAccessControl(client *bigquery.Client, datasetID string) error
 
 	// Leverage the ETag for the update to assert there's been no modifications to the
 	// dataset since the metadata was originally read.
-	if _, err := ds.Update(ctx, changes, original.ETag); err != nil {
+	if _, err := ds.Update(ctx, update, meta.ETag); err != nil {
 		return err
 	}
 	// [END bigquery_update_dataset_access]
+	return nil
+}
+
+func datasetLabels(client *bigquery.Client, w io.Writer, datasetID string) error {
+	ctx := context.Background()
+	// [START bigquery_get_dataset_labels]
+	meta, err := client.Dataset(datasetID).Metadata(ctx)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "Dataset %s labels:\n", datasetID)
+	if len(meta.Labels) == 0 {
+		fmt.Fprintln(w, "Dataset has no labels defined.")
+		return nil
+	}
+	for k, v := range meta.Labels {
+		fmt.Fprintf(w, "\t%s:%s\n", k, v)
+	}
+	// [END bigquery_get_dataset_labels]
+	return nil
+}
+
+func addDatasetLabel(client *bigquery.Client, datasetID string) error {
+	ctx := context.Background()
+	// [START bigquery_label_dataset]
+	ds := client.Dataset(datasetID)
+	meta, err := ds.Metadata(ctx)
+	if err != nil {
+		return err
+	}
+
+	update := bigquery.DatasetMetadataToUpdate{}
+	update.SetLabel("color", "green")
+	if _, err := ds.Update(ctx, update, meta.ETag); err != nil {
+		return err
+	}
+	// [END bigquery_label_dataset]
+	return nil
+}
+
+func deleteDatasetLabel(client *bigquery.Client, datasetID string) error {
+	ctx := context.Background()
+	// [START bigquery_delete_label_dataset]
+	ds := client.Dataset(datasetID)
+	meta, err := ds.Metadata(ctx)
+	if err != nil {
+		return err
+	}
+	update := bigquery.DatasetMetadataToUpdate{}
+	update.DeleteLabel("color")
+	if _, err := ds.Update(ctx, update, meta.ETag); err != nil {
+		return err
+	}
+	// [END bigquery_delete_label_dataset]
 	return nil
 }
 
@@ -113,6 +167,25 @@ func listDatasets(client *bigquery.Client) error {
 		fmt.Println(dataset.DatasetID)
 	}
 	// [END bigquery_list_datasets]
+	return nil
+}
+
+func listDatasetsByLabel(client *bigquery.Client, w io.Writer) error {
+	ctx := context.Background()
+	// [START bigquery_list_datasets_by_label]
+	it := client.Datasets(ctx)
+	it.Filter = "labels.color:green"
+	for {
+		dataset, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "dataset: %s\n", dataset.DatasetID)
+	}
+	// [END bigquery_list_datasets_by_label]
 	return nil
 }
 
@@ -146,6 +219,33 @@ func printDatasetInfo(client *bigquery.Client, datasetID string) error {
 		fmt.Println("\tThis dataset does not contain any tables.")
 	}
 	// [END bigquery_get_dataset]
+	return nil
+}
+
+func listJobs(client *bigquery.Client) error {
+	ctx := context.Background()
+	// [START bigquery_list_jobs]
+	it := client.Jobs(ctx)
+	for i := 0; i < 10; i++ {
+		j, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		state := "Unknown"
+		switch j.LastStatus().State {
+		case bigquery.Pending:
+			state = "Pending"
+		case bigquery.Running:
+			state = "Running"
+		case bigquery.Done:
+			state = "Done"
+		}
+		fmt.Printf("Job %s in state %s\n", j.ID(), state)
+	}
+	// [END bigquery_list_jobs]
 	return nil
 }
 
@@ -211,14 +311,14 @@ func updateTableDescription(client *bigquery.Client, datasetID, tableID string) 
 	ctx := context.Background()
 	// [START bigquery_update_table_description]
 	tableRef := client.Dataset(datasetID).Table(tableID)
-	original, err := tableRef.Metadata(ctx)
+	meta, err := tableRef.Metadata(ctx)
 	if err != nil {
 		return err
 	}
-	newMeta := bigquery.TableMetadataToUpdate{
+	update := bigquery.TableMetadataToUpdate{
 		Description: "Updated description.",
 	}
-	if _, err = tableRef.Update(ctx, newMeta, original.ETag); err != nil {
+	if _, err = tableRef.Update(ctx, update, meta.ETag); err != nil {
 		return err
 	}
 	// [END bigquery_update_table_description]
@@ -230,19 +330,73 @@ func updateTableExpiration(client *bigquery.Client, datasetID, tableID string) e
 	ctx := context.Background()
 	// [START bigquery_update_table_expiration]
 	tableRef := client.Dataset(datasetID).Table(tableID)
-	original, err := tableRef.Metadata(ctx)
+	meta, err := tableRef.Metadata(ctx)
 	if err != nil {
 		return err
 	}
-	newMeta := bigquery.TableMetadataToUpdate{
+	update := bigquery.TableMetadataToUpdate{
 		ExpirationTime: time.Now().Add(time.Duration(5*24) * time.Hour), // table expiration in 5 days.
 	}
-	if _, err = tableRef.Update(ctx, newMeta, original.ETag); err != nil {
+	if _, err = tableRef.Update(ctx, update, meta.ETag); err != nil {
 		return err
 	}
 	// [END bigquery_update_table_expiration]
 	return nil
 
+}
+
+func tableLabels(client *bigquery.Client, w io.Writer, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_get_table_labels]
+	meta, err := client.Dataset(datasetID).Table(tableID).Metadata(ctx)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "Table %s labels:\n", datasetID)
+	if len(meta.Labels) == 0 {
+		fmt.Println("Table has no labels defined.")
+		return nil
+	}
+	for k, v := range meta.Labels {
+		fmt.Fprintf(w, "\t%s:%s\n", k, v)
+	}
+	// [END bigquery_get_table_labels]
+	return nil
+}
+
+func addTableLabel(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_label_table]
+	tbl := client.Dataset(datasetID).Table(tableID)
+	meta, err := tbl.Metadata(ctx)
+	if err != nil {
+		return err
+	}
+
+	update := bigquery.TableMetadataToUpdate{}
+	update.SetLabel("color", "green")
+	if _, err := tbl.Update(ctx, update, meta.ETag); err != nil {
+		return err
+	}
+	// [END bigquery_label_table]
+	return nil
+}
+
+func deleteTableLabel(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_delete_label_table]
+	tbl := client.Dataset(datasetID).Table(tableID)
+	meta, err := tbl.Metadata(ctx)
+	if err != nil {
+		return err
+	}
+	update := bigquery.TableMetadataToUpdate{}
+	update.DeleteLabel("color")
+	if _, err := tbl.Update(ctx, update, meta.ETag); err != nil {
+		return err
+	}
+	// [END bigquery_delete_label_table]
+	return nil
 }
 
 func listTables(client *bigquery.Client, w io.Writer, datasetID string) error {
@@ -532,7 +686,7 @@ func printTableInfo(client *bigquery.Client, datasetID, tableID string) error {
 	// Print basic information about the table.
 	fmt.Printf("Schema has %d top-level fields\n", len(meta.Schema))
 	fmt.Printf("Description: %s\n", meta.Description)
-	fmt.Printf("Row in managed storage: %d\n", meta.NumRows)
+	fmt.Printf("Rows in managed storage: %d\n", meta.NumRows)
 	// [END bigquery_get_table]
 	return nil
 }
