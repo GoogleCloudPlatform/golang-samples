@@ -63,6 +63,32 @@ func TestAll(t *testing.T) {
 	if err := updateDatasetAccessControl(client, datasetID); err != nil {
 		t.Errorf("updateDataSetAccessControl(%q): %v", datasetID, err)
 	}
+	if err := addDatasetLabel(client, datasetID); err != nil {
+		t.Errorf("updateDatasetAddLabel: %v", err)
+	}
+
+	buf := &bytes.Buffer{}
+	if err := datasetLabels(client, buf, datasetID); err != nil {
+		t.Errorf("getDatasetLabels(%q): %v", datasetID, err)
+	}
+	want := "color:green"
+	if got := buf.String(); !strings.Contains(got, want) {
+		t.Errorf("getDatasetLabel(%q) expected %q to contain %q", datasetID, got, want)
+	}
+
+	if err := addDatasetLabel(client, datasetID); err != nil {
+		t.Errorf("updateDatasetAddLabel: %v", err)
+	}
+	buf.Reset()
+	if err := listDatasetsByLabel(client, buf); err != nil {
+		t.Errorf("listDatasetsByLabel: %v", err)
+	}
+	if got := buf.String(); !strings.Contains(got, datasetID) {
+		t.Errorf("listDatasetsByLabel expected %q to contain %q", got, want)
+	}
+	if err := deleteDatasetLabel(client, datasetID); err != nil {
+		t.Errorf("updateDatasetDeleteLabel: %v", err)
+	}
 
 	// Test empty dataset creation/ttl/delete.
 	deletionDatasetID := uniqueBQName("golang_example_quickdelete")
@@ -103,8 +129,14 @@ func TestAll(t *testing.T) {
 	if err := updateTableExpiration(client, datasetID, explicit); err != nil {
 		t.Errorf("updateTableExpiration(dataset:%q table:%q): %v", datasetID, explicit, err)
 	}
+	if err := addTableLabel(client, datasetID, explicit); err != nil {
+		t.Errorf("updateTableAddLabel(dataset:%q table:%q): %v", datasetID, explicit, err)
+	}
+	if err := deleteTableLabel(client, datasetID, explicit); err != nil {
+		t.Errorf("updateTableAddLabel(dataset:%q table:%q): %v", datasetID, explicit, err)
+	}
 
-	buf := &bytes.Buffer{}
+	buf.Reset()
 	if err := listTables(client, buf, datasetID); err != nil {
 		t.Errorf("listTables(%q): %v", datasetID, err)
 	}
@@ -196,6 +228,10 @@ func TestAll(t *testing.T) {
 	dstTableID = uniqueBQName("golang_multicopydest")
 	if err := copyMultiTable(client, datasetID, dstTableID); err != nil {
 		t.Errorf("copyMultiTable(dataset:%q table:%q): %v", datasetID, dstTableID, err)
+	}
+
+	if err := listJobs(client); err != nil {
+		t.Errorf("listJobs: %v", err)
 	}
 
 }
