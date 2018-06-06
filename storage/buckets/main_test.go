@@ -101,13 +101,6 @@ func TestRequesterPays(t *testing.T) {
 	}
 }
 
-func TestDelete(t *testing.T) {
-	testutil.SystemTest(t)
-	if err := deleteBucket(storageClient, bucketName); err != nil {
-		t.Fatalf("failed to delete bucket (%q): %v", bucketName, err)
-	}
-}
-
 func TestKMS(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -121,5 +114,11 @@ func TestKMS(t *testing.T) {
 	kmsKeyName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", tc.ProjectID, "global", keyRingID, cryptoKeyID)
 	if err := setDefaultKMSkey(storageClient, bucketName, kmsKeyName); err != nil {
 		t.Fatalf("failed to enable default kms key (%q): %v", bucketName, err)
+	}
+}
+func TestDelete(t *testing.T) {
+	testutil.SystemTest(t)
+	if err := deleteBucket(storageClient, bucketName); err != nil {
+		t.Fatalf("failed to delete bucket (%q): %v", bucketName, err)
 	}
 }
