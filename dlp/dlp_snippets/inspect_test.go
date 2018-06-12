@@ -122,7 +122,6 @@ func writeObject(ctx context.Context, bucket *storage.BucketHandle, fileName, co
 }
 
 func TestInspectGCS(t *testing.T) {
-	t.Skip("flaky due to timeout")
 	testutil.SystemTest(t)
 	writeTestGCSFiles(t, projectID)
 	tests := []struct {
@@ -183,7 +182,6 @@ func writeTestDatastoreFiles(t *testing.T, projectID string) {
 }
 
 func TestInspectDatastore(t *testing.T) {
-	t.Skip("flaky due to timeout")
 	testutil.SystemTest(t)
 	writeTestDatastoreFiles(t, projectID)
 	tests := []struct {
@@ -263,7 +261,6 @@ func uploadBigQuery(ctx context.Context, d *bigquery.Dataset, schema bigquery.Sc
 }
 
 func TestInspectBigquery(t *testing.T) {
-	t.Skip("flaky due to timeout")
 	testutil.SystemTest(t)
 	if err := createBigqueryTestFiles(projectID, bqDatasetID); err != nil {
 		t.Fatalf("error creating test BigQuery files: %v", err)
