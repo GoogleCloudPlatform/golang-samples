@@ -9,6 +9,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"strings"
 
 	"golang.org/x/net/context"
 
