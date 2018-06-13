@@ -446,7 +446,7 @@ func buildCustomInfoTypes(customDictionaries []string, customRegexes []string) [
 				Dictionary: &dlppb.CustomInfoType_Dictionary{
 					Source: &dlppb.CustomInfoType_Dictionary_WordList_{
 						WordList: &dlppb.CustomInfoType_Dictionary_WordList{
-							Words: it.Split(","),
+							Words: strings.Split(it, ","),
 						},
 					},
 				},
