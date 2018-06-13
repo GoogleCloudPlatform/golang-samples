@@ -27,29 +27,7 @@ func inspectString(w io.Writer, client *dlp.Client, project string, minLikelihoo
 		i = append(i, &dlppb.InfoType{Name: it})
 	}
 	// Convert the custom dictionary word lists and custom regexes to a list of CustomInfoTypes.
-	var customInfoTypes []*dlppb.CustomInfoType
-	for idx, it := range customDictionaries {
-		customInfoTypes = append(customInfoTypes, &dlppb.CustomInfoType{
-			InfoType: &dlppb.InfoType{
-				Name: fmt.Sprintf("CUSTOM_DICTIONARY_%s", idx),
-			},
-			Dictionary: &dlppb.CustomInfoType_Dictionary{
-				WordList: &dlppb.CustomInfoType_Dictionary_WordList{
-					Words: it.Split(","),
-				},
-			},
-		})
-	}
-	for idx, it := range customRegexes {
-		customInfoTypes = append(customInfoTypes, &dlppb.CustomInfoType{
-			InfoType: &dlppb.InfoType{
-				Name: fmt.Sprintf("CUSTOM_REGEX_%s", idx),
-			},
-			Regex: &dlppb.CustomInfoType_Regex{
-				Pattern: it,
-			},
-		})
-	}
+	var customInfoTypes := buildCustomInfoTypes(customDictionaries, customRegexes)
 	// Create a configured request.
 	req := &dlppb.InspectContentRequest{
 		Parent: "projects/" + project,
@@ -90,29 +68,7 @@ func inspectFile(w io.Writer, client *dlp.Client, project string, minLikelihood 
 		i = append(i, &dlppb.InfoType{Name: it})
 	}
 	// Convert the custom dictionary word lists and custom regexes to a list of CustomInfoTypes.
-	var customInfoTypes []*dlppb.CustomInfoType
-	for idx, it := range customDictionaries {
-		customInfoTypes = append(customInfoTypes, &dlppb.CustomInfoType{
-			InfoType: &dlppb.InfoType{
-				Name: fmt.Sprintf("CUSTOM_DICTIONARY_%s", idx),
-			},
-			Dictionary: &dlppb.CustomInfoType_Dictionary{
-				WordList: &dlppb.CustomInfoType_Dictionary_WordList{
-					Words: it.Split(","),
-				},
-			},
-		})
-	}
-	for idx, it := range customRegexes {
-		customInfoTypes = append(customInfoTypes, &dlppb.CustomInfoType{
-			InfoType: &dlppb.InfoType{
-				Name: fmt.Sprintf("CUSTOM_REGEX_%s", idx),
-			},
-			Regex: &dlppb.CustomInfoType_Regex{
-				Pattern: it,
-			},
-		})
-	}
+	var customInfoTypes := buildCustomInfoTypes(customDictionaries, customRegexes)
 	b, err := ioutil.ReadAll(input)
 	if err != nil {
 		log.Fatalf("error reading file: %v", err)
@@ -160,29 +116,7 @@ func inspectGCSFile(w io.Writer, client *dlp.Client, project string, minLikeliho
 		i = append(i, &dlppb.InfoType{Name: it})
 	}
 	// Convert the custom dictionary word lists and custom regexes to a list of CustomInfoTypes.
-	var customInfoTypes []*dlppb.CustomInfoType
-	for idx, it := range customDictionaries {
-		customInfoTypes = append(customInfoTypes, &dlppb.CustomInfoType{
-			InfoType: &dlppb.InfoType{
-				Name: fmt.Sprintf("CUSTOM_DICTIONARY_%s", idx),
-			},
-			Dictionary: &dlppb.CustomInfoType_Dictionary{
-				WordList: &dlppb.CustomInfoType_Dictionary_WordList{
-					Words: it.Split(","),
-				},
-			},
-		})
-	}
-	for idx, it := range customRegexes {
-		customInfoTypes = append(customInfoTypes, &dlppb.CustomInfoType{
-			InfoType: &dlppb.InfoType{
-				Name: fmt.Sprintf("CUSTOM_REGEX_%s", idx),
-			},
-			Regex: &dlppb.CustomInfoType_Regex{
-				Pattern: it,
-			},
-		})
-	}
+	var customInfoTypes := buildCustomInfoTypes(customDictionaries, customRegexes)
 
 	ctx := context.Background()
 
@@ -289,29 +223,8 @@ func inspectDatastore(w io.Writer, client *dlp.Client, project string, minLikeli
 		i = append(i, &dlppb.InfoType{Name: it})
 	}
 	// Convert the custom dictionary word lists and custom regexes to a list of CustomInfoTypes.
-	var customInfoTypes []*dlppb.CustomInfoType
-	for idx, it := range customDictionaries {
-		customInfoTypes = append(customInfoTypes, &dlppb.CustomInfoType{
-			InfoType: &dlppb.InfoType{
-				Name: fmt.Sprintf("CUSTOM_DICTIONARY_%s", idx),
-			},
-			Dictionary: &dlppb.CustomInfoType_Dictionary{
-				WordList: &dlppb.CustomInfoType_Dictionary_WordList{
-					Words: it.Split(","),
-				},
-			},
-		})
-	}
-	for idx, it := range customRegexes {
-		customInfoTypes = append(customInfoTypes, &dlppb.CustomInfoType{
-			InfoType: &dlppb.InfoType{
-				Name: fmt.Sprintf("CUSTOM_REGEX_%s", idx),
-			},
-			Regex: &dlppb.CustomInfoType_Regex{
-				Pattern: it,
-			},
-		})
-	}
+	var customInfoTypes := buildCustomInfoTypes(customDictionaries, customRegexes)
+
 
 	ctx := context.Background()
 
@@ -422,29 +335,7 @@ func inspectBigquery(w io.Writer, client *dlp.Client, project string, minLikelih
 		i = append(i, &dlppb.InfoType{Name: it})
 	}
 	// Convert the custom dictionary word lists and custom regexes to a list of CustomInfoTypes.
-	var customInfoTypes []*dlppb.CustomInfoType
-	for idx, it := range customDictionaries {
-		customInfoTypes = append(customInfoTypes, &dlppb.CustomInfoType{
-			InfoType: &dlppb.InfoType{
-				Name: fmt.Sprintf("CUSTOM_DICTIONARY_%s", idx),
-			},
-			Dictionary: &dlppb.CustomInfoType_Dictionary{
-				WordList: &dlppb.CustomInfoType_Dictionary_WordList{
-					Words: it.Split(","),
-				},
-			},
-		})
-	}
-	for idx, it := range customRegexes {
-		customInfoTypes = append(customInfoTypes, &dlppb.CustomInfoType{
-			InfoType: &dlppb.InfoType{
-				Name: fmt.Sprintf("CUSTOM_REGEX_%s", idx),
-			},
-			Regex: &dlppb.CustomInfoType_Regex{
-				Pattern: it,
-			},
-		})
-	}
+	var customInfoTypes := buildCustomInfoTypes(customDictionaries, customRegexes)
 
 	ctx := context.Background()
 
@@ -542,3 +433,31 @@ func inspectBigquery(w io.Writer, client *dlp.Client, project string, minLikelih
 }
 
 // [END dlp_inspect_bigquery]
+
+// Convert the custom dictionary word lists and custom regexes to a list of CustomInfoTypes.
+func buildCustomInfoTypes(customDictionaries []string, customRegexes []string) []*dlppb.CustomInfoType {
+	var customInfoTypes []*dlppb.CustomInfoType
+	for idx, it := range customDictionaries {
+		customInfoTypes = append(customInfoTypes, &dlppb.CustomInfoType{
+			InfoType: &dlppb.InfoType{
+				Name: fmt.Sprintf("CUSTOM_DICTIONARY_%s", idx),
+			},
+			Dictionary: &dlppb.CustomInfoType_Dictionary{
+				WordList: &dlppb.CustomInfoType_Dictionary_WordList{
+					Words: it.Split(","),
+				},
+			},
+		})
+	}
+	for idx, it := range customRegexes {
+		customInfoTypes = append(customInfoTypes, &dlppb.CustomInfoType{
+			InfoType: &dlppb.InfoType{
+				Name: fmt.Sprintf("CUSTOM_REGEX_%s", idx),
+			},
+			Regex: &dlppb.CustomInfoType_Regex{
+				Pattern: it,
+			},
+		})
+	}
+	return customInfoTypes
+}
