@@ -107,6 +107,17 @@ func TestSample(t *testing.T) {
 	out = runCommand(t, "querywithtimestamp", dbName)
 	assertContains(out, "1000000")
 
+	runCommand(t, "writestructdata", dbName)
+	assertContains(runCommand(t, "querywithstruct", dbName), "6")
+	out = runCommand(t, "querywitharrayofstruct", dbName)
+	assertContains(out, "6")
+	assertContains(out, "7")
+	assertContains(out, "8")
+	assertContains(runCommand(t, "querywithstructfield", dbName), "6")
+	out = runCommand(t, "querywithnestedstructfield", dbName)
+	assertContains(out, "6 Imagination")
+	assertContains(out, "9 Imagination")
+
 	runCommand(t, "createtabledocswithtimestamp", dbName)
 	runCommand(t, "writetodocstable", dbName)
 	runCommand(t, "updatedocstable", dbName)
