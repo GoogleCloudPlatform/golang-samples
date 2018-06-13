@@ -37,14 +37,16 @@ func bytesTypeValues() string {
 }
 
 var (
-	project              = flag.String("project", "", "Project ID (required)")
-	languageCode         = flag.String("languageCode", "en-US", "Language code for infoTypes")
-	infoTypesString      = flag.String("infoTypes", "PHONE_NUMBER,EMAIL_ADDRESS,CREDIT_CARD_NUMBER,US_SOCIAL_SECURITY_NUMBER", "Info types to inspect*, redactImage, createTrigger, and createInspectTemplate")
-	minLikelihoodFlag    = flag.String("minLikelihood", "LIKELIHOOD_UNSPECIFIED", fmt.Sprintf("Minimum likelihood value for inspect*, redactImage, createTrigger, and createInspectTemplate [%v]", minLikelihoodValues()))
-	bytesTypeFlag        = flag.String("bytesType", "BYTES_TYPE_UNSPECIFIED", fmt.Sprintf("Bytes type of input file for inspectFile and redactImage [%v]", bytesTypeValues()))
-	maxFindings          = flag.Int("maxFindings", 0, "Number of results for inspect*, createTrigger, and createInspectTemplate (default 0 (no limit))")
-	autoPopulateTimespan = flag.Bool("autoPopulateTimespan", false, "Limit scan to new content only (default false)")
-	includeQuote         = flag.Bool("includeQuote", false, "Include a quote of findings for inspect* (default false)")
+	project                = flag.String("project", "", "Project ID (required)")
+	languageCode           = flag.String("languageCode", "en-US", "Language code for infoTypes")
+	infoTypesString        = flag.String("infoTypes", "PHONE_NUMBER,EMAIL_ADDRESS,CREDIT_CARD_NUMBER,US_SOCIAL_SECURITY_NUMBER", "Info types to inspect*, redactImage, createTrigger, and createInspectTemplate")
+	customDictionaryString = flag.String("customDictionary", "", "Custom dictionary for inspect*")
+	customRegexesString    = flag.String("customRegexes", "", "Custom regexes for inspect*")
+	minLikelihoodFlag      = flag.String("minLikelihood", "LIKELIHOOD_UNSPECIFIED", fmt.Sprintf("Minimum likelihood value for inspect*, redactImage, createTrigger, and createInspectTemplate [%v]", minLikelihoodValues()))
+	bytesTypeFlag          = flag.String("bytesType", "BYTES_TYPE_UNSPECIFIED", fmt.Sprintf("Bytes type of input file for inspectFile and redactImage [%v]", bytesTypeValues()))
+	maxFindings            = flag.Int("maxFindings", 0, "Number of results for inspect*, createTrigger, and createInspectTemplate (default 0 (no limit))")
+	autoPopulateTimespan   = flag.Bool("autoPopulateTimespan", false, "Limit scan to new content only (default false)")
+	includeQuote           = flag.Bool("includeQuote", false, "Include a quote of findings for inspect* (default false)")
 )
 
 func main() {
@@ -58,6 +60,8 @@ func main() {
 	flag.Parse()
 
 	infoTypesList := strings.Split(*infoTypesString, ",")
+	customDictionaryList := []string{customDictionaryString}
+	customRegexList := strings.Split(*customRegexesString, ",")
 
 	if *project == "" {
 		fmt.Fprintf(os.Stderr, "Must provide a -project\n\n")
@@ -88,23 +92,23 @@ func main() {
 		os.Exit(1)
 	case "inspect":
 		checkNArg(1)
-		inspectString(os.Stdout, client, *project, minLikelihood, int32(*maxFindings), *includeQuote, infoTypesList, flag.Arg(1))
+		inspectString(os.Stdout, client, *project, minLikelihood, int32(*maxFindings), *includeQuote, infoTypesList, customDictionariesList, customRegexesList, flag.Arg(1))
 	case "inspectFile":
 		checkNArg(1)
 		f, err := os.Open(flag.Arg(1))
 		if err != nil {
 			log.Fatalf("error opening file: %v", err)
 		}
-		inspectFile(os.Stdout, client, *project, minLikelihood, int32(*maxFindings), *includeQuote, infoTypesList, bytesType, f)
+		inspectFile(os.Stdout, client, *project, minLikelihood, int32(*maxFindings), *includeQuote, infoTypesList, customDictionariesList, customRegexesList, bytesType, f)
 	case "inspectGCSFile":
 		checkNArg(4)
-		inspectGCSFile(os.Stdout, client, *project, minLikelihood, int32(*maxFindings), *includeQuote, infoTypesList, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4))
+		inspectGCSFile(os.Stdout, client, *project, minLikelihood, int32(*maxFindings), *includeQuote, infoTypesList, customDictionariesList, customRegexesList, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4))
 	case "inspectDatastore":
 		checkNArg(5)
-		inspectDatastore(os.Stdout, client, *project, minLikelihood, int32(*maxFindings), *includeQuote, infoTypesList, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), flag.Arg(5))
+		inspectDatastore(os.Stdout, client, *project, minLikelihood, int32(*maxFindings), *includeQuote, infoTypesList, customDictionariesList, customRegexesList, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), flag.Arg(5))
 	case "inspectBigquery":
 		checkNArg(5)
-		inspectBigquery(os.Stdout, client, *project, minLikelihood, int32(*maxFindings), *includeQuote, infoTypesList, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), flag.Arg(5))
+		inspectBigquery(os.Stdout, client, *project, minLikelihood, int32(*maxFindings), *includeQuote, infoTypesList, customDictionariesList, customRegexesList, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), flag.Arg(5))
 
 	case "redactImage":
 		checkNArg(2)
