@@ -33,12 +33,39 @@ func TestInspectString(t *testing.T) {
 	}
 	for _, test := range tests {
 		buf := new(bytes.Buffer)
-		inspectString(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, true, []string{"US_SOCIAL_SECURITY_NUMBER"}, test.s)
+		inspectString(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, true, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, test.s)
 		if got := buf.String(); test.want != strings.Contains(got, "US_SOCIAL_SECURITY_NUMBER") {
 			if test.want {
 				t.Errorf("inspectString(%s) = %q, want 'US_SOCIAL_SECURITY_NUMBER' substring", test.s, got)
 			} else {
 				t.Errorf("inspectString(%s) = %q, want to not contain 'US_SOCIAL_SECURITY_NUMBER'", test.s, got)
+			}
+		}
+	}
+}
+
+func TestInspectStringWithCustomInfoTypes(t *testing.T) {
+	testutil.SystemTest(t)
+	tests := []struct {
+		s    string
+		want bool
+	}{
+		{
+			s:    "My SSN is 111222333",
+			want: true,
+		},
+		{
+			s: "Does not match",
+		},
+	}
+	for _, test := range tests {
+		buf := new(bytes.Buffer)
+		inspectString(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, true, []string{}, []string{"SSN"}, []string{"\\d{9}"}, test.s)
+		if got := buf.String(); test.want != strings.Contains(got, "CUSTOM_DICTIONARY_0") && strings.Contains(got, "CUSTOM_REGEX_0") {
+			if test.want {
+				t.Errorf("inspectString(%s) = %q, want 'CUSTOM_DICTIONARY_0' and 'CUSTOM_REGEX_0' substring", test.s, got)
+			} else {
+				t.Errorf("inspectString(%s) = %q, want to not contain 'CUSTOM_DICTIONARY_0' and 'CUSTOM_REGEX_0'", test.s, got)
 			}
 		}
 	}
@@ -60,12 +87,39 @@ func TestInspectFile(t *testing.T) {
 	}
 	for _, test := range tests {
 		buf := new(bytes.Buffer)
-		inspectFile(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, true, []string{"US_SOCIAL_SECURITY_NUMBER"}, dlppb.ByteContentItem_TEXT_UTF8, strings.NewReader(test.s))
+		inspectFile(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, true, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, dlppb.ByteContentItem_TEXT_UTF8, strings.NewReader(test.s))
 		if got := buf.String(); test.want != strings.Contains(got, "US_SOCIAL_SECURITY_NUMBER") {
 			if test.want {
 				t.Errorf("inspectString(%s) = %q, want 'US_SOCIAL_SECURITY_NUMBER' substring", test.s, got)
 			} else {
 				t.Errorf("inspectString(%s) = %q, want to not contain 'US_SOCIAL_SECURITY_NUMBER'", test.s, got)
+			}
+		}
+	}
+}
+
+func TestInspectFileWithCustomInfoTypes(t *testing.T) {
+	testutil.SystemTest(t)
+	tests := []struct {
+		s    string
+		want bool
+	}{
+		{
+			s:    "My SSN is 111222333",
+			want: true,
+		},
+		{
+			s: "Does not match",
+		},
+	}
+	for _, test := range tests {
+		buf := new(bytes.Buffer)
+		inspectFile(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, true, []string{}, []string{"SSN"}, []string{"\\d{9}"}, dlppb.ByteContentItem_TEXT_UTF8, strings.NewReader(test.s))
+		if got := buf.String(); test.want != strings.Contains(got, "CUSTOM_DICTIONARY_0") && strings.Contains(got, "CUSTOM_REGEX_0") {
+			if test.want {
+				t.Errorf("inspectString(%s) = %q, want 'CUSTOM_DICTIONARY_0' and 'CUSTOM_REGEX_0' substring", test.s, got)
+			} else {
+				t.Errorf("inspectString(%s) = %q, want to not contain 'CUSTOM_DICTIONARY_0' and 'CUSTOM_REGEX_0'", test.s, got)
 			}
 		}
 	}
@@ -139,7 +193,7 @@ func TestInspectGCS(t *testing.T) {
 	}
 	for _, test := range tests {
 		buf := new(bytes.Buffer)
-		inspectGCSFile(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, true, []string{"US_SOCIAL_SECURITY_NUMBER"}, "test-topic", "test-sub", bucketName, test.fileName)
+		inspectGCSFile(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, true, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, "test-topic", "test-sub", bucketName, test.fileName)
 		if got := buf.String(); !strings.Contains(got, test.want) {
 			t.Errorf("inspectString(%s) = %q, want %q substring", test.fileName, got, test.want)
 		}
@@ -199,7 +253,7 @@ func TestInspectDatastore(t *testing.T) {
 	}
 	for _, test := range tests {
 		buf := new(bytes.Buffer)
-		inspectDatastore(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, true, []string{"US_SOCIAL_SECURITY_NUMBER"}, "test-topic", "test-sub", projectID, "", test.kind)
+		inspectDatastore(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, true, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, "test-topic", "test-sub", projectID, "", test.kind)
 		if got := buf.String(); !strings.Contains(got, test.want) {
 			t.Errorf("inspectDatastore(%s) = %q, want %q substring", test.kind, got, test.want)
 		}
@@ -280,7 +334,7 @@ func TestInspectBigquery(t *testing.T) {
 	}
 	for _, test := range tests {
 		buf := new(bytes.Buffer)
-		inspectBigquery(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, true, []string{"US_SOCIAL_SECURITY_NUMBER"}, "test-topic", "test-sub", projectID, bqDatasetID, test.table)
+		inspectBigquery(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, true, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, "test-topic", "test-sub", projectID, bqDatasetID, test.table)
 		if got := buf.String(); !strings.Contains(got, test.want) {
 			t.Errorf("inspectBigquery(%s) = %q, want %q substring", test.table, got, test.want)
 		}
