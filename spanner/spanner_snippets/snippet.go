@@ -28,28 +28,33 @@ type adminCommand func(ctx context.Context, w io.Writer, adminClient *database.D
 
 var (
 	commands = map[string]command{
-		"write":               write,
-		"query":               query,
-		"read":                read,
-		"update":              update,
-		"writetransaction":    writeWithTransaction,
-		"querynewcolumn":      queryNewColumn,
-		"queryindex":          queryUsingIndex,
-		"readindex":           readUsingIndex,
-		"readstoringindex":    readStoringIndex,
-		"readonlytransaction": readOnlyTransaction,
-		"readstaledata":       readStaleData,
-		"readbatchdata":       readBatchData,
-		"updatewithtimestamp": updateWithTimestamp,
-		"querywithtimestamp":  queryWithTimestamp,
-		"writewithtimestamp":  writeWithTimestamp,
-		"querynewtable":       queryNewTable,
-		"writetodocstable":    writeToDocumentsTable,
-		"updatedocstable":     updateDocumentsTable,
-		"querydocstable":      queryDocumentsTable,
-		"writewithhistory":    writeWithHistory,
-		"updatewithhistory":   updateWithHistory,
-		"querywithhistory":    queryWithHistory,
+		"write":                      write,
+		"query":                      query,
+		"read":                       read,
+		"update":                     update,
+		"writetransaction":           writeWithTransaction,
+		"querynewcolumn":             queryNewColumn,
+		"queryindex":                 queryUsingIndex,
+		"readindex":                  readUsingIndex,
+		"readstoringindex":           readStoringIndex,
+		"readonlytransaction":        readOnlyTransaction,
+		"readstaledata":              readStaleData,
+		"readbatchdata":              readBatchData,
+		"updatewithtimestamp":        updateWithTimestamp,
+		"querywithtimestamp":         queryWithTimestamp,
+		"writewithtimestamp":         writeWithTimestamp,
+		"querynewtable":              queryNewTable,
+		"writetodocstable":           writeToDocumentsTable,
+		"updatedocstable":            updateDocumentsTable,
+		"querydocstable":             queryDocumentsTable,
+		"writewithhistory":           writeWithHistory,
+		"updatewithhistory":          updateWithHistory,
+		"querywithhistory":           queryWithHistory,
+		"writestructdata":            writeStructData,
+		"querywithstruct":            queryWithStruct,
+		"querywitharrayofstruct":     queryWithArrayOfStruct,
+		"querywithstructfield":       queryWithStructField,
+		"querywithnestedstructfield": queryWithNestedStructField,
 	}
 
 	adminCommands = map[string]adminCommand{
@@ -215,6 +220,188 @@ func writeWithTimestamp(ctx context.Context, w io.Writer, client *spanner.Client
 }
 
 // [END spanner_insert_data_with_timestamp_column]
+
+// [START spanner_write_data_for_struct_queries]
+
+func writeStructData(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	singerColumns := []string{"SingerId", "FirstName", "LastName"}
+	m := []*spanner.Mutation{
+		spanner.InsertOrUpdate("Singers", singerColumns, []interface{}{6, "Elena", "Campbell"}),
+		spanner.InsertOrUpdate("Singers", singerColumns, []interface{}{7, "Gabriel", "Wright"}),
+		spanner.InsertOrUpdate("Singers", singerColumns, []interface{}{8, "Benjamin", "Martinez"}),
+		spanner.InsertOrUpdate("Singers", singerColumns, []interface{}{9, "Hannah", "Harris"}),
+	}
+	_, err := client.Apply(ctx, m)
+	return err
+}
+
+// [END spanner_write_data_for_struct_queries]
+
+func queryWithStruct(ctx context.Context, w io.Writer, client *spanner.Client) error {
+
+	// [START spanner_create_struct_with_data]
+
+	type nameStruct struct {
+		FirstName string
+		LastName  string
+	}
+	var singerInfo = nameStruct{"Elena", "Campbell"}
+
+	// [END spanner_create_struct_with_data]
+
+	// [START spanner_query_data_with_struct]
+
+	stmt := spanner.Statement{
+		SQL: `SELECT SingerId FROM SINGERS
+				WHERE (FirstName, LastName) = @singerinfo`,
+		Params: map[string]interface{}{"singerinfo": singerInfo},
+	}
+	iter := client.Single().Query(ctx, stmt)
+	defer iter.Stop()
+	for {
+		row, err := iter.Next()
+		if err == iterator.Done {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		var singerID int64
+		if err := row.Columns(&singerID); err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "%d\n", singerID)
+	}
+
+	// [END spanner_query_data_with_struct]
+}
+
+func queryWithArrayOfStruct(ctx context.Context, w io.Writer, client *spanner.Client) error {
+
+	// [START spanner_create_user_defined_struct]
+
+	type nameType struct {
+		FirstName string
+		LastName  string
+	}
+
+	// [END spanner_create_user_defined_struct]
+
+	// [START spanner_create_array_of_struct_with_data]
+
+	var bandMembers = []nameType{
+		{"Elena", "Campbell"},
+		{"Gabriel", "Wright"},
+		{"Benjamin", "Martinez"},
+	}
+
+	// [END spanner_create_array_of_struct_with_data]
+
+	// [START spanner_query_data_with_array_of_struct]
+
+	stmt := spanner.Statement{
+		SQL: `SELECT SingerId FROM SINGERS
+			WHERE STRUCT<FirstName STRING, LastName STRING>(FirstName, LastName)
+			IN UNNEST(@names)`,
+		Params: map[string]interface{}{"names": bandMembers},
+	}
+	iter := client.Single().Query(ctx, stmt)
+	defer iter.Stop()
+	for {
+		row, err := iter.Next()
+		if err == iterator.Done {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		var singerID int64
+		if err := row.Columns(&singerID); err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "%d\n", singerID)
+	}
+
+	// [END spanner_query_data_with_array_of_struct]
+}
+
+// [START spanner_field_access_on_struct_parameters]
+
+func queryWithStructField(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	type structParam struct {
+		FirstName string
+		LastName  string
+	}
+	var singerInfo = structParam{"Elena", "Campbell"}
+	stmt := spanner.Statement{
+		SQL: `SELECT SingerId FROM SINGERS
+			WHERE FirstName = @name.FirstName`,
+		Params: map[string]interface{}{"name": singerInfo},
+	}
+	iter := client.Single().Query(ctx, stmt)
+	defer iter.Stop()
+	for {
+		row, err := iter.Next()
+		if err == iterator.Done {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		var singerID int64
+		if err := row.Columns(&singerID); err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "%d\n", singerID)
+	}
+}
+
+// [END spanner_field_access_on_struct_parameters]
+
+// [START spanner_field_access_on_nested_struct_parameters]
+
+func queryWithNestedStructField(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	type nameType struct {
+		FirstName string
+		LastName  string
+	}
+	type songInfoStruct struct {
+		SongName    string
+		ArtistNames []nameType
+	}
+	var songInfo = songInfoStruct{
+		SongName: "Imagination",
+		ArtistNames: []nameType{
+			{FirstName: "Elena", LastName: "Campbell"},
+			{FirstName: "Hannah", LastName: "Harris"},
+		},
+	}
+	stmt := spanner.Statement{
+		SQL: `SELECT SingerId, @songinfo.SongName FROM Singers
+			WHERE STRUCT<FirstName STRING, LastName STRING>(FirstName, LastName)
+			IN UNNEST(@songinfo.ArtistNames)`,
+		Params: map[string]interface{}{"songinfo": songInfo},
+	}
+	iter := client.Single().Query(ctx, stmt)
+	defer iter.Stop()
+	for {
+		row, err := iter.Next()
+		if err == iterator.Done {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		var singerID int64
+		var songName string
+		if err := row.Columns(&singerID, &songName); err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "%d %s\n", singerID, songName)
+	}
+}
+
+// [END spanner_field_access_on_nested_struct_parameters]
 
 // [START spanner_query_data]
 
@@ -985,7 +1172,8 @@ func main() {
 		addcommittimestamp, updatewithtimestamp, querywithtimestamp, createtablewithtimestamp,
 		writewithtimestamp, querynewtable, createtabledocswithtimestamp, writetodocstable,
 		updatedocstable, querydocstable, createtabledocswithhistorytable, writewithhistory,
-		updatewithhistory, querywithhistory
+		updatewithhistory, querywithhistory, writestructdata, querywithstruct, querywitharrayofstruct,
+		querywithstructfield, querywithnestedstructfield
 
 Examples:
 	spanner_snippets createdatabase projects/my-project/instances/my-instance/databases/example-db
