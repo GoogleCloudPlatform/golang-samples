@@ -27,7 +27,7 @@ func inspectString(w io.Writer, client *dlp.Client, project string, minLikelihoo
 		i = append(i, &dlppb.InfoType{Name: it})
 	}
 	// Convert the custom dictionary word lists and custom regexes to a list of CustomInfoTypes.
-	var customInfoTypes := buildCustomInfoTypes(customDictionaries, customRegexes)
+	customInfoTypes := buildCustomInfoTypes(customDictionaries, customRegexes)
 	// Create a configured request.
 	req := &dlppb.InspectContentRequest{
 		Parent: "projects/" + project,
@@ -68,7 +68,7 @@ func inspectFile(w io.Writer, client *dlp.Client, project string, minLikelihood 
 		i = append(i, &dlppb.InfoType{Name: it})
 	}
 	// Convert the custom dictionary word lists and custom regexes to a list of CustomInfoTypes.
-	var customInfoTypes := buildCustomInfoTypes(customDictionaries, customRegexes)
+	customInfoTypes := buildCustomInfoTypes(customDictionaries, customRegexes)
 	b, err := ioutil.ReadAll(input)
 	if err != nil {
 		log.Fatalf("error reading file: %v", err)
@@ -116,7 +116,7 @@ func inspectGCSFile(w io.Writer, client *dlp.Client, project string, minLikeliho
 		i = append(i, &dlppb.InfoType{Name: it})
 	}
 	// Convert the custom dictionary word lists and custom regexes to a list of CustomInfoTypes.
-	var customInfoTypes := buildCustomInfoTypes(customDictionaries, customRegexes)
+	customInfoTypes := buildCustomInfoTypes(customDictionaries, customRegexes)
 
 	ctx := context.Background()
 
@@ -223,7 +223,7 @@ func inspectDatastore(w io.Writer, client *dlp.Client, project string, minLikeli
 		i = append(i, &dlppb.InfoType{Name: it})
 	}
 	// Convert the custom dictionary word lists and custom regexes to a list of CustomInfoTypes.
-	var customInfoTypes := buildCustomInfoTypes(customDictionaries, customRegexes)
+	customInfoTypes := buildCustomInfoTypes(customDictionaries, customRegexes)
 
 
 	ctx := context.Background()
@@ -335,7 +335,7 @@ func inspectBigquery(w io.Writer, client *dlp.Client, project string, minLikelih
 		i = append(i, &dlppb.InfoType{Name: it})
 	}
 	// Convert the custom dictionary word lists and custom regexes to a list of CustomInfoTypes.
-	var customInfoTypes := buildCustomInfoTypes(customDictionaries, customRegexes)
+	customInfoTypes := buildCustomInfoTypes(customDictionaries, customRegexes)
 
 	ctx := context.Background()
 
