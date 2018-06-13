@@ -442,7 +442,7 @@ func buildCustomInfoTypes(customDictionaries []string, customRegexes []string) [
 			InfoType: &dlppb.InfoType{
 				Name: fmt.Sprintf("CUSTOM_DICTIONARY_%s", idx),
 			},
-			Type: &dlppb.CustomInfoType_Dictionary{
+			isDictionary_Type: &dlppb.CustomInfoType_Dictionary{
 				WordList: &dlppb.CustomInfoType_Dictionary_WordList{
 					Words: it.Split(","),
 				},
@@ -454,7 +454,7 @@ func buildCustomInfoTypes(customDictionaries []string, customRegexes []string) [
 			InfoType: &dlppb.InfoType{
 				Name: fmt.Sprintf("CUSTOM_REGEX_%s", idx),
 			},
-			Type: &dlppb.CustomInfoType_Regex{
+			isDictionary_Type: &dlppb.CustomInfoType_Regex{
 				Pattern: it,
 			},
 		})
