@@ -18,8 +18,8 @@ import (
 
 // [START dlp_deidentify_masking]
 
-// mask deidentifies the input by masking all info types with maskingCharacter and
-// prints the result to w.
+// mask deidentifies the input by masking all provided info types with maskingCharacter
+// and prints the result to w.
 func mask(w io.Writer, client *dlp.Client, project, input string, infoTypes []string, maskingCharacter string, numberToMask int32) {
 	// Convert the info type strings to a list of InfoTypes.
 	var i []*dlppb.InfoType
