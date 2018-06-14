@@ -60,8 +60,14 @@ func main() {
 	flag.Parse()
 
 	infoTypesList := strings.Split(*infoTypesString, ",")
-	customDictionariesList := []string{*customDictionaryString}
-	customRegexesList := strings.Split(*customRegexesString, ",")
+	var customDictionariesList []string
+	if *customDictionaryString != "" {
+		customDictionariesList = []string{*customDictionaryString}
+	}
+	var customRegexesList []string
+	if *customRegexesString != "" {
+		customRegexesList = strings.Split(*customRegexesString, ",")
+	}
 
 	if *project == "" {
 		fmt.Fprintf(os.Stderr, "Must provide a -project\n\n")
