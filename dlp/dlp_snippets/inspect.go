@@ -33,9 +33,9 @@ func inspectString(w io.Writer, client *dlp.Client, project string, minLikelihoo
 	req := &dlppb.InspectContentRequest{
 		Parent: "projects/" + project,
 		InspectConfig: &dlppb.InspectConfig{
-			InfoTypes:     i,
+			InfoTypes:       i,
 			CustomInfoTypes: customInfoTypes,
-			MinLikelihood: minLikelihood,
+			MinLikelihood:   minLikelihood,
 			Limits: &dlppb.InspectConfig_FindingLimits{
 				MaxFindingsPerRequest: maxFindings,
 			},
@@ -78,9 +78,9 @@ func inspectFile(w io.Writer, client *dlp.Client, project string, minLikelihood 
 	req := &dlppb.InspectContentRequest{
 		Parent: "projects/" + project,
 		InspectConfig: &dlppb.InspectConfig{
-			InfoTypes:     i,
+			InfoTypes:       i,
 			CustomInfoTypes: customInfoTypes,
-			MinLikelihood: minLikelihood,
+			MinLikelihood:   minLikelihood,
 			Limits: &dlppb.InspectConfig_FindingLimits{
 				MaxFindingsPerRequest: maxFindings,
 			},
@@ -154,9 +154,9 @@ func inspectGCSFile(w io.Writer, client *dlp.Client, project string, minLikeliho
 				},
 				// InspectConfig describes what fields to look for.
 				InspectConfig: &dlppb.InspectConfig{
-					InfoTypes:     i,
+					InfoTypes:       i,
 					CustomInfoTypes: customInfoTypes,
-					MinLikelihood: minLikelihood,
+					MinLikelihood:   minLikelihood,
 					Limits: &dlppb.InspectConfig_FindingLimits{
 						MaxFindingsPerRequest: maxFindings,
 					},
@@ -226,7 +226,6 @@ func inspectDatastore(w io.Writer, client *dlp.Client, project string, minLikeli
 	// Convert the custom dictionary word lists and custom regexes to a list of CustomInfoTypes.
 	customInfoTypes := buildCustomInfoTypes(customDictionaries, customRegexes)
 
-
 	ctx := context.Background()
 
 	// Create a PubSub Client used to listen for when the inspect job finishes.
@@ -266,9 +265,9 @@ func inspectDatastore(w io.Writer, client *dlp.Client, project string, minLikeli
 				},
 				// InspectConfig describes what fields to look for.
 				InspectConfig: &dlppb.InspectConfig{
-					InfoTypes:     i,
+					InfoTypes:       i,
 					CustomInfoTypes: customInfoTypes,
-					MinLikelihood: minLikelihood,
+					MinLikelihood:   minLikelihood,
 					Limits: &dlppb.InspectConfig_FindingLimits{
 						MaxFindingsPerRequest: maxFindings,
 					},
@@ -375,9 +374,9 @@ func inspectBigquery(w io.Writer, client *dlp.Client, project string, minLikelih
 				},
 				// InspectConfig describes what fields to look for.
 				InspectConfig: &dlppb.InspectConfig{
-					InfoTypes:     i,
+					InfoTypes:       i,
 					CustomInfoTypes: customInfoTypes,
-					MinLikelihood: minLikelihood,
+					MinLikelihood:   minLikelihood,
 					Limits: &dlppb.InspectConfig_FindingLimits{
 						MaxFindingsPerRequest: maxFindings,
 					},
@@ -457,7 +456,7 @@ func buildCustomInfoTypes(customDictionaries []string, customRegexes []string) [
 	for idx, it := range customRegexes {
 		customInfoTypes = append(customInfoTypes, &dlppb.CustomInfoType{
 			InfoType: &dlppb.InfoType{
-				Name: fmt.Sprintf("CUSTOM_REGEX_%s", idx),
+				Name: fmt.Sprintf("CUSTOM_REGEX_%d", idx),
 			},
 			Type: &dlppb.CustomInfoType_Regex_{
 				Regex: &dlppb.CustomInfoType_Regex{
