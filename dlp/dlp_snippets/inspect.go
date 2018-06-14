@@ -440,7 +440,7 @@ func buildCustomInfoTypes(customDictionaries []string, customRegexes []string) [
 	for idx, it := range customDictionaries {
 		customInfoTypes = append(customInfoTypes, &dlppb.CustomInfoType{
 			InfoType: &dlppb.InfoType{
-				Name: fmt.Sprintf("CUSTOM_DICTIONARY_%s", idx),
+				Name: fmt.Sprintf("CUSTOM_DICTIONARY_%d", idx),
 			},
 			Type: &dlppb.CustomInfoType_Dictionary_{
 				Dictionary: &dlppb.CustomInfoType_Dictionary{
