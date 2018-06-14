@@ -120,13 +120,13 @@ func main() {
 
 	case "mask":
 		checkNArg(1)
-		mask(os.Stdout, client, *project, flag.Arg(1), "*", 0)
+		mask(os.Stdout, client, *project, flag.Arg(1), infoTypesList, "*", 0)
 	case "dateShift":
 		checkNArg(1)
 		deidentifyDateShift(os.Stdout, client, *project, -2000, 2000, flag.Arg(1))
 	case "fpe":
 		checkNArg(4)
-		deidentifyFPE(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4))
+		deidentifyFPE(os.Stdout, client, *project, flag.Arg(1), infoTypesList, flag.Arg(2), flag.Arg(3), flag.Arg(4))
 	case "reidentifyFPE":
 		checkNArg(4)
 		reidentifyFPE(os.Stdout, client, *project, flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4))
