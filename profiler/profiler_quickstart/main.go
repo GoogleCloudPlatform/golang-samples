@@ -36,6 +36,8 @@ func main() {
 		NoHeapProfiling:      true,
 		NoGoroutineProfiling: true,
 		DebugLogging:         true,
+		// ProjectID must be set if not running on GCP.
+		// ProjectID: "my-project",
 	})
 	if err != nil {
 		log.Fatalf("failed to start the profiler: %v", err)

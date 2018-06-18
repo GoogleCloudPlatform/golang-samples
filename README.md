@@ -52,21 +52,22 @@ Note: samples under `docs/appengine` are not shown because they mostly do not ru
 |Path|Description|
 |---|---|
 |[appengine/bigquery](appengine/bigquery)|This App Engine application uses its default service account to list all the BigQuery datasets accessible via the BigQuery REST API.|
-|[docs/managed_vms/analytics](docs/managed_vms/analytics)|Sample analytics demonstrates Google Analytics calls from App Engine flexible environment.|
-|[docs/managed_vms/cloudsql](docs/managed_vms/cloudsql)|Sample cloudsql demonstrates usage of Cloud SQL from App Engine flexible environment.|
-|[docs/managed_vms/datastore](docs/managed_vms/datastore)|Sample datastore demonstrates use of the cloud.google.com/go/datastore package from App Engine flexible.|
-|[docs/managed_vms/endpoints](docs/managed_vms/endpoints)|Sample endpoints demonstrates a Cloud Endpoints API.|
-|[docs/managed_vms/endpoints/client](docs/managed_vms/endpoints/client)|Command client performs authenticated requests against an Endpoints API server.|
-|[docs/managed_vms/helloworld](docs/managed_vms/helloworld)|Sample helloworld is a basic App Engine flexible app.|
-|[docs/managed_vms/mailgun](docs/managed_vms/mailgun)|Sample mailgun is a demonstration on sending an e-mail from App Engine flexible environment.|
-|[docs/managed_vms/mailjet](docs/managed_vms/mailjet)|Sample mailjet is a demonstration on sending an e-mail from App Engine flexible environment.|
-|[docs/managed_vms/memcache](docs/managed_vms/memcache)|Sample memcache demonstrates use of a memcached client from App Engine flexible environment.|
-|[docs/managed_vms/pubsub](docs/managed_vms/pubsub)|Sample pubsub demonstrates use of the cloud.google.com/go/pubsub package from App Engine flexible environment.|
-|[docs/managed_vms/sendgrid](docs/managed_vms/sendgrid)|Sample sendgrid is a demonstration on sending an e-mail from App Engine flexible environment.|
-|[docs/managed_vms/static_files](docs/managed_vms/static_files)|Package static demonstrates a static file handler for App Engine flexible environment.|
-|[docs/managed_vms/storage](docs/managed_vms/storage)|Sample storage demonstrates use of the cloud.google.com/go/storage package from App Engine flexible environment.|
-|[docs/managed_vms/tiny](docs/managed_vms/tiny)|Sample tiny demonstrates overall program structure: a main package with a main function that calls appengine.Main.|
-|[docs/managed_vms/twilio](docs/managed_vms/twilio)|Sample twilio demonstrates sending and receiving SMS, receiving calls via Twilio from App Engine flexible environment.|
+|[appengine_flexible/analytics](appengine_flexible/analytics)|Sample analytics demonstrates Google Analytics calls from App Engine flexible environment.|
+|[appengine_flexible/cloudsql](appengine_flexible/cloudsql)|Sample cloudsql demonstrates usage of Cloud SQL for MySQL from App Engine flexible environment.|
+|[appengine_flexible/cloudsql_postgres](appengine_flexible/cloudsql_postgres)|Sample cloudsql_postgres demonstrates usage of Cloud SQL for PostgreSQL from App Engine flexible environment.|
+|[appengine_flexible/datastore](appengine_flexible/datastore)|Sample datastore demonstrates use of the cloud.google.com/go/datastore package from App Engine flexible.|
+|[appengine_flexible/endpoints](appengine_flexible/endpoints)|Sample endpoints demonstrates a Cloud Endpoints API.|
+|[appengine_flexible/endpoints/client](appengine_flexible/endpoints/client)|Command client performs authenticated requests against an Endpoints API server.|
+|[appengine_flexible/helloworld](appengine_flexible/helloworld)|Sample helloworld is a basic App Engine flexible app.|
+|[appengine_flexible/mailgun](appengine_flexible/mailgun)|Sample mailgun is a demonstration on sending an e-mail from App Engine flexible environment.|
+|[appengine_flexible/mailjet](appengine_flexible/mailjet)|Sample mailjet is a demonstration on sending an e-mail from App Engine flexible environment.|
+|[appengine_flexible/memcache](appengine_flexible/memcache)|Sample memcache demonstrates use of a memcached client from App Engine flexible environment.|
+|[appengine_flexible/pubsub](appengine_flexible/pubsub)|Sample pubsub demonstrates use of the cloud.google.com/go/pubsub package from App Engine flexible environment.|
+|[appengine_flexible/sendgrid](appengine_flexible/sendgrid)|Sample sendgrid is a demonstration on sending an e-mail from App Engine flexible environment.|
+|[appengine_flexible/static_files](appengine_flexible/static_files)|Package static demonstrates a static file handler for App Engine flexible environment.|
+|[appengine_flexible/storage](appengine_flexible/storage)|Sample storage demonstrates use of the cloud.google.com/go/storage package from App Engine flexible environment.|
+|[appengine_flexible/tiny](appengine_flexible/tiny)|Sample tiny demonstrates overall program structure: a main package with a main function that calls appengine.Main.|
+|[appengine_flexible/twilio](appengine_flexible/twilio)|Sample twilio demonstrates sending and receiving SMS, receiving calls via Twilio from App Engine flexible environment.|
 
 ### Storage
 

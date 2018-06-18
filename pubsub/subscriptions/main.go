@@ -13,18 +13,15 @@ import (
 	"sync"
 	"time"
 
-	// [START imports]
 	"golang.org/x/net/context"
 
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
 	"google.golang.org/api/iterator"
-	// [END imports]
 )
 
 func main() {
 	ctx := context.Background()
-	// [START auth]
 	proj := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	if proj == "" {
 		fmt.Fprintf(os.Stderr, "GOOGLE_CLOUD_PROJECT environment variable must be set.\n")
@@ -34,7 +31,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Could not create pubsub Client: %v", err)
 	}
-	// [END auth]
 
 	// Print all the subscriptions in the project.
 	fmt.Println("Listing all subscriptions from the project:")
@@ -67,7 +63,7 @@ func main() {
 
 func list(client *pubsub.Client) ([]*pubsub.Subscription, error) {
 	ctx := context.Background()
-	// [START get_all_subscriptions]
+	// [START pubsub_list_subscriptions]
 	var subs []*pubsub.Subscription
 	it := client.Subscriptions(ctx)
 	for {
@@ -80,7 +76,7 @@ func list(client *pubsub.Client) ([]*pubsub.Subscription, error) {
 		}
 		subs = append(subs, s)
 	}
-	// [END get_all_subscriptions]
+	// [END pubsub_list_subscriptions]
 	return subs, nil
 }
 
@@ -104,7 +100,8 @@ func pullMsgs(client *pubsub.Client, name string, topic *pubsub.Topic) error {
 		}
 	}
 
-	// [START pull_messages]
+	// [START pubsub_subscriber_async_pull]
+	// [START pubsub_quickstart_subscriber]
 	// Consume 10 messages.
 	var mu sync.Mutex
 	received := 0
@@ -123,13 +120,14 @@ func pullMsgs(client *pubsub.Client, name string, topic *pubsub.Topic) error {
 	if err != nil {
 		return err
 	}
-	// [END pull_messages]
+	// [END pubsub_subscriber_async_pull]
+	// [END pubsub_quickstart_subscriber]
 	return nil
 }
 
 func pullMsgsError(client *pubsub.Client, name string) error {
 	ctx := context.Background()
-	// [START pull_messages_error]
+	// [START pubsub_subscriber_error_listener]
 	// If the service returns a non-retryable error, Receive returns that error after
 	// all of the outstanding calls to the handler have returned.
 	err := client.Subscription(name).Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
@@ -139,13 +137,13 @@ func pullMsgsError(client *pubsub.Client, name string) error {
 	if err != nil {
 		return err
 	}
-	// [END pull_messages_error]
+	// [END pubsub_subscriber_error_listener]
 	return nil
 }
 
 func pullMsgsSettings(client *pubsub.Client, name string) error {
 	ctx := context.Background()
-	// [START pull_messages_settings]
+	// [START pubsub_subscriber_flow_settings]
 	sub := client.Subscription(name)
 	sub.ReceiveSettings.MaxOutstandingMessages = 10
 	err := sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
@@ -155,13 +153,13 @@ func pullMsgsSettings(client *pubsub.Client, name string) error {
 	if err != nil {
 		return err
 	}
-	// [END pull_messages_settings]
+	// [END pubsub_subscriber_flow_settings]
 	return nil
 }
 
 func create(client *pubsub.Client, name string, topic *pubsub.Topic) error {
 	ctx := context.Background()
-	// [START create_subscription]
+	// [START pubsub_create_pull_subscription]
 	sub, err := client.CreateSubscription(ctx, name, pubsub.SubscriptionConfig{
 		Topic:       topic,
 		AckDeadline: 20 * time.Second,
@@ -170,13 +168,13 @@ func create(client *pubsub.Client, name string, topic *pubsub.Topic) error {
 		return err
 	}
 	fmt.Printf("Created subscription: %v\n", sub)
-	// [END create_subscription]
+	// [END pubsub_create_pull_subscription]
 	return nil
 }
 
 func createWithEndpoint(client *pubsub.Client, name string, topic *pubsub.Topic, endpoint string) error {
 	ctx := context.Background()
-	// [START create_push_subscription]
+	// [START pubsub_create_push_subscription]
 
 	// For example, endpoint is "https://my-test-project.appspot.com/push".
 	sub, err := client.CreateSubscription(ctx, name, pubsub.SubscriptionConfig{
@@ -188,13 +186,13 @@ func createWithEndpoint(client *pubsub.Client, name string, topic *pubsub.Topic,
 		return err
 	}
 	fmt.Printf("Created subscription: %v\n", sub)
-	// [END create_push_subscription]
+	// [END pubsub_create_push_subscription]
 	return nil
 }
 
 func updateEndpoint(client *pubsub.Client, name string, endpoint string) error {
 	ctx := context.Background()
-	// [START update_push_subscription]
+	// [START pubsub_update_push_configuration]
 
 	// For example, endpoint is "https://my-test-project.appspot.com/push".
 	subConfig, err := client.Subscription(name).Update(ctx, pubsub.SubscriptionConfigToUpdate{
@@ -204,19 +202,19 @@ func updateEndpoint(client *pubsub.Client, name string, endpoint string) error {
 		return err
 	}
 	fmt.Printf("Updated subscription config: %#v", subConfig)
-	// [END update_push_subscription]
+	// [END pubsub_update_push_configuration]
 	return nil
 }
 
 func delete(client *pubsub.Client, name string) error {
 	ctx := context.Background()
-	// [START delete_subscription]
+	// [START pubsub_delete_subscription]
 	sub := client.Subscription(name)
 	if err := sub.Delete(ctx); err != nil {
 		return err
 	}
 	fmt.Println("Subscription deleted.")
-	// [END delete_subscription]
+	// [END pubsub_delete_subscription]
 	return nil
 }
 
