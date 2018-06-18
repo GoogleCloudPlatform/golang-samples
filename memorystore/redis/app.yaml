@@ -1,0 +1,11 @@
+runtime: go
+env: flex
+
+# Update with Redis instance details
+env_variables:
+  REDISHOST: '127.0.0.1'
+  REDISPORT: '6379'
+
+# Update with Redis instance network name
+network:
+  name: default

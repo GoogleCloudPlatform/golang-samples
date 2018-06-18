@@ -236,6 +236,7 @@ func delete(client *storage.Client, bucket, object string) error {
 	return nil
 }
 
+// writeEncryptedObject writes an object encrypted with user-provided AES key to a bucket.
 func writeEncryptedObject(client *storage.Client, bucket, object string, secretKey []byte) error {
 	ctx := context.Background()
 
@@ -250,6 +251,25 @@ func writeEncryptedObject(client *storage.Client, bucket, object string, secretK
 		return err
 	}
 	// [END storage_upload_encrypted_file]
+	return nil
+}
+
+// writeWithKMSKey writes an object encrypted with KMS-provided key to a bucket.
+func writeWithKMSKey(client *storage.Client, bucket, object string, keyName string) error {
+	ctx := context.Background()
+
+	// [START storage_upload_with_kms_key]
+	obj := client.Bucket(bucket).Object(object)
+	// Encrypt the object's contents
+	wc := obj.NewWriter(ctx)
+	wc.KMSKeyName = keyName
+	if _, err := wc.Write([]byte("top secret")); err != nil {
+		return err
+	}
+	if err := wc.Close(); err != nil {
+		return err
+	}
+	// [END storage_upload_with_kms_key]
 	return nil
 }
 
