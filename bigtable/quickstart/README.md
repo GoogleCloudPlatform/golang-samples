@@ -1,8 +1,8 @@
 # Cloud Bigtable Quickstart in Go
 
-This is a simple application that demonstrates using the [Google Cloud APIs Go
+This application demonstrates using the [Google Cloud APIs Go
 Client Library](https://github.com/GoogleCloudPlatform/google-cloud-go) to connect
-to a Cloud Bigtable instance and read a row from a table.
+to a [Cloud Bigtable](https://cloud.google.com/bigtable/) instance and read a row from a table.
 
 ## Before you begin
 
@@ -10,9 +10,9 @@ to a Cloud Bigtable instance and read a row from a table.
 
 1. Enable [billing][billing] for your project.
 
-1. Enable the Cloud Bigtable API][enable_api].
+1. Enable the [Cloud Bigtable API][enable_api].
 
-    Note: The quickstart performs an operation on an existing table.
+    Note: The quickstart performs an operation on an existing table (created below).
     If you require your code to create instances or tables,
     the [Admin API](https://console.cloud.google.com/flows/enableapi?apiid=bigtableadmin.googleapis.com)
     must be enabled as well.
@@ -23,8 +23,8 @@ to a Cloud Bigtable instance and read a row from a table.
 create a Cloud Bigtable instance (if necessary).
 
 1. Follow the [cbt tutorial](https://cloud.google.com/bigtable/docs/quickstart-cbt) to install the
-cbt command line tool.
-Here are the cbt commands to create a table, column family and add some data:
+`cbt` command line tool.
+Here are the `cbt` commands to create a table, column family and add some data:
 ```
    cbt createtable my-table
    cbt createfamily my-table cf1
@@ -39,10 +39,9 @@ Here are the cbt commands to create a table, column family and add some data:
 
 ## Running the quickstart
 
-The [Quick start](main.go) sample shows a basic usage of the Bigtable client library: reading rows from a table.
+The [quickstart](main.go) sample shows how to read rows from a table with the Bigtable client library.
 
-
-Run the quick start to read the row you just wrote using `cbt`:
+Run the quickstart to read the row you just wrote using `cbt`:
 ```
    `go run main.go -project PROJECT_ID -instance INSTANCE_ID -table my-table
 ```
