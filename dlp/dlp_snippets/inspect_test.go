@@ -69,7 +69,7 @@ func TestInspectFile(t *testing.T) {
 	}
 	for _, test := range tests {
 		buf := new(bytes.Buffer)
-		inspectFile(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, true, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, dlppb.ByteContentItem_TEXT_UTF8, strings.NewReader(test.s))
+		inspectFile(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, true, []string{"US_SOCIAL_SECURITY_NUMBER"}, nil, nil, dlppb.ByteContentItem_TEXT_UTF8, strings.NewReader(test.s))
 		if got := buf.String(); test.want != strings.Contains(got, "US_SOCIAL_SECURITY_NUMBER") {
 			if test.want {
 				t.Errorf("inspectString(%s) = %q, want 'US_SOCIAL_SECURITY_NUMBER' substring", test.s, got)
@@ -77,26 +77,8 @@ func TestInspectFile(t *testing.T) {
 				t.Errorf("inspectString(%s) = %q, want to not contain 'US_SOCIAL_SECURITY_NUMBER'", test.s, got)
 			}
 		}
-	}
-}
-
-func TestInspectFileWithCustomInfoTypes(t *testing.T) {
-	testutil.SystemTest(t)
-	tests := []struct {
-		s    string
-		want bool
-	}{
-		{
-			s:    "My SSN is 111222333",
-			want: true,
-		},
-		{
-			s: "Does not match",
-		},
-	}
-	for _, test := range tests {
-		buf := new(bytes.Buffer)
-		inspectFile(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, true, []string{}, []string{"SSN"}, []string{"\\d{9}"}, dlppb.ByteContentItem_TEXT_UTF8, strings.NewReader(test.s))
+		buf.Reset()
+		inspectFile(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, true, nil, []string{"SSN"}, []string{"\\d{9}"}, dlppb.ByteContentItem_TEXT_UTF8, strings.NewReader(test.s))
 		if got := buf.String(); test.want != strings.Contains(got, "CUSTOM_DICTIONARY_0") && strings.Contains(got, "CUSTOM_REGEX_0") {
 			if test.want {
 				t.Errorf("inspectString(%s) = %q, want 'CUSTOM_DICTIONARY_0' and 'CUSTOM_REGEX_0' substring", test.s, got)
