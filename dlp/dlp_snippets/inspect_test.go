@@ -33,7 +33,7 @@ func TestInspectString(t *testing.T) {
 	}
 	for _, test := range tests {
 		buf := new(bytes.Buffer)
-		inspectString(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, true, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, test.s)
+		inspectString(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, true, []string{"US_SOCIAL_SECURITY_NUMBER"}, nil, nil, test.s)
 		if got := buf.String(); test.want != strings.Contains(got, "US_SOCIAL_SECURITY_NUMBER") {
 			if test.want {
 				t.Errorf("inspectString(%s) = %q, want 'US_SOCIAL_SECURITY_NUMBER' substring", test.s, got)
@@ -41,26 +41,8 @@ func TestInspectString(t *testing.T) {
 				t.Errorf("inspectString(%s) = %q, want to not contain 'US_SOCIAL_SECURITY_NUMBER'", test.s, got)
 			}
 		}
-	}
-}
-
-func TestInspectStringWithCustomInfoTypes(t *testing.T) {
-	testutil.SystemTest(t)
-	tests := []struct {
-		s    string
-		want bool
-	}{
-		{
-			s:    "My SSN is 111222333",
-			want: true,
-		},
-		{
-			s: "Does not match",
-		},
-	}
-	for _, test := range tests {
-		buf := new(bytes.Buffer)
-		inspectString(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, true, []string{}, []string{"SSN"}, []string{"\\d{9}"}, test.s)
+		buf.Reset()
+		inspectString(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, true, nil, []string{"SSN"}, []string{"\\d{9}"}, test.s)
 		if got := buf.String(); test.want != strings.Contains(got, "CUSTOM_DICTIONARY_0") && strings.Contains(got, "CUSTOM_REGEX_0") {
 			if test.want {
 				t.Errorf("inspectString(%s) = %q, want 'CUSTOM_DICTIONARY_0' and 'CUSTOM_REGEX_0' substring", test.s, got)
