@@ -573,37 +573,3 @@ func inspectBigquery(w io.Writer, client *dlp.Client, project string, minLikelih
 }
 
 // [END dlp_inspect_bigquery]
-
-// Convert the custom dictionary word lists and custom regexes to a list of CustomInfoTypes.
-func buildCustomInfoTypes(customDictionaries []string, customRegexes []string) []*dlppb.CustomInfoType {
-	var customInfoTypes []*dlppb.CustomInfoType
-	for idx, it := range customDictionaries {
-		customInfoTypes = append(customInfoTypes, &dlppb.CustomInfoType{
-			InfoType: &dlppb.InfoType{
-				Name: fmt.Sprintf("CUSTOM_DICTIONARY_%d", idx),
-			},
-			Type: &dlppb.CustomInfoType_Dictionary_{
-				Dictionary: &dlppb.CustomInfoType_Dictionary{
-					Source: &dlppb.CustomInfoType_Dictionary_WordList_{
-						WordList: &dlppb.CustomInfoType_Dictionary_WordList{
-							Words: strings.Split(it, ","),
-						},
-					},
-				},
-			},
-		})
-	}
-	for idx, it := range customRegexes {
-		customInfoTypes = append(customInfoTypes, &dlppb.CustomInfoType{
-			InfoType: &dlppb.InfoType{
-				Name: fmt.Sprintf("CUSTOM_REGEX_%d", idx),
-			},
-			Type: &dlppb.CustomInfoType_Regex_{
-				Regex: &dlppb.CustomInfoType_Regex{
-					Pattern: it,
-				},
-			},
-		})
-	}
-	return customInfoTypes
-}
