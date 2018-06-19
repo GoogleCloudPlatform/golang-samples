@@ -48,14 +48,25 @@ if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* && -n $GOLANG_SAMPLES_GO
 fi
 
 # Download imports.
-GO_IMPORTS=$(go list -f '{{join .Imports "\n"}}{{"\n"}}{{join .TestImports "\n"}}' ./... | sort | uniq | grep -v golang-samples | grep -v golang.org/x/tools/imports)
+GO_IMPORTS=$(go list -f '{{join .Imports "\n"}}{{"\n"}}{{join .TestImports "\n"}}' ./... | \
+  sort | uniq | \
+  grep -v golang-samples | \
+  grep -v golang.org/x/tools/imports | \
+  grep -v go-sql-driver/mysql)
 time go get -u -v -d $GO_IMPORTS
 
-# Manually clone golang.org/x/tools since it's incompatible with Go 1.6.
+# Manually clone packages incompatible with Go 1.6.
 mkdir -p $GOPATH/src/golang.org/x;
 pushd $GOPATH/src/golang.org/x;
 if [ ! -d tools ]; then
   git clone https://go.googlesource.com/tools;
+fi
+popd;
+
+mkdir -p $GOPATH/src/github.com/go-sql-driver;
+pushd $GOPATH/src/github.com/go-sql-driver;
+if [ ! -d mysql ]; then
+  git clone https://github.com/go-sql-driver/mysql;
 fi
 popd;
 
