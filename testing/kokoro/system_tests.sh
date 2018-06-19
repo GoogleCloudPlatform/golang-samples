@@ -63,8 +63,8 @@ if [ ! -d tools ]; then
 fi
 popd;
 
-mkdir -p $GOPATH/src/go-sql-driver;
-pushd $GOPATH/src/go-sql-driver;
+mkdir -p $GOPATH/src/github.com/go-sql-driver;
+pushd $GOPATH/src/github.com/go-sql-driver;
 if [ ! -d mysql ]; then
   git clone https://github.com/go-sql-driver/mysql;
 fi
