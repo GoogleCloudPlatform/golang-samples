@@ -2,8 +2,6 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// [START datastore_all]
-
 // A simple command-line task list manager to demonstrate using the
 // cloud.google.com/go/datastore package.
 package main
@@ -180,7 +178,6 @@ func DeleteTask(ctx context.Context, client *datastore.Client, taskID int64) err
 
 // [END datastore_delete_entity]
 
-// [START datastore_format_results]
 // PrintTasks prints the tasks to the given writer.
 func PrintTasks(w io.Writer, tasks []*Task) {
 	// Use a tab writer to help make results pretty.
@@ -195,8 +192,6 @@ func PrintTasks(w io.Writer, tasks []*Task) {
 	}
 	tw.Flush()
 }
-
-// [END datastore_format_results]
 
 func usage() {
 	fmt.Print(`Usage:
@@ -220,5 +215,3 @@ func parseCmd(line string) (cmd, args string, n int64) {
 	}
 	return cmd, args, n
 }
-
-// [END datastore_all]
