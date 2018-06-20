@@ -193,7 +193,6 @@ func PrintTasks(w io.Writer, tasks []*Task) {
 	tw.Flush()
 }
 
-
 func usage() {
 	fmt.Print(`Usage:
 
