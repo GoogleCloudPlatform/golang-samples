@@ -17,9 +17,9 @@ import (
 )
 
 func main() {
-	projectID := "my-project-id" // The Google Cloud Platform project ID
+	projectID := "my-project-id"   // The Google Cloud Platform project ID
 	instanceID := "my-instance-id" // The Google Cloud Bigtable instance ID
-	tableID := "my-table" // The Google Cloud Bigtable table
+	tableID := "my-table"          // The Google Cloud Bigtable table
 
 	// [END bigtable_quickstart]
 	// Override with -project, -instance, -table flags
@@ -55,4 +55,5 @@ func main() {
 		log.Fatalf("Could not close data operations client: %v", err)
 	}
 }
+
 // [END bigtable_quickstart]
