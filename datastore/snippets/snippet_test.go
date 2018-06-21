@@ -376,21 +376,10 @@ func SnippetQuery_KeysOnly() {
 	// [START datastore_keys_only_query]
 	query := datastore.NewQuery("Task").KeysOnly()
 	// [END datastore_keys_only_query]
-	// [START datastore_run_keys_only_query]
+
 	keys, err := client.GetAll(ctx, query, nil)
-	// [END datastore_run_keys_only_query]
 	_ = err  // Make sure you check err.
 	_ = keys // Keys contains keys for all stored tasks.
-}
-
-func SnippetQuery_Distinct() {
-	// [START datastore_distinct_query]
-	query := datastore.NewQuery("Task").
-		Project("Priority", "PercentComplete").
-		Distinct().
-		Order("Category").Order("Priority")
-	// [END datastore_distinct_query]
-	_ = query // Use client.Run or client.GetAll to execute the query.
 }
 
 func SnippetQuery_DistinctOn() {
