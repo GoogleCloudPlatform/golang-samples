@@ -47,18 +47,9 @@ Run the quickstart to read the row you just wrote using `cbt`:
 ```
 Expected output similar to:
 ```
-    Row key: r1
-    Data: {
-        "cf1": {
-            "c1": [
-                {
-                    "value": "test-value",
-                    "labels": [],
-                    "timestamp": "1526104247827000"
-                }
-            ]
-        }
-    }
+2018/06/15 18:50:52 Getting a single row by row key:
+2018/06/15 18:50:54 Row key: r1
+2018/06/15 18:50:54 Data: test-value
 ```
 
 ## Cleaning up

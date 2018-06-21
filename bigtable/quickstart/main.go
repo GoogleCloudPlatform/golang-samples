@@ -23,16 +23,10 @@ func main() {
 
 	// [END bigtable_quickstart]
 	// Override with -project, -instance, -table flags
-	flag.StringVar(&projectID, "project", "", "The Google Cloud Platform project ID.")
-	flag.StringVar(&instanceID, "instance", "", "The Google Cloud Bigtable instance ID.")
-	flag.StringVar(&tableID, "table", "", "The Google Cloud Bigtable table ID.")
+	flag.StringVar(&projectID, "project", projectID, "The Google Cloud Platform project ID.")
+	flag.StringVar(&instanceID, "instance", instanceID, "The Google Cloud Bigtable instance ID.")
+	flag.StringVar(&tableID, "table", tableID, "The Google Cloud Bigtable table ID.")
 	flag.Parse()
-
-	for _, f := range []string{"project", "instance", "table"} {
-		if flag.Lookup(f).Value.String() == "" {
-			log.Fatalf("The %s flag is required.", f)
-		}
-	}
 
 	// [START bigtable_quickstart]
 	ctx := context.Background()
