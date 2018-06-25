@@ -22,7 +22,7 @@ import (
 // [START dlp_create_trigger]
 
 // createTrigger creates a trigger with the given configuration.
-func createTrigger(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, maxFindings int32, triggerID, displayName, description, bucketName string, scanPeriod int64, infoTypes []string) {
+func createTrigger(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, maxFindings int32, triggerID, displayName, description, bucketName string, autoPopulateTimespan bool, scanPeriodDays int64, infoTypes []string) {
 	// Convert the info type strings to a list of InfoTypes.
 	var i []*dlppb.InfoType
 	for _, it := range infoTypes {
@@ -44,7 +44,7 @@ func createTrigger(w io.Writer, client *dlp.Client, project string, minLikelihoo
 						Schedule: &dlppb.Schedule{
 							Option: &dlppb.Schedule_RecurrencePeriodDuration{
 								RecurrencePeriodDuration: &duration.Duration{
-									Seconds: scanPeriod * 60 * 60 * 24, // Trigger the scan daily
+									Seconds: scanPeriodDays * 60 * 60 * 24, // Days to seconds.
 								},
 							},
 						},
@@ -68,6 +68,12 @@ func createTrigger(w io.Writer, client *dlp.Client, project string, minLikelihoo
 									Url: "gs://" + bucketName + "/*",
 								},
 							},
+						},
+						// Time-based configuration for each storage object. See more at
+						// https://cloud.google.com/dlp/docs/reference/rest/v2/InspectJobConfig#TimespanConfig
+						TimespanConfig: &dlppb.StorageConfig_TimespanConfig{
+							// Auto-populate start and end times in order to scan new objects only.
+							EnableAutoPopulationOfTimespanConfig: autoPopulateTimespan,
 						},
 					},
 				},
