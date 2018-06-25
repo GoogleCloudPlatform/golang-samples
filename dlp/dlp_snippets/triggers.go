@@ -72,6 +72,7 @@ func createTrigger(w io.Writer, client *dlp.Client, project string, minLikelihoo
 						// Time-based configuration for each storage object. See more at
 						// https://cloud.google.com/dlp/docs/reference/rest/v2/InspectJobConfig#TimespanConfig
 						TimespanConfig: &dlppb.StorageConfig_TimespanConfig{
+							// Auto-populate start and end times in order to scan new objects only.
 							EnableAutoPopulationOfTimespanConfig: autoPopulateTimespan,
 						},
 					},
