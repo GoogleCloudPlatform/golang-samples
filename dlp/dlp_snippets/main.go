@@ -37,13 +37,14 @@ func bytesTypeValues() string {
 }
 
 var (
-	project           = flag.String("project", "", "Project ID (required)")
-	languageCode      = flag.String("languageCode", "en-US", "Language code for infoTypes")
-	infoTypesString   = flag.String("infoTypes", "PHONE_NUMBER,EMAIL_ADDRESS,CREDIT_CARD_NUMBER,US_SOCIAL_SECURITY_NUMBER", "Info types to inspect*, redactImage, createTrigger, and createInspectTemplate")
-	minLikelihoodFlag = flag.String("minLikelihood", "LIKELIHOOD_UNSPECIFIED", fmt.Sprintf("Minimum likelihood value for inspect*, redactImage, createTrigger, and createInspectTemplate [%v]", minLikelihoodValues()))
-	bytesTypeFlag     = flag.String("bytesType", "BYTES_TYPE_UNSPECIFIED", fmt.Sprintf("Bytes type of input file for inspectFile and redactImage [%v]", bytesTypeValues()))
-	maxFindings       = flag.Int("maxFindings", 0, "Number of results for inspect*, createTrigger, and createInspectTemplate (default 0 (no limit))")
-	includeQuote      = flag.Bool("includeQuote", false, "Include a quote of findings for inspect* (default false)")
+	project              = flag.String("project", "", "Project ID (required)")
+	languageCode         = flag.String("languageCode", "en-US", "Language code for infoTypes")
+	infoTypesString      = flag.String("infoTypes", "PHONE_NUMBER,EMAIL_ADDRESS,CREDIT_CARD_NUMBER,US_SOCIAL_SECURITY_NUMBER", "Info types to inspect*, redactImage, createTrigger, and createInspectTemplate")
+	minLikelihoodFlag    = flag.String("minLikelihood", "LIKELIHOOD_UNSPECIFIED", fmt.Sprintf("Minimum likelihood value for inspect*, redactImage, createTrigger, and createInspectTemplate [%v]", minLikelihoodValues()))
+	bytesTypeFlag        = flag.String("bytesType", "BYTES_TYPE_UNSPECIFIED", fmt.Sprintf("Bytes type of input file for inspectFile and redactImage [%v]", bytesTypeValues()))
+	maxFindings          = flag.Int("maxFindings", 0, "Number of results for inspect*, createTrigger, and createInspectTemplate (default 0 (no limit))")
+	autoPopulateTimespan = flag.Bool("autoPopulateTimespan", false, "Limit scan to new content only (default false)")
+	includeQuote         = flag.Bool("includeQuote", false, "Include a quote of findings for inspect* (default false)")
 )
 
 func main() {
@@ -144,7 +145,7 @@ func main() {
 
 	case "createTrigger":
 		checkNArg(4)
-		createTrigger(os.Stdout, client, *project, minLikelihood, int32(*maxFindings), flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), 12, infoTypesList)
+		createTrigger(os.Stdout, client, *project, minLikelihood, int32(*maxFindings), flag.Arg(1), flag.Arg(2), flag.Arg(3), flag.Arg(4), *autoPopulateTimespan, 12, infoTypesList)
 	case "listTriggers":
 		checkNArg(0)
 		listTriggers(os.Stdout, client, *project)
