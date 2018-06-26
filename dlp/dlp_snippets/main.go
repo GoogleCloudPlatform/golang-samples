@@ -41,7 +41,7 @@ var (
 	languageCode           = flag.String("languageCode", "en-US", "Language code for infoTypes")
 	infoTypesString        = flag.String("infoTypes", "PHONE_NUMBER,EMAIL_ADDRESS,CREDIT_CARD_NUMBER,US_SOCIAL_SECURITY_NUMBER", "Info types to inspect*, redactImage, createTrigger, and createInspectTemplate")
 	customDictionaryString = flag.String("customDictionary", "", "Custom dictionary for inspect*")
-	customRegexesString    = flag.String("customRegexes", "", "Custom regexes for inspect*")
+	customRegexString      = flag.String("customRegex", "", "Custom regex for inspect*")
 	minLikelihoodFlag      = flag.String("minLikelihood", "LIKELIHOOD_UNSPECIFIED", fmt.Sprintf("Minimum likelihood value for inspect*, redactImage, createTrigger, and createInspectTemplate [%v]", minLikelihoodValues()))
 	bytesTypeFlag          = flag.String("bytesType", "BYTES_TYPE_UNSPECIFIED", fmt.Sprintf("Bytes type of input file for inspectFile and redactImage [%v]", bytesTypeValues()))
 	maxFindings            = flag.Int("maxFindings", 0, "Number of results for inspect*, createTrigger, and createInspectTemplate (default 0 (no limit))")
@@ -65,8 +65,8 @@ func main() {
 		customDictionariesList = []string{*customDictionaryString}
 	}
 	var customRegexesList []string
-	if *customRegexesString != "" {
-		customRegexesList = strings.Split(*customRegexesString, ",")
+	if *customRegexString != "" {
+		customRegexesList = []string{*customRegexString}
 	}
 
 	if *project == "" {
