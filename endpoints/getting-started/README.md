@@ -20,10 +20,8 @@ First, edit the `app.yaml` configuration file, setting `endpoints_api_service.na
 Then, deploy the app with:
 
 ```bash
-gcloud beta app deploy
+gcloud app deploy
 ```
-
-Note: make sure to use the beta version of `gcloud` by running `gcloud beta app` instead of `gcloud app`, or else the *rollout_strategy* feature will be rejected.
 
 ## Running the client
 
