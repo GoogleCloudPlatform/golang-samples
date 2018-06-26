@@ -18,12 +18,20 @@ import (
 
 // [START dlp_deidentify_masking]
 
-// mask deidentifies the input by masking all info types with maskingCharacter and
-// prints the result to w.
-func mask(w io.Writer, client *dlp.Client, project, input, maskingCharacter string, numberToMask int32) {
+// mask deidentifies the input by masking all provided info types with maskingCharacter
+// and prints the result to w.
+func mask(w io.Writer, client *dlp.Client, project, input string, infoTypes []string, maskingCharacter string, numberToMask int32) {
+	// Convert the info type strings to a list of InfoTypes.
+	var i []*dlppb.InfoType
+	for _, it := range infoTypes {
+		i = append(i, &dlppb.InfoType{Name: it})
+	}
 	// Create a configured request.
 	req := &dlppb.DeidentifyContentRequest{
 		Parent: "projects/" + project,
+		InspectConfig: &dlppb.InspectConfig{
+			InfoTypes: i,
+		},
 		DeidentifyConfig: &dlppb.DeidentifyConfig{
 			Transformation: &dlppb.DeidentifyConfig_InfoTypeTransformations{
 				InfoTypeTransformations: &dlppb.InfoTypeTransformations{
@@ -121,7 +129,12 @@ func deidentifyDateShift(w io.Writer, client *dlp.Client, project string, lowerB
 // full KMS key resource name used to wrap the key. surrogateInfoType is an
 // optional identifier needed for reidentification. surrogateInfoType can be any
 // value not found in your input.
-func deidentifyFPE(w io.Writer, client *dlp.Client, project, input, keyFileName, cryptoKeyName, surrogateInfoType string) {
+func deidentifyFPE(w io.Writer, client *dlp.Client, project, input string, infoTypes []string, keyFileName, cryptoKeyName, surrogateInfoType string) {
+	// Convert the info type strings to a list of InfoTypes.
+	var i []*dlppb.InfoType
+	for _, it := range infoTypes {
+		i = append(i, &dlppb.InfoType{Name: it})
+	}
 	// Read the key file.
 	keyBytes, err := ioutil.ReadFile(keyFileName)
 	if err != nil {
@@ -130,6 +143,9 @@ func deidentifyFPE(w io.Writer, client *dlp.Client, project, input, keyFileName,
 	// Create a configured request.
 	req := &dlppb.DeidentifyContentRequest{
 		Parent: "projects/" + project,
+		InspectConfig: &dlppb.InspectConfig{
+			InfoTypes: i,
+		},
 		DeidentifyConfig: &dlppb.DeidentifyConfig{
 			Transformation: &dlppb.DeidentifyConfig_InfoTypeTransformations{
 				InfoTypeTransformations: &dlppb.InfoTypeTransformations{

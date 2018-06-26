@@ -16,13 +16,24 @@ import (
 func TestTemplateSamples(t *testing.T) {
 	testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
-	createInspectTemplate(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, "golang-samples-test-template", "Test Template", "Template for testing", nil)
+	fullID := "projects/" + projectID + "/inspectTemplates/golang-samples-test-template"
+	// Delete template before trying to create it since the test uses the same name every time.
+	listInspectTemplates(buf, client, projectID)
 	got := buf.String()
+	if strings.Contains(got, fullID) {
+		buf.Reset()
+		deleteInspectTemplate(buf, client, fullID)
+		if got := buf.String(); !strings.Contains(got, "Successfully deleted inspect template") {
+			t.Fatalf("failed to delete template")
+		}
+	}
+	buf.Reset()
+	createInspectTemplate(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, "golang-samples-test-template", "Test Template", "Template for testing", nil)
+	got = buf.String()
 	if !strings.Contains(got, "Successfully created inspect template") {
 		t.Fatalf("failed to createInspectTemplate: %s", got)
 	}
 	buf.Reset()
-	fullID := "projects/" + projectID + "/inspectTemplates/golang-samples-test-template"
 	listInspectTemplates(buf, client, projectID)
 	got = buf.String()
 	if !strings.Contains(got, fullID) {
