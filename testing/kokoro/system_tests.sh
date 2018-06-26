@@ -93,7 +93,27 @@ fi
 
 date
 
-# Run all of the tests
+RUN_ALL_TESTS="0"
+# If this is a nightly test (not a PR), run all tests.
+if [ -z ${KOKORO_GITHUB_PULL_REQUEST_NUMBER:-} ]; then
+  RUN_ALL_TESTS="1"
+fi
+
+# CHANGED_DIRS is the list of top-level directories that changed. CHANGED_DIRS will be empty when run on master.
+CHANGED_DIRS=$(git --no-pager diff --name-only HEAD $(git merge-base HEAD master) | grep "/" | cut -d/ -f1 | sort | uniq || true)
+# If test configuration is changed, run all tests.
+if [[ $CHANGED_DIRS =~ "testing" ]]; then
+  RUN_ALL_TESTS="1"
+fi
+
+if [[ $RUN_ALL_TESTS = "1" ]]; then
+  TARGET="./..."
+  echo "Running all tests"
+else
+  TARGET=$(printf "%s/... " $CHANGED_DIRS)
+  echo "Running tests in modified directories: $TARGET"
+fi
+
 OUTFILE=gotest.out
-2>&1 go test -timeout $TIMEOUT -v ./... | tee $OUTFILE
+2>&1 go test -timeout $TIMEOUT -v $TARGET | tee $OUTFILE
 cat $OUTFILE | $GOPATH/bin/go-junit-report -set-exit-code > sponge_log.xml
