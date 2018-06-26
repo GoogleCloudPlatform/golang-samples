@@ -110,7 +110,7 @@ if [[ $RUN_ALL_TESTS = "1" ]]; then
   TARGET="./..."
   echo "Running all tests"
 else
-  TARGET=$(printf "%s/... " $CHANGED_DIRS)
+  TARGET=$(printf "./%s/... " $CHANGED_DIRS)
   echo "Running tests in modified directories: $TARGET"
 fi
 
