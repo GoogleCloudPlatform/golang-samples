@@ -32,11 +32,13 @@ func main() {
 	// Make the RPC call.
 	response, err := jobService.Companies.List().Do()
 	if err != nil {
-		log.Fatalf("Failed to list key rings: %v", err)
+		log.Fatalf("Failed to list Companies: %v", err)
 	}
 
-	// Print the returned response.
-	fmt.Printf("response: %q\n", response)
+	// Print the returned companies.
+	for _, company := range response.Companies {
+		fmt.Printf("================\nCompany:\n%q\n================\n", company)
+	}
 }
 
 // [END quick_start]
