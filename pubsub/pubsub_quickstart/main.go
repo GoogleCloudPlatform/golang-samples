@@ -2,7 +2,7 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// [START pubsub_quickstart]
+// [START pubsub_quickstart_create_topic]
 // Sample pubsub-quickstart creates a Google Cloud Pub/Sub topic.
 package main
 
@@ -39,4 +39,4 @@ func main() {
 	fmt.Printf("Topic %v created.\n", topic)
 }
 
-// [END pubsub_quickstart]
+// [END pubsub_quickstart_create_topic]

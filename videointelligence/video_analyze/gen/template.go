@@ -56,6 +56,9 @@ func boilerplate() { //# omit
 	//# enddef
 } //# omit
 
+// [START video_analyze_labels_local] //# include if !gcs
+// [START video_analyze_labels_gcs] //# include if gcs
+
 func label__SUFFIX__(w io.Writer, file string) error {
 	//# replace __req.feature__ videopb.Feature_LABEL_DETECTION
 	var resp *videopb.AnnotateVideoResponse //# template dorequest
@@ -87,6 +90,11 @@ func label__SUFFIX__(w io.Writer, file string) error {
 	return nil
 }
 
+// [END video_analyze_labels_local] //# include if !gcs
+// [END video_analyze_labels_gcs] //# include if gcs
+
+// [START video_analyze_shots] //# include if gcs
+
 func shotChange__SUFFIX__(w io.Writer, file string) error {
 	//# replace __req.feature__ videopb.Feature_SHOT_CHANGE_DETECTION
 	var resp *videopb.AnnotateVideoResponse //# template dorequest
@@ -104,6 +112,10 @@ func shotChange__SUFFIX__(w io.Writer, file string) error {
 	return nil
 }
 
+// [END video_analyze_shots] //# include if gcs
+
+// [START video_analyze_explicit_content] //# include if gcs
+
 func explicitContent__SUFFIX__(w io.Writer, file string) error {
 	//# replace __req.feature__ videopb.Feature_EXPLICIT_CONTENT_DETECTION
 	var resp *videopb.AnnotateVideoResponse //# template dorequest
@@ -118,3 +130,5 @@ func explicitContent__SUFFIX__(w io.Writer, file string) error {
 
 	return nil
 }
+
+// [END video_analyze_explicit_content] //# include if gcs

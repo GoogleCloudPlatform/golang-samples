@@ -23,7 +23,7 @@ window.addEventListener('load', function () {
       // User is signed in.
       document.getElementById('sign-out').hidden = false;
       document.getElementById('post-form').hidden = false;
-      var account = document.getElementById('account-details').textContent =
+      document.getElementById('account-details').textContent =
           'Signed in as ' + user.displayName + ' (' + user.email + ')';
       user.getIdToken().then(function (accessToken) {
         // Add the token to the post form. The user info will be extracted

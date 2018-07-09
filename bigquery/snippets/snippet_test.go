@@ -7,8 +7,7 @@ package snippets
 import (
 	"bytes"
 	"fmt"
-	"log"
-	"os"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -17,24 +16,34 @@ import (
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"golang.org/x/net/context"
-	"golang.org/x/oauth2/google"
-	rawbq "google.golang.org/api/bigquery/v2"
 	"google.golang.org/api/iterator"
 )
 
-func init() {
-	// Workaround for Travis:
-	// https://docs.travis-ci.com/user/common-build-problems/#Build-times-out-because-no-output-was-received
-	if os.Getenv("TRAVIS") == "true" {
-		go func() {
-			for {
-				time.Sleep(5 * time.Minute)
-				log.Print("Still testing. Don't kill me!")
-			}
-		}()
-	}
+// uniqueBQName returns a more unique name for a BigQuery resource.
+func uniqueBQName(prefix string) string {
+	t := time.Now()
+	return fmt.Sprintf("%s_%d", sanitize(prefix, '_'), t.Unix())
 }
 
+// uniqueBucketName returns a more unique name cloud storage bucket.
+func uniqueBucketName(prefix, projectID string) string {
+	t := time.Now()
+	f := fmt.Sprintf("%s-%s-%d", sanitize(prefix, '-'), sanitize(projectID, '-'), t.Unix())
+	// bucket max name length is 63 chars, so we truncate.
+	if len(f) > 63 {
+		return f[:63]
+	}
+	return f
+}
+
+func sanitize(s string, allowedSeparator rune) string {
+	pattern := fmt.Sprintf("[^a-zA-Z0-9%s]", string(allowedSeparator))
+	reg, err := regexp.Compile(pattern)
+	if err != nil {
+		return s
+	}
+	return reg.ReplaceAllString(s, "")
+}
 func TestAll(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
@@ -44,17 +53,45 @@ func TestAll(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	datasetID := fmt.Sprintf("golang_example_dataset_%d", time.Now().Unix())
+	datasetID := uniqueBQName("golang_example_dataset")
 	if err := createDataset(client, datasetID); err != nil {
 		t.Errorf("createDataset(%q): %v", datasetID, err)
 	}
+	// Cleanup dataset at end of test.
+	defer client.Dataset(datasetID).DeleteWithContents(ctx)
 
 	if err := updateDatasetAccessControl(client, datasetID); err != nil {
 		t.Errorf("updateDataSetAccessControl(%q): %v", datasetID, err)
 	}
+	if err := addDatasetLabel(client, datasetID); err != nil {
+		t.Errorf("updateDatasetAddLabel: %v", err)
+	}
+
+	buf := &bytes.Buffer{}
+	if err := datasetLabels(client, buf, datasetID); err != nil {
+		t.Errorf("getDatasetLabels(%q): %v", datasetID, err)
+	}
+	want := "color:green"
+	if got := buf.String(); !strings.Contains(got, want) {
+		t.Errorf("getDatasetLabel(%q) expected %q to contain %q", datasetID, got, want)
+	}
+
+	if err := addDatasetLabel(client, datasetID); err != nil {
+		t.Errorf("updateDatasetAddLabel: %v", err)
+	}
+	buf.Reset()
+	if err := listDatasetsByLabel(client, buf); err != nil {
+		t.Errorf("listDatasetsByLabel: %v", err)
+	}
+	if got := buf.String(); !strings.Contains(got, datasetID) {
+		t.Errorf("listDatasetsByLabel expected %q to contain %q", got, want)
+	}
+	if err := deleteDatasetLabel(client, datasetID); err != nil {
+		t.Errorf("updateDatasetDeleteLabel: %v", err)
+	}
 
 	// Test empty dataset creation/ttl/delete.
-	deletionDatasetID := fmt.Sprintf("%s_quickdelete", datasetID)
+	deletionDatasetID := uniqueBQName("golang_example_quickdelete")
 	if err := createDataset(client, deletionDatasetID); err != nil {
 		t.Errorf("createDataset(%q): %v", deletionDatasetID, err)
 	}
@@ -72,9 +109,9 @@ func TestAll(t *testing.T) {
 		t.Errorf("listDatasets: %v", err)
 	}
 
-	inferred := fmt.Sprintf("golang_example_table_inferred_%d", time.Now().Unix())
-	explicit := fmt.Sprintf("golang_example_table_explicit_%d", time.Now().Unix())
-	empty := fmt.Sprintf("golang_example_table_emptyschema_%d", time.Now().Unix())
+	inferred := uniqueBQName("golang_example_table_inferred")
+	explicit := uniqueBQName("golang_example_table_explicit")
+	empty := uniqueBQName("golang_example_table_emptyschema")
 
 	if err := createTableInferredSchema(client, datasetID, inferred); err != nil {
 		t.Errorf("createTableInferredSchema(dataset:%q table:%q): %v", datasetID, inferred, err)
@@ -92,8 +129,14 @@ func TestAll(t *testing.T) {
 	if err := updateTableExpiration(client, datasetID, explicit); err != nil {
 		t.Errorf("updateTableExpiration(dataset:%q table:%q): %v", datasetID, explicit, err)
 	}
+	if err := addTableLabel(client, datasetID, explicit); err != nil {
+		t.Errorf("updateTableAddLabel(dataset:%q table:%q): %v", datasetID, explicit, err)
+	}
+	if err := deleteTableLabel(client, datasetID, explicit); err != nil {
+		t.Errorf("updateTableAddLabel(dataset:%q table:%q): %v", datasetID, explicit, err)
+	}
 
-	buf := &bytes.Buffer{}
+	buf.Reset()
 	if err := listTables(client, buf, datasetID); err != nil {
 		t.Errorf("listTables(%q): %v", datasetID, err)
 	}
@@ -108,58 +151,89 @@ func TestAll(t *testing.T) {
 		t.Errorf("want table list %q to contain table %q", got, empty)
 	}
 
+	if err := printDatasetInfo(client, datasetID); err != nil {
+		t.Errorf("printDatasetInfo: %v", err)
+	}
+
 	// Stream data, read, query the inferred schema table.
 	if err := insertRows(client, datasetID, inferred); err != nil {
 		t.Errorf("insertRows(dataset:%q table:%q): %v", datasetID, inferred, err)
 	}
-	if err := listRows(client, datasetID, inferred); err != nil {
-		t.Errorf("listRows(dataset:%q table:%q): %v", datasetID, inferred, err)
-	}
 	if err := browseTable(client, datasetID, inferred); err != nil {
 		t.Errorf("browseTable(dataset:%q table:%q): %v", datasetID, inferred, err)
 	}
-	if err := basicQuery(client, datasetID, inferred); err != nil {
-		t.Errorf("basicQuery(dataset:%q table:%q): %v", datasetID, inferred, err)
+
+	if err := queryBasic(client); err != nil {
+		t.Errorf("queryBasic: %v", err)
+	}
+	batchTable := uniqueBQName("golang_example_batchresults")
+	if err := queryBatch(client, datasetID, batchTable); err != nil {
+		t.Errorf("queryBatch(dataset:%q table:%q): %v", datasetID, batchTable, err)
+	}
+	if err := queryDisableCache(client); err != nil {
+		t.Errorf("queryBasicDisableCache: %v", err)
+	}
+	if err := queryDryRun(client); err != nil {
+		t.Errorf("queryDryRun: %v", err)
+	}
+	sql := "SELECT 17 as foo"
+	if err := queryLegacy(client, sql); err != nil {
+		t.Errorf("queryLegacy: %v", err)
+	}
+	largeResults := uniqueBQName("golang_example_legacy_largeresults")
+	if err := queryLegacyLargeResults(client, datasetID, largeResults); err != nil {
+		t.Errorf("queryLegacyLargeResults(dataset:%q table:%q): %v", datasetID, largeResults, err)
+	}
+	if err := queryWithArrayParams(client); err != nil {
+		t.Errorf("queryWithArrayParams: %v", err)
+	}
+	if err := queryWithNamedParams(client); err != nil {
+		t.Errorf("queryWithNamedParams: %v", err)
+	}
+	if err := queryWithPositionalParams(client); err != nil {
+		t.Errorf("queryWithPositionalParams: %v", err)
+	}
+	if err := queryWithTimestampParam(client); err != nil {
+		t.Errorf("queryWithTimestampParam: %v", err)
+	}
+	if err := queryWithStructParam(client); err != nil {
+		t.Errorf("queryWithStructParam: %v", err)
+	}
+
+	// Run query variations
+	persisted := uniqueBQName("golang_example_table_queryresult")
+	if err := queryWithDestination(client, datasetID, persisted); err != nil {
+		t.Errorf("queryWithDestination(dataset:%q table:%q): %v", datasetID, persisted, err)
 	}
 
 	// Print information about tables (extended and simple).
-	if err := printTableMetadataSimple(client, datasetID, inferred); err != nil {
-		t.Errorf("printTableMetadata(dataset:%q table:%q): %v", datasetID, inferred, err)
+	if err := printTableInfo(client, datasetID, inferred); err != nil {
+		t.Errorf("printTableInfo(dataset:%q table:%q): %v", datasetID, inferred, err)
 	}
-	if err := printTableMetadataSimple(client, datasetID, explicit); err != nil {
-		t.Errorf("printTableMetadata(dataset:%q table:%q): %v", datasetID, explicit, err)
+	if err := printTableInfo(client, datasetID, explicit); err != nil {
+		t.Errorf("printTableInfo(dataset:%q table:%q): %v", datasetID, explicit, err)
 	}
 
-	dstTableID := fmt.Sprintf("golang_example_tabledst_%d", time.Now().Unix())
+	dstTableID := uniqueBQName("golang_example_tabledst")
 	if err := copyTable(client, datasetID, inferred, dstTableID); err != nil {
 		t.Errorf("copyTable(dataset:%q src:%q dst:%q): %v", datasetID, inferred, dstTableID, err)
 	}
 	if err := deleteTable(client, datasetID, inferred); err != nil {
 		t.Errorf("deleteTable(dataset:%q table:%q): %v", datasetID, inferred, err)
 	}
-	if err := deleteTable(client, datasetID, dstTableID); err != nil {
-		t.Errorf("deleteTable(dataset:%q table:%q): %v", datasetID, dstTableID, err)
+	if err := deleteAndUndeleteTable(client, datasetID, dstTableID); err != nil {
+		t.Errorf("undeleteTable(dataset:%q table:%q): %v", datasetID, dstTableID, err)
 	}
 
-	deleteDataset(t, ctx, datasetID)
-}
+	dstTableID = uniqueBQName("golang_multicopydest")
+	if err := copyMultiTable(client, datasetID, dstTableID); err != nil {
+		t.Errorf("copyMultiTable(dataset:%q table:%q): %v", datasetID, dstTableID, err)
+	}
 
-func deleteDataset(t *testing.T, ctx context.Context, datasetID string) {
-	tc := testutil.SystemTest(t)
-	hc, err := google.DefaultClient(ctx, rawbq.CloudPlatformScope)
-	if err != nil {
-		t.Errorf("DefaultClient: %v", err)
+	if err := listJobs(client); err != nil {
+		t.Errorf("listJobs: %v", err)
 	}
-	s, err := rawbq.New(hc)
-	if err != nil {
-		t.Errorf("bigquery.New: %v", err)
-	}
-	call := s.Datasets.Delete(tc.ProjectID, datasetID)
-	call.DeleteContents(true)
-	call.Context(ctx)
-	if err := call.Do(); err != nil {
-		t.Errorf("deleteDataset(%q): %v", datasetID, err)
-	}
+
 }
 
 func TestImportExport(t *testing.T) {
@@ -175,33 +249,33 @@ func TestImportExport(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	datasetID := fmt.Sprintf("golang_example_dataset_importexport_%d", time.Now().Unix())
-	tableID := fmt.Sprintf("golang_example_dataset_importexport_%d", time.Now().Unix())
+	datasetID := uniqueBQName("golang_example_dataset_importexport")
+	tableID := uniqueBQName("golang_example_dataset_importexport")
 	if err := createDataset(client, datasetID); err != nil {
 		t.Errorf("createDataset(%q): %v", datasetID, err)
 	}
-	defer deleteDataset(t, ctx, datasetID)
+	defer client.Dataset(datasetID).DeleteWithContents(ctx)
 
 	filename := "testdata/people.csv"
 	if err := importCSVFromFile(client, datasetID, tableID, filename); err != nil {
 		t.Fatalf("importCSVFromFile(dataset:%q table:%q filename:%q): %v", datasetID, tableID, filename, err)
 	}
 
-	explicitCSV := fmt.Sprintf("golang_example_dataset_importcsv_explicit_%d", time.Now().Unix())
+	explicitCSV := uniqueBQName("golang_example_dataset_importcsv_explicit")
 	if err := importCSVExplicitSchema(client, datasetID, explicitCSV); err != nil {
 		t.Fatalf("importCSVExplicitSchema(dataset:%q table:%q): %v", datasetID, explicitCSV, err)
 	}
 
-	explicitJSON := fmt.Sprintf("golang_example_dataset_importjson_explicit_%d", time.Now().Unix())
+	explicitJSON := uniqueBQName("golang_example_dataset_importjson_explicit")
 	if err := importJSONExplicitSchema(client, datasetID, explicitJSON); err != nil {
 		t.Fatalf("importJSONExplicitSchema(dataset:%q table:%q): %v", datasetID, explicitJSON, err)
 	}
 
-	autodetectJSON := fmt.Sprintf("golang_example_dataset_importjson_autodetect_%d", time.Now().Unix())
+	autodetectJSON := uniqueBQName("golang_example_dataset_importjson_autodetect")
 	if err := importJSONAutodetectSchema(client, datasetID, autodetectJSON); err != nil {
 		t.Fatalf("importJSONAutodetectSchema(dataset:%q table:%q): %v", datasetID, autodetectJSON, err)
 	}
-	bucket := fmt.Sprintf("golang-example-bigquery-importexport-bucket-%d", time.Now().Unix())
+	bucket := uniqueBucketName("golang-example-bucket", tc.ProjectID)
 	const object = "values.csv"
 
 	if err := storageClient.Bucket(bucket).Create(ctx, tc.ProjectID, nil); err != nil {

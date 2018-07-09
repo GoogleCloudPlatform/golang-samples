@@ -461,7 +461,7 @@ func riskLDiversity(w io.Writer, client *dlp.Client, project, dataProject, pubSu
 
 // [END dlp_l_diversity]
 
-// [START k_map]
+// [START dlp_k_map]
 
 // riskKMap runs K Map on the given data.
 func riskKMap(w io.Writer, client *dlp.Client, project, dataProject, pubSubTopic, pubSubSub, datasetID, tableID, region string, columnNames ...string) {
@@ -574,4 +574,4 @@ func riskKMap(w io.Writer, client *dlp.Client, project, dataProject, pubSubTopic
 	}
 }
 
-// [END k_map]
+// [END dlp_k_map]

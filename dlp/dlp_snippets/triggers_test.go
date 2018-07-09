@@ -16,7 +16,7 @@ import (
 func TestTriggersSamples(t *testing.T) {
 	testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
-	createTrigger(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, "my-trigger", "My Trigger", "Test trigger", "my-bucket", 10, nil)
+	createTrigger(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, "my-trigger", "My Trigger", "Test trigger", "my-bucket", true, 10, nil)
 	if got := buf.String(); !strings.Contains(got, "Successfully created trigger") {
 		t.Fatalf("failed to createTrigger: %s", got)
 	}
