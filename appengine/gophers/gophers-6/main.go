@@ -180,7 +180,7 @@ func uploadFileFromForm(ctx context.Context, r *http.Request) (url string, err e
 	return fmt.Sprintf(publicURL, firebaseConfig.StorageBucket, name), nil
 }
 
-// [END upload_image}
+// [END upload_image]
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
