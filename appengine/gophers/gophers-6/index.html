@@ -36,18 +36,21 @@
 
 {{with .Notice}}<div id="notice">{{.}}</div>{{end}}
 
+<!-- [START form] -->
 <form id="post-form" enctype="multipart/form-data" action="/" method="post" hidden=true>
   <div>Message: <input name="message" value="{{.Message}}"></div>
   <input name="image" id="image" type="file" accept="image/*">
   <input type="hidden" name="token" id="token">
   <input type="submit">
 </form>
+<!-- [END form] -->
 
 {{with .Posts}}
 <ol>
   {{range .}}
   <li>
     <cite>{{.Author}}</cite><p>{{.Message}}</p>
+    <!-- [START image] -->
     {{ if .ImageURL }}
     <img src="{{.ImageURL}}">
     {{ if .Labels }}
@@ -59,6 +62,7 @@
     </p>
     {{end}}
     {{end}}
+    <!-- [END image] -->
   </li>
   {{end}}
 </ol>
