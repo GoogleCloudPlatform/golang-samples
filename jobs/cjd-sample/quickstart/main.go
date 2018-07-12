@@ -37,7 +37,7 @@ func main() {
 
 	// Print the returned companies.
 	for _, company := range response.Companies {
-		fmt.Printf("================\nCompany:\n%q\n================\n", company)
+		fmt.Printf("================\nCompany:\n%v\n================\n", company)
 	}
 }
 
