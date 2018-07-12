@@ -7,10 +7,20 @@ environments, see the [Google Cloud Endpoints Quickstarts][1].
 
 ## Running the backend locally
 
-Simply run the backend using `go run`:
+Run the backend using `go run`:
 
 ```bash
 go run app.go
+```
+
+## Deploying the backend to AppEngine Flex
+
+First, edit the `app.yaml` configuration file, setting `endpoints_api_service.name` to your service domain name.
+
+Then, deploy the app with:
+
+```bash
+gcloud app deploy
 ```
 
 ## Running the client

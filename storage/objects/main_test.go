@@ -6,7 +6,9 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"log"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -171,6 +173,37 @@ func TestObjects(t *testing.T) {
 			r.Errorf("cleanup of bucket failed: %v", err)
 		}
 	})
+}
+
+func TestKMSObjects(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	keyRingID := os.Getenv("GOLANG_SAMPLES_KMS_KEYRING")
+	cryptoKeyID := os.Getenv("GOLANG_SAMPLES_KMS_CRYPTOKEY")
+	if keyRingID == "" || cryptoKeyID == "" {
+		t.Skip("GOLANG_SAMPLES_KMS_KEYRING and GOLANG_SAMPLES_KMS_CRYPTOKEY must be set")
+	}
+
+	var (
+		bucket    = tc.ProjectID + "-samples-object-bucket-1"
+		dstBucket = tc.ProjectID + "-samples-object-bucket-2"
+
+		object1 = "foo.txt"
+	)
+
+	cleanBucket(t, ctx, client, tc.ProjectID, bucket)
+	cleanBucket(t, ctx, client, tc.ProjectID, dstBucket)
+
+	kmsKeyName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", tc.ProjectID, "global", keyRingID, cryptoKeyID)
+
+	if err := writeWithKMSKey(client, bucket, object1, kmsKeyName); err != nil {
+		t.Errorf("cannot write a KMS encrypted object: %v", err)
+	}
 }
 
 // cleanBucket ensures there's a fresh bucket with a given name, deleting the existing bucket if it already exists.
