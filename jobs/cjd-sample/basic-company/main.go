@@ -103,7 +103,7 @@ func patchCompanyWithFieldMask(ctx context.Context, js *jobs.Service, company *j
 		return nil, err
 	}
 
-	fmt.Printf("Company after patching:\n %v\n", prettyFormat(c))
+	fmt.Printf("Company updated:\n %v\n", prettyFormat(c))
 	return c, nil
 }
 
@@ -120,7 +120,7 @@ func deleteCompany(ctx context.Context, js *jobs.Service, name string) error {
 		return err
 	}
 
-	fmt.Printf("Successfully deleted a Company with name %s...\n", name)
+	fmt.Println("Company deleted")
 	return nil
 }
 
@@ -151,14 +151,14 @@ func main() {
 
 	company, err = getCompany(ctx, jobService, company.Name)
 	if err != nil {
-		fmt.Printf("Failed to get a company with name %s: \n", company.Name, err)
+		fmt.Printf("Failed to get a company with name %s: %v\n", company.Name, err)
 		return
 	}
 
 	company.Website = "https://elgoog.im/"
 	company, err = patchCompany(ctx, jobService, company)
 	if err != nil {
-		fmt.Printf("Failed to update a company with name %s: \n", company.Name, err)
+		fmt.Printf("Failed to update a company with name %s: %v\n", company.Name, err)
 		return
 	}
 
@@ -167,12 +167,12 @@ func main() {
 	// Only the website field should be updated by this call.
 	company, err = patchCompanyWithFieldMask(ctx, jobService, company, "website")
 	if err != nil {
-		fmt.Printf("Failed to update a company with name %s: \n", company.Name, err)
+		fmt.Printf("Failed to update a company with name %s: %v\n", company.Name, err)
 		return
 	}
 
 	if err := deleteCompany(ctx, jobService, company.Name); err != nil {
-		fmt.Printf("Failed to delete a company with name %s: \n", company.Name, err)
+		fmt.Printf("Failed to delete a company with name %s: %v\n", company.Name, err)
 		return
 	}
 }
