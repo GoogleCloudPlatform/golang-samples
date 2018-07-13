@@ -22,7 +22,7 @@ var (
 	// Service version to configure.
 	version = flag.String("version", "1.0.0", "service version")
 	// Skew of foo1 function over foo2, in the CPU busyloop, to simulate diff.
-	skew = flag.Int("skew", 100, "skew of foo2 over foo1 (100=none)")
+	skew = flag.Int("skew", 100, "skew of foo2 over foo1: foo2 will consume skew/100 CPU time compared to foo1 (default is no skew)")
 	// There are several goroutines continuously fighting for this mutex.
 	mu sync.Mutex
 	// Some allocated memory. Held in a global variable to protect it from GC.
