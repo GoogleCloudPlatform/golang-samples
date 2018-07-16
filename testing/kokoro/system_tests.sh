@@ -56,7 +56,7 @@ fi
 # CHANGED_DIRS is the list of top-level directories that changed. CHANGED_DIRS will be empty when run on master.
 CHANGED_DIRS=$(git --no-pager diff --name-only HEAD..master | grep "/" | cut -d/ -f1 | sort | uniq || true)
 # If test configuration is changed, run all tests.
-if [[ $CHANGED_DIRS =~ "testing" ]]; then
+if [[ $CHANGED_DIRS =~ "testing" || $CHANGED_DIRS =~ "internal" ]]; then
   RUN_ALL_TESTS="1"
 fi
 
