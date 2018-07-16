@@ -6,9 +6,15 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"strings"
 	"testing"
+	"time"
+
+	"cloud.google.com/go/storage"
+	"golang.org/x/net/context"
+	"google.golang.org/api/iterator"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
@@ -63,6 +69,66 @@ func TestDetect(t *testing.T) {
 		}
 		if got := buf.String(); !strings.Contains(got, tt.wantContain) {
 			t.Errorf("GCS %s(%q): got %q, want to contain %q", tt.name, tt.path, got, tt.wantContain)
+		}
+	}
+}
+
+func TestDetectAsyncDocument(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	ctx := context.Background()
+
+	// Create a temporary bucket
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	bucketName := fmt.Sprintf("%s-golang-samples-%d", tc.ProjectID, time.Now().Unix())
+	bucket := client.Bucket(bucketName)
+	if err := bucket.Create(ctx, tc.ProjectID, nil); err != nil {
+		t.Fatal(err)
+	}
+
+	// Clean and delete the bucket at the end of the test
+	defer func() {
+		it := bucket.Objects(ctx, nil)
+		for {
+			attrs, err := it.Next()
+			if err == iterator.Done {
+				break
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := bucket.Object(attrs.Name).Delete(ctx); err != nil {
+				t.Fatal(err)
+			}
+		}
+		if err := bucket.Delete(ctx); err != nil {
+			t.Fatal(err)
+		}
+	}()
+
+	// Run the test
+	var buf bytes.Buffer
+	gcsSourceURI := "gs://python-docs-samples-tests/HodgeConj.pdf"
+	gcsDestinationURI := "gs://" + bucketName + "/vision/"
+	err = detectAsyncDocument(&buf, gcsSourceURI, gcsDestinationURI)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Check that the output files exist
+	expectedFiles := []string{
+		"vision/output-1-to-2.json",
+		"vision/output-3-to-4.json",
+		"vision/output-5-to-5.json",
+	}
+	for _, filename := range expectedFiles {
+		_, err = bucket.Object(filename).Attrs(ctx)
+		if err != nil {
+			t.Fatalf("wanted object %q, got error: %v", filename, err)
 		}
 	}
 }
