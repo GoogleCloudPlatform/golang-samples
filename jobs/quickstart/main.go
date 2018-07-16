@@ -4,6 +4,7 @@
 
 // [START quick_start]
 
+// This is a quickstart sample of using the Google Cloud Job Discovery API.
 package main
 
 import (
