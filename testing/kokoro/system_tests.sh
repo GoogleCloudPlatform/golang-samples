@@ -47,8 +47,29 @@ if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* && -n $GOLANG_SAMPLES_GO
   ./testing/kokoro/configure_gcloud.bash;
 fi
 
+RUN_ALL_TESTS="0"
+# If this is a nightly test (not a PR), run all tests.
+if [ -z ${KOKORO_GITHUB_PULL_REQUEST_NUMBER:-} ]; then
+  RUN_ALL_TESTS="1"
+fi
+
+# CHANGED_DIRS is the list of top-level directories that changed. CHANGED_DIRS will be empty when run on master.
+CHANGED_DIRS=$(git --no-pager diff --name-only HEAD $(git merge-base HEAD master) | grep "/" | cut -d/ -f1 | sort | uniq || true)
+# If test configuration is changed, run all tests.
+if [[ $CHANGED_DIRS =~ "testing" ]]; then
+  RUN_ALL_TESTS="1"
+fi
+
+if [[ $RUN_ALL_TESTS = "1" ]]; then
+  TARGET="./..."
+  echo "Running all tests"
+else
+  TARGET=$(printf "./%s/... " $CHANGED_DIRS)
+  echo "Running tests in modified directories: $TARGET"
+fi
+
 # Download imports.
-GO_IMPORTS=$(go list -f '{{join .Imports "\n"}}{{"\n"}}{{join .TestImports "\n"}}' ./... | \
+GO_IMPORTS=$(go list -f '{{join .Imports "\n"}}{{"\n"}}{{join .TestImports "\n"}}' $TARGET | \
   sort | uniq | \
   grep -v golang-samples | \
   grep -v golang.org/x/tools/imports | \
@@ -88,31 +109,10 @@ go install -v $GO_IMPORTS
 # Do the easy stuff before running tests. Fail fast!
 if [ $GOLANG_SAMPLES_GO_VET ]; then
   diff -u <(echo -n) <(gofmt -d -s .)
-  go vet ./...
+  go vet $TARGET
 fi
 
 date
-
-RUN_ALL_TESTS="0"
-# If this is a nightly test (not a PR), run all tests.
-if [ -z ${KOKORO_GITHUB_PULL_REQUEST_NUMBER:-} ]; then
-  RUN_ALL_TESTS="1"
-fi
-
-# CHANGED_DIRS is the list of top-level directories that changed. CHANGED_DIRS will be empty when run on master.
-CHANGED_DIRS=$(git --no-pager diff --name-only HEAD $(git merge-base HEAD master) | grep "/" | cut -d/ -f1 | sort | uniq || true)
-# If test configuration is changed, run all tests.
-if [[ $CHANGED_DIRS =~ "testing" ]]; then
-  RUN_ALL_TESTS="1"
-fi
-
-if [[ $RUN_ALL_TESTS = "1" ]]; then
-  TARGET="./..."
-  echo "Running all tests"
-else
-  TARGET=$(printf "./%s/... " $CHANGED_DIRS)
-  echo "Running tests in modified directories: $TARGET"
-fi
 
 OUTFILE=gotest.out
 2>&1 go test -timeout $TIMEOUT -v $TARGET | tee $OUTFILE
