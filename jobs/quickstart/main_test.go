@@ -27,7 +27,7 @@ func TestQuickStart(t *testing.T) {
 	}
 	got := string(out)
 
-	want := "================\nCompany:\n"
+	want := "Request ID"
 	if !strings.Contains(got, want) {
 		t.Errorf("stdout returned %s, wanted to contain %s", got, want)
 	}
