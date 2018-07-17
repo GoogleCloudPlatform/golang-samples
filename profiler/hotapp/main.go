@@ -9,6 +9,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"runtime"
 	"sync"
@@ -17,11 +18,16 @@ import (
 	"cloud.google.com/go/profiler"
 )
 
-// There are several goroutines continuously fighting for this mutex.
-var mu sync.Mutex
-
-// Some allocated memory. Held in a global variable to protect it from GC.
-var mem [][]byte
+var (
+	// Service version to configure.
+	version = flag.String("version", "1.0.0", "service version")
+	// Skew of foo1 function over foo2, in the CPU busyloop, to simulate diff.
+	skew = flag.Int("skew", 100, "skew of foo2 over foo1: foo2 will consume skew/100 CPU time compared to foo1 (default is no skew)")
+	// There are several goroutines continuously fighting for this mutex.
+	mu sync.Mutex
+	// Some allocated memory. Held in a global variable to protect it from GC.
+	mem [][]byte
+)
 
 func sleepLocked(d time.Duration) {
 	mu.Lock()
@@ -72,39 +78,42 @@ func allocImpl() {
 // Simulates a CPU-intensive computation.
 func busyloop() {
 	for {
-		foo1()
-		foo2()
+		foo1(100)
+		foo2(*skew)
 		// Yield so that some preemption happens.
 		runtime.Gosched()
 	}
 }
 
-func foo1() {
-	bar()
-	baz()
+func foo1(scale int) {
+	bar(scale)
+	baz(scale)
 }
 
-func foo2() {
-	bar()
-	baz()
+func foo2(scale int) {
+	bar(scale)
+	baz(scale)
 }
 
-func bar() {
-	load()
+func bar(scale int) {
+	load(scale)
 }
 
-func baz() {
-	load()
+func baz(scale int) {
+	load(scale)
 }
 
-func load() {
-	for i := 0; i < (1 << 20); i++ {
+func load(scale int) {
+	for i := 0; i < scale*(1<<16); i++ {
 	}
 }
 
 func main() {
+	flag.Parse()
+
 	err := profiler.Start(profiler.Config{
 		Service:        "hotapp-service",
+		ServiceVersion: *version,
 		DebugLogging:   true,
 		MutexProfiling: true,
 	})

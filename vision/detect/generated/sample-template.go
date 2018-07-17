@@ -244,8 +244,9 @@ func detectWeb(w io.Writer, file string) error {
 	}
 	if len(web.WebEntities) != 0 {
 		fmt.Fprintln(w, "\tEntities:")
+		fmt.Fprintln(w, "\t\tEntity\t\tScore\tDescription")
 		for _, entity := range web.WebEntities {
-			fmt.Fprintf(w, "\t\t%-12s %s\n", entity.EntityId, entity.Description)
+			fmt.Fprintf(w, "\t\t%-14s\t%-2.4f\t%s\n", entity.EntityId, entity.Score, entity.Description)
 		}
 	}
 	if len(web.BestGuessLabels) != 0 {
@@ -277,8 +278,9 @@ func detectWebGeo(w io.Writer, file string) error {
 
 	if len(web.WebEntities) != 0 {
 		fmt.Fprintln(w, "Entities:")
+		fmt.Fprintln(w, "\tEntity\t\tScore\tDescription")
 		for _, entity := range web.WebEntities {
-			fmt.Fprintf(w, "\t%-12s %s\n", entity.EntityId, entity.Description)
+			fmt.Fprintf(w, "\t%-14s\t%-2.4f\t%s\n", entity.EntityId, entity.Score, entity.Description)
 		}
 	}
 
