@@ -40,7 +40,12 @@ func main() {
 	}
 
 	// Create topic if it doesn't exist.
-	topic, _ = client.CreateTopic(ctx, mustGetenv("PUBSUB_TOPIC"))
+	topicName := mustGetenv("PUBSUB_TOPIC")
+	topic, _ = client.CreateTopic(ctx, topicName)
+	// Get handle for topic in case it already existed.
+	if topic == nil {
+		topic = client.Topic(topicName)
+	}
 
 	http.HandleFunc("/", listHandler)
 	http.HandleFunc("/pubsub/publish", publishHandler)
