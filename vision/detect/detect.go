@@ -385,8 +385,9 @@ func detectWeb(w io.Writer, file string) error {
 	}
 	if len(web.WebEntities) != 0 {
 		fmt.Fprintln(w, "\tEntities:")
+		fmt.Fprintln(w, "\t\tEntity\t\tScore\tDescription")
 		for _, entity := range web.WebEntities {
-			fmt.Fprintf(w, "\t\t%-12s %s\n", entity.EntityId, entity.Description)
+			fmt.Fprintf(w, "\t\t%-14s\t%-2.4f\t%s\n", entity.EntityId, entity.Score, entity.Description)
 		}
 	}
 	if len(web.BestGuessLabels) != 0 {
@@ -434,8 +435,9 @@ func detectWebGeo(w io.Writer, file string) error {
 
 	if len(web.WebEntities) != 0 {
 		fmt.Fprintln(w, "Entities:")
+		fmt.Fprintln(w, "\tEntity\t\tScore\tDescription")
 		for _, entity := range web.WebEntities {
-			fmt.Fprintf(w, "\t%-12s %s\n", entity.EntityId, entity.Description)
+			fmt.Fprintf(w, "\t%-14s\t%-2.4f\t%s\n", entity.EntityId, entity.Score, entity.Description)
 		}
 	}
 
@@ -479,6 +481,59 @@ func detectLogos(w io.Writer, file string) error {
 
 	return nil
 }
+
+// [START vision_detect_async_document]
+
+// detectAsyncDocument does Optical Character Recognition (OCR) on a PDF file
+// stored in GCS.
+func detectAsyncDocument(w io.Writer, gcsSourceURI, gcsDestinationURI string) error {
+	ctx := context.Background()
+
+	client, err := vision.NewImageAnnotatorClient(ctx)
+	if err != nil {
+		return err
+	}
+
+	request := &visionpb.AsyncBatchAnnotateFilesRequest{
+		Requests: []*visionpb.AsyncAnnotateFileRequest{
+			{
+				Features: []*visionpb.Feature{
+					{
+						Type: visionpb.Feature_DOCUMENT_TEXT_DETECTION,
+					},
+				},
+				InputConfig: &visionpb.InputConfig{
+					GcsSource: &visionpb.GcsSource{Uri: gcsSourceURI},
+					// Supported MimeTypes are: "application/pdf" and "image/tiff".
+					MimeType: "application/pdf",
+				},
+				OutputConfig: &visionpb.OutputConfig{
+					GcsDestination: &visionpb.GcsDestination{Uri: gcsDestinationURI},
+					// How many pages should be grouped into each json output file.
+					BatchSize: 2,
+				},
+			},
+		},
+	}
+
+	operation, err := client.AsyncBatchAnnotateFiles(ctx, request)
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprintf(w, "Waiting for the operation to finish.")
+
+	resp, err := operation.Wait(ctx)
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprintf(w, "%v", resp)
+
+	return nil
+}
+
+// [END vision_detect_async_document]
 
 func init() {
 	// Refer to these functions so that goimports is happy before boilerplate is inserted.
@@ -760,8 +815,9 @@ func detectWebURI(w io.Writer, file string) error {
 	}
 	if len(web.WebEntities) != 0 {
 		fmt.Fprintln(w, "\tEntities:")
+		fmt.Fprintln(w, "\t\tEntity\t\tScore\tDescription")
 		for _, entity := range web.WebEntities {
-			fmt.Fprintf(w, "\t\t%-12s %s\n", entity.EntityId, entity.Description)
+			fmt.Fprintf(w, "\t\t%-14s\t%-2.4f\t%s\n", entity.EntityId, entity.Score, entity.Description)
 		}
 	}
 	if len(web.BestGuessLabels) != 0 {
@@ -800,8 +856,9 @@ func detectWebGeoURI(w io.Writer, file string) error {
 
 	if len(web.WebEntities) != 0 {
 		fmt.Fprintln(w, "Entities:")
+		fmt.Fprintln(w, "\tEntity\t\tScore\tDescription")
 		for _, entity := range web.WebEntities {
-			fmt.Fprintf(w, "\t%-12s %s\n", entity.EntityId, entity.Description)
+			fmt.Fprintf(w, "\t%-14s\t%-2.4f\t%s\n", entity.EntityId, entity.Score, entity.Description)
 		}
 	}
 
@@ -836,3 +893,56 @@ func detectLogosURI(w io.Writer, file string) error {
 
 	return nil
 }
+
+// [START vision_detect_async_document_uri]
+
+// detectAsyncDocument does Optical Character Recognition (OCR) on a PDF file
+// stored in GCS.
+func detectAsyncDocumentURI(w io.Writer, gcsSourceURI, gcsDestinationURI string) error {
+	ctx := context.Background()
+
+	client, err := vision.NewImageAnnotatorClient(ctx)
+	if err != nil {
+		return err
+	}
+
+	request := &visionpb.AsyncBatchAnnotateFilesRequest{
+		Requests: []*visionpb.AsyncAnnotateFileRequest{
+			{
+				Features: []*visionpb.Feature{
+					{
+						Type: visionpb.Feature_DOCUMENT_TEXT_DETECTION,
+					},
+				},
+				InputConfig: &visionpb.InputConfig{
+					GcsSource: &visionpb.GcsSource{Uri: gcsSourceURI},
+					// Supported MimeTypes are: "application/pdf" and "image/tiff".
+					MimeType: "application/pdf",
+				},
+				OutputConfig: &visionpb.OutputConfig{
+					GcsDestination: &visionpb.GcsDestination{Uri: gcsDestinationURI},
+					// How many pages should be grouped into each json output file.
+					BatchSize: 2,
+				},
+			},
+		},
+	}
+
+	operation, err := client.AsyncBatchAnnotateFiles(ctx, request)
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprintf(w, "Waiting for the operation to finish.")
+
+	resp, err := operation.Wait(ctx)
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprintf(w, "%v", resp)
+
+	return nil
+}
+
+// [END vision_detect_async_document_uri]
