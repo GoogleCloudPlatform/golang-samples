@@ -4,7 +4,7 @@
 
 // [START quick_start]
 
-// This is a quickstart sample of using the Google Cloud Job Discovery API.
+// Command quickstart is an example of using the Google Cloud Job Discovery API.
 package main
 
 import (
@@ -37,7 +37,7 @@ func main() {
 		log.Fatalf("Failed to list Companies: %v", err)
 	}
 
-    // Print the request id.
+	// Print the request id.
 	fmt.Printf("Request ID: %q\n", response.Metadata.RequestId)
 
 	// Print the returned companies.
