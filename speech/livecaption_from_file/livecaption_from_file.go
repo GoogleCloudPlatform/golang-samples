@@ -68,6 +68,15 @@ func main() {
 		buf := make([]byte, 1024)
 		for {
 			n, err := f.Read(buf)
+			if n > 0 {
+				if err := stream.Send(&speechpb.StreamingRecognizeRequest{
+					StreamingRequest: &speechpb.StreamingRecognizeRequest_AudioContent{
+						AudioContent: buf[:n],
+					},
+				}); err != nil {
+					log.Printf("Could not send audio: %v", err)
+				}
+			}
 			if err == io.EOF {
 				// Nothing else to pipe, close the stream.
 				if err := stream.CloseSend(); err != nil {
@@ -78,13 +87,6 @@ func main() {
 			if err != nil {
 				log.Printf("Could not read from %s: %v", audioFile, err)
 				continue
-			}
-			if err = stream.Send(&speechpb.StreamingRecognizeRequest{
-				StreamingRequest: &speechpb.StreamingRecognizeRequest_AudioContent{
-					AudioContent: buf[:n],
-				},
-			}); err != nil {
-				log.Printf("Could not send audio: %v", err)
 			}
 		}
 	}()
