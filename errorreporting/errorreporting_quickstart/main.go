@@ -35,7 +35,6 @@ func main() {
 		log.Fatal(err)
 	}
 	defer errorClient.Close()
-	defer errorClient.Flush()
 
 	resp, err := http.Get("not-a-valid-url")
 	if err != nil {

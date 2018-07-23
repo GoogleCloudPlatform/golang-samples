@@ -37,7 +37,7 @@ func TestMask(t *testing.T) {
 	}
 	for _, test := range tests {
 		buf := new(bytes.Buffer)
-		mask(buf, client, projectID, test.input, test.maskingCharacter, test.numberToMask)
+		mask(buf, client, projectID, test.input, []string{"US_SOCIAL_SECURITY_NUMBER"}, test.maskingCharacter, test.numberToMask)
 		if got := buf.String(); got != test.want {
 			t.Errorf("mask(%q, %s, %v) = %q, want %q", test.input, test.maskingCharacter, test.numberToMask, got, test.want)
 		}

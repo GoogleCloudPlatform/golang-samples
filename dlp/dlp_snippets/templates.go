@@ -17,7 +17,7 @@ import (
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
-// [START dlp_create_template]
+// [START dlp_create_inspect_template]
 
 // createInspectTemplate creates a template with the given configuration.
 func createInspectTemplate(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, maxFindings int32, templateID, displayName, description string, infoTypes []string) {
@@ -52,9 +52,9 @@ func createInspectTemplate(w io.Writer, client *dlp.Client, project string, minL
 	fmt.Fprintf(w, "Successfully created inspect template: %v", resp.GetName())
 }
 
-// [END dlp_create_template]
+// [END dlp_create_inspect_template]
 
-// [START dlp_list_templates]
+// [START dlp_list_inspect_templates]
 
 // listInspectTemplates lists the inspect templates in the project.
 func listInspectTemplates(w io.Writer, client *dlp.Client, project string) {
@@ -82,9 +82,9 @@ func listInspectTemplates(w io.Writer, client *dlp.Client, project string) {
 	}
 }
 
-// [END dlp_list_templates]
+// [END dlp_list_inspect_templates]
 
-// [START dlp_delete_template]
+// [START dlp_delete_inspect_template]
 
 // deleteInspectTemplate deletes the given template.
 func deleteInspectTemplate(w io.Writer, client *dlp.Client, templateID string) {
@@ -98,4 +98,4 @@ func deleteInspectTemplate(w io.Writer, client *dlp.Client, templateID string) {
 	fmt.Fprintf(w, "Successfully deleted inspect template %v", templateID)
 }
 
-// [END dlp_delete_template]
+// [END dlp_delete_inspect_template]
