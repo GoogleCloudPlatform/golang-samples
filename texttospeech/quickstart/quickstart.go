@@ -16,7 +16,8 @@ import (
 	texttospeechpb "google.golang.org/genproto/googleapis/cloud/texttospeech/v1"
 )
 
-// [START tts_quickstart]
+// [START quickstart]
+
 func main() {
 	// Instantiates a client.
 	ctx := context.Background()
@@ -59,4 +60,4 @@ func main() {
 	fmt.Printf("Audio content written to file: %v\n", filename)
 }
 
-// [END tts_quickstart]
+// [END quickstart]
