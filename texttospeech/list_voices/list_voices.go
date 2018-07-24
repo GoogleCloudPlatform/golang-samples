@@ -2,7 +2,7 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// The `list_voices` command lists the available Text-to-Speech voices.
+// The list_voices command lists the available Text-to-Speech voices.
 package main
 
 import (

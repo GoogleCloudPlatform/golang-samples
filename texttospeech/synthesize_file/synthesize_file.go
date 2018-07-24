@@ -2,7 +2,7 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// The `synthesize_file` command converts a plain text or SSML file to an audio file.
+// The synthesize_file command converts a plain text or SSML file to an audio file.
 package main
 
 import (
