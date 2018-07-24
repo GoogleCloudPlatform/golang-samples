@@ -102,6 +102,9 @@ if go version | grep go1\.6\.; then
   popd;
 fi
 
+# Always download internal dependencies.
+go get ./internal/...
+
 go get github.com/jstemmer/go-junit-report
 go install golang.org/x/tools/imports;
 go install -v $GO_IMPORTS
