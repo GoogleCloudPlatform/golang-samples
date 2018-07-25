@@ -73,6 +73,7 @@ GO_IMPORTS=$(go list -f '{{join .Imports "\n"}}{{"\n"}}{{join .TestImports "\n"}
   sort | uniq | \
   grep -v golang-samples | \
   grep -v golang.org/x/tools/imports | \
+  grep -v golang.org/x/sys/unix | \
   grep -v go-sql-driver/mysql)
 time go get -u -v -d $GO_IMPORTS
 
@@ -81,6 +82,9 @@ mkdir -p $GOPATH/src/golang.org/x;
 pushd $GOPATH/src/golang.org/x;
 if [ ! -d tools ]; then
   git clone https://go.googlesource.com/tools;
+fi
+if [ ! -d sys ]; then
+  git clone https://go.googlesource.com/sys;
 fi
 popd;
 
@@ -99,6 +103,10 @@ if go version | grep go1\.6\.; then
 
   pushd $GOPATH/src/golang.org/x/tools;
   git checkout 8e070db38e5c55da6a85c81878ab769bf5667848;
+  popd;
+
+  pushd $GOPATH/src/golang.org/x/sys;
+  git checkout ac767d655b305d4e9612f5f6e33120b9176c4ad4;
   popd;
 fi
 
