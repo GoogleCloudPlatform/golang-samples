@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // [START complete_sample_application]
+
 package blobstore_example
 
 import (

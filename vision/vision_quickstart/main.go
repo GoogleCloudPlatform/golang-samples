@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // [START vision_quickstart]
+
 // Sample vision-quickstart uses the Google Cloud Vision API to label an image.
 package main
 
