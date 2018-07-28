@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // [START bigquery_quickstart]
+
 // Sample bigquery-quickstart creates a Google BigQuery dataset.
 package main
 
