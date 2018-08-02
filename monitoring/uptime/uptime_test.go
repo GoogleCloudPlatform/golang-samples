@@ -95,6 +95,40 @@ func TestGet(t *testing.T) {
 	}
 }
 
+func TestUpdate(t *testing.T) {
+	c := testutil.SystemTest(t)
+	uc := createTestUptimeCheck(c.ProjectID)
+	buf := new(bytes.Buffer)
+	displayName := "New display name"
+	path := "example.com/example"
+	update(buf, uc.GetName(), displayName, path)
+
+	want := "Successfully"
+	if got := buf.String(); !strings.Contains(got, want) {
+		t.Errorf("%q not found in output: %q", want, got)
+	}
+
+	ctx := context.Background()
+	client, err := monitoring.NewUptimeCheckClient(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.Close()
+	req := &monitoringpb.GetUptimeCheckConfigRequest{
+		Name: uc.GetName(),
+	}
+	updated, err := client.GetUptimeCheckConfig(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := updated.GetDisplayName(); got != displayName {
+		t.Errorf("Display name not updated: got %q, want %q", got, displayName)
+	}
+	if got := updated.GetHttpCheck().GetPath(); got != path {
+		t.Errorf("HTTP path not updated: got %q, want %q", got, displayName)
+	}
+}
+
 func TestDelete(t *testing.T) {
 	c := testutil.SystemTest(t)
 	uc := createTestUptimeCheck(c.ProjectID)

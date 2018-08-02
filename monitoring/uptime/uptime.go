@@ -16,6 +16,7 @@ import (
 	"google.golang.org/api/iterator"
 	"google.golang.org/genproto/googleapis/api/monitoredres"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
+	"google.golang.org/genproto/protobuf/field_mask"
 )
 
 // [START monitoring_uptime_check_create]
@@ -137,6 +138,40 @@ func get(w io.Writer, resourceName string) {
 }
 
 // [END monitoring_uptime_check_get]
+
+// [START monitoring_uptime_check_update]
+
+// update is an example of updating an uptime check. resourceName should be
+// of the form `projects/[PROJECT_ID]/uptimeCheckConfigs/[UPTIME_CHECK_ID]`.
+func update(w io.Writer, resourceName, displayName, httpCheckPath string) {
+	ctx := context.Background()
+	client, err := monitoring.NewUptimeCheckClient(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+	getReq := &monitoringpb.GetUptimeCheckConfigRequest{
+		Name: resourceName,
+	}
+	config, err := client.GetUptimeCheckConfig(ctx, getReq)
+	if err != nil {
+		log.Fatal(err)
+	}
+	config.DisplayName = displayName
+	config.GetHttpCheck().Path = httpCheckPath
+	req := &monitoringpb.UpdateUptimeCheckConfigRequest{
+		UpdateMask: &field_mask.FieldMask{
+			Paths: []string{"display_name", "http_check.path"},
+		},
+		UptimeCheckConfig: config,
+	}
+	if _, err := client.UpdateUptimeCheckConfig(ctx, req); err != nil {
+		log.Fatal(err)
+	}
+	fmt.Fprintf(w, "Successfully updated %v", resourceName)
+}
+
+// [END monitoring_uptime_check_update]
 
 // [START monitoring_uptime_check_delete]
 
