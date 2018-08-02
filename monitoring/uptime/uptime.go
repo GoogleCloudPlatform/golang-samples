@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc. All rights reserved.
+// Copyright 2018 Google Inc. All rights reserved.
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
@@ -8,7 +8,6 @@ package uptime
 import (
 	"fmt"
 	"io"
-	"log"
 
 	monitoring "cloud.google.com/go/monitoring/apiv3"
 	"github.com/golang/protobuf/ptypes/duration"
@@ -22,11 +21,11 @@ import (
 // [START monitoring_uptime_check_create]
 
 // create creates an example uptime check.
-func create(w io.Writer, projectID string) {
+func create(w io.Writer, projectID string) (*monitoringpb.UptimeCheckConfig, error) {
 	ctx := context.Background()
 	client, err := monitoring.NewUptimeCheckClient(ctx)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("NewUptimeCheckClient: %v", err)
 	}
 	defer client.Close()
 	req := &monitoringpb.CreateUptimeCheckConfigRequest{
@@ -51,11 +50,12 @@ func create(w io.Writer, projectID string) {
 			Period:  &duration.Duration{Seconds: 300},
 		},
 	}
-	uc, err := client.CreateUptimeCheckConfig(ctx, req)
+	config, err := client.CreateUptimeCheckConfig(ctx, req)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("CreateUptimeCheckConfig: %v", err)
 	}
-	fmt.Fprintf(w, "Successfully created uptime check %q\n", uc.GetDisplayName())
+	fmt.Fprintf(w, "Successfully created uptime check %q\n", config.GetDisplayName())
+	return config, nil
 }
 
 // [END monitoring_uptime_check_create]
@@ -63,11 +63,11 @@ func create(w io.Writer, projectID string) {
 // [START monitoring_uptime_check_list_configs]
 
 // list is an example of listing the uptime checks in projectID.
-func list(w io.Writer, projectID string) {
+func list(w io.Writer, projectID string) error {
 	ctx := context.Background()
 	client, err := monitoring.NewUptimeCheckClient(ctx)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("NewUptimeCheckClient: %v", err)
 	}
 	defer client.Close()
 	req := &monitoringpb.ListUptimeCheckConfigsRequest{
@@ -80,11 +80,12 @@ func list(w io.Writer, projectID string) {
 			break
 		}
 		if err != nil {
-			log.Fatalf("Error getting uptime checks: %v", err)
+			return fmt.Errorf("ListUptimeCheckConfigs: %v", err)
 		}
 		fmt.Fprintln(w, config)
 	}
 	fmt.Fprintln(w, "Done listing uptime checks")
+	return nil
 }
 
 // [END monitoring_uptime_check_list_configs]
@@ -92,11 +93,11 @@ func list(w io.Writer, projectID string) {
 // [START monitoring_uptime_check_list_ips]
 
 // listIPs is an example of listing uptime check IPs.
-func listIPs(w io.Writer) {
+func listIPs(w io.Writer) error {
 	ctx := context.Background()
 	client, err := monitoring.NewUptimeCheckClient(ctx)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("NewUptimeCheckClient: %v", err)
 	}
 	defer client.Close()
 	req := &monitoringpb.ListUptimeCheckIpsRequest{}
@@ -107,11 +108,12 @@ func listIPs(w io.Writer) {
 			break
 		}
 		if err != nil {
-			log.Fatalf("Error getting uptime checks: %v", err)
+			return fmt.Errorf("ListUptimeCheckIps: %v", err)
 		}
 		fmt.Fprintln(w, config)
 	}
 	fmt.Fprintln(w, "Done listing uptime check IPs")
+	return nil
 }
 
 // [END monitoring_uptime_check_list_ips]
@@ -120,11 +122,11 @@ func listIPs(w io.Writer) {
 
 // get is an example of getting an uptime check. resourceName should be
 // of the form `projects/[PROJECT_ID]/uptimeCheckConfigs/[UPTIME_CHECK_ID]`.
-func get(w io.Writer, resourceName string) {
+func get(w io.Writer, resourceName string) (*monitoringpb.UptimeCheckConfig, error) {
 	ctx := context.Background()
 	client, err := monitoring.NewUptimeCheckClient(ctx)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("NewUptimeCheckClient: %v", err)
 	}
 	defer client.Close()
 	req := &monitoringpb.GetUptimeCheckConfigRequest{
@@ -132,9 +134,10 @@ func get(w io.Writer, resourceName string) {
 	}
 	config, err := client.GetUptimeCheckConfig(ctx, req)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("GetUptimeCheckConfig: %v", err)
 	}
 	fmt.Fprintf(w, "Config: %v", config)
+	return config, nil
 }
 
 // [END monitoring_uptime_check_get]
@@ -143,11 +146,11 @@ func get(w io.Writer, resourceName string) {
 
 // update is an example of updating an uptime check. resourceName should be
 // of the form `projects/[PROJECT_ID]/uptimeCheckConfigs/[UPTIME_CHECK_ID]`.
-func update(w io.Writer, resourceName, displayName, httpCheckPath string) {
+func update(w io.Writer, resourceName, displayName, httpCheckPath string) (*monitoringpb.UptimeCheckConfig, error) {
 	ctx := context.Background()
 	client, err := monitoring.NewUptimeCheckClient(ctx)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("NewUptimeCheckClient: %v", err)
 	}
 	defer client.Close()
 	getReq := &monitoringpb.GetUptimeCheckConfigRequest{
@@ -155,7 +158,7 @@ func update(w io.Writer, resourceName, displayName, httpCheckPath string) {
 	}
 	config, err := client.GetUptimeCheckConfig(ctx, getReq)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("GetUptimeCheckConfig: %v", err)
 	}
 	config.DisplayName = displayName
 	config.GetHttpCheck().Path = httpCheckPath
@@ -165,10 +168,12 @@ func update(w io.Writer, resourceName, displayName, httpCheckPath string) {
 		},
 		UptimeCheckConfig: config,
 	}
-	if _, err := client.UpdateUptimeCheckConfig(ctx, req); err != nil {
-		log.Fatal(err)
+	config, err = client.UpdateUptimeCheckConfig(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("UpdateUptimeCheckConfig: %v", err)
 	}
 	fmt.Fprintf(w, "Successfully updated %v", resourceName)
+	return config, nil
 }
 
 // [END monitoring_uptime_check_update]
@@ -177,20 +182,21 @@ func update(w io.Writer, resourceName, displayName, httpCheckPath string) {
 
 // delete is an example of deleting an uptime check. resourceName should be
 // of the form `projects/[PROJECT_ID]/uptimeCheckConfigs/[UPTIME_CHECK_ID]`.
-func delete(w io.Writer, resourceName string) {
+func delete(w io.Writer, resourceName string) error {
 	ctx := context.Background()
 	client, err := monitoring.NewUptimeCheckClient(ctx)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("NewUptimeCheckClient: %v", err)
 	}
 	defer client.Close()
 	req := &monitoringpb.DeleteUptimeCheckConfigRequest{
 		Name: resourceName,
 	}
 	if err := client.DeleteUptimeCheckConfig(ctx, req); err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("DeleteUptimeCheckConfig: %v", err)
 	}
 	fmt.Fprintf(w, "Successfully deleted %q", resourceName)
+	return nil
 }
 
 // [END monitoring_uptime_check_delete]
