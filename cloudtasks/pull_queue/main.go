@@ -1,0 +1,194 @@
+// Copyright 2018 Google Inc. All rights reserved.
+// Use of this source code is governed by the Apache 2.0
+// license that can be found in the LICENSE file.
+
+package main
+
+import (
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
+	"log"
+	"os"
+
+	"golang.org/x/net/context"
+
+	cloudtasks "cloud.google.com/go/cloudtasks/apiv2beta2"
+	duration "github.com/golang/protobuf/ptypes/duration"
+	taskspb "google.golang.org/genproto/googleapis/cloud/tasks/v2beta2"
+)
+
+// usage powers the help documentation when a help operation is used or the wrong number of arguments specified.
+func usage() {
+	fmt.Println("Usage of tasks_cli:")
+	fmt.Println()
+	fmt.Println("\t$> tasks create $PROJECT_ID $LOCATION_ID $QUEUE_ID")
+	fmt.Println("\t$> tasks pull $PROJECT_ID $LOCATION_ID $QUEUE_ID")
+	fmt.Println("\t$> tasks help")
+	fmt.Println("\nFor more information, see https://cloud.google.com/cloud-tasks/docs")
+}
+
+func main() {
+	args := os.Args[1:]
+	if len(args) == 0 || (len(args) < 3 && args[0] != "help") {
+		usage()
+		os.Exit(1)
+	}
+
+	switch args[0] {
+	case "create":
+		runTaskCreate(args[1:])
+	case "pull":
+		runTaskLeaseAndAck(args[1:])
+	default:
+		usage()
+	}
+
+	fmt.Println()
+}
+
+// runTaskCreate is invoked by the CLI for the "create" operation.
+func runTaskCreate(args []string) {
+	_, err := taskCreate(args[0], args[1], args[2])
+	if err != nil {
+		log.Fatalf("Error creating task: %s\n", err)
+	}
+}
+
+// runTaskPull is invoked by the CLI for the "pull" operation.
+func runTaskLeaseAndAck(args []string) {
+	task, err := taskLease(args[0], args[1], args[2])
+	if err != nil {
+		log.Fatalf("Error leasing task: %s\n", err)
+	} else if task == nil {
+		log.Println("No tasks available for lease")
+	} else if taskAck(task) != nil {
+		log.Fatalf("Error acknowledging task: %s\n", err)
+	}
+}
+
+// [START cloud_tasks_create_task]
+// taskCreate creates a new Task on the specified pull queue.
+// TODO(developer) call this with your Project, and Location & Queue IDs of your pull queue.
+func taskCreate(projectID, locationID, queueID string) (*taskspb.Task, error) {
+	// Create a new Cloud Tasks client instance.
+	// See https://godoc.org/cloud.google.com/go/cloudtasks/apiv2beta2
+	ctx := context.Background()
+	c, clientErr := cloudtasks.NewClient(ctx)
+	if clientErr != nil {
+		return nil, clientErr
+	}
+
+	// Message to be sent as the task payload.
+	message := base64.StdEncoding.EncodeToString([]byte("a message for the recipient"))
+
+	// Construct the expected form of the Queue ID.
+	queueName := fmt.Sprintf("projects/%s/locations/%s/queues/%s", projectID, locationID, queueID)
+
+	// Cloud Tasks Go Client uses protobuf.
+	// See https://godoc.org/google.golang.org/genproto/googleapis/cloud/tasks/v2beta2#CreateTaskRequest
+	req := &taskspb.CreateTaskRequest{
+		Parent: queueName,
+		Task: &taskspb.Task{
+			PayloadType: &taskspb.Task_PullMessage{
+				PullMessage: &taskspb.PullMessage{
+					Payload: []byte(message),
+				},
+			},
+		},
+	}
+
+	createdTask, reqErr := c.CreateTask(ctx, req)
+	if reqErr != nil {
+		return nil, reqErr
+	}
+
+	fmt.Println("Created task:", createdTask.GetName())
+
+	return createdTask, nil
+}
+// [END cloud_tasks_create_task]
+
+// [START cloud_tasks_lease_and_acknowledge_task]
+// runTaskPull leases the next task from the specified pull queue.
+// TODO(developer) call this with your Project, and Location & Queue IDs of your pull queue.
+func taskLease(projectID, locationID, queueID string) (*taskspb.Task, error) {
+	// Create a new Cloud Tasks client instance.
+	// See https://godoc.org/cloud.google.com/go/cloudtasks/apiv2beta2
+	ctx := context.Background()
+	c, clientErr := cloudtasks.NewClient(ctx)
+	if clientErr != nil {
+		return nil, clientErr
+	}
+
+	// Construct the expected form of the Queue ID.
+	queueName := fmt.Sprintf("projects/%s/locations/%s/queues/%s", projectID, locationID, queueID)
+
+	// Cloud Tasks Go Client uses protobuf.
+	// See https://godoc.org/google.golang.org/genproto/googleapis/cloud/tasks/v2beta2#LeaseTasksRequest
+	req := &taskspb.LeaseTasksRequest{
+		Parent:        queueName,
+		MaxTasks:      1,
+		LeaseDuration: &duration.Duration{Seconds: 600},
+		ResponseView:  taskspb.Task_FULL,
+	}
+
+	// See https://godoc.org/google.golang.org/genproto/googleapis/cloud/tasks/v2beta2#LeaseTasksResponse
+	resp, reqErr := c.LeaseTasks(ctx, req)
+	if reqErr != nil {
+		return nil, reqErr
+	}
+
+	// If no tasks are available, nothing further to be done.
+	if len(resp.Tasks) == 0 {
+		return nil, nil
+	}
+
+	// Leasing tasks allows retrieval of one or more tasks. The Tasks property will
+	leasedTask := resp.Tasks[0]
+
+	// See the full code on Github for the implementation of toJsonString.
+	fmt.Println("Leased task:", toJSONString(leasedTask))
+
+	return leasedTask, nil
+}
+
+// taskAck acknowledges the provided Task for use in conjunction with taskLease().
+func taskAck(task *taskspb.Task) error {
+	// Create a new Cloud Tasks client instance.
+	// See https://godoc.org/cloud.google.com/go/cloudtasks/apiv2beta2
+	ctx := context.Background()
+	c, clientErr := cloudtasks.NewClient(ctx)
+	if clientErr != nil {
+		return clientErr
+	}
+
+	// See https://godoc.org/google.golang.org/genproto/googleapis/cloud/tasks/v2beta2#AcknowledgeTaskRequest
+	req := &taskspb.AcknowledgeTaskRequest{
+		Name:         task.GetName(),
+		ScheduleTime: task.GetScheduleTime(),
+	}
+
+	reqErr := c.AcknowledgeTask(ctx, req)
+	if reqErr != nil {
+		return reqErr
+	}
+	fmt.Println("Acknowledged task:", task.GetName())
+
+	return nil
+}
+// [END cloud_tasks_lease_and_acknowledge_task]
+
+// toJSONString is a utility to serialize arbitrary data to JSON.
+// Marshalling errors are silently dropped.
+func toJSONString(task *taskspb.Task) string {
+	m := map[string]interface{}{
+		"name":         task.GetName(),
+		"scheduleTime": task.GetScheduleTime(),
+	}
+	raw, err := json.Marshal(m)
+	if err != nil {
+		return ""
+	}
+	return string(raw)
+}
