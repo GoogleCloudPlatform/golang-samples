@@ -2,6 +2,7 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
+// Program pull_queue provides a basic CLI for basic Cloud Tasks API interaction.
 package main
 
 import (
