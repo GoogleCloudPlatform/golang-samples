@@ -143,9 +143,6 @@ func TestAll(t *testing.T) {
 	if got := buf.String(); !strings.Contains(got, explicit) {
 		t.Errorf("want table list %q to contain table %q", got, explicit)
 	}
-	if got := buf.String(); !strings.Contains(got, empty) {
-		t.Errorf("want table list %q to contain table %q", got, empty)
-	}
 
 	if err := printDatasetInfo(client, datasetID); err != nil {
 		t.Errorf("printDatasetInfo: %v", err)
