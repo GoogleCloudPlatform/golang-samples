@@ -297,16 +297,6 @@ func createTableExplicitSchema(client *bigquery.Client, datasetID, tableID strin
 	return nil
 }
 
-func createTableEmptySchema(client *bigquery.Client, datasetID, tableID string) error {
-	ctx := context.Background()
-	// [START bigquery_create_table_without_schema]
-	if err := client.Dataset(datasetID).Table(tableID).Create(ctx, nil); err != nil {
-		return err
-	}
-	// [END bigquery_create_table_without_schema]
-	return nil
-}
-
 func updateTableDescription(client *bigquery.Client, datasetID, tableID string) error {
 	ctx := context.Background()
 	// [START bigquery_update_table_description]
