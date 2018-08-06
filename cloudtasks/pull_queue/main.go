@@ -7,7 +7,6 @@ package main
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -69,8 +68,8 @@ func runTaskLeaseAndAck(args []string) {
 }
 
 // [START cloud_tasks_create_task]
+
 // taskCreate creates a new Task on the specified pull queue.
-// TODO(developer) call this with your Project, and Location & Queue IDs of your pull queue.
 func taskCreate(projectID, locationID, queueID string) (*taskspb.Task, error) {
 	// Create a new Cloud Tasks client instance.
 	// See https://godoc.org/cloud.google.com/go/cloudtasks/apiv2beta2
@@ -111,8 +110,8 @@ func taskCreate(projectID, locationID, queueID string) (*taskspb.Task, error) {
 // [END cloud_tasks_create_task]
 
 // [START cloud_tasks_lease_and_acknowledge_task]
+
 // runTaskPull leases the next task from the specified pull queue.
-// TODO(developer) call this with your Project, and Location & Queue IDs of your pull queue.
 func taskLease(projectID, locationID, queueID string) (*taskspb.Task, error) {
 	// Create a new Cloud Tasks client instance.
 	// See https://godoc.org/cloud.google.com/go/cloudtasks/apiv2beta2
@@ -145,11 +144,12 @@ func taskLease(projectID, locationID, queueID string) (*taskspb.Task, error) {
 		return nil, nil
 	}
 
-	// Leasing tasks allows retrieval of one or more tasks. The Tasks property will
+        // Leasing tasks allows retrieval of one or more tasks. The Tasks property is always a slice
+        // even if a single task is leased.
 	leasedTask := resp.Tasks[0]
 
 	// See the full code on Github for the implementation of toJsonString.
-	fmt.Println("Leased task:", toJSONString(leasedTask))
+        fmt.Println("Leased task:", leasedTask.GetName())
 
 	return leasedTask, nil
 }
@@ -179,17 +179,3 @@ func taskAck(task *taskspb.Task) error {
 	return nil
 }
 // [END cloud_tasks_lease_and_acknowledge_task]
-
-// toJSONString is a utility to serialize arbitrary data to JSON.
-// Marshalling errors are silently dropped.
-func toJSONString(task *taskspb.Task) string {
-	m := map[string]interface{}{
-		"name":         task.GetName(),
-		"scheduleTime": task.GetScheduleTime(),
-	}
-	raw, err := json.Marshal(m)
-	if err != nil {
-		return ""
-	}
-	return string(raw)
-}
