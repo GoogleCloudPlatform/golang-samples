@@ -18,15 +18,8 @@ func setup(t *testing.T) {
 
 	// ProjectID is set from environment variable GOLANG_SAMPLES_PROJECT_ID.
 	projectID = tc.ProjectID
-	locationID = os.Getenv("GOLANG_SAMPLES_LOCATION_ID")
-	if locationID == "" {
-		locationID = "us-central1"
-	}
-	locationID = os.Getenv("GOLANG_SAMPLES_LOCATION_ID")
-	queueID = os.Getenv("GOLANG_SAMPLES_QUEUE_ID")
-	if queueID == "" {
-		queueID = "my-pull-queue"
-	}
+        locationID = "us-central1"
+    queueID = "my-pull-queue"
 }
 
 func TestTaskCreate(t *testing.T) {
@@ -52,7 +45,8 @@ func TestTaskLeaseAndAck(t *testing.T) {
 	task, err := taskLease(projectID, locationID, queueID)
 	if err != nil {
 		t.Fatalf("failed to lease a task: %v", err)
-	} else if task == nil {
+        }
+        if task == nil {
 		t.Fatalf("no task available to lease: %v", err)
 	}
 
