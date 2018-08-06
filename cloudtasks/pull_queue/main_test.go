@@ -5,7 +5,6 @@
 package main
 
 import (
-	"os"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
