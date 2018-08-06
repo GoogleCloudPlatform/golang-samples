@@ -60,7 +60,8 @@ func runTaskLeaseAndAck(args []string) {
 	task, err := taskLease(args[0], args[1], args[2])
 	if err != nil {
 		log.Fatalf("Error leasing task: %s\n", err)
-	} else if task == nil {
+	}
+	if task == nil {
 		log.Println("No tasks available for lease")
 	} else if taskAck(task) != nil {
 		log.Fatalf("Error acknowledging task: %s\n", err)
@@ -74,9 +75,9 @@ func taskCreate(projectID, locationID, queueID string) (*taskspb.Task, error) {
 	// Create a new Cloud Tasks client instance.
 	// See https://godoc.org/cloud.google.com/go/cloudtasks/apiv2beta2
 	ctx := context.Background()
-	c, clientErr := cloudtasks.NewClient(ctx)
-	if clientErr != nil {
-		return nil, clientErr
+	c, err := cloudtasks.NewClient(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("NewCloudTasksClient: %v", err)
 	}
 
 	// Message to be sent as the task payload.
@@ -98,15 +99,16 @@ func taskCreate(projectID, locationID, queueID string) (*taskspb.Task, error) {
 		},
 	}
 
-	createdTask, reqErr := c.CreateTask(ctx, req)
-	if reqErr != nil {
-		return nil, reqErr
+	createdTask, err := c.CreateTask(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("CreateCloudTask: %v", err)
 	}
 
 	fmt.Println("Created task:", createdTask.GetName())
 
 	return createdTask, nil
 }
+
 // [END cloud_tasks_create_task]
 
 // [START cloud_tasks_lease_and_acknowledge_task]
@@ -116,9 +118,9 @@ func taskLease(projectID, locationID, queueID string) (*taskspb.Task, error) {
 	// Create a new Cloud Tasks client instance.
 	// See https://godoc.org/cloud.google.com/go/cloudtasks/apiv2beta2
 	ctx := context.Background()
-	c, clientErr := cloudtasks.NewClient(ctx)
-	if clientErr != nil {
-		return nil, clientErr
+	c, err := cloudtasks.NewClient(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("NewCloudTasksClient: %v", err)
 	}
 
 	// Construct the expected form of the Queue ID.
@@ -134,9 +136,9 @@ func taskLease(projectID, locationID, queueID string) (*taskspb.Task, error) {
 	}
 
 	// See https://godoc.org/google.golang.org/genproto/googleapis/cloud/tasks/v2beta2#LeaseTasksResponse
-	resp, reqErr := c.LeaseTasks(ctx, req)
-	if reqErr != nil {
-		return nil, reqErr
+	resp, err := c.LeaseTasks(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("LeaseCloudTask: %v", err)
 	}
 
 	// If no tasks are available, nothing further to be done.
@@ -144,12 +146,12 @@ func taskLease(projectID, locationID, queueID string) (*taskspb.Task, error) {
 		return nil, nil
 	}
 
-        // Leasing tasks allows retrieval of one or more tasks. The Tasks property is always a slice
-        // even if a single task is leased.
+	// Leasing tasks allows retrieval of one or more tasks. The Tasks property is always a slice
+	// even if a single task is leased.
 	leasedTask := resp.Tasks[0]
 
 	// See the full code on Github for the implementation of toJsonString.
-        fmt.Println("Leased task:", leasedTask.GetName())
+	fmt.Println("Leased task:", leasedTask.GetName())
 
 	return leasedTask, nil
 }
@@ -159,9 +161,9 @@ func taskAck(task *taskspb.Task) error {
 	// Create a new Cloud Tasks client instance.
 	// See https://godoc.org/cloud.google.com/go/cloudtasks/apiv2beta2
 	ctx := context.Background()
-	c, clientErr := cloudtasks.NewClient(ctx)
-	if clientErr != nil {
-		return clientErr
+	c, err := cloudtasks.NewClient(ctx)
+	if err != nil {
+		return fmt.Errorf("NewCloudTasksClient: %v", err)
 	}
 
 	// See https://godoc.org/google.golang.org/genproto/googleapis/cloud/tasks/v2beta2#AcknowledgeTaskRequest
@@ -170,12 +172,12 @@ func taskAck(task *taskspb.Task) error {
 		ScheduleTime: task.GetScheduleTime(),
 	}
 
-	reqErr := c.AcknowledgeTask(ctx, req)
-	if reqErr != nil {
-		return reqErr
+	if err := c.AcknowledgeTask(ctx, req); err != nil {
+		return fmt.Errorf("AcknowledgeCloudTask: %v", err)
 	}
 	fmt.Println("Acknowledged task:", task.GetName())
 
 	return nil
 }
+
 // [END cloud_tasks_lease_and_acknowledge_task]
