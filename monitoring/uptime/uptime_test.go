@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc. All rights reserved.
+// Copyright 2018 Google Inc. All rights reserved.
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
@@ -6,32 +6,33 @@ package uptime
 
 import (
 	"bytes"
-	"log"
+	"io/ioutil"
 	"strings"
 	"testing"
 
-	monitoring "cloud.google.com/go/monitoring/apiv3"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"github.com/golang/protobuf/ptypes/duration"
-	"golang.org/x/net/context"
-	"google.golang.org/genproto/googleapis/api/monitoredres"
-	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 )
 
 func TestCreate(t *testing.T) {
 	c := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
-	create(buf, c.ProjectID)
+	config, err := create(buf, c.ProjectID)
+	if err != nil {
+		t.Fatalf("create: %v", err)
+	}
 	want := "Successfully"
 	if got := buf.String(); !strings.Contains(got, want) {
 		t.Errorf("%q not found in output: %q", want, got)
 	}
+	delete(ioutil.Discard, config.GetName())
 }
 
 func TestList(t *testing.T) {
 	c := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
-	list(buf, c.ProjectID)
+	if err := list(buf, c.ProjectID); err != nil {
+		t.Fatalf("list: %v", err)
+	}
 	want := "Done"
 	if got := buf.String(); !strings.Contains(got, want) {
 		t.Errorf("%q not found in output: %q", want, got)
@@ -41,65 +42,67 @@ func TestList(t *testing.T) {
 func TestListIPs(t *testing.T) {
 	testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
-	listIPs(buf)
+	if err := listIPs(buf); err != nil {
+		t.Fatalf("listIPs: %v", err)
+	}
 	want := "Done"
 	if got := buf.String(); !strings.Contains(got, want) {
 		t.Errorf("%q not found in output: %q", want, got)
 	}
 }
 
-func createTestUptimeCheck(projectID string) *monitoringpb.UptimeCheckConfig {
-	ctx := context.Background()
-	client, err := monitoring.NewUptimeCheckClient(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer client.Close()
-	req := &monitoringpb.CreateUptimeCheckConfigRequest{
-		Parent: "projects/" + projectID,
-		UptimeCheckConfig: &monitoringpb.UptimeCheckConfig{
-			DisplayName: "new uptime check",
-			Resource: &monitoringpb.UptimeCheckConfig_MonitoredResource{
-				MonitoredResource: &monitoredres.MonitoredResource{
-					Type: "uptime_url",
-					Labels: map[string]string{
-						"host": "example.com",
-					},
-				},
-			},
-			CheckRequestType: &monitoringpb.UptimeCheckConfig_HttpCheck_{
-				HttpCheck: &monitoringpb.UptimeCheckConfig_HttpCheck{
-					Path: "/",
-					Port: 80,
-				},
-			},
-			Timeout: &duration.Duration{Seconds: 10},
-			Period:  &duration.Duration{Seconds: 300},
-		},
-	}
-	uc, err := client.CreateUptimeCheckConfig(ctx, req)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return uc
-}
-
 func TestGet(t *testing.T) {
 	c := testutil.SystemTest(t)
-	uc := createTestUptimeCheck(c.ProjectID)
+	config, err := create(ioutil.Discard, c.ProjectID)
+	if err != nil {
+		t.Fatalf("create: %v", err)
+	}
+	defer delete(ioutil.Discard, config.GetName())
 	buf := new(bytes.Buffer)
-	get(buf, uc.GetName())
-	want := "Config:"
+	got, err := get(buf, config.GetName())
+	if err != nil {
+		t.Fatalf("get: %v", err)
+	}
+	if got.GetDisplayName() != config.GetDisplayName() {
+		t.Fatalf("display names not equal: want %q, got %q", config.GetDisplayName(), got.GetDisplayName())
+	}
+}
+
+func TestUpdate(t *testing.T) {
+	c := testutil.SystemTest(t)
+	config, err := create(ioutil.Discard, c.ProjectID)
+	if err != nil {
+		t.Fatalf("create: %v", err)
+	}
+	defer delete(ioutil.Discard, config.GetName())
+	buf := new(bytes.Buffer)
+	displayName := "New display name"
+	path := "example.com/example"
+	updated, err := update(buf, config.GetName(), displayName, path)
+	if err != nil {
+		t.Fatalf("update: %v", err)
+	}
+	want := "Successfully"
 	if got := buf.String(); !strings.Contains(got, want) {
 		t.Errorf("%q not found in output: %q", want, got)
+	}
+
+	if got := updated.GetDisplayName(); got != displayName {
+		t.Errorf("Display name not updated: got %q, want %q", got, displayName)
+	}
+	if got := updated.GetHttpCheck().GetPath(); got != path {
+		t.Errorf("HTTP path not updated: got %q, want %q", got, displayName)
 	}
 }
 
 func TestDelete(t *testing.T) {
 	c := testutil.SystemTest(t)
-	uc := createTestUptimeCheck(c.ProjectID)
+	config, err := create(ioutil.Discard, c.ProjectID)
+	if err != nil {
+		t.Fatalf("create: %v", err)
+	}
 	buf := new(bytes.Buffer)
-	delete(buf, uc.GetName())
+	delete(buf, config.GetName())
 	want := "Successfully"
 	if got := buf.String(); !strings.Contains(got, want) {
 		t.Errorf("%q not found in output: %q", want, got)
