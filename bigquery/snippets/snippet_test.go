@@ -111,16 +111,12 @@ func TestAll(t *testing.T) {
 
 	inferred := uniqueBQName("golang_example_table_inferred")
 	explicit := uniqueBQName("golang_example_table_explicit")
-	empty := uniqueBQName("golang_example_table_emptyschema")
 
 	if err := createTableInferredSchema(client, datasetID, inferred); err != nil {
 		t.Errorf("createTableInferredSchema(dataset:%q table:%q): %v", datasetID, inferred, err)
 	}
 	if err := createTableExplicitSchema(client, datasetID, explicit); err != nil {
 		t.Errorf("createTableExplicitSchema(dataset:%q table:%q): %v", datasetID, explicit, err)
-	}
-	if err := createTableEmptySchema(client, datasetID, empty); err != nil {
-		t.Errorf("createTableEmptySchema(dataset:%q table:%q): %v", datasetID, empty, err)
 	}
 
 	if err := updateTableDescription(client, datasetID, explicit); err != nil {
@@ -146,9 +142,6 @@ func TestAll(t *testing.T) {
 	}
 	if got := buf.String(); !strings.Contains(got, explicit) {
 		t.Errorf("want table list %q to contain table %q", got, explicit)
-	}
-	if got := buf.String(); !strings.Contains(got, empty) {
-		t.Errorf("want table list %q to contain table %q", got, empty)
 	}
 
 	if err := printDatasetInfo(client, datasetID); err != nil {
