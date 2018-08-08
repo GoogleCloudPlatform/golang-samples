@@ -297,6 +297,66 @@ func createTableExplicitSchema(client *bigquery.Client, datasetID, tableID strin
 	return nil
 }
 
+func createTableEmptySchema(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_create_table_without_schema]
+	if err := client.Dataset(datasetID).Table(tableID).Create(ctx, nil); err != nil {
+		return err
+	}
+	// [END bigquery_create_table_without_schema]
+	return nil
+}
+
+func createTablePartitioned(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_create_table_partitioned]
+	sampleSchema := bigquery.Schema{
+		{Name: "name", Type: bigquery.StringFieldType},
+		{Name: "post_abbr", Type: bigquery.IntegerFieldType},
+		{Name: "date", Type: bigquery.DateFieldType},
+	}
+	metaData := &bigquery.TableMetadata{
+		TimePartitioning: &bigquery.TimePartitioning{
+			Field:      "date",
+			Expiration: 90 * 24 * time.Hour,
+		},
+		Schema: sampleSchema,
+	}
+	tableRef := client.Dataset(datasetID).Table(tableID)
+	if err := tableRef.Create(ctx, metaData); err != nil {
+		return err
+	}
+	// [END bigquery_create_table_partitioned]
+	return nil
+}
+
+func createTableClustered(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_create_table_clustered]
+	sampleSchema := bigquery.Schema{
+		{Name: "timestamp", Type: bigquery.TimestampFieldType},
+		{Name: "origin", Type: bigquery.StringFieldType},
+		{Name: "destination", Type: bigquery.StringFieldType},
+		{Name: "amount", Type: bigquery.NumericFieldType},
+	}
+	metaData := &bigquery.TableMetadata{
+		Schema: sampleSchema,
+		TimePartitioning: &bigquery.TimePartitioning{
+			Field:      "timestamp",
+			Expiration: 90 * 24 * time.Hour,
+		},
+		Clustering: &bigquery.Clustering{
+			Fields: []string{"origin", "destination"},
+		},
+	}
+	tableRef := client.Dataset(datasetID).Table(tableID)
+	if err := tableRef.Create(ctx, metaData); err != nil {
+		return err
+	}
+	// [END bigquery_create_table_partitioned]
+	return nil
+}
+
 func updateTableDescription(client *bigquery.Client, datasetID, tableID string) error {
 	ctx := context.Background()
 	// [START bigquery_update_table_description]
@@ -666,6 +726,37 @@ func queryWithStructParam(client *bigquery.Client) error {
 	return runAndRead(ctx, client, q)
 }
 
+func queryPartitionedTable(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_query_partitioned_table]
+	q := client.Query(fmt.Sprintf("SELECT * FROM `%s.%s` WHERE `date` BETWEEN DATE('1800-01-01') AND DATE('1899-12-31')", datasetID, tableID))
+	// [END bigquery_query_partitioned_table]
+	return runAndRead(ctx, client, q)
+}
+
+func queryClusteredTable(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_query_clustered_table]
+	q := client.Query(fmt.Sprintf(`
+	SELECT
+	  COUNT(1) as transactions,
+	  SUM(amount) as total_paid,
+	  COUNT(DISTINCT destination) as distinct_recipients
+    FROM
+	  `+"`%s.%s`"+`
+	 WHERE
+	    timestamp > TIMESTAMP('2015-01-01')
+		AND origin = @wallet`, datasetID, tableID))
+	q.Parameters = []bigquery.QueryParameter{
+		{
+			Name:  "wallet",
+			Value: "wallet00001866cb7e0f09a890",
+		},
+	}
+	// [END bigquery_query_clustered_table]
+	return runAndRead(ctx, client, q)
+}
+
 func printTableInfo(client *bigquery.Client, datasetID, tableID string) error {
 	ctx := context.Background()
 	// [START bigquery_get_table]
@@ -945,6 +1036,75 @@ func importJSONAutodetectSchema(client *bigquery.Client, datasetID, tableID stri
 	return nil
 }
 
+func importPartitionedSampleTable(client *bigquery.Client, destDatasetID, destTableID string) error {
+	ctx := context.Background()
+	// [START bigquery_load_table_partitioned]
+	gcsRef := bigquery.NewGCSReference("gs://cloud-samples-data/bigquery/us-states/us-states-by-date.csv")
+	gcsRef.SkipLeadingRows = 1
+	gcsRef.Schema = bigquery.Schema{
+		{Name: "name", Type: bigquery.StringFieldType},
+		{Name: "post_abbr", Type: bigquery.StringFieldType},
+		{Name: "date", Type: bigquery.DateFieldType},
+	}
+	loader := client.Dataset(destDatasetID).Table(destTableID).LoaderFrom(gcsRef)
+	loader.TimePartitioning = &bigquery.TimePartitioning{
+		Field:      "date",
+		Expiration: 90 * 24 * time.Hour,
+	}
+	loader.WriteDisposition = bigquery.WriteEmpty
+
+	job, err := loader.Run(ctx)
+	if err != nil {
+		return err
+	}
+	status, err := job.Wait(ctx)
+	if err != nil {
+		return err
+	}
+
+	if status.Err() != nil {
+		return fmt.Errorf("Job completed with error: %v", status.Err())
+	}
+	// [END bigquery_load_table_partitioned]
+	return nil
+}
+
+func importClusteredSampleTable(client *bigquery.Client, destDatasetID, destTableID string) error {
+	ctx := context.Background()
+	// [START bigquery_load_table_clustered]
+	gcsRef := bigquery.NewGCSReference("gs://cloud-samples-data/bigquery/sample-transactions/transactions.csv")
+	gcsRef.SkipLeadingRows = 1
+	gcsRef.Schema = bigquery.Schema{
+		{Name: "timestamp", Type: bigquery.TimestampFieldType},
+		{Name: "origin", Type: bigquery.StringFieldType},
+		{Name: "destination", Type: bigquery.StringFieldType},
+		{Name: "amount", Type: bigquery.NumericFieldType},
+	}
+	loader := client.Dataset(destDatasetID).Table(destTableID).LoaderFrom(gcsRef)
+	loader.TimePartitioning = &bigquery.TimePartitioning{
+		Field: "timestamp",
+	}
+	loader.Clustering = &bigquery.Clustering{
+		Fields: []string{"origin", "destination"},
+	}
+	loader.WriteDisposition = bigquery.WriteEmpty
+
+	job, err := loader.Run(ctx)
+	if err != nil {
+		return err
+	}
+	status, err := job.Wait(ctx)
+	if err != nil {
+		return err
+	}
+
+	if status.Err() != nil {
+		return fmt.Errorf("Job completed with error: %v", status.Err())
+	}
+	// [END bigquery_load_table_clustered]
+	return nil
+}
+
 func exportSampleTableAsCSV(client *bigquery.Client, gcsURI string) error {
 	ctx := context.Background()
 	// [START bigquery_extract_table]
@@ -1052,6 +1212,8 @@ func runAndRead(ctx context.Context, client *bigquery.Client, q *bigquery.Query)
 	// [START bigquery_query_params_positional]
 	// [START bigquery_query_params_timestamps]
 	// [START bigquery_query_params_structs]
+	// [START bigquery_query_partitioned_table]
+	// [START bigquery_query_clustered_table]
 	job, err := q.Run(ctx)
 	if err != nil {
 		return err
@@ -1085,5 +1247,7 @@ func runAndRead(ctx context.Context, client *bigquery.Client, q *bigquery.Query)
 	// [END bigquery_query_params_positional]
 	// [END bigquery_query_params_timestamps]
 	// [END bigquery_query_params_structs]
+	// [END bigquery_query_partitioned_table]
+	// [END bigquery_query_clustered_table]
 	return nil
 }
