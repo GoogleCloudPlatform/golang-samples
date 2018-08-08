@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Sample analytics demonstrates Google Analytics calls from App Engine flexible environment.
+// [START gae_flex_analytics_track_event]
 package main
 
 import (
@@ -88,3 +89,4 @@ func trackEvent(r *http.Request, category, action, label string, value *uint) er
 	_, err := http.PostForm("https://www.google-analytics.com/collect", v)
 	return err
 }
+// [END gae_flex_analytics_track_event]
