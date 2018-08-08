@@ -5,6 +5,8 @@
 // Package snippets is a collection of sample code snippets.
 package snippets
 
+// [START cloud_tasks_create_task]
+
 import (
 	"encoding/base64"
 	"fmt"
@@ -14,8 +16,6 @@ import (
 	"golang.org/x/net/context"
 	taskspb "google.golang.org/genproto/googleapis/cloud/tasks/v2beta2"
 )
-
-// [START cloud_tasks_create_task]
 
 // taskCreate creates a new Task on the specified pull queue.
 func taskCreate(w io.Writer, projectID, locationID, queueID string) (*taskspb.Task, error) {

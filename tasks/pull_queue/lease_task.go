@@ -5,6 +5,8 @@
 // Package snippets is a collection of sample code snippets.
 package snippets
 
+// [START cloud_tasks_lease_and_acknowledge_task]
+
 import (
 	"fmt"
 	"io"
@@ -14,8 +16,6 @@ import (
 	"golang.org/x/net/context"
 	taskspb "google.golang.org/genproto/googleapis/cloud/tasks/v2beta2"
 )
-
-// [START cloud_tasks_lease_and_acknowledge_task]
 
 // runTaskPull leases the next task from the specified pull queue.
 func taskLease(w io.Writer, projectID, locationID, queueID string) (*taskspb.Task, error) {
