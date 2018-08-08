@@ -6,53 +6,53 @@
 package snippets
 
 import (
-        "encoding/base64"
-        "fmt"
-        "io"
+	"encoding/base64"
+	"fmt"
+	"io"
 
-        cloudtasks "cloud.google.com/go/cloudtasks/apiv2beta2"
-        "golang.org/x/net/context"
-        taskspb "google.golang.org/genproto/googleapis/cloud/tasks/v2beta2"
+	cloudtasks "cloud.google.com/go/cloudtasks/apiv2beta2"
+	"golang.org/x/net/context"
+	taskspb "google.golang.org/genproto/googleapis/cloud/tasks/v2beta2"
 )
 
 // [START cloud_tasks_create_task]
 
 // taskCreate creates a new Task on the specified pull queue.
 func taskCreate(w io.Writer, projectID, locationID, queueID string) (*taskspb.Task, error) {
-        // Create a new Cloud Tasks client instance.
-        // See https://godoc.org/cloud.google.com/go/cloudtasks/apiv2beta2
-        ctx := context.Background()
-        c, err := cloudtasks.NewClient(ctx)
-        if err != nil {
-                return nil, fmt.Errorf("NewCloudTasksClient: %v", err)
-        }
+	// Create a new Cloud Tasks client instance.
+	// See https://godoc.org/cloud.google.com/go/cloudtasks/apiv2beta2
+	ctx := context.Background()
+	c, err := cloudtasks.NewClient(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("NewCloudTasksClient: %v", err)
+	}
 
-        // Message to be sent as the task payload.
-        message := base64.StdEncoding.EncodeToString([]byte("a message for the recipient"))
+	// Message to be sent as the task payload.
+	message := base64.StdEncoding.EncodeToString([]byte("a message for the recipient"))
 
-        // Construct the expected form of the Queue ID.
-        queueName := fmt.Sprintf("projects/%s/locations/%s/queues/%s", projectID, locationID, queueID)
+	// Construct the expected form of the Queue ID.
+	queueName := fmt.Sprintf("projects/%s/locations/%s/queues/%s", projectID, locationID, queueID)
 
-        // Cloud Tasks Go Client uses protobuf.
-        // See https://godoc.org/google.golang.org/genproto/googleapis/cloud/tasks/v2beta2#CreateTaskRequest
-        req := &taskspb.CreateTaskRequest{
-                Parent: queueName,
-                Task: &taskspb.Task{
-                        PayloadType: &taskspb.Task_PullMessage{
-                                PullMessage: &taskspb.PullMessage{
-                                        Payload: []byte(message),
-                                },
-                        },
-                },
-        }
-        createdTask, err := c.CreateTask(ctx, req)
-        if err != nil {
-                return nil, fmt.Errorf("CreateCloudTask: %v", err)
-        }
+	// Cloud Tasks Go Client uses protobuf.
+	// See https://godoc.org/google.golang.org/genproto/googleapis/cloud/tasks/v2beta2#CreateTaskRequest
+	req := &taskspb.CreateTaskRequest{
+		Parent: queueName,
+		Task: &taskspb.Task{
+			PayloadType: &taskspb.Task_PullMessage{
+				PullMessage: &taskspb.PullMessage{
+					Payload: []byte(message),
+				},
+			},
+		},
+	}
+	createdTask, err := c.CreateTask(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("CreateCloudTask: %v", err)
+	}
 
-        fmt.Fprintln(w, "Created task:", createdTask.GetName())
+	fmt.Fprintln(w, "Created task:", createdTask.GetName())
 
-        return createdTask, nil
+	return createdTask, nil
 }
 
 // [END cloud_tasks_create_task]

@@ -5,22 +5,22 @@
 package snippets
 
 import (
-        "io/ioutil"
-        "testing"
+	"io/ioutil"
+	"testing"
 
-        "github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestTaskCreate(t *testing.T) {
-        tc := testutil.SystemTest(t)
+	tc := testutil.SystemTest(t)
 
-        // ProjectID is set from environment variable GOLANG_SAMPLES_PROJECT_ID.
-        projectID := tc.ProjectID
-        locationID := "us-central1"
-        queueID := "my-pull-queue"
+	// ProjectID is set from environment variable GOLANG_SAMPLES_PROJECT_ID.
+	projectID := tc.ProjectID
+	locationID := "us-central1"
+	queueID := "my-pull-queue"
 
-        _, err := taskCreate(ioutil.Discard, projectID, locationID, queueID)
-        if err != nil {
-                t.Fatalf("failed to create new task: %v", err)
-        }
+	_, err := taskCreate(ioutil.Discard, projectID, locationID, queueID)
+	if err != nil {
+		t.Fatalf("failed to create new task: %v", err)
+	}
 }

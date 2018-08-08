@@ -5,43 +5,43 @@
 package snippets
 
 import (
-        "io/ioutil"
-        "testing"
+	"io/ioutil"
+	"testing"
 
-        "github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestTaskLeaseAndAck(t *testing.T) {
-        tc := testutil.SystemTest(t)
+	tc := testutil.SystemTest(t)
 
-        // ProjectID is set from environment variable GOLANG_SAMPLES_PROJECT_ID.
-        projectID := tc.ProjectID
-        locationID := "us-central1"
-        queueID := "my-pull-queue"
+	// ProjectID is set from environment variable GOLANG_SAMPLES_PROJECT_ID.
+	projectID := tc.ProjectID
+	locationID := "us-central1"
+	queueID := "my-pull-queue"
 
-        // Guarantee a task will be available in the queue
-        // in the event TestTaskCreate is skipped.
-        seed, err := taskCreate(ioutil.Discard, projectID, locationID, queueID)
-        if err != nil {
-                t.Fatalf("failed to ensure a task would be available for lease: %v", err)
-        }
+	// Guarantee a task will be available in the queue
+	// in the event TestTaskCreate is skipped.
+	seed, err := taskCreate(ioutil.Discard, projectID, locationID, queueID)
+	if err != nil {
+		t.Fatalf("failed to ensure a task would be available for lease: %v", err)
+	}
 
-        // Test task leasing.
-        task, err := taskLease(ioutil.Discard, projectID, locationID, queueID)
-        if err != nil {
-                t.Fatalf("failed to lease a task: %v", err)
-        }
-        if task == nil {
-                t.Fatalf("no task available to lease: %v", err)
-        }
+	// Test task leasing.
+	task, err := taskLease(ioutil.Discard, projectID, locationID, queueID)
+	if err != nil {
+		t.Fatalf("failed to lease a task: %v", err)
+	}
+	if task == nil {
+		t.Fatalf("no task available to lease: %v", err)
+	}
 
-        // Note cross-test data poisoning through concurrent queue usage or pre-created tasks.
-        if task.GetName() != seed.GetName() {
-                t.Logf("Task used for lease testing was not created by test setup: (seeded: %s, leased: %s)", seed.GetName(), task.GetName())
-        }
+	// Note cross-test data poisoning through concurrent queue usage or pre-created tasks.
+	if task.GetName() != seed.GetName() {
+		t.Logf("Task used for lease testing was not created by test setup: (seeded: %s, leased: %s)", seed.GetName(), task.GetName())
+	}
 
-        // Acknowledge our leased task.
-        if err = taskAck(ioutil.Discard, task); err != nil {
-                t.Fatalf("failed to acknowledge task: %v", err)
-        }
+	// Acknowledge our leased task.
+	if err = taskAck(ioutil.Discard, task); err != nil {
+		t.Fatalf("failed to acknowledge task: %v", err)
+	}
 }
