@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Sample memcache demonstrates use of a memcached client from App Engine flexible environment.
+// [START gae_flex_redislabs_memcache]
 package main
 
 import (
@@ -70,3 +71,4 @@ func handle(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprintf(w, "Count: %d", count)
 }
+// [END gae_flex_redislabs_memcache]
