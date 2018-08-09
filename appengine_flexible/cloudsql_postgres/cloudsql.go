@@ -7,6 +7,7 @@
 // [START gae_flex_postgres_app]
 
 // Sample cloudsql demonstrates usage of Cloud SQL from App Engine flexible environment.
+// [START gae_flex_postgres_app]
 package main
 
 import (

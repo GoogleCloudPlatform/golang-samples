@@ -5,6 +5,7 @@
 // [START gae_flex_datastore_app]
 
 // Sample datastore demonstrates use of the cloud.google.com/go/datastore package from App Engine flexible.
+// [START gae_flex_datastore_app]
 package main
 
 import (
