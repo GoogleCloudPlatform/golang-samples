@@ -14,10 +14,10 @@ import (
 	"google.golang.org/appengine"
 )
 
-// [START import]
+// [START gae_flex_mailjet_config]
 import "github.com/mailjet/mailjet-apiv3-go"
 
-// [END import]
+// [END gae_flex_mailjet_config]
 
 func main() {
 	http.HandleFunc("/send", sendEmail)
@@ -42,6 +42,7 @@ func mustGetenv(k string) string {
 	return v
 }
 
+// [START gae_flex_mailjet_send_email]
 func sendEmail(w http.ResponseWriter, r *http.Request) {
 	to := r.FormValue("to")
 	if to == "" {
@@ -77,3 +78,5 @@ func sendEmail(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprintf(w, "%d email(s) sent!", len(resp.ResultsV31))
 }
+
+// [END gae_flex_mailjet_send_email]
