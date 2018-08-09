@@ -5,6 +5,7 @@
 // +build go1.8
 
 // Sample cloudsql demonstrates usage of Cloud SQL from App Engine flexible environment.
+// [START gae_flex_postgres_app]
 package main
 
 import (
@@ -109,3 +110,5 @@ func queryVisits(limit int64) ([]visit, error) {
 
 	return visits, rows.Err()
 }
+
+// [END gae_flex_postgres_app]
