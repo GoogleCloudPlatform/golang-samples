@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Sample storage demonstrates use of the cloud.google.com/go/storage package from App Engine flexible environment.
+// [START gae_flex_storage_app]
 package main
 
 import (
@@ -93,3 +94,5 @@ const formHTML = `<!DOCTYPE html>
     </form>
   </body>
 </html>`
+
+// [END gae_flex_storage_app]
