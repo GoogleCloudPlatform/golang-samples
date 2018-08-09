@@ -5,6 +5,7 @@
 // [START gae_flex_golang_static_files]
 
 // Package static demonstrates a static file handler for App Engine flexible environment.
+// [START gae_flex_golang_static_files]
 package main
 
 import (
