@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package static demonstrates a static file handler for App Engine flexible environment.
+// [START gae_flex_golang_static_files]
 package main
 
 import (
@@ -34,3 +35,5 @@ const homepage = `<!doctype html>
 func homepageHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, homepage)
 }
+
+// [END gae_flex_golang_static_files]
