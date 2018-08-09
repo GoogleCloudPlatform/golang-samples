@@ -72,5 +72,8 @@ func handle(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprintf(w, "Count: %d", count)
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> mailgun, memcache, redis
 // [END gae_flex_redislabs_memcache]
