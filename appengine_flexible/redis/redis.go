@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Sample redis demonstrates use of a redis client from App Engine flexible environment.
+// [START gae_flex_golang_redis]
 package main
 
 import (
@@ -61,3 +62,4 @@ func handle(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprintf(w, "Count: %d", count)
 }
+// [END gae_flex_golang_redis]
