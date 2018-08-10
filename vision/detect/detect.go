@@ -313,7 +313,7 @@ func detectCropHints(w io.Writer, file string) error {
 	return nil
 }
 
-// [START vision_detect_safe_search]
+// [START vision_safe_search_detection]
 
 // detectSafeSearch gets image properties from the Vision API for an image at the given file path.
 func detectSafeSearch(w io.Writer, file string) error {
@@ -349,7 +349,7 @@ func detectSafeSearch(w io.Writer, file string) error {
 	return nil
 }
 
-// [END vision_detect_safe_search]
+// [END vision_safe_search_detection]
 
 // [START vision_detect_web]
 
@@ -769,7 +769,7 @@ func detectCropHintsURI(w io.Writer, file string) error {
 	return nil
 }
 
-// [START vision_detect_safe_search_uri]
+// [START vision_safe_search_detection_gcs]
 
 // detectSafeSearch gets image properties from the Vision API for an image at the given file path.
 func detectSafeSearchURI(w io.Writer, file string) error {
@@ -796,7 +796,7 @@ func detectSafeSearchURI(w io.Writer, file string) error {
 	return nil
 }
 
-// [END vision_detect_safe_search_uri]
+// [END vision_safe_search_detection_gcs]
 
 // [START vision_detect_web_uri]
 
