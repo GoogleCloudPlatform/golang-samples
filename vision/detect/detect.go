@@ -72,6 +72,7 @@ func detectFaces(w io.Writer, file string) error {
 
 // detectLabels gets labels from the Vision API for an image at the given file path.
 func detectLabels(w io.Writer, file string) error {
+	// [START vision_label_detection]
 	ctx := context.Background()
 
 	client, err := vision.NewImageAnnotatorClient(ctx)
@@ -102,7 +103,7 @@ func detectLabels(w io.Writer, file string) error {
 			fmt.Fprintln(w, annotation.Description)
 		}
 	}
-
+	// [END vision_label_detection]
 	return nil
 }
 
@@ -578,6 +579,7 @@ func detectFacesURI(w io.Writer, file string) error {
 
 // detectLabels gets labels from the Vision API for an image at the given file path.
 func detectLabelsURI(w io.Writer, file string) error {
+	// [START vision_label_detection_gcs]
 	ctx := context.Background()
 
 	client, err := vision.NewImageAnnotatorClient(ctx)
@@ -599,7 +601,7 @@ func detectLabelsURI(w io.Writer, file string) error {
 			fmt.Fprintln(w, annotation.Description)
 		}
 	}
-
+	// [END vision_label_detection_gcs]
 	return nil
 }
 
