@@ -454,6 +454,7 @@ func detectWebGeo(w io.Writer, file string) error {
 
 // detectLogos gets logos from the Vision API for an image at the given file path.
 func detectLogos(w io.Writer, file string) error {
+	// [START vision_logo_detection]
 	ctx := context.Background()
 
 	client, err := vision.NewImageAnnotatorClient(ctx)
@@ -484,7 +485,7 @@ func detectLogos(w io.Writer, file string) error {
 			fmt.Fprintln(w, annotation.Description)
 		}
 	}
-
+	// [END vision_logo_detection]
 	return nil
 }
 
@@ -881,6 +882,7 @@ func detectWebGeoURI(w io.Writer, file string) error {
 
 // detectLogos gets logos from the Vision API for an image at the given file path.
 func detectLogosURI(w io.Writer, file string) error {
+	// [START vision_logo_detection_gcs]
 	ctx := context.Background()
 
 	client, err := vision.NewImageAnnotatorClient(ctx)
@@ -902,7 +904,7 @@ func detectLogosURI(w io.Writer, file string) error {
 			fmt.Fprintln(w, annotation.Description)
 		}
 	}
-
+	// [END vision_logo_detection_gcs]
 	return nil
 }
 
