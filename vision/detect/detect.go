@@ -352,7 +352,7 @@ func detectSafeSearch(w io.Writer, file string) error {
 
 // [END vision_safe_search_detection]
 
-// [START vision_detect_web]
+// [START vision_web_detection]
 
 // detectWeb gets image properties from the Vision API for an image at the given file path.
 func detectWeb(w io.Writer, file string) error {
@@ -408,9 +408,9 @@ func detectWeb(w io.Writer, file string) error {
 	return nil
 }
 
-// [END vision_detect_web]
+// [END vision_web_detection]
 
-// [START vision_web_entities_include_geo_results]
+// [START vision_web_detection_include_geo]
 
 // detectWebGeo detects geographic metadata from the Vision API for an image at the given file path.
 func detectWebGeo(w io.Writer, file string) error {
@@ -452,7 +452,7 @@ func detectWebGeo(w io.Writer, file string) error {
 	return nil
 }
 
-// [END vision_web_entities_include_geo_results]
+// [END vision_web_detection_include_geo]
 
 // detectLogos gets logos from the Vision API for an image at the given file path.
 func detectLogos(w io.Writer, file string) error {
@@ -800,7 +800,7 @@ func detectSafeSearchURI(w io.Writer, file string) error {
 
 // [END vision_safe_search_detection_gcs]
 
-// [START vision_detect_web_uri]
+// [START vision_web_detection_gcs]
 
 // detectWeb gets image properties from the Vision API for an image at the given file path.
 func detectWebURI(w io.Writer, file string) error {
@@ -847,9 +847,9 @@ func detectWebURI(w io.Writer, file string) error {
 	return nil
 }
 
-// [END vision_detect_web_uri]
+// [END vision_web_detection_gcs]
 
-// [START vision_web_entities_include_geo_results_uri]
+// [START vision_web_detection_include_geo_gcs]
 
 // detectWebGeo detects geographic metadata from the Vision API for an image at the given file path.
 func detectWebGeoURI(w io.Writer, file string) error {
@@ -882,7 +882,7 @@ func detectWebGeoURI(w io.Writer, file string) error {
 	return nil
 }
 
-// [END vision_web_entities_include_geo_results_uri]
+// [END vision_web_detection_include_geo_gcs]
 
 // detectLogos gets logos from the Vision API for an image at the given file path.
 func detectLogosURI(w io.Writer, file string) error {
