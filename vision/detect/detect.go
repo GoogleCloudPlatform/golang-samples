@@ -242,6 +242,7 @@ func detectDocumentText(w io.Writer, file string) error {
 
 // detectProperties gets image properties from the Vision API for an image at the given file path.
 func detectProperties(w io.Writer, file string) error {
+	// [START vision_image_property_detection]
 	ctx := context.Background()
 
 	client, err := vision.NewImageAnnotatorClient(ctx)
@@ -272,7 +273,7 @@ func detectProperties(w io.Writer, file string) error {
 		b := int(color.Blue) & 0xff
 		fmt.Fprintf(w, "%2.1f%% - #%02x%02x%02x\n", quantized.PixelFraction*100, r, g, b)
 	}
-
+	// [END vision_image_property_detection]
 	return nil
 }
 
@@ -715,6 +716,7 @@ func detectDocumentTextURI(w io.Writer, file string) error {
 
 // detectProperties gets image properties from the Vision API for an image at the given file path.
 func detectPropertiesURI(w io.Writer, file string) error {
+	// [START vision_image_property_detection_gcs]
 	ctx := context.Background()
 
 	client, err := vision.NewImageAnnotatorClient(ctx)
@@ -736,7 +738,7 @@ func detectPropertiesURI(w io.Writer, file string) error {
 		b := int(color.Blue) & 0xff
 		fmt.Fprintf(w, "%2.1f%% - #%02x%02x%02x\n", quantized.PixelFraction*100, r, g, b)
 	}
-
+	// [END vision_image_property_detection_gcs]
 	return nil
 }
 
