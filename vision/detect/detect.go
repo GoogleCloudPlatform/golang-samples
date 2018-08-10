@@ -146,6 +146,7 @@ func detectLandmarks(w io.Writer, file string) error {
 
 // detectText gets text from the Vision API for an image at the given file path.
 func detectText(w io.Writer, file string) error {
+	// [START vision_text_detection]
 	ctx := context.Background()
 
 	client, err := vision.NewImageAnnotatorClient(ctx)
@@ -176,7 +177,7 @@ func detectText(w io.Writer, file string) error {
 			fmt.Fprintf(w, "%q\n", annotation.Description)
 		}
 	}
-
+	// [END vision_text_detection]
 	return nil
 }
 
@@ -638,6 +639,7 @@ func detectLandmarksURI(w io.Writer, file string) error {
 
 // detectText gets text from the Vision API for an image at the given file path.
 func detectTextURI(w io.Writer, file string) error {
+	// [START vision_text_detection_gcs]
 	ctx := context.Background()
 
 	client, err := vision.NewImageAnnotatorClient(ctx)
@@ -659,7 +661,7 @@ func detectTextURI(w io.Writer, file string) error {
 			fmt.Fprintf(w, "%q\n", annotation.Description)
 		}
 	}
-
+	// [END vision_text_detection_gcs]
 	return nil
 }
 
