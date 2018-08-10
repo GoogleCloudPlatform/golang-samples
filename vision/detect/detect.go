@@ -178,7 +178,7 @@ func detectText(w io.Writer, file string) error {
 	return nil
 }
 
-// [START vision_detect_document]
+// [START vision_fulltext_detection]
 
 // detectDocumentText gets the full document text from the Vision API for an image at the given file path.
 func detectDocumentText(w io.Writer, file string) error {
@@ -236,7 +236,7 @@ func detectDocumentText(w io.Writer, file string) error {
 	return nil
 }
 
-// [END vision_detect_document]
+// [END vision_fulltext_detection]
 
 // detectProperties gets image properties from the Vision API for an image at the given file path.
 func detectProperties(w io.Writer, file string) error {
@@ -657,7 +657,7 @@ func detectTextURI(w io.Writer, file string) error {
 	return nil
 }
 
-// [START vision_detect_document_uri]
+// [START vision_fulltext_detection_gcs]
 
 // detectDocumentText gets the full document text from the Vision API for an image at the given file path.
 func detectDocumentTextURI(w io.Writer, file string) error {
@@ -706,7 +706,7 @@ func detectDocumentTextURI(w io.Writer, file string) error {
 	return nil
 }
 
-// [END vision_detect_document_uri]
+// [END vision_fulltext_detection_gcs]
 
 // detectProperties gets image properties from the Vision API for an image at the given file path.
 func detectPropertiesURI(w io.Writer, file string) error {
