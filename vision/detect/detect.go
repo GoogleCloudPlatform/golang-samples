@@ -33,6 +33,7 @@ func init() {
 
 // detectFaces gets faces from the Vision API for an image at the given file path.
 func detectFaces(w io.Writer, file string) error {
+	// [START vision_face_detection]
 	ctx := context.Background()
 
 	client, err := vision.NewImageAnnotatorClient(ctx)
@@ -65,6 +66,7 @@ func detectFaces(w io.Writer, file string) error {
 			fmt.Fprintln(w, "    Surprise:", annotation.SurpriseLikelihood)
 		}
 	}
+	// [END vision_face_detection]
 	return nil
 }
 
@@ -546,6 +548,7 @@ func init() {
 
 // detectFaces gets faces from the Vision API for an image at the given file path.
 func detectFacesURI(w io.Writer, file string) error {
+	// [START vision_face_detection_gcs]
 	ctx := context.Background()
 
 	client, err := vision.NewImageAnnotatorClient(ctx)
@@ -569,6 +572,7 @@ func detectFacesURI(w io.Writer, file string) error {
 			fmt.Fprintln(w, "    Surprise:", annotation.SurpriseLikelihood)
 		}
 	}
+	// [END vision_face_detection_gcs]
 	return nil
 }
 
