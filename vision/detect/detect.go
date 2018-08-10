@@ -274,6 +274,7 @@ func detectProperties(w io.Writer, file string) error {
 
 // detectCropHints gets suggested croppings the Vision API for an image at the given file path.
 func detectCropHints(w io.Writer, file string) error {
+	// [START vision_crop_hint_detection]
 	ctx := context.Background()
 
 	client, err := vision.NewImageAnnotatorClient(ctx)
@@ -302,6 +303,7 @@ func detectCropHints(w io.Writer, file string) error {
 			fmt.Fprintf(w, "(%d,%d)\n", v.X, v.Y)
 		}
 	}
+	// [END vision_crop_hint_detection]
 
 	return nil
 }
@@ -731,6 +733,7 @@ func detectPropertiesURI(w io.Writer, file string) error {
 
 // detectCropHints gets suggested croppings the Vision API for an image at the given file path.
 func detectCropHintsURI(w io.Writer, file string) error {
+	// [START vision_crop_hint_detection_gcs]
 	ctx := context.Background()
 
 	client, err := vision.NewImageAnnotatorClient(ctx)
@@ -750,6 +753,7 @@ func detectCropHintsURI(w io.Writer, file string) error {
 			fmt.Fprintf(w, "(%d,%d)\n", v.X, v.Y)
 		}
 	}
+	// [END vision_crop_hint_detection_gcs]
 
 	return nil
 }
