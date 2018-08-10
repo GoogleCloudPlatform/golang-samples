@@ -69,7 +69,10 @@ import (
 // [START bigquery_update_dataset_expiration]
 // [START bigquery_update_table_description]
 // [START bigquery_update_table_expiration]
+// To run this sample, you will need to create (or reuse) a context and
+// an instance of the bigquery client.  For example:
 // import "cloud.google.com/go/bigquery"
+// ctx := context.Background()
 // client, err := bigquery.NewClient(ctx, "your-project-id")
 // [END bigquery_browse_table]
 // [END bigquery_copy_table]
@@ -412,7 +415,7 @@ func createTablePartitioned(client *bigquery.Client, datasetID, tableID string) 
 		{Name: "post_abbr", Type: bigquery.IntegerFieldType},
 		{Name: "date", Type: bigquery.DateFieldType},
 	}
-	metaData := &bigquery.TableMetadata{
+	metadata := &bigquery.TableMetadata{
 		TimePartitioning: &bigquery.TimePartitioning{
 			Field:      "date",
 			Expiration: 90 * 24 * time.Hour,
@@ -420,7 +423,7 @@ func createTablePartitioned(client *bigquery.Client, datasetID, tableID string) 
 		Schema: sampleSchema,
 	}
 	tableRef := client.Dataset(datasetID).Table(tableID)
-	if err := tableRef.Create(ctx, metaData); err != nil {
+	if err := tableRef.Create(ctx, metadata); err != nil {
 		return err
 	}
 	// [END bigquery_create_table_partitioned]
