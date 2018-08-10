@@ -109,6 +109,7 @@ func detectLabels(w io.Writer, file string) error {
 
 // detectLandmarks gets landmarks from the Vision API for an image at the given file path.
 func detectLandmarks(w io.Writer, file string) error {
+	// [START vision_landmark_detection]
 	ctx := context.Background()
 
 	client, err := vision.NewImageAnnotatorClient(ctx)
@@ -139,7 +140,7 @@ func detectLandmarks(w io.Writer, file string) error {
 			fmt.Fprintln(w, annotation.Description)
 		}
 	}
-
+	// [END vision_landmark_detection]
 	return nil
 }
 
@@ -607,6 +608,7 @@ func detectLabelsURI(w io.Writer, file string) error {
 
 // detectLandmarks gets landmarks from the Vision API for an image at the given file path.
 func detectLandmarksURI(w io.Writer, file string) error {
+	// [START vision_landmark_detection_gcs]
 	ctx := context.Background()
 
 	client, err := vision.NewImageAnnotatorClient(ctx)
@@ -628,7 +630,7 @@ func detectLandmarksURI(w io.Writer, file string) error {
 			fmt.Fprintln(w, annotation.Description)
 		}
 	}
-
+	// [END vision_landmark_detection_gcs]
 	return nil
 }
 
