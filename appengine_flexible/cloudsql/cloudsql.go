@@ -2,8 +2,9 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// Sample cloudsql demonstrates usage of Cloud SQL from App Engine flexible environment.
 // [START gae_flex_mysql_app]
+
+// Sample cloudsql demonstrates usage of Cloud SQL from App Engine flexible environment.
 package main
 
 import (
