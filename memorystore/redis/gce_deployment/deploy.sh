@@ -12,7 +12,7 @@ if [ -z "$REDISPORT" ]; then
 fi
 
 if [ -z "$GCS_APP_LOCATION" ]; then
-  echo "Must set \$GCS_APP_LOCATION. For example: GCS_APP_LOCATION=gs://my-bucket/app"
+  echo "Must set \$GCS_APP_LOCATION. For example: GCS_APP_LOCATION=gs://my-bucket/gce/"
   exit 1
 fi
 
@@ -31,7 +31,7 @@ gsutil cp app.tar $GCS_APP_LOCATION
 
 # Create an instance
 gcloud compute instances create my-instance \
-    --image-family=debian-8 \
+    --image-family=debian-9 \
     --image-project=debian-cloud \
     --machine-type=g1-small \
     --scopes cloud-platform \
