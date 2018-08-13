@@ -22,6 +22,7 @@ import (
 
 // [START bigquery_browse_table]
 // [START bigquery_copy_table]
+// [START bigquery_copy_table_cmek]
 // [START bigquery_copy_table_multiple_source]
 // [START bigquery_create_dataset]
 // [START bigquery_create_table]
@@ -81,6 +82,7 @@ import (
 // [END bigquery_add_empty_column]
 // [END bigquery_browse_table]
 // [END bigquery_copy_table]
+// [END bigquery_copy_table_cmek]
 // [END bigquery_copy_table_multiple_source]
 // [END bigquery_create_dataset]
 // [END bigquery_create_table]
@@ -1002,6 +1004,29 @@ func copyTable(client *bigquery.Client, datasetID, srcID, dstID string) error {
 		return err
 	}
 	// [END bigquery_copy_table]
+	return nil
+}
+
+func copyTableWithCMEK(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_copy_table_cmek]
+	srcTable := client.DatasetInProject("bigquery-public-data", "samples").Table("shakespeare")
+	copier := client.Dataset(datasetID).Table(tableID).CopierFrom(srcTable)
+	copier.DestinationEncryptionConfig = &bigquery.EncryptionConfig{
+		KMSKeyName: "projects/cloud-samples-tests/locations/us-central1/keyRings/test/cryptoKeys/test",
+	}
+	job, err := copier.Run(ctx)
+	if err != nil {
+		return err
+	}
+	status, err := job.Wait(ctx)
+	if err != nil {
+		return err
+	}
+	if err := status.Err(); err != nil {
+		return err
+	}
+	// [END bigquery_copy_table_cmek]
 	return nil
 }
 
