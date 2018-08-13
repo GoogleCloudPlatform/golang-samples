@@ -31,9 +31,10 @@ func init() {
 	_ = os.Open
 }
 
+// [START vision_face_detection]
+
 // detectFaces gets faces from the Vision API for an image at the given file path.
 func detectFaces(w io.Writer, file string) error {
-	// [START vision_face_detection]
 	ctx := context.Background()
 
 	client, err := vision.NewImageAnnotatorClient(ctx)
@@ -66,13 +67,15 @@ func detectFaces(w io.Writer, file string) error {
 			fmt.Fprintln(w, "    Surprise:", annotation.SurpriseLikelihood)
 		}
 	}
-	// [END vision_face_detection]
 	return nil
 }
 
+// [END vision_face_detection]
+
+// [START vision_label_detection]
+
 // detectLabels gets labels from the Vision API for an image at the given file path.
 func detectLabels(w io.Writer, file string) error {
-	// [START vision_label_detection]
 	ctx := context.Background()
 
 	client, err := vision.NewImageAnnotatorClient(ctx)
@@ -103,13 +106,16 @@ func detectLabels(w io.Writer, file string) error {
 			fmt.Fprintln(w, annotation.Description)
 		}
 	}
-	// [END vision_label_detection]
+
 	return nil
 }
 
+// [END vision_label_detection]
+
+// [START vision_landmark_detection]
+
 // detectLandmarks gets landmarks from the Vision API for an image at the given file path.
 func detectLandmarks(w io.Writer, file string) error {
-	// [START vision_landmark_detection]
 	ctx := context.Background()
 
 	client, err := vision.NewImageAnnotatorClient(ctx)
@@ -140,13 +146,16 @@ func detectLandmarks(w io.Writer, file string) error {
 			fmt.Fprintln(w, annotation.Description)
 		}
 	}
-	// [END vision_landmark_detection]
+
 	return nil
 }
 
+// [END vision_landmark_detection]
+
+// [START vision_text_detection]
+
 // detectText gets text from the Vision API for an image at the given file path.
 func detectText(w io.Writer, file string) error {
-	// [START vision_text_detection]
 	ctx := context.Background()
 
 	client, err := vision.NewImageAnnotatorClient(ctx)
@@ -177,9 +186,11 @@ func detectText(w io.Writer, file string) error {
 			fmt.Fprintf(w, "%q\n", annotation.Description)
 		}
 	}
-	// [END vision_text_detection]
+
 	return nil
 }
+
+// [END vision_text_detection]
 
 // [START vision_fulltext_detection]
 
@@ -241,9 +252,10 @@ func detectDocumentText(w io.Writer, file string) error {
 
 // [END vision_fulltext_detection]
 
+// [START vision_image_property_detection]
+
 // detectProperties gets image properties from the Vision API for an image at the given file path.
 func detectProperties(w io.Writer, file string) error {
-	// [START vision_image_property_detection]
 	ctx := context.Background()
 
 	client, err := vision.NewImageAnnotatorClient(ctx)
@@ -274,13 +286,16 @@ func detectProperties(w io.Writer, file string) error {
 		b := int(color.Blue) & 0xff
 		fmt.Fprintf(w, "%2.1f%% - #%02x%02x%02x\n", quantized.PixelFraction*100, r, g, b)
 	}
-	// [END vision_image_property_detection]
+
 	return nil
 }
 
+// [END vision_image_property_detection]
+
+// [START vision_crop_hint_detection]
+
 // detectCropHints gets suggested croppings the Vision API for an image at the given file path.
 func detectCropHints(w io.Writer, file string) error {
-	// [START vision_crop_hint_detection]
 	ctx := context.Background()
 
 	client, err := vision.NewImageAnnotatorClient(ctx)
@@ -309,10 +324,11 @@ func detectCropHints(w io.Writer, file string) error {
 			fmt.Fprintf(w, "(%d,%d)\n", v.X, v.Y)
 		}
 	}
-	// [END vision_crop_hint_detection]
 
 	return nil
 }
+
+// [END vision_crop_hint_detection]
 
 // [START vision_safe_search_detection]
 
@@ -454,9 +470,10 @@ func detectWebGeo(w io.Writer, file string) error {
 
 // [END vision_web_detection_include_geo]
 
+// [START vision_logo_detection]
+
 // detectLogos gets logos from the Vision API for an image at the given file path.
 func detectLogos(w io.Writer, file string) error {
-	// [START vision_logo_detection]
 	ctx := context.Background()
 
 	client, err := vision.NewImageAnnotatorClient(ctx)
@@ -487,14 +504,16 @@ func detectLogos(w io.Writer, file string) error {
 			fmt.Fprintln(w, annotation.Description)
 		}
 	}
-	// [END vision_logo_detection]
+
 	return nil
 }
 
-// [START vision_detect_async_document]
+// [END vision_logo_detection]
 
-// detectAsyncDocument does Optical Character Recognition (OCR) on a PDF file
-// stored in GCS.
+// [START vision_async_detect_document_ocr]
+
+// detectAsyncDocument performs Optical Character Recognition (OCR) on a
+// PDF file stored in GCS.
 func detectAsyncDocument(w io.Writer, gcsSourceURI, gcsDestinationURI string) error {
 	ctx := context.Background()
 
@@ -542,7 +561,7 @@ func detectAsyncDocument(w io.Writer, gcsSourceURI, gcsDestinationURI string) er
 	return nil
 }
 
-// [END vision_detect_async_document]
+// [END vision_async_detect_document_ocr]
 
 func init() {
 	// Refer to these functions so that goimports is happy before boilerplate is inserted.
@@ -551,9 +570,10 @@ func init() {
 	_ = os.Open
 }
 
+// [START vision_face_detection_gcs]
+
 // detectFaces gets faces from the Vision API for an image at the given file path.
 func detectFacesURI(w io.Writer, file string) error {
-	// [START vision_face_detection_gcs]
 	ctx := context.Background()
 
 	client, err := vision.NewImageAnnotatorClient(ctx)
@@ -577,13 +597,15 @@ func detectFacesURI(w io.Writer, file string) error {
 			fmt.Fprintln(w, "    Surprise:", annotation.SurpriseLikelihood)
 		}
 	}
-	// [END vision_face_detection_gcs]
 	return nil
 }
 
+// [END vision_face_detection_gcs]
+
+// [START vision_label_detection_gcs]
+
 // detectLabels gets labels from the Vision API for an image at the given file path.
 func detectLabelsURI(w io.Writer, file string) error {
-	// [START vision_label_detection_gcs]
 	ctx := context.Background()
 
 	client, err := vision.NewImageAnnotatorClient(ctx)
@@ -605,13 +627,16 @@ func detectLabelsURI(w io.Writer, file string) error {
 			fmt.Fprintln(w, annotation.Description)
 		}
 	}
-	// [END vision_label_detection_gcs]
+
 	return nil
 }
 
+// [END vision_label_detection_gcs]
+
+// [START vision_landmark_detection_gcs]
+
 // detectLandmarks gets landmarks from the Vision API for an image at the given file path.
 func detectLandmarksURI(w io.Writer, file string) error {
-	// [START vision_landmark_detection_gcs]
 	ctx := context.Background()
 
 	client, err := vision.NewImageAnnotatorClient(ctx)
@@ -633,13 +658,16 @@ func detectLandmarksURI(w io.Writer, file string) error {
 			fmt.Fprintln(w, annotation.Description)
 		}
 	}
-	// [END vision_landmark_detection_gcs]
+
 	return nil
 }
 
+// [END vision_landmark_detection_gcs]
+
+// [START vision_text_detection_gcs]
+
 // detectText gets text from the Vision API for an image at the given file path.
 func detectTextURI(w io.Writer, file string) error {
-	// [START vision_text_detection_gcs]
 	ctx := context.Background()
 
 	client, err := vision.NewImageAnnotatorClient(ctx)
@@ -661,9 +689,11 @@ func detectTextURI(w io.Writer, file string) error {
 			fmt.Fprintf(w, "%q\n", annotation.Description)
 		}
 	}
-	// [END vision_text_detection_gcs]
+
 	return nil
 }
+
+// [END vision_text_detection_gcs]
 
 // [START vision_fulltext_detection_gcs]
 
@@ -716,9 +746,10 @@ func detectDocumentTextURI(w io.Writer, file string) error {
 
 // [END vision_fulltext_detection_gcs]
 
+// [START vision_image_property_detection_gcs]
+
 // detectProperties gets image properties from the Vision API for an image at the given file path.
 func detectPropertiesURI(w io.Writer, file string) error {
-	// [START vision_image_property_detection_gcs]
 	ctx := context.Background()
 
 	client, err := vision.NewImageAnnotatorClient(ctx)
@@ -740,13 +771,16 @@ func detectPropertiesURI(w io.Writer, file string) error {
 		b := int(color.Blue) & 0xff
 		fmt.Fprintf(w, "%2.1f%% - #%02x%02x%02x\n", quantized.PixelFraction*100, r, g, b)
 	}
-	// [END vision_image_property_detection_gcs]
+
 	return nil
 }
 
+// [END vision_image_property_detection_gcs]
+
+// [START vision_crop_hint_detection_gcs]
+
 // detectCropHints gets suggested croppings the Vision API for an image at the given file path.
 func detectCropHintsURI(w io.Writer, file string) error {
-	// [START vision_crop_hint_detection_gcs]
 	ctx := context.Background()
 
 	client, err := vision.NewImageAnnotatorClient(ctx)
@@ -766,10 +800,11 @@ func detectCropHintsURI(w io.Writer, file string) error {
 			fmt.Fprintf(w, "(%d,%d)\n", v.X, v.Y)
 		}
 	}
-	// [END vision_crop_hint_detection_gcs]
 
 	return nil
 }
+
+// [END vision_crop_hint_detection_gcs]
 
 // [START vision_safe_search_detection_gcs]
 
@@ -884,9 +919,10 @@ func detectWebGeoURI(w io.Writer, file string) error {
 
 // [END vision_web_detection_include_geo_gcs]
 
+// [START vision_logo_detection_gcs]
+
 // detectLogos gets logos from the Vision API for an image at the given file path.
 func detectLogosURI(w io.Writer, file string) error {
-	// [START vision_logo_detection_gcs]
 	ctx := context.Background()
 
 	client, err := vision.NewImageAnnotatorClient(ctx)
@@ -908,14 +944,16 @@ func detectLogosURI(w io.Writer, file string) error {
 			fmt.Fprintln(w, annotation.Description)
 		}
 	}
-	// [END vision_logo_detection_gcs]
+
 	return nil
 }
 
-// [START vision_detect_async_document_uri]
+// [END vision_logo_detection_gcs]
 
-// detectAsyncDocument does Optical Character Recognition (OCR) on a PDF file
-// stored in GCS.
+// [START vision_async_detect_document_ocr_gcs]
+
+// detectAsyncDocument performs Optical Character Recognition (OCR) on a
+// PDF file stored in GCS.
 func detectAsyncDocumentURI(w io.Writer, gcsSourceURI, gcsDestinationURI string) error {
 	ctx := context.Background()
 
@@ -963,4 +1001,4 @@ func detectAsyncDocumentURI(w io.Writer, gcsSourceURI, gcsDestinationURI string)
 	return nil
 }
 
-// [END vision_detect_async_document_uri]
+// [END vision_async_detect_document_ocr_gcs]

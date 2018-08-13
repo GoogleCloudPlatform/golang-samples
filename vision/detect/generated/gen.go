@@ -54,7 +54,7 @@ const boilerplateSentinel = "\tvar client *vision.ImageAnnotatorClient // Boiler
 
 const regionTagParameter = "{REGION_TAG_PARAMETER}"
 const standardRegionTagParameterValue = ""
-const gcsRegionTagParameterValue = "_uri"
+const gcsRegionTagParameterValue = "_gcs"
 
 const boilerplate = `	ctx := context.Background()
 
