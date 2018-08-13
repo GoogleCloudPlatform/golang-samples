@@ -310,3 +310,47 @@ func TestImportExport(t *testing.T) {
 		t.Errorf("failed to cleanup the GCS bucket: %v", err)
 	}
 }
+
+func TestPartitioningAndClustering(t *testing.T) {
+	tc := testutil.EndToEndTest(t)
+	ctx := context.Background()
+
+	client, err := bigquery.NewClient(ctx, tc.ProjectID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	datasetID := uniqueBQName("golang_example_dataset_partition_cluster")
+	if err := createDataset(client, datasetID); err != nil {
+		t.Errorf("createDataset(%q): %v", datasetID, err)
+	}
+	defer client.Dataset(datasetID).DeleteWithContents(ctx)
+
+	partitionedEmpty := uniqueBQName("golang_example_partitioned")
+	if err := createTablePartitioned(client, datasetID, partitionedEmpty); err != nil {
+		t.Errorf("createTablePartitioned(dataset:%q table:%q): %v", datasetID, partitionedEmpty, err)
+	}
+
+	partitionedLoad := uniqueBQName("golang_example_partitioned_load")
+	if err := importPartitionedSampleTable(client, datasetID, partitionedLoad); err != nil {
+		t.Errorf("importPartitionedStatesByDate(dataset:%q table:%q): %v", datasetID, partitionedLoad, err)
+	}
+
+	if err := queryPartitionedTable(client, datasetID, partitionedLoad); err != nil {
+		t.Errorf("queryPartitionedTable(dataset:%q table:%q): %v", datasetID, partitionedLoad, err)
+	}
+
+	clusteredEmpty := uniqueBQName("golang_example_clustered")
+	if err := createTableClustered(client, datasetID, clusteredEmpty); err != nil {
+		t.Errorf("createTableClustered(dataset:%q table:%q): %v", datasetID, clusteredEmpty, err)
+	}
+
+	clusteredLoad := uniqueBQName("golang_example_clustered_transactions")
+	if err := importClusteredSampleTable(client, datasetID, clusteredLoad); err != nil {
+		t.Errorf("importClusteredSampleTable(dataset:%q table:%q): %v", datasetID, clusteredLoad, err)
+	}
+
+	if err := queryClusteredTable(client, datasetID, clusteredLoad); err != nil {
+		t.Errorf("queryClusteredTable(dataset:%q table:%q): %v", datasetID, clusteredLoad, err)
+	}
+}
