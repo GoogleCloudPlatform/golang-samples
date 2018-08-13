@@ -1306,6 +1306,36 @@ func importJSONAutodetectSchema(client *bigquery.Client, datasetID, tableID stri
 	return nil
 }
 
+func importJSONWithCMEK(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_load_table_gcs_json_cmek]
+	gcsRef := bigquery.NewGCSReference("gs://cloud-samples-data/bigquery/us-states/us-states.json")
+	gcsRef.SourceFormat = bigquery.JSON
+	gcsRef.AutoDetect = true
+	loader := client.Dataset(datasetID).Table(tableID).LoaderFrom(gcsRef)
+	loader.WriteDisposition = bigquery.WriteEmpty
+	loader.DestinationEncryptionConfig = &bigquery.EncryptionConfig{
+		// TODO: Replace this key with a key you have created in KMS.
+		KMSKeyName: "projects/cloud-samples-tests/locations/us-central1/keyRings/test/cryptoKeys/test",
+	}
+
+	job, err := loader.Run(ctx)
+	if err != nil {
+		return err
+	}
+	status, err := job.Wait(ctx)
+	if err != nil {
+		return err
+	}
+
+	if status.Err() != nil {
+		return fmt.Errorf("Job completed with error: %v", status.Err())
+	}
+
+	// [END bigquery_load_table_gcs_json_cmek]
+	return nil
+}
+
 func importPartitionedSampleTable(client *bigquery.Client, destDatasetID, destTableID string) error {
 	ctx := context.Background()
 	// [START bigquery_load_table_partitioned]

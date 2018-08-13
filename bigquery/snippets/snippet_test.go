@@ -291,6 +291,12 @@ func TestImportExport(t *testing.T) {
 	if err := importJSONAutodetectSchema(client, datasetID, autodetectJSON); err != nil {
 		t.Fatalf("importJSONAutodetectSchema(dataset:%q table:%q): %v", datasetID, autodetectJSON, err)
 	}
+
+	autoJSONwithCMEK := uniqueBQName("golang_example_importjson_cmek")
+	if err := importJSONWithCMEK(client, datasetID, autoJSONwithCMEK); err != nil {
+		t.Fatalf("importJSONWithCMEK(dataset:%q table:%q): %v", datasetID, autoJSONwithCMEK, err)
+	}
+
 	bucket := uniqueBucketName("golang-example-bucket", tc.ProjectID)
 	const object = "values.csv"
 
