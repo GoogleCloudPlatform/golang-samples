@@ -18,7 +18,6 @@ import (
 
 import "github.com/mailgun/mailgun-go"
 
-
 func main() {
 	http.HandleFunc("/send_simple", sendSimpleMessageHandler)
 	http.HandleFunc("/send_complex", sendComplexMessageHandler)
@@ -90,4 +89,4 @@ func sendComplexMessageHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Message sent!"))
 }
 
-// [gae_flex_mailgun_complex_message]
+// [END gae_flex_mailgun_complex_message]

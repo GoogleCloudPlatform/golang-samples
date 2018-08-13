@@ -4,8 +4,9 @@
 
 // +build go1.8
 
-// Sample cloudsql demonstrates usage of Cloud SQL from App Engine flexible environment.
 // [START gae_flex_postgres_app]
+
+// Sample cloudsql demonstrates usage of Cloud SQL from App Engine flexible environment.
 package main
 
 import (

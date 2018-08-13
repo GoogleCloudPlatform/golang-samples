@@ -2,8 +2,9 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// Sample storage demonstrates use of the cloud.google.com/go/storage package from App Engine flexible environment.
 // [START gae_flex_storage_app]
+
+// Sample storage demonstrates use of the cloud.google.com/go/storage package from App Engine flexible environment.
 package main
 
 import (
