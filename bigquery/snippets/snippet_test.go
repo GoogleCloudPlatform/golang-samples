@@ -131,6 +131,11 @@ func TestAll(t *testing.T) {
 		t.Errorf("createTableWithCMEK(dataset:%q table:%q): %v", datasetID, tableCMEK, err)
 	}
 
+	widen := uniqueBQName("golang_example_table_widen")
+	if err := createTableAndWiden(client, datasetID, widen); err != nil {
+		t.Errorf("createTableAndWiden(dataset:%q table:%q): %v", datasetID, widen, err)
+	}
+
 	if err := updateTableDescription(client, datasetID, explicit); err != nil {
 		t.Errorf("updateTableDescription(dataset:%q table:%q): %v", datasetID, explicit, err)
 	}
@@ -295,6 +300,14 @@ func TestImportExport(t *testing.T) {
 	autoJSONwithCMEK := uniqueBQName("golang_example_importjson_cmek")
 	if err := importJSONWithCMEK(client, datasetID, autoJSONwithCMEK); err != nil {
 		t.Fatalf("importJSONWithCMEK(dataset:%q table:%q): %v", datasetID, autoJSONwithCMEK, err)
+	}
+
+	parquet := uniqueBQName("golang_example_importparquet")
+	if err := importParquet(client, datasetID, parquet); err != nil {
+		t.Errorf("importParquet(dataset:%q table: %q): %v", datasetID, parquet, err)
+	}
+	if err := importParquetTruncate(client, datasetID, parquet); err != nil {
+		t.Errorf("importParquetTruncate(dataset:%q table: %q): %v", datasetID, parquet, err)
 	}
 
 	bucket := uniqueBucketName("golang-example-bucket", tc.ProjectID)

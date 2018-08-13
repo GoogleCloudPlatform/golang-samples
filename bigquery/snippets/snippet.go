@@ -19,7 +19,7 @@ import (
 // Use a common block to inline comments related to importing the library
 // and constructing a client.
 // [START bigquery_add_empty_column]
-
+// [START bigquery_add_column_query_append]
 // [START bigquery_browse_table]
 // [START bigquery_copy_table]
 // [START bigquery_copy_table_cmek]
@@ -50,6 +50,8 @@ import (
 // [START bigquery_load_table_gcs_csv]
 // [START bigquery_load_table_gcs_json]
 // [START bigquery_load_table_gcs_json_autodetect]
+// [START bigquery_load_table_gcs_parquet]
+// [START bigquery_load_table_gcs_parquet_truncate]
 // [START bigquery_load_table_partitioned]
 // [START bigquery_nested_repeated_schema]
 // [START bigquery_query]
@@ -80,6 +82,7 @@ import (
 // ctx := context.Background()
 // client, err := bigquery.NewClient(ctx, "your-project-id")
 // [END bigquery_add_empty_column]
+// [END bigquery_add_column_query_append]
 // [END bigquery_browse_table]
 // [END bigquery_copy_table]
 // [END bigquery_copy_table_cmek]
@@ -110,6 +113,8 @@ import (
 // [END bigquery_load_table_gcs_csv]
 // [END bigquery_load_table_gcs_json]
 // [END bigquery_load_table_gcs_json_autodetect]
+// [END bigquery_load_table_gcs_parquet]
+// [END bigquery_load_table_gcs_parquet_truncate]
 // [END bigquery_load_table_partitioned]
 // [END bigquery_nested_repeated_schema]
 // [END bigquery_query]
@@ -494,6 +499,39 @@ func createTableRequiredThenRelax(client *bigquery.Client, datasetID, tableID st
 		return err
 	}
 	// [END  bigquery_relax_column]
+	return nil
+}
+
+func createTableAndWiden(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_add_column_query_append]
+	sampleSchema := bigquery.Schema{
+		{Name: "full_name", Type: bigquery.StringFieldType, Required: true},
+		{Name: "age", Type: bigquery.IntegerFieldType, Required: true},
+	}
+	original := &bigquery.TableMetadata{
+		Schema: sampleSchema,
+	}
+	tableRef := client.Dataset(datasetID).Table(tableID)
+	if err := tableRef.Create(ctx, original); err != nil {
+		return err
+	}
+	// Our table has two columns.  We'll introduce a new favorite_color column via
+	// a subsequent query that appends to the table.
+	q := client.Query("SELECT \"Timmy\" as full_name, 85 as age, \"Blue\" as favorite_color")
+	q.SchemaUpdateOptions = []string{"ALLOW_FIELD_ADDITION"}
+	q.QueryConfig.Dst = client.Dataset(datasetID).Table(tableID)
+	q.WriteDisposition = bigquery.WriteAppend
+	q.Location = "US"
+	job, err := q.Run(ctx)
+	if err != nil {
+		return err
+	}
+	_, err = job.Wait(ctx)
+	if err != nil {
+		return err
+	}
+	// [END bigquery_add_column_query_append]
 	return nil
 }
 
@@ -1333,6 +1371,55 @@ func importJSONWithCMEK(client *bigquery.Client, datasetID, tableID string) erro
 	}
 
 	// [END bigquery_load_table_gcs_json_cmek]
+	return nil
+}
+
+func importParquet(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_load_table_gcs_parquet]
+	gcsRef := bigquery.NewGCSReference("gs://cloud-samples-data/bigquery/us-states/us-states.parquet")
+	gcsRef.SourceFormat = bigquery.Parquet
+	gcsRef.AutoDetect = true
+	loader := client.Dataset(datasetID).Table(tableID).LoaderFrom(gcsRef)
+
+	job, err := loader.Run(ctx)
+	if err != nil {
+		return err
+	}
+	status, err := job.Wait(ctx)
+	if err != nil {
+		return err
+	}
+
+	if status.Err() != nil {
+		return fmt.Errorf("Job completed with error: %v", status.Err())
+	}
+	// [END bigquery_load_table_gcs_parquet]
+	return nil
+}
+
+func importParquetTruncate(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_load_table_gcs_parquet_truncate]
+	gcsRef := bigquery.NewGCSReference("gs://cloud-samples-data/bigquery/us-states/us-states.parquet")
+	gcsRef.SourceFormat = bigquery.Parquet
+	gcsRef.AutoDetect = true
+	loader := client.Dataset(datasetID).Table(tableID).LoaderFrom(gcsRef)
+	loader.WriteDisposition = bigquery.WriteTruncate
+
+	job, err := loader.Run(ctx)
+	if err != nil {
+		return err
+	}
+	status, err := job.Wait(ctx)
+	if err != nil {
+		return err
+	}
+
+	if status.Err() != nil {
+		return fmt.Errorf("Job completed with error: %v", status.Err())
+	}
+	// [END bigquery_load_table_gcs_parquet_truncate]
 	return nil
 }
 
