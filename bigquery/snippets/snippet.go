@@ -18,6 +18,8 @@ import (
 
 // Use a common block to inline comments related to importing the library
 // and constructing a client.
+// [START bigquery_add_empty_column]
+
 // [START bigquery_browse_table]
 // [START bigquery_copy_table]
 // [START bigquery_copy_table_multiple_source]
@@ -48,6 +50,7 @@ import (
 // [START bigquery_load_table_gcs_json]
 // [START bigquery_load_table_gcs_json_autodetect]
 // [START bigquery_load_table_partitioned]
+// [START bigquery_nested_repeated_schema]
 // [START bigquery_query]
 // [START bigquery_query_batch]
 // [START bigquery_query_clustered_table]
@@ -62,6 +65,7 @@ import (
 // [START bigquery_query_params_structs]
 // [START bigquery_query_params_timestamps]
 // [START bigquery_query_partitioned_table]
+// [START bigquery_relax_column]
 // [START bigquery_table_insert_rows]
 // [START bigquery_undelete_table]
 // [START bigquery_update_dataset_access]
@@ -74,6 +78,7 @@ import (
 // import "cloud.google.com/go/bigquery"
 // ctx := context.Background()
 // client, err := bigquery.NewClient(ctx, "your-project-id")
+// [END bigquery_add_empty_column]
 // [END bigquery_browse_table]
 // [END bigquery_copy_table]
 // [END bigquery_copy_table_multiple_source]
@@ -104,6 +109,7 @@ import (
 // [END bigquery_load_table_gcs_json]
 // [END bigquery_load_table_gcs_json_autodetect]
 // [END bigquery_load_table_partitioned]
+// [END bigquery_nested_repeated_schema]
 // [END bigquery_query]
 // [END bigquery_query_batch]
 // [END bigquery_query_clustered_table]
@@ -118,6 +124,7 @@ import (
 // [END bigquery_query_params_structs]
 // [END bigquery_query_params_timestamps]
 // [END bigquery_query_partitioned_table]
+// [END bigquery_relax_column]
 // [END bigquery_table_insert_rows]
 // [END bigquery_undelete_table]
 // [END bigquery_update_dataset_access]
@@ -438,6 +445,36 @@ func createTableComplexSchema(client *bigquery.Client, datasetID, tableID string
 	}
 	fmt.Printf("created table %s\n", tableRef.FullyQualifiedName())
 	// [END bigquery_nested_repeated_schema]
+	return nil
+}
+
+func createTableRequiredThenRelax(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_relax_column]
+	sampleSchema := bigquery.Schema{
+		{Name: "full_name", Type: bigquery.StringFieldType, Required: true},
+		{Name: "age", Type: bigquery.IntegerFieldType, Required: true},
+	}
+	original := &bigquery.TableMetadata{
+		Schema: sampleSchema,
+	}
+	tableRef := client.Dataset(datasetID).Table(tableID)
+	if err := tableRef.Create(ctx, original); err != nil {
+		return err
+	}
+	// Iterate through the schema to set all Required fields to false (nullable).
+	var relaxed bigquery.Schema
+	for _, v := range original.Schema {
+		v.Required = false
+		relaxed = append(relaxed, v)
+	}
+	newMeta := bigquery.TableMetadataToUpdate{
+		Schema: relaxed,
+	}
+	if _, err := tableRef.Update(ctx, newMeta, ""); err != nil {
+		return err
+	}
+	// [END  bigquery_relax_column]
 	return nil
 }
 

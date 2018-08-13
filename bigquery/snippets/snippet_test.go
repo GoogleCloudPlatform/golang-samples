@@ -122,6 +122,10 @@ func TestAll(t *testing.T) {
 	if err := createTableComplexSchema(client, datasetID, complex); err != nil {
 		t.Errorf("createTableComplexSchema(dataset:%q table:%q): %v", datasetID, complex, err)
 	}
+	required := uniqueBQName("golang_example_table_required")
+	if err := createTableRequiredThenRelax(client, datasetID, required); err != nil {
+		t.Errorf("createTableRequiredThenRelax(dataset:%q table:%q): %v", datasetID, required, err)
+	}
 
 	if err := updateTableDescription(client, datasetID, explicit); err != nil {
 		t.Errorf("updateTableDescription(dataset:%q table:%q): %v", datasetID, explicit, err)
