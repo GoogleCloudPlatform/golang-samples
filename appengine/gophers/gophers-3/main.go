@@ -40,7 +40,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	// [START handling]
 	params := templateParams{}
 
-	if r.Method == "GET" {
+	if r.Method == http.MethodGet {
 		indexTemplate.Execute(w, params)
 		return
 	}
