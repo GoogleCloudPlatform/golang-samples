@@ -118,12 +118,19 @@ func TestAll(t *testing.T) {
 	if err := createTableExplicitSchema(client, datasetID, explicit); err != nil {
 		t.Errorf("createTableExplicitSchema(dataset:%q table:%q): %v", datasetID, explicit, err)
 	}
+	complex := uniqueBQName("golang_example_table_complex")
+	if err := createTableComplexSchema(client, datasetID, complex); err != nil {
+		t.Errorf("createTableComplexSchema(dataset:%q table:%q): %v", datasetID, complex, err)
+	}
 
 	if err := updateTableDescription(client, datasetID, explicit); err != nil {
 		t.Errorf("updateTableDescription(dataset:%q table:%q): %v", datasetID, explicit, err)
 	}
 	if err := updateTableExpiration(client, datasetID, explicit); err != nil {
 		t.Errorf("updateTableExpiration(dataset:%q table:%q): %v", datasetID, explicit, err)
+	}
+	if err := updateTableAddColumn(client, datasetID, explicit); err != nil {
+		t.Errorf("updateTableAddColumn(dataset:%q table:%q): %v", datasetID, explicit, err)
 	}
 	if err := addTableLabel(client, datasetID, explicit); err != nil {
 		t.Errorf("updateTableAddLabel(dataset:%q table:%q): %v", datasetID, explicit, err)

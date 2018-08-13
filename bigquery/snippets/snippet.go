@@ -407,6 +407,40 @@ func createTableExplicitSchema(client *bigquery.Client, datasetID, tableID strin
 	return nil
 }
 
+func createTableComplexSchema(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_nested_repeated_schema]
+	sampleSchema := bigquery.Schema{
+		{Name: "id", Type: bigquery.StringFieldType},
+		{Name: "first_name", Type: bigquery.StringFieldType},
+		{Name: "last_name", Type: bigquery.StringFieldType},
+		{Name: "dob", Type: bigquery.DateFieldType},
+		{Name: "addresses",
+			Type:     bigquery.RecordFieldType,
+			Repeated: true,
+			Schema: bigquery.Schema{
+				{Name: "status", Type: bigquery.StringFieldType},
+				{Name: "address", Type: bigquery.StringFieldType},
+				{Name: "city", Type: bigquery.StringFieldType},
+				{Name: "state", Type: bigquery.StringFieldType},
+				{Name: "zip", Type: bigquery.StringFieldType},
+				{Name: "numberOfYears", Type: bigquery.StringFieldType},
+			}},
+	}
+
+	metaData := &bigquery.TableMetadata{
+		Schema:         sampleSchema,
+		ExpirationTime: time.Now().AddDate(1, 0, 0), // Table will be automatically deleted in 1 year.
+	}
+	tableRef := client.Dataset(datasetID).Table(tableID)
+	if err := tableRef.Create(ctx, metaData); err != nil {
+		return err
+	}
+	fmt.Printf("created table %s\n", tableRef.FullyQualifiedName())
+	// [END bigquery_nested_repeated_schema]
+	return nil
+}
+
 func createTablePartitioned(client *bigquery.Client, datasetID, tableID string) error {
 	ctx := context.Background()
 	// [START bigquery_create_table_partitioned]
@@ -454,6 +488,27 @@ func createTableClustered(client *bigquery.Client, datasetID, tableID string) er
 		return err
 	}
 	// [END bigquery_create_table_partitioned]
+	return nil
+}
+
+func updateTableAddColumn(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_add_empty_column]
+	tableRef := client.Dataset(datasetID).Table(tableID)
+	meta, err := tableRef.Metadata(ctx)
+	if err != nil {
+		return err
+	}
+	newSchema := append(meta.Schema,
+		&bigquery.FieldSchema{Name: "phone", Type: bigquery.StringFieldType},
+	)
+	update := bigquery.TableMetadataToUpdate{
+		Schema: newSchema,
+	}
+	if _, err := tableRef.Update(ctx, update, meta.ETag); err != nil {
+		return err
+	}
+	// [END bigquery_add_empty_column]
 	return nil
 }
 
