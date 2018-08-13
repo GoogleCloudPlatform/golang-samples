@@ -450,6 +450,23 @@ func createTableComplexSchema(client *bigquery.Client, datasetID, tableID string
 	return nil
 }
 
+func createTableWithCMEK(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_create_table_cmek
+	tableRef := client.Dataset(datasetID).Table(tableID)
+	meta := &bigquery.TableMetadata{
+		EncryptionConfig: &bigquery.EncryptionConfig{
+			// TODO: Replace this key with a key you have created in Cloud KMS.
+			KMSKeyName: "projects/cloud-samples-tests/locations/us-central1/keyRings/test/cryptoKeys/test",
+		},
+	}
+	if err := tableRef.Create(ctx, meta); err != nil {
+		return err
+	}
+	// [END bigquery_create_table_cmek
+	return nil
+}
+
 func createTableRequiredThenRelax(client *bigquery.Client, datasetID, tableID string) error {
 	ctx := context.Background()
 	// [START bigquery_relax_column]
@@ -548,6 +565,26 @@ func updateTableAddColumn(client *bigquery.Client, datasetID, tableID string) er
 		return err
 	}
 	// [END bigquery_add_empty_column]
+	return nil
+}
+
+func updateTableChangeCMEK(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_update_table_cmek]
+	tableRef := client.Dataset(datasetID).Table(tableID)
+	meta, err := tableRef.Metadata(ctx)
+	if err != nil {
+		return err
+	}
+	update := bigquery.TableMetadataToUpdate{
+		EncryptionConfig: &bigquery.EncryptionConfig{
+			KMSKeyName: "projects/cloud-samples-tests/locations/us-central1/keyRings/test/cryptoKeys/otherkey",
+		},
+	}
+	if _, err := tableRef.Update(ctx, update, meta.ETag); err != nil {
+		return err
+	}
+	// [END bigquery_update_table_cmek]
 	return nil
 }
 
@@ -790,6 +827,21 @@ func queryWithDestination(client *bigquery.Client, destDatasetID, destTableID st
 	return runAndRead(ctx, client, q)
 }
 
+func queryWithDestinationCMEK(client *bigquery.Client, destDatasetID, destTableID string) error {
+	ctx := context.Background()
+	// [START bigquery_query_destination_table_cmek]
+	q := client.Query("SELECT 17 as my_col")
+	q.Location = "US" // Location must match the dataset(s) referenced in query.
+	q.QueryConfig.Dst = client.Dataset(destDatasetID).Table(destTableID)
+	q.DestinationEncryptionConfig = &bigquery.EncryptionConfig{
+		// TODO: Replace this key with a key you have created in Cloud KMS.
+		KMSKeyName: "projects/cloud-samples-tests/locations/us-central1/keyRings/test/cryptoKeys/test",
+	}
+	return runAndRead(ctx, client, q)
+	// [END bigquery_query_destination_table_cmek]
+
+}
+
 func queryLegacy(client *bigquery.Client, sqlString string) error {
 	ctx := context.Background()
 	// [START bigquery_query_legacy]
@@ -1013,6 +1065,7 @@ func copyTableWithCMEK(client *bigquery.Client, datasetID, tableID string) error
 	srcTable := client.DatasetInProject("bigquery-public-data", "samples").Table("shakespeare")
 	copier := client.Dataset(datasetID).Table(tableID).CopierFrom(srcTable)
 	copier.DestinationEncryptionConfig = &bigquery.EncryptionConfig{
+		// TODO: Replace this key with a key you have created in Cloud KMS.
 		KMSKeyName: "projects/cloud-samples-tests/locations/us-central1/keyRings/test/cryptoKeys/test",
 	}
 	job, err := copier.Run(ctx)
@@ -1421,6 +1474,7 @@ func exportSampleTableAsJSON(client *bigquery.Client, gcsURI string) error {
 func runAndRead(ctx context.Context, client *bigquery.Client, q *bigquery.Query) error {
 	// [START bigquery_query]
 	// [START bigquery_query_destination_table]
+	// [START bigquery_query_destination_table_cmek]
 	// [START bigquery_query_legacy]
 	// [START bigquery_query_legacy_large_results]
 	// [START bigquery_query_no_cache]
@@ -1456,6 +1510,7 @@ func runAndRead(ctx context.Context, client *bigquery.Client, q *bigquery.Query)
 	}
 	// [END bigquery_query]
 	// [END bigquery_query_destination_table]
+	// [END bigquery_query_destination_table_cmek]
 	// [END bigquery_query_legacy]
 	// [END bigquery_query_legacy_large_results]
 	// [END bigquery_query_no_cache]

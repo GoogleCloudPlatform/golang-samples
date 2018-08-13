@@ -126,6 +126,10 @@ func TestAll(t *testing.T) {
 	if err := createTableRequiredThenRelax(client, datasetID, required); err != nil {
 		t.Errorf("createTableRequiredThenRelax(dataset:%q table:%q): %v", datasetID, required, err)
 	}
+	tableCMEK := uniqueBQName("golang_example_table_cmek")
+	if err := createTableWithCMEK(client, datasetID, tableCMEK); err != nil {
+		t.Errorf("createTableWithCMEK(dataset:%q table:%q): %v", datasetID, tableCMEK, err)
+	}
 
 	if err := updateTableDescription(client, datasetID, explicit); err != nil {
 		t.Errorf("updateTableDescription(dataset:%q table:%q): %v", datasetID, explicit, err)
@@ -208,6 +212,10 @@ func TestAll(t *testing.T) {
 	persisted := uniqueBQName("golang_example_table_queryresult")
 	if err := queryWithDestination(client, datasetID, persisted); err != nil {
 		t.Errorf("queryWithDestination(dataset:%q table:%q): %v", datasetID, persisted, err)
+	}
+	persistedCMEK := uniqueBQName("golang_example_table_queryresult_cmek")
+	if err := queryWithDestinationCMEK(client, datasetID, persistedCMEK); err != nil {
+		t.Errorf("queryWithDestinationCMEK(dataset:%q table:%q): %v", datasetID, persistedCMEK, err)
 	}
 
 	// Print information about tables (extended and simple).
