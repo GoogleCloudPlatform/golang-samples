@@ -5,7 +5,6 @@
 // [START gae_flex_mysql_app]
 
 // Sample cloudsql demonstrates usage of Cloud SQL from App Engine flexible environment.
-// [START gae_flex_mysql_app]
 package main
 
 import (

@@ -5,7 +5,6 @@
 // [START gae_flex_storage_app]
 
 // Sample storage demonstrates use of the cloud.google.com/go/storage package from App Engine flexible environment.
-// [START gae_flex_storage_app]
 package main
 
 import (
