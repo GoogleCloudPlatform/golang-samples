@@ -337,7 +337,7 @@ func detectLogos(w io.Writer, file string) error {
 
 // [END vision_logo_detection{REGION_TAG_PARAMETER}]
 
-// [START vision_async_detect_document_ocr{REGION_TAG_PARAMETER}]
+// [START vision_text_detection_pdf{REGION_TAG_PARAMETER}]
 
 // detectAsyncDocument performs Optical Character Recognition (OCR) on a
 // PDF file stored in GCS.
@@ -388,4 +388,4 @@ func detectAsyncDocument(w io.Writer, gcsSourceURI, gcsDestinationURI string) er
 	return nil
 }
 
-// [END vision_async_detect_document_ocr{REGION_TAG_PARAMETER}]
+// [END vision_text_detection_pdf{REGION_TAG_PARAMETER}]

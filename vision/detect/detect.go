@@ -510,7 +510,7 @@ func detectLogos(w io.Writer, file string) error {
 
 // [END vision_logo_detection]
 
-// [START vision_async_detect_document_ocr]
+// [START vision_text_detection_pdf]
 
 // detectAsyncDocument performs Optical Character Recognition (OCR) on a
 // PDF file stored in GCS.
@@ -561,7 +561,7 @@ func detectAsyncDocument(w io.Writer, gcsSourceURI, gcsDestinationURI string) er
 	return nil
 }
 
-// [END vision_async_detect_document_ocr]
+// [END vision_text_detection_pdf]
 
 func init() {
 	// Refer to these functions so that goimports is happy before boilerplate is inserted.
@@ -950,7 +950,7 @@ func detectLogosURI(w io.Writer, file string) error {
 
 // [END vision_logo_detection_gcs]
 
-// [START vision_async_detect_document_ocr_gcs]
+// [START vision_text_detection_pdf_gcs]
 
 // detectAsyncDocument performs Optical Character Recognition (OCR) on a
 // PDF file stored in GCS.
@@ -1001,4 +1001,4 @@ func detectAsyncDocumentURI(w io.Writer, gcsSourceURI, gcsDestinationURI string)
 	return nil
 }
 
-// [END vision_async_detect_document_ocr_gcs]
+// [END vision_text_detection_pdf_gcs]
