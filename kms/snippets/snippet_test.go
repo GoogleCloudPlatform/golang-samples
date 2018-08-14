@@ -25,7 +25,7 @@ func init() {
 	_ = google.DefaultClient
 }
 
-func createKeyring(project, name string) error {
+func createKeyring(project, keyRing string) error {
 	ctx := context.Background()
 	authedClient, err := google.DefaultClient(ctx, cloudkms.CloudPlatformScope)
 	if err != nil {
@@ -39,7 +39,7 @@ func createKeyring(project, name string) error {
 	parent := fmt.Sprintf("projects/%s/locations/%s", project, location)
 
 	_, err = client.Projects.Locations.KeyRings.Create(
-		parent, &cloudkms.KeyRing{}).KeyRingId(name).Do()
+		parent, &cloudkms.KeyRing{}).KeyRingId(keyRing).Do()
 	if err != nil {
 		return err
 	}
@@ -200,7 +200,7 @@ func getRingPolicy(project, keyRing string) error {
 	return nil
 }
 
-func addMemberRingPolicy(project, keyRing, role, member string) error {
+func addMemberRingPolicy(project, location, keyRing, role, member string) error {
 	ctx := context.Background()
 	authedClient, err := google.DefaultClient(ctx, cloudkms.CloudPlatformScope)
 	if err != nil {
@@ -210,7 +210,7 @@ func addMemberRingPolicy(project, keyRing, role, member string) error {
 	if err != nil {
 		return err
 	}
-	location := "global"
+
 	parent := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s",
 		project, location, keyRing)
 
