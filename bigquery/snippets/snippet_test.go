@@ -304,6 +304,14 @@ func TestImportExport(t *testing.T) {
 		t.Fatalf("importJSONWithCMEK(dataset:%q table:%q): %v", datasetID, autoJSONwithCMEK, err)
 	}
 
+	orc := uniqueBQName("golang_example_importorc")
+	if err := importORC(client, datasetID, orc); err != nil {
+		t.Errorf("importOrc(dataset:%q table: %q): %v", datasetID, orc, err)
+	}
+	if err := importORCTruncate(client, datasetID, orc); err != nil {
+		t.Errorf("importOrcTruncate(dataset:%q table: %q): %v", datasetID, orc, err)
+	}
+
 	parquet := uniqueBQName("golang_example_importparquet")
 	if err := importParquet(client, datasetID, parquet); err != nil {
 		t.Errorf("importParquet(dataset:%q table: %q): %v", datasetID, parquet, err)

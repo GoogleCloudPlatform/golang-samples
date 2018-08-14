@@ -54,6 +54,8 @@ func noOpCommentFunc() {
 	// [START bigquery_load_table_gcs_json]
 	// [START bigquery_load_table_gcs_json_autodetect]
 	// [START bigquery_load_table_gcs_json_cmek]
+	// [START bigquery_load_table_gcs_orc]
+	// [START bigquery_load_table_gcs_orc_truncate]
 	// [START bigquery_load_table_gcs_parquet]
 	// [START bigquery_load_table_gcs_parquet_truncate]
 	// [START bigquery_load_table_partitioned]
@@ -122,6 +124,8 @@ func noOpCommentFunc() {
 	// [END bigquery_load_table_gcs_json]
 	// [END bigquery_load_table_gcs_json_autodetect]
 	// [END bigquery_load_table_gcs_json_cmek]
+	// [END bigquery_load_table_gcs_orc]
+	// [END bigquery_load_table_gcs_orc_truncate]
 	// [END bigquery_load_table_gcs_parquet]
 	// [END bigquery_load_table_gcs_parquet_truncate]
 	// [END bigquery_load_table_partitioned]
@@ -1458,6 +1462,55 @@ func importJSONWithCMEK(client *bigquery.Client, datasetID, tableID string) erro
 	}
 
 	// [END bigquery_load_table_gcs_json_cmek]
+	return nil
+}
+
+func importORC(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_load_table_gcs_orc]
+	gcsRef := bigquery.NewGCSReference("gs://cloud-samples-data/bigquery/us-states/us-states.orc")
+	gcsRef.SourceFormat = bigquery.ORC
+	loader := client.Dataset(datasetID).Table(tableID).LoaderFrom(gcsRef)
+
+	job, err := loader.Run(ctx)
+	if err != nil {
+		return err
+	}
+	status, err := job.Wait(ctx)
+	if err != nil {
+		return err
+	}
+
+	if status.Err() != nil {
+		return fmt.Errorf("Job completed with error: %v", status.Err())
+	}
+	// [END bigquery_load_table_gcs_orc]
+	return nil
+}
+
+func importORCTruncate(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_load_table_gcs_orc_truncate]
+	gcsRef := bigquery.NewGCSReference("gs://cloud-samples-data/bigquery/us-states/us-states.orc")
+	gcsRef.SourceFormat = bigquery.ORC
+	loader := client.Dataset(datasetID).Table(tableID).LoaderFrom(gcsRef)
+	// default for import jobs is to append data to a table.  WriteTruncate
+	// specifies that existing data should instead be replaced/overwritten.
+	loader.WriteDisposition = bigquery.WriteTruncate
+
+	job, err := loader.Run(ctx)
+	if err != nil {
+		return err
+	}
+	status, err := job.Wait(ctx)
+	if err != nil {
+		return err
+	}
+
+	if status.Err() != nil {
+		return fmt.Errorf("Job completed with error: %v", status.Err())
+	}
+	// [END bigquery_load_table_gcs_orc_truncate]
 	return nil
 }
 
