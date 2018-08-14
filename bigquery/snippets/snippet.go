@@ -16,129 +16,142 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-// Use a common block to inline comments related to importing the library
-// and constructing a client.
-// [START bigquery_add_empty_column]
-// [START bigquery_add_column_query_append]
-// [START bigquery_browse_table]
-// [START bigquery_copy_table]
-// [START bigquery_copy_table_cmek]
-// [START bigquery_copy_table_multiple_source]
-// [START bigquery_create_dataset]
-// [START bigquery_create_table]
-// [START bigquery_create_table_clustered]
-// [START bigquery_create_table_partitioned]
-// [START bigquery_delete_dataset]
-// [START bigquery_delete_label_dataset]
-// [START bigquery_delete_label_table]
-// [START bigquery_delete_table]
-// [START bigquery_extract_table]
-// [START bigquery_extract_table_compressed]
-// [START bigquery_extract_table_json]
-// [START bigquery_get_dataset]
-// [START bigquery_get_dataset_labels]
-// [START bigquery_get_table]
-// [START bigquery_get_table_labels]
-// [START bigquery_label_dataset]
-// [START bigquery_label_table]
-// [START bigquery_list_datasets]
-// [START bigquery_list_datasets_by_label]
-// [START bigquery_list_jobs]
-// [START bigquery_list_tables]
-// [START bigquery_load_from_file]
-// [START bigquery_load_table_clustered]
-// [START bigquery_load_table_gcs_csv]
-// [START bigquery_load_table_gcs_json]
-// [START bigquery_load_table_gcs_json_autodetect]
-// [START bigquery_load_table_gcs_parquet]
-// [START bigquery_load_table_gcs_parquet_truncate]
-// [START bigquery_load_table_partitioned]
-// [START bigquery_nested_repeated_schema]
-// [START bigquery_query]
-// [START bigquery_query_batch]
-// [START bigquery_query_clustered_table]
-// [START bigquery_query_destination_table]
-// [START bigquery_query_dry_run]
-// [START bigquery_query_legacy]
-// [START bigquery_query_legacy_large_results]
-// [START bigquery_query_no_cache]
-// [START bigquery_query_params_arrays]
-// [START bigquery_query_params_named]
-// [START bigquery_query_params_positional]
-// [START bigquery_query_params_structs]
-// [START bigquery_query_params_timestamps]
-// [START bigquery_query_partitioned_table]
-// [START bigquery_relax_column]
-// [START bigquery_table_insert_rows]
-// [START bigquery_undelete_table]
-// [START bigquery_update_dataset_access]
-// [START bigquery_update_dataset_description]
-// [START bigquery_update_dataset_expiration]
-// [START bigquery_update_table_description]
-// [START bigquery_update_table_expiration]
-// To run this sample, you will need to create (or reuse) a context and
-// an instance of the bigquery client.  For example:
-// import "cloud.google.com/go/bigquery"
-// ctx := context.Background()
-// client, err := bigquery.NewClient(ctx, "your-project-id")
-// [END bigquery_add_empty_column]
-// [END bigquery_add_column_query_append]
-// [END bigquery_browse_table]
-// [END bigquery_copy_table]
-// [END bigquery_copy_table_cmek]
-// [END bigquery_copy_table_multiple_source]
-// [END bigquery_create_dataset]
-// [END bigquery_create_table]
-// [END bigquery_create_table_clustered]
-// [END bigquery_create_table_partitioned]
-// [END bigquery_delete_dataset]
-// [END bigquery_delete_label_dataset]
-// [END bigquery_delete_label_table]
-// [END bigquery_delete_table]
-// [END bigquery_extract_table]
-// [END bigquery_extract_table_compressed]
-// [END bigquery_extract_table_json]
-// [END bigquery_get_dataset]
-// [END bigquery_get_dataset_labels]
-// [END bigquery_get_table]
-// [END bigquery_get_table_labels]
-// [END bigquery_label_dataset]
-// [END bigquery_label_table]
-// [END bigquery_list_datasets]
-// [END bigquery_list_datasets_by_label]
-// [END bigquery_list_jobs]
-// [END bigquery_list_tables]
-// [END bigquery_load_from_file]
-// [END bigquery_load_table_clustered]
-// [END bigquery_load_table_gcs_csv]
-// [END bigquery_load_table_gcs_json]
-// [END bigquery_load_table_gcs_json_autodetect]
-// [END bigquery_load_table_gcs_parquet]
-// [END bigquery_load_table_gcs_parquet_truncate]
-// [END bigquery_load_table_partitioned]
-// [END bigquery_nested_repeated_schema]
-// [END bigquery_query]
-// [END bigquery_query_batch]
-// [END bigquery_query_clustered_table]
-// [END bigquery_query_destination_table]
-// [END bigquery_query_dry_run]
-// [END bigquery_query_legacy]
-// [END bigquery_query_legacy_large_results]
-// [END bigquery_query_no_cache]
-// [END bigquery_query_params_arrays]
-// [END bigquery_query_params_named]
-// [END bigquery_query_params_positional]
-// [END bigquery_query_params_structs]
-// [END bigquery_query_params_timestamps]
-// [END bigquery_query_partitioned_table]
-// [END bigquery_relax_column]
-// [END bigquery_table_insert_rows]
-// [END bigquery_undelete_table]
-// [END bigquery_update_dataset_access]
-// [END bigquery_update_dataset_description]
-// [END bigquery_update_dataset_expiration]
-// [END bigquery_update_table_description]
-// [END bigquery_update_table_expiration]
+func noOpCommentFunc() {
+	// Use a common block to inline comments related to importing the library
+	// and constructing a client.  Inside a func to ensure the indentation is
+	// consistent between multiple includes.
+	// [START bigquery_add_empty_column]
+	// [START bigquery_add_column_query_append]
+	// [START bigquery_browse_table]
+	// [START bigquery_copy_table]
+	// [START bigquery_copy_table_cmek]
+	// [START bigquery_copy_table_multiple_source]
+	// [START bigquery_create_dataset]
+	// [START bigquery_create_table]
+	// [START bigquery_create_table_clustered]
+	// [START bigquery_create_table_cmek]
+	// [START bigquery_create_table_partitioned]
+	// [START bigquery_delete_dataset]
+	// [START bigquery_delete_label_dataset]
+	// [START bigquery_delete_label_table]
+	// [START bigquery_delete_table]
+	// [START bigquery_extract_table]
+	// [START bigquery_extract_table_compressed]
+	// [START bigquery_extract_table_json]
+	// [START bigquery_get_dataset]
+	// [START bigquery_get_dataset_labels]
+	// [START bigquery_get_table]
+	// [START bigquery_get_table_labels]
+	// [START bigquery_label_dataset]
+	// [START bigquery_label_table]
+	// [START bigquery_list_datasets]
+	// [START bigquery_list_datasets_by_label]
+	// [START bigquery_list_jobs]
+	// [START bigquery_list_tables]
+	// [START bigquery_load_from_file]
+	// [START bigquery_load_table_clustered]
+	// [START bigquery_load_table_gcs_csv]
+	// [START bigquery_load_table_gcs_json]
+	// [START bigquery_load_table_gcs_json_autodetect]
+	// [START bigquery_load_table_gcs_json_cmek]
+	// [START bigquery_load_table_gcs_parquet]
+	// [START bigquery_load_table_gcs_parquet_truncate]
+	// [START bigquery_load_table_partitioned]
+	// [START bigquery_nested_repeated_schema]
+	// [START bigquery_query]
+	// [START bigquery_query_batch]
+	// [START bigquery_query_clustered_table]
+	// [START bigquery_query_destination_table]
+	// [START bigquery_query_dry_run]
+	// [START bigquery_query_legacy]
+	// [START bigquery_query_legacy_large_results]
+	// [START bigquery_query_no_cache]
+	// [START bigquery_query_params_arrays]
+	// [START bigquery_query_params_named]
+	// [START bigquery_query_params_positional]
+	// [START bigquery_query_params_structs]
+	// [START bigquery_query_params_timestamps]
+	// [START bigquery_query_partitioned_table]
+	// [START bigquery_relax_column]
+	// [START bigquery_relax_column_load_append]
+	// [START bigquery_relax_column_query_append]
+	// [START bigquery_table_insert_rows]
+	// [START bigquery_undelete_table]
+	// [START bigquery_update_dataset_access]
+	// [START bigquery_update_dataset_description]
+	// [START bigquery_update_dataset_expiration]
+	// [START bigquery_update_table_cmek]
+	// [START bigquery_update_table_description]
+	// [START bigquery_update_table_expiration]
+	// To run this sample, you will need to create (or reuse) a context and
+	// an instance of the bigquery client.  For example:
+	// import "cloud.google.com/go/bigquery"
+	// ctx := context.Background()
+	// client, err := bigquery.NewClient(ctx, "your-project-id")
+	// [END bigquery_add_empty_column]
+	// [END bigquery_add_column_query_append]
+	// [END bigquery_browse_table]
+	// [END bigquery_copy_table]
+	// [END bigquery_copy_table_cmek]
+	// [END bigquery_copy_table_multiple_source]
+	// [END bigquery_create_dataset]
+	// [END bigquery_create_table]
+	// [END bigquery_create_table_clustered]
+	// [END bigquery_create_table_cmek]
+	// [END bigquery_create_table_partitioned]
+	// [END bigquery_delete_dataset]
+	// [END bigquery_delete_label_dataset]
+	// [END bigquery_delete_label_table]
+	// [END bigquery_delete_table]
+	// [END bigquery_extract_table]
+	// [END bigquery_extract_table_compressed]
+	// [END bigquery_extract_table_json]
+	// [END bigquery_get_dataset]
+	// [END bigquery_get_dataset_labels]
+	// [END bigquery_get_table]
+	// [END bigquery_get_table_labels]
+	// [END bigquery_label_dataset]
+	// [END bigquery_label_table]
+	// [END bigquery_list_datasets]
+	// [END bigquery_list_datasets_by_label]
+	// [END bigquery_list_jobs]
+	// [END bigquery_list_tables]
+	// [END bigquery_load_from_file]
+	// [END bigquery_load_table_clustered]
+	// [END bigquery_load_table_gcs_csv]
+	// [END bigquery_load_table_gcs_json]
+	// [END bigquery_load_table_gcs_json_autodetect]
+	// [END bigquery_load_table_gcs_json_cmek]
+	// [END bigquery_load_table_gcs_parquet]
+	// [END bigquery_load_table_gcs_parquet_truncate]
+	// [END bigquery_load_table_partitioned]
+	// [END bigquery_nested_repeated_schema]
+	// [END bigquery_query]
+	// [END bigquery_query_batch]
+	// [END bigquery_query_clustered_table]
+	// [END bigquery_query_destination_table]
+	// [END bigquery_query_dry_run]
+	// [END bigquery_query_legacy]
+	// [END bigquery_query_legacy_large_results]
+	// [END bigquery_query_no_cache]
+	// [END bigquery_query_params_arrays]
+	// [END bigquery_query_params_named]
+	// [END bigquery_query_params_positional]
+	// [END bigquery_query_params_structs]
+	// [END bigquery_query_params_timestamps]
+	// [END bigquery_query_partitioned_table]
+	// [END bigquery_relax_column]
+	// [END bigquery_relax_column_load_append]
+	// [END bigquery_relax_column_query_append]
+	// [END bigquery_table_insert_rows]
+	// [END bigquery_undelete_table]
+	// [END bigquery_update_dataset_access]
+	// [END bigquery_update_table_cmek]
+	// [END bigquery_update_dataset_description]
+	// [END bigquery_update_dataset_expiration]
+	// [END bigquery_update_table_description]
+	// [END bigquery_update_table_expiration]
+}
 
 func createDataset(client *bigquery.Client, datasetID string) error {
 	ctx := context.Background()
@@ -457,7 +470,7 @@ func createTableComplexSchema(client *bigquery.Client, datasetID, tableID string
 
 func createTableWithCMEK(client *bigquery.Client, datasetID, tableID string) error {
 	ctx := context.Background()
-	// [START bigquery_create_table_cmek
+	// [START bigquery_create_table_cmek]
 	tableRef := client.Dataset(datasetID).Table(tableID)
 	meta := &bigquery.TableMetadata{
 		EncryptionConfig: &bigquery.EncryptionConfig{
@@ -468,11 +481,11 @@ func createTableWithCMEK(client *bigquery.Client, datasetID, tableID string) err
 	if err := tableRef.Create(ctx, meta); err != nil {
 		return err
 	}
-	// [END bigquery_create_table_cmek
+	// [END bigquery_create_table_cmek]
 	return nil
 }
 
-func createTableRequiredThenRelax(client *bigquery.Client, datasetID, tableID string) error {
+func relaxTableAPI(client *bigquery.Client, datasetID, tableID string) error {
 	ctx := context.Background()
 	// [START bigquery_relax_column]
 	sampleSchema := bigquery.Schema{
@@ -499,6 +512,80 @@ func createTableRequiredThenRelax(client *bigquery.Client, datasetID, tableID st
 		return err
 	}
 	// [END  bigquery_relax_column]
+	return nil
+}
+
+func relaxTableImport(client *bigquery.Client, datasetID, tableID, filename string) error {
+	ctx := context.Background()
+	// [START bigquery_relax_column_load_append]
+	sampleSchema := bigquery.Schema{
+		{Name: "full_name", Type: bigquery.StringFieldType, Required: true},
+		{Name: "age", Type: bigquery.IntegerFieldType, Required: true},
+	}
+	meta := &bigquery.TableMetadata{
+		Schema: sampleSchema,
+	}
+	tableRef := client.Dataset(datasetID).Table(tableID)
+	if err := tableRef.Create(ctx, meta); err != nil {
+		return err
+	}
+	// Now, import data from a local file, but specify relaxation of required
+	// fields as a side effect while the data is appended.
+	f, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	source := bigquery.NewReaderSource(f)
+	source.AutoDetect = true   // Allow BigQuery to determine schema.
+	source.SkipLeadingRows = 1 // CSV has a single header line.
+
+	loader := client.Dataset(datasetID).Table(tableID).LoaderFrom(source)
+	loader.SchemaUpdateOptions = []string{"ALLOW_FIELD_RELAXATION"}
+	job, err := loader.Run(ctx)
+	if err != nil {
+		return err
+	}
+	status, err := job.Wait(ctx)
+	if err != nil {
+		return err
+	}
+	if err := status.Err(); err != nil {
+		return err
+	}
+	// [END  bigquery_relax_column_load_append]
+	return nil
+}
+
+func relaxTableQuery(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_relax_column_query_append]
+	sampleSchema := bigquery.Schema{
+		{Name: "full_name", Type: bigquery.StringFieldType, Required: true},
+		{Name: "age", Type: bigquery.IntegerFieldType, Required: true},
+	}
+	meta := &bigquery.TableMetadata{
+		Schema: sampleSchema,
+	}
+	tableRef := client.Dataset(datasetID).Table(tableID)
+	if err := tableRef.Create(ctx, meta); err != nil {
+		return err
+	}
+	// Now, append a query result that includes nulls, but allow the job to relax
+	// all required columns.
+	q := client.Query("SELECT \"Beyonce\" as full_name")
+	q.QueryConfig.Dst = client.Dataset(datasetID).Table(tableID)
+	q.SchemaUpdateOptions = []string{"ALLOW_FIELD_RELAXATION"}
+	q.WriteDisposition = bigquery.WriteAppend
+	q.Location = "US"
+	job, err := q.Run(ctx)
+	if err != nil {
+		return err
+	}
+	_, err = job.Wait(ctx)
+	if err != nil {
+		return err
+	}
+	// [END bigquery_relax_column_query_append]
 	return nil
 }
 

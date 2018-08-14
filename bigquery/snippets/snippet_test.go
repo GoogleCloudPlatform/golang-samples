@@ -122,13 +122,15 @@ func TestAll(t *testing.T) {
 	if err := createTableComplexSchema(client, datasetID, complex); err != nil {
 		t.Errorf("createTableComplexSchema(dataset:%q table:%q): %v", datasetID, complex, err)
 	}
-	required := uniqueBQName("golang_example_table_required")
-	if err := createTableRequiredThenRelax(client, datasetID, required); err != nil {
-		t.Errorf("createTableRequiredThenRelax(dataset:%q table:%q): %v", datasetID, required, err)
-	}
+
 	tableCMEK := uniqueBQName("golang_example_table_cmek")
 	if err := createTableWithCMEK(client, datasetID, tableCMEK); err != nil {
 		t.Errorf("createTableWithCMEK(dataset:%q table:%q): %v", datasetID, tableCMEK, err)
+	}
+
+	required := uniqueBQName("golang_example_table_required")
+	if err := relaxTableAPI(client, datasetID, required); err != nil {
+		t.Errorf("relaxTableApi(dataset:%q table:%q): %v", datasetID, required, err)
 	}
 
 	widen := uniqueBQName("golang_example_table_widen")
@@ -308,6 +310,17 @@ func TestImportExport(t *testing.T) {
 	}
 	if err := importParquetTruncate(client, datasetID, parquet); err != nil {
 		t.Errorf("importParquetTruncate(dataset:%q table: %q): %v", datasetID, parquet, err)
+	}
+
+	requiredImport := uniqueBQName("golang_example_table_required_import")
+	filenameRelax := "testdata/people.csv"
+	if err := relaxTableImport(client, datasetID, requiredImport, filenameRelax); err != nil {
+		t.Errorf("relaxTableImport(dataset:%q table:%q): %v", datasetID, requiredImport, err)
+	}
+
+	requiredQuery := uniqueBQName("golang_example_table_required_query")
+	if err := relaxTableQuery(client, datasetID, requiredQuery); err != nil {
+		t.Errorf("relaxTableQuery(dataset:%q table:%q): %v", datasetID, requiredImport, err)
 	}
 
 	bucket := uniqueBucketName("golang-example-bucket", tc.ProjectID)
