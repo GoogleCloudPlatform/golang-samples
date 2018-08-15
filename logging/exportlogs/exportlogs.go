@@ -63,7 +63,7 @@ func main() {
 }
 
 func listSinks(client *logadmin.Client) ([]string, error) {
-	// [START list_log_sinks]
+	// [START logging_list_sinks]
 	ctx := context.Background()
 
 	var sinks []string
@@ -78,41 +78,41 @@ func listSinks(client *logadmin.Client) ([]string, error) {
 		}
 		sinks = append(sinks, sink.ID)
 	}
-	// [END list_log_sinks]
+	// [END logging_list_sinks]
 	return sinks, nil
 }
 
 func createSink(client *logadmin.Client) error {
-	// [START create_log_sink]
+	// [START logging_create_sink]
 	ctx := context.Background()
 	_, err := client.CreateSink(ctx, &logadmin.Sink{
 		ID:          "severe-errors-to-gcs",
 		Destination: "storage.googleapis.com/logsinks-bucket",
 		Filter:      "severity >= ERROR",
 	})
-	// [END create_log_sink]
+	// [END logging_create_sink]
 	return err
 }
 
 func updateSink(client *logadmin.Client) error {
-	// [START update_log_sink]
+	// [START logging_update_sink]
 	ctx := context.Background()
 	_, err := client.UpdateSink(ctx, &logadmin.Sink{
 		ID:          "severe-errors-to-gcs",
 		Destination: "storage.googleapis.com/logsinks-new-bucket",
 		Filter:      "severity >= INFO",
 	})
-	// [END update_log_sink]
+	// [END logging_update_sink]
 	return err
 }
 
 func deleteSink(client *logadmin.Client) error {
-	// [START delete_log_sink]
+	// [START logging_delete_sink]
 	ctx := context.Background()
 	if err := client.DeleteSink(ctx, "severe-errors-to-gcs"); err != nil {
 		return err
 	}
-	// [END delete_log_sink]
+	// [END logging_delete_sink]
 	return nil
 }
 
