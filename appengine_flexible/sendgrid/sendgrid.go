@@ -14,10 +14,10 @@ import (
 	"google.golang.org/appengine"
 )
 
-// [START gae_flex_sendgrid_import]
+// [START import]
 import "gopkg.in/sendgrid/sendgrid-go.v2"
 
-// [END gae_flex_sendgrid_import]
+// [END import]
 
 func main() {
 	http.HandleFunc("/sendmail", sendMailHandler)
@@ -35,7 +35,6 @@ func init() {
 	sendgridClient = sendgrid.NewSendGridClientWithApiKey(sendgridKey)
 }
 
-// [START gae_flex_sendgrid]
 func sendMailHandler(w http.ResponseWriter, r *http.Request) {
 	m := sendgrid.NewMail()
 	m.AddTo("example@email.com")
@@ -50,5 +49,3 @@ func sendMailHandler(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprintf(w, "email sent successfully.")
 }
-
-// [END gae_flex_sendgrid]
