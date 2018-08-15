@@ -176,7 +176,7 @@ func updateDocNested(ctx context.Context, client *firestore.Client) error {
 		"favorites": map[string]interface{}{
 			"color": "Red",
 		},
-	}, firestore.MergeAll) // TODO(cbro): this should fail
+	}, firestore.MergeAll)
 	if err != nil {
 		return err
 	}

@@ -21,10 +21,10 @@ var (
 	bucketName    string
 )
 
-func TestCreate(t *testing.T) {
+func setup(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	ctx := context.Background()
 
+	ctx := context.Background()
 	var err error
 	storageClient, err = storage.NewClient(ctx)
 	if err != nil {
@@ -32,6 +32,11 @@ func TestCreate(t *testing.T) {
 	}
 
 	bucketName = tc.ProjectID + "-storage-buckets-tests"
+}
+
+func TestCreate(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	setup(t)
 
 	// Clean up bucket before running tests.
 	deleteBucket(storageClient, bucketName)
@@ -55,6 +60,8 @@ func TestCreateWithAttrs(t *testing.T) {
 
 func TestList(t *testing.T) {
 	tc := testutil.SystemTest(t)
+	setup(t)
+
 	buckets, err := list(storageClient, tc.ProjectID)
 	if err != nil {
 		t.Fatal(err)
@@ -77,6 +84,8 @@ outer:
 
 func TestIAM(t *testing.T) {
 	testutil.SystemTest(t)
+	setup(t)
+
 	if _, err := getPolicy(storageClient, bucketName); err != nil {
 		t.Errorf("getPolicy: %#v", err)
 	}
@@ -90,6 +99,8 @@ func TestIAM(t *testing.T) {
 
 func TestRequesterPays(t *testing.T) {
 	testutil.SystemTest(t)
+	setup(t)
+
 	if err := enableRequesterPays(storageClient, bucketName); err != nil {
 		t.Errorf("enableRequesterPays: %#v", err)
 	}
@@ -103,6 +114,7 @@ func TestRequesterPays(t *testing.T) {
 
 func TestKMS(t *testing.T) {
 	tc := testutil.SystemTest(t)
+	setup(t)
 
 	keyRingID := os.Getenv("GOLANG_SAMPLES_KMS_KEYRING")
 	cryptoKeyID := os.Getenv("GOLANG_SAMPLES_KMS_CRYPTOKEY")
@@ -116,8 +128,11 @@ func TestKMS(t *testing.T) {
 		t.Fatalf("failed to enable default kms key (%q): %v", bucketName, err)
 	}
 }
+
 func TestDelete(t *testing.T) {
 	testutil.SystemTest(t)
+	setup(t)
+
 	if err := deleteBucket(storageClient, bucketName); err != nil {
 		t.Fatalf("failed to delete bucket (%q): %v", bucketName, err)
 	}
