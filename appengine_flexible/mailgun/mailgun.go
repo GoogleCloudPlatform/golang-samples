@@ -16,7 +16,10 @@ import (
 	"google.golang.org/appengine"
 )
 
+// [START import]
 import "github.com/mailgun/mailgun-go"
+
+// [END import]
 
 func main() {
 	http.HandleFunc("/send_simple", sendSimpleMessageHandler)
@@ -46,7 +49,6 @@ func mustGetenv(k string) string {
 	return v
 }
 
-// [START gae_flex_mailgun_simple_message]
 func sendSimpleMessageHandler(w http.ResponseWriter, r *http.Request) {
 	msg, id, err := mailgunClient.Send(mailgunClient.NewMessage(
 		/* From */ fmt.Sprintf("Excited User <mailgun@%s>", mailgunDomain),
@@ -63,9 +65,6 @@ func sendSimpleMessageHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Message sent!"))
 }
 
-// [END gae_flex_mailgun_simple_message]
-
-// [START gae_flex_mailgun_complex_message]
 func sendComplexMessageHandler(w http.ResponseWriter, r *http.Request) {
 	message := mailgunClient.NewMessage(
 		/* From */ fmt.Sprintf("Excited User <mailgun@%s>", mailgunDomain),
@@ -88,5 +87,3 @@ func sendComplexMessageHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Write([]byte("Message sent!"))
 }
-
-// [END gae_flex_mailgun_complex_message]

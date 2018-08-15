@@ -2,8 +2,6 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// [START gae_flex_redislabs_memcache]
-
 // Sample memcache demonstrates use of a memcached client from App Engine flexible environment.
 package main
 
@@ -72,5 +70,3 @@ func handle(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprintf(w, "Count: %d", count)
 }
-
-// [END gae_flex_redislabs_memcache]

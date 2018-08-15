@@ -2,8 +2,6 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// [START gae_flex_datastore_app]
-
 // Sample datastore demonstrates use of the cloud.google.com/go/datastore package from App Engine flexible.
 package main
 
@@ -96,5 +94,3 @@ func queryVisits(ctx context.Context, limit int64) ([]*visit, error) {
 	_, err := datastoreClient.GetAll(ctx, q, &visits)
 	return visits, err
 }
-
-// [END gae_flex_datastore_app]
