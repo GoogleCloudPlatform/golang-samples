@@ -4,9 +4,9 @@ env: flex
 automatic_scaling:
   min_num_instances: 1
 
-# [START env_variables]
+# [START gae_flex_twilio_env]
 env_variables:
   TWILIO_ACCOUNT_SID: your-account-sid
   TWILIO_AUTH_TOKEN: your-auth-token
   TWILIO_NUMBER: your-twilio-number
-# [END env_variables]
+# [END gae_flex_twilio_env]

@@ -4,7 +4,7 @@ env: flex
 automatic_scaling:
   min_num_instances: 1
 
-# [START env_variables]
+# [START gae_flex_sendgrid_yaml]
 env_variables:
   SENDGRID_API_KEY: your-sendgrid-api-key
-# [END env_variables]
+# [END gae_flex_sendgrid_yaml]
