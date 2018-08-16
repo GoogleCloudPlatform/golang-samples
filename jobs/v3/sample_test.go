@@ -8,12 +8,12 @@ import (
 	"testing"
 )
 
-func TestCompanySampleEntry(t *testing.T) {
+func TestBasicCompanySampleEntry(t *testing.T) {
 	oldStdout := os.Stdout
 	r, w, _ := os.Pipe()
 	os.Stdout = w
 
-	CompanySampleEntry()
+	BasicCompanySampleEntry()
 
 	w.Close()
 	os.Stdout = oldStdout
@@ -35,12 +35,12 @@ func TestCompanySampleEntry(t *testing.T) {
 	}
 }
 
-func TestJobSampleEntry(t *testing.T) {
+func TestBasicJobSampleEntry(t *testing.T) {
 	oldStdout := os.Stdout
 	r, w, _ := os.Pipe()
 	os.Stdout = w
 
-	JobSampleEntry()
+	BasicJobSampleEntry()
 
 	w.Close()
 	os.Stdout = oldStdout
@@ -165,7 +165,6 @@ func TestEmailAlertSearchSampleEntry(t *testing.T) {
 		t.Errorf("stdout returned %s, wanted to contain %s", got, want)
 	}
 
-
 	want = "DeleteJob StatusCode: 200\n"
 	want += "DeleteCompany StatusCode: 200\n"
 	if !strings.Contains(got, want) {
@@ -199,7 +198,6 @@ func TestFeaturedJobSearchSampleEntry(t *testing.T) {
 	if !strings.Contains(got, want) {
 		t.Errorf("stdout returned %s, wanted to contain %s", got, want)
 	}
-
 
 	want = "DeleteJob StatusCode: 200\n"
 	want += "DeleteCompany StatusCode: 200\n"
@@ -248,7 +246,7 @@ func TestAutoCompleteSampleEntry(t *testing.T) {
 	}
 
 	want = "JobTitleAutoComplete query: gap StatusCode: 200\n"
-//	want += "-- suggestion: GAP Product Manager\n"
+	//	want += "-- suggestion: GAP Product Manager\n"
 	if !strings.Contains(got, want) {
 		t.Errorf("stdout returned %s, wanted to contain %s", got, want)
 	}
@@ -259,7 +257,6 @@ func TestAutoCompleteSampleEntry(t *testing.T) {
 	if !strings.Contains(got, want) {
 		t.Errorf("stdout returned %s, wanted to contain %s", got, want)
 	}
-
 
 }
 
@@ -396,5 +393,3 @@ func TestGeneralSearchSampleEntry(t *testing.T) {
 	}
 
 }
-
-

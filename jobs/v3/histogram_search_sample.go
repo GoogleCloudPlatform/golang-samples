@@ -8,14 +8,14 @@ import (
 	talent "google.golang.org/api/jobs/v3"
 )
 
-// [START commute_search]
+// [START histogram_search]
 
 /**
  * Search on histogram search
  */
 func HistogramSearch(service *talent.Service, companyName string) (*talent.SearchJobsResponse, error) {
 	// Make sure to set the requestMetadata the same as the associated search request
-	requestMetadata := &talent.RequestMetadata {
+	requestMetadata := &talent.RequestMetadata{
 		// Make sure to hash your userID
 		UserId: "HashedUsrId",
 		// Make sure to hash the sessionID
@@ -24,25 +24,25 @@ func HistogramSearch(service *talent.Service, companyName string) (*talent.Searc
 		Domain: "www.googlesample.com",
 	}
 
-	histogramFacets := &talent.HistogramFacets {
+	histogramFacets := &talent.HistogramFacets{
 		SimpleHistogramFacets: []string{"COMPANY_ID"},
-		CustomAttributeHistogramFacets: []*talent.CustomAttributeHistogramRequest {
-			&talent.CustomAttributeHistogramRequest {
-				Key: "someFieldString",
+		CustomAttributeHistogramFacets: []*talent.CustomAttributeHistogramRequest{
+			&talent.CustomAttributeHistogramRequest{
+				Key:                  "someFieldString",
 				StringValueHistogram: true,
 			},
 		},
 	}
 
-	searchJobsRequest := &talent.SearchJobsRequest {
+	searchJobsRequest := &talent.SearchJobsRequest{
 		RequestMetadata: requestMetadata,
-		HistogramFacets: histogramFacets, 
+		HistogramFacets: histogramFacets,
 		// Set the search mode to a regular search
-		SearchMode: "JOB_SEARCH",
+		SearchMode:               "JOB_SEARCH",
 		RequirePreciseResultSize: true,
 	}
 	if companyName != "" {
-		jobQuery := &talent.JobQuery {
+		jobQuery := &talent.JobQuery{
 			CompanyNames: []string{companyName},
 		}
 		searchJobsRequest.JobQuery = jobQuery
@@ -56,6 +56,8 @@ func HistogramSearch(service *talent.Service, companyName string) (*talent.Searc
 }
 
 // [END histogram_search]
+
+// [START histogram_search_sample_entry]
 
 func HistogramSearchSampleEntry() {
 	service, _ := CreateCtsService()
@@ -82,16 +84,17 @@ func HistogramSearchSampleEntry() {
 	}
 	fmt.Printf("SimpleHistogramResults size: %d\n", len(resp.HistogramResults.SimpleHistogramResults))
 	for _, hist := range resp.HistogramResults.SimpleHistogramResults {
-		fmt.Printf("-- simple histogram searchType: %s value: %v\n", hist.SearchType, hist.Values) 
+		fmt.Printf("-- simple histogram searchType: %s value: %v\n", hist.SearchType, hist.Values)
 	}
 	fmt.Printf("CustomAttributeHistogramResults size: %d\n", len(resp.HistogramResults.CustomAttributeHistogramResults))
 	for _, hist := range resp.HistogramResults.CustomAttributeHistogramResults {
-		fmt.Printf("-- custom-attribute histogram key: %s value: %v\n", hist.Key, hist.StringValueHistogramResult) 
+		fmt.Printf("-- custom-attribute histogram key: %s value: %v\n", hist.Key, hist.StringValueHistogramResult)
 	}
-
 
 	empty, _ := DeleteJob(service, jobCreatedSWE.Name)
 	fmt.Printf("DeleteJob StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
 	empty, _ = DeleteCompany(service, companyCreated.Name)
 	fmt.Printf("DeleteCompany StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
 }
+
+// [END histogram_search_sample_entry]

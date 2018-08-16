@@ -8,17 +8,11 @@ import (
 	talent "google.golang.org/api/jobs/v3"
 )
 
-func CreateJob(service *talent.Service, jobToCreate *talent.Job) (*talent.Job, error) {
-	createJobRequest := &talent.CreateJobRequest{
-		Job: jobToCreate,
-	}
-	job, err := service.Projects.Jobs.Create(GetParent(), createJobRequest).Do()
-	if err != nil {
-		log.Fatalf("Failed to create job %q, Err: %v", jobToCreate.RequisitionId, err)
-	}
-	return job, err
-}
+// [START basic_job]
 
+/**
+ * Construct a basic job with given companyName and jobTitle
+ */
 func ConstructJobWithRequiredFields(companyName string, jobTitle string) *talent.Job {
 	requisitionId := fmt.Sprintf("sample-job-required-fields-%d", time.Now().UnixNano())
 	applicationInfo := &talent.ApplicationInfo{
@@ -35,6 +29,31 @@ func ConstructJobWithRequiredFields(companyName string, jobTitle string) *talent
 	return job
 }
 
+// [END basic_job]
+
+// [START create_job]
+
+/**
+ * Create a job
+ */
+func CreateJob(service *talent.Service, jobToCreate *talent.Job) (*talent.Job, error) {
+	createJobRequest := &talent.CreateJobRequest{
+		Job: jobToCreate,
+	}
+	job, err := service.Projects.Jobs.Create(GetParent(), createJobRequest).Do()
+	if err != nil {
+		log.Fatalf("Failed to create job %q, Err: %v", jobToCreate.RequisitionId, err)
+	}
+	return job, err
+}
+
+// [END create_job]
+
+// [START get_job]
+
+/**
+ * Get a job
+ */
 func GetJob(service *talent.Service, jobName string) (*talent.Job, error) {
 	job, err := service.Projects.Jobs.Get(jobName).Do()
 	if err != nil {
@@ -44,6 +63,13 @@ func GetJob(service *talent.Service, jobName string) (*talent.Job, error) {
 	return job, err
 }
 
+// [END get_job]
+
+// [START update_job]
+
+/**
+ * Update a job with all fields
+ */
 func UpdateJob(service *talent.Service, jobName string, jobToUpdate *talent.Job) (*talent.Job, error) {
 	updateJobRequest := &talent.UpdateJobRequest{
 		Job: jobToUpdate,
@@ -56,6 +82,14 @@ func UpdateJob(service *talent.Service, jobName string, jobToUpdate *talent.Job)
 	return job, err
 }
 
+// [END update_job]
+
+// [START update_job_with_field_mask]
+
+/**
+ * Update a job
+ * mask: comma separated top-level fields of Job
+ */
 // mask: comma separated top-level fields of Job
 func UpdateJobWithMask(service *talent.Service, jobName string, mask string, jobToUpdate *talent.Job) (*talent.Job, error) {
 	updateJobRequest := &talent.UpdateJobRequest{
@@ -70,6 +104,13 @@ func UpdateJobWithMask(service *talent.Service, jobName string, mask string, job
 	return job, err
 }
 
+// [END update_job_with_field_mask]
+
+// [START delete_job]
+
+/**
+ * Delete a job
+ */
 func DeleteJob(service *talent.Service, jobName string) (*talent.Empty, error) {
 	empty, err := service.Projects.Jobs.Delete(jobName).Do()
 	if err != nil {
@@ -79,8 +120,14 @@ func DeleteJob(service *talent.Service, jobName string) (*talent.Empty, error) {
 	return empty, err
 }
 
-// filter required
-// companyName = "projects/api-test-project/companies/123"
+// [END delete_job]
+
+// [START list_jobs]
+
+/**
+ * List jobs with companyName as filter
+ * filter required, eg companyName = "projects/api-test-project/companies/123"
+ */
 func ListJobs(service *talent.Service, filter string) (*talent.ListJobsResponse, error) {
 	resp, err := service.Projects.Jobs.List(GetParent()).Filter(filter).Do()
 	if err != nil {
@@ -90,7 +137,11 @@ func ListJobs(service *talent.Service, filter string) (*talent.ListJobsResponse,
 	return resp, err
 }
 
-func JobSampleEntry() {
+// [END list_jobs]
+
+// [START basic_job_sample_entry]
+
+func BasicJobSampleEntry() {
 	service, _ := CreateCtsService()
 
 	// Create a company before creating jobs
@@ -138,3 +189,5 @@ func JobSampleEntry() {
 	empty, _ = DeleteCompany(service, companyCreated.Name)
 	fmt.Printf("DeleteCompany StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
 }
+
+// [END basic_job_sample_entry]

@@ -15,7 +15,7 @@ import (
  */
 func SearchForAlerts(service *talent.Service, companyName string) (*talent.SearchJobsResponse, error) {
 	// Make sure to set the requestMetadata the same as the associated search request
-	requestMetadata := &talent.RequestMetadata {
+	requestMetadata := &talent.RequestMetadata{
 		// Make sure to hash your userID
 		UserId: "HashedUsrId",
 		// Make sure to hash the sessionID
@@ -24,13 +24,13 @@ func SearchForAlerts(service *talent.Service, companyName string) (*talent.Searc
 		Domain: "www.googlesample.com",
 	}
 
-	searchJobsRequest := &talent.SearchJobsRequest {
+	searchJobsRequest := &talent.SearchJobsRequest{
 		RequestMetadata: requestMetadata,
 		// Set the search mode to a regular search
 		SearchMode: "JOB_SEARCH",
 	}
 	if companyName != "" {
-		jobQuery := &talent.JobQuery {
+		jobQuery := &talent.JobQuery{
 			CompanyNames: []string{companyName},
 		}
 		searchJobsRequest.JobQuery = jobQuery
@@ -44,6 +44,8 @@ func SearchForAlerts(service *talent.Service, companyName string) (*talent.Searc
 }
 
 // [END search_for_alerts]
+
+// [START email_alert_search_sample_entry]
 
 func EmailAlertSearchSampleEntry() {
 	service, _ := CreateCtsService()
@@ -77,3 +79,4 @@ func EmailAlertSearchSampleEntry() {
 
 }
 
+// [END email_alert_search_sample_entry]

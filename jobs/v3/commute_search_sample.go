@@ -15,7 +15,7 @@ import (
  */
 func CommuteSearch(service *talent.Service, companyName string) (*talent.SearchJobsResponse, error) {
 	// Make sure to set the requestMetadata the same as the associated search request
-	requestMetadata := &talent.RequestMetadata {
+	requestMetadata := &talent.RequestMetadata{
 		// Make sure to hash your userID
 		UserId: "HashedUsrId",
 		// Make sure to hash the sessionID
@@ -23,13 +23,13 @@ func CommuteSearch(service *talent.Service, companyName string) (*talent.SearchJ
 		// Domain of the website where the search is conducted
 		Domain: "www.googlesample.com",
 	}
-	jobQuery := &talent.JobQuery {
-		CommuteFilter: &talent.CommuteFilter {
-			RoadTraffic: "TRAFFIC_FREE",
-			CommuteMethod: "TRANSIT",
+	jobQuery := &talent.JobQuery{
+		CommuteFilter: &talent.CommuteFilter{
+			RoadTraffic:    "TRAFFIC_FREE",
+			CommuteMethod:  "TRANSIT",
 			TravelDuration: "1000s",
-			StartCoordinates: &talent.LatLng {
-				Latitude: 37.422408,
+			StartCoordinates: &talent.LatLng{
+				Latitude:  37.422408,
 				Longitude: -122.085609,
 			},
 		},
@@ -38,12 +38,12 @@ func CommuteSearch(service *talent.Service, companyName string) (*talent.SearchJ
 		jobQuery.CompanyNames = []string{companyName}
 	}
 
-	searchJobsRequest := &talent.SearchJobsRequest {
+	searchJobsRequest := &talent.SearchJobsRequest{
 		RequestMetadata: requestMetadata,
 		// Set the actual search term as defined in the jobQurey
-		JobQuery: jobQuery, 
+		JobQuery: jobQuery,
 		// Set the search mode to a regular search
-		SearchMode: "JOB_SEARCH",
+		SearchMode:               "JOB_SEARCH",
 		RequirePreciseResultSize: true,
 	}
 	resp, err := service.Projects.Jobs.Search(GetParent(), searchJobsRequest).Do()
@@ -55,6 +55,7 @@ func CommuteSearch(service *talent.Service, companyName string) (*talent.SearchJ
 
 // [END commute_search]
 
+// [START commute_search_sample_entry]
 func CommuteSearchSampleEntry() {
 	service, _ := CreateCtsService()
 
@@ -84,3 +85,5 @@ func CommuteSearchSampleEntry() {
 	empty, _ = DeleteCompany(service, companyCreated.Name)
 	fmt.Printf("DeleteCompany StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
 }
+
+// [END commute_search_sample_entry]

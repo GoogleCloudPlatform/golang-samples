@@ -1,6 +1,5 @@
 package cjdsample
 
-
 import (
 	"fmt"
 	"log"
@@ -8,8 +7,12 @@ import (
 
 	talent "google.golang.org/api/jobs/v3"
 )
-// Auto completes job titles within given companyName
-//
+
+// [START auto_complete_job_title]
+
+/**
+ * Auto completes job titles within given companyName
+ */
 func JobTitleAutoComplete(service *talent.Service, companyName string, query string) (*talent.CompleteQueryResponse, error) {
 	complete := service.Projects.Complete(GetParent()).Query(query).LanguageCode("en-US").Type("JOB_TITLE").PageSize(10)
 	if companyName != "" {
@@ -23,9 +26,13 @@ func JobTitleAutoComplete(service *talent.Service, companyName string, query str
 
 }
 
+// [END auto_complete_job_title]
 
-// Auto completes job titles within given companyName
-//
+// [START auto_complete_default]
+
+/**
+ * Auto completes job titles or company names within given companyName
+ */
 func DefaultAutoComplete(service *talent.Service, companyName string, query string) (*talent.CompleteQueryResponse, error) {
 	complete := service.Projects.Complete(GetParent()).Query(query).LanguageCode("en-US").Type("COMBINED").PageSize(10)
 	if companyName != "" {
@@ -39,6 +46,9 @@ func DefaultAutoComplete(service *talent.Service, companyName string, query stri
 
 }
 
+// [END auto_complete_default]
+
+// [START auto_complete_sample_entry]
 func AutoCompleteSampleEntry() {
 	service, _ := CreateCtsService()
 
@@ -100,3 +110,5 @@ func AutoCompleteSampleEntry() {
 	fmt.Printf("DeleteCompany StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
 
 }
+
+// [END auto_complete_sample_entry]

@@ -13,32 +13,33 @@ import (
 /**
  * Construct a job as featured
  */
-func ConstructFeaturedJob(companyName string, jobTitle string) (*talent.Job) {
+func ConstructFeaturedJob(companyName string, jobTitle string) *talent.Job {
 	requisitionId := fmt.Sprintf("featured-job-required-fields-%d", time.Now().UnixNano())
-	applicationInfo := &talent.ApplicationInfo {
-		Uris: []string {"https://googlesample.com/career"},
+	applicationInfo := &talent.ApplicationInfo{
+		Uris: []string{"https://googlesample.com/career"},
 	}
 	job := &talent.Job{
-		RequisitionId: requisitionId,
-		Title: jobTitle,
-		CompanyName: companyName,
+		RequisitionId:   requisitionId,
+		Title:           jobTitle,
+		CompanyName:     companyName,
 		ApplicationInfo: applicationInfo,
-		Description: "Design, devolop, test, deploy, maintain and improve software.",
-		PromotionValue: 2,
+		Description:     "Design, devolop, test, deploy, maintain and improve software.",
+		PromotionValue:  2,
 	}
-//	fmt.Printf("Job constructed: %v\n",job)
+	//	fmt.Printf("Job constructed: %v\n",job)
 	return job
 }
+
 // [END featured_job]
 
 // [START search_featured_job]
 
 /**
-  * Simple search jobs with keyword.
-  */
+ * Simple search jobs with keyword.
+ */
 func SearchFeaturedJobs(service *talent.Service, companyName string, query string) (*talent.SearchJobsResponse, error) {
 	// Make sure to set the requestMetadata the same as the associated search request
-	requestMetadata := &talent.RequestMetadata {
+	requestMetadata := &talent.RequestMetadata{
 		// Make sure to hash your userID
 		UserId: "HashedUsrId",
 		// Make sure to hash the sessionID
@@ -46,17 +47,17 @@ func SearchFeaturedJobs(service *talent.Service, companyName string, query strin
 		// Domain of the website where the search is conducted
 		Domain: "www.googlesample.com",
 	}
-	jobQuery := &talent.JobQuery {
+	jobQuery := &talent.JobQuery{
 		Query: query,
 	}
 	if companyName != "" {
 		jobQuery.CompanyNames = []string{companyName}
 	}
 
-	searchJobsRequest := &talent.SearchJobsRequest {
+	searchJobsRequest := &talent.SearchJobsRequest{
 		RequestMetadata: requestMetadata,
 		// Set the actual search term as defined in the jobQurey
-		JobQuery: jobQuery, 
+		JobQuery: jobQuery,
 		// Set the search mode to a featured search
 		// which would only search the jobs with positive promotion value
 		SearchMode: "FEATURED_JOB_SEARCH",
@@ -67,8 +68,10 @@ func SearchFeaturedJobs(service *talent.Service, companyName string, query strin
 	}
 	return resp, err
 }
+
 // [END search_featured_job]
 
+// [START featured_job_search_sample_entry]
 
 func FeaturedJobSearchSampleEntry() {
 	service, _ := CreateCtsService()
@@ -105,6 +108,4 @@ func FeaturedJobSearchSampleEntry() {
 	fmt.Printf("DeleteCompany StatusCode: %d\n", emptyResp.ServerResponse.HTTPStatusCode)
 }
 
-
-
-
+// [END featured_job_search_sample_entry]

@@ -11,11 +11,23 @@ import (
 	talent "google.golang.org/api/jobs/v3"
 )
 
+// [START get_parent]
+
+/**
+ *
+ */
 func GetParent() string {
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	return fmt.Sprintf("projects/%s", projectID)
 }
 
+// [END get_parent]
+
+// [START create_service]
+
+/**
+ * Create service of Cloud Talent Solution
+ */
 func CreateCtsService() (*talent.Service, error) {
 	// Authorize the client using Application Default Credentials.
 	// See https://g.co/dv/identity/protocols/application-default-credentials
@@ -32,6 +44,28 @@ func CreateCtsService() (*talent.Service, error) {
 	return ctsService, err
 }
 
+// [END create_service]
+
+// [START basic_company]
+
+/**
+ * Construct a company
+ */
+func ConstructCompanyWithRequiredFields() *talent.Company {
+	externalId := fmt.Sprintf("sample-company-%d", time.Now().UnixNano())
+	return &talent.Company{
+		ExternalId:  externalId,
+		DisplayName: "Google Sample",
+	}
+}
+
+// [END basic_company]
+
+// [START create_company]
+
+/**
+ * Create a company
+ */
 func CreateCompany(service *talent.Service, companyToCreate *talent.Company) (*talent.Company, error) {
 	createCompanyRquest := &talent.CreateCompanyRequest{
 		Company: companyToCreate,
@@ -44,6 +78,13 @@ func CreateCompany(service *talent.Service, companyToCreate *talent.Company) (*t
 	return company, err
 }
 
+// [END create_company]
+
+// [START get_company]
+
+/**
+ * Get a company
+ */
 func GetCompany(service *talent.Service, name string) (*talent.Company, error) {
 	company, err := service.Projects.Companies.Get(name).Do()
 	if err != nil {
@@ -53,6 +94,13 @@ func GetCompany(service *talent.Service, name string) (*talent.Company, error) {
 	return company, err
 }
 
+// [END get_company]
+
+// [START update_company]
+
+/**
+ * Update company with all fields
+ */
 func UpdateCompany(service *talent.Service, name string, companyToUpdate *talent.Company) (*talent.Company, error) {
 	updateCompanyRequest := &talent.UpdateCompanyRequest{
 		Company: companyToUpdate,
@@ -65,7 +113,14 @@ func UpdateCompany(service *talent.Service, name string, companyToUpdate *talent
 	return company, err
 }
 
-// mask: comma separated top-level fields of Company
+// [END update_company]
+
+// [START update_company_with_field_mask]
+
+/**
+ * Update company with field mask
+ * mask: comma separated top-level fields of Company
+ */
 func UpdateCompanyWithMask(service *talent.Service, name string, mask string, companyToUpdate *talent.Company) (*talent.Company, error) {
 	updateCompanyRequest := &talent.UpdateCompanyRequest{
 		Company:    companyToUpdate,
@@ -79,6 +134,13 @@ func UpdateCompanyWithMask(service *talent.Service, name string, mask string, co
 	return company, err
 }
 
+// [END update_company_with_field_mask]
+
+// [START delete_company]
+
+/**
+ * Delete a company
+ */
 func DeleteCompany(service *talent.Service, name string) (*talent.Empty, error) {
 	empty, err := service.Projects.Companies.Delete(name).Do()
 	if err != nil {
@@ -88,6 +150,13 @@ func DeleteCompany(service *talent.Service, name string) (*talent.Empty, error) 
 	return empty, err
 }
 
+// [END delete_company
+
+// [START list_companies]
+
+/**
+ * List companies in the project
+ */
 func ListCompanies(service *talent.Service) (*talent.ListCompaniesResponse, error) {
 	resp, err := service.Projects.Companies.List(GetParent()).Do()
 	if err != nil {
@@ -97,15 +166,10 @@ func ListCompanies(service *talent.Service) (*talent.ListCompaniesResponse, erro
 	return resp, err
 }
 
-func ConstructCompanyWithRequiredFields() *talent.Company {
-	externalId := fmt.Sprintf("sample-company-%d", time.Now().UnixNano())
-	return &talent.Company{
-		ExternalId:  externalId,
-		DisplayName: "Google Sample",
-	}
-}
+// [END list_companies]
 
-func CompanySampleEntry() {
+// [START basic_company_sample_entry]
+func BasicCompanySampleEntry() {
 	service, _ := CreateCtsService()
 
 	companyToCreate := ConstructCompanyWithRequiredFields()
@@ -138,3 +202,5 @@ func CompanySampleEntry() {
 	}
 
 }
+
+// [END basic_company_sample_entry]

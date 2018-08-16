@@ -15,7 +15,7 @@ import (
  */
 func BasicLocationSearch(service *talent.Service, companyName string, location string, distance float64) (*talent.SearchJobsResponse, error) {
 	// Make sure to set the requestMetadata the same as the associated search request
-	requestMetadata := &talent.RequestMetadata {
+	requestMetadata := &talent.RequestMetadata{
 		// Make sure to hash your userID
 		UserId: "HashedUsrId",
 		// Make sure to hash the sessionID
@@ -23,10 +23,10 @@ func BasicLocationSearch(service *talent.Service, companyName string, location s
 		// Domain of the website where the search is conducted
 		Domain: "www.googlesample.com",
 	}
-	jobQuery := &talent.JobQuery {
-		LocationFilters: []*talent.LocationFilter { 
-			&talent.LocationFilter {
-				Address: location,
+	jobQuery := &talent.JobQuery{
+		LocationFilters: []*talent.LocationFilter{
+			&talent.LocationFilter{
+				Address:         location,
 				DistanceInMiles: distance,
 			},
 		},
@@ -36,10 +36,10 @@ func BasicLocationSearch(service *talent.Service, companyName string, location s
 		jobQuery.CompanyNames = []string{companyName}
 	}
 
-	searchJobsRequest := &talent.SearchJobsRequest {
+	searchJobsRequest := &talent.SearchJobsRequest{
 		RequestMetadata: requestMetadata,
 		// Set the actual search term as defined in the jobQurey
-		JobQuery: jobQuery, 
+		JobQuery: jobQuery,
 		// Set the search mode to a regular search
 		SearchMode: "JOB_SEARCH",
 	}
@@ -59,7 +59,7 @@ func BasicLocationSearch(service *talent.Service, companyName string, location s
  */
 func CityLocationSearch(service *talent.Service, companyName string, location string) (*talent.SearchJobsResponse, error) {
 	// Make sure to set the requestMetadata the same as the associated search request
-	requestMetadata := &talent.RequestMetadata {
+	requestMetadata := &talent.RequestMetadata{
 		// Make sure to hash your userID
 		UserId: "HashedUsrId",
 		// Make sure to hash the sessionID
@@ -67,9 +67,9 @@ func CityLocationSearch(service *talent.Service, companyName string, location st
 		// Domain of the website where the search is conducted
 		Domain: "www.googlesample.com",
 	}
-	jobQuery := &talent.JobQuery {
-		LocationFilters: []*talent.LocationFilter { 
-			&talent.LocationFilter {
+	jobQuery := &talent.JobQuery{
+		LocationFilters: []*talent.LocationFilter{
+			&talent.LocationFilter{
 				Address: location,
 			},
 		},
@@ -79,10 +79,10 @@ func CityLocationSearch(service *talent.Service, companyName string, location st
 		jobQuery.CompanyNames = []string{companyName}
 	}
 
-	searchJobsRequest := &talent.SearchJobsRequest {
+	searchJobsRequest := &talent.SearchJobsRequest{
 		RequestMetadata: requestMetadata,
 		// Set the actual search term as defined in the jobQurey
-		JobQuery: jobQuery, 
+		JobQuery: jobQuery,
 		// Set the search mode to a regular search
 		SearchMode: "JOB_SEARCH",
 	}
@@ -102,7 +102,7 @@ func CityLocationSearch(service *talent.Service, companyName string, location st
  */
 func BroadeningLocationSearch(service *talent.Service, companyName string, location string) (*talent.SearchJobsResponse, error) {
 	// Make sure to set the requestMetadata the same as the associated search request
-	requestMetadata := &talent.RequestMetadata {
+	requestMetadata := &talent.RequestMetadata{
 		// Make sure to hash your userID
 		UserId: "HashedUsrId",
 		// Make sure to hash the sessionID
@@ -110,9 +110,9 @@ func BroadeningLocationSearch(service *talent.Service, companyName string, locat
 		// Domain of the website where the search is conducted
 		Domain: "www.googlesample.com",
 	}
-	jobQuery := &talent.JobQuery {
-		LocationFilters: []*talent.LocationFilter { 
-			&talent.LocationFilter {
+	jobQuery := &talent.JobQuery{
+		LocationFilters: []*talent.LocationFilter{
+			&talent.LocationFilter{
 				Address: location,
 			},
 		},
@@ -122,12 +122,12 @@ func BroadeningLocationSearch(service *talent.Service, companyName string, locat
 		jobQuery.CompanyNames = []string{companyName}
 	}
 
-	searchJobsRequest := &talent.SearchJobsRequest {
+	searchJobsRequest := &talent.SearchJobsRequest{
 		RequestMetadata: requestMetadata,
 		// Set the actual search term as defined in the jobQurey
-		JobQuery: jobQuery, 
+		JobQuery: jobQuery,
 		// Set the search mode to a regular search
-		SearchMode: "JOB_SEARCH",
+		SearchMode:       "JOB_SEARCH",
 		EnableBroadening: true,
 	}
 	resp, err := service.Projects.Jobs.Search(GetParent(), searchJobsRequest).Do()
@@ -146,7 +146,7 @@ func BroadeningLocationSearch(service *talent.Service, companyName string, locat
  */
 func KeywordLocationSearch(service *talent.Service, companyName string, location string, distance float64, keyword string) (*talent.SearchJobsResponse, error) {
 	// Make sure to set the requestMetadata the same as the associated search request
-	requestMetadata := &talent.RequestMetadata {
+	requestMetadata := &talent.RequestMetadata{
 		// Make sure to hash your userID
 		UserId: "HashedUsrId",
 		// Make sure to hash the sessionID
@@ -154,10 +154,10 @@ func KeywordLocationSearch(service *talent.Service, companyName string, location
 		// Domain of the website where the search is conducted
 		Domain: "www.googlesample.com",
 	}
-	jobQuery := &talent.JobQuery {
-		LocationFilters: []*talent.LocationFilter { 
-			&talent.LocationFilter {
-				Address: location,
+	jobQuery := &talent.JobQuery{
+		LocationFilters: []*talent.LocationFilter{
+			&talent.LocationFilter{
+				Address:         location,
 				DistanceInMiles: distance,
 			},
 		},
@@ -168,10 +168,10 @@ func KeywordLocationSearch(service *talent.Service, companyName string, location
 		jobQuery.CompanyNames = []string{companyName}
 	}
 
-	searchJobsRequest := &talent.SearchJobsRequest {
+	searchJobsRequest := &talent.SearchJobsRequest{
 		RequestMetadata: requestMetadata,
 		// Set the actual search term as defined in the jobQurey
-		JobQuery: jobQuery, 
+		JobQuery: jobQuery,
 		// Set the search mode to a regular search
 		SearchMode: "JOB_SEARCH",
 	}
@@ -191,7 +191,7 @@ func KeywordLocationSearch(service *talent.Service, companyName string, location
  */
 func MultiLocationsSearch(service *talent.Service, companyName string, location string, distance float64, location2 string) (*talent.SearchJobsResponse, error) {
 	// Make sure to set the requestMetadata the same as the associated search request
-	requestMetadata := &talent.RequestMetadata {
+	requestMetadata := &talent.RequestMetadata{
 		// Make sure to hash your userID
 		UserId: "HashedUsrId",
 		// Make sure to hash the sessionID
@@ -199,13 +199,13 @@ func MultiLocationsSearch(service *talent.Service, companyName string, location 
 		// Domain of the website where the search is conducted
 		Domain: "www.googlesample.com",
 	}
-	jobQuery := &talent.JobQuery {
-		LocationFilters: []*talent.LocationFilter { 
-			&talent.LocationFilter {
-				Address: location,
+	jobQuery := &talent.JobQuery{
+		LocationFilters: []*talent.LocationFilter{
+			&talent.LocationFilter{
+				Address:         location,
 				DistanceInMiles: distance,
 			},
-			&talent.LocationFilter {
+			&talent.LocationFilter{
 				Address: location,
 			},
 		},
@@ -215,10 +215,10 @@ func MultiLocationsSearch(service *talent.Service, companyName string, location 
 		jobQuery.CompanyNames = []string{companyName}
 	}
 
-	searchJobsRequest := &talent.SearchJobsRequest {
+	searchJobsRequest := &talent.SearchJobsRequest{
 		RequestMetadata: requestMetadata,
 		// Set the actual search term as defined in the jobQurey
-		JobQuery: jobQuery, 
+		JobQuery: jobQuery,
 		// Set the search mode to a regular search
 		SearchMode: "JOB_SEARCH",
 	}
@@ -230,6 +230,8 @@ func MultiLocationsSearch(service *talent.Service, companyName string, location 
 }
 
 // [END keyword_locations_search]
+
+// [START location_based_search_sample_entry]
 
 func LocationBasedSearchSampleEntry() {
 	service, _ := CreateCtsService()
@@ -247,14 +249,14 @@ func LocationBasedSearchSampleEntry() {
 	// Create a SDE job
 	jobTitle := keyword
 	jobToCreate := ConstructJobWithRequiredFields(companyCreated.Name, jobTitle)
-	jobToCreate.Addresses = []string {location}
+	jobToCreate.Addresses = []string{location}
 
 	jobCreated, _ := CreateJob(service, jobToCreate)
 	fmt.Printf("CreateJob: %s\n", jobCreated.Title)
 
 	jobTitle2 := "Senior " + keyword
 	jobToCreate2 := ConstructJobWithRequiredFields(companyCreated.Name, jobTitle2)
-	jobToCreate2.Addresses = []string {location2}
+	jobToCreate2.Addresses = []string{location2}
 	jobCreated2, _ := CreateJob(service, jobToCreate2)
 	fmt.Printf("CreateJob: %s\n", jobCreated2.Title)
 
@@ -304,3 +306,5 @@ func LocationBasedSearchSampleEntry() {
 	fmt.Printf("DeleteCompany StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
 
 }
+
+// [END location_based_search_sample_entry]

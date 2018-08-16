@@ -5,58 +5,72 @@ import (
 	"log"
 	"time"
 
-	googleapi "google.golang.org/api/googleapi"
 	talent "google.golang.org/api/jobs/v3"
 )
 
-func ConstructJobWithCustomAttributes(companyName string, jobTitle string) (*talent.Job) {
+// [START custom_attribute_job]
+
+/**
+ * Construct a job with custom attributes
+ */
+func ConstructJobWithCustomAttributes(companyName string, jobTitle string) *talent.Job {
 	// requisition id shoud be the unique Id in your system
 	requisitionId := fmt.Sprintf("job-with-custom-attribute-%d", time.Now().UnixNano())
-	applicationInfo := &talent.ApplicationInfo {
-		Uris: []string {"https://googlesample.com/career"},
+	applicationInfo := &talent.ApplicationInfo{
+		Uris: []string{"https://googlesample.com/career"},
 	}
-	customAttrStr := &talent.CustomAttribute {
-		Filterable: true,
+	customAttrStr := &talent.CustomAttribute{
+		Filterable:   true,
 		StringValues: []string{"someStrVal"},
 	}
-	customAttrLong := &talent.CustomAttribute {
+	customAttrLong := &talent.CustomAttribute{
 		Filterable: true,
-		LongValues: googleapi.Int64s {900},
+		LongValues: []int64{900},
 	}
 
-	customAttributes := map[string]talent.CustomAttribute {
+	customAttributes := map[string]talent.CustomAttribute{
 		"someFieldString": *customAttrStr,
-		"someFieldLong": *customAttrLong,
+		"someFieldLong":   *customAttrLong,
 	}
 
 	job := &talent.Job{
-		RequisitionId: requisitionId,
-		Title: jobTitle,
-		CompanyName: companyName,
-		ApplicationInfo: applicationInfo,
-		Description: "Design, devolop, test, deploy, maintain and improve software.",
+		RequisitionId:    requisitionId,
+		Title:            jobTitle,
+		CompanyName:      companyName,
+		ApplicationInfo:  applicationInfo,
+		Description:      "Design, devolop, test, deploy, maintain and improve software.",
 		CustomAttributes: customAttributes,
 	}
-//	fmt.Printf("Job constructed: %v\n",job)
+	//	fmt.Printf("Job constructed: %v\n",job)
 	return job
 }
 
+// [END custom_attribute_job]
 
-func FilterOnStringValueCustomAttribute(service *talent.Service)(*talent.SearchJobsResponse, error) {
-	requestMetadata := &talent.RequestMetadata {
+// [START custom_attribute_filter_string_value]
+
+/**
+ * CustomAttributeFilter on a string value custom atrribute
+ */
+func FilterOnStringValueCustomAttribute(service *talent.Service) (*talent.SearchJobsResponse, error) {
+	// Make sure to set the requestMetadata the same as the associated search request
+	requestMetadata := &talent.RequestMetadata{
+		// Make sure to hash your userID
 		UserId: "HashedUsrId",
+		// Make sure to hash the sessionID
 		SessionId: "HashedSessionId",
+		// Domain of the website where the search is conducted
 		Domain: "www.googlesample.com",
 	}
 
 	customAttrFilter := "NOT EMPTY(someFieldString)"
-	query := &talent.JobQuery {
+	query := &talent.JobQuery{
 		CustomAttributeFilter: customAttrFilter,
 	}
-	searchJobsRequest := &talent.SearchJobsRequest {
-		JobQuery: query,
+	searchJobsRequest := &talent.SearchJobsRequest{
+		JobQuery:        query,
 		RequestMetadata: requestMetadata,
-		JobView: "JOB_VIEW_FULL",
+		JobView:         "JOB_VIEW_FULL",
 	}
 	resp, err := service.Projects.Jobs.Search(GetParent(), searchJobsRequest).Do()
 	if err != nil {
@@ -66,22 +80,32 @@ func FilterOnStringValueCustomAttribute(service *talent.Service)(*talent.SearchJ
 	return resp, err
 }
 
+// [END custom_attribute_filter_string_value]
 
-func FilterOnLongValueCustomAttribute(service *talent.Service)(*talent.SearchJobsResponse, error) {
-	requestMetadata := &talent.RequestMetadata {
+// [START custom_attribute_filter_long_value]
+
+/**
+ * CustomAttributeFilter on a long value custom attribute
+ */
+func FilterOnLongValueCustomAttribute(service *talent.Service) (*talent.SearchJobsResponse, error) {
+	// Make sure to set the requestMetadata the same as the associated search request
+	requestMetadata := &talent.RequestMetadata{
+		// Make sure to hash your userID
 		UserId: "HashedUsrId",
+		// Make sure to hash the sessionID
 		SessionId: "HashedSessionId",
+		// Domain of the website where the search is conducted
 		Domain: "www.googlesample.com",
 	}
 
 	customAttrFilter := "someFieldLong < 1000"
-	query := &talent.JobQuery {
+	query := &talent.JobQuery{
 		CustomAttributeFilter: customAttrFilter,
 	}
-	searchJobsRequest := &talent.SearchJobsRequest {
-		JobQuery: query,
+	searchJobsRequest := &talent.SearchJobsRequest{
+		JobQuery:        query,
 		RequestMetadata: requestMetadata,
-		JobView: "JOB_VIEW_FULL",
+		JobView:         "JOB_VIEW_FULL",
 	}
 	resp, err := service.Projects.Jobs.Search(GetParent(), searchJobsRequest).Do()
 	if err != nil {
@@ -91,22 +115,33 @@ func FilterOnLongValueCustomAttribute(service *talent.Service)(*talent.SearchJob
 	return resp, err
 }
 
+// [END custom_attribute_filter_long_value]
+
+// [START custom_attribute_filter_multi_attributes]
+
+/**
+ * CustomAttributeFilter on multiple custom attributes
+ */
 func FilterOnMultiCustomAttributes(service *talent.Service) (*talent.SearchJobsResponse, error) {
-	requestMetadata := &talent.RequestMetadata {
+	// Make sure to set the requestMetadata the same as the associated search request
+	requestMetadata := &talent.RequestMetadata{
+		// Make sure to hash your userID
 		UserId: "HashedUsrId",
+		// Make sure to hash the sessionID
 		SessionId: "HashedSessionId",
+		// Domain of the website where the search is conducted
 		Domain: "www.googlesample.com",
 	}
 
 	customAttrFilter := "(someFieldString = \"someStrVal\") AND (someFieldLong < 1000)"
-	query := &talent.JobQuery {
+	query := &talent.JobQuery{
 		CustomAttributeFilter: customAttrFilter,
 	}
 
-	searchJobsRequest := &talent.SearchJobsRequest {
-		JobQuery: query,
+	searchJobsRequest := &talent.SearchJobsRequest{
+		JobQuery:        query,
 		RequestMetadata: requestMetadata,
-		JobView: "JOB_VIEW_FULL",
+		JobView:         "JOB_VIEW_FULL",
 	}
 	resp, err := service.Projects.Jobs.Search(GetParent(), searchJobsRequest).Do()
 	if err != nil {
@@ -116,7 +151,9 @@ func FilterOnMultiCustomAttributes(service *talent.Service) (*talent.SearchJobsR
 	return resp, err
 }
 
+// [END custom_attribute_filter_multi_attributes]
 
+// [START custom_attribute_sample_entry]
 func CustomAttributeSampleEntry() {
 	service, _ := CreateCtsService()
 
@@ -162,3 +199,5 @@ func CustomAttributeSampleEntry() {
 	fmt.Printf("DeleteCompany StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
 
 }
+
+// [END custom_attribute_sample_entry]

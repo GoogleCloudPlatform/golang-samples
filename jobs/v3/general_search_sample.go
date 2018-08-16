@@ -11,11 +11,11 @@ import (
 // [START basic_keyword_search]
 
 /**
-  * Simple search jobs with keyword.
-  */
+ * Simple search jobs with keyword.
+ */
 func BasicJobSearch(service *talent.Service, companyName string, query string) (*talent.SearchJobsResponse, error) {
 	// Make sure to set the requestMetadata the same as the associated search request
-	requestMetadata := &talent.RequestMetadata {
+	requestMetadata := &talent.RequestMetadata{
 		// Make sure to hash your userID
 		UserId: "HashedUsrId",
 		// Make sure to hash the sessionID
@@ -23,17 +23,17 @@ func BasicJobSearch(service *talent.Service, companyName string, query string) (
 		// Domain of the website where the search is conducted
 		Domain: "www.googlesample.com",
 	}
-	jobQuery := &talent.JobQuery {
+	jobQuery := &talent.JobQuery{
 		Query: query,
 	}
 	if companyName != "" {
 		jobQuery.CompanyNames = []string{companyName}
 	}
 
-	searchJobsRequest := &talent.SearchJobsRequest {
+	searchJobsRequest := &talent.SearchJobsRequest{
 		RequestMetadata: requestMetadata,
 		// Set the actual search term as defined in the jobQurey
-		JobQuery: jobQuery, 
+		JobQuery: jobQuery,
 		// Set the search mode to a regular search
 		SearchMode: "JOB_SEARCH",
 	}
@@ -43,16 +43,17 @@ func BasicJobSearch(service *talent.Service, companyName string, query string) (
 	}
 	return resp, err
 }
-//[END basic_keyword_search]
 
+// [END basic_keyword_search]
 
 // [START category_filter]
+
 /**
  * Search on category filter
  */
 func CategoryFilterSearch(service *talent.Service, companyName string, categories []string) (*talent.SearchJobsResponse, error) {
 	// Make sure to set the requestMetadata the same as the associated search request
-	requestMetadata := &talent.RequestMetadata {
+	requestMetadata := &talent.RequestMetadata{
 		// Make sure to hash your userID
 		UserId: "HashedUsrId",
 		// Make sure to hash the sessionID
@@ -60,17 +61,17 @@ func CategoryFilterSearch(service *talent.Service, companyName string, categorie
 		// Domain of the website where the search is conducted
 		Domain: "www.googlesample.com",
 	}
-	jobQuery := &talent.JobQuery {
+	jobQuery := &talent.JobQuery{
 		JobCategories: categories,
 	}
 	if companyName != "" {
 		jobQuery.CompanyNames = []string{companyName}
 	}
 
-	searchJobsRequest := &talent.SearchJobsRequest {
+	searchJobsRequest := &talent.SearchJobsRequest{
 		RequestMetadata: requestMetadata,
 		// Set the actual search term as defined in the jobQurey
-		JobQuery: jobQuery, 
+		JobQuery: jobQuery,
 		// Set the search mode to a regular search
 		SearchMode: "JOB_SEARCH",
 	}
@@ -80,6 +81,7 @@ func CategoryFilterSearch(service *talent.Service, companyName string, categorie
 	}
 	return resp, err
 }
+
 // [END category_filter]
 
 // [START employment_types_filter]
@@ -89,7 +91,7 @@ func CategoryFilterSearch(service *talent.Service, companyName string, categorie
  */
 func EmploymentTypesSearch(service *talent.Service, companyName string, employmentTypes []string) (*talent.SearchJobsResponse, error) {
 	// Make sure to set the requestMetadata the same as the associated search request
-	requestMetadata := &talent.RequestMetadata {
+	requestMetadata := &talent.RequestMetadata{
 		// Make sure to hash your userID
 		UserId: "HashedUsrId",
 		// Make sure to hash the sessionID
@@ -97,17 +99,17 @@ func EmploymentTypesSearch(service *talent.Service, companyName string, employme
 		// Domain of the website where the search is conducted
 		Domain: "www.googlesample.com",
 	}
-	jobQuery := &talent.JobQuery {
+	jobQuery := &talent.JobQuery{
 		EmploymentTypes: employmentTypes,
 	}
 	if companyName != "" {
 		jobQuery.CompanyNames = []string{companyName}
 	}
 
-	searchJobsRequest := &talent.SearchJobsRequest {
+	searchJobsRequest := &talent.SearchJobsRequest{
 		RequestMetadata: requestMetadata,
 		// Set the actual search term as defined in the jobQurey
-		JobQuery: jobQuery, 
+		JobQuery: jobQuery,
 		// Set the search mode to a regular search
 		SearchMode: "JOB_SEARCH",
 	}
@@ -117,6 +119,7 @@ func EmploymentTypesSearch(service *talent.Service, companyName string, employme
 	}
 	return resp, err
 }
+
 // [END employment_types_filter]
 
 // [START date_range_filter]
@@ -130,7 +133,7 @@ func EmploymentTypesSearch(service *talent.Service, companyName string, employme
  */
 func DateRangeSearch(service *talent.Service, companyName string, startTime string, endTime string) (*talent.SearchJobsResponse, error) {
 	// Make sure to set the requestMetadata the same as the associated search request
-	requestMetadata := &talent.RequestMetadata {
+	requestMetadata := &talent.RequestMetadata{
 		// Make sure to hash your userID
 		UserId: "HashedUsrId",
 		// Make sure to hash the sessionID
@@ -138,20 +141,20 @@ func DateRangeSearch(service *talent.Service, companyName string, startTime stri
 		// Domain of the website where the search is conducted
 		Domain: "www.googlesample.com",
 	}
-	jobQuery := &talent.JobQuery {
-		PublishTimeRange: &talent.TimestampRange {
+	jobQuery := &talent.JobQuery{
+		PublishTimeRange: &talent.TimestampRange{
 			StartTime: startTime,
-			EndTime: endTime,
+			EndTime:   endTime,
 		},
 	}
 	if companyName != "" {
 		jobQuery.CompanyNames = []string{companyName}
 	}
 
-	searchJobsRequest := &talent.SearchJobsRequest {
+	searchJobsRequest := &talent.SearchJobsRequest{
 		RequestMetadata: requestMetadata,
 		// Set the actual search term as defined in the jobQurey
-		JobQuery: jobQuery, 
+		JobQuery: jobQuery,
 		// Set the search mode to a regular search
 		SearchMode: "JOB_SEARCH",
 	}
@@ -161,6 +164,7 @@ func DateRangeSearch(service *talent.Service, companyName string, startTime stri
 	}
 	return resp, err
 }
+
 // [END date_range_filter]
 
 // [START language_code_filter]
@@ -170,7 +174,7 @@ func DateRangeSearch(service *talent.Service, companyName string, startTime stri
  */
 func LanguageCodeSearch(service *talent.Service, companyName string, languageCodes []string) (*talent.SearchJobsResponse, error) {
 	// Make sure to set the requestMetadata the same as the associated search request
-	requestMetadata := &talent.RequestMetadata {
+	requestMetadata := &talent.RequestMetadata{
 		// Make sure to hash your userID
 		UserId: "HashedUsrId",
 		// Make sure to hash the sessionID
@@ -178,17 +182,17 @@ func LanguageCodeSearch(service *talent.Service, companyName string, languageCod
 		// Domain of the website where the search is conducted
 		Domain: "www.googlesample.com",
 	}
-	jobQuery := &talent.JobQuery {
+	jobQuery := &talent.JobQuery{
 		LanguageCodes: languageCodes,
 	}
 	if companyName != "" {
 		jobQuery.CompanyNames = []string{companyName}
 	}
 
-	searchJobsRequest := &talent.SearchJobsRequest {
+	searchJobsRequest := &talent.SearchJobsRequest{
 		RequestMetadata: requestMetadata,
 		// Set the actual search term as defined in the jobQurey
-		JobQuery: jobQuery, 
+		JobQuery: jobQuery,
 		// Set the search mode to a regular search
 		SearchMode: "JOB_SEARCH",
 	}
@@ -208,7 +212,7 @@ func LanguageCodeSearch(service *talent.Service, companyName string, languageCod
  */
 func CompanyDisplayNameSearch(service *talent.Service, companyName string, companyDisplayNames []string) (*talent.SearchJobsResponse, error) {
 	// Make sure to set the requestMetadata the same as the associated search request
-	requestMetadata := &talent.RequestMetadata {
+	requestMetadata := &talent.RequestMetadata{
 		// Make sure to hash your userID
 		UserId: "HashedUsrId",
 		// Make sure to hash the sessionID
@@ -216,17 +220,17 @@ func CompanyDisplayNameSearch(service *talent.Service, companyName string, compa
 		// Domain of the website where the search is conducted
 		Domain: "www.googlesample.com",
 	}
-	jobQuery := &talent.JobQuery {
+	jobQuery := &talent.JobQuery{
 		CompanyDisplayNames: companyDisplayNames,
 	}
 	if companyName != "" {
 		jobQuery.CompanyNames = []string{companyName}
 	}
 
-	searchJobsRequest := &talent.SearchJobsRequest {
+	searchJobsRequest := &talent.SearchJobsRequest{
 		RequestMetadata: requestMetadata,
 		// Set the actual search term as defined in the jobQurey
-		JobQuery: jobQuery, 
+		JobQuery: jobQuery,
 		// Set the search mode to a regular search
 		SearchMode: "JOB_SEARCH",
 	}
@@ -246,7 +250,7 @@ func CompanyDisplayNameSearch(service *talent.Service, companyName string, compa
  */
 func CompensationSearch(service *talent.Service, companyName string) (*talent.SearchJobsResponse, error) {
 	// Make sure to set the requestMetadata the same as the associated search request
-	requestMetadata := &talent.RequestMetadata {
+	requestMetadata := &talent.RequestMetadata{
 		// Make sure to hash your userID
 		UserId: "HashedUsrId",
 		// Make sure to hash the sessionID
@@ -254,19 +258,19 @@ func CompensationSearch(service *talent.Service, companyName string) (*talent.Se
 		// Domain of the website where the search is conducted
 		Domain: "www.googlesample.com",
 	}
-	jobQuery := &talent.JobQuery {
-		CompensationFilter: &talent.CompensationFilter {
-			Type: "UNIT_AND_AMOUNT",
-			Units: []string {"HOURLY"},
-			Range: &talent.CompensationRange {
-				MaxCompensation: &talent.Money {
-					Units:15,
+	jobQuery := &talent.JobQuery{
+		CompensationFilter: &talent.CompensationFilter{
+			Type:  "UNIT_AND_AMOUNT",
+			Units: []string{"HOURLY"},
+			Range: &talent.CompensationRange{
+				MaxCompensation: &talent.Money{
+					Units:        15,
 					CurrencyCode: "USD",
 				},
-				MinCompensation: &talent.Money {
-					Units: 10,
+				MinCompensation: &talent.Money{
+					Units:        10,
 					CurrencyCode: "USD",
-					Nanos: 500000000,
+					Nanos:        500000000,
 				},
 			},
 		},
@@ -275,10 +279,10 @@ func CompensationSearch(service *talent.Service, companyName string) (*talent.Se
 		jobQuery.CompanyNames = []string{companyName}
 	}
 
-	searchJobsRequest := &talent.SearchJobsRequest {
+	searchJobsRequest := &talent.SearchJobsRequest{
 		RequestMetadata: requestMetadata,
 		// Set the actual search term as defined in the jobQurey
-		JobQuery: jobQuery, 
+		JobQuery: jobQuery,
 		// Set the search mode to a regular search
 		SearchMode: "JOB_SEARCH",
 	}
@@ -291,6 +295,7 @@ func CompensationSearch(service *talent.Service, companyName string) (*talent.Se
 
 // [END compensation_filter]
 
+// [START general_search_sample_entry]
 
 /**
  * Sample entry for the general job search
@@ -309,18 +314,17 @@ func GeneralSearchSampleEntry() {
 	jobToCreate.LanguageCode = "en-US"
 	jobToCreate.EmploymentTypes = []string{"FULL_TIME"}
 	compensationInfo := &talent.CompensationInfo{}
-	compensationInfo.Entries = []*talent.CompensationEntry {
-		&talent.CompensationEntry {
+	compensationInfo.Entries = []*talent.CompensationEntry{
+		&talent.CompensationEntry{
 			Type: "BASE",
 			Unit: "HOURLY",
-			Amount: &talent.Money {
+			Amount: &talent.Money{
 				CurrencyCode: "USD",
-				Units: 12,
+				Units:        12,
 			},
 		},
 	}
 	jobToCreate.CompensationInfo = compensationInfo
-
 
 	jobCreated, _ := CreateJob(service, jobToCreate)
 	fmt.Printf("CreateJob: %s\n", jobCreated.Title)
@@ -358,14 +362,14 @@ func GeneralSearchSampleEntry() {
 		fmt.Printf("-- match job: %s\n", mJob.Job.Title)
 	}
 
-	resp, _ = LanguageCodeSearch(service, companyCreated.Name, []string {"pt-BR", "en-US"})
+	resp, _ = LanguageCodeSearch(service, companyCreated.Name, []string{"pt-BR", "en-US"})
 	fmt.Printf("LanguageCodeSearch StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
 	fmt.Printf("MatchingJobs size: %d\n", len(resp.MatchingJobs))
 	for _, mJob := range resp.MatchingJobs {
 		fmt.Printf("-- match job: %s\n", mJob.Job.Title)
 	}
 
-	resp, _ = CompanyDisplayNameSearch(service, companyCreated.Name, []string {"Google Sample"})
+	resp, _ = CompanyDisplayNameSearch(service, companyCreated.Name, []string{"Google Sample"})
 	fmt.Printf("CompanyDisplayNameSearch StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
 	fmt.Printf("MatchingJobs size: %d\n", len(resp.MatchingJobs))
 	for _, mJob := range resp.MatchingJobs {
@@ -386,3 +390,4 @@ func GeneralSearchSampleEntry() {
 
 }
 
+// [END general_search_sample_entry]

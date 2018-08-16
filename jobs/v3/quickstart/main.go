@@ -35,7 +35,6 @@ func CreateCtsService() (*talent.Service, error) {
 	return ctsService, err
 }
 
-
 func main() {
 	// Create the jobs service client.
 	ctsService, err := CreateCtsService()
