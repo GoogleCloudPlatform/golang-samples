@@ -83,14 +83,14 @@ func main() {
 }
 
 func writeEntry(client *logging.Client) {
-	// [START write_log_entry]
+	// [START logging_write_log_entry]
 	const name = "log-example"
 	logger := client.Logger(name)
 	defer logger.Flush() // Ensure the entry is written.
 
 	infolog := logger.StandardLogger(logging.Info)
 	infolog.Printf("infolog is a standard Go log.Logger with INFO severity.")
-	// [END write_log_entry]
+	// [END logging_write_log_entry]
 }
 
 func structuredWrite(client *logging.Client) {
@@ -106,25 +106,25 @@ func structuredWrite(client *logging.Client) {
 		},
 		Severity: logging.Debug,
 	})
-	// [END write_log_entry]
+	// [END logging_write_log_entry]
 }
 
 func deleteLog(adminClient *logadmin.Client) error {
 	ctx := context.Background()
 
-	// [START delete_log]
+	// [START logging_delete_log]
 	const name = "log-example"
 	if err := adminClient.DeleteLog(ctx, name); err != nil {
 		return err
 	}
-	// [END delete_log]
+	// [END logging_delete_log]
 	return nil
 }
 
 func getEntries(adminClient *logadmin.Client, projID string) ([]*logging.Entry, error) {
 	ctx := context.Background()
 
-	// [START list_log_entries]
+	// [START logging_list_log_entries]
 	var entries []*logging.Entry
 	const name = "log-example"
 	iter := adminClient.Entries(ctx,
@@ -146,7 +146,7 @@ func getEntries(adminClient *logadmin.Client, projID string) ([]*logging.Entry, 
 		entries = append(entries, entry)
 	}
 	return entries, nil
-	// [END list_log_entries]
+	// [END logging_list_log_entries]
 }
 
 func usage(msg string) {
