@@ -80,7 +80,7 @@ func list(client *pubsub.Client) ([]*pubsub.Subscription, error) {
 	return subs, nil
 }
 
-func pullMsgs(client *pubsub.Client, name string, topic *pubsub.Topic) error {
+func pullMsgs(client *pubsub.Client, subName string, topic *pubsub.Topic) error {
 	ctx := context.Background()
 
 	// Publish 10 messages on the topic.
@@ -105,7 +105,7 @@ func pullMsgs(client *pubsub.Client, name string, topic *pubsub.Topic) error {
 	// Consume 10 messages.
 	var mu sync.Mutex
 	received := 0
-	sub := client.Subscription(name)
+	sub := client.Subscription(subName)
 	cctx, cancel := context.WithCancel(ctx)
 	err := sub.Receive(cctx, func(ctx context.Context, msg *pubsub.Message) {
 		msg.Ack()
@@ -125,12 +125,12 @@ func pullMsgs(client *pubsub.Client, name string, topic *pubsub.Topic) error {
 	return nil
 }
 
-func pullMsgsError(client *pubsub.Client, name string) error {
+func pullMsgsError(client *pubsub.Client, subName string) error {
 	ctx := context.Background()
 	// [START pubsub_subscriber_error_listener]
 	// If the service returns a non-retryable error, Receive returns that error after
 	// all of the outstanding calls to the handler have returned.
-	err := client.Subscription(name).Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
+	err := client.Subscription(subName).Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
 		fmt.Printf("Got message: %q\n", string(msg.Data))
 		msg.Ack()
 	})
@@ -141,10 +141,10 @@ func pullMsgsError(client *pubsub.Client, name string) error {
 	return nil
 }
 
-func pullMsgsSettings(client *pubsub.Client, name string) error {
+func pullMsgsSettings(client *pubsub.Client, subName string) error {
 	ctx := context.Background()
 	// [START pubsub_subscriber_flow_settings]
-	sub := client.Subscription(name)
+	sub := client.Subscription(subName)
 	sub.ReceiveSettings.MaxOutstandingMessages = 10
 	err := sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
 		fmt.Printf("Got message: %q\n", string(msg.Data))
@@ -157,10 +157,10 @@ func pullMsgsSettings(client *pubsub.Client, name string) error {
 	return nil
 }
 
-func create(client *pubsub.Client, name string, topic *pubsub.Topic) error {
+func create(client *pubsub.Client, subName string, topic *pubsub.Topic) error {
 	ctx := context.Background()
 	// [START pubsub_create_pull_subscription]
-	sub, err := client.CreateSubscription(ctx, name, pubsub.SubscriptionConfig{
+	sub, err := client.CreateSubscription(ctx, subName, pubsub.SubscriptionConfig{
 		Topic:       topic,
 		AckDeadline: 20 * time.Second,
 	})
@@ -172,12 +172,12 @@ func create(client *pubsub.Client, name string, topic *pubsub.Topic) error {
 	return nil
 }
 
-func createWithEndpoint(client *pubsub.Client, name string, topic *pubsub.Topic, endpoint string) error {
+func createWithEndpoint(client *pubsub.Client, subName string, topic *pubsub.Topic, endpoint string) error {
 	ctx := context.Background()
 	// [START pubsub_create_push_subscription]
 
 	// For example, endpoint is "https://my-test-project.appspot.com/push".
-	sub, err := client.CreateSubscription(ctx, name, pubsub.SubscriptionConfig{
+	sub, err := client.CreateSubscription(ctx, subName, pubsub.SubscriptionConfig{
 		Topic:       topic,
 		AckDeadline: 10 * time.Second,
 		PushConfig:  pubsub.PushConfig{Endpoint: endpoint},
@@ -190,12 +190,12 @@ func createWithEndpoint(client *pubsub.Client, name string, topic *pubsub.Topic,
 	return nil
 }
 
-func updateEndpoint(client *pubsub.Client, name string, endpoint string) error {
+func updateEndpoint(client *pubsub.Client, subName string, endpoint string) error {
 	ctx := context.Background()
 	// [START pubsub_update_push_configuration]
 
 	// For example, endpoint is "https://my-test-project.appspot.com/push".
-	subConfig, err := client.Subscription(name).Update(ctx, pubsub.SubscriptionConfigToUpdate{
+	subConfig, err := client.Subscription(subName).Update(ctx, pubsub.SubscriptionConfigToUpdate{
 		PushConfig: &pubsub.PushConfig{Endpoint: endpoint},
 	})
 	if err != nil {
@@ -206,10 +206,10 @@ func updateEndpoint(client *pubsub.Client, name string, endpoint string) error {
 	return nil
 }
 
-func delete(client *pubsub.Client, name string) error {
+func delete(client *pubsub.Client, subName string) error {
 	ctx := context.Background()
 	// [START pubsub_delete_subscription]
-	sub := client.Subscription(name)
+	sub := client.Subscription(subName)
 	if err := sub.Delete(ctx); err != nil {
 		return err
 	}
