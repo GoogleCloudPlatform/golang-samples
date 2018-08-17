@@ -8,10 +8,10 @@ import (
 	"sync"
 	"testing"
 	"time"
+	"context"
 
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
-	"golang.org/x/net/context"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
