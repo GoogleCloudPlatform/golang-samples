@@ -32,7 +32,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, usage)
 		os.Exit(2)
 	}
-
+ 
 	var sendFunc func(*speech.Client, string) (*speechpb.LongRunningRecognizeResponse, error)
 
 	path := os.Args[1]
@@ -48,21 +48,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	resp, err := sendFunc(client, os.Args[1])
-	if err != nil {
+	if err := sendFunc(client, os.Args[1]); err != nil {
 		log.Fatal(err)
 	}
-
-	// [START print]
-	// Print the results.
-	for _, result := range resp.Results {
-		for _, alt := range result.Alternatives {
-			fmt.Printf("\"%v\" (confidence=%3f)\n", alt.Transcript, alt.Confidence)
-		}
-	}
-	// [END print]
 }
 
+// [START speech_transcribe_async]
 func send(client *speech.Client, filename string) (*speechpb.LongRunningRecognizeResponse, error) {
 	ctx := context.Background()
 	data, err := ioutil.ReadFile(filename)
@@ -87,9 +78,22 @@ func send(client *speech.Client, filename string) (*speechpb.LongRunningRecogniz
 	if err != nil {
 		return nil, err
 	}
-	return op.Wait(ctx)
-}
+	resp, err := op.Wait(ctx)
+	if err != nil {
+		return err
+	}
 
+	// Print the results.
+	for _, result := range resp.Results {
+		for _, alt := range result.Alternatives {
+			fmt.Printf("\"%v\" (confidence=%3f)\n", alt.Transcript, alt.Confidence)
+		}
+	}
+	return nil
+}
+// [END speech_transcribe_async]
+
+// [START speech_transcribe_async_gcs]
 func sendGCS(client *speech.Client, gcsURI string) (*speechpb.LongRunningRecognizeResponse, error) {
 	ctx := context.Background()
 
@@ -110,5 +114,17 @@ func sendGCS(client *speech.Client, gcsURI string) (*speechpb.LongRunningRecogni
 	if err != nil {
 		return nil, err
 	}
-	return op.Wait(ctx)
+	resp, err := op.Wait(ctx)
+	if err != nil {
+		return err
+	}
+
+	// Print the results.
+	for _, result := range resp.Results {
+		for _, alt := range result.Alternatives {
+			fmt.Printf("\"%v\" (confidence=%3f)\n", alt.Transcript, alt.Confidence)
+		}
+	}
+	return nil
 }
+// [END speech_transcribe_async_gcs]

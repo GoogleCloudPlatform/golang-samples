@@ -51,28 +51,17 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// [START print]
-	// Print the results.
-	for _, result := range resp.Results {
-		for _, alt := range result.Alternatives {
-			fmt.Printf("\"%v\" (confidence=%3f)\n", alt.Transcript, alt.Confidence)
-		}
-	}
-	// [END print]
 }
 
+// [START speech_transcribe_sync_gcs]
 func recognizeGCS(gcsURI string) (*speechpb.RecognizeResponse, error) {
 	ctx := context.Background()
 
-	// [START init_gcs]
 	client, err := speech.NewClient(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
-	// [END init_gcs]
 
-	// [START request_gcs]
 	// Send the request with the URI (gs://...)
 	// and sample rate information to be transcripted.
 	resp, err := client.Recognize(ctx, &speechpb.RecognizeRequest{
@@ -85,21 +74,26 @@ func recognizeGCS(gcsURI string) (*speechpb.RecognizeResponse, error) {
 			AudioSource: &speechpb.RecognitionAudio_Uri{Uri: gcsURI},
 		},
 	})
-	// [END request_gcs]
+
+	// Print the results.
+	for _, result := range resp.Results {
+		for _, alt := range result.Alternatives {
+			fmt.Printf("\"%v\" (confidence=%3f)\n", alt.Transcript, alt.Confidence)
+		}
+	}
 	return resp, err
 }
+// [END speech_transcribe_sync_gcs]
 
+// [START speech_transcribe_sync]
 func recognize(file string) (*speechpb.RecognizeResponse, error) {
 	ctx := context.Background()
 
-	// [START init]
 	client, err := speech.NewClient(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
-	// [END init]
 
-	// [START request]
 	data, err := ioutil.ReadFile(file)
 	if err != nil {
 		log.Fatal(err)
@@ -117,6 +111,13 @@ func recognize(file string) (*speechpb.RecognizeResponse, error) {
 			AudioSource: &speechpb.RecognitionAudio_Content{Content: data},
 		},
 	})
-	// [END request]
+
+	// Print the results.
+	for _, result := range resp.Results {
+		for _, alt := range result.Alternatives {
+			fmt.Printf("\"%v\" (confidence=%3f)\n", alt.Transcript, alt.Confidence)
+		}
+	}
 	return resp, err
 }
+// [END speech_transcribe_sync]
