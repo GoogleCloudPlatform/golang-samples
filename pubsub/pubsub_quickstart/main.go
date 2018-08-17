@@ -10,10 +10,10 @@ package main
 import (
 	"fmt"
 	"log"
+	"context"
 
 	// Imports the Google Cloud Pub/Sub client package.
 	"cloud.google.com/go/pubsub"
-	"golang.org/x/net/context"
 )
 
 func main() {
