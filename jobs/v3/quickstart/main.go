@@ -4,7 +4,7 @@
 
 // [START quick_start]
 
-// Command quickstart is an example of using the Google Cloud Job Discovery API.
+// Command quickstart is an example of using the Google Cloud Talent Solution API.
 package main
 
 import (
@@ -17,12 +17,10 @@ import (
 	talent "google.golang.org/api/jobs/v3"
 )
 
-func GetParent() string {
+func main() {
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
-	return fmt.Sprintf("projects/%s", projectID)
-}
+	parent := fmt.Sprintf("projects/%s", projectID)
 
-func CreateCtsService() (*talent.Service, error) {
 	// Authorize the client using Application Default Credentials.
 	// See https://g.co/dv/identity/protocols/application-default-credentials
 	ctx := context.Background()
@@ -30,20 +28,15 @@ func CreateCtsService() (*talent.Service, error) {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	// Create the jobs service client.
 	ctsService, err := talent.New(client)
-	return ctsService, err
-}
-
-func main() {
-	// Create the jobs service client.
-	ctsService, err := CreateCtsService()
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Make the RPC call.
-	response, err := ctsService.Projects.Companies.List(DEFAULT_PROJECT_ID).Do()
+	response, err := ctsService.Projects.Companies.List(parent).Do()
 	if err != nil {
 		log.Fatalf("Failed to list Companies: %v", err)
 	}

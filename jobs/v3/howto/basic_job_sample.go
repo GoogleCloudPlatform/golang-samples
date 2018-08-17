@@ -1,8 +1,14 @@
-package cjdsample
+// Copyright 2018 Google Inc. All rights reserved.
+// Use of this source code is governed by the Apache 2.0
+// license that can be found in the LICENSE file.
+
+package sample
 
 import (
 	"fmt"
 	"log"
+	"io"
+	"os"
 	"time"
 
 	talent "google.golang.org/api/jobs/v3"
@@ -10,10 +16,8 @@ import (
 
 // [START basic_job]
 
-/**
- * Construct a basic job with given companyName and jobTitle
- */
-func ConstructJobWithRequiredFields(companyName string, jobTitle string) *talent.Job {
+// constructJobWithRequiredFields constructs a basic job with given companyName and jobTitle.
+func constructJobWithRequiredFields(companyName string, jobTitle string) *talent.Job {
 	requisitionId := fmt.Sprintf("sample-job-required-fields-%d", time.Now().UnixNano())
 	applicationInfo := &talent.ApplicationInfo{
 		Uris: []string{"https://googlesample.com/career"},
@@ -25,22 +29,20 @@ func ConstructJobWithRequiredFields(companyName string, jobTitle string) *talent
 		ApplicationInfo: applicationInfo,
 		Description:     "Design, devolop, test, deploy, maintain and improve software.",
 	}
-	//	fmt.Printf("Job constructed: %v\n",job)
 	return job
 }
 
 // [END basic_job]
 
+
 // [START create_job]
 
-/**
- * Create a job
- */
-func CreateJob(service *talent.Service, jobToCreate *talent.Job) (*talent.Job, error) {
+// createJob create a job as given.
+func createJob(service *talent.Service, parent string, jobToCreate *talent.Job) (*talent.Job, error) {
 	createJobRequest := &talent.CreateJobRequest{
 		Job: jobToCreate,
 	}
-	job, err := service.Projects.Jobs.Create(GetParent(), createJobRequest).Do()
+	job, err := service.Projects.Jobs.Create(parent, createJobRequest).Do()
 	if err != nil {
 		log.Fatalf("Failed to create job %q, Err: %v", jobToCreate.RequisitionId, err)
 	}
@@ -49,12 +51,11 @@ func CreateJob(service *talent.Service, jobToCreate *talent.Job) (*talent.Job, e
 
 // [END create_job]
 
+
 // [START get_job]
 
-/**
- * Get a job
- */
-func GetJob(service *talent.Service, jobName string) (*talent.Job, error) {
+// getJob gets a job by name.
+func getJob(service *talent.Service, jobName string) (*talent.Job, error) {
 	job, err := service.Projects.Jobs.Get(jobName).Do()
 	if err != nil {
 		log.Fatalf("Failed to get job %s, Err: %v", jobName, err)
@@ -65,12 +66,11 @@ func GetJob(service *talent.Service, jobName string) (*talent.Job, error) {
 
 // [END get_job]
 
+
 // [START update_job]
 
-/**
- * Update a job with all fields
- */
-func UpdateJob(service *talent.Service, jobName string, jobToUpdate *talent.Job) (*talent.Job, error) {
+// updateJob update a job with all fields except name
+func updateJob(service *talent.Service, jobName string, jobToUpdate *talent.Job) (*talent.Job, error) {
 	updateJobRequest := &talent.UpdateJobRequest{
 		Job: jobToUpdate,
 	}
@@ -84,14 +84,12 @@ func UpdateJob(service *talent.Service, jobName string, jobToUpdate *talent.Job)
 
 // [END update_job]
 
+
 // [START update_job_with_field_mask]
 
-/**
- * Update a job
- * mask: comma separated top-level fields of Job
- */
+// updateJobWithMask updates a job by name with specific fields
 // mask: comma separated top-level fields of Job
-func UpdateJobWithMask(service *talent.Service, jobName string, mask string, jobToUpdate *talent.Job) (*talent.Job, error) {
+func updateJobWithMask(service *talent.Service, jobName string, mask string, jobToUpdate *talent.Job) (*talent.Job, error) {
 	updateJobRequest := &talent.UpdateJobRequest{
 		Job:        jobToUpdate,
 		UpdateMask: mask,
@@ -106,12 +104,11 @@ func UpdateJobWithMask(service *talent.Service, jobName string, mask string, job
 
 // [END update_job_with_field_mask]
 
+
 // [START delete_job]
 
-/**
- * Delete a job
- */
-func DeleteJob(service *talent.Service, jobName string) (*talent.Empty, error) {
+// deleteJob deletes an existing job by name
+func deleteJob(service *talent.Service, jobName string) (*talent.Empty, error) {
 	empty, err := service.Projects.Jobs.Delete(jobName).Do()
 	if err != nil {
 		log.Fatalf("Failed to delete job %s, Err: %v", jobName, err)
@@ -122,14 +119,13 @@ func DeleteJob(service *talent.Service, jobName string) (*talent.Empty, error) {
 
 // [END delete_job]
 
+
 // [START list_jobs]
 
-/**
- * List jobs with companyName as filter
- * filter required, eg companyName = "projects/api-test-project/companies/123"
- */
-func ListJobs(service *talent.Service, filter string) (*talent.ListJobsResponse, error) {
-	resp, err := service.Projects.Jobs.List(GetParent()).Filter(filter).Do()
+// listJobs lists jobs with companyName as filter
+// filter required, eg companyName = "projects/api-test-project/companies/123"
+func listJobs(service *talent.Service, parent string, filter string) (*talent.ListJobsResponse, error) {
+	resp, err := service.Projects.Jobs.List(parent).Filter(filter).Do()
 	if err != nil {
 		log.Fatalf("Failed to list jobs with filter: %s, Err: %v", filter, err)
 	}
@@ -139,55 +135,57 @@ func ListJobs(service *talent.Service, filter string) (*talent.ListJobsResponse,
 
 // [END list_jobs]
 
-// [START basic_job_sample_entry]
 
-func BasicJobSampleEntry() {
-	service, _ := CreateCtsService()
+// [START run_basic_job_sample]
+
+func runBasicJobSample(w io.Writer) {
+	parent := fmt.Sprintf("projects/%s", os.Getenv("GOOGLE_CLOUD_PROJECT"))
+	service, _ := createCtsService()
 
 	// Create a company before creating jobs
-	companyToCreate := ConstructCompanyWithRequiredFields()
-	companyCreated, _ := CreateCompany(service, companyToCreate)
-	fmt.Printf("CreateCompany: %s\n", companyCreated.DisplayName)
+	companyToCreate := constructCompanyWithRequiredFields()
+	companyCreated, _ := createCompany(service, parent, companyToCreate)
+	fmt.Fprintf(w, "CreateCompany: %s\n", companyCreated.DisplayName)
 
 	// Construct a job
 	jobTitle := "Software Engineer"
-	jobToCreate := ConstructJobWithRequiredFields(companyCreated.Name, jobTitle)
+	jobToCreate := constructJobWithRequiredFields(companyCreated.Name, jobTitle)
 
 	// Create a job
-	jobCreated, _ := CreateJob(service, jobToCreate)
-	fmt.Printf("CreateJob: %s\n", jobCreated.Title)
+	jobCreated, _ := createJob(service, parent, jobToCreate)
+	fmt.Fprintf(w, "CreateJob: %s\n", jobCreated.Title)
 
 	// Get an existing job
 	jobName := jobCreated.Name
-	jobGot, _ := GetJob(service, jobName)
-	fmt.Printf("GetJob: %s\n", jobGot.Title)
+	jobGot, _ := getJob(service, jobName)
+	fmt.Fprintf(w, "GetJob: %s\n", jobGot.Title)
 
 	// Update an existing job
 	jobToUpdate := jobGot
 	jobToUpdate.Title = "Software Engineer (updated)"
-	jobUpdated, _ := UpdateJob(service, jobName, jobToUpdate)
-	fmt.Printf("UpdateJob: %s\n", jobUpdated.Title)
+	jobUpdated, _ := updateJob(service, jobName, jobToUpdate)
+	fmt.Fprintf(w, "UpdateJob: %s\n", jobUpdated.Title)
 
 	// Update job with field mask, only top level fields could be masked
 	jobToUpdate.Title = "Software Engineer (unintended)"
 	jobToUpdate.Department = "Engineering (updated with mask)"
-	jobUpdatedWithMask, _ := UpdateJobWithMask(service, jobName, "Department", jobToUpdate)
-	fmt.Printf("UpdateJobWithMask: Title: %s Department: %s\n", jobUpdatedWithMask.Title, jobUpdatedWithMask.Department)
+	jobUpdatedWithMask, _ := updateJobWithMask(service, jobName, "Department", jobToUpdate)
+	fmt.Fprintf(w, "UpdateJobWithMask: Title: %s Department: %s\n", jobUpdatedWithMask.Title, jobUpdatedWithMask.Department)
 
 	companyFilter := fmt.Sprintf("companyName = \"%s\"", companyCreated.Name)
-	resp, _ := ListJobs(service, companyFilter)
-	fmt.Printf("ListJobs Request ID: %q\n", resp.Metadata.RequestId)
+	resp, _ := listJobs(service, parent, companyFilter)
+	fmt.Fprintf(w, "ListJobs Request ID: %q\n", resp.Metadata.RequestId)
 
 	for _, job := range resp.Jobs {
-		fmt.Printf("-- Job: %q\n", job.Name)
+		fmt.Fprintf(w, "-- Job: %q\n", job.Name)
 	}
 
 	// Delete Job
-	empty, _ := DeleteJob(service, jobCreated.Name)
-	fmt.Printf("DeleteJob StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
+	empty, _ := deleteJob(service, jobCreated.Name)
+	fmt.Fprintf(w, "DeleteJob StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
 	// Delete Company
-	empty, _ = DeleteCompany(service, companyCreated.Name)
-	fmt.Printf("DeleteCompany StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
+	empty, _ = deleteCompany(service, companyCreated.Name)
+	fmt.Fprintf(w, "DeleteCompany StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
 }
 
-// [END basic_job_sample_entry]
+// [END run_basic_job_sample]

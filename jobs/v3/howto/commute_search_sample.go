@@ -1,8 +1,14 @@
-package cjdsample
+// Copyright 2018 Google Inc. All rights reserved.
+// Use of this source code is governed by the Apache 2.0
+// license that can be found in the LICENSE file.
+
+package sample
 
 import (
 	"fmt"
 	"log"
+	"io"
+	"os"
 	"time"
 
 	talent "google.golang.org/api/jobs/v3"
@@ -10,10 +16,8 @@ import (
 
 // [START commute_search]
 
-/**
- * Search on commute search
- */
-func CommuteSearch(service *talent.Service, companyName string) (*talent.SearchJobsResponse, error) {
+// commuteSearch searches for jobs within commute filter.
+func commuteSearch(service *talent.Service, parent string, companyName string) (*talent.SearchJobsResponse, error) {
 	// Make sure to set the requestMetadata the same as the associated search request
 	requestMetadata := &talent.RequestMetadata{
 		// Make sure to hash your userID
@@ -46,7 +50,7 @@ func CommuteSearch(service *talent.Service, companyName string) (*talent.SearchJ
 		SearchMode:               "JOB_SEARCH",
 		RequirePreciseResultSize: true,
 	}
-	resp, err := service.Projects.Jobs.Search(GetParent(), searchJobsRequest).Do()
+	resp, err := service.Projects.Jobs.Search(parent, searchJobsRequest).Do()
 	if err != nil {
 		log.Fatalf("Failed to search for jobs with commute filter, Err: %v", err)
 	}
@@ -55,35 +59,36 @@ func CommuteSearch(service *talent.Service, companyName string) (*talent.SearchJ
 
 // [END commute_search]
 
-// [START commute_search_sample_entry]
-func CommuteSearchSampleEntry() {
-	service, _ := CreateCtsService()
+// [START run_commute_search_sample]
+func runCommuteSearchSample(w io.Writer) {
+	parent := fmt.Sprintf("projects/%s", os.Getenv("GOOGLE_CLOUD_PROJECT"))
+	service, _ := createCtsService()
 
 	// Create a company before creating jobs
-	companyToCreate := ConstructCompanyWithRequiredFields()
-	companyCreated, _ := CreateCompany(service, companyToCreate)
-	fmt.Printf("CreateCompany: %s\n", companyCreated.DisplayName)
+	companyToCreate := constructCompanyWithRequiredFields()
+	companyCreated, _ := createCompany(service, parent, companyToCreate)
+	fmt.Fprintf(w, "CreateCompany: %s\n", companyCreated.DisplayName)
 
 	jobTitle := "Software Engineer"
-	jobToCreate := ConstructJobWithRequiredFields(companyCreated.Name, jobTitle)
+	jobToCreate := constructJobWithRequiredFields(companyCreated.Name, jobTitle)
 	jobToCreate.Addresses = []string{"1600 Amphitheatre Parkway, Mountain View, CA 94043"}
-	jobCreated, _ := CreateJob(service, jobToCreate)
-	fmt.Printf("CreateJob: %s\n", jobCreated.Title)
+	jobCreated, _ := createJob(service, parent, jobToCreate)
+	fmt.Fprintf(w, "CreateJob: %s\n", jobCreated.Title)
 
 	// Wait several seconds for post processing
 	time.Sleep(10 * time.Second)
 
-	resp, _ := CommuteSearch(service, companyCreated.Name)
-	fmt.Printf("CommuteSearch StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
-	fmt.Printf("MatchingJobs size: %d\n", len(resp.MatchingJobs))
+	resp, _ := commuteSearch(service, parent, companyCreated.Name)
+	fmt.Fprintf(w, "CommuteSearch StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
+	fmt.Fprintf(w, "MatchingJobs size: %d\n", len(resp.MatchingJobs))
 	for _, mJob := range resp.MatchingJobs {
-		fmt.Printf("-- match job: %s\n", mJob.Job.Title)
+		fmt.Fprintf(w, "-- match job: %s\n", mJob.Job.Title)
 	}
 
-	empty, _ := DeleteJob(service, jobCreated.Name)
-	fmt.Printf("DeleteJob StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
-	empty, _ = DeleteCompany(service, companyCreated.Name)
-	fmt.Printf("DeleteCompany StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
+	empty, _ := deleteJob(service, jobCreated.Name)
+	fmt.Fprintf(w, "DeleteJob StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
+	empty, _ = deleteCompany(service, companyCreated.Name)
+	fmt.Fprintf(w, "DeleteCompany StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
 }
 
-// [END commute_search_sample_entry]
+// [END run_commute_search_sample]

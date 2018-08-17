@@ -1,8 +1,14 @@
-package cjdsample
+// Copyright 2018 Google Inc. All rights reserved.
+// Use of this source code is governed by the Apache 2.0
+// license that can be found in the LICENSE file.
+
+package sample
 
 import (
 	"fmt"
 	"log"
+	"io"
+	"os"
 	"time"
 
 	talent "google.golang.org/api/jobs/v3"
@@ -10,10 +16,8 @@ import (
 
 // [START custom_attribute_job]
 
-/**
- * Construct a job with custom attributes
- */
-func ConstructJobWithCustomAttributes(companyName string, jobTitle string) *talent.Job {
+// constructJobWithCustomAttributes constructs a job with custom attributes.
+func constructJobWithCustomAttributes(companyName string, jobTitle string) *talent.Job {
 	// requisition id shoud be the unique Id in your system
 	requisitionId := fmt.Sprintf("job-with-custom-attribute-%d", time.Now().UnixNano())
 	applicationInfo := &talent.ApplicationInfo{
@@ -41,18 +45,16 @@ func ConstructJobWithCustomAttributes(companyName string, jobTitle string) *tale
 		Description:      "Design, devolop, test, deploy, maintain and improve software.",
 		CustomAttributes: customAttributes,
 	}
-	//	fmt.Printf("Job constructed: %v\n",job)
 	return job
 }
 
 // [END custom_attribute_job]
 
+
 // [START custom_attribute_filter_string_value]
 
-/**
- * CustomAttributeFilter on a string value custom atrribute
- */
-func FilterOnStringValueCustomAttribute(service *talent.Service) (*talent.SearchJobsResponse, error) {
+// filterOnStringValueCustomAttribute searches for jobs on a string value custom atrribute.
+func filterOnStringValueCustomAttribute(service *talent.Service, parent string) (*talent.SearchJobsResponse, error) {
 	// Make sure to set the requestMetadata the same as the associated search request
 	requestMetadata := &talent.RequestMetadata{
 		// Make sure to hash your userID
@@ -72,7 +74,7 @@ func FilterOnStringValueCustomAttribute(service *talent.Service) (*talent.Search
 		RequestMetadata: requestMetadata,
 		JobView:         "JOB_VIEW_FULL",
 	}
-	resp, err := service.Projects.Jobs.Search(GetParent(), searchJobsRequest).Do()
+	resp, err := service.Projects.Jobs.Search(parent, searchJobsRequest).Do()
 	if err != nil {
 		log.Fatalf("Failed to search for jobs with string value custom attribute, Err: %v", err)
 	}
@@ -82,12 +84,11 @@ func FilterOnStringValueCustomAttribute(service *talent.Service) (*talent.Search
 
 // [END custom_attribute_filter_string_value]
 
+
 // [START custom_attribute_filter_long_value]
 
-/**
- * CustomAttributeFilter on a long value custom attribute
- */
-func FilterOnLongValueCustomAttribute(service *talent.Service) (*talent.SearchJobsResponse, error) {
+// filterOnLongValueCustomAttribute searches for jobs on a long value custom atrribute.
+func filterOnLongValueCustomAttribute(service *talent.Service, parent string) (*talent.SearchJobsResponse, error) {
 	// Make sure to set the requestMetadata the same as the associated search request
 	requestMetadata := &talent.RequestMetadata{
 		// Make sure to hash your userID
@@ -107,7 +108,7 @@ func FilterOnLongValueCustomAttribute(service *talent.Service) (*talent.SearchJo
 		RequestMetadata: requestMetadata,
 		JobView:         "JOB_VIEW_FULL",
 	}
-	resp, err := service.Projects.Jobs.Search(GetParent(), searchJobsRequest).Do()
+	resp, err := service.Projects.Jobs.Search(parent, searchJobsRequest).Do()
 	if err != nil {
 		log.Fatalf("Failed to search for jobs with long value custom attribute, Err: %v", err)
 	}
@@ -117,12 +118,11 @@ func FilterOnLongValueCustomAttribute(service *talent.Service) (*talent.SearchJo
 
 // [END custom_attribute_filter_long_value]
 
+
 // [START custom_attribute_filter_multi_attributes]
 
-/**
- * CustomAttributeFilter on multiple custom attributes
- */
-func FilterOnMultiCustomAttributes(service *talent.Service) (*talent.SearchJobsResponse, error) {
+// filterOnLongValueCustomAttribute searches for jobs on multiple custom atrributes.
+func filterOnMultiCustomAttributes(service *talent.Service, parent string) (*talent.SearchJobsResponse, error) {
 	// Make sure to set the requestMetadata the same as the associated search request
 	requestMetadata := &talent.RequestMetadata{
 		// Make sure to hash your userID
@@ -143,7 +143,7 @@ func FilterOnMultiCustomAttributes(service *talent.Service) (*talent.SearchJobsR
 		RequestMetadata: requestMetadata,
 		JobView:         "JOB_VIEW_FULL",
 	}
-	resp, err := service.Projects.Jobs.Search(GetParent(), searchJobsRequest).Do()
+	resp, err := service.Projects.Jobs.Search(parent, searchJobsRequest).Do()
 	if err != nil {
 		log.Fatalf("Failed to search for jobs with multiple custom attributes, Err: %v", err)
 	}
@@ -153,51 +153,54 @@ func FilterOnMultiCustomAttributes(service *talent.Service) (*talent.SearchJobsR
 
 // [END custom_attribute_filter_multi_attributes]
 
-// [START custom_attribute_sample_entry]
-func CustomAttributeSampleEntry() {
-	service, _ := CreateCtsService()
+
+// [START run_custom_attribute_sample]
+
+func runCustomAttributeSample(w io.Writer) {
+	parent := fmt.Sprintf("projects/%s", os.Getenv("GOOGLE_CLOUD_PROJECT"))
+	service, _ := createCtsService()
 
 	// Create a company before creating jobs
-	companyToCreate := ConstructCompanyWithRequiredFields()
-	companyCreated, _ := CreateCompany(service, companyToCreate)
-	fmt.Printf("CreateCompany: %s\n", companyCreated.DisplayName)
+	companyToCreate := constructCompanyWithRequiredFields()
+	companyCreated, _ := createCompany(service, parent, companyToCreate)
+	fmt.Fprintf(w, "CreateCompany: %s\n", companyCreated.DisplayName)
 
 	// Create a job with custom fields
 	jobTitle := "Software Engineer"
-	jobToCreate := ConstructJobWithCustomAttributes(companyCreated.Name, jobTitle)
-	jobCreated, _ := CreateJob(service, jobToCreate)
-	fmt.Printf("CreateJob: %s\n", jobCreated.Title)
+	jobToCreate := constructJobWithCustomAttributes(companyCreated.Name, jobTitle)
+	jobCreated, _ := createJob(service, parent, jobToCreate)
+	fmt.Fprintf(w, "CreateJob: %s\n", jobCreated.Title)
 
 	time.Sleep(10 * time.Second)
 
-	resp, _ := FilterOnStringValueCustomAttribute(service)
-	fmt.Printf("FilterOnStringValueCustomAttribute StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
-	fmt.Printf("MatchingJobs size: %d\n", len(resp.MatchingJobs))
+	resp, _ := filterOnStringValueCustomAttribute(service, parent)
+	fmt.Fprintf(w, "FilterOnStringValueCustomAttribute StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
+	fmt.Fprintf(w, "MatchingJobs size: %d\n", len(resp.MatchingJobs))
 	for _, mJob := range resp.MatchingJobs {
-		fmt.Printf("-- match job: %s\n", mJob.Job.Title)
+		fmt.Fprintf(w, "-- match job: %s\n", mJob.Job.Title)
 	}
 
-	resp, _ = FilterOnLongValueCustomAttribute(service)
-	fmt.Printf("FilterOnLongValueCustomAttribute StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
-	fmt.Printf("MatchingJobs size: %d\n", len(resp.MatchingJobs))
+	resp, _ = filterOnLongValueCustomAttribute(service, parent)
+	fmt.Fprintf(w, "FilterOnLongValueCustomAttribute StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
+	fmt.Fprintf(w, "MatchingJobs size: %d\n", len(resp.MatchingJobs))
 	for _, mJob := range resp.MatchingJobs {
-		fmt.Printf("-- match job: %s\n", mJob.Job.Title)
+		fmt.Fprintf(w, "-- match job: %s\n", mJob.Job.Title)
 	}
 
-	resp, _ = FilterOnMultiCustomAttributes(service)
-	fmt.Printf("FilterOnMultiCustomAttributes StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
-	fmt.Printf("MatchingJobs size: %d\n", len(resp.MatchingJobs))
+	resp, _ = filterOnMultiCustomAttributes(service, parent)
+	fmt.Fprintf(w, "FilterOnMultiCustomAttributes StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
+	fmt.Fprintf(w, "MatchingJobs size: %d\n", len(resp.MatchingJobs))
 	for _, mJob := range resp.MatchingJobs {
-		fmt.Printf("-- match job: %s\n", mJob.Job.Title)
+		fmt.Fprintf(w, "-- match job: %s\n", mJob.Job.Title)
 	}
 
 	// Delete Job
-	empty, _ := DeleteJob(service, jobCreated.Name)
-	fmt.Printf("DeleteJob StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
+	empty, _ := deleteJob(service, jobCreated.Name)
+	fmt.Fprintf(w, "DeleteJob StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
 	// Delete Company
-	empty, _ = DeleteCompany(service, companyCreated.Name)
-	fmt.Printf("DeleteCompany StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
+	empty, _ = deleteCompany(service, companyCreated.Name)
+	fmt.Fprintf(w, "DeleteCompany StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
 
 }
 
-// [END custom_attribute_sample_entry]
+// [END run_custom_attribute_sample]

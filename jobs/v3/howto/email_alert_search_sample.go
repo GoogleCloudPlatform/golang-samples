@@ -1,8 +1,14 @@
-package cjdsample
+// Copyright 2018 Google Inc. All rights reserved.
+// Use of this source code is governed by the Apache 2.0
+// license that can be found in the LICENSE file.
+
+package sample
 
 import (
 	"fmt"
 	"log"
+	"io"
+	"os"
 	"time"
 
 	talent "google.golang.org/api/jobs/v3"
@@ -10,10 +16,8 @@ import (
 
 // [START search_for_alerts]
 
-/**
- * Search jobs for alert
- */
-func SearchForAlerts(service *talent.Service, companyName string) (*talent.SearchJobsResponse, error) {
+// SearchForAlerts searches for jobs with email alert set which could receive updates later if search result updates
+func searchForAlerts(service *talent.Service, parent string, companyName string) (*talent.SearchJobsResponse, error) {
 	// Make sure to set the requestMetadata the same as the associated search request
 	requestMetadata := &talent.RequestMetadata{
 		// Make sure to hash your userID
@@ -36,7 +40,7 @@ func SearchForAlerts(service *talent.Service, companyName string) (*talent.Searc
 		searchJobsRequest.JobQuery = jobQuery
 	}
 
-	resp, err := service.Projects.Jobs.SearchForAlert(GetParent(), searchJobsRequest).Do()
+	resp, err := service.Projects.Jobs.SearchForAlert(parent, searchJobsRequest).Do()
 	if err != nil {
 		log.Fatalf("Failed to search for jobs with alerts, Err: %v", err)
 	}
@@ -45,38 +49,39 @@ func SearchForAlerts(service *talent.Service, companyName string) (*talent.Searc
 
 // [END search_for_alerts]
 
-// [START email_alert_search_sample_entry]
+// [START run_email_alert_search_sample]
 
-func EmailAlertSearchSampleEntry() {
-	service, _ := CreateCtsService()
+func runEmailAlertSearchSample(w io.Writer) {
+	parent := fmt.Sprintf("projects/%s", os.Getenv("GOOGLE_CLOUD_PROJECT"))
+	service, _ := createCtsService()
 
 	// Create a company before creating jobs
-	companyToCreate := ConstructCompanyWithRequiredFields()
-	companyCreated, _ := CreateCompany(service, companyToCreate)
-	fmt.Printf("CreateCompany: %s\n", companyCreated.DisplayName)
+	companyToCreate := constructCompanyWithRequiredFields()
+	companyCreated, _ := createCompany(service, parent, companyToCreate)
+	fmt.Fprintf(w, "CreateCompany: %s\n", companyCreated.DisplayName)
 
 	// Create a SDE job
 	jobTitle := "Software Engineer"
-	jobToCreate := ConstructJobWithRequiredFields(companyCreated.Name, jobTitle)
-	jobCreated, _ := CreateJob(service, jobToCreate)
-	fmt.Printf("CreateJob: %s\n", jobCreated.Title)
+	jobToCreate := constructJobWithRequiredFields(companyCreated.Name, jobTitle)
+	jobCreated, _ := createJob(service, parent, jobToCreate)
+	fmt.Fprintf(w, "CreateJob: %s\n", jobCreated.Title)
 
 	// Wait for 10 seconds for post processing
 	time.Sleep(10 * time.Second)
 
 	// Search jobs with alerts
-	resp, _ := SearchForAlerts(service, companyCreated.Name)
-	fmt.Printf("SearchForAlerts StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
-	fmt.Printf("MatchingJobs size: %d\n", len(resp.MatchingJobs))
+	resp, _ := searchForAlerts(service, parent, companyCreated.Name)
+	fmt.Fprintf(w, "SearchForAlerts StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
+	fmt.Fprintf(w, "MatchingJobs size: %d\n", len(resp.MatchingJobs))
 	for _, mJob := range resp.MatchingJobs {
-		fmt.Printf("-- match job: %s\n", mJob.Job.Title)
+		fmt.Fprintf(w, "-- match job: %s\n", mJob.Job.Title)
 	}
 
-	empty, _ := DeleteJob(service, jobCreated.Name)
-	fmt.Printf("DeleteJob StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
-	empty, _ = DeleteCompany(service, companyCreated.Name)
-	fmt.Printf("DeleteCompany StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
+	empty, _ := deleteJob(service, jobCreated.Name)
+	fmt.Fprintf(w, "DeleteJob StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
+	empty, _ = deleteCompany(service, companyCreated.Name)
+	fmt.Fprintf(w, "DeleteCompany StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
 
 }
 
-// [END email_alert_search_sample_entry]
+// [END run_email_alert_search_sample]

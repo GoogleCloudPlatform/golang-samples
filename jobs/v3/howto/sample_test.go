@@ -1,27 +1,20 @@
-package cjdsample
+// Copyright 2018 Google Inc. All rights reserved.
+// Use of this source code is governed by the Apache 2.0
+// license that can be found in the LICENSE file.
+
+package sample
 
 import (
-	"io/ioutil"
-	"os"
+	"bytes"
 	"strings"
 	"testing"
 )
 
-func TestBasicCompanySampleEntry(t *testing.T) {
-	oldStdout := os.Stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
 
-	BasicCompanySampleEntry()
-
-	w.Close()
-	os.Stdout = oldStdout
-
-	out, err := ioutil.ReadAll(r)
-	if err != nil {
-		t.Fatalf("Failed to read stdout: %v", err)
-	}
-	got := string(out)
+func TestRunBasicCompanySample(t *testing.T) {
+	out := new(bytes.Buffer)
+	runBasicCompanySample(out)
+	got := out.String()
 
 	want := "CreateCompany: Google Sample\n"
 	want += "GetCompany: Google Sample\n"
@@ -34,21 +27,11 @@ func TestBasicCompanySampleEntry(t *testing.T) {
 	}
 }
 
-func TestBasicJobSampleEntry(t *testing.T) {
-	oldStdout := os.Stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
 
-	BasicJobSampleEntry()
-
-	w.Close()
-	os.Stdout = oldStdout
-
-	out, err := ioutil.ReadAll(r)
-	if err != nil {
-		t.Fatalf("Failed to read stdout: %v", err)
-	}
-	got := string(out)
+func TestRunBasicJobSample(t *testing.T) {
+	out := new(bytes.Buffer)
+	runBasicJobSample(out)
+	got := out.String()
 
 	want := "CreateCompany: Google Sample\n"
 	want += "CreateJob: Software Engineer\n"
@@ -66,21 +49,11 @@ func TestBasicJobSampleEntry(t *testing.T) {
 	}
 }
 
-func TestCommuteSearchSampleEntry(t *testing.T) {
-	oldStdout := os.Stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
 
-	CommuteSearchSampleEntry()
-
-	w.Close()
-	os.Stdout = oldStdout
-
-	out, err := ioutil.ReadAll(r)
-	if err != nil {
-		t.Fatalf("Failed to read stdout: %v", err)
-	}
-	got := string(out)
+func TestRunCommuteSearchSample(t *testing.T) {
+	out := new(bytes.Buffer)
+	runCommuteSearchSample(out)
+	got := out.String()
 
 	want := "CreateCompany: Google Sample\n"
 	want += "CreateJob: Software Engineer\n"
@@ -97,21 +70,11 @@ func TestCommuteSearchSampleEntry(t *testing.T) {
 	}
 }
 
-func TestHistogramSearchSampleEntry(t *testing.T) {
-	oldStdout := os.Stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
 
-	HistogramSearchSampleEntry()
-
-	w.Close()
-	os.Stdout = oldStdout
-
-	out, err := ioutil.ReadAll(r)
-	if err != nil {
-		t.Fatalf("Failed to read stdout: %v", err)
-	}
-	got := string(out)
+func TestRunHistogramSearchSample(t *testing.T) {
+	out := new(bytes.Buffer)
+	runHistogramSearchSample(out)
+	got := out.String()
 
 	want := "CreateCompany: Google Sample\n"
 	want += "CreateJob: Software Engineer\n"
@@ -138,21 +101,11 @@ func TestHistogramSearchSampleEntry(t *testing.T) {
 
 }
 
-func TestEmailAlertSearchSampleEntry(t *testing.T) {
-	oldStdout := os.Stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
 
-	EmailAlertSearchSampleEntry()
-
-	w.Close()
-	os.Stdout = oldStdout
-
-	out, err := ioutil.ReadAll(r)
-	if err != nil {
-		t.Fatalf("Failed to read stdout: %v", err)
-	}
-	got := string(out)
+func TestRunEmailAlertSearchSample(t *testing.T) {
+	out := new(bytes.Buffer)
+	runEmailAlertSearchSample(out)
+	got := out.String()
 
 	want := "CreateCompany: Google Sample\n"
 	want += "CreateJob: Software Engineer\n"
@@ -172,21 +125,11 @@ func TestEmailAlertSearchSampleEntry(t *testing.T) {
 
 }
 
-func TestFeaturedJobSearchSampleEntry(t *testing.T) {
-	oldStdout := os.Stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
 
-	FeaturedJobSearchSampleEntry()
-
-	w.Close()
-	os.Stdout = oldStdout
-
-	out, err := ioutil.ReadAll(r)
-	if err != nil {
-		t.Fatalf("Failed to read stdout: %v", err)
-	}
-	got := string(out)
+func TestRunFeaturedJobSearchSample(t *testing.T) {
+	out := new(bytes.Buffer)
+	runFeaturedJobSearchSample(out)
+	got := out.String()
 
 	want := "CreateCompany: Google Sample\n"
 	want += "CreateJob: Software Engineer (Featured)\n"
@@ -206,21 +149,11 @@ func TestFeaturedJobSearchSampleEntry(t *testing.T) {
 
 }
 
-func TestAutoCompleteSampleEntry(t *testing.T) {
-	oldStdout := os.Stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
 
-	AutoCompleteSampleEntry()
-
-	w.Close()
-	os.Stdout = oldStdout
-
-	out, err := ioutil.ReadAll(r)
-	if err != nil {
-		t.Fatalf("Failed to read stdout: %v", err)
-	}
-	got := string(out)
+func TestRunAutoCompleteSample(t *testing.T) {
+	out := new(bytes.Buffer)
+	runAutoCompleteSample(out)
+	got := out.String()
 
 	want := "CreateCompany: Google Sample\n"
 	want += "CreateJob: Software Engineer\n"
@@ -239,7 +172,7 @@ func TestAutoCompleteSampleEntry(t *testing.T) {
 	}
 
 	want = "DefaultAutoComplete query: gap StatusCode: 200\n"
-	want += "-- suggestion: Gap Inc.\n"
+	want += "-- suggestion: Gap\n"
 	if !strings.Contains(got, want) {
 		t.Errorf("stdout returned %s, wanted to contain %s", got, want)
 	}
@@ -259,21 +192,11 @@ func TestAutoCompleteSampleEntry(t *testing.T) {
 
 }
 
-func TestCustomAttributeSampleEntry(t *testing.T) {
-	oldStdout := os.Stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
 
-	CustomAttributeSampleEntry()
-
-	w.Close()
-	os.Stdout = oldStdout
-
-	out, err := ioutil.ReadAll(r)
-	if err != nil {
-		t.Fatalf("Failed to read stdout: %v", err)
-	}
-	got := string(out)
+func TestRunCustomAttributeSample(t *testing.T) {
+	out := new(bytes.Buffer)
+	runCustomAttributeSample(out)
+	got := out.String()
 
 	want := "CreateCompany: Google Sample\n"
 	want += "CreateJob: Software Engineer\n"
@@ -295,21 +218,11 @@ func TestCustomAttributeSampleEntry(t *testing.T) {
 
 }
 
-func TestLocationBasedSearchSampleEntry(t *testing.T) {
-	oldStdout := os.Stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
 
-	LocationBasedSearchSampleEntry()
-
-	w.Close()
-	os.Stdout = oldStdout
-
-	out, err := ioutil.ReadAll(r)
-	if err != nil {
-		t.Fatalf("Failed to read stdout: %v", err)
-	}
-	got := string(out)
+func TestRunLocationBasedSearchSample(t *testing.T) {
+	out := new(bytes.Buffer)
+	runLocationBasedSearchSample(out)
+	got := out.String()
 
 	want := "CreateCompany: Google Sample\n"
 	want += "CreateJob: Software Engineer\n"
@@ -344,21 +257,11 @@ func TestLocationBasedSearchSampleEntry(t *testing.T) {
 
 }
 
-func TestGeneralSearchSampleEntry(t *testing.T) {
-	oldStdout := os.Stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
 
-	GeneralSearchSampleEntry()
-
-	w.Close()
-	os.Stdout = oldStdout
-
-	out, err := ioutil.ReadAll(r)
-	if err != nil {
-		t.Fatalf("Failed to read stdout: %v", err)
-	}
-	got := string(out)
+func TestRunGeneralSearchSample(t *testing.T) {
+	out := new(bytes.Buffer)
+	runGeneralSearchSample(out)
+	got := out.String()
 
 	want := "CreateCompany: Google Sample\n"
 	want += "CreateJob: Systems Administrator\n"

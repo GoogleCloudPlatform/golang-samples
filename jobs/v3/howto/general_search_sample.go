@@ -1,8 +1,14 @@
-package cjdsample
+// Copyright 2018 Google Inc. All rights reserved.
+// Use of this source code is governed by the Apache 2.0
+// license that can be found in the LICENSE file.
+
+package sample
 
 import (
 	"fmt"
 	"log"
+	"io"
+	"os"
 	"time"
 
 	talent "google.golang.org/api/jobs/v3"
@@ -10,10 +16,8 @@ import (
 
 // [START basic_keyword_search]
 
-/**
- * Simple search jobs with keyword.
- */
-func BasicJobSearch(service *talent.Service, companyName string, query string) (*talent.SearchJobsResponse, error) {
+// basicJobSearch searches for jobs with query.
+func basicJobSearch(service *talent.Service, parent string, companyName string, query string) (*talent.SearchJobsResponse, error) {
 	// Make sure to set the requestMetadata the same as the associated search request
 	requestMetadata := &talent.RequestMetadata{
 		// Make sure to hash your userID
@@ -37,7 +41,7 @@ func BasicJobSearch(service *talent.Service, companyName string, query string) (
 		// Set the search mode to a regular search
 		SearchMode: "JOB_SEARCH",
 	}
-	resp, err := service.Projects.Jobs.Search(GetParent(), searchJobsRequest).Do()
+	resp, err := service.Projects.Jobs.Search(parent, searchJobsRequest).Do()
 	if err != nil {
 		log.Fatalf("Failed to search for jobs with query %v, Err: %v", query, err)
 	}
@@ -46,12 +50,11 @@ func BasicJobSearch(service *talent.Service, companyName string, query string) (
 
 // [END basic_keyword_search]
 
+
 // [START category_filter]
 
-/**
- * Search on category filter
- */
-func CategoryFilterSearch(service *talent.Service, companyName string, categories []string) (*talent.SearchJobsResponse, error) {
+// categoryFilterSearch searches for jobs on category filter.
+func categoryFilterSearch(service *talent.Service, parent string, companyName string, categories []string) (*talent.SearchJobsResponse, error) {
 	// Make sure to set the requestMetadata the same as the associated search request
 	requestMetadata := &talent.RequestMetadata{
 		// Make sure to hash your userID
@@ -75,7 +78,7 @@ func CategoryFilterSearch(service *talent.Service, companyName string, categorie
 		// Set the search mode to a regular search
 		SearchMode: "JOB_SEARCH",
 	}
-	resp, err := service.Projects.Jobs.Search(GetParent(), searchJobsRequest).Do()
+	resp, err := service.Projects.Jobs.Search(parent, searchJobsRequest).Do()
 	if err != nil {
 		log.Fatalf("Failed to search for jobs with categories %v, Err: %v", categories, err)
 	}
@@ -84,12 +87,11 @@ func CategoryFilterSearch(service *talent.Service, companyName string, categorie
 
 // [END category_filter]
 
+
 // [START employment_types_filter]
 
-/**
- * Search on employment types
- */
-func EmploymentTypesSearch(service *talent.Service, companyName string, employmentTypes []string) (*talent.SearchJobsResponse, error) {
+// employmentTypesSearch searches for jobs on employment types.
+func employmentTypesSearch(service *talent.Service, parent string, companyName string, employmentTypes []string) (*talent.SearchJobsResponse, error) {
 	// Make sure to set the requestMetadata the same as the associated search request
 	requestMetadata := &talent.RequestMetadata{
 		// Make sure to hash your userID
@@ -113,7 +115,7 @@ func EmploymentTypesSearch(service *talent.Service, companyName string, employme
 		// Set the search mode to a regular search
 		SearchMode: "JOB_SEARCH",
 	}
-	resp, err := service.Projects.Jobs.Search(GetParent(), searchJobsRequest).Do()
+	resp, err := service.Projects.Jobs.Search(parent, searchJobsRequest).Do()
 	if err != nil {
 		log.Fatalf("Failed to search for jobs with employment types %v, Err: %v", employmentTypes, err)
 	}
@@ -122,16 +124,17 @@ func EmploymentTypesSearch(service *talent.Service, companyName string, employme
 
 // [END employment_types_filter]
 
+
 // [START date_range_filter]
 
 /**
- * Search on date range.
+ * SdateRangeSearch searches for jobs on date range.
  * In JSON format, the Timestamp type is encoded as a string in the
  * [RFC 3339](https://www.ietf.org/rfc/rfc3339.txt) format. That is, the
  * format is "{year}-{month}-{day}T{hour}:{min}:{sec}[.{frac_sec}]Z"
  * e.g. "2017-01-15T01:30:15.01Z"
  */
-func DateRangeSearch(service *talent.Service, companyName string, startTime string, endTime string) (*talent.SearchJobsResponse, error) {
+func dateRangeSearch(service *talent.Service, parent string, companyName string, startTime string, endTime string) (*talent.SearchJobsResponse, error) {
 	// Make sure to set the requestMetadata the same as the associated search request
 	requestMetadata := &talent.RequestMetadata{
 		// Make sure to hash your userID
@@ -158,7 +161,7 @@ func DateRangeSearch(service *talent.Service, companyName string, startTime stri
 		// Set the search mode to a regular search
 		SearchMode: "JOB_SEARCH",
 	}
-	resp, err := service.Projects.Jobs.Search(GetParent(), searchJobsRequest).Do()
+	resp, err := service.Projects.Jobs.Search(parent, searchJobsRequest).Do()
 	if err != nil {
 		log.Fatalf("Failed to search for jobs with date range [%s, %s], Err: %v", startTime, endTime, err)
 	}
@@ -167,12 +170,11 @@ func DateRangeSearch(service *talent.Service, companyName string, startTime stri
 
 // [END date_range_filter]
 
+
 // [START language_code_filter]
 
-/**
- * Search on language code
- */
-func LanguageCodeSearch(service *talent.Service, companyName string, languageCodes []string) (*talent.SearchJobsResponse, error) {
+// languageCodeSearch searches for jobs on language code.
+func languageCodeSearch(service *talent.Service, parent string, companyName string, languageCodes []string) (*talent.SearchJobsResponse, error) {
 	// Make sure to set the requestMetadata the same as the associated search request
 	requestMetadata := &talent.RequestMetadata{
 		// Make sure to hash your userID
@@ -196,7 +198,7 @@ func LanguageCodeSearch(service *talent.Service, companyName string, languageCod
 		// Set the search mode to a regular search
 		SearchMode: "JOB_SEARCH",
 	}
-	resp, err := service.Projects.Jobs.Search(GetParent(), searchJobsRequest).Do()
+	resp, err := service.Projects.Jobs.Search(parent, searchJobsRequest).Do()
 	if err != nil {
 		log.Fatalf("Failed to search for jobs with languange codes %v, Err: %v", languageCodes, err)
 	}
@@ -205,12 +207,11 @@ func LanguageCodeSearch(service *talent.Service, companyName string, languageCod
 
 // [END language_code_filter]
 
+
 // [START company_display_name_filter]
 
-/**
- * Search on company display name
- */
-func CompanyDisplayNameSearch(service *talent.Service, companyName string, companyDisplayNames []string) (*talent.SearchJobsResponse, error) {
+// companyDisplayNameSearch searches for job on company display names
+func companyDisplayNameSearch(service *talent.Service, parent string, companyName string, companyDisplayNames []string) (*talent.SearchJobsResponse, error) {
 	// Make sure to set the requestMetadata the same as the associated search request
 	requestMetadata := &talent.RequestMetadata{
 		// Make sure to hash your userID
@@ -234,7 +235,7 @@ func CompanyDisplayNameSearch(service *talent.Service, companyName string, compa
 		// Set the search mode to a regular search
 		SearchMode: "JOB_SEARCH",
 	}
-	resp, err := service.Projects.Jobs.Search(GetParent(), searchJobsRequest).Do()
+	resp, err := service.Projects.Jobs.Search(parent, searchJobsRequest).Do()
 	if err != nil {
 		log.Fatalf("Failed to search for jobs with company display names %v, Err: %v", companyDisplayNames, err)
 	}
@@ -245,10 +246,8 @@ func CompanyDisplayNameSearch(service *talent.Service, companyName string, compa
 
 // [START compensation_fiter]
 
-/**
- * Search on compensation
- */
-func CompensationSearch(service *talent.Service, companyName string) (*talent.SearchJobsResponse, error) {
+// compensationSearch searches for job on compensation
+func compensationSearch(service *talent.Service, parent string, companyName string) (*talent.SearchJobsResponse, error) {
 	// Make sure to set the requestMetadata the same as the associated search request
 	requestMetadata := &talent.RequestMetadata{
 		// Make sure to hash your userID
@@ -286,7 +285,7 @@ func CompensationSearch(service *talent.Service, companyName string) (*talent.Se
 		// Set the search mode to a regular search
 		SearchMode: "JOB_SEARCH",
 	}
-	resp, err := service.Projects.Jobs.Search(GetParent(), searchJobsRequest).Do()
+	resp, err := service.Projects.Jobs.Search(parent, searchJobsRequest).Do()
 	if err != nil {
 		log.Fatalf("Failed to search for jobs with compensation, Err: %v", err)
 	}
@@ -295,22 +294,22 @@ func CompensationSearch(service *talent.Service, companyName string) (*talent.Se
 
 // [END compensation_filter]
 
-// [START general_search_sample_entry]
 
-/**
- * Sample entry for the general job search
- */
-func GeneralSearchSampleEntry() {
-	service, _ := CreateCtsService()
+// [START run_general_search_sample]
+
+// runGeneralSearchSample runs the general job search samples
+func runGeneralSearchSample(w io.Writer) {
+	parent := fmt.Sprintf("projects/%s", os.Getenv("GOOGLE_CLOUD_PROJECT"))
+	service, _ := createCtsService()
 
 	// Create a company before creating jobs
-	companyToCreate := ConstructCompanyWithRequiredFields()
-	companyCreated, _ := CreateCompany(service, companyToCreate)
-	fmt.Printf("CreateCompany: %s\n", companyCreated.DisplayName)
+	companyToCreate := constructCompanyWithRequiredFields()
+	companyCreated, _ := createCompany(service, parent, companyToCreate)
+	fmt.Fprintf(w, "CreateCompany: %s\n", companyCreated.DisplayName)
 
 	// Create a job
 	jobTitle := "Systems Administrator"
-	jobToCreate := ConstructJobWithRequiredFields(companyCreated.Name, jobTitle)
+	jobToCreate := constructJobWithRequiredFields(companyCreated.Name, jobTitle)
 	jobToCreate.LanguageCode = "en-US"
 	jobToCreate.EmploymentTypes = []string{"FULL_TIME"}
 	compensationInfo := &talent.CompensationInfo{}
@@ -326,68 +325,68 @@ func GeneralSearchSampleEntry() {
 	}
 	jobToCreate.CompensationInfo = compensationInfo
 
-	jobCreated, _ := CreateJob(service, jobToCreate)
-	fmt.Printf("CreateJob: %s\n", jobCreated.Title)
+	jobCreated, _ := createJob(service, parent, jobToCreate)
+	fmt.Fprintf(w, "CreateJob: %s\n", jobCreated.Title)
 
 	// Wait for 10 seconds for post processing
 	time.Sleep(10 * time.Second)
 
-	resp, _ := BasicJobSearch(service, companyCreated.Name, jobTitle)
-	fmt.Printf("BasicJobSearch StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
-	fmt.Printf("MatchingJobs size: %d\n", len(resp.MatchingJobs))
+	resp, _ := basicJobSearch(service, parent, companyCreated.Name, jobTitle)
+	fmt.Fprintf(w, "BasicJobSearch StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
+	fmt.Fprintf(w, "MatchingJobs size: %d\n", len(resp.MatchingJobs))
 	for _, mJob := range resp.MatchingJobs {
-		fmt.Printf("-- match job: %s\n", mJob.Job.Title)
+		fmt.Fprintf(w, "-- match job: %s\n", mJob.Job.Title)
 	}
 
 	categories := []string{"COMPUTER_AND_IT"}
-	resp, _ = CategoryFilterSearch(service, companyCreated.Name, categories)
-	fmt.Printf("CategoryFilterSearch StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
-	fmt.Printf("MatchingJobs size: %d\n", len(resp.MatchingJobs))
+	resp, _ = categoryFilterSearch(service, parent, companyCreated.Name, categories)
+	fmt.Fprintf(w, "CategoryFilterSearch StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
+	fmt.Fprintf(w, "MatchingJobs size: %d\n", len(resp.MatchingJobs))
 	for _, mJob := range resp.MatchingJobs {
-		fmt.Printf("-- match job: %s\n", mJob.Job.Title)
+		fmt.Fprintf(w, "-- match job: %s\n", mJob.Job.Title)
 	}
 
 	employmentTypes := []string{"FULL_TIME", "CONTRACTOR", "PER_DIEM"}
-	resp, _ = EmploymentTypesSearch(service, companyCreated.Name, employmentTypes)
-	fmt.Printf("EmploymentTypesSearch StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
-	fmt.Printf("MatchingJobs size: %d\n", len(resp.MatchingJobs))
+	resp, _ = employmentTypesSearch(service, parent, companyCreated.Name, employmentTypes)
+	fmt.Fprintf(w, "EmploymentTypesSearch StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
+	fmt.Fprintf(w, "MatchingJobs size: %d\n", len(resp.MatchingJobs))
 	for _, mJob := range resp.MatchingJobs {
-		fmt.Printf("-- match job: %s\n", mJob.Job.Title)
+		fmt.Fprintf(w, "-- match job: %s\n", mJob.Job.Title)
 	}
 
-	resp, _ = DateRangeSearch(service, companyCreated.Name, "2000-01-01T00:00:00.01Z", "2099-01-01T00:00:00.01Z")
-	fmt.Printf("DateRangeSearch StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
-	fmt.Printf("MatchingJobs size: %d\n", len(resp.MatchingJobs))
+	resp, _ = dateRangeSearch(service, parent, companyCreated.Name, "2000-01-01T00:00:00.01Z", "2099-01-01T00:00:00.01Z")
+	fmt.Fprintf(w, "DateRangeSearch StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
+	fmt.Fprintf(w, "MatchingJobs size: %d\n", len(resp.MatchingJobs))
 	for _, mJob := range resp.MatchingJobs {
-		fmt.Printf("-- match job: %s\n", mJob.Job.Title)
+		fmt.Fprintf(w, "-- match job: %s\n", mJob.Job.Title)
 	}
 
-	resp, _ = LanguageCodeSearch(service, companyCreated.Name, []string{"pt-BR", "en-US"})
-	fmt.Printf("LanguageCodeSearch StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
-	fmt.Printf("MatchingJobs size: %d\n", len(resp.MatchingJobs))
+	resp, _ = languageCodeSearch(service, parent, companyCreated.Name, []string{"pt-BR", "en-US"})
+	fmt.Fprintf(w, "LanguageCodeSearch StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
+	fmt.Fprintf(w, "MatchingJobs size: %d\n", len(resp.MatchingJobs))
 	for _, mJob := range resp.MatchingJobs {
-		fmt.Printf("-- match job: %s\n", mJob.Job.Title)
+		fmt.Fprintf(w, "-- match job: %s\n", mJob.Job.Title)
 	}
 
-	resp, _ = CompanyDisplayNameSearch(service, companyCreated.Name, []string{"Google Sample"})
-	fmt.Printf("CompanyDisplayNameSearch StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
-	fmt.Printf("MatchingJobs size: %d\n", len(resp.MatchingJobs))
+	resp, _ = companyDisplayNameSearch(service, parent, companyCreated.Name, []string{"Google Sample"})
+	fmt.Fprintf(w, "CompanyDisplayNameSearch StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
+	fmt.Fprintf(w, "MatchingJobs size: %d\n", len(resp.MatchingJobs))
 	for _, mJob := range resp.MatchingJobs {
-		fmt.Printf("-- match job: %s\n", mJob.Job.Title)
+		fmt.Fprintf(w, "-- match job: %s\n", mJob.Job.Title)
 	}
 
-	resp, _ = CompensationSearch(service, companyCreated.Name)
-	fmt.Printf("CompensationSearch StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
-	fmt.Printf("MatchingJobs size: %d\n", len(resp.MatchingJobs))
+	resp, _ = compensationSearch(service, parent, companyCreated.Name)
+	fmt.Fprintf(w, "CompensationSearch StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
+	fmt.Fprintf(w, "MatchingJobs size: %d\n", len(resp.MatchingJobs))
 	for _, mJob := range resp.MatchingJobs {
-		fmt.Printf("-- match job: %s\n", mJob.Job.Title)
+		fmt.Fprintf(w, "-- match job: %s\n", mJob.Job.Title)
 	}
 
-	empty, _ := DeleteJob(service, jobCreated.Name)
-	fmt.Printf("DeleteJob StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
-	empty, _ = DeleteCompany(service, companyCreated.Name)
-	fmt.Printf("DeleteCompany StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
+	empty, _ := deleteJob(service, jobCreated.Name)
+	fmt.Fprintf(w, "DeleteJob StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
+	empty, _ = deleteCompany(service, companyCreated.Name)
+	fmt.Fprintf(w, "DeleteCompany StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
 
 }
 
-// [END general_search_sample_entry]
+// [END run_general_search_sample]
