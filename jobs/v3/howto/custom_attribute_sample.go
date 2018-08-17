@@ -6,8 +6,8 @@ package sample
 
 import (
 	"fmt"
-	"log"
 	"io"
+	"log"
 	"os"
 	"time"
 
@@ -50,7 +50,6 @@ func constructJobWithCustomAttributes(companyName string, jobTitle string) *tale
 
 // [END custom_attribute_job]
 
-
 // [START custom_attribute_filter_string_value]
 
 // filterOnStringValueCustomAttribute searches for jobs on a string value custom atrribute.
@@ -83,7 +82,6 @@ func filterOnStringValueCustomAttribute(service *talent.Service, parent string) 
 }
 
 // [END custom_attribute_filter_string_value]
-
 
 // [START custom_attribute_filter_long_value]
 
@@ -118,7 +116,6 @@ func filterOnLongValueCustomAttribute(service *talent.Service, parent string) (*
 
 // [END custom_attribute_filter_long_value]
 
-
 // [START custom_attribute_filter_multi_attributes]
 
 // filterOnLongValueCustomAttribute searches for jobs on multiple custom atrributes.
@@ -152,7 +149,6 @@ func filterOnMultiCustomAttributes(service *talent.Service, parent string) (*tal
 }
 
 // [END custom_attribute_filter_multi_attributes]
-
 
 // [START run_custom_attribute_sample]
 

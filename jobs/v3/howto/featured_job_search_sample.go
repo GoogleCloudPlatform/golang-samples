@@ -6,8 +6,8 @@ package sample
 
 import (
 	"fmt"
-	"log"
 	"io"
+	"log"
 	"os"
 	"time"
 
@@ -35,7 +35,6 @@ func constructFeaturedJob(companyName string, jobTitle string) *talent.Job {
 }
 
 // [END featured_job]
-
 
 // [START search_featured_job]
 
@@ -73,7 +72,6 @@ func searchFeaturedJobs(service *talent.Service, parent string, companyName stri
 }
 
 // [END search_featured_job]
-
 
 // [START run_featured_job_search_sample]
 

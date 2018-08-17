@@ -6,8 +6,8 @@ package sample
 
 import (
 	"fmt"
-	"log"
 	"io"
+	"log"
 	"os"
 	"time"
 
@@ -50,7 +50,6 @@ func constructCompanyWithRequiredFields() *talent.Company {
 
 // [END basic_company]
 
-
 // [START create_company]
 
 // createCompany creates a company as given.
@@ -68,7 +67,6 @@ func createCompany(service *talent.Service, parent string, companyToCreate *tale
 
 // [END create_company]
 
-
 // [START get_company]
 
 // getCompany gets an existing company by name.
@@ -82,7 +80,6 @@ func getCompany(service *talent.Service, name string) (*talent.Company, error) {
 }
 
 // [END get_company]
-
 
 // [START update_company]
 
@@ -100,7 +97,6 @@ func updateCompany(service *talent.Service, name string, companyToUpdate *talent
 }
 
 // [END update_company]
-
 
 // [START update_company_with_field_mask]
 
@@ -121,7 +117,6 @@ func updateCompanyWithMask(service *talent.Service, name string, mask string, co
 
 // [END update_company_with_field_mask]
 
-
 // [START delete_company]
 
 // deleteCompany deletes an existing company by name.
@@ -135,7 +130,6 @@ func deleteCompany(service *talent.Service, name string) (*talent.Empty, error) 
 }
 
 // [END delete_company
-
 
 // [START list_companies]
 

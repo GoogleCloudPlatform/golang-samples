@@ -10,7 +10,6 @@ import (
 	"testing"
 )
 
-
 func TestRunBasicCompanySample(t *testing.T) {
 	out := new(bytes.Buffer)
 	runBasicCompanySample(out)
@@ -26,7 +25,6 @@ func TestRunBasicCompanySample(t *testing.T) {
 		t.Errorf("stdout returned %s, wanted to contain %s", got, want)
 	}
 }
-
 
 func TestRunBasicJobSample(t *testing.T) {
 	out := new(bytes.Buffer)
@@ -49,7 +47,6 @@ func TestRunBasicJobSample(t *testing.T) {
 	}
 }
 
-
 func TestRunCommuteSearchSample(t *testing.T) {
 	out := new(bytes.Buffer)
 	runCommuteSearchSample(out)
@@ -69,7 +66,6 @@ func TestRunCommuteSearchSample(t *testing.T) {
 		t.Errorf("stdout returned %s, wanted to contain %s", got, want)
 	}
 }
-
 
 func TestRunHistogramSearchSample(t *testing.T) {
 	out := new(bytes.Buffer)
@@ -101,7 +97,6 @@ func TestRunHistogramSearchSample(t *testing.T) {
 
 }
 
-
 func TestRunEmailAlertSearchSample(t *testing.T) {
 	out := new(bytes.Buffer)
 	runEmailAlertSearchSample(out)
@@ -125,7 +120,6 @@ func TestRunEmailAlertSearchSample(t *testing.T) {
 
 }
 
-
 func TestRunFeaturedJobSearchSample(t *testing.T) {
 	out := new(bytes.Buffer)
 	runFeaturedJobSearchSample(out)
@@ -148,7 +142,6 @@ func TestRunFeaturedJobSearchSample(t *testing.T) {
 	}
 
 }
-
 
 func TestRunAutoCompleteSample(t *testing.T) {
 	out := new(bytes.Buffer)
@@ -192,7 +185,6 @@ func TestRunAutoCompleteSample(t *testing.T) {
 
 }
 
-
 func TestRunCustomAttributeSample(t *testing.T) {
 	out := new(bytes.Buffer)
 	runCustomAttributeSample(out)
@@ -217,7 +209,6 @@ func TestRunCustomAttributeSample(t *testing.T) {
 	}
 
 }
-
 
 func TestRunLocationBasedSearchSample(t *testing.T) {
 	out := new(bytes.Buffer)
@@ -256,7 +247,6 @@ func TestRunLocationBasedSearchSample(t *testing.T) {
 	}
 
 }
-
 
 func TestRunGeneralSearchSample(t *testing.T) {
 	out := new(bytes.Buffer)

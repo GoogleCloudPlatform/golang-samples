@@ -6,8 +6,8 @@ package sample
 
 import (
 	"fmt"
-	"log"
 	"io"
+	"log"
 	"os"
 	"time"
 
@@ -16,7 +16,7 @@ import (
 
 // [START histogram_search]
 
-// histogramSearch searches for jobs with histogram facets 
+// histogramSearch searches for jobs with histogram facets
 func histogramSearch(service *talent.Service, parent string, companyName string) (*talent.SearchJobsResponse, error) {
 	// Make sure to set the requestMetadata the same as the associated search request
 	requestMetadata := &talent.RequestMetadata{
@@ -60,7 +60,6 @@ func histogramSearch(service *talent.Service, parent string, companyName string)
 }
 
 // [END histogram_search]
-
 
 // [START run_histogram_search_sample]
 

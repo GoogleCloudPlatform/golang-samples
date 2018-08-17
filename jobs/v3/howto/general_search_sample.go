@@ -6,8 +6,8 @@ package sample
 
 import (
 	"fmt"
-	"log"
 	"io"
+	"log"
 	"os"
 	"time"
 
@@ -50,7 +50,6 @@ func basicJobSearch(service *talent.Service, parent string, companyName string, 
 
 // [END basic_keyword_search]
 
-
 // [START category_filter]
 
 // categoryFilterSearch searches for jobs on category filter.
@@ -87,7 +86,6 @@ func categoryFilterSearch(service *talent.Service, parent string, companyName st
 
 // [END category_filter]
 
-
 // [START employment_types_filter]
 
 // employmentTypesSearch searches for jobs on employment types.
@@ -123,7 +121,6 @@ func employmentTypesSearch(service *talent.Service, parent string, companyName s
 }
 
 // [END employment_types_filter]
-
 
 // [START date_range_filter]
 
@@ -170,7 +167,6 @@ func dateRangeSearch(service *talent.Service, parent string, companyName string,
 
 // [END date_range_filter]
 
-
 // [START language_code_filter]
 
 // languageCodeSearch searches for jobs on language code.
@@ -206,7 +202,6 @@ func languageCodeSearch(service *talent.Service, parent string, companyName stri
 }
 
 // [END language_code_filter]
-
 
 // [START company_display_name_filter]
 
@@ -293,7 +288,6 @@ func compensationSearch(service *talent.Service, parent string, companyName stri
 }
 
 // [END compensation_filter]
-
 
 // [START run_general_search_sample]
 

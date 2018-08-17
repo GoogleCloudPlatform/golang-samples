@@ -6,8 +6,8 @@ package sample
 
 import (
 	"fmt"
-	"log"
 	"io"
+	"log"
 	"os"
 	"time"
 
@@ -56,7 +56,6 @@ func basicLocationSearch(service *talent.Service, parent string, companyName str
 
 // [END basic_location_search]
 
-
 // [START city_location_search]
 
 // cityLocationSearch searches for jobs in the same city of given location.
@@ -97,7 +96,6 @@ func cityLocationSearch(service *talent.Service, parent string, companyName stri
 }
 
 // [END city_location_search]
-
 
 // [START broadening_location_search]
 
@@ -140,7 +138,6 @@ func broadeningLocationSearch(service *talent.Service, parent string, companyNam
 }
 
 // [END broadening_location_search]
-
 
 // [START keyword_location_search]
 
@@ -230,7 +227,6 @@ func multiLocationsSearch(service *talent.Service, parent string, companyName st
 
 // [END multi_locations_search]
 
-
 // [START run_location_based_search_sample]
 
 func runLocationBasedSearchSample(w io.Writer) {
@@ -252,7 +248,7 @@ func runLocationBasedSearchSample(w io.Writer) {
 	jobToCreate := constructJobWithRequiredFields(companyCreated.Name, jobTitle)
 	jobToCreate.Addresses = []string{location}
 
-	jobCreated, _ := createJob(service, parent,jobToCreate)
+	jobCreated, _ := createJob(service, parent, jobToCreate)
 	fmt.Fprintf(w, "CreateJob: %s\n", jobCreated.Title)
 
 	jobTitle2 := "Senior " + keyword

@@ -6,8 +6,8 @@ package sample
 
 import (
 	"fmt"
-	"log"
 	"io"
+	"log"
 	"os"
 	"time"
 
@@ -32,7 +32,6 @@ func jobTitleAutoComplete(service *talent.Service, parent string, companyName st
 
 // [END auto_complete_job_title]
 
-
 // [START auto_complete_default]
 
 // defaultAutoComplete suggests job titles or company display names of given companyName based on query.
@@ -50,7 +49,6 @@ func defaultAutoComplete(service *talent.Service, parent string, companyName str
 }
 
 // [END auto_complete_default]
-
 
 // [START run_auto_complete_sample]
 
@@ -79,14 +77,14 @@ func runAutoCompleteSample(w io.Writer) {
 	time.Sleep(10 * time.Second)
 
 	query := "sof"
-	resp, _ := defaultAutoComplete(service, parent, /*companyName*/ "", query)
+	resp, _ := defaultAutoComplete(service, parent /*companyName*/, "", query)
 	fmt.Fprintf(w, "DefaultAutoComplete query: %s StatusCode: %d\n", query, resp.ServerResponse.HTTPStatusCode)
 	for _, comp := range resp.CompletionResults {
 		fmt.Fprintf(w, "-- suggestion: %s\n", comp.Suggestion)
 	}
 
 	query = "sof"
-	resp, _ = jobTitleAutoComplete(service, parent, /*companyName*/ "", query)
+	resp, _ = jobTitleAutoComplete(service, parent /*companyName*/, "", query)
 	fmt.Fprintf(w, "JobTitleAutoComplete query: %s StatusCode: %d\n", query, resp.ServerResponse.HTTPStatusCode)
 	for _, comp := range resp.CompletionResults {
 		fmt.Fprintf(w, "-- suggestion: %s\n", comp.Suggestion)

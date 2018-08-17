@@ -6,8 +6,8 @@ package sample
 
 import (
 	"fmt"
-	"log"
 	"io"
+	"log"
 	"os"
 	"time"
 
@@ -34,7 +34,6 @@ func constructJobWithRequiredFields(companyName string, jobTitle string) *talent
 
 // [END basic_job]
 
-
 // [START create_job]
 
 // createJob create a job as given.
@@ -51,7 +50,6 @@ func createJob(service *talent.Service, parent string, jobToCreate *talent.Job) 
 
 // [END create_job]
 
-
 // [START get_job]
 
 // getJob gets a job by name.
@@ -65,7 +63,6 @@ func getJob(service *talent.Service, jobName string) (*talent.Job, error) {
 }
 
 // [END get_job]
-
 
 // [START update_job]
 
@@ -83,7 +80,6 @@ func updateJob(service *talent.Service, jobName string, jobToUpdate *talent.Job)
 }
 
 // [END update_job]
-
 
 // [START update_job_with_field_mask]
 
@@ -104,7 +100,6 @@ func updateJobWithMask(service *talent.Service, jobName string, mask string, job
 
 // [END update_job_with_field_mask]
 
-
 // [START delete_job]
 
 // deleteJob deletes an existing job by name
@@ -118,7 +113,6 @@ func deleteJob(service *talent.Service, jobName string) (*talent.Empty, error) {
 }
 
 // [END delete_job]
-
 
 // [START list_jobs]
 
@@ -134,7 +128,6 @@ func listJobs(service *talent.Service, parent string, filter string) (*talent.Li
 }
 
 // [END list_jobs]
-
 
 // [START run_basic_job_sample]
 
