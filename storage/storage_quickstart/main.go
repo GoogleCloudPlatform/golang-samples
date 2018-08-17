@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // [START storage_quickstart]
+
 // Sample storage-quickstart creates a Google Cloud Storage bucket.
 package main
 

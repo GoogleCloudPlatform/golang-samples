@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // [START sample_code]
+
 // This sample gets the app displays 5 log Records at a time, including all
 // AppLogs, with a Next link to let the user page through the results using the
 // Record's Offset property.
