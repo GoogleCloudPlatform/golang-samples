@@ -8,8 +8,7 @@ import (
 	"sync"
 	"testing"
 	"time"
-
-	"golang.org/x/net/context"
+	"context"
 
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
