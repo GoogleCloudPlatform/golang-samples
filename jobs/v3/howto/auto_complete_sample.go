@@ -77,14 +77,14 @@ func runAutoCompleteSample(w io.Writer) {
 	time.Sleep(10 * time.Second)
 
 	query := "sof"
-	resp, _ := defaultAutoComplete(service, parent /*companyName*/, "", query)
+	resp, _ := defaultAutoComplete(service, parent, "" /*companyName*/, query)
 	fmt.Fprintf(w, "DefaultAutoComplete query: %s StatusCode: %d\n", query, resp.ServerResponse.HTTPStatusCode)
 	for _, comp := range resp.CompletionResults {
 		fmt.Fprintf(w, "-- suggestion: %s\n", comp.Suggestion)
 	}
 
 	query = "sof"
-	resp, _ = jobTitleAutoComplete(service, parent /*companyName*/, "", query)
+	resp, _ = jobTitleAutoComplete(service, parent, "" /*companyName*/, query)
 	fmt.Fprintf(w, "JobTitleAutoComplete query: %s StatusCode: %d\n", query, resp.ServerResponse.HTTPStatusCode)
 	for _, comp := range resp.CompletionResults {
 		fmt.Fprintf(w, "-- suggestion: %s\n", comp.Suggestion)
