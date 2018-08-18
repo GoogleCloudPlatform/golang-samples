@@ -1,0 +1,10 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: basic-ingress
+  labels:
+    app: basicwebapp
+spec:
+  backend:
+    serviceName: basicwebapp
+    servicePort: 8080
