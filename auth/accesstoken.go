@@ -12,7 +12,6 @@ package authsnippets
 // permissions on allow listing Topics on a project.
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 
@@ -24,16 +23,16 @@ import (
 	"google.golang.org/api/option"
 )
 
-func accesstoken() {
+// audience values for other services can be found in the repo here similar to PubSub
+// https://github.com/googleapis/googleapis/blob/master/google/pubsub/pubsub.yaml#L6
+const audience string = "https://pubsub.googleapis.com/google.pubsub.v1.Publisher"
 
-	ctx := context.Background()
+func authsnippets() {
+
 	projectID := "YOUR_PROJECT"
 	keyfile := "service_account.json"
 
-	// audience values for other services can be found in the repo here similar to PubSub
-	// // https://github.com/googleapis/googleapis/blob/master/google/pubsub/pubsub.yaml#L6
-	audience := "https://pubsub.googleapis.com/google.pubsub.v1.Publisher"
-
+	ctx := context.Background()
 	keyBytes, err := ioutil.ReadFile(keyfile)
 	if err != nil {
 		log.Fatalf("Unable to read service account key file  %v", err)
@@ -46,7 +45,7 @@ func accesstoken() {
 	if err != nil {
 		log.Fatalf("Unable to generate JWT token: %v", err)
 	}
-	fmt.Println(jwt.AccessToken)
+	log.Println(jwt.AccessToken)
 
 	pubsubClient, err := pubsub.NewClient(ctx, projectID, option.WithTokenSource(tokenSource))
 	if err != nil {
@@ -59,8 +58,8 @@ func accesstoken() {
 			break
 		}
 		if err != nil {
-			fmt.Println(err)
+			log.Fatalf("Error listing topics %v", err)
 		}
-		fmt.Println(topic)
+		log.Println(topic)
 	}
 }
