@@ -8,11 +8,14 @@
 
 // To use, create a service accountJSON file and allow atleast Pub/Sub Viewer IAM
 // permissions on allow listing Topics on a project.
-package authsnippets
+package main
 
 import (
+	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
@@ -27,13 +30,27 @@ import (
 // https://github.com/googleapis/googleapis/blob/master/google/pubsub/pubsub.yaml
 const aud string = "https://pubsub.googleapis.com/google.pubsub.v1.Publisher"
 
-func authsnippets() {
+var (
+	projectID = flag.String("project", "", "Project ID")
+	keyfile   = flag.String("keyfile", "", "Service Account JSON keyfile")
+)
 
-	projectID := "YOUR_PROJECT"
-	keyfile := "service_account.json"
+func main() {
+	flag.Parse()
+
+	if *projectID == "" {
+		fmt.Fprintln(os.Stderr, "missing -project flag")
+		flag.Usage()
+		os.Exit(2)
+	}
+	if *keyfile == "" {
+		fmt.Fprintln(os.Stderr, "missing -keyfile flag")
+		flag.Usage()
+		os.Exit(2)
+	}
 
 	ctx := context.Background()
-	keyBytes, err := ioutil.ReadFile(keyfile)
+	keyBytes, err := ioutil.ReadFile(*keyfile)
 	if err != nil {
 		log.Fatalf("Unable to read service account key file  %v", err)
 	}
@@ -47,7 +64,7 @@ func authsnippets() {
 	}
 	log.Println(jwt.AccessToken)
 
-	client, err := pubsub.NewClient(ctx, projectID, option.WithTokenSource(tokenSource))
+	client, err := pubsub.NewClient(ctx, *projectID, option.WithTokenSource(tokenSource))
 	if err != nil {
 		log.Fatalf("Could not create pubsub Client: %v", err)
 	}
