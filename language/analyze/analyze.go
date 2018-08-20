@@ -62,6 +62,7 @@ func usage(msg string) {
 	os.Exit(2)
 }
 
+// [START language_entities_text]
 func analyzeEntities(ctx context.Context, client *language.Client, text string) (*languagepb.AnalyzeEntitiesResponse, error) {
 	return client.AnalyzeEntities(ctx, &languagepb.AnalyzeEntitiesRequest{
 		Document: &languagepb.Document{
@@ -73,7 +74,9 @@ func analyzeEntities(ctx context.Context, client *language.Client, text string) 
 		EncodingType: languagepb.EncodingType_UTF8,
 	})
 }
+// [END language_entities_text]
 
+// [START language_sentiment_text]
 func analyzeSentiment(ctx context.Context, client *language.Client, text string) (*languagepb.AnalyzeSentimentResponse, error) {
 	return client.AnalyzeSentiment(ctx, &languagepb.AnalyzeSentimentRequest{
 		Document: &languagepb.Document{
@@ -84,7 +87,9 @@ func analyzeSentiment(ctx context.Context, client *language.Client, text string)
 		},
 	})
 }
+// [END language_sentiment_text]
 
+// [START language_syntax_text]
 func analyzeSyntax(ctx context.Context, client *language.Client, text string) (*languagepb.AnnotateTextResponse, error) {
 	return client.AnnotateText(ctx, &languagepb.AnnotateTextRequest{
 		Document: &languagepb.Document{
@@ -99,7 +104,9 @@ func analyzeSyntax(ctx context.Context, client *language.Client, text string) (*
 		EncodingType: languagepb.EncodingType_UTF8,
 	})
 }
+// [END language_syntax_text]
 
+// [START language_classify_text]
 func classifyText(ctx context.Context, client *language.Client, text string) (*languagepb.ClassifyTextResponse, error) {
 	return client.ClassifyText(ctx, &languagepb.ClassifyTextRequest{
 		Document: &languagepb.Document{
@@ -110,6 +117,7 @@ func classifyText(ctx context.Context, client *language.Client, text string) (*l
 		},
 	})
 }
+// [END language_classify_text]
 
 func printResp(v proto.Message, err error) {
 	if err != nil {
