@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // [START gae_golang_logging_example]
+
 package hello
 
 import (
