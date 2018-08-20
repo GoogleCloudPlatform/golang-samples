@@ -9,6 +9,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -35,7 +36,7 @@ func main() {
 		os.Exit(2)
 	}
 
-	var runFunc func(string) (*speechpb.RecognizeResponse, error)
+	var runFunc func(io.Writer, string) error
 
 	path := os.Args[1]
 	if strings.Contains(path, "://") {
@@ -45,19 +46,19 @@ func main() {
 	}
 
 	// Perform the request.
-	resp, err := runFunc(os.Args[1])
-	if err != nil {
+	if err := runFunc(os.Stdout, os.Args[1]); err != nil {
 		log.Fatal(err)
 	}
 }
 
 // [START speech_transcribe_sync_gcs]
-func recognizeGCS(gcsURI string) (*speechpb.RecognizeResponse, error) {
+
+func recognizeGCS(w io.Writer, gcsURI string) error {
 	ctx := context.Background()
 
 	client, err := speech.NewClient(ctx)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	// Send the request with the URI (gs://...)
@@ -76,25 +77,27 @@ func recognizeGCS(gcsURI string) (*speechpb.RecognizeResponse, error) {
 	// Print the results.
 	for _, result := range resp.Results {
 		for _, alt := range result.Alternatives {
-			fmt.Printf("\"%v\" (confidence=%3f)\n", alt.Transcript, alt.Confidence)
+			fmt.Fprintf(w, "\"%v\" (confidence=%3f)\n", alt.Transcript, alt.Confidence)
 		}
 	}
-	return resp, err
+	return nil
 }
+
 // [END speech_transcribe_sync_gcs]
 
 // [START speech_transcribe_sync]
-func recognize(file string) (*speechpb.RecognizeResponse, error) {
+
+func recognize(w io.Writer, file string) error {
 	ctx := context.Background()
 
 	client, err := speech.NewClient(ctx)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	data, err := ioutil.ReadFile(file)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	// Send the contents of the audio file with the encoding and
@@ -113,9 +116,10 @@ func recognize(file string) (*speechpb.RecognizeResponse, error) {
 	// Print the results.
 	for _, result := range resp.Results {
 		for _, alt := range result.Alternatives {
-			fmt.Printf("\"%v\" (confidence=%3f)\n", alt.Transcript, alt.Confidence)
+			fmt.Fprintf(w, "\"%v\" (confidence=%3f)\n", alt.Transcript, alt.Confidence)
 		}
 	}
-	return resp, err
+	return nil
 }
+
 // [END speech_transcribe_sync]
