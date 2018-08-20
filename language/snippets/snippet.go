@@ -15,6 +15,7 @@ import (
 // to avoid it being included in the function signature below.
 var client *language.Client
 
+// [START language_entities_file_gcs]
 func analyzeEntitiesFromGCS(ctx context.Context, gcsURI string) (*languagepb.AnalyzeEntitiesResponse, error) {
 	return client.AnalyzeEntities(ctx, &languagepb.AnalyzeEntitiesRequest{
 		Document: &languagepb.Document{
@@ -26,7 +27,9 @@ func analyzeEntitiesFromGCS(ctx context.Context, gcsURI string) (*languagepb.Ana
 		EncodingType: languagepb.EncodingType_UTF8,
 	})
 }
+// [END language_entities_file_gcs]
 
+// [START language_sentiment_file_gcs]
 func analyzeSentimentFromGCS(ctx context.Context, gcsURI string) (*languagepb.AnalyzeSentimentResponse, error) {
 	return client.AnalyzeSentiment(ctx, &languagepb.AnalyzeSentimentRequest{
 		Document: &languagepb.Document{
@@ -37,7 +40,9 @@ func analyzeSentimentFromGCS(ctx context.Context, gcsURI string) (*languagepb.An
 		},
 	})
 }
+// [END language_sentiment_file_gcs]
 
+// [START language_syntax_file_gcs]
 func analyzeSyntaxFromGCS(ctx context.Context, gcsURI string) (*languagepb.AnnotateTextResponse, error) {
 	return client.AnnotateText(ctx, &languagepb.AnnotateTextRequest{
 		Document: &languagepb.Document{
@@ -52,7 +57,9 @@ func analyzeSyntaxFromGCS(ctx context.Context, gcsURI string) (*languagepb.Annot
 		EncodingType: languagepb.EncodingType_UTF8,
 	})
 }
+// [END language_syntax_file_gcs]
 
+// [START language_classify_file_gcs]
 func classifyTextFromGCS(ctx context.Context, gcsURI string) (*languagepb.ClassifyTextResponse, error) {
 	return client.ClassifyText(ctx, &languagepb.ClassifyTextRequest{
 		Document: &languagepb.Document{
@@ -63,3 +70,4 @@ func classifyTextFromGCS(ctx context.Context, gcsURI string) (*languagepb.Classi
 		},
 	})
 }
+// [END language_classify_file_gcs]
