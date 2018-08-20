@@ -66,7 +66,11 @@ func handleSend(w http.ResponseWriter, r *http.Request) {
 	if ok {
 		text = tvalues[0]
 	}
-	message := services.Message{user, friend, text, -1}
+	message := services.Message{
+		User:   user,
+		Friend: friend,
+		Text:   text,
+		Id:     -1}
 	ctx := r.Context()
 	_, span := trace.StartSpan(ctx, "SendUserMessage")
 	defer span.End()
