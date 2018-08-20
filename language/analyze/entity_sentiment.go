@@ -22,6 +22,7 @@ func betaClient() *language.Client {
 	return client
 }
 
+// [START language_entity_sentiment_text]
 func analyzeEntitySentiment(ctx context.Context, client *language.Client, text string) (*languagepb.AnalyzeEntitySentimentResponse, error) {
 	return client.AnalyzeEntitySentiment(ctx, &languagepb.AnalyzeEntitySentimentRequest{
 		Document: &languagepb.Document{
@@ -32,3 +33,4 @@ func analyzeEntitySentiment(ctx context.Context, client *language.Client, text s
 		},
 	})
 }
+// [END language_entity_sentiment_text]
