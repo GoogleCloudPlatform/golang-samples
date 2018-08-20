@@ -34,7 +34,6 @@ func main() {
 
 	ctx := context.Background()
 
-	// [START speech_streaming_file_recognize]
 	client, err := speech.NewClient(ctx)
 	if err != nil {
 		log.Fatal(err)
@@ -106,5 +105,4 @@ func main() {
 			fmt.Printf("Result: %+v\n", result)
 		}
 	}
-	// [END speech_streaming_file_recognize]
 }
