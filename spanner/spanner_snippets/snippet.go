@@ -55,6 +55,16 @@ var (
 		"querywitharrayofstruct":     queryWithArrayOfStruct,
 		"querywithstructfield":       queryWithStructField,
 		"querywithnestedstructfield": queryWithNestedStructField,
+		"dmlinsert":                  insertUsingDML,
+		"dmlupdate":                  updateUsingDML,
+		"dmldelete":                  deleteUsingDML,
+		"dmlwithtimestamp":           updateUsingDMLWithTimestamp,
+		"dmlwriteread":               writeAndReadUsingDML,
+		"dmlupdatestruct":            updateUsingDMLStruct,
+		"dmlwrite":                   writeUsingDML,
+		"dmlwritetxn":                writeWithTransactionUsingDML,
+		"dmlupdatepart":              updateUsingPartitionedDML,
+		"dmldeletepart":              deleteUsingPartitionedDML,
 	}
 
 	adminCommands = map[string]adminCommand{
@@ -833,7 +843,7 @@ func addCommitTimestamp(ctx context.Context, w io.Writer, adminClient *database.
 		Database: database,
 		Statements: []string{
 			"ALTER TABLE Albums ADD COLUMN LastUpdateTime TIMESTAMP " +
-				"OPTIONS (allow_commit_timestamp=true)",
+					"OPTIONS (allow_commit_timestamp=true)",
 		},
 	})
 	if err != nil {
@@ -905,6 +915,264 @@ func queryWithTimestamp(ctx context.Context, w io.Writer, client *spanner.Client
 }
 
 // [END spanner_query_data_with_timestamp_column]
+
+// [START spanner_dml_standard_insert]
+
+func insertUsingDML(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	_, err := client.ReadWriteTransaction(
+		ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
+			rowCount, err := txn.Update(ctx, spanner.Statement{
+				SQL: `INSERT Singers (SingerId, FirstName, LastName)
+										VALUES (10, 'Virginia', 'Watson')`})
+			if err != nil {
+				return err
+			}
+			fmt.Fprintf(w, "%d record(s) inserted.\n", rowCount)
+			return nil
+		})
+	return err
+}
+
+// [END spanner_dml_standard_insert]
+
+// [START spanner_dml_standard_update]
+
+func updateUsingDML(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	_, err := client.ReadWriteTransaction(
+		ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
+			rowCount, err := txn.Update(ctx, spanner.Statement{
+				SQL: `UPDATE Albums
+								SET MarketingBudget = MarketingBudget * 2
+								WHERE SingerId = 1 and AlbumId = 1`})
+			if err != nil {
+				return err
+			}
+			fmt.Fprintf(w, "%d record(s) updated.\n", rowCount)
+			return nil
+		})
+	return err
+}
+
+// [END spanner_dml_standard_update]
+
+// [START spanner_dml_standard_delete]
+
+func deleteUsingDML(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	_, err := client.ReadWriteTransaction(
+		ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
+			rowCount, err := txn.Update(ctx, spanner.Statement{
+				SQL: `DELETE Singers WHERE FirstName = 'Alice'`})
+			if err != nil {
+				return err
+			}
+			fmt.Fprintf(w, "%d record(s) deleted.\n", rowCount)
+			return nil
+		})
+	return err
+}
+
+// [END spanner_dml_standard_delete]
+
+// [START spanner_dml_standard_update_with_timestamp]
+
+func updateUsingDMLWithTimestamp(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	_, err := client.ReadWriteTransaction(
+		ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
+			rowCount, err := txn.Update(ctx, spanner.Statement{
+				SQL: `UPDATE Albums
+								SET LastUpdateTime = PENDING_COMMIT_TIMESTAMP()
+								WHERE SingerId = 1`})
+			if err != nil {
+				return err
+			}
+			fmt.Fprintf(w, "%d record(s) updated.\n", rowCount)
+			return nil
+		})
+	return err
+}
+
+// [END spanner_dml_standard_update_with_timestamp]
+
+// [START spanner_dml_write_then_read]
+
+func writeAndReadUsingDML(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	_, err := client.ReadWriteTransaction(
+		ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
+			// Insert Record
+			rowCount, err := txn.Update(ctx, spanner.Statement{
+				SQL: `INSERT Singers (SingerId, FirstName, LastName)
+								VALUES (11, 'Timothy', 'Campbell')`})
+			if err != nil {
+				return err
+			}
+			fmt.Fprintf(w, "%d record(s) inserted.\n", rowCount)
+
+			// Read newly inserted record
+			iter := txn.Query(ctx, spanner.Statement{
+				SQL: `SELECT FirstName, LastName FROM Singers WHERE SingerId = 11`})
+			defer iter.Stop()
+
+			for {
+				row, err := iter.Next()
+				if err == iterator.Done || err != nil {
+					break
+				}
+				var firstName, lastName string
+				if err := row.ColumnByName("FirstName", &firstName); err != nil {
+					return err
+				}
+				if err := row.ColumnByName("LastName", &lastName); err != nil {
+					return err
+				}
+				fmt.Fprintf(w, "Found record name with %s, %s", firstName, lastName)
+			}
+			return err
+		})
+	return err
+}
+
+// [END spanner_dml_write_then_read]
+
+// [START spanner_dml_structs]
+
+func updateUsingDMLStruct(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	_, err := client.ReadWriteTransaction(
+		ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
+
+			type nameStruct struct {
+				FirstName string
+				LastName  string
+			}
+			var singerInfo = nameStruct{"Timothy", "Campbell"}
+
+			rowCount, err := txn.Update(ctx, spanner.Statement{
+				SQL: `Update Singers Set LastName = 'Grant' 
+						WHERE STRUCT<FirstName String, LastName String>(Firstname, LastName) = @name`,
+				Params: map[string]interface{}{"name": singerInfo},
+			})
+			if err != nil {
+				return err
+			}
+			fmt.Fprintf(w, "%d record(s) inserted.\n", rowCount)
+			return nil
+		})
+	return err
+}
+
+// [END spanner_dml_structs]
+
+// [START spanner_dml_getting_started_insert]
+
+func writeUsingDML(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	_, err := client.ReadWriteTransaction(
+		ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
+			rowCount, err := txn.Update(ctx, spanner.Statement{
+				SQL: `INSERT Singers (SingerId, FirstName, LastName) VALUES
+								(12, 'Melissa', 'Garcia'),
+								(13, 'Russell', 'Morales'),
+								(14, 'Jacqueline', 'Long'),
+								(15, 'Dylan', 'Shaw')`})
+			if err != nil {
+				return err
+			}
+			fmt.Fprintf(w, "%d record(s) inserted.\n", rowCount)
+			return err
+		})
+	return err
+}
+
+// [END spanner_dml_getting_started_insert]
+
+// [START spanner_dml_getting_started_update]
+
+func writeWithTransactionUsingDML(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	_, err := client.ReadWriteTransaction(
+		ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
+			// Helper function for retrieving the budget of a record
+			getBudget := func(key spanner.Key) (int64, error) {
+				row, err := txn.ReadRow(ctx, "Albums", key, []string{"MarketingBudget"})
+				if err != nil {
+					return 0, err
+				}
+				var budget int64
+				if err := row.Column(0, &budget); err != nil {
+					return 0, err
+				}
+				return budget, nil
+			}
+			// Helper function for updating the budget of a record.
+			updateBudget := func(singerId, albumId, albumBudget int64) error {
+				_, err := txn.Update(ctx, spanner.Statement{
+					SQL: `UPDATE Albums
+									SET MarketingBudget = @AlbumBudget
+									WHERE SingerId = @SingerId and AlbumId = @AlbumId`,
+					Params: map[string]interface{}{
+						"SingerId":    singerId,
+						"AlbumId":     albumId,
+						"AlbumBudget": albumBudget,
+					},
+				})
+				return err
+			}
+
+			// Transfer the marketing budget from one album to another. By keeping the actions
+			// in a single transaction, it ensures the movement is atomic.
+			const transferAmt = 200000
+			var album1budget, album2budget int64
+			var err error
+			if album1budget, err = getBudget(spanner.Key{1, 1}); err != nil {
+				return err
+			}
+			// Transaction will only be committed if this condition still holds at the time of
+			// commit. Otherwise it will be aborted and the callable will be rerun by the
+			// client library.
+			if album1budget >= transferAmt {
+				if album2budget, err = getBudget(spanner.Key{2, 2}); err != nil {
+					return err
+				}
+				if err = updateBudget(1, 1, album1budget-transferAmt); err != nil {
+					return err
+				}
+				if err = updateBudget(2, 2, album2budget+transferAmt); err != nil {
+					return err
+				}
+				fmt.Fprintf(w, "Moved %d from Album1's MarketingBudget to Album2's.", transferAmt)
+			}
+			return nil
+		})
+	return err
+}
+
+// [END spanner_dml_getting_started_update]
+
+// [START spanner_dml_partitioned_update]
+
+func updateUsingPartitionedDML(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	rowCount, err := client.PartitionedUpdate(ctx, spanner.Statement{
+		SQL: "UPDATE Albums SET MarketingBudget = 100000 WHERE SingerId > 1"})
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "%d record(s) updated.\n", rowCount)
+	return nil
+}
+
+// [END spanner_dml_partitioned_update]
+
+// [START spanner_dml_partitioned_delete]
+
+func deleteUsingPartitionedDML(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	rowCount, err := client.PartitionedUpdate(ctx, spanner.Statement{
+		SQL: "DELETE Singers WHERE SingerId > 10"})
+	if err != nil {
+		return err
+
+	}
+	fmt.Fprintf(w, "%d record(s) deleted.", rowCount)
+	return nil
+}
+
+// [END spanner_dml_partitioned_delete]
 
 func queryNewTable(ctx context.Context, w io.Writer, client *spanner.Client) error {
 	stmt := spanner.Statement{
@@ -1173,7 +1441,8 @@ func main() {
 		writewithtimestamp, querynewtable, createtabledocswithtimestamp, writetodocstable,
 		updatedocstable, querydocstable, createtabledocswithhistorytable, writewithhistory,
 		updatewithhistory, querywithhistory, writestructdata, querywithstruct, querywitharrayofstruct,
-		querywithstructfield, querywithnestedstructfield
+		querywithstructfield, querywithnestedstructfield, dmlinsert, dmlupdate, dmldelete,
+		dmlwithtimestamp, dmlwriteread, dmlwrite, dmlwritetxn, dmlupdatepart, dmldeletepart
 
 Examples:
 	spanner_snippets createdatabase projects/my-project/instances/my-instance/databases/example-db
