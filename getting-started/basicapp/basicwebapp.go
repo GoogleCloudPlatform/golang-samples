@@ -2,9 +2,12 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-package main
+// +build go1.7
 
-// Example app with code portable betwee different execution environments
+// Example app with code portable betwee different execution environments.
+// See README.md for details.
+
+package main
 
 import (
 	"fmt"
@@ -20,6 +23,8 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/getting-started/basicapp/services"
 )
 
+// Checks messages sent to a user. The identity of the user is found in the
+// HTTP request parametes.
 func handleCheckMessages(w http.ResponseWriter, r *http.Request) {
 	uvalues, ok := r.URL.Query()["user"]
 	if !ok {
@@ -39,6 +44,7 @@ func handleCheckMessages(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Handle a HTTP request for the root URL
 func handleDefault(w http.ResponseWriter, r *http.Request) {
 	pathSend := "/send?user=Friend1&friend=Friend2&text=We+miss+you!"
 	pathCheck := "/messages?user=Friend2"
@@ -49,6 +55,8 @@ func handleDefault(w http.ResponseWriter, r *http.Request) {
 		"</ol>", pathSend, pathCheck)
 }
 
+// Handle a HTTP request to send a message to a user. The identify of the
+// sender and recipient and retrieved from HTTP request parametes.
 func handleSend(w http.ResponseWriter, r *http.Request) {
 	messageService := services.GetMessageService()
 	uvalues, ok := r.URL.Query()["user"]
@@ -83,6 +91,7 @@ func handleSend(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "<p>Message sent</p>\n")
 }
 
+// Entry point to the application
 func main() {
 	// Profiler initialization
 	if err := profiler.Start(profiler.Config{
@@ -101,6 +110,7 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8080", &ochttp.Handler{}))
 }
 
+// Health check for the load balancer
 func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "ok")
 }
