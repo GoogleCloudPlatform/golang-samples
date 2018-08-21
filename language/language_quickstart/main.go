@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // [START language_quickstart]
+
 // Sample language-quickstart uses the Google Cloud Natural API to analyze the
 // sentiment of "Hello, world!".
 package main

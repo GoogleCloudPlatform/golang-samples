@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // [START monitoring_quickstart]
+
 // Sample monitoring-quickstart writes a data point to Stackdriver Monitoring.
 package main
 
