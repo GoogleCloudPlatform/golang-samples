@@ -54,7 +54,7 @@ func main() {
 	}
 }
 
-// [START speech_transcribe_async_time_offsets_gcs]
+// [START speech_transcribe_async_word_time_offsets_gcs]
 
 func asyncWords(client *speech.Client, out io.Writer, gcsURI string) error {
 	ctx := context.Background()
@@ -99,7 +99,7 @@ func asyncWords(client *speech.Client, out io.Writer, gcsURI string) error {
 	return nil
 }
 
-// [END speech_transcribe_async_time_offsets_gcs]
+// [END speech_transcribe_async_word_time_offsets_gcs]
 
 func syncWords(client *speech.Client, out io.Writer, file string) error {
 	ctx := context.Background()
