@@ -45,7 +45,7 @@ func getAsymmetricPublicKey(ctx context.Context, client *cloudkms.Service, keyPa
 
 // [START kms_decrypt_rsa]
 
-// decryptRSA will attempt to decrypt a given ciphertext with saved a RSA key.
+// decryptRSA will attempt to decrypt a given ciphertext with an 'RSA_DECRYPT_OAEP_2048_SHA256' private key.stored on Cloud KMS
 func decryptRSA(ctx context.Context, client *cloudkms.Service, ciphertext, keyPath string) (string, error) {
 	decryptRequest := &cloudkms.AsymmetricDecryptRequest{
 		Ciphertext: ciphertext,
@@ -67,7 +67,7 @@ func decryptRSA(ctx context.Context, client *cloudkms.Service, ciphertext, keyPa
 
 // [START kms_encrypt_rsa]
 
-// encryptRSA creates a ciphertext from a plain message using a RSA public key saved at the specified keyPath.
+// encryptRSA will encrypt a message locally using an 'RSA_DECRYPT_OAEP_2048_SHA256' public key retrieved from Cloud KMS
 func encryptRSA(ctx context.Context, client *cloudkms.Service, message, keyPath string) (string, error) {
 	abstractKey, err := getAsymmetricPublicKey(ctx, client, keyPath)
 	if err != nil {
@@ -90,7 +90,8 @@ func encryptRSA(ctx context.Context, client *cloudkms.Service, message, keyPath 
 
 // signAsymmetric will sign a plaintext message using a saved asymmetric private key.
 func signAsymmetric(ctx context.Context, client *cloudkms.Service, message, keyPath string) (string, error) {
-	// Find the hash of the plaintext message.
+	// Note: some key algorithms will require a different hash function.
+	// For example, EC_SIGN_P384_SHA384 requires SHA-384.
 	digest := sha256.New()
 	digest.Write([]byte(message))
 	digestStr := base64.StdEncoding.EncodeToString(digest.Sum(nil))
@@ -144,7 +145,7 @@ func verifySignatureRSA(ctx context.Context, client *cloudkms.Service, signature
 
 // [START kms_verify_signature_ec]
 
-// verifySignatureEC will verify that an 'EC_SIGN_P224_SHA256' signature is valid for a given plaintext message.
+// verifySignatureEC will verify that an 'EC_SIGN_P256_SHA256' signature is valid for a given plaintext message.
 func verifySignatureEC(ctx context.Context, client *cloudkms.Service, signature, message, keyPath string) error {
 	abstractKey, err := getAsymmetricPublicKey(ctx, client, keyPath)
 	if err != nil {
