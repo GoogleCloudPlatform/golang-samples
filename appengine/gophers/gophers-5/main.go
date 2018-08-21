@@ -84,7 +84,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	// Create a new Firebase App.
 	app, err := firebase.NewApp(ctx, firebaseConfig)
 	if err != nil {
-		params.Notice = "Couldn't authenticate. Try logging in again?"
+		params.Notice = fmt.Sprintf("firebase.NewApp: %v", err)
 		params.Message = message // Preserve their message so they can try again.
 		indexTemplate.Execute(w, params)
 		return
@@ -92,7 +92,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	// Create a new authenticator for the app.
 	auth, err := app.Auth(ctx)
 	if err != nil {
-		params.Notice = "Couldn't authenticate. Try logging in again?"
+		params.Notice = fmt.Sprintf("app.Auth: %v", err)
 		params.Message = message // Preserve their message so they can try again.
 		indexTemplate.Execute(w, params)
 		return
@@ -100,7 +100,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	// Verify the token passed in by the user is valid.
 	tok, err := auth.VerifyIDTokenAndCheckRevoked(ctx, r.FormValue("token"))
 	if err != nil {
-		params.Notice = "Couldn't authenticate. Try logging in again?"
+		params.Notice = fmt.Sprintf("auth.VerifyIDAndCheckRevoked: %v", err)
 		params.Message = message // Preserve their message so they can try again.
 		indexTemplate.Execute(w, params)
 		return
@@ -108,7 +108,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	// Use the validated token to get the user's information.
 	user, err := auth.GetUser(ctx, tok.UID)
 	if err != nil {
-		params.Notice = "Couldn't authenticate. Try logging in again?"
+		params.Notice = fmt.Sprintf("auth.GetUser: %v", err)
 		params.Message = message // Preserve their message so they can try again.
 		indexTemplate.Execute(w, params)
 		return
