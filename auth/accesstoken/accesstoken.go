@@ -2,12 +2,11 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// Package authsnippets contains Google Cloud authentication snippets.
 // This sample demonstrates AccessTokenCredentials:
 // https://godoc.org/golang.org/x/oauth2/google#JWTAccessTokenSourceFromJSON
 
-// To use, create a service accountJSON file and allow atleast Pub/Sub Viewer IAM
-// permissions on allow listing Topics on a project.
+// To use, create a service accountJSON file and allow it atleast Pub/Sub Viewer IAM
+// permissions to list Topics on a project.
 package main
 
 import (
@@ -24,11 +23,6 @@ import (
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 )
-
-// audience values for other services can be found in the repo here similar to
-// PubSub
-// https://github.com/googleapis/googleapis/blob/master/google/pubsub/pubsub.yaml
-const aud string = "https://pubsub.googleapis.com/google.pubsub.v1.Publisher"
 
 var (
 	projectID = flag.String("project", "", "Project ID")
@@ -48,6 +42,12 @@ func main() {
 		flag.Usage()
 		os.Exit(2)
 	}
+
+  // [START jwtaccesstoken_sample]
+	// audience values for other services can be found in the repo here similar to
+	// PubSub
+	// https://github.com/googleapis/googleapis/blob/master/google/pubsub/pubsub.yaml
+	var aud string = "https://pubsub.googleapis.com/google.pubsub.v1.Publisher"
 
 	ctx := context.Background()
 	keyBytes, err := ioutil.ReadFile(*keyfile)
@@ -79,4 +79,5 @@ func main() {
 		}
 		log.Println(topic)
 	}
+	// [END jwtaccesstoken_sample]
 }
