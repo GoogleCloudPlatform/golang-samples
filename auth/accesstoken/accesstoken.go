@@ -43,7 +43,7 @@ func main() {
 		os.Exit(2)
 	}
 
-  // [START jwtaccesstoken_sample]
+	// [START jwtaccesstoken_sample]
 	// audience values for other services can be found in the repo here similar to
 	// PubSub
 	// https://github.com/googleapis/googleapis/blob/master/google/pubsub/pubsub.yaml
