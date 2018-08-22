@@ -15,13 +15,13 @@ import (
 // [END gae_go_env_import]
 // [START gae_go_env_main]
 func main() {
-	http.HandleFunc("/", gae_go_env_index)
+	http.HandleFunc("/", indexHandler)
 	appengine.Main() // Starts the server to receive requests
 }
 
 // [END gae_go_env_main]
 // [START gae_go_env_index]
-func gae_go_env_index(w http.ResponseWriter, r *http.Request) {
+func indexHandler(w http.ResponseWriter, r *http.Request) {
 	// if statement redirects all invalid URLs to the root homepage.
 	// Ex: if URL is http://[YOUR_PROJECT_ID].appspot.com/FOO, it will be
 	// redirected to http://[YOUR_PROJECT_ID].appspot.com.
