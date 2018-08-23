@@ -11,6 +11,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"sync"
 	"time"
 
 	"golang.org/x/net/context"
@@ -150,18 +151,19 @@ func publish(client *pubsub.Client, topic, msg string) error {
 }
 
 func publishThatScales(client *pubsub.Client, topic string, n int) {
+	var wg sync.WaitGroup
 	ctx := context.Background()
 	// [START pubsub_publish_that_scales]
 	t := client.Topic(topic)
-
-	fmt.Println("\nPress ENTER to stop publishing...\n")
 
 	for i := 0; i < n; i++ {
 		result := t.Publish(ctx, &pubsub.Message{
 			Data: []byte("Message No. " + strconv.Itoa(i)),
 		})
-
+		wg.Add(1)
 		go func(i int) {
+			defer wg.Done()
+
 			// Block until the result is returned and a server-generated
 			// ID is returned for the published message.
 			id, err := result.Get(ctx)
@@ -172,11 +174,9 @@ func publishThatScales(client *pubsub.Client, topic string, n int) {
 				fmt.Printf("Published message No. %d; msg ID: %v\n", i, id)
 			}
 		}(i)
-
+		wg.Wait()
 	}
 
-	fmt.Scanln()
-	fmt.Println("You pressed ENTER to stop publishing.\n")
 	// [END pubsub_publish_that_scales]
 }
 
