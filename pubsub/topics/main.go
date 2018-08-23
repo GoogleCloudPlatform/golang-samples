@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"golang.org/x/net/context"
@@ -51,6 +52,9 @@ func main() {
 	if err := publish(client, topic, "hello world!"); err != nil {
 		log.Fatalf("Failed to publish: %v", err)
 	}
+
+	// Publish 10 messages with asynchronous error handling.
+	publishThatScales(client, topic, 10)
 
 	// Delete the topic.
 	if err := delete(client, topic); err != nil {
@@ -143,6 +147,37 @@ func publish(client *pubsub.Client, topic, msg string) error {
 	// [END pubsub_publish]
 	// [END pubsub_quickstart_publisher]
 	return nil
+}
+
+func publishThatScales(client *pubsub.Client, topic string, n int) {
+	ctx := context.Background()
+	// [START pubsub_publish_that_scales]
+	t := client.Topic(topic)
+
+	fmt.Println("\nPress ENTER to stop publishing...\n")
+
+	for i := 0; i < n; i++ {
+		result := t.Publish(ctx, &pubsub.Message{
+			Data: []byte("Message No. " + strconv.Itoa(i)),
+		})
+
+		go func(i int) {
+			// Block until the result is returned and a server-generated
+			// ID is returned for the published message.
+			id, err := result.Get(ctx)
+
+			if err != nil {
+				log.Output(1, fmt.Sprintf("Failed to publish: %v", err))
+			} else {
+				fmt.Printf("Published message No. %d; msg ID: %v\n", i, id)
+			}
+		}(i)
+
+	}
+
+	fmt.Scanln()
+	fmt.Println("You pressed ENTER to stop publishing.\n")
+	// [END pubsub_publish_that_scales]
 }
 
 func publishWithSettings(client *pubsub.Client, topic string, msg []byte) error {
