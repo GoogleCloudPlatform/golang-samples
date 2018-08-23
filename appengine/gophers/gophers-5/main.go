@@ -10,16 +10,16 @@ import (
 	"net/http"
 	"time"
 
-	// [START imports]
+	// [START gae_go_env_firebase_imports]
 	firebase "firebase.google.com/go"
-	// [END imports]
+	// [END gae_go_env_firebase_imports]
 
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
 )
 
-// [START new_variable]
+// [START gae_go_env_new_variable]
 
 var (
 	firebaseConfig = &firebase.Config{
@@ -30,9 +30,9 @@ var (
 	indexTemplate = template.Must(template.ParseFiles("index.html"))
 )
 
-// [END new_variable]
+// [END gae_go_env_new_variable]
 
-// [START new_post_field]
+// [START gae_go_env_new_post_field]
 
 type Post struct {
 	Author  string
@@ -41,7 +41,7 @@ type Post struct {
 	Posted  time.Time
 }
 
-// [END new_post_field]
+// [END gae_go_env_new_post_field]
 
 type templateParams struct {
 	Notice  string
@@ -78,7 +78,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	// It's a POST request, so handle the form submission.
 
-	// [START firebase_token]
+	// [START gae_go_env_firebase_token]
 	message := r.FormValue("message")
 
 	// Create a new Firebase App.
@@ -114,16 +114,16 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// [END firebase_token]
+	// [END gae_go_env_firebase_token]
 
-	// [START logged_in_post]
+	// [START gae_go_env_logged_in_post]
 	post := Post{
 		UserID:  user.UID, // Include UserID in case Author isn't unique.
 		Author:  user.DisplayName,
 		Message: message,
 		Posted:  time.Now(),
 	}
-	// [END logged_in_post]
+	// [END gae_go_env_logged_in_post]
 
 	params.Name = post.Author
 

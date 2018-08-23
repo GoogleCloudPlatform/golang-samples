@@ -4,7 +4,7 @@
 
 package main
 
-// [START import_statements]
+// [START gae_go_env_import]
 import (
 	"fmt"
 	"net/http"
@@ -12,15 +12,15 @@ import (
 	"google.golang.org/appengine" // Required external App Engine library
 )
 
-// [END import_statements]
-// [START main_func]
+// [END gae_go_env_import]
+// [START gae_go_env_main]
 func main() {
 	http.HandleFunc("/", indexHandler)
 	appengine.Main() // Starts the server to receive requests
 }
 
-// [END main_func]
-// [START indexHandler]
+// [END gae_go_env_main]
+// [START gae_go_env_index]
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	// if statement redirects all invalid URLs to the root homepage.
 	// Ex: if URL is http://[YOUR_PROJECT_ID].appspot.com/FOO, it will be
@@ -33,4 +33,4 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Hello, Gopher Network!")
 }
 
-// [END indexHandler]
+// [END gae_go_env_index]

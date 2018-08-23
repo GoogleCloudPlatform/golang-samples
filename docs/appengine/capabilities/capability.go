@@ -13,7 +13,7 @@ import (
 	"google.golang.org/appengine/capability"
 )
 
-// [START datastore_lookup]
+// [START gae_go_capabilities_lookup]
 func handler(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
 	if !capability.Enabled(ctx, "datastore_v3", "*") {
@@ -23,13 +23,13 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	// do Datastore lookup ...
 }
 
-// [END datastore_lookup]
+// [END gae_go_capabilities_lookup]
 
 func example() {
 	var ctx context.Context
-	// [START intro]
+	// [START gae_go_capabilities_mode]
 	if !capability.Enabled(ctx, "datastore_v3", "write") {
 		// Datastore is in read-only mode.
 	}
-	// [END intro]
+	// [END gae_go_capabilities_mode]
 }

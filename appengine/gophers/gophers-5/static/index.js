@@ -3,7 +3,7 @@ window.addEventListener('load', function () {
     firebase.auth().signOut();
   };
 
-  // [START UIconfig_variable]
+  // [START gae_go_env_ui_config]
   // FirebaseUI config.
   var uiConfig = {
     signInSuccessUrl: '/',
@@ -19,9 +19,9 @@ window.addEventListener('load', function () {
     // Terms of service url.
     tosUrl: '<your-tos-url>'
   };
-  // [END UIconfig_variable]
+  // [END gae_go_env_ui_config]
 
-  // [START auth_request]
+  // [START gae_go_env_auth_request]
   firebase.auth().onAuthStateChanged(function (user) {
     if (user) {
       // User is signed in.
@@ -49,5 +49,5 @@ window.addEventListener('load', function () {
     console.log(error);
     alert('Unable to log in: ' + error)
   });
-  // [END auth_request]
+  // [END gae_go_env_auth_request]
 });
