@@ -94,6 +94,13 @@ func TestPublish(t *testing.T) {
 	}
 }
 
+func TestPublishThatScales(t *testing.T) {
+	c := setup(t)
+	if err := publishThatScales(c, topicID, 10); err != nil {
+		t.Errorf("failed to publish message: %v", err)
+	}
+}
+
 func TestIAM(t *testing.T) {
 	c := setup(t)
 

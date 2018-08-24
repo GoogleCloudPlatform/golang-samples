@@ -7,11 +7,13 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
 	"strconv"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"golang.org/x/net/context"
@@ -55,7 +57,9 @@ func main() {
 	}
 
 	// Publish 10 messages with asynchronous error handling.
-	publishThatScales(client, topic, 10)
+	if err := publishThatScales(client, topic, 10); err != nil {
+		log.Fatalf("Failed to publish: %v", err)
+	}
 
 	// Delete the topic.
 	if err := delete(client, topic); err != nil {
@@ -150,34 +154,41 @@ func publish(client *pubsub.Client, topic, msg string) error {
 	return nil
 }
 
-func publishThatScales(client *pubsub.Client, topic string, n int) {
-	var wg sync.WaitGroup
+func publishThatScales(client *pubsub.Client, topic string, n uint64) error {
 	ctx := context.Background()
-	// [START pubsub_publish_that_scales]
+	var wg sync.WaitGroup
+	var ops uint64
+	// [START pubsub_publish_with_error_handling_that_scales]
 	t := client.Topic(topic)
 
-	for i := 0; i < n; i++ {
+	for i := 0; i < int(n); i++ {
 		result := t.Publish(ctx, &pubsub.Message{
 			Data: []byte("Message No. " + strconv.Itoa(i)),
 		})
+
 		wg.Add(1)
 		go func(i int) {
 			defer wg.Done()
-
-			// Block until the result is returned and a server-generated
-			// ID is returned for the published message.
+			// The Get method blocks until the result is returned and a
+			// server-generated ID is returned for the published message.
 			id, err := result.Get(ctx)
-
 			if err != nil {
+				// Error handling code can be here.
 				log.Output(1, fmt.Sprintf("Failed to publish: %v", err))
 			} else {
 				fmt.Printf("Published message No. %d; msg ID: %v\n", i, id)
 			}
+			atomic.AddUint64(&ops, 1)
 		}(i)
+
 		wg.Wait()
 	}
 
-	// [END pubsub_publish_that_scales]
+	if n != ops {
+		return errors.New("some messages did not publish successfully")
+	}
+	return nil
+	// [END pubsub_publish_with_error_handling_that_scales]
 }
 
 func publishWithSettings(client *pubsub.Client, topic string, msg []byte) error {
