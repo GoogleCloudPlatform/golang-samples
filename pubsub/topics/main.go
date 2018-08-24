@@ -157,7 +157,7 @@ func publish(client *pubsub.Client, topic, msg string) error {
 func publishThatScales(client *pubsub.Client, topic string, n uint64) error {
 	ctx := context.Background()
 	var wg sync.WaitGroup
-	var ops uint64
+	var n_err uint64
 	// [START pubsub_publish_with_error_handling_that_scales]
 	t := client.Topic(topic)
 
@@ -175,16 +175,16 @@ func publishThatScales(client *pubsub.Client, topic string, n uint64) error {
 			if err != nil {
 				// Error handling code can be here.
 				log.Output(1, fmt.Sprintf("Failed to publish: %v", err))
+				atomic.AddUint64(&n_err, 1)
 			} else {
 				fmt.Printf("Published message No. %d; msg ID: %v\n", i, id)
 			}
-			atomic.AddUint64(&ops, 1)
 		}(i)
 
 		wg.Wait()
 	}
 
-	if n != ops {
+	if n_err > 0 {
 		return errors.New("some messages did not publish successfully")
 	}
 	return nil
