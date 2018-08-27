@@ -23,6 +23,7 @@ func noOpCommentFunc() {
 	// [START bigquery_add_empty_column]
 	// [START bigquery_add_column_query_append]
 	// [START bigquery_browse_table]
+	// [START bigquery_cancel_job]
 	// [START bigquery_copy_table]
 	// [START bigquery_copy_table_cmek]
 	// [START bigquery_copy_table_multiple_source]
@@ -40,6 +41,7 @@ func noOpCommentFunc() {
 	// [START bigquery_extract_table_json]
 	// [START bigquery_get_dataset]
 	// [START bigquery_get_dataset_labels]
+	// [START bigquery_get_job]
 	// [START bigquery_get_table]
 	// [START bigquery_get_table_labels]
 	// [START bigquery_label_dataset]
@@ -93,6 +95,7 @@ func noOpCommentFunc() {
 	// [END bigquery_add_empty_column]
 	// [END bigquery_add_column_query_append]
 	// [END bigquery_browse_table]
+	// [END bigquery_cancel_job]
 	// [END bigquery_copy_table]
 	// [END bigquery_copy_table_cmek]
 	// [END bigquery_copy_table_multiple_source]
@@ -110,6 +113,7 @@ func noOpCommentFunc() {
 	// [END bigquery_extract_table_json]
 	// [END bigquery_get_dataset]
 	// [END bigquery_get_dataset_labels]
+	// [END bigquery_get_job]
 	// [END bigquery_get_table]
 	// [END bigquery_get_table_labels]
 	// [END bigquery_label_dataset]
@@ -155,6 +159,17 @@ func noOpCommentFunc() {
 	// [END bigquery_update_dataset_expiration]
 	// [END bigquery_update_table_description]
 	// [END bigquery_update_table_expiration]
+}
+
+func cancelJob(client *bigquery.Client, jobID string) error {
+	ctx := context.Background()
+	// [START bigquery_cancel_job]
+	job, err := client.JobFromID(ctx, jobID)
+	if err != nil {
+		return nil
+	}
+	return job.Cancel(ctx)
+	// [END bigquery_cancel_job]
 }
 
 func createDataset(client *bigquery.Client, datasetID string) error {
@@ -1324,6 +1339,30 @@ func deleteAndUndeleteTable(client *bigquery.Client, datasetID, tableID string) 
 	ds.Table(recoverTableID).Delete(ctx)
 	return nil
 
+}
+
+func getJobInfo(client *bigquery.Client, jobID string) error {
+	ctx := context.Background()
+	// [START bigquery_get_job]
+	job, err := client.JobFromID(ctx, jobID)
+	if err != nil {
+		return err
+	}
+
+	status := job.LastStatus()
+	state := "Unknown"
+	switch status.State {
+	case bigquery.Pending:
+		state = "Pending"
+	case bigquery.Running:
+		state = "Running"
+	case bigquery.Done:
+		state = "Done"
+	}
+	fmt.Printf("Job %s was created %v and is in state %s\n",
+		jobID, status.Statistics.CreationTime, state)
+	// [END bigquery_get_job]
+	return nil
 }
 
 func importCSVFromFile(client *bigquery.Client, datasetID, tableID, filename string) error {

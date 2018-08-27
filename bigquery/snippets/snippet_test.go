@@ -225,6 +225,19 @@ func TestAll(t *testing.T) {
 		t.Errorf("queryWithDestinationCMEK(dataset:%q table:%q): %v", datasetID, persistedCMEK, err)
 	}
 
+	// Control a job lifecycle explicitly: create, report status, cancel.
+	exampleJobID := uniqueBQName("golang_example_job")
+	q := client.Query("Select 17 as foo")
+	q.JobID = exampleJobID
+	q.Priority = bigquery.BatchPriority
+	q.Run(ctx)
+	if err := getJobInfo(client, exampleJobID); err != nil {
+		t.Errorf("getJobInfo(%s): %v", exampleJobID, err)
+	}
+	if err := cancelJob(client, exampleJobID); err != nil {
+		t.Errorf("cancelJobInfo(%s): %v", exampleJobID, err)
+	}
+
 	// Print information about tables (extended and simple).
 	if err := printTableInfo(client, datasetID, inferred); err != nil {
 		t.Errorf("printTableInfo(dataset:%q table:%q): %v", datasetID, inferred, err)
