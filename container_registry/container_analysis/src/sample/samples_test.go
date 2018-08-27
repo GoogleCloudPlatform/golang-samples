@@ -40,7 +40,7 @@ func setup(t *testing.T) TestVariables {
 	// Make a random portion so each test is unique
 	rand := strconv.Itoa(rand.Int())
 	// Set how many times to retry network tasks
-	tryLimit := 35
+	tryLimit := 30
 
 	// Create variables used by tests
 	projectID := tc.ProjectID
