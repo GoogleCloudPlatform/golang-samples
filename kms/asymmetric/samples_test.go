@@ -84,7 +84,7 @@ func TestMain(m *testing.M) {
 		//Create cryptokeys in the test project if needed.
 		s1 := createKeyHelper(v, v.rsaDecryptId, v.rsaDecryptPath, "ASYMMETRIC_DECRYPT", "RSA_DECRYPT_OAEP_2048_SHA256", parent)
 		s2 := createKeyHelper(v, v.rsaSignId, v.rsaSignPath, "ASYMMETRIC_SIGN", "RSA_SIGN_PSS_2048_SHA256", parent)
-		s3 := createKeyHelper(v, v.ecSignId, v.ecSignPath, "ASYMMETRIC_SIGN", "EC_SIGN_P224_SHA256", parent)
+		s3 := createKeyHelper(v, v.ecSignId, v.ecSignPath, "ASYMMETRIC_SIGN", "EC_SIGN_P256_SHA256", parent)
 		if s1 || s2 || s3 {
 			//Leave time for keys to initialize.
 			time.Sleep(20 * time.Second)

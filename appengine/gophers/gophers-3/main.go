@@ -5,28 +5,28 @@
 package main
 
 import (
-	// [START import]
+	// [START gae_go_env_template_import]
 	"fmt"
 	"html/template"
-	// [END import]
+	// [END gae_go_env_template_import]
 	"net/http"
 
 	"google.golang.org/appengine"
 )
 
-// [START templ_variable]
+// [START gae_go_env_template_vars]
 var (
 	indexTemplate = template.Must(template.ParseFiles("index.html"))
 )
 
-// [END templ_variable]
-// [START templ_params]
+// [END gae_go_env_template_vars]
+// [START gae_go_env_template_params]
 type templateParams struct {
 	Notice string
 	Name   string
 }
 
-// [END templ_params]
+// [END gae_go_env_template_params]
 func main() {
 	http.HandleFunc("/", indexHandler)
 	appengine.Main()
@@ -37,7 +37,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
-	// [START handling]
+	// [START gae_go_env_handling]
 	params := templateParams{}
 
 	if r.Method == "GET" {
@@ -64,8 +64,8 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	// TODO: save the message into a database.
 
 	params.Notice = fmt.Sprintf("Thank you for your submission, %s!", name)
-	// [END handling]
-	// [START execute]
+	// [END gae_go_env_handling]
+	// [START gae_go_env_execute]
 	indexTemplate.Execute(w, params)
-	// [END execute]
+	// [END gae_go_env_execute]
 }

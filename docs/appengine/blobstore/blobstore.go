@@ -14,7 +14,7 @@ import (
 )
 
 func sampleHandler(w http.ResponseWriter, r *http.Request) {
-	// [START uploading_a_blob_2]
+	// [START gae_blobstore_upload_form]
 	var rootTemplate = template.Must(template.New("root").Parse(rootTemplateHTML))
 
 	const rootTemplateHTML = `
@@ -24,16 +24,16 @@ Upload File: <input type="file" name="file"><br>
 <input type="submit" name="submit" value="Submit">
 </form></body></html>
 `
-	// [END uploading_a_blob_2]
+	// [END gae_blobstore_upload_form]
 
-	// [START uploading_a_blob_1]
+	// [START gae_blobstore_upload_url]
 	ctx := appengine.NewContext(r)
 	uploadURL, err := blobstore.UploadURL(ctx, "/upload", nil)
 	if err != nil {
 		serveError(ctx, w, err)
 		return
 	}
-	// [END uploading_a_blob_1]
+	// [END gae_blobstore_upload_url]
 
 	w.Header().Set("Content-Type", "text/html")
 	err = rootTemplate.Execute(w, uploadURL)
@@ -43,7 +43,7 @@ Upload File: <input type="file" name="file"><br>
 }
 
 func sampleHandler2(w http.ResponseWriter, r *http.Request) {
-	// [START uploading_a_blob_3]
+	// [START gae_blobstore_upload_handler]
 	ctx := appengine.NewContext(r)
 	blobs, _, err := blobstore.ParseUpload(r)
 	if err != nil {
@@ -57,16 +57,15 @@ func sampleHandler2(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.Redirect(w, r, "/serve/?blobKey="+string(file[0].BlobKey), http.StatusFound)
-	// [END uploading_a_blob_3]
+	// [END gae_blobstore_upload_handler]
 
-	// [START serving_a_blob]
+	// [START gae_blobstore_serving]
 	blobstore.Send(w, appengine.BlobKey(r.FormValue("blobKey")))
-	// [END serving_a_blob]
+	// [END gae_blobstore_serving]
 }
 
 /* Requires old package (import "appengine/blobstore")
 
-// [START writing_files_to_the_Blobstore]
 var k appengine.BlobKey
 bw, err := blobstore.Create(ctx, "application/octet-stream")
 if err != nil {
@@ -81,6 +80,5 @@ if err != nil {
 	return k, err
 }
 return bw.Key()
-// [END writing_files_to_the_Blobstore]
 
 */
