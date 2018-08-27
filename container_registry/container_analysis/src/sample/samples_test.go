@@ -40,7 +40,7 @@ func setup(t *testing.T) TestVariables {
 	// Make a random portion so each test is unique
 	rand := strconv.Itoa(rand.Int())
 	// Set how many times to retry network tasks
-	tryLimit := 30
+	tryLimit := 20
 
 	// Create variables used by tests
 	projectID := tc.ProjectID
@@ -209,14 +209,19 @@ func TestOccurrencesForImage(t *testing.T) {
 	if origCount != 0 {
 		t.Errorf("unexpected initial number of occurrences: %d; want: %d", origCount, 0)
 	}
-	created, _ := createOccurrence(v.ctx, v.client, v.imageUrl, v.noteID, v.projectID, v.projectID)
+	created, err := createOccurrence(v.ctx, v.client, v.imageUrl, v.noteID, v.projectID, v.projectID)
+	if err != nil {
+		t.Errorf("createOccurrence(%s, %s): %v", v.imageUrl, v.noteID, err)
+	} else if created == nil {
+		t.Error("createOccurrence returns nil Occurrence object")
+	}
 	testutil.Retry(t, v.tryLimit, time.Second, func(r *testutil.R) {
 		newCount, err := getOccurrencesForImage(v.ctx, v.client, v.imageUrl, v.projectID)
 		if err != nil {
-			t.Errorf("getOccurrencesForImage(%s): %v", v.imageUrl, err)
+			r.Errorf("getOccurrencesForImage(%s): %v", v.imageUrl, err)
 		}
 		if newCount != 1 {
-			t.Errorf("unexpected updated number of occurrences: %d; want: %d", newCount, 1)
+			r.Errorf("unexpected updated number of occurrences: %d; want: %d", newCount, 1)
 		}
 	})
 
@@ -235,14 +240,20 @@ func TestOccurrencesForNote(t *testing.T) {
 	if origCount != 0 {
 		t.Errorf("unexpected initial number of occurrences: %d; want: %d", origCount, 0)
 	}
-	created, _ := createOccurrence(v.ctx, v.client, v.imageUrl, v.noteID, v.projectID, v.projectID)
+	created, err := createOccurrence(v.ctx, v.client, v.imageUrl, v.noteID, v.projectID, v.projectID)
+	if err != nil {
+		t.Errorf("createOccurrence(%s, %s): %v", v.imageUrl, v.noteID, err)
+	} else if created == nil {
+		t.Error("createOccurrence returns nil Occurrence object")
+	}
+
 	testutil.Retry(t, v.tryLimit, time.Second, func(r *testutil.R) {
 		newCount, err := getOccurrencesForNote(v.ctx, v.client, v.noteID, v.projectID)
 		if err != nil {
-			t.Errorf("getOccurrencesForNote(%s): %v", v.noteID, err)
+			r.Errorf("getOccurrencesForNote(%s): %v", v.noteID, err)
 		}
 		if newCount != 1 {
-			t.Errorf("unexpected updated number of occurrences: %d; want: %d", newCount, 1)
+			r.Errorf("unexpected updated number of occurrences: %d; want: %d", newCount, 1)
 		}
 	})
 
