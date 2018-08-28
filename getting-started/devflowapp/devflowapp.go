@@ -2,8 +2,6 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// +build go1.8
-
 // Example app with code portable betwee different execution environments.
 // See README.md for details.
 
@@ -14,13 +12,7 @@ import (
 	"log"
 	"net/http"
 
-	"cloud.google.com/go/profiler"
-
-	"contrib.go.opencensus.io/exporter/stackdriver"
-	"go.opencensus.io/plugin/ochttp"
-	"go.opencensus.io/trace"
-
-	"github.com/GoogleCloudPlatform/golang-samples/getting-started/basicapp/services"
+	"github.com/GoogleCloudPlatform/golang-samples/getting-started/devflowapp/services"
 )
 
 // Checks messages sent to a user. The identity of the user is found in the
@@ -32,9 +24,6 @@ func handleCheckMessages(w http.ResponseWriter, r *http.Request) {
 	} else {
 		messageService := services.GetMessageService()
 		user := uvalues[0]
-		ctx := r.Context()
-		_, span := trace.StartSpan(ctx, "CheckMessages")
-		defer span.End()
 		messages, err := services.CheckMessages(messageService, user)
 		if err != nil {
 			fmt.Fprintf(w, "<p>%v</p>", err)
@@ -79,9 +68,6 @@ func handleSend(w http.ResponseWriter, r *http.Request) {
 		Friend: friend,
 		Text:   text,
 		Id:     -1}
-	ctx := r.Context()
-	_, span := trace.StartSpan(ctx, "SendUserMessage")
-	defer span.End()
 	err := services.SendUserMessage(messageService, message)
 	if err != nil {
 		fmt.Fprintf(w, "<p>There was an error sending the message</p>\n")
@@ -93,40 +79,16 @@ func handleSend(w http.ResponseWriter, r *http.Request) {
 
 // Entry point to the application
 func main() {
-	// Profiler initialization
-	if err := profiler.Start(profiler.Config{
-		Service:        "basicapp",
-		ServiceVersion: "0.001",
-	}); err != nil {
-		log.Printf("main: running without the profiler enabled\n")
-	}
-	ocSetup()
 
 	http.HandleFunc("/", handleDefault)
 	http.HandleFunc("/messages", handleCheckMessages)
 	http.HandleFunc("/send", handleSend)
 	http.HandleFunc("/_ah/health", healthCheckHandler)
 	log.Print("Listening on port 8080")
-	log.Fatal(http.ListenAndServe(":8080", &ochttp.Handler{}))
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
 // Health check for the load balancer
 func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "ok")
-}
-
-// Initialization for OpenCensus for tracing
-func ocSetup() {
-
-	log.Printf("Configure OpenCensus")
-
-	// Create and register exporters for monitoring metrics and trace
-	se, err := stackdriver.NewExporter(stackdriver.Options{})
-	if err != nil {
-		log.Printf("Error creating Stackdriver exporter: %v", err)
-		return
-	}
-	trace.RegisterExporter(se)
-	trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
-	log.Printf("ocSetup: exporter registerd")
 }
