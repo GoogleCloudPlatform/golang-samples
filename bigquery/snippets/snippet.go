@@ -475,8 +475,7 @@ func createTableComplexSchema(client *bigquery.Client, datasetID, tableID string
 	}
 
 	metaData := &bigquery.TableMetadata{
-		Schema:         sampleSchema,
-		ExpirationTime: time.Now().AddDate(1, 0, 0), // Table will be automatically deleted in 1 year.
+		Schema: sampleSchema,
 	}
 	tableRef := client.Dataset(datasetID).Table(tableID)
 	if err := tableRef.Create(ctx, metaData); err != nil {
@@ -506,7 +505,6 @@ func createTableWithCMEK(client *bigquery.Client, datasetID, tableID string) err
 
 func relaxTableAPI(client *bigquery.Client, datasetID, tableID string) error {
 	ctx := context.Background()
-	// [START bigquery_relax_column]
 	sampleSchema := bigquery.Schema{
 		{Name: "full_name", Type: bigquery.StringFieldType, Required: true},
 		{Name: "age", Type: bigquery.IntegerFieldType, Required: true},
@@ -514,20 +512,25 @@ func relaxTableAPI(client *bigquery.Client, datasetID, tableID string) error {
 	original := &bigquery.TableMetadata{
 		Schema: sampleSchema,
 	}
+	if err := client.Dataset(datasetID).Table(tableID).Create(ctx, original); err != nil {
+		return err
+	}
+	// [START bigquery_relax_column]
 	tableRef := client.Dataset(datasetID).Table(tableID)
-	if err := tableRef.Create(ctx, original); err != nil {
+	meta, err := tableRef.Metadata(ctx)
+	if err != nil {
 		return err
 	}
 	// Iterate through the schema to set all Required fields to false (nullable).
 	var relaxed bigquery.Schema
-	for _, v := range original.Schema {
+	for _, v := range meta.Schema {
 		v.Required = false
 		relaxed = append(relaxed, v)
 	}
 	newMeta := bigquery.TableMetadataToUpdate{
 		Schema: relaxed,
 	}
-	if _, err := tableRef.Update(ctx, newMeta, ""); err != nil {
+	if _, err := tableRef.Update(ctx, newMeta, meta.ETag); err != nil {
 		return err
 	}
 	// [END  bigquery_relax_column]
