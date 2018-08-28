@@ -11,36 +11,36 @@ import (
 
 	"google.golang.org/appengine"
 
-	// [START imports]
+	// [START gae_go_env_data_imports]
 	"time"
 
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
-	// [END imports]
+	// [END gae_go_env_data_imports]
 )
 
 var (
 	indexTemplate = template.Must(template.ParseFiles("index.html"))
 )
 
-// [START post_struct]
+// [START gae_go_env_post_struct]
 type Post struct {
 	Author  string
 	Message string
 	Posted  time.Time
 }
 
-// [END post_struct]
+// [END gae_go_env_post_struct]
 
 type templateParams struct {
 	Notice string
 
 	Name string
-	// [START added_templateParams_fields]
+	// [START gae_go_env_template_params_fields]
 	Message string
 
 	Posts []Post
-	// [END added_templateParams_fields]
+	// [END gae_go_env_template_params_fields]
 
 }
 
@@ -54,15 +54,15 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
-	// [START new_context]
+	// [START gae_go_env_new_context]
 	ctx := appengine.NewContext(r)
-	// [END new_context]
+	// [END gae_go_env_new_context]
 	params := templateParams{}
 
-	// [START new_query]
+	// [START gae_go_env_new_query]
 	q := datastore.NewQuery("Post").Order("-Posted").Limit(20)
-	// [END new_query]
-	// [START get_posts]
+	// [END gae_go_env_new_query]
+	// [START gae_go_env_get_posts]
 	if _, err := q.GetAll(ctx, &params.Posts); err != nil {
 		log.Errorf(ctx, "Getting posts: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -70,7 +70,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		indexTemplate.Execute(w, params)
 		return
 	}
-	// [END get_posts]
+	// [END gae_go_env_get_posts]
 
 	if r.Method == "GET" {
 		indexTemplate.Execute(w, params)
@@ -78,13 +78,13 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// It's a POST request, so handle the form submission.
-	// [START new_post]
+	// [START gae_go_env_new_post]
 	post := Post{
 		Author:  r.FormValue("name"),
 		Message: r.FormValue("message"),
 		Posted:  time.Now(),
 	}
-	// [END new_post]
+	// [END gae_go_env_new_post]
 	if post.Author == "" {
 		post.Author = "Anonymous Gopher"
 	}
@@ -96,10 +96,10 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		indexTemplate.Execute(w, params)
 		return
 	}
-	// [START new_key]
+	// [START gae_go_env_new_key]
 	key := datastore.NewIncompleteKey(ctx, "Post", nil)
-	// [END new_key]
-	// [START add_post]
+	// [END gae_go_env_new_key]
+	// [START gae_go_env_add_post]
 	if _, err := datastore.Put(ctx, key, &post); err != nil {
 		log.Errorf(ctx, "datastore.Put: %v", err)
 
@@ -109,12 +109,12 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		indexTemplate.Execute(w, params)
 		return
 	}
-	// [END add_post]
+	// [END gae_go_env_add_post]
 
 	// Prepend the post that was just added.
-	// [START prepend_post]
+	// [START gae_go_env_prepend_post]
 	params.Posts = append([]Post{post}, params.Posts...)
-	// [END prepend_post]
+	// [END gae_go_env_prepend_post]
 
 	params.Notice = fmt.Sprintf("Thank you for your submission, %s!", post.Author)
 	indexTemplate.Execute(w, params)
