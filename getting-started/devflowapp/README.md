@@ -48,11 +48,11 @@ cd go/src/github.com/GoogleCloudPlatform/golang-samples/getting-started/devflowa
 ```
 
 ## Local development, mocks, and unit testing
-You can run locally and unit test using a mock of the messaging service.
+You can run locally and unit test using a mock of the ```MessageService```
+interface.
 
 ### Running locally
-To run the app locally commands export an environment variable for use of mocks
-instead of a real database:
+To use a mock database when running the app locally, run::
 ```
 export MESSAGE_SERVICE=mock
 go get -d -v ./...
@@ -64,7 +64,7 @@ Check that the application successfully responds to a HTTP request:
 curl -I http://localhost:8080
 ```
 
-You can also use curl to send a message to your friend a message, like
+You can also use Curl to send a message to your friend a message, like
 ```
 curl "http://localhost:8080/send?user=Friend1&friend=Friend2&text=We+miss+you!"
 ```
@@ -92,12 +92,13 @@ Check that the tests pass. The Go
 [httptest](https://golang.org/pkg/net/http/httptest/) package is used to
 simulate HTTP requests and writers in some of the unit tests.
 
-Run the build and execute unit tests using Cloud Build
+To use Cloud Build, run the build and execute unit tests using Cloud Build
 ```
 gcloud builds submit --config build/cb-unittest.yaml .
 ```
 
-View the build and test results in the cloud console under the Cloud Build menu.
+View the build and test results in the cloud console under the [Cloud Build
+menu](https://console.cloud.google.com/cloud-build).
 
 ## Database
 ### Setup
@@ -126,10 +127,10 @@ gcloud sql instances describe $INSTANCE_NAME
 ```
 
 Look for the ```connectionName```, which as the form 
-```$PROJECT:$REGION:$INSTANCE_NAME```. Also, look for the IP address of the
-instance.
+```$PROJECT:$REGION:$INSTANCE_NAME```. 
+Also, look for the IP address of the instance.
 
-Connect to the your Cloud SQL instance with the command in the cloud shell
+Connect to the your Cloud SQL instance with the command in the Cloud Shell
 ```
 INSTANCE_NAME=devflowapp
 gcloud sql connect $INSTANCE_NAME --user=root
@@ -139,7 +140,7 @@ Execute the statements in [data/database_setup.sql](data/database_setup.sql).
 
 ### Working with the Database in a Local Development Environment (Optional)
 
-To install the Cloud SQL proxy locally follow the steps in [Using Cloud SQL
+To install the Cloud SQL proxy locally follow [Using Cloud SQL
 with Go](https://cloud.google.com/go/getting-started/using-cloud-sql), for
 example on Mac, use the commands
 
@@ -167,7 +168,7 @@ export MYSQL_CONNECTION="$DBUSER:$DBPASSWORD@tcp($DBHOST:3306)/$DATABASE"
 go run devflowapp.go
 ```
 
-You can now use the same curl commands as above to send your friend a message.
+You can now use the same Curl commands as above to send your friend a message.
 
 ## Packaging in a Docker Container
 The devflowapp example can package your application in a Docker container based
@@ -183,14 +184,14 @@ docker run -itd --rm --name devflowapp \
 This will run the container with the mock messaging service. We will describe
 how to configure the app to connect to Cloud SQL below.
 
-Check that the application is running OK use the same curl commands as above.
+Check that the application is running OK use the same Curl commands as above.
 
 Stop the app with the command
 ```
 docker stop devflowapp
 ```
 
-Build the Docker container with cloud build:
+Build the Docker container with Cloud Build:
 ```
 gcloud builds submit --config build/cb-docker.yaml .
 ```
@@ -208,7 +209,7 @@ curl -I http://localhost:8080
 docker stop devflowapp
 ```
 
-## Deploy the app to Flex
+## Deploy the app to App Engine Flexible
 If you have not used App Engine in your project before you will need to enable
 it. You can do that with the command
 ```
@@ -229,7 +230,7 @@ gcloud app browse
 To run the app together with the Cloud SQL database follow steps as in [Using 
 Cloud SQL for 
 MySQL](https://cloud.google.com/appengine/docs/flexible/go/using-cloud-sql) for
-Flex. You can do this by editing the app.yaml file, filling in the text for the
+Flex. You can do this by editing the app.yaml file then filling in the text for the
 password and the project id. Then redeploy the app using the command
 ```
 gcloud app deploy .
@@ -244,6 +245,7 @@ You will want to avoid leaving the project id and password in the app
 configuration file, especially if you are adding the file to a code repository.
 Revert the values back to their original symbols by editing app.yaml. To deploy
 with Cloud Build, set the strings as environment variables using the command
+
 ```
 DB_PASSWORD=[user db password]
 gcloud builds submit \
@@ -265,7 +267,7 @@ curl -I $PROJECT_ID.appspot.com
 
 ##  Integration and Load Testing
 
-An integration test uses curl to make sure that the application is properly
+An integration test uses Curl to make sure that the application is properly
 configured to talk to the database and test cases for sending and retrieving
 messages are working ok end-to-end. 
 
