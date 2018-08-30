@@ -14,13 +14,13 @@ import (
 	"google.golang.org/appengine"
 )
 
-// [START import]
+// [START gae_flex_twilio_import]
 import (
 	"bitbucket.org/ckvist/twilio/twiml"
 	"bitbucket.org/ckvist/twilio/twirest"
 )
 
-// [END import]
+// [END gae_flex_twilio_import]
 
 func main() {
 	http.HandleFunc("/call/receive", receiveCallHandler)

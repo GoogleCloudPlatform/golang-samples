@@ -8,6 +8,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -33,7 +34,7 @@ func main() {
 		os.Exit(2)
 	}
 
-	var sendFunc func(*speech.Client, string) (*speechpb.LongRunningRecognizeResponse, error)
+	var sendFunc func(io.Writer, *speech.Client, string) error
 
 	path := os.Args[1]
 	if strings.Contains(path, "://") {
@@ -48,26 +49,18 @@ func main() {
 		log.Fatal(err)
 	}
 
-	resp, err := sendFunc(client, os.Args[1])
-	if err != nil {
+	if err := sendFunc(os.Stdout, client, os.Args[1]); err != nil {
 		log.Fatal(err)
 	}
-
-	// [START print]
-	// Print the results.
-	for _, result := range resp.Results {
-		for _, alt := range result.Alternatives {
-			fmt.Printf("\"%v\" (confidence=%3f)\n", alt.Transcript, alt.Confidence)
-		}
-	}
-	// [END print]
 }
 
-func send(client *speech.Client, filename string) (*speechpb.LongRunningRecognizeResponse, error) {
+// [START speech_transcribe_async]
+
+func send(w io.Writer, client *speech.Client, filename string) error {
 	ctx := context.Background()
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// Send the contents of the audio file with the encoding and
@@ -85,12 +78,27 @@ func send(client *speech.Client, filename string) (*speechpb.LongRunningRecogniz
 
 	op, err := client.LongRunningRecognize(ctx, req)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return op.Wait(ctx)
+	resp, err := op.Wait(ctx)
+	if err != nil {
+		return err
+	}
+
+	// Print the results.
+	for _, result := range resp.Results {
+		for _, alt := range result.Alternatives {
+			fmt.Fprintf(w, "\"%v\" (confidence=%3f)\n", alt.Transcript, alt.Confidence)
+		}
+	}
+	return nil
 }
 
-func sendGCS(client *speech.Client, gcsURI string) (*speechpb.LongRunningRecognizeResponse, error) {
+// [END speech_transcribe_async]
+
+// [START speech_transcribe_async_gcs]
+
+func sendGCS(w io.Writer, client *speech.Client, gcsURI string) error {
 	ctx := context.Background()
 
 	// Send the contents of the audio file with the encoding and
@@ -108,7 +116,20 @@ func sendGCS(client *speech.Client, gcsURI string) (*speechpb.LongRunningRecogni
 
 	op, err := client.LongRunningRecognize(ctx, req)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return op.Wait(ctx)
+	resp, err := op.Wait(ctx)
+	if err != nil {
+		return err
+	}
+
+	// Print the results.
+	for _, result := range resp.Results {
+		for _, alt := range result.Alternatives {
+			fmt.Fprintf(w, "\"%v\" (confidence=%3f)\n", alt.Transcript, alt.Confidence)
+		}
+	}
+	return nil
 }
+
+// [END speech_transcribe_async_gcs]

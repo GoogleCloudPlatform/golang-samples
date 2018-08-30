@@ -2,6 +2,8 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
+// [START gae_flex_golang_redis]
+
 // Sample redis demonstrates use of a redis client from App Engine flexible environment.
 package main
 
@@ -61,3 +63,5 @@ func handle(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprintf(w, "Count: %d", count)
 }
+
+// [END gae_flex_golang_redis]

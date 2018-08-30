@@ -24,7 +24,7 @@ import (
 func main() {
 	ctx := context.Background()
 
-	// [START speech_streaming_mic_recognize]
+	// [START speech_transcribe_streaming_mic]
 	client, err := speech.NewClient(ctx)
 	if err != nil {
 		log.Fatal(err)
@@ -95,5 +95,5 @@ func main() {
 			fmt.Printf("Result: %+v\n", result)
 		}
 	}
-	// [END speech_streaming_mic_recognize]
+	// [END speech_transcribe_streaming_mic]
 }

@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // [START speech_quickstart]
+
 // Sample speech-quickstart uses the Google Cloud Speech API to transcribe
 // audio.
 package main

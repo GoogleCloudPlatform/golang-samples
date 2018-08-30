@@ -4,7 +4,7 @@
 
 package sample
 
-// [START asserting_identity_to_Google_APIs]
+// [START gae_go_app_identity]
 import (
 	"net/http"
 
@@ -37,4 +37,4 @@ func shortenURL(ctx context.Context, url string) (string, error) {
 	return resp.Id, nil
 }
 
-// [END asserting_identity_to_Google_APIs]
+// [END gae_go_app_identity]
