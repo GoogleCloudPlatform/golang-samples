@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	containeranalysis "cloud.google.com/go/devtools/containeranalysis/apiv1beta1"
+	containeranalysis "cloud.google.com/go/containeranalysis/apiv1beta1"
 	pubsub "cloud.google.com/go/pubsub"
 	"golang.org/x/net/context"
 	"google.golang.org/api/iterator"

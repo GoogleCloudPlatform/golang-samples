@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	containeranalysis "cloud.google.com/go/devtools/containeranalysis/apiv1beta1"
+	containeranalysis "cloud.google.com/go/containeranalysis/apiv1beta1"
 	pubsub "cloud.google.com/go/pubsub"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"golang.org/x/net/context"
