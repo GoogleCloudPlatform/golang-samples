@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // [START translate_quickstart]
+
 // Sample translate-quickstart translates "Hello, world!" into Russian.
 package main
 

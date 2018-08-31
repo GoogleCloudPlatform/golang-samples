@@ -17,7 +17,7 @@ import (
 	texttospeechpb "google.golang.org/genproto/googleapis/cloud/texttospeech/v1"
 )
 
-// [START ListVoices]
+// [START tts_list_voices]
 
 // ListVoices lists the available text to speech voices.
 func ListVoices(w io.Writer) error {
@@ -54,7 +54,7 @@ func ListVoices(w io.Writer) error {
 	return nil
 }
 
-// [END ListVoices]
+// [END tts_list_voices]
 
 func main() {
 	err := ListVoices(os.Stdout)

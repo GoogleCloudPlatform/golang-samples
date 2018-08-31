@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // [START pubsub_quickstart_create_topic]
+
 // Sample pubsub-quickstart creates a Google Cloud Pub/Sub topic.
 package main
 

@@ -31,6 +31,8 @@ func init() {
 	_ = os.Open
 }
 
+// [START vision_face_detection]
+
 // detectFaces gets faces from the Vision API for an image at the given file path.
 func detectFaces(w io.Writer, file string) error {
 	ctx := context.Background()
@@ -68,6 +70,10 @@ func detectFaces(w io.Writer, file string) error {
 	return nil
 }
 
+// [END vision_face_detection]
+
+// [START vision_label_detection]
+
 // detectLabels gets labels from the Vision API for an image at the given file path.
 func detectLabels(w io.Writer, file string) error {
 	ctx := context.Background()
@@ -103,6 +109,10 @@ func detectLabels(w io.Writer, file string) error {
 
 	return nil
 }
+
+// [END vision_label_detection]
+
+// [START vision_landmark_detection]
 
 // detectLandmarks gets landmarks from the Vision API for an image at the given file path.
 func detectLandmarks(w io.Writer, file string) error {
@@ -140,6 +150,10 @@ func detectLandmarks(w io.Writer, file string) error {
 	return nil
 }
 
+// [END vision_landmark_detection]
+
+// [START vision_text_detection]
+
 // detectText gets text from the Vision API for an image at the given file path.
 func detectText(w io.Writer, file string) error {
 	ctx := context.Background()
@@ -176,7 +190,9 @@ func detectText(w io.Writer, file string) error {
 	return nil
 }
 
-// [START vision_detect_document]
+// [END vision_text_detection]
+
+// [START vision_fulltext_detection]
 
 // detectDocumentText gets the full document text from the Vision API for an image at the given file path.
 func detectDocumentText(w io.Writer, file string) error {
@@ -234,7 +250,9 @@ func detectDocumentText(w io.Writer, file string) error {
 	return nil
 }
 
-// [END vision_detect_document]
+// [END vision_fulltext_detection]
+
+// [START vision_image_property_detection]
 
 // detectProperties gets image properties from the Vision API for an image at the given file path.
 func detectProperties(w io.Writer, file string) error {
@@ -272,6 +290,10 @@ func detectProperties(w io.Writer, file string) error {
 	return nil
 }
 
+// [END vision_image_property_detection]
+
+// [START vision_crop_hint_detection]
+
 // detectCropHints gets suggested croppings the Vision API for an image at the given file path.
 func detectCropHints(w io.Writer, file string) error {
 	ctx := context.Background()
@@ -306,7 +328,9 @@ func detectCropHints(w io.Writer, file string) error {
 	return nil
 }
 
-// [START vision_detect_safe_search]
+// [END vision_crop_hint_detection]
+
+// [START vision_safe_search_detection]
 
 // detectSafeSearch gets image properties from the Vision API for an image at the given file path.
 func detectSafeSearch(w io.Writer, file string) error {
@@ -342,9 +366,9 @@ func detectSafeSearch(w io.Writer, file string) error {
 	return nil
 }
 
-// [END vision_detect_safe_search]
+// [END vision_safe_search_detection]
 
-// [START vision_detect_web]
+// [START vision_web_detection]
 
 // detectWeb gets image properties from the Vision API for an image at the given file path.
 func detectWeb(w io.Writer, file string) error {
@@ -400,9 +424,9 @@ func detectWeb(w io.Writer, file string) error {
 	return nil
 }
 
-// [END vision_detect_web]
+// [END vision_web_detection]
 
-// [START vision_web_entities_include_geo_results]
+// [START vision_web_detection_include_geo]
 
 // detectWebGeo detects geographic metadata from the Vision API for an image at the given file path.
 func detectWebGeo(w io.Writer, file string) error {
@@ -444,7 +468,9 @@ func detectWebGeo(w io.Writer, file string) error {
 	return nil
 }
 
-// [END vision_web_entities_include_geo_results]
+// [END vision_web_detection_include_geo]
+
+// [START vision_logo_detection]
 
 // detectLogos gets logos from the Vision API for an image at the given file path.
 func detectLogos(w io.Writer, file string) error {
@@ -482,10 +508,12 @@ func detectLogos(w io.Writer, file string) error {
 	return nil
 }
 
-// [START vision_detect_async_document]
+// [END vision_logo_detection]
 
-// detectAsyncDocument does Optical Character Recognition (OCR) on a PDF file
-// stored in GCS.
+// [START vision_text_detection_pdf]
+
+// detectAsyncDocument performs Optical Character Recognition (OCR) on a
+// PDF file stored in GCS.
 func detectAsyncDocument(w io.Writer, gcsSourceURI, gcsDestinationURI string) error {
 	ctx := context.Background()
 
@@ -533,7 +561,7 @@ func detectAsyncDocument(w io.Writer, gcsSourceURI, gcsDestinationURI string) er
 	return nil
 }
 
-// [END vision_detect_async_document]
+// [END vision_text_detection_pdf]
 
 func init() {
 	// Refer to these functions so that goimports is happy before boilerplate is inserted.
@@ -541,6 +569,8 @@ func init() {
 	_ = vision.ImageAnnotatorClient{}
 	_ = os.Open
 }
+
+// [START vision_face_detection_gcs]
 
 // detectFaces gets faces from the Vision API for an image at the given file path.
 func detectFacesURI(w io.Writer, file string) error {
@@ -570,6 +600,10 @@ func detectFacesURI(w io.Writer, file string) error {
 	return nil
 }
 
+// [END vision_face_detection_gcs]
+
+// [START vision_label_detection_gcs]
+
 // detectLabels gets labels from the Vision API for an image at the given file path.
 func detectLabelsURI(w io.Writer, file string) error {
 	ctx := context.Background()
@@ -596,6 +630,10 @@ func detectLabelsURI(w io.Writer, file string) error {
 
 	return nil
 }
+
+// [END vision_label_detection_gcs]
+
+// [START vision_landmark_detection_gcs]
 
 // detectLandmarks gets landmarks from the Vision API for an image at the given file path.
 func detectLandmarksURI(w io.Writer, file string) error {
@@ -624,6 +662,10 @@ func detectLandmarksURI(w io.Writer, file string) error {
 	return nil
 }
 
+// [END vision_landmark_detection_gcs]
+
+// [START vision_text_detection_gcs]
+
 // detectText gets text from the Vision API for an image at the given file path.
 func detectTextURI(w io.Writer, file string) error {
 	ctx := context.Background()
@@ -651,7 +693,9 @@ func detectTextURI(w io.Writer, file string) error {
 	return nil
 }
 
-// [START vision_detect_document_uri]
+// [END vision_text_detection_gcs]
+
+// [START vision_fulltext_detection_gcs]
 
 // detectDocumentText gets the full document text from the Vision API for an image at the given file path.
 func detectDocumentTextURI(w io.Writer, file string) error {
@@ -700,7 +744,9 @@ func detectDocumentTextURI(w io.Writer, file string) error {
 	return nil
 }
 
-// [END vision_detect_document_uri]
+// [END vision_fulltext_detection_gcs]
+
+// [START vision_image_property_detection_gcs]
 
 // detectProperties gets image properties from the Vision API for an image at the given file path.
 func detectPropertiesURI(w io.Writer, file string) error {
@@ -729,6 +775,10 @@ func detectPropertiesURI(w io.Writer, file string) error {
 	return nil
 }
 
+// [END vision_image_property_detection_gcs]
+
+// [START vision_crop_hint_detection_gcs]
+
 // detectCropHints gets suggested croppings the Vision API for an image at the given file path.
 func detectCropHintsURI(w io.Writer, file string) error {
 	ctx := context.Background()
@@ -754,7 +804,9 @@ func detectCropHintsURI(w io.Writer, file string) error {
 	return nil
 }
 
-// [START vision_detect_safe_search_uri]
+// [END vision_crop_hint_detection_gcs]
+
+// [START vision_safe_search_detection_gcs]
 
 // detectSafeSearch gets image properties from the Vision API for an image at the given file path.
 func detectSafeSearchURI(w io.Writer, file string) error {
@@ -781,9 +833,9 @@ func detectSafeSearchURI(w io.Writer, file string) error {
 	return nil
 }
 
-// [END vision_detect_safe_search_uri]
+// [END vision_safe_search_detection_gcs]
 
-// [START vision_detect_web_uri]
+// [START vision_web_detection_gcs]
 
 // detectWeb gets image properties from the Vision API for an image at the given file path.
 func detectWebURI(w io.Writer, file string) error {
@@ -830,9 +882,9 @@ func detectWebURI(w io.Writer, file string) error {
 	return nil
 }
 
-// [END vision_detect_web_uri]
+// [END vision_web_detection_gcs]
 
-// [START vision_web_entities_include_geo_results_uri]
+// [START vision_web_detection_include_geo_gcs]
 
 // detectWebGeo detects geographic metadata from the Vision API for an image at the given file path.
 func detectWebGeoURI(w io.Writer, file string) error {
@@ -865,7 +917,9 @@ func detectWebGeoURI(w io.Writer, file string) error {
 	return nil
 }
 
-// [END vision_web_entities_include_geo_results_uri]
+// [END vision_web_detection_include_geo_gcs]
+
+// [START vision_logo_detection_gcs]
 
 // detectLogos gets logos from the Vision API for an image at the given file path.
 func detectLogosURI(w io.Writer, file string) error {
@@ -894,10 +948,12 @@ func detectLogosURI(w io.Writer, file string) error {
 	return nil
 }
 
-// [START vision_detect_async_document_uri]
+// [END vision_logo_detection_gcs]
 
-// detectAsyncDocument does Optical Character Recognition (OCR) on a PDF file
-// stored in GCS.
+// [START vision_text_detection_pdf_gcs]
+
+// detectAsyncDocument performs Optical Character Recognition (OCR) on a
+// PDF file stored in GCS.
 func detectAsyncDocumentURI(w io.Writer, gcsSourceURI, gcsDestinationURI string) error {
 	ctx := context.Background()
 
@@ -945,4 +1001,4 @@ func detectAsyncDocumentURI(w io.Writer, gcsSourceURI, gcsDestinationURI string)
 	return nil
 }
 
-// [END vision_detect_async_document_uri]
+// [END vision_text_detection_pdf_gcs]

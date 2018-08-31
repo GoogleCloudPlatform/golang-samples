@@ -56,7 +56,7 @@ func boilerplate() { //# omit
 	//# enddef
 } //# omit
 
-// [START video_analyze_labels_local] //# include if !gcs
+// [START video_analyze_labels] //# include if !gcs
 // [START video_analyze_labels_gcs] //# include if gcs
 
 func label__SUFFIX__(w io.Writer, file string) error {
@@ -90,7 +90,7 @@ func label__SUFFIX__(w io.Writer, file string) error {
 	return nil
 }
 
-// [END video_analyze_labels_local] //# include if !gcs
+// [END video_analyze_labels] //# include if !gcs
 // [END video_analyze_labels_gcs] //# include if gcs
 
 // [START video_analyze_shots] //# include if gcs

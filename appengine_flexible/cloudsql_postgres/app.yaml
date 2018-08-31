@@ -4,7 +4,7 @@ env: flex
 automatic_scaling:
   min_num_instances: 1
 
-#[START env]
+#[START gae_flex_postgres_env]
 env_variables:
   # See https://godoc.org/github.com/lib/pq
   #
@@ -15,13 +15,13 @@ env_variables:
   # If you're testing locally using the Cloud SQL proxy with TCP,
   # instead set this environment variable:
   # POSTGRES_CONNECTION="user=postgres password=pw dbname=db sslmode=disable"
-#[END env]
+#[END gae_flex_postgres_env]
 
-#[START cloudsql_settings]
+#[START gae_flex_postgres_settings]
 # Replace INSTANCE_CONNECTION_NAME with the value obtained when configuring your
 # Cloud SQL instance, available from the Google Cloud Console or from the Cloud SDK.
 # For SQL v2 instances, this should be in the form of "project:region:instance".
 # Cloud SQL v1 instances are not supported.
 beta_settings:
   cloud_sql_instances: INSTANCE_CONNECTION_NAME
-#[END cloudsql_settings]
+#[END gae_flex_postgres_settings]
