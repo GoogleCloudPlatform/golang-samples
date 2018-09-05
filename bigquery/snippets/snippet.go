@@ -725,6 +725,7 @@ func updateTableChangeCMEK(client *bigquery.Client, datasetID, tableID string) e
 	}
 	update := bigquery.TableMetadataToUpdate{
 		EncryptionConfig: &bigquery.EncryptionConfig{
+			// TODO: Replace this key with a key you have created in Cloud KMS.
 			KMSKeyName: "projects/cloud-samples-tests/locations/us-central1/keyRings/test/cryptoKeys/otherkey",
 		},
 	}
@@ -1536,7 +1537,7 @@ func importORCTruncate(client *bigquery.Client, datasetID, tableID string) error
 	gcsRef := bigquery.NewGCSReference("gs://cloud-samples-data/bigquery/us-states/us-states.orc")
 	gcsRef.SourceFormat = bigquery.ORC
 	loader := client.Dataset(datasetID).Table(tableID).LoaderFrom(gcsRef)
-	// default for import jobs is to append data to a table.  WriteTruncate
+	// Default for import jobs is to append data to a table.  WriteTruncate
 	// specifies that existing data should instead be replaced/overwritten.
 	loader.WriteDisposition = bigquery.WriteTruncate
 
