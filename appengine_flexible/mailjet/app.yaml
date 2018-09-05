@@ -4,9 +4,9 @@ env: flex
 automatic_scaling:
   min_num_instances: 1
 
-# [START env_variables]
+# [START gae_flex_mailjet_yaml]
 env_variables:
   MJ_FROM_EMAIL: your-mailjet-sender-address
   MJ_APIKEY_PUBLIC: your-mailjet-api-key
   MJ_APIKEY_PRIVATE: your-mailjet-secret-key
-# [END env_variables]
+# [END gae_flex_mailjet_yaml]

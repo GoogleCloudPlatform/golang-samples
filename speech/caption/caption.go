@@ -9,17 +9,16 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"strings"
 
-	// [START imports]
 	"golang.org/x/net/context"
 
 	speech "cloud.google.com/go/speech/apiv1"
 	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"
-	// [END imports]
 )
 
 const usage = `Usage: caption <audiofile>
@@ -37,7 +36,7 @@ func main() {
 		os.Exit(2)
 	}
 
-	var runFunc func(string) (*speechpb.RecognizeResponse, error)
+	var runFunc func(io.Writer, string) error
 
 	path := os.Args[1]
 	if strings.Contains(path, "://") {
@@ -47,32 +46,21 @@ func main() {
 	}
 
 	// Perform the request.
-	resp, err := runFunc(os.Args[1])
-	if err != nil {
+	if err := runFunc(os.Stdout, os.Args[1]); err != nil {
 		log.Fatal(err)
 	}
-
-	// [START print]
-	// Print the results.
-	for _, result := range resp.Results {
-		for _, alt := range result.Alternatives {
-			fmt.Printf("\"%v\" (confidence=%3f)\n", alt.Transcript, alt.Confidence)
-		}
-	}
-	// [END print]
 }
 
-func recognizeGCS(gcsURI string) (*speechpb.RecognizeResponse, error) {
+// [START speech_transcribe_sync_gcs]
+
+func recognizeGCS(w io.Writer, gcsURI string) error {
 	ctx := context.Background()
 
-	// [START init_gcs]
 	client, err := speech.NewClient(ctx)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	// [END init_gcs]
 
-	// [START request_gcs]
 	// Send the request with the URI (gs://...)
 	// and sample rate information to be transcripted.
 	resp, err := client.Recognize(ctx, &speechpb.RecognizeRequest{
@@ -85,24 +73,31 @@ func recognizeGCS(gcsURI string) (*speechpb.RecognizeResponse, error) {
 			AudioSource: &speechpb.RecognitionAudio_Uri{Uri: gcsURI},
 		},
 	})
-	// [END request_gcs]
-	return resp, err
+
+	// Print the results.
+	for _, result := range resp.Results {
+		for _, alt := range result.Alternatives {
+			fmt.Fprintf(w, "\"%v\" (confidence=%3f)\n", alt.Transcript, alt.Confidence)
+		}
+	}
+	return nil
 }
 
-func recognize(file string) (*speechpb.RecognizeResponse, error) {
+// [END speech_transcribe_sync_gcs]
+
+// [START speech_transcribe_sync]
+
+func recognize(w io.Writer, file string) error {
 	ctx := context.Background()
 
-	// [START init]
 	client, err := speech.NewClient(ctx)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	// [END init]
 
-	// [START request]
 	data, err := ioutil.ReadFile(file)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	// Send the contents of the audio file with the encoding and
@@ -117,6 +112,14 @@ func recognize(file string) (*speechpb.RecognizeResponse, error) {
 			AudioSource: &speechpb.RecognitionAudio_Content{Content: data},
 		},
 	})
-	// [END request]
-	return resp, err
+
+	// Print the results.
+	for _, result := range resp.Results {
+		for _, alt := range result.Alternatives {
+			fmt.Fprintf(w, "\"%v\" (confidence=%3f)\n", alt.Transcript, alt.Confidence)
+		}
+	}
+	return nil
 }
+
+// [END speech_transcribe_sync]

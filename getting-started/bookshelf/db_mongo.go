@@ -72,7 +72,7 @@ func randomID() (int64, error) {
 func (db *mongoDB) AddBook(b *Book) (id int64, err error) {
 	id, err = randomID()
 	if err != nil {
-		return 0, fmt.Errorf("mongodb: could not assign an new ID: %v", err)
+		return 0, fmt.Errorf("mongodb: could not assign a new ID: %v", err)
 	}
 
 	b.ID = id
