@@ -2,7 +2,7 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-package main
+package sample
 
 import (
 	"math/rand"
@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	containeranalysis "cloud.google.com/go/devtools/containeranalysis/apiv1beta1"
+	containeranalysis "cloud.google.com/go/containeranalysis/apiv1beta1"
 	pubsub "cloud.google.com/go/pubsub"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"golang.org/x/net/context"

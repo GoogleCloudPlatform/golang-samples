@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Samples for asymmetric keys feature of Cloud Key Management Service: https://cloud.google.com/kms/
-package main
+package samples
 
 import (
 	"crypto"
