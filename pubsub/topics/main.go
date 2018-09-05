@@ -156,36 +156,39 @@ func publish(client *pubsub.Client, topic, msg string) error {
 
 func publishThatScales(client *pubsub.Client, topic string, n uint64) error {
 	ctx := context.Background()
-	var wg sync.WaitGroup
-	var n_err uint64
 	// [START pubsub_publish_with_error_handling_that_scales]
+	var wg sync.WaitGroup
+	var totalErrors uint64
 	t := client.Topic(topic)
 
 	for i := 0; i < int(n); i++ {
 		result := t.Publish(ctx, &pubsub.Message{
-			Data: []byte("Message No. " + strconv.Itoa(i)),
+			// data must be a ByteString
+			Data: []byte("Message " + strconv.Itoa(i)),
 		})
 
 		wg.Add(1)
-		go func(i int) {
+		go func(i int, res *pubsub.PublishResult) {
 			defer wg.Done()
-			// The Get method blocks until the result is returned and a
-			// server-generated ID is returned for the published message.
-			id, err := result.Get(ctx)
+			// The Get method blocks until a server-generated ID or
+			// an error is returned for the published message.
+			id, err := res.Get(ctx)
 			if err != nil {
-				// Error handling code can be here.
+				// Error handling code can be added here.
 				log.Output(1, fmt.Sprintf("Failed to publish: %v", err))
-				atomic.AddUint64(&n_err, 1)
+				atomic.AddUint64(&totalErrors, 1)
 			} else {
-				fmt.Printf("Published message No. %d; msg ID: %v\n", i, id)
+				fmt.Printf("Published message %d; msg ID: %v\n", i, id)
 			}
-		}(i)
-
-		wg.Wait()
+		}(i, result)
 	}
 
-	if n_err > 0 {
-		return errors.New("some messages did not publish successfully")
+	wg.Wait()
+
+	if totalErrors > 0 {
+		return errors.New(
+			fmt.Sprintf("%d of %d messages did not publish successfully",
+				totalErrors, n))
 	}
 	return nil
 	// [END pubsub_publish_with_error_handling_that_scales]
