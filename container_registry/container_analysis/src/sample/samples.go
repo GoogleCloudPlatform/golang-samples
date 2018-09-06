@@ -245,7 +245,8 @@ func occurrencePubsub(ctx context.Context, subscriptionID string, timeout int, p
 	count := 0
 
 	// Listen to messages for 'timeout' seconds.
-	toctx, _ := context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
+	toctx, cancel := context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
+	defer cancel()
 	err = sub.Receive(toctx, func(ctx context.Context, msg *pubsub.Message) {
 		mu.Lock()
 		count = count + 1

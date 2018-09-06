@@ -25,7 +25,8 @@ func TestMain(m *testing.M) {
 
 func TestCustomMetric(t *testing.T) {
 	hc := testutil.SystemTest(t)
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*30)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+	defer cancel()
 
 	s, err := createService(ctx)
 	if err != nil {

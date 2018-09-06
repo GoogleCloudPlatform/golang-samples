@@ -1188,7 +1188,8 @@ Examples:
 	}
 
 	cmd, db := flag.Arg(0), flag.Arg(1)
-	ctx, _ := context.WithTimeout(context.Background(), 1*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
+	defer cancel()
 	adminClient, dataClient := createClients(ctx, db)
 	if err := run(ctx, adminClient, dataClient, os.Stdout, cmd, db); err != nil {
 		os.Exit(1)
