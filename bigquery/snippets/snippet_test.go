@@ -118,12 +118,34 @@ func TestAll(t *testing.T) {
 	if err := createTableExplicitSchema(client, datasetID, explicit); err != nil {
 		t.Errorf("createTableExplicitSchema(dataset:%q table:%q): %v", datasetID, explicit, err)
 	}
+	complex := uniqueBQName("golang_example_table_complex")
+	if err := createTableComplexSchema(client, datasetID, complex); err != nil {
+		t.Errorf("createTableComplexSchema(dataset:%q table:%q): %v", datasetID, complex, err)
+	}
+
+	tableCMEK := uniqueBQName("golang_example_table_cmek")
+	if err := createTableWithCMEK(client, datasetID, tableCMEK); err != nil {
+		t.Errorf("createTableWithCMEK(dataset:%q table:%q): %v", datasetID, tableCMEK, err)
+	}
+
+	required := uniqueBQName("golang_example_table_required")
+	if err := relaxTableAPI(client, datasetID, required); err != nil {
+		t.Errorf("relaxTableApi(dataset:%q table:%q): %v", datasetID, required, err)
+	}
+
+	widen := uniqueBQName("golang_example_table_widen")
+	if err := createTableAndWiden(client, datasetID, widen); err != nil {
+		t.Errorf("createTableAndWiden(dataset:%q table:%q): %v", datasetID, widen, err)
+	}
 
 	if err := updateTableDescription(client, datasetID, explicit); err != nil {
 		t.Errorf("updateTableDescription(dataset:%q table:%q): %v", datasetID, explicit, err)
 	}
 	if err := updateTableExpiration(client, datasetID, explicit); err != nil {
 		t.Errorf("updateTableExpiration(dataset:%q table:%q): %v", datasetID, explicit, err)
+	}
+	if err := updateTableAddColumn(client, datasetID, explicit); err != nil {
+		t.Errorf("updateTableAddColumn(dataset:%q table:%q): %v", datasetID, explicit, err)
 	}
 	if err := addTableLabel(client, datasetID, explicit); err != nil {
 		t.Errorf("updateTableAddLabel(dataset:%q table:%q): %v", datasetID, explicit, err)
@@ -198,6 +220,23 @@ func TestAll(t *testing.T) {
 	if err := queryWithDestination(client, datasetID, persisted); err != nil {
 		t.Errorf("queryWithDestination(dataset:%q table:%q): %v", datasetID, persisted, err)
 	}
+	persistedCMEK := uniqueBQName("golang_example_table_queryresult_cmek")
+	if err := queryWithDestinationCMEK(client, datasetID, persistedCMEK); err != nil {
+		t.Errorf("queryWithDestinationCMEK(dataset:%q table:%q): %v", datasetID, persistedCMEK, err)
+	}
+
+	// Control a job lifecycle explicitly: create, report status, cancel.
+	exampleJobID := uniqueBQName("golang_example_job")
+	q := client.Query("Select 17 as foo")
+	q.JobID = exampleJobID
+	q.Priority = bigquery.BatchPriority
+	q.Run(ctx)
+	if err := getJobInfo(client, exampleJobID); err != nil {
+		t.Errorf("getJobInfo(%s): %v", exampleJobID, err)
+	}
+	if err := cancelJob(client, exampleJobID); err != nil {
+		t.Errorf("cancelJobInfo(%s): %v", exampleJobID, err)
+	}
 
 	// Print information about tables (extended and simple).
 	if err := printTableInfo(client, datasetID, inferred); err != nil {
@@ -221,6 +260,10 @@ func TestAll(t *testing.T) {
 	dstTableID = uniqueBQName("golang_multicopydest")
 	if err := copyMultiTable(client, datasetID, dstTableID); err != nil {
 		t.Errorf("copyMultiTable(dataset:%q table:%q): %v", datasetID, dstTableID, err)
+	}
+	dstTableID = uniqueBQName("golang_example_copycmek")
+	if err := copyTableWithCMEK(client, datasetID, dstTableID); err != nil {
+		t.Errorf("copyTableWithCMEK(dataset:%q table:%q): %v", datasetID, dstTableID, err)
 	}
 
 	if err := listJobs(client); err != nil {
@@ -268,6 +311,39 @@ func TestImportExport(t *testing.T) {
 	if err := importJSONAutodetectSchema(client, datasetID, autodetectJSON); err != nil {
 		t.Fatalf("importJSONAutodetectSchema(dataset:%q table:%q): %v", datasetID, autodetectJSON, err)
 	}
+
+	autoJSONwithCMEK := uniqueBQName("golang_example_importjson_cmek")
+	if err := importJSONWithCMEK(client, datasetID, autoJSONwithCMEK); err != nil {
+		t.Fatalf("importJSONWithCMEK(dataset:%q table:%q): %v", datasetID, autoJSONwithCMEK, err)
+	}
+
+	orc := uniqueBQName("golang_example_importorc")
+	if err := importORC(client, datasetID, orc); err != nil {
+		t.Errorf("importOrc(dataset:%q table: %q): %v", datasetID, orc, err)
+	}
+	if err := importORCTruncate(client, datasetID, orc); err != nil {
+		t.Errorf("importOrcTruncate(dataset:%q table: %q): %v", datasetID, orc, err)
+	}
+
+	parquet := uniqueBQName("golang_example_importparquet")
+	if err := importParquet(client, datasetID, parquet); err != nil {
+		t.Errorf("importParquet(dataset:%q table: %q): %v", datasetID, parquet, err)
+	}
+	if err := importParquetTruncate(client, datasetID, parquet); err != nil {
+		t.Errorf("importParquetTruncate(dataset:%q table: %q): %v", datasetID, parquet, err)
+	}
+
+	requiredImport := uniqueBQName("golang_example_table_required_import")
+	filenameRelax := "testdata/people.csv"
+	if err := relaxTableImport(client, datasetID, requiredImport, filenameRelax); err != nil {
+		t.Errorf("relaxTableImport(dataset:%q table:%q): %v", datasetID, requiredImport, err)
+	}
+
+	requiredQuery := uniqueBQName("golang_example_table_required_query")
+	if err := relaxTableQuery(client, datasetID, requiredQuery); err != nil {
+		t.Errorf("relaxTableQuery(dataset:%q table:%q): %v", datasetID, requiredImport, err)
+	}
+
 	bucket := uniqueBucketName("golang-example-bucket", tc.ProjectID)
 	const object = "values.csv"
 

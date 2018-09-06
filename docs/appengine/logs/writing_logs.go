@@ -4,7 +4,7 @@
 
 package app
 
-// [START sample]
+// [START gae_writing_logs]
 import (
 	"net/http"
 
@@ -28,7 +28,7 @@ func logHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("ok!"))
 }
 
-// [END sample]
+// [END gae_writing_logs]
 
 type Post struct {
 	Body string
