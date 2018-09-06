@@ -17,6 +17,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"flag"
 	"fmt"
 	"html/template"
@@ -30,7 +31,6 @@ import (
 	"unicode"
 
 	"cloud.google.com/go/bigtable"
-	"golang.org/x/net/context"
 )
 
 var (
@@ -149,7 +149,8 @@ func tokenize(s string) []string {
 
 // handleContent fetches the content of a document from the Bigtable and returns it.
 func handleContent(w http.ResponseWriter, r *http.Request, table *bigtable.Table) {
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	name := r.FormValue("name")
 	if len(name) == 0 {
 		http.Error(w, "No document name supplied.", http.StatusBadRequest)
@@ -176,7 +177,8 @@ func handleContent(w http.ResponseWriter, r *http.Request, table *bigtable.Table
 
 // handleSearch responds to search queries, returning links and snippets for matching documents.
 func handleSearch(w http.ResponseWriter, r *http.Request, table *bigtable.Table) {
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	query := r.FormValue("q")
 	// Split the query into words.
 	words := tokenize(query)
@@ -269,7 +271,8 @@ func handleAddDoc(w http.ResponseWriter, r *http.Request, table *bigtable.Table)
 		return
 	}
 
-	ctx, _ := context.WithTimeout(context.Background(), time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
 
 	name := r.FormValue("name")
 	if len(name) == 0 {
@@ -345,7 +348,9 @@ func handleReset(w http.ResponseWriter, r *http.Request, table string, adminClie
 		http.Error(w, "POST requests only", http.StatusMethodNotAllowed)
 		return
 	}
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
+
 	adminClient.DeleteTable(ctx, table)
 	if err := adminClient.CreateTable(ctx, table); err != nil {
 		http.Error(w, "Error creating Bigtable: "+err.Error(), http.StatusInternalServerError)
@@ -372,7 +377,8 @@ func copyTable(src, dst string, client *bigtable.Client, adminClient *bigtable.A
 	if src == "" || src == dst {
 		return nil
 	}
-	ctx, _ := context.WithTimeout(context.Background(), time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
 
 	// Open the source and destination tables.
 	srcTable := client.Open(src)

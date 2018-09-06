@@ -5,6 +5,7 @@
 package tictactoe
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -14,7 +15,6 @@ import (
 	"time"
 
 	"github.com/zabawaba99/firego"
-	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/appengine"
 )

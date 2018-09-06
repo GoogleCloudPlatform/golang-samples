@@ -5,6 +5,7 @@
 package sample
 
 import (
+	"context"
 	"math/rand"
 	"strconv"
 	"testing"
@@ -13,7 +14,6 @@ import (
 	containeranalysis "cloud.google.com/go/containeranalysis/apiv1beta1"
 	pubsub "cloud.google.com/go/pubsub"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"golang.org/x/net/context"
 	grafeaspb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/grafeas"
 	vulnerability "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/vulnerability"
 )

@@ -7,14 +7,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 	"strings"
 
 	"github.com/golang/protobuf/proto"
-
-	"golang.org/x/net/context"
 
 	// [START imports]
 	language "cloud.google.com/go/language/apiv1"

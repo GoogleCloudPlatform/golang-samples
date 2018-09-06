@@ -11,12 +11,11 @@ package main
 
 // [START imports]
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
 	"strings"
-
-	"golang.org/x/net/context"
 
 	vision "cloud.google.com/go/vision/apiv1"
 	visionpb "google.golang.org/genproto/googleapis/cloud/vision/v1"

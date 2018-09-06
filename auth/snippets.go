@@ -6,11 +6,11 @@
 package authsnippets
 
 import (
+	"context"
 	"fmt"
 	"log"
 
 	"cloud.google.com/go/storage"
-	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
 	cloudkms "google.golang.org/api/cloudkms/v1"
 	"google.golang.org/api/iterator"

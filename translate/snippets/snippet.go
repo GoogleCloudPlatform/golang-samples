@@ -5,11 +5,10 @@
 package translate_snippets
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"log"
-
-	"golang.org/x/net/context"
 
 	"cloud.google.com/go/translate"
 	"golang.org/x/text/language"

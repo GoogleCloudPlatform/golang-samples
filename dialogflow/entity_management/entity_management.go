@@ -6,16 +6,17 @@ package main
 
 // [START import_libraries]
 import (
-	dialogflow "cloud.google.com/go/dialogflow/apiv2"
+	"context"
 	"errors"
 	"flag"
 	"fmt"
-	"golang.org/x/net/context"
-	dialogflowpb "google.golang.org/genproto/googleapis/cloud/dialogflow/v2"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
+
+	dialogflow "cloud.google.com/go/dialogflow/apiv2"
+	dialogflowpb "google.golang.org/genproto/googleapis/cloud/dialogflow/v2"
 )
 
 // [END import_libraries]

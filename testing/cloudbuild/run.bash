@@ -40,9 +40,6 @@ cd $target
 diff -u <(echo -n) <(gofmt -d -s .)
 go vet ./...
 
-# Check use of Go 1.7 context package
-! grep -R '"context"$' * || { echo "Use golang.org/x/net/context"; false; }
-
 # Download imports.
 time go get -u -v $(go list -f '{{join .Imports "\n"}}{{"\n"}}{{join .TestImports "\n"}}' ./... | sort | uniq | grep -v golang-samples)
 

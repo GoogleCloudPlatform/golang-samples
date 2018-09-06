@@ -6,12 +6,12 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
 	"os"
 
-	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
 
 	container "google.golang.org/api/container/v1"

@@ -16,6 +16,7 @@ import (
 	"google.golang.org/appengine/log"
 
 	// [START new_imports]
+	"context"
 	"io"
 	"path"
 	"strings"
@@ -23,7 +24,6 @@ import (
 	"cloud.google.com/go/storage"
 	vision "cloud.google.com/go/vision/apiv1"
 	uuid "github.com/satori/go.uuid"
-	"golang.org/x/net/context"
 	"google.golang.org/appengine/delay"
 	// [END new_imports]
 )

@@ -12,8 +12,9 @@ import (
 	"path/filepath"
 
 	// [START imports]
+	"context"
+
 	vision "cloud.google.com/go/vision/apiv1"
-	"golang.org/x/net/context"
 	// [END imports]
 )
 

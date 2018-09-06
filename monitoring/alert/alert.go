@@ -8,6 +8,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -19,7 +20,6 @@ import (
 	monitoring "cloud.google.com/go/monitoring/apiv3"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/ptypes/wrappers"
-	"golang.org/x/net/context"
 	"google.golang.org/api/iterator"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 	fieldmask "google.golang.org/genproto/protobuf/field_mask"

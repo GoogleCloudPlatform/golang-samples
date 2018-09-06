@@ -5,11 +5,10 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"log"
-
-	"golang.org/x/net/context"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
 	"google.golang.org/api/iterator"

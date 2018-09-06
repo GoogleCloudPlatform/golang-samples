@@ -37,9 +37,6 @@ mkdir -p $target
 mv github/golang-samples $target
 cd $target/golang-samples
 
-# Check use of Go 1.7 context package
-! grep -R '"context"$' * || { echo "Use golang.org/x/net/context"; false; }
-
 if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* && -n $GOLANG_SAMPLES_GO_VET ]]; then
   echo "This test run will run end-to-end tests.";
   export GOLANG_SAMPLES_E2E_TEST=1
@@ -71,44 +68,8 @@ fi
 # Download imports.
 GO_IMPORTS=$(go list -f '{{join .Imports "\n"}}{{"\n"}}{{join .TestImports "\n"}}' $TARGET | \
   sort | uniq | \
-  grep -v golang-samples | \
-  grep -v golang.org/x/tools/imports | \
-  grep -v golang.org/x/sys/unix | \
-  grep -v go-sql-driver/mysql)
+  grep -v golang-samples)
 time go get -u -v -d $GO_IMPORTS
-
-# Manually clone packages incompatible with Go 1.6.
-mkdir -p $GOPATH/src/golang.org/x;
-pushd $GOPATH/src/golang.org/x;
-if [ ! -d tools ]; then
-  git clone https://go.googlesource.com/tools;
-fi
-if [ ! -d sys ]; then
-  git clone https://go.googlesource.com/sys;
-fi
-popd;
-
-mkdir -p $GOPATH/src/github.com/go-sql-driver;
-pushd $GOPATH/src/github.com/go-sql-driver;
-if [ ! -d mysql ]; then
-  git clone https://github.com/go-sql-driver/mysql;
-fi
-popd;
-
-# Pin golang.org/x/tools and go-sql-driver/mysql to support Go 1.6.
-if go version | grep go1\.6\.; then
-  pushd $GOPATH/src/github.com/go-sql-driver/mysql;
-  git checkout v1.3;
-  popd;
-
-  pushd $GOPATH/src/golang.org/x/tools;
-  git checkout 8e070db38e5c55da6a85c81878ab769bf5667848;
-  popd;
-
-  pushd $GOPATH/src/golang.org/x/sys;
-  git checkout ac767d655b305d4e9612f5f6e33120b9176c4ad4;
-  popd;
-fi
 
 # Always download internal dependencies.
 go get ./internal/...

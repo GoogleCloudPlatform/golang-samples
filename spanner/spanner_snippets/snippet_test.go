@@ -6,13 +6,13 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"os"
 	"strings"
 	"testing"
 	"time"
 
-	"golang.org/x/net/context"
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"

@@ -5,6 +5,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"testing"
@@ -12,7 +13,6 @@ import (
 
 	"cloud.google.com/go/logging"
 	"cloud.google.com/go/logging/logadmin"
-	"golang.org/x/net/context"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )

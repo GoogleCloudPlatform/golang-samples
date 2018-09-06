@@ -7,13 +7,12 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 	"sync"
 	"time"
-
-	"golang.org/x/net/context"
 
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"

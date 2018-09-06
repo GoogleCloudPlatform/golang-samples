@@ -6,6 +6,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -16,7 +17,6 @@ import (
 	"google.golang.org/api/iterator"
 
 	"cloud.google.com/go/storage"
-	"golang.org/x/net/context"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )

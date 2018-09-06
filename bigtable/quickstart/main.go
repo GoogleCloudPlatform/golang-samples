@@ -9,11 +9,11 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"log"
 
 	"cloud.google.com/go/bigtable"
-	"golang.org/x/net/context"
 )
 
 func main() {
