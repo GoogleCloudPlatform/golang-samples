@@ -6,11 +6,11 @@ package sample
 
 // [START gae_go_app_identity]
 import (
+	"context"
 	"net/http"
 
 	"google.golang.org/appengine/urlfetch"
 
-	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	urlshortener "google.golang.org/api/urlshortener/v1"

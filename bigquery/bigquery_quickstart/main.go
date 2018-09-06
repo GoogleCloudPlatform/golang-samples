@@ -8,12 +8,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
-	// Imports the Google Cloud BigQuery client package.
 	"cloud.google.com/go/bigquery"
-	"golang.org/x/net/context"
 )
 
 func main() {

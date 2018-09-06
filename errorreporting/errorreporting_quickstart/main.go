@@ -9,11 +9,11 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 
 	"cloud.google.com/go/errorreporting"
-	"golang.org/x/net/context"
 )
 
 var errorClient *errorreporting.Client

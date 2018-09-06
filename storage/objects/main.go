@@ -9,6 +9,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"io"
@@ -18,8 +19,6 @@ import (
 	"strings"
 
 	"google.golang.org/api/iterator"
-
-	"golang.org/x/net/context"
 
 	"cloud.google.com/go/storage"
 )

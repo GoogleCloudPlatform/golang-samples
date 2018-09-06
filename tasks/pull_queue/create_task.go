@@ -8,12 +8,12 @@ package snippets
 // [START cloud_tasks_create_task]
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 	"io"
 
 	cloudtasks "cloud.google.com/go/cloudtasks/apiv2beta2"
-	"golang.org/x/net/context"
 	taskspb "google.golang.org/genproto/googleapis/cloud/tasks/v2beta2"
 )
 

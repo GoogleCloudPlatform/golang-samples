@@ -5,13 +5,12 @@
 package main
 
 import (
+	"context"
 	"io/ioutil"
 	"log"
 	"os"
 	"testing"
 	"time"
-
-	"golang.org/x/net/context"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )

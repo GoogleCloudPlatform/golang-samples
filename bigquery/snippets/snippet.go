@@ -6,13 +6,13 @@
 package snippets
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
 	"time"
 
 	"cloud.google.com/go/bigquery"
-	"golang.org/x/net/context"
 	"google.golang.org/api/iterator"
 )
 

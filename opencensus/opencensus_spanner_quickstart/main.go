@@ -10,13 +10,13 @@
 package main
 
 import (
+	"context"
 	"log"
 
 	"cloud.google.com/go/spanner"
 	"contrib.go.opencensus.io/exporter/stackdriver"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
-	"golang.org/x/net/context"
 )
 
 func main() {

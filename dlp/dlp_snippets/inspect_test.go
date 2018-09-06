@@ -6,6 +6,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"strings"
 	"testing"
 
@@ -13,7 +14,6 @@ import (
 	"cloud.google.com/go/datastore"
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"golang.org/x/net/context"
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 

@@ -2,13 +2,12 @@
 package tictactoe
 
 import (
+    "context"
     "errors"
     "html/template"
     "net/http"
     "strconv"
     "strings"
-
-    "golang.org/x/net/context"
 
     "google.golang.org/appengine"
     "google.golang.org/appengine/channel"

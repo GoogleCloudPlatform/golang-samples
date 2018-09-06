@@ -6,6 +6,7 @@
 package samples
 
 import (
+	"context"
 	"crypto/ecdsa"
 	"crypto/rsa"
 	"os"
@@ -13,7 +14,6 @@ import (
 	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/cloudkms/v1"
 )

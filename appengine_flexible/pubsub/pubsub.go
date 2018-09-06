@@ -6,6 +6,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -15,10 +16,7 @@ import (
 	"sync"
 
 	"cloud.google.com/go/pubsub"
-
 	"google.golang.org/appengine"
-
-	"golang.org/x/net/context"
 )
 
 var (

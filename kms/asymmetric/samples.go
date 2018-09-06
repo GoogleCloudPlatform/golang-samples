@@ -6,6 +6,7 @@
 package samples
 
 import (
+	"context"
 	"crypto"
 	"crypto/ecdsa"
 	"crypto/rand"
@@ -19,7 +20,6 @@ import (
 	"fmt"
 	"math/big"
 
-	"golang.org/x/net/context"
 	"google.golang.org/api/cloudkms/v1"
 )
 

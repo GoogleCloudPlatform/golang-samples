@@ -17,6 +17,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"flag"
 	"fmt"
 	"html/template"
@@ -30,7 +31,6 @@ import (
 	"unicode"
 
 	"cloud.google.com/go/bigtable"
-	"golang.org/x/net/context"
 )
 
 var (

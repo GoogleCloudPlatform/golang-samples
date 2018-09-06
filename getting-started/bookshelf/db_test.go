@@ -5,6 +5,7 @@
 package bookshelf
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strconv"
@@ -12,8 +13,6 @@ import (
 	"time"
 
 	"cloud.google.com/go/datastore"
-
-	"golang.org/x/net/context"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )

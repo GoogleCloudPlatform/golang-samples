@@ -7,6 +7,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -19,8 +20,6 @@ import (
 
 	"cloud.google.com/go/pubsub"
 	"cloud.google.com/go/storage"
-
-	"golang.org/x/net/context"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"

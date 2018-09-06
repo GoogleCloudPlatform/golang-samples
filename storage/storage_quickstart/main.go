@@ -8,12 +8,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
-	// Imports the Google Cloud Storage client package.
 	"cloud.google.com/go/storage"
-	"golang.org/x/net/context"
 )
 
 func main() {

@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"golang.org/x/net/context"
+	"context"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )

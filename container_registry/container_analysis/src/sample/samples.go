@@ -6,13 +6,13 @@
 package sample
 
 import (
+	"context"
 	"fmt"
 	"sync"
 	"time"
 
 	containeranalysis "cloud.google.com/go/containeranalysis/apiv1beta1"
 	pubsub "cloud.google.com/go/pubsub"
-	"golang.org/x/net/context"
 	"google.golang.org/api/iterator"
 	grafeaspb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/grafeas"
 	"google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/vulnerability"

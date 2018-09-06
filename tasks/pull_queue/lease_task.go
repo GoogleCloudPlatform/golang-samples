@@ -8,12 +8,12 @@ package snippets
 // [START cloud_tasks_lease_and_acknowledge_task]
 
 import (
+	"context"
 	"fmt"
 	"io"
 
 	cloudtasks "cloud.google.com/go/cloudtasks/apiv2beta2"
 	duration "github.com/golang/protobuf/ptypes/duration"
-	"golang.org/x/net/context"
 	taskspb "google.golang.org/genproto/googleapis/cloud/tasks/v2beta2"
 )
 

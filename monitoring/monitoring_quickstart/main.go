@@ -8,14 +8,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
 
-	// Imports the Stackdriver Monitoring client package.
 	monitoring "cloud.google.com/go/monitoring/apiv3"
 	googlepb "github.com/golang/protobuf/ptypes/timestamp"
-	"golang.org/x/net/context"
 	metricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"

@@ -7,6 +7,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -18,8 +19,6 @@ import (
 	books "google.golang.org/api/books/v1"
 
 	"cloud.google.com/go/pubsub"
-
-	"golang.org/x/net/context"
 
 	"github.com/GoogleCloudPlatform/golang-samples/getting-started/bookshelf"
 )

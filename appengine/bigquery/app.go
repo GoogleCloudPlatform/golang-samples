@@ -7,12 +7,12 @@
 package sample
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strings"
 
 	"cloud.google.com/go/bigquery"
-	"golang.org/x/net/context"
 	"google.golang.org/api/iterator"
 	"google.golang.org/appengine"
 )

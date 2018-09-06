@@ -6,10 +6,9 @@ package newsletter
 
 // [START utility_example_2]
 import (
+	"context"
 	"errors"
 	"testing"
-
-	"golang.org/x/net/context"
 
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/aetest"
