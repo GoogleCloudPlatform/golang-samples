@@ -154,14 +154,14 @@ func publish(client *pubsub.Client, topic, msg string) error {
 	return nil
 }
 
-func publishThatScales(client *pubsub.Client, topic string, n uint64) error {
+func publishThatScales(client *pubsub.Client, topic string, n int) error {
 	ctx := context.Background()
 	// [START pubsub_publish_with_error_handling_that_scales]
 	var wg sync.WaitGroup
 	var totalErrors uint64
 	t := client.Topic(topic)
 
-	for i := 0; i < int(n); i++ {
+	for i := 0; i < n; i++ {
 		result := t.Publish(ctx, &pubsub.Message{
 			// data must be a ByteString
 			Data: []byte("Message " + strconv.Itoa(i)),
@@ -177,9 +177,9 @@ func publishThatScales(client *pubsub.Client, topic string, n uint64) error {
 				// Error handling code can be added here.
 				log.Output(1, fmt.Sprintf("Failed to publish: %v", err))
 				atomic.AddUint64(&totalErrors, 1)
-			} else {
-				fmt.Printf("Published message %d; msg ID: %v\n", i, id)
+				return
 			}
+			fmt.Printf("Published message %d; msg ID: %v\n", i, id)
 		}(i, result)
 	}
 
