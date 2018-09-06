@@ -18,7 +18,7 @@ import (
 var maxHeight int
 var minBirthYear, maxBirthYear int
 
-// [START interface]
+// [START gae_go_datastore_interface]
 type Person struct {
 	FirstName string
 	LastName  string
@@ -45,48 +45,48 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	// ...
 }
 
-// [END interface]
+// [END gae_go_datastore_interface]
 
 func example() {
 	var lastSeenKey *datastore.Key
 
-	// [START key_filter_example]
+	// [START gae_go_datastore_key_filter]
 	q := datastore.NewQuery("Person").Filter("__key__ >", lastSeenKey)
-	// [END key_filter_example]
+	// [END gae_go_datastore_key_filter]
 	_ = q
 }
 
 func example2() {
-	// [START property_filter_example]
+	// [START gae_go_datastore_property_filter]
 	q := datastore.NewQuery("Person").Filter("Height <=", maxHeight)
-	// [END property_filter_example]
+	// [END gae_go_datastore_property_filter]
 	_ = q
 }
 
 func example3() {
 	var ancestorKey *datastore.Key
 
-	// [START ancestor_filter_example]
+	// [START gae_go_datastore_ancestor_filter]
 	q := datastore.NewQuery("Person").Ancestor(ancestorKey)
-	// [END ancestor_filter_example]
+	// [END gae_go_datastore_ancestor_filter]
 	_ = q
 }
 
 func example4() {
-	// [START sort_order_example]
+	// [START gae_go_datastore_sort_order]
 	// Order alphabetically by last name:
 	q := datastore.NewQuery("Person").Order("LastName")
 
 	// Order by height, tallest to shortest:
 	q = datastore.NewQuery("Person").Order("-Height")
-	// [END sort_order_example]
+	// [END gae_go_datastore_sort_order]
 	_ = q
 }
 
 func example5() {
-	// [START multiple_sort_orders_example]
+	// [START gae_go_datastore_multiple_sort_orders]
 	q := datastore.NewQuery("Person").Order("LastName").Order("-Height")
-	// [END multiple_sort_orders_example]
+	// [END gae_go_datastore_multiple_sort_orders]
 	_ = q
 }
 
@@ -96,7 +96,7 @@ func example6() {
 	}
 	var ctx context.Context
 
-	// [START ancestor_query_example]
+	// [START gae_go_datastore_ancestor_query]
 	// Create two Photo entities in the datastore with a Person as their ancestor.
 	tomKey := datastore.NewKey(ctx, "Person", "Tom", 0, nil)
 
@@ -117,93 +117,93 @@ func example6() {
 	_, err = q.GetAll(ctx, &photos)
 	// check err
 	// do something with photos
-	// [END ancestor_query_example]
+	// [END gae_go_datastore_ancestor_query]
 	_ = err
 	_ = photos
 }
 
 func example7() {
-	// [START keys_only_example]
+	// [START gae_go_datastore_keys_only]
 	q := datastore.NewQuery("Person").KeysOnly()
-	// [END keys_only_example]
+	// [END gae_go_datastore_keys_only]
 	_ = q
 }
 
 func example8() {
-	// [START inequality_filters_one_property_valid_example_1]
+	// [START gae_go_datastore_inequality_filters_one_property_valid_1]
 	q := datastore.NewQuery("Person").
 		Filter("BirthYear >=", minBirthYear).
 		Filter("BirthYear <=", maxBirthYear)
-	// [END inequality_filters_one_property_valid_example_1]
+	// [END gae_go_datastore_inequality_filters_one_property_valid_1]
 	_ = q
 }
 
 func example9() {
-	// [START inequality_filters_one_property_invalid_example]
+	// [START gae_go_datastore_inequality_filters_one_property_invalid]
 	q := datastore.NewQuery("Person").
 		Filter("BirthYear >=", minBirthYear).
 		Filter("Height <=", maxHeight) // ERROR
-	// [END inequality_filters_one_property_invalid_example]
+	// [END gae_go_datastore_inequality_filters_one_property_invalid]
 	_ = q
 }
 
 func example10() {
 	var targetLastName, targetCity string
 
-	// [START inequality_filters_one_property_valid_example_2]
+	// [START gae_go_datastore_inequality_filters_one_property_valid_2]
 	q := datastore.NewQuery("Person").
 		Filter("LastName =", targetLastName).
 		Filter("City =", targetCity).
 		Filter("BirthYear >=", minBirthYear).
 		Filter("BirthYear <=", maxBirthYear)
-	// [END inequality_filters_one_property_valid_example_2]
+	// [END gae_go_datastore_inequality_filters_one_property_valid_2]
 	_ = q
 }
 
 func example11() {
-	// [START inequality_filters_sort_orders_valid_example]
+	// [START gae_go_datastore_inequality_filters_sort_orders_valid]
 	q := datastore.NewQuery("Person").
 		Filter("BirthYear >=", minBirthYear).
 		Order("BirthYear").
 		Order("LastName")
-	// [END inequality_filters_sort_orders_valid_example]
+	// [END gae_go_datastore_inequality_filters_sort_orders_valid]
 	_ = q
 }
 
 func example12() {
-	// [START inequality_filters_sort_orders_invalid_example_1]
+	// [START gae_go_datastore_inequality_filters_sort_orders_invalid_1]
 	q := datastore.NewQuery("Person").
 		Filter("BirthYear >=", minBirthYear).
 		Order("LastName") // ERROR
-	// [END inequality_filters_sort_orders_invalid_example_1]
+	// [END gae_go_datastore_inequality_filters_sort_orders_invalid_1]
 	_ = q
 }
 
 func example13() {
-	// [START inequality_filters_sort_orders_invalid_example_2]
+	// [START gae_go_datastore_inequality_filters_sort_orders_invalid_2]
 	q := datastore.NewQuery("Person").
 		Filter("BirthYear >=", minBirthYear).
 		Order("LastName").
 		Order("BirthYear") // ERROR
-	// [END inequality_filters_sort_orders_invalid_example_2]
+	// [END gae_go_datastore_inequality_filters_sort_orders_invalid_2]
 	_ = q
 }
 
 func example14() {
-	// [START surprising_behavior_example_1]
+	// [START gae_go_datastore_surprising_behavior_1]
 	q := datastore.NewQuery("Widget").
 		Filter("x >", 1).
 		Filter("x <", 2)
-	// [END surprising_behavior_example_1]
+	// [END gae_go_datastore_surprising_behavior_1]
 	_ = q
 }
 
 func example15() {
-	// [START surprising_behavior_example_2]
+	// [START gae_go_datastore_surprising_behavior_2]
 	q := datastore.NewQuery("Widget").
 		Filter("x =", 1).
 		Filter("x =", 2)
-	// [END surprising_behavior_example_2]
+	// [END gae_go_datastore_surprising_behavior_2]
 	_ = q
 }
 
@@ -211,7 +211,7 @@ func doSomething(k *datastore.Key, p Person) {}
 
 func example16() {
 	var ctx context.Context
-	// [START retrieval_example]
+	// [START gae_go_datastore_retrieval]
 	q := datastore.NewQuery("Person")
 	t := q.Run(ctx)
 	for {
@@ -227,13 +227,13 @@ func example16() {
 		// Do something with Person p and Key k
 		doSomething(k, p)
 	}
-	// [END retrieval_example]
+	// [END gae_go_datastore_retrieval]
 }
 
 func example17() {
 	var ctx context.Context
 
-	// [START all_entities_retrieval_example]
+	// [START gae_go_datastore_all_entities_retrieval]
 	q := datastore.NewQuery("Person")
 	var people []Person
 	keys, err := q.GetAll(ctx, &people)
@@ -246,13 +246,13 @@ func example17() {
 		// Do something with Person p and Key k
 		doSomething(k, p)
 	}
-	// [END all_entities_retrieval_example]
+	// [END gae_go_datastore_all_entities_retrieval]
 }
 
 func example18() {
 	var ctx context.Context
 
-	// [START query_limit_example]
+	// [START gae_go_datastore_query_limit]
 	q := datastore.NewQuery("Person").Order("-Height").Limit(5)
 	var people []Person
 	_, err := q.GetAll(ctx, &people)
@@ -261,21 +261,19 @@ func example18() {
 	for _, p := range people {
 		log.Infof(ctx, "%s %s, %d inches tall", p.FirstName, p.LastName, p.Height)
 	}
-	// [END query_limit_example]
+	// [END gae_go_datastore_query_limit]
 	_ = err
 }
 
 func example19() {
-	// [START query_offset_example]
 	q := datastore.NewQuery("Person").Order("-Height").Limit(5).Offset(5)
-	// [END query_offset_example]
 	_ = q
 }
 
 func example20() {
 	var ctx context.Context
 
-	// [START cursors]
+	// [START gae_go_datastore_cursors]
 	// Create a query for all Person entities.
 	q := datastore.NewQuery("Person")
 
@@ -310,24 +308,24 @@ func example20() {
 			Value: []byte(cursor.String()),
 		})
 	}
-	// [END cursors]
+	// [END gae_go_datastore_cursors]
 }
 
 func example21() {
 	var lastSeenKey *datastore.Key
 
-	// [START kindless_query_example]
+	// [START gae_go_datastore_kindless_query]
 	q := datastore.NewQuery("").Filter("__key__ >", lastSeenKey)
-	// [END kindless_query_example]
+	// [END gae_go_datastore_kindless_query]
 	_ = q
 }
 
 func example22() {
 	var ancestorKey, lastSeenKey *datastore.Key
 
-	// [START kindless_ancestor_key_query_example]
+	// [START gae_go_datastore_kindless_ancestor_key_query]
 	q := datastore.NewQuery("").Ancestor(ancestorKey).Filter("__key__ >", lastSeenKey)
-	// [END kindless_ancestor_key_query_example]
+	// [END gae_go_datastore_kindless_ancestor_key_query]
 	_ = q
 }
 
@@ -339,7 +337,7 @@ func example23() {
 	var ctx context.Context
 	doSomething := func(x interface{}) {}
 
-	// [START kindless_ancestor_query_example]
+	// [START gae_go_datastore_kindless_ancestor_query]
 	tomKey := datastore.NewKey(ctx, "Person", "Tom", 0, nil)
 
 	weddingPhoto := &Photo{URL: "http://example.com/some/path/to/wedding_photo.jpg"}
@@ -365,6 +363,6 @@ func example23() {
 		// Do something (e.g. switch on types)
 		doSomething(x)
 	}
-	// [END kindless_ancestor_query_example]
+	// [END gae_go_datastore_kindless_ancestor_query]
 	_ = err
 }

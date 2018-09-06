@@ -7,9 +7,13 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
+	"strconv"
+	"sync"
+	"sync/atomic"
 	"time"
 
 	"golang.org/x/net/context"
@@ -49,6 +53,11 @@ func main() {
 
 	// Publish a text message on the created topic.
 	if err := publish(client, topic, "hello world!"); err != nil {
+		log.Fatalf("Failed to publish: %v", err)
+	}
+
+	// Publish 10 messages with asynchronous error handling.
+	if err := publishThatScales(client, topic, 10); err != nil {
 		log.Fatalf("Failed to publish: %v", err)
 	}
 
@@ -143,6 +152,46 @@ func publish(client *pubsub.Client, topic, msg string) error {
 	// [END pubsub_publish]
 	// [END pubsub_quickstart_publisher]
 	return nil
+}
+
+func publishThatScales(client *pubsub.Client, topic string, n int) error {
+	ctx := context.Background()
+	// [START pubsub_publish_with_error_handling_that_scales]
+	var wg sync.WaitGroup
+	var totalErrors uint64
+	t := client.Topic(topic)
+
+	for i := 0; i < n; i++ {
+		result := t.Publish(ctx, &pubsub.Message{
+			// data must be a ByteString
+			Data: []byte("Message " + strconv.Itoa(i)),
+		})
+
+		wg.Add(1)
+		go func(i int, res *pubsub.PublishResult) {
+			defer wg.Done()
+			// The Get method blocks until a server-generated ID or
+			// an error is returned for the published message.
+			id, err := res.Get(ctx)
+			if err != nil {
+				// Error handling code can be added here.
+				log.Output(1, fmt.Sprintf("Failed to publish: %v", err))
+				atomic.AddUint64(&totalErrors, 1)
+				return
+			}
+			fmt.Printf("Published message %d; msg ID: %v\n", i, id)
+		}(i, result)
+	}
+
+	wg.Wait()
+
+	if totalErrors > 0 {
+		return errors.New(
+			fmt.Sprintf("%d of %d messages did not publish successfully",
+				totalErrors, n))
+	}
+	return nil
+	// [END pubsub_publish_with_error_handling_that_scales]
 }
 
 func publishWithSettings(client *pubsub.Client, topic string, msg []byte) error {

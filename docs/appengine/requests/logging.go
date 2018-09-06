@@ -2,7 +2,7 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// [START logging]
+// [START gae_golang_logging_example]
 
 package hello
 
@@ -22,4 +22,4 @@ func Logger(w http.ResponseWriter, r *http.Request) {
 	log.Infof(ctx, "Requested URL: %v", r.URL)
 }
 
-// [END logging]
+// [END gae_golang_logging_example]

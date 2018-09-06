@@ -5,6 +5,8 @@
 package main
 
 import (
+	"bytes"
+	"strings"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -13,19 +15,16 @@ import (
 func TestRecognize(t *testing.T) {
 	testutil.SystemTest(t)
 
-	resp, err := recognize("../testdata/quit.raw")
-	if err != nil {
+	var buf bytes.Buffer
+
+	if err := recognize(&buf, "../testdata/quit.raw"); err != nil {
 		t.Fatal(err)
 	}
-	if len(resp.Results) == 0 {
+	if len(buf.String()) == 0 {
 		t.Fatal("got no results; want at least one")
 	}
 
-	result := resp.Results[0]
-	if len(result.Alternatives) < 1 {
-		t.Fatal("got no alternatives; want at least one")
-	}
-	if got, want := result.Alternatives[0].Transcript, "quit"; got != want {
+	if got, want := buf.String(), "quit"; !strings.Contains(got, want) {
 		t.Errorf("Transcript: got %q; want %q", got, want)
 	}
 }
@@ -33,19 +32,16 @@ func TestRecognize(t *testing.T) {
 func TestRecognizeGCS(t *testing.T) {
 	testutil.SystemTest(t)
 
-	resp, err := recognizeGCS("gs://python-docs-samples-tests/speech/audio.raw")
-	if err != nil {
+	var buf bytes.Buffer
+
+	if err := recognizeGCS(&buf, "gs://python-docs-samples-tests/speech/audio.raw"); err != nil {
 		t.Fatal(err)
 	}
-	if len(resp.Results) == 0 {
+	if len(buf.String()) == 0 {
 		t.Fatal("got no results; want at least one")
 	}
 
-	result := resp.Results[0]
-	if len(result.Alternatives) < 1 {
-		t.Fatal("got no alternatives; want at least one")
-	}
-	if got, want := result.Alternatives[0].Transcript, "how old is the Brooklyn Bridge"; got != want {
+	if got, want := buf.String(), "how old is the Brooklyn Bridge"; !strings.Contains(got, want) {
 		t.Errorf("Transcript: got %q; want %q", got, want)
 	}
 }
