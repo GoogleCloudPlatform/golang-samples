@@ -7,12 +7,12 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
 
 	"cloud.google.com/go/bigtable"
-	"golang.org/x/net/context"
 )
 
 // User-provided constants.

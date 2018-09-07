@@ -8,11 +8,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
 	"cloud.google.com/go/spanner"
-	"golang.org/x/net/context"
 )
 
 func main() {

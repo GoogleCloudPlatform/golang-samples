@@ -7,11 +7,10 @@
 package blobstore_example
 
 import (
+	"context"
 	"html/template"
 	"io"
 	"net/http"
-
-	"golang.org/x/net/context"
 
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/blobstore"

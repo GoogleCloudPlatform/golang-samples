@@ -8,6 +8,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -15,9 +16,6 @@ import (
 	"time"
 
 	"cloud.google.com/go/datastore"
-
-	"golang.org/x/net/context"
-
 	"google.golang.org/appengine"
 )
 

@@ -8,12 +8,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
-	// Imports the Google Cloud Datastore client package.
 	"cloud.google.com/go/datastore"
-	"golang.org/x/net/context"
 )
 
 type Task struct {

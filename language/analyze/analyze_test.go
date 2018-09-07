@@ -5,10 +5,9 @@
 package main
 
 import (
+	"context"
 	"strings"
 	"testing"
-
-	"golang.org/x/net/context"
 
 	language "cloud.google.com/go/language/apiv1"
 	languagepb "google.golang.org/genproto/googleapis/cloud/language/v1"

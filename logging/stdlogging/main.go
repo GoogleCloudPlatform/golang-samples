@@ -8,11 +8,10 @@
 package main
 
 import (
+	"context"
 	"log"
 
-	// Imports the Stackdriver Logging client package.
 	"cloud.google.com/go/logging"
-	"golang.org/x/net/context"
 )
 
 func main() {

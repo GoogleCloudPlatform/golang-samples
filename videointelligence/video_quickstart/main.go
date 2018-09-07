@@ -8,14 +8,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
 	"github.com/golang/protobuf/ptypes"
 
-	// Imports the Google Cloud Video Intelligence API client package.
 	video "cloud.google.com/go/videointelligence/apiv1"
-	"golang.org/x/net/context"
 	videopb "google.golang.org/genproto/googleapis/cloud/videointelligence/v1"
 )
 

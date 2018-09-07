@@ -8,13 +8,12 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 
-	// Imports the Google Cloud Vision API client package.
 	vision "cloud.google.com/go/vision/apiv1"
-	"golang.org/x/net/context"
 )
 
 func main() {

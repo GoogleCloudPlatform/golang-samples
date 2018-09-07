@@ -5,13 +5,13 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
 	"testing"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"golang.org/x/net/context"
 )
 
 var client *dlp.Client

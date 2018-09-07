@@ -8,6 +8,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"log"
@@ -16,10 +17,7 @@ import (
 	"os"
 
 	"cloud.google.com/go/storage"
-
 	"google.golang.org/appengine"
-
-	"golang.org/x/net/context"
 )
 
 var (

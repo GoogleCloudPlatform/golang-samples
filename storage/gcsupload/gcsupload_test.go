@@ -6,11 +6,11 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"crypto/md5"
 	"strings"
 	"testing"
 
-	"golang.org/x/net/context"
 	"google.golang.org/api/iterator"
 
 	"cloud.google.com/go/storage"

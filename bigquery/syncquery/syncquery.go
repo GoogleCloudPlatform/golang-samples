@@ -6,14 +6,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 
 	"cloud.google.com/go/bigquery"
 	"google.golang.org/api/iterator"
-
-	"golang.org/x/net/context"
 )
 
 func main() {

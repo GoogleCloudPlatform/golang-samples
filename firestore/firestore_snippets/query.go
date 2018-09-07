@@ -6,7 +6,7 @@ package main
 
 // [START fs_dependencies]
 import (
-	"golang.org/x/net/context"
+	"context"
 
 	"cloud.google.com/go/firestore"
 )

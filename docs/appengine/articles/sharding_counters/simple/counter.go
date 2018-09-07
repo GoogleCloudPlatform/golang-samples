@@ -5,10 +5,9 @@
 package sharded_counter
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
-
-	"golang.org/x/net/context"
 
 	"google.golang.org/appengine/datastore"
 )

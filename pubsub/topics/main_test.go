@@ -5,11 +5,10 @@
 package main
 
 import (
+	"context"
 	"sync"
 	"testing"
 	"time"
-
-	"golang.org/x/net/context"
 
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"

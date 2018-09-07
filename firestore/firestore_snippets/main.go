@@ -6,11 +6,10 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
-
-	"golang.org/x/net/context"
 
 	"cloud.google.com/go/firestore"
 )
