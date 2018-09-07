@@ -1,0 +1,15 @@
+steps:
+- name: 'gcr.io/cloud-builders/go'
+  args: ['get', '-d', '-v', './...']
+  env: ['PROJECT_ROOT=github.com/GoogleCloudPlatform/golang-samples/getting-started/devflowapp']
+- name: 'gcr.io/cloud-builders/go'
+  args: ['install', '.']
+  env: ['PROJECT_ROOT=github.com/GoogleCloudPlatform/golang-samples/getting-started/devflowapp']
+- name: 'gcr.io/cloud-builders/go'
+  args: ['test']
+  env: 
+  - 'PROJECT_ROOT=github.com/GoogleCloudPlatform/golang-samples/getting-started/devflowapp'
+- name: 'gcr.io/cloud-builders/go'
+  args: ['test', 'github.com/GoogleCloudPlatform/golang-samples/getting-started/devflowapp/services']
+  env: 
+  - 'PROJECT_ROOT=github.com/GoogleCloudPlatform/golang-samples/getting-started/devflowapp'

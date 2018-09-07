@@ -1,0 +1,6 @@
+runtime: custom
+env: flex
+manual_scaling:
+  instances: 1
+env_variables:
+  MESSAGE_SERVICE: "mock"
