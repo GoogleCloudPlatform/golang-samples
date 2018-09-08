@@ -25,14 +25,14 @@ To run this example, you will need to create a Google Cloud project with billing
 enabled. You will also need to enable the following APIs
 
 1. [App Engine Admin API](https://cloud.google.com/appengine/docs/admin-api/)
-   - (enable)[https://console.cloud.google.com/flows/enableapi?apiid=appengine]
+   \- [enable](https://console.cloud.google.com/flows/enableapi?apiid=appengine)
 
 2. [App Engine Flexible Environment 
    API](https://cloud.google.com/appengine/docs/flexible/go/)
-   - [enable](https://console.cloud.google.com/flows/enableapi?apiid=appengineflex.googleapis.com)
+   \- [enable](https://console.cloud.google.com/flows/enableapi?apiid=appengineflex.googleapis.com)
 
 3. [Cloud SQL Admin API](https://cloud.google.com/sql/docs/mysql/admin-api/)
-   - [enable](https://console.cloud.google.com/flows/enableapi?apiid=sqladmin)
+   \- [enable](https://console.cloud.google.com/flows/enableapi?apiid=sqladmin)
 
 Set your project as the default in your local development environment with the
 command
@@ -136,7 +136,8 @@ INSTANCE_NAME=devflowapp
 gcloud sql connect $INSTANCE_NAME --user=root
 ```
 
-Execute the statements in [data/database_setup.sql](data/database_setup.sql).
+Execute the statements in
+[data/database_setup.sql](https://github.com/GoogleCloudPlatform/golang-samples/blob/master/getting-started/devflowapp/data/dastabase_setup.sql).
 
 ### Working with the Database in a Local Development Environment (Optional)
 
