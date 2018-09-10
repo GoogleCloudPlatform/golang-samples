@@ -7,7 +7,6 @@ package sample
 import (
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"time"
 
@@ -24,9 +23,9 @@ func jobTitleAutoComplete(service *talent.Service, parent string, companyName st
 	}
 	resp, err := complete.Do()
 	if err != nil {
-		log.Fatalf("Failed to auto complete with query %s in company %s, Err: %v", query, companyName, err)
+		return nil, fmt.Errorf("failed to auto complete with query %s in company %s: %v", query, companyName, err)
 	}
-	return resp, err
+	return resp, nil
 
 }
 
@@ -42,9 +41,9 @@ func defaultAutoComplete(service *talent.Service, parent string, companyName str
 	}
 	resp, err := complete.Do()
 	if err != nil {
-		log.Fatalf("Failed to auto complete with query %s in company %s, Err: %v", query, companyName, err)
+		return nil, fmt.Errorf("failed to auto complete with query %s in company %s: %v", query, companyName, err)
 	}
-	return resp, err
+	return resp, nil
 
 }
 
@@ -55,7 +54,7 @@ func defaultAutoComplete(service *talent.Service, parent string, companyName str
 // runAutoCompleteSample is to run all samples of auto complete APIs.
 func runAutoCompleteSample(w io.Writer) {
 	parent := fmt.Sprintf("projects/%s", os.Getenv("GOOGLE_CLOUD_PROJECT"))
-	service, _ := createCtsService()
+	service, _ := createCTSService()
 
 	// Create a company before creating jobs
 	companyToCreate := constructCompanyWithRequiredFields()

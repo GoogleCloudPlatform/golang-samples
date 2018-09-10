@@ -7,7 +7,6 @@ package sample
 import (
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"time"
 
@@ -49,9 +48,9 @@ func basicLocationSearch(service *talent.Service, parent string, companyName str
 	}
 	resp, err := service.Projects.Jobs.Search(parent, searchJobsRequest).Do()
 	if err != nil {
-		log.Fatalf("Failed to search for jobs with basic location %s within %f miles, Err: %v", location, distance, err)
+		return nil, fmt.Errorf("failed to search for jobs with basic location %s within %f miles: %v", location, distance, err)
 	}
-	return resp, err
+	return resp, nil
 }
 
 // [END basic_location_search]
@@ -90,9 +89,9 @@ func cityLocationSearch(service *talent.Service, parent string, companyName stri
 	}
 	resp, err := service.Projects.Jobs.Search(parent, searchJobsRequest).Do()
 	if err != nil {
-		log.Fatalf("Failed to search for jobs with city location %s, Err: %v", location, err)
+		return nil, fmt.Errorf("failed to search for jobs with city location %s: %v", location, err)
 	}
-	return resp, err
+	return resp, nil
 }
 
 // [END city_location_search]
@@ -132,9 +131,9 @@ func broadeningLocationSearch(service *talent.Service, parent string, companyNam
 	}
 	resp, err := service.Projects.Jobs.Search(parent, searchJobsRequest).Do()
 	if err != nil {
-		log.Fatalf("Failed to search for jobs with broadening location %v, Err: %v", location, err)
+		return nil, fmt.Errorf("failed to search for jobs with broadening location %v: %v", location, err)
 	}
-	return resp, err
+	return resp, nil
 }
 
 // [END broadening_location_search]
@@ -175,9 +174,9 @@ func keywordLocationSearch(service *talent.Service, parent string, companyName s
 	}
 	resp, err := service.Projects.Jobs.Search(parent, searchJobsRequest).Do()
 	if err != nil {
-		log.Fatalf("Failed to search for jobs with keyword %s in location %v within %f miles, Err: %v", keyword, location, distance, err)
+		return nil, fmt.Errorf("failed to search for jobs with keyword %q in location %v within %f miles: %v", keyword, location, distance, err)
 	}
-	return resp, err
+	return resp, nil
 }
 
 // [END keyword_location_search]
@@ -220,9 +219,9 @@ func multiLocationsSearch(service *talent.Service, parent string, companyName st
 	}
 	resp, err := service.Projects.Jobs.Search(parent, searchJobsRequest).Do()
 	if err != nil {
-		log.Fatalf("Failed to search for jobs with multi locations %s and %s within %f miles, Err: %v", location, location2, distance, err)
+		return nil, fmt.Errorf("Failed to search for jobs with multi locations %s and %s within %f miles, Err: %v", location, location2, distance, err)
 	}
-	return resp, err
+	return resp, nil
 }
 
 // [END multi_locations_search]
@@ -231,7 +230,7 @@ func multiLocationsSearch(service *talent.Service, parent string, companyName st
 
 func runLocationBasedSearchSample(w io.Writer) {
 	parent := fmt.Sprintf("projects/%s", os.Getenv("GOOGLE_CLOUD_PROJECT"))
-	service, _ := createCtsService()
+	service, _ := createCTSService()
 
 	// Create a company before creating jobs
 	companyToCreate := constructCompanyWithRequiredFields()

@@ -7,7 +7,6 @@ package sample
 import (
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"time"
 
@@ -52,9 +51,9 @@ func commuteSearch(service *talent.Service, parent string, companyName string) (
 	}
 	resp, err := service.Projects.Jobs.Search(parent, searchJobsRequest).Do()
 	if err != nil {
-		log.Fatalf("Failed to search for jobs with commute filter, Err: %v", err)
+		return nil, fmt.Errorf("failed to search for jobs with commute filter: %v", err)
 	}
-	return resp, err
+	return resp, nil
 }
 
 // [END commute_search]
@@ -62,7 +61,7 @@ func commuteSearch(service *talent.Service, parent string, companyName string) (
 // [START run_commute_search_sample]
 func runCommuteSearchSample(w io.Writer) {
 	parent := fmt.Sprintf("projects/%s", os.Getenv("GOOGLE_CLOUD_PROJECT"))
-	service, _ := createCtsService()
+	service, _ := createCTSService()
 
 	// Create a company before creating jobs
 	companyToCreate := constructCompanyWithRequiredFields()

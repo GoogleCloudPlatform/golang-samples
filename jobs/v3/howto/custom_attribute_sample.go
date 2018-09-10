@@ -7,7 +7,6 @@ package sample
 import (
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"time"
 
@@ -18,8 +17,8 @@ import (
 
 // constructJobWithCustomAttributes constructs a job with custom attributes.
 func constructJobWithCustomAttributes(companyName string, jobTitle string) *talent.Job {
-	// requisition id shoud be the unique Id in your system
-	requisitionId := fmt.Sprintf("job-with-custom-attribute-%d", time.Now().UnixNano())
+	// requisitionID shoud be the unique ID in your system
+	requisitionID := fmt.Sprintf("job-with-custom-attribute-%d", time.Now().UnixNano())
 	applicationInfo := &talent.ApplicationInfo{
 		Uris: []string{"https://googlesample.com/career"},
 	}
@@ -38,7 +37,7 @@ func constructJobWithCustomAttributes(companyName string, jobTitle string) *tale
 	}
 
 	job := &talent.Job{
-		RequisitionId:    requisitionId,
+		RequisitionId:    requisitionID,
 		Title:            jobTitle,
 		CompanyName:      companyName,
 		ApplicationInfo:  applicationInfo,
@@ -75,10 +74,10 @@ func filterOnStringValueCustomAttribute(service *talent.Service, parent string) 
 	}
 	resp, err := service.Projects.Jobs.Search(parent, searchJobsRequest).Do()
 	if err != nil {
-		log.Fatalf("Failed to search for jobs with string value custom attribute, Err: %v", err)
+		return nil, fmt.Errorf("failed to search for jobs with string value custom attribute: %v", err)
 	}
 
-	return resp, err
+	return resp, nil
 }
 
 // [END custom_attribute_filter_string_value]
@@ -108,10 +107,10 @@ func filterOnLongValueCustomAttribute(service *talent.Service, parent string) (*
 	}
 	resp, err := service.Projects.Jobs.Search(parent, searchJobsRequest).Do()
 	if err != nil {
-		log.Fatalf("Failed to search for jobs with long value custom attribute, Err: %v", err)
+		return nil, fmt.Errorf("failed to search for jobs with long value custom attribute: %v", err)
 	}
 
-	return resp, err
+	return resp, nil
 }
 
 // [END custom_attribute_filter_long_value]
@@ -142,10 +141,10 @@ func filterOnMultiCustomAttributes(service *talent.Service, parent string) (*tal
 	}
 	resp, err := service.Projects.Jobs.Search(parent, searchJobsRequest).Do()
 	if err != nil {
-		log.Fatalf("Failed to search for jobs with multiple custom attributes, Err: %v", err)
+		return nil, fmt.Errorf("failed to search for jobs with multiple custom attributes: %v", err)
 	}
 
-	return resp, err
+	return resp, nil
 }
 
 // [END custom_attribute_filter_multi_attributes]
@@ -154,7 +153,7 @@ func filterOnMultiCustomAttributes(service *talent.Service, parent string) (*tal
 
 func runCustomAttributeSample(w io.Writer) {
 	parent := fmt.Sprintf("projects/%s", os.Getenv("GOOGLE_CLOUD_PROJECT"))
-	service, _ := createCtsService()
+	service, _ := createCTSService()
 
 	// Create a company before creating jobs
 	companyToCreate := constructCompanyWithRequiredFields()

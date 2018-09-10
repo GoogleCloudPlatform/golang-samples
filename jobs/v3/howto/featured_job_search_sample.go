@@ -7,7 +7,6 @@ package sample
 import (
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"time"
 
@@ -18,19 +17,18 @@ import (
 
 // constructFeaturedJob constructs a job as featured/promoted one
 func constructFeaturedJob(companyName string, jobTitle string) *talent.Job {
-	requisitionId := fmt.Sprintf("featured-job-required-fields-%d", time.Now().UnixNano())
+	requisitionID := fmt.Sprintf("featured-job-required-fields-%d", time.Now().UnixNano())
 	applicationInfo := &talent.ApplicationInfo{
 		Uris: []string{"https://googlesample.com/career"},
 	}
 	job := &talent.Job{
-		RequisitionId:   requisitionId,
+		RequisitionId:   requisitionID,
 		Title:           jobTitle,
 		CompanyName:     companyName,
 		ApplicationInfo: applicationInfo,
 		Description:     "Design, devolop, test, deploy, maintain and improve software.",
 		PromotionValue:  2,
 	}
-	//	fmt.Fprintf(w, "Job constructed: %v\n",job)
 	return job
 }
 
@@ -66,9 +64,9 @@ func searchFeaturedJobs(service *talent.Service, parent string, companyName stri
 	}
 	resp, err := service.Projects.Jobs.Search(parent, searchJobsRequest).Do()
 	if err != nil {
-		log.Fatalf("Failed to search for jobs with query %v, Err: %v", query, err)
+		return nil, fmt.Errorf("failed to search for jobs with query %q: %v", query, err)
 	}
-	return resp, err
+	return resp, nil
 }
 
 // [END search_featured_job]
@@ -77,7 +75,7 @@ func searchFeaturedJobs(service *talent.Service, parent string, companyName stri
 
 func runFeaturedJobSearchSample(w io.Writer) {
 	parent := fmt.Sprintf("projects/%s", os.Getenv("GOOGLE_CLOUD_PROJECT"))
-	service, _ := createCtsService()
+	service, _ := createCTSService()
 
 	// Create a company before creating jobs
 	companyToCreate := constructCompanyWithRequiredFields()

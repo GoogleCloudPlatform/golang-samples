@@ -18,12 +18,12 @@ import (
 
 // constructJobWithRequiredFields constructs a basic job with given companyName and jobTitle.
 func constructJobWithRequiredFields(companyName string, jobTitle string) *talent.Job {
-	requisitionId := fmt.Sprintf("sample-job-required-fields-%d", time.Now().UnixNano())
+	requisitionID := fmt.Sprintf("sample-job-required-fields-%d", time.Now().UnixNano())
 	applicationInfo := &talent.ApplicationInfo{
 		Uris: []string{"https://googlesample.com/career"},
 	}
 	job := &talent.Job{
-		RequisitionId:   requisitionId,
+		RequisitionId:   requisitionID,
 		Title:           jobTitle,
 		CompanyName:     companyName,
 		ApplicationInfo: applicationInfo,
@@ -133,7 +133,7 @@ func listJobs(service *talent.Service, parent string, filter string) (*talent.Li
 
 func runBasicJobSample(w io.Writer) {
 	parent := fmt.Sprintf("projects/%s", os.Getenv("GOOGLE_CLOUD_PROJECT"))
-	service, _ := createCtsService()
+	service, _ := createCTSService()
 
 	// Create a company before creating jobs
 	companyToCreate := constructCompanyWithRequiredFields()

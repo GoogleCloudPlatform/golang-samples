@@ -7,7 +7,6 @@ package sample
 import (
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"time"
 
@@ -42,9 +41,9 @@ func searchForAlerts(service *talent.Service, parent string, companyName string)
 
 	resp, err := service.Projects.Jobs.SearchForAlert(parent, searchJobsRequest).Do()
 	if err != nil {
-		log.Fatalf("Failed to search for jobs with alerts, Err: %v", err)
+		return nil, fmt.Errorf("failed to search for jobs with alerts: %v", err)
 	}
-	return resp, err
+	return resp, nil
 }
 
 // [END search_for_alerts]
@@ -53,7 +52,7 @@ func searchForAlerts(service *talent.Service, parent string, companyName string)
 
 func runEmailAlertSearchSample(w io.Writer) {
 	parent := fmt.Sprintf("projects/%s", os.Getenv("GOOGLE_CLOUD_PROJECT"))
-	service, _ := createCtsService()
+	service, _ := createCTSService()
 
 	// Create a company before creating jobs
 	companyToCreate := constructCompanyWithRequiredFields()

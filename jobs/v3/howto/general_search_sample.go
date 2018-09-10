@@ -7,7 +7,6 @@ package sample
 import (
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"time"
 
@@ -43,9 +42,9 @@ func basicJobSearch(service *talent.Service, parent string, companyName string, 
 	}
 	resp, err := service.Projects.Jobs.Search(parent, searchJobsRequest).Do()
 	if err != nil {
-		log.Fatalf("Failed to search for jobs with query %v, Err: %v", query, err)
+		return nil, fmt.Errorf("failed to search for jobs with query %q: %v", query, err)
 	}
-	return resp, err
+	return resp, nil
 }
 
 // [END basic_keyword_search]
@@ -79,9 +78,9 @@ func categoryFilterSearch(service *talent.Service, parent string, companyName st
 	}
 	resp, err := service.Projects.Jobs.Search(parent, searchJobsRequest).Do()
 	if err != nil {
-		log.Fatalf("Failed to search for jobs with categories %v, Err: %v", categories, err)
+		return nil, fmt.Errorf("failed to search for jobs with categories %v: %v", categories, err)
 	}
-	return resp, err
+	return resp, nil
 }
 
 // [END category_filter]
@@ -115,9 +114,9 @@ func employmentTypesSearch(service *talent.Service, parent string, companyName s
 	}
 	resp, err := service.Projects.Jobs.Search(parent, searchJobsRequest).Do()
 	if err != nil {
-		log.Fatalf("Failed to search for jobs with employment types %v, Err: %v", employmentTypes, err)
+		return nil, fmt.Errorf("failed to search for jobs with employment types %v: %v", employmentTypes, err)
 	}
-	return resp, err
+	return resp, nil
 }
 
 // [END employment_types_filter]
@@ -160,9 +159,9 @@ func dateRangeSearch(service *talent.Service, parent string, companyName string,
 	}
 	resp, err := service.Projects.Jobs.Search(parent, searchJobsRequest).Do()
 	if err != nil {
-		log.Fatalf("Failed to search for jobs with date range [%s, %s], Err: %v", startTime, endTime, err)
+		return nil, fmt.Errorf("failed to search for jobs with date range [%s, %s]: %v", startTime, endTime, err)
 	}
-	return resp, err
+	return resp, nil
 }
 
 // [END date_range_filter]
@@ -196,9 +195,9 @@ func languageCodeSearch(service *talent.Service, parent string, companyName stri
 	}
 	resp, err := service.Projects.Jobs.Search(parent, searchJobsRequest).Do()
 	if err != nil {
-		log.Fatalf("Failed to search for jobs with languange codes %v, Err: %v", languageCodes, err)
+		return nil, fmt.Errorf("failed to search for jobs with languange codes %v: %v", languageCodes, err)
 	}
-	return resp, err
+	return resp, nil
 }
 
 // [END language_code_filter]
@@ -232,9 +231,9 @@ func companyDisplayNameSearch(service *talent.Service, parent string, companyNam
 	}
 	resp, err := service.Projects.Jobs.Search(parent, searchJobsRequest).Do()
 	if err != nil {
-		log.Fatalf("Failed to search for jobs with company display names %v, Err: %v", companyDisplayNames, err)
+		return nil, fmt.Errorf("failed to search for jobs with company display names %v: %v", companyDisplayNames, err)
 	}
-	return resp, err
+	return resp, nil
 }
 
 // [END company_display_name_filter]
@@ -282,9 +281,9 @@ func compensationSearch(service *talent.Service, parent string, companyName stri
 	}
 	resp, err := service.Projects.Jobs.Search(parent, searchJobsRequest).Do()
 	if err != nil {
-		log.Fatalf("Failed to search for jobs with compensation, Err: %v", err)
+		return nil, fmt.Errorf("failed to search for jobs with compensation: %v", err)
 	}
-	return resp, err
+	return resp, nil
 }
 
 // [END compensation_filter]
@@ -294,7 +293,7 @@ func compensationSearch(service *talent.Service, parent string, companyName stri
 // runGeneralSearchSample runs the general job search samples
 func runGeneralSearchSample(w io.Writer) {
 	parent := fmt.Sprintf("projects/%s", os.Getenv("GOOGLE_CLOUD_PROJECT"))
-	service, _ := createCtsService()
+	service, _ := createCTSService()
 
 	// Create a company before creating jobs
 	companyToCreate := constructCompanyWithRequiredFields()

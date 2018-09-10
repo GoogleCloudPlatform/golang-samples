@@ -8,7 +8,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"time"
 
@@ -18,21 +17,21 @@ import (
 
 // [START create_service]
 
-// createCtsService creates service of Cloud Talent Solution.
-func createCtsService() (*talent.Service, error) {
+// createCTSService creates service of Cloud Talent Solution.
+func createCTSService() (*talent.Service, error) {
 	// Authorize the client using Application Default Credentials.
 	// See https://g.co/dv/identity/protocols/application-default-credentials
 	ctx := context.Background()
 	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
 	if err != nil {
-		log.Fatalf("Failed to create client of Cloud Talent Solution, Err: %v", err)
+		return nil, fmt.Errorf("google.DefaultClient: %v", err)
 	}
 	// Create the jobs service client.
 	ctsService, err := talent.New(client)
 	if err != nil {
-		log.Fatalf("Failed to create service of Cloud Talent Solution, Err: %v", err)
+		return nil, fmt.Errorf("talent.New: %v", err)
 	}
-	return ctsService, err
+	return ctsService, nil
 }
 
 // [END create_service]
@@ -41,9 +40,9 @@ func createCtsService() (*talent.Service, error) {
 
 // constructCompanyWithRequiredFields constructs a company with required fields: ExternalId and DisplayName.
 func constructCompanyWithRequiredFields() *talent.Company {
-	externalId := fmt.Sprintf("sample-company-%d", time.Now().UnixNano())
+	externalID := fmt.Sprintf("sample-company-%d", time.Now().UnixNano())
 	return &talent.Company{
-		ExternalId:  externalId,
+		ExternalId:  externalID,
 		DisplayName: "Google Sample",
 	}
 }
@@ -59,10 +58,10 @@ func createCompany(service *talent.Service, parent string, companyToCreate *tale
 	}
 	company, err := service.Projects.Companies.Create(parent, createCompanyRquest).Do()
 	if err != nil {
-		log.Fatalf("Failed to create company %s, Err: %v", companyToCreate.DisplayName, err)
+		return nil, fmt.Errorf("failed to create company %q: %v", companyToCreate.DisplayName, err)
 	}
 
-	return company, err
+	return company, nil
 }
 
 // [END create_company]
@@ -73,10 +72,10 @@ func createCompany(service *talent.Service, parent string, companyToCreate *tale
 func getCompany(service *talent.Service, name string) (*talent.Company, error) {
 	company, err := service.Projects.Companies.Get(name).Do()
 	if err != nil {
-		log.Fatalf("Failed to get company %s, Err: %v", name, err)
+		return nil, fmt.Errorf("failed to get company %q: %v", name, err)
 	}
 
-	return company, err
+	return company, nil
 }
 
 // [END get_company]
@@ -90,10 +89,10 @@ func updateCompany(service *talent.Service, name string, companyToUpdate *talent
 	}
 	company, err := service.Projects.Companies.Patch(name, updateCompanyRequest).Do()
 	if err != nil {
-		log.Fatalf("Failed to update company %s, Err: %v", name, err)
+		return nil, fmt.Errorf("failed to update company %q: %v", name, err)
 	}
 
-	return company, err
+	return company, nil
 }
 
 // [END update_company]
@@ -109,10 +108,10 @@ func updateCompanyWithMask(service *talent.Service, name string, mask string, co
 	}
 	company, err := service.Projects.Companies.Patch(name, updateCompanyRequest).Do()
 	if err != nil {
-		log.Fatalf("Failed to update company %s with mask %s, Err: %v", name, mask, err)
+		return nil, fmt.Errorf("failed to update company %q with mask %q: %v", name, mask, err)
 	}
 
-	return company, err
+	return company, nil
 }
 
 // [END update_company_with_field_mask]
@@ -123,10 +122,10 @@ func updateCompanyWithMask(service *talent.Service, name string, mask string, co
 func deleteCompany(service *talent.Service, name string) (*talent.Empty, error) {
 	empty, err := service.Projects.Companies.Delete(name).Do()
 	if err != nil {
-		log.Fatalf("Failed to delete company %s, Err: %v", name, err)
+		return nil, fmt.Errorf("failed to delete company %q: %v", name, err)
 	}
 
-	return empty, err
+	return empty, nil
 }
 
 // [END delete_company
@@ -137,10 +136,10 @@ func deleteCompany(service *talent.Service, name string) (*talent.Empty, error) 
 func listCompanies(service *talent.Service, parent string) (*talent.ListCompaniesResponse, error) {
 	resp, err := service.Projects.Companies.List(parent).Do()
 	if err != nil {
-		log.Fatalf("Failed to list companies, Err: %v", err)
+		return nil, fmt.Errorf("failed to list companies: %v", err)
 	}
 
-	return resp, err
+	return resp, nil
 }
 
 // [END list_companies]
@@ -149,7 +148,7 @@ func listCompanies(service *talent.Service, parent string) (*talent.ListCompanie
 
 func runBasicCompanySample(w io.Writer) {
 	parent := fmt.Sprintf("projects/%s", os.Getenv("GOOGLE_CLOUD_PROJECT"))
-	service, _ := createCtsService()
+	service, _ := createCTSService()
 
 	companyToCreate := constructCompanyWithRequiredFields()
 	companyCreated, _ := createCompany(service, parent, companyToCreate)
@@ -178,7 +177,6 @@ func runBasicCompanySample(w io.Writer) {
 	for _, company := range resp.Companies {
 		fmt.Fprintf(w, "-- Company: %q\n", company.Name)
 	}
-
 }
 
 // [END run_basic_company_sample]

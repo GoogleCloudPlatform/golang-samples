@@ -7,7 +7,6 @@ package sample
 import (
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"time"
 
@@ -54,9 +53,9 @@ func histogramSearch(service *talent.Service, parent string, companyName string)
 
 	resp, err := service.Projects.Jobs.Search(parent, searchJobsRequest).Do()
 	if err != nil {
-		log.Fatalf("Failed to search for jobs with Historgram Facets, Err: %v", err)
+		return nil, fmt.Errorf("failed to search for jobs with Historgram Facets: %v", err)
 	}
-	return resp, err
+	return resp, nil
 }
 
 // [END histogram_search]
@@ -65,7 +64,7 @@ func histogramSearch(service *talent.Service, parent string, companyName string)
 
 func runHistogramSearchSample(w io.Writer) {
 	parent := fmt.Sprintf("projects/%s", os.Getenv("GOOGLE_CLOUD_PROJECT"))
-	service, _ := createCtsService()
+	service, _ := createCTSService()
 
 	// Create a company before creating jobs
 	companyToCreate := constructCompanyWithRequiredFields()
