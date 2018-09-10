@@ -5,13 +5,13 @@
 package sample
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"log"
 	"os"
 	"time"
 
-	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
 	talent "google.golang.org/api/jobs/v3"
 )

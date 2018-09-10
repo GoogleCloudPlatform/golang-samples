@@ -8,11 +8,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 
-	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
 	talent "google.golang.org/api/jobs/v3"
 )
