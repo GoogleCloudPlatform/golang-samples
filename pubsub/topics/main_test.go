@@ -5,11 +5,10 @@
 package main
 
 import (
+	"context"
 	"sync"
 	"testing"
 	"time"
-
-	"golang.org/x/net/context"
 
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
@@ -90,6 +89,13 @@ func TestPublish(t *testing.T) {
 	// TODO(jbd): Merge topics and subscriptions programs maybe?
 	c := setup(t)
 	if err := publish(c, topicID, "hello world"); err != nil {
+		t.Errorf("failed to publish message: %v", err)
+	}
+}
+
+func TestPublishThatScales(t *testing.T) {
+	c := setup(t)
+	if err := publishThatScales(c, topicID, 10); err != nil {
 		t.Errorf("failed to publish message: %v", err)
 	}
 }

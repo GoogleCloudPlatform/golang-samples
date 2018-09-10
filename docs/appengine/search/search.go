@@ -6,11 +6,10 @@ package sample
 
 // [START creating_a_document]
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"time"
-
-	"golang.org/x/net/context"
 
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/search"

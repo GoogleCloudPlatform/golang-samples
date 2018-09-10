@@ -6,11 +6,10 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
-
-	"golang.org/x/net/context"
 
 	texttospeech "cloud.google.com/go/texttospeech/apiv1"
 	texttospeechpb "google.golang.org/genproto/googleapis/cloud/texttospeech/v1"

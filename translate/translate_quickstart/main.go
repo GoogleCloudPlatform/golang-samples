@@ -8,12 +8,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
-	// Imports the Google Cloud Translate client package.
 	"cloud.google.com/go/translate"
-	"golang.org/x/net/context"
 	"golang.org/x/text/language"
 )
 

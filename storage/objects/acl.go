@@ -4,11 +4,10 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"time"
-
-	"golang.org/x/net/context"
 
 	"cloud.google.com/go/storage"
 )

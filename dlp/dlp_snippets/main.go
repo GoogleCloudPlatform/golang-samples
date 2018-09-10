@@ -6,14 +6,13 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
 	"os"
 	"sort"
 	"strings"
-
-	"golang.org/x/net/context"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
 	"github.com/fatih/color"

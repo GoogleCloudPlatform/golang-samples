@@ -11,6 +11,7 @@ package e2e
 
 import (
 	"bytes"
+	"context"
 	"io/ioutil"
 	"log"
 	"mime/multipart"
@@ -20,7 +21,6 @@ import (
 	"testing"
 	"time"
 
-	"golang.org/x/net/context"
 	"golang.org/x/time/rate"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/aeintegrate"

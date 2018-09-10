@@ -34,6 +34,7 @@
 package aeintegrate
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -44,7 +45,6 @@ import (
 	"path/filepath"
 	"time"
 
-	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
 
 	appengine "google.golang.org/api/appengine/v1"

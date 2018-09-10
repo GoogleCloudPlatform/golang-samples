@@ -6,11 +6,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 
-	"golang.org/x/net/context"
 	"google.golang.org/api/iterator"
 
 	"cloud.google.com/go/logging/logadmin"

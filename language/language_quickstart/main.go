@@ -9,12 +9,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
-	// Imports the Google Cloud Natural Language API client package.
 	language "cloud.google.com/go/language/apiv1"
-	"golang.org/x/net/context"
 	languagepb "google.golang.org/genproto/googleapis/cloud/language/v1"
 )
 

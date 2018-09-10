@@ -5,13 +5,12 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"strings"
-
-	"golang.org/x/net/context"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
 	"cloud.google.com/go/pubsub"

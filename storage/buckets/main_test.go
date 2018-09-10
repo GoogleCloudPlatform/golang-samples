@@ -5,6 +5,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -13,7 +14,6 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 
 	"cloud.google.com/go/storage"
-	"golang.org/x/net/context"
 )
 
 var (

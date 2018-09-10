@@ -6,6 +6,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"io"
@@ -17,7 +18,6 @@ import (
 
 	"cloud.google.com/go/spanner"
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
-	"golang.org/x/net/context"
 	"google.golang.org/api/iterator"
 
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
@@ -1188,7 +1188,8 @@ Examples:
 	}
 
 	cmd, db := flag.Arg(0), flag.Arg(1)
-	ctx, _ := context.WithTimeout(context.Background(), 1*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
+	defer cancel()
 	adminClient, dataClient := createClients(ctx, db)
 	if err := run(ctx, adminClient, dataClient, os.Stdout, cmd, db); err != nil {
 		os.Exit(1)

@@ -1,0 +1,9 @@
+steps:
+- name: 'ubuntu'
+  args: ['bash', './deployment/sed_wrapper.sh', "app.yaml"]  
+  env:
+  - '_DB_PASSWORD=${_DB_PASSWORD}'
+  - 'PROJECT=$PROJECT_ID'
+- name: 'gcr.io/cloud-builders/gcloud'
+  args: ['app', 'deploy']
+timeout: '1600s'

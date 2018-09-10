@@ -8,6 +8,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"io"
@@ -16,7 +17,6 @@ import (
 	"path/filepath"
 
 	speech "cloud.google.com/go/speech/apiv1"
-	"golang.org/x/net/context"
 	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"
 )
 

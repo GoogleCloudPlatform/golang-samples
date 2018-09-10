@@ -12,7 +12,7 @@ import (
 	"time"
 
 	// [START imports]
-	"golang.org/x/net/context"
+	"context"
 
 	"cloud.google.com/go/logging"
 	"cloud.google.com/go/logging/logadmin"

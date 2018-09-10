@@ -6,13 +6,13 @@
 package main
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 
-	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
 	cloudkms "google.golang.org/api/cloudkms/v1"
 )

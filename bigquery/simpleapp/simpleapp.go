@@ -8,6 +8,7 @@ package main
 // [START bigquery_simple_app_all]
 // [START bigquery_simple_app_deps]
 import (
+	"context"
 	"fmt"
 	"io"
 	"log"
@@ -15,8 +16,6 @@ import (
 
 	"cloud.google.com/go/bigquery"
 	"google.golang.org/api/iterator"
-
-	"golang.org/x/net/context"
 )
 
 // [END bigquery_simple_app_deps]

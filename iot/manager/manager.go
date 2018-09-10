@@ -15,7 +15,8 @@ import (
 	"reflect"
 
 	// [START imports]
-	"golang.org/x/net/context"
+	"context"
+
 	"golang.org/x/oauth2/google"
 	cloudiot "google.golang.org/api/cloudiot/v1"
 	// [END imports]

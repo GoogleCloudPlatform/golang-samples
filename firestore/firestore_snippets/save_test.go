@@ -5,12 +5,11 @@
 package main
 
 import (
+	"context"
 	"os"
 	"reflect"
 	"runtime"
 	"testing"
-
-	"golang.org/x/net/context"
 
 	"cloud.google.com/go/firestore"
 )

@@ -5,12 +5,11 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"time"
 
 	"google.golang.org/api/iterator"
-
-	"golang.org/x/net/context"
 
 	"cloud.google.com/go/firestore"
 )

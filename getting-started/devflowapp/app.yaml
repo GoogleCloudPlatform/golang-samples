@@ -1,0 +1,11 @@
+runtime: custom
+env: flex
+manual_scaling:
+  instances: 1
+env_variables:
+  #Format: MYSQL_CONNECTION: DB_USER:DB_PASSWORD@tcp(IP:3306)/DATABASE
+  # Values for password and project to be substituted by build script
+  MYSQL_CONNECTION: proxyuser:_DB_PASSWORD@unix(/cloudsql/PROJECT_ID:us-central1:devflowapp)/messagesdb
+beta_settings:
+  #cloud_sql_instances: PROJECT_ID:REGION:INSTANCE
+  cloud_sql_instances: PROJECT_ID:us-central1:devflowapp

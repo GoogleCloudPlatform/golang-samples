@@ -8,6 +8,7 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"io"
 	"log"
@@ -18,8 +19,6 @@ import (
 	"time"
 
 	"cloud.google.com/go/datastore"
-
-	"golang.org/x/net/context"
 )
 
 func main() {
