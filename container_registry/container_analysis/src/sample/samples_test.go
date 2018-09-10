@@ -267,33 +267,32 @@ func TestPubSub(t *testing.T) {
 	// Create a new subscription if it doesn't exist.
 	createOccurrenceSubscription(v.ctx, v.subID, v.projectID)
 
-	// Run Pub/Sub to clear out any extra messages from the queue.
-	occurrencePubsub(v.ctx, v.subID, 20, v.projectID)
+	testutil.Retry(t, v.tryLimit, time.Second, func(r *testutil.R) {
+		// Use a channel and a goroutine to count incomming messages.
+		c := make(chan int)
+		go func() {
+			count, err := occurrencePubsub(v.ctx, v.subID, 20, v.projectID)
+			if err != nil {
+				t.Errorf("occurrencePubsub(%s): %v", v.subID, err)
+			}
+			c <- count
+		}()
 
-	// Use a channel and a goroutine to count incomming messages.
-	c := make(chan int)
-	go func() {
-		count, err := occurrencePubsub(v.ctx, v.subID, 20, v.projectID)
-		if err != nil {
-			t.Errorf("occurrencePubsub(%s): %v", v.subID, err)
+		// Create some Occurrences.
+		totalCreated := 3
+		for i := 0; i < totalCreated; i++ {
+			created, _ := createOccurrence(v.ctx, v.client, v.imageUrl, v.noteID, v.projectID, v.projectID)
+			time.Sleep(time.Second)
+			if err := deleteOccurrence(v.ctx, v.client, created.Name); err != nil {
+				t.Errorf("deleteOccurrence(%s): %v", created.Name, err)
+			}
+			time.Sleep(time.Second)
 		}
-		c <- count
-	}()
-
-	// Create some Occurrences.
-	totalCreated := 3
-	for i := 0; i < totalCreated; i++ {
-		created, _ := createOccurrence(v.ctx, v.client, v.imageUrl, v.noteID, v.projectID, v.projectID)
-		time.Sleep(time.Second)
-		if err := deleteOccurrence(v.ctx, v.client, created.Name); err != nil {
-			t.Errorf("deleteOccurrence(%s): %v", created.Name, err)
+		result := <-c
+		if result != totalCreated {
+			r.Errorf("invalid occurrence count: %d; want: %d", result, totalCreated)
 		}
-		time.Sleep(time.Second)
-	}
-	result := <-c
-	if result != totalCreated {
-		t.Errorf("invalid occurrence count: %d; want: %d", result, totalCreated)
-	}
+	})
 
 	// Clean up
 	client, _ := pubsub.NewClient(v.ctx, v.projectID)
