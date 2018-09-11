@@ -690,7 +690,7 @@ func createTableClustered(client *bigquery.Client, datasetID, tableID string) er
 	if err := tableRef.Create(ctx, metaData); err != nil {
 		return err
 	}
-	// [END bigquery_create_table_partitioned]
+	// [END bigquery_create_table_clustered]
 	return nil
 }
 
