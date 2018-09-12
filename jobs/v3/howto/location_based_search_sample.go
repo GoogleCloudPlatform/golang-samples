@@ -278,9 +278,6 @@ func runLocationBasedSearchSample(w io.Writer) {
 	}
 	fmt.Fprintf(w, "BasicLocationSearch StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
 	fmt.Fprintf(w, "MatchingJobs size: %d\n", len(resp.MatchingJobs))
-	for _, mJob := range resp.MatchingJobs {
-		fmt.Fprintf(w, "-- match job: %s\n", mJob.Job.Title)
-	}
 
 	resp, err = cityLocationSearch(service, parent, companyCreated.Name, location)
 	if err != nil {
@@ -298,9 +295,6 @@ func runLocationBasedSearchSample(w io.Writer) {
 	}
 	fmt.Fprintf(w, "BroadeningLocationSearch StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
 	fmt.Fprintf(w, "MatchingJobs size: %d\n", len(resp.MatchingJobs))
-	for _, mJob := range resp.MatchingJobs {
-		fmt.Fprintf(w, "-- match job: %s\n", mJob.Job.Title)
-	}
 
 	resp, err = keywordLocationSearch(service, parent, companyCreated.Name, location, distance, keyword)
 	if err != nil {
@@ -308,9 +302,6 @@ func runLocationBasedSearchSample(w io.Writer) {
 	}
 	fmt.Fprintf(w, "KeywordLocationSearch StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
 	fmt.Fprintf(w, "MatchingJobs size: %d\n", len(resp.MatchingJobs))
-	for _, mJob := range resp.MatchingJobs {
-		fmt.Fprintf(w, "-- match job: %s\n", mJob.Job.Title)
-	}
 
 	resp, err = multiLocationsSearch(service, parent, companyCreated.Name, location, distance, location2)
 	if err != nil {
@@ -318,9 +309,6 @@ func runLocationBasedSearchSample(w io.Writer) {
 	}
 	fmt.Fprintf(w, "MultiLocationsSearch StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
 	fmt.Fprintf(w, "MatchingJobs size: %d\n", len(resp.MatchingJobs))
-	for _, mJob := range resp.MatchingJobs {
-		fmt.Fprintf(w, "-- match job: %s\n", mJob.Job.Title)
-	}
 
 	empty, err := deleteJob(service, jobCreated.Name)
 	if err != nil {
