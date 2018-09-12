@@ -7,6 +7,7 @@ package sample
 import (
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"time"
 
@@ -153,22 +154,34 @@ func filterOnMultiCustomAttributes(service *talent.Service, parent string) (*tal
 
 func runCustomAttributeSample(w io.Writer) {
 	parent := fmt.Sprintf("projects/%s", os.Getenv("GOOGLE_CLOUD_PROJECT"))
-	service, _ := createCTSService()
+	service, err := createCTSService()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Create a company before creating jobs
 	companyToCreate := constructCompanyWithRequiredFields()
-	companyCreated, _ := createCompany(service, parent, companyToCreate)
+	companyCreated, err := createCompany(service, parent, companyToCreate)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "CreateCompany: %s\n", companyCreated.DisplayName)
 
 	// Create a job with custom fields
 	jobTitle := "Software Engineer"
 	jobToCreate := constructJobWithCustomAttributes(companyCreated.Name, jobTitle)
-	jobCreated, _ := createJob(service, parent, jobToCreate)
+	jobCreated, err := createJob(service, parent, jobToCreate)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "CreateJob: %s\n", jobCreated.Title)
 
 	time.Sleep(10 * time.Second)
 
-	resp, _ := filterOnStringValueCustomAttribute(service, parent)
+	resp, err := filterOnStringValueCustomAttribute(service, parent)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "FilterOnStringValueCustomAttribute StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
 	fmt.Fprintf(w, "MatchingJobs size: %d\n", len(resp.MatchingJobs))
 	for _, mJob := range resp.MatchingJobs {
@@ -182,7 +195,10 @@ func runCustomAttributeSample(w io.Writer) {
 		fmt.Fprintf(w, "-- match job: %s\n", mJob.Job.Title)
 	}
 
-	resp, _ = filterOnMultiCustomAttributes(service, parent)
+	resp, err = filterOnMultiCustomAttributes(service, parent)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "FilterOnMultiCustomAttributes StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
 	fmt.Fprintf(w, "MatchingJobs size: %d\n", len(resp.MatchingJobs))
 	for _, mJob := range resp.MatchingJobs {
@@ -190,12 +206,17 @@ func runCustomAttributeSample(w io.Writer) {
 	}
 
 	// Delete Job
-	empty, _ := deleteJob(service, jobCreated.Name)
+	empty, err := deleteJob(service, jobCreated.Name)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "DeleteJob StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
 	// Delete Company
-	empty, _ = deleteCompany(service, companyCreated.Name)
+	empty, err = deleteCompany(service, companyCreated.Name)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "DeleteCompany StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
-
 }
 
 // [END run_custom_attribute_sample]

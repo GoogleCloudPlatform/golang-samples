@@ -7,6 +7,7 @@ package sample
 import (
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"time"
 
@@ -293,11 +294,17 @@ func compensationSearch(service *talent.Service, parent string, companyName stri
 // runGeneralSearchSample runs the general job search samples
 func runGeneralSearchSample(w io.Writer) {
 	parent := fmt.Sprintf("projects/%s", os.Getenv("GOOGLE_CLOUD_PROJECT"))
-	service, _ := createCTSService()
+	service, err := createCTSService()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Create a company before creating jobs
 	companyToCreate := constructCompanyWithRequiredFields()
-	companyCreated, _ := createCompany(service, parent, companyToCreate)
+	companyCreated, err := createCompany(service, parent, companyToCreate)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "CreateCompany: %s\n", companyCreated.DisplayName)
 
 	// Create a job
@@ -318,13 +325,19 @@ func runGeneralSearchSample(w io.Writer) {
 	}
 	jobToCreate.CompensationInfo = compensationInfo
 
-	jobCreated, _ := createJob(service, parent, jobToCreate)
+	jobCreated, err := createJob(service, parent, jobToCreate)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "CreateJob: %s\n", jobCreated.Title)
 
 	// Wait for 10 seconds for post processing
 	time.Sleep(10 * time.Second)
 
-	resp, _ := basicJobSearch(service, parent, companyCreated.Name, jobTitle)
+	resp, err := basicJobSearch(service, parent, companyCreated.Name, jobTitle)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "BasicJobSearch StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
 	fmt.Fprintf(w, "MatchingJobs size: %d\n", len(resp.MatchingJobs))
 	for _, mJob := range resp.MatchingJobs {
@@ -332,7 +345,10 @@ func runGeneralSearchSample(w io.Writer) {
 	}
 
 	categories := []string{"COMPUTER_AND_IT"}
-	resp, _ = categoryFilterSearch(service, parent, companyCreated.Name, categories)
+	resp, err = categoryFilterSearch(service, parent, companyCreated.Name, categories)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "CategoryFilterSearch StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
 	fmt.Fprintf(w, "MatchingJobs size: %d\n", len(resp.MatchingJobs))
 	for _, mJob := range resp.MatchingJobs {
@@ -340,46 +356,66 @@ func runGeneralSearchSample(w io.Writer) {
 	}
 
 	employmentTypes := []string{"FULL_TIME", "CONTRACTOR", "PER_DIEM"}
-	resp, _ = employmentTypesSearch(service, parent, companyCreated.Name, employmentTypes)
+	resp, err = employmentTypesSearch(service, parent, companyCreated.Name, employmentTypes)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "EmploymentTypesSearch StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
 	fmt.Fprintf(w, "MatchingJobs size: %d\n", len(resp.MatchingJobs))
 	for _, mJob := range resp.MatchingJobs {
 		fmt.Fprintf(w, "-- match job: %s\n", mJob.Job.Title)
 	}
 
-	resp, _ = dateRangeSearch(service, parent, companyCreated.Name, "2000-01-01T00:00:00.01Z", "2099-01-01T00:00:00.01Z")
+	resp, err = dateRangeSearch(service, parent, companyCreated.Name, "2000-01-01T00:00:00.01Z", "2099-01-01T00:00:00.01Z")
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "DateRangeSearch StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
 	fmt.Fprintf(w, "MatchingJobs size: %d\n", len(resp.MatchingJobs))
 	for _, mJob := range resp.MatchingJobs {
 		fmt.Fprintf(w, "-- match job: %s\n", mJob.Job.Title)
 	}
 
-	resp, _ = languageCodeSearch(service, parent, companyCreated.Name, []string{"pt-BR", "en-US"})
+	resp, err = languageCodeSearch(service, parent, companyCreated.Name, []string{"pt-BR", "en-US"})
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "LanguageCodeSearch StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
 	fmt.Fprintf(w, "MatchingJobs size: %d\n", len(resp.MatchingJobs))
 	for _, mJob := range resp.MatchingJobs {
 		fmt.Fprintf(w, "-- match job: %s\n", mJob.Job.Title)
 	}
 
-	resp, _ = companyDisplayNameSearch(service, parent, companyCreated.Name, []string{"Google Sample"})
+	resp, err = companyDisplayNameSearch(service, parent, companyCreated.Name, []string{"Google Sample"})
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "CompanyDisplayNameSearch StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
 	fmt.Fprintf(w, "MatchingJobs size: %d\n", len(resp.MatchingJobs))
 	for _, mJob := range resp.MatchingJobs {
 		fmt.Fprintf(w, "-- match job: %s\n", mJob.Job.Title)
 	}
 
-	resp, _ = compensationSearch(service, parent, companyCreated.Name)
+	resp, err = compensationSearch(service, parent, companyCreated.Name)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "CompensationSearch StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
 	fmt.Fprintf(w, "MatchingJobs size: %d\n", len(resp.MatchingJobs))
 	for _, mJob := range resp.MatchingJobs {
 		fmt.Fprintf(w, "-- match job: %s\n", mJob.Job.Title)
 	}
 
-	empty, _ := deleteJob(service, jobCreated.Name)
+	empty, err := deleteJob(service, jobCreated.Name)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "DeleteJob StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
-	empty, _ = deleteCompany(service, companyCreated.Name)
+	empty, err = deleteCompany(service, companyCreated.Name)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "DeleteCompany StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
-
 }
 
 // [END run_general_search_sample]

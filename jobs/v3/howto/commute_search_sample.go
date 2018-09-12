@@ -7,6 +7,7 @@ package sample
 import (
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"time"
 
@@ -61,32 +62,50 @@ func commuteSearch(service *talent.Service, parent string, companyName string) (
 // [START run_commute_search_sample]
 func runCommuteSearchSample(w io.Writer) {
 	parent := fmt.Sprintf("projects/%s", os.Getenv("GOOGLE_CLOUD_PROJECT"))
-	service, _ := createCTSService()
+	service, err := createCTSService()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Create a company before creating jobs
 	companyToCreate := constructCompanyWithRequiredFields()
-	companyCreated, _ := createCompany(service, parent, companyToCreate)
+	companyCreated, err := createCompany(service, parent, companyToCreate)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "CreateCompany: %s\n", companyCreated.DisplayName)
 
 	jobTitle := "Software Engineer"
 	jobToCreate := constructJobWithRequiredFields(companyCreated.Name, jobTitle)
 	jobToCreate.Addresses = []string{"1600 Amphitheatre Parkway, Mountain View, CA 94043"}
-	jobCreated, _ := createJob(service, parent, jobToCreate)
+	jobCreated, err := createJob(service, parent, jobToCreate)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "CreateJob: %s\n", jobCreated.Title)
 
 	// Wait several seconds for post processing
 	time.Sleep(10 * time.Second)
 
-	resp, _ := commuteSearch(service, parent, companyCreated.Name)
+	resp, err := commuteSearch(service, parent, companyCreated.Name)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "CommuteSearch StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
 	fmt.Fprintf(w, "MatchingJobs size: %d\n", len(resp.MatchingJobs))
 	for _, mJob := range resp.MatchingJobs {
 		fmt.Fprintf(w, "-- match job: %s\n", mJob.Job.Title)
 	}
 
-	empty, _ := deleteJob(service, jobCreated.Name)
+	empty, err := deleteJob(service, jobCreated.Name)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "DeleteJob StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
-	empty, _ = deleteCompany(service, companyCreated.Name)
+	empty, err = deleteCompany(service, companyCreated.Name)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "DeleteCompany StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
 }
 

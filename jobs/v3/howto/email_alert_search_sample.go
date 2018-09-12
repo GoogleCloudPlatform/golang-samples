@@ -7,6 +7,7 @@ package sample
 import (
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"time"
 
@@ -52,35 +53,52 @@ func searchForAlerts(service *talent.Service, parent string, companyName string)
 
 func runEmailAlertSearchSample(w io.Writer) {
 	parent := fmt.Sprintf("projects/%s", os.Getenv("GOOGLE_CLOUD_PROJECT"))
-	service, _ := createCTSService()
+	service, err := createCTSService()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Create a company before creating jobs
 	companyToCreate := constructCompanyWithRequiredFields()
-	companyCreated, _ := createCompany(service, parent, companyToCreate)
+	companyCreated, err := createCompany(service, parent, companyToCreate)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "CreateCompany: %s\n", companyCreated.DisplayName)
 
 	// Create a SDE job
 	jobTitle := "Software Engineer"
 	jobToCreate := constructJobWithRequiredFields(companyCreated.Name, jobTitle)
-	jobCreated, _ := createJob(service, parent, jobToCreate)
+	jobCreated, err := createJob(service, parent, jobToCreate)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "CreateJob: %s\n", jobCreated.Title)
 
 	// Wait for 10 seconds for post processing
 	time.Sleep(10 * time.Second)
 
 	// Search jobs with alerts
-	resp, _ := searchForAlerts(service, parent, companyCreated.Name)
+	resp, err := searchForAlerts(service, parent, companyCreated.Name)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "SearchForAlerts StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
 	fmt.Fprintf(w, "MatchingJobs size: %d\n", len(resp.MatchingJobs))
 	for _, mJob := range resp.MatchingJobs {
 		fmt.Fprintf(w, "-- match job: %s\n", mJob.Job.Title)
 	}
 
-	empty, _ := deleteJob(service, jobCreated.Name)
+	empty, err := deleteJob(service, jobCreated.Name)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "DeleteJob StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
-	empty, _ = deleteCompany(service, companyCreated.Name)
+	empty, err = deleteCompany(service, companyCreated.Name)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "DeleteCompany StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
-
 }
 
 // [END run_email_alert_search_sample]

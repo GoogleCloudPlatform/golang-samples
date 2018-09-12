@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"time"
 
@@ -148,30 +149,51 @@ func listCompanies(service *talent.Service, parent string) (*talent.ListCompanie
 
 func runBasicCompanySample(w io.Writer) {
 	parent := fmt.Sprintf("projects/%s", os.Getenv("GOOGLE_CLOUD_PROJECT"))
-	service, _ := createCTSService()
+	service, err := createCTSService()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	companyToCreate := constructCompanyWithRequiredFields()
-	companyCreated, _ := createCompany(service, parent, companyToCreate)
+	companyCreated, err := createCompany(service, parent, companyToCreate)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "CreateCompany: %s\n", companyCreated.DisplayName)
 
 	name := companyCreated.Name
-	companyGot, _ := getCompany(service, name)
+	companyGot, err := getCompany(service, name)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "GetCompany: %s\n", companyGot.DisplayName)
 
 	companyToUpdate := companyCreated
 	companyToUpdate.DisplayName = "Google Sample (updated)"
-	companyUpdated, _ := updateCompany(service, name, companyToUpdate)
+	companyUpdated, err := updateCompany(service, name, companyToUpdate)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "UpdateCompany: %s\n", companyUpdated.DisplayName)
 
 	companyUpdated.WebsiteUri = "http://googlesample.com"
 	companyUpdated.DisplayName = "Google Sample (updated with mask)"
-	companyUpdatedWithMask, _ := updateCompanyWithMask(service, name, "WebSiteUri,DisplayName", companyUpdated)
+	companyUpdatedWithMask, err := updateCompanyWithMask(service, name, "WebSiteUri,DisplayName", companyUpdated)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "UpdateCompanyWithMask: %s\n", companyUpdatedWithMask.DisplayName)
 
-	empty, _ := deleteCompany(service, name)
+	empty, err := deleteCompany(service, name)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "DeleteCompany StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
 
-	resp, _ := listCompanies(service, parent)
+	resp, err := listCompanies(service, parent)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "ListCompanies Request ID: %q\n", resp.Metadata.RequestId)
 
 	for _, company := range resp.Companies {

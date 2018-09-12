@@ -133,11 +133,17 @@ func listJobs(service *talent.Service, parent string, filter string) (*talent.Li
 
 func runBasicJobSample(w io.Writer) {
 	parent := fmt.Sprintf("projects/%s", os.Getenv("GOOGLE_CLOUD_PROJECT"))
-	service, _ := createCTSService()
+	service, err := createCTSService()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Create a company before creating jobs
 	companyToCreate := constructCompanyWithRequiredFields()
-	companyCreated, _ := createCompany(service, parent, companyToCreate)
+	companyCreated, err := createCompany(service, parent, companyToCreate)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "CreateCompany: %s\n", companyCreated.DisplayName)
 
 	// Construct a job
@@ -145,28 +151,43 @@ func runBasicJobSample(w io.Writer) {
 	jobToCreate := constructJobWithRequiredFields(companyCreated.Name, jobTitle)
 
 	// Create a job
-	jobCreated, _ := createJob(service, parent, jobToCreate)
+	jobCreated, err := createJob(service, parent, jobToCreate)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "CreateJob: %s\n", jobCreated.Title)
 
 	// Get an existing job
 	jobName := jobCreated.Name
-	jobGot, _ := getJob(service, jobName)
+	jobGot, err := getJob(service, jobName)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "GetJob: %s\n", jobGot.Title)
 
 	// Update an existing job
 	jobToUpdate := jobGot
 	jobToUpdate.Title = "Software Engineer (updated)"
-	jobUpdated, _ := updateJob(service, jobName, jobToUpdate)
+	jobUpdated, err := updateJob(service, jobName, jobToUpdate)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "UpdateJob: %s\n", jobUpdated.Title)
 
 	// Update job with field mask, only top level fields could be masked
 	jobToUpdate.Title = "Software Engineer (unintended)"
 	jobToUpdate.Department = "Engineering (updated with mask)"
-	jobUpdatedWithMask, _ := updateJobWithMask(service, jobName, "Department", jobToUpdate)
+	jobUpdatedWithMask, err := updateJobWithMask(service, jobName, "Department", jobToUpdate)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "UpdateJobWithMask: Title: %s Department: %s\n", jobUpdatedWithMask.Title, jobUpdatedWithMask.Department)
 
 	companyFilter := fmt.Sprintf("companyName = \"%s\"", companyCreated.Name)
-	resp, _ := listJobs(service, parent, companyFilter)
+	resp, err := listJobs(service, parent, companyFilter)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "ListJobs Request ID: %q\n", resp.Metadata.RequestId)
 
 	for _, job := range resp.Jobs {
@@ -174,10 +195,16 @@ func runBasicJobSample(w io.Writer) {
 	}
 
 	// Delete Job
-	empty, _ := deleteJob(service, jobCreated.Name)
+	empty, err := deleteJob(service, jobCreated.Name)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "DeleteJob StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
 	// Delete Company
-	empty, _ = deleteCompany(service, companyCreated.Name)
+	empty, err = deleteCompany(service, companyCreated.Name)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "DeleteCompany StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
 }
 

@@ -7,6 +7,7 @@ package sample
 import (
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"time"
 
@@ -230,11 +231,17 @@ func multiLocationsSearch(service *talent.Service, parent string, companyName st
 
 func runLocationBasedSearchSample(w io.Writer) {
 	parent := fmt.Sprintf("projects/%s", os.Getenv("GOOGLE_CLOUD_PROJECT"))
-	service, _ := createCTSService()
+	service, err := createCTSService()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Create a company before creating jobs
 	companyToCreate := constructCompanyWithRequiredFields()
-	companyCreated, _ := createCompany(service, parent, companyToCreate)
+	companyCreated, err := createCompany(service, parent, companyToCreate)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "CreateCompany: %s\n", companyCreated.DisplayName)
 
 	location := "Mountain View, CA"
@@ -247,60 +254,89 @@ func runLocationBasedSearchSample(w io.Writer) {
 	jobToCreate := constructJobWithRequiredFields(companyCreated.Name, jobTitle)
 	jobToCreate.Addresses = []string{location}
 
-	jobCreated, _ := createJob(service, parent, jobToCreate)
+	jobCreated, err := createJob(service, parent, jobToCreate)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "CreateJob: %s\n", jobCreated.Title)
 
 	jobTitle2 := "Senior " + keyword
 	jobToCreate2 := constructJobWithRequiredFields(companyCreated.Name, jobTitle2)
 	jobToCreate2.Addresses = []string{location2}
-	jobCreated2, _ := createJob(service, parent, jobToCreate2)
+	jobCreated2, err := createJob(service, parent, jobToCreate2)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "CreateJob: %s\n", jobCreated2.Title)
 
 	// Wait for 10 seconds for post processing
 	time.Sleep(10 * time.Second)
 
-	resp, _ := basicLocationSearch(service, parent, companyCreated.Name, location, distance)
+	resp, err := basicLocationSearch(service, parent, companyCreated.Name, location, distance)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "BasicLocationSearch StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
 	fmt.Fprintf(w, "MatchingJobs size: %d\n", len(resp.MatchingJobs))
 	for _, mJob := range resp.MatchingJobs {
 		fmt.Fprintf(w, "-- match job: %s\n", mJob.Job.Title)
 	}
 
-	resp, _ = cityLocationSearch(service, parent, companyCreated.Name, location)
+	resp, err = cityLocationSearch(service, parent, companyCreated.Name, location)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "CityLocationSearch StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
 	fmt.Fprintf(w, "MatchingJobs size: %d\n", len(resp.MatchingJobs))
 	for _, mJob := range resp.MatchingJobs {
 		fmt.Fprintf(w, "-- match job: %s\n", mJob.Job.Title)
 	}
 
-	resp, _ = broadeningLocationSearch(service, parent, companyCreated.Name, location)
+	resp, err = broadeningLocationSearch(service, parent, companyCreated.Name, location)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "BroadeningLocationSearch StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
 	fmt.Fprintf(w, "MatchingJobs size: %d\n", len(resp.MatchingJobs))
 	for _, mJob := range resp.MatchingJobs {
 		fmt.Fprintf(w, "-- match job: %s\n", mJob.Job.Title)
 	}
 
-	resp, _ = keywordLocationSearch(service, parent, companyCreated.Name, location, distance, keyword)
+	resp, err = keywordLocationSearch(service, parent, companyCreated.Name, location, distance, keyword)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "KeywordLocationSearch StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
 	fmt.Fprintf(w, "MatchingJobs size: %d\n", len(resp.MatchingJobs))
 	for _, mJob := range resp.MatchingJobs {
 		fmt.Fprintf(w, "-- match job: %s\n", mJob.Job.Title)
 	}
 
-	resp, _ = multiLocationsSearch(service, parent, companyCreated.Name, location, distance, location2)
+	resp, err = multiLocationsSearch(service, parent, companyCreated.Name, location, distance, location2)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "MultiLocationsSearch StatusCode: %d\n", resp.ServerResponse.HTTPStatusCode)
 	fmt.Fprintf(w, "MatchingJobs size: %d\n", len(resp.MatchingJobs))
 	for _, mJob := range resp.MatchingJobs {
 		fmt.Fprintf(w, "-- match job: %s\n", mJob.Job.Title)
 	}
 
-	empty, _ := deleteJob(service, jobCreated.Name)
+	empty, err := deleteJob(service, jobCreated.Name)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "DeleteJob StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
-	empty, _ = deleteJob(service, jobCreated2.Name)
+	empty, err = deleteJob(service, jobCreated2.Name)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "DeleteJob StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
-	empty, _ = deleteCompany(service, companyCreated.Name)
+	empty, err = deleteCompany(service, companyCreated.Name)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Fprintf(w, "DeleteCompany StatusCode: %d\n", empty.ServerResponse.HTTPStatusCode)
-
 }
 
 // [END run_location_based_search_sample]
