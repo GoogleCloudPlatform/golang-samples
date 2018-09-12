@@ -133,9 +133,15 @@ func TestAll(t *testing.T) {
 		t.Errorf("relaxTableApi(dataset:%q table:%q): %v", datasetID, required, err)
 	}
 
-	widen := uniqueBQName("golang_example_table_widen")
-	if err := createTableAndWiden(client, datasetID, widen); err != nil {
-		t.Errorf("createTableAndWiden(dataset:%q table:%q): %v", datasetID, widen, err)
+	widenLoad := uniqueBQName("golang_example_table_widen_load")
+	filenameWiden := "testdata/people.csv"
+	if err := createTableAndWidenLoad(client, datasetID, widenLoad, filenameWiden); err != nil {
+		t.Errorf("createTableAndWidenLoad(dataset:%q table:%q): %v", datasetID, widenLoad, err)
+	}
+
+	widenQuery := uniqueBQName("golang_example_table_widen_query")
+	if err := createTableAndWidenQuery(client, datasetID, widenQuery); err != nil {
+		t.Errorf("createTableAndWidenQuery(dataset:%q table:%q): %v", datasetID, widenQuery, err)
 	}
 
 	if err := updateTableDescription(client, datasetID, explicit); err != nil {
