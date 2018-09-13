@@ -12,6 +12,7 @@ import (
 )
 
 func TestMain(t *testing.T) {
+	t.Skip("Need to set GOOGLE_CLOUD_PROJECT")
 	oldStdout := os.Stdout
 	r, w, _ := os.Pipe()
 	os.Stdout = w
