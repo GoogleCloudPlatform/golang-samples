@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"os"
 	"time"
 
 	talent "google.golang.org/api/jobs/v3"
@@ -53,13 +52,12 @@ func defaultAutoComplete(service *talent.Service, parent string, companyName str
 // [START run_auto_complete_sample]
 
 // runAutoCompleteSample is to run all samples of auto complete APIs.
-func runAutoCompleteSample(w io.Writer) {
-	parent := fmt.Sprintf("projects/%s", os.Getenv("GOOGLE_CLOUD_PROJECT"))
+func runAutoCompleteSample(w io.Writer, projectID string) {
+	parent := fmt.Sprintf("projects/%s", projectID)
 	service, err := createCTSService()
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	// Create a company before creating jobs
 	companyToCreate := constructCompanyWithRequiredFields()
 	companyCreated, err := createCompany(service, parent, companyToCreate)

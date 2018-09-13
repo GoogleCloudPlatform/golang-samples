@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"os"
 	"time"
 
 	talent "google.golang.org/api/jobs/v3"
@@ -60,8 +59,8 @@ func commuteSearch(service *talent.Service, parent string, companyName string) (
 // [END commute_search]
 
 // [START run_commute_search_sample]
-func runCommuteSearchSample(w io.Writer) {
-	parent := fmt.Sprintf("projects/%s", os.Getenv("GOOGLE_CLOUD_PROJECT"))
+func runCommuteSearchSample(w io.Writer, projectID string) {
+	parent := fmt.Sprintf("projects/%s", projectID)
 	service, err := createCTSService()
 	if err != nil {
 		log.Fatal(err)

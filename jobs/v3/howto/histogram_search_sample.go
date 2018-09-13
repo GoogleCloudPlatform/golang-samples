@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"os"
 	"time"
 
 	talent "google.golang.org/api/jobs/v3"
@@ -63,8 +62,8 @@ func histogramSearch(service *talent.Service, parent string, companyName string)
 
 // [START run_histogram_search_sample]
 
-func runHistogramSearchSample(w io.Writer) {
-	parent := fmt.Sprintf("projects/%s", os.Getenv("GOOGLE_CLOUD_PROJECT"))
+func runHistogramSearchSample(w io.Writer, projectID string) {
+	parent := fmt.Sprintf("projects/%s", projectID)
 	service, err := createCTSService()
 	if err != nil {
 		log.Fatal(err)

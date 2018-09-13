@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"os"
 	"time"
 
 	talent "google.golang.org/api/jobs/v3"
@@ -131,8 +130,8 @@ func listJobs(service *talent.Service, parent string, filter string) (*talent.Li
 
 // [START run_basic_job_sample]
 
-func runBasicJobSample(w io.Writer) {
-	parent := fmt.Sprintf("projects/%s", os.Getenv("GOOGLE_CLOUD_PROJECT"))
+func runBasicJobSample(w io.Writer, projectID string) {
+	parent := fmt.Sprintf("projects/%s", projectID)
 	service, err := createCTSService()
 	if err != nil {
 		log.Fatal(err)

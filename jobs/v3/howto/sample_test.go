@@ -8,11 +8,25 @@ import (
 	"bytes"
 	"strings"
 	"testing"
+
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
+func checkServiceAvailable(t *testing.T, projectID string) {
+	service, err := createCTSService()
+	if err != nil {
+		t.Skipf("createCTSService: service account likely in different project: %v", err)
+	}
+	if _, err := service.Projects.Companies.List("projects/" + projectID).Do(); err != nil {
+		t.Skip("List: service account likely in different project")
+	}
+}
+
 func TestRunBasicCompanySample(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	checkServiceAvailable(t, tc.ProjectID)
 	out := new(bytes.Buffer)
-	runBasicCompanySample(out)
+	runBasicCompanySample(out, tc.ProjectID)
 	got := out.String()
 
 	want := "CreateCompany: Google Sample\n"
@@ -27,8 +41,11 @@ func TestRunBasicCompanySample(t *testing.T) {
 }
 
 func TestRunBasicJobSample(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	checkServiceAvailable(t, tc.ProjectID)
+
 	out := new(bytes.Buffer)
-	runBasicJobSample(out)
+	runBasicJobSample(out, tc.ProjectID)
 	got := out.String()
 
 	want := "CreateCompany: Google Sample\n"
@@ -48,8 +65,10 @@ func TestRunBasicJobSample(t *testing.T) {
 }
 
 func TestRunCommuteSearchSample(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	checkServiceAvailable(t, tc.ProjectID)
 	out := new(bytes.Buffer)
-	runCommuteSearchSample(out)
+	runCommuteSearchSample(out, tc.ProjectID)
 	got := out.String()
 
 	want := "CreateCompany: Google Sample\n"
@@ -68,8 +87,10 @@ func TestRunCommuteSearchSample(t *testing.T) {
 }
 
 func TestRunHistogramSearchSample(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	checkServiceAvailable(t, tc.ProjectID)
 	out := new(bytes.Buffer)
-	runHistogramSearchSample(out)
+	runHistogramSearchSample(out, tc.ProjectID)
 	got := out.String()
 
 	want := "CreateCompany: Google Sample\n"
@@ -98,8 +119,10 @@ func TestRunHistogramSearchSample(t *testing.T) {
 }
 
 func TestRunEmailAlertSearchSample(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	checkServiceAvailable(t, tc.ProjectID)
 	out := new(bytes.Buffer)
-	runEmailAlertSearchSample(out)
+	runEmailAlertSearchSample(out, tc.ProjectID)
 	got := out.String()
 
 	want := "CreateCompany: Google Sample\n"
@@ -121,8 +144,10 @@ func TestRunEmailAlertSearchSample(t *testing.T) {
 }
 
 func TestRunFeaturedJobSearchSample(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	checkServiceAvailable(t, tc.ProjectID)
 	out := new(bytes.Buffer)
-	runFeaturedJobSearchSample(out)
+	runFeaturedJobSearchSample(out, tc.ProjectID)
 	got := out.String()
 
 	want := "CreateCompany: Google Sample\n"
@@ -144,8 +169,10 @@ func TestRunFeaturedJobSearchSample(t *testing.T) {
 }
 
 func TestRunAutoCompleteSample(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	checkServiceAvailable(t, tc.ProjectID)
 	out := new(bytes.Buffer)
-	runAutoCompleteSample(out)
+	runAutoCompleteSample(out, tc.ProjectID)
 	got := out.String()
 
 	want := "CreateCompany: Google Sample\n"
@@ -186,8 +213,10 @@ func TestRunAutoCompleteSample(t *testing.T) {
 }
 
 func TestRunCustomAttributeSample(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	checkServiceAvailable(t, tc.ProjectID)
 	out := new(bytes.Buffer)
-	runCustomAttributeSample(out)
+	runCustomAttributeSample(out, tc.ProjectID)
 	got := out.String()
 
 	want := "CreateCompany: Google Sample\n"
@@ -211,8 +240,10 @@ func TestRunCustomAttributeSample(t *testing.T) {
 }
 
 func TestRunLocationBasedSearchSample(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	checkServiceAvailable(t, tc.ProjectID)
 	out := new(bytes.Buffer)
-	runLocationBasedSearchSample(out)
+	runLocationBasedSearchSample(out, tc.ProjectID)
 	got := out.String()
 
 	want := "CreateCompany: Google Sample\n"
@@ -241,8 +272,10 @@ func TestRunLocationBasedSearchSample(t *testing.T) {
 }
 
 func TestRunGeneralSearchSample(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	checkServiceAvailable(t, tc.ProjectID)
 	out := new(bytes.Buffer)
-	runGeneralSearchSample(out)
+	runGeneralSearchSample(out, tc.ProjectID)
 	got := out.String()
 
 	want := "CreateCompany: Google Sample\n"

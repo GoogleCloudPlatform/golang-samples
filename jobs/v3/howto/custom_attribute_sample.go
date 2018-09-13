@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"os"
 	"time"
 
 	talent "google.golang.org/api/jobs/v3"
@@ -152,8 +151,8 @@ func filterOnMultiCustomAttributes(service *talent.Service, parent string) (*tal
 
 // [START run_custom_attribute_sample]
 
-func runCustomAttributeSample(w io.Writer) {
-	parent := fmt.Sprintf("projects/%s", os.Getenv("GOOGLE_CLOUD_PROJECT"))
+func runCustomAttributeSample(w io.Writer, projectID string) {
+	parent := fmt.Sprintf("projects/%s", projectID)
 	service, err := createCTSService()
 	if err != nil {
 		log.Fatal(err)

@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"os"
 	"time"
 
 	"golang.org/x/oauth2/google"
@@ -147,8 +146,8 @@ func listCompanies(service *talent.Service, parent string) (*talent.ListCompanie
 
 // [START run_basic_company_sample]
 
-func runBasicCompanySample(w io.Writer) {
-	parent := fmt.Sprintf("projects/%s", os.Getenv("GOOGLE_CLOUD_PROJECT"))
+func runBasicCompanySample(w io.Writer, projectID string) {
+	parent := fmt.Sprintf("projects/%s", projectID)
 	service, err := createCTSService()
 	if err != nil {
 		log.Fatal(err)
