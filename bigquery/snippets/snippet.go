@@ -21,6 +21,7 @@ func noOpCommentFunc() {
 	// and constructing a client.  Inside a func to ensure the indentation is
 	// consistent between multiple includes.
 	// [START bigquery_add_empty_column]
+	// [START bigquery_add_column_load_append]
 	// [START bigquery_add_column_query_append]
 	// [START bigquery_browse_table]
 	// [START bigquery_cancel_job]
@@ -93,6 +94,7 @@ func noOpCommentFunc() {
 	// ctx := context.Background()
 	// client, err := bigquery.NewClient(ctx, "your-project-id")
 	// [END bigquery_add_empty_column]
+	// [END bigquery_add_column_load_append]
 	// [END bigquery_add_column_query_append]
 	// [END bigquery_browse_table]
 	// [END bigquery_cancel_job]
@@ -611,7 +613,48 @@ func relaxTableQuery(client *bigquery.Client, datasetID, tableID string) error {
 	return nil
 }
 
-func createTableAndWiden(client *bigquery.Client, datasetID, tableID string) error {
+func createTableAndWidenLoad(client *bigquery.Client, datasetID, tableID, filename string) error {
+	ctx := context.Background()
+	// [START bigquery_add_column_load_append]
+	sampleSchema := bigquery.Schema{
+		{Name: "full_name", Type: bigquery.StringFieldType},
+	}
+	meta := &bigquery.TableMetadata{
+		Schema: sampleSchema,
+	}
+	tableRef := client.Dataset(datasetID).Table(tableID)
+	if err := tableRef.Create(ctx, meta); err != nil {
+		return err
+	}
+	// Now, import data from a local file, but specify field additions are allowed.
+	// Because the data has a second column (age), the schema is amended as part of
+	// the load.
+	f, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	source := bigquery.NewReaderSource(f)
+	source.AutoDetect = true   // Allow BigQuery to determine schema.
+	source.SkipLeadingRows = 1 // CSV has a single header line.
+
+	loader := client.Dataset(datasetID).Table(tableID).LoaderFrom(source)
+	loader.SchemaUpdateOptions = []string{"ALLOW_FIELD_ADDITION"}
+	job, err := loader.Run(ctx)
+	if err != nil {
+		return err
+	}
+	status, err := job.Wait(ctx)
+	if err != nil {
+		return err
+	}
+	if err := status.Err(); err != nil {
+		return err
+	}
+	// [END bigquery_add_column_load_append]
+	return nil
+}
+
+func createTableAndWidenQuery(client *bigquery.Client, datasetID, tableID string) error {
 	ctx := context.Background()
 	// [START bigquery_add_column_query_append]
 	sampleSchema := bigquery.Schema{
