@@ -30,7 +30,7 @@ func histogramSearch(service *talent.Service, parent string, companyName string)
 	histogramFacets := &talent.HistogramFacets{
 		SimpleHistogramFacets: []string{"COMPANY_ID"},
 		CustomAttributeHistogramFacets: []*talent.CustomAttributeHistogramRequest{
-			&talent.CustomAttributeHistogramRequest{
+			{
 				Key:                  "someFieldString",
 				StringValueHistogram: true,
 			},

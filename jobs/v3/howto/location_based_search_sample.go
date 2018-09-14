@@ -28,7 +28,7 @@ func basicLocationSearch(service *talent.Service, parent string, companyName str
 	}
 	jobQuery := &talent.JobQuery{
 		LocationFilters: []*talent.LocationFilter{
-			&talent.LocationFilter{
+			{
 				Address:         location,
 				DistanceInMiles: distance,
 			},
@@ -70,7 +70,7 @@ func cityLocationSearch(service *talent.Service, parent string, companyName stri
 	}
 	jobQuery := &talent.JobQuery{
 		LocationFilters: []*talent.LocationFilter{
-			&talent.LocationFilter{
+			{
 				Address: location,
 			},
 		},
@@ -111,7 +111,7 @@ func broadeningLocationSearch(service *talent.Service, parent string, companyNam
 	}
 	jobQuery := &talent.JobQuery{
 		LocationFilters: []*talent.LocationFilter{
-			&talent.LocationFilter{
+			{
 				Address: location,
 			},
 		},
@@ -153,7 +153,7 @@ func keywordLocationSearch(service *talent.Service, parent string, companyName s
 	}
 	jobQuery := &talent.JobQuery{
 		LocationFilters: []*talent.LocationFilter{
-			&talent.LocationFilter{
+			{
 				Address:         location,
 				DistanceInMiles: distance,
 			},
@@ -196,11 +196,11 @@ func multiLocationsSearch(service *talent.Service, parent string, companyName st
 	}
 	jobQuery := &talent.JobQuery{
 		LocationFilters: []*talent.LocationFilter{
-			&talent.LocationFilter{
+			{
 				Address:         location,
 				DistanceInMiles: distance,
 			},
-			&talent.LocationFilter{
+			{
 				Address: location2,
 			},
 		},

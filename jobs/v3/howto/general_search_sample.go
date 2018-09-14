@@ -313,7 +313,7 @@ func runGeneralSearchSample(w io.Writer, projectID string) {
 	jobToCreate.EmploymentTypes = []string{"FULL_TIME"}
 	compensationInfo := &talent.CompensationInfo{}
 	compensationInfo.Entries = []*talent.CompensationEntry{
-		&talent.CompensationEntry{
+		{
 			Type: "BASE",
 			Unit: "HOURLY",
 			Amount: &talent.Money{
