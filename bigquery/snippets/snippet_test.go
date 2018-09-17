@@ -6,6 +6,7 @@ package snippets
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"regexp"
 	"strings"
@@ -15,7 +16,6 @@ import (
 	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"golang.org/x/net/context"
 	"google.golang.org/api/iterator"
 )
 
@@ -111,7 +111,6 @@ func TestAll(t *testing.T) {
 
 	inferred := uniqueBQName("golang_example_table_inferred")
 	explicit := uniqueBQName("golang_example_table_explicit")
-	empty := uniqueBQName("golang_example_table_emptyschema")
 
 	if err := createTableInferredSchema(client, datasetID, inferred); err != nil {
 		t.Errorf("createTableInferredSchema(dataset:%q table:%q): %v", datasetID, inferred, err)
@@ -119,8 +118,30 @@ func TestAll(t *testing.T) {
 	if err := createTableExplicitSchema(client, datasetID, explicit); err != nil {
 		t.Errorf("createTableExplicitSchema(dataset:%q table:%q): %v", datasetID, explicit, err)
 	}
-	if err := createTableEmptySchema(client, datasetID, empty); err != nil {
-		t.Errorf("createTableEmptySchema(dataset:%q table:%q): %v", datasetID, empty, err)
+	complex := uniqueBQName("golang_example_table_complex")
+	if err := createTableComplexSchema(client, datasetID, complex); err != nil {
+		t.Errorf("createTableComplexSchema(dataset:%q table:%q): %v", datasetID, complex, err)
+	}
+
+	tableCMEK := uniqueBQName("golang_example_table_cmek")
+	if err := createTableWithCMEK(client, datasetID, tableCMEK); err != nil {
+		t.Errorf("createTableWithCMEK(dataset:%q table:%q): %v", datasetID, tableCMEK, err)
+	}
+
+	required := uniqueBQName("golang_example_table_required")
+	if err := relaxTableAPI(client, datasetID, required); err != nil {
+		t.Errorf("relaxTableApi(dataset:%q table:%q): %v", datasetID, required, err)
+	}
+
+	widenLoad := uniqueBQName("golang_example_table_widen_load")
+	filenameWiden := "testdata/people.csv"
+	if err := createTableAndWidenLoad(client, datasetID, widenLoad, filenameWiden); err != nil {
+		t.Errorf("createTableAndWidenLoad(dataset:%q table:%q): %v", datasetID, widenLoad, err)
+	}
+
+	widenQuery := uniqueBQName("golang_example_table_widen_query")
+	if err := createTableAndWidenQuery(client, datasetID, widenQuery); err != nil {
+		t.Errorf("createTableAndWidenQuery(dataset:%q table:%q): %v", datasetID, widenQuery, err)
 	}
 
 	if err := updateTableDescription(client, datasetID, explicit); err != nil {
@@ -128,6 +149,9 @@ func TestAll(t *testing.T) {
 	}
 	if err := updateTableExpiration(client, datasetID, explicit); err != nil {
 		t.Errorf("updateTableExpiration(dataset:%q table:%q): %v", datasetID, explicit, err)
+	}
+	if err := updateTableAddColumn(client, datasetID, explicit); err != nil {
+		t.Errorf("updateTableAddColumn(dataset:%q table:%q): %v", datasetID, explicit, err)
 	}
 	if err := addTableLabel(client, datasetID, explicit); err != nil {
 		t.Errorf("updateTableAddLabel(dataset:%q table:%q): %v", datasetID, explicit, err)
@@ -146,9 +170,6 @@ func TestAll(t *testing.T) {
 	}
 	if got := buf.String(); !strings.Contains(got, explicit) {
 		t.Errorf("want table list %q to contain table %q", got, explicit)
-	}
-	if got := buf.String(); !strings.Contains(got, empty) {
-		t.Errorf("want table list %q to contain table %q", got, empty)
 	}
 
 	if err := printDatasetInfo(client, datasetID); err != nil {
@@ -205,6 +226,23 @@ func TestAll(t *testing.T) {
 	if err := queryWithDestination(client, datasetID, persisted); err != nil {
 		t.Errorf("queryWithDestination(dataset:%q table:%q): %v", datasetID, persisted, err)
 	}
+	persistedCMEK := uniqueBQName("golang_example_table_queryresult_cmek")
+	if err := queryWithDestinationCMEK(client, datasetID, persistedCMEK); err != nil {
+		t.Errorf("queryWithDestinationCMEK(dataset:%q table:%q): %v", datasetID, persistedCMEK, err)
+	}
+
+	// Control a job lifecycle explicitly: create, report status, cancel.
+	exampleJobID := uniqueBQName("golang_example_job")
+	q := client.Query("Select 17 as foo")
+	q.JobID = exampleJobID
+	q.Priority = bigquery.BatchPriority
+	q.Run(ctx)
+	if err := getJobInfo(client, exampleJobID); err != nil {
+		t.Errorf("getJobInfo(%s): %v", exampleJobID, err)
+	}
+	if err := cancelJob(client, exampleJobID); err != nil {
+		t.Errorf("cancelJobInfo(%s): %v", exampleJobID, err)
+	}
 
 	// Print information about tables (extended and simple).
 	if err := printTableInfo(client, datasetID, inferred); err != nil {
@@ -228,6 +266,10 @@ func TestAll(t *testing.T) {
 	dstTableID = uniqueBQName("golang_multicopydest")
 	if err := copyMultiTable(client, datasetID, dstTableID); err != nil {
 		t.Errorf("copyMultiTable(dataset:%q table:%q): %v", datasetID, dstTableID, err)
+	}
+	dstTableID = uniqueBQName("golang_example_copycmek")
+	if err := copyTableWithCMEK(client, datasetID, dstTableID); err != nil {
+		t.Errorf("copyTableWithCMEK(dataset:%q table:%q): %v", datasetID, dstTableID, err)
 	}
 
 	if err := listJobs(client); err != nil {
@@ -275,6 +317,39 @@ func TestImportExport(t *testing.T) {
 	if err := importJSONAutodetectSchema(client, datasetID, autodetectJSON); err != nil {
 		t.Fatalf("importJSONAutodetectSchema(dataset:%q table:%q): %v", datasetID, autodetectJSON, err)
 	}
+
+	autoJSONwithCMEK := uniqueBQName("golang_example_importjson_cmek")
+	if err := importJSONWithCMEK(client, datasetID, autoJSONwithCMEK); err != nil {
+		t.Fatalf("importJSONWithCMEK(dataset:%q table:%q): %v", datasetID, autoJSONwithCMEK, err)
+	}
+
+	orc := uniqueBQName("golang_example_importorc")
+	if err := importORC(client, datasetID, orc); err != nil {
+		t.Errorf("importOrc(dataset:%q table: %q): %v", datasetID, orc, err)
+	}
+	if err := importORCTruncate(client, datasetID, orc); err != nil {
+		t.Errorf("importOrcTruncate(dataset:%q table: %q): %v", datasetID, orc, err)
+	}
+
+	parquet := uniqueBQName("golang_example_importparquet")
+	if err := importParquet(client, datasetID, parquet); err != nil {
+		t.Errorf("importParquet(dataset:%q table: %q): %v", datasetID, parquet, err)
+	}
+	if err := importParquetTruncate(client, datasetID, parquet); err != nil {
+		t.Errorf("importParquetTruncate(dataset:%q table: %q): %v", datasetID, parquet, err)
+	}
+
+	requiredImport := uniqueBQName("golang_example_table_required_import")
+	filenameRelax := "testdata/people.csv"
+	if err := relaxTableImport(client, datasetID, requiredImport, filenameRelax); err != nil {
+		t.Errorf("relaxTableImport(dataset:%q table:%q): %v", datasetID, requiredImport, err)
+	}
+
+	requiredQuery := uniqueBQName("golang_example_table_required_query")
+	if err := relaxTableQuery(client, datasetID, requiredQuery); err != nil {
+		t.Errorf("relaxTableQuery(dataset:%q table:%q): %v", datasetID, requiredImport, err)
+	}
+
 	bucket := uniqueBucketName("golang-example-bucket", tc.ProjectID)
 	const object = "values.csv"
 
@@ -315,5 +390,49 @@ func TestImportExport(t *testing.T) {
 	time.Sleep(time.Second) // Give it a second, due to eventual consistency.
 	if err := storageClient.Bucket(bucket).Delete(ctx); err != nil {
 		t.Errorf("failed to cleanup the GCS bucket: %v", err)
+	}
+}
+
+func TestPartitioningAndClustering(t *testing.T) {
+	tc := testutil.EndToEndTest(t)
+	ctx := context.Background()
+
+	client, err := bigquery.NewClient(ctx, tc.ProjectID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	datasetID := uniqueBQName("golang_example_dataset_partition_cluster")
+	if err := createDataset(client, datasetID); err != nil {
+		t.Errorf("createDataset(%q): %v", datasetID, err)
+	}
+	defer client.Dataset(datasetID).DeleteWithContents(ctx)
+
+	partitionedEmpty := uniqueBQName("golang_example_partitioned")
+	if err := createTablePartitioned(client, datasetID, partitionedEmpty); err != nil {
+		t.Errorf("createTablePartitioned(dataset:%q table:%q): %v", datasetID, partitionedEmpty, err)
+	}
+
+	partitionedLoad := uniqueBQName("golang_example_partitioned_load")
+	if err := importPartitionedSampleTable(client, datasetID, partitionedLoad); err != nil {
+		t.Errorf("importPartitionedStatesByDate(dataset:%q table:%q): %v", datasetID, partitionedLoad, err)
+	}
+
+	if err := queryPartitionedTable(client, datasetID, partitionedLoad); err != nil {
+		t.Errorf("queryPartitionedTable(dataset:%q table:%q): %v", datasetID, partitionedLoad, err)
+	}
+
+	clusteredEmpty := uniqueBQName("golang_example_clustered")
+	if err := createTableClustered(client, datasetID, clusteredEmpty); err != nil {
+		t.Errorf("createTableClustered(dataset:%q table:%q): %v", datasetID, clusteredEmpty, err)
+	}
+
+	clusteredLoad := uniqueBQName("golang_example_clustered_transactions")
+	if err := importClusteredSampleTable(client, datasetID, clusteredLoad); err != nil {
+		t.Errorf("importClusteredSampleTable(dataset:%q table:%q): %v", datasetID, clusteredLoad, err)
+	}
+
+	if err := queryClusteredTable(client, datasetID, clusteredLoad); err != nil {
+		t.Errorf("queryClusteredTable(dataset:%q table:%q): %v", datasetID, clusteredLoad, err)
 	}
 }

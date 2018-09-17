@@ -25,6 +25,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"io"
@@ -33,8 +34,6 @@ import (
 	"path/filepath"
 
 	"cloud.google.com/go/storage"
-
-	"golang.org/x/net/context"
 )
 
 func main() {

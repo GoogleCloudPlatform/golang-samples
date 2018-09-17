@@ -5,6 +5,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -13,10 +14,9 @@ import (
 	videopb "google.golang.org/genproto/googleapis/cloud/videointelligence/v1"
 
 	"github.com/golang/protobuf/ptypes"
-	"golang.org/x/net/context"
 )
 
-// [START video_analyze_labels_local]
+// [START video_analyze_labels]
 
 func label(w io.Writer, file string) error {
 	ctx := context.Background()
@@ -71,7 +71,7 @@ func label(w io.Writer, file string) error {
 	return nil
 }
 
-// [END video_analyze_labels_local]
+// [END video_analyze_labels]
 
 func shotChange(w io.Writer, file string) error {
 	ctx := context.Background()

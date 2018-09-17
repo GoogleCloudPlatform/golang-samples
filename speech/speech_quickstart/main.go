@@ -3,17 +3,16 @@
 // license that can be found in the LICENSE file.
 
 // [START speech_quickstart]
+
 // Sample speech-quickstart uses the Google Cloud Speech API to transcribe
 // audio.
 package main
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
-
-	// Imports the Google Cloud Speech API client package.
-	"golang.org/x/net/context"
 
 	speech "cloud.google.com/go/speech/apiv1"
 	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"

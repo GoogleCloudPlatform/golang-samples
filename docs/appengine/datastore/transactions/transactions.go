@@ -3,13 +3,13 @@
 // license that can be found in the LICENSE file.
 
 // [START using_transactions]
+
 package counter
 
 import (
+	"context"
 	"fmt"
 	"net/http"
-
-	"golang.org/x/net/context"
 
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"

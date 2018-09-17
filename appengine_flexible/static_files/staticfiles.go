@@ -2,6 +2,8 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
+// [START gae_flex_golang_static_files]
+
 // Package static demonstrates a static file handler for App Engine flexible environment.
 package main
 
@@ -34,3 +36,5 @@ const homepage = `<!doctype html>
 func homepageHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, homepage)
 }
+
+// [END gae_flex_golang_static_files]

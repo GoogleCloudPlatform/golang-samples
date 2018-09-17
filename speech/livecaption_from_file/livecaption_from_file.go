@@ -8,6 +8,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"io"
@@ -16,7 +17,6 @@ import (
 	"path/filepath"
 
 	speech "cloud.google.com/go/speech/apiv1"
-	"golang.org/x/net/context"
 	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"
 )
 
@@ -34,7 +34,6 @@ func main() {
 
 	ctx := context.Background()
 
-	// [START speech_streaming_file_recognize]
 	client, err := speech.NewClient(ctx)
 	if err != nil {
 		log.Fatal(err)
@@ -106,5 +105,4 @@ func main() {
 			fmt.Printf("Result: %+v\n", result)
 		}
 	}
-	// [END speech_streaming_file_recognize]
 }

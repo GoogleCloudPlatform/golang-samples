@@ -3,16 +3,16 @@
 // license that can be found in the LICENSE file.
 
 // [START datastore_quickstart]
+
 // Sample datastore-quickstart fetches an entity from Google Cloud Datastore.
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
-	// Imports the Google Cloud Datastore client package.
 	"cloud.google.com/go/datastore"
-	"golang.org/x/net/context"
 )
 
 type Task struct {

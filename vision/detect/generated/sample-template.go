@@ -14,12 +14,11 @@ package main
 
 // [START imports]
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
 	"strings"
-
-	"golang.org/x/net/context"
 
 	vision "cloud.google.com/go/vision/apiv1"
 	visionpb "google.golang.org/genproto/googleapis/cloud/vision/v1"
@@ -33,6 +32,8 @@ func init() {
 	_ = vision.ImageAnnotatorClient{}
 	_ = os.Open
 }
+
+// [START vision_face_detection{REGION_TAG_PARAMETER}]
 
 // detectFaces gets faces from the Vision API for an image at the given file path.
 func detectFaces(w io.Writer, file string) error {
@@ -55,6 +56,10 @@ func detectFaces(w io.Writer, file string) error {
 	return nil
 }
 
+// [END vision_face_detection{REGION_TAG_PARAMETER}]
+
+// [START vision_label_detection{REGION_TAG_PARAMETER}]
+
 // detectLabels gets labels from the Vision API for an image at the given file path.
 func detectLabels(w io.Writer, file string) error {
 	var client *vision.ImageAnnotatorClient // Boilerplate is inserted by gen.go
@@ -74,6 +79,10 @@ func detectLabels(w io.Writer, file string) error {
 
 	return nil
 }
+
+// [END vision_label_detection{REGION_TAG_PARAMETER}]
+
+// [START vision_landmark_detection{REGION_TAG_PARAMETER}]
 
 // detectLandmarks gets landmarks from the Vision API for an image at the given file path.
 func detectLandmarks(w io.Writer, file string) error {
@@ -95,6 +104,10 @@ func detectLandmarks(w io.Writer, file string) error {
 	return nil
 }
 
+// [END vision_landmark_detection{REGION_TAG_PARAMETER}]
+
+// [START vision_text_detection{REGION_TAG_PARAMETER}]
+
 // detectText gets text from the Vision API for an image at the given file path.
 func detectText(w io.Writer, file string) error {
 	var client *vision.ImageAnnotatorClient // Boilerplate is inserted by gen.go
@@ -115,7 +128,9 @@ func detectText(w io.Writer, file string) error {
 	return nil
 }
 
-// [START vision_detect_document{REGION_TAG_PARAMETER}]
+// [END vision_text_detection{REGION_TAG_PARAMETER}]
+
+// [START vision_fulltext_detection{REGION_TAG_PARAMETER}]
 
 // detectDocumentText gets the full document text from the Vision API for an image at the given file path.
 func detectDocumentText(w io.Writer, file string) error {
@@ -157,7 +172,9 @@ func detectDocumentText(w io.Writer, file string) error {
 	return nil
 }
 
-// [END vision_detect_document{REGION_TAG_PARAMETER}]
+// [END vision_fulltext_detection{REGION_TAG_PARAMETER}]
+
+// [START vision_image_property_detection{REGION_TAG_PARAMETER}]
 
 // detectProperties gets image properties from the Vision API for an image at the given file path.
 func detectProperties(w io.Writer, file string) error {
@@ -179,6 +196,10 @@ func detectProperties(w io.Writer, file string) error {
 	return nil
 }
 
+// [END vision_image_property_detection{REGION_TAG_PARAMETER}]
+
+// [START vision_crop_hint_detection{REGION_TAG_PARAMETER}]
+
 // detectCropHints gets suggested croppings the Vision API for an image at the given file path.
 func detectCropHints(w io.Writer, file string) error {
 	var client *vision.ImageAnnotatorClient // Boilerplate is inserted by gen.go
@@ -197,7 +218,9 @@ func detectCropHints(w io.Writer, file string) error {
 	return nil
 }
 
-// [START vision_detect_safe_search{REGION_TAG_PARAMETER}]
+// [END vision_crop_hint_detection{REGION_TAG_PARAMETER}]
+
+// [START vision_safe_search_detection{REGION_TAG_PARAMETER}]
 
 // detectSafeSearch gets image properties from the Vision API for an image at the given file path.
 func detectSafeSearch(w io.Writer, file string) error {
@@ -217,9 +240,9 @@ func detectSafeSearch(w io.Writer, file string) error {
 	return nil
 }
 
-// [END vision_detect_safe_search{REGION_TAG_PARAMETER}]
+// [END vision_safe_search_detection{REGION_TAG_PARAMETER}]
 
-// [START vision_detect_web{REGION_TAG_PARAMETER}]
+// [START vision_web_detection{REGION_TAG_PARAMETER}]
 
 // detectWeb gets image properties from the Vision API for an image at the given file path.
 func detectWeb(w io.Writer, file string) error {
@@ -259,9 +282,9 @@ func detectWeb(w io.Writer, file string) error {
 	return nil
 }
 
-// [END vision_detect_web{REGION_TAG_PARAMETER}]
+// [END vision_web_detection{REGION_TAG_PARAMETER}]
 
-// [START vision_web_entities_include_geo_results{REGION_TAG_PARAMETER}]
+// [START vision_web_detection_include_geo{REGION_TAG_PARAMETER}]
 
 // detectWebGeo detects geographic metadata from the Vision API for an image at the given file path.
 func detectWebGeo(w io.Writer, file string) error {
@@ -287,7 +310,9 @@ func detectWebGeo(w io.Writer, file string) error {
 	return nil
 }
 
-// [END vision_web_entities_include_geo_results{REGION_TAG_PARAMETER}]
+// [END vision_web_detection_include_geo{REGION_TAG_PARAMETER}]
+
+// [START vision_logo_detection{REGION_TAG_PARAMETER}]
 
 // detectLogos gets logos from the Vision API for an image at the given file path.
 func detectLogos(w io.Writer, file string) error {
@@ -309,10 +334,12 @@ func detectLogos(w io.Writer, file string) error {
 	return nil
 }
 
-// [START vision_detect_async_document{REGION_TAG_PARAMETER}]
+// [END vision_logo_detection{REGION_TAG_PARAMETER}]
 
-// detectAsyncDocument does Optical Character Recognition (OCR) on a PDF file
-// stored in GCS.
+// [START vision_text_detection_pdf{REGION_TAG_PARAMETER}]
+
+// detectAsyncDocument performs Optical Character Recognition (OCR) on a
+// PDF file stored in GCS.
 func detectAsyncDocument(w io.Writer, gcsSourceURI, gcsDestinationURI string) error {
 	ctx := context.Background()
 
@@ -360,4 +387,4 @@ func detectAsyncDocument(w io.Writer, gcsSourceURI, gcsDestinationURI string) er
 	return nil
 }
 
-// [END vision_detect_async_document{REGION_TAG_PARAMETER}]
+// [END vision_text_detection_pdf{REGION_TAG_PARAMETER}]

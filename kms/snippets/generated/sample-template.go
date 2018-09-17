@@ -13,10 +13,10 @@
 package kms_snippets
 
 import (
+	"context"
 	"fmt"
 	"log"
 
-	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
 
 	cloudkms "google.golang.org/api/cloudkms/v1"
@@ -147,9 +147,9 @@ func getRingPolicy(project, keyRing string) error {
 	return nil
 }
 
-func addMemberRingPolicy(project, keyRing, role, member string) error {
+func addMemberRingPolicy(project, location, keyRing, role, member string) error {
 	var client *cloudkms.Service // Boilerplate is inserted by gen.go
-	location := "global"
+
 	parent := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s",
 		project, location, keyRing)
 

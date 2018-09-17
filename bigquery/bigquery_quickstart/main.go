@@ -3,16 +3,16 @@
 // license that can be found in the LICENSE file.
 
 // [START bigquery_quickstart]
+
 // Sample bigquery-quickstart creates a Google BigQuery dataset.
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
-	// Imports the Google Cloud BigQuery client package.
 	"cloud.google.com/go/bigquery"
-	"golang.org/x/net/context"
 )
 
 func main() {

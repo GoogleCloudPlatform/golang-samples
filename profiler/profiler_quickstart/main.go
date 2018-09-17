@@ -34,6 +34,7 @@ func main() {
 	err := profiler.Start(profiler.Config{
 		Service:              "hello-profiler",
 		NoHeapProfiling:      true,
+		NoAllocProfiling:     true,
 		NoGoroutineProfiling: true,
 		DebugLogging:         true,
 		// ProjectID must be set if not running on GCP.

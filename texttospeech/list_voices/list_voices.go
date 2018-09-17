@@ -2,22 +2,21 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// The `list_voices` command lists the available Text-to-Speech voices.
+// The list_voices command lists the available Text-to-Speech voices.
 package main
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"log"
 	"os"
 
-	"golang.org/x/net/context"
-
 	texttospeech "cloud.google.com/go/texttospeech/apiv1"
 	texttospeechpb "google.golang.org/genproto/googleapis/cloud/texttospeech/v1"
 )
 
-// [START ListVoices]
+// [START tts_list_voices]
 
 // ListVoices lists the available text to speech voices.
 func ListVoices(w io.Writer) error {
@@ -54,7 +53,7 @@ func ListVoices(w io.Writer) error {
 	return nil
 }
 
-// [END ListVoices]
+// [END tts_list_voices]
 
 func main() {
 	err := ListVoices(os.Stdout)

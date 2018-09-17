@@ -5,17 +5,14 @@
 package translate_snippets
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"log"
 
-	"golang.org/x/net/context"
-
-	// [START imports]
 	"cloud.google.com/go/translate"
 	"golang.org/x/text/language"
 	"google.golang.org/api/option"
-	// [END imports]
 )
 
 func createClientWithKey() {

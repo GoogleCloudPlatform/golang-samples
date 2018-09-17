@@ -3,12 +3,12 @@
 // license that can be found in the LICENSE file.
 
 // [START example_handler]
+
 package demo
 
 import (
+	"context"
 	"strings"
-
-	"golang.org/x/net/context"
 
 	"google.golang.org/appengine/log"
 	"google.golang.org/appengine/xmpp"

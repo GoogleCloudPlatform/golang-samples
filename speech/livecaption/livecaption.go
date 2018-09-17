@@ -11,20 +11,20 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"log"
 	"os"
 
 	speech "cloud.google.com/go/speech/apiv1"
-	"golang.org/x/net/context"
 	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"
 )
 
 func main() {
 	ctx := context.Background()
 
-	// [START speech_streaming_mic_recognize]
+	// [START speech_transcribe_streaming_mic]
 	client, err := speech.NewClient(ctx)
 	if err != nil {
 		log.Fatal(err)
@@ -95,5 +95,5 @@ func main() {
 			fmt.Printf("Result: %+v\n", result)
 		}
 	}
-	// [END speech_streaming_mic_recognize]
+	// [END speech_transcribe_streaming_mic]
 }

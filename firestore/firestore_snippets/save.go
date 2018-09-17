@@ -5,12 +5,11 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"time"
 
 	"google.golang.org/api/iterator"
-
-	"golang.org/x/net/context"
 
 	"cloud.google.com/go/firestore"
 )
@@ -176,7 +175,7 @@ func updateDocNested(ctx context.Context, client *firestore.Client) error {
 		"favorites": map[string]interface{}{
 			"color": "Red",
 		},
-	}, firestore.MergeAll) // TODO(cbro): this should fail
+	}, firestore.MergeAll)
 	if err != nil {
 		return err
 	}

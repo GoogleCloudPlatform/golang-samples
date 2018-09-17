@@ -10,6 +10,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"flag"
 	"fmt"
@@ -17,7 +18,6 @@ import (
 	"time"
 
 	ds "cloud.google.com/go/datastore"
-	"golang.org/x/net/context"
 )
 
 var (

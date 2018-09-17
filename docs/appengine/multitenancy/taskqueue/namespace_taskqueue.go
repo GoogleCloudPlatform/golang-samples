@@ -6,10 +6,9 @@ package sample
 
 // [START using_namespaces_with_the_Task_Queue]
 import (
+	"context"
 	"io"
 	"net/http"
-
-	"golang.org/x/net/context"
 
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"

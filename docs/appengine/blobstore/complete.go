@@ -2,15 +2,15 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// [START complete_sample_application]
+// [START gae_blobstore_sample]
+
 package blobstore_example
 
 import (
+	"context"
 	"html/template"
 	"io"
 	"net/http"
-
-	"golang.org/x/net/context"
 
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/blobstore"
@@ -74,4 +74,4 @@ func init() {
 	http.HandleFunc("/upload", handleUpload)
 }
 
-// [END complete_sample_application]
+// [END gae_blobstore_sample]

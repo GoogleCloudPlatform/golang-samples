@@ -5,9 +5,8 @@
 package main
 
 import (
+	"context"
 	"log"
-
-	"golang.org/x/net/context"
 
 	language "cloud.google.com/go/language/apiv1beta2"
 	languagepb "google.golang.org/genproto/googleapis/cloud/language/v1beta2"
@@ -22,6 +21,8 @@ func betaClient() *language.Client {
 	return client
 }
 
+// [START language_entity_sentiment_text]
+
 func analyzeEntitySentiment(ctx context.Context, client *language.Client, text string) (*languagepb.AnalyzeEntitySentimentResponse, error) {
 	return client.AnalyzeEntitySentiment(ctx, &languagepb.AnalyzeEntitySentimentRequest{
 		Document: &languagepb.Document{
@@ -32,3 +33,5 @@ func analyzeEntitySentiment(ctx context.Context, client *language.Client, text s
 		},
 	})
 }
+
+// [END language_entity_sentiment_text]

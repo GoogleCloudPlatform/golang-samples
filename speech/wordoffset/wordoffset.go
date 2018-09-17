@@ -7,14 +7,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"strings"
-
-	"golang.org/x/net/context"
 
 	speech "cloud.google.com/go/speech/apiv1"
 	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"
@@ -53,6 +52,8 @@ func main() {
 		log.Fatal(err)
 	}
 }
+
+// [START speech_transcribe_async_word_time_offsets_gcs]
 
 func asyncWords(client *speech.Client, out io.Writer, gcsURI string) error {
 	ctx := context.Background()
@@ -96,6 +97,8 @@ func asyncWords(client *speech.Client, out io.Writer, gcsURI string) error {
 	}
 	return nil
 }
+
+// [END speech_transcribe_async_word_time_offsets_gcs]
 
 func syncWords(client *speech.Client, out io.Writer, file string) error {
 	ctx := context.Background()

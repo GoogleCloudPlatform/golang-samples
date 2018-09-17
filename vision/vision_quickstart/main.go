@@ -3,17 +3,17 @@
 // license that can be found in the LICENSE file.
 
 // [START vision_quickstart]
+
 // Sample vision-quickstart uses the Google Cloud Vision API to label an image.
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 
-	// Imports the Google Cloud Vision API client package.
 	vision "cloud.google.com/go/vision/apiv1"
-	"golang.org/x/net/context"
 )
 
 func main() {

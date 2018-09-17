@@ -3,16 +3,16 @@
 // license that can be found in the LICENSE file.
 
 // [START pubsub_quickstart_create_topic]
+
 // Sample pubsub-quickstart creates a Google Cloud Pub/Sub topic.
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
-	// Imports the Google Cloud Pub/Sub client package.
 	"cloud.google.com/go/pubsub"
-	"golang.org/x/net/context"
 )
 
 func main() {

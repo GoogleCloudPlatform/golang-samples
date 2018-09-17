@@ -2,10 +2,13 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
+// [START gae_flex_storage_app]
+
 // Sample storage demonstrates use of the cloud.google.com/go/storage package from App Engine flexible environment.
 package main
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"log"
@@ -14,10 +17,7 @@ import (
 	"os"
 
 	"cloud.google.com/go/storage"
-
 	"google.golang.org/appengine"
-
-	"golang.org/x/net/context"
 )
 
 var (
@@ -93,3 +93,5 @@ const formHTML = `<!DOCTYPE html>
     </form>
   </body>
 </html>`
+
+// [END gae_flex_storage_app]

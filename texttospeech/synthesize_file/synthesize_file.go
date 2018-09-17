@@ -2,10 +2,11 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// The `synthesize_file` command converts a plain text or SSML file to an audio file.
+// The synthesize_file command converts a plain text or SSML file to an audio file.
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"io"
@@ -13,13 +14,11 @@ import (
 	"log"
 	"os"
 
-	"golang.org/x/net/context"
-
 	texttospeech "cloud.google.com/go/texttospeech/apiv1"
 	texttospeechpb "google.golang.org/genproto/googleapis/cloud/texttospeech/v1"
 )
 
-// [START SynthesizeTextFile]
+// [START tts_synthesize_text_file]
 
 // SynthesizeTextFile synthesizes the text in textFile and saves the output to
 // outputFile.
@@ -64,9 +63,9 @@ func SynthesizeTextFile(w io.Writer, textFile, outputFile string) error {
 	return nil
 }
 
-// [END SynthesizeTextFile]
+// [END tts_synthesize_text_file]
 
-// [START SynthesizeSSMLFile]
+// [START tts_synthesize_ssml_file]
 
 // SynthesizeSSMLFile synthesizes the SSML contents in ssmlFile and saves the
 // output to outputFile.
@@ -115,7 +114,7 @@ func SynthesizeSSMLFile(w io.Writer, ssmlFile, outputFile string) error {
 	return nil
 }
 
-// [END SynthesizeSSMLFile]
+// [END tts_synthesize_ssml_file]
 
 func main() {
 	textFile := flag.String("text", "",

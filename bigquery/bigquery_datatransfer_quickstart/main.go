@@ -8,10 +8,10 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
-	"golang.org/x/net/context"
 	"google.golang.org/api/iterator"
 
 	// Imports the BigQuery Data Transfer client package.

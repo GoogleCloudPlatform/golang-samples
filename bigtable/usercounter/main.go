@@ -12,13 +12,13 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/binary"
 	"html/template"
 	"log"
 	"net/http"
 
 	"cloud.google.com/go/bigtable"
-	"golang.org/x/net/context"
 	"google.golang.org/appengine"
 	aelog "google.golang.org/appengine/log"
 	"google.golang.org/appengine/user"

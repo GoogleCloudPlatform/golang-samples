@@ -3,16 +3,16 @@
 // license that can be found in the LICENSE file.
 
 // [START logging_quickstart]
+
 // Sample logging-quickstart writes a log entry to Stackdriver Logging.
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
-	// Imports the Stackdriver Logging client package.
 	"cloud.google.com/go/logging"
-	"golang.org/x/net/context"
 )
 
 func main() {

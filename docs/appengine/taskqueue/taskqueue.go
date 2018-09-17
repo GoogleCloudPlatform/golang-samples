@@ -6,9 +6,8 @@ package sample
 
 // [START tasks_within_transactions]
 import (
+	"context"
 	"net/url"
-
-	"golang.org/x/net/context"
 
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/taskqueue"

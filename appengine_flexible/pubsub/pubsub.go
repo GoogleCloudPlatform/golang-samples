@@ -6,6 +6,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -15,10 +16,7 @@ import (
 	"sync"
 
 	"cloud.google.com/go/pubsub"
-
 	"google.golang.org/appengine"
-
-	"golang.org/x/net/context"
 )
 
 var (
@@ -125,12 +123,10 @@ var tmpl = template.Must(template.New("").Parse(`<!DOCTYPE html>
       {{ end }}
       </ul>
     </div>
-    <!-- [START form] -->
     <form method="post" action="/pubsub/publish">
       <textarea name="payload" placeholder="Enter message here"></textarea>
       <input type="submit">
     </form>
-    <!-- [END form] -->
     <p>Note: if the application is running across multiple instances, each
       instance will have its own list of messages.</p>
   </body>

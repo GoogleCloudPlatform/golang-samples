@@ -3,16 +3,16 @@
 // license that can be found in the LICENSE file.
 
 // [START storage_quickstart]
+
 // Sample storage-quickstart creates a Google Cloud Storage bucket.
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
-	// Imports the Google Cloud Storage client package.
 	"cloud.google.com/go/storage"
-	"golang.org/x/net/context"
 )
 
 func main() {

@@ -16,6 +16,7 @@ import (
 	"google.golang.org/appengine/log"
 
 	// [START new_imports]
+	"context"
 	"io"
 	"path"
 	"strings"
@@ -23,7 +24,6 @@ import (
 	"cloud.google.com/go/storage"
 	vision "cloud.google.com/go/vision/apiv1"
 	uuid "github.com/satori/go.uuid"
-	"golang.org/x/net/context"
 	"google.golang.org/appengine/delay"
 	// [END new_imports]
 )
@@ -217,6 +217,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	app, err := firebase.NewApp(ctx, firebaseConfig)
 	if err != nil {
 		params.Notice = "Couldn't authenticate. Try logging in again?"
+		log.Errorf(ctx, "firebase.NewApp: %v", err)
 		params.Message = message // Preserve their message so they can try again.
 		indexTemplate.Execute(w, params)
 		return
@@ -225,6 +226,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	auth, err := app.Auth(ctx)
 	if err != nil {
 		params.Notice = "Couldn't authenticate. Try logging in again?"
+		log.Errorf(ctx, "app.Auth: %v", err)
 		params.Message = message // Preserve their message so they can try again.
 		indexTemplate.Execute(w, params)
 		return
@@ -233,6 +235,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	tok, err := auth.VerifyIDTokenAndCheckRevoked(ctx, r.FormValue("token"))
 	if err != nil {
 		params.Notice = "Couldn't authenticate. Try logging in again?"
+		log.Errorf(ctx, "auth.VerifyIDAndCheckRevoked: %v", err)
 		params.Message = message // Preserve their message so they can try again.
 		indexTemplate.Execute(w, params)
 		return
@@ -241,6 +244,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	user, err := auth.GetUser(ctx, tok.UID)
 	if err != nil {
 		params.Notice = "Couldn't authenticate. Try logging in again?"
+		log.Errorf(ctx, "auth.GetUser: %v", err)
 		params.Message = message // Preserve their message so they can try again.
 		indexTemplate.Execute(w, params)
 		return

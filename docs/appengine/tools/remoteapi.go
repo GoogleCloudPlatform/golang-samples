@@ -5,10 +5,10 @@
 package main
 
 import (
+	"context"
 	"log"
 	"time"
 
-	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
 
 	"google.golang.org/appengine/datastore"

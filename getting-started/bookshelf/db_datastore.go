@@ -5,11 +5,10 @@
 package bookshelf
 
 import (
+	"context"
 	"fmt"
 
 	"cloud.google.com/go/datastore"
-
-	"golang.org/x/net/context"
 )
 
 // datastoreDB persists books to Cloud Datastore.

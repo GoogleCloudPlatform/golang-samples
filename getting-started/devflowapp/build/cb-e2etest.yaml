@@ -1,0 +1,7 @@
+steps:
+- name: gcr.io/cloud-builders/curl
+  args: ['http://$PROJECT_ID.appspot.com', '--output', 'output.txt']
+- name: gcr.io/cloud-builders/curl
+  args: ['http://$PROJECT_ID.appspot.com/send?user=Friend1&friend=Friend[0-9]&text=We+miss+you!', '--output', 'send.txt']
+- name: gcr.io/cloud-builders/curl
+  args: ['http://$PROJECT_ID.appspot.com/messages?user=Friend[0-9]', '--output', 'send.txt']
