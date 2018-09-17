@@ -4,6 +4,14 @@ This directory contains [Cloud Speech API](https://cloud.google.com/speech/) Go 
 
 ## Samples
 
+### Auto Punctuation
+
+The `auto_punctuation` command sends audio data to the Google Speech API and prints its transcript with auto punctuation enabled.
+
+For more details, see the [Getting Punctuation](https://cloud.google.com/speech-to-text/docs/automatic-punctuation) tutorial in the docs.
+
+[Go Code](auto_punctuation)
+
 ### Caption
 
 The `caption` command sends audio data to the Google Speech API and prints its transcript. It returns recognized text for short audio (less than ~1 minute). For long audio, see the Caption Async example.
