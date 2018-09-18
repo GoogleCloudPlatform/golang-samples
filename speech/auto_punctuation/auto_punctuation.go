@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"strings"
 
 	// [START imports]
@@ -25,13 +24,13 @@ func autoPunctuation(w io.Writer, path string) error {
 
 	client, err := speech.NewClient(ctx)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("NewClient: %v", err)
 	}
 
 	// path := "../testdata/commercial_mono.wav"
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("ReadFile: %v", err)
 	}
 
 	resp, err := client.Recognize(ctx, &speechpb.RecognizeRequest{
@@ -46,6 +45,9 @@ func autoPunctuation(w io.Writer, path string) error {
 			AudioSource: &speechpb.RecognitionAudio_Content{Content: data},
 		},
 	})
+	if err != nil {
+		return fmt.Errorf("Recognize: %v", err)
+	}
 
 	for i, result := range resp.Results {
 		fmt.Fprintf(w, "%s\n", strings.Repeat("-", 20))
@@ -55,5 +57,5 @@ func autoPunctuation(w io.Writer, path string) error {
 		}
 	}
 	// [END speech_transcribe_auto_punctuation]
-	return err
+	return nil
 }
