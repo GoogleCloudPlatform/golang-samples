@@ -6,8 +6,6 @@ This directory contains [Cloud Speech API](https://cloud.google.com/speech/) Go 
 
 ### Auto Punctuation
 
-The `auto_punctuation` command sends audio data to the Google Speech API and prints its transcript with auto punctuation enabled.
-
 For more details, see the [Getting Punctuation](https://cloud.google.com/speech-to-text/docs/automatic-punctuation) tutorial in the docs.
 
 [Go Code](auto_punctuation)

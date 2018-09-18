@@ -2,17 +2,13 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// Command auto_punctuation sends audio data to the Google Speech API
-// and prints its transcript with auto punctuation enabled.
 package main
 
 import (
-	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
-	"os"
 	"strings"
 
 	// [START imports]
@@ -22,25 +18,6 @@ import (
 	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"
 	// [END imports]
 )
-
-const usage = `Usage: auto_punctuation <audiofile>
-
-Audio file must be a 16-bit signed little-endian encoded
-with a sample rate of 8000.
-`
-
-func main() {
-	flag.Parse()
-	if len(os.Args) < 2 {
-		fmt.Fprintln(os.Stderr, usage)
-		os.Exit(2)
-	}
-
-	err := autoPunctuation(os.Stdout, os.Args[1])
-	if err != nil {
-		log.Fatal(err)
-	}
-}
 
 func autoPunctuation(w io.Writer, path string) error {
 	// [START speech_transcribe_auto_punctuation]
