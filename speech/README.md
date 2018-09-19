@@ -37,3 +37,9 @@ The `wordoffset` command sends audio data to the Google Speech API and prints th
 For more details, see the [Time Offsets (Timestamps)](https://cloud.google.com/speech/docs/async-time-offsets) tutorial in the docs.
 
 [Go Code](wordoffset)
+
+## Snippets
+
+Snippets contain small re-usable code snippets for common tasks.
+
+[Go Code](snippets)
