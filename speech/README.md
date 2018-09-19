@@ -4,12 +4,6 @@ This directory contains [Cloud Speech API](https://cloud.google.com/speech/) Go 
 
 ## Samples
 
-### Auto Punctuation
-
-For more details, see the [Getting Punctuation](https://cloud.google.com/speech-to-text/docs/automatic-punctuation) tutorial in the docs.
-
-[Go Code](auto_punctuation)
-
 ### Caption
 
 The `caption` command sends audio data to the Google Speech API and prints its transcript. It returns recognized text for short audio (less than ~1 minute). For long audio, see the Caption Async example.
@@ -43,3 +37,9 @@ The `wordoffset` command sends audio data to the Google Speech API and prints th
 For more details, see the [Time Offsets (Timestamps)](https://cloud.google.com/speech/docs/async-time-offsets) tutorial in the docs.
 
 [Go Code](wordoffset)
+
+## Snippets
+
+Snippets contain small re-usable code snippets for common tasks.
+
+[Go Code](snippets)
