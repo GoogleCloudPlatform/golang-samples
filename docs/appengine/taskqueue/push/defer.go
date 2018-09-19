@@ -11,7 +11,7 @@ import (
 )
 
 func example() {
-	var ctx context.Context
+	ctx := context.Background()
 
 	// [START deferred_tasks]
 	var expensiveFunc = delay.Func("some-arbitrary-key", func(ctx context.Context, a string, b int) {
