@@ -7,6 +7,7 @@ package sample
 // [START tasks_within_transactions]
 import (
 	"context"
+	"net/http"
 	"net/url"
 
 	"google.golang.org/appengine/datastore"
@@ -48,4 +49,13 @@ func example() {
 	err = taskqueue.Delete(ctx, t, "queue1")
 	// [END deleting_tasks]
 	_ = err
+
+	// [START taskqueue_host]
+	h := http.Header{}
+	h.Add("Host", "versionHostname")
+	task := taskqueue.Task{
+		Header: h,
+	}
+	// [END taskqueue_host]
+	_ = task
 }
