@@ -20,6 +20,7 @@ import (
 )
 
 // [START speech_transcribe_auto_punctuation]
+
 func autoPunctuation(w io.Writer, path string) error {
 	ctx := context.Background()
 
@@ -59,4 +60,5 @@ func autoPunctuation(w io.Writer, path string) error {
 	}
 	return nil
 }
+
 // [END speech_transcribe_auto_punctuation]
