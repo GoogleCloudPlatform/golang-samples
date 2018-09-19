@@ -22,6 +22,6 @@ func TestEnhancedModel(t *testing.T) {
 	}
 
 	if got := buf.String(); !strings.Contains(got, "Chrome") {
-		t.Fatalf(`enhancedModel(../testdata/commercial_mono.wav) = %q; want "Okay. Sure"`, got)
+		t.Fatalf(`enhancedModel(../testdata/commercial_mono.wav) = %q; want "Chrome"`, got)
 	}
 }
