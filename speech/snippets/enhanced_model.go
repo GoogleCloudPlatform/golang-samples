@@ -54,9 +54,9 @@ func enhancedModel(w io.Writer, path string) error {
 
 	for i, result := range resp.Results {
 		fmt.Fprintf(w, "%s\n", strings.Repeat("-", 20))
-		fmt.Fprintf(w, "Result %d\n", i + 1)
+		fmt.Fprintf(w, "Result %d\n", i+1)
 		for j, alternative := range result.Alternatives {
-			fmt.Fprintf(w, "Alternative %d: %s\n", j + 1, alternative.Transcript)
+			fmt.Fprintf(w, "Alternative %d: %s\n", j+1, alternative.Transcript)
 		}
 	}
 	// [END speech_transcribe_enhanced_model]
