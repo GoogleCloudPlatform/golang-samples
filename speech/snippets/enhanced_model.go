@@ -2,6 +2,7 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
+// Package snippets contains speech examples.
 package snippets
 
 import (
@@ -11,15 +12,15 @@ import (
 	"strings"
 
 	// [START imports]
-	"golang.org/x/net/context"
+	"context"
 
 	speech "cloud.google.com/go/speech/apiv1"
 	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"
 	// [END imports]
 )
 
+// [START speech_transcribe_enhanced_model]
 func enhancedModel(w io.Writer, path string) error {
-	// [START speech_transcribe_enhanced_model]
 	ctx := context.Background()
 
 	client, err := speech.NewClient(ctx)
@@ -27,7 +28,7 @@ func enhancedModel(w io.Writer, path string) error {
 		return fmt.Errorf("NewClient: %v", err)
 	}
 
-	// path := "../testdata/commercial_mono.wav"
+	// path = "../testdata/commercial_mono.wav"
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return fmt.Errorf("ReadFile: %v", err)
@@ -59,6 +60,6 @@ func enhancedModel(w io.Writer, path string) error {
 			fmt.Fprintf(w, "Alternative %d: %s\n", j+1, alternative.Transcript)
 		}
 	}
-	// [END speech_transcribe_enhanced_model]
-	return err
+	return nil
 }
+// [END speech_transcribe_enhanced_model]

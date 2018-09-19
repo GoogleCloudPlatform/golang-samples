@@ -2,6 +2,7 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
+// Package snippets contains speech examples.
 package snippets
 
 import (
@@ -11,15 +12,15 @@ import (
 	"strings"
 
 	// [START imports]
-	"golang.org/x/net/context"
+	"context"
 
 	speech "cloud.google.com/go/speech/apiv1"
 	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"
 	// [END imports]
 )
 
+// [START speech_transcribe_auto_punctuation]
 func autoPunctuation(w io.Writer, path string) error {
-	// [START speech_transcribe_auto_punctuation]
 	ctx := context.Background()
 
 	client, err := speech.NewClient(ctx)
@@ -27,7 +28,7 @@ func autoPunctuation(w io.Writer, path string) error {
 		return fmt.Errorf("NewClient: %v", err)
 	}
 
-	// path := "../testdata/commercial_mono.wav"
+	// path = "../testdata/commercial_mono.wav"
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return fmt.Errorf("ReadFile: %v", err)
@@ -38,7 +39,7 @@ func autoPunctuation(w io.Writer, path string) error {
 			Encoding:        speechpb.RecognitionConfig_LINEAR16,
 			SampleRateHertz: 8000,
 			LanguageCode:    "en-US",
-			// Enable automatic punctuation
+			// Enable automatic punctuation.
 			EnableAutomaticPunctuation: true,
 		},
 		Audio: &speechpb.RecognitionAudio{
@@ -56,6 +57,6 @@ func autoPunctuation(w io.Writer, path string) error {
 			fmt.Fprintf(w, "Alternative %d: %s\n", j+1, alternative.Transcript)
 		}
 	}
-	// [END speech_transcribe_auto_punctuation]
 	return nil
 }
+// [END speech_transcribe_auto_punctuation]
