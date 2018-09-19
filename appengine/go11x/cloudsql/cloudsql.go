@@ -2,6 +2,8 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
+// [START gae_cloudsql]
+
 // Sample cloudsql demonstrates connection to a Cloud SQL instance from App Engine standard.
 package main
 
@@ -95,3 +97,5 @@ func mustGetenv(k string) string {
 	}
 	return v
 }
+
+// [END gae_cloudsql]
