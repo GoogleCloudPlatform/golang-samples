@@ -15,7 +15,7 @@ import (
 	"net/http"
 	"os"
 
-	// MySQL library, comment out for PostgreSQL
+	// MySQL library, comment out to use PostgreSQL.
 	_ "github.com/go-sql-driver/mysql"
 	// PostgreSQL Library, uncomment to use.
 	// _ "github.com/lib/pq"
@@ -24,7 +24,7 @@ import (
 var db *sql.DB
 
 func main() {
-	db = GetDB()
+	db = DB()
 
 	http.HandleFunc("/", indexHandler)
 	port := os.Getenv("PORT")
@@ -37,15 +37,16 @@ func main() {
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
 }
 
-// GetDB gets a connection to the database.
-func GetDB() *sql.DB {
+// DB gets a connection to the database.
+// This can panic for malformed database connection strings, invalid credentials, or non-existance database instance.
+func DB() *sql.DB {
 	var (
 		connectionName = mustGetenv("CLOUDSQL_CONNECTION_NAME")
 		user           = mustGetenv("CLOUDSQL_USER")
 		password       = os.Getenv("CLOUDSQL_PASSWORD") // NOTE: password may be empty
 	)
 
-	// MySQL Connection, comment out for PostgreSQL
+	// MySQL Connection, comment out to use PostgreSQL.
 	// connection string format: USER:PASSWORD@unix(/cloudsql/)PROJECT_ID:REGION_ID:INSTANCE_ID/[DB_NAME]
 	dbURI := fmt.Sprintf("%s:%s@unix(/cloudsql/%s)/", user, password, connectionName)
 	conn, err := sql.Open("mysql", dbURI)
@@ -56,7 +57,7 @@ func GetDB() *sql.DB {
 	// conn, err := sql.Open("postgres", dbURI)
 
 	if err != nil {
-		panic(fmt.Sprintf("GetDB: %v", err))
+		panic(fmt.Sprintf("DB: %v", err))
 	}
 
 	return conn
@@ -73,7 +74,8 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 
 	rows, err := db.Query("SHOW DATABASES")
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Could not query db: %v", err), 500)
+		log.Printf("Could not query db: %v", err)
+		http.Error(w, "Internal Error", 500)
 		return
 	}
 	defer rows.Close()
@@ -82,7 +84,8 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var dbName string
 		if err := rows.Scan(&dbName); err != nil {
-			http.Error(w, fmt.Sprintf("Could not scan result: %v", err), 500)
+			log.Printf("Could not scan result: %v", err)
+			http.Error(w, "Internal Error", 500)
 			return
 		}
 		fmt.Fprintf(buf, "- %s\n", dbName)
