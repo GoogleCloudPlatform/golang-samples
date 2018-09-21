@@ -5,6 +5,8 @@
 // Samples for asymmetric keys feature of Cloud Key Management Service: https://cloud.google.com/kms/
 package samples
 
+// [START kms_get_asymmetric_public]
+
 import (
 	"context"
 	"crypto"
@@ -22,6 +24,8 @@ import (
 
 	"google.golang.org/api/cloudkms/v1"
 )
+
+// [END kms_get_asymmetric_public]
 
 // [START kms_get_asymmetric_public]
 
