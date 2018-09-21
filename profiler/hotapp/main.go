@@ -75,6 +75,18 @@ func allocImpl() {
 	}
 }
 
+// Simulates a function which allocates a lot of memory, but does not hold on
+// to that memory.
+func allocMany() {
+	// Allocate 1 MiB of 64 KiB chunks repeatedly.
+	for {
+		for i := 0; i < 16; i++ {
+			_ = make([]byte, 64*1024)
+		}
+		time.Sleep(time.Second)
+	}
+}
+
 // Simulates a CPU-intensive computation.
 func busyloop() {
 	for {
@@ -134,6 +146,9 @@ func main() {
 
 	// Simulate some memory allocation.
 	alloc()
+
+	// Simulate repeated memory allocations.
+	go allocMany()
 
 	// Simulate CPU load.
 	busyloop()
