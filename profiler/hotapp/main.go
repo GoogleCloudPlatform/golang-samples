@@ -64,7 +64,7 @@ func waitImpl() {
 // Simulates a memory-hungry function. It calls an "impl" function to produce
 // a bit deeper stacks in the profiler visualization, merely for illustration
 // purpose.
-func alloc() {
+func allocOnce() {
 	allocImpl()
 }
 
@@ -145,7 +145,7 @@ func main() {
 	}
 
 	// Simulate some memory allocation.
-	alloc()
+	allocOnce()
 
 	// Simulate repeated memory allocations.
 	go allocMany()
