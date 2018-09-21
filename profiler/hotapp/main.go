@@ -83,7 +83,7 @@ func allocMany() {
 		for i := 0; i < 16; i++ {
 			_ = make([]byte, 64*1024)
 		}
-		time.Sleep(time.Second)
+		time.Sleep(100 * time.Millisecond)
 	}
 }
 
