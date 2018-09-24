@@ -43,13 +43,13 @@ func main() {
 	// Create the topic if it doesn't exist.
 	exists, err := topic.Exists(ctx)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	if !exists {
-		log.Println("t doesn't exist")
+		log.Printf("Topic %v doesn't exist - creating it", topicName)
 		_, err = client.CreateTopic(ctx, topicName)
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 	}
 
