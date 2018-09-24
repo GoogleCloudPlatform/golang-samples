@@ -44,7 +44,7 @@ func DB() *sql.DB {
 		connectionName = mustGetenv("CLOUDSQL_CONNECTION_NAME")
 		user           = mustGetenv("CLOUDSQL_USER")
 		password       = os.Getenv("CLOUDSQL_PASSWORD") // NOTE: password may be empty
-		socket         = os.Getenv("CLOUDSQL_SOCKET_FILE")
+		socket         = os.Getenv("CLOUDSQL_SOCKET_PREFIX")
 	)
 
 	// /cloudsql is used on App Engine.
