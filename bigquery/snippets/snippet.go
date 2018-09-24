@@ -33,6 +33,7 @@ func noOpCommentFunc() {
 	// [START bigquery_create_table_clustered]
 	// [START bigquery_create_table_cmek]
 	// [START bigquery_create_table_partitioned]
+	// [START bigquery_create_view]
 	// [START bigquery_delete_dataset]
 	// [START bigquery_delete_label_dataset]
 	// [START bigquery_delete_label_table]
@@ -45,6 +46,8 @@ func noOpCommentFunc() {
 	// [START bigquery_get_job]
 	// [START bigquery_get_table]
 	// [START bigquery_get_table_labels]
+	// [START bigquery_get_view]
+	// [START bigquery_grant_view_access]
 	// [START bigquery_label_dataset]
 	// [START bigquery_label_table]
 	// [START bigquery_list_datasets]
@@ -54,9 +57,11 @@ func noOpCommentFunc() {
 	// [START bigquery_load_from_file]
 	// [START bigquery_load_table_clustered]
 	// [START bigquery_load_table_gcs_csv]
+	// [START bigquery_load_table_gcs_csv_truncate]
 	// [START bigquery_load_table_gcs_json]
 	// [START bigquery_load_table_gcs_json_autodetect]
 	// [START bigquery_load_table_gcs_json_cmek]
+	// [START bigquery_load_table_gcs_json_truncate]
 	// [START bigquery_load_table_gcs_orc]
 	// [START bigquery_load_table_gcs_orc_truncate]
 	// [START bigquery_load_table_gcs_parquet]
@@ -88,6 +93,7 @@ func noOpCommentFunc() {
 	// [START bigquery_update_table_cmek]
 	// [START bigquery_update_table_description]
 	// [START bigquery_update_table_expiration]
+	// [START bigquery_update_view_query]
 	// To run this sample, you will need to create (or reuse) a context and
 	// an instance of the bigquery client.  For example:
 	// import "cloud.google.com/go/bigquery"
@@ -106,6 +112,7 @@ func noOpCommentFunc() {
 	// [END bigquery_create_table_clustered]
 	// [END bigquery_create_table_cmek]
 	// [END bigquery_create_table_partitioned]
+	// [END bigquery_create_view]
 	// [END bigquery_delete_dataset]
 	// [END bigquery_delete_label_dataset]
 	// [END bigquery_delete_label_table]
@@ -118,6 +125,8 @@ func noOpCommentFunc() {
 	// [END bigquery_get_job]
 	// [END bigquery_get_table]
 	// [END bigquery_get_table_labels]
+	// [END bigquery_get_view]
+	// [END bigquery_grant_view_access]
 	// [END bigquery_label_dataset]
 	// [END bigquery_label_table]
 	// [END bigquery_list_datasets]
@@ -127,9 +136,11 @@ func noOpCommentFunc() {
 	// [END bigquery_load_from_file]
 	// [END bigquery_load_table_clustered]
 	// [END bigquery_load_table_gcs_csv]
+	// [END bigquery_load_table_gcs_csv_truncate]
 	// [END bigquery_load_table_gcs_json]
 	// [END bigquery_load_table_gcs_json_autodetect]
 	// [END bigquery_load_table_gcs_json_cmek]
+	// [END bigquery_load_table_gcs_json_truncate]
 	// [END bigquery_load_table_gcs_orc]
 	// [END bigquery_load_table_gcs_orc_truncate]
 	// [END bigquery_load_table_gcs_parquet]
@@ -161,6 +172,7 @@ func noOpCommentFunc() {
 	// [END bigquery_update_dataset_expiration]
 	// [END bigquery_update_table_description]
 	// [END bigquery_update_table_expiration]
+	// [END bigquery_update_view_query]
 }
 
 func cancelJob(client *bigquery.Client, jobID string) error {
@@ -184,6 +196,22 @@ func createDataset(client *bigquery.Client, datasetID string) error {
 		return err
 	}
 	// [END bigquery_create_dataset]
+	return nil
+}
+
+func createView(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_create_view]
+	meta := &bigquery.TableMetadata{
+		// This example shows how to create a view of the shakespeare sample dataset, which
+		// provides word frequency information.  This view restricts the results to only contain
+		// results for works that contain the "king" in the title, e.g. King Lear, King Henry V, etc.
+		ViewQuery: "SELECT word, word_count, corpus, corpus_date FROM `bigquery-public-data:samples.shakespear WHERE corpus LIKE '%king%'",
+	}
+	if err := client.Dataset(datasetID).Table(tableID).Create(ctx, meta); err != nil {
+		return err
+	}
+	// [END bigquery_create_view]
 	return nil
 }
 
@@ -815,6 +843,84 @@ func updateTableExpiration(client *bigquery.Client, datasetID, tableID string) e
 	// [END bigquery_update_table_expiration]
 	return nil
 
+}
+
+func getView(client *bigquery.Client, datasetID, viewID string) error {
+	ctx := context.Background()
+	// [START bigquery_get_view]
+	view := client.Dataset(datasetID).Table(viewID)
+	meta, err := view.Metadata(ctx)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("View %s, query: %s\n", view.FullyQualifiedName(), meta.ViewQuery)
+	// [END bigquery_get_view]
+	return nil
+}
+
+func updateView(client *bigquery.Client, datasetID, viewID string) error {
+	ctx := context.Background()
+	// [START bigquery_update_view_query]
+	view := client.Dataset(datasetID).Table(viewID)
+	meta, err := view.Metadata(ctx)
+	if err != nil {
+		return err
+	}
+
+	newMeta := bigquery.TableMetadataToUpdate{
+		// this example updates a view into the shakespeare dataset to exclude works named after kings.
+		ViewQuery: "SELECT word, word_count, corpus, corpus_date FROM `bigquery-public-data:samples.shakespear WHERE corpus NOT LIKE '%king%'",
+	}
+
+	if _, err := view.Update(ctx, newMeta, meta.ETag); err != nil {
+		return err
+	}
+	// [END bigquery_update_view_query]
+	return nil
+}
+
+func updateViewDelegated(client *bigquery.Client, srcDatasetID, viewDatasetID, viewID string) error {
+	ctx := context.Background()
+	// [START bigquery_grant_view_access]
+	srcDataset := client.Dataset(srcDatasetID)
+	viewDataset := client.Dataset(viewDatasetID)
+	view := viewDataset.Table(viewID)
+
+	// First, we'll add a group to the ACL for the dataset containing the view.  This will allow users within
+	// that group to query the view, but they must have direct access to any tables referenced by the view.
+	vMeta, err := viewDataset.Metadata(ctx)
+	if err != nil {
+		return err
+	}
+	vUpdateMeta := bigquery.DatasetMetadataToUpdate{
+		Access: append(vMeta.Access, &bigquery.AccessEntry{
+			Role:       bigquery.ReaderRole,
+			EntityType: bigquery.GroupEmailEntity,
+			Entity:     "example-analyst-group@google.com",
+		}),
+	}
+	if _, err := viewDataset.Update(ctx, vUpdateMeta, vMeta.ETag); err != nil {
+		return err
+	}
+
+	// Now, we'll authorize a specific view against a source dataset, delegating access enforcement.
+	// Once this has been completed, members of the group previously added to the view dataset's ACL
+	// no longer require access to the source dataset to successfully query the view.
+	srcMeta, err := srcDataset.Metadata(ctx)
+	if err != nil {
+		return err
+	}
+	srcUpdateMeta := bigquery.DatasetMetadataToUpdate{
+		Access: append(srcMeta.Access, &bigquery.AccessEntry{
+			EntityType: bigquery.ViewEntity,
+			View:       view,
+		}),
+	}
+	if _, err := srcDataset.Update(ctx, srcUpdateMeta, srcMeta.ETag); err != nil {
+		return err
+	}
+	// [END bigquery_grant_view_access]
+	return nil
 }
 
 func tableLabels(client *bigquery.Client, w io.Writer, datasetID, tableID string) error {
@@ -1468,6 +1574,57 @@ func importCSVExplicitSchema(client *bigquery.Client, datasetID, tableID string)
 	return nil
 }
 
+func importCSVAutodetectSchema(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_load_table_gcs_csv_autodetect]
+	gcsRef := bigquery.NewGCSReference("gs://cloud-samples-data/bigquery/us-states/us-states.csv")
+	gcsRef.SourceFormat = bigquery.CSV
+	gcsRef.AutoDetect = true
+	gcsRef.SkipLeadingRows = 1
+	loader := client.Dataset(datasetID).Table(tableID).LoaderFrom(gcsRef)
+
+	job, err := loader.Run(ctx)
+	if err != nil {
+		return err
+	}
+	status, err := job.Wait(ctx)
+	if err != nil {
+		return err
+	}
+
+	if status.Err() != nil {
+		return fmt.Errorf("Job completed with error: %v", status.Err())
+	}
+	// [END bigquery_load_table_gcs_csv_autodetect]
+	return nil
+}
+
+func importCSVTruncate(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_load_table_gcs_csv_truncate]
+	gcsRef := bigquery.NewGCSReference("gs://cloud-samples-data/bigquery/us-states/us-states.csv")
+	gcsRef.SourceFormat = bigquery.CSV
+	gcsRef.AutoDetect = true
+	gcsRef.SkipLeadingRows = 1
+	loader := client.Dataset(datasetID).Table(tableID).LoaderFrom(gcsRef)
+	loader.WriteDisposition = bigquery.WriteTruncate
+
+	job, err := loader.Run(ctx)
+	if err != nil {
+		return err
+	}
+	status, err := job.Wait(ctx)
+	if err != nil {
+		return err
+	}
+
+	if status.Err() != nil {
+		return fmt.Errorf("Job completed with error: %v", status.Err())
+	}
+	// [END bigquery_load_table_gcs_csv_truncate]
+	return nil
+}
+
 func importJSONExplicitSchema(client *bigquery.Client, datasetID, tableID string) error {
 	ctx := context.Background()
 	// [START bigquery_load_table_gcs_json]
@@ -1548,6 +1705,32 @@ func importJSONWithCMEK(client *bigquery.Client, datasetID, tableID string) erro
 	}
 
 	// [END bigquery_load_table_gcs_json_cmek]
+	return nil
+}
+
+func importJSONTruncate(client *bigquery.Client, datasetID, tableID string) error {
+	ctx := context.Background()
+	// [START bigquery_load_table_gcs_json_truncate]
+	gcsRef := bigquery.NewGCSReference("gs://cloud-samples-data/bigquery/us-states/us-states.json")
+	gcsRef.SourceFormat = bigquery.JSON
+	gcsRef.AutoDetect = true
+	loader := client.Dataset(datasetID).Table(tableID).LoaderFrom(gcsRef)
+	loader.WriteDisposition = bigquery.WriteTruncate
+
+	job, err := loader.Run(ctx)
+	if err != nil {
+		return err
+	}
+	status, err := job.Wait(ctx)
+	if err != nil {
+		return err
+	}
+
+	if status.Err() != nil {
+		return fmt.Errorf("Job completed with error: %v", status.Err())
+	}
+
+	// [END bigquery_load_table_gcs_json_truncate]
 	return nil
 }
 
