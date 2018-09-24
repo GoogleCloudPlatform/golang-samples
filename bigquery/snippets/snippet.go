@@ -206,7 +206,7 @@ func createView(client *bigquery.Client, datasetID, tableID string) error {
 		// This example shows how to create a view of the shakespeare sample dataset, which
 		// provides word frequency information.  This view restricts the results to only contain
 		// results for works that contain the "king" in the title, e.g. King Lear, King Henry V, etc.
-		ViewQuery: "SELECT word, word_count, corpus, corpus_date FROM `bigquery-public-data:samples.shakespear WHERE corpus LIKE '%king%'",
+		ViewQuery: "SELECT word, word_count, corpus, corpus_date FROM `bigquery-public-data.samples.shakespeare` WHERE corpus LIKE '%king%'",
 	}
 	if err := client.Dataset(datasetID).Table(tableID).Create(ctx, meta); err != nil {
 		return err
@@ -869,7 +869,7 @@ func updateView(client *bigquery.Client, datasetID, viewID string) error {
 
 	newMeta := bigquery.TableMetadataToUpdate{
 		// this example updates a view into the shakespeare dataset to exclude works named after kings.
-		ViewQuery: "SELECT word, word_count, corpus, corpus_date FROM `bigquery-public-data:samples.shakespear WHERE corpus NOT LIKE '%king%'",
+		ViewQuery: "SELECT word, word_count, corpus, corpus_date FROM `bigquery-public-data.samples.shakespeare` WHERE corpus NOT LIKE '%king%'",
 	}
 
 	if _, err := view.Update(ctx, newMeta, meta.ETag); err != nil {
@@ -1462,6 +1462,19 @@ func deleteAndUndeleteTable(client *bigquery.Client, datasetID, tableID string) 
 	// Record the current time.  We'll use this as the snapshot time
 	// for recovering the table.
 	snapTime := time.Now()
+	// [END bigquery_undelete_table]
+	// Because this test immediately creates the test resource and deletes it, it is sensitive
+	// to timing variance between the client and backend.  We correct for that by choosing the latter
+	// of the "current" local time, and the backend's report of the creation time of the table.
+	meta, err := ds.Table(tableID).Metadata(ctx)
+	if err != nil {
+		return err
+	}
+
+	if snapTime.Before(meta.CreationTime) {
+		snapTime = time.Time(meta.CreationTime)
+	}
+	// [START bigquery_undelete_table]
 
 	// "Accidentally" delete the table.
 	if err := client.Dataset(datasetID).Table(tableID).Delete(ctx); err != nil {
