@@ -1,9 +1,7 @@
 # Contributing
 
 1. Sign one of the contributor license agreements below.
-1. Setup a local Go development environment:
-
-    `install go`
+1. [Install Go](https://golang.org/doc/install)
 1. Get the package:
 
     `go get -d github.com/GoogleCloudPlatform/golang-samples`
