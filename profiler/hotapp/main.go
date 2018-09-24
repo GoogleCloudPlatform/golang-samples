@@ -75,8 +75,8 @@ func allocImpl() {
 	}
 }
 
-// Simulates a function which allocates a lot of memory, but does not hold on
-// to that memory.
+// allocMany simulates a function which allocates a lot of memory, but does not
+// hold on to that memory.
 func allocMany() {
 	// Allocate 1 MiB of 64 KiB chunks repeatedly.
 	for {
