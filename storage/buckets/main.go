@@ -9,6 +9,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -195,6 +196,133 @@ func removeUser(c *storage.Client, bucketName string) error {
 	// was modified since it was retrieved.
 	// [END remove_bucket_iam_member]
 	return nil
+}
+
+func setRetentionPolicy(c *storage.Client, bucketName string, retentionPeriod time.Duration) error {
+	ctx := context.Background()
+
+	// [START storage_set_retention_policy]
+	bucket := c.Bucket(bucketName)
+	if _, err := bucket.Update(ctx, storage.BucketAttrsToUpdate{
+		RetentionPolicy: &storage.RetentionPolicy{
+			RetentionPeriod: retentionPeriod,
+		},
+	}); err != nil {
+		return err
+	}
+	// [END storage_set_retention_policy]
+	return nil
+}
+
+func removeRetentionPolicy(c *storage.Client, bucketName string) error {
+	ctx := context.Background()
+
+	// [START storage_remove_retention_policy]
+	bucket := c.Bucket(bucketName)
+
+	attrs, err := c.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		return err
+	}
+	if attrs.RetentionPolicy.IsLocked {
+		return errors.New("Retention policy is locked")
+	}
+
+	if _, err := bucket.Update(ctx, storage.BucketAttrsToUpdate{
+		RetentionPolicy: &storage.RetentionPolicy{},
+	}); err != nil {
+		return err
+	}
+	// [END storage_remove_retention_policy]
+	return nil
+}
+
+func lockRetentionPolicy(c *storage.Client, bucketName string) error {
+	ctx := context.Background()
+
+	// [START storage_lock_retention_policy]
+	bucket := c.Bucket(bucketName)
+	attrs, err := c.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		return err
+	}
+
+	conditions := storage.BucketConditions{
+		MetagenerationMatch: attrs.MetaGeneration,
+	}
+	if err := bucket.If(conditions).LockRetentionPolicy(ctx); err != nil {
+		return err
+	}
+
+	lockedAttrs, err := c.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Retention policy for %v is now locked\n", bucketName)
+	fmt.Printf("Retention policy effective as of %v\n",
+		lockedAttrs.RetentionPolicy.EffectiveTime)
+	// [END storage_lock_retention_policy]
+	return nil
+}
+
+func getRetentionPolicy(c *storage.Client, bucketName string) (*storage.BucketAttrs, error) {
+	ctx := context.Background()
+
+	// [START storage_get_retention_policy]
+	attrs, err := c.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Print("Retention Policy\n")
+	fmt.Printf("period: %v\n", attrs.RetentionPolicy.RetentionPeriod)
+	fmt.Printf("effective time: %v\n", attrs.RetentionPolicy.EffectiveTime)
+	fmt.Printf("policy locked: %v\n", attrs.RetentionPolicy.IsLocked)
+	// [END storage_get_retention_policy]
+	return attrs, nil
+}
+
+func enableDefaultEventBasedHold(c *storage.Client, bucketName string) error {
+	ctx := context.Background()
+
+	// [START storage_enable_default_event_based_hold]
+	bucket := c.Bucket(bucketName)
+
+	if _, err := bucket.Update(ctx, storage.BucketAttrsToUpdate{
+		DefaultEventBasedHold: true,
+	}); err != nil {
+		return err
+	}
+	// [END storage_enable_default_event_based_hold]
+	return nil
+}
+
+func disableDefaultEventBasedHold(c *storage.Client, bucketName string) error {
+	ctx := context.Background()
+
+	// [START storage_disable_default_event_based_hold]
+	bucket := c.Bucket(bucketName)
+
+	if _, err := bucket.Update(ctx, storage.BucketAttrsToUpdate{
+		DefaultEventBasedHold: false,
+	}); err != nil {
+		return err
+	}
+	// [END storage_disable_default_event_based_hold]
+	return nil
+}
+
+func getDefaultEventBasedHold(c *storage.Client, bucketName string) (*storage.BucketAttrs, error) {
+	ctx := context.Background()
+
+	// [START storage_get_default_event_based_hold]
+	attrs, err := c.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Printf("Is default event-based hold enabled? %t\n",
+		attrs.DefaultEventBasedHold)
+	// [END storage_get_default_event_based_hold]
+	return attrs, nil
 }
 
 func enableRequesterPays(c *storage.Client, bucketName string) error {
