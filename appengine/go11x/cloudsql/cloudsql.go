@@ -44,11 +44,17 @@ func DB() *sql.DB {
 		connectionName = mustGetenv("CLOUDSQL_CONNECTION_NAME")
 		user           = mustGetenv("CLOUDSQL_USER")
 		password       = os.Getenv("CLOUDSQL_PASSWORD") // NOTE: password may be empty
+		socket         = os.Getenv("CLOUDSQL_SOCKET_PREFIX")
 	)
+
+	// /cloudsql is used on App Engine.
+	if socket == "" {
+		socket = "/cloudsql"
+	}
 
 	// MySQL Connection, comment out to use PostgreSQL.
 	// connection string format: USER:PASSWORD@unix(/cloudsql/)PROJECT_ID:REGION_ID:INSTANCE_ID/[DB_NAME]
-	dbURI := fmt.Sprintf("%s:%s@unix(/cloudsql/%s)/", user, password, connectionName)
+	dbURI := fmt.Sprintf("%s:%s@unix(%s/%s)/", user, password, socket, connectionName)
 	conn, err := sql.Open("mysql", dbURI)
 
 	// PostgreSQL Connection, uncomment to use.
