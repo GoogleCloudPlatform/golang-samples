@@ -563,7 +563,7 @@ func relaxTableAPI(client *bigquery.Client, datasetID, tableID string) error {
 	if _, err := tableRef.Update(ctx, newMeta, meta.ETag); err != nil {
 		return err
 	}
-	// [END  bigquery_relax_column]
+	// [END bigquery_relax_column]
 	return nil
 }
 
@@ -604,7 +604,7 @@ func relaxTableImport(client *bigquery.Client, datasetID, tableID, filename stri
 	if err := status.Err(); err != nil {
 		return err
 	}
-	// [END  bigquery_relax_column_load_append]
+	// [END bigquery_relax_column_load_append]
 	return nil
 }
 
