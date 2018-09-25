@@ -162,7 +162,7 @@ func TestRSASignVerify(t *testing.T) {
 		t.Fatalf("intial variable setup failed: %v", err)
 	}
 
-	sig, err := signAsymmetric(v.ctx, v.client, v.message, v.rsaSignPath)
+	sig, err := signAsymmetric(v.ctx, v.client, v.rsaSignPath, []byte(v.message))
 	if err != nil {
 		t.Fatalf("signAsymmetric(%s, %s): %v", v.message, v.rsaSignPath, err)
 	}
@@ -172,10 +172,11 @@ func TestRSASignVerify(t *testing.T) {
 	if sig[len(sig)-2:] != "==" {
 		t.Errorf("sig ending: %s; want: %s", sig[len(sig)-2:], "==")
 	}
-	if err = verifySignatureRSA(v.ctx, v.client, sig, v.message, v.rsaSignPath); err != nil {
+	if err = verifySignatureRSA(v.ctx, v.client, sig, v.rsaSignPath, []byte(v.message)); err != nil {
 		t.Fatalf("verifySignatureRSA(%s, %s, %s): %v", sig, v.message, v.rsaSignPath, err)
 	}
-	if err = verifySignatureRSA(v.ctx, v.client, sig, v.message+".", v.rsaSignPath); err == nil {
+	changed := v.message + "."
+	if err = verifySignatureRSA(v.ctx, v.client, sig, v.rsaSignPath, []byte(changed)); err == nil {
 		t.Errorf("verification for modified message should fail")
 	}
 }
@@ -187,7 +188,7 @@ func TestECSignVerify(t *testing.T) {
 		t.Fatalf("intial variable setup failed: %v", err)
 	}
 
-	sig, err := signAsymmetric(v.ctx, v.client, v.message, v.ecSignPath)
+	sig, err := signAsymmetric(v.ctx, v.client, v.ecSignPath, []byte(v.message))
 	if err != nil {
 		t.Fatalf("signAsymmetric(%s, %s): %v", v.message, v.ecSignPath, err)
 	}
@@ -195,10 +196,11 @@ func TestECSignVerify(t *testing.T) {
 		t.Errorf("Length = %d; want between 50-300", len(sig))
 	}
 
-	if err = verifySignatureEC(v.ctx, v.client, sig, v.message, v.ecSignPath); err != nil {
+	if err = verifySignatureEC(v.ctx, v.client, sig, v.ecSignPath, []byte(v.message)); err != nil {
 		t.Fatalf("verifySignatureEC(%s, %s, %s): %v", sig, v.message, v.ecSignPath, err)
 	}
-	if err = verifySignatureEC(v.ctx, v.client, sig, v.message+".", v.ecSignPath); err == nil {
+	changed := v.message + "."
+	if err = verifySignatureEC(v.ctx, v.client, sig, v.ecSignPath, []byte(changed)); err == nil {
 		t.Errorf("verification for modified message should fail")
 	}
 }

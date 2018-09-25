@@ -93,11 +93,11 @@ func encryptRSA(ctx context.Context, client *cloudkms.Service, message, keyPath 
 // [START kms_sign_asymmetric]
 
 // signAsymmetric will sign a plaintext message using a saved asymmetric private key.
-func signAsymmetric(ctx context.Context, client *cloudkms.Service, message, keyPath string) (string, error) {
+func signAsymmetric(ctx context.Context, client *cloudkms.Service, keyPath string, message []byte) (string, error) {
 	// Note: some key algorithms will require a different hash function.
 	// For example, EC_SIGN_P384_SHA384 requires SHA-384.
 	digest := sha256.New()
-	digest.Write([]byte(message))
+	digest.Write(message)
 	digestStr := base64.StdEncoding.EncodeToString(digest.Sum(nil))
 
 	asymmetricSignRequest := &cloudkms.AsymmetricSignRequest{
@@ -121,7 +121,7 @@ func signAsymmetric(ctx context.Context, client *cloudkms.Service, message, keyP
 // [START kms_verify_signature_rsa]
 
 // verifySignatureRSA will verify that an 'RSA_SIGN_PSS_2048_SHA256' signature is valid for a given plaintext message.
-func verifySignatureRSA(ctx context.Context, client *cloudkms.Service, signature, message, keyPath string) error {
+func verifySignatureRSA(ctx context.Context, client *cloudkms.Service, signature, keyPath string, message []byte) error {
 	abstractKey, err := getAsymmetricPublicKey(ctx, client, keyPath)
 	if err != nil {
 		return err
@@ -134,7 +134,7 @@ func verifySignatureRSA(ctx context.Context, client *cloudkms.Service, signature
 
 	}
 	digest := sha256.New()
-	digest.Write([]byte(message))
+	digest.Write(message)
 	hash := digest.Sum(nil)
 
 	pssOptions := rsa.PSSOptions{SaltLength: len(hash), Hash: crypto.SHA256}
@@ -150,7 +150,7 @@ func verifySignatureRSA(ctx context.Context, client *cloudkms.Service, signature
 // [START kms_verify_signature_ec]
 
 // verifySignatureEC will verify that an 'EC_SIGN_P256_SHA256' signature is valid for a given plaintext message.
-func verifySignatureEC(ctx context.Context, client *cloudkms.Service, signature, message, keyPath string) error {
+func verifySignatureEC(ctx context.Context, client *cloudkms.Service, signature, keyPath string, message []byte) error {
 	abstractKey, err := getAsymmetricPublicKey(ctx, client, keyPath)
 	if err != nil {
 		return err
@@ -168,7 +168,7 @@ func verifySignatureEC(ctx context.Context, client *cloudkms.Service, signature,
 	}
 
 	digest := sha256.New()
-	digest.Write([]byte(message))
+	digest.Write(message)
 	hash := digest.Sum(nil)
 
 	if !ecdsa.Verify(ecKey, hash, parsedSig.R, parsedSig.S) {
