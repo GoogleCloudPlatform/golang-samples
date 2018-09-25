@@ -64,7 +64,7 @@ func waitImpl() {
 // Simulates a memory-hungry function. It calls an "impl" function to produce
 // a bit deeper stacks in the profiler visualization, merely for illustration
 // purpose.
-func alloc() {
+func allocOnce() {
 	allocImpl()
 }
 
@@ -72,6 +72,18 @@ func allocImpl() {
 	// Allocate 64 MiB in 64 KiB chunks
 	for i := 0; i < 64*16; i++ {
 		mem = append(mem, make([]byte, 64*1024))
+	}
+}
+
+// allocMany simulates a function which allocates a lot of memory, but does not
+// hold on to that memory.
+func allocMany() {
+	// Allocate 1 MiB of 64 KiB chunks repeatedly.
+	for {
+		for i := 0; i < 16; i++ {
+			_ = make([]byte, 64*1024)
+		}
+		time.Sleep(100 * time.Millisecond)
 	}
 }
 
@@ -133,7 +145,10 @@ func main() {
 	}
 
 	// Simulate some memory allocation.
-	alloc()
+	allocOnce()
+
+	// Simulate repeated memory allocations.
+	go allocMany()
 
 	// Simulate CPU load.
 	busyloop()
