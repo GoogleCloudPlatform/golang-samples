@@ -868,7 +868,7 @@ func updateView(client *bigquery.Client, datasetID, viewID string) error {
 	}
 
 	newMeta := bigquery.TableMetadataToUpdate{
-		// this example updates a view into the shakespeare dataset to exclude works named after kings.
+		// This example updates a view into the shakespeare dataset to exclude works named after kings.
 		ViewQuery: "SELECT word, word_count, corpus, corpus_date FROM `bigquery-public-data.samples.shakespeare` WHERE corpus NOT LIKE '%king%'",
 	}
 
@@ -1581,7 +1581,7 @@ func importCSVExplicitSchema(client *bigquery.Client, datasetID, tableID string)
 	}
 
 	if status.Err() != nil {
-		return fmt.Errorf("Job completed with error: %v", status.Err())
+		return fmt.Errorf("job completed with error: %v", status.Err())
 	}
 	// [END bigquery_load_table_gcs_csv]
 	return nil
@@ -1606,7 +1606,7 @@ func importCSVAutodetectSchema(client *bigquery.Client, datasetID, tableID strin
 	}
 
 	if status.Err() != nil {
-		return fmt.Errorf("Job completed with error: %v", status.Err())
+		return fmt.Errorf("job completed with error: %v", status.Err())
 	}
 	// [END bigquery_load_table_gcs_csv_autodetect]
 	return nil
@@ -1632,7 +1632,7 @@ func importCSVTruncate(client *bigquery.Client, datasetID, tableID string) error
 	}
 
 	if status.Err() != nil {
-		return fmt.Errorf("Job completed with error: %v", status.Err())
+		return fmt.Errorf("job completed with error: %v", status.Err())
 	}
 	// [END bigquery_load_table_gcs_csv_truncate]
 	return nil
@@ -1660,7 +1660,7 @@ func importJSONExplicitSchema(client *bigquery.Client, datasetID, tableID string
 	}
 
 	if status.Err() != nil {
-		return fmt.Errorf("Job completed with error: %v", status.Err())
+		return fmt.Errorf("job completed with error: %v", status.Err())
 	}
 	// [END bigquery_load_table_gcs_json]
 	return nil
@@ -1685,7 +1685,7 @@ func importJSONAutodetectSchema(client *bigquery.Client, datasetID, tableID stri
 	}
 
 	if status.Err() != nil {
-		return fmt.Errorf("Job completed with error: %v", status.Err())
+		return fmt.Errorf("job completed with error: %v", status.Err())
 	}
 	// [END bigquery_load_table_gcs_json_autodetect]
 	return nil
@@ -1714,7 +1714,7 @@ func importJSONWithCMEK(client *bigquery.Client, datasetID, tableID string) erro
 	}
 
 	if status.Err() != nil {
-		return fmt.Errorf("Job completed with error: %v", status.Err())
+		return fmt.Errorf("job completed with error: %v", status.Err())
 	}
 
 	// [END bigquery_load_table_gcs_json_cmek]
@@ -1740,7 +1740,7 @@ func importJSONTruncate(client *bigquery.Client, datasetID, tableID string) erro
 	}
 
 	if status.Err() != nil {
-		return fmt.Errorf("Job completed with error: %v", status.Err())
+		return fmt.Errorf("job completed with error: %v", status.Err())
 	}
 
 	// [END bigquery_load_table_gcs_json_truncate]
@@ -1764,7 +1764,7 @@ func importORC(client *bigquery.Client, datasetID, tableID string) error {
 	}
 
 	if status.Err() != nil {
-		return fmt.Errorf("Job completed with error: %v", status.Err())
+		return fmt.Errorf("job completed with error: %v", status.Err())
 	}
 	// [END bigquery_load_table_gcs_orc]
 	return nil
@@ -1790,7 +1790,7 @@ func importORCTruncate(client *bigquery.Client, datasetID, tableID string) error
 	}
 
 	if status.Err() != nil {
-		return fmt.Errorf("Job completed with error: %v", status.Err())
+		return fmt.Errorf("job completed with error: %v", status.Err())
 	}
 	// [END bigquery_load_table_gcs_orc_truncate]
 	return nil
@@ -1814,7 +1814,7 @@ func importParquet(client *bigquery.Client, datasetID, tableID string) error {
 	}
 
 	if status.Err() != nil {
-		return fmt.Errorf("Job completed with error: %v", status.Err())
+		return fmt.Errorf("job completed with error: %v", status.Err())
 	}
 	// [END bigquery_load_table_gcs_parquet]
 	return nil
@@ -1839,7 +1839,7 @@ func importParquetTruncate(client *bigquery.Client, datasetID, tableID string) e
 	}
 
 	if status.Err() != nil {
-		return fmt.Errorf("Job completed with error: %v", status.Err())
+		return fmt.Errorf("job completed with error: %v", status.Err())
 	}
 	// [END bigquery_load_table_gcs_parquet_truncate]
 	return nil
@@ -1872,7 +1872,7 @@ func importPartitionedSampleTable(client *bigquery.Client, destDatasetID, destTa
 	}
 
 	if status.Err() != nil {
-		return fmt.Errorf("Job completed with error: %v", status.Err())
+		return fmt.Errorf("job completed with error: %v", status.Err())
 	}
 	// [END bigquery_load_table_partitioned]
 	return nil
@@ -1908,7 +1908,7 @@ func importClusteredSampleTable(client *bigquery.Client, destDatasetID, destTabl
 	}
 
 	if status.Err() != nil {
-		return fmt.Errorf("Job completed with error: %v", status.Err())
+		return fmt.Errorf("job completed with error: %v", status.Err())
 	}
 	// [END bigquery_load_table_clustered]
 	return nil
