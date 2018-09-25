@@ -50,21 +50,21 @@ func getAsymmetricPublicKey(ctx context.Context, client *cloudkms.Service, keyPa
 // [START kms_decrypt_rsa]
 
 // decryptRSA will attempt to decrypt a given ciphertext with an 'RSA_DECRYPT_OAEP_2048_SHA256' private key.stored on Cloud KMS
-func decryptRSA(ctx context.Context, client *cloudkms.Service, ciphertext, keyPath string) (string, error) {
+func decryptRSA(ctx context.Context, client *cloudkms.Service, keyPath string, ciphertext []byte) ([]byte, error) {
 	decryptRequest := &cloudkms.AsymmetricDecryptRequest{
-		Ciphertext: ciphertext,
+		Ciphertext: base64.StdEncoding.EncodeToString(ciphertext),
 	}
 	response, err := client.Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions.
 		AsymmetricDecrypt(keyPath, decryptRequest).Context(ctx).Do()
 	if err != nil {
-		return "", fmt.Errorf("decryption request failed: %+v", err)
+		return nil, fmt.Errorf("decryption request failed: %+v", err)
 	}
-	message, err := base64.StdEncoding.DecodeString(response.Plaintext)
+	plaintext, err := base64.StdEncoding.DecodeString(response.Plaintext)
 	if err != nil {
-		return "", fmt.Errorf("failed to decode decryted string: %+v", err)
+		return nil, fmt.Errorf("failed to decode decryted string: %+v", err)
 
 	}
-	return string(message), nil
+	return plaintext, nil
 }
 
 // [END kms_decrypt_rsa]
@@ -72,20 +72,20 @@ func decryptRSA(ctx context.Context, client *cloudkms.Service, ciphertext, keyPa
 // [START kms_encrypt_rsa]
 
 // encryptRSA will encrypt a message locally using an 'RSA_DECRYPT_OAEP_2048_SHA256' public key retrieved from Cloud KMS
-func encryptRSA(ctx context.Context, client *cloudkms.Service, message, keyPath string) (string, error) {
+func encryptRSA(ctx context.Context, client *cloudkms.Service, keyPath string, plaintext []byte) ([]byte, error) {
 	abstractKey, err := getAsymmetricPublicKey(ctx, client, keyPath)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	// Perform type assertion to get the RSA key.
 	rsaKey := abstractKey.(*rsa.PublicKey)
 
-	ciphertextBytes, err := rsa.EncryptOAEP(sha256.New(), rand.Reader, rsaKey, []byte(message), nil)
+	ciphertext, err := rsa.EncryptOAEP(sha256.New(), rand.Reader, rsaKey, plaintext, nil)
 	if err != nil {
-		return "", fmt.Errorf("encryption failed: %+v", err)
+		return nil, fmt.Errorf("encryption failed: %+v", err)
 	}
-	return base64.StdEncoding.EncodeToString(ciphertextBytes), nil
+	return ciphertext, nil
 }
 
 // [END kms_encrypt_rsa]

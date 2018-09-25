@@ -6,9 +6,11 @@
 package samples
 
 import (
+	"bytes"
 	"context"
 	"crypto/ecdsa"
 	"crypto/rsa"
+	"encoding/base64"
 	"os"
 	"testing"
 	"time"
@@ -136,7 +138,8 @@ func TestRSAEncryptDecrypt(t *testing.T) {
 		t.Fatalf("intial variable setup failed: %v", err)
 	}
 
-	ciphertext, err := encryptRSA(v.ctx, v.client, v.message, v.rsaDecryptPath)
+	cipherBytes, err := encryptRSA(v.ctx, v.client, v.rsaDecryptPath, []byte(v.message))
+	ciphertext := base64.StdEncoding.EncodeToString(cipherBytes)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -146,12 +149,17 @@ func TestRSAEncryptDecrypt(t *testing.T) {
 	if ciphertext[len(ciphertext)-2:] != "==" {
 		t.Errorf("ciphertet ending: %s; want: %s", ciphertext[len(ciphertext)-2:], "==")
 	}
-	plaintext, err := decryptRSA(v.ctx, v.client, ciphertext, v.rsaDecryptPath)
+
+	plainBytes, err := decryptRSA(v.ctx, v.client, v.rsaDecryptPath, cipherBytes)
+	if !bytes.Equal(plainBytes, []byte(v.message)) {
+		t.Fatalf("decrypted plaintext does not match input message: want %s, got %s", []byte(v.message), plainBytes)
+	}
+	plaintext := string(plainBytes)
 	if err != nil {
 		t.Fatalf("decryptRSA(%s, %s): %v", ciphertext, v.rsaDecryptPath, err)
 	}
-	if v.message != plaintext {
-		t.Errorf("failed to decypt expected plaintext: want %s, got %s", plaintext, v.message)
+	if plaintext != v.message {
+		t.Fatalf("failed to decypt expected plaintext: want %s, got %s", v.message, plaintext)
 	}
 }
 
