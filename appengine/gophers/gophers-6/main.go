@@ -162,6 +162,8 @@ func uploadFileFromForm(ctx context.Context, r *http.Request) (url string, err e
 	name := u.String() + path.Ext(fh.Filename)
 
 	w := storageBucket.Object(name).NewWriter(ctx)
+
+	// Warning: storage.AllUsers gives public read access to anyone.
 	w.ACL = []storage.ACLRule{{Entity: storage.AllUsers, Role: storage.RoleReader}}
 	w.ContentType = fh.Header.Get("Content-Type")
 
