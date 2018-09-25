@@ -71,7 +71,7 @@ func decryptRSA(ctx context.Context, client *cloudkms.Service, keyPath string, c
 
 // [START kms_encrypt_rsa]
 
-// encryptRSA will encrypt a message locally using an 'RSA_DECRYPT_OAEP_2048_SHA256' public key retrieved from Cloud KMS
+// encryptRSA will encrypt data locally using an 'RSA_DECRYPT_OAEP_2048_SHA256' public key retrieved from Cloud KMS
 func encryptRSA(ctx context.Context, client *cloudkms.Service, keyPath string, plaintext []byte) ([]byte, error) {
 	abstractKey, err := getAsymmetricPublicKey(ctx, client, keyPath)
 	if err != nil {
@@ -120,7 +120,7 @@ func signAsymmetric(ctx context.Context, client *cloudkms.Service, keyPath strin
 
 // [START kms_verify_signature_rsa]
 
-// verifySignatureRSA will verify that an 'RSA_SIGN_PSS_2048_SHA256' signature is valid for a given plaintext message.
+// verifySignatureRSA will verify that an 'RSA_SIGN_PSS_2048_SHA256' signature is valid for a given message.
 func verifySignatureRSA(ctx context.Context, client *cloudkms.Service, signature, keyPath string, message []byte) error {
 	abstractKey, err := getAsymmetricPublicKey(ctx, client, keyPath)
 	if err != nil {
@@ -149,7 +149,7 @@ func verifySignatureRSA(ctx context.Context, client *cloudkms.Service, signature
 
 // [START kms_verify_signature_ec]
 
-// verifySignatureEC will verify that an 'EC_SIGN_P256_SHA256' signature is valid for a given plaintext message.
+// verifySignatureEC will verify that an 'EC_SIGN_P256_SHA256' signature is valid for a given message.
 func verifySignatureEC(ctx context.Context, client *cloudkms.Service, signature, keyPath string, message []byte) error {
 	abstractKey, err := getAsymmetricPublicKey(ctx, client, keyPath)
 	if err != nil {
