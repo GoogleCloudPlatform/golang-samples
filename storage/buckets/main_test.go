@@ -158,12 +158,12 @@ func TestBucketLock(t *testing.T) {
 	}
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		if err := lockRetentionPolicy(storageClient, bucketName); err != nil {
-			t.Errorf("failed to lock retention policy (%q): %v", bucketName, err)
+			r.Errorf("failed to lock retention policy (%q): %v", bucketName, err)
 		}
 	})
 	deleteBucket(storageClient, bucketName)
 	if err := create(storageClient, tc.ProjectID, bucketName); err != nil {
-		t.Errorf("failed to create bucket (%q): %v", bucketName, err)
+		t.Fatalf("failed to create bucket (%q): %v", bucketName, err)
 	}
 }
 
