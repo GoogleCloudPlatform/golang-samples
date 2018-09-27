@@ -219,7 +219,7 @@ func TestObjectBucketLock(t *testing.T) {
 
 		objectName = "foo.txt"
 
-		retentionPeriod = time.Duration(5) * time.Second
+		retentionPeriod = 5 * time.Second
 	)
 
 	cleanBucket(t, ctx, client, tc.ProjectID, bucketName)

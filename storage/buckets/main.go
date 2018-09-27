@@ -203,11 +203,12 @@ func setRetentionPolicy(c *storage.Client, bucketName string, retentionPeriod ti
 
 	// [START storage_set_retention_policy]
 	bucket := c.Bucket(bucketName)
-	if _, err := bucket.Update(ctx, storage.BucketAttrsToUpdate{
+	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
 		RetentionPolicy: &storage.RetentionPolicy{
 			RetentionPeriod: retentionPeriod,
 		},
-	}); err != nil {
+	}
+	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
 		return err
 	}
 	// [END storage_set_retention_policy]
@@ -225,12 +226,13 @@ func removeRetentionPolicy(c *storage.Client, bucketName string) error {
 		return err
 	}
 	if attrs.RetentionPolicy.IsLocked {
-		return errors.New("Retention policy is locked")
+		return errors.New("retention policy is locked")
 	}
 
-	if _, err := bucket.Update(ctx, storage.BucketAttrsToUpdate{
+	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
 		RetentionPolicy: &storage.RetentionPolicy{},
-	}); err != nil {
+	}
+	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
 		return err
 	}
 	// [END storage_remove_retention_policy]
@@ -286,10 +288,10 @@ func enableDefaultEventBasedHold(c *storage.Client, bucketName string) error {
 
 	// [START storage_enable_default_event_based_hold]
 	bucket := c.Bucket(bucketName)
-
-	if _, err := bucket.Update(ctx, storage.BucketAttrsToUpdate{
+	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
 		DefaultEventBasedHold: true,
-	}); err != nil {
+	}
+	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
 		return err
 	}
 	// [END storage_enable_default_event_based_hold]
@@ -301,10 +303,10 @@ func disableDefaultEventBasedHold(c *storage.Client, bucketName string) error {
 
 	// [START storage_disable_default_event_based_hold]
 	bucket := c.Bucket(bucketName)
-
-	if _, err := bucket.Update(ctx, storage.BucketAttrsToUpdate{
+	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
 		DefaultEventBasedHold: false,
-	}); err != nil {
+	}
+	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
 		return err
 	}
 	// [END storage_disable_default_event_based_hold]
@@ -319,7 +321,7 @@ func getDefaultEventBasedHold(c *storage.Client, bucketName string) (*storage.Bu
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("Is default event-based hold enabled? %t\n",
+	fmt.Printf("Default event-based hold enabled? %t\n",
 		attrs.DefaultEventBasedHold)
 	// [END storage_get_default_event_based_hold]
 	return attrs, nil
@@ -330,9 +332,10 @@ func enableRequesterPays(c *storage.Client, bucketName string) error {
 
 	// [START enable_requester_pays]
 	bucket := c.Bucket(bucketName)
-	if _, err := bucket.Update(ctx, storage.BucketAttrsToUpdate{
+	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
 		RequesterPays: true,
-	}); err != nil {
+	}
+	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
 		return err
 	}
 	// [END enable_requester_pays]
@@ -344,9 +347,10 @@ func disableRequesterPays(c *storage.Client, bucketName string) error {
 
 	// [START disable_requester_pays]
 	bucket := c.Bucket(bucketName)
-	if _, err := bucket.Update(ctx, storage.BucketAttrsToUpdate{
+	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
 		RequesterPays: false,
-	}); err != nil {
+	}
+	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
 		return err
 	}
 	// [END disable_requester_pays]
@@ -371,9 +375,10 @@ func setDefaultKMSkey(c *storage.Client, bucketName string, keyName string) erro
 
 	// [START storage_set_bucket_default_kms_key]
 	bucket := c.Bucket(bucketName)
-	if _, err := bucket.Update(ctx, storage.BucketAttrsToUpdate{
+	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
 		Encryption: &storage.BucketEncryption{DefaultKMSKeyName: keyName},
-	}); err != nil {
+	}
+	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
 		return err
 	}
 	// [END storage_set_bucket_default_kms_key]

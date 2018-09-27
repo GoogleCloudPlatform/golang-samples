@@ -199,7 +199,7 @@ func attrs(client *storage.Client, bucket, object string) (*storage.ObjectAttrs,
 	fmt.Printf("Retention expiration time %v\n", attrs.RetentionExpirationTime)
 	fmt.Print("\n\nMetadata\n")
 	for key, value := range attrs.Metadata {
-		fmt.Printf("%v = %v\n", key, value)
+		fmt.Printf("\t%v = %v\n", key, value)
 	}
 
 	return attrs, nil
@@ -223,9 +223,10 @@ func releaseEventBasedHold(client *storage.Client, bucket, object string) error 
 	ctx := context.Background()
 	// [START storage_release_event_based_hold]
 	o := client.Bucket(bucket).Object(object)
-	if _, err := o.Update(ctx, storage.ObjectAttrsToUpdate{
+	objectAttrsToUpdate := storage.ObjectAttrsToUpdate{
 		EventBasedHold: false,
-	}); err != nil {
+	}
+	if _, err := o.Update(ctx, objectAttrsToUpdate); err != nil {
 		return err
 	}
 	// [END storage_release_event_based_hold]
@@ -236,9 +237,10 @@ func setTemporaryHold(client *storage.Client, bucket, object string) error {
 	ctx := context.Background()
 	// [START storage_set_temporary_hold]
 	o := client.Bucket(bucket).Object(object)
-	if _, err := o.Update(ctx, storage.ObjectAttrsToUpdate{
+	objectAttrsToUpdate := storage.ObjectAttrsToUpdate{
 		TemporaryHold: true,
-	}); err != nil {
+	}
+	if _, err := o.Update(ctx, objectAttrsToUpdate); err != nil {
 		return err
 	}
 	// [END storage_set_temporary_hold]
@@ -249,9 +251,10 @@ func releaseTemporaryHold(client *storage.Client, bucket, object string) error {
 	ctx := context.Background()
 	// [START storage_release_temporary_hold]
 	o := client.Bucket(bucket).Object(object)
-	if _, err := o.Update(ctx, storage.ObjectAttrsToUpdate{
+	objectAttrsToUpdate := storage.ObjectAttrsToUpdate{
 		TemporaryHold: false,
-	}); err != nil {
+	}
+	if _, err := o.Update(ctx, objectAttrsToUpdate); err != nil {
 		return err
 	}
 	// [END storage_release_temporary_hold]

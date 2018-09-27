@@ -133,7 +133,7 @@ func TestBucketLock(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	setup(t)
 
-	retentionPeriod := time.Duration(5) * time.Second
+	retentionPeriod := 5 * time.Second
 
 	if err := setRetentionPolicy(storageClient, bucketName, retentionPeriod); err != nil {
 		t.Fatalf("failed to set retention policy (%q): %v", bucketName, err)
