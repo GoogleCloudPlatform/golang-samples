@@ -562,6 +562,52 @@ func detectAsyncDocument(w io.Writer, gcsSourceURI, gcsDestinationURI string) er
 
 // [END vision_text_detection_pdf]
 
+// [START vision_localize_objects]
+
+// localizeObjects gets objects and bounding boxes from the Vision API for an image at the given file path.
+func localizeObjects(w io.Writer, file string) error {
+	ctx := context.Background()
+
+	client, err := vision.NewImageAnnotatorClient(ctx)
+	if err != nil {
+		return err
+	}
+
+	f, err := os.Open(file)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	image, err := vision.NewImageFromReader(f)
+	if err != nil {
+		return err
+	}
+	annotations, err := client.LocalizeObjects(ctx, image, nil)
+	if err != nil {
+		return err
+	}
+
+	if len(annotations) == 0 {
+		fmt.Fprintln(w, "No objects found.")
+		return nil
+	}
+
+	fmt.Fprintln(w, "Objects:")
+	for _, annotation := range annotations {
+		fmt.Fprintln(w, annotation.Name)
+		fmt.Fprintln(w, annotation.Score)
+
+		for _, v := range annotation.BoundingPoly.NormalizedVertices {
+			fmt.Fprintf(w, "(%f,%f)\n", v.X, v.Y)
+		}
+	}
+
+	return nil
+}
+
+// [END vision_localize_objects]
+
 func init() {
 	// Refer to these functions so that goimports is happy before boilerplate is inserted.
 	_ = context.Background()
@@ -1001,3 +1047,40 @@ func detectAsyncDocumentURI(w io.Writer, gcsSourceURI, gcsDestinationURI string)
 }
 
 // [END vision_text_detection_pdf_gcs]
+
+// [START vision_localize_objects_gcs]
+
+// localizeObjects gets objects and bounding boxes from the Vision API for an image at the given file path.
+func localizeObjectsURI(w io.Writer, file string) error {
+	ctx := context.Background()
+
+	client, err := vision.NewImageAnnotatorClient(ctx)
+	if err != nil {
+		return err
+	}
+
+	image := vision.NewImageFromURI(file)
+	annotations, err := client.LocalizeObjects(ctx, image, nil)
+	if err != nil {
+		return err
+	}
+
+	if len(annotations) == 0 {
+		fmt.Fprintln(w, "No objects found.")
+		return nil
+	}
+
+	fmt.Fprintln(w, "Objects:")
+	for _, annotation := range annotations {
+		fmt.Fprintln(w, annotation.Name)
+		fmt.Fprintln(w, annotation.Score)
+
+		for _, v := range annotation.BoundingPoly.NormalizedVertices {
+			fmt.Fprintf(w, "(%f,%f)\n", v.X, v.Y)
+		}
+	}
+
+	return nil
+}
+
+// [END vision_localize_objects_gcs]

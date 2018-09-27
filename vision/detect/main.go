@@ -46,6 +46,7 @@ func main() {
 		{"detectWeb", detectWeb, detectWebURI},
 		{"detectWebGeo", detectWebGeo, detectWebGeoURI},
 		{"detectSafeSearch", detectSafeSearch, detectSafeSearchURI},
+		{"localizeObjects", localizeObjects, localizeObjectsURI},
 	}
 
 	for _, sample := range samples {

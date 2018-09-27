@@ -388,3 +388,33 @@ func detectAsyncDocument(w io.Writer, gcsSourceURI, gcsDestinationURI string) er
 }
 
 // [END vision_text_detection_pdf{REGION_TAG_PARAMETER}]
+
+// [START vision_localize_objects{REGION_TAG_PARAMETER}]
+
+// localizeObjects gets objects and bounding boxes from the Vision API for an image at the given file path.
+func localizeObjects(w io.Writer, file string) error {
+	var client *vision.ImageAnnotatorClient // Boilerplate is inserted by gen.go
+	annotations, err := client.LocalizeObjects(ctx, image, nil)
+	if err != nil {
+		return err
+	}
+
+	if len(annotations) == 0 {
+		fmt.Fprintln(w, "No objects found.")
+		return nil
+	}
+
+	fmt.Fprintln(w, "Objects:")
+	for _, annotation := range annotations {
+		fmt.Fprintln(w, annotation.Name)
+		fmt.Fprintln(w, annotation.Score)
+
+		for _, v := range annotation.BoundingPoly.NormalizedVertices {
+			fmt.Fprintf(w, "(%f,%f)\n", v.X, v.Y)
+		}
+	}
+
+	return nil
+}
+
+// [END vision_localize_objects{REGION_TAG_PARAMETER}]
