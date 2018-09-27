@@ -401,15 +401,16 @@ func localizeObjects(w io.Writer, file string) error {
 
 	if len(annotations) == 0 {
 		fmt.Fprintln(w, "No objects found.")
-	} else {
-		fmt.Fprintln(w, "Objects:")
-		for _, annotation := range annotations {
-			fmt.Fprintln(w, annotation.Name)
-			fmt.Fprintln(w, annotation.Score)
+		return nil
+	}
 
-			for _, v := range annotation.BoundingPoly.NormalizedVertices {
-				fmt.Fprintf(w, "(%f,%f)\n", v.X, v.Y)
-			}
+	fmt.Fprintln(w, "Objects:")
+	for _, annotation := range annotations {
+		fmt.Fprintln(w, annotation.Name)
+		fmt.Fprintln(w, annotation.Score)
+
+		for _, v := range annotation.BoundingPoly.NormalizedVertices {
+			fmt.Fprintf(w, "(%f,%f)\n", v.X, v.Y)
 		}
 	}
 
