@@ -200,7 +200,9 @@ func TestBucketLock(t *testing.T) {
 			r.Errorf("retention policy is not locked")
 		}
 	})
+	time.Sleep(5 * time.Second)
 	deleteBucket(storageClient, bucketName)
+	time.Sleep(5 * time.Second)
 	if err := create(storageClient, tc.ProjectID, bucketName); err != nil {
 		t.Fatalf("failed to create bucket (%q): %v", bucketName, err)
 	}
