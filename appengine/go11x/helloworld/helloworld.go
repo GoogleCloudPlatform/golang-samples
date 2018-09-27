@@ -21,6 +21,7 @@ import (
 func main() {
 	http.HandleFunc("/", indexHandler)
 
+	// [START setting_port]
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
@@ -29,6 +30,7 @@ func main() {
 
 	log.Printf("Listening on port %s", port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
+	// [END setting_port]
 }
 
 // [END main_func]
