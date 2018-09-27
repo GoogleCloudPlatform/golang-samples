@@ -149,15 +149,14 @@ func TestRSAEncryptDecrypt(t *testing.T) {
 	if ciphertext[len(ciphertext)-2:] != "==" {
 		t.Errorf("ciphertet ending: %s; want: %s", ciphertext[len(ciphertext)-2:], "==")
 	}
-
 	plainBytes, err := decryptRSA(v.ctx, v.client, v.rsaDecryptPath, cipherBytes)
+	if err != nil {
+		t.Fatalf("decryptRSA(%s, %s): %v", ciphertext, v.rsaDecryptPath, err)
+	}
 	if !bytes.Equal(plainBytes, []byte(v.message)) {
 		t.Fatalf("decrypted plaintext does not match input message: want %s, got %s", []byte(v.message), plainBytes)
 	}
 	plaintext := string(plainBytes)
-	if err != nil {
-		t.Fatalf("decryptRSA(%s, %s): %v", ciphertext, v.rsaDecryptPath, err)
-	}
 	if plaintext != v.message {
 		t.Fatalf("failed to decypt expected plaintext: want %s, got %s", v.message, plaintext)
 	}
