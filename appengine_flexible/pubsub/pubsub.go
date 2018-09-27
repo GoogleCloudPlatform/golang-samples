@@ -39,10 +39,18 @@ func main() {
 
 	// Create topic if it doesn't exist.
 	topicName := mustGetenv("PUBSUB_TOPIC")
-	topic, _ = client.CreateTopic(ctx, topicName)
-	// Get handle for topic in case it already existed.
-	if topic == nil {
-		topic = client.Topic(topicName)
+	topic = client.Topic(topicName)
+	// Create the topic if it doesn't exist.
+	exists, err := topic.Exists(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if !exists {
+		log.Printf("Topic %v doesn't exist - creating it", topicName)
+		_, err = client.CreateTopic(ctx, topicName)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	http.HandleFunc("/", listHandler)
