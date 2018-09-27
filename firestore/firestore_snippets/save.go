@@ -249,7 +249,7 @@ func deleteField(ctx context.Context, client *firestore.Client) error {
 
 // [START fs_delete_collection]
 func deleteCollection(ctx context.Context, client *firestore.Client,
-		ref *firestore.CollectionRef, batchSize int) error {
+	ref *firestore.CollectionRef, batchSize int) error {
 
 	for {
 		// Get a batch of documents
