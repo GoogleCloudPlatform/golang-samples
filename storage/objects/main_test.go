@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -21,6 +22,13 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
+func TestMain(m *testing.M) {
+	// These functions are noisy.
+	log.SetOutput(ioutil.Discard)
+	s := m.Run()
+	log.SetOutput(os.Stderr)
+	os.Exit(s)
+}
 func TestObjects(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
@@ -238,8 +246,22 @@ func TestObjectBucketLock(t *testing.T) {
 	if err := setEventBasedHold(client, bucketName, objectName); err != nil {
 		t.Errorf("unable to set event-based hold (%q/%q): %v", bucketName, objectName, err)
 	}
+	oAttrs, err := attrs(client, bucketName, objectName)
+	if err != nil {
+		t.Errorf("cannot get object metadata: %v", err)
+	}
+	if !oAttrs.EventBasedHold {
+		t.Errorf("event-based hold is not enabled")
+	}
 	if err := releaseEventBasedHold(client, bucketName, objectName); err != nil {
 		t.Errorf("unable to set event-based hold (%q/%q): %v", bucketName, objectName, err)
+	}
+	oAttrs, err = attrs(client, bucketName, objectName)
+	if err != nil {
+		t.Errorf("cannot get object metadata: %v", err)
+	}
+	if oAttrs.EventBasedHold {
+		t.Errorf("event-based hold is not disabled")
 	}
 	if _, err := bucket.Update(ctx, storage.BucketAttrsToUpdate{
 		RetentionPolicy: &storage.RetentionPolicy{},
@@ -249,8 +271,22 @@ func TestObjectBucketLock(t *testing.T) {
 	if err := setTemporaryHold(client, bucketName, objectName); err != nil {
 		t.Errorf("unable to set temporary hold (%q/%q): %v", bucketName, objectName, err)
 	}
+	oAttrs, err = attrs(client, bucketName, objectName)
+	if err != nil {
+		t.Errorf("cannot get object metadata: %v", err)
+	}
+	if !oAttrs.TemporaryHold {
+		t.Errorf("temporary hold is not disabled")
+	}
 	if err := releaseTemporaryHold(client, bucketName, objectName); err != nil {
 		t.Errorf("unable to release temporary hold (%q/%q): %v", bucketName, objectName, err)
+	}
+	oAttrs, err = attrs(client, bucketName, objectName)
+	if err != nil {
+		t.Errorf("cannot get object metadata: %v", err)
+	}
+	if oAttrs.TemporaryHold {
+		t.Errorf("temporary hold is not disabled")
 	}
 }
 

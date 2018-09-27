@@ -260,8 +260,8 @@ func lockRetentionPolicy(c *storage.Client, bucketName string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Retention policy for %v is now locked\n", bucketName)
-	fmt.Printf("Retention policy effective as of %v\n",
+	log.Printf("Retention policy for %v is now locked\n", bucketName)
+	log.Printf("Retention policy effective as of %v\n",
 		lockedAttrs.RetentionPolicy.EffectiveTime)
 	// [END storage_lock_retention_policy]
 	return nil
@@ -275,10 +275,12 @@ func getRetentionPolicy(c *storage.Client, bucketName string) (*storage.BucketAt
 	if err != nil {
 		return nil, err
 	}
-	fmt.Print("Retention Policy\n")
-	fmt.Printf("period: %v\n", attrs.RetentionPolicy.RetentionPeriod)
-	fmt.Printf("effective time: %v\n", attrs.RetentionPolicy.EffectiveTime)
-	fmt.Printf("policy locked: %v\n", attrs.RetentionPolicy.IsLocked)
+	if attrs.RetentionPolicy != nil {
+		log.Print("Retention Policy\n")
+		log.Printf("period: %v\n", attrs.RetentionPolicy.RetentionPeriod)
+		log.Printf("effective time: %v\n", attrs.RetentionPolicy.EffectiveTime)
+		log.Printf("policy locked: %v\n", attrs.RetentionPolicy.IsLocked)
+	}
 	// [END storage_get_retention_policy]
 	return attrs, nil
 }
@@ -321,7 +323,7 @@ func getDefaultEventBasedHold(c *storage.Client, bucketName string) (*storage.Bu
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("Default event-based hold enabled? %t\n",
+	log.Printf("Default event-based hold enabled? %t\n",
 		attrs.DefaultEventBasedHold)
 	// [END storage_get_default_event_based_hold]
 	return attrs, nil
@@ -365,7 +367,7 @@ func checkRequesterPays(c *storage.Client, bucketName string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Is requester pays enabled? %v\n", attrs.RequesterPays)
+	log.Printf("Is requester pays enabled? %v\n", attrs.RequesterPays)
 	// [END get_requester_pays_status]
 	return nil
 }
