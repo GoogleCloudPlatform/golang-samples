@@ -278,6 +278,46 @@ func TestAll(t *testing.T) {
 
 }
 
+// Exercise BigQuery logical views.
+func TestViews(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+
+	client, err := bigquery.NewClient(ctx, tc.ProjectID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	srcDatasetID := uniqueBQName("golang_example_view_source")
+	if err := createDataset(client, srcDatasetID); err != nil {
+		t.Errorf("createDataset(%q): %v", srcDatasetID, err)
+	}
+	defer client.Dataset(srcDatasetID).DeleteWithContents(ctx)
+	viewDatasetID := uniqueBQName("golang_example_view_container")
+	if err := createDataset(client, viewDatasetID); err != nil {
+		t.Errorf("createDataset(%q): %v", viewDatasetID, err)
+	}
+	defer client.Dataset(viewDatasetID).DeleteWithContents(ctx)
+
+	viewID := uniqueBQName("golang_example_view")
+
+	if err := createView(client, viewDatasetID, viewID); err != nil {
+		t.Fatalf("createView(dataset:%q view:%q): %v", viewDatasetID, viewID, err)
+	}
+
+	if err := getView(client, viewDatasetID, viewID); err != nil {
+		t.Fatalf("getView(dataset:%q view:%q): %v", viewDatasetID, viewID, err)
+	}
+
+	if err := updateView(client, viewDatasetID, viewID); err != nil {
+		t.Fatalf("updateView(dataset:%q view:%q): %v", viewDatasetID, viewID, err)
+	}
+
+	if err := updateViewDelegated(client, srcDatasetID, viewDatasetID, viewID); err != nil {
+		t.Fatalf("updateViewDelegated(srcdataset:%q viewdataset:%q view:%q): %v", srcDatasetID, viewDatasetID, viewID, err)
+	}
+
+}
+
 func TestImportExport(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 	ctx := context.Background()
@@ -303,6 +343,16 @@ func TestImportExport(t *testing.T) {
 		t.Fatalf("importCSVFromFile(dataset:%q table:%q filename:%q): %v", datasetID, tableID, filename, err)
 	}
 
+	autoCSV := uniqueBQName("golang_example_csv_autodetect")
+	if err := importCSVAutodetectSchema(client, datasetID, autoCSV); err != nil {
+		t.Fatalf("importCSVAutodetectSchema(dataset:%q table:%q): %v", datasetID, autoCSV, err)
+	}
+
+	autoCSVTruncate := uniqueBQName("golang_example_csv_truncate")
+	if err := importCSVTruncate(client, datasetID, autoCSVTruncate); err != nil {
+		t.Fatalf("importCSVTruncate(dataset:%q table:%q): %v", datasetID, autoCSVTruncate, err)
+	}
+
 	explicitCSV := uniqueBQName("golang_example_dataset_importcsv_explicit")
 	if err := importCSVExplicitSchema(client, datasetID, explicitCSV); err != nil {
 		t.Fatalf("importCSVExplicitSchema(dataset:%q table:%q): %v", datasetID, explicitCSV, err)
@@ -321,6 +371,11 @@ func TestImportExport(t *testing.T) {
 	autoJSONwithCMEK := uniqueBQName("golang_example_importjson_cmek")
 	if err := importJSONWithCMEK(client, datasetID, autoJSONwithCMEK); err != nil {
 		t.Fatalf("importJSONWithCMEK(dataset:%q table:%q): %v", datasetID, autoJSONwithCMEK, err)
+	}
+
+	autoJSONTruncate := uniqueBQName("golang_example_importjson_truncate")
+	if err := importJSONTruncate(client, datasetID, autoJSONTruncate); err != nil {
+		t.Fatalf("importJSONTruncate(dataset:%q table:%q): %v", datasetID, autoJSONTruncate, err)
 	}
 
 	orc := uniqueBQName("golang_example_importorc")

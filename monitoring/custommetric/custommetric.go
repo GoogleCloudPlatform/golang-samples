@@ -70,6 +70,21 @@ func getCustomMetric(s *monitoring.Service, projectID, metricType string) (*moni
 
 // [END monitoring_list_descriptors]
 
+// [START monitoring_delete_metric]
+
+// deleteMetric deletes the given metric.
+func deleteMetric(s *monitoring.Service, projectID, metricType string) error {
+	metricResource := "projects/" + projectID + "/metricDescriptors/" + metricType
+	_, err := s.Projects.MetricDescriptors.Delete(metricResource).Do()
+	if err != nil {
+		return fmt.Errorf("Could not delete metric: %v", err)
+	}
+	log.Printf("Deleted metric: %q\n", metricType)
+	return nil
+}
+
+// [END monitoring_delete_metric]
+
 // [START monitoring_write_timeseries]
 
 // writeTimeSeriesValue writes a value for the custom metric created
@@ -191,6 +206,10 @@ func main() {
 
 	// Read the TimeSeries for the last 5 minutes for that metric.
 	if err := readTimeSeriesValue(s, projectID, metricType); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := deleteMetric(s, projectID, metricType); err != nil {
 		log.Fatal(err)
 	}
 }
