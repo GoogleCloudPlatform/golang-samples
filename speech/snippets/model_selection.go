@@ -35,17 +35,19 @@ func modelSelection(w io.Writer, path string) error {
 		return fmt.Errorf("ReadFile: %v", err)
 	}
 
-	resp, err := client.Recognize(ctx, &speechpb.RecognizeRequest{
+	req := &speechpb.RecognizeRequest{
 		Config: &speechpb.RecognitionConfig{
 			Encoding:        speechpb.RecognitionConfig_LINEAR16,
 			SampleRateHertz: 16000,
 			LanguageCode:    "en-US",
-			Model: "video",
+			Model:           "video",
 		},
 		Audio: &speechpb.RecognitionAudio{
 			AudioSource: &speechpb.RecognitionAudio_Content{Content: data},
 		},
-	})
+	}
+
+	resp, err := client.Recognize(ctx, req)
 	if err != nil {
 		return fmt.Errorf("Recognize: %v", err)
 	}
