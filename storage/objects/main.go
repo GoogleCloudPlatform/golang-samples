@@ -210,9 +210,10 @@ func setEventBasedHold(client *storage.Client, bucket, object string) error {
 	ctx := context.Background()
 	// [START storage_set_event_based_hold]
 	o := client.Bucket(bucket).Object(object)
-	if _, err := o.Update(ctx, storage.ObjectAttrsToUpdate{
+	objectAttrsToUpdate := storage.ObjectAttrsToUpdate{
 		EventBasedHold: true,
-	}); err != nil {
+	}
+	if _, err := o.Update(ctx, objectAttrsToUpdate); err != nil {
 		return err
 	}
 	// [END storage_set_event_based_hold]
