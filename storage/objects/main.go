@@ -177,8 +177,89 @@ func attrs(client *storage.Client, bucket, object string) (*storage.ObjectAttrs,
 	if err != nil {
 		return nil, err
 	}
+	log.Printf("Bucket: %v\n", attrs.Bucket)
+	log.Printf("CacheControl: %v\n", attrs.CacheControl)
+	log.Printf("ContentDisposition: %v\n", attrs.ContentDisposition)
+	log.Printf("ContentEncoding: %v\n", attrs.ContentEncoding)
+	log.Printf("ContentLanguage: %v\n", attrs.ContentLanguage)
+	log.Printf("ContentType: %v\n", attrs.ContentType)
+	log.Printf("Crc32c: %v\n", attrs.CRC32C)
+	log.Printf("Generation: %v\n", attrs.Generation)
+	log.Printf("KmsKeyName: %v\n", attrs.KMSKeyName)
+	log.Printf("Md5Hash: %v\n", attrs.MD5)
+	log.Printf("MediaLink: %v\n", attrs.MediaLink)
+	log.Printf("Metageneration: %v\n", attrs.Metageneration)
+	log.Printf("Name: %v\n", attrs.Name)
+	log.Printf("Size: %v\n", attrs.Size)
+	log.Printf("StorageClass: %v\n", attrs.StorageClass)
+	log.Printf("TimeCreated: %v\n", attrs.Created)
+	log.Printf("Updated: %v\n", attrs.Updated)
+	log.Printf("Event-based hold enabled? %t\n", attrs.EventBasedHold)
+	log.Printf("Temporary hold enabled? %t\n", attrs.TemporaryHold)
+	log.Printf("Retention expiration time %v\n", attrs.RetentionExpirationTime)
+	log.Print("\n\nMetadata\n")
+	for key, value := range attrs.Metadata {
+		log.Printf("\t%v = %v\n", key, value)
+	}
+
 	return attrs, nil
 	// [END get_metadata]
+}
+
+func setEventBasedHold(client *storage.Client, bucket, object string) error {
+	ctx := context.Background()
+	// [START storage_set_event_based_hold]
+	o := client.Bucket(bucket).Object(object)
+	objectAttrsToUpdate := storage.ObjectAttrsToUpdate{
+		EventBasedHold: true,
+	}
+	if _, err := o.Update(ctx, objectAttrsToUpdate); err != nil {
+		return err
+	}
+	// [END storage_set_event_based_hold]
+	return nil
+}
+
+func releaseEventBasedHold(client *storage.Client, bucket, object string) error {
+	ctx := context.Background()
+	// [START storage_release_event_based_hold]
+	o := client.Bucket(bucket).Object(object)
+	objectAttrsToUpdate := storage.ObjectAttrsToUpdate{
+		EventBasedHold: false,
+	}
+	if _, err := o.Update(ctx, objectAttrsToUpdate); err != nil {
+		return err
+	}
+	// [END storage_release_event_based_hold]
+	return nil
+}
+
+func setTemporaryHold(client *storage.Client, bucket, object string) error {
+	ctx := context.Background()
+	// [START storage_set_temporary_hold]
+	o := client.Bucket(bucket).Object(object)
+	objectAttrsToUpdate := storage.ObjectAttrsToUpdate{
+		TemporaryHold: true,
+	}
+	if _, err := o.Update(ctx, objectAttrsToUpdate); err != nil {
+		return err
+	}
+	// [END storage_set_temporary_hold]
+	return nil
+}
+
+func releaseTemporaryHold(client *storage.Client, bucket, object string) error {
+	ctx := context.Background()
+	// [START storage_release_temporary_hold]
+	o := client.Bucket(bucket).Object(object)
+	objectAttrsToUpdate := storage.ObjectAttrsToUpdate{
+		TemporaryHold: false,
+	}
+	if _, err := o.Update(ctx, objectAttrsToUpdate); err != nil {
+		return err
+	}
+	// [END storage_release_temporary_hold]
+	return nil
 }
 
 func makePublic(client *storage.Client, bucket, object string) error {
