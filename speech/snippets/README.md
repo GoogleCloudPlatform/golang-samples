@@ -17,3 +17,7 @@ For more details, see the [Using Enhanced Models](https://cloud.google.com/speec
 > **Caution**: If you attempt to use an enhanced model but your Google Cloud Project does not have data logging enabled, Speech-to-Text API sends a `400` HTTP code response with the status `INVALID_ARGUMENT`. You must [enable data logging](https://cloud.google.com/speech-to-text/docs/enable-data-logging) to use the enhanced speech recognition models.
 
 [Go Code](enhanced_model.go)
+
+### Model Selection
+
+For more details, see the [Transcribing Video Files](https://cloud.google.com/speech-to-text/docs/video-model) tutorial in the docs.
