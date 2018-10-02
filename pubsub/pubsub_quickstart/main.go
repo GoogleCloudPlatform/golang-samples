@@ -28,7 +28,7 @@ func main() {
 	}
 
 	// Sets the name for the new topic.
-	topicName := "my-new-topic"
+	topicName := "my-topic"
 
 	// Creates the new topic.
 	topic, err := client.CreateTopic(ctx, topicName)
