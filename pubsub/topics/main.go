@@ -44,8 +44,8 @@ func main() {
 		fmt.Println(t)
 	}
 
-	const topic = "example-topic"
-	// Create a new topic called example-topic.
+	const topic = "my-topic"
+	// Create a new topic called my-topic.
 	if err := create(client, topic); err != nil {
 		log.Fatalf("Failed to create a topic: %v", err)
 	}
