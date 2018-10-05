@@ -1,0 +1,15 @@
+# Copyright 2018 Google Inc. All rights reserved.
+# Use of this source code is governed by the Apache 2.0
+# license that can be found in the LICENSE file.
+runtime: go111
+
+handlers:
+# Configure App Engine to serve any static assets.
+- url: /static
+  static_dir: public
+
+# Use HTTPS for all requests.
+- url: /.*
+  secure: always
+  redirect_http_response_code: 301
+  script: auto
