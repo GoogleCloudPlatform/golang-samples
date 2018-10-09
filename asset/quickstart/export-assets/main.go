@@ -13,7 +13,6 @@
 // limitations under the License.
 
 // [START asset-quickstart_export_assets]
-
 package main
 
 import (
