@@ -39,6 +39,7 @@ func TestSample(t *testing.T) {
 		}
 	}
 	runCommand := func(t *testing.T, cmd string, dbName string) string {
+		t.Helper()
 		var b bytes.Buffer
 		if err := run(context.Background(), adminClient, dataClient, &b, cmd, dbName); err != nil {
 			t.Errorf("run(%q, %q): %v", cmd, dbName, err)
@@ -46,6 +47,7 @@ func TestSample(t *testing.T) {
 		return b.String()
 	}
 	mustRunCommand := func(t *testing.T, cmd string, dbName string) string {
+		t.Helper()
 		var b bytes.Buffer
 		if err := run(context.Background(), adminClient, dataClient, &b, cmd, dbName); err != nil {
 			t.Fatalf("run(%q, %q): %v", cmd, dbName, err)

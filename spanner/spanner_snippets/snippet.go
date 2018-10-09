@@ -251,11 +251,11 @@ func queryWithStruct(ctx context.Context, w io.Writer, client *spanner.Client) e
 
 	// [START spanner_create_struct_with_data]
 
-	type nameStruct struct {
+	type name struct {
 		FirstName string
 		LastName  string
 	}
-	var singerInfo = nameStruct{"Elena", "Campbell"}
+	var singerInfo = name{"Elena", "Campbell"}
 
 	// [END spanner_create_struct_with_data]
 
@@ -921,9 +921,11 @@ func queryWithTimestamp(ctx context.Context, w io.Writer, client *spanner.Client
 func insertUsingDML(ctx context.Context, w io.Writer, client *spanner.Client) error {
 	_, err := client.ReadWriteTransaction(
 		ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
-			rowCount, err := txn.Update(ctx, spanner.Statement{
+			stmt := spanner.Statement{
 				SQL: `INSERT Singers (SingerId, FirstName, LastName)
-										VALUES (10, 'Virginia', 'Watson')`})
+								VALUES (10, 'Virginia', 'Watson')`,
+			}
+			rowCount, err := txn.Update(ctx, stmt)
 			if err != nil {
 				return err
 			}
@@ -940,10 +942,12 @@ func insertUsingDML(ctx context.Context, w io.Writer, client *spanner.Client) er
 func updateUsingDML(ctx context.Context, w io.Writer, client *spanner.Client) error {
 	_, err := client.ReadWriteTransaction(
 		ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
-			rowCount, err := txn.Update(ctx, spanner.Statement{
+			stmt := spanner.Statement{
 				SQL: `UPDATE Albums
 								SET MarketingBudget = MarketingBudget * 2
-								WHERE SingerId = 1 and AlbumId = 1`})
+								WHERE SingerId = 1 and AlbumId = 1`,
+			}
+			rowCount, err := txn.Update(ctx, stmt)
 			if err != nil {
 				return err
 			}
@@ -960,8 +964,8 @@ func updateUsingDML(ctx context.Context, w io.Writer, client *spanner.Client) er
 func deleteUsingDML(ctx context.Context, w io.Writer, client *spanner.Client) error {
 	_, err := client.ReadWriteTransaction(
 		ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
-			rowCount, err := txn.Update(ctx, spanner.Statement{
-				SQL: `DELETE Singers WHERE FirstName = 'Alice'`})
+			stmt := spanner.Statement{SQL: `DELETE Singers WHERE FirstName = 'Alice'`}
+			rowCount, err := txn.Update(ctx, stmt)
 			if err != nil {
 				return err
 			}
@@ -978,10 +982,12 @@ func deleteUsingDML(ctx context.Context, w io.Writer, client *spanner.Client) er
 func updateUsingDMLWithTimestamp(ctx context.Context, w io.Writer, client *spanner.Client) error {
 	_, err := client.ReadWriteTransaction(
 		ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
-			rowCount, err := txn.Update(ctx, spanner.Statement{
+			stmt := spanner.Statement{
 				SQL: `UPDATE Albums
 								SET LastUpdateTime = PENDING_COMMIT_TIMESTAMP()
-								WHERE SingerId = 1`})
+								WHERE SingerId = 1`,
+			}
+			rowCount, err := txn.Update(ctx, stmt)
 			if err != nil {
 				return err
 			}
@@ -999,17 +1005,19 @@ func writeAndReadUsingDML(ctx context.Context, w io.Writer, client *spanner.Clie
 	_, err := client.ReadWriteTransaction(
 		ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
 			// Insert Record
-			rowCount, err := txn.Update(ctx, spanner.Statement{
+			stmt := spanner.Statement{
 				SQL: `INSERT Singers (SingerId, FirstName, LastName)
-								VALUES (11, 'Timothy', 'Campbell')`})
+								VALUES (11, 'Timothy', 'Campbell')`,
+			}
+			rowCount, err := txn.Update(ctx, stmt)
 			if err != nil {
 				return err
 			}
 			fmt.Fprintf(w, "%d record(s) inserted.\n", rowCount)
 
 			// Read newly inserted record
-			iter := txn.Query(ctx, spanner.Statement{
-				SQL: `SELECT FirstName, LastName FROM Singers WHERE SingerId = 11`})
+			stmt = spanner.Statement{SQL: `SELECT FirstName, LastName FROM Singers WHERE SingerId = 11`}
+			iter := txn.Query(ctx, stmt)
 			defer iter.Stop()
 
 			for {
@@ -1038,18 +1046,18 @@ func writeAndReadUsingDML(ctx context.Context, w io.Writer, client *spanner.Clie
 func updateUsingDMLStruct(ctx context.Context, w io.Writer, client *spanner.Client) error {
 	_, err := client.ReadWriteTransaction(
 		ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
-
-			type nameStruct struct {
+			type name struct {
 				FirstName string
 				LastName  string
 			}
-			var singerInfo = nameStruct{"Timothy", "Campbell"}
+			var singerInfo = name{"Timothy", "Campbell"}
 
-			rowCount, err := txn.Update(ctx, spanner.Statement{
+			stmt := spanner.Statement{
 				SQL: `Update Singers Set LastName = 'Grant' 
-						WHERE STRUCT<FirstName String, LastName String>(Firstname, LastName) = @name`,
+								WHERE STRUCT<FirstName String, LastName String>(Firstname, LastName) = @name`,
 				Params: map[string]interface{}{"name": singerInfo},
-			})
+			}
+			rowCount, err := txn.Update(ctx, stmt)
 			if err != nil {
 				return err
 			}
@@ -1066,12 +1074,14 @@ func updateUsingDMLStruct(ctx context.Context, w io.Writer, client *spanner.Clie
 func writeUsingDML(ctx context.Context, w io.Writer, client *spanner.Client) error {
 	_, err := client.ReadWriteTransaction(
 		ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
-			rowCount, err := txn.Update(ctx, spanner.Statement{
+			stmt := spanner.Statement{
 				SQL: `INSERT Singers (SingerId, FirstName, LastName) VALUES
 								(12, 'Melissa', 'Garcia'),
 								(13, 'Russell', 'Morales'),
 								(14, 'Jacqueline', 'Long'),
-								(15, 'Dylan', 'Shaw')`})
+								(15, 'Dylan', 'Shaw')`,
+			}
+			rowCount, err := txn.Update(ctx, stmt)
 			if err != nil {
 				return err
 			}
@@ -1088,8 +1098,9 @@ func writeUsingDML(ctx context.Context, w io.Writer, client *spanner.Client) err
 func writeWithTransactionUsingDML(ctx context.Context, w io.Writer, client *spanner.Client) error {
 	_, err := client.ReadWriteTransaction(
 		ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
-			// Helper function for retrieving the budget of a record
-			getBudget := func(key spanner.Key) (int64, error) {
+			// getBudget returns the budget for a record with a given albumId and singerId.
+			getBudget := func(albumId, singerId int64) (int64, error) {
+				key := spanner.Key{albumId, singerId}
 				row, err := txn.ReadRow(ctx, "Albums", key, []string{"MarketingBudget"})
 				if err != nil {
 					return 0, err
@@ -1100,9 +1111,9 @@ func writeWithTransactionUsingDML(ctx context.Context, w io.Writer, client *span
 				}
 				return budget, nil
 			}
-			// Helper function for updating the budget of a record.
+			// updateBudget updates the budget for a record with a given albumId and singerId.
 			updateBudget := func(singerId, albumId, albumBudget int64) error {
-				_, err := txn.Update(ctx, spanner.Statement{
+				stmt := spanner.Statement{
 					SQL: `UPDATE Albums
 									SET MarketingBudget = @AlbumBudget
 									WHERE SingerId = @SingerId and AlbumId = @AlbumId`,
@@ -1111,7 +1122,8 @@ func writeWithTransactionUsingDML(ctx context.Context, w io.Writer, client *span
 						"AlbumId":     albumId,
 						"AlbumBudget": albumBudget,
 					},
-				})
+				}
+				_, err := txn.Update(ctx, stmt)
 				return err
 			}
 
@@ -1120,14 +1132,14 @@ func writeWithTransactionUsingDML(ctx context.Context, w io.Writer, client *span
 			const transferAmt = 200000
 			var album1budget, album2budget int64
 			var err error
-			if album1budget, err = getBudget(spanner.Key{1, 1}); err != nil {
+			if album1budget, err = getBudget(1, 1); err != nil {
 				return err
 			}
-			// Transaction will only be committed if this condition still holds at the time of
-			// commit. Otherwise it will be aborted and the callable will be rerun by the
+			// The transaction will only be committed if this condition still holds at the time
+			// of commit. Otherwise it will be aborted and the callable will be rerun by the
 			// client library.
 			if album1budget >= transferAmt {
-				if album2budget, err = getBudget(spanner.Key{2, 2}); err != nil {
+				if album2budget, err = getBudget(1, 1); err != nil {
 					return err
 				}
 				if err = updateBudget(1, 1, album1budget-transferAmt); err != nil {
@@ -1148,8 +1160,8 @@ func writeWithTransactionUsingDML(ctx context.Context, w io.Writer, client *span
 // [START spanner_dml_partitioned_update]
 
 func updateUsingPartitionedDML(ctx context.Context, w io.Writer, client *spanner.Client) error {
-	rowCount, err := client.PartitionedUpdate(ctx, spanner.Statement{
-		SQL: "UPDATE Albums SET MarketingBudget = 100000 WHERE SingerId > 1"})
+	stmt := spanner.Statement{SQL: "UPDATE Albums SET MarketingBudget = 100000 WHERE SingerId > 1"}
+	rowCount, err := client.PartitionedUpdate(ctx, stmt)
 	if err != nil {
 		return err
 	}
@@ -1162,8 +1174,8 @@ func updateUsingPartitionedDML(ctx context.Context, w io.Writer, client *spanner
 // [START spanner_dml_partitioned_delete]
 
 func deleteUsingPartitionedDML(ctx context.Context, w io.Writer, client *spanner.Client) error {
-	rowCount, err := client.PartitionedUpdate(ctx, spanner.Statement{
-		SQL: "DELETE Singers WHERE SingerId > 10"})
+	stmt := spanner.Statement{SQL: "DELETE Singers WHERE SingerId > 10"}
+	rowCount, err := client.PartitionedUpdate(ctx, stmt)
 	if err != nil {
 		return err
 
