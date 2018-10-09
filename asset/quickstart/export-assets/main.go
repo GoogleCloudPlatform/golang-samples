@@ -34,18 +34,16 @@ func main() {
         if err != nil {
                 log.Fatal(err)
         }
-        gcsDestination := &assetpb.GcsDestination{
-                Uri: string("gs://[my_gcs_bucket]/[my_asset_dump_file]"),
-        }
-        destination := &assetpb.OutputConfig_GcsDestination{
-                GcsDestination: gcsDestination,
-        }
-        outputConfig := &assetpb.OutputConfig{
-                Destination: destination,
-        }
+        assetDumpFile := "gs://[my_gcs_bucket]/[my_asset_dump_file]"
         req := &assetpb.ExportAssetsRequest{
-                Parent:       fmt.Sprintf("projects/%s", projectID),
-                OutputConfig: outputConfig,
+                Parent: fmt.Sprintf("projects/%s", projectID),
+                OutputConfig: &assetpb.OutputConfig{
+                        Destination: &assetpb.OutputConfig_GcsDestination{
+                                GcsDestination: &assetpb.GcsDestination{
+                                        Uri: string(assetDumpFile),
+                                },
+                        },
+                },
         }
         operation, err := client.ExportAssets(ctx, req)
         if err != nil {
