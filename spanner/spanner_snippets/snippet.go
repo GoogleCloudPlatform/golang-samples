@@ -1099,8 +1099,8 @@ func writeWithTransactionUsingDML(ctx context.Context, w io.Writer, client *span
 	_, err := client.ReadWriteTransaction(
 		ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
 			// getBudget returns the budget for a record with a given albumId and singerId.
-			getBudget := func(albumId, singerId int64) (int64, error) {
-				key := spanner.Key{albumId, singerId}
+			getBudget := func(albumID, singerID int64) (int64, error) {
+				key := spanner.Key{albumID, singerID}
 				row, err := txn.ReadRow(ctx, "Albums", key, []string{"MarketingBudget"})
 				if err != nil {
 					return 0, err
@@ -1112,14 +1112,14 @@ func writeWithTransactionUsingDML(ctx context.Context, w io.Writer, client *span
 				return budget, nil
 			}
 			// updateBudget updates the budget for a record with a given albumId and singerId.
-			updateBudget := func(singerId, albumId, albumBudget int64) error {
+			updateBudget := func(singerID, albumID, albumBudget int64) error {
 				stmt := spanner.Statement{
 					SQL: `UPDATE Albums
 									SET MarketingBudget = @AlbumBudget
 									WHERE SingerId = @SingerId and AlbumId = @AlbumId`,
 					Params: map[string]interface{}{
-						"SingerId":    singerId,
-						"AlbumId":     albumId,
+						"SingerId":    singerID,
+						"AlbumId":     albumID,
 						"AlbumBudget": albumBudget,
 					},
 				}
@@ -1139,7 +1139,7 @@ func writeWithTransactionUsingDML(ctx context.Context, w io.Writer, client *span
 			// of commit. Otherwise it will be aborted and the callable will be rerun by the
 			// client library.
 			if album1budget >= transferAmt {
-				if album2budget, err = getBudget(1, 1); err != nil {
+				if album2budget, err = getBudget(2, 2); err != nil {
 					return err
 				}
 				if err = updateBudget(1, 1, album1budget-transferAmt); err != nil {
