@@ -843,7 +843,7 @@ func addCommitTimestamp(ctx context.Context, w io.Writer, adminClient *database.
 		Database: database,
 		Statements: []string{
 			"ALTER TABLE Albums ADD COLUMN LastUpdateTime TIMESTAMP " +
-					"OPTIONS (allow_commit_timestamp=true)",
+				"OPTIONS (allow_commit_timestamp=true)",
 		},
 	})
 	if err != nil {
