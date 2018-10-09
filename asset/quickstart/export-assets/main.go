@@ -30,7 +30,7 @@ import (
 func main() {
         ctx := context.Background()
         projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
-	bucketName := os.Getenv("EXPORT_ASSETS_GCS_BUCKET")
+	bucketName := fmt.Sprintf("%s-for-asset", projectID)
         client, err := asset.NewClient(ctx)
         if err != nil {
                 log.Fatal(err)

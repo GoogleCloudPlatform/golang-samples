@@ -65,8 +65,7 @@ func TestMain(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	os.Setenv("GOOGLE_CLOUD_PROJECT", tc.ProjectID)
 
-	bucketName = tc.ProjectID + "-for-assets"
-	os.Setenv("EXPORT_ASSETS_GCS_BUCKET", bucketName)
+	bucketName = fmt.Sprintf("%s-for-assets", tc.ProjectID)
 
 	setup(t)
 
