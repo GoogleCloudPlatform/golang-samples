@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START asset-quickstart_export_assets]
+[START asset-quickstart_export_asset]
+
 package main
 
 import (
@@ -57,4 +58,4 @@ func main() {
 	fmt.Print(response)
 }
 
-// [END asset-quickstart_export_assets]
+[END asset-quickstart_export_asset]
