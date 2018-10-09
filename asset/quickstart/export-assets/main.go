@@ -30,11 +30,12 @@ import (
 func main() {
         ctx := context.Background()
         projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
+	bucketName := os.Getenv("EXPORT_ASSETS_GCS_BUCKET")
         client, err := asset.NewClient(ctx)
         if err != nil {
                 log.Fatal(err)
         }
-        assetDumpFile := "gs://[my_gcs_bucket]/[my_asset_dump_file]"
+	assetDumpFile := fmt.Sprintf("gs://%s/my-assets.txt", bucketName)
         req := &assetpb.ExportAssetsRequest{
                 Parent: fmt.Sprintf("projects/%s", projectID),
                 OutputConfig: &assetpb.OutputConfig{
