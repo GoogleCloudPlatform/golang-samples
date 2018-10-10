@@ -34,8 +34,8 @@ func main() {
         if err != nil {
                 log.Fatal(err)
         }
-	bucketName := fmt.Sprintf("%s-for-asset", projectID)
-	assetDumpFile := fmt.Sprintf("gs://%s/my-assets.txt", bucketName)
+        bucketName := fmt.Sprintf("%s-for-asset", projectID)
+        assetDumpFile := fmt.Sprintf("gs://%s/my-assets.txt", bucketName)
         req := &assetpb.ExportAssetsRequest{
                 Parent: fmt.Sprintf("projects/%s", projectID),
                 OutputConfig: &assetpb.OutputConfig{
