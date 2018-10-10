@@ -35,13 +35,22 @@ func TestSample(t *testing.T) {
 
 	assertContains := func(out string, sub string) {
 		if !strings.Contains(out, sub) {
-			t.Errorf("got output %q; want it to contain %s", out, sub)
+			t.Errorf("got output %q; want it to contain %q", out, sub)
 		}
 	}
 	runCommand := func(t *testing.T, cmd string, dbName string) string {
+		t.Helper()
 		var b bytes.Buffer
 		if err := run(context.Background(), adminClient, dataClient, &b, cmd, dbName); err != nil {
 			t.Errorf("run(%q, %q): %v", cmd, dbName, err)
+		}
+		return b.String()
+	}
+	mustRunCommand := func(t *testing.T, cmd string, dbName string) string {
+		t.Helper()
+		var b bytes.Buffer
+		if err := run(context.Background(), adminClient, dataClient, &b, cmd, dbName); err != nil {
+			t.Fatalf("run(%q, %q): %v", cmd, dbName, err)
 		}
 		return b.String()
 	}
@@ -57,7 +66,7 @@ func TestSample(t *testing.T) {
 
 	// We execute all the commands of the tutorial code. These commands have to be run in a specific
 	// order since in many cases earlier commands setup the database for the subsequent commands.
-	runCommand(t, "createdatabase", dbName)
+	mustRunCommand(t, "createdatabase", dbName)
 	runCommand(t, "write", dbName)
 	writeTime := time.Now()
 
@@ -94,7 +103,7 @@ func TestSample(t *testing.T) {
 	}
 
 	// Wait at least 15 seconds since the write.
-	time.Sleep(time.Now().Add(16 * time.Second).Sub(writeTime))
+	time.Sleep(time.Until(writeTime.Add(16 * time.Second)))
 	out = runCommand(t, "readstaledata", dbName)
 	assertContains(out, "Go, Go, Go")
 	assertContains(out, "Forever Hold Your Peace")
@@ -130,4 +139,34 @@ func TestSample(t *testing.T) {
 
 	out = runCommand(t, "querywithhistory", dbName)
 	assertContains(out, "1 1 Hello World 1 Updated")
+
+	out = runCommand(t, "dmlinsert", dbName)
+	assertContains(out, "record(s) inserted")
+
+	out = runCommand(t, "dmlupdate", dbName)
+	assertContains(out, "record(s) updated")
+
+	out = runCommand(t, "dmldelete", dbName)
+	assertContains(out, "record(s) deleted")
+
+	out = runCommand(t, "dmlwithtimestamp", dbName)
+	assertContains(out, "record(s) updated")
+
+	out = runCommand(t, "dmlwriteread", dbName)
+	assertContains(out, "Found record name with ")
+
+	out = runCommand(t, "dmlupdatestruct", dbName)
+	assertContains(out, "record(s) inserted")
+
+	out = runCommand(t, "dmlwrite", dbName)
+	assertContains(out, "record(s) inserted")
+
+	out = runCommand(t, "dmlwritetxn", dbName)
+	assertContains(out, "from Album1's MarketingBudget to Album2")
+
+	out = runCommand(t, "dmlupdatepart", dbName)
+	assertContains(out, "record(s) updated")
+
+	out = runCommand(t, "dmldeletepart", dbName)
+	assertContains(out, "record(s) deleted")
 }
