@@ -1106,7 +1106,8 @@ func writeWithTransactionUsingDML(ctx context.Context, w io.Writer, client *span
 		// updateBudget updates the budget for a record with a given albumId and singerId.
 		updateBudget := func(singerID, albumID, albumBudget int64) error {
 			stmt := spanner.Statement{
-				SQL: `UPDATE AlbumsSET MarketingBudget = @AlbumBudget
+				SQL: `UPDATE Albums
+					SET MarketingBudget = @AlbumBudget
 					WHERE SingerId = @SingerId and AlbumId = @AlbumId`,
 				Params: map[string]interface{}{
 					"SingerId":    singerID,
