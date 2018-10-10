@@ -93,7 +93,7 @@ func encryptRSA(ctx context.Context, client *cloudkms.Service, keyPath string, p
 // [START kms_sign_asymmetric]
 
 // signAsymmetric will sign a plaintext message using a saved asymmetric private key.
-func signAsymmetric(ctx context.Context, client *cloudkms.Service, keyPath string, message []byte) (string, error) {
+func signAsymmetric(ctx context.Context, client *cloudkms.Service, keyPath string, message []byte) ([]byte, error) {
 	// Note: some key algorithms will require a different hash function.
 	// For example, EC_SIGN_P384_SHA384 requires SHA-384.
 	digest := sha256.New()
@@ -109,11 +109,10 @@ func signAsymmetric(ctx context.Context, client *cloudkms.Service, keyPath strin
 	response, err := client.Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions.
 		AsymmetricSign(keyPath, asymmetricSignRequest).Context(ctx).Do()
 	if err != nil {
-		return "", fmt.Errorf("asymmetric sign request failed: %+v", err)
+		return nil, fmt.Errorf("asymmetric sign request failed: %+v", err)
 
 	}
-
-	return response.Signature, nil
+	return base64.StdEncoding.DecodeString(response.Signature)
 }
 
 // [END kms_sign_asymmetric]
@@ -121,24 +120,19 @@ func signAsymmetric(ctx context.Context, client *cloudkms.Service, keyPath strin
 // [START kms_verify_signature_rsa]
 
 // verifySignatureRSA will verify that an 'RSA_SIGN_PSS_2048_SHA256' signature is valid for a given message.
-func verifySignatureRSA(ctx context.Context, client *cloudkms.Service, signature, keyPath string, message []byte) error {
+func verifySignatureRSA(ctx context.Context, client *cloudkms.Service, keyPath string, signature, message []byte) error {
 	abstractKey, err := getAsymmetricPublicKey(ctx, client, keyPath)
 	if err != nil {
 		return err
 	}
 	// Perform type assertion to get the RSA key.
 	rsaKey := abstractKey.(*rsa.PublicKey)
-	decodedSignature, err := base64.StdEncoding.DecodeString(signature)
-	if err != nil {
-		return fmt.Errorf("failed to decode signature string: %+v", err)
-
-	}
 	digest := sha256.New()
 	digest.Write(message)
 	hash := digest.Sum(nil)
 
 	pssOptions := rsa.PSSOptions{SaltLength: len(hash), Hash: crypto.SHA256}
-	err = rsa.VerifyPSS(rsaKey, crypto.SHA256, hash, decodedSignature, &pssOptions)
+	err = rsa.VerifyPSS(rsaKey, crypto.SHA256, hash, signature, &pssOptions)
 	if err != nil {
 		return fmt.Errorf("signature verification failed: %+v", err)
 	}
@@ -150,19 +144,15 @@ func verifySignatureRSA(ctx context.Context, client *cloudkms.Service, signature
 // [START kms_verify_signature_ec]
 
 // verifySignatureEC will verify that an 'EC_SIGN_P256_SHA256' signature is valid for a given message.
-func verifySignatureEC(ctx context.Context, client *cloudkms.Service, signature, keyPath string, message []byte) error {
+func verifySignatureEC(ctx context.Context, client *cloudkms.Service, keyPath string, signature, message []byte) error {
 	abstractKey, err := getAsymmetricPublicKey(ctx, client, keyPath)
 	if err != nil {
 		return err
 	}
 	// Perform type assertion to get the elliptic curve key.
 	ecKey := abstractKey.(*ecdsa.PublicKey)
-	decodedSignature, err := base64.StdEncoding.DecodeString(signature)
-	if err != nil {
-		return fmt.Errorf("failed to decode signature string: %+v", err)
-	}
 	var parsedSig struct{ R, S *big.Int }
-	_, err = asn1.Unmarshal(decodedSignature, &parsedSig)
+	_, err = asn1.Unmarshal(signature, &parsedSig)
 	if err != nil {
 		return fmt.Errorf("failed to parse signature bytes: %+v", err)
 	}
