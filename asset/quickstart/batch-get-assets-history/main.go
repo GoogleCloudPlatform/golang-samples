@@ -37,7 +37,7 @@ func main() {
 	}
 
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
-	bucketResourceName := fmt.Sprintf("//storage.googleapis.com/%s-for-asset", projectID)
+	bucketResourceName := fmt.Sprintf("//storage.googleapis.com/%s-for-assets", projectID)
 	req := &assetpb.BatchGetAssetsHistoryRequest{
 		Parent: fmt.Sprintf("projects/%s", projectID),
 		// Asset names, e.g.: bucket resource name
