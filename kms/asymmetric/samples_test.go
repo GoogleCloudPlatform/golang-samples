@@ -143,11 +143,8 @@ func TestRSAEncryptDecrypt(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(ciphertext) != 344 {
-		t.Errorf("ciphertext length = %d; want: %d", len(ciphertext), 344)
-	}
-	if ciphertext[len(ciphertext)-2:] != "==" {
-		t.Errorf("ciphertet ending: %s; want: %s", ciphertext[len(ciphertext)-2:], "==")
+	if len(cipherBytes) != 256 {
+		t.Errorf("ciphertext length = %d; want: %d", len(ciphertext), 256)
 	}
 	plainBytes, err := decryptRSA(v.ctx, v.client, v.rsaDecryptPath, cipherBytes)
 	if err != nil {
@@ -173,17 +170,14 @@ func TestRSASignVerify(t *testing.T) {
 	if err != nil {
 		t.Fatalf("signAsymmetric(%s, %s): %v", v.message, v.rsaSignPath, err)
 	}
-	if len(sig) != 344 {
-		t.Errorf("sig length = %d; want: %d", len(sig), 344)
+	if len(sig) != 256 {
+		t.Errorf("sig length = %d; want: %d", len(sig), 256)
 	}
-	if sig[len(sig)-2:] != "==" {
-		t.Errorf("sig ending: %s; want: %s", sig[len(sig)-2:], "==")
-	}
-	if err = verifySignatureRSA(v.ctx, v.client, sig, v.rsaSignPath, []byte(v.message)); err != nil {
+	if err = verifySignatureRSA(v.ctx, v.client, v.rsaSignPath, sig, []byte(v.message)); err != nil {
 		t.Fatalf("verifySignatureRSA(%s, %s, %s): %v", sig, v.message, v.rsaSignPath, err)
 	}
 	changed := v.message + "."
-	if err = verifySignatureRSA(v.ctx, v.client, sig, v.rsaSignPath, []byte(changed)); err == nil {
+	if err = verifySignatureRSA(v.ctx, v.client, v.rsaSignPath, sig, []byte(changed)); err == nil {
 		t.Errorf("verification for modified message should fail")
 	}
 }
@@ -203,11 +197,11 @@ func TestECSignVerify(t *testing.T) {
 		t.Errorf("Length = %d; want between 50-300", len(sig))
 	}
 
-	if err = verifySignatureEC(v.ctx, v.client, sig, v.ecSignPath, []byte(v.message)); err != nil {
+	if err = verifySignatureEC(v.ctx, v.client, v.ecSignPath, sig, []byte(v.message)); err != nil {
 		t.Fatalf("verifySignatureEC(%s, %s, %s): %v", sig, v.message, v.ecSignPath, err)
 	}
 	changed := v.message + "."
-	if err = verifySignatureEC(v.ctx, v.client, sig, v.ecSignPath, []byte(changed)); err == nil {
+	if err = verifySignatureEC(v.ctx, v.client, v.ecSignPath, sig, []byte(changed)); err == nil {
 		t.Errorf("verification for modified message should fail")
 	}
 }
