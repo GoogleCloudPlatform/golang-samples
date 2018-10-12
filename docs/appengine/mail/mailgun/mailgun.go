@@ -21,7 +21,6 @@ func SendSimpleMessageHandler(w http.ResponseWriter, r *http.Request) {
 	mg := mailgun.NewMailgun(
 		"YOUR_DOMAIN_NAME", // Domain name
 		"YOUR_API_KEY",     // API Key
-		"YOUR_PUBLIC_KEY",  // Public Key
 	)
 	mg.SetClient(httpc)
 
@@ -47,7 +46,6 @@ func SendComplexMessageHandler(w http.ResponseWriter, r *http.Request) {
 	mg := mailgun.NewMailgun(
 		"YOUR_DOMAIN_NAME", // Domain name
 		"YOUR_API_KEY",     // API Key
-		"YOUR_PUBLIC_KEY",  // Public Key
 	)
 	mg.SetClient(httpc)
 
