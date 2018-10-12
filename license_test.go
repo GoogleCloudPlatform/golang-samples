@@ -9,13 +9,13 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"testing"
 )
 
-// Break up string so the current file is also tested.
-const sentinel = "Google Inc. All rights reserved.\n" +
-	"// Use of this source code is governed by the Apache 2.0\n" +
-	"// license that can be found in the LICENSE file."
+var sentinel = regexp.MustCompile(`// Copyright \d\d\d\d Google (Inc|LLC)\. All rights reserved\.
+// Use of this source code is governed by the Apache 2\.0
+// license that can be found in the LICENSE file\.`)
 
 const prefix = "// Copyright "
 
@@ -46,7 +46,7 @@ func TestLicense(t *testing.T) {
 		}
 
 		// Find license
-		if !bytes.Contains(src, []byte(sentinel)) {
+		if !sentinel.Match(src) {
 			t.Errorf("%v: license header not present", path)
 			return nil
 		}
