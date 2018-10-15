@@ -10,7 +10,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 	"time"
 
 	"contrib.go.opencensus.io/exporter/stackdriver"
@@ -20,32 +19,25 @@ import (
 )
 
 var (
-	// The latency in milliseconds.
-	latencyMs = stats.Float64("demo/latency", "The latency in milliseconds", "ms")
+	// The task latency in milliseconds.
+	latencyMs = stats.Float64("task_latency", "The task latency in milliseconds", "ms")
+)
 
-	latencyView = &view.View{
-		Name:        "demo/latency",
+func main() {
+	ctx := context.Background()
+
+	// Register the view. It is imperative that this step exists,
+	// otherwise recorded metrics will be dropped and never exported.
+	v := &view.View{
+		Name:        "task_latency_distribution",
 		Measure:     latencyMs,
-		Description: "The distribution of the latencies",
+		Description: "The distribution of the task latencies",
 
 		// Latency in buckets:
 		// [>=0ms, >=100ms, >=200ms, >=400ms, >=1s, >=2s, >=4s]
 		Aggregation: view.Distribution(0, 100, 200, 400, 1000, 2000, 4000),
 	}
-)
-
-var projectID = os.Getenv("GOOGLE_CLOUD_PROJECT")
-
-func main() {
-	if projectID == "" {
-		log.Fatal("The GOOGLE_CLOUD_PROJECT environment variable must be set.")
-	}
-
-	ctx := context.Background()
-
-	// Register the view. It is imperative that this step exists,
-	// otherwise recorded metrics will be dropped and never exported.
-	if err := view.Register(latencyView); err != nil {
+	if err := view.Register(v); err != nil {
 		log.Fatalf("Failed to register the view: %v", err)
 	}
 
@@ -54,10 +46,7 @@ func main() {
 	// Exporters use Application Default Credentials to authenticate.
 	// See https://developers.google.com/identity/protocols/application-default-credentials
 	// for more details.
-	exporter, err := stackdriver.NewExporter(stackdriver.Options{
-		ProjectID:    projectID,
-		MetricPrefix: "my-metrics",
-	})
+	exporter, err := stackdriver.NewExporter(stackdriver.Options{})
 	if err != nil {
 		log.Fatal(err)
 	}
