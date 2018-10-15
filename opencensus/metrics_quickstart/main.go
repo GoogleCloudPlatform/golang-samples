@@ -2,6 +2,8 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
+// [START monitoring_opencensus_metrics_quickstart]
+
 // metrics_quickstart is an example of exporting a custom metric from
 // OpenCensus to Stackdriver.
 package main
@@ -68,3 +70,5 @@ func main() {
 
 	fmt.Println("Done recording metrics")
 }
+
+// [END monitoring_opencensus_metrics_quickstart]
