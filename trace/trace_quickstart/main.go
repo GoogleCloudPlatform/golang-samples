@@ -2,8 +2,7 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// +build go1.8
-
+// [START trace_setup_go_quickstart]
 // [START trace_quickstart]
 
 // Sample trace_quickstart creates traces incoming and outgoing requests.
@@ -20,11 +19,8 @@ import (
 )
 
 func main() {
-	// Create an register a OpenCensus
-	// Stackdriver Trace exporter.
-	exporter, err := stackdriver.NewExporter(stackdriver.Options{
-		ProjectID: "YOUR_PROJECT_ID",
-	})
+	// Create and register a OpenCensus Stackdriver Trace exporter.
+	exporter, err := stackdriver.NewExporter(stackdriver.Options{})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -54,3 +50,4 @@ func main() {
 }
 
 // [END trace_quickstart]
+// [END trace_setup_go_quickstart]

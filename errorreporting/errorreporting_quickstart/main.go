@@ -2,6 +2,8 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
+// [START error_reporting_setup_go]
+// [START error_reporting_quickstart]
 // [START errorreporting_quickstart]
 
 // Sample errorreporting_quickstart contains is a quickstart
@@ -52,3 +54,5 @@ func logAndPrintError(err error) {
 }
 
 // [END errorreporting_quickstart]
+// [END error_reporting_quickstart]
+// [END error_reporting_setup_go]

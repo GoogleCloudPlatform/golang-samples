@@ -2,10 +2,12 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
+// [START profiler_setup_go_compute_engine]
+// [START profiler_start]
+
 // snippets is an example of starting cloud.google.com/go/profiler.
 package main
 
-// [START profiler_start]
 import (
 	"cloud.google.com/go/profiler"
 )
@@ -23,3 +25,4 @@ func main() {
 }
 
 // [END profiler_start]
+// [END profiler_setup_go_compute_engine]
