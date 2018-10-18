@@ -6,9 +6,11 @@
 package samples
 
 import (
+	"bytes"
 	"context"
 	"crypto/ecdsa"
 	"crypto/rsa"
+	"encoding/base64"
 	"os"
 	"testing"
 	"time"
@@ -136,22 +138,24 @@ func TestRSAEncryptDecrypt(t *testing.T) {
 		t.Fatalf("intial variable setup failed: %v", err)
 	}
 
-	ciphertext, err := encryptRSA(v.ctx, v.client, v.message, v.rsaDecryptPath)
+	cipherBytes, err := encryptRSA(v.ctx, v.client, v.rsaDecryptPath, []byte(v.message))
+	ciphertext := base64.StdEncoding.EncodeToString(cipherBytes)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(ciphertext) != 344 {
-		t.Errorf("ciphertext length = %d; want: %d", len(ciphertext), 344)
+	if len(cipherBytes) != 256 {
+		t.Errorf("ciphertext length = %d; want: %d", len(ciphertext), 256)
 	}
-	if ciphertext[len(ciphertext)-2:] != "==" {
-		t.Errorf("ciphertet ending: %s; want: %s", ciphertext[len(ciphertext)-2:], "==")
-	}
-	plaintext, err := decryptRSA(v.ctx, v.client, ciphertext, v.rsaDecryptPath)
+	plainBytes, err := decryptRSA(v.ctx, v.client, v.rsaDecryptPath, cipherBytes)
 	if err != nil {
 		t.Fatalf("decryptRSA(%s, %s): %v", ciphertext, v.rsaDecryptPath, err)
 	}
-	if v.message != plaintext {
-		t.Errorf("failed to decypt expected plaintext: want %s, got %s", plaintext, v.message)
+	if !bytes.Equal(plainBytes, []byte(v.message)) {
+		t.Fatalf("decrypted plaintext does not match input message: want %s, got %s", []byte(v.message), plainBytes)
+	}
+	plaintext := string(plainBytes)
+	if plaintext != v.message {
+		t.Fatalf("failed to decypt expected plaintext: want %s, got %s", v.message, plaintext)
 	}
 }
 
@@ -162,20 +166,18 @@ func TestRSASignVerify(t *testing.T) {
 		t.Fatalf("intial variable setup failed: %v", err)
 	}
 
-	sig, err := signAsymmetric(v.ctx, v.client, v.message, v.rsaSignPath)
+	sig, err := signAsymmetric(v.ctx, v.client, v.rsaSignPath, []byte(v.message))
 	if err != nil {
 		t.Fatalf("signAsymmetric(%s, %s): %v", v.message, v.rsaSignPath, err)
 	}
-	if len(sig) != 344 {
-		t.Errorf("sig length = %d; want: %d", len(sig), 344)
+	if len(sig) != 256 {
+		t.Errorf("sig length = %d; want: %d", len(sig), 256)
 	}
-	if sig[len(sig)-2:] != "==" {
-		t.Errorf("sig ending: %s; want: %s", sig[len(sig)-2:], "==")
-	}
-	if err = verifySignatureRSA(v.ctx, v.client, sig, v.message, v.rsaSignPath); err != nil {
+	if err = verifySignatureRSA(v.ctx, v.client, v.rsaSignPath, sig, []byte(v.message)); err != nil {
 		t.Fatalf("verifySignatureRSA(%s, %s, %s): %v", sig, v.message, v.rsaSignPath, err)
 	}
-	if err = verifySignatureRSA(v.ctx, v.client, sig, v.message+".", v.rsaSignPath); err == nil {
+	changed := v.message + "."
+	if err = verifySignatureRSA(v.ctx, v.client, v.rsaSignPath, sig, []byte(changed)); err == nil {
 		t.Errorf("verification for modified message should fail")
 	}
 }
@@ -187,7 +189,7 @@ func TestECSignVerify(t *testing.T) {
 		t.Fatalf("intial variable setup failed: %v", err)
 	}
 
-	sig, err := signAsymmetric(v.ctx, v.client, v.message, v.ecSignPath)
+	sig, err := signAsymmetric(v.ctx, v.client, v.ecSignPath, []byte(v.message))
 	if err != nil {
 		t.Fatalf("signAsymmetric(%s, %s): %v", v.message, v.ecSignPath, err)
 	}
@@ -195,10 +197,11 @@ func TestECSignVerify(t *testing.T) {
 		t.Errorf("Length = %d; want between 50-300", len(sig))
 	}
 
-	if err = verifySignatureEC(v.ctx, v.client, sig, v.message, v.ecSignPath); err != nil {
+	if err = verifySignatureEC(v.ctx, v.client, v.ecSignPath, sig, []byte(v.message)); err != nil {
 		t.Fatalf("verifySignatureEC(%s, %s, %s): %v", sig, v.message, v.ecSignPath, err)
 	}
-	if err = verifySignatureEC(v.ctx, v.client, sig, v.message+".", v.ecSignPath); err == nil {
+	changed := v.message + "."
+	if err = verifySignatureEC(v.ctx, v.client, v.ecSignPath, sig, []byte(changed)); err == nil {
 		t.Errorf("verification for modified message should fail")
 	}
 }

@@ -7,6 +7,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"os"
 	"testing"
 	"time"
@@ -20,6 +22,14 @@ var (
 	storageClient *storage.Client
 	bucketName    string
 )
+
+func TestMain(m *testing.M) {
+	// These functions are noisy.
+	log.SetOutput(ioutil.Discard)
+	s := m.Run()
+	log.SetOutput(os.Stderr)
+	os.Exit(s)
+}
 
 func setup(t *testing.T) {
 	tc := testutil.SystemTest(t)
@@ -126,6 +136,75 @@ func TestKMS(t *testing.T) {
 	kmsKeyName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", tc.ProjectID, "global", keyRingID, cryptoKeyID)
 	if err := setDefaultKMSkey(storageClient, bucketName, kmsKeyName); err != nil {
 		t.Fatalf("failed to enable default kms key (%q): %v", bucketName, err)
+	}
+}
+
+func TestBucketLock(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	setup(t)
+
+	retentionPeriod := 5 * time.Second
+
+	if err := setRetentionPolicy(storageClient, bucketName, retentionPeriod); err != nil {
+		t.Fatalf("failed to set retention policy (%q): %v", bucketName, err)
+	}
+	attrs, err := getRetentionPolicy(storageClient, bucketName)
+	if err != nil {
+		t.Fatalf("failed to get retention policy (%q): %v", bucketName, err)
+	}
+	if attrs.RetentionPolicy.RetentionPeriod != retentionPeriod {
+		t.Fatalf("retention period is not the expected value (%q): %v", retentionPeriod, attrs.RetentionPolicy.RetentionPeriod)
+	}
+	if err := enableDefaultEventBasedHold(storageClient, bucketName); err != nil {
+		t.Fatalf("failed to enable default event-based hold (%q): %v", bucketName, err)
+	}
+	attrs, err = getDefaultEventBasedHold(storageClient, bucketName)
+	if err != nil {
+		t.Fatalf("failed to get default event-based hold (%q): %v", bucketName, err)
+	}
+	if !attrs.DefaultEventBasedHold {
+		t.Fatalf("default event-based hold was not enabled")
+	}
+	if err := disableDefaultEventBasedHold(storageClient, bucketName); err != nil {
+		t.Fatalf("failed to disable event-based hold (%q): %v", bucketName, err)
+	}
+	attrs, err = getDefaultEventBasedHold(storageClient, bucketName)
+	if err != nil {
+		t.Fatalf("failed to get default event-based hold (%q): %v", bucketName, err)
+	}
+	if attrs.DefaultEventBasedHold {
+		t.Fatalf("default event-based hold was not disabled")
+	}
+	if err := removeRetentionPolicy(storageClient, bucketName); err != nil {
+		t.Fatalf("failed to remove retention policy (%q): %v", bucketName, err)
+	}
+	attrs, err = getRetentionPolicy(storageClient, bucketName)
+	if err != nil {
+		t.Fatalf("failed to get retention policy (%q): %v", bucketName, err)
+	}
+	if attrs.RetentionPolicy != nil {
+		t.Fatalf("retention period to not be set")
+	}
+	if err := setRetentionPolicy(storageClient, bucketName, retentionPeriod); err != nil {
+		t.Fatalf("failed to set retention policy (%q): %v", bucketName, err)
+	}
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		if err := lockRetentionPolicy(storageClient, bucketName); err != nil {
+			r.Errorf("failed to lock retention policy (%q): %v", bucketName, err)
+		}
+		attrs, err := getRetentionPolicy(storageClient, bucketName)
+		if err != nil {
+			r.Errorf("failed to check if retention policy is locked (%q): %v", bucketName, err)
+		}
+		if !attrs.RetentionPolicy.IsLocked {
+			r.Errorf("retention policy is not locked")
+		}
+	})
+	time.Sleep(5 * time.Second)
+	deleteBucket(storageClient, bucketName)
+	time.Sleep(5 * time.Second)
+	if err := create(storageClient, tc.ProjectID, bucketName); err != nil {
+		t.Fatalf("failed to create bucket (%q): %v", bucketName, err)
 	}
 }
 

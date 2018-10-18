@@ -43,7 +43,7 @@ func main() {
 
 	t := createTopicIfNotExists(client)
 
-	const sub = "example-subscription"
+	const sub = "my-sub"
 	// Create a new subscription.
 	if err := create(client, sub, t); err != nil {
 		log.Fatal(err)
@@ -220,7 +220,7 @@ func delete(client *pubsub.Client, subName string) error {
 func createTopicIfNotExists(c *pubsub.Client) *pubsub.Topic {
 	ctx := context.Background()
 
-	const topic = "example-topic"
+	const topic = "my-topic"
 	// Create a topic to subscribe to.
 	t := c.Topic(topic)
 	ok, err := t.Exists(ctx)

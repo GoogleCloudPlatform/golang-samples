@@ -13,10 +13,9 @@ import (
 	"os"
 	"strings"
 
+	"github.com/mailgun/mailgun-go"
 	"google.golang.org/appengine"
 )
-
-import "github.com/mailgun/mailgun-go"
 
 func main() {
 	http.HandleFunc("/send_simple", sendSimpleMessageHandler)
@@ -34,8 +33,7 @@ func init() {
 	mailgunDomain = mustGetenv("MAILGUN_DOMAIN_NAME")
 	mailgunClient = mailgun.NewMailgun(
 		mailgunDomain,
-		mustGetenv("MAILGUN_API_KEY"),
-		mustGetenv("MAILGUN_PUBLIC_KEY"))
+		mustGetenv("MAILGUN_API_KEY"))
 }
 
 func mustGetenv(k string) string {
