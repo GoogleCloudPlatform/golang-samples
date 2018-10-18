@@ -5,8 +5,6 @@
 // Samples for asymmetric keys feature of Cloud Key Management Service: https://cloud.google.com/kms/
 package samples
 
-// [START kms_get_asymmetric_public]
-
 import (
 	"context"
 	"crypto"
@@ -25,11 +23,13 @@ import (
 	"google.golang.org/api/cloudkms/v1"
 )
 
-// [END kms_get_asymmetric_public]
-
 // [START kms_get_asymmetric_public]
 
 // getAsymmetricPublicKey retrieves the public key from a saved asymmetric key pair on KMS.
+//
+// Requires:
+//   crypto/x509
+//   encoding/pem
 func getAsymmetricPublicKey(ctx context.Context, client *cloudkms.Service, keyPath string) (interface{}, error) {
 	response, err := client.Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions.
 		GetPublicKey(keyPath).Context(ctx).Do()
@@ -50,6 +50,9 @@ func getAsymmetricPublicKey(ctx context.Context, client *cloudkms.Service, keyPa
 // [START kms_decrypt_rsa]
 
 // decryptRSA will attempt to decrypt a given ciphertext with an 'RSA_DECRYPT_OAEP_2048_SHA256' private key.stored on Cloud KMS
+//
+// Requires:
+//   encoding/base64
 func decryptRSA(ctx context.Context, client *cloudkms.Service, keyPath string, ciphertext []byte) ([]byte, error) {
 	decryptRequest := &cloudkms.AsymmetricDecryptRequest{
 		Ciphertext: base64.StdEncoding.EncodeToString(ciphertext),
@@ -72,6 +75,11 @@ func decryptRSA(ctx context.Context, client *cloudkms.Service, keyPath string, c
 // [START kms_encrypt_rsa]
 
 // encryptRSA will encrypt data locally using an 'RSA_DECRYPT_OAEP_2048_SHA256' public key retrieved from Cloud KMS
+//
+// Requires:
+//   crypto/rand
+//   crypto/rsa
+//   crypto/sha256
 func encryptRSA(ctx context.Context, client *cloudkms.Service, keyPath string, plaintext []byte) ([]byte, error) {
 	abstractKey, err := getAsymmetricPublicKey(ctx, client, keyPath)
 	if err != nil {
@@ -93,6 +101,10 @@ func encryptRSA(ctx context.Context, client *cloudkms.Service, keyPath string, p
 // [START kms_sign_asymmetric]
 
 // signAsymmetric will sign a plaintext message using a saved asymmetric private key.
+//
+// Requires:
+//   crypto/sha256
+//   encoding/base64
 func signAsymmetric(ctx context.Context, client *cloudkms.Service, keyPath string, message []byte) ([]byte, error) {
 	// Note: some key algorithms will require a different hash function.
 	// For example, EC_SIGN_P384_SHA384 requires SHA-384.
@@ -120,6 +132,10 @@ func signAsymmetric(ctx context.Context, client *cloudkms.Service, keyPath strin
 // [START kms_verify_signature_rsa]
 
 // verifySignatureRSA will verify that an 'RSA_SIGN_PSS_2048_SHA256' signature is valid for a given message.
+//
+// Requires:
+//   crypto/rsa
+//   crypto/sha256
 func verifySignatureRSA(ctx context.Context, client *cloudkms.Service, keyPath string, signature, message []byte) error {
 	abstractKey, err := getAsymmetricPublicKey(ctx, client, keyPath)
 	if err != nil {
@@ -144,6 +160,12 @@ func verifySignatureRSA(ctx context.Context, client *cloudkms.Service, keyPath s
 // [START kms_verify_signature_ec]
 
 // verifySignatureEC will verify that an 'EC_SIGN_P256_SHA256' signature is valid for a given message.
+//
+// Requires:
+//   crypto/ecdsa
+//   crypto/sha256
+//   encoding/asn1
+//   math/big
 func verifySignatureEC(ctx context.Context, client *cloudkms.Service, keyPath string, signature, message []byte) error {
 	abstractKey, err := getAsymmetricPublicKey(ctx, client, keyPath)
 	if err != nil {
