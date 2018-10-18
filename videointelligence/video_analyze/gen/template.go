@@ -13,9 +13,8 @@ import (
 	"io/ioutil"
 
 	video "cloud.google.com/go/videointelligence/apiv1"
-	videopb "google.golang.org/genproto/googleapis/cloud/videointelligence/v1"
-
 	"github.com/golang/protobuf/ptypes"
+	videopb "google.golang.org/genproto/googleapis/cloud/videointelligence/v1"
 )
 
 //# if gcs
