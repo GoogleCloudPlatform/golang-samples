@@ -192,7 +192,7 @@ func TestRunAutoCompleteSample(t *testing.T) {
 	}
 
 	want = "DefaultAutoComplete query: gap StatusCode: 200\n"
-	want += "-- suggestion: Gap\n"
+	want += "-- suggestion: Gap"
 	if !strings.Contains(got, want) {
 		t.Errorf("stdout returned %s, wanted to contain %s", got, want)
 	}
