@@ -9,6 +9,7 @@ package snippets
 
 import (
 	"log"
+	"os"
 
 	"contrib.go.opencensus.io/exporter/stackdriver"
 	"go.opencensus.io/trace"
@@ -16,7 +17,9 @@ import (
 
 func main() {
 	// Create and register a OpenCensus Stackdriver Trace exporter.
-	exporter, err := stackdriver.NewExporter(stackdriver.Options{})
+	exporter, err := stackdriver.NewExporter(stackdriver.Options{
+		ProjectID: os.Getenv("GOOGLE_CLOUD_PROJECT"),
+	})
 	if err != nil {
 		log.Fatal(err)
 	}
