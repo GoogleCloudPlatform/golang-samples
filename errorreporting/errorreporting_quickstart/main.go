@@ -4,7 +4,6 @@
 
 // [START error_reporting_setup_go]
 // [START error_reporting_quickstart]
-// [START errorreporting_quickstart]
 
 // Sample errorreporting_quickstart contains is a quickstart
 // example for the Google Cloud Error Reporting API.
@@ -53,6 +52,5 @@ func logAndPrintError(err error) {
 	log.Print(err)
 }
 
-// [END errorreporting_quickstart]
 // [END error_reporting_quickstart]
 // [END error_reporting_setup_go]
