@@ -2,6 +2,8 @@
 
 set -e
 
+export GO111MODULE=on # always use modules.
+
 export GOLANG_SAMPLES_KMS_KEYRING=ring1
 export GOLANG_SAMPLES_KMS_CRYPTOKEY=key1
 export GOLANG_SAMPLES_IOT_PUB=$KOKORO_GFILE_DIR/rsa_cert.pem
@@ -77,11 +79,15 @@ else
   echo "Running tests in modified directories: $TARGET"
 fi
 
-# Download imports.
-GO_IMPORTS=$(go list -f '{{join .Imports "\n"}}{{"\n"}}{{join .TestImports "\n"}}' $TARGET | \
-  sort | uniq | \
-  grep -v golang-samples)
-time go get -u -v -d $GO_IMPORTS
+# Download imports (pre Go 1.11). Go 1.11+ uses modules.
+# NOTE: this command fails in Go 1.11 because "go get" on a standard library import fails.
+# TODO: remove this block once we cease support for Go 1.10.
+if ! go help mod 2>/dev/null >/dev/null; then
+  GO_IMPORTS=$(go list -f '{{join .Imports "\n"}}{{"\n"}}{{join .TestImports "\n"}}' $TARGET | \
+    sort | uniq | \
+    grep -v golang-samples)
+  time go get -u -v -d $GO_IMPORTS
+fi
 
 # Always download top-level and internal dependencies.
 go get -t ./internal/...
@@ -101,3 +107,8 @@ date
 OUTFILE=gotest.out
 2>&1 go test -timeout $TIMEOUT -v . $TARGET | tee $OUTFILE
 cat $OUTFILE | $GOPATH/bin/go-junit-report -set-exit-code > sponge_log.xml
+
+# Kokoro tries to cache the files, ensure they are readable.
+# It seems Kokoro uses a different user to read the files.
+modcachedir="$(go env GOPATH)/pkg/mod/cache"
+[[ -d "$modcachedir" ]] && chmod a+r -R "$modcachedir" || true
