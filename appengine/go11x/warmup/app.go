@@ -2,6 +2,8 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
+// [START gae_go111_warmup]
+
 // Sample warmup demonstrates usage of the /_ah/warmup handler.
 package main
 
@@ -31,3 +33,5 @@ func warmupHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("warmup done")
 }
+
+// [END gae_go111_warmup]
