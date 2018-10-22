@@ -14,45 +14,38 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-var projectID string
-
-func assertContains(t *testing.T, out string, sub string) {
-	t.Helper()
-	if !strings.Contains(out, sub) {
-		t.Errorf("got output %q; want it to contain %q", out, sub)
-	}
-}
-
-func TestMain(m *testing.M) {
-	if c, ok := testutil.ContextMain(m); ok {
-		projectID = c.ProjectID
-	}
-	os.Exit(m.Run())
-}
-
 func TestInspectString(t *testing.T) {
-	testutil.SystemTest(t)
-	// Capture snippet log
-	var b bytes.Buffer
-	log.SetOutput(&b)
-	// Run Snippet
-	inspectString(projectID, "I'm Gary and my email is gary@example.com")
+	tc := testutil.SystemTest(t)
+	// Run snippet and capture output.
+	buf := new(bytes.Buffer)
+	log.SetOutput(buf)
+	err := inspectString(buf, tc.ProjectID, "I'm Gary and my email is gary@example.com")
 	log.SetOutput(os.Stderr)
-	//Verify snippet output
-	output := b.String()
-	assertContains(t, output, "Info type: EMAIL_ADDRESS")
+
+	if err != nil {
+		t.Errorf("TestInspectFile: %v", err)
+	}
+	got := buf.String()
+	if want := "Info type: EMAIL_ADDRESS"; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
 }
 
 func TestInspectFile(t *testing.T) {
-	testutil.SystemTest(t)
-	// Capture snippet log
-	var b bytes.Buffer
-	log.SetOutput(&b)
-	// Run Snippet
-	inspectFile(projectID, "testdata/test.png", "IMAGE")
+	tc := testutil.SystemTest(t)
+	// Run snippet and capture output.
+	buf := new(bytes.Buffer)
+	err := inspectFile(buf, tc.ProjectID, "testdata/test.png", "IMAGE")
 	log.SetOutput(os.Stderr)
-	//Verify snippet output
-	output := b.String()
-	assertContains(t, output, "Info type: PHONE_NUMBER")
-	assertContains(t, output, "Info type: EMAIL_ADDRESS")
+
+	if err != nil {
+		t.Errorf("TestInspectFile: %v", err)
+	}
+	got := buf.String()
+	if want := "Info type: PHONE_NUMBER"; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
+	if want := "Info type: EMAIL_ADDRESS"; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
 }

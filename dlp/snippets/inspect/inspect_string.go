@@ -2,6 +2,7 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
+// Package inspect contains example snippets using the DLP Inspect API.
 package inspect
 
 // [START dlp_inspect_string]
@@ -13,32 +14,34 @@ import (
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
+// inspectString inspects the a given string, and prints results.
 func inspectString(projectID, textToInspect string) error {
 	// projectID := "my-project-id"
 	// textToInspect := "My name is Gary and my email is gary@example.com"
+	ctx := context.Background()
 
-	// Initialize client
-	client, err := dlp.NewClient(context.Background())
+	// Initialize client.
+	client, err := dlp.NewClient(ctx)
 	if err != nil {
 		return err
 	}
-	defer client.Close() // Closing the client safely stops any background threads or connections.
+	defer client.Close() // Closing the client safely cleans up background resources.
 
-	// Prepare the request.
-	// Set the item for the request.
+	// Construct the request to be processed by the client.
+	// Set the item for the request to inspect.
 	item := &dlppb.ContentItem{
 		DataItem: &dlppb.ContentItem_Value{
 			Value: textToInspect,
 		},
 	}
-	// Set the required InfoTypes for the inspection config.
-	var infoTypes []*dlppb.InfoType
-	for _, it := range []string{"PHONE_NUMBER", "EMAIL_ADDRESS", "CREDIT_CARD_NUMBER"} {
-		infoTypes = append(infoTypes, &dlppb.InfoType{Name: it})
-	}
+
 	// Set the inspection configuration for the request.
 	config := &dlppb.InspectConfig{
-		InfoTypes:    infoTypes,
+		InfoTypes: []*dlppb.InfoType{
+			{Name: "PHONE_NUMBER"},
+			{Name: "EMAIL_ADDRESS"},
+			{Name: "CREDIT_CARD_NUMBER"},
+		},
 		IncludeQuote: true,
 	}
 
@@ -48,7 +51,7 @@ func inspectString(projectID, textToInspect string) error {
 		Item:          item,
 		InspectConfig: config,
 	}
-	resp, err := client.InspectContent(context.Background(), req)
+	resp, err := client.InspectContent(ctx, req)
 	if err != nil {
 		return err
 	}

@@ -2,34 +2,36 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
+// Package inspect contains example snippets using the DLP Inspect API.
 package inspect
 
 // [START dlp_inspect_file]
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 
 	"cloud.google.com/go/dlp/apiv2"
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
+	"log"
 )
 
+// inspectFile inspects the file at a given filePath, and prints results.
 func inspectFile(projectID, filepath, fileType string) error {
 	// projectID := "my-project-id";
 	// filePath := "path/to/image.png";
 	// fileType := "IMAGE"
+	ctx := context.Background()
 
-	// Initialize client
-	client, err := dlp.NewClient(context.Background())
+	// Initialize client.
+	client, err := dlp.NewClient(ctx)
 	if err != nil {
 		return err
 	}
-	defer client.Close() // Closing the client safely stops any background threads or connections.
+	defer client.Close() // Closing the client safely cleans up background resources.
 
-	// Prepare the request
-	// Set the item for the request.
+	// Construct the request to be processed by the client.
+	// Set the item for the request to inspect.
 	data, err := ioutil.ReadFile(filepath)
 	if err != nil {
 		return err
@@ -41,7 +43,7 @@ func inspectFile(projectID, filepath, fileType string) error {
 	case "TEXT_UTF8":
 		itemType = dlppb.ByteContentItem_TEXT_UTF8
 	default:
-		return errors.New(fmt.Sprintf("invalid ByteType for ByteContentItem: '%s'", fileType))
+		return fmt.Errorf("invalid ByteType for ByteContentItem: '%s'", fileType)
 	}
 	item := &dlppb.ContentItem{
 		DataItem: &dlppb.ContentItem_ByteItem{
@@ -51,14 +53,14 @@ func inspectFile(projectID, filepath, fileType string) error {
 			},
 		},
 	}
-	// Set the required InfoTypes for the inspection config.
-	var infoTypes []*dlppb.InfoType
-	for _, it := range []string{"PHONE_NUMBER", "EMAIL_ADDRESS", "CREDIT_CARD_NUMBER"} {
-		infoTypes = append(infoTypes, &dlppb.InfoType{Name: it})
-	}
+
 	// Set the inspection configuration for the request.
 	config := &dlppb.InspectConfig{
-		InfoTypes:    infoTypes,
+		InfoTypes: []*dlppb.InfoType{
+			{Name: "PHONE_NUMBER"},
+			{Name: "EMAIL_ADDRESS"},
+			{Name: "CREDIT_CARD_NUMBER"},
+		},
 		IncludeQuote: true,
 	}
 
@@ -68,15 +70,14 @@ func inspectFile(projectID, filepath, fileType string) error {
 		Item:          item,
 		InspectConfig: config,
 	}
-	resp, err := client.InspectContent(context.Background(), req)
+	resp, err := client.InspectContent(ctx, req)
 	if err != nil {
-		return err
+		return fmt.Errorf("InspectContent: %v", err)
 	}
 
 	// Process the results.
-	result := resp.Result
-	log.Printf("Findings: %d\n", len(result.Findings))
-	for _, f := range result.Findings {
+	log.Printf("Findings: %d\n", len(resp.Result.Findings))
+	for _, f := range resp.Result.Findings {
 		log.Printf("\tQoute: %s\n", f.Quote)
 		log.Printf("\tInfo type: %s\n", f.InfoType.Name)
 		log.Printf("\tLikelihood: %s\n", f.Likelihood)
