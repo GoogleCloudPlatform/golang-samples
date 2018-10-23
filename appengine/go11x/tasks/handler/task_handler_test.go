@@ -5,8 +5,6 @@
 package main
 
 import (
-	"bytes"
-	"encoding/base64"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -91,8 +89,7 @@ func TestTaskHandler(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		message := base64.StdEncoding.EncodeToString([]byte(test.message))
-		req, err := http.NewRequest("POST", "/test_handler", strings.NewReader(message))
+		req, err := http.NewRequest("POST", "/test_handler", strings.NewReader(test.message))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -118,7 +115,7 @@ func TestTaskHandler(t *testing.T) {
 		}
 
 		// HTTP Body might have embedded NUL characters.
-		got := string(bytes.Replace(rr.Body.Bytes(), []byte("\x00"), []byte{}, -1))
+		got := rr.Body.String()
 		if got != want {
 			t.Errorf(
 				"%s: unexpected body:\n\tgot (%s)\n\twant (%s)",

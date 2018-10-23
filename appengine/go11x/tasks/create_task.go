@@ -9,7 +9,6 @@ package tasks
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
 	"os"
 
@@ -27,14 +26,14 @@ func CreateTask(locationID, queueID, message string) (*taskspb.Task, error) {
 		return nil, fmt.Errorf("NewClient: %v", err)
 	}
 
-	// Build the Task queue name.
+	// Build the Task queue path.
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
-	queueName := fmt.Sprintf("projects/%s/locations/%s/queues/%s", projectID, locationID, queueID)
+	queuePath := fmt.Sprintf("projects/%s/locations/%s/queues/%s", projectID, locationID, queueID)
 
 	// Build the Task payload.
 	// https://godoc.org/google.golang.org/genproto/googleapis/cloud/tasks/v2beta3#CreateTaskRequest
 	req := &taskspb.CreateTaskRequest{
-		Parent: queueName,
+		Parent: queuePath,
 		Task: &taskspb.Task{
 			// https://godoc.org/google.golang.org/genproto/googleapis/cloud/tasks/v2beta3#AppEngineHttpRequest
 			PayloadType: &taskspb.Task_AppEngineHttpRequest{
@@ -48,8 +47,7 @@ func CreateTask(locationID, queueID, message string) (*taskspb.Task, error) {
 
 	// Add a payload message if one is present.
 	if message != "" {
-		body := base64.StdEncoding.EncodeToString([]byte(message))
-		req.Task.GetAppEngineHttpRequest().Body = []byte(body)
+		req.Task.GetAppEngineHttpRequest().Body = []byte(message)
 	}
 
 	createdTask, err := client.CreateTask(ctx, req)

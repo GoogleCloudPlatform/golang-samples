@@ -8,7 +8,8 @@
 package main
 
 import (
-	"encoding/base64"
+	//"bytes"
+	//"encoding/base64"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -61,6 +62,7 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 		queueName = q[0]
 	}
 
+	// Extract the request body for further task details.
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "ReadAll: %v", err)
@@ -69,9 +71,7 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	taskMessage := ""
 	if len(body) > 0 {
-		decodedBytes := make([]byte, len(body))
-		base64.StdEncoding.Decode(decodedBytes, body)
-		taskMessage = string(decodedBytes)
+		taskMessage = string(body)
 	}
 
 	// Log & output details of the task.
@@ -81,7 +81,9 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 		taskMessage,
 	)
 
+	fmt.Println(output)
 	// This provides a 200 response code to delete the task from the queue.
+	// If removed, an implicit default success response will be sent.
 	fmt.Fprintln(w, output)
 }
 
