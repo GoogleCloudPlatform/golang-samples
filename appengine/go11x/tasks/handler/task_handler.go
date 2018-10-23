@@ -8,8 +8,6 @@
 package main
 
 import (
-	//"bytes"
-	//"encoding/base64"
 	"fmt"
 	"io/ioutil"
 	"log"
