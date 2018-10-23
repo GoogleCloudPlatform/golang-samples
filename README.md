@@ -68,7 +68,6 @@ Note: samples under `docs/appengine` are not shown because they mostly do not ru
 |[appengine_flexible/storage](appengine_flexible/storage)|Sample storage demonstrates use of the cloud.google.com/go/storage package from App Engine flexible environment.|
 |[appengine_flexible/tiny](appengine_flexible/tiny)|Sample tiny demonstrates overall program structure: a main package with a main function that calls appengine.Main.|
 |[appengine_flexible/twilio](appengine_flexible/twilio)|Sample twilio demonstrates sending and receiving SMS, receiving calls via Twilio from App Engine flexible environment.|
-|[tasks/pull_queue](tasks/pull_queue)|Sample Pull Queue snippets to create, lease, and acknowledge Cloud Tasks.|
 
 ### Storage
 
