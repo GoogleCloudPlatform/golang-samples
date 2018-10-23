@@ -3,9 +3,8 @@
 // license that can be found in the LICENSE file.
 
 // [START trace_setup_go_quickstart]
-// [START trace_quickstart]
 
-// Sample trace_quickstart creates traces incoming and outgoing requests.
+// Sample trace_quickstart traces incoming and outgoing requests.
 package main
 
 import (
@@ -52,5 +51,4 @@ func main() {
 	log.Fatal(http.ListenAndServe(":6060", &ochttp.Handler{}))
 }
 
-// [END trace_quickstart]
 // [END trace_setup_go_quickstart]
