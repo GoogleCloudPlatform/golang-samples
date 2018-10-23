@@ -11,20 +11,20 @@ import (
 )
 
 func TestIndexHandler(t *testing.T) {
-	tests := []struct{
-		route string
+	tests := []struct {
+		route  string
 		status int
-		body string
+		body   string
 	}{
 		{
-			route: "/",
+			route:  "/",
 			status: http.StatusOK,
-			body: "Hello, World!",
+			body:   "Hello, World!",
 		},
 		{
-			route: "/404",
+			route:  "/404",
 			status: http.StatusNotFound,
-			body: "404 page not found\n",
+			body:   "404 page not found\n",
 		},
 	}
 
@@ -33,11 +33,11 @@ func TestIndexHandler(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-	
+
 		rr := httptest.NewRecorder()
 		handler := http.HandlerFunc(indexHandler)
 		handler.ServeHTTP(rr, req)
-	
+
 		if status := rr.Code; status != test.status {
 			t.Errorf(
 				"unexpected status: got (%v) want (%v)",
@@ -45,7 +45,7 @@ func TestIndexHandler(t *testing.T) {
 				test.status,
 			)
 		}
-	
+
 		expected := test.body
 		if rr.Body.String() != expected {
 			t.Errorf(
