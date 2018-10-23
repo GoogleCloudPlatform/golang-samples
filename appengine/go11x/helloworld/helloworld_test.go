@@ -11,48 +11,48 @@ import (
 )
 
 func TestIndexHandler(t *testing.T) {
-	req, err := http.NewRequest("GET", "/", nil)
-	if err != nil {
-		t.Fatal(err)
+	tests := []struct{
+		route string
+		status int
+		body string
+	}{
+		{
+			route: "/",
+			status: http.StatusOK,
+			body: "Hello, World!",
+		},
+		{
+			route: "/404",
+			status: http.StatusNotFound,
+			body: "404 page not found\n",
+		},
 	}
 
-	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(indexHandler)
-	handler.ServeHTTP(rr, req)
-
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf(
-			"unexpected status: got (%v) want (%v)",
-			status,
-			http.StatusOK,
-		)
-	}
-
-	expected := "Hello, World!"
-	if rr.Body.String() != expected {
-		t.Errorf(
-			"unexpected body: got (%v) want (%v)",
-			rr.Body.String(),
-			"Hello, World!",
-		)
-	}
-}
-
-func TestIndexHandlerNotFound(t *testing.T) {
-	req, err := http.NewRequest("GET", "/404", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(indexHandler)
-	handler.ServeHTTP(rr, req)
-
-	if status := rr.Code; status != http.StatusNotFound {
-		t.Errorf(
-			"unexpected status: got (%v) want (%v)",
-			status,
-			http.StatusOK,
-		)
+	for _, test := range tests {
+		req, err := http.NewRequest("GET", test.route, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+	
+		rr := httptest.NewRecorder()
+		handler := http.HandlerFunc(indexHandler)
+		handler.ServeHTTP(rr, req)
+	
+		if status := rr.Code; status != test.status {
+			t.Errorf(
+				"unexpected status: got (%v) want (%v)",
+				status,
+				test.status,
+			)
+		}
+	
+		expected := test.body
+		if rr.Body.String() != expected {
+			t.Errorf(
+				"unexpected body: got (%v) want (%v)",
+				rr.Body.String(),
+				test.body,
+			)
+		}
 	}
 }
