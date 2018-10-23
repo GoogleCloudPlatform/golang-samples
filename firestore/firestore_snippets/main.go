@@ -15,13 +15,15 @@ import (
 )
 
 // [START fs_class_definition]
+
 // City represents a city.
 type City struct {
-	Name       string `firestore:"name,omitempty"`
-	State      string `firestore:"state,omitempty"`
-	Country    string `firestore:"country,omitempty"`
-	Capital    bool   `firestore:"capital,omitempty"`
-	Population int64  `firestore:"population,omitempty"`
+	Name       string   `firestore:"name,omitempty"`
+	State      string   `firestore:"state,omitempty"`
+	Country    string   `firestore:"country,omitempty"`
+	Capital    bool     `firestore:"capital,omitempty"`
+	Population int64    `firestore:"population,omitempty"`
+	Regions    []string `firestore:"regions,omitempty"`
 }
 
 // [END fs_class_definition]
@@ -116,7 +118,12 @@ func main() {
 	if err := getCollections(ctx, client); err != nil {
 		log.Fatalf("Cannot get subcollections for document: %v", err)
 	}
-
+	if err := createArrayContainsQuery(ctx, client); err != nil {
+		log.Fatalf("Cannot get query results using array-contains: %v", err)
+	}
+	if err := createStartAtDocSnapshotQuery(ctx, client); err != nil {
+		log.Fatalf("Cannot get query results using document snapshot: %v", err)
+	}
 	if err := deleteCollection(ctx, client, client.Collection("cities"), 2); err != nil {
 		log.Fatalf("Cannot delete collectionL %v", err)
 	}
