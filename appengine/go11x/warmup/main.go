@@ -28,10 +28,11 @@ func main() {
 }
 
 func warmupHandler(w http.ResponseWriter, r *http.Request) {
-	// Perform warmup tasks, including ones that require a context,
+	// Perform warmup tasks, including ones that require a context.Context,
 	// such as retrieving data from Datastore.
 
 	log.Println("warmup done")
 }
 
 // [END gae_go111_warmup]
+
