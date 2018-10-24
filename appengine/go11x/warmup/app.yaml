@@ -3,9 +3,6 @@ runtime: go111
 inbound_services:
   - warmup
 
-automatic_scaling:
-  min_idle_instances: 1
-
 handlers:
   - url: /_ah/warmup
     script: auto
