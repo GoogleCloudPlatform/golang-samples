@@ -9,17 +9,17 @@ package inspect
 import (
 	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
 
 	"cloud.google.com/go/dlp/apiv2"
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
-	"log"
 )
 
 // inspectFile inspects the file at a given filePath, and prints results.
-func inspectFile(projectID, filepath, fileType string) error {
-	// projectID := "my-project-id";
-	// filePath := "path/to/image.png";
+func inspectFile(w io.Writer, projectID, filePath, fileType string) error {
+	// projectID := "my-project-id"
+	// filePath := "path/to/image.png"
 	// fileType := "IMAGE"
 	ctx := context.Background()
 
@@ -30,9 +30,8 @@ func inspectFile(projectID, filepath, fileType string) error {
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
-	// Construct the request to be processed by the client.
-	// Set the item for the request to inspect.
-	data, err := ioutil.ReadFile(filepath)
+	// Gather the resources for the request.
+	data, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		return err
 	}
@@ -45,30 +44,26 @@ func inspectFile(projectID, filepath, fileType string) error {
 	default:
 		return fmt.Errorf("invalid ByteType for ByteContentItem: '%s'", fileType)
 	}
-	item := &dlppb.ContentItem{
-		DataItem: &dlppb.ContentItem_ByteItem{
-			ByteItem: &dlppb.ByteContentItem{
-				Type: itemType,
-				Data: data,
-			},
-		},
-	}
-
-	// Set the inspection configuration for the request.
-	config := &dlppb.InspectConfig{
-		InfoTypes: []*dlppb.InfoType{
-			{Name: "PHONE_NUMBER"},
-			{Name: "EMAIL_ADDRESS"},
-			{Name: "CREDIT_CARD_NUMBER"},
-		},
-		IncludeQuote: true,
-	}
 
 	// Create and send the request.
 	req := &dlppb.InspectContentRequest{
-		Parent:        "projects/" + projectID,
-		Item:          item,
-		InspectConfig: config,
+		Parent: "projects/" + projectID,
+		Item: &dlppb.ContentItem{
+			DataItem: &dlppb.ContentItem_ByteItem{
+				ByteItem: &dlppb.ByteContentItem{
+					Type: itemType,
+					Data: data,
+				},
+			},
+		},
+		InspectConfig: &dlppb.InspectConfig{
+			InfoTypes: []*dlppb.InfoType{
+				{Name: "PHONE_NUMBER"},
+				{Name: "EMAIL_ADDRESS"},
+				{Name: "CREDIT_CARD_NUMBER"},
+			},
+			IncludeQuote: true,
+		},
 	}
 	resp, err := client.InspectContent(ctx, req)
 	if err != nil {
@@ -76,11 +71,11 @@ func inspectFile(projectID, filepath, fileType string) error {
 	}
 
 	// Process the results.
-	log.Printf("Findings: %d\n", len(resp.Result.Findings))
+	fmt.Fprintf(w, "Findings: %d\n", len(resp.Result.Findings))
 	for _, f := range resp.Result.Findings {
-		log.Printf("\tQoute: %s\n", f.Quote)
-		log.Printf("\tInfo type: %s\n", f.InfoType.Name)
-		log.Printf("\tLikelihood: %s\n", f.Likelihood)
+		fmt.Fprintf(w, "\tQoute: %s\n", f.Quote)
+		fmt.Fprintf(w, "\tInfo type: %s\n", f.InfoType.Name)
+		fmt.Fprintf(w, "\tLikelihood: %s\n", f.Likelihood)
 	}
 	return nil
 }
