@@ -67,16 +67,12 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Error", http.StatusInternalServerError)
 		return
 	}
-	taskMessage := ""
-	if len(body) > 0 {
-		taskMessage = string(body)
-	}
 
 	// Log & output details of the task.
 	output := fmt.Sprintf("Completed task: task queue(%s), task name(%s), payload(%s)",
 		queueName,
 		taskName,
-		taskMessage,
+		string(body),
 	)
 
 	fmt.Println(output)
