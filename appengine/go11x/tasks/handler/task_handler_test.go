@@ -101,8 +101,7 @@ func TestTaskHandler(t *testing.T) {
 		}
 
 		// HTTP Body might have embedded NUL characters.
-		got := rr.Body.String()
-		if got != want {
+		if got := rr.Body.String(); got != want {
 			t.Errorf("%s: unexpected body:\n\tgot (%s)\n\twant (%s)", test.name, got, want)
 		}
 	}
