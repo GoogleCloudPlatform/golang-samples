@@ -6,12 +6,11 @@ package tasks
 
 import (
 	"testing"
-
-        //"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	//"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestCreateTask(t *testing.T) {
-        tc := testutil.SystemTest(t)
+	tc := testutil.SystemTest(t)
 	locationID := "us-central1"
 	queueID := "my-appengine-queue"
 
@@ -30,7 +29,7 @@ func TestCreateTask(t *testing.T) {
 	}
 
 	for _, test := range tests {
-                _, err := createTask(tc.ProjectID, locationID, queueID, test.message)
+		_, err := createTask(tc.ProjectID, locationID, queueID, test.message)
 		if err != nil {
 			t.Errorf("CreateTask(%s): %v", test.name, err)
 		}
