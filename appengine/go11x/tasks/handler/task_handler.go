@@ -45,10 +45,10 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 func taskHandler(w http.ResponseWriter, r *http.Request) {
 	t, ok := r.Header["X-Appengine-Taskname"]
 	if !ok || len(t[0]) == 0 {
-		// Using the presence of the X-Appengine-Taskname header to indicate
-		// the request originates from Cloud Tasks.
-		fmt.Fprintln(os.Stderr, "Invalid Task: No X-Appengine-Taskname request header found")
-		http.Error(w, "Invalid Task", http.StatusBadRequest)
+		// You may use the presence of the X-Appengine-Taskname header to validate
+		// the request comes from Cloud Tasks.
+		log.Println("Invalid Task: No X-Appengine-Taskname request header found")
+		http.Error(w, "Bad Request - Invalid Task", http.StatusBadRequest)
 		return
 	}
 	taskName := t[0]
@@ -74,10 +74,10 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 		taskName,
 		string(body),
 	)
+	log.Println(output)
 
-	fmt.Println(output)
-	// This provides a 200 response code to delete the task from the queue.
-	// If removed, an implicit default success response will be sent.
+	// Set a non-2xx status code to indicate a failure in task processing that should be retried.
+	// For example, http.Error(w, "Internal Server Error: Task Processing", http.StatusInternalServerError)
 	fmt.Fprintln(w, output)
 }
 

@@ -62,7 +62,7 @@ func TestTaskHandler(t *testing.T) {
 			name:     "Invalid Task",
 			taskName: "",
 			message:  "",
-			body:     "Invalid Task\n",
+			body:     "Bad Request - Invalid Task\n",
 			status:   http.StatusBadRequest,
 		},
 		{
