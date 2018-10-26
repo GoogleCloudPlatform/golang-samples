@@ -12,12 +12,9 @@ import (
 )
 
 func TestCreateTask(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	// CreateTask pulls the project ID from the environment.
-	os.Setenv("GOOGLE_CLOUD_PROJECT", tc.ProjectID)
-	locationID := "us-central1"
-	queueID := "my-appengine-queue"
+        tc := testutil.SystemTest(t)
+        locationID := "us-central1"
+        queueID := "my-appengine-queue"
 
 	tests := []struct {
 		name    string
@@ -34,7 +31,7 @@ func TestCreateTask(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		_, err := CreateTask(locationID, queueID, test.message)
+		_, err := createTask(locationID, queueID, test.message)
 		if err != nil {
 			t.Errorf("CreateTask(%s): %v", test.name, err)
 		}

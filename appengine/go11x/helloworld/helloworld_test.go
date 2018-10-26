@@ -11,7 +11,6 @@ import (
 )
 
 func TestIndexHandler(t *testing.T) {
-<<<<<<< HEAD
 	tests := []struct {
 		route  string
 		status int
@@ -28,24 +27,6 @@ func TestIndexHandler(t *testing.T) {
 			body:   "404 page not found\n",
 		},
 	}
-=======
-        tests := []struct {
-                route  string
-                status int
-                body   string
-        }{
-                {
-                        route:  "/",
-                        status: http.StatusOK,
-                        body:   "Hello, World!",
-                },
-                {
-                        route:  "/404",
-                        status: http.StatusNotFound,
-                        body:   "404 page not found\n",
-                },
-        }
->>>>>>> appengine/tasks: fix gofmt on helloworld_test.go
 
 	for _, test := range tests {
 		req, err := http.NewRequest("GET", test.route, nil)
@@ -58,20 +39,12 @@ func TestIndexHandler(t *testing.T) {
 		handler.ServeHTTP(rr, req)
 
 		if status := rr.Code; status != test.status {
-			t.Errorf(
-				"unexpected status: got (%v) want (%v)",
-				status,
-				test.status,
-			)
+			t.Errorf("unexpected status: got (%v) want (%v)", status, test.status)
 		}
 
 		expected := test.body
 		if rr.Body.String() != expected {
-			t.Errorf(
-				"unexpected body: got (%v) want (%v)",
-				rr.Body.String(),
-				test.body,
-			)
+			t.Errorf("unexpected body: got (%v) want (%v)", rr.Body.String(), test.body)
 		}
 	}
 }
