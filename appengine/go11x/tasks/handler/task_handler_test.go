@@ -40,14 +40,14 @@ func TestIndexHandler(t *testing.T) {
 		handler := http.HandlerFunc(indexHandler)
 		handler.ServeHTTP(rr, req)
 
-                if status := rr.Code; status != test.status {
-                        t.Errorf("unexpected status: got (%v) want (%v)", status, test.status)
-                }
+		if status := rr.Code; status != test.status {
+			t.Errorf("unexpected status: got (%v) want (%v)", status, test.status)
+		}
 
-                if rr.Body.String() != test.body {
-                        t.Errorf("unexpected body: got (%v) want (%v)", rr.Body.String(), test.body)
-                }
-        }
+		if rr.Body.String() != test.body {
+			t.Errorf("unexpected body: got (%v) want (%v)", rr.Body.String(), test.body)
+		}
+	}
 }
 
 func TestTaskHandler(t *testing.T) {
@@ -90,9 +90,9 @@ func TestTaskHandler(t *testing.T) {
 		handler := http.HandlerFunc(taskHandler)
 		handler.ServeHTTP(rr, req)
 
-                if status := rr.Code; status != test.status {
-                        t.Errorf("%s: unexpected status: got (%v) want (%v)", test.name, status, test.status)
-                }
+		if status := rr.Code; status != test.status {
+			t.Errorf("%s: unexpected status: got (%v) want (%v)", test.name, status, test.status)
+		}
 
 		// Allow test cases to override the body message.
 		want := test.body
@@ -100,10 +100,10 @@ func TestTaskHandler(t *testing.T) {
 			want = fmt.Sprintf("Completed task: task queue(%s), task name(%s), payload(%s)\n", "", test.taskName, test.message)
 		}
 
-                // HTTP Body might have embedded NUL characters.
-                got := rr.Body.String()
-                if got != want {
-                        t.Errorf("%s: unexpected body:\n\tgot (%s)\n\twant (%s)", test.name, got, want)
-                }
-        }
+		// HTTP Body might have embedded NUL characters.
+		got := rr.Body.String()
+		if got != want {
+			t.Errorf("%s: unexpected body:\n\tgot (%s)\n\twant (%s)", test.name, got, want)
+		}
+	}
 }

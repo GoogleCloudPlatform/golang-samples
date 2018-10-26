@@ -8,11 +8,11 @@
 package main
 
 import (
-        "fmt"
-        "io/ioutil"
-        "log"
-        "net/http"
-        "os"
+	"fmt"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"os"
 )
 
 func main() {
