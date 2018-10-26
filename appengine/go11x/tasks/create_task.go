@@ -10,7 +10,6 @@ package tasks
 import (
 	"context"
 	"fmt"
-	"os"
 
 	cloudtasks "cloud.google.com/go/cloudtasks/apiv2beta3"
 	taskspb "google.golang.org/genproto/googleapis/cloud/tasks/v2beta3"
