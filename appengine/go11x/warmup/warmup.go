@@ -22,14 +22,17 @@ var startupTime time.Time
 var client *storage.Client
 
 func main() {
-	if err := setup(context.Background()); err != nil {
+	// Perform required setup steps for the application to function.
+	// This assumes any returned error requires a new instance to be created.
+	if err := warmupApp(context.Background()); err != nil {
 		log.Fatalf("setup: %v", err)
 	}
 
+	// Log when an appengine warmup request is used to create the new instance.
+	// Warmup steps are taken in warmupApp for consistency with "cold start" instances.
 	http.HandleFunc("/_ah/warmup", func(w http.ResponseWriter, r *http.Request) {
 		log.Println("warmup done")
 	})
-
 	http.HandleFunc("/", indexHandler)
 
 	port := os.Getenv("PORT")
@@ -42,14 +45,13 @@ func main() {
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
 }
 
-// setup executes per-instance one-time setup actions.
-func setup(ctx context.Context) error {
-	var err error
-
+// warmupApp executes per-instance one-time setup actions.
+func warmupApp(ctx context.Context) error {
 	// Store the startup time of the server.
 	startupTime = time.Now()
 
 	// Initialize a Google Cloud Storage client.
+	var err error
 	if client, err = storage.NewClient(ctx); err != nil {
 		return err
 	}
