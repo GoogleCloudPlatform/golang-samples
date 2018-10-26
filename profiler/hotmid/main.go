@@ -20,9 +20,9 @@ import (
 )
 
 var (
-	// Service version to configure.
+	// version is the service version to configure.
 	version = flag.String("version", "1.0.0", "service version")
-	// Benchmark duration or 0 to run forever.
+	// seconds is the benchmark duration in seconds or 0 to run forever.
 	seconds = flag.Int("seconds", 0, "benchmark duration in seconds")
 )
 
@@ -90,7 +90,8 @@ func foo6() {
 }
 
 func run() {
-	for start := time.Now(); *seconds == 0 || time.Since(start) < time.Duration(*seconds)*time.Second; {
+	start, duration := time.Now(), time.Duration(*seconds)*time.Second
+	for duration == 0 || time.Since(start) < duration {
 		foo1()
 		foo2()
 		foo3()
