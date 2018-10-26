@@ -63,7 +63,7 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 	// Extract the request body for further task details.
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "ReadAll: %v", err)
+		log.Printf("ReadAll: %v", err)
 		http.Error(w, "Internal Error", http.StatusInternalServerError)
 		return
 	}
