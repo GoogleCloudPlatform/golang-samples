@@ -42,9 +42,8 @@ func TestIndexHandler(t *testing.T) {
 			t.Errorf("unexpected status: got (%v) want (%v)", status, test.status)
 		}
 
-		expected := test.body
-		if rr.Body.String() != expected {
-			t.Errorf("unexpected body: got (%v) want (%v)", rr.Body.String(), test.body)
+		if got := rr.Body.String(); got != test.body {
+			t.Errorf("unexpected body: got (%v) want (%v)", got, test.body)
 		}
 	}
 }
