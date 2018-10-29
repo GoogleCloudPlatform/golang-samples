@@ -104,3 +104,5 @@ Note: samples under `docs/appengine` are not shown because they mostly do not ru
 
 [kokoro_badge]: https://storage.googleapis.com/cloud-devrel-kokoro-resources/go/golang-samples/system_tests-ubuntu.png
 [kokoro_link]: https://fusion.corp.google.com/projectanalysis/current/KOKORO/prod%3Acloud-devrel%2Fgo%2Fgolang-samples%2Fsystem_tests
+
+vary good
