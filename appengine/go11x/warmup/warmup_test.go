@@ -32,8 +32,8 @@ func TestIndexHandler(t *testing.T) {
 	}
 }
 
-func TestWarmupApp(t *testing.T) {
-	warmupApp(context.Background())
+func TestSetup(t *testing.T) {
+	setup(context.Background())
 	if startupTime.IsZero() {
 		t.Error("warmupApp: got (uninitialized startupTime) want (startupTime)")
 	}

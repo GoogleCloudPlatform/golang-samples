@@ -24,7 +24,7 @@ var client *storage.Client
 func main() {
 	// Perform required setup steps for the application to function.
 	// This assumes any returned error requires a new instance to be created.
-	if err := warmupApp(context.Background()); err != nil {
+	if err := setup(context.Background()); err != nil {
 		log.Fatalf("setup: %v", err)
 	}
 
@@ -45,8 +45,8 @@ func main() {
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
 }
 
-// warmupApp executes per-instance one-time setup actions.
-func warmupApp(ctx context.Context) error {
+// setup executes per-instance one-time warmup and initialization actions.
+func setup(ctx context.Context) error {
 	// Store the startup time of the server.
 	startupTime = time.Now()
 
