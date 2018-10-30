@@ -29,7 +29,7 @@ func main() {
 	}
 
 	// Log when an appengine warmup request is used to create the new instance.
-	// Warmup steps are taken in warmupApp for consistency with "cold start" instances.
+	// Warmup steps are taken in setup for consistency with "cold start" instances.
 	http.HandleFunc("/_ah/warmup", func(w http.ResponseWriter, r *http.Request) {
 		log.Println("warmup done")
 	})
