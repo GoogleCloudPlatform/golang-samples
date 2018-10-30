@@ -46,9 +46,11 @@ func TestCustomMetric(t *testing.T) {
 
 	time.Sleep(2 * time.Second)
 
-	if err := writeTimeSeriesValue(s, hc.ProjectID, metricType); err != nil {
-		t.Error(err)
-	}
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
+		if err := writeTimeSeriesValue(s, hc.ProjectID, metricType); err != nil {
+			t.Error(err)
+		}
+	})
 
 	time.Sleep(2 * time.Second)
 
@@ -58,7 +60,9 @@ func TestCustomMetric(t *testing.T) {
 		}
 	})
 
-	if err := deleteMetric(s, hc.ProjectID, metricType); err != nil {
-		t.Error(err)
-	}
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
+		if err := deleteMetric(s, hc.ProjectID, metricType); err != nil {
+			t.Error(err)
+		}
+	})
 }
