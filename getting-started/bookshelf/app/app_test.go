@@ -7,11 +7,13 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"math/rand"
 	"mime/multipart"
 	"net/http/httptest"
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/getting-started/bookshelf"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -29,12 +31,17 @@ func TestMain(m *testing.M) {
 }
 
 func TestMainFunc(t *testing.T) {
-	wt := webtest.New(t, "localhost:8080")
+	// randomize port selection to reduce liklihood of port collision
+	rand.Seed(time.Now().UnixNano())
+	port := fmt.Sprintf("%d", 8000+rand.Int31n(2000))
+	env := map[string]string{"PORT": port}
+	fmt.Printf("Using port: %s\n", port)
 	m := testutil.BuildMain(t)
 	defer m.Cleanup()
-	m.Run(nil, func() {
-		wt.WaitForNet()
-		bodyContains(t, wt, "/", "No books found")
+	m.Run(env, func() {
+		appWt := webtest.New(nil, fmt.Sprintf(":%s", port))
+		appWt.WaitForNet()
+		bodyContains(t, appWt, "/books", "No books found")
 	})
 }
 
