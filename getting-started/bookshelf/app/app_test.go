@@ -39,7 +39,7 @@ func TestMainFunc(t *testing.T) {
 	m := testutil.BuildMain(t)
 	defer m.Cleanup()
 	m.Run(env, func() {
-		appWt := webtest.New(nil, fmt.Sprintf(":%s", port))
+		appWt := webtest.New(nil, fmt.Sprintf("localhost:%s", port))
 		appWt.WaitForNet()
 		bodyContains(t, appWt, "/books", "No books found")
 	})
