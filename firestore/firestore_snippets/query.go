@@ -7,6 +7,7 @@ package main
 // [START fs_dependencies]
 import (
 	"context"
+	"fmt"
 
 	"cloud.google.com/go/firestore"
 )
@@ -19,11 +20,36 @@ func prepareQuery(ctx context.Context, client *firestore.Client) error {
 		id string
 		c  City
 	}{
-		{id: "SF", c: City{Name: "San Francisco", State: "CA", Country: "USA", Capital: false, Population: 860000}},
-		{id: "LA", c: City{Name: "Los Angeles", State: "CA", Country: "USA", Capital: false, Population: 3900000}},
-		{id: "DC", c: City{Name: "Washington D.C.", Country: "USA", Capital: false, Population: 680000}},
-		{id: "TOK", c: City{Name: "Tokyo", Country: "Japan", Capital: true, Population: 9000000}},
-		{id: "BJ", c: City{Name: "Beijing", Country: "China", Capital: true, Population: 21500000}},
+		{
+			id: "SF",
+			c: City{Name: "San Francisco", State: "CA", Country: "USA",
+				Capital: false, Population: 860000,
+				Regions: []string{"west_coast", "norcal"}},
+		},
+		{
+			id: "LA",
+			c: City{Name: "Los Angeles", State: "CA", Country: "USA",
+				Capital: false, Population: 3900000,
+				Regions: []string{"west_coast", "socal"}},
+		},
+		{
+			id: "DC",
+			c: City{Name: "Washington D.C.", Country: "USA",
+				Capital: false, Population: 680000,
+				Regions: []string{"east_coast"}},
+		},
+		{
+			id: "TOK",
+			c: City{Name: "Tokyo", Country: "Japan",
+				Capital: true, Population: 9000000,
+				Regions: []string{"kanto", "honshu"}},
+		},
+		{
+			id: "BJ",
+			c: City{Name: "Beijing", Country: "China",
+				Capital: true, Population: 21500000,
+				Regions: []string{"jingjinji", "hebei"}},
+		},
 	}
 	for _, c := range cities {
 		if _, err := client.Collection("cities").Doc(c.id).Set(ctx, c.c); err != nil {
@@ -211,4 +237,28 @@ func createMultipleStartAtQuery(client *firestore.Client) {
 		OrderBy("state", firestore.Asc).
 		StartAt("Springfield", "Wisconsin")
 	// [END fs_start_at_multiple]
+}
+
+func createArrayContainsQuery(ctx context.Context, client *firestore.Client) error {
+	cities := client.Collection("cities")
+	// [START fs_array_contains_query]
+	query := cities.Where("regions", "array-contains", "west_coast").Documents(ctx)
+	// [END fs_array_contains_query]
+
+	_ = query
+	return nil
+}
+
+func createStartAtDocSnapshotQuery(ctx context.Context, client *firestore.Client) error {
+	// [START fs_document_snapshot_cursor]
+	cities := client.Collection("cities")
+	dsnap, err := cities.Doc("SF").Get(ctx)
+	if err != nil {
+		fmt.Println(err)
+	}
+	query := cities.OrderBy("population", firestore.Asc).StartAt(dsnap.Data()["population"]).Documents(ctx)
+	// [END fs_document_snapshot_cursor]
+
+	_ = query
+	return nil
 }
