@@ -23,7 +23,7 @@ type W struct {
 	Client *http.Client
 }
 
-// New creates a web test for a given a host tring (e.g. "localhost:8080")
+// New creates a web test for a given a host string (e.g. "localhost:8080")
 func New(t *testing.T, host string) *W {
 	return &W{
 		t:      t,

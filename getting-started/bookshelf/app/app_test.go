@@ -28,14 +28,16 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func TestMainFunc(t *testing.T) {
-	wt := webtest.New(t, "localhost:8080")
+// This function verifies compilation occurs without error.
+// It may not be possible to run the application without
+// satisfying appengine environmental dependencies such as
+// the presence of a GCE metadata server.
+func TestBuildable(t *testing.T) {
 	m := testutil.BuildMain(t)
 	defer m.Cleanup()
-	m.Run(nil, func() {
-		wt.WaitForNet()
-		bodyContains(t, wt, "/", "No books found")
-	})
+	if !m.Built() {
+		t.Fatal("failed to compile application.")
+	}
 }
 
 func TestNoBooks(t *testing.T) {
