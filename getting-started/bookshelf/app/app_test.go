@@ -14,6 +14,7 @@ import (
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/getting-started/bookshelf"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/webtest"
 )
 
@@ -25,6 +26,18 @@ func TestMain(m *testing.M) {
 	registerHandlers()
 
 	os.Exit(m.Run())
+}
+
+// This function verifies compilation occurs without error.
+// It may not be possible to run the application without
+// satisfying appengine environmental dependencies such as
+// the presence of a GCE metadata server.
+func TestBuildable(t *testing.T) {
+	m := testutil.BuildMain(t)
+	defer m.Cleanup()
+	if !m.Built() {
+		t.Fatal("failed to compile application.")
+	}
 }
 
 func TestNoBooks(t *testing.T) {
