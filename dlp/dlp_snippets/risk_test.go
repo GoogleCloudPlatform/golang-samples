@@ -13,11 +13,14 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
+var riskTopicName = "dlp-risk-test-topic"
+var riskSubscriptionName = "dlp-risk-test-sub"
+
 func TestRiskNumerical(t *testing.T) {
 	testutil.SystemTest(t)
 	testutil.Retry(t, 20, 2*time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
-		riskNumerical(buf, client, projectID, "bigquery-public-data", "dlp-test-topic", "dlp-test-sub", "nhtsa_traffic_fatalities", "accident_2015", "state_number")
+		riskNumerical(buf, client, projectID, "bigquery-public-data", riskTopicName, riskSubscriptionName, "nhtsa_traffic_fatalities", "accident_2015", "state_number")
 		wants := []string{"Created job", "Value range", "Value at"}
 		got := buf.String()
 		for _, want := range wants {
@@ -32,7 +35,7 @@ func TestRiskCategorical(t *testing.T) {
 	testutil.SystemTest(t)
 	testutil.Retry(t, 20, 2*time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
-		riskCategorical(buf, client, projectID, "bigquery-public-data", "dlp-test-topic", "dlp-test-sub", "nhtsa_traffic_fatalities", "accident_2015", "state_number")
+		riskCategorical(buf, client, projectID, "bigquery-public-data", riskTopicName, riskSubscriptionName, "nhtsa_traffic_fatalities", "accident_2015", "state_number")
 		wants := []string{"Created job", "Histogram bucket", "Most common value occurs"}
 		got := buf.String()
 		for _, want := range wants {
@@ -47,7 +50,7 @@ func TestRiskKAnonymity(t *testing.T) {
 	testutil.SystemTest(t)
 	testutil.Retry(t, 20, 2*time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
-		riskKAnonymity(buf, client, projectID, "bigquery-public-data", "dlp-test-topic", "dlp-test-sub", "nhtsa_traffic_fatalities", "accident_2015", "state_number", "county")
+		riskKAnonymity(buf, client, projectID, "bigquery-public-data", riskTopicName, riskSubscriptionName, "nhtsa_traffic_fatalities", "accident_2015", "state_number", "county")
 		wants := []string{"Created job", "Histogram bucket", "Size range"}
 		got := buf.String()
 		for _, want := range wants {
@@ -62,7 +65,7 @@ func TestRiskLDiversity(t *testing.T) {
 	testutil.SystemTest(t)
 	testutil.Retry(t, 20, 2*time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
-		riskLDiversity(buf, client, projectID, "bigquery-public-data", "dlp-test-topic", "dlp-test-sub", "nhtsa_traffic_fatalities", "accident_2015", "city", "state_number", "county")
+		riskLDiversity(buf, client, projectID, "bigquery-public-data", riskTopicName, riskSubscriptionName, "nhtsa_traffic_fatalities", "accident_2015", "city", "state_number", "county")
 		wants := []string{"Created job", "Histogram bucket", "Size range"}
 		got := buf.String()
 		for _, want := range wants {
@@ -77,7 +80,7 @@ func TestRiskKMap(t *testing.T) {
 	testutil.SystemTest(t)
 	testutil.Retry(t, 20, 2*time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
-		riskKMap(buf, client, projectID, "bigquery-public-data", "dlp-test-topic", "dlp-test-sub", "san_francisco", "bikeshare_trips", "US", "zip_code")
+		riskKMap(buf, client, projectID, "bigquery-public-data", riskTopicName, riskSubscriptionName, "san_francisco", "bikeshare_trips", "US", "zip_code")
 		wants := []string{"Created job", "Histogram bucket", "Anonymity range"}
 		got := buf.String()
 		for _, want := range wants {

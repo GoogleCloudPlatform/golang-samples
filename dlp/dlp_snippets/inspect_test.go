@@ -17,6 +17,9 @@ import (
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
+var inspectTopicName = "dlp-inspect-test-topic"
+var inspectSubscriptionName = "dlp-inspect-test-sub"
+
 func TestInspectString(t *testing.T) {
 	testutil.SystemTest(t)
 	tests := []struct {
@@ -157,7 +160,7 @@ func TestInspectGCS(t *testing.T) {
 	}
 	for _, test := range tests {
 		buf := new(bytes.Buffer)
-		inspectGCSFile(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, true, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, "test-topic", "test-sub", bucketName, test.fileName)
+		inspectGCSFile(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, true, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, inspectTopicName, inspectSubscriptionName, bucketName, test.fileName)
 		if got := buf.String(); !strings.Contains(got, test.want) {
 			t.Errorf("inspectString(%s) = %q, want %q substring", test.fileName, got, test.want)
 		}
@@ -217,7 +220,7 @@ func TestInspectDatastore(t *testing.T) {
 	}
 	for _, test := range tests {
 		buf := new(bytes.Buffer)
-		inspectDatastore(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, true, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, "test-topic", "test-sub", projectID, "", test.kind)
+		inspectDatastore(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, true, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, inspectTopicName, inspectSubscriptionName, projectID, "", test.kind)
 		if got := buf.String(); !strings.Contains(got, test.want) {
 			t.Errorf("inspectDatastore(%s) = %q, want %q substring", test.kind, got, test.want)
 		}
@@ -298,7 +301,7 @@ func TestInspectBigquery(t *testing.T) {
 	}
 	for _, test := range tests {
 		buf := new(bytes.Buffer)
-		inspectBigquery(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, true, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, "test-topic", "test-sub", projectID, bqDatasetID, test.table)
+		inspectBigquery(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, true, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, inspectTopicName, inspectSubscriptionName, projectID, bqDatasetID, test.table)
 		if got := buf.String(); !strings.Contains(got, test.want) {
 			t.Errorf("inspectBigquery(%s) = %q, want %q substring", test.table, got, test.want)
 		}
