@@ -17,8 +17,10 @@ import (
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
-var inspectTopicName = "dlp-inspect-test-topic"
-var inspectSubscriptionName = "dlp-inspect-test-sub"
+const (
+	inspectTopicName        = "dlp-inspect-test-topic"
+	inspectSubscriptionName = "dlp-inspect-test-sub"
+)
 
 func TestInspectString(t *testing.T) {
 	testutil.SystemTest(t)

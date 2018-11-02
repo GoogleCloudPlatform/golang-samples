@@ -13,8 +13,10 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-var riskTopicName = "dlp-risk-test-topic"
-var riskSubscriptionName = "dlp-risk-test-sub"
+const (
+	riskTopicName        = "dlp-risk-test-topic"
+	riskSubscriptionName = "dlp-risk-test-sub"
+)
 
 func TestRiskNumerical(t *testing.T) {
 	testutil.SystemTest(t)
