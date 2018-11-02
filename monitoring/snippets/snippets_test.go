@@ -20,7 +20,7 @@ func TestReadTimeSeriesAlign(t *testing.T) {
 	}
 	want := "Done"
 	if got := buf.String(); !strings.Contains(got, want) {
-		t.Errorf("readTimeSeriesAlign got %q, want to contain %q", got, want)
+		t.Errorf("readTimeSeriesAlign() = %q, want to contain %q", got, want)
 	}
 }
 
@@ -32,7 +32,7 @@ func TestReadTimeSeriesReduce(t *testing.T) {
 	}
 	want := "Done"
 	if got := buf.String(); !strings.Contains(got, want) {
-		t.Errorf("readTimeSeriesReduce got %q, want to contain %q", got, want)
+		t.Errorf("readTimeSeriesReduce() = %q, want to contain %q", got, want)
 	}
 }
 
@@ -44,6 +44,6 @@ func TestReadTimeSeriesFields(t *testing.T) {
 	}
 	want := "Done"
 	if got := buf.String(); !strings.Contains(got, want) {
-		t.Errorf("readTimeSeriesFields got %q, want to contain %q", got, want)
+		t.Errorf("readTimeSeriesFields() = %q, want to contain %q", got, want)
 	}
 }
