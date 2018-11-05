@@ -5,12 +5,10 @@
 package main
 
 import (
-	"context"
 	"io/ioutil"
 	"log"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
@@ -25,21 +23,13 @@ func TestMain(m *testing.M) {
 
 func TestListResources(t *testing.T) {
 	hc := testutil.SystemTest(t)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
-	defer cancel()
-
-	s, err := createService(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if err := listMonitoredResourceDescriptors(s, hc.ProjectID); err != nil {
+	if err := listMonitoredResourceDescriptors(hc.ProjectID); err != nil {
 		log.Fatal(err)
 	}
-	if err := listMetricDescriptors(s, hc.ProjectID); err != nil {
+	if err := listMetricDescriptors(hc.ProjectID); err != nil {
 		log.Fatal(err)
 	}
-	if err := listTimeSeries(s, hc.ProjectID); err != nil {
+	if err := listTimeSeries(hc.ProjectID); err != nil {
 		log.Fatal(err)
 	}
 }
