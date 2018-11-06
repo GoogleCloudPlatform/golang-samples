@@ -58,7 +58,7 @@ func createCustomMetric(projectID, metricType string) error {
 		DisplayName: "Custom Metric",
 	}
 	req := &monitoringpb.CreateMetricDescriptorRequest{
-		Name:             projectID,
+		Name:             "projects/" + projectID,
 		MetricDescriptor: md,
 	}
 	resp, err := c.CreateMetricDescriptor(ctx, req)
@@ -82,7 +82,7 @@ func getCustomMetric(projectID, metricType string) (*metric.MetricDescriptor, er
 		return nil, err
 	}
 	req := &monitoringpb.GetMetricDescriptorRequest{
-		Name: fmt.Sprintf("/projects/%s/metricDescriptors/%s", projectID, metricType),
+		Name: fmt.Sprintf("projects/%s/metricDescriptors/%s", projectID, metricType),
 	}
 	resp, err := c.GetMetricDescriptor(ctx, req)
 	if err != nil {

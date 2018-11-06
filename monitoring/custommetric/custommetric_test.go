@@ -5,7 +5,6 @@
 package main
 
 import (
-	"context"
 	"io/ioutil"
 	"log"
 	"os"
@@ -25,15 +24,13 @@ func TestMain(m *testing.M) {
 
 func TestCustomMetric(t *testing.T) {
 	hc := testutil.SystemTest(t)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
-	defer cancel()
 
 	if err := createCustomMetric(hc.ProjectID, metricType); err != nil {
 		t.Fatal(err)
 	}
 
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
-		_, err = getCustomMetric(hc.ProjectID, metricType)
+		_, err := getCustomMetric(hc.ProjectID, metricType)
 		if err != nil {
 			r.Errorf("%v", err)
 		}
