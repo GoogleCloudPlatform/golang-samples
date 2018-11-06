@@ -44,7 +44,7 @@ func createCustomMetric(projectID, metricType string) error {
 		return err
 	}
 	md := &metric.MetricDescriptor{
-		Name: "Custom Metric",
+		Name: metricType,
 		Type: metricType,
 		Labels: []*label.LabelDescriptor{{
 			Key:         "environment",
