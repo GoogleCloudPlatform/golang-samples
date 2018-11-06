@@ -24,7 +24,6 @@ func TestMain(m *testing.M) {
 
 func TestCustomMetric(t *testing.T) {
 	hc := testutil.SystemTest(t)
-
 	if err := createCustomMetric(hc.ProjectID, metricType); err != nil {
 		t.Fatal(err)
 	}
