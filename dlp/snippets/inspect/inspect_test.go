@@ -27,13 +27,31 @@ func TestInspectString(t *testing.T) {
 	}
 }
 
-func TestInspectFile(t *testing.T) {
+func TestInspectTextFile(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	// Run snippet and capture output.
 	buf := new(bytes.Buffer)
-	err := inspectFile(buf, tc.ProjectID, "testdata/test.png", "IMAGE")
+	err := inspectTextFile(buf, tc.ProjectID, "testdata/test.txt")
 	if err != nil {
-		t.Errorf("TestInspectFile: %v", err)
+		t.Errorf("TestInspectTextFile: %v", err)
+	}
+
+	got := buf.String()
+	if want := "Info type: PHONE_NUMBER"; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
+	if want := "Info type: EMAIL_ADDRESS"; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func TestInspectImageFile(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	// Run snippet and capture output.
+	buf := new(bytes.Buffer)
+	err := inspectImageFile(buf, tc.ProjectID, "testdata/test.png")
+	if err != nil {
+		t.Errorf("TestInspectImageFile: %v", err)
 	}
 
 	got := buf.String()

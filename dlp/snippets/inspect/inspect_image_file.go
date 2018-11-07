@@ -5,7 +5,7 @@
 // Package inspect contains example snippets using the DLP Inspect API.
 package inspect
 
-// [START dlp_inspect_file]
+// [START dlp_inspect_file_image]
 import (
 	"context"
 	"fmt"
@@ -16,8 +16,8 @@ import (
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
-// inspectFile inspects the file at a given filePath, and prints results.
-func inspectFile(w io.Writer, projectID, filePath, fileType string) error {
+// inspectImageFile inspects an image file at a given filePath, and prints results.
+func inspectImageFile(w io.Writer, projectID, filePath string) error {
 	// projectID := "my-project-id"
 	// filePath := "path/to/image.png"
 	// fileType := "IMAGE"
@@ -35,15 +35,6 @@ func inspectFile(w io.Writer, projectID, filePath, fileType string) error {
 	if err != nil {
 		return err
 	}
-	var itemType dlppb.ByteContentItem_BytesType
-	switch fileType {
-	case "IMAGE":
-		itemType = dlppb.ByteContentItem_IMAGE
-	case "TEXT_UTF8":
-		itemType = dlppb.ByteContentItem_TEXT_UTF8
-	default:
-		return fmt.Errorf("invalid ByteType for ByteContentItem: '%s'", fileType)
-	}
 
 	// Create and send the request.
 	req := &dlppb.InspectContentRequest{
@@ -51,7 +42,7 @@ func inspectFile(w io.Writer, projectID, filePath, fileType string) error {
 		Item: &dlppb.ContentItem{
 			DataItem: &dlppb.ContentItem_ByteItem{
 				ByteItem: &dlppb.ByteContentItem{
-					Type: itemType,
+					Type: dlppb.ByteContentItem_IMAGE,
 					Data: data,
 				},
 			},
@@ -80,4 +71,4 @@ func inspectFile(w io.Writer, projectID, filePath, fileType string) error {
 	return nil
 }
 
-// [END dlp_inspect_file]
+// [END dlp_inspect_file_image]
