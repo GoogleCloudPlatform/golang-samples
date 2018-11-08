@@ -5,7 +5,7 @@ runtime: go111
 
 handlers:
 # Configure App Engine to serve any static assets.
-- url: /static
+- url: /public
   static_dir: public
 
 # Use HTTPS for all requests.
