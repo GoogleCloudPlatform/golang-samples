@@ -176,7 +176,6 @@ func listRegistries(projectID string, region string) ([]*cloudiot.DeviceRegistry
 		fmt.Println("\t", registry.Name)
 	}
 	// [END iot_list_registries]
-
 	return response.DeviceRegistries, err
 }
 
@@ -488,7 +487,6 @@ func listDevices(projectID string, region string, registry string) ([]*cloudiot.
 		fmt.Println("\t", device.Id)
 	}
 	// [END iot_list_devices]
-
 	return response.Devices, err
 }
 
@@ -704,8 +702,8 @@ func main() {
 				fnArgs = append(fnArgs, reflect.ValueOf(arg))
 			}
 			retValues := reflect.ValueOf(cmd.fn).Call(fnArgs)
-			err := retValues[len(retValues)-1].Interface().(error)
-			if err != nil {
+			err := retValues[len(retValues)-1]
+			if !err.IsNil() {
 				fmt.Fprintf(os.Stderr, "%v\n", err)
 				os.Exit(1)
 			}
