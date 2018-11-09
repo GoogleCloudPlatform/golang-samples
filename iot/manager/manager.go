@@ -176,6 +176,7 @@ func listRegistries(projectID string, region string) ([]*cloudiot.DeviceRegistry
 		fmt.Println("\t", registry.Name)
 	}
 	// [END iot_list_registries]
+
 	return response.DeviceRegistries, err
 }
 
@@ -487,6 +488,7 @@ func listDevices(projectID string, region string, registry string) ([]*cloudiot.
 		fmt.Println("\t", device.Id)
 	}
 	// [END iot_list_devices]
+
 	return response.Devices, err
 }
 
@@ -635,6 +637,7 @@ func main() {
 		{"createRegistry", createRegistry, []string{"cloud-region", "registry-id", "pubsub-topic"}},
 		{"deleteRegistry", deleteRegistry, []string{"cloud-region", "registry-id"}},
 		{"getRegistry", getRegistry, []string{"cloud-region", "registry-id"}},
+		{"listRegistries", listRegistries, []string{"cloud-region"}},
 		{"getRegistryIam", getRegistryIam, []string{"cloud-region", "registry-id"}},
 		{"setRegistryIam", setRegistryIam, []string{"cloud-region", "registry-id", "member", "role"}},
 	}
