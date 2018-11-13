@@ -637,6 +637,7 @@ func main() {
 		{"createRegistry", createRegistry, []string{"cloud-region", "registry-id", "pubsub-topic"}},
 		{"deleteRegistry", deleteRegistry, []string{"cloud-region", "registry-id"}},
 		{"getRegistry", getRegistry, []string{"cloud-region", "registry-id"}},
+		{"listRegistries", listRegistries, []string{"cloud-region"}},
 		{"getRegistryIam", getRegistryIam, []string{"cloud-region", "registry-id"}},
 		{"setRegistryIam", setRegistryIam, []string{"cloud-region", "registry-id", "member", "role"}},
 	}
@@ -704,8 +705,8 @@ func main() {
 				fnArgs = append(fnArgs, reflect.ValueOf(arg))
 			}
 			retValues := reflect.ValueOf(cmd.fn).Call(fnArgs)
-			err := retValues[len(retValues)-1].Interface().(error)
-			if err != nil {
+			err := retValues[len(retValues)-1]
+			if !err.IsNil() {
 				fmt.Fprintf(os.Stderr, "%v\n", err)
 				os.Exit(1)
 			}

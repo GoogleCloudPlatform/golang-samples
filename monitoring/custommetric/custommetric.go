@@ -18,9 +18,14 @@ import (
 	"os"
 	"time"
 
-	"golang.org/x/oauth2/google"
-
-	"google.golang.org/api/monitoring/v3"
+	"cloud.google.com/go/monitoring/apiv3"
+	timestamp "github.com/golang/protobuf/ptypes/timestamp"
+	"google.golang.org/api/iterator"
+	"google.golang.org/genproto/googleapis/api/label"
+	"google.golang.org/genproto/googleapis/api/metric"
+	metricpb "google.golang.org/genproto/googleapis/api/metric"
+	monitoredres "google.golang.org/genproto/googleapis/api/monitoredres"
+	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 )
 
 const metricType = "custom.googleapis.com/custom_measurement"
@@ -32,20 +37,33 @@ func projectResource(projectID string) string {
 // [START monitoring_create_metric]
 
 // createCustomMetric creates a custom metric specified by the metric type.
-func createCustomMetric(s *monitoring.Service, projectID, metricType string) error {
-	ld := monitoring.LabelDescriptor{Key: "environment", ValueType: "STRING", Description: "An arbitrary measurement"}
-	md := monitoring.MetricDescriptor{
-		Type:        metricType,
-		Labels:      []*monitoring.LabelDescriptor{&ld},
-		MetricKind:  "GAUGE",
-		ValueType:   "INT64",
-		Unit:        "items",
+func createCustomMetric(projectID, metricType string) error {
+	ctx := context.Background()
+	c, err := monitoring.NewMetricClient(ctx)
+	if err != nil {
+		return err
+	}
+	md := &metric.MetricDescriptor{
+		Name: "Custom Metric",
+		Type: metricType,
+		Labels: []*label.LabelDescriptor{{
+			Key:         "environment",
+			ValueType:   label.LabelDescriptor_STRING,
+			Description: "An arbitrary measurement",
+		}},
+		MetricKind:  metric.MetricDescriptor_GAUGE,
+		ValueType:   metric.MetricDescriptor_INT64,
+		Unit:        "s",
 		Description: "An arbitrary measurement",
 		DisplayName: "Custom Metric",
 	}
-	resp, err := s.Projects.MetricDescriptors.Create(projectResource(projectID), &md).Do()
+	req := &monitoringpb.CreateMetricDescriptorRequest{
+		Name:             "projects/" + projectID,
+		MetricDescriptor: md,
+	}
+	resp, err := c.CreateMetricDescriptor(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Could not create custom metric: %v", err)
+		return fmt.Errorf("could not create custom metric: %v", err)
 	}
 
 	log.Printf("createCustomMetric: %s\n", formatResource(resp))
@@ -57,11 +75,18 @@ func createCustomMetric(s *monitoring.Service, projectID, metricType string) err
 // [START monitoring_list_descriptors]
 
 // getCustomMetric reads the custom metric created.
-func getCustomMetric(s *monitoring.Service, projectID, metricType string) (*monitoring.ListMetricDescriptorsResponse, error) {
-	resp, err := s.Projects.MetricDescriptors.List(projectResource(projectID)).
-		Filter(fmt.Sprintf("metric.type=\"%s\"", metricType)).Do()
+func getCustomMetric(projectID, metricType string) (*metric.MetricDescriptor, error) {
+	ctx := context.Background()
+	c, err := monitoring.NewMetricClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("Could not get custom metric: %v", err)
+		return nil, err
+	}
+	req := &monitoringpb.GetMetricDescriptorRequest{
+		Name: fmt.Sprintf("projects/%s/metricDescriptors/%s", projectID, metricType),
+	}
+	resp, err := c.GetMetricDescriptor(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("could not get custom metric: %v", err)
 	}
 
 	log.Printf("getCustomMetric: %s\n", formatResource(resp))
@@ -73,11 +98,19 @@ func getCustomMetric(s *monitoring.Service, projectID, metricType string) (*moni
 // [START monitoring_delete_metric]
 
 // deleteMetric deletes the given metric.
-func deleteMetric(s *monitoring.Service, projectID, metricType string) error {
-	metricResource := "projects/" + projectID + "/metricDescriptors/" + metricType
-	_, err := s.Projects.MetricDescriptors.Delete(metricResource).Do()
+func deleteMetric(projectID, metricType string) error {
+	ctx := context.Background()
+	c, err := monitoring.NewMetricClient(ctx)
 	if err != nil {
-		return fmt.Errorf("Could not delete metric: %v", err)
+		return err
+	}
+	metricResource := "projects/" + projectID + "/metricDescriptors/" + metricType
+	req := &monitoringpb.DeleteMetricDescriptorRequest{
+		Name: metricResource,
+	}
+	err = c.DeleteMetricDescriptor(ctx, req)
+	if err != nil {
+		return fmt.Errorf("could not delete metric: %v", err)
 	}
 	log.Printf("Deleted metric: %q\n", metricType)
 	return nil
@@ -88,44 +121,49 @@ func deleteMetric(s *monitoring.Service, projectID, metricType string) error {
 // [START monitoring_write_timeseries]
 
 // writeTimeSeriesValue writes a value for the custom metric created
-func writeTimeSeriesValue(s *monitoring.Service, projectID, metricType string) error {
-	now := time.Now().UTC().Format(time.RFC3339Nano)
-	randVal := rand.Int63n(10)
-	timeseries := monitoring.TimeSeries{
-		Metric: &monitoring.Metric{
-			Type: metricType,
-			Labels: map[string]string{
-				"environment": "STAGING",
+func writeTimeSeriesValue(projectID, metricType string) error {
+	ctx := context.Background()
+	c, err := monitoring.NewMetricClient(ctx)
+	if err != nil {
+		return err
+	}
+	now := &timestamp.Timestamp{
+		Seconds: time.Now().Unix(),
+	}
+	req := &monitoringpb.CreateTimeSeriesRequest{
+		Name: projectResource(projectID),
+		TimeSeries: []*monitoringpb.TimeSeries{{
+			Metric: &metricpb.Metric{
+				Type: metricType,
+				Labels: map[string]string{
+					"environment": "STAGING",
+				},
 			},
-		},
-		Resource: &monitoring.MonitoredResource{
-			Labels: map[string]string{
-				"instance_id": "test-instance",
-				"zone":        "us-central1-f",
+			Resource: &monitoredres.MonitoredResource{
+				Type: "gce_instance",
+				Labels: map[string]string{
+					"instance_id": "test-instance",
+					"zone":        "us-central1-f",
+				},
 			},
-			Type: "gce_instance",
-		},
-		Points: []*monitoring.Point{
-			{
-				Interval: &monitoring.TimeInterval{
+			Points: []*monitoringpb.Point{{
+				Interval: &monitoringpb.TimeInterval{
 					StartTime: now,
 					EndTime:   now,
 				},
-				Value: &monitoring.TypedValue{
-					Int64Value: &randVal,
+				Value: &monitoringpb.TypedValue{
+					Value: &monitoringpb.TypedValue_Int64Value{
+						Int64Value: rand.Int63n(10),
+					},
 				},
-			},
-		},
+			}},
+		}},
 	}
+	log.Printf("writeTimeseriesRequest: %s\n", formatResource(req))
 
-	createTimeseriesRequest := monitoring.CreateTimeSeriesRequest{
-		TimeSeries: []*monitoring.TimeSeries{&timeseries},
-	}
-
-	log.Printf("writeTimeseriesRequest: %s\n", formatResource(createTimeseriesRequest))
-	_, err := s.Projects.TimeSeries.Create(projectResource(projectID), &createTimeseriesRequest).Do()
+	err = c.CreateTimeSeries(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Could not write time series value, %v ", err)
+		return fmt.Errorf("could not write time series value, %v ", err)
 	}
 	return nil
 }
@@ -135,34 +173,42 @@ func writeTimeSeriesValue(s *monitoring.Service, projectID, metricType string) e
 // [START monitoring_read_timeseries_simple]
 
 // readTimeSeriesValue reads the TimeSeries for the value specified by metric type in a time window from the last 5 minutes.
-func readTimeSeriesValue(s *monitoring.Service, projectID, metricType string) error {
-	startTime := time.Now().UTC().Add(time.Minute * -5)
-	endTime := time.Now().UTC()
-	resp, err := s.Projects.TimeSeries.List(projectResource(projectID)).
-		Filter(fmt.Sprintf("metric.type=\"%s\"", metricType)).
-		IntervalStartTime(startTime.Format(time.RFC3339Nano)).
-		IntervalEndTime(endTime.Format(time.RFC3339Nano)).
-		Do()
+func readTimeSeriesValue(projectID, metricType string) error {
+	ctx := context.Background()
+	c, err := monitoring.NewMetricClient(ctx)
 	if err != nil {
-		return fmt.Errorf("Could not read time series value, %v ", err)
+		return err
 	}
-	log.Printf("readTimeseriesValue: %s\n", formatResource(resp))
+	startTime := time.Now().UTC().Add(time.Minute * -5).Unix()
+	endTime := time.Now().UTC().Unix()
+
+	req := &monitoringpb.ListTimeSeriesRequest{
+		Name:   projectResource(projectID),
+		Filter: fmt.Sprintf("metric.type=\"%s\"", metricType),
+		Interval: &monitoringpb.TimeInterval{
+			StartTime: &timestamp.Timestamp{Seconds: startTime},
+			EndTime:   &timestamp.Timestamp{Seconds: endTime},
+		},
+	}
+	iter := c.ListTimeSeries(ctx, req)
+
+	var series []*monitoringpb.TimeSeries
+	for {
+		resp, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return fmt.Errorf("could not read time series value, %v ", err)
+		}
+		series = append(series, resp)
+	}
+
+	log.Printf("readTimeseriesValue: %s\n", formatResource(series))
 	return nil
 }
 
 // [END monitoring_read_timeseries_simple]
-
-func createService(ctx context.Context) (*monitoring.Service, error) {
-	hc, err := google.DefaultClient(ctx, monitoring.MonitoringScope)
-	if err != nil {
-		return nil, err
-	}
-	s, err := monitoring.New(hc)
-	if err != nil {
-		return nil, err
-	}
-	return s, nil
-}
 
 func main() {
 	rand.Seed(time.Now().UTC().UnixNano())
@@ -172,44 +218,38 @@ func main() {
 		return
 	}
 
-	ctx := context.Background()
-	s, err := createService(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	projectID := os.Args[1]
 
 	// Create the metric.
-	if err := createCustomMetric(s, projectID, metricType); err != nil {
+	if err := createCustomMetric(projectID, metricType); err != nil {
 		log.Fatal(err)
 	}
 
 	// Wait until the new metric can be read back.
 	for {
-		resp, err := getCustomMetric(s, projectID, metricType)
+		resp, err := getCustomMetric(projectID, metricType)
 		if err != nil {
 			log.Fatal(err)
 		}
-		if len(resp.MetricDescriptors) != 0 {
+		if resp != nil {
 			break
 		}
 		time.Sleep(2 * time.Second)
 	}
 
 	// Write a TimeSeries value for that metric
-	if err := writeTimeSeriesValue(s, projectID, metricType); err != nil {
+	if err := writeTimeSeriesValue(projectID, metricType); err != nil {
 		log.Fatal(err)
 	}
 
 	time.Sleep(2 * time.Second)
 
 	// Read the TimeSeries for the last 5 minutes for that metric.
-	if err := readTimeSeriesValue(s, projectID, metricType); err != nil {
+	if err := readTimeSeriesValue(projectID, metricType); err != nil {
 		log.Fatal(err)
 	}
 
-	if err := deleteMetric(s, projectID, metricType); err != nil {
+	if err := deleteMetric(projectID, metricType); err != nil {
 		log.Fatal(err)
 	}
 }
