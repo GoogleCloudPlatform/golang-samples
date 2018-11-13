@@ -7,4 +7,5 @@ automatic_scaling:
 #[START gae_flex_pubsub_yaml]
 env_variables:
   PUBSUB_TOPIC: your-topic
+  PUBSUB_VERIFICATION_TOKEN: your-token
 #[END gae_flex_pubsub_yaml]
