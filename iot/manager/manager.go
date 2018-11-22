@@ -16,6 +16,7 @@ import (
 
 	// [START imports]
 	"context"
+	b64 "encoding/base64"
 
 	"golang.org/x/oauth2/google"
 	cloudiot "google.golang.org/api/cloudiot/v1"
@@ -613,6 +614,38 @@ func setConfig(projectID string, region string, registry string, deviceID string
 	return response, err
 }
 
+// sendCommand sends a command to a device listening for commands
+func sendCommand(projectID string, region string, registry string, deviceID string, sendData string) (*cloudiot.SendCommandToDeviceResponse, error) {
+	// [START iot_send_command]
+	// Authorize the client using Application Default Credentials.
+	// See https://g.co/dv/identity/protocols/application-default-credentials
+	ctx := context.Background()
+	httpClient, err := google.DefaultClient(ctx, cloudiot.CloudPlatformScope)
+	if err != nil {
+		return nil, err
+	}
+	client, err := cloudiot.New(httpClient)
+	if err != nil {
+		return nil, err
+	}
+
+	req := cloudiot.SendCommandToDeviceRequest{
+		BinaryData: b64.StdEncoding.EncodeToString([]byte(sendData)),
+	}
+
+	name := fmt.Sprintf("projects/%s/locations/%s/registries/%s/devices/%s", projectID, region, registry, deviceID)
+
+	response, err := client.Projects.Locations.Registries.Devices.SendCommandToDevice(name, &req).Do()
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Fprintf(os.Stdout, "Sent command to device")
+	// [END iot_send_command]
+
+	return response, err
+}
+
 type command struct {
 	name string
 	fn   interface{}
@@ -654,6 +687,7 @@ func main() {
 		{"patchDeviceEs", patchDeviceEs, []string{"cloud-region", "registry-id", "device-id", "keyfile-path"}},
 		{"patchDeviceRsa", patchDeviceRsa, []string{"cloud-region", "registry-id", "device-id", "keyfile-path"}},
 		{"setConfig", setConfig, []string{"cloud-region", "registry-id", "device-id", "config-data"}},
+		{"sendCommand", sendCommand, []string{"cloud-region", "registry-id", "device-id", "send-data"}},
 	}
 
 	var commands []command
