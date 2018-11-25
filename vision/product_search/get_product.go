@@ -45,7 +45,7 @@ func getProduct(project string, location string, productId string) error {
 
 func main() {
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: <project-id> <location>\n")
+		fmt.Fprintf(os.Stderr, "Usage: %s <project-id> <location> <product-id>\n", filepath.Base(os.Args[0]))
 	}
 	flag.Parse()
 
