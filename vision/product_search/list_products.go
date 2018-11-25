@@ -2,7 +2,6 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// Command label uses the Vision API's label detection capabilities to find a label based on an image's content.
 package main
 
 // [START imports]
