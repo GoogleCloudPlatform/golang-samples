@@ -18,30 +18,27 @@ import (
 )
 // [END imports]
 
-// [START vision_product_search_get_product]
-func getProduct(projectId string, location string, productId string) error {
+// [START vision_product_search_delete_product]
+func deleteProduct(projectId string, location string, productId string) error {
 	ctx := context.Background()
 	c, err := vision.NewProductSearchClient(ctx)
 	if err != nil {
 		return err
 	}
 
-	req := &visionpb.GetProductRequest{}
+	req := &visionpb.DeleteProductRequest{}
 	req.Name = fmt.Sprintf("projects/%s/locations/%s/products/%s", projectId, location, productId)
 
-	resp, err := c.GetProduct(ctx, req)
+	err = c.DeleteProduct(ctx, req)
 	if err != nil {
 		return err
 	}
 
-	fmt.Println("Product name:", resp.Name)
-	fmt.Println("Product display name:", resp.DisplayName)
-	fmt.Println("Product category:", resp.ProductCategory)
-	fmt.Println("Product labels:", resp.ProductLabels)
+	fmt.Println("Product deleted.")
 
 	return nil
 }
-// [END vision_product_search_get_product]
+// [END vision_product_search_delete_product]
 
 func main() {
 	flag.Usage = func() {
@@ -55,7 +52,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	err := getProduct(args[0], args[1], args[2])
+	err := deleteProduct(args[0], args[1], args[2])
 
 	if err != nil {
 		fmt.Println("Error:", err)

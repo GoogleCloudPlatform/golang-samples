@@ -18,14 +18,20 @@
 
 ## Run the samples
 
-To build and run the samples, you need to provide your `GCP_PROJECT_ID` and a `LOCATION`, which is a GCP compute zone such as `us-west1`.
-
-### Product management
+To build and run the samples, you need to provide your `PROJECT_ID` and a `LOCATION`, which is a GCP compute zone such as `us-west1`.
 
 ```bash
-go run list_products.go GCP_PROJECT_ID LOCATION
+go run delete_product.go PROJECT_ID LOCATION PRODUCT_ID
 ```
 
 ```bash
-go run get_product.go GCP_PROJECT_ID LOCATION PRODUCT_ID
+go run list_products.go PROJECT_ID LOCATION
+```
+
+```bash
+go run get_product.go PROJECT_ID LOCATION PRODUCT_ID
+```
+
+```bash
+go run create_product.go PROJECT_ID LOCATION PRODUCT_ID PRODUCT_DISPLAY_NAME PRODUCT_CATEGORY
 ```

@@ -20,7 +20,7 @@ import (
 // [END imports]
 
 // [START vision_product_search_list_products]
-func listProducts(project string, location string) error {
+func listProducts(projectId string, location string) error {
 	ctx := context.Background()
 	c, err := vision.NewProductSearchClient(ctx)
 	if err != nil {
@@ -28,7 +28,7 @@ func listProducts(project string, location string) error {
 	}
 
 	req := &visionpb.ListProductsRequest{}
-	req.Parent = fmt.Sprintf("projects/%s/locations/%s", project, location)
+	req.Parent = fmt.Sprintf("projects/%s/locations/%s", projectId, location)
 
 	it := c.ListProducts(ctx, req)
 	for {
