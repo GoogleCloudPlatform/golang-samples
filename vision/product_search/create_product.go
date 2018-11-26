@@ -8,6 +8,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	
@@ -19,7 +20,7 @@ import (
 // [END imports]
 
 // [START vision_product_search_create_product]
-func createProduct(projectId string, location string, productId string, productDisplayName string, productCategory string) error {
+func createProduct(w io.Writer, projectId string, location string, productId string, productDisplayName string, productCategory string) error {
 	ctx := context.Background()
 	c, err := vision.NewProductSearchClient(ctx)
 	if err != nil {
@@ -58,7 +59,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	err := createProduct(args[0], args[1], args[2], args[3], args[4])
+	err := createProduct(os.Stdout, args[0], args[1], args[2], args[3], args[4])
 
 	if err != nil {
 		fmt.Println("Error:", err)

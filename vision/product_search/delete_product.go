@@ -8,6 +8,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	
@@ -19,7 +20,7 @@ import (
 // [END imports]
 
 // [START vision_product_search_delete_product]
-func deleteProduct(projectId string, location string, productId string) error {
+func deleteProduct(w io.Writer, projectId string, location string, productId string) error {
 	ctx := context.Background()
 	c, err := vision.NewProductSearchClient(ctx)
 	if err != nil {
@@ -52,7 +53,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	err := deleteProduct(args[0], args[1], args[2])
+	err := deleteProduct(os.Stdout, args[0], args[1], args[2])
 
 	if err != nil {
 		fmt.Println("Error:", err)
