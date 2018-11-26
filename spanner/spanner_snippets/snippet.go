@@ -223,11 +223,11 @@ func delete(ctx context.Context, w io.Writer, client *spanner.Client) error {
 	// Delete each of the albums by individual key,
 	// then delete all the singers using a key range.
 	m := []*spanner.Mutation{
-		spanner.Delete("Albums", spanner.Key{1,1}),
-		spanner.Delete("Albums", spanner.Key{1,2}),
-		spanner.Delete("Albums", spanner.Key{2,1}),
-		spanner.Delete("Albums", spanner.Key{2,2}),
-		spanner.Delete("Albums", spanner.Key{2,3}),
+		spanner.Delete("Albums", spanner.Key{1, 1}),
+		spanner.Delete("Albums", spanner.Key{1, 2}),
+		spanner.Delete("Albums", spanner.Key{2, 1}),
+		spanner.Delete("Albums", spanner.Key{2, 2}),
+		spanner.Delete("Albums", spanner.Key{2, 3}),
 		spanner.Delete("Singers", spanner.KeyRange{Start: spanner.Key{1}, End: spanner.Key{5}, Kind: spanner.ClosedClosed}),
 	}
 	_, err := client.Apply(ctx, m)
