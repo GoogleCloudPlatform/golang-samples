@@ -18,7 +18,7 @@ func TestCreateProducts(t *testing.T) {
 	const location = "us-west1"
 	const productDisplayName = "fake_product_display_name_for_testing"
 	const productCategory = "homegoods"
-	const productId = "fake_product_id_for_testing"
+	const productID = "fake_product_id_for_testing"
 
 	var buf bytes.Buffer
 
@@ -26,12 +26,12 @@ func TestCreateProducts(t *testing.T) {
 	if err := listProducts(&buf, tc.ProjectID, location); err != nil {
 		t.Fatal(err)
 	}
-	if got := buf.String(); strings.Contains(got, productId) {
-		t.Errorf("Product ID %s already exists", productId)
+	if got := buf.String(); strings.Contains(got, productID) {
+		t.Errorf("Product ID %s already exists", productID)
 	}
 
 	// Create a fake product.
-	if err := createProduct(&buf, tc.ProjectID, location, productId, productDisplayName, productCategory); err != nil {
+	if err := createProduct(&buf, tc.ProjectID, location, productID, productDisplayName, productCategory); err != nil {
 		t.Fatal(err)
 	}
 
@@ -40,10 +40,10 @@ func TestCreateProducts(t *testing.T) {
 	if err := listProducts(&buf, tc.ProjectID, location); err != nil {
 		t.Fatal(err)
 	}
-	if got := buf.String(); !strings.Contains(got, productId) {
-		t.Errorf("Product ID %s does not exist", productId)
+	if got := buf.String(); !strings.Contains(got, productID) {
+		t.Errorf("Product ID %s does not exist", productID)
 	}
 
 	// Clean up.
-	deleteProduct(&buf, tc.ProjectID, location, productId)
+	deleteProduct(&buf, tc.ProjectID, location, productID)
 }

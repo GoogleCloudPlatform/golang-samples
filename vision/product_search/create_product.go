@@ -15,7 +15,7 @@ import (
 	visionpb "google.golang.org/genproto/googleapis/cloud/vision/v1"
 )
 
-func createProduct(w io.Writer, projectId string, location string, productId string, productDisplayName string, productCategory string) error {
+func createProduct(w io.Writer, projectID string, location string, productID string, productDisplayName string, productCategory string) error {
 	ctx := context.Background()
 	c, err := vision.NewProductSearchClient(ctx)
 	if err != nil {
@@ -23,8 +23,8 @@ func createProduct(w io.Writer, projectId string, location string, productId str
 	}
 
 	req := &visionpb.CreateProductRequest{
-		Parent: fmt.Sprintf("projects/%s/locations/%s", projectId, location),
-		ProductId: productId,
+		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
+		ProductId: productID,
 		Product: &visionpb.Product{
 			DisplayName: productDisplayName,
 			ProductCategory: productCategory,

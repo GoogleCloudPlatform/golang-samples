@@ -16,7 +16,7 @@ import (
 	visionpb "google.golang.org/genproto/googleapis/cloud/vision/v1"
 )
 
-func listProducts(w io.Writer, projectId string, location string) error {
+func listProducts(w io.Writer, projectID string, location string) error {
 	ctx := context.Background()
 	c, err := vision.NewProductSearchClient(ctx)
 	if err != nil {
@@ -24,7 +24,7 @@ func listProducts(w io.Writer, projectId string, location string) error {
 	}
 
 	req := &visionpb.ListProductsRequest{
-		Parent: fmt.Sprintf("projects/%s/locations/%s", projectId, location),
+		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
 	}
 
 	it := c.ListProducts(ctx, req)

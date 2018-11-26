@@ -15,7 +15,7 @@ import (
 	visionpb "google.golang.org/genproto/googleapis/cloud/vision/v1"
 )
 
-func deleteProduct(w io.Writer, projectId string, location string, productId string) error {
+func deleteProduct(w io.Writer, projectID string, location string, productID string) error {
 	ctx := context.Background()
 	c, err := vision.NewProductSearchClient(ctx)
 	if err != nil {
@@ -23,7 +23,7 @@ func deleteProduct(w io.Writer, projectId string, location string, productId str
 	}
 
 	req := &visionpb.DeleteProductRequest{
-		Name: fmt.Sprintf("projects/%s/locations/%s/products/%s", projectId, location, productId),
+		Name: fmt.Sprintf("projects/%s/locations/%s/products/%s", projectID, location, productID),
 	}
 
 	err = c.DeleteProduct(ctx, req)
