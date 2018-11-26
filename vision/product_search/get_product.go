@@ -2,24 +2,19 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-package main
+package productsearch
 
-// [START imports]
+// [START vision_product_search_get_product]
+
 import (
-	"flag"
+	"context"
 	"fmt"
 	"io"
-	"os"
-	"path/filepath"
-	
-	"context"
 
 	vision "cloud.google.com/go/vision/apiv1"
 	visionpb "google.golang.org/genproto/googleapis/cloud/vision/v1"
 )
-// [END imports]
 
-// [START vision_product_search_get_product]
 func getProduct(w io.Writer, projectId string, location string, productId string) error {
 	ctx := context.Background()
 	c, err := vision.NewProductSearchClient(ctx)
@@ -27,8 +22,9 @@ func getProduct(w io.Writer, projectId string, location string, productId string
 		return err
 	}
 
-	req := &visionpb.GetProductRequest{}
-	req.Name = fmt.Sprintf("projects/%s/locations/%s/products/%s", projectId, location, productId)
+	req := &visionpb.GetProductRequest{
+		Name: fmt.Sprintf("projects/%s/locations/%s/products/%s", projectId, location, productId),
+	}
 
 	resp, err := c.GetProduct(ctx, req)
 	if err != nil {
@@ -42,23 +38,5 @@ func getProduct(w io.Writer, projectId string, location string, productId string
 
 	return nil
 }
+
 // [END vision_product_search_get_product]
-
-func main() {
-	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: %s <project-id> <location> <product-id>\n", filepath.Base(os.Args[0]))
-	}
-	flag.Parse()
-
-	args := flag.Args()
-	if len(args) < 3 {
-		flag.Usage()
-		os.Exit(1)
-	}
-
-	err := getProduct(os.Stdout, args[0], args[1], args[2])
-
-	if err != nil {
-		fmt.Println("Error:", err)
-	}
-}
