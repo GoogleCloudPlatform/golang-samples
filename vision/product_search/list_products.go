@@ -41,10 +41,10 @@ func listProducts(w io.Writer, projectId string, location string) error {
 			return err
 		}
 
-		fmt.Println("Product name:", resp.Name)
-		fmt.Println("Product display name:", resp.DisplayName)
-		fmt.Println("Product category:", resp.ProductCategory)
-		fmt.Println("Product labels:", resp.ProductLabels, "\n")
+		fmt.Fprintln(w, "Product name:", resp.Name)
+		fmt.Fprintln(w, "Product display name:", resp.DisplayName)
+		fmt.Fprintln(w, "Product category:", resp.ProductCategory)
+		fmt.Fprintln(w, "Product labels:", resp.ProductLabels, "\n")
 	}
 
 	return nil

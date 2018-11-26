@@ -35,10 +35,10 @@ func getProduct(w io.Writer, projectId string, location string, productId string
 		return err
 	}
 
-	fmt.Println("Product name:", resp.Name)
-	fmt.Println("Product display name:", resp.DisplayName)
-	fmt.Println("Product category:", resp.ProductCategory)
-	fmt.Println("Product labels:", resp.ProductLabels)
+	fmt.Fprintln(w, "Product name:", resp.Name)
+	fmt.Fprintln(w, "Product display name:", resp.DisplayName)
+	fmt.Fprintln(w, "Product category:", resp.ProductCategory)
+	fmt.Fprintln(w, "Product labels:", resp.ProductLabels)
 
 	return nil
 }

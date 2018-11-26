@@ -35,7 +35,7 @@ func deleteProduct(w io.Writer, projectId string, location string, productId str
 		return err
 	}
 
-	fmt.Println("Product deleted.")
+	fmt.Fprintln(w, "Product deleted.")
 
 	return nil
 }

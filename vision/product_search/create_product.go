@@ -41,7 +41,7 @@ func createProduct(w io.Writer, projectId string, location string, productId str
 		return err
 	}
 
-	fmt.Println("Product name:", resp.Name)
+	fmt.Fprintln(w, "Product name:", resp.Name)
 
 	return nil
 }
