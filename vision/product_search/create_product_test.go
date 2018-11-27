@@ -12,7 +12,7 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestCreateProducts(t *testing.T) {
+func TestCreateProduct(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	const location = "us-west1"
