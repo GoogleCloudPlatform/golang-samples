@@ -6,7 +6,9 @@ package bookshelf
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"io/ioutil"
 	"log"
 	"os"
 
@@ -26,6 +28,8 @@ var (
 	DB          BookDatabase
 	OAuthConfig *oauth2.Config
 
+	PubsubTopicID string
+
 	StorageBucket     *storage.BucketHandle
 	StorageBucketName string
 
@@ -37,43 +41,54 @@ var (
 	_ mgo.Session
 )
 
-const PubsubTopicID = "fill-book-details"
-
 func init() {
 	var err error
+
+	// Read config.json
+	configFile, err := ioutil.ReadFile("../config.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Parse config.json
+	var configJson map[string]interface{}
+	err = json.Unmarshal(configFile, &config)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// To use the in-memory test database, uncomment the next line.
 	DB = newMemoryDB()
 
 	// [START cloudsql]
-	// To use Cloud SQL, uncomment the following lines, and update the username,
-	// password and instance connection string. When running locally,
-	// localhost:3306 is used, and the instance name is ignored.
-	// DB, err = configureCloudSQL(cloudSQLConfig{
-	// 	Username: "root",
-	// 	Password: "",
-	// 	// The connection name of the Cloud SQL v2 instance, i.e.,
-	// 	// "project:region:instance-id"
-	// 	// Cloud SQL v1 instances are not supported.
-	// 	Instance: "",
-	// })
+	// When running locally, localhost:3306 is used, and the instance name is
+  // ignored.
+	if configJson["DATA_BACKEND"].(string) == "cloudsql" {
+		DB, err = configureCloudSQL(cloudSQLConfig{
+			Username: configJson["MYSQL_USER"].(string),
+			Password: configJson["MYSQL_PASSWORD"].(string),
+			// The connection name of the Cloud SQL v2 instance, i.e.,
+			// "project:region:instance-id"
+			// Cloud SQL v1 instances are not supported.
+			Instance: configJson["INSTANCE_CONNECTION_NAME"].(string),
+		})
+	}
 	// [END cloudsql]
 
 	// [START mongo]
-	// To use Mongo, uncomment the next lines and update the address string and
-	// optionally, the credentials.
-	//
-	// var cred *mgo.Credential
-	// DB, err = newMongoDB("localhost", cred)
+	// You can optionally update the credentials.
+	if configJson["DATA_BACKEND"].(string) == "mongodb" {
+		var cred *mgo.Credential
+		DB, err = newMongoDB(configJson["MONGO_URL"].(string), cred)
+	}
 	// [END mongo]
 
 	// [START datastore]
-	// To use Cloud Datastore, uncomment the following lines and update the
-	// project ID.
-	// More options can be set, see the google package docs for details:
-	// http://godoc.org/golang.org/x/oauth2/google
-	//
-	// DB, err = configureDatastoreDB("<your-project-id>")
+	if configJson["DATA_BACKEND"].(string) == "datastore" {
+		// More options can be set, see the google package docs for details:
+		// http://godoc.org/golang.org/x/oauth2/google
+		DB, err = configureDatastoreDB(configJson["GCLOUD_PROJECT"].(string))
+	}
 	// [END datastore]
 
 	if err != nil {
@@ -81,11 +96,8 @@ func init() {
 	}
 
 	// [START storage]
-	// To configure Cloud Storage, uncomment the following lines and update the
-	// bucket name.
-	//
-	// StorageBucketName = "<your-storage-bucket>"
-	// StorageBucket, err = configureStorage(StorageBucketName)
+	StorageBucketName = configJson["CLOUD_BUCKET"].(string)
+	StorageBucket, err = configureStorage(StorageBucketName)
 	// [END storage]
 
 	if err != nil {
@@ -93,18 +105,20 @@ func init() {
 	}
 
 	// [START auth]
-	// To enable user sign-in, uncomment the following lines and update the
-	// Client ID and Client Secret.
-	// You will also need to update OAUTH2_CALLBACK in app.yaml when pushing to
+	// To enable user sign-in, uncomment the following lines.
+	// You will also need to update OAUTH2_CALLBACK in config.json when pushing to
 	// production.
 	//
-	// OAuthConfig = configureOAuthClient("clientid", "clientsecret")
+	// OAuthConfig = configureOAuthClient(
+	// 	configJson["OAUTH2_CLIENT_ID"].(string),
+	// 	configJson["OAUTH2_CLIENT_SECRET"].(string),
+	//	configJson["OAUTH2_CALLBACK"].(string)
+	// )
 	// [END auth]
 
 	// [START sessions]
 	// Configure storage method for session-wide information.
-	// Update "something-very-secret" with a hard to guess string or byte sequence.
-	cookieStore := sessions.NewCookieStore([]byte("something-very-secret"))
+	cookieStore := sessions.NewCookieStore([]byte(configJson["COOKIE_STORE_SECRET"].(string)))
 	cookieStore.Options = &sessions.Options{
 		HttpOnly: true,
 	}
@@ -112,9 +126,14 @@ func init() {
 	// [END sessions]
 
 	// [START pubsub]
-	// To configure Pub/Sub, uncomment the following lines and update the project ID.
+	PubsubTopicID = configJson["TOPIC_NAME"].(string)
+
+	// To configure Pub/Sub, uncomment the following lines.
 	//
-	// PubsubClient, err = configurePubsub("<your-project-id>")
+	// PubsubClient, err = configurePubsub(
+	// 	configJson["GCLOUD_PROJECT"].(string),
+	// 	configJson["TOPIC_NAME"].(string)
+	// )
 	// [END pubsub]
 
 	if err != nil {
@@ -140,7 +159,7 @@ func configureStorage(bucketID string) (*storage.BucketHandle, error) {
 	return client.Bucket(bucketID), nil
 }
 
-func configurePubsub(projectID string) (*pubsub.Client, error) {
+func configurePubsub(projectID string, topicID string) (*pubsub.Client, error) {
 	if _, ok := DB.(*memoryDB); ok {
 		return nil, errors.New("Pub/Sub worker doesn't work with the in-memory DB " +
 			"(worker does not share its memory as the main app). Configure another " +
@@ -154,18 +173,17 @@ func configurePubsub(projectID string) (*pubsub.Client, error) {
 	}
 
 	// Create the topic if it doesn't exist.
-	if exists, err := client.Topic(PubsubTopicID).Exists(ctx); err != nil {
+	if exists, err := client.Topic(topicID).Exists(ctx); err != nil {
 		return nil, err
 	} else if !exists {
-		if _, err := client.CreateTopic(ctx, PubsubTopicID); err != nil {
+		if _, err := client.CreateTopic(ctx, topicID); err != nil {
 			return nil, err
 		}
 	}
 	return client, nil
 }
 
-func configureOAuthClient(clientID, clientSecret string) *oauth2.Config {
-	redirectURL := os.Getenv("OAUTH2_CALLBACK")
+func configureOAuthClient(clientID, clientSecret string, redirectURL string) *oauth2.Config {
 	if redirectURL == "" {
 		redirectURL = "http://localhost:8080/oauth2callback"
 	}
