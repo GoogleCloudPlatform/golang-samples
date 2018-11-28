@@ -52,7 +52,7 @@ func init() {
 
 	// Parse config.json
 	var configJson map[string]interface{}
-	err = json.Unmarshal(configFile, &config)
+	err = json.Unmarshal(configFile, &configJson)
 	if err != nil {
 		log.Fatal(err)
 	}
