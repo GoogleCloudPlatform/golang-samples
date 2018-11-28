@@ -29,6 +29,13 @@ tar -c -f $TMP/bundle.tar -C $TMP app
 
 # Add static files.
 tar -u -f $TMP/bundle.tar -C ../app templates
+
+# Add config.json (encrypted, if it exists)
+if [-f ../config.json.enc ]; then
+  tar -u -f $TMP/bundle.tar -C .. config.json.enc
+else
+  tar -u -f $TMP/bundle.tar -C .. config.json
+fi
 # [END tar]
 
 # [START gcs_push]

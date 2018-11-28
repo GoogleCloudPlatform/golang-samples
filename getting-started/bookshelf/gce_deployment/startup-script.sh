@@ -38,6 +38,11 @@ mkdir -p /app
 tar -x -f /app.tar -C /app
 chmod +x /app/app
 
+# Decrypt config.json, if applicable
+if [-f settings.yml ]; then
+  gcloud kms decrypt --location=global --keyring=[YOUR_KEY_RING] --key=[YOUR_KEY_NAME] --plaintext-file=settings.yml --ciphertext-file=settings.yml.enc
+fi
+
 # Create a goapp user. The application will run as this user.
 getent passwd goapp || useradd -m -d /home/goapp goapp
 chown -R goapp:goapp /app
