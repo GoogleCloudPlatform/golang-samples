@@ -5,7 +5,6 @@
 package main
 
 import (
-	"context"
 	"io/ioutil"
 	"log"
 	"os"
@@ -25,20 +24,12 @@ func TestMain(m *testing.M) {
 
 func TestCustomMetric(t *testing.T) {
 	hc := testutil.SystemTest(t)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
-	defer cancel()
-
-	s, err := createService(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if err := createCustomMetric(s, hc.ProjectID, metricType); err != nil {
+	if err := createCustomMetric(hc.ProjectID, metricType); err != nil {
 		t.Fatal(err)
 	}
 
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
-		_, err = getCustomMetric(s, hc.ProjectID, metricType)
+		_, err := getCustomMetric(hc.ProjectID, metricType)
 		if err != nil {
 			r.Errorf("%v", err)
 		}
@@ -46,19 +37,23 @@ func TestCustomMetric(t *testing.T) {
 
 	time.Sleep(2 * time.Second)
 
-	if err := writeTimeSeriesValue(s, hc.ProjectID, metricType); err != nil {
-		t.Error(err)
-	}
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
+		if err := writeTimeSeriesValue(hc.ProjectID, metricType); err != nil {
+			t.Error(err)
+		}
+	})
 
 	time.Sleep(2 * time.Second)
 
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
-		if err := readTimeSeriesValue(s, hc.ProjectID, metricType); err != nil {
+		if err := readTimeSeriesValue(hc.ProjectID, metricType); err != nil {
 			r.Errorf("%v", err)
 		}
 	})
 
-	if err := deleteMetric(s, hc.ProjectID, metricType); err != nil {
-		t.Error(err)
-	}
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
+		if err := deleteMetric(hc.ProjectID, metricType); err != nil {
+			t.Error(err)
+		}
+	})
 }

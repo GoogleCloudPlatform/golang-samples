@@ -2,16 +2,15 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// +build go1.8
+// [START trace_setup_go_quickstart]
 
-// [START trace_quickstart]
-
-// Sample trace_quickstart creates traces incoming and outgoing requests.
+// Sample trace_quickstart traces incoming and outgoing requests.
 package main
 
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"contrib.go.opencensus.io/exporter/stackdriver"
 	"contrib.go.opencensus.io/exporter/stackdriver/propagation"
@@ -20,10 +19,9 @@ import (
 )
 
 func main() {
-	// Create an register a OpenCensus
-	// Stackdriver Trace exporter.
+	// Create and register a OpenCensus Stackdriver Trace exporter.
 	exporter, err := stackdriver.NewExporter(stackdriver.Options{
-		ProjectID: "YOUR_PROJECT_ID",
+		ProjectID: os.Getenv("GOOGLE_CLOUD_PROJECT"),
 	})
 	if err != nil {
 		log.Fatal(err)
@@ -53,4 +51,4 @@ func main() {
 	log.Fatal(http.ListenAndServe(":6060", &ochttp.Handler{}))
 }
 
-// [END trace_quickstart]
+// [END trace_setup_go_quickstart]

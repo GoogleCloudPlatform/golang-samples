@@ -19,6 +19,8 @@ import (
 )
 
 func TestSample(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
 	instance := os.Getenv("GOLANG_SAMPLES_SPANNER")
 	if instance == "" {
 		t.Skip("Skipping spanner integration test. Set GOLANG_SAMPLES_SPANNER.")
@@ -26,7 +28,7 @@ func TestSample(t *testing.T) {
 	if !strings.HasPrefix(instance, "projects/") {
 		t.Fatal("Spanner instance ref must be in the form of 'projects/PROJECT_ID/instances/INSTANCE_ID'")
 	}
-	dbName := fmt.Sprintf("%s/databases/test-%d", instance, time.Now().Unix())
+	dbName := fmt.Sprintf("%s/databases/test-%s", instance, tc.ProjectID)
 
 	ctx := context.Background()
 	adminClient, dataClient := createClients(ctx, dbName)
@@ -67,6 +69,9 @@ func TestSample(t *testing.T) {
 	// We execute all the commands of the tutorial code. These commands have to be run in a specific
 	// order since in many cases earlier commands setup the database for the subsequent commands.
 	mustRunCommand(t, "createdatabase", dbName)
+	runCommand(t, "write", dbName)
+
+	runCommand(t, "delete", dbName)
 	runCommand(t, "write", dbName)
 	writeTime := time.Now()
 

@@ -1,10 +1,11 @@
-// Copyright 2016 Google Inc. All rights reserved.
+// Copyright 2018 Google Inc. All rights reserved.
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// [START profiler_setup_go_compute_engine]
+// [START profiler_setup_go_appengine]
 
-// snippets is an example of starting cloud.google.com/go/profiler.
+// appengine is an example of starting cloud.google.com/go/profiler on
+// App Engine.
 package main
 
 import (
@@ -14,8 +15,8 @@ import (
 func main() {
 	// Profiler initialization, best done as early as possible.
 	if err := profiler.Start(profiler.Config{
-		Service:        "myservice",
-		ServiceVersion: "1.0.0",
+		// Service and ServiceVersion can be automatically inferred when running
+		// on App Engine.
 		// ProjectID must be set if not running on GCP.
 		// ProjectID: "my-project",
 	}); err != nil {
@@ -23,4 +24,4 @@ func main() {
 	}
 }
 
-// [END profiler_setup_go_compute_engine]
+// [END profiler_setup_go_appengine]

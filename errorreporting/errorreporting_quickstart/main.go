@@ -2,7 +2,8 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// [START errorreporting_quickstart]
+// [START error_reporting_setup_go]
+// [START error_reporting_quickstart]
 
 // Sample errorreporting_quickstart contains is a quickstart
 // example for the Google Cloud Error Reporting API.
@@ -39,9 +40,9 @@ func main() {
 	resp, err := http.Get("not-a-valid-url")
 	if err != nil {
 		logAndPrintError(err)
-	} else {
-		log.Print(resp.Status)
+		return
 	}
+	log.Print(resp.Status)
 }
 
 func logAndPrintError(err error) {
@@ -51,4 +52,5 @@ func logAndPrintError(err error) {
 	log.Print(err)
 }
 
-// [END errorreporting_quickstart]
+// [END error_reporting_quickstart]
+// [END error_reporting_setup_go]
