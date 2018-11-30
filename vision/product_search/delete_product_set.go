@@ -16,6 +16,7 @@ import (
 	visionpb "google.golang.org/genproto/googleapis/cloud/vision/v1"
 )
 
+// deleteProductSet deletes a product set.
 func deleteProductSet(w io.Writer, projectID string, location string, productSetID string) error {
 	ctx := context.Background()
 	c, err := vision.NewProductSearchClient(ctx)

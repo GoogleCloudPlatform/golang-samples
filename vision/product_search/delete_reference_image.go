@@ -16,6 +16,7 @@ import (
 	visionpb "google.golang.org/genproto/googleapis/cloud/vision/v1"
 )
 
+// deleteReferenceImage deletes a reference image from a product.
 func deleteReferenceImage(w io.Writer, projectID string, location string, productID string, referenceImageID string) error {
 	ctx := context.Background()
 	c, err := vision.NewProductSearchClient(ctx)

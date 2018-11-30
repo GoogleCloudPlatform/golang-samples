@@ -16,6 +16,7 @@ import (
 	visionpb "google.golang.org/genproto/googleapis/cloud/vision/v1"
 )
 
+// createReferenceImage creates a reference image for a product.
 func createReferenceImage(w io.Writer, projectID string, location string, productID string, referenceImageID string, gcsURI string) error {
 	ctx := context.Background()
 	c, err := vision.NewProductSearchClient(ctx)

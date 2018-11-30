@@ -16,6 +16,7 @@ import (
 	visionpb "google.golang.org/genproto/googleapis/cloud/vision/v1"
 )
 
+// addProductToProductSet adds a product to a product set.
 func addProductToProductSet(w io.Writer, projectID string, location string, productID string, productSetID string) error {
 	ctx := context.Background()
 	c, err := vision.NewProductSearchClient(ctx)
@@ -28,8 +29,7 @@ func addProductToProductSet(w io.Writer, projectID string, location string, prod
 		Product: fmt.Sprintf("projects/%s/locations/%s/products/%s", projectID, location, productID),
 	}
 
-	err = c.AddProductToProductSet(ctx, req)
-	if err != nil {
+	if err = c.AddProductToProductSet(ctx, req); err != nil {
 		return err
 	}
 

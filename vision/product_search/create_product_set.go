@@ -16,6 +16,7 @@ import (
 	visionpb "google.golang.org/genproto/googleapis/cloud/vision/v1"
 )
 
+// createProductSet creates a product set.
 func createProductSet(w io.Writer, projectID string, location string, productSetID string, productSetDisplayName string) error {
 	ctx := context.Background()
 	c, err := vision.NewProductSearchClient(ctx)

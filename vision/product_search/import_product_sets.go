@@ -16,6 +16,7 @@ import (
 	visionpb "google.golang.org/genproto/googleapis/cloud/vision/v1"
 )
 
+// importProductSets creates a product set using information in a csv file on GCS.
 func importProductSets(w io.Writer, projectID string, location string, gcsURI string) error {
 	ctx := context.Background()
 	c, err := vision.NewProductSearchClient(ctx)

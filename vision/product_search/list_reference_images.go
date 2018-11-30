@@ -17,6 +17,7 @@ import (
 	visionpb "google.golang.org/genproto/googleapis/cloud/vision/v1"
 )
 
+// listReferenceImages lists reference images of a product.
 func listReferenceImages(w io.Writer, projectID string, location string, productID string) error {
 	ctx := context.Background()
 	c, err := vision.NewProductSearchClient(ctx)

@@ -16,6 +16,7 @@ import (
 	visionpb "google.golang.org/genproto/googleapis/cloud/vision/v1"
 )
 
+// getSimilarProductsURI searches for products from a product set similar to products in an image file on GCS.
 func getSimilarProductsURI(w io.Writer, projectID string, location string, productSetID string, productCategory string, imageURI string, filter string) error {
 	ctx := context.Background()
 	c, err := vision.NewImageAnnotatorClient(ctx)

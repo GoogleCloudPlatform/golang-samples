@@ -17,6 +17,7 @@ import (
 	visionpb "google.golang.org/genproto/googleapis/cloud/vision/v1"
 )
 
+// listProductSets lists product sets.
 func listProductSets(w io.Writer, projectID string, location string) error {
 	ctx := context.Background()
 	c, err := vision.NewProductSearchClient(ctx)
