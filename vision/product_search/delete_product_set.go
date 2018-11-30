@@ -28,8 +28,7 @@ func deleteProductSet(w io.Writer, projectID string, location string, productSet
 		Name: fmt.Sprintf("projects/%s/locations/%s/productSets/%s", projectID, location, productSetID),
 	}
 
-	err = c.DeleteProductSet(ctx, req)
-	if err != nil {
+	if err = c.DeleteProductSet(ctx, req); err != nil {
 		return err
 	}
 

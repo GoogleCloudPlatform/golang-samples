@@ -28,8 +28,7 @@ func deleteReferenceImage(w io.Writer, projectID string, location string, produc
 		Name: fmt.Sprintf("projects/%s/locations/%s/products/%s/referenceImages/%s", projectID, location, productID, referenceImageID),
 	}
 
-	err = c.DeleteReferenceImage(ctx, req)
-	if err != nil {
+	if err = c.DeleteReferenceImage(ctx, req); err != nil {
 		return err
 	}
 

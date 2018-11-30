@@ -41,7 +41,7 @@ func TestAddProductToProductSet(t *testing.T) {
 		t.Errorf("Product ID %s already in product set", productID)
 	}
 
-	// Add product to product set
+	// Add product to product set.
 	if err := addProductToProductSet(&buf, tc.ProjectID, location, productID, productSetID); err != nil {
 		t.Fatal(err)
 	}

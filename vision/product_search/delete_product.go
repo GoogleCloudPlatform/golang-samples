@@ -28,8 +28,7 @@ func deleteProduct(w io.Writer, projectID string, location string, productID str
 		Name: fmt.Sprintf("projects/%s/locations/%s/products/%s", projectID, location, productID),
 	}
 
-	err = c.DeleteProduct(ctx, req)
-	if err != nil {
+	if err = c.DeleteProduct(ctx, req); err != nil {
 		return err
 	}
 

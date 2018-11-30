@@ -25,7 +25,6 @@ func TestGetSimilarProductsURIWithFilter(t *testing.T) {
 
 	var buf bytes.Buffer
 
-	// Make sure the product to be created does not already exist.
 	if err := getSimilarProductsURI(&buf, tc.ProjectID, location, productSetID, productCategory, imageURI, filter); err != nil {
 		t.Fatal(err)
 	}

@@ -46,7 +46,7 @@ func TestRemoveProductFromProductSet(t *testing.T) {
 		t.Errorf("Product ID %s is not in product set", productID)
 	}
 
-	// Remove product from product set
+	// Remove product from product set.
 	if err := removeProductFromProductSet(&buf, tc.ProjectID, location, productID, productSetID); err != nil {
 		t.Fatal(err)
 	}
