@@ -21,7 +21,7 @@ func removeProductFromProductSet(w io.Writer, projectID string, location string,
 	ctx := context.Background()
 	c, err := vision.NewProductSearchClient(ctx)
 	if err != nil {
-		return err
+		fmt.Errorf("NewProductSearchClient: %v", err)
 	}
 
 	req := &visionpb.RemoveProductFromProductSetRequest{
@@ -30,7 +30,7 @@ func removeProductFromProductSet(w io.Writer, projectID string, location string,
 	}
 
 	if err = c.RemoveProductFromProductSet(ctx, req); err != nil {
-		return err
+		fmt.Errorf("NewProductSearchClient: %v", err)
 	}
 
 	fmt.Fprintln(w, "Product removed from product set.")

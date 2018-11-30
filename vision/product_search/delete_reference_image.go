@@ -21,7 +21,7 @@ func deleteReferenceImage(w io.Writer, projectID string, location string, produc
 	ctx := context.Background()
 	c, err := vision.NewProductSearchClient(ctx)
 	if err != nil {
-		return err
+		fmt.Errorf("NewProductSearchClient: %v", err)
 	}
 
 	req := &visionpb.DeleteReferenceImageRequest{
@@ -29,7 +29,7 @@ func deleteReferenceImage(w io.Writer, projectID string, location string, produc
 	}
 
 	if err = c.DeleteReferenceImage(ctx, req); err != nil {
-		return err
+		fmt.Errorf("NewProductSearchClient: %v", err)
 	}
 
 	fmt.Fprintln(w, "Reference image deleted from product.")

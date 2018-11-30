@@ -21,7 +21,7 @@ func getProduct(w io.Writer, projectID string, location string, productID string
 	ctx := context.Background()
 	c, err := vision.NewProductSearchClient(ctx)
 	if err != nil {
-		return err
+		fmt.Errorf("NewProductSearchClient: %v", err)
 	}
 
 	req := &visionpb.GetProductRequest{
@@ -30,7 +30,7 @@ func getProduct(w io.Writer, projectID string, location string, productID string
 
 	resp, err := c.GetProduct(ctx, req)
 	if err != nil {
-		return err
+		fmt.Errorf("GetProduct: %v", err)
 	}
 
 	fmt.Fprintln(w, "Product name:", resp.Name)

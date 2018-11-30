@@ -22,18 +22,18 @@ func getSimilarProducts(w io.Writer, projectID string, location string, productS
 	ctx := context.Background()
 	c, err := vision.NewImageAnnotatorClient(ctx)
 	if err != nil {
-		return err
+		fmt.Errorf("NewImageAnnotatorClient: %v", err)
 	}
 
 	f, err := os.Open(file)
 	if err != nil {
-		return err
+		fmt.Errorf("Open: %v", err)
 	}
 	defer f.Close()
 
 	image, err := vision.NewImageFromReader(f)
 	if err != nil {
-		return err
+		fmt.Errorf("NewImageFromReader: %v", err)
 	}
 
 	ictx := &visionpb.ImageContext{
@@ -46,7 +46,7 @@ func getSimilarProducts(w io.Writer, projectID string, location string, productS
 
 	response, err := c.ProductSearch(ctx, image, ictx)
 	if err != nil {
-		return err
+		fmt.Errorf("ProductSearch: %v", err)
 	}
 
 	fmt.Fprintln(w, "Product set index time:")

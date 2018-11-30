@@ -21,7 +21,7 @@ func importProductSets(w io.Writer, projectID string, location string, gcsURI st
 	ctx := context.Background()
 	c, err := vision.NewProductSearchClient(ctx)
 	if err != nil {
-		return err
+		fmt.Errorf("NewProductSearchClient: %v", err)
 	}
 
 	req := &visionpb.ImportProductSetsRequest{
@@ -37,14 +37,14 @@ func importProductSets(w io.Writer, projectID string, location string, gcsURI st
 
 	op, err := c.ImportProductSets(ctx, req)
 	if err != nil {
-		return err
+		fmt.Errorf("ImportProductSets: %v", err)
 	}
 
 	fmt.Fprintln(w, "Processing operation name: ", op.Name())
 
 	resp, err := op.Wait(ctx)
 	if err != nil {
-		return err
+		fmt.Errorf("Wait: %v", err)
 	}
 
 	fmt.Fprintln(w, "processing done.")

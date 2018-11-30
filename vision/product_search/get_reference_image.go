@@ -21,7 +21,7 @@ func getReferenceImage(w io.Writer, projectID string, location string, productID
 	ctx := context.Background()
 	c, err := vision.NewProductSearchClient(ctx)
 	if err != nil {
-		return err
+		fmt.Errorf("NewProductSearchClient: %v", err)
 	}
 
 	req := &visionpb.GetReferenceImageRequest{
@@ -30,7 +30,7 @@ func getReferenceImage(w io.Writer, projectID string, location string, productID
 
 	resp, err := c.GetReferenceImage(ctx, req)
 	if err != nil {
-		return err
+		fmt.Errorf("GetReferenceImage: %v", err)
 	}
 
 	fmt.Fprintln(w, "Reference image name:", resp.Name)

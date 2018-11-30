@@ -22,7 +22,7 @@ func listProductsInProductSet(w io.Writer, projectID string, location string, pr
 	ctx := context.Background()
 	c, err := vision.NewProductSearchClient(ctx)
 	if err != nil {
-		return err
+		fmt.Errorf("NewProductSearchClient: %v", err)
 	}
 
 	req := &visionpb.ListProductsInProductSetRequest{
@@ -36,7 +36,7 @@ func listProductsInProductSet(w io.Writer, projectID string, location string, pr
 			break
 		}
 		if err != nil {
-			return err
+			fmt.Errorf("Next: %v", err)
 		}
 
 		fmt.Fprintln(w, "Product name:", resp.Name)
