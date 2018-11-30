@@ -26,16 +26,16 @@ func TestAddProductToProductSet(t *testing.T) {
 
 	// Create fake product set and product.
 	if err := createProductSet(&buf, tc.ProjectID, location, productSetID, productSetDisplayName); err != nil {
-		t.Fatal(err)
+		t.Fatalf("createProductSet: %v", err)
 	}
 	if err := createProduct(&buf, tc.ProjectID, location, productID, productDisplayName, productCategory); err != nil {
-		t.Fatal(err)
+		t.Fatalf("createProduct: %v", err)
 	}
 
 	// Make sure the product is not in the product set.
 	buf.Reset()
 	if err := listProductsInProductSet(&buf, tc.ProjectID, location, productSetID); err != nil {
-		t.Fatal(err)
+		t.Fatalf("listProductsInProductSet: %v", err)
 	}
 	if got := buf.String(); strings.Contains(got, productID) {
 		t.Errorf("Product ID %s already in product set", productID)
@@ -43,13 +43,13 @@ func TestAddProductToProductSet(t *testing.T) {
 
 	// Add product to product set.
 	if err := addProductToProductSet(&buf, tc.ProjectID, location, productID, productSetID); err != nil {
-		t.Fatal(err)
+		t.Fatalf("addProductToProductSet: %v", err)
 	}
 
 	// Check if the product is in the product set now.
 	buf.Reset()
 	if err := listProductsInProductSet(&buf, tc.ProjectID, location, productSetID); err != nil {
-		t.Fatal(err)
+		t.Fatalf("listProductsInProductSet: %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, productID) {
 		t.Errorf("Product ID %s is not in product set", productID)

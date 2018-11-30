@@ -26,18 +26,18 @@ func TestDeleteReferenceImage(t *testing.T) {
 
 	// Create a fake product.
 	if err := createProduct(&buf, tc.ProjectID, location, productID, productDisplayName, productCategory); err != nil {
-		t.Fatal(err)
+		t.Fatalf("createProduct: %v", err)
 	}
 
 	// Create reference image.
 	if err := createReferenceImage(&buf, tc.ProjectID, location, productID, referenceImageID, gcsURI) ; err != nil {
-		t.Fatal(err)
+		t.Fatalf("createReferenceImage: %v", err)
 	}
 
 	// Confirm the reference image exists.
 	buf.Reset()
 	if err := listReferenceImages(&buf, tc.ProjectID, location, productID); err != nil {
-		t.Fatal(err)
+		t.Fatalf("listReferenceImages: %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, referenceImageID) {
 		t.Errorf("Reference image ID %s does not exist", referenceImageID)
@@ -45,13 +45,13 @@ func TestDeleteReferenceImage(t *testing.T) {
 
 	// Delete reference image.
 	if err := deleteReferenceImage(&buf, tc.ProjectID, location, productID, referenceImageID) ; err != nil {
-		t.Fatal(err)
+		t.Fatalf("deleteReferenceImage: %v", err)
 	}
 
 	// Check if the reference image is deleted.
 	buf.Reset()
 	if err := listReferenceImages(&buf, tc.ProjectID, location, productID); err != nil {
-		t.Fatal(err)
+		t.Fatalf("listReferenceImages: %v", err)
 	}
 	if got := buf.String(); strings.Contains(got, referenceImageID) {
 		t.Errorf("Reference image ID %s still exists", referenceImageID)

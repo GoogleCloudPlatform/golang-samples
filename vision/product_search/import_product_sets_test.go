@@ -27,7 +27,7 @@ func TestImportProductSets(t *testing.T) {
 
 	// Make sure the product set to be created does not already exist.
 	if err := listProductSets(&buf, tc.ProjectID, location); err != nil {
-		t.Fatal(err)
+		t.Fatalf("listProductSets: %v", err)
 	}
 	if got := buf.String(); strings.Contains(got, productSetID) {
 		t.Errorf("Product set ID %s already exists", productSetID)
@@ -35,7 +35,7 @@ func TestImportProductSets(t *testing.T) {
 
 	// Make sure the products to be created do not already exist.
 	if err := listProducts(&buf, tc.ProjectID, location); err != nil {
-		t.Fatal(err)
+		t.Fatalf("listProducts: %v", err)
 	}
 	if got := buf.String(); strings.Contains(got, productID1) || strings.Contains(got, productID2) {
 		t.Errorf("Product IDs %s %s already exist", productID1, productID2)
@@ -43,13 +43,13 @@ func TestImportProductSets(t *testing.T) {
 
 	// Import product set.
 	if err := importProductSets(&buf, tc.ProjectID, location, gcsURI); err != nil {
-		t.Fatal(err)
+		t.Fatalf("importProductSets: %v", err)
 	}
 
 	// Check if the product set exists now.
 	buf.Reset()
 	if err := listProductSets(&buf, tc.ProjectID, location); err != nil {
-		t.Fatal(err)
+		t.Fatalf("listProductSets: %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, productSetID) {
 		t.Errorf("Product set ID %s does not exist", productSetID)
@@ -58,7 +58,7 @@ func TestImportProductSets(t *testing.T) {
 	// Check if the products exist.
 	buf.Reset()
 	if err := listProducts(&buf, tc.ProjectID, location); err != nil {
-		t.Fatal(err)
+		t.Fatalf("listProducts: %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, productID1) ||  !strings.Contains(got, productID2) {
 		t.Errorf("Product IDs %s %s do not exist", productID1, productID2)
@@ -67,7 +67,7 @@ func TestImportProductSets(t *testing.T) {
 	// Check if the products are in the product set.
 	buf.Reset()
 	if err := listProductsInProductSet(&buf, tc.ProjectID, location, productSetID); err != nil {
-		t.Fatal(err)
+		t.Fatalf("listProductsInProductSet: %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, productID1) ||  !strings.Contains(got, productID2) {
 		t.Errorf("Product IDs %s %s do not exist in product set", productID1, productID2)
@@ -76,7 +76,7 @@ func TestImportProductSets(t *testing.T) {
 	// check if the reference images exsit.
 	buf.Reset()
 	if err := listReferenceImages(&buf, tc.ProjectID, location, productID1); err != nil {
-		t.Fatal(err)
+		t.Fatalf("listReferenceImages: %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, imageURI1) {
 		t.Errorf("Reference image uri %s does not exist in product set", imageURI1)
@@ -84,7 +84,7 @@ func TestImportProductSets(t *testing.T) {
 
 	buf.Reset()
 	if err := listReferenceImages(&buf, tc.ProjectID, location, productID2); err != nil {
-		t.Fatal(err)
+		t.Fatalf("listReferenceImages: %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, imageURI2) {
 		t.Errorf("Reference image uri %s does not exist in product set", imageURI2)

@@ -26,12 +26,12 @@ func TestUpdateProductLabels(t *testing.T) {
 
 	// Create a fake product.
 	if err := createProduct(&buf, tc.ProjectID, location, productID, productDisplayName, productCategory); err != nil {
-		t.Fatal(err)
+		t.Fatalf("createProduct: %v", err)
 	}
 
 	// Make sure the label to be added to the product does not already exist.
 	if err := getProduct(&buf, tc.ProjectID, location, productID); err != nil {
-		t.Fatal(err)
+		t.Fatalf("getProduct: %v", err)
 	}
 	if got := buf.String(); strings.Contains(got, key) || strings.Contains(got, value) {
 		t.Errorf("Key-value %s %s already exists", key, value)
@@ -40,7 +40,7 @@ func TestUpdateProductLabels(t *testing.T) {
 	// Update product labels.
 	buf.Reset()
 	if err := updateProductLabels(&buf, tc.ProjectID, location, productID, key, value); err != nil {
-		t.Fatal(err)
+		t.Fatalf("updateProductLabels: %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, key) || !strings.Contains(got, value) {
 		t.Errorf("Label %s %s does not exist", key, value)

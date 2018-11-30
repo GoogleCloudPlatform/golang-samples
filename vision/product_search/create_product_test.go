@@ -24,7 +24,7 @@ func TestCreateProduct(t *testing.T) {
 
 	// Make sure the product to be created does not already exist.
 	if err := listProducts(&buf, tc.ProjectID, location); err != nil {
-		t.Fatal(err)
+		t.Fatalf("listProducts: %v", err)
 	}
 	if got := buf.String(); strings.Contains(got, productID) {
 		t.Errorf("Product ID %s already exists", productID)
@@ -32,13 +32,13 @@ func TestCreateProduct(t *testing.T) {
 
 	// Create a fake product.
 	if err := createProduct(&buf, tc.ProjectID, location, productID, productDisplayName, productCategory); err != nil {
-		t.Fatal(err)
+		t.Fatalf("createProduct: %v", err)
 	}
 
 	// Check if the product exists now.
 	buf.Reset()
 	if err := listProducts(&buf, tc.ProjectID, location); err != nil {
-		t.Fatal(err)
+		t.Fatalf("listProducts: %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, productID) {
 		t.Errorf("Product ID %s does not exist", productID)

@@ -23,12 +23,12 @@ func TestDeleteProductSet(t *testing.T) {
 
 	// Create a fake product set.
 	if err := createProductSet(&buf, tc.ProjectID, location, productSetID, productSetDisplayName); err != nil {
-		t.Fatal(err)
+		t.Fatalf("createProductSet: %v", err)
 	}
 
 	// Confirm the product set exists.
 	if err := listProductSets(&buf, tc.ProjectID, location); err != nil {
-		t.Fatal(err)
+		t.Fatalf("listProductSets: %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, productSetID) {
 		t.Errorf("Product set ID %s does not exist", productSetID)
@@ -40,7 +40,7 @@ func TestDeleteProductSet(t *testing.T) {
 	// Confirm the product set has been deleted.
 	buf.Reset()
 	if err := listProductSets(&buf, tc.ProjectID, location); err != nil {
-		t.Fatal(err)
+		t.Fatalf("listProductSets: %v", err)
 	}
 	if got := buf.String(); strings.Contains(got, productSetID) {
 		t.Errorf("Product set ID %s still exists", productSetID)

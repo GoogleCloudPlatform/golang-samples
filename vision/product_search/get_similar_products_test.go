@@ -26,7 +26,7 @@ func TestGetSimilarProducts(t *testing.T) {
 	var buf bytes.Buffer
 
 	if err := getSimilarProducts(&buf, tc.ProjectID, location, productSetID, productCategory, file, filter); err != nil {
-		t.Fatal(err)
+		t.Fatalf("getSimilarProducts: %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, productID1) || !strings.Contains(got, productID2) {
 		t.Errorf("Product IDs %s %s not returned", productID1, productID2)
