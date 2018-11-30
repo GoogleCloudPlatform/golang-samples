@@ -2,6 +2,7 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
+// Package productsearch contains samples for Google Cloud Vision API Product Search.
 package productsearch
 
 // [START vision_product_search_get_product_set]
