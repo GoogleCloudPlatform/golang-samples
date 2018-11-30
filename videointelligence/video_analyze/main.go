@@ -42,6 +42,7 @@ func main() {
 		{"label", label, labelURI},
 		{"shotChange", shotChange, shotChangeURI},
 		{"explicitContent", explicitContent, explicitContentURI},
+		{"speechTranscription", speechTranscription, speechTranscriptionURI},
 	}
 
 	for _, sample := range samples {

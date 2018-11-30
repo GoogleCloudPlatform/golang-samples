@@ -131,3 +131,79 @@ func explicitContent__SUFFIX__(w io.Writer, file string) error {
 }
 
 // [END video_analyze_explicit_content] //# include if gcs
+
+// [START video_analyze_speech_transcription] //# include if !gcs
+// [START video_analyze_speech_transcription_gcs] //# include if gcs
+
+func speechTranscription__SUFFIX__(w io.Writer, file string) error {
+	ctx := context.Background()
+	client, err := video.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	//# if !gcs
+
+	fileBytes, err := ioutil.ReadFile(file)
+	if err != nil {
+		return err
+	}
+	//# end
+
+	op, err := client.AnnotateVideo(ctx, &videopb.AnnotateVideoRequest{
+		Features: []videopb.Feature{
+			videopb.Feature_SPEECH_TRANSCRIPTION,
+		},
+		VideoContext: &videopb.VideoContext{
+			SpeechTranscriptionConfig: &videopb.SpeechTranscriptionConfig{
+				LanguageCode:               "en-US",
+				EnableAutomaticPunctuation: true,
+			},
+		},
+		InputContent: fileBytes, //# include if !gcs
+		InputUri:     file,      //# include if gcs
+	})
+	if err != nil {
+		return err
+	}
+	resp, err := op.Wait(ctx)
+	if err != nil {
+		return err
+	}
+
+	// A single video was processed. Get the first result.
+	result := resp.AnnotationResults[0]
+
+	for _, transcription := range result.SpeechTranscriptions {
+		// The number of alternatives for each transcription is limited by
+		// SpeechTranscriptionConfig.MaxAlternatives.
+		// Each alternative is a different possible transcription
+		// and has its own confidence score.
+		for _, alternative := range transcription.GetAlternatives() {
+			transcript := alternative.GetTranscript()
+			confidence := alternative.GetConfidence()
+			words := alternative.GetWords()
+
+			fmt.Fprintf(w, "Alternative level information:\n")
+			fmt.Fprintf(w, "\tTranscript: %v\n", transcript)
+			fmt.Fprintf(w, "\tConfidence: %v\n", confidence)
+
+			fmt.Fprintf(w, "Word level information:\n")
+			for _, wordInfo := range words {
+				word := wordInfo.GetWord()
+				startTime := wordInfo.GetStartTime()
+				endTime := wordInfo.GetEndTime()
+				speakerTag := wordInfo.GetSpeakerTag()
+				fmt.Fprintf(w, "\t%4.1f - %4.1f: %v (speaker %v)\n",
+					float64(startTime.GetSeconds())+float64(startTime.GetNanos())*1e-9,
+					float64(endTime.GetSeconds())+float64(endTime.GetNanos())*1e-9,
+					word,
+					speakerTag)
+			}
+		}
+	}
+
+	return nil
+}
+
+// [END video_analyze_speech_transcription] //# include if !gcs
+// [END video_analyze_speech_transcription_gcs] //# include if gcs
