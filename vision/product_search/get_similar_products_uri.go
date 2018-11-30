@@ -21,7 +21,7 @@ func getSimilarProductsURI(w io.Writer, projectID string, location string, produ
 	ctx := context.Background()
 	c, err := vision.NewImageAnnotatorClient(ctx)
 	if err != nil {
-		fmt.Errorf("NewImageAnnotatorClient: %v", err)
+		return fmt.Errorf("NewImageAnnotatorClient: %v", err)
 	}
 
 	image := vision.NewImageFromURI(imageURI)
@@ -36,21 +36,21 @@ func getSimilarProductsURI(w io.Writer, projectID string, location string, produ
 
 	response, err := c.ProductSearch(ctx, image, ictx)
 	if err != nil {
-		fmt.Errorf("ProductSearch: %v", err)
+		return fmt.Errorf("ProductSearch: %v", err)
 	}
 
-	fmt.Fprintln(w, "Product set index time:")
-	fmt.Fprintln(w, "  seconds: ", response.IndexTime.Seconds)
-	fmt.Fprintln(w, "  nanos: ", response.IndexTime.Nanos, "\n")
+	fmt.Fprintf(w, "Product set index time:\n")
+	fmt.Fprintf(w, "seconds: %s\n", response.IndexTime.Seconds)
+	fmt.Fprintf(w, "nanos: %s\n", response.IndexTime.Nanos)
 
-	fmt.Fprintln(w, "Search results:")
+	fmt.Fprintf(w, "Search results:\n")
 	for _, result := range response.Results {
-		fmt.Fprintln(w, "Score(Confidence): ", result.Score)
-		fmt.Fprintln(w, "Image name: ", result.Image)
+		fmt.Fprintf(w, "Score(Confidence): %s\n", result.Score)
+		fmt.Fprintf(w, "Image name: %s\n", result.Image)
 
-		fmt.Fprintln(w, "Prodcut name: ", result.Product.Name)
-		fmt.Fprintln(w, "Product display name: ", result.Product.DisplayName)
-		fmt.Fprintln(w, "Product labels: ", result.Product.ProductLabels, "\n")
+		fmt.Fprintf(w, "Prodcut name: %s\n", result.Product.Name)
+		fmt.Fprintf(w, "Product display name: %s\n", result.Product.DisplayName)
+		fmt.Fprintf(w, "Product labels: %s\n", result.Product.ProductLabels)
 	}
 
 	return nil

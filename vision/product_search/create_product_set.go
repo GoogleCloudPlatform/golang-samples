@@ -21,7 +21,7 @@ func createProductSet(w io.Writer, projectID string, location string, productSet
 	ctx := context.Background()
 	c, err := vision.NewProductSearchClient(ctx)
 	if err != nil {
-		fmt.Errorf("NewProductSearchClient: %v", err)
+		return fmt.Errorf("NewProductSearchClient: %v", err)
 	}
 
 	req := &visionpb.CreateProductSetRequest{
@@ -34,10 +34,10 @@ func createProductSet(w io.Writer, projectID string, location string, productSet
 
 	resp, err := c.CreateProductSet(ctx, req)
 	if err != nil {
-		fmt.Errorf("CreateProductSet: %v", err)
+		return fmt.Errorf("CreateProductSet: %v", err)
 	}
 
-	fmt.Fprintln(w, "Product set name:", resp.Name)
+	fmt.Fprintf(w, "Product set name: %s\n", resp.Name)
 
 	return nil
 }

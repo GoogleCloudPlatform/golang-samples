@@ -21,7 +21,7 @@ func importProductSets(w io.Writer, projectID string, location string, gcsURI st
 	ctx := context.Background()
 	c, err := vision.NewProductSearchClient(ctx)
 	if err != nil {
-		fmt.Errorf("NewProductSearchClient: %v", err)
+		return fmt.Errorf("NewProductSearchClient: %v", err)
 	}
 
 	req := &visionpb.ImportProductSetsRequest{
@@ -37,26 +37,26 @@ func importProductSets(w io.Writer, projectID string, location string, gcsURI st
 
 	op, err := c.ImportProductSets(ctx, req)
 	if err != nil {
-		fmt.Errorf("ImportProductSets: %v", err)
+		return fmt.Errorf("ImportProductSets: %v", err)
 	}
 
-	fmt.Fprintln(w, "Processing operation name: ", op.Name())
+	fmt.Fprintf(w, "Processing operation name: %s\n", op.Name())
 
 	resp, err := op.Wait(ctx)
 	if err != nil {
-		fmt.Errorf("Wait: %v", err)
+		return fmt.Errorf("Wait: %v", err)
 	}
 
-	fmt.Fprintln(w, "processing done.")
+	fmt.Fprintf(w, "processing done.\n")
 
 	for i, status := range resp.Statuses {
 		// `0` is the coee for OK in google.rpc.code
 		fmt.Fprintf(w, "Status of processing line %d of the csv: %d\n", i, status.Code)
 
 		if status.Code == 0 {
-			fmt.Fprintln(w, "Reference image name: ", resp.ReferenceImages[i].Name, "\n")
+			fmt.Fprintf(w, "Reference image name: %s\n", resp.ReferenceImages[i].Name)
 		} else {
-			fmt.Fprintln(w, "Status code not OK: ", status.Message, "\n")
+			fmt.Fprintf(w, "Status code not OK: %s\n", status.Message)
 		}
 	}
 

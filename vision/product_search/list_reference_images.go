@@ -22,7 +22,7 @@ func listReferenceImages(w io.Writer, projectID string, location string, product
 	ctx := context.Background()
 	c, err := vision.NewProductSearchClient(ctx)
 	if err != nil {
-		fmt.Errorf("NewProductSearchClient: %v", err)
+		return fmt.Errorf("NewProductSearchClient: %v", err)
 	}
 
 	req := &visionpb.ListReferenceImagesRequest{
@@ -36,12 +36,12 @@ func listReferenceImages(w io.Writer, projectID string, location string, product
 			break
 		}
 		if err != nil {
-			fmt.Errorf("Next: %v", err)
+			return fmt.Errorf("Next: %v", err)
 		}
 
-		fmt.Fprintln(w, "Reference image name:", resp.Name)
-		fmt.Fprintln(w, "Reference image uri:", resp.Uri)
-		fmt.Fprintln(w, "Reference image bounding polygons: ", resp.BoundingPolys, "\n")
+		fmt.Fprintf(w, "Reference image name: %s\n", resp.Name)
+		fmt.Fprintf(w, "Reference image uri: %s\n", resp.Uri)
+		fmt.Fprintf(w, "Reference image bounding polygons: %s\n", resp.BoundingPolys)
 	}
 
 	return nil

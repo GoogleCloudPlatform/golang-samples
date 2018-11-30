@@ -22,7 +22,7 @@ func listProductSets(w io.Writer, projectID string, location string) error {
 	ctx := context.Background()
 	c, err := vision.NewProductSearchClient(ctx)
 	if err != nil {
-		fmt.Errorf("NewProductSearchClient: %v", err)
+		return fmt.Errorf("NewProductSearchClient: %v", err)
 	}
 
 	req := &visionpb.ListProductSetsRequest{
@@ -36,14 +36,14 @@ func listProductSets(w io.Writer, projectID string, location string) error {
 			break
 		}
 		if err != nil {
-			fmt.Errorf("Next: %v", err)
+			return fmt.Errorf("Next: %v", err)
 		}
 
-		fmt.Fprintln(w, "Product set name:", resp.Name)
-		fmt.Fprintln(w, "Product set display name:", resp.DisplayName)
-		fmt.Fprintln(w, "Product set index time:")
-		fmt.Fprintln(w, "  seconds: ", resp.IndexTime.Seconds)
-		fmt.Fprintln(w, "  nanos: ", resp.IndexTime.Nanos, "\n")
+		fmt.Fprintf(w, "Product set name: %s\n", resp.Name)
+		fmt.Fprintf(w, "Product set display name: %s\n", resp.DisplayName)
+		fmt.Fprintf(w, "Product set index time:\n")
+		fmt.Fprintf(w, "seconds: %s\n", resp.IndexTime.Seconds)
+		fmt.Fprintf(w, "nanos: %s\n", resp.IndexTime.Nanos)
 	}
 
 	return nil
