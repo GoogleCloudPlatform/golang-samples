@@ -45,7 +45,7 @@ func init() {
 	var err error
 
 	// Read config.json
-	configFile, err := ioutil.ReadFile("../config.json")
+	configFile, err := ioutil.ReadFile("config.json")
 	if err != nil {
 		log.Fatal(err)
 	}
