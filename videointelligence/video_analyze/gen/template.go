@@ -179,25 +179,19 @@ func speechTranscription__SUFFIX__(w io.Writer, file string) error {
 		// Each alternative is a different possible transcription
 		// and has its own confidence score.
 		for _, alternative := range transcription.GetAlternatives() {
-			transcript := alternative.GetTranscript()
-			confidence := alternative.GetConfidence()
-			words := alternative.GetWords()
-
 			fmt.Fprintf(w, "Alternative level information:\n")
-			fmt.Fprintf(w, "\tTranscript: %v\n", transcript)
-			fmt.Fprintf(w, "\tConfidence: %v\n", confidence)
+			fmt.Fprintf(w, "\tTranscript: %v\n", alternative.GetTranscript())
+			fmt.Fprintf(w, "\tConfidence: %v\n", alternative.GetConfidence())
 
 			fmt.Fprintf(w, "Word level information:\n")
-			for _, wordInfo := range words {
-				word := wordInfo.GetWord()
+			for _, wordInfo := range alternative.GetWords() {
 				startTime := wordInfo.GetStartTime()
 				endTime := wordInfo.GetEndTime()
-				speakerTag := wordInfo.GetSpeakerTag()
 				fmt.Fprintf(w, "\t%4.1f - %4.1f: %v (speaker %v)\n",
-					float64(startTime.GetSeconds())+float64(startTime.GetNanos())*1e-9,
-					float64(endTime.GetSeconds())+float64(endTime.GetNanos())*1e-9,
-					word,
-					speakerTag)
+					float64(startTime.GetSeconds())+float64(startTime.GetNanos())*1e-9, // start as seconds
+					float64(endTime.GetSeconds())+float64(endTime.GetNanos())*1e-9,     // end as seconds
+					wordInfo.GetWord(),
+					wordInfo.GetSpeakerTag())
 			}
 		}
 	}
