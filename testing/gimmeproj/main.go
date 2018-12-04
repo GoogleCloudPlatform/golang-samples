@@ -210,7 +210,7 @@ func lease(ctx context.Context, duration string) error {
 func list(ctx context.Context) error {
 	return withPool(ctx, func(pool *Pool) error {
 		for _, proj := range pool.Projects {
-			fmt.Print(proj.ID, " ")
+			fmt.Println(proj.ID)
 		}
 
 		return nil
