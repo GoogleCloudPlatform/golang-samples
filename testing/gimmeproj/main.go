@@ -95,6 +95,7 @@ Usage:
 
 Commands:
 	lease [duration]    Leases a project for a given duration. Prints the project ID to stdout.
+	list [project ID]   List all projects in the pool.
 	done [project ID]   Returns a project to the pool.
 	version             Prints the version of gimmeproj.
 
@@ -125,12 +126,19 @@ Administrative commands:
 		return fmt.Errorf("datastore.NewClient: %v", err)
 	}
 
+	// List is intended explicitly for scripting.
+	if flag.Arg(0) != "list" {
+		fmt.Println(flag.Arg(0), flag.Arg(1))
+	}
+
 	switch flag.Arg(0) {
 	case "help":
 		fmt.Fprintln(os.Stderr, usage.Error())
 		return nil
 	case "lease":
 		return lease(ctx, flag.Arg(1))
+	case "list":
+		return list(ctx)
 	case "pool-add":
 		return addToPool(ctx, flag.Arg(1))
 	case "pool-rm":
@@ -197,6 +205,16 @@ func lease(ctx context.Context, duration string) error {
 	fmt.Fprintf(os.Stderr, "Leased! %s is yours for %s.\n", proj.ID, d)
 	fmt.Print(proj.ID)
 	return nil
+}
+
+func list(ctx context.Context) error {
+	return withPool(ctx, func(pool *Pool) error {
+		for _, proj := range pool.Projects {
+			fmt.Print(proj.ID, " ")
+		}
+
+		return nil
+	})
 }
 
 func done(ctx context.Context, projectID string) error {
