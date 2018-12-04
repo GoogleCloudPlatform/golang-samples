@@ -22,6 +22,7 @@ import (
 
 var (
 	metaProject = flag.String("project", "", "Meta-project that manages the pool.")
+	format      = flag.String("output", "", "Output format for selected operations. Options include: list")
 	datastore   *ds.Client
 
 	version   = "dev"
@@ -92,6 +93,7 @@ func submain() error {
 	usage := errors.New(`
 Usage:
 	gimmeproj -project=[meta project ID] command
+	gimmeproj -project=[meta project ID] -output=list status
 
 Commands:
 	lease [duration]    Leases a project for a given duration. Prints the project ID to stdout.
@@ -102,7 +104,7 @@ Commands:
 Administrative commands:
 	pool-add [project ID]       Adds a project to the pool.
 	pool-rm  [project ID]       Removes a project from the pool.
-	status                      Displays the current status of the meta project.
+	status                      Displays the current status of the meta project. Respects -output.
 `)
 
 	if flag.Arg(0) == "version" {
@@ -126,8 +128,7 @@ Administrative commands:
 		return fmt.Errorf("datastore.NewClient: %v", err)
 	}
 
-	// List is intended explicitly for scripting.
-	if flag.Arg(0) != "list" {
+	if *format == "" {
 		fmt.Println(flag.Arg(0), flag.Arg(1))
 	}
 
@@ -137,8 +138,6 @@ Administrative commands:
 		return nil
 	case "lease":
 		return lease(ctx, flag.Arg(1))
-	case "list":
-		return list(ctx)
 	case "pool-add":
 		return addToPool(ctx, flag.Arg(1))
 	case "pool-rm":
@@ -207,16 +206,6 @@ func lease(ctx context.Context, duration string) error {
 	return nil
 }
 
-func list(ctx context.Context) error {
-	return withPool(ctx, func(pool *Pool) error {
-		for _, proj := range pool.Projects {
-			fmt.Println(proj.ID)
-		}
-
-		return nil
-	})
-}
-
 func done(ctx context.Context, projectID string) error {
 	if projectID == "" {
 		return errors.New("must provide project id")
@@ -238,14 +227,23 @@ func done(ctx context.Context, projectID string) error {
 
 func status(ctx context.Context) error {
 	return withPool(ctx, func(pool *Pool) error {
-		fmt.Printf("%-8s %s\n", "LEASE", "PROJECT")
+		if *format == "" {
+			fmt.Printf("%-8s %s\n", "LEASE", "PROJECT")
+		}
 		for _, proj := range pool.Projects {
 			exp := ""
 			if !proj.Expired() {
 				secs := proj.LeaseExpiry.Sub(time.Now()) / time.Second * time.Second
 				exp = secs.String()
 			}
-			fmt.Printf("%-8s %s\n", exp, proj.ID)
+			switch *format {
+			case "":
+				fmt.Printf("%-8s %s\n", exp, proj.ID)
+			case "list":
+				fmt.Printf("%s\n", proj.ID)
+			default:
+				return errors.New("output may be '', 'list'")
+			}
 		}
 		return nil
 	})
