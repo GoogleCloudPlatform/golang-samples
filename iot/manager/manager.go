@@ -107,8 +107,9 @@ func deleteRegistry(w io.Writer, projectID string, region string, registryID str
 
 // [END iot_delete_registry]
 
+// [START iot_get_registry]
+
 func getRegistry(w io.Writer, projectID string, region string, registryID string) (*cloudiot.DeviceRegistry, error) {
-	// [START iot_get_registry]
 	// Authorize the client using Application Default Credentials.
 	// See https://g.co/dv/identity/protocols/application-default-credentials
 	ctx := context.Background()
