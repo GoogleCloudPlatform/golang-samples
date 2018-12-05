@@ -2,8 +2,6 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-//[START sample]
-
 // Package gcsdemo is an example App Engine app using the Google Cloud Storage API.
 package gcsdemo
 
@@ -210,7 +208,6 @@ func (d *demo) dumpStats(obj *storage.ObjectAttrs) {
 	fmt.Fprintf(d.w, "Updated: %v)\n", obj.Updated)
 }
 
-//[START file_metadata]
 // statFile reads the stats of the named file in Google Cloud Storage.
 func (d *demo) statFile(fileName string) {
 	io.WriteString(d.w, "\nFile stat:\n")
@@ -223,8 +220,6 @@ func (d *demo) statFile(fileName string) {
 
 	d.dumpStats(obj)
 }
-
-//[END file_metadata]
 
 // createListFiles creates files that will be used by listBucket.
 func (d *demo) createListFiles() {
@@ -415,5 +410,3 @@ func (d *demo) deleteFiles() {
 		}
 	}
 }
-
-//[END sample]
