@@ -14,7 +14,7 @@ import (
 	"os"
 
 	"cloud.google.com/go/iam"
-	//"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	cloudkms "cloud.google.com/go/kms/apiv1"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
@@ -85,9 +85,8 @@ func createKeyHelper(v TestVariables, keyId, keyPath, parent string,
 }
 
 func TestMain(m *testing.M) {
-	//tc, ok := testutil.ContextMain(m)
-	ProjectID := "sanche-testing-project"
-	v := getTestVariables(ProjectID)
+	tc, _ := testutil.ContextMain(m)
+	v := getTestVariables(tc.ProjectID)
 	parent := "projects/" + v.projectId + "/locations/global"
 	//Create cryptokeys in the test project if needed.
 	s1 := createKeyHelper(v, v.rsaDecryptId, v.rsaDecryptPath, parent, kmspb.CryptoKey_ASYMMETRIC_DECRYPT, kmspb.CryptoKeyVersion_RSA_DECRYPT_OAEP_2048_SHA256)
@@ -96,7 +95,7 @@ func TestMain(m *testing.M) {
 	s4 := createKeyHelper(v, v.symId, v.symPath, parent, kmspb.CryptoKey_ENCRYPT_DECRYPT, kmspb.CryptoKeyVersion_GOOGLE_SYMMETRIC_ENCRYPTION)
 	if s1 || s2 || s3 || s4 {
 		//Leave time for keys to initialize.
-		time.Sleep(20 * time.Second)
+		time.Sleep(30 * time.Second)
 	}
 	//Run tests.
 	exitCode := m.Run()
@@ -148,8 +147,8 @@ func TestCreateCryptoKey(t *testing.T) {
 
 // tests disable/enable/destroy/restore
 func TestChangeKeyVersionState(t *testing.T) {
-	//tc := testutil.SystemTest(t)
-	v := getTestVariables(ProjectID)
+	tc := testutil.SystemTest(t)
+	v := getTestVariables(tc.ProjectID)
 	client, _ := cloudkms.NewKeyManagementClient(v.ctx)
 	
 
@@ -202,8 +201,8 @@ func TestChangeKeyVersionState(t *testing.T) {
 }
 
 func TestGetRingPolicy(t *testing.T) {
-	//tc := testutil.SystemTest(t)
-	v := getTestVariables(ProjectID)
+	tc := testutil.SystemTest(t)
+	v := getTestVariables(tc.ProjectID)
 
 	policy, err := getRingPolicy(v.keyRingPath)
 	if err != nil {
@@ -215,8 +214,8 @@ func TestGetRingPolicy(t *testing.T) {
 }
 
 func TestAddMemberRingPolicy(t *testing.T) {
-	//tc := testutil.SystemTest(t)
-	v := getTestVariables(ProjectID)
+	tc := testutil.SystemTest(t)
+	v := getTestVariables(tc.ProjectID)
 
 	if err := addMemberRingPolicy(v.keyRingPath, v.member, v.role); err != nil {
 		t.Fatalf("addMemberRingPolicy(%s, %s, %s): %v", v.keyRingPath, v.member, v.role, err)
@@ -248,8 +247,8 @@ func TestAddMemberRingPolicy(t *testing.T) {
 }
 
 func TestAddRemoveMemberCryptoKey(t *testing.T) {
-	//tc := testutil.SystemTest(t)
-	v := getTestVariables(ProjectID)
+	tc := testutil.SystemTest(t)
+	v := getTestVariables(tc.ProjectID)
 
 	rsaPath := v.keyRingPath + "/cryptoKeys/" + v.rsaDecryptId
 	ecPath := v.keyRingPath + "/cryptoKeys/" + v.ecSignId
@@ -286,7 +285,9 @@ func TestAddRemoveMemberCryptoKey(t *testing.T) {
 }
 
 func TestSymmetricEncryptDecrypt(t *testing.T) {
-	cipherBytes, err := encrypt(v.symPath, []byte(v.message))
+	tc := testutil.SystemTest(t)
+	v := getTestVariables(tc.ProjectID)
+
 	cipherBytes, err := encryptSymmetric(v.symPath, []byte(v.message))
 	if err != nil {
 		t.Fatalf("encrypt(%s, %s): %v", v.symPath, []byte(v.message), err)

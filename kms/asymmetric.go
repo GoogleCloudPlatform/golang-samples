@@ -17,6 +17,7 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"log"
 	"math/big"
 
 	cloudkms "cloud.google.com/go/kms/apiv1"

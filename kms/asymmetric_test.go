@@ -12,7 +12,7 @@ import (
 	"encoding/base64"
 	"testing"
 
-	//"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestGetPublicKey(t *testing.T) {
