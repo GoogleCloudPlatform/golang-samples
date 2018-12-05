@@ -19,12 +19,13 @@ import (
 	"github.com/google/uuid"
 )
 
+var projectID string
 var topicID string
 
 var client *pubsub.Client
 
 func TestMain(m *testing.M) {
-	setup()
+	setup(m)
 	log.SetOutput(ioutil.Discard)
 	s := m.Run()
 	log.SetOutput(os.Stderr)
@@ -32,8 +33,17 @@ func TestMain(m *testing.M) {
 	os.Exit(s)
 }
 
-func setup() {
+func setup(m *testing.M) {
 	ctx := context.Background()
+	tc, ok := testutil.ContextMain(m)
+
+	// Retrive
+	if ok {
+		projectID = tc.ProjectID
+	} else {
+		fmt.Fprintln(os.Stderr, "Project is not set up properly for system tests. Make sure GOLANG_SAMPLES_PROJECT_ID is set")
+		os.Exit(1)
+	}
 
 	pubsubClient, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
@@ -65,9 +75,6 @@ func shutdown() {
 }
 
 func TestSendCommand(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	projectID := tc.ProjectID
-
 	// Generate UUID v1 for test registry and device
 	registryUUID, _ := uuid.NewRandom()
 	deviceUUID, _ := uuid.NewRandom()
