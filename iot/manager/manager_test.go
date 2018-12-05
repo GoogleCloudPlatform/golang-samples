@@ -20,7 +20,6 @@ import (
 )
 
 var topicID string
-var projectID string
 
 var client *pubsub.Client
 
@@ -35,13 +34,6 @@ func TestMain(m *testing.M) {
 
 func setup() {
 	ctx := context.Background()
-	// Retrieve project ID from console
-	projectID = os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
-	if projectID == "" {
-		fmt.Fprintf(os.Stderr, "GOOGLE_CLOUD_PROJECT environment variable must be set.\n")
-		os.Exit(1)
-	}
-	os.Setenv("GOOGLE_CLOUD_PROJECT", projectID)
 
 	pubsubClient, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
@@ -73,7 +65,8 @@ func shutdown() {
 }
 
 func TestSendCommand(t *testing.T) {
-	testutil.SystemTest(t)
+	tc := testutil.SystemTest(t)
+	projectID := tc.ProjectID
 
 	// Generate UUID v1 for test registry and device
 	registryUUID, _ := uuid.NewRandom()
