@@ -40,7 +40,7 @@ func createAsymmetricKey(keyRingName, keyId string) error {
 		Parent:      keyRingName,
 		CryptoKeyId: keyId,
 		CryptoKey: &kmspb.CryptoKey{
-			Purpose:  kmspb.CryptoKey_ASYMMETRIC_DECRYPT,
+			Purpose: kmspb.CryptoKey_ASYMMETRIC_DECRYPT,
 			VersionTemplate: &kmspb.CryptoKeyVersionTemplate{
 				Algorithm: kmspb.CryptoKeyVersion_RSA_DECRYPT_OAEP_2048_SHA256,
 			},
@@ -54,6 +54,7 @@ func createAsymmetricKey(keyRingName, keyId string) error {
 	log.Printf("Created crypto key. %s", result)
 	return nil
 }
+
 // [END kms_create_asymmetric_key]
 
 // [START kms_get_asymmetric_public]
@@ -101,7 +102,7 @@ func decryptRSA(keyName string, ciphertext []byte) ([]byte, error) {
 
 	// Build the request.
 	req := &kmspb.AsymmetricDecryptRequest{
-		Name: keyName,
+		Name:       keyName,
 		Ciphertext: ciphertext,
 	}
 	// Call the API.
@@ -126,7 +127,7 @@ func encryptRSA(keyName string, plaintext []byte) ([]byte, error) {
 	}
 
 	// Retrieve the public key from KMS.
-	response, err := client.GetPublicKey(ctx, &kmspb.GetPublicKeyRequest{Name: keyName,})
+	response, err := client.GetPublicKey(ctx, &kmspb.GetPublicKeyRequest{Name: keyName})
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch public key: %+v", err)
 	}
@@ -167,9 +168,9 @@ func signAsymmetric(keyName string, message []byte) ([]byte, error) {
 		Name: keyName,
 		Digest: &kmspb.Digest{
 			Digest: &kmspb.Digest_Sha256{
-				Sha256: digest.Sum(nil),							
+				Sha256: digest.Sum(nil),
 			},
-		},	
+		},
 	}
 	// Call the API.
 	response, err := client.AsymmetricSign(ctx, req)
@@ -193,7 +194,7 @@ func verifySignatureRSA(keyName string, signature, message []byte) error {
 	}
 
 	// Retrieve the public key from KMS.
-	response, err := client.GetPublicKey(ctx, &kmspb.GetPublicKeyRequest{Name: keyName,})
+	response, err := client.GetPublicKey(ctx, &kmspb.GetPublicKeyRequest{Name: keyName})
 	if err != nil {
 		return fmt.Errorf("failed to fetch public key: %+v", err)
 	}
@@ -230,7 +231,7 @@ func verifySignatureEC(keyName string, signature, message []byte) error {
 	}
 
 	// Retrieve the public key from KMS.
-	response, err := client.GetPublicKey(ctx, &kmspb.GetPublicKeyRequest{Name: keyName,})
+	response, err := client.GetPublicKey(ctx, &kmspb.GetPublicKeyRequest{Name: keyName})
 	if err != nil {
 		return fmt.Errorf("failed to fetch public key: %+v", err)
 	}

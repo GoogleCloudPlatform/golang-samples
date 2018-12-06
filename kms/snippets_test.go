@@ -5,17 +5,17 @@
 package kms
 
 import (
-	"context"
 	"bytes"
-	"testing"
-	"strings"
-	"strconv"
-	"time"
+	"context"
 	"os"
+	"strconv"
+	"strings"
+	"testing"
+	"time"
 
 	"cloud.google.com/go/iam"
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	cloudkms "cloud.google.com/go/kms/apiv1"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
@@ -40,7 +40,7 @@ type TestVariables struct {
 	ecSignId       string
 }
 
-func getTestVariables(projectID string) (TestVariables) {
+func getTestVariables(projectID string) TestVariables {
 	var v TestVariables
 	location := "global"
 	parent := "projects/" + projectID + "/locations/" + location
@@ -70,15 +70,15 @@ func getTestVariables(projectID string) (TestVariables) {
 	return v
 }
 
-func createKeyHelper(v TestVariables, keyId, keyPath, parent string, 
-					purpose kmspb.CryptoKey_CryptoKeyPurpose, algorithm kmspb.CryptoKeyVersion_CryptoKeyVersionAlgorithm) bool {
+func createKeyHelper(v TestVariables, keyId, keyPath, parent string,
+	purpose kmspb.CryptoKey_CryptoKeyPurpose, algorithm kmspb.CryptoKeyVersion_CryptoKeyVersionAlgorithm) bool {
 	client, _ := cloudkms.NewKeyManagementClient(v.ctx)
 	if _, err := getAsymmetricPublicKey(keyPath); err != nil {
-		versionObj := &kmspb.CryptoKeyVersionTemplate{Algorithm: algorithm,}
-		keyObj := &kmspb.CryptoKey{Purpose: purpose, VersionTemplate: versionObj,}
+		versionObj := &kmspb.CryptoKeyVersionTemplate{Algorithm: algorithm}
+		keyObj := &kmspb.CryptoKey{Purpose: purpose, VersionTemplate: versionObj}
 
-		client.CreateKeyRing(v.ctx, &kmspb.CreateKeyRingRequest{Parent: parent, KeyRingId: v.keyRing,})
-		client.CreateCryptoKey(v.ctx, &kmspb.CreateCryptoKeyRequest{Parent: parent+"/keyRings/"+v.keyRing, CryptoKeyId: keyId, CryptoKey: keyObj,})
+		client.CreateKeyRing(v.ctx, &kmspb.CreateKeyRingRequest{Parent: parent, KeyRingId: v.keyRing})
+		client.CreateCryptoKey(v.ctx, &kmspb.CreateCryptoKeyRequest{Parent: parent + "/keyRings/" + v.keyRing, CryptoKeyId: keyId, CryptoKey: keyObj})
 		return true
 	}
 	return false
@@ -113,11 +113,11 @@ func TestCreateKeyRing(t *testing.T) {
 		t.Fatalf("createKeyRing(%s, %s): %v", v.projectId, ringId, err)
 	}
 	client, _ := cloudkms.NewKeyManagementClient(v.ctx)
-	resp, err := client.GetKeyRing(v.ctx, &kmspb.GetKeyRingRequest{Name: ringId,})
+	resp, err := client.GetKeyRing(v.ctx, &kmspb.GetKeyRingRequest{Name: ringId})
 	if err != nil {
 		t.Fatalf("GetKeyRing(%s): %v", ringId, err)
 	}
-	if !strings.Contains(resp.Name, ringId){
+	if !strings.Contains(resp.Name, ringId) {
 		t.Fatalf("new ring %s does not contain requested id %s: %v", resp.Name, ringId, err)
 	}
 }
@@ -138,11 +138,11 @@ func TestCreateCryptoKey(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetCryptoKey(%s): %v", keyPath, err)
 	}
-	if !strings.Contains(resp.Name, keyId){
+	if !strings.Contains(resp.Name, keyId) {
 		t.Fatalf("new key %s does not contain requested id %s: %v", resp.Name, keyId, err)
 	}
 	// mark for destruction
-	destroyCryptoKeyVersion(keyPath+"/cryptoKeyVersions/1")
+	destroyCryptoKeyVersion(keyPath + "/cryptoKeyVersions/1")
 }
 
 // tests disable/enable/destroy/restore
@@ -150,9 +150,8 @@ func TestChangeKeyVersionState(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	v := getTestVariables(tc.ProjectID)
 	client, _ := cloudkms.NewKeyManagementClient(v.ctx)
-	
 
-	for _, keyPath := range  []string {v.symVersionPath, v.rsaDecryptPath, v.ecSignPath} {
+	for _, keyPath := range []string{v.symVersionPath, v.rsaDecryptPath, v.ecSignPath} {
 		// test disable
 		if err := disableCryptoKeyVersion(keyPath); err != nil {
 			t.Fatalf("disableCryptoKeyVersion(%s): %v", keyPath, err)
@@ -252,7 +251,7 @@ func TestAddRemoveMemberCryptoKey(t *testing.T) {
 
 	rsaPath := v.keyRingPath + "/cryptoKeys/" + v.rsaDecryptId
 	ecPath := v.keyRingPath + "/cryptoKeys/" + v.ecSignId
-	for _, keyPath := range  []string {v.symPath, rsaPath, ecPath} {
+	for _, keyPath := range []string{v.symPath, rsaPath, ecPath} {
 		// add member
 		if err := addMemberCryptoKeyPolicy(keyPath, v.member, v.role); err != nil {
 			t.Fatalf("addMemberCryptoKeyPolicy(%s, %s, %s): %v", keyPath, v.member, v.role, err)

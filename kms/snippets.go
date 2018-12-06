@@ -54,7 +54,7 @@ func createCryptoKey(keyRingName, keyId string) error {
 		Parent:      keyRingName,
 		CryptoKeyId: keyId,
 		CryptoKey: &kmspb.CryptoKey{
-			Purpose:  kmspb.CryptoKey_ENCRYPT_DECRYPT,
+			Purpose: kmspb.CryptoKey_ENCRYPT_DECRYPT,
 			VersionTemplate: &kmspb.CryptoKeyVersionTemplate{
 				Algorithm: kmspb.CryptoKeyVersion_GOOGLE_SYMMETRIC_ENCRYPTION,
 			},
@@ -300,8 +300,6 @@ func removeMemberRingPolicy(keyRingName, member string, role iam.RoleName) error
 	return nil
 }
 
-
-
 // [START kms_add_member_to_cryptokey_policy]
 // addMemberCryptoKeyPolicy adds a new member to a specified IAM role for the key
 // example keyName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID"
@@ -380,7 +378,7 @@ func encryptSymmetric(keyName string, plaintext []byte) ([]byte, error) {
 
 	// Build the request.
 	req := &kmspb.EncryptRequest{
-		Name: keyName,
+		Name:      keyName,
 		Plaintext: plaintext,
 	}
 	// Call the API
@@ -405,7 +403,7 @@ func decryptSymmetric(keyName string, ciphertext []byte) ([]byte, error) {
 
 	// Build the request.
 	req := &kmspb.DecryptRequest{
-		Name: keyName,
+		Name:       keyName,
 		Ciphertext: ciphertext,
 	}
 	// Call the API
