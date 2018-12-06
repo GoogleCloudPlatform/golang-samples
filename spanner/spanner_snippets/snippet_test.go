@@ -70,6 +70,9 @@ func TestSample(t *testing.T) {
 	// order since in many cases earlier commands setup the database for the subsequent commands.
 	mustRunCommand(t, "createdatabase", dbName)
 	runCommand(t, "write", dbName)
+
+	runCommand(t, "delete", dbName)
+	runCommand(t, "write", dbName)
 	writeTime := time.Now()
 
 	assertContains(runCommand(t, "read", dbName), "1 1 Total Junk")

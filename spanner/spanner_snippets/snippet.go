@@ -29,6 +29,7 @@ type adminCommand func(ctx context.Context, w io.Writer, adminClient *database.D
 var (
 	commands = map[string]command{
 		"write":                      write,
+		"delete":                     delete,
 		"query":                      query,
 		"read":                       read,
 		"update":                     update,
@@ -215,6 +216,25 @@ func write(ctx context.Context, w io.Writer, client *spanner.Client) error {
 }
 
 // [END spanner_insert_data]
+
+// [START spanner_delete_data]
+
+func delete(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	// Delete each of the albums by individual key,
+	// then delete all the singers using a key range.
+	m := []*spanner.Mutation{
+		spanner.Delete("Albums", spanner.Key{1, 1}),
+		spanner.Delete("Albums", spanner.Key{1, 2}),
+		spanner.Delete("Albums", spanner.Key{2, 1}),
+		spanner.Delete("Albums", spanner.Key{2, 2}),
+		spanner.Delete("Albums", spanner.Key{2, 3}),
+		spanner.Delete("Singers", spanner.KeyRange{Start: spanner.Key{1}, End: spanner.Key{5}, Kind: spanner.ClosedClosed}),
+	}
+	_, err := client.Apply(ctx, m)
+	return err
+}
+
+// [END spanner_delete_data]
 
 // [START spanner_insert_data_with_timestamp_column]
 
