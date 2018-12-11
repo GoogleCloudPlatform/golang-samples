@@ -36,7 +36,7 @@ gcloud compute instances create my-instance \
     --machine-type=g1-small \
     --scopes cloud-platform \
     --metadata-from-file startup-script=startup-script.sh \
-    --metadata gcs_bucket=$GCS_BUCKET_NAME,redis-host=$REDISHOST,redis-port=$REDISPORT \
+    --metadata gcs-bucket=$GCS_BUCKET_NAME,redis-host=$REDISHOST,redis-port=$REDISPORT \
     --zone $ZONE \
     --tags http-server
 
