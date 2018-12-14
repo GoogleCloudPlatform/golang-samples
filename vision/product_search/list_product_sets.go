@@ -42,8 +42,8 @@ func listProductSets(w io.Writer, projectID string, location string) error {
 		fmt.Fprintf(w, "Product set name: %s\n", resp.Name)
 		fmt.Fprintf(w, "Product set display name: %s\n", resp.DisplayName)
 		fmt.Fprintf(w, "Product set index time:\n")
-		fmt.Fprintf(w, "seconds: %s\n", resp.IndexTime.Seconds)
-		fmt.Fprintf(w, "nanos: %s\n", resp.IndexTime.Nanos)
+		fmt.Fprintf(w, "seconds: %d\n", resp.IndexTime.Seconds)
+		fmt.Fprintf(w, "nanos: %d\n", resp.IndexTime.Nanos)
 	}
 
 	return nil

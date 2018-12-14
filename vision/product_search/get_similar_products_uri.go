@@ -40,12 +40,12 @@ func getSimilarProductsURI(w io.Writer, projectID string, location string, produ
 	}
 
 	fmt.Fprintf(w, "Product set index time:\n")
-	fmt.Fprintf(w, "seconds: %s\n", response.IndexTime.Seconds)
-	fmt.Fprintf(w, "nanos: %s\n", response.IndexTime.Nanos)
+	fmt.Fprintf(w, "seconds: %d\n", response.IndexTime.Seconds)
+	fmt.Fprintf(w, "nanos: %d\n", response.IndexTime.Nanos)
 
 	fmt.Fprintf(w, "Search results:\n")
 	for _, result := range response.Results {
-		fmt.Fprintf(w, "Score(Confidence): %s\n", result.Score)
+		fmt.Fprintf(w, "Score(Confidence): %f\n", result.Score)
 		fmt.Fprintf(w, "Image name: %s\n", result.Image)
 
 		fmt.Fprintf(w, "Prodcut name: %s\n", result.Product.Name)
