@@ -3,9 +3,10 @@
 // license that can be found in the LICENSE file.
 
 // Sample quickstart is a basic program that uses Cloud KMS.
-package kms
 
 // [START kms_quickstart]
+package main
+
 import (
 	"context"
 	"fmt"

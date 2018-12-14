@@ -381,7 +381,7 @@ func encryptSymmetric(keyName string, plaintext []byte) ([]byte, error) {
 		Name:      keyName,
 		Plaintext: plaintext,
 	}
-	// Call the API
+	// Call the API.
 	resp, err := client.Encrypt(ctx, req)
 	if err != nil {
 		return nil, err
@@ -406,7 +406,7 @@ func decryptSymmetric(keyName string, ciphertext []byte) ([]byte, error) {
 		Name:       keyName,
 		Ciphertext: ciphertext,
 	}
-	// Call the API
+	// Call the API.
 	resp, err := client.Decrypt(ctx, req)
 	if err != nil {
 		return nil, err

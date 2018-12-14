@@ -2,7 +2,8 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// Samples for asymmetric keys feature of Cloud Key Management Service: https://cloud.google.com/kms/
+// Package kms contains samples for asymmetric keys feature of Cloud Key Management Service
+// https://cloud.google.com/kms/
 package kms
 
 import (
@@ -60,7 +61,7 @@ func createAsymmetricKey(keyRingName, keyId string) error {
 // [START kms_get_asymmetric_public]
 
 // getAsymmetricPublicKey retrieves the public key from a saved asymmetric key pair on KMS.
-// example keyName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1""
+// example keyName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
 func getAsymmetricPublicKey(keyName string) (interface{}, error) {
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
@@ -92,7 +93,7 @@ func getAsymmetricPublicKey(keyName string) (interface{}, error) {
 // [START kms_decrypt_rsa]
 
 // decryptRSA will attempt to decrypt a given ciphertext with an 'RSA_DECRYPT_OAEP_2048_SHA256' private key.stored on Cloud KMS
-// example keyName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1""
+// example keyName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
 func decryptRSA(keyName string, ciphertext []byte) ([]byte, error) {
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
@@ -118,7 +119,7 @@ func decryptRSA(keyName string, ciphertext []byte) ([]byte, error) {
 // [START kms_encrypt_rsa]
 
 // encryptRSA will encrypt data locally using an 'RSA_DECRYPT_OAEP_2048_SHA256' public key retrieved from Cloud KMS
-// example keyName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1""
+// example keyName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
 func encryptRSA(keyName string, plaintext []byte) ([]byte, error) {
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
@@ -137,7 +138,10 @@ func encryptRSA(keyName string, plaintext []byte) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse public key: %+v", err)
 	}
-	rsaKey := abstractKey.(*rsa.PublicKey)
+	rsaKey, ok := abstractKey.(*rsa.PublicKey)
+	if !ok {
+		return nil, fmt.Errorf("key '%s' is not RSA", keyName)
+	}
 	// Encrypt data using the RSA public key.
 	ciphertext, err := rsa.EncryptOAEP(sha256.New(), rand.Reader, rsaKey, plaintext, nil)
 	if err != nil {
@@ -151,7 +155,7 @@ func encryptRSA(keyName string, plaintext []byte) ([]byte, error) {
 // [START kms_sign_asymmetric]
 
 // signAsymmetric will sign a plaintext message using a saved asymmetric private key.
-// example keyName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1""
+// example keyName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
 func signAsymmetric(keyName string, message []byte) ([]byte, error) {
 	// Note: some key algorithms will require a different hash function.
 	// For example, EC_SIGN_P384_SHA384 requires SHA-384.
@@ -160,10 +164,10 @@ func signAsymmetric(keyName string, message []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	// Find the digest of the message
+	// Find the digest of the message.
 	digest := sha256.New()
 	digest.Write(message)
-	// Build the signing request
+	// Build the signing request.
 	req := &kmspb.AsymmetricSignRequest{
 		Name: keyName,
 		Digest: &kmspb.Digest{
@@ -185,7 +189,7 @@ func signAsymmetric(keyName string, message []byte) ([]byte, error) {
 // [START kms_verify_signature_rsa]
 
 // verifySignatureRSA will verify that an 'RSA_SIGN_PSS_2048_SHA256' signature is valid for a given message.
-// example keyName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1""
+// example keyName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
 func verifySignatureRSA(keyName string, signature, message []byte) error {
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
@@ -204,7 +208,10 @@ func verifySignatureRSA(keyName string, signature, message []byte) error {
 	if err != nil {
 		return fmt.Errorf("failed to parse public key: %+v", err)
 	}
-	rsaKey := abstractKey.(*rsa.PublicKey)
+	rsaKey, ok := abstractKey.(*rsa.PublicKey)
+	if !ok {
+		return fmt.Errorf("key '%s' is not RSA", keyName)
+	}
 	// Verify RSA signature.
 	hash := sha256.New()
 	hash.Write(message)
@@ -222,7 +229,7 @@ func verifySignatureRSA(keyName string, signature, message []byte) error {
 // [START kms_verify_signature_ec]
 
 // verifySignatureEC will verify that an 'EC_SIGN_P256_SHA256' signature is valid for a given message.
-// example keyName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1""
+// example keyName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
 func verifySignatureEC(keyName string, signature, message []byte) error {
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
@@ -241,7 +248,10 @@ func verifySignatureEC(keyName string, signature, message []byte) error {
 	if err != nil {
 		return fmt.Errorf("failed to parse public key: %+v", err)
 	}
-	ecKey := abstractKey.(*ecdsa.PublicKey)
+	ecKey, ok := abstractKey.(*ecdsa.PublicKey)
+	if !ok {
+		return fmt.Errorf("key '%s' is not EC", keyName)
+	}
 	// Verify Elliptic Curve signature.
 	var parsedSig struct{ R, S *big.Int }
 	_, err = asn1.Unmarshal(signature, &parsedSig)
