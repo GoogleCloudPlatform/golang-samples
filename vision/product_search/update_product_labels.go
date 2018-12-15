@@ -17,7 +17,7 @@ import (
 	field_mask "google.golang.org/genproto/protobuf/field_mask"
 )
 
-// updateProductLabels updates product labels of a product. 
+// updateProductLabels updates product labels of a product.
 func updateProductLabels(w io.Writer, projectID string, location string, productID string, key string, value string) error {
 	ctx := context.Background()
 	c, err := vision.NewProductSearchClient(ctx)
@@ -35,7 +35,7 @@ func updateProductLabels(w io.Writer, projectID string, location string, product
 			Name: fmt.Sprintf("projects/%s/locations/%s/products/%s", projectID, location, productID),
 			ProductLabels: []*visionpb.Product_KeyValue{
 				{
-					Key: key,
+					Key:   key,
 					Value: value,
 				},
 			},

@@ -30,7 +30,7 @@ func TestDeleteReferenceImage(t *testing.T) {
 	}
 
 	// Create reference image.
-	if err := createReferenceImage(&buf, tc.ProjectID, location, productID, referenceImageID, gcsURI) ; err != nil {
+	if err := createReferenceImage(&buf, tc.ProjectID, location, productID, referenceImageID, gcsURI); err != nil {
 		t.Fatalf("createReferenceImage: %v", err)
 	}
 
@@ -44,7 +44,7 @@ func TestDeleteReferenceImage(t *testing.T) {
 	}
 
 	// Delete reference image.
-	if err := deleteReferenceImage(&buf, tc.ProjectID, location, productID, referenceImageID) ; err != nil {
+	if err := deleteReferenceImage(&buf, tc.ProjectID, location, productID, referenceImageID); err != nil {
 		t.Fatalf("deleteReferenceImage: %v", err)
 	}
 

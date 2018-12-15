@@ -38,9 +38,9 @@ func getSimilarProducts(w io.Writer, projectID string, location string, productS
 
 	ictx := &visionpb.ImageContext{
 		ProductSearchParams: &visionpb.ProductSearchParams{
-			ProductSet: fmt.Sprintf("projects/%s/locations/%s/productSets/%s", projectID, location, productSetID),
+			ProductSet:        fmt.Sprintf("projects/%s/locations/%s/productSets/%s", projectID, location, productSetID),
 			ProductCategories: []string{productCategory},
-			Filter: filter,
+			Filter:            filter,
 		},
 	}
 

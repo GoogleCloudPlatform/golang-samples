@@ -38,7 +38,7 @@ func TestCreateReferenceImage(t *testing.T) {
 	}
 
 	// Create reference image.
-	if err := createReferenceImage(&buf, tc.ProjectID, location, productID, referenceImageID, gcsURI) ; err != nil {
+	if err := createReferenceImage(&buf, tc.ProjectID, location, productID, referenceImageID, gcsURI); err != nil {
 		t.Fatalf("createReferenceImage: %v", err)
 	}
 

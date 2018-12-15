@@ -39,7 +39,7 @@ func TestImportProductSets(t *testing.T) {
 	}
 	if got := buf.String(); strings.Contains(got, productID1) || strings.Contains(got, productID2) {
 		t.Errorf("Product IDs %s %s already exist", productID1, productID2)
-	}	
+	}
 
 	// Import product set.
 	if err := importProductSets(&buf, tc.ProjectID, location, gcsURI); err != nil {
@@ -60,7 +60,7 @@ func TestImportProductSets(t *testing.T) {
 	if err := listProducts(&buf, tc.ProjectID, location); err != nil {
 		t.Fatalf("listProducts: %v", err)
 	}
-	if got := buf.String(); !strings.Contains(got, productID1) ||  !strings.Contains(got, productID2) {
+	if got := buf.String(); !strings.Contains(got, productID1) || !strings.Contains(got, productID2) {
 		t.Errorf("Product IDs %s %s do not exist", productID1, productID2)
 	}
 
@@ -69,7 +69,7 @@ func TestImportProductSets(t *testing.T) {
 	if err := listProductsInProductSet(&buf, tc.ProjectID, location, productSetID); err != nil {
 		t.Fatalf("listProductsInProductSet: %v", err)
 	}
-	if got := buf.String(); !strings.Contains(got, productID1) ||  !strings.Contains(got, productID2) {
+	if got := buf.String(); !strings.Contains(got, productID1) || !strings.Contains(got, productID2) {
 		t.Errorf("Product IDs %s %s do not exist in product set", productID1, productID2)
 	}
 

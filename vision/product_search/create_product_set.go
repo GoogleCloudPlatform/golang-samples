@@ -25,7 +25,7 @@ func createProductSet(w io.Writer, projectID string, location string, productSet
 	}
 
 	req := &visionpb.CreateProductSetRequest{
-		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
+		Parent:       fmt.Sprintf("projects/%s/locations/%s", projectID, location),
 		ProductSetId: productSetID,
 		ProductSet: &visionpb.ProductSet{
 			DisplayName: productSetDisplayName,

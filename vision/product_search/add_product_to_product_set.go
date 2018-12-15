@@ -25,7 +25,7 @@ func addProductToProductSet(w io.Writer, projectID string, location string, prod
 	}
 
 	req := &visionpb.AddProductToProductSetRequest{
-		Name: fmt.Sprintf("projects/%s/locations/%s/productSets/%s", projectID, location, productSetID),
+		Name:    fmt.Sprintf("projects/%s/locations/%s/productSets/%s", projectID, location, productSetID),
 		Product: fmt.Sprintf("projects/%s/locations/%s/products/%s", projectID, location, productID),
 	}
 

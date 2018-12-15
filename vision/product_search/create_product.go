@@ -25,10 +25,10 @@ func createProduct(w io.Writer, projectID string, location string, productID str
 	}
 
 	req := &visionpb.CreateProductRequest{
-		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
+		Parent:    fmt.Sprintf("projects/%s/locations/%s", projectID, location),
 		ProductId: productID,
 		Product: &visionpb.Product{
-			DisplayName: productDisplayName,
+			DisplayName:     productDisplayName,
 			ProductCategory: productCategory,
 		},
 	}

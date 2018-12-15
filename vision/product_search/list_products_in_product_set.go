@@ -12,8 +12,8 @@ import (
 	"fmt"
 	"io"
 
-	"google.golang.org/api/iterator"
 	vision "cloud.google.com/go/vision/apiv1"
+	"google.golang.org/api/iterator"
 	visionpb "google.golang.org/genproto/googleapis/cloud/vision/v1"
 )
 
