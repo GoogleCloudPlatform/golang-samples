@@ -13,9 +13,12 @@ import (
 	"os"
 	"time"
 
-	"golang.org/x/oauth2/google"
-
-	"google.golang.org/api/monitoring/v3"
+	"cloud.google.com/go/monitoring/apiv3"
+	"github.com/golang/protobuf/ptypes/timestamp"
+	"google.golang.org/api/iterator"
+	metricpb "google.golang.org/genproto/googleapis/api/metric"
+	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
+	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 )
 
 const metric = "compute.googleapis.com/instance/cpu/usage_time"
@@ -25,59 +28,101 @@ func projectResource(projectID string) string {
 }
 
 // listMonitoredResourceDescriptor lists all the resources available to be monitored in the API.
-func listMonitoredResourceDescriptors(s *monitoring.Service, projectID string) error {
-	resp, err := s.Projects.MonitoredResourceDescriptors.List(projectResource(projectID)).Do()
+func listMonitoredResourceDescriptors(projectID string) error {
+	ctx := context.Background()
+	c, err := monitoring.NewMetricClient(ctx)
 	if err != nil {
-		return fmt.Errorf("Could not list time series: %v", err)
+		return err
 	}
 
-	log.Printf("listMonitoredResourceDescriptors: %s\n", formatResource(resp))
+	req := &monitoringpb.ListMonitoredResourceDescriptorsRequest{
+		Name: projectResource(projectID),
+	}
+	iter := c.ListMonitoredResourceDescriptors(ctx, req)
+
+	var list []*monitoredrespb.MonitoredResourceDescriptor
+	for {
+		resp, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return fmt.Errorf("Could not list time series: %v", err)
+		}
+		list = append(list, resp)
+	}
+
+	log.Printf("listMonitoredResourceDescriptors: %s\n", formatResource(list))
 	return nil
 }
 
 // listMetricDescriptors lists the metrics specified by the metric constant.
-func listMetricDescriptors(s *monitoring.Service, projectID string) error {
-	resp, err := s.Projects.MetricDescriptors.List(projectResource(projectID)).
-		Filter(fmt.Sprintf("metric.type=%q", metric)).
-		Do()
+func listMetricDescriptors(projectID string) error {
+	ctx := context.Background()
+	c, err := monitoring.NewMetricClient(ctx)
 	if err != nil {
-		return fmt.Errorf("Could not list metric descriptors: %v", err)
+		return err
 	}
 
-	log.Printf("listMetricDescriptors %s\n", formatResource(resp))
+	req := &monitoringpb.ListMetricDescriptorsRequest{
+		Name:   projectResource(projectID),
+		Filter: fmt.Sprintf("metric.type=%q", metric),
+	}
+	iter := c.ListMetricDescriptors(ctx, req)
+
+	var list []*metricpb.MetricDescriptor
+	for {
+		resp, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return fmt.Errorf("could not list metric descriptors: %v", err)
+		}
+		list = append(list, resp)
+
+	}
+	log.Printf("listMetricDescriptors %s\n", formatResource(list))
 	return nil
 }
 
 // listTimesSeries lists all the timeseries created for metric created in a 5
 // minute interval an hour ago
-func listTimeSeries(s *monitoring.Service, projectID string) error {
-	startTime := time.Now().UTC().Add(-time.Hour)
-	endTime := startTime.Add(5 * time.Minute)
-
-	resp, err := s.Projects.TimeSeries.List(projectResource(projectID)).
-		PageSize(3).
-		Filter(fmt.Sprintf("metric.type=\"%s\"", metric)).
-		IntervalStartTime(startTime.Format(time.RFC3339)).
-		IntervalEndTime(endTime.Format(time.RFC3339)).
-		Do()
+func listTimeSeries(projectID string) error {
+	ctx := context.Background()
+	c, err := monitoring.NewMetricClient(ctx)
 	if err != nil {
-		return fmt.Errorf("Could not list time series: %v", err)
+		return err
 	}
 
-	log.Printf("listTimeseries %s\n", formatResource(resp))
+	startTime := time.Now().UTC().Add(time.Minute * -5).Unix()
+	endTime := time.Now().UTC().Unix()
+
+	req := &monitoringpb.ListTimeSeriesRequest{
+		Name:   projectResource(projectID),
+		Filter: fmt.Sprintf("metric.type=\"%s\"", metric),
+		Interval: &monitoringpb.TimeInterval{
+			StartTime: &timestamp.Timestamp{Seconds: startTime},
+			EndTime:   &timestamp.Timestamp{Seconds: endTime},
+		},
+		PageSize: 5,
+	}
+	iter := c.ListTimeSeries(ctx, req)
+
+	var series []*monitoringpb.TimeSeries
+	for {
+		resp, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return fmt.Errorf("could not read time series value, %v ", err)
+		}
+		series = append(series, resp)
+	}
+
+	log.Printf("readTimeseriesValue: %s\n", formatResource(series))
 	return nil
-}
-
-func createService(ctx context.Context) (*monitoring.Service, error) {
-	hc, err := google.DefaultClient(ctx, monitoring.MonitoringScope)
-	if err != nil {
-		return nil, err
-	}
-	s, err := monitoring.New(hc)
-	if err != nil {
-		return nil, err
-	}
-	return s, nil
 }
 
 func main() {
@@ -86,21 +131,15 @@ func main() {
 		return
 	}
 
-	ctx := context.Background()
-	s, err := createService(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	projectID := os.Args[1]
 
-	if err := listMonitoredResourceDescriptors(s, projectID); err != nil {
+	if err := listMonitoredResourceDescriptors(projectID); err != nil {
 		log.Fatal(err)
 	}
-	if err := listMetricDescriptors(s, projectID); err != nil {
+	if err := listMetricDescriptors(projectID); err != nil {
 		log.Fatal(err)
 	}
-	if err := listTimeSeries(s, projectID); err != nil {
+	if err := listTimeSeries(projectID); err != nil {
 		log.Fatal(err)
 	}
 }

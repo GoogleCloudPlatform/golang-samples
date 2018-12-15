@@ -14,6 +14,7 @@ import (
 )
 
 const catVideo = "gs://demomaker/cat.mp4"
+const googleworkVideo = "gs://python-docs-samples-tests/video/googlework_short.mp4"
 
 func TestAnalyze(t *testing.T) {
 	testutil.SystemTest(t)
@@ -27,6 +28,7 @@ func TestAnalyze(t *testing.T) {
 		{"ShotChange", shotChangeURI, catVideo, "Shot"},
 		{"Labels", labelURI, catVideo, "cat"},
 		{"Explicit", explicitContentURI, catVideo, "VERY_UNLIKELY"},
+		{"SpeechTranscription", speechTranscriptionURI, googleworkVideo, "cultural"},
 	}
 
 	for _, tt := range tests {
