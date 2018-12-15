@@ -1,4 +1,0 @@
-// [START enable_config]
-inbound_services:
-- xmpp_message
-// [END enable_config]
