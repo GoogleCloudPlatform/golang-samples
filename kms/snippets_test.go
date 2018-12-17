@@ -93,16 +93,21 @@ func TestMain(m *testing.M) {
 	tc, _ := testutil.ContextMain(m)
 	v := getTestVariables(tc.ProjectID)
 	parent := "projects/" + v.projectId + "/locations/global"
-	//Create cryptokeys in the test project if needed.
+	// Create cryptokeys in the test project if needed.
 	s1 := createKeyHelper(v, v.rsaDecryptId, v.rsaDecryptPath, parent, kmspb.CryptoKey_ASYMMETRIC_DECRYPT, kmspb.CryptoKeyVersion_RSA_DECRYPT_OAEP_2048_SHA256)
 	s2 := createKeyHelper(v, v.rsaSignId, v.rsaSignPath, parent, kmspb.CryptoKey_ASYMMETRIC_SIGN, kmspb.CryptoKeyVersion_RSA_SIGN_PSS_2048_SHA256)
 	s3 := createKeyHelper(v, v.ecSignId, v.ecSignPath, parent, kmspb.CryptoKey_ASYMMETRIC_SIGN, kmspb.CryptoKeyVersion_EC_SIGN_P256_SHA256)
 	s4 := createKeyHelper(v, v.symId, v.symPath, parent, kmspb.CryptoKey_ENCRYPT_DECRYPT, kmspb.CryptoKeyVersion_GOOGLE_SYMMETRIC_ENCRYPTION)
 	if s1 || s2 || s3 || s4 {
-		//Leave time for keys to initialize.
+		// Leave time for keys to initialize.
 		time.Sleep(30 * time.Second)
 	}
-	//Run tests.
+	// Restore any disabled keys
+	for _, keyPath := range []string{v.symVersionPath, v.rsaDecryptPath, v.ecSignPath} {
+		restoreCryptoKeyVersion(keyPath)
+		enableCryptoKeyVersion(keyPath)
+	}
+	// Run tests.
 	exitCode := m.Run()
 	os.Exit(exitCode)
 }
