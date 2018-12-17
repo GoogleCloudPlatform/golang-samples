@@ -139,3 +139,63 @@ func explicitContentURI(w io.Writer, file string) error {
 }
 
 // [END video_analyze_explicit_content]
+
+// [START video_analyze_speech_transcription_gcs]
+
+func speechTranscriptionURI(w io.Writer, file string) error {
+	ctx := context.Background()
+	client, err := video.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+
+	op, err := client.AnnotateVideo(ctx, &videopb.AnnotateVideoRequest{
+		Features: []videopb.Feature{
+			videopb.Feature_SPEECH_TRANSCRIPTION,
+		},
+		VideoContext: &videopb.VideoContext{
+			SpeechTranscriptionConfig: &videopb.SpeechTranscriptionConfig{
+				LanguageCode:               "en-US",
+				EnableAutomaticPunctuation: true,
+			},
+		},
+		InputUri: file,
+	})
+	if err != nil {
+		return err
+	}
+	resp, err := op.Wait(ctx)
+	if err != nil {
+		return err
+	}
+
+	// A single video was processed. Get the first result.
+	result := resp.AnnotationResults[0]
+
+	for _, transcription := range result.SpeechTranscriptions {
+		// The number of alternatives for each transcription is limited by
+		// SpeechTranscriptionConfig.MaxAlternatives.
+		// Each alternative is a different possible transcription
+		// and has its own confidence score.
+		for _, alternative := range transcription.GetAlternatives() {
+			fmt.Fprintf(w, "Alternative level information:\n")
+			fmt.Fprintf(w, "\tTranscript: %v\n", alternative.GetTranscript())
+			fmt.Fprintf(w, "\tConfidence: %v\n", alternative.GetConfidence())
+
+			fmt.Fprintf(w, "Word level information:\n")
+			for _, wordInfo := range alternative.GetWords() {
+				startTime := wordInfo.GetStartTime()
+				endTime := wordInfo.GetEndTime()
+				fmt.Fprintf(w, "\t%4.1f - %4.1f: %v (speaker %v)\n",
+					float64(startTime.GetSeconds())+float64(startTime.GetNanos())*1e-9, // start as seconds
+					float64(endTime.GetSeconds())+float64(endTime.GetNanos())*1e-9,     // end as seconds
+					wordInfo.GetWord(),
+					wordInfo.GetSpeakerTag())
+			}
+		}
+	}
+
+	return nil
+}
+
+// [END video_analyze_speech_transcription_gcs]

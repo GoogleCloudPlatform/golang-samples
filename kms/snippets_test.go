@@ -39,7 +39,7 @@ type TestVariables struct {
 	rsaSignId      string
 	ecSignId       string
 	tryLimit       int
-	waitTime       int
+	waitTime       time.Duration
 }
 
 func getTestVariables(projectID string) TestVariables {
@@ -67,8 +67,8 @@ func getTestVariables(projectID string) TestVariables {
 	member := "group:test@google.com"
 	role := iam.Viewer
 
-	tryLimit = 10
-	waitTime = 10 * time.Second
+	tryLimit := 20
+	waitTime := 5 * time.Second
 
 	v = TestVariables{ctx, projectID, message, location, parent, member, role, keyRing, keyRingPath,
 		sym, symVersion, rsaDecrypt, rsaSign, ecSign, symId, rsaDecryptId, rsaSignId, ecSignId, tryLimit, waitTime}
@@ -226,7 +226,7 @@ func TestAddMemberRingPolicy(t *testing.T) {
 		if err := addMemberRingPolicy(v.keyRingPath, v.member, v.role); err != nil {
 			r.Errorf("addMemberRingPolicy(%s, %s, %s): %v", v.keyRingPath, v.member, v.role, err)
 		}
-	}
+	})
 	policy, _ := getRingPolicy(v.keyRingPath)
 	found := false
 	for _, m := range policy.Members(v.role) {
@@ -242,7 +242,7 @@ func TestAddMemberRingPolicy(t *testing.T) {
 		if err := removeMemberRingPolicy(v.keyRingPath, v.member, v.role); err != nil {
 			r.Errorf("removeMemberCryptoKeyPolicy(%s, %s, %s): %v", v.symPath, v.member, v.role, err)
 		}
-	}
+	})
 	policy, _ = getRingPolicy(v.keyRingPath)
 	found = false
 	for _, m := range policy.Members(v.role) {
@@ -267,7 +267,7 @@ func TestAddRemoveMemberCryptoKey(t *testing.T) {
 			if err := addMemberCryptoKeyPolicy(keyPath, v.member, v.role); err != nil {
 				r.Errorf("addMemberCryptoKeyPolicy(%s, %s, %s): %v", keyPath, v.member, v.role, err)
 			}
-		}
+		})
 		policy, _ := getCryptoKeyPolicy(keyPath)
 		found := false
 		for _, m := range policy.Members(v.role) {
@@ -283,7 +283,7 @@ func TestAddRemoveMemberCryptoKey(t *testing.T) {
 			if err := removeMemberCryptoKeyPolicy(keyPath, v.member, v.role); err != nil {
 				r.Errorf("removeMemberCryptoKeyPolicy(%s, %s, %s): %v", keyPath, v.member, v.role, err)
 			}
-		}
+		})
 		policy, _ = getCryptoKeyPolicy(keyPath)
 		found = false
 		for _, m := range policy.Members(v.role) {

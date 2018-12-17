@@ -40,9 +40,9 @@ func main() {
 	resp, err := http.Get("not-a-valid-url")
 	if err != nil {
 		logAndPrintError(err)
-	} else {
-		log.Print(resp.Status)
+		return
 	}
+	log.Print(resp.Status)
 }
 
 func logAndPrintError(err error) {
