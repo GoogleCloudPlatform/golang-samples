@@ -38,6 +38,8 @@ type TestVariables struct {
 	rsaDecryptId   string
 	rsaSignId      string
 	ecSignId       string
+	tryLimit       int
+	waitTime       int
 }
 
 func getTestVariables(projectID string) TestVariables {
@@ -65,8 +67,11 @@ func getTestVariables(projectID string) TestVariables {
 	member := "group:test@google.com"
 	role := iam.Viewer
 
+	tryLimit = 10
+	waitTime = 10 * time.Second
+
 	v = TestVariables{ctx, projectID, message, location, parent, member, role, keyRing, keyRingPath,
-		sym, symVersion, rsaDecrypt, rsaSign, ecSign, symId, rsaDecryptId, rsaSignId, ecSignId}
+		sym, symVersion, rsaDecrypt, rsaSign, ecSign, symId, rsaDecryptId, rsaSignId, ecSignId, tryLimit, waitTime}
 	return v
 }
 
@@ -216,8 +221,11 @@ func TestAddMemberRingPolicy(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	v := getTestVariables(tc.ProjectID)
 
-	if err := addMemberRingPolicy(v.keyRingPath, v.member, v.role); err != nil {
-		t.Fatalf("addMemberRingPolicy(%s, %s, %s): %v", v.keyRingPath, v.member, v.role, err)
+	// add member
+	testutil.Retry(t, v.tryLimit, v.waitTime, func(r *testutil.R) {
+		if err := addMemberRingPolicy(v.keyRingPath, v.member, v.role); err != nil {
+			r.Errorf("addMemberRingPolicy(%s, %s, %s): %v", v.keyRingPath, v.member, v.role, err)
+		}
 	}
 	policy, _ := getRingPolicy(v.keyRingPath)
 	found := false
@@ -230,8 +238,10 @@ func TestAddMemberRingPolicy(t *testing.T) {
 		t.Fatalf("could not find member '%s' for role '%s'", v.member, v.role)
 	}
 	// remove member
-	if err := removeMemberRingPolicy(v.keyRingPath, v.member, v.role); err != nil {
-		t.Fatalf("removeMemberCryptoKeyPolicy(%s, %s, %s): %v", v.symPath, v.member, v.role, err)
+	testutil.Retry(t, v.tryLimit, v.waitTime, func(r *testutil.R) {
+		if err := removeMemberRingPolicy(v.keyRingPath, v.member, v.role); err != nil {
+			r.Errorf("removeMemberCryptoKeyPolicy(%s, %s, %s): %v", v.symPath, v.member, v.role, err)
+		}
 	}
 	policy, _ = getRingPolicy(v.keyRingPath)
 	found = false
@@ -253,8 +263,10 @@ func TestAddRemoveMemberCryptoKey(t *testing.T) {
 	ecPath := v.keyRingPath + "/cryptoKeys/" + v.ecSignId
 	for _, keyPath := range []string{v.symPath, rsaPath, ecPath} {
 		// add member
-		if err := addMemberCryptoKeyPolicy(keyPath, v.member, v.role); err != nil {
-			t.Fatalf("addMemberCryptoKeyPolicy(%s, %s, %s): %v", keyPath, v.member, v.role, err)
+		testutil.Retry(t, v.tryLimit, v.waitTime, func(r *testutil.R) {
+			if err := addMemberCryptoKeyPolicy(keyPath, v.member, v.role); err != nil {
+				r.Errorf("addMemberCryptoKeyPolicy(%s, %s, %s): %v", keyPath, v.member, v.role, err)
+			}
 		}
 		policy, _ := getCryptoKeyPolicy(keyPath)
 		found := false
@@ -267,8 +279,10 @@ func TestAddRemoveMemberCryptoKey(t *testing.T) {
 			t.Fatalf("could not find member '%s' for role '%s' in key: %s", v.member, v.role, keyPath)
 		}
 		// remove member
-		if err := removeMemberCryptoKeyPolicy(keyPath, v.member, v.role); err != nil {
-			t.Fatalf("removeMemberCryptoKeyPolicy(%s, %s, %s): %v", keyPath, v.member, v.role, err)
+		testutil.Retry(t, v.tryLimit, v.waitTime, func(r *testutil.R) {
+			if err := removeMemberCryptoKeyPolicy(keyPath, v.member, v.role); err != nil {
+				r.Errorf("removeMemberCryptoKeyPolicy(%s, %s, %s): %v", keyPath, v.member, v.role, err)
+			}
 		}
 		policy, _ = getCryptoKeyPolicy(keyPath)
 		found = false
