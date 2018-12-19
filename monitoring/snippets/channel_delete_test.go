@@ -48,7 +48,7 @@ func createChannel(projectID string) (*monitoringpb.NotificationChannel, error) 
 		NotificationChannel: &monitoringpb.NotificationChannel{
 			Type:        "email",
 			DisplayName: "Email",
-			Labels:      map[string]string{"email_address": "me@example.com"},
+			Labels:      map[string]string{"email_address": "noreply@google.com"},
 		},
 	}
 

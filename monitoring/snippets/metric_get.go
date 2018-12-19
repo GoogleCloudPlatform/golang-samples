@@ -17,7 +17,8 @@ import (
 )
 
 // getMetricDescriptor gets the descriptor for the given metricType and prints
-// information about it.
+// information about it. metricType is the type of the metric, for example
+// compute.googleapis.com/firewall/dropped_packets_count.
 func getMetricDescriptor(w io.Writer, projectID, metricType string) error {
 	ctx := context.Background()
 	c, err := monitoring.NewMetricClient(ctx)
