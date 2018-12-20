@@ -163,49 +163,57 @@ func TestChangeKeyVersionState(t *testing.T) {
 
 	for _, keyPath := range []string{v.symVersionPath, v.rsaDecryptPath, v.ecSignPath} {
 		// test disable
-		if err := disableCryptoKeyVersion(keyPath); err != nil {
-			t.Fatalf("disableCryptoKeyVersion(%s): %v", keyPath, err)
-		}
-		resp, err := client.GetCryptoKeyVersion(v.ctx, &kmspb.GetCryptoKeyVersionRequest{Name: keyPath})
-		if err != nil {
-			t.Fatalf("GetCryptoKeyVersion(%s): %v", keyPath, err)
-		}
-		if resp.State != kmspb.CryptoKeyVersion_DISABLED {
-			t.Fatalf("failed to disable cryptokey version. current state: %v", resp.State)
-		}
+		testutil.Retry(t, v.tryLimit, v.waitTime, func(r *testutil.R) {
+			if err := disableCryptoKeyVersion(keyPath); err != nil {
+				r.Errorf("disableCryptoKeyVersion(%s): %v", keyPath, err)
+			}
+			resp, err := client.GetCryptoKeyVersion(v.ctx, &kmspb.GetCryptoKeyVersionRequest{Name: keyPath})
+			if err != nil {
+				r.Errorf("GetCryptoKeyVersion(%s): %v", keyPath, err)
+			}
+			if resp.State != kmspb.CryptoKeyVersion_DISABLED {
+				r.Errorf("failed to disable cryptokey version. current state: %v", resp.State)
+			}
+		})
 		// test destroy
-		if err = destroyCryptoKeyVersion(keyPath); err != nil {
-			t.Fatalf("destroyCryptoKeyVersion(%s): %v", keyPath, err)
-		}
-		resp, err = client.GetCryptoKeyVersion(v.ctx, &kmspb.GetCryptoKeyVersionRequest{Name: keyPath})
-		if err != nil {
-			t.Fatalf("GetCryptoKeyVersion(%s): %v", keyPath, err)
-		}
-		if resp.State != kmspb.CryptoKeyVersion_DESTROY_SCHEDULED {
-			t.Fatalf("failed to destroy cryptokey version. current state: %v", resp.State)
-		}
+		testutil.Retry(t, v.tryLimit, v.waitTime, func(r *testutil.R) {
+			if err = destroyCryptoKeyVersion(keyPath); err != nil {
+				r.Errorf("destroyCryptoKeyVersion(%s): %v", keyPath, err)
+			}
+			resp, err = client.GetCryptoKeyVersion(v.ctx, &kmspb.GetCryptoKeyVersionRequest{Name: keyPath})
+			if err != nil {
+				r.Errorf("GetCryptoKeyVersion(%s): %v", keyPath, err)
+			}
+			if resp.State != kmspb.CryptoKeyVersion_DESTROY_SCHEDULED {
+				r.Errorf("failed to destroy cryptokey version. current state: %v", resp.State)
+			}
+		})
 		// test restore
-		if err = restoreCryptoKeyVersion(keyPath); err != nil {
-			t.Fatalf("restoreCryptoKeyVersion(%s): %v", keyPath, err)
-		}
-		resp, err = client.GetCryptoKeyVersion(v.ctx, &kmspb.GetCryptoKeyVersionRequest{Name: keyPath})
-		if err != nil {
-			t.Fatalf("GetCryptoKeyVersion(%s): %v", keyPath, err)
-		}
-		if resp.State != kmspb.CryptoKeyVersion_DISABLED {
-			t.Fatalf("failed to restore cryptokey version. current state: %v", resp.State)
-		}
+		testutil.Retry(t, v.tryLimit, v.waitTime, func(r *testutil.R) {
+			if err = restoreCryptoKeyVersion(keyPath); err != nil {
+				r.Errorf("restoreCryptoKeyVersion(%s): %v", keyPath, err)
+			}
+			resp, err = client.GetCryptoKeyVersion(v.ctx, &kmspb.GetCryptoKeyVersionRequest{Name: keyPath})
+			if err != nil {
+				r.Errorf("GetCryptoKeyVersion(%s): %v", keyPath, err)
+			}
+			if resp.State != kmspb.CryptoKeyVersion_DISABLED {
+				r.Errorf("failed to restore cryptokey version. current state: %v", resp.State)
+			}
+		})
 		// test re-enable
-		if err = enableCryptoKeyVersion(keyPath); err != nil {
-			t.Fatalf("enableCryptoKeyVersion(%s): %v", keyPath, err)
-		}
-		resp, err = client.GetCryptoKeyVersion(v.ctx, &kmspb.GetCryptoKeyVersionRequest{Name: keyPath})
-		if err != nil {
-			t.Fatalf("GetCryptoKeyVersion(%s): %v", keyPath, err)
-		}
-		if resp.State != kmspb.CryptoKeyVersion_ENABLED {
-			t.Fatalf("failed to enable cryptokey version. current state: %v", resp.State)
-		}
+		testutil.Retry(t, v.tryLimit, v.waitTime, func(r *testutil.R) {
+			if err = enableCryptoKeyVersion(keyPath); err != nil {
+				r.Errorf("enableCryptoKeyVersion(%s): %v", keyPath, err)
+			}
+			resp, err = client.GetCryptoKeyVersion(v.ctx, &kmspb.GetCryptoKeyVersionRequest{Name: keyPath})
+			if err != nil {
+				r.Errorf("GetCryptoKeyVersion(%s): %v", keyPath, err)
+			}
+			if resp.State != kmspb.CryptoKeyVersion_ENABLED {
+				r.Errorf("failed to enable cryptokey version. current state: %v", resp.State)
+			}
+		})
 	}
 }
 
