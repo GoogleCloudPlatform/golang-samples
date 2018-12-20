@@ -177,10 +177,10 @@ func TestChangeKeyVersionState(t *testing.T) {
 		})
 		// test destroy
 		testutil.Retry(t, v.tryLimit, v.waitTime, func(r *testutil.R) {
-			if err = destroyCryptoKeyVersion(keyPath); err != nil {
+			if err := destroyCryptoKeyVersion(keyPath); err != nil {
 				r.Errorf("destroyCryptoKeyVersion(%s): %v", keyPath, err)
 			}
-			resp, err = client.GetCryptoKeyVersion(v.ctx, &kmspb.GetCryptoKeyVersionRequest{Name: keyPath})
+			resp, err := client.GetCryptoKeyVersion(v.ctx, &kmspb.GetCryptoKeyVersionRequest{Name: keyPath})
 			if err != nil {
 				r.Errorf("GetCryptoKeyVersion(%s): %v", keyPath, err)
 			}
@@ -190,10 +190,10 @@ func TestChangeKeyVersionState(t *testing.T) {
 		})
 		// test restore
 		testutil.Retry(t, v.tryLimit, v.waitTime, func(r *testutil.R) {
-			if err = restoreCryptoKeyVersion(keyPath); err != nil {
+			if err := restoreCryptoKeyVersion(keyPath); err != nil {
 				r.Errorf("restoreCryptoKeyVersion(%s): %v", keyPath, err)
 			}
-			resp, err = client.GetCryptoKeyVersion(v.ctx, &kmspb.GetCryptoKeyVersionRequest{Name: keyPath})
+			resp, err := client.GetCryptoKeyVersion(v.ctx, &kmspb.GetCryptoKeyVersionRequest{Name: keyPath})
 			if err != nil {
 				r.Errorf("GetCryptoKeyVersion(%s): %v", keyPath, err)
 			}
@@ -203,10 +203,10 @@ func TestChangeKeyVersionState(t *testing.T) {
 		})
 		// test re-enable
 		testutil.Retry(t, v.tryLimit, v.waitTime, func(r *testutil.R) {
-			if err = enableCryptoKeyVersion(keyPath); err != nil {
+			if err := enableCryptoKeyVersion(keyPath); err != nil {
 				r.Errorf("enableCryptoKeyVersion(%s): %v", keyPath, err)
 			}
-			resp, err = client.GetCryptoKeyVersion(v.ctx, &kmspb.GetCryptoKeyVersionRequest{Name: keyPath})
+			resp, err := client.GetCryptoKeyVersion(v.ctx, &kmspb.GetCryptoKeyVersionRequest{Name: keyPath})
 			if err != nil {
 				r.Errorf("GetCryptoKeyVersion(%s): %v", keyPath, err)
 			}
