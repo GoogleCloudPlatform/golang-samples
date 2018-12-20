@@ -3,7 +3,7 @@ env: flex
 
 # Update with Redis instance details
 env_variables:
-  REDISHOST: '127.0.0.1'
+  REDISHOST: '<REDIS_IP>'
   REDISPORT: '6379'
 
 # Update with Redis instance network name
