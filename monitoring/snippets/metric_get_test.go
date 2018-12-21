@@ -19,11 +19,11 @@ const metricType = "custom.googleapis.com/golang-samples-tests/get"
 func TestGetMetricDescriptor(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	metric, err := createCustomMetric(ioutil.Discard, tc.ProjectID, metricType)
+	m, err := createCustomMetric(ioutil.Discard, tc.ProjectID, metricType)
 	if err != nil {
 		t.Fatalf("createMetric: %v", err)
 	}
-	defer deleteMetric(ioutil.Discard, metric.GetName())
+	defer deleteMetric(ioutil.Discard, m.GetName())
 
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
 		buf := &bytes.Buffer{}

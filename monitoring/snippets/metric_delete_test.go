@@ -15,13 +15,13 @@ import (
 
 func TestDeleteMetric(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	metric, err := createCustomMetric(ioutil.Discard, tc.ProjectID, metricType)
+	m, err := createCustomMetric(ioutil.Discard, tc.ProjectID, metricType)
 	if err != nil {
 		t.Fatalf("createCustomMetric: %v", err)
 	}
 
 	buf := &bytes.Buffer{}
-	if err := deleteMetric(buf, metric.GetName()); err != nil {
+	if err := deleteMetric(buf, m.GetName()); err != nil {
 		t.Fatalf("deleteMetric: %v", err)
 	}
 	want := "Deleted"

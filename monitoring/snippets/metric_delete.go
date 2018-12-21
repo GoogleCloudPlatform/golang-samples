@@ -26,8 +26,8 @@ func deleteMetric(w io.Writer, name string) error {
 	req := &monitoringpb.DeleteMetricDescriptorRequest{
 		Name: name,
 	}
-	err = c.DeleteMetricDescriptor(ctx, req)
-	if err != nil {
+
+	if err := c.DeleteMetricDescriptor(ctx, req); err != nil {
 		return fmt.Errorf("could not delete metric: %v", err)
 	}
 	fmt.Fprintf(w, "Deleted metric: %q\n", name)

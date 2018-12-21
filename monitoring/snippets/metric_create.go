@@ -43,13 +43,13 @@ func createCustomMetric(w io.Writer, projectID, metricType string) (*metricpb.Me
 		Name:             "projects/" + projectID,
 		MetricDescriptor: md,
 	}
-	metric, err := c.CreateMetricDescriptor(ctx, req)
+	m, err := c.CreateMetricDescriptor(ctx, req)
 	if err != nil {
 		return nil, fmt.Errorf("could not create custom metric: %v", err)
 	}
 
-	fmt.Fprintf(w, "Created %s\n", metric.GetName())
-	return metric, nil
+	fmt.Fprintf(w, "Created %s\n", m.GetName())
+	return m, nil
 }
 
 // [END monitoring_create_metric]

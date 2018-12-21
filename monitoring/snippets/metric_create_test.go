@@ -17,11 +17,11 @@ func TestCreateCustomMetric(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	buf := &bytes.Buffer{}
-	metric, err := createCustomMetric(buf, tc.ProjectID, metricType)
+	m, err := createCustomMetric(buf, tc.ProjectID, metricType)
 	if err != nil {
 		t.Fatalf("createCustomMetric: %v", err)
 	}
-	defer deleteMetric(ioutil.Discard, metric.GetName())
+	defer deleteMetric(ioutil.Discard, m.GetName())
 
 	want := "Created"
 	if got := buf.String(); !strings.Contains(got, want) {

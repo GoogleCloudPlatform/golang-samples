@@ -2,8 +2,7 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// The alert sample demonstrates interacting with the monitoring
-// and alerting API.
+// Package alert demonstrates interacting with the monitoring and alerting API.
 package alert
 
 import (

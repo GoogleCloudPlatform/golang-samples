@@ -12,7 +12,7 @@ import (
 	"math/rand"
 	"time"
 
-	"cloud.google.com/go/monitoring/apiv3"
+	monitoring "cloud.google.com/go/monitoring/apiv3"
 	timestamp "github.com/golang/protobuf/ptypes/timestamp"
 	"google.golang.org/api/iterator"
 	"google.golang.org/genproto/googleapis/api/label"
