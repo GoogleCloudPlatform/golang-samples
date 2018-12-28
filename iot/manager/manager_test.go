@@ -2,7 +2,7 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-package main
+package manager
 
 import (
 	"bytes"
@@ -88,18 +88,18 @@ func TestSendCommand(t *testing.T) {
 
 	var buf bytes.Buffer
 
-	if _, err := createRegistry(&buf, projectID, region, registryID, topic.String()); err != nil {
+	if _, err := CreateRegistry(&buf, projectID, region, registryID, topic.String()); err != nil {
 		t.Fatalf("Could not create registry: %v", err)
 	}
 
-	if _, err := createUnauth(&buf, projectID, region, registryID, deviceID); err != nil {
+	if _, err := CreateUnauth(&buf, projectID, region, registryID, deviceID); err != nil {
 		t.Fatalf("Could not create device: %v", err)
 	}
 
 	commandToSend := "test"
 
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
-		_, err := sendCommand(&buf, projectID, region, registryID, deviceID, commandToSend)
+		_, err := SendCommand(&buf, projectID, region, registryID, deviceID, commandToSend)
 
 		// Currently, there is no Go client to receive commands so instead test for the "not subscribed" message
 		if err == nil {
@@ -111,6 +111,6 @@ func TestSendCommand(t *testing.T) {
 		}
 	})
 
-	deleteDevice(&buf, projectID, region, registryID, deviceID)
-	deleteRegistry(&buf, projectID, region, registryID)
+	DeleteDevice(&buf, projectID, region, registryID, deviceID)
+	DeleteRegistry(&buf, projectID, region, registryID)
 }
