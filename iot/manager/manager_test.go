@@ -80,7 +80,7 @@ func setup(m *testing.M) {
 	// Generate UUID v1 for registry used for tests
 	registryID = createIDForTest("registry")
 
-	_, err = CreateRegistry(os.Stdout, projectID, region, registryID, topicName)
+	_, err = createRegistry(os.Stdout, projectID, region, registryID, topicName)
 	if err != nil {
 		log.Fatalf("Could not create registry: %v\n", err)
 	}
@@ -95,7 +95,7 @@ func shutdown() {
 	}
 	fmt.Printf("Deleted topic: %v\n", t)
 
-	if _, err := DeleteRegistry(os.Stdout, projectID, region, registryID); err != nil {
+	if _, err := deleteRegistry(os.Stdout, projectID, region, registryID); err != nil {
 		log.Fatalf("Could not delete registry: %v\n", err)
 	}
 }
@@ -105,7 +105,7 @@ func TestCreateRegistry(t *testing.T) {
 
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
-		registry, err := CreateRegistry(buf, projectID, region, testRegistryID, topicName)
+		registry, err := createRegistry(buf, projectID, region, testRegistryID, topicName)
 		if err != nil {
 			r.Errorf("Could not create registry: %v\n", err)
 
@@ -120,7 +120,7 @@ func TestCreateRegistry(t *testing.T) {
 				r.Errorf("CreateRegistry got %s, want substring %q", got, want)
 			}
 
-			DeleteRegistry(buf, projectID, region, testRegistryID)
+			deleteRegistry(buf, projectID, region, testRegistryID)
 		}
 	})
 }
@@ -130,12 +130,12 @@ func TestGetRegistry(t *testing.T) {
 
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
-		_, err := CreateRegistry(buf, projectID, region, testRegistryID, topicName)
+		_, err := createRegistry(buf, projectID, region, testRegistryID, topicName)
 		if err != nil {
 			r.Errorf("Could not create registry: %v\n", err)
 		}
 
-		_, err = GetRegistry(buf, projectID, region, testRegistryID)
+		_, err = getRegistry(buf, projectID, region, testRegistryID)
 		if err != nil {
 			r.Errorf("Could not get registry: %v\n", err)
 		}
@@ -146,7 +146,7 @@ func TestGetRegistry(t *testing.T) {
 			r.Errorf("GetRegistry got %s, want substring %q", got, want)
 		}
 
-		DeleteRegistry(buf, projectID, region, testRegistryID)
+		deleteRegistry(buf, projectID, region, testRegistryID)
 	})
 }
 
@@ -155,12 +155,12 @@ func TestListRegistries(t *testing.T) {
 
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
-		_, err := CreateRegistry(buf, projectID, region, testRegistryID, topicName)
+		_, err := createRegistry(buf, projectID, region, testRegistryID, topicName)
 		if err != nil {
 			r.Errorf("Could not create registry 1: %v\n", err)
 		}
 
-		_, err = ListRegistries(buf, projectID, region)
+		_, err = listRegistries(buf, projectID, region)
 		if err != nil {
 			r.Errorf("Could not list registries: %v\n", err)
 		}
@@ -168,10 +168,10 @@ func TestListRegistries(t *testing.T) {
 		got := buf.String()
 		want := testRegistryID + "\n"
 		if !strings.Contains(got, want) {
-			r.Errorf("ListRegistries got:\n %s, want substring: \n %q", got, want)
+			r.Errorf("listRegistries got:\n %s, want substring: \n %q", got, want)
 		}
 
-		DeleteRegistry(buf, projectID, region, testRegistryID)
+		deleteRegistry(buf, projectID, region, testRegistryID)
 	})
 }
 
@@ -180,12 +180,12 @@ func TestDeleteRegistry(t *testing.T) {
 
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
-		_, err := CreateRegistry(buf, projectID, region, testRegistryID, topicName)
+		_, err := createRegistry(buf, projectID, region, testRegistryID, topicName)
 		if err != nil {
 			r.Errorf("Could not create registry: %v\n", err)
 		}
 
-		_, err = DeleteRegistry(buf, projectID, region, testRegistryID)
+		_, err = deleteRegistry(buf, projectID, region, testRegistryID)
 		if err != nil {
 			r.Errorf("Could not delete registry: %v\n", err)
 		}
@@ -193,7 +193,7 @@ func TestDeleteRegistry(t *testing.T) {
 		want := "Deleted registry: " + testRegistryID
 
 		if !strings.Contains(got, want) {
-			r.Errorf("DeleteRegistry got %s, want substring %q", got, want)
+			r.Errorf("deleteRegistry got %s, want substring %q", got, want)
 		}
 	})
 }
@@ -202,7 +202,7 @@ func TestSendCommand(t *testing.T) {
 	deviceID := createIDForTest("device")
 	buf := new(bytes.Buffer)
 
-	if _, err := CreateUnauth(buf, projectID, region, registryID, deviceID); err != nil {
+	if _, err := createUnauth(buf, projectID, region, registryID, deviceID); err != nil {
 		t.Fatalf("Could not create device: %v", err)
 	}
 
@@ -210,7 +210,7 @@ func TestSendCommand(t *testing.T) {
 
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
-		_, err := SendCommand(buf, projectID, region, registryID, deviceID, commandToSend)
+		_, err := sendCommand(buf, projectID, region, registryID, deviceID, commandToSend)
 
 		// Currently, there is no Go client to receive commands so instead test for the "not subscribed" message
 		if err == nil {
@@ -222,7 +222,7 @@ func TestSendCommand(t *testing.T) {
 		}
 	})
 
-	DeleteDevice(buf, projectID, region, registryID, deviceID)
+	deleteDevice(buf, projectID, region, registryID, deviceID)
 }
 
 func TestCreateGateway(t *testing.T) {
@@ -243,7 +243,7 @@ func TestCreateGateway(t *testing.T) {
 			r.Errorf("CreateGateway got %s, want substring %q", got, want)
 		}
 
-		DeleteDevice(buf, projectID, region, registryID, gatewayID)
+		deleteDevice(buf, projectID, region, registryID, gatewayID)
 	})
 }
 
@@ -283,7 +283,7 @@ func TestListGateways(t *testing.T) {
 			r.Errorf("ListGateways got %s, want substring %q", got, want)
 		}
 
-		DeleteDevice(buf, projectID, region, registryID, gatewayID)
+		deleteDevice(buf, projectID, region, registryID, gatewayID)
 	})
 }
 
@@ -298,7 +298,7 @@ func TestBindDeviceToGateway(t *testing.T) {
 			r.Errorf("Could not create gateway: %v\n", err)
 		}
 
-		_, err = CreateRSA(buf, projectID, region, registryID, deviceID, pubKeyRSA)
+		_, err = createRSA(buf, projectID, region, registryID, deviceID, pubKeyRSA)
 		if err != nil {
 			r.Errorf("Could not create device: %v\n", err)
 		}
@@ -316,8 +316,8 @@ func TestBindDeviceToGateway(t *testing.T) {
 		}
 
 		unbindDeviceFromGateway(buf, projectID, region, registryID, gatewayID, deviceID)
-		DeleteDevice(buf, projectID, region, registryID, deviceID)
-		DeleteDevice(buf, projectID, region, registryID, gatewayID)
+		deleteDevice(buf, projectID, region, registryID, deviceID)
+		deleteDevice(buf, projectID, region, registryID, gatewayID)
 	})
 }
 
@@ -332,7 +332,7 @@ func TestUnbindDeviceFromGateway(t *testing.T) {
 			r.Errorf("Could not create gateway: %v\n", err)
 		}
 
-		_, err = CreateRSA(buf, projectID, region, registryID, deviceID, pubKeyRSA)
+		_, err = createRSA(buf, projectID, region, registryID, deviceID, pubKeyRSA)
 		if err != nil {
 			r.Errorf("Could not create device: %v\n", err)
 		}
@@ -354,8 +354,8 @@ func TestUnbindDeviceFromGateway(t *testing.T) {
 			r.Errorf("CreateGateway got %s, want substring %q", got, want)
 		}
 
-		DeleteDevice(buf, projectID, region, registryID, deviceID)
-		DeleteDevice(buf, projectID, region, registryID, gatewayID)
+		deleteDevice(buf, projectID, region, registryID, deviceID)
+		deleteDevice(buf, projectID, region, registryID, gatewayID)
 	})
 }
 func TestListDevicesForGateway(t *testing.T) {
@@ -370,7 +370,7 @@ func TestListDevicesForGateway(t *testing.T) {
 			r.Errorf("Could not create gateway: %v\n", err)
 		}
 
-		_, err = CreateRSA(buf, projectID, region, registryID, deviceID, pubKeyRSA)
+		_, err = createRSA(buf, projectID, region, registryID, deviceID, pubKeyRSA)
 		if err != nil {
 			r.Errorf("Could not create device: %v\n", err)
 		}
@@ -391,7 +391,7 @@ func TestListDevicesForGateway(t *testing.T) {
 		}
 
 		unbindDeviceFromGateway(buf, projectID, region, registryID, gatewayID, deviceID)
-		DeleteDevice(buf, projectID, region, registryID, deviceID)
-		DeleteDevice(buf, projectID, region, registryID, gatewayID)
+		deleteDevice(buf, projectID, region, registryID, deviceID)
+		deleteDevice(buf, projectID, region, registryID, gatewayID)
 	})
 }
