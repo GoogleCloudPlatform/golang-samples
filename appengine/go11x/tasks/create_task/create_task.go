@@ -4,7 +4,7 @@
 
 // [START cloud_tasks_appengine_create_task]
 
-// createTask constructs and adds a task to an App Engine Queue.
+// Command create_task constructs and adds a task to an App Engine Queue.
 package main
 
 import (
