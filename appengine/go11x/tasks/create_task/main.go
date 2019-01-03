@@ -2,7 +2,7 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// Sample Create Task contains snippets for using Cloud Tasks with App Engine.
+// Simple CLI to run createTask function via the Cloud Tasks API.
 package main
 
 import (

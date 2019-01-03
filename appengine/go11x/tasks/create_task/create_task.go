@@ -4,7 +4,7 @@
 
 // [START cloud_tasks_appengine_create_task]
 
-// Sample Create Task contains snippets for using Cloud Tasks with App Engine.
+// createTask constructs and adds a task to an App Engine Queue.
 package main
 
 import (
