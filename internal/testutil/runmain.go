@@ -5,6 +5,8 @@
 package testutil
 
 import (
+	realContext "context"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -42,9 +44,11 @@ func BuildMain(t *testing.T) *Runner {
 
 // Runner holds the result of `go build`
 type Runner struct {
-	t   *testing.T
-	tmp string
-	bin string
+	t      *testing.T
+	tmp    string
+	bin    string
+	Stdout []byte
+	Stderr []byte
 }
 
 // Built reports whether the build was successful.
@@ -101,4 +105,36 @@ func (r *Runner) Run(env map[string]string, f func()) {
 		}
 	case <-done:
 	}
+}
+
+// RunNonInteractive runs the build binary until terminated or timeout has
+// been reached, and indicates successful execution on return.
+func (r *Runner) RunNonInteractive(env map[string]string, timeout time.Duration) bool {
+	if !r.Built() {
+		r.t.Error("Tried to run when binary not built.")
+		return false
+	}
+	environ := os.Environ()
+	for k, v := range env {
+		environ = append(environ, k+"="+v)
+	}
+
+	ctx, cancel := realContext.WithTimeout(realContext.Background(), timeout)
+	defer cancel()
+
+	cmd := exec.CommandContext(ctx, r.bin)
+	cmd.Env = environ
+
+	out, err := cmd.Output()
+	r.Stdout = out
+	if err != nil {
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			r.Stderr = exitErr.Stderr
+		}
+
+		// propagate this, or let callers decide?
+		r.t.Error(fmt.Sprintf("execution error: %v", string(r.Stderr)))
+		return false
+	}
+	return true
 }
