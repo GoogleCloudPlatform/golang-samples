@@ -38,7 +38,7 @@ func ListVoices(w io.Writer) error {
 		fmt.Fprintf(w, "Name: %v\n", voice.Name)
 
 		// Display the supported language codes for this voice. Example: "en-US"
-		for languageCode := range voice.LanguageCodes {
+		for _, languageCode := range voice.LanguageCodes {
 			fmt.Fprintf(w, "  Supported language: %v\n", languageCode)
 		}
 
