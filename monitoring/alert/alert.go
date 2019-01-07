@@ -2,20 +2,16 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// The alert sample demonstrates interacting with the monitoring
-// and alerting API.
-package main
+// Package alert demonstrates interacting with the monitoring and alerting API.
+package alert
 
 import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"io"
 	"log"
-	"os"
-	"strings"
 
 	monitoring "cloud.google.com/go/monitoring/apiv3"
 	"github.com/golang/protobuf/jsonpb"
@@ -24,58 +20,6 @@ import (
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 	fieldmask "google.golang.org/genproto/protobuf/field_mask"
 )
-
-func main() {
-	projectID := flag.String("projectID", "", "Project ID")
-	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, `Usage:
-alert -projectID <project ID> <action> <args>
-
-Actions:
-* list: print alert policies to stdout.
-* backup: serialize policies and channels to stdout.
-* restore: restore policies from stdin (based on backout output).
-* replaceChannels <alertPolicyID> <comma,separated,channelIDs>: replace project channels.
-* enable: enable all policies.
-* disable: disable all policies.
-`)
-	}
-	flag.Parse()
-	if *projectID == "" {
-		fmt.Fprintf(os.Stderr, "projectID must be set\n")
-		os.Exit(1)
-	}
-	switch flag.Arg(0) {
-	case "list":
-		if err := listAlertPolicies(os.Stdout, *projectID); err != nil {
-			log.Fatal(err)
-		}
-	case "backup":
-		if err := backupPolicies(os.Stdout, *projectID); err != nil {
-			log.Fatal(err)
-		}
-	case "restore":
-		if err := restorePolicies(os.Stdout, *projectID, os.Stdin); err != nil {
-			log.Fatal(err)
-		}
-	case "replaceChannels":
-		if err := replaceChannels(os.Stdout, *projectID, flag.Arg(1), strings.Split(flag.Arg(2), ",")); err != nil {
-			log.Fatal(err)
-		}
-	case "enable":
-		if err := enablePolicies(os.Stdout, *projectID, true); err != nil {
-			log.Fatal(err)
-		}
-	case "disable":
-		if err := enablePolicies(os.Stdout, *projectID, false); err != nil {
-			log.Fatal(err)
-		}
-	default:
-		fmt.Fprintf(os.Stderr, "Invalid action: %q\n", flag.Arg(0))
-		flag.Usage()
-		os.Exit(1)
-	}
-}
 
 // [START monitoring_alert_list_policies]
 

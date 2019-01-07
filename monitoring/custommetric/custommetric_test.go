@@ -2,16 +2,21 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-package main
+package custommetric
 
 import (
+	"context"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"testing"
 	"time"
 
+	monitoring "cloud.google.com/go/monitoring/apiv3"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"google.golang.org/genproto/googleapis/api/metric"
+	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 )
 
 func TestMain(m *testing.M) {
@@ -56,4 +61,22 @@ func TestCustomMetric(t *testing.T) {
 			t.Error(err)
 		}
 	})
+}
+
+// getCustomMetric reads the custom metric created.
+func getCustomMetric(projectID, metricType string) (*metric.MetricDescriptor, error) {
+	ctx := context.Background()
+	c, err := monitoring.NewMetricClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+	req := &monitoringpb.GetMetricDescriptorRequest{
+		Name: fmt.Sprintf("projects/%s/metricDescriptors/%s", projectID, metricType),
+	}
+	resp, err := c.GetMetricDescriptor(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("could not get custom metric: %v", err)
+	}
+
+	return resp, nil
 }

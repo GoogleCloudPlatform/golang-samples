@@ -13,6 +13,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"cloud.google.com/go/pubsub"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -88,25 +89,27 @@ func TestSendCommand(t *testing.T) {
 	var buf bytes.Buffer
 
 	if _, err := createRegistry(&buf, projectID, region, registryID, topic.String()); err != nil {
-		log.Fatalf("Could not create registry: %v", err)
+		t.Fatalf("Could not create registry: %v", err)
 	}
 
 	if _, err := createUnauth(&buf, projectID, region, registryID, deviceID); err != nil {
-		log.Fatalf("Could not create device: %v", err)
+		t.Fatalf("Could not create device: %v", err)
 	}
 
 	commandToSend := "test"
 
-	_, err := sendCommand(&buf, projectID, region, registryID, deviceID, commandToSend)
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
+		_, err := sendCommand(&buf, projectID, region, registryID, deviceID, commandToSend)
 
-	// Currently, there is no Go client to receive commands so instead test for the "not subscribed" message
-	if err == nil {
-		t.Error("Should not be able to send command")
-	}
+		// Currently, there is no Go client to receive commands so instead test for the "not subscribed" message
+		if err == nil {
+			r.Errorf("Should not be able to send command")
+		}
 
-	if !strings.Contains(err.Error(), "is not subscribed to the commands topic") {
-		t.Error("Should create an error that device is not subscribed", err)
-	}
+		if !strings.Contains(err.Error(), "is not subscribed to the commands topic") {
+			r.Errorf("Should create an error that device is not subscribed: %v", err)
+		}
+	})
 
 	deleteDevice(&buf, projectID, region, registryID, deviceID)
 	deleteRegistry(&buf, projectID, region, registryID)

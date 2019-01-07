@@ -7,6 +7,8 @@ package productsearch
 
 // [START vision_product_search_import_product_images]
 
+// [START vision_product_search_tutorial_import]
+
 import (
 	"context"
 	"fmt"
@@ -15,6 +17,8 @@ import (
 	vision "cloud.google.com/go/vision/apiv1"
 	visionpb "google.golang.org/genproto/googleapis/cloud/vision/v1"
 )
+
+// [END vision_product_search_tutorial_import]
 
 // importProductSets creates a product set using information in a csv file on GCS.
 func importProductSets(w io.Writer, projectID string, location string, gcsURI string) error {
