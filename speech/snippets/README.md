@@ -24,6 +24,6 @@ For more details, see the [Transcribing Video Files](https://cloud.google.com/sp
 
 ### Multi-channel Transcription
 
-For more details, see the [Transcribing Audio with Multiple Channels](hhttps://cloud.google.com/speech-to-text/docs/multi-channel) tutorial in the docs.
+For more details, see the [Transcribing Audio with Multiple Channels](https://cloud.google.com/speech-to-text/docs/multi-channel) tutorial in the docs.
 
 [Go Code](multichannel.go)
