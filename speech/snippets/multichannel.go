@@ -27,7 +27,7 @@ func transcribeMultichannel(w io.Writer, path string) error {
 	if err != nil {
 		return fmt.Errorf("NewClient: %v", err)
 	}
-  // path = "../testdata/commercial_stereo.wav"
+  	// path = "../testdata/commercial_stereo.wav"
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return fmt.Errorf("ReadFile: %v", err)
@@ -38,8 +38,8 @@ func transcribeMultichannel(w io.Writer, path string) error {
 			Encoding:        speechpb.RecognitionConfig_LINEAR16,
 			SampleRateHertz: 44100,
 			LanguageCode:    "en-US",
-      AudioChannelCount:  2,
-      EnableSeparateRecognitionPerChannel: true,
+      			AudioChannelCount:  2,
+      			EnableSeparateRecognitionPerChannel: true,
 		},
 		Audio: &speechpb.RecognitionAudio{
 			AudioSource: &speechpb.RecognitionAudio_Content{Content: data},
@@ -50,7 +50,7 @@ func transcribeMultichannel(w io.Writer, path string) error {
 	}
 
 	// Print the results.
-  for _, result := range resp.Results {
+  	for _, result := range resp.Results {
 		for _, alt := range result.Alternatives {
 			fmt.Fprintf(w, "Channel %v: %v\n", result.ChannelTag, alt.Transcript)
 		}
