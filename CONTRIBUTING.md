@@ -15,7 +15,15 @@
 1. Make changes, commit to your fork.
 1. Send a pull request with your changes.
 
+# Formatting
+
+All code must be formatted with `gofmt` (with the latest Go version) and pass
+`go vet`.
+
 # Testing
+
+Tests are required for all samples. When writing a pull request, be sure to
+write and run the tests in any modified directories.
 
 ## Running system tests
 
@@ -28,6 +36,9 @@
 1. Run the tests:
 
     `go test github.com/GoogleCloudPlatform/golang-samples/...`
+
+Note: You may want to `cd` to the directory you're modifying and run
+`go test -v ./...` to avoid running every test in the repo.
 
 ## Contributor License Agreements
 
