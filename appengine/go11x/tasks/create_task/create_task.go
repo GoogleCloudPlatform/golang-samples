@@ -4,8 +4,8 @@
 
 // [START cloud_tasks_appengine_create_task]
 
-// Package tasks contains snippets for using Cloud Tasks with App Engine.
-package tasks
+// Command create_task constructs and adds a task to an App Engine Queue.
+package main
 
 import (
 	"context"
