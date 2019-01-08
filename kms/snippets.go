@@ -209,6 +209,7 @@ func getRingPolicy(keyRingName string) (*iam.Policy, error) {
 
 // [END kms_get_keyring_policy]
 
+// [START kms_get_cryptokey_policy]
 // getCryptoKeyPolicy retrieves and prints the IAM policy associated with the key
 // example keyName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID"
 func getCryptoKeyPolicy(keyName string) (*iam.Policy, error) {
@@ -235,6 +236,8 @@ func getCryptoKeyPolicy(keyName string) (*iam.Policy, error) {
 	}
 	return policy, nil
 }
+
+// [END kms_get_cryptokey_policy]
 
 // [START kms_add_member_to_keyring_policy]
 // addMemberRingPolicy adds a new member to a specified IAM role for the key ring
@@ -269,6 +272,7 @@ func addMemberRingPolicy(keyRingName, member string, role iam.RoleName) error {
 
 // [END kms_add_member_to_keyring_policy]
 
+// [START kms_remove_member_from_keyring_policy]
 // removeMemberRingPolicy removes a specified member from an IAM role for the key ring
 // example keyRingName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID"
 func removeMemberRingPolicy(keyRingName, member string, role iam.RoleName) error {
@@ -299,6 +303,8 @@ func removeMemberRingPolicy(keyRingName, member string, role iam.RoleName) error
 	log.Print("Removed member from keyring policy.")
 	return nil
 }
+
+// [END kms_remove_member_from_keyring_policy]
 
 // [START kms_add_member_to_cryptokey_policy]
 // addMemberCryptoKeyPolicy adds a new member to a specified IAM role for the key
