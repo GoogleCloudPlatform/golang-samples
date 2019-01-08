@@ -18,7 +18,7 @@ import (
 	// [END imports]
 )
 
-// [START speech_transcribe_multichannel]
+// TranscribeMultichannel generates a transcript of a multichannel speech file and tags the speech from each channel.
 
 func transcribeMultichannel(w io.Writer, path string) error {
 	ctx := context.Background()
