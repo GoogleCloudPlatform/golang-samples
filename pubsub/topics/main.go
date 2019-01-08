@@ -193,6 +193,26 @@ func publishThatScales(client *pubsub.Client, topic string, n int) error {
 	// [END pubsub_publish_with_error_handling_that_scales]
 }
 
+func publishCustomAttributes(client *pubsub.Client, topic string) error {
+	ctx := context.Background()
+	// [START pubsub_publish_custom_attributes]
+	t := client.Topic(topic)
+	result := t.Publish(ctx, &pubsub.Message{
+		// data must be a ByteString
+		Data: []byte("Hello world!"),
+		Attributes: map[string]string{"origin": "golang", "username": "gcp"},
+	})
+	// Block until the result is returned and a server-generated
+	// ID is returned for the published message.
+	id, err := result.Get(ctx)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Published message with custom attributes. Msg ID: %v\n", id)
+	// [END pubsub_publish_custom_attributes]
+	return nil
+}
+
 func publishWithSettings(client *pubsub.Client, topic string, msg []byte) error {
 	ctx := context.Background()
 	// [START pubsub_publisher_batch_settings]
