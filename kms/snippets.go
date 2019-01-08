@@ -15,6 +15,7 @@ import (
 )
 
 // [START kms_create_keyring]
+
 // createKeyRing creates a new ring to store keys on KMS.
 // example parentName: "projects/PROJECT_ID/locations/global/"
 func createKeyRing(parentName, keyRingId string) error {
@@ -40,6 +41,7 @@ func createKeyRing(parentName, keyRingId string) error {
 // [END kms_create_keyring]
 
 // [START kms_create_cryptokey]
+
 // createCryptoKey creates a new symmetric encrypt/decrypt key on KMS.
 // example keyRingName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID"
 func createCryptoKey(keyRingName, keyId string) error {
@@ -72,6 +74,7 @@ func createCryptoKey(keyRingName, keyId string) error {
 // [END kms_create_cryptokey]
 
 // [START kms_disable_cryptokey_version]
+
 // disableCryptoKeyVersion disables a specified key version on KMS.
 // example keyVersionName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
 func disableCryptoKeyVersion(keyVersionName string) error {
@@ -102,6 +105,7 @@ func disableCryptoKeyVersion(keyVersionName string) error {
 // [END kms_disable_cryptokey_version]
 
 // [START kms_enable_cryptokey_version]
+
 // enableCryptoKeyVersion enables a previously disabled key version on KMS.
 // example keyVersionName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
 func enableCryptoKeyVersion(keyVersionName string) error {
@@ -132,6 +136,7 @@ func enableCryptoKeyVersion(keyVersionName string) error {
 // [END kms_enable_cryptokey_version]
 
 // [START kms_destroy_cryptokey_version]
+
 // destroyCryptoKeyVersion marks a specified key version for deletion. The key can be restored if requested within 24 hours.
 // example keyVersionName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
 func destroyCryptoKeyVersion(keyVersionName string) error {
@@ -156,6 +161,7 @@ func destroyCryptoKeyVersion(keyVersionName string) error {
 // [END kms_destroy_cryptokey_version]
 
 // [START kms_restore_cryptokey_version]
+
 // restoreCryptoKeyVersion attempts to recover a key that has been marked for destruction within the last 24 hours.
 // example keyVersionName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
 func restoreCryptoKeyVersion(keyVersionName string) error {
@@ -180,6 +186,7 @@ func restoreCryptoKeyVersion(keyVersionName string) error {
 // [END kms_restore_cryptokey_version]
 
 // [START kms_get_keyring_policy]
+
 // getRingPolicy retrieves and prints the IAM policy associated with the key ring
 // example keyRingName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID"
 func getRingPolicy(keyRingName string) (*iam.Policy, error) {
@@ -209,6 +216,8 @@ func getRingPolicy(keyRingName string) (*iam.Policy, error) {
 
 // [END kms_get_keyring_policy]
 
+// [START kms_get_cryptokey_policy]
+
 // getCryptoKeyPolicy retrieves and prints the IAM policy associated with the key
 // example keyName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID"
 func getCryptoKeyPolicy(keyName string) (*iam.Policy, error) {
@@ -236,7 +245,10 @@ func getCryptoKeyPolicy(keyName string) (*iam.Policy, error) {
 	return policy, nil
 }
 
+// [END kms_get_cryptokey_policy]
+
 // [START kms_add_member_to_keyring_policy]
+
 // addMemberRingPolicy adds a new member to a specified IAM role for the key ring
 // example keyRingName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID"
 func addMemberRingPolicy(keyRingName, member string, role iam.RoleName) error {
@@ -269,6 +281,8 @@ func addMemberRingPolicy(keyRingName, member string, role iam.RoleName) error {
 
 // [END kms_add_member_to_keyring_policy]
 
+// [START kms_remove_member_from_keyring_policy]
+
 // removeMemberRingPolicy removes a specified member from an IAM role for the key ring
 // example keyRingName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID"
 func removeMemberRingPolicy(keyRingName, member string, role iam.RoleName) error {
@@ -300,7 +314,10 @@ func removeMemberRingPolicy(keyRingName, member string, role iam.RoleName) error
 	return nil
 }
 
+// [END kms_remove_member_from_keyring_policy]
+
 // [START kms_add_member_to_cryptokey_policy]
+
 // addMemberCryptoKeyPolicy adds a new member to a specified IAM role for the key
 // example keyName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID"
 func addMemberCryptoKeyPolicy(keyName, member string, role iam.RoleName) error {
@@ -334,6 +351,7 @@ func addMemberCryptoKeyPolicy(keyName, member string, role iam.RoleName) error {
 // [END kms_add_member_to_cryptokey_policy]
 
 // [START kms_remove_member_from_cryptokey_policy]
+
 // removeMemberCryptoKeyPolicy removes a specified member from an IAM role for the key
 // example keyName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID"
 func removeMemberCryptoKeyPolicy(keyName, member string, role iam.RoleName) error {
@@ -367,6 +385,7 @@ func removeMemberCryptoKeyPolicy(keyName, member string, role iam.RoleName) erro
 // [END kms_remove_member_from_cryptokey_policy]
 
 // [START kms_encrypt]
+
 // encrypt will encrypt the input plaintext with the specified symmetric key
 // example keyName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID"
 func encryptSymmetric(keyName string, plaintext []byte) ([]byte, error) {
@@ -392,6 +411,7 @@ func encryptSymmetric(keyName string, plaintext []byte) ([]byte, error) {
 // [END kms_encrypt]
 
 // [START kms_decrypt]
+
 // decrypt will decrypt the input ciphertext bytes using the specified symmetric key
 // example keyName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID"
 func decryptSymmetric(keyName string, ciphertext []byte) ([]byte, error) {
