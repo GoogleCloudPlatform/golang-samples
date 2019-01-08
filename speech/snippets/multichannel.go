@@ -52,7 +52,7 @@ func transcribeMultichannel(w io.Writer, path string) error {
 	// Print the results.
   for _, result := range resp.Results {
 		for _, alt := range result.Alternatives {
-			fmt.Fprintf(w, "Channel %v: %q)\n", result.ChannelTag, alt.Transcript)
+			fmt.Fprintf(w, "Channel %v: %v\n", result.ChannelTag, alt.Transcript)
 		}
 	}
 	return nil
