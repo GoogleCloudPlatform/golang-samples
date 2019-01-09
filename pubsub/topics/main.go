@@ -199,7 +199,7 @@ func publishCustomAttributes(client *pubsub.Client, topic string) error {
 	result := t.Publish(ctx, &pubsub.Message{
 		Data: []byte("Hello world!"),
 		Attributes: map[string]string{
-			"origin": "golang",
+			"origin":   "golang",
 			"username": "gcp",
 		},
 	})

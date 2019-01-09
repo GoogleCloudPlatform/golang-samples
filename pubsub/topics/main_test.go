@@ -100,14 +100,12 @@ func TestPublishThatScales(t *testing.T) {
 	}
 }
 
-
 func TestPublishCustomAttributes(t *testing.T) {
 	c := setup(t)
 	if err := publishCustomAttributes(c, topicID); err != nil {
 		t.Errorf("failed to publish message: %v", err)
 	}
 }
-
 
 func TestIAM(t *testing.T) {
 	c := setup(t)
