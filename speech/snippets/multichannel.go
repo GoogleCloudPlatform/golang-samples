@@ -15,6 +15,8 @@ import (
 	"context"
 )
 
+// [START speech_transcribe_multichannel_beta]
+
 // transcribeMultichannel generates a transcript from a multichannel speech file and tags the speech from each channel.
 func transcribeMultichannel(w io.Writer, path string) error {
 	ctx := context.Background()
@@ -53,3 +55,5 @@ func transcribeMultichannel(w io.Writer, path string) error {
 	}
 	return nil
 }
+
+// [END speech_transcribe_multichannel_beta]
