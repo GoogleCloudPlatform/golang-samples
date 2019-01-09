@@ -162,7 +162,6 @@ func publishThatScales(client *pubsub.Client, topic string, n int) error {
 
 	for i := 0; i < n; i++ {
 		result := t.Publish(ctx, &pubsub.Message{
-			// data must be a ByteString
 			Data: []byte("Message " + strconv.Itoa(i)),
 		})
 
@@ -198,9 +197,11 @@ func publishCustomAttributes(client *pubsub.Client, topic string) error {
 	// [START pubsub_publish_custom_attributes]
 	t := client.Topic(topic)
 	result := t.Publish(ctx, &pubsub.Message{
-		// data must be a ByteString
 		Data: []byte("Hello world!"),
-		Attributes: map[string]string{"origin": "golang", "username": "gcp"},
+		Attributes: map[string]string{
+			"origin": "golang",
+			"username": "gcp",
+		},
 	})
 	// Block until the result is returned and a server-generated
 	// ID is returned for the published message.
@@ -208,7 +209,7 @@ func publishCustomAttributes(client *pubsub.Client, topic string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Published message with custom attributes. Msg ID: %v\n", id)
+	fmt.Printf("Published message with custom attributes; msg ID: %v\n", id)
 	// [END pubsub_publish_custom_attributes]
 	return nil
 }
