@@ -46,7 +46,7 @@ $ go run client/main.go
 Build and tag your gRPC server, storing it in your private container registry:
 
 ```bash
-gcloud container builds submit --tag gcr.io/YOUR_PROJECT_ID/go-grpc-hello:1.0 .
+gcloud builds submit --tag gcr.io/YOUR_PROJECT_ID/go-grpc-hello:1.0 .
 ```
 
 ## Deploy to GCE or GKE
@@ -56,7 +56,7 @@ gcloud container builds submit --tag gcr.io/YOUR_PROJECT_ID/go-grpc-hello:1.0 .
 1. Create an instance and SSH into it:
 
     ```bash
-    gcloud compute instances create grpc-host --image-family gci-stable --image-project google-containers --tags=http-server
+    gcloud compute instances create grpc-host --image-family cos-stable --image-project cos-cloud --tags=http-server
     gcloud compute ssh grpc-host
     ```
 
