@@ -2,12 +2,13 @@
 
 set -e
 
-export GOOGLE_APPLICATION_CREDENTIALS=$KOKORO_KEYSTORE_DIR/71386_golang-samples-kokoro-service-account
 export GOLANG_SAMPLES_KMS_KEYRING=ring1
 export GOLANG_SAMPLES_KMS_CRYPTOKEY=key1
 
 TIMEOUT=25m
 
+# Set application credentials before using gimmeproj so it has access.
+export GOOGLE_APPLICATION_CREDENTIALS=$KOKORO_KEYSTORE_DIR/71386_kokoro-golang-samples-tests
 curl https://storage.googleapis.com/gimme-proj/linux_amd64/gimmeproj > /bin/gimmeproj && chmod +x /bin/gimmeproj;
 gimmeproj version;
 export GOLANG_SAMPLES_PROJECT_ID=$(gimmeproj -project golang-samples-tests lease $TIMEOUT);
@@ -17,6 +18,10 @@ if [ -z "$GOLANG_SAMPLES_PROJECT_ID" ]; then
 fi
 echo "Running tests in project $GOLANG_SAMPLES_PROJECT_ID";
 trap "gimmeproj -project golang-samples-tests done $GOLANG_SAMPLES_PROJECT_ID" EXIT
+
+# Set application credentials to the project-specific account. Some APIs do not
+# allow the service account project and GOOGLE_CLOUD_PROJECT to be different.
+export GOOGLE_APPLICATION_CREDENTIALS=$KOKORO_KEYSTORE_DIR/71386_kokoro-$GOLANG_SAMPLES_PROJECT_ID
 
 set -x
 
