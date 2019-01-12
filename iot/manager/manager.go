@@ -86,7 +86,14 @@ func createRegistry(w io.Writer, projectID string, region string, registryID str
 
 // deleteRegistry deletes a device registry if it is empty.
 func deleteRegistry(w io.Writer, projectID string, region string, registryID string) (*cloudiot.Empty, error) {
-	client, err := getClient()
+	// Authorize the client using Application Default Credentials.
+	// See https://g.co/dv/identity/protocols/application-default-credentials
+	ctx := context.Background()
+	httpClient, err := google.DefaultClient(ctx, cloudiot.CloudPlatformScope)
+	if err != nil {
+		return nil, err
+	}
+	client, err := cloudiot.New(httpClient)
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +115,14 @@ func deleteRegistry(w io.Writer, projectID string, region string, registryID str
 
 // getRegistry gets information about a device registry given a registryID.
 func getRegistry(w io.Writer, projectID string, region string, registryID string) (*cloudiot.DeviceRegistry, error) {
-	client, err := getClient()
+	// Authorize the client using Application Default Credentials.
+	// See https://g.co/dv/identity/protocols/application-default-credentials
+	ctx := context.Background()
+	httpClient, err := google.DefaultClient(ctx, cloudiot.CloudPlatformScope)
+	if err != nil {
+		return nil, err
+	}
+	client, err := cloudiot.New(httpClient)
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +148,14 @@ func getRegistry(w io.Writer, projectID string, region string, registryID string
 
 // listRegistries gets the names of device registries given a project / region.
 func listRegistries(w io.Writer, projectID string, region string) ([]*cloudiot.DeviceRegistry, error) {
-	client, err := getClient()
+	// Authorize the client using Application Default Credentials.
+	// See https://g.co/dv/identity/protocols/application-default-credentials
+	ctx := context.Background()
+	httpClient, err := google.DefaultClient(ctx, cloudiot.CloudPlatformScope)
+	if err != nil {
+		return nil, err
+	}
+	client, err := cloudiot.New(httpClient)
 	if err != nil {
 		return nil, err
 	}
@@ -164,7 +185,14 @@ func listRegistries(w io.Writer, projectID string, region string) ([]*cloudiot.D
 
 // getRegistryIAM gets the IAM policy for a device registry.
 func getRegistryIAM(w io.Writer, projectID string, region string, registryID string) (*cloudiot.Policy, error) {
-	client, err := getClient()
+	// Authorize the client using Application Default Credentials.
+	// See https://g.co/dv/identity/protocols/application-default-credentials
+	ctx := context.Background()
+	httpClient, err := google.DefaultClient(ctx, cloudiot.CloudPlatformScope)
+	if err != nil {
+		return nil, err
+	}
+	client, err := cloudiot.New(httpClient)
 	if err != nil {
 		return nil, err
 	}
@@ -194,7 +222,14 @@ func getRegistryIAM(w io.Writer, projectID string, region string, registryID str
 
 // setRegistryIAM sets the IAM policy for a device registry
 func setRegistryIAM(w io.Writer, projectID string, region string, registryID string, member string, role string) (*cloudiot.Policy, error) {
-	client, err := getClient()
+	// Authorize the client using Application Default Credentials.
+	// See https://g.co/dv/identity/protocols/application-default-credentials
+	ctx := context.Background()
+	httpClient, err := google.DefaultClient(ctx, cloudiot.CloudPlatformScope)
+	if err != nil {
+		return nil, err
+	}
+	client, err := cloudiot.New(httpClient)
 	if err != nil {
 		return nil, err
 	}
@@ -228,7 +263,14 @@ func setRegistryIAM(w io.Writer, projectID string, region string, registryID str
 
 // createES creates a device in a registry with ES256 credentials.
 func createES(w io.Writer, projectID string, region string, registryID string, deviceID string, keyPath string) (*cloudiot.Device, error) {
-	client, err := getClient()
+	// Authorize the client using Application Default Credentials.
+	// See https://g.co/dv/identity/protocols/application-default-credentials
+	ctx := context.Background()
+	httpClient, err := google.DefaultClient(ctx, cloudiot.CloudPlatformScope)
+	if err != nil {
+		return nil, err
+	}
+	client, err := cloudiot.New(httpClient)
 	if err != nil {
 		return nil, err
 	}
@@ -267,7 +309,14 @@ func createES(w io.Writer, projectID string, region string, registryID string, d
 
 // createRSA creates a device in a registry given RSA X.509 credentials.
 func createRSA(w io.Writer, projectID string, region string, registryID string, deviceID string, keyPath string) (*cloudiot.Device, error) {
-	client, err := getClient()
+	// Authorize the client using Application Default Credentials.
+	// See https://g.co/dv/identity/protocols/application-default-credentials
+	ctx := context.Background()
+	httpClient, err := google.DefaultClient(ctx, cloudiot.CloudPlatformScope)
+	if err != nil {
+		return nil, err
+	}
+	client, err := cloudiot.New(httpClient)
 	if err != nil {
 		return nil, err
 	}
@@ -306,7 +355,14 @@ func createRSA(w io.Writer, projectID string, region string, registryID string, 
 
 // createUnauth creates a device in a registry without credentials.
 func createUnauth(w io.Writer, projectID string, region string, registryID string, deviceID string) (*cloudiot.Device, error) {
-	client, err := getClient()
+	// Authorize the client using Application Default Credentials.
+	// See https://g.co/dv/identity/protocols/application-default-credentials
+	ctx := context.Background()
+	httpClient, err := google.DefaultClient(ctx, cloudiot.CloudPlatformScope)
+	if err != nil {
+		return nil, err
+	}
+	client, err := cloudiot.New(httpClient)
 	if err != nil {
 		return nil, err
 	}
@@ -322,7 +378,7 @@ func createUnauth(w io.Writer, projectID string, region string, registryID strin
 
 	fmt.Fprintf(w, "Successfully created device without credentials: %s\n", deviceID)
 
-	return response, nil 
+	return response, nil
 }
 
 // [END iot_create_unauth_device]
@@ -661,7 +717,14 @@ func sendCommand(w io.Writer, projectID string, region string, registryID string
 // gatewayAuthMethod can be one of: ASSOCIATION_ONLY, DEVICE_AUTH_TOKEN_ONLY, ASSOCIATION_AND_DEVICE_AUTH_TOKEN.
 // https://cloud.google.com/iot/docs/reference/cloudiot/rest/v1/projects.locations.registries.devices#gatewayauthmethod
 func createGateway(w io.Writer, projectID string, region string, registryID string, gatewayID string, gatewayAuthMethod string, publicKeyPath string) (*cloudiot.Device, error) {
-	client, err := getClient()
+	// Authorize the client using Application Default Credentials.
+	// See https://g.co/dv/identity/protocols/application-default-credentials
+	ctx := context.Background()
+	httpClient, err := google.DefaultClient(ctx, cloudiot.CloudPlatformScope)
+	if err != nil {
+		return nil, err
+	}
+	client, err := cloudiot.New(httpClient)
 	if err != nil {
 		return nil, err
 	}
@@ -678,7 +741,7 @@ func createGateway(w io.Writer, projectID string, region string, registryID stri
 				PublicKey: &cloudiot.PublicKeyCredential{
 					Format: "RSA_X509_PEM",
 					Key:    string(keyBytes),
-				}
+				},
 			},
 		},
 		GatewayConfig: &cloudiot.GatewayConfig{
@@ -704,7 +767,14 @@ func createGateway(w io.Writer, projectID string, region string, registryID stri
 
 // listGateways lists all the gateways in a specific registry.
 func listGateways(w io.Writer, projectID string, region string, registryID string) ([]*cloudiot.Device, error) {
-	client, err := getClient()
+	// Authorize the client using Application Default Credentials.
+	// See https://g.co/dv/identity/protocols/application-default-credentials
+	ctx := context.Background()
+	httpClient, err := google.DefaultClient(ctx, cloudiot.CloudPlatformScope)
+	if err != nil {
+		return nil, err
+	}
+	client, err := cloudiot.New(httpClient)
 	if err != nil {
 		return nil, err
 	}
@@ -735,7 +805,17 @@ func listGateways(w io.Writer, projectID string, region string, registryID strin
 
 // bindDeviceToGateway creates an association between an existing device and gateway.
 func bindDeviceToGateway(w io.Writer, projectID string, region string, registryID string, gatewayID string, deviceID string) (*cloudiot.BindDeviceToGatewayResponse, error) {
-	client, err := getClient()
+	// Authorize the client using Application Default Credentials.
+	// See https://g.co/dv/identity/protocols/application-default-credentials
+	ctx := context.Background()
+	httpClient, err := google.DefaultClient(ctx, cloudiot.CloudPlatformScope)
+	if err != nil {
+		return nil, err
+	}
+	client, err := cloudiot.New(httpClient)
+	if err != nil {
+		return nil, err
+	}
 
 	parent := fmt.Sprintf("projects/%s/locations/%s/registries/%s", projectID, region, registryID)
 	bindRequest := &cloudiot.BindDeviceToGatewayRequest{
@@ -763,7 +843,17 @@ func bindDeviceToGateway(w io.Writer, projectID string, region string, registryI
 
 // unbindDeviceFromGateway unbinds a bound device from a gateway.
 func unbindDeviceFromGateway(w io.Writer, projectID string, region string, registryID string, gatewayID string, deviceID string) (*cloudiot.UnbindDeviceFromGatewayResponse, error) {
-	client, err := getClient()
+	// Authorize the client using Application Default Credentials.
+	// See https://g.co/dv/identity/protocols/application-default-credentials
+	ctx := context.Background()
+	httpClient, err := google.DefaultClient(ctx, cloudiot.CloudPlatformScope)
+	if err != nil {
+		return nil, err
+	}
+	client, err := cloudiot.New(httpClient)
+	if err != nil {
+		return nil, err
+	}
 
 	parent := fmt.Sprintf("projects/%s/locations/%s/registries/%s", projectID, region, registryID)
 	unbindRequest := &cloudiot.UnbindDeviceFromGatewayRequest{
@@ -790,7 +880,14 @@ func unbindDeviceFromGateway(w io.Writer, projectID string, region string, regis
 
 // listDevicesForGateway lists the devices that are bound to a gateway.
 func listDevicesForGateway(w io.Writer, projectID string, region string, registryID, gatewayID string) ([]*cloudiot.Device, error) {
-	client, err := getClient()
+	// Authorize the client using Application Default Credentials.
+	// See https://g.co/dv/identity/protocols/application-default-credentials
+	ctx := context.Background()
+	httpClient, err := google.DefaultClient(ctx, cloudiot.CloudPlatformScope)
+	if err != nil {
+		return nil, err
+	}
+	client, err := cloudiot.New(httpClient)
 	if err != nil {
 		return nil, err
 	}
