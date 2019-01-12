@@ -829,11 +829,11 @@ func bindDeviceToGateway(w io.Writer, projectID string, region string, registryI
 		return nil, fmt.Errorf("BindDeviceToGateway: %v", err)
 	}
 
-	if response.HTTPStatusCode == 200 {
-		fmt.Fprintf(w, "Bound %s to %s", deviceID, gatewayID)
-	} else {
-		return nil, fmt.Errorf("BindDeviceToGateway: HTTP status code not 200\n %v", response)
+	if response.HTTPStatusCode/100 != 2 {
+		return nil, fmt.Errorf("BindDeviceToGateway: HTTP status code not 2xx\n %v", response)
 	}
+
+	fmt.Fprintf(w, "Bound %s to %s", deviceID, gatewayID)
 
 	return response, nil
 }
@@ -864,12 +864,14 @@ func unbindDeviceFromGateway(w io.Writer, projectID string, region string, regis
 	response, err := client.Projects.Locations.Registries.UnbindDeviceFromGateway(parent, unbindRequest).Do()
 
 	if err != nil {
-		return nil, fmt.Errorf("BindDeviceToGateway: %v", err)
+		return nil, fmt.Errorf("UnbindDeviceFromGateway error: %v", err)
 	}
 
-	if response.HTTPStatusCode == 200 {
-		fmt.Fprintf(w, "Unbound %s from %s", deviceID, gatewayID)
+	if response.HTTPStatusCode/100 != 2 {
+		return nil, fmt.Errorf("UnbindDeviceFromGateway: HTTP status code not 2xx\n %v", response)
 	}
+
+	fmt.Fprintf(w, "Unbound %s from %s", deviceID, gatewayID)
 
 	return response, nil
 }
