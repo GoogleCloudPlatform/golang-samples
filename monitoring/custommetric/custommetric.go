@@ -15,75 +15,12 @@ import (
 	monitoring "cloud.google.com/go/monitoring/apiv3"
 	timestamp "github.com/golang/protobuf/ptypes/timestamp"
 	"google.golang.org/api/iterator"
-	"google.golang.org/genproto/googleapis/api/label"
-	"google.golang.org/genproto/googleapis/api/metric"
 	metricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoredres "google.golang.org/genproto/googleapis/api/monitoredres"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 )
 
 const metricType = "custom.googleapis.com/custom_measurement"
-
-// [START monitoring_create_metric]
-
-// createCustomMetric creates a custom metric specified by the metric type.
-func createCustomMetric(projectID, metricType string) error {
-	ctx := context.Background()
-	c, err := monitoring.NewMetricClient(ctx)
-	if err != nil {
-		return err
-	}
-	md := &metric.MetricDescriptor{
-		Name: "Custom Metric",
-		Type: metricType,
-		Labels: []*label.LabelDescriptor{{
-			Key:         "environment",
-			ValueType:   label.LabelDescriptor_STRING,
-			Description: "An arbitrary measurement",
-		}},
-		MetricKind:  metric.MetricDescriptor_GAUGE,
-		ValueType:   metric.MetricDescriptor_INT64,
-		Unit:        "s",
-		Description: "An arbitrary measurement",
-		DisplayName: "Custom Metric",
-	}
-	req := &monitoringpb.CreateMetricDescriptorRequest{
-		Name:             "projects/" + projectID,
-		MetricDescriptor: md,
-	}
-	resp, err := c.CreateMetricDescriptor(ctx, req)
-	if err != nil {
-		return fmt.Errorf("could not create custom metric: %v", err)
-	}
-
-	log.Printf("createCustomMetric: %s\n", resp.GetName())
-	return nil
-}
-
-// [END monitoring_create_metric]
-
-// [START monitoring_delete_metric]
-
-// deleteMetric deletes the given metric.
-func deleteMetric(projectID, metricType string) error {
-	ctx := context.Background()
-	c, err := monitoring.NewMetricClient(ctx)
-	if err != nil {
-		return err
-	}
-	metricResource := "projects/" + projectID + "/metricDescriptors/" + metricType
-	req := &monitoringpb.DeleteMetricDescriptorRequest{
-		Name: metricResource,
-	}
-	err = c.DeleteMetricDescriptor(ctx, req)
-	if err != nil {
-		return fmt.Errorf("could not delete metric: %v", err)
-	}
-	log.Printf("Deleted metric: %q\n", metricType)
-	return nil
-}
-
-// [END monitoring_delete_metric]
 
 // [START monitoring_write_timeseries]
 
