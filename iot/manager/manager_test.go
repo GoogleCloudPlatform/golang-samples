@@ -26,7 +26,8 @@ var topicName string // topicName is the full path to the topic (e.g. project/{p
 var registryID string
 
 const region = "us-central1"
-const pubKeyRSA = "./resources/rsa_cert.pem"
+
+var pubKeyRSA = os.Getenv("GOLANG_SAMPLES_IOT_PUB")
 
 var client *pubsub.Client
 
