@@ -77,6 +77,12 @@ GO_IMPORTS=$(go list -f '{{join .Imports "\n"}}{{"\n"}}{{join .TestImports "\n"}
   grep -v golang-samples)
 time go get -u -v -d $GO_IMPORTS
 
+# The latest version of mailgun-go uses a major module path (and imports),
+# which breaks on Go versions without module support (< 1.11).
+pushd $GOPATH/src/github.com/mailgun/mailgun-go
+git checkout v2.0.0
+popd
+
 # Always download internal dependencies.
 go get ./internal/...
 
