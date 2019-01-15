@@ -8,6 +8,7 @@ export GOLANG_SAMPLES_KMS_CRYPTOKEY=key1
 TIMEOUT=25m
 
 # Set application credentials before using gimmeproj so it has access.
+# This is changed to a project-specific credential after a project is leased.
 export GOOGLE_APPLICATION_CREDENTIALS=$KOKORO_KEYSTORE_DIR/71386_kokoro-golang-samples-tests
 curl https://storage.googleapis.com/gimme-proj/linux_amd64/gimmeproj > /bin/gimmeproj && chmod +x /bin/gimmeproj;
 gimmeproj version;
