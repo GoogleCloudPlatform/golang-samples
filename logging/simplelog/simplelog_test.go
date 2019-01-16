@@ -50,7 +50,7 @@ func TestSimplelog(t *testing.T) {
 	writeEntry(client)
 	structuredWrite(client)
 
-	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 20, 2*time.Second, func(r *testutil.R) {
 		entries, err := getEntries(adminClient, tc.ProjectID)
 		if err != nil {
 			r.Errorf("getEntries: %v", err)
