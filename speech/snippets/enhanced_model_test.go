@@ -18,7 +18,7 @@ func TestEnhancedModel(t *testing.T) {
 	var buf bytes.Buffer
 	err := enhancedModel(&buf, "../testdata/commercial_mono.wav")
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("%v - You may need to enable data logging. See https://cloud.google.com/speech-to-text/docs/enable-data-logging", err)
 	}
 
 	if got := buf.String(); !strings.Contains(got, "Chrome") {
