@@ -2,12 +2,14 @@
 
 set -e
 
-export GOOGLE_APPLICATION_CREDENTIALS=$KOKORO_KEYSTORE_DIR/71386_golang-samples-kokoro-service-account
 export GOLANG_SAMPLES_KMS_KEYRING=ring1
 export GOLANG_SAMPLES_KMS_CRYPTOKEY=key1
 
 TIMEOUT=25m
 
+# Set application credentials before using gimmeproj so it has access.
+# This is changed to a project-specific credential after a project is leased.
+export GOOGLE_APPLICATION_CREDENTIALS=$KOKORO_KEYSTORE_DIR/71386_kokoro-golang-samples-tests
 curl https://storage.googleapis.com/gimme-proj/linux_amd64/gimmeproj > /bin/gimmeproj && chmod +x /bin/gimmeproj;
 gimmeproj version;
 export GOLANG_SAMPLES_PROJECT_ID=$(gimmeproj -project golang-samples-tests lease $TIMEOUT);
@@ -17,6 +19,10 @@ if [ -z "$GOLANG_SAMPLES_PROJECT_ID" ]; then
 fi
 echo "Running tests in project $GOLANG_SAMPLES_PROJECT_ID";
 trap "gimmeproj -project golang-samples-tests done $GOLANG_SAMPLES_PROJECT_ID" EXIT
+
+# Set application credentials to the project-specific account. Some APIs do not
+# allow the service account project and GOOGLE_CLOUD_PROJECT to be different.
+export GOOGLE_APPLICATION_CREDENTIALS=$KOKORO_KEYSTORE_DIR/71386_kokoro-$GOLANG_SAMPLES_PROJECT_ID
 
 set -x
 
@@ -68,8 +74,20 @@ fi
 # Download imports.
 GO_IMPORTS=$(go list -f '{{join .Imports "\n"}}{{"\n"}}{{join .TestImports "\n"}}' $TARGET | \
   sort | uniq | \
-  grep -v golang-samples)
+  grep -v golang-samples | \
+  grep -v mailgun)
 time go get -u -v -d $GO_IMPORTS
+
+# The latest version of mailgun-go uses a major module path (and imports),
+# which breaks on Go versions without module support (< 1.11).
+if [ -d $GOPATH/src/github.com/mailgun/mailgun-go ]; then
+  rm -rf $GOPATH/src/github.com/mailgun/mailgun-go
+fi
+git clone https://github.com/mailgun/mailgun-go.git $GOPATH/src/github.com/mailgun/mailgun-go
+pushd $GOPATH/src/github.com/mailgun/mailgun-go
+git checkout v2.0.0
+go get -v ./...
+popd
 
 # Always download internal dependencies.
 go get ./internal/...
