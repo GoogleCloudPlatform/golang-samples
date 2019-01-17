@@ -26,7 +26,8 @@ var topicName string // topicName is the full path to the topic (e.g. project/{p
 var registryID string
 
 const region = "us-central1"
-const pubKeyRSA = "./resources/rsa_cert.pem"
+
+var pubKeyRSA = os.Getenv("GOLANG_SAMPLES_IOT_PUB")
 
 var client *pubsub.Client
 
@@ -80,8 +81,7 @@ func setup(m *testing.M) {
 	// Generate UUID v1 for registry used for tests
 	registryID = createIDForTest("registry")
 
-	_, err = createRegistry(os.Stdout, projectID, region, registryID, topicName)
-	if err != nil {
+	if _, err = createRegistry(os.Stdout, projectID, region, registryID, topicName); err != nil {
 		log.Fatalf("Could not create registry: %v\n", err)
 	}
 }
@@ -108,20 +108,20 @@ func TestCreateRegistry(t *testing.T) {
 		registry, err := createRegistry(buf, projectID, region, testRegistryID, topicName)
 		if err != nil {
 			r.Errorf("Could not create registry: %v\n", err)
-
-		} else {
-			if registry.Id != testRegistryID {
-				r.Errorf("Created registry, but registryID is wrong. Got %q, want %q", registry.Id, testRegistryID)
-			}
-
-			got := buf.String()
-			want := fmt.Sprintf("Created registry:\n\tID: %s", testRegistryID)
-			if !strings.Contains(got, want) {
-				r.Errorf("CreateRegistry got %s, want substring %q", got, want)
-			}
-
-			deleteRegistry(buf, projectID, region, testRegistryID)
+			return
 		}
+
+		if registry.Id != testRegistryID {
+			r.Errorf("Created registry, but registryID is wrong. Got %q, want %q", registry.Id, testRegistryID)
+		}
+
+		want := fmt.Sprintf("Created registry:\n\tID: %s", testRegistryID)
+		if got := buf.String(); !strings.Contains(got, want) {
+			r.Errorf("CreateRegistry got %s, want substring %q", got, want)
+		}
+
+		deleteRegistry(ioutil.Discard, projectID, region, testRegistryID)
+
 	})
 }
 
@@ -130,23 +130,21 @@ func TestGetRegistry(t *testing.T) {
 
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
-		_, err := createRegistry(buf, projectID, region, testRegistryID, topicName)
-		if err != nil {
+		if _, err := createRegistry(ioutil.Discard, projectID, region, testRegistryID, topicName); err != nil {
 			r.Errorf("Could not create registry: %v\n", err)
+			return
 		}
 
-		_, err = getRegistry(buf, projectID, region, testRegistryID)
-		if err != nil {
+		if _, err := getRegistry(buf, projectID, region, testRegistryID); err != nil {
 			r.Errorf("Could not get registry: %v\n", err)
 		}
 
-		got := buf.String()
 		want := "Got registry:\n\tID: " + testRegistryID
-		if !strings.Contains(got, want) {
+		if got := buf.String(); !strings.Contains(got, want) {
 			r.Errorf("GetRegistry got %s, want substring %q", got, want)
 		}
 
-		deleteRegistry(buf, projectID, region, testRegistryID)
+		deleteRegistry(ioutil.Discard, projectID, region, testRegistryID)
 	})
 }
 
@@ -155,23 +153,20 @@ func TestListRegistries(t *testing.T) {
 
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
-		_, err := createRegistry(buf, projectID, region, testRegistryID, topicName)
-		if err != nil {
+		if _, err := createRegistry(ioutil.Discard, projectID, region, testRegistryID, topicName); err != nil {
 			r.Errorf("Could not create registry 1: %v\n", err)
 		}
 
-		_, err = listRegistries(buf, projectID, region)
-		if err != nil {
+		if _, err := listRegistries(buf, projectID, region); err != nil {
 			r.Errorf("Could not list registries: %v\n", err)
 		}
 
-		got := buf.String()
 		want := testRegistryID + "\n"
-		if !strings.Contains(got, want) {
+		if got := buf.String(); !strings.Contains(got, want) {
 			r.Errorf("listRegistries got:\n %s, want substring: \n %q", got, want)
 		}
 
-		deleteRegistry(buf, projectID, region, testRegistryID)
+		deleteRegistry(ioutil.Discard, projectID, region, testRegistryID)
 	})
 }
 
@@ -180,19 +175,16 @@ func TestDeleteRegistry(t *testing.T) {
 
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
-		_, err := createRegistry(buf, projectID, region, testRegistryID, topicName)
-		if err != nil {
+		if _, err := createRegistry(ioutil.Discard, projectID, region, testRegistryID, topicName); err != nil {
 			r.Errorf("Could not create registry: %v\n", err)
 		}
 
-		_, err = deleteRegistry(buf, projectID, region, testRegistryID)
-		if err != nil {
+		if _, err := deleteRegistry(buf, projectID, region, testRegistryID); err != nil {
 			r.Errorf("Could not delete registry: %v\n", err)
 		}
-		got := buf.String()
-		want := "Deleted registry: " + testRegistryID
 
-		if !strings.Contains(got, want) {
+		want := "Deleted registry: " + testRegistryID
+		if got := buf.String(); !strings.Contains(got, want) {
 			r.Errorf("deleteRegistry got %s, want substring %q", got, want)
 		}
 	})
@@ -200,10 +192,10 @@ func TestDeleteRegistry(t *testing.T) {
 
 func TestSendCommand(t *testing.T) {
 	deviceID := createIDForTest("device")
-	buf := new(bytes.Buffer)
 
-	if _, err := createUnauth(buf, projectID, region, registryID, deviceID); err != nil {
+	if _, err := createUnauth(ioutil.Discard, projectID, region, registryID, deviceID); err != nil {
 		t.Fatalf("Could not create device: %v", err)
+		return
 	}
 
 	commandToSend := "test"
@@ -222,7 +214,7 @@ func TestSendCommand(t *testing.T) {
 		}
 	})
 
-	deleteDevice(buf, projectID, region, registryID, deviceID)
+	deleteDevice(ioutil.Discard, projectID, region, registryID, deviceID)
 }
 
 func TestCreateGateway(t *testing.T) {
@@ -230,20 +222,17 @@ func TestCreateGateway(t *testing.T) {
 
 	testutil.Retry(t, 1, 10*time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
-		_, err := createGateway(buf, projectID, region, registryID, gatewayID, "ASSOCIATION_ONLY", pubKeyRSA)
-
-		if err != nil {
+		if _, err := createGateway(buf, projectID, region, registryID, gatewayID, "ASSOCIATION_ONLY", pubKeyRSA); err != nil {
 			r.Errorf("Could not create gateway: %v\n", err)
+			return
 		}
 
-		got := buf.String()
-		want := "Successfully created gateway: " + gatewayID
-
-		if !strings.Contains(got, want) {
+		want := fmt.Sprintf("Successfully created gateway: %s", gatewayID)
+		if got := buf.String(); !strings.Contains(got, want) {
 			r.Errorf("CreateGateway got %s, want substring %q", got, want)
 		}
 
-		deleteDevice(buf, projectID, region, registryID, gatewayID)
+		deleteDevice(ioutil.Discard, projectID, region, registryID, gatewayID)
 	})
 }
 
@@ -251,15 +240,13 @@ func TestListGateways(t *testing.T) {
 	// list zero gateways for initial registry
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
-		_, err := listGateways(buf, projectID, region, registryID)
-		if err != nil {
+		if _, err := listGateways(buf, projectID, region, registryID); err != nil {
 			r.Errorf("Could not list gateways: %v\v", err)
+			return
 		}
 
-		got := buf.String()
 		want := "No gateways found\n"
-
-		if !strings.Contains(got, want) {
+		if got := buf.String(); !strings.Contains(got, want) {
 			r.Errorf("ListGateways got %s, want substring %q", got, want)
 		}
 	})
@@ -269,21 +256,21 @@ func TestListGateways(t *testing.T) {
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
 
-		_, err := createGateway(buf, projectID, region, registryID, gatewayID, "ASSOCIATION_ONLY", pubKeyRSA)
-		if err != nil {
+		if _, err := createGateway(ioutil.Discard, projectID, region, registryID, gatewayID, "ASSOCIATION_ONLY", pubKeyRSA); err != nil {
 			r.Errorf("Could not create gateway: %v\n", err)
+			return
 		}
 
-		_, err = listGateways(buf, projectID, region, registryID)
+		if _, err := listGateways(buf, projectID, region, registryID); err != nil {
+			r.Errorf("ListGateways error: %v\n", err)
+		}
 
-		got := buf.String()
 		want := gatewayID + "\n"
-
-		if !strings.Contains(got, want) {
+		if got := buf.String(); !strings.Contains(got, want) {
 			r.Errorf("ListGateways got %s, want substring %q", got, want)
 		}
 
-		deleteDevice(buf, projectID, region, registryID, gatewayID)
+		deleteDevice(ioutil.Discard, projectID, region, registryID, gatewayID)
 	})
 }
 
@@ -293,31 +280,27 @@ func TestBindDeviceToGateway(t *testing.T) {
 
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
-		_, err := createGateway(buf, projectID, region, registryID, gatewayID, "ASSOCIATION_ONLY", pubKeyRSA)
-		if err != nil {
+		if _, err := createGateway(ioutil.Discard, projectID, region, registryID, gatewayID, "ASSOCIATION_ONLY", pubKeyRSA); err != nil {
 			r.Errorf("Could not create gateway: %v\n", err)
+			return
 		}
 
-		_, err = createRSA(buf, projectID, region, registryID, deviceID, pubKeyRSA)
-		if err != nil {
+		if _, err := createRSA(ioutil.Discard, projectID, region, registryID, deviceID, pubKeyRSA); err != nil {
 			r.Errorf("Could not create device: %v\n", err)
 		}
 
-		_, err = bindDeviceToGateway(buf, projectID, region, registryID, gatewayID, deviceID)
-		if err != nil {
+		if _, err := bindDeviceToGateway(buf, projectID, region, registryID, gatewayID, deviceID); err != nil {
 			r.Errorf("Could not bind device to gateway: %v\n", err)
 		}
 
-		got := buf.String()
 		want := fmt.Sprintf("Bound %s to %s", deviceID, gatewayID)
-
-		if !strings.Contains(got, want) {
+		if got := buf.String(); !strings.Contains(got, want) {
 			r.Errorf("BindDeviceToGateway got %s, want substring %q", got, want)
 		}
 
-		unbindDeviceFromGateway(buf, projectID, region, registryID, gatewayID, deviceID)
-		deleteDevice(buf, projectID, region, registryID, deviceID)
-		deleteDevice(buf, projectID, region, registryID, gatewayID)
+		unbindDeviceFromGateway(ioutil.Discard, projectID, region, registryID, gatewayID, deviceID)
+		deleteDevice(ioutil.Discard, projectID, region, registryID, deviceID)
+		deleteDevice(ioutil.Discard, projectID, region, registryID, gatewayID)
 	})
 }
 
@@ -327,17 +310,17 @@ func TestUnbindDeviceFromGateway(t *testing.T) {
 
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
-		_, err := createGateway(buf, projectID, region, registryID, gatewayID, "ASSOCIATION_ONLY", pubKeyRSA)
+		_, err := createGateway(ioutil.Discard, projectID, region, registryID, gatewayID, "ASSOCIATION_ONLY", pubKeyRSA)
 		if err != nil {
 			r.Errorf("Could not create gateway: %v\n", err)
 		}
 
-		_, err = createRSA(buf, projectID, region, registryID, deviceID, pubKeyRSA)
+		_, err = createRSA(ioutil.Discard, projectID, region, registryID, deviceID, pubKeyRSA)
 		if err != nil {
 			r.Errorf("Could not create device: %v\n", err)
 		}
 
-		_, err = bindDeviceToGateway(buf, projectID, region, registryID, gatewayID, deviceID)
+		_, err = bindDeviceToGateway(ioutil.Discard, projectID, region, registryID, gatewayID, deviceID)
 		if err != nil {
 			r.Errorf("Could not bind device to gateway: %v\n", err)
 		}
@@ -347,15 +330,13 @@ func TestUnbindDeviceFromGateway(t *testing.T) {
 			r.Errorf("Could not unbind device to gateway: %v\n", err)
 		}
 
-		got := buf.String()
 		want := fmt.Sprintf("Unbound %s from %s", deviceID, gatewayID)
-
-		if !strings.Contains(got, want) {
+		if got := buf.String(); !strings.Contains(got, want) {
 			r.Errorf("CreateGateway got %s, want substring %q", got, want)
 		}
 
-		deleteDevice(buf, projectID, region, registryID, deviceID)
-		deleteDevice(buf, projectID, region, registryID, gatewayID)
+		deleteDevice(ioutil.Discard, projectID, region, registryID, deviceID)
+		deleteDevice(ioutil.Discard, projectID, region, registryID, gatewayID)
 	})
 }
 func TestListDevicesForGateway(t *testing.T) {
@@ -365,23 +346,26 @@ func TestListDevicesForGateway(t *testing.T) {
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
 
-		_, err := createGateway(buf, projectID, region, registryID, gatewayID, "ASSOCIATION_ONLY", pubKeyRSA)
-		if err != nil {
+		if _, err := createGateway(ioutil.Discard, projectID, region, registryID, gatewayID, "ASSOCIATION_ONLY", pubKeyRSA); err != nil {
 			r.Errorf("Could not create gateway: %v\n", err)
+			return
 		}
 
-		_, err = createRSA(buf, projectID, region, registryID, deviceID, pubKeyRSA)
-		if err != nil {
+		if _, err := createRSA(ioutil.Discard, projectID, region, registryID, deviceID, pubKeyRSA); err != nil {
 			r.Errorf("Could not create device: %v\n", err)
 		}
 
-		bindDeviceToGateway(buf, projectID, region, registryID, gatewayID, deviceID)
+		if _, err := bindDeviceToGateway(ioutil.Discard, projectID, region, registryID, gatewayID, deviceID); err != nil {
+			r.Errorf("Could not bind device to gateway: %v\n", err)
+		}
 
-		_, err = listDevicesForGateway(buf, projectID, region, registryID, gatewayID)
+		if _, err := listDevicesForGateway(buf, projectID, region, registryID, gatewayID); err != nil {
+			r.Errorf("Could not list gateways")
+		}
 
 		got := buf.String()
 		want := fmt.Sprintf("Devices for %s", gatewayID)
-		if !strings.Contains(got, want) {
+		if got := buf.String(); !strings.Contains(got, want) {
 			r.Errorf("ListDeviesForGateway got %s, want substring %q", got, want)
 		}
 
@@ -390,8 +374,9 @@ func TestListDevicesForGateway(t *testing.T) {
 			r.Errorf("ListDeviesForGateway got %s, want substring %q", got, want)
 		}
 
-		unbindDeviceFromGateway(buf, projectID, region, registryID, gatewayID, deviceID)
-		deleteDevice(buf, projectID, region, registryID, deviceID)
-		deleteDevice(buf, projectID, region, registryID, gatewayID)
+		// cleanup
+		unbindDeviceFromGateway(ioutil.Discard, projectID, region, registryID, gatewayID, deviceID)
+		deleteDevice(ioutil.Discard, projectID, region, registryID, deviceID)
+		deleteDevice(ioutil.Discard, projectID, region, registryID, gatewayID)
 	})
 }
