@@ -208,6 +208,31 @@ func TestBucketLock(t *testing.T) {
 	}
 }
 
+func TestBucketPolicyOnly(t *testing.T) {
+	setup(t)
+
+	if err := enableBucketPolicyOnly(storageClient, bucketName); err != nil {
+		t.Fatalf("failed to enable Bucket Policy Only (%q): %v", bucketName, err)
+	}
+	attrs, err := getBucketPolicyOnly(storageClient, bucketName)
+	if err != nil {
+		t.Fatalf("failed to get Bucket Policy Only attrs (%q): %v", bucketName, err)
+	}
+	if !attrs.BucketPolicyOnly.Enabled {
+		t.Fatalf("Bucket Policy Only was not enabled for (%q).", bucketName)
+	}
+	if err := disableBucketPolicyOnly(storageClient, bucketName); err != nil {
+		t.Fatalf("failed to disable Bucket Policy Only (%q): %v", bucketName, err)
+	}
+	attrs, err = getBucketPolicyOnly(storageClient, bucketName)
+	if err != nil {
+		t.Fatalf("failed to get Bucket Policy Only attrs (%q): %v", bucketName, err)
+	}
+	if attrs.BucketPolicyOnly.Enabled {
+		t.Fatalf("Bucket Policy Only was not disabled for (%q).", bucketName)
+	}
+}
+
 func TestDelete(t *testing.T) {
 	testutil.SystemTest(t)
 	setup(t)
