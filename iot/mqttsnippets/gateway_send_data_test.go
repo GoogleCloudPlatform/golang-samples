@@ -2,29 +2,42 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-// Command manager lets you manage Cloud IoT Core devices and registries.
-package main
+package mqttsnippets
 
 import (
 	"bytes"
-	"flag"
+	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
-	"path/filepath"
-	"reflect"
+	"strings"
+	"testing"
+	"time"
 
-	// [START imports]
-	"context"
 	b64 "encoding/base64"
 
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/google/uuid"
 	"golang.org/x/oauth2/google"
 	cloudiot "google.golang.org/api/cloudiot/v1"
-	// [END imports]
 )
 
-// [START iot_get_client]
+var privateKeyRSA = os.Getenv("GOLANG_SAMPLES_IOT_PRIV")
+var pubKeyRSA = os.Getenv("GOLANG_SAMPLES_IOT_PUB")
+var region = "us-central1"
+
+// returns a v1 UUID for a resource: e.g. topic, registry, gateway, device
+func createIDForTest(resource string) string {
+	uuid, err := uuid.NewRandom()
+	if err != nil {
+		log.Fatalf("Could not generate uuid: %v", err)
+	}
+	id := fmt.Sprintf("golang-test-%s-%s", resource, uuid.String())
+
+	return id
+}
 
 // getClient returns a client based on the environment variable GOOGLE_APPLICATION_CREDENTIALS
 func getClient() (*cloudiot.Service, error) {
@@ -974,128 +987,40 @@ func listDevicesForGateway(w io.Writer, projectID string, region string, registr
 
 // END BETA FEATURES
 
-type command struct {
-	name string
-	fn   interface{}
-	args []string
-}
+func TestSendDataFromBoundDevice(t *testing.T) {
+	projectID := testutil.SystemTest(t).ProjectID
 
-func (c command) usage() string {
-	var buf bytes.Buffer
-	buf.WriteString(c.name)
-	buf.WriteString(" ")
-	for _, arg := range c.args {
-		buf.WriteString("<")
-		buf.WriteString(arg)
-		buf.WriteString("> ")
-	}
-	buf.UnreadByte()
-	return buf.String()
-}
+	registryID := "golang-iot-test-registry"
+	gatewayID := createIDForTest("gateway")
+	deviceID := createIDForTest("device")
 
-func main() {
-	registryManagementCommands := []command{
-		{"createRegistry", createRegistry, []string{"cloud-region", "registry-id", "pubsub-topic"}},
-		{"deleteRegistry", deleteRegistry, []string{"cloud-region", "registry-id"}},
-		{"getRegistry", getRegistry, []string{"cloud-region", "registry-id"}},
-		{"listRegistries", listRegistries, []string{"cloud-region"}},
-		{"getRegistryIAM", getRegistryIAM, []string{"cloud-region", "registry-id"}},
-		{"setRegistryIAM", setRegistryIAM, []string{"cloud-region", "registry-id", "member", "role"}},
-	}
-
-	deviceManagementCommands := []command{
-		{"createES", createES, []string{"cloud-region", "registry-id", "device-id", "keyfile-path"}},
-		{"createRSA", createRSA, []string{"cloud-region", "registry-id", "device-id", "keyfile-path"}},
-		{"createUnauth", createUnauth, []string{"cloud-region", "registry-id", "device-id"}},
-		{"createDevice", createDevice, []string{"cloud-region, registry-id", "device-id", "public-key-format", "keyfile-path"}},
-		{"deleteDevice", deleteDevice, []string{"cloud-region", "registry-id", "device-id"}},
-		{"getDevice", getDevice, []string{"cloud-region", "registry-id", "device-id"}},
-		{"getDeviceConfigs", getDeviceConfigs, []string{"cloud-region", "registry-id", "device-id"}},
-		{"getDeviceStates", getDeviceStates, []string{"cloud-region", "registry-id", "device-id"}},
-		{"listDevices", listDevices, []string{"cloud-region", "registry-id"}},
-		{"patchDevice", patchDeviceES, []string{"cloud-region", "registry-id", "device-id", "keyfile-path"}},
-		{"patchDeviceRSA", patchDeviceRSA, []string{"cloud-region", "registry-id", "device-id", "keyfile-path"}},
-		{"setConfig", setConfig, []string{"cloud-region", "registry-id", "device-id", "config-data"}},
-		{"sendCommand", sendCommand, []string{"cloud-region", "registry-id", "device-id", "send-data"}},
-	}
-
-	// Beta Features: Gateway management commands
-	gatewayManagementCommands := []command{
-		{"createGateway", createGateway, []string{"cloud-region", "registry-id", "gateway-id", "auth-method", "public-key-path"}},
-		{"listGateways", listGateways, []string{"cloud-region", "registry-id"}},
-		{"bindDeviceToGateway", bindDeviceToGateway, []string{"cloud-region", "registry-id", "gateway-id", "device-id"}},
-		{"unbindDeviceFromGateway", unbindDeviceFromGateway, []string{"cloud-region", "registry-id", "gateway-id", "device-id"}},
-		{"listDevicesForGateway", listDevicesForGateway, []string{"cloud-region", "registry-id", "gateway-id"}},
-	}
-
-	var commands []command
-	commands = append(commands, registryManagementCommands...)
-	commands = append(commands, deviceManagementCommands...)
-	commands = append(commands, gatewayManagementCommands...)
-
-	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage:\n")
-		fmt.Fprintf(os.Stderr, "\tRegistry Management\n")
-		fmt.Fprintf(os.Stderr, "\t-----\n")
-		for _, cmd := range registryManagementCommands {
-			fmt.Fprintf(os.Stderr, "\t%s %s\n", filepath.Base(os.Args[0]), cmd.usage())
+	testutil.Retry(t, 1, 10*time.Second, func(r *testutil.R) {
+		if _, err := createGateway(ioutil.Discard, projectID, region, registryID, gatewayID, "ASSOCIATION_ONLY", pubKeyRSA); err != nil {
+			r.Errorf("Could not create gateway: %v\n", err)
+			return
 		}
-		fmt.Fprintln(os.Stderr)
-		fmt.Fprintf(os.Stderr, "\tDevice Management\n")
-		fmt.Fprintf(os.Stderr, "\t-----\n")
-		for _, cmd := range deviceManagementCommands {
-			fmt.Fprintf(os.Stderr, "\t%s %s\n", filepath.Base(os.Args[0]), cmd.usage())
+
+		if _, err := createDevice(ioutil.Discard, projectID, region, registryID, deviceID, "RSA_X509_PEM", pubKeyRSA); err != nil {
+			r.Errorf("Could not create device: %v\n", err)
+			return
 		}
-		fmt.Fprintln(os.Stderr)
-		fmt.Fprintf(os.Stderr, "\tBeta Gateway Management\n")
-		fmt.Fprintf(os.Stderr, "\t-----\n")
-		for _, cmd := range gatewayManagementCommands {
-			fmt.Fprintf(os.Stderr, "\t%s %s\n", filepath.Base(os.Args[0]), cmd.usage())
+
+		if _, err := bindDeviceToGateway(ioutil.Discard, projectID, region, registryID, gatewayID, deviceID); err != nil {
+			r.Errorf("Could not bind device to gateway: %v\n", err)
+			return
 		}
-	}
-	flag.Parse()
 
-	// Retrieve project ID from console.
-	projectID := os.Getenv("GCLOUD_PROJECT")
-	if projectID == "" {
-		projectID = os.Getenv("GOOGLE_CLOUD_PROJECT")
-	}
-	if projectID == "" {
-		fmt.Fprintln(os.Stderr, "Set the GCLOUD_PROJECT or GOOGLE_CLOUD_PROJECT environment variable.")
-	}
+		buf := new(bytes.Buffer)
+		sendDataFromBoundDevice(buf, projectID, region, registryID, gatewayID, deviceID, privateKeyRSA, "RS256", 2, "test")
 
-	if len(flag.Args()) == 0 {
-		flag.Usage()
-		os.Exit(1)
-	}
-
-	commandName := flag.Args()[0]
-	commandArgs := flag.Args()[1:]
-
-	for _, cmd := range commands {
-		if cmd.name == commandName {
-			if len(commandArgs[1:]) != len(cmd.args)-1 {
-				fmt.Fprintf(os.Stderr, "Wrong number of arguments. Usage:\n\t%s\n", cmd.usage())
-				os.Exit(1)
-			}
-			var fnArgs []reflect.Value
-
-			fnArgs = append(fnArgs, reflect.ValueOf(os.Stdout))
-			fnArgs = append(fnArgs, reflect.ValueOf(projectID))
-			for _, arg := range commandArgs {
-				fnArgs = append(fnArgs, reflect.ValueOf(arg))
-			}
-			retValues := reflect.ValueOf(cmd.fn).Call(fnArgs)
-			err := retValues[len(retValues)-1]
-			if !err.IsNil() {
-				fmt.Fprintf(os.Stderr, "%v\n", err)
-				os.Exit(1)
-			}
-			os.Exit(0)
+		want := fmt.Sprintf("Publishing message: %s", "test")
+		if got := buf.String(); !strings.Contains(got, want) {
+			r.Errorf("SendDataFromBoundDevice got %s, want substring %q", got, want)
 		}
-	}
+	})
 
-	// Unknown command
-	flag.Usage()
-	os.Exit(1)
+	// cleanup
+	unbindDeviceFromGateway(ioutil.Discard, projectID, region, registryID, gatewayID, deviceID)
+	deleteDevice(ioutil.Discard, projectID, region, registryID, deviceID)
+	deleteDevice(ioutil.Discard, projectID, region, registryID, gatewayID)
 }
