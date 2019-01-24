@@ -407,7 +407,7 @@ func enableBucketPolicyOnly(c *storage.Client, bucketName string) error {
 func disableBucketPolicyOnly(c *storage.Client, bucketName string) error {
 	ctx := context.Background()
 
-	// [START storage_enable_bucket_policy_only]
+	// [START storage_disable_bucket_policy_only]
 	bucket := c.Bucket(bucketName)
 	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
 		BucketPolicyOnly: &storage.BucketPolicyOnly{
@@ -417,7 +417,7 @@ func disableBucketPolicyOnly(c *storage.Client, bucketName string) error {
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
 		return err
 	}
-	// [END storage_enable_bucket_policy_only]
+	// [END storage_disable_bucket_policy_only]
 	return nil
 }
 
