@@ -392,12 +392,12 @@ func enableBucketPolicyOnly(c *storage.Client, bucketName string) error {
 
 	// [START storage_enable_bucket_policy_only]
 	bucket := c.Bucket(bucketName)
-	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
+	enableBucketPolicyOnly := storage.BucketAttrsToUpdate{
 		BucketPolicyOnly: &storage.BucketPolicyOnly{
 			Enabled: true,
 		},
 	}
-	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
+	if _, err := bucket.Update(ctx, enableBucketPolicyOnly); err != nil {
 		return err
 	}
 	// [END storage_enable_bucket_policy_only]
@@ -409,12 +409,12 @@ func disableBucketPolicyOnly(c *storage.Client, bucketName string) error {
 
 	// [START storage_disable_bucket_policy_only]
 	bucket := c.Bucket(bucketName)
-	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
+	disableBucketPolicyOnly := storage.BucketAttrsToUpdate{
 		BucketPolicyOnly: &storage.BucketPolicyOnly{
 			Enabled: false,
 		},
 	}
-	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
+	if _, err := bucket.Update(ctx, disableBucketPolicyOnly); err != nil {
 		return err
 	}
 	// [END storage_disable_bucket_policy_only]
