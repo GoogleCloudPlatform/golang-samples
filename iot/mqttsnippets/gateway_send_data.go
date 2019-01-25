@@ -29,7 +29,7 @@ func sendDataFromBoundDevice(w io.Writer, projectID string, region string, regis
 
 	// onConnect defines the on connect handler which resets backoff variables.
 	var onConnect mqtt.OnConnectHandler = func(client mqtt.Client) {
-		fmt.Printf("Client connected: %t\n", client.IsConnected())
+		fmt.Fprintf(w, "Client connected: %t\n", client.IsConnected())
 
 		shouldBackoff = false
 		backoffTime = minimumBackoffTime
@@ -37,14 +37,13 @@ func sendDataFromBoundDevice(w io.Writer, projectID string, region string, regis
 
 	// onMessage defines the message handler for the mqtt client.
 	var onMessage mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
-		fmt.Printf("Topic: %s\n", msg.Topic())
-		fmt.Printf("Message: %s\n", msg.Payload())
+		fmt.Fprintf(w, "Topic: %s\n", msg.Topic())
+		fmt.Fprintf(w, "Message: %s\n", msg.Payload())
 	}
 
 	// onDisconnect defines the connection lost handler for the mqtt client.
 	var onDisconnect mqtt.ConnectionLostHandler = func(client mqtt.Client, err error) {
-		fmt.Println("Client disconnected")
-
+		fmt.Fprintln(w, "Client disconnected")
 		shouldBackoff = true
 	}
 
@@ -79,7 +78,6 @@ func sendDataFromBoundDevice(w io.Writer, projectID string, region string, regis
 	deviceStateTopic := fmt.Sprintf("/devices/%s/state", deviceID)
 
 	gatewayInitPayload := fmt.Sprintf("Starting gateway at time: %d", time.Now().Unix())
-	fmt.Println(gatewayInitPayload)
 	if token := client.Publish(gatewayStateTopic, 1, false, gatewayInitPayload); token.Wait() && token.Error() != nil {
 		fmt.Fprintln(w, "Failed to publish initial gateway payload")
 		return
@@ -112,8 +110,7 @@ func sendDataFromBoundDevice(w io.Writer, projectID string, region string, regis
 
 	detachDevice(deviceID, client, "")
 
-	client.Disconnect(10)
-
+	client.Disconnect(20)
 }
 
 // [END iot_send_data_from_bound_device]

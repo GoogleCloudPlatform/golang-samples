@@ -111,23 +111,23 @@ func createDevice(w io.Writer, projectID string, region string, registryID strin
 	var device cloudiot.Device
 
 	// if no credentials are passed in, create an unauth device
-	// if publicKeyFormat == "" {
-	// 	device = cloudiot.Device{
-	// 		Id: deviceID,
-	// 	}
-	// } else {
-	device = cloudiot.Device{
-		Id: deviceID,
-		Credentials: []*cloudiot.DeviceCredential{
-			{
-				PublicKey: &cloudiot.PublicKeyCredential{
-					Format: publicKeyFormat,
-					Key:    string(keyBytes),
+	if publicKeyFormat == "" {
+		device = cloudiot.Device{
+			Id: deviceID,
+		}
+	} else {
+		device = cloudiot.Device{
+			Id: deviceID,
+			Credentials: []*cloudiot.DeviceCredential{
+				{
+					PublicKey: &cloudiot.PublicKeyCredential{
+						Format: publicKeyFormat,
+						Key:    string(keyBytes),
+					},
 				},
 			},
-		},
+		}
 	}
-	// }
 
 	parent := fmt.Sprintf("projects/%s/locations/%s/registries/%s", projectID, region, registryID)
 	response, err := client.Projects.Locations.Registries.Devices.Create(parent, &device).Do()
