@@ -15,7 +15,7 @@ import (
 // attaches a devices to a gateway.
 func attachDevice(deviceID string, client mqtt.Client, jwt string) error {
 	attachTopic := fmt.Sprintf("/devices/%s/attach", deviceID)
-	fmt.Printf("Attaching topic: %s\n", attachTopic)
+	fmt.Printf("Attaching device: %s\n", attachTopic)
 
 	attachPayload := "{}"
 	if jwt != "" {
@@ -35,7 +35,7 @@ func attachDevice(deviceID string, client mqtt.Client, jwt string) error {
 // detaches a devices to a gateway.
 func detachDevice(deviceID string, client mqtt.Client, jwt string) error {
 	detachTopic := fmt.Sprintf("/devices/%s/detach", deviceID)
-	fmt.Printf("Detaching topic: %s\n", detachTopic)
+	fmt.Printf("Detaching device: %s\n", detachTopic)
 
 	detachPayload := "{}"
 	if jwt != "" {

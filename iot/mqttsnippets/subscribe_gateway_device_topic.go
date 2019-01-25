@@ -13,10 +13,11 @@ import (
 	"github.com/eclipse/paho.mqtt.golang"
 )
 
-// [START iot_subscribe_to_bound_device]
+// [START iot_subuscribe_config_bound_device]
 
-// subcribeToBoundDevice subscribes and listens on a topic for a bound device
-func subscribeToBoundDevice(w io.Writer, projectID string, region string, registryID string, gatewayID string, deviceID string, privateKeyPath string, algorithm string) {
+// subscribeGatewayToDeviceTopic creates a gateway client that subscribes to a topic of a bound device.
+// Currently supported topics include: "config", "state", "commands", "errors"
+func subscribeGatewayToDeviceTopic(w io.Writer, projectID string, region string, registryID string, gatewayID string, deviceID string, privateKeyPath string, algorithm string, clientDuration int, topic string) {
 
 	const (
 		mqttBrokerURL   = "tls://mqtt.googleapis.com:443"
@@ -25,13 +26,13 @@ func subscribeToBoundDevice(w io.Writer, projectID string, region string, regist
 
 	// onConnect defines the on connect handler which resets backoff variables.
 	var onConnect mqtt.OnConnectHandler = func(client mqtt.Client) {
-		fmt.Printf("Client connected: %t\n", client.IsConnected())
+		fmt.Fprintf(w, "Client connected: %t\n", client.IsConnected())
 	}
 
 	// onMessage defines the message handler for the mqtt client.
 	var onMessage mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
-		fmt.Printf("Topic: %s\n", msg.Topic())
-		fmt.Printf("Message: %s\n", msg.Payload())
+		fmt.Fprintf(w, "Topic: %s\n", msg.Topic())
+		fmt.Fprintf(w, "Message: %s\n", msg.Payload())
 	}
 
 	// onDisconnect defines the connection lost handler for the mqtt client.
@@ -63,35 +64,29 @@ func subscribeToBoundDevice(w io.Writer, projectID string, region string, regist
 
 	time.Sleep(5 * time.Second)
 
-	//subscribe to the topic and request messages to be delivered
-	//at a maximum qos of zero, wait for the receipt to confirm the subscription
-	gatewayConfigTopic := fmt.Sprintf("/devices/%s/config", gatewayID)
-	if token := client.Subscribe(gatewayConfigTopic, 0, nil); token.Wait() && token.Error() != nil {
-		fmt.Println(token.Error())
+	// Subscribe to the config topic of the current gateway and a device bound to the gateway.
+	gatewayTopic := fmt.Sprintf("/devices/%s/%s", gatewayID, topic)
+	if token := client.Subscribe(gatewayTopic, 0, nil); token.Wait() && token.Error() != nil {
+		fmt.Fprintln(w, token.Error())
 		os.Exit(1)
 	}
 
-	deviceConfigTopic := fmt.Sprintf("/devices/%s/config", deviceID)
-	if token := client.Subscribe(deviceConfigTopic, 0, nil); token.Wait() && token.Error() != nil {
-		fmt.Println(token.Error())
+	deviceTopic := fmt.Sprintf("/devices/%s/%s", deviceID, topic)
+	if token := client.Subscribe(deviceTopic, 0, nil); token.Wait() && token.Error() != nil {
+		fmt.Fprintln(w, token.Error())
 		os.Exit(1)
 	}
 
-	time.Sleep(60 * time.Second)
+	time.Sleep(time.Duration(clientDuration) * time.Second)
 
 	detachDevice(deviceID, client, "")
 
-	if token := client.Unsubscribe(deviceConfigTopic); token.Wait() && token.Error() != nil {
-		fmt.Println(token.Error())
+	if token := client.Unsubscribe(gatewayTopic, deviceTopic); token.Wait() && token.Error() != nil {
+		fmt.Fprintln(w, token.Error())
 		os.Exit(1)
 	}
 
-	if token := client.Unsubscribe(deviceConfigTopic); token.Wait() && token.Error() != nil {
-		fmt.Println(token.Error())
-		os.Exit(1)
-	}
-
-	client.Disconnect(250)
+	client.Disconnect(10)
 }
 
 // [END iot_subscribe_to_bound_device]
