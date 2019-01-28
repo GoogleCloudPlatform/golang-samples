@@ -1,4 +1,4 @@
-// Copyright 2018 Google LLC. All rights reserved.
+// Copyright 2019 Google LLC. All rights reserved.
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
@@ -6,7 +6,6 @@ package mqttsnippets
 
 import (
 	"bytes"
-	"context"
 	"encoding/base64"
 	"fmt"
 	"io"
@@ -16,22 +15,12 @@ import (
 	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"golang.org/x/oauth2/google"
 	cloudiot "google.golang.org/api/cloudiot/v1"
 )
 
-// [START iot_set_device_config]
-
-// setConfig sends a configuration change to a device.
+// setConfig sends a configuration message to a device.
 func setConfig(w io.Writer, projectID string, region string, registryID string, deviceID string, configData string) (*cloudiot.DeviceConfig, error) {
-	// Authorize the client using Application Default Credentials.
-	// See https://g.co/dv/identity/protocols/application-default-credentials
-	ctx := context.Background()
-	httpClient, err := google.DefaultClient(ctx, cloudiot.CloudPlatformScope)
-	if err != nil {
-		return nil, err
-	}
-	client, err := cloudiot.New(httpClient)
+	client, err := getClient()
 	if err != nil {
 		return nil, err
 	}
@@ -50,8 +39,6 @@ func setConfig(w io.Writer, projectID string, region string, registryID string, 
 
 	return response, nil
 }
-
-// [END iot_set_device_config]
 
 func TestSubscribeGatewayToDeviceTopic(t *testing.T) {
 	projectID := testutil.SystemTest(t).ProjectID

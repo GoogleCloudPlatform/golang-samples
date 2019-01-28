@@ -1,4 +1,4 @@
-// Copyright 2018 Google LLC. All rights reserved.
+// Copyright 2019 Google LLC. All rights reserved.
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
@@ -54,12 +54,6 @@ func getClient() (*cloudiot.Service, error) {
 	return client, nil
 }
 
-// [END iot_get_client]
-
-// Registry Management
-
-// [START iot_create_registry]
-
 // createRegistry creates a IoT Core device registry associated with a PubSub topic
 func createRegistry(w io.Writer, projectID string, region string, registryID string, topicName string) (*cloudiot.DeviceRegistry, error) {
 	client, err := getClient()
@@ -90,10 +84,6 @@ func createRegistry(w io.Writer, projectID string, region string, registryID str
 
 	return response, nil
 }
-
-// [END iot_create_registry]
-
-// [START iot_create_device]
 
 // createDevice creates a device in a registry with one of the following public key formats
 // RSA_PEM, RSA_X509_PEM, ES256_PEM, ES256_X509_PEM
@@ -140,10 +130,6 @@ func createDevice(w io.Writer, projectID string, region string, registryID strin
 	return response, nil
 }
 
-// [END iot_create_device]
-
-// [START iot_delete_device]
-
 // deleteDevice deletes a device from a registry.
 func deleteDevice(w io.Writer, projectID string, region string, registryID string, deviceID string) (*cloudiot.Empty, error) {
 	client, err := getClient()
@@ -161,10 +147,6 @@ func deleteDevice(w io.Writer, projectID string, region string, registryID strin
 
 	return response, nil
 }
-
-// [END iot_delete_device]
-
-// [START iot_create_gateway]
 
 // createGateway creates a new IoT Core gateway with a given id, public key, and auth method.
 // gatewayAuthMethod can be one of: ASSOCIATION_ONLY, DEVICE_AUTH_TOKEN_ONLY, ASSOCIATION_AND_DEVICE_AUTH_TOKEN.
@@ -207,10 +189,6 @@ func createGateway(w io.Writer, projectID string, region string, registryID stri
 	return response, nil
 }
 
-// [END iot_create_gateway]
-
-// [START iot_bind_device_to_gateway]
-
 // bindDeviceToGateway creates an association between an existing device and gateway.
 func bindDeviceToGateway(w io.Writer, projectID string, region string, registryID string, gatewayID string, deviceID string) (*cloudiot.BindDeviceToGatewayResponse, error) {
 	client, err := getClient()
@@ -239,9 +217,6 @@ func bindDeviceToGateway(w io.Writer, projectID string, region string, registryI
 	return response, nil
 }
 
-// [END iot_bind_device_to_gateway]
-// [START unbind_device_from_gateway]
-
 // unbindDeviceFromGateway unbinds a bound device from a gateway.
 func unbindDeviceFromGateway(w io.Writer, projectID string, region string, registryID string, gatewayID string, deviceID string) (*cloudiot.UnbindDeviceFromGatewayResponse, error) {
 	client, err := getClient()
@@ -269,8 +244,6 @@ func unbindDeviceFromGateway(w io.Writer, projectID string, region string, regis
 
 	return response, nil
 }
-
-// [END unbind_device_from_gateway]
 
 func TestSendDataFromBoundDevice(t *testing.T) {
 	projectID := testutil.SystemTest(t).ProjectID

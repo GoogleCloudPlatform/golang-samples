@@ -1,4 +1,4 @@
-// Copyright 2018 Google LLC. All rights reserved.
+// Copyright 2019 Google LLC. All rights reserved.
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
@@ -60,7 +60,10 @@ func subscribeGatewayToDeviceTopic(w io.Writer, projectID string, region string,
 		return
 	}
 
-	attachDevice(deviceID, client, "")
+	if err := attachDevice(deviceID, client, ""); err != nil {
+		fmt.Fprintf(w, "AttachDevice error: %v\n", err)
+		return
+	}
 
 	time.Sleep(5 * time.Second)
 
@@ -79,7 +82,10 @@ func subscribeGatewayToDeviceTopic(w io.Writer, projectID string, region string,
 
 	time.Sleep(time.Duration(clientDuration) * time.Second)
 
-	detachDevice(deviceID, client, "")
+	if err := detachDevice(deviceID, client, ""); err != nil {
+		fmt.Fprintf(w, "DetachDevice error: %v\n", err)
+		return
+	}
 
 	if token := client.Unsubscribe(gatewayTopic, deviceTopic); token.Wait() && token.Error() != nil {
 		fmt.Fprintln(w, token.Error())

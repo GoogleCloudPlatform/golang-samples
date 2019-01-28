@@ -1,4 +1,4 @@
-// Copyright 2018 Google LLC. All rights reserved.
+// Copyright 2019 Google LLC. All rights reserved.
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
@@ -68,7 +68,7 @@ func sendDataFromBoundDevice(w io.Writer, projectID string, region string, regis
 	}
 
 	if err := attachDevice(deviceID, client, ""); err != nil {
-		fmt.Fprintf(w, "Failed to attach device %s\n", deviceID)
+		fmt.Fprintf(w, "Failed to attach device %s\n", err)
 		return
 	}
 
