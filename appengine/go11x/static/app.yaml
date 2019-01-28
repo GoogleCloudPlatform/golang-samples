@@ -3,10 +3,12 @@
 # license that can be found in the LICENSE file.
 runtime: go111
 
+# [START static_handlers]
 handlers:
 # Configure App Engine to serve any static assets.
 - url: /public
   static_dir: public
+# [END static_handlers]
 
 # Use HTTPS for all requests.
 - url: /.*
