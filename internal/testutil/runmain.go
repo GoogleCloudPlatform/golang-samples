@@ -5,13 +5,13 @@
 package testutil
 
 import (
-	realContext "context"
+	"bytes"
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"syscall"
 	"testing"
 	"time"
 )
@@ -47,8 +47,8 @@ type Runner struct {
 	t      *testing.T
 	tmp    string
 	bin    string
-	Stdout []byte
-	Stderr []byte
+	stdout bytes.Buffer
+	stderr bytes.Buffer
 }
 
 // Built reports whether the build was successful.
@@ -63,78 +63,55 @@ func (r *Runner) Cleanup() {
 	}
 }
 
-// Run runs the built binary with the given environment.
-// After f returns, the running process is shut down.
-func (r *Runner) Run(env map[string]string, f func()) {
-	if !r.Built() {
-		r.t.Error("Tried to run when binary not built.")
-		return
-	}
-	environ := os.Environ()
-	for k, v := range env {
-		environ = append(environ, k+"="+v)
-	}
-
-	cmd := exec.Command(r.bin)
-	cmd.Env = environ
-
-	if err := cmd.Start(); err != nil {
-		r.t.Error(err)
-		return
-	}
-
-	// Run the user's tests.
-	f()
-
-	done := make(chan struct{})
-	go func() {
-		cmd.Wait()
-		close(done)
-	}()
-
-	// Try to gracefully kill the process.
-	if err := cmd.Process.Signal(syscall.SIGINT); err != nil {
-		r.t.Error(err)
-	}
-
-	select {
-	case <-time.After(5 * time.Second):
-		r.t.Error("Timed out with SIGINT, trying SIGKILL.")
-		if err := cmd.Process.Kill(); err != nil {
-			r.t.Error(err)
-		}
-	case <-done:
-	}
+// Stdout returns the stdout from the most recent Run()
+func (r *Runner) Stdout() []byte {
+	return r.stdout.Bytes()
 }
 
-// RunNonInteractive runs the build binary until terminated or timeout has
+// Stderr returns the stderr from the most recent Run()
+func (r *Runner) Stderr() []byte {
+	return r.stderr.Bytes()
+}
+
+// Run executes runs the built binary until terminated or timeout has
 // been reached, and indicates successful execution on return.
-func (r *Runner) RunNonInteractive(env map[string]string, timeout time.Duration) bool {
+func (r *Runner) Run(env map[string]string, timeout time.Duration) error {
 	if !r.Built() {
-		r.t.Error("Tried to run when binary not built.")
-		return false
+		return fmt.Errorf("tried to run when binary not built")
 	}
+	r.stderr.Reset()
+	r.stdout.Reset()
 	environ := os.Environ()
 	for k, v := range env {
 		environ = append(environ, k+"="+v)
 	}
 
-	ctx, cancel := realContext.WithTimeout(realContext.Background(), timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
 	cmd := exec.CommandContext(ctx, r.bin)
 	cmd.Env = environ
 
-	out, err := cmd.Output()
-	r.Stdout = out
+	stdErr, err := cmd.StderrPipe()
 	if err != nil {
-		if exitErr, ok := err.(*exec.ExitError); ok {
-			r.Stderr = exitErr.Stderr
-		}
-
-		// propagate this, or let callers decide?
-		r.t.Error(fmt.Sprintf("execution error: %v", string(r.Stderr)))
-		return false
+		return fmt.Errorf("could not get stderr pipe")
 	}
-	return true
+	stdOut, err := cmd.StdoutPipe()
+	if err != nil {
+		return fmt.Errorf("could not get stdout pipe")
+	}
+
+	if err := cmd.Start(); err != nil {
+		return fmt.Errorf("could not execute binary: %v", err)
+	}
+
+	b, _ := ioutil.ReadAll(stdOut)
+	r.stdout.Write(b)
+	b, _ = ioutil.ReadAll(stdErr)
+	r.stderr.Write(b)
+
+	if err := cmd.Wait(); err != nil {
+		return fmt.Errorf("error waiting for termination: %v", err)
+	}
+	return nil
 }
