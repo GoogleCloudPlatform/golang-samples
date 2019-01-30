@@ -20,6 +20,7 @@ var (
 	)
 )
 
+// [START main]
 func main() {
 	http.HandleFunc("/", indexHandler)
 
@@ -39,7 +40,9 @@ func main() {
 	log.Printf("Listening on port %s", port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
 }
+//[END main]
 
+// [START handlers]
 // indexHandler uses a template to create an index.html.
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
@@ -61,3 +64,4 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 	}
 }
+// [END handlers]
