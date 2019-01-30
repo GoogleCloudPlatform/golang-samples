@@ -21,3 +21,9 @@ For more details, see the [Using Enhanced Models](https://cloud.google.com/speec
 ### Model Selection
 
 For more details, see the [Transcribing Video Files](https://cloud.google.com/speech-to-text/docs/video-model) tutorial in the docs.
+
+### Multi-channel Transcription
+
+For more details, see the [Transcribing Audio with Multiple Channels](https://cloud.google.com/speech-to-text/docs/multi-channel) tutorial in the docs.
+
+[Go Code](multichannel.go)
