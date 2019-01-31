@@ -24,12 +24,10 @@ import (
 	// [END imports]
 )
 
-// Registry Management
+// [START iot_get_client]
 
-// [START iot_create_registry]
-
-// createRegistry creates a device registry.
-func createRegistry(w io.Writer, projectID string, region string, registryID string, topicName string) (*cloudiot.DeviceRegistry, error) {
+// getClient returns a client based on the environment variable GOOGLE_APPLICATION_CREDENTIALS
+func getClient() (*cloudiot.Service, error) {
 	// Authorize the client using Application Default Credentials.
 	// See https://g.co/dv/identity/protocols/application-default-credentials
 	ctx := context.Background()
@@ -38,6 +36,22 @@ func createRegistry(w io.Writer, projectID string, region string, registryID str
 		return nil, err
 	}
 	client, err := cloudiot.New(httpClient)
+	if err != nil {
+		return nil, err
+	}
+
+	return client, nil
+}
+
+// [END iot_get_client]
+
+// Registry Management
+
+// [START iot_create_registry]
+
+// createRegistry creates a IoT Core device registry associated with a PubSub topic
+func createRegistry(w io.Writer, projectID string, region string, registryID string, topicName string) (*cloudiot.DeviceRegistry, error) {
+	client, err := getClient()
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +77,7 @@ func createRegistry(w io.Writer, projectID string, region string, registryID str
 	fmt.Fprintf(w, "\tMQTT: %s\n", response.MqttConfig.MqttEnabledState)
 	fmt.Fprintf(w, "\tName: %s\n", response.Name)
 
-	return response, err
+	return response, nil
 }
 
 // [END iot_create_registry]
@@ -90,9 +104,9 @@ func deleteRegistry(w io.Writer, projectID string, region string, registryID str
 		return nil, err
 	}
 
-	fmt.Fprintln(w, "Deleted registry")
+	fmt.Fprintf(w, "Deleted registry: %s\n", registryID)
 
-	return response, err
+	return response, nil
 }
 
 // [END iot_delete_registry]
@@ -125,7 +139,7 @@ func getRegistry(w io.Writer, projectID string, region string, registryID string
 	fmt.Fprintf(w, "\tMQTT: %s\n", response.MqttConfig.MqttEnabledState)
 	fmt.Fprintf(w, "\tName: %s\n", response.Name)
 
-	return response, err
+	return response, nil
 }
 
 // [END iot_get_registry]
@@ -152,12 +166,17 @@ func listRegistries(w io.Writer, projectID string, region string) ([]*cloudiot.D
 		return nil, err
 	}
 
-	fmt.Fprintln(w, "Registries:")
+	if len(response.DeviceRegistries) == 0 {
+		fmt.Fprintln(w, "No registries found")
+		return response.DeviceRegistries, nil
+	}
+
+	fmt.Fprintf(w, "%d registries:\n", len(response.DeviceRegistries))
 	for _, registry := range response.DeviceRegistries {
 		fmt.Fprintf(w, "\t%s\n", registry.Name)
 	}
 
-	return response.DeviceRegistries, err
+	return response.DeviceRegistries, nil
 }
 
 // [END iot_list_registries]
@@ -194,7 +213,7 @@ func getRegistryIAM(w io.Writer, projectID string, region string, registryID str
 		}
 	}
 
-	return response, err
+	return response, nil
 }
 
 // [END iot_get_iam_policy]
@@ -233,7 +252,7 @@ func setRegistryIAM(w io.Writer, projectID string, region string, registryID str
 
 	fmt.Fprintf(w, "Successfully set IAM policy for registry: %s\n", registryID)
 
-	return response, err
+	return response, nil
 }
 
 // [END iot_set_iam_policy]
@@ -242,8 +261,8 @@ func setRegistryIAM(w io.Writer, projectID string, region string, registryID str
 
 // [START iot_create_es_device]
 
-// createES creates a device in a registry with ES credentials.
-func createES(w io.Writer, projectID string, region string, registry string, deviceID string, keyPath string) (*cloudiot.Device, error) {
+// createES creates a device in a registry with ES256 credentials.
+func createES(w io.Writer, projectID string, region string, registryID string, deviceID string, keyPath string) (*cloudiot.Device, error) {
 	// Authorize the client using Application Default Credentials.
 	// See https://g.co/dv/identity/protocols/application-default-credentials
 	ctx := context.Background()
@@ -273,23 +292,23 @@ func createES(w io.Writer, projectID string, region string, registry string, dev
 		},
 	}
 
-	parent := fmt.Sprintf("projects/%s/locations/%s/registries/%s", projectID, region, registry)
+	parent := fmt.Sprintf("projects/%s/locations/%s/registries/%s", projectID, region, registryID)
 	response, err := client.Projects.Locations.Registries.Devices.Create(parent, &device).Do()
 	if err != nil {
 		return nil, err
 	}
 
-	fmt.Fprintln(w, "Successfully created ESA device")
+	fmt.Fprintf(w, "Successfully created ES256 device: %s\n", deviceID)
 
-	return response, err
+	return response, nil
 }
 
 // [END iot_create_es_device]
 
 // [START iot_create_rsa_device]
 
-// createRSA creates a device in a registry with RS credentials.
-func createRSA(w io.Writer, projectID string, region string, registry string, deviceID string, keyPath string) (*cloudiot.Device, error) {
+// createRSA creates a device in a registry given RSA X.509 credentials.
+func createRSA(w io.Writer, projectID string, region string, registryID string, deviceID string, keyPath string) (*cloudiot.Device, error) {
 	// Authorize the client using Application Default Credentials.
 	// See https://g.co/dv/identity/protocols/application-default-credentials
 	ctx := context.Background()
@@ -319,15 +338,15 @@ func createRSA(w io.Writer, projectID string, region string, registry string, de
 		},
 	}
 
-	parent := fmt.Sprintf("projects/%s/locations/%s/registries/%s", projectID, region, registry)
+	parent := fmt.Sprintf("projects/%s/locations/%s/registries/%s", projectID, region, registryID)
 	response, err := client.Projects.Locations.Registries.Devices.Create(parent, &device).Do()
 	if err != nil {
 		return nil, err
 	}
 
-	fmt.Fprintln(w, "Successfully created RSA device")
+	fmt.Fprintf(w, "Successfully created RSA256 X.509 device: %s", deviceID)
 
-	return response, err
+	return response, nil
 }
 
 // [END iot_create_rsa_device]
@@ -335,7 +354,7 @@ func createRSA(w io.Writer, projectID string, region string, registry string, de
 // [START iot_create_unauth_device]
 
 // createUnauth creates a device in a registry without credentials.
-func createUnauth(w io.Writer, projectID string, region string, registry string, deviceID string) (*cloudiot.Device, error) {
+func createUnauth(w io.Writer, projectID string, region string, registryID string, deviceID string) (*cloudiot.Device, error) {
 	// Authorize the client using Application Default Credentials.
 	// See https://g.co/dv/identity/protocols/application-default-credentials
 	ctx := context.Background()
@@ -351,15 +370,15 @@ func createUnauth(w io.Writer, projectID string, region string, registry string,
 	device := cloudiot.Device{
 		Id: deviceID,
 	}
-	parent := fmt.Sprintf("projects/%s/locations/%s/registries/%s", projectID, region, registry)
+	parent := fmt.Sprintf("projects/%s/locations/%s/registries/%s", projectID, region, registryID)
 	response, err := client.Projects.Locations.Registries.Devices.Create(parent, &device).Do()
 	if err != nil {
 		return nil, err
 	}
 
-	fmt.Fprintln(w, "Successfully created device without credentials")
+	fmt.Fprintf(w, "Successfully created device without credentials: %s\n", deviceID)
 
-	return response, err
+	return response, nil
 }
 
 // [END iot_create_unauth_device]
@@ -367,7 +386,7 @@ func createUnauth(w io.Writer, projectID string, region string, registry string,
 // [START iot_delete_device]
 
 // deleteDevice deletes a device from a registry.
-func deleteDevice(w io.Writer, projectID string, region string, registry string, deviceID string) (*cloudiot.Empty, error) {
+func deleteDevice(w io.Writer, projectID string, region string, registryID string, deviceID string) (*cloudiot.Empty, error) {
 	// Authorize the client using Application Default Credentials.
 	// See https://g.co/dv/identity/protocols/application-default-credentials
 	ctx := context.Background()
@@ -380,7 +399,7 @@ func deleteDevice(w io.Writer, projectID string, region string, registry string,
 		return nil, err
 	}
 
-	path := fmt.Sprintf("projects/%s/locations/%s/registries/%s/devices/%s", projectID, region, registry, deviceID)
+	path := fmt.Sprintf("projects/%s/locations/%s/registries/%s/devices/%s", projectID, region, registryID, deviceID)
 	response, err := client.Projects.Locations.Registries.Devices.Delete(path).Do()
 	if err != nil {
 		return nil, err
@@ -388,7 +407,7 @@ func deleteDevice(w io.Writer, projectID string, region string, registry string,
 
 	fmt.Fprintf(w, "Deleted device: %s\n", deviceID)
 
-	return response, err
+	return response, nil
 }
 
 // [END iot_delete_device]
@@ -396,7 +415,7 @@ func deleteDevice(w io.Writer, projectID string, region string, registry string,
 // [START iot_get_device]
 
 // getDevice retrieves a specific device and prints its details.
-func getDevice(w io.Writer, projectID string, region string, registry string, device string) (*cloudiot.Device, error) {
+func getDevice(w io.Writer, projectID string, region string, registryID string, device string) (*cloudiot.Device, error) {
 	// Authorize the client using Application Default Credentials.
 	// See https://g.co/dv/identity/protocols/application-default-credentials
 	ctx := context.Background()
@@ -409,7 +428,7 @@ func getDevice(w io.Writer, projectID string, region string, registry string, de
 		return nil, err
 	}
 
-	path := fmt.Sprintf("projects/%s/locations/%s/registries/%s/devices/%s", projectID, region, registry, device)
+	path := fmt.Sprintf("projects/%s/locations/%s/registries/%s/devices/%s", projectID, region, registryID, device)
 	response, err := client.Projects.Locations.Registries.Devices.Get(path).Do()
 	if err != nil {
 		return nil, err
@@ -428,7 +447,7 @@ func getDevice(w io.Writer, projectID string, region string, registry string, de
 	fmt.Fprintf(w, "\tLast State Time: %s\n", response.LastStateTime)
 	fmt.Fprintf(w, "\tNumId: %d\n", response.NumId)
 
-	return response, err
+	return response, nil
 }
 
 // [END iot_get_device]
@@ -436,7 +455,7 @@ func getDevice(w io.Writer, projectID string, region string, registry string, de
 // [START iot_get_device_configs]
 
 // getDeviceConfigs retrieves and lists device configurations.
-func getDeviceConfigs(w io.Writer, projectID string, region string, registry string, device string) ([]*cloudiot.DeviceConfig, error) {
+func getDeviceConfigs(w io.Writer, projectID string, region string, registryID string, device string) ([]*cloudiot.DeviceConfig, error) {
 	// Authorize the client using Application Default Credentials.
 	// See https://g.co/dv/identity/protocols/application-default-credentials
 	ctx := context.Background()
@@ -449,7 +468,7 @@ func getDeviceConfigs(w io.Writer, projectID string, region string, registry str
 		return nil, err
 	}
 
-	path := fmt.Sprintf("projects/%s/locations/%s/registries/%s/devices/%s", projectID, region, registry, device)
+	path := fmt.Sprintf("projects/%s/locations/%s/registries/%s/devices/%s", projectID, region, registryID, device)
 	response, err := client.Projects.Locations.Registries.Devices.ConfigVersions.List(path).Do()
 	if err != nil {
 		return nil, err
@@ -459,7 +478,7 @@ func getDeviceConfigs(w io.Writer, projectID string, region string, registry str
 		fmt.Fprintf(w, "%d : %s\n", config.Version, config.BinaryData)
 	}
 
-	return response.DeviceConfigs, err
+	return response.DeviceConfigs, nil
 }
 
 // [END iot_get_device_configs]
@@ -467,7 +486,7 @@ func getDeviceConfigs(w io.Writer, projectID string, region string, registry str
 // [START iot_get_device_state]
 
 // getDeviceStates retrieves and lists device states.
-func getDeviceStates(w io.Writer, projectID string, region string, registry string, device string) ([]*cloudiot.DeviceState, error) {
+func getDeviceStates(w io.Writer, projectID string, region string, registryID string, device string) ([]*cloudiot.DeviceState, error) {
 	// Authorize the client using Application Default Credentials.
 	// See https://g.co/dv/identity/protocols/application-default-credentials
 	ctx := context.Background()
@@ -480,7 +499,7 @@ func getDeviceStates(w io.Writer, projectID string, region string, registry stri
 		return nil, err
 	}
 
-	path := fmt.Sprintf("projects/%s/locations/%s/registries/%s/devices/%s", projectID, region, registry, device)
+	path := fmt.Sprintf("projects/%s/locations/%s/registries/%s/devices/%s", projectID, region, registryID, device)
 	response, err := client.Projects.Locations.Registries.Devices.States.List(path).Do()
 	if err != nil {
 		return nil, err
@@ -492,15 +511,15 @@ func getDeviceStates(w io.Writer, projectID string, region string, registry stri
 		fmt.Fprintf(w, "%s : %s\n", state.UpdateTime, state.BinaryData)
 	}
 
-	return response.DeviceStates, err
+	return response.DeviceStates, nil
 }
 
 // [END iot_get_device_state]
 
 // [START iot_list_devices]
 
-// listDevices gets the identifiers of devices given a registry name.
-func listDevices(w io.Writer, projectID string, region string, registry string) ([]*cloudiot.Device, error) {
+// listDevices gets the identifiers of devices for a specific registry.
+func listDevices(w io.Writer, projectID string, region string, registryID string) ([]*cloudiot.Device, error) {
 	// Authorize the client using Application Default Credentials.
 	// See https://g.co/dv/identity/protocols/application-default-credentials
 	ctx := context.Background()
@@ -513,7 +532,7 @@ func listDevices(w io.Writer, projectID string, region string, registry string) 
 		return nil, err
 	}
 
-	parent := fmt.Sprintf("projects/%s/locations/%s/registries/%s", projectID, region, registry)
+	parent := fmt.Sprintf("projects/%s/locations/%s/registries/%s", projectID, region, registryID)
 	response, err := client.Projects.Locations.Registries.Devices.List(parent).Do()
 	if err != nil {
 		return nil, err
@@ -524,15 +543,15 @@ func listDevices(w io.Writer, projectID string, region string, registry string) 
 		fmt.Fprintf(w, "\t%s\n", device.Id)
 	}
 
-	return response.Devices, err
+	return response.Devices, nil
 }
 
 // [END iot_list_devices]
 
 // [START iot_patch_es]
 
-// patchDeviceES patches a device to use ES credentials.
-func patchDeviceES(w io.Writer, projectID string, region string, registry string, deviceID string, keyPath string) (*cloudiot.Device, error) {
+// patchDeviceES patches a device to use ES256 credentials.
+func patchDeviceES(w io.Writer, projectID string, region string, registryID string, deviceID string, keyPath string) (*cloudiot.Device, error) {
 	// Authorize the client using Application Default Credentials.
 	// See https://g.co/dv/identity/protocols/application-default-credentials
 	ctx := context.Background()
@@ -562,24 +581,24 @@ func patchDeviceES(w io.Writer, projectID string, region string, registry string
 		},
 	}
 
-	parent := fmt.Sprintf("projects/%s/locations/%s/registries/%s/devices/%s", projectID, region, registry, deviceID)
+	parent := fmt.Sprintf("projects/%s/locations/%s/registries/%s/devices/%s", projectID, region, registryID, deviceID)
 	response, err := client.Projects.Locations.Registries.Devices.
 		Patch(parent, &device).UpdateMask("credentials").Do()
 	if err != nil {
 		return nil, err
 	}
 
-	fmt.Fprintln(w, "Successfully patched device with ES credentials")
+	fmt.Fprintln(w, "Successfully patched device with ES256 credentials")
 
-	return response, err
+	return response, nil
 }
 
 // [END iot_patch_es]
 
 // [START iot_patch_rsa]
 
-// patchDeviceRSA patches a device to use RSA credentials.
-func patchDeviceRSA(w io.Writer, projectID string, region string, registry string, deviceID string, keyPath string) (*cloudiot.Device, error) {
+// patchDeviceRSA patches a device to use RSA256 X.509 credentials.
+func patchDeviceRSA(w io.Writer, projectID string, region string, registryID string, deviceID string, keyPath string) (*cloudiot.Device, error) {
 	// Authorize the client using Application Default Credentials.
 	// See https://g.co/dv/identity/protocols/application-default-credentials
 	ctx := context.Background()
@@ -609,16 +628,16 @@ func patchDeviceRSA(w io.Writer, projectID string, region string, registry strin
 		},
 	}
 
-	parent := fmt.Sprintf("projects/%s/locations/%s/registries/%s/devices/%s", projectID, region, registry, deviceID)
+	parent := fmt.Sprintf("projects/%s/locations/%s/registries/%s/devices/%s", projectID, region, registryID, deviceID)
 	response, err := client.Projects.Locations.Registries.Devices.
 		Patch(parent, &device).UpdateMask("credentials").Do()
 	if err != nil {
 		return nil, err
 	}
 
-	fmt.Fprintln(w, "Successfully patched device")
+	fmt.Fprintln(w, "Successfully patched device with RSA256 X.509 credentials")
 
-	return response, err
+	return response, nil
 }
 
 // [END iot_patch_rsa]
@@ -626,7 +645,7 @@ func patchDeviceRSA(w io.Writer, projectID string, region string, registry strin
 // [START iot_set_device_config]
 
 // setConfig sends a configuration change to a device.
-func setConfig(w io.Writer, projectID string, region string, registry string, deviceID string, configData string, format string) (*cloudiot.DeviceConfig, error) {
+func setConfig(w io.Writer, projectID string, region string, registryID string, deviceID string, configData string, format string) (*cloudiot.DeviceConfig, error) {
 	// Authorize the client using Application Default Credentials.
 	// See https://g.co/dv/identity/protocols/application-default-credentials
 	ctx := context.Background()
@@ -643,7 +662,7 @@ func setConfig(w io.Writer, projectID string, region string, registry string, de
 		BinaryData: b64.StdEncoding.EncodeToString([]byte(configData)),
 	}
 
-	path := fmt.Sprintf("projects/%s/locations/%s/registries/%s/devices/%s", projectID, region, registry, deviceID)
+	path := fmt.Sprintf("projects/%s/locations/%s/registries/%s/devices/%s", projectID, region, registryID, deviceID)
 	response, err := client.Projects.Locations.Registries.Devices.ModifyCloudToDeviceConfig(path, &req).Do()
 	if err != nil {
 		return nil, err
@@ -651,7 +670,7 @@ func setConfig(w io.Writer, projectID string, region string, registry string, de
 
 	fmt.Fprintf(w, "Config set!\nVersion now: %d\n", response.Version)
 
-	return response, err
+	return response, nil
 }
 
 // [END iot_set_device_config]
@@ -659,7 +678,7 @@ func setConfig(w io.Writer, projectID string, region string, registry string, de
 // [START iot_send_command]
 
 // sendCommand sends a command to a device listening for commands.
-func sendCommand(w io.Writer, projectID string, region string, registry string, deviceID string, sendData string) (*cloudiot.SendCommandToDeviceResponse, error) {
+func sendCommand(w io.Writer, projectID string, region string, registryID string, deviceID string, sendData string) (*cloudiot.SendCommandToDeviceResponse, error) {
 	// Authorize the client using Application Default Credentials.
 	// See https://g.co/dv/identity/protocols/application-default-credentials
 	ctx := context.Background()
@@ -676,7 +695,7 @@ func sendCommand(w io.Writer, projectID string, region string, registry string, 
 		BinaryData: b64.StdEncoding.EncodeToString([]byte(sendData)),
 	}
 
-	name := fmt.Sprintf("projects/%s/locations/%s/registries/%s/devices/%s", projectID, region, registry, deviceID)
+	name := fmt.Sprintf("projects/%s/locations/%s/registries/%s/devices/%s", projectID, region, registryID, deviceID)
 
 	response, err := client.Projects.Locations.Registries.Devices.SendCommandToDevice(name, &req).Do()
 	if err != nil {
@@ -685,10 +704,219 @@ func sendCommand(w io.Writer, projectID string, region string, registry string, 
 
 	fmt.Fprintln(w, "Sent command to device")
 
-	return response, err
+	return response, nil
 }
 
 // [END iot_send_command]
+
+// START BETA FEATURES
+
+// [START iot_create_gateway]
+
+// createGateway creates a new IoT Core gateway with a given id, public key, and auth method.
+// gatewayAuthMethod can be one of: ASSOCIATION_ONLY, DEVICE_AUTH_TOKEN_ONLY, ASSOCIATION_AND_DEVICE_AUTH_TOKEN.
+// https://cloud.google.com/iot/docs/reference/cloudiot/rest/v1/projects.locations.registries.devices#gatewayauthmethod
+func createGateway(w io.Writer, projectID string, region string, registryID string, gatewayID string, gatewayAuthMethod string, publicKeyPath string) (*cloudiot.Device, error) {
+	// Authorize the client using Application Default Credentials.
+	// See https://g.co/dv/identity/protocols/application-default-credentials
+	ctx := context.Background()
+	httpClient, err := google.DefaultClient(ctx, cloudiot.CloudPlatformScope)
+	if err != nil {
+		return nil, err
+	}
+	client, err := cloudiot.New(httpClient)
+	if err != nil {
+		return nil, err
+	}
+
+	keyBytes, err := ioutil.ReadFile(publicKeyPath)
+	if err != nil {
+		return nil, err
+	}
+
+	gateway := &cloudiot.Device{
+		Id: gatewayID,
+		Credentials: []*cloudiot.DeviceCredential{
+			{
+				PublicKey: &cloudiot.PublicKeyCredential{
+					Format: "RSA_X509_PEM",
+					Key:    string(keyBytes),
+				},
+			},
+		},
+		GatewayConfig: &cloudiot.GatewayConfig{
+			GatewayType:       "GATEWAY",
+			GatewayAuthMethod: gatewayAuthMethod,
+		},
+	}
+
+	parent := fmt.Sprintf("projects/%s/locations/%s/registries/%s", projectID, region, registryID)
+	response, err := client.Projects.Locations.Registries.Devices.Create(parent, gateway).Do()
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Fprintln(w, "Successfully created gateway:", gatewayID)
+
+	return response, nil
+}
+
+// [END iot_create_gateway]
+
+// [START iot_list_gateways]
+
+// listGateways lists all the gateways in a specific registry.
+func listGateways(w io.Writer, projectID string, region string, registryID string) ([]*cloudiot.Device, error) {
+	// Authorize the client using Application Default Credentials.
+	// See https://g.co/dv/identity/protocols/application-default-credentials
+	ctx := context.Background()
+	httpClient, err := google.DefaultClient(ctx, cloudiot.CloudPlatformScope)
+	if err != nil {
+		return nil, err
+	}
+	client, err := cloudiot.New(httpClient)
+	if err != nil {
+		return nil, err
+	}
+
+	parent := fmt.Sprintf("projects/%s/locations/%s/registries/%s", projectID, region, registryID)
+	response, err := client.Projects.Locations.Registries.Devices.List(parent).GatewayListOptionsGatewayType("GATEWAY").Do()
+
+	if err != nil {
+		return nil, fmt.Errorf("ListGateways: %v", err)
+	}
+
+	if len(response.Devices) == 0 {
+		fmt.Fprintln(w, "No gateways found")
+		return response.Devices, nil
+	}
+
+	fmt.Fprintln(w, len(response.Devices), "devices:")
+	for _, gateway := range response.Devices {
+		fmt.Fprintf(w, "\t%s\n", gateway.Id)
+	}
+
+	return response.Devices, nil
+}
+
+// [END iot_list_gateways]
+
+// [START iot_bind_device_to_gateway]
+
+// bindDeviceToGateway creates an association between an existing device and gateway.
+func bindDeviceToGateway(w io.Writer, projectID string, region string, registryID string, gatewayID string, deviceID string) (*cloudiot.BindDeviceToGatewayResponse, error) {
+	// Authorize the client using Application Default Credentials.
+	// See https://g.co/dv/identity/protocols/application-default-credentials
+	ctx := context.Background()
+	httpClient, err := google.DefaultClient(ctx, cloudiot.CloudPlatformScope)
+	if err != nil {
+		return nil, err
+	}
+	client, err := cloudiot.New(httpClient)
+	if err != nil {
+		return nil, err
+	}
+
+	parent := fmt.Sprintf("projects/%s/locations/%s/registries/%s", projectID, region, registryID)
+	bindRequest := &cloudiot.BindDeviceToGatewayRequest{
+		DeviceId:  deviceID,
+		GatewayId: gatewayID,
+	}
+
+	response, err := client.Projects.Locations.Registries.BindDeviceToGateway(parent, bindRequest).Do()
+
+	if err != nil {
+		return nil, fmt.Errorf("BindDeviceToGateway: %v", err)
+	}
+
+	if response.HTTPStatusCode/100 != 2 {
+		return nil, fmt.Errorf("BindDeviceToGateway: HTTP status code not 2xx\n %v", response)
+	}
+
+	fmt.Fprintf(w, "Bound %s to %s", deviceID, gatewayID)
+
+	return response, nil
+}
+
+// [END iot_bind_device_to_gateway]
+// [START unbind_device_from_gateway]
+
+// unbindDeviceFromGateway unbinds a bound device from a gateway.
+func unbindDeviceFromGateway(w io.Writer, projectID string, region string, registryID string, gatewayID string, deviceID string) (*cloudiot.UnbindDeviceFromGatewayResponse, error) {
+	// Authorize the client using Application Default Credentials.
+	// See https://g.co/dv/identity/protocols/application-default-credentials
+	ctx := context.Background()
+	httpClient, err := google.DefaultClient(ctx, cloudiot.CloudPlatformScope)
+	if err != nil {
+		return nil, err
+	}
+	client, err := cloudiot.New(httpClient)
+	if err != nil {
+		return nil, err
+	}
+
+	parent := fmt.Sprintf("projects/%s/locations/%s/registries/%s", projectID, region, registryID)
+	unbindRequest := &cloudiot.UnbindDeviceFromGatewayRequest{
+		DeviceId:  deviceID,
+		GatewayId: gatewayID,
+	}
+
+	response, err := client.Projects.Locations.Registries.UnbindDeviceFromGateway(parent, unbindRequest).Do()
+
+	if err != nil {
+		return nil, fmt.Errorf("UnbindDeviceFromGateway error: %v", err)
+	}
+
+	if response.HTTPStatusCode/100 != 2 {
+		return nil, fmt.Errorf("UnbindDeviceFromGateway: HTTP status code not 2xx\n %v", response)
+	}
+
+	fmt.Fprintf(w, "Unbound %s from %s", deviceID, gatewayID)
+
+	return response, nil
+}
+
+// [END unbind_device_from_gateway]
+
+// [START list_devices_for_gateway]
+
+// listDevicesForGateway lists the devices that are bound to a gateway.
+func listDevicesForGateway(w io.Writer, projectID string, region string, registryID, gatewayID string) ([]*cloudiot.Device, error) {
+	// Authorize the client using Application Default Credentials.
+	// See https://g.co/dv/identity/protocols/application-default-credentials
+	ctx := context.Background()
+	httpClient, err := google.DefaultClient(ctx, cloudiot.CloudPlatformScope)
+	if err != nil {
+		return nil, err
+	}
+	client, err := cloudiot.New(httpClient)
+	if err != nil {
+		return nil, err
+	}
+
+	parent := fmt.Sprintf("projects/%s/locations/%s/registries/%s", projectID, region, registryID)
+	response, err := client.Projects.Locations.Registries.Devices.List(parent).GatewayListOptionsAssociationsGatewayId(gatewayID).Do()
+
+	if err != nil {
+		return nil, fmt.Errorf("ListDevicesForGateway: %v", err)
+	}
+
+	if len(response.Devices) == 0 {
+		fmt.Fprintln(w, "\tNo devices found")
+		return response.Devices, nil
+	}
+
+	fmt.Fprintf(w, "Devices for %s:\n", gatewayID)
+	for _, gateway := range response.Devices {
+		fmt.Fprintf(w, "\t%s\n", gateway.Id)
+	}
+
+	return response.Devices, nil
+}
+
+// [END list_devices_for_gateway]
+
+// END BETA FEATURES
 
 type command struct {
 	name string
@@ -734,9 +962,19 @@ func main() {
 		{"sendCommand", sendCommand, []string{"cloud-region", "registry-id", "device-id", "send-data"}},
 	}
 
+	// Beta Features: Gateway management commands
+	gatewayManagementCommands := []command{
+		{"createGateway", createGateway, []string{"cloud-region", "registry-id", "gateway-id", "auth-method", "public-key-path"}},
+		{"listGateways", listGateways, []string{"cloud-region", "registry-id"}},
+		{"bindDeviceToGateway", bindDeviceToGateway, []string{"cloud-region", "registry-id", "gateway-id", "device-id"}},
+		{"unbindDeviceFromGateway", unbindDeviceFromGateway, []string{"cloud-region", "registry-id", "gateway-id", "device-id"}},
+		{"listDevicesForGateway", listDevicesForGateway, []string{"cloud-region", "registry-id", "gateway-id"}},
+	}
+
 	var commands []command
 	commands = append(commands, registryManagementCommands...)
 	commands = append(commands, deviceManagementCommands...)
+	commands = append(commands, gatewayManagementCommands...)
 
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage:\n")
@@ -749,6 +987,12 @@ func main() {
 		fmt.Fprintf(os.Stderr, "\tDevice Management\n")
 		fmt.Fprintf(os.Stderr, "\t-----\n")
 		for _, cmd := range deviceManagementCommands {
+			fmt.Fprintf(os.Stderr, "\t%s %s\n", filepath.Base(os.Args[0]), cmd.usage())
+		}
+		fmt.Fprintln(os.Stderr)
+		fmt.Fprintf(os.Stderr, "\tBeta Gateway Management\n")
+		fmt.Fprintf(os.Stderr, "\t-----\n")
+		for _, cmd := range gatewayManagementCommands {
 			fmt.Fprintf(os.Stderr, "\t%s %s\n", filepath.Base(os.Args[0]), cmd.usage())
 		}
 	}

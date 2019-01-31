@@ -4,7 +4,7 @@
 
 // [START functions_sql_mysql]
 
-// Package sql contains examples of using to Cloud SQL.
+// Package sql contains examples of using Cloud SQL.
 package sql
 
 import (
