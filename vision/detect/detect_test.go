@@ -53,7 +53,7 @@ func TestDetect(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Local %s(%q): got %v, want nil err", tt.name, tt.path, err)
 		}
-		if got := buf.String(); !strings.Contains(got, tt.wantContain) {
+		if got := buf.String(); !strings.Contains(strings.ToLower(got), strings.ToLower(tt.wantContain)) {
 			t.Errorf("Local %s(%q): got %q, want to contain %q", tt.name, tt.path, got, tt.wantContain)
 		}
 	}
@@ -68,7 +68,7 @@ func TestDetect(t *testing.T) {
 		if err != nil {
 			t.Fatalf("GCS %s(%q): got %v, want nil err", tt.name, tt.path, err)
 		}
-		if got := buf.String(); !strings.Contains(got, tt.wantContain) {
+		if got := buf.String(); !strings.Contains(strings.ToLower(got), strings.ToLower(tt.wantContain)) {
 			t.Errorf("GCS %s(%q): got %q, want to contain %q", tt.name, tt.path, got, tt.wantContain)
 		}
 	}
