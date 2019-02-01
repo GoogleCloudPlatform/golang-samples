@@ -619,7 +619,7 @@ func SnippetTransaction_runQuery() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	// [START datastore_transactional_single_entity_group_read_only]
-	tx, err := client.NewTransaction(ctx)
+	tx, err := client.NewTransaction(ctx, datastore.ReadOnly)
 	if err != nil {
 		log.Fatalf("client.NewTransaction: %v", err)
 	}
