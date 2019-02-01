@@ -5,8 +5,6 @@
 // +build ignore
 // Disabled until system tests are working on Kokoro.
 
-// TODO: Use testutil.SystemTest and os.Setenv for GOOGLE_CLOUD_PROJECT.
-
 // [START functions_pubsub_system_test]
 
 package helloworld
@@ -28,7 +26,7 @@ func TestHelloPubSubSystem(t *testing.T) {
 	ctx := context.Background()
 
 	topicName := os.Getenv("FUNCTIONS_TOPIC")
-	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
+	projectID := os.Getenv("GCP_PROJECT")
 
 	startTime := time.Now().UTC().Format(time.RFC3339)
 

@@ -31,7 +31,9 @@ func main() {
 		OutputConfig: &assetpb.OutputConfig{
 			Destination: &assetpb.OutputConfig_GcsDestination{
 				GcsDestination: &assetpb.GcsDestination{
-					Uri: string(assetDumpFile),
+					ObjectUri: &assetpb.GcsDestination_Uri{
+						Uri: string(assetDumpFile),
+					},
 				},
 			},
 		},
