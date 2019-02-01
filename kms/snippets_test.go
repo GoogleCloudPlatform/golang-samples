@@ -56,7 +56,7 @@ func getTestVariables(projectID string) TestVariables {
 
 	sym := keyRingPath + "/cryptoKeys/" + symId
 	symVersion := sym + "/cryptoKeyVersions/1"
-	rsaDecrypt := keyRingPath + "/cryptoKeys/" + rsaDecryptId + "/cryptoKeyVersions/1"
+	rsaDecrypt := keyRingPath + "/cryptoKeys/" + rsaDecryptId + "/cryptoKeyVersions/2"
 	rsaSign := keyRingPath + "/cryptoKeys/" + rsaSignId + "/cryptoKeyVersions/1"
 	ecSign := keyRingPath + "/cryptoKeys/" + ecSignId + "/cryptoKeyVersions/1"
 
