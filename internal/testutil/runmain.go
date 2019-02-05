@@ -87,7 +87,7 @@ func (r *Runner) Run(env map[string]string, timeout time.Duration) (stdout, stde
 	}
 
 	if err := cmd.Wait(); err != nil {
-		return bufOut.Bytes(), bufErr.Bytes(), fmt.Errorf("error waiting for termination: %v", err)
+		return bufOut.Bytes(), bufErr.Bytes(), err
 	}
 	return bufOut.Bytes(), bufErr.Bytes(), nil
 }
