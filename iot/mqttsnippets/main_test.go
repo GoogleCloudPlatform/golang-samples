@@ -36,7 +36,7 @@ func setup(m *testing.M) {
 	ctx := context.Background()
 	tc, ok := testutil.ContextMain(m)
 
-	// Retrieve project ID
+	// Retrieve project ID.
 	if !ok {
 		fmt.Fprintln(os.Stderr, "Project is not set up properly for system tests. Make sure GOLANG_SAMPLES_PROJECT_ID is set")
 		return

@@ -12,7 +12,7 @@ import (
 
 // [START iot_attach_device]
 
-// attaches a device to a gateway.
+// attachDevice attaches a device to a gateway.
 func attachDevice(deviceID string, client mqtt.Client, jwt string) error {
 	attachTopic := fmt.Sprintf("/devices/%s/attach", deviceID)
 	fmt.Printf("Attaching device: %s\n", attachTopic)
@@ -32,7 +32,7 @@ func attachDevice(deviceID string, client mqtt.Client, jwt string) error {
 
 // [START iot_detach_device]
 
-// detaches a device from a gateway.
+// detatchDevice detaches a device from a gateway.
 func detachDevice(deviceID string, client mqtt.Client, jwt string) error {
 	detachTopic := fmt.Sprintf("/devices/%s/detach", deviceID)
 	fmt.Printf("Detaching device: %s\n", detachTopic)

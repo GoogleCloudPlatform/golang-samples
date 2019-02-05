@@ -385,8 +385,8 @@ func createUnauth(w io.Writer, projectID string, region string, registryID strin
 
 // [START iot_create_device]
 
-// createDevice creates a device in a registry with one of the following public key formats
-// RSA_PEM, RSA_X509_PEM, ES256_PEM, ES256_X509_PEM, UNAUTH
+// createDevice creates a device in a registry with one of the following public key formats:
+// RSA_PEM, RSA_X509_PEM, ES256_PEM, ES256_X509_PEM, UNAUTH.
 func createDevice(w io.Writer, projectID string, region string, registryID string, deviceID string, publicKeyFormat string, keyPath string) (*cloudiot.Device, error) {
 	client, err := getClient()
 	if err != nil {
@@ -400,7 +400,7 @@ func createDevice(w io.Writer, projectID string, region string, registryID strin
 
 	var device cloudiot.Device
 
-	// if no credentials are passed in, create an unauth device
+	// If no credentials are passed in, create an unauth device.
 	if publicKeyFormat == "UNAUTH" {
 		device = cloudiot.Device{
 			Id: deviceID,

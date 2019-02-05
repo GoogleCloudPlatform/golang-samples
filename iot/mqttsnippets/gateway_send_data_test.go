@@ -26,15 +26,13 @@ var privateKeyRSA = os.Getenv("GOLANG_SAMPLES_IOT_PRIV")
 var pubKeyRSA = os.Getenv("GOLANG_SAMPLES_IOT_PUB")
 var region = "us-central1"
 
-// returns a v1 UUID for a resource: e.g. topic, registry, gateway, device
-func createIDForTest(resource string) string {
+// createID returns a v1 UUID for a resource: e.g. topic, registry, gateway, device
+func createID(resource string) string {
 	uuid, err := uuid.NewRandom()
 	if err != nil {
 		log.Fatalf("Could not generate uuid: %v", err)
 	}
-	id := fmt.Sprintf("golang-test-%s-%s", resource, uuid.String())
-
-	return id
+	return fmt.Sprintf("golang-test-%s-%s", resource, uuid.String())
 }
 
 // getClient returns a client based on the environment variable GOOGLE_APPLICATION_CREDENTIALS
@@ -249,10 +247,10 @@ func TestSendDataFromBoundDevice(t *testing.T) {
 	projectID := testutil.SystemTest(t).ProjectID
 
 	registryID := "golang-iot-test-registry"
-	gatewayID := createIDForTest("gateway")
-	deviceID := createIDForTest("device")
+	gatewayID := createID("gateway")
+	deviceID := createID("device")
 
-	testutil.Retry(t, 1, 10*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
 		if _, err := createGateway(ioutil.Discard, projectID, region, registryID, gatewayID, "ASSOCIATION_ONLY", pubKeyRSA); err != nil {
 			r.Errorf("Could not create gateway: %v\n", err)
 			return
@@ -267,9 +265,13 @@ func TestSendDataFromBoundDevice(t *testing.T) {
 			r.Errorf("Could not bind device to gateway: %v\n", err)
 			return
 		}
+	})
 
+	testutil.Retry(t, 2, 10*time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
-		sendDataFromBoundDevice(buf, projectID, region, registryID, gatewayID, deviceID, privateKeyRSA, "RS256", 2, "test")
+		if err := sendDataFromBoundDevice(buf, projectID, region, registryID, gatewayID, deviceID, privateKeyRSA, "RS256", 2, "test"); err != nil {
+			r.Errorf("Error in sendDataFromBoundDevice: %v\n", err)
+		}
 
 		want := fmt.Sprintf("Publishing message: %s", "test")
 		if got := buf.String(); !strings.Contains(got, want) {
@@ -278,7 +280,17 @@ func TestSendDataFromBoundDevice(t *testing.T) {
 	})
 
 	// cleanup
-	unbindDeviceFromGateway(ioutil.Discard, projectID, region, registryID, gatewayID, deviceID)
-	deleteDevice(ioutil.Discard, projectID, region, registryID, deviceID)
-	deleteDevice(ioutil.Discard, projectID, region, registryID, gatewayID)
+	testutil.Retry(t, 5, 10*time.Second, func(r *testutil.R) {
+		if _, err := unbindDeviceFromGateway(ioutil.Discard, projectID, region, registryID, gatewayID, deviceID); err != nil {
+			r.Errorf("Could not unbind device: %v\n", err)
+		}
+
+		if _, err := deleteDevice(ioutil.Discard, projectID, region, registryID, deviceID); err != nil {
+			r.Errorf("Could not unbind device: %v\n", err)
+		}
+
+		if _, err := deleteDevice(ioutil.Discard, projectID, region, registryID, gatewayID); err != nil {
+			r.Errorf("Could not unbind device: %v\n", err)
+		}
+	})
 }

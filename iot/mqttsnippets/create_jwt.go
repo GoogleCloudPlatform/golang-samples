@@ -15,12 +15,12 @@ import (
 )
 
 // createJWT creates a Cloud IoT Core JWT for the given project id.
-// algorithm can be one of ["RSA256", "ES256"]
-func createJWT(projectID string, privateKeyPath string, algorithm string, expiresMin int) (string, error) {
+// algorithm can be one of ["RSA256", "ES256"].
+func createJWT(projectID string, privateKeyPath string, algorithm string, expiration time.Duration) (string, error) {
 	claims := jwt.StandardClaims{
 		Audience:  projectID,
 		IssuedAt:  time.Now().Unix(),
-		ExpiresAt: time.Now().Unix() + int64(expiresMin*60),
+		ExpiresAt: time.Now().Add(expiration).Unix(),
 	}
 
 	keyBytes, err := ioutil.ReadFile(privateKeyPath)
@@ -37,9 +37,9 @@ func createJWT(projectID string, privateKeyPath string, algorithm string, expire
 	case "ES256":
 		privKey, _ := jwt.ParseECPrivateKeyFromPEM(keyBytes)
 		return token.SignedString(privKey)
-	default:
-		return "", errors.New("Cannot find JWT algorithm. Specify 'ES256' or 'RS256'")
 	}
+
+	return "", errors.New("Cannot find JWT algorithm. Specify 'ES256' or 'RS256'")
 }
 
 // [END iot_mqtt_jwt]

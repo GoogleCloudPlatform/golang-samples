@@ -44,10 +44,10 @@ func TestSubscribeGatewayToDeviceTopic(t *testing.T) {
 	projectID := testutil.SystemTest(t).ProjectID
 
 	registryID := "golang-iot-test-registry"
-	gatewayID := createIDForTest("gateway")
-	deviceID := createIDForTest("device")
+	gatewayID := createID("gateway")
+	deviceID := createID("device")
 
-	testutil.Retry(t, 1, 10*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
 		if _, err := createGateway(ioutil.Discard, projectID, region, registryID, gatewayID, "ASSOCIATION_ONLY", pubKeyRSA); err != nil {
 			r.Errorf("Could not create gateway: %v\n", err)
 			return
@@ -62,8 +62,11 @@ func TestSubscribeGatewayToDeviceTopic(t *testing.T) {
 			r.Errorf("Could not bind device to gateway: %v\n", err)
 			return
 		}
+	})
 
-		message := "enable low power mode"
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		// sample test config message.
+		message := "{'threshold':'high'}"
 
 		go func() {
 			time.Sleep(10 * time.Second)
@@ -80,7 +83,17 @@ func TestSubscribeGatewayToDeviceTopic(t *testing.T) {
 	})
 
 	// cleanup
-	unbindDeviceFromGateway(ioutil.Discard, projectID, region, registryID, gatewayID, deviceID)
-	deleteDevice(ioutil.Discard, projectID, region, registryID, deviceID)
-	deleteDevice(ioutil.Discard, projectID, region, registryID, gatewayID)
+	testutil.Retry(t, 5, 10*time.Second, func(r *testutil.R) {
+		if _, err := unbindDeviceFromGateway(ioutil.Discard, projectID, region, registryID, gatewayID, deviceID); err != nil {
+			r.Errorf("Could not unbind device: %v\n", err)
+		}
+
+		if _, err := deleteDevice(ioutil.Discard, projectID, region, registryID, deviceID); err != nil {
+			r.Errorf("Could not unbind device: %v\n", err)
+		}
+
+		if _, err := deleteDevice(ioutil.Discard, projectID, region, registryID, gatewayID); err != nil {
+			r.Errorf("Could not unbind device: %v\n", err)
+		}
+	})
 }

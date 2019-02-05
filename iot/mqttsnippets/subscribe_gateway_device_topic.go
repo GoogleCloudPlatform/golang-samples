@@ -4,20 +4,19 @@
 
 package mqttsnippets
 
+// [START iot_subscribe_gateway_bound_device]
+
 import (
 	"fmt"
 	"io"
-	"os"
 	"time"
 
 	"github.com/eclipse/paho.mqtt.golang"
 )
 
-// [START iot_subuscribe_config_bound_device]
-
 // subscribeGatewayToDeviceTopic creates a gateway client that subscribes to a topic of a bound device.
 // Currently supported topics include: "config", "state", "commands", "errors"
-func subscribeGatewayToDeviceTopic(w io.Writer, projectID string, region string, registryID string, gatewayID string, deviceID string, privateKeyPath string, algorithm string, clientDuration int, topic string) {
+func subscribeGatewayToDeviceTopic(w io.Writer, projectID string, region string, registryID string, gatewayID string, deviceID string, privateKeyPath string, algorithm string, clientDuration int, topic string) error {
 
 	const (
 		mqttBrokerURL   = "tls://mqtt.googleapis.com:443"
@@ -57,42 +56,44 @@ func subscribeGatewayToDeviceTopic(w io.Writer, projectID string, region string,
 	client := mqtt.NewClient(opts)
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
 		fmt.Fprintln(w, "Failed to connect client")
-		return
+		return token.Error()
 	}
 
 	if err := attachDevice(deviceID, client, ""); err != nil {
 		fmt.Fprintf(w, "AttachDevice error: %v\n", err)
-		return
+		return err
 	}
 
+	// Sleep for 5 seconds to allow attachDevice message to propagate.
 	time.Sleep(5 * time.Second)
 
 	// Subscribe to the config topic of the current gateway and a device bound to the gateway.
 	gatewayTopic := fmt.Sprintf("/devices/%s/%s", gatewayID, topic)
 	if token := client.Subscribe(gatewayTopic, 0, nil); token.Wait() && token.Error() != nil {
 		fmt.Fprintln(w, token.Error())
-		os.Exit(1)
+		return token.Error()
 	}
 
 	deviceTopic := fmt.Sprintf("/devices/%s/%s", deviceID, topic)
 	if token := client.Subscribe(deviceTopic, 0, nil); token.Wait() && token.Error() != nil {
 		fmt.Fprintln(w, token.Error())
-		os.Exit(1)
+		return token.Error()
 	}
 
 	time.Sleep(time.Duration(clientDuration) * time.Second)
 
 	if err := detachDevice(deviceID, client, ""); err != nil {
 		fmt.Fprintf(w, "DetachDevice error: %v\n", err)
-		return
+		return err
 	}
 
 	if token := client.Unsubscribe(gatewayTopic, deviceTopic); token.Wait() && token.Error() != nil {
 		fmt.Fprintln(w, token.Error())
-		os.Exit(1)
+		return token.Error()
 	}
 
 	client.Disconnect(10)
+	return nil
 }
 
-// [END iot_subscribe_to_bound_device]
+// [END iot_subscribe_gateway_bound_device]

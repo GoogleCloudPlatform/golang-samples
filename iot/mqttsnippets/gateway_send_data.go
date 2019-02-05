@@ -4,7 +4,10 @@
 
 package mqttsnippets
 
+// [START iot_send_data_from_bound_device]
+
 import (
+	"errors"
 	"fmt"
 	"io"
 	"math/rand"
@@ -13,10 +16,8 @@ import (
 	"github.com/eclipse/paho.mqtt.golang"
 )
 
-// [START iot_send_data_from_bound_device]
-
-// Sends data on behalf of a bound device
-func sendDataFromBoundDevice(w io.Writer, projectID string, region string, registryID string, gatewayID string, deviceID string, privateKeyPath string, algorithm string, numMessages int, payload string) {
+// sendDataFromBoundDevice starts a gateway client that sends data on behalf of a bound device.
+func sendDataFromBoundDevice(w io.Writer, projectID string, region string, registryID string, gatewayID string, deviceID string, privateKeyPath string, algorithm string, numMessages int, payload string) error {
 	const (
 		mqttBrokerURL      = "tls://mqtt.googleapis.com:443"
 		protocolVersion    = 4  // corresponds to MQTT 3.1.1
@@ -64,14 +65,15 @@ func sendDataFromBoundDevice(w io.Writer, projectID string, region string, regis
 	client := mqtt.NewClient(opts)
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
 		fmt.Fprintln(w, "Failed to connect client")
-		return
+		return token.Error()
 	}
 
 	if err := attachDevice(deviceID, client, ""); err != nil {
 		fmt.Fprintf(w, "Failed to attach device %s\n", err)
-		return
+		return err
 	}
 
+	// Sleep for 5 seconds to allow attachDevice message to propagate.
 	time.Sleep(5 * time.Second)
 
 	gatewayStateTopic := fmt.Sprintf("/devices/%s/state", gatewayID)
@@ -80,14 +82,14 @@ func sendDataFromBoundDevice(w io.Writer, projectID string, region string, regis
 	gatewayInitPayload := fmt.Sprintf("Starting gateway at time: %d", time.Now().Unix())
 	if token := client.Publish(gatewayStateTopic, 1, false, gatewayInitPayload); token.Wait() && token.Error() != nil {
 		fmt.Fprintln(w, "Failed to publish initial gateway payload")
-		return
+		return token.Error()
 	}
 
 	for i := 1; i <= numMessages; i++ {
 		if shouldBackoff {
 			if backoffTime > maximumBackoffTime {
 				fmt.Fprintln(w, "Exceeded max backoff time.")
-				return
+				return errors.New("exceeded maximum backoff time, exiting")
 			}
 
 			waitTime := backoffTime + rand.Intn(1000)/1000.0
@@ -103,14 +105,17 @@ func sendDataFromBoundDevice(w io.Writer, projectID string, region string, regis
 
 		if token := client.Publish(deviceStateTopic, 1, false, payload); token.Wait() && token.Error() != nil {
 			fmt.Fprintln(w, "Failed to publish payload to device state topic")
-			return
+			return token.Error()
 		}
+
+		// Sleep for a bit between messages to simulate real world device state publishing.
 		time.Sleep(5 * time.Second)
 	}
 
 	detachDevice(deviceID, client, "")
 
 	client.Disconnect(20)
+	return nil
 }
 
 // [END iot_send_data_from_bound_device]
