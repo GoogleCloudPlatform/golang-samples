@@ -21,9 +21,9 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-// projectID is set from the GOOGLE_CLOUD_PROJECT environment variable, which is
+// projectID is set from the GCP_PROJECT environment variable, which is
 // automatically set by the Cloud Functions runtime.
-var projectID = os.Getenv("GOOGLE_CLOUD_PROJECT")
+var projectID = os.Getenv("GCP_PROJECT")
 
 // client is a global Pub/Sub client, initialized once per instance.
 var client *pubsub.Client

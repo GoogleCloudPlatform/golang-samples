@@ -5,11 +5,13 @@
 package testutil
 
 import (
+	"bytes"
+	"context"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"syscall"
 	"testing"
 	"time"
 )
@@ -59,46 +61,33 @@ func (r *Runner) Cleanup() {
 	}
 }
 
-// Run runs the built binary with the given environment.
-// After f returns, the running process is shut down.
-func (r *Runner) Run(env map[string]string, f func()) {
+// Run executes runs the built binary until terminated or timeout has
+// been reached, and indicates successful execution on return.
+func (r *Runner) Run(env map[string]string, timeout time.Duration) (stdout, stderr []byte, err error) {
 	if !r.Built() {
-		r.t.Error("Tried to run when binary not built.")
-		return
+		return nil, nil, fmt.Errorf("tried to run when binary not built")
 	}
+
 	environ := os.Environ()
 	for k, v := range env {
 		environ = append(environ, k+"="+v)
 	}
 
-	cmd := exec.Command(r.bin)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	cmd := exec.CommandContext(ctx, r.bin)
 	cmd.Env = environ
+	var bufOut, bufErr bytes.Buffer
+	cmd.Stdout = &bufOut
+	cmd.Stderr = &bufErr
 
 	if err := cmd.Start(); err != nil {
-		r.t.Error(err)
-		return
+		return nil, nil, fmt.Errorf("could not execute binary: %v", err)
 	}
 
-	// Run the user's tests.
-	f()
-
-	done := make(chan struct{})
-	go func() {
-		cmd.Wait()
-		close(done)
-	}()
-
-	// Try to gracefully kill the process.
-	if err := cmd.Process.Signal(syscall.SIGINT); err != nil {
-		r.t.Error(err)
+	if err := cmd.Wait(); err != nil {
+		return bufOut.Bytes(), bufErr.Bytes(), err
 	}
-
-	select {
-	case <-time.After(5 * time.Second):
-		r.t.Error("Timed out with SIGINT, trying SIGKILL.")
-		if err := cmd.Process.Kill(); err != nil {
-			r.t.Error(err)
-		}
-	case <-done:
-	}
+	return bufOut.Bytes(), bufErr.Bytes(), nil
 }
