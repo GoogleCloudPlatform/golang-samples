@@ -386,3 +386,60 @@ func setDefaultKMSkey(c *storage.Client, bucketName string, keyName string) erro
 	// [END storage_set_bucket_default_kms_key]
 	return nil
 }
+
+func enableBucketPolicyOnly(c *storage.Client, bucketName string) error {
+	ctx := context.Background()
+
+	// [START storage_enable_bucket_policy_only]
+	bucket := c.Bucket(bucketName)
+	enableBucketPolicyOnly := storage.BucketAttrsToUpdate{
+		BucketPolicyOnly: &storage.BucketPolicyOnly{
+			Enabled: true,
+		},
+	}
+	if _, err := bucket.Update(ctx, enableBucketPolicyOnly); err != nil {
+		return err
+	}
+	// [END storage_enable_bucket_policy_only]
+	return nil
+}
+
+func disableBucketPolicyOnly(c *storage.Client, bucketName string) error {
+	ctx := context.Background()
+
+	// [START storage_disable_bucket_policy_only]
+	bucket := c.Bucket(bucketName)
+	disableBucketPolicyOnly := storage.BucketAttrsToUpdate{
+		BucketPolicyOnly: &storage.BucketPolicyOnly{
+			Enabled: false,
+		},
+	}
+	if _, err := bucket.Update(ctx, disableBucketPolicyOnly); err != nil {
+		return err
+	}
+	// [END storage_disable_bucket_policy_only]
+	return nil
+}
+
+func getBucketPolicyOnly(c *storage.Client, bucketName string) (*storage.BucketAttrs, error) {
+	ctx := context.Background()
+
+	// [START storage_get_bucket_policy_only]
+	attrs, err := c.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		return nil, err
+	}
+	bucketPolicyOnly := attrs.BucketPolicyOnly
+	if bucketPolicyOnly.Enabled {
+		log.Printf("Bucket Policy Only is enabled for %q.\n",
+			attrs.Name)
+		log.Printf("Bucket will be locked on %q.\n",
+			bucketPolicyOnly.LockedTime)
+	} else {
+		log.Printf("Bucket Policy Only is not enabled for %q.\n",
+			attrs.Name)
+	}
+
+	// [END storage_get_bucket_policy_only]
+	return attrs, nil
+}
