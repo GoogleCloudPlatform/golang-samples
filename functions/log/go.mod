@@ -1,4 +1,4 @@
-module github.com/GoogleCloudPlatform/golang-samples/functions/spanner
+module github.com/GoogleCloudPlatform/golang-samples/functions/log
 
 require (
 	cloud.google.com/go v0.35.1
