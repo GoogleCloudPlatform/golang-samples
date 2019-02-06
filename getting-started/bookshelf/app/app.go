@@ -23,7 +23,7 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	uuid "github.com/satori/go.uuid"
+	uuid "github.com/gofrs/uuid"
 
 	"github.com/GoogleCloudPlatform/golang-samples/getting-started/bookshelf"
 )
