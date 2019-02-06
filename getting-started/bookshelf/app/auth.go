@@ -16,7 +16,7 @@ import (
 	"golang.org/x/oauth2"
 
 	"github.com/GoogleCloudPlatform/golang-samples/getting-started/bookshelf"
-	uuid "github.com/satori/go.uuid"
+	uuid "github.com/gofrs/uuid"
 )
 
 const (
