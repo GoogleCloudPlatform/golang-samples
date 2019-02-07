@@ -20,9 +20,14 @@ func TestMultichannel(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	var want = "Channel 1: hi I'd like to buy a Chromecast I'm always wondering whether you could help me with that\nChannel 2: certainly which color would you like we have blue black and red"
+	wants := []string{
+		"Channel 1: hi I'd like to buy a Chromecast",
+		"Channel 2: certainly which color",
+	}
 
-	if got := buf.String(); !strings.Contains(got, want) {
-		t.Fatalf(`transcribeMultichannel(../testdata/commercial_stereo.wav) = %q; want to contain %q`, got, want)
+	for _, want := range wants {
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf(`transcribeMultichannel(../testdata/commercial_stereo.wav) = \n\n%q\n\nWant to contain \n\n%q`, got, want)
+		}
 	}
 }
