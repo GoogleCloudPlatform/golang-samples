@@ -49,6 +49,8 @@ func main() {
 }
 
 // [START endpoints_generate_jwt_sa]
+
+// generateJWT creates a signed JSON Web Token using a Google API Service Account.
 func generateJWT(saKeyfile, saEmail, audience string, expiryLength int64) (string, error) {
 	now := time.Now().Unix()
 	
@@ -95,25 +97,26 @@ func generateJWT(saKeyfile, saEmail, audience string, expiryLength int64) (strin
 // [END endpoints_generate_jwt_sa]
 
 // [START endpoints_jwt_request]
+
+// makeJWTRequest sends an authorized request to your deployed endpoint.
 func makeJWTRequest(signedJWT, url string) (string, error){
 	client := &http.Client{}
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return "", fmt.Errorf("error building HTTP request: %v", err)
+		return "", fmt.Errorf("failed to create HTTP request: %v", err)
 	}
 	req.Header.Add("Authorization", "Bearer " + signedJWT)
 	req.Header.Add("content-type", "application/json")
 
 	response, err := client.Do(req)
 	if err != nil {
-		//fix these error messages
-		return "", fmt.Errorf("error making HTTP request", err)
+		return "", fmt.Errorf("HTTP request failed", err)
 	}
 	defer response.Body.Close()
 	responseData, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		return "", fmt.Errorf("error parsing HTTP response", err)
+		return "", fmt.Errorf("failed to parse HTTP response", err)
 	}
 	return string(responseData), nil
 }
