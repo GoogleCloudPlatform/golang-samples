@@ -23,7 +23,7 @@ import (
 
 	"cloud.google.com/go/storage"
 	vision "cloud.google.com/go/vision/apiv1"
-	uuid "github.com/satori/go.uuid"
+	uuid "github.com/gofrs/uuid"
 	"google.golang.org/appengine/delay"
 	// [END new_imports]
 )

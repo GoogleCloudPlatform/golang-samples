@@ -21,11 +21,9 @@ import (
 	"cloud.google.com/go/pubsub"
 	"cloud.google.com/go/storage"
 
+	uuid "github.com/gofrs/uuid"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	uuid "github.com/satori/go.uuid"
-
-	"google.golang.org/appengine"
 
 	"github.com/GoogleCloudPlatform/golang-samples/getting-started/bookshelf"
 )
@@ -38,8 +36,12 @@ var (
 )
 
 func main() {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
 	registerHandlers()
-	appengine.Main()
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
 }
 
 func registerHandlers() {

@@ -39,7 +39,6 @@ func addTaskHandler(w http.ResponseWriter, r *http.Request) {
 	tasks, err = taskqueue.LeaseByTag(ctx, 100, "pull-queue", 3600, "render")
 
 	// Leases up to 100 tasks that have same tag.
-	// Tag is that of "oldest" task by ETA.
 	tasks, err = taskqueue.LeaseByTag(ctx, 100, "pull-queue", 3600, "")
 	// [END leasing_tasks_2]
 

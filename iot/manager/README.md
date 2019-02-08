@@ -3,7 +3,7 @@
 ## Authentication
 
 * Create a project with the [Google Cloud Console][cloud-console], and enable
-  the [Cloud IoT Core API][].
+  the [Cloud IoT Core API][cloud-iot-api].
 * From the Cloud Console, create a service account,
   download its json credentials file, then set the `GCLOUD_PROJECT` and
   `GOOGLE_APPLICATION_CREDENTIALS` environment variable:
@@ -14,8 +14,7 @@
   ```
 
 [cloud-console]: https://console.cloud.google.com
-[vision-api]: https://console.cloud.google.com/apis/api/cloudiot.googleapis.com/overview?project=_
-[adc]: https://cloud.google.com/docs/authentication#developer_workflow
+[cloud-iot-api]: https://console.developers.google.com/iot
 
 ## Run the sample
 
