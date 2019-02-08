@@ -17,7 +17,7 @@ type GCSEvent struct {
 	Name   string `json:"name"`
 }
 
-// HelloGCS prints a message when a file is uploaded to the GCS bucket.
+// HelloGCS prints a message when a file is changed in a Cloud Storage bucket.
 func HelloGCS(ctx context.Context, e GCSEvent) error {
 	log.Printf("Processing file: %s", e.Name)
 	return nil

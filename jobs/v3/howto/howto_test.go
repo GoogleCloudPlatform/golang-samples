@@ -11,7 +11,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/satori/go.uuid"
+	"github.com/gofrs/uuid"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	talent "google.golang.org/api/jobs/v3"
