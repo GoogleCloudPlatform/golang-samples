@@ -4,12 +4,13 @@
 
 // [START iam_quickstart]
 
-package quickstart
+// The quickstart command is an example of using the IAM API.
+package main
 
 import (
 	"fmt"
 
-	"golang.org/x/net/context"
+	"context"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/iam/v1"
 )
@@ -21,14 +22,20 @@ func main() {
 		iam.CloudPlatformScope)
 
 	// Create the Cloud IAM service object
-	iamService, _ := iam.New(client)
+	iamService, err := iam.New(client)
+	if err != nil {
+		log.Fatalf("iam.New: %v", err)
+	}
 
 	// Call the Cloud IAM Roles API
-	response, _ := iamService.Roles.List().Do()
+	resp, err := iamService.Roles.List().Do()
+	if err != nil {
+		log.Fatalf("List.Do: %v", err)
+	}
 	roles := response.Roles
 
 	// Process the response
-	for _, role := range roles {
+	for _, role := range resp.Roles {
 		fmt.Println("Tile: " + role.Title)
 		fmt.Println("Name: " + role.Name)
 		fmt.Println("Description: " + role.Description)
