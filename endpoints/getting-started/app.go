@@ -88,6 +88,7 @@ func authInfoHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Write(b)
 }
+
 // [END endpoints_auth_info_backend]
 
 // errorf writes a swagger-compliant error response.

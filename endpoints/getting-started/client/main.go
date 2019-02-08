@@ -1,4 +1,4 @@
-// Copyright 2016 Google Inc. All rights reserved.
+// Copyright 2018 Google LLC. All rights reserved.
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
@@ -12,8 +12,8 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"log"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -23,9 +23,9 @@ import (
 )
 
 var (
-	host   = flag.String("host", "", "The API host. Required.")
-	audience = flag.String("audience", "", "The audience for the JWT. equired")
-	serviceAccountFile = flag.String("service-account-file", "", "Path to service account JSON file. Required.")
+	host                = flag.String("host", "", "The API host. Required.")
+	audience            = flag.String("audience", "", "The audience for the JWT. equired")
+	serviceAccountFile  = flag.String("service-account-file", "", "Path to service account JSON file. Required.")
 	serviceAccountEmail = flag.String("service-account-email", "", "Path email associated with the service account. Required.")
 )
 
@@ -53,18 +53,18 @@ func main() {
 // generateJWT creates a signed JSON Web Token using a Google API Service Account.
 func generateJWT(saKeyfile, saEmail, audience string, expiryLength int64) (string, error) {
 	now := time.Now().Unix()
-	
+
 	// build payload
 	jwt := &jws.ClaimSet{
-		Iat:           now,
+		Iat: now,
 		// expires after 'expiraryLength' seconds.
-		Exp:           now + expiryLength,
+		Exp: now + expiryLength,
 		// Iss must match 'issuer' in the security configuration in your
 		// swagger spec (e.g. service account email). It can be any string.
-		Iss:           saEmail,
+		Iss: saEmail,
 		// Aud must be either your Endpoints service name, or match the value
 		// specified as the 'x-google-audience' in the OpenAPI document.
-		Aud:           audience,
+		Aud: audience,
 		// Sub and Email should match the service account's email address
 		Sub:           saEmail,
 		PrivateClaims: map[string]interface{}{"email": saEmail},
@@ -94,30 +94,32 @@ func generateJWT(saKeyfile, saEmail, audience string, expiryLength int64) (strin
 	}
 	return jws.Encode(jwsHeader, jwt, rsaKey)
 }
+
 // [END endpoints_generate_jwt_sa]
 
 // [START endpoints_jwt_request]
 
 // makeJWTRequest sends an authorized request to your deployed endpoint.
-func makeJWTRequest(signedJWT, url string) (string, error){
+func makeJWTRequest(signedJWT, url string) (string, error) {
 	client := &http.Client{}
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return "", fmt.Errorf("failed to create HTTP request: %v", err)
 	}
-	req.Header.Add("Authorization", "Bearer " + signedJWT)
+	req.Header.Add("Authorization", "Bearer "+signedJWT)
 	req.Header.Add("content-type", "application/json")
 
 	response, err := client.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("HTTP request failed", err)
+		return "", fmt.Errorf("HTTP request failed: %v", err)
 	}
 	defer response.Body.Close()
 	responseData, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		return "", fmt.Errorf("failed to parse HTTP response", err)
+		return "", fmt.Errorf("failed to parse HTTP response: %v", err)
 	}
 	return string(responseData), nil
 }
+
 // [END endpoints_jwt_request]
