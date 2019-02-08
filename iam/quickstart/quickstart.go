@@ -8,9 +8,8 @@
 package main
 
 import (
-	"log"
-
 	"context"
+	"log"
 
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/iam/v1"
