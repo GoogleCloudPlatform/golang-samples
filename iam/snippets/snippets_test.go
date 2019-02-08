@@ -5,11 +5,11 @@
 package snippets
 
 import (
-	"math/rand"
 	"os"
-	"strconv"
+	"strings"
 	"testing"
-	"time"
+
+	"github.com/gofrs/uuid"
 )
 
 func TestViewGrantableRoles(t *testing.T) {
@@ -25,22 +25,20 @@ func TestQueryTestablePermissions(t *testing.T) {
 }
 
 func TestRoles(t *testing.T) {
-	rand.Seed(time.Now().UnixNano())
-	roleName := "gotest" + strconv.Itoa(rand.Intn(100000))
+	uuid, _ := uuid.NewV4()
+	roleName := strings.Replace(uuid.String(), "-", "", -1)
 	projectID := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
 
-	createRole(roleName, projectID, "Go Test", "Go Test",
-		[]string{"appengine.versions.get"}, "GA")
-	editRole(roleName, projectID, "Go Test 2", "Go Test 2",
-		[]string{"appengine.versions.get"}, "GA")
+	createRole(roleName, projectID, "Go Test", "Go Test", []string{"appengine.versions.get"}, "GA")
+	editRole(roleName, projectID, "Go Test 2", "Go Test 2", []string{"appengine.versions.get"}, "GA")
 	disableRole(roleName, projectID)
 	listRoles(projectID)
 	deleteRole(roleName, projectID)
 }
 
 func TestServiceAccountsAndKeys(t *testing.T) {
-	rand.Seed(time.Now().UnixNano())
-	accountName := "gotest" + strconv.Itoa(rand.Intn(100000))
+	uuid, _ := uuid.NewV4()
+	accountName := strings.Replace(uuid.String(), "-", "", -1)[:29]
 	projectID := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
 
 	account := createServiceAccount(projectID, accountName, "Test Account")
