@@ -31,7 +31,7 @@ func (tc Context) Path(p ...string) string {
 // Useful for initializing global variables before running parallel system tests.
 // ok is false if the project is not set up properly for system tests.
 func ContextMain(m *testing.M) (tc Context, ok bool) {
-	c, err := context()
+	c, err := testContext()
 	if err == noProjectID {
 		return c, false
 	} else if err != nil {
@@ -43,7 +43,7 @@ func ContextMain(m *testing.M) (tc Context, ok bool) {
 // SystemTest gets the test context.
 // The test is skipped if the GOLANG_SAMPLES_PROJECT_ID environment variable is not set.
 func SystemTest(t *testing.T) Context {
-	tc, err := context()
+	tc, err := testContext()
 	if err == noProjectID {
 		t.Skip(err)
 	} else if err != nil {
@@ -60,7 +60,7 @@ func EndToEndTest(t *testing.T) Context {
 		t.Skip("GOLANG_SAMPLES_E2E_TEST not set")
 	}
 
-	tc, err := context()
+	tc, err := testContext()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -70,7 +70,7 @@ func EndToEndTest(t *testing.T) Context {
 	return tc
 }
 
-func context() (Context, error) {
+func testContext() (Context, error) {
 	tc := Context{}
 
 	tc.ProjectID = os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
