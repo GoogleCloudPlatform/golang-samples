@@ -1,4 +1,4 @@
-// Copyright 2018 Google LLC. All rights reserved.
+// Copyright 2016 Google Inc. All rights reserved.
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
@@ -40,12 +40,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(jwt)
-	resp, err := makeJWTRequest(jwt, *host)
+	resp, err := makeJWTRequest(jwt, *host, 10*time.Second)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(resp)
+	fmt.Printf("%s Response: %s", *host, resp)
 }
 
 // [START endpoints_generate_jwt_sa]
@@ -54,7 +53,7 @@ func main() {
 func generateJWT(saKeyfile, saEmail, audience string, expiryLength int64) (string, error) {
 	now := time.Now().Unix()
 
-	// build payload
+	// Build the JWT payload.
 	jwt := &jws.ClaimSet{
 		Iat: now,
 		// expires after 'expiraryLength' seconds.
@@ -65,7 +64,7 @@ func generateJWT(saKeyfile, saEmail, audience string, expiryLength int64) (strin
 		// Aud must be either your Endpoints service name, or match the value
 		// specified as the 'x-google-audience' in the OpenAPI document.
 		Aud: audience,
-		// Sub and Email should match the service account's email address
+		// Sub and Email should match the service account's email address.
 		Sub:           saEmail,
 		PrivateClaims: map[string]interface{}{"email": saEmail},
 	}
@@ -74,7 +73,7 @@ func generateJWT(saKeyfile, saEmail, audience string, expiryLength int64) (strin
 		Typ:       "JWT",
 	}
 
-	// sign with keyfile
+	// Extract the RSA private key from the service account keyfile.
 	sa, err := ioutil.ReadFile(saKeyfile)
 	if err != nil {
 		return "", fmt.Errorf("Could not read service account file: %v", err)
@@ -89,6 +88,7 @@ func generateJWT(saKeyfile, saEmail, audience string, expiryLength int64) (strin
 		return "", fmt.Errorf("private key parse error: %v", err)
 	}
 	rsaKey, ok := parsedKey.(*rsa.PrivateKey)
+	// Sign the JWT with the service account's private key.
 	if !ok {
 		return "", errors.New("private key failed rsa.PrivateKey type assertion")
 	}
@@ -100,8 +100,10 @@ func generateJWT(saKeyfile, saEmail, audience string, expiryLength int64) (strin
 // [START endpoints_jwt_request]
 
 // makeJWTRequest sends an authorized request to your deployed endpoint.
-func makeJWTRequest(signedJWT, url string) (string, error) {
-	client := &http.Client{}
+func makeJWTRequest(signedJWT, url string, timeout time.Duration) (string, error) {
+	client := &http.Client{
+		Timeout: timeout,
+	}
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {

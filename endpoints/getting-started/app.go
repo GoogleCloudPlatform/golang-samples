@@ -73,6 +73,7 @@ func (h corsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // [START endpoints_auth_info_backend]
+
 // authInfoHandler reads authentication info provided by the Endpoints proxy.
 func authInfoHandler(w http.ResponseWriter, r *http.Request) {
 	encodedInfo := r.Header.Get("X-Endpoint-API-UserInfo")
