@@ -23,6 +23,7 @@ import (
 	"log"
 
 	"cloud.google.com/go/spanner"
+	"google.golang.org/api/iterator"
 )
 
 func main() {
@@ -41,16 +42,22 @@ func main() {
 	iter := client.Single().Query(ctx, stmt)
 	defer iter.Stop()
 
-	row, err := iter.Next()
-	if err != nil {
-		log.Fatalf("Query failed with %v", err)
-	}
+	for {
+		row, err := iter.Next()
+		if err == iterator.Done {
+			fmt.Println("Done")
+			return
+		}
+		if err != nil {
+			log.Fatalf("Query failed with %v", err)
+		}
 
-	var i int64
-	if row.Columns(&i) != nil {
-		log.Fatalf("Failed to parse row %v", err)
+		var i int64
+		if row.Columns(&i) != nil {
+			log.Fatalf("Failed to parse row %v", err)
+		}
+		fmt.Printf("Got value %v\n", i)
 	}
-	fmt.Printf("Got value %v\n", i)
 }
 
 // [END spanner_quickstart]
