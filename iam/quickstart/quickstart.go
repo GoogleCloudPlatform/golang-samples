@@ -4,7 +4,7 @@
 
 // [START iam_quickstart]
 
-// The quickstart command is an example of using the IAM API.
+// The quickstart command is an example of using the Cloud IAM Roles API.
 package main
 
 import (
@@ -23,15 +23,15 @@ func main() {
 	}
 
 	// Create the Cloud IAM service object.
-	iamService, err := iam.New(client)
+	service, err := iam.New(client)
 	if err != nil {
 		log.Fatalf("iam.New: %v", err)
 	}
 
 	// Call the Cloud IAM Roles API.
-	resp, err := iamService.Roles.List().Do()
+	resp, err := service.Roles.List().Do()
 	if err != nil {
-		log.Fatalf("List.Do: %v", err)
+		log.Fatalf("Roles.List: %v", err)
 	}
 
 	// Process the response.
@@ -39,7 +39,6 @@ func main() {
 		log.Println("Tile: " + role.Title)
 		log.Println("Name: " + role.Name)
 		log.Println("Description: " + role.Description)
-		log.Println()
 	}
 }
 
