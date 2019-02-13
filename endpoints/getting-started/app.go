@@ -82,6 +82,8 @@ func (h corsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h(w, r)
 }
 
+// [START endpoints_auth_info_backend]
+
 // authInfoHandler reads authentication info provided by the Endpoints proxy.
 func authInfoHandler(w http.ResponseWriter, r *http.Request) {
 	encodedInfo := r.Header.Get("X-Endpoint-API-UserInfo")
@@ -97,6 +99,8 @@ func authInfoHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Write(b)
 }
+
+// [END endpoints_auth_info_backend]
 
 // errorf writes a swagger-compliant error response.
 func errorf(w http.ResponseWriter, code int, format string, a ...interface{}) {

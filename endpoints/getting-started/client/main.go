@@ -16,10 +16,8 @@
 package main
 
 import (
-	"bytes"
 	"crypto/rsa"
 	"crypto/x509"
-	"encoding/json"
 	"encoding/pem"
 	"errors"
 	"flag"
@@ -27,7 +25,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/http/httputil"
 	"os"
 	"time"
 
@@ -36,150 +33,105 @@ import (
 )
 
 var (
-	host   = flag.String("host", "", "The API host. Required.")
-	apiKey = flag.String("api-key", "", "Your API key. Required.")
-
-	echo           = flag.String("echo", "", "Message to echo. Cannot be used with -service-account")
-	serviceAccount = flag.String("service-account", "", "Path to service account JSON file. Cannot be used with -echo.")
+	host                = flag.String("host", "", "The API host. Required.")
+	audience            = flag.String("audience", "", "The audience for the JWT. equired")
+	serviceAccountFile  = flag.String("service-account-file", "", "Path to service account JSON file. Required.")
+	serviceAccountEmail = flag.String("service-account-email", "", "Path email associated with the service account. Required.")
 )
 
 func main() {
 	flag.Parse()
 
-	if *apiKey == "" || *host == "" {
-		flag.PrintDefaults()
+	if *audience == "" || *host == "" || *serviceAccountFile == "" || *serviceAccountEmail == "" {
+		fmt.Println("requires: --host, --audience, --service-account-file, --service-account-email")
 		os.Exit(1)
 	}
-	if *serviceAccount == "" && *echo == "" {
-		fmt.Fprint(os.Stderr, "Provide one of -echo or -service-account.")
-		flag.PrintDefaults()
-		os.Exit(1)
-	}
-	if *serviceAccount != "" && *echo != "" {
-		fmt.Fprint(os.Stderr, "Provide only one of -echo or -service-account.")
-		flag.PrintDefaults()
-		os.Exit(1)
-	}
-
-	var resp *http.Response
-	var err error
-	if *echo != "" {
-		resp, err = doEcho()
-	} else if *serviceAccount != "" {
-		resp, err = doJWT()
-	}
+	jwt, err := generateJWT(*serviceAccountFile, *serviceAccountEmail, *audience, 3600)
 	if err != nil {
 		log.Fatal(err)
 	}
-	b, err := httputil.DumpResponse(resp, true)
+	resp, err := makeJWTRequest(jwt, *host)
 	if err != nil {
 		log.Fatal(err)
 	}
-	os.Stdout.Write(b)
+	fmt.Printf("%s Response: %s", *host, resp)
 }
 
-// doEcho performs an authenticated echo request using an API key.
-func doEcho() (*http.Response, error) {
-	msg := map[string]string{
-		"message": *echo,
-	}
-	var buf bytes.Buffer
-	if err := json.NewEncoder(&buf).Encode(msg); err != nil {
-		return nil, err
-	}
-	return http.Post(*host+"/echo?key="+*apiKey, "application/json", &buf)
-}
+// [START endpoints_generate_jwt_sa]
 
-// doJWT performs an authenticated request using the credentials in the service account file.
-func doJWT() (*http.Response, error) {
-	sa, err := ioutil.ReadFile(*serviceAccount)
-	if err != nil {
-		return nil, fmt.Errorf("Could not read service account file: %v", err)
-	}
-	conf, err := google.JWTConfigFromJSON(sa)
-	if err != nil {
-		return nil, fmt.Errorf("Could not parse service account JSON: %v", err)
-	}
-	rsaKey, err := parseKey(conf.PrivateKey)
-	if err != nil {
-		return nil, fmt.Errorf("Could not get RSA key: %v", err)
-	}
+// generateJWT creates a signed JSON Web Token using a Google API Service Account.
+func generateJWT(saKeyfile, saEmail, audience string, expiryLength int64) (string, error) {
+	now := time.Now().Unix()
 
-	iat := time.Now()
-	exp := iat.Add(time.Hour)
-
+	// Build the JWT payload.
 	jwt := &jws.ClaimSet{
-		Iss:   "jwt-client.endpoints.sample.google.com",
-		Sub:   "foo!",
-		Aud:   "echo.endpoints.sample.google.com",
-		Scope: "email",
-		Iat:   iat.Unix(),
-		Exp:   exp.Unix(),
+		Iat: now,
+		// expires after 'expiraryLength' seconds.
+		Exp: now + expiryLength,
+		// Iss must match 'issuer' in the security configuration in your
+		// swagger spec (e.g. service account email). It can be any string.
+		Iss: saEmail,
+		// Aud must be either your Endpoints service name, or match the value
+		// specified as the 'x-google-audience' in the OpenAPI document.
+		Aud: audience,
+		// Sub and Email should match the service account's email address.
+		Sub:           saEmail,
+		PrivateClaims: map[string]interface{}{"email": saEmail},
 	}
 	jwsHeader := &jws.Header{
 		Algorithm: "RS256",
 		Typ:       "JWT",
 	}
 
-	msg, err := jws.Encode(jwsHeader, jwt, rsaKey)
+	// Extract the RSA private key from the service account keyfile.
+	sa, err := ioutil.ReadFile(saKeyfile)
 	if err != nil {
-		return nil, fmt.Errorf("Could not encode JWT: %v", err)
+		return "", fmt.Errorf("Could not read service account file: %v", err)
 	}
-
-	req, _ := http.NewRequest("GET", *host+"/auth/info/googlejwt?key="+*apiKey, nil)
-	req.Header.Add("Authorization", "Bearer "+msg)
-	return http.DefaultClient.Do(req)
-}
-
-// The following code is copied from golang.org/x/oauth2/internal
-// Copyright (c) 2009 The oauth2 Authors. All rights reserved.
-
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are
-// met:
-
-//   * Redistributions of source code must retain the above copyright
-//notice, this list of conditions and the following disclaimer.
-//   * Redistributions in binary form must reproduce the above
-// copyright notice, this list of conditions and the following disclaimer
-// in the documentation and/or other materials provided with the
-// distribution.
-//    * Neither the name of Google Inc. nor the names of its
-// contributors may be used to endorse or promote products derived from
-// this software without specific prior written permission.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-// parseKey converts the binary contents of a private key file
-// to an *rsa.PrivateKey. It detects whether the private key is in a
-// PEM container or not. If so, it extracts the the private key
-// from PEM container before conversion. It only supports PEM
-// containers with no passphrase.
-func parseKey(key []byte) (*rsa.PrivateKey, error) {
-	block, _ := pem.Decode(key)
-	if block != nil {
-		key = block.Bytes
-	}
-	parsedKey, err := x509.ParsePKCS8PrivateKey(key)
+	conf, err := google.JWTConfigFromJSON(sa)
 	if err != nil {
-		parsedKey, err = x509.ParsePKCS1PrivateKey(key)
-		if err != nil {
-			return nil, fmt.Errorf("private key should be a PEM or plain PKSC1 or PKCS8; parse error: %v", err)
-		}
+		return "", fmt.Errorf("Could not parse service account JSON: %v", err)
 	}
-	parsed, ok := parsedKey.(*rsa.PrivateKey)
+	block, _ := pem.Decode(conf.PrivateKey)
+	parsedKey, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+	if err != nil {
+		return "", fmt.Errorf("private key parse error: %v", err)
+	}
+	rsaKey, ok := parsedKey.(*rsa.PrivateKey)
+	// Sign the JWT with the service account's private key.
 	if !ok {
-		return nil, errors.New("private key is invalid")
+		return "", errors.New("private key failed rsa.PrivateKey type assertion")
 	}
-	return parsed, nil
+	return jws.Encode(jwsHeader, jwt, rsaKey)
 }
+
+// [END endpoints_generate_jwt_sa]
+
+// [START endpoints_jwt_request]
+
+// makeJWTRequest sends an authorized request to your deployed endpoint.
+func makeJWTRequest(signedJWT, url string) (string, error) {
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+	}
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return "", fmt.Errorf("failed to create HTTP request: %v", err)
+	}
+	req.Header.Add("Authorization", "Bearer "+signedJWT)
+	req.Header.Add("content-type", "application/json")
+
+	response, err := client.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("HTTP request failed: %v", err)
+	}
+	defer response.Body.Close()
+	responseData, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse HTTP response: %v", err)
+	}
+	return string(responseData), nil
+}
+
+// [END endpoints_jwt_request]
