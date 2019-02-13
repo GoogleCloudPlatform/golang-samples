@@ -1,6 +1,16 @@
-// Copyright 2018 Google LLC. All rights reserved.
-// Use of this source code is governed by the Apache 2.0
-// license that can be found in the LICENSE file.
+// Copyright 2019 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 // Command manager lets you manage Cloud IoT Core devices and registries.
 package main
@@ -383,6 +393,55 @@ func createUnauth(w io.Writer, projectID string, region string, registryID strin
 
 // [END iot_create_unauth_device]
 
+// [START iot_create_device]
+
+// createDevice creates a device in a registry with one of the following public key formats:
+// RSA_PEM, RSA_X509_PEM, ES256_PEM, ES256_X509_PEM, UNAUTH.
+func createDevice(w io.Writer, projectID string, region string, registryID string, deviceID string, publicKeyFormat string, keyPath string) (*cloudiot.Device, error) {
+	client, err := getClient()
+	if err != nil {
+		return nil, err
+	}
+
+	keyBytes, err := ioutil.ReadFile(keyPath)
+	if err != nil {
+		return nil, err
+	}
+
+	var device cloudiot.Device
+
+	// If no credentials are passed in, create an unauth device.
+	if publicKeyFormat == "UNAUTH" {
+		device = cloudiot.Device{
+			Id: deviceID,
+		}
+	} else {
+		device = cloudiot.Device{
+			Id: deviceID,
+			Credentials: []*cloudiot.DeviceCredential{
+				{
+					PublicKey: &cloudiot.PublicKeyCredential{
+						Format: publicKeyFormat,
+						Key:    string(keyBytes),
+					},
+				},
+			},
+		}
+	}
+
+	parent := fmt.Sprintf("projects/%s/locations/%s/registries/%s", projectID, region, registryID)
+	response, err := client.Projects.Locations.Registries.Devices.Create(parent, &device).Do()
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Fprintf(w, "Successfully created a device with %s public key: %s", publicKeyFormat, deviceID)
+
+	return response, nil
+}
+
+// [END iot_create_device]
+
 // [START iot_delete_device]
 
 // deleteDevice deletes a device from a registry.
@@ -645,7 +704,7 @@ func patchDeviceRSA(w io.Writer, projectID string, region string, registryID str
 // [START iot_set_device_config]
 
 // setConfig sends a configuration change to a device.
-func setConfig(w io.Writer, projectID string, region string, registryID string, deviceID string, configData string, format string) (*cloudiot.DeviceConfig, error) {
+func setConfig(w io.Writer, projectID string, region string, registryID string, deviceID string, configData string) (*cloudiot.DeviceConfig, error) {
 	// Authorize the client using Application Default Credentials.
 	// See https://g.co/dv/identity/protocols/application-default-credentials
 	ctx := context.Background()
@@ -951,6 +1010,7 @@ func main() {
 		{"createES", createES, []string{"cloud-region", "registry-id", "device-id", "keyfile-path"}},
 		{"createRSA", createRSA, []string{"cloud-region", "registry-id", "device-id", "keyfile-path"}},
 		{"createUnauth", createUnauth, []string{"cloud-region", "registry-id", "device-id"}},
+		{"createDevice", createDevice, []string{"cloud-region", "registry-id", "device-id", "public-key-format", "keyfile-path"}},
 		{"deleteDevice", deleteDevice, []string{"cloud-region", "registry-id", "device-id"}},
 		{"getDevice", getDevice, []string{"cloud-region", "registry-id", "device-id"}},
 		{"getDeviceConfigs", getDeviceConfigs, []string{"cloud-region", "registry-id", "device-id"}},

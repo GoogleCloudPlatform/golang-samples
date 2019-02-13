@@ -1,6 +1,16 @@
-// Copyright 2018 Google LLC. All rights reserved.
-// Use of this source code is governed by the Apache 2.0
-// license that can be found in the LICENSE file.
+// Copyright 2019 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package main
 
@@ -20,16 +30,17 @@ import (
 	"github.com/google/uuid"
 )
 
-var projectID string
-var topicID string
-var topicName string // topicName is the full path to the topic (e.g. project/{project}/topics/{topic})
-var registryID string
+var (
+	projectID  string
+	topicID    string
+	topicName  string // topicName is the full path to the topic (e.g. project/{project}/topics/{topic}).
+	registryID string
+	client     *pubsub.Client
+)
 
 const region = "us-central1"
 
 var pubKeyRSA = os.Getenv("GOLANG_SAMPLES_IOT_PUB")
-
-var client *pubsub.Client
 
 // returns a v1 UUID for a resource: e.g. topic, registry, gateway, device
 func createIDForTest(resource string) string {
@@ -44,9 +55,7 @@ func createIDForTest(resource string) string {
 
 func TestMain(m *testing.M) {
 	setup(m)
-	log.SetOutput(ioutil.Discard)
 	s := m.Run()
-	log.SetOutput(os.Stderr)
 	shutdown()
 	os.Exit(s)
 }
@@ -55,17 +64,16 @@ func setup(m *testing.M) {
 	ctx := context.Background()
 	tc, ok := testutil.ContextMain(m)
 
-	// Retrive
-	if ok {
-		projectID = tc.ProjectID
-	} else {
+	// Retrieve project ID
+	if !ok {
 		fmt.Fprintln(os.Stderr, "Project is not set up properly for system tests. Make sure GOLANG_SAMPLES_PROJECT_ID is set")
-		os.Exit(1)
+		return
 	}
+	projectID = tc.ProjectID
 
 	pubsubClient, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		log.Fatalf("Could not create pubsub Client: %v", err)
+		fmt.Printf("Could not create pubsub Client:\n%v\n", err)
 	}
 	client = pubsubClient
 
@@ -82,21 +90,23 @@ func setup(m *testing.M) {
 	registryID = createIDForTest("registry")
 
 	if _, err = createRegistry(os.Stdout, projectID, region, registryID, topicName); err != nil {
-		log.Fatalf("Could not create registry: %v\n", err)
+		fmt.Printf("Could not create registry: %v\n", err)
+		return
 	}
 }
 
 func shutdown() {
 	ctx := context.Background()
 
-	t := client.Topic(topicID)
-	if err := t.Delete(ctx); err != nil {
-		log.Fatalf("Could not delete topic: %v\n", err)
+	topic := client.Topic(topicID)
+	if err := topic.Delete(ctx); err != nil {
+		fmt.Printf("Could not delete topic: %v\n", err)
+		return
 	}
-	fmt.Printf("Deleted topic: %v\n", t)
+	fmt.Printf("Deleted topic: %v\n", topic)
 
 	if _, err := deleteRegistry(os.Stdout, projectID, region, registryID); err != nil {
-		log.Fatalf("Could not delete registry: %v\n", err)
+		fmt.Printf("Could not delete registry: %v\n", err)
 	}
 }
 
