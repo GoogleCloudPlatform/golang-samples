@@ -25,8 +25,7 @@ import (
 )
 
 // createServiceAccount creates a service account.
-func createServiceAccount(w io.Writer, projectID string, name string,
-	displayName string) (*iam.ServiceAccount, error) {
+func createServiceAccount(w io.Writer, projectID, name, displayName string) (*iam.ServiceAccount, error) {
 	client, err := google.DefaultClient(context.Background(), iam.CloudPlatformScope)
 	if err != nil {
 		return nil, fmt.Errorf("google.DefaultClient: %v", err)

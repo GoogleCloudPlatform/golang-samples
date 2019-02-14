@@ -25,8 +25,7 @@ import (
 )
 
 // createRole creates a custom role.
-func createRole(w io.Writer, name string, projectID string, title string, description string,
-	permissions []string, stage string) (*iam.Role, error) {
+func createRole(w io.Writer, name, projectID, title, description, stage string, permissions []string) (*iam.Role, error) {
 	client, err := google.DefaultClient(context.Background(), iam.CloudPlatformScope)
 	if err != nil {
 		return nil, fmt.Errorf("google.DefaultClient: %v", err)

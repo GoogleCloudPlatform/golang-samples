@@ -25,7 +25,7 @@ import (
 )
 
 // renameServiceAccount renames a service account.
-func renameServiceAccount(w io.Writer, email string, newDisplayName string) (*iam.ServiceAccount, error) {
+func renameServiceAccount(w io.Writer, email, newDisplayName string) (*iam.ServiceAccount, error) {
 	client, err := google.DefaultClient(context.Background(), iam.CloudPlatformScope)
 	if err != nil {
 		return nil, fmt.Errorf("google.DefaultClient: %v", err)

@@ -57,7 +57,7 @@ func TestRoles(t *testing.T) {
 	stage := "GA"
 
 	// createRole test.
-	role, err = createRole(buf, name, project, title, desc, perms, stage)
+	role, err = createRole(buf, name, project, title, desc, stage, perms)
 	if err != nil {
 		t.Fatalf("createRole: %v", err)
 	}
@@ -68,7 +68,7 @@ func TestRoles(t *testing.T) {
 
 	// editRole test.
 	newTitle := "Updated test role"
-	role, err = editRole(buf, name, project, newTitle, desc, perms, stage)
+	role, err = editRole(buf, name, project, newTitle, desc, stage, perms)
 	if err != nil {
 		t.Fatalf("editRole: %v", err)
 	}
