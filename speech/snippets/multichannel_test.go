@@ -1,6 +1,16 @@
-// Copyright 2016 Google Inc. All rights reserved.
-// Use of this source code is governed by the Apache 2.0
-// license that can be found in the LICENSE file.
+// Copyright 2019 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package snippets
 
@@ -20,9 +30,14 @@ func TestMultichannel(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	var want = "Channel 1: hi I'd like to buy a Chromecast I'm always wondering whether you could help me with that\nChannel 2: certainly which color would you like we have blue black and red"
+	wants := []string{
+		"Channel 1: hi I'd like to buy a Chromecast",
+		"Channel 2: certainly which color",
+	}
 
-	if got := buf.String(); !strings.Contains(got, want) {
-		t.Fatalf(`transcribeMultichannel(../testdata/commercial_stereo.wav) = %q; want to contain %q`, got, want)
+	for _, want := range wants {
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf(`transcribeMultichannel(../testdata/commercial_stereo.wav) = \n\n%q\n\nWant to contain \n\n%q`, got, want)
+		}
 	}
 }
