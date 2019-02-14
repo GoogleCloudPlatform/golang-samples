@@ -219,7 +219,6 @@ func processStream(ctx context.Context, client *bqStorage.BigQueryStorageClient,
 			}
 		}
 	}
-	return nil
 }
 
 // processAvro receives row blocks from a channel, and uses the provided Avro
@@ -260,7 +259,6 @@ func processAvro(ctx context.Context, schema string, ch <-chan *bqStoragepb.Avro
 			}
 		}
 	}
-	return nil
 }
 
 // [END bigquerystorage_quickstart]
