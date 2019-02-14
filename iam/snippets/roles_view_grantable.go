@@ -35,8 +35,8 @@ func viewGrantableRoles(w io.Writer, fullResourceName string) ([]*iam.Role, erro
 		return nil, fmt.Errorf("iam.New: %v", err)
 	}
 
-	request := iam.QueryGrantableRolesRequest{FullResourceName: fullResourceName}
-	response, err := service.Roles.QueryGrantableRoles(&request).Do()
+	request := &iam.QueryGrantableRolesRequest{FullResourceName: fullResourceName}
+	response, err := service.Roles.QueryGrantableRoles(request).Do()
 	if err != nil {
 		return nil, fmt.Errorf("Roles.QueryGrantableRoles: %v", err)
 	}

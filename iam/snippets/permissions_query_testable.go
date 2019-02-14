@@ -35,8 +35,8 @@ func queryTestablePermissions(w io.Writer, fullResourceName string) ([]*iam.Perm
 		return nil, fmt.Errorf("iam.New: %v", err)
 	}
 
-	request := iam.QueryTestablePermissionsRequest{FullResourceName: fullResourceName}
-	response, err := service.Permissions.QueryTestablePermissions(&request).Do()
+	request := &iam.QueryTestablePermissionsRequest{FullResourceName: fullResourceName}
+	response, err := service.Permissions.QueryTestablePermissions(request).Do()
 	if err != nil {
 		return nil, fmt.Errorf("Permissions.QueryTestablePermissions: %v", err)
 	}

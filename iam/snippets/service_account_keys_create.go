@@ -36,8 +36,8 @@ func createKey(w io.Writer, serviceAccountEmail string) (*iam.ServiceAccountKey,
 	}
 
 	resource := "projects/-/serviceAccounts/" + serviceAccountEmail
-	request := iam.CreateServiceAccountKeyRequest{}
-	key, err := service.Projects.ServiceAccounts.Keys.Create(resource, &request).Do()
+	request := &iam.CreateServiceAccountKeyRequest{}
+	key, err := service.Projects.ServiceAccounts.Keys.Create(resource, request).Do()
 	if err != nil {
 		return nil, fmt.Errorf("Projects.ServiceAccounts.Keys.Create: %v", err)
 	}

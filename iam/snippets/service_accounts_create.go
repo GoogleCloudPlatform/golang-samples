@@ -36,10 +36,10 @@ func createServiceAccount(w io.Writer, projectID string, name string,
 		return nil, fmt.Errorf("iam.New: %v", err)
 	}
 
-	request := iam.CreateServiceAccountRequest{
+	request := &iam.CreateServiceAccountRequest{
 		AccountId:      name,
 		ServiceAccount: &iam.ServiceAccount{DisplayName: displayName}}
-	account, err := service.Projects.ServiceAccounts.Create("projects/"+projectID, &request).Do()
+	account, err := service.Projects.ServiceAccounts.Create("projects/"+projectID, request).Do()
 	if err != nil {
 		return nil, fmt.Errorf("Projects.ServiceAccounts.Create: %v", err)
 	}

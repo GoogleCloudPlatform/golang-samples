@@ -36,8 +36,8 @@ func undeleteRole(w io.Writer, name string, projectID string) (*iam.Role, error)
 	}
 
 	resource := "projects/" + projectID + "/roles/" + name
-	request := iam.UndeleteRoleRequest{}
-	role, err := service.Projects.Roles.Undelete(resource, &request).Do()
+	request := &iam.UndeleteRoleRequest{}
+	role, err := service.Projects.Roles.Undelete(resource, request).Do()
 	if err != nil {
 		return nil, fmt.Errorf("Projects.Roles.Undelete: %v", err)
 	}
