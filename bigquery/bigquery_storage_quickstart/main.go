@@ -52,7 +52,7 @@ var rpcOpts = gax.WithGRPCOptions(
 var (
 	projectID = flag.String("project_id", "",
 		"Cloud Project ID, used for session creation.")
-	snapShotMillis = flag.Int64("snapshot_millis", 0,
+	snapshotMillis = flag.Int64("snapshot_millis", 0,
 		"Snapshot time to use for reads, represented in epoch milliseconds format.  Default behavior reads current data.")
 )
 
@@ -93,10 +93,10 @@ func main() {
 	}
 
 	// Set a snapshot time if it's been specified.
-	if *snapShotMillis > 0 {
-		ts, err := ptypes.TimestampProto(time.Unix(0, *snapShotMillis*1000))
+	if *snapshotMillis > 0 {
+		ts, err := ptypes.TimestampProto(time.Unix(0, *snapshotMillis*1000))
 		if err != nil {
-			log.Fatalf("Invalid snapshot millis (%d): %v", *snapShotMillis, err)
+			log.Fatalf("Invalid snapshot millis (%d): %v", *snapshotMillis, err)
 		}
 		readSessionRequest.TableModifiers = &bqStoragepb.TableModifiers{
 			SnapshotTime: ts,
