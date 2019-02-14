@@ -35,12 +35,15 @@ func createRole(w io.Writer, name, projectID, title, description, stage string, 
 		return nil, fmt.Errorf("iam.New: %v", err)
 	}
 
-	request := &iam.CreateRoleRequest{Role: &iam.Role{
-		Title:               title,
-		Description:         description,
-		IncludedPermissions: permissions,
-		Stage:               stage,
-	}, RoleId: name}
+	request := &iam.CreateRoleRequest{
+		Role: &iam.Role{
+			Title:               title,
+			Description:         description,
+			IncludedPermissions: permissions,
+			Stage:               stage,
+		},
+		RoleId: name,
+	}
 	role, err := service.Projects.Roles.Create("projects/"+projectID, request).Do()
 	if err != nil {
 		return nil, fmt.Errorf("Projects.Roles.Create: %v", err)
