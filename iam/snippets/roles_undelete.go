@@ -25,7 +25,7 @@ import (
 )
 
 // undeleteRole restores a deleted custom role.
-func undeleteRole(w io.Writer, name, projectID string) (*iam.Role, error) {
+func undeleteRole(w io.Writer, projectID, name string) (*iam.Role, error) {
 	client, err := google.DefaultClient(context.Background(), iam.CloudPlatformScope)
 	if err != nil {
 		return nil, fmt.Errorf("google.DefaultClient: %v", err)

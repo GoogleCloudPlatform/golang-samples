@@ -25,7 +25,7 @@ import (
 )
 
 // editRole modifies a custom role.
-func editRole(w io.Writer, name, projectID, newTitle, newDescription, newStage string, newPermissions []string) (*iam.Role, error) {
+func editRole(w io.Writer, projectID, name, newTitle, newDescription, newStage string, newPermissions []string) (*iam.Role, error) {
 	client, err := google.DefaultClient(context.Background(), iam.CloudPlatformScope)
 	if err != nil {
 		return nil, fmt.Errorf("google.DefaultClient: %v", err)

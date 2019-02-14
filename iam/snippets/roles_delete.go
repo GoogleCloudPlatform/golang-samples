@@ -25,7 +25,7 @@ import (
 )
 
 // deleteRole deletes a custom role.
-func deleteRole(w io.Writer, name, projectID string) error {
+func deleteRole(w io.Writer, projectID, name string) error {
 	client, err := google.DefaultClient(context.Background(), iam.CloudPlatformScope)
 	if err != nil {
 		return fmt.Errorf("google.DefaultClient: %v", err)
