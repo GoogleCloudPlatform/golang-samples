@@ -16,14 +16,15 @@ package snippets
 
 import (
 	"bytes"
-	"os"
 	"testing"
+
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestQueryTestablePermissions(t *testing.T) {
+	tc := testutil.SystemTest(t)
 	buf := &bytes.Buffer{}
-	project := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
-	name := "//cloudresourcemanager.googleapis.com/projects/" + project
+	name := "//cloudresourcemanager.googleapis.com/projects/" + tc.ProjectID
 	permissions, err := queryTestablePermissions(buf, name)
 	if err != nil {
 		t.Fatalf("queryTestablePermissions: %v", err)

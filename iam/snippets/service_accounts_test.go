@@ -16,26 +16,26 @@ package snippets
 
 import (
 	"bytes"
-	"os"
 	"strings"
 	"testing"
 
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/gofrs/uuid"
 )
 
 func TestServiceAccounts(t *testing.T) {
+	tc := testutil.SystemTest(t)
 	buf := &bytes.Buffer{}
 	uuid, _ := uuid.NewV4()
 	// Name must start with a letter and be 6-30 characters.
 	name := "a" + strings.Replace(uuid.String(), "-", "", -1)[:29]
-	project := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
 
 	// createServiceAccount test.
-	account, err := createServiceAccount(buf, project, name, "Test")
+	account, err := createServiceAccount(buf, tc.ProjectID, name, "Test")
 	if err != nil {
 		t.Fatalf("createServiceAccount: %v", err)
 	}
-	wantEmail := name + "@" + project + ".iam.gserviceaccount.com"
+	wantEmail := name + "@" + tc.ProjectID + ".iam.gserviceaccount.com"
 	if wantEmail != account.Email {
 		t.Fatalf("createServiceAccount: account.Email is %q, wanted %q", account.Email, wantEmail)
 	}
@@ -51,7 +51,7 @@ func TestServiceAccounts(t *testing.T) {
 	}
 
 	// listServiceAccounts test
-	accounts, err := listServiceAccounts(buf, project)
+	accounts, err := listServiceAccounts(buf, tc.ProjectID)
 	if err != nil {
 		t.Fatalf("listServiceAccounts: %v", err)
 	}
