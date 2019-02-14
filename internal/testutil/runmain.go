@@ -72,8 +72,9 @@ func (r *Runner) Cleanup() {
 }
 
 // Run executes runs the built binary until terminated or timeout has
-// been reached, and indicates successful execution on return.
-func (r *Runner) Run(env map[string]string, timeout time.Duration) (stdout, stderr []byte, err error) {
+// been reached, and indicates successful execution on return.  You can
+// supply extra arguments for the binary via args.
+func (r *Runner) Run(env map[string]string, timeout time.Duration, args ...string) (stdout, stderr []byte, err error) {
 	if !r.Built() {
 		return nil, nil, fmt.Errorf("tried to run when binary not built")
 	}
@@ -86,7 +87,7 @@ func (r *Runner) Run(env map[string]string, timeout time.Duration) (stdout, stde
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, r.bin)
+	cmd := exec.CommandContext(ctx, r.bin, args...)
 	cmd.Env = environ
 	var bufOut, bufErr bytes.Buffer
 	cmd.Stdout = &bufOut

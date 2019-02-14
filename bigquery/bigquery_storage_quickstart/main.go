@@ -1,6 +1,16 @@
-// Copyright 2019 Google Inc. All rights reserved.
-// Use of this source code is governed by the Apache 2.0
-// license that can be found in the LICENSE file.
+// Copyright 2019 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 // [START bigquerystorage_quickstart]
 
@@ -19,7 +29,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"os"
 	"sort"
 	"sync"
 	"time"
@@ -42,8 +51,8 @@ var rpcOpts = gax.WithGRPCOptions(
 // Command-line flags.
 var (
 	projectID = flag.String("project_id", "",
-		"Cloud Project for attributing usage costs, in projects/<projectid> format")
-	snapShotMs = flag.Int64("snapshot_ms", 0,
+		"Cloud Project ID, used for session creation.")
+	snapShotMillis = flag.Int64("snapshot_millis", 0,
 		"Snapshot time to use for reads, represented in epoch milliseconds format.  Default behavior reads current data.")
 )
 
@@ -56,14 +65,10 @@ func main() {
 	}
 	defer bqStorageClient.Close()
 
-	// Determine the parent project we'll use for the read session.  The
+	// Verify we've been provided a parent project which will contain the read session.  The
 	// session may exist in a different project than the table being read.
-	parentProject := os.Getenv("GOOGLE_CLOUD_PROJECT")
-	if *projectID != "" {
-		parentProject = *projectID
-	}
-	if parentProject == "" {
-		log.Fatalf("No parent project for the read session specified.  Use the --project_id flag to specify, or set the GOOGLE_CLOUD_PROJECT environment variable.")
+	if *projectID == "" {
+		log.Fatalf("No parent project ID specified, please supply using the --project_id flag.")
 	}
 
 	// This example uses baby name data from the public datasets.
@@ -82,16 +87,16 @@ func main() {
 	}
 
 	readSessionRequest := &bqStoragepb.CreateReadSessionRequest{
-		Parent:         fmt.Sprintf("projects/%s", parentProject),
+		Parent:         fmt.Sprintf("projects/%s", *projectID),
 		TableReference: readTable,
 		ReadOptions:    tableReadOptions,
 	}
 
 	// Set a snapshot time if it's been specified.
-	if *snapShotMs > 0 {
-		ts, err := ptypes.TimestampProto(time.Unix(0, *snapShotMs*1000))
+	if *snapShotMillis > 0 {
+		ts, err := ptypes.TimestampProto(time.Unix(0, *snapShotMillis*1000))
 		if err != nil {
-			log.Fatalf("Invalid snapshot millis (%d): %v", *snapShotMs, err)
+			log.Fatalf("Invalid snapshot millis (%d): %v", *snapShotMillis, err)
 		}
 		readSessionRequest.TableModifiers = &bqStoragepb.TableModifiers{
 			SnapshotTime: ts,
@@ -237,7 +242,7 @@ func processAvro(ctx context.Context, schema string, ch <-chan *bqStoragepb.Avro
 	for {
 		select {
 		case <-ctx.Done():
-			// context was cancelled.  Stop.
+			// Context was cancelled.  Stop.
 			return nil
 		case rows, ok := <-ch:
 			if !ok {
