@@ -12,10 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// This App Engine application uses its default service account to list all
-// the BigQuery datasets accessible via the BigQuery REST API.
-
-// Package inspect contains example snippets using the DLP Inspect API.
 package inspect
 
 // [START dlp_inspect_string]

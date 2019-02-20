@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// This App Engine application uses its default service account to list all
-// the BigQuery datasets accessible via the BigQuery REST API.
-
 package inspect
 
 import (
