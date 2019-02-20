@@ -25,6 +25,7 @@ import (
 
 	"cloud.google.com/go/bigtable"
 )
+
 // [END bigtable_hw_imports]
 
 // User-provided constants.
