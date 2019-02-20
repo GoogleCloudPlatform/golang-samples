@@ -16,6 +16,7 @@
 // library to perform basic CRUD operations
 package main
 
+// [START bigtable_hw_imports]
 import (
 	"context"
 	"flag"
@@ -24,6 +25,8 @@ import (
 
 	"cloud.google.com/go/bigtable"
 )
+
+// [END bigtable_hw_imports]
 
 // User-provided constants.
 const (
@@ -59,11 +62,14 @@ func main() {
 
 	// Set up admin client, tables, and column families.
 	// NewAdminClient uses Application Default Credentials to authenticate.
+	// [START bigtable_hw_connect]
 	adminClient, err := bigtable.NewAdminClient(ctx, *project, *instance)
 	if err != nil {
 		log.Fatalf("Could not create admin client: %v", err)
 	}
+	// [END bigtable_hw_connect]
 
+	// [START bigtable_hw_create_table]
 	tables, err := adminClient.Tables(ctx)
 	if err != nil {
 		log.Fatalf("Could not fetch table list: %v", err)
@@ -86,14 +92,18 @@ func main() {
 			log.Fatalf("Could not create column family %s: %v", columnFamilyName, err)
 		}
 	}
+	// [END bigtable_hw_create_table]
 
 	// Set up Bigtable data operations client.
 	// NewClient uses Application Default Credentials to authenticate.
+	// [START bigtable_hw_connect_data]
 	client, err := bigtable.NewClient(ctx, *project, *instance)
 	if err != nil {
 		log.Fatalf("Could not create data operations client: %v", err)
 	}
+	// [END bigtable_hw_connect_data]
 
+	// [START bigtable_hw_write_rows]
 	tbl := client.Open(tableName)
 	muts := make([]*bigtable.Mutation, len(greetings))
 	rowKeys := make([]string, len(greetings))
@@ -127,14 +137,18 @@ func main() {
 		}
 		log.Fatalf("Could not write some rows")
 	}
+	// [END bigtable_hw_write_rows]
 
+	// [START bigtable_hw_get_by_key]
 	log.Printf("Getting a single greeting by row key:")
 	row, err := tbl.ReadRow(ctx, rowKeys[0], bigtable.RowFilter(bigtable.ColumnFilter(columnName)))
 	if err != nil {
 		log.Fatalf("Could not read row with key %s: %v", rowKeys[0], err)
 	}
 	log.Printf("\t%s = %s\n", rowKeys[0], string(row[columnFamilyName][0].Value))
+	// [END bigtable_hw_get_by_key]
 
+	// [START bigtable_hw_scan_all]
 	log.Printf("Reading all greeting rows:")
 	err = tbl.ReadRows(ctx, bigtable.PrefixRange(columnName), func(row bigtable.Row) bool {
 		item := row[columnFamilyName][0]
@@ -145,7 +159,9 @@ func main() {
 	if err = client.Close(); err != nil {
 		log.Fatalf("Could not close data operations client: %v", err)
 	}
+	// [END bigtable_hw_scan_all]
 
+	// [START bigtable_hw_delete_table]
 	log.Printf("Deleting the table")
 	if err = adminClient.DeleteTable(ctx, tableName); err != nil {
 		log.Fatalf("Could not delete table %s: %v", tableName, err)
@@ -154,4 +170,5 @@ func main() {
 	if err = adminClient.Close(); err != nil {
 		log.Fatalf("Could not close admin client: %v", err)
 	}
+	// [END bigtable_hw_delete_table]
 }
