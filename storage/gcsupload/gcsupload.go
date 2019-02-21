@@ -87,7 +87,7 @@ func main() {
 	}
 
 	ctx := context.Background()
-	_, objAttrs, err := upload(ctx, r, projectID, bucket, name, true)
+	_, objAttrs, err := upload(ctx, r, projectID, bucket, name, public)
 	if err != nil {
 		switch err {
 		case storage.ErrBucketNotExist:
