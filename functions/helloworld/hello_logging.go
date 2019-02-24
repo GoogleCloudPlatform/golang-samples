@@ -31,8 +31,8 @@ var (
 
 // HelloLogging logs messages.
 func HelloLogging(w http.ResponseWriter, r *http.Request) {
-	stdLogger.Println("I am a log entry!")
-	logger.Println("I am an error!")
+	stdLogger.Println("This is sent to os.Stdout")
+	logger.Println("This is sent to os.Stderr")
 }
 
 // [END functions_log_helloworld]
