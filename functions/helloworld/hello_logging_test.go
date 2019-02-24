@@ -37,7 +37,7 @@ func TestHelloLogging(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ReadAll: %v", err)
 	}
-	want := "log entry"
+	want := "Stdout"
 	if got := string(stdout); !strings.Contains(got, want) {
 		t.Errorf("Stdout got %q, want to contain %q", got, want)
 	}
@@ -46,7 +46,7 @@ func TestHelloLogging(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ReadAll: %v", err)
 	}
-	want = "error"
+	want = "Stderr"
 	if got := string(stderr); !strings.Contains(got, want) {
 		t.Errorf("Stderr got %q, want to contain %q", got, want)
 	}
