@@ -1,6 +1,16 @@
-// Copyright 2015 Google Inc. All rights reserved.
-// Use of this source code is governed by the Apache 2.0
-// license that can be found in the LICENSE file.
+// Copyright 2019 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 // Sample pubsub demonstrates use of the cloud.google.com/go/pubsub package from App Engine flexible environment.
 package main
@@ -16,7 +26,6 @@ import (
 	"sync"
 
 	"cloud.google.com/go/pubsub"
-	"google.golang.org/appengine"
 )
 
 var (
@@ -25,6 +34,9 @@ var (
 	// Messages received by this instance.
 	messagesMu sync.Mutex
 	messages   []string
+
+	// token is used to verify push requests.
+	token = mustGetenv("PUBSUB_VERIFICATION_TOKEN")
 )
 
 const maxMessages = 10
@@ -37,9 +49,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Create topic if it doesn't exist.
 	topicName := mustGetenv("PUBSUB_TOPIC")
 	topic = client.Topic(topicName)
+
 	// Create the topic if it doesn't exist.
 	exists, err := topic.Exists(ctx)
 	if err != nil {
@@ -57,7 +69,14 @@ func main() {
 	http.HandleFunc("/pubsub/publish", publishHandler)
 	http.HandleFunc("/pubsub/push", pushHandler)
 
-	appengine.Main()
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+		log.Printf("Defaulting to port %s", port)
+	}
+
+	log.Printf("Listening on port %s", port)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
 }
 
 func mustGetenv(k string) string {
@@ -78,6 +97,10 @@ type pushRequest struct {
 }
 
 func pushHandler(w http.ResponseWriter, r *http.Request) {
+	// Verify the token.
+	if r.URL.Query().Get("token") != token {
+		http.Error(w, "Bad token", http.StatusBadRequest)
+	}
 	msg := &pushRequest{}
 	if err := json.NewDecoder(r.Body).Decode(msg); err != nil {
 		http.Error(w, fmt.Sprintf("Could not decode body: %v", err), http.StatusBadRequest)

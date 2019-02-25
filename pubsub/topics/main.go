@@ -1,6 +1,16 @@
-// Copyright 2016 Google Inc. All rights reserved.
-// Use of this source code is governed by the Apache 2.0
-// license that can be found in the LICENSE file.
+// Copyright 2019 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 // Command topics is a tool to manage Google Cloud Pub/Sub topics by using the Pub/Sub API.
 // See more about Google Cloud Pub/Sub at https://cloud.google.com/pubsub/docs/overview.
@@ -162,7 +172,6 @@ func publishThatScales(client *pubsub.Client, topic string, n int) error {
 
 	for i := 0; i < n; i++ {
 		result := t.Publish(ctx, &pubsub.Message{
-			// data must be a ByteString
 			Data: []byte("Message " + strconv.Itoa(i)),
 		})
 
@@ -191,6 +200,28 @@ func publishThatScales(client *pubsub.Client, topic string, n int) error {
 	}
 	return nil
 	// [END pubsub_publish_with_error_handling_that_scales]
+}
+
+func publishCustomAttributes(client *pubsub.Client, topic string) error {
+	ctx := context.Background()
+	// [START pubsub_publish_custom_attributes]
+	t := client.Topic(topic)
+	result := t.Publish(ctx, &pubsub.Message{
+		Data: []byte("Hello world!"),
+		Attributes: map[string]string{
+			"origin":   "golang",
+			"username": "gcp",
+		},
+	})
+	// Block until the result is returned and a server-generated
+	// ID is returned for the published message.
+	id, err := result.Get(ctx)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Published message with custom attributes; msg ID: %v\n", id)
+	// [END pubsub_publish_custom_attributes]
+	return nil
 }
 
 func publishWithSettings(client *pubsub.Client, topic string, msg []byte) error {

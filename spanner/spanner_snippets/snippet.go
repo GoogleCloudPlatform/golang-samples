@@ -1,6 +1,16 @@
-// Copyright 2018 Google Inc. All rights reserved.
-// Use of this source code is governed by the Apache 2.0
-// license that can be found in the LICENSE file.
+// Copyright 2019 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 // Command spanner_snippets contains runnable snippet code for Cloud Spanner.
 package main
@@ -29,6 +39,7 @@ type adminCommand func(ctx context.Context, w io.Writer, adminClient *database.D
 var (
 	commands = map[string]command{
 		"write":                      write,
+		"delete":                     delete,
 		"query":                      query,
 		"read":                       read,
 		"update":                     update,
@@ -215,6 +226,25 @@ func write(ctx context.Context, w io.Writer, client *spanner.Client) error {
 }
 
 // [END spanner_insert_data]
+
+// [START spanner_delete_data]
+
+func delete(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	// Delete each of the albums by individual key,
+	// then delete all the singers using a key range.
+	m := []*spanner.Mutation{
+		spanner.Delete("Albums", spanner.Key{1, 1}),
+		spanner.Delete("Albums", spanner.Key{1, 2}),
+		spanner.Delete("Albums", spanner.Key{2, 1}),
+		spanner.Delete("Albums", spanner.Key{2, 2}),
+		spanner.Delete("Albums", spanner.Key{2, 3}),
+		spanner.Delete("Singers", spanner.KeyRange{Start: spanner.Key{1}, End: spanner.Key{5}, Kind: spanner.ClosedClosed}),
+	}
+	_, err := client.Apply(ctx, m)
+	return err
+}
+
+// [END spanner_delete_data]
 
 // [START spanner_insert_data_with_timestamp_column]
 

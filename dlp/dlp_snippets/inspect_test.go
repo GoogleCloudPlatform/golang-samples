@@ -1,6 +1,16 @@
-// Copyright 2018 Google Inc. All rights reserved.
-// Use of this source code is governed by the Apache 2.0
-// license that can be found in the LICENSE file.
+// Copyright 2019 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package main
 
@@ -15,6 +25,11 @@ import (
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
+)
+
+const (
+	inspectTopicName        = "dlp-inspect-test-topic"
+	inspectSubscriptionName = "dlp-inspect-test-sub"
 )
 
 func TestInspectString(t *testing.T) {
@@ -157,7 +172,7 @@ func TestInspectGCS(t *testing.T) {
 	}
 	for _, test := range tests {
 		buf := new(bytes.Buffer)
-		inspectGCSFile(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, true, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, "test-topic", "test-sub", bucketName, test.fileName)
+		inspectGCSFile(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, true, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, inspectTopicName, inspectSubscriptionName, bucketName, test.fileName)
 		if got := buf.String(); !strings.Contains(got, test.want) {
 			t.Errorf("inspectString(%s) = %q, want %q substring", test.fileName, got, test.want)
 		}
@@ -217,7 +232,7 @@ func TestInspectDatastore(t *testing.T) {
 	}
 	for _, test := range tests {
 		buf := new(bytes.Buffer)
-		inspectDatastore(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, true, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, "test-topic", "test-sub", projectID, "", test.kind)
+		inspectDatastore(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, true, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, inspectTopicName, inspectSubscriptionName, projectID, "", test.kind)
 		if got := buf.String(); !strings.Contains(got, test.want) {
 			t.Errorf("inspectDatastore(%s) = %q, want %q substring", test.kind, got, test.want)
 		}
@@ -298,7 +313,7 @@ func TestInspectBigquery(t *testing.T) {
 	}
 	for _, test := range tests {
 		buf := new(bytes.Buffer)
-		inspectBigquery(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, true, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, "test-topic", "test-sub", projectID, bqDatasetID, test.table)
+		inspectBigquery(buf, client, projectID, dlppb.Likelihood_POSSIBLE, 0, true, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, inspectTopicName, inspectSubscriptionName, projectID, bqDatasetID, test.table)
 		if got := buf.String(); !strings.Contains(got, test.want) {
 			t.Errorf("inspectBigquery(%s) = %q, want %q substring", test.table, got, test.want)
 		}
