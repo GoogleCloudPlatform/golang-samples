@@ -95,12 +95,12 @@ func main() {
 	}
 	if *token != "" {
 		log.Printf("Using authentication token: %s", *token)
-                _, ok := metadata.FromOutgoingContext(ctx)
+		_, ok := metadata.FromOutgoingContext(ctx)
 		if ok {
-                  ctx = metadata.AppendToOutgoingContext(ctx, "Authorization", fmt.Sprintf("Bearer %s", *token))
-                } else {
-                  ctx = metadata.NewOutgoingContext(ctx, metadata.Pairs("Authorization", fmt.Sprintf("Bearer %s", *token)))
-                }
+			ctx = metadata.AppendToOutgoingContext(ctx, "Authorization", fmt.Sprintf("Bearer %s", *token))
+		} else {
+			ctx = metadata.NewOutgoingContext(ctx, metadata.Pairs("Authorization", fmt.Sprintf("Bearer %s", *token)))
+		}
 	}
 
 	// Contact the server and print out its response.
