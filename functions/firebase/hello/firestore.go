@@ -14,7 +14,7 @@
 
 // [START functions_firebase_firestore]
 
-// Package hello contains a Firestore Cloud Function.
+// Package hello contains a Cloud Function triggered by a Firestore event.
 package hello
 
 import (
