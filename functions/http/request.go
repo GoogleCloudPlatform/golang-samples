@@ -15,7 +15,7 @@
 // [START functions_concepts_requests]
 // [START functions_tips_connection_pooling]
 
-// Package http provides a set of HTTP Cloud Function samples.
+// Package http provides a set of HTTP Cloud Functions samples.
 package http
 
 import (
