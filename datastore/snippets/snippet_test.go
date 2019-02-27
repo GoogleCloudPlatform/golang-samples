@@ -204,7 +204,7 @@ func SnippetTransaction_update() {
 		log.Fatalf("tx.Get: %v", err)
 	}
 	task.Priority = 5
-	if _, err := tx.Put(taskKey, task); err != nil {
+	if _, err := tx.Put(taskKey, &task); err != nil {
 		log.Fatalf("tx.Put: %v", err)
 	}
 	if _, err := tx.Commit(); err != nil {
