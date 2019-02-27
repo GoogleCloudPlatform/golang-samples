@@ -15,7 +15,7 @@
 // [START functions_helloworld_pubsub]
 // [START functions_helloworld_background]
 
-// Package helloworld provides a set of Cloud Function samples.
+// Package helloworld provides a set of Cloud Functions samples.
 package helloworld
 
 import (

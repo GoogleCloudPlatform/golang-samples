@@ -14,7 +14,7 @@
 
 // [START functions_helloworld_storage_generic]
 
-// Package helloworld provides a set of Cloud Function samples.
+// Package helloworld provides a set of Cloud Functions samples.
 package helloworld
 
 import (
