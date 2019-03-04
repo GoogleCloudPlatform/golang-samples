@@ -12,19 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-runtime: go
-api_version: go1
+runtime: go111
 
 handlers:
-# [START gae_go_env_static_handlers]
-# If the path is empty, show static index.html file
-- url: /
-  static_files: index.html
-  upload: index.html
+  # [START gae_go_env_static_handlers]
+  # If the path is empty, show static index.html file
+  - url: /
+    # Path is relative based on ROOT_REPO
+    # e.g. https://github.com/USERNAME/REPO_NAME/cmd/SERVICE/public/...
+    # static_files: cmd/SERVICE/public/index.html
+    # upload: cmd/SERVICE/public/index.html
+    static_files: index.html
+    upload: index.html
 
-# Otherwise, find file in static directory
-- url: /static
-  static_dir: static
-# [END gae_go_env_static_handlers]  
-- url: /.*
-  script: _go_app
+  # Otherwise, find file in static directory
+  - url: /static
+    static_dir: static
+  # [END gae_go_env_static_handlers]
+  - url: /.*
+    script: auto
