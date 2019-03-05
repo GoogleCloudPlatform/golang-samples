@@ -1,6 +1,16 @@
-// Copyright 2016 Google Inc. All rights reserved.
-// Use of this source code is governed by the Apache 2.0
-// license that can be found in the LICENSE file.
+// Copyright 2019 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 // Sample buckets creates a bucket, lists buckets and deletes a bucket
 // using the Google Storage API. More documentation is available at
@@ -385,4 +395,61 @@ func setDefaultKMSkey(c *storage.Client, bucketName string, keyName string) erro
 	}
 	// [END storage_set_bucket_default_kms_key]
 	return nil
+}
+
+func enableBucketPolicyOnly(c *storage.Client, bucketName string) error {
+	ctx := context.Background()
+
+	// [START storage_enable_bucket_policy_only]
+	bucket := c.Bucket(bucketName)
+	enableBucketPolicyOnly := storage.BucketAttrsToUpdate{
+		BucketPolicyOnly: &storage.BucketPolicyOnly{
+			Enabled: true,
+		},
+	}
+	if _, err := bucket.Update(ctx, enableBucketPolicyOnly); err != nil {
+		return err
+	}
+	// [END storage_enable_bucket_policy_only]
+	return nil
+}
+
+func disableBucketPolicyOnly(c *storage.Client, bucketName string) error {
+	ctx := context.Background()
+
+	// [START storage_disable_bucket_policy_only]
+	bucket := c.Bucket(bucketName)
+	disableBucketPolicyOnly := storage.BucketAttrsToUpdate{
+		BucketPolicyOnly: &storage.BucketPolicyOnly{
+			Enabled: false,
+		},
+	}
+	if _, err := bucket.Update(ctx, disableBucketPolicyOnly); err != nil {
+		return err
+	}
+	// [END storage_disable_bucket_policy_only]
+	return nil
+}
+
+func getBucketPolicyOnly(c *storage.Client, bucketName string) (*storage.BucketAttrs, error) {
+	ctx := context.Background()
+
+	// [START storage_get_bucket_policy_only]
+	attrs, err := c.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		return nil, err
+	}
+	bucketPolicyOnly := attrs.BucketPolicyOnly
+	if bucketPolicyOnly.Enabled {
+		log.Printf("Bucket Policy Only is enabled for %q.\n",
+			attrs.Name)
+		log.Printf("Bucket will be locked on %q.\n",
+			bucketPolicyOnly.LockedTime)
+	} else {
+		log.Printf("Bucket Policy Only is not enabled for %q.\n",
+			attrs.Name)
+	}
+
+	// [END storage_get_bucket_policy_only]
+	return attrs, nil
 }
