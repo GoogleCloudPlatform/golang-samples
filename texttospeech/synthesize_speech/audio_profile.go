@@ -28,6 +28,7 @@ import (
 	texttospeechpb "google.golang.org/genproto/googleapis/cloud/texttospeech/v1"
 )
 
+// audioProfile generates audio from text using a custom synthesizer like a telephone call.
 func audioProfile(w io.Writer, text string, outputFile string) error {
 	// text := "hello"
 	// outputFile := "out.mp3"

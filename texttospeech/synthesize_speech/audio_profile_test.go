@@ -35,6 +35,7 @@ func TestAudioProfile(t *testing.T) {
 	if err := audioProfile(&buf, text, outputFile); err != nil {
 		t.Fatal(err)
 	}
+	defer os.Remove(outputFile)
 
 	if got := buf.String(); !strings.Contains(got, "Audio content written to file") {
 		t.Error("'Audio content written to file' not found")
@@ -48,6 +49,4 @@ func TestAudioProfile(t *testing.T) {
 	if stat.Size() == 0 {
 		t.Error("Empty output file")
 	}
-
-	os.Remove(outputFile)
 }
