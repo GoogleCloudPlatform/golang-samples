@@ -14,7 +14,7 @@
 
 // [START functions_http_content]
 
-// Package http provides a set of HTTP Cloud Function samples.
+// Package http provides a set of HTTP Cloud Functions samples.
 package http
 
 import (
