@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package p contains a Firestore Cloud Function.
+// Package p contains a Cloud Function triggered by a Firestore event.
 package p
 
 import (
