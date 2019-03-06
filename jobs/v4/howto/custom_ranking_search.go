@@ -27,21 +27,19 @@ import (
 // [START job_search_custom_ranking_search]
 
 // customRankingSearch searches for jobs based on custom ranking.
-func customRankingSearch(w io.Writer, projectID, companyName string) error {
+func customRankingSearch(w io.Writer, projectId, companyName string) error {
 	ctx := context.Background()
 
-	// Create a job service client.
+	// Initialize a jobService client.
 	c, err := talent.NewJobClient(ctx)
 	if err != nil {
-		return fmt.Errorf("talent.NewJobClient: %v", err)
+		fmt.Printf("talent.NewJobClient: %v", err)
+		return err
 	}
 
-	jobQuery := &talentpb.JobQuery{
-		CompanyNames: []string{companyName},
-	}
-
+	// Construct a searchJobs request.
 	req := &talentpb.SearchJobsRequest{
-		Parent: "projects/" + projectID,
+		Parent: "projects/" + projectId,
 		// Make sure to set the RequestMetadata the same as the associated
 		// search request.
 		RequestMetadata: &talentpb.RequestMetadata{
@@ -52,27 +50,30 @@ func customRankingSearch(w io.Writer, projectID, companyName string) error {
 			// Domain of the website where the search is conducted.
 			Domain: "www.googlesample.com",
 		},
-		// Optional. Set the actual search term as defined in the jobQuery.
-		JobQuery: jobQuery,
-    // Optional.
+		JobQuery: &talentpb.JobQuery{
+			CompanyNames: []string{companyName},
+		},
+    // More info on customRankingInfo.
+		// https://godoc.org/google.golang.org/genproto/googleapis/cloud/talent/v4beta1#SearchJobsRequest_CustomRankingInfo
     CustomRankingInfo: &talentpb.SearchJobsRequest_CustomRankingInfo{
       ImportanceLevel: 6,
-      RankingExpression: "(year + 25) * 0.25 - (freshness / 0.5)",
+      RankingExpression: "(someFieldLong + 25) * 0.25 - anotherFieldLong",
     },
     OrderBy: "custom_ranking desc",
 	}
+
 	it := c.SearchJobs(ctx, req)
-	fmt.Fprintln(w, "Jobs:")
+
 	for {
 		resp, err := it.Next()
 		if err == iterator.Done {
 			return nil
 		}
 		if err != nil {
-			return fmt.Errorf("it.Next: %v", err)
+			fmt.Printf("it.Next: %v", err)
+			return err
 		}
-		fmt.Printf("%v\n", resp.Job.Name)
-		fmt.Fprintf(w, "\t%q\n", resp.Job.Name)
+		fmt.Fprintf(w, "Job: %q\n", resp.Job.GetName())
 	}
 }
 

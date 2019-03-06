@@ -16,6 +16,7 @@ package howto
 
 import (
 	"bytes"
+	"fmt"
 	"log"
 	"strings"
 	"testing"
@@ -29,14 +30,14 @@ func TestCreateClientEvent(t *testing.T) {
 		tc := testutil.SystemTest(t)
 		buf := &bytes.Buffer{}
 
-		requestID := "request24680"
-		eventID := "event13579"
+		requestId := fmt.Sprintf("requestId-%d", time.Now().UnixNano())
+		eventId := fmt.Sprintf("eventId-%d", time.Now().UnixNano())
 		relatedJobNames := []string{testJob.Name}
 
-		if _, err := createClientEvent(buf, tc.ProjectID, requestID, eventID, relatedJobNames); err != nil {
+		if _, err := createClientEvent(buf, tc.ProjectID, requestId, eventId, relatedJobNames); err != nil {
 			log.Fatalf("createClientEvent: %v", err)
 		}
-		want := "Client event created"
+		want := "Client event created: "
 		if got := buf.String(); !strings.Contains(got, want) {
 			t.Fatalf("getJob got %q, want to contain %q", got, want)
 		}

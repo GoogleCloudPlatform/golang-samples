@@ -25,26 +25,30 @@ import (
 
 // [START job_search_batch_delete_job]
 
-// deleteJob deletes an existing job by filter.
-func batchDeleteJobs(w io.Writer, projectID string, filter string) error {
+// batchDeleteJobs deletes existing jobs by filter.
+func batchDeleteJobs(w io.Writer, projectId string, filter string) error {
 	ctx := context.Background()
 
-	// Create a job service client.
+	// Initialize a jobService client.
 	c, err := talent.NewJobClient(ctx)
 	if err != nil {
-		return fmt.Errorf("talent.NewJobClient: %v", err)
+		fmt.Printf("talent.NewJobClient: %v", err)
+		return err
 	}
 
-	// Construct a GetJobRequest.
+	// Construct a batchDeteleJobs request.
 	req := &talentpb.BatchDeleteJobsRequest{
-    Parent: "projects/" + projectID,
+    Parent: "projects/" + projectId,
     // The fields eligible for filtering are `companyName` and `requisitionId`.
 		Filter: filter,
 	}
 
 	if err := c.BatchDeleteJobs(ctx, req); err != nil {
-		return fmt.Errorf("Delete jobs from %s: %v", filter, err)
+		fmt.Printf("Batch deleting jobs from %s yielded: %v", filter, err)
+		return err
 	}
+
+	fmt.Fprintf(w, "Batch deleted jobs from %s\n", filter)
 
 	return err
 }

@@ -28,19 +28,20 @@ import (
 // [START job_search_create_client_event]
 
 // createClientEvent creates a client event.
-func createClientEvent(w io.Writer, projectID string, requestID string, eventID string, relatedJobNames []string) (*talentpb.ClientEvent, error) {
+func createClientEvent(w io.Writer, projectId string, requestId string, eventId string, relatedJobNames []string) (*talentpb.ClientEvent, error) {
 	ctx := context.Background()
 
-	// Create an event service client.
+	// Create an eventService client.
 	c, err := talent.NewEventClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("talent.NewEventServiceClient: %v", err)
+		fmt.Printf("talent.NewEventClient: %v", err)
+		return nil, err
 	}
 
   createTime, _ := ptypes.TimestampProto(time.Now())
   clientEventToCreate := &talentpb.ClientEvent{
-    RequestId: requestID,
-    EventId: eventID,
+    RequestId: requestId,
+    EventId: eventId,
     CreateTime: createTime,
     Event: &talentpb.ClientEvent_JobEvent{
       JobEvent: &talentpb.JobEvent{
@@ -50,19 +51,20 @@ func createClientEvent(w io.Writer, projectID string, requestID string, eventID 
     },
   }
 
-	// Construct a CreateJobRequest.
+	// Construct a createJob request.
 	req := &talentpb.CreateClientEventRequest{
-		Parent: "projects/" + projectID,
+		Parent: "projects/" + projectId,
 		ClientEvent: clientEventToCreate,
 	}
 
 	resp, err := c.CreateClientEvent(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to create client event: %v", err)
+		fmt.Printf("Failed to create client event: %v", err)
+		return nil, err
 	}
-  fmt.Printf(resp.GetRequestId())
 
 	fmt.Fprintf(w, "Client event created: %v\n", resp.GetEvent())
+
 	return resp, nil
 }
 

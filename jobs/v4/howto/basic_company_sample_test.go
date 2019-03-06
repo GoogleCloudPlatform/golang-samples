@@ -28,7 +28,7 @@ func TestGetCompany(t *testing.T) {
 	if _, err := getCompany(buf, testCompany.GetName()); err != nil {
 		t.Fatalf("getCompany: %v", err)
 	}
-	want := "Got company name: "
+	want := testCompany.Name
 	if got := buf.String(); !strings.Contains(got, want) {
 		t.Fatalf("getCompany got %q, want %q", got, want)
 	}

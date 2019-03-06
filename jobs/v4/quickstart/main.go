@@ -19,7 +19,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 
 	talent "cloud.google.com/go/talent/apiv4beta1"
@@ -28,22 +27,23 @@ import (
 )
 
 func main() {
-	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
-	parent := fmt.Sprintf("projects/%s", projectID)
+	projectId := os.Getenv("GOOGLE_CLOUD_PROJECT")
 
 	// Initialize job search client.
 	ctx := context.Background()
 	c, err := talent.NewCompanyClient(ctx)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Printf("talent.NewCompanyClient: %v", err)
+		return
 	}
 
+	// Construct a listCompany request.
 	req := &talentpb.ListCompaniesRequest{
-		Parent: parent,
+		Parent: "projects/" + projectId,
 	}
+
 	it := c.ListCompanies(ctx, req)
 
-	// Print the returned companies.
 	for {
 		resp, err := it.Next()
 		if err == iterator.Done {
@@ -51,7 +51,7 @@ func main() {
 			break
 		}
 		if err != nil {
-			log.Fatal(err)
+			fmt.Printf("it.Next: %v", err)
 			return
 		}
 		fmt.Printf("Company: %v\n", resp.GetName())

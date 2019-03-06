@@ -24,15 +24,15 @@ import (
 	talentpb "google.golang.org/genproto/googleapis/cloud/talent/v4beta1"
 )
 
-// [START job_search_create_job_custom_attribute]
+// [START job_search_create_job_custom_attributes]
 
-// constructJobWithCustomAttributes constructs a job with custom attributes.
-func createJobWithCustomAttributes(w io.Writer, projectID string, companyName string, jobTitle string) (*talentpb.Job, error) {
-	// requisitionID shoud be the unique ID in your system
-	requisitionID := fmt.Sprintf("job-with-custom-attribute-%d", time.Now().UnixNano())
+// createJobWithCustomAttributes creates a job with custom attributes.
+func createJobWithCustomAttributes(w io.Writer, projectId string, companyName string, jobTitle string) (*talentpb.Job, error) {
+	// requisitionId shoud be the unique ID in your system
+	requisitionId := fmt.Sprintf("job-with-custom-attribute-%d", time.Now().UnixNano())
 
 	jobToCreate := &talentpb.Job{
-		RequisitionId: requisitionID,
+		RequisitionId: requisitionId,
 		Title:         jobTitle,
 		CompanyName:   companyName,
 		ApplicationInfo: &talentpb.Job_ApplicationInfo{
@@ -53,26 +53,28 @@ func createJobWithCustomAttributes(w io.Writer, projectID string, companyName st
 
 	ctx := context.Background()
 
-	// Create a job service client.
+	// Initialize a job service client.
 	c, err := talent.NewJobClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("talent.NewJobClient: %v", err)
+		fmt.Printf("talent.NewJobClient: %v", err)
+		return nil, err
 	}
 
-	// Construct a CreateJobRequest.
+	// Construct a createJob request.
 	req := &talentpb.CreateJobRequest{
-		Parent: "projects/" + projectID,
+		Parent: "projects/" + projectId,
 		Job: jobToCreate,
 	}
 
 	resp, err := c.CreateJob(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to create job: %v", err)
+		fmt.Printf("Failed to create job with custom attributes: %v", err)
+		return nil, err
 	}
 
-	fmt.Printf("Creating job: %v\n", resp.GetRequisitionId())
-	fmt.Printf("Created job name: %v\n", resp.GetName())
+	fmt.Printf("Created job with custom attributres: %q\n", resp.GetName())
+
 	return resp, nil
 }
 
-// [END job_search_create_job_custom_attribute]
+// [END job_search_create_job_custom_attributes]

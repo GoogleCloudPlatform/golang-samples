@@ -27,28 +27,30 @@ import (
 // [START job_search_create_job]
 
 // createJob create a job as given.
-func createJob(w io.Writer, projectID string, jobToCreate *talentpb.Job) (*talentpb.Job, error) {
+func createJob(w io.Writer, projectId string, jobToCreate *talentpb.Job) (*talentpb.Job, error) {
 	ctx := context.Background()
 
-	// Create a job service client.
+	// Initialize a jobService client.
 	c, err := talent.NewJobClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("talent.NewJobClient: %v", err)
+		fmt.Printf("talent.NewJobClient: %v", err)
+		return nil, err
 	}
 
-  // Construct a CreateJobRequest.
+  // Construct a createJob request.
 	req := &talentpb.CreateJobRequest{
-		Parent: "projects/" + projectID,
+		Parent: "projects/" + projectId,
 		Job: jobToCreate,
 	}
 
 	resp, err := c.CreateJob(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to create job: %v", err)
+		fmt.Printf("Failed to create job: %v", err)
+		return nil, err
 	}
 
-	fmt.Printf("Creating job: %v\n", resp.GetRequisitionId())
-	fmt.Printf("Created job name: %v\n at Company %v\n\n", resp.GetName(), resp.GetCompanyName())
+	fmt.Printf("Created job: %q\n", resp.GetName())
+
 	return resp, nil
 }
 
@@ -56,17 +58,18 @@ func createJob(w io.Writer, projectID string, jobToCreate *talentpb.Job) (*talen
 
 // [START job_search_get_job]
 
-// getJob gets a job by name.
+// getJob gets an existing job by name.
 func getJob(w io.Writer, jobName string) (*talentpb.Job, error) {
 	ctx := context.Background()
 
-	// Create a job service client.
+	// Initialize a jobService client.
 	c, err := talent.NewJobClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("talent.NewJobClient: %v", err)
+		fmt.Printf("talent.NewJobClient: %v", err)
+		return nil, err
 	}
 
-	// Construct a GetJobRequest.
+	// Construct a getJob request.
 	req := &talentpb.GetJobRequest{
 		// The resource name of the job to retrieve.
     // The format is "projects/{project_id}/jobs/{job_id}".
@@ -75,10 +78,11 @@ func getJob(w io.Writer, jobName string) (*talentpb.Job, error) {
 
 	resp, err := c.GetJob(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to get job %s: %v", jobName, err)
+		fmt.Printf("Failed to get job %s: %v", jobName, err)
+		return nil, err
 	}
 
-	fmt.Fprintf(w, "Job: %q", resp.Name)
+	fmt.Fprintf(w, "Job: %q\n", resp.GetName())
 
 	return resp, err
 }
@@ -91,22 +95,26 @@ func getJob(w io.Writer, jobName string) (*talentpb.Job, error) {
 func deleteJob(w io.Writer, jobName string) error {
 	ctx := context.Background()
 
-	// Create a job service client.
+	// Initialize a jobService client.
 	c, err := talent.NewJobClient(ctx)
 	if err != nil {
-		return fmt.Errorf("talent.NewJobClient: %v", err)
+		fmt.Printf("talent.NewJobClient: %v", err)
+		return err
 	}
 
-	// Construct a GetJobRequest.
+	// Construct a deleteJob request.
 	req := &talentpb.DeleteJobRequest{
-		// The resource name of the job to retrieve.
+		// The resource name of the job to be deleted.
 		// The format is "projects/{project_id}/jobs/{job_id}".
 		Name: jobName,
 	}
 
 	if err := c.DeleteJob(ctx, req); err != nil {
-		return fmt.Errorf("Delete(%s): %v", jobName, err)
+		fmt.Printf("Delete(%s): %v", jobName, err)
+		return err
 	}
+
+	fmt.Printf("Deleted job: %q\n", jobName)
 
 	return err
 }
@@ -117,32 +125,34 @@ func deleteJob(w io.Writer, jobName string) error {
 
 // listJobs lists jobs with a filter, for example
 // `companyName="projects/my-project/companies/123"`.
-func listJobs(w io.Writer, projectID, filter string) error {
+func listJobs(w io.Writer, projectId, filter string) error {
 	ctx := context.Background()
 
-	// Create a job service client.
+	// Initialize a jobService client.
 	c, err := talent.NewJobClient(ctx)
 	if err != nil {
-		return fmt.Errorf("talent.NewJobClient: %v", err)
+		fmt.Printf("talent.NewJobClient: %v", err)
+		return err
 	}
 
-	// Construct a GetJobRequest.
+	// Construct a listJobs request.
 	req := &talentpb.ListJobsRequest{
-		Parent: "projects/" + projectID,
+		Parent: "projects/" + projectId,
 		Filter: filter,
 	}
 
 	it := c.ListJobs(ctx, req)
+
 	for {
 		resp, err := it.Next()
 		if err == iterator.Done {
 			return nil
 		}
 		if err != nil {
-			return fmt.Errorf("it.Next: %v", err)
+			fmt.Printf("it.Next: %v", err)
+			return err
 		}
-		fmt.Printf("\nListing job: %v\n", resp.GetTitle())
-		fmt.Fprintf(w, "Listed job display name: %v\n", resp.GetName())
+		fmt.Fprintf(w, "Listing job: %v\n", resp.GetName())
 	}
 }
 

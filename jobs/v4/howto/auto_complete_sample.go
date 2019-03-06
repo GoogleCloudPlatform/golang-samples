@@ -27,25 +27,28 @@ import (
 
 // jobTitleAutoComplete suggests the job titles of the given companyName based
 // on query.
-func jobTitleAutocomplete(w io.Writer, projectID, companyName, query string) (*talentpb.CompleteQueryResponse, error) {
+func jobTitleAutocomplete(w io.Writer, projectId, companyName, query string) (*talentpb.CompleteQueryResponse, error) {
 	ctx := context.Background()
 
-	// Create a job service client.
+	// Initialize a completionService client.
 	c, err := talent.NewCompletionClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("talent.NewCompletionClient: %v", err)
+		fmt.Printf("talent.NewCompletionClient: %v", err)
+		return nil, err
 	}
 
-	// Construct a CreateJobRequest.
+	// Construct a completeQuery request.
 	req := &talentpb.CompleteQueryRequest{
-		Name: "projects/" + projectID,
+		Name: "projects/" + projectId,
 		Query: query,
 		PageSize: 1,
+		CompanyName: companyName,
 	}
 
 	resp, err := c.CompleteQuery(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to auto complete with query %s in company %s: %v", query, companyName, err)
+		fmt.Printf("failed to auto complete with query %s in %s: %v", query, companyName, err)
+		return nil, err
 	}
 
 	fmt.Fprintf(w, "Auto complete results:")

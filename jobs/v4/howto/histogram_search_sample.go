@@ -26,31 +26,35 @@ import (
 
 // [START job_search_histogram_search]
 
-// histogramSearch searches for jobs with histogram facets.
+// histogramSearch searches for jobs with histogram queries.
 func histogramSearch(w io.Writer, projectID, companyName string) error {
 	ctx := context.Background()
 
-	// Create a job service client.
+	// Initialize a jobService client.
 	c, err := talent.NewJobClient(ctx)
 	if err != nil {
-		return fmt.Errorf("talent.NewJobClient: %v", err)
+		fmt.Printf("talent.NewJobClient: %v", err)
+		return err
 	}
 
+	// Construct a searchJobs request.
 	req := &talentpb.SearchJobsRequest{
 		Parent: "projects/" + projectID,
 		// Make sure to set the RequestMetadata the same as the associated
 		// search request.
 		RequestMetadata: &talentpb.RequestMetadata{
-			// Make sure to hash your userID.
+			// Make sure to hash your userId.
 			UserId: "HashedUsrId",
-			// Make sure to hash the sessionID.
+			// Make sure to hash the sessionId.
 			SessionId: "HashedSessionId",
 			// Domain of the website where the search is conducted.
 			Domain: "www.googlesample.com",
 		},
 		HistogramQueries: []*talentpb.HistogramQuery{
 			{
-				HistogramQuery: "count(admin1)",
+				// More info on histogram facets, constants, and built-in functions:
+				// https://godoc.org/google.golang.org/genproto/googleapis/cloud/talent/v4beta1#SearchJobsRequest
+				HistogramQuery: "count(base_compensation, [bucket(12, 20)])",
 			},
 		},
 	}
@@ -61,17 +65,17 @@ func histogramSearch(w io.Writer, projectID, companyName string) error {
 	}
 
 	it := c.SearchJobs(ctx, req)
-	fmt.Fprintln(w, "Jobs:")
+
 	for {
 		resp, err := it.Next()
 		if err == iterator.Done {
 			return nil
 		}
 		if err != nil {
-			return fmt.Errorf("it.Next: %v", err)
+			fmt.Printf("it.Next: %v", err)
+			return err
 		}
-		fmt.Printf("%v\n", resp.Job.Name)
-		fmt.Fprintf(w, "\t%q\n", resp.Job.Name)
+		fmt.Fprintf(w, "Job: %q\n", resp.Job.GetName())
 	}
 }
 

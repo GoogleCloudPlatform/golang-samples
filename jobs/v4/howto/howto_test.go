@@ -21,7 +21,6 @@ import (
 	"os"
 	"testing"
 
-  // talent "cloud.google.com/go/talent/apiv4beta1"
 	"github.com/gofrs/uuid"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	talentpb "google.golang.org/genproto/googleapis/cloud/talent/v4beta1"
@@ -65,6 +64,10 @@ func TestMain(m *testing.M) {
 				StringValues: []string{"someStrVal"},
 			},
 			"someFieldLong": {
+				Filterable: true,
+				LongValues: []int64{900},
+			},
+			"anotherFieldLong": {
 				Filterable: true,
 				LongValues: []int64{900},
 			},

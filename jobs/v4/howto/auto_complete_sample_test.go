@@ -26,10 +26,10 @@ func TestJobTitleAutocomplete(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	buf := &bytes.Buffer{}
-	if _, err := jobTitleAutocomplete(buf, tc.ProjectID, "", "Software Engineer"); err != nil {
+	if _, err := jobTitleAutocomplete(buf, tc.ProjectID, testCompany.Name, "Software"); err != nil {
 		t.Fatalf("jobTitleAutoComplete: %v", err)
 	}
-	want := "Auto complete results"
+	want := "Software Engineer"
 	if got := buf.String(); !strings.Contains(got, want) {
 		t.Errorf("jobTitleAutoComplete got %q, want %q", got, want)
 	}

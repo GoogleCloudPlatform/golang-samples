@@ -29,15 +29,17 @@ import (
 // [START job_search_commute_search]
 
 // commuteSearch searches for jobs within commute filter.
-func commuteSearch(w io.Writer, projectID, companyName string) error {
+func commuteSearch(w io.Writer, projectId, companyName string) error {
 	ctx := context.Background()
 
-	// Create a job service client.
+	// Initialize a jobService client.
 	c, err := talent.NewJobClient(ctx)
 	if err != nil {
-		return fmt.Errorf("talent.NewJobClient: %v", err)
+		fmt.Printf("talent.NewJobClient: %v", err)
+		return err
 	}
 
+	// Construct a jobQuery request with a commute filter.
 	jobQuery := &talentpb.JobQuery{
 		CommuteFilter: &talentpb.CommuteFilter{
 			CommuteMethod:  2,
@@ -52,8 +54,9 @@ func commuteSearch(w io.Writer, projectID, companyName string) error {
 		jobQuery.CompanyNames = []string{companyName}
 	}
 
+	// Construct a searchJobs request with a jobQuery.
 	req := &talentpb.SearchJobsRequest{
-		Parent: "projects/" + projectID,
+		Parent: "projects/" + projectId,
 		// Make sure to set the RequestMetadata the same as the associated
 		// search request.
 		RequestMetadata: &talentpb.RequestMetadata{
@@ -67,18 +70,19 @@ func commuteSearch(w io.Writer, projectID, companyName string) error {
 		// Set the actual search term as defined in the jobQuery.
 		JobQuery: jobQuery,
 	}
+
 	it := c.SearchJobs(ctx, req)
-	fmt.Fprintln(w, "Jobs:")
+
 	for {
 		resp, err := it.Next()
 		if err == iterator.Done {
 			return nil
 		}
 		if err != nil {
-			return fmt.Errorf("it.Next: %v", err)
+			fmt.Printf("it.Next: %v", err)
+			return err
 		}
-		fmt.Printf("%v\n", resp.Job.Name)
-		fmt.Fprintf(w, "\t%q\n", resp.Job.Name)
+		fmt.Fprintf(w, "Job: %q\n", resp.Job.GetName())
 	}
 }
 

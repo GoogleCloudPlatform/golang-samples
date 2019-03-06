@@ -30,24 +30,27 @@ import (
 func createCompany(w io.Writer, projectId string, companyToCreate *talentpb.Company) (*talentpb.Company, error) {
 	ctx := context.Background()
 
-	// Create a company service client.
+	// Initializes a companyService client.
 	c, err := talent.NewCompanyClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("talent.NewCompanyClient: %v", err)
+		fmt.Printf("talent.NewCompanyClient: %v", err)
+		return nil, err
 	}
 
-  // projectId := "Your Google Cloud Project ID"
+  // Construct a createCompany request.
 	req := &talentpb.CreateCompanyRequest{
 		Parent: "projects/" + projectId,
 		Company: companyToCreate,
 	}
+
 	resp, err := c.CreateCompany(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to create company: %v", err)
+		fmt.Printf("talent.NewCompanyClient: %v", err)
+		return nil, err
 	}
 
-	fmt.Printf("Creating company: %v\n", resp.GetDisplayName())
-	fmt.Printf("Created company name: %v\n", resp)
+	fmt.Printf("Created company: %q\n", resp.GetName())
+
 	return resp, nil
 }
 
@@ -56,28 +59,31 @@ func createCompany(w io.Writer, projectId string, companyToCreate *talentpb.Comp
 // [START job_search_get_company]
 
 // getCompany gets an existing company by name.
-func getCompany(w io.Writer, name string) (*talentpb.Company, error) {
+func getCompany(w io.Writer, companyName string) (*talentpb.Company, error) {
 	ctx := context.Background()
 
-	// Create a company service client.
+	// Initialize a companyService client.
 	c, err := talent.NewCompanyClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("talent.NewCompanyClient: %v", err)
+		fmt.Printf("talent.NewCompanyClient: %v", err)
+		return nil, err
 	}
 
+	// Construct a getCompany request.
 	req := &talentpb.GetCompanyRequest{
 		// The resource name of the company to be retrieved.
     // The format is "projects/{project_id}/companies/{company_id}".
-		Name: name,
+		Name: companyName,
 	}
 
 	resp, err := c.GetCompany(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get company %q: %v", name, err)
+		fmt.Printf("failed to get company %q: %v", companyName, err)
+		return nil, err
 	}
 
-  fmt.Printf("\nGetting company: %v\n", resp.GetDisplayName())
-	fmt.Fprintf(w, "Got company name: %q\n", resp.GetName())
+	fmt.Fprintf(w, "Company: %q\n", resp.GetName())
+
 	return resp, nil
 }
 
@@ -85,24 +91,32 @@ func getCompany(w io.Writer, name string) (*talentpb.Company, error) {
 
 // [START job_search_delete_company]
 
-// deleteCompany deletes an existing company by name.
-func deleteCompany(w io.Writer, name string) error {
+// deleteCompany deletes an existing company by name. Companies with
+// existing jobs cannot be deleted until those jobs have been deleted.
+func deleteCompany(w io.Writer, companyName string) error {
 	ctx := context.Background()
 
-	// Create a company service client.
+	// Initialize a companyService client.
 	c, err := talent.NewCompanyClient(ctx)
 	if err != nil {
-		return fmt.Errorf("talent.NewCompanyClient: %v", err)
+		fmt.Printf("talent.NewCompanyClient: %v", err)
+		return err
 	}
 
+	// Construct a deleteCompany request.
 	req := &talentpb.DeleteCompanyRequest{
-		Name: name,
-	}
-	if err := c.DeleteCompany(ctx, req); err != nil {
-		return fmt.Errorf("failed to delete company %q: %v", name, err)
+		// The resource name of the company to be deleted.
+		// The format is "projects/{project_id}/companies/{company_id}".
+		Name: companyName,
 	}
 
-	fmt.Printf("Deleted company: %s\n", name)
+	if err := c.DeleteCompany(ctx, req); err != nil {
+		fmt.Printf("failed to delete company %q: %v", companyName, err)
+		return err
+	}
+
+	fmt.Printf("Deleted company: %q\n", companyName)
+
 	return nil
 }
 
@@ -114,27 +128,30 @@ func deleteCompany(w io.Writer, name string) error {
 func listCompanies(w io.Writer, projectId string) error {
 	ctx := context.Background()
 
-	// Create a compnay service client.
+	// Initialize a compnayService client.
 	c, err := talent.NewCompanyClient(ctx)
 	if err != nil {
-		return fmt.Errorf("talent.NewCompanyClient: %v", err)
+		fmt.Printf("talent.NewCompanyClient: %v", err)
+		return err
 	}
 
+	// Construct a listCompanies request.
 	req := &talentpb.ListCompaniesRequest{
-		Parent: fmt.Sprintf("projects/%s", projectId),
+		Parent: "projects/" + projectId,
 	}
+
 	it := c.ListCompanies(ctx, req)
-	// Print the returned companies.
+
 	for {
 		resp, err := it.Next()
 		if err == iterator.Done {
 			return nil
 		}
 		if err != nil {
-			return fmt.Errorf("it.Next: %v", err)
+			fmt.Printf("it.Next: %q", err)
+			return err
 		}
-		fmt.Printf("\nListing company: %v\n%v\n", resp.GetDisplayName(), resp.GetName())
-		fmt.Fprintf(w, "Listed company display name: %v\n", resp.GetName())
+		fmt.Fprintf(w, "Listed company: %q\n", resp.GetName())
 	}
 }
 

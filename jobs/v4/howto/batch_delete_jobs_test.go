@@ -21,7 +21,6 @@ import (
 	"testing"
   "time"
 
-  // talent "cloud.google.com/go/talent/apiv4beta1"
 	"github.com/gofrs/uuid"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	talentpb "google.golang.org/genproto/googleapis/cloud/talent/v4beta1"
@@ -41,7 +40,11 @@ func TestBatchDeleteJobs(t *testing.T) {
     if err != nil {
       log.Fatalf("createCompany: %v", err)
     }
+
     requisitionId := fmt.Sprintf("job-%s", uuid.Must(uuid.NewV4()).String())
+
+		// Create two identical jobs with different language codes.
+
     job1ToCreate := &talentpb.Job{
       RequisitionId: requisitionId,
       Title:         "Software Engineer",
@@ -52,6 +55,7 @@ func TestBatchDeleteJobs(t *testing.T) {
   		},
       LanguageCode: "en_US",
     }
+
     job2ToCreate := &talentpb.Job{
       RequisitionId: requisitionId,
       Title:         "Test Engineer",
@@ -60,7 +64,7 @@ func TestBatchDeleteJobs(t *testing.T) {
       ApplicationInfo: &talentpb.Job_ApplicationInfo{
   			Uris: []string{"https://googlesample.com/career"},
   		},
-      LanguageCode: "sr_Latn", 
+      LanguageCode: "sr_Latn",
     }
 
     if _, err := createJob(ioutil.Discard, tc.ProjectID, job1ToCreate); err != nil {
@@ -71,13 +75,9 @@ func TestBatchDeleteJobs(t *testing.T) {
       log.Fatalf("createJob2: %v", err)
     }
 
+    filter := fmt.Sprintf("companyName=%q AND requisitionId=%q", tempCompany.Name, requisitionId)
 
-    // if err := listJobs(buf, tc.ProjectID, fmt.Sprintf("companyName=%q", testCompany.Name)); err != nil {
-  	// 	t.Fatalf("listJobs: %v", err)
-  	// }
-
-
-    if err := batchDeleteJobs(ioutil.Discard, tc.ProjectID, fmt.Sprintf("companyName=%q AND requisitionId=%q", tempCompany.Name, requisitionId)); err != nil {
+    if err := batchDeleteJobs(ioutil.Discard, tc.ProjectID, filter); err != nil {
       log.Fatalf("batchDeleteJob: %v", err)
     }
 
