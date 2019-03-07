@@ -34,6 +34,7 @@ func updateProductLabels(w io.Writer, projectID string, location string, product
 	if err != nil {
 		return fmt.Errorf("NewProductSearchClient: %v", err)
 	}
+	defer c.Close()
 
 	req := &visionpb.UpdateProductRequest{
 		UpdateMask: &field_mask.FieldMask{

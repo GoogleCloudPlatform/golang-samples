@@ -50,6 +50,7 @@ func detectFaces(w io.Writer, file string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 
 	f, err := os.Open(file)
 	if err != nil {

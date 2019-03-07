@@ -33,6 +33,7 @@ func getProduct(w io.Writer, projectID string, location string, productID string
 	if err != nil {
 		return fmt.Errorf("NewProductSearchClient: %v", err)
 	}
+	defer c.Close()
 
 	req := &visionpb.GetProductRequest{
 		Name: fmt.Sprintf("projects/%s/locations/%s/products/%s", projectID, location, productID),

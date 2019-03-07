@@ -33,6 +33,7 @@ func deleteProductSet(w io.Writer, projectID string, location string, productSet
 	if err != nil {
 		return fmt.Errorf("NewProductSearchClient: %v", err)
 	}
+	defer c.Close()
 
 	req := &visionpb.DeleteProductSetRequest{
 		Name: fmt.Sprintf("projects/%s/locations/%s/productSets/%s", projectID, location, productSetID),
@@ -42,7 +43,7 @@ func deleteProductSet(w io.Writer, projectID string, location string, productSet
 		return fmt.Errorf("NewProductSearchClient: %v", err)
 	}
 
-	fmt.Fprintf(w, "Product set deleted.\n")
+	fmt.Fprintln(w, "Product set deleted.")
 
 	return nil
 }
