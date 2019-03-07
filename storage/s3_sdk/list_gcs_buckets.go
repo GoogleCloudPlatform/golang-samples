@@ -42,7 +42,7 @@ func list_gcs_buckets(googleAccessKeyID string, googleAccessKeySecret string) ([
 	return result.Buckets, nil
 }
 
-// [START storage_s3_sdk_list_buckets]
+// [END storage_s3_sdk_list_buckets]
 
 func main() {
 	var googleAccessKeyID string
