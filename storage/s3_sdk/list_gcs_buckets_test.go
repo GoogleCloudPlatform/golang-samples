@@ -13,8 +13,6 @@ import (
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/aws/aws-sdk-go/aws"
-
-	"cloud.google.com/go/storage"
 )
 
 func TestMain(m *testing.M) {
@@ -26,12 +24,10 @@ func TestMain(m *testing.M) {
 
 func TestList(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	setup(t)
 
 	bucketName := os.Getenv("CLOUD_CLOUD_PROJECT_S3_SDK")
 	googleAccessKeyID := os.Getenv("STORAGE_HMAC_ACCESS_KEY_ID")
 	googleAccessKeySecret := os.Getenv("STORAGE_HMAC_ACCESS_SECRET_KEY")
-	setup(t)
 
 	buckets, err := list_gcs_buckets(googleAccessKeyID, googleAccessKeySecret)
 	if err != nil {
