@@ -34,7 +34,6 @@ func TestGetCompany(t *testing.T) {
 	}
 }
 
-
 func TestListCompanies(t *testing.T) {
 	tc := testutil.SystemTest(t)
 

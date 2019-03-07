@@ -21,10 +21,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/gofrs/uuid"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/gofrs/uuid"
 	talentpb "google.golang.org/genproto/googleapis/cloud/talent/v4beta1"
-	money "google.golang.org/genproto/googleapis/type/money"
 )
 
 var testCompany *talentpb.Company
@@ -36,58 +35,23 @@ func TestMain(m *testing.M) {
 		log.Fatal("Error getting test context")
 	}
 
-	companyToCreate := &talentpb.Company{
-		ExternalId:  fmt.Sprintf("company-%s", uuid.Must(uuid.NewV4()).String()),
-		DisplayName: "Google Sample",
-	}
+	externalID := fmt.Sprintf("company-%s", uuid.Must(uuid.NewV4()).String())
+	displayName := "Google Sample"
 	var err error
-	testCompany, err = createCompany(ioutil.Discard, tc.ProjectID, companyToCreate)
+	testCompany, err = createCompany(ioutil.Discard, tc.ProjectID, externalID, displayName)
 	if err != nil {
 		log.Fatalf("createCompany: %v", err)
 	}
 
-	jobToCreate := &talentpb.Job{
-		RequisitionId: fmt.Sprintf("job-%s", uuid.Must(uuid.NewV4()).String()),
-		Title:         "Software Engineer",
-		CompanyName:   testCompany.Name,
-		ApplicationInfo: &talentpb.Job_ApplicationInfo{
-			Uris: []string{"https://googlesample.com/career"},
-		},
-		Description:     "Design, devolop, test, deploy, maintain and improve software.",
-		LanguageCode:    "en-US",
-		PromotionValue:  2,
-		EmploymentTypes: []talentpb.EmploymentType{1},
-		Addresses:       []string{"Mountain View, CA"},
-		CustomAttributes: map[string]*talentpb.CustomAttribute{
-			"someFieldString": {
-				Filterable:   true,
-				StringValues: []string{"someStrVal"},
-			},
-			"someFieldLong": {
-				Filterable: true,
-				LongValues: []int64{900},
-			},
-			"anotherFieldLong": {
-				Filterable: true,
-				LongValues: []int64{900},
-			},
-		},
-		CompensationInfo: &talentpb.CompensationInfo{
-			Entries: []*talentpb.CompensationInfo_CompensationEntry{
-				{
-					Type: 1,
-					Unit: 1,
-					CompensationAmount: &talentpb.CompensationInfo_CompensationEntry_Amount{
-						&money.Money{
-							CurrencyCode: "USD",
-							Units:        12,
-						},
-					},
-				},
-			},
-		},
-	}
-	testJob, err = createJob(ioutil.Discard, tc.ProjectID, jobToCreate)
+	requisitionID := fmt.Sprintf("job-%s", uuid.Must(uuid.NewV4()).String())
+	title := "Software Engineer"
+	URI := "https://googlesample.com/career"
+	description := "Design, devolop, test, deploy, maintain and improve software."
+	address1 := "Mountain View, CA"
+	address2 := "New York City, NY"
+	languageCode := "en-US"
+
+	testJob, err = createJob(ioutil.Discard, tc.ProjectID, testCompany.Name, requisitionID, title, URI, description, address1, address2, languageCode)
 	if err != nil {
 		log.Fatalf("createJob: %v", err)
 	}

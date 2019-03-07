@@ -14,6 +14,7 @@
 
 package howto
 
+// [START job_search_create_job]
 import (
 	"context"
 	"fmt"
@@ -24,28 +25,38 @@ import (
 	talentpb "google.golang.org/genproto/googleapis/cloud/talent/v4beta1"
 )
 
-// [START job_search_create_job]
-
 // createJob create a job as given.
-func createJob(w io.Writer, projectId string, jobToCreate *talentpb.Job) (*talentpb.Job, error) {
+func createJob(w io.Writer, projectID, companyName, requisitionID, title, URI, description, address1, address2, languageCode string) (*talentpb.Job, error) {
 	ctx := context.Background()
 
 	// Initialize a jobService client.
 	c, err := talent.NewJobClient(ctx)
 	if err != nil {
-		fmt.Printf("talent.NewJobClient: %v", err)
+		fmt.Printf("talent.NewJobClient: %v\n", err)
 		return nil, err
 	}
 
-  // Construct a createJob request.
+	jobToCreate := &talentpb.Job{
+		CompanyName:   companyName,
+		RequisitionId: requisitionID,
+		Title:         title,
+		ApplicationInfo: &talentpb.Job_ApplicationInfo{
+			Uris: []string{URI},
+		},
+		Description:  description,
+		Addresses:    []string{address1, address2},
+		LanguageCode: languageCode,
+	}
+
+	// Construct a createJob request.
 	req := &talentpb.CreateJobRequest{
-		Parent: "projects/" + projectId,
-		Job: jobToCreate,
+		Parent: "projects/" + projectID,
+		Job:    jobToCreate,
 	}
 
 	resp, err := c.CreateJob(ctx, req)
 	if err != nil {
-		fmt.Printf("Failed to create job: %v", err)
+		fmt.Printf("Failed to create job: %v\n", err)
 		return nil, err
 	}
 
@@ -65,20 +76,20 @@ func getJob(w io.Writer, jobName string) (*talentpb.Job, error) {
 	// Initialize a jobService client.
 	c, err := talent.NewJobClient(ctx)
 	if err != nil {
-		fmt.Printf("talent.NewJobClient: %v", err)
+		fmt.Printf("talent.NewJobClient: %v\n", err)
 		return nil, err
 	}
 
 	// Construct a getJob request.
 	req := &talentpb.GetJobRequest{
 		// The resource name of the job to retrieve.
-    // The format is "projects/{project_id}/jobs/{job_id}".
+		// The format is "projects/{project_id}/jobs/{job_id}".
 		Name: jobName,
 	}
 
 	resp, err := c.GetJob(ctx, req)
 	if err != nil {
-		fmt.Printf("Failed to get job %s: %v", jobName, err)
+		fmt.Printf("Failed to get job %s: %v\n", jobName, err)
 		return nil, err
 	}
 
@@ -99,7 +110,7 @@ func deleteJob(w io.Writer, jobName string) error {
 	// Initialize a jobService client.
 	c, err := talent.NewJobClient(ctx)
 	if err != nil {
-		fmt.Printf("talent.NewJobClient: %v", err)
+		fmt.Printf("talent.NewJobClient: %v\n", err)
 		return err
 	}
 
@@ -111,7 +122,7 @@ func deleteJob(w io.Writer, jobName string) error {
 	}
 
 	if err := c.DeleteJob(ctx, req); err != nil {
-		fmt.Printf("Delete(%s): %v", jobName, err)
+		fmt.Printf("Delete(%s): %v\n", jobName, err)
 		return err
 	}
 
@@ -126,19 +137,19 @@ func deleteJob(w io.Writer, jobName string) error {
 
 // listJobs lists jobs with a filter, for example
 // `companyName="projects/my-project/companies/123"`.
-func listJobs(w io.Writer, projectId, filter string) error {
+func listJobs(w io.Writer, projectID, filter string) error {
 	ctx := context.Background()
 
 	// Initialize a jobService client.
 	c, err := talent.NewJobClient(ctx)
 	if err != nil {
-		fmt.Printf("talent.NewJobClient: %v", err)
+		fmt.Printf("talent.NewJobClient: %v\n", err)
 		return err
 	}
 
 	// Construct a listJobs request.
 	req := &talentpb.ListJobsRequest{
-		Parent: "projects/" + projectId,
+		Parent: "projects/" + projectID,
 		Filter: filter,
 	}
 
@@ -150,7 +161,7 @@ func listJobs(w io.Writer, projectId, filter string) error {
 			return nil
 		}
 		if err != nil {
-			fmt.Printf("it.Next: %v", err)
+			fmt.Printf("it.Next: %v\n", err)
 			return err
 		}
 		fmt.Fprintf(w, "Listing job: %v\n", resp.GetName())

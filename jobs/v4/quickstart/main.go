@@ -13,7 +13,6 @@
 // limitations under the License.
 
 // [START job_search_quick_start_list_companies]
-
 package main
 
 import (
@@ -27,7 +26,7 @@ import (
 )
 
 func main() {
-	projectId := os.Getenv("GOOGLE_CLOUD_PROJECT")
+	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 
 	// Initialize job search client.
 	ctx := context.Background()
@@ -39,7 +38,7 @@ func main() {
 
 	// Construct a listCompany request.
 	req := &talentpb.ListCompaniesRequest{
-		Parent: "projects/" + projectId,
+		Parent: "projects/" + projectID,
 	}
 
 	it := c.ListCompanies(ctx, req)

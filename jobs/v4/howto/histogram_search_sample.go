@@ -14,17 +14,16 @@
 
 package howto
 
+// [START job_search_histogram_search]
 import (
 	"context"
 	"fmt"
 	"io"
 
-  talent "cloud.google.com/go/talent/apiv4beta1"
+	talent "cloud.google.com/go/talent/apiv4beta1"
 	"google.golang.org/api/iterator"
 	talentpb "google.golang.org/genproto/googleapis/cloud/talent/v4beta1"
 )
-
-// [START job_search_histogram_search]
 
 // histogramSearch searches for jobs with histogram queries.
 func histogramSearch(w io.Writer, projectID, companyName string) error {
@@ -33,7 +32,7 @@ func histogramSearch(w io.Writer, projectID, companyName string) error {
 	// Initialize a jobService client.
 	c, err := talent.NewJobClient(ctx)
 	if err != nil {
-		fmt.Printf("talent.NewJobClient: %v", err)
+		fmt.Printf("talent.NewJobClient: %v\n", err)
 		return err
 	}
 
@@ -44,9 +43,9 @@ func histogramSearch(w io.Writer, projectID, companyName string) error {
 		// search request.
 		RequestMetadata: &talentpb.RequestMetadata{
 			// Make sure to hash your userId.
-			UserId: "HashedUsrId",
+			UserId: "HashedUsrID",
 			// Make sure to hash the sessionId.
-			SessionId: "HashedSessionId",
+			SessionId: "HashedSessionID",
 			// Domain of the website where the search is conducted.
 			Domain: "www.googlesample.com",
 		},
@@ -72,7 +71,7 @@ func histogramSearch(w io.Writer, projectID, companyName string) error {
 			return nil
 		}
 		if err != nil {
-			fmt.Printf("it.Next: %v", err)
+			fmt.Printf("it.Next: %v\n", err)
 			return err
 		}
 		fmt.Fprintf(w, "Job: %q\n", resp.Job.GetName())

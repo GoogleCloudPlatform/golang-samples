@@ -30,11 +30,11 @@ func TestCreateClientEvent(t *testing.T) {
 		tc := testutil.SystemTest(t)
 		buf := &bytes.Buffer{}
 
-		requestId := fmt.Sprintf("requestId-%d", time.Now().UnixNano())
-		eventId := fmt.Sprintf("eventId-%d", time.Now().UnixNano())
+		requestID := fmt.Sprintf("requestId-%d", time.Now().UnixNano())
+		eventID := fmt.Sprintf("eventId-%d", time.Now().UnixNano())
 		relatedJobNames := []string{testJob.Name}
 
-		if _, err := createClientEvent(buf, tc.ProjectID, requestId, eventId, relatedJobNames); err != nil {
+		if _, err := createClientEvent(buf, tc.ProjectID, requestID, eventID, relatedJobNames); err != nil {
 			log.Fatalf("createClientEvent: %v", err)
 		}
 		want := "Client event created: "

@@ -14,6 +14,7 @@
 
 package howto
 
+// [START job_search_batch_delete_job]
 import (
 	"context"
 	"fmt"
@@ -23,28 +24,28 @@ import (
 	talentpb "google.golang.org/genproto/googleapis/cloud/talent/v4beta1"
 )
 
-// [START job_search_batch_delete_job]
-
 // batchDeleteJobs deletes existing jobs by filter.
-func batchDeleteJobs(w io.Writer, projectId string, filter string) error {
+func batchDeleteJobs(w io.Writer, projectID, companyName, requisitionID string) error {
 	ctx := context.Background()
 
 	// Initialize a jobService client.
 	c, err := talent.NewJobClient(ctx)
 	if err != nil {
-		fmt.Printf("talent.NewJobClient: %v", err)
+		fmt.Printf("talent.NewJobClient: %v\n", err)
 		return err
 	}
 
+	filter := fmt.Sprintf("companyName=%q AND requisitionId=%q", companyName, requisitionID)
+
 	// Construct a batchDeteleJobs request.
 	req := &talentpb.BatchDeleteJobsRequest{
-    Parent: "projects/" + projectId,
-    // The fields eligible for filtering are `companyName` and `requisitionId`.
+		Parent: "projects/" + projectID,
+		// The fields eligible for filtering are `companyName` and `requisitionId`.
 		Filter: filter,
 	}
 
 	if err := c.BatchDeleteJobs(ctx, req); err != nil {
-		fmt.Printf("Batch deleting jobs from %s yielded: %v", filter, err)
+		fmt.Printf("Batch deleting jobs from %s yielded: %v\n", filter, err)
 		return err
 	}
 

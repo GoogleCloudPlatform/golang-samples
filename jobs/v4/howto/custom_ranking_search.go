@@ -14,52 +14,51 @@
 
 package howto
 
+// [START job_search_custom_ranking_search]
 import (
 	"context"
 	"fmt"
 	"io"
 
-  talent "cloud.google.com/go/talent/apiv4beta1"
+	talent "cloud.google.com/go/talent/apiv4beta1"
 	"google.golang.org/api/iterator"
 	talentpb "google.golang.org/genproto/googleapis/cloud/talent/v4beta1"
 )
 
-// [START job_search_custom_ranking_search]
-
 // customRankingSearch searches for jobs based on custom ranking.
-func customRankingSearch(w io.Writer, projectId, companyName string) error {
+func customRankingSearch(w io.Writer, projectID, companyName string) error {
 	ctx := context.Background()
 
 	// Initialize a jobService client.
 	c, err := talent.NewJobClient(ctx)
 	if err != nil {
-		fmt.Printf("talent.NewJobClient: %v", err)
+		fmt.Printf("talent.NewJobClient: %v\n", err)
 		return err
 	}
 
 	// Construct a searchJobs request.
 	req := &talentpb.SearchJobsRequest{
-		Parent: "projects/" + projectId,
+		Parent: "projects/" + projectID,
 		// Make sure to set the RequestMetadata the same as the associated
 		// search request.
 		RequestMetadata: &talentpb.RequestMetadata{
 			// Make sure to hash your userID.
-			UserId: "HashedUsrId",
+			UserId: "HashedUsrID",
 			// Make sure to hash the sessionID.
-			SessionId: "HashedSessionId",
+			SessionId: "HashedSessionID",
 			// Domain of the website where the search is conducted.
 			Domain: "www.googlesample.com",
 		},
 		JobQuery: &talentpb.JobQuery{
 			CompanyNames: []string{companyName},
 		},
-    // More info on customRankingInfo.
+		// More info on customRankingInfo.
 		// https://godoc.org/google.golang.org/genproto/googleapis/cloud/talent/v4beta1#SearchJobsRequest_CustomRankingInfo
-    CustomRankingInfo: &talentpb.SearchJobsRequest_CustomRankingInfo{
-      ImportanceLevel: 6,
-      RankingExpression: "(someFieldLong + 25) * 0.25 - anotherFieldLong",
-    },
-    OrderBy: "custom_ranking desc",
+		CustomRankingInfo: &talentpb.SearchJobsRequest_CustomRankingInfo{
+			ImportanceLevel:   6,
+			RankingExpression: "(someFieldLong + 25) * 0.25 - anotherFieldLong",
+		},
+		OrderBy: "custom_ranking desc",
 	}
 
 	it := c.SearchJobs(ctx, req)
@@ -67,10 +66,11 @@ func customRankingSearch(w io.Writer, projectId, companyName string) error {
 	for {
 		resp, err := it.Next()
 		if err == iterator.Done {
+			fmt.Printf("Done.\n")
 			return nil
 		}
 		if err != nil {
-			fmt.Printf("it.Next: %v", err)
+			fmt.Printf("it.Next: %v\n", err)
 			return err
 		}
 		fmt.Fprintf(w, "Job: %q\n", resp.Job.GetName())

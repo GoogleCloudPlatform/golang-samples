@@ -14,6 +14,7 @@
 
 package howto
 
+// [START job_search_autocomplete_job_title]
 import (
 	"context"
 	"fmt"
@@ -23,37 +24,35 @@ import (
 	talentpb "google.golang.org/genproto/googleapis/cloud/talent/v4beta1"
 )
 
-// [START job_search_autocomplete_job_title]
-
 // jobTitleAutoComplete suggests the job titles of the given companyName based
 // on query.
-func jobTitleAutocomplete(w io.Writer, projectId, companyName, query string) (*talentpb.CompleteQueryResponse, error) {
+func jobTitleAutocomplete(w io.Writer, projectID, companyName, query string) (*talentpb.CompleteQueryResponse, error) {
 	ctx := context.Background()
 
 	// Initialize a completionService client.
 	c, err := talent.NewCompletionClient(ctx)
 	if err != nil {
-		fmt.Printf("talent.NewCompletionClient: %v", err)
+		fmt.Printf("talent.NewCompletionClient: %v\n", err)
 		return nil, err
 	}
 
 	// Construct a completeQuery request.
 	req := &talentpb.CompleteQueryRequest{
-		Name: "projects/" + projectId,
-		Query: query,
-		PageSize: 1,
+		Name:        "projects/" + projectID,
+		Query:       query,
+		PageSize:    1,
 		CompanyName: companyName,
 	}
 
 	resp, err := c.CompleteQuery(ctx, req)
 	if err != nil {
-		fmt.Printf("failed to auto complete with query %s in %s: %v", query, companyName, err)
+		fmt.Printf("failed to auto complete with query %s in %s: %v\n", query, companyName, err)
 		return nil, err
 	}
 
 	fmt.Fprintf(w, "Auto complete results:")
 	for _, c := range resp.GetCompletionResults() {
-		fmt.Fprintf(w, "\t%v", c.Suggestion)
+		fmt.Fprintf(w, "\t%v\n", c.Suggestion)
 	}
 
 	return resp, nil

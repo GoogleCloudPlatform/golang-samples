@@ -14,52 +14,51 @@
 
 package howto
 
+// [START job_search_create_client_event]
 import (
 	"context"
 	"fmt"
 	"io"
-  "time"
+	"time"
 
 	talent "cloud.google.com/go/talent/apiv4beta1"
-  "github.com/golang/protobuf/ptypes"
+	"github.com/golang/protobuf/ptypes"
 	talentpb "google.golang.org/genproto/googleapis/cloud/talent/v4beta1"
 )
 
-// [START job_search_create_client_event]
-
 // createClientEvent creates a client event.
-func createClientEvent(w io.Writer, projectId string, requestId string, eventId string, relatedJobNames []string) (*talentpb.ClientEvent, error) {
+func createClientEvent(w io.Writer, projectID string, requestID string, eventID string, relatedJobNames []string) (*talentpb.ClientEvent, error) {
 	ctx := context.Background()
 
 	// Create an eventService client.
 	c, err := talent.NewEventClient(ctx)
 	if err != nil {
-		fmt.Printf("talent.NewEventClient: %v", err)
+		fmt.Printf("talent.NewEventClient: %v\n", err)
 		return nil, err
 	}
 
-  createTime, _ := ptypes.TimestampProto(time.Now())
-  clientEventToCreate := &talentpb.ClientEvent{
-    RequestId: requestId,
-    EventId: eventId,
-    CreateTime: createTime,
-    Event: &talentpb.ClientEvent_JobEvent{
-      JobEvent: &talentpb.JobEvent{
-        Type: 2,
-        Jobs: relatedJobNames,
-      },
-    },
-  }
+	createTime, _ := ptypes.TimestampProto(time.Now())
+	clientEventToCreate := &talentpb.ClientEvent{
+		RequestId:  requestID,
+		EventId:    eventID,
+		CreateTime: createTime,
+		Event: &talentpb.ClientEvent_JobEvent{
+			JobEvent: &talentpb.JobEvent{
+				Type: 2,
+				Jobs: relatedJobNames,
+			},
+		},
+	}
 
 	// Construct a createJob request.
 	req := &talentpb.CreateClientEventRequest{
-		Parent: "projects/" + projectId,
+		Parent:      "projects/" + projectID,
 		ClientEvent: clientEventToCreate,
 	}
 
 	resp, err := c.CreateClientEvent(ctx, req)
 	if err != nil {
-		fmt.Printf("Failed to create client event: %v", err)
+		fmt.Printf("Failed to create client event: %v\n", err)
 		return nil, err
 	}
 

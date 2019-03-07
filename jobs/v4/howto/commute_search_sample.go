@@ -14,28 +14,27 @@
 
 package howto
 
+// [START job_search_commute_search]
 import (
 	"context"
 	"fmt"
 	"io"
 
+	talent "cloud.google.com/go/talent/apiv4beta1"
 	"github.com/golang/protobuf/ptypes/duration"
-  talent "cloud.google.com/go/talent/apiv4beta1"
 	"google.golang.org/api/iterator"
 	talentpb "google.golang.org/genproto/googleapis/cloud/talent/v4beta1"
 	"google.golang.org/genproto/googleapis/type/latlng"
 )
 
-// [START job_search_commute_search]
-
 // commuteSearch searches for jobs within commute filter.
-func commuteSearch(w io.Writer, projectId, companyName string) error {
+func commuteSearch(w io.Writer, projectID, companyName string) error {
 	ctx := context.Background()
 
 	// Initialize a jobService client.
 	c, err := talent.NewJobClient(ctx)
 	if err != nil {
-		fmt.Printf("talent.NewJobClient: %v", err)
+		fmt.Printf("talent.NewJobClient: %v\n", err)
 		return err
 	}
 
@@ -43,7 +42,7 @@ func commuteSearch(w io.Writer, projectId, companyName string) error {
 	jobQuery := &talentpb.JobQuery{
 		CommuteFilter: &talentpb.CommuteFilter{
 			CommuteMethod:  2,
-			TravelDuration: &duration.Duration{Seconds:1800},
+			TravelDuration: &duration.Duration{Seconds: 1800},
 			StartCoordinates: &latlng.LatLng{
 				Latitude:  37.422408,
 				Longitude: -122.085609,
@@ -56,14 +55,14 @@ func commuteSearch(w io.Writer, projectId, companyName string) error {
 
 	// Construct a searchJobs request with a jobQuery.
 	req := &talentpb.SearchJobsRequest{
-		Parent: "projects/" + projectId,
+		Parent: "projects/" + projectID,
 		// Make sure to set the RequestMetadata the same as the associated
 		// search request.
 		RequestMetadata: &talentpb.RequestMetadata{
 			// Make sure to hash your userID.
-			UserId: "HashedUsrId",
+			UserId: "HashedUsrID",
 			// Make sure to hash the sessionID.
-			SessionId: "HashedSessionId",
+			SessionId: "HashedSessionID",
 			// Domain of the website where the search is conducted.
 			Domain: "www.googlesample.com",
 		},
@@ -79,7 +78,7 @@ func commuteSearch(w io.Writer, projectId, companyName string) error {
 			return nil
 		}
 		if err != nil {
-			fmt.Printf("it.Next: %v", err)
+			fmt.Printf("it.Next: %v\n", err)
 			return err
 		}
 		fmt.Fprintf(w, "Job: %q\n", resp.Job.GetName())

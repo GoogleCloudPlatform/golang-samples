@@ -14,6 +14,7 @@
 
 package howto
 
+// [START job_search_create_company]
 import (
 	"context"
 	"fmt"
@@ -24,28 +25,29 @@ import (
 	talentpb "google.golang.org/genproto/googleapis/cloud/talent/v4beta1"
 )
 
-// [START job_search_create_company]
-
 // createCompany creates a company as given.
-func createCompany(w io.Writer, projectId string, companyToCreate *talentpb.Company) (*talentpb.Company, error) {
+func createCompany(w io.Writer, projectID string, externalID string, displayName string) (*talentpb.Company, error) {
 	ctx := context.Background()
 
 	// Initializes a companyService client.
 	c, err := talent.NewCompanyClient(ctx)
 	if err != nil {
-		fmt.Printf("talent.NewCompanyClient: %v", err)
+		fmt.Printf("talent.NewCompanyClient: %v\n", err)
 		return nil, err
 	}
 
 	// Construct a createCompany request.
 	req := &talentpb.CreateCompanyRequest{
-		Parent: "projects/" + projectId,
-		Company: companyToCreate,
+		Parent: "projects/" + projectID,
+		Company: &talentpb.Company{
+			ExternalId:  externalID,
+			DisplayName: displayName,
+		},
 	}
 
 	resp, err := c.CreateCompany(ctx, req)
 	if err != nil {
-		fmt.Printf("talent.NewCompanyClient: %v", err)
+		fmt.Printf("talent.NewCompanyClient: %v\n", err)
 		return nil, err
 	}
 
@@ -65,25 +67,25 @@ func getCompany(w io.Writer, companyName string) (*talentpb.Company, error) {
 	// Initialize a companyService client.
 	c, err := talent.NewCompanyClient(ctx)
 	if err != nil {
-		fmt.Printf("talent.NewCompanyClient: %v", err)
+		fmt.Printf("talent.NewCompanyClient: %v\n", err)
 		return nil, err
 	}
 
 	// Construct a getCompany request.
 	req := &talentpb.GetCompanyRequest{
 		// The resource name of the company to be retrieved.
-    // The format is "projects/{project_id}/companies/{company_id}".
+		// The format is "projects/{project_id}/companies/{company_id}".
 		Name: companyName,
 	}
 
 	resp, err := c.GetCompany(ctx, req)
 	if err != nil {
-		fmt.Printf("failed to get company %q: %v", companyName, err)
+		fmt.Printf("failed to get company %q: %v\n", companyName, err)
 		return nil, err
 	}
 
 	fmt.Fprintf(w, "Company: %q\n", resp.GetName())
-  fmt.Printf("Company display name: %q\n", resp.GetDisplayName())
+	fmt.Printf("Company display name: %q\n", resp.GetDisplayName())
 
 	return resp, nil
 }
@@ -100,7 +102,7 @@ func deleteCompany(w io.Writer, companyName string) error {
 	// Initialize a companyService client.
 	c, err := talent.NewCompanyClient(ctx)
 	if err != nil {
-		fmt.Printf("talent.NewCompanyClient: %v", err)
+		fmt.Printf("talent.NewCompanyClient: %v\n", err)
 		return err
 	}
 
@@ -112,7 +114,7 @@ func deleteCompany(w io.Writer, companyName string) error {
 	}
 
 	if err := c.DeleteCompany(ctx, req); err != nil {
-		fmt.Printf("failed to delete company %q: %v", companyName, err)
+		fmt.Printf("failed to delete company %q: %v\n", companyName, err)
 		return err
 	}
 
@@ -126,19 +128,19 @@ func deleteCompany(w io.Writer, companyName string) error {
 // [START job_search_list_companies]
 
 // listCompanies lists all companies in the project.
-func listCompanies(w io.Writer, projectId string) error {
+func listCompanies(w io.Writer, projectID string) error {
 	ctx := context.Background()
 
 	// Initialize a compnayService client.
 	c, err := talent.NewCompanyClient(ctx)
 	if err != nil {
-		fmt.Printf("talent.NewCompanyClient: %v", err)
+		fmt.Printf("talent.NewCompanyClient: %v\n", err)
 		return err
 	}
 
 	// Construct a listCompanies request.
 	req := &talentpb.ListCompaniesRequest{
-		Parent: "projects/" + projectId,
+		Parent: "projects/" + projectID,
 	}
 
 	it := c.ListCompanies(ctx, req)
@@ -149,7 +151,7 @@ func listCompanies(w io.Writer, projectId string) error {
 			return nil
 		}
 		if err != nil {
-			fmt.Printf("it.Next: %q", err)
+			fmt.Printf("it.Next: %q\n", err)
 			return err
 		}
 		fmt.Fprintf(w, "Listing company: %q\n", resp.GetName())
