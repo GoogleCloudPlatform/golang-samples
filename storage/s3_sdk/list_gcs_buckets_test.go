@@ -11,7 +11,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/aws/aws-sdk-go/aws"
 )
 
@@ -23,9 +22,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestList(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	bucketName := os.Getenv("CLOUD_CLOUD_PROJECT_S3_SDK")
+	bucketName := os.Getenv("GOOGLE_CLOUD_PROJECT_S3_SDK")
 	googleAccessKeyID := os.Getenv("STORAGE_HMAC_ACCESS_KEY_ID")
 	googleAccessKeySecret := os.Getenv("STORAGE_HMAC_ACCESS_SECRET_KEY")
 

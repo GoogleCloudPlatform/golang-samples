@@ -7,9 +7,11 @@ package main
 // [START storage_s3_sdk_list_buckets]
 import (
 	"context"
+	"flag"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 )
@@ -49,11 +51,6 @@ func main() {
 	flag.StringVar(&googleAccessKeyID, "googleAccessKeyID", "", "Your Cloud Storage HMAC Access Key ID.")
 	flag.StringVar(&googleAccessKeySecret, "googleAccessKeySecret", "", "Your Cloud Storage HMAC Access Key Secret.")
 	flag.Parse()
-
-	// If they haven't set the googleAccessKeyID, googleAccessKeySecret nor specified
-	// in the environment, then fail if missing.
-	googleAccessKeyID = mustGetEnv("STORAGE_HMAC_ACCESS_KEY_ID", googleAccessKeyID)
-	googleAccessKeySecret = mustGetEnv("STORAGE_HMAC_ACCESS_SECRET_KEY", googleAccessKeySecret)
 
 	list_gcs_buckets(googleAccessKeyID, googleAccessKeySecret)
 }
