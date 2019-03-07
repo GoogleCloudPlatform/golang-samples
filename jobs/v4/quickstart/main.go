@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START job_search_quick_start_list_companies]
 package main
 
+// [START job_search_quick_start_list_companies]
 import (
 	"context"
 	"fmt"
