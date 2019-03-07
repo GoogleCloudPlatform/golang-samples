@@ -14,7 +14,8 @@
 
 // [START functions_firebase_rtdb]
 
-// Package p contains a Firebase Realtime Database Cloud Function.
+// Package p contains a Cloud Function triggered by a Firebase Realtime Database
+// event.
 package p
 
 import (
