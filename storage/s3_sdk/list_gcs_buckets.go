@@ -1,19 +1,8 @@
 package main
 
-// Copyright 2018 Google Inc. All rights reserved.
+// Copyright 2019 Google Inc. All rights reserved.
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
-
-// This sample shows how to list Google Cloud Storage (GCS) buckets
-//  using the AWS S3 SDK with the GCS interoperable XML API.
-//
-// GCS Credentials are passed in using the following environment variables:
-//
-//     * AWS_ACCESS_KEY_ID
-//     * AWS_SECRET_ACCESS_KEY
-//
-// Learn how to get GCS interoperable credentials at
-// https://cloud.google.com/storage/docs/migrating#keys.
 
 // [START storage_s3_sdk_list_buckets]
 import (
@@ -25,11 +14,16 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 )
 
-func list_gcs_buckets() ([]*s3.Bucket, error) {
+func list_gcs_buckets(googleAccessKeyID string, googleAccessKeySecret string) ([]*s3.Bucket, error) {
+	// Create a new client and do the following:
+	// 1. Change the endpoint URL to use the Google Cloud Storage XML API endpoint.
+    // 2. Use Cloud Storage HMAC Credentials.
 	sess := session.Must(session.NewSession(&aws.Config{
 		Region:   aws.String("auto"),
 		Endpoint: aws.String("https://storage.googleapis.com"),
+		Credentials: credentials.NewStaticCredentials(googleAccessKeyID, googleAccessKeySecret, ""),
 	}))
+
 	client := s3.New(sess)
 	ctx := context.Background()
 
@@ -49,5 +43,17 @@ func list_gcs_buckets() ([]*s3.Bucket, error) {
 // [START storage_s3_sdk_list_buckets]
 
 func main() {
-	list_gcs_buckets()
+	var googleAccessKeyID string
+	var googleAccessKeySecret string
+
+	flag.StringVar(&googleAccessKeyID, "googleAccessKeyID", "", "Your Cloud Storage HMAC Access Key ID.")
+	flag.StringVar(&googleAccessKeySecret, "googleAccessKeySecret", "", "Your Cloud Storage HMAC Access Key Secret.")
+	flag.Parse()
+
+	// If they haven't set the googleAccessKeyID, googleAccessKeySecret nor specified
+	// in the environment, then fail if missing.
+	googleAccessKeyID = mustGetEnv("STORAGE_HMAC_ACCESS_KEY_ID", googleAccessKeyID)
+	googleAccessKeySecret = mustGetEnv("STORAGE_HMAC_ACCESS_SECRET_KEY", googleAccessKeySecret)
+
+	list_gcs_buckets(googleAccessKeyID, googleAccessKeySecret)
 }

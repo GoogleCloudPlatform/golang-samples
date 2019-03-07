@@ -17,11 +17,6 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-var (
-	storageClient *storage.Client
-	bucketName    string
-)
-
 func TestMain(m *testing.M) {
 	log.SetOutput(ioutil.Discard)
 	s := m.Run()
@@ -29,16 +24,16 @@ func TestMain(m *testing.M) {
 	os.Exit(s)
 }
 
-func setup(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	bucketName = tc.ProjectID + "-storage-buckets-tests"
-}
-
 func TestList(t *testing.T) {
+	tc := testutil.SystemTest(t)
 	setup(t)
 
-	buckets, err := list_gcs_buckets()
+	bucketName := os.Getenv("CLOUD_CLOUD_PROJECT_S3_SDK")
+	googleAccessKeyID := os.Getenv("STORAGE_HMAC_ACCESS_KEY_ID")
+	googleAccessKeySecret := os.Getenv("STORAGE_HMAC_ACCESS_SECRET_KEY")
+	setup(t)
+
+	buckets, err := list_gcs_buckets(googleAccessKeyID, googleAccessKeySecret)
 	if err != nil {
 		t.Errorf("Unable to list GCS buckets: %v", err)
 	}
