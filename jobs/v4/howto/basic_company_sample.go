@@ -37,7 +37,7 @@ func createCompany(w io.Writer, projectId string, companyToCreate *talentpb.Comp
 		return nil, err
 	}
 
-  // Construct a createCompany request.
+	// Construct a createCompany request.
 	req := &talentpb.CreateCompanyRequest{
 		Parent: "projects/" + projectId,
 		Company: companyToCreate,
@@ -83,6 +83,7 @@ func getCompany(w io.Writer, companyName string) (*talentpb.Company, error) {
 	}
 
 	fmt.Fprintf(w, "Company: %q\n", resp.GetName())
+  fmt.Printf("Company display name: %q\n", resp.GetDisplayName())
 
 	return resp, nil
 }
@@ -151,7 +152,9 @@ func listCompanies(w io.Writer, projectId string) error {
 			fmt.Printf("it.Next: %q", err)
 			return err
 		}
-		fmt.Fprintf(w, "Listed company: %q\n", resp.GetName())
+		fmt.Fprintf(w, "Listing company: %q\n", resp.GetName())
+		fmt.Printf("Display name: %v\n", resp.GetDisplayName())
+		fmt.Printf("External ID: %v\n", resp.GetExternalId())
 	}
 }
 

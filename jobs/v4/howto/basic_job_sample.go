@@ -83,6 +83,7 @@ func getJob(w io.Writer, jobName string) (*talentpb.Job, error) {
 	}
 
 	fmt.Fprintf(w, "Job: %q\n", resp.GetName())
+	fmt.Printf("Job title: %v\n", resp.GetTitle())
 
 	return resp, err
 }
@@ -153,6 +154,7 @@ func listJobs(w io.Writer, projectId, filter string) error {
 			return err
 		}
 		fmt.Fprintf(w, "Listing job: %v\n", resp.GetName())
+		fmt.Printf("Job title: %v\n", resp.GetTitle())
 	}
 }
 
