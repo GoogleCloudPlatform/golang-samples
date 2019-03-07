@@ -19,7 +19,7 @@ import (
 func list_gcs_buckets(googleAccessKeyID string, googleAccessKeySecret string) ([]*s3.Bucket, error) {
 	// Create a new client and do the following:
 	// 1. Change the endpoint URL to use the Google Cloud Storage XML API endpoint.
-    // 2. Use Cloud Storage HMAC Credentials.
+	// 2. Use Cloud Storage HMAC Credentials.
 	sess := session.Must(session.NewSession(&aws.Config{
 		Region:   aws.String("auto"),
 		Endpoint: aws.String("https://storage.googleapis.com"),
