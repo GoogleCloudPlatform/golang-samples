@@ -43,7 +43,7 @@ func deleteProductSet(w io.Writer, projectID string, location string, productSet
 		return fmt.Errorf("NewProductSearchClient: %v", err)
 	}
 
-	fmt.Fprintf(w, "Product set deleted.\n")
+	fmt.Fprintln(w, "Product set deleted.")
 
 	return nil
 }
