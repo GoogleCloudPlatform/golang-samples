@@ -55,8 +55,8 @@ func customRankingSearch(w io.Writer, projectID, companyName string) error {
 		// More info on customRankingInfo.
 		// https://godoc.org/google.golang.org/genproto/googleapis/cloud/talent/v4beta1#SearchJobsRequest_CustomRankingInfo
 		CustomRankingInfo: &talentpb.SearchJobsRequest_CustomRankingInfo{
-			ImportanceLevel:   6,
-			RankingExpression: "(someFieldLong + 25) * 0.25 - anotherFieldLong",
+			ImportanceLevel:   talentpb.SearchJobsRequest_CustomRankingInfo_EXTREME,
+			RankingExpression: "(someFieldLong + 25) * 0.25",
 		},
 		OrderBy: "custom_ranking desc",
 	}

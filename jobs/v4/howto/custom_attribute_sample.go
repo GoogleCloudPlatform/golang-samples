@@ -60,10 +60,6 @@ func createJobWithCustomAttributes(w io.Writer, projectID string, companyName st
 				Filterable: true,
 				LongValues: []int64{900},
 			},
-			"anotherFieldLong": {
-				Filterable: true,
-				LongValues: []int64{900},
-			},
 		},
 		CompensationInfo: &talentpb.CompensationInfo{
 			Entries: []*talentpb.CompensationInfo_CompensationEntry{
@@ -71,7 +67,7 @@ func createJobWithCustomAttributes(w io.Writer, projectID string, companyName st
 					Type: 1,
 					Unit: 1,
 					CompensationAmount: &talentpb.CompensationInfo_CompensationEntry_Amount{
-						&money.Money{
+						Amount: &money.Money{
 							CurrencyCode: "USD",
 							Units:        1,
 						},

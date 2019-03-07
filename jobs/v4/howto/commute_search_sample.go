@@ -41,7 +41,7 @@ func commuteSearch(w io.Writer, projectID, companyName string) error {
 	// Construct a jobQuery request with a commute filter.
 	jobQuery := &talentpb.JobQuery{
 		CommuteFilter: &talentpb.CommuteFilter{
-			CommuteMethod:  2,
+			CommuteMethod:  talentpb.CommuteMethod_TRANSIT,
 			TravelDuration: &duration.Duration{Seconds: 1800},
 			StartCoordinates: &latlng.LatLng{
 				Latitude:  37.422408,
