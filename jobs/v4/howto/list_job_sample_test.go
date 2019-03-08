@@ -16,34 +16,22 @@ package howto
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestGetCompany(t *testing.T) {
-	buf := &bytes.Buffer{}
-
-	if _, err := getCompany(buf, testCompany.GetName()); err != nil {
-		t.Fatalf("getCompany: %v", err)
-	}
-	want := testCompany.Name
-	if got := buf.String(); !strings.Contains(got, want) {
-		t.Fatalf("getCompany got %q, want %q", got, want)
-	}
-}
-
-func TestListCompanies(t *testing.T) {
+func TestListJobs(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	buf := &bytes.Buffer{}
-	listCompanies(buf, tc.ProjectID)
-	if err := listCompanies(buf, tc.ProjectID); err != nil {
-		t.Fatalf("listCompanies: %v", err)
+	if err := listJobs(buf, tc.ProjectID, fmt.Sprintf("companyName=%q", testCompany.Name)); err != nil {
+		t.Fatalf("listJobs: %v", err)
 	}
-	want := testCompany.Name
+	want := testJob.Name
 	if got := buf.String(); !strings.Contains(got, want) {
-		t.Fatalf("listCompanies got %q, want to contain %q", got, want)
+		t.Fatalf("listJobs got %q, want to contain %q", got, want)
 	}
 }
