@@ -18,7 +18,7 @@
 //    -async
 //        Don't wait for successful deletion.
 //    -filter regexp
-//        Filter regexp for version IDs. If empty, attemps to clean all versions.
+//        Filter regexp for version IDs. If empty, attempts to clean all versions.
 //    -n  Dry run.
 //    -project Project ID
 //        Project ID to clean.
@@ -47,7 +47,7 @@ import (
 var (
 	proj    = flag.String("project", "", "`Project ID` to clean.")
 	service = flag.String("service", "", "`Service/module ID` to clean. If omitted, cleans all services.")
-	filter  = flag.String("filter", "", "Filter `regexp` for version IDs. If empty, attemps to clean all versions.")
+	filter  = flag.String("filter", "", "Filter `regexp` for version IDs. If empty, attempts to clean all versions.")
 	async   = flag.Bool("async", false, "Don't wait for successful deletion.")
 	dryRun  = flag.Bool("n", false, "Dry run.")
 )
