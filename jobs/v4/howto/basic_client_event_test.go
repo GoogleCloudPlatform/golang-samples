@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/gofrs/uuid"
 )
 
 func TestCreateClientEvent(t *testing.T) {
@@ -30,8 +31,8 @@ func TestCreateClientEvent(t *testing.T) {
 		tc := testutil.SystemTest(t)
 		buf := &bytes.Buffer{}
 
-		requestID := fmt.Sprintf("requestId-%d", time.Now().UnixNano())
-		eventID := fmt.Sprintf("eventId-%d", time.Now().UnixNano())
+		requestID := fmt.Sprintf("requestId-%s", uuid.Must(uuid.NewV4()).String())
+		eventID := fmt.Sprintf("eventId-%s", uuid.Must(uuid.NewV4()).String())
 		relatedJobNames := []string{testJob.Name}
 
 		if _, err := createClientEvent(buf, tc.ProjectID, requestID, eventID, relatedJobNames); err != nil {

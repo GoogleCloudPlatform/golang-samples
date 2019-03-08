@@ -19,9 +19,9 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"time"
 
 	talent "cloud.google.com/go/talent/apiv4beta1"
+	"github.com/gofrs/uuid"
 	talentpb "google.golang.org/genproto/googleapis/cloud/talent/v4beta1"
 	money "google.golang.org/genproto/googleapis/type/money"
 )
@@ -38,7 +38,7 @@ func createJobWithCustomAttributes(w io.Writer, projectID string, companyName st
 	}
 
 	// requisitionID shoud be the unique ID in your system
-	requisitionID := fmt.Sprintf("job-with-custom-attribute-%d", time.Now().UnixNano())
+	requisitionID := fmt.Sprintf("job-with-custom-attribute-%s", uuid.Must(uuid.NewV4()).String())
 	jobToCreate := &talentpb.Job{
 		CompanyName:   companyName,
 		RequisitionId: requisitionID,
