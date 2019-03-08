@@ -176,6 +176,8 @@ func TestDeleteOccurrence(t *testing.T) {
 }
 
 func TestUpdateOccurrence(t *testing.T) {
+	t.Skip("Flaky. golang-samples#785")
+
 	v := setup(t)
 
 	created, err := createOccurrence(v.ctx, v.client, v.imageUrl, v.noteID, v.projectID, v.projectID)
