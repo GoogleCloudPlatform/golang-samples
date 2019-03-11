@@ -25,7 +25,7 @@ import (
 
 func TestHistogramSearch(t *testing.T) {
 	tc := testutil.SystemTest(t)
-  companyID := strings.SplitAfter(testCompany.Name, "companies/")[1]
+	companyID := strings.SplitAfter(testCompany.Name, "companies/")[1]
 	testutil.Retry(t, 10, 1*time.Second, func(r *testutil.R) {
 		buf := &bytes.Buffer{}
 		if err := histogramSearch(buf, tc.ProjectID, companyID); err != nil {
