@@ -49,6 +49,7 @@ func TestRedactImage(t *testing.T) {
 	}
 	for _, test := range tests {
 		buf := new(bytes.Buffer)
+		// TODO: output to a Writer or bytes rather than to a file on disk.
 		redactImage(buf, client, projectID, dlppb.Likelihood_POSSIBLE, test.infoTypes, test.bt, test.inputPath, "testdata/test_output.png")
 		if got := buf.String(); !strings.Contains(got, test.want) {
 			t.Errorf("redactImage(%s) got %q, want substring %q", test.name, got, test.want)

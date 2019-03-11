@@ -24,6 +24,10 @@ import (
 func TestLogEntries(t *testing.T) {
 	// TODO: Use testutil to get the project.
 	projectID := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
+	if projectID == "" {
+		t.Skip("Missing GOLANG_SAMPLES_PROJECT_ID.")
+	}
+
 	buf := new(bytes.Buffer)
 	if err := logEntries(buf, projectID); err != nil {
 		t.Fatalf("logEntries: %v", err)
