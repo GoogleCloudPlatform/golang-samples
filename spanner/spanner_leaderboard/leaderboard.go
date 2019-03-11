@@ -80,7 +80,6 @@ func createDatabase(ctx context.Context, w io.Writer, adminClient *database.Data
 
 func insertPlayers(ctx context.Context, w io.Writer, client *spanner.Client) error {
 	// Get number of Players
-	//var playerNameSuffix int = 0
 	stmt := spanner.Statement{
 		SQL: `SELECT Count(PlayerId) as PlayerCount FROM Players`,
 	}
@@ -137,7 +136,7 @@ func insertScores(ctx context.Context, w io.Writer, client *spanner.Client) erro
 		if err := row.ColumnByName("PlayerId", &playerID); err != nil {
 			return err
 		}
-		// Intialize values for random score
+		// Intialize values for random score and date
 		rand.Seed(time.Now().UnixNano())
 		min := 1000
 		max := 1000000
@@ -277,6 +276,10 @@ func run(ctx context.Context, adminClient *database.DatabaseAdminClient, dataCli
 
 	// querywithtimespan command
 	if cmd == "querywithtimespan" {
+		if timespan == 0 {
+			flag.Usage()
+			os.Exit(2)
+		}
 		err := queryWithTimespan(ctx, w, dataClient, timespan)
 		if err != nil {
 			fmt.Fprintf(w, "%s failed with %v", cmd, err)
