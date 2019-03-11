@@ -24,7 +24,6 @@ import (
 
 func TestListCompanies(t *testing.T) {
 	tc := testutil.SystemTest(t)
-
 	buf := &bytes.Buffer{}
 	listCompanies(buf, tc.ProjectID)
 	if err := listCompanies(buf, tc.ProjectID); err != nil {

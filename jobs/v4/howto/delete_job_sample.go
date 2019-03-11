@@ -24,8 +24,8 @@ import (
 	talentpb "google.golang.org/genproto/googleapis/cloud/talent/v4beta1"
 )
 
-// deleteJob deletes an existing job by name.
-func deleteJob(w io.Writer, jobName string) error {
+// deleteJob deletes an existing job by its resource name.
+func deleteJob(w io.Writer, projectID, jobID string) error {
 	ctx := context.Background()
 
 	// Initialize a jobService client.
@@ -36,6 +36,7 @@ func deleteJob(w io.Writer, jobName string) error {
 	}
 
 	// Construct a deleteJob request.
+	jobName := fmt.Sprintf("projects/%s/jobs/%s", projectID, jobID)
 	req := &talentpb.DeleteJobRequest{
 		// The resource name of the job to be deleted.
 		// The format is "projects/{project_id}/jobs/{job_id}".

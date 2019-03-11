@@ -24,8 +24,8 @@ import (
 	talentpb "google.golang.org/genproto/googleapis/cloud/talent/v4beta1"
 )
 
-// getCompany gets an existing company by name.
-func getCompany(w io.Writer, companyName string) (*talentpb.Company, error) {
+// getCompany gets an existing company by its resource name.
+func getCompany(w io.Writer, projectID, companyID string) (*talentpb.Company, error) {
 	ctx := context.Background()
 
 	// Initialize a companyService client.
@@ -36,6 +36,7 @@ func getCompany(w io.Writer, companyName string) (*talentpb.Company, error) {
 	}
 
 	// Construct a getCompany request.
+	companyName := fmt.Sprintf("projects/%s/companies/%s", projectID, companyID)
 	req := &talentpb.GetCompanyRequest{
 		// The resource name of the company to be retrieved.
 		// The format is "projects/{project_id}/companies/{company_id}".
@@ -49,7 +50,7 @@ func getCompany(w io.Writer, companyName string) (*talentpb.Company, error) {
 	}
 
 	fmt.Fprintf(w, "Company: %q\n", resp.GetName())
-	fmt.Printf("Company display name: %q\n", resp.GetDisplayName())
+	fmt.Fprintf(w, "Company display name: %q\n", resp.GetDisplayName())
 
 	return resp, nil
 }

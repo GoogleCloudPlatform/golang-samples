@@ -26,7 +26,7 @@ import (
 )
 
 // customRankingSearch searches for jobs based on custom ranking.
-func customRankingSearch(w io.Writer, projectID, companyName string) error {
+func customRankingSearch(w io.Writer, projectID, companyID string) error {
 	ctx := context.Background()
 
 	// Initialize a jobService client.
@@ -38,7 +38,7 @@ func customRankingSearch(w io.Writer, projectID, companyName string) error {
 
 	// Construct a searchJobs request.
 	req := &talentpb.SearchJobsRequest{
-		Parent: "projects/" + projectID,
+		Parent: fmt.Sprintf("projects/%s", projectID),
 		// Make sure to set the RequestMetadata the same as the associated
 		// search request.
 		RequestMetadata: &talentpb.RequestMetadata{
@@ -50,7 +50,7 @@ func customRankingSearch(w io.Writer, projectID, companyName string) error {
 			Domain: "www.googlesample.com",
 		},
 		JobQuery: &talentpb.JobQuery{
-			CompanyNames: []string{companyName},
+			CompanyNames: []string{fmt.Sprintf("projects/%s/companies/%s", projectID, companyID)},
 		},
 		// More info on customRankingInfo.
 		// https://godoc.org/google.golang.org/genproto/googleapis/cloud/talent/v4beta1#SearchJobsRequest_CustomRankingInfo

@@ -24,9 +24,9 @@ import (
 	talentpb "google.golang.org/genproto/googleapis/cloud/talent/v4beta1"
 )
 
-// jobTitleAutoComplete suggests the job titles of the given companyName based
-// on query.
-func jobTitleAutocomplete(w io.Writer, projectID, companyName, query string) (*talentpb.CompleteQueryResponse, error) {
+// jobTitleAutoComplete suggests the job titles of the given
+// company identifier on query.
+func jobTitleAutocomplete(w io.Writer, projectID, companyID, query string) (*talentpb.CompleteQueryResponse, error) {
 	ctx := context.Background()
 
 	// Initialize a completionService client.
@@ -38,15 +38,15 @@ func jobTitleAutocomplete(w io.Writer, projectID, companyName, query string) (*t
 
 	// Construct a completeQuery request.
 	req := &talentpb.CompleteQueryRequest{
-		Name:        "projects/" + projectID,
+		Name:        fmt.Sprintf("projects/%s", projectID),
 		Query:       query,
 		PageSize:    1,
-		CompanyName: companyName,
+		CompanyName: fmt.Sprintf("projects/%s/companies/%s", projectID, companyID),
 	}
 
 	resp, err := c.CompleteQuery(ctx, req)
 	if err != nil {
-		fmt.Printf("failed to auto complete with query %s in %s: %v\n", query, companyName, err)
+		fmt.Printf("failed to auto complete with query %s in %s: %v\n", query, companyID, err)
 		return nil, err
 	}
 

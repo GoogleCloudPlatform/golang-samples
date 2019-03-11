@@ -44,7 +44,7 @@ func createClientEvent(w io.Writer, projectID string, requestID string, eventID 
 		CreateTime: createTime,
 		Event: &talentpb.ClientEvent_JobEvent{
 			JobEvent: &talentpb.JobEvent{
-				Type: 2,
+				Type: talentpb.JobEvent_VIEW,
 				Jobs: relatedJobNames,
 			},
 		},
@@ -52,7 +52,7 @@ func createClientEvent(w io.Writer, projectID string, requestID string, eventID 
 
 	// Construct a createJob request.
 	req := &talentpb.CreateClientEventRequest{
-		Parent:      "projects/" + projectID,
+		Parent:      fmt.Sprintf("projects/%s", projectID),
 		ClientEvent: clientEventToCreate,
 	}
 

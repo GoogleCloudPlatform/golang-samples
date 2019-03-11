@@ -19,6 +19,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -28,6 +29,8 @@ import (
 
 var testCompany *talentpb.Company
 var testJob *talentpb.Job
+var companyID string
+var jobID string
 
 func TestMain(m *testing.M) {
 	tc, ok := testutil.ContextMain(m)
@@ -43,26 +46,28 @@ func TestMain(m *testing.M) {
 		log.Fatalf("createCompany: %v", err)
 	}
 
+	companyID := strings.SplitAfter(testCompany.Name, "companies/")[1]
 	requisitionID := fmt.Sprintf("job-%s", uuid.Must(uuid.NewV4()).String())
 	title := "Software Engineer"
 	URI := "https://googlesample.com/career"
 	description := "Design, devolop, test, deploy, maintain and improve software."
-	address1 := "Mountain View, CA"
-	address2 := "New York City, NY"
+	address1 := "1600 Amphitheatre PkwyMountain View, CA 94043"
+	address2 := "85 10th Ave, New York, NY 10011"
 	languageCode := "en-US"
 
-	testJob, err = createJob(ioutil.Discard, tc.ProjectID, testCompany.Name, requisitionID, title, URI, description, address1, address2, languageCode)
+	testJob, err = createJob(ioutil.Discard, tc.ProjectID, companyID, requisitionID, title, URI, description, address1, address2, languageCode)
 	if err != nil {
 		log.Fatalf("createJob: %v", err)
 	}
+	jobID := strings.SplitAfter(testJob.Name, "jobs/")[1]
 
 	result := m.Run()
 
-	if err := deleteJob(ioutil.Discard, testJob.Name); err != nil {
+	if err := deleteJob(ioutil.Discard, tc.ProjectID, jobID); err != nil {
 		log.Fatalf("deleteJob: %v", err)
 	}
 
-	if err := deleteCompany(ioutil.Discard, testCompany.GetName()); err != nil {
+	if err := deleteCompany(ioutil.Discard, tc.ProjectID, companyID); err != nil {
 		log.Fatalf("deleteCompany: %v", err)
 	}
 

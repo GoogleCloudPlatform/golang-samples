@@ -25,7 +25,7 @@ import (
 )
 
 // createCompany creates a company as given.
-func createCompany(w io.Writer, projectID string, externalID string, displayName string) (*talentpb.Company, error) {
+func createCompany(w io.Writer, projectID, externalID, displayName string) (*talentpb.Company, error) {
 	ctx := context.Background()
 
 	// Initializes a companyService client.
@@ -37,7 +37,7 @@ func createCompany(w io.Writer, projectID string, externalID string, displayName
 
 	// Construct a createCompany request.
 	req := &talentpb.CreateCompanyRequest{
-		Parent: "projects/" + projectID,
+		Parent: fmt.Sprintf("projects/%s", projectID),
 		Company: &talentpb.Company{
 			ExternalId:  externalID,
 			DisplayName: displayName,

@@ -26,7 +26,7 @@ import (
 )
 
 // histogramSearch searches for jobs with histogram queries.
-func histogramSearch(w io.Writer, projectID, companyName string) error {
+func histogramSearch(w io.Writer, projectID, companyID string) error {
 	ctx := context.Background()
 
 	// Initialize a jobService client.
@@ -38,7 +38,7 @@ func histogramSearch(w io.Writer, projectID, companyName string) error {
 
 	// Construct a searchJobs request.
 	req := &talentpb.SearchJobsRequest{
-		Parent: "projects/" + projectID,
+		Parent: fmt.Sprintf("projects/%s", projectID),
 		// Make sure to set the RequestMetadata the same as the associated
 		// search request.
 		RequestMetadata: &talentpb.RequestMetadata{
@@ -57,9 +57,9 @@ func histogramSearch(w io.Writer, projectID, companyName string) error {
 			},
 		},
 	}
-	if companyName != "" {
+	if companyID != "" {
 		req.JobQuery = &talentpb.JobQuery{
-			CompanyNames: []string{companyName},
+			CompanyNames: []string{fmt.Sprintf("projects/%s/companies/%s", projectID, companyID)},
 		}
 	}
 

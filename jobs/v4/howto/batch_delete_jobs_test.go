@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"strings"
 	"testing"
 	"time"
 
@@ -29,6 +30,7 @@ func TestBatchDeleteJobs(t *testing.T) {
 	testutil.Retry(t, 10, 1*time.Second, func(r *testutil.R) {
 		tc := testutil.SystemTest(t)
 
+		companyID := strings.SplitAfter(testCompany.Name, "companies/")[1]
 		requisitionID := fmt.Sprintf("job-%s", uuid.Must(uuid.NewV4()).String())
 		title := "Software Engineer"
 		URI := "https://googlesample.com/career"
@@ -39,14 +41,14 @@ func TestBatchDeleteJobs(t *testing.T) {
 		languageCode2 := "sr_Latn"
 
 		// Create two identical jobs with different language codes.
-		if _, err := createJob(ioutil.Discard, tc.ProjectID, testCompany.Name, requisitionID, title, URI, description, address1, address2, languageCode1); err != nil {
+		if _, err := createJob(ioutil.Discard, tc.ProjectID, companyID, requisitionID, title, URI, description, address1, address2, languageCode1); err != nil {
 			log.Fatalf("createJob1: %v", err)
 		}
-		if _, err := createJob(ioutil.Discard, tc.ProjectID, testCompany.Name, requisitionID, title, URI, description, address1, address2, languageCode2); err != nil {
+		if _, err := createJob(ioutil.Discard, tc.ProjectID, companyID, requisitionID, title, URI, description, address1, address2, languageCode2); err != nil {
 			log.Fatalf("createJob2: %v", err)
 		}
 
-		if err := batchDeleteJobs(ioutil.Discard, tc.ProjectID, testCompany.Name, requisitionID); err != nil {
+		if err := batchDeleteJobs(ioutil.Discard, tc.ProjectID, companyID, requisitionID); err != nil {
 			log.Fatalf("batchDeleteJob: %v", err)
 		}
 	})

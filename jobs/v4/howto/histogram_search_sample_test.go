@@ -28,7 +28,7 @@ func TestHistogramSearch(t *testing.T) {
 
 	testutil.Retry(t, 10, 1*time.Second, func(r *testutil.R) {
 		buf := &bytes.Buffer{}
-		if err := histogramSearch(buf, tc.ProjectID, testCompany.Name); err != nil {
+		if err := histogramSearch(buf, tc.ProjectID, companyID); err != nil {
 			r.Errorf("histogramSearch: %v", err)
 		}
 		want := testJob.Name

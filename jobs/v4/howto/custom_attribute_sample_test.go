@@ -15,8 +15,10 @@
 package howto
 
 import (
+	"bytes"
 	"io/ioutil"
 	"log"
+	"strings"
 	"testing"
 	"time"
 
@@ -26,11 +28,18 @@ import (
 func TestCreateJobWithCustomAttributes(t *testing.T) {
 	testutil.Retry(t, 10, 1*time.Second, func(r *testutil.R) {
 		tc := testutil.SystemTest(t)
-		customJob, err := createJobWithCustomAttributes(ioutil.Discard, tc.ProjectID, testJob.CompanyName, testJob.Title)
+		buf := &bytes.Buffer{}
+		companyID := strings.SplitAfter(testCompany.Name, "companies/")[1]
+		customJob, err := createJobWithCustomAttributes(buf, tc.ProjectID, companyID, testJob.Title)
 		if err != nil {
-			log.Fatalf("createJob: %v", err)
+			log.Fatalf("createJobWithCustomAttributes: %v", err)
 		}
-		if err := deleteJob(ioutil.Discard, customJob.Name); err != nil {
+		want := "900"
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Fatalf("createJobWithCustomAttributes got %q, want to contain %q", got, want)
+		}
+		jobID := strings.SplitAfter(customJob.Name, "jobs/")[1]
+		if err := deleteJob(ioutil.Discard, tc.ProjectID, jobID); err != nil {
 			log.Fatalf("deleteJob: %v", err)
 		}
 	})

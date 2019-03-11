@@ -15,7 +15,8 @@
 package howto
 
 import (
-	"io/ioutil"
+	"bytes"
+	"strings"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -23,7 +24,12 @@ import (
 
 func TestCustomRankingSearch(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	if err := customRankingSearch(ioutil.Discard, tc.ProjectID, testCompany.Name); err != nil {
+	buf := &bytes.Buffer{}
+	if err := customRankingSearch(buf, tc.ProjectID, companyID); err != nil {
 		t.Fatalf("customRankingSearch: %v", err)
+	}
+	want := "Job: "
+	if got := buf.String(); !strings.Contains(got, want) {
+		t.Fatalf("getJob got %q, want to contain %q", got, want)
 	}
 }

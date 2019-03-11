@@ -27,7 +27,7 @@ import (
 )
 
 // createJobWithCustomAttributes creates a job with custom attributes.
-func createJobWithCustomAttributes(w io.Writer, projectID string, companyName string, jobTitle string) (*talentpb.Job, error) {
+func createJobWithCustomAttributes(w io.Writer, projectID, companyID, jobTitle string) (*talentpb.Job, error) {
 	ctx := context.Background()
 
 	// Initialize a job service client.
@@ -40,7 +40,7 @@ func createJobWithCustomAttributes(w io.Writer, projectID string, companyName st
 	// requisitionID shoud be the unique ID in your system
 	requisitionID := fmt.Sprintf("job-with-custom-attribute-%s", uuid.Must(uuid.NewV4()).String())
 	jobToCreate := &talentpb.Job{
-		CompanyName:   companyName,
+		CompanyName:   fmt.Sprintf("projects/%s/companies/%s", projectID, companyID),
 		RequisitionId: requisitionID,
 		Title:         jobTitle,
 		ApplicationInfo: &talentpb.Job_ApplicationInfo{
@@ -64,8 +64,8 @@ func createJobWithCustomAttributes(w io.Writer, projectID string, companyName st
 		CompensationInfo: &talentpb.CompensationInfo{
 			Entries: []*talentpb.CompensationInfo_CompensationEntry{
 				{
-					Type: 1,
-					Unit: 1,
+					Type: talentpb.CompensationInfo_BASE,
+					Unit: talentpb.CompensationInfo_HOURLY,
 					CompensationAmount: &talentpb.CompensationInfo_CompensationEntry_Amount{
 						Amount: &money.Money{
 							CurrencyCode: "USD",
@@ -79,7 +79,7 @@ func createJobWithCustomAttributes(w io.Writer, projectID string, companyName st
 
 	// Construct a createJob request.
 	req := &talentpb.CreateJobRequest{
-		Parent: "projects/" + projectID,
+		Parent: fmt.Sprintf("projects/%s", projectID),
 		Job:    jobToCreate,
 	}
 
@@ -89,7 +89,8 @@ func createJobWithCustomAttributes(w io.Writer, projectID string, companyName st
 		return nil, err
 	}
 
-	fmt.Printf("Created job with custom attributres: %q\n", resp.GetName())
+	fmt.Fprintf(w, "Created job with custom attributres: %q\n", resp.GetName())
+	fmt.Fprintf(w, "Custom long field has value: %v\n", resp.GetCustomAttributes()["someFieldLong"].GetLongValues())
 
 	return resp, nil
 }

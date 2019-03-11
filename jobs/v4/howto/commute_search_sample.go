@@ -28,7 +28,7 @@ import (
 )
 
 // commuteSearch searches for jobs within commute filter.
-func commuteSearch(w io.Writer, projectID, companyName string) error {
+func commuteSearch(w io.Writer, projectID, companyID string) error {
 	ctx := context.Background()
 
 	// Initialize a jobService client.
@@ -49,13 +49,13 @@ func commuteSearch(w io.Writer, projectID, companyName string) error {
 			},
 		},
 	}
-	if companyName != "" {
-		jobQuery.CompanyNames = []string{companyName}
+	if companyID != "" {
+		jobQuery.CompanyNames = []string{fmt.Sprintf("projects/%s/companies/%s", projectID, companyID)}
 	}
 
 	// Construct a searchJobs request with a jobQuery.
 	req := &talentpb.SearchJobsRequest{
-		Parent: "projects/" + projectID,
+		Parent: fmt.Sprintf("projects/%s", projectID),
 		// Make sure to set the RequestMetadata the same as the associated
 		// search request.
 		RequestMetadata: &talentpb.RequestMetadata{
@@ -81,7 +81,8 @@ func commuteSearch(w io.Writer, projectID, companyName string) error {
 			fmt.Printf("it.Next: %v\n", err)
 			return err
 		}
-		fmt.Fprintf(w, "Job: %q\n", resp.Job.GetName())
+		fmt.Fprintf(w, "Matcing job: %q\n", resp.GetJob().GetName())
+		fmt.Fprintf(w, "Job address: %v\n", resp.GetCommuteInfo().GetJobLocation().GetPostalAddress().GetAddressLines())
 	}
 }
 

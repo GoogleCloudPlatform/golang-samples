@@ -24,8 +24,8 @@ import (
 	talentpb "google.golang.org/genproto/googleapis/cloud/talent/v4beta1"
 )
 
-// batchDeleteJobs deletes existing jobs by filter.
-func batchDeleteJobs(w io.Writer, projectID, companyName, requisitionID string) error {
+// batchDeleteJobs deletes existing jobs by a filter.
+func batchDeleteJobs(w io.Writer, projectID, companyID, requisitionID string) error {
 	ctx := context.Background()
 
 	// Initialize a jobService client.
@@ -35,11 +35,12 @@ func batchDeleteJobs(w io.Writer, projectID, companyName, requisitionID string) 
 		return err
 	}
 
+	companyName := fmt.Sprintf("projects/%s/companies/%s", projectID, companyID)
 	filter := fmt.Sprintf("companyName=%q AND requisitionId=%q", companyName, requisitionID)
 
 	// Construct a batchDeteleJobs request.
 	req := &talentpb.BatchDeleteJobsRequest{
-		Parent: "projects/" + projectID,
+		Parent: fmt.Sprintf("projects/%s", projectID),
 		// The fields eligible for filtering are `companyName` and `requisitionId`.
 		Filter: filter,
 	}

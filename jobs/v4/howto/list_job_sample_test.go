@@ -16,7 +16,6 @@ package howto
 
 import (
 	"bytes"
-	"fmt"
 	"strings"
 	"testing"
 
@@ -25,9 +24,9 @@ import (
 
 func TestListJobs(t *testing.T) {
 	tc := testutil.SystemTest(t)
-
 	buf := &bytes.Buffer{}
-	if err := listJobs(buf, tc.ProjectID, fmt.Sprintf("companyName=%q", testCompany.Name)); err != nil {
+	companyID := strings.SplitAfter(testCompany.Name, "companies/")[1]
+	if err := listJobs(buf, tc.ProjectID, companyID); err != nil {
 		t.Fatalf("listJobs: %v", err)
 	}
 	want := testJob.Name

@@ -18,15 +18,19 @@ import (
 	"bytes"
 	"strings"
 	"testing"
+
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestGetCompany(t *testing.T) {
+	tc := testutil.SystemTest(t)
 	buf := &bytes.Buffer{}
+	companyID := strings.SplitAfter(testCompany.Name, "companies/")[1]
 
-	if _, err := getCompany(buf, testCompany.GetName()); err != nil {
+	if _, err := getCompany(buf, tc.ProjectID, companyID); err != nil {
 		t.Fatalf("getCompany: %v", err)
 	}
-	want := testCompany.Name
+	want := "Google"
 	if got := buf.String(); !strings.Contains(got, want) {
 		t.Fatalf("getCompany got %q, want %q", got, want)
 	}

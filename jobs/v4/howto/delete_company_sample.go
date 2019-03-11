@@ -24,9 +24,9 @@ import (
 	talentpb "google.golang.org/genproto/googleapis/cloud/talent/v4beta1"
 )
 
-// deleteCompany deletes an existing company by name. Companies with
+// deleteCompany deletes an existing company. Companies with
 // existing jobs cannot be deleted until those jobs have been deleted.
-func deleteCompany(w io.Writer, companyName string) error {
+func deleteCompany(w io.Writer, projectID, companyID string) error {
 	ctx := context.Background()
 
 	// Initialize a companyService client.
@@ -37,6 +37,7 @@ func deleteCompany(w io.Writer, companyName string) error {
 	}
 
 	// Construct a deleteCompany request.
+	companyName := fmt.Sprintf("projects/%s/companies/%s", projectID, companyID)
 	req := &talentpb.DeleteCompanyRequest{
 		// The resource name of the company to be deleted.
 		// The format is "projects/{project_id}/companies/{company_id}".

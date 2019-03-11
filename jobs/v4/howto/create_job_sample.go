@@ -25,7 +25,7 @@ import (
 )
 
 // createJob create a job as given.
-func createJob(w io.Writer, projectID, companyName, requisitionID, title, URI, description, address1, address2, languageCode string) (*talentpb.Job, error) {
+func createJob(w io.Writer, projectID, companyID, requisitionID, title, URI, description, address1, address2, languageCode string) (*talentpb.Job, error) {
 	ctx := context.Background()
 
 	// Initialize a jobService client.
@@ -36,7 +36,7 @@ func createJob(w io.Writer, projectID, companyName, requisitionID, title, URI, d
 	}
 
 	jobToCreate := &talentpb.Job{
-		CompanyName:   companyName,
+		CompanyName:   fmt.Sprintf("projects/%s/companies/%s", projectID, companyID),
 		RequisitionId: requisitionID,
 		Title:         title,
 		ApplicationInfo: &talentpb.Job_ApplicationInfo{
@@ -49,7 +49,7 @@ func createJob(w io.Writer, projectID, companyName, requisitionID, title, URI, d
 
 	// Construct a createJob request.
 	req := &talentpb.CreateJobRequest{
-		Parent: "projects/" + projectID,
+		Parent: fmt.Sprintf("projects/%s", projectID),
 		Job:    jobToCreate,
 	}
 

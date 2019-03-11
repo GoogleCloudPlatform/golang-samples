@@ -15,7 +15,8 @@
 package howto
 
 import (
-	"io/ioutil"
+	"bytes"
+	"strings"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -23,7 +24,12 @@ import (
 
 func TestCommuteSearch(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	if err := commuteSearch(ioutil.Discard, tc.ProjectID, testCompany.Name); err != nil {
+	buf := &bytes.Buffer{}
+	if err := commuteSearch(buf, tc.ProjectID, companyID); err != nil {
 		t.Fatalf("commuteSearch: %v", err)
+	}
+	want := "Mountain View"
+	if got := buf.String(); !strings.Contains(got, want) {
+		t.Fatalf("commuteSearch got %q, want to contain %q", got, want)
 	}
 }

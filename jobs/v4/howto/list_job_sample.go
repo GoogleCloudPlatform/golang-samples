@@ -27,7 +27,7 @@ import (
 
 // listJobs lists jobs with a filter, for example
 // `companyName="projects/my-project/companies/123"`.
-func listJobs(w io.Writer, projectID, filter string) error {
+func listJobs(w io.Writer, projectID, companyID string) error {
 	ctx := context.Background()
 
 	// Initialize a jobService client.
@@ -38,9 +38,10 @@ func listJobs(w io.Writer, projectID, filter string) error {
 	}
 
 	// Construct a listJobs request.
+	companyName := fmt.Sprintf("projects/%s/companies/%s", projectID, companyID)
 	req := &talentpb.ListJobsRequest{
 		Parent: "projects/" + projectID,
-		Filter: filter,
+		Filter: fmt.Sprintf("companyName=%q", companyName),
 	}
 
 	it := c.ListJobs(ctx, req)
@@ -55,7 +56,7 @@ func listJobs(w io.Writer, projectID, filter string) error {
 			return err
 		}
 		fmt.Fprintf(w, "Listing job: %v\n", resp.GetName())
-		fmt.Printf("Job title: %v\n", resp.GetTitle())
+		fmt.Fprintf(w, "Job title: %v\n", resp.GetTitle())
 	}
 }
 

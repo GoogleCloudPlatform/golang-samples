@@ -53,8 +53,8 @@ func listCompanies(w io.Writer, projectID string) error {
 			return err
 		}
 		fmt.Fprintf(w, "Listing company: %q\n", resp.GetName())
-		fmt.Printf("Display name: %v\n", resp.GetDisplayName())
-		fmt.Printf("External ID: %v\n", resp.GetExternalId())
+		fmt.Fprintf(w, "Display name: %v\n", resp.GetDisplayName())
+		fmt.Fprintf(w, "External ID: %v\n", resp.GetExternalId())
 	}
 }
 

@@ -18,14 +18,18 @@ import (
 	"bytes"
 	"strings"
 	"testing"
+
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestGetJob(t *testing.T) {
+	tc := testutil.SystemTest(t)
 	buf := &bytes.Buffer{}
-	if _, err := getJob(buf, testJob.Name); err != nil {
+	jobID := strings.SplitAfter(testJob.Name, "jobs/")[1]
+	if _, err := getJob(buf, tc.ProjectID, jobID); err != nil {
 		t.Fatalf("getJob: %v", err)
 	}
-	want := testJob.Name
+	want := "Software Engineer"
 	if got := buf.String(); !strings.Contains(got, want) {
 		t.Fatalf("getJob got %q, want to contain %q", got, want)
 	}
