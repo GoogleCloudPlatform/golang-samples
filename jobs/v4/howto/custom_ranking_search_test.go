@@ -25,6 +25,7 @@ import (
 func TestCustomRankingSearch(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := &bytes.Buffer{}
+	companyID := strings.SplitAfter(testCompany.Name, "companies/")[1]
 	if err := customRankingSearch(buf, tc.ProjectID, companyID); err != nil {
 		t.Fatalf("customRankingSearch: %v", err)
 	}

@@ -29,8 +29,6 @@ import (
 
 var testCompany *talentpb.Company
 var testJob *talentpb.Job
-var companyID string
-var jobID string
 
 func TestMain(m *testing.M) {
 	tc, ok := testutil.ContextMain(m)
