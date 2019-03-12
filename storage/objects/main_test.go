@@ -122,7 +122,7 @@ func TestObjects(t *testing.T) {
 		t.Errorf("cannot add bucket acl: %v", err)
 	}
 	if err := addDefaultBucketACL(client, bucket); err != nil {
-		t.Errorf("cannot add bucket deafult acl: %v", err)
+		t.Errorf("cannot add bucket default acl: %v", err)
 	}
 	if err := bucketACL(client, bucket); err != nil {
 		t.Errorf("cannot get bucket acl: %v", err)
