@@ -16,8 +16,8 @@
 package snippets
 
 import (
-	speech "cloud.google.com/go/speech/apiv1p1beta1"
-	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1p1beta1"
+	speech "cloud.google.com/go/speech/apiv1"
+	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"
 
 	"context"
 	"fmt"
