@@ -91,11 +91,11 @@ func main() {
 	ctx := context.Background()
 	if *key != "" {
 		log.Printf("Using API key: %s", *key)
-		ctx = metadata.NewOutgoingContext(ctx, metadata.Pairs("x-api-key", *key))
+		ctx = metadata.AppendToOutgoingContext(ctx, "x-api-key", *key)
 	}
 	if *token != "" {
 		log.Printf("Using authentication token: %s", *token)
-		ctx = metadata.NewOutgoingContext(ctx, metadata.Pairs("Authorization", fmt.Sprintf("Bearer %s", *token)))
+		ctx = metadata.AppendToOutgoingContext(ctx, "Authorization", fmt.Sprintf("Bearer %s", *token))
 	}
 
 	// Contact the server and print out its response.

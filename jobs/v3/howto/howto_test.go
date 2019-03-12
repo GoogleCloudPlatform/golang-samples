@@ -33,7 +33,8 @@ var testJob *talent.Job
 func TestMain(m *testing.M) {
 	tc, ok := testutil.ContextMain(m)
 	if !ok {
-		log.Fatal("Error getting test context")
+		log.Print("GOLANG_SAMPLES_PROJECT_ID is unset. Skipping.")
+		return
 	}
 
 	companyToCreate := &talent.Company{

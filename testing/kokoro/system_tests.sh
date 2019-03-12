@@ -95,7 +95,6 @@ popd
 go get ./internal/...
 
 go get github.com/jstemmer/go-junit-report
-go install golang.org/x/tools/imports;
 go install -v $GO_IMPORTS
 
 # Do the easy stuff before running tests. Fail fast!

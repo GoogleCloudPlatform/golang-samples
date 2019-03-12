@@ -29,8 +29,12 @@ import (
 const topicName = "functions-test-topic"
 
 func TestPublishMessage(t *testing.T) {
-	// TODO: Use testutil.
+	// TODO: Use testutil to get the project.
 	projectID = os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
+	if projectID == "" {
+		t.Skip("Missing GOLANG_SAMPLES_PROJECT_ID.")
+	}
+
 	ctx := context.Background()
 	var err error
 	client, err = pubsub.NewClient(ctx, projectID)

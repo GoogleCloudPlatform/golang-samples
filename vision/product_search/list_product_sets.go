@@ -34,6 +34,7 @@ func listProductSets(w io.Writer, projectID string, location string) error {
 	if err != nil {
 		return fmt.Errorf("NewProductSearchClient: %v", err)
 	}
+	defer c.Close()
 
 	req := &visionpb.ListProductSetsRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
