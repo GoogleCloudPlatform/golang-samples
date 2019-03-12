@@ -38,6 +38,7 @@ func findLabels(file string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer client.Close()
 	// [END init]
 
 	// [START request]

@@ -33,6 +33,7 @@ func getReferenceImage(w io.Writer, projectID string, location string, productID
 	if err != nil {
 		return fmt.Errorf("NewProductSearchClient: %v", err)
 	}
+	defer c.Close()
 
 	req := &visionpb.GetReferenceImageRequest{
 		Name: fmt.Sprintf("projects/%s/locations/%s/products/%s/referenceImages/%s", projectID, location, productID, referenceImageID),

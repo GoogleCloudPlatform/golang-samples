@@ -33,6 +33,7 @@ func createProductSet(w io.Writer, projectID string, location string, productSet
 	if err != nil {
 		return fmt.Errorf("NewProductSearchClient: %v", err)
 	}
+	defer c.Close()
 
 	req := &visionpb.CreateProductSetRequest{
 		Parent:       fmt.Sprintf("projects/%s/locations/%s", projectID, location),

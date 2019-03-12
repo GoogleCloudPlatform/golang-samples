@@ -33,6 +33,7 @@ func getSimilarProductsURI(w io.Writer, projectID string, location string, produ
 	if err != nil {
 		return fmt.Errorf("NewImageAnnotatorClient: %v", err)
 	}
+	defer c.Close()
 
 	image := vision.NewImageFromURI(imageURI)
 
