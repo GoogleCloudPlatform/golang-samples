@@ -56,8 +56,7 @@ func audioProfile(w io.Writer, text string, outputFile string) error {
 		return fmt.Errorf("SynthesizeSpeech: %v", err)
 	}
 
-	err = ioutil.WriteFile(outputFile, resp.AudioContent, 0644)
-	if err != nil {
+	if err = ioutil.WriteFile(outputFile, resp.AudioContent, 0644); err != nil {
 		return err
 	}
 
