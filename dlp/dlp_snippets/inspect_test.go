@@ -215,7 +215,7 @@ func writeTestDatastoreFiles(t *testing.T, projectID string) {
 }
 
 func TestInspectDatastore(t *testing.T) {
-	testutil.SystemTest(t)
+	testutil.EndToEndTest(t)
 	writeTestDatastoreFiles(t, projectID)
 	tests := []struct {
 		kind string
@@ -294,7 +294,7 @@ func uploadBigQuery(ctx context.Context, d *bigquery.Dataset, schema bigquery.Sc
 }
 
 func TestInspectBigquery(t *testing.T) {
-	testutil.SystemTest(t)
+	testutil.EndToEndTest(t)
 	if err := createBigqueryTestFiles(projectID, bqDatasetID); err != nil {
 		t.Fatalf("error creating test BigQuery files: %v", err)
 	}
