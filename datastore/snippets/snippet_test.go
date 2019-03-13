@@ -610,7 +610,7 @@ func SnippetTransaction_getOrCreate() {
 	// [START datastore_transactional_get_or_create]
 	_, err := client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
 		var task Task
-		if err := tx.Get(key, &task); err != datastore.ErrNoSuchEntity {
+		if err := tx.Get(key, &task); err != nil && err != datastore.ErrNoSuchEntity {
 			return err
 		}
 		_, err := tx.Put(key, &Task{
