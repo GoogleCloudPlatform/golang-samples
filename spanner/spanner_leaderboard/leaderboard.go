@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Command spanner_snippets contains runnable snippet code for Cloud Spanner.
+// Command spanner_leaderboard contains runnable snippet code for Cloud Spanner.
 package main
 
 import (
@@ -79,50 +79,60 @@ func createDatabase(ctx context.Context, w io.Writer, adminClient *database.Data
 }
 
 func insertPlayers(ctx context.Context, w io.Writer, client *spanner.Client) error {
-	// Get number of Players
+	// Get number of players to use as an incrementing value for each PlayerName to be inserted
 	stmt := spanner.Statement{
 		SQL: `SELECT Count(PlayerId) as PlayerCount FROM Players`,
 	}
 	iter := client.Single().Query(ctx, stmt)
 	defer iter.Stop()
 	row, err := iter.Next()
-	if err == iterator.Done {
-		return nil
-	}
 	if err != nil {
 		return err
 	}
-	var numberOfPlayers int64
+	var numberOfPlayers int64 = 0
 	if err := row.Columns(&numberOfPlayers); err != nil {
 		return err
 	}
+	// Intialize values for random PlayerId
+	rand.Seed(time.Now().UnixNano())
+	min := 1000000000
+	max := 9000000000
 	// Insert 100 player records into the Players table
-	for i := 1; i <= 10; i++ {
-		numberOfPlayers++
-		rand.Seed(time.Now().UnixNano())
-		min := 1000000000
-		max := 9000000000
-		PlayerId := rand.Intn(max-min) + min
-		PlayerName := fmt.Sprintf("Player %d", numberOfPlayers)
-		cols := []string{"PlayerId", "PlayerName"}
-		m := []*spanner.Mutation{
-			spanner.InsertOrUpdate("Players", cols, []interface{}{PlayerId, PlayerName}),
+	_, err = client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
+		stmts := []spanner.Statement{}
+		for i := 1; i <= 100; i++ {
+			numberOfPlayers++
+			playerID := rand.Intn(max-min) + min
+			playerName := fmt.Sprintf("Player %d", numberOfPlayers)
+			stmts = append(stmts, spanner.Statement{
+				SQL: `INSERT INTO Players
+						(PlayerId, PlayerName)
+						VALUES (@playerID, @playerName)`,
+				Params: map[string]interface{}{
+					"playerID":   playerID,
+					"playerName": playerName,
+				},
+			})
 		}
-		_, err := client.Apply(ctx, m)
+		_, err := txn.BatchUpdate(ctx, stmts)
 		if err != nil {
 			return err
 		}
-	}
+		return nil
+	})
 	fmt.Fprintf(w, "Inserted players \n")
 	return nil
 }
 
 func insertScores(ctx context.Context, w io.Writer, client *spanner.Client) error {
-	var playerRecordsFound bool = false
+	playerRecordsFound := false
+	// Create slice for insert statements
+	stmts := []spanner.Statement{}
 	// Select all player records
 	stmt := spanner.Statement{SQL: `SELECT PlayerId FROM Players`}
 	iter := client.Single().Query(ctx, stmt)
 	defer iter.Stop()
+	// Insert 4 score records into the Scores table for each player in the Players table
 	for {
 		row, err := iter.Next()
 		if err == iterator.Done {
@@ -140,9 +150,8 @@ func insertScores(ctx context.Context, w io.Writer, client *spanner.Client) erro
 		rand.Seed(time.Now().UnixNano())
 		min := 1000
 		max := 1000000
-		// Insert 4 score records into the Scores table for each player in the Players table
-		for i := 1; i <= 4; i++ {
-			// Generate random score between 1,000,000 and 1,000
+		for i := 0; i < 4; i++ {
+			// Generate random score between 1,000 and 1,000,000
 			score := rand.Intn(max-min) + min
 			// Generate random day within the past two years
 			now := time.Now()
@@ -151,20 +160,32 @@ func insertScores(ctx context.Context, w io.Writer, client *spanner.Client) erro
 			startDate := past.Unix()
 			randomDateInSeconds := rand.Int63n(endDate-startDate) + startDate
 			randomDate := time.Unix(randomDateInSeconds, 0)
-			cols := []string{"PlayerId", "Score", "Timestamp"}
-			m := []*spanner.Mutation{
-				spanner.InsertOrUpdate("Scores", cols, []interface{}{playerID, score, randomDate}),
-			}
-			_, err := client.Apply(ctx, m)
-			if err != nil {
-				return err
-			}
+			// Add insert statement to stmts slice
+			stmts = append(stmts, spanner.Statement{
+				SQL: `INSERT INTO Scores
+						(PlayerId, Score, Timestamp)
+						VALUES (@playerID, @score, @timestamp)`,
+				Params: map[string]interface{}{
+					"playerID":  playerID,
+					"score":     score,
+					"timestamp": randomDate,
+				},
+			})
 		}
+
 	}
 	if !playerRecordsFound {
-		fmt.Fprintf(w, "No player records currently exist. First insert players then insert scores.")
+		fmt.Fprintln(w, "No player records currently exist. First insert players then insert scores.")
 	} else {
-		fmt.Fprintf(w, "Inserted scores")
+		_, err := client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
+			// Commit insert statements for all scores to be inserted as a single transaction
+			_, err := txn.BatchUpdate(ctx, stmts)
+			return err
+		})
+		if err != nil {
+			return err
+		}
+		fmt.Fprintln(w, "Inserted scores")
 	}
 	return nil
 }
