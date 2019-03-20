@@ -68,7 +68,7 @@ func setup(t *testing.T) TestVariables {
 // Run after each test
 // Removes any unneeded resources allocated for test
 func teardown(t *testing.T, v TestVariables) {
-	if err := deleteNote(v.ctx, v.client, v.noteID, v.projectID); err != nil {
+	if err := deleteNote(v.noteID, v.projectID); err != nil {
 		t.Log(err)
 	}
 }
@@ -76,7 +76,7 @@ func teardown(t *testing.T, v TestVariables) {
 func TestCreateNote(t *testing.T) {
 	v := setup(t)
 
-	newNote, err := getNote(v.ctx, v.client, v.noteID, v.projectID)
+	newNote, err := getNote(v.noteID, v.projectID)
 	if err != nil {
 		t.Errorf("getNote(%s): %v", v.noteID, err)
 	} else if newNote == nil {
@@ -91,10 +91,10 @@ func TestCreateNote(t *testing.T) {
 func TestDeleteNote(t *testing.T) {
 	v := setup(t)
 
-	if err := deleteNote(v.ctx, v.client, v.noteID, v.projectID); err != nil {
+	if err := deleteNote(v.noteID, v.projectID); err != nil {
 		t.Errorf("deleteNote(%s): %v", v.noteID, err)
 	}
-	deleted, err := getNote(v.ctx, v.client, v.noteID, v.projectID)
+	deleted, err := getNote(v.noteID, v.projectID)
 	if err == nil {
 		t.Error("expected error from getNote; got nil")
 	}
@@ -110,13 +110,13 @@ func TestUpdateNote(t *testing.T) {
 
 	description := "updated"
 	v.noteObj.ShortDescription = description
-	returned, err := updateNote(v.ctx, v.client, v.noteObj, v.noteID, v.projectID)
+	returned, err := updateNote(v.noteObj, v.noteID, v.projectID)
 	if err != nil {
 		t.Errorf("updateNote(%s): %v", v.noteID, err)
 	} else if returned.ShortDescription != description {
 		t.Errorf("returned note doesn't contain requested description text: %s; want: %s", returned.ShortDescription, description)
 	}
-	updated, err := getNote(v.ctx, v.client, v.noteID, v.projectID)
+	updated, err := getNote(v.noteID, v.projectID)
 	if err != nil {
 		t.Errorf("getNote(%s): %v", v.noteID, err)
 	} else if updated == nil {
@@ -131,13 +131,13 @@ func TestUpdateNote(t *testing.T) {
 func TestCreateOccurrence(t *testing.T) {
 	v := setup(t)
 
-	created, err := createOccurrence(v.ctx, v.client, v.imageUrl, v.noteID, v.projectID, v.projectID)
+	created, err := createOccurrence(v.imageUrl, v.noteID, v.projectID, v.projectID)
 	if err != nil {
 		t.Errorf("createOccurrence(%s, %s): %v", v.imageUrl, v.noteID, err)
 	} else if created == nil {
 		t.Error("returned occurrence is nil")
 	} else {
-		retrieved, err := getOccurrence(v.ctx, v.client, created.Name)
+		retrieved, err := getOccurrence(created.Name)
 		if err != nil {
 			t.Errorf("getOccurrence(%s): %v", created.Name, err)
 		} else if retrieved == nil {
@@ -153,17 +153,17 @@ func TestCreateOccurrence(t *testing.T) {
 func TestDeleteOccurrence(t *testing.T) {
 	v := setup(t)
 
-	created, err := createOccurrence(v.ctx, v.client, v.imageUrl, v.noteID, v.projectID, v.projectID)
+	created, err := createOccurrence(v.imageUrl, v.noteID, v.projectID, v.projectID)
 	if err != nil {
 		t.Errorf("createOccurrence(%s, %s): %v", v.imageUrl, v.noteID, err)
 	} else if created == nil {
 		t.Error("createOccurrence returns nil Occurrence object")
 	} else {
-		err = deleteOccurrence(v.ctx, v.client, created.Name)
+		err = deleteOccurrence(created.Name)
 		if err != nil {
 			t.Errorf("deleteOccurrence(%s): %v", created.Name, err)
 		}
-		deleted, err := getOccurrence(v.ctx, v.client, created.Name)
+		deleted, err := getOccurrence(created.Name)
 		if err == nil {
 			t.Error("getOccurrence returned nil error after DeleteOccurrence. expected error")
 		}
@@ -180,7 +180,7 @@ func TestUpdateOccurrence(t *testing.T) {
 
 	v := setup(t)
 
-	created, err := createOccurrence(v.ctx, v.client, v.imageUrl, v.noteID, v.projectID, v.projectID)
+	created, err := createOccurrence(v.imageUrl, v.noteID, v.projectID, v.projectID)
 	if err != nil {
 		t.Errorf("createOccurrence(%s, %s): %v", v.imageUrl, v.noteID, err)
 	} else if created == nil {
@@ -214,21 +214,21 @@ func TestUpdateOccurrence(t *testing.T) {
 func TestOccurrencesForImage(t *testing.T) {
 	v := setup(t)
 
-	origCount, err := getOccurrencesForImage(v.ctx, v.client, v.imageUrl, v.projectID)
+	origCount, err := getOccurrencesForImage(v.imageUrl, v.projectID)
 	if err != nil {
 		t.Errorf("getOccurrenceForImage(%s): %v", v.imageUrl, err)
 	}
 	if origCount != 0 {
 		t.Errorf("unexpected initial number of occurrences: %d; want: %d", origCount, 0)
 	}
-	created, err := createOccurrence(v.ctx, v.client, v.imageUrl, v.noteID, v.projectID, v.projectID)
+	created, err := createOccurrence(v.imageUrl, v.noteID, v.projectID, v.projectID)
 	if err != nil {
 		t.Errorf("createOccurrence(%s, %s): %v", v.imageUrl, v.noteID, err)
 	} else if created == nil {
 		t.Error("createOccurrence returns nil Occurrence object")
 	}
 	testutil.Retry(t, v.tryLimit, time.Second, func(r *testutil.R) {
-		newCount, err := getOccurrencesForImage(v.ctx, v.client, v.imageUrl, v.projectID)
+		newCount, err := getOccurrencesForImage(v.imageUrl, v.projectID)
 		if err != nil {
 			r.Errorf("getOccurrencesForImage(%s): %v", v.imageUrl, err)
 		}
@@ -238,21 +238,21 @@ func TestOccurrencesForImage(t *testing.T) {
 	})
 
 	// Clean up
-	deleteOccurrence(v.ctx, v.client, created.Name)
+	deleteOccurrence(created.Name)
 	teardown(t, v)
 }
 
 func TestOccurrencesForNote(t *testing.T) {
 	v := setup(t)
 
-	origCount, err := getOccurrencesForNote(v.ctx, v.client, v.noteID, v.projectID)
+	origCount, err := getOccurrencesForNote(v.noteID, v.projectID)
 	if err != nil {
 		t.Errorf("getOccurrenceForNote(%s): %v", v.noteID, err)
 	}
 	if origCount != 0 {
 		t.Errorf("unexpected initial number of occurrences: %d; want: %d", origCount, 0)
 	}
-	created, err := createOccurrence(v.ctx, v.client, v.imageUrl, v.noteID, v.projectID, v.projectID)
+	created, err := createOccurrence(v.imageUrl, v.noteID, v.projectID, v.projectID)
 	if err != nil {
 		t.Errorf("createOccurrence(%s, %s): %v", v.imageUrl, v.noteID, err)
 	} else if created == nil {
@@ -260,7 +260,7 @@ func TestOccurrencesForNote(t *testing.T) {
 	}
 
 	testutil.Retry(t, v.tryLimit, time.Second, func(r *testutil.R) {
-		newCount, err := getOccurrencesForNote(v.ctx, v.client, v.noteID, v.projectID)
+		newCount, err := getOccurrencesForNote(v.noteID, v.projectID)
 		if err != nil {
 			r.Errorf("getOccurrencesForNote(%s): %v", v.noteID, err)
 		}
@@ -270,20 +270,20 @@ func TestOccurrencesForNote(t *testing.T) {
 	})
 
 	// Clean up
-	deleteOccurrence(v.ctx, v.client, created.Name)
+	deleteOccurrence(created.Name)
 	teardown(t, v)
 }
 
 func TestPubSub(t *testing.T) {
 	v := setup(t)
 	// Create a new subscription if it doesn't exist.
-	createOccurrenceSubscription(v.ctx, v.subID, v.projectID)
+	createOccurrenceSubscription(v.subID, v.projectID)
 
 	testutil.Retry(t, v.tryLimit, time.Second, func(r *testutil.R) {
 		// Use a channel and a goroutine to count incomming messages.
 		c := make(chan int)
 		go func() {
-			count, err := occurrencePubsub(v.ctx, v.subID, 20, v.projectID)
+			count, err := occurrencePubsub(v.subID, 20, v.projectID)
 			if err != nil {
 				t.Errorf("occurrencePubsub(%s): %v", v.subID, err)
 			}
@@ -293,9 +293,9 @@ func TestPubSub(t *testing.T) {
 		// Create some Occurrences.
 		totalCreated := 3
 		for i := 0; i < totalCreated; i++ {
-			created, _ := createOccurrence(v.ctx, v.client, v.imageUrl, v.noteID, v.projectID, v.projectID)
+			created, _ := createOccurrence(v.imageUrl, v.noteID, v.projectID, v.projectID)
 			time.Sleep(time.Second)
-			if err := deleteOccurrence(v.ctx, v.client, created.Name); err != nil {
+			if err := deleteOccurrence(created.Name); err != nil {
 				t.Errorf("deleteOccurrence(%s): %v", created.Name, err)
 			}
 			time.Sleep(time.Second)
