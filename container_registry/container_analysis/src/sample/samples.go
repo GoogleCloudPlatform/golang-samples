@@ -31,8 +31,14 @@ import (
 // [START containeranalysis_create_note]
 
 // createNote creates and returns a new vulnerability Note.
-func createNote(ctx context.Context, client *containeranalysis.GrafeasV1Beta1Client, noteID, projectID string) (*grafeaspb.Note, error) {
-	projectName := "projects/" + projectID
+func createNote(projectID string) (*grafeaspb.Note, error) {
+	ctx := context.Background()
+	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
+	if err != nil {
+		return nil, err
+	}
+	
+	projectName := fmt.Sprintf("projects/%s", projectID)
 
 	req := &grafeaspb.CreateNoteRequest{
 		Parent: projectName,
@@ -53,14 +59,17 @@ func createNote(ctx context.Context, client *containeranalysis.GrafeasV1Beta1Cli
 // [START containeranalysis_create_occurrence]
 
 // createsOccurrence creates and returns a new Occurrence of a previously created vulnerability Note.
-func createOccurrence(ctx context.Context, client *containeranalysis.GrafeasV1Beta1Client, imageURL, noteID, occProjectID, noteProjectID string) (*grafeaspb.Occurrence, error) {
-	noteName := "projects/" + noteProjectID + "/notes/" + noteID
-	occProjectName := "projects/" + occProjectID
-
+func createOccurrence(imageURL, noteID, occProjectID, noteProjectID string) (*grafeaspb.Occurrence, error) {
+	ctx := context.Background()
+	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
+	if err != nil {
+		return nil, err
+	}
+	
 	req := &grafeaspb.CreateOccurrenceRequest{
-		Parent: occProjectName,
+		Parent: fmt.Sprintf("projects/%s", occProjectID),
 		Occurrence: &grafeaspb.Occurrence{
-			NoteName: noteName,
+			NoteName: fmt.Sprintf("projects/%s/notes/%s", noteProjectID, noteID),
 			// Attach the occurrence to the associated image uri.
 			Resource: &grafeaspb.Resource{
 				Uri: imageURL,
@@ -71,7 +80,6 @@ func createOccurrence(ctx context.Context, client *containeranalysis.GrafeasV1Be
 			},
 		},
 	}
-
 	return client.CreateOccurrence(ctx, req)
 }
 
@@ -80,11 +88,15 @@ func createOccurrence(ctx context.Context, client *containeranalysis.GrafeasV1Be
 // [START containeranalysis_update_note]
 
 // updateNote pushes an update to a Note that already exists on the server.
-func updateNote(ctx context.Context, client *containeranalysis.GrafeasV1Beta1Client, updated *grafeaspb.Note, noteID, projectID string) (*grafeaspb.Note, error) {
-	noteName := "projects/" + projectID + "/notes/" + noteID
-
+func updateNote(updated *grafeaspb.Note, noteID, projectID string) (*grafeaspb.Note, error) {
+	ctx := context.Background()
+	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
+	if err != nil {
+		return nil, err
+	}
+	
 	req := &grafeaspb.UpdateNoteRequest{
-		Name: noteName,
+		Name: fmt.Sprintf("projects/%s/notes/%s", projectID, noteID),
 		Note: updated,
 	}
 	return client.UpdateNote(ctx, req)
@@ -96,7 +108,13 @@ func updateNote(ctx context.Context, client *containeranalysis.GrafeasV1Beta1Cli
 
 // updateOccurrences pushes an update to an Occurrence that already exists on the server.
 // occurrenceName should be in the following format: "projects/[PROJECT_ID]/occurrences/[OCCURRENCE_ID]"
-func updateOccurrence(ctx context.Context, client *containeranalysis.GrafeasV1Beta1Client, updated *grafeaspb.Occurrence, occurrenceName string) (*grafeaspb.Occurrence, error) {
+func updateOccurrence(updated *grafeaspb.Occurrence, occurrenceName string) (*grafeaspb.Occurrence, error) {
+	ctx := context.Background()
+	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
+	if err != nil {
+		return nil, err
+	}
+	
 	req := &grafeaspb.UpdateOccurrenceRequest{
 		Name:       occurrenceName,
 		Occurrence: updated,
@@ -109,10 +127,16 @@ func updateOccurrence(ctx context.Context, client *containeranalysis.GrafeasV1Be
 // [START containeranalysis_delete_note]
 
 // deleteNote removes an existing Note from the server.
-func deleteNote(ctx context.Context, client *containeranalysis.GrafeasV1Beta1Client, noteID, projectID string) error {
-	noteName := "projects/" + projectID + "/notes/" + noteID
+func deleteNote(noteID, projectID string) error {
+	ctx := context.Background()
+	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
+	if err != nil {
+		return err
+	}
 
-	req := &grafeaspb.DeleteNoteRequest{Name: noteName}
+	req := &grafeaspb.DeleteNoteRequest{
+		Name: fmt.Sprintf("projects/%s/notes/%s", projectID, noteID),
+	}
 	return client.DeleteNote(ctx, req)
 }
 
@@ -122,7 +146,13 @@ func deleteNote(ctx context.Context, client *containeranalysis.GrafeasV1Beta1Cli
 
 // deleteOccurrence removes an existing Occurrence from the server.
 // occurrenceName should be in the following format: "projects/[PROJECT_ID]/occurrences/[OCCURRENCE_ID]"
-func deleteOccurrence(ctx context.Context, client *containeranalysis.GrafeasV1Beta1Client, occurrenceName string) error {
+func deleteOccurrence(occurrenceName string) error {
+	ctx := context.Background()
+	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
+	if err != nil {
+		return err
+	}
+	
 	req := &grafeaspb.DeleteOccurrenceRequest{Name: occurrenceName}
 	return client.DeleteOccurrence(ctx, req)
 }
@@ -132,9 +162,16 @@ func deleteOccurrence(ctx context.Context, client *containeranalysis.GrafeasV1Be
 // [START containeranalysis_get_note]
 
 // getNote retrieves and prints a specified Note from the server.
-func getNote(ctx context.Context, client *containeranalysis.GrafeasV1Beta1Client, noteID, projectID string) (*grafeaspb.Note, error) {
-	noteName := "projects/" + projectID + "/notes/" + noteID
-	req := &grafeaspb.GetNoteRequest{Name: noteName}
+func getNote(noteID, projectID string) (*grafeaspb.Note, error) {
+	ctx := context.Background()
+	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	req := &grafeaspb.GetNoteRequest{
+		Name: fmt.Sprintf("projects/%s/notes/%s", projectID, noteID),
+	}
 	note, err := client.GetNote(ctx, req)
 	fmt.Println(note)
 	return note, err
@@ -146,7 +183,13 @@ func getNote(ctx context.Context, client *containeranalysis.GrafeasV1Beta1Client
 
 // getOccurrence retrieves and prints a specified Occurrence from the server.
 // occurrenceName should be in the following format: "projects/[PROJECT_ID]/occurrences/[OCCURRENCE_ID]"
-func getOccurrence(ctx context.Context, client *containeranalysis.GrafeasV1Beta1Client, occurrenceName string) (*grafeaspb.Occurrence, error) {
+func getOccurrence(occurrenceName string) (*grafeaspb.Occurrence, error) {
+	ctx := context.Background()
+	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	req := &grafeaspb.GetOccurrenceRequest{Name: occurrenceName}
 	occ, err := client.GetOccurrence(ctx, req)
 	fmt.Println(occ)
@@ -159,13 +202,16 @@ func getOccurrence(ctx context.Context, client *containeranalysis.GrafeasV1Beta1
 
 // getDiscoveryInfo retrieves and prints the Discovery Occurrence created for a specified image.
 // The Discovery Occurrence contains information about the initial scan on the image.
-func getDiscoveryInfo(ctx context.Context, client *containeranalysis.GrafeasV1Beta1Client, imageURL, projectID string) error {
-	filterStr := `kind="DISCOVERY" AND resourceUrl="` + imageURL + `"`
-	projectName := "projects/" + projectID
+func getDiscoveryInfo(imageURL, projectID string) error {
+	ctx := context.Background()
+	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
+	if err != nil {
+		return err
+	}
 
 	req := &grafeaspb.ListOccurrencesRequest{
-		Parent: projectName,
-		Filter: filterStr,
+		Parent: fmt.Sprintf("projects/%s", projectID),
+		Filter: fmt.Sprintf(`kind="DISCOVERY" AND resourceUrl=%q`, imageURL),
 	}
 	it := client.ListOccurrences(ctx, req)
 	for {
@@ -187,10 +233,16 @@ func getDiscoveryInfo(ctx context.Context, client *containeranalysis.GrafeasV1Be
 
 // getOccurrencesForNote retrieves all the Occurrences associated with a specified Note.
 // Here, all Occurrences are printed and counted.
-func getOccurrencesForNote(ctx context.Context, client *containeranalysis.GrafeasV1Beta1Client, noteID, projectID string) (int, error) {
-	noteName := "projects/" + projectID + "/notes/" + noteID
+func getOccurrencesForNote( noteID, projectID string) (int, error) {
+	ctx := context.Background()
+	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
+	if err != nil {
+		return -1, err
+	}
 
-	req := &grafeaspb.ListNoteOccurrencesRequest{Name: noteName}
+	req := &grafeaspb.ListNoteOccurrencesRequest{
+		Name: fmt.Sprintf("projects/%s/notes/%s", projectID, noteID),
+	}
 	it := client.ListNoteOccurrences(ctx, req)
 	count := 0
 	for {
@@ -214,13 +266,19 @@ func getOccurrencesForNote(ctx context.Context, client *containeranalysis.Grafea
 
 // getOccurrencesForImage retrieves all the Occurrences associated with a specified image.
 // Here, all Occurrences are simply printed and counted.
-func getOccurrencesForImage(ctx context.Context, client *containeranalysis.GrafeasV1Beta1Client, imageURL, projectID string) (int, error) {
+func getOccurrencesForImage(imageURL, projectID string) (int, error) {
+	ctx := context.Background()
+	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
+	if err != nil {
+		return -1, err
+	}
+	
 	filterStr := `resourceUrl="` + imageURL + `"`
 	project := "projects/" + projectID
 
 	req := &grafeaspb.ListOccurrencesRequest{
-		Parent: project,
-		Filter: filterStr,
+		Parent: fmt.Sprintf("projects/%s", projectID),
+		Filter: fmt.Sprintf("resourceUrl=%q", imageURL),
 	}
 	it := client.ListOccurrences(ctx, req)
 	count := 0
@@ -244,7 +302,9 @@ func getOccurrencesForImage(ctx context.Context, client *containeranalysis.Grafe
 // [START containeranalysis_pubsub]
 
 // occurrencePubsub handles incoming Occurrences using a Cloud Pub/Sub subscription.
-func occurrencePubsub(ctx context.Context, subscriptionID string, timeout int, projectID string) (int, error) {
+func occurrencePubsub(subscriptionID string, timeout int, projectID string) (int, error) {
+	ctx := context.Background()
+	
 	var mu sync.Mutex
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
@@ -273,7 +333,8 @@ func occurrencePubsub(ctx context.Context, subscriptionID string, timeout int, p
 }
 
 // createOccurrenceSubscription creates and returns a Pub/Sub subscription object listening to the Occurrence topic.
-func createOccurrenceSubscription(ctx context.Context, subscriptionID, projectID string) error {
+func createOccurrenceSubscription(subscriptionID, projectID string) error {
+	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
 		return err
