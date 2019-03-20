@@ -107,8 +107,7 @@ func updateNote(updated *grafeaspb.Note, noteID, projectID string) (*grafeaspb.N
 // [START containeranalysis_update_occurrence]
 
 // updateOccurrences pushes an update to an Occurrence that already exists on the server.
-// occurrenceName should be in the following format: "projects/[PROJECT_ID]/occurrences/[OCCURRENCE_ID]"
-func updateOccurrence(updated *grafeaspb.Occurrence, occurrenceName string) (*grafeaspb.Occurrence, error) {
+func updateOccurrence(updated *grafeaspb.Occurrence, occurrenceID, projectID string) (*grafeaspb.Occurrence, error) {
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
@@ -116,7 +115,7 @@ func updateOccurrence(updated *grafeaspb.Occurrence, occurrenceName string) (*gr
 	}
 	
 	req := &grafeaspb.UpdateOccurrenceRequest{
-		Name:       occurrenceName,
+		Name: fmt.Sprintf("projects/%s/occurrences/%s", projectID, occurrenceID),
 		Occurrence: updated,
 	}
 	return client.UpdateOccurrence(ctx, req)
@@ -145,15 +144,16 @@ func deleteNote(noteID, projectID string) error {
 // [START containeranalysis_delete_occurrence]
 
 // deleteOccurrence removes an existing Occurrence from the server.
-// occurrenceName should be in the following format: "projects/[PROJECT_ID]/occurrences/[OCCURRENCE_ID]"
-func deleteOccurrence(occurrenceName string) error {
+func deleteOccurrence(occurrenceID, projectID string) error {
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
 		return err
 	}
 	
-	req := &grafeaspb.DeleteOccurrenceRequest{Name: occurrenceName}
+	req := &grafeaspb.DeleteOccurrenceRequest{
+		Name: fmt.Sprintf("projects/%s/occurrences/%s", projectID, occurrenceID),
+	}
 	return client.DeleteOccurrence(ctx, req)
 }
 
@@ -182,15 +182,16 @@ func getNote(noteID, projectID string) (*grafeaspb.Note, error) {
 // [START containeranalysis_get_occurrence]
 
 // getOccurrence retrieves and prints a specified Occurrence from the server.
-// occurrenceName should be in the following format: "projects/[PROJECT_ID]/occurrences/[OCCURRENCE_ID]"
-func getOccurrence(occurrenceName string) (*grafeaspb.Occurrence, error) {
+func getOccurrence(occurrenceID, projectID c  string) (*grafeaspb.Occurrence, error) {
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	req := &grafeaspb.GetOccurrenceRequest{Name: occurrenceName}
+	req := &grafeaspb.GetOccurrenceRequest{
+		Name: fmt.Sprintf("projects/%s/occurrences/%s", projectID, occurrenceID),
+	}
 	occ, err := client.GetOccurrence(ctx, req)
 	fmt.Println(occ)
 	return occ, err
@@ -273,9 +274,6 @@ func getOccurrencesForImage(imageURL, projectID string) (int, error) {
 		return -1, err
 	}
 	
-	filterStr := `resourceUrl="` + imageURL + `"`
-	project := "projects/" + projectID
-
 	req := &grafeaspb.ListOccurrencesRequest{
 		Parent: fmt.Sprintf("projects/%s", projectID),
 		Filter: fmt.Sprintf("resourceUrl=%q", imageURL),
