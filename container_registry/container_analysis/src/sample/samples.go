@@ -28,7 +28,7 @@ import (
 	"google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/vulnerability"
 )
 
-// [START create_note]
+// [START containeranalysis_create_note]
 
 // createNote creates and returns a new vulnerability Note.
 func createNote(ctx context.Context, client *containeranalysis.GrafeasV1Beta1Client, noteID, projectID string) (*grafeaspb.Note, error) {
@@ -48,9 +48,9 @@ func createNote(ctx context.Context, client *containeranalysis.GrafeasV1Beta1Cli
 	return client.CreateNote(ctx, req)
 }
 
-// [END create_note]
+// [END containeranalysis_create_note]
 
-// [START create_occurrence]
+// [START containeranalysis_create_occurrence]
 
 // createsOccurrence creates and returns a new Occurrence of a previously created vulnerability Note.
 func createOccurrence(ctx context.Context, client *containeranalysis.GrafeasV1Beta1Client, imageURL, noteID, occProjectID, noteProjectID string) (*grafeaspb.Occurrence, error) {
@@ -75,9 +75,9 @@ func createOccurrence(ctx context.Context, client *containeranalysis.GrafeasV1Be
 	return client.CreateOccurrence(ctx, req)
 }
 
-// [END create_occurrence]
+// [END containeranalysis_create_occurrence]
 
-// [START update_note]
+// [START containeranalysis_update_note]
 
 // updateNote pushes an update to a Note that already exists on the server.
 func updateNote(ctx context.Context, client *containeranalysis.GrafeasV1Beta1Client, updated *grafeaspb.Note, noteID, projectID string) (*grafeaspb.Note, error) {
@@ -90,9 +90,9 @@ func updateNote(ctx context.Context, client *containeranalysis.GrafeasV1Beta1Cli
 	return client.UpdateNote(ctx, req)
 }
 
-// [END update_note]
+// [END containeranalysis_update_note]
 
-// [START update_occurrence]
+// [START containeranalysis_update_occurrence]
 
 // updateOccurrences pushes an update to an Occurrence that already exists on the server.
 // occurrenceName should be in the following format: "projects/[PROJECT_ID]/occurrences/[OCCURRENCE_ID]"
@@ -104,9 +104,9 @@ func updateOccurrence(ctx context.Context, client *containeranalysis.GrafeasV1Be
 	return client.UpdateOccurrence(ctx, req)
 }
 
-// [END update_occurrence]
+// [END containeranalysis_update_occurrence]
 
-// [START delete_note]
+// [START containeranalysis_delete_note]
 
 // deleteNote removes an existing Note from the server.
 func deleteNote(ctx context.Context, client *containeranalysis.GrafeasV1Beta1Client, noteID, projectID string) error {
@@ -116,9 +116,9 @@ func deleteNote(ctx context.Context, client *containeranalysis.GrafeasV1Beta1Cli
 	return client.DeleteNote(ctx, req)
 }
 
-// [END delete_note]
+// [END containeranalysis_delete_note]
 
-// [START delete_occurrence]
+// [START containeranalysis_delete_occurrence]
 
 // deleteOccurrence removes an existing Occurrence from the server.
 // occurrenceName should be in the following format: "projects/[PROJECT_ID]/occurrences/[OCCURRENCE_ID]"
@@ -127,9 +127,9 @@ func deleteOccurrence(ctx context.Context, client *containeranalysis.GrafeasV1Be
 	return client.DeleteOccurrence(ctx, req)
 }
 
-// [END delete_occurrence]
+// [END containeranalysis_delete_occurrence]
 
-// [START get_note]
+// [START containeranalysis_get_note]
 
 // getNote retrieves and prints a specified Note from the server.
 func getNote(ctx context.Context, client *containeranalysis.GrafeasV1Beta1Client, noteID, projectID string) (*grafeaspb.Note, error) {
@@ -140,9 +140,9 @@ func getNote(ctx context.Context, client *containeranalysis.GrafeasV1Beta1Client
 	return note, err
 }
 
-// [END get_note]
+// [END containeranalysis_get_note]
 
-// [START get_occurrence]
+// [START containeranalysis_get_occurrence]
 
 // getOccurrence retrieves and prints a specified Occurrence from the server.
 // occurrenceName should be in the following format: "projects/[PROJECT_ID]/occurrences/[OCCURRENCE_ID]"
@@ -153,9 +153,9 @@ func getOccurrence(ctx context.Context, client *containeranalysis.GrafeasV1Beta1
 	return occ, err
 }
 
-// [END get_occurrence]
+// [END containeranalysis_get_occurrence]
 
-// [START discovery_info]
+// [START containeranalysis_discovery_info]
 
 // getDiscoveryInfo retrieves and prints the Discovery Occurrence created for a specified image.
 // The Discovery Occurrence contains information about the initial scan on the image.
@@ -181,9 +181,9 @@ func getDiscoveryInfo(ctx context.Context, client *containeranalysis.GrafeasV1Be
 	return nil
 }
 
-// [END discovery_info]
+// [END containeranalysis_discovery_info]
 
-// [START occurrences_for_note]
+// [START containeranalysis_occurrences_for_note]
 
 // getOccurrencesForNote retrieves all the Occurrences associated with a specified Note.
 // Here, all Occurrences are printed and counted.
@@ -208,9 +208,9 @@ func getOccurrencesForNote(ctx context.Context, client *containeranalysis.Grafea
 	return count, nil
 }
 
-// [END occurrences_for_note]
+// [END containeranalysis_occurrences_for_note]
 
-// [START occurrences_for_image]
+// [START containeranalysis_occurrences_for_image]
 
 // getOccurrencesForImage retrieves all the Occurrences associated with a specified image.
 // Here, all Occurrences are simply printed and counted.
@@ -239,9 +239,9 @@ func getOccurrencesForImage(ctx context.Context, client *containeranalysis.Grafe
 	return count, nil
 }
 
-// [END occurrences_for_image]
+// [END containeranalysis_occurrences_for_image]
 
-// [START pubsub]
+// [START containeranalysis_pubsub]
 
 // occurrencePubsub handles incoming Occurrences using a Cloud Pub/Sub subscription.
 func occurrencePubsub(ctx context.Context, subscriptionID string, timeout int, projectID string) (int, error) {
@@ -287,4 +287,4 @@ func createOccurrenceSubscription(ctx context.Context, subscriptionID, projectID
 	return err
 }
 
-// [END pubsub]
+// [END containeranalysis_pubsub]
