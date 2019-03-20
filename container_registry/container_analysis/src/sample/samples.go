@@ -59,7 +59,7 @@ func createNote(projectID string) (*grafeaspb.Note, error) {
 // [START containeranalysis_create_occurrence]
 
 // createsOccurrence creates and returns a new Occurrence of a previously created vulnerability Note.
-func createOccurrence(imageURL, noteID, occProjectID, noteProjectID string) (*grafeaspb.Occurrence, error) {
+func createOccurrence(resourceURL, noteID, occProjectID, noteProjectID string) (*grafeaspb.Occurrence, error) {
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
@@ -70,9 +70,9 @@ func createOccurrence(imageURL, noteID, occProjectID, noteProjectID string) (*gr
 		Parent: fmt.Sprintf("projects/%s", occProjectID),
 		Occurrence: &grafeaspb.Occurrence{
 			NoteName: fmt.Sprintf("projects/%s/notes/%s", noteProjectID, noteID),
-			// Attach the occurrence to the associated image uri.
+			// Attach the occurrence to the associated resource uri.
 			Resource: &grafeaspb.Resource{
-				Uri: imageURL,
+				Uri: resourceURL,
 			},
 			// Details about the vulnerability instance can be added here.
 			Details: &grafeaspb.Occurrence_Vulnerability{
@@ -203,7 +203,7 @@ func getOccurrence(occurrenceID, projectID c  string) (*grafeaspb.Occurrence, er
 
 // getDiscoveryInfo retrieves and prints the Discovery Occurrence created for a specified image.
 // The Discovery Occurrence contains information about the initial scan on the image.
-func getDiscoveryInfo(imageURL, projectID string) error {
+func getDiscoveryInfo(resourceURL, projectID string) error {
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
@@ -212,7 +212,7 @@ func getDiscoveryInfo(imageURL, projectID string) error {
 
 	req := &grafeaspb.ListOccurrencesRequest{
 		Parent: fmt.Sprintf("projects/%s", projectID),
-		Filter: fmt.Sprintf(`kind="DISCOVERY" AND resourceUrl=%q`, imageURL),
+		Filter: fmt.Sprintf(`kind="DISCOVERY" AND resourceUrl=%q`, resourceURL),
 	}
 	it := client.ListOccurrences(ctx, req)
 	for {
@@ -267,7 +267,7 @@ func getOccurrencesForNote( noteID, projectID string) (int, error) {
 
 // getOccurrencesForImage retrieves all the Occurrences associated with a specified image.
 // Here, all Occurrences are simply printed and counted.
-func getOccurrencesForImage(imageURL, projectID string) (int, error) {
+func getOccurrencesForImage(resourceURL, projectID string) (int, error) {
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
@@ -276,7 +276,7 @@ func getOccurrencesForImage(imageURL, projectID string) (int, error) {
 	
 	req := &grafeaspb.ListOccurrencesRequest{
 		Parent: fmt.Sprintf("projects/%s", projectID),
-		Filter: fmt.Sprintf("resourceUrl=%q", imageURL),
+		Filter: fmt.Sprintf("resourceUrl=%q", resourceURL),
 	}
 	it := client.ListOccurrences(ctx, req)
 	count := 0
