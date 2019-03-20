@@ -186,27 +186,29 @@ func TestUpdateOccurrence(t *testing.T) {
 	} else if created == nil {
 		t.Error("createOccurrence returns nil Occurrence object")
 	} else {
-		newType := "updated"
+		testutil.Retry(t, v.tryLimit, time.Second, func(r *testutil.R) {
+			newType := "updated"
 
-		details := vulnerability.Details{Type: newType}
-		vulDetails := grafeaspb.Occurrence_Vulnerability{Vulnerability: &details}
-		resource := grafeaspb.Resource{Uri: created.Resource.Uri}
-		occurrence := grafeaspb.Occurrence{NoteName: created.NoteName, Resource: &resource, Details: &vulDetails}
+			details := vulnerability.Details{Type: newType}
+			vulDetails := grafeaspb.Occurrence_Vulnerability{Vulnerability: &details}
+			resource := grafeaspb.Resource{Uri: created.Resource.Uri}
+			occurrence := grafeaspb.Occurrence{NoteName: created.NoteName, Resource: &resource, Details: &vulDetails}
 
-		returned, err := updateOccurrence(v.ctx, v.client, &occurrence, created.Name)
-		if err != nil {
-			t.Errorf("updateOccurrence(%s): %v", created.Name, err)
-		} else if returned.GetVulnerability().Type != newType {
-			t.Errorf("returned occurrence doesn't contain requested vulnerability type: %s; want: %s", returned.GetVulnerability().Type, newType)
-		}
-		retrieved, err := getOccurrence(v.ctx, v.client, created.Name)
-		if err != nil {
-			t.Errorf("getOccurrence(%s): %v", created.Name, err)
-		} else if retrieved == nil {
-			t.Error("GetOccurrence returned nil Occurrence object")
-		} else if retrieved.GetVulnerability().Type != newType {
-			t.Errorf("updated occurrence doesn't contain requested vulnerability type: %s; want: %s", retrieved.GetVulnerability().Type, newType)
-		}
+			returned, err := updateOccurrence(&occurrence, created.Name)
+			if err != nil {
+				r.Errorf("updateOccurrence(%s): %v", created.Name, err)
+			} else if returned.GetVulnerability().Type != newType {
+				r.Errorf("returned occurrence doesn't contain requested vulnerability type: %s; want: %s", returned.GetVulnerability().Type, newType)
+			}
+			retrieved, err := getOccurrence(created.Name)
+			if err != nil {
+				r.Errorf("getOccurrence(%s): %v", created.Name, err)
+			} else if retrieved == nil {
+				r.Error("GetOccurrence returned nil Occurrence object")
+			} else if retrieved.GetVulnerability().Type != newType {
+				r.Errorf("updated occurrence doesn't contain requested vulnerability type: %s; want: %s", retrieved.GetVulnerability().Type, newType)
+			}
+		})
 	}
 	teardown(t, v)
 }
