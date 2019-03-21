@@ -48,7 +48,7 @@ func listGCSBuckets(w io.Writer, googleAccessKeyID string, googleAccessKeySecret
 
 	fmt.Fprintf(w, "Buckets:")
 	for _, b := range result.Buckets {
-		fmt.Fprintf(w, "%s HELLO!\n", aws.StringValue(b.Name))
+		fmt.Fprintf(w, "%s\n", aws.StringValue(b.Name))
 	}
 
 	return result.Buckets, nil
