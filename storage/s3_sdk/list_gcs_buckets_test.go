@@ -51,7 +51,7 @@ func TestList(t *testing.T) {
 		t.Errorf("got %q, want %q", got, want)
 	}
 
-	testutil.Retry(t, 2, 10*time.Second, func(r *testutil.R) { // for eventual consistency
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) { // for eventual consistency
 		for _, b := range buckets {
 			if aws.StringValue(b.Name) == bucketName {
 				return
