@@ -1,17 +1,31 @@
-// Copyright 2018 Google Inc. All rights reserved.
-// Use of this source code is governed by the Apache 2.0
-// license that can be found in the LICENSE file.
+// Copyright 2019 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
+// Sample lists GCS buckets using the S3 SDK using interoperability mode.
 package main
 
 import (
 	"io/ioutil"
 	"log"
 	"os"
-	"testing"
 	"time"
+	"bytes"
+	"strings"
+	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestMain(m *testing.M) {
@@ -26,23 +40,24 @@ func TestList(t *testing.T) {
 	googleAccessKeyID := os.Getenv("STORAGE_HMAC_ACCESS_KEY_ID")
 	googleAccessKeySecret := os.Getenv("STORAGE_HMAC_ACCESS_SECRET_KEY")
 
-	buckets, err := list_gcs_buckets(googleAccessKeyID, googleAccessKeySecret)
+	buf := new(bytes.Buffer)
+	buckets, err := listGCSBuckets(buf, googleAccessKeyID, googleAccessKeySecret)
 	if err != nil {
 		t.Errorf("Unable to list GCS buckets: %v", err)
 	}
 
-	var ok bool
-outer:
-	for attempt := 0; attempt < 5; attempt++ { // for eventual consistency
+	got := buf.String()
+	if want := bucketName; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
+
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) { // for eventual consistency
 		for _, b := range buckets {
 			if aws.StringValue(b.Name) == bucketName {
-				ok = true
-				break outer
+				return
 			}
 		}
-		time.Sleep(2 * time.Second)
-	}
-	if !ok {
 		t.Errorf("got bucket list: %v; want %q in the list", buckets, bucketName)
-	}
+		time.Sleep(2 * time.Second)
+	})
 }
