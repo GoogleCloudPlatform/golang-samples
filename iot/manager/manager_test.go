@@ -54,26 +54,27 @@ func createIDForTest(resource string) string {
 }
 
 func TestMain(m *testing.M) {
-	setup(m)
+	_, ok := testutil.ContextMain(m)
+	if !ok {
+		log.Print("GOLANG_SAMPLES_PROJECT_ID is unset. Skipping.")
+		return
+	}
+	if err := setup(m); err != nil {
+		log.Fatal(err)
+	}
 	s := m.Run()
 	shutdown()
 	os.Exit(s)
 }
 
-func setup(m *testing.M) {
+func setup(m *testing.M) error {
 	ctx := context.Background()
-	tc, ok := testutil.ContextMain(m)
-
-	// Retrieve project ID
-	if !ok {
-		fmt.Fprintln(os.Stderr, "Project is not set up properly for system tests. Make sure GOLANG_SAMPLES_PROJECT_ID is set")
-		return
-	}
+	tc, _ := testutil.ContextMain(m)
 	projectID = tc.ProjectID
 
 	pubsubClient, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		fmt.Printf("Could not create pubsub Client:\n%v\n", err)
+		return err
 	}
 	client = pubsubClient
 
@@ -81,7 +82,7 @@ func setup(m *testing.M) {
 
 	topic, err := client.CreateTopic(ctx, topicID)
 	if err != nil {
-		log.Fatalf("Could not create topic: %v", err)
+		return err
 	}
 	fmt.Printf("Topic created: %v\n", topic)
 	topicName = topic.String()
@@ -89,10 +90,10 @@ func setup(m *testing.M) {
 	// Generate UUID v1 for registry used for tests
 	registryID = createIDForTest("registry")
 
-	if _, err = createRegistry(os.Stdout, projectID, region, registryID, topicName); err != nil {
-		fmt.Printf("Could not create registry: %v\n", err)
-		return
+	if _, err := createRegistry(os.Stdout, projectID, region, registryID, topicName); err != nil {
+		return err
 	}
+	return nil
 }
 
 func shutdown() {

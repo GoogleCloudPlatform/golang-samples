@@ -34,6 +34,7 @@ func getSimilarProducts(w io.Writer, projectID string, location string, productS
 	if err != nil {
 		return fmt.Errorf("NewImageAnnotatorClient: %v", err)
 	}
+	defer c.Close()
 
 	f, err := os.Open(file)
 	if err != nil {
