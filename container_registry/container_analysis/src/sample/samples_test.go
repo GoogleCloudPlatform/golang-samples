@@ -20,6 +20,7 @@ import (
 	"strconv"
 	"testing"
 	"time"
+	"path"
 
 	containeranalysis "cloud.google.com/go/containeranalysis/apiv1beta1"
 	pubsub "cloud.google.com/go/pubsub"
@@ -57,7 +58,7 @@ func setup(t *testing.T) TestVariables {
 	noteID := "note-" + timestamp + "-" + rand
 	subID := "CA-Occurrences-" + timestamp + "-" + rand
 	imageUrl := "www." + timestamp + "-" + rand + ".com"
-	noteObj, err := createNote(ctx, client, noteID, projectID)
+	noteObj, err := createNote(noteID, projectID)
 	if err != nil {
 		t.Fatalf("createNote(%s): %v", noteID, err)
 	}
@@ -137,7 +138,7 @@ func TestCreateOccurrence(t *testing.T) {
 	} else if created == nil {
 		t.Error("returned occurrence is nil")
 	} else {
-		retrieved, err := getOccurrence(created.Name)
+		retrieved, err := getOccurrence(path.Base(created.Name), v.projectID)
 		if err != nil {
 			t.Errorf("getOccurrence(%s): %v", created.Name, err)
 		} else if retrieved == nil {
@@ -159,11 +160,11 @@ func TestDeleteOccurrence(t *testing.T) {
 	} else if created == nil {
 		t.Error("createOccurrence returns nil Occurrence object")
 	} else {
-		err = deleteOccurrence(created.Name)
+		err = deleteOccurrence(path.Base(created.Name), v.projectID)
 		if err != nil {
 			t.Errorf("deleteOccurrence(%s): %v", created.Name, err)
 		}
-		deleted, err := getOccurrence(created.Name)
+		deleted, err := getOccurrence(path.Base(created.Name), v.projectID)
 		if err == nil {
 			t.Error("getOccurrence returned nil error after DeleteOccurrence. expected error")
 		}
@@ -194,13 +195,12 @@ func TestUpdateOccurrence(t *testing.T) {
 			resource := grafeaspb.Resource{Uri: created.Resource.Uri}
 			occurrence := grafeaspb.Occurrence{NoteName: created.NoteName, Resource: &resource, Details: &vulDetails}
 
-			returned, err := updateOccurrence(&occurrence, created.Name)
+			returned, err := updateOccurrence(&occurrence, path.Base(created.Name), v.projectID)
 			if err != nil {
 				r.Errorf("updateOccurrence(%s): %v", created.Name, err)
 			} else if returned.GetVulnerability().Type != newType {
 				r.Errorf("returned occurrence doesn't contain requested vulnerability type: %s; want: %s", returned.GetVulnerability().Type, newType)
 			}
-			retrieved, err := getOccurrence(created.Name)
 			if err != nil {
 				r.Errorf("getOccurrence(%s): %v", created.Name, err)
 			} else if retrieved == nil {
@@ -240,7 +240,7 @@ func TestOccurrencesForImage(t *testing.T) {
 	})
 
 	// Clean up
-	deleteOccurrence(created.Name)
+	deleteOccurrence(path.Base(created.Name), v.projectID)
 	teardown(t, v)
 }
 
@@ -272,7 +272,7 @@ func TestOccurrencesForNote(t *testing.T) {
 	})
 
 	// Clean up
-	deleteOccurrence(created.Name)
+	deleteOccurrence(path.Base(created.Name), v.projectID)
 	teardown(t, v)
 }
 
@@ -297,7 +297,7 @@ func TestPubSub(t *testing.T) {
 		for i := 0; i < totalCreated; i++ {
 			created, _ := createOccurrence(v.imageUrl, v.noteID, v.projectID, v.projectID)
 			time.Sleep(time.Second)
-			if err := deleteOccurrence(created.Name); err != nil {
+			if err := deleteOccurrence(path.Base(created.Name), v.projectID); err != nil {
 				t.Errorf("deleteOccurrence(%s): %v", created.Name, err)
 			}
 			time.Sleep(time.Second)

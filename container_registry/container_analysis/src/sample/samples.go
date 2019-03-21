@@ -31,7 +31,7 @@ import (
 // [START containeranalysis_create_note]
 
 // createNote creates and returns a new vulnerability Note.
-func createNote(projectID string) (*grafeaspb.Note, error) {
+func createNote(noteID, projectID string) (*grafeaspb.Note, error) {
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
@@ -182,7 +182,7 @@ func getNote(noteID, projectID string) (*grafeaspb.Note, error) {
 // [START containeranalysis_get_occurrence]
 
 // getOccurrence retrieves and prints a specified Occurrence from the server.
-func getOccurrence(occurrenceID, projectID c  string) (*grafeaspb.Occurrence, error) {
+func getOccurrence(occurrenceID, projectID string) (*grafeaspb.Occurrence, error) {
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
