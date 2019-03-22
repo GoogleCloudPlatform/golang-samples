@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // Sample quickstart for getting vulnerabilities from the Container Analysis API: https://cloud.google.com/container-registry/docs/vulnerability-scan-go
-package main
+package sample
 
 import (
 	"context"
@@ -38,7 +38,7 @@ const (
 func main() {
 	projectID := "my-project-id"                                           // The Google Cloud Platform project ID
 	resourceURL := "https://gcr.io/my-project-id/image-name@sha256:digest" // The resource URL to analyze
-
+	
 	ctx := context.Background()
 
 	// Get a Container Analysis Client.
