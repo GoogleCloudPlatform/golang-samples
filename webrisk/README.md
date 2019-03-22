@@ -59,9 +59,11 @@ To use the local proxy server to check a URL, send a POST request to `127.0.0.1:
 
 	```json
 	{
-            "uri" : "http://testsafebrowsing.appspot.com/apiv4/ANY_PLATFORM/MALWARE/URL/"
-	    "threatTypes":  ["MALWARE"],
-	}
+          "uri":"http://testsafebrowsing.appspot.com/apiv4/ANY_PLATFORM/MALWARE/URL/",
+          "threatTypes":[
+            "MALWARE"
+          ]
+        }
 	```
 
 # Command-Line Lookup
