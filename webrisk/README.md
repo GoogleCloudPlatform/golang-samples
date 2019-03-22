@@ -78,7 +78,7 @@ $ echo "http://testsafebrowsing.appspot.com/apiv4/ANY_PLATFORM/MALWARE/URL/" | w
 ```
 
 
-# Safe Browsing System Test
+# WebRisk System Test
 To perform an end-to-end test on the package with the Safe Browsing backend,
 run the following command:
 
