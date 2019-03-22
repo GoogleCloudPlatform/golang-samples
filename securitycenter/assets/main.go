@@ -86,6 +86,8 @@ func ListAllProjectAssets(orgId string) (int, error) {
 	// Process the results from the iterator.
 loop:
 	for {
+		// r is a ListAssetsResult object.  See API reference for
+		// details on its fields.
 		r, err := it.Next()
 		switch err {
 		case nil:
@@ -133,6 +135,8 @@ func ListAllProjectAssetsAtTime(orgId string, asOf time.Time) (int, error) {
 	// Process the results from the iterator.
 loop:
 	for {
+		// r is a ListAssetsResult object.  See API reference for
+		// details on its fields.
 		r, err := it.Next()
 		switch err {
 		case nil:
@@ -151,6 +155,8 @@ loop:
 
 // [END list_project_assets_at_time]
 
+// List all assets in an organization that are GCP projects along with
+// there state change from 30 days ago.
 // [START list_project_assets_with_state_changes]
 func ListAllProjectAssetsWithStateChanges(orgId string) (int, error) {
 	// Initialize a new context and client and return any errors (e.g
@@ -177,6 +183,8 @@ func ListAllProjectAssetsWithStateChanges(orgId string) (int, error) {
 	// Process the results from the iterator.
 loop:
 	for {
+		// r is a ListAssetsResult object.  See API reference for
+		// details on its fields.
 		r, err := it.Next()
 		switch err {
 		case nil:
