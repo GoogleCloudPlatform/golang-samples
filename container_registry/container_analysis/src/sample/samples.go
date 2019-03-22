@@ -26,6 +26,7 @@ import (
 	"google.golang.org/api/iterator"
 	grafeaspb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/grafeas"
 	"google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/vulnerability"
+	fieldmaskpb "google.golang.org/genproto/protobuf/field_mask"
 )
 
 // [START containeranalysis_create_note]
@@ -117,6 +118,7 @@ func updateOccurrence(updated *grafeaspb.Occurrence, occurrenceID, projectID str
 	req := &grafeaspb.UpdateOccurrenceRequest{
 		Name: fmt.Sprintf("projects/%s/occurrences/%s", projectID, occurrenceID),
 		Occurrence: updated,
+		UpdateMask: &fieldmaskpb.FieldMask{Paths: []string{"details"}},
 	}
 	return client.UpdateOccurrence(ctx, req)
 }
@@ -234,7 +236,7 @@ func getDiscoveryInfo(resourceURL, projectID string) error {
 
 // getOccurrencesForNote retrieves all the Occurrences associated with a specified Note.
 // Here, all Occurrences are printed and counted.
-func getOccurrencesForNote( noteID, projectID string) (int, error) {
+func getOccurrencesForNote(noteID, projectID string) (int, error) {
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {

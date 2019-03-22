@@ -177,8 +177,6 @@ func TestDeleteOccurrence(t *testing.T) {
 }
 
 func TestUpdateOccurrence(t *testing.T) {
-	t.Skip("Flaky. golang-samples#785")
-
 	v := setup(t)
 
 	created, err := createOccurrence(v.imageUrl, v.noteID, v.projectID, v.projectID)
@@ -201,10 +199,11 @@ func TestUpdateOccurrence(t *testing.T) {
 			} else if returned.GetVulnerability().Type != newType {
 				r.Errorf("returned occurrence doesn't contain requested vulnerability type: %s; want: %s", returned.GetVulnerability().Type, newType)
 			}
+			retrieved, err := getOccurrence(path.Base(created.Name), v.projectID)
 			if err != nil {
 				r.Errorf("getOccurrence(%s): %v", created.Name, err)
 			} else if retrieved == nil {
-				r.Error("GetOccurrence returned nil Occurrence object")
+				r.Errorf("GetOccurrence returned nil Occurrence object")
 			} else if retrieved.GetVulnerability().Type != newType {
 				r.Errorf("updated occurrence doesn't contain requested vulnerability type: %s; want: %s", retrieved.GetVulnerability().Type, newType)
 			}
