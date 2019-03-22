@@ -53,9 +53,10 @@ func main() {
 		req = req.WithContext(r.Context())
 
 		// The outgoing request will be traced with r's trace ID.
-		if _, err := client.Do(req); err != nil {
+		if resp, err := client.Do(req); err != nil {
 			log.Fatal(err)
 		}
+		resp.Body.Close()
 	})
 	http.Handle("/foo", handler)
 	log.Fatal(http.ListenAndServe(":6060", &ochttp.Handler{}))
