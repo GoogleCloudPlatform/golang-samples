@@ -66,9 +66,6 @@
 // If we are still unsure about the query, then we finally query the API server,
 // which is guaranteed to return to us an authoritative answer, assuming no
 // networking failures.
-//
-// For more information, see the API developer's guide:
-//	https://developers.google.com/safe-browsing/
 package webrisk
 
 import (

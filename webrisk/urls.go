@@ -34,9 +34,6 @@ package webrisk
 // The process that Web Risk uses predates Chrome and many RFC standards
 // and is partly based on how legacy browsers typically parse URLs. Thus, we
 // parse URLs in a way that is not strictly standards compliant.
-//
-// The parsing policy is documented here:
-//	https://developers.google.com/safe-browsing/
 
 import (
 	"bytes"
