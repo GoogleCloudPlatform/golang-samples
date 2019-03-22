@@ -84,24 +84,3 @@ func TestProjectsWithStatusReturned(t *testing.T) {
 		t.Errorf("Unexpected number of results: %d", found)
 	}
 }
-
-/*
-func TestListAssetsNoFilterOrDate(t *testing.T) {
-	la := setup(t)
-	assertTrue(59 >= snippets.listAssets(null, null).size())
-}
-
-func TestListAssetsWithFilterAndInstance(t *testing.T) {
-	la := setup(t)
-	assertTrue(
-		3 >= snippets.listAssets(PROJECT_ASSET_FILTERS, SOMETHING_INSTANCE).size())
-}
-
-func TestChangesReturnsValues(t *testing.T) {
-	ImmutableList < ListAssetsResult > result =
-		snippets.listAssetAndStatusChanges(
-			Duration.ofDays(3), AssetSnippets.PROJECT_ASSET_FILTERS, SOMETHING_INSTANCE)
-	assertTrue("Result: "+result.toString(), result.toString().contains("ADDED"))
-	assertTrue(3 >= result.size())
-}
-*/
