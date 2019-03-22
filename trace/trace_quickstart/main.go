@@ -53,7 +53,8 @@ func main() {
 		req = req.WithContext(r.Context())
 
 		// The outgoing request will be traced with r's trace ID.
-		if resp, err := client.Do(req); err != nil {
+		resp, err := client.Do(req)
+		if err != nil {
 			log.Fatal(err)
 		}
 		resp.Body.Close()
