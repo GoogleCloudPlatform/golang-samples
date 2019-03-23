@@ -347,6 +347,33 @@ func TestFindVulnerabilitiesForImage(t *testing.T){
 	v := setup(t)
 
 
+	occList, err := findVulnerabilityOccurrencesForImage(v.imageUrl, v.projectID)
+	if err != nil {
+		t.Fatalf("findVulnerabilityOccurrencesForImage(%v): %v", v.imageUrl, err)
+	}
+	if len(occList) != 0 {
+		t.Errorf("unexpected initial number of vulnerabilities: %d; want: %d", len(occList), 0)
+	}
+
+	created, err := createOccurrence(v.imageUrl, v.noteID, v.projectID, v.projectID)
+	if err != nil {
+		t.Errorf("createOccurrence(%s, %s): %v", v.imageUrl, v.noteID, err)
+	} else if created == nil {
+		t.Error("createOccurrence returns nil Occurrence object")
+	}
+
+	//TODO: try creating a non-vulnerability occurrence
+
+	testutil.Retry(t, v.tryLimit, time.Second, func(r *testutil.R) {
+		occList, err = findVulnerabilityOccurrencesForImage(v.imageUrl, v.projectID)
+		if err != nil {
+			r.Errorf("getOccurrencesForNote(%s): %v", v.noteID, err)
+		}
+		if len(occList) != 1 {
+			r.Errorf("unexpected updated number of occurrences: %d; want: %d", len(occList), 1)
+		}
+	})
+
 
 	teardown(t, v)
 }
