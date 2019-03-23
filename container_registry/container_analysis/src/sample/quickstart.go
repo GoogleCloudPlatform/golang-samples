@@ -97,7 +97,7 @@ func pollDiscoveryOccurrenceFinished(resourceURL, projectID string, timeout time
 
 	// find the discovery occurrence
 	var discoveryOccurrence *grafeaspb.Occurrence
-	wait.Poll(time.Second, timeout, func() (bool, error) {
+	err = wait.Poll(time.Second, timeout, func() (bool, error) {
 		log.Printf("Querying for discovery occurrence")
 		req := &grafeaspb.ListOccurrencesRequest{
 			Parent: fmt.Sprintf("projects/%s", projectID),
@@ -106,34 +106,36 @@ func pollDiscoveryOccurrenceFinished(resourceURL, projectID string, timeout time
 		it := client.ListOccurrences(ctx, req)
 		// Only one should ever be returned by ListOccurrences and the given filter.
 		result, err := it.Next()
-		if err == iterator.Done {
-			return false, fmt.Errorf("occurrence not found: %v", err)
-		} else if err != nil {
-			return false, err
-		} else if result.GetDiscovered() == nil {
-			return false, fmt.Errorf("occurrence is not a valid discovery occurrence")
+		if err != nil || result == nil || result.GetDiscovered() == nil {
+			return false, nil
 		} else {
 			discoveryOccurrence = result
 			return true, nil
 		}
 	})
+	if err != nil {
+		return nil, fmt.Errorf("could not find dicovery occurrence: %v", err)
+	}
 
 	// wait for terminal state
-	wait.Poll(time.Second, timeout, func() (bool, error) {
-		state := discoveryOccurrence.GetDiscovered().GetDiscovered().GetAnalysisStatus()
-		if state ==  discovery.Discovered_FINISHED_SUCCESS || state == discovery.Discovered_FINISHED_FAILED || state == discovery.Discovered_FINISHED_UNSUPPORTED {
-			return true, nil
+	err = wait.Poll(time.Second, timeout, func() (bool, error) {
+		// check for updated occurrence state
+		newOccurrence, err := client.GetOccurrence(ctx, &grafeaspb.GetOccurrenceRequest{Name: discoveryOccurrence.GetName()})
+		if err != nil {
+			return false, err
 		} else {
-			// refresh discovery occurrence
-			newOccurrence, err := client.GetOccurrence(ctx, &grafeaspb.GetOccurrenceRequest{Name: discoveryOccurrence.GetName()})
-			if err != nil {
-				return false, fmt.Errorf("error getting occurrence: %v", err)
-			} else {
-				discoveryOccurrence = newOccurrence
-				return false, fmt.Errorf("discovery occurrence not in terminal state: %v", state)
-			}
+			discoveryOccurrence = newOccurrence
 		}
+		// check if in ternimal state
+		state := discoveryOccurrence.GetDiscovered().GetDiscovered().GetAnalysisStatus()
+		isTerminal := (state ==  discovery.Discovered_FINISHED_SUCCESS ||
+						state == discovery.Discovered_FINISHED_FAILED ||
+						state == discovery.Discovered_FINISHED_UNSUPPORTED)
+		return isTerminal, nil
 	})
+	if err != nil {
+		return nil, fmt.Errorf("occurrence never reached terminal state: %v", err)
+	}
 	return discoveryOccurrence, nil
 }
 
