@@ -27,6 +27,7 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	grafeaspb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/grafeas"
 	vulnerability "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/vulnerability"
+	discovery "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/discovery"
 )
 
 type TestVariables struct {
@@ -57,7 +58,7 @@ func setup(t *testing.T) TestVariables {
 	projectID := tc.ProjectID
 	noteID := "note-" + timestamp + "-" + rand
 	subID := "CA-Occurrences-" + timestamp + "-" + rand
-	imageUrl := "www." + timestamp + "-" + rand + ".com"
+	imageUrl := "gcr.io/" + timestamp + "-" + rand
 	noteObj, err := createNote(noteID, projectID)
 	if err != nil {
 		t.Fatalf("createNote(%s): %v", noteID, err)
@@ -312,5 +313,48 @@ func TestPubSub(t *testing.T) {
 	client, _ := pubsub.NewClient(v.ctx, v.projectID)
 	sub := client.Subscription(v.subID)
 	sub.Delete(v.ctx)
+	teardown(t, v)
+}
+
+func TestPollDiscoveryOccurrenceFinished(t *testing.T) {
+	v := setup(t)
+
+	
+	timeout := time.Duration(1)*time.Second
+	discOcc, err := pollDiscoveryOccurrenceFinished(v.imageUrl, v.projectID, timeout)
+	if err == nil || discOcc != nil {
+		t.Errorf("expected error when resourceUrl has no discovery occurrence")
+	}
+
+	timeout = time.Duration(20)*time.Second
+	discOcc, err = pollDiscoveryOccurrenceFinished(resourceUrl, v.projectID, timeout)
+	if err != nil {
+		t.Fatalf("error getting discovery occurrence: %v", err)
+	}
+	if discOcc == nil {
+		t.Error("discovery occurrence is nil")
+	} else {
+		analysisStatus := discOcc.GetDiscovered().GetDiscovered().AnalysisStatus
+		if analysisStatus != discovery.Discovered_FINISHED_SUCCESS {
+			t.Errorf("discovery occurrence reported unexpected state: %sm want: %s", analysisStatus, discovery.Discovered_FINISHED_SUCCESS)
+		}
+	}
+
+	teardown(t, v)
+}
+
+func TestFindVulnerabilitiesForImage(t *testing.T){
+	v := setup(t)
+
+
+
+	teardown(t, v)
+}
+
+func TestFindHighVulnerabilities(t *testing.T){
+	v := setup(t)
+
+
+
 	teardown(t, v)
 }
