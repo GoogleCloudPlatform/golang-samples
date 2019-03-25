@@ -29,53 +29,6 @@ import (
 	vulnerability "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/vulnerability"
 )
 
-const (
-	discoveryProviderID          = "goog-analysis"
-	discoveryVulnerabilityNoteID = "PACKAGE_VULNERABILITY"
-	backoff                      = time.Second
-)
-
-func main() {
-	projectID := "my-project-id"                                           // The Google Cloud Platform project ID
-	resourceURL := "https://gcr.io/my-project-id/image-name@sha256:digest" // The resource URL to analyze
-	
-	ctx := context.Background()
-
-	// Get a Container Analysis Client.
-	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
-	if err != nil {
-		log.Fatalf("Failed to create client: %v", err)
-	}
-
-	// Close client when done.
-	defer client.Close()
-
-	// Wait for analysis to complete.
-	occ, err := pollDiscoveryOccurrenceFinished(resourceURL, projectID, time.Duration(30)*time.Second)
-	if err != nil {
-		log.Fatalf("Failed to get occurrence: %v", err)
-	}
-	analysisStatus := occ.GetDiscovered().GetDiscovered().AnalysisStatus
-	log.Printf("Vulnerability analysis complete, status is %s", analysisStatus)
-
-
-	// Find any vulnerabilities for this resource.
-	vulnOccs, err := findVulnerabilityOccurrencesForImage(resourceURL, projectID)
-	if err != nil {
-		log.Fatalf("Failed to get vulnerability occurrences: %v", err)
-	}
-	log.Printf("Got %d vulnerabilities", len(vulnOccs))
-
-	// find high severity occurrences
-	filteredOccs := findHighSeverityVulnerabilitiesForImage(resourceURL, projectID)
-
-	log.Printf("Got %d severity high or above vulnerabilities:", len(filteredOccs))
-	for i, occ := range filteredOccs {
-		log.Printf("Vulnerability %d:\n%+v", i+1, occ)
-	}
-
-}
-
 // [START containeranalysis_poll_discovery_occurrence_finished]
 
 // pollDiscoveryOccurrenceFinished returns a discovery occurrence for an image once that discovery occurrence is in a finished state.
