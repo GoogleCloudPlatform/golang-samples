@@ -38,6 +38,7 @@ func createNote(noteID, projectID string) (*grafeaspb.Note, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer client.Close()
 	
 	projectName := fmt.Sprintf("projects/%s", projectID)
 
@@ -66,6 +67,7 @@ func createOccurrence(resourceURL, noteID, occProjectID, noteProjectID string) (
 	if err != nil {
 		return nil, err
 	}
+	defer client.Close()
 	
 	req := &grafeaspb.CreateOccurrenceRequest{
 		Parent: fmt.Sprintf("projects/%s", occProjectID),
@@ -95,6 +97,7 @@ func updateNote(updated *grafeaspb.Note, noteID, projectID string) (*grafeaspb.N
 	if err != nil {
 		return nil, err
 	}
+	defer client.Close()
 	
 	req := &grafeaspb.UpdateNoteRequest{
 		Name: fmt.Sprintf("projects/%s/notes/%s", projectID, noteID),
@@ -114,6 +117,7 @@ func updateOccurrence(updated *grafeaspb.Occurrence, occurrenceID, projectID str
 	if err != nil {
 		return nil, err
 	}
+	defer client.Close()
 	
 	req := &grafeaspb.UpdateOccurrenceRequest{
 		Name: fmt.Sprintf("projects/%s/occurrences/%s", projectID, occurrenceID),
@@ -134,6 +138,7 @@ func deleteNote(noteID, projectID string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 
 	req := &grafeaspb.DeleteNoteRequest{
 		Name: fmt.Sprintf("projects/%s/notes/%s", projectID, noteID),
@@ -152,6 +157,7 @@ func deleteOccurrence(occurrenceID, projectID string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 	
 	req := &grafeaspb.DeleteOccurrenceRequest{
 		Name: fmt.Sprintf("projects/%s/occurrences/%s", projectID, occurrenceID),
@@ -170,6 +176,7 @@ func getNote(noteID, projectID string) (*grafeaspb.Note, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer client.Close()
 
 	req := &grafeaspb.GetNoteRequest{
 		Name: fmt.Sprintf("projects/%s/notes/%s", projectID, noteID),
@@ -190,6 +197,7 @@ func getOccurrence(occurrenceID, projectID string) (*grafeaspb.Occurrence, error
 	if err != nil {
 		return nil, err
 	}
+	defer client.Close()
 
 	req := &grafeaspb.GetOccurrenceRequest{
 		Name: fmt.Sprintf("projects/%s/occurrences/%s", projectID, occurrenceID),
@@ -211,6 +219,7 @@ func getDiscoveryInfo(resourceURL, projectID string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 
 	req := &grafeaspb.ListOccurrencesRequest{
 		Parent: fmt.Sprintf("projects/%s", projectID),
@@ -242,6 +251,7 @@ func getOccurrencesForNote(noteID, projectID string) (int, error) {
 	if err != nil {
 		return -1, err
 	}
+	defer client.Close()
 
 	req := &grafeaspb.ListNoteOccurrencesRequest{
 		Name: fmt.Sprintf("projects/%s/notes/%s", projectID, noteID),
@@ -275,6 +285,7 @@ func getOccurrencesForImage(resourceURL, projectID string) (int, error) {
 	if err != nil {
 		return -1, err
 	}
+	defer client.Close()
 	
 	req := &grafeaspb.ListOccurrencesRequest{
 		Parent: fmt.Sprintf("projects/%s", projectID),
@@ -339,6 +350,7 @@ func createOccurrenceSubscription(subscriptionID, projectID string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 
 	// This topic id will automatically receive messages when Occurrences are added or modified
 	topicID := "container-analysis-occurrences-v1beta1"

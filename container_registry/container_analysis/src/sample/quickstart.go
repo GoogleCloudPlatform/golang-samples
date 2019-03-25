@@ -85,6 +85,7 @@ func pollDiscoveryOccurrenceFinished(resourceURL, projectID string, timeout time
 	if err != nil {
 		return nil, err
 	}
+	defer client.Close()
 
 	// Discover Occurrences are stored within a Google-owned project. 
 	const providerProjectID = "goog-analysis"
@@ -145,6 +146,7 @@ func findVulnerabilityOccurrencesForImage(resourceURL, projectID string) ([]*gra
 	if err != nil {
 		return nil, err
 	}
+	defer client.Close()
 	
 	var occs []*grafeaspb.Occurrence
 
