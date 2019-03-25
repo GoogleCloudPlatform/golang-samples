@@ -79,7 +79,7 @@ func main() {
 // [START containeranalysis_poll_discovery_occurrence_finished]
 
 // pollDiscoveryOccurrenceFinished returns a discovery occurrence for an image once that discovery occurrence is in a finished state.
-func pollDiscoveryOccurrenceFinished(resourceURL, projectID string, timeout time.Duration) (*grafeaspb.Occurrence, error) {
+func pollDiscoveryOccurrenceFinished(resourceUrl, projectID string, timeout time.Duration) (*grafeaspb.Occurrence, error) {
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
@@ -97,7 +97,7 @@ func pollDiscoveryOccurrenceFinished(resourceURL, projectID string, timeout time
 		log.Printf("Querying for discovery occurrence")
 		req := &grafeaspb.ListOccurrencesRequest{
 			Parent: fmt.Sprintf("projects/%s", projectID),
-			Filter: fmt.Sprintf("resourceUrl = %q noteProjectId = %q noteId = %q", resourceURL, providerProjectID, providerNoteID),
+			Filter: fmt.Sprintf("resourceUrl = %q noteProjectId = %q noteId = %q", resourceUrl, providerProjectID, providerNoteID),
 		}
 		it := client.ListOccurrences(ctx, req)
 		// Only one should ever be returned by ListOccurrences and the given filter.
@@ -140,7 +140,7 @@ func pollDiscoveryOccurrenceFinished(resourceURL, projectID string, timeout time
 // [START containeranalysis_vulnerability_occurrences_for_image]
 
 // findVulnerabilityOccurrencesForImage retrieves all vulnerability Occurrences associated with an image.
-func findVulnerabilityOccurrencesForImage(resourceURL, projectID string) ([]*grafeaspb.Occurrence, error) {
+func findVulnerabilityOccurrencesForImage(resourceUrl, projectID string) ([]*grafeaspb.Occurrence, error) {
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
@@ -152,7 +152,7 @@ func findVulnerabilityOccurrencesForImage(resourceURL, projectID string) ([]*gra
 
 	req := &grafeaspb.ListOccurrencesRequest{
 		Parent: fmt.Sprintf("projects/%s", projectID),
-		Filter: fmt.Sprintf("resourceUrl = %q kind = %q", resourceURL, "VULNERABILITY"),
+		Filter: fmt.Sprintf("resourceUrl = %q kind = %q", resourceUrl, "VULNERABILITY"),
 	}
 
 	it := client.ListOccurrences(ctx, req)
@@ -175,21 +175,21 @@ func findVulnerabilityOccurrencesForImage(resourceURL, projectID string) ([]*gra
 
 // [START containeranalysis_filter_vulnerability_occurrences]
 
-func findHighSeverityVulnerabilitiesForImage(resourceUrl, projectID string) error {
+func findHighSeverityVulnerabilitiesForImage(resourceUrl, projectID string) ([]*grafeaspb.Occurrence, error) {
 	// retrieve a list of all vulnerabilities using the function defined above
-	vulnOccs, err := findVulnerabilityOccurrencesForImage(resourceURL, projectID)
+	vulnOccs, err := findVulnerabilityOccurrencesForImage(resourceUrl, projectID)
 	if err != nil {
-		return fmt.Errorf("Failed to get vulnerability occurrences: %v", err)
+		return nil, fmt.Errorf("Failed to get vulnerability occurrences: %v", err)
 	}
 	// add high severity occurrences to a new filtered list
 	var filteredOccs []*grafeaspb.Occurrence
 	for _, occ := range vulnOccs {
-		severityLevel = occ.GetVulnerability().GetSeverity()
+		severityLevel := occ.GetVulnerability().GetSeverity()
 		if severityLevel == vulnerability.Severity_HIGH || severityLevel == vulnerability.Severity_CRITICAL {
 			filteredOccs = append(filteredOccs, occ)
 		}
 	}
-	return filteredOccs
+	return filteredOccs, nil
 }
 
 // [END containeranalysis_filter_vulnerability_occurrences]
