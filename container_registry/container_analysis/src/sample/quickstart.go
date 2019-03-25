@@ -66,19 +66,14 @@ func main() {
 	}
 	log.Printf("Got %d vulnerabilities", len(vulnOccs))
 
-	// [START containeranalysis_filter_vulnerability_occurrences]
+	// find high severity occurrences
+	filteredOccs := findHighSeverityVulnerabilitiesForImage(resourceURL, projectID)
 
-	// Filter occurrence based on non-distribution specific CVSS severity rating.
-	filteredOccs := filterOccurrences(vulnOccs, func(occ *grafeaspb.Occurrence) bool {
-		s := occ.GetVulnerability().GetSeverity()
-		return s == vulnerability.Severity_HIGH || s == vulnerability.Severity_CRITICAL
-	})
 	log.Printf("Got %d severity high or above vulnerabilities:", len(filteredOccs))
 	for i, occ := range filteredOccs {
 		log.Printf("Vulnerability %d:\n%+v", i+1, occ)
 	}
 
-	// [END containeranalysis_filter_vulnerability_occurrences]
 }
 
 // [START containeranalysis_poll_discovery_occurrence_finished]
@@ -175,12 +170,20 @@ func findVulnerabilityOccurrencesForImage(resourceURL, projectID string) ([]*gra
 
 // [END containeranalysis_vulnerability_occurrences_for_image]
 
+
 // [START containeranalysis_filter_vulnerability_occurrences]
 
-func filterOccurrences(occs []*grafeaspb.Occurrence, predicate func(*grafeaspb.Occurrence) bool) []*grafeaspb.Occurrence {
+func findHighSeverityVulnerabilitiesForImage(resourceUrl, projectID string) error {
+	// retrieve a list of all vulnerabilities using the function defined above
+	vulnOccs, err := findVulnerabilityOccurrencesForImage(resourceURL, projectID)
+	if err != nil {
+		return fmt.Errorf("Failed to get vulnerability occurrences: %v", err)
+	}
+	// add high severity occurrences to a new filtered list
 	var filteredOccs []*grafeaspb.Occurrence
-	for _, occ := range occs {
-		if predicate(occ) {
+	for _, occ := range vulnOccs {
+		severityLevel = occ.GetVulnerability().GetSeverity()
+		if severityLevel == vulnerability.Severity_HIGH || severityLevel == vulnerability.Severity_CRITICAL {
 			filteredOccs = append(filteredOccs, occ)
 		}
 	}
