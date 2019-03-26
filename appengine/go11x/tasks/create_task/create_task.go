@@ -44,7 +44,7 @@ func createTask(projectID, locationID, queueID, message string) (*taskspb.Task, 
 		Parent: queuePath,
 		Task: &taskspb.Task{
 			// https://godoc.org/google.golang.org/genproto/googleapis/cloud/tasks/v2#AppEngineHttpRequest
-			PayloadType: &taskspb.Task_AppEngineHttpRequest{
+			MessageType: &taskspb.Task_AppEngineHttpRequest{
 				AppEngineHttpRequest: &taskspb.AppEngineHttpRequest{
 					HttpMethod:  taskspb.HttpMethod_POST,
 					RelativeUri: "/task_handler",
