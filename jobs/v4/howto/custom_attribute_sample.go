@@ -49,7 +49,7 @@ func createJobWithCustomAttributes(w io.Writer, projectID, companyID, jobTitle s
 		Description:     "Design, devolop, test, deploy, maintain and improve software.",
 		LanguageCode:    "en-US",
 		PromotionValue:  2,
-		EmploymentTypes: []talentpb.EmploymentType{1},
+		EmploymentTypes: []talentpb.EmploymentType{talentpb.EmploymentType_FULL_TIME},
 		Addresses:       []string{"Mountain View, CA"},
 		CustomAttributes: map[string]*talentpb.CustomAttribute{
 			"someFieldString": {
