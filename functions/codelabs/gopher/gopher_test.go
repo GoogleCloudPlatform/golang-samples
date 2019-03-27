@@ -12,24 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package howto
+package gopher
 
 import (
-	"bytes"
-	"strings"
+	"net/http"
+	"net/http/httptest"
 	"testing"
-
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestJobTitleAutocomplete(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	buf := &bytes.Buffer{}
-	if _, err := jobTitleAutocomplete(buf, tc.ProjectID, "Software"); err != nil {
-		t.Fatalf("jobTitleAutoComplete: %v", err)
-	}
-	want := "Software Developer"
-	if got := buf.String(); !strings.Contains(got, want) {
-		t.Errorf("jobTitleAutoComplete got %q, want %q", got, want)
+func TestGopher(t *testing.T) {
+	rr := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/", nil)
+	Gopher(rr, req)
+	if rr.Result().StatusCode != http.StatusOK {
+		t.Errorf("Gopher StatusCode = %v, want %v", rr.Result().StatusCode, http.StatusOK)
 	}
 }
