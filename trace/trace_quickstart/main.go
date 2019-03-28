@@ -57,6 +57,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+		// Because we don't read the resp.Body, need to manually call Close().
 		resp.Body.Close()
 	})
 	http.Handle("/foo", handler)
