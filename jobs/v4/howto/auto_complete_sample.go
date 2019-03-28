@@ -26,7 +26,7 @@ import (
 
 // jobTitleAutoComplete suggests the job titles of the given
 // company identifier on query.
-func jobTitleAutocomplete(w io.Writer, projectID, companyID, query string) (*talentpb.CompleteQueryResponse, error) {
+func jobTitleAutocomplete(w io.Writer, projectID, query string) (*talentpb.CompleteQueryResponse, error) {
 	ctx := context.Background()
 
 	// Initialize a completionService client.
@@ -38,15 +38,17 @@ func jobTitleAutocomplete(w io.Writer, projectID, companyID, query string) (*tal
 
 	// Construct a completeQuery request.
 	req := &talentpb.CompleteQueryRequest{
-		Name:        fmt.Sprintf("projects/%s", projectID),
-		Query:       query,
-		PageSize:    1,
-		CompanyName: fmt.Sprintf("projects/%s/companies/%s", projectID, companyID),
+		Name:          fmt.Sprintf("projects/%s", projectID),
+		Query:         query,
+		LanguageCodes: []string{"en-US"},
+		PageSize:      5, // Number of completion results returned.
+		Scope:         talentpb.CompleteQueryRequest_PUBLIC,
+		Type:          talentpb.CompleteQueryRequest_JOB_TITLE,
 	}
 
 	resp, err := c.CompleteQuery(ctx, req)
 	if err != nil {
-		fmt.Printf("failed to auto complete with query %s in %s: %v\n", query, companyID, err)
+		fmt.Printf("failed to auto complete with query %s: %v\n", query, err)
 		return nil, err
 	}
 

@@ -12,24 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package howto
+// The cmd command starts an HTTP server.
+package main
 
 import (
-	"bytes"
-	"strings"
-	"testing"
+	"fmt"
+	"log"
+	"net/http"
 
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/GoogleCloudPlatform/golang-samples/functions/codelabs/gopher"
 )
 
-func TestJobTitleAutocomplete(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	buf := &bytes.Buffer{}
-	if _, err := jobTitleAutocomplete(buf, tc.ProjectID, "Software"); err != nil {
-		t.Fatalf("jobTitleAutoComplete: %v", err)
-	}
-	want := "Software Developer"
-	if got := buf.String(); !strings.Contains(got, want) {
-		t.Errorf("jobTitleAutoComplete got %q, want %q", got, want)
-	}
+func main() {
+	http.HandleFunc("/", gopher.Gopher)
+	fmt.Println("Listening on localhost:8080")
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
