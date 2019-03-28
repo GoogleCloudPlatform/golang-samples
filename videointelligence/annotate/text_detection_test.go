@@ -37,14 +37,10 @@ func TestTextDetection(t *testing.T) {
 	}
 
 	output := strings.ToUpper(buf.String())
-	textExists := false
 	for _, text := range possibleTexts {
 		if strings.Contains(output, text) {
-			textExists = true
-			break
+			return
 		}
 	}
-	if !textExists {
-		t.Fatalf(`textDetection(%q) didn't contain any of the possibleTexts`, filename)
-	}
+	t.Fatalf(`textDetection(%q) didn't contain any of the possibleTexts`, filename)
 }
