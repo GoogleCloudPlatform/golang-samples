@@ -220,8 +220,8 @@ func TestSendCommand(t *testing.T) {
 			r.Errorf("Should not be able to send command")
 		}
 
-		if !strings.Contains(err.Error(), "is not subscribed to the commands topic") {
-			r.Errorf("Should create an error that device is not subscribed: %v", err)
+		if !strings.Contains(err.Error(), "not connected") {
+			r.Errorf("Should create an error that device is not connected: %v", err)
 		}
 	})
 
