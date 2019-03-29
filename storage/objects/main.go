@@ -27,8 +27,10 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"google.golang.org/api/iterator"
+	"golang.org/x/oauth2/google"
 
 	"cloud.google.com/go/storage"
 )
@@ -423,6 +425,75 @@ func downloadUsingRequesterPays(client *storage.Client, object, bucketName, loca
 	// [END storage_download_file_requester_pays]
 	return nil
 }
+
+func generateV4GetObjectSignedUrl(client *storage.Client, bucketName, objectName, serviceAccount string) (string, error) {
+	// [START storage_generate_signed_url_v4]
+	jsonKey, err := ioutil.ReadFile(serviceAccount)
+	if err != nil {
+		return "", fmt.Errorf("cannot read the JSON key file, err: %v", err)
+	}
+
+	conf, err := google.JWTConfigFromJSON(jsonKey)
+	if err != nil {
+		return "", fmt.Errorf("google.JWTConfigFromJSON: %v", err)
+	}
+
+	opts := &storage.SignedURLOptions{
+		Scheme: storage.SigningSchemeV4,
+		Method: "GET",
+		GoogleAccessID: conf.Email,
+		PrivateKey:     conf.PrivateKey,
+		Expires:        time.Now().Add(15*time.Minute),
+	}
+
+	u, err := storage.SignedURL(bucketName, objectName, opts)
+	if err != nil {
+		return "", fmt.Errorf("Unable to generate a signed URL: %v", err)
+	}
+
+	fmt.Printf("Generated GET signed URL:\n");
+	fmt.Printf("'%v'\n", u);
+	fmt.Printf("You can use this URL with any user agent, for example:\n");
+	fmt.Printf("curl '%v'\n", u);
+	// [END storage_generate_signed_url_v4]
+	return u, nil
+}
+
+func generateV4PutObjectSignedUrl(client *storage.Client, bucketName, objectName, serviceAccount string) (string, error) {
+	// [START storage_generate_upload_signed_url_v4]
+	jsonKey, err := ioutil.ReadFile(serviceAccount)
+	if err != nil {
+		return "", fmt.Errorf("cannot read the JSON key file, err: %v", err)
+	}
+	conf, err := google.JWTConfigFromJSON(jsonKey)
+	if err != nil {
+		return "", fmt.Errorf("google.JWTConfigFromJSON: %v", err)
+	}
+
+	opts := &storage.SignedURLOptions{
+		Scheme: storage.SigningSchemeV4,
+		Method: "PUT",
+		Headers: []string{
+			"Content-Type:application/octet-stream",
+		},
+		GoogleAccessID: conf.Email,
+		PrivateKey:     conf.PrivateKey,
+		Expires:        time.Now().Add(15*time.Minute),
+	}
+
+	u, err := storage.SignedURL(bucketName, objectName, opts)
+	if err != nil {
+		return "", fmt.Errorf("Unable to generate a signed URL: %v", err)
+	}
+
+	fmt.Printf("Generated PUT signed URL:\n");
+	fmt.Printf("'%v'\n", u);
+	fmt.Printf("You can use this URL with any user agent, for example:\n");
+	fmt.Printf("curl -X PUT -H 'Content-Type: application/octet-stream' --upload-file my-file '%v'\n", u);
+	// [END storage_generate_upload_signed_url_v4]
+	return u, nil
+}
+
 
 // TODO(jbd): Add test for downloadUsingRequesterPays.
 

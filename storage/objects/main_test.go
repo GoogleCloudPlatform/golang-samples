@@ -24,6 +24,7 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"net/http"
 
 	"google.golang.org/api/iterator"
 
@@ -222,6 +223,60 @@ func TestKMSObjects(t *testing.T) {
 	if err := writeWithKMSKey(client, bucket, object1, kmsKeyName); err != nil {
 		t.Errorf("cannot write a KMS encrypted object: %v", err)
 	}
+}
+
+func TestV4SignedUrl(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var (
+		bucketName = tc.ProjectID + "-signed-url-bucket-name"
+
+		objectName = "foo.txt"
+
+		serviceAccount = os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
+	)
+
+	cleanBucket(t, ctx, client, tc.ProjectID, bucketName)
+
+	putUrl, err := generateV4PutObjectSignedUrl(client, bucketName, objectName, serviceAccount)
+	if err != nil {
+		t.Errorf("can't generate a put signed url: %v", err)
+	}
+
+	httpClient := &http.Client{}
+	request, err := http.NewRequest("PUT", putUrl, strings.NewReader("hello world"))
+	request.ContentLength = 11
+	request.Header.Set("Content-Type", "application/octet-stream")
+	response, err := httpClient.Do(request)
+	if err != nil {
+		t.Errorf("Err: %v", err)
+	}
+
+	getUrl, err := generateV4GetObjectSignedUrl(client, bucketName, objectName, serviceAccount)
+	if err != nil {
+		t.Errorf("can't generate a get signed url: %v", err)
+	}
+
+	response, err = http.Get(getUrl)
+	if err != nil {
+		t.Errorf("Err: %v", err)
+	}
+	defer response.Body.Close()
+
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		t.Errorf("Err: %v", err)
+	}
+
+	if got, want := string(body), "hello world"; got != want {
+		t.Errorf("object content = %q; want %q", got, want)
+	}
+
 }
 
 func TestObjectBucketLock(t *testing.T) {
