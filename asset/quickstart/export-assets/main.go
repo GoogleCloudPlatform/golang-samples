@@ -24,7 +24,7 @@ import (
 
 	asset "cloud.google.com/go/asset/apiv1"
 	"golang.org/x/net/context"
-	assetpb "google.golang.org/genproto/googleapis/cloud/asset/apiv1"
+	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1"
 )
 
 func main() {
