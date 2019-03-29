@@ -50,9 +50,7 @@ func enhancedModel(w io.Writer, path string) error {
 			Encoding:        speechpb.RecognitionConfig_LINEAR16,
 			SampleRateHertz: 8000,
 			LanguageCode:    "en-US",
-			// Enhanced models are only available to projects that
-			// opt in for audio data collection.
-			UseEnhanced: true,
+			UseEnhanced:     true,
 			// A model must be specified to use enhanced model.
 			Model: "phone_call",
 		},
