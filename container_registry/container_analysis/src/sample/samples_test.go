@@ -275,6 +275,7 @@ func TestOccurrencesForNote(t *testing.T) {
 }
 
 func TestPubSub(t *testing.T) {
+	t.Skip("Flaky: golang-samples#812")
 	v := setup(t)
 	// Create a new subscription if it doesn't exist.
 	createOccurrenceSubscription(v.ctx, v.subID, v.projectID)
