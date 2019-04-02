@@ -28,6 +28,12 @@ Add that to your `$PATH` for convenience:
 export PATH=$PATH:$GOPATH/bin
 ```
 
+The program expects an API key as a parameter, export it with the following
+command for later use:
+
+```
+export APIKEY=Your Api Key
+```
 
 # Proxy Server
 
@@ -79,7 +85,7 @@ $ echo "http://testsafebrowsing.appspot.com/apiv4/ANY_PLATFORM/MALWARE/URL/" | w
 
 
 # WebRisk System Test
-To perform an end-to-end test on the package with the Safe Browsing backend,
+To perform an end-to-end test on the package with the WebRisk backend,
 run the following command:
 
 ```
