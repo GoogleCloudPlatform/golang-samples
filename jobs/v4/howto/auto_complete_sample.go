@@ -32,13 +32,12 @@ func jobTitleAutocomplete(w io.Writer, projectID, query string) (*talentpb.Compl
 	// Initialize a completionService client.
 	c, err := talent.NewCompletionClient(ctx)
 	if err != nil {
-		fmt.Printf("talent.NewCompletionClient: %v\n", err)
-		return nil, err
+		return nil, fmt.Errorf("talent.NewCompletionClient: %v", err)
 	}
 
 	// Construct a completeQuery request.
 	req := &talentpb.CompleteQueryRequest{
-		Name:          fmt.Sprintf("projects/%s", projectID),
+		Parent:        fmt.Sprintf("projects/%s", projectID),
 		Query:         query,
 		LanguageCodes: []string{"en-US"},
 		PageSize:      5, // Number of completion results returned.
@@ -48,8 +47,7 @@ func jobTitleAutocomplete(w io.Writer, projectID, query string) (*talentpb.Compl
 
 	resp, err := c.CompleteQuery(ctx, req)
 	if err != nil {
-		fmt.Printf("failed to auto complete with query %s: %v\n", query, err)
-		return nil, err
+		return nil, fmt.Errorf("CompleteQuery(%s): %v", query, err)
 	}
 
 	fmt.Fprintf(w, "Auto complete results:")
