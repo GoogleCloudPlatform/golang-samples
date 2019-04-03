@@ -53,9 +53,9 @@ func listSource(w io.Writer, orgID string) (int, error) {
 			return -1, fmt.Errorf("Error listing sources: %v", err)
 		}
 		fmt.Fprintf(w, "Source Name: %s, Display name %s, Description %s\n",
-			(*source).Name,
-			(*source).DisplayName,
-			(*source).Description)
+			source.Name,
+			source.DisplayName,
+			source.Description)
 		sourcesFound++
 	}
 	return sourcesFound, nil
