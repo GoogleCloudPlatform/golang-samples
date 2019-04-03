@@ -42,12 +42,10 @@ func listAllProjectAssetsAndStateChanges(w io.Writer, orgID string) (int, error)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
-	daysAgo := 24 * time.Hour
-
 	req := &securitycenterpb.ListAssetsRequest{
 		Parent:          fmt.Sprintf("organizations/%s", orgID),
 		Filter:          `security_center_properties.resource_type="google.cloud.resourcemanager.Project"`,
-		CompareDuration: ptypes.DurationProto(daysAgo),
+		CompareDuration: ptypes.DurationProto(24 * time.Hour),
 	}
 
 	assetsFound := 0
