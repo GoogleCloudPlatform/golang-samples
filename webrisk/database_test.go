@@ -75,20 +75,20 @@ func TestDatabaseInit(t *testing.T) {
 		// Load from a valid database file.
 		config: &Config{
 			ThreatLists: []ThreatType{
-				threatTypeUnspecified,
-				threatTypeMalware,
+				ThreatTypeUnspecified,
+				ThreatTypeMalware,
 			},
 			UpdatePeriod: DefaultUpdatePeriod,
 		},
 		oldDB: &database{
 			last: now.Add(-DefaultUpdatePeriod + time.Minute),
 			tfu: threatsForUpdate{
-				threatTypeUnspecified: partialHashes{
+				ThreatTypeUnspecified: partialHashes{
 					Hashes: []hashPrefix{"aaaa", "bbbb"},
 					SHA256: mustDecodeHex(t, "e5c1edb50ff8b4fcc3ead3a845ffbe1ad51c9dae5d44335a5c333b57ac8df062"),
 					State:  []byte("state1"),
 				},
-				threatTypeMalware: partialHashes{
+				ThreatTypeMalware: partialHashes{
 					Hashes: []hashPrefix{"bbbb", "cccc"},
 					SHA256: mustDecodeHex(t, "9a720c6ee500f5a0d4e5477fc9f3d8573226723d0b338b0c8f572d877bdfa224"),
 					State:  []byte("state2"),
@@ -98,38 +98,38 @@ func TestDatabaseInit(t *testing.T) {
 		newDB: &database{
 			last: now.Add(-DefaultUpdatePeriod + time.Minute),
 			tfu: threatsForUpdate{
-				threatTypeUnspecified: partialHashes{
+				ThreatTypeUnspecified: partialHashes{
 					SHA256: mustDecodeHex(t, "e5c1edb50ff8b4fcc3ead3a845ffbe1ad51c9dae5d44335a5c333b57ac8df062"),
 					State:  []byte("state1"),
 				},
-				threatTypeMalware: partialHashes{
+				ThreatTypeMalware: partialHashes{
 					SHA256: mustDecodeHex(t, "9a720c6ee500f5a0d4e5477fc9f3d8573226723d0b338b0c8f572d877bdfa224"),
 					State:  []byte("state2"),
 				},
 			},
 			tfl: threatsForLookup{
-				threatTypeUnspecified: newHashSet([]hashPrefix{"aaaa", "bbbb"}),
-				threatTypeMalware:     newHashSet([]hashPrefix{"bbbb", "cccc"}),
+				ThreatTypeUnspecified: newHashSet([]hashPrefix{"aaaa", "bbbb"}),
+				ThreatTypeMalware:     newHashSet([]hashPrefix{"bbbb", "cccc"}),
 			},
 		},
 	}, {
 		// Load from an older but not yet stale valid database file.
 		config: &Config{
 			ThreatLists: []ThreatType{
-				threatTypeUnspecified,
-				threatTypeMalware,
+				ThreatTypeUnspecified,
+				ThreatTypeMalware,
 			},
 			UpdatePeriod: DefaultUpdatePeriod,
 		},
 		oldDB: &database{
 			last: now.Add(-DefaultUpdatePeriod + (30 * time.Minute)),
 			tfu: threatsForUpdate{
-				threatTypeUnspecified: partialHashes{
+				ThreatTypeUnspecified: partialHashes{
 					Hashes: []hashPrefix{"aaaa", "bbbb"},
 					SHA256: mustDecodeHex(t, "e5c1edb50ff8b4fcc3ead3a845ffbe1ad51c9dae5d44335a5c333b57ac8df062"),
 					State:  []byte("state1"),
 				},
-				threatTypeMalware: partialHashes{
+				ThreatTypeMalware: partialHashes{
 					Hashes: []hashPrefix{"bbbb", "cccc"},
 					SHA256: mustDecodeHex(t, "9a720c6ee500f5a0d4e5477fc9f3d8573226723d0b338b0c8f572d877bdfa224"),
 					State:  []byte("state2"),
@@ -139,39 +139,39 @@ func TestDatabaseInit(t *testing.T) {
 		newDB: &database{
 			last: now.Add(-DefaultUpdatePeriod + (30 * time.Minute)),
 			tfu: threatsForUpdate{
-				threatTypeUnspecified: partialHashes{
+				ThreatTypeUnspecified: partialHashes{
 					SHA256: mustDecodeHex(t, "e5c1edb50ff8b4fcc3ead3a845ffbe1ad51c9dae5d44335a5c333b57ac8df062"),
 					State:  []byte("state1"),
 				},
-				threatTypeMalware: partialHashes{
+				ThreatTypeMalware: partialHashes{
 					SHA256: mustDecodeHex(t, "9a720c6ee500f5a0d4e5477fc9f3d8573226723d0b338b0c8f572d877bdfa224"),
 					State:  []byte("state2"),
 				},
 			},
 			tfl: threatsForLookup{
-				threatTypeUnspecified: newHashSet([]hashPrefix{"aaaa", "bbbb"}),
-				threatTypeMalware:     newHashSet([]hashPrefix{"bbbb", "cccc"}),
+				ThreatTypeUnspecified: newHashSet([]hashPrefix{"aaaa", "bbbb"}),
+				ThreatTypeMalware:     newHashSet([]hashPrefix{"bbbb", "cccc"}),
 			},
 		},
 	}, {
 		// Load from a valid database file with more descriptors than in configuration.
 		config: &Config{
-			ThreatLists: []ThreatType{threatTypeUnspecified},
+			ThreatLists: []ThreatType{ThreatTypeUnspecified},
 		},
 		oldDB: &database{
 			last: now,
 			tfu: threatsForUpdate{
-				threatTypeUnspecified: partialHashes{
+				ThreatTypeUnspecified: partialHashes{
 					Hashes: []hashPrefix{"aaaa", "bbbb"},
 					SHA256: mustDecodeHex(t, "e5c1edb50ff8b4fcc3ead3a845ffbe1ad51c9dae5d44335a5c333b57ac8df062"),
 					State:  []byte("state1"),
 				},
-				threatTypeMalware: partialHashes{
+				ThreatTypeMalware: partialHashes{
 					Hashes: []hashPrefix{"bbbb", "cccc"},
 					SHA256: mustDecodeHex(t, "9a720c6ee500f5a0d4e5477fc9f3d8573226723d0b338b0c8f572d877bdfa224"),
 					State:  []byte("state2"),
 				},
-				threatTypeUnwantedSoftware: partialHashes{
+				ThreatTypeUnwantedSoftware: partialHashes{
 					Hashes: []hashPrefix{"xxx", "yyy", "zzz"},
 					SHA256: mustDecodeHex(t, "cc6c955cadf2cc09442c0848ce8e165b8f9aa5974916de7186a9e1b6c4e7937e"),
 				},
@@ -180,27 +180,27 @@ func TestDatabaseInit(t *testing.T) {
 		newDB: &database{
 			last: now,
 			tfu: threatsForUpdate{
-				threatTypeUnspecified: partialHashes{
+				ThreatTypeUnspecified: partialHashes{
 					SHA256: mustDecodeHex(t, "e5c1edb50ff8b4fcc3ead3a845ffbe1ad51c9dae5d44335a5c333b57ac8df062"),
 					State:  []byte("state1"),
 				},
 			},
 			tfl: threatsForLookup{
-				threatTypeUnspecified: newHashSet([]hashPrefix{"aaaa", "bbbb"}),
+				ThreatTypeUnspecified: newHashSet([]hashPrefix{"aaaa", "bbbb"}),
 			},
 		},
 	}, {
 		// Load from a invalid database file with fewer descriptors than in configuration.
 		config: &Config{
 			ThreatLists: []ThreatType{
-				threatTypeUnspecified,
-				threatTypeMalware,
+				ThreatTypeUnspecified,
+				ThreatTypeMalware,
 			},
 		},
 		oldDB: &database{
 			last: now,
 			tfu: threatsForUpdate{
-				threatTypeUnspecified: partialHashes{
+				ThreatTypeUnspecified: partialHashes{
 					Hashes: []hashPrefix{"aaaa", "bbbb"},
 					SHA256: mustDecodeHex(t, "e5c1edb50ff8b4fcc3ead3a845ffbe1ad51c9dae5d44335a5c333b57ac8df062"),
 					State:  []byte("state1"),
@@ -212,20 +212,20 @@ func TestDatabaseInit(t *testing.T) {
 		// Load from a stale database file.
 		config: &Config{
 			ThreatLists: []ThreatType{
-				threatTypeUnspecified,
-				threatTypeMalware,
+				ThreatTypeUnspecified,
+				ThreatTypeMalware,
 			},
 			UpdatePeriod: DefaultUpdatePeriod,
 		},
 		oldDB: &database{
 			last: now.Add(-2 * (DefaultUpdatePeriod + time.Minute)),
 			tfu: threatsForUpdate{
-				threatTypeUnspecified: partialHashes{
+				ThreatTypeUnspecified: partialHashes{
 					Hashes: []hashPrefix{"aaaa", "bbbb"},
 					SHA256: mustDecodeHex(t, "e5c1edb50ff8b4fcc3ead3a845ffbe1ad51c9dae5d44335a5c333b57ac8df062"),
 					State:  []byte("state1"),
 				},
-				threatTypeMalware: partialHashes{
+				ThreatTypeMalware: partialHashes{
 					Hashes: []hashPrefix{"bbbb", "cccc"},
 					SHA256: mustDecodeHex(t, "9a720c6ee500f5a0d4e5477fc9f3d8573226723d0b338b0c8f572d877bdfa224"),
 					State:  []byte("state2"),
@@ -237,14 +237,14 @@ func TestDatabaseInit(t *testing.T) {
 		// Load from a corrupted database file (has bad SHA256 checksums).
 		config: &Config{
 			ThreatLists: []ThreatType{
-				threatTypeUnspecified,
-				threatTypeMalware,
+				ThreatTypeUnspecified,
+				ThreatTypeMalware,
 			},
 		},
 		oldDB: &database{
 			last: now,
 			tfu: threatsForUpdate{
-				threatTypeUnspecified: partialHashes{
+				ThreatTypeUnspecified: partialHashes{
 					Hashes: []hashPrefix{"aaaa", "bbbb"},
 					State:  []byte("state1"),
 					SHA256: []byte("bad checksum"),
@@ -285,7 +285,7 @@ func TestDatabaseUpdate(t *testing.T) {
 
 		config = &Config{
 			ThreatLists: []ThreatType{
-				threatTypeMalware,
+				ThreatTypeMalware,
 			},
 			UpdatePeriod: 1800 * time.Second,
 		}
@@ -340,7 +340,7 @@ func TestDatabaseUpdate(t *testing.T) {
 
 	// Update 0: partial update on empty database.
 	now = now.Add(time.Hour)
-	resp = newResp(threatTypeMalware, partial, []int32{0, 1, 2, 3}, nil,
+	resp = newResp(ThreatTypeMalware, partial, []int32{0, 1, 2, 3}, nil,
 		"d0", "0000000000000000000000000000000000000000000000000000000000000000")
 	delay, updated := db.Update(context.Background(), mockAPI)
 	if db.err == nil || updated {
@@ -354,7 +354,7 @@ func TestDatabaseUpdate(t *testing.T) {
 
 	// Update 1: full update to all values.
 	now = now.Add(time.Hour)
-	resp = newResp(threatTypeMalware, full, nil, []string{"aaaa", "0421e", "666666", "7777777", "88888888"},
+	resp = newResp(ThreatTypeMalware, full, nil, []string{"aaaa", "0421e", "666666", "7777777", "88888888"},
 		"d1", "a3b93fac424834c2447e2dbe5db3ec8553519777523907ea310e207f556a7637")
 	ts, _ := pt.TimestampProto(time.Now().Add(2000 * time.Second))
 	resp.RecommendedNextDiff = ts
@@ -374,10 +374,10 @@ func TestDatabaseUpdate(t *testing.T) {
 	wantDB = &database{
 		last: now,
 		tfu: threatsForUpdate{
-			threatTypeMalware: {SHA256: gotDB.tfu[threatTypeMalware].SHA256, State: []byte{0x64, 0x31}},
+			ThreatTypeMalware: {SHA256: gotDB.tfu[ThreatTypeMalware].SHA256, State: []byte{0x64, 0x31}},
 		},
 		tfl: threatsForLookup{
-			threatTypeMalware: newHashSet([]hashPrefix{"0421e", "666666", "7777777", "88888888", "aaaa"}),
+			ThreatTypeMalware: newHashSet([]hashPrefix{"0421e", "666666", "7777777", "88888888", "aaaa"}),
 		},
 	}
 	if !reflect.DeepEqual(gotDB.tfu, wantDB.tfu) {
@@ -389,7 +389,7 @@ func TestDatabaseUpdate(t *testing.T) {
 
 	// Update 2: partial update with no changes.
 	now = now.Add(time.Hour)
-	resp = newResp(threatTypeMalware, partial, nil, nil,
+	resp = newResp(ThreatTypeMalware, partial, nil, nil,
 		"d1", "a3b93fac424834c2447e2dbe5db3ec8553519777523907ea310e207f556a7637")
 	delay, updated = db.Update(context.Background(), mockAPI)
 	if db.err != nil || !updated {
@@ -409,7 +409,7 @@ func TestDatabaseUpdate(t *testing.T) {
 
 	// Update 3: full update and partial update with removals and additions.
 	now = now.Add(time.Hour)
-	resp = newResp(threatTypeMalware, full, nil, []string{"AAAA", "0421E"},
+	resp = newResp(ThreatTypeMalware, full, nil, []string{"AAAA", "0421E"},
 		"d2", "b742965b7a759ba0254685bfc6edae3b1ba54d0168fb86f526d6c79c3d44c753")
 	delay, updated = db.Update(context.Background(), mockAPI)
 	if db.err != nil || !updated {
@@ -422,10 +422,10 @@ func TestDatabaseUpdate(t *testing.T) {
 	wantDB = &database{
 		last: now,
 		tfu: threatsForUpdate{
-			threatTypeMalware: {SHA256: gotDB.tfu[threatTypeMalware].SHA256, State: []byte{0x64, 0x32}},
+			ThreatTypeMalware: {SHA256: gotDB.tfu[ThreatTypeMalware].SHA256, State: []byte{0x64, 0x32}},
 		},
 		tfl: threatsForLookup{
-			threatTypeMalware: newHashSet([]hashPrefix{"0421E", "AAAA"}),
+			ThreatTypeMalware: newHashSet([]hashPrefix{"0421E", "AAAA"}),
 		},
 	}
 	if !reflect.DeepEqual(gotDB.tfu, wantDB.tfu) {
@@ -438,7 +438,7 @@ func TestDatabaseUpdate(t *testing.T) {
 
 	// Update 4: invalid SHA256 checksum.
 	now = now.Add(time.Hour)
-	resp = newResp(threatTypeUnspecified, partial, []int32{0, 1}, []string{"fizz", "buzz"},
+	resp = newResp(ThreatTypeUnspecified, partial, []int32{0, 1}, []string{"fizz", "buzz"},
 		"a3", "bad0bad0bad0bad0bad0bad0bad0bad0bad0bad0bad0bad0bad0bad0bad0bad0")
 
 	delay, updated = db.Update(context.Background(), mockAPI)
@@ -456,7 +456,7 @@ func TestDatabaseUpdate(t *testing.T) {
 
 	// Update 5: removal index is out-of-bounds.
 	now = now.Add(time.Hour)
-	resp = newResp(threatTypeUnspecified, partial, []int32{9000}, []string{"fizz", "buzz"},
+	resp = newResp(ThreatTypeUnspecified, partial, []int32{9000}, []string{"fizz", "buzz"},
 		"a4", "5d6506974928a003d2a0ccbd7a40b5341ad10578fd3f54527087c5ecbbd17a12")
 	delay, updated = db.Update(context.Background(), mockAPI)
 	if db.err == nil || updated {
@@ -520,13 +520,13 @@ func TestDatabaseLookup(t *testing.T) {
 	}
 
 	db := &database{tfl: threatsForLookup{
-		threatTypeUnspecified: newHashSet([]hashPrefix{
+		ThreatTypeUnspecified: newHashSet([]hashPrefix{
 			"26e307", "524d", "5c6655d4"}),
-		threatTypeMalware: newHashSet([]hashPrefix{
+		ThreatTypeMalware: newHashSet([]hashPrefix{
 			"1e25395a9b1b8", "3f93", "5c6655d2", "5c6655d5", "7294", "cad78c1c"}),
-		threatTypeSocialEngineering: newHashSet([]hashPrefix{
+		ThreatTypeSocialEngineering: newHashSet([]hashPrefix{
 			"1e25395a9b1b8", "cad78c628", "cad78c68"}),
-		threatTypeUnwantedSoftware: newHashSet([]hashPrefix{
+		ThreatTypeUnwantedSoftware: newHashSet([]hashPrefix{
 			"524d", "59b8", "5c6655d3", "cad78c1c"}),
 	}}
 
@@ -540,27 +540,27 @@ func TestDatabaseLookup(t *testing.T) {
 	}, {
 		input:   "59b8332112b29950f594cf957f4d0e63",
 		output:  "59b8",
-		threats: []ThreatType{threatTypeUnwantedSoftware},
+		threats: []ThreatType{ThreatTypeUnwantedSoftware},
 	}, {
 		input:   "524dfa307ba397754a35dcce0ee5f54a",
 		output:  "524d",
-		threats: []ThreatType{threatTypeUnspecified, threatTypeUnwantedSoftware},
+		threats: []ThreatType{ThreatTypeUnspecified, ThreatTypeUnwantedSoftware},
 	}, {
 		input:   "524dea307ba397754a35dcce0ee5f54a",
 		output:  "524d",
-		threats: []ThreatType{threatTypeUnspecified, threatTypeUnwantedSoftware},
+		threats: []ThreatType{ThreatTypeUnspecified, ThreatTypeUnwantedSoftware},
 	}, {
 		input:   "5c6655d2096dd9ffb3c9e2bd5f86798f",
 		output:  "5c6655d2",
-		threats: []ThreatType{threatTypeMalware},
+		threats: []ThreatType{ThreatTypeMalware},
 	}, {
 		input:   "5c6655d33db40718dad209613a1fd9dc",
 		output:  "5c6655d3",
-		threats: []ThreatType{threatTypeUnwantedSoftware},
+		threats: []ThreatType{ThreatTypeUnwantedSoftware},
 	}, {
 		input:   "1e25395a9b1b87db129a7d85ee7cc0fd",
 		output:  "1e25395a9b1b8",
-		threats: []ThreatType{threatTypeMalware, threatTypeSocialEngineering},
+		threats: []ThreatType{ThreatTypeMalware, ThreatTypeSocialEngineering},
 	}}
 
 	for i, v := range vectors {
@@ -588,7 +588,7 @@ func TestDatabasePersistence(t *testing.T) {
 	}, {
 		last: time.Unix(123456, 789),
 		tfu: threatsForUpdate{
-			threatTypeUnspecified: partialHashes{
+			ThreatTypeUnspecified: partialHashes{
 				SHA256: mustDecodeHex(t, "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"),
 			},
 		},
@@ -673,7 +673,7 @@ func TestDatabaseLoadErrors(t *testing.T) {
 
 func TestReady(t *testing.T) {
 	config := &Config{
-		ThreatLists: []ThreatType{threatTypeUnspecified},
+		ThreatLists: []ThreatType{ThreatTypeUnspecified},
 	}
 
 	db := new(database)

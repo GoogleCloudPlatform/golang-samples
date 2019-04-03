@@ -226,9 +226,9 @@ var (
 )
 
 var threatTemplate = map[webrisk.ThreatType]string{
-	webrisk.ThreatType_Malware:           "/malware.tmpl",
-	webrisk.ThreatType_UnwantedSoftware:  "/unwanted.tmpl",
-	webrisk.ThreatType_SocialEngineering: "/social_engineering.tmpl",
+	webrisk.ThreatTypeMalware:           "/malware.tmpl",
+	webrisk.ThreatTypeUnwantedSoftware:  "/unwanted.tmpl",
+	webrisk.ThreatTypeSocialEngineering: "/social_engineering.tmpl",
 }
 
 const usage = `wrserver: starts a Web Risk API proxy server.

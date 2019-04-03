@@ -112,18 +112,18 @@ func (tt ThreatType) String() string { return pb.ThreatType(tt).String() }
 
 // List of ThreatType constants.
 const (
-	threatTypeUnspecified       = ThreatType(pb.ThreatType_THREAT_TYPE_UNSPECIFIED)
-	threatTypeMalware           = ThreatType(pb.ThreatType_MALWARE)
-	threatTypeSocialEngineering = ThreatType(pb.ThreatType_SOCIAL_ENGINEERING)
-	threatTypeUnwantedSoftware  = ThreatType(pb.ThreatType_UNWANTED_SOFTWARE)
+	ThreatTypeUnspecified       = ThreatType(pb.ThreatType_THREAT_TYPE_UNSPECIFIED)
+	ThreatTypeMalware           = ThreatType(pb.ThreatType_MALWARE)
+	ThreatTypeSocialEngineering = ThreatType(pb.ThreatType_SOCIAL_ENGINEERING)
+	ThreatTypeUnwantedSoftware  = ThreatType(pb.ThreatType_UNWANTED_SOFTWARE)
 )
 
 // DefaultThreatLists is the default list of threat lists that WebriskClient
 // will maintain. Do not modify this variable.
 var DefaultThreatLists = []ThreatType{
-	threatTypeMalware,
-	threatTypeSocialEngineering,
-	threatTypeUnwantedSoftware,
+	ThreatTypeMalware,
+	ThreatTypeSocialEngineering,
+	ThreatTypeUnwantedSoftware,
 }
 
 // A URLThreat is a specialized ThreatType for the URL threat
