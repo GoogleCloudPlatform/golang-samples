@@ -16,7 +16,7 @@ package webrisk
 
 import (
 	"context"
-	"flag"
+	"os"
 	"testing"
 	"time"
 
@@ -27,14 +27,14 @@ import (
 // network requests against the Web Risk API servers. Thus, in order to
 // operate they need the user's API key. This can be specified using the -apikey
 // command-line flag when running the tests.
-var apiKeyFlag = flag.String("apikey", "", "specify your Web Risk API key")
+var apiKey = os.Getenv("WEBRISK_APIKEY")
 
 func TestNetworkAPIUpdate(t *testing.T) {
-	if *apiKeyFlag == "" {
+	if apiKey == "" {
 		t.Skip()
 	}
 
-	nm, err := newNetAPI(DefaultServerURL, *apiKeyFlag, "")
+	nm, err := newNetAPI(DefaultServerURL, apiKey, "")
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
@@ -69,11 +69,11 @@ func TestNetworkAPIUpdate(t *testing.T) {
 }
 
 func TestNetworkAPILookup(t *testing.T) {
-	if *apiKeyFlag == "" {
+	if apiKey == "" {
 		t.Skip()
 	}
 
-	nm, err := newNetAPI(DefaultServerURL, *apiKeyFlag, "")
+	nm, err := newNetAPI(DefaultServerURL, apiKey, "")
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
@@ -97,12 +97,12 @@ func TestNetworkAPILookup(t *testing.T) {
 }
 
 func TestWebriskClient(t *testing.T) {
-	if *apiKeyFlag == "" {
+	if apiKey == "" {
 		t.Skip()
 	}
 
 	sb, err := NewWebriskClient(Config{
-		APIKey:       *apiKeyFlag,
+		APIKey:       apiKey,
 		ID:           "GoWebriskClientSystemTest",
 		DBPath:       "/tmp/webriskClient.db",
 		UpdatePeriod: 10 * time.Second,

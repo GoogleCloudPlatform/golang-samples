@@ -15,8 +15,9 @@
 package webrisk
 
 import (
-	"sync"
+	"errors"
 	"time"
+	"sync"
 
 	pb "github.com/GoogleCloudPlatform/golang-samples/webrisk/internal/webrisk_proto"
 	pt "github.com/golang/protobuf/ptypes"
@@ -37,6 +38,10 @@ const (
 	// cacheMiss indicates that the given hash did not match any entry
 	// in the cache. The caller should make a follow-up query to the server.
 	cacheMiss
+
+	// cacheError indicates that there was an error while looking up an
+	// entry.
+	cacheError
 )
 
 // cache caches results from API calls to SearchHashesRequest to reduce
@@ -62,7 +67,7 @@ type cache struct {
 
 // Update updates the cache according to the request that was made to the server
 // and the response given back.
-func (c *cache) Update(req *pb.SearchHashesRequest, resp *pb.SearchHashesResponse) {
+func (c *cache) Update(req *pb.SearchHashesRequest, resp *pb.SearchHashesResponse) error {
 	c.Lock()
 	defer c.Unlock()
 
@@ -84,7 +89,7 @@ func (c *cache) Update(req *pb.SearchHashesRequest, resp *pb.SearchHashesRespons
 			var err error
 			c.pttls[fullHash][ThreatType(tt)], err = pt.Timestamp(threat.ExpireTime)
 			if err != nil {
-				panic("timestamp conversion error")
+				return errors.New("timestamp conversion error")
 			}
 		}
 	}
@@ -95,13 +100,14 @@ func (c *cache) Update(req *pb.SearchHashesRequest, resp *pb.SearchHashesRespons
 		partialHash := hashPrefix(req.HashPrefix)
 		c.nttls[partialHash] = nttl
 	}
+	return nil
 }
 
 // Lookup looks up a full hash and returns a set of ThreatTypes and the
 // validity of the result.
-func (c *cache) Lookup(hash hashPrefix) (map[ThreatType]bool, cacheResult) {
+func (c *cache) Lookup(hash hashPrefix) (map[ThreatType]bool, cacheResult){
 	if !hash.IsFull() {
-		panic("hash is not full")
+		return nil, cacheError
 	}
 
 	c.Lock()

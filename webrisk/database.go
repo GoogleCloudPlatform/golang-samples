@@ -57,22 +57,21 @@ const (
 //	* Check if the requested full hash matches any partial hash in tfl.
 //	If a match is found, return a set of ThreatTypes with a partial match.
 type database struct {
-	config *Config
+	ml  sync.RWMutex // Protects tfl, err, and last
+	// threatsForLookup maps ThreatTypes to sets of partial hashes.
+	// This data structure is in a format that is easily queried.
+	tfl threatsForLookup
+	err             error         // Last error encountered
+	last            time.Time     // Last time the threat list were synced
 
+	config *Config
 	// threatsForUpdate maps ThreatTypes to lists of partial hashes.
 	// This data structure is in a format that is easily updated by the API.
 	// It is also the form that is written to disk.
 	tfu threatsForUpdate
 	mu  sync.Mutex // Protects tfu
 
-	// threatsForLookup maps ThreatTypes to sets of partial hashes.
-	// This data structure is in a format that is easily queried.
-	tfl threatsForLookup
-	ml  sync.RWMutex // Protects tfl, err, and last
-
-	err             error         // Last error encountered
 	readyCh         chan struct{} // Used for waiting until not in an error state.
-	last            time.Time     // Last time the threat list were synced
 	updateAPIErrors uint          // Number of times we attempted to contact the api and failed
 
 	log *log.Logger
@@ -101,7 +100,8 @@ type databaseFormat struct {
 }
 
 // Init initializes the database from the specified file in config.DBPath.
-// It reports true if the database was successfully loaded.
+// It reports true if the database was successfully loaded. If it reports false
+// use Status for more details on the failure.
 func (db *database) Init(config *Config, logger *log.Logger) bool {
 	db.mu.Lock()
 	defer db.mu.Unlock()
@@ -313,10 +313,7 @@ func (db *database) setError(err error) {
 // Staleness is defined as being older than two of the configured update periods
 // plus jitter.
 func (db *database) isStale(lastUpdate time.Time) bool {
-	if db.config.now().Sub(lastUpdate) > 2*(db.config.UpdatePeriod+jitter) {
-		return true
-	}
-	return false
+	return db.config.now().Sub(lastUpdate) > 2*(db.config.UpdatePeriod+jitter)
 }
 
 // setStale sets the error state to a stale message, without clearing

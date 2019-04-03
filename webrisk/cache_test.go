@@ -215,7 +215,10 @@ func TestCacheUpdate(t *testing.T) {
 	}}
 
 	for i, v := range vectors {
-		v.gotCache.Update(v.req, v.resp)
+		err := v.gotCache.Update(v.req, v.resp)
+		if err != nil {
+			t.Fatalf("gotCache update returned unexpected error %v", err)
+		}
 		if !reflect.DeepEqual(v.wantCache.pttls, v.gotCache.pttls) {
 			t.Errorf("test %d, mismatching cache contents: PTTLS\ngot  %+v\nwant %+v", i, v.gotCache.pttls, v.wantCache.pttls)
 		}
