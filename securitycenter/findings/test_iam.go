@@ -20,49 +20,52 @@ package findings
 import (
 	"context"
 	"fmt"
-	"time"
+	"io"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
-	"github.com/golang/protobuf/ptypes"
-	structpb "github.com/golang/protobuf/ptypes/struct"
-	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
+	iam "google.golang.org/genproto/googleapis/iam/v1"
 )
 
-// updateFindingSourceProperties demonstrates how to update a security finding
-// in CSCC.  sourceName is the full resource name of the source the finding
-// should be associated with.  Returns the updated finding.
-func updateFindingState(sourceName string) (*securitycenterpb.Finding, error) {
+// testIam demonstrates how to determine if your service user has appropriate
+// access to create and update findings, it writes messages to w.
+// sourceName is the full resource name of the source the finding
+// should be associated with.
+func testIam(w io.Writer, sourceName string) error {
 	// sourceName := "organizations/111122222444/sources/1234"
 	// Instantiate a context and a security service client to make API calls.
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("Error instantiating client %v\n", err)
+		return fmt.Errorf("Error instantiating client %v\n", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
-	// Use now as the eventTime for the security finding.
-	now, err := ptypes.TimestampProto(time.Now())
-	if err != nil {
-		fmt.Printf("Error converting now: %v", err)
-		return nil, err
+	// Check for create/update Permissions.
+	req := &iam.TestIamPermissionsRequest{
+		Resource:    sourceName,
+		Permissions: []string{"securitycenter.findings.update"},
 	}
 
-	// Findings are a child resource of sources.
-	findingName := fmt.Sprintf("%s/findings/samplefindingprops", sourceName)
-	req := &securitycenterpb.SetFindingStateRequest{
-		Finding: &securitycenterpb.Finding{
-			Name:  findingName,
-			State: securitycenterpb.Finding_INACTIVE,
-			// New state is effective immediately.
-			StartTime: now,
-		},
+	policy, err := client.TestIamPermissions(ctx, req)
+	if err != nil {
+		return fmt.Errorf("Error getting IAM policy: %v", err)
+	}
+	fmt.Fprintf(w, "Permision to create/update findings? %t",
+		len(policy.Permissions) > 0)
+
+	// Check for updating state Permissions
+	req = &iam.TestIamPermissionsRequest{
+		Resource:    sourceName,
+		Permissions: []string{"securitycenter.findings.setState"},
 	}
 
-	finding, err := client.SetFindingState(ctx, req)
+	policy, err = client.TestIamPermissions(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("Error updating finding state: %v", err)
+		return fmt.Errorf("Error getting IAM policy: %v", err)
 	}
-	return finding, nil
+	fmt.Fprintf(w, "Permision to update state? %t",
+		len(policy.Permissions) > 0)
+
+	return nil
 }
 
 // [END test_iam]

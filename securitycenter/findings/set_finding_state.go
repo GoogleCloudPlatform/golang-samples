@@ -24,11 +24,10 @@ import (
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
 	"github.com/golang/protobuf/ptypes"
-	structpb "github.com/golang/protobuf/ptypes/struct"
 	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
 )
 
-// updateFindingSourceProperties demonstrates how to update a security finding
+// updateFindingState demonstrates how to update a security finding
 // in CSCC.  sourceName is the full resource name of the source the finding
 // should be associated with.  Returns the updated finding.
 func updateFindingState(sourceName string) (*securitycenterpb.Finding, error) {
@@ -50,12 +49,10 @@ func updateFindingState(sourceName string) (*securitycenterpb.Finding, error) {
 	// Findings are a child resource of sources.
 	findingName := fmt.Sprintf("%s/findings/samplefindingprops", sourceName)
 	req := &securitycenterpb.SetFindingStateRequest{
-		Finding: &securitycenterpb.Finding{
-			Name:  findingName,
-			State: securitycenterpb.Finding_INACTIVE,
-			// New state is effective immediately.
-			StartTime: now,
-		},
+		Name:  findingName,
+		State: securitycenterpb.Finding_INACTIVE,
+		// New state is effective immediately.
+		StartTime: now,
 	}
 
 	finding, err := client.SetFindingState(ctx, req)

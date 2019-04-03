@@ -26,6 +26,7 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	structpb "github.com/golang/protobuf/ptypes/struct"
 	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
+	"google.golang.org/genproto/protobuf/field_mask"
 )
 
 // updateFindingSourceProperties demonstrates how to update a security finding
