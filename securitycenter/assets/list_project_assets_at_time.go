@@ -64,12 +64,11 @@ func listAllProjectAssetsAtTime(w io.Writer, orgID string, asOf time.Time) (int,
 		if err != nil {
 			return -1, fmt.Errorf("Error listing assets: %v", err)
 		}
-		asset := &result.Asset
-		properties := &(*asset).SecurityCenterProperties
-		fmt.Fprintf(w, "Asset Name: %s, Resource Name %s, Resource Type %s\n",
-			(*asset).Name,
-			(*properties).ResourceName,
-			(*properties).ResourceType)
+		asset := result.Asset
+		properties := asset.SecurityCenterProperties
+		fmt.Fprintf(w, "Asset Name: %s,", asset.Name)
+		fmt.Fprintf(w, "Resource Name %s,", properties.ResourceName)
+		fmt.Fprintf(w, "Resource Type %s\n", properties.ResourceType)
 		assetsFound++
 	}
 	return assetsFound, nil
