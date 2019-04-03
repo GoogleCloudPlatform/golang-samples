@@ -15,7 +15,7 @@
 package webrisk
 
 import (
-	"errors"
+	"fmt"
 	"time"
 	"sync"
 
@@ -89,7 +89,7 @@ func (c *cache) Update(req *pb.SearchHashesRequest, resp *pb.SearchHashesRespons
 			var err error
 			c.pttls[fullHash][ThreatType(tt)], err = pt.Timestamp(threat.ExpireTime)
 			if err != nil {
-				return errors.New("timestamp conversion error")
+				return fmt.Errorf("pt.Timestamp: %v", err)
 			}
 		}
 	}

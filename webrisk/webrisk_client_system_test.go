@@ -106,7 +106,7 @@ func TestWebriskClient(t *testing.T) {
 		ID:           "GoWebriskClientSystemTest",
 		DBPath:       "/tmp/webriskClient.db",
 		UpdatePeriod: 10 * time.Second,
-		ThreatLists: []ThreatType{ThreatType_Malware},
+		ThreatLists: []ThreatType{threatTypeMalware},
 	})
 	if err != nil {
 		t.Fatal(err)
