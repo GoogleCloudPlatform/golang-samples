@@ -24,7 +24,6 @@ import (
 	"strings"
 
 	pb "github.com/GoogleCloudPlatform/golang-samples/webrisk/internal/webrisk_proto"
-
 	"github.com/golang/protobuf/proto"
 )
 

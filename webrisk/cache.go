@@ -20,8 +20,6 @@ import (
 
 	pb "github.com/GoogleCloudPlatform/golang-samples/webrisk/internal/webrisk_proto"
 	pt "github.com/golang/protobuf/ptypes"
-
-
 )
 
 type cacheResult int
