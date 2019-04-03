@@ -76,6 +76,7 @@ var (
 		"dmlwritetxn":                writeWithTransactionUsingDML,
 		"dmlupdatepart":              updateUsingPartitionedDML,
 		"dmldeletepart":              deleteUsingPartitionedDML,
+		"dmlbatchupdate":             updateUsingBatchDML,
 	}
 
 	adminCommands = map[string]adminCommand{
@@ -1208,6 +1209,30 @@ func deleteUsingPartitionedDML(ctx context.Context, w io.Writer, client *spanner
 
 // [END spanner_dml_partitioned_delete]
 
+// [START spanner_dml_batch_update]
+
+func updateUsingBatchDML(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	_, err := client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
+		stmts := []spanner.Statement{
+			{SQL: `INSERT INTO Albums
+				(SingerId, AlbumId, AlbumTitle, MarketingBudget)
+				VALUES (1, 3, 'Test Album Title', 10000)`},
+			{SQL: `UPDATE Albums
+				SET MarketingBudget = MarketingBudget * 2
+				WHERE SingerId = 1 and AlbumId = 3`},
+		}
+		rowCounts, err := txn.BatchUpdate(ctx, stmts)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "Executed %d SQL statements using Batch DML.\n", len(rowCounts))
+		return nil
+	})
+	return err
+}
+
+// [END spanner_dml_batch_update]
+
 func queryNewTable(ctx context.Context, w io.Writer, client *spanner.Client) error {
 	stmt := spanner.Statement{
 		SQL: `SELECT SingerId, VenueId, EventDate, Revenue, LastUpdateTime FROM Performances
@@ -1476,7 +1501,8 @@ func main() {
 		updatedocstable, querydocstable, createtabledocswithhistorytable, writewithhistory,
 		updatewithhistory, querywithhistory, writestructdata, querywithstruct, querywitharrayofstruct,
 		querywithstructfield, querywithnestedstructfield, dmlinsert, dmlupdate, dmldelete,
-		dmlwithtimestamp, dmlwriteread, dmlwrite, dmlwritetxn, dmlupdatepart, dmldeletepart
+		dmlwithtimestamp, dmlwriteread, dmlwrite, dmlwritetxn, dmlupdatepart, dmldeletepart,
+		dmlbatchupdate
 
 Examples:
 	spanner_snippets createdatabase projects/my-project/instances/my-instance/databases/example-db

@@ -32,8 +32,7 @@ func customRankingSearch(w io.Writer, projectID, companyID string) error {
 	// Initialize a jobService client.
 	c, err := talent.NewJobClient(ctx)
 	if err != nil {
-		fmt.Printf("talent.NewJobClient: %v\n", err)
-		return err
+		return fmt.Errorf("taleng.NewJobClient: %v", err)
 	}
 
 	// Construct a searchJobs request.
@@ -50,7 +49,7 @@ func customRankingSearch(w io.Writer, projectID, companyID string) error {
 			Domain: "www.googlesample.com",
 		},
 		JobQuery: &talentpb.JobQuery{
-			CompanyNames: []string{fmt.Sprintf("projects/%s/companies/%s", projectID, companyID)},
+			Companies: []string{fmt.Sprintf("projects/%s/companies/%s", projectID, companyID)},
 		},
 		// More info on customRankingInfo.
 		// https://godoc.org/google.golang.org/genproto/googleapis/cloud/talent/v4beta1#SearchJobsRequest_CustomRankingInfo
@@ -66,12 +65,10 @@ func customRankingSearch(w io.Writer, projectID, companyID string) error {
 	for {
 		resp, err := it.Next()
 		if err == iterator.Done {
-			fmt.Printf("Done.\n")
 			return nil
 		}
 		if err != nil {
-			fmt.Printf("it.Next: %v\n", err)
-			return err
+			return fmt.Errorf("it.Next: %v", err)
 		}
 		fmt.Fprintf(w, "Job: %q\n", resp.Job.GetName())
 	}
