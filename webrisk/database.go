@@ -57,12 +57,12 @@ const (
 //	* Check if the requested full hash matches any partial hash in tfl.
 //	If a match is found, return a set of ThreatTypes with a partial match.
 type database struct {
-	ml  sync.RWMutex // Protects tfl, err, and last
+	ml sync.RWMutex // Protects tfl, err, and last
 	// threatsForLookup maps ThreatTypes to sets of partial hashes.
 	// This data structure is in a format that is easily queried.
-	tfl threatsForLookup
-	err             error         // Last error encountered
-	last            time.Time     // Last time the threat list were synced
+	tfl  threatsForLookup
+	err  error     // Last error encountered
+	last time.Time // Last time the threat list were synced
 
 	config *Config
 	// threatsForUpdate maps ThreatTypes to lists of partial hashes.
@@ -199,8 +199,8 @@ func (db *database) Update(ctx context.Context, api api) (time.Duration, bool) {
 			state = row.State
 		}
 
-		s = append(s, &pb.ComputeThreatListDiffRequest {
-			ThreatType:      pb.ThreatType(td),
+		s = append(s, &pb.ComputeThreatListDiffRequest{
+			ThreatType: pb.ThreatType(td),
 			Constraints: &pb.ComputeThreatListDiffRequest_Constraints{
 				SupportedCompressions: db.config.compressionTypes},
 			VersionToken: state,
@@ -229,7 +229,7 @@ func (db *database) Update(ctx context.Context, api api) (time.Duration, bool) {
 		}
 		resps = append(resps, resp)
 		if resp.RecommendedNextDiff != nil {
-			ndiff, _ :=pt.Timestamp(resp.RecommendedNextDiff)
+			ndiff, _ := pt.Timestamp(resp.RecommendedNextDiff)
 			serverMinWait := time.Duration(ndiff.Sub(time.Now()))
 			if serverMinWait > nextUpdateWait {
 				nextUpdateWait = serverMinWait
@@ -237,7 +237,6 @@ func (db *database) Update(ctx context.Context, api api) (time.Duration, bool) {
 			}
 		}
 	}
-
 
 	// If for some reason we missed a request or didn't get a response the
 	// rest of the logic may fail.
@@ -472,52 +471,52 @@ func (tfu threatsForUpdate) update(resp *pb.ComputeThreatListDiffResponse, td Th
 				removalQuantity += int(resp.Removals.RiceIndices.EntryCount)
 			}
 		}
-	switch resp.ResponseType {
-	case pb.ComputeThreatListDiffResponse_DIFF:
-		if !ok {
-			return errors.New("webrisk: partial update received for non-existent key")
-		}
-	case pb.ComputeThreatListDiffResponse_RESET:
-		if removalQuantity > 0 {
-			return errors.New("webrisk: indices to be removed included in a full update")
-		}
-	default:
-		return errors.New("webrisk: unknown response type")
-	}
-
-	// Hashes must be sorted for removal logic to work properly.
-	phs.Hashes.Sort()
-
-	idxs, err := decodeIndices(resp.Removals)
-	if err != nil {
-		return err
-	}
-
-	for _, i := range idxs {
-		if i < 0 || i >= int32(len(phs.Hashes)) {
-			return errors.New("webrisk: invalid removal index")
-		}
-		phs.Hashes[i] = ""
-	}
-
-	// If any removal was performed, compact the list of hashes.
-	if removalQuantity > 0 {
-		compactHashes := phs.Hashes[:0]
-		for _, h := range phs.Hashes {
-			if h != "" {
-				compactHashes = append(compactHashes, h)
+		switch resp.ResponseType {
+		case pb.ComputeThreatListDiffResponse_DIFF:
+			if !ok {
+				return errors.New("webrisk: partial update received for non-existent key")
 			}
+		case pb.ComputeThreatListDiffResponse_RESET:
+			if removalQuantity > 0 {
+				return errors.New("webrisk: indices to be removed included in a full update")
+			}
+		default:
+			return errors.New("webrisk: unknown response type")
 		}
-		phs.Hashes = compactHashes
-	}
+
+		// Hashes must be sorted for removal logic to work properly.
+		phs.Hashes.Sort()
+
+		idxs, err := decodeIndices(resp.Removals)
+		if err != nil {
+			return err
+		}
+
+		for _, i := range idxs {
+			if i < 0 || i >= int32(len(phs.Hashes)) {
+				return errors.New("webrisk: invalid removal index")
+			}
+			phs.Hashes[i] = ""
+		}
+
+		// If any removal was performed, compact the list of hashes.
+		if removalQuantity > 0 {
+			compactHashes := phs.Hashes[:0]
+			for _, h := range phs.Hashes {
+				if h != "" {
+					compactHashes = append(compactHashes, h)
+				}
+			}
+			phs.Hashes = compactHashes
+		}
 	}
 
 	if resp.Additions != nil {
 
-	hashes, err := decodeHashes(resp.Additions)
-	if err != nil {
-		return err
-	}
+		hashes, err := decodeHashes(resp.Additions)
+		if err != nil {
+			return err
+		}
 		phs.Hashes = append(phs.Hashes, hashes...)
 	}
 

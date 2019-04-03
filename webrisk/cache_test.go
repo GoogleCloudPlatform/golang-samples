@@ -19,8 +19,8 @@ import (
 	"testing"
 	"time"
 
-	pt "github.com/golang/protobuf/ptypes"
 	pb "github.com/GoogleCloudPlatform/golang-samples/webrisk/internal/webrisk_proto"
+	pt "github.com/golang/protobuf/ptypes"
 )
 
 func TestCacheLookup(t *testing.T) {
@@ -185,14 +185,14 @@ func TestCacheUpdate(t *testing.T) {
 		},
 	}, {
 		req: &pb.SearchHashesRequest{
-				ThreatTypes:      []pb.ThreatType{0, 1, 2},
-				HashPrefix: []byte("aaaa"),
-			},
+			ThreatTypes: []pb.ThreatType{0, 1, 2},
+			HashPrefix:  []byte("aaaa"),
+		},
 		resp: &pb.SearchHashesResponse{
 			Threats: []*pb.SearchHashesResponse_ThreatHash{{
-				ThreatTypes:      []pb.ThreatType{0, 1, 2},
-				Hash: []byte("aaaabbbbccccddddeeeeffffgggghhhh"),
-				ExpireTime:   ts,
+				ThreatTypes: []pb.ThreatType{0, 1, 2},
+				Hash:        []byte("aaaabbbbccccddddeeeeffffgggghhhh"),
+				ExpireTime:  ts,
 			}},
 			NegativeExpireTime: ts,
 		},

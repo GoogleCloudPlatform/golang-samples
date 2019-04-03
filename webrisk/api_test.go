@@ -67,13 +67,13 @@ func TestNetAPI(t *testing.T) {
 
 	// Test that ListUpdate marshal/unmarshal works.
 	wantReq = &pb.ComputeThreatListDiffRequest{
-			ThreatType: pb.ThreatType_MALWARE,
-			Constraints: &pb.ComputeThreatListDiffRequest_Constraints{
-				SupportedCompressions: []pb.CompressionType{1, 2, 3}},
+		ThreatType: pb.ThreatType_MALWARE,
+		Constraints: &pb.ComputeThreatListDiffRequest_Constraints{
+			SupportedCompressions: []pb.CompressionType{1, 2, 3}},
 	}
 	wantResp = &pb.ComputeThreatListDiffResponse{
 		ResponseType: 1,
-		Checksum: &pb.ComputeThreatListDiffResponse_Checksum{Sha256: []byte("abcd")},
+		Checksum:     &pb.ComputeThreatListDiffResponse_Checksum{Sha256: []byte("abcd")},
 		Removals: &pb.ThreatEntryRemovals{
 			RawIndices: &pb.RawIndices{Indices: []int32{1, 2, 3}},
 		},
@@ -93,12 +93,12 @@ func TestNetAPI(t *testing.T) {
 
 	// Test that HashLookup marshal/unmarshal works.
 	wantReq = &pb.SearchHashesRequest{
-		HashPrefix: []byte("aaaa"),
-		ThreatTypes:      []pb.ThreatType{1, 2, 3},
+		HashPrefix:  []byte("aaaa"),
+		ThreatTypes: []pb.ThreatType{1, 2, 3},
 	}
 	wantResp = &pb.SearchHashesResponse{Threats: []*pb.SearchHashesResponse_ThreatHash{{
-			ThreatTypes: []pb.ThreatType{pb.ThreatType_MALWARE},
-			Hash: []byte("abcd")}}}
+		ThreatTypes: []pb.ThreatType{pb.ThreatType_MALWARE},
+		Hash:        []byte("abcd")}}}
 	gotReq = &pb.SearchHashesRequest{}
 	resp2, err := api.HashLookup(context.Background(), wantReq.(*pb.SearchHashesRequest))
 	gotResp = resp2
@@ -114,12 +114,12 @@ func TestNetAPI(t *testing.T) {
 
 	// Test canceled Context returns an error.
 	wantReq = &pb.SearchHashesRequest{
-		HashPrefix: []byte("aaaa"),
-		ThreatTypes:      []pb.ThreatType{1, 2, 3},
-		}
+		HashPrefix:  []byte("aaaa"),
+		ThreatTypes: []pb.ThreatType{1, 2, 3},
+	}
 	wantResp = &pb.SearchHashesResponse{Threats: []*pb.SearchHashesResponse_ThreatHash{{
 		ThreatTypes: []pb.ThreatType{pb.ThreatType_MALWARE},
-		 Hash: []byte("abcd")},
+		Hash:        []byte("abcd")},
 	}}
 	gotReq = &pb.SearchHashesRequest{}
 	ctx, cancel := context.WithCancel(context.Background())

@@ -40,8 +40,8 @@ func TestNetworkAPIUpdate(t *testing.T) {
 	}
 
 	req := &pb.ComputeThreatListDiffRequest{
-			ThreatType:      pb.ThreatType_MALWARE,
-		}
+		ThreatType: pb.ThreatType_MALWARE,
+	}
 
 	dat, err := nm.ListUpdate(context.Background(), req)
 	if err != nil {
@@ -55,8 +55,8 @@ func TestNetworkAPIUpdate(t *testing.T) {
 	for i := 0; i < len(hashes) && i < 10; i++ {
 		hash := hashes[i]
 		fullHashReq := &pb.SearchHashesRequest{
-				ThreatTypes:      []pb.ThreatType{pb.ThreatType_MALWARE},
-				HashPrefix: []byte(hash),
+			ThreatTypes: []pb.ThreatType{pb.ThreatType_MALWARE},
+			HashPrefix:  []byte(hash),
 		}
 		fullHashResp, err := nm.HashLookup(context.Background(), fullHashReq)
 		if err != nil {
@@ -79,13 +79,13 @@ func TestNetworkAPILookup(t *testing.T) {
 	}
 
 	var c = pb.ComputeThreatListDiffRequest{
-		ThreatType:      pb.ThreatType_MALWARE,
+		ThreatType: pb.ThreatType_MALWARE,
 	}
 	url := "http://testwebrisk | w.appspot.com/apiv4/ANY_PLATFORM/MALWARE/URL/"
 	hash := hashFromPattern(url)
 	req := &pb.SearchHashesRequest{
-			ThreatTypes:      []pb.ThreatType{c.ThreatType},
-			HashPrefix: []byte(hash[:minHashPrefixLength]),
+		ThreatTypes: []pb.ThreatType{c.ThreatType},
+		HashPrefix:  []byte(hash[:minHashPrefixLength]),
 	}
 	resp, err := nm.HashLookup(context.Background(), req)
 	if err != nil {
@@ -106,7 +106,7 @@ func TestWebriskClient(t *testing.T) {
 		ID:           "GoWebriskClientSystemTest",
 		DBPath:       "/tmp/webriskClient.db",
 		UpdatePeriod: 10 * time.Second,
-		ThreatLists: []ThreatType{threatTypeMalware},
+		ThreatLists:  []ThreatType{threatTypeMalware},
 	})
 	if err != nil {
 		t.Fatal(err)

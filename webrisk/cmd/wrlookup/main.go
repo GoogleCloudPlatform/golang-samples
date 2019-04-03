@@ -33,8 +33,8 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"os"
 	"github.com/GoogleCloudPlatform/golang-samples/webrisk"
+	"os"
 )
 
 var (

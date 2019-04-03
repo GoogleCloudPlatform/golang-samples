@@ -112,12 +112,11 @@ func (tt ThreatType) String() string { return pb.ThreatType(tt).String() }
 
 // List of ThreatType constants.
 const (
-	threatTypeUnspecified			 = ThreatType(pb.ThreatType_THREAT_TYPE_UNSPECIFIED)
-	threatTypeMalware                       = ThreatType(pb.ThreatType_MALWARE)
-	threatTypeSocialEngineering             = ThreatType(pb.ThreatType_SOCIAL_ENGINEERING)
-	threatTypeUnwantedSoftware              = ThreatType(pb.ThreatType_UNWANTED_SOFTWARE)
+	threatTypeUnspecified       = ThreatType(pb.ThreatType_THREAT_TYPE_UNSPECIFIED)
+	threatTypeMalware           = ThreatType(pb.ThreatType_MALWARE)
+	threatTypeSocialEngineering = ThreatType(pb.ThreatType_SOCIAL_ENGINEERING)
+	threatTypeUnwantedSoftware  = ThreatType(pb.ThreatType_UNWANTED_SOFTWARE)
 )
-
 
 // DefaultThreatLists is the default list of threat lists that WebriskClient
 // will maintain. Do not modify this variable.
@@ -414,7 +413,7 @@ func (sb *WebriskClient) LookupURLsContext(ctx context.Context, urls []string) (
 				for _, td := range unsureThreats {
 					if _, ok := cachedThreats[td]; ok {
 						threats[i] = append(threats[i], URLThreat{
-							Pattern:          pattern,
+							Pattern:    pattern,
 							ThreatType: td,
 						})
 					}
@@ -439,8 +438,8 @@ func (sb *WebriskClient) LookupURLsContext(ctx context.Context, urls []string) (
 					tts = append(tts, pb.ThreatType(tt))
 				}
 
-				reqs = append(reqs, &pb.SearchHashesRequest {
-					HashPrefix: []byte(partialHash),
+				reqs = append(reqs, &pb.SearchHashesRequest{
+					HashPrefix:  []byte(partialHash),
 					ThreatTypes: tts,
 				})
 			}
@@ -474,7 +473,7 @@ func (sb *WebriskClient) LookupURLsContext(ctx context.Context, urls []string) (
 					}
 					for _, idx := range idxs {
 						threats[idx] = append(threats[idx], URLThreat{
-							Pattern:          pattern,
+							Pattern:    pattern,
 							ThreatType: ThreatType(td),
 						})
 					}

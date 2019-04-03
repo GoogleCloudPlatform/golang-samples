@@ -16,8 +16,8 @@ package webrisk
 
 import (
 	"fmt"
-	"time"
 	"sync"
+	"time"
 
 	pb "github.com/GoogleCloudPlatform/golang-samples/webrisk/internal/webrisk_proto"
 	pt "github.com/golang/protobuf/ptypes"
@@ -105,7 +105,7 @@ func (c *cache) Update(req *pb.SearchHashesRequest, resp *pb.SearchHashesRespons
 
 // Lookup looks up a full hash and returns a set of ThreatTypes and the
 // validity of the result.
-func (c *cache) Lookup(hash hashPrefix) (map[ThreatType]bool, cacheResult){
+func (c *cache) Lookup(hash hashPrefix) (map[ThreatType]bool, cacheResult) {
 	if !hash.IsFull() {
 		return nil, cacheError
 	}

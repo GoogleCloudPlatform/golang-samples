@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -28,7 +29,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-	"fmt"
 
 	pb "github.com/GoogleCloudPlatform/golang-samples/webrisk/internal/webrisk_proto"
 	pt "github.com/golang/protobuf/ptypes"
@@ -109,7 +109,7 @@ func TestDatabaseInit(t *testing.T) {
 			},
 			tfl: threatsForLookup{
 				threatTypeUnspecified: newHashSet([]hashPrefix{"aaaa", "bbbb"}),
-				threatTypeMalware: newHashSet([]hashPrefix{"bbbb", "cccc"}),
+				threatTypeMalware:     newHashSet([]hashPrefix{"bbbb", "cccc"}),
 			},
 		},
 	}, {
@@ -150,7 +150,7 @@ func TestDatabaseInit(t *testing.T) {
 			},
 			tfl: threatsForLookup{
 				threatTypeUnspecified: newHashSet([]hashPrefix{"aaaa", "bbbb"}),
-				threatTypeMalware: newHashSet([]hashPrefix{"bbbb", "cccc"}),
+				threatTypeMalware:     newHashSet([]hashPrefix{"bbbb", "cccc"}),
 			},
 		},
 	}, {
@@ -296,12 +296,12 @@ func TestDatabaseUpdate(t *testing.T) {
 	newResp := func(td ThreatType, rtype int, dels []int32, adds []string, state string, chksum string) pb.ComputeThreatListDiffResponse {
 		resp := pb.ComputeThreatListDiffResponse{
 			ResponseType:    pb.ComputeThreatListDiffResponse_ResponseType(rtype),
-			NewVersionToken:  []byte(state),
+			NewVersionToken: []byte(state),
 			Checksum:        &pb.ComputeThreatListDiffResponse_Checksum{Sha256: mustDecodeHex(t, chksum)},
 		}
 		if dels != nil {
 			resp.Removals = &pb.ThreatEntryRemovals{
-				RawIndices:      &pb.RawIndices{Indices: dels},
+				RawIndices: &pb.RawIndices{Indices: dels},
 			}
 		}
 		if adds != nil {
@@ -313,9 +313,9 @@ func TestDatabaseUpdate(t *testing.T) {
 			for n, hs := range bySize {
 				sort.Strings(hs)
 				resp.Additions.RawHashes = append(resp.Additions.RawHashes, &pb.RawHashes{
-						PrefixSize: int32(n),
-						RawHashes:  []byte(strings.Join(hs, "")),
-						})
+					PrefixSize: int32(n),
+					RawHashes:  []byte(strings.Join(hs, "")),
+				})
 			}
 		}
 		return resp
@@ -341,7 +341,7 @@ func TestDatabaseUpdate(t *testing.T) {
 	// Update 0: partial update on empty database.
 	now = now.Add(time.Hour)
 	resp = newResp(threatTypeMalware, partial, []int32{0, 1, 2, 3}, nil,
-				"d0", "0000000000000000000000000000000000000000000000000000000000000000")
+		"d0", "0000000000000000000000000000000000000000000000000000000000000000")
 	delay, updated := db.Update(context.Background(), mockAPI)
 	if db.err == nil || updated {
 		t.Fatalf("update 0, unexpected update success")
@@ -355,7 +355,7 @@ func TestDatabaseUpdate(t *testing.T) {
 	// Update 1: full update to all values.
 	now = now.Add(time.Hour)
 	resp = newResp(threatTypeMalware, full, nil, []string{"aaaa", "0421e", "666666", "7777777", "88888888"},
-			"d1", "a3b93fac424834c2447e2dbe5db3ec8553519777523907ea310e207f556a7637")
+		"d1", "a3b93fac424834c2447e2dbe5db3ec8553519777523907ea310e207f556a7637")
 	ts, _ := pt.TimestampProto(time.Now().Add(2000 * time.Second))
 	resp.RecommendedNextDiff = ts
 
@@ -390,7 +390,7 @@ func TestDatabaseUpdate(t *testing.T) {
 	// Update 2: partial update with no changes.
 	now = now.Add(time.Hour)
 	resp = newResp(threatTypeMalware, partial, nil, nil,
-				"d1", "a3b93fac424834c2447e2dbe5db3ec8553519777523907ea310e207f556a7637")
+		"d1", "a3b93fac424834c2447e2dbe5db3ec8553519777523907ea310e207f556a7637")
 	delay, updated = db.Update(context.Background(), mockAPI)
 	if db.err != nil || !updated {
 		t.Fatalf("update 2, unexpected update error: %v", db.err)
@@ -410,7 +410,7 @@ func TestDatabaseUpdate(t *testing.T) {
 	// Update 3: full update and partial update with removals and additions.
 	now = now.Add(time.Hour)
 	resp = newResp(threatTypeMalware, full, nil, []string{"AAAA", "0421E"},
-			"d2", "b742965b7a759ba0254685bfc6edae3b1ba54d0168fb86f526d6c79c3d44c753")
+		"d2", "b742965b7a759ba0254685bfc6edae3b1ba54d0168fb86f526d6c79c3d44c753")
 	delay, updated = db.Update(context.Background(), mockAPI)
 	if db.err != nil || !updated {
 		t.Fatalf("update 3, unexpected update error: %v", db.err)
@@ -457,7 +457,7 @@ func TestDatabaseUpdate(t *testing.T) {
 	// Update 5: removal index is out-of-bounds.
 	now = now.Add(time.Hour)
 	resp = newResp(threatTypeUnspecified, partial, []int32{9000}, []string{"fizz", "buzz"},
-			"a4", "5d6506974928a003d2a0ccbd7a40b5341ad10578fd3f54527087c5ecbbd17a12")
+		"a4", "5d6506974928a003d2a0ccbd7a40b5341ad10578fd3f54527087c5ecbbd17a12")
 	delay, updated = db.Update(context.Background(), mockAPI)
 	if db.err == nil || updated {
 		t.Fatalf("update 5, unexpected update success")

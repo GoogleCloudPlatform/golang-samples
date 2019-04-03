@@ -158,7 +158,7 @@ func (hs *hashSet) Lookup(h hashPrefix) int {
 func decodeHashes(input *pb.ThreatEntryAdditions) ([]hashPrefix, error) {
 	var output []hashPrefix
 	if input.RawHashes != nil {
-		for _, raw := range input.GetRawHashes(){
+		for _, raw := range input.GetRawHashes() {
 			if raw == nil {
 				return nil, errors.New("webrisk: nil raw hashes")
 			}
@@ -218,7 +218,6 @@ func decodeIndices(input *pb.ThreatEntryRemovals) ([]int32, error) {
 	}
 	return ind, nil
 }
-
 
 // decodeRiceIntegers decodes a list of Golomb-Rice encoded integers.
 func decodeRiceIntegers(rice *pb.RiceDeltaEncoding) ([]uint32, error) {

@@ -201,16 +201,16 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/webrisk"
 	pb "github.com/GoogleCloudPlatform/golang-samples/webrisk/internal/webrisk_proto"
 
+	_ "github.com/GoogleCloudPlatform/golang-samples/webrisk/cmd/wrserver/statik"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
-	_ "github.com/GoogleCloudPlatform/golang-samples/webrisk/cmd/wrserver/statik"
 	"github.com/rakyll/statik/fs"
 )
 
 const (
-	statusPath         = "/status"
-	findThreatPath     = "/v1beta1/uris:search"
-	redirectPath       = "/r"
+	statusPath     = "/status"
+	findThreatPath = "/v1beta1/uris:search"
+	redirectPath   = "/r"
 )
 
 const (
@@ -226,9 +226,9 @@ var (
 )
 
 var threatTemplate = map[webrisk.ThreatType]string{
-	webrisk.ThreatType_Malware:                       "/malware.tmpl",
-	webrisk.ThreatType_UnwantedSoftware:              "/unwanted.tmpl",
-	webrisk.ThreatType_SocialEngineering:             "/social_engineering.tmpl",
+	webrisk.ThreatType_Malware:           "/malware.tmpl",
+	webrisk.ThreatType_UnwantedSoftware:  "/unwanted.tmpl",
+	webrisk.ThreatType_SocialEngineering: "/social_engineering.tmpl",
 }
 
 const usage = `wrserver: starts a Web Risk API proxy server.
