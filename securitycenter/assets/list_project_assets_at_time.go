@@ -44,8 +44,7 @@ func listAllProjectAssetsAtTime(w io.Writer, orgID string, asOf time.Time) (int,
 	// Convert the time to a Timestamp protobuf
 	readTime, err := ptypes.TimestampProto(asOf)
 	if err != nil {
-		fmt.Printf("Error converting %v: %v", asOf, err)
-		return 0, err
+		return 0, fmt.Errorf("Error converting %v: %v", asOf, err)
 	}
 
 	req := &securitycenterpb.ListAssetsRequest{
