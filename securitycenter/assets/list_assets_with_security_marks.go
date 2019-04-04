@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Pacakge assets contains example snippets for listing CSCC Assets.
+// assets contains example snippets for working with CSCC Assets.
 package assets
 
 // [START list_assets_with_security_marks]

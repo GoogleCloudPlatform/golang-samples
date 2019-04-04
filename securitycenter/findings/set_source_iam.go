@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // Pacakge assets contains example snippets for working with findings
-// and there parent resource "sources".
+// and their parent resource "sources".
 package findings
 
 // [START set_iam_policy_source]

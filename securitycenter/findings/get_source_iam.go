@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // findings  contains example snippets for working with findings
-// and there parent resource "sources".
+// and their parent resource "sources".
 package findings
 
 // [START get_iam_policy_source]
