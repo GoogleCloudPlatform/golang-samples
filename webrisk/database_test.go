@@ -636,7 +636,9 @@ func TestDatabaseSaveErrors(t *testing.T) {
 	}
 
 	if err := saveDatabase(path, databaseFormat{}); err == nil {
-		t.Errorf("unexpected save success")
+		fileInfo, _ := os.Stat(path)
+		fileMode := fileInfo.Mode()
+		t.Errorf("unexpected save success on file %s, with permissions %d", path, fileMode)
 	}
 }
 
