@@ -12,11 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// findings contains example snippets for working with findings
-// and there parent resource "sources".
-package findings
+// Pacakge assets contains example snippets for listing CSCC Assets.
+package assets
 
-// [START list_findings_with_marks]
+// [START list_assets_with_security_marks]
 import (
 	"context"
 	"fmt"
@@ -27,12 +26,11 @@ import (
 	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
 )
 
-// listFindingsWithMarks prints findings that don't have a security mark
-// finding_key_a equal to value_a to w.  It returns the count of findings
-// encountered.  sourceName is the full resource name of the source to search
-// for findings under.
-func listFindingsWithMarks(w io.Writer, sourceName string) (int, error) {
-	// sourceName := "organizations/111122222444/sources/1234"
+// listAssetsWithMarks prints assets that have a mark of key_a equal to value_a
+// to w for orgID and returns the number of assets found.  orgID is the numeric
+// Organization ID.
+func listAssetsWithMarks(w io.Writer, orgID string) (int, error) {
+	// orgID := "12321311"
 	// Instantiate a context and a security service client to make API calls.
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
@@ -41,27 +39,29 @@ func listFindingsWithMarks(w io.Writer, sourceName string) (int, error) {
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
-	req := &securitycenterpb.ListFindingsRequest{
-		Parent: sourceName,
-		Filter: `NOT security_marks.marks.finding_key_a="value_a"`,
+	req := &securitycenterpb.ListAssetsRequest{
+		Parent: fmt.Sprintf("organizations/%s", orgID),
+		Filter: `security_marks.marks.key_a = "value_a"`,
 	}
-	findingsFound := 0
-	it := client.ListFindings(ctx, req)
+
+	assetsFound := 0
+	it := client.ListAssets(ctx, req)
 	for {
-		findingResult, err := it.Next()
+		result, err := it.Next()
 		if err == iterator.Done {
 			break
 		}
 		if err != nil {
-			return -1, fmt.Errorf("Error listing sources: %v", err)
+			return -1, fmt.Errorf("Error listing assets: %v", err)
 		}
-		finding := findingResult.Finding
-		fmt.Fprintf(w, "Finding Name: %s, ", finding.Name)
-		fmt.Fprintf(w, "Resource Name %s, ", finding.ResourceName)
-		fmt.Fprintf(w, "Category: %s\n", finding.Category)
-		findingsFound++
+		asset := result.Asset
+		properties := asset.SecurityCenterProperties
+		fmt.Fprintf(w, "Asset Name: %s, ", asset.Name)
+		fmt.Fprintf(w, "Resource Name %s, ", properties.ResourceName)
+		fmt.Fprintf(w, "Resource Type %s\n", properties.ResourceType)
+		assetsFound++
 	}
-	return findingsFound, nil
+	return assetsFound, nil
 }
 
-// [END list_findings_with_marks]
+// [END list_assets_with_security_marks]
