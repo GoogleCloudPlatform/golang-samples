@@ -19,21 +19,22 @@ package assets
 import (
 	"context"
 	"fmt"
+	"io"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
 	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
 	"google.golang.org/genproto/protobuf/field_mask"
 )
 
-// deleteSecurityMarks deletes security marks "key_a" and  "key_b" from assetName,
-// and returns the update marks.  assetName is the resource path for an asset.
-func deleteSecurityMarks(assetName string) (*securitycenterpb.SecurityMarks, error) {
+// deleteSecurityMarks deletes security marks "key_a" and  "key_b" from
+// assetName's marks.  assetName is the resource path for an asset.
+func deleteSecurityMarks(w io.Writer, assetName string) error {
 	// assetName := "organizations/123123342/assets/12312321"
 	// Instantiate a context and a security service client to make API calls.
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("Error instantiating client %v\n", err)
+		return fmt.Errorf("Error instantiating client %v\n", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
@@ -48,7 +49,16 @@ func deleteSecurityMarks(assetName string) (*securitycenterpb.SecurityMarks, err
 			// corresponding field mask deletes them.
 		},
 	}
-	return client.UpdateSecurityMarks(ctx, req)
+	updatedMarks, err := client.UpdateSecurityMarks(ctx, req)
+	if err != nil {
+		return fmt.Errorf("Error updating marks %v", err)
+	}
+
+	fmt.Fprintf(w, "Updated marks: %s\n", updatedMarks.Name)
+	for k, v := range updatedMarks.Marks {
+		fmt.Fprintf(w, "%s = %s\n", k, v)
+	}
+	return nil
 }
 
 // [END delete_security_marks]

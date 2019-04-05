@@ -27,15 +27,14 @@ import (
 )
 
 // listAssetsWithMarks prints assets that have a mark of key_a equal to value_a
-// to w for orgID and returns the number of assets found.  orgID is the numeric
-// Organization ID.
-func listAssetsWithMarks(w io.Writer, orgID string) (int, error) {
+// to w for orgID.  orgID is the numeric Organization ID.
+func listAssetsWithMarks(w io.Writer, orgID string) error {
 	// orgID := "12321311"
 	// Instantiate a context and a security service client to make API calls.
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return -1, fmt.Errorf("Error instantiating client %v\n", err)
+		return fmt.Errorf("Error instantiating client %v\n", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
@@ -44,7 +43,6 @@ func listAssetsWithMarks(w io.Writer, orgID string) (int, error) {
 		Filter: `security_marks.marks.key_a = "value_a"`,
 	}
 
-	assetsFound := 0
 	it := client.ListAssets(ctx, req)
 	for {
 		result, err := it.Next()
@@ -52,16 +50,15 @@ func listAssetsWithMarks(w io.Writer, orgID string) (int, error) {
 			break
 		}
 		if err != nil {
-			return -1, fmt.Errorf("Error listing assets: %v", err)
+			return fmt.Errorf("Error listing assets: %v", err)
 		}
 		asset := result.Asset
 		properties := asset.SecurityCenterProperties
 		fmt.Fprintf(w, "Asset Name: %s, ", asset.Name)
 		fmt.Fprintf(w, "Resource Name %s, ", properties.ResourceName)
 		fmt.Fprintf(w, "Resource Type %s\n", properties.ResourceType)
-		assetsFound++
 	}
-	return assetsFound, nil
+	return nil
 }
 
 // [END list_assets_with_security_marks]
