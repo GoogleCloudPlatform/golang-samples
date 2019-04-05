@@ -26,15 +26,14 @@ import (
 )
 
 // getOrgSettings gets and prints the current organization asset discovery
-// settings to w.  Returns the organizationSettings. orgID is the numeric
-// Organization ID.
-func getOrgSettings(w io.Writer, orgID string) (*securitycenterpb.OrganizationSettings, error) {
+// settings to w.  orgID is the numeric Organization ID.
+func getOrgSettings(w io.Writer, orgID string) error {
 	// orgID := "12321311"
 	// Instantiate a context and a security service client to make API calls.
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("Error instantiating client %v\n", err)
+		return fmt.Errorf("Error instantiating client %v\n", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
@@ -43,10 +42,11 @@ func getOrgSettings(w io.Writer, orgID string) (*securitycenterpb.OrganizationSe
 	}
 	settings, err := client.GetOrganizationSettings(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("Error creating finding: %v", err)
+		return fmt.Errorf("Error creating finding: %v", err)
 	}
+	fmt.Fprintf(w, "Retrieved Settings for: %s\n", settings.Name)
 	fmt.Fprintf(w, "Asset Discovery on? %v", settings.EnableAssetDiscovery)
-	return settings, nil
+	return nil
 }
 
 // [END get_org_settings]
