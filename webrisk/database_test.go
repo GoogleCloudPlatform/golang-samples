@@ -635,9 +635,14 @@ func TestDatabaseSaveErrors(t *testing.T) {
 		t.Errorf("unexpected error: %v", err)
 	}
 
+	fileInfo, _ := os.Stat(path)
+	fileMode := fileInfo.Mode()
+	if fileMode != 292 {
+		// If for whatever reason the file is not read only and we
+		// did not return an error skip the test.
+		t.Skip()
+	}
 	if err := saveDatabase(path, databaseFormat{}); err == nil {
-		fileInfo, _ := os.Stat(path)
-		fileMode := fileInfo.Mode()
 		t.Errorf("unexpected save success on file %s, with permissions %d", path, fileMode)
 	}
 }
