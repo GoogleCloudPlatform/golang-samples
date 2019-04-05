@@ -20,6 +20,7 @@ package findings
 import (
 	"context"
 	"fmt"
+	"io"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
 	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
@@ -28,14 +29,14 @@ import (
 
 // updateSource changes a sources display name to "New Display Name" for a
 // specific source.  sourceName is the full resource name of the source to be
-// updated.  Returns the updated Source.
-func updateSource(sourceName string) (*securitycenterpb.Source, error) {
+// updated.
+func updateSource(w io.Writer, sourceName string) error {
 	// sourceName := "organizations/111122222444/sources/1234"
 	// Instantiate a context and a security service client to make API calls.
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("Error instantiating client %v\n", err)
+		return fmt.Errorf("Error instantiating client %v\n", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
@@ -52,10 +53,13 @@ func updateSource(sourceName string) (*securitycenterpb.Source, error) {
 	}
 	source, err := client.UpdateSource(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("Error updating source: %v", err)
+		return fmt.Errorf("Error updating source: %v", err)
 	}
+	fmt.Fprintf(w, "Source Name: %s, ", source.Name)
+	fmt.Fprintf(w, "Display name: %s, ", source.DisplayName)
+	fmt.Fprintf(w, "Description: %s\n", source.Description)
 
-	return source, nil
+	return nil
 }
 
 // [END update_source]

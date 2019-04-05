@@ -27,15 +27,14 @@ import (
 )
 
 // getSource retrieves a source by its resource name and print it to w.
-// sourceName is the full resource name of the source to be updated.  Returns
-// the Source.
-func getSource(w io.Writer, sourceName string) (*securitycenterpb.Source, error) {
+// sourceName is the full resource name of the source to be updated.
+func getSource(w io.Writer, sourceName string) error {
 	// sourceName := "organizations/111122222444/sources/1234"
 	// Instantiate a context and a security service client to make API calls.
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("Error instantiating client %v\n", err)
+		return fmt.Errorf("Error instantiating client %v\n", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
@@ -44,10 +43,12 @@ func getSource(w io.Writer, sourceName string) (*securitycenterpb.Source, error)
 	}
 	source, err := client.GetSource(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("Error getting source: %v", err)
+		return fmt.Errorf("Error getting source: %v", err)
 	}
-	fmt.Fprintf(w, "Source: %v", source)
-	return source, nil
+	fmt.Fprintf(w, "Source: %v\n", source.Name)
+	fmt.Fprintf(w, "Display Name: %v\n", source.DisplayName)
+	fmt.Fprintf(w, "Description: %v\n", source.Description)
+	return nil
 }
 
 // [END get_source]

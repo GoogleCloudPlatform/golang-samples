@@ -27,22 +27,21 @@ import (
 	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
 )
 
-// listSources prints all sources in  orgID to w and returns the count of sources
-// found.  orgID is the numeric identifier of the organization.
-func listSource(w io.Writer, orgID string) (int, error) {
+// listSources prints all sources in  orgID to w.  orgID is the numeric
+// identifier of the organization.
+func listSources(w io.Writer, orgID string) error {
 	// orgID := "12321311"
 	// Instantiate a context and a security service client to make API calls.
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return -1, fmt.Errorf("Error instantiating client %v\n", err)
+		return fmt.Errorf("Error instantiating client %v\n", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
 	req := &securitycenterpb.ListSourcesRequest{
 		Parent: fmt.Sprintf("organizations/%s", orgID),
 	}
-	sourcesFound := 0
 	it := client.ListSources(ctx, req)
 	for {
 		source, err := it.Next()
@@ -50,15 +49,13 @@ func listSource(w io.Writer, orgID string) (int, error) {
 			break
 		}
 		if err != nil {
-			return -1, fmt.Errorf("Error listing sources: %v", err)
+			return fmt.Errorf("Error listing sources: %v", err)
 		}
-		fmt.Fprintf(w, "Source Name: %s, Display name %s, Description %s\n",
-			source.Name,
-			source.DisplayName,
-			source.Description)
-		sourcesFound++
+		fmt.Fprintf(w, "Source Name: %s, ", source.Name)
+		fmt.Fprintf(w, "Display name: %s, ", source.DisplayName)
+		fmt.Fprintf(w, "Description: %s\n", source.Description)
 	}
-	return sourcesFound, nil
+	return nil
 }
 
 // [END list_sources]

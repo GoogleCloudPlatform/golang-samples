@@ -20,6 +20,7 @@ package findings
 import (
 	"context"
 	"fmt"
+	"io"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
 	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
@@ -27,13 +28,13 @@ import (
 
 // createSource creates a new source for organization orgID.  orgID is
 // the numeric identifier of the organization
-func createSource(orgID string) (string, error) {
+func createSource(w io.Writer, orgID string) error {
 	// orgID := "12321311"
 	// Instantiate a context and a security service client to make API calls.
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return "", fmt.Errorf("Error instantiating client %v\n", err)
+		return fmt.Errorf("Error instantiating client %v\n", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
@@ -46,10 +47,12 @@ func createSource(orgID string) (string, error) {
 	}
 	source, err := client.CreateSource(ctx, req)
 	if err != nil {
-		return "", fmt.Errorf("Error creating source: %v", err)
+		return fmt.Errorf("Error creating source: %v", err)
 	}
 
-	return source.Name, nil
+	fmt.Fprintf(w, "New source created: %s\n", source.Name)
+	fmt.Fprintf(w, "Display Name: %s\n", source.DisplayName)
+	return nil
 }
 
 // [END create_source]

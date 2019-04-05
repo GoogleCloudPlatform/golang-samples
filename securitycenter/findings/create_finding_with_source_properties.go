@@ -20,6 +20,7 @@ package findings
 import (
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
@@ -31,21 +32,20 @@ import (
 // createFindingWithProperties demonstrates how to create a new security
 // finding in CSCC that includes additional metadata via sourceProperties.
 // sourceName is the full resource name of the source the finding should be
-// associated with.  Returns the created finding.
-func createFindingWithProperties(sourceName string) (*securitycenterpb.Finding, error) {
+// associated with.
+func createFindingWithProperties(w io.Writer, sourceName string) error {
 	// sourceName := "organizations/111122222444/sources/1234"
 	// Instantiate a context and a security service client to make API calls.
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("Error instantiating client %v\n", err)
+		return fmt.Errorf("Error instantiating client %v\n", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 	// Use now as the eventTime for the security finding.
 	eventTime, err := ptypes.TimestampProto(time.Now())
 	if err != nil {
-		fmt.Printf("Error converting now: %v", err)
-		return nil, err
+		return fmt.Errorf("Error converting now: %v", err)
 	}
 
 	// Define key-value pair metadata to include with the finding.
@@ -74,9 +74,16 @@ func createFindingWithProperties(sourceName string) (*securitycenterpb.Finding, 
 
 	finding, err := client.CreateFinding(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("Error creating finding: %v", err)
+		return fmt.Errorf("Error creating finding: %v", err)
 	}
-	return finding, nil
+	fmt.Fprintf(w, "New finding created: %s\n", finding.Name)
+	fmt.Fprintf(w, "Event time (Epoch Seconds): %d\n", eventTime.Seconds)
+	fmt.Fprintf(w, "Source Properties:\n")
+	for k, v := range finding.SourceProperties {
+		fmt.Fprintf(w, "%s = %v\n", k, v)
+	}
+
+	return nil
 }
 
 // [END create_finding_with_source_properties]

@@ -20,6 +20,7 @@ package findings
 import (
 	"context"
 	"fmt"
+	"io"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
 	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
@@ -30,13 +31,13 @@ import (
 // returns the updated marks. Specifically, it sets "key_a" an "key_b" to
 // "value_a" and "value_b" respectively.  findingName is the resource path for
 // a finding.
-func addSecurityMarks(findingName string) (*securitycenterpb.SecurityMarks, error) {
+func addSecurityMarks(w io.Writer, findingName string) error {
 	// findingName := "organizations/11123213/sources/12342342/findings/fidningid"
 	// Instantiate a context and a security service client to make API calls.
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("Error instantiating client %v\n", err)
+		return fmt.Errorf("Error instantiating client %v\n", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
@@ -52,7 +53,17 @@ func addSecurityMarks(findingName string) (*securitycenterpb.SecurityMarks, erro
 			Marks: map[string]string{"key_a": "value_a", "key_b": "value_b"},
 		},
 	}
-	return client.UpdateSecurityMarks(ctx, req)
+
+	updatedMarks, err := client.UpdateSecurityMarks(ctx, req)
+	if err != nil {
+		return fmt.Errorf("Trouble updating marks %v", err)
+	}
+
+	fmt.Fprintf(w, "Updated marks: %s", updatedMarks.Name)
+	for k, v := range updatedMarks.Marks {
+		fmt.Fprintf(w, "%s = %s\n", k, v)
+	}
+	return nil
 }
 
 // [END add_security_marks]
