@@ -28,16 +28,15 @@ import (
 )
 
 // listFilteredFindings prints findings with category 'MEDIUM_RISK_ONE' for a
-// specific source to w and returns the count of
-// findings found.  sourceName is the full resource name of the source
+// specific source to w.  sourceName is the full resource name of the source
 // to search for findings under.
-func listFilteredFindings(w io.Writer, sourceName string) (int, error) {
+func listFilteredFindings(w io.Writer, sourceName string) error {
 	// sourceName := "organizations/111122222444/sources/1234"
 	// Instantiate a context and a security service client to make API calls.
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return -1, fmt.Errorf("Error instantiating client %v\n", err)
+		return fmt.Errorf("Error instantiating client %v\n", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
@@ -45,7 +44,6 @@ func listFilteredFindings(w io.Writer, sourceName string) (int, error) {
 		Parent: sourceName,
 		Filter: `category="MEDIUM_RISK_ONE"`,
 	}
-	findingsFound := 0
 	it := client.ListFindings(ctx, req)
 	for {
 		findingResult, err := it.Next()
@@ -53,15 +51,14 @@ func listFilteredFindings(w io.Writer, sourceName string) (int, error) {
 			break
 		}
 		if err != nil {
-			return -1, fmt.Errorf("Error listing sources: %v", err)
+			return fmt.Errorf("Error listing sources: %v", err)
 		}
 		finding := findingResult.Finding
 		fmt.Fprintf(w, "Finding Name: %s, ", finding.Name)
 		fmt.Fprintf(w, "Resource Name %s, ", finding.ResourceName)
 		fmt.Fprintf(w, "Category: %s\n", finding.Category)
-		findingsFound++
 	}
-	return findingsFound, nil
+	return nil
 }
 
 // [END list_filtered_findings]

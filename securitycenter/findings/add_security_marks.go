@@ -30,7 +30,7 @@ import (
 // addSecurityMarks adds/updates a the security marks for the findingName and
 // returns the updated marks. Specifically, it sets "key_a" an "key_b" to
 // "value_a" and "value_b" respectively.  findingName is the resource path for
-// a finding.
+// the finding to add marks to.
 func addSecurityMarks(w io.Writer, findingName string) error {
 	// findingName := "organizations/11123213/sources/12342342/findings/fidningid"
 	// Instantiate a context and a security service client to make API calls.
@@ -59,7 +59,7 @@ func addSecurityMarks(w io.Writer, findingName string) error {
 		return fmt.Errorf("Trouble updating marks %v", err)
 	}
 
-	fmt.Fprintf(w, "Updated marks: %s", updatedMarks.Name)
+	fmt.Fprintf(w, "Updated marks: %s\n", updatedMarks.Name)
 	for k, v := range updatedMarks.Marks {
 		fmt.Fprintf(w, "%s = %s\n", k, v)
 	}

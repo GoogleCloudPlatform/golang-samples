@@ -30,28 +30,26 @@ import (
 )
 
 // listFindingsAtTime prints findings that where present for a specific source
-// as of five days ago to w.  It returns the count of findings encountered.
-// sourceName is the full resource name of the source to search for findings
-// under.
-func listFindingsAtTime(w io.Writer, sourceName string) (int, error) {
+// as of five days ago to w.  sourceName is the full resource name of the
+// source to search for findings under.
+func listFindingsAtTime(w io.Writer, sourceName string) error {
 	// sourceName := "organizations/111122222444/sources/1234"
 	// Instantiate a context and a security service client to make API calls.
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return -1, fmt.Errorf("Error instantiating client %v\n", err)
+		return fmt.Errorf("Error instantiating client %v\n", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 	fiveDaysAgo, err := ptypes.TimestampProto(time.Now().AddDate(0, 0, -5))
 	if err != nil {
-		return -1, fmt.Errorf("Error converting five days ago: %v", err)
+		return fmt.Errorf("Error converting five days ago: %v", err)
 	}
 
 	req := &securitycenterpb.ListFindingsRequest{
 		Parent:   sourceName,
 		ReadTime: fiveDaysAgo,
 	}
-	findingsFound := 0
 	it := client.ListFindings(ctx, req)
 	for {
 		findingResult, err := it.Next()
@@ -59,15 +57,14 @@ func listFindingsAtTime(w io.Writer, sourceName string) (int, error) {
 			break
 		}
 		if err != nil {
-			return -1, fmt.Errorf("Error listing sources: %v", err)
+			return fmt.Errorf("Error listing sources: %v", err)
 		}
 		finding := findingResult.Finding
 		fmt.Fprintf(w, "Finding Name: %s, ", finding.Name)
 		fmt.Fprintf(w, "Resource Name %s, ", finding.ResourceName)
 		fmt.Fprintf(w, "Category: %s\n", finding.Category)
-		findingsFound++
 	}
-	return findingsFound, nil
+	return nil
 }
 
 // [END list_findings_at_time]

@@ -20,6 +20,7 @@ package findings
 import (
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
@@ -27,27 +28,23 @@ import (
 	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
 )
 
-// updateFindingState demonstrates how to update a security finding
-// in CSCC.  sourceName is the full resource name of the source the finding
-// should be associated with.  Returns the updated finding.
-func updateFindingState(sourceName string) (*securitycenterpb.Finding, error) {
-	// sourceName := "organizations/111122222444/sources/1234"
+// updateFindingState demonstrates how to update a security finding's state
+// in CSCC.  findingName is the full resource name of the finding to update.
+func setFindingState(w io.Writer, findingName string) error {
+	// findingName := "organizations/111122222444/sources/1234"
 	// Instantiate a context and a security service client to make API calls.
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("Error instantiating client %v\n", err)
+		return fmt.Errorf("Error instantiating client %v\n", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 	// Use now as the eventTime for the security finding.
 	now, err := ptypes.TimestampProto(time.Now())
 	if err != nil {
-		fmt.Printf("Error converting now: %v", err)
-		return nil, err
+		return fmt.Errorf("Error converting now: %v", err)
 	}
 
-	// Findings are a child resource of sources.
-	findingName := fmt.Sprintf("%s/findings/samplefindingprops", sourceName)
 	req := &securitycenterpb.SetFindingStateRequest{
 		Name:  findingName,
 		State: securitycenterpb.Finding_INACTIVE,
@@ -57,9 +54,14 @@ func updateFindingState(sourceName string) (*securitycenterpb.Finding, error) {
 
 	finding, err := client.SetFindingState(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("Error updating finding state: %v", err)
+		return fmt.Errorf("Error updating finding state: %v", err)
 	}
-	return finding, nil
+
+	fmt.Fprintf(w, "Finding updated: %s\n", finding.Name)
+	fmt.Fprintf(w, "Finding state: %v\n", finding.State)
+	fmt.Fprintf(w, "Event time (Epoch Seconds): %d\n", finding.EventTime.Seconds)
+
+	return nil
 }
 
 // [END set_finding_state]

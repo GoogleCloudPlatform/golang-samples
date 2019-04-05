@@ -27,23 +27,22 @@ import (
 	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
 )
 
-// listFindings prints all findings in orgID to w and returns the count of
-// findings found.  orgID is the numeric identifier of the organization.
-func listFindings(w io.Writer, orgID string) (int, error) {
+// listFindings prints all findings in orgID to w.  orgID is the numeric
+// identifier of the organization.
+func listFindings(w io.Writer, orgID string) error {
 	// orgID := "12321311"
 	// Instantiate a context and a security service client to make API calls.
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return -1, fmt.Errorf("Error instantiating client %v\n", err)
+		return fmt.Errorf("Error instantiating client %v\n", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
 	req := &securitycenterpb.ListFindingsRequest{
 		// List findings across all sources.
-		Parent: fmt.Sprintf("organizations/%s/source/-", orgID),
+		Parent: fmt.Sprintf("organizations/%s/sources/-", orgID),
 	}
-	findingsFound := 0
 	it := client.ListFindings(ctx, req)
 	for {
 		finding_result, err := it.Next()
@@ -51,15 +50,14 @@ func listFindings(w io.Writer, orgID string) (int, error) {
 			break
 		}
 		if err != nil {
-			return -1, fmt.Errorf("Error listing sources: %v", err)
+			return fmt.Errorf("Error listing sources: %v", err)
 		}
 		finding := finding_result.Finding
 		fmt.Fprintf(w, "Finding Name: %s, ", finding.Name)
 		fmt.Fprintf(w, "Resource Name %s, ", finding.ResourceName)
 		fmt.Fprintf(w, "Category: %s\n", finding.Category)
-		findingsFound++
 	}
-	return findingsFound, nil
+	return nil
 }
 
 // [END list_all_findings]

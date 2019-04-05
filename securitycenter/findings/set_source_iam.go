@@ -20,22 +20,23 @@ package findings
 import (
 	"context"
 	"fmt"
+	"io"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
 	iam "google.golang.org/genproto/googleapis/iam/v1"
 )
 
-// setIamPolicySource grants user roles/securitycenter.findingsEditor permision
+// setSourceIamPolicy  grants user roles/securitycenter.findingsEditor permision
 // for a source.  sourceName is the full resource name of the source to be
-// updated.  user is an email address. Returns the updated policy for source.
-func setIamPolicySource(sourceName string, user string) (*iam.Policy, error) {
+// updated.  user is an email address that IAM can grant permissions to.
+func setSourceIamPolicy(w io.Writer, sourceName string, user string) error {
 	// sourceName := "organizations/111122222444/sources/1234"
 	// user := "someuser@some_domain.com
 	// Instantiate a context and a security service client to make API calls.
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("Error instantiating client %v\n", err)
+		return fmt.Errorf("Error instantiating client %v\n", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
@@ -45,30 +46,35 @@ func setIamPolicySource(sourceName string, user string) (*iam.Policy, error) {
 		Resource: sourceName,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("Couldn't get IAM policy for %s: %v", sourceName, err)
-	}
-
-	// New IAM Binding for the user.
-	newBinding := &iam.Binding{
-		Role:    "roles/securitycenter.findingsEditor",
-		Members: []string{fmt.Sprintf("user:%s", user)},
+		return fmt.Errorf("Couldn't get IAM policy for %s: %v", sourceName, err)
 	}
 
 	req := &iam.SetIamPolicyRequest{
 		Resource: sourceName,
 		Policy: &iam.Policy{
 			// Enables partial update of existing policy
-			Etag:     existing.Etag,
-			Bindings: []*iam.Binding{newBinding},
+			Etag: existing.Etag,
+			Bindings: []*iam.Binding{&iam.Binding{
+				Role: "roles/securitycenter.findingsEditor",
+				// New IAM Binding for the user.
+				Members: []string{fmt.Sprintf("user:%s", user)},
+			},
+			},
 		},
 	}
 	policy, err := client.SetIamPolicy(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("Error updating source %s with policy %v: %v",
+		return fmt.Errorf("Error updating source %s with policy %v: %v",
 			sourceName, req.Policy, err)
 	}
 
-	return policy, nil
+	fmt.Fprint(w, "Bindings:\n")
+	for _, binding := range policy.Bindings {
+		for _, member := range binding.Members {
+			fmt.Fprintf(w, "Principal: %s Role: %s\n", member, binding.Role)
+		}
+	}
+	return nil
 }
 
 // [END set_iam_policy_source]

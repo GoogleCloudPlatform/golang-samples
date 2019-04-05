@@ -27,9 +27,8 @@ import (
 )
 
 // testIam demonstrates how to determine if your service user has appropriate
-// access to create and update findings, it writes messages to w.
-// sourceName is the full resource name of the source the finding
-// should be associated with.
+// access to create and update findings, it writes permissions to w.
+// sourceName is the full resource name of the source to test for permissions.
 func testIam(w io.Writer, sourceName string) error {
 	// sourceName := "organizations/111122222444/sources/1234"
 	// Instantiate a context and a security service client to make API calls.

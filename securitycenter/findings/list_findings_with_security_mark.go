@@ -28,24 +28,22 @@ import (
 )
 
 // listFindingsWithMarks prints findings that don't have a security mark
-// finding_key_a equal to value_a to w.  It returns the count of findings
-// encountered.  sourceName is the full resource name of the source to search
-// for findings under.
-func listFindingsWithMarks(w io.Writer, sourceName string) (int, error) {
+// key_a equal to value_a to w.  sourceName is the full resource name
+// of the source to search for findings under.
+func listFindingsWithMarks(w io.Writer, sourceName string) error {
 	// sourceName := "organizations/111122222444/sources/1234"
 	// Instantiate a context and a security service client to make API calls.
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return -1, fmt.Errorf("Error instantiating client %v\n", err)
+		return fmt.Errorf("Error instantiating client %v\n", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
 	req := &securitycenterpb.ListFindingsRequest{
 		Parent: sourceName,
-		Filter: `NOT security_marks.marks.finding_key_a="value_a"`,
+		Filter: `NOT security_marks.marks.key_a="value_a"`,
 	}
-	findingsFound := 0
 	it := client.ListFindings(ctx, req)
 	for {
 		findingResult, err := it.Next()
@@ -53,15 +51,14 @@ func listFindingsWithMarks(w io.Writer, sourceName string) (int, error) {
 			break
 		}
 		if err != nil {
-			return -1, fmt.Errorf("Error listing sources: %v", err)
+			return fmt.Errorf("Error listing sources: %v", err)
 		}
 		finding := findingResult.Finding
 		fmt.Fprintf(w, "Finding Name: %s, ", finding.Name)
 		fmt.Fprintf(w, "Resource Name %s, ", finding.ResourceName)
 		fmt.Fprintf(w, "Category: %s\n", finding.Category)
-		findingsFound++
 	}
-	return findingsFound, nil
+	return nil
 }
 
 // [END list_findings_with_marks]

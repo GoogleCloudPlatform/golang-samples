@@ -48,14 +48,6 @@ func createFindingWithProperties(w io.Writer, sourceName string) error {
 		return fmt.Errorf("Error converting now: %v", err)
 	}
 
-	// Define key-value pair metadata to include with the finding.
-	properties := map[string]*structpb.Value{
-		"s_value": &structpb.Value{
-			Kind: &structpb.Value_StringValue{"string_example"}},
-		"n_value": &structpb.Value{
-			Kind: &structpb.Value_NumberValue{1234}},
-	}
-
 	req := &securitycenterpb.CreateFindingRequest{
 		Parent:    sourceName,
 		FindingId: "samplefindingprops",
@@ -67,8 +59,14 @@ func createFindingWithProperties(w io.Writer, sourceName string) error {
 			// A free-form category.
 			Category: "MEDIUM_RISK_ONE",
 			// The time associated with discovering the issue.
-			EventTime:        eventTime,
-			SourceProperties: properties,
+			EventTime: eventTime,
+			// Define key-value pair metadata to include with the finding.
+			SourceProperties: map[string]*structpb.Value{
+				"s_value": &structpb.Value{
+					Kind: &structpb.Value_StringValue{"string_example"}},
+				"n_value": &structpb.Value{
+					Kind: &structpb.Value_NumberValue{1234}},
+			},
 		},
 	}
 
