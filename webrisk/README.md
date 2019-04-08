@@ -9,7 +9,7 @@ redirector to redirect users to a warning page for unsafe URLs. The `wrlookup`
 program is a command line service that can also be used to check URLs.
 
 This **README.md** is a quickstart guide on how to build, deploy, and use the
-`safebrowsing` Go package. It can be used out-of-the-box. The GoDoc and API
+`[WebRisk](https://godoc.org/cloud.google.com/go/webrisk/apiv1beta1)` Go package. It can be used out-of-the-box. The GoDoc and API
 documentation provide more details on fine tuning the parameters if desired.
 
 
@@ -37,7 +37,7 @@ export APIKEY=Your Api Key
 
 # Proxy Server
 
-The `wrserver` server binary runs a Safe Browsing API lookup proxy that allows
+The `wrserver` server binary runs a WebRisk API lookup proxy that allows
 users to check URLs via a simple JSON API.
 
 1.	Once the Go environment is setup, run the following command with your API key:
@@ -50,7 +50,7 @@ users to check URLs via a simple JSON API.
 	With the default settings this will start a local server at **127.0.0.1:8080**.
 
 2.  The server also uses an URL redirector (listening on `/r`) to show an interstitial for anything marked unsafe.  
-If the URL is safe, the client is automatically redirected to the target. Else, an interstitial warning page is shown as recommended by Safe Browsing.  
+If the URL is safe, the client is automatically redirected to the target. Else, an interstitial warning page is shown as recommended by Web Risk.  
 Try these URLs:
 
 	```
