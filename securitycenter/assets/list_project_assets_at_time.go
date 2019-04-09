@@ -29,22 +29,21 @@ import (
 )
 
 // listAllProjectAssets lists all GCP Projects in orgID at asOf time and prints
-// out results to w. listAllProjectAssets returns the number of project assets
-// found.  orgID is the numeric organization ID of interest.
-func listAllProjectAssetsAtTime(w io.Writer, orgID string, asOf time.Time) (int, error) {
+// out results to w. orgID is the numeric organization ID of interest.
+func listAllProjectAssetsAtTime(w io.Writer, orgID string, asOf time.Time) error {
 	// orgID := "12321311"
 	// Instantiate a context and a security service client to make API calls.
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return -1, fmt.Errorf("Error instantiating client %v\n", err)
+		return fmt.Errorf("Error instantiating client %v\n", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
 	// Convert the time to a Timestamp protobuf
 	readTime, err := ptypes.TimestampProto(asOf)
 	if err != nil {
-		return 0, fmt.Errorf("Error converting %v: %v", asOf, err)
+		return fmt.Errorf("Error converting %v: %v", asOf, err)
 	}
 
 	req := &securitycenterpb.ListAssetsRequest{
@@ -61,7 +60,7 @@ func listAllProjectAssetsAtTime(w io.Writer, orgID string, asOf time.Time) (int,
 			break
 		}
 		if err != nil {
-			return -1, fmt.Errorf("Error listing assets: %v", err)
+			return fmt.Errorf("Error listing assets: %v", err)
 		}
 		asset := result.Asset
 		properties := asset.SecurityCenterProperties
@@ -70,7 +69,7 @@ func listAllProjectAssetsAtTime(w io.Writer, orgID string, asOf time.Time) (int,
 		fmt.Fprintf(w, "Resource Type %s\n", properties.ResourceType)
 		assetsFound++
 	}
-	return assetsFound, nil
+	return nil
 }
 
 // [END list_project_assets_at_time]

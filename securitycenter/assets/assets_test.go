@@ -158,6 +158,7 @@ func setup(t *testing.T) string {
 
 func TestMain(m *testing.M) {
 	initAssetForManipulation()
+	rand.Seed(time.Now().UTC().UnixNano())
 	code := m.Run()
 	os.Exit(code)
 }
@@ -165,11 +166,13 @@ func TestMain(m *testing.M) {
 func TestListAllAssets(t *testing.T) {
 	buf := new(bytes.Buffer)
 	orgID := setup(t)
-	got, err := listAllAssets(buf, orgID)
+	err := listAllAssets(buf, orgID)
 	if err != nil {
 		t.Fatalf("listAllAssets(%s) failed: %v", orgID, err)
 	}
+
 	want := 59
+	got := strings.Count(buf.String(), "\n")
 	if got < want {
 		t.Errorf("listAllAssets(%s) Not enough results: %d Want >= %d", orgID, got, want)
 	}
@@ -178,11 +181,12 @@ func TestListAllAssets(t *testing.T) {
 func TestListAllProjectAssets(t *testing.T) {
 	buf := new(bytes.Buffer)
 	orgID := setup(t)
-	got, err := listAllProjectAssets(buf, orgID)
+	err := listAllProjectAssets(buf, orgID)
 	if err != nil {
 		t.Fatalf("listAllAssets(%s) failed: %v", orgID, err)
 	}
 	want := 3
+	got := strings.Count(buf.String(), "\n")
 	if got != want {
 		t.Errorf("listAllAssets(%s) Unexpected number of results: %d Want: %d", orgID, got, want)
 	}
@@ -193,20 +197,25 @@ func TestListAllProjectAssetsAtTime(t *testing.T) {
 	buf := new(bytes.Buffer)
 	var nothingInstant = time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC)
 
-	got, err := listAllProjectAssetsAtTime(buf, orgID, nothingInstant)
+	err := listAllProjectAssetsAtTime(buf, orgID, nothingInstant)
+
 	if err != nil {
 		t.Fatalf("listAllProjectAssetsAtTime(%s, %v) failed: %v", orgID, nothingInstant, err)
 	}
+
+	got := strings.Count(buf.String(), "\n")
 	if got != 0 {
 		t.Errorf("listAllProjectAssetsAtTime(%s, %v) Results not 0: %d", orgID, nothingInstant, got)
 	}
 
+	buf.Truncate(0)
 	var somethingInstant = time.Date(2019, 3, 15, 0, 0, 0, 0, time.UTC)
-	got, err = listAllProjectAssetsAtTime(buf, orgID, somethingInstant)
+	err = listAllProjectAssetsAtTime(buf, orgID, somethingInstant)
 	if err != nil {
 		t.Fatalf("listAllProjectAssetsAtTime(%s, %v) failed: %v", orgID, somethingInstant, err)
 	}
 	want := 3
+	got = strings.Count(buf.String(), "\n")
 	if got != want {
 		t.Errorf("listAllProjectAssetsAtTime(%s, %v) Unexpected number of projects: %d Want: %d", orgID, somethingInstant, got, want)
 	}
@@ -215,10 +224,11 @@ func TestListAllProjectAssetsAtTime(t *testing.T) {
 func TestListAllProjectAssetsAndStateChanges(t *testing.T) {
 	buf := new(bytes.Buffer)
 	orgID := setup(t)
-	got, err := listAllProjectAssetsAndStateChanges(buf, orgID)
+	err := listAllProjectAssetsAndStateChanges(buf, orgID)
 	if err != nil {
 		t.Fatalf("listAllProjectAssetsAndStateChanges(%s) failed: %v", orgID, err)
 	}
+	got := strings.Count(buf.String(), "\n")
 	want := 3
 	if got != want {
 		t.Errorf("listAllProjectAssetsAndStateChanges(%s) Unexpected number of results: %d Want: %d", orgID, got, want)

@@ -33,8 +33,10 @@ import (
 // as of five days ago to w.  sourceName is the full resource name of the
 // source to search for findings under.
 func listFindingsAtTime(w io.Writer, sourceName string) error {
+	// Specific source.
 	// sourceName := "organizations/111122222444/sources/1234"
-	// Instantiate a context and a security service client to make API calls.
+	// All sources.
+	// sourceName := "organizations/111122222444/sources/-"
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {

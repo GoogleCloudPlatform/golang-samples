@@ -29,16 +29,15 @@ import (
 )
 
 // listAllProjectAssetsAndStateChange lists all current GCP project assets in
-// orgID and prints the projects and there change from a day ago out to w. The
-// method returns the number of project assets found.  orgID is the numeric
-// organization ID of interest.
-func listAllProjectAssetsAndStateChanges(w io.Writer, orgID string) (int, error) {
+// orgID and prints the projects and there change from a day ago out to w.
+// orgID is the numeric // organization ID of interest.
+func listAllProjectAssetsAndStateChanges(w io.Writer, orgID string) error {
 	// orgID := "12321311"
 	// Instantiate a context and a security service client to make API calls.
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return -1, fmt.Errorf("Error instantiating client %v\n", err)
+		return fmt.Errorf("Error instantiating client %v\n", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
@@ -56,17 +55,17 @@ func listAllProjectAssetsAndStateChanges(w io.Writer, orgID string) (int, error)
 			break
 		}
 		if err != nil {
-			return -1, fmt.Errorf("Error listing assets: %v", err)
+			return fmt.Errorf("Error listing assets: %v", err)
 		}
 		asset := result.Asset
 		properties := asset.SecurityCenterProperties
 		fmt.Fprintf(w, "Asset Name: %s,", asset.Name)
 		fmt.Fprintf(w, "Resource Name %s,", properties.ResourceName)
-		fmt.Fprintf(w, "Resource Type %s\n", properties.ResourceType)
+		fmt.Fprintf(w, "Resource Type %s", properties.ResourceType)
 		fmt.Fprintf(w, "State Change %s\n", result.StateChange)
 		assetsFound++
 	}
-	return assetsFound, nil
+	return nil
 }
 
 // [END list_project_assets_and_state_changes]

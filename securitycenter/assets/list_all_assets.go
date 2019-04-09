@@ -26,15 +26,15 @@ import (
 	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
 )
 
-// listAllAssets prints every asset to w for orgID and returns the number of
-// assets found. orgID is the numeric Organization ID.
-func listAllAssets(w io.Writer, orgID string) (int, error) {
+// listAllAssets prints every asset to w for orgID. orgID is the numeric
+// Organization ID.
+func listAllAssets(w io.Writer, orgID string) error {
 	// orgID := "12321311"
 	// Instantiate a context and a security service client to make API calls.
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return -1, fmt.Errorf("Error instantiating client %v\n", err)
+		return fmt.Errorf("Error instantiating client %v\n", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
@@ -50,7 +50,7 @@ func listAllAssets(w io.Writer, orgID string) (int, error) {
 			break
 		}
 		if err != nil {
-			return -1, fmt.Errorf("Error listing assets: %v", err)
+			return fmt.Errorf("Error listing assets: %v", err)
 		}
 		asset := result.Asset
 		properties := asset.SecurityCenterProperties
@@ -59,7 +59,7 @@ func listAllAssets(w io.Writer, orgID string) (int, error) {
 		fmt.Fprintf(w, "Resource Type %s\n", properties.ResourceType)
 		assetsFound++
 	}
-	return assetsFound, nil
+	return nil
 }
 
 // [END list_all_assets]

@@ -27,15 +27,14 @@ import (
 )
 
 // listAllProjectAssets lists all current GCP project assets in orgID and
-// prints out results to w. listAllProjectAssets returns the number of project
-// assets found.  orgID is the numeric organization ID of interest.
-func listAllProjectAssets(w io.Writer, orgID string) (int, error) {
+// prints out results to w. orgID is the numeric organization ID of interest.
+func listAllProjectAssets(w io.Writer, orgID string) error {
 	// orgID := "12321311"
 	// Instantiate a context and a security service client to make API calls.
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return -1, fmt.Errorf("Error instantiating client %v\n", err)
+		return fmt.Errorf("Error instantiating client %v\n", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 	req := &securitycenterpb.ListAssetsRequest{
@@ -51,7 +50,7 @@ func listAllProjectAssets(w io.Writer, orgID string) (int, error) {
 			break
 		}
 		if err != nil {
-			return -1, fmt.Errorf("Error listing assets: %v", err)
+			return fmt.Errorf("Error listing assets: %v", err)
 		}
 		asset := result.Asset
 		properties := asset.SecurityCenterProperties
@@ -60,7 +59,7 @@ func listAllProjectAssets(w io.Writer, orgID string) (int, error) {
 		fmt.Fprintf(w, "Resource Type %s\n", properties.ResourceType)
 		assetsFound++
 	}
-	return assetsFound, nil
+	return nil
 }
 
 // [END list_project_assets]
