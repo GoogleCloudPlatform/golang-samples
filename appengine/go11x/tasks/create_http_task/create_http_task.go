@@ -23,8 +23,6 @@ import (
 
 	cloudtasks "cloud.google.com/go/cloudtasks/apiv2beta3"
 	taskspb "google.golang.org/genproto/googleapis/cloud/tasks/v2beta3"
-
-
 )
 
 // createTask creates a new task in your App Engine queue.
@@ -48,8 +46,8 @@ func createHttpTask(projectID, locationID, queueID, url, message string) (*tasks
 			// https://godoc.org/google.golang.org/genproto/googleapis/cloud/tasks/v2beta3#HttpRequest
 			PayloadType: &taskspb.Task_HttpRequest{
 				HttpRequest: &taskspb.HttpRequest{
-					HttpMethod:  taskspb.HttpMethod_POST,
-					Url: url,
+					HttpMethod: taskspb.HttpMethod_POST,
+					Url:        url,
 				},
 			},
 		},
