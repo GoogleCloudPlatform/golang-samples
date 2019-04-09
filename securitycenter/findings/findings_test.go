@@ -189,6 +189,10 @@ func TestUpdateSource(t *testing.T) {
 	if !strings.Contains(got, sourceName) {
 		t.Errorf("updateSource(%s) got: %s want %s", sourceName, got, sourceName)
 	}
+	if want := "does X"; !strings.Contains(got, want) {
+		t.Errorf("updateSource(%s) got: %s want %s", sourceName, got, want)
+	}
+
 }
 
 func TestCreateFinding(t *testing.T) {
