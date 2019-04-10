@@ -15,6 +15,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"testing"
 )
