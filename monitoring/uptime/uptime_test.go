@@ -87,7 +87,7 @@ func TestUpdate(t *testing.T) {
 	defer delete(ioutil.Discard, config.GetName())
 	buf := new(bytes.Buffer)
 	displayName := "New display name"
-	path := "example.com/example"
+	path := "/example.com/example"
 	updated, err := update(buf, config.GetName(), displayName, path)
 	if err != nil {
 		t.Fatalf("update: %v", err)
@@ -101,7 +101,7 @@ func TestUpdate(t *testing.T) {
 		t.Errorf("Display name not updated: got %q, want %q", got, displayName)
 	}
 	if got := updated.GetHttpCheck().GetPath(); got != path {
-		t.Errorf("HTTP path not updated: got %q, want %q", got, displayName)
+		t.Errorf("HTTP path not updated: got %q, want %q", got, path)
 	}
 }
 

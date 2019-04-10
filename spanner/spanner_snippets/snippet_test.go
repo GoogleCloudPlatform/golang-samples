@@ -184,4 +184,7 @@ func TestSample(t *testing.T) {
 
 	out = runCommand(t, "dmldeletepart", dbName)
 	assertContains(out, "record(s) deleted")
+
+	out = runCommand(t, "dmlbatchupdate", dbName)
+	assertContains(out, "Executed 2 SQL statements using Batch DML.")
 }
