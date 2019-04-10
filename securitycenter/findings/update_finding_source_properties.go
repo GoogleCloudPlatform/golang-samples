@@ -52,7 +52,7 @@ func updateFindingSourceProperties(w io.Writer, findingName string) error {
 			Name:      findingName,
 			EventTime: eventTime,
 			SourceProperties: map[string]*structpb.Value{
-				"s_value": &structpb.Value{
+				"s_value": {
 					Kind: &structpb.Value_StringValue{"new_string_example"}},
 			},
 		},

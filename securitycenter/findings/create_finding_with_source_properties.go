@@ -62,9 +62,9 @@ func createFindingWithProperties(w io.Writer, sourceName string) error {
 			EventTime: eventTime,
 			// Define key-value pair metadata to include with the finding.
 			SourceProperties: map[string]*structpb.Value{
-				"s_value": &structpb.Value{
+				"s_value": {
 					Kind: &structpb.Value_StringValue{"string_example"}},
-				"n_value": &structpb.Value{
+				"n_value": {
 					Kind: &structpb.Value_NumberValue{1234}},
 			},
 		},

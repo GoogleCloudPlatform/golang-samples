@@ -54,7 +54,7 @@ func setSourceIamPolicy(w io.Writer, sourceName string, user string) error {
 		Policy: &iam.Policy{
 			// Enables partial update of existing policy
 			Etag: existing.Etag,
-			Bindings: []*iam.Binding{&iam.Binding{
+			Bindings: []*iam.Binding{{
 				Role: "roles/securitycenter.findingsEditor",
 				// New IAM Binding for the user.
 				Members: []string{fmt.Sprintf("user:%s", user)},
