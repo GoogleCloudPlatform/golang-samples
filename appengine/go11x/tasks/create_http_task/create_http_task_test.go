@@ -23,6 +23,7 @@ func TestCreateHttpTask(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	locationID := "us-central1"
 	queueID := "my-appengine-queue"
+	url := fmt.Sprintf("https://$s.appspot.com/task_handler", tc.ProjectID)
 
 	tests := []struct {
 		name    string
