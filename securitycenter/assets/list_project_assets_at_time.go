@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Contains examples calls to Cloud Security Center ListAssets API method.
 package assets
 
 // [START list_project_assets_at_time]
@@ -36,14 +35,14 @@ func listAllProjectAssetsAtTime(w io.Writer, orgID string, asOf time.Time) error
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("Error instantiating client %v\n", err)
+		return fmt.Errorf("securitycenter.NewClient: %v", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
 	// Convert the time to a Timestamp protobuf
 	readTime, err := ptypes.TimestampProto(asOf)
 	if err != nil {
-		return fmt.Errorf("Error converting %v: %v", asOf, err)
+		return fmt.Errorf("TimestampProto(%v): %v", asOf, err)
 	}
 
 	req := &securitycenterpb.ListAssetsRequest{
@@ -60,7 +59,7 @@ func listAllProjectAssetsAtTime(w io.Writer, orgID string, asOf time.Time) error
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("Error listing assets: %v", err)
+			return fmt.Errorf("ListAssets: %v", err)
 		}
 		asset := result.Asset
 		properties := asset.SecurityCenterProperties

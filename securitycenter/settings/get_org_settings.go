@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// settings contains snippets for working with CSCC organization settings.
 package settings
 
 // [START get_org_settings]
@@ -26,14 +25,14 @@ import (
 )
 
 // getOrgSettings gets and prints the current organization asset discovery
-// settings to w.  orgID is the numeric Organization ID.
+// settings to w. orgID is the numeric Organization ID.
 func getOrgSettings(w io.Writer, orgID string) error {
 	// orgID := "12321311"
 	// Instantiate a context and a security service client to make API calls.
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("Error instantiating client %v\n", err)
+		return fmt.Errorf("securitycenter.NewClient: %v", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
@@ -42,7 +41,7 @@ func getOrgSettings(w io.Writer, orgID string) error {
 	}
 	settings, err := client.GetOrganizationSettings(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Error creating finding: %v", err)
+		return fmt.Errorf("GetOrganizationSettings: %v", err)
 	}
 	fmt.Fprintf(w, "Retrieved Settings for: %s\n", settings.Name)
 	fmt.Fprintf(w, "Asset Discovery on? %v", settings.EnableAssetDiscovery)

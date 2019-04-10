@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// assets contains example snippets for working with CSCC Assets.
 package assets
 
 // [START list_assets_with_security_marks]
@@ -34,7 +33,7 @@ func listAssetsWithMarks(w io.Writer, orgID string) error {
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("Error instantiating client %v\n", err)
+		return fmt.Errorf("securitycenter.NewClient: %v", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
@@ -50,7 +49,7 @@ func listAssetsWithMarks(w io.Writer, orgID string) error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("Error listing assets: %v", err)
+			return fmt.Errorf("ListAssets: %v", err)
 		}
 		asset := result.Asset
 		properties := asset.SecurityCenterProperties

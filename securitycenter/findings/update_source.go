@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Pacakge assets contains example snippets for working with findings
-// and their parent resource "sources".
 package findings
 
 // [START update_source]
@@ -28,7 +26,7 @@ import (
 )
 
 // updateSource changes a sources display name to "New Display Name" for a
-// specific source.  sourceName is the full resource name of the source to be
+// specific source. sourceName is the full resource name of the source to be
 // updated.
 func updateSource(w io.Writer, sourceName string) error {
 	// sourceName := "organizations/111122222444/sources/1234"
@@ -36,7 +34,7 @@ func updateSource(w io.Writer, sourceName string) error {
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("Error instantiating client %v\n", err)
+		return fmt.Errorf("securitycenter.NewClient: %v", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
@@ -53,7 +51,7 @@ func updateSource(w io.Writer, sourceName string) error {
 	}
 	source, err := client.UpdateSource(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Error updating source: %v", err)
+		return fmt.Errorf("UpdateSource: %v", err)
 	}
 	fmt.Fprintf(w, "Source Name: %s, ", source.Name)
 	fmt.Fprintf(w, "Display name: %s, ", source.DisplayName)

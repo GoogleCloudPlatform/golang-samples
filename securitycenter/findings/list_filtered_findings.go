@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// findings contains example snippets for working with findings
-// and their parent resource "sources".
 package findings
 
 // [START list_filtered_findings]
@@ -28,7 +26,7 @@ import (
 )
 
 // listFilteredFindings prints findings with category 'MEDIUM_RISK_ONE' for a
-// specific source to w.  sourceName is the full resource name of the source
+// specific source to w. sourceName is the full resource name of the source
 // to search for findings under.
 func listFilteredFindings(w io.Writer, sourceName string) error {
 	// Specific source.
@@ -39,7 +37,7 @@ func listFilteredFindings(w io.Writer, sourceName string) error {
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("Error instantiating client %v\n", err)
+		return fmt.Errorf("securitycenter.NewClient: %v", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
@@ -49,14 +47,14 @@ func listFilteredFindings(w io.Writer, sourceName string) error {
 	}
 	it := client.ListFindings(ctx, req)
 	for {
-		findingResult, err := it.Next()
+		result, err := it.Next()
 		if err == iterator.Done {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("Error listing sources: %v", err)
+			return fmt.Errorf("it.Next: %v", err)
 		}
-		finding := findingResult.Finding
+		finding := result.Finding
 		fmt.Fprintf(w, "Finding Name: %s, ", finding.Name)
 		fmt.Fprintf(w, "Resource Name %s, ", finding.ResourceName)
 		fmt.Fprintf(w, "Category: %s\n", finding.Category)

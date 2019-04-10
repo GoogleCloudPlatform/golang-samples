@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// findings contains example snippets for working with findings
-// and their parent resource "sources".
 package findings
 
 // [START create_finding]
@@ -37,13 +35,13 @@ func createFinding(w io.Writer, sourceName string) error {
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("Error instantiating client %v", err)
+		return fmt.Errorf("securitycenter.NewClient: %v", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 	// Use now as the eventTime for the security finding.
 	eventTime, err := ptypes.TimestampProto(time.Now())
 	if err != nil {
-		return fmt.Errorf("Error converting now: %v", err)
+		return fmt.Errorf("TimestampProto: %v", err)
 	}
 
 	req := &securitycenterpb.CreateFindingRequest{
@@ -51,7 +49,7 @@ func createFinding(w io.Writer, sourceName string) error {
 		FindingId: "samplefindingid",
 		Finding: &securitycenterpb.Finding{
 			State: securitycenterpb.Finding_ACTIVE,
-			// Resource the finding is associated with.  This is an
+			// Resource the finding is associated with. This is an
 			// example any resource identifier can be used.
 			ResourceName: "//cloudresourcemanager.googleapis.com/organizations/11232",
 			// A free-form category.
@@ -62,7 +60,7 @@ func createFinding(w io.Writer, sourceName string) error {
 	}
 	finding, err := client.CreateFinding(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Error creating finding: %v", err)
+		return fmt.Errorf("CreateFinding: %v", err)
 	}
 	fmt.Fprintf(w, "New finding created: %s\n", finding.Name)
 	fmt.Fprintf(w, "Event time (Epoch Seconds): %d\n", eventTime.Seconds)

@@ -36,7 +36,7 @@ var untouchedFindingName = ""
 func createFindingHelper(ctx context.Context, client *securitycenter.Client, findingID string, category string) (*securitycenterpb.Finding, error) {
 	eventTime, err := ptypes.TimestampProto(time.Now())
 	if err != nil {
-		return nil, fmt.Errorf("Error converting now: %v", err)
+		return nil, fmt.Errorf("TimestampProto: %v", err)
 	}
 
 	req := &securitycenterpb.CreateFindingRequest{
@@ -66,7 +66,7 @@ func setupEntities() {
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		fmt.Printf("Error instantiating client %v\n", err)
+		fmt.Printf("securitycenter.NewClient: %v", err)
 		return
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
@@ -80,7 +80,7 @@ func setupEntities() {
 	})
 
 	if err != nil {
-		fmt.Printf("Error creating source: %v", err)
+		fmt.Printf("CreateSource: %v", err)
 		return
 	}
 	sourceName = source.Name

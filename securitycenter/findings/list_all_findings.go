@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// findings contains example snippets for working with findings
-// and their parent resource "sources".
 package findings
 
 // [START list_all_findings]
@@ -35,7 +33,7 @@ func listFindings(w io.Writer, orgID string) error {
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("Error instantiating client %v\n", err)
+		return fmt.Errorf("securitycenter.NewClient: %v", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
@@ -45,14 +43,14 @@ func listFindings(w io.Writer, orgID string) error {
 	}
 	it := client.ListFindings(ctx, req)
 	for {
-		finding_result, err := it.Next()
+		result, err := it.Next()
 		if err == iterator.Done {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("Error listing sources: %v", err)
+			return fmt.Errorf("it.Next: %v", err)
 		}
-		finding := finding_result.Finding
+		finding := result.Finding
 		fmt.Fprintf(w, "Finding Name: %s, ", finding.Name)
 		fmt.Fprintf(w, "Resource Name %s, ", finding.ResourceName)
 		fmt.Fprintf(w, "Category: %s\n", finding.Category)

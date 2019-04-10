@@ -39,7 +39,7 @@ func getRandomAsset(client *securitycenter.Client, orgID string) (*securitycente
 		Parent: fmt.Sprintf("organizations/%s", orgID),
 	}
 
-	var randomAsset *securitycenterpb.Asset = nil
+	var randomAsset *securitycenterpb.Asset
 	assetsCount := 0
 	it := client.ListAssets(ctx, req)
 	for {
@@ -126,7 +126,7 @@ func initAssetForManipulation() {
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		fmt.Printf("Error instantiating client %v\n", err)
+		fmt.Printf("securitycenter.NewClient: %v", err)
 		return
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.

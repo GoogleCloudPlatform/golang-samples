@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// findings contains example snippets for working with findings
-// and their parent resource "sources".
 package findings
 
 // [START update_finding_source_properties]
@@ -31,20 +29,20 @@ import (
 )
 
 // updateFindingSourceProperties demonstrates how to update a security finding
-// in CSCC.  findingName is the full resource name of the finding to update.
+// in CSCC. findingName is the full resource name of the finding to update.
 func updateFindingSourceProperties(w io.Writer, findingName string) error {
 	// findingName := "organizations/111122222444/sources/1234/findings/findingid"
 	// Instantiate a context and a security service client to make API calls.
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("Error instantiating client %v\n", err)
+		return fmt.Errorf("securitycenter.NewClient: %v", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 	// Use now as the eventTime for the security finding.
 	eventTime, err := ptypes.TimestampProto(time.Now())
 	if err != nil {
-		return fmt.Errorf("Error converting now: %v", err)
+		return fmt.Errorf("TimestampProto: %v", err)
 	}
 
 	req := &securitycenterpb.UpdateFindingRequest{
@@ -52,12 +50,12 @@ func updateFindingSourceProperties(w io.Writer, findingName string) error {
 			Name:      findingName,
 			EventTime: eventTime,
 			SourceProperties: map[string]*structpb.Value{
-				"s_value": &structpb.Value{
-					Kind: &structpb.Value_StringValue{"new_string_example"}},
+				"s_value": {
+					Kind: &structpb.Value_StringValue{StringValue: "new_string_example"}},
 			},
 		},
 		// Needed to only update the specific source property s_value
-		// and EventTime.  EventTime is a required field.
+		// and EventTime. EventTime is a required field.
 		UpdateMask: &field_mask.FieldMask{
 			Paths: []string{"event_time", "source_properties.s_value"},
 		},
@@ -65,7 +63,7 @@ func updateFindingSourceProperties(w io.Writer, findingName string) error {
 
 	finding, err := client.UpdateFinding(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Error updating finding: %v", err)
+		return fmt.Errorf("UpdateFinding: %v", err)
 	}
 	fmt.Fprintf(w, "Finding updated: %s\n", finding.Name)
 	fmt.Fprintf(w, "Finding state: %v\n", finding.State)

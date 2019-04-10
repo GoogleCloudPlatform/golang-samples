@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// findings contains example snippets for working with findings
-// and their parent resource "sources".
 package findings
 
 // [START set_finding_state]
@@ -36,13 +34,13 @@ func setFindingState(w io.Writer, findingName string) error {
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("Error instantiating client %v\n", err)
+		return fmt.Errorf("securitycenter.NewClient: %v", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 	// Use now as the eventTime for the security finding.
 	now, err := ptypes.TimestampProto(time.Now())
 	if err != nil {
-		return fmt.Errorf("Error converting now: %v", err)
+		return fmt.Errorf("TimestampProto: %v", err)
 	}
 
 	req := &securitycenterpb.SetFindingStateRequest{
@@ -54,7 +52,7 @@ func setFindingState(w io.Writer, findingName string) error {
 
 	finding, err := client.SetFindingState(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Error updating finding state: %v", err)
+		return fmt.Errorf("SetFindingState: %v", err)
 	}
 
 	fmt.Fprintf(w, "Finding updated: %s\n", finding.Name)

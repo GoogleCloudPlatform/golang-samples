@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Pacakge assets contains example snippets for working with findings
-// and their parent resource "sources".
 package findings
 
 // [START create_source]
@@ -26,7 +24,7 @@ import (
 	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
 )
 
-// createSource creates a new source for organization orgID.  orgID is
+// createSource creates a new source for organization orgID. orgID is
 // the numeric identifier of the organization
 func createSource(w io.Writer, orgID string) error {
 	// orgID := "12321311"
@@ -34,7 +32,7 @@ func createSource(w io.Writer, orgID string) error {
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("Error instantiating client %v\n", err)
+		return fmt.Errorf("securitycenter.NewClient: %v", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
@@ -47,7 +45,7 @@ func createSource(w io.Writer, orgID string) error {
 	}
 	source, err := client.CreateSource(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Error creating source: %v", err)
+		return fmt.Errorf("CreateSource: %v", err)
 	}
 
 	fmt.Fprintf(w, "New source created: %s\n", source.Name)

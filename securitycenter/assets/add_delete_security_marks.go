@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// assets contains example snippets for working with CSCC Assets.
 package assets
 
 // [START add_delete_security_marks]
@@ -27,14 +26,14 @@ import (
 )
 
 // addDeleteSecurityMarks adds/updates "key_a" and deletes  "key_b" from
-// assetName's securityMarks.  assetName is the resource path for an asset.
+// assetName's securityMarks. assetName is the resource path for an asset.
 func addDeleteSecurityMarks(w io.Writer, assetName string) error {
 	// assetName := "organizations/123123342/assets/12312321"
 	// Instantiate a context and a security service client to make API calls.
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("Error instantiating client %v\n", err)
+		return fmt.Errorf("securitycenter.NewClient: %v", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
@@ -53,7 +52,7 @@ func addDeleteSecurityMarks(w io.Writer, assetName string) error {
 
 	updatedMarks, err := client.UpdateSecurityMarks(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Error updating marks %v", err)
+		return fmt.Errorf("UpdateSecurityMarks: %v", err)
 	}
 
 	fmt.Fprintf(w, "Updated marks: %s\n", updatedMarks.Name)

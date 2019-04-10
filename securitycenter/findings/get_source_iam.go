@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// findings  contains example snippets for working with findings
-// and their parent resource "sources".
 package findings
 
 // [START get_iam_policy_source]
@@ -34,7 +32,7 @@ func getSourceIamPolicy(w io.Writer, sourceName string) error {
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("Error instantiating client %v\n", err)
+		return fmt.Errorf("securitycenter.NewClient: %v", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
@@ -44,7 +42,7 @@ func getSourceIamPolicy(w io.Writer, sourceName string) error {
 
 	policy, err := client.GetIamPolicy(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Couldn't get IAM policy for %s: %v", sourceName, err)
+		return fmt.Errorf("GetIamPolicy(%s): %v", sourceName, err)
 	}
 
 	fmt.Fprintf(w, "Policy: %v", policy)

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// settings contains snippets for working with CSCC organization settings.
+// Package settings contains snippets for working with CSCC organization settings.
 package settings
 
 // [START get_org_settings]
@@ -34,7 +34,7 @@ func enableAssetDiscovery(w io.Writer, orgID string) error {
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("Error instantiating client %v\n", err)
+		return fmt.Errorf("securitycenter.NewClient: %v", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
@@ -50,7 +50,7 @@ func enableAssetDiscovery(w io.Writer, orgID string) error {
 	}
 	settings, err := client.UpdateOrganizationSettings(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Error creating finding: %v", err)
+		return fmt.Errorf("UpdateOrganizationSettings: %v", err)
 	}
 	fmt.Fprintf(w, "Updated Settings for: %s\n", settings.Name)
 	fmt.Fprintf(w, "Asset discovery on? %v\n", settings.EnableAssetDiscovery)

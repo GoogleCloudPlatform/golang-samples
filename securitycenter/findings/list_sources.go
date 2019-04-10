@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// findings contains example snippets for working with findings
-// and their parent resource "sources".
 package findings
 
 // [START list_sources]
@@ -35,7 +33,7 @@ func listSources(w io.Writer, orgID string) error {
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("Error instantiating client %v\n", err)
+		return fmt.Errorf("securitycenter.NewClient: %v", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
@@ -49,7 +47,7 @@ func listSources(w io.Writer, orgID string) error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("Error listing sources: %v", err)
+			return fmt.Errorf("it.Next: %v", err)
 		}
 		fmt.Fprintf(w, "Source Name: %s, ", source.Name)
 		fmt.Fprintf(w, "Display name: %s, ", source.DisplayName)

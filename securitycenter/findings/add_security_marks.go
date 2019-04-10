@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// findings contains example snippets for working with findings
-// and their parent resource "sources".
 package findings
 
 // [START add_security_marks]
@@ -29,7 +27,7 @@ import (
 
 // addSecurityMarks adds/updates a the security marks for the findingName and
 // returns the updated marks. Specifically, it sets "key_a" an "key_b" to
-// "value_a" and "value_b" respectively.  findingName is the resource path for
+// "value_a" and "value_b" respectively. findingName is the resource path for
 // the finding to add marks to.
 func addSecurityMarks(w io.Writer, findingName string) error {
 	// findingName := "organizations/11123213/sources/12342342/findings/fidningid"
@@ -37,7 +35,7 @@ func addSecurityMarks(w io.Writer, findingName string) error {
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("Error instantiating client %v\n", err)
+		return fmt.Errorf("securitycenter.NewClient: %v", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
@@ -56,7 +54,7 @@ func addSecurityMarks(w io.Writer, findingName string) error {
 
 	updatedMarks, err := client.UpdateSecurityMarks(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Trouble updating marks %v", err)
+		return fmt.Errorf("UpdateSecurityMarks: %v", err)
 	}
 
 	fmt.Fprintf(w, "Updated marks: %s\n", updatedMarks.Name)
