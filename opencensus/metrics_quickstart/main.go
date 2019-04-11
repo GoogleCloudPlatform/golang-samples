@@ -65,10 +65,8 @@ func main() {
 	// Flush must be called before main() exits to ensure metrics are recorded.
 	defer exporter.Flush()
 
-	view.RegisterExporter(exporter)
-
-	// The minimum reporting period for Stackdriver is 1 minute.
-	view.SetReportingPeriod(60 * time.Second)
+	exporter.StartMetricsExporter()
+	defer exporter.StopMetricsExporter()
 
 	// Record 100 fake latency values between 0 and 5 seconds.
 	for i := 0; i < 100; i++ {
