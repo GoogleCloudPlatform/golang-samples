@@ -51,7 +51,8 @@ func updateFindingSourceProperties(w io.Writer, findingName string) error {
 			EventTime: eventTime,
 			SourceProperties: map[string]*structpb.Value{
 				"s_value": {
-					Kind: &structpb.Value_StringValue{StringValue: "new_string_example"}},
+					Kind: &structpb.Value_StringValue{StringValue: "new_string_example"},
+				},
 			},
 		},
 		// Needed to only update the specific source property s_value
