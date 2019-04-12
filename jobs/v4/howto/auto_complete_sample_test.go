@@ -29,7 +29,7 @@ func TestJobTitleAutocomplete(t *testing.T) {
 	if _, err := jobTitleAutocomplete(buf, tc.ProjectID, companyID, "Software"); err != nil {
 		t.Fatalf("jobTitleAutoComplete: %v", err)
 	}
-	want := "Software Engineer"
+	want := "Software Developer"
 	if got := buf.String(); !strings.Contains(got, want) {
 		t.Errorf("jobTitleAutoComplete got %q, want %q", got, want)
 	}

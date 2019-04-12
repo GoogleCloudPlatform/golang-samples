@@ -40,7 +40,7 @@ func jobTitleAutocomplete(w io.Writer, projectID, companyID, query string) (*tal
 	req := &talentpb.CompleteQueryRequest{
 		Name:        fmt.Sprintf("projects/%s", projectID),
 		Query:       query,
-		PageSize:    1,
+		PageSize:    10,
 		CompanyName: fmt.Sprintf("projects/%s/companies/%s", projectID, companyID),
 	}
 
