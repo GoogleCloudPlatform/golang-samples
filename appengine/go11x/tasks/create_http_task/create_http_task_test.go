@@ -46,5 +46,4 @@ func TestCreateHTTPTask(t *testing.T) {
 			t.Errorf("CreateTask(%s): %v", test.name, err)
 		}
 	}
-	return test.name
 }
