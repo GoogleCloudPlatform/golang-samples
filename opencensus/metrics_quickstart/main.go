@@ -65,7 +65,9 @@ func main() {
 	// Flush must be called before main() exits to ensure metrics are recorded.
 	defer exporter.Flush()
 
-	exporter.StartMetricsExporter()
+	if err := exporter.StartMetricsExporter(); err != nil {
+		log.Fatalf("error starting metric exporter. error=%v", err)
+	}
 	defer exporter.StopMetricsExporter()
 
 	// Record 100 fake latency values between 0 and 5 seconds.
