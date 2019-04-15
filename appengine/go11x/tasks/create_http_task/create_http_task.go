@@ -26,7 +26,7 @@ import (
 )
 
 // createTask creates a new task in your App Engine queue.
-func createHttpTask(projectID, locationID, queueID, url, message string) (*taskspb.Task, error) {
+func createHTTPTask(projectID, locationID, queueID, url, message string) (*taskspb.Task, error) {
 	// Create a new Cloud Tasks client instance.
 	// See https://godoc.org/cloud.google.com/go/cloudtasks/apiv2beta3
 	ctx := context.Background()
@@ -54,9 +54,7 @@ func createHttpTask(projectID, locationID, queueID, url, message string) (*tasks
 	}
 
 	// Add a payload message if one is present.
-	if message != "" {
-		req.Task.GetHttpRequest().Body = []byte(message)
-	}
+	req.Task.GetHttpRequest().Body = []byte(message)
 
 	createdTask, err := client.CreateTask(ctx, req)
 	if err != nil {

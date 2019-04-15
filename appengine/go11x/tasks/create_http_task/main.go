@@ -24,7 +24,7 @@ import (
 )
 
 func main() {
-	if len(os.Args) <= 5 {
+	if len(os.Args) < 5 {
 		fmt.Println("Usage: Must include 4 arguments for projectID, locationID, queueID, and url")
 		os.Exit(1)
 	}
@@ -38,9 +38,9 @@ func main() {
 		message = os.Args[5]
 	}
 
-	task, err := createHttpTask(projectID, locationID, queueID, url, message)
+	task, err := createHTTPTask(projectID, locationID, queueID, url, message)
 	if err != nil {
-		log.Fatalf("createHttpTask: %v", err)
+		log.Fatalf("createHTTPTask: %v", err)
 	}
 
 	fmt.Printf("Create Task: %s\n", task.GetName())

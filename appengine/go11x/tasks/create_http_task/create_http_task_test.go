@@ -20,7 +20,7 @@ import (
 	"testing"
 )
 
-func TestCreateHttpTask(t *testing.T) {
+func TestCreateHTTPTask(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	locationID := "us-central1"
 	queueID := "my-appengine-queue"
@@ -41,9 +41,10 @@ func TestCreateHttpTask(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		_, err := createHttpTask(tc.ProjectID, locationID, queueID, url, test.message)
+		_, err := createHTTPTask(tc.ProjectID, locationID, queueID, url, test.message)
 		if err != nil {
 			t.Errorf("CreateTask(%s): %v", test.name, err)
 		}
 	}
+	return test.name
 }
