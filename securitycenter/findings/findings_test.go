@@ -33,7 +33,7 @@ var sourceName = ""
 var findingName = ""
 var untouchedFindingName = ""
 
-func createFindingHelper(ctx context.Context, client *securitycenter.Client, findingID string, category string) (*securitycenterpb.Finding, error) {
+func createTestFinding(ctx context.Context, client *securitycenter.Client, findingID string, category string) (*securitycenterpb.Finding, error) {
 	eventTime, err := ptypes.TimestampProto(time.Now())
 	if err != nil {
 		return nil, fmt.Errorf("TimestampProto: %v", err)
@@ -58,16 +58,16 @@ func createFindingHelper(ctx context.Context, client *securitycenter.Client, fin
 
 // setupEntities initializes variables in this file with entityNames to
 // use for testing.
-func setupEntities() {
+func setupEntities() error {
 	orgID = os.Getenv("GCLOUD_ORGANIZATION")
 	if orgID == "" {
-		return
+		// Each test checks for GCLOUD_ORGANIZATION. Return nil so we see every skip.
+		return nil
 	}
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		fmt.Printf("securitycenter.NewClient: %v", err)
-		return
+		return fmt.Errorf("securitycenter.NewClient: %v", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
@@ -80,23 +80,20 @@ func setupEntities() {
 	})
 
 	if err != nil {
-		fmt.Printf("CreateSource: %v", err)
-		return
+		return fmt.Errorf("CreateSource: %v", err)
 	}
 	sourceName = source.Name
-	finding, err := createFindingHelper(ctx, client, "updated", "MEDIUM_RISK_ONE")
+	finding, err := createTestFinding(ctx, client, "updated", "MEDIUM_RISK_ONE")
 	if err != nil {
-		fmt.Printf("Error creating findings1 %v", err)
-		return
+		return fmt.Errorf("createTestFinding: %v", err)
 	}
 	findingName = finding.Name
-	finding, err = createFindingHelper(ctx, client, "untouched", "XSS")
+	finding, err = createTestFinding(ctx, client, "untouched", "XSS")
 	if err != nil {
-		fmt.Printf("Error creating findings1 %v", err)
-		return
+		return fmt.Errorf("createTestFinding: %v", err)
 	}
 	untouchedFindingName = finding.Name
-
+	return nil
 }
 
 func setup(t *testing.T) string {
@@ -110,7 +107,10 @@ func setup(t *testing.T) string {
 }
 
 func TestMain(m *testing.M) {
-	setupEntities()
+	if err := setupEntities(); err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to initialize findings test environment: %v\n", err)
+		return
+	}
 	code := m.Run()
 	os.Exit(code)
 }
@@ -285,7 +285,7 @@ func TestTestIam(t *testing.T) {
 	got := buf.String()
 	trueCount := strings.Count(got, "true")
 	if want := 2; want != trueCount {
-		t.Errorf("testIam(%s) got: %s true count: %d want %d", sourceName, got, trueCount, want)
+		t.Errorf("testIam(%s) got %q, true count: %d, want %d", sourceName, got, trueCount, want)
 	}
 }
 

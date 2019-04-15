@@ -48,7 +48,7 @@ func getRandomAsset(client *securitycenter.Client, orgID string) (*securitycente
 			break
 		}
 		if err != nil {
-			return nil, fmt.Errorf("Error listing assets: %v", err)
+			return nil, fmt.Errorf("it.Next(): %v", err)
 		}
 		assetsCount++
 		if rand.Float64() < 1.0/float64(assetsCount) {
@@ -67,12 +67,12 @@ func attemptLease(client *securitycenter.Client, asset *securitycenterpb.Asset, 
 	if lease != "" {
 		i, err := strconv.ParseInt(lease, 10, 64)
 		if err != nil {
-			fmt.Printf("Couldn't parse lease value %v: ", err)
+			fmt.Printf("strconv.ParseInt(%v, 10, 64): %v", lease, err)
 		}
 		okToLease = now > i
 	}
 	if !okToLease {
-		return fmt.Errorf("Lease by another process still active for %s", asset.Name)
+		return fmt.Errorf("lease by another process still active for %s", asset.Name)
 	}
 	leaseTime := now + (60 * time.Second).Nanoseconds()
 	leaseValue := strconv.FormatInt(leaseTime, 10)
@@ -81,8 +81,11 @@ func attemptLease(client *securitycenter.Client, asset *securitycenterpb.Asset, 
 		// If not set or empty, all marks would be cleared before
 		// adding the new marks below.
 		UpdateMask: &field_mask.FieldMask{
-			Paths: []string{fmt.Sprintf("marks.%s", leaseExpirationKey),
-				"marks.key_a", "marks.key_b"},
+			Paths: []string{
+				fmt.Sprintf("marks.%s", leaseExpirationKey),
+				"marks.key_a",
+				"marks.key_b",
+			},
 		},
 		SecurityMarks: &securitycenterpb.SecurityMarks{
 			Name: fmt.Sprintf("%s/securityMarks", asset.Name),
@@ -91,7 +94,7 @@ func attemptLease(client *securitycenter.Client, asset *securitycenterpb.Asset, 
 		},
 	})
 	if err != nil {
-		return fmt.Errorf("Couldn't update mark for lease %s", err)
+		return fmt.Errorf("UpdateSecurityMarks: %v", err)
 	}
 	// Randomize wake-up in case we are in the edge case of two writes
 	time.Sleep(time.Duration((100 * rand.Int63n(20))) * time.Millisecond)
@@ -102,32 +105,31 @@ func attemptLease(client *securitycenter.Client, asset *securitycenterpb.Asset, 
 
 	result, err := it.Next()
 	if err == iterator.Done {
-		return fmt.Errorf("Didn't find asset %s", asset.Name)
+		return fmt.Errorf("didn't find asset %s", asset.Name)
 	}
 	if err != nil {
-		return fmt.Errorf("Error listing asset again: %v", err)
+		return fmt.Errorf("it.Next: %v", err)
 	}
 	asset = result.Asset
 
 	if asset.SecurityMarks.Marks[leaseExpirationKey] != leaseValue {
-		return fmt.Errorf("Simultaneous write by another process for %s", asset.Name)
+		return fmt.Errorf("simultaneous write by another process for %s", asset.Name)
 	}
 	marksAssetName = asset.Name
 	return nil
 }
 
-func initAssetForManipulation() {
+func initAssetForManipulation() error {
 	orgID := os.Getenv("GCLOUD_ORGANIZATION")
 	if orgID == "" {
-		fmt.Printf("orgID Missing\n")
-		return
+		// Each test checks for GCLOUD_ORGANIZATION. Return nil so we see every skip.
+		return nil
 	}
 
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		fmt.Printf("securitycenter.NewClient: %v", err)
-		return
+		return fmt.Errorf("securitycenter.NewClient: %v", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
@@ -136,14 +138,16 @@ func initAssetForManipulation() {
 		try++
 		asset, err := getRandomAsset(client, orgID)
 		if err != nil {
-			fmt.Printf("Coulnd't get random asset: %v", err)
 			continue
 		}
-		err = attemptLease(client, asset, orgID)
-		if err != nil {
-			fmt.Printf("Lease not obtained on %s", asset.Name)
+		if err := attemptLease(client, asset, orgID); err != nil {
+			return fmt.Errorf("attemptLease: %s", asset.Name)
 		}
 	}
+	if marksAssetName == "" {
+		return fmt.Errorf("failed to set marksAssetName")
+	}
+	return nil
 }
 
 func setup(t *testing.T) string {
@@ -157,7 +161,10 @@ func setup(t *testing.T) string {
 }
 
 func TestMain(m *testing.M) {
-	initAssetForManipulation()
+	if err := initAssetForManipulation(); err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to initialize assets test environment: %v", err)
+		return
+	}
 	rand.Seed(time.Now().UTC().UnixNano())
 	code := m.Run()
 	os.Exit(code)
