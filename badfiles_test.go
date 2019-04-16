@@ -39,6 +39,7 @@ var whitelist = []string{
 	"**/*.mod",
 	"**/*.sum",
 	"**/*.svg",
+	"**/*.tmpl",
 	"**/*.css",
 	"**/*.html",
 	"**/*.js",
@@ -55,6 +56,15 @@ var whitelist = []string{
 	"**/testdata/**/*.png",
 	"**/testdata/**/*.txt",
 	"**/testdata/**/*.csv",
+
+	// Healthcare data.
+	"healthcare/testdata/dicom_00000001_000.dcm",
+	"healthcare/testdata/hl7v2message.dat",
+
+	// Webrisk samples.
+	"webrisk/non_existing_path.path",
+	"webrisk/internal/webrisk_proto/*.proto",
+	"webrisk/testdata/hashes.gob",
 
 	// Endpoints samples.
 	"endpoints/**/*.proto",
