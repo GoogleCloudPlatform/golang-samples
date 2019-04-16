@@ -31,12 +31,11 @@ func createJob(w io.Writer, projectID, companyID, requisitionID, title, URI, des
 	// Initialize a jobService client.
 	c, err := talent.NewJobClient(ctx)
 	if err != nil {
-		fmt.Printf("talent.NewJobClient: %v\n", err)
-		return nil, err
+		return nil, fmt.Errorf("talent.NewJobClient: %v", err)
 	}
 
 	jobToCreate := &talentpb.Job{
-		CompanyName:   fmt.Sprintf("projects/%s/companies/%s", projectID, companyID),
+		Company:       fmt.Sprintf("projects/%s/companies/%s", projectID, companyID),
 		RequisitionId: requisitionID,
 		Title:         title,
 		ApplicationInfo: &talentpb.Job_ApplicationInfo{
@@ -55,11 +54,10 @@ func createJob(w io.Writer, projectID, companyID, requisitionID, title, URI, des
 
 	resp, err := c.CreateJob(ctx, req)
 	if err != nil {
-		fmt.Printf("Failed to create job: %v\n", err)
-		return nil, err
+		return nil, fmt.Errorf("CreateJob: %v", err)
 	}
 
-	fmt.Printf("Created job: %q\n", resp.GetName())
+	fmt.Fprintf(w, "Created job: %q\n", resp.GetName())
 
 	return resp, nil
 }
