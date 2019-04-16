@@ -32,6 +32,7 @@ var orgID = ""
 var sourceName = ""
 var findingName = ""
 var untouchedFindingName = ""
+var settableFindingName = ""
 
 func createTestFinding(ctx context.Context, client *securitycenter.Client, findingID string, category string) (*securitycenterpb.Finding, error) {
 	eventTime, err := ptypes.TimestampProto(time.Now())
@@ -85,14 +86,21 @@ func setupEntities() error {
 	sourceName = source.Name
 	finding, err := createTestFinding(ctx, client, "updated", "MEDIUM_RISK_ONE")
 	if err != nil {
-		return fmt.Errorf("createTestFinding: %v", err)
+		return fmt.Errorf("createTestFinding(updated, MEDIUM_RISK_ONE): %v", err)
 	}
 	findingName = finding.Name
 	finding, err = createTestFinding(ctx, client, "untouched", "XSS")
 	if err != nil {
-		return fmt.Errorf("createTestFinding: %v", err)
+		return fmt.Errorf("createTestFinding(untouched, xss): %v", err)
 	}
 	untouchedFindingName = finding.Name
+
+	finding, err = createTestFinding(ctx, client, "other", "otherCat")
+	if err != nil {
+		return fmt.Errorf("createTestFinding(other, otherCat): %v", err)
+	}
+	settableFindingName = finding.Name
+
 	return nil
 }
 
@@ -257,18 +265,18 @@ func TestSetFindingState(t *testing.T) {
 	setup(t)
 	buf := new(bytes.Buffer)
 
-	err := setFindingState(buf, findingName)
+	err := setFindingState(buf, settableFindingName)
 
 	if err != nil {
-		t.Fatalf("setFindingState(%s) had error: %v", findingName, err)
+		t.Fatalf("setFindingState(%s) had error: %v", settableFindingName, err)
 	}
 
 	got := buf.String()
 	if want := "INACTIVE"; !strings.Contains(got, want) {
-		t.Errorf("setFindingState(%s) got: %s want %s", findingName, got, want)
+		t.Errorf("setFindingState(%s) got: %s want %s", settableFindingName, got, want)
 	}
-	if !strings.Contains(got, findingName) {
-		t.Errorf("setFindingState(%s) got: %s want %s", findingName, got, findingName)
+	if !strings.Contains(got, settableFindingName) {
+		t.Errorf("setFindingState(%s) got: %s want %s", settableFindingName, got, settableFindingName)
 	}
 }
 
