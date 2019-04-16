@@ -23,13 +23,13 @@ import (
 	"github.com/h2non/filetype"
 )
 
-// Glob patterns that should always be rejected.
+// alwaysBad contains glob patterns that should always be rejected.
 var alwaysBad = []string{
 	"**/*.swp",
 }
 
-// Glob patterns that are acceptable.
-var whitelist = []string{
+// allowList contains glob patterns that are acceptable.
+var allowList = []string{
 	// Files that are always good!
 	"**/*.go",
 	"**/*.md",
@@ -114,7 +114,7 @@ func TestBadFiles(t *testing.T) {
 			}
 		}
 
-		for _, pattern := range whitelist {
+		for _, pattern := range allowList {
 			match, err := doublestar.PathMatch(pattern, path)
 			if err != nil {
 				t.Fatalf("bad pattern: %q", pattern)
