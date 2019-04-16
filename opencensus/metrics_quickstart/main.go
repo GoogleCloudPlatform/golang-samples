@@ -66,7 +66,7 @@ func main() {
 	defer exporter.Flush()
 
 	if err := exporter.StartMetricsExporter(); err != nil {
-		log.Fatalf("error starting metric exporter. error=%v", err)
+		log.Fatalf("Error starting metric exporter: %v", err)
 	}
 	defer exporter.StopMetricsExporter()
 
