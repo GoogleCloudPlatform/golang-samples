@@ -59,17 +59,22 @@ var whitelist = []string{
 	// Endpoints samples.
 	"endpoints/**/*.proto",
 
+	// Cloud Functions codelab picture.
+	"functions/codelabs/gopher/gophercolor.png",
+
 	// Samples that aren't really code. Legacy.
 	"**/appengine/**/*.txt",
 
-	// Test configs.
+	// Test output and configs.
+	"gotest.out",
 	"testing/kokoro/*.cfg",
 
 	// TODO: cruft that should probably be under "testdata".
+	"appengine_flexible/pubsub/sample_message.json",
 	"dialogflow/resources/**/*",
 	"texttospeech/**/*",
 	"storage/objects/notes.txt",
-	"appengine_flexible/pubsub/sample_message.json",
+	"videointelligence/resources/**/*",
 
 	// TODO: remove when all DLP snippets are moved to canonical format.
 	"dlp/dlp_snippets/testdata/.gitignore",
