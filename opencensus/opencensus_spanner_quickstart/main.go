@@ -25,7 +25,6 @@ import (
 
 	"cloud.google.com/go/spanner"
 	"contrib.go.opencensus.io/exporter/stackdriver"
-	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
 )
 
@@ -37,14 +36,19 @@ func main() {
 	// Exporters use Application Default Credentials to authenticate.
 	// See https://developers.google.com/identity/protocols/application-default-credentials
 	// for more details.
-	exporter, err := stackdriver.NewExporter(stackdriver.Options{
-		ProjectID: "your-project-id",
-	})
+	exporter, err := stackdriver.NewExporter(stackdriver.Options{})
 	if err != nil {
 		log.Fatal(err)
 	}
-	view.RegisterExporter(exporter)
+	// Flush must be called before main() exits to ensure metrics are recorded.
+	defer exporter.Flush()
+
 	trace.RegisterExporter(exporter)
+
+	if err := exporter.StartMetricsExporter(); err != nil {
+		log.Fatalf("Error starting metric exporter: %v", err)
+	}
+	defer exporter.StopMetricsExporter()
 
 	// Use trace.AlwaysSample() to always record traces. The
 	// default sampler skips some traces to conserve resources,
@@ -68,7 +72,4 @@ func main() {
 	if err != nil {
 		log.Printf("Failed to insert: %v", err)
 	}
-
-	// Make sure data is uploaded before program finishes.
-	exporter.Flush()
 }
