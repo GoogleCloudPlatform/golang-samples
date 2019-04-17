@@ -1,7 +1,7 @@
 # Contributing
 
 1. Sign one of the contributor license agreements below.
-1. [Install Go](https://golang.org/doc/install)
+1. [Install Go](https://golang.org/doc/install).
 1. Get the package:
 
     `go get -d github.com/GoogleCloudPlatform/golang-samples`
@@ -12,18 +12,224 @@
 1. Set your fork as a remote:
 
     `git remote add fork git@github.com:GITHUB_USERNAME/golang-samples.git`
-1. Make changes, commit to your fork.
+1. Make changes (see [Formatting](#formatting) and [Style](#style)), commit to
+   your fork. Commit messages should follow the
+   [Go project style](https://github.com/golang/go/wiki/CommitMessage) (e.g.
+   `functions: add gophers codelab`).
 1. Send a pull request with your changes.
+1. A maintainer will review the pull request and make comments. Prefer adding
+   additional commits over ammending and force-pushing since it can be difficult
+   to follow code reviews when the commit history changes.
+
+   Commits will be squashed when they're merged.
 
 # Formatting
 
 All code must be formatted with `gofmt` (with the latest Go version) and pass
 `go vet`.
 
+# Style
+
+Please read and follow https://github.com/golang/go/wiki/CodeReviewComments for
+all Go code in this repo.
+
+The following style guidelines are specific to writing Go samples.
+
+## One file per sample
+
+Each sample should be in its own file so the imports used by the sample can
+be included in the region tag.
+
+## Include imports in region tags
+
+The sample region (e.g. `[START foo]` and `[END foo`]) should include the import
+block.
+
+```go
+// Package hello contains Hello samples.
+package hello
+
+// [START hello]
+import "fmt"
+
+func hello(w io.Writer) {
+	fmt.Fprintln(w, "Hello, World")
+}
+
+// [END hello]
+```
+
+## Print to an `io.Writer`
+
+Do not print to `stdout` or `stderr`. Pass `w io.Writer` as the first argument
+to the sample function and print to it with `fmt.Fprintf(w, ...)`.
+
+This pattern matches `http.Handler`s, which print to an `http.ResponseWriter`, normally named
+`w`.
+
+```go
+func hello(w io.Writer) {
+	fmt.Fprintln(w, "Hello, World.")
+}
+```
+
+## Google Cloud Project ID
+
+Quickstarts should use an example project ID or add a project ID flag.
+
+If a project ID is needed, snippets should have a `projectID string` argument.
+
+## Declare a `context.Context` as needed
+
+Don't pass a `context.Context` as an argument. New Go developers may not
+understand where the `ctx` comes from.
+
+```diff
+- func hello(ctx context.Context, w io.Writer) { ... }
++ func hello(w io.Writer) {
++ 	ctx := context.Background()
++ 	// ...
++ }
+```
+
+## Only quickstarts have `package main`
+
+Sample code should not include a runnable binary. Binaries should only be
+included for quickstarts (which should all be `package main`).
+
+Quickstarts need to be in a separate directories from snippets because they need
+to be in different packages.
+
+The output can be verified during testing using a buffer.
+
+[inspect_test.go](https://github.com/GoogleCloudPlatform/golang-samples/blob/readme/dlp/snippets/inspect/inspect_test.go)
+```go
+func TestInspectString(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+	err := inspectString(buf, tc.ProjectID, "I'm Gary and my email is gary@example.com")
+	if err != nil {
+		t.Errorf("TestInspectFile: %v", err)
+	}
+
+	got := buf.String()
+	if want := "Info type: EMAIL_ADDRESS"; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+```
+
+## Prefer inline proto declarations
+
+Where possible, prefer a single declaration when initializing a proto value.
+
+Request values should usually be named `req` and be declared on their own so the
+API call (which uses `req`) is easier to understand.
+
+```diff
+- myRequest := &pb.Request{}
+- myRequest.Parent = projectID
++ req := &pb.Request{
++ 	Parent: projectID,
++ }
+```
+
+## Initialize clients and services in every sample
+
+Don't initialize one client for the entire set of samples and pass it as an
+argument. Each sample should initialize its own client/service.
+
+```diff
+- func hello(client foo.Client, w io.Writer) { ... }
++ func hello(w io.Writer) {
++	client, err := foo.NewClient(...)
++	// ...
++ }
+```
+
+## Return errors
+
+If the sample can run into errors, return the errors with additional context.
+Don't call `log.Fatal` or friends.
+
+`log.Fatal` is difficult to test because it will stop the entire test suite.
+
+```diff
+client, err := foo.NewClient(...)
+- if err != nil {
+- 	log.Fatal(err)
+- }
++ if err != nil {
++ 	return fmt.Errorf("foo.NewClient: %v", err)
++ }
+```
+
+## Error messages
+
+Use `fmt.Errorf` to add information when returning errors. See
+[Return errors](#return-errors).
+
+## Imports
+
+Imports should be added and sorted by `goimports`. There should be two groups,
+separated by a newline:
+* Standard library
+* Everything else
+
+```go
+import (
+	"context"
+	"fmt"
+	"log"
+	"time"
+
+	"contrib.go.opencensus.io/exporter/stackdriver"
+	"go.opencensus.io/stats"
+	"go.opencensus.io/stats/view"
+	"golang.org/x/exp/rand"
+)
+```
+
+## Comment functions and packages
+
+One file in the sample package should have a package comment. The comment is
+shown as a description on
+https://godoc.org/github.com/GoogleCloudPlatform/golang-samples. If there are
+many files/samples in the package, it's common to create a `doc.go` file that
+only has the package comment. The comment should start with
+`Package packagename`.
+
+Functions should have comments starting with the name of the function (with the
+same capitalization, even if it's lower case).
+
+```go
+// package foo contains samples for Foo.
+package foo
+
+// hello prints "Hello, World."
+func hello(w io.Writer) { ... }
+```
+
+See https://golang.org/doc/effective_go.html#commentary.
+
+
+## Use `testutil` for tests
+
+All tests should use `testutil.SystemTest` or variants. `testutil` checks the
+`GOLANG_SAMPLES_PROJECT_ID` environment variable exists, and skips the test if
+not.
+
+See [Print to an `io.Writer`](#print-to-an-iowriter) for a full test example.
+
+See [Testing](#testing).
+
 # Testing
 
 Tests are required for all samples. When writing a pull request, be sure to
 write and run the tests in any modified directories.
+
+See [Use `testutil` for tests](#use-testutil-for-tests) and
+[Print to an `io.Writer`](#print-to-an-iowriter).
 
 ## Running system tests
 
