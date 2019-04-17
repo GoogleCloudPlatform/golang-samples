@@ -19,7 +19,7 @@ import (
 	"testing"
 )
 
-func TestCreateHttpTaskWithToken(t *testing.T) {
+func TestCreateHTTPTaskWithToken(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	locationID := "us-central1"
 	queueID := "my-appengine-queue"
@@ -41,7 +41,7 @@ func TestCreateHttpTaskWithToken(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		_, err := createHttpTaskWithToken(tc.ProjectID, locationID, queueID, url, serviceAccountEmail, test.message)
+		_, err := createHTTPTaskWithToken(tc.ProjectID, locationID, queueID, url, serviceAccountEmail, test.message)
 		if err != nil {
 			t.Errorf("CreateTask(%s): %v", test.name, err)
 		}

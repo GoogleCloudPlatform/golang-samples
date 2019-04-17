@@ -26,7 +26,7 @@ import (
 )
 
 // createTask creates a new task in your App Engine queue.
-func createHttpTaskWithToken(projectID, locationID, queueID, url, email, message string) (*taskspb.Task, error) {
+func createHTTPTaskWithToken(projectID, locationID, queueID, url, email, message string) (*taskspb.Task, error) {
 	// Create a new Cloud Tasks client instance.
 	// See https://godoc.org/cloud.google.com/go/cloudtasks/apiv2beta3
 	ctx := context.Background()
