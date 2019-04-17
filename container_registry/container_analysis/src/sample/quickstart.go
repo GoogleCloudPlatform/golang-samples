@@ -15,6 +15,7 @@
 // Sample quickstart for getting vulnerabilities from the Container Analysis API: https://cloud.google.com/container-registry/docs/vulnerability-scan-go
 package sample
 
+// [START containeranalysis_imports_quickstart]
 import (
 	"context"
 	"log"
@@ -28,6 +29,7 @@ import (
 	grafeaspb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/grafeas"
 	vulnerability "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/vulnerability"
 )
+// [END containeranalysis_imports_quickstart]
 
 // [START containeranalysis_poll_discovery_occurrence_finished]
 

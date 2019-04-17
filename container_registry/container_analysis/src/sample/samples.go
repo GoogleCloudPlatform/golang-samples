@@ -15,6 +15,7 @@
 // Samples for the Container Analysis golang libraries: https://cloud.google.com/container-registry/docs/container-analysis
 package sample
 
+// [START containeranalysis_imports_samples]
 import (
 	"context"
 	"fmt"
@@ -28,6 +29,7 @@ import (
 	"google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/vulnerability"
 	fieldmaskpb "google.golang.org/genproto/protobuf/field_mask"
 )
+// [END containeranalysis_imports_samples]
 
 // [START containeranalysis_create_note]
 
