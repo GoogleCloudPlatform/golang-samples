@@ -40,6 +40,21 @@ The following style guidelines are specific to writing Go samples.
 Each sample should be in its own file so the imports used by the sample can
 be included in the region tag.
 
+## File paths
+
+The top level directory should be the product the sample is for (e.g.
+`functions` or `dlp`).
+
+Sub-directories can be used to keep different groups of samples for the product
+separate.
+
+Files should be named after the sample in them (e.g. `hello.go`). No need to
+include the product name or "sample" in the filename.
+
+If there are many samples to write in the same directory, use filename prefixes
+to group the files acting on similar types (for example, when writing
+create/update/delete type samples).
+
 ## Include imports in region tags
 
 The sample region (e.g. `[START foo]` and `[END foo`]) should include the import
