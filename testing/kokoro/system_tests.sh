@@ -93,7 +93,7 @@ popd
 
 # Always download top-level and internal dependencies.
 go get -t ./internal/...
-go get -t .
+go get -t -d .
 
 go get github.com/jstemmer/go-junit-report
 go install -v $GO_IMPORTS
