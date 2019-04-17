@@ -14,8 +14,9 @@
 
 // [START cloud_tasks_create_http_task_with_token]
 
-// Command create_task constructs and adds a task to an App Engine Queue.
-package main
+// Command createHTTPTaskWithToken constructs a task with a authorization token
+// and HTTP target then adds it to a Queue.
+package create_http_task_with_token
 
 import (
 	"context"
