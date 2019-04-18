@@ -91,8 +91,9 @@ git checkout v2.0.0
 go get -v ./...
 popd
 
-# Always download internal dependencies.
-go get ./internal/...
+# Always download top-level and internal dependencies.
+go get -t ./internal/...
+go get -t -d .
 
 go get github.com/jstemmer/go-junit-report
 go install -v $GO_IMPORTS
