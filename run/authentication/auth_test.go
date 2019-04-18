@@ -22,7 +22,7 @@ import (
 	"testing"
 )
 
-func Test_makeGetRequest(t *testing.T) {
+func TestMakeGetRequest(t *testing.T) {
 	metadata := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		v := r.URL.Query().Get("audience")
 		if v == "" {
@@ -35,7 +35,7 @@ func Test_makeGetRequest(t *testing.T) {
 
 	metadataURL, err := url.Parse(metadata.URL)
 	if err != nil {
-		t.Fatalf("failed to parse metadata URL (%s): %v", metadata.URL, err)
+		t.Fatalf("url.Parse(%s): %v", metadata.URL, err)
 	}
 	defer os.Unsetenv("GCE_METADATA_HOST")
 	os.Setenv("GCE_METADATA_HOST", metadataURL.Host)
@@ -55,13 +55,14 @@ func Test_makeGetRequest(t *testing.T) {
 
 	resp, err := makeGetRequest(url)
 	if err != nil {
-		t.Fatalf("makeGetRequest: ")
-	}
-	if expected := http.StatusOK; resp.StatusCode != expected {
-		t.Fatalf("unexpected response status: got=%d; expected=%d", resp.StatusCode, expected)
-	}
-	if gotHeader != expectedHeader {
-		t.Fatalf("unexpected Authorization header: expected=%q; got=%q", expectedHeader, gotHeader)
+		t.Fatalf("makeGetRequest: %v", err)
 	}
 	defer resp.Body.Close()
+
+	if expected := http.StatusOK; resp.StatusCode != expected {
+		t.Errorf("makeGetRequest got status code = %d; expected=%d", resp.StatusCode, expected)
+	}
+	if gotHeader != expectedHeader {
+		t.Errorf("makeGetRequest got Authorization header = %q; expected = %q", gotHeader, expectedHeader)
+	}
 }
