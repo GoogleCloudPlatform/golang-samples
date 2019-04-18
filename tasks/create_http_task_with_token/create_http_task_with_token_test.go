@@ -23,7 +23,7 @@ func TestCreateHTTPTaskWithToken(t *testing.T) {
 	locationID := "us-central1"
 	queueID := "my-appengine-queue"
 	url := "https://example.com/task_handler"
-	serviceAccountEmail := "ClientID@ProjectID.iam.gserviceaccount.com"
+	serviceAccountEmail := "test-run-invoker@pgolang-samples-tests.iam.gserviceaccount.com"
 
 	tests := []struct {
 		name    string
