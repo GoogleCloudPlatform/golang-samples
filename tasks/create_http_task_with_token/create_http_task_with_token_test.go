@@ -14,6 +14,8 @@
 package create_http_task_with_token
 
 import (
+	"fmt"
+
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"testing"
 )
@@ -23,7 +25,7 @@ func TestCreateHTTPTaskWithToken(t *testing.T) {
 	locationID := "us-central1"
 	queueID := "my-appengine-queue"
 	url := "https://example.com/task_handler"
-	serviceAccountEmail := "test-run-invoker@pgolang-samples-tests.iam.gserviceaccount.com"
+	serviceAccountEmail := fmt.Printf("test-run-invoker@%s.iam.gserviceaccount.com", tc.ProjectID)
 
 	tests := []struct {
 		name    string
