@@ -128,10 +128,6 @@ Administrative commands:
 		return fmt.Errorf("datastore.NewClient: %v", err)
 	}
 
-	if *format == "" {
-		fmt.Println(flag.Arg(0), flag.Arg(1))
-	}
-
 	switch flag.Arg(0) {
 	case "help":
 		fmt.Fprintln(os.Stderr, usage.Error())
