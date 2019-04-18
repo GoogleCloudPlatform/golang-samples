@@ -25,8 +25,9 @@ import (
 	taskspb "google.golang.org/genproto/googleapis/cloud/tasks/v2beta3"
 )
 
-// createTask creates a new task in your App Engine queue.
+// createHTTPTask creates a new task in your with a HTTP target.
 func createHTTPTask(projectID, locationID, queueID, url, message string) (*taskspb.Task, error) {
+
 	// Create a new Cloud Tasks client instance.
 	// See https://godoc.org/cloud.google.com/go/cloudtasks/apiv2beta3
 	ctx := context.Background()
