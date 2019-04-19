@@ -1,6 +1,16 @@
-// Copyright 2018 Google Inc. All rights reserved.
-// Use of this source code is governed by the Apache 2.0
-// license that can be found in the LICENSE file.
+// Copyright 2019 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package main
 
@@ -205,7 +215,7 @@ func writeTestDatastoreFiles(t *testing.T, projectID string) {
 }
 
 func TestInspectDatastore(t *testing.T) {
-	testutil.SystemTest(t)
+	testutil.EndToEndTest(t)
 	writeTestDatastoreFiles(t, projectID)
 	tests := []struct {
 		kind string
@@ -284,7 +294,7 @@ func uploadBigQuery(ctx context.Context, d *bigquery.Dataset, schema bigquery.Sc
 }
 
 func TestInspectBigquery(t *testing.T) {
-	testutil.SystemTest(t)
+	testutil.EndToEndTest(t)
 	if err := createBigqueryTestFiles(projectID, bqDatasetID); err != nil {
 		t.Fatalf("error creating test BigQuery files: %v", err)
 	}

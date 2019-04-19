@@ -1,6 +1,16 @@
-// Copyright 2018 Google Inc. All rights reserved.
-// Use of this source code is governed by the Apache 2.0
-// license that can be found in the LICENSE file.
+// Copyright 2019 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 // Samples for the Container Analysis golang libraries: https://cloud.google.com/container-registry/docs/container-analysis
 package sample
@@ -22,7 +32,7 @@ import (
 
 // createNote creates and returns a new vulnerability Note.
 func createNote(ctx context.Context, client *containeranalysis.GrafeasV1Beta1Client, noteID, projectID string) (*grafeaspb.Note, error) {
-	projectName := "projects/" + projectID
+	projectName := fmt.Sprintf("projects/%s", projectID)
 
 	req := &grafeaspb.CreateNoteRequest{
 		Parent: projectName,
@@ -44,13 +54,10 @@ func createNote(ctx context.Context, client *containeranalysis.GrafeasV1Beta1Cli
 
 // createsOccurrence creates and returns a new Occurrence of a previously created vulnerability Note.
 func createOccurrence(ctx context.Context, client *containeranalysis.GrafeasV1Beta1Client, imageURL, noteID, occProjectID, noteProjectID string) (*grafeaspb.Occurrence, error) {
-	noteName := "projects/" + noteProjectID + "/notes/" + noteID
-	occProjectName := "projects/" + occProjectID
-
 	req := &grafeaspb.CreateOccurrenceRequest{
-		Parent: occProjectName,
+		Parent: fmt.Sprintf("projects/%s", occProjectID),
 		Occurrence: &grafeaspb.Occurrence{
-			NoteName: noteName,
+			NoteName: fmt.Sprintf("projects/%s/notes/%s", noteProjectID, noteID),
 			// Attach the occurrence to the associated image uri.
 			Resource: &grafeaspb.Resource{
 				Uri: imageURL,
@@ -61,7 +68,6 @@ func createOccurrence(ctx context.Context, client *containeranalysis.GrafeasV1Be
 			},
 		},
 	}
-
 	return client.CreateOccurrence(ctx, req)
 }
 
@@ -71,10 +77,8 @@ func createOccurrence(ctx context.Context, client *containeranalysis.GrafeasV1Be
 
 // updateNote pushes an update to a Note that already exists on the server.
 func updateNote(ctx context.Context, client *containeranalysis.GrafeasV1Beta1Client, updated *grafeaspb.Note, noteID, projectID string) (*grafeaspb.Note, error) {
-	noteName := "projects/" + projectID + "/notes/" + noteID
-
 	req := &grafeaspb.UpdateNoteRequest{
-		Name: noteName,
+		Name: fmt.Sprintf("projects/%s/notes/%s", projectID, noteID),
 		Note: updated,
 	}
 	return client.UpdateNote(ctx, req)
@@ -100,9 +104,9 @@ func updateOccurrence(ctx context.Context, client *containeranalysis.GrafeasV1Be
 
 // deleteNote removes an existing Note from the server.
 func deleteNote(ctx context.Context, client *containeranalysis.GrafeasV1Beta1Client, noteID, projectID string) error {
-	noteName := "projects/" + projectID + "/notes/" + noteID
-
-	req := &grafeaspb.DeleteNoteRequest{Name: noteName}
+	req := &grafeaspb.DeleteNoteRequest{
+		Name: fmt.Sprintf("projects/%s/notes/%s", projectID, noteID),
+	}
 	return client.DeleteNote(ctx, req)
 }
 
@@ -123,8 +127,9 @@ func deleteOccurrence(ctx context.Context, client *containeranalysis.GrafeasV1Be
 
 // getNote retrieves and prints a specified Note from the server.
 func getNote(ctx context.Context, client *containeranalysis.GrafeasV1Beta1Client, noteID, projectID string) (*grafeaspb.Note, error) {
-	noteName := "projects/" + projectID + "/notes/" + noteID
-	req := &grafeaspb.GetNoteRequest{Name: noteName}
+	req := &grafeaspb.GetNoteRequest{
+		Name: fmt.Sprintf("projects/%s/notes/%s", projectID, noteID),
+	}
 	note, err := client.GetNote(ctx, req)
 	fmt.Println(note)
 	return note, err
@@ -150,12 +155,9 @@ func getOccurrence(ctx context.Context, client *containeranalysis.GrafeasV1Beta1
 // getDiscoveryInfo retrieves and prints the Discovery Occurrence created for a specified image.
 // The Discovery Occurrence contains information about the initial scan on the image.
 func getDiscoveryInfo(ctx context.Context, client *containeranalysis.GrafeasV1Beta1Client, imageURL, projectID string) error {
-	filterStr := `kind="DISCOVERY" AND resourceUrl="` + imageURL + `"`
-	projectName := "projects/" + projectID
-
 	req := &grafeaspb.ListOccurrencesRequest{
-		Parent: projectName,
-		Filter: filterStr,
+		Parent: fmt.Sprintf("projects/%s", projectID),
+		Filter: fmt.Sprintf(`kind="DISCOVERY" AND resourceUrl=%q`, imageURL),
 	}
 	it := client.ListOccurrences(ctx, req)
 	for {
@@ -178,9 +180,9 @@ func getDiscoveryInfo(ctx context.Context, client *containeranalysis.GrafeasV1Be
 // getOccurrencesForNote retrieves all the Occurrences associated with a specified Note.
 // Here, all Occurrences are printed and counted.
 func getOccurrencesForNote(ctx context.Context, client *containeranalysis.GrafeasV1Beta1Client, noteID, projectID string) (int, error) {
-	noteName := "projects/" + projectID + "/notes/" + noteID
-
-	req := &grafeaspb.ListNoteOccurrencesRequest{Name: noteName}
+	req := &grafeaspb.ListNoteOccurrencesRequest{
+		Name: fmt.Sprintf("projects/%s/notes/%s", projectID, noteID),
+	}
 	it := client.ListNoteOccurrences(ctx, req)
 	count := 0
 	for {
@@ -205,12 +207,9 @@ func getOccurrencesForNote(ctx context.Context, client *containeranalysis.Grafea
 // getOccurrencesForImage retrieves all the Occurrences associated with a specified image.
 // Here, all Occurrences are simply printed and counted.
 func getOccurrencesForImage(ctx context.Context, client *containeranalysis.GrafeasV1Beta1Client, imageURL, projectID string) (int, error) {
-	filterStr := `resourceUrl="` + imageURL + `"`
-	project := "projects/" + projectID
-
 	req := &grafeaspb.ListOccurrencesRequest{
-		Parent: project,
-		Filter: filterStr,
+		Parent: fmt.Sprintf("projects/%s", projectID),
+		Filter: fmt.Sprintf("resourceUrl=%q", imageURL),
 	}
 	it := client.ListOccurrences(ctx, req)
 	count := 0

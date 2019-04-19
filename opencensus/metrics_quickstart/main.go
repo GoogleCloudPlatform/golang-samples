@@ -1,6 +1,16 @@
-// Copyright 2018 Google Inc. All rights reserved.
-// Use of this source code is governed by the Apache 2.0
-// license that can be found in the LICENSE file.
+// Copyright 2019 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 // [START monitoring_opencensus_metrics_quickstart]
 
@@ -55,10 +65,10 @@ func main() {
 	// Flush must be called before main() exits to ensure metrics are recorded.
 	defer exporter.Flush()
 
-	view.RegisterExporter(exporter)
-
-	// The minimum reporting period for Stackdriver is 1 minute.
-	view.SetReportingPeriod(60 * time.Second)
+	if err := exporter.StartMetricsExporter(); err != nil {
+		log.Fatalf("Error starting metric exporter: %v", err)
+	}
+	defer exporter.StopMetricsExporter()
 
 	// Record 100 fake latency values between 0 and 5 seconds.
 	for i := 0; i < 100; i++ {

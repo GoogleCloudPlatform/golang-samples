@@ -1,6 +1,16 @@
-// Copyright 2018 Google Inc. All rights reserved.
-// Use of this source code is governed by the Apache 2.0
-// license that can be found in the LICENSE file.
+// Copyright 2019 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 // +build go1.8
 
@@ -15,7 +25,6 @@ import (
 
 	"cloud.google.com/go/spanner"
 	"contrib.go.opencensus.io/exporter/stackdriver"
-	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
 )
 
@@ -27,14 +36,19 @@ func main() {
 	// Exporters use Application Default Credentials to authenticate.
 	// See https://developers.google.com/identity/protocols/application-default-credentials
 	// for more details.
-	exporter, err := stackdriver.NewExporter(stackdriver.Options{
-		ProjectID: "your-project-id",
-	})
+	exporter, err := stackdriver.NewExporter(stackdriver.Options{})
 	if err != nil {
 		log.Fatal(err)
 	}
-	view.RegisterExporter(exporter)
+	// Flush must be called before main() exits to ensure metrics are recorded.
+	defer exporter.Flush()
+
 	trace.RegisterExporter(exporter)
+
+	if err := exporter.StartMetricsExporter(); err != nil {
+		log.Fatalf("Error starting metric exporter: %v", err)
+	}
+	defer exporter.StopMetricsExporter()
 
 	// Use trace.AlwaysSample() to always record traces. The
 	// default sampler skips some traces to conserve resources,
@@ -58,7 +72,4 @@ func main() {
 	if err != nil {
 		log.Printf("Failed to insert: %v", err)
 	}
-
-	// Make sure data is uploaded before program finishes.
-	exporter.Flush()
 }

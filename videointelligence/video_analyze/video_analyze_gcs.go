@@ -1,6 +1,16 @@
-// Copyright 2017 Google Inc. All rights reserved.
-// Use of this source code is governed by the Apache 2.0
-// license that can be found in the LICENSE file.
+// Copyright 2019 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package main
 
@@ -139,3 +149,63 @@ func explicitContentURI(w io.Writer, file string) error {
 }
 
 // [END video_analyze_explicit_content]
+
+// [START video_analyze_speech_transcription_gcs]
+
+func speechTranscriptionURI(w io.Writer, file string) error {
+	ctx := context.Background()
+	client, err := video.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+
+	op, err := client.AnnotateVideo(ctx, &videopb.AnnotateVideoRequest{
+		Features: []videopb.Feature{
+			videopb.Feature_SPEECH_TRANSCRIPTION,
+		},
+		VideoContext: &videopb.VideoContext{
+			SpeechTranscriptionConfig: &videopb.SpeechTranscriptionConfig{
+				LanguageCode:               "en-US",
+				EnableAutomaticPunctuation: true,
+			},
+		},
+		InputUri: file,
+	})
+	if err != nil {
+		return err
+	}
+	resp, err := op.Wait(ctx)
+	if err != nil {
+		return err
+	}
+
+	// A single video was processed. Get the first result.
+	result := resp.AnnotationResults[0]
+
+	for _, transcription := range result.SpeechTranscriptions {
+		// The number of alternatives for each transcription is limited by
+		// SpeechTranscriptionConfig.MaxAlternatives.
+		// Each alternative is a different possible transcription
+		// and has its own confidence score.
+		for _, alternative := range transcription.GetAlternatives() {
+			fmt.Fprintf(w, "Alternative level information:\n")
+			fmt.Fprintf(w, "\tTranscript: %v\n", alternative.GetTranscript())
+			fmt.Fprintf(w, "\tConfidence: %v\n", alternative.GetConfidence())
+
+			fmt.Fprintf(w, "Word level information:\n")
+			for _, wordInfo := range alternative.GetWords() {
+				startTime := wordInfo.GetStartTime()
+				endTime := wordInfo.GetEndTime()
+				fmt.Fprintf(w, "\t%4.1f - %4.1f: %v (speaker %v)\n",
+					float64(startTime.GetSeconds())+float64(startTime.GetNanos())*1e-9, // start as seconds
+					float64(endTime.GetSeconds())+float64(endTime.GetNanos())*1e-9,     // end as seconds
+					wordInfo.GetWord(),
+					wordInfo.GetSpeakerTag())
+			}
+		}
+	}
+
+	return nil
+}
+
+// [END video_analyze_speech_transcription_gcs]
