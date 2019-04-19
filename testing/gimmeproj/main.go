@@ -97,7 +97,6 @@ Usage:
 
 Commands:
 	lease [duration]    Leases a project for a given duration. Prints the project ID to stdout.
-	list [project ID]   List all projects in the pool.
 	done [project ID]   Returns a project to the pool.
 	version             Prints the version of gimmeproj.
 
