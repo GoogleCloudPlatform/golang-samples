@@ -14,7 +14,7 @@
 
 // [START cloud_tasks_create_http_task]
 
-// Command create_task constructs and adds a task to an App Engine Queue.
+// Command createHTTPtask constructs and adds a task to a Cloud Tasks Queue.
 package main
 
 import (

@@ -25,7 +25,7 @@ func TestCreateHTTPTaskWithToken(t *testing.T) {
 	locationID := "us-central1"
 	queueID := "my-appengine-queue"
 	url := "https://example.com/task_handler"
-	serviceAccountEmail := fmt.Printf("kokoro-%s@%s.iam.gserviceaccount.com", tc.ProjectID, tc.ProjectID)
+	serviceAccountEmail := fmt.Sprintf("kokoro-%s@%s.iam.gserviceaccount.com", tc.ProjectID, tc.ProjectID)
 
 	tests := []struct {
 		name    string
