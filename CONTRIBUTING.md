@@ -40,7 +40,7 @@ The following style guidelines are specific to writing Go samples.
 Each sample should be in its own file so the imports used by the sample can
 be included in the region tag.
 
-## File paths
+## Sample file name and directory
 
 The top level directory should be the product the sample is for (e.g.
 `functions` or `dlp`).
@@ -74,6 +74,10 @@ func hello(w io.Writer) {
 // [END hello]
 ```
 
+For quickstarts, the region should include the package declaration.
+
+For snippets, the region should _not_ include the package declaration.
+
 ## Print to an `io.Writer`
 
 Do not print to `stdout` or `stderr`. Pass `w io.Writer` as the first argument
@@ -105,6 +109,28 @@ understand where the `ctx` comes from.
 + 	ctx := context.Background()
 + 	// ...
 + }
+```
+
+## Function arguments
+
+There should be as few function arguments as possible. An `io.Writer` and
+project ID are the most common. If you need additional arguments (for example,
+the ID of a resource to get or delete), there should be an example value in the
+body of the sample function.
+
+```go
+// delete deletes the resource identified by resourceID.
+func delete(w io.Writer, resourceID string) error {
+	// resource := fmt.Sprintf("/projects/my-project/resources/%s", resourceID)
+	client, err := foo.NewClient()
+	if err != nil {
+		return fmt.Errorf("foo.NewClient: %v", err)
+	}
+	if err := client.Delete(resourceID); err != nil {
+		return fmt.Errorf("Delete: %v", err)
+	}
+	return nil
+}
 ```
 
 ## Only quickstarts have `package main`
@@ -169,20 +195,36 @@ Don't call `log.Fatal` or friends.
 
 `log.Fatal` is difficult to test because it will stop the entire test suite.
 
+Use `fmt.Errorf` to add information when returning errors. Usually, the name of
+the `package.Function` or just `Function` that returned the error is enough. It
+may also help to include any arguments that were passed to the function.
+
+Prefer inline error declaration when they aren't needed outside the `if`
+statement.
+
 ```diff
-client, err := foo.NewClient(...)
-- if err != nil {
-- 	log.Fatal(err)
-- }
-+ if err != nil {
-+ 	return fmt.Errorf("foo.NewClient: %v", err)
-+ }
+client, err := foo.NewClient()
+// delete deletes the resource identified by resourceID.
+func delete(w io.Writer, resourceID string) error {
+	// resource := fmt.Sprintf("/projects/my-project/resources/%s", resourceID)
+	client, err := foo.NewClient()
+-	if err != nil {
+-		log.Fatal(err)
+-	}
+-	err := client.Delete(resourceID)
+-	if err != nil {
+-		log.Fatal(err)
+-	}
++	if err != nil {
++		return fmt.Errorf("foo.NewClient: %v", err)
++ 	}
++	if err := client.Delete(resourceID); err != nil {
++		return fmt.Errorf("Delete: %v", err)
++	}
+	return nil
+}
 ```
 
-## Error messages
-
-Use `fmt.Errorf` to add information when returning errors. See
-[Return errors](#return-errors).
 
 ## Imports
 
