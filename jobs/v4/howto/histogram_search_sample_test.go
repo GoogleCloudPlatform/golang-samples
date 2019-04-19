@@ -24,7 +24,6 @@ import (
 )
 
 func TestHistogramSearch(t *testing.T) {
-	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/822")
 	tc := testutil.SystemTest(t)
 	companyID := strings.SplitAfter(testCompany.Name, "companies/")[1]
 	testutil.Retry(t, 10, 1*time.Second, func(r *testutil.R) {
