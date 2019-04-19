@@ -12,11 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// package token constructs a request to Cloud Tasks API.
+package token
 // [START cloud_tasks_create_http_task_with_token]
-
-// Command createHTTPTaskWithToken constructs a task with a authorization token
-// and HTTP target then adds it to a Queue.
-package create_http_task_with_token
 
 import (
 	"context"
@@ -26,7 +24,8 @@ import (
 	taskspb "google.golang.org/genproto/googleapis/cloud/tasks/v2beta3"
 )
 
-// createTask creates a new task in your App Engine queue.
+// createHTTPTaskWithToken constructs a task with a authorization token
+// and HTTP target then adds it to a Queue.
 func createHTTPTaskWithToken(projectID, locationID, queueID, url, email, message string) (*taskspb.Task, error) {
 	// Create a new Cloud Tasks client instance.
 	// See https://godoc.org/cloud.google.com/go/cloudtasks/apiv2beta3
