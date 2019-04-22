@@ -16,7 +16,6 @@
 package token
 
 // [START cloud_tasks_create_http_task_with_token]
-
 import (
 	"context"
 	"fmt"

@@ -14,10 +14,10 @@
 package token
 
 import (
-	"fmt"
+	"os"
+	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"testing"
 )
 
 func TestCreateHTTPTaskWithToken(t *testing.T) {
@@ -25,18 +25,18 @@ func TestCreateHTTPTaskWithToken(t *testing.T) {
 	locationID := "us-central1"
 	queueID := "my-appengine-queue"
 	url := "https://example.com/task_handler"
-	serviceAccountEmail := fmt.Sprintf("kokoro-%s@%s.iam.gserviceaccount.com", tc.ProjectID, tc.ProjectID)
+	serviceAccountEmail := os.Getenv("GOLANG_SAMPLES_SERVICE_ACCOUNT_EMAIL")
+	if serviceAccountEmail == "" {
+		t.Skip("GOLANG_SAMPLES_SERVICE_ACCOUNT_EMAIL not set")
+	}
 
 	tests := []struct {
-		name    string
 		message string
 	}{
 		{
-			name:    "Message",
 			message: "task details for handler processing",
 		},
 		{
-			name:    "No Message",
 			message: "",
 		},
 	}
@@ -44,7 +44,7 @@ func TestCreateHTTPTaskWithToken(t *testing.T) {
 	for _, test := range tests {
 		_, err := createHTTPTaskWithToken(tc.ProjectID, locationID, queueID, url, serviceAccountEmail, test.message)
 		if err != nil {
-			t.Errorf("CreateTask(%s): %v", test.name, err)
+			t.Errorf("CreateTask(%q): %v", test.message, err)
 		}
 	}
 }
