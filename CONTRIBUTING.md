@@ -37,16 +37,21 @@ The following style guidelines are specific to writing Go samples.
 
 ## One file per sample
 
-Each sample should be in its own file so the imports used by the sample can
-be included in the region tag.
+Each sample should be in its own file so the [imports used by the sample can
+be included in the region tag](#include-imports-in-region-tags).
 
-## Sample file name and directory
+## Sample package name, file name, and directory
 
 The top level directory should be the product the sample is for (e.g.
 `functions` or `dlp`).
 
 Sub-directories can be used to keep different groups of samples for the product
 separate.
+
+The package name should match the directory name, unless it's a quickstart.
+[Quickstarts use `package main`](#only-quickstarts-have-package-main); the
+default binary name is the name of the directory. See
+https://golang.org/doc/effective_go.html#names.
 
 Files should be named after the sample in them (e.g. `hello.go`). No need to
 include the product name or "sample" in the filename.
@@ -78,6 +83,8 @@ For quickstarts, the region should include the package declaration.
 
 For snippets, the region should _not_ include the package declaration.
 
+Also see [Imports](#imports).
+
 ## Print to an `io.Writer`
 
 Do not print to `stdout` or `stderr`. Pass `w io.Writer` as the first argument
@@ -89,6 +96,25 @@ This pattern matches `http.Handler`s, which print to an `http.ResponseWriter`, n
 ```go
 func hello(w io.Writer) {
 	fmt.Fprintln(w, "Hello, World.")
+}
+```
+
+The output can be verified during testing using a buffer.
+
+[inspect_test.go](https://github.com/GoogleCloudPlatform/golang-samples/blob/readme/dlp/snippets/inspect/inspect_test.go)
+```go
+func TestInspectString(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+	err := inspectString(buf, tc.ProjectID, "I'm Gary and my email is gary@example.com")
+	if err != nil {
+		t.Errorf("TestInspectFile: %v", err)
+	}
+
+	got := buf.String()
+	if want := "Info type: EMAIL_ADDRESS"; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
 }
 ```
 
@@ -119,46 +145,36 @@ the ID of a resource to get or delete), there should be an example value in the
 body of the sample function.
 
 ```go
-// delete deletes the resource identified by resourceID.
-func delete(w io.Writer, resourceID string) error {
-	// resource := fmt.Sprintf("/projects/my-project/resources/%s", resourceID)
-	client, err := foo.NewClient()
+// delete deletes the resource identified by name.
+func delete(w io.Writer, name string) error {
+	// name := fmt.Sprintf("/projects/my-project/resources/my-resource")
+	ctx := context.Background()
+	client, err := foo.NewClient(ctx)
 	if err != nil {
 		return fmt.Errorf("foo.NewClient: %v", err)
 	}
-	if err := client.Delete(resourceID); err != nil {
+	if err := client.Delete(name); err != nil {
 		return fmt.Errorf("Delete: %v", err)
 	}
 	return nil
 }
 ```
 
+## Don't export sample functions
+
+Sample functions should not be
+[exported](https://golang.org/ref/spec#Exported_identifiers). Users should not
+be depending directly on this sample code. So, the function name should start
+with a lower case letter.
+
 ## Only quickstarts have `package main`
 
 Sample code should not include a runnable binary. Binaries should only be
-included for quickstarts (which should all be `package main`).
+included for quickstarts (which should all be `package main` with the example
+code in `func main`).
 
 Quickstarts need to be in a separate directories from snippets because they need
 to be in different packages.
-
-The output can be verified during testing using a buffer.
-
-[inspect_test.go](https://github.com/GoogleCloudPlatform/golang-samples/blob/readme/dlp/snippets/inspect/inspect_test.go)
-```go
-func TestInspectString(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	buf := new(bytes.Buffer)
-	err := inspectString(buf, tc.ProjectID, "I'm Gary and my email is gary@example.com")
-	if err != nil {
-		t.Errorf("TestInspectFile: %v", err)
-	}
-
-	got := buf.String()
-	if want := "Info type: EMAIL_ADDRESS"; !strings.Contains(got, want) {
-		t.Errorf("got %q, want %q", got, want)
-	}
-}
-```
 
 ## Prefer inline proto declarations
 
@@ -183,7 +199,8 @@ argument. Each sample should initialize its own client/service.
 ```diff
 - func hello(client foo.Client, w io.Writer) { ... }
 + func hello(w io.Writer) {
-+	client, err := foo.NewClient(...)
++	ctx := context.Background()
++	client, err := foo.NewClient(ctx)
 +	// ...
 + }
 ```
@@ -203,11 +220,11 @@ Prefer inline error declaration when they aren't needed outside the `if`
 statement.
 
 ```diff
-client, err := foo.NewClient()
 // delete deletes the resource identified by resourceID.
 func delete(w io.Writer, resourceID string) error {
 	// resource := fmt.Sprintf("/projects/my-project/resources/%s", resourceID)
-	client, err := foo.NewClient()
+	ctx := context.Background()
+	client, err := foo.NewClient(ctx)
 -	if err != nil {
 -		log.Fatal(err)
 -	}
@@ -228,8 +245,9 @@ func delete(w io.Writer, resourceID string) error {
 
 ## Imports
 
-Imports should be added and sorted by `goimports`. There should be two groups,
-separated by a newline:
+Imports should be added and sorted by
+[`goimports`](https://godoc.org/golang.org/x/tools/cmd/goimports). There should
+be at least two groups, separated by a newline:
 * Standard library
 * Everything else
 
@@ -260,15 +278,32 @@ Functions should have comments starting with the name of the function (with the
 same capitalization, even if it's lower case).
 
 ```go
-// package foo contains samples for Foo.
+// Package foo contains samples for Foo.
 package foo
 
 // hello prints "Hello, World."
 func hello(w io.Writer) { ... }
 ```
 
-See https://golang.org/doc/effective_go.html#commentary.
+See
+[Sample package name, file name, and directory](#sample-package-name-file-name-and-directory)
+and https://golang.org/doc/effective_go.html#commentary.
 
+## Common identifiers
+
+* **`ctx`**: All `context.Context` values unless the original can't be shadowed.
+* **`name`**: Fully-qualified resource names (e.g.
+  `/projects/my-project/resource/my-resource`).
+* **`parent`**: Partially-qualified resource names (e.g.
+  `/projects/my-project`)
+* **`req`**: Request value to send.
+* **`projectID`**: Google Cloud project ID.
+
+Names should always be camelCase, even if it's a constant. Initialisms/acronyms
+should have consistent case (e.g. `createFHIRStore` and `fhirStoreID`). See
+https://golang.org/doc/effective_go.html#names.
+
+See [Don't export sample functions](#dont-export-sample-functions).
 
 ## Use `testutil` for tests
 
