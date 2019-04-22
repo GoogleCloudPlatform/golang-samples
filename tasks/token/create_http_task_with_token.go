@@ -12,11 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START cloud_tasks_create_http_task]
+// package token constructs a request to Cloud Tasks API.
+package token
 
-// Command createHTTPtask constructs and adds a task to a Cloud Tasks Queue.
-package main
-
+// [START cloud_tasks_create_http_task_with_token]
 import (
 	"context"
 	"fmt"
@@ -25,9 +24,9 @@ import (
 	taskspb "google.golang.org/genproto/googleapis/cloud/tasks/v2beta3"
 )
 
-// createHTTPTask creates a new task in your with a HTTP target.
-func createHTTPTask(projectID, locationID, queueID, url, message string) (*taskspb.Task, error) {
-
+// createHTTPTaskWithToken constructs a task with a authorization token
+// and HTTP target then adds it to a Queue.
+func createHTTPTaskWithToken(projectID, locationID, queueID, url, email, message string) (*taskspb.Task, error) {
 	// Create a new Cloud Tasks client instance.
 	// See https://godoc.org/cloud.google.com/go/cloudtasks/apiv2beta3
 	ctx := context.Background()
@@ -49,6 +48,11 @@ func createHTTPTask(projectID, locationID, queueID, url, message string) (*tasks
 				HttpRequest: &taskspb.HttpRequest{
 					HttpMethod: taskspb.HttpMethod_POST,
 					Url:        url,
+					AuthorizationHeader: &taskspb.HttpRequest_OidcToken{
+						OidcToken: &taskspb.OidcToken{
+							ServiceAccountEmail: email,
+						},
+					},
 				},
 			},
 		},
@@ -65,4 +69,4 @@ func createHTTPTask(projectID, locationID, queueID, url, message string) (*tasks
 	return createdTask, nil
 }
 
-// [END cloud_tasks_create_http_task]
+// [END cloud_tasks_create_http_task_with_token]
