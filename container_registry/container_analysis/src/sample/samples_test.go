@@ -318,20 +318,54 @@ func TestPubSub(t *testing.T) {
 }
 
 func TestPollDiscoveryOccurrenceFinished(t *testing.T) {
-	// This test queries resources created by the Google vulnerability scanner, which can't be easily mocked.
-	// Maintainers should run this test locally on images they control to ensure it works as expected
-	//t.Skip("test polling discovery occurrence locally.")
 	v := setup(t)
-	resourceUrl := "https://gcr.io/your-image-here@sha256:..."
-	resourceUrl = "https://gcr.io/sanche-testing-project/hello-world@sha256:2512a890d0030258ec3b4039a5fc73f2fb41cb17d44d12c62cc075c3445d2ac4"
+
 	timeout := time.Duration(1)*time.Second
 	discOcc, err := pollDiscoveryOccurrenceFinished(v.imageUrl, v.projectID, timeout)
 	if err == nil || discOcc != nil {
 		t.Errorf("expected error when resourceUrl has no discovery occurrence")
 	}
 
+	// create discovery occurrence
+	noteId := "discovery-note-" + v.timestamp
+	noteReq := &grafeaspb.CreateNoteRequest{
+		Parent:  fmt.Sprintf("projects/%s", v.projectID),
+		NoteId: noteId,
+		Note: &grafeaspb.Note{
+			Type: &grafeaspb.Note_Discovery{
+				Discovery: &discovery.Discovery {},
+			},
+		},
+	}
+	occReq := &grafeaspb.CreateOccurrenceRequest{
+		Parent: fmt.Sprintf("projects/%s", v.projectID),
+		Occurrence: &grafeaspb.Occurrence{
+			NoteName: fmt.Sprintf("projects/%s/notes/%s", v.projectID, noteId),
+			Resource: &grafeaspb.Resource{Uri: v.imageUrl,},
+			Details: &grafeaspb.Occurrence_Discovered {
+				Discovered: &discovery.Details {
+					Discovered: &discovery.Discovered {
+						AnalysisStatus: discovery.Discovered_FINISHED_SUCCESS,
+					},
+				},
+			},
+		},
+	}
+	ctx := context.Background()
+	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
+	if err != nil {
+		t.Errorf("could not create client: %v", err)
+	}
+	defer client.Close()
+	_, err = client.CreateNote(ctx, noteReq)
+	created, err := client.CreateOccurrence(ctx, occReq)
+	if err != nil {
+		t.Errorf("createOccurrence(%s, %s): %v", v.imageUrl, v.noteID, err)
+	} 
+
+	// poll again
 	timeout = time.Duration(20)*time.Second
-	discOcc, err = pollDiscoveryOccurrenceFinished(resourceUrl, resourceProject, timeout)
+	discOcc, err = pollDiscoveryOccurrenceFinished(v.imageUrl, v.projectID, timeout)
 	if err != nil {
 		t.Fatalf("error getting discovery occurrence: %v", err)
 	}
@@ -344,6 +378,9 @@ func TestPollDiscoveryOccurrenceFinished(t *testing.T) {
 		}
 	}
 
+	// Clean up
+	deleteOccurrence(path.Base(created.Name), v.projectID)
+	deleteNote(noteId, v.projectID)
 	teardown(t, v)
 }
 

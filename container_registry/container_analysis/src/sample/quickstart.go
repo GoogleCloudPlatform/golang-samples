@@ -42,17 +42,13 @@ func pollDiscoveryOccurrenceFinished(resourceUrl, projectID string, timeout time
 	}
 	defer client.Close()
 
-	// Discovery Occurrences are stored within a Google-owned project. 
-	const providerProjectID = "goog-analysis"
-	const providerNoteID = "PACKAGE_VULNERABILITY"
-
 	// find the discovery occurrence
 	var discoveryOccurrence *grafeaspb.Occurrence
 	err = wait.Poll(time.Second, timeout, func() (bool, error) {
 		log.Printf("Querying for discovery occurrence")
 		req := &grafeaspb.ListOccurrencesRequest{
 			Parent: fmt.Sprintf("projects/%s", projectID),
-			Filter: fmt.Sprintf("resourceUrl = %q noteProjectId = %q noteId = %q", resourceUrl, providerProjectID, providerNoteID),
+			Filter: fmt.Sprintf(`kind="DISCOVERY" AND resourceUrl=%q`, resourceUrl),
 		}
 		it := client.ListOccurrences(ctx, req)
 		// Only one should ever be returned by ListOccurrences and the given filter.
