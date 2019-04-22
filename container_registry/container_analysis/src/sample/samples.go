@@ -92,47 +92,6 @@ func createOccurrence(resourceURL, noteID, occProjectID, noteProjectID string) (
 
 // [END containeranalysis_create_occurrence]
 
-// [START containeranalysis_update_note]
-
-// updateNote pushes an update to a Note that already exists on the server.
-func updateNote(updated *grafeaspb.Note, noteID, projectID string) (*grafeaspb.Note, error) {
-	ctx := context.Background()
-	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer client.Close()
-
-	req := &grafeaspb.UpdateNoteRequest{
-		Name: fmt.Sprintf("projects/%s/notes/%s", projectID, noteID),
-		Note: updated,
-	}
-	return client.UpdateNote(ctx, req)
-}
-
-// [END containeranalysis_update_note]
-
-// [START containeranalysis_update_occurrence]
-
-// updateOccurrences pushes an update to an Occurrence that already exists on the server.
-func updateOccurrence(updated *grafeaspb.Occurrence, occurrenceID, projectID string) (*grafeaspb.Occurrence, error) {
-	ctx := context.Background()
-	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer client.Close()
-
-	req := &grafeaspb.UpdateOccurrenceRequest{
-		Name:       fmt.Sprintf("projects/%s/occurrences/%s", projectID, occurrenceID),
-		Occurrence: updated,
-		UpdateMask: &fieldmaskpb.FieldMask{Paths: []string{"details"}},
-	}
-	return client.UpdateOccurrence(ctx, req)
-}
-
-// [END containeranalysis_update_occurrence]
-
 // [START containeranalysis_delete_note]
 
 // deleteNote removes an existing Note from the server.
