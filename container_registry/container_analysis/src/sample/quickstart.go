@@ -35,7 +35,7 @@ import (
 
 // [START containeranalysis_poll_discovery_occurrence_finished]
 
-// pollDiscoveryOccurrenceFinished returns a discovery occurrence for an image once it is in a finished state.
+// pollDiscoveryOccurrenceFinished returns the discovery occurrence for a resource once it reaches a finished state.
 func pollDiscoveryOccurrenceFinished(resourceUrl, projectID string, timeout time.Duration) (*grafeaspb.Occurrence, error) {
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
@@ -93,7 +93,7 @@ func pollDiscoveryOccurrenceFinished(resourceUrl, projectID string, timeout time
 
 // [START containeranalysis_vulnerability_occurrences_for_image]
 
-// findVulnerabilityOccurrencesForImage retrieves all vulnerability Occurrences associated with an image.
+// findVulnerabilityOccurrencesForImage retrieves all vulnerability Occurrences associated with a resource.
 func findVulnerabilityOccurrencesForImage(resourceUrl, projectID string) ([]*grafeaspb.Occurrence, error) {
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
