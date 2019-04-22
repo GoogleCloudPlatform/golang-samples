@@ -16,6 +16,7 @@
 package sample
 
 // [START containeranalysis_imports_samples]
+
 import (
 	"context"
 	"fmt"

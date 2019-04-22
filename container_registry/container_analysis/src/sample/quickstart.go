@@ -16,6 +16,7 @@
 package sample
 
 // [START containeranalysis_imports_quickstart]
+
 import (
 	"context"
 	"fmt"
@@ -34,7 +35,7 @@ import (
 
 // [START containeranalysis_poll_discovery_occurrence_finished]
 
-// pollDiscoveryOccurrenceFinished returns a discovery occurrence for an image once that discovery occurrence is in a finished state.
+// pollDiscoveryOccurrenceFinished returns a discovery occurrence for an image once it is in a finished state.
 func pollDiscoveryOccurrenceFinished(resourceUrl, projectID string, timeout time.Duration) (*grafeaspb.Occurrence, error) {
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
@@ -43,7 +44,7 @@ func pollDiscoveryOccurrenceFinished(resourceUrl, projectID string, timeout time
 	}
 	defer client.Close()
 
-	// find the discovery occurrence
+	// Find the discovery occurrence using a filter string.
 	var discoveryOccurrence *grafeaspb.Occurrence
 	err = wait.Poll(time.Second, timeout, func() (bool, error) {
 		log.Printf("Querying for discovery occurrence")
@@ -65,16 +66,17 @@ func pollDiscoveryOccurrenceFinished(resourceUrl, projectID string, timeout time
 		return nil, fmt.Errorf("could not find dicovery occurrence: %v", err)
 	}
 
-	// wait for terminal state
+	// Wait for the discovery occurrence to enter a terminal state.
 	err = wait.Poll(time.Second, timeout, func() (bool, error) {
-		// check for updated occurrence state
-		newOccurrence, err := client.GetOccurrence(ctx, &grafeaspb.GetOccurrenceRequest{Name: discoveryOccurrence.GetName()})
+		// Update the occurrence
+		request := &grafeaspb.GetOccurrenceRequest{Name: discoveryOccurrence.GetName()}
+		newOccurrence, err := client.GetOccurrence(ctx, request)
 		if err != nil {
 			return false, err
 		} else {
 			discoveryOccurrence = newOccurrence
 		}
-		// check if in ternimal state
+		// Check if the discovery occurrence is in a ternimal state.
 		state := discoveryOccurrence.GetDiscovered().GetDiscovered().GetAnalysisStatus()
 		isTerminal := (state == discovery.Discovered_FINISHED_SUCCESS ||
 			state == discovery.Discovered_FINISHED_FAILED ||
@@ -100,7 +102,7 @@ func findVulnerabilityOccurrencesForImage(resourceUrl, projectID string) ([]*gra
 	}
 	defer client.Close()
 
-	var occs []*grafeaspb.Occurrence
+	var occurrenceList []*grafeaspb.Occurrence
 
 	req := &grafeaspb.ListOccurrencesRequest{
 		Parent: fmt.Sprintf("projects/%s", projectID),
@@ -116,31 +118,32 @@ func findVulnerabilityOccurrencesForImage(resourceUrl, projectID string) ([]*gra
 		if err != nil {
 			return nil, err
 		}
-		occs = append(occs, occ)
+		occurrenceList = append(occurrenceList, occ)
 	}
 
-	return occs, nil
+	return occurrenceList, nil
 }
 
 // [END containeranalysis_vulnerability_occurrences_for_image]
 
 // [START containeranalysis_filter_vulnerability_occurrences]
 
+// findHighSeverityVulnerabilitiesForImage retrieves a list of only high vulnerability occurrences associated with a resource.
 func findHighSeverityVulnerabilitiesForImage(resourceUrl, projectID string) ([]*grafeaspb.Occurrence, error) {
-	// retrieve a list of all vulnerabilities using the function defined above
+	// Retrieve a list of all vulnerabilities using the function defined previously.
 	vulnOccs, err := findVulnerabilityOccurrencesForImage(resourceUrl, projectID)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to get vulnerability occurrences: %v", err)
 	}
-	// add high severity occurrences to a new filtered list
-	var filteredOccs []*grafeaspb.Occurrence
+	// Add high severity occurrences to a new filtered list.
+	var filteredList []*grafeaspb.Occurrence
 	for _, occ := range vulnOccs {
 		severityLevel := occ.GetVulnerability().GetSeverity()
 		if severityLevel == vulnerability.Severity_HIGH || severityLevel == vulnerability.Severity_CRITICAL {
-			filteredOccs = append(filteredOccs, occ)
+			filteredList = append(filteredList, occ)
 		}
 	}
-	return filteredOccs, nil
+	return filteredList, nil
 }
 
 // [END containeranalysis_filter_vulnerability_occurrences]
