@@ -318,8 +318,12 @@ func TestPubSub(t *testing.T) {
 }
 
 func TestPollDiscoveryOccurrenceFinished(t *testing.T) {
+	// This test queries resources created by the Google vulnerability scanner, which can't be easily mocked.
+	// Maintainers should run this test locally on images they control to ensure it works as expected
+	//t.Skip("test polling discovery occurrence locally.")
 	v := setup(t)
-	
+	resourceUrl := "https://gcr.io/your-image-here@sha256:..."
+	resourceUrl = "https://gcr.io/sanche-testing-project/hello-world@sha256:2512a890d0030258ec3b4039a5fc73f2fb41cb17d44d12c62cc075c3445d2ac4"
 	timeout := time.Duration(1)*time.Second
 	discOcc, err := pollDiscoveryOccurrenceFinished(v.imageUrl, v.projectID, timeout)
 	if err == nil || discOcc != nil {
@@ -327,7 +331,7 @@ func TestPollDiscoveryOccurrenceFinished(t *testing.T) {
 	}
 
 	timeout = time.Duration(20)*time.Second
-	discOcc, err = pollDiscoveryOccurrenceFinished(resourceUrl, v.projectID, timeout)
+	discOcc, err = pollDiscoveryOccurrenceFinished(resourceUrl, resourceProject, timeout)
 	if err != nil {
 		t.Fatalf("error getting discovery occurrence: %v", err)
 	}
@@ -360,8 +364,6 @@ func TestFindVulnerabilitiesForImage(t *testing.T){
 	} else if created == nil {
 		t.Error("createOccurrence returns nil Occurrence object")
 	}
-
-	//TODO: try creating a non-vulnerability occurrence
 
 	testutil.Retry(t, v.tryLimit, time.Second, func(r *testutil.R) {
 		occList, err = findVulnerabilityOccurrencesForImage(v.imageUrl, v.projectID)
