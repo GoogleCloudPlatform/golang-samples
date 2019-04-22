@@ -12,28 +12,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package howto
+package main
 
 import (
-	"bytes"
-	"strings"
-	"testing"
-	"time"
-
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"testing"
 )
 
-func TestHistogramSearch(t *testing.T) {
+func TestCreateHTTPTask(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	companyID := strings.SplitAfter(testCompany.Name, "companies/")[1]
-	testutil.Retry(t, 10, 1*time.Second, func(r *testutil.R) {
-		buf := &bytes.Buffer{}
-		if err := histogramSearch(buf, tc.ProjectID, companyID); err != nil {
-			r.Errorf("histogramSearch: %v", err)
+	locationID := "us-central1"
+	queueID := "my-appengine-queue"
+	url := "https://example.com/task_handler"
+
+	tests := []struct {
+		name    string
+		message string
+	}{
+		{
+			name:    "Message",
+			message: "task details for handler processing",
+		},
+		{
+			name:    "No Message",
+			message: "",
+		},
+	}
+
+	for _, test := range tests {
+		_, err := createHTTPTask(tc.ProjectID, locationID, queueID, url, test.message)
+		if err != nil {
+			t.Errorf("CreateTask(%s): %v", test.name, err)
 		}
-		want := strings.SplitAfter(testJob.Name, "jobs/")[1]
-		if got := buf.String(); !strings.Contains(got, want) {
-			r.Errorf("histogramSearch got %q, want to contain %q", got, want)
-		}
-	})
+	}
 }

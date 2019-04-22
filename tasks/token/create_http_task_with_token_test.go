@@ -11,29 +11,40 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-package howto
+package token
 
 import (
-	"bytes"
-	"strings"
+	"os"
 	"testing"
-	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestHistogramSearch(t *testing.T) {
+func TestCreateHTTPTaskWithToken(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	companyID := strings.SplitAfter(testCompany.Name, "companies/")[1]
-	testutil.Retry(t, 10, 1*time.Second, func(r *testutil.R) {
-		buf := &bytes.Buffer{}
-		if err := histogramSearch(buf, tc.ProjectID, companyID); err != nil {
-			r.Errorf("histogramSearch: %v", err)
+	locationID := "us-central1"
+	queueID := "my-appengine-queue"
+	url := "https://example.com/task_handler"
+	serviceAccountEmail := os.Getenv("GOLANG_SAMPLES_SERVICE_ACCOUNT_EMAIL")
+	if serviceAccountEmail == "" {
+		t.Skip("GOLANG_SAMPLES_SERVICE_ACCOUNT_EMAIL not set")
+	}
+
+	tests := []struct {
+		message string
+	}{
+		{
+			message: "task details for handler processing",
+		},
+		{
+			message: "",
+		},
+	}
+
+	for _, test := range tests {
+		_, err := createHTTPTaskWithToken(tc.ProjectID, locationID, queueID, url, serviceAccountEmail, test.message)
+		if err != nil {
+			t.Errorf("CreateTask(%q): %v", test.message, err)
 		}
-		want := strings.SplitAfter(testJob.Name, "jobs/")[1]
-		if got := buf.String(); !strings.Contains(got, want) {
-			r.Errorf("histogramSearch got %q, want to contain %q", got, want)
-		}
-	})
+	}
 }
