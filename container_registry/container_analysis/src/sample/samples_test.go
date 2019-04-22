@@ -21,6 +21,7 @@ import (
 	"testing"
 	"time"
 	"path"
+	"fmt"
 
 	containeranalysis "cloud.google.com/go/containeranalysis/apiv1beta1"
 	pubsub "cloud.google.com/go/pubsub"
@@ -39,6 +40,7 @@ type TestVariables struct {
 	projectID string
 	noteObj   *grafeaspb.Note
 	tryLimit  int
+	timestamp string
 }
 
 // Run before each test. Creates a set of useful variables
@@ -63,7 +65,7 @@ func setup(t *testing.T) TestVariables {
 	if err != nil {
 		t.Fatalf("createNote(%s): %v", noteID, err)
 	}
-	v := TestVariables{ctx, client, noteID, subID, imageUrl, projectID, noteObj, tryLimit}
+	v := TestVariables{ctx, client, noteID, subID, imageUrl, projectID, noteObj, tryLimit, timestamp}
 	return v
 }
 
@@ -366,21 +368,77 @@ func TestFindVulnerabilitiesForImage(t *testing.T){
 	testutil.Retry(t, v.tryLimit, time.Second, func(r *testutil.R) {
 		occList, err = findVulnerabilityOccurrencesForImage(v.imageUrl, v.projectID)
 		if err != nil {
-			r.Errorf("getOccurrencesForNote(%s): %v", v.noteID, err)
+			r.Errorf("findVulnerabilityOccurrencesForImage(%v): %v", v.imageUrl, err)
 		}
 		if len(occList) != 1 {
 			r.Errorf("unexpected updated number of occurrences: %d; want: %d", len(occList), 1)
 		}
 	})
 
-
+	// Clean up
+	deleteOccurrence(path.Base(created.Name), v.projectID)
 	teardown(t, v)
 }
 
 func TestFindHighVulnerabilities(t *testing.T){
 	v := setup(t)
 
+	// check before creation
+	occList, err := findHighSeverityVulnerabilitiesForImage(v.imageUrl, v.projectID)
+	if err != nil {
+		t.Fatalf("findHighSeverityVulnerabilitiesForImage(%v): %v", v.imageUrl, err)
+	}
+	if len(occList) != 0 {
+		t.Errorf("unexpected initial number of vulnerabilities: %d; want: %d", len(occList), 0)
+	}
+	
+	// create high severity occurrence
+	noteId := "severe-note-" + v.timestamp
+	noteReq := &grafeaspb.CreateNoteRequest{
+		Parent:  fmt.Sprintf("projects/%s", v.projectID),
+		NoteId: noteId,
+		Note: &grafeaspb.Note{
+			Type: &grafeaspb.Note_Vulnerability{
+				Vulnerability: &vulnerability.Vulnerability {Severity: vulnerability.Severity_CRITICAL,},
+			},
+		},
+	}
+	occReq := &grafeaspb.CreateOccurrenceRequest{
+		Parent: fmt.Sprintf("projects/%s", v.projectID),
+		Occurrence: &grafeaspb.Occurrence{
+			NoteName: fmt.Sprintf("projects/%s/notes/%s", v.projectID, noteId),
+			Resource: &grafeaspb.Resource{Uri: v.imageUrl,},
+			Details: &grafeaspb.Occurrence_Vulnerability{
+				Vulnerability: &vulnerability.Details{Severity: vulnerability.Severity_CRITICAL,},
+			},
+		},
+	}
+	ctx := context.Background()
+	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
+	if err != nil {
+		t.Errorf("could not create client: %v", err)
+	}
+	defer client.Close()
+	_, err = client.CreateNote(ctx, noteReq)
+	created, err := client.CreateOccurrence(ctx, occReq)
+	if err != nil {
+		t.Errorf("createOccurrence(%s, %s): %v", v.imageUrl, v.noteID, err)
+	} else if created == nil {
+		t.Error("createOccurrence returns nil Occurrence object")
+	}
+	// check after creation
+	testutil.Retry(t, v.tryLimit, time.Second, func(r *testutil.R) {
+		occList, err = findHighSeverityVulnerabilitiesForImage(v.imageUrl, v.projectID)
+		if err != nil {
+			r.Errorf("findHighSeverityVulnerabilitiesForImage(%s): %v", v.imageUrl, err)
+		}
+		if len(occList) != 1 {
+			r.Errorf("unexpected updated number of vulnerabilities: %d; want: %d", len(occList), 1)
+		}
+	})
 
-
+	// Clean up
+	deleteOccurrence(path.Base(created.Name), v.projectID)
+	deleteNote(noteId, v.projectID)
 	teardown(t, v)
 }
