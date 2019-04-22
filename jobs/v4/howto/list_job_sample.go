@@ -33,8 +33,7 @@ func listJobs(w io.Writer, projectID, companyID string) error {
 	// Initialize a jobService client.
 	c, err := talent.NewJobClient(ctx)
 	if err != nil {
-		fmt.Printf("talent.NewJobClient: %v\n", err)
-		return err
+		return fmt.Errorf("talent.NewJobClient: %v", err)
 	}
 
 	// Construct a listJobs request.
@@ -52,8 +51,7 @@ func listJobs(w io.Writer, projectID, companyID string) error {
 			return nil
 		}
 		if err != nil {
-			fmt.Printf("it.Next: %v\n", err)
-			return err
+			return fmt.Errorf("it.Next: %v", err)
 		}
 		fmt.Fprintf(w, "Listing job: %v\n", resp.GetName())
 		fmt.Fprintf(w, "Job title: %v\n", resp.GetTitle())

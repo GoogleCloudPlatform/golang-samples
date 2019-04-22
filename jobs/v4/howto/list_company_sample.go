@@ -32,8 +32,7 @@ func listCompanies(w io.Writer, projectID string) error {
 	// Initialize a compnayService client.
 	c, err := talent.NewCompanyClient(ctx)
 	if err != nil {
-		fmt.Printf("talent.NewCompanyClient: %v\n", err)
-		return err
+		return fmt.Errorf("talent.NewCompanyClient: %v", err)
 	}
 
 	// Construct a listCompanies request.
@@ -49,8 +48,7 @@ func listCompanies(w io.Writer, projectID string) error {
 			return nil
 		}
 		if err != nil {
-			fmt.Printf("it.Next: %q\n", err)
-			return err
+			return fmt.Errorf("it.Next: %v", err)
 		}
 		fmt.Fprintf(w, "Listing company: %q\n", resp.GetName())
 		fmt.Fprintf(w, "Display name: %v\n", resp.GetDisplayName())

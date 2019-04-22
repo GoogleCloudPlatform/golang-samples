@@ -58,7 +58,7 @@ func TestBroadeningLocationSearch(t *testing.T) {
 
 	testutil.Retry(t, 10, 1*time.Second, func(r *testutil.R) {
 		buf := &bytes.Buffer{}
-		if _, err := broadeningLocationSearch(buf, tc.ProjectID, testCompany.Name, "Sunnyvale, CA"); err != nil {
+		if _, err := broadeningLocationSearch(buf, tc.ProjectID, testCompany.Name, "Bay Area"); err != nil {
 			r.Errorf("broadeningLocationSearch: %v", err)
 		}
 		want := testJob.Name

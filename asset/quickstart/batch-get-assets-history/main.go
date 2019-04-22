@@ -23,10 +23,10 @@ import (
 	"os"
 	"time"
 
-	asset "cloud.google.com/go/asset/v1beta1"
+	asset "cloud.google.com/go/asset/apiv1"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"golang.org/x/net/context"
-	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1beta1"
+	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1"
 )
 
 func main() {

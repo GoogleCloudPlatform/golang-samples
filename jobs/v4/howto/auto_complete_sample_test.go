@@ -25,8 +25,7 @@ import (
 func TestJobTitleAutocomplete(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := &bytes.Buffer{}
-	companyID := strings.SplitAfter(testCompany.Name, "companies/")[1]
-	if _, err := jobTitleAutocomplete(buf, tc.ProjectID, companyID, "Software"); err != nil {
+	if _, err := jobTitleAutocomplete(buf, tc.ProjectID, "Software"); err != nil {
 		t.Fatalf("jobTitleAutoComplete: %v", err)
 	}
 	want := "Software Developer"

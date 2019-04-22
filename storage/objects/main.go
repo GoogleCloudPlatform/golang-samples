@@ -131,7 +131,7 @@ func listByPrefix(w io.Writer, client *storage.Client, bucket, prefix, delim str
 	// Prefixes and delimiters can be used to emulate directory listings.
 	// Prefixes can be used filter objects starting with prefix.
 	// The delimiter argument can be used to restrict the results to only the
-	// objects in the given "directory". Without the delimeter, the entire  tree
+	// objects in the given "directory". Without the delimiter, the entire  tree
 	// under the prefix is returned.
 	//
 	// For example, given these blobs:
