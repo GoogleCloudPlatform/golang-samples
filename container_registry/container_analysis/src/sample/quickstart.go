@@ -42,7 +42,7 @@ func pollDiscoveryOccurrenceFinished(resourceUrl, projectID string, timeout time
 	}
 	defer client.Close()
 
-	// Discover Occurrences are stored within a Google-owned project. 
+	// Discovery Occurrences are stored within a Google-owned project. 
 	const providerProjectID = "goog-analysis"
 	const providerNoteID = "PACKAGE_VULNERABILITY"
 

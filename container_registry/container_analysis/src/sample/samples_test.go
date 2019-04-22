@@ -319,7 +319,6 @@ func TestPubSub(t *testing.T) {
 
 func TestPollDiscoveryOccurrenceFinished(t *testing.T) {
 	v := setup(t)
-
 	
 	timeout := time.Duration(1)*time.Second
 	discOcc, err := pollDiscoveryOccurrenceFinished(v.imageUrl, v.projectID, timeout)
@@ -346,7 +345,6 @@ func TestPollDiscoveryOccurrenceFinished(t *testing.T) {
 
 func TestFindVulnerabilitiesForImage(t *testing.T){
 	v := setup(t)
-
 
 	occList, err := findVulnerabilityOccurrencesForImage(v.imageUrl, v.projectID)
 	if err != nil {
