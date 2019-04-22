@@ -16,19 +16,19 @@ package sample
 
 import (
 	"context"
+	"fmt"
 	"math/rand"
+	"path"
 	"strconv"
 	"testing"
 	"time"
-	"path"
-	"fmt"
 
 	containeranalysis "cloud.google.com/go/containeranalysis/apiv1beta1"
 	pubsub "cloud.google.com/go/pubsub"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	discovery "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/discovery"
 	grafeaspb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/grafeas"
 	vulnerability "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/vulnerability"
-	discovery "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/discovery"
 )
 
 type TestVariables struct {
@@ -320,7 +320,7 @@ func TestPubSub(t *testing.T) {
 func TestPollDiscoveryOccurrenceFinished(t *testing.T) {
 	v := setup(t)
 
-	timeout := time.Duration(1)*time.Second
+	timeout := time.Duration(1) * time.Second
 	discOcc, err := pollDiscoveryOccurrenceFinished(v.imageUrl, v.projectID, timeout)
 	if err == nil || discOcc != nil {
 		t.Errorf("expected error when resourceUrl has no discovery occurrence")
@@ -329,11 +329,11 @@ func TestPollDiscoveryOccurrenceFinished(t *testing.T) {
 	// create discovery occurrence
 	noteId := "discovery-note-" + v.timestamp
 	noteReq := &grafeaspb.CreateNoteRequest{
-		Parent:  fmt.Sprintf("projects/%s", v.projectID),
+		Parent: fmt.Sprintf("projects/%s", v.projectID),
 		NoteId: noteId,
 		Note: &grafeaspb.Note{
 			Type: &grafeaspb.Note_Discovery{
-				Discovery: &discovery.Discovery {},
+				Discovery: &discovery.Discovery{},
 			},
 		},
 	}
@@ -341,10 +341,10 @@ func TestPollDiscoveryOccurrenceFinished(t *testing.T) {
 		Parent: fmt.Sprintf("projects/%s", v.projectID),
 		Occurrence: &grafeaspb.Occurrence{
 			NoteName: fmt.Sprintf("projects/%s/notes/%s", v.projectID, noteId),
-			Resource: &grafeaspb.Resource{Uri: v.imageUrl,},
-			Details: &grafeaspb.Occurrence_Discovered {
-				Discovered: &discovery.Details {
-					Discovered: &discovery.Discovered {
+			Resource: &grafeaspb.Resource{Uri: v.imageUrl},
+			Details: &grafeaspb.Occurrence_Discovered{
+				Discovered: &discovery.Details{
+					Discovered: &discovery.Discovered{
 						AnalysisStatus: discovery.Discovered_FINISHED_SUCCESS,
 					},
 				},
@@ -361,10 +361,10 @@ func TestPollDiscoveryOccurrenceFinished(t *testing.T) {
 	created, err := client.CreateOccurrence(ctx, occReq)
 	if err != nil {
 		t.Errorf("createOccurrence(%s, %s): %v", v.imageUrl, v.noteID, err)
-	} 
+	}
 
 	// poll again
-	timeout = time.Duration(20)*time.Second
+	timeout = time.Duration(20) * time.Second
 	discOcc, err = pollDiscoveryOccurrenceFinished(v.imageUrl, v.projectID, timeout)
 	if err != nil {
 		t.Fatalf("error getting discovery occurrence: %v", err)
@@ -384,7 +384,7 @@ func TestPollDiscoveryOccurrenceFinished(t *testing.T) {
 	teardown(t, v)
 }
 
-func TestFindVulnerabilitiesForImage(t *testing.T){
+func TestFindVulnerabilitiesForImage(t *testing.T) {
 	v := setup(t)
 
 	occList, err := findVulnerabilityOccurrencesForImage(v.imageUrl, v.projectID)
@@ -417,7 +417,7 @@ func TestFindVulnerabilitiesForImage(t *testing.T){
 	teardown(t, v)
 }
 
-func TestFindHighVulnerabilities(t *testing.T){
+func TestFindHighVulnerabilities(t *testing.T) {
 	v := setup(t)
 
 	// check before creation
@@ -428,15 +428,15 @@ func TestFindHighVulnerabilities(t *testing.T){
 	if len(occList) != 0 {
 		t.Errorf("unexpected initial number of vulnerabilities: %d; want: %d", len(occList), 0)
 	}
-	
+
 	// create high severity occurrence
 	noteId := "severe-note-" + v.timestamp
 	noteReq := &grafeaspb.CreateNoteRequest{
-		Parent:  fmt.Sprintf("projects/%s", v.projectID),
+		Parent: fmt.Sprintf("projects/%s", v.projectID),
 		NoteId: noteId,
 		Note: &grafeaspb.Note{
 			Type: &grafeaspb.Note_Vulnerability{
-				Vulnerability: &vulnerability.Vulnerability {Severity: vulnerability.Severity_CRITICAL,},
+				Vulnerability: &vulnerability.Vulnerability{Severity: vulnerability.Severity_CRITICAL},
 			},
 		},
 	}
@@ -444,9 +444,9 @@ func TestFindHighVulnerabilities(t *testing.T){
 		Parent: fmt.Sprintf("projects/%s", v.projectID),
 		Occurrence: &grafeaspb.Occurrence{
 			NoteName: fmt.Sprintf("projects/%s/notes/%s", v.projectID, noteId),
-			Resource: &grafeaspb.Resource{Uri: v.imageUrl,},
+			Resource: &grafeaspb.Resource{Uri: v.imageUrl},
 			Details: &grafeaspb.Occurrence_Vulnerability{
-				Vulnerability: &vulnerability.Details{Severity: vulnerability.Severity_CRITICAL,},
+				Vulnerability: &vulnerability.Details{Severity: vulnerability.Severity_CRITICAL},
 			},
 		},
 	}

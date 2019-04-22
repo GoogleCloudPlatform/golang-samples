@@ -18,10 +18,10 @@ package sample
 // [START containeranalysis_imports_quickstart]
 import (
 	"context"
-	"log"
 	"fmt"
-	"time"
 	wait "k8s.io/apimachinery/pkg/util/wait"
+	"log"
+	"time"
 
 	containeranalysis "cloud.google.com/go/containeranalysis/apiv1beta1"
 	"google.golang.org/api/iterator"
@@ -29,6 +29,7 @@ import (
 	grafeaspb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/grafeas"
 	vulnerability "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/vulnerability"
 )
+
 // [END containeranalysis_imports_quickstart]
 
 // [START containeranalysis_poll_discovery_occurrence_finished]
@@ -75,9 +76,9 @@ func pollDiscoveryOccurrenceFinished(resourceUrl, projectID string, timeout time
 		}
 		// check if in ternimal state
 		state := discoveryOccurrence.GetDiscovered().GetDiscovered().GetAnalysisStatus()
-		isTerminal := (state ==  discovery.Discovered_FINISHED_SUCCESS ||
-						state == discovery.Discovered_FINISHED_FAILED ||
-						state == discovery.Discovered_FINISHED_UNSUPPORTED)
+		isTerminal := (state == discovery.Discovered_FINISHED_SUCCESS ||
+			state == discovery.Discovered_FINISHED_FAILED ||
+			state == discovery.Discovered_FINISHED_UNSUPPORTED)
 		return isTerminal, nil
 	})
 	if err != nil {
@@ -98,7 +99,7 @@ func findVulnerabilityOccurrencesForImage(resourceUrl, projectID string) ([]*gra
 		return nil, err
 	}
 	defer client.Close()
-	
+
 	var occs []*grafeaspb.Occurrence
 
 	req := &grafeaspb.ListOccurrencesRequest{
@@ -122,7 +123,6 @@ func findVulnerabilityOccurrencesForImage(resourceUrl, projectID string) ([]*gra
 }
 
 // [END containeranalysis_vulnerability_occurrences_for_image]
-
 
 // [START containeranalysis_filter_vulnerability_occurrences]
 

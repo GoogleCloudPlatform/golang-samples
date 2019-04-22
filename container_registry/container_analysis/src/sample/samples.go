@@ -29,6 +29,7 @@ import (
 	"google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/vulnerability"
 	fieldmaskpb "google.golang.org/genproto/protobuf/field_mask"
 )
+
 // [END containeranalysis_imports_samples]
 
 // [START containeranalysis_create_note]
@@ -41,7 +42,7 @@ func createNote(noteID, projectID string) (*grafeaspb.Note, error) {
 		return nil, err
 	}
 	defer client.Close()
-	
+
 	projectName := fmt.Sprintf("projects/%s", projectID)
 
 	req := &grafeaspb.CreateNoteRequest{
@@ -70,7 +71,7 @@ func createOccurrence(resourceURL, noteID, occProjectID, noteProjectID string) (
 		return nil, err
 	}
 	defer client.Close()
-	
+
 	req := &grafeaspb.CreateOccurrenceRequest{
 		Parent: fmt.Sprintf("projects/%s", occProjectID),
 		Occurrence: &grafeaspb.Occurrence{
@@ -100,7 +101,7 @@ func updateNote(updated *grafeaspb.Note, noteID, projectID string) (*grafeaspb.N
 		return nil, err
 	}
 	defer client.Close()
-	
+
 	req := &grafeaspb.UpdateNoteRequest{
 		Name: fmt.Sprintf("projects/%s/notes/%s", projectID, noteID),
 		Note: updated,
@@ -120,9 +121,9 @@ func updateOccurrence(updated *grafeaspb.Occurrence, occurrenceID, projectID str
 		return nil, err
 	}
 	defer client.Close()
-	
+
 	req := &grafeaspb.UpdateOccurrenceRequest{
-		Name: fmt.Sprintf("projects/%s/occurrences/%s", projectID, occurrenceID),
+		Name:       fmt.Sprintf("projects/%s/occurrences/%s", projectID, occurrenceID),
 		Occurrence: updated,
 		UpdateMask: &fieldmaskpb.FieldMask{Paths: []string{"details"}},
 	}
@@ -160,7 +161,7 @@ func deleteOccurrence(occurrenceID, projectID string) error {
 		return err
 	}
 	defer client.Close()
-	
+
 	req := &grafeaspb.DeleteOccurrenceRequest{
 		Name: fmt.Sprintf("projects/%s/occurrences/%s", projectID, occurrenceID),
 	}
@@ -288,7 +289,7 @@ func getOccurrencesForImage(resourceURL, projectID string) (int, error) {
 		return -1, err
 	}
 	defer client.Close()
-	
+
 	req := &grafeaspb.ListOccurrencesRequest{
 		Parent: fmt.Sprintf("projects/%s", projectID),
 		Filter: fmt.Sprintf("resourceUrl=%q", resourceURL),
@@ -317,7 +318,7 @@ func getOccurrencesForImage(resourceURL, projectID string) (int, error) {
 // occurrencePubsub handles incoming Occurrences using a Cloud Pub/Sub subscription.
 func occurrencePubsub(subscriptionID string, timeout int, projectID string) (int, error) {
 	ctx := context.Background()
-	
+
 	var mu sync.Mutex
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
