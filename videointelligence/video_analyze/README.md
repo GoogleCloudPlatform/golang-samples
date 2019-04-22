@@ -28,12 +28,3 @@ gsutil cp gs://demomaker/cat.mp4
 
 ./video_analyze gs://demomaker/cat.mp4
 ```
-
-## Modifiying the source code
-
-Do not edit the `video_analyze.go` file directly. In order to modify it edit the code at `videointelligence/video_analyze/gen/template.go` and run `go generate` at the command line:
-
-```bash
-cd videointelligence/video_analyze
-go generate
-```

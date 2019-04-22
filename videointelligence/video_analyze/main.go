@@ -12,10 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// github.com/broady/preprocess
-//go:generate bash -c "cat gen/template.go | preprocess | goimports > video_analyze.go"
-//go:generate bash -c "cat gen/template.go | preprocess gcs | goimports > video_analyze_gcs.go"
-
 // Command video_analyze uses the Google Cloud Video Intelligence API to analyze a video.
 package main
 

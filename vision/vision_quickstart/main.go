@@ -34,6 +34,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
+	defer client.Close()
 
 	// Sets the name of the image file to annotate.
 	filename := "../testdata/cat.jpg"

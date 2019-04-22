@@ -28,7 +28,7 @@ write and run the tests in any modified directories.
 ## Running system tests
 
 1. Set the `GOLANG_SAMPLES_PROJECT_ID` environment variable to a suitable test project.
-1. Ensure you are logged in using `gcloud login` or set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable to the path of your credentials file.
+1. Ensure you are logged in using `gcloud auth login` or set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable to the path of your credentials file.
    Tests are authenticated using [Application Default Credentials](https://developers.google.com/identity/protocols/application-default-credentials).
 1. Install the test dependencies:
 

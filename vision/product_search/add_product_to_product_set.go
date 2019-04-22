@@ -33,6 +33,7 @@ func addProductToProductSet(w io.Writer, projectID string, location string, prod
 	if err != nil {
 		return fmt.Errorf("NewProductSearchClient: %v", err)
 	}
+	defer c.Close()
 
 	req := &visionpb.AddProductToProductSetRequest{
 		Name:    fmt.Sprintf("projects/%s/locations/%s/productSets/%s", projectID, location, productSetID),

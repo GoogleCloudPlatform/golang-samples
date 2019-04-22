@@ -176,6 +176,8 @@ func TestDeleteOccurrence(t *testing.T) {
 }
 
 func TestUpdateOccurrence(t *testing.T) {
+	t.Skip("Flaky. golang-samples#785")
+
 	v := setup(t)
 
 	created, err := createOccurrence(v.ctx, v.client, v.imageUrl, v.noteID, v.projectID, v.projectID)
@@ -273,6 +275,7 @@ func TestOccurrencesForNote(t *testing.T) {
 }
 
 func TestPubSub(t *testing.T) {
+	t.Skip("Flaky: golang-samples#812")
 	v := setup(t)
 	// Create a new subscription if it doesn't exist.
 	createOccurrenceSubscription(v.ctx, v.subID, v.projectID)

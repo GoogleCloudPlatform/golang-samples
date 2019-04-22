@@ -33,6 +33,7 @@ func deleteProduct(w io.Writer, projectID string, location string, productID str
 	if err != nil {
 		return fmt.Errorf("NewProductSearchClient: %v", err)
 	}
+	defer c.Close()
 
 	req := &visionpb.DeleteProductRequest{
 		Name: fmt.Sprintf("projects/%s/locations/%s/products/%s", projectID, location, productID),

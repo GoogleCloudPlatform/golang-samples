@@ -33,6 +33,7 @@ func deleteReferenceImage(w io.Writer, projectID string, location string, produc
 	if err != nil {
 		return fmt.Errorf("NewProductSearchClient: %v", err)
 	}
+	defer c.Close()
 
 	req := &visionpb.DeleteReferenceImageRequest{
 		Name: fmt.Sprintf("projects/%s/locations/%s/products/%s/referenceImages/%s", projectID, location, productID, referenceImageID),
