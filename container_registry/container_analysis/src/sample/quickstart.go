@@ -130,20 +130,37 @@ func findVulnerabilityOccurrencesForImage(resourceUrl, projectID string) ([]*gra
 
 // findHighSeverityVulnerabilitiesForImage retrieves a list of only high vulnerability occurrences associated with a resource.
 func findHighSeverityVulnerabilitiesForImage(resourceUrl, projectID string) ([]*grafeaspb.Occurrence, error) {
-	// Retrieve a list of all vulnerabilities using the function defined previously.
-	vulnOccs, err := findVulnerabilityOccurrencesForImage(resourceUrl, projectID)
+	ctx := context.Background()
+	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to get vulnerability occurrences: %v", err)
+		return nil, err
 	}
-	// Add high severity occurrences to a new filtered list.
-	var filteredList []*grafeaspb.Occurrence
-	for _, occ := range vulnOccs {
+	defer client.Close()
+
+	var occurrenceList []*grafeaspb.Occurrence
+
+	req := &grafeaspb.ListOccurrencesRequest{
+		Parent: fmt.Sprintf("projects/%s", projectID),
+		Filter: fmt.Sprintf("resourceUrl = %q kind = %q", resourceUrl, "VULNERABILITY"),
+	}
+
+	it := client.ListOccurrences(ctx, req)
+	for {
+		occ, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+
 		severityLevel := occ.GetVulnerability().GetSeverity()
 		if severityLevel == vulnerability.Severity_HIGH || severityLevel == vulnerability.Severity_CRITICAL {
-			filteredList = append(filteredList, occ)
+			occurrenceList = append(occurrenceList, occ)
 		}
 	}
-	return filteredList, nil
+
+	return occurrenceList, nil
 }
 
 // [END containeranalysis_filter_vulnerability_occurrences]
