@@ -269,10 +269,10 @@ func TestPollDiscoveryOccurrenceFinished(t *testing.T) {
 	}
 
 	// create discovery occurrence
-	noteId := "discovery-note-" + v.timestamp
+	noteID := "discovery-note-" + v.timestamp
 	noteReq := &grafeaspb.CreateNoteRequest{
 		Parent: fmt.Sprintf("projects/%s", v.projectID),
-		NoteId: noteId,
+		NoteId: noteID,
 		Note: &grafeaspb.Note{
 			Type: &grafeaspb.Note_Discovery{
 				Discovery: &discovery.Discovery{},
@@ -282,7 +282,7 @@ func TestPollDiscoveryOccurrenceFinished(t *testing.T) {
 	occReq := &grafeaspb.CreateOccurrenceRequest{
 		Parent: fmt.Sprintf("projects/%s", v.projectID),
 		Occurrence: &grafeaspb.Occurrence{
-			NoteName: fmt.Sprintf("projects/%s/notes/%s", v.projectID, noteId),
+			NoteName: fmt.Sprintf("projects/%s/notes/%s", v.projectID, noteID),
 			Resource: &grafeaspb.Resource{Uri: v.imageURL},
 			Details: &grafeaspb.Occurrence_Discovered{
 				Discovered: &discovery.Details{
@@ -322,7 +322,7 @@ func TestPollDiscoveryOccurrenceFinished(t *testing.T) {
 
 	// Clean up
 	deleteOccurrence(path.Base(created.Name), v.projectID)
-	deleteNote(noteId, v.projectID)
+	deleteNote(noteID, v.projectID)
 	teardown(t, v)
 }
 
@@ -372,10 +372,10 @@ func TestFindHighVulnerabilities(t *testing.T) {
 	}
 
 	// create high severity occurrence
-	noteId := "severe-note-" + v.timestamp
+	noteID := "severe-note-" + v.timestamp
 	noteReq := &grafeaspb.CreateNoteRequest{
 		Parent: fmt.Sprintf("projects/%s", v.projectID),
-		NoteId: noteId,
+		NoteId: noteID,
 		Note: &grafeaspb.Note{
 			Type: &grafeaspb.Note_Vulnerability{
 				Vulnerability: &vulnerability.Vulnerability{Severity: vulnerability.Severity_CRITICAL},
@@ -385,7 +385,7 @@ func TestFindHighVulnerabilities(t *testing.T) {
 	occReq := &grafeaspb.CreateOccurrenceRequest{
 		Parent: fmt.Sprintf("projects/%s", v.projectID),
 		Occurrence: &grafeaspb.Occurrence{
-			NoteName: fmt.Sprintf("projects/%s/notes/%s", v.projectID, noteId),
+			NoteName: fmt.Sprintf("projects/%s/notes/%s", v.projectID, noteID),
 			Resource: &grafeaspb.Resource{Uri: v.imageURL},
 			Details: &grafeaspb.Occurrence_Vulnerability{
 				Vulnerability: &vulnerability.Details{Severity: vulnerability.Severity_CRITICAL},
@@ -418,6 +418,6 @@ func TestFindHighVulnerabilities(t *testing.T) {
 
 	// Clean up
 	deleteOccurrence(path.Base(created.Name), v.projectID)
-	deleteNote(noteId, v.projectID)
+	deleteNote(noteID, v.projectID)
 	teardown(t, v)
 }
