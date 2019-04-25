@@ -36,7 +36,7 @@ import (
 // [START containeranalysis_poll_discovery_occurrence_finished]
 
 // pollDiscoveryOccurrenceFinished returns the discovery occurrence for a resource once it reaches a finished state.
-func pollDiscoveryOccurrenceFinished(resourceUrl, projectID string, timeout time.Duration) (*grafeaspb.Occurrence, error) {
+func pollDiscoveryOccurrenceFinished(resourceURL, projectID string, timeout time.Duration) (*grafeaspb.Occurrence, error) {
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
@@ -50,7 +50,7 @@ func pollDiscoveryOccurrenceFinished(resourceUrl, projectID string, timeout time
 		log.Printf("Querying for discovery occurrence")
 		req := &grafeaspb.ListOccurrencesRequest{
 			Parent: fmt.Sprintf("projects/%s", projectID),
-			Filter: fmt.Sprintf(`kind="DISCOVERY" AND resourceUrl=%q`, resourceUrl),
+			Filter: fmt.Sprintf(`kind="DISCOVERY" AND resourceUrl=%q`, resourceURL),
 		}
 		it := client.ListOccurrences(ctx, req)
 		// Only one should ever be returned by ListOccurrences and the given filter.
@@ -94,7 +94,7 @@ func pollDiscoveryOccurrenceFinished(resourceUrl, projectID string, timeout time
 // [START containeranalysis_vulnerability_occurrences_for_image]
 
 // findVulnerabilityOccurrencesForImage retrieves all vulnerability Occurrences associated with a resource.
-func findVulnerabilityOccurrencesForImage(resourceUrl, projectID string) ([]*grafeaspb.Occurrence, error) {
+func findVulnerabilityOccurrencesForImage(resourceURL, projectID string) ([]*grafeaspb.Occurrence, error) {
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
@@ -106,7 +106,7 @@ func findVulnerabilityOccurrencesForImage(resourceUrl, projectID string) ([]*gra
 
 	req := &grafeaspb.ListOccurrencesRequest{
 		Parent: fmt.Sprintf("projects/%s", projectID),
-		Filter: fmt.Sprintf("resourceUrl = %q kind = %q", resourceUrl, "VULNERABILITY"),
+		Filter: fmt.Sprintf("resourceUrl = %q kind = %q", resourceURL, "VULNERABILITY"),
 	}
 
 	it := client.ListOccurrences(ctx, req)
@@ -129,7 +129,7 @@ func findVulnerabilityOccurrencesForImage(resourceUrl, projectID string) ([]*gra
 // [START containeranalysis_filter_vulnerability_occurrences]
 
 // findHighSeverityVulnerabilitiesForImage retrieves a list of only high vulnerability occurrences associated with a resource.
-func findHighSeverityVulnerabilitiesForImage(resourceUrl, projectID string) ([]*grafeaspb.Occurrence, error) {
+func findHighSeverityVulnerabilitiesForImage(resourceURL, projectID string) ([]*grafeaspb.Occurrence, error) {
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
@@ -141,7 +141,7 @@ func findHighSeverityVulnerabilitiesForImage(resourceUrl, projectID string) ([]*
 
 	req := &grafeaspb.ListOccurrencesRequest{
 		Parent: fmt.Sprintf("projects/%s", projectID),
-		Filter: fmt.Sprintf("resourceUrl = %q kind = %q", resourceUrl, "VULNERABILITY"),
+		Filter: fmt.Sprintf("resourceUrl = %q kind = %q", resourceURL, "VULNERABILITY"),
 	}
 
 	it := client.ListOccurrences(ctx, req)
