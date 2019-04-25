@@ -101,13 +101,12 @@ func findVulnerabilityOccurrencesForImage(resourceURL, projectID string) ([]*gra
 	}
 	defer client.Close()
 
-	var occurrenceList []*grafeaspb.Occurrence
-
 	req := &grafeaspb.ListOccurrencesRequest{
 		Parent: fmt.Sprintf("projects/%s", projectID),
 		Filter: fmt.Sprintf("resourceUrl = %q kind = %q", resourceURL, "VULNERABILITY"),
 	}
 
+	var occurrenceList []*grafeaspb.Occurrence
 	it := client.ListOccurrences(ctx, req)
 	for {
 		occ, err := it.Next()
@@ -136,13 +135,12 @@ func findHighSeverityVulnerabilitiesForImage(resourceURL, projectID string) ([]*
 	}
 	defer client.Close()
 
-	var occurrenceList []*grafeaspb.Occurrence
-
 	req := &grafeaspb.ListOccurrencesRequest{
 		Parent: fmt.Sprintf("projects/%s", projectID),
 		Filter: fmt.Sprintf("resourceUrl = %q kind = %q", resourceURL, "VULNERABILITY"),
 	}
 
+	var occurrenceList []*grafeaspb.Occurrence
 	it := client.ListOccurrences(ctx, req)
 	for {
 		occ, err := it.Next()
