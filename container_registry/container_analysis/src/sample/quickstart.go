@@ -69,8 +69,8 @@ func pollDiscoveryOccurrenceFinished(resourceURL, projectID string, timeout time
 	// Wait for the discovery occurrence to enter a terminal state.
 	err = wait.Poll(time.Second, timeout, func() (bool, error) {
 		// Update the occurrence
-		request := &grafeaspb.GetOccurrenceRequest{Name: discoveryOccurrence.GetName()}
-		newOccurrence, err := client.GetOccurrence(ctx, request)
+		req := &grafeaspb.GetOccurrenceRequest{Name: discoveryOccurrence.GetName()}
+		newOccurrence, err := client.GetOccurrence(ctx, req)
 		if err != nil {
 			return false, err
 		}
