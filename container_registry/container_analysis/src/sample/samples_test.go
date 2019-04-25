@@ -159,7 +159,7 @@ func TestDeleteOccurrence(t *testing.T) {
 func TestOccurrencesForImage(t *testing.T) {
 	v := setup(t)
 
-	origCount, err := getOccurrencesForImage(v.imageURL, v.projectID)
+	origCount, err := getOccurrencesForImage(new(bytes.Buffer), v.imageURL, v.projectID)
 	if err != nil {
 		t.Errorf("getOccurrenceForImage(%s): %v", v.imageURL, err)
 	}
@@ -173,7 +173,7 @@ func TestOccurrencesForImage(t *testing.T) {
 		t.Error("createOccurrence returns nil Occurrence object")
 	}
 	testutil.Retry(t, v.tryLimit, time.Second, func(r *testutil.R) {
-		newCount, err := getOccurrencesForImage(v.imageURL, v.projectID)
+		newCount, err := getOccurrencesForImage(new(bytes.Buffer), v.imageURL, v.projectID)
 		if err != nil {
 			r.Errorf("getOccurrencesForImage(%s): %v", v.imageURL, err)
 		}
@@ -190,7 +190,7 @@ func TestOccurrencesForImage(t *testing.T) {
 func TestOccurrencesForNote(t *testing.T) {
 	v := setup(t)
 
-	origCount, err := getOccurrencesForNote(v.noteID, v.projectID)
+	origCount, err := getOccurrencesForNote(new(bytes.Buffer), v.noteID, v.projectID)
 	if err != nil {
 		t.Errorf("getOccurrenceForNote(%s): %v", v.noteID, err)
 	}
@@ -205,7 +205,7 @@ func TestOccurrencesForNote(t *testing.T) {
 	}
 
 	testutil.Retry(t, v.tryLimit, time.Second, func(r *testutil.R) {
-		newCount, err := getOccurrencesForNote(v.noteID, v.projectID)
+		newCount, err := getOccurrencesForNote(new(bytes.Buffer), v.noteID, v.projectID)
 		if err != nil {
 			r.Errorf("getOccurrencesForNote(%s): %v", v.noteID, err)
 		}
@@ -228,7 +228,7 @@ func TestPubSub(t *testing.T) {
 		// Use a channel and a goroutine to count incomming messages.
 		c := make(chan int)
 		go func() {
-			count, err := occurrencePubsub(v.subID, time.Duration(20)*time.Second, v.projectID)
+			count, err := occurrencePubsub(new(bytes.Buffer), v.subID, time.Duration(20)*time.Second, v.projectID)
 			if err != nil {
 				t.Errorf("occurrencePubsub(%s): %v", v.subID, err)
 			}

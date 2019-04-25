@@ -153,7 +153,6 @@ func getNote(noteID, projectID string) (*grafeaspb.Note, error) {
 	if err != nil {
 		return nil, fmt.Errorf("client.GetNote: %v", err)
 	}
-	fmt.Println(note)
 	return note, nil
 }
 
@@ -178,7 +177,6 @@ func getOccurrence(occurrenceID, projectID string) (*grafeaspb.Occurrence, error
 	if err != nil {
 		return nil, fmt.Errorf("client.GetOccurrence: %v", err)
 	}
-	fmt.Println(occ)
 	return occ, nil
 }
 
@@ -188,7 +186,7 @@ func getOccurrence(occurrenceID, projectID string) (*grafeaspb.Occurrence, error
 
 // getDiscoveryInfo retrieves and prints the Discovery Occurrence created for a specified image.
 // The Discovery Occurrence contains information about the initial scan on the image.
-func getDiscoveryInfo(resourceURL, projectID string) error {
+func getDiscoveryInfo(w io.Writer, resourceURL, projectID string) error {
 	// resourceURL := fmt.Sprintf("https://gcr.io/my-project/my-image")
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
@@ -210,7 +208,7 @@ func getDiscoveryInfo(resourceURL, projectID string) error {
 		if err != nil {
 			return fmt.Errorf("occurrence iteration error: %v", err)
 		}
-		fmt.Println(occ)
+		fmt.Fprintln(w, occ)
 	}
 	return nil
 }
@@ -221,7 +219,7 @@ func getDiscoveryInfo(resourceURL, projectID string) error {
 
 // getOccurrencesForNote retrieves all the Occurrences associated with a specified Note.
 // Here, all Occurrences are printed and counted.
-func getOccurrencesForNote(noteID, projectID string) (int, error) {
+func getOccurrencesForNote(w io.Writer, noteID, projectID string) (int, error) {
 	// noteID := fmt.Sprintf("my-note")
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
@@ -244,7 +242,7 @@ func getOccurrencesForNote(noteID, projectID string) (int, error) {
 			return -1, fmt.Errorf("occurrence iteration error: %v", err)
 		}
 		// Write custom code to process each Occurrence here.
-		fmt.Println(occ)
+		fmt.Fprintln(w, occ)
 		count = count + 1
 	}
 	return count, nil
@@ -256,7 +254,7 @@ func getOccurrencesForNote(noteID, projectID string) (int, error) {
 
 // getOccurrencesForImage retrieves all the Occurrences associated with a specified image.
 // Here, all Occurrences are simply printed and counted.
-func getOccurrencesForImage(resourceURL, projectID string) (int, error) {
+func getOccurrencesForImage(w io.Writer, resourceURL, projectID string) (int, error) {
 	// resourceURL := fmt.Sprintf("https://gcr.io/my-project/my-image")
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
@@ -280,7 +278,7 @@ func getOccurrencesForImage(resourceURL, projectID string) (int, error) {
 			return -1, fmt.Errorf("occurrence iteration error: %v", err)
 		}
 		// Write custom code to process each Occurrence here.
-		fmt.Println(occ)
+		fmt.Fprintln(w, occ)
 		count = count + 1
 	}
 	return count, nil
@@ -291,7 +289,7 @@ func getOccurrencesForImage(resourceURL, projectID string) (int, error) {
 // [START containeranalysis_pubsub]
 
 // occurrencePubsub handles incoming Occurrences using a Cloud Pub/Sub subscription.
-func occurrencePubsub(subscriptionID string, timeout time.Duration, projectID string) (int, error) {
+func occurrencePubsub(w io.Writer, subscriptionID string, timeout time.Duration, projectID string) (int, error) {
 	// subscriptionID := fmt.Sprintf("my-occurrences-subscription")
 	// timeout := time.Duration(20) * time.Second
 	ctx := context.Background()
@@ -311,7 +309,7 @@ func occurrencePubsub(subscriptionID string, timeout time.Duration, projectID st
 	err = sub.Receive(toctx, func(ctx context.Context, msg *pubsub.Message) {
 		mu.Lock()
 		count = count + 1
-		fmt.Printf("Message %d: %q\n", count, string(msg.Data))
+		fmt.Fprintf(w, "Message %d: %q\n", count, string(msg.Data))
 		msg.Ack()
 		mu.Unlock()
 	})
@@ -319,7 +317,7 @@ func occurrencePubsub(subscriptionID string, timeout time.Duration, projectID st
 		return -1, fmt.Errorf("sub.Receive: %v", err)
 	}
 	// Print and return the number of Pub/Sub messages received.
-	fmt.Println(count)
+	fmt.Fprintln(w, count)
 	return count, nil
 }
 
