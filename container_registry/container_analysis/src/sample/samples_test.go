@@ -296,7 +296,7 @@ func TestPollDiscoveryOccurrenceFinished(t *testing.T) {
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
-		t.Errorf("could not create client: %v", err)
+		t.Errorf("containeranalysis.NewGrafeasV1Beta1Client: %v", err)
 	}
 	defer client.Close()
 	_, err = client.CreateNote(ctx, noteReq)
