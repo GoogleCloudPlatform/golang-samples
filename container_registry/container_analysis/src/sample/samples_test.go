@@ -262,7 +262,7 @@ func TestPubSub(t *testing.T) {
 func TestPollDiscoveryOccurrenceFinished(t *testing.T) {
 	v := setup(t)
 
-	timeout := time.Duration(1) * time.Second
+	timeout := time.Duration(5) * time.Second
 	discOcc, err := pollDiscoveryOccurrenceFinished(v.imageURL, v.projectID, timeout)
 	if err == nil || discOcc != nil {
 		t.Errorf("expected error when resourceURL has no discovery occurrence")
@@ -306,17 +306,19 @@ func TestPollDiscoveryOccurrenceFinished(t *testing.T) {
 	}
 
 	// poll again
-	timeout = time.Duration(20) * time.Second
-	discOcc, err = pollDiscoveryOccurrenceFinished(v.imageURL, v.projectID, timeout)
-	if err != nil {
-		t.Fatalf("error getting discovery occurrence: %v", err)
-	}
-	if discOcc == nil {
-		t.Error("discovery occurrence is nil")
-	} else {
-		analysisStatus := discOcc.GetDiscovered().GetDiscovered().AnalysisStatus
-		if analysisStatus != discovery.Discovered_FINISHED_SUCCESS {
-			t.Errorf("discovery occurrence reported unexpected state: %sm want: %s", analysisStatus, discovery.Discovered_FINISHED_SUCCESS)
+
+	testutil.Retry(t, v.tryLimit, time.Second, func(r *testutil.R) {
+		discOcc, err = pollDiscoveryOccurrenceFinished(v.imageURL, v.projectID, timeout)
+		if err != nil {
+			r.Errorf("error getting discovery occurrence: %v", err)
+		}
+		if discOcc == nil {
+			r.Error("discovery occurrence is nil")
+		} else {
+			analysisStatus := discOcc.GetDiscovered().GetDiscovered().AnalysisStatus
+			if analysisStatus != discovery.Discovered_FINISHED_SUCCESS {
+				r.Errorf("discovery occurrence reported unexpected state: %s, want: %s", analysisStatus, discovery.Discovered_FINISHED_SUCCESS)
+			}
 		}
 	}
 
