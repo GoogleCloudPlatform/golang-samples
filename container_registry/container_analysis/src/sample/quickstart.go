@@ -57,9 +57,9 @@ func pollDiscoveryOccurrenceFinished(resourceURL, projectID string, timeout time
 		result, err := it.Next()
 		if err != nil || result == nil || result.GetDiscovered() == nil {
 			return false, nil
-		} else {
-			discoveryOccurrence = result
-			return true, nil
+		}
+		discoveryOccurrence = result
+		return true, nil
 		}
 	})
 	if err != nil {
@@ -73,9 +73,8 @@ func pollDiscoveryOccurrenceFinished(resourceURL, projectID string, timeout time
 		newOccurrence, err := client.GetOccurrence(ctx, request)
 		if err != nil {
 			return false, err
-		} else {
-			discoveryOccurrence = newOccurrence
 		}
+		discoveryOccurrence = newOccurrence
 		// Check if the discovery occurrence is in a ternimal state.
 		state := discoveryOccurrence.GetDiscovered().GetDiscovered().GetAnalysisStatus()
 		isTerminal := (state == discovery.Discovered_FINISHED_SUCCESS ||
