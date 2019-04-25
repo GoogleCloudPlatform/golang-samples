@@ -26,10 +26,10 @@ import (
 	containeranalysis "cloud.google.com/go/containeranalysis/apiv1beta1"
 	pubsub "cloud.google.com/go/pubsub"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/google/uuid"
 	discovery "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/discovery"
 	grafeaspb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/grafeas"
 	vulnerability "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/vulnerability"
-	"github.com/google/uuid"
 )
 
 type TestVariables struct {
@@ -41,7 +41,7 @@ type TestVariables struct {
 	projectID string
 	noteObj   *grafeaspb.Note
 	tryLimit  int
-	uuid string
+	uuid      string
 }
 
 // Run before each test. Creates a set of useful variables
@@ -119,15 +119,14 @@ func TestCreateOccurrence(t *testing.T) {
 		t.Errorf("createOccurrence(%s, %s): %v", v.imageURL, v.noteID, err)
 	} else if created == nil {
 		t.Error("returned occurrence is nil")
-	} else {
-		retrieved, err := getOccurrence(path.Base(created.Name), v.projectID)
-		if err != nil {
-			t.Errorf("getOccurrence(%s): %v", created.Name, err)
-		} else if retrieved == nil {
-			t.Error("getOccurrence returns nil Occurrence object")
-		} else if retrieved.Name != created.Name {
-			t.Errorf("created occurrence has wrong name: %s; want: %s", retrieved.Name, created.Name)
-		}
+	}
+	retrieved, err := getOccurrence(path.Base(created.Name), v.projectID)
+	if err != nil {
+		t.Errorf("getOccurrence(%s): %v", created.Name, err)
+	} else if retrieved == nil {
+		t.Error("getOccurrence returns nil Occurrence object")
+	} else if retrieved.Name != created.Name {
+		t.Errorf("created occurrence has wrong name: %s; want: %s", retrieved.Name, created.Name)
 	}
 
 	teardown(t, v)
@@ -141,18 +140,17 @@ func TestDeleteOccurrence(t *testing.T) {
 		t.Errorf("createOccurrence(%s, %s): %v", v.imageURL, v.noteID, err)
 	} else if created == nil {
 		t.Error("createOccurrence returns nil Occurrence object")
-	} else {
-		err = deleteOccurrence(path.Base(created.Name), v.projectID)
-		if err != nil {
-			t.Errorf("deleteOccurrence(%s): %v", created.Name, err)
-		}
-		deleted, err := getOccurrence(path.Base(created.Name), v.projectID)
-		if err == nil {
-			t.Error("getOccurrence returned nil error after DeleteOccurrence. expected error")
-		}
-		if deleted != nil {
-			t.Errorf("getOccurrence returned occurrence after deletion: %v; expected nil", deleted)
-		}
+	}
+	err = deleteOccurrence(path.Base(created.Name), v.projectID)
+	if err != nil {
+		t.Errorf("deleteOccurrence(%s): %v", created.Name, err)
+	}
+	deleted, err := getOccurrence(path.Base(created.Name), v.projectID)
+	if err == nil {
+		t.Error("getOccurrence returned nil error after DeleteOccurrence. expected error")
+	}
+	if deleted != nil {
+		t.Errorf("getOccurrence returned occurrence after deletion: %v; expected nil", deleted)
 	}
 
 	teardown(t, v)
@@ -315,13 +313,12 @@ func TestPollDiscoveryOccurrenceFinished(t *testing.T) {
 		}
 		if discOcc == nil {
 			r.Error("discovery occurrence is nil")
-		} else {
-			analysisStatus := discOcc.GetDiscovered().GetDiscovered().AnalysisStatus
-			if analysisStatus != discovery.Discovered_FINISHED_SUCCESS {
-				r.Errorf("discovery occurrence reported unexpected state: %s, want: %s", analysisStatus, discovery.Discovered_FINISHED_SUCCESS)
-			}
 		}
-	}
+		analysisStatus := discOcc.GetDiscovered().GetDiscovered().AnalysisStatus
+		if analysisStatus != discovery.Discovered_FINISHED_SUCCESS {
+			r.Errorf("discovery occurrence reported unexpected state: %s, want: %s", analysisStatus, discovery.Discovered_FINISHED_SUCCESS)
+		}
+	})
 
 	// Clean up
 	deleteOccurrence(path.Base(created.Name), v.projectID)

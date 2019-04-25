@@ -60,7 +60,6 @@ func pollDiscoveryOccurrenceFinished(resourceURL, projectID string, timeout time
 		}
 		discoveryOccurrence = result
 		return true, nil
-		}
 	})
 	if err != nil {
 		return nil, fmt.Errorf("could not find dicovery occurrence: %v", err)
