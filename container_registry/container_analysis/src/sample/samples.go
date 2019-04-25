@@ -40,7 +40,7 @@ func createNote(noteID, projectID string) (*grafeaspb.Note, error) {
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("NewGrafeasV1Beta1Client: %v", err)
 	}
 	defer client.Close()
 
@@ -71,7 +71,7 @@ func createOccurrence(resourceURL, noteID, occProjectID, noteProjectID string) (
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("NewGrafeasV1Beta1Client: %v", err)
 	}
 	defer client.Close()
 
@@ -102,7 +102,7 @@ func deleteNote(noteID, projectID string) error {
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("NewGrafeasV1Beta1Client: %v", err)
 	}
 	defer client.Close()
 
@@ -122,7 +122,7 @@ func deleteOccurrence(occurrenceID, projectID string) error {
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("NewGrafeasV1Beta1Client: %v", err)
 	}
 	defer client.Close()
 
@@ -142,7 +142,7 @@ func getNote(noteID, projectID string) (*grafeaspb.Note, error) {
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("NewGrafeasV1Beta1Client: %v", err)
 	}
 	defer client.Close()
 
@@ -150,8 +150,11 @@ func getNote(noteID, projectID string) (*grafeaspb.Note, error) {
 		Name: fmt.Sprintf("projects/%s/notes/%s", projectID, noteID),
 	}
 	note, err := client.GetNote(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("client.GetNote: %v", err)
+	}
 	fmt.Println(note)
-	return note, err
+	return note, nil
 }
 
 // [END containeranalysis_get_note]
@@ -164,7 +167,7 @@ func getOccurrence(occurrenceID, projectID string) (*grafeaspb.Occurrence, error
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("NewGrafeasV1Beta1Client: %v", err)
 	}
 	defer client.Close()
 
@@ -172,8 +175,11 @@ func getOccurrence(occurrenceID, projectID string) (*grafeaspb.Occurrence, error
 		Name: fmt.Sprintf("projects/%s/occurrences/%s", projectID, occurrenceID),
 	}
 	occ, err := client.GetOccurrence(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("client.GetOccurrence: %v", err)
+	}
 	fmt.Println(occ)
-	return occ, err
+	return occ, nil
 }
 
 // [END containeranalysis_get_occurrence]
@@ -187,7 +193,7 @@ func getDiscoveryInfo(resourceURL, projectID string) error {
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("NewGrafeasV1Beta1Client: %v", err)
 	}
 	defer client.Close()
 
@@ -202,7 +208,7 @@ func getDiscoveryInfo(resourceURL, projectID string) error {
 			break
 		}
 		if err != nil {
-			return err
+			return fmt.Errorf("occurrence iteration error: %v", err)
 		}
 		fmt.Println(occ)
 	}
@@ -220,7 +226,7 @@ func getOccurrencesForNote(noteID, projectID string) (int, error) {
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
-		return -1, err
+		return -1, fmt.Errorf("NewGrafeasV1Beta1Client: %v", err)
 	}
 	defer client.Close()
 
@@ -235,7 +241,7 @@ func getOccurrencesForNote(noteID, projectID string) (int, error) {
 			break
 		}
 		if err != nil {
-			return -1, err
+			return -1, fmt.Errorf("occurrence iteration error: %v", err)
 		}
 		// Write custom code to process each Occurrence here.
 		fmt.Println(occ)
@@ -255,7 +261,7 @@ func getOccurrencesForImage(resourceURL, projectID string) (int, error) {
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
-		return -1, err
+		return -1, fmt.Errorf("NewGrafeasV1Beta1Client: %v", err)
 	}
 	defer client.Close()
 
@@ -271,7 +277,7 @@ func getOccurrencesForImage(resourceURL, projectID string) (int, error) {
 			break
 		}
 		if err != nil {
-			return -1, err
+			return -1, fmt.Errorf("occurrence iteration error: %v", err)
 		}
 		// Write custom code to process each Occurrence here.
 		fmt.Println(occ)
@@ -293,7 +299,7 @@ func occurrencePubsub(subscriptionID string, timeout time.Duration, projectID st
 	var mu sync.Mutex
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return -1, err
+		return -1, fmt.Errorf("pubsub.NewClient: %v", err)
 	}
 	// Subscribe to the requested Pub/Sub channel.
 	sub := client.Subscription(subscriptionID)
@@ -310,7 +316,7 @@ func occurrencePubsub(subscriptionID string, timeout time.Duration, projectID st
 		mu.Unlock()
 	})
 	if err != nil {
-		return -1, err
+		return -1, fmt.Errorf("sub.Receive: %v", err)
 	}
 	// Print and return the number of Pub/Sub messages received.
 	fmt.Println(count)
@@ -323,7 +329,7 @@ func createOccurrenceSubscription(subscriptionID, projectID string) error {
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return err
+		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
 	defer client.Close()
 
@@ -332,7 +338,7 @@ func createOccurrenceSubscription(subscriptionID, projectID string) error {
 	topic := client.Topic(topicID)
 	config := pubsub.SubscriptionConfig{Topic: topic}
 	_, err = client.CreateSubscription(ctx, subscriptionID, config)
-	return err
+	return fmt.Errorf("client.CreateSubscription: %v", err)
 }
 
 // [END containeranalysis_pubsub]

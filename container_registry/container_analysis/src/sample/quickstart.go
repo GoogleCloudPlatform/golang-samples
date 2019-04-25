@@ -42,7 +42,7 @@ func pollDiscoveryOccurrenceFinished(resourceURL, projectID string, timeout time
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("NewGrafeasV1Beta1Client: %v", err)
 	}
 	defer client.Close()
 
@@ -73,7 +73,7 @@ func pollDiscoveryOccurrenceFinished(resourceURL, projectID string, timeout time
 		req := &grafeaspb.GetOccurrenceRequest{Name: discoveryOccurrence.GetName()}
 		newOccurrence, err := client.GetOccurrence(ctx, req)
 		if err != nil {
-			return false, err
+			return false, fmt.Errorf("GetOccurrence: %v", err)
 		}
 		discoveryOccurrence = newOccurrence
 		// Check if the discovery occurrence is in a ternimal state.
@@ -99,7 +99,7 @@ func findVulnerabilityOccurrencesForImage(resourceURL, projectID string) ([]*gra
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("NewGrafeasV1Beta1Client: %v", err)
 	}
 	defer client.Close()
 
@@ -116,7 +116,7 @@ func findVulnerabilityOccurrencesForImage(resourceURL, projectID string) ([]*gra
 			break
 		}
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("occurrence iteration error: %v", err)
 		}
 		occurrenceList = append(occurrenceList, occ)
 	}
@@ -134,7 +134,7 @@ func findHighSeverityVulnerabilitiesForImage(resourceURL, projectID string) ([]*
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("NewGrafeasV1Beta1Client: %v", err)
 	}
 	defer client.Close()
 
@@ -151,7 +151,7 @@ func findHighSeverityVulnerabilitiesForImage(resourceURL, projectID string) ([]*
 			break
 		}
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("occurrence iteration error: %v", err)
 		}
 
 		severityLevel := occ.GetVulnerability().GetSeverity()
