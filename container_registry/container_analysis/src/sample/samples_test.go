@@ -36,7 +36,7 @@ type TestVariables struct {
 	client    *containeranalysis.GrafeasV1Beta1Client
 	noteID    string
 	subID     string
-	imageUrl  string
+	imageURL  string
 	projectID string
 	noteObj   *grafeaspb.Note
 	tryLimit  int
@@ -60,12 +60,12 @@ func setup(t *testing.T) TestVariables {
 	projectID := tc.ProjectID
 	noteID := "note-" + timestamp + "-" + rand
 	subID := "CA-Occurrences-" + timestamp + "-" + rand
-	imageUrl := "gcr.io/" + timestamp + "-" + rand
+	imageURL := "gcr.io/" + timestamp + "-" + rand
 	noteObj, err := createNote(noteID, projectID)
 	if err != nil {
 		t.Fatalf("createNote(%s): %v", noteID, err)
 	}
-	v := TestVariables{ctx, client, noteID, subID, imageUrl, projectID, noteObj, tryLimit, timestamp}
+	v := TestVariables{ctx, client, noteID, subID, imageURL, projectID, noteObj, tryLimit, timestamp}
 	return v
 }
 
@@ -112,9 +112,9 @@ func TestDeleteNote(t *testing.T) {
 func TestCreateOccurrence(t *testing.T) {
 	v := setup(t)
 
-	created, err := createOccurrence(v.imageUrl, v.noteID, v.projectID, v.projectID)
+	created, err := createOccurrence(v.imageURL, v.noteID, v.projectID, v.projectID)
 	if err != nil {
-		t.Errorf("createOccurrence(%s, %s): %v", v.imageUrl, v.noteID, err)
+		t.Errorf("createOccurrence(%s, %s): %v", v.imageURL, v.noteID, err)
 	} else if created == nil {
 		t.Error("returned occurrence is nil")
 	} else {
@@ -134,9 +134,9 @@ func TestCreateOccurrence(t *testing.T) {
 func TestDeleteOccurrence(t *testing.T) {
 	v := setup(t)
 
-	created, err := createOccurrence(v.imageUrl, v.noteID, v.projectID, v.projectID)
+	created, err := createOccurrence(v.imageURL, v.noteID, v.projectID, v.projectID)
 	if err != nil {
-		t.Errorf("createOccurrence(%s, %s): %v", v.imageUrl, v.noteID, err)
+		t.Errorf("createOccurrence(%s, %s): %v", v.imageURL, v.noteID, err)
 	} else if created == nil {
 		t.Error("createOccurrence returns nil Occurrence object")
 	} else {
@@ -159,23 +159,23 @@ func TestDeleteOccurrence(t *testing.T) {
 func TestOccurrencesForImage(t *testing.T) {
 	v := setup(t)
 
-	origCount, err := getOccurrencesForImage(v.imageUrl, v.projectID)
+	origCount, err := getOccurrencesForImage(v.imageURL, v.projectID)
 	if err != nil {
-		t.Errorf("getOccurrenceForImage(%s): %v", v.imageUrl, err)
+		t.Errorf("getOccurrenceForImage(%s): %v", v.imageURL, err)
 	}
 	if origCount != 0 {
 		t.Errorf("unexpected initial number of occurrences: %d; want: %d", origCount, 0)
 	}
-	created, err := createOccurrence(v.imageUrl, v.noteID, v.projectID, v.projectID)
+	created, err := createOccurrence(v.imageURL, v.noteID, v.projectID, v.projectID)
 	if err != nil {
-		t.Errorf("createOccurrence(%s, %s): %v", v.imageUrl, v.noteID, err)
+		t.Errorf("createOccurrence(%s, %s): %v", v.imageURL, v.noteID, err)
 	} else if created == nil {
 		t.Error("createOccurrence returns nil Occurrence object")
 	}
 	testutil.Retry(t, v.tryLimit, time.Second, func(r *testutil.R) {
-		newCount, err := getOccurrencesForImage(v.imageUrl, v.projectID)
+		newCount, err := getOccurrencesForImage(v.imageURL, v.projectID)
 		if err != nil {
-			r.Errorf("getOccurrencesForImage(%s): %v", v.imageUrl, err)
+			r.Errorf("getOccurrencesForImage(%s): %v", v.imageURL, err)
 		}
 		if newCount != 1 {
 			r.Errorf("unexpected updated number of occurrences: %d; want: %d", newCount, 1)
@@ -197,9 +197,9 @@ func TestOccurrencesForNote(t *testing.T) {
 	if origCount != 0 {
 		t.Errorf("unexpected initial number of occurrences: %d; want: %d", origCount, 0)
 	}
-	created, err := createOccurrence(v.imageUrl, v.noteID, v.projectID, v.projectID)
+	created, err := createOccurrence(v.imageURL, v.noteID, v.projectID, v.projectID)
 	if err != nil {
-		t.Errorf("createOccurrence(%s, %s): %v", v.imageUrl, v.noteID, err)
+		t.Errorf("createOccurrence(%s, %s): %v", v.imageURL, v.noteID, err)
 	} else if created == nil {
 		t.Error("createOccurrence returns nil Occurrence object")
 	}
@@ -239,7 +239,7 @@ func TestPubSub(t *testing.T) {
 		// Create some Occurrences.
 		totalCreated := 3
 		for i := 0; i < totalCreated; i++ {
-			created, _ := createOccurrence(v.imageUrl, v.noteID, v.projectID, v.projectID)
+			created, _ := createOccurrence(v.imageURL, v.noteID, v.projectID, v.projectID)
 			time.Sleep(time.Second)
 			if err := deleteOccurrence(path.Base(created.Name), v.projectID); err != nil {
 				t.Errorf("deleteOccurrence(%s): %v", created.Name, err)
@@ -263,9 +263,9 @@ func TestPollDiscoveryOccurrenceFinished(t *testing.T) {
 	v := setup(t)
 
 	timeout := time.Duration(1) * time.Second
-	discOcc, err := pollDiscoveryOccurrenceFinished(v.imageUrl, v.projectID, timeout)
+	discOcc, err := pollDiscoveryOccurrenceFinished(v.imageURL, v.projectID, timeout)
 	if err == nil || discOcc != nil {
-		t.Errorf("expected error when resourceUrl has no discovery occurrence")
+		t.Errorf("expected error when resourceURL has no discovery occurrence")
 	}
 
 	// create discovery occurrence
@@ -283,7 +283,7 @@ func TestPollDiscoveryOccurrenceFinished(t *testing.T) {
 		Parent: fmt.Sprintf("projects/%s", v.projectID),
 		Occurrence: &grafeaspb.Occurrence{
 			NoteName: fmt.Sprintf("projects/%s/notes/%s", v.projectID, noteId),
-			Resource: &grafeaspb.Resource{Uri: v.imageUrl},
+			Resource: &grafeaspb.Resource{Uri: v.imageURL},
 			Details: &grafeaspb.Occurrence_Discovered{
 				Discovered: &discovery.Details{
 					Discovered: &discovery.Discovered{
@@ -302,12 +302,12 @@ func TestPollDiscoveryOccurrenceFinished(t *testing.T) {
 	_, err = client.CreateNote(ctx, noteReq)
 	created, err := client.CreateOccurrence(ctx, occReq)
 	if err != nil {
-		t.Errorf("createOccurrence(%s, %s): %v", v.imageUrl, v.noteID, err)
+		t.Errorf("createOccurrence(%s, %s): %v", v.imageURL, v.noteID, err)
 	}
 
 	// poll again
 	timeout = time.Duration(20) * time.Second
-	discOcc, err = pollDiscoveryOccurrenceFinished(v.imageUrl, v.projectID, timeout)
+	discOcc, err = pollDiscoveryOccurrenceFinished(v.imageURL, v.projectID, timeout)
 	if err != nil {
 		t.Fatalf("error getting discovery occurrence: %v", err)
 	}
@@ -329,25 +329,25 @@ func TestPollDiscoveryOccurrenceFinished(t *testing.T) {
 func TestFindVulnerabilitiesForImage(t *testing.T) {
 	v := setup(t)
 
-	occList, err := findVulnerabilityOccurrencesForImage(v.imageUrl, v.projectID)
+	occList, err := findVulnerabilityOccurrencesForImage(v.imageURL, v.projectID)
 	if err != nil {
-		t.Fatalf("findVulnerabilityOccurrencesForImage(%v): %v", v.imageUrl, err)
+		t.Fatalf("findVulnerabilityOccurrencesForImage(%v): %v", v.imageURL, err)
 	}
 	if len(occList) != 0 {
 		t.Errorf("unexpected initial number of vulnerabilities: %d; want: %d", len(occList), 0)
 	}
 
-	created, err := createOccurrence(v.imageUrl, v.noteID, v.projectID, v.projectID)
+	created, err := createOccurrence(v.imageURL, v.noteID, v.projectID, v.projectID)
 	if err != nil {
-		t.Errorf("createOccurrence(%s, %s): %v", v.imageUrl, v.noteID, err)
+		t.Errorf("createOccurrence(%s, %s): %v", v.imageURL, v.noteID, err)
 	} else if created == nil {
 		t.Error("createOccurrence returns nil Occurrence object")
 	}
 
 	testutil.Retry(t, v.tryLimit, time.Second, func(r *testutil.R) {
-		occList, err = findVulnerabilityOccurrencesForImage(v.imageUrl, v.projectID)
+		occList, err = findVulnerabilityOccurrencesForImage(v.imageURL, v.projectID)
 		if err != nil {
-			r.Errorf("findVulnerabilityOccurrencesForImage(%v): %v", v.imageUrl, err)
+			r.Errorf("findVulnerabilityOccurrencesForImage(%v): %v", v.imageURL, err)
 		}
 		if len(occList) != 1 {
 			r.Errorf("unexpected updated number of occurrences: %d; want: %d", len(occList), 1)
@@ -363,9 +363,9 @@ func TestFindHighVulnerabilities(t *testing.T) {
 	v := setup(t)
 
 	// check before creation
-	occList, err := findHighSeverityVulnerabilitiesForImage(v.imageUrl, v.projectID)
+	occList, err := findHighSeverityVulnerabilitiesForImage(v.imageURL, v.projectID)
 	if err != nil {
-		t.Fatalf("findHighSeverityVulnerabilitiesForImage(%v): %v", v.imageUrl, err)
+		t.Fatalf("findHighSeverityVulnerabilitiesForImage(%v): %v", v.imageURL, err)
 	}
 	if len(occList) != 0 {
 		t.Errorf("unexpected initial number of vulnerabilities: %d; want: %d", len(occList), 0)
@@ -386,7 +386,7 @@ func TestFindHighVulnerabilities(t *testing.T) {
 		Parent: fmt.Sprintf("projects/%s", v.projectID),
 		Occurrence: &grafeaspb.Occurrence{
 			NoteName: fmt.Sprintf("projects/%s/notes/%s", v.projectID, noteId),
-			Resource: &grafeaspb.Resource{Uri: v.imageUrl},
+			Resource: &grafeaspb.Resource{Uri: v.imageURL},
 			Details: &grafeaspb.Occurrence_Vulnerability{
 				Vulnerability: &vulnerability.Details{Severity: vulnerability.Severity_CRITICAL},
 			},
@@ -401,15 +401,15 @@ func TestFindHighVulnerabilities(t *testing.T) {
 	_, err = client.CreateNote(ctx, noteReq)
 	created, err := client.CreateOccurrence(ctx, occReq)
 	if err != nil {
-		t.Errorf("createOccurrence(%s, %s): %v", v.imageUrl, v.noteID, err)
+		t.Errorf("createOccurrence(%s, %s): %v", v.imageURL, v.noteID, err)
 	} else if created == nil {
 		t.Error("createOccurrence returns nil Occurrence object")
 	}
 	// check after creation
 	testutil.Retry(t, v.tryLimit, time.Second, func(r *testutil.R) {
-		occList, err = findHighSeverityVulnerabilitiesForImage(v.imageUrl, v.projectID)
+		occList, err = findHighSeverityVulnerabilitiesForImage(v.imageURL, v.projectID)
 		if err != nil {
-			r.Errorf("findHighSeverityVulnerabilitiesForImage(%s): %v", v.imageUrl, err)
+			r.Errorf("findHighSeverityVulnerabilitiesForImage(%s): %v", v.imageURL, err)
 		}
 		if len(occList) != 1 {
 			r.Errorf("unexpected updated number of vulnerabilities: %d; want: %d", len(occList), 1)
