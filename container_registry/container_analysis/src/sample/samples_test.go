@@ -306,7 +306,6 @@ func TestPollDiscoveryOccurrenceFinished(t *testing.T) {
 	}
 
 	// poll again
-
 	testutil.Retry(t, v.tryLimit, time.Second, func(r *testutil.R) {
 		discOcc, err = pollDiscoveryOccurrenceFinished(v.imageURL, v.projectID, timeout)
 		if err != nil {
@@ -333,7 +332,7 @@ func TestFindVulnerabilitiesForImage(t *testing.T) {
 
 	occList, err := findVulnerabilityOccurrencesForImage(v.imageURL, v.projectID)
 	if err != nil {
-		t.Fatalf("findVulnerabilityOccurrencesForImage(%v): %v", v.imageURL, err)
+		t.Errorf("findVulnerabilityOccurrencesForImage(%v): %v", v.imageURL, err)
 	}
 	if len(occList) != 0 {
 		t.Errorf("unexpected initial number of vulnerabilities: %d; want: %d", len(occList), 0)
@@ -367,7 +366,7 @@ func TestFindHighVulnerabilities(t *testing.T) {
 	// check before creation
 	occList, err := findHighSeverityVulnerabilitiesForImage(v.imageURL, v.projectID)
 	if err != nil {
-		t.Fatalf("findHighSeverityVulnerabilitiesForImage(%v): %v", v.imageURL, err)
+		t.Errorf("findHighSeverityVulnerabilitiesForImage(%v): %v", v.imageURL, err)
 	}
 	if len(occList) != 0 {
 		t.Errorf("unexpected initial number of vulnerabilities: %d; want: %d", len(occList), 0)
