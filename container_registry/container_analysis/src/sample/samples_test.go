@@ -29,6 +29,7 @@ import (
 	discovery "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/discovery"
 	grafeaspb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/grafeas"
 	vulnerability "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/vulnerability"
+	"github.com/google/uuid"
 )
 
 type TestVariables struct {
@@ -40,7 +41,7 @@ type TestVariables struct {
 	projectID string
 	noteObj   *grafeaspb.Note
 	tryLimit  int
-	timestamp string
+	uuid string
 }
 
 // Run before each test. Creates a set of useful variables
@@ -49,23 +50,24 @@ func setup(t *testing.T) TestVariables {
 	// Create client and context
 	ctx := context.Background()
 	client, _ := containeranalysis.NewGrafeasV1Beta1Client(ctx)
-	// Get current timestamp
-	timestamp := strconv.Itoa(int(time.Now().Unix()))
-	// Make a random portion so each test is unique
-	rand := strconv.Itoa(rand.Int())
+	// Get unique id
+	uuid, err := uuid.NewRandom()
+	if err != nil {
+		t.Fatalf("Could not generate uuid: %v", err)
+	}
 	// Set how many times to retry network tasks
 	tryLimit := 20
 
 	// Create variables used by tests
 	projectID := tc.ProjectID
-	noteID := "note-" + timestamp + "-" + rand
-	subID := "CA-Occurrences-" + timestamp + "-" + rand
-	imageURL := "gcr.io/" + timestamp + "-" + rand
+	noteID := "note-" + uuid
+	subID := "CA-Occurrences-" + uuid
+	imageURL := "gcr.io/" + uuid
 	noteObj, err := createNote(noteID, projectID)
 	if err != nil {
 		t.Fatalf("createNote(%s): %v", noteID, err)
 	}
-	v := TestVariables{ctx, client, noteID, subID, imageURL, projectID, noteObj, tryLimit, timestamp}
+	v := TestVariables{ctx, client, noteID, subID, imageURL, projectID, noteObj, tryLimit, uuid}
 	return v
 }
 
@@ -269,7 +271,7 @@ func TestPollDiscoveryOccurrenceFinished(t *testing.T) {
 	}
 
 	// create discovery occurrence
-	noteID := "discovery-note-" + v.timestamp
+	noteID := "discovery-note-" + v.uuid
 	noteReq := &grafeaspb.CreateNoteRequest{
 		Parent: fmt.Sprintf("projects/%s", v.projectID),
 		NoteId: noteID,
@@ -373,7 +375,7 @@ func TestFindHighVulnerabilities(t *testing.T) {
 	}
 
 	// create high severity occurrence
-	noteID := "severe-note-" + v.timestamp
+	noteID := "severe-note-" + v.uuid
 	noteReq := &grafeaspb.CreateNoteRequest{
 		Parent: fmt.Sprintf("projects/%s", v.projectID),
 		NoteId: noteID,
