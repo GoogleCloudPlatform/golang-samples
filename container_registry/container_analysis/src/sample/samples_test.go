@@ -62,7 +62,7 @@ func setup(t *testing.T) TestVariables {
 	projectID := tc.ProjectID
 	noteID := "note-" + uuid
 	subID := "CA-Occurrences-" + uuid
-	imageURL := "gcr.io/" + uuid
+	imageURL := "https://gcr.io/" + uuid
 	noteObj, err := createNote(noteID, projectID)
 	if err != nil {
 		t.Fatalf("createNote(%s): %v", noteID, err)
@@ -229,7 +229,7 @@ func TestPubSub(t *testing.T) {
 		// Use a channel and a goroutine to count incomming messages.
 		c := make(chan int)
 		go func() {
-			count, err := occurrencePubsub(v.subID, 20, v.projectID)
+			count, err := occurrencePubsub(v.subID, time.Duration(20)*time.Second, v.projectID)
 			if err != nil {
 				t.Errorf("occurrencePubsub(%s): %v", v.subID, err)
 			}

@@ -37,6 +37,8 @@ import (
 
 // pollDiscoveryOccurrenceFinished returns the discovery occurrence for a resource once it reaches a finished state.
 func pollDiscoveryOccurrenceFinished(resourceURL, projectID string, timeout time.Duration) (*grafeaspb.Occurrence, error) {
+	// resourceURL := fmt.Sprintf("https://gcr.io/my-project/my-image")
+	// timeout := time.Duration(5) * time.Second
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
@@ -93,6 +95,7 @@ func pollDiscoveryOccurrenceFinished(resourceURL, projectID string, timeout time
 
 // findVulnerabilityOccurrencesForImage retrieves all vulnerability Occurrences associated with a resource.
 func findVulnerabilityOccurrencesForImage(resourceURL, projectID string) ([]*grafeaspb.Occurrence, error) {
+	// resourceURL := fmt.Sprintf("https://gcr.io/my-project/my-image")
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
@@ -127,6 +130,7 @@ func findVulnerabilityOccurrencesForImage(resourceURL, projectID string) ([]*gra
 
 // findHighSeverityVulnerabilitiesForImage retrieves a list of only high vulnerability occurrences associated with a resource.
 func findHighSeverityVulnerabilitiesForImage(resourceURL, projectID string) ([]*grafeaspb.Occurrence, error) {
+	// resourceURL := fmt.Sprintf("https://gcr.io/my-project/my-image")
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {

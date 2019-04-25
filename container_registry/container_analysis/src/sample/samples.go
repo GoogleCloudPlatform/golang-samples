@@ -66,6 +66,8 @@ func createNote(noteID, projectID string) (*grafeaspb.Note, error) {
 
 // createsOccurrence creates and returns a new Occurrence of a previously created vulnerability Note.
 func createOccurrence(resourceURL, noteID, occProjectID, noteProjectID string) (*grafeaspb.Occurrence, error) {
+	// resourceURL := fmt.Sprintf("https://gcr.io/my-project/my-image")
+	// noteID := fmt.Sprintf("my-note")
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
@@ -96,6 +98,7 @@ func createOccurrence(resourceURL, noteID, occProjectID, noteProjectID string) (
 
 // deleteNote removes an existing Note from the server.
 func deleteNote(noteID, projectID string) error {
+	// noteID := fmt.Sprintf("my-note")
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
@@ -115,6 +118,7 @@ func deleteNote(noteID, projectID string) error {
 
 // deleteOccurrence removes an existing Occurrence from the server.
 func deleteOccurrence(occurrenceID, projectID string) error {
+	// occurrenceID := path.Base(occurrence.Name)
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
@@ -134,6 +138,7 @@ func deleteOccurrence(occurrenceID, projectID string) error {
 
 // getNote retrieves and prints a specified Note from the server.
 func getNote(noteID, projectID string) (*grafeaspb.Note, error) {
+	// noteID := fmt.Sprintf("my-note")
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
@@ -155,6 +160,7 @@ func getNote(noteID, projectID string) (*grafeaspb.Note, error) {
 
 // getOccurrence retrieves and prints a specified Occurrence from the server.
 func getOccurrence(occurrenceID, projectID string) (*grafeaspb.Occurrence, error) {
+	// occurrenceID := path.Base(occurrence.Name)
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
@@ -177,6 +183,7 @@ func getOccurrence(occurrenceID, projectID string) (*grafeaspb.Occurrence, error
 // getDiscoveryInfo retrieves and prints the Discovery Occurrence created for a specified image.
 // The Discovery Occurrence contains information about the initial scan on the image.
 func getDiscoveryInfo(resourceURL, projectID string) error {
+	// resourceURL := fmt.Sprintf("https://gcr.io/my-project/my-image")
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
@@ -209,6 +216,7 @@ func getDiscoveryInfo(resourceURL, projectID string) error {
 // getOccurrencesForNote retrieves all the Occurrences associated with a specified Note.
 // Here, all Occurrences are printed and counted.
 func getOccurrencesForNote(noteID, projectID string) (int, error) {
+	// noteID := fmt.Sprintf("my-note")
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
@@ -243,6 +251,7 @@ func getOccurrencesForNote(noteID, projectID string) (int, error) {
 // getOccurrencesForImage retrieves all the Occurrences associated with a specified image.
 // Here, all Occurrences are simply printed and counted.
 func getOccurrencesForImage(resourceURL, projectID string) (int, error) {
+	// resourceURL := fmt.Sprintf("https://gcr.io/my-project/my-image")
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
@@ -276,7 +285,9 @@ func getOccurrencesForImage(resourceURL, projectID string) (int, error) {
 // [START containeranalysis_pubsub]
 
 // occurrencePubsub handles incoming Occurrences using a Cloud Pub/Sub subscription.
-func occurrencePubsub(subscriptionID string, timeout int, projectID string) (int, error) {
+func occurrencePubsub(subscriptionID string, timeout time.Duration, projectID string) (int, error) {
+	// subscriptionID := fmt.Sprintf("my-occurrences-subscription")
+	// timeout := time.Duration(20) * time.Second
 	ctx := context.Background()
 
 	var mu sync.Mutex
@@ -289,7 +300,7 @@ func occurrencePubsub(subscriptionID string, timeout int, projectID string) (int
 	count := 0
 
 	// Listen to messages for 'timeout' seconds.
-	toctx, cancel := context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
+	toctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 	err = sub.Receive(toctx, func(ctx context.Context, msg *pubsub.Message) {
 		mu.Lock()
@@ -308,6 +319,7 @@ func occurrencePubsub(subscriptionID string, timeout int, projectID string) (int
 
 // createOccurrenceSubscription creates and returns a Pub/Sub subscription object listening to the Occurrence topic.
 func createOccurrenceSubscription(subscriptionID, projectID string) error {
+	// subscriptionID := fmt.Sprintf("my-occurrences-subscription")
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
