@@ -45,6 +45,10 @@ func TestSample(t *testing.T) {
 	defer adminClient.Close()
 	defer dataClient.Close()
 
+	// Issue a pessimistic delete of the database before starting, as it's possible that resources have
+	// not been fully cleaned up from prior runs.
+	t.Logf("pessimistic spanner delete result: %v", adminClient.DropDatabase(ctx, &adminpb.DropDatabaseRequest{Database: dbName}))
+
 	assertContains := func(out string, sub string) {
 		if !strings.Contains(out, sub) {
 			t.Errorf("got output %q; want it to contain %q", out, sub)
