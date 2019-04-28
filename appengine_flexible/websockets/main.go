@@ -25,7 +25,7 @@ import (
 
 func main() {
 	http.Handle("/", http.FileServer(http.Dir("static")))
-	http.HandleFunc("/ws", websocketHandler)
+	http.HandleFunc("/ws", socketHandler)
 	http.HandleFunc("/_ah/health", healthCheckHandler)
 	log.Print("Listening on port 8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
@@ -37,8 +37,8 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-// wsHandler addresses inbound websocket connection requests.
-func websocketHandler(w http.ResponseWriter, r *http.Request) {
+// socketHandler echos websocket messages back to the client.
+func socketHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/ws" {
 		http.NotFound(w, r)
 		return
@@ -49,19 +49,19 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	if err != nil {
-			log.Printf("upgrader.Upgrade: %v", err)
-			return
+		log.Printf("upgrader.Upgrade: %v", err)
+		return
 	}
 
 	for {
-    messageType, p, err := conn.ReadMessage()
-    if err != nil {
-				log.Printf("conn.ReadMessage: %v", err)
-        return
-    }
-    if err := conn.WriteMessage(messageType, p); err != nil {
-        log.Printf("conn.WriteMessage: %v", err)
-        return
+		messageType, p, err := conn.ReadMessage()
+		if err != nil {
+			log.Printf("conn.ReadMessage: %v", err)
+			return
+		}
+		if err := conn.WriteMessage(messageType, p); err != nil {
+			log.Printf("conn.WriteMessage: %v", err)
+			return
 		}
 	}
 }
