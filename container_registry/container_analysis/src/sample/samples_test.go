@@ -15,6 +15,7 @@
 package sample
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"path"
@@ -53,7 +54,7 @@ func setup(t *testing.T) TestVariables {
 	if err != nil {
 		t.Fatalf("Could not generate uuid: %v", err)
 	}
-	uuidStr = uuid.String()
+	uuidStr := uuid.String()
 	// Set how many times to retry network tasks
 	tryLimit := 20
 

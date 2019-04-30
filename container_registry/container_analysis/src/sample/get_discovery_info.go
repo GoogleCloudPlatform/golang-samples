@@ -20,14 +20,11 @@ package sample
 import (
 	"context"
 	"fmt"
-	"sync"
-	"time"
+	"io"
 
 	containeranalysis "cloud.google.com/go/containeranalysis/apiv1beta1"
-	pubsub "cloud.google.com/go/pubsub"
 	"google.golang.org/api/iterator"
 	grafeaspb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/grafeas"
-	"google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/vulnerability"
 )
 
 // getDiscoveryInfo retrieves and prints the Discovery Occurrence created for a specified image.

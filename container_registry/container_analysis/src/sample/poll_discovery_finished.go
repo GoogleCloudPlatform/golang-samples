@@ -25,10 +25,8 @@ import (
 	"time"
 
 	containeranalysis "cloud.google.com/go/containeranalysis/apiv1beta1"
-	"google.golang.org/api/iterator"
 	discovery "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/discovery"
 	grafeaspb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/grafeas"
-	vulnerability "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/vulnerability"
 )
 
 // pollDiscoveryOccurrenceFinished returns the discovery occurrence for a resource once it reaches a finished state.
