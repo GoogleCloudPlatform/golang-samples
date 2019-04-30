@@ -63,4 +63,3 @@ func getOccurrencesForImage(w io.Writer, resourceURL, projectID string) (int, er
 }
 
 // [END containeranalysis_occurrences_for_image]
-

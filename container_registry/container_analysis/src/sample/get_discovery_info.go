@@ -60,5 +60,3 @@ func getDiscoveryInfo(w io.Writer, resourceURL, projectID string) error {
 }
 
 // [END containeranalysis_discovery_info]
-
-

@@ -62,4 +62,3 @@ func getOccurrencesForNote(w io.Writer, noteID, projectID string) (int, error) {
 }
 
 // [END containeranalysis_occurrences_for_note]
-

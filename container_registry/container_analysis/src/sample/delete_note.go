@@ -15,7 +15,6 @@
 // Samples for the Container Analysis golang libraries: https://cloud.google.com/container-registry/docs/container-analysis
 package sample
 
-
 // [START containeranalysis_delete_note]
 
 import (
