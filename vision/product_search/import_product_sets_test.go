@@ -39,6 +39,13 @@ func TestImportProductSets(t *testing.T) {
 	if err := getProductSet(&buf, tc.ProjectID, location, productSetID); err == nil {
 		deleteProductSet(&buf, tc.ProjectID, location, productSetID)
 	}
+	if err := getProduct(&buf, tc.ProjectID, location, productID1); err == nil {
+		deleteProduct(&buf, tc.ProjectID, location, productID1)
+	}
+	if err := getProduct(&buf, tc.ProjectID, location, productID2); err == nil {
+		deleteProduct(&buf, tc.ProjectID, location, productID2)
+	}
+
 	buf.Reset()
 
 	// Import product set.
