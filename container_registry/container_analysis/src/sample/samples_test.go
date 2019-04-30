@@ -17,9 +17,7 @@ package sample
 import (
 	"context"
 	"fmt"
-	"math/rand"
 	"path"
-	"strconv"
 	"testing"
 	"time"
 
@@ -55,19 +53,20 @@ func setup(t *testing.T) TestVariables {
 	if err != nil {
 		t.Fatalf("Could not generate uuid: %v", err)
 	}
+	uuidStr = uuid.String()
 	// Set how many times to retry network tasks
 	tryLimit := 20
 
 	// Create variables used by tests
 	projectID := tc.ProjectID
-	noteID := "note-" + uuid
-	subID := "CA-Occurrences-" + uuid
-	imageURL := "https://gcr.io/" + uuid
+	noteID := "note-" + uuidStr
+	subID := "occurrences-" + uuidStr
+	imageURL := "https://gcr.io/" + uuidStr
 	noteObj, err := createNote(noteID, projectID)
 	if err != nil {
 		t.Fatalf("createNote(%s): %v", noteID, err)
 	}
-	v := TestVariables{ctx, client, noteID, subID, imageURL, projectID, noteObj, tryLimit, uuid}
+	v := TestVariables{ctx, client, noteID, subID, imageURL, projectID, noteObj, tryLimit, uuidStr}
 	return v
 }
 
@@ -225,7 +224,7 @@ func TestPubSub(t *testing.T) {
 	createOccurrenceSubscription(v.subID, v.projectID)
 
 	testutil.Retry(t, v.tryLimit, time.Second, func(r *testutil.R) {
-		// Use a channel and a goroutine to count incomming messages.
+		// Use a channel and a goroutine to count incoming messages.
 		c := make(chan int)
 		go func() {
 			count, err := occurrencePubsub(new(bytes.Buffer), v.subID, time.Duration(20)*time.Second, v.projectID)
@@ -311,7 +310,7 @@ func TestPollDiscoveryOccurrenceFinished(t *testing.T) {
 			r.Errorf("error getting discovery occurrence: %v", err)
 		}
 		if discOcc == nil {
-			r.Error("discovery occurrence is nil")
+			r.Errorf("discovery occurrence is nil")
 		}
 		analysisStatus := discOcc.GetDiscovered().GetDiscovered().AnalysisStatus
 		if analysisStatus != discovery.Discovered_FINISHED_SUCCESS {

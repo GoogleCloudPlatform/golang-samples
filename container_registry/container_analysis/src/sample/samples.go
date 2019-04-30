@@ -28,7 +28,6 @@ import (
 	"google.golang.org/api/iterator"
 	grafeaspb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/grafeas"
 	"google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/vulnerability"
-	fieldmaskpb "google.golang.org/genproto/protobuf/field_mask"
 )
 
 // [END containeranalysis_imports_samples]
@@ -321,7 +320,7 @@ func occurrencePubsub(w io.Writer, subscriptionID string, timeout time.Duration,
 	return count, nil
 }
 
-// createOccurrenceSubscription creates and returns a Pub/Sub subscription object listening to the Occurrence topic.
+// createOccurrenceSubscription creates a new Pub/Sub subscription object listening to the Occurrence topic.
 func createOccurrenceSubscription(subscriptionID, projectID string) error {
 	// subscriptionID := fmt.Sprintf("my-occurrences-subscription")
 	ctx := context.Background()
