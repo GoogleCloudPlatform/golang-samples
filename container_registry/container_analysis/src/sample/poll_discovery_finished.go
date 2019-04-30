@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Sample quickstart for getting vulnerabilities from the Container Analysis API: https://cloud.google.com/container-registry/docs/vulnerability-scan-go
+// Samples for the Container Analysis golang libraries: https://cloud.google.com/container-registry/docs/container-analysis
 package sample
 
-// [START containeranalysis_imports_quickstart]
+// [START containeranalysis_poll_discovery_occurrence_finished]
 
 import (
 	"context"
@@ -30,10 +30,6 @@ import (
 	grafeaspb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/grafeas"
 	vulnerability "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/vulnerability"
 )
-
-// [END containeranalysis_imports_quickstart]
-
-// [START containeranalysis_poll_discovery_occurrence_finished]
 
 // pollDiscoveryOccurrenceFinished returns the discovery occurrence for a resource once it reaches a finished state.
 func pollDiscoveryOccurrenceFinished(resourceURL, projectID string, timeout time.Duration) (*grafeaspb.Occurrence, error) {
@@ -90,77 +86,3 @@ func pollDiscoveryOccurrenceFinished(resourceURL, projectID string, timeout time
 }
 
 // [END containeranalysis_poll_discovery_occurrence_finished]
-
-// [START containeranalysis_vulnerability_occurrences_for_image]
-
-// findVulnerabilityOccurrencesForImage retrieves all vulnerability Occurrences associated with a resource.
-func findVulnerabilityOccurrencesForImage(resourceURL, projectID string) ([]*grafeaspb.Occurrence, error) {
-	// resourceURL := fmt.Sprintf("https://gcr.io/my-project/my-image")
-	ctx := context.Background()
-	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("NewGrafeasV1Beta1Client: %v", err)
-	}
-	defer client.Close()
-
-	req := &grafeaspb.ListOccurrencesRequest{
-		Parent: fmt.Sprintf("projects/%s", projectID),
-		Filter: fmt.Sprintf("resourceUrl = %q kind = %q", resourceURL, "VULNERABILITY"),
-	}
-
-	var occurrenceList []*grafeaspb.Occurrence
-	it := client.ListOccurrences(ctx, req)
-	for {
-		occ, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return nil, fmt.Errorf("occurrence iteration error: %v", err)
-		}
-		occurrenceList = append(occurrenceList, occ)
-	}
-
-	return occurrenceList, nil
-}
-
-// [END containeranalysis_vulnerability_occurrences_for_image]
-
-// [START containeranalysis_filter_vulnerability_occurrences]
-
-// findHighSeverityVulnerabilitiesForImage retrieves a list of only high vulnerability occurrences associated with a resource.
-func findHighSeverityVulnerabilitiesForImage(resourceURL, projectID string) ([]*grafeaspb.Occurrence, error) {
-	// resourceURL := fmt.Sprintf("https://gcr.io/my-project/my-image")
-	ctx := context.Background()
-	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("NewGrafeasV1Beta1Client: %v", err)
-	}
-	defer client.Close()
-
-	req := &grafeaspb.ListOccurrencesRequest{
-		Parent: fmt.Sprintf("projects/%s", projectID),
-		Filter: fmt.Sprintf("resourceUrl = %q kind = %q", resourceURL, "VULNERABILITY"),
-	}
-
-	var occurrenceList []*grafeaspb.Occurrence
-	it := client.ListOccurrences(ctx, req)
-	for {
-		occ, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return nil, fmt.Errorf("occurrence iteration error: %v", err)
-		}
-
-		severityLevel := occ.GetVulnerability().GetSeverity()
-		if severityLevel == vulnerability.Severity_HIGH || severityLevel == vulnerability.Severity_CRITICAL {
-			occurrenceList = append(occurrenceList, occ)
-		}
-	}
-
-	return occurrenceList, nil
-}
-
-// [END containeranalysis_filter_vulnerability_occurrences]
