@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// [START gae_flex_websockets_app]
+
 // Sample websockets demonstrates an App Engine Flexible app.
 package main
 
@@ -39,14 +41,8 @@ var upgrader = websocket.Upgrader{
 
 // socketHandler echos websocket messages back to the client.
 func socketHandler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/ws" {
-		http.NotFound(w, r)
-		return
-	}
 	conn, err := upgrader.Upgrade(w, r, nil)
-	defer func() {
-		conn.Close()
-	}()
+	defer conn.Close()
 
 	if err != nil {
 		log.Printf("upgrader.Upgrade: %v", err)
@@ -70,3 +66,5 @@ func socketHandler(w http.ResponseWriter, r *http.Request) {
 func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "ok")
 }
+
+// [END gae_flex_websockets_app]
