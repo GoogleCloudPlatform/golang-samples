@@ -45,6 +45,13 @@ func TestSample(t *testing.T) {
 	defer adminClient.Close()
 	defer dataClient.Close()
 
+	// Check for database existance prior to test start and delete, as resources may not have
+	// been cleaned up from previous invocations.
+	if db, err := adminClient.GetDatabase(ctx, &adminpb.GetDatabaseRequest{Name: dbName}); err == nil {
+		t.Logf("database %s exists in state %s. delete result: %v", db.GetName(), db.GetState().String(),
+			adminClient.DropDatabase(ctx, &adminpb.DropDatabaseRequest{Database: dbName}))
+	}
+
 	assertContains := func(out string, sub string) {
 		if !strings.Contains(out, sub) {
 			t.Errorf("got output %q; want it to contain %q", out, sub)

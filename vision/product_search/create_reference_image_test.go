@@ -34,17 +34,18 @@ func TestCreateReferenceImage(t *testing.T) {
 
 	var buf bytes.Buffer
 
+	// Ensure re-used resource names don't exist prior to test start.
+	if err := getReferenceImage(&buf, tc.ProjectID, location, productID, referenceImageID); err == nil {
+		deleteReferenceImage(&buf, tc.ProjectID, location, productID, referenceImageID)
+	}
+	if err := getProduct(&buf, tc.ProjectID, location, productID); err == nil {
+		deleteProduct(&buf, tc.ProjectID, location, productID)
+	}
+	buf.Reset()
+
 	// Create a fake product.
 	if err := createProduct(&buf, tc.ProjectID, location, productID, productDisplayName, productCategory); err != nil {
 		t.Fatalf("createProduct: %v", err)
-	}
-
-	// Make sure the reference image to be created does not already exist.
-	if err := listReferenceImages(&buf, tc.ProjectID, location, productID); err != nil {
-		t.Fatalf("listReferenceImages: %v", err)
-	}
-	if got := buf.String(); strings.Contains(got, referenceImageID) {
-		t.Errorf("Reference image ID %s already exists", referenceImageID)
 	}
 
 	// Create reference image.

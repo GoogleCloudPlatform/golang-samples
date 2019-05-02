@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	healthcare "google.golang.org/api/healthcare/v1beta1"
 )
@@ -71,8 +72,23 @@ func deidentifyDataset(w io.Writer, projectID, location, sourceDatasetID, destin
 		return fmt.Errorf("Deidentify: %v", err)
 	}
 
-	fmt.Fprintf(w, "Created de-identified dataset %s from %s\n", resp.Name, sourceName)
-	return nil
+	// Wait for the deidentification operation to finish.
+	operationService := healthcareService.Projects.Locations.Datasets.Operations
+	for {
+		op, err := operationService.Get(resp.Name).Do()
+		if err != nil {
+			return fmt.Errorf("operationService.Get: %v", err)
+		}
+		if !op.Done {
+			time.Sleep(1 * time.Second)
+			continue
+		}
+		if op.Error != nil {
+			return fmt.Errorf("deidentify operation error: %v", *op.Error)
+		}
+		fmt.Fprintf(w, "Created de-identified dataset %s from %s\n", resp.Name, sourceName)
+		return nil
+	}
 }
 
 // [END healthcare_deidentify_dataset]
