@@ -20,7 +20,6 @@ package sample
 import (
 	"context"
 	"fmt"
-	wait "k8s.io/apimachinery/pkg/util/wait"
 	"log"
 	"time"
 
@@ -33,6 +32,7 @@ import (
 func pollDiscoveryOccurrenceFinished(resourceURL, projectID string, timeout time.Duration) (*grafeaspb.Occurrence, error) {
 	// resourceURL := fmt.Sprintf("https://gcr.io/my-project/my-image")
 	// timeout := time.Duration(5) * time.Second
+	deadline := time.Now().Add(timeout).Unix()
 	ctx := context.Background()
 	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
 	if err != nil {
@@ -42,7 +42,7 @@ func pollDiscoveryOccurrenceFinished(resourceURL, projectID string, timeout time
 
 	// Find the discovery occurrence using a filter string.
 	var discoveryOccurrence *grafeaspb.Occurrence
-	err = wait.Poll(time.Second, timeout, func() (bool, error) {
+	for discoveryOccurrence == nil {
 		log.Printf("Querying for discovery occurrence")
 		req := &grafeaspb.ListOccurrencesRequest{
 			Parent: fmt.Sprintf("projects/%s", projectID),
@@ -51,34 +51,31 @@ func pollDiscoveryOccurrenceFinished(resourceURL, projectID string, timeout time
 		it := client.ListOccurrences(ctx, req)
 		// Only one should ever be returned by ListOccurrences and the given filter.
 		result, err := it.Next()
-		if err != nil || result == nil || result.GetDiscovered() == nil {
-			return false, nil
+		if result != nil && result.GetDiscovered() != nil {
+			discoveryOccurrence = result;
+		} else if time.Now().Unix() > deadline {
+			return nil, fmt.Errorf("timeout while retrieving discovery occurrence: %v", err)
+		} else {
+			time.Sleep(time.Second)
 		}
-		discoveryOccurrence = result
-		return true, nil
-	})
-	if err != nil {
-		return nil, fmt.Errorf("could not find dicovery occurrence: %v", err)
 	}
 
 	// Wait for the discovery occurrence to enter a terminal state.
-	err = wait.Poll(time.Second, timeout, func() (bool, error) {
-		// Update the occurrence
+	status := discovery.Discovered_PENDING
+	for status != discovery.Discovered_FINISHED_SUCCESS &&
+		status != discovery.Discovered_FINISHED_FAILED &&
+		status != discovery.Discovered_FINISHED_UNSUPPORTED {
+		// Update the occurrence.
 		req := &grafeaspb.GetOccurrenceRequest{Name: discoveryOccurrence.GetName()}
-		newOccurrence, err := client.GetOccurrence(ctx, req)
-		if err != nil {
-			return false, fmt.Errorf("GetOccurrence: %v", err)
+		updated, err := client.GetOccurrence(ctx, req)
+		if err == nil {
+			// Update the analysis status object.
+			status = updated.GetDiscovered().GetDiscovered().GetAnalysisStatus()
+		} else if time.Now().Unix() > deadline {
+			return nil, fmt.Errorf("timeout while waiting for terminal state: %v", err)
+		} else {
+			time.Sleep(time.Second)
 		}
-		discoveryOccurrence = newOccurrence
-		// Check if the discovery occurrence is in a ternimal state.
-		state := discoveryOccurrence.GetDiscovered().GetDiscovered().GetAnalysisStatus()
-		isTerminal := (state == discovery.Discovered_FINISHED_SUCCESS ||
-			state == discovery.Discovered_FINISHED_FAILED ||
-			state == discovery.Discovered_FINISHED_UNSUPPORTED)
-		return isTerminal, nil
-	})
-	if err != nil {
-		return nil, fmt.Errorf("occurrence never reached terminal state: %v", err)
 	}
 	return discoveryOccurrence, nil
 }
