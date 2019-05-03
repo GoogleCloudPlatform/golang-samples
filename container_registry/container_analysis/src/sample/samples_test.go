@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package sample provides code samples for the Container Analysis libraries: https://cloud.google.com/container-registry/docs/container-analysis
 package sample
 
 import (
