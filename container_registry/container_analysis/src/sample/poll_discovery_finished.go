@@ -51,7 +51,7 @@ func pollDiscoveryOccurrenceFinished(resourceURL, projectID string, timeout time
 		// Only one should ever be returned by ListOccurrences and the given filter.
 		result, err := it.Next()
 		if result != nil && result.GetDiscovered() != nil {
-			discoveryOccurrence = result;
+			discoveryOccurrence = result
 		} else if time.Now().Unix() > deadline {
 			return nil, fmt.Errorf("timeout while retrieving discovery occurrence: %v", err)
 		} else {
