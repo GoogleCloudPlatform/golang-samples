@@ -1,0 +1,92 @@
+// Copyright 2019 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package main
+
+// [START containeranalysis_poll_discovery_occurrence_finished]
+
+import (
+	"context"
+	"fmt"
+	"time"
+
+	containeranalysis "cloud.google.com/go/containeranalysis/apiv1beta1"
+	discovery "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/discovery"
+	grafeaspb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/grafeas"
+)
+
+// pollDiscoveryOccurrenceFinished returns the discovery occurrence for a resource once it reaches a finished state.
+func pollDiscoveryOccurrenceFinished(resourceURL, projectID string, timeout time.Duration) (*grafeaspb.Occurrence, error) {
+	// resourceURL := fmt.Sprintf("https://gcr.io/my-project/my-image")
+	// timeout := time.Duration(5) * time.Second
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("NewGrafeasV1Beta1Client: %v", err)
+	}
+	defer client.Close()
+
+	// ticker is used to poll once per second.
+	ticker := time.NewTicker(1 * time.Second)
+	defer ticker.Stop()
+
+	// Find the discovery occurrence using a filter string.
+	var discoveryOccurrence *grafeaspb.Occurrence
+	for discoveryOccurrence == nil {
+		select {
+		case <-ctx.Done():
+			return nil, fmt.Errorf("timeout while retrieving discovery occurrence")
+		case <-ticker.C:
+			req := &grafeaspb.ListOccurrencesRequest{
+				Parent: fmt.Sprintf("projects/%s", projectID),
+				Filter: fmt.Sprintf(`kind="DISCOVERY" AND resourceUrl=%q`, resourceURL),
+			}
+			it := client.ListOccurrences(ctx, req)
+			// Only one occurrence should ever be returned by ListOccurrences
+			// and the given filter.
+			result, err := it.Next()
+			if err != nil {
+				return nil, fmt.Errorf("it.Next: %v", err)
+			}
+			if result.GetDiscovered() != nil {
+				discoveryOccurrence = result
+			}
+		}
+	}
+
+	// Wait for the discovery occurrence to enter a terminal state.
+	for {
+		select {
+		case <-ctx.Done():
+			return nil, fmt.Errorf("timeout waiting for terminal state")
+		case <-ticker.C:
+			// Update the occurrence.
+			req := &grafeaspb.GetOccurrenceRequest{Name: discoveryOccurrence.GetName()}
+			updated, err := client.GetOccurrence(ctx, req)
+			if err != nil {
+				return nil, fmt.Errorf("GetOccurrence: %v", err)
+			}
+			switch updated.GetDiscovered().GetDiscovered().GetAnalysisStatus() {
+			case discovery.Discovered_FINISHED_SUCCESS,
+				discovery.Discovered_FINISHED_FAILED,
+				discovery.Discovered_FINISHED_UNSUPPORTED:
+				return discoveryOccurrence, nil
+			}
+		}
+	}
+}
+
+// [END containeranalysis_poll_discovery_occurrence_finished]
