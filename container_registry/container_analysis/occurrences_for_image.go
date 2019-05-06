@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package sample
+package main
 
 // [START containeranalysis_occurrences_for_image]
 
