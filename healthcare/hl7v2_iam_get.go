@@ -41,7 +41,7 @@ func hl7V2IAMPolicy(w io.Writer, projectID, location, datasetID, hl7V2StoreID st
 		return fmt.Errorf("GetIamPolicy: %v", err)
 	}
 
-	fmt.Fprintf(w, "Got HL7V2 IAM policy version: %q\n", policy.Version)
+	fmt.Fprintf(w, "IAM policy etag: %q\n", policy.Etag)
 	return nil
 }
 

@@ -41,7 +41,7 @@ func datasetIAMPolicy(w io.Writer, projectID, location, datasetID string) error 
 		return fmt.Errorf("GetIamPolicy: %v", err)
 	}
 
-	fmt.Fprintf(w, "IAM Policy version: %v\n", policy.Version)
+	fmt.Fprintf(w, "IAM Policy etag: %v\n", policy.Etag)
 	return nil
 }
 
