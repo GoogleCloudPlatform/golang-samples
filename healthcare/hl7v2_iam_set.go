@@ -36,28 +36,22 @@ func setHL7V2IAMPolicy(w io.Writer, projectID, location, datasetID, hl7V2StoreID
 
 	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/hl7v2Stores/%s", projectID, location, datasetID, hl7V2StoreID)
 
-	req := &healthcare.SetIamPolicyRequest{
-		Policy: &healthcare.Policy{
-			AuditConfigs: []*healthcare.AuditConfig{
-				{
-					Service: "allServices",
-					AuditLogConfigs: []*healthcare.AuditLogConfig{
-						{
-							LogType: "DATA_READ",
-						},
-					},
-				},
-			},
-			Bindings: []*healthcare.Binding{
-				{
-					Members: []string{"user:example@example.com"},
-					Role:    "roles/viewer",
-				},
-			},
-		},
+	policy, err := storesService.GetIamPolicy(name).Do()
+	if err != nil {
+		return fmt.Errorf("GetIamPolicy: %v", err)
 	}
 
-	if _, err := storesService.SetIamPolicy(name, req).Do(); err != nil {
+	policy.Bindings = append(policy.Bindings, &healthcare.Binding{
+		Members: []string{"user:example@example.com"},
+		Role:    "roles/viewer",
+	})
+
+	req := &healthcare.SetIamPolicyRequest{
+		Policy: policy,
+	}
+
+	policy, err = storesService.SetIamPolicy(name, req).Do()
+	if err != nil {
 		return fmt.Errorf("SetIamPolicy: %v", err)
 	}
 

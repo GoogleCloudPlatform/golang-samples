@@ -36,32 +36,26 @@ func setDatasetIAMPolicy(w io.Writer, projectID, location, datasetID string) err
 
 	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s", projectID, location, datasetID)
 
-	req := &healthcare.SetIamPolicyRequest{
-		Policy: &healthcare.Policy{
-			AuditConfigs: []*healthcare.AuditConfig{
-				{
-					Service: "allServices",
-					AuditLogConfigs: []*healthcare.AuditLogConfig{
-						{
-							LogType: "DATA_READ",
-						},
-					},
-				},
-			},
-			Bindings: []*healthcare.Binding{
-				{
-					Members: []string{"user:example@example.com"},
-					Role:    "roles/viewer",
-				},
-			},
-		},
+	policy, err := datasetsService.GetIamPolicy(name).Do()
+	if err != nil {
+		return fmt.Errorf("GetIamPolicy: %v", err)
 	}
 
-	if _, err := datasetsService.SetIamPolicy(name, req).Do(); err != nil {
+	policy.Bindings = append(policy.Bindings, &healthcare.Binding{
+		Members: []string{"user:example@example.com"},
+		Role:    "roles/viewer",
+	})
+
+	req := &healthcare.SetIamPolicyRequest{
+		Policy: policy,
+	}
+
+	policy, err = datasetsService.SetIamPolicy(name, req).Do()
+	if err != nil {
 		return fmt.Errorf("SetIamPolicy: %v", err)
 	}
 
-	fmt.Fprintf(w, "Sucessfully set IAM Policy.\n")
+	fmt.Fprintf(w, "IAM Policy etag: %v", policy.Etag)
 	return nil
 }
 

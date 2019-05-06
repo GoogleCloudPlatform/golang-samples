@@ -35,30 +35,24 @@ func setFHIRIAMPolicy(w io.Writer, projectID, location, datasetID, fhirStoreID s
 	fhirService := healthcareService.Projects.Locations.Datasets.FhirStores
 
 	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/fhirStores/%s", projectID, location, datasetID, fhirStoreID)
-	req := &healthcare.SetIamPolicyRequest{
-		Policy: &healthcare.Policy{
-			AuditConfigs: []*healthcare.AuditConfig{
-				{
-					Service: "allServices",
-					AuditLogConfigs: []*healthcare.AuditLogConfig{
-						{
-							LogType: "DATA_READ",
-						},
-					},
-				},
-			},
-			Bindings: []*healthcare.Binding{
-				{
-					Members: []string{"user:example@example.com"},
-					Role:    "roles/viewer",
-				},
-			},
-		},
-	}
 
-	policy, err := fhirService.SetIamPolicy(name, req).Do()
+	policy, err := fhirService.GetIamPolicy(name).Do()
 	if err != nil {
 		return fmt.Errorf("GetIamPolicy: %v", err)
+	}
+
+	policy.Bindings = append(policy.Bindings, &healthcare.Binding{
+		Members: []string{"user:example@example.com"},
+		Role:    "roles/viewer",
+	})
+
+	req := &healthcare.SetIamPolicyRequest{
+		Policy: policy,
+	}
+
+	policy, err = fhirService.SetIamPolicy(name, req).Do()
+	if err != nil {
+		return fmt.Errorf("SetIamPolicy: %v", err)
 	}
 
 	fmt.Fprintf(w, "IAM Policy version: %v\n", policy.Version)
