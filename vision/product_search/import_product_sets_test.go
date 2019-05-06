@@ -35,21 +35,18 @@ func TestImportProductSets(t *testing.T) {
 
 	var buf bytes.Buffer
 
-	// Make sure the product set to be created does not already exist.
-	if err := listProductSets(&buf, tc.ProjectID, location); err != nil {
-		t.Fatalf("listProductSets: %v", err)
+	// Ensure re-used resource names don't exist prior to test start.
+	if err := getProductSet(&buf, tc.ProjectID, location, productSetID); err == nil {
+		deleteProductSet(&buf, tc.ProjectID, location, productSetID)
 	}
-	if got := buf.String(); strings.Contains(got, productSetID) {
-		t.Errorf("Product set ID %s already exists", productSetID)
+	if err := getProduct(&buf, tc.ProjectID, location, productID1); err == nil {
+		deleteProduct(&buf, tc.ProjectID, location, productID1)
+	}
+	if err := getProduct(&buf, tc.ProjectID, location, productID2); err == nil {
+		deleteProduct(&buf, tc.ProjectID, location, productID2)
 	}
 
-	// Make sure the products to be created do not already exist.
-	if err := listProducts(&buf, tc.ProjectID, location); err != nil {
-		t.Fatalf("listProducts: %v", err)
-	}
-	if got := buf.String(); strings.Contains(got, productID1) || strings.Contains(got, productID2) {
-		t.Errorf("Product IDs %s %s already exist", productID1, productID2)
-	}
+	buf.Reset()
 
 	// Import product set.
 	if err := importProductSets(&buf, tc.ProjectID, location, gcsURI); err != nil {
