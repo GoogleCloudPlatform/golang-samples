@@ -30,7 +30,7 @@ func deidentifyDataset(w io.Writer, projectID, location, sourceDatasetID, destin
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.New: %v", err)
+		return fmt.Errorf("healthcare.NewService: %v", err)
 	}
 
 	datasetsService := healthcareService.Projects.Locations.Datasets

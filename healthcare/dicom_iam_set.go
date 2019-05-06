@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START healthcare_get_dicom_store]
+// [START healthcare_dicom_store_set_iam_policy]
 import (
 	"context"
 	"fmt"
@@ -23,8 +23,8 @@ import (
 	healthcare "google.golang.org/api/healthcare/v1beta1"
 )
 
-// getDICOMStore gets a DICOM store.
-func getDICOMStore(w io.Writer, projectID, location, datasetID, dicomStoreID string) error {
+// setDICOMIAMPolicy sets the DICOM store's IAM policy.
+func setDICOMIAMPolicy(w io.Writer, projectID, location, datasetID, dicomStoreID string) error {
 	ctx := context.Background()
 
 	healthcareService, err := healthcare.NewService(ctx)
@@ -32,17 +32,37 @@ func getDICOMStore(w io.Writer, projectID, location, datasetID, dicomStoreID str
 		return fmt.Errorf("healthcare.NewService: %v", err)
 	}
 
-	storesService := healthcareService.Projects.Locations.Datasets.DicomStores
+	dicomService := healthcareService.Projects.Locations.Datasets.DicomStores
 
 	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/dicomStores/%s", projectID, location, datasetID, dicomStoreID)
-
-	store, err := storesService.Get(name).Do()
-	if err != nil {
-		return fmt.Errorf("Get: %v", err)
+	req := &healthcare.SetIamPolicyRequest{
+		Policy: &healthcare.Policy{
+			AuditConfigs: []*healthcare.AuditConfig{
+				{
+					Service: "allServices",
+					AuditLogConfigs: []*healthcare.AuditLogConfig{
+						{
+							LogType: "DATA_READ",
+						},
+					},
+				},
+			},
+			Bindings: []*healthcare.Binding{
+				{
+					Members: []string{"user:example@example.com"},
+					Role:    "roles/viewer",
+				},
+			},
+		},
 	}
 
-	fmt.Fprintf(w, "Got DICOM store: %+v\n", store)
+	policy, err := dicomService.SetIamPolicy(name, req).Do()
+	if err != nil {
+		return fmt.Errorf("GetIamPolicy: %v", err)
+	}
+
+	fmt.Fprintf(w, "IAM Policy version: %v\n", policy.Version)
 	return nil
 }
 
-// [END healthcare_get_dicom_store]
+// [END healthcare_dicom_store_set_iam_policy]

@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START healthcare_create_dataset]
+// [START healthcare_delete_resource_purge]
 import (
 	"context"
 	"fmt"
@@ -23,8 +23,8 @@ import (
 	healthcare "google.golang.org/api/healthcare/v1beta1"
 )
 
-// createDataset creates a dataset.
-func createDataset(w io.Writer, projectID, location, datasetID string) error {
+// purgeFHIRResource purges an FHIR resources.
+func purgeFHIRResource(w io.Writer, projectID, location, datasetID, fhirStoreID, resourceType, fhirResourceID string) error {
 	ctx := context.Background()
 
 	healthcareService, err := healthcare.NewService(ctx)
@@ -32,17 +32,17 @@ func createDataset(w io.Writer, projectID, location, datasetID string) error {
 		return fmt.Errorf("healthcare.NewService: %v", err)
 	}
 
-	datasetsService := healthcareService.Projects.Locations.Datasets
+	fhirService := healthcareService.Projects.Locations.Datasets.FhirStores.Fhir
 
-	parent := fmt.Sprintf("projects/%s/locations/%s", projectID, location)
+	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/fhirStores/%s/fhir/%s/%s", projectID, location, datasetID, fhirStoreID, resourceType, fhirResourceID)
 
-	resp, err := datasetsService.Create(parent, &healthcare.Dataset{}).DatasetId(datasetID).Do()
-	if err != nil {
-		return fmt.Errorf("Create: %v", err)
+	if _, err := fhirService.ResourcePurge(name).Do(); err != nil {
+		return fmt.Errorf("ResourcePurge: %v", err)
 	}
 
-	fmt.Fprintf(w, "Created dataset: %q\n", resp.Name)
+	fmt.Fprintf(w, "Resource Purged: %q", name)
+
 	return nil
 }
 
-// [END healthcare_create_dataset]
+// [END healthcare_delete_resource_purge]

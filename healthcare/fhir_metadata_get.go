@@ -14,17 +14,18 @@
 
 package snippets
 
-// [START healthcare_create_dataset]
+// [START healthcare_get_metadata]
 import (
 	"context"
 	"fmt"
 	"io"
+	"io/ioutil"
 
 	healthcare "google.golang.org/api/healthcare/v1beta1"
 )
 
-// createDataset creates a dataset.
-func createDataset(w io.Writer, projectID, location, datasetID string) error {
+// getFHIRMetadata gets FHIR store metadata.
+func getFHIRMetadata(w io.Writer, projectID, location, datasetID, fhirStoreID string) error {
 	ctx := context.Background()
 
 	healthcareService, err := healthcare.NewService(ctx)
@@ -32,17 +33,27 @@ func createDataset(w io.Writer, projectID, location, datasetID string) error {
 		return fmt.Errorf("healthcare.NewService: %v", err)
 	}
 
-	datasetsService := healthcareService.Projects.Locations.Datasets
+	fhirService := healthcareService.Projects.Locations.Datasets.FhirStores.Fhir
 
-	parent := fmt.Sprintf("projects/%s/locations/%s", projectID, location)
+	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/fhirStores/%s", projectID, location, datasetID, fhirStoreID)
 
-	resp, err := datasetsService.Create(parent, &healthcare.Dataset{}).DatasetId(datasetID).Do()
+	resp, err := fhirService.Capabilities(name).Do()
 	if err != nil {
-		return fmt.Errorf("Create: %v", err)
+		return fmt.Errorf("Capabilities: %v", err)
 	}
 
-	fmt.Fprintf(w, "Created dataset: %q\n", resp.Name)
+	defer resp.Body.Close()
+
+	respBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("could not read response: %v", err)
+	}
+
+	if resp.StatusCode > 299 {
+		return fmt.Errorf("Capabilities: status %d %s: %s", resp.StatusCode, resp.Status, respBytes)
+	}
+	fmt.Fprintf(w, "%s", respBytes)
 	return nil
 }
 
-// [END healthcare_create_dataset]
+// [END healthcare_get_metadata]

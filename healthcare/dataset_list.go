@@ -29,7 +29,7 @@ func listDatasets(w io.Writer, projectID string, location string) error {
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.New: %v", err)
+		return fmt.Errorf("healthcare.NewService: %v", err)
 	}
 
 	datasetsService := healthcareService.Projects.Locations.Datasets

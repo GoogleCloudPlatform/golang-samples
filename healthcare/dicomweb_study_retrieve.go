@@ -14,17 +14,19 @@
 
 package snippets
 
-// [START healthcare_delete_dataset]
+// [START healthcare_dicomweb_retrieve_study]
 import (
 	"context"
 	"fmt"
 	"io"
+	"io/ioutil"
 
 	healthcare "google.golang.org/api/healthcare/v1beta1"
 )
 
-// deleteDataset deletes the given dataset.
-func deleteDataset(w io.Writer, projectID, location, datasetID string) error {
+// dicomWebRetrieveStudy retrieves all instances in the given dicomWebPath
+// study.
+func dicomWebRetrieveStudy(w io.Writer, projectID, location, datasetID, dicomStoreID, dicomWebPath string) error {
 	ctx := context.Background()
 
 	healthcareService, err := healthcare.NewService(ctx)
@@ -32,15 +34,27 @@ func deleteDataset(w io.Writer, projectID, location, datasetID string) error {
 		return fmt.Errorf("healthcare.NewService: %v", err)
 	}
 
-	datasetsService := healthcareService.Projects.Locations.Datasets
+	storesService := healthcareService.Projects.Locations.Datasets.DicomStores.Studies
 
-	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s", projectID, location, datasetID)
-	if _, err := datasetsService.Delete(name).Do(); err != nil {
+	parent := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/dicomStores/%s", projectID, location, datasetID, dicomStoreID)
+
+	resp, err := storesService.RetrieveStudy(parent, dicomWebPath).Do()
+	if err != nil {
 		return fmt.Errorf("Delete: %v", err)
 	}
 
-	fmt.Fprintf(w, "Deleted dataset: %q\n", name)
+	defer resp.Body.Close()
+
+	respBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("could not read response: %v", err)
+	}
+
+	if resp.StatusCode > 299 {
+		return fmt.Errorf("SearchForInstances: status %d %s: %s", resp.StatusCode, resp.Status, respBytes)
+	}
+	fmt.Fprintf(w, "%s", respBytes)
 	return nil
 }
 
-// [END healthcare_delete_dataset]
+// [END healthcare_dicomweb_retrieve_study]
