@@ -24,8 +24,8 @@ import (
 	healthcare "google.golang.org/api/healthcare/v1beta1"
 )
 
-// getFHIRResourceHistory gets an FHIR resource history.
-func getFHIRResourceHistory(w io.Writer, projectID, location, datasetID, fhirStoreID, resourceType, fhirResourceID, versionID string) error {
+// listFHIRResourceHistory lists an FHIR resource's history.
+func listFHIRResourceHistory(w io.Writer, projectID, location, datasetID, fhirStoreID, resourceType, fhirResourceID string) error {
 	ctx := context.Background()
 
 	healthcareService, err := healthcare.NewService(ctx)
@@ -35,9 +35,9 @@ func getFHIRResourceHistory(w io.Writer, projectID, location, datasetID, fhirSto
 
 	fhirService := healthcareService.Projects.Locations.Datasets.FhirStores.Fhir
 
-	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/fhirStores/%s/fhir/%s/%s/_history/%s", projectID, location, datasetID, fhirStoreID, resourceType, fhirResourceID, versionID)
+	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/fhirStores/%s/fhir/%s/%s", projectID, location, datasetID, fhirStoreID, resourceType, fhirResourceID)
 
-	resp, err := fhirService.Vread(name).Do()
+	resp, err := fhirService.History(name).Do()
 	if err != nil {
 		return fmt.Errorf("Read: %v", err)
 	}

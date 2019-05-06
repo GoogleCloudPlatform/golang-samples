@@ -179,7 +179,17 @@ func TestFHIRStore(t *testing.T) {
 
 	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
 		buf.Reset()
-		if err := getFHIRResourceHistory(buf, tc.ProjectID, location, datasetID, fhirStoreID, resourceType, res.ID); err != nil {
+		if err := listFHIRResourceHistory(buf, tc.ProjectID, location, datasetID, fhirStoreID, resourceType, res.ID); err != nil {
+			r.Errorf("listFHIRResourceHistory got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, res.Meta.VersionID) {
+			r.Errorf("listFHIRResourceHistory got\n----\n%s\n----\nWant to contain:\n----\n%s\n----\n", got, res.Meta.VersionID)
+		}
+	})
+
+	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
+		buf.Reset()
+		if err := getFHIRResourceHistory(buf, tc.ProjectID, location, datasetID, fhirStoreID, resourceType, res.ID, res.Meta.VersionID); err != nil {
 			r.Errorf("getFHIRResourceHistory got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, res.Meta.VersionID) {
