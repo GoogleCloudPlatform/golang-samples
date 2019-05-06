@@ -17,7 +17,6 @@ package snippets
 // [START healthcare_import_fhir_resources]
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"time"
@@ -54,7 +53,7 @@ func importFHIRResource(w io.Writer, projectID, location, datasetID, fhirStoreID
 	for {
 		select {
 		case <-ctx.Done():
-			return errors.New("timeout waiting for operation to finish")
+			return ctx.Err()
 		case <-ticker.C:
 			newOp, err := operationsService.Get(op.Name).Do()
 			if err != nil {

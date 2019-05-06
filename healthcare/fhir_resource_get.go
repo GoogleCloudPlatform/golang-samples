@@ -52,7 +52,7 @@ func getFHIRResource(w io.Writer, projectID, location, datasetID, fhirStoreID, r
 	}
 
 	if resp.StatusCode > 299 {
-		return fmt.Errorf("Create: status %d %s: %s", resp.StatusCode, resp.Status, respBytes)
+		return fmt.Errorf("Read: status %d %s: %s", resp.StatusCode, resp.Status, respBytes)
 	}
 	fmt.Fprintf(w, "%s", respBytes)
 

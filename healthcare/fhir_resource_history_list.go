@@ -39,7 +39,7 @@ func listFHIRResourceHistory(w io.Writer, projectID, location, datasetID, fhirSt
 
 	resp, err := fhirService.History(name).Do()
 	if err != nil {
-		return fmt.Errorf("Read: %v", err)
+		return fmt.Errorf("History: %v", err)
 	}
 
 	defer resp.Body.Close()
@@ -50,7 +50,7 @@ func listFHIRResourceHistory(w io.Writer, projectID, location, datasetID, fhirSt
 	}
 
 	if resp.StatusCode > 299 {
-		return fmt.Errorf("Create: status %d %s: %s", resp.StatusCode, resp.Status, respBytes)
+		return fmt.Errorf("History: status %d %s: %s", resp.StatusCode, resp.Status, respBytes)
 	}
 	fmt.Fprintf(w, "%s", respBytes)
 
