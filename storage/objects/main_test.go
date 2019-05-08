@@ -225,7 +225,7 @@ func TestKMSObjects(t *testing.T) {
 	}
 }
 
-func TestV4SignedUrl(t *testing.T) {
+func TestV4SignedURL(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
@@ -233,36 +233,32 @@ func TestV4SignedUrl(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	var (
-		bucketName = tc.ProjectID + "-signed-url-bucket-name"
-
-		objectName = "foo.txt"
-
-		serviceAccount = os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
-	)
+	bucketName := tc.ProjectID + "-signed-url-bucket-name"
+	objectName := "foo.txt"
+	serviceAccount := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
 
 	cleanBucket(t, ctx, client, tc.ProjectID, bucketName)
 
-	putUrl, err := generateV4PutObjectSignedUrl(client, bucketName, objectName, serviceAccount)
+	putURL, err := generateV4PutObjectSignedURL(client, bucketName, objectName, serviceAccount)
 	if err != nil {
 		t.Errorf("can't generate a put signed url: %v", err)
 	}
 
 	httpClient := &http.Client{}
-	request, err := http.NewRequest("PUT", putUrl, strings.NewReader("hello world"))
+	request, err := http.NewRequest("PUT", putURL, strings.NewReader("hello world"))
 	request.ContentLength = 11
 	request.Header.Set("Content-Type", "application/octet-stream")
 	response, err := httpClient.Do(request)
 	if err != nil {
-		t.Errorf("Err: %v", err)
+		t.Errorf("TestV4SignedURL(httpClient.Do): %v", err)
 	}
 
-	getUrl, err := generateV4GetObjectSignedUrl(client, bucketName, objectName, serviceAccount)
+	getURL, err := generateV4GetObjectSignedURL(client, bucketName, objectName, serviceAccount)
 	if err != nil {
 		t.Errorf("can't generate a get signed url: %v", err)
 	}
 
-	response, err = http.Get(getUrl)
+	response, err = http.Get(getURL)
 	if err != nil {
 		t.Errorf("Err: %v", err)
 	}
