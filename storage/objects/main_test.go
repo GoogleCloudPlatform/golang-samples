@@ -241,7 +241,7 @@ func TestV4SignedURL(t *testing.T) {
 
 	putURL, err := generateV4PutObjectSignedURL(client, bucketName, objectName, serviceAccount)
 	if err != nil {
-		t.Errorf("can't generate a put signed url: %v", err)
+		t.Errorf("generateV4PutObjectSignedURL: %v", err)
 	}
 
 	httpClient := &http.Client{}
@@ -250,23 +250,23 @@ func TestV4SignedURL(t *testing.T) {
 	request.Header.Set("Content-Type", "application/octet-stream")
 	response, err := httpClient.Do(request)
 	if err != nil {
-		t.Errorf("TestV4SignedURL(httpClient.Do): %v", err)
+		t.Errorf("httpClient.Do: %v", err)
 	}
 
 	getURL, err := generateV4GetObjectSignedURL(client, bucketName, objectName, serviceAccount)
 	if err != nil {
-		t.Errorf("can't generate a get signed url: %v", err)
+		t.Errorf("generateV4GetObjectSignedURL: %v", err)
 	}
 
 	response, err = http.Get(getURL)
 	if err != nil {
-		t.Errorf("Err: %v", err)
+		t.Errorf("http.Get: %v", err)
 	}
 	defer response.Body.Close()
 
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		t.Errorf("Err: %v", err)
+		t.Errorf("ioutil.ReadAll: %v", err)
 	}
 
 	if got, want := string(body), "hello world"; got != want {
