@@ -73,10 +73,16 @@ gcloud builds submit --tag gcr.io/YOUR_PROJECT_ID/go-grpc-hello:1.0 .
     /usr/share/google/dockercfg_update.sh
     ```
 
+1. Create your own container network called esp_net:
+
+    ```bash
+    docker network create --driver bridge esp_net
+    ```
+
 1. Run your gRPC server's container:
 
     ```bash
-    docker run --detach --name=grpc-hello gcr.io/${GOOGLE_CLOUD_PROJECT}/go-grpc-hello:1.0
+    docker run --detach --net=esp_net --name=grpc-hello gcr.io/${GOOGLE_CLOUD_PROJECT}/go-grpc-hello:1.0
     ```
 
 1. Run Endpoints proxy:
@@ -86,7 +92,7 @@ gcloud builds submit --tag gcr.io/YOUR_PROJECT_ID/go-grpc-hello:1.0 .
         --detach \
         --name=esp \
         --publish=80:9000 \
-        --link=grpc-hello:grpc-hello \
+        --net=esp_net \
         gcr.io/endpoints-release/endpoints-runtime:1 \
         --service=${SERVICE_NAME} \
         --rollout_strategy=managed \
