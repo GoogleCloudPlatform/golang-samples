@@ -34,6 +34,14 @@ func TestAddProductToProductSet(t *testing.T) {
 
 	var buf bytes.Buffer
 
+	// Ensure re-used resource names don't exist prior to test start.
+	if err := getProductSet(&buf, tc.ProjectID, location, productSetID); err == nil {
+		deleteProductSet(&buf, tc.ProjectID, location, productSetID)
+	}
+	if err := getProduct(&buf, tc.ProjectID, location, productID); err == nil {
+		deleteProduct(&buf, tc.ProjectID, location, productID)
+	}
+
 	// Create fake product set and product.
 	if err := createProductSet(&buf, tc.ProjectID, location, productSetID, productSetDisplayName); err != nil {
 		t.Fatalf("createProductSet: %v", err)

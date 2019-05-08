@@ -54,9 +54,7 @@ func createTask(projectID, locationID, queueID, message string) (*taskspb.Task, 
 	}
 
 	// Add a payload message if one is present.
-	if message != "" {
-		req.Task.GetAppEngineHttpRequest().Body = []byte(message)
-	}
+	req.Task.GetAppEngineHttpRequest().Body = []byte(message)
 
 	createdTask, err := client.CreateTask(ctx, req)
 	if err != nil {

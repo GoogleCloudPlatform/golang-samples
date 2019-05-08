@@ -31,8 +31,7 @@ func getJob(w io.Writer, projectID, jobID string) (*talentpb.Job, error) {
 	// Initialize a jobService client.
 	c, err := talent.NewJobClient(ctx)
 	if err != nil {
-		fmt.Printf("talent.NewJobClient: %v\n", err)
-		return nil, err
+		return nil, fmt.Errorf("talent.NewJobClient: %v", err)
 	}
 
 	// Construct a getJob request.
@@ -45,8 +44,7 @@ func getJob(w io.Writer, projectID, jobID string) (*talentpb.Job, error) {
 
 	resp, err := c.GetJob(ctx, req)
 	if err != nil {
-		fmt.Printf("Failed to get job %s: %v\n", jobName, err)
-		return nil, err
+		return nil, fmt.Errorf("GetJob: %v", err)
 	}
 
 	fmt.Fprintf(w, "Job: %q\n", resp.GetName())

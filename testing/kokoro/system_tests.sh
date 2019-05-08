@@ -6,6 +6,7 @@ export GOLANG_SAMPLES_KMS_KEYRING=ring1
 export GOLANG_SAMPLES_KMS_CRYPTOKEY=key1
 export GOLANG_SAMPLES_IOT_PUB=$KOKORO_GFILE_DIR/rsa_cert.pem
 export GOLANG_SAMPLES_IOT_PRIV=$KOKORO_GFILE_DIR/rsa_private.pem
+export GCLOUD_ORGANIZATION=1081635000895
 
 TIMEOUT=25m
 
@@ -29,6 +30,7 @@ export GOOGLE_APPLICATION_CREDENTIALS=$KOKORO_KEYSTORE_DIR/71386_kokoro-$GOLANG_
 set -x
 
 export GOLANG_SAMPLES_SPANNER=projects/golang-samples-tests/instances/golang-samples-tests
+export GOLANG_SAMPLES_SERVICE_ACCOUNT_EMAIL=kokoro-$GOLANG_SAMPLES_PROJECT_ID@$GOLANG_SAMPLES_PROJECT_ID.iam.gserviceaccount.com
 
 go version
 date
@@ -91,8 +93,9 @@ git checkout v2.0.0
 go get -v ./...
 popd
 
-# Always download internal dependencies.
-go get ./internal/...
+# Always download top-level and internal dependencies.
+go get -t ./internal/...
+go get -t -d .
 
 go get github.com/jstemmer/go-junit-report
 go install -v $GO_IMPORTS

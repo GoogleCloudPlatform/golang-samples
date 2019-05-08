@@ -33,14 +33,13 @@ func createJobWithCustomAttributes(w io.Writer, projectID, companyID, jobTitle s
 	// Initialize a job service client.
 	c, err := talent.NewJobClient(ctx)
 	if err != nil {
-		fmt.Printf("talent.NewJobClient: %v\n", err)
-		return nil, err
+		return nil, fmt.Errorf("talent.NewJobClient: %v", err)
 	}
 
 	// requisitionID shoud be the unique ID in your system
 	requisitionID := fmt.Sprintf("job-with-custom-attribute-%s", uuid.Must(uuid.NewV4()).String())
 	jobToCreate := &talentpb.Job{
-		CompanyName:   fmt.Sprintf("projects/%s/companies/%s", projectID, companyID),
+		Company:       fmt.Sprintf("projects/%s/companies/%s", projectID, companyID),
 		RequisitionId: requisitionID,
 		Title:         jobTitle,
 		ApplicationInfo: &talentpb.Job_ApplicationInfo{
@@ -85,8 +84,7 @@ func createJobWithCustomAttributes(w io.Writer, projectID, companyID, jobTitle s
 
 	resp, err := c.CreateJob(ctx, req)
 	if err != nil {
-		fmt.Printf("Failed to create job with custom attributes: %v\n", err)
-		return nil, err
+		return nil, fmt.Errorf("CreateJob: %v", err)
 	}
 
 	fmt.Fprintf(w, "Created job with custom attributres: %q\n", resp.GetName())

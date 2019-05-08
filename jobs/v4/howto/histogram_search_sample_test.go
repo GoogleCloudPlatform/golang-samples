@@ -31,7 +31,7 @@ func TestHistogramSearch(t *testing.T) {
 		if err := histogramSearch(buf, tc.ProjectID, companyID); err != nil {
 			r.Errorf("histogramSearch: %v", err)
 		}
-		want := testJob.Name
+		want := strings.SplitAfter(testJob.Name, "jobs/")[1]
 		if got := buf.String(); !strings.Contains(got, want) {
 			r.Errorf("histogramSearch got %q, want to contain %q", got, want)
 		}

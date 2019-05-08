@@ -23,8 +23,8 @@ To build and run the sample:
 ```bash
 go build -o video_analyze
 
-gsutil cp gs://demomaker/cat.mp4
+gsutil cp gs://cloud-samples-data/video/cat.mp4
 ./video_analyze cat.mp4
 
-./video_analyze gs://demomaker/cat.mp4
+./video_analyze gs://cloud-samples-data/video/cat.mp4
 ```
