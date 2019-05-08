@@ -45,7 +45,7 @@ func TestObjects(t *testing.T) {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		log.Fatal(err)
+		t.Fatalf("storage.NewClient: %v", err)
 	}
 
 	var (
@@ -199,7 +199,7 @@ func TestKMSObjects(t *testing.T) {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		log.Fatal(err)
+		t.Fatalf("storage.NewClient: %v", err)
 	}
 
 	keyRingID := os.Getenv("GOLANG_SAMPLES_KMS_KEYRING")
@@ -230,7 +230,7 @@ func TestV4SignedURL(t *testing.T) {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		log.Fatal(err)
+		t.Fatalf("storage.NewClient: %v", err)
 	}
 
 	bucketName := tc.ProjectID + "-signed-url-bucket-name"
@@ -280,7 +280,7 @@ func TestObjectBucketLock(t *testing.T) {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		log.Fatal(err)
+		t.Fatalf("storage.NewClient: %v", err)
 	}
 
 	var (
