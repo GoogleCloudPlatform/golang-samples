@@ -38,7 +38,7 @@ func main() {
 	}
 
 	op, err := client.AnnotateVideo(ctx, &videopb.AnnotateVideoRequest{
-		InputUri: "gs://demomaker/cat.mp4",
+		InputUri: "gs://cloud-samples-data/video/cat.mp4",
 		Features: []videopb.Feature{
 			videopb.Feature_LABEL_DETECTION,
 		},
