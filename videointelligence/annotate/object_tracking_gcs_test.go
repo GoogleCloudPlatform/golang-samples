@@ -25,7 +25,7 @@ import (
 func TestObjectTrackingGCS(t *testing.T) {
 	testutil.SystemTest(t)
 
-	gcsURI := "gs://demomaker/cat.mp4"
+	gcsURI := "gs://cloud-samples-data/video/cat.mp4"
 
 	var buf bytes.Buffer
 	if err := objectTrackingGCS(&buf, gcsURI); err != nil {
