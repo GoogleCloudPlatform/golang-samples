@@ -238,10 +238,14 @@ func TestV4SignedURL(t *testing.T) {
 	serviceAccount := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
 
 	cleanBucket(t, ctx, client, tc.ProjectID, bucketName)
-
-	putURL, err := generateV4PutObjectSignedURL(client, bucketName, objectName, serviceAccount)
+	putBuf := new(bytes.Buffer)
+	putURL, err := generateV4PutObjectSignedURL(putBuf, client, bucketName, objectName, serviceAccount)
 	if err != nil {
 		t.Errorf("generateV4PutObjectSignedURL: %v", err)
+	}
+	got := putBuf.String()
+	if want := "Generated PUT signed URL:"; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
 	}
 
 	httpClient := &http.Client{}
@@ -252,11 +256,16 @@ func TestV4SignedURL(t *testing.T) {
 	if err != nil {
 		t.Errorf("httpClient.Do: %v", err)
 	}
-
-	getURL, err := generateV4GetObjectSignedURL(client, bucketName, objectName, serviceAccount)
+	getBuf := new(bytes.Buffer)
+	getURL, err := generateV4GetObjectSignedURL(getBuf, client, bucketName, objectName, serviceAccount)
 	if err != nil {
 		t.Errorf("generateV4GetObjectSignedURL: %v", err)
 	}
+	got = getBuf.String()
+	if want := "Generated GET signed URL:"; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
+
 
 	response, err = http.Get(getURL)
 	if err != nil {

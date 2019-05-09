@@ -426,7 +426,7 @@ func downloadUsingRequesterPays(client *storage.Client, object, bucketName, loca
 	return nil
 }
 
-func generateV4GetObjectSignedURL(client *storage.Client, bucketName, objectName, serviceAccount string) (string, error) {
+func generateV4GetObjectSignedURL(w io.Writer, client *storage.Client, bucketName, objectName, serviceAccount string) (string, error) {
 	// [START storage_generate_signed_url_v4]
 	jsonKey, err := ioutil.ReadFile(serviceAccount)
 	if err != nil {
@@ -451,15 +451,15 @@ func generateV4GetObjectSignedURL(client *storage.Client, bucketName, objectName
 		return "", fmt.Errorf("Unable to generate a signed URL: %v", err)
 	}
 
-	fmt.Printf("Generated GET signed URL:\n")
-	fmt.Printf("'%v'\n", u)
-	fmt.Printf("You can use this URL with any user agent, for example:\n")
-	fmt.Printf("curl '%v'\n", u)
+	fmt.Fprintln(w, "Generated GET signed URL:")
+	fmt.Fprintf(w, "'%v'\n", u)
+	fmt.Fprintln(w, "You can use this URL with any user agent, for example:")
+	fmt.Fprintf(w, "curl '%v'\n", u)
 	// [END storage_generate_signed_url_v4]
 	return u, nil
 }
 
-func generateV4PutObjectSignedURL(client *storage.Client, bucketName, objectName, serviceAccount string) (string, error) {
+func generateV4PutObjectSignedURL(w io.Writer, client *storage.Client, bucketName, objectName, serviceAccount string) (string, error) {
 	// [START storage_generate_upload_signed_url_v4]
 	jsonKey, err := ioutil.ReadFile(serviceAccount)
 	if err != nil {
@@ -486,10 +486,10 @@ func generateV4PutObjectSignedURL(client *storage.Client, bucketName, objectName
 		return "", fmt.Errorf("Unable to generate a signed URL: %v", err)
 	}
 
-	fmt.Printf("Generated PUT signed URL:\n")
-	fmt.Printf("'%v'\n", u)
-	fmt.Printf("You can use this URL with any user agent, for example:\n")
-	fmt.Printf("curl -X PUT -H 'Content-Type: application/octet-stream' --upload-file my-file '%v'\n", u)
+	fmt.Fprintln(w, "Generated PUT signed URL:")
+	fmt.Fprintf(w, "'%v'\n", u)
+	fmt.Fprintln(w, "You can use this URL with any user agent, for example:")
+	fmt.Fprintf(w, "curl -X PUT -H 'Content-Type: application/octet-stream' --upload-file my-file '%v'\n", u)
 	// [END storage_generate_upload_signed_url_v4]
 	return u, nil
 }
