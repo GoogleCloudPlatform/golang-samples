@@ -254,6 +254,7 @@ func unbindDeviceFromGateway(w io.Writer, projectID string, region string, regis
 }
 
 func TestSendDataFromBoundDevice(t *testing.T) {
+	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/847")
 	projectID := testutil.SystemTest(t).ProjectID
 
 	registryID := "golang-iot-test-registry"
