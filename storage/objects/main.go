@@ -494,7 +494,6 @@ func generateV4PutObjectSignedURL(w io.Writer, client *storage.Client, bucketNam
 	return u, nil
 }
 
-
 // TODO(jbd): Add test for downloadUsingRequesterPays.
 
 const helptext = `usage: objects -o=bucket:name [subcommand] <args...>
