@@ -472,10 +472,10 @@ func generateV4PutObjectSignedURL(w io.Writer, client *storage.Client, bucketNam
 
 	opts := &storage.SignedURLOptions{
 		Scheme: storage.SigningSchemeV4,
-		Method:         "PUT",
-		Headers:        []string{
-			                "Content-Type:application/octet-stream",
-		                },
+		Method: "PUT",
+		Headers: []string{
+						"Content-Type:application/octet-stream",
+		},
 		GoogleAccessID: conf.Email,
 		PrivateKey:     conf.PrivateKey,
 		Expires:        time.Now().Add(15 * time.Minute),
