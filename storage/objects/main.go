@@ -474,7 +474,7 @@ func generateV4PutObjectSignedURL(w io.Writer, client *storage.Client, bucketNam
 		Scheme: storage.SigningSchemeV4,
 		Method: "PUT",
 		Headers: []string{
-						"Content-Type:application/octet-stream",
+			"Content-Type:application/octet-stream",
 		},
 		GoogleAccessID: conf.Email,
 		PrivateKey:     conf.PrivateKey,
