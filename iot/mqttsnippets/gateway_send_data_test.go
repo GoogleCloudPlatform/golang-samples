@@ -254,6 +254,10 @@ func unbindDeviceFromGateway(w io.Writer, projectID string, region string, regis
 }
 
 func TestSendDataFromBoundDevice(t *testing.T) {
+	if pubKeyRSA == "" {
+		t.Skip("GOLANG_SAMPLES_IOT_PUB not set")
+	}
+
 	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/847")
 	projectID := testutil.SystemTest(t).ProjectID
 
