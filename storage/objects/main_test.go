@@ -20,11 +20,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 	"testing"
 	"time"
-	"net/http"
 
 	"google.golang.org/api/iterator"
 
@@ -265,7 +265,6 @@ func TestV4SignedURL(t *testing.T) {
 	if want := "Generated GET signed URL:"; !strings.Contains(got, want) {
 		t.Errorf("got %q, want %q", got, want)
 	}
-
 
 	response, err = http.Get(getURL)
 	if err != nil {
