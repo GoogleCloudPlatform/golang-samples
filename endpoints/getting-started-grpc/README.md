@@ -70,7 +70,7 @@ gcloud builds submit --tag gcr.io/YOUR_PROJECT_ID/go-grpc-hello:1.0 .
 1. Pull your credentials to access your private container registry:
 
     ```bash
-    /usr/share/google/dockercfg_update.sh
+    docker-credential-gcr configure-docker
     ```
 
 1. Create your own container network called esp_net:
@@ -100,7 +100,7 @@ gcloud builds submit --tag gcr.io/YOUR_PROJECT_ID/go-grpc-hello:1.0 .
         --backend=grpc://grpc-hello:50051
     ```
 
-1. Get the IP address of your secured gRPC server:
+1. On your local machine, get the IP address of your secured gRPC server:
 
     ```bash
     gcloud compute instances list --filter=grpc-host
@@ -132,7 +132,8 @@ If you haven't got a cluster, first [create one](https://cloud.google.com/kubern
 
 1. First, [create a project API key](https://console.developers.google.com/apis/credentials).
 
-1. Then, after you have your server's IP address (via GKE's `kubectl get svc` or your GCE instance's IP), run:
+1. Then, on your local machine, after you have your server's IP address (via
+   GKE's `kubectl get svc` or your GCE instance's IP), run:
 
     ```bash
     go run client/main.go --api-key=AIza.... --addr=YOUR_SERVER_IP_ADDRESS:80 [message]
