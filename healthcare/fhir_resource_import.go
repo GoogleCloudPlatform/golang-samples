@@ -61,7 +61,7 @@ func importFHIRResource(w io.Writer, projectID, location, datasetID, fhirStoreID
 			}
 			if newOp.Done {
 				if newOp.Error != nil {
-					return fmt.Errorf("import operation %q completed with error: %v", op.Name, newOp.Error)
+					return fmt.Errorf("import operation %q completed with error: %s", op.Name, newOp.Error.Details)
 				}
 				return nil
 			}
