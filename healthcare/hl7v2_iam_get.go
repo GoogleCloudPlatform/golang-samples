@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START healthcare_create_dataset]
+// [START healthcare_hl7v2_store_get_iam_policy]
 import (
 	"context"
 	"fmt"
@@ -23,8 +23,8 @@ import (
 	healthcare "google.golang.org/api/healthcare/v1beta1"
 )
 
-// createDataset creates a dataset.
-func createDataset(w io.Writer, projectID, location, datasetID string) error {
+// hl7V2IAMPolicy gets the IAM policy.
+func hl7V2IAMPolicy(w io.Writer, projectID, location, datasetID, hl7V2StoreID string) error {
 	ctx := context.Background()
 
 	healthcareService, err := healthcare.NewService(ctx)
@@ -32,17 +32,17 @@ func createDataset(w io.Writer, projectID, location, datasetID string) error {
 		return fmt.Errorf("healthcare.NewService: %v", err)
 	}
 
-	datasetsService := healthcareService.Projects.Locations.Datasets
+	storesService := healthcareService.Projects.Locations.Datasets.Hl7V2Stores
 
-	parent := fmt.Sprintf("projects/%s/locations/%s", projectID, location)
+	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/hl7v2Stores/%s", projectID, location, datasetID, hl7V2StoreID)
 
-	resp, err := datasetsService.Create(parent, &healthcare.Dataset{}).DatasetId(datasetID).Do()
+	policy, err := storesService.GetIamPolicy(name).Do()
 	if err != nil {
-		return fmt.Errorf("Create: %v", err)
+		return fmt.Errorf("GetIamPolicy: %v", err)
 	}
 
-	fmt.Fprintf(w, "Created dataset: %q\n", resp.Name)
+	fmt.Fprintf(w, "IAM policy etag: %q\n", policy.Etag)
 	return nil
 }
 
-// [END healthcare_create_dataset]
+// [END healthcare_hl7v2_store_get_iam_policy]

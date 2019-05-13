@@ -29,7 +29,7 @@ func getDICOMStore(w io.Writer, projectID, location, datasetID, dicomStoreID str
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.New: %v", err)
+		return fmt.Errorf("healthcare.NewService: %v", err)
 	}
 
 	storesService := healthcareService.Projects.Locations.Datasets.DicomStores
@@ -41,7 +41,7 @@ func getDICOMStore(w io.Writer, projectID, location, datasetID, dicomStoreID str
 		return fmt.Errorf("Get: %v", err)
 	}
 
-	fmt.Fprintf(w, "Got DICOM store: %q\n", store.Name)
+	fmt.Fprintf(w, "Got DICOM store: %+v\n", store)
 	return nil
 }
 

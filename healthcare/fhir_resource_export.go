@@ -14,17 +14,18 @@
 
 package snippets
 
-// [START healthcare_get_fhir_store]
+// [START healthcare_export_fhir_resources]
 import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	healthcare "google.golang.org/api/healthcare/v1beta1"
 )
 
-// getFHIRStore gets an FHIR store.
-func getFHIRStore(w io.Writer, projectID, location, datasetID, fhirStoreID string) error {
+// exportFHIRResource exports the resources in the FHIR store.
+func exportFHIRResource(w io.Writer, projectID, location, datasetID, fhirStoreID, gcsURIPrefix string) error {
 	ctx := context.Background()
 
 	healthcareService, err := healthcare.NewService(ctx)
@@ -35,14 +36,37 @@ func getFHIRStore(w io.Writer, projectID, location, datasetID, fhirStoreID strin
 	storesService := healthcareService.Projects.Locations.Datasets.FhirStores
 
 	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/fhirStores/%s", projectID, location, datasetID, fhirStoreID)
-
-	store, err := storesService.Get(name).Do()
-	if err != nil {
-		return fmt.Errorf("Get: %v", err)
+	req := &healthcare.ExportResourcesRequest{
+		GcsDestination: &healthcare.GoogleCloudHealthcareV1beta1FhirRestGcsDestination{
+			UriPrefix: gcsURIPrefix,
+		},
 	}
 
-	fmt.Fprintf(w, "Got FHIR store: %q\n", store.Name)
-	return nil
+	op, err := storesService.Export(name, req).Do()
+	if err != nil {
+		return fmt.Errorf("Export: %v", err)
+	}
+
+	operationsService := healthcareService.Projects.Locations.Datasets.Operations
+	ticker := time.NewTicker(1 * time.Second)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-ticker.C:
+			newOp, err := operationsService.Get(op.Name).Do()
+			if err != nil {
+				return fmt.Errorf("operationsService.Get(%q): %v", op.Name, err)
+			}
+			if newOp.Done {
+				if newOp.Error != nil {
+					return fmt.Errorf("export operation %q completed with error: %v", op.Name, newOp.Error)
+				}
+				return nil
+			}
+		}
+	}
 }
 
-// [END healthcare_get_fhir_store]
+// [END healthcare_export_fhir_resources]

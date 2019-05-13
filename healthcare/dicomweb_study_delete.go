@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START healthcare_create_dataset]
+// [START healthcare_dicomweb_delete_study]
 import (
 	"context"
 	"fmt"
@@ -23,8 +23,8 @@ import (
 	healthcare "google.golang.org/api/healthcare/v1beta1"
 )
 
-// createDataset creates a dataset.
-func createDataset(w io.Writer, projectID, location, datasetID string) error {
+// dicomWebDeleteStudy deletes all instances in the given dicomWebPath study.
+func dicomWebDeleteStudy(w io.Writer, projectID, location, datasetID, dicomStoreID, dicomWebPath string) error {
 	ctx := context.Background()
 
 	healthcareService, err := healthcare.NewService(ctx)
@@ -32,17 +32,16 @@ func createDataset(w io.Writer, projectID, location, datasetID string) error {
 		return fmt.Errorf("healthcare.NewService: %v", err)
 	}
 
-	datasetsService := healthcareService.Projects.Locations.Datasets
+	storesService := healthcareService.Projects.Locations.Datasets.DicomStores.Studies
 
-	parent := fmt.Sprintf("projects/%s/locations/%s", projectID, location)
+	parent := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/dicomStores/%s", projectID, location, datasetID, dicomStoreID)
 
-	resp, err := datasetsService.Create(parent, &healthcare.Dataset{}).DatasetId(datasetID).Do()
-	if err != nil {
-		return fmt.Errorf("Create: %v", err)
+	if _, err := storesService.Delete(parent, dicomWebPath).Do(); err != nil {
+		return fmt.Errorf("Delete: %v", err)
 	}
 
-	fmt.Fprintf(w, "Created dataset: %q\n", resp.Name)
+	fmt.Fprintf(w, "Deleted %q\n", dicomWebPath)
 	return nil
 }
 
-// [END healthcare_create_dataset]
+// [END healthcare_dicomweb_delete_study]

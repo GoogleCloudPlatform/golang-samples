@@ -14,35 +14,47 @@
 
 package snippets
 
-// [START healthcare_create_dataset]
+// [START healthcare_ingest_hl7v2_message]
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"io"
+	"io/ioutil"
 
 	healthcare "google.golang.org/api/healthcare/v1beta1"
 )
 
-// createDataset creates a dataset.
-func createDataset(w io.Writer, projectID, location, datasetID string) error {
+// ingestHL7V2Message ingests an HL7V2 message.
+func ingestHL7V2Message(w io.Writer, projectID, location, datasetID, hl7V2StoreID, messageFile string) error {
 	ctx := context.Background()
+
+	hl7v2message, err := ioutil.ReadFile(messageFile)
+	if err != nil {
+		return fmt.Errorf("ReadFile: %v", err)
+	}
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
 		return fmt.Errorf("healthcare.NewService: %v", err)
 	}
 
-	datasetsService := healthcareService.Projects.Locations.Datasets
+	messagesService := healthcareService.Projects.Locations.Datasets.Hl7V2Stores.Messages
 
-	parent := fmt.Sprintf("projects/%s/locations/%s", projectID, location)
+	req := &healthcare.IngestMessageRequest{
+		Message: &healthcare.Message{
+			Data: base64.StdEncoding.EncodeToString(hl7v2message),
+		},
+	}
+	parent := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/hl7V2Stores/%s", projectID, location, datasetID, hl7V2StoreID)
 
-	resp, err := datasetsService.Create(parent, &healthcare.Dataset{}).DatasetId(datasetID).Do()
+	resp, err := messagesService.Ingest(parent, req).Do()
 	if err != nil {
 		return fmt.Errorf("Create: %v", err)
 	}
 
-	fmt.Fprintf(w, "Created dataset: %q\n", resp.Name)
+	fmt.Fprintf(w, "Ingested HL7V2 message: %q\n", resp.Message.Name)
 	return nil
 }
 
-// [END healthcare_create_dataset]
+// [END healthcare_ingest_hl7v2_message]

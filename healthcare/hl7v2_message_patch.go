@@ -14,18 +14,25 @@
 
 package snippets
 
-// [START healthcare_delete_hl7v2_message]
+// [START healthcare_patch_hl7v2_message]
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"io"
+	"io/ioutil"
 
 	healthcare "google.golang.org/api/healthcare/v1beta1"
 )
 
-// deleteHL7V2Message deletes an HL7V2 message.
-func deleteHL7V2Message(w io.Writer, projectID, location, datasetID, hl7V2StoreID, hl7V2MessageID string) error {
+// patchHL7V2Message patches an HL7V2 message.
+func patchHL7V2Message(w io.Writer, projectID, location, datasetID, hl7V2StoreID, hl7V2MessageID, messageFile string) error {
 	ctx := context.Background()
+
+	hl7v2message, err := ioutil.ReadFile(messageFile)
+	if err != nil {
+		return fmt.Errorf("ReadFile: %v", err)
+	}
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
@@ -35,12 +42,20 @@ func deleteHL7V2Message(w io.Writer, projectID, location, datasetID, hl7V2StoreI
 	messagesService := healthcareService.Projects.Locations.Datasets.Hl7V2Stores.Messages
 
 	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/hl7V2Stores/%s/messages/%s", projectID, location, datasetID, hl7V2StoreID, hl7V2MessageID)
-	if _, err := messagesService.Delete(name).Do(); err != nil {
-		return fmt.Errorf("Delete: %v", err)
+	message := &healthcare.Message{
+		Data:   base64.StdEncoding.EncodeToString(hl7v2message),
+		Labels: map[string]string{"my-label": "true"},
 	}
 
-	fmt.Fprintf(w, "Deleted HL7V2 message: %q\n", name)
+	call := messagesService.Patch(name, message)
+	call.UpdateMask("labels")
+	resp, err := call.Do()
+	if err != nil {
+		return fmt.Errorf("Patch: %v", err)
+	}
+
+	fmt.Fprintf(w, "Patched HL7V2 message: %q\n", resp.Name)
 	return nil
 }
 
-// [END healthcare_delete_hl7v2_message]
+// [END healthcare_patch_hl7v2_message]

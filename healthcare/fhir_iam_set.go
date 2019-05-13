@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START healthcare_delete_fhir_store]
+// [START healthcare_fhir_store_set_iam_policy]
 import (
 	"context"
 	"fmt"
@@ -23,8 +23,8 @@ import (
 	healthcare "google.golang.org/api/healthcare/v1beta1"
 )
 
-// deleteFHIRStore deletes an FHIR store.
-func deleteFHIRStore(w io.Writer, projectID, location, datasetID, fhirStoreID string) error {
+// setFHIRIAMPolicy sets the FHIR store's IAM policy.
+func setFHIRIAMPolicy(w io.Writer, projectID, location, datasetID, fhirStoreID string) error {
 	ctx := context.Background()
 
 	healthcareService, err := healthcare.NewService(ctx)
@@ -32,16 +32,31 @@ func deleteFHIRStore(w io.Writer, projectID, location, datasetID, fhirStoreID st
 		return fmt.Errorf("healthcare.NewService: %v", err)
 	}
 
-	storesService := healthcareService.Projects.Locations.Datasets.FhirStores
+	fhirService := healthcareService.Projects.Locations.Datasets.FhirStores
 
 	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/fhirStores/%s", projectID, location, datasetID, fhirStoreID)
 
-	if _, err := storesService.Delete(name).Do(); err != nil {
-		return fmt.Errorf("Delete: %v", err)
+	policy, err := fhirService.GetIamPolicy(name).Do()
+	if err != nil {
+		return fmt.Errorf("GetIamPolicy: %v", err)
 	}
 
-	fmt.Fprintf(w, "Deleted FHIR store: %q\n", fhirStoreID)
+	policy.Bindings = append(policy.Bindings, &healthcare.Binding{
+		Members: []string{"user:example@example.com"},
+		Role:    "roles/viewer",
+	})
+
+	req := &healthcare.SetIamPolicyRequest{
+		Policy: policy,
+	}
+
+	policy, err = fhirService.SetIamPolicy(name, req).Do()
+	if err != nil {
+		return fmt.Errorf("SetIamPolicy: %v", err)
+	}
+
+	fmt.Fprintf(w, "IAM Policy version: %v\n", policy.Version)
 	return nil
 }
 
-// [END healthcare_delete_fhir_store]
+// [END healthcare_fhir_store_set_iam_policy]

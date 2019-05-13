@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START healthcare_import_dicom_instance]
+// [START healthcare_dicom_store_set_iam_policy]
 import (
 	"context"
 	"fmt"
@@ -23,8 +23,8 @@ import (
 	healthcare "google.golang.org/api/healthcare/v1beta1"
 )
 
-// importDICOMInstance imports DICOM objects from GCS.
-func importDICOMInstance(w io.Writer, projectID, location, datasetID, dicomStoreID, contentURI string) error {
+// setDICOMIAMPolicy sets the DICOM store's IAM policy.
+func setDICOMIAMPolicy(w io.Writer, projectID, location, datasetID, dicomStoreID string) error {
 	ctx := context.Background()
 
 	healthcareService, err := healthcare.NewService(ctx)
@@ -32,22 +32,31 @@ func importDICOMInstance(w io.Writer, projectID, location, datasetID, dicomStore
 		return fmt.Errorf("healthcare.NewService: %v", err)
 	}
 
-	storesService := healthcareService.Projects.Locations.Datasets.DicomStores
+	dicomService := healthcareService.Projects.Locations.Datasets.DicomStores
 
-	req := &healthcare.ImportDicomDataRequest{
-		GcsSource: &healthcare.GoogleCloudHealthcareV1beta1DicomGcsSource{
-			Uri: contentURI,
-		},
-	}
 	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/dicomStores/%s", projectID, location, datasetID, dicomStoreID)
 
-	lro, err := storesService.Import(name, req).Do()
+	policy, err := dicomService.GetIamPolicy(name).Do()
 	if err != nil {
-		return fmt.Errorf("Import: %v", err)
+		return fmt.Errorf("GetIamPolicy: %v", err)
 	}
 
-	fmt.Fprintf(w, "Import to DICOM store started. Operation: %q\n", lro.Name)
+	policy.Bindings = append(policy.Bindings, &healthcare.Binding{
+		Members: []string{"user:example@example.com"},
+		Role:    "roles/viewer",
+	})
+
+	req := &healthcare.SetIamPolicyRequest{
+		Policy: policy,
+	}
+
+	policy, err = dicomService.SetIamPolicy(name, req).Do()
+	if err != nil {
+		return fmt.Errorf("SetIamPolicy: %v", err)
+	}
+
+	fmt.Fprintf(w, "IAM Policy etag: %v\n", policy.Etag)
 	return nil
 }
 
-// [END healthcare_import_dicom_instance]
+// [END healthcare_dicom_store_set_iam_policy]

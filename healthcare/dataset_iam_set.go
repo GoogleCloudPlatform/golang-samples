@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START healthcare_create_dataset]
+// [START healthcare_dataset_set_iam_policy]
 import (
 	"context"
 	"fmt"
@@ -23,8 +23,8 @@ import (
 	healthcare "google.golang.org/api/healthcare/v1beta1"
 )
 
-// createDataset creates a dataset.
-func createDataset(w io.Writer, projectID, location, datasetID string) error {
+// setDatasetIAMPolicy sets an IAM policy for the dataset.
+func setDatasetIAMPolicy(w io.Writer, projectID, location, datasetID string) error {
 	ctx := context.Background()
 
 	healthcareService, err := healthcare.NewService(ctx)
@@ -34,15 +34,29 @@ func createDataset(w io.Writer, projectID, location, datasetID string) error {
 
 	datasetsService := healthcareService.Projects.Locations.Datasets
 
-	parent := fmt.Sprintf("projects/%s/locations/%s", projectID, location)
+	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s", projectID, location, datasetID)
 
-	resp, err := datasetsService.Create(parent, &healthcare.Dataset{}).DatasetId(datasetID).Do()
+	policy, err := datasetsService.GetIamPolicy(name).Do()
 	if err != nil {
-		return fmt.Errorf("Create: %v", err)
+		return fmt.Errorf("GetIamPolicy: %v", err)
 	}
 
-	fmt.Fprintf(w, "Created dataset: %q\n", resp.Name)
+	policy.Bindings = append(policy.Bindings, &healthcare.Binding{
+		Members: []string{"user:example@example.com"},
+		Role:    "roles/viewer",
+	})
+
+	req := &healthcare.SetIamPolicyRequest{
+		Policy: policy,
+	}
+
+	policy, err = datasetsService.SetIamPolicy(name, req).Do()
+	if err != nil {
+		return fmt.Errorf("SetIamPolicy: %v", err)
+	}
+
+	fmt.Fprintf(w, "IAM Policy etag: %v", policy.Etag)
 	return nil
 }
 
-// [END healthcare_create_dataset]
+// [END healthcare_dataset_set_iam_policy]

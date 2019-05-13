@@ -31,7 +31,7 @@ func getHL7V2Message(w io.Writer, projectID, location, datasetID, hl7V2StoreID, 
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.New: %v", err)
+		return fmt.Errorf("healthcare.NewService: %v", err)
 	}
 
 	messagesService := healthcareService.Projects.Locations.Datasets.Hl7V2Stores.Messages

@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START healthcare_create_hl7v2_store]
+// [START healthcare_hl7v2_store_set_iam_policy]
 import (
 	"context"
 	"fmt"
@@ -23,8 +23,8 @@ import (
 	healthcare "google.golang.org/api/healthcare/v1beta1"
 )
 
-// createHL7V2Store creates an HL7V2 store.
-func createHL7V2Store(w io.Writer, projectID, location, datasetID, hl7V2StoreID string) error {
+// setHL7V2IAMPolicy sets an IAM policy.
+func setHL7V2IAMPolicy(w io.Writer, projectID, location, datasetID, hl7V2StoreID string) error {
 	ctx := context.Background()
 
 	healthcareService, err := healthcare.NewService(ctx)
@@ -34,16 +34,29 @@ func createHL7V2Store(w io.Writer, projectID, location, datasetID, hl7V2StoreID 
 
 	storesService := healthcareService.Projects.Locations.Datasets.Hl7V2Stores
 
-	store := &healthcare.Hl7V2Store{}
-	parent := fmt.Sprintf("projects/%s/locations/%s/datasets/%s", projectID, location, datasetID)
+	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/hl7v2Stores/%s", projectID, location, datasetID, hl7V2StoreID)
 
-	resp, err := storesService.Create(parent, store).Hl7V2StoreId(hl7V2StoreID).Do()
+	policy, err := storesService.GetIamPolicy(name).Do()
 	if err != nil {
-		return fmt.Errorf("Create: %v", err)
+		return fmt.Errorf("GetIamPolicy: %v", err)
 	}
 
-	fmt.Fprintf(w, "Created HL7V2 store: %q\n", resp.Name)
+	policy.Bindings = append(policy.Bindings, &healthcare.Binding{
+		Members: []string{"user:example@example.com"},
+		Role:    "roles/viewer",
+	})
+
+	req := &healthcare.SetIamPolicyRequest{
+		Policy: policy,
+	}
+
+	policy, err = storesService.SetIamPolicy(name, req).Do()
+	if err != nil {
+		return fmt.Errorf("SetIamPolicy: %v", err)
+	}
+
+	fmt.Fprintf(w, "Sucessfully set IAM Policy.\n")
 	return nil
 }
 
-// [END healthcare_create_hl7v2_store]
+// [END healthcare_hl7v2_store_set_iam_policy]

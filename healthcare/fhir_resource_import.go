@@ -14,17 +14,18 @@
 
 package snippets
 
-// [START healthcare_delete_fhir_store]
+// [START healthcare_import_fhir_resources]
 import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	healthcare "google.golang.org/api/healthcare/v1beta1"
 )
 
-// deleteFHIRStore deletes an FHIR store.
-func deleteFHIRStore(w io.Writer, projectID, location, datasetID, fhirStoreID string) error {
+// importsFHIRResource imports an FHIR resource.
+func importFHIRResource(w io.Writer, projectID, location, datasetID, fhirStoreID, gcsURI string) error {
 	ctx := context.Background()
 
 	healthcareService, err := healthcare.NewService(ctx)
@@ -35,13 +36,37 @@ func deleteFHIRStore(w io.Writer, projectID, location, datasetID, fhirStoreID st
 	storesService := healthcareService.Projects.Locations.Datasets.FhirStores
 
 	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/fhirStores/%s", projectID, location, datasetID, fhirStoreID)
-
-	if _, err := storesService.Delete(name).Do(); err != nil {
-		return fmt.Errorf("Delete: %v", err)
+	req := &healthcare.ImportResourcesRequest{
+		GcsSource: &healthcare.GoogleCloudHealthcareV1beta1FhirRestGcsSource{
+			Uri: gcsURI,
+		},
 	}
 
-	fmt.Fprintf(w, "Deleted FHIR store: %q\n", fhirStoreID)
-	return nil
+	op, err := storesService.Import(name, req).Do()
+	if err != nil {
+		return fmt.Errorf("Import: %v", err)
+	}
+
+	operationsService := healthcareService.Projects.Locations.Datasets.Operations
+	ticker := time.NewTicker(1 * time.Second)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-ticker.C:
+			newOp, err := operationsService.Get(op.Name).Do()
+			if err != nil {
+				return fmt.Errorf("operationsService.Get(%q): %v", op.Name, err)
+			}
+			if newOp.Done {
+				if newOp.Error != nil {
+					return fmt.Errorf("import operation %q completed with error: %s", op.Name, newOp.Error.Details)
+				}
+				return nil
+			}
+		}
+	}
 }
 
-// [END healthcare_delete_fhir_store]
+// [END healthcare_import_fhir_resources]

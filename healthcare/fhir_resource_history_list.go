@@ -14,10 +14,9 @@
 
 package snippets
 
-// [START healthcare_create_hl7v2_message]
+// [START healthcare_list_resource_history]
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -25,35 +24,37 @@ import (
 	healthcare "google.golang.org/api/healthcare/v1beta1"
 )
 
-// createHL7V2Message creates an HL7V2 message.
-func createHL7V2Message(w io.Writer, projectID, location, datasetID, hl7V2StoreID, messageFile string) error {
+// listFHIRResourceHistory lists an FHIR resource's history.
+func listFHIRResourceHistory(w io.Writer, projectID, location, datasetID, fhirStoreID, resourceType, fhirResourceID string) error {
 	ctx := context.Background()
-
-	hl7v2message, err := ioutil.ReadFile(messageFile)
-	if err != nil {
-		return fmt.Errorf("ReadFile: %v", err)
-	}
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
 		return fmt.Errorf("healthcare.NewService: %v", err)
 	}
 
-	messagesService := healthcareService.Projects.Locations.Datasets.Hl7V2Stores.Messages
+	fhirService := healthcareService.Projects.Locations.Datasets.FhirStores.Fhir
 
-	req := &healthcare.CreateMessageRequest{
-		Message: &healthcare.Message{
-			Data: base64.StdEncoding.EncodeToString(hl7v2message),
-		},
-	}
-	parent := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/hl7V2Stores/%s", projectID, location, datasetID, hl7V2StoreID)
-	resp, err := messagesService.Create(parent, req).Do()
+	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/fhirStores/%s/fhir/%s/%s", projectID, location, datasetID, fhirStoreID, resourceType, fhirResourceID)
+
+	resp, err := fhirService.History(name).Do()
 	if err != nil {
-		return fmt.Errorf("Create: %v", err)
+		return fmt.Errorf("History: %v", err)
 	}
 
-	fmt.Fprintf(w, "Created HL7V2 message: %q\n", resp.Name)
+	defer resp.Body.Close()
+
+	respBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("could not read response: %v", err)
+	}
+
+	if resp.StatusCode > 299 {
+		return fmt.Errorf("History: status %d %s: %s", resp.StatusCode, resp.Status, respBytes)
+	}
+	fmt.Fprintf(w, "%s", respBytes)
+
 	return nil
 }
 
-// [END healthcare_create_hl7v2_message]
+// [END healthcare_list_resource_history]
