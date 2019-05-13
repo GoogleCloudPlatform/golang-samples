@@ -55,7 +55,7 @@ func pollDiscoveryOccurrenceFinished(resourceURL, projectID string, timeout time
 				// Vulbnerability discovery occurrences are always associated with the
 				// PACKAGE_VULNERABILITY note in the "goog-analysis" GCP project.
 				Filter: fmt.Sprintf("resourceUrl=\"%s\" AND noteProjectId=\"%s\" AND noteId=\"%s\"",
-					resourceUrl, "goog-analysis", "PACKAGE_VULNERABILITY"),
+					resourceURL, "goog-analysis", "PACKAGE_VULNERABILITY"),
 			}
 			// [END containeranalysis_poll_discovery_occurrence_finished]
 			// The above filter isn't testable, since it looks for occurrences in a locked down project.
