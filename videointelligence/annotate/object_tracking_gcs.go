@@ -32,7 +32,7 @@ import (
 
 // objectTrackingGCS analyzes a video and extracts entities with their bounding boxes.
 func objectTrackingGCS(w io.Writer, gcsURI string) error {
-	// gcsURI := "gs://demomaker/cat.mp4"
+	// gcsURI := "gs://cloud-samples-data/video/cat.mp4"
 
 	ctx := context.Background()
 

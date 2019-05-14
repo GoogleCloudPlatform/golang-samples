@@ -17,7 +17,7 @@ package mqttsnippets
 import (
 	"fmt"
 
-	"github.com/eclipse/paho.mqtt.golang"
+	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
 // [START iot_attach_device]

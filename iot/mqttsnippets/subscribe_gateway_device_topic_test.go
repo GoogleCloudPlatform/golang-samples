@@ -51,34 +51,45 @@ func setConfig(w io.Writer, projectID string, region string, registryID string, 
 }
 
 func TestSubscribeGatewayToDeviceTopic(t *testing.T) {
+	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/847")
+	if pubKeyRSA == "" {
+		t.Skip("GOLANG_SAMPLES_IOT_PUB not set")
+	}
+
 	projectID := testutil.SystemTest(t).ProjectID
 
 	registryID := "golang-iot-test-registry"
 	gatewayID := createID("gateway")
 	deviceID := createID("device")
 
-	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 10, 5*time.Second, func(r *testutil.R) {
 		if _, err := createGateway(ioutil.Discard, projectID, region, registryID, gatewayID, "ASSOCIATION_ONLY", pubKeyRSA); err != nil {
 			r.Errorf("Could not create gateway: %v\n", err)
-			return
 		}
 	})
+	if t.Failed() {
+		return
+	}
 
-	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 10, 5*time.Second, func(r *testutil.R) {
 		if _, err := createDevice(ioutil.Discard, projectID, region, registryID, deviceID, "RSA_X509_PEM", pubKeyRSA); err != nil {
 			r.Errorf("Could not create device: %v\n", err)
-			return
 		}
 	})
+	if t.Failed() {
+		return
+	}
 
-	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 10, 5*time.Second, func(r *testutil.R) {
 		if _, err := bindDeviceToGateway(ioutil.Discard, projectID, region, registryID, gatewayID, deviceID); err != nil {
 			r.Errorf("Could not bind device to gateway: %v\n", err)
-			return
 		}
 	})
+	if t.Failed() {
+		return
+	}
 
-	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 10, 5*time.Second, func(r *testutil.R) {
 		// sample test config message.
 		message := "{'threshold':'high'}"
 
@@ -97,19 +108,19 @@ func TestSubscribeGatewayToDeviceTopic(t *testing.T) {
 	})
 
 	// cleanup
-	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 10, 5*time.Second, func(r *testutil.R) {
 		if _, err := unbindDeviceFromGateway(ioutil.Discard, projectID, region, registryID, gatewayID, deviceID); err != nil {
 			r.Errorf("Could not unbind device: %v\n", err)
 		}
 	})
 
-	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 10, 5*time.Second, func(r *testutil.R) {
 		if _, err := deleteDevice(ioutil.Discard, projectID, region, registryID, deviceID); err != nil {
 			r.Errorf("Could not unbind device: %v\n", err)
 		}
 	})
 
-	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 10, 5*time.Second, func(r *testutil.R) {
 		if _, err := deleteDevice(ioutil.Discard, projectID, region, registryID, gatewayID); err != nil {
 			r.Errorf("Could not unbind device: %v\n", err)
 		}

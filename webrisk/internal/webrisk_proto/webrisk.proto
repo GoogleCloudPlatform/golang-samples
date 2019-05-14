@@ -17,46 +17,7 @@ syntax = "proto3";
 
 package google.cloud.webrisk.v1beta1;
 
-import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
-
-option csharp_namespace = "Google.Cloud.WebRisk.V1Beta1";
-option go_package = "google.golang.org/genproto/googleapis/cloud/webrisk/v1beta1;webrisk";
-option java_multiple_files = true;
-option java_outer_classname = "WebRiskProto";
-option java_package = "com.google.webrisk.v1beta1";
-option objc_class_prefix = "GCWR";
-option php_namespace = "Google\\Cloud\\WebRisk\\V1beta1";
-
-// Web Risk v1beta1 API defines an interface to detect malicious URLs on your
-// website and in client applications.
-service WebRiskServiceV1Beta1 {
-  // Gets the most recent threat list diffs.
-  rpc ComputeThreatListDiff(ComputeThreatListDiffRequest)
-      returns (ComputeThreatListDiffResponse) {
-    option (google.api.http) = {
-      get: "/v1beta1/threatLists:computeDiff"
-    };
-  }
-
-  // This method is used to check whether a URI is on a given threatList.
-  rpc SearchUris(SearchUrisRequest) returns (SearchUrisResponse) {
-    option (google.api.http) = {
-      get: "/v1beta1/uris:search"
-    };
-  }
-
-  // Gets the full hashes that match the requested hash prefix.
-  // This is used after a hash prefix is looked up in a threatList
-  // and there is a match. The client side threatList only holds partial hashes
-  // so the client must query this method to determine if there is a full
-  // hash match of a threat.
-  rpc SearchHashes(SearchHashesRequest) returns (SearchHashesResponse) {
-    option (google.api.http) = {
-      get: "/v1beta1/hashes:search"
-    };
-  }
-}
 
 // Describes an API diff request.
 message ComputeThreatListDiffRequest {

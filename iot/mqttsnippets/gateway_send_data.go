@@ -23,7 +23,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/eclipse/paho.mqtt.golang"
+	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
 // sendDataFromBoundDevice starts a gateway client that sends data on behalf of a bound device.

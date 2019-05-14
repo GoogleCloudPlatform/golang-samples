@@ -31,12 +31,9 @@ func TestCreateProductSet(t *testing.T) {
 
 	var buf bytes.Buffer
 
-	// Make sure the product set to be created does not already exist.
-	if err := listProductSets(&buf, tc.ProjectID, location); err != nil {
-		t.Fatalf("listProductSets: %v", err)
-	}
-	if got := buf.String(); strings.Contains(got, productSetID) {
-		t.Errorf("Product set ID %s already exists", productSetID)
+	// Ensure re-used resource names don't exist prior to test start.
+	if err := getProductSet(&buf, tc.ProjectID, location, productSetID); err == nil {
+		deleteProductSet(&buf, tc.ProjectID, location, productSetID)
 	}
 
 	// Create a fake product set.
