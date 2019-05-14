@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START healthcare_list_resource_history]
+// [START healthcare_get_resource_history]
 import (
 	"context"
 	"fmt"
@@ -57,4 +57,4 @@ func getFHIRResourceHistory(w io.Writer, projectID, location, datasetID, fhirSto
 	return nil
 }
 
-// [END healthcare_list_resource_history]
+// [END healthcare_get_resource_history]
