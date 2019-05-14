@@ -37,6 +37,7 @@ func importFHIRResource(w io.Writer, projectID, location, datasetID, fhirStoreID
 
 	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/fhirStores/%s", projectID, location, datasetID, fhirStoreID)
 	req := &healthcare.ImportResourcesRequest{
+		ContentStructure: "RESOURCE",
 		GcsSource: &healthcare.GoogleCloudHealthcareV1beta1FhirRestGcsSource{
 			Uri: gcsURI,
 		},
