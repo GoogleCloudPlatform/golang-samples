@@ -183,6 +183,9 @@ func TestSample(t *testing.T) {
 	out = runCommand(t, "dmlwrite", dbName)
 	assertContains(out, "record(s) inserted")
 
+	out = runCommand(t, "querywithparameter", dbName)
+	assertContains(out, "12 Melissa Garcia")
+
 	out = runCommand(t, "dmlwritetxn", dbName)
 	assertContains(out, "from Album1's MarketingBudget to Album2")
 

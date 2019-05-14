@@ -73,6 +73,7 @@ var (
 		"dmlwriteread":               writeAndReadUsingDML,
 		"dmlupdatestruct":            updateUsingDMLStruct,
 		"dmlwrite":                   writeUsingDML,
+		"querywithparameter":         queryWithParameter,
 		"dmlwritetxn":                writeWithTransactionUsingDML,
 		"dmlupdatepart":              updateUsingPartitionedDML,
 		"dmldeletepart":              deleteUsingPartitionedDML,
@@ -1097,25 +1098,57 @@ func updateUsingDMLStruct(ctx context.Context, w io.Writer, client *spanner.Clie
 // [START spanner_dml_getting_started_insert]
 
 func writeUsingDML(ctx context.Context, w io.Writer, client *spanner.Client) error {
-	_, err := client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
-		stmt := spanner.Statement{
-			SQL: `INSERT Singers (SingerId, FirstName, LastName) VALUES
+	_, err := client.ReadWriteTransaction(
+		ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
+			stmt := spanner.Statement{
+				SQL: `INSERT Singers (SingerId, FirstName, LastName) VALUES
 				(12, 'Melissa', 'Garcia'),
 				(13, 'Russell', 'Morales'),
 				(14, 'Jacqueline', 'Long'),
 				(15, 'Dylan', 'Shaw')`,
-		}
-		rowCount, err := txn.Update(ctx, stmt)
-		if err != nil {
+			}
+			rowCount, err := txn.Update(ctx, stmt)
+			if err != nil {
+				return err
+			}
+			fmt.Fprintf(w, "%d record(s) inserted.\n", rowCount)
 			return err
-		}
-		fmt.Fprintf(w, "%d record(s) inserted.\n", rowCount)
-		return err
-	})
+		})
 	return err
 }
 
 // [END spanner_dml_getting_started_insert]
+
+// [START spanner_query_with_parameter]
+
+func queryWithParameter(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	stmt := spanner.Statement{
+		SQL: `SELECT SingerId, FirstName, LastName FROM Singers
+			WHERE LastName = @lastName`,
+		Params: map[string]interface{}{
+			"lastName": "Garcia",
+		},
+	}
+	iter := client.Single().Query(ctx, stmt)
+	defer iter.Stop()
+	for {
+		row, err := iter.Next()
+		if err == iterator.Done {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		var singerID int64
+		var firstName, lastName string
+		if err := row.Columns(&singerID, &firstName, &lastName); err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "%d %s %s\n", singerID, firstName, lastName)
+	}
+}
+
+// [END spanner_query_with_parameter]
 
 // [START spanner_dml_getting_started_update]
 
@@ -1501,8 +1534,8 @@ func main() {
 		updatedocstable, querydocstable, createtabledocswithhistorytable, writewithhistory,
 		updatewithhistory, querywithhistory, writestructdata, querywithstruct, querywitharrayofstruct,
 		querywithstructfield, querywithnestedstructfield, dmlinsert, dmlupdate, dmldelete,
-		dmlwithtimestamp, dmlwriteread, dmlwrite, dmlwritetxn, dmlupdatepart, dmldeletepart,
-		dmlbatchupdate
+		dmlwithtimestamp, dmlwriteread, dmlwrite, dmlwritetxn, querywithparameter, dmlupdatepart,
+		dmldeletepart, dmlbatchupdate
 
 Examples:
 	spanner_snippets createdatabase projects/my-project/instances/my-instance/databases/example-db
