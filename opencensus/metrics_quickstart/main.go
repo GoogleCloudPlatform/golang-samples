@@ -53,6 +53,7 @@ func main() {
 		log.Fatalf("Failed to register the view: %v", err)
 	}
 
+	// [START monitoring_opencensus_setup_exporter]
 	// Enable OpenCensus exporters to export metrics
 	// to Stackdriver Monitoring.
 	// Exporters use Application Default Credentials to authenticate.
@@ -69,6 +70,7 @@ func main() {
 		log.Fatalf("Error starting metric exporter: %v", err)
 	}
 	defer exporter.StopMetricsExporter()
+	// [END monitoring_opencensus_setup_exporter]
 
 	// Record 100 fake latency values between 0 and 5 seconds.
 	for i := 0; i < 100; i++ {
