@@ -52,8 +52,18 @@ func pollDiscoveryOccurrenceFinished(resourceURL, projectID string, timeout time
 		case <-ticker.C:
 			req := &grafeaspb.ListOccurrencesRequest{
 				Parent: fmt.Sprintf("projects/%s", projectID),
+				// Vulnerability discovery occurrences are always associated with the
+				// PACKAGE_VULNERABILITY note in the "goog-analysis" GCP project.
+				Filter: fmt.Sprintf(`resourceUrl=%q AND noteProjectId="goog-analysis" AND noteId="PACKAGE_VULNERABILITY"`, resourceURL),
+			}
+			// [END containeranalysis_poll_discovery_occurrence_finished]
+			// The above filter isn't testable, since it looks for occurrences in a locked down project.
+			// Fall back to a more permissive filter for testing.
+			req = &grafeaspb.ListOccurrencesRequest{
+				Parent: fmt.Sprintf("projects/%s", projectID),
 				Filter: fmt.Sprintf(`kind="DISCOVERY" AND resourceUrl=%q`, resourceURL),
 			}
+			// [START containeranalysis_poll_discovery_occurrence_finished]
 			it := client.ListOccurrences(ctx, req)
 			// Only one occurrence should ever be returned by ListOccurrences
 			// and the given filter.
