@@ -197,28 +197,25 @@ func TestFHIRStore(t *testing.T) {
 		}
 	})
 
-	/*
-		TODO: Enable. Some import operations fail.
-		testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
-			buf.Reset()
-			// Delete the bucket (if it exists) then recreate it, optimistically
-			// ignoring errors.
-			// Note: the Healthcare Agent needs access to the bucket.
-			// golang-samples-tests have been given access, but other projects may
-			// fail until they give the agent access to the bucket.
-			bucketName := tc.ProjectID + "-healthcare-test"
-			gsURIPrefix := "gs://" + bucketName + "/fhir-export/"
-			cleanBucket(tc.ProjectID, bucketName)
+	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
+		buf.Reset()
+		// Delete the bucket (if it exists) then recreate it, optimistically
+		// ignoring errors.
+		// Note: the Healthcare Agent needs access to the bucket.
+		// golang-samples-tests have been given access, but other projects may
+		// fail until they give the agent access to the bucket.
+		bucketName := tc.ProjectID + "-healthcare-test"
+		gsURIPrefix := "gs://" + bucketName + "/fhir-export/"
+		cleanBucket(tc.ProjectID, bucketName)
 
-			if err := exportFHIRResource(buf, tc.ProjectID, location, datasetID, fhirStoreID, gsURIPrefix); err != nil {
-				r.Errorf("exportFHIRResource got err: %v", err)
-			}
+		if err := exportFHIRResource(buf, tc.ProjectID, location, datasetID, fhirStoreID, gsURIPrefix); err != nil {
+			r.Errorf("exportFHIRResource got err: %v", err)
+		}
 
-			if err := importFHIRResource(ioutil.Discard, tc.ProjectID, location, datasetID, fhirStoreID, gsURIPrefix+"**"); err != nil {
-				r.Errorf("importFHIRResource got err: %v", err)
-			}
-		})
-	*/
+		if err := importFHIRResource(ioutil.Discard, tc.ProjectID, location, datasetID, fhirStoreID, gsURIPrefix+"**"); err != nil {
+			r.Errorf("importFHIRResource got err: %v", err)
+		}
+	})
 
 	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
 		if err := deleteFHIRResource(ioutil.Discard, tc.ProjectID, location, datasetID, fhirStoreID, resourceType, res.ID); err != nil {
