@@ -52,7 +52,7 @@ func pollDiscoveryOccurrenceFinished(resourceURL, projectID string, timeout time
 		case <-ticker.C:
 			req := &grafeaspb.ListOccurrencesRequest{
 				Parent: fmt.Sprintf("projects/%s", projectID),
-				// Vulbnerability discovery occurrences are always associated with the
+				// Vulnerability discovery occurrences are always associated with the
 				// PACKAGE_VULNERABILITY note in the "goog-analysis" GCP project.
 				Filter: fmt.Sprintf(`resourceUrl=%q AND noteProjectId="goog-analysis" AND noteId="PACKAGE_VULNERABILITY"`, resourceURL),
 			}
