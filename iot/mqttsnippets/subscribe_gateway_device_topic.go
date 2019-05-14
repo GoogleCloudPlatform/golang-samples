@@ -21,7 +21,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/eclipse/paho.mqtt.golang"
+	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
 // subscribeGatewayToDeviceTopic creates a gateway client that subscribes to a topic of a bound device.

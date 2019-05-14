@@ -31,8 +31,7 @@ func createCompany(w io.Writer, projectID, externalID, displayName string) (*tal
 	// Initializes a companyService client.
 	c, err := talent.NewCompanyClient(ctx)
 	if err != nil {
-		fmt.Printf("talent.NewCompanyClient: %v\n", err)
-		return nil, err
+		return nil, fmt.Errorf("talent.NewCompanyClient: %v", err)
 	}
 
 	// Construct a createCompany request.
@@ -46,11 +45,10 @@ func createCompany(w io.Writer, projectID, externalID, displayName string) (*tal
 
 	resp, err := c.CreateCompany(ctx, req)
 	if err != nil {
-		fmt.Printf("talent.NewCompanyClient: %v\n", err)
-		return nil, err
+		return nil, fmt.Errorf("CreateCompany: %v", err)
 	}
 
-	fmt.Printf("Created company: %q\n", resp.GetName())
+	fmt.Fprintf(w, "Created company: %q\n", resp.GetName())
 
 	return resp, nil
 }

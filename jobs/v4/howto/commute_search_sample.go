@@ -34,8 +34,7 @@ func commuteSearch(w io.Writer, projectID, companyID string) error {
 	// Initialize a jobService client.
 	c, err := talent.NewJobClient(ctx)
 	if err != nil {
-		fmt.Printf("talent.NewJobClient: %v\n", err)
-		return err
+		return fmt.Errorf("talent.NewJobClient: %v", err)
 	}
 
 	// Construct a jobQuery request with a commute filter.
@@ -50,7 +49,7 @@ func commuteSearch(w io.Writer, projectID, companyID string) error {
 		},
 	}
 	if companyID != "" {
-		jobQuery.CompanyNames = []string{fmt.Sprintf("projects/%s/companies/%s", projectID, companyID)}
+		jobQuery.Companies = []string{fmt.Sprintf("projects/%s/companies/%s", projectID, companyID)}
 	}
 
 	// Construct a searchJobs request with a jobQuery.
@@ -78,8 +77,7 @@ func commuteSearch(w io.Writer, projectID, companyID string) error {
 			return nil
 		}
 		if err != nil {
-			fmt.Printf("it.Next: %v\n", err)
-			return err
+			return fmt.Errorf("it.Next: %v", err)
 		}
 		fmt.Fprintf(w, "Matcing job: %q\n", resp.GetJob().GetName())
 		fmt.Fprintf(w, "Job address: %v\n", resp.GetCommuteInfo().GetJobLocation().GetPostalAddress().GetAddressLines())

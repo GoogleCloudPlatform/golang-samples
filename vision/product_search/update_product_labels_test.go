@@ -34,6 +34,12 @@ func TestUpdateProductLabels(t *testing.T) {
 
 	var buf bytes.Buffer
 
+	// Ensure re-used resource names don't exist prior to test start.
+	if err := getProduct(&buf, tc.ProjectID, location, productID); err == nil {
+		deleteProduct(&buf, tc.ProjectID, location, productID)
+	}
+	buf.Reset()
+
 	// Create a fake product.
 	if err := createProduct(&buf, tc.ProjectID, location, productID, productDisplayName, productCategory); err != nil {
 		t.Fatalf("createProduct: %v", err)

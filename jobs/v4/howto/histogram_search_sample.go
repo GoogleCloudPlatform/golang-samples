@@ -32,8 +32,7 @@ func histogramSearch(w io.Writer, projectID, companyID string) error {
 	// Initialize a jobService client.
 	c, err := talent.NewJobClient(ctx)
 	if err != nil {
-		fmt.Printf("talent.NewJobClient: %v\n", err)
-		return err
+		return fmt.Errorf("talent.NewJobClient: %v", err)
 	}
 
 	// Construct a searchJobs request.
@@ -59,7 +58,7 @@ func histogramSearch(w io.Writer, projectID, companyID string) error {
 	}
 	if companyID != "" {
 		req.JobQuery = &talentpb.JobQuery{
-			CompanyNames: []string{fmt.Sprintf("projects/%s/companies/%s", projectID, companyID)},
+			Companies: []string{fmt.Sprintf("projects/%s/companies/%s", projectID, companyID)},
 		}
 	}
 
@@ -71,8 +70,7 @@ func histogramSearch(w io.Writer, projectID, companyID string) error {
 			return nil
 		}
 		if err != nil {
-			fmt.Printf("it.Next: %v\n", err)
-			return err
+			return fmt.Errorf("it.Next: %v", err)
 		}
 		fmt.Fprintf(w, "Job: %q\n", resp.Job.GetName())
 	}
