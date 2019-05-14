@@ -1098,22 +1098,21 @@ func updateUsingDMLStruct(ctx context.Context, w io.Writer, client *spanner.Clie
 // [START spanner_dml_getting_started_insert]
 
 func writeUsingDML(ctx context.Context, w io.Writer, client *spanner.Client) error {
-	_, err := client.ReadWriteTransaction(
-		ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
-			stmt := spanner.Statement{
-				SQL: `INSERT Singers (SingerId, FirstName, LastName) VALUES
+	_, err := client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
+		stmt := spanner.Statement{
+			SQL: `INSERT Singers (SingerId, FirstName, LastName) VALUES
 				(12, 'Melissa', 'Garcia'),
 				(13, 'Russell', 'Morales'),
 				(14, 'Jacqueline', 'Long'),
 				(15, 'Dylan', 'Shaw')`,
-			}
-			rowCount, err := txn.Update(ctx, stmt)
-			if err != nil {
-				return err
-			}
-			fmt.Fprintf(w, "%d record(s) inserted.\n", rowCount)
+		}
+		rowCount, err := txn.Update(ctx, stmt)
+		if err != nil {
 			return err
-		})
+		}
+		fmt.Fprintf(w, "%d record(s) inserted.\n", rowCount)
+		return err
+	})
 	return err
 }
 
