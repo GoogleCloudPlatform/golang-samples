@@ -23,7 +23,7 @@ import (
 func TestCreateHTTPTaskWithToken(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	locationID := "us-central1"
-	queueID := "my-appengine-queue"
+	queueID := "my-queue"
 	url := "https://example.com/task_handler"
 	serviceAccountEmail := os.Getenv("GOLANG_SAMPLES_SERVICE_ACCOUNT_EMAIL")
 	if serviceAccountEmail == "" {
