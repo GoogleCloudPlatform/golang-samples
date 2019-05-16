@@ -43,23 +43,7 @@ func deidentifyDataset(w io.Writer, projectID, location, sourceDatasetID, destin
 			Dicom: &healthcare.DicomConfig{
 				KeepList: &healthcare.TagFilterList{
 					Tags: []string{
-						"Columns",
-						"NumberOfFrames",
-						"PixelRepresentation",
-						"MediaStorageSOPClassUID",
-						"MediaStorageSOPInstanceUID",
-						"Rows",
-						"SamplesPerPixel",
-						"BitsAllocated",
-						"HighBit",
-						"PhotometricInterpretation",
-						"BitsStored",
 						"PatientID",
-						"TransferSyntaxUID",
-						"SOPInstanceUID",
-						"StudyInstanceUID",
-						"SeriesInstanceUID",
-						"PixelData",
 					},
 				},
 			},
