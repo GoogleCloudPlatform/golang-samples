@@ -87,6 +87,25 @@ func TestSample(t *testing.T) {
 	// order since in many cases earlier commands setup the database for the subsequent commands.
 	mustRunCommand(t, "createdatabase", dbName)
 	runCommand(t, "write", dbName)
+	runCommand(t, "addnewcolumn", dbName)
+
+	runCommand(t, "delete", dbName)
+	runCommand(t, "write", dbName)
+	runCommand(t, "update", dbName)
+	out := runCommand(t, "dmlwritetxn", dbName)
+	assertContains(out, "Moved 100000 from Album1's MarketingBudget to Album2")
+	out = runCommand(t, "querynewcolumn", dbName)
+	assertContains(out, "1 1 0")
+	assertContains(out, "2 2 600000")
+
+	runCommand(t, "delete", dbName)
+	runCommand(t, "write", dbName)
+	runCommand(t, "update", dbName)
+	out = runCommand(t, "writetransaction", dbName)
+	assertContains(out, "Moved 100000 from Album1's MarketingBudget to Album2")
+	out = runCommand(t, "querynewcolumn", dbName)
+	assertContains(out, "1 1 0")
+	assertContains(out, "2 2 600000")
 
 	runCommand(t, "delete", dbName)
 	runCommand(t, "write", dbName)
@@ -95,14 +114,6 @@ func TestSample(t *testing.T) {
 	assertContains(runCommand(t, "read", dbName), "1 1 Total Junk")
 
 	assertContains(runCommand(t, "query", dbName), "1 1 Total Junk")
-
-	runCommand(t, "addnewcolumn", dbName)
-	runCommand(t, "update", dbName)
-
-	runCommand(t, "writetransaction", dbName)
-	out := runCommand(t, "querynewcolumn", dbName)
-	assertContains(out, "1 1 300000")
-	assertContains(out, "2 2 300000")
 
 	runCommand(t, "addindex", dbName)
 	out = runCommand(t, "queryindex", dbName)
@@ -117,11 +128,14 @@ func TestSample(t *testing.T) {
 	assertContains(out, "Forever Hold Your Peace")
 	assertContains(out, "Green")
 
+	runCommand(t, "delete", dbName)
+	runCommand(t, "write", dbName)
+	runCommand(t, "update", dbName)
 	runCommand(t, "addstoringindex", dbName)
-	assertContains(runCommand(t, "readstoringindex", dbName), "300000")
+	assertContains(runCommand(t, "readstoringindex", dbName), "500000")
 	out = runCommand(t, "readonlytransaction", dbName)
 	if strings.Count(out, "Total Junk") != 2 {
-		t.Errorf("got output %q; wanted it to contain 2 occurences of Total Junk", out)
+		t.Errorf("got output %q; wanted it to contain 2 occurrences of Total Junk", out)
 	}
 
 	// Wait at least 15 seconds since the write.
@@ -182,9 +196,6 @@ func TestSample(t *testing.T) {
 
 	out = runCommand(t, "dmlwrite", dbName)
 	assertContains(out, "record(s) inserted")
-
-	out = runCommand(t, "dmlwritetxn", dbName)
-	assertContains(out, "from Album1's MarketingBudget to Album2")
 
 	out = runCommand(t, "dmlupdatepart", dbName)
 	assertContains(out, "record(s) updated")
