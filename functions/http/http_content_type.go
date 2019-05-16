@@ -45,7 +45,7 @@ func HelloContentType(w http.ResponseWriter, r *http.Request) {
 	case "application/octet-stream":
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			log.Printf("error parsing text/plain: %v", err)
+			log.Printf("error parsing application/octet-stream: %v", err)
 		} else {
 			name = string(body)
 		}
