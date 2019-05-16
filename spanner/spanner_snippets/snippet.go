@@ -553,14 +553,17 @@ func writeWithTransaction(ctx context.Context, w io.Writer, client *spanner.Clie
 			if err != nil {
 				return err
 			}
-			const transfer = 200000
-			album1Budget += transfer
-			album2Budget -= transfer
-			cols := []string{"SingerId", "AlbumId", "MarketingBudget"}
-			txn.BufferWrite([]*spanner.Mutation{
-				spanner.Update("Albums", cols, []interface{}{1, 1, album1Budget}),
-				spanner.Update("Albums", cols, []interface{}{2, 2, album2Budget}),
-			})
+			const transfer = 100000
+			if album1Budget >= transfer {
+				album1Budget -= transfer
+				album2Budget += transfer
+				cols := []string{"SingerId", "AlbumId", "MarketingBudget"}
+				txn.BufferWrite([]*spanner.Mutation{
+					spanner.Update("Albums", cols, []interface{}{1, 1, album1Budget}),
+					spanner.Update("Albums", cols, []interface{}{2, 2, album2Budget}),
+				})
+				fmt.Fprintf(w, "Moved %d from Album1's MarketingBudget to Album2's.", transfer)
+			}
 		}
 		return nil
 	})
@@ -1079,7 +1082,7 @@ func updateUsingDMLStruct(ctx context.Context, w io.Writer, client *spanner.Clie
 		var singerInfo = name{"Timothy", "Campbell"}
 
 		stmt := spanner.Statement{
-			SQL: `Update Singers Set LastName = 'Grant' 
+			SQL: `Update Singers Set LastName = 'Grant'
 				WHERE STRUCT<FirstName String, LastName String>(Firstname, LastName) = @name`,
 			Params: map[string]interface{}{"name": singerInfo},
 		}
@@ -1184,7 +1187,7 @@ func writeWithTransactionUsingDML(ctx context.Context, w io.Writer, client *span
 
 		// Transfer the marketing budget from one album to another. By keeping the actions
 		// in a single transaction, it ensures the movement is atomic.
-		const transferAmt = 200000
+		const transferAmt = 100000
 		var album1budget, album2budget int64
 		var err error
 		if album1budget, err = getBudget(1, 1); err != nil {
