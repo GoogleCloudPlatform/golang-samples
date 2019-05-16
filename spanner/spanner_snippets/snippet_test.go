@@ -176,9 +176,6 @@ func TestSample(t *testing.T) {
 	out = runCommand(t, "querywithhistory", dbName)
 	assertContains(out, "1 1 Hello World 1 Updated")
 
-	out = runCommand(t, "querywithparameter", dbName)
-	assertContains(out, "12 Melissa Garcia")
-
 	out = runCommand(t, "dmlinsert", dbName)
 	assertContains(out, "record(s) inserted")
 
@@ -199,6 +196,9 @@ func TestSample(t *testing.T) {
 
 	out = runCommand(t, "dmlwrite", dbName)
 	assertContains(out, "record(s) inserted")
+
+	out = runCommand(t, "querywithparameter", dbName)
+	assertContains(out, "12 Melissa Garcia")
 
 	out = runCommand(t, "dmlupdatepart", dbName)
 	assertContains(out, "record(s) updated")
