@@ -35,6 +35,13 @@ all Go code in this repo.
 
 The following style guidelines are specific to writing Go samples.
 
+Canonical samples:
+
+* Veneer client library with complex request: [`inspect_string.go`](https://github.com/GoogleCloudPlatform/golang-samples/blob/master/dlp/snippets/inspect/inspect_string.go)
+* Apiary client with normal request: [`dicom_store_create.go`](https://github.com/GoogleCloudPlatform/golang-samples/blob/master/healthcare/dicom_store_create.go)
+* Apiary client with complex request: [`fhir_resource_create.go`](https://github.com/GoogleCloudPlatform/golang-samples/blob/master/healthcare/fhir_resource_create.go)
+* Apiary client with file I/O: [`dicomweb_instance_store.go`](https://github.com/GoogleCloudPlatform/golang-samples/blob/master/healthcare/dicomweb_instance_store.go)
+
 ## One file per sample
 
 Each sample should be in its own file so the [imports used by the sample can
