@@ -73,6 +73,7 @@ var (
 		"dmlwriteread":               writeAndReadUsingDML,
 		"dmlupdatestruct":            updateUsingDMLStruct,
 		"dmlwrite":                   writeUsingDML,
+		"querywithparameter":         queryWithParameter,
 		"dmlwritetxn":                writeWithTransactionUsingDML,
 		"dmlupdatepart":              updateUsingPartitionedDML,
 		"dmldeletepart":              deleteUsingPartitionedDML,
@@ -552,14 +553,17 @@ func writeWithTransaction(ctx context.Context, w io.Writer, client *spanner.Clie
 			if err != nil {
 				return err
 			}
-			const transfer = 200000
-			album1Budget += transfer
-			album2Budget -= transfer
-			cols := []string{"SingerId", "AlbumId", "MarketingBudget"}
-			txn.BufferWrite([]*spanner.Mutation{
-				spanner.Update("Albums", cols, []interface{}{1, 1, album1Budget}),
-				spanner.Update("Albums", cols, []interface{}{2, 2, album2Budget}),
-			})
+			const transfer = 100000
+			if album1Budget >= transfer {
+				album1Budget -= transfer
+				album2Budget += transfer
+				cols := []string{"SingerId", "AlbumId", "MarketingBudget"}
+				txn.BufferWrite([]*spanner.Mutation{
+					spanner.Update("Albums", cols, []interface{}{1, 1, album1Budget}),
+					spanner.Update("Albums", cols, []interface{}{2, 2, album2Budget}),
+				})
+				fmt.Fprintf(w, "Moved %d from Album1's MarketingBudget to Album2's.", transfer)
+			}
 		}
 		return nil
 	})
@@ -1078,7 +1082,7 @@ func updateUsingDMLStruct(ctx context.Context, w io.Writer, client *spanner.Clie
 		var singerInfo = name{"Timothy", "Campbell"}
 
 		stmt := spanner.Statement{
-			SQL: `Update Singers Set LastName = 'Grant' 
+			SQL: `Update Singers Set LastName = 'Grant'
 				WHERE STRUCT<FirstName String, LastName String>(Firstname, LastName) = @name`,
 			Params: map[string]interface{}{"name": singerInfo},
 		}
@@ -1117,6 +1121,37 @@ func writeUsingDML(ctx context.Context, w io.Writer, client *spanner.Client) err
 
 // [END spanner_dml_getting_started_insert]
 
+// [START spanner_query_with_parameter]
+
+func queryWithParameter(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	stmt := spanner.Statement{
+		SQL: `SELECT SingerId, FirstName, LastName FROM Singers
+			WHERE LastName = @lastName`,
+		Params: map[string]interface{}{
+			"lastName": "Garcia",
+		},
+	}
+	iter := client.Single().Query(ctx, stmt)
+	defer iter.Stop()
+	for {
+		row, err := iter.Next()
+		if err == iterator.Done {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		var singerID int64
+		var firstName, lastName string
+		if err := row.Columns(&singerID, &firstName, &lastName); err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "%d %s %s\n", singerID, firstName, lastName)
+	}
+}
+
+// [END spanner_query_with_parameter]
+
 // [START spanner_dml_getting_started_update]
 
 func writeWithTransactionUsingDML(ctx context.Context, w io.Writer, client *spanner.Client) error {
@@ -1152,7 +1187,7 @@ func writeWithTransactionUsingDML(ctx context.Context, w io.Writer, client *span
 
 		// Transfer the marketing budget from one album to another. By keeping the actions
 		// in a single transaction, it ensures the movement is atomic.
-		const transferAmt = 200000
+		const transferAmt = 100000
 		var album1budget, album2budget int64
 		var err error
 		if album1budget, err = getBudget(1, 1); err != nil {
@@ -1501,8 +1536,8 @@ func main() {
 		updatedocstable, querydocstable, createtabledocswithhistorytable, writewithhistory,
 		updatewithhistory, querywithhistory, writestructdata, querywithstruct, querywitharrayofstruct,
 		querywithstructfield, querywithnestedstructfield, dmlinsert, dmlupdate, dmldelete,
-		dmlwithtimestamp, dmlwriteread, dmlwrite, dmlwritetxn, dmlupdatepart, dmldeletepart,
-		dmlbatchupdate
+		dmlwithtimestamp, dmlwriteread, dmlwrite, dmlwritetxn, querywithparameter, dmlupdatepart,
+		dmldeletepart, dmlbatchupdate
 
 Examples:
 	spanner_snippets createdatabase projects/my-project/instances/my-instance/databases/example-db
