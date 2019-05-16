@@ -22,7 +22,7 @@ import (
 func TestCreateHTTPTask(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	locationID := "us-central1"
-	queueID := "my-appengine-queue"
+	queueID := "my-queue"
 	url := "https://example.com/task_handler"
 
 	tests := []struct {
