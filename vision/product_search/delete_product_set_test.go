@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
@@ -51,14 +52,19 @@ func TestDeleteProductSet(t *testing.T) {
 	}
 
 	// Delete the product set.
-	deleteProductSet(&buf, tc.ProjectID, location, productSetID)
+	testutil.Retry(t, 10, 1*time.Second, func(r *testutil.R) {
+		if err := deleteProductSet(&buf, tc.ProjectID, location, productSetID); err != nil {
+			r.Errorf("deleteProductSet: %v", err)
+		}
 
-	// Confirm the product set has been deleted.
-	buf.Reset()
-	if err := listProductSets(&buf, tc.ProjectID, location); err != nil {
-		t.Fatalf("listProductSets: %v", err)
-	}
-	if got := buf.String(); strings.Contains(got, productSetID) {
-		t.Errorf("Product set ID %s still exists", productSetID)
-	}
+		// Confirm the product set has been deleted.
+		buf.Reset()
+		if err := listProductSets(&buf, tc.ProjectID, location); err != nil {
+			r.Errorf("listProductSets: %v", err)
+			return
+		}
+		if got := buf.String(); strings.Contains(got, productSetID) {
+			r.Errorf("Product set ID %s still exists", productSetID)
+		}
+	})
 }
