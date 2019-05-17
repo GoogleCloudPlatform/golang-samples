@@ -51,7 +51,6 @@ func setConfig(w io.Writer, projectID string, region string, registryID string, 
 }
 
 func TestSubscribeGatewayToDeviceTopic(t *testing.T) {
-	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/847")
 	if pubKeyRSA == "" {
 		t.Skip("GOLANG_SAMPLES_IOT_PUB not set")
 	}
