@@ -452,9 +452,9 @@ func generateV4GetObjectSignedURL(w io.Writer, client *storage.Client, bucketNam
 	}
 
 	fmt.Fprintln(w, "Generated GET signed URL:")
-	fmt.Fprintf(w, "'%v'\n", u)
+	fmt.Fprintf(w, "%q\n", u)
 	fmt.Fprintln(w, "You can use this URL with any user agent, for example:")
-	fmt.Fprintf(w, "curl '%v'\n", u)
+	fmt.Fprintf(w, "curl %q\n", u)
 	// [END storage_generate_signed_url_v4]
 	return u, nil
 }
@@ -487,9 +487,9 @@ func generateV4PutObjectSignedURL(w io.Writer, client *storage.Client, bucketNam
 	}
 
 	fmt.Fprintln(w, "Generated PUT signed URL:")
-	fmt.Fprintf(w, "'%v'\n", u)
+	fmt.Fprintf(w, "%q\n", u)
 	fmt.Fprintln(w, "You can use this URL with any user agent, for example:")
-	fmt.Fprintf(w, "curl -X PUT -H 'Content-Type: application/octet-stream' --upload-file my-file '%v'\n", u)
+	fmt.Fprintf(w, "curl -X PUT -H 'Content-Type: application/octet-stream' --upload-file my-file %q\n", u)
 	// [END storage_generate_upload_signed_url_v4]
 	return u, nil
 }
