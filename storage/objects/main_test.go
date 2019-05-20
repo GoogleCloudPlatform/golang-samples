@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 	"testing"
@@ -44,7 +45,7 @@ func TestObjects(t *testing.T) {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		log.Fatal(err)
+		t.Fatalf("storage.NewClient: %v", err)
 	}
 
 	var (
@@ -198,7 +199,7 @@ func TestKMSObjects(t *testing.T) {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		log.Fatal(err)
+		t.Fatalf("storage.NewClient: %v", err)
 	}
 
 	keyRingID := os.Getenv("GOLANG_SAMPLES_KMS_KEYRING")
@@ -224,12 +225,70 @@ func TestKMSObjects(t *testing.T) {
 	}
 }
 
+func TestV4SignedURL(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+
+	bucketName := tc.ProjectID + "-signed-url-bucket-name"
+	objectName := "foo.txt"
+	serviceAccount := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
+
+	cleanBucket(t, ctx, client, tc.ProjectID, bucketName)
+	putBuf := new(bytes.Buffer)
+	putURL, err := generateV4PutObjectSignedURL(putBuf, client, bucketName, objectName, serviceAccount)
+	if err != nil {
+		t.Errorf("generateV4PutObjectSignedURL: %v", err)
+	}
+	got := putBuf.String()
+	if want := "Generated PUT signed URL:"; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
+
+	httpClient := &http.Client{}
+	request, err := http.NewRequest("PUT", putURL, strings.NewReader("hello world"))
+	request.ContentLength = 11
+	request.Header.Set("Content-Type", "application/octet-stream")
+	response, err := httpClient.Do(request)
+	if err != nil {
+		t.Errorf("httpClient.Do: %v", err)
+	}
+	getBuf := new(bytes.Buffer)
+	getURL, err := generateV4GetObjectSignedURL(getBuf, client, bucketName, objectName, serviceAccount)
+	if err != nil {
+		t.Errorf("generateV4GetObjectSignedURL: %v", err)
+	}
+	got = getBuf.String()
+	if want := "Generated GET signed URL:"; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
+
+	response, err = http.Get(getURL)
+	if err != nil {
+		t.Errorf("http.Get: %v", err)
+	}
+	defer response.Body.Close()
+
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		t.Errorf("ioutil.ReadAll: %v", err)
+	}
+
+	if got, want := string(body), "hello world"; got != want {
+		t.Errorf("object content = %q; want %q", got, want)
+	}
+
+}
+
 func TestObjectBucketLock(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		log.Fatal(err)
+		t.Fatalf("storage.NewClient: %v", err)
 	}
 
 	var (
