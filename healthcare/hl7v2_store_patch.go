@@ -29,7 +29,7 @@ func patchHL7V2Store(w io.Writer, projectID, location, datasetID, hl7v2StoreID, 
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.New: %v", err)
+		return fmt.Errorf("healthcare.NewService: %v", err)
 	}
 
 	storesService := healthcareService.Projects.Locations.Datasets.Hl7V2Stores

@@ -229,6 +229,10 @@ func TestSendCommand(t *testing.T) {
 }
 
 func TestCreateGateway(t *testing.T) {
+	if pubKeyRSA == "" {
+		t.Skip("GOLANG_SAMPLES_IOT_PUB not set")
+	}
+
 	gatewayID := createIDForTest("gateway")
 
 	testutil.Retry(t, 1, 10*time.Second, func(r *testutil.R) {
@@ -248,6 +252,10 @@ func TestCreateGateway(t *testing.T) {
 }
 
 func TestListGateways(t *testing.T) {
+	if pubKeyRSA == "" {
+		t.Skip("GOLANG_SAMPLES_IOT_PUB not set")
+	}
+
 	// list zero gateways for initial registry
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
@@ -286,6 +294,10 @@ func TestListGateways(t *testing.T) {
 }
 
 func TestBindDeviceToGateway(t *testing.T) {
+	if pubKeyRSA == "" {
+		t.Skip("GOLANG_SAMPLES_IOT_PUB not set")
+	}
+
 	gatewayID := createIDForTest("gateway")
 	deviceID := createIDForTest("device")
 
@@ -316,6 +328,10 @@ func TestBindDeviceToGateway(t *testing.T) {
 }
 
 func TestUnbindDeviceFromGateway(t *testing.T) {
+	if pubKeyRSA == "" {
+		t.Skip("GOLANG_SAMPLES_IOT_PUB not set")
+	}
+
 	gatewayID := createIDForTest("gateway")
 	deviceID := createIDForTest("device")
 
@@ -351,6 +367,10 @@ func TestUnbindDeviceFromGateway(t *testing.T) {
 	})
 }
 func TestListDevicesForGateway(t *testing.T) {
+	if pubKeyRSA == "" {
+		t.Skip("GOLANG_SAMPLES_IOT_PUB not set")
+	}
+
 	gatewayID := createIDForTest("gateway")
 	deviceID := createIDForTest("device")
 

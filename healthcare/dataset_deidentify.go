@@ -30,7 +30,7 @@ func deidentifyDataset(w io.Writer, projectID, location, sourceDatasetID, destin
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.New: %v", err)
+		return fmt.Errorf("healthcare.NewService: %v", err)
 	}
 
 	datasetsService := healthcareService.Projects.Locations.Datasets
@@ -43,23 +43,7 @@ func deidentifyDataset(w io.Writer, projectID, location, sourceDatasetID, destin
 			Dicom: &healthcare.DicomConfig{
 				KeepList: &healthcare.TagFilterList{
 					Tags: []string{
-						"Columns",
-						"NumberOfFrames",
-						"PixelRepresentation",
-						"MediaStorageSOPClassUID",
-						"MediaStorageSOPInstanceUID",
-						"Rows",
-						"SamplesPerPixel",
-						"BitsAllocated",
-						"HighBit",
-						"PhotometricInterpretation",
-						"BitsStored",
 						"PatientID",
-						"TransferSyntaxUID",
-						"SOPInstanceUID",
-						"StudyInstanceUID",
-						"SeriesInstanceUID",
-						"PixelData",
 					},
 				},
 			},

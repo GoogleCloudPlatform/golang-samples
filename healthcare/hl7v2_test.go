@@ -34,6 +34,16 @@ func TestHL7V2Store(t *testing.T) {
 	location := "us-central1"
 	datasetID := "hl7v2-dataset"
 	hl7V2StoreID := "my-hl7v2-store"
+
+	// Delete test dataset if it already exists.
+	if err := getDataset(buf, tc.ProjectID, location, datasetID); err == nil {
+		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+			if err := deleteDataset(ioutil.Discard, tc.ProjectID, location, datasetID); err != nil {
+				r.Errorf("deleteDataset got err: %v", err)
+			}
+		})
+	}
+
 	if err := createDataset(ioutil.Discard, tc.ProjectID, location, datasetID); err != nil {
 		t.Fatalf("Unable to create test dataset: %v", err)
 	}
@@ -68,11 +78,27 @@ func TestHL7V2Store(t *testing.T) {
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		buf.Reset()
+		if err := ingestHL7V2Message(buf, tc.ProjectID, location, datasetID, hl7V2StoreID, dataFile); err != nil {
+			r.Errorf("ingestHL7V2Message got err: %v", err)
+		}
+		if got, wantContain := buf.String(), messageID; !strings.Contains(got, wantContain) {
+			r.Errorf("ingestHL7V2Message got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, wantContain)
+		}
+	})
+
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		buf.Reset()
 		if err := getHL7V2Message(buf, tc.ProjectID, location, datasetID, hl7V2StoreID, messageID); err != nil {
 			r.Errorf("getHL7V2Message got err: %v", err)
 		}
 		if got, wantContain := buf.String(), "Raw length: 167"; !strings.Contains(got, wantContain) {
 			r.Errorf("getHL7V2Message got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, wantContain)
+		}
+	})
+
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		if err := patchHL7V2Message(ioutil.Discard, tc.ProjectID, location, datasetID, hl7V2StoreID, messageID, dataFile); err != nil {
+			r.Errorf("patchHL7V2Message got err: %v", err)
 		}
 	})
 

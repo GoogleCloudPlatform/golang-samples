@@ -34,6 +34,16 @@ func TestDICOMStore(t *testing.T) {
 	location := "us-central1"
 	datasetID := "dicom-dataset"
 	dicomStoreID := "my-dicom-store"
+
+	// Delete test dataset if it already exists.
+	if err := getDataset(buf, tc.ProjectID, location, datasetID); err == nil {
+		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+			if err := deleteDataset(ioutil.Discard, tc.ProjectID, location, datasetID); err != nil {
+				r.Errorf("deleteDataset got err: %v", err)
+			}
+		})
+	}
+
 	if err := createDataset(ioutil.Discard, tc.ProjectID, location, datasetID); err != nil {
 		t.Skipf("Unable to create test dataset: %v", err)
 		return
@@ -53,7 +63,39 @@ func TestDICOMStore(t *testing.T) {
 		}
 	})
 
-	// TODO(cbro): test get
+	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
+		buf.Reset()
+		if err := getDICOMStore(buf, tc.ProjectID, location, datasetID, dicomStoreID); err != nil {
+			r.Errorf("getDICOMStore got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, dicomStoreName) {
+			r.Errorf("listDICOMStores got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, dicomStoreName)
+		}
+	})
+
+	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
+		if err := dicomWebStoreInstance(ioutil.Discard, tc.ProjectID, location, datasetID, dicomStoreID, "studies/1.3.6.1.4.1.11129.5.5.111396399361969898205364400549799252857604", "./testdata/dicom_00000001_000.dcm"); err != nil {
+			r.Errorf("dicomStoreInstance got err: %v", err)
+		}
+	})
+
+	// testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
+	// 	if err := dicomWebSearchInstances(ioutil.Discard, tc.ProjectID, location, datasetID, dicomStoreID, "studies/1.3.6.1.4.1.11129.5.5.111396399361969898205364400549799252857604"); err != nil {
+	// 		r.Errorf("dicomWebSearchInstances got err: %v", err)
+	// 	}
+	// })
+
+	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
+		if err := dicomWebRetrieveStudy(ioutil.Discard, tc.ProjectID, location, datasetID, dicomStoreID, "studies/1.3.6.1.4.1.11129.5.5.111396399361969898205364400549799252857604"); err != nil {
+			r.Errorf("dicomWebSearchInstances got err: %v", err)
+		}
+	})
+
+	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
+		if err := dicomWebDeleteStudy(ioutil.Discard, tc.ProjectID, location, datasetID, dicomStoreID, "studies/1.3.6.1.4.1.11129.5.5.111396399361969898205364400549799252857604"); err != nil {
+			r.Errorf("dicomWebSearchInstances got err: %v", err)
+		}
+	})
 
 	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
 		if err := deleteDICOMStore(ioutil.Discard, tc.ProjectID, location, datasetID, dicomStoreID); err != nil {
