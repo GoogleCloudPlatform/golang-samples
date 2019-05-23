@@ -20,6 +20,8 @@ trap "gimmeproj -project golang-samples-tests done $GOLANG_SAMPLES_PROJECT_ID" E
 set -x
 
 export GOLANG_SAMPLES_SPANNER=projects/golang-samples-tests/instances/golang-samples-tests
+export GOLANG_SAMPLES_BIGTABLE_PROJECT=golang-samples-tests
+export GOLANG_SAMPLES_BIGTABLE_INSTANCE=testing-instance
 
 date
 
