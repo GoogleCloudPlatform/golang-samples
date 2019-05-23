@@ -33,7 +33,7 @@ All code must be formatted with `gofmt` (with the latest Go version) and pass
 Please read and follow https://github.com/golang/go/wiki/CodeReviewComments for
 all Go code in this repo.
 
-The [DLP Samples](https://github.com/GoogleCloudPlatform/golang-samples/tree/master/dlp/snippets/inspect) are a good example to follow with the new format. The following style guidelines are specific to writing Go samples.
+The following style guidelines are specific to writing Go samples.
 
 Canonical samples:
 
