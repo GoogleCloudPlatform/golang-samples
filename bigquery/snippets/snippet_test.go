@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io/ioutil"
 	"regexp"
 	"strings"
 	"testing"
@@ -115,7 +116,7 @@ func TestAll(t *testing.T) {
 	if err := updateDatasetDescription(client, datasetID); err != nil {
 		t.Errorf("updateDatasetDescription(%q): %v", datasetID, err)
 	}
-	if err := listDatasets(client); err != nil {
+	if err := listDatasets(client, ioutil.Discard); err != nil {
 		t.Errorf("listDatasets: %v", err)
 	}
 
@@ -129,7 +130,7 @@ func TestAll(t *testing.T) {
 		t.Errorf("createTableExplicitSchema(dataset:%q table:%q): %v", datasetID, explicit, err)
 	}
 	complex := uniqueBQName("golang_example_table_complex")
-	if err := createTableComplexSchema(client, datasetID, complex); err != nil {
+	if err := createTableComplexSchema(client, ioutil.Discard, datasetID, complex); err != nil {
 		t.Errorf("createTableComplexSchema(dataset:%q table:%q): %v", datasetID, complex, err)
 	}
 
@@ -182,7 +183,7 @@ func TestAll(t *testing.T) {
 		t.Errorf("want table list %q to contain table %q", got, explicit)
 	}
 
-	if err := printDatasetInfo(client, datasetID); err != nil {
+	if err := printDatasetInfo(client, ioutil.Discard, datasetID); err != nil {
 		t.Errorf("printDatasetInfo: %v", err)
 	}
 
@@ -190,54 +191,54 @@ func TestAll(t *testing.T) {
 	if err := insertRows(client, datasetID, inferred); err != nil {
 		t.Errorf("insertRows(dataset:%q table:%q): %v", datasetID, inferred, err)
 	}
-	if err := browseTable(client, datasetID, inferred); err != nil {
+	if err := browseTable(client, ioutil.Discard, datasetID, inferred); err != nil {
 		t.Errorf("browseTable(dataset:%q table:%q): %v", datasetID, inferred, err)
 	}
 
-	if err := queryBasic(client); err != nil {
+	if err := queryBasic(client, ioutil.Discard); err != nil {
 		t.Errorf("queryBasic: %v", err)
 	}
 	batchTable := uniqueBQName("golang_example_batchresults")
-	if err := queryBatch(client, datasetID, batchTable); err != nil {
+	if err := queryBatch(client, ioutil.Discard, datasetID, batchTable); err != nil {
 		t.Errorf("queryBatch(dataset:%q table:%q): %v", datasetID, batchTable, err)
 	}
-	if err := queryDisableCache(client); err != nil {
+	if err := queryDisableCache(client, ioutil.Discard); err != nil {
 		t.Errorf("queryBasicDisableCache: %v", err)
 	}
-	if err := queryDryRun(client); err != nil {
+	if err := queryDryRun(client, ioutil.Discard); err != nil {
 		t.Errorf("queryDryRun: %v", err)
 	}
 	sql := "SELECT 17 as foo"
-	if err := queryLegacy(client, sql); err != nil {
+	if err := queryLegacy(client, ioutil.Discard, sql); err != nil {
 		t.Errorf("queryLegacy: %v", err)
 	}
 	largeResults := uniqueBQName("golang_example_legacy_largeresults")
-	if err := queryLegacyLargeResults(client, datasetID, largeResults); err != nil {
+	if err := queryLegacyLargeResults(client, ioutil.Discard, datasetID, largeResults); err != nil {
 		t.Errorf("queryLegacyLargeResults(dataset:%q table:%q): %v", datasetID, largeResults, err)
 	}
-	if err := queryWithArrayParams(client); err != nil {
+	if err := queryWithArrayParams(client, ioutil.Discard); err != nil {
 		t.Errorf("queryWithArrayParams: %v", err)
 	}
-	if err := queryWithNamedParams(client); err != nil {
+	if err := queryWithNamedParams(client, ioutil.Discard); err != nil {
 		t.Errorf("queryWithNamedParams: %v", err)
 	}
-	if err := queryWithPositionalParams(client); err != nil {
+	if err := queryWithPositionalParams(client, ioutil.Discard); err != nil {
 		t.Errorf("queryWithPositionalParams: %v", err)
 	}
-	if err := queryWithTimestampParam(client); err != nil {
+	if err := queryWithTimestampParam(client, ioutil.Discard); err != nil {
 		t.Errorf("queryWithTimestampParam: %v", err)
 	}
-	if err := queryWithStructParam(client); err != nil {
+	if err := queryWithStructParam(client, ioutil.Discard); err != nil {
 		t.Errorf("queryWithStructParam: %v", err)
 	}
 
 	// Run query variations
 	persisted := uniqueBQName("golang_example_table_queryresult")
-	if err := queryWithDestination(client, datasetID, persisted); err != nil {
+	if err := queryWithDestination(client, ioutil.Discard, datasetID, persisted); err != nil {
 		t.Errorf("queryWithDestination(dataset:%q table:%q): %v", datasetID, persisted, err)
 	}
 	persistedCMEK := uniqueBQName("golang_example_table_queryresult_cmek")
-	if err := queryWithDestinationCMEK(client, datasetID, persistedCMEK); err != nil {
+	if err := queryWithDestinationCMEK(client, ioutil.Discard, datasetID, persistedCMEK); err != nil {
 		t.Errorf("queryWithDestinationCMEK(dataset:%q table:%q): %v", datasetID, persistedCMEK, err)
 	}
 
@@ -247,7 +248,7 @@ func TestAll(t *testing.T) {
 	q.JobID = exampleJobID
 	q.Priority = bigquery.BatchPriority
 	q.Run(ctx)
-	if err := getJobInfo(client, exampleJobID); err != nil {
+	if err := getJobInfo(client, ioutil.Discard, exampleJobID); err != nil {
 		t.Errorf("getJobInfo(%s): %v", exampleJobID, err)
 	}
 	if err := cancelJob(client, exampleJobID); err != nil {
@@ -255,10 +256,10 @@ func TestAll(t *testing.T) {
 	}
 
 	// Print information about tables (extended and simple).
-	if err := printTableInfo(client, datasetID, inferred); err != nil {
+	if err := printTableInfo(client, ioutil.Discard, datasetID, inferred); err != nil {
 		t.Errorf("printTableInfo(dataset:%q table:%q): %v", datasetID, inferred, err)
 	}
-	if err := printTableInfo(client, datasetID, explicit); err != nil {
+	if err := printTableInfo(client, ioutil.Discard, datasetID, explicit); err != nil {
 		t.Errorf("printTableInfo(dataset:%q table:%q): %v", datasetID, explicit, err)
 	}
 
@@ -282,7 +283,7 @@ func TestAll(t *testing.T) {
 		t.Errorf("copyTableWithCMEK(dataset:%q table:%q): %v", datasetID, dstTableID, err)
 	}
 
-	if err := listJobs(client); err != nil {
+	if err := listJobs(client, ioutil.Discard); err != nil {
 		t.Errorf("listJobs: %v", err)
 	}
 
@@ -314,7 +315,7 @@ func TestViews(t *testing.T) {
 		t.Fatalf("createView(dataset:%q view:%q): %v", viewDatasetID, viewID, err)
 	}
 
-	if err := getView(client, viewDatasetID, viewID); err != nil {
+	if err := getView(client, ioutil.Discard, viewDatasetID, viewID); err != nil {
 		t.Fatalf("getView(dataset:%q view:%q): %v", viewDatasetID, viewID, err)
 	}
 
@@ -483,7 +484,7 @@ func TestPartitioningAndClustering(t *testing.T) {
 		t.Errorf("importPartitionedStatesByDate(dataset:%q table:%q): %v", datasetID, partitionedLoad, err)
 	}
 
-	if err := queryPartitionedTable(client, datasetID, partitionedLoad); err != nil {
+	if err := queryPartitionedTable(client, ioutil.Discard, datasetID, partitionedLoad); err != nil {
 		t.Errorf("queryPartitionedTable(dataset:%q table:%q): %v", datasetID, partitionedLoad, err)
 	}
 
@@ -497,7 +498,7 @@ func TestPartitioningAndClustering(t *testing.T) {
 		t.Errorf("importClusteredSampleTable(dataset:%q table:%q): %v", datasetID, clusteredLoad, err)
 	}
 
-	if err := queryClusteredTable(client, datasetID, clusteredLoad); err != nil {
+	if err := queryClusteredTable(client, ioutil.Discard, datasetID, clusteredLoad); err != nil {
 		t.Errorf("queryClusteredTable(dataset:%q table:%q): %v", datasetID, clusteredLoad, err)
 	}
 }
