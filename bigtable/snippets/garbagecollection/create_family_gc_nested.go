@@ -15,11 +15,12 @@ package garbagecollection
 
 // [START bigtable_create_family_gc_nested]
 import (
-	"cloud.google.com/go/bigtable"
 	"context"
 	"fmt"
 	"io"
 	"time"
+
+	"cloud.google.com/go/bigtable"
 )
 
 func createFamilyGCNested(w io.Writer, projectID, instanceID string, tableName string) error {
@@ -31,12 +32,12 @@ func createFamilyGCNested(w io.Writer, projectID, instanceID string, tableName s
 
 	adminClient, err := bigtable.NewAdminClient(ctx, projectID, instanceID)
 	if err != nil {
-		return fmt.Errorf("could not create admin client: %v", err)
+		return fmt.Errorf("bigtable.NewAdminClient: %v", err)
 	}
 
 	columnFamilyName := "cf5"
 	if err := adminClient.CreateColumnFamily(ctx, tableName, columnFamilyName); err != nil {
-		return fmt.Errorf("could not create column family %s: %v", columnFamilyName, err)
+		fmt.Errorf("CreateColumnFamily(%s): %v", columnFamilyName, err)
 	}
 
 	// Create a nested GC rule:
@@ -45,14 +46,16 @@ func createFamilyGCNested(w io.Writer, projectID, instanceID string, tableName s
 	// Drop cells that are older than a month AND older than the 2 recent versions
 	maxAge := time.Hour * 24 * 5
 	maxAgePolicy := bigtable.MaxAgePolicy(maxAge)
-	nestedPolicy := bigtable.UnionPolicy(bigtable.MaxVersionsPolicy(10),
-		bigtable.IntersectionPolicy(bigtable.MaxVersionsPolicy(2),
+	policy := bigtable.UnionPolicy(
+		bigtable.MaxVersionsPolicy(10),
+		bigtable.IntersectionPolicy(
+			bigtable.MaxVersionsPolicy(2),
 			maxAgePolicy))
-	if err := adminClient.SetGCPolicy(ctx, tableName, columnFamilyName, nestedPolicy); err != nil {
-		return fmt.Errorf("could not set garbage collection policy: %v", err)
+	if err := adminClient.SetGCPolicy(ctx, tableName, columnFamilyName, policy); err != nil {
+		return fmt.Errorf("SetGCPolicy(%s): %v", policy, err)
 	}
 
-	fmt.Fprintf(w, "created column family %s with policy: %v\n", columnFamilyName, nestedPolicy)
+	fmt.Fprintf(w, "created column family %s with policy: %v\n", columnFamilyName, policy)
 	return nil
 }
 

@@ -15,11 +15,12 @@ package garbagecollection
 
 // [START bigtable_create_family_gc_union]
 import (
-	"cloud.google.com/go/bigtable"
 	"context"
 	"fmt"
 	"io"
 	"time"
+
+	"cloud.google.com/go/bigtable"
 )
 
 func createFamilyGCUnion(w io.Writer, projectID, instanceID string, tableName string) error {
@@ -31,12 +32,12 @@ func createFamilyGCUnion(w io.Writer, projectID, instanceID string, tableName st
 
 	adminClient, err := bigtable.NewAdminClient(ctx, projectID, instanceID)
 	if err != nil {
-		return fmt.Errorf("could not create admin client: %v", err)
+		return fmt.Errorf("bigtable.NewAdminClient: %v", err)
 	}
 
 	columnFamilyName := "cf3"
 	if err := adminClient.CreateColumnFamily(ctx, tableName, columnFamilyName); err != nil {
-		return fmt.Errorf("could not create column family %s: %v", columnFamilyName, err)
+		fmt.Errorf("CreateColumnFamily(%s): %v", columnFamilyName, err)
 	}
 
 	// Define a GC rule to drop cells older than 5 days or not the most recent version
@@ -44,7 +45,7 @@ func createFamilyGCUnion(w io.Writer, projectID, instanceID string, tableName st
 	maxAgePolicy := bigtable.MaxAgePolicy(maxAge)
 	policy := bigtable.UnionPolicy(bigtable.MaxVersionsPolicy(2), maxAgePolicy)
 	if err := adminClient.SetGCPolicy(ctx, tableName, columnFamilyName, policy); err != nil {
-		return fmt.Errorf("could not set garbage collection policy: %v", err)
+		return fmt.Errorf("SetGCPolicy(%s): %v", policy, err)
 	}
 
 	fmt.Fprintf(w, "created column family %s with policy: %v\n", columnFamilyName, policy)

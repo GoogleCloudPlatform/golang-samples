@@ -15,10 +15,11 @@ package garbagecollection
 
 // [START bigtable_create_family_gc_max_versions]
 import (
-	"cloud.google.com/go/bigtable"
 	"context"
 	"fmt"
 	"io"
+
+	"cloud.google.com/go/bigtable"
 )
 
 func createFamilyGCMaxVersions(w io.Writer, projectID, instanceID string, tableName string) error {
@@ -30,18 +31,18 @@ func createFamilyGCMaxVersions(w io.Writer, projectID, instanceID string, tableN
 
 	adminClient, err := bigtable.NewAdminClient(ctx, projectID, instanceID)
 	if err != nil {
-		return fmt.Errorf("could not create admin client: %v", err)
+		return fmt.Errorf("bigtable.NewAdminClient: %v", err)
 	}
 
 	columnFamilyName := "cf2"
 	if err := adminClient.CreateColumnFamily(ctx, tableName, columnFamilyName); err != nil {
-		return fmt.Errorf("could not create column family %s: %v", columnFamilyName, err)
+		fmt.Errorf("CreateColumnFamily(%s): %v", columnFamilyName, err)
 	}
 
 	// Set a garbage collection policy of 2 versions.
 	policy := bigtable.MaxVersionsPolicy(2)
 	if err := adminClient.SetGCPolicy(ctx, tableName, columnFamilyName, policy); err != nil {
-		return fmt.Errorf("could not set garbage collection policy: %v", err)
+		return fmt.Errorf("SetGCPolicy(%s): %v", policy, err)
 	}
 
 	fmt.Fprintf(w, "created column family %s with policy: %v\n", columnFamilyName, policy)
