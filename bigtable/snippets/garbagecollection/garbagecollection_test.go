@@ -17,15 +17,17 @@ package garbagecollection
 import (
 	"bytes"
 	"context"
-	"log"
 	"os"
 	"strings"
 	"testing"
 
 	"cloud.google.com/go/bigtable"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestGarbageCollection(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
 	ctx := context.Background()
 	project := os.Getenv("GOLANG_SAMPLES_BIGTABLE_PROJECT")
 	instance := os.Getenv("GOLANG_SAMPLES_BIGTABLE_INSTANCE")
@@ -34,15 +36,15 @@ func TestGarbageCollection(t *testing.T) {
 	}
 	adminClient, err := bigtable.NewAdminClient(ctx, project, instance)
 
-	tableName := "gc-table"
+	tableName := "gc-table-" + tc.ProjectID
 	adminClient.DeleteTable(ctx, tableName)
 
 	if err := adminClient.CreateTable(ctx, tableName); err != nil {
-		log.Fatalf("Could not create table %s: %v", tableName, err)
+		t.Fatalf("Could not create table %s: %v", tableName, err)
 	}
 
 	buf := new(bytes.Buffer)
-	if err = createFamilyGCMaxAge(buf, project, instance, "gc-table"); err != nil {
+	if err = createFamilyGCMaxAge(buf, project, instance, tableName); err != nil {
 		t.Errorf("TestGarbageCollection: %v", err)
 	}
 
@@ -52,7 +54,7 @@ func TestGarbageCollection(t *testing.T) {
 	}
 
 	buf.Reset()
-	if err = createFamilyGCMaxVersions(buf, project, instance, "gc-table"); err != nil {
+	if err = createFamilyGCMaxVersions(buf, project, instance, tableName); err != nil {
 		t.Errorf("TestGarbageCollection: %v", err)
 	}
 
@@ -62,7 +64,7 @@ func TestGarbageCollection(t *testing.T) {
 	}
 
 	buf.Reset()
-	if err = createFamilyGCUnion(buf, project, instance, "gc-table"); err != nil {
+	if err = createFamilyGCUnion(buf, project, instance, tableName); err != nil {
 		t.Errorf("TestGarbageCollection: %v", err)
 	}
 
@@ -72,7 +74,7 @@ func TestGarbageCollection(t *testing.T) {
 	}
 
 	buf.Reset()
-	if err = createFamilyGCIntersect(buf, project, instance, "gc-table"); err != nil {
+	if err = createFamilyGCIntersect(buf, project, instance, tableName); err != nil {
 		t.Errorf("TestGarbageCollection: %v", err)
 	}
 
@@ -82,7 +84,7 @@ func TestGarbageCollection(t *testing.T) {
 	}
 
 	buf.Reset()
-	if err = createFamilyGCNested(buf, project, instance, "gc-table"); err != nil {
+	if err = createFamilyGCNested(buf, project, instance, tableName); err != nil {
 		t.Errorf("TestGarbageCollection: %v", err)
 	}
 
