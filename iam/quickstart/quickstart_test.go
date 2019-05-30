@@ -16,8 +16,17 @@ package main
 
 import (
 	"testing"
+	"time"
+
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestMain(t *testing.T) {
-	main()
+	testutil.SystemTest(t)
+
+	r := testutil.BuildMain(t)
+	if stdout, stderr, err := r.Run(nil, 10*time.Second); err != nil {
+		t.Errorf("error running main: %v\n\nstdout:\n----\n%v\n----\nstderr:\n----\n%v\n----", err, string(stdout), string(stderr))
+	}
+	r.Cleanup()
 }
