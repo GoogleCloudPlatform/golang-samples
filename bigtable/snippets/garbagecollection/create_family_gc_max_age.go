@@ -37,7 +37,7 @@ func createFamilyGCMaxAge(w io.Writer, projectID, instanceID string, tableName s
 
 	columnFamilyName := "cf1"
 	if err := adminClient.CreateColumnFamily(ctx, tableName, columnFamilyName); err != nil {
-		fmt.Errorf("CreateColumnFamily(%s): %v", columnFamilyName, err)
+		return fmt.Errorf("CreateColumnFamily(%s): %v", columnFamilyName, err)
 	}
 
 	// Set a garbage collection policy of 5 days.

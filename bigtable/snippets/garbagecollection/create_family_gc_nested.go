@@ -37,7 +37,7 @@ func createFamilyGCNested(w io.Writer, projectID, instanceID string, tableName s
 
 	columnFamilyName := "cf5"
 	if err := adminClient.CreateColumnFamily(ctx, tableName, columnFamilyName); err != nil {
-		fmt.Errorf("CreateColumnFamily(%s): %v", columnFamilyName, err)
+		return fmt.Errorf("CreateColumnFamily(%s): %v", columnFamilyName, err)
 	}
 
 	// Create a nested GC rule:

@@ -37,7 +37,7 @@ func createFamilyGCUnion(w io.Writer, projectID, instanceID string, tableName st
 
 	columnFamilyName := "cf3"
 	if err := adminClient.CreateColumnFamily(ctx, tableName, columnFamilyName); err != nil {
-		fmt.Errorf("CreateColumnFamily(%s): %v", columnFamilyName, err)
+		return fmt.Errorf("CreateColumnFamily(%s): %v", columnFamilyName, err)
 	}
 
 	// Define a GC rule to drop cells older than 5 days or not the most recent version

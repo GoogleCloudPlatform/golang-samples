@@ -36,7 +36,7 @@ func createFamilyGCMaxVersions(w io.Writer, projectID, instanceID string, tableN
 
 	columnFamilyName := "cf2"
 	if err := adminClient.CreateColumnFamily(ctx, tableName, columnFamilyName); err != nil {
-		fmt.Errorf("CreateColumnFamily(%s): %v", columnFamilyName, err)
+		return fmt.Errorf("CreateColumnFamily(%s): %v", columnFamilyName, err)
 	}
 
 	// Set a garbage collection policy of 2 versions.

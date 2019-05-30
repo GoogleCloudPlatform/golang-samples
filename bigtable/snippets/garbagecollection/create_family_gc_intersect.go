@@ -37,7 +37,7 @@ func createFamilyGCIntersect(w io.Writer, projectID, instanceID string, tableNam
 
 	columnFamilyName := "cf4"
 	if err := adminClient.CreateColumnFamily(ctx, tableName, columnFamilyName); err != nil {
-		fmt.Errorf("CreateColumnFamily(%s): %v", columnFamilyName, err)
+		return fmt.Errorf("CreateColumnFamily(%s): %v", columnFamilyName, err)
 	}
 
 	// GC rule: Drop cells older than 5 days AND older than the most recent 2 versions
