@@ -62,7 +62,7 @@ func TestIndexHandlerNotFound(t *testing.T) {
 		t.Errorf(
 			"unexpected status: got (%v) want (%v)",
 			status,
-			http.StatusOK,
+			http.StatusNotFound,
 		)
 	}
 }
