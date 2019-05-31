@@ -337,7 +337,7 @@ func TestSymmetricEncryptDecrypt(t *testing.T) {
 		t.Fatalf("decrypted plaintext does not match input message: want %s, got %s", []byte(v.message), plainBytes)
 	}
 	if bytes.Equal(cipherBytes, []byte(v.message)) {
-		t.Fatalf("ciphertext and plaintext bytes are IDentical: %s", cipherBytes)
+		t.Fatalf("ciphertext and plaintext bytes are identical: %s", cipherBytes)
 	}
 	plaintext := string(plainBytes)
 	if plaintext != v.message {
