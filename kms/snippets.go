@@ -16,7 +16,8 @@ package kms
 
 import (
 	"context"
-	"log"
+	"fmt"
+	"io"
 
 	"cloud.google.com/go/iam"
 	cloudkms "cloud.google.com/go/kms/apiv1"
@@ -28,7 +29,7 @@ import (
 
 // createKeyRing creates a new ring to store keys on KMS.
 // example parentName: "projects/PROJECT_ID/locations/global/"
-func createKeyRing(parentName, keyRingId string) error {
+func createKeyRing(w io.Writer, parentName, keyRingID string) error {
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
@@ -37,14 +38,14 @@ func createKeyRing(parentName, keyRingId string) error {
 	// Build the request.
 	req := &kmspb.CreateKeyRingRequest{
 		Parent:    parentName,
-		KeyRingId: keyRingId,
+		KeyRingId: keyRingID,
 	}
 	// Call the API.
 	result, err := client.CreateKeyRing(ctx, req)
 	if err != nil {
 		return err
 	}
-	log.Printf("Created key ring: %s", result)
+	fmt.Fprintf(w, "Created key ring: %s", result)
 	return nil
 }
 
@@ -54,7 +55,7 @@ func createKeyRing(parentName, keyRingId string) error {
 
 // createCryptoKey creates a new symmetric encrypt/decrypt key on KMS.
 // example keyRingName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID"
-func createCryptoKey(keyRingName, keyId string) error {
+func createCryptoKey(w io.Writer, keyRingName, keyID string) error {
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
@@ -64,7 +65,7 @@ func createCryptoKey(keyRingName, keyId string) error {
 	// Build the request.
 	req := &kmspb.CreateCryptoKeyRequest{
 		Parent:      keyRingName,
-		CryptoKeyId: keyId,
+		CryptoKeyId: keyID,
 		CryptoKey: &kmspb.CryptoKey{
 			Purpose: kmspb.CryptoKey_ENCRYPT_DECRYPT,
 			VersionTemplate: &kmspb.CryptoKeyVersionTemplate{
@@ -77,7 +78,7 @@ func createCryptoKey(keyRingName, keyId string) error {
 	if err != nil {
 		return err
 	}
-	log.Printf("Created crypto key. %s", result)
+	fmt.Fprintf(w, "Created crypto key. %s", result)
 	return nil
 }
 
@@ -87,7 +88,7 @@ func createCryptoKey(keyRingName, keyId string) error {
 
 // disableCryptoKeyVersion disables a specified key version on KMS.
 // example keyVersionName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
-func disableCryptoKeyVersion(keyVersionName string) error {
+func disableCryptoKeyVersion(w io.Writer, keyVersionName string) error {
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
@@ -108,7 +109,7 @@ func disableCryptoKeyVersion(keyVersionName string) error {
 	if err != nil {
 		return err
 	}
-	log.Printf("Disabled crypto key version: %s", result)
+	fmt.Fprintf(w, "Disabled crypto key version: %s", result)
 	return nil
 }
 
@@ -118,7 +119,7 @@ func disableCryptoKeyVersion(keyVersionName string) error {
 
 // enableCryptoKeyVersion enables a previously disabled key version on KMS.
 // example keyVersionName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
-func enableCryptoKeyVersion(keyVersionName string) error {
+func enableCryptoKeyVersion(w io.Writer, keyVersionName string) error {
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
@@ -139,7 +140,7 @@ func enableCryptoKeyVersion(keyVersionName string) error {
 	if err != nil {
 		return err
 	}
-	log.Printf("Enabled crypto key version: %s", result)
+	fmt.Fprintf(w, "Enabled crypto key version: %s", result)
 	return nil
 }
 
@@ -149,7 +150,7 @@ func enableCryptoKeyVersion(keyVersionName string) error {
 
 // destroyCryptoKeyVersion marks a specified key version for deletion. The key can be restored if requested within 24 hours.
 // example keyVersionName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
-func destroyCryptoKeyVersion(keyVersionName string) error {
+func destroyCryptoKeyVersion(w io.Writer, keyVersionName string) error {
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
@@ -164,7 +165,7 @@ func destroyCryptoKeyVersion(keyVersionName string) error {
 	if err != nil {
 		return err
 	}
-	log.Printf("Destroyed crypto key version: %s", result)
+	fmt.Fprintf(w, "Destroyed crypto key version: %s", result)
 	return nil
 }
 
@@ -174,7 +175,7 @@ func destroyCryptoKeyVersion(keyVersionName string) error {
 
 // restoreCryptoKeyVersion attempts to recover a key that has been marked for destruction within the last 24 hours.
 // example keyVersionName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
-func restoreCryptoKeyVersion(keyVersionName string) error {
+func restoreCryptoKeyVersion(w io.Writer, keyVersionName string) error {
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
@@ -189,7 +190,7 @@ func restoreCryptoKeyVersion(keyVersionName string) error {
 	if err != nil {
 		return err
 	}
-	log.Printf("Restored crypto key version: %s", result)
+	fmt.Fprintf(w, "Restored crypto key version: %s", result)
 	return nil
 }
 
@@ -199,7 +200,7 @@ func restoreCryptoKeyVersion(keyVersionName string) error {
 
 // getRingPolicy retrieves and prints the IAM policy associated with the key ring
 // example keyRingName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID"
-func getRingPolicy(keyRingName string) (*iam.Policy, error) {
+func getRingPolicy(w io.Writer, keyRingName string) (*iam.Policy, error) {
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
@@ -218,7 +219,7 @@ func getRingPolicy(keyRingName string) (*iam.Policy, error) {
 	}
 	for _, role := range policy.Roles() {
 		for _, member := range policy.Members(role) {
-			log.Printf("Role: %s Member: %s\n", role, member)
+			fmt.Fprintf(w, "Role: %s Member: %s\n", role, member)
 		}
 	}
 	return policy, nil
@@ -230,7 +231,7 @@ func getRingPolicy(keyRingName string) (*iam.Policy, error) {
 
 // getCryptoKeyPolicy retrieves and prints the IAM policy associated with the key
 // example keyName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID"
-func getCryptoKeyPolicy(keyName string) (*iam.Policy, error) {
+func getCryptoKeyPolicy(w io.Writer, keyName string) (*iam.Policy, error) {
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
@@ -249,7 +250,7 @@ func getCryptoKeyPolicy(keyName string) (*iam.Policy, error) {
 	}
 	for _, role := range policy.Roles() {
 		for _, member := range policy.Members(role) {
-			log.Printf("Role: %s Member: %s\n", role, member)
+			fmt.Fprintf(w, "Role: %s Member: %s\n", role, member)
 		}
 	}
 	return policy, nil
@@ -261,7 +262,7 @@ func getCryptoKeyPolicy(keyName string) (*iam.Policy, error) {
 
 // addMemberRingPolicy adds a new member to a specified IAM role for the key ring
 // example keyRingName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID"
-func addMemberRingPolicy(keyRingName, member string, role iam.RoleName) error {
+func addMemberRingPolicy(w io.Writer, keyRingName, member string, role iam.RoleName) error {
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
@@ -285,7 +286,7 @@ func addMemberRingPolicy(keyRingName, member string, role iam.RoleName) error {
 	if err != nil {
 		return err
 	}
-	log.Print("Added member to keyring policy.")
+	fmt.Fprint(w, "Added member to keyring policy.")
 	return nil
 }
 
@@ -295,7 +296,7 @@ func addMemberRingPolicy(keyRingName, member string, role iam.RoleName) error {
 
 // removeMemberRingPolicy removes a specified member from an IAM role for the key ring
 // example keyRingName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID"
-func removeMemberRingPolicy(keyRingName, member string, role iam.RoleName) error {
+func removeMemberRingPolicy(w io.Writer, keyRingName, member string, role iam.RoleName) error {
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
@@ -320,7 +321,7 @@ func removeMemberRingPolicy(keyRingName, member string, role iam.RoleName) error
 	if err != nil {
 		return err
 	}
-	log.Print("Removed member from keyring policy.")
+	fmt.Fprint(w, "Removed member from keyring policy.")
 	return nil
 }
 
@@ -330,7 +331,7 @@ func removeMemberRingPolicy(keyRingName, member string, role iam.RoleName) error
 
 // addMemberCryptoKeyPolicy adds a new member to a specified IAM role for the key
 // example keyName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID"
-func addMemberCryptoKeyPolicy(keyName, member string, role iam.RoleName) error {
+func addMemberCryptoKeyPolicy(w io.Writer, keyName, member string, role iam.RoleName) error {
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
@@ -354,7 +355,7 @@ func addMemberCryptoKeyPolicy(keyName, member string, role iam.RoleName) error {
 	if err != nil {
 		return err
 	}
-	log.Print("Added member to cryptokey policy.")
+	fmt.Fprint(w, "Added member to cryptokey policy.")
 	return nil
 }
 
@@ -364,7 +365,7 @@ func addMemberCryptoKeyPolicy(keyName, member string, role iam.RoleName) error {
 
 // removeMemberCryptoKeyPolicy removes a specified member from an IAM role for the key
 // example keyName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID"
-func removeMemberCryptoKeyPolicy(keyName, member string, role iam.RoleName) error {
+func removeMemberCryptoKeyPolicy(w io.Writer, keyName, member string, role iam.RoleName) error {
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
@@ -388,7 +389,7 @@ func removeMemberCryptoKeyPolicy(keyName, member string, role iam.RoleName) erro
 	if err != nil {
 		return err
 	}
-	log.Print("Removed member from cryptokey policy.")
+	fmt.Fprint(w, "Removed member from cryptokey policy.")
 	return nil
 }
 
