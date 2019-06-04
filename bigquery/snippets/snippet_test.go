@@ -523,17 +523,17 @@ func TestModels(t *testing.T) {
 
 	// Create a ML model via a query.
 	sql := fmt.Sprintf(`
-		CREATE MODEL `+"`%s`"+`
-		OPTIONS (
-			model_type='linear_reg',
-			max_iteration=1,
-			learn_rate=0.4,
-			learn_rate_strategy='constant'
-		) AS (
-			SELECT 'a' AS f1, 2.0 AS label
-			UNION ALL
-			SELECT 'b' AS f1, 3.8 AS label
-		)`, modelRef)
+	CREATE MODEL `+"`%s`"+`
+	OPTIONS (
+		model_type='linear_reg',
+		max_iteration=1,
+		learn_rate=0.4,
+		learn_rate_strategy='constant'
+	) AS (
+		SELECT 'a' AS f1, 2.0 AS label
+		UNION ALL
+		SELECT 'b' AS f1, 3.8 AS label
+	)`, modelRef)
 	job, err := client.Query(sql).Run(ctx)
 	if err != nil {
 		t.Fatalf("failed to create model: %v", err)
