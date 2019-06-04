@@ -831,7 +831,7 @@ func updateModelDescription(client *bigquery.Client, datasetID, modelID string) 
 	model := client.Dataset(datasetID).Model(modelID)
 	oldMeta, err := model.Metadata(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get model metadata: %v", err)
 	}
 	update := bigquery.ModelMetadataToUpdate{
 		Description: "This model was modified from a Go program",
@@ -1377,7 +1377,7 @@ func printModelInfo(client *bigquery.Client, w io.Writer, datasetID, modelID str
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(w, "Got model '%s' with friendly name '%s'\n", modelID, meta.Name)
+	fmt.Fprintf(w, "Got model '%q' with friendly name '%q'\n", modelID, meta.Name)
 	// [END bigquery_get_model]
 	return nil
 }
