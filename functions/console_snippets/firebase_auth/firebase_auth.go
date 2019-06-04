@@ -25,8 +25,6 @@ import (
 )
 
 // AuthEvent is the payload of a Firebase Auth event.
-// Please refer to the docs for additional information
-// regarding Firebase Auth events.
 type AuthEvent struct {
 	Email string `json:"email"`
 	UID   string `json:"uid"`

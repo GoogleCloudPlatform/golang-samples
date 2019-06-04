@@ -26,8 +26,6 @@ import (
 )
 
 // AnalyticsEvent is the payload of an Analytics log event.
-// Please refer to the docs for additional information
-// regarding Analytics events.
 type AnalyticsEvent struct {
 	EventDimensions []EventDimensions `json:"eventDim"`
 	UserDimensions  interface{}       `json:"userDim"`

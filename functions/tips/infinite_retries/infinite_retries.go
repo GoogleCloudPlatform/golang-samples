@@ -26,8 +26,7 @@ import (
 	"cloud.google.com/go/functions/metadata"
 )
 
-// PubSubMessage is the payload of a Pub/Sub event. Please refer to the docs for
-// additional information regarding Pub/Sub events.
+// PubSubMessage is the payload of a Pub/Sub event.
 type PubSubMessage struct {
 	Data []byte `json:"data"`
 }
