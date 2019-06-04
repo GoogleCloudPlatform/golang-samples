@@ -29,7 +29,7 @@ import (
 // sendDataFromBoundDevice starts a gateway client that sends data on behalf of a bound device.
 func sendDataFromBoundDevice(w io.Writer, projectID string, region string, registryID string, gatewayID string, deviceID string, privateKeyPath string, algorithm string, numMessages int, payload string) error {
 	const (
-		mqttBrokerURL      = "tls://mqtt.googleapis.com:443"
+		mqttBrokerURL      = "tls://mqtt.googleapis.com:8883"
 		protocolVersion    = 4  // corresponds to MQTT 3.1.1
 		minimumBackoffTime = 1  // initial backoff time in seconds
 		maximumBackoffTime = 32 // maximum backoff time in seconds

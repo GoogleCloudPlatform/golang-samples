@@ -258,7 +258,6 @@ func TestSendDataFromBoundDevice(t *testing.T) {
 		t.Skip("GOLANG_SAMPLES_IOT_PUB not set")
 	}
 
-	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/847")
 	projectID := testutil.SystemTest(t).ProjectID
 
 	registryID := "golang-iot-test-registry"

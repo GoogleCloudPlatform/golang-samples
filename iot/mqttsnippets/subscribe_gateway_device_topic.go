@@ -29,7 +29,7 @@ import (
 func subscribeGatewayToDeviceTopic(w io.Writer, projectID string, region string, registryID string, gatewayID string, deviceID string, privateKeyPath string, algorithm string, clientDuration int, topic string) error {
 
 	const (
-		mqttBrokerURL   = "tls://mqtt.googleapis.com:443"
+		mqttBrokerURL   = "tls://mqtt.googleapis.com:8883"
 		protocolVersion = 4 // corresponds to MQTT 3.1.1
 	)
 

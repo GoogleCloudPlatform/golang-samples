@@ -18,6 +18,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -25,7 +26,6 @@ import (
 
 	asset "cloud.google.com/go/asset/apiv1"
 	"github.com/golang/protobuf/ptypes/timestamp"
-	"golang.org/x/net/context"
 	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1"
 )
 
