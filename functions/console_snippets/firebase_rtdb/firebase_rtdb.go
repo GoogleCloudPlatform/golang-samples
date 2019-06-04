@@ -27,8 +27,6 @@ import (
 )
 
 // RTDBEvent is the payload of a RTDB event.
-// Please refer to the docs for additional information
-// regarding Firestore events.
 type RTDBEvent struct {
 	Data  interface{} `json:"data"`
 	Delta interface{} `json:"delta"`

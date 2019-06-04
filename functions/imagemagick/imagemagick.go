@@ -55,8 +55,7 @@ func init() {
 
 // [START functions_imagemagick_analyze]
 
-// GCSEvent is the payload of a GCS event. Please refer to the docs for
-// additional information regarding GCS events.
+// GCSEvent is the payload of a GCS event.
 type GCSEvent struct {
 	Bucket string `json:"bucket"`
 	Name   string `json:"name"`
