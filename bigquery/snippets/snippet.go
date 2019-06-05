@@ -831,13 +831,13 @@ func updateModelDescription(client *bigquery.Client, datasetID, modelID string) 
 	model := client.Dataset(datasetID).Model(modelID)
 	oldMeta, err := model.Metadata(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to get model metadata: %v", err)
+		return fmt.Errorf("metadata: %v", err)
 	}
 	update := bigquery.ModelMetadataToUpdate{
 		Description: "This model was modified from a Go program",
 	}
 	if _, err = model.Update(ctx, update, oldMeta.ETag); err != nil {
-		return err
+		return fmt.Errorf("update: %v", err)
 	}
 	// [END bigquery_update_model_description]
 	return nil
@@ -1375,7 +1375,7 @@ func printModelInfo(client *bigquery.Client, w io.Writer, datasetID, modelID str
 	// [START bigquery_get_model]
 	meta, err := client.Dataset(datasetID).Model(modelID).Metadata(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("metadata: %v", err)
 	}
 	fmt.Fprintf(w, "Got model '%q' with friendly name '%q'\n", modelID, meta.Name)
 	// [END bigquery_get_model]
@@ -1513,7 +1513,7 @@ func deleteModel(client *bigquery.Client, datasetID, modelID string) error {
 	// [START bigquery_delete_model]
 	model := client.Dataset(datasetID).Model(modelID)
 	if err := model.Delete(ctx); err != nil {
-		return err
+		return fmt.Errorf("delete: %v", err)
 	}
 	// [END bigquery_delete_model]
 	return nil
