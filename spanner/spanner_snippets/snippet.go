@@ -548,22 +548,20 @@ func writeWithTransaction(ctx context.Context, w io.Writer, client *spanner.Clie
 		if err != nil {
 			return err
 		}
-		if album2Budget >= 300000 {
+		const transferAmt = 200000
+		if album2Budget >= transferAmt {
 			album1Budget, err := getBudget(spanner.Key{1, 1})
 			if err != nil {
 				return err
 			}
-			const transfer = 100000
-			if album1Budget >= transfer {
-				album1Budget -= transfer
-				album2Budget += transfer
-				cols := []string{"SingerId", "AlbumId", "MarketingBudget"}
-				txn.BufferWrite([]*spanner.Mutation{
-					spanner.Update("Albums", cols, []interface{}{1, 1, album1Budget}),
-					spanner.Update("Albums", cols, []interface{}{2, 2, album2Budget}),
-				})
-				fmt.Fprintf(w, "Moved %d from Album1's MarketingBudget to Album2's.", transfer)
-			}
+			album1Budget += transferAmt
+			album2Budget -= transferAmt
+			cols := []string{"SingerId", "AlbumId", "MarketingBudget"}
+			txn.BufferWrite([]*spanner.Mutation{
+				spanner.Update("Albums", cols, []interface{}{1, 1, album1Budget}),
+				spanner.Update("Albums", cols, []interface{}{2, 2, album2Budget}),
+			})
+			fmt.Fprintf(w, "Moved %d from Album2's MarketingBudget to Album1's.", transferAmt)
 		}
 		return nil
 	})
@@ -1187,26 +1185,26 @@ func writeWithTransactionUsingDML(ctx context.Context, w io.Writer, client *span
 
 		// Transfer the marketing budget from one album to another. By keeping the actions
 		// in a single transaction, it ensures the movement is atomic.
-		const transferAmt = 100000
-		var album1budget, album2budget int64
-		var err error
-		if album1budget, err = getBudget(1, 1); err != nil {
+		const transferAmt = 200000
+		album2Budget, err := getBudget(2, 2)
+		if err != nil {
 			return err
 		}
 		// The transaction will only be committed if this condition still holds at the time
 		// of commit. Otherwise it will be aborted and the callable will be rerun by the
 		// client library.
-		if album1budget >= transferAmt {
-			if album2budget, err = getBudget(2, 2); err != nil {
+		if album2Budget >= transferAmt {
+			album1Budget, err := getBudget(1, 1)
+			if err != nil {
 				return err
 			}
-			if err = updateBudget(1, 1, album1budget-transferAmt); err != nil {
+			if err = updateBudget(1, 1, album1Budget+transferAmt); err != nil {
 				return err
 			}
-			if err = updateBudget(2, 2, album2budget+transferAmt); err != nil {
+			if err = updateBudget(2, 2, album2Budget-transferAmt); err != nil {
 				return err
 			}
-			fmt.Fprintf(w, "Moved %d from Album1's MarketingBudget to Album2's.", transferAmt)
+			fmt.Fprintf(w, "Moved %d from Album2's MarketingBudget to Album1's.", transferAmt)
 		}
 		return nil
 	})
