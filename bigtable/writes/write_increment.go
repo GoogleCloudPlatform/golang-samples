@@ -15,10 +15,11 @@ package writes
 
 // [START bigtable_writes_increment]
 import (
-	"cloud.google.com/go/bigtable"
 	"context"
 	"fmt"
 	"io"
+
+	"cloud.google.com/go/bigtable"
 )
 
 func writeIncrement(w io.Writer, projectID, instanceID string, tableName string) error {
