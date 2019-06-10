@@ -56,14 +56,18 @@ func Translate(ctx context.Context, m PubSubMessage) error {
 	}
 
 	if translateClient == nil {
+		// Pre-declare err to avoid shadowing translateClient.
 		var err error
+		// Use context.Background() so the client can be reused.
 		translateClient, err = translate.NewClient(context.Background())
 		if err != nil {
 			return fmt.Errorf("translate.NewClient: %v", err)
 		}
 	}
 	if firestoreClient == nil {
+		// Pre-declare err to avoid shadowing firestoreClient.
 		var err error
+		// Use context.Background() so the client can be reused.
 		firestoreClient, err = firestore.NewClient(context.Background(), projectID)
 		if err != nil {
 			return fmt.Errorf("firestore.NewClient: %v", err)
@@ -83,6 +87,10 @@ func Translate(ctx context.Context, m PubSubMessage) error {
 	outs, err := translateClient.Translate(ctx, []string{t.Original}, lang, nil)
 	if err != nil {
 		return fmt.Errorf("Translate: %v", err)
+	}
+
+	if len(outs) < 1 {
+		return fmt.Errorf("Translate got %d translations, need at least 1", len(outs))
 	}
 
 	t.Translated = outs[0].Text

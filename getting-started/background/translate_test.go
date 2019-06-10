@@ -17,46 +17,12 @@ package background
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"os"
 	"testing"
 
 	"cloud.google.com/go/firestore"
 )
-
-func deleteAll(projectID string) error {
-	client, err := firestore.NewClient(context.Background(), projectID)
-	if err != nil {
-		return err
-	}
-	docs, err := client.Collection("translations").Documents(context.Background()).GetAll()
-	if err != nil {
-		return err
-	}
-	for _, doc := range docs {
-		if _, err := doc.Ref.Delete(context.Background()); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func getAll(projectID string) ([]Translation, error) {
-	client, err := firestore.NewClient(context.Background(), projectID)
-	if err != nil {
-		return nil, err
-	}
-	docs, err := client.Collection("translations").Documents(context.Background()).GetAll()
-	if err != nil {
-		return nil, err
-	}
-	translations := []Translation{}
-	for _, doc := range docs {
-		t := Translation{}
-		doc.DataTo(&t)
-		translations = append(translations, t)
-	}
-	return translations, nil
-}
 
 func TestTranslate(t *testing.T) {
 	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
@@ -65,21 +31,25 @@ func TestTranslate(t *testing.T) {
 	}
 	os.Setenv("GOOGLE_CLOUD_PROJECT", projectID)
 
+	ctx := context.Background()
+
 	// Remove any old translations.
-	if err := deleteAll(projectID); err != nil {
+	if err := deleteAll(ctx, projectID); err != nil {
 		t.Fatalf("deleteAll: %v", err)
 	}
 
-	ctx := context.Background()
-	msg, _ := json.Marshal(Translation{
+	msg, err := json.Marshal(Translation{
 		Original: "Hello",
 		Language: "fr",
 	})
+	if err != nil {
+		t.Fatalf("json.Marshal: %v", err)
+	}
 	m := PubSubMessage{Data: msg}
 	if err := Translate(ctx, m); err != nil {
 		t.Fatalf("Translate: %v", err)
 	}
-	translations, err := getAll(projectID)
+	translations, err := getAll(ctx, projectID)
 	if err != nil {
 		t.Fatalf("getAll: %v", err)
 	}
@@ -95,4 +65,41 @@ func TestTranslate(t *testing.T) {
 	if translations[0] != want {
 		t.Fatalf("Translate got:\n%+v\nWant:\n%+v", translations[0], want)
 	}
+}
+
+func deleteAll(ctx context.Context, projectID string) error {
+	client, err := firestore.NewClient(ctx, projectID)
+	if err != nil {
+		return err
+	}
+	docs, err := client.Collection("translations").Documents(ctx).GetAll()
+	if err != nil {
+		return err
+	}
+	for _, doc := range docs {
+		if _, err := doc.Ref.Delete(ctx); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func getAll(ctx context.Context, projectID string) ([]Translation, error) {
+	client, err := firestore.NewClient(ctx, projectID)
+	if err != nil {
+		return nil, err
+	}
+	docs, err := client.Collection("translations").Documents(ctx).GetAll()
+	if err != nil {
+		return nil, err
+	}
+	var translations []Translation
+	for _, doc := range docs {
+		t := Translation{}
+		if err := doc.DataTo(&t); err != nil {
+			return nil, fmt.Errorf("DataTo: %v", err)
+		}
+		translations = append(translations, t)
+	}
+	return translations, nil
 }

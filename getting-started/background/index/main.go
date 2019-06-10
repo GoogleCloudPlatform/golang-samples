@@ -45,6 +45,29 @@ type app struct {
 	tmpl            *template.Template
 }
 
+func main() {
+	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
+	if projectID == "" {
+		log.Fatalf("GOOGLE_CLOUD_PROJECT must be set")
+	}
+
+	a, err := newApp(projectID, "index")
+	if err != nil {
+		log.Fatalf("newApp: %v", err)
+	}
+
+	http.HandleFunc("/", a.index)
+	http.HandleFunc("/request-translation", a.requestTranslation)
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	log.Printf("Listening on localhost:%v", port)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
+}
+
 // newApp creates a new app.
 func newApp(projectID, templateDir string) (*app, error) {
 	ctx := context.Background()
@@ -76,29 +99,6 @@ func newApp(projectID, templateDir string) (*app, error) {
 	}, nil
 }
 
-func main() {
-	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
-	if projectID == "" {
-		log.Fatalf("GOOGLE_CLOUD_PROJECT must be set")
-	}
-
-	a, err := newApp(projectID, "index")
-	if err != nil {
-		log.Fatalf("newApp: %v", err)
-	}
-
-	http.HandleFunc("/", a.index)
-	http.HandleFunc("/request-translation", a.requestTranslation)
-
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-
-	log.Printf("Listening on localhost:%v", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
-}
-
 // index lists the current translations.
 func (a *app) index(w http.ResponseWriter, r *http.Request) {
 	docs, err := a.firestoreClient.Collection("translations").Documents(r.Context()).GetAll()
@@ -107,12 +107,13 @@ func (a *app) index(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	translations := []background.Translation{}
+	var translations []background.Translation
 	for _, d := range docs {
 		t := background.Translation{}
 		if err := d.DataTo(&t); err != nil {
-			http.Error(w, "Error reading translations", http.StatusInternalServerError)
 			log.Printf("DataTo: %v", err)
+			http.Error(w, "Error reading translations", http.StatusInternalServerError)
+			return
 		}
 		translations = append(translations, t)
 	}
@@ -122,7 +123,11 @@ func (a *app) index(w http.ResponseWriter, r *http.Request) {
 
 // requestTranslation parses the request, validates it, and sends it to Pub/Sub.
 func (a *app) requestTranslation(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	if err := r.ParseForm(); err != nil {
+		log.Printf("ParseForm: %v", err)
+		http.Error(w, "Bad request", http.StatusBadRequest)
+		return
+	}
 	v := r.PostFormValue("v")
 	if v == "" {
 		log.Printf("Empty value")
@@ -141,6 +146,7 @@ func (a *app) requestTranslation(w http.ResponseWriter, r *http.Request) {
 	if !acceptableLanguages[lang] {
 		log.Printf("Unsupported language: %v", lang)
 		http.Error(w, fmt.Sprintf("Unsupported language: %v", lang), http.StatusBadRequest)
+		return
 	}
 
 	log.Printf("Translation requested: %q -> %s", v, lang)
