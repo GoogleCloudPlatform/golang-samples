@@ -41,7 +41,20 @@ func createNote(noteID, projectID string) (*grafeaspb.Note, error) {
 		Note: &grafeaspb.Note{
 			Type: &grafeaspb.Note_Vulnerability{
 				// The 'Vulnerability' field can be modified to contain information about your vulnerability.
-				Vulnerability: &grafeaspb.VulnerabilityNote{},
+				Vulnerability: &grafeaspb.VulnerabilityNote{
+					Details: []*grafeaspb.VulnerabilityNote_Detail{
+						&grafeaspb.VulnerabilityNote_Detail{
+							AffectedCpeUri: "your-uri-here",
+							AffectedPackage: "your-package-here",
+							MinAffectedVersion: &grafeaspb.Version{
+								Kind: grafeaspb.Version_MINIMUM,
+							},
+							FixedVersion: &grafeaspb.Version{
+								Kind: grafeaspb.Version_MAXIMUM,
+							},
+						},
+					},
+				},
 			},
 		},
 	}

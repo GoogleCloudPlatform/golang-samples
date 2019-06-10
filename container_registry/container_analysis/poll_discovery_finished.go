@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"time"
+	"google.golang.org/api/iterator"
 
 	containeranalysis "cloud.google.com/go/containeranalysis/apiv1"
 	grafeaspb "google.golang.org/genproto/googleapis/grafeas/v1"
@@ -67,6 +68,9 @@ func pollDiscoveryOccurrenceFinished(resourceURL, projectID string, timeout time
 			// Only one occurrence should ever be returned by ListOccurrences
 			// and the given filter.
 			result, err := it.Next()
+			if err == iterator.Done {
+				break
+			}
 			if err != nil {
 				return nil, fmt.Errorf("it.Next: %v", err)
 			}
