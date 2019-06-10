@@ -33,8 +33,13 @@ func TestTranslate(t *testing.T) {
 
 	ctx := context.Background()
 
+	client, err := firestore.NewClient(ctx, projectID)
+	if err != nil {
+		t.Fatalf("firestore.NewClient: %v", err)
+	}
+
 	// Remove any old translations.
-	if err := deleteAll(ctx, projectID); err != nil {
+	if err := deleteAll(ctx, client, projectID); err != nil {
 		t.Fatalf("deleteAll: %v", err)
 	}
 
@@ -49,7 +54,7 @@ func TestTranslate(t *testing.T) {
 	if err := Translate(ctx, m); err != nil {
 		t.Fatalf("Translate: %v", err)
 	}
-	translations, err := getAll(ctx, projectID)
+	translations, err := getAll(ctx, client, projectID)
 	if err != nil {
 		t.Fatalf("getAll: %v", err)
 	}
@@ -67,11 +72,7 @@ func TestTranslate(t *testing.T) {
 	}
 }
 
-func deleteAll(ctx context.Context, projectID string) error {
-	client, err := firestore.NewClient(ctx, projectID)
-	if err != nil {
-		return err
-	}
+func deleteAll(ctx context.Context, client *firestore.Client, projectID string) error {
 	docs, err := client.Collection("translations").Documents(ctx).GetAll()
 	if err != nil {
 		return err
@@ -84,11 +85,7 @@ func deleteAll(ctx context.Context, projectID string) error {
 	return nil
 }
 
-func getAll(ctx context.Context, projectID string) ([]Translation, error) {
-	client, err := firestore.NewClient(ctx, projectID)
-	if err != nil {
-		return nil, err
-	}
+func getAll(ctx context.Context, client *firestore.Client, projectID string) ([]Translation, error) {
 	docs, err := client.Collection("translations").Documents(ctx).GetAll()
 	if err != nil {
 		return nil, err
