@@ -11,6 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+// Package writes contains snippets related to writing to Cloud Bigtable.
 package writes
 
 // [START bigtable_writes_simple]
@@ -31,7 +33,7 @@ func writeSimple(w io.Writer, projectID, instanceID string, tableName string) er
 	ctx := context.Background()
 	client, err := bigtable.NewClient(ctx, projectID, instanceID)
 	if err != nil {
-		return fmt.Errorf("bigtable.NewAdminClient: %v", err)
+		return fmt.Errorf("bigtable.NewClient: %v", err)
 	}
 	tbl := client.Open(tableName)
 	columnFamilyName := "stats_summary"

@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package writes
 
 // [START bigtable_writes_conditional]
@@ -50,7 +51,7 @@ func writeConditionally(w io.Writer, projectID, instanceID string, tableName str
 		return fmt.Errorf("Apply: %v", err)
 	}
 
-	fmt.Fprint(w, "Successfully updated row's os_name\n")
+	fmt.Fprintln(w, "Successfully updated row's os_name")
 	return nil
 }
 

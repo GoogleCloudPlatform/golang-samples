@@ -45,6 +45,7 @@ func TestWrites(t *testing.T) {
 
 	columnFamilyName := "stats_summary"
 	if err := adminClient.CreateColumnFamily(ctx, tableName, columnFamilyName); err != nil {
+		adminClient.DeleteTable(ctx, tableName)
 		t.Fatalf("CreateColumnFamily(%s): %v", columnFamilyName, err)
 	}
 
@@ -53,8 +54,7 @@ func TestWrites(t *testing.T) {
 		t.Errorf("TestWriteSimple: %v", err)
 	}
 
-	got := buf.String()
-	if want := "Successfully wrote row"; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Successfully wrote row"; !strings.Contains(got, want) {
 		t.Errorf("got %q, want %q", got, want)
 	}
 
@@ -63,8 +63,7 @@ func TestWrites(t *testing.T) {
 		t.Errorf("TestWriteConditionally: %v", err)
 	}
 
-	got = buf.String()
-	if want := "Successfully updated row's os_name"; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Successfully updated row's os_name"; !strings.Contains(got, want) {
 		t.Errorf("got %q, want %q", got, want)
 	}
 
@@ -73,8 +72,7 @@ func TestWrites(t *testing.T) {
 		t.Errorf("TestWriteIncrement: %v", err)
 	}
 
-	got = buf.String()
-	if want := "Successfully updated row"; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Successfully updated row"; !strings.Contains(got, want) {
 		t.Errorf("got %q, want %q", got, want)
 	}
 
@@ -83,8 +81,7 @@ func TestWrites(t *testing.T) {
 		t.Errorf("TestWriteBatch: %v", err)
 	}
 
-	got = buf.String()
-	if want := "Successfully wrote 2 rows"; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Successfully wrote 2 rows"; !strings.Contains(got, want) {
 		t.Errorf("got %q, want %q", got, want)
 	}
 
