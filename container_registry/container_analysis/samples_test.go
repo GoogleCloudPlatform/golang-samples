@@ -25,7 +25,7 @@ import (
 
 	containeranalysis "cloud.google.com/go/containeranalysis/apiv1"
 	pubsub "cloud.google.com/go/pubsub"
-	//"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
 	grafeaspb "google.golang.org/genproto/googleapis/grafeas/v1"
 )
@@ -44,7 +44,7 @@ type TestVariables struct {
 
 // Run before each test. Creates a set of useful variables
 func setup(t *testing.T) TestVariables {
-	//tc := testutil.SystemTest(t)
+	tc := testutil.SystemTest(t)
 	// Create client and context
 	ctx := context.Background()
 	client, _ := containeranalysis.NewClient(ctx)
@@ -58,7 +58,7 @@ func setup(t *testing.T) TestVariables {
 	tryLimit := 20
 
 	// Create variables used by tests
-	projectID := "sanche-testing-project" //tc.ProjectID
+	projectID := tc.ProjectID
 	noteID := "note-" + uuidStr
 	subID := "occurrences-" + uuidStr
 	imageURL := "https://gcr.io/" + uuidStr
@@ -171,15 +171,15 @@ func TestOccurrencesForImage(t *testing.T) {
 	} else if created == nil {
 		t.Error("createOccurrence returns nil Occurrence object")
 	}
-	//testutil.Retry(t, v.tryLimit, time.Second, func(r *testutil.R) {
+	testutil.Retry(t, v.tryLimit, time.Second, func(r *testutil.R) {
 		newCount, err := getOccurrencesForImage(new(bytes.Buffer), v.imageURL, v.projectID)
 		if err != nil {
-			t.Errorf("getOccurrencesForImage(%s): %v", v.imageURL, err)
+			r.Errorf("getOccurrencesForImage(%s): %v", v.imageURL, err)
 		}
 		if newCount != 1 {
-			t.Errorf("unexpected updated number of occurrences: %d; want: %d", newCount, 1)
+			r.Errorf("unexpected updated number of occurrences: %d; want: %d", newCount, 1)
 		}
-	//})
+	})
 
 	// Clean up
 	deleteOccurrence(path.Base(created.Name), v.projectID)
@@ -203,15 +203,15 @@ func TestOccurrencesForNote(t *testing.T) {
 		t.Error("createOccurrence returns nil Occurrence object")
 	}
 
-	//testutil.Retry(t, v.tryLimit, time.Second, func(r *testutil.R) {
+	testutil.Retry(t, v.tryLimit, time.Second, func(r *testutil.R) {
 		newCount, err := getOccurrencesForNote(new(bytes.Buffer), v.noteID, v.projectID)
 		if err != nil {
-			t.Errorf("getOccurrencesForNote(%s): %v", v.noteID, err)
+			r.Errorf("getOccurrencesForNote(%s): %v", v.noteID, err)
 		}
 		if newCount != 1 {
-			t.Errorf("unexpected updated number of occurrences: %d; want: %d", newCount, 1)
+			r.Errorf("unexpected updated number of occurrences: %d; want: %d", newCount, 1)
 		}
-	//})
+	})
 
 	// Clean up
 	deleteOccurrence(path.Base(created.Name), v.projectID)
@@ -223,7 +223,7 @@ func TestPubSub(t *testing.T) {
 	// Create a new subscription if it doesn't exist.
 	createOccurrenceSubscription(v.subID, v.projectID)
 
-	//testutil.Retry(t, v.tryLimit, time.Second, func(r *testutil.R) {
+	testutil.Retry(t, v.tryLimit, time.Second, func(r *testutil.R) {
 		// Use a channel and a goroutine to count incoming messages.
 		c := make(chan int)
 		go func() {
@@ -246,9 +246,9 @@ func TestPubSub(t *testing.T) {
 		}
 		result := <-c
 		if result != totalCreated {
-			t.Errorf("invalid occurrence count: %d; want: %d", result, totalCreated)
+			r.Errorf("invalid occurrence count: %d; want: %d", result, totalCreated)
 		}
-	//})
+	})
 
 	// Clean up
 	client, _ := pubsub.NewClient(v.ctx, v.projectID)
@@ -307,19 +307,19 @@ func TestPollDiscoveryOccurrenceFinished(t *testing.T) {
 	}
 
 	// poll again
-	//testutil.Retry(t, v.tryLimit, time.Second, func(r *testutil.R) {
+	testutil.Retry(t, v.tryLimit, time.Second, func(r *testutil.R) {
 		discOcc, err = pollDiscoveryOccurrenceFinished(v.imageURL, v.projectID, timeout)
 		if err != nil {
-			t.Errorf("error getting discovery occurrence: %v", err)
+			r.Errorf("error getting discovery occurrence: %v", err)
 		}
 		if discOcc == nil {
-			t.Errorf("discovery occurrence is nil")
+			r.Errorf("discovery occurrence is nil")
 		}
 		analysisStatus := discOcc.GetDiscovery().GetAnalysisStatus()
 		if analysisStatus != grafeaspb.DiscoveryOccurrence_FINISHED_SUCCESS {
-			t.Errorf("discovery occurrence reported unexpected state: %s, want: %s", analysisStatus, grafeaspb.DiscoveryOccurrence_FINISHED_SUCCESS)
+			r.Errorf("discovery occurrence reported unexpected state: %s, want: %s", analysisStatus, grafeaspb.DiscoveryOccurrence_FINISHED_SUCCESS)
 		}
-	//})
+	})
 
 	// Clean up
 	deleteOccurrence(path.Base(created.Name), v.projectID)
@@ -345,15 +345,15 @@ func TestFindVulnerabilitiesForImage(t *testing.T) {
 		t.Error("createOccurrence returns nil Occurrence object")
 	}
 
-	//testutil.Retry(t, v.tryLimit, time.Second, func(r *testutil.R) {
+	testutil.Retry(t, v.tryLimit, time.Second, func(r *testutil.R) {
 		occList, err = findVulnerabilityOccurrencesForImage(v.imageURL, v.projectID)
 		if err != nil {
-			t.Errorf("findVulnerabilityOccurrencesForImage(%v): %v", v.imageURL, err)
+			r.Errorf("findVulnerabilityOccurrencesForImage(%v): %v", v.imageURL, err)
 		}
 		if len(occList) != 1 {
-			t.Errorf("unexpected updated number of occurrences: %d; want: %d", len(occList), 1)
+			r.Errorf("unexpected updated number of occurrences: %d; want: %d", len(occList), 1)
 		}
-	//})
+	})
 
 	// Clean up
 	deleteOccurrence(path.Base(created.Name), v.projectID)
@@ -437,15 +437,15 @@ func TestFindHighVulnerabilities(t *testing.T) {
 		t.Error("createOccurrence returns nil Occurrence object")
 	}
 	// check after creation
-	//testutil.Retry(t, v.tryLimit, time.Second, func(r *testutil.R) {
+	testutil.Retry(t, v.tryLimit, time.Second, func(r *testutil.R) {
 		occList, err = findHighSeverityVulnerabilitiesForImage(v.imageURL, v.projectID)
 		if err != nil {
-			t.Errorf("findHighSeverityVulnerabilitiesForImage(%s): %v", v.imageURL, err)
+			r.Errorf("findHighSeverityVulnerabilitiesForImage(%s): %v", v.imageURL, err)
 		}
 		if len(occList) != 1 {
-			t.Errorf("unexpected updated number of vulnerabilities: %d; want: %d", len(occList), 1)
+			r.Errorf("unexpected updated number of vulnerabilities: %d; want: %d", len(occList), 1)
 		}
-	//})
+	})
 
 	// Clean up
 	deleteOccurrence(path.Base(created.Name), v.projectID)
