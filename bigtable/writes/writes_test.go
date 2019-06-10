@@ -85,5 +85,5 @@ func TestWrites(t *testing.T) {
 		t.Errorf("got %q, want %q", got, want)
 	}
 
-	adminClient.DeleteTable(ctx, tableName)
+	//adminClient.DeleteTable(ctx, tableName)
 }

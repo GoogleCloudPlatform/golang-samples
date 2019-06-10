@@ -41,7 +41,8 @@ func writeSimple(w io.Writer, projectID, instanceID string, tableName string) er
 
 	mut := bigtable.NewMutation()
 	b := make([]byte, 8)
-	binary.BigEndian.PutUint64(b, uint64(1))
+	binary.PutVarint(b, int64(1))
+
 	mut.Set(columnFamilyName, "connected_cell", timestamp, b)
 	mut.Set(columnFamilyName, "connected_wifi", timestamp, b)
 	mut.Set(columnFamilyName, "os_build", timestamp, []byte("PQ2A.190405.003"))

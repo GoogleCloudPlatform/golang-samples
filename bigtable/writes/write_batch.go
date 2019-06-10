@@ -38,15 +38,20 @@ func writeBatch(w io.Writer, projectID, instanceID string, tableName string) err
 	columnFamilyName := "stats_summary"
 	timestamp := bigtable.Now()
 
-	muts := make([]*bigtable.Mutation, 2)
-	b := make([]byte, 8)
-	binary.BigEndian.PutUint64(b, uint64(1))
-	muts[0] = bigtable.NewMutation()
-	muts[0].Set(columnFamilyName, "connected_wifi", timestamp, b)
-	muts[0].Set(columnFamilyName, "os_build", timestamp, []byte("12155.0.0-rc1"))
-	muts[1] = bigtable.NewMutation()
-	muts[1].Set(columnFamilyName, "connected_wifi", timestamp, b)
-	muts[1].Set(columnFamilyName, "os_build", timestamp, []byte("12145.0.0-rc6"))
+	var muts []*bigtable.Mutation
+
+	b := make([]byte, binary.MaxVarintLen64)
+	binary.PutVarint(b, int64(1))
+
+	mut := bigtable.NewMutation()
+	mut.Set(columnFamilyName, "connected_wifi", timestamp, b)
+	mut.Set(columnFamilyName, "os_build", timestamp, []byte("12155.0.0-rc1"))
+	muts = append(muts, mut)
+
+	mut = bigtable.NewMutation()
+	mut.Set(columnFamilyName, "connected_wifi", timestamp, b)
+	mut.Set(columnFamilyName, "os_build", timestamp, []byte("12145.0.0-rc6"))
+	muts = append(muts, mut)
 
 	rowKeys := []string{"tablet#a0b81f74#20190501", "tablet#a0b81f74#20190502"}
 	if _, err := tbl.ApplyBulk(ctx, rowKeys, muts); err != nil {
