@@ -103,6 +103,7 @@ func newApp(projectID, templateDir string) (*app, error) {
 func (a *app) index(w http.ResponseWriter, r *http.Request) {
 	docs, err := a.firestoreClient.Collection("translations").Documents(r.Context()).GetAll()
 	if err != nil {
+		log.Printf("GetAll: %v", err)
 		http.Error(w, fmt.Sprintf("Error getting translations: %v", err), http.StatusInternalServerError)
 		return
 	}
@@ -118,7 +119,11 @@ func (a *app) index(w http.ResponseWriter, r *http.Request) {
 		translations = append(translations, t)
 	}
 
-	a.tmpl.Execute(w, translations)
+	if err := a.tmpl.Execute(w, translations); err != nil {
+		log.Printf("tmpl.Execute: %v", err)
+		http.Error(w, "Error writing response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // requestTranslation parses the request, validates it, and sends it to Pub/Sub.
