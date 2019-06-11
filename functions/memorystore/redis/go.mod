@@ -1,4 +1,4 @@
-module visitcount
+module github.com/GoogleCloudPlatform/golang-samples/functions/memorystore/redis
 
 go 1.11
 
