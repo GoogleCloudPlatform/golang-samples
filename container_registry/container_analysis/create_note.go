@@ -20,15 +20,14 @@ import (
 	"context"
 	"fmt"
 
-	containeranalysis "cloud.google.com/go/containeranalysis/apiv1beta1"
-	grafeaspb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/grafeas"
-	"google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/vulnerability"
+	containeranalysis "cloud.google.com/go/containeranalysis/apiv1"
+	grafeaspb "google.golang.org/genproto/googleapis/grafeas/v1"
 )
 
 // createNote creates and returns a new vulnerability Note.
 func createNote(noteID, projectID string) (*grafeaspb.Note, error) {
 	ctx := context.Background()
-	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
+	client, err := containeranalysis.NewClient(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("NewGrafeasV1Beta1Client: %v", err)
 	}
@@ -42,12 +41,25 @@ func createNote(noteID, projectID string) (*grafeaspb.Note, error) {
 		Note: &grafeaspb.Note{
 			Type: &grafeaspb.Note_Vulnerability{
 				// The 'Vulnerability' field can be modified to contain information about your vulnerability.
-				Vulnerability: &vulnerability.Vulnerability{},
+				Vulnerability: &grafeaspb.VulnerabilityNote{
+					Details: []*grafeaspb.VulnerabilityNote_Detail{
+						{
+							AffectedCpeUri:  "your-uri-here",
+							AffectedPackage: "your-package-here",
+							MinAffectedVersion: &grafeaspb.Version{
+								Kind: grafeaspb.Version_MINIMUM,
+							},
+							FixedVersion: &grafeaspb.Version{
+								Kind: grafeaspb.Version_MAXIMUM,
+							},
+						},
+					},
+				},
 			},
 		},
 	}
 
-	return client.CreateNote(ctx, req)
+	return client.GetGrafeasClient().CreateNote(ctx, req)
 }
 
 // [END containeranalysis_create_note]

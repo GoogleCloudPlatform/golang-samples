@@ -20,15 +20,15 @@ import (
 	"context"
 	"fmt"
 
-	containeranalysis "cloud.google.com/go/containeranalysis/apiv1beta1"
-	grafeaspb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/grafeas"
+	containeranalysis "cloud.google.com/go/containeranalysis/apiv1"
+	grafeaspb "google.golang.org/genproto/googleapis/grafeas/v1"
 )
 
 // getNote retrieves and prints a specified Note from the server.
 func getNote(noteID, projectID string) (*grafeaspb.Note, error) {
 	// noteID := fmt.Sprintf("my-note")
 	ctx := context.Background()
-	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
+	client, err := containeranalysis.NewClient(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("NewGrafeasV1Beta1Client: %v", err)
 	}
@@ -37,7 +37,7 @@ func getNote(noteID, projectID string) (*grafeaspb.Note, error) {
 	req := &grafeaspb.GetNoteRequest{
 		Name: fmt.Sprintf("projects/%s/notes/%s", projectID, noteID),
 	}
-	note, err := client.GetNote(ctx, req)
+	note, err := client.GetGrafeasClient().GetNote(ctx, req)
 	if err != nil {
 		return nil, fmt.Errorf("client.GetNote: %v", err)
 	}
