@@ -93,7 +93,7 @@ func Translate(ctx context.Context, m PubSubMessage) error {
 	// array to a byte slice.
 	docName := base64.StdEncoding.EncodeToString(sum[:])
 	// The document name cannot contain "/".
-	docName = strings.ReplaceAll(docName, "/", "-")
+	docName = strings.Replace(docName, "/", "-", -1)
 	ref := firestoreClient.Collection("translations").Doc(docName)
 
 	err := firestoreClient.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
