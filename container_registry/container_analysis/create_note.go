@@ -32,7 +32,7 @@ func createNote(noteID, projectID string) (*grafeaspb.Note, error) {
 		return nil, fmt.Errorf("NewGrafeasV1Beta1Client: %v", err)
 	}
 	defer client.Close()
-	
+
 	projectName := fmt.Sprintf("projects/%s", projectID)
 
 	req := &grafeaspb.CreateNoteRequest{
@@ -43,8 +43,8 @@ func createNote(noteID, projectID string) (*grafeaspb.Note, error) {
 				// The 'Vulnerability' field can be modified to contain information about your vulnerability.
 				Vulnerability: &grafeaspb.VulnerabilityNote{
 					Details: []*grafeaspb.VulnerabilityNote_Detail{
-						&grafeaspb.VulnerabilityNote_Detail{
-							AffectedCpeUri: "your-uri-here",
+						{
+							AffectedCpeUri:  "your-uri-here",
 							AffectedPackage: "your-package-here",
 							MinAffectedVersion: &grafeaspb.Version{
 								Kind: grafeaspb.Version_MINIMUM,

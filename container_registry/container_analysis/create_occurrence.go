@@ -45,8 +45,8 @@ func createOccurrence(resourceURL, noteID, occProjectID, noteProjectID string) (
 			Details: &grafeaspb.Occurrence_Vulnerability{
 				Vulnerability: &grafeaspb.VulnerabilityOccurrence{
 					PackageIssue: []*grafeaspb.VulnerabilityOccurrence_PackageIssue{
-						&grafeaspb.VulnerabilityOccurrence_PackageIssue{
-							AffectedCpeUri: "your-uri-here",
+						{
+							AffectedCpeUri:  "your-uri-here",
 							AffectedPackage: "your-package-here",
 							MinAffectedVersion: &grafeaspb.Version{
 								Kind: grafeaspb.Version_MINIMUM,

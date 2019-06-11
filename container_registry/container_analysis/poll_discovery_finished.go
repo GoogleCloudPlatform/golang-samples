@@ -20,9 +20,9 @@ import (
 	"context"
 	"fmt"
 	"time"
-	"google.golang.org/api/iterator"
 
 	containeranalysis "cloud.google.com/go/containeranalysis/apiv1"
+	"google.golang.org/api/iterator"
 	grafeaspb "google.golang.org/genproto/googleapis/grafeas/v1"
 )
 

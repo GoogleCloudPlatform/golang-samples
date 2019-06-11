@@ -282,10 +282,10 @@ func TestPollDiscoveryOccurrenceFinished(t *testing.T) {
 	occReq := &grafeaspb.CreateOccurrenceRequest{
 		Parent: fmt.Sprintf("projects/%s", v.projectID),
 		Occurrence: &grafeaspb.Occurrence{
-			NoteName: fmt.Sprintf("projects/%s/notes/%s", v.projectID, noteID),
+			NoteName:    fmt.Sprintf("projects/%s/notes/%s", v.projectID, noteID),
 			ResourceUri: v.imageURL,
 			Details: &grafeaspb.Occurrence_Discovery{
-				Discovery: &grafeaspb.DiscoveryOccurrence {
+				Discovery: &grafeaspb.DiscoveryOccurrence{
 					AnalysisStatus: grafeaspb.DiscoveryOccurrence_FINISHED_SUCCESS,
 				},
 			},
@@ -382,8 +382,8 @@ func TestFindHighVulnerabilities(t *testing.T) {
 				Vulnerability: &grafeaspb.VulnerabilityNote{
 					Severity: grafeaspb.Severity_CRITICAL,
 					Details: []*grafeaspb.VulnerabilityNote_Detail{
-						&grafeaspb.VulnerabilityNote_Detail{
-							AffectedCpeUri: "your-uri-here",
+						{
+							AffectedCpeUri:  "your-uri-here",
 							AffectedPackage: "your-package-here",
 							MinAffectedVersion: &grafeaspb.Version{
 								Kind: grafeaspb.Version_MINIMUM,
@@ -400,13 +400,13 @@ func TestFindHighVulnerabilities(t *testing.T) {
 	occReq := &grafeaspb.CreateOccurrenceRequest{
 		Parent: fmt.Sprintf("projects/%s", v.projectID),
 		Occurrence: &grafeaspb.Occurrence{
-			NoteName: fmt.Sprintf("projects/%s/notes/%s", v.projectID, noteID),
+			NoteName:    fmt.Sprintf("projects/%s/notes/%s", v.projectID, noteID),
 			ResourceUri: v.imageURL,
 			Details: &grafeaspb.Occurrence_Vulnerability{
 				Vulnerability: &grafeaspb.VulnerabilityOccurrence{
 					PackageIssue: []*grafeaspb.VulnerabilityOccurrence_PackageIssue{
-						&grafeaspb.VulnerabilityOccurrence_PackageIssue{
-							AffectedCpeUri: "your-uri-here",
+						{
+							AffectedCpeUri:  "your-uri-here",
 							AffectedPackage: "your-package-here",
 							MinAffectedVersion: &grafeaspb.Version{
 								Kind: grafeaspb.Version_MINIMUM,
@@ -429,7 +429,7 @@ func TestFindHighVulnerabilities(t *testing.T) {
 	_, err = client.GetGrafeasClient().CreateNote(ctx, noteReq)
 	if err != nil {
 		t.Errorf("createNote(%s): %v", v.noteID, err)
-	} 
+	}
 	created, err := client.GetGrafeasClient().CreateOccurrence(ctx, occReq)
 	if err != nil {
 		t.Errorf("createOccurrence(%s, %s): %v", v.imageURL, v.noteID, err)
