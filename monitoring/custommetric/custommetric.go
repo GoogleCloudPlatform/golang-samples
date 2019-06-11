@@ -93,7 +93,7 @@ func readTimeSeriesValue(projectID, metricType string) error {
 	if err != nil {
 		return err
 	}
-	startTime := time.Now().UTC().Add(time.Minute * -5).Unix()
+	startTime := time.Now().UTC().Add(time.Minute * -20).Unix()
 	endTime := time.Now().UTC().Unix()
 
 	req := &monitoringpb.ListTimeSeriesRequest{
