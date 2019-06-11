@@ -86,7 +86,7 @@ func writeTimeSeriesValue(projectID, metricType string) error {
 
 // [START monitoring_read_timeseries_simple]
 
-// readTimeSeriesValue reads the TimeSeries for the value specified by metric type in a time window from the last 5 minutes.
+// readTimeSeriesValue reads the TimeSeries for the value specified by metric type in a time window from the last 20 minutes.
 func readTimeSeriesValue(projectID, metricType string) error {
 	ctx := context.Background()
 	c, err := monitoring.NewMetricClient(ctx)
