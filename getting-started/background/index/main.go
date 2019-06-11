@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// [START getting_started_background_app_main]
+
 // Command index is an HTTP app that displays all previous translations
 // (stored in Firestore) and has a form to request new translations. On form
 // submission, the request is sent to Pub/Sub to be processed in the background.
@@ -99,6 +101,10 @@ func newApp(projectID, templateDir string) (*app, error) {
 	}, nil
 }
 
+// [END getting_started_background_app_main]
+
+// [START getting_started_background_app_list]
+
 // index lists the current translations.
 func (a *app) index(w http.ResponseWriter, r *http.Request) {
 	docs, err := a.firestoreClient.Collection("translations").Documents(r.Context()).GetAll()
@@ -125,6 +131,10 @@ func (a *app) index(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+// [END getting_started_background_app_list]
+
+// [START getting_started_background_app_request]
 
 // requestTranslation parses the request, validates it, and sends it to Pub/Sub.
 func (a *app) requestTranslation(w http.ResponseWriter, r *http.Request) {
@@ -174,3 +184,5 @@ func (a *app) requestTranslation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+// [END getting_started_background_app_request]

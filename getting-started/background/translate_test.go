@@ -70,6 +70,18 @@ func TestTranslate(t *testing.T) {
 	if translations[0] != want {
 		t.Fatalf("Translate got:\n%+v\nWant:\n%+v", translations[0], want)
 	}
+
+	// Ensure duplicate requests are only processed once.
+	if err := Translate(ctx, m); err != nil {
+		t.Fatalf("Translate: %v", err)
+	}
+	translations, err = getAll(ctx, client, projectID)
+	if err != nil {
+		t.Fatalf("getAll: %v", err)
+	}
+	if len(translations) != 1 {
+		t.Fatalf("Translate got %d translations, want 1", len(translations))
+	}
 }
 
 func deleteAll(ctx context.Context, client *firestore.Client, projectID string) error {

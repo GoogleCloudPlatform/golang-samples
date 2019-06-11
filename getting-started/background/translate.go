@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// [START getting_started_background_translate]
+
 // Package background contains a Cloud Function to translate text.
 // The function listens to Pub/Sub, does the translations, and stores the
 // result in Firestore.
@@ -19,13 +21,18 @@ package background
 
 import (
 	"context"
+	"crypto/sha512"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	"cloud.google.com/go/firestore"
 	"cloud.google.com/go/translate"
 	"golang.org/x/text/language"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // A Translation contains the original and translated text.
@@ -48,7 +55,7 @@ type PubSubMessage struct {
 	Data []byte `json:"data"`
 }
 
-// Translate translates the given message to French.
+// Translate translates the given message and stores the result in Firestore.
 func Translate(ctx context.Context, m PubSubMessage) error {
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	if projectID == "" {
@@ -79,26 +86,53 @@ func Translate(ctx context.Context, m PubSubMessage) error {
 		return fmt.Errorf("json.Unmarshal: %v", err)
 	}
 
-	lang, err := language.Parse(t.Language)
+	// Use a unique document name to prevent duplicate translations.
+	key := fmt.Sprintf("%s/%s", t.Language, t.Original)
+	sum := sha512.Sum512([]byte(key))
+	// Base64 encode the sum to make a nice string. The [:] converts the byte
+	// array to a byte slice.
+	docName := base64.StdEncoding.EncodeToString(sum[:])
+	// The document name cannot contain "/".
+	docName = strings.ReplaceAll(docName, "/", "-")
+	ref := firestoreClient.Collection("translations").Doc(docName)
+
+	err := firestoreClient.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
+		doc, err := tx.Get(ref)
+		if err != nil && status.Code(err) != codes.NotFound {
+			return fmt.Errorf("Get: %v", err)
+		}
+		// Do nothing if the document already exists.
+		if doc.Exists() {
+			return nil
+		}
+
+		lang, err := language.Parse(t.Language)
+		if err != nil {
+			return fmt.Errorf("language.Parse: %v", err)
+		}
+
+		outs, err := translateClient.Translate(ctx, []string{t.Original}, lang, nil)
+		if err != nil {
+			return fmt.Errorf("Translate: %v", err)
+		}
+
+		if len(outs) < 1 {
+			return fmt.Errorf("Translate got %d translations, need at least 1", len(outs))
+		}
+
+		t.Translated = outs[0].Text
+		t.OriginalLanguage = outs[0].Source.String()
+
+		if err := tx.Set(ref, t); err != nil {
+			return fmt.Errorf("Set: %v", err)
+		}
+		return nil
+	})
+
 	if err != nil {
-		return fmt.Errorf("language.Parse: %v", err)
+		return fmt.Errorf("RunTransaction: %v", err)
 	}
-
-	outs, err := translateClient.Translate(ctx, []string{t.Original}, lang, nil)
-	if err != nil {
-		return fmt.Errorf("Translate: %v", err)
-	}
-
-	if len(outs) < 1 {
-		return fmt.Errorf("Translate got %d translations, need at least 1", len(outs))
-	}
-
-	t.Translated = outs[0].Text
-	t.OriginalLanguage = outs[0].Source.String()
-
-	if _, err := firestoreClient.Collection("translations").NewDoc().Create(ctx, t); err != nil {
-		return fmt.Errorf("Create: %v", err)
-	}
-
 	return nil
 }
+
+// [END getting_started_background_translate]
