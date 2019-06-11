@@ -20,9 +20,8 @@ import (
 	"context"
 	"fmt"
 
-	containeranalysis "cloud.google.com/go/containeranalysis/apiv1beta1"
-	grafeaspb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/grafeas"
-	"google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/vulnerability"
+	containeranalysis "cloud.google.com/go/containeranalysis/apiv1"
+	grafeaspb "google.golang.org/genproto/googleapis/grafeas/v1"
 )
 
 // createsOccurrence creates and returns a new Occurrence of a previously created vulnerability Note.
@@ -30,7 +29,7 @@ func createOccurrence(resourceURL, noteID, occProjectID, noteProjectID string) (
 	// resourceURL := fmt.Sprintf("https://gcr.io/my-project/my-image")
 	// noteID := fmt.Sprintf("my-note")
 	ctx := context.Background()
-	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
+	client, err := containeranalysis.NewClient(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("NewGrafeasV1Beta1Client: %v", err)
 	}
@@ -41,16 +40,27 @@ func createOccurrence(resourceURL, noteID, occProjectID, noteProjectID string) (
 		Occurrence: &grafeaspb.Occurrence{
 			NoteName: fmt.Sprintf("projects/%s/notes/%s", noteProjectID, noteID),
 			// Attach the occurrence to the associated resource uri.
-			Resource: &grafeaspb.Resource{
-				Uri: resourceURL,
-			},
+			ResourceUri: resourceURL,
 			// Details about the vulnerability instance can be added here.
 			Details: &grafeaspb.Occurrence_Vulnerability{
-				Vulnerability: &vulnerability.Details{},
+				Vulnerability: &grafeaspb.VulnerabilityOccurrence{
+					PackageIssue: []*grafeaspb.VulnerabilityOccurrence_PackageIssue{
+						{
+							AffectedCpeUri:  "your-uri-here",
+							AffectedPackage: "your-package-here",
+							MinAffectedVersion: &grafeaspb.Version{
+								Kind: grafeaspb.Version_MINIMUM,
+							},
+							FixedVersion: &grafeaspb.Version{
+								Kind: grafeaspb.Version_MAXIMUM,
+							},
+						},
+					},
+				},
 			},
 		},
 	}
-	return client.CreateOccurrence(ctx, req)
+	return client.GetGrafeasClient().CreateOccurrence(ctx, req)
 }
 
 // [END containeranalysis_create_occurrence]

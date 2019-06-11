@@ -20,15 +20,15 @@ import (
 	"context"
 	"fmt"
 
-	containeranalysis "cloud.google.com/go/containeranalysis/apiv1beta1"
-	grafeaspb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/grafeas"
+	containeranalysis "cloud.google.com/go/containeranalysis/apiv1"
+	grafeaspb "google.golang.org/genproto/googleapis/grafeas/v1"
 )
 
 // deleteNote removes an existing Note from the server.
 func deleteNote(noteID, projectID string) error {
 	// noteID := fmt.Sprintf("my-note")
 	ctx := context.Background()
-	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
+	client, err := containeranalysis.NewClient(ctx)
 	if err != nil {
 		return fmt.Errorf("NewGrafeasV1Beta1Client: %v", err)
 	}
@@ -37,7 +37,7 @@ func deleteNote(noteID, projectID string) error {
 	req := &grafeaspb.DeleteNoteRequest{
 		Name: fmt.Sprintf("projects/%s/notes/%s", projectID, noteID),
 	}
-	return client.DeleteNote(ctx, req)
+	return client.GetGrafeasClient().DeleteNote(ctx, req)
 }
 
 // [END containeranalysis_delete_note]

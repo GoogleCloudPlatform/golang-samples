@@ -23,18 +23,16 @@ import (
 	"testing"
 	"time"
 
-	containeranalysis "cloud.google.com/go/containeranalysis/apiv1beta1"
+	containeranalysis "cloud.google.com/go/containeranalysis/apiv1"
 	pubsub "cloud.google.com/go/pubsub"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
-	discovery "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/discovery"
-	grafeaspb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/grafeas"
-	vulnerability "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/vulnerability"
+	grafeaspb "google.golang.org/genproto/googleapis/grafeas/v1"
 )
 
 type TestVariables struct {
 	ctx       context.Context
-	client    *containeranalysis.GrafeasV1Beta1Client
+	client    *containeranalysis.Client
 	noteID    string
 	subID     string
 	imageURL  string
@@ -49,7 +47,7 @@ func setup(t *testing.T) TestVariables {
 	tc := testutil.SystemTest(t)
 	// Create client and context
 	ctx := context.Background()
-	client, _ := containeranalysis.NewGrafeasV1Beta1Client(ctx)
+	client, _ := containeranalysis.NewClient(ctx)
 	// Get unique id
 	uuid, err := uuid.NewRandom()
 	if err != nil {
@@ -275,32 +273,35 @@ func TestPollDiscoveryOccurrenceFinished(t *testing.T) {
 		NoteId: noteID,
 		Note: &grafeaspb.Note{
 			Type: &grafeaspb.Note_Discovery{
-				Discovery: &discovery.Discovery{},
+				Discovery: &grafeaspb.DiscoveryNote{
+					AnalysisKind: grafeaspb.NoteKind_DISCOVERY,
+				},
 			},
 		},
 	}
 	occReq := &grafeaspb.CreateOccurrenceRequest{
 		Parent: fmt.Sprintf("projects/%s", v.projectID),
 		Occurrence: &grafeaspb.Occurrence{
-			NoteName: fmt.Sprintf("projects/%s/notes/%s", v.projectID, noteID),
-			Resource: &grafeaspb.Resource{Uri: v.imageURL},
-			Details: &grafeaspb.Occurrence_Discovered{
-				Discovered: &discovery.Details{
-					Discovered: &discovery.Discovered{
-						AnalysisStatus: discovery.Discovered_FINISHED_SUCCESS,
-					},
+			NoteName:    fmt.Sprintf("projects/%s/notes/%s", v.projectID, noteID),
+			ResourceUri: v.imageURL,
+			Details: &grafeaspb.Occurrence_Discovery{
+				Discovery: &grafeaspb.DiscoveryOccurrence{
+					AnalysisStatus: grafeaspb.DiscoveryOccurrence_FINISHED_SUCCESS,
 				},
 			},
 		},
 	}
 	ctx := context.Background()
-	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
+	client, err := containeranalysis.NewClient(ctx)
 	if err != nil {
 		t.Errorf("containeranalysis.NewGrafeasV1Beta1Client: %v", err)
 	}
 	defer client.Close()
-	_, err = client.CreateNote(ctx, noteReq)
-	created, err := client.CreateOccurrence(ctx, occReq)
+	_, err = client.GetGrafeasClient().CreateNote(ctx, noteReq)
+	if err != nil {
+		t.Errorf("createNote(%s): %v", v.noteID, err)
+	}
+	created, err := client.GetGrafeasClient().CreateOccurrence(ctx, occReq)
 	if err != nil {
 		t.Errorf("createOccurrence(%s, %s): %v", v.imageURL, v.noteID, err)
 	}
@@ -314,9 +315,9 @@ func TestPollDiscoveryOccurrenceFinished(t *testing.T) {
 		if discOcc == nil {
 			r.Errorf("discovery occurrence is nil")
 		}
-		analysisStatus := discOcc.GetDiscovered().GetDiscovered().AnalysisStatus
-		if analysisStatus != discovery.Discovered_FINISHED_SUCCESS {
-			r.Errorf("discovery occurrence reported unexpected state: %s, want: %s", analysisStatus, discovery.Discovered_FINISHED_SUCCESS)
+		analysisStatus := discOcc.GetDiscovery().GetAnalysisStatus()
+		if analysisStatus != grafeaspb.DiscoveryOccurrence_FINISHED_SUCCESS {
+			r.Errorf("discovery occurrence reported unexpected state: %s, want: %s", analysisStatus, grafeaspb.DiscoveryOccurrence_FINISHED_SUCCESS)
 		}
 	})
 
@@ -378,28 +379,58 @@ func TestFindHighVulnerabilities(t *testing.T) {
 		NoteId: noteID,
 		Note: &grafeaspb.Note{
 			Type: &grafeaspb.Note_Vulnerability{
-				Vulnerability: &vulnerability.Vulnerability{Severity: vulnerability.Severity_CRITICAL},
+				Vulnerability: &grafeaspb.VulnerabilityNote{
+					Severity: grafeaspb.Severity_CRITICAL,
+					Details: []*grafeaspb.VulnerabilityNote_Detail{
+						{
+							AffectedCpeUri:  "your-uri-here",
+							AffectedPackage: "your-package-here",
+							MinAffectedVersion: &grafeaspb.Version{
+								Kind: grafeaspb.Version_MINIMUM,
+							},
+							FixedVersion: &grafeaspb.Version{
+								Kind: grafeaspb.Version_MAXIMUM,
+							},
+						},
+					},
+				},
 			},
 		},
 	}
 	occReq := &grafeaspb.CreateOccurrenceRequest{
 		Parent: fmt.Sprintf("projects/%s", v.projectID),
 		Occurrence: &grafeaspb.Occurrence{
-			NoteName: fmt.Sprintf("projects/%s/notes/%s", v.projectID, noteID),
-			Resource: &grafeaspb.Resource{Uri: v.imageURL},
+			NoteName:    fmt.Sprintf("projects/%s/notes/%s", v.projectID, noteID),
+			ResourceUri: v.imageURL,
 			Details: &grafeaspb.Occurrence_Vulnerability{
-				Vulnerability: &vulnerability.Details{Severity: vulnerability.Severity_CRITICAL},
+				Vulnerability: &grafeaspb.VulnerabilityOccurrence{
+					PackageIssue: []*grafeaspb.VulnerabilityOccurrence_PackageIssue{
+						{
+							AffectedCpeUri:  "your-uri-here",
+							AffectedPackage: "your-package-here",
+							MinAffectedVersion: &grafeaspb.Version{
+								Kind: grafeaspb.Version_MINIMUM,
+							},
+							FixedVersion: &grafeaspb.Version{
+								Kind: grafeaspb.Version_MAXIMUM,
+							},
+						},
+					},
+				},
 			},
 		},
 	}
 	ctx := context.Background()
-	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
+	client, err := containeranalysis.NewClient(ctx)
 	if err != nil {
 		t.Errorf("could not create client: %v", err)
 	}
 	defer client.Close()
-	_, err = client.CreateNote(ctx, noteReq)
-	created, err := client.CreateOccurrence(ctx, occReq)
+	_, err = client.GetGrafeasClient().CreateNote(ctx, noteReq)
+	if err != nil {
+		t.Errorf("createNote(%s): %v", v.noteID, err)
+	}
+	created, err := client.GetGrafeasClient().CreateOccurrence(ctx, occReq)
 	if err != nil {
 		t.Errorf("createOccurrence(%s, %s): %v", v.imageURL, v.noteID, err)
 	} else if created == nil {
