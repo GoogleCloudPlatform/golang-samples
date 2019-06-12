@@ -191,6 +191,7 @@ func signAsymmetric(keyName string, message []byte) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("asymmetric sign request failed: %+v", err)
 	}
+	// Signature is base64 encoded.
 	return response.Signature, nil
 }
 
