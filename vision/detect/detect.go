@@ -515,59 +515,6 @@ func detectLogos(w io.Writer, file string) error {
 
 // [END vision_logo_detection]
 
-// [START vision_text_detection_pdf]
-
-// detectAsyncDocument performs Optical Character Recognition (OCR) on a
-// PDF file stored in GCS.
-func detectAsyncDocument(w io.Writer, gcsSourceURI, gcsDestinationURI string) error {
-	ctx := context.Background()
-
-	client, err := vision.NewImageAnnotatorClient(ctx)
-	if err != nil {
-		return err
-	}
-
-	request := &visionpb.AsyncBatchAnnotateFilesRequest{
-		Requests: []*visionpb.AsyncAnnotateFileRequest{
-			{
-				Features: []*visionpb.Feature{
-					{
-						Type: visionpb.Feature_DOCUMENT_TEXT_DETECTION,
-					},
-				},
-				InputConfig: &visionpb.InputConfig{
-					GcsSource: &visionpb.GcsSource{Uri: gcsSourceURI},
-					// Supported MimeTypes are: "application/pdf" and "image/tiff".
-					MimeType: "application/pdf",
-				},
-				OutputConfig: &visionpb.OutputConfig{
-					GcsDestination: &visionpb.GcsDestination{Uri: gcsDestinationURI},
-					// How many pages should be grouped into each json output file.
-					BatchSize: 2,
-				},
-			},
-		},
-	}
-
-	operation, err := client.AsyncBatchAnnotateFiles(ctx, request)
-	if err != nil {
-		return err
-	}
-
-	fmt.Fprintf(w, "Waiting for the operation to finish.")
-
-	resp, err := operation.Wait(ctx)
-	if err != nil {
-		return err
-	}
-
-	fmt.Fprintf(w, "%v", resp)
-
-	return nil
-}
-
-// [END vision_text_detection_pdf]
-
 // [START vision_localize_objects]
 
 // localizeObjects gets objects and bounding boxes from the Vision API for an image at the given file path.
@@ -1003,7 +950,7 @@ func detectLogosURI(w io.Writer, file string) error {
 
 // [START vision_text_detection_pdf_gcs]
 
-// detectAsyncDocument performs Optical Character Recognition (OCR) on a
+// detectAsyncDocumentURI performs Optical Character Recognition (OCR) on a
 // PDF file stored in GCS.
 func detectAsyncDocumentURI(w io.Writer, gcsSourceURI, gcsDestinationURI string) error {
 	ctx := context.Background()
