@@ -14,9 +14,9 @@
 
 // [START functions_memorystore_redis]
 
-// Package redis provides a basic Cloud Function that connects
+// Package visitcount provides a Cloud Function that connects
 // to a managed Redis instance.
-package redis
+package visitcount
 
 import (
 	"fmt"
@@ -42,9 +42,16 @@ func init() {
 	redisAddr := fmt.Sprintf("%s:%s", redisHost, redisPort)
 
 	const maxConnections = 10
-	redisPool = redis.NewPool(func() (redis.Conn, error) {
-		return redis.Dial("tcp", redisAddr)
-	}, maxConnections)
+	redisPool = &redis.Pool{
+		MaxIdle: maxConnections,
+		Dial: func() (redis.Conn, error) {
+			c, err := redis.Dial("tcp", redisAddr)
+			if err != nil {
+				log.Fatal("Error connecting to Redis instance")
+			}
+			return c, err
+		},
+	}
 }
 
 // VisitCount increments the visit count on the Redis instance
@@ -55,6 +62,7 @@ func VisitCount(w http.ResponseWriter, r *http.Request) {
 
 	counter, err := redis.Int(conn.Do("INCR", "visits"))
 	if err != nil {
+		log.Printf("redis.Int: %v", err)
 		http.Error(w, "Error incrementing visit count", http.StatusInternalServerError)
 		return
 	}
