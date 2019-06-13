@@ -58,12 +58,11 @@ func TestDetect(t *testing.T) {
 		t.Run(tt.name+"/local", func(t *testing.T) {
 			t.Parallel()
 			var buf bytes.Buffer
-			err := tt.local(&buf, "../testdata/"+tt.path)
-			if err != nil {
+			if err := tt.local(&buf, "../testdata/"+tt.path); err != nil {
 				t.Fatalf("Local %s(%q): got %v, want nil err", tt.name, tt.path, err)
 			}
-			if got := buf.String(); !strings.Contains(strings.ToLower(got), strings.ToLower(tt.wantContain)) {
-				t.Errorf("Local %s(%q): got %q, want to contain %q", tt.name, tt.path, got, tt.wantContain)
+			if got, wantContain := strings.ToLower(buf.String()), strings.ToLower(tt.wantContain); !strings.Contains(got, wantContain) {
+				t.Errorf("Local %s(%q): got %q, want to contain %q", tt.name, tt.path, got, wantContain)
 			}
 		})
 	}
@@ -75,12 +74,11 @@ func TestDetect(t *testing.T) {
 		t.Run(tt.name+"/gcs", func(t *testing.T) {
 			t.Parallel()
 			var buf bytes.Buffer
-			err := tt.gcs(&buf, "gs://python-docs-samples-tests/vision/"+tt.path)
-			if err != nil {
+			if err := tt.gcs(&buf, "gs://python-docs-samples-tests/vision/"+tt.path); err != nil {
 				t.Fatalf("GCS %s(%q): got %v, want nil err", tt.name, tt.path, err)
 			}
-			if got := buf.String(); !strings.Contains(strings.ToLower(got), strings.ToLower(tt.wantContain)) {
-				t.Errorf("GCS %s(%q): got %q, want to contain %q", tt.name, tt.path, got, tt.wantContain)
+			if got, wantContain := strings.ToLower(buf.String()), strings.ToLower(tt.wantContain); !strings.Contains(got, wantContain) {
+				t.Errorf("GCS %s(%q): got %q, want to contain %q", tt.name, tt.path, got, wantContain)
 			}
 		})
 	}
