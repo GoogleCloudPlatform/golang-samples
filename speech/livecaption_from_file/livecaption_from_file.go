@@ -17,6 +17,7 @@
 
 package main
 
+// [START speech_transcribe_streaming]
 import (
 	"context"
 	"flag"
@@ -116,3 +117,5 @@ func main() {
 		}
 	}
 }
+
+// [END speech_transcribe_streaming]

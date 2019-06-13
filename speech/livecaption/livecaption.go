@@ -20,6 +20,7 @@
 //    $ gst-launch-1.0 -v pulsesrc ! audioconvert ! audioresample ! audio/x-raw,channels=1,rate=16000 ! filesink location=/dev/stdout | livecaption
 package main
 
+// [START speech_transcribe_streaming_mic]
 import (
 	"context"
 	"fmt"
@@ -34,7 +35,6 @@ import (
 func main() {
 	ctx := context.Background()
 
-	// [START speech_transcribe_streaming_mic]
 	client, err := speech.NewClient(ctx)
 	if err != nil {
 		log.Fatal(err)
@@ -105,5 +105,6 @@ func main() {
 			fmt.Printf("Result: %+v\n", result)
 		}
 	}
-	// [END speech_transcribe_streaming_mic]
 }
+
+// [END speech_transcribe_streaming_mic]
