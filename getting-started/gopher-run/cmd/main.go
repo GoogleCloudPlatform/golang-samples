@@ -1,3 +1,18 @@
+// Copyright 2019 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+//The cmd command starts a Gopher Run game server
 package main
 
 import (
@@ -14,13 +29,38 @@ import (
 	"google.golang.org/api/iterator"
 )
 
+func main() {
+	//Open http port
+	http.HandleFunc("/", handler)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
+	ctx := context.Background()
+	client, err := firestore.NewClient(ctx, "maralder-start")
+	if err != nil {
+		log.Fatalf("Error opening client, %v", err)
+	}
+	defer client.Close()
+	//Get snapshots
+	iter := client.Collection("teams").Snapshots(ctx)
+	defer iter.Stop()
+	for {
+		docsnap, err := iter.Next()
+		if err != nil {
+			log.Fatalf("Error checking snapshots, %v", err)
+		}
+		fmt.Println(docsnap.Changes)
+	}
+}
+
 func handlePost(w http.ResponseWriter, r *http.Request) {
-	//Open database
 	projectID := "maralder-start"
 	ctx := context.Background()
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
-		log.Fatalf("Error creating client, %v", err)
+		log.Fatalf("firestore.NewClient: %v", err)
 	}
 	defer client.Close()
 	//Read
@@ -105,29 +145,4 @@ func printData(ctx context.Context, client *firestore.Client, w io.Writer) {
 		fmt.Fprint(w, doc.Data())
 	}
 
-}
-func main() {
-	//Open http port
-	http.HandleFunc("/", handler)
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
-	ctx := context.Background()
-	client, err := firestore.NewClient(ctx, "maralder-start")
-	if err != nil {
-		log.Fatalf("Error opening client, %v", err)
-	}
-	defer client.Close()
-	//Get snapshots
-	iter := client.Collection("teams").Snapshots(ctx)
-	defer iter.Stop()
-	for {
-		docsnap, err := iter.Next()
-		if err != nil {
-			log.Fatalf("Error checking snapshots, %v", err)
-		}
-		fmt.Println(docsnap.Changes)
-	}
 }
