@@ -1053,7 +1053,7 @@ func listTables(client *bigquery.Client, w io.Writer, datasetID string) error {
 func insertRows(client *bigquery.Client, datasetID, tableID string) error {
 	ctx := context.Background()
 	// [START bigquery_table_insert_rows]
-	u := client.Dataset(datasetID).Table(tableID).Uploader()
+	u := client.Dataset(datasetID).Table(tableID).Inserter()
 	items := []*Item{
 		// Item implements the ValueSaver interface.
 		{Name: "Phred Phlyntstone", Age: 32},
