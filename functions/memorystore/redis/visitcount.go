@@ -19,6 +19,7 @@
 package visitcount
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -29,34 +30,46 @@ import (
 
 var redisPool *redis.Pool
 
-// Initialize the connection pool on instance startup
-func init() {
+// initializeRedis initializes and returns a connection pool
+func initializeRedis() (*redis.Pool, error) {
 	redisHost := os.Getenv("REDISHOST")
 	if redisHost == "" {
-		log.Fatal("REDISHOST must be set")
+		return nil, errors.New("REDISHOST must be set")
 	}
 	redisPort := os.Getenv("REDISPORT")
 	if redisPort == "" {
-		log.Fatal("REDISPORT must be set")
+		return nil, errors.New("REDISPORT must be set")
 	}
 	redisAddr := fmt.Sprintf("%s:%s", redisHost, redisPort)
 
 	const maxConnections = 10
-	redisPool = &redis.Pool{
+	return &redis.Pool{
 		MaxIdle: maxConnections,
 		Dial: func() (redis.Conn, error) {
 			c, err := redis.Dial("tcp", redisAddr)
 			if err != nil {
-				log.Fatal("Error connecting to Redis instance")
+				return nil, fmt.Errorf("redis.Dial: %v", err)
 			}
 			return c, err
 		},
-	}
+	}, nil
 }
 
 // VisitCount increments the visit count on the Redis instance
 // and prints the current count in the HTTP response.
 func VisitCount(w http.ResponseWriter, r *http.Request) {
+	// Initialize connection pool on first invocation
+	if redisPool == nil {
+		// Pre-declare err to avoid shadowing redisPool
+		var err error
+		redisPool, err = initializeRedis()
+		if err != nil {
+			log.Printf("initializeRedis: %v", err)
+			http.Error(w, "Error initializing connection pool", http.StatusInternalServerError)
+			return
+		}
+	}
+
 	conn := redisPool.Get()
 	defer conn.Close()
 
