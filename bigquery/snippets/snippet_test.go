@@ -65,60 +65,13 @@ func TestAll(t *testing.T) {
 	}
 
 	datasetID := uniqueBQName("golang_example_dataset")
-	if err := createDataset(client, datasetID); err != nil {
-		t.Errorf("createDataset(%q): %v", datasetID, err)
+	if err := client.Dataset(datasetID).Create(ctx, &bigquery.DatasetMetadata{
+		Location: "US",
+	}); err != nil {
+		t.Errorf("dataset.Create(%q): %v", datasetID, err)
 	}
 	// Cleanup dataset at end of test.
 	defer client.Dataset(datasetID).DeleteWithContents(ctx)
-
-	if err := updateDatasetAccessControl(client, datasetID); err != nil {
-		t.Errorf("updateDataSetAccessControl(%q): %v", datasetID, err)
-	}
-	if err := addDatasetLabel(client, datasetID); err != nil {
-		t.Errorf("updateDatasetAddLabel: %v", err)
-	}
-
-	buf := &bytes.Buffer{}
-	if err := datasetLabels(client, buf, datasetID); err != nil {
-		t.Errorf("getDatasetLabels(%q): %v", datasetID, err)
-	}
-	want := "color:green"
-	if got := buf.String(); !strings.Contains(got, want) {
-		t.Errorf("getDatasetLabel(%q) expected %q to contain %q", datasetID, got, want)
-	}
-
-	if err := addDatasetLabel(client, datasetID); err != nil {
-		t.Errorf("updateDatasetAddLabel: %v", err)
-	}
-	buf.Reset()
-	if err := listDatasetsByLabel(client, buf); err != nil {
-		t.Errorf("listDatasetsByLabel: %v", err)
-	}
-	if got := buf.String(); !strings.Contains(got, datasetID) {
-		t.Errorf("listDatasetsByLabel expected %q to contain %q", got, want)
-	}
-	if err := deleteDatasetLabel(client, datasetID); err != nil {
-		t.Errorf("updateDatasetDeleteLabel: %v", err)
-	}
-
-	// Test empty dataset creation/ttl/delete.
-	deletionDatasetID := uniqueBQName("golang_example_quickdelete")
-	if err := createDataset(client, deletionDatasetID); err != nil {
-		t.Errorf("createDataset(%q): %v", deletionDatasetID, err)
-	}
-	if err = updateDatasetDefaultExpiration(client, deletionDatasetID); err != nil {
-		t.Errorf("updateDatasetDefaultExpiration(%q): %v", deletionDatasetID, err)
-	}
-	if err := deleteEmptyDataset(client, deletionDatasetID); err != nil {
-		t.Errorf("deleteEmptyDataset(%q): %v", deletionDatasetID, err)
-	}
-
-	if err := updateDatasetDescription(client, datasetID); err != nil {
-		t.Errorf("updateDatasetDescription(%q): %v", datasetID, err)
-	}
-	if err := listDatasets(client, ioutil.Discard); err != nil {
-		t.Errorf("listDatasets: %v", err)
-	}
 
 	inferred := uniqueBQName("golang_example_table_inferred")
 	explicit := uniqueBQName("golang_example_table_explicit")
@@ -171,7 +124,7 @@ func TestAll(t *testing.T) {
 		t.Errorf("updateTableAddLabel(dataset:%q table:%q): %v", datasetID, explicit, err)
 	}
 
-	buf.Reset()
+	buf := &bytes.Buffer{}
 	if err := listTables(client, buf, datasetID); err != nil {
 		t.Errorf("listTables(%q): %v", datasetID, err)
 	}
@@ -181,10 +134,6 @@ func TestAll(t *testing.T) {
 	}
 	if got := buf.String(); !strings.Contains(got, explicit) {
 		t.Errorf("want table list %q to contain table %q", got, explicit)
-	}
-
-	if err := printDatasetInfo(client, ioutil.Discard, datasetID); err != nil {
-		t.Errorf("printDatasetInfo: %v", err)
 	}
 
 	// Stream data, read, query the inferred schema table.
@@ -298,14 +247,22 @@ func TestViews(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	srcDatasetID := uniqueBQName("golang_example_view_source")
-	if err := createDataset(client, srcDatasetID); err != nil {
-		t.Errorf("createDataset(%q): %v", srcDatasetID, err)
+	if err := client.Dataset(srcDatasetID).Create(ctx,
+		&bigquery.DatasetMetadata{
+			Location: "US",
+		}); err != nil {
+		t.Errorf("dataset.Create(%q): %v", srcDatasetID, err)
 	}
 	defer client.Dataset(srcDatasetID).DeleteWithContents(ctx)
+
 	viewDatasetID := uniqueBQName("golang_example_view_container")
-	if err := createDataset(client, viewDatasetID); err != nil {
-		t.Errorf("createDataset(%q): %v", viewDatasetID, err)
+	if err := client.Dataset(viewDatasetID).Create(ctx,
+		&bigquery.DatasetMetadata{
+			Location: "US",
+		}); err != nil {
+		t.Errorf("dataset.Create(%q): %v", viewDatasetID, err)
 	}
 	defer client.Dataset(viewDatasetID).DeleteWithContents(ctx)
 
@@ -344,8 +301,11 @@ func TestImportExport(t *testing.T) {
 
 	datasetID := uniqueBQName("golang_example_dataset_importexport")
 	tableID := uniqueBQName("golang_example_dataset_importexport")
-	if err := createDataset(client, datasetID); err != nil {
-		t.Errorf("createDataset(%q): %v", datasetID, err)
+	if err := client.Dataset(datasetID).Create(ctx,
+		&bigquery.DatasetMetadata{
+			Location: "US",
+		}); err != nil {
+		t.Errorf("dataset.Create(%q): %v", datasetID, err)
 	}
 	defer client.Dataset(datasetID).DeleteWithContents(ctx)
 
@@ -469,8 +429,10 @@ func TestPartitioningAndClustering(t *testing.T) {
 	}
 
 	datasetID := uniqueBQName("golang_example_dataset_partition_cluster")
-	if err := createDataset(client, datasetID); err != nil {
-		t.Errorf("createDataset(%q): %v", datasetID, err)
+	if err := client.Dataset(datasetID).Create(ctx, &bigquery.DatasetMetadata{
+		Location: "US",
+	}); err != nil {
+		t.Errorf("dataset.Create(%q): %v", datasetID, err)
 	}
 	defer client.Dataset(datasetID).DeleteWithContents(ctx)
 
@@ -513,8 +475,11 @@ func TestModels(t *testing.T) {
 	}
 
 	datasetID := uniqueBQName("golang_example_dataset_model")
-	if err := createDataset(client, datasetID); err != nil {
-		t.Errorf("createDataset(%q): %v", datasetID, err)
+	if err := client.Dataset(datasetID).Create(ctx,
+		&bigquery.DatasetMetadata{
+			Location: "US",
+		}); err != nil {
+		t.Errorf("dataset.Create(%q): %v", datasetID, err)
 	}
 	defer client.Dataset(datasetID).DeleteWithContents(ctx)
 
