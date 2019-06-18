@@ -12,11 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// The cmd command starts a Gopher Run leaderboard server
+//This package starts a local web server to host the WebGL build of Gopher Run
 package main
 
-// lead "/go/src/github.com/GoogleCloudPlatform/golang-samples/getting-started/gopher-run/leaderboard"
+import (
+	"fmt"
+	"log"
+	"net/http"
+)
 
 func main() {
-	// go lead.startLeaderboardServer()
+	http.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir("/usr/local/google/home/maralder/GCBuild/gorun"))))
+	fmt.Println("hello")
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }

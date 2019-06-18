@@ -4,7 +4,7 @@
 FROM golang:1.12 as builder
 
 # Copy local code to the container image.
-WORKDIR /go/src/github.com/maralder
+WORKDIR /app
 COPY . .
 
 # Build the command inside the container.
@@ -18,7 +18,7 @@ FROM alpine
 RUN apk add --no-cache ca-certificates
 
 # Copy the binary to the production image from the builder stage.
-COPY --from=builder /go/src/github.com/maralder/main /main
+COPY --from=builder /app/main /main
 
 # Run the web service on container startup.
 CMD ["/main"]
