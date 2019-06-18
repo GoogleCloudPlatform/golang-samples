@@ -23,6 +23,7 @@ import (
 	"io"
 
 	"cloud.google.com/go/bigtable"
+	"bytes"
 )
 
 func writeSimple(w io.Writer, projectID, instanceID string, tableName string) error {
@@ -40,11 +41,11 @@ func writeSimple(w io.Writer, projectID, instanceID string, tableName string) er
 	timestamp := bigtable.Now()
 
 	mut := bigtable.NewMutation()
-	b := make([]byte, 8)
-	binary.PutVarint(b, int64(1))
+	binary1 := new(bytes.Buffer)
+	binary.Write(binary1, binary.BigEndian, int64(1))
 
-	mut.Set(columnFamilyName, "connected_cell", timestamp, b)
-	mut.Set(columnFamilyName, "connected_wifi", timestamp, b)
+	mut.Set(columnFamilyName, "connected_cell", timestamp, binary1.Bytes())
+	mut.Set(columnFamilyName, "connected_wifi", timestamp, binary1.Bytes())
 	mut.Set(columnFamilyName, "os_build", timestamp, []byte("PQ2A.190405.003"))
 
 	rowKey := "phone#4c410523#20190501"

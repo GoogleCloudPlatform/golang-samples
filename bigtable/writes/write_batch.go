@@ -22,6 +22,7 @@ import (
 	"io"
 
 	"cloud.google.com/go/bigtable"
+	"bytes"
 )
 
 func writeBatch(w io.Writer, projectID, instanceID string, tableName string) error {
@@ -40,16 +41,16 @@ func writeBatch(w io.Writer, projectID, instanceID string, tableName string) err
 
 	var muts []*bigtable.Mutation
 
-	b := make([]byte, binary.MaxVarintLen64)
-	binary.PutVarint(b, int64(1))
+	binary1 := new(bytes.Buffer)
+	binary.Write(binary1, binary.BigEndian, int64(1))
 
 	mut := bigtable.NewMutation()
-	mut.Set(columnFamilyName, "connected_wifi", timestamp, b)
+	mut.Set(columnFamilyName, "connected_wifi", timestamp, binary1.Bytes())
 	mut.Set(columnFamilyName, "os_build", timestamp, []byte("12155.0.0-rc1"))
 	muts = append(muts, mut)
 
 	mut = bigtable.NewMutation()
-	mut.Set(columnFamilyName, "connected_wifi", timestamp, b)
+	mut.Set(columnFamilyName, "connected_wifi", timestamp, binary1.Bytes())
 	mut.Set(columnFamilyName, "os_build", timestamp, []byte("12145.0.0-rc6"))
 	muts = append(muts, mut)
 
