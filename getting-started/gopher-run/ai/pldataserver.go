@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//This package starts a Gopher Run player data server
-package pldata
+//Package ai starts a Gopher Run player data server, writes recieved data to csv file
+package ai
 
 import (
 	"context"
@@ -23,32 +23,33 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	"cloud.google.com/go/firestore"
+	"cloud.google.com/go/storage"
 	"google.golang.org/api/iterator"
 )
 
-const projectID := "maralder-start"
-//os.Getenv("GOOGLE_CLOUD_PROJECT")
+var projectID = os.Getenv("GOOGLE_CLOUD_PROJECT")
 
 type playdata struct {
 	Act string  `json:"act"`
-	H   float64 `json:h`
-	X0  float64 `json:x0`
-	Y0  float64 `json:y0`
-	X1  float64 `json:x1`
-	Y1  float64 `json:y1`
-	X2  float64 `json:x2`
-	Y2  float64 `json:y2`
-	X3  float64 `json:x3`
-	Y3  float64 `json:y3`
+	H   float64 `json:"h"`
+	X0  float64 `json:"x0"`
+	Y0  float64 `json:"y0"`
+	X1  float64 `json:"x1"`
+	Y1  float64 `json:"y1"`
+	X2  float64 `json:"x2"`
+	Y2  float64 `json:"y2"`
+	X3  float64 `json:"x3"`
+	Y3  float64 `json:"y3"`
 }
 
 func handlePost(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
-	client, err := firestore.NewClient(ctx, projectID)
+	client, err := storage.NewClient(ctx)
 	if err != nil {
-		log.Printf("firestore.NewClient: %v", err)
+		log.Printf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
 	//Read
@@ -58,25 +59,38 @@ func handlePost(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Fprint(w, "Error decoding JSON\n")
 	}
-	fmt.Fprint(w, "Act: "+d.Act)
-	_, _, err = client.Collection("patterns").Add(ctx, map[string]interface{}{
-		"act": d.Act,
-		"h":   d.H,
-		"x0":  d.X0,
-		"y0":  d.Y0,
-		"x1":  d.X1,
-		"y1":  d.Y1,
-		"x2":  d.X2,
-		"y2":  d.Y2,
-		"x3":  d.X3,
-		"y3":  d.Y3,
-	})
-	if err != nil {
-		log.Printf("Error setting data, %v", err)
+	bkt := client.Bucket("maralder-start-ml")
+	wc := bkt.Object("pldata").NewWriter(ctx)
+	defer wc.Close()
+	pos := ""
+	vals := []string{"h", "x0", "y0", "x1", "y1", "x2", "y2", "x3", "y3"}
+	for _, v := range vals {
+		fl, ok := doc.Data()[v].(float64)
+		if ok {
+			pos += "," + strconv.FormatFloat(fl, 'f', 6, 64)
+		} else {
+			fmt.Println(doc.Data()[v])
+			continue
+		}
 	}
+	a, ok := doc.Data()["act"].(string)
+	if ok {
+		wc.Write([]byte(a + pos + "\n"))
+	}
+	// "act": d.Act,
+	// "h":   d.H,
+	// "x0":  d.X0,
+	// "y0":  d.Y0,
+	// "x1":  d.X1,
+	// "y1":  d.Y1,
+	// "x2":  d.X2,
+	// "y2":  d.Y2,
+	// "x3":  d.X3,
+	// "y3":  d.Y3,
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
+//Handler handles http requests
+func Handler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		handlePost(w, r)
 	} else {
@@ -97,13 +111,4 @@ func printData(ctx context.Context, client *firestore.Client, w io.Writer) {
 		fmt.Fprint(w, doc.Data())
 	}
 
-}
-
-func main() {
-	http.HandleFunc("/", handler)
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
 }

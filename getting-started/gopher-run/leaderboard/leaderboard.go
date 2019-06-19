@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 
 	"cloud.google.com/go/firestore"
 	"google.golang.org/api/iterator"
@@ -34,8 +33,8 @@ type scoredata struct {
 	Distance float32 `json:distance`
 }
 
-// Choose a handler function based on the request method
-func handler(w http.ResponseWriter, r *http.Request) {
+// Handler chooses a handler function based on the request method
+func Handler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		handlePost(w, r)
 	} else if r.Method == "GET" {
@@ -59,12 +58,12 @@ func handlePost(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Fprint(w, "Error decoding JSON\n")
 	}
-	fmt.Fprint(w, "Act: "+d.Act)
+	fmt.Fprint(w, "Act: "+d.Name)
 	_, _, err = client.Collection("leaderboard").Add(ctx, map[string]interface{}{
-		d.Name,
-		d.Team,
-		d.Coins,
-		d.Distance,
+		"name":     d.Name,
+		"team":     d.Team,
+		"coins":    d.Coins,
+		"distance": d.Distance,
 	})
 	if err != nil {
 		log.Fatalf("Error setting data, %v", err)
@@ -91,13 +90,4 @@ func handleGet(w http.ResponseWriter, r *http.Request) {
 		}
 		fmt.Fprint(w, doc.Data())
 	}
-}
-
-func startLeaderboardServer() {
-	http.HandleFunc("/", handler)
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
 }

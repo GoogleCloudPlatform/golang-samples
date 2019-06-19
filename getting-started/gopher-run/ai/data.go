@@ -12,22 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//This package moves the Firestore play data into data/playdata.csv
-package data
+//Package ai moves the Firestore play data into a csv in a cloud storage bucket
+package ai
 
 import (
 	"context"
 	"fmt"
 	"log"
 	"os"
-	"strconv"
 
 	"cloud.google.com/go/firestore"
-	"google.golang.org/api/iterator"
+	ml "google.golang.org/api/ml/v1"
 )
 
 func main() {
-	fmt.Println("hello")
 	ctx := context.Background()
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
@@ -36,34 +34,30 @@ func main() {
 	defer client.Close()
 	f, err := os.Create("data/playdata.csv")
 	if err != nil {
-		log.Fatalf("os.Create: %v", err)
+		// log.Fatalf("os.Create: %v", err)
 	}
 	defer f.Close()
 
-	iter := client.Collection("patterns").Documents(ctx)
-	for {
-		doc, err := iter.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			log.Fatalf("Failed iteration %v", err)
-		}
-		pos := ""
-		vals := []string{"h", "x0", "y0", "x1", "y1", "x2", "y2", "x3", "y3"}
-		for _, v := range vals {
-			fl, ok := doc.Data()[v].(float64)
-			if ok {
-				pos += "," + strconv.FormatFloat(fl, 'f', 6, 64)
-			} else {
-				fmt.Println(doc.Data()[v])
-				continue
-			}
-		}
-		a, ok := doc.Data()["act"].(string)
-		if ok {
-			f.WriteString(a + pos + "\n")
-		}
+	mlService, err := ml.NewService(ctx)
+	if err != nil {
+		log.Printf("ml.NewService: %v", err)
 	}
-	f.Sync()
+	jobsService := mlService.Projects.Jobs
+	job := &ml.GoogleCloudMlV1__Job{
+		JobId: "automatic",
+		PredictionInput: &ml.GoogleCloudMlV1__PredictionInput{
+			DataFormat: "CSV",
+			InputPaths: []string{},
+		},
+		TrainingInput: &ml.GoogleCloudMlV1__TrainingInput{
+			PackageUris:  []string{},
+			PythonModule: "",
+			Region:       "us-west1",
+			ScaleTier:    "STANDARD_1",
+		}}
+	resp, err := jobsService.Create("projects/"+projectID, job).Do()
+	if err != nil {
+		log.Fatalf("Create: %v", err)
+	}
+	fmt.Println(resp)
 }

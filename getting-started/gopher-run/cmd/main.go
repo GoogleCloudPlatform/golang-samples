@@ -15,8 +15,22 @@
 // The cmd command starts a Gopher Run leaderboard server
 package main
 
-// lead "/go/src/github.com/GoogleCloudPlatform/golang-samples/getting-started/gopher-run/leaderboard"
+import (
+	"fmt"
+	"log"
+	"net/http"
+	"os"
+
+	"github.com/GoogleCloudPlatform/golang-samples/getting-started/gopher-run/ai"
+	"github.com/GoogleCloudPlatform/golang-samples/getting-started/gopher-run/leaderboard"
+)
 
 func main() {
-	// go lead.startLeaderboardServer()
+	http.HandleFunc("/leaderboard", leaderboard.Handler)
+	http.HandleFunc("/pldata", ai.Handler)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
 }
