@@ -21,13 +21,11 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/GoogleCloudPlatform/golang-samples/getting-started/gopher-run/ai"
 	"github.com/GoogleCloudPlatform/golang-samples/getting-started/gopher-run/leaderboard"
 )
 
 func main() {
 	http.HandleFunc("/leaderboard", leaderboard.Handler)
-	http.HandleFunc("/pldata", ai.Handler)
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
