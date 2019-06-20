@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"io"
 
-	containeranalysis "cloud.google.com/go/containeranalysis/apiv1beta1"
+	containeranalysis "cloud.google.com/go/containeranalysis/apiv1"
 	"google.golang.org/api/iterator"
-	grafeaspb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/grafeas"
+	grafeaspb "google.golang.org/genproto/googleapis/grafeas/v1"
 )
 
 // getOccurrencesForNote retrieves all the Occurrences associated with a specified Note.
@@ -31,7 +31,7 @@ import (
 func getOccurrencesForNote(w io.Writer, noteID, projectID string) (int, error) {
 	// noteID := fmt.Sprintf("my-note")
 	ctx := context.Background()
-	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
+	client, err := containeranalysis.NewClient(ctx)
 	if err != nil {
 		return -1, fmt.Errorf("NewGrafeasV1Beta1Client: %v", err)
 	}
@@ -40,7 +40,7 @@ func getOccurrencesForNote(w io.Writer, noteID, projectID string) (int, error) {
 	req := &grafeaspb.ListNoteOccurrencesRequest{
 		Name: fmt.Sprintf("projects/%s/notes/%s", projectID, noteID),
 	}
-	it := client.ListNoteOccurrences(ctx, req)
+	it := client.GetGrafeasClient().ListNoteOccurrences(ctx, req)
 	count := 0
 	for {
 		occ, err := it.Next()

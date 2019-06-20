@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"io"
 
-	containeranalysis "cloud.google.com/go/containeranalysis/apiv1beta1"
+	containeranalysis "cloud.google.com/go/containeranalysis/apiv1"
 	"google.golang.org/api/iterator"
-	grafeaspb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/grafeas"
+	grafeaspb "google.golang.org/genproto/googleapis/grafeas/v1"
 )
 
 // getOccurrencesForImage retrieves all the Occurrences associated with a specified image.
@@ -31,7 +31,7 @@ import (
 func getOccurrencesForImage(w io.Writer, resourceURL, projectID string) (int, error) {
 	// resourceURL := fmt.Sprintf("https://gcr.io/my-project/my-image")
 	ctx := context.Background()
-	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
+	client, err := containeranalysis.NewClient(ctx)
 	if err != nil {
 		return -1, fmt.Errorf("NewGrafeasV1Beta1Client: %v", err)
 	}
@@ -41,7 +41,7 @@ func getOccurrencesForImage(w io.Writer, resourceURL, projectID string) (int, er
 		Parent: fmt.Sprintf("projects/%s", projectID),
 		Filter: fmt.Sprintf("resourceUrl=%q", resourceURL),
 	}
-	it := client.ListOccurrences(ctx, req)
+	it := client.GetGrafeasClient().ListOccurrences(ctx, req)
 	count := 0
 	for {
 		occ, err := it.Next()

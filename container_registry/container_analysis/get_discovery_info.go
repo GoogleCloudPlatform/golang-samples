@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"io"
 
-	containeranalysis "cloud.google.com/go/containeranalysis/apiv1beta1"
+	containeranalysis "cloud.google.com/go/containeranalysis/apiv1"
 	"google.golang.org/api/iterator"
-	grafeaspb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/grafeas"
+	grafeaspb "google.golang.org/genproto/googleapis/grafeas/v1"
 )
 
 // getDiscoveryInfo retrieves and prints the Discovery Occurrence created for a specified image.
@@ -31,7 +31,7 @@ import (
 func getDiscoveryInfo(w io.Writer, resourceURL, projectID string) error {
 	// resourceURL := fmt.Sprintf("https://gcr.io/my-project/my-image")
 	ctx := context.Background()
-	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
+	client, err := containeranalysis.NewClient(ctx)
 	if err != nil {
 		return fmt.Errorf("NewGrafeasV1Beta1Client: %v", err)
 	}
@@ -41,7 +41,7 @@ func getDiscoveryInfo(w io.Writer, resourceURL, projectID string) error {
 		Parent: fmt.Sprintf("projects/%s", projectID),
 		Filter: fmt.Sprintf(`kind="DISCOVERY" AND resourceUrl=%q`, resourceURL),
 	}
-	it := client.ListOccurrences(ctx, req)
+	it := client.GetGrafeasClient().ListOccurrences(ctx, req)
 	for {
 		occ, err := it.Next()
 		if err == iterator.Done {

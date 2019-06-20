@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"time"
 
-	containeranalysis "cloud.google.com/go/containeranalysis/apiv1beta1"
-	discovery "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/discovery"
-	grafeaspb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/grafeas"
+	containeranalysis "cloud.google.com/go/containeranalysis/apiv1"
+	"google.golang.org/api/iterator"
+	grafeaspb "google.golang.org/genproto/googleapis/grafeas/v1"
 )
 
 // pollDiscoveryOccurrenceFinished returns the discovery occurrence for a resource once it reaches a finished state.
@@ -33,7 +33,7 @@ func pollDiscoveryOccurrenceFinished(resourceURL, projectID string, timeout time
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
-	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
+	client, err := containeranalysis.NewClient(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("NewGrafeasV1Beta1Client: %v", err)
 	}
@@ -64,14 +64,17 @@ func pollDiscoveryOccurrenceFinished(resourceURL, projectID string, timeout time
 				Filter: fmt.Sprintf(`kind="DISCOVERY" AND resourceUrl=%q`, resourceURL),
 			}
 			// [START containeranalysis_poll_discovery_occurrence_finished]
-			it := client.ListOccurrences(ctx, req)
+			it := client.GetGrafeasClient().ListOccurrences(ctx, req)
 			// Only one occurrence should ever be returned by ListOccurrences
 			// and the given filter.
 			result, err := it.Next()
+			if err == iterator.Done {
+				break
+			}
 			if err != nil {
 				return nil, fmt.Errorf("it.Next: %v", err)
 			}
-			if result.GetDiscovered() != nil {
+			if result.GetDiscovery() != nil {
 				discoveryOccurrence = result
 			}
 		}
@@ -85,14 +88,14 @@ func pollDiscoveryOccurrenceFinished(resourceURL, projectID string, timeout time
 		case <-ticker.C:
 			// Update the occurrence.
 			req := &grafeaspb.GetOccurrenceRequest{Name: discoveryOccurrence.GetName()}
-			updated, err := client.GetOccurrence(ctx, req)
+			updated, err := client.GetGrafeasClient().GetOccurrence(ctx, req)
 			if err != nil {
 				return nil, fmt.Errorf("GetOccurrence: %v", err)
 			}
-			switch updated.GetDiscovered().GetDiscovered().GetAnalysisStatus() {
-			case discovery.Discovered_FINISHED_SUCCESS,
-				discovery.Discovered_FINISHED_FAILED,
-				discovery.Discovered_FINISHED_UNSUPPORTED:
+			switch updated.GetDiscovery().GetAnalysisStatus() {
+			case grafeaspb.DiscoveryOccurrence_FINISHED_SUCCESS,
+				grafeaspb.DiscoveryOccurrence_FINISHED_FAILED,
+				grafeaspb.DiscoveryOccurrence_FINISHED_UNSUPPORTED:
 				return discoveryOccurrence, nil
 			}
 		}

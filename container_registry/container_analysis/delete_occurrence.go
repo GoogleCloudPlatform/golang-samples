@@ -20,15 +20,15 @@ import (
 	"context"
 	"fmt"
 
-	containeranalysis "cloud.google.com/go/containeranalysis/apiv1beta1"
-	grafeaspb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/grafeas"
+	containeranalysis "cloud.google.com/go/containeranalysis/apiv1"
+	grafeaspb "google.golang.org/genproto/googleapis/grafeas/v1"
 )
 
 // deleteOccurrence removes an existing Occurrence from the server.
 func deleteOccurrence(occurrenceID, projectID string) error {
 	// occurrenceID := path.Base(occurrence.Name)
 	ctx := context.Background()
-	client, err := containeranalysis.NewGrafeasV1Beta1Client(ctx)
+	client, err := containeranalysis.NewClient(ctx)
 	if err != nil {
 		return fmt.Errorf("NewGrafeasV1Beta1Client: %v", err)
 	}
@@ -37,7 +37,7 @@ func deleteOccurrence(occurrenceID, projectID string) error {
 	req := &grafeaspb.DeleteOccurrenceRequest{
 		Name: fmt.Sprintf("projects/%s/occurrences/%s", projectID, occurrenceID),
 	}
-	return client.DeleteOccurrence(ctx, req)
+	return client.GetGrafeasClient().DeleteOccurrence(ctx, req)
 }
 
 // [END containeranalysis_delete_occurrence]
