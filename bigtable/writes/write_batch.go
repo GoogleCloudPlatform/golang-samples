@@ -16,13 +16,13 @@ package writes
 
 // [START bigtable_writes_batch]
 import (
+	"bytes"
 	"context"
 	"encoding/binary"
 	"fmt"
 	"io"
 
 	"cloud.google.com/go/bigtable"
-	"bytes"
 )
 
 func writeBatch(w io.Writer, projectID, instanceID string, tableName string) error {
