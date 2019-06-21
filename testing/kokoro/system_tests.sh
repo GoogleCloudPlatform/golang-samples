@@ -80,20 +80,8 @@ fi
 # Download imports.
 GO_IMPORTS=$(go list -f '{{join .Imports "\n"}}{{"\n"}}{{join .TestImports "\n"}}' $TARGET | \
   sort | uniq | \
-  grep -v golang-samples | \
-  grep -v mailgun)
+  grep -v golang-samples)
 time go get -u -v -d $GO_IMPORTS
-
-# The latest version of mailgun-go uses a major module path (and imports),
-# which breaks on Go versions without module support (< 1.11).
-if [ -d $GOPATH/src/github.com/mailgun/mailgun-go ]; then
-  rm -rf $GOPATH/src/github.com/mailgun/mailgun-go
-fi
-git clone https://github.com/mailgun/mailgun-go.git $GOPATH/src/github.com/mailgun/mailgun-go
-pushd $GOPATH/src/github.com/mailgun/mailgun-go
-git checkout v2.0.0
-go get -v ./...
-popd
 
 # Always download top-level and internal dependencies.
 go get -t ./internal/...
