@@ -31,6 +31,8 @@ set -x
 
 export GOLANG_SAMPLES_SPANNER=projects/golang-samples-tests/instances/golang-samples-tests
 export GOLANG_SAMPLES_SERVICE_ACCOUNT_EMAIL=kokoro-$GOLANG_SAMPLES_PROJECT_ID@$GOLANG_SAMPLES_PROJECT_ID.iam.gserviceaccount.com
+export GOLANG_SAMPLES_BIGTABLE_PROJECT=golang-samples-tests
+export GOLANG_SAMPLES_BIGTABLE_INSTANCE=testing-instance
 
 go version
 date

@@ -18,21 +18,37 @@ import (
 	"context"
 	"io/ioutil"
 	"log"
+	"os"
 	"testing"
 )
 
 func TestBlurOffensiveImages(t *testing.T) {
+	t.Skip("convert is not available in test images yet (#877)")
+
+	projectID := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
+	if projectID == "" {
+		t.Skip("GOLANG_SAMPLES_PROJECT_ID not set")
+	}
+
 	log.SetOutput(ioutil.Discard)
 
-	// TODO: use testutil
-	t.Skip("convert is not available in test images")
+	outputBucket := projectID + "-test-blurred"
+	os.Setenv("BLURRED_BUCKET_NAME", outputBucket)
+
 	e := GCSEvent{
-		Bucket: "golang-samples-tests",
+		Bucket: projectID,
 		Name:   "functions/zombie.jpg",
 	}
 	ctx := context.Background()
 
-	outputBlob := storageClient.Bucket(e.Bucket).Object("blurred-" + e.Name)
+	inputBlob := storageClient.Bucket(projectID).Object(e.Name)
+	if _, err := inputBlob.Attrs(ctx); err != nil {
+		t.Skipf("could not get input file: %s: %v", inputBlob.ObjectName(), err)
+	}
+
+	b := storageClient.Bucket(outputBucket)
+	b.Create(ctx, projectID, nil)
+	outputBlob := b.Object(e.Name)
 	outputBlob.Delete(ctx) // Ensure the output file doesn't already exist.
 
 	if err := BlurOffensiveImages(ctx, e); err != nil {
@@ -43,10 +59,4 @@ func TestBlurOffensiveImages(t *testing.T) {
 		t.Fatalf("BlurOffensiveImages(%v) got error when checking output: %v", e, err)
 	}
 	outputBlob.Delete(ctx)
-
-	// Check proper handling of already-blurred images.
-	e.Name = "blurred-" + e.Name
-	if err := BlurOffensiveImages(ctx, e); err != nil {
-		t.Fatalf("BlurOffensiveImages(%v) got error on already blurred image: %v", e, err)
-	}
 }

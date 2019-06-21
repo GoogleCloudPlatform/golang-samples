@@ -18,12 +18,12 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 
 	asset "cloud.google.com/go/asset/apiv1"
-	"golang.org/x/net/context"
 	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1"
 )
 

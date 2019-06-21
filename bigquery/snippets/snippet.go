@@ -47,6 +47,7 @@ func noOpCommentFunc() {
 	// [START bigquery_delete_dataset]
 	// [START bigquery_delete_label_dataset]
 	// [START bigquery_delete_label_table]
+	// [START bigquery_delete_model]
 	// [START bigquery_delete_table]
 	// [START bigquery_extract_table]
 	// [START bigquery_extract_table_compressed]
@@ -54,6 +55,7 @@ func noOpCommentFunc() {
 	// [START bigquery_get_dataset]
 	// [START bigquery_get_dataset_labels]
 	// [START bigquery_get_job]
+	// [START bigquery_get_model]
 	// [START bigquery_get_table]
 	// [START bigquery_get_table_labels]
 	// [START bigquery_get_view]
@@ -63,6 +65,7 @@ func noOpCommentFunc() {
 	// [START bigquery_list_datasets]
 	// [START bigquery_list_datasets_by_label]
 	// [START bigquery_list_jobs]
+	// [START bigquery_list_models]
 	// [START bigquery_list_tables]
 	// [START bigquery_load_from_file]
 	// [START bigquery_load_table_clustered]
@@ -101,6 +104,7 @@ func noOpCommentFunc() {
 	// [START bigquery_update_dataset_description]
 	// [START bigquery_update_dataset_expiration]
 	// [START bigquery_update_table_cmek]
+	// [START bigquery_update_model_description]
 	// [START bigquery_update_table_description]
 	// [START bigquery_update_table_expiration]
 	// [START bigquery_update_view_query]
@@ -126,6 +130,7 @@ func noOpCommentFunc() {
 	// [END bigquery_delete_dataset]
 	// [END bigquery_delete_label_dataset]
 	// [END bigquery_delete_label_table]
+	// [END bigquery_delete_model]
 	// [END bigquery_delete_table]
 	// [END bigquery_extract_table]
 	// [END bigquery_extract_table_compressed]
@@ -133,6 +138,7 @@ func noOpCommentFunc() {
 	// [END bigquery_get_dataset]
 	// [END bigquery_get_dataset_labels]
 	// [END bigquery_get_job]
+	// [END bigquery_get_model]
 	// [END bigquery_get_table]
 	// [END bigquery_get_table_labels]
 	// [END bigquery_get_view]
@@ -142,6 +148,7 @@ func noOpCommentFunc() {
 	// [END bigquery_list_datasets]
 	// [END bigquery_list_datasets_by_label]
 	// [END bigquery_list_jobs]
+	// [END bigquery_list_models]
 	// [END bigquery_list_tables]
 	// [END bigquery_load_from_file]
 	// [END bigquery_load_table_clustered]
@@ -177,6 +184,7 @@ func noOpCommentFunc() {
 	// [END bigquery_table_insert_rows]
 	// [END bigquery_undelete_table]
 	// [END bigquery_update_dataset_access]
+	// [END bigquery_update_model_description]
 	// [END bigquery_update_table_cmek]
 	// [END bigquery_update_dataset_description]
 	// [END bigquery_update_dataset_expiration]
@@ -351,7 +359,7 @@ func deleteEmptyDataset(client *bigquery.Client, datasetID string) error {
 	return nil
 }
 
-func listDatasets(client *bigquery.Client) error {
+func listDatasets(client *bigquery.Client, w io.Writer) error {
 	ctx := context.Background()
 	// [START bigquery_list_datasets]
 	it := client.Datasets(ctx)
@@ -360,7 +368,7 @@ func listDatasets(client *bigquery.Client) error {
 		if err == iterator.Done {
 			break
 		}
-		fmt.Println(dataset.DatasetID)
+		fmt.Fprintln(w, dataset.DatasetID)
 	}
 	// [END bigquery_list_datasets]
 	return nil
@@ -385,7 +393,7 @@ func listDatasetsByLabel(client *bigquery.Client, w io.Writer) error {
 	return nil
 }
 
-func printDatasetInfo(client *bigquery.Client, datasetID string) error {
+func printDatasetInfo(client *bigquery.Client, w io.Writer, datasetID string) error {
 	ctx := context.Background()
 	// [START bigquery_get_dataset]
 	meta, err := client.Dataset(datasetID).Metadata(ctx)
@@ -393,13 +401,13 @@ func printDatasetInfo(client *bigquery.Client, datasetID string) error {
 		return err
 	}
 
-	fmt.Printf("Dataset ID: %s\n", datasetID)
-	fmt.Printf("Description: %s\n", meta.Description)
-	fmt.Println("Labels:")
+	fmt.Fprintf(w, "Dataset ID: %s\n", datasetID)
+	fmt.Fprintf(w, "Description: %s\n", meta.Description)
+	fmt.Fprintln(w, "Labels:")
 	for k, v := range meta.Labels {
-		fmt.Printf("\t%s: %s", k, v)
+		fmt.Fprintf(w, "\t%s: %s", k, v)
 	}
-	fmt.Println("Tables:")
+	fmt.Fprintln(w, "Tables:")
 	it := client.Dataset(datasetID).Tables(ctx)
 
 	cnt := 0
@@ -409,16 +417,16 @@ func printDatasetInfo(client *bigquery.Client, datasetID string) error {
 			break
 		}
 		cnt++
-		fmt.Printf("\t%s\n", t.TableID)
+		fmt.Fprintf(w, "\t%s\n", t.TableID)
 	}
 	if cnt == 0 {
-		fmt.Println("\tThis dataset does not contain any tables.")
+		fmt.Fprintln(w, "\tThis dataset does not contain any tables.")
 	}
 	// [END bigquery_get_dataset]
 	return nil
 }
 
-func listJobs(client *bigquery.Client) error {
+func listJobs(client *bigquery.Client, w io.Writer) error {
 	ctx := context.Background()
 	// [START bigquery_list_jobs]
 	it := client.Jobs(ctx)
@@ -439,7 +447,7 @@ func listJobs(client *bigquery.Client) error {
 		case bigquery.Done:
 			state = "Done"
 		}
-		fmt.Printf("Job %s in state %s\n", j.ID(), state)
+		fmt.Fprintf(w, "Job %s in state %s\n", j.ID(), state)
 	}
 	// [END bigquery_list_jobs]
 	return nil
@@ -493,7 +501,7 @@ func createTableExplicitSchema(client *bigquery.Client, datasetID, tableID strin
 	return nil
 }
 
-func createTableComplexSchema(client *bigquery.Client, datasetID, tableID string) error {
+func createTableComplexSchema(client *bigquery.Client, w io.Writer, datasetID, tableID string) error {
 	ctx := context.Background()
 	// [START bigquery_nested_repeated_schema]
 	sampleSchema := bigquery.Schema{
@@ -521,7 +529,7 @@ func createTableComplexSchema(client *bigquery.Client, datasetID, tableID string
 	if err := tableRef.Create(ctx, metaData); err != nil {
 		return err
 	}
-	fmt.Printf("created table %s\n", tableRef.FullyQualifiedName())
+	fmt.Fprintf(w, "created table %s\n", tableRef.FullyQualifiedName())
 	// [END bigquery_nested_repeated_schema]
 	return nil
 }
@@ -817,6 +825,24 @@ func updateTableChangeCMEK(client *bigquery.Client, datasetID, tableID string) e
 	return nil
 }
 
+func updateModelDescription(client *bigquery.Client, datasetID, modelID string) error {
+	ctx := context.Background()
+	// [START bigquery_update_model_description]
+	model := client.Dataset(datasetID).Model(modelID)
+	oldMeta, err := model.Metadata(ctx)
+	if err != nil {
+		return fmt.Errorf("Metadata: %v", err)
+	}
+	update := bigquery.ModelMetadataToUpdate{
+		Description: "This model was modified from a Go program",
+	}
+	if _, err = model.Update(ctx, update, oldMeta.ETag); err != nil {
+		return fmt.Errorf("Update: %v", err)
+	}
+	// [END bigquery_update_model_description]
+	return nil
+}
+
 func updateTableDescription(client *bigquery.Client, datasetID, tableID string) error {
 	ctx := context.Background()
 	// [START bigquery_update_table_description]
@@ -855,7 +881,7 @@ func updateTableExpiration(client *bigquery.Client, datasetID, tableID string) e
 
 }
 
-func getView(client *bigquery.Client, datasetID, viewID string) error {
+func getView(client *bigquery.Client, w io.Writer, datasetID, viewID string) error {
 	ctx := context.Background()
 	// [START bigquery_get_view]
 	view := client.Dataset(datasetID).Table(viewID)
@@ -863,7 +889,7 @@ func getView(client *bigquery.Client, datasetID, viewID string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("View %s, query: %s\n", view.FullyQualifiedName(), meta.ViewQuery)
+	fmt.Fprintf(w, "View %s, query: %s\n", view.FullyQualifiedName(), meta.ViewQuery)
 	// [END bigquery_get_view]
 	return nil
 }
@@ -942,7 +968,7 @@ func tableLabels(client *bigquery.Client, w io.Writer, datasetID, tableID string
 	}
 	fmt.Fprintf(w, "Table %s labels:\n", datasetID)
 	if len(meta.Labels) == 0 {
-		fmt.Println("Table has no labels defined.")
+		fmt.Fprintln(w, "Table has no labels defined.")
 		return nil
 	}
 	for k, v := range meta.Labels {
@@ -987,6 +1013,25 @@ func deleteTableLabel(client *bigquery.Client, datasetID, tableID string) error 
 	return nil
 }
 
+func listModels(client *bigquery.Client, w io.Writer, datasetID string) error {
+	ctx := context.Background()
+	// [START bigquery_list_models]
+	fmt.Fprintf(w, "Models contained in dataset '%s'\n", datasetID)
+	it := client.Dataset(datasetID).Models(ctx)
+	for {
+		m, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "Model: %s\n", m.FullyQualifiedName())
+	}
+	// [END bigquery_list_models]
+	return nil
+}
+
 func listTables(client *bigquery.Client, w io.Writer, datasetID string) error {
 	ctx := context.Background()
 	// [START bigquery_list_tables]
@@ -1008,7 +1053,7 @@ func listTables(client *bigquery.Client, w io.Writer, datasetID string) error {
 func insertRows(client *bigquery.Client, datasetID, tableID string) error {
 	ctx := context.Background()
 	// [START bigquery_table_insert_rows]
-	u := client.Dataset(datasetID).Table(tableID).Uploader()
+	u := client.Dataset(datasetID).Table(tableID).Inserter()
 	items := []*Item{
 		// Item implements the ValueSaver interface.
 		{Name: "Phred Phlyntstone", Age: 32},
@@ -1021,7 +1066,7 @@ func insertRows(client *bigquery.Client, datasetID, tableID string) error {
 	return nil
 }
 
-func queryBasic(client *bigquery.Client) error {
+func queryBasic(client *bigquery.Client, w io.Writer) error {
 	ctx := context.Background()
 	// [START bigquery_query]
 
@@ -1032,10 +1077,10 @@ func queryBasic(client *bigquery.Client) error {
 	// Location must match that of the dataset(s) referenced in the query.
 	q.Location = "US"
 	// [END bigquery_query]
-	return runAndRead(ctx, client, q)
+	return runAndRead(ctx, w, client, q)
 }
 
-func queryDisableCache(client *bigquery.Client) error {
+func queryDisableCache(client *bigquery.Client, w io.Writer) error {
 	ctx := context.Background()
 	// [START bigquery_query_no_cache]
 
@@ -1046,10 +1091,10 @@ func queryDisableCache(client *bigquery.Client) error {
 	q.Location = "US"
 	// [END bigquery_query_no_cache]
 
-	return runAndRead(ctx, client, q)
+	return runAndRead(ctx, w, client, q)
 }
 
-func queryBatch(client *bigquery.Client, dstDatasetID, dstTableID string) error {
+func queryBatch(client *bigquery.Client, w io.Writer, dstDatasetID, dstTableID string) error {
 	ctx := context.Background()
 	// [START bigquery_query_batch]
 	// Build an aggregate table.
@@ -1088,14 +1133,14 @@ func queryBatch(client *bigquery.Client, dstDatasetID, dstTableID string) error 
 	// You can continue to monitor job progress until it reaches
 	// the Done state by polling periodically.  In this example,
 	// we print the latest status.
-	fmt.Printf("Job %s in Location %s currently in state: %s\n", job.ID(), job.Location(), state)
+	fmt.Fprintf(w, "Job %s in Location %s currently in state: %s\n", job.ID(), job.Location(), state)
 
 	// [END bigquery_query_batch]
 	job.Cancel(ctx)
 	return nil
 }
 
-func queryDryRun(client *bigquery.Client) error {
+func queryDryRun(client *bigquery.Client, w io.Writer) error {
 	ctx := context.Background()
 	// [START bigquery_query_dry_run]
 	q := client.Query(`
@@ -1118,12 +1163,12 @@ func queryDryRun(client *bigquery.Client) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("This query will process %d bytes\n", status.Statistics.TotalBytesProcessed)
+	fmt.Fprintf(w, "This query will process %d bytes\n", status.Statistics.TotalBytesProcessed)
 	// [END bigquery_query_dry_run]
 	return nil
 }
 
-func queryWithDestination(client *bigquery.Client, destDatasetID, destTableID string) error {
+func queryWithDestination(client *bigquery.Client, w io.Writer, destDatasetID, destTableID string) error {
 	ctx := context.Background()
 	// [START bigquery_query_destination_table]
 
@@ -1131,10 +1176,10 @@ func queryWithDestination(client *bigquery.Client, destDatasetID, destTableID st
 	q.Location = "US" // Location must match the dataset(s) referenced in query.
 	q.QueryConfig.Dst = client.Dataset(destDatasetID).Table(destTableID)
 	// [END bigquery_query_destination_table]
-	return runAndRead(ctx, client, q)
+	return runAndRead(ctx, w, client, q)
 }
 
-func queryWithDestinationCMEK(client *bigquery.Client, destDatasetID, destTableID string) error {
+func queryWithDestinationCMEK(client *bigquery.Client, w io.Writer, destDatasetID, destTableID string) error {
 	ctx := context.Background()
 	// [START bigquery_query_destination_table_cmek]
 	q := client.Query("SELECT 17 as my_col")
@@ -1144,22 +1189,22 @@ func queryWithDestinationCMEK(client *bigquery.Client, destDatasetID, destTableI
 		// TODO: Replace this key with a key you have created in Cloud KMS.
 		KMSKeyName: "projects/cloud-samples-tests/locations/us-central1/keyRings/test/cryptoKeys/test",
 	}
-	return runAndRead(ctx, client, q)
+	return runAndRead(ctx, w, client, q)
 	// [END bigquery_query_destination_table_cmek]
 
 }
 
-func queryLegacy(client *bigquery.Client, sqlString string) error {
+func queryLegacy(client *bigquery.Client, w io.Writer, sqlString string) error {
 	ctx := context.Background()
 	// [START bigquery_query_legacy]
 	q := client.Query(sqlString)
 	q.UseLegacySQL = true
 
 	// [END bigquery_query_legacy]
-	return runAndRead(ctx, client, q)
+	return runAndRead(ctx, w, client, q)
 }
 
-func queryLegacyLargeResults(client *bigquery.Client, dstDatasetID, dstTableID string) error {
+func queryLegacyLargeResults(client *bigquery.Client, w io.Writer, dstDatasetID, dstTableID string) error {
 	ctx := context.Background()
 	// [START bigquery_query_legacy_large_results]
 	q := client.Query(
@@ -1168,10 +1213,10 @@ func queryLegacyLargeResults(client *bigquery.Client, dstDatasetID, dstTableID s
 	q.AllowLargeResults = true
 	q.QueryConfig.Dst = client.Dataset(dstDatasetID).Table(dstTableID)
 	// [END bigquery_query_legacy_large_results]
-	return runAndRead(ctx, client, q)
+	return runAndRead(ctx, w, client, q)
 }
 
-func queryWithArrayParams(client *bigquery.Client) error {
+func queryWithArrayParams(client *bigquery.Client, w io.Writer) error {
 	ctx := context.Background()
 	// [START bigquery_query_params_arrays]
 	q := client.Query(
@@ -1198,10 +1243,10 @@ func queryWithArrayParams(client *bigquery.Client) error {
 		},
 	}
 	// [END bigquery_query_params_arrays]
-	return runAndRead(ctx, client, q)
+	return runAndRead(ctx, w, client, q)
 }
 
-func queryWithNamedParams(client *bigquery.Client) error {
+func queryWithNamedParams(client *bigquery.Client, w io.Writer) error {
 	ctx := context.Background()
 	// [START bigquery_query_params_named]
 	q := client.Query(
@@ -1221,10 +1266,10 @@ func queryWithNamedParams(client *bigquery.Client) error {
 		},
 	}
 	// [END bigquery_query_params_named]
-	return runAndRead(ctx, client, q)
+	return runAndRead(ctx, w, client, q)
 }
 
-func queryWithPositionalParams(client *bigquery.Client) error {
+func queryWithPositionalParams(client *bigquery.Client, w io.Writer) error {
 	ctx := context.Background()
 	// [START bigquery_query_params_positional]
 	q := client.Query(
@@ -1242,10 +1287,10 @@ func queryWithPositionalParams(client *bigquery.Client) error {
 		},
 	}
 	// [END bigquery_query_params_positional]
-	return runAndRead(ctx, client, q)
+	return runAndRead(ctx, w, client, q)
 }
 
-func queryWithTimestampParam(client *bigquery.Client) error {
+func queryWithTimestampParam(client *bigquery.Client, w io.Writer) error {
 	ctx := context.Background()
 	// [START bigquery_query_params_timestamps]
 	q := client.Query(
@@ -1257,10 +1302,10 @@ func queryWithTimestampParam(client *bigquery.Client) error {
 		},
 	}
 	// [END bigquery_query_params_timestamps]
-	return runAndRead(ctx, client, q)
+	return runAndRead(ctx, w, client, q)
 }
 
-func queryWithStructParam(client *bigquery.Client) error {
+func queryWithStructParam(client *bigquery.Client, w io.Writer) error {
 	ctx := context.Background()
 	// [START bigquery_query_params_structs]
 	type MyStruct struct {
@@ -1276,18 +1321,18 @@ func queryWithStructParam(client *bigquery.Client) error {
 		},
 	}
 	// [END bigquery_query_params_structs]
-	return runAndRead(ctx, client, q)
+	return runAndRead(ctx, w, client, q)
 }
 
-func queryPartitionedTable(client *bigquery.Client, datasetID, tableID string) error {
+func queryPartitionedTable(client *bigquery.Client, w io.Writer, datasetID, tableID string) error {
 	ctx := context.Background()
 	// [START bigquery_query_partitioned_table]
 	q := client.Query(fmt.Sprintf("SELECT * FROM `%s.%s` WHERE `date` BETWEEN DATE('1800-01-01') AND DATE('1899-12-31')", datasetID, tableID))
 	// [END bigquery_query_partitioned_table]
-	return runAndRead(ctx, client, q)
+	return runAndRead(ctx, w, client, q)
 }
 
-func queryClusteredTable(client *bigquery.Client, datasetID, tableID string) error {
+func queryClusteredTable(client *bigquery.Client, w io.Writer, datasetID, tableID string) error {
 	ctx := context.Background()
 	// [START bigquery_query_clustered_table]
 	q := client.Query(fmt.Sprintf(`
@@ -1307,10 +1352,10 @@ func queryClusteredTable(client *bigquery.Client, datasetID, tableID string) err
 		},
 	}
 	// [END bigquery_query_clustered_table]
-	return runAndRead(ctx, client, q)
+	return runAndRead(ctx, w, client, q)
 }
 
-func printTableInfo(client *bigquery.Client, datasetID, tableID string) error {
+func printTableInfo(client *bigquery.Client, w io.Writer, datasetID, tableID string) error {
 	ctx := context.Background()
 	// [START bigquery_get_table]
 	meta, err := client.Dataset(datasetID).Table(tableID).Metadata(ctx)
@@ -1318,14 +1363,26 @@ func printTableInfo(client *bigquery.Client, datasetID, tableID string) error {
 		return err
 	}
 	// Print basic information about the table.
-	fmt.Printf("Schema has %d top-level fields\n", len(meta.Schema))
-	fmt.Printf("Description: %s\n", meta.Description)
-	fmt.Printf("Rows in managed storage: %d\n", meta.NumRows)
+	fmt.Fprintf(w, "Schema has %d top-level fields\n", len(meta.Schema))
+	fmt.Fprintf(w, "Description: %s\n", meta.Description)
+	fmt.Fprintf(w, "Rows in managed storage: %d\n", meta.NumRows)
 	// [END bigquery_get_table]
 	return nil
 }
 
-func browseTable(client *bigquery.Client, datasetID, tableID string) error {
+func printModelInfo(client *bigquery.Client, w io.Writer, datasetID, modelID string) error {
+	ctx := context.Background()
+	// [START bigquery_get_model]
+	meta, err := client.Dataset(datasetID).Model(modelID).Metadata(ctx)
+	if err != nil {
+		return fmt.Errorf("Metadata: %v", err)
+	}
+	fmt.Fprintf(w, "Got model '%q' with friendly name '%q'\n", modelID, meta.Name)
+	// [END bigquery_get_model]
+	return nil
+}
+
+func browseTable(client *bigquery.Client, w io.Writer, datasetID, tableID string) error {
 	ctx := context.Background()
 	// [START bigquery_browse_table]
 	table := client.Dataset(datasetID).Table(tableID)
@@ -1339,7 +1396,7 @@ func browseTable(client *bigquery.Client, datasetID, tableID string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Println(row)
+		fmt.Fprintln(w, row)
 	}
 	// [END bigquery_browse_table]
 	return nil
@@ -1450,6 +1507,18 @@ func copyMultiTable(client *bigquery.Client, datasetID, dstTableID string) error
 	// [END bigquery_copy_table_multiple_source]
 	return nil
 }
+
+func deleteModel(client *bigquery.Client, datasetID, modelID string) error {
+	ctx := context.Background()
+	// [START bigquery_delete_model]
+	model := client.Dataset(datasetID).Model(modelID)
+	if err := model.Delete(ctx); err != nil {
+		return fmt.Errorf("Delete: %v", err)
+	}
+	// [END bigquery_delete_model]
+	return nil
+}
+
 func deleteTable(client *bigquery.Client, datasetID, tableID string) error {
 	ctx := context.Background()
 	// [START bigquery_delete_table]
@@ -1517,7 +1586,7 @@ func deleteAndUndeleteTable(client *bigquery.Client, datasetID, tableID string) 
 
 }
 
-func getJobInfo(client *bigquery.Client, jobID string) error {
+func getJobInfo(client *bigquery.Client, w io.Writer, jobID string) error {
 	ctx := context.Background()
 	// [START bigquery_get_job]
 	job, err := client.JobFromID(ctx, jobID)
@@ -1535,7 +1604,7 @@ func getJobInfo(client *bigquery.Client, jobID string) error {
 	case bigquery.Done:
 		state = "Done"
 	}
-	fmt.Printf("Job %s was created %v and is in state %s\n",
+	fmt.Fprintf(w, "Job %s was created %v and is in state %s\n",
 		jobID, status.Statistics.CreationTime, state)
 	// [END bigquery_get_job]
 	return nil
@@ -2020,7 +2089,7 @@ func exportSampleTableAsJSON(client *bigquery.Client, gcsURI string) error {
 }
 
 // runAndRead executes a query then prints results.
-func runAndRead(ctx context.Context, client *bigquery.Client, q *bigquery.Query) error {
+func runAndRead(ctx context.Context, w io.Writer, client *bigquery.Client, q *bigquery.Query) error {
 	// [START bigquery_query]
 	// [START bigquery_query_destination_table]
 	// [START bigquery_query_destination_table_cmek]
@@ -2055,7 +2124,7 @@ func runAndRead(ctx context.Context, client *bigquery.Client, q *bigquery.Query)
 		if err != nil {
 			return err
 		}
-		fmt.Println(row)
+		fmt.Fprintln(w, row)
 	}
 	// [END bigquery_query]
 	// [END bigquery_query_destination_table]
