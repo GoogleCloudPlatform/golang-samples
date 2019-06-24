@@ -80,7 +80,7 @@ func TestDeidentifyDateShift(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.input, func(t *testing.T) {
-			// t.Parallel()
+			t.Parallel()
 			buf := new(bytes.Buffer)
 			deidentifyDateShift(buf, client, projectID, test.lowerBound, test.upperBound, test.input)
 			if got := buf.String(); got != test.want {
