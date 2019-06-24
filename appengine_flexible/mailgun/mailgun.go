@@ -56,7 +56,7 @@ func mustGetenv(k string) string {
 
 // [START gae_flex_mailgun_simple_message]
 func sendSimpleMessageHandler(w http.ResponseWriter, r *http.Request) {
-	msg, id, err := mailgunClient.Send(mailgunClient.NewMessage(
+	msg, id, err := mailgunClient.Send(r.Context(), mailgunClient.NewMessage(
 		/* From */ fmt.Sprintf("Excited User <mailgun@%s>", mailgunDomain),
 		/* Subject */ "Hello",
 		/* Body */ "Testing some Mailgun awesomness!",
@@ -87,7 +87,7 @@ func sendComplexMessageHandler(w http.ResponseWriter, r *http.Request) {
 	message.AddReaderAttachment("files/test.txt",
 		ioutil.NopCloser(strings.NewReader("foo")))
 
-	msg, id, err := mailgunClient.Send(message)
+	msg, id, err := mailgunClient.Send(r.Context(), message)
 	if err != nil {
 		msg := fmt.Sprintf("Could not send message: %v, ID %v, %+v", err, id, msg)
 		http.Error(w, msg, http.StatusInternalServerError)
