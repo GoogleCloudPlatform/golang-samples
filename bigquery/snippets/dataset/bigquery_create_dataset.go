@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package dataset demonstrates interactions with BigQuery's dataset resources.
 package dataset
 
 // [START bigquery_create_dataset]
