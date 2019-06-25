@@ -39,6 +39,9 @@ func listDatasets(projectID string, w io.Writer) error {
 		if err == iterator.Done {
 			break
 		}
+		if err != nil {
+			return err
+		}
 		fmt.Fprintln(w, dataset.DatasetID)
 	}
 	return nil
