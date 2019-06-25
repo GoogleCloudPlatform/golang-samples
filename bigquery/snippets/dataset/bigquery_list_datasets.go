@@ -25,8 +25,14 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-func listDatasets(client *bigquery.Client, w io.Writer) error {
+func listDatasets(projectID string, w io.Writer) error {
+	// projectID := "my-project-id"
 	ctx := context.Background()
+	client, err := bigquery.NewClient(ctx, projectID)
+	if err != nil {
+		return err
+	}
+
 	it := client.Datasets(ctx)
 	for {
 		dataset, err := it.Next()

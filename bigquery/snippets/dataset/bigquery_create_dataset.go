@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package dataset demonstrates interactions with BigQuery's dataset resources.
 package dataset
 
 // [START bigquery_create_dataset]
@@ -22,8 +23,16 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
-func createDataset(client *bigquery.Client, datasetID string) error {
+func createDataset(projectID, datasetID string) error {
+	// projectID := "my-project-id"
+	// datasetID := "mydataset"
 	ctx := context.Background()
+
+	client, err := bigquery.NewClient(ctx, projectID)
+	if err != nil {
+		return err
+	}
+
 	meta := &bigquery.DatasetMetadata{
 		Location: "US", // See https://cloud.google.com/bigquery/docs/locations
 	}

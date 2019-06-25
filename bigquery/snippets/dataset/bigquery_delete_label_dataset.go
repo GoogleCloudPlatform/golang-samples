@@ -22,8 +22,16 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
-func deleteDatasetLabel(client *bigquery.Client, datasetID string) error {
+func deleteDatasetLabel(projectID, datasetID string) error {
+	// projectID := "my-project-id"
+	// datasetID := "mydataset"
 	ctx := context.Background()
+
+	client, err := bigquery.NewClient(ctx, projectID)
+	if err != nil {
+		return err
+	}
+
 	ds := client.Dataset(datasetID)
 	meta, err := ds.Metadata(ctx)
 	if err != nil {

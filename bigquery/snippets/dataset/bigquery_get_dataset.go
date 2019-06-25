@@ -25,8 +25,15 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-func printDatasetInfo(client *bigquery.Client, w io.Writer, datasetID string) error {
+func printDatasetInfo(w io.Writer, projectID, datasetID string) error {
+	// projectID := "my-project-id"
+	// datasetID := "mydataset"
 	ctx := context.Background()
+	client, err := bigquery.NewClient(ctx, projectID)
+	if err != nil {
+		return err
+	}
+
 	meta, err := client.Dataset(datasetID).Metadata(ctx)
 	if err != nil {
 		return err

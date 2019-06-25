@@ -25,8 +25,14 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-func listDatasetsByLabel(client *bigquery.Client, w io.Writer) error {
+func listDatasetsByLabel(w io.Writer, projectID string) error {
+	// projectID := "my-project-id"
 	ctx := context.Background()
+	client, err := bigquery.NewClient(ctx, projectID)
+	if err != nil {
+		return err
+	}
+
 	it := client.Datasets(ctx)
 	it.Filter = "labels.color:green"
 	for {

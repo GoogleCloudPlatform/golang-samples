@@ -23,8 +23,16 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
-func deleteDataset(client *bigquery.Client, datasetID string) error {
+func deleteDataset(projectID, datasetID string) error {
+	// projectID := "my-project-id"
+	// datasetID := "mydataset"
 	ctx := context.Background()
+
+	client, err := bigquery.NewClient(ctx, projectID)
+	if err != nil {
+		return err
+	}
+
 	// To recursively delete a dataset and contents, use DeleteWithContents.
 	if err := client.Dataset(datasetID).Delete(ctx); err != nil {
 		return fmt.Errorf("Delete: %v", err)

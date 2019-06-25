@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package dataset demonstrates interactions with BigQuery's dataset resources.
+// Examples include lifecycle operations such as creation, modification, and
+// deletion.
 package dataset
 
 import (
@@ -22,7 +25,7 @@ import (
 	"testing"
 
 	"cloud.google.com/go/bigquery"
-	bqtestutil "github.com/GoogleCloudPlatform/golang-samples/bigquery/snippets/testutil"
+	"github.com/GoogleCloudPlatform/golang-samples/bigquery/snippets/bqtestutil"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
@@ -35,22 +38,26 @@ func TestAll(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	datasetID := bqtestutil.UniqueBQName("golang_snippettest_dataset")
-	if err := createDataset(client, datasetID); err != nil {
+	datasetID, err := bqtestutil.UniqueBQName("golang_snippettest_dataset")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := createDataset(tc.ProjectID, datasetID); err != nil {
 		t.Errorf("createDataset(%q): %v", datasetID, err)
 	}
 	// Cleanup dataset at end of test.
 	defer client.Dataset(datasetID).DeleteWithContents(ctx)
 
-	if err := updateDatasetAccessControl(client, datasetID); err != nil {
+	if err := updateDatasetAccessControl(tc.ProjectID, datasetID); err != nil {
 		t.Errorf("updateDataSetAccessControl(%q): %v", datasetID, err)
 	}
-	if err := addDatasetLabel(client, datasetID); err != nil {
+	if err := addDatasetLabel(tc.ProjectID, datasetID); err != nil {
 		t.Errorf("updateDatasetAddLabel: %v", err)
 	}
 
 	buf := &bytes.Buffer{}
-	if err := printDatasetLabels(client, buf, datasetID); err != nil {
+	if err := printDatasetLabels(buf, tc.ProjectID, datasetID); err != nil {
 		t.Errorf("printDatasetLabels(%q): %v", datasetID, err)
 	}
 	want := "color:green"
@@ -58,39 +65,42 @@ func TestAll(t *testing.T) {
 		t.Errorf("getDatasetLabel(%q) expected %q to contain %q", datasetID, got, want)
 	}
 
-	if err := addDatasetLabel(client, datasetID); err != nil {
+	if err := addDatasetLabel(tc.ProjectID, datasetID); err != nil {
 		t.Errorf("updateDatasetAddLabel: %v", err)
 	}
 	buf.Reset()
-	if err := listDatasetsByLabel(client, buf); err != nil {
+	if err := listDatasetsByLabel(buf, tc.ProjectID); err != nil {
 		t.Errorf("listDatasetsByLabel: %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, datasetID) {
 		t.Errorf("listDatasetsByLabel expected %q to contain %q", got, want)
 	}
-	if err := deleteDatasetLabel(client, datasetID); err != nil {
+	if err := deleteDatasetLabel(tc.ProjectID, datasetID); err != nil {
 		t.Errorf("updateDatasetDeleteLabel: %v", err)
 	}
-	if err := printDatasetInfo(client, ioutil.Discard, datasetID); err != nil {
+	if err := printDatasetInfo(ioutil.Discard, tc.ProjectID, datasetID); err != nil {
 		t.Errorf("printDatasetInfo: %v", err)
 	}
 
 	// Test empty dataset creation/ttl/delete.
-	deletionDatasetID := bqtestutil.UniqueBQName("golang_example_quickdelete")
-	if err := createDataset(client, deletionDatasetID); err != nil {
+	deletionDatasetID, err := bqtestutil.UniqueBQName("golang_example_quickdelete")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := createDataset(tc.ProjectID, deletionDatasetID); err != nil {
 		t.Errorf("createDataset(%q): %v", deletionDatasetID, err)
 	}
-	if err = updateDatasetDefaultExpiration(client, deletionDatasetID); err != nil {
+	if err = updateDatasetDefaultExpiration(tc.ProjectID, deletionDatasetID); err != nil {
 		t.Errorf("updateDatasetDefaultExpiration(%q): %v", deletionDatasetID, err)
 	}
-	if err := deleteDataset(client, deletionDatasetID); err != nil {
+	if err := deleteDataset(tc.ProjectID, deletionDatasetID); err != nil {
 		t.Errorf("deleteEmptyDataset(%q): %v", deletionDatasetID, err)
 	}
 
-	if err := updateDatasetDescription(client, datasetID); err != nil {
+	if err := updateDatasetDescription(tc.ProjectID, datasetID); err != nil {
 		t.Errorf("updateDatasetDescription(%q): %v", datasetID, err)
 	}
-	if err := listDatasets(client, ioutil.Discard); err != nil {
+	if err := listDatasets(tc.ProjectID, ioutil.Discard); err != nil {
 		t.Errorf("listDatasets: %v", err)
 	}
 

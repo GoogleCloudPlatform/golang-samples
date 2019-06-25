@@ -12,33 +12,42 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package testutil
+package bqtestutil
 
 import (
 	"fmt"
 	"regexp"
-	"time"
+
+	"github.com/gofrs/uuid"
 )
 
+var u1 = uuid.Must(uuid.NewV4())
+
 // UniqueBQName returns a more unique name for a BigQuery resource.
-func UniqueBQName(prefix string) string {
-	t := time.Now()
-	return fmt.Sprintf("%s_%d", sanitize(prefix, '_'), t.Unix())
+func UniqueBQName(prefix string) (string, error) {
+	u, err := uuid.NewV4()
+	if err != nil {
+		return "", fmt.Errorf("failed to generate bq uuid: %v", err)
+	}
+	return fmt.Sprintf("%s_%s", sanitize(prefix, "_"), sanitize(u.String(), "_")), nil
 }
 
 // UniqueBucketName returns a more unique name cloud storage bucket.
-func UniqueBucketName(prefix, projectID string) string {
-	t := time.Now()
-	f := fmt.Sprintf("%s-%s-%d", sanitize(prefix, '-'), sanitize(projectID, '-'), t.Unix())
+func UniqueBucketName(prefix, projectID string) (string, error) {
+	u, err := uuid.NewV4()
+	if err != nil {
+		return "", fmt.Errorf("failed to generate bucket uuid: %v", err)
+	}
+	f := fmt.Sprintf("%s-%s-%s", sanitize(prefix, "-"), sanitize(projectID, "-"), sanitize(u.String(), "-"))
 	// bucket max name length is 63 chars, so we truncate.
 	if len(f) > 63 {
-		return f[:63]
+		return f[:63], nil
 	}
-	return f
+	return f, nil
 }
 
-func sanitize(s string, allowedSeparator rune) string {
-	pattern := fmt.Sprintf("[^a-zA-Z0-9%s]", string(allowedSeparator))
+func sanitize(s string, allowedSeparator string) string {
+	pattern := fmt.Sprintf("[^a-zA-Z0-9%s]", allowedSeparator)
 	reg, err := regexp.Compile(pattern)
 	if err != nil {
 		return s
