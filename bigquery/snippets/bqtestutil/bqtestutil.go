@@ -21,8 +21,6 @@ import (
 	"github.com/gofrs/uuid"
 )
 
-var u1 = uuid.Must(uuid.NewV4())
-
 // UniqueBQName returns a more unique name for a BigQuery resource.
 func UniqueBQName(prefix string) (string, error) {
 	u, err := uuid.NewV4()
