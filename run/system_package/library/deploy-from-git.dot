@@ -1,0 +1,9 @@
+digraph Cloud_Run_Deploy {
+  Developer [shape=plaintext]
+  "Cloud Run" [fillcolor="cyan:lightblue" style=filled gradientangle=270]
+
+  Developer -> "Git Repository"
+  "Git Repository" -> "Cloud Build"
+  "Cloud Build" -> "Google Container Registry"
+  "Google Container Registry" -> "Cloud Run"
+}
