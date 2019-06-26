@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START healthcare_export_dicom_instance]
+// [START healthcare_export_dicom_instance_gcs]
 import (
 	"context"
 	"fmt"
@@ -50,4 +50,4 @@ func exportDICOMInstance(w io.Writer, projectID, location, datasetID, dicomStore
 	return nil
 }
 
-// [END healthcare_export_dicom_instance]
+// [END healthcare_export_dicom_instance_gcs]
