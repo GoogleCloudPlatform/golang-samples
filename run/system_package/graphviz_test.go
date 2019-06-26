@@ -31,7 +31,7 @@ func TestDiagramHandlerErrors(t *testing.T) {
 		{
 			label:       "invalid",
 			data:        "digraph",
-			want:        "Bad Request\n",
+			want:        "Bad Request: DOT syntax error\n",
 			contentType: "text/plain; charset=utf-8",
 		},
 	}
@@ -85,7 +85,7 @@ func TestDiagramHandlerImage(t *testing.T) {
 		}
 
 		got = rr.Result().Header.Get("Cache-Control")
-		if (got != test.cacheControl) {
+		if got != test.cacheControl {
 			t.Errorf("response (%s) Cache-Control: got %q, want %q", test.label, got, test.cacheControl)
 		}
 	}
