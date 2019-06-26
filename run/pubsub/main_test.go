@@ -26,7 +26,7 @@ func TestHelloPubSubErrors(t *testing.T) {
 	for _, test := range tests {
 		var payload *strings.Reader
 		if test.name == "no_payload" {
-			payload = strings.NewReader("");
+			payload = strings.NewReader("")
 		} else {
 			not_encoded := "Gopher"
 			jsonStr := fmt.Sprintf(`{"message":{"data":"%s","id":"test-123"}}`, not_encoded)
