@@ -46,10 +46,13 @@ func TestInfoTypes(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		buf := new(bytes.Buffer)
-		infoTypes(buf, client, test.language, test.filter)
-		if got := buf.String(); !strings.Contains(got, test.want) {
-			t.Errorf("infoTypes(%s, %s) = %s, want substring %q", test.language, test.filter, got, test.want)
-		}
+		t.Run(test.language, func(t *testing.T) {
+			t.Parallel()
+			buf := new(bytes.Buffer)
+			infoTypes(buf, client, test.language, test.filter)
+			if got := buf.String(); !strings.Contains(got, test.want) {
+				t.Errorf("infoTypes(%s, %s) = %s, want substring %q", test.language, test.filter, got, test.want)
+			}
+		})
 	}
 }

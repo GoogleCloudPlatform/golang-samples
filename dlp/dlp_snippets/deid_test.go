@@ -46,11 +46,14 @@ func TestMask(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		buf := new(bytes.Buffer)
-		mask(buf, client, projectID, test.input, []string{"US_SOCIAL_SECURITY_NUMBER"}, test.maskingCharacter, test.numberToMask)
-		if got := buf.String(); got != test.want {
-			t.Errorf("mask(%q, %s, %v) = %q, want %q", test.input, test.maskingCharacter, test.numberToMask, got, test.want)
-		}
+		t.Run(test.input, func(t *testing.T) {
+			t.Parallel()
+			buf := new(bytes.Buffer)
+			mask(buf, client, projectID, test.input, []string{"US_SOCIAL_SECURITY_NUMBER"}, test.maskingCharacter, test.numberToMask)
+			if got := buf.String(); got != test.want {
+				t.Errorf("mask(%q, %s, %v) = %q, want %q", test.input, test.maskingCharacter, test.numberToMask, got, test.want)
+			}
+		})
 	}
 }
 
@@ -76,10 +79,13 @@ func TestDeidentifyDateShift(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		buf := new(bytes.Buffer)
-		deidentifyDateShift(buf, client, projectID, test.lowerBound, test.upperBound, test.input)
-		if got := buf.String(); got != test.want {
-			t.Errorf("deidentifyDateShift(%v, %v, %q) = %q, want %q", test.lowerBound, test.upperBound, got, test.input, test.want)
-		}
+		t.Run(test.input, func(t *testing.T) {
+			t.Parallel()
+			buf := new(bytes.Buffer)
+			deidentifyDateShift(buf, client, projectID, test.lowerBound, test.upperBound, test.input)
+			if got := buf.String(); got != test.want {
+				t.Errorf("deidentifyDateShift(%v, %v, %q) = %q, want %q", test.lowerBound, test.upperBound, got, test.input, test.want)
+			}
+		})
 	}
 }
