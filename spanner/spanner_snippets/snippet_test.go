@@ -210,11 +210,9 @@ func TestSample(t *testing.T) {
 	assertContains(out, "Executed 2 SQL statements using Batch DML.")
 
 	out = runCommand(t, "createtablewithdatatypes", dbName)
-	assertContains(out, "Created table Venues")
+	assertContains(out, "Created Venues table")
 
 	out = runCommand(t, "writedatatypesdata", dbName)
-	assertContains(out, "Inserted data.")
-
 	out = runCommand(t, "querywitharray", dbName)
 	assertContains(out, "19 Venue 19 2020-11-01")
 	assertContains(out, "42 Venue 42 2020-10-01")

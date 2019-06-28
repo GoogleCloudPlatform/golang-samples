@@ -1497,7 +1497,7 @@ func queryWithFloat(ctx context.Context, w io.Writer, client *spanner.Client) er
 		if err := row.Columns(&venueID, &venueName, &popularityScore); err != nil {
 			return err
 		}
-		fmt.Fprintf(w, "%d %s %d\n", venueID, venueName, popularityScore)
+		fmt.Fprintf(w, "%d %s %f\n", venueID, venueName, popularityScore)
 	}
 }
 
@@ -1570,8 +1570,7 @@ func queryWithString(ctx context.Context, w io.Writer, client *spanner.Client) e
 // [START spanner_query_with_timestamp_parameter]
 
 func queryWithTimestampParameter(ctx context.Context, w io.Writer, client *spanner.Client) error {
-	now := time.Now()
-	var exampleTimestamp = now.Unix()
+	var exampleTimestamp = time.Now()
 	stmt := spanner.Statement{
 		SQL: `SELECT VenueId, VenueName, LastUpdateTime FROM Venues
             WHERE LastUpdateTime < @lastUpdateTime`,
