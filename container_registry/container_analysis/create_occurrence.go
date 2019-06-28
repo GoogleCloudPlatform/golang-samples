@@ -48,10 +48,10 @@ func createOccurrence(resourceURL, noteID, occProjectID, noteProjectID string) (
 						{
 							AffectedCpeUri:  "your-uri-here",
 							AffectedPackage: "your-package-here",
-							MinAffectedVersion: &grafeaspb.Version{
+							AffectedVersionStart: &grafeaspb.Version{
 								Kind: grafeaspb.Version_MINIMUM,
 							},
-							FixedVersion: &grafeaspb.Version{
+							AffectedVersionEnd: &grafeaspb.Version{
 								Kind: grafeaspb.Version_MAXIMUM,
 							},
 						},
