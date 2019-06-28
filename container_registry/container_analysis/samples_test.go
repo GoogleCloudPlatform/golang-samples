@@ -294,7 +294,7 @@ func TestPollDiscoveryOccurrenceFinished(t *testing.T) {
 	ctx := context.Background()
 	client, err := containeranalysis.NewClient(ctx)
 	if err != nil {
-		t.Errorf("containeranalysis.NewGrafeasV1Beta1Client: %v", err)
+		t.Errorf("containeranalysis.NewClient: %v", err)
 	}
 	defer client.Close()
 	_, err = client.GetGrafeasClient().CreateNote(ctx, noteReq)
