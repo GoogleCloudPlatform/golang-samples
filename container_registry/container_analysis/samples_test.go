@@ -408,10 +408,10 @@ func TestFindHighVulnerabilities(t *testing.T) {
 						{
 							AffectedCpeUri:  "your-uri-here",
 							AffectedPackage: "your-package-here",
-							AffectedVersionStart: &grafeaspb.Version{
+							AffectedVersion: &grafeaspb.Version{
 								Kind: grafeaspb.Version_MINIMUM,
 							},
-							AffectedVersionEnd: &grafeaspb.Version{
+							FixedVersion: &grafeaspb.Version{
 								Kind: grafeaspb.Version_MAXIMUM,
 							},
 						},
