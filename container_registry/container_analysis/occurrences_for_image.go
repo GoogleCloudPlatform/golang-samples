@@ -33,7 +33,7 @@ func getOccurrencesForImage(w io.Writer, resourceURL, projectID string) (int, er
 	ctx := context.Background()
 	client, err := containeranalysis.NewClient(ctx)
 	if err != nil {
-		return -1, fmt.Errorf("NewGrafeasV1Beta1Client: %v", err)
+		return -1, fmt.Errorf("NewClient: %v", err)
 	}
 	defer client.Close()
 

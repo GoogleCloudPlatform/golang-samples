@@ -294,7 +294,7 @@ func TestPollDiscoveryOccurrenceFinished(t *testing.T) {
 	ctx := context.Background()
 	client, err := containeranalysis.NewClient(ctx)
 	if err != nil {
-		t.Errorf("containeranalysis.NewGrafeasV1Beta1Client: %v", err)
+		t.Errorf("containeranalysis.NewClient: %v", err)
 	}
 	defer client.Close()
 	_, err = client.GetGrafeasClient().CreateNote(ctx, noteReq)
@@ -385,10 +385,10 @@ func TestFindHighVulnerabilities(t *testing.T) {
 						{
 							AffectedCpeUri:  "your-uri-here",
 							AffectedPackage: "your-package-here",
-							MinAffectedVersion: &grafeaspb.Version{
+							AffectedVersionStart: &grafeaspb.Version{
 								Kind: grafeaspb.Version_MINIMUM,
 							},
-							FixedVersion: &grafeaspb.Version{
+							AffectedVersionEnd: &grafeaspb.Version{
 								Kind: grafeaspb.Version_MAXIMUM,
 							},
 						},
@@ -408,7 +408,7 @@ func TestFindHighVulnerabilities(t *testing.T) {
 						{
 							AffectedCpeUri:  "your-uri-here",
 							AffectedPackage: "your-package-here",
-							MinAffectedVersion: &grafeaspb.Version{
+							AffectedVersion: &grafeaspb.Version{
 								Kind: grafeaspb.Version_MINIMUM,
 							},
 							FixedVersion: &grafeaspb.Version{

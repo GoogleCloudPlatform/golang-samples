@@ -31,7 +31,7 @@ func createOccurrence(resourceURL, noteID, occProjectID, noteProjectID string) (
 	ctx := context.Background()
 	client, err := containeranalysis.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("NewGrafeasV1Beta1Client: %v", err)
+		return nil, fmt.Errorf("NewClient: %v", err)
 	}
 	defer client.Close()
 
@@ -48,7 +48,7 @@ func createOccurrence(resourceURL, noteID, occProjectID, noteProjectID string) (
 						{
 							AffectedCpeUri:  "your-uri-here",
 							AffectedPackage: "your-package-here",
-							MinAffectedVersion: &grafeaspb.Version{
+							AffectedVersion: &grafeaspb.Version{
 								Kind: grafeaspb.Version_MINIMUM,
 							},
 							FixedVersion: &grafeaspb.Version{
