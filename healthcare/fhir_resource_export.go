@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START healthcare_export_fhir_resources]
+// [START healthcare_export_fhir_resources_gcs]
 import (
 	"context"
 	"fmt"
@@ -69,4 +69,4 @@ func exportFHIRResource(w io.Writer, projectID, location, datasetID, fhirStoreID
 	}
 }
 
-// [END healthcare_export_fhir_resources]
+// [END healthcare_export_fhir_resources_gcs]
