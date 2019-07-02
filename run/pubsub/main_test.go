@@ -28,27 +28,27 @@ import (
 
 func TestHelloPubSubErrors(t *testing.T) {
 	tests := []struct {
-		name string
+		name    string
+		message string
 	}{
-		{name: "no_payload"},
-		{name: "not_base64"},
+		{
+			name:    "no_payload",
+			message: "",
+		},
+		{
+			name:    "not_base64",
+			message: `{"message":{"data":"Gopher","id":"test-123"}}`,
+		},
 	}
 	for _, test := range tests {
-		var payload *strings.Reader
-		if test.name == "no_payload" {
-			payload = strings.NewReader("")
-		} else {
-			not_encoded := "Gopher"
-			jsonStr := fmt.Sprintf(`{"message":{"data":"%s","id":"test-123"}}`, not_encoded)
-			payload = strings.NewReader(jsonStr)
-		}
+		payload := strings.NewReader(test.message)
 		req := httptest.NewRequest("GET", "/", payload)
 		rr := httptest.NewRecorder()
 
 		HelloPubSub(rr, req)
 
-		if rr.Result().StatusCode != http.StatusBadRequest {
-			t.Errorf("HelloPubSub(%q) should get BadRequest response", test.name)
+		if code := rr.Result().StatusCode; code != http.StatusBadRequest {
+			t.Errorf("HelloPubSub(%q): got (%q), want (%q)", test.name, code, http.StatusBadRequest)
 		}
 	}
 }
@@ -82,8 +82,8 @@ func TestHelloPubSub(t *testing.T) {
 		log.SetOutput(os.Stderr)
 		log.SetFlags(originalFlags)
 
-		if rr.Result().StatusCode == http.StatusBadRequest {
-			t.Errorf("HelloPubSub received invalid input (%q)", test.data)
+		if code := rr.Result().StatusCode; code == http.StatusBadRequest {
+			t.Errorf("HelloPubSub(%q) invalid input, status code (%q)", test.data, code)
 		}
 
 		out, err := ioutil.ReadAll(r)
@@ -91,7 +91,7 @@ func TestHelloPubSub(t *testing.T) {
 			t.Fatalf("ReadAll: %v", err)
 		}
 		if got := string(out); got != test.want {
-			t.Errorf("HelloPubSub(%q) = %q, want %q", test.data, got, test.want)
+			t.Errorf("HelloPubSub(%q): got %q, want %q", test.data, got, test.want)
 		}
 	}
 }

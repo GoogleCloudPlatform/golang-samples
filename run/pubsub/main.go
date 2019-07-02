@@ -41,6 +41,7 @@ func main() {
 // [END run_pubsub_server]
 
 // [START run_pubsub_handler]
+
 // PubSubMessage is the payload of a Pub/Sub event. Please refer to the docs for
 // additional information regarding Pub/Sub events.
 type PubSubMessage struct {
