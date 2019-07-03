@@ -19,14 +19,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"os"
 
 	"cloud.google.com/go/firestore"
 	"cloud.google.com/go/storage"
-	"github.com/GoogleCloudPlatform/golang-samples/getting-started/gopher-run/ai"
 	"github.com/GoogleCloudPlatform/golang-samples/getting-started/gopher-run/leaderboard"
 )
 
@@ -47,7 +45,6 @@ func main() {
 	}
 	http.HandleFunc("/leaderboard/post", a.addScore)
 	http.HandleFunc("/leaderboard/get", a.topScores)
-	http.HandleFunc("/pldata", a.addPlayData)
 	http.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir("static"))))
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -90,38 +87,6 @@ func (a *app) topScores(w http.ResponseWriter, r *http.Request) {
 		}
 		fmt.Fprintf(w, "%v\n", string(j))
 	}
-}
-
-func (a *app) addPlayData(w http.ResponseWriter, r *http.Request) {
-	bkt := a.bucket
-	if _, err := bkt.Object("pldataold.csv").CopierFrom(bkt.Object("pldata.csv")).Run(r.Context()); err != nil {
-		log.Printf("CopierFrom: %v", err)
-		http.Error(w, "CopierFrom failed", http.StatusInternalServerError)
-		return
-	}
-	old, err := bkt.Object("pldataold.csv").NewReader(r.Context())
-	if err != nil {
-		log.Printf("NewReader: %v", err)
-		http.Error(w, "NewReader failed", http.StatusInternalServerError)
-		return
-	}
-	defer old.Close()
-	new := bkt.Object("pldata.csv").NewWriter(r.Context())
-	defer new.Close()
-	_, err = io.Copy(new, old)
-	if err != nil {
-		log.Printf("io.Copy: %v", err)
-		http.Error(w, "Copy failed", http.StatusInternalServerError)
-		return
-	}
-	var d ai.PlayData
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&d); err != nil {
-		fmt.Fprintf(w, "decoder.Decode: %v", err)
-	}
-	r.Body.Close()
-	new.Write([]byte(fmt.Sprintf("%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", d.Act, d.G, d.V, d.H, d.X0, d.Y0, d.X1, d.Y1, d.X2, d.Y2, d.X3, d.Y3)))
-	fmt.Fprintf(w, "Recieved %v\n", d.Act)
 }
 
 func newApp(projectID string) (*app, error) {
