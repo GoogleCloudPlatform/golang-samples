@@ -17,77 +17,68 @@ package leaderboard
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"log"
-	"net/http"
 
 	"cloud.google.com/go/firestore"
 	"google.golang.org/api/iterator"
 )
 
-type scoredata struct {
-	Name     string  `json:"name"`
+// ScoreData is a player's score.
+type ScoreData struct {
+	Name string `json:"name"`
+	// ID       string  `json:"id"`
 	Team     string  `json:"team"`
 	Coins    int     `json:"coins"`
 	Distance float32 `json:"distance"`
+	Combo    float32 `json:"combo"`
 }
 
-// Handler chooses a handler function based on the request method.
-func Handler(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "POST" {
-		handlePost(w, r)
-	} else if r.Method == "GET" {
-		handleGet(w, r)
-	}
-}
-
-// handlePost adds a new score to the database.
-func handlePost(w http.ResponseWriter, r *http.Request) {
-	projectID := "maralder-start"
-	ctx := context.Background()
-	client, err := firestore.NewClient(ctx, projectID)
-	if err != nil {
-		log.Fatalf("firestore.NewClient: %v", err)
-	}
-	defer client.Close()
-	//Read
-	var d scoredata
-	decoder := json.NewDecoder(r.Body)
-	err = decoder.Decode(&d)
-	if err != nil {
-		fmt.Fprint(w, "Error decoding JSON\n")
-	}
-	fmt.Fprint(w, "Act: "+d.Name)
-	_, _, err = client.Collection("leaderboard").Add(ctx, map[string]interface{}{
-		"name":     d.Name,
-		"team":     d.Team,
-		"coins":    d.Coins,
-		"distance": d.Distance,
-	})
-	if err != nil {
-		log.Fatalf("Error setting data, %v", err)
-	}
-}
-
-// handleGet retrieves the top scores from the database.
-func handleGet(w http.ResponseWriter, r *http.Request) {
-	projectID := "maralder-start"
-	ctx := context.Background()
-	client, err := firestore.NewClient(ctx, projectID)
-	if err != nil {
-		log.Fatalf("Error creating client, %v", err)
-	}
-	defer client.Close()
-	iter := client.Collection("teams").Documents(ctx)
+// TopScores returns the top 10 scores in the leaderboard.
+func TopScores(ctx context.Context, client *firestore.Client) ([]ScoreData, error) {
+	iter := client.Collection("leaderboard").Query.OrderBy("coins", firestore.Desc).Limit(10).Documents(ctx)
+	var top []ScoreData
 	for {
 		doc, err := iter.Next()
 		if err == iterator.Done {
 			break
 		}
 		if err != nil {
-			log.Fatalf("Failed iteration %v", err)
+			return nil, fmt.Errorf("iter.Next: %v", err)
 		}
-		fmt.Fprint(w, doc.Data())
+		var d ScoreData
+		if err = doc.DataTo(&d); err != nil {
+			return nil, fmt.Errorf("doc.DataTo: %v", err)
+		}
+		top = append(top, d)
 	}
+	return top, nil
+}
+
+// AddScore adds a score to the leaderboard if it's in the top 10, or the scores database otherwise.
+func AddScore(ctx context.Context, client *firestore.Client, d ScoreData) error {
+	var oldD ScoreData
+	iter := client.Collection("leaderboard").Query.Limit(1).Where("name", "==", d.Name).Documents(ctx)
+	doc, err := iter.Next()
+	if err != iterator.Done && err != nil {
+		return fmt.Errorf("iter.Next: %v", err)
+	}
+	if err != iterator.Done {
+		if err = doc.DataTo(&oldD); err != nil {
+			return fmt.Errorf("doc.DataTo: %v", err)
+		}
+	}
+	if oldD.Coins < d.Coins {
+		_, err := client.Collection("leaderboard").Doc(d.Name).Set(ctx, map[string]interface{}{
+			"name": d.Name,
+			// "id":       d.ID,
+			"team":     d.Team,
+			"coins":    d.Coins,
+			"distance": d.Distance,
+			"combo":    d.Combo,
+		})
+		if err != nil {
+			return fmt.Errorf("Doc(%v).Set: %v", d.Name, err)
+		}
+	}
+	return nil
 }
