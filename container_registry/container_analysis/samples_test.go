@@ -223,7 +223,7 @@ func TestPubSub(t *testing.T) {
 	// Create a new Topic if needed
 	client, _ := pubsub.NewClient(v.ctx, v.projectID)
 	topicID := "container-analysis-occurrences-v1"
-	pubsubClient.CreateTopic(v.ctx, topicID)
+	client.CreateTopic(v.ctx, topicID)
 
 	// Create a new subscription if it doesn't exist.
 	createOccurrenceSubscription(v.subID, v.projectID)
