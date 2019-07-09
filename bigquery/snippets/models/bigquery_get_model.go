@@ -25,6 +25,9 @@ import (
 )
 
 func printModelInfo(w io.Writer, projectID, datasetID, modelID string) error {
+	// projectID := "my-project-id"
+	// datasetID := "mydataset"
+	// modelID := "mymodel"
 	ctx := context.Background()
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
