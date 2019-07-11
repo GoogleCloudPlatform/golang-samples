@@ -70,7 +70,7 @@ func createOccurrenceSubscription(subscriptionID, projectID string) error {
 	defer client.Close()
 
 	// This topic id will automatically receive messages when Occurrences are added or modified
-	topicID := "container-analysis-occurrences-v1beta1"
+	topicID := "container-analysis-occurrences-v1"
 	topic := client.Topic(topicID)
 	config := pubsub.SubscriptionConfig{Topic: topic}
 	_, err = client.CreateSubscription(ctx, subscriptionID, config)
