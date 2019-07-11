@@ -31,7 +31,7 @@ func printModelInfo(w io.Writer, projectID, datasetID, modelID string) error {
 	ctx := context.Background()
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
-		return err
+		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
 
 	meta, err := client.Dataset(datasetID).Model(modelID).Metadata(ctx)
