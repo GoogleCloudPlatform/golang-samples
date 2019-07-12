@@ -22,11 +22,18 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 
 	"cloud.google.com/go/firestore"
 	"cloud.google.com/go/storage"
+	"github.com/GoogleCloudPlatform/golang-samples/getting-started/gopher-run/generator"
 	"github.com/GoogleCloudPlatform/golang-samples/getting-started/gopher-run/leaderboard"
 )
+
+type playData struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
 
 type app struct {
 	projectID string
@@ -45,13 +52,56 @@ func main() {
 	}
 	http.HandleFunc("/leaderboard/post", a.addScore)
 	http.HandleFunc("/leaderboard/get", a.topScores)
-	http.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir("static"))))
+	http.HandleFunc("/pldata", a.addPlayData)
+	http.HandleFunc("/bggenerator", a.SendGeneratedBackground)
+	http.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir("static/gorun"))))
+	submitTrainingJob(a)
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 	fmt.Printf("Starting server: localhost:%v\n", port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
+}
+
+// Concatenate data from the top runs and start a Cloud ML training job on them
+func submitTrainingJob(a *app) {
+	// ctx := context.Background()
+	// bkt := a.bucket
+	// topPlayers, err := leaderboard.TopScores(ctx, a.fsClient)
+	// if err != nil {
+	// 	log.Printf("leaderboard.TopScores: %v", err)
+	// 	return
+	// }
+	// var appends [][]byte
+	// for _, player := range topPlayers {
+	// 	pld, err := bkt.Object("pldata/" + player.Name + "_pldata.csv").NewReader(ctx)
+	// 	if err != nil {
+	// 		log.Printf("NewReader: %v", err)
+	// 		continue
+	// 	}
+	// 	defer pld.Close()
+	// 	old, err := bkt.Object("pldata.csv").NewReader(ctx)
+	// 	if err != nil {
+	// 		log.Printf("NewReader: %v", err)
+	// 		continue
+	// 	}
+	// 	defer old.Close()
+	// 	b, err := ioutil.ReadAll(pld)
+	// 	if err != nil {
+	// 		log.Printf("ioutil.ReadAll: %v", err)
+	// 		continue
+	// 	}
+	// 	appends = append(appends, b)
+	// }
+	// var fullb []byte
+	// for _, item := range appends {
+	// 	fullb = append(fullb, item...)
+	// }
+	// new := bkt.Object("pldata.csv").NewWriter(ctx)
+	// defer new.Close()
+	// new.Write(fullb)
+	exec.Command("/bin/sh", "cmd/training.sh").Run()
 }
 
 func (a *app) addScore(w http.ResponseWriter, r *http.Request) {
@@ -87,6 +137,40 @@ func (a *app) topScores(w http.ResponseWriter, r *http.Request) {
 		}
 		fmt.Fprintf(w, "%v\n", string(j))
 	}
+}
+
+func (a *app) addPlayData(w http.ResponseWriter, r *http.Request) {
+	bkt := a.bucket
+	var d playData
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&d); err != nil {
+		fmt.Fprintf(w, "decoder.Decode: %v", err)
+	}
+	r.Body.Close()
+	new := bkt.Object("pldata/" + d.Name + "_pldata.csv").NewWriter(r.Context())
+	defer new.Close()
+	new.Write([]byte(d.Value))
+	fmt.Fprint(w, "Recieved data\n")
+}
+
+// SendGeneratedBackground returns cloud/hill placements.
+func (a *app) SendGeneratedBackground(w http.ResponseWriter, r *http.Request) {
+	var d generator.RequestData
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&d); err != nil {
+		fmt.Fprintf(w, "decoder.Decode: %v\n", err)
+		log.Printf("decoder.Decode: %v\n", err)
+		return
+	}
+	r.Body.Close()
+	generator.Speed = d.Speed
+	generator.GenerateBackground(generator.Vector3{d.Xmin, 0, 0}, generator.Vector3{d.Xmax, 0, 0})
+	objs := generator.GetObjects()
+	s := ""
+	for _, obj := range objs {
+		s += obj.ToString() + "\n"
+	}
+	fmt.Fprint(w, s)
 }
 
 func newApp(projectID string) (*app, error) {
