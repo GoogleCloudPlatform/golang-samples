@@ -48,8 +48,8 @@ func oauthClient() {
 	}
 
 	// Dummy authorization flow to read auth code from stdin
-	authorizeUrl := config.AuthCodeURL("your state")
-	fmt.Printf("Follow the link in your browser to obtain auth code: %s", authorizeUrl)
+	authURL := config.AuthCodeURL("your state")
+	fmt.Printf("Follow the link in your browser to obtain auth code: %s", authURL)
 
 	// Read the authentication code from the command line
 	var code string
