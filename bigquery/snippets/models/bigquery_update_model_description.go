@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package dataset
+package models
 
-// [START bigquery_update_dataset_description]
+// [START bigquery_update_model_description]
 
 import (
 	"context"
@@ -23,27 +23,28 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
-func updateDatasetDescription(projectID, datasetID string) error {
+func updateModelDescription(projectID, datasetID, modelID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"
+	// modelID := "mymodel"
 	ctx := context.Background()
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
 
-	ds := client.Dataset(datasetID)
-	meta, err := ds.Metadata(ctx)
+	model := client.Dataset(datasetID).Model(modelID)
+	oldMeta, err := model.Metadata(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("Metadata: %v", err)
 	}
-	update := bigquery.DatasetMetadataToUpdate{
-		Description: "Updated Description.",
+	update := bigquery.ModelMetadataToUpdate{
+		Description: "This model was modified from a Go program",
 	}
-	if _, err = ds.Update(ctx, update, meta.ETag); err != nil {
-		return err
+	if _, err = model.Update(ctx, update, oldMeta.ETag); err != nil {
+		return fmt.Errorf("Update: %v", err)
 	}
 	return nil
 }
 
-// [END bigquery_update_dataset_description]
+// [END bigquery_update_model_description]
