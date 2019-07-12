@@ -92,8 +92,10 @@ func initializeClients() error {
 
 // [START getting_started_background_translate_string]
 
-// translateString translates text to lang, returning the translated text,
-// the automatically detected source language, and an error.
+// translateString translates text to lang, returning:
+// * the translated text,
+// * the automatically detected source language, and
+// * an error.
 func translateString(ctx context.Context, text string, lang string) (translated string, originalLang string, err error) {
 	l, err := language.Parse(lang)
 	if err != nil {
