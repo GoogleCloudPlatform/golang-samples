@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -53,9 +54,9 @@ func main() {
 	http.HandleFunc("/leaderboard/post", a.addScore)
 	http.HandleFunc("/leaderboard/get", a.topScores)
 	http.HandleFunc("/pldata", a.addPlayData)
-	http.HandleFunc("/bggenerator", a.SendGeneratedBackground)
+	http.HandleFunc("/bggenerator", a.sendGeneratedBackground)
 	http.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir("static/gorun"))))
-	submitTrainingJob(a)
+	a.submitTrainingJob()
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
@@ -65,43 +66,44 @@ func main() {
 }
 
 // Concatenate data from the top runs and start a Cloud ML training job on them
-func submitTrainingJob(a *app) {
-	// ctx := context.Background()
-	// bkt := a.bucket
-	// topPlayers, err := leaderboard.TopScores(ctx, a.fsClient)
-	// if err != nil {
-	// 	log.Printf("leaderboard.TopScores: %v", err)
-	// 	return
-	// }
-	// var appends [][]byte
-	// for _, player := range topPlayers {
-	// 	pld, err := bkt.Object("pldata/" + player.Name + "_pldata.csv").NewReader(ctx)
-	// 	if err != nil {
-	// 		log.Printf("NewReader: %v", err)
-	// 		continue
-	// 	}
-	// 	defer pld.Close()
-	// 	old, err := bkt.Object("pldata.csv").NewReader(ctx)
-	// 	if err != nil {
-	// 		log.Printf("NewReader: %v", err)
-	// 		continue
-	// 	}
-	// 	defer old.Close()
-	// 	b, err := ioutil.ReadAll(pld)
-	// 	if err != nil {
-	// 		log.Printf("ioutil.ReadAll: %v", err)
-	// 		continue
-	// 	}
-	// 	appends = append(appends, b)
-	// }
-	// var fullb []byte
-	// for _, item := range appends {
-	// 	fullb = append(fullb, item...)
-	// }
-	// new := bkt.Object("pldata.csv").NewWriter(ctx)
-	// defer new.Close()
-	// new.Write(fullb)
+func (a *app) submitTrainingJob() error {
+	ctx := context.Background()
+	bkt := a.bucket
+	topPlayers, err := leaderboard.TopScores(ctx, a.fsClient)
+	if err != nil {
+		log.Printf("leaderboard.TopScores: %v", err)
+		return err
+	}
+	var appends [][]byte
+	for _, player := range topPlayers {
+		pld, err := bkt.Object("pldata/" + player.Name + "_pldata.csv").NewReader(ctx)
+		if err != nil {
+			log.Printf("NewReader: %v", err)
+			continue
+		}
+		defer pld.Close()
+		old, err := bkt.Object("pldata.csv").NewReader(ctx)
+		if err != nil {
+			log.Printf("NewReader: %v", err)
+			continue
+		}
+		defer old.Close()
+		b, err := ioutil.ReadAll(pld)
+		if err != nil {
+			log.Printf("ioutil.ReadAll: %v", err)
+			continue
+		}
+		appends = append(appends, b)
+	}
+	var fullb []byte
+	for _, item := range appends {
+		fullb = append(fullb, item...)
+	}
+	newObj := bkt.Object("pldata.csv").NewWriter(ctx)
+	defer newObj.Close()
+	newObj.Write(fullb)
 	exec.Command("/bin/sh", "cmd/training.sh").Run()
+	return nil
 }
 
 func (a *app) addScore(w http.ResponseWriter, r *http.Request) {
@@ -140,21 +142,20 @@ func (a *app) topScores(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *app) addPlayData(w http.ResponseWriter, r *http.Request) {
-	bkt := a.bucket
 	var d playData
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&d); err != nil {
 		fmt.Fprintf(w, "decoder.Decode: %v", err)
 	}
 	r.Body.Close()
-	new := bkt.Object("pldata/" + d.Name + "_pldata.csv").NewWriter(r.Context())
+	new := a.bucket.Object("pldata/" + d.Name + "_pldata.csv").NewWriter(r.Context())
 	defer new.Close()
 	new.Write([]byte(d.Value))
 	fmt.Fprint(w, "Recieved data\n")
 }
 
-// SendGeneratedBackground returns cloud/hill placements.
-func (a *app) SendGeneratedBackground(w http.ResponseWriter, r *http.Request) {
+// sendGeneratedBackground returns cloud/hill placements.
+func (a *app) sendGeneratedBackground(w http.ResponseWriter, r *http.Request) {
 	var d generator.RequestData
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&d); err != nil {
@@ -163,9 +164,7 @@ func (a *app) SendGeneratedBackground(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	r.Body.Close()
-	generator.Speed = d.Speed
-	generator.GenerateBackground(generator.Vector3{d.Xmin, 0, 0}, generator.Vector3{d.Xmax, 0, 0})
-	objs := generator.GetObjects()
+	objs := generator.GenerateBackground(generator.Vector3{d.Xmin, 0, 0}, generator.Vector3{d.Xmax, 0, 0}, d.Speed)
 	s := ""
 	for _, obj := range objs {
 		s += obj.ToString() + "\n"
