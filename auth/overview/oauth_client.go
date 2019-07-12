@@ -19,12 +19,13 @@ package overview
 import (
 	"context"
 	"fmt"
+	"log"
+	"os"
+
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 	"google.golang.org/api/pubsub/v1"
-	"log"
-	"os"
 )
 
 // [START auth_overview_oauth_client]

@@ -18,8 +18,9 @@ package overview
 
 import (
 	"context"
-	"google.golang.org/api/pubsub/v1"
 	"log"
+
+	"google.golang.org/api/pubsub/v1"
 )
 
 // [START auth_overview_service_account]

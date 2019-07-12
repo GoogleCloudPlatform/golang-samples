@@ -18,9 +18,10 @@ package overview
 
 import (
 	"context"
+	"log"
+
 	"google.golang.org/api/option"
 	"google.golang.org/api/pubsub/v1"
-	"log"
 )
 
 // [START auth_overview_api_key]
