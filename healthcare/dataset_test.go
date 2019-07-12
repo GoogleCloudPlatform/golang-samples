@@ -42,7 +42,7 @@ func TestDataset(t *testing.T) {
 			}
 		})
 	}
-	if err := getDataset(buf, tc.ProjectID, location, datasetID); err == nil {
+	if err := getDataset(buf, tc.ProjectID, location, deidentifiedDatasetID); err == nil {
 		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 			if err := deleteDataset(ioutil.Discard, tc.ProjectID, location, deidentifiedDatasetID); err != nil {
 				r.Errorf("deleteDataset got err: %v", err)
