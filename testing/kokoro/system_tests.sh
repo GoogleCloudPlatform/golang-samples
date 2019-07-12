@@ -8,7 +8,7 @@ export GOLANG_SAMPLES_IOT_PUB=$KOKORO_GFILE_DIR/rsa_cert.pem
 export GOLANG_SAMPLES_IOT_PRIV=$KOKORO_GFILE_DIR/rsa_private.pem
 export GCLOUD_ORGANIZATION=1081635000895
 
-TIMEOUT=25m
+TIMEOUT=45m
 
 # Set application credentials before using gimmeproj so it has access.
 # This is changed to a project-specific credential after a project is leased.
