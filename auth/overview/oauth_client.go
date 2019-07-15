@@ -57,10 +57,10 @@ func oauthClient() error {
 	if err != nil {
 		return fmt.Errorf("config.Exchange: %v", err)
 	}
-	service, err := pubsub.NewClient(ctx, "your-project-id", option.WithTokenSource(config.TokenSource(ctx, token)))
+	client, err := pubsub.NewClient(ctx, "your-project-id", option.WithTokenSource(config.TokenSource(ctx, token)))
 
 	// Use the authenticated client.
-	_ = service
+	_ = client
 
 	return nil
 }

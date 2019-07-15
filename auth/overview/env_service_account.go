@@ -27,12 +27,12 @@ func envServiceAccount() error {
 	// If your application runs in a GCP environment, such as Compute Engine,
 	// you don't need to provide any application credentials. The client
 	// library will find the credentials by itself.
-	service, err := pubsub.NewClient(context.Background(), "your-project-id")
+	client, err := pubsub.NewClient(context.Background(), "your-project-id")
 	if err != nil {
 		return fmt.Errorf("pubsub.NewService: %v", err)
 	}
 	// Use the authenticated client.
-	_ = service
+	_ = client
 
 	return nil
 }

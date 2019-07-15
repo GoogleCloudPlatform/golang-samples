@@ -27,12 +27,12 @@ func serviceAccount() error {
 	// Download service account key per https://cloud.google.com/docs/authentication/production.
 	// Set environment variable GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account-key.json
 	// This environment variable will be automatically picked up by the client.
-	service, err := pubsub.NewClient(context.Background(), "your-project-id")
+	client, err := pubsub.NewClient(context.Background(), "your-project-id")
 	if err != nil {
 		return fmt.Errorf("pubsub.NewService: %v", err)
 	}
 	// Use the authenticated client.
-	_ = service
+	_ = client
 
 	return nil
 }
