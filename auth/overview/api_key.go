@@ -25,7 +25,7 @@ import (
 	"google.golang.org/api/pubsub/v1"
 )
 
-// apiKey shows how to use API key to authenticate.
+// apiKey shows how to use an API key to authenticate.
 func apiKey() error {
 	service, err := pubsub.NewService(context.Background(), option.WithAPIKey("api-key-string"))
 	if err != nil {

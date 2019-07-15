@@ -22,7 +22,7 @@ import (
 	"google.golang.org/api/pubsub/v1"
 )
 
-// envServiceAccount shows how to use environment-provided service account to authenticate.
+// envServiceAccount shows how to use an environment-provided service account to authenticate.
 func envServiceAccount() error {
 	// If your application runs in a GCP environment, such as Compute Engine,
 	// you don't need to provide any application credentials. The client

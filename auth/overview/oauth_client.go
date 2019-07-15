@@ -26,7 +26,7 @@ import (
 	"google.golang.org/api/pubsub/v1"
 )
 
-// oauthClient shows how to use the OAuth client ID to authenticate as an end-user.
+// oauthClient shows how to use an OAuth client ID to authenticate as an end-user.
 func oauthClient() error {
 	ctx := context.Background()
 
