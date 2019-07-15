@@ -34,10 +34,17 @@ func TestDataset(t *testing.T) {
 	datasetID := "my-dataset"
 	deidentifiedDatasetID := "my-dataset-deidentified"
 
-	// Delete test dataset if it already exists.
+	// Delete test datasets if they already exist.
 	if err := getDataset(buf, tc.ProjectID, location, datasetID); err == nil {
 		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 			if err := deleteDataset(ioutil.Discard, tc.ProjectID, location, datasetID); err != nil {
+				r.Errorf("deleteDataset got err: %v", err)
+			}
+		})
+	}
+	if err := getDataset(buf, tc.ProjectID, location, deidentifiedDatasetID); err == nil {
+		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+			if err := deleteDataset(ioutil.Discard, tc.ProjectID, location, deidentifiedDatasetID); err != nil {
 				r.Errorf("deleteDataset got err: %v", err)
 			}
 		})

@@ -12,38 +12,42 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package dataset
+package models
 
-// [START bigquery_update_dataset_description]
+// [START bigquery_list_models]
 
 import (
 	"context"
 	"fmt"
+	"io"
 
 	"cloud.google.com/go/bigquery"
+	"google.golang.org/api/iterator"
 )
 
-func updateDatasetDescription(projectID, datasetID string) error {
+func listModels(w io.Writer, projectID, datasetID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"
 	ctx := context.Background()
+
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
 
-	ds := client.Dataset(datasetID)
-	meta, err := ds.Metadata(ctx)
-	if err != nil {
-		return err
-	}
-	update := bigquery.DatasetMetadataToUpdate{
-		Description: "Updated Description.",
-	}
-	if _, err = ds.Update(ctx, update, meta.ETag); err != nil {
-		return err
+	fmt.Fprintf(w, "Models contained in dataset %q\n", datasetID)
+	it := client.Dataset(datasetID).Models(ctx)
+	for {
+		m, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "Model: %s\n", m.FullyQualifiedName())
 	}
 	return nil
 }
 
-// [END bigquery_update_dataset_description]
+// [END bigquery_list_models]

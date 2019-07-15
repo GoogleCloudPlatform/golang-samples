@@ -23,8 +23,6 @@ import (
 )
 
 func TestBlurOffensiveImages(t *testing.T) {
-	t.Skip("convert is not available in test images yet (#877)")
-
 	projectID := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
 	if projectID == "" {
 		t.Skip("GOLANG_SAMPLES_PROJECT_ID not set")
