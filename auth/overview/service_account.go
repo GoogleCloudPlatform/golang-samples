@@ -12,30 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package overview contains Google Cloud authentication overview snippets.
-// https://cloud.google.com/docs/authentication/
 package overview
 
+// [START auth_overview_service_account]
 import (
 	"context"
-	"log"
+	"fmt"
 
 	"google.golang.org/api/pubsub/v1"
 )
 
-// [START auth_overview_service_account]
-
-// serviceAccount shows how to use service account to authenticate.
-func serviceAccount() {
+// serviceAccount shows how to use a service account to authenticate.
+func serviceAccount() error {
 	// Download service account key per https://cloud.google.com/docs/authentication/production.
 	// Set environment variable GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account-key.json
 	// This environment variable will be automatically picked up by the client.
 	service, err := pubsub.NewService(context.Background())
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("pubsub.NewService: %v", err)
 	}
-	// Use the authenticated client
+	// Use the authenticated client.
 	_ = service
+
+	return nil
 }
 
 // [END auth_overview_service_account]

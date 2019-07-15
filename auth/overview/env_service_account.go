@@ -12,30 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package overview contains Google Cloud authentication overview snippets.
-// https://cloud.google.com/docs/authentication/
 package overview
 
+// [START auth_overview_env_service_account]
 import (
 	"context"
-	"log"
+	"fmt"
 
 	"google.golang.org/api/pubsub/v1"
 )
 
-// [START auth_overview_env_service_account]
-
 // envServiceAccount shows how to use environment-provided service account to authenticate.
-func envServiceAccount() {
+func envServiceAccount() error {
 	// If your application runs in a GCP environment, such as Compute Engine,
 	// you don't need to provide any application credentials. The client
 	// library will find the credentials by itself.
 	service, err := pubsub.NewService(context.Background())
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("pubsub.NewService: %v", err)
 	}
-	// Use the authenticated client
+	// Use the authenticated client.
 	_ = service
+
+	return nil
 }
 
 // [END auth_overview_env_service_account]

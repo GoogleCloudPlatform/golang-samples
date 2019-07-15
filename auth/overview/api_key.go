@@ -16,25 +16,25 @@
 // https://cloud.google.com/docs/authentication/
 package overview
 
+// [START auth_overview_api_key]
 import (
 	"context"
-	"log"
+	"fmt"
 
 	"google.golang.org/api/option"
 	"google.golang.org/api/pubsub/v1"
 )
 
-// [START auth_overview_api_key]
-
 // apiKey shows how to use API key to authenticate.
-func apiKey() {
-	service, err := pubsub.NewService(context.Background(),
-		option.WithAPIKey("api-key-string"))
+func apiKey() error {
+	service, err := pubsub.NewService(context.Background(), option.WithAPIKey("api-key-string"))
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("pubsub.NewService: %v", err)
 	}
-	// Use the authenticated client
+	// Use the authenticated client.
 	_ = service
+
+	return nil
 }
 
 // [END auth_overview_api_key]

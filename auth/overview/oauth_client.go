@@ -12,14 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package overview contains Google Cloud authentication overview snippets.
-// https://cloud.google.com/docs/authentication/
 package overview
 
+// [START auth_overview_oauth_client]
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 
 	"golang.org/x/oauth2"
@@ -28,10 +26,8 @@ import (
 	"google.golang.org/api/pubsub/v1"
 )
 
-// [START auth_overview_oauth_client]
-
-// oauthClient shows how to OAuth client ID to authenticate as an end-user.
-func oauthClient() {
+// oauthClient shows how to use the OAuth client ID to authenticate as an end-user.
+func oauthClient() error {
 	ctx := context.Background()
 
 	// Please make sure the redirect URL is the same as the one you specified when you
@@ -48,7 +44,7 @@ func oauthClient() {
 		Endpoint:     google.Endpoint,
 	}
 
-	// Dummy authorization flow to read auth code from stdin
+	// Dummy authorization flow to read auth code from stdin.
 	authURL := config.AuthCodeURL("your state")
 	fmt.Printf("Follow the link in your browser to obtain auth code: %s", authURL)
 
@@ -59,12 +55,14 @@ func oauthClient() {
 	// Exchange auth code for OAuth token.
 	token, err := config.Exchange(ctx, code)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("config.Exchange: %v", err)
 	}
 	service, err := pubsub.NewService(ctx, option.WithTokenSource(config.TokenSource(ctx, token)))
 
 	// Use the authenticated client.
 	_ = service
+
+	return nil
 }
 
 // [END auth_overview_oauth_client]
