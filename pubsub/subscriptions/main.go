@@ -154,6 +154,7 @@ func pullMsgsSettings(client *pubsub.Client, subName string) error {
 	ctx := context.Background()
 	// [START pubsub_subscriber_flow_settings]
 	sub := client.Subscription(subName)
+	sub.ReceiveSettings.Synchronous = true
 	sub.ReceiveSettings.MaxOutstandingMessages = 10
 	err := sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
 		fmt.Printf("Got message: %q\n", string(msg.Data))
