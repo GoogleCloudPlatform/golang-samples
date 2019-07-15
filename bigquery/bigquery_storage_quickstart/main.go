@@ -90,6 +90,13 @@ func main() {
 		Parent:         fmt.Sprintf("projects/%s", *projectID),
 		TableReference: readTable,
 		ReadOptions:    tableReadOptions,
+		// This API can also deliver data serialized in Apache Arrow format.
+		// This example leverages Apache Avro.
+		Format: bqStoragepb.DataFormat_AVRO,
+		// We use a LIQUID strategy in this example because we only
+		// read from a single stream.  Consider BALANCED if you're consuming
+		// multiple streams concurrently and want more consistent stream sizes.
+		ShardingStrategy: bqStoragepb.ShardingStrategy_LIQUID,
 	}
 
 	// Set a snapshot time if it's been specified.
@@ -216,7 +223,7 @@ func processStream(ctx context.Context, client *bqStorage.BigQueryStorageClient,
 				}
 			}
 
-			rc := r.GetAvroRows().GetRowCount()
+			rc := r.GetRowCount()
 			if rc > 0 {
 				// Bookmark our progress in case of retries and send the rowblock on the channel.
 				offset = offset + rc
