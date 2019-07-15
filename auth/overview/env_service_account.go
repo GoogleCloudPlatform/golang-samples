@@ -19,7 +19,7 @@ import (
 	"context"
 	"fmt"
 
-	"google.golang.org/api/pubsub/v1"
+	"cloud.google.com/go/pubsub"
 )
 
 // envServiceAccount shows how to use an environment-provided service account to authenticate.
@@ -27,7 +27,7 @@ func envServiceAccount() error {
 	// If your application runs in a GCP environment, such as Compute Engine,
 	// you don't need to provide any application credentials. The client
 	// library will find the credentials by itself.
-	service, err := pubsub.NewService(context.Background())
+	service, err := pubsub.NewClient(context.Background(), "your-project-id")
 	if err != nil {
 		return fmt.Errorf("pubsub.NewService: %v", err)
 	}

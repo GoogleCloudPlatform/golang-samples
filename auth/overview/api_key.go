@@ -21,13 +21,13 @@ import (
 	"context"
 	"fmt"
 
+	"cloud.google.com/go/pubsub"
 	"google.golang.org/api/option"
-	"google.golang.org/api/pubsub/v1"
 )
 
 // apiKey shows how to use an API key to authenticate.
 func apiKey() error {
-	service, err := pubsub.NewService(context.Background(), option.WithAPIKey("api-key-string"))
+	service, err := pubsub.NewClient(context.Background(), "your-project-id", option.WithAPIKey("api-key-string"))
 	if err != nil {
 		return fmt.Errorf("pubsub.NewService: %v", err)
 	}

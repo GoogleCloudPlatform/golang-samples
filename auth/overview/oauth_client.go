@@ -20,10 +20,10 @@ import (
 	"fmt"
 	"os"
 
+	"cloud.google.com/go/pubsub"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
-	"google.golang.org/api/pubsub/v1"
 )
 
 // oauthClient shows how to use an OAuth client ID to authenticate as an end-user.
@@ -57,7 +57,7 @@ func oauthClient() error {
 	if err != nil {
 		return fmt.Errorf("config.Exchange: %v", err)
 	}
-	service, err := pubsub.NewService(ctx, option.WithTokenSource(config.TokenSource(ctx, token)))
+	service, err := pubsub.NewClient(ctx, "your-project-id", option.WithTokenSource(config.TokenSource(ctx, token)))
 
 	// Use the authenticated client.
 	_ = service
