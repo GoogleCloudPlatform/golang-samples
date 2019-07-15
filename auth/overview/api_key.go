@@ -29,7 +29,7 @@ import (
 func apiKey() error {
 	client, err := pubsub.NewClient(context.Background(), "your-project-id", option.WithAPIKey("api-key-string"))
 	if err != nil {
-		return fmt.Errorf("pubsub.NewService: %v", err)
+		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
 	// Use the authenticated client.
 	_ = client
