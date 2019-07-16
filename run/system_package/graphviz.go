@@ -1,6 +1,16 @@
-// Copyright 2019 Google LLC. All rights reserved.
-// Use of this source code is governed by the Apache 2.0
-// license that can be found in the LICENSE file.
+// Copyright 2019 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 // Sample graphviz-web is a Cloud Run service which provides a CLI tool over HTTP.
 package main
@@ -45,24 +55,24 @@ func main() {
 
 // diagramHandler renders a diagram using HTTP request parameters and the dot command.
 func diagramHandler(w http.ResponseWriter, r *http.Request) {
-        if r.Method != http.MethodGet {
+	if r.Method != http.MethodGet {
 		log.Printf("method not allowed: %s", r.Method)
 		http.Error(w, fmt.Sprintf("HTTP Method %s Not Allowed", r.Method), http.StatusMethodNotAllowed)
 		return
 	}
 
-        q := r.URL.Query()
-        dot := q.Get("dot")
-        if dot == "" {
-                log.Print("no graphviz definition provided")
-                http.Error(w, "Bad Request", http.StatusBadRequest)
-                return
-        }
+	q := r.URL.Query()
+	dot := q.Get("dot")
+	if dot == "" {
+		log.Print("no graphviz definition provided")
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
 
-        // Cache header must be set before writing a response.
-        w.Header().Set("Cache-Control", "public, max-age=86400")
+	// Cache header must be set before writing a response.
+	w.Header().Set("Cache-Control", "public, max-age=86400")
 
-        input = strings.NewReader(dot)
+	input = strings.NewReader(dot)
 	if err := createDiagram(w, input); err != nil {
 		log.Printf("createDiagram: %v", err)
 		// Do not cache error responses.
