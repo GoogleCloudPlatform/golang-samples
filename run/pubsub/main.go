@@ -42,8 +42,7 @@ func main() {
 
 // [START run_pubsub_handler]
 
-// PubSubMessage is the payload of a Pub/Sub event. Please refer to the docs for
-// additional information regarding Pub/Sub events.
+// PubSubMessage is the payload of a Pub/Sub event.
 type PubSubMessage struct {
 	Message struct {
 		Data []byte `json:"data,omitempty"`
