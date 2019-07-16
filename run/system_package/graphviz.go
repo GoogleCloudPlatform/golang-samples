@@ -45,24 +45,24 @@ func main() {
 
 // diagramHandler renders a diagram using HTTP request parameters and the dot command.
 func diagramHandler(w http.ResponseWriter, r *http.Request) {
-	var input io.Reader
-	if r.Method == http.MethodGet {
-		q := r.URL.Query()
-		dot := q.Get("dot")
-		if dot == "" {
-			log.Print("no graphviz definition provided")
-			http.Error(w, "Bad Request", http.StatusBadRequest)
-			return
-		}
-		// Cache header must be set before writing a response.
-		w.Header().Set("Cache-Control", "public, max-age=86400")
-		input = strings.NewReader(dot)
-	} else {
+        if r.Method != http.MethodGet {
 		log.Printf("method not allowed: %s", r.Method)
 		http.Error(w, fmt.Sprintf("HTTP Method %s Not Allowed", r.Method), http.StatusMethodNotAllowed)
 		return
 	}
 
+        q := r.URL.Query()
+        dot := q.Get("dot")
+        if dot == "" {
+                log.Print("no graphviz definition provided")
+                http.Error(w, "Bad Request", http.StatusBadRequest)
+                return
+        }
+
+        // Cache header must be set before writing a response.
+        w.Header().Set("Cache-Control", "public, max-age=86400")
+
+        input = strings.NewReader(dot)
 	if err := createDiagram(w, input); err != nil {
 		log.Printf("createDiagram: %v", err)
 		// Do not cache error responses.
