@@ -30,7 +30,6 @@ import (
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/getting-started/gopher-run/generator"
 	"github.com/GoogleCloudPlatform/golang-samples/getting-started/gopher-run/leaderboard"
-	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 )
 
@@ -70,8 +69,7 @@ func main() {
 }
 
 func (a *app) predictionRequest(w http.ResponseWriter, r *http.Request) {
-	client, err := google.DefaultClient(oauth2.NoContext,
-		"https://www.googleapis.com/auth/cloud-platform")
+	client, err := google.DefaultClient(r.Context(), "https://www.googleapis.com/auth/cloud-platform")
 	if err != nil {
 		log.Printf("DefaultClient: %v", err)
 	}
