@@ -75,9 +75,11 @@ func (a *app) predictionRequest(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("DefaultClient: %v", err)
 	}
-	resp, err := client.Post("https://ml.googleapis.com/v1/projects/maralder-start/models/playerdata_linear_classification:predict", "application/json", r.Body)
+	resp, err := client.Post("https://ml.googleapis.com/v1/projects/"+a.projectID+"/models/playerdata_linear_classification:predict", "application/json", r.Body)
 	if err != nil {
 		log.Printf("client.Post: %v", err)
+		http.Error(w, "Prediction server error", http.StatusInternalServerError)
+		return
 	}
 	io.Copy(w, resp.Body)
 	resp.Body.Close()
@@ -91,6 +93,7 @@ func (a *app) submitTrainingJob(ctx context.Context) error {
 		log.Printf("leaderboard.TopScores: %v", err)
 		return err
 	}
+	// Add dummy data at the beginning for consistency in which actions are assigned numbers 0,1,2,3 for prediction output
 	data := []byte(`idle,0,0,0,0,0,0,0,0,0,0,0
 roll,0,0,0,0,0,0,0,0,0,0,0
 jump,0,0,0,0,0,0,0,0,0,0,0
