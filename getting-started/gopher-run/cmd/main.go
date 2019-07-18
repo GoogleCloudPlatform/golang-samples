@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -29,6 +30,8 @@ import (
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/getting-started/gopher-run/generator"
 	"github.com/GoogleCloudPlatform/golang-samples/getting-started/gopher-run/leaderboard"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
 )
 
 type playData struct {
@@ -53,28 +56,45 @@ func main() {
 	}
 	http.HandleFunc("/leaderboard/post", a.addScore)
 	http.HandleFunc("/leaderboard/get", a.topScores)
+	http.HandleFunc("/predict", a.predictionRequest)
 	http.HandleFunc("/pldata", a.addPlayData)
 	http.HandleFunc("/bggenerator", a.sendGeneratedBackground)
-	http.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir("static/gorun"))))
-	a.submitTrainingJob()
+	http.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir("static/gorun/"))))
+	// a.submitTrainingJob(context.Background())
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
-	fmt.Printf("Starting server: localhost:%v\n", port)
+	fmt.Printf("Starting server on port %v\n", port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
 }
 
-// Concatenate data from the top runs and start a Cloud ML training job on them
-func (a *app) submitTrainingJob() error {
-	ctx := context.Background()
+func (a *app) predictionRequest(w http.ResponseWriter, r *http.Request) {
+	client, err := google.DefaultClient(oauth2.NoContext,
+		"https://www.googleapis.com/auth/cloud-platform")
+	if err != nil {
+		log.Printf("DefaultClient: %v", err)
+	}
+	resp, err := client.Post("https://ml.googleapis.com/v1/projects/maralder-start/models/playerdata_linear_classification:predict", "application/json", r.Body)
+	if err != nil {
+		log.Printf("client.Post: %v", err)
+	}
+	io.Copy(w, resp.Body)
+	resp.Body.Close()
+}
+
+// Concatenate data from the top runs and start a Cloud ML training job on it
+func (a *app) submitTrainingJob(ctx context.Context) error {
 	bkt := a.bucket
 	topPlayers, err := leaderboard.TopScores(ctx, a.fsClient)
 	if err != nil {
 		log.Printf("leaderboard.TopScores: %v", err)
 		return err
 	}
-	var appends [][]byte
+	data := []byte(`idle,0,0,0,0,0,0,0,0,0,0,0
+roll,0,0,0,0,0,0,0,0,0,0,0
+jump,0,0,0,0,0,0,0,0,0,0,0
+unroll,0,0,0,0,0,0,0,0,0,0,0`)
 	for _, player := range topPlayers {
 		pld, err := bkt.Object("pldata/" + player.Name + "_pldata.csv").NewReader(ctx)
 		if err != nil {
@@ -93,15 +113,33 @@ func (a *app) submitTrainingJob() error {
 			log.Printf("ioutil.ReadAll: %v", err)
 			continue
 		}
-		appends = append(appends, b)
-	}
-	var fullb []byte
-	for _, item := range appends {
-		fullb = append(fullb, item...)
+		data = append(data, b...)
 	}
 	newObj := bkt.Object("pldata.csv").NewWriter(ctx)
 	defer newObj.Close()
-	newObj.Write(fullb)
+	newObj.Write(data)
+
+	// mlService, err := ml.NewService(ctx)
+	// if err != nil {
+	// 	log.Printf("ml.NewService: %v", err)
+	// }
+	// jobsService := mlService.Projects.Jobs
+	// job := &ml.GoogleCloudMlV1__Job{
+	// 	JobId: "gotest4",
+	// 	TrainingInput: &ml.GoogleCloudMlV1__TrainingInput{
+	// 		JobDir:       "gs://maralder-start-ml/algorithms_training/pldata/",
+	// 		PackageUris:  []string{"gs://maralder-start-ml/xgboost-master.zip"},
+	// 		PythonModule: "python-package/xgboost/core.py",
+	// 		Region:       "us-central1",
+	// 		ScaleTier:    "STANDARD_1",
+	// 		Args:         []string{"--objective=multi:softmax", "--num_class=4", "--training_data_path=gs://maralder-start-ml/pldata.csv"},
+	// 	}}
+	// resp, err := jobsService.Create("projects/"+"maralder-start", job).Do()
+	// if err != nil {
+	// 	log.Printf("Create: %v", err)
+	// }
+	// "projects/" + "maralder-start" + "/models/playerdata_linear_classification",
+	// fmt.Println(resp)
 	exec.Command("/bin/sh", "cmd/training.sh").Run()
 	return nil
 }
@@ -164,10 +202,10 @@ func (a *app) sendGeneratedBackground(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	r.Body.Close()
-	objs := generator.GenerateBackground(generator.Vector3{d.Xmin, 0, 0}, generator.Vector3{d.Xmax, 0, 0}, d.Speed)
+	objs := generator.GenerateBackground(d.Xmin, d.Xmax, d.Speed)
 	s := ""
 	for _, obj := range objs {
-		s += obj.ToString() + "\n"
+		s += obj.String() + "\n"
 	}
 	fmt.Fprint(w, s)
 }

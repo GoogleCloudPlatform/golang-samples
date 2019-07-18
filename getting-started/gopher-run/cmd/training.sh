@@ -1,3 +1,17 @@
+# Copyright 2019 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 PROJECT_ID="maralder-start"
 BUCKET_NAME="maralder-start-ml"
 REGION="us-central1"
@@ -25,15 +39,15 @@ DATE="$(date '+%Y%m%d_%H%M%S')"
 # -- \
 # --preprocess --training_data_path=$TRAINING_DATA_PATH --objective=multi:softmax --num_class=4
     
-# VERSION_NAME="V_${DATE}"
-# gcloud ai-platform versions create $VERSION_NAME \
-# --model $MODEL_NAME \
-# --origin "${JOB_DIR}model/" \
-# --runtime-version=1.11 \
-# --framework $FRAMEWORK \
-# --python-version=2.7
+VERSION_NAME="V_${DATE}"
+gcloud ai-platform versions create $VERSION_NAME \
+--model $MODEL_NAME \
+--origin "${JOB_DIR}model/" \
+--runtime-version=1.11 \
+--framework $FRAMEWORK \
+--python-version=2.7
 
-# gcloud ai-platform versions set-default ${VERSION_NAME} --model=${MODEL_NAME}
+gcloud ai-platform versions set-default ${VERSION_NAME} --model=${MODEL_NAME}
     
 #bash training.sh &> /dev/null &
 # --model_type=$MODEL_TYPE --batch_size=250 --learning_rate=0.1 --max_steps=1000
