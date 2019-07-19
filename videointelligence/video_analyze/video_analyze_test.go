@@ -46,7 +46,7 @@ func TestAnalyze(t *testing.T) {
 			t.Parallel()
 
 			if tt.gcs == nil {
-				return
+				t.Fatal("gcs not set")
 			}
 
 			var buf bytes.Buffer
