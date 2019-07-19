@@ -17,8 +17,10 @@ package main
 import (
 	"image"
 	"io/ioutil"
+	"log"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"strings"
 	"testing"
 
@@ -26,6 +28,10 @@ import (
 )
 
 func TestDiagramHandlerErrors(t *testing.T) {
+	checkGraphviz(t)
+	log.SetOutput(ioutil.Discard)
+	defer log.SetOutput(os.Stderr)
+
 	tests := []struct {
 		label       string
 		data        string
@@ -67,6 +73,8 @@ func TestDiagramHandlerErrors(t *testing.T) {
 }
 
 func TestDiagramHandlerImage(t *testing.T) {
+	checkGraphviz(t)
+
 	tests := []struct {
 		label        string
 		data         string
@@ -98,5 +106,15 @@ func TestDiagramHandlerImage(t *testing.T) {
 		if got != test.cacheControl {
 			t.Errorf("response (%s) Cache-Control: got %q, want %q", test.label, got, test.cacheControl)
 		}
+	}
+}
+
+func checkGraphviz(t *testing.T) {
+	fileInfo, err := os.Stat("/usr/bin/dot")
+	if err != nil {
+		t.Skipf("os.Stat: %v (install graphviz?)", err)
+	}
+	if fileInfo.Mode()&0111 == 0 {
+		t.Skipf("/usr/bin/dot not executable (install graphviz?)")
 	}
 }

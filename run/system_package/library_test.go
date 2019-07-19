@@ -27,6 +27,8 @@ import (
 )
 
 func TestDiagramLibrary(t *testing.T) {
+	checkGraphviz(t)
+
 	files, err := ioutil.ReadDir("library")
 	if err != nil {
 		t.Fatalf("ReadDir: %v", err)

@@ -44,9 +44,11 @@ var allowList = []string{
 	"**/*.html",
 	"**/*.js",
 	"**/*.sql",
+	"**/*.dot",
 
 	"LICENSE",
-	"**/Dockerfile*",
+	"**/*Dockerfile*",
+	"**/.dockerignore",
 	"**/Makefile",
 
 	// Primarily ML APIs.

@@ -34,7 +34,7 @@ func main() {
 		log.Fatalf("graphviz-web: %v", err)
 	}
 	if fileInfo.Mode()&0111 == 0 {
-		log.Fatalf("graphviz-web: (%q) not executable", "/usr/bin/dot")
+		log.Fatal(`graphviz-web: ("/usr/bin/dot") not executable`)
 	}
 
 	http.HandleFunc("/diagram.png", diagramHandler)
@@ -72,7 +72,7 @@ func diagramHandler(w http.ResponseWriter, r *http.Request) {
 	// Cache header must be set before writing a response.
 	w.Header().Set("Cache-Control", "public, max-age=86400")
 
-	input = strings.NewReader(dot)
+	input := strings.NewReader(dot)
 	if err := createDiagram(w, input); err != nil {
 		log.Printf("createDiagram: %v", err)
 		// Do not cache error responses.
