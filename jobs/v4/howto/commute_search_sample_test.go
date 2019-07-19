@@ -29,11 +29,12 @@ func TestCommuteSearch(t *testing.T) {
 	testutil.Retry(t, 20, 2*time.Second, func(r *testutil.R) {
 		buf := &bytes.Buffer{}
 		if err := commuteSearch(buf, tc.ProjectID, companyID); err != nil {
-			t.Fatalf("commuteSearch: %v", err)
+			r.Errorf("commuteSearch: %v", err)
+			return
 		}
 		want := "Mountain View"
 		if got := buf.String(); !strings.Contains(got, want) {
-			t.Fatalf("commuteSearch got %q, want to contain %q", got, want)
+			r.Errorf("commuteSearch got %q, want to contain %q", got, want)
 		}
 	})
 }
