@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START healthcare_deidentify_dataset]
+// [START healthcare_dicom_keeplist_deidentify_dataset]
 import (
 	"context"
 	"fmt"
@@ -75,4 +75,4 @@ func deidentifyDataset(w io.Writer, projectID, location, sourceDatasetID, destin
 	}
 }
 
-// [END healthcare_deidentify_dataset]
+// [END healthcare_dicom_keeplist_deidentify_dataset]

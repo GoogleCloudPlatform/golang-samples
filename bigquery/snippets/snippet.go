@@ -44,20 +44,17 @@ func noOpCommentFunc() {
 	// [START bigquery_create_table_partitioned]
 	// [START bigquery_create_view]
 	// [START bigquery_delete_label_table]
-	// [START bigquery_delete_model]
 	// [START bigquery_delete_table]
 	// [START bigquery_extract_table]
 	// [START bigquery_extract_table_compressed]
 	// [START bigquery_extract_table_json]
 	// [START bigquery_get_job]
-	// [START bigquery_get_model]
 	// [START bigquery_get_table]
 	// [START bigquery_get_table_labels]
 	// [START bigquery_get_view]
 	// [START bigquery_grant_view_access]
 	// [START bigquery_label_table]
 	// [START bigquery_list_jobs]
-	// [START bigquery_list_models]
 	// [START bigquery_list_tables]
 	// [START bigquery_load_from_file]
 	// [START bigquery_load_table_clustered]
@@ -93,7 +90,6 @@ func noOpCommentFunc() {
 	// [START bigquery_table_insert_rows]
 	// [START bigquery_undelete_table]
 	// [START bigquery_update_table_cmek]
-	// [START bigquery_update_model_description]
 	// [START bigquery_update_table_description]
 	// [START bigquery_update_table_expiration]
 	// [START bigquery_update_view_query]
@@ -116,20 +112,17 @@ func noOpCommentFunc() {
 	// [END bigquery_create_table_partitioned]
 	// [END bigquery_create_view]
 	// [END bigquery_delete_label_table]
-	// [END bigquery_delete_model]
 	// [END bigquery_delete_table]
 	// [END bigquery_extract_table]
 	// [END bigquery_extract_table_compressed]
 	// [END bigquery_extract_table_json]
 	// [END bigquery_get_job]
-	// [END bigquery_get_model]
 	// [END bigquery_get_table]
 	// [END bigquery_get_table_labels]
 	// [END bigquery_get_view]
 	// [END bigquery_grant_view_access]
 	// [END bigquery_label_table]
 	// [END bigquery_list_jobs]
-	// [END bigquery_list_models]
 	// [END bigquery_list_tables]
 	// [END bigquery_load_from_file]
 	// [END bigquery_load_table_clustered]
@@ -164,7 +157,6 @@ func noOpCommentFunc() {
 	// [END bigquery_relax_column_query_append]
 	// [END bigquery_table_insert_rows]
 	// [END bigquery_undelete_table]
-	// [END bigquery_update_model_description]
 	// [END bigquery_update_table_cmek]
 	// [END bigquery_update_table_description]
 	// [END bigquery_update_table_expiration]
@@ -597,24 +589,6 @@ func updateTableChangeCMEK(client *bigquery.Client, datasetID, tableID string) e
 	return nil
 }
 
-func updateModelDescription(client *bigquery.Client, datasetID, modelID string) error {
-	ctx := context.Background()
-	// [START bigquery_update_model_description]
-	model := client.Dataset(datasetID).Model(modelID)
-	oldMeta, err := model.Metadata(ctx)
-	if err != nil {
-		return fmt.Errorf("Metadata: %v", err)
-	}
-	update := bigquery.ModelMetadataToUpdate{
-		Description: "This model was modified from a Go program",
-	}
-	if _, err = model.Update(ctx, update, oldMeta.ETag); err != nil {
-		return fmt.Errorf("Update: %v", err)
-	}
-	// [END bigquery_update_model_description]
-	return nil
-}
-
 func updateTableDescription(client *bigquery.Client, datasetID, tableID string) error {
 	ctx := context.Background()
 	// [START bigquery_update_table_description]
@@ -782,25 +756,6 @@ func deleteTableLabel(client *bigquery.Client, datasetID, tableID string) error 
 		return err
 	}
 	// [END bigquery_delete_label_table]
-	return nil
-}
-
-func listModels(client *bigquery.Client, w io.Writer, datasetID string) error {
-	ctx := context.Background()
-	// [START bigquery_list_models]
-	fmt.Fprintf(w, "Models contained in dataset '%s'\n", datasetID)
-	it := client.Dataset(datasetID).Models(ctx)
-	for {
-		m, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return err
-		}
-		fmt.Fprintf(w, "Model: %s\n", m.FullyQualifiedName())
-	}
-	// [END bigquery_list_models]
 	return nil
 }
 
@@ -1142,18 +1097,6 @@ func printTableInfo(client *bigquery.Client, w io.Writer, datasetID, tableID str
 	return nil
 }
 
-func printModelInfo(client *bigquery.Client, w io.Writer, datasetID, modelID string) error {
-	ctx := context.Background()
-	// [START bigquery_get_model]
-	meta, err := client.Dataset(datasetID).Model(modelID).Metadata(ctx)
-	if err != nil {
-		return fmt.Errorf("Metadata: %v", err)
-	}
-	fmt.Fprintf(w, "Got model '%q' with friendly name '%q'\n", modelID, meta.Name)
-	// [END bigquery_get_model]
-	return nil
-}
-
 func browseTable(client *bigquery.Client, w io.Writer, datasetID, tableID string) error {
 	ctx := context.Background()
 	// [START bigquery_browse_table]
@@ -1277,17 +1220,6 @@ func copyMultiTable(client *bigquery.Client, datasetID, dstTableID string) error
 		return err
 	}
 	// [END bigquery_copy_table_multiple_source]
-	return nil
-}
-
-func deleteModel(client *bigquery.Client, datasetID, modelID string) error {
-	ctx := context.Background()
-	// [START bigquery_delete_model]
-	model := client.Dataset(datasetID).Model(modelID)
-	if err := model.Delete(ctx); err != nil {
-		return fmt.Errorf("Delete: %v", err)
-	}
-	// [END bigquery_delete_model]
 	return nil
 }
 

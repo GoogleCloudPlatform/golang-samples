@@ -228,11 +228,10 @@ func publishWithSettings(client *pubsub.Client, topic string, msg []byte) error 
 	ctx := context.Background()
 	// [START pubsub_publisher_batch_settings]
 	t := client.Topic(topic)
-	t.PublishSettings = pubsub.PublishSettings{
-		ByteThreshold:  5000,
-		CountThreshold: 10,
-		DelayThreshold: 100 * time.Millisecond,
-	}
+	t.PublishSettings.ByteThreshold = 5000
+	t.PublishSettings.CountThreshold = 10
+	t.PublishSettings.DelayThreshold = 100 * time.Millisecond
+
 	result := t.Publish(ctx, &pubsub.Message{Data: msg})
 	// Block until the result is returned and a server-generated
 	// ID is returned for the published message.
@@ -249,9 +248,8 @@ func publishSingleGoroutine(client *pubsub.Client, topic string, msg []byte) err
 	ctx := context.Background()
 	// [START pubsub_publisher_concurrency_control]
 	t := client.Topic(topic)
-	t.PublishSettings = pubsub.PublishSettings{
-		NumGoroutines: 1,
-	}
+	t.PublishSettings.NumGoroutines = 1
+
 	result := t.Publish(ctx, &pubsub.Message{Data: msg})
 	// Block until the result is returned and a server-generated
 	// ID is returned for the published message.
