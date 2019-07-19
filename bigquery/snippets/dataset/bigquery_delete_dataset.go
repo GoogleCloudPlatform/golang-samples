@@ -30,7 +30,7 @@ func deleteDataset(projectID, datasetID string) error {
 
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
-		return err
+		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
 
 	// To recursively delete a dataset and contents, use DeleteWithContents.
