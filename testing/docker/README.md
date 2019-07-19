@@ -9,13 +9,13 @@ See [`CONTRIBUTING.md`](/CONTRIBUTING.md),
 [`/testing/kokoro`](/testing/kokoro).
 
 When new minor versions are released, we should build and push new versions of
-these repos.
+these containers.
 
 ```
 gcloud config set project golang-samples-tests
-for d in `find . -type d`; do
+for d in `find * -type d`; do
   cd $d
-  gcloud builds submit gcr.io/golang-samples-tests/$d
+  gcloud builds submit --tag gcr.io/golang-samples-tests/$d
   cd -
 done
 ```
