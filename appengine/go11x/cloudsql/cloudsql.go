@@ -53,8 +53,8 @@ func DB() *sql.DB {
 	var (
 		connectionName = mustGetenv("CLOUDSQL_CONNECTION_NAME")
 		user           = mustGetenv("CLOUDSQL_USER")
-		dbName         = os.Getenv("CLOUDSQL_DATABASE_NAME")
-		password       = os.Getenv("CLOUDSQL_PASSWORD") // NOTE: password may be empty
+		dbName         = os.Getenv("CLOUDSQL_DATABASE_NAME") // NOTE: dbName may be empty
+		password       = os.Getenv("CLOUDSQL_PASSWORD")      // NOTE: password may be empty
 		socket         = os.Getenv("CLOUDSQL_SOCKET_PREFIX")
 	)
 
