@@ -220,6 +220,11 @@ func TestOccurrencesForNote(t *testing.T) {
 
 func TestPubSub(t *testing.T) {
 	v := setup(t)
+	// Create a new Topic if needed
+	client, _ := pubsub.NewClient(v.ctx, v.projectID)
+	topicID := "container-analysis-occurrences-v1"
+	client.CreateTopic(v.ctx, topicID)
+
 	// Create a new subscription if it doesn't exist.
 	createOccurrenceSubscription(v.subID, v.projectID)
 
@@ -251,7 +256,6 @@ func TestPubSub(t *testing.T) {
 	})
 
 	// Clean up
-	client, _ := pubsub.NewClient(v.ctx, v.projectID)
 	sub := client.Subscription(v.subID)
 	sub.Delete(v.ctx)
 	teardown(t, v)

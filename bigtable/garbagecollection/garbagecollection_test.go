@@ -26,6 +26,7 @@ import (
 )
 
 func TestGarbageCollection(t *testing.T) {
+	t.Skip("Flaky: https://github.com/GoogleCloudPlatform/golang-samples/issues/914")
 	tc := testutil.SystemTest(t)
 
 	ctx := context.Background()

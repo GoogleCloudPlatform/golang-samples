@@ -31,7 +31,7 @@ func printDatasetLabels(w io.Writer, projectID, datasetID string) error {
 
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
-		return err
+		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
 
 	meta, err := client.Dataset(datasetID).Metadata(ctx)

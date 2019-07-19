@@ -12,38 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package dataset
+// Package overview contains Google Cloud authentication overview snippets.
+// https://cloud.google.com/docs/authentication/
+package overview
 
-// [START bigquery_label_dataset]
-
+// [START auth_overview_api_key]
 import (
 	"context"
 	"fmt"
 
-	"cloud.google.com/go/bigquery"
+	"cloud.google.com/go/pubsub"
+	"google.golang.org/api/option"
 )
 
-func addDatasetLabel(projectID, datasetID string) error {
-	// projectID := "my-project-id"
-	// datasetID := "mydataset"
-	ctx := context.Background()
-	client, err := bigquery.NewClient(ctx, projectID)
+// apiKey shows how to use an API key to authenticate.
+func apiKey() error {
+	client, err := pubsub.NewClient(context.Background(), "your-project-id", option.WithAPIKey("api-key-string"))
 	if err != nil {
-		return fmt.Errorf("bigquery.NewClient: %v", err)
+		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
+	// Use the authenticated client.
+	_ = client
 
-	ds := client.Dataset(datasetID)
-	meta, err := ds.Metadata(ctx)
-	if err != nil {
-		return err
-	}
-
-	update := bigquery.DatasetMetadataToUpdate{}
-	update.SetLabel("color", "green")
-	if _, err := ds.Update(ctx, update, meta.ETag); err != nil {
-		return err
-	}
 	return nil
 }
 
-// [END bigquery_label_dataset]
+// [END auth_overview_api_key]

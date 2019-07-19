@@ -12,38 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package dataset
+package overview
 
-// [START bigquery_label_dataset]
-
+// [START auth_overview_env_service_account]
 import (
 	"context"
 	"fmt"
 
-	"cloud.google.com/go/bigquery"
+	"cloud.google.com/go/pubsub"
 )
 
-func addDatasetLabel(projectID, datasetID string) error {
-	// projectID := "my-project-id"
-	// datasetID := "mydataset"
-	ctx := context.Background()
-	client, err := bigquery.NewClient(ctx, projectID)
+// envServiceAccount shows how to use an environment-provided service account to authenticate.
+func envServiceAccount() error {
+	// If your application runs in a GCP environment, such as Compute Engine,
+	// you don't need to provide any application credentials. The client
+	// library will find the credentials by itself.
+	client, err := pubsub.NewClient(context.Background(), "your-project-id")
 	if err != nil {
-		return fmt.Errorf("bigquery.NewClient: %v", err)
+		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
+	// Use the authenticated client.
+	_ = client
 
-	ds := client.Dataset(datasetID)
-	meta, err := ds.Metadata(ctx)
-	if err != nil {
-		return err
-	}
-
-	update := bigquery.DatasetMetadataToUpdate{}
-	update.SetLabel("color", "green")
-	if _, err := ds.Update(ctx, update, meta.ETag); err != nil {
-		return err
-	}
 	return nil
 }
 
-// [END bigquery_label_dataset]
+// [END auth_overview_env_service_account]

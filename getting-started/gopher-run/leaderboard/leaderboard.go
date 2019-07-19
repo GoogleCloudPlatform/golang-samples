@@ -69,8 +69,7 @@ func AddScore(ctx context.Context, client *firestore.Client, d ScoreData) error 
 	}
 	if oldD.Coins < d.Coins {
 		_, err := client.Collection("leaderboard").Doc(d.Name).Set(ctx, map[string]interface{}{
-			"name": d.Name,
-			// "id":       d.ID,
+			"name":     d.Name,
 			"team":     d.Team,
 			"coins":    d.Coins,
 			"distance": d.Distance,
