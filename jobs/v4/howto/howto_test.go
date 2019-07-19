@@ -49,7 +49,7 @@ func TestMain(m *testing.M) {
 	title := "Software Engineer"
 	URI := "https://googlesample.com/career"
 	description := "Design, devolop, test, deploy, maintain and improve software."
-	address1 := "1600 Amphitheatre PkwyMountain View, CA 94043"
+	address1 := "1600 Amphitheatre Pkwy, Mountain View, CA 94043"
 	address2 := "85 10th Ave, New York, NY 10011"
 	languageCode := "en-US"
 
