@@ -1,8 +1,8 @@
 runtime: go112
 main: cmd
 env_variables: 
-  GOPHER_RUN_BUCKET: "maralder-start-ml"
-  GOOGLE_CLOUD_PROJECT: "maralder-start"
+  GOPHER_RUN_BUCKET: "go-gopher-run-ml"
+  GOOGLE_CLOUD_PROJECT: "go-gopher-run"
 handlers:
   - url: /play
     static_dir: static/gorun
