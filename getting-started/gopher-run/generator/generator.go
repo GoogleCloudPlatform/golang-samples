@@ -20,6 +20,7 @@ import (
 	"math/rand"
 )
 
+// RequestData is the form in which requests for background generation come in.
 type RequestData struct {
 	Xmin  float64
 	Xmax  float64
@@ -56,7 +57,7 @@ func (o GameObject) String() string {
 // GenerateBackground determines positions for background objects.
 func GenerateBackground(start, end, speed float64) []GameObject {
 	objects := []GameObject{}
-	for n := start; n < end; n += 20 {
+	for n := start; n < end; n += 30 {
 		for m := 0; m < 3; m++ {
 			cscale := randRange(0.2, 0.6)
 			cx := randRange(n, n+10)

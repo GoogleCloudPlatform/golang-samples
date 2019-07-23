@@ -15,8 +15,8 @@
 runtime: go112
 main: cmd
 env_variables: 
-  GOPHER_RUN_BUCKET: "gopher-run-ml"
-  GOOGLE_CLOUD_PROJECT: "gopher-run"
+  GOPHER_RUN_BUCKET: "go-gopher-run-ml"
+  GOOGLE_CLOUD_PROJECT: "go-gopher-run"
 handlers:
   - url: /play
     static_dir: static/gorun
