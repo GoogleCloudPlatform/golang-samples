@@ -53,7 +53,7 @@ func TopScores(ctx context.Context, client *firestore.Client) ([]ScoreData, erro
 	return top, nil
 }
 
-// AddScore adds a score to the leaderboard if it's in the top 10, or the scores database otherwise.
+// AddScore adds a score to the leaderboard database and returns information about whether it updated an existing score.
 func AddScore(ctx context.Context, client *firestore.Client, d ScoreData) (string, error) {
 	var oldD ScoreData
 	iter := client.Collection("leaderboard").Query.Limit(1).Where("name", "==", d.Name).Documents(ctx)
