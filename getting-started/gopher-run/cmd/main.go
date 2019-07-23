@@ -112,8 +112,8 @@ unroll,0,0,0,0,0,0,0,0,0,0,0`)
 			log.Printf("ioutil.ReadAll: %v", err)
 			continue
 		}
-		data = append(append(data, []byte(`
-`)...), b...)
+		data = append(append(data, []byte("\n")...))
+		data = append(data, b...)
 	}
 	newObj := bkt.Object("pldata.csv").NewWriter(ctx)
 	defer newObj.Close()
