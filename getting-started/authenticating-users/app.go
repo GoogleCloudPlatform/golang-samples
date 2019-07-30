@@ -15,125 +15,127 @@
 package main
 
 import (
-    "fmt"
-    "log"
-    "net/http"
-    "io/ioutil"
-    "os"
-    "encoding/json"
-    "github.com/dgrijalva/jwt-go"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"os"
+
+	"github.com/dgrijalva/jwt-go"
 )
 
-var AUDIENCE string
-var CERTIFICATES = make(map[string]string)
-
+var cachedAudience string
+var cachedCertificates = make(map[string]string)
 
 func main() {
-    http.HandleFunc("/", indexHandler)
+	http.HandleFunc("/", indexHandler)
 
-    port := os.Getenv("PORT")
-    if port == "" {
-        port = "8080"
-        log.Printf("Defaulting to port %s", port)
-    }
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+		log.Printf("Defaulting to port %s", port)
+	}
 
-    log.Printf("Listening on port %s", port)
-    log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
+	log.Printf("Listening on port %s", port)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
 }
 
 func certs() map[string]string {
-    const url = "https://www.gstatic.com/iap/verify/public_key"
+	const url = "https://www.gstatic.com/iap/verify/public_key"
 
-    if len(CERTIFICATES) == 0 {
-        resp, err := http.Get(url)
-        if err != nil {
-            log.Printf("Failed to fetch certificates: %s", err)
-            return CERTIFICATES
-        }
-
-        defer resp.Body.Close()
-        body, err := ioutil.ReadAll(resp.Body)
-        if err != nil {
-            log.Printf("Error reading certs: %s", err)
-            return CERTIFICATES
-        }
-
-        err = json.Unmarshal(body, &CERTIFICATES)
-        if err != nil {
-            log.Printf("Error converting from JSON: %s", err)
-            return CERTIFICATES
-        }
+	if len(cachedCertificates) != 0 {  # Already got them previously
+        return cachedCertificates
     }
 
-    return CERTIFICATES
+	resp, err := http.Get(url)
+	if err != nil {
+		log.Printf("Failed to fetch certificates: %s", err)
+		return cachedCertificates
+	}
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Printf("Error reading certs: %s", err)
+		return cachedCertificates
+	}
+
+	err = json.Unmarshal(body, &cachedCertificates)
+	if err != nil {
+		log.Printf("Error converting from JSON: %s", err)
+		return cachedCertificates
+	}
+
+	return cachedCertificates
 }
 
 func getMetadata(itemName string) string {
-    const url = "http://metadata.google.internal/computeMetadata/v1/project/"
+	const url = "http://metadata.google.internal/computeMetadata/v1/project/"
 
-    client := &http.Client{}
-    req, _ := http.NewRequest("GET", url + itemName, nil)
-    req.Header.Add("Metadata-Flavor", "Google")
-    resp, err := client.Do(req)
-    if err != nil {
-        log.Printf("Error making metadata request: %s", err)
-        return "None"
-    }
+	client := &http.Client{}
+	req, _ := http.NewRequest("GET", url+itemName, nil)
+	req.Header.Add("Metadata-Flavor", "Google")
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Printf("Error making metadata request: %s", err)
+		return "None"
+	}
 
-    defer resp.Body.Close()
-    body, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
 
-    if err != nil {
-        log.Printf("Error reading metadata: %s", err)
-        return "None"
-    } else {
-        return(string(body))
-    }
+	if err != nil {
+		log.Printf("Error reading metadata: %s", err)
+		return "None"
+	} else {
+		return (string(body))
+	}
 }
 
 func audience() string {
-    if AUDIENCE == "" {
-        project_number := getMetadata("numeric-project-id")
-        project_id := getMetadata("project-id")
-        AUDIENCE = "/projects/" + project_number + "/apps/" + project_id
-    }
+	if cachedAudience == "" {
+		projectNumber := getMetadata("numeric-project-id")
+		projectID := getMetadata("project-id")
+		cachedAudience = "/projects/" + projectNumber + "/apps/" + projectID
+	}
 
-    return AUDIENCE
+	return cachedAudience
 }
 
 func validateAssertion(assertion string) (string, string) {
-    certificates := certs()
+	certificates := certs()
 
-    token, err := jwt.Parse(assertion, func(token *jwt.Token) (interface{}, error) {
-        keyId := token.Header["kid"].(string)
+	token, err := jwt.Parse(assertion, func(token *jwt.Token) (interface{}, error) {
+		keyID := token.Header["kid"].(string)
 
-        _, ok := token.Method.(*jwt.SigningMethodECDSA)
-        if !ok {
-            log.Printf("Wrong signing method: %v", token.Header["alg"])
-            return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
-        }
+		_, ok := token.Method.(*jwt.SigningMethodECDSA)
+		if !ok {
+			log.Printf("Wrong signing method: %v", token.Header["alg"])
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
 
-        cert := certificates[keyId]
-        return jwt.ParseECPublicKeyFromPEM([]byte(cert))
-    })
+		cert := certificates[keyID]
+		return jwt.ParseECPublicKeyFromPEM([]byte(cert))
+	})
 
-    if err != nil {
-        log.Printf("Failed to validate assertion: %s", assertion)
-        return "None", "None"
-    }
+	if err != nil {
+		log.Printf("Failed to validate assertion: %s", assertion)
+		return "None", "None"
+	}
 
-    claims, _ := token.Claims.(jwt.MapClaims)
-    return claims["email"].(string), claims["sub"].(string)
+	claims, _ := token.Claims.(jwt.MapClaims)
+	return claims["email"].(string), claims["sub"].(string)
 }
 
 // indexHandler responds to requests with our greeting.
 func indexHandler(w http.ResponseWriter, r *http.Request) {
-    if r.URL.Path != "/" {
-        http.NotFound(w, r)
-        return
-    }
+	if r.URL.Path != "/" {
+		http.NotFound(w, r)
+		return
+	}
 
-    assertion := r.Header.Get("X-Goog-IAP-JWT-Assertion")
-    email, _ := validateAssertion(assertion)
-    fmt.Fprint(w, "Hello " + email)
+	assertion := r.Header.Get("X-Goog-IAP-JWT-Assertion")
+	email, _ := validateAssertion(assertion)
+	fmt.Fprint(w, "Hello "+email)
 }
