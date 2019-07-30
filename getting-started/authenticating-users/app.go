@@ -46,9 +46,9 @@ func main() {
 func certs() map[string]string {
 	const url = "https://www.gstatic.com/iap/verify/public_key"
 
-	if len(cachedCertificates) != 0 {  // Already got them previously
-        return cachedCertificates
-    }
+	if len(cachedCertificates) != 0 { // Already got them previously
+		return cachedCertificates
+	}
 
 	resp, err := http.Get(url)
 	if err != nil {
