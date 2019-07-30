@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// The main program is a sample web server application that extracts and
+// verifies user identity data passed to it via Identity-Aware Proxy.
 package main
 
 import (
@@ -44,7 +46,7 @@ func main() {
 func certs() map[string]string {
 	const url = "https://www.gstatic.com/iap/verify/public_key"
 
-	if len(cachedCertificates) != 0 {  # Already got them previously
+	if len(cachedCertificates) != 0 {  // Already got them previously
         return cachedCertificates
     }
 
@@ -54,14 +56,8 @@ func certs() map[string]string {
 		return cachedCertificates
 	}
 
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Printf("Error reading certs: %s", err)
-		return cachedCertificates
-	}
-
-	err = json.Unmarshal(body, &cachedCertificates)
+	dec := json.NewDecoder(resp.Body)
+	err = dec.Decode(&cachedCertificates)
 	if err != nil {
 		log.Printf("Error converting from JSON: %s", err)
 		return cachedCertificates
@@ -103,7 +99,7 @@ func audience() string {
 	return cachedAudience
 }
 
-func validateAssertion(assertion string) (string, string) {
+func validateAssertion(assertion string) (email string, userid string) {
 	certificates := certs()
 
 	token, err := jwt.Parse(assertion, func(token *jwt.Token) (interface{}, error) {
@@ -125,6 +121,10 @@ func validateAssertion(assertion string) (string, string) {
 	}
 
 	claims, _ := token.Claims.(jwt.MapClaims)
+	if claims["aud"].(string) != audience() {
+		log.Printf("Token aud %s does not match audience %s", claims["aud"], audience())
+		return "None", "None"
+	}
 	return claims["email"].(string), claims["sub"].(string)
 }
 

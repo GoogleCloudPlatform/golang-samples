@@ -1,4 +1,4 @@
-module github.com/GoogleCloudPlatform/golang-samples/getting-started/user-authentication
+module app.go
 
 go 1.12
 
