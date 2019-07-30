@@ -25,8 +25,7 @@ import (
 
 // ScoreData is a player's score.
 type ScoreData struct {
-	Name string `json:"name"`
-	// ID       string  `json:"id"`
+	Name     string  `json:"name"`
 	Team     string  `json:"team"`
 	Coins    int     `json:"coins"`
 	Distance float32 `json:"distance"`
@@ -54,20 +53,22 @@ func TopScores(ctx context.Context, client *firestore.Client) ([]ScoreData, erro
 	return top, nil
 }
 
-// AddScore adds a score to the leaderboard if it's in the top 10, or the scores database otherwise.
-func AddScore(ctx context.Context, client *firestore.Client, d ScoreData) error {
+// AddScore adds a score to the leaderboard database and returns information about whether it updated an existing score.
+func AddScore(ctx context.Context, client *firestore.Client, d ScoreData) (string, error) {
 	var oldD ScoreData
 	iter := client.Collection("leaderboard").Query.Limit(1).Where("name", "==", d.Name).Documents(ctx)
 	doc, err := iter.Next()
 	if err != iterator.Done && err != nil {
-		return fmt.Errorf("iter.Next: %v", err)
+		return "", fmt.Errorf("iter.Next: %v", err)
 	}
 	if err != iterator.Done {
 		if err = doc.DataTo(&oldD); err != nil {
-			return fmt.Errorf("doc.DataTo: %v", err)
+			return "", fmt.Errorf("doc.DataTo: %v", err)
 		}
 	}
+	s := ""
 	if oldD.Coins < d.Coins {
+		s = "pb"
 		_, err := client.Collection("leaderboard").Doc(d.Name).Set(ctx, map[string]interface{}{
 			"name":     d.Name,
 			"team":     d.Team,
@@ -76,8 +77,8 @@ func AddScore(ctx context.Context, client *firestore.Client, d ScoreData) error 
 			"combo":    d.Combo,
 		})
 		if err != nil {
-			return fmt.Errorf("Doc(%v).Set: %v", d.Name, err)
+			return "", fmt.Errorf("Doc(%v).Set: %v", d.Name, err)
 		}
 	}
-	return nil
+	return s, nil
 }

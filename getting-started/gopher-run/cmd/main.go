@@ -24,7 +24,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
 
 	"cloud.google.com/go/firestore"
 	"cloud.google.com/go/storage"
@@ -59,7 +58,6 @@ func main() {
 	http.HandleFunc("/pldata", a.addPlayData)
 	http.HandleFunc("/bggenerator", a.sendGeneratedBackground)
 	http.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir("static/gorun/"))))
-	// a.submitTrainingJob(context.Background())
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
@@ -114,34 +112,12 @@ unroll,0,0,0,0,0,0,0,0,0,0,0`)
 			log.Printf("ioutil.ReadAll: %v", err)
 			continue
 		}
+		data = append(append(data, []byte("\n")...))
 		data = append(data, b...)
 	}
 	newObj := bkt.Object("pldata.csv").NewWriter(ctx)
 	defer newObj.Close()
 	newObj.Write(data)
-
-	// mlService, err := ml.NewService(ctx)
-	// if err != nil {
-	// 	log.Printf("ml.NewService: %v", err)
-	// }
-	// jobsService := mlService.Projects.Jobs
-	// job := &ml.GoogleCloudMlV1__Job{
-	// 	JobId: "gotest4",
-	// 	TrainingInput: &ml.GoogleCloudMlV1__TrainingInput{
-	// 		JobDir:       "gs://maralder-start-ml/algorithms_training/pldata/",
-	// 		PackageUris:  []string{"gs://maralder-start-ml/xgboost-master.zip"},
-	// 		PythonModule: "python-package/xgboost/core.py",
-	// 		Region:       "us-central1",
-	// 		ScaleTier:    "STANDARD_1",
-	// 		Args:         []string{"--objective=multi:softmax", "--num_class=4", "--training_data_path=gs://maralder-start-ml/pldata.csv"},
-	// 	}}
-	// resp, err := jobsService.Create("projects/"+"maralder-start", job).Do()
-	// if err != nil {
-	// 	log.Printf("Create: %v", err)
-	// }
-	// "projects/" + "maralder-start" + "/models/playerdata_linear_classification",
-	// fmt.Println(resp)
-	exec.Command("/bin/sh", "cmd/training.sh").Run()
 	return nil
 }
 
@@ -154,11 +130,13 @@ func (a *app) addScore(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	r.Body.Close()
-	fmt.Fprint(w, "Act: "+d.Name)
-	if err := leaderboard.AddScore(r.Context(), a.fsClient, d); err != nil {
+	top, err := leaderboard.AddScore(r.Context(), a.fsClient, d)
+	if err != nil {
 		log.Printf("leaderboar.AddScore: %v\n", err)
 		http.Error(w, "Server error", http.StatusInternalServerError)
 	}
+	a.submitTrainingJob(r.Context())
+	fmt.Fprint(w, top)
 }
 
 // topScores retrieves top 10 scores from the database, return as \n-separated jsons.
