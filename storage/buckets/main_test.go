@@ -117,6 +117,21 @@ func TestIAM(t *testing.T) {
 	}
 }
 
+func TestGetBucketMetadata(t *testing.T) {
+	testutil.SystemTest(t)
+	setup(t)
+
+	bucketMetadataBuf := new(bytes.Buffer)
+	if err := getBucketMetadata(bucketMetadataBuf, storageClient, bucketName); err != nil {
+		t.Errorf("getBucketMetadata: %#v", err)
+	}
+
+	got := putBuf.String()
+	if want := "BucketName:"; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
 func TestRequesterPays(t *testing.T) {
 	testutil.SystemTest(t)
 	setup(t)
