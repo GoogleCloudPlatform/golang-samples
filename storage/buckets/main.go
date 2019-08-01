@@ -153,18 +153,18 @@ func getBucketMetadata(w io.Writer, client *storage.Client, bucketName string) (
 	fmt.Fprintln(w, "Metageneration: %v", attrs.MetaGeneration)
 	fmt.Fprintln(w, "PredefinedACL: %v", attrs.PredefinedACL)
 	fmt.Fprintln(w, "DefaultKmsKeyName: %v", attrs.BucketEncryption.DefaultKMSKeyName)
-  fmt.Fprintln(w, "IndexPage: %v", attrs.BucketWebsite.MainPageSuffix)
-  fmt.Fprintln(w, "NotFoundPage: %v", attrs.BucketWebsite.NotFoundPage)
+	fmt.Fprintln(w, "IndexPage: %v", attrs.BucketWebsite.MainPageSuffix)
+	fmt.Fprintln(w, "NotFoundPage: %v", attrs.BucketWebsite.NotFoundPage)
 	fmt.Fprintln(w, "DefaultEventBasedHold: %v", attrs.DefaultEventBasedHold)
 	fmt.Fprintln(w, "RetentionEffectiveTime: %v" + attrs.RetentionPolicy.EffectiveTime)
 	fmt.Fprintln(w, "RetentionPeriod: %v", attrs.RetentionPolicy.RetentionPeriod)
 	fmt.Fprintln(w, "RetentionPolicyIsLocked: %v", attrs.RetentionPolicy.IsLocked)
-  fmt.Fprintln(w, "RequesterPays: %v", attrs.RequesterPays)
+	fmt.Fprintln(w, "RequesterPays: %v", attrs.RequesterPays)
 	fmt.Fprintln(w, "VersioningEnabled: %v", attrs.VersioningEnabled)
 	fmt.Fprintln(w, "LogBucket: %v", attrs.BucketLogging.LogBucket)
 	fmt.Fprintln(w, "LogObjectPrefix: %v", attrs.BucketLogging.LogObjectPrefix)
 	fmt.Fprintln(w, "\n\n\nLabels:")
-  for key, value := range attrs.Labels {
+	for key, value := range attrs.Labels {
 		fmt.Fprintln(w, "\t%v = %v", key, value)
 	}
 	// [END storage_get_bucket_metadata]
