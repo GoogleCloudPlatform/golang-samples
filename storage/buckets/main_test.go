@@ -15,6 +15,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io/ioutil"
@@ -22,6 +23,7 @@ import (
 	"os"
 	"testing"
 	"time"
+	"strings"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 
@@ -126,7 +128,7 @@ func TestGetBucketMetadata(t *testing.T) {
 		t.Errorf("getBucketMetadata: %#v", err)
 	}
 
-	got := putBuf.String()
+	got := bucketMetadataBuf.String()
 	if want := "BucketName:"; !strings.Contains(got, want) {
 		t.Errorf("got %q, want %q", got, want)
 	}
