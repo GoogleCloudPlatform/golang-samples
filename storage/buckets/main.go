@@ -156,7 +156,7 @@ func getBucketMetadata(w io.Writer, client *storage.Client, bucketName string) (
 	fmt.Fprintln(w, "IndexPage: %v", attrs.BucketWebsite.MainPageSuffix)
 	fmt.Fprintln(w, "NotFoundPage: %v", attrs.BucketWebsite.NotFoundPage)
 	fmt.Fprintln(w, "DefaultEventBasedHold: %v", attrs.DefaultEventBasedHold)
-	fmt.Fprintln(w, "RetentionEffectiveTime: %v" + attrs.RetentionPolicy.EffectiveTime)
+	fmt.Fprintln(w, "RetentionEffectiveTime: %v", attrs.RetentionPolicy.EffectiveTime)
 	fmt.Fprintln(w, "RetentionPeriod: %v", attrs.RetentionPolicy.RetentionPeriod)
 	fmt.Fprintln(w, "RetentionPolicyIsLocked: %v", attrs.RetentionPolicy.IsLocked)
 	fmt.Fprintln(w, "RequesterPays: %v", attrs.RequesterPays)
