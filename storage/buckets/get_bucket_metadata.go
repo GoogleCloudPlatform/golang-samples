@@ -69,4 +69,5 @@ func getBucketMetadata(w io.Writer, client *storage.Client, bucketName string) (
 
 	return attrs, nil
 }
+
 // [END storage_get_bucket_metadata]
