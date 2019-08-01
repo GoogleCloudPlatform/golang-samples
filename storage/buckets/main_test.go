@@ -15,6 +15,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io/ioutil"
@@ -22,6 +23,7 @@ import (
 	"os"
 	"testing"
 	"time"
+	"strings"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 

@@ -21,9 +21,9 @@ package main
 // [START storage_get_bucket_metadata]
 import (
 	"context"
-	"errors"
 	"fmt"
-	"time"
+	"io"
+	"log"
 
 	"cloud.google.com/go/storage"
 )
@@ -44,27 +44,27 @@ func getBucketMetadata(w io.Writer, client *storage.Client, bucketName string) (
 		return nil, err
 	}
 
-	fmt.Fprintln(w, "BucketName: %v", attrs.Name)
-	fmt.Fprintln(w, "Location: %v", attrs.Location)
-	fmt.Fprintln(w, "LocationType: %v", attrs.LocationType)
-	fmt.Fprintln(w, "StorageClass: %v", attrs.StorageClass)
-	fmt.Fprintln(w, "TimeCreated: %v", attrs.Created)
-	fmt.Fprintln(w, "Metageneration: %v", attrs.MetaGeneration)
-	fmt.Fprintln(w, "PredefinedACL: %v", attrs.PredefinedACL)
-	fmt.Fprintln(w, "DefaultKmsKeyName: %v", attrs.Encryption.DefaultKMSKeyName)
-	fmt.Fprintln(w, "IndexPage: %v", attrs.Website.MainPageSuffix)
-	fmt.Fprintln(w, "NotFoundPage: %v", attrs.Website.NotFoundPage)
-	fmt.Fprintln(w, "DefaultEventBasedHold: %v", attrs.DefaultEventBasedHold)
-	fmt.Fprintln(w, "RetentionEffectiveTime: %v", attrs.RetentionPolicy.EffectiveTime)
-	fmt.Fprintln(w, "RetentionPeriod: %v", attrs.RetentionPolicy.RetentionPeriod)
-	fmt.Fprintln(w, "RetentionPolicyIsLocked: %v", attrs.RetentionPolicy.IsLocked)
-	fmt.Fprintln(w, "RequesterPays: %v", attrs.RequesterPays)
-	fmt.Fprintln(w, "VersioningEnabled: %v", attrs.VersioningEnabled)
-	fmt.Fprintln(w, "LogBucket: %v", attrs.Logging.LogBucket)
-	fmt.Fprintln(w, "LogObjectPrefix: %v", attrs.Logging.LogObjectPrefix)
-	fmt.Fprintln(w, "\n\n\nLabels:")
+	fmt.Fprintf(w, "BucketName: %v\n", attrs.Name)
+	fmt.Fprintf(w, "Location: %v\n", attrs.Location)
+	fmt.Fprintf(w, "LocationType: %v\n", attrs.LocationType)
+	fmt.Fprintf(w, "StorageClass: %v\n", attrs.StorageClass)
+	fmt.Fprintf(w, "TimeCreated: %v\n", attrs.Created)
+	fmt.Fprintf(w, "Metageneration: %v\n", attrs.MetaGeneration)
+	fmt.Fprintf(w, "PredefinedACL: %v\n", attrs.PredefinedACL)
+	fmt.Fprintf(w, "DefaultKmsKeyName: %v\n", attrs.Encryption.DefaultKMSKeyName)
+	fmt.Fprintf(w, "IndexPage: %v\n", attrs.Website.MainPageSuffix)
+	fmt.Fprintf(w, "NotFoundPage: %v\n", attrs.Website.NotFoundPage)
+	fmt.Fprintf(w, "DefaultEventBasedHold: %v\n", attrs.DefaultEventBasedHold)
+	fmt.Fprintf(w, "RetentionEffectiveTime: %v\n", attrs.RetentionPolicy.EffectiveTime)
+	fmt.Fprintf(w, "RetentionPeriod: %v\n", attrs.RetentionPolicy.RetentionPeriod)
+	fmt.Fprintf(w, "RetentionPolicyIsLocked: %v\n", attrs.RetentionPolicy.IsLocked)
+	fmt.Fprintf(w, "RequesterPays: %v\n", attrs.RequesterPays)
+	fmt.Fprintf(w, "VersioningEnabled: %v\n", attrs.VersioningEnabled)
+	fmt.Fprintf(w, "LogBucket: %v\n", attrs.Logging.LogBucket)
+	fmt.Fprintf(w, "LogObjectPrefix: %v\n", attrs.Logging.LogObjectPrefix)
+	fmt.Fprintf(w, "\n\n\nLabels:")
 	for key, value := range attrs.Labels {
-		fmt.Fprintln(w, "\t%v = %v", key, value)
+		fmt.Fprintf(w, "\t%v = %v\n", key, value)
 	}
 
 	return attrs, nil
