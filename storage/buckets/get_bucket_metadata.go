@@ -18,7 +18,7 @@
 
 package main
 
-	// [START storage_get_bucket_metadata]
+// [START storage_get_bucket_metadata]
 import (
 	"context"
 	"errors"
