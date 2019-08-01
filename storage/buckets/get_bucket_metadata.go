@@ -60,9 +60,9 @@ func getBucketMetadata(w io.Writer, client *storage.Client, bucketName string) (
 	}
 	fmt.Fprintf(w, "DefaultEventBasedHold: %v\n", attrs.DefaultEventBasedHold)
 	if attrs.RetentionPolicy != nil {
-	fmt.Fprintf(w, "RetentionEffectiveTime: %v\n", attrs.RetentionPolicy.EffectiveTime)
-	fmt.Fprintf(w, "RetentionPeriod: %v\n", attrs.RetentionPolicy.RetentionPeriod)
-	fmt.Fprintf(w, "RetentionPolicyIsLocked: %v\n", attrs.RetentionPolicy.IsLocked)
+		fmt.Fprintf(w, "RetentionEffectiveTime: %v\n", attrs.RetentionPolicy.EffectiveTime)
+		fmt.Fprintf(w, "RetentionPeriod: %v\n", attrs.RetentionPolicy.RetentionPeriod)
+		fmt.Fprintf(w, "RetentionPolicyIsLocked: %v\n", attrs.RetentionPolicy.IsLocked)
 	}
 	fmt.Fprintf(w, "RequesterPays: %v\n", attrs.RequesterPays)
 	fmt.Fprintf(w, "VersioningEnabled: %v\n", attrs.VersioningEnabled)

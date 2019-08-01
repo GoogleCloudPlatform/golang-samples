@@ -21,9 +21,9 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 	"testing"
 	"time"
-	"strings"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 
