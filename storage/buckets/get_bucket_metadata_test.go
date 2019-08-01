@@ -20,6 +20,8 @@ import (
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+
+	"cloud.google.com/go/storage"
 )
 
 func TestGetBucketMetadata(t *testing.T) {
