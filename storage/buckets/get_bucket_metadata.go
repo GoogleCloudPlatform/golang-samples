@@ -16,7 +16,7 @@
 // using the Google Storage API. More documentation is available at
 // https://cloud.google.com/storage/docs/json_api/v1/.
 
-package main
+package storage
 
 // [START storage_get_bucket_metadata]
 import (

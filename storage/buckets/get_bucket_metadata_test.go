@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package inspect
+package storage
 
 import (
 	"bytes"
@@ -41,7 +41,7 @@ func TestGetBucketMetadata(t *testing.T) {
 
 	// Run test
 	bucketMetadataBuf := new(bytes.Buffer)
-	if err := getBucketMetadata(bucketMetadataBuf, storageClient, bucketName); err != nil {
+	if _, err := getBucketMetadata(bucketMetadataBuf, storageClient, bucketName); err != nil {
 		t.Errorf("getBucketMetadata: %#v", err)
 	}
 
