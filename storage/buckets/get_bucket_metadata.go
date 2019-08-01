@@ -51,20 +51,30 @@ func getBucketMetadata(w io.Writer, client *storage.Client, bucketName string) (
 	fmt.Fprintf(w, "TimeCreated: %v\n", attrs.Created)
 	fmt.Fprintf(w, "Metageneration: %v\n", attrs.MetaGeneration)
 	fmt.Fprintf(w, "PredefinedACL: %v\n", attrs.PredefinedACL)
-	fmt.Fprintf(w, "DefaultKmsKeyName: %v\n", attrs.Encryption.DefaultKMSKeyName)
-	fmt.Fprintf(w, "IndexPage: %v\n", attrs.Website.MainPageSuffix)
-	fmt.Fprintf(w, "NotFoundPage: %v\n", attrs.Website.NotFoundPage)
+	if attrs.Encryption != nil {
+		fmt.Fprintf(w, "DefaultKmsKeyName: %v\n", attrs.Encryption.DefaultKMSKeyName)
+	}
+	if attrs.Website != nil {
+		fmt.Fprintf(w, "IndexPage: %v\n", attrs.Website.MainPageSuffix)
+		fmt.Fprintf(w, "NotFoundPage: %v\n", attrs.Website.NotFoundPage)
+	}
 	fmt.Fprintf(w, "DefaultEventBasedHold: %v\n", attrs.DefaultEventBasedHold)
+	if attrs.RetentionPolicy != nil {
 	fmt.Fprintf(w, "RetentionEffectiveTime: %v\n", attrs.RetentionPolicy.EffectiveTime)
 	fmt.Fprintf(w, "RetentionPeriod: %v\n", attrs.RetentionPolicy.RetentionPeriod)
 	fmt.Fprintf(w, "RetentionPolicyIsLocked: %v\n", attrs.RetentionPolicy.IsLocked)
+	}
 	fmt.Fprintf(w, "RequesterPays: %v\n", attrs.RequesterPays)
 	fmt.Fprintf(w, "VersioningEnabled: %v\n", attrs.VersioningEnabled)
-	fmt.Fprintf(w, "LogBucket: %v\n", attrs.Logging.LogBucket)
-	fmt.Fprintf(w, "LogObjectPrefix: %v\n", attrs.Logging.LogObjectPrefix)
-	fmt.Fprintf(w, "\n\n\nLabels:")
-	for key, value := range attrs.Labels {
-		fmt.Fprintf(w, "\t%v = %v\n", key, value)
+	if attrs.Logging != nil {
+		fmt.Fprintf(w, "LogBucket: %v\n", attrs.Logging.LogBucket)
+		fmt.Fprintf(w, "LogObjectPrefix: %v\n", attrs.Logging.LogObjectPrefix)
+	}
+	if attrs.Labels != nil {
+		fmt.Fprintf(w, "\n\n\nLabels:")
+		for key, value := range attrs.Labels {
+			fmt.Fprintf(w, "\t%v = %v\n", key, value)
+		}
 	}
 
 	return attrs, nil
