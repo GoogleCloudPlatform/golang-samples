@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+// Package topics is a tool to manage Google Cloud Pub/Sub topics by using the Pub/Sub API.
+// See more about Google Cloud Pub/Sub at https://cloud.google.com/pubsub/docs/overview.package topics
+package topics
 
 import (
 	"context"
@@ -22,12 +24,10 @@ import (
 
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
-
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-var topic *pubsub.Topic
-var subID string
+var topicID string
 
 var once sync.Once // guards cleanup related operations in setup.
 
@@ -35,38 +35,25 @@ func setup(t *testing.T) *pubsub.Client {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 
+	topicID = tc.ProjectID + "-test-topic"
+
 	client, err := pubsub.NewClient(ctx, tc.ProjectID)
 	if err != nil {
 		t.Fatalf("failed to create client: %v", err)
 	}
 
-	subID = tc.ProjectID + "-test-sub"
-	topicID := tc.ProjectID + "-test-sub-topic"
-
 	// Cleanup resources from the previous failed tests.
 	once.Do(func() {
-		// Create a topic.
-		topic = client.Topic(topicID)
+		topic := client.Topic(topicID)
 		ok, err := topic.Exists(ctx)
 		if err != nil {
 			t.Fatalf("failed to check if topic exists: %v", err)
 		}
 		if !ok {
-			if topic, err = client.CreateTopic(ctx, topicID); err != nil {
-				t.Fatalf("failed to create the topic: %v", err)
-			}
+			return
 		}
-
-		// Delete the sub if already exists.
-		sub := client.Subscription(subID)
-		ok, err = sub.Exists(ctx)
-		if err != nil {
-			t.Fatalf("failed to check if sub exists: %v", err)
-		}
-		if ok {
-			if err := client.Subscription(subID).Delete(ctx); err != nil {
-				t.Fatalf("failed to cleanup the topic (%q): %v", subID, err)
-			}
+		if err := topic.Delete(ctx); err != nil {
+			t.Fatalf("failed to cleanup the topic (%q): %v", topicID, err)
 		}
 	})
 	return client
@@ -74,16 +61,15 @@ func setup(t *testing.T) *pubsub.Client {
 
 func TestCreate(t *testing.T) {
 	c := setup(t)
-
-	if err := create(c, subID, topic); err != nil {
-		t.Fatalf("failed to create a subscription: %v", err)
+	if err := create(c, topicID); err != nil {
+		t.Fatalf("failed to create a topic: %v", err)
 	}
-	ok, err := c.Subscription(subID).Exists(context.Background())
+	ok, err := c.Topic(topicID).Exists(context.Background())
 	if err != nil {
 		t.Fatalf("failed to check if sub exists: %v", err)
 	}
 	if !ok {
-		t.Fatalf("got none; want sub = %q", subID)
+		t.Fatalf("got none; want topic = %q", topicID)
 	}
 }
 
@@ -91,31 +77,53 @@ func TestList(t *testing.T) {
 	c := setup(t)
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-		subs, err := list(c)
+		topics, err := list(c)
 		if err != nil {
-			r.Errorf("failed to list subscriptions: %v", err)
-			return
+			r.Errorf("failed to list topics: %v", err)
 		}
 
-		for _, sub := range subs {
-			if sub.ID() == subID {
+		for _, t := range topics {
+			if t.ID() == topicID {
 				return // PASS
 			}
 		}
 
-		subNames := make([]string, len(subs))
-		for i, sub := range subs {
-			subNames[i] = sub.ID()
+		topicNames := make([]string, len(topics))
+		for i, t := range topics {
+			topicNames[i] = t.ID()
 		}
-		r.Errorf("got %+v; want a list with subscription %q", subNames, subID)
+		r.Errorf("got %+v; want a list with topic = %q", topicNames, topicID)
 	})
+}
+
+func TestPublish(t *testing.T) {
+	// Nothing much to do here, unless we are consuming.
+	// TODO(jbd): Merge topics and subscriptions programs maybe?
+	c := setup(t)
+	if err := publish(c, topicID, "hello world"); err != nil {
+		t.Errorf("failed to publish message: %v", err)
+	}
+}
+
+func TestPublishThatScales(t *testing.T) {
+	c := setup(t)
+	if err := publishThatScales(c, topicID, 10); err != nil {
+		t.Errorf("failed to publish message: %v", err)
+	}
+}
+
+func TestPublishCustomAttributes(t *testing.T) {
+	c := setup(t)
+	if err := publishCustomAttributes(c, topicID); err != nil {
+		t.Errorf("failed to publish message: %v", err)
+	}
 }
 
 func TestIAM(t *testing.T) {
 	c := setup(t)
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-		perms, err := testPermissions(c, subID)
+		perms, err := testPermissions(c, topicID)
 		if err != nil {
 			r.Errorf("testPermissions: %v", err)
 		}
@@ -125,15 +133,15 @@ func TestIAM(t *testing.T) {
 	})
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-		if err := addUsers(c, subID); err != nil {
+		if err := addUsers(c, topicID); err != nil {
 			r.Errorf("addUsers: %v", err)
 		}
 	})
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-		policy, err := getPolicy(c, subID)
+		policy, err := policy(c, topicID)
 		if err != nil {
-			r.Errorf("getPolicy: %v", err)
+			r.Errorf("policy: %v", err)
 		}
 		if role, member := iam.Editor, "group:cloud-logs@google.com"; !policy.HasRole(member, role) {
 			r.Errorf("want %q as viewer, policy=%v", member, policy)
@@ -146,15 +154,14 @@ func TestIAM(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	c := setup(t)
-
-	if err := delete(c, subID); err != nil {
-		t.Fatalf("failed to delete subscription (%q): %v", subID, err)
+	if err := delete(c, topicID); err != nil {
+		t.Fatalf("failed to delete subscription (%q): %v", topicID, err)
 	}
-	ok, err := c.Subscription(subID).Exists(context.Background())
+	ok, err := c.Topic(topicID).Exists(context.Background())
 	if err != nil {
 		t.Fatalf("failed to check if sub exists: %v", err)
 	}
 	if ok {
-		t.Fatalf("got sub = %q; want none", subID)
+		t.Fatalf("got sub = %q; want none", topicID)
 	}
 }

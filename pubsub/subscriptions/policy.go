@@ -12,40 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Sample pubsub-quickstart creates a Google Cloud Pub/Sub topic.
-package main
+// Package subscription is a tool to manage Google Cloud Pub/Sub subscriptions by using the Pub/Sub API.
+// See more about Google Cloud Pub/Sub at https://cloud.google.com/pubsub/docs/overview.
+package subscription
 
-// [START pubsub_quickstart_create_topic]
+// [START pubsub_get_subscription_policy]
 import (
 	"context"
-	"fmt"
 	"log"
 
+	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
 )
 
-func main() {
+func policy(c *pubsub.Client, subName string) (*iam.Policy, error) {
 	ctx := context.Background()
 
-	// Sets your Google Cloud Platform project ID.
-	projectID := "YOUR_PROJECT_ID"
-
-	// Creates a client.
-	client, err := pubsub.NewClient(ctx, projectID)
+	policy, err := c.Subscription(subName).IAM().Policy(ctx)
 	if err != nil {
-		log.Fatalf("Failed to create client: %v", err)
+		return nil, err
 	}
-
-	// Sets the name for the new topic.
-	topicName := "my-topic"
-
-	// Creates the new topic.
-	topic, err := client.CreateTopic(ctx, topicName)
-	if err != nil {
-		log.Fatalf("Failed to create topic: %v", err)
+	for _, role := range policy.Roles() {
+		log.Printf("%q: %q", role, policy.Members(role))
 	}
-
-	fmt.Printf("Topic %v created.\n", topic)
+	return policy, nil
 }
 
-// [END pubsub_quickstart_create_topic]
+// [END pubsub_get_subscription_policy]

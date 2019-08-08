@@ -12,40 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Sample pubsub-quickstart creates a Google Cloud Pub/Sub topic.
-package main
+// Package topics is a tool to manage Google Cloud Pub/Sub topics by using the Pub/Sub API.
+// See more about Google Cloud Pub/Sub at https://cloud.google.com/pubsub/docs/overview.
+package topics
 
-// [START pubsub_quickstart_create_topic]
+// [START pubsub_create_topic]
+
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"cloud.google.com/go/pubsub"
 )
 
-func main() {
+func create(client *pubsub.Client, topic string) error {
 	ctx := context.Background()
-
-	// Sets your Google Cloud Platform project ID.
-	projectID := "YOUR_PROJECT_ID"
-
-	// Creates a client.
-	client, err := pubsub.NewClient(ctx, projectID)
+	t, err := client.CreateTopic(ctx, topic)
 	if err != nil {
-		log.Fatalf("Failed to create client: %v", err)
+		return fmt.Errorf("CreateTopic: %v", err)
 	}
-
-	// Sets the name for the new topic.
-	topicName := "my-topic"
-
-	// Creates the new topic.
-	topic, err := client.CreateTopic(ctx, topicName)
-	if err != nil {
-		log.Fatalf("Failed to create topic: %v", err)
-	}
-
-	fmt.Printf("Topic %v created.\n", topic)
+	fmt.Printf("Topic created: %v\n", t)
+	return nil
 }
 
-// [END pubsub_quickstart_create_topic]
+// [END pubsub_create_topic]

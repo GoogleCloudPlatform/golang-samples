@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Sample pubsub-quickstart creates a Google Cloud Pub/Sub topic.
-package main
+// Package topics is a tool to manage Google Cloud Pub/Sub topics by using the Pub/Sub API.
+// See more about Google Cloud Pub/Sub at https://cloud.google.com/pubsub/docs/overview.
+package topics
 
-// [START pubsub_quickstart_create_topic]
+// [START pubsub_test_topic_permissions]
+
 import (
 	"context"
 	"fmt"
@@ -24,28 +26,20 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func main() {
+func testPermissions(c *pubsub.Client, topicName string) ([]string, error) {
 	ctx := context.Background()
-
-	// Sets your Google Cloud Platform project ID.
-	projectID := "YOUR_PROJECT_ID"
-
-	// Creates a client.
-	client, err := pubsub.NewClient(ctx, projectID)
+	topic := c.Topic(topicName)
+	perms, err := topic.IAM().TestPermissions(ctx, []string{
+		"pubsub.topics.publish",
+		"pubsub.topics.update",
+	})
 	if err != nil {
-		log.Fatalf("Failed to create client: %v", err)
+		return nil, fmt.Errorf("TestPermissions: %v", err)
 	}
-
-	// Sets the name for the new topic.
-	topicName := "my-topic"
-
-	// Creates the new topic.
-	topic, err := client.CreateTopic(ctx, topicName)
-	if err != nil {
-		log.Fatalf("Failed to create topic: %v", err)
+	for _, perm := range perms {
+		log.Printf("Allowed: %v", perm)
 	}
-
-	fmt.Printf("Topic %v created.\n", topic)
+	return perms, nil
 }
 
-// [END pubsub_quickstart_create_topic]
+// [END pubsub_test_topic_permissions]
