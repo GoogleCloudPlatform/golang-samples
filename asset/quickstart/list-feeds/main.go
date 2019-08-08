@@ -37,7 +37,7 @@ func main() {
         }
 
         projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
-        projectNumber := assetUtils.GetProjectNumberById(projectID)
+        projectNumber := assetUtils.GetProjectNumberByID(projectID)
         parent := fmt.Sprintf("projects/%s", projectNumber)
         req := &assetpb.ListFeedsRequest{
                 Parent: parent}

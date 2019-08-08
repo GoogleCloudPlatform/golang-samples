@@ -32,7 +32,7 @@ func TestMain(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	os.Setenv("GOOGLE_CLOUD_PROJECT", tc.ProjectID)
 
-    projectNumber := assetUtils.GetProjectNumberById(tc.ProjectID)
+    projectNumber := assetUtils.GetProjectNumberByID(tc.ProjectID)
 
 	oldStdout := os.Stdout
 	r, w, _ := os.Pipe()

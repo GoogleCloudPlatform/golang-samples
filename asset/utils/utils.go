@@ -10,6 +10,7 @@ import (
     cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 )
 
+// CleanUp will clear up test data after test.
 func CleanUp(ctx context.Context, client *asset.Client, feedName string) {
     req := &assetpb.DeleteFeedRequest{
     	Name: feedName,
@@ -17,14 +18,17 @@ func CleanUp(ctx context.Context, client *asset.Client, feedName string) {
     client.DeleteFeed(ctx, req)
 }
 
-func GetProjectNumberById(projectId string) string {
+
+// GetProjectNumberByID will get projectNumber from projectID by calling
+// cloudresourcemanager api
+func GetProjectNumberByID(projectID string) string {
 	ctx := context.Background()
 	cloudresourcemanagerClient, err := cloudresourcemanager.NewService(ctx)
     if err != nil {
             log.Fatal(err)
     }
 
-    project, err := cloudresourcemanagerClient.Projects.Get(projectId).Do()
+    project, err := cloudresourcemanagerClient.Projects.Get(projectID).Do()
     if err != nil {
             log.Fatal(err)
     }

@@ -42,11 +42,7 @@ func main() {
         }
 
         projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
-        project, err := cloudresourcemanagerClient.Projects.Get(projectID).Do()
-        if err != nil {
-                log.Fatal(err)
-        }
-        projectNumber := strconv.FormatInt(project.ProjectNumber, 10)
+        projectNumber := assetUtils.GetProjectNumberByID(projectID)
         feedName := fmt.Sprintf("projects/%s/feeds/%s", projectNumber, "YOUR_FEED_ID")
         req := &assetpb.DeleteFeedRequest{
                 Name: feedName}

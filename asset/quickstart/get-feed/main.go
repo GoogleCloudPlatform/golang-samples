@@ -37,7 +37,7 @@ func main() {
         }
 
         projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
-        projectNumber := assetUtils.GetProjectNumberById(projectID)
+        projectNumber := assetUtils.GetProjectNumberByID(projectID)
         feedName := fmt.Sprintf("projects/%s/feeds/%s", projectNumber, "YOUR_FEED_ID")
         req := &assetpb.GetFeedRequest{
                 Name: feedName}

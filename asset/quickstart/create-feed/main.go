@@ -37,13 +37,13 @@ func main() {
 
         projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
         feedParent := fmt.Sprintf("projects/%s", projectID) 
-        feedId := "YOUR_FEED_ID"
+        feedID := "YOUR_FEED_ID"
         assetNames :=  []string{"YOUR_ASSET_NAME"}
         topic := fmt.Sprintf("projects/%s/topics/%s", projectID, "YOUR_TOPIC_NAME")
         
         req := &assetpb.CreateFeedRequest{
                 Parent: feedParent,
-                FeedId: feedId,
+                FeedId: feedID,
                 Feed: &assetpb.Feed{
                   AssetNames: assetNames,
                   FeedOutputConfig: &assetpb.FeedOutputConfig{
