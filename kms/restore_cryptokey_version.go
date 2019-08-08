@@ -33,7 +33,7 @@ func restoreCryptoKeyVersion(w io.Writer, keyVersionName string) error {
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("cloudkms.NewKeyManagementClient: %v", err)
 	}
 	// Build the request.
 	req := &kmspb.RestoreCryptoKeyVersionRequest{
@@ -42,7 +42,7 @@ func restoreCryptoKeyVersion(w io.Writer, keyVersionName string) error {
 	// Call the API.
 	result, err := client.RestoreCryptoKeyVersion(ctx, req)
 	if err != nil {
-		return err
+		return fmt.Errorf("RestoreCryptoKeyVersion: %v", err)
 	}
 	fmt.Fprintf(w, "Restored crypto key version: %s", result)
 	return nil

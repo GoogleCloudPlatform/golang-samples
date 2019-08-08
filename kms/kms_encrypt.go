@@ -18,6 +18,7 @@ package kms
 
 import (
 	"context"
+	"fmt"
 
 	cloudkms "cloud.google.com/go/kms/apiv1"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
@@ -31,7 +32,7 @@ func encryptSymmetric(keyName string, plaintext []byte) ([]byte, error) {
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("cloudkms.NewKeyManagementClient: %v", err)
 	}
 
 	// Build the request.
@@ -42,7 +43,7 @@ func encryptSymmetric(keyName string, plaintext []byte) ([]byte, error) {
 	// Call the API.
 	resp, err := client.Encrypt(ctx, req)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Encrypt: %v", err)
 	}
 	return resp.Ciphertext, nil
 }

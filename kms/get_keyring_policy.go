@@ -34,18 +34,18 @@ func getRingPolicy(w io.Writer, keyRingName string) (*iam.Policy, error) {
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("cloudkms.NewKeyManagementClient: %v", err)
 	}
 	// Get the KeyRing.
 	keyRingObj, err := client.GetKeyRing(ctx, &kmspb.GetKeyRingRequest{Name: keyRingName})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("GetKeyRing: %v", err)
 	}
 	// Get IAM Policy.
 	handle := client.KeyRingIAM(keyRingObj)
 	policy, err := handle.Policy(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Policy: %v", err)
 	}
 	for _, role := range policy.Roles() {
 		for _, member := range policy.Members(role) {

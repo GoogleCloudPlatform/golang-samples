@@ -34,7 +34,7 @@ func getAsymmetricPublicKey(keyName string) (interface{}, error) {
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("cloudkms.NewKeyManagementClient: %v", err)
 	}
 
 	// Build the request.

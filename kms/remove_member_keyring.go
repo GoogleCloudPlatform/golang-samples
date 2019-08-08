@@ -34,26 +34,25 @@ func removeMemberRingPolicy(w io.Writer, keyRingName, member string, role iam.Ro
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("cloudkms.NewKeyManagementClient: %v", err)
 	}
-
 	// Get the KeyRing.
 	keyRingObj, err := client.GetKeyRing(ctx, &kmspb.GetKeyRingRequest{Name: keyRingName})
 	if err != nil {
-		return err
+		return fmt.Errorf("GetKeyRing: %v", err)
 	}
 	// Get IAM Policy.
 	handle := client.KeyRingIAM(keyRingObj)
 	policy, err := handle.Policy(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("Policy: %v", err)
 	}
 
 	// Remove Member.
 	policy.Remove(member, role)
 	err = handle.SetPolicy(ctx, policy)
 	if err != nil {
-		return err
+		return fmt.Errorf("SetPolicy: %v", err)
 	}
 	fmt.Fprint(w, "Removed member from keyring policy.")
 	return nil

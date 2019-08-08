@@ -37,9 +37,8 @@ func verifySignatureRSA(keyName string, signature, message []byte) error {
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("cloudkms.NewKeyManagementClient: %v", err)
 	}
-
 	// Retrieve the public key from KMS.
 	response, err := client.GetPublicKey(ctx, &kmspb.GetPublicKeyRequest{Name: keyName})
 	if err != nil {

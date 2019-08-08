@@ -32,7 +32,7 @@ func decryptRSA(keyName string, ciphertext []byte) ([]byte, error) {
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("cloudkms.NewKeyManagementClient: %v", err)
 	}
 
 	// Build the request.
@@ -43,7 +43,7 @@ func decryptRSA(keyName string, ciphertext []byte) ([]byte, error) {
 	// Call the API.
 	response, err := client.AsymmetricDecrypt(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("decryption request failed: %+v", err)
+		return nil, fmt.Errorf("AsymmetricDecrypt: %v", err)
 	}
 	return response.Plaintext, nil
 }

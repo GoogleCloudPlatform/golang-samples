@@ -34,25 +34,24 @@ func removeMemberCryptoKeyPolicy(w io.Writer, keyName, member string, role iam.R
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("cloudkms.NewKeyManagementClient: %v", err)
 	}
-
 	// Get the desired CryptoKey.
 	keyObj, err := client.GetCryptoKey(ctx, &kmspb.GetCryptoKeyRequest{Name: keyName})
 	if err != nil {
-		return err
+		return fmt.Errorf("GetCryptoKey: %v", err)
 	}
 	// Get IAM Policy.
 	handle := client.CryptoKeyIAM(keyObj)
 	policy, err := handle.Policy(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("Policy: %v", err)
 	}
 	// Remove Member.
 	policy.Remove(member, role)
 	err = handle.SetPolicy(ctx, policy)
 	if err != nil {
-		return err
+		return fmt.Errorf("SetPolicy: %v", err)
 	}
 	fmt.Fprint(w, "Removed member from cryptokey policy.")
 	return nil

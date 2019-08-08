@@ -33,7 +33,7 @@ func createCryptoKey(w io.Writer, keyRingName, keyID string) error {
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("cloudkms.NewKeyManagementClient: %v", err)
 	}
 
 	// Build the request.
@@ -50,7 +50,7 @@ func createCryptoKey(w io.Writer, keyRingName, keyID string) error {
 	// Call the API.
 	result, err := client.CreateCryptoKey(ctx, req)
 	if err != nil {
-		return err
+		return fmt.Errorf("CreateCryptoKey: %v", err)
 	}
 	fmt.Fprintf(w, "Created crypto key. %s", result)
 	return nil

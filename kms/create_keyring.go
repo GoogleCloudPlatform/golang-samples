@@ -33,7 +33,7 @@ func createKeyRing(w io.Writer, parentName, keyRingID string) error {
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("cloudkms.NewKeyManagementClient: %v", err)
 	}
 	// Build the request.
 	req := &kmspb.CreateKeyRingRequest{
@@ -43,7 +43,7 @@ func createKeyRing(w io.Writer, parentName, keyRingID string) error {
 	// Call the API.
 	result, err := client.CreateKeyRing(ctx, req)
 	if err != nil {
-		return err
+		return fmt.Errorf("CreateKeyRing: %v", err)
 	}
 	fmt.Fprintf(w, "Created key ring: %s", result)
 	return nil

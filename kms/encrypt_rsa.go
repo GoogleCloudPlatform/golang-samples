@@ -37,7 +37,7 @@ func encryptRSA(keyName string, plaintext []byte) ([]byte, error) {
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("cloudkms.NewKeyManagementClient: %v", err)
 	}
 
 	// Retrieve the public key from KMS.

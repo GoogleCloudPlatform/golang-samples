@@ -20,6 +20,7 @@ package kms
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	cloudkms "cloud.google.com/go/kms/apiv1"
@@ -32,9 +33,8 @@ func createAsymmetricKey(keyRingName, keyID string) error {
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("cloudkms.NewKeyManagementClient: %v", err)
 	}
-
 	// Build the request.
 	req := &kmspb.CreateCryptoKeyRequest{
 		Parent:      keyRingName,
@@ -49,7 +49,7 @@ func createAsymmetricKey(keyRingName, keyID string) error {
 	// Call the API.
 	result, err := client.CreateCryptoKey(ctx, req)
 	if err != nil {
-		return err
+		return fmt.Errorf("CreateCryptoKey: %v", err)
 	}
 	log.Printf("Created crypto key. %s", result)
 	return nil

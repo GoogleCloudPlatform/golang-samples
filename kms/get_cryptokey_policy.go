@@ -34,18 +34,18 @@ func getCryptoKeyPolicy(w io.Writer, keyName string) (*iam.Policy, error) {
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("cloudkms.NewKeyManagementClient: %v", err)
 	}
 	// Get the KeyRing.
 	keyObj, err := client.GetCryptoKey(ctx, &kmspb.GetCryptoKeyRequest{Name: keyName})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("GetCryptoKey: %v", err)
 	}
 	// Get IAM Policy.
 	handle := client.CryptoKeyIAM(keyObj)
 	policy, err := handle.Policy(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Policy: %v", err)
 	}
 	for _, role := range policy.Roles() {
 		for _, member := range policy.Members(role) {

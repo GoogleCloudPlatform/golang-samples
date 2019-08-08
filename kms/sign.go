@@ -35,7 +35,7 @@ func signAsymmetric(keyName string, message []byte) ([]byte, error) {
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("cloudkms.NewKeyManagementClient: %v", err)
 	}
 	// Find the digest of the message.
 	digest := sha256.New()
