@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package translate_snippets contains snippet code for the Translate API.
+// Package trsnippets contains snippet code for the Translate API.
 // The code is not runnable.
-package translate_snippets
+package trsnippets
 
 import (
 	"bytes"
