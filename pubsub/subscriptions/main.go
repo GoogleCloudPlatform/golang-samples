@@ -155,7 +155,10 @@ func pullMsgsSettings(client *pubsub.Client, subName string) error {
 	// [START pubsub_subscriber_flow_settings]
 	sub := client.Subscription(subName)
 	sub.ReceiveSettings.Synchronous = true
+	// MaxOutstandingMessages is the maximum number of unprocessed messages (unacknowledged but not yet expired).
 	sub.ReceiveSettings.MaxOutstandingMessages = 10
+	// MaxOutstandingBytes is the maximum size of unprocessed messages (unacknowledged but not yet expired).
+	sub.ReceiveSettings.MaxOutstandingBytes = 1e10
 	err := sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
 		fmt.Printf("Got message: %q\n", string(msg.Data))
 		msg.Ack()
@@ -167,6 +170,37 @@ func pullMsgsSettings(client *pubsub.Client, subName string) error {
 	return nil
 }
 
+func pullMsgsConcurrencyControl(client *pubsub.Client, subName string, numGoroutines int) error {
+	ctx := context.Background()
+	// [START pubsub_subscriber_concurrency_control]
+	sub := client.Subscription(subName)
+	sub.ReceiveSettings.NumGoroutines = numGoroutines
+	err := sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
+		fmt.Printf("Got message %q\n", string(msg.Data))
+		msg.Ack()
+	})
+	if err != nil {
+		return err
+	}
+	// [END pubsub_subscriber_concurrency_control]
+	return nil
+}
+
+func pullMsgsSynchronous(client *pubsub.Client, subName string) error {
+	ctx := context.Background()
+	// [START pubsub_subscriber_sync_pull]
+	sub := client.Subscription(subName)
+	sub.ReceiveSettings.Synchronous = true
+	err := sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
+		fmt.Printf("Got message %q\n", string(msg.Data))
+		msg.Ack()
+	})
+	if err != nil {
+		return err
+	}
+	// [END pubsub_subscriber_sync_pull]
+	return nil
+}
 func create(client *pubsub.Client, subName string, topic *pubsub.Topic) error {
 	ctx := context.Background()
 	// [START pubsub_create_pull_subscription]
