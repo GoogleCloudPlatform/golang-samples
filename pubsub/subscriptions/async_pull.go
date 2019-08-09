@@ -16,6 +16,8 @@
 // See more about Google Cloud Pub/Sub at https://cloud.google.com/pubsub/docs/overview.
 package subscription
 
+// [START pubsub_subscriber_async_pull]
+// [START pubsub_quickstart_subscriber]
 import (
 	"context"
 	"fmt"
@@ -40,12 +42,9 @@ func pullMsgs(client *pubsub.Client, subName string, topic *pubsub.Topic) error 
 	for _, r := range results {
 		_, err := r.Get(ctx)
 		if err != nil {
-			return err
+			return fmt.Errorf("Get: %v", err)
 		}
 	}
-
-	// [START pubsub_subscriber_async_pull]
-	// [START pubsub_quickstart_subscriber]
 	// Consume 10 messages.
 	var mu sync.Mutex
 	received := 0
@@ -62,9 +61,10 @@ func pullMsgs(client *pubsub.Client, subName string, topic *pubsub.Topic) error 
 		}
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("Receive: %v", err)
 	}
-	// [END pubsub_subscriber_async_pull]
-	// [END pubsub_quickstart_subscriber]
 	return nil
 }
+
+// [END pubsub_subscriber_async_pull]
+// [END pubsub_quickstart_subscriber]

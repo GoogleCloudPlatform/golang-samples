@@ -35,7 +35,7 @@ func createWithEndpoint(client *pubsub.Client, subName string, topic *pubsub.Top
 		PushConfig:  pubsub.PushConfig{Endpoint: endpoint},
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("CreateSubscription: %v", err)
 	}
 	fmt.Printf("Created subscription: %v\n", sub)
 	return nil

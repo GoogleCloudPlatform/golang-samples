@@ -29,7 +29,7 @@ func delete(client *pubsub.Client, subName string) error {
 	ctx := context.Background()
 	sub := client.Subscription(subName)
 	if err := sub.Delete(ctx); err != nil {
-		return err
+		return fmt.Errorf("Delete: %v", err)
 	}
 	fmt.Println("Subscription deleted.")
 	return nil

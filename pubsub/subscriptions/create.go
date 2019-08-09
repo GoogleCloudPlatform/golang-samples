@@ -32,7 +32,7 @@ func create(client *pubsub.Client, subName string, topic *pubsub.Topic) error {
 		AckDeadline: 20 * time.Second,
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("CreateSubscription: %v", err)
 	}
 	fmt.Printf("Created subscription: %v\n", sub)
 	return nil

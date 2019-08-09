@@ -34,7 +34,7 @@ func pullMsgsError(client *pubsub.Client, subName string) error {
 		msg.Ack()
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("Receive: %v", err)
 	}
 	return nil
 }

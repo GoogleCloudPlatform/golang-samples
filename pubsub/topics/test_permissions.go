@@ -21,12 +21,12 @@ package topics
 import (
 	"context"
 	"fmt"
-	"log"
+	"io"
 
 	"cloud.google.com/go/pubsub"
 )
 
-func testPermissions(c *pubsub.Client, topicName string) ([]string, error) {
+func testPermissions(w io.Writer, c *pubsub.Client, topicName string) ([]string, error) {
 	ctx := context.Background()
 	topic := c.Topic(topicName)
 	perms, err := topic.IAM().TestPermissions(ctx, []string{
@@ -37,7 +37,7 @@ func testPermissions(c *pubsub.Client, topicName string) ([]string, error) {
 		return nil, fmt.Errorf("TestPermissions: %v", err)
 	}
 	for _, perm := range perms {
-		log.Printf("Allowed: %v", perm)
+		fmt.Fprintf(w, "Allowed: %v", perm)
 	}
 	return perms, nil
 }

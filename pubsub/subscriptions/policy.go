@@ -19,21 +19,22 @@ package subscription
 // [START pubsub_get_subscription_policy]
 import (
 	"context"
-	"log"
+	"fmt"
+	"io"
 
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
 )
 
-func policy(c *pubsub.Client, subName string) (*iam.Policy, error) {
+func policy(w io.Writer, c *pubsub.Client, subName string) (*iam.Policy, error) {
 	ctx := context.Background()
 
 	policy, err := c.Subscription(subName).IAM().Policy(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Subscription: %v", err)
 	}
 	for _, role := range policy.Roles() {
-		log.Printf("%q: %q", role, policy.Members(role))
+		fmt.Fprintf(w, "%q: %q", role, policy.Members(role))
 	}
 	return policy, nil
 }

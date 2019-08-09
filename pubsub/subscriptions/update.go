@@ -32,7 +32,7 @@ func updateEndpoint(client *pubsub.Client, subName string, endpoint string) erro
 		PushConfig: &pubsub.PushConfig{Endpoint: endpoint},
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("Update: %v", err)
 	}
 	fmt.Printf("Updated subscription config: %#v", subConfig)
 	return nil

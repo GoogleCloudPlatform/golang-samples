@@ -21,7 +21,6 @@ package topics
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
@@ -39,7 +38,7 @@ func addUsers(c *pubsub.Client, topicName string) error {
 	policy.Add(iam.AllUsers, iam.Viewer)
 	policy.Add("group:cloud-logs@google.com", iam.Editor)
 	if err := topic.IAM().SetPolicy(ctx, policy); err != nil {
-		log.Fatalf("SetPolicy: %v", err)
+		return fmt.Errorf("SetPolicy: %v", err)
 	}
 	// NOTE: It may be necessary to retry this operation if IAM policies are
 	// being modified concurrently. SetPolicy will return an error if the policy

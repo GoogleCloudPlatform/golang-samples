@@ -21,7 +21,7 @@ package topics
 import (
 	"context"
 	"fmt"
-	"log"
+	"io"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -29,7 +29,7 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func publishThatScales(client *pubsub.Client, topic string, n int) error {
+func publishThatScales(w io.Writer, client *pubsub.Client, topic string, n int) error {
 	ctx := context.Background()
 	var wg sync.WaitGroup
 	var totalErrors uint64
@@ -48,7 +48,7 @@ func publishThatScales(client *pubsub.Client, topic string, n int) error {
 			id, err := res.Get(ctx)
 			if err != nil {
 				// Error handling code can be added here.
-				log.Output(1, fmt.Sprintf("Failed to publish: %v", err))
+				fmt.Fprintf(w, "Failed to publish: %v", err)
 				atomic.AddUint64(&totalErrors, 1)
 				return
 			}

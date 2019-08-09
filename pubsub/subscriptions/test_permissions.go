@@ -19,12 +19,12 @@ package subscription
 import (
 	"context"
 	"fmt"
-	"log"
+	"io"
 
 	"cloud.google.com/go/pubsub"
 )
 
-func testPermissions(c *pubsub.Client, subName string) ([]string, error) {
+func testPermissions(w io.Writer, c *pubsub.Client, subName string) ([]string, error) {
 	ctx := context.Background()
 
 	// [START pubsub_test_subscription_permissions]
@@ -37,7 +37,7 @@ func testPermissions(c *pubsub.Client, subName string) ([]string, error) {
 		return nil, fmt.Errorf("TestPermissions: %v", err)
 	}
 	for _, perm := range perms {
-		log.Printf("Allowed: %v", perm)
+		fmt.Fprintf(w, "Allowed: %v", perm)
 	}
 	// [END pubsub_test_subscription_permissions]
 	return perms, nil

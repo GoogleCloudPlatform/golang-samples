@@ -17,6 +17,7 @@
 package subscription
 
 // [START pubsub_set_subscription_policy]
+
 import (
 	"context"
 	"fmt"
@@ -25,6 +26,7 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
+// addUsers adds all IAM users to a subscription
 func addUsers(c *pubsub.Client, subName string) error {
 	ctx := context.Background()
 

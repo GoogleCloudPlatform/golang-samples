@@ -16,26 +16,28 @@
 // See more about Google Cloud Pub/Sub at https://cloud.google.com/pubsub/docs/overview.
 package topics
 
+// [START pubsub_get_topic_policy]
+
 import (
 	"context"
 	"fmt"
-	"log"
+	"io"
 
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
 )
 
-func policy(c *pubsub.Client, topicName string) (*iam.Policy, error) {
+func policy(w io.Writer, c *pubsub.Client, topicName string) (*iam.Policy, error) {
 	ctx := context.Background()
 
-	// [START pubsub_get_topic_policy]
 	policy, err := c.Topic(topicName).IAM().Policy(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("Policy: %v", err)
 	}
 	for _, role := range policy.Roles() {
-		log.Print(policy.Members(role))
+		fmt.Fprint(w, policy.Members(role))
 	}
-	// [END pubsub_get_topic_policy]
 	return policy, nil
 }
+
+// [END pubsub_get_topic_policy]
