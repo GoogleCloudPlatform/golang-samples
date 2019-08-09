@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package kms contains samples for asymmetric keys feature of Cloud Key Management Service
-// https://cloud.google.com/kms/
 package kms
 
 // [START kms_remove_member_from_keyring_policy]
@@ -29,15 +27,15 @@ import (
 )
 
 // removeMemberRingPolicy removes a specified member from an IAM role for the key ring
-// example keyRingName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID"
-func removeMemberRingPolicy(w io.Writer, keyRingName, member string, role iam.RoleName) error {
+func removeMemberRingPolicy(w io.Writer, name, member string, role iam.RoleName) error {
+	// name: "projects/PROJECT_ID/locations/global/keyRings/RING_ID"
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
 		return fmt.Errorf("cloudkms.NewKeyManagementClient: %v", err)
 	}
 	// Get the KeyRing.
-	keyRingObj, err := client.GetKeyRing(ctx, &kmspb.GetKeyRingRequest{Name: keyRingName})
+	keyRingObj, err := client.GetKeyRing(ctx, &kmspb.GetKeyRingRequest{Name: name})
 	if err != nil {
 		return fmt.Errorf("GetKeyRing: %v", err)
 	}
@@ -54,7 +52,7 @@ func removeMemberRingPolicy(w io.Writer, keyRingName, member string, role iam.Ro
 	if err != nil {
 		return fmt.Errorf("SetPolicy: %v", err)
 	}
-	fmt.Fprint(w, "Removed member from keyring policy.")
+	fmt.Fprintf(w, "Removed member %s from keyring policy.", member)
 	return nil
 }
 

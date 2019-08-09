@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package kms contains samples for asymmetric keys feature of Cloud Key Management Service
-// https://cloud.google.com/kms/
 package kms
 
 // [START kms_restore_cryptokey_version]

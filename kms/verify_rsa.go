@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package kms contains samples for asymmetric keys feature of Cloud Key Management Service
-// https://cloud.google.com/kms/
 package kms
 
 import (
@@ -32,27 +30,27 @@ import (
 // [START kms_verify_signature_rsa]
 
 // verifySignatureRSA will verify that an 'RSA_SIGN_PSS_2048_SHA256' signature is valid for a given message.
-// example keyName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
-func verifySignatureRSA(keyName string, signature, message []byte) error {
+func verifySignatureRSA(name string, signature, message []byte) error {
+	// name: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
 		return fmt.Errorf("cloudkms.NewKeyManagementClient: %v", err)
 	}
 	// Retrieve the public key from KMS.
-	response, err := client.GetPublicKey(ctx, &kmspb.GetPublicKeyRequest{Name: keyName})
+	response, err := client.GetPublicKey(ctx, &kmspb.GetPublicKeyRequest{Name: name})
 	if err != nil {
-		return fmt.Errorf("failed to fetch public key: %+v", err)
+		return fmt.Errorf("GetPublicKey: %v", err)
 	}
 	// Parse the key.
 	block, _ := pem.Decode([]byte(response.Pem))
 	abstractKey, err := x509.ParsePKIXPublicKey(block.Bytes)
 	if err != nil {
-		return fmt.Errorf("failed to parse public key: %+v", err)
+		return fmt.Errorf("x509.ParsePKIXPublicKey: %v", err)
 	}
 	rsaKey, ok := abstractKey.(*rsa.PublicKey)
 	if !ok {
-		return fmt.Errorf("key '%s' is not RSA", keyName)
+		return fmt.Errorf("key '%s' is not RSA", name)
 	}
 	// Verify RSA signature.
 	hash := sha256.New()
@@ -61,7 +59,7 @@ func verifySignatureRSA(keyName string, signature, message []byte) error {
 	pssOptions := rsa.PSSOptions{SaltLength: len(digest), Hash: crypto.SHA256}
 	err = rsa.VerifyPSS(rsaKey, crypto.SHA256, digest, signature, &pssOptions)
 	if err != nil {
-		return fmt.Errorf("signature verification failed: %+v", err)
+		return fmt.Errorf("rsa.VerifyPSS: %v", err)
 	}
 	return nil
 }

@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package kms contains samples for asymmetric keys feature of Cloud Key Management Service
-// https://cloud.google.com/kms/
 package kms
 
 // [START kms_add_member_to_cryptokey_policy]
@@ -29,8 +27,9 @@ import (
 )
 
 // addMemberCryptoKeyPolicy adds a new member to a specified IAM role for the key
-// example keyName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID"
 func addMemberCryptoKeyPolicy(w io.Writer, keyName, member string, role iam.RoleName) error {
+	// keyName := "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID"
+	// role = iam.Viewer
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
@@ -54,7 +53,7 @@ func addMemberCryptoKeyPolicy(w io.Writer, keyName, member string, role iam.Role
 	if err != nil {
 		return fmt.Errorf("SetPolicy: %v", err)
 	}
-	fmt.Fprint(w, "Added member to cryptokey policy.")
+	fmt.Fprintf(w, "Added member %s to cryptokey policy.", member)
 	return nil
 }
 

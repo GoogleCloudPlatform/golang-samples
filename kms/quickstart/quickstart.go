@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START kms_quickstart]
-
 // Sample quickstart is a basic program that uses Cloud KMS.
 package main
+
+// [START kms_quickstart]
 
 import (
 	"context"
@@ -40,11 +40,11 @@ func main() {
 	}
 
 	// The resource name of the key rings.
-	parentName := fmt.Sprintf("projects/%s/locations/%s", projectID, locationID)
+	parent := fmt.Sprintf("projects/%s/locations/%s", projectID, locationID)
 
 	// Build the request.
 	req := &kmspb.ListKeyRingsRequest{
-		Parent: parentName,
+		Parent: parent,
 	}
 	// Query the API.
 	it := client.ListKeyRings(ctx, req)

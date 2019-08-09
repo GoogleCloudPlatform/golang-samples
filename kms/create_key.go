@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package kms contains samples for asymmetric keys feature of Cloud Key Management Service
-// https://cloud.google.com/kms/
 package kms
 
 // [START kms_create_asymmetric_key]
@@ -21,15 +19,15 @@ package kms
 import (
 	"context"
 	"fmt"
-	"log"
+	"io"
 
 	cloudkms "cloud.google.com/go/kms/apiv1"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
 // createAsymmetricKey creates a new RSA encrypt/decrypt key pair on KMS.
-// example keyRingName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID"
-func createAsymmetricKey(keyRingName, keyID string) error {
+func createAsymmetricKey(w io.Writer, keyRingName, keyID string) error {
+	// keyRingName := "projects/PROJECT_ID/locations/global/keyRings/RING_ID"
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
@@ -51,7 +49,7 @@ func createAsymmetricKey(keyRingName, keyID string) error {
 	if err != nil {
 		return fmt.Errorf("CreateCryptoKey: %v", err)
 	}
-	log.Printf("Created crypto key. %s", result)
+	fmt.Fprintf(w, "Created crypto key. %s", result)
 	return nil
 }
 

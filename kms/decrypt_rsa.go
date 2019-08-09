@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package kms contains samples for asymmetric keys feature of Cloud Key Management Service
-// https://cloud.google.com/kms/
 package kms
 
 // [START kms_decrypt_rsa]
@@ -27,8 +25,8 @@ import (
 )
 
 // decryptRSA will attempt to decrypt a given ciphertext with an 'RSA_DECRYPT_OAEP_2048_SHA256' private key.stored on Cloud KMS
-// example keyName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
-func decryptRSA(keyName string, ciphertext []byte) ([]byte, error) {
+func decryptRSA(name string, ciphertext []byte) ([]byte, error) {
+	// name := "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
@@ -37,7 +35,7 @@ func decryptRSA(keyName string, ciphertext []byte) ([]byte, error) {
 
 	// Build the request.
 	req := &kmspb.AsymmetricDecryptRequest{
-		Name:       keyName,
+		Name:       name,
 		Ciphertext: ciphertext,
 	}
 	// Call the API.

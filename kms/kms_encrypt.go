@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package kms contains samples for asymmetric keys feature of Cloud Key Management Service
-// https://cloud.google.com/kms/
 package kms
 
 import (
@@ -26,9 +24,9 @@ import (
 
 // [START kms_encrypt]
 
-// encrypt will encrypt the input plaintext with the specified symmetric key
-// example keyName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID"
-func encryptSymmetric(keyName string, plaintext []byte) ([]byte, error) {
+// encryptSymmetric will encrypt the input plaintext with the specified symmetric key
+func encryptSymmetric(name string, plaintext []byte) ([]byte, error) {
+	// example name: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID"
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
@@ -37,7 +35,7 @@ func encryptSymmetric(keyName string, plaintext []byte) ([]byte, error) {
 
 	// Build the request.
 	req := &kmspb.EncryptRequest{
-		Name:      keyName,
+		Name:      name,
 		Plaintext: plaintext,
 	}
 	// Call the API.

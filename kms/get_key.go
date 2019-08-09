@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package kms contains samples for asymmetric keys feature of Cloud Key Management Service
-// https://cloud.google.com/kms/
 package kms
 
 // [START kms_get_asymmetric_public]
@@ -29,8 +27,8 @@ import (
 )
 
 // getAsymmetricPublicKey retrieves the public key from a saved asymmetric key pair on KMS.
-// example keyName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
-func getAsymmetricPublicKey(keyName string) (interface{}, error) {
+func getAsymmetricPublicKey(name string) (interface{}, error) {
+	// name: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
@@ -39,19 +37,19 @@ func getAsymmetricPublicKey(keyName string) (interface{}, error) {
 
 	// Build the request.
 	req := &kmspb.GetPublicKeyRequest{
-		Name: keyName,
+		Name: name,
 	}
 	// Call the API.
 	response, err := client.GetPublicKey(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch public key: %+v", err)
+		return nil, fmt.Errorf("GetPublicKey: %v", err)
 	}
 	// Parse the key.
 	keyBytes := []byte(response.Pem)
 	block, _ := pem.Decode(keyBytes)
 	publicKey, err := x509.ParsePKIXPublicKey(block.Bytes)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse public key: %+v", err)
+		return nil, fmt.Errorf("x509.ParsePKIXPublicKey: %v", err)
 	}
 	return publicKey, nil
 }

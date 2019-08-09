@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package kms contains samples for asymmetric keys feature of Cloud Key Management Service
-// https://cloud.google.com/kms/
 package kms
 
 import (
@@ -29,15 +27,15 @@ import (
 // [START kms_get_cryptokey_policy]
 
 // getCryptoKeyPolicy retrieves and prints the IAM policy associated with the key
-// example keyName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID"
-func getCryptoKeyPolicy(w io.Writer, keyName string) (*iam.Policy, error) {
+func getCryptoKeyPolicy(w io.Writer, name string) (*iam.Policy, error) {
+	// name := "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID"
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("cloudkms.NewKeyManagementClient: %v", err)
 	}
 	// Get the KeyRing.
-	keyObj, err := client.GetCryptoKey(ctx, &kmspb.GetCryptoKeyRequest{Name: keyName})
+	keyObj, err := client.GetCryptoKey(ctx, &kmspb.GetCryptoKeyRequest{Name: name})
 	if err != nil {
 		return nil, fmt.Errorf("GetCryptoKey: %v", err)
 	}

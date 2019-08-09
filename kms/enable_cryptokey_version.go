@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package kms contains samples for asymmetric keys feature of Cloud Key Management Service
-// https://cloud.google.com/kms/
 package kms
 
 // [START kms_enable_cryptokey_version]
@@ -29,8 +27,8 @@ import (
 )
 
 // enableCryptoKeyVersion enables a previously disabled key version on KMS.
-// example keyVersionName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
-func enableCryptoKeyVersion(w io.Writer, keyVersionName string) error {
+func enableCryptoKeyVersion(w io.Writer, name string) error {
+	// name := "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
@@ -39,7 +37,7 @@ func enableCryptoKeyVersion(w io.Writer, keyVersionName string) error {
 	// Build the request.
 	req := &kmspb.UpdateCryptoKeyVersionRequest{
 		CryptoKeyVersion: &kmspb.CryptoKeyVersion{
-			Name:  keyVersionName,
+			Name:  name,
 			State: kmspb.CryptoKeyVersion_ENABLED,
 		},
 		UpdateMask: &fieldmask.FieldMask{

@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package kms contains samples for asymmetric keys feature of Cloud Key Management Service
-// https://cloud.google.com/kms/
 package kms
 
 // [START kms_destroy_cryptokey_version]
@@ -28,8 +26,8 @@ import (
 )
 
 // destroyCryptoKeyVersion marks a specified key version for deletion. The key can be restored if requested within 24 hours.
-// example keyVersionName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
-func destroyCryptoKeyVersion(w io.Writer, keyVersionName string) error {
+func destroyCryptoKeyVersion(w io.Writer, name string) error {
+	// name := "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
@@ -37,7 +35,7 @@ func destroyCryptoKeyVersion(w io.Writer, keyVersionName string) error {
 	}
 	// Build the request.
 	req := &kmspb.DestroyCryptoKeyVersionRequest{
-		Name: keyVersionName,
+		Name: name,
 	}
 	// Call the API.
 	result, err := client.DestroyCryptoKeyVersion(ctx, req)

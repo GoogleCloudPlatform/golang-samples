@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package kms contains samples for asymmetric keys feature of Cloud Key Management Service
-// https://cloud.google.com/kms/
 package kms
 
 // [START kms_create_keyring]
@@ -28,8 +26,8 @@ import (
 )
 
 // createKeyRing creates a new ring to store keys on KMS.
-// example parentName: "projects/PROJECT_ID/locations/global/"
-func createKeyRing(w io.Writer, parentName, keyRingID string) error {
+func createKeyRing(w io.Writer, parent, keyRingID string) error {
+	// parent := "projects/PROJECT_ID/locations/global/"
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
@@ -37,7 +35,7 @@ func createKeyRing(w io.Writer, parentName, keyRingID string) error {
 	}
 	// Build the request.
 	req := &kmspb.CreateKeyRingRequest{
-		Parent:    parentName,
+		Parent:    parent,
 		KeyRingId: keyRingID,
 	}
 	// Call the API.

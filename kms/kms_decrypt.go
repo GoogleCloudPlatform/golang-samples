@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package kms contains samples for asymmetric keys feature of Cloud Key Management Service
-// https://cloud.google.com/kms/
 package kms
 
 // [START kms_decrypt]
@@ -26,9 +24,9 @@ import (
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
-// decrypt will decrypt the input ciphertext bytes using the specified symmetric key
-// example keyName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID"
-func decryptSymmetric(keyName string, ciphertext []byte) ([]byte, error) {
+// decryptSymmetric will decrypt the input ciphertext bytes using the specified symmetric key
+func decryptSymmetric(name string, ciphertext []byte) ([]byte, error) {
+	// name := "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID"
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
@@ -37,7 +35,7 @@ func decryptSymmetric(keyName string, ciphertext []byte) ([]byte, error) {
 
 	// Build the request.
 	req := &kmspb.DecryptRequest{
-		Name:       keyName,
+		Name:       name,
 		Ciphertext: ciphertext,
 	}
 	// Call the API.

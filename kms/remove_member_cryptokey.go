@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package kms contains samples for asymmetric keys feature of Cloud Key Management Service
-// https://cloud.google.com/kms/
 package kms
 
 // [START kms_remove_member_from_cryptokey_policy]
@@ -29,15 +27,15 @@ import (
 )
 
 // removeMemberCryptoKeyPolicy removes a specified member from an IAM role for the key
-// example keyName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID"
-func removeMemberCryptoKeyPolicy(w io.Writer, keyName, member string, role iam.RoleName) error {
+func removeMemberCryptoKeyPolicy(w io.Writer, name, member string, role iam.RoleName) error {
+	// name: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID"
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
 		return fmt.Errorf("cloudkms.NewKeyManagementClient: %v", err)
 	}
 	// Get the desired CryptoKey.
-	keyObj, err := client.GetCryptoKey(ctx, &kmspb.GetCryptoKeyRequest{Name: keyName})
+	keyObj, err := client.GetCryptoKey(ctx, &kmspb.GetCryptoKeyRequest{Name: name})
 	if err != nil {
 		return fmt.Errorf("GetCryptoKey: %v", err)
 	}
@@ -53,7 +51,7 @@ func removeMemberCryptoKeyPolicy(w io.Writer, keyName, member string, role iam.R
 	if err != nil {
 		return fmt.Errorf("SetPolicy: %v", err)
 	}
-	fmt.Fprint(w, "Removed member from cryptokey policy.")
+	fmt.Fprintf(w, "Removed member %s from cryptokey policy.", member)
 	return nil
 }
 

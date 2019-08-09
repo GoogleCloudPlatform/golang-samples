@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package kms contains samples for asymmetric keys feature of Cloud Key Management Service
-// https://cloud.google.com/kms/
 package kms
 
 // [START kms_encrypt_rsa]
@@ -32,8 +30,8 @@ import (
 )
 
 // encryptRSA will encrypt data locally using an 'RSA_DECRYPT_OAEP_2048_SHA256' public key retrieved from Cloud KMS
-// example keyName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
-func encryptRSA(keyName string, plaintext []byte) ([]byte, error) {
+func encryptRSA(name string, plaintext []byte) ([]byte, error) {
+	// name: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
@@ -41,24 +39,24 @@ func encryptRSA(keyName string, plaintext []byte) ([]byte, error) {
 	}
 
 	// Retrieve the public key from KMS.
-	response, err := client.GetPublicKey(ctx, &kmspb.GetPublicKeyRequest{Name: keyName})
+	response, err := client.GetPublicKey(ctx, &kmspb.GetPublicKeyRequest{Name: name})
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch public key: %+v", err)
+		return nil, fmt.Errorf("GetPublicKey: %v", err)
 	}
 	// Parse the key.
 	block, _ := pem.Decode([]byte(response.Pem))
 	abstractKey, err := x509.ParsePKIXPublicKey(block.Bytes)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse public key: %+v", err)
+		return nil, fmt.Errorf("x509.ParsePKIXPublicKey: %+v", err)
 	}
 	rsaKey, ok := abstractKey.(*rsa.PublicKey)
 	if !ok {
-		return nil, fmt.Errorf("key '%s' is not RSA", keyName)
+		return nil, fmt.Errorf("key '%s' is not RSA", name)
 	}
 	// Encrypt data using the RSA public key.
 	ciphertext, err := rsa.EncryptOAEP(sha256.New(), rand.Reader, rsaKey, plaintext, nil)
 	if err != nil {
-		return nil, fmt.Errorf("encryption failed: %+v", err)
+		return nil, fmt.Errorf("rsa.EncryptOAEP: %v", err)
 	}
 	return ciphertext, nil
 }

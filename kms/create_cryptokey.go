@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package kms contains samples for asymmetric keys feature of Cloud Key Management Service
-// https://cloud.google.com/kms/
 package kms
 
 // [START kms_create_cryptokey]
@@ -28,8 +26,8 @@ import (
 )
 
 // createCryptoKey creates a new symmetric encrypt/decrypt key on KMS.
-// example keyRingName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID"
 func createCryptoKey(w io.Writer, keyRingName, keyID string) error {
+	// keyRingName := "projects/PROJECT_ID/locations/global/keyRings/RING_ID"
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {

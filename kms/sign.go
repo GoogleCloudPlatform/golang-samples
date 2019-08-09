@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package kms contains samples for asymmetric keys feature of Cloud Key Management Service
-// https://cloud.google.com/kms/
 package kms
 
 // [START kms_sign_asymmetric]
@@ -28,8 +26,8 @@ import (
 )
 
 // signAsymmetric will sign a plaintext message using a saved asymmetric private key.
-// example keyName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
-func signAsymmetric(keyName string, message []byte) ([]byte, error) {
+func signAsymmetric(name string, message []byte) ([]byte, error) {
+	// name: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
 	// Note: some key algorithms will require a different hash function.
 	// For example, EC_SIGN_P384_SHA384 requires SHA-384.
 	ctx := context.Background()
@@ -42,7 +40,7 @@ func signAsymmetric(keyName string, message []byte) ([]byte, error) {
 	digest.Write(message)
 	// Build the signing request.
 	req := &kmspb.AsymmetricSignRequest{
-		Name: keyName,
+		Name: name,
 		Digest: &kmspb.Digest{
 			Digest: &kmspb.Digest_Sha256{
 				Sha256: digest.Sum(nil),
@@ -52,7 +50,7 @@ func signAsymmetric(keyName string, message []byte) ([]byte, error) {
 	// Call the API.
 	response, err := client.AsymmetricSign(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("asymmetric sign request failed: %+v", err)
+		return nil, fmt.Errorf("AsymmetricSign: %v", err)
 	}
 	// Signature is base64 encoded.
 	return response.Signature, nil
