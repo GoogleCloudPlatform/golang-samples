@@ -205,7 +205,7 @@ func processStream(ctx context.Context, client *bqStorage.BigQueryStorageClient,
 	retryLimit := 3
 
 	for {
-		retries := retryLimit
+		retries := 0
 		// Send the initiating request to start streaming row blocks.
 		rowStream, err := client.ReadRows(ctx, &bqStoragepb.ReadRowsRequest{
 			ReadPosition: &bqStoragepb.StreamPosition{
@@ -223,8 +223,8 @@ func processStream(ctx context.Context, client *bqStorage.BigQueryStorageClient,
 				return nil
 			}
 			if err != nil {
-				retries--
-				if retries <= 0 {
+				retries++
+				if retries >= retryLimit {
 					return fmt.Errorf("processStream retries exhausted: %v", err)
 				}
 			}
@@ -234,7 +234,7 @@ func processStream(ctx context.Context, client *bqStorage.BigQueryStorageClient,
 				// Bookmark our progress in case of retries and send the rowblock on the channel.
 				offset = offset + rc
 				// We're making progress, reset retries.
-				retries = retryLimit
+				retries = 0
 				ch <- r.GetAvroRows()
 			}
 		}
