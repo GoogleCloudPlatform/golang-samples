@@ -24,9 +24,9 @@ import (
 )
 
 func createWithEndpoint(client *pubsub.Client, subName string, topic *pubsub.Topic, endpoint string) error {
+	// endpoint := "https://my-test-project.appspot.com/push"
 	ctx := context.Background()
 
-	// For example, endpoint is "https://my-test-project.appspot.com/push".
 	sub, err := client.CreateSubscription(ctx, subName, pubsub.SubscriptionConfig{
 		Topic:       topic,
 		AckDeadline: 10 * time.Second,

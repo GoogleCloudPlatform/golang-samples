@@ -23,9 +23,9 @@ import (
 )
 
 func updateEndpoint(client *pubsub.Client, subName string, endpoint string) error {
+	// endpoint := "https://my-test-project.appspot.com/push"
 	ctx := context.Background()
 
-	// For example, endpoint is "https://my-test-project.appspot.com/push".
 	subConfig, err := client.Subscription(subName).Update(ctx, pubsub.SubscriptionConfigToUpdate{
 		PushConfig: &pubsub.PushConfig{Endpoint: endpoint},
 	})
