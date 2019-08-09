@@ -12,9 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package trsnip contains snippet code for the Translate API.
-// The code is not runnable.
-package trsnip
+package snippets
 
 // [START translate_text_with_model]
 
@@ -27,6 +25,10 @@ import (
 )
 
 func translateTextWithModel(targetLanguage, text, model string) (string, error) {
+	// targetLanguage := "ja"
+	// text := "The Go Gopher is cute"
+	// model := "nmt"
+
 	ctx := context.Background()
 
 	lang, err := language.Parse(targetLanguage)
@@ -45,6 +47,9 @@ func translateTextWithModel(targetLanguage, text, model string) (string, error) 
 	})
 	if err != nil {
 		return "", fmt.Errorf("Translate: %v", err)
+	}
+	if len(resp) == 0 {
+		return "", nil
 	}
 	return resp[0].Text, nil
 }

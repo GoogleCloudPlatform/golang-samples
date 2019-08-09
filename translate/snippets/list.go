@@ -12,9 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package trsnip contains snippet code for the Translate API.
-// The code is not runnable.
-package trsnip
+package snippets
 
 // [START translate_list_codes]
 // [START translate_list_language_names]
@@ -29,6 +27,7 @@ import (
 )
 
 func listSupportedLanguages(w io.Writer, targetLanguage string) error {
+	// targetLanguage := "th"
 	ctx := context.Background()
 
 	lang, err := language.Parse(targetLanguage)

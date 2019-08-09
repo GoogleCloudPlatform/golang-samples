@@ -12,9 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package trsnip contains snippet code for the Translate API.
-// The code is not runnable.
-package trsnip
+package snippets
 
 // [START translate_detect_language]
 
@@ -25,14 +23,15 @@ import (
 	"cloud.google.com/go/translate"
 )
 
+// detectLanguage returns Translate API's most likely hypothesis for the language of text
 func detectLanguage(text string) (*translate.Detection, error) {
+	// text := "こんにちは世界"
 	ctx := context.Background()
 	client, err := translate.NewClient(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("translate.NewClient: %v", err)
 	}
 	defer client.Close()
-
 	lang, err := client.DetectLanguage(ctx, []string{text})
 	if err != nil {
 		return nil, fmt.Errorf("DetectLanguage: %v", err)

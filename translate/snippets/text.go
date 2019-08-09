@@ -12,9 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package trsnip contains snippet code for the Translate API.
-// The code is not runnable.
-package trsnip
+package snippets
 
 import (
 	"context"
@@ -27,6 +25,7 @@ import (
 // [START translate_translate_text]
 
 func translateText(targetLanguage, text string) (string, error) {
+	// text := "The Go Gopher is cute"
 	ctx := context.Background()
 
 	lang, err := language.Parse(targetLanguage)
@@ -43,6 +42,9 @@ func translateText(targetLanguage, text string) (string, error) {
 	resp, err := client.Translate(ctx, []string{text}, lang, nil)
 	if err != nil {
 		return "", fmt.Errorf("Translate: %v", err)
+	}
+	if len(resp) == 0 {
+		return "", fmt.Errorf("Translate returned empty response to text: %s", text)
 	}
 	return resp[0].Text, nil
 }

@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package trsnip contains snippet code for the Translate API.
-// The code is not runnable.
-package trsnip
+// Package snippets contains snippet code for the Translate API.
+package snippets
 
 import (
 	"bytes"
