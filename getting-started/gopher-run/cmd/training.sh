@@ -52,5 +52,3 @@ while true; do
   # Repeate every 30 minutes
   sleep 1800
 done
-
-# bash training.sh
