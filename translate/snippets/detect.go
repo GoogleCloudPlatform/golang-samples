@@ -15,7 +15,6 @@
 package snippets
 
 // [START translate_detect_language]
-
 import (
 	"context"
 	"fmt"
@@ -23,7 +22,6 @@ import (
 	"cloud.google.com/go/translate"
 )
 
-// detectLanguage returns Translate API's most likely hypothesis for the language of text
 func detectLanguage(text string) (*translate.Detection, error) {
 	// text := "こんにちは世界"
 	ctx := context.Background()
@@ -35,6 +33,9 @@ func detectLanguage(text string) (*translate.Detection, error) {
 	lang, err := client.DetectLanguage(ctx, []string{text})
 	if err != nil {
 		return nil, fmt.Errorf("DetectLanguage: %v", err)
+	}
+	if len(lang) == 0 || len(lang[0]) == 0 {
+		return nil, fmt.Errorf("DetectLanguage return value empty")
 	}
 	return &lang[0][0], nil
 }

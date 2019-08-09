@@ -16,7 +16,6 @@ package snippets
 
 // [START translate_list_codes]
 // [START translate_list_language_names]
-
 import (
 	"context"
 	"fmt"

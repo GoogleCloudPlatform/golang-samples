@@ -15,7 +15,6 @@
 package snippets
 
 // [START translate_text_with_model]
-
 import (
 	"context"
 	"fmt"

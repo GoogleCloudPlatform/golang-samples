@@ -14,6 +14,7 @@
 
 package snippets
 
+// [START translate_translate_text]
 import (
 	"context"
 	"fmt"
@@ -21,8 +22,6 @@ import (
 	"cloud.google.com/go/translate"
 	"golang.org/x/text/language"
 )
-
-// [START translate_translate_text]
 
 func translateText(targetLanguage, text string) (string, error) {
 	// text := "The Go Gopher is cute"
