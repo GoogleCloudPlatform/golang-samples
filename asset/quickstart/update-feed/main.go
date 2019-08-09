@@ -14,53 +14,63 @@
 
 // [START asset_quickstart_update_feed]
 
-// Sample asset-quickstart update feed.
-
+// Sample update-feed update feed.
 package main
 
 import (
-        "context"
-        "fmt"
-        "log"
-        "os"
-        
-        assetUtils "github.com/GoogleCloudPlatform/golang-samples/asset/utils"
-        asset "cloud.google.com/go/asset/apiv1p2beta1"
-        assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1p2beta1"
-        field_mask "google.golang.org/genproto/protobuf/field_mask"
+	"context"
+	"fmt"
+	"log"
+	"os"
+	"strconv"
+
+	asset "cloud.google.com/go/asset/apiv1p2beta1"
+	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
+	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1p2beta1"
+	field_mask "google.golang.org/genproto/protobuf/field_mask"
 )
 
 func main() {
-        ctx := context.Background()
-        client, err := asset.NewClient(ctx)
-        if err != nil {
-                log.Fatal(err)
-        }
-        
-        projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
-        projectNumber := assetUtils.GetProjectNumberByID(projectID)
-        feedName := fmt.Sprintf("projects/%s/feeds/%s", projectNumber, "YOUR_FEED_ID")
-        topic := fmt.Sprintf("projects/%s/topics/%s", projectID, "TOPIC_TO_UPDATE")
+	ctx := context.Background()
+	client, err := asset.NewClient(ctx)
+	if err != nil {
+		log.Fatalf("asset.NewClient: %v", err)
+	}
 
-        req := &assetpb.UpdateFeedRequest{
-          Feed: &assetpb.Feed{
-            Name: feedName,
-            FeedOutputConfig: &assetpb.FeedOutputConfig{
-                    Destination: &assetpb.FeedOutputConfig_PubsubDestination{
-                      PubsubDestination: &assetpb.PubsubDestination{
-                        Topic: topic,
-                      },
-                    },
-                  },
-          },
-          UpdateMask: &field_mask.FieldMask{
-            Paths: []string{"feed_output_config.pubsub_destination.topic"},
-          },
-        }
-        response, err := client.UpdateFeed(ctx, req)
-        if err != nil {
-                log.Fatal(err)
-        }
-        fmt.Print(response)
+	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
+	cloudresourcemanagerClient, err := cloudresourcemanager.NewService(ctx)
+	if err != nil {
+		log.Fatalf("cloudresourcemanager.NewService: %v", err)
+	}
+
+	project, err := cloudresourcemanagerClient.Projects.Get(projectID).Do()
+	if err != nil {
+		log.Fatalf("cloudresourcemanagerClient.Projects.Get.Do: %v", err)
+	}
+	projectNumber := strconv.FormatInt(project.ProjectNumber, 10)
+	feedName := fmt.Sprintf("projects/%s/feeds/%s", projectNumber, "YOUR_FEED_ID")
+	topic := fmt.Sprintf("projects/%s/topics/%s", projectID, "TOPIC_TO_UPDATE")
+
+	req := &assetpb.UpdateFeedRequest{
+		Feed: &assetpb.Feed{
+			Name: feedName,
+			FeedOutputConfig: &assetpb.FeedOutputConfig{
+				Destination: &assetpb.FeedOutputConfig_PubsubDestination{
+					PubsubDestination: &assetpb.PubsubDestination{
+						Topic: topic,
+					},
+				},
+			},
+		},
+		UpdateMask: &field_mask.FieldMask{
+			Paths: []string{"feed_output_config.pubsub_destination.topic"},
+		},
+	}
+	response, err := client.UpdateFeed(ctx, req)
+	if err != nil {
+		log.Fatalf("client.UpdateFeed: %v", err)
+	}
+	fmt.Print(response)
 }
+
 // [END asset_quickstart_update_feed]

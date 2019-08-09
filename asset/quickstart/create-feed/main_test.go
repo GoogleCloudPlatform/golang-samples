@@ -17,47 +17,60 @@ package main
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
-	"log"
+	// "io/ioutil"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
-	assetUtils "github.com/GoogleCloudPlatform/golang-samples/asset/utils"
+	"time"
 
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	asset "cloud.google.com/go/asset/apiv1p2beta1"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
+	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1p2beta1"
 )
 
 func TestMain(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	os.Setenv("GOOGLE_CLOUD_PROJECT", tc.ProjectID)
-
-    projectNumber := assetUtils.GetProjectNumberByID(tc.ProjectID)
-
-	oldStdout := os.Stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
-
-	main()
-
-	w.Close()
-	os.Stdout = oldStdout
-
-	out, err := ioutil.ReadAll(r)
+	ctx := context.Background()
+	cloudresourcemanagerClient, err := cloudresourcemanager.NewService(ctx)
 	if err != nil {
-		t.Fatalf("Failed to read stdout: %v", err)
+		t.Fatalf("cloudresourcemanager.NewService: %v", err)
 	}
-	got := string(out)
 
+	project, err := cloudresourcemanagerClient.Projects.Get(tc.ProjectID).Do()
+	if err != nil {
+		t.Fatalf("cloudresourcemanager.Projects.Get.Do: %v", err)
+	}
+	projectNumber := strconv.FormatInt(project.ProjectNumber, 10)
+
+	m := testutil.BuildMain(t)
+	defer m.Cleanup()
+
+	if !m.Built() {
+		t.Errorf("failed to build app")
+	}
+
+	stdOut, stdErr, err := m.Run(nil, 30*time.Second, fmt.Sprintf("--project_id=%s", tc.ProjectID))
+	if err != nil {
+		t.Errorf("execution failed: %v", err)
+	}
+	if len(stdErr) > 0 {
+		t.Errorf("did not expect stderr output, got %d bytes: %s", len(stdErr), string(stdErr))
+	}
+	got := string(stdOut)
 	want := "YOUR_FEED_ID"
 	if !strings.Contains(got, want) {
 		t.Errorf("stdout returned %s, wanted to contain %s", got, want)
 	}
 
-    ctx := context.Background()
-    client, err := asset.NewClient(ctx)
-    if err != nil {
-    	log.Fatal(err)
-    }
-    assetUtils.CleanUp(ctx, client, fmt.Sprintf("projects/%s/feeds/YOUR_FEED_ID", projectNumber))
+	client, err := asset.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("asset.NewClient: %v", err)
+	}
+
+	client.DeleteFeed(ctx, &assetpb.DeleteFeedRequest{
+		Name: fmt.Sprintf("projects/%s/feeds/YOUR_FEED_ID", projectNumber),
+	})
 }

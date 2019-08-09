@@ -17,66 +17,64 @@ package main
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
-	"log"
 	"os"
 	"strings"
 	"testing"
+	"time"
 
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	asset "cloud.google.com/go/asset/apiv1p2beta1"
-    assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1p2beta1"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1p2beta1"
 )
 
 func TestMain(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	os.Setenv("GOOGLE_CLOUD_PROJECT", tc.ProjectID)
 
-    // Set a feed for delete feed
 	ctx := context.Background()
-    client, err := asset.NewClient(ctx)
-    if err != nil {
-            log.Fatal(err)
-    }
-    
-    feedParent := fmt.Sprintf("projects/%s", tc.ProjectID) 
-    feedID := "YOUR_FEED_ID"
-    assetNames :=  []string{"YOUR_ASSET_NAME"}
-    topic := fmt.Sprintf("projects/%s/topics/%s", tc.ProjectID, "YOUR_TOPIC_NAME")
-    
-    req := &assetpb.CreateFeedRequest{
-            Parent: feedParent,
-            FeedId: feedID,
-            Feed: &assetpb.Feed{
-              AssetNames: assetNames,
-              FeedOutputConfig: &assetpb.FeedOutputConfig{
-                Destination: &assetpb.FeedOutputConfig_PubsubDestination{
-                  PubsubDestination: &assetpb.PubsubDestination{
-                    Topic: topic,
-                  },
-                },
-              },
-            }}
-    _, err = client.CreateFeed(ctx, req)
-    if err != nil {
-            log.Fatal(err)
-    }
-
-	oldStdout := os.Stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
-
-	main()
-
-	w.Close()
-	os.Stdout = oldStdout
-
-	out, err := ioutil.ReadAll(r)
+	client, err := asset.NewClient(ctx)
 	if err != nil {
-		t.Fatalf("Failed to read stdout: %v", err)
+		t.Fatalf("asset.NewClient: %v", err)
 	}
-	got := string(out)
 
+	feedParent := fmt.Sprintf("projects/%s", tc.ProjectID)
+	feedID := "YOUR_FEED_ID"
+	assetNames := []string{"YOUR_ASSET_NAME"}
+	topic := fmt.Sprintf("projects/%s/topics/%s", tc.ProjectID, "YOUR_TOPIC_NAME")
+
+	req := &assetpb.CreateFeedRequest{
+		Parent: feedParent,
+		FeedId: feedID,
+		Feed: &assetpb.Feed{
+			AssetNames: assetNames,
+			FeedOutputConfig: &assetpb.FeedOutputConfig{
+				Destination: &assetpb.FeedOutputConfig_PubsubDestination{
+					PubsubDestination: &assetpb.PubsubDestination{
+						Topic: topic,
+					},
+				},
+			},
+		}}
+	_, err = client.CreateFeed(ctx, req)
+	if err != nil {
+		t.Fatalf("client.CreateFeed: %v", err)
+	}
+
+	m := testutil.BuildMain(t)
+	defer m.Cleanup()
+
+	if !m.Built() {
+		t.Errorf("failed to build app")
+	}
+
+	stdOut, stdErr, err := m.Run(nil, 30*time.Second, fmt.Sprintf("--project_id=%s", tc.ProjectID))
+	if err != nil {
+		t.Errorf("execution failed: %v", err)
+	}
+	if len(stdErr) > 0 {
+		t.Errorf("did not expect stderr output, got %d bytes: %s", len(stdErr), string(stdErr))
+	}
+	got := string(stdOut)
 	want := "Deleted Feed"
 	if !strings.Contains(got, want) {
 		t.Errorf("stdout returned %s, wanted to contain %s", got, want)

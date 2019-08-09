@@ -14,37 +14,47 @@
 
 // [START asset_quickstart_list_feeds]
 
-// Sample asset-quickstart list feeds.
-
+// Sample list-feeds list feeds.
 package main
 
 import (
-        "context"
-        "fmt"
-        "log"
-        "os"
-        
-        assetUtils "github.com/GoogleCloudPlatform/golang-samples/asset/utils"
-        asset "cloud.google.com/go/asset/apiv1p2beta1"
-        assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1p2beta1"
+	"context"
+	"fmt"
+	"log"
+	"os"
+	"strconv"
+
+	asset "cloud.google.com/go/asset/apiv1p2beta1"
+	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
+	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1p2beta1"
 )
 
 func main() {
-        ctx := context.Background()
-        client, err := asset.NewClient(ctx)
-        if err != nil {
-                log.Fatal(err)
-        }
+	ctx := context.Background()
+	client, err := asset.NewClient(ctx)
+	if err != nil {
+		log.Fatalf("asset.NewClient: %v", err)
+	}
 
-        projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
-        projectNumber := assetUtils.GetProjectNumberByID(projectID)
-        parent := fmt.Sprintf("projects/%s", projectNumber)
-        req := &assetpb.ListFeedsRequest{
-                Parent: parent}
-        response, err := client.ListFeeds(ctx, req)
-        if err != nil {
-                log.Fatal(err)
-        }
-        fmt.Print(response)
+	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
+	cloudresourcemanagerClient, err := cloudresourcemanager.NewService(ctx)
+	if err != nil {
+		log.Fatalf("cloudresourcemanager.NewService: %v", err)
+	}
+
+	project, err := cloudresourcemanagerClient.Projects.Get(projectID).Do()
+	if err != nil {
+		log.Fatalf("cloudresourcemanagerClient.Projects.Get.Do: %v", err)
+	}
+	projectNumber := strconv.FormatInt(project.ProjectNumber, 10)
+	parent := fmt.Sprintf("projects/%s", projectNumber)
+	req := &assetpb.ListFeedsRequest{
+		Parent: parent}
+	response, err := client.ListFeeds(ctx, req)
+	if err != nil {
+		log.Fatalf("client.ListFeeds: %v", err)
+	}
+	fmt.Print(response)
 }
+
 // [END asset_quickstart_list_feeds]

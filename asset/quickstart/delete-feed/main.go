@@ -14,39 +14,48 @@
 
 // [START asset_quickstart_delete_feed]
 
-// Sample asset-quickstart delete feed.
-
+// Sample delete-feed delete feed.
 package main
 
 import (
-        "context"
-        "fmt"
-        "log"
-        "os"
-        "strconv"
-        
-        asset "cloud.google.com/go/asset/apiv1p2beta1"
-        assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1p2beta1"
-        cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
+	"context"
+	"fmt"
+	"log"
+	"os"
+	"strconv"
+
+	asset "cloud.google.com/go/asset/apiv1p2beta1"
+	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
+	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1p2beta1"
 )
 
 func main() {
-        ctx := context.Background()
-        client, err := asset.NewClient(ctx)
-        if err != nil {
-                log.Fatal(err)
-        }
-        cloudresourcemanagerClient, err := cloudresourcemanager.NewService(ctx)
-        if err != nil {
-                log.Fatal(err)
-        }
+	ctx := context.Background()
+	client, err := asset.NewClient(ctx)
+	if err != nil {
+		log.Fatalf("asset.NewClient: %v", err)
+	}
 
-        projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
-        projectNumber := assetUtils.GetProjectNumberByID(projectID)
-        feedName := fmt.Sprintf("projects/%s/feeds/%s", projectNumber, "YOUR_FEED_ID")
-        req := &assetpb.DeleteFeedRequest{
-                Name: feedName}
-        client.DeleteFeed(ctx, req)
-        fmt.Print("Deleted Feed")
+	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
+	cloudresourcemanagerClient, err := cloudresourcemanager.NewService(ctx)
+	if err != nil {
+		log.Fatalf("cloudresourcemanager.NewService: %v", err)
+	}
+
+	project, err := cloudresourcemanagerClient.Projects.Get(projectID).Do()
+	if err != nil {
+		log.Fatalf("cloudresourcemanagerClient.Projects.Get.Do: %v", err)
+	}
+	projectNumber := strconv.FormatInt(project.ProjectNumber, 10)
+	feedName := fmt.Sprintf("projects/%s/feeds/%s", projectNumber, "YOUR_FEED_ID")
+	req := &assetpb.DeleteFeedRequest{
+		Name: feedName,
+	}
+	err = client.DeleteFeed(ctx, req)
+	if err != nil {
+		log.Fatalf("client.DeleteFeed: %v", err)
+	}
+	fmt.Print("Deleted Feed")
 }
+
 // [END asset_quickstart_delete_feed]
