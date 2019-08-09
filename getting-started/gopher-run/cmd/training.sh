@@ -53,5 +53,5 @@ while true; do
   sleep 1800
 done
 
-# bash training.sh &> /dev/null &	
+# bash training.sh &> /dev/null &
 # --model_type=$MODEL_TYPE --batch_size=250 --learning_rate=0.1 --max_steps=1000
