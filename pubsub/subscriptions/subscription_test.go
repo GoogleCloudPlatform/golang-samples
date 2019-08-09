@@ -17,6 +17,7 @@
 package subscription
 
 import (
+	"bytes"
 	"context"
 	"sync"
 	"testing"
@@ -117,7 +118,8 @@ func TestIAM(t *testing.T) {
 	c := setup(t)
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-		perms, err := testPermissions(c, subID)
+		buf := new(bytes.Buffer)
+		perms, err := testPermissions(buf, c, subID)
 		if err != nil {
 			r.Errorf("testPermissions: %v", err)
 		}
@@ -133,7 +135,8 @@ func TestIAM(t *testing.T) {
 	})
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-		policy, err := policy(c, subID)
+		buf := new(bytes.Buffer)
+		policy, err := policy(buf, c, subID)
 		if err != nil {
 			r.Errorf("policy: %v", err)
 		}

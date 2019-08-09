@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package topics is a tool to manage Google Cloud Pub/Sub topics by using the Pub/Sub API.
-// See more about Google Cloud Pub/Sub at https://cloud.google.com/pubsub/docs/overview.
 package topics
 
 // [START pubsub_publish_custom_attributes]
