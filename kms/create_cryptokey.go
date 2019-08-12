@@ -28,6 +28,7 @@ import (
 // createCryptoKey creates a new symmetric encrypt/decrypt key on KMS.
 func createCryptoKey(w io.Writer, keyRingName, keyID string) error {
 	// keyRingName := "projects/PROJECT_ID/locations/global/keyRings/RING_ID"
+	// keyID := "key-" + strconv.Itoa(int(time.Now().Unix()))
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {

@@ -57,8 +57,7 @@ func verifySignatureRSA(name string, signature, message []byte) error {
 	hash.Write(message)
 	digest := hash.Sum(nil)
 	pssOptions := rsa.PSSOptions{SaltLength: len(digest), Hash: crypto.SHA256}
-	err = rsa.VerifyPSS(rsaKey, crypto.SHA256, digest, signature, &pssOptions)
-	if err != nil {
+	if err = rsa.VerifyPSS(rsaKey, crypto.SHA256, digest, signature, &pssOptions); err != nil {
 		return fmt.Errorf("rsa.VerifyPSS: %v", err)
 	}
 	return nil

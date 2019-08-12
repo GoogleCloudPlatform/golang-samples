@@ -26,9 +26,11 @@ import (
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
-// removeMemberCryptoKeyPolicy removes a specified member from an IAM role for the key
+// removeMemberCryptoKeyPolicy removes a specified member from an IAM role for the key.
 func removeMemberCryptoKeyPolicy(w io.Writer, name, member string, role iam.RoleName) error {
 	// name: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID"
+	// member := "user@gmail.com"
+	// role := iam.Viewer
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
@@ -47,8 +49,7 @@ func removeMemberCryptoKeyPolicy(w io.Writer, name, member string, role iam.Role
 	}
 	// Remove Member.
 	policy.Remove(member, role)
-	err = handle.SetPolicy(ctx, policy)
-	if err != nil {
+	if err = handle.SetPolicy(ctx, policy); err != nil {
 		return fmt.Errorf("SetPolicy: %v", err)
 	}
 	fmt.Fprintf(w, "Removed member %s from cryptokey policy.", member)

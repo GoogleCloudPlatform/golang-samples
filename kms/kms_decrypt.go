@@ -24,9 +24,11 @@ import (
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
-// decryptSymmetric will decrypt the input ciphertext bytes using the specified symmetric key
+// decryptSymmetric will decrypt the input ciphertext bytes using the specified symmetric key.
 func decryptSymmetric(name string, ciphertext []byte) ([]byte, error) {
 	// name := "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID"
+	// cipherBytes, err := encryptRSA(rsaDecryptPath, []byte("Sample message"))
+	// ciphertext := base64.StdEncoding.EncodeToString(cipherBytes)
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {

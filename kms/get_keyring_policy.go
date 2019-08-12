@@ -26,7 +26,7 @@ import (
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
-// getRingPolicy retrieves and prints the IAM policy associated with the key ring
+// getRingPolicy retrieves and prints the IAM policy associated with the key ring.
 func getRingPolicy(w io.Writer, name string) (*iam.Policy, error) {
 	// name: "projects/PROJECT_ID/locations/global/keyRings/RING_ID"
 	ctx := context.Background()

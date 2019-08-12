@@ -55,8 +55,7 @@ func verifySignatureEC(name string, signature, message []byte) error {
 	}
 	// Verify Elliptic Curve signature.
 	var parsedSig struct{ R, S *big.Int }
-	_, err = asn1.Unmarshal(signature, &parsedSig)
-	if err != nil {
+	if _, err = asn1.Unmarshal(signature, &parsedSig); err != nil {
 		return fmt.Errorf("asn1.Unmarshal: %v", err)
 	}
 	hash := sha256.New()

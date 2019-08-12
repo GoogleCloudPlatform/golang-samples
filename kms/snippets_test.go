@@ -69,7 +69,7 @@ func getTestVariables(projectID string) TestVariables {
 
 	sym := keyRingPath + "/cryptoKeys/" + symID
 	symVersion := sym + "/cryptoKeyVersions/1"
-	rsaDecrypt := keyRingPath + "/cryptoKeys/" + rsaDecryptID + "/cryptoKeyVersions/2"
+	rsaDecryptPath := keyRingPath + "/cryptoKeys/" + rsaDecryptID + "/cryptoKeyVersions/2"
 	rsaSign := keyRingPath + "/cryptoKeys/" + rsaSignID + "/cryptoKeyVersions/1"
 	ecSign := keyRingPath + "/cryptoKeys/" + ecSignID + "/cryptoKeyVersions/1"
 
@@ -84,7 +84,7 @@ func getTestVariables(projectID string) TestVariables {
 	waitTime := 5 * time.Second
 
 	v = TestVariables{ctx, projectID, message, location, parent, member, role, keyRing, keyRingPath,
-		sym, symVersion, rsaDecrypt, rsaSign, ecSign, symID, rsaDecryptID, rsaSignID, ecSignID, tryLimit, waitTime}
+		sym, symVersion, rsaDecryptPath, rsaSign, ecSign, symID, rsaDecryptID, rsaSignID, ecSignID, tryLimit, waitTime}
 	return v
 }
 

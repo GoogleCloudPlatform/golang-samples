@@ -14,6 +14,7 @@
 
 package kms
 
+// [START kms_encrypt]
 import (
 	"context"
 	"fmt"
@@ -22,11 +23,10 @@ import (
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
-// [START kms_encrypt]
-
-// encryptSymmetric will encrypt the input plaintext with the specified symmetric key
+// encryptSymmetric will encrypt the input plaintext with the specified symmetric key.
 func encryptSymmetric(name string, plaintext []byte) ([]byte, error) {
-	// example name: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID"
+	// name := "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID"
+	// plaintext := []byte("Sample message")
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {

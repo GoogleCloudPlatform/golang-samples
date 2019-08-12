@@ -26,7 +26,7 @@ import (
 
 // [START kms_get_cryptokey_policy]
 
-// getCryptoKeyPolicy retrieves and prints the IAM policy associated with the key
+// getCryptoKeyPolicy retrieves and prints the IAM policy associated with the key.
 func getCryptoKeyPolicy(w io.Writer, name string) (*iam.Policy, error) {
 	// name := "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID"
 	ctx := context.Background()

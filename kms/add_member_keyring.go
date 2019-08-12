@@ -26,10 +26,11 @@ import (
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
-// addMemberRingPolicy adds a new member to a specified IAM role for the key ring
+// addMemberRingPolicy adds a new member to a specified IAM role for the key ring.
 func addMemberRingPolicy(w io.Writer, keyRingName, member string, role iam.RoleName) error {
 	// keyRingName := "projects/PROJECT_ID/locations/global/keyRings/RING_ID"
-	// role = iam.Viewer
+	// member := "user@gmail.com"
+	// role := iam.Viewer
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
@@ -49,8 +50,7 @@ func addMemberRingPolicy(w io.Writer, keyRingName, member string, role iam.RoleN
 	}
 	// Add Member.
 	policy.Add(member, role)
-	err = handle.SetPolicy(ctx, policy)
-	if err != nil {
+	if err = handle.SetPolicy(ctx, policy); err != nil {
 		return fmt.Errorf("SetPolicy: %v", err)
 	}
 	fmt.Fprintf(w, "Added member %s to keyring policy.", member)

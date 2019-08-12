@@ -28,6 +28,7 @@ import (
 // createAsymmetricKey creates a new RSA encrypt/decrypt key pair on KMS.
 func createAsymmetricKey(w io.Writer, keyRingName, keyID string) error {
 	// keyRingName := "projects/PROJECT_ID/locations/global/keyRings/RING_ID"
+	// keyID := "key-" + strconv.Itoa(int(time.Now().Unix()))
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {

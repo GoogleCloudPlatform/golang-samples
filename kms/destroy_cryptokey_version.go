@@ -25,7 +25,8 @@ import (
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
-// destroyCryptoKeyVersion marks a specified key version for deletion. The key can be restored if requested within 24 hours.
+// destroyCryptoKeyVersion marks a specified key version for deletion.
+// The key can be restored if requested within 24 hours.
 func destroyCryptoKeyVersion(w io.Writer, name string) error {
 	// name := "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
 	ctx := context.Background()

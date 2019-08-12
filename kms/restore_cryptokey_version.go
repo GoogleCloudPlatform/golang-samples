@@ -26,8 +26,8 @@ import (
 )
 
 // restoreCryptoKeyVersion attempts to recover a key that has been marked for destruction within the last 24 hours.
-// example keyVersionName: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
 func restoreCryptoKeyVersion(w io.Writer, keyVersionName string) error {
+	// keyVersionName := "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
