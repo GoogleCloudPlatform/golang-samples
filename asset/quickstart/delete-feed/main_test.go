@@ -17,7 +17,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -29,7 +28,7 @@ import (
 
 func TestMain(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	os.Setenv("GOOGLE_CLOUD_PROJECT", tc.ProjectID)
+	env := map[string]string{"GOOGLE_CLOUD_PROJECT": tc.ProjectID}
 
 	ctx := context.Background()
 	client, err := asset.NewClient(ctx)
@@ -67,7 +66,7 @@ func TestMain(t *testing.T) {
 		t.Errorf("failed to build app")
 	}
 
-	stdOut, stdErr, err := m.Run(nil, 30*time.Second, fmt.Sprintf("--project_id=%s", tc.ProjectID))
+	stdOut, stdErr, err := m.Run(env, 30*time.Second)
 	if err != nil {
 		t.Errorf("execution failed: %v", err)
 	}

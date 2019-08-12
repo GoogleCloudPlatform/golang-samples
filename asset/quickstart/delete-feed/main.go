@@ -51,8 +51,7 @@ func main() {
 	req := &assetpb.DeleteFeedRequest{
 		Name: feedName,
 	}
-	err = client.DeleteFeed(ctx, req)
-	if err != nil {
+	if err = client.DeleteFeed(ctx, req); err != nil {
 		log.Fatalf("client.DeleteFeed: %v", err)
 	}
 	fmt.Print("Deleted Feed")
