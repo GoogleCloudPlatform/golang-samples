@@ -12,44 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Sample translate-quickstart translates "Hello, world!" into Russian.
-package main
+package snippets
 
-// [START translate_quickstart]
+// [START translate_detect_language]
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"cloud.google.com/go/translate"
-	"golang.org/x/text/language"
 )
 
-func main() {
+func detectLanguage(text string) (*translate.Detection, error) {
+	// text := "こんにちは世界"
 	ctx := context.Background()
-
-	// Creates a client.
 	client, err := translate.NewClient(ctx)
 	if err != nil {
-		log.Fatalf("Failed to create client: %v", err)
+		return nil, fmt.Errorf("translate.NewClient: %v", err)
 	}
-
-	// Sets the text to translate.
-	text := "Hello, world!"
-	// Sets the target language.
-	target, err := language.Parse("ru")
+	defer client.Close()
+	lang, err := client.DetectLanguage(ctx, []string{text})
 	if err != nil {
-		log.Fatalf("Failed to parse target language: %v", err)
+		return nil, fmt.Errorf("DetectLanguage: %v", err)
 	}
-
-	// Translates the text into Russian.
-	translations, err := client.Translate(ctx, []string{text}, target, nil)
-	if err != nil {
-		log.Fatalf("Failed to translate text: %v", err)
+	if len(lang) == 0 || len(lang[0]) == 0 {
+		return nil, fmt.Errorf("DetectLanguage return value empty")
 	}
-
-	fmt.Printf("Text: %v\n", text)
-	fmt.Printf("Translation: %v\n", translations[0].Text)
+	return &lang[0][0], nil
 }
 
-// [END translate_quickstart]
+// [END translate_detect_language]

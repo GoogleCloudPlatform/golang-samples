@@ -12,19 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package translate_snippets contains snippet code for the Translate API.
-// The code is not runnable.
-package translate_snippets
+// Package snippets contains snippet code for the Translate API.
+package snippets
 
 import (
 	"bytes"
 	"strings"
-
-	"golang.org/x/text/language"
-
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"golang.org/x/text/language"
 )
 
 func TestTranslateText(t *testing.T) {
