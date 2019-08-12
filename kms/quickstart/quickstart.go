@@ -13,6 +13,7 @@
 // limitations under the License.
 
 // [START kms_quickstart]
+
 // Sample quickstart is a basic program that uses Cloud KMS.
 package main
 

@@ -29,6 +29,9 @@ import (
 func decryptRSA(name string, ciphertext []byte) ([]byte, error) {
 	// name := "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
 	// cipherBytes, err := encryptRSA(rsaDecryptPath, []byte("Sample message"))
+	// if err != nil {
+	//   return nil, fmt.Errorf("encryptRSA: %v", err)
+	// }
 	// ciphertext := base64.StdEncoding.EncodeToString(cipherBytes)
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
