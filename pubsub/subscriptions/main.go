@@ -164,23 +164,27 @@ func pullMsgsSettings(client *pubsub.Client, subName string) error {
 		msg.Ack()
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("Receive: %v", err)
 	}
 	// [END pubsub_subscriber_flow_settings]
 	return nil
 }
 
-func pullMsgsConcurrencyControl(client *pubsub.Client, subName string, numGoroutines int) error {
+func pullMsgsConcurrencyControl(client *pubsub.Client, subName string) error {
 	ctx := context.Background()
 	// [START pubsub_subscriber_concurrency_control]
 	sub := client.Subscription(subName)
-	sub.ReceiveSettings.NumGoroutines = numGoroutines
+	// NumGoroutines is the number of goroutines Receive will spawn to pull messages concurrently.
+	sub.ReceiveSettings.NumGoroutines = 4
+	// If ReceiveSettings.Synchronous is set to true, NumGoroutines is overriden to 1. To change
+	// concurrency settings, disable synchronous pull.
+	sub.ReceiveSettings.Synchronous = false
 	err := sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
 		fmt.Printf("Got message %q\n", string(msg.Data))
 		msg.Ack()
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("Receive: %v", err)
 	}
 	// [END pubsub_subscriber_concurrency_control]
 	return nil
@@ -196,11 +200,12 @@ func pullMsgsSynchronous(client *pubsub.Client, subName string) error {
 		msg.Ack()
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("Receive: %v", err)
 	}
 	// [END pubsub_subscriber_sync_pull]
 	return nil
 }
+
 func create(client *pubsub.Client, subName string, topic *pubsub.Topic) error {
 	ctx := context.Background()
 	// [START pubsub_create_pull_subscription]
