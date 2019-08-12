@@ -27,6 +27,9 @@ import (
 
 // listJobs lists jobs matching the given optional filter and optional jobType.
 func listJobs(w io.Writer, client *dlp.Client, project, filter, jobType string) error {
+	// filter := "`state` = FINISHED"
+	// jobType := "RISK_ANALYSIS_JOB"
+
 	// Create a configured request.
 	req := &dlppb.ListDlpJobsRequest{
 		Parent: "projects/" + project,

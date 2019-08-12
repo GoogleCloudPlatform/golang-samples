@@ -27,6 +27,12 @@ import (
 // mask deidentifies the input by masking all provided info types with maskingCharacter
 // and prints the result to w.
 func mask(w io.Writer, client *dlp.Client, project, input string, infoTypes []string, maskingCharacter string, numberToMask int32) error {
+	// input := "My SSN is 111222333"
+	// infoTypes := []string{"US_SOCIAL_SECURITY_NUMBER"}
+	// maskingCharacter := "+"
+	// numberToMask := 6
+	// Will print "My SSN is ++++++333"
+
 	// Convert the info type strings to a list of InfoTypes.
 	var i []*dlppb.InfoType
 	for _, it := range infoTypes {

@@ -17,11 +17,32 @@ package metadata
 
 import (
 	"bytes"
+	"context"
+	"log"
+	"os"
 	"strings"
 	"testing"
 
+	dlp "cloud.google.com/go/dlp/apiv2"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
+
+var client *dlp.Client
+var projectID string
+
+func TestMain(m *testing.M) {
+	ctx := context.Background()
+	if c, ok := testutil.ContextMain(m); ok {
+		var err error
+		client, err = dlp.NewClient(ctx)
+		if err != nil {
+			log.Fatalf("datastore.NewClient: %v", err)
+		}
+		projectID = c.ProjectID
+		defer client.Close()
+	}
+	os.Exit(m.Run())
+}
 
 func TestInfoTypes(t *testing.T) {
 	testutil.SystemTest(t)
@@ -50,7 +71,10 @@ func TestInfoTypes(t *testing.T) {
 		t.Run(test.language, func(t *testing.T) {
 			t.Parallel()
 			buf := new(bytes.Buffer)
-			infoTypes(buf, client, test.language, test.filter)
+			err := infoTypes(buf, client, test.language, test.filter)
+			if err != nil {
+				t.Errorf("infoTypes(%s, %s) = error %q, want substring %q", test.language, test.filter, err, test.want)
+			}
 			if got := buf.String(); !strings.Contains(got, test.want) {
 				t.Errorf("infoTypes(%s, %s) = %s, want substring %q", test.language, test.filter, got, test.want)
 			}

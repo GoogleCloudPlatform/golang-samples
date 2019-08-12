@@ -17,10 +17,31 @@ package deid
 
 import (
 	"bytes"
+	"context"
+	"log"
+	"os"
 	"testing"
 
+	dlp "cloud.google.com/go/dlp/apiv2"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
+
+var client *dlp.Client
+var projectID string
+
+func TestMain(m *testing.M) {
+	ctx := context.Background()
+	if c, ok := testutil.ContextMain(m); ok {
+		var err error
+		client, err = dlp.NewClient(ctx)
+		if err != nil {
+			log.Fatalf("datastore.NewClient: %v", err)
+		}
+		projectID = c.ProjectID
+		defer client.Close()
+	}
+	os.Exit(m.Run())
+}
 
 func TestMask(t *testing.T) {
 	tc := testutil.SystemTest(t)
@@ -50,10 +71,9 @@ func TestMask(t *testing.T) {
 		t.Run(test.input, func(t *testing.T) {
 			t.Parallel()
 			buf := new(bytes.Buffer)
-			// TODO: variables defined in main_test.go, need to move over
 			err := mask(buf, client, tc.ProjectID, test.input, []string{"US_SOCIAL_SECURITY_NUMBER"}, test.maskingCharacter, test.numberToMask)
 			if err != nil {
-				t.Errorf("mask(%q, %s, %v) = error '%q', want %q", test.input, test.maskingCharacter, test.numberToMask, err, test.want)
+				t.Errorf("mask(%q, %s, %v) = error %q, want %q", test.input, test.maskingCharacter, test.numberToMask, err, test.want)
 			}
 			if got := buf.String(); got != test.want {
 				t.Errorf("mask(%q, %s, %v) = %q, want %q", test.input, test.maskingCharacter, test.numberToMask, got, test.want)
