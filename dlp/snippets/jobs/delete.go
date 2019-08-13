@@ -34,8 +34,7 @@ func deleteJob(w io.Writer, jobName string) error {
 	req := &dlppb.DeleteDlpJobRequest{
 		Name: jobName,
 	}
-	err = client.DeleteDlpJob(context.Background(), req)
-	if err != nil {
+	if err = client.DeleteDlpJob(context.Background(), req); err != nil {
 		return fmt.Errorf("DeleteDlpJob: %v", err)
 	}
 	fmt.Fprintf(w, "Successfully deleted job")
