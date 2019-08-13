@@ -15,7 +15,6 @@
 package topics
 
 // [START pubsub_publisher_batch_settings]
-
 import (
 	"context"
 	"fmt"
@@ -24,8 +23,13 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func publishWithSettings(client *pubsub.Client, topic string, msg []byte) error {
+func publishWithSettings(projectID, topic string, msg []byte) error {
 	ctx := context.Background()
+	client, err := pubsub.NewClient(ctx, projectID)
+	if err != nil {
+		return fmt.Errorf("pubsub.NewClient: %v", err)
+	}
+
 	t := client.Topic(topic)
 	t.PublishSettings.ByteThreshold = 5000
 	t.PublishSettings.CountThreshold = 10

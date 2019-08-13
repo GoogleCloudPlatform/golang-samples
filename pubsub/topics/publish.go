@@ -16,7 +16,6 @@ package topics
 
 // [START pubsub_publish]
 // [START pubsub_quickstart_publisher]
-
 import (
 	"context"
 	"fmt"
@@ -24,8 +23,13 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func publish(client *pubsub.Client, topic, msg string) error {
+func publish(projectID, topic, msg string) error {
 	ctx := context.Background()
+	client, err := pubsub.NewClient(ctx, projectID)
+	if err != nil {
+		return fmt.Errorf("pubsub.NewClient: %v", err)
+	}
+
 	t := client.Topic(topic)
 	result := t.Publish(ctx, &pubsub.Message{
 		Data: []byte(msg),

@@ -14,6 +14,7 @@
 
 package subscription
 
+// [START pubsub_test_subscription_permissions]
 import (
 	"context"
 	"fmt"
@@ -22,11 +23,15 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func testPermissions(w io.Writer, c *pubsub.Client, subName string) ([]string, error) {
+func testPermissions(w io.Writer, projectID, subName string) ([]string, error) {
+	// subName := projectID + "-example-sub"
 	ctx := context.Background()
+	client, err := pubsub.NewClient(ctx, projectID)
+	if err != nil {
+		return nil, fmt.Errorf("pubsub.NewClient: %v", err)
+	}
 
-	// [START pubsub_test_subscription_permissions]
-	sub := c.Subscription(subName)
+	sub := client.Subscription(subName)
 	perms, err := sub.IAM().TestPermissions(ctx, []string{
 		"pubsub.subscriptions.consume",
 		"pubsub.subscriptions.update",

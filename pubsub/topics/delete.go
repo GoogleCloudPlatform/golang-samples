@@ -15,7 +15,6 @@
 package topics
 
 // [START pubsub_delete_topic]
-
 import (
 	"context"
 	"fmt"
@@ -23,8 +22,13 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func delete(client *pubsub.Client, topic string) error {
+func delete(projectID, topic string) error {
 	ctx := context.Background()
+	client, err := pubsub.NewClient(ctx, projectID)
+	if err != nil {
+		return fmt.Errorf("pubsub.NewClient: %v", err)
+	}
+
 	t := client.Topic(topic)
 	if err := t.Delete(ctx); err != nil {
 		return fmt.Errorf("Delete: %v", err)

@@ -23,9 +23,14 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func createWithEndpoint(client *pubsub.Client, subName string, topic *pubsub.Topic, endpoint string) error {
+func createWithEndpoint(projectID, subName string, topic *pubsub.Topic, endpoint string) error {
+	// subName := projectID + "-example-sub"
 	// endpoint := "https://my-test-project.appspot.com/push"
 	ctx := context.Background()
+	client, err := pubsub.NewClient(ctx, projectID)
+	if err != nil {
+		return fmt.Errorf("pubsub.NewClient: %v", err)
+	}
 
 	sub, err := client.CreateSubscription(ctx, subName, pubsub.SubscriptionConfig{
 		Topic:       topic,

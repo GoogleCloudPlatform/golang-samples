@@ -76,9 +76,10 @@ func setup(t *testing.T) *pubsub.Client {
 }
 
 func TestCreate(t *testing.T) {
+	tc := testutil.SystemTest(t)
 	c := setup(t)
 
-	if err := create(c, subID, topic); err != nil {
+	if err := create(tc.ProjectID, subID, topic); err != nil {
 		t.Fatalf("failed to create a subscription: %v", err)
 	}
 	ok, err := c.Subscription(subID).Exists(context.Background())
@@ -91,10 +92,11 @@ func TestCreate(t *testing.T) {
 }
 
 func TestList(t *testing.T) {
-	c := setup(t)
+	tc := testutil.SystemTest(t)
+	setup(t)
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-		subs, err := list(c)
+		subs, err := list(tc.ProjectID)
 		if err != nil {
 			r.Errorf("failed to list subscriptions: %v", err)
 			return
@@ -115,11 +117,12 @@ func TestList(t *testing.T) {
 }
 
 func TestIAM(t *testing.T) {
-	c := setup(t)
+	tc := testutil.SystemTest(t)
+	setup(t)
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
-		perms, err := testPermissions(buf, c, subID)
+		perms, err := testPermissions(buf, tc.ProjectID, subID)
 		if err != nil {
 			r.Errorf("testPermissions: %v", err)
 		}
@@ -129,14 +132,14 @@ func TestIAM(t *testing.T) {
 	})
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-		if err := addUsers(c, subID); err != nil {
+		if err := addUsers(tc.ProjectID, subID); err != nil {
 			r.Errorf("addUsers: %v", err)
 		}
 	})
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
-		policy, err := policy(buf, c, subID)
+		policy, err := policy(buf, tc.ProjectID, subID)
 		if err != nil {
 			r.Errorf("policy: %v", err)
 		}
@@ -149,10 +152,12 @@ func TestIAM(t *testing.T) {
 	})
 }
 
+// Not sure about the best way to rewrite this test
 func TestDelete(t *testing.T) {
-	c := setup(t)
+	tc := testutil.SystemTest(t)
+	setup(t)
 
-	if err := delete(c, subID); err != nil {
+	if err := delete(tc.ProjectID, subID); err != nil {
 		t.Fatalf("failed to delete subscription (%q): %v", subID, err)
 	}
 	ok, err := c.Subscription(subID).Exists(context.Background())

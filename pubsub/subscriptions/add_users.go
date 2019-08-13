@@ -15,7 +15,6 @@
 package subscription
 
 // [START pubsub_set_subscription_policy]
-
 import (
 	"context"
 	"fmt"
@@ -24,11 +23,16 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-// addUsers adds all IAM users to a subscription
-func addUsers(c *pubsub.Client, subName string) error {
+// addUsers adds all IAM users to a subscription.
+func addUsers(projectID, subName string) error {
+	// subName := projectID + "-example-sub"
 	ctx := context.Background()
+	client, err := pubsub.NewClient(ctx, projectID)
+	if err != nil {
+		return fmt.Errorf("pubsub.NewClient: %v", err)
+	}
 
-	sub := c.Subscription(subName)
+	sub := client.Subscription(subName)
 	policy, err := sub.IAM().Policy(ctx)
 	if err != nil {
 		return fmt.Errorf("Policy: %v", err)

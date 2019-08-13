@@ -23,8 +23,14 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func create(client *pubsub.Client, subName string, topic *pubsub.Topic) error {
+func create(projectID, subName string, topic *pubsub.Topic) error {
+	// subName := projectID + "-example-sub"
 	ctx := context.Background()
+	client, err := pubsub.NewClient(ctx, projectID)
+	if err != nil {
+		return fmt.Errorf("pubsub.NewClient: %v", err)
+	}
+
 	sub, err := client.CreateSubscription(ctx, subName, pubsub.SubscriptionConfig{
 		Topic:       topic,
 		AckDeadline: 20 * time.Second,

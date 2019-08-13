@@ -24,10 +24,15 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func policy(w io.Writer, c *pubsub.Client, subName string) (*iam.Policy, error) {
+func policy(w io.Writer, projectID, subName string) (*iam.Policy, error) {
+	// subName := projectID + "-example-sub"
 	ctx := context.Background()
+	client, err := pubsub.NewClient(ctx, projectID)
+	if err != nil {
+		return nil, fmt.Errorf("pubsub.NewClient: %v", err)
+	}
 
-	policy, err := c.Subscription(subName).IAM().Policy(ctx)
+	policy, err := client.Subscription(subName).IAM().Policy(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("Subscription: %v", err)
 	}

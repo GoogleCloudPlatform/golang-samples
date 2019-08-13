@@ -15,7 +15,6 @@
 package subscription
 
 // [START pubsub_subscriber_flow_settings]
-
 import (
 	"context"
 	"fmt"
@@ -23,12 +22,18 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func pullMsgsSettings(client *pubsub.Client, subName string) error {
+func pullMsgsSettings(projectID, subName string) error {
+	// subName := projectID + "-example-sub"
 	ctx := context.Background()
+	client, err := pubsub.NewClient(ctx, projectID)
+	if err != nil {
+		return fmt.Errorf("pubsub.NewClient: %v", err)
+	}
+
 	sub := client.Subscription(subName)
 	sub.ReceiveSettings.Synchronous = true
 	sub.ReceiveSettings.MaxOutstandingMessages = 10
-	err := sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
+	err = sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
 		fmt.Printf("Got message: %q\n", string(msg.Data))
 		msg.Ack()
 	})

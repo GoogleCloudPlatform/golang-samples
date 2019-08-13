@@ -15,7 +15,6 @@
 package topics
 
 // [START pubsub_test_topic_permissions]
-
 import (
 	"context"
 	"fmt"
@@ -24,9 +23,14 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func testPermissions(w io.Writer, c *pubsub.Client, topicName string) ([]string, error) {
+func testPermissions(w io.Writer, projectID, topicName string) ([]string, error) {
 	ctx := context.Background()
-	topic := c.Topic(topicName)
+	client, err := pubsub.NewClient(ctx, projectID)
+	if err != nil {
+		return nil, fmt.Errorf("pubsub.NewClient: %v", err)
+	}
+
+	topic := client.Topic(topicName)
 	perms, err := topic.IAM().TestPermissions(ctx, []string{
 		"pubsub.topics.publish",
 		"pubsub.topics.update",

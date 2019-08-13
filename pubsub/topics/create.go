@@ -15,7 +15,6 @@
 package topics
 
 // [START pubsub_create_topic]
-
 import (
 	"context"
 	"fmt"
@@ -23,8 +22,13 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func create(client *pubsub.Client, topic string) error {
+func create(projectID, topic string) error {
 	ctx := context.Background()
+	client, err := pubsub.NewClient(ctx, projectID)
+	if err != nil {
+		return fmt.Errorf("pubsub.NewClient: %v", err)
+	}
+
 	t, err := client.CreateTopic(ctx, topic)
 	if err != nil {
 		return fmt.Errorf("CreateTopic: %v", err)

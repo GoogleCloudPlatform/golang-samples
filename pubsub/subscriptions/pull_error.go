@@ -15,7 +15,6 @@
 package subscription
 
 // [START pubsub_subscriber_error_listener]
-
 import (
 	"context"
 	"fmt"
@@ -23,11 +22,17 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func pullMsgsError(client *pubsub.Client, subName string) error {
+func pullMsgsError(projectID, subName string) error {
+	// subName := projectID + "-example-sub"
 	ctx := context.Background()
+	client, err := pubsub.NewClient(ctx, projectID)
+	if err != nil {
+		return fmt.Errorf("pubsub.NewClient: %v", err)
+	}
+
 	// If the service returns a non-retryable error, Receive returns that error after
 	// all of the outstanding calls to the handler have returned.
-	err := client.Subscription(subName).Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
+	err = client.Subscription(subName).Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
 		fmt.Printf("Got message: %q\n", string(msg.Data))
 		msg.Ack()
 	})

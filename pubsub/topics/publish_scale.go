@@ -15,7 +15,6 @@
 package topics
 
 // [START pubsub_publish_with_error_handling_that_scales]
-
 import (
 	"context"
 	"fmt"
@@ -27,8 +26,13 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func publishThatScales(w io.Writer, client *pubsub.Client, topic string, n int) error {
+func publishThatScales(w io.Writer, projectID, topic string, n int) error {
 	ctx := context.Background()
+	client, err := pubsub.NewClient(ctx, projectID)
+	if err != nil {
+		return fmt.Errorf("pubsub.NewClient: %v", err)
+	}
+
 	var wg sync.WaitGroup
 	var totalErrors uint64
 	t := client.Topic(topic)

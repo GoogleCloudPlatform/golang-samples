@@ -15,7 +15,6 @@
 package topics
 
 // [START pubsub_list_topics]
-
 import (
 	"context"
 	"fmt"
@@ -24,8 +23,12 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-func list(client *pubsub.Client) ([]*pubsub.Topic, error) {
+func list(projectID string) ([]*pubsub.Topic, error) {
 	ctx := context.Background()
+	client, err := pubsub.NewClient(ctx, projectID)
+	if err != nil {
+		return nil, fmt.Errorf("pubsub.NewClient: %v", err)
+	}
 
 	var topics []*pubsub.Topic
 

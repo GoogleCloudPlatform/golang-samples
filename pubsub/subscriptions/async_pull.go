@@ -24,8 +24,13 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func pullMsgs(client *pubsub.Client, subName string, topic *pubsub.Topic) error {
+func pullMsgs(projectID, subName string, topic *pubsub.Topic) error {
+	// subName := projectID + "-example-sub"
 	ctx := context.Background()
+	client, err := pubsub.NewClient(ctx, projectID)
+	if err != nil {
+		return fmt.Errorf("pubsub.NewClient: %v", err)
+	}
 
 	// Publish 10 messages on the topic.
 	var results []*pubsub.PublishResult
@@ -48,7 +53,7 @@ func pullMsgs(client *pubsub.Client, subName string, topic *pubsub.Topic) error 
 	received := 0
 	sub := client.Subscription(subName)
 	cctx, cancel := context.WithCancel(ctx)
-	err := sub.Receive(cctx, func(ctx context.Context, msg *pubsub.Message) {
+	err = sub.Receive(cctx, func(ctx context.Context, msg *pubsub.Message) {
 		msg.Ack()
 		fmt.Printf("Got message: %q\n", string(msg.Data))
 		mu.Lock()

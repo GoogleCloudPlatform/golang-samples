@@ -15,7 +15,6 @@
 package topics
 
 // [START pubsub_set_topic_policy]
-
 import (
 	"context"
 	"fmt"
@@ -24,9 +23,14 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func addUsers(c *pubsub.Client, topicName string) error {
+func addUsers(projectID, topicName string) error {
 	ctx := context.Background()
-	topic := c.Topic(topicName)
+	client, err := pubsub.NewClient(ctx, projectID)
+	if err != nil {
+		return fmt.Errorf("pubsub.NewClient: %v", err)
+	}
+
+	topic := client.Topic(topicName)
 	policy, err := topic.IAM().Policy(ctx)
 	if err != nil {
 		return fmt.Errorf("Policy: %v", err)

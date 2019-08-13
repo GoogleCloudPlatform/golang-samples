@@ -15,7 +15,6 @@
 package subscription
 
 // [START pubsub_delete_subscription]
-
 import (
 	"context"
 	"fmt"
@@ -23,8 +22,14 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func delete(client *pubsub.Client, subName string) error {
+func delete(projectID, subName string) error {
+	// subName := projectID + "-example-sub"
 	ctx := context.Background()
+	client, err := pubsub.NewClient(ctx, projectID)
+	if err != nil {
+		return fmt.Errorf("pubsub.NewClient: %v", err)
+	}
+
 	sub := client.Subscription(subName)
 	if err := sub.Delete(ctx); err != nil {
 		return fmt.Errorf("Delete: %v", err)
