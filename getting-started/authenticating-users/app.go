@@ -133,7 +133,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Assertion did not validate: %s", err)
 	}
 
-	fmt.Fprint("Hello %s", email)
+	fmt.Fprintf(w, "Hello %s", email)
 }
 
 // userAgentTransport sets the User-Agent header before calling base.
