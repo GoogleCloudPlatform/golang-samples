@@ -1,4 +1,4 @@
-module /home/engelke_demo/iap-go
+module github.com/GoogleCloudPlatform/golang-samples/getting-started/authenticating-users
 
 go 1.12
 

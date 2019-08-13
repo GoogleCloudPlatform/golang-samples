@@ -21,7 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-    "net/http"
+	"net/http"
 	"os"
 
 	"cloud.google.com/go/compute/metadata"
@@ -75,12 +75,12 @@ func audience() (string, error) {
 		return "", err
 	}
 
-    projectID, err := client.ProjectID()
+	projectID, err := client.ProjectID()
 	if err != nil {
 		return "", err
 	}
 
-	return "/projects/"+projectNumber+"/apps/"+projectID, nil
+	return "/projects/" + projectNumber + "/apps/" + projectID, nil
 }
 
 func validateAssertion(assertion string) (email string, userid string, err error) {
@@ -94,7 +94,7 @@ func validateAssertion(assertion string) (email string, userid string, err error
 
 		_, ok := token.Method.(*jwt.SigningMethodECDSA)
 		if !ok {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
 		cert := certificates[keyID]
@@ -107,7 +107,7 @@ func validateAssertion(assertion string) (email string, userid string, err error
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return "None", "None", fmt.Errorf("Coud not extract claims")
+		return "None", "None", fmt.Errorf("could not extract claims")
 	}
 
 	aud, err := audience()
@@ -116,7 +116,7 @@ func validateAssertion(assertion string) (email string, userid string, err error
 	}
 
 	if claims["aud"].(string) != aud {
-		return "None", "None", fmt.Errorf("Mismatched audience. aud field %s does not match %s", claims["aud"], aud)
+		return "None", "None", fmt.Errorf("mismatched audience. aud field %s does not match %s", claims["aud"], aud)
 	}
 	return claims["email"].(string), claims["sub"].(string), nil
 }
@@ -134,7 +134,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Assertion did not validate: %s", err)
 	}
 
-	fmt.Fprint(w, "Hello "+email)
+	fmt.Fprint("Hello %s", email)
 }
 
 // userAgentTransport sets the User-Agent header before calling base.
