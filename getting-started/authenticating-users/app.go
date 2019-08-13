@@ -28,7 +28,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-var cachedCertificates = make(map[string]string)
+var cachedCertificates map[string]string
 
 func main() {
 	http.HandleFunc("/", indexHandler)
