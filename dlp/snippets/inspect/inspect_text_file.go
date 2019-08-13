@@ -27,7 +27,7 @@ import (
 
 // inspectTextFile inspects a text file at a given filePath, and prints results.
 func inspectTextFile(w io.Writer, projectID, filePath string) error {
-	// projectID := "my-project-id-id"
+	// projectID := "my-project-id"
 	// filePath := "path/to/image.png"
 	ctx := context.Background()
 
