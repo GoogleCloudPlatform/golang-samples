@@ -32,7 +32,8 @@ import (
 // optional identifier needed for reidentification. surrogateInfoType can be any
 // value not found in your input.
 // Info types can be found with the infoTypes.list method or on https://cloud.google.com/dlp/docs/infotypes-reference
-func deidentifyFPE(w io.Writer, project, input string, infoTypes []string, keyFileName, cryptoKeyName, surrogateInfoType string) error {
+func deidentifyFPE(w io.Writer, projectID, input string, infoTypes []string, keyFileName, cryptoKeyName, surrogateInfoType string) error {
+	// projectID := "my-project-id"
 	// input := "My SSN is 123456789"
 	// infoTypes := []string{"US_SOCIAL_SECURITY_NUMBER"}
 	// keyFileName := "projects/YOUR_GCLOUD_PROJECT/locations/YOUR_LOCATION/keyRings/YOUR_KEYRING_NAME/cryptoKeys/YOUR_KEY_NAME"
@@ -55,7 +56,7 @@ func deidentifyFPE(w io.Writer, project, input string, infoTypes []string, keyFi
 	}
 	// Create a configured request.
 	req := &dlppb.DeidentifyContentRequest{
-		Parent: "projects/" + project,
+		Parent: "projects/" + projectID,
 		InspectConfig: &dlppb.InspectConfig{
 			InfoTypes: i,
 		},
@@ -100,7 +101,7 @@ func deidentifyFPE(w io.Writer, project, input string, infoTypes []string, keyFi
 		},
 	}
 	// Send the request.
-	r, err := client.DeidentifyContent(context.Background(), req)
+	r, err := client.DeidentifyContent(ctx, req)
 	if err != nil {
 		return fmt.Errorf("DeidentifyContent: %v", err)
 	}

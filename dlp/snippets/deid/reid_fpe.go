@@ -31,7 +31,8 @@ import (
 // full KMS key resource name used to wrap the key. surrogateInfoType is an
 // the identifier used during deidentification.
 // Info types can be found with the infoTypes.list method or on https://cloud.google.com/dlp/docs/infotypes-reference
-func reidentifyFPE(w io.Writer, project, input, keyFileName, cryptoKeyName, surrogateInfoType string) error {
+func reidentifyFPE(w io.Writer, projectID, input, keyFileName, cryptoKeyName, surrogateInfoType string) error {
+	// projectID := "my-project-id"
 	// input := "My SSN is 123456789"
 	// keyFileName := "projects/YOUR_GCLOUD_PROJECT/locations/YOUR_LOCATION/keyRings/YOUR_KEYRING_NAME/cryptoKeys/YOUR_KEY_NAME"
 	// cryptoKeyName := "YOUR_ENCRYPTED_AES_256_KEY"
@@ -48,7 +49,7 @@ func reidentifyFPE(w io.Writer, project, input, keyFileName, cryptoKeyName, surr
 	}
 	// Create a configured request.
 	req := &dlppb.ReidentifyContentRequest{
-		Parent: "projects/" + project,
+		Parent: "projects/" + projectID,
 		ReidentifyConfig: &dlppb.DeidentifyConfig{
 			Transformation: &dlppb.DeidentifyConfig_InfoTypeTransformations{
 				InfoTypeTransformations: &dlppb.InfoTypeTransformations{
@@ -103,7 +104,7 @@ func reidentifyFPE(w io.Writer, project, input, keyFileName, cryptoKeyName, surr
 		},
 	}
 	// Send the request.
-	r, err := client.ReidentifyContent(context.Background(), req)
+	r, err := client.ReidentifyContent(ctx, req)
 	if err != nil {
 		return fmt.Errorf("ReidentifyContent: %v", err)
 	}

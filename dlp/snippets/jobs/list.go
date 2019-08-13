@@ -26,23 +26,24 @@ import (
 )
 
 // listJobs lists jobs matching the given optional filter and optional jobType.
-func listJobs(w io.Writer, project, filter, jobType string) error {
+func listJobs(w io.Writer, projectID, filter, jobType string) error {
+	// projectID := "my-project-id"
+	// filter := "`state` = FINISHED"
+	// jobType := "RISK_ANALYSIS_JOB"
 	ctx := context.Background()
 	client, err := dlp.NewClient(ctx)
 	if err != nil {
 		return fmt.Errorf("dlp.NewClient: %v", err)
 	}
-	// filter := "`state` = FINISHED"
-	// jobType := "RISK_ANALYSIS_JOB"
 
 	// Create a configured request.
 	req := &dlppb.ListDlpJobsRequest{
-		Parent: "projects/" + project,
+		Parent: "projects/" + projectID,
 		Filter: filter,
 		Type:   dlppb.DlpJobType(dlppb.DlpJobType_value[jobType]),
 	}
 	// Send the request and iterate over the results.
-	it := client.ListDlpJobs(context.Background(), req)
+	it := client.ListDlpJobs(ctx, req)
 	for {
 		j, err := it.Next()
 		if err == iterator.Done {

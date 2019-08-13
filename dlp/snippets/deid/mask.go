@@ -26,7 +26,8 @@ import (
 
 // mask deidentifies the input by masking all provided info types with maskingCharacter
 // and prints the result to w.
-func mask(w io.Writer, project, input string, infoTypes []string, maskingCharacter string, numberToMask int32) error {
+func mask(w io.Writer, projectID, input string, infoTypes []string, maskingCharacter string, numberToMask int32) error {
+	// projectID := "my-project-id"
 	// input := "My SSN is 111222333"
 	// infoTypes := []string{"US_SOCIAL_SECURITY_NUMBER"}
 	// maskingCharacter := "+"
@@ -45,7 +46,7 @@ func mask(w io.Writer, project, input string, infoTypes []string, maskingCharact
 	}
 	// Create a configured request.
 	req := &dlppb.DeidentifyContentRequest{
-		Parent: "projects/" + project,
+		Parent: "projects/" + projectID,
 		InspectConfig: &dlppb.InspectConfig{
 			InfoTypes: i,
 		},
@@ -76,7 +77,7 @@ func mask(w io.Writer, project, input string, infoTypes []string, maskingCharact
 		},
 	}
 	// Send the request.
-	r, err := client.DeidentifyContent(context.Background(), req)
+	r, err := client.DeidentifyContent(ctx, req)
 	if err != nil {
 		return fmt.Errorf("DeidentifyContent: %v", err)
 	}

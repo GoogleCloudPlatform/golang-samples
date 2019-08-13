@@ -21,13 +21,13 @@ import (
 	"io"
 	"io/ioutil"
 
-	"cloud.google.com/go/dlp/apiv2"
+	dlp "cloud.google.com/go/dlp/apiv2"
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
 // inspectTextFile inspects a text file at a given filePath, and prints results.
 func inspectTextFile(w io.Writer, projectID, filePath string) error {
-	// projectID := "my-project-id"
+	// projectID := "my-project-id-id"
 	// filePath := "path/to/image.png"
 	ctx := context.Background()
 

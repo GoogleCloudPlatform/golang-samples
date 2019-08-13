@@ -26,6 +26,7 @@ import (
 
 // deleteJob deletes the job with the given name.
 func deleteJob(w io.Writer, jobName string) error {
+	// jobName := "job-example"
 	ctx := context.Background()
 	client, err := dlp.NewClient(ctx)
 	if err != nil {
@@ -34,7 +35,7 @@ func deleteJob(w io.Writer, jobName string) error {
 	req := &dlppb.DeleteDlpJobRequest{
 		Name: jobName,
 	}
-	if err = client.DeleteDlpJob(context.Background(), req); err != nil {
+	if err = client.DeleteDlpJob(ctx, req); err != nil {
 		return fmt.Errorf("DeleteDlpJob: %v", err)
 	}
 	fmt.Fprintf(w, "Successfully deleted job")

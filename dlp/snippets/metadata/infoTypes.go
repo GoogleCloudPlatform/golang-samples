@@ -26,6 +26,8 @@ import (
 
 // infoTypes returns the info types in the given language and matching the given filter.
 func infoTypes(w io.Writer, languageCode, filter string) error {
+	// languageCode := "en-US"
+	// filter := "supported_by=INSPECT"
 	ctx := context.Background()
 	client, err := dlp.NewClient(ctx)
 	if err != nil {
@@ -36,7 +38,7 @@ func infoTypes(w io.Writer, languageCode, filter string) error {
 		LanguageCode: languageCode,
 		Filter:       filter,
 	}
-	resp, err := client.ListInfoTypes(context.Background(), req)
+	resp, err := client.ListInfoTypes(ctx, req)
 	if err != nil {
 		return fmt.Errorf("ListInfoTypes: %v", err)
 	}
