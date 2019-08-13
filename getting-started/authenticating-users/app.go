@@ -56,9 +56,8 @@ func certs() (map[string]string, error) {
 	}
 
 	dec := json.NewDecoder(resp.Body)
-	err = dec.Decode(&cachedCertificates)
-	if err != nil {
-		return cachedCertificates, err
+	if err := dec.Decode(&cachedCertificates); err != nil {
+		return nil, fmt.Errorf("decode: %v", err)
 	}
 
 	return cachedCertificates, nil
@@ -83,7 +82,7 @@ func audience() (string, error) {
 	return "/projects/" + projectNumber + "/apps/" + projectID, nil
 }
 
-func validateAssertion(assertion string) (email string, userid string, err error) {
+func validateAssertion(assertion string) (email string, userID string, err error) {
 	certificates, err := certs()
 	if err != nil {
 		return "None", "None", err
