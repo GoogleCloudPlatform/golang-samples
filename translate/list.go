@@ -12,44 +12,45 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Sample translate-quickstart translates "Hello, world!" into Russian.
-package main
+package snippets
 
-// [START translate_quickstart]
+// [START translate_list_codes]
+// [START translate_list_language_names]
 import (
 	"context"
 	"fmt"
-	"log"
+	"io"
 
 	"cloud.google.com/go/translate"
 	"golang.org/x/text/language"
 )
 
-func main() {
+func listSupportedLanguages(w io.Writer, targetLanguage string) error {
+	// targetLanguage := "th"
 	ctx := context.Background()
 
-	// Creates a client.
+	lang, err := language.Parse(targetLanguage)
+	if err != nil {
+		return fmt.Errorf("language.Parse: %v", err)
+	}
+
 	client, err := translate.NewClient(ctx)
 	if err != nil {
-		log.Fatalf("Failed to create client: %v", err)
+		return fmt.Errorf("translate.NewClient: %v", err)
 	}
+	defer client.Close()
 
-	// Sets the text to translate.
-	text := "Hello, world!"
-	// Sets the target language.
-	target, err := language.Parse("ru")
+	langs, err := client.SupportedLanguages(ctx, lang)
 	if err != nil {
-		log.Fatalf("Failed to parse target language: %v", err)
+		return fmt.Errorf("SupportedLanguages: %v", err)
 	}
 
-	// Translates the text into Russian.
-	translations, err := client.Translate(ctx, []string{text}, target, nil)
-	if err != nil {
-		log.Fatalf("Failed to translate text: %v", err)
+	for _, lang := range langs {
+		fmt.Fprintf(w, "%q: %s\n", lang.Tag, lang.Name)
 	}
 
-	fmt.Printf("Text: %v\n", text)
-	fmt.Printf("Translation: %v\n", translations[0].Text)
+	return nil
 }
 
-// [END translate_quickstart]
+// [END translate_list_language_names]
+// [END translate_list_codes]
