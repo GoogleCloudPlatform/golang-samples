@@ -26,7 +26,12 @@ import (
 )
 
 // listJobs lists jobs matching the given optional filter and optional jobType.
-func listJobs(w io.Writer, client *dlp.Client, project, filter, jobType string) error {
+func listJobs(w io.Writer, project, filter, jobType string) error {
+	ctx := context.Background()
+	client, err := dlp.NewClient(ctx)
+	if err != nil {
+		return fmt.Errorf("dlp.NewClient: %v", err)
+	}
 	// filter := "`state` = FINISHED"
 	// jobType := "RISK_ANALYSIS_JOB"
 

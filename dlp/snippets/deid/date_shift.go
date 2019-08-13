@@ -26,12 +26,16 @@ import (
 
 // deidentifyDateShift shifts dates found in the input between lowerBoundDays and
 // upperBoundDays.
-func deidentifyDateShift(w io.Writer, client *dlp.Client, project string, lowerBoundDays, upperBoundDays int32, input string) error {
+func deidentifyDateShift(w io.Writer, project string, lowerBoundDays, upperBoundDays int32, input string) error {
 	// input := "2016-01-10"
 	// lowerBoundDays := -1
 	// upperBound := -1
 	// Will print "2016-01-09"
-
+	ctx := context.Background()
+	client, err := dlp.NewClient(ctx)
+	if err != nil {
+		return fmt.Errorf("dlp.NewClient: %v", err)
+	}
 	// Create a configured request.
 	req := &dlppb.DeidentifyContentRequest{
 		Parent: "projects/" + project,

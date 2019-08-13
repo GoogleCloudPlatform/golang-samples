@@ -30,7 +30,17 @@ import (
 // keyFileName is the file name with the KMS wrapped key and cryptoKeyName is the
 // full KMS key resource name used to wrap the key. surrogateInfoType is an
 // the identifier used during deidentification.
-func reidentifyFPE(w io.Writer, client *dlp.Client, project, s, keyFileName, cryptoKeyName, surrogateInfoType string) error {
+// Info types can be found with the infoTypes.list method or on https://cloud.google.com/dlp/docs/infotypes-reference
+func reidentifyFPE(w io.Writer, project, input, keyFileName, cryptoKeyName, surrogateInfoType string) error {
+	// input := "My SSN is 123456789"
+	// keyFileName := "projects/YOUR_GCLOUD_PROJECT/locations/YOUR_LOCATION/keyRings/YOUR_KEYRING_NAME/cryptoKeys/YOUR_KEY_NAME"
+	// cryptoKeyName := "YOUR_ENCRYPTED_AES_256_KEY"
+	// surrogateInfoType := "AGE"
+	ctx := context.Background()
+	client, err := dlp.NewClient(ctx)
+	if err != nil {
+		return fmt.Errorf("dlp.NewClient: %v", err)
+	}
 	// Read the key file.
 	keyBytes, err := ioutil.ReadFile(keyFileName)
 	if err != nil {
@@ -88,7 +98,7 @@ func reidentifyFPE(w io.Writer, client *dlp.Client, project, s, keyFileName, cry
 		// The item to analyze.
 		Item: &dlppb.ContentItem{
 			DataItem: &dlppb.ContentItem_Value{
-				Value: s,
+				Value: input,
 			},
 		},
 	}

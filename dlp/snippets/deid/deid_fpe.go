@@ -31,7 +31,18 @@ import (
 // full KMS key resource name used to wrap the key. surrogateInfoType is an
 // optional identifier needed for reidentification. surrogateInfoType can be any
 // value not found in your input.
-func deidentifyFPE(w io.Writer, client *dlp.Client, project, input string, infoTypes []string, keyFileName, cryptoKeyName, surrogateInfoType string) error {
+// Info types can be found with the infoTypes.list method or on https://cloud.google.com/dlp/docs/infotypes-reference
+func deidentifyFPE(w io.Writer, project, input string, infoTypes []string, keyFileName, cryptoKeyName, surrogateInfoType string) error {
+	// input := "My SSN is 123456789"
+	// infoTypes := []string{"US_SOCIAL_SECURITY_NUMBER"}
+	// keyFileName := "projects/YOUR_GCLOUD_PROJECT/locations/YOUR_LOCATION/keyRings/YOUR_KEYRING_NAME/cryptoKeys/YOUR_KEY_NAME"
+	// cryptoKeyName := "YOUR_ENCRYPTED_AES_256_KEY"
+	// surrogateInfoType := "AGE"
+	ctx := context.Background()
+	client, err := dlp.NewClient(ctx)
+	if err != nil {
+		return fmt.Errorf("dlp.NewClient: %v", err)
+	}
 	// Convert the info type strings to a list of InfoTypes.
 	var i []*dlppb.InfoType
 	for _, it := range infoTypes {

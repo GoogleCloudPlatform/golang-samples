@@ -17,31 +17,10 @@ package deid
 
 import (
 	"bytes"
-	"context"
-	"log"
-	"os"
 	"testing"
 
-	dlp "cloud.google.com/go/dlp/apiv2"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
-
-var client *dlp.Client
-var projectID string
-
-func TestMain(m *testing.M) {
-	ctx := context.Background()
-	if c, ok := testutil.ContextMain(m); ok {
-		var err error
-		client, err = dlp.NewClient(ctx)
-		if err != nil {
-			log.Fatalf("datastore.NewClient: %v", err)
-		}
-		projectID = c.ProjectID
-		defer client.Close()
-	}
-	os.Exit(m.Run())
-}
 
 func TestMask(t *testing.T) {
 	tc := testutil.SystemTest(t)
@@ -71,7 +50,7 @@ func TestMask(t *testing.T) {
 		t.Run(test.input, func(t *testing.T) {
 			t.Parallel()
 			buf := new(bytes.Buffer)
-			err := mask(buf, client, tc.ProjectID, test.input, []string{"US_SOCIAL_SECURITY_NUMBER"}, test.maskingCharacter, test.numberToMask)
+			err := mask(buf, tc.ProjectID, test.input, []string{"US_SOCIAL_SECURITY_NUMBER"}, test.maskingCharacter, test.numberToMask)
 			if err != nil {
 				t.Errorf("mask(%q, %s, %v) = error %q, want %q", test.input, test.maskingCharacter, test.numberToMask, err, test.want)
 			}
@@ -83,7 +62,7 @@ func TestMask(t *testing.T) {
 }
 
 func TestDeidentifyDateShift(t *testing.T) {
-	testutil.SystemTest(t)
+	tc := testutil.SystemTest(t)
 	tests := []struct {
 		input      string
 		want       string
@@ -107,7 +86,7 @@ func TestDeidentifyDateShift(t *testing.T) {
 		t.Run(test.input, func(t *testing.T) {
 			t.Parallel()
 			buf := new(bytes.Buffer)
-			err := deidentifyDateShift(buf, client, projectID, test.lowerBound, test.upperBound, test.input)
+			err := deidentifyDateShift(buf, tc.ProjectID, test.lowerBound, test.upperBound, test.input)
 			if err != nil {
 				t.Errorf("deidentifyDateShift(%v, %v, %q) = error '%q', want %q", test.lowerBound, test.upperBound, err, test.input, test.want)
 			}

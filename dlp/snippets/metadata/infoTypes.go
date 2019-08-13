@@ -25,7 +25,13 @@ import (
 )
 
 // infoTypes returns the info types in the given language and matching the given filter.
-func infoTypes(w io.Writer, client *dlp.Client, languageCode, filter string) error {
+func infoTypes(w io.Writer, languageCode, filter string) error {
+	ctx := context.Background()
+	client, err := dlp.NewClient(ctx)
+	if err != nil {
+		return fmt.Errorf("dlp.NewClient: %v", err)
+	}
+
 	req := &dlppb.ListInfoTypesRequest{
 		LanguageCode: languageCode,
 		Filter:       filter,
