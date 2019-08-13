@@ -52,7 +52,7 @@ func certs() (map[string]string, error) {
 
 	resp, err := http.Get(url)
 	if err != nil {
-		return cachedCertificates, err
+		return nil, fmt.Errorf("http.Get: %v", err)
 	}
 
 	dec := json.NewDecoder(resp.Body)
