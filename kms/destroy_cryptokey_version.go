@@ -15,7 +15,6 @@
 package kms
 
 // [START kms_destroy_cryptokey_version]
-
 import (
 	"context"
 	"fmt"

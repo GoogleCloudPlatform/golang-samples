@@ -14,6 +14,7 @@
 
 package kms
 
+// [START kms_verify_signature_rsa]
 import (
 	"context"
 	"crypto"
@@ -26,8 +27,6 @@ import (
 	cloudkms "cloud.google.com/go/kms/apiv1"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
-
-// [START kms_verify_signature_rsa]
 
 // verifySignatureRSA will verify that an 'RSA_SIGN_PSS_2048_SHA256' signature is valid for a given message.
 func verifySignatureRSA(name string, signature, message []byte) error {

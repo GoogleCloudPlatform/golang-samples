@@ -15,7 +15,6 @@
 package kms
 
 // [START kms_get_asymmetric_public]
-
 import (
 	"context"
 	"crypto/x509"

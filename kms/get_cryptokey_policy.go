@@ -14,6 +14,7 @@
 
 package kms
 
+// [START kms_get_cryptokey_policy]
 import (
 	"context"
 	"fmt"
@@ -23,8 +24,6 @@ import (
 	cloudkms "cloud.google.com/go/kms/apiv1"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
-
-// [START kms_get_cryptokey_policy]
 
 // getCryptoKeyPolicy retrieves and prints the IAM policy associated with the key.
 func getCryptoKeyPolicy(w io.Writer, name string) (*iam.Policy, error) {
