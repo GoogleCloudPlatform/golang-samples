@@ -12,54 +12,43 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START kms_quickstart]
+package kms
 
-// Sample quickstart is a basic program that uses Cloud KMS.
-package main
+// [START kms_decrypt]
 
 import (
 	"context"
 	"fmt"
-	"log"
 
 	cloudkms "cloud.google.com/go/kms/apiv1"
-	"google.golang.org/api/iterator"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
-func main() {
-	projectID := "your-project-id"
-	// Location of the key rings.
-	locationID := "global"
-
-	// Create the KMS client.
+// decryptSymmetric will decrypt the input ciphertext bytes using the specified symmetric key.
+func decryptSymmetric(name string, ciphertext []byte) ([]byte, error) {
+	// name := "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID"
+	// cipherBytes, err := encryptRSA(rsaDecryptPath, []byte("Sample message"))
+	// if err != nil {
+	//   return nil, fmt.Errorf("encryptRSA: %v", err)
+	// }
+	// ciphertext := base64.StdEncoding.EncodeToString(cipherBytes)
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("cloudkms.NewKeyManagementClient: %v", err)
 	}
-
-	// The resource name of the key rings.
-	parent := fmt.Sprintf("projects/%s/locations/%s", projectID, locationID)
 
 	// Build the request.
-	req := &kmspb.ListKeyRingsRequest{
-		Parent: parent,
+	req := &kmspb.DecryptRequest{
+		Name:       name,
+		Ciphertext: ciphertext,
 	}
-	// Query the API.
-	it := client.ListKeyRings(ctx, req)
-
-	// Iterate and print results.
-	for {
-		resp, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			log.Fatalf("Failed to list key rings: %v", err)
-		}
-		fmt.Printf("KeyRing: %q\n", resp.Name)
+	// Call the API.
+	resp, err := client.Decrypt(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("Decrypt: %v", err)
 	}
+	return resp.Plaintext, nil
 }
 
-// [END kms_quickstart]
+// [END kms_decrypt]

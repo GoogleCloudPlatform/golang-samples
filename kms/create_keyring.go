@@ -12,54 +12,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START kms_quickstart]
+package kms
 
-// Sample quickstart is a basic program that uses Cloud KMS.
-package main
+// [START kms_create_keyring]
 
 import (
 	"context"
 	"fmt"
-	"log"
+	"io"
 
 	cloudkms "cloud.google.com/go/kms/apiv1"
-	"google.golang.org/api/iterator"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
-func main() {
-	projectID := "your-project-id"
-	// Location of the key rings.
-	locationID := "global"
-
-	// Create the KMS client.
+// createKeyRing creates a new ring to store keys on KMS.
+func createKeyRing(w io.Writer, parent, keyRingID string) error {
+	// parent := "projects/PROJECT_ID/locations/global/"
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("cloudkms.NewKeyManagementClient: %v", err)
 	}
-
-	// The resource name of the key rings.
-	parent := fmt.Sprintf("projects/%s/locations/%s", projectID, locationID)
-
 	// Build the request.
-	req := &kmspb.ListKeyRingsRequest{
-		Parent: parent,
+	req := &kmspb.CreateKeyRingRequest{
+		Parent:    parent,
+		KeyRingId: keyRingID,
 	}
-	// Query the API.
-	it := client.ListKeyRings(ctx, req)
-
-	// Iterate and print results.
-	for {
-		resp, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			log.Fatalf("Failed to list key rings: %v", err)
-		}
-		fmt.Printf("KeyRing: %q\n", resp.Name)
+	// Call the API.
+	result, err := client.CreateKeyRing(ctx, req)
+	if err != nil {
+		return fmt.Errorf("CreateKeyRing: %v", err)
 	}
+	fmt.Fprintf(w, "Created key ring: %s", result)
+	return nil
 }
 
-// [END kms_quickstart]
+// [END kms_create_keyring]
