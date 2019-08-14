@@ -30,10 +30,9 @@ import (
 )
 
 // detectText detects the text in an image using the Google Vision API.
-func detectText(w io.Writer, projectID, bucket, filename string) error {
-	// filename := "images/sign.png"
-	fmt.Fprintf(w, "Looking for text in image %v", filename)
-	// var futures []string
+func detectText(w io.Writer, projectID, bucketName, fileName string) error {
+	// fileName := "images/sign.png"
+	fmt.Fprintf(w, "Looking for text in image %v", fileName)
 	ctx := context.Background()
 	visionClient, err := vision.NewImageAnnotatorClient(ctx)
 	if err != nil {
@@ -43,7 +42,7 @@ func detectText(w io.Writer, projectID, bucket, filename string) error {
 	annotations, err := visionClient.DetectTexts(ctx,
 		&pb.Image{
 			Source: &pb.ImageSource{
-				GcsImageUri: fmt.Sprintf("gs://%s/%s", bucket, filename),
+				GcsImageUri: fmt.Sprintf("gs://%s/%s", bucketName, fileName),
 			}},
 		&pb.ImageContext{}, maxResults,
 	)
@@ -97,7 +96,7 @@ func detectText(w io.Writer, projectID, bucket, filename string) error {
 		}
 		message, err := json.Marshal(ocrmessage{
 			text:     text,
-			filename: filename,
+			fileName: fileName,
 			lang:     targetTag,
 			srcLang:  srcTag,
 		})
@@ -118,11 +117,7 @@ func detectText(w io.Writer, projectID, bucket, filename string) error {
 		if err != nil {
 			return fmt.Errorf("Publish: %v", err)
 		}
-		// futures += future
 	}
-	// for future := range futures {
-	// 	future.result()
-	// }
 	return nil
 }
 

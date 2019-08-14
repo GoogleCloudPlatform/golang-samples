@@ -40,10 +40,10 @@ func saveResult(w io.Writer, event pubsubpb.PubsubMessage) error {
 		return fmt.Errorf("Empty data")
 	}
 	text := message.text
-	filename := message.filename
+	fileName := message.fileName
 	lang := message.lang
 
-	fmt.Fprintf(w, "Received request to save file %q.", filename)
+	fmt.Fprintf(w, "Received request to save file %q.", fileName)
 
 	data, err := ioutil.ReadFile("config.json")
 	if err != nil {
@@ -56,7 +56,7 @@ func saveResult(w io.Writer, event pubsubpb.PubsubMessage) error {
 	}
 
 	bucketName := config.resultBucket
-	resultFilename := fmt.Sprintf("%s_%s.txt", filename, lang)
+	resultFilename := fmt.Sprintf("%s_%s.txt", fileName, lang)
 	storageClient, err := storage.NewClient(ctx)
 	if err != nil {
 		return fmt.Errorf("storage.NewClient: %v", err)

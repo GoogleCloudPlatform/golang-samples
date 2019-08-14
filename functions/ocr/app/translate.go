@@ -44,7 +44,7 @@ func translateText(w io.Writer, projectID string, event pubsubpb.PubsubMessage) 
 		return fmt.Errorf("Empty data")
 	}
 	text := message.text
-	filename := message.filename
+	fileName := message.fileName
 	targetTag := message.lang
 	srcTag := message.srcLang
 
@@ -81,7 +81,7 @@ func translateText(w io.Writer, projectID string, event pubsubpb.PubsubMessage) 
 	}
 	messageData, err := json.Marshal(ocrmessage{
 		text:     translatedText.Text,
-		filename: filename,
+		fileName: fileName,
 		lang:     targetTag,
 		srcLang:  srcTag,
 	})

@@ -13,23 +13,26 @@
 
 package ocr
 
-// This file might not be used for Go
 // [START functions_ocr_process]
 import (
-	"context"
 	"fmt"
 	"io"
+
+	"cloud.google.com/go/storage"
 )
 
 // processImage is executed when a file is uploaded to the Cloud Storage bucket you created for uploading images.
 // It runs detectText, which processes the image for text.
-func processImage(ctx context.Context, w io.Writer, projectID, bucket, name string) {
-	// bucket, err := validateMessage(file, "bucket")
-	// name, err := validateMessage(file, "name")
-
-	detectText(w, projectID, bucket, name)
-
-	fmt.Fprintf(w, "File %s processed.", name)
+func processImage(w io.Writer, projectID string, file storage.ObjectAttrs) error {
+	if file.Bucket == "" {
+		return fmt.Errorf("empty file.Bucket")
+	}
+	if file.Name == "" {
+		return fmt.Errorf("empty file.Name")
+	}
+	detectText(w, projectID, file.Bucket, file.Name)
+	fmt.Fprintf(w, "File %s processed.", file.Name)
+	return nil
 }
 
 // [END functions_ocr_process]

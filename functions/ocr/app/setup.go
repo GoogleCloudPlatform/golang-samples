@@ -38,7 +38,7 @@ type config struct {
 
 type ocrmessage struct {
 	text     string
-	filename string
+	fileName string
 	lang     language.Tag
 	srcLang  language.Tag
 }
