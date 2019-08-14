@@ -15,7 +15,6 @@
 package kms
 
 // [START kms_get_keyring_policy]
-
 import (
 	"context"
 	"fmt"

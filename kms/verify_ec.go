@@ -15,7 +15,6 @@
 package kms
 
 // [START kms_verify_signature_ec]
-
 import (
 	"context"
 	"crypto/ecdsa"

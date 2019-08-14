@@ -15,7 +15,6 @@
 package kms
 
 // [START kms_create_keyring]
-
 import (
 	"context"
 	"fmt"
