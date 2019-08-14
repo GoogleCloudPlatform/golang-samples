@@ -29,8 +29,8 @@ curl https://storage.googleapis.com/gimme-acc/linux_amd64/gimme-acc > gimme-acc
 chmod +x gimme-acc
 ./gimme-acc version
 
-export HMAC_SERVICE_ACCOUNT=$(./gimme-acc -project gimme-acc lease 15m)
-trap "./gimme-acc -project gimme-acc done $HMAC_SERVICE_ACCOUNT" EXIT
+export HMAC_SERVICE_ACCOUNT=$(./gimme-acc -project your-project-id lease 15m)
+trap "./gimme-acc -project your-project-id done $HMAC_SERVICE_ACCOUNT" EXIT
 
 go test ....
 ```
