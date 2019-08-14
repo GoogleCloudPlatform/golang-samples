@@ -17,76 +17,96 @@ package ocr
 import (
 	"bytes"
 	"context"
+	"encoding/json"
+	"fmt"
 	"strings"
 	"testing"
 
-	"cloud.google.com/go/pubsub"
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"golang.org/x/text/language"
+	pubsubpb "google.golang.org/genproto/googleapis/pubsub/v1"
 )
 
 const (
-	menuName   = "images/menu.png"
-	bucketName = "golang-samples-ocr-test"
-	topicName  = "ocr-test-topic"
+	menuName        = "menu.jpg"
+	signName        = "sign.png"
+	bucketName      = "result-bucket-test"
+	imageBucketName = "ocr-image-bucket123"
+	topicName       = "ocr-test-topic"
 )
-
-func TestMain(t *testing.T) {
-	ctx := context.Background()
-	tc := testutil.SystemTest(t)
-	client, err := pubsub.NewClient(ctx, tc.ProjectID)
-	if err != nil {
-		t.Errorf("pubsub.NewClient: %v", err)
-	}
-	topic, err := client.CreateTopic(ctx, topicName)
-	if err != nil {
-		t.Errorf("CreateTopic: %v", err)
-	}
-	_ = topic
-}
 
 func TestSaveResult(t *testing.T) {
 	ctx := context.Background()
-	tc := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
 	client, err := storage.NewClient(ctx)
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
-	client.Bucket(bucketName)
-	err = detectText(buf, tc.ProjectID, bucketName, menuName)
+	bkt := client.Bucket(bucketName)
+	en, err := language.Parse("en")
 	if err != nil {
-		t.Errorf("TestInspectFile: %v", err)
+		t.Errorf("language.Parse: %v", err)
 	}
-	err = translateText(buf, tc.ProjectID)
+	fr, err := language.Parse("fr")
 	if err != nil {
-		t.Errorf("TestInspectFile: %v", err)
+		t.Errorf("language.Parse: %v", err)
 	}
-	got := buf.String()
-	if want := "Menu"; !strings.Contains(got, want) {
+	data, err := json.Marshal(ocrmessage{
+		Text:     "Hello",
+		FileName: menuName,
+		Lang:     en,
+		SrcLang:  fr,
+	})
+	err = saveResult(buf, pubsubpb.PubsubMessage{
+		Data: data,
+	})
+	if err != nil {
+		t.Errorf("TestSaveResult: %v", err)
+	}
+	r, err := bkt.Object(fmt.Sprintf("%s_%s.txt", menuName, en)).NewReader(ctx)
+	if err != nil {
+		t.Errorf("NewReader: %v", err)
+	}
+	fbuf := make([]byte, 100, 100)
+	_, err = r.Read(fbuf)
+	if err != nil {
+		t.Errorf("Reader: %v", err)
+	}
+	got := string(fbuf)
+	if want := "Hello"; !strings.Contains(got, want) {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }
 
 func TestTranslateText(t *testing.T) {
-	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
-	client, err := storage.NewClient(ctx)
+	en, err := language.Parse("en")
 	if err != nil {
-		t.Fatalf("Failed to create client: %v", err)
+		t.Errorf("language.Parse: %v", err)
 	}
-	client.Bucket(bucketName)
-	err = detectText(buf, tc.ProjectID, bucketName, menuName)
+	fr, err := language.Parse("fr")
 	if err != nil {
-		t.Errorf("TestInspectFile: %v", err)
+		t.Errorf("language.Parse: %v", err)
 	}
-	err = translateText(buf, tc.ProjectID)
+	data, err := json.Marshal(ocrmessage{
+		Text:     "Hello",
+		FileName: menuName,
+		Lang:     fr,
+		SrcLang:  en,
+	})
 	if err != nil {
-		t.Errorf("TestInspectFile: %v", err)
+		t.Errorf("json.Marshal: %v", err)
+	}
+	err = translateText(buf, tc.ProjectID, pubsubpb.PubsubMessage{
+		Data: data,
+	})
+	if err != nil {
+		t.Errorf("translateText: %v", err)
 	}
 	got := buf.String()
-	if want := "Menu"; !strings.Contains(got, want) {
+	if want := "Bonjour"; !strings.Contains(got, want) {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }
@@ -99,13 +119,13 @@ func TestDetectText(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
-	client.Bucket(bucketName)
-	err = detectText(buf, tc.ProjectID, bucketName, menuName)
+	client.Bucket(imageBucketName)
+	err = detectText(buf, tc.ProjectID, imageBucketName, menuName)
 	if err != nil {
-		t.Errorf("TestInspectFile: %v", err)
+		t.Errorf("TestDetectText: %v", err)
 	}
 	got := buf.String()
-	if want := "Menu"; !strings.Contains(got, want) {
+	if want := "Filets de Boeuf"; !strings.Contains(got, want) {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }

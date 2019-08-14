@@ -31,21 +31,26 @@ import (
 
 // detectText detects the text in an image using the Google Vision API.
 func detectText(w io.Writer, projectID, bucketName, fileName string) error {
-	// fileName := "images/sign.png"
+	// bucketName := "ocr-image-bucket123"
+	// fileName := "menu.jpg"
 	fmt.Fprintf(w, "Looking for text in image %v", fileName)
 	ctx := context.Background()
 	visionClient, err := vision.NewImageAnnotatorClient(ctx)
 	if err != nil {
 		return fmt.Errorf("vision.NewImageAnnotatorClient: %v", err)
 	}
-	maxResults := 1000
+	maxResults := 1
 	annotations, err := visionClient.DetectTexts(ctx,
 		&pb.Image{
 			Source: &pb.ImageSource{
 				GcsImageUri: fmt.Sprintf("gs://%s/%s", bucketName, fileName),
-			}},
+			},
+		},
 		&pb.ImageContext{}, maxResults,
 	)
+	if err != nil {
+		return fmt.Errorf("DetectTexts: %v", err)
+	}
 	text := ""
 	if len(annotations) > 0 {
 		text = annotations[0].Description
@@ -81,10 +86,10 @@ func detectText(w io.Writer, projectID, bucketName, fileName string) error {
 	if err != nil {
 		return fmt.Errorf("translate.NewClient: %v", err)
 	}
-	for _, targetLang := range config.toLang {
-		topicName := config.translateTopic
+	for _, targetLang := range config.ToLang {
+		topicName := config.TranslateTopic
 		if srcLang == targetLang || srcLang == "und" {
-			topicName = config.resultTopic
+			topicName = config.ResultTopic
 		}
 		targetTag, err := language.Parse(targetLang)
 		if err != nil {
@@ -95,10 +100,10 @@ func detectText(w io.Writer, projectID, bucketName, fileName string) error {
 			return fmt.Errorf("language.Parse: %v", err)
 		}
 		message, err := json.Marshal(ocrmessage{
-			text:     text,
-			fileName: fileName,
-			lang:     targetTag,
-			srcLang:  srcTag,
+			Text:     text,
+			FileName: fileName,
+			Lang:     targetTag,
+			SrcLang:  srcTag,
 		})
 		if err != nil {
 			return fmt.Errorf("json.Marshal: %v", err)

@@ -29,6 +29,7 @@ import (
 // translateText is executed when a message is published to the Cloud Pub/Sub topic specified
 // by TRANSLATE_TOPIC in config.json, and translates the text using the Google Translate API.
 func translateText(w io.Writer, projectID string, event pubsubpb.PubsubMessage) error {
+	// projectID := "my-project-id"
 	ctx := context.Background()
 	if event.Data == nil {
 		return fmt.Errorf("Empty data")
@@ -43,10 +44,11 @@ func translateText(w io.Writer, projectID string, event pubsubpb.PubsubMessage) 
 	} else {
 		return fmt.Errorf("Empty data")
 	}
-	text := message.text
-	fileName := message.fileName
-	targetTag := message.lang
-	srcTag := message.srcLang
+
+	text := message.Text
+	fileName := message.FileName
+	targetTag := message.Lang
+	srcTag := message.SrcLang
 
 	fmt.Fprintf(w, "Translating text into %s.", targetTag.String())
 	translateClient, err := translate.NewClient(ctx)
@@ -75,15 +77,15 @@ func translateText(w io.Writer, projectID string, event pubsubpb.PubsubMessage) 
 		return fmt.Errorf("json.Unmarshal: %v", err)
 	}
 
-	topicName := config.resultTopic
+	topicName := config.ResultTopic
 	if err != nil {
 		return fmt.Errorf("language.Parse: %v", err)
 	}
 	messageData, err := json.Marshal(ocrmessage{
-		text:     translatedText.Text,
-		fileName: fileName,
-		lang:     targetTag,
-		srcLang:  srcTag,
+		Text:     translatedText.Text,
+		FileName: fileName,
+		Lang:     targetTag,
+		SrcLang:  srcTag,
 	})
 	if err != nil {
 		return fmt.Errorf("json.Marshal: %v", err)
@@ -106,6 +108,7 @@ func translateText(w io.Writer, projectID string, event pubsubpb.PubsubMessage) 
 	if err != nil {
 		return fmt.Errorf("Publish: %v", err)
 	}
+	fmt.Fprintf(w, "Sent translation: %q", translatedText.Text)
 	return nil
 }
 

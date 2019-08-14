@@ -29,51 +29,57 @@ import (
 )
 
 type config struct {
-	resultTopic    string
-	resultBucket   string
-	translateTopic string
-	translate      bool
-	toLang         []string
+	ResultTopic    string   `json:"RESULT_TOPIC"`
+	ResultBucket   string   `json:"RESULT_BUCKET"`
+	TranslateTopic string   `json:"TRANSLATE_TOPIC"`
+	Translate      bool     `json:"TRANSLATE"`
+	ToLang         []string `json:"TO_LANG"`
 }
 
 type ocrmessage struct {
-	text     string
-	fileName string
-	lang     language.Tag
-	srcLang  language.Tag
+	Text     string       `json:"text"`
+	FileName string       `json:"fileName"`
+	Lang     language.Tag `json:"lang"`
+	SrcLang  language.Tag `json:"srcLang"`
 }
 
 func setup() error {
 	ctx := context.Background()
+	projectID := "GCP_PROJECT"
+
 	visionClient, err := vision.NewImageAnnotatorClient(ctx)
 	if err != nil {
 		return fmt.Errorf("vision.NewImageAnnotatorClient: %v", err)
 	}
-	_ = visionClient
+
 	translateClient, err := translate.NewClient(ctx)
 	if err != nil {
 		return fmt.Errorf("translate.NewClient: %v", err)
 	}
-	_ = translateClient
+
 	publisher, err := pubsub.NewPublisherClient(ctx)
 	if err != nil {
 		return fmt.Errorf("translate.NewClient: %v", err)
 	}
-	_ = publisher
+
 	storageClient, err := storage.NewClient(ctx)
 	if err != nil {
 		return fmt.Errorf("storage.NewClient: %v", err)
 	}
-	_ = storageClient
-	projectID := "GCP_PROJECT"
+
 	data, err := ioutil.ReadFile("config.json")
 	if err != nil {
 		return fmt.Errorf("ioutil.ReadFile: %v", err)
 	}
-	_ = projectID
 	config, err := json.Marshal(data)
+
+	// [END functions_ocr_setup]
+
+	_ = visionClient
+	_ = translateClient
+	_ = publisher
+	_ = storageClient
+	_ = projectID
 	_ = config
 	return nil
 }
-
-// [END functions_ocr_setup]

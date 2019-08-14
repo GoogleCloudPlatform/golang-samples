@@ -39,9 +39,9 @@ func saveResult(w io.Writer, event pubsubpb.PubsubMessage) error {
 	} else {
 		return fmt.Errorf("Empty data")
 	}
-	text := message.text
-	fileName := message.fileName
-	lang := message.lang
+	text := message.Text
+	fileName := message.FileName
+	lang := message.Lang
 
 	fmt.Fprintf(w, "Received request to save file %q.", fileName)
 
@@ -55,7 +55,7 @@ func saveResult(w io.Writer, event pubsubpb.PubsubMessage) error {
 		return fmt.Errorf("json.Unmarshal: %v", err)
 	}
 
-	bucketName := config.resultBucket
+	bucketName := config.ResultBucket
 	resultFilename := fmt.Sprintf("%s_%s.txt", fileName, lang)
 	storageClient, err := storage.NewClient(ctx)
 	if err != nil {
@@ -69,7 +69,7 @@ func saveResult(w io.Writer, event pubsubpb.PubsubMessage) error {
 	defer file.Close()
 	fmt.Fprint(file, text)
 
-	print("File saved.")
+	fmt.Fprintf(w, "File saved.")
 	return nil
 }
 
