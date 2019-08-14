@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Command gimme-acc provides access to a pool of projects.
+// Command gimme-acc provides access to a pool of service accounts.
 //
-// The metadata about the project pool is stored in Cloud Datastore in a meta-project.
-// Projects are leased for a certain duration, and automatically returned to the pool when the lease expires.
-// Projects should be returned before the lease expires.
+// The metadata about the service account pool is stored in Cloud Datastore in a meta-project.
+// Service accounts are leased for a certain duration, and automatically returned to the pool when the lease expires.
+// Service accounts should be returned before the lease expires.
 package main
 
 import (
