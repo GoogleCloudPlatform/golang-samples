@@ -30,6 +30,7 @@ import (
 )
 
 type configType struct {
+	ProjectID      string   `json:"PROJECT_ID"`
 	ResultTopic    string   `json:"RESULT_TOPIC"`
 	ResultBucket   string   `json:"RESULT_BUCKET"`
 	TranslateTopic string   `json:"TRANSLATE_TOPIC"`
@@ -52,10 +53,21 @@ var (
 	config          *configType
 )
 
-func init() {
+func setup() {
 	ctx := context.Background()
-	projectID := "my-project-id"
-	var err error
+
+	cfgFile, err := os.Open("config.json")
+	if err != nil {
+		log.Fatalf("os.Open: %v", err)
+	}
+	d := json.NewDecoder(cfgFile)
+	config = &configType{}
+	err = d.Decode(config)
+	if err != nil {
+		log.Fatalf("Decode: %v", err)
+	}
+
+	projectID := config.ProjectID
 
 	visionClient, err = vision.NewImageAnnotatorClient(ctx)
 	if err != nil {
@@ -75,17 +87,6 @@ func init() {
 	storageClient, err = storage.NewClient(ctx)
 	if err != nil {
 		log.Fatalf("storage.NewClient: %v", err)
-	}
-
-	cfgFile, err := os.Open("config.json")
-	if err != nil {
-		log.Fatalf("os.Open: %v", err)
-	}
-	d := json.NewDecoder(cfgFile)
-	config = &configType{}
-	err = d.Decode(config)
-	if err != nil {
-		log.Fatalf("Decode: %v", err)
 	}
 }
 

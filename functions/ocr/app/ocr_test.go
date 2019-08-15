@@ -19,6 +19,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
+	"os"
 	"strings"
 	"testing"
 
@@ -39,8 +41,22 @@ var (
 
 func TestMain(t *testing.T) {
 	tc := testutil.SystemTest(t)
+	setup()
 	bucketName = fmt.Sprintf("%s-result", tc.ProjectID)
 	imageBucketName = fmt.Sprintf("%s-image", tc.ProjectID)
+	config = &configType{
+		ProjectID:      os.Getenv("GOOGLE_CLOUD_PROJECT"),
+		ResultTopic:    "test-result-topic",
+		ResultBucket:   bucketName,
+		TranslateTopic: "test-translate-topic",
+		Translate:      true,
+		ToLang:         []string{"en", "fr", "es", "ja", "ru"},
+	}
+	var err error
+	publisher, err = pubsub.NewClient(context.Background(), config.ProjectID)
+	if err != nil {
+		log.Fatalf("translate.NewClient: %v", err)
+	}
 }
 
 func TestSaveResult(t *testing.T) {
