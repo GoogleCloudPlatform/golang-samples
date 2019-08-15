@@ -16,38 +16,47 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"mime/multipart"
 	"net/http/httptest"
 	"os"
 	"strings"
 	"testing"
 
-	"github.com/GoogleCloudPlatform/golang-samples/getting-started/bookshelf"
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"github.com/GoogleCloudPlatform/golang-samples/internal/webtest"
+	"github.com/GoogleCloudPlatform/golang-samples/getting-started/bookshelf/internal/webtest"
 )
 
-var wt *webtest.W
+var (
+	wt *webtest.W
+	b  *Bookshelf
+)
 
 func TestMain(m *testing.M) {
+	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
+	if projectID == "" {
+		fmt.Fprintln(os.Stderr, "GOLANG_SAMPLES_FIRESTORE_PROJECT not set. Skipping.")
+		return
+	}
+
+	// Don't log anything during testing.
+	log.SetOutput(ioutil.Discard)
+
+	var err error
+	b, err = NewBookshelf(projectID)
+	if err != nil {
+		log.Fatalf("NewBookshelf: %v", err)
+	}
+	b.logWriter = ioutil.Discard
+
 	serv := httptest.NewServer(nil)
 	wt = webtest.New(nil, serv.Listener.Addr().String())
-	registerHandlers()
+
+	b.registerHandlers()
 
 	os.Exit(m.Run())
-}
-
-// This function verifies compilation occurs without error.
-// It may not be possible to run the application without
-// satisfying appengine environmental dependencies such as
-// the presence of a GCE metadata server.
-func TestBuildable(t *testing.T) {
-	m := testutil.BuildMain(t)
-	defer m.Cleanup()
-	if !m.Built() {
-		t.Fatal("failed to compile application.")
-	}
 }
 
 func TestNoBooks(t *testing.T) {
@@ -55,8 +64,9 @@ func TestNoBooks(t *testing.T) {
 }
 
 func TestBookDetail(t *testing.T) {
+	ctx := context.Background()
 	const title = "book mcbook"
-	id, err := bookshelf.DB.AddBook(&bookshelf.Book{
+	id, err := b.DB.AddBook(ctx, &Book{
 		Title: title,
 	})
 	if err != nil {
@@ -65,10 +75,10 @@ func TestBookDetail(t *testing.T) {
 
 	bodyContains(t, wt, "/", title)
 
-	bookPath := fmt.Sprintf("/books/%d", id)
+	bookPath := fmt.Sprintf("/books/%s", id)
 	bodyContains(t, wt, bookPath, title)
 
-	if err := bookshelf.DB.DeleteBook(id); err != nil {
+	if err := b.DB.DeleteBook(ctx, id); err != nil {
 		t.Fatal(err)
 	}
 
@@ -76,15 +86,16 @@ func TestBookDetail(t *testing.T) {
 }
 
 func TestEditBook(t *testing.T) {
+	ctx := context.Background()
 	const title = "book mcbook"
-	id, err := bookshelf.DB.AddBook(&bookshelf.Book{
+	id, err := b.DB.AddBook(ctx, &Book{
 		Title: title,
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	bookPath := fmt.Sprintf("/books/%d", id)
+	bookPath := fmt.Sprintf("/books/%s", id)
 	editPath := bookPath + "/edit"
 	bodyContains(t, wt, editPath, "Edit book")
 	bodyContains(t, wt, editPath, title)
@@ -106,7 +117,7 @@ func TestEditBook(t *testing.T) {
 	bodyContains(t, wt, bookPath, "simpsons")
 	bodyContains(t, wt, bookPath, "homer")
 
-	if err := bookshelf.DB.DeleteBook(id); err != nil {
+	if err := b.DB.DeleteBook(ctx, id); err != nil {
 		t.Fatalf("got err %v, want nil", err)
 	}
 }
