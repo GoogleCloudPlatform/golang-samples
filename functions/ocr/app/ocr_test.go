@@ -22,28 +22,34 @@ import (
 	"strings"
 	"testing"
 
-	"cloud.google.com/go/storage"
+	"cloud.google.com/go/pubsub"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"golang.org/x/text/language"
-	pubsubpb "google.golang.org/genproto/googleapis/pubsub/v1"
 )
 
 const (
-	menuName        = "menu.jpg"
-	signName        = "sign.png"
-	bucketName      = "result-bucket-test"
-	imageBucketName = "ocr-image-bucket123"
-	topicName       = "ocr-test-topic"
+	menuName = "menu.jpg"
+	signName = "sign.png"
 )
+
+var (
+	bucketName      string
+	imageBucketName string
+)
+
+func TestMain(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	bucketName = fmt.Sprintf("%s-result", tc.ProjectID)
+	imageBucketName = fmt.Sprintf("%s-image", tc.ProjectID)
+}
 
 func TestSaveResult(t *testing.T) {
 	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	bucketName = fmt.Sprintf("%s-result", tc.ProjectID)
+	imageBucketName = fmt.Sprintf("%s-image", tc.ProjectID)
 	buf := new(bytes.Buffer)
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		t.Fatalf("Failed to create client: %v", err)
-	}
-	bkt := client.Bucket(bucketName)
+	bkt := storageClient.Bucket(bucketName)
 	en, err := language.Parse("en")
 	if err != nil {
 		t.Errorf("language.Parse: %v", err)
@@ -52,13 +58,13 @@ func TestSaveResult(t *testing.T) {
 	if err != nil {
 		t.Errorf("language.Parse: %v", err)
 	}
-	data, err := json.Marshal(ocrmessage{
+	data, err := json.Marshal(ocrMessage{
 		Text:     "Hello",
 		FileName: menuName,
 		Lang:     en,
 		SrcLang:  fr,
 	})
-	err = saveResult(buf, pubsubpb.PubsubMessage{
+	err = saveResult(buf, pubsub.Message{
 		Data: data,
 	})
 	if err != nil {
@@ -90,7 +96,7 @@ func TestTranslateText(t *testing.T) {
 	if err != nil {
 		t.Errorf("language.Parse: %v", err)
 	}
-	data, err := json.Marshal(ocrmessage{
+	data, err := json.Marshal(ocrMessage{
 		Text:     "Hello",
 		FileName: menuName,
 		Lang:     fr,
@@ -99,7 +105,7 @@ func TestTranslateText(t *testing.T) {
 	if err != nil {
 		t.Errorf("json.Marshal: %v", err)
 	}
-	err = translateText(buf, tc.ProjectID, pubsubpb.PubsubMessage{
+	err = translateText(buf, tc.ProjectID, pubsub.Message{
 		Data: data,
 	})
 	if err != nil {
@@ -112,15 +118,10 @@ func TestTranslateText(t *testing.T) {
 }
 
 func TestDetectText(t *testing.T) {
-	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		t.Fatalf("Failed to create client: %v", err)
-	}
-	client.Bucket(imageBucketName)
-	err = detectText(buf, tc.ProjectID, imageBucketName, menuName)
+	storageClient.Bucket(imageBucketName)
+	err := detectText(buf, tc.ProjectID, imageBucketName, menuName)
 	if err != nil {
 		t.Errorf("TestDetectText: %v", err)
 	}

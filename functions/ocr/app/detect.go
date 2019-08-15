@@ -11,43 +11,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// [START functions_ocr_detect]
+
 package ocr
 
-// [START functions_ocr_detect]
 import (
 	"context"
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 
-	pubsub "cloud.google.com/go/pubsub/apiv1"
-	"cloud.google.com/go/translate"
-	vision "cloud.google.com/go/vision/apiv1"
+	"cloud.google.com/go/pubsub"
 	"golang.org/x/text/language"
-	pb "google.golang.org/genproto/googleapis/cloud/vision/v1"
-	pubsubpb "google.golang.org/genproto/googleapis/pubsub/v1"
+	visionpb "google.golang.org/genproto/googleapis/cloud/vision/v1"
 )
 
 // detectText detects the text in an image using the Google Vision API.
 func detectText(w io.Writer, projectID, bucketName, fileName string) error {
-	// bucketName := "ocr-image-bucket123"
-	// fileName := "menu.jpg"
 	fmt.Fprintf(w, "Looking for text in image %v", fileName)
 	ctx := context.Background()
-	visionClient, err := vision.NewImageAnnotatorClient(ctx)
-	if err != nil {
-		return fmt.Errorf("vision.NewImageAnnotatorClient: %v", err)
-	}
 	maxResults := 1
-	annotations, err := visionClient.DetectTexts(ctx,
-		&pb.Image{
-			Source: &pb.ImageSource{
-				GcsImageUri: fmt.Sprintf("gs://%s/%s", bucketName, fileName),
-			},
+	image := &visionpb.Image{
+		Source: &visionpb.ImageSource{
+			GcsImageUri: fmt.Sprintf("gs://%s/%s", bucketName, fileName),
 		},
-		&pb.ImageContext{}, maxResults,
-	)
+	}
+	annotations, err := visionClient.DetectTexts(ctx, image, &visionpb.ImageContext{}, maxResults)
 	if err != nil {
 		return fmt.Errorf("DetectTexts: %v", err)
 	}
@@ -55,12 +44,12 @@ func detectText(w io.Writer, projectID, bucketName, fileName string) error {
 	if len(annotations) > 0 {
 		text = annotations[0].Description
 	}
+	if len(annotations) == 0 || len(text) == 0 {
+		fmt.Fprintf(w, "No text detected in image %q. Returning early.", fileName)
+		return nil
+	}
 	fmt.Fprintf(w, "Extracted text %q from image (%d chars).", text, len(text))
 
-	translateClient, err := translate.NewClient(ctx)
-	if err != nil {
-		return fmt.Errorf("translate.NewClient: %v", err)
-	}
 	detectResponse, err := translateClient.DetectLanguage(ctx, []string{text})
 	if err != nil {
 		return fmt.Errorf("DetectLanguage: %v", err)
@@ -71,21 +60,7 @@ func detectText(w io.Writer, projectID, bucketName, fileName string) error {
 	srcLang := detectResponse[0][0].Language.String()
 	fmt.Fprintf(w, "Detected language %q for text %q.", srcLang, text)
 
-	data, err := ioutil.ReadFile("config.json")
-	if err != nil {
-		return fmt.Errorf("ioutil.ReadFile: %v", err)
-	}
-	config := &config{}
-	err = json.Unmarshal(data, config)
-	if err != nil {
-		return fmt.Errorf("json.Unmarshal: %v", err)
-	}
-
 	// Submit a message to the bus for each target language
-	publisher, err := pubsub.NewPublisherClient(ctx)
-	if err != nil {
-		return fmt.Errorf("translate.NewClient: %v", err)
-	}
 	for _, targetLang := range config.ToLang {
 		topicName := config.TranslateTopic
 		if srcLang == targetLang || srcLang == "und" {
@@ -99,7 +74,7 @@ func detectText(w io.Writer, projectID, bucketName, fileName string) error {
 		if err != nil {
 			return fmt.Errorf("language.Parse: %v", err)
 		}
-		message, err := json.Marshal(ocrmessage{
+		message, err := json.Marshal(ocrMessage{
 			Text:     text,
 			FileName: fileName,
 			Lang:     targetTag,
@@ -108,19 +83,21 @@ func detectText(w io.Writer, projectID, bucketName, fileName string) error {
 		if err != nil {
 			return fmt.Errorf("json.Marshal: %v", err)
 		}
-		messageData := []byte(message)
-		topicPath := pubsub.PublisherTopicPath(projectID, topicName)
-		_, err = publisher.Publish(ctx,
-			&pubsubpb.PublishRequest{
-				Topic: topicPath,
-				Messages: []*pubsubpb.PubsubMessage{
-					&pubsubpb.PubsubMessage{
-						Data: messageData,
-					},
-				},
-			})
+		topic := publisher.Topic(topicName)
+		ok, err := topic.Exists(ctx)
 		if err != nil {
-			return fmt.Errorf("Publish: %v", err)
+			return fmt.Errorf("Exists: %v", err)
+		}
+		if !ok {
+			return fmt.Errorf("topic %q does not exist", topicName)
+		}
+		r := topic.Publish(ctx,
+			&pubsub.Message{
+				Data: []byte(message),
+			})
+		_, err = r.Get(ctx)
+		if err != nil {
+			return fmt.Errorf("Get: %v", err)
 		}
 	}
 	return nil

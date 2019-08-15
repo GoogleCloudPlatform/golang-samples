@@ -11,25 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// [START functions_ocr_save]
+
 package ocr
 
-// [START functions_ocr_save]
 import (
 	"context"
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 
-	"cloud.google.com/go/storage"
-	pubsubpb "google.golang.org/genproto/googleapis/pubsub/v1"
+	"cloud.google.com/go/pubsub"
 )
 
 // saveResult is executed when a message is published to the Cloud Pub/Sub topic specified by
 // RESULT_TOPIC in config.json file, and saves the data packet to a file in GCS.
-func saveResult(w io.Writer, event pubsubpb.PubsubMessage) error {
+func saveResult(w io.Writer, event pubsub.Message) error {
 	ctx := context.Background()
-	var message ocrmessage
+	var message ocrMessage
 	if event.Data != nil {
 		messageData := event.Data
 		err := json.Unmarshal(messageData, &message)
@@ -45,22 +44,8 @@ func saveResult(w io.Writer, event pubsubpb.PubsubMessage) error {
 
 	fmt.Fprintf(w, "Received request to save file %q.", fileName)
 
-	data, err := ioutil.ReadFile("config.json")
-	if err != nil {
-		return fmt.Errorf("ioutil.ReadFile: %v", err)
-	}
-	config := &config{}
-	err = json.Unmarshal(data, config)
-	if err != nil {
-		return fmt.Errorf("json.Unmarshal: %v", err)
-	}
-
 	bucketName := config.ResultBucket
 	resultFilename := fmt.Sprintf("%s_%s.txt", fileName, lang)
-	storageClient, err := storage.NewClient(ctx)
-	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
-	}
 	bucket := storageClient.Bucket(bucketName)
 
 	fmt.Fprintf(w, "Saving result to %q in bucket %q.", resultFilename, bucketName)

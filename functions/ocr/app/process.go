@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// [START functions_ocr_process]
+
 package ocr
 
-// [START functions_ocr_process]
 import (
 	"fmt"
 	"io"
@@ -24,7 +25,6 @@ import (
 // processImage is executed when a file is uploaded to the Cloud Storage bucket you created for uploading images.
 // It runs detectText, which processes the image for text.
 func processImage(w io.Writer, projectID string, file storage.ObjectAttrs) error {
-	// projectID := "my-project-id"
 	if file.Bucket == "" {
 		return fmt.Errorf("empty file.Bucket")
 	}

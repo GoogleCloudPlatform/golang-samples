@@ -11,24 +11,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// [START functions_ocr_setup]
+
 // Package ocr contains Go samples for OCR functions.
 package ocr
 
-// [START functions_ocr_setup]
 import (
 	"context"
 	"encoding/json"
-	"fmt"
-	"io/ioutil"
+	"log"
+	"os"
 
-	pubsub "cloud.google.com/go/pubsub/apiv1"
+	"cloud.google.com/go/pubsub"
 	"cloud.google.com/go/storage"
 	"cloud.google.com/go/translate"
 	vision "cloud.google.com/go/vision/apiv1"
 	"golang.org/x/text/language"
 )
 
-type config struct {
+type configType struct {
 	ResultTopic    string   `json:"RESULT_TOPIC"`
 	ResultBucket   string   `json:"RESULT_BUCKET"`
 	TranslateTopic string   `json:"TRANSLATE_TOPIC"`
@@ -36,50 +37,56 @@ type config struct {
 	ToLang         []string `json:"TO_LANG"`
 }
 
-type ocrmessage struct {
+type ocrMessage struct {
 	Text     string       `json:"text"`
 	FileName string       `json:"fileName"`
 	Lang     language.Tag `json:"lang"`
 	SrcLang  language.Tag `json:"srcLang"`
 }
 
-func setup() error {
+var (
+	visionClient    *vision.ImageAnnotatorClient
+	translateClient *translate.Client
+	publisher       *pubsub.Client
+	storageClient   *storage.Client
+	config          *configType
+)
+
+func init() {
 	ctx := context.Background()
-	projectID := "GCP_PROJECT"
+	projectID := "my-project-id"
+	var err error
 
-	visionClient, err := vision.NewImageAnnotatorClient(ctx)
+	visionClient, err = vision.NewImageAnnotatorClient(ctx)
 	if err != nil {
-		return fmt.Errorf("vision.NewImageAnnotatorClient: %v", err)
+		log.Fatalf("vision.NewImageAnnotatorClient: %v", err)
 	}
 
-	translateClient, err := translate.NewClient(ctx)
+	translateClient, err = translate.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("translate.NewClient: %v", err)
+		log.Fatalf("translate.NewClient: %v", err)
 	}
 
-	publisher, err := pubsub.NewPublisherClient(ctx)
+	publisher, err = pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("translate.NewClient: %v", err)
+		log.Fatalf("translate.NewClient: %v", err)
 	}
 
-	storageClient, err := storage.NewClient(ctx)
+	storageClient, err = storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		log.Fatalf("storage.NewClient: %v", err)
 	}
 
-	data, err := ioutil.ReadFile("config.json")
+	cfgFile, err := os.Open("config.json")
 	if err != nil {
-		return fmt.Errorf("ioutil.ReadFile: %v", err)
+		log.Fatalf("os.Open: %v", err)
 	}
-	config, err := json.Marshal(data)
-
-	// [END functions_ocr_setup]
-
-	_ = visionClient
-	_ = translateClient
-	_ = publisher
-	_ = storageClient
-	_ = projectID
-	_ = config
-	return nil
+	d := json.NewDecoder(cfgFile)
+	config = &configType{}
+	err = d.Decode(config)
+	if err != nil {
+		log.Fatalf("Decode: %v", err)
+	}
 }
+
+// [END functions_ocr_setup]
