@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START healthcare_dicomweb_retrieve_study]
+// [START healthcare_dicomweb_retrieve_rendered]
 import (
 	"context"
 	"fmt"
@@ -24,9 +24,8 @@ import (
 	healthcare "google.golang.org/api/healthcare/v1beta1"
 )
 
-// dicomWebRetrieveStudy retrieves all instances in the given dicomWebPath
-// study.
-func dicomWebRetrieveStudy(w io.Writer, projectID, location, datasetID, dicomStoreID, dicomWebPath string, outputFile string) error {
+// dicomWebRetrieveRendered retrieves a consumer imaging format like JPEG or PNG.
+func dicomWebRetrieveRendered(w io.Writer, projectID, location, datasetID, dicomStoreID, dicomWebPath string, outputFile string) error {
 	ctx := context.Background()
 
 	healthcareService, err := healthcare.NewService(ctx)
@@ -34,13 +33,15 @@ func dicomWebRetrieveStudy(w io.Writer, projectID, location, datasetID, dicomSto
 		return fmt.Errorf("healthcare.NewService: %v", err)
 	}
 
-	storesService := healthcareService.Projects.Locations.Datasets.DicomStores.Studies
+	storesService := healthcareService.Projects.Locations.Datasets.DicomStores.Studies.Series.Instances
 
 	parent := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/dicomStores/%s", projectID, location, datasetID, dicomStoreID)
 
-	resp, err := storesService.RetrieveStudy(parent, dicomWebPath).Do()
+	call := storesService.RetrieveRendered(parent, dicomWebPath)
+	call.Header().Set("Accept", "image/png")
+	resp, err := call.Do()
 	if err != nil {
-		return fmt.Errorf("RetrieveStudy: %v", err)
+		return fmt.Errorf("RetrieveRendered: %v", err)
 	}
 
 	defer resp.Body.Close()
@@ -54,9 +55,9 @@ func dicomWebRetrieveStudy(w io.Writer, projectID, location, datasetID, dicomSto
 		return err
 	}
 
-	fmt.Fprintf(w, "Study retrieved and downloaded to file: %v\n", outputFile)
+	fmt.Fprintf(w, "Rendered PNG image retrieved and downloaded to file: %v\n", outputFile)
 
 	return nil
 }
 
-// [END healthcare_dicomweb_retrieve_study]
+// [END healthcare_dicomweb_retrieve_rendered]
