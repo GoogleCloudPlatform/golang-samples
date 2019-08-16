@@ -80,6 +80,7 @@ fi
 if ! go help mod 2>/dev/null >/dev/null; then
   GO_IMPORTS=$(go list -f '{{join .Imports "\n"}}{{"\n"}}{{join .TestImports "\n"}}' $TARGET | \
     sort | uniq | \
+    sed 's:github.com/mailgun/mailgun-go/v3:github.com/mailgun/mailgun-go:g' | \
     grep -v golang-samples | \
     grep '\.')
   time go get -u -v -d $GO_IMPORTS
