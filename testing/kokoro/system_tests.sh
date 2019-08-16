@@ -101,7 +101,12 @@ date
 
 OUTFILE=gotest.out
 2>&1 go test -timeout $TIMEOUT -v . $TARGET | tee $OUTFILE
-cat $OUTFILE | $GOPATH/bin/go-junit-report -set-exit-code > sponge_log.xml
 
 # Clear the cache so Kokoro doesn't try to copy it.
-go clean -modcache
+# Must happen before calling go-junit-report since it can cause a non-zero exit
+# code, stopping execution.
+if go help mod 2>/dev/null >/dev/null; then
+  go clean -modcache
+fi
+
+cat $OUTFILE | $GOPATH/bin/go-junit-report -set-exit-code > sponge_log.xml
