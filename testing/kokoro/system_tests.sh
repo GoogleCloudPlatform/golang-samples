@@ -2,7 +2,8 @@
 
 set -e
 
-export GO111MODULE=on # always use modules.
+export GO111MODULE=on # Always use modules.
+export GOPROXY=https://proxy.golang.org
 
 export GOLANG_SAMPLES_KMS_KEYRING=ring1
 export GOLANG_SAMPLES_KMS_CRYPTOKEY=key1
