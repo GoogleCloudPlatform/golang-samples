@@ -19,7 +19,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
+	"log"
 
 	"cloud.google.com/go/pubsub"
 	"golang.org/x/text/language"
@@ -27,9 +27,8 @@ import (
 )
 
 // detectText detects the text in an image using the Google Vision API.
-func detectText(w io.Writer, projectID, bucketName, fileName string) error {
-	fmt.Fprintf(w, "Looking for text in image %v", fileName)
-	ctx := context.Background()
+func detectText(ctx context.Context, bucketName, fileName string) error {
+	log.Printf("Looking for text in image %v", fileName)
 	maxResults := 1
 	image := &visionpb.Image{
 		Source: &visionpb.ImageSource{
@@ -45,10 +44,10 @@ func detectText(w io.Writer, projectID, bucketName, fileName string) error {
 		text = annotations[0].Description
 	}
 	if len(annotations) == 0 || len(text) == 0 {
-		fmt.Fprintf(w, "No text detected in image %q. Returning early.", fileName)
+		log.Printf("No text detected in image %q. Returning early.", fileName)
 		return nil
 	}
-	fmt.Fprintf(w, "Extracted text %q from image (%d chars).", text, len(text))
+	log.Printf("Extracted text %q from image (%d chars).", text, len(text))
 
 	detectResponse, err := translateClient.DetectLanguage(ctx, []string{text})
 	if err != nil {
@@ -58,7 +57,7 @@ func detectText(w io.Writer, projectID, bucketName, fileName string) error {
 		return fmt.Errorf("DetectLanguage gave empty response")
 	}
 	srcLang := detectResponse[0][0].Language.String()
-	fmt.Fprintf(w, "Detected language %q for text %q.", srcLang, text)
+	log.Printf("Detected language %q for text %q.", srcLang, text)
 
 	// Submit a message to the bus for each target language
 	for _, targetLang := range config.ToLang {
@@ -89,7 +88,10 @@ func detectText(w io.Writer, projectID, bucketName, fileName string) error {
 			return fmt.Errorf("Exists: %v", err)
 		}
 		if !ok {
-			return fmt.Errorf("topic %q does not exist", topicName)
+			topic, err = publisher.CreateTopic(ctx, topicName)
+			if err != nil {
+				return fmt.Errorf("CreateTopic: %v", err)
+			}
 		}
 		r := topic.Publish(ctx,
 			&pubsub.Message{

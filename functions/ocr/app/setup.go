@@ -19,8 +19,10 @@ package ocr
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"cloud.google.com/go/pubsub"
 	"cloud.google.com/go/storage"
@@ -45,8 +47,19 @@ type ocrMessage struct {
 	SrcLang  language.Tag `json:"srcLang"`
 }
 
-type ocrEvent struct {
-	Data []byte `json:"PROJECT_ID"`
+// GCSEvent is the payload of a GCS event.
+type GCSEvent struct {
+	Bucket         string    `json:"bucket"`
+	Name           string    `json:"name"`
+	Metageneration string    `json:"metageneration"`
+	ResourceState  string    `json:"resourceState"`
+	TimeCreated    time.Time `json:"timeCreated"`
+	Updated        time.Time `json:"updated"`
+}
+
+// PubSubMessage is the payload of a Pub/Sub event.
+type PubSubMessage struct {
+	Data []byte `json:"data"`
 }
 
 var (
@@ -57,13 +70,14 @@ var (
 	config          *configType
 )
 
-func setup() {
+func init() {
 	ctx := context.Background()
 
 	cfgFile, err := os.Open("config.json")
 	if err != nil {
 		log.Fatalf("os.Open: %v", err)
 	}
+
 	d := json.NewDecoder(cfgFile)
 	config = &configType{}
 	err = d.Decode(config)
@@ -71,6 +85,16 @@ func setup() {
 		log.Fatalf("Decode: %v", err)
 	}
 
+	bucketName := fmt.Sprintf("%s-result", os.Getenv("GOOGLE_CLOUD_PROJECT"))
+	// imageBucketName := fmt.Sprintf("%s-image", os.Getenv("GOOGLE_CLOUD_PROJECT"))
+	config = &configType{
+		ProjectID:      os.Getenv("GOOGLE_CLOUD_PROJECT"),
+		ResultTopic:    "test-result-topic",
+		ResultBucket:   bucketName,
+		TranslateTopic: "test-translate-topic",
+		Translate:      true,
+		ToLang:         []string{"en", "fr", "es", "ja", "ru"},
+	}
 	projectID := config.ProjectID
 
 	visionClient, err = vision.NewImageAnnotatorClient(ctx)

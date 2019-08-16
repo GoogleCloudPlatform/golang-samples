@@ -41,7 +41,6 @@ var (
 
 func TestMain(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	setup()
 	bucketName = fmt.Sprintf("%s-result", tc.ProjectID)
 	imageBucketName = fmt.Sprintf("%s-image", tc.ProjectID)
 	config = &configType{
@@ -81,7 +80,7 @@ func TestSaveResult(t *testing.T) {
 		SrcLang:  fr,
 	})
 	log.SetOutput(buf)
-	err = SaveResult(ctx, ocrEvent{
+	err = SaveResult(ctx, PubSubMessage{
 		Data: data,
 	})
 	if err != nil {
@@ -123,7 +122,7 @@ func TestTranslateText(t *testing.T) {
 		t.Errorf("json.Marshal: %v", err)
 	}
 	log.SetOutput(buf)
-	err = TranslateText(ctx, ocrEvent{
+	err = TranslateText(ctx, PubSubMessage{
 		Data: data,
 	})
 	if err != nil {

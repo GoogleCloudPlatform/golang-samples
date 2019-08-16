@@ -27,7 +27,7 @@ import (
 
 // TranslateText is executed when a message is published to the Cloud Pub/Sub topic specified
 // by TRANSLATE_TOPIC in config.json, and translates the text using the Google Translate API.
-func TranslateText(ctx context.Context, event ocrEvent) error {
+func TranslateText(ctx context.Context, event PubSubMessage) error {
 	if event.Data == nil {
 		return fmt.Errorf("Empty data")
 	}
@@ -48,10 +48,10 @@ func TranslateText(ctx context.Context, event ocrEvent) error {
 	srcTag := message.SrcLang
 
 	log.Printf("Translating text into %s.", targetTag.String())
-	translateResponse, err := translateClient.Translate(ctx, []string{text}, targetTag,
-		&translate.Options{
-			Source: srcTag,
-		})
+	opts := translate.Options{
+		Source: srcTag,
+	}
+	translateResponse, err := translateClient.Translate(ctx, []string{text}, targetTag, &opts)
 	if err != nil {
 		return fmt.Errorf("Translate: %v", err)
 	}
@@ -80,7 +80,10 @@ func TranslateText(ctx context.Context, event ocrEvent) error {
 		return fmt.Errorf("Exists: %v", err)
 	}
 	if !ok {
-		return fmt.Errorf("topic %q does not exist", topicName)
+		topic, err = publisher.CreateTopic(ctx, topicName)
+		if err != nil {
+			return fmt.Errorf("CreateTopic: %v", err)
+		}
 	}
 	r := topic.Publish(ctx,
 		&pubsub.Message{
