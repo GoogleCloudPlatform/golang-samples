@@ -76,17 +76,9 @@ else
 fi
 
 # Download imports (pre Go 1.11). Go 1.11+ uses modules.
-# NOTE: this command fails in Go 1.11 because "go get" on a standard library import fails.
 # TODO: remove this block once we cease support for Go 1.10.
 if ! go help mod 2>/dev/null >/dev/null; then
-  GO_IMPORTS=$(go list -f '{{join .Imports "\n"}}{{"\n"}}{{join .TestImports "\n"}}' $TARGET | \
-    sort | uniq | \
-    grep -v golang-samples)
-  time go get -u -v -d $GO_IMPORTS
-  # Always download top-level and internal dependencies.
-  go get -t ./internal/...
-  go get -t -d .
-  go install -v $GO_IMPORTS
+  time go get -u -d ./...
 fi
 
 go get github.com/jstemmer/go-junit-report
