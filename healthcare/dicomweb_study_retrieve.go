@@ -58,6 +58,9 @@ func dicomWebRetrieveStudy(w io.Writer, projectID, location, datasetID, dicomSto
 		return err
 	}
 
+	// When specifying the output file, use an extension like ".multipart".
+	// Then, parse the downloaded multipart file to get each individual DICOM
+	// file.
 	fmt.Fprintf(w, "Study retrieved and downloaded to file: %v\n", outputFile)
 
 	return nil
