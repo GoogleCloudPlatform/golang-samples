@@ -28,6 +28,7 @@ import (
 )
 
 func TestSimplelog(t *testing.T) {
+	t.Skip("Flaky https://github.com/GoogleCloudPlatform/golang-samples/issues/696")
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 

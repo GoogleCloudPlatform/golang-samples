@@ -42,17 +42,21 @@ func TestAnalyze(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		if tt.gcs == nil {
-			continue
-		}
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 
-		var buf bytes.Buffer
-		err := tt.gcs(&buf, tt.path)
-		if err != nil {
-			t.Fatalf("GCS %s(%q): got %v, want nil err", tt.name, tt.path, err)
-		}
-		if got := buf.String(); !strings.Contains(got, tt.wantContain) {
-			t.Errorf("GCS %s(%q): got %q, want to contain %q", tt.name, tt.path, got, tt.wantContain)
-		}
+			if tt.gcs == nil {
+				t.Fatal("gcs not set")
+			}
+
+			var buf bytes.Buffer
+			err := tt.gcs(&buf, tt.path)
+			if err != nil {
+				t.Fatalf("GCS %s(%q): got %v, want nil err", tt.name, tt.path, err)
+			}
+			if got := buf.String(); !strings.Contains(got, tt.wantContain) {
+				t.Errorf("GCS %s(%q): got %q, want to contain %q", tt.name, tt.path, got, tt.wantContain)
+			}
+		})
 	}
 }

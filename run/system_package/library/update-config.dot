@@ -1,0 +1,3 @@
+digraph Update_Config {
+  Deploy -> "Find Service" -> "Update Configuration" -> "Warm Instance" -> "Route New Requests"
+}

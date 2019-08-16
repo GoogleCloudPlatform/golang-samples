@@ -18,6 +18,7 @@ package dataset
 
 import (
 	"context"
+	"fmt"
 
 	"cloud.google.com/go/bigquery"
 )
@@ -29,7 +30,7 @@ func deleteDatasetLabel(projectID, datasetID string) error {
 
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
-		return err
+		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
 
 	ds := client.Dataset(datasetID)
