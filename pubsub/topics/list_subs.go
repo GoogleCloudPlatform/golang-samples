@@ -24,6 +24,8 @@ import (
 )
 
 func listSubscriptions(projectID, topicID string) ([]*pubsub.Subscription, error) {
+	// projectID := "my-project-id"
+	// topicName := "projects/sample-248520/topics/ocr-go-test-topic"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {

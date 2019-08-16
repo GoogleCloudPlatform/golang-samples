@@ -25,6 +25,7 @@ import (
 )
 
 func policy(w io.Writer, projectID, subName string) (*iam.Policy, error) {
+	// projectID := "my-project-id"
 	// subName := projectID + "-example-sub"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)

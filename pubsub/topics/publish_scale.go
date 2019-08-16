@@ -26,7 +26,9 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func publishThatScales(w io.Writer, projectID, topic string, n int) error {
+func publishThatScales(w io.Writer, projectID, topicID string, n int) error {
+	// projectID := "my-project-id"
+	// topicID := "projects/my-project-id/topics/my-topic"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
@@ -35,7 +37,7 @@ func publishThatScales(w io.Writer, projectID, topic string, n int) error {
 
 	var wg sync.WaitGroup
 	var totalErrors uint64
-	t := client.Topic(topic)
+	t := client.Topic(topicID)
 
 	for i := 0; i < n; i++ {
 		result := t.Publish(ctx, &pubsub.Message{

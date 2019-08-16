@@ -24,7 +24,9 @@ import (
 )
 
 func create(projectID, subName string, topic *pubsub.Topic) error {
+	// projectID := "my-project-id"
 	// subName := projectID + "-example-sub"
+	// topic of type https://godoc.org/cloud.google.com/go/pubsub#Topic
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {

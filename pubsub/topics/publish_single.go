@@ -23,6 +23,9 @@ import (
 )
 
 func publishSingleGoroutine(projectID, topic string, msg []byte) error {
+	// projectID := "my-project-id"
+	// topicID := "projects/my-project-id/topics/my-topic"
+	// msg := []byte("Hello World")
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {

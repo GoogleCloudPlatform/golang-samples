@@ -24,7 +24,9 @@ import (
 )
 
 func createWithEndpoint(projectID, subName string, topic *pubsub.Topic, endpoint string) error {
+	// projectID := "my-project-id"
 	// subName := projectID + "-example-sub"
+	// topic of type https://godoc.org/cloud.google.com/go/pubsub#Topic
 	// endpoint := "https://my-test-project.appspot.com/push"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)

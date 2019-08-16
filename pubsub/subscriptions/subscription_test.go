@@ -31,14 +31,14 @@ import (
 
 var topic *pubsub.Topic
 var subID string
-
+var client *pubsub.Client
 var once sync.Once // guards cleanup related operations in setup.
 
 func setup(t *testing.T) *pubsub.Client {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
-
-	client, err := pubsub.NewClient(ctx, tc.ProjectID)
+	var err error
+	client, err = pubsub.NewClient(ctx, tc.ProjectID)
 	if err != nil {
 		t.Fatalf("failed to create client: %v", err)
 	}
@@ -160,7 +160,7 @@ func TestDelete(t *testing.T) {
 	if err := delete(tc.ProjectID, subID); err != nil {
 		t.Fatalf("failed to delete subscription (%q): %v", subID, err)
 	}
-	ok, err := c.Subscription(subID).Exists(context.Background())
+	ok, err := client.Subscription(subID).Exists(context.Background())
 	if err != nil {
 		t.Fatalf("failed to check if sub exists: %v", err)
 	}

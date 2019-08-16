@@ -24,6 +24,7 @@ import (
 )
 
 func list(projectID string) ([]*pubsub.Topic, error) {
+	// projectID := "my-project-id"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {

@@ -23,6 +23,7 @@ import (
 )
 
 func updateEndpoint(projectID, subName string, endpoint string) error {
+	// projectID := "my-project-id"
 	// subName := projectID + "-example-sub"
 	// endpoint := "https://my-test-project.appspot.com/push"
 	ctx := context.Background()

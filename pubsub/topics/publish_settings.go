@@ -23,14 +23,17 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func publishWithSettings(projectID, topic string, msg []byte) error {
+func publishWithSettings(projectID, topicID string, msg []byte) error {
+	// projectID := "my-project-id"
+	// topicID := "projects/my-project-id/topics/my-topic"
+	// msg := []byte("Hello World")
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
 
-	t := client.Topic(topic)
+	t := client.Topic(topicID)
 	t.PublishSettings.ByteThreshold = 5000
 	t.PublishSettings.CountThreshold = 10
 	t.PublishSettings.DelayThreshold = 100 * time.Millisecond

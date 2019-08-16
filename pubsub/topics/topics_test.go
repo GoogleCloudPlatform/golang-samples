@@ -29,7 +29,7 @@ import (
 )
 
 var topicID string
-
+var client *pubsub.Client
 var once sync.Once // guards cleanup related operations in setup.
 
 func setup(t *testing.T) *pubsub.Client {
@@ -37,8 +37,8 @@ func setup(t *testing.T) *pubsub.Client {
 	tc := testutil.SystemTest(t)
 
 	topicID = tc.ProjectID + "-test-topic"
-
-	client, err := pubsub.NewClient(ctx, tc.ProjectID)
+	var err error
+	client, err = pubsub.NewClient(ctx, tc.ProjectID)
 	if err != nil {
 		t.Fatalf("failed to create client: %v", err)
 	}
@@ -61,11 +61,11 @@ func setup(t *testing.T) *pubsub.Client {
 }
 
 func TestCreate(t *testing.T) {
-	c := setup(t)
-	if err := create(c, topicID); err != nil {
+	tc := testutil.SystemTest(t)
+	if err := create(tc.ProjectID, topicID); err != nil {
 		t.Fatalf("failed to create a topic: %v", err)
 	}
-	ok, err := c.Topic(topicID).Exists(context.Background())
+	ok, err := client.Topic(topicID).Exists(context.Background())
 	if err != nil {
 		t.Fatalf("failed to check if sub exists: %v", err)
 	}
@@ -75,10 +75,10 @@ func TestCreate(t *testing.T) {
 }
 
 func TestList(t *testing.T) {
-	c := setup(t)
+	tc := testutil.SystemTest(t)
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-		topics, err := list(c)
+		topics, err := list(tc.ProjectID)
 		if err != nil {
 			r.Errorf("failed to list topics: %v", err)
 		}
@@ -100,33 +100,37 @@ func TestList(t *testing.T) {
 func TestPublish(t *testing.T) {
 	// Nothing much to do here, unless we are consuming.
 	// TODO(jbd): Merge topics and subscriptions programs maybe?
-	c := setup(t)
-	if err := publish(c, topicID, "hello world"); err != nil {
+	tc := testutil.SystemTest(t)
+	setup(t)
+	if err := publish(tc.ProjectID, topicID, "hello world"); err != nil {
 		t.Errorf("failed to publish message: %v", err)
 	}
 }
 
 func TestPublishThatScales(t *testing.T) {
-	c := setup(t)
+	tc := testutil.SystemTest(t)
+	setup(t)
 	buf := new(bytes.Buffer)
-	if err := publishThatScales(buf, c, topicID, 10); err != nil {
+	if err := publishThatScales(buf, tc.ProjectID, topicID, 10); err != nil {
 		t.Errorf("failed to publish message: %v", err)
 	}
 }
 
 func TestPublishCustomAttributes(t *testing.T) {
-	c := setup(t)
-	if err := publishCustomAttributes(c, topicID); err != nil {
+	tc := testutil.SystemTest(t)
+	setup(t)
+	if err := publishCustomAttributes(tc.ProjectID, topicID); err != nil {
 		t.Errorf("failed to publish message: %v", err)
 	}
 }
 
 func TestIAM(t *testing.T) {
-	c := setup(t)
+	tc := testutil.SystemTest(t)
+	setup(t)
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
-		perms, err := testPermissions(buf, c, topicID)
+		perms, err := testPermissions(buf, tc.ProjectID, topicID)
 		if err != nil {
 			r.Errorf("testPermissions: %v", err)
 		}
@@ -136,14 +140,14 @@ func TestIAM(t *testing.T) {
 	})
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-		if err := addUsers(c, topicID); err != nil {
+		if err := addUsers(tc.ProjectID, topicID); err != nil {
 			r.Errorf("addUsers: %v", err)
 		}
 	})
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
-		policy, err := policy(buf, c, topicID)
+		policy, err := policy(buf, tc.ProjectID, topicID)
 		if err != nil {
 			r.Errorf("policy: %v", err)
 		}
@@ -157,11 +161,12 @@ func TestIAM(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	c := setup(t)
-	if err := delete(c, topicID); err != nil {
+	tc := testutil.SystemTest(t)
+	setup(t)
+	if err := delete(tc.ProjectID, topicID); err != nil {
 		t.Fatalf("failed to delete subscription (%q): %v", topicID, err)
 	}
-	ok, err := c.Topic(topicID).Exists(context.Background())
+	ok, err := client.Topic(topicID).Exists(context.Background())
 	if err != nil {
 		t.Fatalf("failed to check if sub exists: %v", err)
 	}

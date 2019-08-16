@@ -23,14 +23,16 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func addUsers(projectID, topicName string) error {
+func addUsers(projectID, topicID string) error {
+	// projectID := "my-project-id"
+	// topicID := "projects/my-project-id/topics/my-topic"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
 
-	topic := client.Topic(topicName)
+	topic := client.Topic(topicID)
 	policy, err := topic.IAM().Policy(ctx)
 	if err != nil {
 		return fmt.Errorf("Policy: %v", err)

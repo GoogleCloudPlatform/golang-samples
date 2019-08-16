@@ -24,7 +24,7 @@ import (
 )
 
 func list(projectID string) ([]*pubsub.Subscription, error) {
-	// subName := projectID + "-example-sub"
+	// projectID := "my-project-id"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {

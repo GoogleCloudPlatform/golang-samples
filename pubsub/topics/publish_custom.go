@@ -22,14 +22,16 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func publishCustomAttributes(projectID, topic string) error {
+func publishCustomAttributes(projectID, topicID string) error {
+	// projectID := "my-project-id"
+	// topicID := "projects/my-project-id/topics/my-topic"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
 
-	t := client.Topic(topic)
+	t := client.Topic(topicID)
 	result := t.Publish(ctx, &pubsub.Message{
 		Data: []byte("Hello world!"),
 		Attributes: map[string]string{

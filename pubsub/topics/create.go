@@ -22,14 +22,16 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func create(projectID, topic string) error {
+func create(projectID, topicID string) error {
+	// projectID := "my-project-id"
+	// topicID := "projects/my-project-id/topics/my-topic"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
 
-	t, err := client.CreateTopic(ctx, topic)
+	t, err := client.CreateTopic(ctx, topicID)
 	if err != nil {
 		return fmt.Errorf("CreateTopic: %v", err)
 	}
