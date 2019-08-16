@@ -16,34 +16,28 @@ require (
 	github.com/bradfitz/gomemcache v0.0.0-20190329173943-551aad21a668
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/eclipse/paho.mqtt.golang v1.2.0
-	github.com/facebookgo/ensure v0.0.0-20160127193407-b4ab57deab51 // indirect
-	github.com/facebookgo/stack v0.0.0-20160209184415-751773369052 // indirect
-	github.com/facebookgo/subset v0.0.0-20150612182917-8dac2c3c4870 // indirect
 	github.com/fatih/color v1.7.0
 	github.com/fluent/fluent-logger-golang v1.4.0
 	github.com/go-sql-driver/mysql v1.4.1
-	github.com/gobuffalo/envy v1.7.0 // indirect
 	github.com/gofrs/uuid v3.2.0+incompatible
 	github.com/golang/protobuf v1.3.2
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/google/uuid v1.1.1
-	github.com/googleapis/gax-go v2.0.2+incompatible
+	github.com/googleapis/gax-go/v2 v2.0.5
 	github.com/gorilla/handlers v1.4.2
 	github.com/gorilla/mux v1.7.3
 	github.com/gorilla/sessions v1.2.0
 	github.com/gorilla/websocket v1.4.0
 	github.com/h2non/filetype v1.0.10
+	github.com/kr/pretty v0.1.0 // indirect
 	github.com/lib/pq v1.2.0
 	github.com/linkedin/goavro v2.1.0+incompatible
-	github.com/mailgun/mailgun-go v2.0.0+incompatible
+	github.com/mailgun/mailgun-go/v3 v3.6.0
 	github.com/mailjet/mailjet-apiv3-go v0.0.0-20190724151621-55e56f74078c
 	github.com/mattn/go-colorable v0.1.2 // indirect
 	github.com/mattn/go-isatty v0.0.9 // indirect
-	github.com/onsi/ginkgo v1.8.0 // indirect
-	github.com/onsi/gomega v1.5.0 // indirect
 	github.com/philhofer/fwd v1.0.0 // indirect
-	github.com/pkg/errors v0.8.1 // indirect
 	github.com/rakyll/statik v0.1.6
 	github.com/sendgrid/smtpapi-go v0.6.0 // indirect
 	github.com/tinylib/msgp v1.1.0 // indirect
