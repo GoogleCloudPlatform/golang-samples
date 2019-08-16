@@ -105,18 +105,18 @@ func TestDICOMStore(t *testing.T) {
 
 		err := dicomWebRetrieveStudy(buf, tc.ProjectID, location, datasetID, dicomStoreID, studyUID, studyOutputFile)
 		if err != nil {
-			t.Errorf("Testing dicomWebRetrieveStudy: %v", err)
+			r.Errorf("dicomWebRetrieveStudy: %v", err)
 		}
 
 		got := buf.String()
 
 		if want := "Study retrieved and downloaded to file: study.multipart\n"; !strings.Contains(got, want) {
-			t.Errorf("got %q, want %q", got, want)
+			r.Errorf("got %q, want %q", got, want)
 		}
 
 		stat, err := os.Stat(studyOutputFile)
 		if err != nil {
-			t.Error("Could not stat output file")
+			r.Errorf("os.Stat: %v", err)
 		}
 
 		if stat.Size() == 0 {
@@ -133,18 +133,18 @@ func TestDICOMStore(t *testing.T) {
 
 		err := dicomWebRetrieveInstance(buf, tc.ProjectID, location, datasetID, dicomStoreID, studyUID+seriesUID+instanceUID, instanceOutputFile)
 		if err != nil {
-			t.Errorf("Testing dicomWebRetrieveInstance: %v", err)
+			r.Errorf("dicomWebRetrieveInstance: %v", err)
 		}
 
 		got := buf.String()
 
 		if want := "DICOM instance retrieved and downloaded to file: instance.dcm\n"; !strings.Contains(got, want) {
-			t.Errorf("got %q, want %q", got, want)
+			r.Errorf("got %q, want %q", got, want)
 		}
 
 		stat, err := os.Stat(instanceOutputFile)
 		if err != nil {
-			t.Error("Could not stat output file")
+			r.Errorf("os.Stat: %v", err)
 		}
 
 		if stat.Size() == 0 {
@@ -161,18 +161,18 @@ func TestDICOMStore(t *testing.T) {
 
 		err := dicomWebRetrieveRendered(buf, tc.ProjectID, location, datasetID, dicomStoreID, studyUID+seriesUID+instanceUID+"rendered", renderedOutputFile)
 		if err != nil {
-			t.Errorf("Testing dicomWebRetrieveRendered: %v", err)
+			r.Errorf("dicomWebRetrieveRendered: %v", err)
 		}
 
 		got := buf.String()
 
 		if want := "Rendered PNG image retrieved and downloaded to file: rendered_image.png\n"; !strings.Contains(got, want) {
-			t.Errorf("got %q, want %q", got, want)
+			r.Errorf("got %q, want %q", got, want)
 		}
 
 		stat, err := os.Stat(renderedOutputFile)
 		if err != nil {
-			t.Error("Could not stat output file")
+			r.Errorf("os.Stat: %v", err)
 		}
 
 		if stat.Size() == 0 {

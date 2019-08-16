@@ -51,6 +51,10 @@ func dicomWebRetrieveRendered(w io.Writer, projectID, location, datasetID, dicom
 		return fmt.Errorf("could not read response: %v", err)
 	}
 
+        if resp.StatusCode > 299 {
+                return fmt.Errorf("RetrieveRendered: status %d %s: %s", resp.StatusCode, resp.Status, respBytes)
+        }
+
 	if err = ioutil.WriteFile(outputFile, respBytes, 0644); err != nil {
 		return err
 	}

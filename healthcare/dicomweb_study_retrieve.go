@@ -50,6 +50,10 @@ func dicomWebRetrieveStudy(w io.Writer, projectID, location, datasetID, dicomSto
 		return fmt.Errorf("could not read response: %v", err)
 	}
 
+        if resp.StatusCode > 299 {
+                return fmt.Errorf("RetrieveStudy: status %d %s: %s", resp.StatusCode, resp.Status, respBytes)
+        }
+
 	if err = ioutil.WriteFile(outputFile, respBytes, 0644); err != nil {
 		return err
 	}
