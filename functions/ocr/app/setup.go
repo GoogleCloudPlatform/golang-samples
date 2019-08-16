@@ -45,6 +45,10 @@ type ocrMessage struct {
 	SrcLang  language.Tag `json:"srcLang"`
 }
 
+type ocrEvent struct {
+	Data []byte `json:"PROJECT_ID"`
+}
+
 var (
 	visionClient    *vision.ImageAnnotatorClient
 	translateClient *translate.Client

@@ -19,15 +19,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
-
-	"cloud.google.com/go/pubsub"
+	"log"
 )
 
-// saveResult is executed when a message is published to the Cloud Pub/Sub topic specified by
+// SaveResult is executed when a message is published to the Cloud Pub/Sub topic specified by
 // RESULT_TOPIC in config.json file, and saves the data packet to a file in GCS.
-func saveResult(w io.Writer, event pubsub.Message) error {
-	ctx := context.Background()
+func SaveResult(ctx context.Context, event ocrEvent) error {
 	var message ocrMessage
 	if event.Data != nil {
 		messageData := event.Data
@@ -42,19 +39,19 @@ func saveResult(w io.Writer, event pubsub.Message) error {
 	fileName := message.FileName
 	lang := message.Lang
 
-	fmt.Fprintf(w, "Received request to save file %q.", fileName)
+	log.Printf("Received request to save file %q.", fileName)
 
 	bucketName := config.ResultBucket
 	resultFilename := fmt.Sprintf("%s_%s.txt", fileName, lang)
 	bucket := storageClient.Bucket(bucketName)
 
-	fmt.Fprintf(w, "Saving result to %q in bucket %q.", resultFilename, bucketName)
+	log.Printf("Saving result to %q in bucket %q.", resultFilename, bucketName)
 
 	file := bucket.Object(resultFilename).NewWriter(ctx)
 	defer file.Close()
 	fmt.Fprint(file, text)
 
-	fmt.Fprintf(w, "File saved.")
+	log.Printf("File saved.")
 	return nil
 }
 

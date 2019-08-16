@@ -19,16 +19,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
+	"log"
 
 	"cloud.google.com/go/pubsub"
 	"cloud.google.com/go/translate"
 )
 
-// translateText is executed when a message is published to the Cloud Pub/Sub topic specified
+// TranslateText is executed when a message is published to the Cloud Pub/Sub topic specified
 // by TRANSLATE_TOPIC in config.json, and translates the text using the Google Translate API.
-func translateText(w io.Writer, projectID string, event pubsub.Message) error {
-	ctx := context.Background()
+func TranslateText(ctx context.Context, event ocrEvent) error {
 	if event.Data == nil {
 		return fmt.Errorf("Empty data")
 	}
@@ -48,7 +47,7 @@ func translateText(w io.Writer, projectID string, event pubsub.Message) error {
 	targetTag := message.Lang
 	srcTag := message.SrcLang
 
-	fmt.Fprintf(w, "Translating text into %s.", targetTag.String())
+	log.Printf("Translating text into %s.", targetTag.String())
 	translateResponse, err := translateClient.Translate(ctx, []string{text}, targetTag,
 		&translate.Options{
 			Source: srcTag,
@@ -91,7 +90,7 @@ func translateText(w io.Writer, projectID string, event pubsub.Message) error {
 	if err != nil {
 		return fmt.Errorf("Get: %v", err)
 	}
-	fmt.Fprintf(w, "Sent translation: %q", translatedText.Text)
+	log.Printf("Sent translation: %q", translatedText.Text)
 	return nil
 }
 
