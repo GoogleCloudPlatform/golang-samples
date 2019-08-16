@@ -40,11 +40,6 @@ export GOLANG_SAMPLES_BIGTABLE_INSTANCE=testing-instance
 go version
 date
 
-if [[ -d /cache ]]; then
-  time mv /cache/* .
-  echo 'Uncached'
-fi
-
 # Re-organize files
 export GOPATH=$PWD/gopath
 target=$GOPATH/src/github.com/GoogleCloudPlatform
@@ -88,14 +83,13 @@ if ! go help mod 2>/dev/null >/dev/null; then
     sort | uniq | \
     grep -v golang-samples)
   time go get -u -v -d $GO_IMPORTS
+  # Always download top-level and internal dependencies.
+  go get -t ./internal/...
+  go get -t -d .
+  go install -v $GO_IMPORTS
 fi
 
-# Always download top-level and internal dependencies.
-go get -t ./internal/...
-go get -t -d .
-
 go get github.com/jstemmer/go-junit-report
-go install -v $GO_IMPORTS
 
 # Do the easy stuff before running tests. Fail fast!
 if [ $GOLANG_SAMPLES_GO_VET ]; then
@@ -109,7 +103,5 @@ OUTFILE=gotest.out
 2>&1 go test -timeout $TIMEOUT -v . $TARGET | tee $OUTFILE
 cat $OUTFILE | $GOPATH/bin/go-junit-report -set-exit-code > sponge_log.xml
 
-# Kokoro tries to cache the files, ensure they are readable.
-# It seems Kokoro uses a different user to read the files.
-modcachedir="$(go env GOPATH)/pkg/mod/cache"
-[[ -d "$modcachedir" ]] && chmod a+r -R "$modcachedir" || true
+# Clear the cache so Kokoro doesn't try to copy it.
+go clean -modcache
