@@ -19,7 +19,6 @@ package ocr
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
 	"time"
@@ -70,8 +69,7 @@ var (
 	config          *configType
 )
 
-func init() {
-	ctx := context.Background()
+func setup(ctx context.Context) {
 
 	cfgFile, err := os.Open("config.json")
 	if err != nil {
@@ -85,16 +83,6 @@ func init() {
 		log.Fatalf("Decode: %v", err)
 	}
 
-	bucketName := fmt.Sprintf("%s-result", os.Getenv("GOOGLE_CLOUD_PROJECT"))
-	// imageBucketName := fmt.Sprintf("%s-image", os.Getenv("GOOGLE_CLOUD_PROJECT"))
-	config = &configType{
-		ProjectID:      os.Getenv("GOOGLE_CLOUD_PROJECT"),
-		ResultTopic:    "test-result-topic",
-		ResultBucket:   bucketName,
-		TranslateTopic: "test-translate-topic",
-		Translate:      true,
-		ToLang:         []string{"en", "fr", "es", "ja", "ru"},
-	}
 	projectID := config.ProjectID
 
 	visionClient, err = vision.NewImageAnnotatorClient(ctx)

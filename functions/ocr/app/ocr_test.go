@@ -40,6 +40,7 @@ var (
 )
 
 func TestMain(t *testing.T) {
+	setup(context.Background())
 	tc := testutil.SystemTest(t)
 	bucketName = fmt.Sprintf("%s-result", tc.ProjectID)
 	imageBucketName = fmt.Sprintf("%s-image", tc.ProjectID)
@@ -135,10 +136,11 @@ func TestTranslateText(t *testing.T) {
 }
 
 func TestDetectText(t *testing.T) {
-	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+	testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
 	storageClient.Bucket(imageBucketName)
-	err := detectText(buf, tc.ProjectID, imageBucketName, menuName)
+	err := detectText(ctx, imageBucketName, menuName)
 	if err != nil {
 		t.Errorf("TestDetectText: %v", err)
 	}

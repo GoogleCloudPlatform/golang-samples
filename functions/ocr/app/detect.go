@@ -28,6 +28,7 @@ import (
 
 // detectText detects the text in an image using the Google Vision API.
 func detectText(ctx context.Context, bucketName, fileName string) error {
+	setup(ctx)
 	log.Printf("Looking for text in image %v", fileName)
 	maxResults := 1
 	image := &visionpb.Image{

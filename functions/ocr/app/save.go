@@ -25,6 +25,7 @@ import (
 // SaveResult is executed when a message is published to the Cloud Pub/Sub topic specified by
 // RESULT_TOPIC in config.json file, and saves the data packet to a file in GCS.
 func SaveResult(ctx context.Context, event PubSubMessage) error {
+	setup(ctx)
 	var message ocrMessage
 	if event.Data != nil {
 		messageData := event.Data

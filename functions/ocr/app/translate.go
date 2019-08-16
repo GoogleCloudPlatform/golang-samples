@@ -28,6 +28,7 @@ import (
 // TranslateText is executed when a message is published to the Cloud Pub/Sub topic specified
 // by TRANSLATE_TOPIC in config.json, and translates the text using the Google Translate API.
 func TranslateText(ctx context.Context, event PubSubMessage) error {
+	setup(ctx)
 	if event.Data == nil {
 		return fmt.Errorf("Empty data")
 	}
