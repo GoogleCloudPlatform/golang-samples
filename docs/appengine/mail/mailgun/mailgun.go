@@ -18,8 +18,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/mailgun/mailgun-go"
-
+	mailgun "github.com/mailgun/mailgun-go/v3"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/urlfetch"
 )
