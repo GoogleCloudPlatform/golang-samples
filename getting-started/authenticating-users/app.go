@@ -130,15 +130,3 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprintf(w, "Hello %s", email)
 }
-
-// userAgentTransport sets the User-Agent header before calling base.
-type userAgentTransport struct {
-	userAgent string
-	base      http.RoundTripper
-}
-
-// RoundTrip implements the http.RoundTripper interface.
-func (t userAgentTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	req.Header.Set("User-Agent", t.userAgent)
-	return t.base.RoundTrip(req)
-}
