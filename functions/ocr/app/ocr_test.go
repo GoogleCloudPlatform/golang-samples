@@ -20,11 +20,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"os"
 	"strings"
 	"testing"
 
 	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/storage"
+	"cloud.google.com/go/translate"
+	vision "cloud.google.com/go/vision/apiv1"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"golang.org/x/text/language"
 )
@@ -40,22 +42,39 @@ var (
 )
 
 func TestMain(t *testing.T) {
-	setup(context.Background())
+	ctx := context.Background()
 	tc := testutil.SystemTest(t)
+	var err error
 	bucketName = fmt.Sprintf("%s-result", tc.ProjectID)
 	imageBucketName = fmt.Sprintf("%s-image", tc.ProjectID)
 	config = &configType{
-		ProjectID:      os.Getenv("GOOGLE_CLOUD_PROJECT"),
+		ProjectID:      tc.ProjectID,
 		ResultTopic:    "test-result-topic",
 		ResultBucket:   bucketName,
 		TranslateTopic: "test-translate-topic",
 		Translate:      true,
 		ToLang:         []string{"en", "fr", "es", "ja", "ru"},
 	}
-	var err error
-	publisher, err = pubsub.NewClient(context.Background(), config.ProjectID)
+	projectID := config.ProjectID
+
+	visionClient, err = vision.NewImageAnnotatorClient(ctx)
+	if err != nil {
+		log.Fatalf("vision.NewImageAnnotatorClient: %v", err)
+	}
+
+	translateClient, err = translate.NewClient(ctx)
 	if err != nil {
 		log.Fatalf("translate.NewClient: %v", err)
+	}
+
+	publisher, err = pubsub.NewClient(ctx, projectID)
+	if err != nil {
+		log.Fatalf("translate.NewClient: %v", err)
+	}
+
+	storageClient, err = storage.NewClient(ctx)
+	if err != nil {
+		log.Fatalf("storage.NewClient: %v", err)
 	}
 }
 

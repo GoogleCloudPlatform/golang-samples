@@ -13,7 +13,8 @@
 
 // [START functions_ocr_setup]
 
-// Package ocr contains Go samples for OCR functions.
+// Package ocr contains Go samples for creating OCR
+// (Optical Character Recognition) Cloud functions.
 package ocr
 
 import (
@@ -70,7 +71,6 @@ var (
 )
 
 func setup(ctx context.Context) {
-
 	cfgFile, err := os.Open("config.json")
 	if err != nil {
 		log.Fatalf("os.Open: %v", err)
