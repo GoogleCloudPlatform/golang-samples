@@ -64,17 +64,12 @@ func certs() (map[string]string, error) {
 }
 
 func audience() (string, error) {
-	client := metadata.NewClient(&http.Client{Transport: userAgentTransport{
-		userAgent: "my-user-agent",
-		base:      http.DefaultTransport,
-	}})
-
-	projectNumber, err := client.NumericProjectID()
+	projectNumber, err := metadata.NumericProjectID()
 	if err != nil {
 		return "", err
 	}
 
-	projectID, err := client.ProjectID()
+	projectID, err := metadata.ProjectID()
 	if err != nil {
 		return "", err
 	}
