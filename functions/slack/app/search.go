@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// [START functions_slack_search]
+
 package slack
 
 import (
@@ -19,14 +21,13 @@ import (
 	"net/http"
 )
 
-// [START functions_slack_search]
 func kgSearch(w http.ResponseWriter, r *http.Request) ([]byte, error) {
 	if r.Method != "POST" {
 		http.Error(w, "Only POST requests are accepted", 405)
 	}
 	err := r.ParseForm()
 	if err != nil {
-		http.Error(w, "Couldn't parse form", 405)
+		http.Error(w, "Couldn't parse form", 400)
 		return nil, fmt.Errorf("ParseForm: %v", err)
 	}
 	err = verifyWebhook(r.Form)
@@ -34,6 +35,9 @@ func kgSearch(w http.ResponseWriter, r *http.Request) ([]byte, error) {
 		return nil, fmt.Errorf("verifyWebhook: %v", err)
 	}
 	kgSearchResponse, err := makeSearchRequest(r.Form["text"][0])
+	if err != nil {
+		return nil, fmt.Errorf("makeSearchRequest: %v", err)
+	}
 	return json.Marshal(kgSearchResponse)
 }
 

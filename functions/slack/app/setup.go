@@ -32,22 +32,18 @@ type configType struct {
 	Key       string `json:"KG_API_KEY"`
 }
 
-// // GCSEvent is the payload of a GCS event.
-// type GCSEvent struct {
-// 	Bucket         string    `json:"bucket"`
-// 	Name           string    `json:"name"`
-// 	Metageneration string    `json:"metageneration"`
-// 	ResourceState  string    `json:"resourceState"`
-// 	TimeCreated    time.Time `json:"timeCreated"`
-// 	Updated        time.Time `json:"updated"`
-// }
-
 type attachment struct {
 	color     string
 	title     string
 	titleLink string
 	text      string
 	imageURL  string
+}
+
+type kgResponse struct {
+	name string
+	text         string
+	attachments  []attachment
 }
 
 // SlackMessage is the a Slack message event.
@@ -64,7 +60,6 @@ var (
 )
 
 func setup(ctx context.Context) {
-
 	cfgFile, err := os.Open("config.json")
 	if err != nil {
 		log.Fatalf("os.Open: %v", err)

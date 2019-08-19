@@ -11,17 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// [START functions_slack_format]
+
 package slack
 
-// [START functions_slack_format]
 import (
 	"fmt"
 
 	"google.golang.org/api/kgsearch/v1"
 )
 
-func formatSlackMessage(query string, response kgsearch.SearchResponse) (*SlackMessage, error) {
-	entity := response.ItemListElement[0].result
+func formatSlackMessage(query string, response *kgsearch.SearchResponse) (*SlackMessage, error) {
+	var entity interface{}
+	if len(response.ItemListElement) > 0 {
+		entity = response.ItemListElement[0]
+	}
 	message := &SlackMessage{
 		responseType: "in_channel",
 		text:         fmt.Sprintf("Query: %s", query),
@@ -29,7 +33,8 @@ func formatSlackMessage(query string, response kgsearch.SearchResponse) (*SlackM
 	}
 
 	attachment := attachment{}
-	if entity != "" {
+	if entity != nil {
+
 		name := entity.Name
 		description := entity.Description
 		detailedDesc := entity.DetailedDescription

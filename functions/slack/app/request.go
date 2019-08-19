@@ -11,12 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// [START functions_slack_request]
+
 package slack
 
-// [START functions_slack_request]
-func makeSearchRequest(query string) (string, error) {
+import "fmt"
+
+func makeSearchRequest(query string) (*SlackMessage, error) {
 	req := kgService.Search()
-	res := req.execute()
+	req = req.Query(query)
+	req = req.Limit(1)
+	res, err := req.Do()
+	if err != nil {
+		return nil, fmt.Errorf("Do: %v", err)
+	}
 	return formatSlackMessage(query, res)
 }
 
