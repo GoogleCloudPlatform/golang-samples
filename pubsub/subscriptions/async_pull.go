@@ -12,19 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package subscription
+package subscriptions
 
 // [START pubsub_subscriber_async_pull]
 // [START pubsub_quickstart_subscriber]
 import (
 	"context"
 	"fmt"
+	"io"
 	"sync"
 
 	"cloud.google.com/go/pubsub"
 )
 
-func pullMsgs(projectID, subName string, topic *pubsub.Topic) error {
+func pullMsgs(w io.Writer, projectID, subName string, topic *pubsub.Topic) error {
 	// projectID := "my-project-id"
 	// subName := projectID + "-example-sub"
 	// topic of type https://godoc.org/cloud.google.com/go/pubsub#Topic
@@ -57,7 +58,7 @@ func pullMsgs(projectID, subName string, topic *pubsub.Topic) error {
 	cctx, cancel := context.WithCancel(ctx)
 	err = sub.Receive(cctx, func(ctx context.Context, msg *pubsub.Message) {
 		msg.Ack()
-		fmt.Printf("Got message: %q\n", string(msg.Data))
+		fmt.Fprintf(w, "Got message: %q\n", string(msg.Data))
 		mu.Lock()
 		defer mu.Unlock()
 		received++

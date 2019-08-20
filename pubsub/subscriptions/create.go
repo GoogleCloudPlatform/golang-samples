@@ -12,18 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package subscription
+package subscriptions
 
 // [START pubsub_create_pull_subscription]
 import (
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	"cloud.google.com/go/pubsub"
 )
 
-func create(projectID, subName string, topic *pubsub.Topic) error {
+func create(w io.Writer, projectID, subName string, topic *pubsub.Topic) error {
 	// projectID := "my-project-id"
 	// subName := projectID + "-example-sub"
 	// topic of type https://godoc.org/cloud.google.com/go/pubsub#Topic
@@ -40,7 +41,7 @@ func create(projectID, subName string, topic *pubsub.Topic) error {
 	if err != nil {
 		return fmt.Errorf("CreateSubscription: %v", err)
 	}
-	fmt.Printf("Created subscription: %v\n", sub)
+	fmt.Fprintf(w, "Created subscription: %v\n", sub)
 	return nil
 }
 

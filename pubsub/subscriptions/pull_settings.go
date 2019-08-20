@@ -12,17 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package subscription
+package subscriptions
 
 // [START pubsub_subscriber_flow_settings]
 import (
 	"context"
 	"fmt"
+	"io"
 
 	"cloud.google.com/go/pubsub"
 )
 
-func pullMsgsSettings(projectID, subName string) error {
+func pullMsgsSettings(w io.Writer, projectID, subName string) error {
 	// projectID := "my-project-id"
 	// subName := projectID + "-example-sub"
 	ctx := context.Background()
@@ -35,7 +36,7 @@ func pullMsgsSettings(projectID, subName string) error {
 	sub.ReceiveSettings.Synchronous = true
 	sub.ReceiveSettings.MaxOutstandingMessages = 10
 	err = sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
-		fmt.Printf("Got message: %q\n", string(msg.Data))
+		fmt.Fprintf(w, "Got message: %q\n", string(msg.Data))
 		msg.Ack()
 	})
 	if err != nil {

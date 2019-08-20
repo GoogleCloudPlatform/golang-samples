@@ -12,17 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package subscription
+package subscriptions
 
 // [START pubsub_update_push_configuration]
 import (
 	"context"
 	"fmt"
+	"io"
 
 	"cloud.google.com/go/pubsub"
 )
 
-func updateEndpoint(projectID, subName string, endpoint string) error {
+func updateEndpoint(w io.Writer, projectID, subName string, endpoint string) error {
 	// projectID := "my-project-id"
 	// subName := projectID + "-example-sub"
 	// endpoint := "https://my-test-project.appspot.com/push"
@@ -38,7 +39,7 @@ func updateEndpoint(projectID, subName string, endpoint string) error {
 	if err != nil {
 		return fmt.Errorf("Update: %v", err)
 	}
-	fmt.Printf("Updated subscription config: %#v", subConfig)
+	fmt.Fprintf(w, "Updated subscription config: %v\n", subConfig)
 	return nil
 }
 

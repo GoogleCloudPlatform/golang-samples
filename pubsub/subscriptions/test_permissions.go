@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package subscription
+package subscriptions
 
 // [START pubsub_test_subscription_permissions]
 import (
@@ -41,7 +41,7 @@ func testPermissions(w io.Writer, projectID, subName string) ([]string, error) {
 		return nil, fmt.Errorf("TestPermissions: %v", err)
 	}
 	for _, perm := range perms {
-		fmt.Fprintf(w, "Allowed: %v", perm)
+		fmt.Fprintf(w, "Allowed: %v\n", perm)
 	}
 	// [END pubsub_test_subscription_permissions]
 	return perms, nil

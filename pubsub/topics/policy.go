@@ -26,7 +26,7 @@ import (
 
 func policy(w io.Writer, projectID, topicID string) (*iam.Policy, error) {
 	// projectID := "my-project-id"
-	// topicID := "projects/my-project-id/topics/my-topic"
+	// topicID := "my-topic"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {

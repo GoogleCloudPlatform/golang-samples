@@ -18,13 +18,14 @@ package topics
 import (
 	"context"
 	"fmt"
+	"io"
 
 	"cloud.google.com/go/pubsub"
 )
 
-func create(projectID, topicID string) error {
+func create(w io.Writer, projectID, topicID string) error {
 	// projectID := "my-project-id"
-	// topicID := "projects/my-project-id/topics/my-topic"
+	// topicID := "my-topic"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
@@ -35,7 +36,7 @@ func create(projectID, topicID string) error {
 	if err != nil {
 		return fmt.Errorf("CreateTopic: %v", err)
 	}
-	fmt.Printf("Topic created: %v\n", t)
+	fmt.Fprintf(w, "Topic created: %v\n", t)
 	return nil
 }
 

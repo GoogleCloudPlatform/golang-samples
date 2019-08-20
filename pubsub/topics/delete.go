@@ -18,13 +18,14 @@ package topics
 import (
 	"context"
 	"fmt"
+	"io"
 
 	"cloud.google.com/go/pubsub"
 )
 
-func delete(projectID, topicID string) error {
+func delete(w io.Writer, projectID, topicID string) error {
 	// projectID := "my-project-id"
-	// topicID := "projects/my-project-id/topics/my-topic"
+	// topicID := "my-topic"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
@@ -35,7 +36,7 @@ func delete(projectID, topicID string) error {
 	if err := t.Delete(ctx); err != nil {
 		return fmt.Errorf("Delete: %v", err)
 	}
-	fmt.Printf("Deleted topic: %v\n", t)
+	fmt.Fprintf(w, "Deleted topic: %v\n", t)
 	return nil
 }
 

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package subscription
+package subscriptions
 
 // [START pubsub_get_subscription_policy]
 import (
@@ -38,7 +38,7 @@ func policy(w io.Writer, projectID, subName string) (*iam.Policy, error) {
 		return nil, fmt.Errorf("Subscription: %v", err)
 	}
 	for _, role := range policy.Roles() {
-		fmt.Fprintf(w, "%q: %q", role, policy.Members(role))
+		fmt.Fprintf(w, "%q: %q\n", role, policy.Members(role))
 	}
 	return policy, nil
 }

@@ -19,14 +19,15 @@ package topics
 import (
 	"context"
 	"fmt"
+	"io"
 
 	"cloud.google.com/go/pubsub"
 )
 
-func publish(projectID, topic, msg string) error {
+func publish(w io.Writer, projectID, topic, msg string) error {
 	// projectID := "my-project-id"
-	// topicID := "projects/my-project-id/topics/my-topic"
-	// msg := []byte("Hello World")
+	// topicID := "my-topic"
+	// msg := "Hello World"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
@@ -43,7 +44,7 @@ func publish(projectID, topic, msg string) error {
 	if err != nil {
 		return fmt.Errorf("Get: %v", err)
 	}
-	fmt.Printf("Published a message; msg ID: %v\n", id)
+	fmt.Fprintf(w, "Published a message; msg ID: %v\n", id)
 	return nil
 }
 

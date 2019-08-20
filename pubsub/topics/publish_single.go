@@ -18,14 +18,15 @@ package topics
 import (
 	"context"
 	"fmt"
+	"io"
 
 	"cloud.google.com/go/pubsub"
 )
 
-func publishSingleGoroutine(projectID, topic string, msg []byte) error {
+func publishSingleGoroutine(w io.Writer, projectID, topic, msg string) error {
 	// projectID := "my-project-id"
-	// topicID := "projects/my-project-id/topics/my-topic"
-	// msg := []byte("Hello World")
+	// topicID := "my-topic"
+	// msg := "Hello World"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
@@ -35,14 +36,14 @@ func publishSingleGoroutine(projectID, topic string, msg []byte) error {
 	t := client.Topic(topic)
 	t.PublishSettings.NumGoroutines = 1
 
-	result := t.Publish(ctx, &pubsub.Message{Data: msg})
+	result := t.Publish(ctx, &pubsub.Message{Data: []byte(msg)})
 	// Block until the result is returned and a server-generated
 	// ID is returned for the published message.
 	id, err := result.Get(ctx)
 	if err != nil {
 		return fmt.Errorf("Get: %v", err)
 	}
-	fmt.Printf("Published a message; msg ID: %v\n", id)
+	fmt.Fprintf(w, "Published a message; msg ID: %v\n", id)
 	return nil
 }
 

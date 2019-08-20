@@ -28,7 +28,7 @@ import (
 
 func publishThatScales(w io.Writer, projectID, topicID string, n int) error {
 	// projectID := "my-project-id"
-	// topicID := "projects/my-project-id/topics/my-topic"
+	// topicID := "my-topic"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
@@ -56,7 +56,7 @@ func publishThatScales(w io.Writer, projectID, topicID string, n int) error {
 				atomic.AddUint64(&totalErrors, 1)
 				return
 			}
-			fmt.Printf("Published message %d; msg ID: %v\n", i, id)
+			fmt.Fprintf(w, "Published message %d; msg ID: %v\n", i, id)
 		}(i, result)
 	}
 
