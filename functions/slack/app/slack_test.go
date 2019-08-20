@@ -28,7 +28,8 @@ import (
 func TestMain(m *testing.M) {
 	tc, ok := testutil.ContextMain(m)
 	if !ok {
-		log.Fatalf("testutil.ContextMain failed")
+		log.Print("GOLANG_SAMPLES_PROJECT_ID is unset. Skipping.")
+		return
 	}
 	config = &configuration{
 		ProjectID: tc.ProjectID,
@@ -42,20 +43,17 @@ func TestMain(m *testing.M) {
 func TestVerifyWebHook(t *testing.T) {
 	v := make(url.Values)
 	v["token"] = []string{config.Token}
-	err := verifyWebHook(v)
-	if err != nil {
+	if err := verifyWebHook(v); err != nil {
 		t.Errorf("verifyWebHook: %v", err)
 	}
 	v = make(url.Values)
 	v["token"] = []string{"this is not the token"}
-	err = verifyWebHook(v)
-	if err == nil {
+	if err := verifyWebHook(v); err == nil {
 		t.Errorf("got %q, want %q", "nil", "invalid request/credentials")
 	}
 	v = make(url.Values)
 	v["token"] = []string{""}
-	err = verifyWebHook(v)
-	if err == nil {
+	if err := verifyWebHook(v); err == nil {
 		t.Errorf("got %q, want %q", "nil", "empty form token")
 	}
 }
