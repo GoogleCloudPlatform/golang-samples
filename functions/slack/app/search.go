@@ -22,7 +22,8 @@ import (
 	"os"
 )
 
-// KGSearch uses the Knowledge Graph API
+// KGSearch uses the Knowledge Graph API to search for a query provided
+// by a Slack message.
 func KGSearch(w http.ResponseWriter, r *http.Request) {
 	setup(r.Context())
 	cfgFile, err := os.Open("config.json")
@@ -45,6 +46,7 @@ func KGSearch(w http.ResponseWriter, r *http.Request) {
 	if err = verifyWebHook(r.Form); err != nil {
 		log.Fatalf("verifyWebhook: %v", err)
 	}
+
 	kgSearchResponse, err := makeSearchRequest(r.Form["text"][0])
 	if err != nil {
 		log.Fatalf("makeSearchRequest: %v", err)
