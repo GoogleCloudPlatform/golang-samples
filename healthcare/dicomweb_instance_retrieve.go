@@ -19,13 +19,19 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 
 	healthcare "google.golang.org/api/healthcare/v1beta1"
 )
 
 // dicomWebRetrieveInstance retrieves a specific instance.
 func dicomWebRetrieveInstance(w io.Writer, projectID, location, datasetID, dicomStoreID, dicomWebPath string, outputFile string) error {
+        // projectID := fmt.Sprintf("my-project")
+        // location := fmt.Sprintf("us-central1")
+        // datasetID := fmt.Sprintf("my-dataset")
+        // dicomStoreID := fmt.Sprintf("my-dicom-store")
+        // dicomWebPath := fmt.Sprintf("studies/1.3.6.1.4.1.11129.5.5.1113639985/series/1.3.6.1.4.1.11129.5.5.1953511724/instances/1.3.6.1.4.1.11129.5.5.9562821369")
+        // outputFile := fmt.Sprintf("instance.dcm")
 	ctx := context.Background()
 
 	healthcareService, err := healthcare.NewService(ctx)
@@ -46,18 +52,18 @@ func dicomWebRetrieveInstance(w io.Writer, projectID, location, datasetID, dicom
 
 	defer resp.Body.Close()
 
-	respBytes, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return fmt.Errorf("could not read response: %v", err)
-	}
-
-        if resp.StatusCode > 299 {
-                return fmt.Errorf("RetrieveInstance: status %d %s: %s", resp.StatusCode, resp.Status, respBytes)
+	if resp.StatusCode > 299 {
+                return fmt.Errorf("RetrieveInstance: status %d %s: %s", resp.StatusCode, resp.Status, resp.Body)
         }
 
-	if err = ioutil.WriteFile(outputFile, respBytes, 0644); err != nil {
-		return err
-	}
+	file, err := os.Create(outputFile)
+        if err != nil {
+	        return fmt.Errorf("os.Create: %v", err)
+        }
+	defer file.Close()
+        if _, err := io.Copy(file, resp.Body); err != nil {
+	        return fmt.Errorf("io.Copy: %v", err)
+        }
 
 	fmt.Fprintf(w, "DICOM instance retrieved and downloaded to file: %v\n", outputFile)
 
