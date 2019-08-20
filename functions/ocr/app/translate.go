@@ -28,30 +28,26 @@ import (
 // TranslateText is executed when a message is published to the Cloud Pub/Sub topic specified
 // by TRANSLATE_TOPIC in config.json, and translates the text using the Google Translate API.
 func TranslateText(ctx context.Context, event PubSubMessage) error {
+	err := setup(ctx)
+	if err != nil {
+		return fmt.Errorf("ProcessImage: %v", err)
+	}
 	if event.Data == nil {
 		return fmt.Errorf("Empty data")
 	}
 	var message ocrMessage
-	if event.Data != nil {
-		messageData := event.Data
-		err := json.Unmarshal(messageData, &message)
-		if err != nil {
-			return fmt.Errorf("json.Unmarshal: %v", err)
-		}
-	} else {
+	if event.Data == nil {
 		return fmt.Errorf("Empty data")
 	}
-
-	text := message.Text
-	fileName := message.FileName
-	targetTag := message.Lang
-	srcTag := message.SrcLang
-
-	log.Printf("Translating text into %s.", targetTag.String())
-	opts := translate.Options{
-		Source: srcTag,
+	if err = json.Unmarshal(event.Data, &message); err != nil {
+		return fmt.Errorf("json.Unmarshal: %v", err)
 	}
-	translateResponse, err := translateClient.Translate(ctx, []string{text}, targetTag, &opts)
+
+	log.Printf("Translating text into %s.", message.Lang.String())
+	opts := translate.Options{
+		Source: message.SrcLang,
+	}
+	translateResponse, err := translateClient.Translate(ctx, []string{message.Text}, message.Lang, &opts)
 	if err != nil {
 		return fmt.Errorf("Translate: %v", err)
 	}
@@ -60,36 +56,31 @@ func TranslateText(ctx context.Context, event PubSubMessage) error {
 	}
 	translatedText := translateResponse[0]
 
-	topicName := config.ResultTopic
-	if err != nil {
-		return fmt.Errorf("language.Parse: %v", err)
-	}
 	messageData, err := json.Marshal(ocrMessage{
 		Text:     translatedText.Text,
-		FileName: fileName,
-		Lang:     targetTag,
-		SrcLang:  srcTag,
+		FileName: message.FileName,
+		Lang:     message.Lang,
+		SrcLang:  message.SrcLang,
 	})
 	if err != nil {
 		return fmt.Errorf("json.Marshal: %v", err)
 	}
 
-	topic := publisher.Topic(topicName)
+	topic := publisher.Topic(config.ResultTopic)
 	ok, err := topic.Exists(ctx)
 	if err != nil {
 		return fmt.Errorf("Exists: %v", err)
 	}
 	if !ok {
-		topic, err = publisher.CreateTopic(ctx, topicName)
+		topic, err = publisher.CreateTopic(ctx, config.ResultTopic)
 		if err != nil {
 			return fmt.Errorf("CreateTopic: %v", err)
 		}
 	}
-	r := topic.Publish(ctx,
-		&pubsub.Message{
-			Data: messageData,
-		})
-	_, err = r.Get(ctx)
+	msg := &pubsub.Message{
+		Data: messageData,
+	}
+	_, err = topic.Publish(ctx, msg).Get(ctx)
 	if err != nil {
 		return fmt.Errorf("Get: %v", err)
 	}

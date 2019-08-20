@@ -25,31 +25,29 @@ import (
 // SaveResult is executed when a message is published to the Cloud Pub/Sub topic specified by
 // RESULT_TOPIC in config.json file, and saves the data packet to a file in GCS.
 func SaveResult(ctx context.Context, event PubSubMessage) error {
+	err := setup(ctx)
+	if err != nil {
+		return fmt.Errorf("ProcessImage: %v", err)
+	}
 	var message ocrMessage
-	if event.Data != nil {
-		messageData := event.Data
-		err := json.Unmarshal(messageData, &message)
-		if err != nil {
-			return fmt.Errorf("json.Unmarshal: %v", err)
-		}
-	} else {
+	if event.Data == nil {
 		return fmt.Errorf("Empty data")
 	}
-	text := message.Text
-	fileName := message.FileName
-	lang := message.Lang
-
-	log.Printf("Received request to save file %q.", fileName)
+	err = json.Unmarshal(event.Data, &message)
+	if err != nil {
+		return fmt.Errorf("json.Unmarshal: %v", err)
+	}
+	log.Printf("Received request to save file %q.", message.FileName)
 
 	bucketName := config.ResultBucket
-	resultFilename := fmt.Sprintf("%s_%s.txt", fileName, lang)
+	resultFilename := fmt.Sprintf("%s_%s.txt", message.FileName, message.Lang)
 	bucket := storageClient.Bucket(bucketName)
 
 	log.Printf("Saving result to %q in bucket %q.", resultFilename, bucketName)
 
-	file := bucket.Object(resultFilename).NewWriter(ctx)
-	defer file.Close()
-	fmt.Fprint(file, text)
+	w := bucket.Object(resultFilename).NewWriter(ctx)
+	defer w.Close()
+	fmt.Fprint(w, message.Text)
 
 	log.Printf("File saved.")
 	return nil

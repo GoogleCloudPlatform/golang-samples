@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/functions/ocr/app
 
-go 1.12
+go 1.11
 
 require (
 	cloud.google.com/go v0.44.3

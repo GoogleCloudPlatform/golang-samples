@@ -20,7 +20,7 @@ package ocr
 import (
 	"context"
 	"encoding/json"
-	"log"
+	"fmt"
 	"os"
 	"time"
 
@@ -31,7 +31,7 @@ import (
 	"golang.org/x/text/language"
 )
 
-type configType struct {
+type configuration struct {
 	ProjectID      string   `json:"PROJECT_ID"`
 	ResultTopic    string   `json:"RESULT_TOPIC"`
 	ResultBucket   string   `json:"RESULT_BUCKET"`
@@ -67,43 +67,53 @@ var (
 	translateClient *translate.Client
 	publisher       *pubsub.Client
 	storageClient   *storage.Client
-	config          *configType
+	config          *configuration
 )
 
-func setup(ctx context.Context) {
-	cfgFile, err := os.Open("config.json")
-	if err != nil {
-		log.Fatalf("os.Open: %v", err)
+func setup(ctx context.Context) error {
+	if config == nil {
+		cfgFile, err := os.Open("config.json")
+		if err != nil {
+			return fmt.Errorf("os.Open: %v", err)
+		}
+
+		d := json.NewDecoder(cfgFile)
+		config = &configuration{}
+		if err = d.Decode(config); err != nil {
+			return fmt.Errorf("Decode: %v", err)
+		}
 	}
 
-	d := json.NewDecoder(cfgFile)
-	config = &configType{}
-	err = d.Decode(config)
-	if err != nil {
-		log.Fatalf("Decode: %v", err)
+	var err error // prevent shadowing clients with :=
+
+	if visionClient == nil {
+		visionClient, err = vision.NewImageAnnotatorClient(ctx)
+		if err != nil {
+			return fmt.Errorf("vision.NewImageAnnotatorClient: %v", err)
+		}
 	}
 
-	projectID := config.ProjectID
-
-	visionClient, err = vision.NewImageAnnotatorClient(ctx)
-	if err != nil {
-		log.Fatalf("vision.NewImageAnnotatorClient: %v", err)
+	if translateClient == nil {
+		translateClient, err = translate.NewClient(ctx)
+		if err != nil {
+			return fmt.Errorf("translate.NewClient: %v", err)
+		}
 	}
 
-	translateClient, err = translate.NewClient(ctx)
-	if err != nil {
-		log.Fatalf("translate.NewClient: %v", err)
+	if publisher == nil {
+		publisher, err = pubsub.NewClient(ctx, config.ProjectID)
+		if err != nil {
+			return fmt.Errorf("translate.NewClient: %v", err)
+		}
 	}
 
-	publisher, err = pubsub.NewClient(ctx, projectID)
-	if err != nil {
-		log.Fatalf("translate.NewClient: %v", err)
+	if storageClient == nil {
+		storageClient, err = storage.NewClient(ctx)
+		if err != nil {
+			return fmt.Errorf("storage.NewClient: %v", err)
+		}
 	}
-
-	storageClient, err = storage.NewClient(ctx)
-	if err != nil {
-		log.Fatalf("storage.NewClient: %v", err)
-	}
+	return nil
 }
 
 // [END functions_ocr_setup]

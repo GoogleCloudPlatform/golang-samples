@@ -62,7 +62,7 @@ func detectText(ctx context.Context, bucketName, fileName string) error {
 	// Submit a message to the bus for each target language
 	for _, targetLang := range config.ToLang {
 		topicName := config.TranslateTopic
-		if srcLang == targetLang || srcLang == "und" {
+		if srcLang == targetLang || srcLang == "und" { // detection returns "und" for undefined language
 			topicName = config.ResultTopic
 		}
 		targetTag, err := language.Parse(targetLang)
@@ -93,12 +93,10 @@ func detectText(ctx context.Context, bucketName, fileName string) error {
 				return fmt.Errorf("CreateTopic: %v", err)
 			}
 		}
-		r := topic.Publish(ctx,
-			&pubsub.Message{
-				Data: []byte(message),
-			})
-		_, err = r.Get(ctx)
-		if err != nil {
+		msg := &pubsub.Message{
+			Data: []byte(message),
+		}
+		if _, err = topic.Publish(ctx, msg).Get(ctx); err != nil {
 			return fmt.Errorf("Get: %v", err)
 		}
 	}
