@@ -24,8 +24,7 @@ import (
 // ProcessImage is executed when a file is uploaded to the Cloud Storage bucket you
 // created for uploading images. It runs detectText, which processes the image for text.
 func ProcessImage(ctx context.Context, event GCSEvent) error {
-	err := setup(ctx)
-	if err != nil {
+	if err := setup(ctx); err != nil {
 		return fmt.Errorf("ProcessImage: %v", err)
 	}
 	if event.Bucket == "" {

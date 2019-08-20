@@ -28,8 +28,7 @@ import (
 // TranslateText is executed when a message is published to the Cloud Pub/Sub topic specified
 // by TRANSLATE_TOPIC in config.json, and translates the text using the Google Translate API.
 func TranslateText(ctx context.Context, event PubSubMessage) error {
-	err := setup(ctx)
-	if err != nil {
+	if err := setup(ctx); err != nil {
 		return fmt.Errorf("ProcessImage: %v", err)
 	}
 	if event.Data == nil {
@@ -39,7 +38,7 @@ func TranslateText(ctx context.Context, event PubSubMessage) error {
 	if event.Data == nil {
 		return fmt.Errorf("Empty data")
 	}
-	if err = json.Unmarshal(event.Data, &message); err != nil {
+	if err := json.Unmarshal(event.Data, &message); err != nil {
 		return fmt.Errorf("json.Unmarshal: %v", err)
 	}
 
@@ -66,13 +65,13 @@ func TranslateText(ctx context.Context, event PubSubMessage) error {
 		return fmt.Errorf("json.Marshal: %v", err)
 	}
 
-	topic := publisher.Topic(config.ResultTopic)
+	topic := pubsubClient.Topic(config.ResultTopic)
 	ok, err := topic.Exists(ctx)
 	if err != nil {
 		return fmt.Errorf("Exists: %v", err)
 	}
 	if !ok {
-		topic, err = publisher.CreateTopic(ctx, config.ResultTopic)
+		topic, err = pubsubClient.CreateTopic(ctx, config.ResultTopic)
 		if err != nil {
 			return fmt.Errorf("CreateTopic: %v", err)
 		}
@@ -80,8 +79,7 @@ func TranslateText(ctx context.Context, event PubSubMessage) error {
 	msg := &pubsub.Message{
 		Data: messageData,
 	}
-	_, err = topic.Publish(ctx, msg).Get(ctx)
-	if err != nil {
+	if _, err = topic.Publish(ctx, msg).Get(ctx); err != nil {
 		return fmt.Errorf("Get: %v", err)
 	}
 	log.Printf("Sent translation: %q", translatedText.Text)

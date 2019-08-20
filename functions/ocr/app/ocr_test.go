@@ -49,7 +49,8 @@ func TestMain(m *testing.M) {
 	ctx := context.Background()
 	tc, ok := testutil.ContextMain(m)
 	if !ok {
-		log.Fatalf("testutil.ContextMain failed")
+		log.Print("GOLANG_SAMPLES_PROJECT_ID is unset. Skipping.")
+		return
 	}
 	bucketName = fmt.Sprintf("%s-result", tc.ProjectID)
 	imageBucketName = fmt.Sprintf("%s-image", tc.ProjectID)
@@ -73,7 +74,7 @@ func TestMain(m *testing.M) {
 		log.Fatalf("translate.NewClient: %v", err)
 	}
 
-	publisher, err = pubsub.NewClient(ctx, tc.ProjectID)
+	pubsubClient, err = pubsub.NewClient(ctx, tc.ProjectID)
 	if err != nil {
 		log.Fatalf("translate.NewClient: %v", err)
 	}

@@ -65,7 +65,7 @@ type PubSubMessage struct {
 var (
 	visionClient    *vision.ImageAnnotatorClient
 	translateClient *translate.Client
-	publisher       *pubsub.Client
+	pubsubClient    *pubsub.Client
 	storageClient   *storage.Client
 	config          *configuration
 )
@@ -100,8 +100,8 @@ func setup(ctx context.Context) error {
 		}
 	}
 
-	if publisher == nil {
-		publisher, err = pubsub.NewClient(ctx, config.ProjectID)
+	if pubsubClient == nil {
+		pubsubClient, err = pubsub.NewClient(ctx, config.ProjectID)
 		if err != nil {
 			return fmt.Errorf("translate.NewClient: %v", err)
 		}

@@ -82,13 +82,13 @@ func detectText(ctx context.Context, bucketName, fileName string) error {
 		if err != nil {
 			return fmt.Errorf("json.Marshal: %v", err)
 		}
-		topic := publisher.Topic(topicName)
+		topic := pubsubClient.Topic(topicName)
 		ok, err := topic.Exists(ctx)
 		if err != nil {
 			return fmt.Errorf("Exists: %v", err)
 		}
 		if !ok {
-			topic, err = publisher.CreateTopic(ctx, topicName)
+			topic, err = pubsubClient.CreateTopic(ctx, topicName)
 			if err != nil {
 				return fmt.Errorf("CreateTopic: %v", err)
 			}
