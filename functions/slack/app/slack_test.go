@@ -32,8 +32,8 @@ func TestMain(m *testing.M) {
 	}
 	config = &configuration{
 		ProjectID: tc.ProjectID,
-		Token:     "",
-		Key:       "",
+		Token:     "mLdpMlnwPr1mcVgusUGR8VBj",
+		Key:       "AIzaSyBFrpWs3otLxuWYJkk2AXQ3Xi1OB2oTi0A",
 	}
 
 	os.Exit(m.Run())

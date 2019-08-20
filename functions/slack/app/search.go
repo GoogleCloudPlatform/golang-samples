@@ -13,6 +13,8 @@
 
 // [START functions_slack_search]
 
+// Package slack is a Cloud Function which recieves a query from
+// a Slack command and responds with the KG API result.
 package slack
 
 import (
