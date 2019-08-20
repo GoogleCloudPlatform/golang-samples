@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package slack
-
 // [START functions_slack_setup]
+
+package slack
 
 import (
 	"context"
@@ -33,24 +33,27 @@ type configType struct {
 }
 
 type attachment struct {
-	color     string
-	title     string
-	titleLink string
-	text      string
-	imageURL  string
+	Color     string `json:"color"`
+	Title     string `json:"title"`
+	TitleLink string `json:"titleLink"`
+	Text      string `json:"text"`
+	ImageURL  string `json:"imageURL"`
 }
 
 type kgResponse struct {
-	name string
-	text         string
-	attachments  []attachment
+	result map[string]string
 }
 
-// SlackMessage is the a Slack message event.
-type SlackMessage struct {
-	responseType string
-	text         string
-	attachments  []attachment
+type kgResult struct {
+	result map[string]string
+}
+
+// Message is the a Slack message event.
+// see https://api.slack.com/docs/message-formatting
+type Message struct {
+	ResponseType string       `json:"response_type"`
+	Text         string       `json:"text"`
+	Attachments  []attachment `json:"attachments"`
 }
 
 var (

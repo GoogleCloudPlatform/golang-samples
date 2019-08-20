@@ -21,46 +21,52 @@ import (
 	"google.golang.org/api/kgsearch/v1"
 )
 
-func formatSlackMessage(query string, response *kgsearch.SearchResponse) (*SlackMessage, error) {
+func formatSlackMessage(query string, response *kgsearch.SearchResponse) (*Message, error) {
 	var entity interface{}
 	if len(response.ItemListElement) > 0 {
 		entity = response.ItemListElement[0]
 	}
-	message := &SlackMessage{
-		responseType: "in_channel",
-		text:         fmt.Sprintf("Query: %s", query),
-		attachments:  []attachment{},
+	resp, ok := entity.(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("error formatting response entity")
+	}
+	result, ok := resp["result"].(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("error formatting response result")
+	}
+	message := &Message{
+		ResponseType: "in_channel",
+		Text:         fmt.Sprintf("Query: %s", query),
+		Attachments:  []attachment{},
 	}
 
 	attachment := attachment{}
 	if entity != nil {
-
-		name := entity.Name
-		description := entity.Description
-		detailedDesc := entity.DetailedDescription
-		url := detailedDesc.URL
-		article := detailedDesc.articleBody
-		imageURL := entity.Image.ContentUrl
-
-		attachment.color = "//3367d6"
-		if name && description {
-			attachment.title = fmt.Sprintf("%s: %s", entity.Name, entity.Description)
-		} else if name {
-			attachment.title = name
+		if name, ok := result["name"].(string); ok {
+			if description, ok := result["description"].(string); ok {
+				attachment.Title = fmt.Sprintf("%s: %s", name, description)
+			} else {
+				attachment.Title = name
+			}
 		}
-		if url {
-			attachment.titleLink = url
+		if detailedDesc, ok := result["detailedDescription"].(map[string]interface{}); ok {
+			if url, ok := detailedDesc["url"].(string); ok {
+				attachment.TitleLink = url
+			}
+			if article, ok := detailedDesc["articleBody"].(string); ok {
+				attachment.Text = article
+			}
 		}
-		if article {
-			attachment.text = article
+		if image, ok := result["image"].(map[string]interface{}); ok {
+			if imageURL, ok := image["contentUrl"].(string); ok {
+				attachment.ImageURL = imageURL
+			}
 		}
-		if imageURL {
-			attachment.imageURL = imageURL
-		}
+		attachment.Color = "//3367d6"
 	} else {
-		attachment.text = "No results match your query."
+		attachment.Text = "No results match your query."
 	}
-	message.attachments = append(message.attachments, attachment)
+	message.Attachments = append(message.Attachments, attachment)
 
 	return message, nil
 }

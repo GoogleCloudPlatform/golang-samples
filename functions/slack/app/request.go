@@ -15,12 +15,14 @@
 
 package slack
 
-import "fmt"
+import (
+	"fmt"
 
-func makeSearchRequest(query string) (*SlackMessage, error) {
-	req := kgService.Search()
-	req = req.Query(query)
-	req = req.Limit(1)
+	"google.golang.org/api/kgsearch/v1"
+)
+
+func makeSearchRequest(kgService *kgsearch.EntitiesService, query string) (*Message, error) {
+	req := kgService.Search().Query(query).Limit(1)
 	res, err := req.Do()
 	if err != nil {
 		return nil, fmt.Errorf("Do: %v", err)

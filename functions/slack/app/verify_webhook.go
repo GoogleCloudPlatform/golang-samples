@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// [START functions_verify_webhook]
+
 package slack
 
 import (
@@ -18,9 +20,12 @@ import (
 	"net/url"
 )
 
-// [START functions_verify_webhook]
 func verifyWebhook(form url.Values) error {
-	if len(form["token"]) == 0 || form["token"][0] != config.Token {
+	t, ok := form["token"]
+	if !ok || len(t) == 0 {
+		return fmt.Errorf("empty form token")
+	}
+	if t[0] != config.Token {
 		return fmt.Errorf("invalid request/credentials")
 	}
 	return nil

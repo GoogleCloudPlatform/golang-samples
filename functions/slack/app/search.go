@@ -18,27 +18,56 @@ package slack
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
+	"os"
+
+	slack "github.com/nlopes/slack"
+	"google.golang.org/api/kgsearch/v1"
+	"google.golang.org/api/option"
 )
 
-func kgSearch(w http.ResponseWriter, r *http.Request) ([]byte, error) {
+// KGSearch uses the Knowledge Graph API
+func KGSearch(w http.ResponseWriter, r *http.Request) {
+	cfgFile, err := os.Open("config.json")
+	if err != nil {
+		log.Fatalf("os.Open: %v", err)
+	}
+
+	d := json.NewDecoder(cfgFile)
+	config = &configType{}
+	err = d.Decode(config)
+	if err != nil {
+		log.Fatalf("Decode: %v", err)
+	}
+
+	slackClient = slack.New(config.Key)
+	kgService, err := kgsearch.NewService(r.Context(), option.WithAPIKey(config.Key))
+	if err != nil {
+		log.Fatalf("kgsearch.NewClient: %v", err)
+	}
+	kgService.Entities = kgsearch.NewEntitiesService(kgService)
 	if r.Method != "POST" {
 		http.Error(w, "Only POST requests are accepted", 405)
 	}
-	err := r.ParseForm()
+	err = r.ParseForm()
 	if err != nil {
 		http.Error(w, "Couldn't parse form", 400)
-		return nil, fmt.Errorf("ParseForm: %v", err)
+		log.Fatalf("ParseForm: %v", err)
 	}
 	err = verifyWebhook(r.Form)
 	if err != nil {
-		return nil, fmt.Errorf("verifyWebhook: %v", err)
+		log.Fatalf("verifyWebhook: %v", err)
 	}
-	kgSearchResponse, err := makeSearchRequest(r.Form["text"][0])
+	kgSearchResponse, err := makeSearchRequest(kgService.Entities, r.Form["text"][0])
 	if err != nil {
-		return nil, fmt.Errorf("makeSearchRequest: %v", err)
+		log.Fatalf("makeSearchRequest: %v", err)
 	}
-	return json.Marshal(kgSearchResponse)
+	resp, err := json.Marshal(kgSearchResponse)
+	if err != nil {
+		log.Fatalf("json.Marshal: %v", err)
+	}
+	fmt.Fprint(w, string(resp))
 }
 
 // [END functions_slack_search]
