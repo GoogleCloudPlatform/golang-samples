@@ -1,4 +1,4 @@
 {
-  "SLACK_TOKEN": "mLdpMlnwPr1mcVgusUGR8VBj",
-  "KG_API_KEY": "AIzaSyBFrpWs3otLxuWYJkk2AXQ3Xi1OB2oTi0A"
+  "SLACK_TOKEN": "[YOUR-SLACK-TOKEN]",
+  "KG_API_KEY": "[YOUR-API-KEY]"
 }

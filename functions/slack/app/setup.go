@@ -21,12 +21,11 @@ import (
 	"log"
 	"os"
 
-	slack "github.com/nlopes/slack"
 	"google.golang.org/api/kgsearch/v1"
 	"google.golang.org/api/option"
 )
 
-type configType struct {
+type configuration struct {
 	ProjectID string `json:"PROJECT_ID"`
 	Token     string `json:"SLACK_TOKEN"`
 	Key       string `json:"KG_API_KEY"`
@@ -35,17 +34,9 @@ type configType struct {
 type attachment struct {
 	Color     string `json:"color"`
 	Title     string `json:"title"`
-	TitleLink string `json:"titleLink"`
+	TitleLink string `json:"title_link"`
 	Text      string `json:"text"`
-	ImageURL  string `json:"imageURL"`
-}
-
-type kgResponse struct {
-	result map[string]string
-}
-
-type kgResult struct {
-	result map[string]string
+	ImageURL  string `json:"image_url"`
 }
 
 // Message is the a Slack message event.
@@ -57,9 +48,9 @@ type Message struct {
 }
 
 var (
-	slackClient *slack.Client
-	kgService   *kgsearch.EntitiesService
-	config      *configType
+	entitiesService *kgsearch.EntitiesService
+	kgService       *kgsearch.Service
+	config          *configuration
 )
 
 func setup(ctx context.Context) {
@@ -69,18 +60,18 @@ func setup(ctx context.Context) {
 	}
 
 	d := json.NewDecoder(cfgFile)
-	config = &configType{}
-	err = d.Decode(config)
-	if err != nil {
+	config = &configuration{}
+	if err = d.Decode(config); err != nil {
 		log.Fatalf("Decode: %v", err)
 	}
 
-	slackClient = slack.New(config.Key)
-	kgService, err := kgsearch.NewService(ctx, option.WithAPIKey(config.Key))
-	if err != nil {
-		log.Fatalf("kgsearch.NewClient: %v", err)
+	if kgService == nil {
+		kgService, err = kgsearch.NewService(ctx, option.WithAPIKey(config.Key))
+		if err != nil {
+			log.Fatalf("kgsearch.NewClient: %v", err)
+		}
+		entitiesService = kgsearch.NewEntitiesService(kgService)
 	}
-	kgService.Entities = kgsearch.NewEntitiesService(kgService)
 }
 
 // [END functions_slack_setup]

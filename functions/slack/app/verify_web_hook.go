@@ -20,13 +20,13 @@ import (
 	"net/url"
 )
 
-func verifyWebhook(form url.Values) error {
+func verifyWebHook(form url.Values) error {
 	t, ok := form["token"]
 	if !ok || len(t) == 0 {
 		return fmt.Errorf("empty form token")
 	}
 	if t[0] != config.Token {
-		return fmt.Errorf("invalid request/credentials")
+		return fmt.Errorf("invalid request/credentials: %q", t[0])
 	}
 	return nil
 }

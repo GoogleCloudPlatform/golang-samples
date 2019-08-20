@@ -14,138 +14,48 @@
 
 package slack
 
-// import (
-// 	"bytes"
-// 	"context"
-// 	"encoding/json"
-// 	"fmt"
-// 	"log"
-// 	"os"
-// 	"strings"
-// 	"testing"
+import (
+	"log"
+	"net/url"
+	"os"
+	"testing"
 
-// 	"cloud.google.com/go/pubsub"
-// 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-// 	"golang.org/x/text/language"
-// )
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+)
 
-// const (
-// 	menuName = "menu.jpg"
-// 	signName = "sign.png"
-// )
+// TestMain sets up the config rather than using the config file
+// which contains placeholder values.
+func TestMain(m *testing.M) {
+	tc, ok := testutil.ContextMain(m)
+	if !ok {
+		log.Fatalf("testutil.ContextMain failed")
+	}
+	config = &configuration{
+		ProjectID: tc.ProjectID,
+		Token:     "",
+		Key:       "",
+	}
 
-// var (
-// 	bucketName      string
-// 	imageBucketName string
-// )
+	os.Exit(m.Run())
+}
 
-// func TestMain(t *testing.T) {
-// 	setup(context.Background())
-// 	tc := testutil.SystemTest(t)
-// 	bucketName = fmt.Sprintf("%s-result", tc.ProjectID)
-// 	imageBucketName = fmt.Sprintf("%s-image", tc.ProjectID)
-// 	config = &configType{
-// 		ProjectID:      os.Getenv("GOOGLE_CLOUD_PROJECT"),
-// 		ResultTopic:    "test-result-topic",
-// 		ResultBucket:   bucketName,
-// 		TranslateTopic: "test-translate-topic",
-// 		Translate:      true,
-// 		ToLang:         []string{"en", "fr", "es", "ja", "ru"},
-// 	}
-// 	var err error
-// 	publisher, err = pubsub.NewClient(context.Background(), config.ProjectID)
-// 	if err != nil {
-// 		log.Fatalf("translate.NewClient: %v", err)
-// 	}
-// }
-
-// func TestSaveResult(t *testing.T) {
-// 	ctx := context.Background()
-// 	tc := testutil.SystemTest(t)
-// 	bucketName = fmt.Sprintf("%s-result", tc.ProjectID)
-// 	imageBucketName = fmt.Sprintf("%s-image", tc.ProjectID)
-// 	buf := new(bytes.Buffer)
-// 	bkt := storageClient.Bucket(bucketName)
-// 	en, err := language.Parse("en")
-// 	if err != nil {
-// 		t.Errorf("language.Parse: %v", err)
-// 	}
-// 	fr, err := language.Parse("fr")
-// 	if err != nil {
-// 		t.Errorf("language.Parse: %v", err)
-// 	}
-// 	data, err := json.Marshal(ocrMessage{
-// 		Text:     "Hello",
-// 		FileName: menuName,
-// 		Lang:     en,
-// 		SrcLang:  fr,
-// 	})
-// 	log.SetOutput(buf)
-// 	err = SaveResult(ctx, PubSubMessage{
-// 		Data: data,
-// 	})
-// 	if err != nil {
-// 		t.Errorf("TestSaveResult: %v", err)
-// 	}
-// 	r, err := bkt.Object(fmt.Sprintf("%s_%s.txt", menuName, en)).NewReader(ctx)
-// 	if err != nil {
-// 		t.Errorf("NewReader: %v", err)
-// 	}
-// 	fbuf := make([]byte, 100, 100)
-// 	_, err = r.Read(fbuf)
-// 	if err != nil {
-// 		t.Errorf("Reader: %v", err)
-// 	}
-// 	got := string(fbuf)
-// 	if want := "Hello"; !strings.Contains(got, want) {
-// 		t.Errorf("got %q, want %q", got, want)
-// 	}
-// }
-
-// func TestTranslateText(t *testing.T) {
-// 	ctx := context.Background()
-// 	buf := new(bytes.Buffer)
-// 	en, err := language.Parse("en")
-// 	if err != nil {
-// 		t.Errorf("language.Parse: %v", err)
-// 	}
-// 	fr, err := language.Parse("fr")
-// 	if err != nil {
-// 		t.Errorf("language.Parse: %v", err)
-// 	}
-// 	data, err := json.Marshal(ocrMessage{
-// 		Text:     "Hello",
-// 		FileName: menuName,
-// 		Lang:     fr,
-// 		SrcLang:  en,
-// 	})
-// 	if err != nil {
-// 		t.Errorf("json.Marshal: %v", err)
-// 	}
-// 	log.SetOutput(buf)
-// 	err = TranslateText(ctx, PubSubMessage{
-// 		Data: data,
-// 	})
-// 	if err != nil {
-// 		t.Errorf("translateText: %v", err)
-// 	}
-// 	got := buf.String()
-// 	if want := "Bonjour"; !strings.Contains(got, want) {
-// 		t.Errorf("got %q, want %q", got, want)
-// 	}
-// }
-
-// func TestDetectText(t *testing.T) {
-// 	ctx := context.Background()
-// 	testutil.SystemTest(t)
-// 	buf := new(bytes.Buffer)
-// 	storageClient.Bucket(imageBucketName)
-// 	err := detectText(ctx, imageBucketName, menuName)
-// 	if err != nil {
-// 		t.Errorf("TestDetectText: %v", err)
-// 	}
-// 	got := buf.String()
-// 	if want := "Filets de Boeuf"; !strings.Contains(got, want) {
-// 		t.Errorf("got %q, want %q", got, want)
-// 	}
-// }
+func TestVerifyWebHook(t *testing.T) {
+	v := make(url.Values)
+	v["token"] = []string{config.Token}
+	err := verifyWebHook(v)
+	if err != nil {
+		t.Errorf("verifyWebHook: %v", err)
+	}
+	v = make(url.Values)
+	v["token"] = []string{"this is not the token"}
+	err = verifyWebHook(v)
+	if err == nil {
+		t.Errorf("got %q, want %q", "nil", "invalid request/credentials")
+	}
+	v = make(url.Values)
+	v["token"] = []string{""}
+	err = verifyWebHook(v)
+	if err == nil {
+		t.Errorf("got %q, want %q", "nil", "empty form token")
+	}
+}
