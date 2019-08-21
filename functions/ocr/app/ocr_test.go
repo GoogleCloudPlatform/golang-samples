@@ -53,7 +53,7 @@ func TestMain(m *testing.M) {
 		return
 	}
 	bucketName = fmt.Sprintf("%s-result", projectID)
-	imageBucketName = fmt.Sprintf("%s-image", projectID)
+	imageBucketName = "cloud-samples-data/functions"
 	config = &configuration{
 		ProjectID:      projectID,
 		ResultTopic:    "test-result-topic",
@@ -87,8 +87,6 @@ func TestMain(m *testing.M) {
 
 func TestSaveResult(t *testing.T) {
 	ctx := context.Background()
-	bucketName = fmt.Sprintf("%s-result", projectID)
-	imageBucketName = fmt.Sprintf("%s-image", projectID)
 	buf := new(bytes.Buffer)
 	bkt := storageClient.Bucket(bucketName)
 
