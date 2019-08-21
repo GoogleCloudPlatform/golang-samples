@@ -42,20 +42,18 @@ func setup(t *testing.T) *pubsub.Client {
 		t.Fatalf("failed to create client: %v", err)
 	}
 
-	// Cleanup resources from the previous failed tests.
-	once.Do(func() {
-		topic := client.Topic(topicName)
-		ok, err := topic.Exists(ctx)
-		if err != nil {
-			t.Fatalf("failed to check if topic exists: %v", err)
-		}
-		if !ok {
-			return
-		}
+	// Cleanup resources from the previous tests.
+	topic := client.Topic(topicName)
+	ok, err := topic.Exists(ctx)
+	if err != nil {
+		t.Fatalf("failed to check if topic exists: %v", err)
+	}
+	if ok {
 		if err := topic.Delete(ctx); err != nil {
 			t.Fatalf("failed to cleanup the topic (%q): %v", topicName, err)
 		}
-	})
+	}
+
 	return client
 }
 
@@ -101,8 +99,10 @@ func TestList(t *testing.T) {
 func TestPublish(t *testing.T) {
 	// Nothing much to do here, unless we are consuming.
 	// TODO(jbd): Merge topics and subscriptions programs maybe?
+	ctx := context.Background()
 	tc := testutil.SystemTest(t)
-	setup(t)
+	client := setup(t)
+	client.CreateTopic(ctx, topicName)
 	buf := new(bytes.Buffer)
 	if err := publish(buf, tc.ProjectID, topicName, "hello world"); err != nil {
 		t.Errorf("failed to publish message: %v", err)
@@ -110,8 +110,11 @@ func TestPublish(t *testing.T) {
 }
 
 func TestPublishThatScales(t *testing.T) {
+	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 	setup(t)
+	client := setup(t)
+	client.CreateTopic(ctx, topicName)
 	buf := new(bytes.Buffer)
 	if err := publishThatScales(buf, tc.ProjectID, topicName, 10); err != nil {
 		t.Errorf("failed to publish message: %v", err)
@@ -119,8 +122,11 @@ func TestPublishThatScales(t *testing.T) {
 }
 
 func TestPublishCustomAttributes(t *testing.T) {
+	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 	setup(t)
+	client := setup(t)
+	client.CreateTopic(ctx, topicName)
 	buf := new(bytes.Buffer)
 	if err := publishCustomAttributes(buf, tc.ProjectID, topicName); err != nil {
 		t.Errorf("failed to publish message: %v", err)
@@ -128,8 +134,10 @@ func TestPublishCustomAttributes(t *testing.T) {
 }
 
 func TestIAM(t *testing.T) {
+	ctx := context.Background()
 	tc := testutil.SystemTest(t)
-	setup(t)
+	client := setup(t)
+	client.CreateTopic(ctx, topicName)
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
