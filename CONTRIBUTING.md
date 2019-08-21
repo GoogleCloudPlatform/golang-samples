@@ -108,7 +108,7 @@ func hello(w io.Writer) {
 
 The output can be verified during testing using a buffer.
 
-[inspect_test.go](https://github.com/GoogleCloudPlatform/golang-samples/blob/readme/dlp/snippets/inspect/inspect_test.go)
+[inspect_test.go](https://github.com/GoogleCloudPlatform/golang-samples/blob/master/dlp/snippets/inspect/inspect_test.go)
 ```go
 func TestInspectString(t *testing.T) {
 	tc := testutil.SystemTest(t)
