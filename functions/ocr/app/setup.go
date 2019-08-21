@@ -36,7 +36,6 @@ type configuration struct {
 	ResultTopic    string   `json:"RESULT_TOPIC"`
 	ResultBucket   string   `json:"RESULT_BUCKET"`
 	TranslateTopic string   `json:"TRANSLATE_TOPIC"`
-	Translate      bool     `json:"TRANSLATE"`
 	ToLang         []string `json:"TO_LANG"`
 }
 

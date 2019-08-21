@@ -59,7 +59,6 @@ func TestMain(m *testing.M) {
 		ResultTopic:    "test-result-topic",
 		ResultBucket:   bucketName,
 		TranslateTopic: "test-translate-topic",
-		Translate:      true,
 		ToLang:         []string{"en", "fr", "es", "ja", "ru"},
 	}
 
