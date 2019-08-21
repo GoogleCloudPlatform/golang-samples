@@ -22,52 +22,59 @@ import (
 )
 
 func formatSlackMessage(query string, response *kgsearch.SearchResponse) (*Message, error) {
-	var entity interface{}
-	if len(response.ItemListElement) > 0 {
-		entity = response.ItemListElement[0]
+	if response == nil {
+		return nil, fmt.Errorf("empty response")
 	}
-	resp, ok := entity.(map[string]interface{})
+
+	if response.ItemListElement == nil || len(response.ItemListElement) == 0 {
+		message := &Message{
+			ResponseType: "in_channel",
+			Text:         fmt.Sprintf("Query: %s", query),
+			Attachments: []attachment{
+				attachment{
+					Color: "//d6334b",
+					Text:  "No results match your query.",
+				},
+			},
+		}
+		return message, nil
+	}
+
+	entity, ok := response.ItemListElement[0].(map[string]interface{})
 	if !ok {
-		return nil, fmt.Errorf("error formatting response entity")
+		return nil, fmt.Errorf("could not parse response entity")
 	}
-	result, ok := resp["result"].(map[string]interface{})
+	result, ok := entity["result"].(map[string]interface{})
 	if !ok {
 		return nil, fmt.Errorf("error formatting response result")
 	}
+
 	message := &Message{
 		ResponseType: "in_channel",
 		Text:         fmt.Sprintf("Query: %s", query),
-		Attachments:  []attachment{},
 	}
-
-	attachment := attachment{}
-	if entity != nil {
-		if name, ok := result["name"].(string); ok {
-			if description, ok := result["description"].(string); ok {
-				attachment.Title = fmt.Sprintf("%s: %s", name, description)
-			} else {
-				attachment.Title = name
-			}
+	attach := attachment{Color: "//3367d6"}
+	if name, ok := result["name"].(string); ok {
+		if description, ok := result["description"].(string); ok {
+			attach.Title = fmt.Sprintf("%s: %s", name, description)
+		} else {
+			attach.Title = name
 		}
-		if detailedDesc, ok := result["detailedDescription"].(map[string]interface{}); ok {
-			if url, ok := detailedDesc["url"].(string); ok {
-				attachment.TitleLink = url
-			}
-			if article, ok := detailedDesc["articleBody"].(string); ok {
-				attachment.Text = article
-			}
-		}
-		if image, ok := result["image"].(map[string]interface{}); ok {
-			if imageURL, ok := image["contentUrl"].(string); ok {
-				attachment.ImageURL = imageURL
-			}
-		}
-		attachment.Color = "//3367d6"
-	} else {
-		attachment.Text = "No results match your query."
 	}
-	message.Attachments = append(message.Attachments, attachment)
-
+	if detailedDesc, ok := result["detailedDescription"].(map[string]interface{}); ok {
+		if url, ok := detailedDesc["url"].(string); ok {
+			attach.TitleLink = url
+		}
+		if article, ok := detailedDesc["articleBody"].(string); ok {
+			attach.Text = article
+		}
+	}
+	if image, ok := result["image"].(map[string]interface{}); ok {
+		if imageURL, ok := image["contentUrl"].(string); ok {
+			attach.ImageURL = imageURL
+		}
+	}
+	message.Attachments = []attachment{attach}
 	return message, nil
 }
 

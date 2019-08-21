@@ -31,42 +31,27 @@ type configuration struct {
 	Key       string `json:"KG_API_KEY"`
 }
 
-type attachment struct {
-	Color     string `json:"color"`
-	Title     string `json:"title"`
-	TitleLink string `json:"title_link"`
-	Text      string `json:"text"`
-	ImageURL  string `json:"image_url"`
-}
-
-// Message is the a Slack message event.
-// see https://api.slack.com/docs/message-formatting
-type Message struct {
-	ResponseType string       `json:"response_type"`
-	Text         string       `json:"text"`
-	Attachments  []attachment `json:"attachments"`
-}
-
 var (
 	entitiesService *kgsearch.EntitiesService
-	kgService       *kgsearch.Service
 	config          *configuration
 )
 
 func setup(ctx context.Context) {
-	cfgFile, err := os.Open("config.json")
-	if err != nil {
-		log.Fatalf("os.Open: %v", err)
+	if config == nil {
+		cfgFile, err := os.Open("config.json")
+		if err != nil {
+			log.Fatalf("os.Open: %v", err)
+		}
+
+		d := json.NewDecoder(cfgFile)
+		config = &configuration{}
+		if err = d.Decode(config); err != nil {
+			log.Fatalf("Decode: %v", err)
+		}
 	}
 
-	d := json.NewDecoder(cfgFile)
-	config = &configuration{}
-	if err = d.Decode(config); err != nil {
-		log.Fatalf("Decode: %v", err)
-	}
-
-	if kgService == nil {
-		kgService, err = kgsearch.NewService(ctx, option.WithAPIKey(config.Key))
+	if entitiesService == nil {
+		kgService, err := kgsearch.NewService(ctx, option.WithAPIKey(config.Key))
 		if err != nil {
 			log.Fatalf("kgsearch.NewClient: %v", err)
 		}

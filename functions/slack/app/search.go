@@ -19,33 +19,40 @@ package slack
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
-	"os"
+	"net/url"
 )
+
+type attachment struct {
+	Color     string `json:"color"`
+	Title     string `json:"title"`
+	TitleLink string `json:"title_link"`
+	Text      string `json:"text"`
+	ImageURL  string `json:"image_url"`
+}
+
+// Message is the a Slack message event.
+// see https://api.slack.com/docs/message-formatting
+type Message struct {
+	ResponseType string       `json:"response_type"`
+	Text         string       `json:"text"`
+	Attachments  []attachment `json:"attachments"`
+}
 
 // KGSearch uses the Knowledge Graph API to search for a query provided
 // by a Slack message.
 func KGSearch(w http.ResponseWriter, r *http.Request) {
 	setup(r.Context())
-	cfgFile, err := os.Open("config.json")
-	if err != nil {
-		log.Fatalf("os.Open: %v", err)
-	}
-
-	d := json.NewDecoder(cfgFile)
-	config = &configuration{}
-	if err = d.Decode(config); err != nil {
-		log.Fatalf("Decode: %v", err)
-	}
 	if r.Method != "POST" {
 		http.Error(w, "Only POST requests are accepted", 405)
 	}
-	if err = r.ParseForm(); err != nil {
+	if err := r.ParseForm(); err != nil {
 		http.Error(w, "Couldn't parse form", 400)
 		log.Fatalf("ParseForm: %v", err)
 	}
-	if err = verifyWebHook(r.Form); err != nil {
+	if err := verifyWebHook(r.Form); err != nil {
 		log.Fatalf("verifyWebhook: %v", err)
 	}
 
@@ -60,3 +67,29 @@ func KGSearch(w http.ResponseWriter, r *http.Request) {
 }
 
 // [END functions_slack_search]
+
+// [START functions_verify_webhook]
+func verifyWebHook(form url.Values) error {
+	t := form.Get("token")
+	if len(t) == 0 {
+		return fmt.Errorf("empty form token")
+	}
+	if t != config.Token {
+		return fmt.Errorf("invalid request/credentials: %q", t[0])
+	}
+	return nil
+}
+
+// [END functions_verify_webhook]
+
+// [START functions_slack_request]
+func makeSearchRequest(query string) (*Message, error) {
+	req := entitiesService.Search().Query(query).Limit(1)
+	res, err := req.Do()
+	if err != nil {
+		return nil, fmt.Errorf("Do: %v", err)
+	}
+	return formatSlackMessage(query, res)
+}
+
+// [END functions_slack_request]

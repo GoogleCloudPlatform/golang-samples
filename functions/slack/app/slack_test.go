@@ -15,45 +15,91 @@
 package slack
 
 import (
+	"context"
 	"log"
 	"net/url"
 	"os"
+	"strings"
 	"testing"
 
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"google.golang.org/api/kgsearch/v1"
+	"google.golang.org/api/option"
 )
+
+var projectID string
 
 // TestMain sets up the config rather than using the config file
 // which contains placeholder values.
 func TestMain(m *testing.M) {
-	tc, ok := testutil.ContextMain(m)
-	if !ok {
+	ctx := context.Background()
+	projectID = os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
+	if projectID == "" {
 		log.Print("GOLANG_SAMPLES_PROJECT_ID is unset. Skipping.")
 		return
 	}
 	config = &configuration{
-		ProjectID: tc.ProjectID,
-		Token:     "mLdpMlnwPr1mcVgusUGR8VBj",
-		Key:       "AIzaSyBFrpWs3otLxuWYJkk2AXQ3Xi1OB2oTi0A",
+		ProjectID: projectID,
+		Token:     "cbdkUvSjpoiSfaHDhVNiXOs4",
+		Key:       "AIzaSyCsNvMEF7iGUM-Nu6m4ARpQw39Txzl4hJU",
 	}
+	kgService, err := kgsearch.NewService(ctx, option.WithAPIKey(config.Key))
+	if err != nil {
+		log.Fatalf("kgsearch.NewClient: %v", err)
+	}
+	entitiesService = kgsearch.NewEntitiesService(kgService)
 
 	os.Exit(m.Run())
 }
 
 func TestVerifyWebHook(t *testing.T) {
 	v := make(url.Values)
-	v["token"] = []string{config.Token}
+	v.Set("token", config.Token)
 	if err := verifyWebHook(v); err != nil {
 		t.Errorf("verifyWebHook: %v", err)
 	}
 	v = make(url.Values)
-	v["token"] = []string{"this is not the token"}
+	v.Set("token", "this is not the token")
 	if err := verifyWebHook(v); err == nil {
 		t.Errorf("got %q, want %q", "nil", "invalid request/credentials")
 	}
 	v = make(url.Values)
-	v["token"] = []string{""}
+	v.Set("token", "")
 	if err := verifyWebHook(v); err == nil {
 		t.Errorf("got %q, want %q", "nil", "empty form token")
+	}
+}
+
+func TestMakeSearchRequest(t *testing.T) {
+	query := "Google"
+	msg, err := makeSearchRequest(query)
+	if err != nil {
+		t.Errorf("makeSearchRequest: %v", err)
+	}
+	if msg == nil {
+		t.Errorf("empty message from query %q", query)
+	}
+	got := msg.Text
+	if want := "Google"; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
+	if len(msg.Attachments) == 0 {
+		t.Errorf("no attachments from query %q", query)
+	}
+	got = msg.Attachments[0].Text
+	if want := "Google"; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
+
+	query = "qjwzl"
+	msg, err = makeSearchRequest(query)
+	if msg == nil {
+		t.Errorf("empty message from query %q", query)
+	}
+	if len(msg.Attachments) == 0 {
+		t.Errorf("no attachments from query %q", query)
+	}
+	got = msg.Attachments[0].Text
+	if want := "No results"; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
 	}
 }
