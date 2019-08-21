@@ -32,7 +32,7 @@ func formatSlackMessage(query string, response *kgsearch.SearchResponse) (*Messa
 			Text:         fmt.Sprintf("Query: %s", query),
 			Attachments: []attachment{
 				attachment{
-					Color: "//d6334b",
+					Color: "#d6334b",
 					Text:  "No results match your query.",
 				},
 			},
@@ -53,7 +53,7 @@ func formatSlackMessage(query string, response *kgsearch.SearchResponse) (*Messa
 		ResponseType: "in_channel",
 		Text:         fmt.Sprintf("Query: %s", query),
 	}
-	attach := attachment{Color: "//3367d6"}
+	attach := attachment{Color: "#3367d6"}
 	if name, ok := result["name"].(string); ok {
 		if description, ok := result["description"].(string); ok {
 			attach.Title = fmt.Sprintf("%s: %s", name, description)
