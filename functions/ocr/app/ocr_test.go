@@ -29,7 +29,6 @@ import (
 	"cloud.google.com/go/storage"
 	"cloud.google.com/go/translate"
 	vision "cloud.google.com/go/vision/apiv1"
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"golang.org/x/text/language"
 )
 
@@ -39,6 +38,7 @@ const (
 )
 
 var (
+	projectID       string
 	bucketName      string
 	imageBucketName string
 )
@@ -47,15 +47,15 @@ var (
 // which contains placeholder values.
 func TestMain(m *testing.M) {
 	ctx := context.Background()
-	tc, ok := testutil.ContextMain(m)
-	if !ok {
+	projectID = os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
+	if projectID == "" {
 		log.Print("GOLANG_SAMPLES_PROJECT_ID is unset. Skipping.")
 		return
 	}
-	bucketName = fmt.Sprintf("%s-result", tc.ProjectID)
-	imageBucketName = fmt.Sprintf("%s-image", tc.ProjectID)
+	bucketName = fmt.Sprintf("%s-result", projectID)
+	imageBucketName = fmt.Sprintf("%s-image", projectID)
 	config = &configuration{
-		ProjectID:      tc.ProjectID,
+		ProjectID:      projectID,
 		ResultTopic:    "test-result-topic",
 		ResultBucket:   bucketName,
 		TranslateTopic: "test-translate-topic",
@@ -74,7 +74,7 @@ func TestMain(m *testing.M) {
 		log.Fatalf("translate.NewClient: %v", err)
 	}
 
-	pubsubClient, err = pubsub.NewClient(ctx, tc.ProjectID)
+	pubsubClient, err = pubsub.NewClient(ctx, projectID)
 	if err != nil {
 		log.Fatalf("translate.NewClient: %v", err)
 	}
@@ -88,9 +88,8 @@ func TestMain(m *testing.M) {
 
 func TestSaveResult(t *testing.T) {
 	ctx := context.Background()
-	tc := testutil.SystemTest(t)
-	bucketName = fmt.Sprintf("%s-result", tc.ProjectID)
-	imageBucketName = fmt.Sprintf("%s-image", tc.ProjectID)
+	bucketName = fmt.Sprintf("%s-result", projectID)
+	imageBucketName = fmt.Sprintf("%s-image", projectID)
 	buf := new(bytes.Buffer)
 	bkt := storageClient.Bucket(bucketName)
 
@@ -173,7 +172,6 @@ func TestTranslateText(t *testing.T) {
 
 func TestDetectText(t *testing.T) {
 	ctx := context.Background()
-	testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
 
 	log.SetOutput(buf)
