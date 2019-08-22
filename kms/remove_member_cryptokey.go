@@ -15,7 +15,6 @@
 package kms
 
 // [START kms_remove_member_from_cryptokey_policy]
-
 import (
 	"context"
 	"fmt"

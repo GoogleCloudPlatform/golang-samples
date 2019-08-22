@@ -15,7 +15,6 @@
 package kms
 
 // [START kms_decrypt]
-
 import (
 	"context"
 	"fmt"

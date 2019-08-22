@@ -15,7 +15,6 @@
 package kms
 
 // [START kms_sign_asymmetric]
-
 import (
 	"context"
 	"crypto/sha256"

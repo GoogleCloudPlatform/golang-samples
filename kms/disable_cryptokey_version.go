@@ -14,6 +14,7 @@
 
 package kms
 
+// [START kms_disable_cryptokey_version]
 import (
 	"context"
 	"fmt"
@@ -23,8 +24,6 @@ import (
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 	fieldmask "google.golang.org/genproto/protobuf/field_mask"
 )
-
-// [START kms_disable_cryptokey_version]
 
 // disableCryptoKeyVersion disables a specified key version on KMS.
 func disableCryptoKeyVersion(w io.Writer, name string) error {

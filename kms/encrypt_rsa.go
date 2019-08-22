@@ -15,7 +15,6 @@
 package kms
 
 // [START kms_encrypt_rsa]
-
 import (
 	"context"
 	"crypto/rand"

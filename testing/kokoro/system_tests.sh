@@ -2,6 +2,9 @@
 
 set -e
 
+export GO111MODULE=on # Always use modules.
+export GOPROXY=https://proxy.golang.org
+
 export GOLANG_SAMPLES_KMS_KEYRING=ring1
 export GOLANG_SAMPLES_KMS_CRYPTOKEY=key1
 export GOLANG_SAMPLES_IOT_PUB=$KOKORO_GFILE_DIR/rsa_cert.pem
@@ -36,11 +39,6 @@ export GOLANG_SAMPLES_BIGTABLE_INSTANCE=testing-instance
 
 go version
 date
-
-if [[ -d /cache ]]; then
-  time mv /cache/* .
-  echo 'Uncached'
-fi
 
 # Re-organize files
 export GOPATH=$PWD/gopath
@@ -77,18 +75,22 @@ else
   echo "Running tests in modified directories: $TARGET"
 fi
 
-# Download imports.
-GO_IMPORTS=$(go list -f '{{join .Imports "\n"}}{{"\n"}}{{join .TestImports "\n"}}' $TARGET | \
-  sort | uniq | \
-  grep -v golang-samples)
-time go get -u -v -d $GO_IMPORTS
-
-# Always download top-level and internal dependencies.
-go get -t ./internal/...
-go get -t -d .
+# Download imports (pre Go 1.11). Go 1.11+ uses modules.
+# TODO: remove this block once we cease support for Go 1.10.
+if ! go help mod 2>/dev/null >/dev/null; then
+  GO_IMPORTS=$(go list -f '{{join .Imports "\n"}}{{"\n"}}{{join .TestImports "\n"}}' $TARGET | \
+    sort | uniq | \
+    sed 's:github.com/mailgun/mailgun-go/v3:github.com/mailgun/mailgun-go:g' | \
+    grep -v golang-samples | \
+    grep '\.')
+  time go get -u -v -d $GO_IMPORTS
+  # Always download top-level and internal dependencies.
+  go get -t ./internal/...
+  go get -t -d .
+  go install -v $GO_IMPORTS
+fi
 
 go get github.com/jstemmer/go-junit-report
-go install -v $GO_IMPORTS
 
 # Do the easy stuff before running tests. Fail fast!
 if [ $GOLANG_SAMPLES_GO_VET ]; then
@@ -100,4 +102,12 @@ date
 
 OUTFILE=gotest.out
 2>&1 go test -timeout $TIMEOUT -v . $TARGET | tee $OUTFILE
+
+# Clear the cache so Kokoro doesn't try to copy it.
+# Must happen before calling go-junit-report since it can cause a non-zero exit
+# code, stopping execution.
+if go help mod 2>/dev/null >/dev/null; then
+  go clean -modcache
+fi
+
 cat $OUTFILE | $GOPATH/bin/go-junit-report -set-exit-code > sponge_log.xml

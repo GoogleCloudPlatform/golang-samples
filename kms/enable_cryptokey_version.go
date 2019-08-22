@@ -15,7 +15,6 @@
 package kms
 
 // [START kms_enable_cryptokey_version]
-
 import (
 	"context"
 	"fmt"
