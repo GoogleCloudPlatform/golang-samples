@@ -1,9 +1,10 @@
-// Copyright 2018, Google, LLC.
+// Copyright 2019 Google LLC
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//    http://www.apache.org/licenses/LICENSE-2.0
+//     https://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -49,10 +50,6 @@ func formatSlackMessage(query string, response *kgsearch.SearchResponse) (*Messa
 		return nil, fmt.Errorf("error formatting response result")
 	}
 
-	message := &Message{
-		ResponseType: "in_channel",
-		Text:         fmt.Sprintf("Query: %s", query),
-	}
 	attach := attachment{Color: "#3367d6"}
 	if name, ok := result["name"].(string); ok {
 		if description, ok := result["description"].(string); ok {
@@ -74,7 +71,12 @@ func formatSlackMessage(query string, response *kgsearch.SearchResponse) (*Messa
 			attach.ImageURL = imageURL
 		}
 	}
-	message.Attachments = []attachment{attach}
+
+	message := &Message{
+		ResponseType: "in_channel",
+		Text:         fmt.Sprintf("Query: %s", query),
+		Attachments:  []attachment{attach},
+	}
 	return message, nil
 }
 

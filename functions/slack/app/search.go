@@ -1,9 +1,10 @@
-// Copyright 2018, Google, LLC.
+// Copyright 2019 Google LLC
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//    http://www.apache.org/licenses/LICENSE-2.0
+//     https://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -55,7 +56,9 @@ func KGSearch(w http.ResponseWriter, r *http.Request) {
 	if err := verifyWebHook(r.Form); err != nil {
 		log.Fatalf("verifyWebhook: %v", err)
 	}
-
+	if len(r.Form["text"]) == 0 {
+		log.Fatalf("emtpy text in form")
+	}
 	kgSearchResponse, err := makeSearchRequest(r.Form["text"][0])
 	if err != nil {
 		log.Fatalf("makeSearchRequest: %v", err)
@@ -84,8 +87,7 @@ func verifyWebHook(form url.Values) error {
 
 // [START functions_slack_request]
 func makeSearchRequest(query string) (*Message, error) {
-	req := entitiesService.Search().Query(query).Limit(1)
-	res, err := req.Do()
+	res, err := entitiesService.Search().Query(query).Limit(1).Do()
 	if err != nil {
 		return nil, fmt.Errorf("Do: %v", err)
 	}
