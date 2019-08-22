@@ -45,12 +45,11 @@ var (
 
 // TestMain sets up the config rather than using the config file
 // which contains placeholder values.
-func TestMain(m *testing.M) {
+func setupTests(t *testing.T) {
 	ctx := context.Background()
 	projectID = os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
 	if projectID == "" {
-		log.Print("GOLANG_SAMPLES_PROJECT_ID is unset. Skipping.")
-		return
+		t.Skip("GOLANG_SAMPLES_PROJECT_ID is unset")
 	}
 	bucketName = fmt.Sprintf("%s-result", projectID)
 	imageBucketName = "cloud-samples-data/functions"
@@ -62,35 +61,37 @@ func TestMain(m *testing.M) {
 		ToLang:         []string{"en", "fr", "es", "ja", "ru"},
 	}
 
-	var err error // prevent shadowing visionClient with :=
+	var err error // Prevent shadowing clients with :=.
 	visionClient, err = vision.NewImageAnnotatorClient(ctx)
 	if err != nil {
-		log.Fatalf("vision.NewImageAnnotatorClient: %v", err)
+		t.Fatalf("vision.NewImageAnnotatorClient: %v", err)
 	}
 
 	translateClient, err = translate.NewClient(ctx)
 	if err != nil {
-		log.Fatalf("translate.NewClient: %v", err)
+		t.Fatalf("translate.NewClient: %v", err)
 	}
 
 	pubsubClient, err = pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		log.Fatalf("translate.NewClient: %v", err)
+		t.Fatalf("translate.NewClient: %v", err)
 	}
 
 	storageClient, err = storage.NewClient(ctx)
 	if err != nil {
-		log.Fatalf("storage.NewClient: %v", err)
+		t.Fatalf("storage.NewClient: %v", err)
 	}
-	os.Exit(m.Run())
+
+	if _, err := storageClient.Bucket(bucketName).Attrs(ctx); err != nil {
+		t.Skipf("Could not get bucket %v: %v", bucketName, err)
+	}
 }
 
 func TestSaveResult(t *testing.T) {
+	setupTests(t)
 	ctx := context.Background()
-	buf := new(bytes.Buffer)
-	bkt := storageClient.Bucket(bucketName)
 
-	// Create sample data
+	// Create sample data.
 	en, err := language.Parse("en")
 	if err != nil {
 		t.Errorf("language.Parse: %v", err)
@@ -106,7 +107,8 @@ func TestSaveResult(t *testing.T) {
 		SrcLang:  fr,
 	})
 
-	// Save data
+	// Save data.
+	buf := new(bytes.Buffer)
 	log.SetOutput(buf)
 	msg := PubSubMessage{
 		Data: data,
@@ -115,8 +117,8 @@ func TestSaveResult(t *testing.T) {
 		t.Errorf("SaveResult: %v", err)
 	}
 
-	// Check for saved object
-	r, err := bkt.Object(fmt.Sprintf("%s_%s.txt", menuName, en)).NewReader(ctx)
+	// Check for saved object.
+	r, err := storageClient.Bucket(bucketName).Object(fmt.Sprintf("%s_%s.txt", menuName, en)).NewReader(ctx)
 	if err != nil {
 		t.Errorf("NewReader: %v", err)
 	}
@@ -131,10 +133,10 @@ func TestSaveResult(t *testing.T) {
 }
 
 func TestTranslateText(t *testing.T) {
+	setupTests(t)
 	ctx := context.Background()
-	buf := new(bytes.Buffer)
 
-	// Create data
+	// Create data.
 	en, err := language.Parse("en")
 	if err != nil {
 		t.Errorf("language.Parse: %v", err)
@@ -153,7 +155,8 @@ func TestTranslateText(t *testing.T) {
 		t.Errorf("json.Marshal: %v", err)
 	}
 
-	// Translate data
+	// Translate data.
+	buf := new(bytes.Buffer)
 	log.SetOutput(buf)
 	err = TranslateText(ctx, PubSubMessage{
 		Data: data,
@@ -168,9 +171,10 @@ func TestTranslateText(t *testing.T) {
 }
 
 func TestDetectText(t *testing.T) {
+	setupTests(t)
 	ctx := context.Background()
-	buf := new(bytes.Buffer)
 
+	buf := new(bytes.Buffer)
 	log.SetOutput(buf)
 	if err := detectText(ctx, imageBucketName, menuName); err != nil {
 		t.Errorf("TestDetectText: %v", err)

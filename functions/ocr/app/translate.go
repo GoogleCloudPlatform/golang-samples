@@ -29,15 +29,12 @@ import (
 // by TRANSLATE_TOPIC in config.json, and translates the text using the Google Translate API.
 func TranslateText(ctx context.Context, event PubSubMessage) error {
 	if err := setup(ctx); err != nil {
-		return fmt.Errorf("ProcessImage: %v", err)
+		return fmt.Errorf("setup: %v", err)
 	}
 	if event.Data == nil {
-		return fmt.Errorf("Empty data")
+		return fmt.Errorf("empty data")
 	}
 	var message ocrMessage
-	if event.Data == nil {
-		return fmt.Errorf("Empty data")
-	}
 	if err := json.Unmarshal(event.Data, &message); err != nil {
 		return fmt.Errorf("json.Unmarshal: %v", err)
 	}

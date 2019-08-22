@@ -83,7 +83,7 @@ func setup(ctx context.Context) error {
 		}
 	}
 
-	var err error // prevent shadowing clients with :=
+	var err error // Prevent shadowing clients with :=.
 
 	if visionClient == nil {
 		visionClient, err = vision.NewImageAnnotatorClient(ctx)
