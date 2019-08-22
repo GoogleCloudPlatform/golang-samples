@@ -17,6 +17,7 @@ package slack
 import (
 	"context"
 	"log"
+	"net/http/httptest"
 	"net/url"
 	"os"
 	"strings"
@@ -69,6 +70,23 @@ func TestVerifyWebHook(t *testing.T) {
 	}
 }
 
+func TestFormatSlackMessage(t *testing.T) {
+	query := "Google"
+	req := entitiesService.Search().Query(query).Limit(1)
+	res, err := req.Do()
+	if err != nil {
+		t.Errorf("Do: %v", err)
+	}
+	msg, err := formatSlackMessage(query, res)
+	if err != nil {
+		t.Errorf("formatSlackMessage: %v", err)
+	}
+	got := msg.Attachments[0].Text
+	if want := "Google"; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
 func TestMakeSearchRequest(t *testing.T) {
 	query := "Google"
 	msg, err := makeSearchRequest(query)
@@ -100,6 +118,16 @@ func TestMakeSearchRequest(t *testing.T) {
 	}
 	got = msg.Attachments[0].Text
 	if want := "No results"; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func TestKGSearch(t *testing.T) {
+	w := httptest.NewRecorder()
+	r := strings.NewReader("Google")
+	KGSearch(w, httptest.NewRequest("POST", "", r))
+	got := w.Body.String()
+	if want := "Google"; !strings.Contains(got, want) {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }

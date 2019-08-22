@@ -42,7 +42,7 @@ type Message struct {
 }
 
 // KGSearch uses the Knowledge Graph API to search for a query provided
-// by a Slack message.
+// by a Slack command.
 func KGSearch(w http.ResponseWriter, r *http.Request) {
 	setup(r.Context())
 	if r.Method != "POST" {
