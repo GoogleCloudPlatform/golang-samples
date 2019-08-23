@@ -29,7 +29,7 @@ import (
 	"path"
 
 	"cloud.google.com/go/storage"
-	uuid "github.com/gofrs/uuid"
+	"github.com/gofrs/uuid"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
@@ -64,7 +64,7 @@ func main() {
 
 func (b *Bookshelf) registerHandlers() {
 	// Use gorilla/mux for rich routing.
-	// See http://www.gorillatoolkit.org/pkg/mux.
+	// See https://www.gorillatoolkit.org/pkg/mux.
 	r := mux.NewRouter()
 
 	r.Handle("/", http.RedirectHandler("/books", http.StatusFound))
@@ -254,7 +254,7 @@ func (b *Bookshelf) deleteHandler(w http.ResponseWriter, r *http.Request) *appEr
 	return nil
 }
 
-// http://blog.golang.org/error-handling-and-go
+// https://blog.golang.org/error-handling-and-go
 type appHandler func(http.ResponseWriter, *http.Request) *appError
 
 type appError struct {

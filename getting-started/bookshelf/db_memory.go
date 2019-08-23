@@ -23,7 +23,6 @@ import (
 	"sync"
 )
 
-// Ensure memoryDB conforms to the BookDatabase interface.
 var _ BookDatabase = &memoryDB{}
 
 // memoryDB is a simple in-memory persistence layer for books.
@@ -41,7 +40,7 @@ func newMemoryDB() *memoryDB {
 }
 
 // Close closes the database.
-func (db *memoryDB) Close(ctx context.Context) error {
+func (db *memoryDB) Close(context.Context) error {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
@@ -51,7 +50,7 @@ func (db *memoryDB) Close(ctx context.Context) error {
 }
 
 // GetBook retrieves a book by its ID.
-func (db *memoryDB) GetBook(ctx context.Context, id string) (*Book, error) {
+func (db *memoryDB) GetBook(_ context.Context, id string) (*Book, error) {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
@@ -63,7 +62,7 @@ func (db *memoryDB) GetBook(ctx context.Context, id string) (*Book, error) {
 }
 
 // AddBook saves a given book, assigning it a new ID.
-func (db *memoryDB) AddBook(ctx context.Context, b *Book) (id string, err error) {
+func (db *memoryDB) AddBook(_ context.Context, b *Book) (id string, err error) {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
@@ -76,7 +75,7 @@ func (db *memoryDB) AddBook(ctx context.Context, b *Book) (id string, err error)
 }
 
 // DeleteBook removes a given book by its ID.
-func (db *memoryDB) DeleteBook(ctx context.Context, id string) error {
+func (db *memoryDB) DeleteBook(_ context.Context, id string) error {
 	if id == "" {
 		return errors.New("memorydb: book with unassigned ID passed into DeleteBook")
 	}
@@ -92,7 +91,7 @@ func (db *memoryDB) DeleteBook(ctx context.Context, id string) error {
 }
 
 // UpdateBook updates the entry for a given book.
-func (db *memoryDB) UpdateBook(ctx context.Context, b *Book) error {
+func (db *memoryDB) UpdateBook(_ context.Context, b *Book) error {
 	if b.ID == "" {
 		return errors.New("memorydb: book with unassigned ID passed into UpdateBook")
 	}
@@ -105,7 +104,7 @@ func (db *memoryDB) UpdateBook(ctx context.Context, b *Book) error {
 }
 
 // ListBooks returns a list of books, ordered by title.
-func (db *memoryDB) ListBooks(ctx context.Context) ([]*Book, error) {
+func (db *memoryDB) ListBooks(_ context.Context) ([]*Book, error) {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
