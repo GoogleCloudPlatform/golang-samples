@@ -76,7 +76,7 @@ var allowList = []string{
 
 	// Cloud Functions configs.
 	"functions/ocr/app/config.json",
-	"functions/slack/app/config.json",
+	"functions/slack/config.json",
 
 	// Samples that aren't really code. Legacy.
 	"**/appengine/**/*.txt",
