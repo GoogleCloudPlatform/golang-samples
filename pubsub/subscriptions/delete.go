@@ -18,11 +18,12 @@ package subscriptions
 import (
 	"context"
 	"fmt"
+	"io"
 
 	"cloud.google.com/go/pubsub"
 )
 
-func delete(projectID, subName string) error {
+func delete(w io.Writer, projectID, subName string) error {
 	// projectID := "my-project-id"
 	// subName := projectID + "-example-sub"
 	ctx := context.Background()
@@ -35,7 +36,7 @@ func delete(projectID, subName string) error {
 	if err := sub.Delete(ctx); err != nil {
 		return fmt.Errorf("Delete: %v", err)
 	}
-	fmt.Println("Subscription deleted.")
+	fmt.Fprintf(w, "Subscription %q deleted.", subName)
 	return nil
 }
 
