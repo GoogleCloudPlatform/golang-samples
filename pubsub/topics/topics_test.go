@@ -29,7 +29,10 @@ import (
 )
 
 var topicName string
-var once sync.Once // guards cleanup related operations in setup.
+
+// once guards cleanup related operations in setup. No need to set up and tear
+// down every time, so this speeds things up.
+var once sync.Once
 
 func setup(t *testing.T) *pubsub.Client {
 	ctx := context.Background()
@@ -43,16 +46,18 @@ func setup(t *testing.T) *pubsub.Client {
 	}
 
 	// Cleanup resources from the previous tests.
-	topic := client.Topic(topicName)
-	ok, err := topic.Exists(ctx)
-	if err != nil {
-		t.Fatalf("failed to check if topic exists: %v", err)
-	}
-	if ok {
-		if err := topic.Delete(ctx); err != nil {
-			t.Fatalf("failed to cleanup the topic (%q): %v", topicName, err)
+	once.Do(func() {
+		topic := client.Topic(topicName)
+		ok, err := topic.Exists(ctx)
+		if err != nil {
+			t.Fatalf("failed to check if topic exists: %v", err)
 		}
-	}
+		if ok {
+			if err := topic.Delete(ctx); err != nil {
+				t.Fatalf("failed to cleanup the topic (%q): %v", topicName, err)
+			}
+		}
+	})
 
 	return client
 }

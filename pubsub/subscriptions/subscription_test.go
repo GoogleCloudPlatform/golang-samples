@@ -32,13 +32,15 @@ import (
 var topicName string
 var subName string
 
-var once sync.Once // guards cleanup related operations in setup.
+// once guards cleanup related operations in setup. No need to set up and tear
+// down every time, so this speeds things up.
+var once sync.Once
 
 func setup(t *testing.T) *pubsub.Client {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 
-	topicName = tc.ProjectID + "-test-topic"
+	topicName = tc.ProjectID + "-test-sub-topic"
 	subName = tc.ProjectID + "-test-sub"
 	var err error
 	client, err := pubsub.NewClient(ctx, tc.ProjectID)
@@ -47,26 +49,28 @@ func setup(t *testing.T) *pubsub.Client {
 	}
 
 	// Cleanup resources from the previous tests.
-	topic := client.Topic(topicName)
-	ok, err := topic.Exists(ctx)
-	if err != nil {
-		t.Fatalf("failed to check if topic exists: %v", err)
-	}
-	if ok {
-		if err := topic.Delete(ctx); err != nil {
-			t.Fatalf("failed to cleanup the topic (%q): %v", topicName, err)
+	once.Do(func() {
+		topic := client.Topic(topicName)
+		ok, err := topic.Exists(ctx)
+		if err != nil {
+			t.Fatalf("failed to check if topic exists: %v", err)
 		}
-	}
-	sub := client.Subscription(subName)
-	ok, err = sub.Exists(ctx)
-	if err != nil {
-		t.Fatalf("failed to check if subscription exists: %v", err)
-	}
-	if ok {
-		if err := sub.Delete(ctx); err != nil {
-			t.Fatalf("failed to cleanup the subscription (%q): %v", subName, err)
+		if ok {
+			if err := topic.Delete(ctx); err != nil {
+				t.Fatalf("failed to cleanup the topic (%q): %v", topicName, err)
+			}
 		}
-	}
+		sub := client.Subscription(subName)
+		ok, err = sub.Exists(ctx)
+		if err != nil {
+			t.Fatalf("failed to check if subscription exists: %v", err)
+		}
+		if ok {
+			if err := sub.Delete(ctx); err != nil {
+				t.Fatalf("failed to cleanup the subscription (%q): %v", subName, err)
+			}
+		}
+	})
 
 	return client
 }
