@@ -74,6 +74,10 @@ var allowList = []string{
 	// Cloud Functions codelab picture.
 	"functions/codelabs/gopher/gophercolor.png",
 
+	// Cloud Functions configs.
+	"functions/ocr/app/config.json",
+	"functions/slack/app/config.json",
+
 	// Samples that aren't really code. Legacy.
 	"**/appengine/**/*.txt",
 
