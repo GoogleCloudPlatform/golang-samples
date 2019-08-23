@@ -175,7 +175,8 @@ func TestDelete(t *testing.T) {
 		}
 	}
 
-	if err := delete(tc.ProjectID, subName); err != nil {
+	buf := new(bytes.Buffer)
+	if err := delete(buf, tc.ProjectID, subName); err != nil {
 		t.Fatalf("failed to delete subscription (%q): %v", subName, err)
 	}
 	ok, err = client.Subscription(subName).Exists(context.Background())
