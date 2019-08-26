@@ -18,19 +18,20 @@ package main
 import (
 	"context"
 	"fmt"
+	"html/template"
 	"log"
 	"math/rand"
 	"net/http"
 	"os"
 
 	firestoregorilla "github.com/GoogleCloudPlatform/firestore-gorilla-go"
-	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
 )
 
 // app stores a sessions.Store. Create a new app with newApp.
 type app struct {
 	store sessions.Store
+	tmpl  *template.Template
 }
 
 // colors are the random background colors that will be assigned to sessions.
@@ -59,30 +60,21 @@ func main() {
 
 // newApp creates a new app.
 func newApp(projectID string) (*app, error) {
-	// For this sample, hashKey and blockKey are created using
-	// GenerateRandomKey(), which does not automatically persist they keys.
-	// New app instances will generate new keys, which will not be able to
-	// decode cookies issued by other instances.
-	//
-	// Set these to random values and treat them as secrets (not hard-coded in
-	// your source code).
-	hashKey := securecookie.GenerateRandomKey(32)
-	if hashKey == nil {
-		log.Fatal("Failed to generate hashKey")
-	}
-	blockKey := securecookie.GenerateRandomKey(32)
-	if blockKey == nil {
-		log.Fatal("Failed to generate blockKey")
-	}
-	codecs := securecookie.CodecsFromPairs(hashKey, blockKey)
-
 	ctx := context.Background()
-	store, err := firestoregorilla.New(ctx, projectID, codecs...)
+	store, err := firestoregorilla.New(ctx, projectID)
 	if err != nil {
 		log.Fatalf("firestoregorilla.New: %v", err)
 	}
 
-	return &app{store: store}, nil
+	tmpl, err := template.New("Index").Parse("<body bgcolor={{.color}}>Views {{.views}}</body>")
+	if err != nil {
+		return nil, fmt.Errorf("template.New: %v", err)
+	}
+
+	return &app{
+		store: store,
+		tmpl:  tmpl,
+	}, nil
 }
 
 // index uses sessions to assign users a random color and keep track of views.
@@ -108,5 +100,5 @@ func (a *app) index(w http.ResponseWriter, r *http.Request) {
 		// Don't return early so the user still gets a response.
 	}
 
-	fmt.Fprintf(w, "<body bgcolor=%v>Views %v</body>", session.Values["color"], session.Values["views"])
+	a.tmpl.Execute(w, session.Values)
 }
