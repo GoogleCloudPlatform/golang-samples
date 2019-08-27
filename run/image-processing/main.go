@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// [START run_imageproc_controller]
+
 // Sample image-processing is a Cloud Run service which performs asynchronous processing on images.
 package main
 
@@ -38,8 +40,6 @@ func main() {
 	log.Printf("Listening on port %s", port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
 }
-
-// [START run_imageproc_controller]
 
 // PubSubMessage is the payload of a Pub/Sub event.
 type PubSubMessage struct {
