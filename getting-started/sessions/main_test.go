@@ -53,3 +53,26 @@ func TestIndex(t *testing.T) {
 		t.Errorf("index second visit got:\n----\n%v\n----\nWant to contain %q", got, want)
 	}
 }
+
+func TestIndexCorrupted(t *testing.T) {
+	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
+	if projectID == "" {
+		t.Skip("GOLANG_SAMPLES_FIRESTORE_PROJECT not set")
+	}
+
+	a, err := newApp(projectID)
+	if err != nil {
+		t.Fatalf("newApp: %v", err)
+	}
+
+	r := httptest.NewRequest("GET", "/", nil)
+	r.Header.Set("Cookie", "this is not a valid session ID")
+
+	rr := httptest.NewRecorder()
+
+	a.index(rr, r)
+
+	if got, want := rr.Body.String(), "Views 1"; !strings.Contains(got, want) {
+		t.Errorf("index first visit got:\n----\n%v\n----\nWant to contain %q", got, want)
+	}
+}

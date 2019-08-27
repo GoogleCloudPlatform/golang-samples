@@ -83,11 +83,15 @@ func (a *app) index(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session, err := a.store.Get(r, "my-sessions-name")
+	// name is a non-empty identifier for this app's sessions. Set it to
+	// something descriptive for your app. It is used as the Firestore
+	// collection name that stores the sessions.
+	name := "color-views"
+	session, err := a.store.Get(r, name)
 	if err != nil {
+		// Could not get the session. Log an error and continue, saving a new
+		// session.
 		log.Printf("store.Get: %v", err)
-		http.Error(w, "Unable to get session", http.StatusInternalServerError)
-		return
 	}
 
 	if session.IsNew {
