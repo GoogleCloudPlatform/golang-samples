@@ -46,9 +46,11 @@ func TestPurgeProductsInProductSet(t *testing.T) {
 	if err := createProductSet(&buf, tc.ProjectID, location, productSetID, productSetDisplayName); err != nil {
 		t.Fatalf("createProductSet: %v", err)
 	}
+	defer deleteProductSet(&buf, tc.ProjectID, location, productSetID)
 	if err := createProduct(&buf, tc.ProjectID, location, productID, productDisplayName, productCategory); err != nil {
 		t.Fatalf("createProduct: %v", err)
 	}
+	defer deleteProduct(&buf, tc.ProjectID, location, productID)
 
 	// Make sure the product is not in the product set.
 	buf.Reset()
@@ -74,7 +76,7 @@ func TestPurgeProductsInProductSet(t *testing.T) {
 	}
 
 	// Purge the products in the product set.
-	if err := purgeProductsInProductSet(&buf, tc.ProjectID, location, productSetID, true); err != nil {
+	if err := purgeProductsInProductSet(&buf, tc.ProjectID, location, productSetID); err != nil {
 		t.Fatalf("purgeProductsInProductSet: %v", err)
 	}
 
@@ -86,8 +88,4 @@ func TestPurgeProductsInProductSet(t *testing.T) {
 	if got := buf.String(); strings.Contains(got, productID) {
 		t.Errorf("Product ID %s was not removed", productID)
 	}
-
-	// Clean up.
-	deleteProduct(&buf, tc.ProjectID, location, productID)
-	deleteProductSet(&buf, tc.ProjectID, location, productSetID)
 }

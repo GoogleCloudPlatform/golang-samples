@@ -15,7 +15,7 @@
 // Package productsearch contains samples for Google Cloud Vision API Product Search.
 package productsearch
 
-// [START vision_product_search_purge_products_in_product_set]
+// [START vision_product_search_purge_orphan_products]
 import (
 	"context"
 	"fmt"
@@ -25,11 +25,10 @@ import (
 	visionpb "google.golang.org/genproto/googleapis/cloud/vision/v1"
 )
 
-// purgeProductsInProductSet deletes all products in a product set.
-func purgeProductsInProductSet(w io.Writer, projectID string, location string, productSetID string) error {
+// purgeOrphanProducts deletes all products not in any product sets.
+func purgeOrphanProducts(w io.Writer, projectID string, location string) error {
 	// projectID := "your-gcp-project-id"
 	// location := "us-west1"
-	// productSetID := "sampleProductSetID"
 
 	ctx := context.Background()
 	c, err := vision.NewProductSearchClient(ctx)
@@ -40,10 +39,8 @@ func purgeProductsInProductSet(w io.Writer, projectID string, location string, p
 
 	req := &visionpb.PurgeProductsRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
-		Target: &visionpb.PurgeProductsRequest_ProductSetPurgeConfig{
-			ProductSetPurgeConfig: &visionpb.ProductSetPurgeConfig{
-				ProductSetId: productSetID,
-			},
+		Target: &visionpb.PurgeProductsRequest_DeleteOrphanProducts{
+			DeleteOrphanProducts: true,
 		},
 		Force: true,
 	}
@@ -51,7 +48,7 @@ func purgeProductsInProductSet(w io.Writer, projectID string, location string, p
 	// The purge operation is async.
 	op, err := c.PurgeProducts(ctx, req)
 	if err != nil {
-		return fmt.Errorf("PurgeProducts: %v", err)
+		return fmt.Errorf("NewProductSearchClient: %v", err)
 	}
 	fmt.Fprintf(w, "Processing operation name: %q\n", op.Name())
 
@@ -59,9 +56,9 @@ func purgeProductsInProductSet(w io.Writer, projectID string, location string, p
 		return fmt.Errorf("Wait: %v", err)
 	}
 
-	fmt.Fprintf(w, "Deleted products in product set.\n")
+	fmt.Fprintf(w, "Orphan products deleted.\n")
 
 	return nil
 }
 
-// [END vision_product_search_purge_products_in_product_set]
+// [END vision_product_search_purge_orphan_products]
