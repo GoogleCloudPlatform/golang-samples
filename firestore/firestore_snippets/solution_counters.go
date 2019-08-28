@@ -25,7 +25,7 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-// [START counter_classes]
+// [START fs_counter_classes]
 // counters/${ID}
 type Counter struct {
 	numShards int
@@ -34,9 +34,9 @@ type Counter struct {
 // counters/${ID}/shards/${NUM}
 type Shard map[string]int
 
-// [END counter_classes]
+// [END fs_counter_classes]
 
-// [START create_counter]
+// [START fs_create_counter]
 func (d *Counter) сreateCounter(ctx context.Context, docRef *firestore.DocumentRef) []error {
 	// Initialize the counter document, then initialize each shard.
 	errsList := make([]error, 0, d.numShards)
@@ -53,9 +53,9 @@ func (d *Counter) сreateCounter(ctx context.Context, docRef *firestore.Document
 	return errsList
 }
 
-// [END create_counter]
+// [END fs_create_counter]
 
-// [START increment_counter]
+// [START fs_increment_counter]
 func (d *Counter) incrementCounter(ctx context.Context, docRef *firestore.DocumentRef) (*firestore.WriteResult, error) {
 	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
 	docID := strconv.Itoa(rng.Intn(d.numShards))
@@ -67,9 +67,9 @@ func (d *Counter) incrementCounter(ctx context.Context, docRef *firestore.Docume
 		})
 }
 
-// [END increment_counter]
+// [END fs_increment_counter]
 
-// [START get_count]
+// [START fs_get_count]
 func (d *Counter) getCount(ctx context.Context, docRef *firestore.DocumentRef) (total int64, err error) {
 	// Sum the count of each shard in the subcollection
 	shards := docRef.Collection("shards").Documents(ctx)
@@ -92,4 +92,4 @@ func (d *Counter) getCount(ctx context.Context, docRef *firestore.DocumentRef) (
 	return total, nil
 }
 
-// [END get_count]
+// [END fs_get_count]
