@@ -24,6 +24,7 @@ import (
 	"net/http"
 	"os"
 
+	"cloud.google.com/go/firestore"
 	firestoregorilla "github.com/GoogleCloudPlatform/firestore-gorilla-go"
 	"github.com/gorilla/sessions"
 )
@@ -61,7 +62,11 @@ func main() {
 // newApp creates a new app.
 func newApp(projectID string) (*app, error) {
 	ctx := context.Background()
-	store, err := firestoregorilla.New(ctx, projectID)
+	client, err := firestore.NewClient(ctx, projectID)
+	if err != nil {
+		log.Fatalf("firestore.NewClient: %v", err)
+	}
+	store, err := firestoregorilla.New(ctx, client)
 	if err != nil {
 		log.Fatalf("firestoregorilla.New: %v", err)
 	}
@@ -95,10 +100,11 @@ func (a *app) index(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if session.IsNew {
-		session.Values["views"] = 0
+		// firestoregorilla uses JSON, which unmarshals numbers as float64s.
+		session.Values["views"] = float64(0)
 		session.Values["color"] = colors[rand.Intn(len(colors))]
 	}
-	session.Values["views"] = session.Values["views"].(int) + 1
+	session.Values["views"] = session.Values["views"].(float64) + 1
 	if err := session.Save(r, w); err != nil {
 		log.Printf("Save: %v", err)
 		// Don't return early so the user still gets a response.
