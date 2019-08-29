@@ -11,15 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-runtime: go
-env: flex
+# [START memorystore_go_app_yaml_standard]
+runtime: go111
 
 # Update with Redis instance details
 env_variables:
   REDISHOST: '<REDIS_IP>'
   REDISPORT: '6379'
 
-# Update with Redis instance network name
-network:
-  name: default
+# Update with Serverless VPC Access connector details
+vpc_access_connector:
+  name: 'projects/<PROJECT_ID>/locations/<REGION>/connectors/<CONNECTOR_NAME>'
+# [END memorystore_go_app_yaml_standard]
