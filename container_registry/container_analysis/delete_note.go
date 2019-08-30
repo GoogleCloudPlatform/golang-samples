@@ -30,7 +30,7 @@ func deleteNote(noteID, projectID string) error {
 	ctx := context.Background()
 	client, err := containeranalysis.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewGrafeasV1Beta1Client: %v", err)
+		return fmt.Errorf("NewClient: %v", err)
 	}
 	defer client.Close()
 

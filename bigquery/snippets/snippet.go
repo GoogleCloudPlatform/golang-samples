@@ -38,34 +38,23 @@ func noOpCommentFunc() {
 	// [START bigquery_copy_table]
 	// [START bigquery_copy_table_cmek]
 	// [START bigquery_copy_table_multiple_source]
-	// [START bigquery_create_dataset]
 	// [START bigquery_create_table]
 	// [START bigquery_create_table_clustered]
 	// [START bigquery_create_table_cmek]
 	// [START bigquery_create_table_partitioned]
 	// [START bigquery_create_view]
-	// [START bigquery_delete_dataset]
-	// [START bigquery_delete_label_dataset]
 	// [START bigquery_delete_label_table]
-	// [START bigquery_delete_model]
 	// [START bigquery_delete_table]
 	// [START bigquery_extract_table]
 	// [START bigquery_extract_table_compressed]
 	// [START bigquery_extract_table_json]
-	// [START bigquery_get_dataset]
-	// [START bigquery_get_dataset_labels]
 	// [START bigquery_get_job]
-	// [START bigquery_get_model]
 	// [START bigquery_get_table]
 	// [START bigquery_get_table_labels]
 	// [START bigquery_get_view]
 	// [START bigquery_grant_view_access]
-	// [START bigquery_label_dataset]
 	// [START bigquery_label_table]
-	// [START bigquery_list_datasets]
-	// [START bigquery_list_datasets_by_label]
 	// [START bigquery_list_jobs]
-	// [START bigquery_list_models]
 	// [START bigquery_list_tables]
 	// [START bigquery_load_from_file]
 	// [START bigquery_load_table_clustered]
@@ -100,11 +89,7 @@ func noOpCommentFunc() {
 	// [START bigquery_relax_column_query_append]
 	// [START bigquery_table_insert_rows]
 	// [START bigquery_undelete_table]
-	// [START bigquery_update_dataset_access]
-	// [START bigquery_update_dataset_description]
-	// [START bigquery_update_dataset_expiration]
 	// [START bigquery_update_table_cmek]
-	// [START bigquery_update_model_description]
 	// [START bigquery_update_table_description]
 	// [START bigquery_update_table_expiration]
 	// [START bigquery_update_view_query]
@@ -121,34 +106,23 @@ func noOpCommentFunc() {
 	// [END bigquery_copy_table]
 	// [END bigquery_copy_table_cmek]
 	// [END bigquery_copy_table_multiple_source]
-	// [END bigquery_create_dataset]
 	// [END bigquery_create_table]
 	// [END bigquery_create_table_clustered]
 	// [END bigquery_create_table_cmek]
 	// [END bigquery_create_table_partitioned]
 	// [END bigquery_create_view]
-	// [END bigquery_delete_dataset]
-	// [END bigquery_delete_label_dataset]
 	// [END bigquery_delete_label_table]
-	// [END bigquery_delete_model]
 	// [END bigquery_delete_table]
 	// [END bigquery_extract_table]
 	// [END bigquery_extract_table_compressed]
 	// [END bigquery_extract_table_json]
-	// [END bigquery_get_dataset]
-	// [END bigquery_get_dataset_labels]
 	// [END bigquery_get_job]
-	// [END bigquery_get_model]
 	// [END bigquery_get_table]
 	// [END bigquery_get_table_labels]
 	// [END bigquery_get_view]
 	// [END bigquery_grant_view_access]
-	// [END bigquery_label_dataset]
 	// [END bigquery_label_table]
-	// [END bigquery_list_datasets]
-	// [END bigquery_list_datasets_by_label]
 	// [END bigquery_list_jobs]
-	// [END bigquery_list_models]
 	// [END bigquery_list_tables]
 	// [END bigquery_load_from_file]
 	// [END bigquery_load_table_clustered]
@@ -183,11 +157,7 @@ func noOpCommentFunc() {
 	// [END bigquery_relax_column_query_append]
 	// [END bigquery_table_insert_rows]
 	// [END bigquery_undelete_table]
-	// [END bigquery_update_dataset_access]
-	// [END bigquery_update_model_description]
 	// [END bigquery_update_table_cmek]
-	// [END bigquery_update_dataset_description]
-	// [END bigquery_update_dataset_expiration]
 	// [END bigquery_update_table_description]
 	// [END bigquery_update_table_expiration]
 	// [END bigquery_update_view_query]
@@ -204,19 +174,6 @@ func cancelJob(client *bigquery.Client, jobID string) error {
 	// [END bigquery_cancel_job]
 }
 
-func createDataset(client *bigquery.Client, datasetID string) error {
-	ctx := context.Background()
-	// [START bigquery_create_dataset]
-	meta := &bigquery.DatasetMetadata{
-		Location: "US", // Create the dataset in the US.
-	}
-	if err := client.Dataset(datasetID).Create(ctx, meta); err != nil {
-		return err
-	}
-	// [END bigquery_create_dataset]
-	return nil
-}
-
 func createView(client *bigquery.Client, datasetID, tableID string) error {
 	ctx := context.Background()
 	// [START bigquery_create_view]
@@ -230,199 +187,6 @@ func createView(client *bigquery.Client, datasetID, tableID string) error {
 		return err
 	}
 	// [END bigquery_create_view]
-	return nil
-}
-
-func updateDatasetDescription(client *bigquery.Client, datasetID string) error {
-	ctx := context.Background()
-	// [START bigquery_update_dataset_description]
-	ds := client.Dataset(datasetID)
-	meta, err := ds.Metadata(ctx)
-	if err != nil {
-		return err
-	}
-	update := bigquery.DatasetMetadataToUpdate{
-		Description: "Updated Description.",
-	}
-	if _, err = ds.Update(ctx, update, meta.ETag); err != nil {
-		return err
-	}
-	// [END bigquery_update_dataset_description]
-	return nil
-}
-
-func updateDatasetDefaultExpiration(client *bigquery.Client, datasetID string) error {
-	ctx := context.Background()
-	// [START bigquery_update_dataset_expiration]
-	ds := client.Dataset(datasetID)
-	meta, err := ds.Metadata(ctx)
-	if err != nil {
-		return err
-	}
-	update := bigquery.DatasetMetadataToUpdate{
-		DefaultTableExpiration: 24 * time.Hour,
-	}
-	if _, err := client.Dataset(datasetID).Update(ctx, update, meta.ETag); err != nil {
-		return err
-	}
-	// [END bigquery_update_dataset_expiration]
-	return nil
-}
-
-func updateDatasetAccessControl(client *bigquery.Client, datasetID string) error {
-	ctx := context.Background()
-	// [START bigquery_update_dataset_access]
-	ds := client.Dataset(datasetID)
-	meta, err := ds.Metadata(ctx)
-	if err != nil {
-		return err
-	}
-	// Append a new access control entry to the existing access list.
-	update := bigquery.DatasetMetadataToUpdate{
-		Access: append(meta.Access, &bigquery.AccessEntry{
-			Role:       bigquery.ReaderRole,
-			EntityType: bigquery.UserEmailEntity,
-			Entity:     "sample.bigquery.dev@gmail.com"},
-		),
-	}
-
-	// Leverage the ETag for the update to assert there's been no modifications to the
-	// dataset since the metadata was originally read.
-	if _, err := ds.Update(ctx, update, meta.ETag); err != nil {
-		return err
-	}
-	// [END bigquery_update_dataset_access]
-	return nil
-}
-
-func datasetLabels(client *bigquery.Client, w io.Writer, datasetID string) error {
-	ctx := context.Background()
-	// [START bigquery_get_dataset_labels]
-	meta, err := client.Dataset(datasetID).Metadata(ctx)
-	if err != nil {
-		return err
-	}
-	fmt.Fprintf(w, "Dataset %s labels:\n", datasetID)
-	if len(meta.Labels) == 0 {
-		fmt.Fprintln(w, "Dataset has no labels defined.")
-		return nil
-	}
-	for k, v := range meta.Labels {
-		fmt.Fprintf(w, "\t%s:%s\n", k, v)
-	}
-	// [END bigquery_get_dataset_labels]
-	return nil
-}
-
-func addDatasetLabel(client *bigquery.Client, datasetID string) error {
-	ctx := context.Background()
-	// [START bigquery_label_dataset]
-	ds := client.Dataset(datasetID)
-	meta, err := ds.Metadata(ctx)
-	if err != nil {
-		return err
-	}
-
-	update := bigquery.DatasetMetadataToUpdate{}
-	update.SetLabel("color", "green")
-	if _, err := ds.Update(ctx, update, meta.ETag); err != nil {
-		return err
-	}
-	// [END bigquery_label_dataset]
-	return nil
-}
-
-func deleteDatasetLabel(client *bigquery.Client, datasetID string) error {
-	ctx := context.Background()
-	// [START bigquery_delete_label_dataset]
-	ds := client.Dataset(datasetID)
-	meta, err := ds.Metadata(ctx)
-	if err != nil {
-		return err
-	}
-	update := bigquery.DatasetMetadataToUpdate{}
-	update.DeleteLabel("color")
-	if _, err := ds.Update(ctx, update, meta.ETag); err != nil {
-		return err
-	}
-	// [END bigquery_delete_label_dataset]
-	return nil
-}
-
-func deleteEmptyDataset(client *bigquery.Client, datasetID string) error {
-	ctx := context.Background()
-	// [START bigquery_delete_dataset]
-	if err := client.Dataset(datasetID).Delete(ctx); err != nil {
-		return fmt.Errorf("Failed to delete dataset: %v", err)
-	}
-	// [END bigquery_delete_dataset]
-	return nil
-}
-
-func listDatasets(client *bigquery.Client, w io.Writer) error {
-	ctx := context.Background()
-	// [START bigquery_list_datasets]
-	it := client.Datasets(ctx)
-	for {
-		dataset, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-		fmt.Fprintln(w, dataset.DatasetID)
-	}
-	// [END bigquery_list_datasets]
-	return nil
-}
-
-func listDatasetsByLabel(client *bigquery.Client, w io.Writer) error {
-	ctx := context.Background()
-	// [START bigquery_list_datasets_by_label]
-	it := client.Datasets(ctx)
-	it.Filter = "labels.color:green"
-	for {
-		dataset, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return err
-		}
-		fmt.Fprintf(w, "dataset: %s\n", dataset.DatasetID)
-	}
-	// [END bigquery_list_datasets_by_label]
-	return nil
-}
-
-func printDatasetInfo(client *bigquery.Client, w io.Writer, datasetID string) error {
-	ctx := context.Background()
-	// [START bigquery_get_dataset]
-	meta, err := client.Dataset(datasetID).Metadata(ctx)
-	if err != nil {
-		return err
-	}
-
-	fmt.Fprintf(w, "Dataset ID: %s\n", datasetID)
-	fmt.Fprintf(w, "Description: %s\n", meta.Description)
-	fmt.Fprintln(w, "Labels:")
-	for k, v := range meta.Labels {
-		fmt.Fprintf(w, "\t%s: %s", k, v)
-	}
-	fmt.Fprintln(w, "Tables:")
-	it := client.Dataset(datasetID).Tables(ctx)
-
-	cnt := 0
-	for {
-		t, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-		cnt++
-		fmt.Fprintf(w, "\t%s\n", t.TableID)
-	}
-	if cnt == 0 {
-		fmt.Fprintln(w, "\tThis dataset does not contain any tables.")
-	}
-	// [END bigquery_get_dataset]
 	return nil
 }
 
@@ -825,24 +589,6 @@ func updateTableChangeCMEK(client *bigquery.Client, datasetID, tableID string) e
 	return nil
 }
 
-func updateModelDescription(client *bigquery.Client, datasetID, modelID string) error {
-	ctx := context.Background()
-	// [START bigquery_update_model_description]
-	model := client.Dataset(datasetID).Model(modelID)
-	oldMeta, err := model.Metadata(ctx)
-	if err != nil {
-		return fmt.Errorf("Metadata: %v", err)
-	}
-	update := bigquery.ModelMetadataToUpdate{
-		Description: "This model was modified from a Go program",
-	}
-	if _, err = model.Update(ctx, update, oldMeta.ETag); err != nil {
-		return fmt.Errorf("Update: %v", err)
-	}
-	// [END bigquery_update_model_description]
-	return nil
-}
-
 func updateTableDescription(client *bigquery.Client, datasetID, tableID string) error {
 	ctx := context.Background()
 	// [START bigquery_update_table_description]
@@ -1010,25 +756,6 @@ func deleteTableLabel(client *bigquery.Client, datasetID, tableID string) error 
 		return err
 	}
 	// [END bigquery_delete_label_table]
-	return nil
-}
-
-func listModels(client *bigquery.Client, w io.Writer, datasetID string) error {
-	ctx := context.Background()
-	// [START bigquery_list_models]
-	fmt.Fprintf(w, "Models contained in dataset '%s'\n", datasetID)
-	it := client.Dataset(datasetID).Models(ctx)
-	for {
-		m, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return err
-		}
-		fmt.Fprintf(w, "Model: %s\n", m.FullyQualifiedName())
-	}
-	// [END bigquery_list_models]
 	return nil
 }
 
@@ -1370,18 +1097,6 @@ func printTableInfo(client *bigquery.Client, w io.Writer, datasetID, tableID str
 	return nil
 }
 
-func printModelInfo(client *bigquery.Client, w io.Writer, datasetID, modelID string) error {
-	ctx := context.Background()
-	// [START bigquery_get_model]
-	meta, err := client.Dataset(datasetID).Model(modelID).Metadata(ctx)
-	if err != nil {
-		return fmt.Errorf("Metadata: %v", err)
-	}
-	fmt.Fprintf(w, "Got model '%q' with friendly name '%q'\n", modelID, meta.Name)
-	// [END bigquery_get_model]
-	return nil
-}
-
 func browseTable(client *bigquery.Client, w io.Writer, datasetID, tableID string) error {
 	ctx := context.Background()
 	// [START bigquery_browse_table]
@@ -1505,17 +1220,6 @@ func copyMultiTable(client *bigquery.Client, datasetID, dstTableID string) error
 		return err
 	}
 	// [END bigquery_copy_table_multiple_source]
-	return nil
-}
-
-func deleteModel(client *bigquery.Client, datasetID, modelID string) error {
-	ctx := context.Background()
-	// [START bigquery_delete_model]
-	model := client.Dataset(datasetID).Model(modelID)
-	if err := model.Delete(ctx); err != nil {
-		return fmt.Errorf("Delete: %v", err)
-	}
-	// [END bigquery_delete_model]
 	return nil
 }
 

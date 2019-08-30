@@ -15,11 +15,13 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -99,6 +101,21 @@ outer:
 	}
 	if !ok {
 		t.Errorf("got bucket list: %v; want %q in the list", buckets, bucketName)
+	}
+}
+
+func TestGetBucketMetadata(t *testing.T) {
+	testutil.SystemTest(t)
+	setup(t)
+
+	bucketMetadataBuf := new(bytes.Buffer)
+	if _, err := getBucketMetadata(bucketMetadataBuf, storageClient, bucketName); err != nil {
+		t.Errorf("getBucketMetadata: %#v", err)
+	}
+
+	got := bucketMetadataBuf.String()
+	if want := "BucketName:"; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
 	}
 }
 

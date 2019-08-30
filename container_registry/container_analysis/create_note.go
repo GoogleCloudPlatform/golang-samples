@@ -29,7 +29,7 @@ func createNote(noteID, projectID string) (*grafeaspb.Note, error) {
 	ctx := context.Background()
 	client, err := containeranalysis.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("NewGrafeasV1Beta1Client: %v", err)
+		return nil, fmt.Errorf("NewClient: %v", err)
 	}
 	defer client.Close()
 
@@ -46,10 +46,10 @@ func createNote(noteID, projectID string) (*grafeaspb.Note, error) {
 						{
 							AffectedCpeUri:  "your-uri-here",
 							AffectedPackage: "your-package-here",
-							MinAffectedVersion: &grafeaspb.Version{
+							AffectedVersionStart: &grafeaspb.Version{
 								Kind: grafeaspb.Version_MINIMUM,
 							},
-							FixedVersion: &grafeaspb.Version{
+							AffectedVersionEnd: &grafeaspb.Version{
 								Kind: grafeaspb.Version_MAXIMUM,
 							},
 						},

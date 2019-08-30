@@ -44,9 +44,11 @@ var allowList = []string{
 	"**/*.html",
 	"**/*.js",
 	"**/*.sql",
+	"**/*.dot",
 
 	"LICENSE",
-	"**/Dockerfile*",
+	"**/*Dockerfile*",
+	"**/.dockerignore",
 	"**/Makefile",
 
 	// Primarily ML APIs.
@@ -71,6 +73,10 @@ var allowList = []string{
 
 	// Cloud Functions codelab picture.
 	"functions/codelabs/gopher/gophercolor.png",
+
+	// Cloud Functions configs.
+	"functions/ocr/app/config.json",
+	"functions/slack/config.json",
 
 	// Samples that aren't really code. Legacy.
 	"**/appengine/**/*.txt",

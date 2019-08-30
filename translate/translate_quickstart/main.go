@@ -12,11 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START translate_quickstart]
-
 // Sample translate-quickstart translates "Hello, world!" into Russian.
 package main
 
+// [START translate_quickstart]
 import (
 	"context"
 	"fmt"

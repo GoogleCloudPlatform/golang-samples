@@ -30,7 +30,7 @@ func getNote(noteID, projectID string) (*grafeaspb.Note, error) {
 	ctx := context.Background()
 	client, err := containeranalysis.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("NewGrafeasV1Beta1Client: %v", err)
+		return nil, fmt.Errorf("NewClient: %v", err)
 	}
 	defer client.Close()
 
