@@ -1279,6 +1279,8 @@ func updateUsingBatchDML(ctx context.Context, w io.Writer, client *spanner.Clien
 
 // [START spanner_create_table_with_datatypes]
 
+// Creates a Cloud Spanner table comprised of columns for each supported data type
+// See https://cloud.google.com/spanner/docs/data-types
 func createTableWithDatatypes(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
 	op, err := adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
 		Database: database,
@@ -1297,7 +1299,7 @@ func createTableWithDatatypes(ctx context.Context, w io.Writer, adminClient *dat
 		},
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("UpdateDatabaseDdl: %v", err)
 	}
 	if err := op.Wait(ctx); err != nil {
 		return err
@@ -1313,22 +1315,19 @@ func createTableWithDatatypes(ctx context.Context, w io.Writer, adminClient *dat
 func writeDatatypesData(ctx context.Context, w io.Writer, client *spanner.Client) error {
 	venueColumns := []string{"VenueId", "VenueName", "VenueInfo", "Capacity", "AvailableDates",
 		"LastContactDate", "OutdoorVenue", "PopularityScore", "LastUpdateTime"}
-	exampleBytes1 := []byte("Hello World 1")
-	exampleBytes2 := []byte("Hello World 2")
-	exampleBytes3 := []byte("Hello World 3")
-	var availableDates1 = []string{"2020-12-01", "2020-12-02", "2020-12-03"}
-	var availableDates2 = []string{"2020-11-01", "2020-11-05", "2020-11-15"}
-	var availableDates3 = []string{"2020-10-01", "2020-10-07"}
 	m := []*spanner.Mutation{
 		spanner.InsertOrUpdate("Venues", venueColumns,
-			[]interface{}{4, "Venue 4", exampleBytes1, 1800, availableDates1,
+			[]interface{}{4, "Venue 4", []byte("Hello World 1"), 1800,
+				[]string{"2020-12-01", "2020-12-02", "2020-12-03"},
 				"2018-09-02", false, 0.85543, spanner.CommitTimestamp}),
 		spanner.InsertOrUpdate("Venues", venueColumns,
-			[]interface{}{19, "Venue 19", exampleBytes2, 6300, availableDates2,
+			[]interface{}{19, "Venue 19", []byte("Hello World 2"), 6300,
+				[]string{"2020-11-01", "2020-11-05", "2020-11-15"},
 				"2019-01-15", true, 0.98716, spanner.CommitTimestamp}),
 		spanner.InsertOrUpdate("Venues", venueColumns,
-			[]interface{}{42, "Venue 42", exampleBytes3, 3000, availableDates3,
-				"2018-10-01", false, 0.72598, spanner.CommitTimestamp}),
+			[]interface{}{42, "Venue 42", []byte("Hello World 3"), 3000,
+				[]string{"2020-10-01", "2020-10-07"}, "2018-10-01",
+				false, 0.72598, spanner.CommitTimestamp}),
 	}
 	_, err := client.Apply(ctx, m)
 	return err
@@ -1344,8 +1343,8 @@ func queryWithArray(ctx context.Context, w io.Writer, client *spanner.Client) er
 	var exampleArray = []civil.Date{date1, date2}
 	stmt := spanner.Statement{
 		SQL: `SELECT VenueId, VenueName, AvailableDate FROM Venues v,
-            UNNEST(v.AvailableDates) as AvailableDate 
-            WHERE AvailableDate IN UNNEST(@availableDates)`,
+            	UNNEST(v.AvailableDates) as AvailableDate 
+            	WHERE AvailableDate IN UNNEST(@availableDates)`,
 		Params: map[string]interface{}{
 			"availableDates": exampleArray,
 		},
@@ -1378,7 +1377,7 @@ func queryWithBool(ctx context.Context, w io.Writer, client *spanner.Client) err
 	var exampleBool = true
 	stmt := spanner.Statement{
 		SQL: `SELECT VenueId, VenueName, OutdoorVenue FROM Venues
-            WHERE OutdoorVenue = @outdoorVenue`,
+            	WHERE OutdoorVenue = @outdoorVenue`,
 		Params: map[string]interface{}{
 			"outdoorVenue": exampleBool,
 		},
@@ -1411,7 +1410,7 @@ func queryWithBytes(ctx context.Context, w io.Writer, client *spanner.Client) er
 	var exampleBytes = []byte("Hello World 1")
 	stmt := spanner.Statement{
 		SQL: `SELECT VenueId, VenueName FROM Venues
-            WHERE VenueInfo = @venueInfo`,
+            	WHERE VenueInfo = @venueInfo`,
 		Params: map[string]interface{}{
 			"venueInfo": exampleBytes,
 		},
@@ -1443,7 +1442,7 @@ func queryWithDate(ctx context.Context, w io.Writer, client *spanner.Client) err
 	var exampleDate = civil.Date{Year: 2019, Month: time.January, Day: 1}
 	stmt := spanner.Statement{
 		SQL: `SELECT VenueId, VenueName, LastContactDate FROM Venues
-            WHERE LastContactDate < @lastContactDate`,
+            	WHERE LastContactDate < @lastContactDate`,
 		Params: map[string]interface{}{
 			"lastContactDate": exampleDate,
 		},
@@ -1476,7 +1475,7 @@ func queryWithFloat(ctx context.Context, w io.Writer, client *spanner.Client) er
 	var exampleFloat = 0.8
 	stmt := spanner.Statement{
 		SQL: `SELECT VenueId, VenueName, PopularityScore FROM Venues
-            WHERE PopularityScore > @popularityScore`,
+            	WHERE PopularityScore > @popularityScore`,
 		Params: map[string]interface{}{
 			"popularityScore": exampleFloat,
 		},
@@ -1509,7 +1508,7 @@ func queryWithInt(ctx context.Context, w io.Writer, client *spanner.Client) erro
 	var exampleInt = 3000
 	stmt := spanner.Statement{
 		SQL: `SELECT VenueId, VenueName, Capacity FROM Venues
-            WHERE Capacity >= @capacity`,
+            	WHERE Capacity >= @capacity`,
 		Params: map[string]interface{}{
 			"capacity": exampleInt,
 		},
@@ -1541,7 +1540,7 @@ func queryWithString(ctx context.Context, w io.Writer, client *spanner.Client) e
 	var exampleString = "Venue 42"
 	stmt := spanner.Statement{
 		SQL: `SELECT VenueId, VenueName FROM Venues
-            WHERE VenueName = @venueName`,
+            	WHERE VenueName = @venueName`,
 		Params: map[string]interface{}{
 			"venueName": exampleString,
 		},
@@ -1573,7 +1572,7 @@ func queryWithTimestampParameter(ctx context.Context, w io.Writer, client *spann
 	var exampleTimestamp = time.Now()
 	stmt := spanner.Statement{
 		SQL: `SELECT VenueId, VenueName, LastUpdateTime FROM Venues
-            WHERE LastUpdateTime < @lastUpdateTime`,
+            	WHERE LastUpdateTime < @lastUpdateTime`,
 		Params: map[string]interface{}{
 			"lastUpdateTime": exampleTimestamp,
 		},
@@ -1603,7 +1602,7 @@ func queryWithTimestampParameter(ctx context.Context, w io.Writer, client *spann
 func queryNewTable(ctx context.Context, w io.Writer, client *spanner.Client) error {
 	stmt := spanner.Statement{
 		SQL: `SELECT SingerId, VenueId, EventDate, Revenue, LastUpdateTime FROM Performances
-			ORDER BY LastUpdateTime DESC`}
+				ORDER BY LastUpdateTime DESC`}
 	iter := client.Single().Query(ctx, stmt)
 	defer iter.Stop()
 	for {
