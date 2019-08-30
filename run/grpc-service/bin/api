@@ -1,0 +1,19 @@
+#!/bin/bash
+
+DIR="$(dirname "$0")"
+. "${DIR}/config"
+
+mkdir -p pkg/api/v1
+mkdir -p doc/v1
+
+protoc \
+    --proto_path api/v1 \
+    --proto_path $GOOGLEAPIS_DIR \
+    --go_out "plugins=grpc:pkg/api/v1" \
+    message.proto
+
+protoc \
+    --proto_path api/v1 \
+    --proto_path $GOOGLEAPIS_DIR \
+    --swagger_out "logtostderr=true:doc/v1" \
+    message.proto

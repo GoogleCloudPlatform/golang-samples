@@ -1,0 +1,26 @@
+#!/bin/bash
+
+DIR="$(dirname "$0")"
+. "${DIR}/config"
+
+export GO111MODULE=on
+CGO_ENABLED=0 \
+    go build -a -tags grpcping \
+    -ldflags '-w -extldflags "-static"' \
+    -mod vendor \
+    -o ./bin/cli ./cmd/client/
+
+export SERVICE_URL=$(gcloud beta run services describe $SERVICE \
+    --platform managed \
+    --region $SERVICE_REGION \
+    --format="value(status.domain)")
+
+
+echo -e "Client CLI generated
+Usage:
+ Unary Request/Unary Response
+ bin/cli --server ${SERVICE_URL/https:\/\//}:443 --message hi
+
+ Unary Request/Stream Response
+ bin/cli --server ${SERVICE_URL/https:\/\//}:443 --message hi --stream 5
+"

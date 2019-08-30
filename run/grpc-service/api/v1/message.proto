@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package message;
+
+import "google/protobuf/timestamp.proto";
+
+service MessageService {
+  rpc Send(Request) returns (Response) {}
+  rpc SendStream(stream Request) returns (stream Response) {}
+}
+
+message Request {
+  string message = 1;
+}
+
+message Content {
+  int32 index = 1;
+  string message = 2;
+  google.protobuf.Timestamp received_on = 3;
+}
+
+message Response {
+  Content content = 1;
+}

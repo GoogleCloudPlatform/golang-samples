@@ -1,0 +1,27 @@
+#!/bin/bash
+
+DIR="$(dirname "$0")"
+. "${DIR}/config"
+
+
+gcloud iam service-accounts create $SERVICE \
+    --display-name "Service Invoker Account for ${SERVICE}" \
+    --quiet
+
+gcloud beta run services add-iam-policy-binding $SERVICE \
+	--member "serviceAccount:${SERVICE_ACCOUNT}" \
+	--region "${SERVICE_REGION}" \
+	--role roles/run.invoker
+
+gcloud projects add-iam-policy-binding $PROJECT \
+	--member "serviceAccount:${SERVICE_ACCOUNT}" \
+    --role roles/logging.logWriter
+
+gcloud projects add-iam-policy-binding $PROJECT \
+	--member "serviceAccount:${SERVICE_ACCOUNT}" \
+    --role roles/cloudtrace.agent
+
+gcloud projects add-iam-policy-binding $PROJECT \
+	--member "serviceAccount:${SERVICE_ACCOUNT}" \
+    --role roles/monitoring.metricWriter
+

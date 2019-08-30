@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# defined
+export SERVICE="grpc-service"
+export SERVICE_REGION="us-central1"
+export SERVICE_VERSION="v1"
+
+# derived
+export PROJECT=$(gcloud config get-value project)
+export SERVICE_ACCOUNT="${SERVICE}@${PROJECT}.iam.gserviceaccount.com"
+
