@@ -26,6 +26,7 @@ import (
 	"strconv"
 	"time"
 
+	"cloud.google.com/go/civil"
 	"cloud.google.com/go/spanner"
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
 	"google.golang.org/api/iterator"
@@ -38,46 +39,55 @@ type adminCommand func(ctx context.Context, w io.Writer, adminClient *database.D
 
 var (
 	commands = map[string]command{
-		"write":                      write,
-		"delete":                     delete,
-		"query":                      query,
-		"read":                       read,
-		"update":                     update,
-		"writetransaction":           writeWithTransaction,
-		"querynewcolumn":             queryNewColumn,
-		"queryindex":                 queryUsingIndex,
-		"readindex":                  readUsingIndex,
-		"readstoringindex":           readStoringIndex,
-		"readonlytransaction":        readOnlyTransaction,
-		"readstaledata":              readStaleData,
-		"readbatchdata":              readBatchData,
-		"updatewithtimestamp":        updateWithTimestamp,
-		"querywithtimestamp":         queryWithTimestamp,
-		"writewithtimestamp":         writeWithTimestamp,
-		"querynewtable":              queryNewTable,
-		"writetodocstable":           writeToDocumentsTable,
-		"updatedocstable":            updateDocumentsTable,
-		"querydocstable":             queryDocumentsTable,
-		"writewithhistory":           writeWithHistory,
-		"updatewithhistory":          updateWithHistory,
-		"querywithhistory":           queryWithHistory,
-		"writestructdata":            writeStructData,
-		"querywithstruct":            queryWithStruct,
-		"querywitharrayofstruct":     queryWithArrayOfStruct,
-		"querywithstructfield":       queryWithStructField,
-		"querywithnestedstructfield": queryWithNestedStructField,
-		"dmlinsert":                  insertUsingDML,
-		"dmlupdate":                  updateUsingDML,
-		"dmldelete":                  deleteUsingDML,
-		"dmlwithtimestamp":           updateUsingDMLWithTimestamp,
-		"dmlwriteread":               writeAndReadUsingDML,
-		"dmlupdatestruct":            updateUsingDMLStruct,
-		"dmlwrite":                   writeUsingDML,
-		"querywithparameter":         queryWithParameter,
-		"dmlwritetxn":                writeWithTransactionUsingDML,
-		"dmlupdatepart":              updateUsingPartitionedDML,
-		"dmldeletepart":              deleteUsingPartitionedDML,
-		"dmlbatchupdate":             updateUsingBatchDML,
+		"write":                       write,
+		"delete":                      delete,
+		"query":                       query,
+		"read":                        read,
+		"update":                      update,
+		"writetransaction":            writeWithTransaction,
+		"querynewcolumn":              queryNewColumn,
+		"queryindex":                  queryUsingIndex,
+		"readindex":                   readUsingIndex,
+		"readstoringindex":            readStoringIndex,
+		"readonlytransaction":         readOnlyTransaction,
+		"readstaledata":               readStaleData,
+		"readbatchdata":               readBatchData,
+		"updatewithtimestamp":         updateWithTimestamp,
+		"querywithtimestamp":          queryWithTimestamp,
+		"writewithtimestamp":          writeWithTimestamp,
+		"querynewtable":               queryNewTable,
+		"writetodocstable":            writeToDocumentsTable,
+		"updatedocstable":             updateDocumentsTable,
+		"querydocstable":              queryDocumentsTable,
+		"writewithhistory":            writeWithHistory,
+		"updatewithhistory":           updateWithHistory,
+		"querywithhistory":            queryWithHistory,
+		"writestructdata":             writeStructData,
+		"querywithstruct":             queryWithStruct,
+		"querywitharrayofstruct":      queryWithArrayOfStruct,
+		"querywithstructfield":        queryWithStructField,
+		"querywithnestedstructfield":  queryWithNestedStructField,
+		"dmlinsert":                   insertUsingDML,
+		"dmlupdate":                   updateUsingDML,
+		"dmldelete":                   deleteUsingDML,
+		"dmlwithtimestamp":            updateUsingDMLWithTimestamp,
+		"dmlwriteread":                writeAndReadUsingDML,
+		"dmlupdatestruct":             updateUsingDMLStruct,
+		"dmlwrite":                    writeUsingDML,
+		"querywithparameter":          queryWithParameter,
+		"dmlwritetxn":                 writeWithTransactionUsingDML,
+		"dmlupdatepart":               updateUsingPartitionedDML,
+		"dmldeletepart":               deleteUsingPartitionedDML,
+		"dmlbatchupdate":              updateUsingBatchDML,
+		"writedatatypesdata":          writeDatatypesData,
+		"querywitharray":              queryWithArray,
+		"querywithbool":               queryWithBool,
+		"querywithbytes":              queryWithBytes,
+		"querywithdate":               queryWithDate,
+		"querywithfloat":              queryWithFloat,
+		"querywithint":                queryWithInt,
+		"querywithstring":             queryWithString,
+		"querywithtimestampparameter": queryWithTimestampParameter,
 	}
 
 	adminCommands = map[string]adminCommand{
@@ -87,6 +97,7 @@ var (
 		"addstoringindex":                 addStoringIndex,
 		"addcommittimestamp":              addCommitTimestamp,
 		"createtablewithtimestamp":        createTableWithTimestamp,
+		"createtablewithdatatypes":        createTableWithDatatypes,
 		"createtabledocswithtimestamp":    createTableDocumentsWithTimestamp,
 		"createtabledocswithhistorytable": createTableDocumentsWithHistoryTable,
 	}
@@ -1266,10 +1277,332 @@ func updateUsingBatchDML(ctx context.Context, w io.Writer, client *spanner.Clien
 
 // [END spanner_dml_batch_update]
 
+// [START spanner_create_table_with_datatypes]
+
+// Creates a Cloud Spanner table comprised of columns for each supported data type
+// See https://cloud.google.com/spanner/docs/data-types
+func createTableWithDatatypes(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	op, err := adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
+		Database: database,
+		Statements: []string{
+			`CREATE TABLE Venues (
+				VenueId	INT64 NOT NULL,
+				VenueName STRING(100),
+				VenueInfo BYTES(MAX),
+				Capacity INT64,
+				AvailableDates ARRAY<DATE>,
+				LastContactDate DATE,
+				OutdoorVenue BOOL,
+				PopularityScore FLOAT64,
+				LastUpdateTime TIMESTAMP NOT NULL OPTIONS (allow_commit_timestamp=true)
+			) PRIMARY KEY (VenueId)`,
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("UpdateDatabaseDdl: %v", err)
+	}
+	if err := op.Wait(ctx); err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "Created Venues table in database [%s]\n", database)
+	return nil
+}
+
+// [END spanner_create_table_with_datatypes]
+
+// [START spanner_insert_datatypes_data]
+
+func writeDatatypesData(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	venueColumns := []string{"VenueId", "VenueName", "VenueInfo", "Capacity", "AvailableDates",
+		"LastContactDate", "OutdoorVenue", "PopularityScore", "LastUpdateTime"}
+	m := []*spanner.Mutation{
+		spanner.InsertOrUpdate("Venues", venueColumns,
+			[]interface{}{4, "Venue 4", []byte("Hello World 1"), 1800,
+				[]string{"2020-12-01", "2020-12-02", "2020-12-03"},
+				"2018-09-02", false, 0.85543, spanner.CommitTimestamp}),
+		spanner.InsertOrUpdate("Venues", venueColumns,
+			[]interface{}{19, "Venue 19", []byte("Hello World 2"), 6300,
+				[]string{"2020-11-01", "2020-11-05", "2020-11-15"},
+				"2019-01-15", true, 0.98716, spanner.CommitTimestamp}),
+		spanner.InsertOrUpdate("Venues", venueColumns,
+			[]interface{}{42, "Venue 42", []byte("Hello World 3"), 3000,
+				[]string{"2020-10-01", "2020-10-07"}, "2018-10-01",
+				false, 0.72598, spanner.CommitTimestamp}),
+	}
+	_, err := client.Apply(ctx, m)
+	return err
+}
+
+// [END spanner_insert_datatypes_data]
+
+// [START spanner_query_with_array_parameter]
+
+func queryWithArray(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	var date1 = civil.Date{Year: 2020, Month: time.October, Day: 1}
+	var date2 = civil.Date{Year: 2020, Month: time.November, Day: 1}
+	var exampleArray = []civil.Date{date1, date2}
+	stmt := spanner.Statement{
+		SQL: `SELECT VenueId, VenueName, AvailableDate FROM Venues v,
+            	UNNEST(v.AvailableDates) as AvailableDate 
+            	WHERE AvailableDate IN UNNEST(@availableDates)`,
+		Params: map[string]interface{}{
+			"availableDates": exampleArray,
+		},
+	}
+	iter := client.Single().Query(ctx, stmt)
+	defer iter.Stop()
+	for {
+		row, err := iter.Next()
+		if err == iterator.Done {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		var venueID int64
+		var venueName string
+		var availableDate civil.Date
+		if err := row.Columns(&venueID, &venueName, &availableDate); err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "%d %s %s\n", venueID, venueName, availableDate)
+	}
+}
+
+// [END spanner_query_with_array_parameter]
+
+// [START spanner_query_with_bool_parameter]
+
+func queryWithBool(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	var exampleBool = true
+	stmt := spanner.Statement{
+		SQL: `SELECT VenueId, VenueName, OutdoorVenue FROM Venues
+            	WHERE OutdoorVenue = @outdoorVenue`,
+		Params: map[string]interface{}{
+			"outdoorVenue": exampleBool,
+		},
+	}
+	iter := client.Single().Query(ctx, stmt)
+	defer iter.Stop()
+	for {
+		row, err := iter.Next()
+		if err == iterator.Done {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		var venueID int64
+		var venueName string
+		var outdoorVenue bool
+		if err := row.Columns(&venueID, &venueName, &outdoorVenue); err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "%d %s %t\n", venueID, venueName, outdoorVenue)
+	}
+}
+
+// [END spanner_query_with_bool_parameter]
+
+// [START spanner_query_with_bytes_parameter]
+
+func queryWithBytes(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	var exampleBytes = []byte("Hello World 1")
+	stmt := spanner.Statement{
+		SQL: `SELECT VenueId, VenueName FROM Venues
+            	WHERE VenueInfo = @venueInfo`,
+		Params: map[string]interface{}{
+			"venueInfo": exampleBytes,
+		},
+	}
+	iter := client.Single().Query(ctx, stmt)
+	defer iter.Stop()
+	for {
+		row, err := iter.Next()
+		if err == iterator.Done {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		var venueID int64
+		var venueName string
+		if err := row.Columns(&venueID, &venueName); err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "%d %s\n", venueID, venueName)
+	}
+}
+
+// [END spanner_query_with_bytes_parameter]
+
+// [START spanner_query_with_date_parameter]
+
+func queryWithDate(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	var exampleDate = civil.Date{Year: 2019, Month: time.January, Day: 1}
+	stmt := spanner.Statement{
+		SQL: `SELECT VenueId, VenueName, LastContactDate FROM Venues
+            	WHERE LastContactDate < @lastContactDate`,
+		Params: map[string]interface{}{
+			"lastContactDate": exampleDate,
+		},
+	}
+	iter := client.Single().Query(ctx, stmt)
+	defer iter.Stop()
+	for {
+		row, err := iter.Next()
+		if err == iterator.Done {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		var venueID int64
+		var venueName string
+		var lastContactDate civil.Date
+		if err := row.Columns(&venueID, &venueName, &lastContactDate); err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "%d %s %v\n", venueID, venueName, lastContactDate)
+	}
+}
+
+// [END spanner_query_with_date_parameter]
+
+// [START spanner_query_with_float_parameter]
+
+func queryWithFloat(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	var exampleFloat = 0.8
+	stmt := spanner.Statement{
+		SQL: `SELECT VenueId, VenueName, PopularityScore FROM Venues
+            	WHERE PopularityScore > @popularityScore`,
+		Params: map[string]interface{}{
+			"popularityScore": exampleFloat,
+		},
+	}
+	iter := client.Single().Query(ctx, stmt)
+	defer iter.Stop()
+	for {
+		row, err := iter.Next()
+		if err == iterator.Done {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		var venueID int64
+		var venueName string
+		var popularityScore float64
+		if err := row.Columns(&venueID, &venueName, &popularityScore); err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "%d %s %f\n", venueID, venueName, popularityScore)
+	}
+}
+
+// [END spanner_query_with_float_parameter]
+
+// [START spanner_query_with_int_parameter]
+
+func queryWithInt(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	var exampleInt = 3000
+	stmt := spanner.Statement{
+		SQL: `SELECT VenueId, VenueName, Capacity FROM Venues
+            	WHERE Capacity >= @capacity`,
+		Params: map[string]interface{}{
+			"capacity": exampleInt,
+		},
+	}
+	iter := client.Single().Query(ctx, stmt)
+	defer iter.Stop()
+	for {
+		row, err := iter.Next()
+		if err == iterator.Done {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		var venueID, capacity int64
+		var venueName string
+		if err := row.Columns(&venueID, &venueName, &capacity); err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "%d %s %d\n", venueID, venueName, capacity)
+	}
+}
+
+// [END spanner_query_with_int_parameter]
+
+// [START spanner_query_with_string_parameter]
+
+func queryWithString(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	var exampleString = "Venue 42"
+	stmt := spanner.Statement{
+		SQL: `SELECT VenueId, VenueName FROM Venues
+            	WHERE VenueName = @venueName`,
+		Params: map[string]interface{}{
+			"venueName": exampleString,
+		},
+	}
+	iter := client.Single().Query(ctx, stmt)
+	defer iter.Stop()
+	for {
+		row, err := iter.Next()
+		if err == iterator.Done {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		var venueID int64
+		var venueName string
+		if err := row.Columns(&venueID, &venueName); err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "%d %s\n", venueID, venueName)
+	}
+}
+
+// [END spanner_query_with_string_parameter]
+
+// [START spanner_query_with_timestamp_parameter]
+
+func queryWithTimestampParameter(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	var exampleTimestamp = time.Now()
+	stmt := spanner.Statement{
+		SQL: `SELECT VenueId, VenueName, LastUpdateTime FROM Venues
+            	WHERE LastUpdateTime < @lastUpdateTime`,
+		Params: map[string]interface{}{
+			"lastUpdateTime": exampleTimestamp,
+		},
+	}
+	iter := client.Single().Query(ctx, stmt)
+	defer iter.Stop()
+	for {
+		row, err := iter.Next()
+		if err == iterator.Done {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		var venueID int64
+		var venueName string
+		var lastUpdateTime time.Time
+		if err := row.Columns(&venueID, &venueName, &lastUpdateTime); err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "%d %s %s\n", venueID, venueName, lastUpdateTime)
+	}
+}
+
+// [END spanner_query_with_timestamp_parameter]
+
 func queryNewTable(ctx context.Context, w io.Writer, client *spanner.Client) error {
 	stmt := spanner.Statement{
 		SQL: `SELECT SingerId, VenueId, EventDate, Revenue, LastUpdateTime FROM Performances
-			ORDER BY LastUpdateTime DESC`}
+				ORDER BY LastUpdateTime DESC`}
 	iter := client.Single().Query(ctx, stmt)
 	defer iter.Stop()
 	for {
@@ -1535,7 +1868,9 @@ func main() {
 		updatewithhistory, querywithhistory, writestructdata, querywithstruct, querywitharrayofstruct,
 		querywithstructfield, querywithnestedstructfield, dmlinsert, dmlupdate, dmldelete,
 		dmlwithtimestamp, dmlwriteread, dmlwrite, dmlwritetxn, querywithparameter, dmlupdatepart,
-		dmldeletepart, dmlbatchupdate
+		dmldeletepart, dmlbatchupdate, createtablewithdatatypes, writedatatypesdata, querywitharray,
+		querywithbool, querywithbytes, querywithdate, querywithfloat, querywithint, querywithstring,
+		querywithtimestampparameter
 
 Examples:
 	spanner_snippets createdatabase projects/my-project/instances/my-instance/databases/example-db

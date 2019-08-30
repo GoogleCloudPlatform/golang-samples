@@ -208,4 +208,38 @@ func TestSample(t *testing.T) {
 
 	out = runCommand(t, "dmlbatchupdate", dbName)
 	assertContains(out, "Executed 2 SQL statements using Batch DML.")
+
+	out = runCommand(t, "createtablewithdatatypes", dbName)
+	assertContains(out, "Created Venues table")
+
+	out = runCommand(t, "writedatatypesdata", dbName)
+	out = runCommand(t, "querywitharray", dbName)
+	assertContains(out, "19 Venue 19 2020-11-01")
+	assertContains(out, "42 Venue 42 2020-10-01")
+
+	out = runCommand(t, "querywithbool", dbName)
+	assertContains(out, "19 Venue 19 true")
+
+	out = runCommand(t, "querywithbytes", dbName)
+	assertContains(out, "4 Venue 4")
+
+	out = runCommand(t, "querywithdate", dbName)
+	assertContains(out, "4 Venue 4 2018-09-02")
+	assertContains(out, "42 Venue 42 2018-10-01")
+
+	out = runCommand(t, "querywithfloat", dbName)
+	assertContains(out, "4 Venue 4 0.8")
+	assertContains(out, "19 Venue 19 0.9")
+
+	out = runCommand(t, "querywithint", dbName)
+	assertContains(out, "19 Venue 19 6300")
+	assertContains(out, "42 Venue 42 3000")
+
+	out = runCommand(t, "querywithstring", dbName)
+	assertContains(out, "42 Venue 42")
+
+	out = runCommand(t, "querywithtimestampparameter", dbName)
+	assertContains(out, "4 Venue 4")
+	assertContains(out, "19 Venue 19")
+	assertContains(out, "42 Venue 42")
 }
