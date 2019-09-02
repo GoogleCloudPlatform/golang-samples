@@ -63,7 +63,7 @@ func (c *Counter) incrementCounter(ctx context.Context, docRef *firestore.Docume
 
 	shardRef := docRef.Collection("shards").Doc(docID)
 	return shardRef.Update(ctx, []firestore.Update{
-		{Path: "count", Value: firestore.Increment(1)},
+		{Path: "Count", Value: firestore.Increment(1)},
 	})
 }
 
