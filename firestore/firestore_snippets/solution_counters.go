@@ -83,7 +83,7 @@ func (c *Counter) getCount(ctx context.Context, docRef *firestore.DocumentRef) (
 			return 0, fmt.Errorf("Next: %v", err)
 		}
 
-		vTotal := doc.Data()["count"]
+		vTotal := doc.Data()["Count"]
 		shardCount, ok := vTotal.(int64)
 		if !ok {
 			return 0, fmt.Errorf("firestore: invalid dataType %T, want int64", vTotal)
