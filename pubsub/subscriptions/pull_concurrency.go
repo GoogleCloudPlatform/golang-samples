@@ -14,7 +14,7 @@
 
 package subscriptions
 
-// [START pubsub_subscriber_flow_settings]
+// [START pubsub_subscriber_concurrency_control]
 import (
 	"context"
 	"fmt"
@@ -23,7 +23,7 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func pullMsgsSettings(w io.Writer, projectID, subName string) error {
+func pullMsgsConcurrent(w io.Writer, projectID, subName string) error {
 	// projectID := "my-project-id"
 	// subName := projectID + "-example-sub"
 	ctx := context.Background()
@@ -33,14 +33,13 @@ func pullMsgsSettings(w io.Writer, projectID, subName string) error {
 	}
 
 	sub := client.Subscription(subName)
-	sub.ReceiveSettings.Synchronous = true
-	// MaxOutstandingMessages is the maximum number of unprocessed messages (unacknowledged but not yet expired).
-	// This is only guaranteed with ReceiveSettings.Synchronous is set to true.
-	sub.ReceiveSettings.MaxOutstandingMessages = 10
-	// MaxOutstandingBytes is the maximum size of unprocessed messages (unacknowledged but not yet expired).
-	sub.ReceiveSettings.MaxOutstandingBytes = 1e10
+	// NumGoroutines is the number of goroutines Receive will spawn to pull messages concurrently.
+	sub.ReceiveSettings.NumGoroutines = 4
+	// If ReceiveSettings.Synchronous is set to true, NumGoroutines is overriden to 1. To enable
+	// concurrency settings, set this to false.
+	sub.ReceiveSettings.Synchronous = false
 	err = sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
-		fmt.Fprintf(w, "Got message: %q\n", string(msg.Data))
+		fmt.Printf("Got message %q\n", string(msg.Data))
 		msg.Ack()
 	})
 	if err != nil {
@@ -49,4 +48,4 @@ func pullMsgsSettings(w io.Writer, projectID, subName string) error {
 	return nil
 }
 
-// [END pubsub_subscriber_flow_settings]
+// [END pubsub_subscriber_concurrency_control]
