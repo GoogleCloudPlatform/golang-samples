@@ -18,11 +18,24 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+)
+
+// The studyUID, seriesUID, and instanceUID are hard-coded into
+// the metadata of the DICOM file and make up the DicomWebPath
+// in the requests to retrieve studies/instances/frames/rendered.
+const (
+	studyUID           = "studies/1.3.6.1.4.1.11129.5.5.111396399361969898205364400549799252857604/"
+	seriesUID          = "series/1.3.6.1.4.1.11129.5.5.195628213694300498946760767481291263511724/"
+	instanceUID        = "instances/1.3.6.1.4.1.11129.5.5.153751009835107614666834563294684339746480/"
+	studyOutputFile    = "study.multipart"
+	instanceOutputFile = "instance.dcm"
+	renderedOutputFile = "rendered_image.png"
 )
 
 // TestDICOMStore runs all DICOM store tests to avoid having to
@@ -74,7 +87,7 @@ func TestDICOMStore(t *testing.T) {
 	})
 
 	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
-		if err := dicomWebStoreInstance(ioutil.Discard, tc.ProjectID, location, datasetID, dicomStoreID, "studies/1.3.6.1.4.1.11129.5.5.111396399361969898205364400549799252857604", "./testdata/dicom_00000001_000.dcm"); err != nil {
+		if err := dicomWebStoreInstance(ioutil.Discard, tc.ProjectID, location, datasetID, dicomStoreID, studyUID, "./testdata/dicom_00000001_000.dcm"); err != nil {
 			r.Errorf("dicomStoreInstance got err: %v", err)
 		}
 	})
@@ -86,14 +99,92 @@ func TestDICOMStore(t *testing.T) {
 	// })
 
 	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
-		if err := dicomWebRetrieveStudy(ioutil.Discard, tc.ProjectID, location, datasetID, dicomStoreID, "studies/1.3.6.1.4.1.11129.5.5.111396399361969898205364400549799252857604"); err != nil {
-			r.Errorf("dicomWebSearchInstances got err: %v", err)
+		// Remove the output file if it already exists.
+		os.Remove(studyOutputFile)
+		buf.Reset()
+
+		err := dicomWebRetrieveStudy(buf, tc.ProjectID, location, datasetID, dicomStoreID, studyUID, studyOutputFile)
+		if err != nil {
+			r.Errorf("dicomWebRetrieveStudy: %v", err)
 		}
+
+		got := buf.String()
+
+		if want := "Study retrieved and downloaded to file: study.multipart\n"; !strings.Contains(got, want) {
+			r.Errorf("got %q, want %q", got, want)
+		}
+
+		stat, err := os.Stat(studyOutputFile)
+		if err != nil {
+			r.Errorf("os.Stat: %v", err)
+		}
+
+		if stat.Size() == 0 {
+			t.Error("Empty output DICOM study file")
+		}
+
+		os.Remove(studyOutputFile)
 	})
 
 	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
-		if err := dicomWebDeleteStudy(ioutil.Discard, tc.ProjectID, location, datasetID, dicomStoreID, "studies/1.3.6.1.4.1.11129.5.5.111396399361969898205364400549799252857604"); err != nil {
-			r.Errorf("dicomWebSearchInstances got err: %v", err)
+		// Remove the output file if it already exists.
+		os.Remove(instanceOutputFile)
+		buf.Reset()
+
+		err := dicomWebRetrieveInstance(buf, tc.ProjectID, location, datasetID, dicomStoreID, studyUID+seriesUID+instanceUID, instanceOutputFile)
+		if err != nil {
+			r.Errorf("dicomWebRetrieveInstance: %v", err)
+		}
+
+		got := buf.String()
+
+		if want := "DICOM instance retrieved and downloaded to file: instance.dcm\n"; !strings.Contains(got, want) {
+			r.Errorf("got %q, want %q", got, want)
+		}
+
+		stat, err := os.Stat(instanceOutputFile)
+		if err != nil {
+			r.Errorf("os.Stat: %v", err)
+		}
+
+		if stat.Size() == 0 {
+			t.Error("Empty output DICOM instance file")
+		}
+
+		os.Remove(instanceOutputFile)
+	})
+
+	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
+		// Remove the output file if it already exists.
+		os.Remove(renderedOutputFile)
+		buf.Reset()
+
+		err := dicomWebRetrieveRendered(buf, tc.ProjectID, location, datasetID, dicomStoreID, studyUID+seriesUID+instanceUID+"rendered", renderedOutputFile)
+		if err != nil {
+			r.Errorf("dicomWebRetrieveRendered: %v", err)
+		}
+
+		got := buf.String()
+
+		if want := "Rendered PNG image retrieved and downloaded to file: rendered_image.png\n"; !strings.Contains(got, want) {
+			r.Errorf("got %q, want %q", got, want)
+		}
+
+		stat, err := os.Stat(renderedOutputFile)
+		if err != nil {
+			r.Errorf("os.Stat: %v", err)
+		}
+
+		if stat.Size() == 0 {
+			t.Error("Empty output rendered image file")
+		}
+
+		os.Remove(renderedOutputFile)
+	})
+
+	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
+		if err := dicomWebDeleteStudy(ioutil.Discard, tc.ProjectID, location, datasetID, dicomStoreID, studyUID); err != nil {
+			r.Errorf("dicomWebDeleteStudy got err: %v", err)
 		}
 	})
 
