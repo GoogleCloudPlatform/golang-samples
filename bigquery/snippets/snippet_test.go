@@ -227,10 +227,12 @@ func TestAll(t *testing.T) {
 	if err := copyMultiTable(client, datasetID, dstTableID); err != nil {
 		t.Errorf("copyMultiTable(dataset:%q table:%q): %v", datasetID, dstTableID, err)
 	}
+	/* skipped due to b/140294699
 	dstTableID = uniqueBQName("golang_example_copycmek")
 	if err := copyTableWithCMEK(client, datasetID, dstTableID); err != nil {
 		t.Errorf("copyTableWithCMEK(dataset:%q table:%q): %v", datasetID, dstTableID, err)
 	}
+	*/
 
 	if err := listJobs(client, ioutil.Discard); err != nil {
 		t.Errorf("listJobs: %v", err)
