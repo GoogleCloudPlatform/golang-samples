@@ -19,7 +19,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"strings"
 	"time"
 
@@ -128,7 +127,8 @@ func riskKMap(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub, datas
 			Name: j.GetName(),
 		})
 		if err != nil {
-			log.Fatalf("GetDlpJob: %v", err)
+			fmt.Fprintf(w, "GetDlpJob: %v", err)
+			return
 		}
 		h := j.GetRiskDetails().GetKMapEstimationResult().GetKMapEstimationHistogram()
 		for i, b := range h {

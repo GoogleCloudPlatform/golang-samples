@@ -19,7 +19,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"time"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
@@ -112,7 +111,8 @@ func riskCategorical(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub
 			Name: j.GetName(),
 		})
 		if err != nil {
-			log.Fatalf("GetDlpJob: %v", err)
+			fmt.Fprintf(w, "GetDlpJob: %v", err)
+			return
 		}
 		h := resp.GetRiskDetails().GetCategoricalStatsResult().GetValueFrequencyHistogramBuckets()
 		for i, b := range h {

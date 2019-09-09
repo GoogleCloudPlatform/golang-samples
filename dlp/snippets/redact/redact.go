@@ -12,24 +12,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package redact
 
+// [START dlp_redact_image]
 import (
 	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
-// [START dlp_redact_image]
-
 // redactImage blacks out the identified portions of the input image (with type bytesType)
 // and stores the result in outputPath.
-func redactImage(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, infoTypes []string, bytesType dlppb.ByteContentItem_BytesType, inputPath, outputPath string) {
+func redactImage(w io.Writer, projectID string, infoTypes []string, bytesType dlppb.ByteContentItem_BytesType, inputPath, outputPath string) error {
+	// projectID := "my-project-id"
+	// infoTypes := []string{"US_SOCIAL_SECURITY_NUMBER"}
+	// bytesType := dlppb.ByteContentItem_IMAGE_PNG
+	// inputPath := /tmp/input
+	// outputPath := /tmp/output
+
+	ctx := context.Background()
+
+	client, err := dlp.NewClient(ctx)
+	if err != nil {
+		return fmt.Errorf("dlp.NewClient: %v", err)
+	}
+
 	// Convert the info type strings to a list of InfoTypes.
 	var i []*dlppb.InfoType
 	for _, it := range infoTypes {
@@ -49,15 +60,15 @@ func redactImage(w io.Writer, client *dlp.Client, project string, minLikelihood 
 	// Read the input file.
 	b, err := ioutil.ReadFile(inputPath)
 	if err != nil {
-		log.Fatalf("error reading file: %v", err)
+		return fmt.Errorf("ioutil.ReadFile: %v", err)
 	}
 
 	// Create a configured request.
 	req := &dlppb.RedactImageRequest{
-		Parent: "projects/" + project,
+		Parent: "projects/" + projectID,
 		InspectConfig: &dlppb.InspectConfig{
 			InfoTypes:     i,
-			MinLikelihood: minLikelihood,
+			MinLikelihood: dlppb.Likelihood_POSSIBLE,
 		},
 		// The item to analyze.
 		ByteItem: &dlppb.ByteContentItem{
@@ -67,15 +78,16 @@ func redactImage(w io.Writer, client *dlp.Client, project string, minLikelihood 
 		ImageRedactionConfigs: ir,
 	}
 	// Send the request.
-	resp, err := client.RedactImage(context.Background(), req)
+	resp, err := client.RedactImage(ctx, req)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("RedactImage: %v", err)
 	}
 	// Write the output file.
 	if err := ioutil.WriteFile(outputPath, resp.GetRedactedImage(), 0644); err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("ioutil.WriteFile: %v", err)
 	}
 	fmt.Fprintf(w, "Wrote output to %s", outputPath)
+	return nil
 }
 
 // [END dlp_redact_image]

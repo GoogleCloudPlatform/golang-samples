@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
@@ -52,7 +51,7 @@ func deidentifyFPE(w io.Writer, projectID, input string, infoTypes []string, key
 	// Read the key file.
 	keyBytes, err := ioutil.ReadFile(keyFileName)
 	if err != nil {
-		log.Fatalf("error reading file: %v", err)
+		return fmt.Errorf("ReadFile: %v", err)
 	}
 	// Create a configured request.
 	req := &dlppb.DeidentifyContentRequest{
