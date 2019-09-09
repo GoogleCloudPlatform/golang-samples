@@ -179,7 +179,7 @@ func TestPullMsgsSync(t *testing.T) {
 		}
 	}
 
-	maxMessages := 10
+	maxMessages := 5
 	buf := new(bytes.Buffer)
 	msgs, err := pullMsgsSync(buf, tc.ProjectID, subName, topic, int32(maxMessages))
 	if err != nil {
