@@ -80,29 +80,29 @@ func inspectGCSFile(w io.Writer, projectID string, infoTypes []string, customDic
 	}
 
 	// Create a PubSub Client used to listen for when the inspect job finishes.
-	pClient, err := pubsub.NewClient(ctx, projectID)
+	pubsubClient, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
-	defer pClient.Close()
+	defer pubsubClient.Close()
 
 	// Create a PubSub subscription we can use to listen for messages.
 	// Create the Topic if it doesn't exist.
-	t := pClient.Topic(pubSubTopic)
+	t := pubsubClient.Topic(pubSubTopic)
 	if exists, err := t.Exists(ctx); err != nil {
 		return fmt.Errorf("t.Exists: %v", err)
 	} else if !exists {
-		if t, err = pClient.CreateTopic(ctx, pubSubTopic); err != nil {
+		if t, err = pubsubClient.CreateTopic(ctx, pubSubTopic); err != nil {
 			return fmt.Errorf("CreateTopic: %v", err)
 		}
 	}
 
 	// Create the Subscription if it doesn't exist.
-	s := pClient.Subscription(pubSubSub)
+	s := pubsubClient.Subscription(pubSubSub)
 	if exists, err := s.Exists(ctx); err != nil {
 		return fmt.Errorf("s.Exists: %v", err)
 	} else if !exists {
-		if s, err = pClient.CreateSubscription(ctx, pubSubSub, pubsub.SubscriptionConfig{Topic: t}); err != nil {
+		if s, err = pubsubClient.CreateSubscription(ctx, pubSubSub, pubsub.SubscriptionConfig{Topic: t}); err != nil {
 			return fmt.Errorf("CreateSubscription: %v", err)
 		}
 	}

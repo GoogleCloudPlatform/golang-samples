@@ -44,11 +44,11 @@ func riskLDiversity(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub,
 	}
 
 	// Create a PubSub Client used to listen for when the inspect job finishes.
-	pClient, err := pubsub.NewClient(ctx, projectID)
+	pubsubClient, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
 		return fmt.Errorf("Error creating PubSub client: %v", err)
 	}
-	defer pClient.Close()
+	defer pubsubClient.Close()
 
 	// Create a PubSub subscription we can use to listen for messages.
 	s, err := setupPubSub(projectID, pubSubTopic, pubSubSub)
@@ -101,7 +101,7 @@ func riskLDiversity(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub,
 		},
 	}
 	// Create the risk job.
-	j, err := client.CreateDlpJob(context.Background(), req)
+	j, err := client.CreateDlpJob(ctx, req)
 	if err != nil {
 		return fmt.Errorf("CreateDlpJob: %v", err)
 	}
