@@ -155,6 +155,41 @@ func TestIAM(t *testing.T) {
 	})
 }
 
+func TestPullMsgsSync(t *testing.T) {
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	client := setup(t)
+
+	topic := client.Topic(topicName)
+	ok, err := topic.Exists(ctx)
+	if err != nil {
+		t.Fatalf("failed to check if topic exists: %v", err)
+	}
+	if !ok {
+		topic, err := client.CreateTopic(ctx, topicName)
+		if err != nil {
+			t.Fatalf("CreateTopic: %v", err)
+		}
+		_, err = client.CreateSubscription(ctx, subName, pubsub.SubscriptionConfig{
+			Topic:       topic,
+			AckDeadline: 20 * time.Second,
+		})
+		if err != nil {
+			t.Fatalf("CreateSubscription: %v", err)
+		}
+	}
+
+	maxMessages := 10
+	buf := new(bytes.Buffer)
+	msgs, err := pullMsgsSync(buf, tc.ProjectID, subName, topic, int32(maxMessages))
+	if err != nil {
+		t.Fatalf("failed to pull messages: %v", err)
+	}
+	if len(msgs) > maxMessages {
+		t.Fatalf("Expected <%d messages, got %d", maxMessages, len(msgs))
+	}
+}
+
 func TestDelete(t *testing.T) {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
@@ -189,40 +224,5 @@ func TestDelete(t *testing.T) {
 	}
 	if ok {
 		t.Fatalf("got sub = %q; want none", subName)
-	}
-}
-
-func TestPullMsgsSync(t *testing.T) {
-	ctx := context.Background()
-	tc := testutil.SystemTest(t)
-	client := setup(t)
-
-	topic := client.Topic(topicName)
-	ok, err := topic.Exists(ctx)
-	if err != nil {
-		t.Fatalf("failed to check if topic exists: %v", err)
-	}
-	if !ok {
-		topic, err := client.CreateTopic(ctx, topicName)
-		if err != nil {
-			t.Fatalf("CreateTopic: %v", err)
-		}
-		_, err = client.CreateSubscription(ctx, subName, pubsub.SubscriptionConfig{
-			Topic:       topic,
-			AckDeadline: 20 * time.Second,
-		})
-		if err != nil {
-			t.Fatalf("CreateSubscription: %v", err)
-		}
-	}
-
-	maxMessages := 10
-	buf := new(bytes.Buffer)
-	msgs, err := pullMsgsSync(buf, tc.ProjectID, subName, topic, int32(maxMessages))
-	if err != nil {
-		t.Fatalf("failed to pull messages: %v", err)
-	}
-	if len(msgs) > maxMessages {
-		t.Fatalf("Expected <%d messages, got %d", maxMessages, len(msgs))
 	}
 }
