@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# [START run_pubsub_dockerfile]
-
 # Use the offical Golang image to create a build artifact.
 # This is based on Debian and sets the GOPATH to /go.
 # https://hub.docker.com/_/golang
@@ -30,7 +28,17 @@ RUN CGO_ENABLED=0 GOOS=linux go build -v -o hellopubsub
 # https://docs.docker.com/develop/develop-images/multistage-build/#use-multi-stage-builds
 FROM alpine:3.10
 
+# [START run_imageproc_dockerfile_imagemagick]
+
+# Install Imagemagick into the container image.
+# For more on system packages review the system packages tutorial.
+# https://cloud.google.com/run/docs/tutorials/system-packages#dockerfile
+RUN apk add --no-cache imagemagick
+
+# [END run_imageproc_dockerfile_imagemagick]
+
 # Install certificates for secure communication with network services.
+# For production containers, a single RUN statement should install all system packages.
 RUN apk add --no-cache ca-certificates
 
 # Copy the binary to the production image from the builder stage.
@@ -38,5 +46,3 @@ COPY --from=builder /app/hellopubsub .
 
 # Run the web service on container startup.
 CMD ["/hellopubsub"]
-
-# [END run_pubsub_dockerfile]

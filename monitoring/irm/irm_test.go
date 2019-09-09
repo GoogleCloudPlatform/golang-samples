@@ -35,10 +35,10 @@ func TestIncident(t *testing.T) {
 
 	buf.Reset()
 	if err := changeStage(buf, incident.Name); err != nil {
-		t.Errorf("changeStage: %v", err)
+		t.Errorf("changeStage(%q): %v", incident.Name, err)
 	}
 	if got, want := buf.String(), "Changed stage"; !strings.Contains(got, want) {
-		t.Errorf("changeStage got\n----\n%s\n----\nWant to contain\n----\n%s\n", got, want)
+		t.Errorf("changeStage(%q) got\n----\n%s\n----\nWant to contain\n----\n%s\n", incident.Name, got, want)
 	}
 
 	buf.Reset()
@@ -51,10 +51,10 @@ func TestIncident(t *testing.T) {
 
 	buf.Reset()
 	if err := annotateIncident(buf, incident.Name); err != nil {
-		t.Errorf("annotateIncident: %v", err)
+		t.Errorf("annotateIncident(%q): %v", incident.Name, err)
 	}
 	if got, want := buf.String(), "Created annotation"; !strings.Contains(got, want) {
-		t.Errorf("annotateIncident got\n----\n%s\n----\nWant to contain\n----\n%s\n", got, want)
+		t.Errorf("annotateIncident(%q) got\n----\n%s\n----\nWant to contain\n----\n%s\n", incident.Name, got, want)
 	}
 }
 
