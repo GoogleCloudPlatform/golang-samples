@@ -12,11 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// [START functions_helloworld_error]
+
 package tips
 
 import (
+	// [END functions_helloworld_error]
 	"context"
 	"errors"
+	// [START functions_helloworld_error]
 	"fmt"
 	"net/http"
 	"os"
@@ -38,6 +42,8 @@ func HTTPError(w http.ResponseWriter, r *http.Request) {
 	// Panics are reported to Error Reporting.
 	panic("An error occurred (panic)")
 }
+
+// [END functions_helloworld_error]
 
 // GCSEvent is the payload of a GCS event.
 type GCSEvent struct {
