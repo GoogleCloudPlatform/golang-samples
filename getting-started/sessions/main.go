@@ -25,7 +25,7 @@ import (
 	"os"
 
 	"cloud.google.com/go/firestore"
-	firestoregorilla "github.com/GoogleCloudPlatform/firestore-gorilla-go"
+	firestoregorilla "github.com/GoogleCloudPlatform/firestore-gorilla-sessions"
 	"github.com/gorilla/sessions"
 )
 
