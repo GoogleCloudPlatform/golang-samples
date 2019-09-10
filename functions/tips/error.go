@@ -17,10 +17,6 @@
 package tips
 
 import (
-	// [END functions_helloworld_error]
-	"context"
-	"errors"
-	// [START functions_helloworld_error]
 	"fmt"
 	"net/http"
 	"os"
@@ -44,19 +40,3 @@ func HTTPError(w http.ResponseWriter, r *http.Request) {
 }
 
 // [END functions_helloworld_error]
-
-// GCSEvent is the payload of a GCS event.
-type GCSEvent struct {
-	Bucket string `json:"bucket"`
-	Name   string `json:"name"`
-}
-
-// GCSError is a Cloud Storage function that returns an error.
-//
-// Errors returned by background functions are NOT reported to Error Reporting.
-//
-// Other scenarios like stdout, stderr, log.Fatal, and panic are handled the
-// same way as HTTP functions.
-func GCSError(ctx context.Context, e GCSEvent) error {
-	return errors.New("an error occurred")
-}
