@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// dlp_quickstart is a basic example of using the Data Loss Prevention API.
+// [START dlp_quickstart]
+
+// The quickstart program is an example of using the Data Loss Prevention API.
 package main
 
 import (
@@ -23,8 +25,6 @@ import (
 	dlp "cloud.google.com/go/dlp/apiv2"
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
-
-// [START dlp_quickstart]
 
 func main() {
 	ctx := context.Background()
