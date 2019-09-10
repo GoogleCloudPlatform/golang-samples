@@ -28,6 +28,7 @@ import (
 	"os"
 	"path"
 
+	"cloud.google.com/go/firestore"
 	"cloud.google.com/go/storage"
 	"github.com/gofrs/uuid"
 	"github.com/gorilla/handlers"
@@ -51,7 +52,18 @@ func main() {
 		log.Fatal("GOOGLE_CLOUD_PROJECT must be set")
 	}
 
-	shelf, err := NewBookshelf(projectID)
+	ctx := context.Background()
+
+	client, err := firestore.NewClient(ctx, projectID)
+	if err != nil {
+		log.Fatalf("firestore.NewClient: %v", err)
+	}
+	db, err := newFirestoreDB(client)
+	if err != nil {
+		log.Fatalf("newFirestoreDB: %v", err)
+	}
+
+	shelf, err := NewBookshelf(projectID, db)
 	if err != nil {
 		log.Fatalf("NewBookshelf: %v", err)
 	}
@@ -101,7 +113,8 @@ func (b *Bookshelf) registerHandlers() {
 
 // listHandler displays a list with summaries of books in the database.
 func (b *Bookshelf) listHandler(w http.ResponseWriter, r *http.Request) *appError {
-	books, err := b.DB.ListBooks(r.Context())
+	ctx := r.Context()
+	books, err := b.DB.ListBooks(ctx)
 	if err != nil {
 		return appErrorf(err, "could not list books: %v", err)
 	}
@@ -112,8 +125,12 @@ func (b *Bookshelf) listHandler(w http.ResponseWriter, r *http.Request) *appErro
 // bookFromRequest retrieves a book from the database given a book ID in the
 // URL's path.
 func (b *Bookshelf) bookFromRequest(r *http.Request) (*Book, error) {
+	ctx := r.Context()
 	id := mux.Vars(r)["id"]
-	book, err := b.DB.GetBook(r.Context(), id)
+	if id == "" {
+		return nil, errors.New("no book with empty ID")
+	}
+	book, err := b.DB.GetBook(ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("could not find book: %v", err)
 	}
@@ -150,7 +167,8 @@ func (b *Bookshelf) editFormHandler(w http.ResponseWriter, r *http.Request) *app
 // bookFromForm populates the fields of a Book from form values
 // (see templates/edit.html).
 func (b *Bookshelf) bookFromForm(r *http.Request) (*Book, error) {
-	imageURL, err := b.uploadFileFromForm(r)
+	ctx := r.Context()
+	imageURL, err := b.uploadFileFromForm(ctx, r)
 	if err != nil {
 		return nil, fmt.Errorf("could not upload file: %v", err)
 	}
@@ -170,7 +188,7 @@ func (b *Bookshelf) bookFromForm(r *http.Request) (*Book, error) {
 }
 
 // uploadFileFromForm uploads a file if it's present in the "image" form field.
-func (b *Bookshelf) uploadFileFromForm(r *http.Request) (url string, err error) {
+func (b *Bookshelf) uploadFileFromForm(ctx context.Context, r *http.Request) (url string, err error) {
 	f, fh, err := r.FormFile("image")
 	if err == http.ErrMissingFile {
 		return "", nil
@@ -182,7 +200,7 @@ func (b *Bookshelf) uploadFileFromForm(r *http.Request) (url string, err error) 
 	if b.StorageBucket == nil {
 		return "", errors.New("storage bucket is missing: check config.go")
 	}
-	if _, err := b.StorageBucket.Attrs(r.Context()); err != nil {
+	if _, err := b.StorageBucket.Attrs(ctx); err != nil {
 		if err == storage.ErrBucketNotExist {
 			return "", fmt.Errorf("bucket %q does not exist: check config.go", b.StorageBucketName)
 		}
@@ -192,7 +210,6 @@ func (b *Bookshelf) uploadFileFromForm(r *http.Request) (url string, err error) 
 	// random filename, retaining existing extension.
 	name := uuid.Must(uuid.NewV4()).String() + path.Ext(fh.Filename)
 
-	ctx := context.Background()
 	w := b.StorageBucket.Object(name).NewWriter(ctx)
 
 	// Warning: storage.AllUsers gives public read access to anyone.
@@ -215,11 +232,12 @@ func (b *Bookshelf) uploadFileFromForm(r *http.Request) (url string, err error) 
 
 // createHandler adds a book to the database.
 func (b *Bookshelf) createHandler(w http.ResponseWriter, r *http.Request) *appError {
+	ctx := r.Context()
 	book, err := b.bookFromForm(r)
 	if err != nil {
 		return appErrorf(err, "could not parse book from form: %v", err)
 	}
-	id, err := b.DB.AddBook(r.Context(), book)
+	id, err := b.DB.AddBook(ctx, book)
 	if err != nil {
 		return appErrorf(err, "could not save book: %v", err)
 	}
@@ -229,6 +247,7 @@ func (b *Bookshelf) createHandler(w http.ResponseWriter, r *http.Request) *appEr
 
 // updateHandler updates the details of a given book.
 func (b *Bookshelf) updateHandler(w http.ResponseWriter, r *http.Request) *appError {
+	ctx := r.Context()
 	id := mux.Vars(r)["id"]
 
 	book, err := b.bookFromForm(r)
@@ -237,7 +256,7 @@ func (b *Bookshelf) updateHandler(w http.ResponseWriter, r *http.Request) *appEr
 	}
 	book.ID = id
 
-	if err := b.DB.UpdateBook(r.Context(), book); err != nil {
+	if err := b.DB.UpdateBook(ctx, book); err != nil {
 		return appErrorf(err, "UpdateBook: %v", err)
 	}
 	http.Redirect(w, r, fmt.Sprintf("/books/%s", book.ID), http.StatusFound)
@@ -246,8 +265,9 @@ func (b *Bookshelf) updateHandler(w http.ResponseWriter, r *http.Request) *appEr
 
 // deleteHandler deletes a given book.
 func (b *Bookshelf) deleteHandler(w http.ResponseWriter, r *http.Request) *appError {
+	ctx := r.Context()
 	id := mux.Vars(r)["id"]
-	if err := b.DB.DeleteBook(r.Context(), id); err != nil {
+	if err := b.DB.DeleteBook(ctx, id); err != nil {
 		return appErrorf(err, "DeleteBook: %v", err)
 	}
 	http.Redirect(w, r, "/books", http.StatusFound)

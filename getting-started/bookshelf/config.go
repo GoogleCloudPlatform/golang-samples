@@ -16,10 +16,10 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"os"
 
-	"cloud.google.com/go/firestore"
 	"cloud.google.com/go/storage"
 )
 
@@ -66,45 +66,25 @@ type Bookshelf struct {
 }
 
 // NewBookshelf creates a new Bookshelf.
-func NewBookshelf(projectID string) (*Bookshelf, error) {
-	b := &Bookshelf{
-		logWriter: os.Stderr,
-	}
-
-	var err error
-	b.DB, err = configureFirestoreDB(projectID)
-	if err != nil {
-		return nil, err
-	}
+func NewBookshelf(projectID string, db BookDatabase) (*Bookshelf, error) {
+	ctx := context.Background()
 
 	// This Cloud Storage bucket must exist to be able to upload book pictures.
 	// You can create it and make it public by running:
 	//     gsutil mb my-project_bucket
 	//     gsutil defacl set public-read gs://my-project_bucket
 	// replacing my-project with your project ID.
-	b.StorageBucketName = projectID + "_bucket"
-	b.StorageBucket, err = configureStorage(b.StorageBucketName)
+	bucketName := projectID + "_bucket"
+	storageClient, err := storage.NewClient(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("storage.NewClient: %v", err)
 	}
 
+	b := &Bookshelf{
+		logWriter:         os.Stderr,
+		DB:                db,
+		StorageBucketName: bucketName,
+		StorageBucket:     storageClient.Bucket(bucketName),
+	}
 	return b, nil
-}
-
-func configureFirestoreDB(projectID string) (*firestoreDB, error) {
-	ctx := context.Background()
-	client, err := firestore.NewClient(ctx, projectID)
-	if err != nil {
-		return nil, err
-	}
-	return newFirestoreDB(client)
-}
-
-func configureStorage(bucketID string) (*storage.BucketHandle, error) {
-	ctx := context.Background()
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return client.Bucket(bucketID), nil
 }

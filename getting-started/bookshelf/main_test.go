@@ -26,29 +26,53 @@ import (
 	"strings"
 	"testing"
 
+	"cloud.google.com/go/firestore"
 	"github.com/GoogleCloudPlatform/golang-samples/getting-started/bookshelf/internal/webtest"
 )
 
 var (
 	wt *webtest.W
 	b  *Bookshelf
+
+	testDBs = map[string]BookDatabase{}
 )
 
 func TestMain(m *testing.M) {
-	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
+	ctx := context.Background()
+
+	projectID := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
 	if projectID == "" {
-		fmt.Fprintln(os.Stderr, "GOLANG_SAMPLES_FIRESTORE_PROJECT not set. Skipping.")
+		log.Println("GOLANG_SAMPLES_PROJECT_ID not set. Skipping.")
 		return
+	}
+
+	memoryDB := newMemoryDB()
+	testDBs["memory"] = memoryDB
+
+	if firestoreProjectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT"); firestoreProjectID != "" {
+		projectID = firestoreProjectID
+
+		client, err := firestore.NewClient(ctx, projectID)
+		if err != nil {
+			log.Fatalf("firestore.NewClient: %v", err)
+		}
+		db, err := newFirestoreDB(client)
+		if err != nil {
+			log.Fatalf("newFirestoreDB: %v", err)
+		}
+		testDBs["firestore"] = db
+	} else {
+		log.Println("GOLANG_SAMPES_FIRESTORE_PROJECT not set. Skipping Firestore database tests.")
+	}
+
+	var err error
+	b, err = NewBookshelf(projectID, memoryDB)
+	if err != nil {
+		log.Fatalf("NewBookshelf: %v", err)
 	}
 
 	// Don't log anything during testing.
 	log.SetOutput(ioutil.Discard)
-
-	var err error
-	b, err = NewBookshelf(projectID)
-	if err != nil {
-		log.Fatalf("NewBookshelf: %v", err)
-	}
 	b.logWriter = ioutil.Discard
 
 	serv := httptest.NewServer(nil)
@@ -60,96 +84,118 @@ func TestMain(m *testing.M) {
 }
 
 func TestNoBooks(t *testing.T) {
-	bodyContains(t, wt, "/", "No books found")
+	for name, db := range testDBs {
+		t.Run(name, func(t *testing.T) {
+			b.DB = db
+			bodyContains(t, wt, "/", "No books found")
+		})
+	}
 }
 
 func TestBookDetail(t *testing.T) {
-	ctx := context.Background()
-	const title = "book mcbook"
-	id, err := b.DB.AddBook(ctx, &Book{
-		Title: title,
-	})
-	if err != nil {
-		t.Fatal(err)
+	for name, db := range testDBs {
+		t.Run(name, func(t *testing.T) {
+			b.DB = db
+			ctx := context.Background()
+			const title = "book mcbook"
+			id, err := b.DB.AddBook(ctx, &Book{
+				Title: title,
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			bodyContains(t, wt, "/", title)
+
+			bookPath := fmt.Sprintf("/books/%s", id)
+			bodyContains(t, wt, bookPath, title)
+
+			if err := b.DB.DeleteBook(ctx, id); err != nil {
+				t.Fatal(err)
+			}
+
+			bodyContains(t, wt, "/", "No books found")
+		})
 	}
 
-	bodyContains(t, wt, "/", title)
-
-	bookPath := fmt.Sprintf("/books/%s", id)
-	bodyContains(t, wt, bookPath, title)
-
-	if err := b.DB.DeleteBook(ctx, id); err != nil {
-		t.Fatal(err)
-	}
-
-	bodyContains(t, wt, "/", "No books found")
 }
 
 func TestEditBook(t *testing.T) {
-	ctx := context.Background()
-	const title = "book mcbook"
-	id, err := b.DB.AddBook(ctx, &Book{
-		Title: title,
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
+	for name, db := range testDBs {
+		t.Run(name, func(t *testing.T) {
+			b.DB = db
+			ctx := context.Background()
+			const title = "book mcbook"
+			id, err := b.DB.AddBook(ctx, &Book{
+				Title: title,
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
 
-	bookPath := fmt.Sprintf("/books/%s", id)
-	editPath := bookPath + "/edit"
-	bodyContains(t, wt, editPath, "Edit book")
-	bodyContains(t, wt, editPath, title)
+			bookPath := fmt.Sprintf("/books/%s", id)
+			editPath := bookPath + "/edit"
+			bodyContains(t, wt, editPath, "Edit book")
+			bodyContains(t, wt, editPath, title)
 
-	var body bytes.Buffer
-	m := multipart.NewWriter(&body)
-	m.WriteField("title", "simpsons")
-	m.WriteField("author", "homer")
-	m.Close()
+			var body bytes.Buffer
+			m := multipart.NewWriter(&body)
+			m.WriteField("title", "simpsons")
+			m.WriteField("author", "homer")
+			m.Close()
 
-	resp, err := wt.Post(bookPath, "multipart/form-data; boundary="+m.Boundary(), &body)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if got, want := resp.Request.URL.Path, bookPath; got != want {
-		t.Errorf("got %s, want %s", got, want)
-	}
+			resp, err := wt.Post(bookPath, "multipart/form-data; boundary="+m.Boundary(), &body)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got, want := resp.Request.URL.Path, bookPath; got != want {
+				t.Errorf("got %s, want %s", got, want)
+			}
 
-	bodyContains(t, wt, bookPath, "simpsons")
-	bodyContains(t, wt, bookPath, "homer")
+			bodyContains(t, wt, bookPath, "simpsons")
+			bodyContains(t, wt, bookPath, "homer")
 
-	if err := b.DB.DeleteBook(ctx, id); err != nil {
-		t.Fatalf("got err %v, want nil", err)
+			if err := b.DB.DeleteBook(ctx, id); err != nil {
+				t.Fatalf("got err %v, want nil", err)
+			}
+		})
 	}
 }
 
 func TestAddAndDelete(t *testing.T) {
-	bodyContains(t, wt, "/books/add", "Add book")
+	for name, db := range testDBs {
+		t.Run(name, func(t *testing.T) {
+			b.DB = db
+			bodyContains(t, wt, "/books/add", "Add book")
 
-	bookPath := fmt.Sprintf("/books")
+			bookPath := fmt.Sprintf("/books")
 
-	var body bytes.Buffer
-	m := multipart.NewWriter(&body)
-	m.WriteField("title", "simpsons")
-	m.WriteField("author", "homer")
-	m.Close()
+			var body bytes.Buffer
+			m := multipart.NewWriter(&body)
+			m.WriteField("title", "simpsons")
+			m.WriteField("author", "homer")
+			m.Close()
 
-	resp, err := wt.Post(bookPath, "multipart/form-data; boundary="+m.Boundary(), &body)
-	if err != nil {
-		t.Fatal(err)
+			resp, err := wt.Post(bookPath, "multipart/form-data; boundary="+m.Boundary(), &body)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			gotPath := resp.Request.URL.Path
+			if wantPrefix := "/books"; !strings.HasPrefix(gotPath, wantPrefix) {
+				t.Fatalf("redirect: got %q, want prefix %q", gotPath, wantPrefix)
+			}
+
+			bodyContains(t, wt, gotPath, "simpsons")
+			bodyContains(t, wt, gotPath, "homer")
+
+			_, err = wt.Post(gotPath+":delete", "", nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+		})
 	}
 
-	gotPath := resp.Request.URL.Path
-	if wantPrefix := "/books"; !strings.HasPrefix(gotPath, wantPrefix) {
-		t.Fatalf("redirect: got %q, want prefix %q", gotPath, wantPrefix)
-	}
-
-	bodyContains(t, wt, gotPath, "simpsons")
-	bodyContains(t, wt, gotPath, "homer")
-
-	_, err = wt.Post(gotPath+":delete", "", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
 }
 
 func bodyContains(t *testing.T, wt *webtest.W, path, contains string) (ok bool) {
