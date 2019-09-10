@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START run_pubsub_server]
+// [START run_imageproc_controller]
 
-// Sample run-pubsub is a Cloud Run service which handles Pub/Sub messages.
+// Sample image-processing is a Cloud Run service which performs asynchronous processing on images.
 package main
 
 import (
@@ -24,6 +24,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/GoogleCloudPlatform/golang-samples/run/image-processing/imagemagick"
 )
 
 func main() {
@@ -38,10 +40,6 @@ func main() {
 	log.Printf("Listening on port %s", port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
 }
-
-// [END run_pubsub_server]
-
-// [START run_pubsub_handler]
 
 // PubSubMessage is the payload of a Pub/Sub event.
 type PubSubMessage struct {
@@ -67,11 +65,23 @@ func HelloPubSub(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	name := string(m.Message.Data)
-	if name == "" {
-		name = "World"
+	var e imagemagick.GCSEvent
+	if err := json.Unmarshal(m.Message.Data, &e); err != nil {
+		log.Printf("json.Unmarshal: %v", err)
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
 	}
-	log.Printf("Hello %s!", name)
+
+	if e.Name == "" || e.Bucket == "" {
+		log.Printf("invalid GCSEvent: expected name and bucket")
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	if err := imagemagick.BlurOffensiveImages(r.Context(), e); err != nil {
+		log.Printf("imagemagick.BlurOffensiveImages: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
 }
 
-// [END run_pubsub_handler]
+// [END run_imageproc_controller]

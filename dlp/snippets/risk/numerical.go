@@ -19,7 +19,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"time"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
@@ -42,11 +41,11 @@ func riskNumerical(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub, 
 		return fmt.Errorf("dlp.NewClient: %v", err)
 	}
 	// Create a PubSub Client used to listen for when the inspect job finishes.
-	pClient, err := pubsub.NewClient(ctx, projectID)
+	pubsubClient, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
 		return fmt.Errorf("Error creating PubSub client: %v", err)
 	}
-	defer pClient.Close()
+	defer pubsubClient.Close()
 
 	// Create a PubSub subscription we can use to listen for messages.
 	s, err := setupPubSub(projectID, pubSubTopic, pubSubSub)
@@ -92,7 +91,7 @@ func riskNumerical(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub, 
 		},
 	}
 	// Create the risk job.
-	j, err := client.CreateDlpJob(context.Background(), req)
+	j, err := client.CreateDlpJob(ctx, req)
 	if err != nil {
 		return fmt.Errorf("CreateDlpJob: %v", err)
 	}
@@ -112,7 +111,8 @@ func riskNumerical(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub, 
 			Name: j.GetName(),
 		})
 		if err != nil {
-			log.Fatalf("GetDlpJob: %v", err)
+			fmt.Fprintf(w, "GetDlpJob: %v", err)
+			return
 		}
 		n := resp.GetRiskDetails().GetNumericalStatsResult()
 		fmt.Fprintf(w, "Value range: [%v, %v]\n", n.GetMinValue(), n.GetMaxValue())
