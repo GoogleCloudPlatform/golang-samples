@@ -213,27 +213,31 @@ const (
 	bqDatasetID   = "golang_samples_dlp"
 )
 
-func createBigqueryTestFiles(projectID, datasetID string) error {
+func mustCreateBigqueryTestFiles(t *testing.T, projectID, datasetID string) {
+	t.Helper()
+
 	ctx := context.Background()
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
-		return err
+		t.Fatalf("bigquery.NewClient: %v", err)
 	}
 	defer client.Close()
 	d := client.Dataset(datasetID)
 	if _, err := d.Metadata(ctx); err != nil {
 		if err := d.Create(ctx, &bigquery.DatasetMetadata{}); err != nil {
-			return err
+			t.Fatalf("Create: %v", err)
 		}
 	}
 	schema, err := bigquery.InferSchema(Item{})
 	if err != nil {
-		return err
+		t.Fatalf("InferSchema: %v", err)
 	}
 	if err := uploadBigQuery(ctx, d, schema, harmlessTable, "Nothing meaningful"); err != nil {
-		return err
+		t.Fatalf("uploadBigQuery: %v", err)
 	}
-	return uploadBigQuery(ctx, d, schema, harmfulTable, "My SSN is 111222333")
+	if err := uploadBigQuery(ctx, d, schema, harmfulTable, "My SSN is 111222333"); err != nil {
+		t.Fatalf("uploadBigQuery: %v", err)
+	}
 }
 
 func uploadBigQuery(ctx context.Context, d *bigquery.Dataset, schema bigquery.Schema, table, content string) error {
@@ -259,9 +263,9 @@ func uploadBigQuery(ctx context.Context, d *bigquery.Dataset, schema bigquery.Sc
 
 func TestInspectBigquery(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
-	if err := createBigqueryTestFiles(tc.ProjectID, bqDatasetID); err != nil {
-		t.Fatalf("createBigqueryTestFiles: %v", err)
-	}
+
+	mustCreateBigqueryTestFiles(t, tc.ProjectID, bqDatasetID)
+
 	tests := []struct {
 		table string
 		want  string
