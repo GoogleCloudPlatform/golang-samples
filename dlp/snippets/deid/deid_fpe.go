@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
@@ -32,10 +31,10 @@ import (
 // optional identifier needed for reidentification. surrogateInfoType can be any
 // value not found in your input.
 // Info types can be found with the infoTypes.list method or on https://cloud.google.com/dlp/docs/infotypes-reference
-func deidentifyFPE(w io.Writer, projectID, input string, infoTypes []string, keyFileName, cryptoKeyName, surrogateInfoType string) error {
+func deidentifyFPE(w io.Writer, projectID, input string, infoTypeNames []string, keyFileName, cryptoKeyName, surrogateInfoType string) error {
 	// projectID := "my-project-id"
 	// input := "My SSN is 123456789"
-	// infoTypes := []string{"US_SOCIAL_SECURITY_NUMBER"}
+	// infoTypeNames := []string{"US_SOCIAL_SECURITY_NUMBER"}
 	// keyFileName := "projects/YOUR_GCLOUD_PROJECT/locations/YOUR_LOCATION/keyRings/YOUR_KEYRING_NAME/cryptoKeys/YOUR_KEY_NAME"
 	// cryptoKeyName := "YOUR_ENCRYPTED_AES_256_KEY"
 	// surrogateInfoType := "AGE"
@@ -45,20 +44,20 @@ func deidentifyFPE(w io.Writer, projectID, input string, infoTypes []string, key
 		return fmt.Errorf("dlp.NewClient: %v", err)
 	}
 	// Convert the info type strings to a list of InfoTypes.
-	var i []*dlppb.InfoType
-	for _, it := range infoTypes {
-		i = append(i, &dlppb.InfoType{Name: it})
+	var infoTypes []*dlppb.InfoType
+	for _, it := range infoTypeNames {
+		infoTypes = append(infoTypes, &dlppb.InfoType{Name: it})
 	}
 	// Read the key file.
 	keyBytes, err := ioutil.ReadFile(keyFileName)
 	if err != nil {
-		log.Fatalf("error reading file: %v", err)
+		return fmt.Errorf("ReadFile: %v", err)
 	}
 	// Create a configured request.
 	req := &dlppb.DeidentifyContentRequest{
 		Parent: "projects/" + projectID,
 		InspectConfig: &dlppb.InspectConfig{
-			InfoTypes: i,
+			InfoTypes: infoTypes,
 		},
 		DeidentifyConfig: &dlppb.DeidentifyConfig{
 			Transformation: &dlppb.DeidentifyConfig_InfoTypeTransformations{
