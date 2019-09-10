@@ -22,6 +22,7 @@ import (
 	"time"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
+	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/api/iterator"
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
@@ -51,11 +52,17 @@ func listTriggers(w io.Writer, projectID string) error {
 		if err != nil {
 			return fmt.Errorf("Next: %v", err)
 		}
-		c := t.GetCreateTime()
-		u := t.GetUpdateTime()
 		fmt.Fprintf(w, "Trigger %v\n", t.GetName())
-		fmt.Fprintf(w, "  Created: %v\n", time.Unix(c.GetSeconds(), int64(c.GetNanos())).Format(time.RFC1123))
-		fmt.Fprintf(w, "  Updated: %v\n", time.Unix(u.GetSeconds(), int64(u.GetNanos())).Format(time.RFC1123))
+		c, err := ptypes.Timestamp(t.GetCreateTime())
+		if err != nil {
+			return fmt.Errorf("CreateTime Timestamp: %v", err)
+		}
+		fmt.Fprintf(w, "  Created: %v\n", c.Format(time.RFC1123))
+		u, err := ptypes.Timestamp(t.GetUpdateTime())
+		if err != nil {
+			return fmt.Errorf("UpdateTime Timestamp: %v", err)
+		}
+		fmt.Fprintf(w, "  Updated: %v\n", u.Format(time.RFC1123))
 		fmt.Fprintf(w, "  Display Name: %q\n", t.GetDisplayName())
 		fmt.Fprintf(w, "  Description: %q\n", t.GetDescription())
 		fmt.Fprintf(w, "  Status: %v\n", t.GetStatus())
