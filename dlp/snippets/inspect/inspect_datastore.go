@@ -27,9 +27,9 @@ import (
 )
 
 // inspectDatastore searches for the given info types in the given dataset kind.
-func inspectDatastore(w io.Writer, projectID string, infoTypes []string, customDictionaries []string, customRegexes []string, pubSubTopic, pubSubSub, dataProject, namespaceID, kind string) error {
+func inspectDatastore(w io.Writer, projectID string, infoTypeNames []string, customDictionaries []string, customRegexes []string, pubSubTopic, pubSubSub, dataProject, namespaceID, kind string) error {
 	// projectID := "my-project-id"
-	// infoTypes := []string{"US_SOCIAL_SECURITY_NUMBER"}
+	// infoTypeNames := []string{"US_SOCIAL_SECURITY_NUMBER"}
 	// customDictionaries := []string{...}
 	// customRegexes := []string{...}
 	// pubSubTopic := "dlp-risk-sample-topic"
@@ -44,9 +44,9 @@ func inspectDatastore(w io.Writer, projectID string, infoTypes []string, customD
 	}
 
 	// Convert the info type strings to a list of InfoTypes.
-	var i []*dlppb.InfoType
-	for _, it := range infoTypes {
-		i = append(i, &dlppb.InfoType{Name: it})
+	var infoTypes []*dlppb.InfoType
+	for _, it := range infoTypeNames {
+		infoTypes = append(infoTypes, &dlppb.InfoType{Name: it})
 	}
 	// Convert the custom dictionary word lists and custom regexes to a list of CustomInfoTypes.
 	var customInfoTypes []*dlppb.CustomInfoType
@@ -131,7 +131,7 @@ func inspectDatastore(w io.Writer, projectID string, infoTypes []string, customD
 				},
 				// InspectConfig describes what fields to look for.
 				InspectConfig: &dlppb.InspectConfig{
-					InfoTypes:       i,
+					InfoTypes:       infoTypes,
 					CustomInfoTypes: customInfoTypes,
 					MinLikelihood:   dlppb.Likelihood_POSSIBLE,
 					Limits: &dlppb.InspectConfig_FindingLimits{

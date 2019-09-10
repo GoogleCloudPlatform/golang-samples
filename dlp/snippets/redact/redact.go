@@ -27,9 +27,9 @@ import (
 
 // redactImage blacks out the identified portions of the input image (with type bytesType)
 // and stores the result in outputPath.
-func redactImage(w io.Writer, projectID string, infoTypes []string, bytesType dlppb.ByteContentItem_BytesType, inputPath, outputPath string) error {
+func redactImage(w io.Writer, projectID string, infoTypeNames []string, bytesType dlppb.ByteContentItem_BytesType, inputPath, outputPath string) error {
 	// projectID := "my-project-id"
-	// infoTypes := []string{"US_SOCIAL_SECURITY_NUMBER"}
+	// infoTypeNames := []string{"US_SOCIAL_SECURITY_NUMBER"}
 	// bytesType := dlppb.ByteContentItem_IMAGE_PNG
 	// inputPath := /tmp/input
 	// outputPath := /tmp/output
@@ -42,15 +42,15 @@ func redactImage(w io.Writer, projectID string, infoTypes []string, bytesType dl
 	}
 
 	// Convert the info type strings to a list of InfoTypes.
-	var i []*dlppb.InfoType
-	for _, it := range infoTypes {
-		i = append(i, &dlppb.InfoType{Name: it})
+	var infoTypes []*dlppb.InfoType
+	for _, it := range infoTypeNames {
+		infoTypes = append(infoTypes, &dlppb.InfoType{Name: it})
 	}
 
 	// Convert the info type strings to a list of types to redact in the image.
-	var ir []*dlppb.RedactImageRequest_ImageRedactionConfig
-	for _, it := range infoTypes {
-		ir = append(ir, &dlppb.RedactImageRequest_ImageRedactionConfig{
+	var redactInfoTypes []*dlppb.RedactImageRequest_ImageRedactionConfig
+	for _, it := range infoTypeNames {
+		redactInfoTypes = append(redactInfoTypes, &dlppb.RedactImageRequest_ImageRedactionConfig{
 			Target: &dlppb.RedactImageRequest_ImageRedactionConfig_InfoType{
 				InfoType: &dlppb.InfoType{Name: it},
 			},
@@ -67,7 +67,7 @@ func redactImage(w io.Writer, projectID string, infoTypes []string, bytesType dl
 	req := &dlppb.RedactImageRequest{
 		Parent: "projects/" + projectID,
 		InspectConfig: &dlppb.InspectConfig{
-			InfoTypes:     i,
+			InfoTypes:     infoTypes,
 			MinLikelihood: dlppb.Likelihood_POSSIBLE,
 		},
 		// The item to analyze.
@@ -75,7 +75,7 @@ func redactImage(w io.Writer, projectID string, infoTypes []string, bytesType dl
 			Type: bytesType,
 			Data: b,
 		},
-		ImageRedactionConfigs: ir,
+		ImageRedactionConfigs: redactInfoTypes,
 	}
 	// Send the request.
 	resp, err := client.RedactImage(ctx, req)

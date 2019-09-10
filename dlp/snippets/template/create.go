@@ -25,12 +25,12 @@ import (
 )
 
 // createInspectTemplate creates a template with the given configuration.
-func createInspectTemplate(w io.Writer, projectID string, templateID, displayName, description string, infoTypes []string) error {
+func createInspectTemplate(w io.Writer, projectID string, templateID, displayName, description string, infoTypeNames []string) error {
 	// projectID := "my-project-id"
 	// templateID := "my-template"
 	// displayName := "My Template"
 	// description := "My template description"
-	// infoTypes := []string{"US_SOCIAL_SECURITY_NUMBER"}
+	// infoTypeNames := []string{"US_SOCIAL_SECURITY_NUMBER"}
 
 	ctx := context.Background()
 
@@ -40,9 +40,9 @@ func createInspectTemplate(w io.Writer, projectID string, templateID, displayNam
 	}
 
 	// Convert the info type strings to a list of InfoTypes.
-	var i []*dlppb.InfoType
-	for _, it := range infoTypes {
-		i = append(i, &dlppb.InfoType{Name: it})
+	var infoTypes []*dlppb.InfoType
+	for _, it := range infoTypeNames {
+		infoTypes = append(infoTypes, &dlppb.InfoType{Name: it})
 	}
 
 	// Create a configured request.
@@ -53,7 +53,7 @@ func createInspectTemplate(w io.Writer, projectID string, templateID, displayNam
 			DisplayName: displayName,
 			Description: description,
 			InspectConfig: &dlppb.InspectConfig{
-				InfoTypes:     i,
+				InfoTypes:     infoTypes,
 				MinLikelihood: dlppb.Likelihood_POSSIBLE,
 				Limits: &dlppb.InspectConfig_FindingLimits{
 					MaxFindingsPerRequest: 10,

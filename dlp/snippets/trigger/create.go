@@ -26,13 +26,13 @@ import (
 )
 
 // createTrigger creates a trigger with the given configuration.
-func createTrigger(w io.Writer, projectID string, triggerID, displayName, description, bucketName string, infoTypes []string) error {
+func createTrigger(w io.Writer, projectID string, triggerID, displayName, description, bucketName string, infoTypeNames []string) error {
 	// projectID := "my-project-id"
 	// triggerID := "my-trigger"
 	// displayName := "My Trigger"
 	// description := "My trigger description"
 	// bucketName := "my-bucket"
-	// infoTypes := []string{"US_SOCIAL_SECURITY_NUMBER"}
+	// infoTypeNames := []string{"US_SOCIAL_SECURITY_NUMBER"}
 
 	ctx := context.Background()
 
@@ -42,9 +42,9 @@ func createTrigger(w io.Writer, projectID string, triggerID, displayName, descri
 	}
 
 	// Convert the info type strings to a list of InfoTypes.
-	var i []*dlppb.InfoType
-	for _, it := range infoTypes {
-		i = append(i, &dlppb.InfoType{Name: it})
+	var infoTypes []*dlppb.InfoType
+	for _, it := range infoTypeNames {
+		infoTypes = append(infoTypes, &dlppb.InfoType{Name: it})
 	}
 
 	// Create a configured request.
@@ -73,7 +73,7 @@ func createTrigger(w io.Writer, projectID string, triggerID, displayName, descri
 			Job: &dlppb.JobTrigger_InspectJob{
 				InspectJob: &dlppb.InspectJobConfig{
 					InspectConfig: &dlppb.InspectConfig{
-						InfoTypes:     i,
+						InfoTypes:     infoTypes,
 						MinLikelihood: dlppb.Likelihood_POSSIBLE,
 						Limits: &dlppb.InspectConfig_FindingLimits{
 							MaxFindingsPerRequest: 10,
