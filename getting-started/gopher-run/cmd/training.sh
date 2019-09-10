@@ -27,19 +27,19 @@ DATASET_NAME="playerdata"
 ALGORITHM="linear"
 MODEL_TYPE="classification"
 MODEL_NAME="${DATASET_NAME}_${ALGORITHM}_${MODEL_TYPE}"
-# Not unique, so newer versions override older ones
+# Constant, so newer models override older ones and the deployed model won't need different directory
 JOB_DIR="gs://${BUCKET_NAME}/algorithms_training/${MODEL_NAME}/"
 FRAMEWORK="XGBOOST"
 
 while true; do
   DATE="$(date '+%Y%m%d_%H%M%S')"
-
+  # Include date so JOB_ID is unique
   JOB_ID="${MODEL_NAME}_${DATE}"
   gcloud beta ai-platform jobs submit training $JOB_ID \
   --master-image-uri=$IMAGE_URI --scale-tier=BASIC --job-dir=$JOB_DIR \
   -- \
   --preprocess --training_data_path=$TRAINING_DATA_PATH --objective=multi:softmax --num_class=4
-      
+
   VERSION_NAME="V_${DATE}"
   gcloud ai-platform versions create $VERSION_NAME \
   --model ${MODEL_NAME} \
@@ -49,8 +49,9 @@ while true; do
   --python-version=2.7
   gcloud ai-platform versions set-default ${VERSION_NAME} --model=${MODEL_NAME}
 
+  # Repeate every 30 minutes
   sleep 1800
 done
-    
-#bash training.sh &> /dev/null &
+
+# bash training.sh &> /dev/null &
 # --model_type=$MODEL_TYPE --batch_size=250 --learning_rate=0.1 --max_steps=1000

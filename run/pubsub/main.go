@@ -20,6 +20,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -51,13 +52,17 @@ type PubSubMessage struct {
 	Subscription string `json:"subscription"`
 }
 
-// HelloPubSub consumes a Pub/Sub message.
+// HelloPubSub receives and processes a Pub/Sub push message.
 func HelloPubSub(w http.ResponseWriter, r *http.Request) {
-	// Parse the Pub/Sub message.
 	var m PubSubMessage
-
-	if err := json.NewDecoder(r.Body).Decode(&m); err != nil {
-		log.Printf("json.NewDecoder: %v", err)
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Printf("iotuil.ReadAll: %v", err)
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+	if err := json.Unmarshal(body, &m); err != nil {
+		log.Printf("json.Unmarshal: %v", err)
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
