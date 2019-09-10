@@ -12,35 +12,44 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package trigger
 
+// [START dlp_create_trigger]
 import (
 	"context"
 	"fmt"
 	"io"
-	"log"
-	"time"
-
-	"github.com/golang/protobuf/ptypes/duration"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
-	"google.golang.org/api/iterator"
+	"github.com/golang/protobuf/ptypes/duration"
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
-// [START dlp_create_trigger]
-
 // createTrigger creates a trigger with the given configuration.
-func createTrigger(w io.Writer, client *dlp.Client, project string, minLikelihood dlppb.Likelihood, maxFindings int32, triggerID, displayName, description, bucketName string, autoPopulateTimespan bool, scanPeriodDays int64, infoTypes []string) {
+func createTrigger(w io.Writer, projectID string, triggerID, displayName, description, bucketName string, infoTypeNames []string) error {
+	// projectID := "my-project-id"
+	// triggerID := "my-trigger"
+	// displayName := "My Trigger"
+	// description := "My trigger description"
+	// bucketName := "my-bucket"
+	// infoTypeNames := []string{"US_SOCIAL_SECURITY_NUMBER"}
+
+	ctx := context.Background()
+
+	client, err := dlp.NewClient(ctx)
+	if err != nil {
+		return fmt.Errorf("dlp.NewClient: %v", err)
+	}
+
 	// Convert the info type strings to a list of InfoTypes.
-	var i []*dlppb.InfoType
-	for _, it := range infoTypes {
-		i = append(i, &dlppb.InfoType{Name: it})
+	var infoTypes []*dlppb.InfoType
+	for _, it := range infoTypeNames {
+		infoTypes = append(infoTypes, &dlppb.InfoType{Name: it})
 	}
 
 	// Create a configured request.
 	req := &dlppb.CreateJobTriggerRequest{
-		Parent:    "projects/" + project,
+		Parent:    "projects/" + projectID,
 		TriggerId: triggerID,
 		JobTrigger: &dlppb.JobTrigger{
 			DisplayName: displayName,
@@ -53,7 +62,7 @@ func createTrigger(w io.Writer, client *dlp.Client, project string, minLikelihoo
 						Schedule: &dlppb.Schedule{
 							Option: &dlppb.Schedule_RecurrencePeriodDuration{
 								RecurrencePeriodDuration: &duration.Duration{
-									Seconds: scanPeriodDays * 60 * 60 * 24, // Days to seconds.
+									Seconds: 10 * 60 * 60 * 24, // 10 days in seconds.
 								},
 							},
 						},
@@ -64,10 +73,10 @@ func createTrigger(w io.Writer, client *dlp.Client, project string, minLikelihoo
 			Job: &dlppb.JobTrigger_InspectJob{
 				InspectJob: &dlppb.InspectJobConfig{
 					InspectConfig: &dlppb.InspectConfig{
-						InfoTypes:     i,
-						MinLikelihood: minLikelihood,
+						InfoTypes:     infoTypes,
+						MinLikelihood: dlppb.Likelihood_POSSIBLE,
 						Limits: &dlppb.InspectConfig_FindingLimits{
-							MaxFindingsPerRequest: maxFindings,
+							MaxFindingsPerRequest: 10,
 						},
 					},
 					StorageConfig: &dlppb.StorageConfig{
@@ -82,67 +91,21 @@ func createTrigger(w io.Writer, client *dlp.Client, project string, minLikelihoo
 						// https://cloud.google.com/dlp/docs/reference/rest/v2/InspectJobConfig#TimespanConfig
 						TimespanConfig: &dlppb.StorageConfig_TimespanConfig{
 							// Auto-populate start and end times in order to scan new objects only.
-							EnableAutoPopulationOfTimespanConfig: autoPopulateTimespan,
+							EnableAutoPopulationOfTimespanConfig: true,
 						},
 					},
 				},
 			},
 		},
 	}
+
 	// Send the request.
-	resp, err := client.CreateJobTrigger(context.Background(), req)
+	resp, err := client.CreateJobTrigger(ctx, req)
 	if err != nil {
-		log.Fatalf("error creating job trigger: %v", err)
+		return fmt.Errorf("CreateJobTrigger: %v", err)
 	}
 	fmt.Fprintf(w, "Successfully created trigger: %v", resp.GetName())
+	return nil
 }
 
 // [END dlp_create_trigger]
-
-// [START dlp_list_triggers]
-
-// listTriggers lists the triggers for the given project.
-func listTriggers(w io.Writer, client *dlp.Client, project string) {
-	// Create a configured request.
-	req := &dlppb.ListJobTriggersRequest{
-		Parent: "projects/" + project,
-	}
-	// Send the request and iterate over the results.
-	it := client.ListJobTriggers(context.Background(), req)
-	for {
-		t, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			log.Fatalf("error getting jobs: %v", err)
-		}
-		c := t.GetCreateTime()
-		u := t.GetUpdateTime()
-		fmt.Fprintf(w, "Trigger %v\n", t.GetName())
-		fmt.Fprintf(w, "  Created: %v\n", time.Unix(c.GetSeconds(), int64(c.GetNanos())).Format(time.RFC1123))
-		fmt.Fprintf(w, "  Updated: %v\n", time.Unix(u.GetSeconds(), int64(u.GetNanos())).Format(time.RFC1123))
-		fmt.Fprintf(w, "  Display Name: %q\n", t.GetDisplayName())
-		fmt.Fprintf(w, "  Description: %q\n", t.GetDescription())
-		fmt.Fprintf(w, "  Status: %v\n", t.GetStatus())
-		fmt.Fprintf(w, "  Error Count: %v\n", len(t.GetErrors()))
-	}
-}
-
-// [END dlp_list_triggers]
-
-// [START dlp_delete_trigger]
-
-// deleteTrigger deletes the given trigger.
-func deleteTrigger(w io.Writer, client *dlp.Client, triggerID string) {
-	req := &dlppb.DeleteJobTriggerRequest{
-		Name: triggerID,
-	}
-	err := client.DeleteJobTrigger(context.Background(), req)
-	if err != nil {
-		log.Fatalf("error deleting job: %v", err)
-	}
-	fmt.Fprintf(w, "Successfully deleted trigger %v", triggerID)
-}
-
-// [END dlp_delete_trigger]
