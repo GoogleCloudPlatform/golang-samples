@@ -249,7 +249,9 @@ func (b *Bookshelf) createHandler(w http.ResponseWriter, r *http.Request) *appEr
 func (b *Bookshelf) updateHandler(w http.ResponseWriter, r *http.Request) *appError {
 	ctx := r.Context()
 	id := mux.Vars(r)["id"]
-
+	if id == "" {
+		return appErrorf(errors.New("no book with empty ID"), "no book with empty ID")
+	}
 	book, err := b.bookFromForm(r)
 	if err != nil {
 		return appErrorf(err, "could not parse book from form: %v", err)
