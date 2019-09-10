@@ -14,6 +14,7 @@
 
 package main
 
+// [START fs_counter_classes]
 import (
 	"context"
 	"fmt"
@@ -24,13 +25,14 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-// [START fs_counter_classes]
-// counters/${ID}
+// Counter is a collection of documents (shards)
+// to realize counter with high frequency.
 type Counter struct {
 	numShards int
 }
 
-// counters/${ID}/shards/${NUM}
+// Shard is a single counter, which is used in a group
+// of other shards within Counter.
 type Shard struct {
 	Count int
 }
@@ -38,17 +40,17 @@ type Shard struct {
 // [END fs_counter_classes]
 
 // [START fs_create_counter]
-func (c *Counter) сreateCounter(ctx context.Context, docRef *firestore.DocumentRef) error {
-	// Initialize the counter document, then initialize each shard.
-	var err error
+
+// initCounter creates a given number of shards as
+// subcollection of specified document.
+func (c *Counter) initCounter(ctx context.Context, docRef *firestore.DocumentRef) error {
 	colRef := docRef.Collection("shards")
 
 	// Initialize each shard with count=0
 	for num := 0; num < c.numShards; num++ {
 		shard := Shard{0}
 
-		_, err = colRef.Doc(strconv.Itoa(num)).Set(ctx, shard)
-		if err != nil {
+		if _, err := colRef.Doc(strconv.Itoa(num)).Set(ctx, shard); err != nil {
 			return fmt.Errorf("Set: %v", err)
 		}
 	}
@@ -58,6 +60,8 @@ func (c *Counter) сreateCounter(ctx context.Context, docRef *firestore.Document
 // [END fs_create_counter]
 
 // [START fs_increment_counter]
+
+// incrementCounter increments a randomly picked shard.
 func (c *Counter) incrementCounter(ctx context.Context, docRef *firestore.DocumentRef) (*firestore.WriteResult, error) {
 	docID := strconv.Itoa(rand.Intn(c.numShards))
 
@@ -70,8 +74,9 @@ func (c *Counter) incrementCounter(ctx context.Context, docRef *firestore.Docume
 // [END fs_increment_counter]
 
 // [START fs_get_count]
+
+// getCount returns a total count across all shards.
 func (c *Counter) getCount(ctx context.Context, docRef *firestore.DocumentRef) (int64, error) {
-	// Sum the count of each shard in the subcollection
 	var total int64
 	shards := docRef.Collection("shards").Documents(ctx)
 	for {

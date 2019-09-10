@@ -16,6 +16,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"testing"
 
@@ -38,10 +39,13 @@ func TestDistributedCounter(t *testing.T) {
 	docRef := client.Collection("counter_samples").Doc("DCounter")
 
 	dc := Counter{3}
-	dc.сreateCounter(ctx, docRef)
+	dc.initCounter(ctx, docRef)
 
 	shards := docRef.Collection("shards")
-	docRefs, _ := shards.DocumentRefs(ctx).GetAll()
+	docRefs, err := shards.DocumentRefs(ctx).GetAll()
+	if err != nil {
+		t.Fatalf("GetAll: %v", err)
+	}
 	if l := len(docRefs); l != 3 {
 		t.Fatalf("created %d shards, want 3", l)
 	}
@@ -49,7 +53,10 @@ func TestDistributedCounter(t *testing.T) {
 	dc.incrementCounter(ctx, docRef)
 	dc.incrementCounter(ctx, docRef)
 
-	total, _ := dc.getCount(ctx, docRef)
+	total, err := dc.getCount(ctx, docRef)
+	if err != nil {
+		t.Fatalf("getCount: %v", err)
+	}
 	if total != 2 {
 		t.Fatalf("got total = %d, want 2", total)
 	}
