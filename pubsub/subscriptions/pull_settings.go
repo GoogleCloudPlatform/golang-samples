@@ -35,7 +35,7 @@ func pullMsgsSettings(w io.Writer, projectID, subName string) error {
 	sub := client.Subscription(subName)
 	sub.ReceiveSettings.Synchronous = true
 	// MaxOutstandingMessages is the maximum number of unprocessed messages (unacknowledged but not yet expired).
-	// This is only guaranteed with ReceiveSettings.Synchronous is set to true.
+	// This is only guaranteed when ReceiveSettings.Synchronous is set to true.
 	sub.ReceiveSettings.MaxOutstandingMessages = 10
 	// MaxOutstandingBytes is the maximum size of unprocessed messages (unacknowledged but not yet expired).
 	sub.ReceiveSettings.MaxOutstandingBytes = 1e10

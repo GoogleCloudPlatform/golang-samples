@@ -73,7 +73,7 @@ func pullMsgsSync(w io.Writer, projectID, subName string, topic *pubsub.Topic, m
 	for _, msg := range resp.GetReceivedMessages() {
 		ackIDs = append(ackIDs, msg.GetAckId())
 		message := string(msg.GetMessage().Data)
-		fmt.Printf("Got message %q\n", message)
+		fmt.Fprintf(w, "Got message %q\n", message)
 		msgs = append(msgs, message)
 	}
 

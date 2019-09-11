@@ -19,6 +19,7 @@ package subscriptions
 import (
 	"bytes"
 	"context"
+	"strconv"
 	"sync"
 	"testing"
 	"time"
@@ -187,6 +188,49 @@ func TestPullMsgsSync(t *testing.T) {
 	}
 	if len(msgs) > maxMessages {
 		t.Fatalf("Expected <%d messages, got %d", maxMessages, len(msgs))
+	}
+}
+
+func TestPullMsgsConcurrencyControl(t *testing.T) {
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	client := setup(t)
+
+	topic := client.Topic(topicName)
+	ok, err := topic.Exists(ctx)
+	if err != nil {
+		t.Fatalf("failed to check if topic exists: %v", err)
+	}
+	if !ok {
+		topic, err := client.CreateTopic(ctx, topicName)
+		if err != nil {
+			t.Fatalf("CreateTopic: %v", err)
+		}
+		_, err = client.CreateSubscription(ctx, subName, pubsub.SubscriptionConfig{
+			Topic:       topic,
+			AckDeadline: 20 * time.Second,
+		})
+		if err != nil {
+			t.Fatalf("CreateSubscription: %v", err)
+		}
+	}
+
+	// Publish 100 message to test with.
+	numMessages := 100
+	for i := 0; i < numMessages; i++ {
+		result := topic.Publish(ctx, &pubsub.Message{
+			Data: []byte("Message " + strconv.Itoa(i)),
+		})
+		result.Get(ctx)
+	}
+
+	buf := new(bytes.Buffer)
+	msgs, err := pullMsgsConcurrenyControl(buf, tc.ProjectID, subName, 4)
+	if err != nil {
+		t.Fatalf("failed to pull messages: %v", err)
+	}
+	if len(msgs) != numMessages {
+		t.Fatalf("expected to pull %d messages, got %d", numMessages, len(msgs))
 	}
 }
 

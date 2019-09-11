@@ -19,33 +19,46 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"sync"
+	"time"
 
 	"cloud.google.com/go/pubsub"
 )
 
-func pullMsgsConcurrent(w io.Writer, projectID, subName string) error {
+func pullMsgsConcurrenyControl(w io.Writer, projectID, subName string, numGoroutines int) ([]string, error) {
 	// projectID := "my-project-id"
 	// subName := projectID + "-example-sub"
+	// numGoroutines := 4
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("pubsub.NewClient: %v", err)
+		return nil, fmt.Errorf("pubsub.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	sub := client.Subscription(subName)
-	// NumGoroutines is the number of goroutines Receive will spawn to pull messages concurrently.
-	sub.ReceiveSettings.NumGoroutines = 4
-	// If ReceiveSettings.Synchronous is set to true, NumGoroutines is overriden to 1. To enable
-	// concurrency settings, set this to false.
+	// Must set ReceiveSettings.Synchronous to false to enable concurrency settings.
+	// Otherwise, NumGoroutines will be set to 1.
 	sub.ReceiveSettings.Synchronous = false
+	// NumGoroutines is the number of goroutines sub.Receive will spawn to pull messages concurrently.
+	sub.ReceiveSettings.NumGoroutines = numGoroutines
+
+	// Receive messages for 10 seconds.
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+	var msgs []string
+	var lock sync.Mutex
 	err = sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
-		fmt.Printf("Got message %q\n", string(msg.Data))
+		lock.Lock()
+		defer lock.Unlock()
+		msgs = append(msgs, string(msg.Data))
+		fmt.Fprintf(w, "Got message: %s\n", string(msg.Data))
 		msg.Ack()
 	})
 	if err != nil {
-		return fmt.Errorf("Receive: %v", err)
+		return nil, fmt.Errorf("Receive: %v", err)
 	}
-	return nil
+	return msgs, nil
 }
 
 // [END pubsub_subscriber_concurrency_control]
