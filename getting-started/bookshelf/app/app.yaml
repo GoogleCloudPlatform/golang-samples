@@ -12,4 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-runtime: go112
+runtime: go
+env: flex
+
+env_variables:
+  OAUTH2_CALLBACK: https://<your-project-id>.appspot.com/oauth2callback
+
+# [START cloudsql_settings]
+# Replace INSTANCE_CONNECTION_NAME with the value obtained when configuring your
+# Cloud SQL instance, available from the Google Cloud Console or from the Cloud SDK.
+# For SQL v2 instances, this should be in the form of "project:region:instance".
+# Cloud SQL v1 instances are not supported.
+#
+# This should match the value in config.go
+beta_settings:
+#  cloud_sql_instances: INSTANCE_CONNECTION_NAME
+# [END cloudsql_settings]
