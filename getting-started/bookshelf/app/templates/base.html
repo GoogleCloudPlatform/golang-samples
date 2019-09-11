@@ -30,7 +30,30 @@
 
     <ul class="nav navbar-nav">
       <li><a href="/books">Books</a></li>
+      {{if .AuthEnabled}}
+        <li><a href="/books/mine">My Books</a></li>
+      {{end}}
     </ul>
+
+    <!-- [START auth] -->
+    {{if .AuthEnabled}}
+      {{if .Profile}}
+      <form method="post" action="{{.LogoutURL}}" class="navbar-form navbar-right">
+        <button class="btn btn-default">Log out</button>
+      </form>
+      <div class="navbar-text navbar-right">
+        {{if .Profile.ImageURL}}
+          <img class="img-circle" width="24" src="{{.Profile.ImageURL}}">
+        {{end}}
+        <span>{{.Profile.DisplayName}}</span>
+      </div>
+      {{else}}
+      <div class="navbar-text navbar-right">
+        <a href="{{.LoginURL}}">Log in</a>
+      </div>
+      {{end}}
+    {{end}}
+    <!-- [END auth] -->
   </div>
 </div>
 <div class="container">
