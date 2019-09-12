@@ -19,20 +19,20 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"sync"
+	"sync/atomic"
 	"time"
 
 	"cloud.google.com/go/pubsub"
 )
 
-func pullMsgsConcurrenyControl(w io.Writer, projectID, subName string, numGoroutines int) ([]string, error) {
+func pullMsgsConcurrenyControl(w io.Writer, projectID, subName string, numGoroutines int) error {
 	// projectID := "my-project-id"
 	// subName := projectID + "-example-sub"
 	// numGoroutines := 4
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return nil, fmt.Errorf("pubsub.NewClient: %v", err)
+		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
 	defer client.Close()
 
@@ -46,19 +46,34 @@ func pullMsgsConcurrenyControl(w io.Writer, projectID, subName string, numGorout
 	// Receive messages for 10 seconds.
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
-	var msgs []string
-	var lock sync.Mutex
+
+	var numMsgs uint64
+	// Create a channel to send messages to as they come in.
+	cm := make(chan *pubsub.Message)
+
+	// Handle individual messages in a goroutine.
+	go func() {
+		for {
+			select {
+			case msg := <-cm:
+				_ = msg // TODO: handle message
+				atomic.AddUint64(&numMsgs, 1)
+				msg.Ack()
+			case <-ctx.Done():
+				fmt.Fprintf(w, "Received %d messages\n", numMsgs)
+				return
+			}
+		}
+	}()
+
 	err = sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
-		lock.Lock()
-		defer lock.Unlock()
-		msgs = append(msgs, string(msg.Data))
-		fmt.Fprintf(w, "Got message: %s\n", string(msg.Data))
-		msg.Ack()
+		cm <- msg
 	})
 	if err != nil {
-		return nil, fmt.Errorf("Receive: %v", err)
+		return fmt.Errorf("Error in Receive: %v", err)
 	}
-	return msgs, nil
+
+	return nil
 }
 
 // [END pubsub_subscriber_concurrency_control]

@@ -25,7 +25,7 @@ import (
 	pb "google.golang.org/genproto/googleapis/pubsub/v1"
 )
 
-func pullMsgsSync(w io.Writer, projectID, subName string, topic *pubsub.Topic, maxMessages int32) ([]string, error) {
+func pullMsgsSync(w io.Writer, projectID, subName string, topic *pubsub.Topic, maxMessages int32) error {
 	// projectID := "my-project-id"
 	// subName := projectID + "-example-sub"
 	// topic of type https://godoc.org/cloud.google.com/go/pubsub#Topic
@@ -44,7 +44,7 @@ func pullMsgsSync(w io.Writer, projectID, subName string, topic *pubsub.Topic, m
 	// Check that all messages were published.
 	for _, r := range results {
 		if _, err := r.Get(ctx); err != nil {
-			return nil, fmt.Errorf("Get: %v", err)
+			return fmt.Errorf("Get: %v", err)
 		}
 	}
 
@@ -55,7 +55,7 @@ func pullMsgsSync(w io.Writer, projectID, subName string, topic *pubsub.Topic, m
 	// versioned client.
 	subClient, err := pubsubV1.NewSubscriberClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("Client instantiation error: %v", err)
+		return fmt.Errorf("Client instantiation error: %v", err)
 	}
 	sub := fmt.Sprintf("projects/%s/subscriptions/%s", projectID, subName)
 
@@ -67,14 +67,13 @@ func pullMsgsSync(w io.Writer, projectID, subName string, topic *pubsub.Topic, m
 
 	resp, err := subClient.Pull(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("Pull error: %v", err)
+		return fmt.Errorf("Pull error: %v", err)
 	}
-	var msgs, ackIDs []string
+	var ackIDs []string
 	for _, msg := range resp.GetReceivedMessages() {
+		fmt.Fprintf(w, "Got message %q\n", string(msg.GetMessage().Data))
+		_ = msg // TODO: handle message.
 		ackIDs = append(ackIDs, msg.GetAckId())
-		message := string(msg.GetMessage().Data)
-		fmt.Fprintf(w, "Got message %q\n", message)
-		msgs = append(msgs, message)
 	}
 
 	subClient.Acknowledge(ctx, &pb.AcknowledgeRequest{
@@ -82,7 +81,7 @@ func pullMsgsSync(w io.Writer, projectID, subName string, topic *pubsub.Topic, m
 		AckIds:       ackIDs,
 	})
 
-	return msgs, nil
+	return nil
 }
 
 // [END pubsub_subscriber_sync_pull]

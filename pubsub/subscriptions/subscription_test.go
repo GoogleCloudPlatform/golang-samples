@@ -19,7 +19,9 @@ package subscriptions
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"strconv"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -182,12 +184,14 @@ func TestPullMsgsSync(t *testing.T) {
 
 	maxMessages := 5
 	buf := new(bytes.Buffer)
-	msgs, err := pullMsgsSync(buf, tc.ProjectID, subName, topic, int32(maxMessages))
+	err = pullMsgsSync(buf, tc.ProjectID, subName, topic, int32(maxMessages))
 	if err != nil {
 		t.Fatalf("failed to pull messages: %v", err)
 	}
-	if len(msgs) > maxMessages {
-		t.Fatalf("Expected <%d messages, got %d", maxMessages, len(msgs))
+	got := buf.String()
+	want := "Got message \"hello world #4\""
+	if !strings.Contains(got, want) {
+		t.Fatalf("got output: %v\nwant %v", got, want)
 	}
 }
 
@@ -216,8 +220,8 @@ func TestPullMsgsConcurrencyControl(t *testing.T) {
 	}
 
 	// Publish 100 message to test with.
-	numMessages := 100
-	for i := 0; i < numMessages; i++ {
+	numMsgs := 100
+	for i := 0; i < numMsgs; i++ {
 		result := topic.Publish(ctx, &pubsub.Message{
 			Data: []byte("Message " + strconv.Itoa(i)),
 		})
@@ -225,12 +229,13 @@ func TestPullMsgsConcurrencyControl(t *testing.T) {
 	}
 
 	buf := new(bytes.Buffer)
-	msgs, err := pullMsgsConcurrenyControl(buf, tc.ProjectID, subName, 4)
-	if err != nil {
+	if err := pullMsgsConcurrenyControl(buf, tc.ProjectID, subName, 4); err != nil {
 		t.Fatalf("failed to pull messages: %v", err)
 	}
-	if len(msgs) != numMessages {
-		t.Fatalf("expected to pull %d messages, got %d", numMessages, len(msgs))
+	got := buf.String()
+	want := fmt.Sprintf("Received %d messages", numMsgs)
+	if !strings.Contains(got, want) {
+		t.Fatalf("got output: %v, want %v", got, want)
 	}
 }
 
