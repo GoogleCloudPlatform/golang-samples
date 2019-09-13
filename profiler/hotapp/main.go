@@ -29,6 +29,10 @@ import (
 )
 
 var (
+	// Project ID to use.
+	projectID = flag.String("project_id", "", "project ID (must be specified if running outside of GCP)")
+	// Service name to configure.
+	service = flag.String("service", "hotapp-service", "service name")
 	// Service version to configure.
 	version = flag.String("version", "1.0.0", "service version")
 	// Skew of foo1 function over foo2, in the CPU busyloop, to simulate diff.
@@ -38,12 +42,6 @@ var (
 	// Some allocated memory. Held in a global variable to protect it from GC.
 	mem [][]byte
 )
-
-func sleepLocked(d time.Duration) {
-	mu.Lock()
-	time.Sleep(d)
-	mu.Unlock()
-}
 
 // Simulates some work that contends over a shared mutex. It calls an "impl"
 // function to produce a bit deeper stacks in the profiler visualization,
@@ -134,7 +132,8 @@ func main() {
 	flag.Parse()
 
 	err := profiler.Start(profiler.Config{
-		Service:        "hotapp-service",
+		ProjectID:      *projectID,
+		Service:        *service,
 		ServiceVersion: *version,
 		DebugLogging:   true,
 		MutexProfiling: true,
