@@ -75,7 +75,7 @@ func improvedHandler(w http.ResponseWriter, r *http.Request) {
 	target := os.Getenv("TARGET")
 	if target == "" {
 		target = "World"
-		log.Printf("warning: TARGET mpt set. default to %s", target)
+		log.Printf("warning: TARGET not set, default to %s", target)
 	}
 
 	// [END run_broken_service_upgrade]
