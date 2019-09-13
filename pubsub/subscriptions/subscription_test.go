@@ -182,9 +182,25 @@ func TestPullMsgsSync(t *testing.T) {
 		}
 	}
 
+	// Publish 10 messages on the topic.
+	var results []*pubsub.PublishResult
+	for i := 0; i < 10; i++ {
+		res := topic.Publish(ctx, &pubsub.Message{
+			Data: []byte(fmt.Sprintf("hello world #%d", i)),
+		})
+		results = append(results, res)
+	}
+
+	// Check that all messages were published.
+	for _, r := range results {
+		if _, err := r.Get(ctx); err != nil {
+			t.Fatalf("Get publish result: %v", err)
+		}
+	}
+
 	maxMessages := 5
 	buf := new(bytes.Buffer)
-	err = pullMsgsSync(buf, tc.ProjectID, subName, topic, int32(maxMessages))
+	err = pullMsgsSync(buf, tc.ProjectID, subName, int32(maxMessages))
 	if err != nil {
 		t.Fatalf("failed to pull messages: %v", err)
 	}

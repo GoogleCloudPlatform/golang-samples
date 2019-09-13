@@ -60,7 +60,7 @@ func pullMsgsConcurrenyControl(w io.Writer, projectID, subName string, numGorout
 				atomic.AddUint64(&numMsgs, 1)
 				msg.Ack()
 			case <-ctx.Done():
-				fmt.Fprintf(w, "Received %d messages\n", numMsgs)
+				close(cm)
 				return
 			}
 		}
@@ -72,6 +72,7 @@ func pullMsgsConcurrenyControl(w io.Writer, projectID, subName string, numGorout
 	if err != nil {
 		return fmt.Errorf("Error in Receive: %v", err)
 	}
+	fmt.Fprintf(w, "Received %d messages\n", numMsgs)
 
 	return nil
 }
