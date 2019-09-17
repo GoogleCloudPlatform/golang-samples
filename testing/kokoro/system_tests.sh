@@ -91,6 +91,7 @@ if ! go help mod 2>/dev/null >/dev/null; then
 fi
 
 go get github.com/jstemmer/go-junit-report
+go install ./testing/sampletests
 
 # Do the easy stuff before running tests. Fail fast!
 if [ $GOLANG_SAMPLES_GO_VET ]; then
@@ -112,5 +113,5 @@ fi
 
 # Rename tests to include the region tags they test.
 cat $OUTFILE | \
-  go run ./testing/sampletests/main.go | \
+  sampletests | \
   $GOPATH/bin/go-junit-report -set-exit-code > sponge_log.xml
