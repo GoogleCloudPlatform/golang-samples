@@ -110,4 +110,7 @@ if go help mod 2>/dev/null >/dev/null; then
   go clean -modcache
 fi
 
-cat $OUTFILE | $GOPATH/bin/go-junit-report -set-exit-code > sponge_log.xml
+# Rename tests to include the region tags they test.
+cat $OUTFILE | \
+  go run ./testing/sampletests/main.go | \
+  $GOPATH/bin/go-junit-report -set-exit-code > sponge_log.xml

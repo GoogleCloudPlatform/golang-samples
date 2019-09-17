@@ -4,18 +4,21 @@ go 1.13
 
 require (
 	bitbucket.org/ckvist/twilio v0.0.0-20170512072134-13c593a1721b
-	cloud.google.com/go v0.45.1
+	cloud.google.com/go v0.46.3
 	cloud.google.com/go/bigquery v1.0.1
 	cloud.google.com/go/bigtable v1.0.0
 	cloud.google.com/go/datastore v1.0.0
+	cloud.google.com/go/firestore v1.0.0
 	cloud.google.com/go/logging v1.0.0
 	cloud.google.com/go/pubsub v1.0.1
+	cloud.google.com/go/spanner v1.0.0
+	cloud.google.com/go/storage v1.0.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.12.7
 	firebase.google.com/go v3.9.0+incompatible
-	github.com/aws/aws-sdk-go v1.23.19 // indirect
+	github.com/aws/aws-sdk-go v1.23.22 // indirect
 	github.com/bmatcuk/doublestar v1.1.5
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
-	github.com/bradfitz/gomemcache v0.0.0-20190329173943-551aad21a668
+	github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/eclipse/paho.mqtt.golang v1.2.0
 	github.com/fluent/fluent-logger-golang v1.4.0
@@ -45,21 +48,20 @@ require (
 	github.com/tinylib/msgp v1.1.0 // indirect
 	github.com/zabawaba99/firego v0.0.0-20190331000051-3bcc4b6a4599
 	go.opencensus.io v0.22.1
-	golang.org/x/exp v0.0.0-20190829153037-c13cbed26979
-	golang.org/x/lint v0.0.0-20190909230951-414d861bb4ac // indirect
-	golang.org/x/net v0.0.0-20190909003024-a7b16738d86b
+	golang.org/x/exp v0.0.0-20190912063710-ac5d2bfcbfe0
+	golang.org/x/net v0.0.0-20190916140828-c8589233b77d
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
-	golang.org/x/sys v0.0.0-20190910064555-bbd175535a8b // indirect
+	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e // indirect
+	golang.org/x/sys v0.0.0-20190916202348-b4ddaad3f8a3 // indirect
 	golang.org/x/text v0.3.2
-	golang.org/x/tools v0.0.0-20190911022129-16c5e0f7d110 // indirect
+	golang.org/x/tools v0.0.0-20190917162342-3b4f30a44f3b
 	google.golang.org/api v0.10.0
 	google.golang.org/appengine v1.6.2
-	google.golang.org/genproto v0.0.0-20190905072037-92dd089d5514
-	google.golang.org/grpc v1.23.0
+	google.golang.org/genproto v0.0.0-20190916214212-f660b8655731
+	google.golang.org/grpc v1.23.1
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/linkedin/goavro.v1 v1.0.5 // indirect
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
 	gopkg.in/sendgrid/sendgrid-go.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.2.2
-	honnef.co/go/tools v0.0.1-2019.2.3 // indirect
 )
