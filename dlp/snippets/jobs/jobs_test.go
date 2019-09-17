@@ -19,13 +19,9 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io"
-	"io/ioutil"
-	"log"
 	"regexp"
 	"strings"
 	"testing"
-	"time"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
 	"cloud.google.com/go/pubsub"
@@ -64,25 +60,18 @@ func setupPubSub(projectID, topic, sub string) (*pubsub.Subscription, error) {
 }
 
 // riskNumerical computes the numerical risk of the given column.
-func riskNumerical(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub, datasetID, tableID, columnName string) error {
-	// projectID := "my-project-id"
-	// dataProject := "bigquery-public-data"
-	// pubSubTopic := "dlp-risk-sample-topic"
-	// pubSubSub := "dlp-risk-sample-sub"
-	// datasetID := "nhtsa_traffic_fatalities"
-	// tableID := "accident_2015"
-	// columnName := "state_number"
+func riskNumerical(projectID, dataProject, pubSubTopic, pubSubSub, datasetID, tableID, columnName string) error {
 	ctx := context.Background()
 	client, err := dlp.NewClient(ctx)
 	if err != nil {
 		return fmt.Errorf("dlp.NewClient: %v", err)
 	}
 	// Create a PubSub Client used to listen for when the inspect job finishes.
-	pClient, err := pubsub.NewClient(ctx, projectID)
+	pubsubClient, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
 		return fmt.Errorf("Error creating PubSub client: %v", err)
 	}
-	defer pClient.Close()
+	defer pubsubClient.Close()
 
 	// Create a PubSub subscription we can use to listen for messages.
 	s, err := setupPubSub(projectID, pubSubTopic, pubSubSub)
@@ -128,11 +117,10 @@ func riskNumerical(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub, 
 		},
 	}
 	// Create the risk job.
-	j, err := client.CreateDlpJob(context.Background(), req)
+	j, err := client.CreateDlpJob(ctx, req)
 	if err != nil {
 		return fmt.Errorf("CreateDlpJob: %v", err)
 	}
-	fmt.Fprintf(w, "Created job: %v\n", j.GetName())
 
 	// Wait for the risk job to finish by waiting for a PubSub message.
 	ctx, cancel := context.WithCancel(ctx)
@@ -143,22 +131,6 @@ func riskNumerical(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub, 
 			return
 		}
 		msg.Ack()
-		time.Sleep(500 * time.Millisecond)
-		resp, err := client.GetDlpJob(ctx, &dlppb.GetDlpJobRequest{
-			Name: j.GetName(),
-		})
-		if err != nil {
-			log.Fatalf("GetDlpJob: %v", err)
-		}
-		n := resp.GetRiskDetails().GetNumericalStatsResult()
-		fmt.Fprintf(w, "Value range: [%v, %v]\n", n.GetMinValue(), n.GetMaxValue())
-		var tmp string
-		for p, v := range n.GetQuantileValues() {
-			if v.String() != tmp {
-				fmt.Fprintf(w, "Value at %v quantile: %v\n", p, v)
-				tmp = v.String()
-			}
-		}
 		// Stop listening for more messages.
 		cancel()
 	})
@@ -175,7 +147,7 @@ func TestListJobs(t *testing.T) {
 	s := buf.String()
 	if len(s) == 0 {
 		// Create job.
-		riskNumerical(ioutil.Discard, tc.ProjectID, "bigquery-public-data", "risk-topic", "risk-sub", "nhtsa_traffic_fatalities", "accident_2015", "state_number")
+		riskNumerical(tc.ProjectID, "bigquery-public-data", "risk-topic", "risk-sub", "nhtsa_traffic_fatalities", "accident_2015", "state_number")
 		buf.Reset()
 		err := listJobs(buf, tc.ProjectID, "", "RISK_ANALYSIS_JOB")
 		if err != nil {
@@ -197,7 +169,7 @@ func TestDeleteJob(t *testing.T) {
 	s := buf.String()
 	if len(s) == 0 {
 		// Create job.
-		riskNumerical(ioutil.Discard, tc.ProjectID, "bigquery-public-data", "risk-topic", "risk-sub", "nhtsa_traffic_fatalities", "accident_2015", "state_number")
+		riskNumerical(tc.ProjectID, "bigquery-public-data", "risk-topic", "risk-sub", "nhtsa_traffic_fatalities", "accident_2015", "state_number")
 		buf.Reset()
 		listJobs(buf, tc.ProjectID, "", "RISK_ANALYSIS_JOB")
 		s = buf.String()

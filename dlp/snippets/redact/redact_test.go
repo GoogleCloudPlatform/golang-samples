@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package redact
 
 import (
 	"bytes"
@@ -24,7 +24,7 @@ import (
 )
 
 func TestRedactImage(t *testing.T) {
-	testutil.SystemTest(t)
+	tc := testutil.SystemTest(t)
 	tests := []struct {
 		name      string
 		inputPath string
@@ -52,7 +52,9 @@ func TestRedactImage(t *testing.T) {
 			t.Parallel()
 			buf := new(bytes.Buffer)
 			// TODO: output to a Writer or bytes rather than to a file on disk.
-			redactImage(buf, client, projectID, dlppb.Likelihood_POSSIBLE, test.infoTypes, test.bt, test.inputPath, "testdata/test_output.png")
+			if err := redactImage(buf, tc.ProjectID, test.infoTypes, test.bt, test.inputPath, "testdata/test_output.png"); err != nil {
+				t.Errorf("redactImage: %v", err)
+			}
 			if got := buf.String(); !strings.Contains(got, test.want) {
 				t.Errorf("redactImage(%s) got %q, want substring %q", test.name, got, test.want)
 			}

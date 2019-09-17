@@ -12,33 +12,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package trigger
 
+// [START dlp_delete_trigger]
 import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
 	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
-// [START dlp_list_info_types]
+// deleteTrigger deletes the given trigger.
+func deleteTrigger(w io.Writer, triggerID string) error {
+	// projectID := "my-project-id"
+	// triggerID := "my-trigger"
 
-// infoTypes returns the info types in the given language and matching the given filter.
-func infoTypes(w io.Writer, client *dlp.Client, languageCode, filter string) {
-	req := &dlppb.ListInfoTypesRequest{
-		LanguageCode: languageCode,
-		Filter:       filter,
-	}
-	resp, err := client.ListInfoTypes(context.Background(), req)
+	ctx := context.Background()
+
+	client, err := dlp.NewClient(ctx)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("dlp.NewClient: %v", err)
 	}
-	for _, it := range resp.GetInfoTypes() {
-		fmt.Fprintln(w, it.GetName())
+
+	req := &dlppb.DeleteJobTriggerRequest{
+		Name: triggerID,
 	}
+
+	if err := client.DeleteJobTrigger(ctx, req); err != nil {
+		return fmt.Errorf("DeleteJobTrigger: %v", err)
+	}
+	fmt.Fprintf(w, "Successfully deleted trigger %v", triggerID)
+	return nil
 }
 
-// [END dlp_list_info_types]
+// [END dlp_delete_trigger]

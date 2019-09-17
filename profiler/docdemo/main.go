@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START hotapp]
+// [START profiler_docdemo]
 
-// Sample hotapp is a synthetic application that exhibits different types of
+// Sample docdemo is a synthetic application that exhibits different types of
 // profiling hotspots: CPU, heap allocations, thread contention.
+// Sample docemo is a modification of the sample hotapp adds work, in the
+// form of for-loops, to the following methods: foo1, foo2, bar, baz.
 package main
 
 import (
@@ -29,19 +31,50 @@ import (
 )
 
 var (
-	// Project ID to use.
-	projectID = flag.String("project_id", "", "project ID (must be specified if running outside of GCP)")
-	// Service name to configure.
-	service = flag.String("service", "hotapp-service", "service name")
 	// Service version to configure.
-	version = flag.String("version", "1.0.0", "service version")
-	// Skew of foo1 function over foo2, in the CPU busyloop, to simulate diff.
-	skew = flag.Int("skew", 100, "skew of foo2 over foo1: foo2 will consume skew/100 CPU time compared to foo1 (default is no skew)")
+	version = flag.String("version", "1.75.0", "service version")
+	// Skew changes the relative CPU time of foo1 to foo2.
+	// Decreasing skew increases the ratio of the CPU time of foo1 to that of foo2.
+	skew = flag.Int("skew", 75, "Set skew from 0 to 100. Decreasing skew reduces relative CPU time for foo2.")
 	// There are several goroutines continuously fighting for this mutex.
 	mu sync.Mutex
 	// Some allocated memory. Held in a global variable to protect it from GC.
 	mem [][]byte
 )
+
+func main() {
+	flag.Parse()
+
+	err := profiler.Start(profiler.Config{
+		Service:        "docdemo-service",
+		ServiceVersion: *version,
+		DebugLogging:   true,
+		MutexProfiling: true,
+	})
+	if err != nil {
+		log.Fatalf("failed to start the profiler: %v", err)
+	}
+
+	// Use four OS threads for the contention simulation.
+	runtime.GOMAXPROCS(4)
+	for i := 0; i < 4; i++ {
+		go contention(time.Duration(i) * 50 * time.Millisecond)
+	}
+
+	// Simulate some waiting goroutines.
+	for i := 0; i < 100; i++ {
+		go wait()
+	}
+
+	// Simulate some memory allocation.
+	allocOnce()
+
+	// Simulate repeated memory allocations.
+	go allocMany()
+
+	// Simulate CPU load.
+	busyloop()
+}
 
 // Simulates some work that contends over a shared mutex. It calls an "impl"
 // function to produce a bit deeper stacks in the profiler visualization,
@@ -98,6 +131,8 @@ func allocMany() {
 // Simulates a CPU-intensive computation.
 func busyloop() {
 	for {
+		for i := 0; i < 100*(1<<16); i++ {
+		}
 		foo1(100)
 		foo2(*skew)
 		// Yield so that some preemption happens.
@@ -106,20 +141,32 @@ func busyloop() {
 }
 
 func foo1(scale int) {
+	// local work
+	for i := 0; i < scale*(1<<16); i++ {
+	}
 	bar(scale)
 	baz(scale)
 }
 
 func foo2(scale int) {
+	// local work
+	for i := 0; i < 5*scale*(1<<16); i++ {
+	}
 	bar(scale)
 	baz(scale)
 }
 
 func bar(scale int) {
+	// local work
+	for i := 0; i < scale*(1<<16); i++ {
+	}
 	load(scale)
 }
 
 func baz(scale int) {
+	// local work
+	for i := 0; i < 5*scale*(1<<16); i++ {
+	}
 	load(scale)
 }
 
@@ -128,39 +175,4 @@ func load(scale int) {
 	}
 }
 
-func main() {
-	flag.Parse()
-
-	err := profiler.Start(profiler.Config{
-		ProjectID:      *projectID,
-		Service:        *service,
-		ServiceVersion: *version,
-		DebugLogging:   true,
-		MutexProfiling: true,
-	})
-	if err != nil {
-		log.Fatalf("failed to start the profiler: %v", err)
-	}
-
-	// Use four OS threads for the contention simulation.
-	runtime.GOMAXPROCS(4)
-	for i := 0; i < 4; i++ {
-		go contention(time.Duration(i) * 50 * time.Millisecond)
-	}
-
-	// Simulate some waiting goroutines.
-	for i := 0; i < 100; i++ {
-		go wait()
-	}
-
-	// Simulate some memory allocation.
-	allocOnce()
-
-	// Simulate repeated memory allocations.
-	go allocMany()
-
-	// Simulate CPU load.
-	busyloop()
-}
-
-// [END hotapp]
+// [END profiler_docdemo]
