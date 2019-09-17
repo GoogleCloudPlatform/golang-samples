@@ -33,13 +33,12 @@
 // The test coverage over all regions is printed at the end.
 //
 // To get the number of unique region tags in the repo manually, run:
-//     grep -RoPh '\[START \K(.+)\]' | sort | uniq | wc -l
+//     grep -RoPh '\[START \K(.+)\]' | sort -u | wc -l
 package main
 
 import (
 	"fmt"
 	"go/ast"
-	"go/types"
 	"io/ioutil"
 	"log"
 	"os"
@@ -95,8 +94,8 @@ func main() {
 	for test, newName := range newTestNames {
 		// Include whitespace to avoid replacing prefixes (TestFoo of
 		// TestFooBar).
-		input = strings.ReplaceAll(input, " "+test+" ", " "+newName+" ")
-		input = strings.ReplaceAll(input, " "+test+"\n", " "+newName+"\n")
+		input = strings.Replace(input, " "+test+" ", " "+newName+" ", -1)
+		input = strings.Replace(input, " "+test+"\n", " "+newName+"\n", -1)
 	}
 
 	fmt.Println(input)
@@ -217,18 +216,14 @@ func testCoverage() (map[string][]testRange, error) {
 				if !ok {
 					return true
 				}
-				calleeObj := typeutil.Callee(pkg.TypesInfo, call)
-				if calleeObj == nil {
+				callee := typeutil.StaticCallee(pkg.TypesInfo, call)
+				if callee == nil {
 					return true
 				}
-				if calleeObj.Pkg() != obj.Pkg() {
+				if callee.Pkg() != obj.Pkg() {
 					return true
 				}
-				calleeFun, ok := calleeObj.(*types.Func)
-				if !ok {
-					return true
-				}
-				calleeScope := calleeFun.Scope()
+				calleeScope := callee.Scope()
 				calleePos := pkg.Fset.Position(calleeScope.Pos())
 				calleeEnd := pkg.Fset.Position(calleeScope.End())
 				result[calleePos.Filename] = append(result[calleePos.Filename], testRange{
