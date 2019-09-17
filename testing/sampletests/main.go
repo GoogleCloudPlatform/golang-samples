@@ -15,7 +15,8 @@
 // The sampletests command adds the region tags tested by each test to the test
 // name. It reads from stdin and writes to stdout.
 //
-// For example:
+// For example, if TestFoo tests the regions foo_hello_world and
+// foo_hello_gopher, the result will be:
 //     TestFoo -> TestFoo__foo_hello_world__foo_hello_gopher
 //
 // It only looks at direct function calls by tests, not transitive calls.
@@ -51,8 +52,10 @@ import (
 	"golang.org/x/tools/go/types/typeutil"
 )
 
-var startRe = regexp.MustCompile("\\[START ([^\\]]+)\\]")
-var endRe = regexp.MustCompile("\\[END ([^\\]]+)\\]")
+var (
+	startRe = regexp.MustCompile("\\[START ([^\\]]+)\\]")
+	endRe   = regexp.MustCompile("\\[END ([^\\]]+)\\]")
+)
 
 // testRange includes the name of the test and the line number ranges it tests.
 // testRange does not include the name of the file being tested - file names are
