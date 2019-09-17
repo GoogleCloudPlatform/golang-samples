@@ -49,8 +49,8 @@ func listHMACKeys(w io.Writer, projectID string) ([]*storage.HMACKey, error) {
 			// Handle error.
 			return nil, err
 		}
-		fmt.Fprintf(w, "The HMAC key metadata is:\n")
-		fmt.Fprintf(w, "%+v", key)
+		fmt.Fprintf(w, "Service Account Email: %s\n", key.ServiceAccountEmail)
+		fmt.Fprintf(w, "Access ID: %s\n", key.AccessID)
 
 		gotKeys = append(gotKeys, key)
 	}

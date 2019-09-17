@@ -36,8 +36,8 @@ func getHMACKey(w io.Writer, accessID string, projectID string) (*storage.HMACKe
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
-	key_handle := client.HMACKeyHandle(projectID, accessID)
-	key, err := key_handle.Get(ctx)
+	handle := client.HMACKeyHandle(projectID, accessID)
+	key, err := handle.Get(ctx)
 	if err != nil {
 		// Handle error.
 		return nil, err

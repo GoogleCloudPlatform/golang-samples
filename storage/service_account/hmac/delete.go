@@ -36,8 +36,8 @@ func deleteHMACKey(w io.Writer, accessID string, projectID string) error {
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
-	key_handle := client.HMACKeyHandle(projectID, accessID)
-	err = key_handle.Delete(ctx)
+	handle := client.HMACKeyHandle(projectID, accessID)
+	err = handle.Delete(ctx)
 	if err != nil {
 		// Handle error.
 		return err

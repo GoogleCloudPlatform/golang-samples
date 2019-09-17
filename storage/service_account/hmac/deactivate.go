@@ -36,8 +36,8 @@ func deactivateHMACKey(w io.Writer, accessID string, projectID string) (*storage
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
-	key_handle := client.HMACKeyHandle(projectID, accessID)
-	key, err := key_handle.Update(ctx, storage.HMACKeyAttrsToUpdate{State: "INACTIVE"})
+	handle := client.HMACKeyHandle(projectID, accessID)
+	key, err := handle.Update(ctx, storage.HMACKeyAttrsToUpdate{State: "INACTIVE"})
 	if err != nil {
 		// Handle error.
 		return nil, err

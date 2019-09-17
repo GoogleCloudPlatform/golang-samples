@@ -78,8 +78,8 @@ func TestActivateKey(t *testing.T) {
 
 	// Key must first be deactivated in order to update to active state.
 	ctx := context.Background()
-	keyHandle := StorageClient.HMACKeyHandle(key.ProjectID, key.AccessID)
-	keyHandle.Update(ctx, storage.HMACKeyAttrsToUpdate{State: "INACTIVE"})
+	handle := StorageClient.HMACKeyHandle(key.ProjectID, key.AccessID)
+	handle.Update(ctx, storage.HMACKeyAttrsToUpdate{State: "INACTIVE"})
 
 	buf := new(bytes.Buffer)
 	key, err = activateHMACKey(buf, key.AccessID, key.ProjectID)
@@ -135,15 +135,15 @@ func TestDeleteKey(t *testing.T) {
 
 	// Keys must be in INACTIVE state before deletion.
 	ctx := context.Background()
-	keyHandle := StorageClient.HMACKeyHandle(key.ProjectID, key.AccessID)
-	keyHandle.Update(ctx, storage.HMACKeyAttrsToUpdate{State: "INACTIVE"})
+	handle := StorageClient.HMACKeyHandle(key.ProjectID, key.AccessID)
+	handle.Update(ctx, storage.HMACKeyAttrsToUpdate{State: "INACTIVE"})
 
 	buf := new(bytes.Buffer)
 	err = deleteHMACKey(buf, key.AccessID, key.ProjectID)
 	if err != nil {
 		t.Errorf("Error in deleteHMACKey: %s", err)
 	}
-	key, _ = keyHandle.Get(ctx)
+	key, _ = handle.Get(ctx)
 	if key.State != "DELETED" {
 		t.Errorf("State of key is %s, should be DELETED", key.State)
 	}
@@ -163,11 +163,11 @@ func CreateTestKey() (*storage.HMACKey, error) {
 // Deactivate and delete the given key. Should operate as a teardown method.
 func DeleteTestKey(key *storage.HMACKey) {
 	ctx := context.Background()
-	keyHandle := StorageClient.HMACKeyHandle(key.ProjectID, key.AccessID)
+	handle := StorageClient.HMACKeyHandle(key.ProjectID, key.AccessID)
 	if key.State == "ACTIVE" {
-		keyHandle.Update(ctx, storage.HMACKeyAttrsToUpdate{State: "INACTIVE"})
+		handle.Update(ctx, storage.HMACKeyAttrsToUpdate{State: "INACTIVE"})
 	}
 	if key.State != "DELETED" {
-		keyHandle.Delete(ctx)
+		handle.Delete(ctx)
 	}
 }
