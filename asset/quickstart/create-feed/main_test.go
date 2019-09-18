@@ -44,6 +44,15 @@ func TestMain(t *testing.T) {
 	}
 	projectNumber := strconv.FormatInt(project.ProjectNumber, 10)
 
+	client, err := asset.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("asset.NewClient: %v", err)
+	}
+
+	client.DeleteFeed(ctx, &assetpb.DeleteFeedRequest{
+		Name: fmt.Sprintf("projects/%s/feeds/YOUR_FEED_ID", projectNumber),
+	})
+
 	m := testutil.BuildMain(t)
 	defer m.Cleanup()
 
@@ -62,11 +71,6 @@ func TestMain(t *testing.T) {
 	want := "YOUR_FEED_ID"
 	if !strings.Contains(got, want) {
 		t.Errorf("stdout returned %s, wanted to contain %s", got, want)
-	}
-
-	client, err := asset.NewClient(ctx)
-	if err != nil {
-		t.Fatalf("asset.NewClient: %v", err)
 	}
 
 	client.DeleteFeed(ctx, &assetpb.DeleteFeedRequest{

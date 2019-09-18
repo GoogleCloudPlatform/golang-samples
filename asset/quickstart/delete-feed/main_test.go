@@ -17,12 +17,14 @@ package main
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
 
 	asset "cloud.google.com/go/asset/apiv1p2beta1"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1p2beta1"
 )
 
@@ -31,10 +33,25 @@ func TestMain(t *testing.T) {
 	env := map[string]string{"GOOGLE_CLOUD_PROJECT": tc.ProjectID}
 
 	ctx := context.Background()
+	cloudresourcemanagerClient, err := cloudresourcemanager.NewService(ctx)
+	if err != nil {
+		t.Fatalf("cloudresourcemanager.NewService: %v", err)
+	}
+
+	project, err := cloudresourcemanagerClient.Projects.Get(tc.ProjectID).Do()
+	if err != nil {
+		t.Fatalf("cloudresourcemanager.Projects.Get.Do: %v", err)
+	}
+	projectNumber := strconv.FormatInt(project.ProjectNumber, 10)
+
 	client, err := asset.NewClient(ctx)
 	if err != nil {
 		t.Fatalf("asset.NewClient: %v", err)
 	}
+
+	client.DeleteFeed(ctx, &assetpb.DeleteFeedRequest{
+		Name: fmt.Sprintf("projects/%s/feeds/YOUR_FEED_ID", projectNumber),
+	})
 
 	feedParent := fmt.Sprintf("projects/%s", tc.ProjectID)
 	feedID := "YOUR_FEED_ID"

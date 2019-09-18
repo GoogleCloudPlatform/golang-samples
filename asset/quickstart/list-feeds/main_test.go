@@ -53,6 +53,10 @@ func TestMain(t *testing.T) {
 	assetNames := []string{"YOUR_ASSET_NAME"}
 	topic := fmt.Sprintf("projects/%s/topics/%s", tc.ProjectID, "YOUR_TOPIC_NAME")
 
+	client.DeleteFeed(ctx, &assetpb.DeleteFeedRequest{
+		Name: fmt.Sprintf("projects/%s/feeds/YOUR_FEED_ID", projectNumber),
+	})
+
 	req := &assetpb.CreateFeedRequest{
 		Parent: feedParent,
 		FeedId: feedID,
