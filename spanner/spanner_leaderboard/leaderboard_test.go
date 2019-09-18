@@ -23,9 +23,8 @@ import (
 	"testing"
 	"time"
 
-	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
-
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
 func TestSample(t *testing.T) {
@@ -75,6 +74,9 @@ func TestSample(t *testing.T) {
 			}
 		})
 	}()
+
+	// Drop the database ignoring errors in case it already exists.
+	adminClient.DropDatabase(ctx, &adminpb.DropDatabaseRequest{Database: dbName})
 
 	// These commands have to be run in a specific order
 	// since earlier commands setup the database for the subsequent commands.
