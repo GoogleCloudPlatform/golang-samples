@@ -146,7 +146,7 @@ func TestTranslateText(t *testing.T) {
 		t.Errorf("language.Parse: %v", err)
 	}
 	data, err := json.Marshal(ocrMessage{
-		Text:     "Hello",
+		Text:     "Thanks",
 		FileName: menuName,
 		Lang:     fr,
 		SrcLang:  en,
@@ -165,8 +165,8 @@ func TestTranslateText(t *testing.T) {
 		t.Errorf("translateText: %v", err)
 	}
 	got := buf.String()
-	if len(got) == 0 {
-		t.Errorf("translateText got empty translation")
+	if want := "Merci"; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
 	}
 }
 
