@@ -4,12 +4,13 @@ go 1.13
 
 require (
 	bitbucket.org/ckvist/twilio v0.0.0-20170512072134-13c593a1721b
-	cloud.google.com/go v0.46.2
+	cloud.google.com/go v0.46.3
 	cloud.google.com/go/bigquery v1.0.1
 	cloud.google.com/go/bigtable v1.0.0
 	cloud.google.com/go/datastore v1.0.0
 	cloud.google.com/go/logging v1.0.0
 	cloud.google.com/go/pubsub v1.0.1
+	cloud.google.com/go/storage v1.0.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.12.7
 	firebase.google.com/go v3.9.0+incompatible
 	github.com/aws/aws-sdk-go v1.23.19 // indirect

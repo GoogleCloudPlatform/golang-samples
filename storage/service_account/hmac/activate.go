@@ -16,34 +16,30 @@ package hmac
 
 // [START storage_activate_hmac_key]
 import (
+	"cloud.google.com/go/storage"
 	"context"
 	"fmt"
 	"io"
-	"log"
-
-	"cloud.google.com/go/storage"
 )
 
-// Activate the HMAC key with the given access ID.
+// activateHMACKey activates the HMAC key with the given access ID.
 func activateHMACKey(w io.Writer, accessID string, projectID string) (*storage.HMACKey, error) {
 	ctx := context.Background()
 
 	// Initialize client.
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		log.Fatal(err)
-		return nil, err
+		return nil, fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
 	handle := client.HMACKeyHandle(projectID, accessID)
 	key, err := handle.Update(ctx, storage.HMACKeyAttrsToUpdate{State: "ACTIVE"})
 	if err != nil {
-		// Handle error.
-		return nil, err
+		return nil, fmt.Errorf("Update: %v", err)
 	}
 
-	fmt.Fprintf(w, "The HMAC key metadata is:\n")
+	fmt.Fprintln(w, "The HMAC key metadata is:")
 	fmt.Fprintf(w, "%+v", key)
 
 	return key, nil

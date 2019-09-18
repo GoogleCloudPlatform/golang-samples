@@ -16,46 +16,41 @@ package hmac
 
 // [START storage_list_hmac_keys]
 import (
+	"cloud.google.com/go/storage"
 	"context"
 	"fmt"
-	"io"
-	"log"
-
-	"cloud.google.com/go/storage"
 	"google.golang.org/api/iterator"
+	"io"
 )
 
-// List all HMAC keys associated with the project.
+// listHMACKeys lists all HMAC keys associated with the project.
 func listHMACKeys(w io.Writer, projectID string) ([]*storage.HMACKey, error) {
-
 	ctx := context.Background()
 
 	// Initialize client.
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		log.Fatal(err)
-		return nil, err
+		return nil, fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
 	iter := client.ListHMACKeys(ctx, projectID)
-	var gotKeys []*storage.HMACKey
+	var keys []*storage.HMACKey
 	for {
 		key, err := iter.Next()
 		if err == iterator.Done {
 			break
 		}
 		if err != nil {
-			// Handle error.
-			return nil, err
+			return nil, fmt.Errorf("ListHMACKeys: %v", err)
 		}
 		fmt.Fprintf(w, "Service Account Email: %s\n", key.ServiceAccountEmail)
 		fmt.Fprintf(w, "Access ID: %s\n", key.AccessID)
 
-		gotKeys = append(gotKeys, key)
+		keys = append(keys, key)
 	}
 
-	return gotKeys, nil
+	return keys, nil
 }
 
 // [END storage_list_hmac_keys]

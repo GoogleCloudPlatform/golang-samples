@@ -16,30 +16,26 @@ package hmac
 
 // [START storage_create_hmac_key]
 import (
+	"cloud.google.com/go/storage"
 	"context"
 	"fmt"
 	"io"
-	"log"
-
-	"cloud.google.com/go/storage"
 )
 
-// Create a new HMAC key using the given project and service account.
+// createHMACKey creates a new HMAC key using the given project and service account.
 func createHMACKey(w io.Writer, projectID string, serviceAccountEmail string) (*storage.HMACKey, error) {
 	ctx := context.Background()
 
 	// Initialize client.
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		log.Fatal(err)
-		return nil, err
+		return nil, fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
 	key, err := client.CreateHMACKey(ctx, projectID, serviceAccountEmail)
 	if err != nil {
-		// Handle error.
-		return nil, err
+		return nil, fmt.Errorf("CreateHMACKey: %v", err)
 	}
 
 	fmt.Fprintf(w, "%s\n", key)

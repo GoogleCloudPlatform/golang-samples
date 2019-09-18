@@ -16,31 +16,27 @@ package hmac
 
 // [START storage_delete_hmac_key]
 import (
+	"cloud.google.com/go/storage"
 	"context"
 	"fmt"
 	"io"
-	"log"
-
-	"cloud.google.com/go/storage"
 )
 
-// Delete the HMAC key with the given access ID. Key must have state INACTIVE in order to succeed.
+// deleteHMACKey deletes the HMAC key with the given access ID. Key must have state
+// INACTIVE in order to succeed.
 func deleteHMACKey(w io.Writer, accessID string, projectID string) error {
 	ctx := context.Background()
 
 	// Initialize client.
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		log.Fatal(err)
-		return err
+		return fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
 	handle := client.HMACKeyHandle(projectID, accessID)
-	err = handle.Delete(ctx)
-	if err != nil {
-		// Handle error.
-		return err
+	if err = handle.Delete(ctx); err != nil {
+		return fmt.Errorf("Delete: %v", err)
 	}
 
 	fmt.Fprintln(w, "The key is deleted, though it may still appear in ListHMACKeys results.")
