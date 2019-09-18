@@ -37,6 +37,8 @@ var (
 	version = flag.String("version", "1.0.0", "service version")
 	// Skew of foo1 function over foo2, in the CPU busyloop, to simulate diff.
 	skew = flag.Int("skew", 100, "skew of foo2 over foo1: foo2 will consume skew/100 CPU time compared to foo1 (default is no skew)")
+	// Whether to run some local CPU work to increase the self metric.
+	localWork = flag.Bool("local_work", false, "whether to run some local CPU work")
 	// There are several goroutines continuously fighting for this mutex.
 	mu sync.Mutex
 	// Some allocated memory. Held in a global variable to protect it from GC.
@@ -98,6 +100,10 @@ func allocMany() {
 // Simulates a CPU-intensive computation.
 func busyloop() {
 	for {
+		if *localWork {
+			for i := 0; i < 100*(1<<16); i++ {
+			}
+		}
 		foo1(100)
 		foo2(*skew)
 		// Yield so that some preemption happens.
@@ -106,20 +112,36 @@ func busyloop() {
 }
 
 func foo1(scale int) {
+	if *localWork {
+		for i := 0; i < scale*(1<<16); i++ {
+		}
+	}
 	bar(scale)
 	baz(scale)
 }
 
 func foo2(scale int) {
+	if *localWork {
+		for i := 0; i < 5*scale*(1<<16); i++ {
+		}
+	}
 	bar(scale)
 	baz(scale)
 }
 
 func bar(scale int) {
+	if *localWork {
+		for i := 0; i < scale*(1<<16); i++ {
+		}
+	}
 	load(scale)
 }
 
 func baz(scale int) {
+	if *localWork {
+		for i := 0; i < 5*scale*(1<<16); i++ {
+		}
+	}
 	load(scale)
 }
 
