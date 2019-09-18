@@ -39,7 +39,8 @@ func annotateIncident(w io.Writer, incidentName string) error {
 	req := &irmpb.CreateAnnotationRequest{
 		Parent: incidentName,
 		Annotation: &irmpb.Annotation{
-			Content: "The red button was found in a depressed state.",
+			Content:     "The red button was found in a depressed state.",
+			ContentType: "text/plain",
 		},
 	}
 

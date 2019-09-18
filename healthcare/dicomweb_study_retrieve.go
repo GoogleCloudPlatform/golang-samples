@@ -19,14 +19,20 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 
 	healthcare "google.golang.org/api/healthcare/v1beta1"
 )
 
 // dicomWebRetrieveStudy retrieves all instances in the given dicomWebPath
 // study.
-func dicomWebRetrieveStudy(w io.Writer, projectID, location, datasetID, dicomStoreID, dicomWebPath string) error {
+func dicomWebRetrieveStudy(w io.Writer, projectID, location, datasetID, dicomStoreID, dicomWebPath string, outputFile string) error {
+	// projectID := "my-project"
+	// location := "us-central1"
+	// datasetID := "my-dataset"
+	// dicomStoreID := "my-dicom-store"
+	// dicomWebPath := "studies/1.3.6.1.4.1.11129.5.5.111396399857604"
+	// outputFile := "study.multipart"
 	ctx := context.Background()
 
 	healthcareService, err := healthcare.NewService(ctx)
@@ -40,20 +46,29 @@ func dicomWebRetrieveStudy(w io.Writer, projectID, location, datasetID, dicomSto
 
 	resp, err := storesService.RetrieveStudy(parent, dicomWebPath).Do()
 	if err != nil {
-		return fmt.Errorf("Delete: %v", err)
+		return fmt.Errorf("RetrieveStudy: %v", err)
 	}
 
 	defer resp.Body.Close()
 
-	respBytes, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return fmt.Errorf("could not read response: %v", err)
+	if resp.StatusCode > 299 {
+		return fmt.Errorf("RetrieveStudy: status %d %s: %s", resp.StatusCode, resp.Status, resp.Body)
 	}
 
-	if resp.StatusCode > 299 {
-		return fmt.Errorf("SearchForInstances: status %d %s: %s", resp.StatusCode, resp.Status, respBytes)
+	file, err := os.Create(outputFile)
+	if err != nil {
+		return fmt.Errorf("os.Create: %v", err)
 	}
-	fmt.Fprintf(w, "%s", respBytes)
+	defer file.Close()
+	if _, err := io.Copy(file, resp.Body); err != nil {
+		return fmt.Errorf("io.Copy: %v", err)
+	}
+
+	// When specifying the output file, use an extension like ".multipart".
+	// Then, parse the downloaded multipart file to get each individual DICOM
+	// file.
+	fmt.Fprintf(w, "Study retrieved and downloaded to file: %v\n", outputFile)
+
 	return nil
 }
 
