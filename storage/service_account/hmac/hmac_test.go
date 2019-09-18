@@ -15,10 +15,10 @@
 package hmac
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"io/ioutil"
 	"os"
 	"testing"
 
@@ -44,8 +44,7 @@ func TestListKeys(t *testing.T) {
 		t.Errorf("Error in key creation: %s", err)
 	}
 
-	buf := new(bytes.Buffer)
-	keys, err := listHMACKeys(buf, tc.ProjectID)
+	keys, err := listHMACKeys(ioutil.Discard, tc.ProjectID)
 	if err != nil {
 		t.Errorf("listHMACKeys raised error: %s", err)
 	}
@@ -55,9 +54,8 @@ func TestListKeys(t *testing.T) {
 }
 
 func TestCreateKey(t *testing.T) {
-	buf := new(bytes.Buffer)
 	tc := testutil.SystemTest(t)
-	key, err := createHMACKey(buf, tc.ProjectID, serviceAccountEmail)
+	key, err := createHMACKey(ioutil.Discard, tc.ProjectID, serviceAccountEmail)
 	defer deleteTestKey(key)
 
 	if err != nil {
@@ -84,8 +82,7 @@ func TestActivateKey(t *testing.T) {
 	handle := storageClient.HMACKeyHandle(key.ProjectID, key.AccessID)
 	handle.Update(ctx, storage.HMACKeyAttrsToUpdate{State: "INACTIVE"})
 
-	buf := new(bytes.Buffer)
-	key, err = activateHMACKey(buf, key.AccessID, key.ProjectID)
+	key, err = activateHMACKey(ioutil.Discard, key.AccessID, key.ProjectID)
 
 	if err != nil {
 		t.Errorf("Error in activateHMACKey: %s", err)
@@ -103,8 +100,7 @@ func TestDeactivateKey(t *testing.T) {
 		t.Errorf("Error in key creation: %s", err)
 	}
 
-	buf := new(bytes.Buffer)
-	key, err = deactivateHMACKey(buf, key.AccessID, key.ProjectID)
+	key, err = deactivateHMACKey(ioutil.Discard, key.AccessID, key.ProjectID)
 	if err != nil {
 		t.Errorf("Error in deactivateHMACKey: %s", err)
 	}
@@ -121,8 +117,7 @@ func TestGetKey(t *testing.T) {
 		t.Errorf("Error in key creation: %s", err)
 	}
 
-	buf := new(bytes.Buffer)
-	key, err = getHMACKey(buf, key.AccessID, key.ProjectID)
+	key, err = getHMACKey(ioutil.Discard, key.AccessID, key.ProjectID)
 	if err != nil {
 		t.Errorf("Error in getHMACKey: %s", err)
 	}
@@ -144,8 +139,7 @@ func TestDeleteKey(t *testing.T) {
 	handle := storageClient.HMACKeyHandle(key.ProjectID, key.AccessID)
 	handle.Update(ctx, storage.HMACKeyAttrsToUpdate{State: "INACTIVE"})
 
-	buf := new(bytes.Buffer)
-	err = deleteHMACKey(buf, key.AccessID, key.ProjectID)
+	err = deleteHMACKey(ioutil.Discard, key.AccessID, key.ProjectID)
 	if err != nil {
 		t.Errorf("Error in deleteHMACKey: %s", err)
 	}
