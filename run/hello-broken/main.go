@@ -22,7 +22,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"runtime/debug"
 )
 
 func main() {
@@ -55,9 +54,7 @@ func brokenHandler(w http.ResponseWriter, r *http.Request) {
 	if target == "" {
 		log.Printf("Missing required server parameter")
 		// Stack trace appears in Stackdriver Error Reporting.
-		debug.PrintStack()
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
+		panic("Missing required server parameter")
 	}
 
 	// [END run_broken_service_problem]
