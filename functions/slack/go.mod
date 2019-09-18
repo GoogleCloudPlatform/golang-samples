@@ -3,11 +3,13 @@ module github.com/GoogleCloudPlatform/golang-samples/functions/slack/app
 go 1.11
 
 require (
-	cloud.google.com/go v0.44.3
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20190819213247-9dcbc6f1dc40
-	github.com/lusis/go-slackbot v0.0.0-20180109053408-401027ccfef5 // indirect
-	github.com/lusis/slack-test v0.0.0-20190426140909-c40012f20018 // indirect
-	github.com/nlopes/slack v0.5.0
-	golang.org/x/text v0.3.2
-	google.golang.org/api v0.8.0
+	cloud.google.com/go v0.46.3 // indirect
+	github.com/google/go-cmp v0.3.1 // indirect
+	go.opencensus.io v0.22.1 // indirect
+	golang.org/x/net v0.0.0-20190918130420-a8b05e9114ab // indirect
+	golang.org/x/sys v0.0.0-20190916202348-b4ddaad3f8a3 // indirect
+	google.golang.org/api v0.10.0
+	google.golang.org/appengine v1.6.2 // indirect
+	google.golang.org/genproto v0.0.0-20190916214212-f660b8655731 // indirect
+	google.golang.org/grpc v1.23.1 // indirect
 )
