@@ -50,8 +50,8 @@ func brokenHandler(w http.ResponseWriter, r *http.Request) {
 
 	// [START run_broken_service_problem]
 
-	target := os.Getenv("TARGET")
-	if target == "" {
+	name := os.Getenv("NAME")
+	if name == "" {
 		log.Printf("Missing required server parameter")
 		// Stack trace appears in Stackdriver Error Reporting.
 		panic("Missing required server parameter")
@@ -59,7 +59,7 @@ func brokenHandler(w http.ResponseWriter, r *http.Request) {
 
 	// [END run_broken_service_problem]
 
-	fmt.Fprintf(w, "Hello %s!\n", target)
+	fmt.Fprintf(w, "Hello %s!\n", name)
 }
 
 // [END run_broken_service]
@@ -69,13 +69,13 @@ func improvedHandler(w http.ResponseWriter, r *http.Request) {
 
 	// [START run_broken_service_upgrade]
 
-	target := os.Getenv("TARGET")
-	if target == "" {
-		target = "World"
-		log.Printf("warning: TARGET not set, default to %s", target)
+	name := os.Getenv("NAME")
+	if name == "" {
+		name = "World"
+		log.Printf("warning: NAME not set, default to %s", name)
 	}
 
 	// [END run_broken_service_upgrade]
 
-	fmt.Fprintf(w, "Hello %s!\n", target)
+	fmt.Fprintf(w, "Hello %s!\n", name)
 }
