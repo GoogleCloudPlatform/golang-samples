@@ -54,7 +54,7 @@ func main() {
 		log.Fatalf("cloudresourcemanagerClient.Projects.Get.Do: %v", err)
 	}
 	projectNumber := strconv.FormatInt(project.ProjectNumber, 10)
-	feedName := fmt.Sprintf("projects/%s/feeds/%s", projectNumber, "YOUR_FEED_ID")
+	feedName := fmt.Sprintf("projects/%s/feeds/%s", projectNumber, *feedID)
 	req := &assetpb.DeleteFeedRequest{
 		Name: feedName,
 	}
