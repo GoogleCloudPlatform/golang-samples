@@ -19,6 +19,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -30,7 +31,13 @@ import (
 	field_mask "google.golang.org/genproto/protobuf/field_mask"
 )
 
+// Command-line flags.
+var (
+	feedID = flag.String("feed_id", "YOUR_FEED_ID", "Identifier of Feed.")
+)
+
 func main() {
+	flag.Parse()
 	ctx := context.Background()
 	client, err := asset.NewClient(ctx)
 	if err != nil {
@@ -48,7 +55,7 @@ func main() {
 		log.Fatalf("cloudresourcemanagerClient.Projects.Get.Do: %v", err)
 	}
 	projectNumber := strconv.FormatInt(project.ProjectNumber, 10)
-	feedName := fmt.Sprintf("projects/%s/feeds/%s", projectNumber, "YOUR_FEED_ID")
+	feedName := fmt.Sprintf("projects/%s/feeds/%s", projectNumber, *feedID)
 	topic := fmt.Sprintf("projects/%s/topics/%s", projectID, "TOPIC_TO_UPDATE")
 
 	req := &assetpb.UpdateFeedRequest{

@@ -19,6 +19,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -27,7 +28,13 @@ import (
 	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1p2beta1"
 )
 
+// Command-line flags.
+var (
+	feedID = flag.String("feed_id", "YOUR_FEED_ID", "Identifier of Feed.")
+)
+
 func main() {
+	flag.Parse()
 	ctx := context.Background()
 	client, err := asset.NewClient(ctx)
 	if err != nil {
@@ -36,13 +43,12 @@ func main() {
 
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	feedParent := fmt.Sprintf("projects/%s", projectID)
-	feedID := "YOUR_FEED_ID"
 	assetNames := []string{"YOUR_ASSET_NAME"}
 	topic := fmt.Sprintf("projects/%s/topics/%s", projectID, "YOUR_TOPIC_NAME")
 
 	req := &assetpb.CreateFeedRequest{
 		Parent: feedParent,
-		FeedId: feedID,
+		FeedId: *feedID,
 		Feed: &assetpb.Feed{
 			AssetNames: assetNames,
 			FeedOutputConfig: &assetpb.FeedOutputConfig{

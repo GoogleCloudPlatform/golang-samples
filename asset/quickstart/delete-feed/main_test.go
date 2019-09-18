@@ -24,37 +24,21 @@ import (
 
 	asset "cloud.google.com/go/asset/apiv1p2beta1"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1p2beta1"
 )
 
 func TestMain(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	env := map[string]string{"GOOGLE_CLOUD_PROJECT": tc.ProjectID}
+	feedID := fmt.Sprintf("FEED-%s", strconv.FormatInt(time.Now().UnixNano(), 10))
 
 	ctx := context.Background()
-	cloudresourcemanagerClient, err := cloudresourcemanager.NewService(ctx)
-	if err != nil {
-		t.Fatalf("cloudresourcemanager.NewService: %v", err)
-	}
-
-	project, err := cloudresourcemanagerClient.Projects.Get(tc.ProjectID).Do()
-	if err != nil {
-		t.Fatalf("cloudresourcemanager.Projects.Get.Do: %v", err)
-	}
-	projectNumber := strconv.FormatInt(project.ProjectNumber, 10)
-
 	client, err := asset.NewClient(ctx)
 	if err != nil {
 		t.Fatalf("asset.NewClient: %v", err)
 	}
 
-	client.DeleteFeed(ctx, &assetpb.DeleteFeedRequest{
-		Name: fmt.Sprintf("projects/%s/feeds/YOUR_FEED_ID", projectNumber),
-	})
-
 	feedParent := fmt.Sprintf("projects/%s", tc.ProjectID)
-	feedID := "YOUR_FEED_ID"
 	assetNames := []string{"YOUR_ASSET_NAME"}
 	topic := fmt.Sprintf("projects/%s/topics/%s", tc.ProjectID, "YOUR_TOPIC_NAME")
 
@@ -83,7 +67,7 @@ func TestMain(t *testing.T) {
 		t.Errorf("failed to build app")
 	}
 
-	stdOut, stdErr, err := m.Run(env, 30*time.Second)
+	stdOut, stdErr, err := m.Run(env, 30*time.Second, fmt.Sprintf("--feed_id=%s", feedID))
 	if err != nil {
 		t.Errorf("execution failed: %v", err)
 	}

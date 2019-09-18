@@ -31,6 +31,7 @@ import (
 func TestMain(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	env := map[string]string{"GOOGLE_CLOUD_PROJECT": tc.ProjectID}
+	feedID := fmt.Sprintf("FEED-%s", strconv.FormatInt(time.Now().UnixNano(), 10))
 
 	ctx := context.Background()
 	client, err := asset.NewClient(ctx)
@@ -49,13 +50,8 @@ func TestMain(t *testing.T) {
 	}
 	projectNumber := strconv.FormatInt(project.ProjectNumber, 10)
 	feedParent := fmt.Sprintf("projects/%s", tc.ProjectID)
-	feedID := "YOUR_FEED_ID"
 	assetNames := []string{"YOUR_ASSET_NAME"}
 	topic := fmt.Sprintf("projects/%s/topics/%s", tc.ProjectID, "YOUR_TOPIC_NAME")
-
-	client.DeleteFeed(ctx, &assetpb.DeleteFeedRequest{
-		Name: fmt.Sprintf("projects/%s/feeds/YOUR_FEED_ID", projectNumber),
-	})
 
 	req := &assetpb.CreateFeedRequest{
 		Parent: feedParent,
@@ -82,7 +78,7 @@ func TestMain(t *testing.T) {
 		t.Errorf("failed to build app")
 	}
 
-	stdOut, stdErr, err := m.Run(env, 30*time.Second)
+	stdOut, stdErr, err := m.Run(env, 30*time.Second, fmt.Sprintf("--feed_id=%s", feedID))
 	if err != nil {
 		t.Errorf("execution failed: %v", err)
 	}
@@ -90,13 +86,11 @@ func TestMain(t *testing.T) {
 		t.Errorf("did not expect stderr output, got %d bytes: %s", len(stdErr), string(stdErr))
 	}
 	got := string(stdOut)
-
-	want := "YOUR_FEED_ID"
-	if !strings.Contains(got, want) {
-		t.Errorf("stdout returned %s, wanted to contain %s", got, want)
+	if !strings.Contains(got, feedID) {
+		t.Errorf("stdout returned %s, wanted to contain %s", got, feedID)
 	}
 
 	client.DeleteFeed(ctx, &assetpb.DeleteFeedRequest{
-		Name: fmt.Sprintf("projects/%s/feeds/YOUR_FEED_ID", projectNumber),
+		Name: fmt.Sprintf("projects/%s/feeds/%s", projectNumber, feedID),
 	})
 }

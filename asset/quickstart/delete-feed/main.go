@@ -19,6 +19,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -29,7 +30,13 @@ import (
 	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1p2beta1"
 )
 
+// Command-line flags.
+var (
+	feedID = flag.String("feed_id", "YOUR_FEED_ID", "Identifier of Feed.")
+)
+
 func main() {
+	flag.Parse()
 	ctx := context.Background()
 	client, err := asset.NewClient(ctx)
 	if err != nil {
