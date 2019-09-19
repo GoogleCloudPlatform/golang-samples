@@ -28,24 +28,26 @@ func TestBrokenErrors(t *testing.T) {
 	req := httptest.NewRequest("GET", "/", payload)
 	rr := httptest.NewRecorder()
 
-	os.Setenv("TARGET", "")
-	brokenHandler(rr, req)
+	os.Setenv("NAME", "")
 
-	if code := rr.Result().StatusCode; code != http.StatusInternalServerError {
-		t.Errorf("brokenHandler: got (%q), want (%q)", code, http.StatusInternalServerError)
-	}
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("brokenHandler: got (no panic), want (panic)")
+		}
+	}()
+	brokenHandler(rr, req)
 }
 
 func TestBrokenHandler(t *testing.T) {
 	tests := []struct {
-		label  string
-		target string
-		want   string
+		label string
+		name  string
+		want  string
 	}{
 		{
-			label:  "<SET>",
-			target: "Testers",
-			want:   "Hello Testers!\n",
+			label: "<SET>",
+			name:  "Testers",
+			want:  "Hello Testers!\n",
 		},
 	}
 
@@ -53,7 +55,7 @@ func TestBrokenHandler(t *testing.T) {
 		req := httptest.NewRequest("GET", "/", strings.NewReader(""))
 		rr := httptest.NewRecorder()
 
-		os.Setenv("TARGET", test.target)
+		os.Setenv("NAME", test.name)
 		improvedHandler(rr, req)
 
 		if code := rr.Result().StatusCode; code != http.StatusOK {
@@ -73,19 +75,19 @@ func TestBrokenHandler(t *testing.T) {
 
 func TestImprovedHandler(t *testing.T) {
 	tests := []struct {
-		label  string
-		target string
-		want   string
+		label string
+		name  string
+		want  string
 	}{
 		{
-			label:  "<EMPTY>",
-			target: "",
-			want:   "Hello World!\n",
+			label: "<EMPTY>",
+			name:  "",
+			want:  "Hello World!\n",
 		},
 		{
-			label:  "<SET>",
-			target: "Testers",
-			want:   "Hello Testers!\n",
+			label: "<SET>",
+			name:  "Testers",
+			want:  "Hello Testers!\n",
 		},
 	}
 
@@ -93,7 +95,7 @@ func TestImprovedHandler(t *testing.T) {
 		req := httptest.NewRequest("GET", "/", strings.NewReader(""))
 		rr := httptest.NewRecorder()
 
-		os.Setenv("TARGET", test.target)
+		os.Setenv("NAME", test.name)
 		improvedHandler(rr, req)
 
 		if code := rr.Result().StatusCode; code != http.StatusOK {
