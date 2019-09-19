@@ -35,10 +35,11 @@ func TestGetMetricDescriptor(t *testing.T) {
 	}
 	defer deleteMetric(ioutil.Discard, m.GetName())
 
-	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 20, 10*time.Second, func(r *testutil.R) {
 		buf := &bytes.Buffer{}
 		if err := getMetricDescriptor(buf, tc.ProjectID, metricType); err != nil {
 			r.Errorf("getMetricDescriptor: %v", err)
+			return
 		}
 		want := "Name:"
 		if got := buf.String(); !strings.Contains(got, want) {
