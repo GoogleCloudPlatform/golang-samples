@@ -23,9 +23,10 @@ import (
 	"testing"
 	"time"
 
-	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
-
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func TestSample(t *testing.T) {
@@ -78,7 +79,15 @@ func TestSample(t *testing.T) {
 
 	// These commands have to be run in a specific order
 	// since earlier commands setup the database for the subsequent commands.
-	mustRunCommand(t, "createdatabase", dbName, 0)
+	var b bytes.Buffer
+	if err := run(context.Background(), adminClient, dataClient, &b, "createdatabase", dbName, 0); err != nil {
+		if status.Code(err) != codes.AlreadyExists {
+			t.Fatalf("run(%q, %q): %v", "createdatabase", dbName, err)
+		}
+		// Drop and recreate the database to start fresh.
+		adminClient.DropDatabase(ctx, &adminpb.DropDatabaseRequest{Database: dbName})
+		mustRunCommand(t, "createdatabase", dbName, 0)
+	}
 	assertContains(runCommand(t, "insertplayers", dbName, 0), "Inserted players")
 	assertContains(runCommand(t, "insertplayers", dbName, 0), "Inserted players")
 	assertContains(runCommand(t, "insertscores", dbName, 0), "Inserted scores")
