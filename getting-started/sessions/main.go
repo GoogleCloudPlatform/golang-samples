@@ -37,7 +37,7 @@ type app struct {
 	tmpl  *template.Template
 }
 
-// colors are the random background colors that will be assigned to sessions.
+// greetings are the random greetings that will be assigned to sessions.
 var greetings = []string{
 	"Hello World",
 	"Hallo Welt",
@@ -98,7 +98,8 @@ func newApp(projectID string) (*app, error) {
 
 // [START getting_started_sessions_handler]
 
-// index uses sessions to assign users a random color and keep track of views.
+// index uses sessions to assign users a random greeting and keep track of
+// views.
 func (a *app) index(w http.ResponseWriter, r *http.Request) {
 	if r.RequestURI != "/" {
 		return
