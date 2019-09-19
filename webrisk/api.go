@@ -86,6 +86,7 @@ func (a *netAPI) doRequest(ctx context.Context, requestPath string, req proto.Me
 	u.Path = requestPath
 	httpReq, err := http.NewRequest("POST", u.String(), bytes.NewReader(p))
 	httpReq.Header.Add("Content-Type", "application/x-protobuf")
+	httpReq.Header.Add("User-Agnet", "Webrisk-Client/0.1.2")
 	httpReq = httpReq.WithContext(ctx)
 	httpResp, err := a.client.Do(httpReq)
 	if err != nil {
