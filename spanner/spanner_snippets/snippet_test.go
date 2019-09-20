@@ -23,9 +23,8 @@ import (
 	"testing"
 	"time"
 
-	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
-
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
 func TestSample(t *testing.T) {
@@ -52,7 +51,8 @@ func TestSample(t *testing.T) {
 			adminClient.DropDatabase(ctx, &adminpb.DropDatabaseRequest{Database: dbName}))
 	}
 
-	assertContains := func(out string, sub string) {
+	assertContains := func(t *testing.T, out string, sub string) {
+		t.Helper()
 		if !strings.Contains(out, sub) {
 			t.Errorf("got output %q; want it to contain %q", out, sub)
 		}
@@ -93,46 +93,46 @@ func TestSample(t *testing.T) {
 	runCommand(t, "write", dbName)
 	runCommand(t, "update", dbName)
 	out := runCommand(t, "dmlwritetxn", dbName)
-	assertContains(out, "Moved 200000 from Album2's MarketingBudget to Album1")
+	assertContains(t, out, "Moved 200000 from Album2's MarketingBudget to Album1")
 	out = runCommand(t, "querynewcolumn", dbName)
-	assertContains(out, "1 1 300000")
-	assertContains(out, "2 2 300000")
+	assertContains(t, out, "1 1 300000")
+	assertContains(t, out, "2 2 300000")
 
 	runCommand(t, "delete", dbName)
 	runCommand(t, "write", dbName)
 	runCommand(t, "update", dbName)
 	out = runCommand(t, "writetransaction", dbName)
-	assertContains(out, "Moved 200000 from Album2's MarketingBudget to Album1")
+	assertContains(t, out, "Moved 200000 from Album2's MarketingBudget to Album1")
 	out = runCommand(t, "querynewcolumn", dbName)
-	assertContains(out, "1 1 300000")
-	assertContains(out, "2 2 300000")
+	assertContains(t, out, "1 1 300000")
+	assertContains(t, out, "2 2 300000")
 
 	runCommand(t, "delete", dbName)
 	runCommand(t, "write", dbName)
 	writeTime := time.Now()
 
-	assertContains(runCommand(t, "read", dbName), "1 1 Total Junk")
+	assertContains(t, runCommand(t, "read", dbName), "1 1 Total Junk")
 
-	assertContains(runCommand(t, "query", dbName), "1 1 Total Junk")
+	assertContains(t, runCommand(t, "query", dbName), "1 1 Total Junk")
 
 	runCommand(t, "addindex", dbName)
 	out = runCommand(t, "queryindex", dbName)
-	assertContains(out, "Go, Go, Go")
-	assertContains(out, "Forever Hold Your Peace")
+	assertContains(t, out, "Go, Go, Go")
+	assertContains(t, out, "Forever Hold Your Peace")
 	if strings.Contains(out, "Green") {
 		t.Errorf("got output %q; should not contain Green", out)
 	}
 
 	out = runCommand(t, "readindex", dbName)
-	assertContains(out, "Go, Go, Go")
-	assertContains(out, "Forever Hold Your Peace")
-	assertContains(out, "Green")
+	assertContains(t, out, "Go, Go, Go")
+	assertContains(t, out, "Forever Hold Your Peace")
+	assertContains(t, out, "Green")
 
 	runCommand(t, "delete", dbName)
 	runCommand(t, "write", dbName)
 	runCommand(t, "update", dbName)
 	runCommand(t, "addstoringindex", dbName)
-	assertContains(runCommand(t, "readstoringindex", dbName), "500000")
+	assertContains(t, runCommand(t, "readstoringindex", dbName), "500000")
 	out = runCommand(t, "readonlytransaction", dbName)
 	if strings.Count(out, "Total Junk") != 2 {
 		t.Errorf("got output %q; wanted it to contain 2 occurrences of Total Junk", out)
@@ -141,105 +141,105 @@ func TestSample(t *testing.T) {
 	// Wait at least 15 seconds since the write.
 	time.Sleep(time.Until(writeTime.Add(16 * time.Second)))
 	out = runCommand(t, "readstaledata", dbName)
-	assertContains(out, "Go, Go, Go")
-	assertContains(out, "Forever Hold Your Peace")
-	assertContains(out, "Green")
+	assertContains(t, out, "Go, Go, Go")
+	assertContains(t, out, "Forever Hold Your Peace")
+	assertContains(t, out, "Green")
 
-	assertContains(runCommand(t, "readbatchdata", dbName), "1 Marc Richards")
+	assertContains(t, runCommand(t, "readbatchdata", dbName), "1 Marc Richards")
 
 	runCommand(t, "addcommittimestamp", dbName)
 	runCommand(t, "updatewithtimestamp", dbName)
 	out = runCommand(t, "querywithtimestamp", dbName)
-	assertContains(out, "1000000")
+	assertContains(t, out, "1000000")
 
 	runCommand(t, "writestructdata", dbName)
-	assertContains(runCommand(t, "querywithstruct", dbName), "6")
+	assertContains(t, runCommand(t, "querywithstruct", dbName), "6")
 	out = runCommand(t, "querywitharrayofstruct", dbName)
-	assertContains(out, "6")
-	assertContains(out, "7")
-	assertContains(out, "8")
-	assertContains(runCommand(t, "querywithstructfield", dbName), "6")
+	assertContains(t, out, "6")
+	assertContains(t, out, "7")
+	assertContains(t, out, "8")
+	assertContains(t, runCommand(t, "querywithstructfield", dbName), "6")
 	out = runCommand(t, "querywithnestedstructfield", dbName)
-	assertContains(out, "6 Imagination")
-	assertContains(out, "9 Imagination")
+	assertContains(t, out, "6 Imagination")
+	assertContains(t, out, "9 Imagination")
 
 	runCommand(t, "createtabledocswithtimestamp", dbName)
 	runCommand(t, "writetodocstable", dbName)
 	runCommand(t, "updatedocstable", dbName)
 
-	assertContains(runCommand(t, "querydocstable", dbName), "Hello World 1 Updated")
+	assertContains(t, runCommand(t, "querydocstable", dbName), "Hello World 1 Updated")
 
 	runCommand(t, "createtabledocswithhistorytable", dbName)
 	runCommand(t, "writewithhistory", dbName)
 	runCommand(t, "updatewithhistory", dbName)
 
 	out = runCommand(t, "querywithhistory", dbName)
-	assertContains(out, "1 1 Hello World 1 Updated")
+	assertContains(t, out, "1 1 Hello World 1 Updated")
 
 	out = runCommand(t, "dmlinsert", dbName)
-	assertContains(out, "record(s) inserted")
+	assertContains(t, out, "record(s) inserted")
 
 	out = runCommand(t, "dmlupdate", dbName)
-	assertContains(out, "record(s) updated")
+	assertContains(t, out, "record(s) updated")
 
 	out = runCommand(t, "dmldelete", dbName)
-	assertContains(out, "record(s) deleted")
+	assertContains(t, out, "record(s) deleted")
 
 	out = runCommand(t, "dmlwithtimestamp", dbName)
-	assertContains(out, "record(s) updated")
+	assertContains(t, out, "record(s) updated")
 
 	out = runCommand(t, "dmlwriteread", dbName)
-	assertContains(out, "Found record name with ")
+	assertContains(t, out, "Found record name with ")
 
 	out = runCommand(t, "dmlupdatestruct", dbName)
-	assertContains(out, "record(s) inserted")
+	assertContains(t, out, "record(s) inserted")
 
 	out = runCommand(t, "dmlwrite", dbName)
-	assertContains(out, "record(s) inserted")
+	assertContains(t, out, "record(s) inserted")
 
 	out = runCommand(t, "querywithparameter", dbName)
-	assertContains(out, "12 Melissa Garcia")
+	assertContains(t, out, "12 Melissa Garcia")
 
 	out = runCommand(t, "dmlupdatepart", dbName)
-	assertContains(out, "record(s) updated")
+	assertContains(t, out, "record(s) updated")
 
 	out = runCommand(t, "dmldeletepart", dbName)
-	assertContains(out, "record(s) deleted")
+	assertContains(t, out, "record(s) deleted")
 
 	out = runCommand(t, "dmlbatchupdate", dbName)
-	assertContains(out, "Executed 2 SQL statements using Batch DML.")
+	assertContains(t, out, "Executed 2 SQL statements using Batch DML.")
 
 	out = runCommand(t, "createtablewithdatatypes", dbName)
-	assertContains(out, "Created Venues table")
+	assertContains(t, out, "Created Venues table")
 
 	out = runCommand(t, "writedatatypesdata", dbName)
 	out = runCommand(t, "querywitharray", dbName)
-	assertContains(out, "19 Venue 19 2020-11-01")
-	assertContains(out, "42 Venue 42 2020-10-01")
+	assertContains(t, out, "19 Venue 19 2020-11-01")
+	assertContains(t, out, "42 Venue 42 2020-10-01")
 
 	out = runCommand(t, "querywithbool", dbName)
-	assertContains(out, "19 Venue 19 true")
+	assertContains(t, out, "19 Venue 19 true")
 
 	out = runCommand(t, "querywithbytes", dbName)
-	assertContains(out, "4 Venue 4")
+	assertContains(t, out, "4 Venue 4")
 
 	out = runCommand(t, "querywithdate", dbName)
-	assertContains(out, "4 Venue 4 2018-09-02")
-	assertContains(out, "42 Venue 42 2018-10-01")
+	assertContains(t, out, "4 Venue 4 2018-09-02")
+	assertContains(t, out, "42 Venue 42 2018-10-01")
 
 	out = runCommand(t, "querywithfloat", dbName)
-	assertContains(out, "4 Venue 4 0.8")
-	assertContains(out, "19 Venue 19 0.9")
+	assertContains(t, out, "4 Venue 4 0.8")
+	assertContains(t, out, "19 Venue 19 0.9")
 
 	out = runCommand(t, "querywithint", dbName)
-	assertContains(out, "19 Venue 19 6300")
-	assertContains(out, "42 Venue 42 3000")
+	assertContains(t, out, "19 Venue 19 6300")
+	assertContains(t, out, "42 Venue 42 3000")
 
 	out = runCommand(t, "querywithstring", dbName)
-	assertContains(out, "42 Venue 42")
+	assertContains(t, out, "42 Venue 42")
 
 	out = runCommand(t, "querywithtimestampparameter", dbName)
-	assertContains(out, "4 Venue 4")
-	assertContains(out, "19 Venue 19")
-	assertContains(out, "42 Venue 42")
+	assertContains(t, out, "4 Venue 4")
+	assertContains(t, out, "19 Venue 19")
+	assertContains(t, out, "42 Venue 42")
 }
