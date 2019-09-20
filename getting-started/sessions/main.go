@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// [START getting_started_sessions_setup]
+
 // Command sessions starts an HTTP server that uses session state.
 package main
 
@@ -35,8 +37,18 @@ type app struct {
 	tmpl  *template.Template
 }
 
-// colors are the random background colors that will be assigned to sessions.
-var colors = []string{"red", "blue", "green", "yellow", "pink"}
+// greetings are the random greetings that will be assigned to sessions.
+var greetings = []string{
+	"Hello World",
+	"Hallo Welt",
+	"Ciao Mondo",
+	"Salut le Monde",
+	"Hola Mundo",
+}
+
+// [END getting_started_sessions_setup]
+
+// [START getting_started_sessions_main]
 
 func main() {
 	port := os.Getenv("PORT")
@@ -71,7 +83,7 @@ func newApp(projectID string) (*app, error) {
 		log.Fatalf("firestoregorilla.New: %v", err)
 	}
 
-	tmpl, err := template.New("Index").Parse("<body bgcolor={{.color}}>Views {{.views}}</body>")
+	tmpl, err := template.New("Index").Parse(`<body>{{.views}} {{if eq .views 1.0}}view{{else}}views{{end}} for "{{.greeting}}"</body>`)
 	if err != nil {
 		return nil, fmt.Errorf("template.New: %v", err)
 	}
@@ -82,7 +94,12 @@ func newApp(projectID string) (*app, error) {
 	}, nil
 }
 
-// index uses sessions to assign users a random color and keep track of views.
+// [END getting_started_sessions_main]
+
+// [START getting_started_sessions_handler]
+
+// index uses sessions to assign users a random greeting and keep track of
+// views.
 func (a *app) index(w http.ResponseWriter, r *http.Request) {
 	if r.RequestURI != "/" {
 		return
@@ -91,7 +108,7 @@ func (a *app) index(w http.ResponseWriter, r *http.Request) {
 	// name is a non-empty identifier for this app's sessions. Set it to
 	// something descriptive for your app. It is used as the Firestore
 	// collection name that stores the sessions.
-	name := "color-views"
+	name := "hello-views"
 	session, err := a.store.Get(r, name)
 	if err != nil {
 		// Could not get the session. Log an error and continue, saving a new
@@ -102,7 +119,7 @@ func (a *app) index(w http.ResponseWriter, r *http.Request) {
 	if session.IsNew {
 		// firestoregorilla uses JSON, which unmarshals numbers as float64s.
 		session.Values["views"] = float64(0)
-		session.Values["color"] = colors[rand.Intn(len(colors))]
+		session.Values["greeting"] = greetings[rand.Intn(len(greetings))]
 	}
 	session.Values["views"] = session.Values["views"].(float64) + 1
 	if err := session.Save(r, w); err != nil {
@@ -110,5 +127,9 @@ func (a *app) index(w http.ResponseWriter, r *http.Request) {
 		// Don't return early so the user still gets a response.
 	}
 
-	a.tmpl.Execute(w, session.Values)
+	if err := a.tmpl.Execute(w, session.Values); err != nil {
+		log.Printf("Execute: %v", err)
+	}
 }
+
+// [END getting_started_sessions_handler]
