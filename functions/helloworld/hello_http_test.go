@@ -17,7 +17,6 @@
 package helloworld
 
 import (
-	"io/ioutil"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -39,11 +38,7 @@ func TestHelloHTTP(t *testing.T) {
 		rr := httptest.NewRecorder()
 		HelloHTTP(rr, req)
 
-		out, err := ioutil.ReadAll(rr.Result().Body)
-		if err != nil {
-			t.Fatalf("ReadAll: %v", err)
-		}
-		if got := string(out); got != test.want {
+		if got := rr.Body.String(); got != test.want {
 			t.Errorf("HelloHTTP(%q) = %q, want %q", test.body, got, test.want)
 		}
 	}
