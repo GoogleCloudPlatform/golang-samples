@@ -8,25 +8,26 @@ to analyze the collected profiles. For the Go language, your analysis options in
 CPU time, heap, allocated heap, contention, and thread analysis. You can even
 compare sets of profiles.
 
-For information on configuring your applications to collect and transmit profiling data to
-your Google Cloud Platform project, the the following guides:
+For profiling concepts, the capabilities of the Profiler UI, and how to configure your application
+to collect and transmit profiling data, see
+[Profiler documentation](https://cloud.google.com/profiler/docs).
+
+Profiling applications written in Go, Java, Node.js, and Python is supported. For configuration
+details, see the following guides:
 
 + [Go](https://cloud.google.com/profiler/docs/profiling-go)
 + [Java](https://cloud.google.com/profiler/docs/profiling-java)
 + [Node.js](https://cloud.google.com/profiler/docs/profiling-nodejs)
 + [Python](https://cloud.google.com/profiler/docs/profiling-python)
 
-## Using these samples
-
-You can execute these samples, without change, on Google Cloud Platform.
-To execute these samples outside of Google Cloud Platform, you must perform additional setup.
+To profile applications running outside of Google Cloud Platform, some additional setup is required.
 For information, see
 [Profiling applications runing outside of Google Cloud Platform](https://cloud.google.com/profiler/docs/profiling-external).
 
-For detailed information on using these samples, see
-[Profiling samples](https://cloud.google.com/profiler/docs/samples).
-
 ## Samples
+
+Detailed instructions on executing these samples from the Cloud Shell is included in
+[Profiling samples](https://cloud.google.com/profiler/docs/samples).
 
 ### profiler_quickstart
 
@@ -39,11 +40,14 @@ This is a very simple service that is used by the
 ### hotapp
 
 The sample `hotapp` is uses an infinite loop with two call stacks.
-The default configuration of this sample is used as a benchmarking tool,
-to verify that as dependent services change the overall performance is static.
+
 The [Profiler documentation](https://cloud.google.com/profiler/docs)
-includes images generated from this sample. The
-`docdemo-service` has a specific configuration that adds work.
+includes images generated from this sample. 
+If you wish to generate profile data consistent with that included in the Profiler documentation,
+run the `hotapp` service with the following command line options:
+```
+       go run main.go -service=docdemo-service -local_work -skew=75 -version=1.75.0
+```
 
 [Go Code](/profiler/hotapp)
 
@@ -56,4 +60,47 @@ in the aggregate these calls add up to a significant time which can be
 identified via looking at the flat list of functions' self and total time.
 
 [Go Code](/profiler/hotmid)
+
+## Executing a sample
+
+To execute a sample and collect profiling data in your GCP project, do the following:
+
+1.  If you have a new GCP, you need to enable the Profiler API for your project. Choose one of the following methods.
+
+    From the Cloud console, go to **APIs & Services** and then click **Enable APIS and Services**.
+    Search for **Profiler**.  If the API isn't enabled, click **Enable**.
+
+    From the Cloud Shell, run the following command:
+    
+```
+    gcloud services enable cloudprofiler.googleapis.com
+``` 
+
+2.  If you aren't running on GCP, then you need to create a service account. For details on these steps, see 
+    [Profiling applications runing outside of Google Cloud Platform](https://cloud.google.com/profiler/docs/profiling-external).
+    
+3.  From your clone of the GitHub repository, change to the source directory of the program you want to execute.
+    For example, the following command changes the working directory to that for the sample `hotapp`:
+```
+   cd ~/gopath/src/github.com/GoogleCloudPlatform/golang-samples/profiler/hotapp
+```
+4. If you aren't running on GCP, edit `main.go` and specify your GCP project ID.
+
+5. Start the program:
+```
+   go run main.go
+```
+
+A few seconds after you start the program, the message `profiler has started` is displayed.
+New messages are displayed each time a profile is uploaded to your GCP project.
+To stop the program, enter `Ctrl-C`.
+
+### Viewing your data
+
+To view your profile data, do the following:
+
+1. Go to the [Cloud console](https://console.cloud.google.com).
+1. From the Navigation menu, scroll to the **Stackdriver** section and then select **Profiler**. 
+
+Each time you click **Now**, the Profiler UI is refreshed and includes profiles up to the current point in time.
 
