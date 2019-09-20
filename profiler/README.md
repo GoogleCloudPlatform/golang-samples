@@ -9,20 +9,21 @@ CPU time, heap, allocated heap, contention, and thread analysis. You can even
 compare sets of profiles.
 
 For profiling concepts, the capabilities of the Profiler UI, and how to configure your application
-to collect and transmit profiling data, see
+to collect and transmit profiling data, see the
 [Profiler documentation](https://cloud.google.com/profiler/docs).
 
-Profiling applications written in Go, Java, Node.js, and Python is supported. For configuration
-details, see the following guides:
+See the following configuration guides for details on modifying your application to collect
+and transmit profiling data:
 
-+ [Go](https://cloud.google.com/profiler/docs/profiling-go)
-+ [Java](https://cloud.google.com/profiler/docs/profiling-java)
-+ [Node.js](https://cloud.google.com/profiler/docs/profiling-nodejs)
-+ [Python](https://cloud.google.com/profiler/docs/profiling-python)
++ [Profiling Go applications](https://cloud.google.com/profiler/docs/profiling-go)
++ [Profiling Java applications](https://cloud.google.com/profiler/docs/profiling-java)
++ [Profiling Node.js applications](https://cloud.google.com/profiler/docs/profiling-nodejs)
++ [Profiling Python applications](https://cloud.google.com/profiler/docs/profiling-python)
 
-To profile applications running outside of Google Cloud Platform, some additional setup is required.
-For information, see
-[Profiling applications runing outside of Google Cloud Platform](https://cloud.google.com/profiler/docs/profiling-external).
+See
+[Profiling applications runing outside of Google Cloud Platform](https://cloud.google.com/profiler/docs/profiling-external) 
+for additional configuration steps that are required when you are running your service outside of
+Google Cloud Platform.
 
 ## Samples
 
