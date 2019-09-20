@@ -24,11 +24,10 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-const metricType = "custom.googleapis.com/golang-samples-tests/get"
-
 func TestGetMetricDescriptor(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
+	metricType := "custom.googleapis.com/golang-samples-tests/get"
 	m, err := createCustomMetric(ioutil.Discard, tc.ProjectID, metricType)
 	if err != nil {
 		t.Fatalf("createMetric: %v", err)

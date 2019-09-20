@@ -26,6 +26,8 @@ import (
 
 func TestDeleteMetric(t *testing.T) {
 	tc := testutil.SystemTest(t)
+
+	metricType := "custom.googleapis.com/golang-samples-tests/delete"
 	m, err := createCustomMetric(ioutil.Discard, tc.ProjectID, metricType)
 	if err != nil {
 		t.Fatalf("createCustomMetric: %v", err)
