@@ -53,7 +53,7 @@ func brokenHandler(w http.ResponseWriter, r *http.Request) {
 	name := os.Getenv("NAME")
 	if name == "" {
 		log.Printf("Missing required server parameter")
-		// Stack trace appears in Stackdriver Error Reporting.
+		// The panic stack trace appears in Stackdriver Error Reporting.
 		panic("Missing required server parameter")
 	}
 

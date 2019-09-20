@@ -15,7 +15,6 @@
 package main
 
 import (
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -62,12 +61,7 @@ func TestBrokenHandler(t *testing.T) {
 			t.Errorf("brokenHandler(%s): got (%q), want (%q)", test.label, code, http.StatusOK)
 		}
 
-		out, err := ioutil.ReadAll(rr.Result().Body)
-		if err != nil {
-			t.Fatalf("ReadAll: %v", err)
-		}
-
-		if got := string(out); test.want != got {
+		if got := rr.Body.String(); test.want != got {
 			t.Errorf("brokenHandler(%s): got (%q), want (%q)", test.label, got, test.want)
 		}
 	}
@@ -102,12 +96,7 @@ func TestImprovedHandler(t *testing.T) {
 			t.Errorf("brokenHandler(%s): got (%q), want (%q)", test.label, code, http.StatusOK)
 		}
 
-		out, err := ioutil.ReadAll(rr.Result().Body)
-		if err != nil {
-			t.Fatalf("ReadAll: %v", err)
-		}
-
-		if got := string(out); test.want != got {
+		if got := rr.Body.String(); test.want != got {
 			t.Errorf("brokenHandler(%s): got (%q), want (%q)", test.label, got, test.want)
 		}
 	}
