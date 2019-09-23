@@ -48,7 +48,7 @@ func pullMsgsConcurrenyControl(w io.Writer, projectID, subName string, numGorout
 	defer cancel()
 
 	var numMsgs uint64
-	// Create a channel to send messages to as they come in.
+	// Create a channel to handle messages to as they come in.
 	cm := make(chan *pubsub.Message)
 
 	// Handle individual messages in a goroutine.

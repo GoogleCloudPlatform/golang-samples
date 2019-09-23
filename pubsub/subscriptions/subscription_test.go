@@ -204,10 +204,10 @@ func TestPullMsgsSync(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to pull messages: %v", err)
 	}
-	got := buf.String()
-	want := "Got message \"hello world #4\""
-	if !strings.Contains(got, want) {
-		t.Fatalf("got output: %v\nwant %v", got, want)
+	// Check for number of newlines, which should correspond with number of messages.
+	got := strings.Count(buf.String(), "\n")
+	if got != maxMessages {
+		t.Fatalf("got %d messages, want %d", got, maxMessages)
 	}
 }
 

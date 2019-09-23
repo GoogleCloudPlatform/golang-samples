@@ -34,10 +34,15 @@ func pullMsgsSettings(w io.Writer, projectID, subName string) error {
 
 	sub := client.Subscription(subName)
 	sub.ReceiveSettings.Synchronous = true
-	// MaxOutstandingMessages is the maximum number of unprocessed messages (unacknowledged but not yet expired).
+	// MaxOutstandingMessages is the maximum number of unprocessed messages the
+	// client will pull from the server before pausing.
 	// This is only guaranteed when ReceiveSettings.Synchronous is set to true.
+	// When Synchronous is set to false, the StreamingPull RPC is used which
+	// can pull a single large batch of messages at once that is greater than
+	// MaxOustandingMessages before pausing.
 	sub.ReceiveSettings.MaxOutstandingMessages = 10
-	// MaxOutstandingBytes is the maximum size of unprocessed messages (unacknowledged but not yet expired).
+	// MaxOutstandingBytes is the maximum size of unprocessed messages,
+	// that the client will pull from the server before pausing.
 	sub.ReceiveSettings.MaxOutstandingBytes = 1e10
 	err = sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
 		fmt.Fprintf(w, "Got message: %q\n", string(msg.Data))
