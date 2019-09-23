@@ -30,7 +30,6 @@ func main() {
 	http.HandleFunc("/", brokenHandler)
 
 	// [END run_broken_service]
-
 	http.HandleFunc("/improved", improvedHandler)
 
 	// [START run_broken_service]
