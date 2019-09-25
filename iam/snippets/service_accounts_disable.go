@@ -24,8 +24,9 @@ import (
 	iam "google.golang.org/api/iam/v1"
 )
 
-// disableServiceAccount disable a service account.
+// disableServiceAccount disables a service account.
 func disableServiceAccount(w io.Writer, email string) error {
+	// email:= service-account@your-project.iam.gserviceaccount.com
 	client, err := google.DefaultClient(context.Background(), iam.CloudPlatformScope)
 	if err != nil {
 		return fmt.Errorf("google.DefaultClient: %v", err)
@@ -35,8 +36,8 @@ func disableServiceAccount(w io.Writer, email string) error {
 		return fmt.Errorf("iam.New: %v", err)
 	}
 
-	request := new(iam.DisableServiceAccountRequest)
-	_, err = service.Projects.ServiceAccounts.Disable("projects/-/serviceAccounts/" + email, request).Do()
+	request := &iam.DisableServiceAccountRequest{}
+	_, err = service.Projects.ServiceAccounts.Disable("projects/-/serviceAccounts/"+email, request).Do()
 	if err != nil {
 		return fmt.Errorf("Projects.ServiceAccounts.Disable: %v", err)
 	}

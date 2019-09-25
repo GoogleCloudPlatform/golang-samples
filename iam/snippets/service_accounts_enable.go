@@ -26,6 +26,7 @@ import (
 
 // enableServiceAccount enables a service account.
 func enableServiceAccount(w io.Writer, email string) error {
+	// email:= service-account@your-project.iam.gserviceaccount.com
 	client, err := google.DefaultClient(context.Background(), iam.CloudPlatformScope)
 	if err != nil {
 		return fmt.Errorf("google.DefaultClient: %v", err)
@@ -35,8 +36,8 @@ func enableServiceAccount(w io.Writer, email string) error {
 		return fmt.Errorf("iam.New: %v", err)
 	}
 
-	request := new(iam.EnableServiceAccountRequest)
-	_, err = service.Projects.ServiceAccounts.Enable("projects/-/serviceAccounts/" + email, request).Do()
+	request := &iam.EnableServiceAccountRequest{}
+	_, err = service.Projects.ServiceAccounts.Enable("projects/-/serviceAccounts/"+email, request).Do()
 	if err != nil {
 		return fmt.Errorf("Projects.ServiceAccounts.Enable: %v", err)
 	}
