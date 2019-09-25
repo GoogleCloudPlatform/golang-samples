@@ -57,8 +57,9 @@ func pullMsgs(w io.Writer, projectID, subName string, topic *pubsub.Topic) error
 	sub := client.Subscription(subName)
 	cctx, cancel := context.WithCancel(ctx)
 	err = sub.Receive(cctx, func(ctx context.Context, msg *pubsub.Message) {
-		msg.Ack()
 		fmt.Fprintf(w, "Got message: %q\n", string(msg.Data))
+		_ = msg // TODO: handle message.
+		msg.Ack()
 		mu.Lock()
 		defer mu.Unlock()
 		received++

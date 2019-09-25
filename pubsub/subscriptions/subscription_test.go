@@ -169,11 +169,19 @@ func TestPullMsgsSync(t *testing.T) {
 		t.Fatalf("failed to check if topic exists: %v", err)
 	}
 	if !ok {
-		topic, err := client.CreateTopic(ctx, topicName)
+		topic, err = client.CreateTopic(ctx, topicName)
 		if err != nil {
 			t.Fatalf("CreateTopic: %v", err)
 		}
-		_, err = client.CreateSubscription(ctx, subName, pubsub.SubscriptionConfig{
+	}
+
+	sub := client.Subscription(subName)
+	ok, err = sub.Exists(ctx)
+	if err != nil {
+		t.Fatalf("failed to check if subscription exists: %v", err)
+	}
+	if !ok {
+		sub, err = client.CreateSubscription(ctx, subName, pubsub.SubscriptionConfig{
 			Topic:       topic,
 			AckDeadline: 20 * time.Second,
 		})
@@ -183,8 +191,9 @@ func TestPullMsgsSync(t *testing.T) {
 	}
 
 	// Publish 10 messages on the topic.
+	const numMessages = 10
 	var results []*pubsub.PublishResult
-	for i := 0; i < 10; i++ {
+	for i := 0; i < numMessages; i++ {
 		res := topic.Publish(ctx, &pubsub.Message{
 			Data: []byte(fmt.Sprintf("hello world #%d", i)),
 		})
@@ -198,16 +207,15 @@ func TestPullMsgsSync(t *testing.T) {
 		}
 	}
 
-	maxMessages := 5
 	buf := new(bytes.Buffer)
-	err = pullMsgsSync(buf, tc.ProjectID, subName, int32(maxMessages))
+	err = pullMsgsSync(buf, tc.ProjectID, subName, topic)
 	if err != nil {
 		t.Fatalf("failed to pull messages: %v", err)
 	}
 	// Check for number of newlines, which should correspond with number of messages.
 	got := strings.Count(buf.String(), "\n")
-	if got != maxMessages {
-		t.Fatalf("got %d messages, want %d", got, maxMessages)
+	if got != numMessages {
+		t.Fatalf("got %d messages, want %d", got, numMessages)
 	}
 }
 
