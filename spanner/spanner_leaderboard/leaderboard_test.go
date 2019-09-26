@@ -28,7 +28,7 @@ import (
 )
 
 func TestSample(t *testing.T) {
-	tc := testutil.SystemTest(t)
+	tc := testutil.EndToEndTest(t)
 
 	instance := os.Getenv("GOLANG_SAMPLES_SPANNER")
 	if instance == "" {
@@ -87,14 +87,6 @@ func TestSample(t *testing.T) {
 	mustRunCommand(t, "createdatabase", dbName, 0)
 	assertContains(t, runCommand(t, "insertplayers", dbName, 0), "Inserted players")
 	assertContains(t, runCommand(t, "insertplayers", dbName, 0), "Inserted players")
-	assertContains(t, runCommand(t, "insertscores", dbName, 0), "Inserted scores")
-	assertContains(t, runCommand(t, "insertscores", dbName, 0), "Inserted scores")
-	assertContains(t, runCommand(t, "insertscores", dbName, 0), "Inserted scores")
-	assertContains(t, runCommand(t, "insertscores", dbName, 0), "Inserted scores")
-	assertContains(t, runCommand(t, "insertscores", dbName, 0), "Inserted scores")
-	assertContains(t, runCommand(t, "insertscores", dbName, 0), "Inserted scores")
-	assertContains(t, runCommand(t, "insertscores", dbName, 0), "Inserted scores")
-	assertContains(t, runCommand(t, "insertscores", dbName, 0), "Inserted scores")
 	assertContains(t, runCommand(t, "insertscores", dbName, 0), "Inserted scores")
 	assertContains(t, runCommand(t, "insertscores", dbName, 0), "Inserted scores")
 	assertContains(t, runCommand(t, "query", dbName, 0), "PlayerId: ")
