@@ -17,16 +17,17 @@ package garbagecollection
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"os"
 	"strings"
 	"testing"
 
 	"cloud.google.com/go/bigtable"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/google/uuid"
 )
 
 func TestGarbageCollection(t *testing.T) {
-	t.Skip("Flaky: https://github.com/GoogleCloudPlatform/golang-samples/issues/914")
 	tc := testutil.SystemTest(t)
 
 	ctx := context.Background()
@@ -36,8 +37,8 @@ func TestGarbageCollection(t *testing.T) {
 		t.Skip("Skipping bigtable integration test. Set GOLANG_SAMPLES_BIGTABLE_PROJECT and GOLANG_SAMPLES_BIGTABLE_INSTANCE.")
 	}
 	adminClient, err := bigtable.NewAdminClient(ctx, project, instance)
-
-	tableName := "gc-table-" + tc.ProjectID
+	uuid, err := uuid.NewRandom()
+	tableName := fmt.Sprintf("gc-table-%s-%s", tc.ProjectID, uuid.String()[:8])
 	adminClient.DeleteTable(ctx, tableName)
 
 	if err := adminClient.CreateTable(ctx, tableName); err != nil {
@@ -51,6 +52,16 @@ func TestGarbageCollection(t *testing.T) {
 
 	got := buf.String()
 	if want := "created column family cf1 with policy: age() > 5d\n"; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
+
+	buf.Reset()
+	if err = updateGCRule(buf, project, instance, tableName); err != nil {
+		t.Errorf("TestGarbageCollection: %v", err)
+	}
+
+	got = buf.String()
+	if want := "Updated column family cf1 GC rule with policy: versions() > 1\n"; !strings.Contains(got, want) {
 		t.Errorf("got %q, want %q", got, want)
 	}
 
