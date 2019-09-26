@@ -1,0 +1,5 @@
+FROM golang:1.12
+
+COPY bootstrap.sh /bootstrap.sh
+RUN chmod +x /bootstrap.sh
+RUN /bootstrap.sh

@@ -7,20 +7,6 @@ if [ -z $KOKORO_BUILD_ARTIFACTS_SUBDIR ]; then
   exit 1
 fi
 
-pushd /tmp
-
-# Get the SDK tar and untar it.
-TARFILE=google-cloud-sdk.tar.gz
-wget https://dl.google.com/dl/cloudsdk/release/$TARFILE
-tar xzf $TARFILE
-rm $TARFILE
-
-# Install the SDK
-./google-cloud-sdk/install.sh \
-  --usage-reporting false \
-  --path-update false \
-  --command-completion false
-
 gcloud -q components update
 gcloud -q components install app-engine-go
 
@@ -32,5 +18,3 @@ gcloud auth activate-service-account --key-file "$GOOGLE_APPLICATION_CREDENTIALS
 
 # Diagnostic information.
 gcloud info
-
-popd
