@@ -164,31 +164,6 @@ func TestPullMsgsSync(t *testing.T) {
 	client := setup(t)
 
 	topic := client.Topic(topicName)
-	ok, err := topic.Exists(ctx)
-	if err != nil {
-		t.Fatalf("failed to check if topic exists: %v", err)
-	}
-	if !ok {
-		topic, err = client.CreateTopic(ctx, topicName)
-		if err != nil {
-			t.Fatalf("CreateTopic: %v", err)
-		}
-	}
-
-	sub := client.Subscription(subName)
-	ok, err = sub.Exists(ctx)
-	if err != nil {
-		t.Fatalf("failed to check if subscription exists: %v", err)
-	}
-	if !ok {
-		sub, err = client.CreateSubscription(ctx, subName, pubsub.SubscriptionConfig{
-			Topic:       topic,
-			AckDeadline: 20 * time.Second,
-		})
-		if err != nil {
-			t.Fatalf("CreateSubscription: %v", err)
-		}
-	}
 
 	// Publish 10 messages on the topic.
 	const numMessages = 10
@@ -208,7 +183,7 @@ func TestPullMsgsSync(t *testing.T) {
 	}
 
 	buf := new(bytes.Buffer)
-	err = pullMsgsSync(buf, tc.ProjectID, subName, topic)
+	err := pullMsgsSync(buf, tc.ProjectID, subName, topic)
 	if err != nil {
 		t.Fatalf("failed to pull messages: %v", err)
 	}
@@ -225,23 +200,6 @@ func TestPullMsgsConcurrencyControl(t *testing.T) {
 	client := setup(t)
 
 	topic := client.Topic(topicName)
-	ok, err := topic.Exists(ctx)
-	if err != nil {
-		t.Fatalf("failed to check if topic exists: %v", err)
-	}
-	if !ok {
-		topic, err := client.CreateTopic(ctx, topicName)
-		if err != nil {
-			t.Fatalf("CreateTopic: %v", err)
-		}
-		_, err = client.CreateSubscription(ctx, subName, pubsub.SubscriptionConfig{
-			Topic:       topic,
-			AckDeadline: 20 * time.Second,
-		})
-		if err != nil {
-			t.Fatalf("CreateSubscription: %v", err)
-		}
-	}
 
 	// Publish 100 message to test with.
 	numMsgs := 100
