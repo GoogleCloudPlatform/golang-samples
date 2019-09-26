@@ -40,7 +40,12 @@ export GOLANG_SAMPLES_BIGTABLE_INSTANCE=testing-instance
 go version
 date
 
-cd github/golang-samples
+# Re-organize files
+export GOPATH=$PWD/gopath
+target=$GOPATH/src/github.com/GoogleCloudPlatform
+mkdir -p $target
+mv github/golang-samples $target
+cd $target/golang-samples
 
 if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* && -n $GOLANG_SAMPLES_GO_VET ]]; then
   echo "This test run will run end-to-end tests.";
