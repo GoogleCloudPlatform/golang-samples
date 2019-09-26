@@ -104,4 +104,4 @@ OUTFILE=gotest.out
 # code, stopping execution.
 go clean -modcache
 
-cat $OUTFILE | $GOPATH/bin/go-junit-report -set-exit-code > sponge_log.xml
+cat $OUTFILE | /go/bin/go-junit-report -set-exit-code > sponge_log.xml
