@@ -43,7 +43,7 @@ func TestList(t *testing.T) {
 	buf := new(bytes.Buffer)
 	buckets, err := listGCSBuckets(buf, googleAccessKeyID, googleAccessKeySecret)
 	if err != nil {
-		t.Errorf("Unable to list GCS buckets: %v", err)
+		t.Errorf("listGCSBuckets: %v", err)
 	}
 
 	got := buf.String()

@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Sample lists GCS buckets using the S3 SDK using interoperability mode.
-package main
+// Package s3sdk lists GCS buckets using the S3 SDK using interoperability mode.
+package s3sdk
 
 // [START storage_s3_sdk_list_buckets]
 import (
