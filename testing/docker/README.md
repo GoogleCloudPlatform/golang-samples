@@ -13,9 +13,8 @@ these containers.
 
 ```
 gcloud config set project golang-samples-tests
-for d in `find * -type d`; do
-  cd $d
-  gcloud builds submit --tag gcr.io/golang-samples-tests/$d
-  cd -
+for v in go111 go112 go113;
+  sudo docker build -f Dockerfile.$v --tag gcr.io/golang-samples-tests/$v .
+  sudo docker push gcr.io/golang-samples-tests/$v
 done
 ```
