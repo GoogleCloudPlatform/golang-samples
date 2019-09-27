@@ -36,11 +36,10 @@ func TestMain(m *testing.M) {
 }
 
 func TestList(t *testing.T) {
-	bucketName := os.Getenv("GOOGLE_CLOUD_PROJECT_S3_SDK")
 	googleAccessKeyID := os.Getenv("STORAGE_HMAC_ACCESS_KEY_ID")
 	googleAccessKeySecret := os.Getenv("STORAGE_HMAC_ACCESS_SECRET_KEY")
 
-	if bucketName == "" || googleAccessKeyID == "" || googleAccessKeySecret == "" {
+	if googleAccessKeyID == "" || googleAccessKeySecret == "" {
 		t.Skip()
 	}
 
@@ -51,7 +50,7 @@ func TestList(t *testing.T) {
 	}
 
 	got := buf.String()
-	if want := bucketName; !strings.Contains(got, want) {
+	if want :=  "Buckets:"; !strings.Contains(got, want) {
 		t.Errorf("got %q, want %q", got, want)
 	}
 
