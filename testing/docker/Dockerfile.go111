@@ -1,5 +1,9 @@
 FROM golang:1.11
 
+# Always use modules.
+ENV GO111MODULE=on GOPROXY=https://proxy.golang.org,direct
+
 COPY bootstrap.sh /bootstrap.sh
-RUN chmod +x /bootstrap.sh
-RUN /bootstrap.sh
+RUN set -ex; \
+    chmod +x /bootstrap.sh; \
+    /bootstrap.sh

@@ -14,7 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set -ex
+
 apt-get update && apt-get install -y imagemagick graphviz
+rm -rf /var/lib/apt/lists/*
 
 go get github.com/GoogleCloudPlatform/golang-samples/testing/gimmeproj github.com/jstemmer/go-junit-report
 
