@@ -53,7 +53,8 @@ func DB() *sql.DB {
 	var (
 		connectionName = mustGetenv("CLOUDSQL_CONNECTION_NAME")
 		user           = mustGetenv("CLOUDSQL_USER")
-		password       = os.Getenv("CLOUDSQL_PASSWORD") // NOTE: password may be empty
+		dbName         = os.Getenv("CLOUDSQL_DATABASE_NAME") // NOTE: dbName may be empty
+		password       = os.Getenv("CLOUDSQL_PASSWORD")      // NOTE: password may be empty
 		socket         = os.Getenv("CLOUDSQL_SOCKET_PREFIX")
 	)
 
@@ -63,13 +64,13 @@ func DB() *sql.DB {
 	}
 
 	// MySQL Connection, comment out to use PostgreSQL.
-	// connection string format: USER:PASSWORD@unix(/cloudsql/)PROJECT_ID:REGION_ID:INSTANCE_ID/[DB_NAME]
-	dbURI := fmt.Sprintf("%s:%s@unix(%s/%s)/", user, password, socket, connectionName)
+	// connection string format: USER:PASSWORD@unix(/cloudsql/PROJECT_ID:REGION_ID:INSTANCE_ID)/[DB_NAME]
+	dbURI := fmt.Sprintf("%s:%s@unix(%s/%s)/%s", user, password, socket, connectionName, dbName)
 	conn, err := sql.Open("mysql", dbURI)
 
 	// PostgreSQL Connection, uncomment to use.
 	// connection string format: user=USER password=PASSWORD host=/cloudsql/PROJECT_ID:REGION_ID:INSTANCE_ID/[ dbname=DB_NAME]
-	// dbURI := fmt.Sprintf("user=%s password=%s host=/cloudsql/%s dbname=%s", user, password, connectionName)
+	// dbURI := fmt.Sprintf("user=%s password=%s host=/cloudsql/%s dbname=%s", user, password, connectionName, dbName)
 	// conn, err := sql.Open("postgres", dbURI)
 
 	if err != nil {

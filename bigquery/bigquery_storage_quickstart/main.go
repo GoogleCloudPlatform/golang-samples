@@ -35,7 +35,7 @@ import (
 
 	bqStorage "cloud.google.com/go/bigquery/storage/apiv1beta1"
 	"github.com/golang/protobuf/ptypes"
-	gax "github.com/googleapis/gax-go"
+	gax "github.com/googleapis/gax-go/v2"
 	"github.com/linkedin/goavro"
 	bqStoragepb "google.golang.org/genproto/googleapis/cloud/bigquery/storage/v1beta1"
 	"google.golang.org/grpc"
@@ -90,6 +90,13 @@ func main() {
 		Parent:         fmt.Sprintf("projects/%s", *projectID),
 		TableReference: readTable,
 		ReadOptions:    tableReadOptions,
+		// This API can also deliver data serialized in Apache Arrow format.
+		// This example leverages Apache Avro.
+		Format: bqStoragepb.DataFormat_AVRO,
+		// We use a LIQUID strategy in this example because we only
+		// read from a single stream.  Consider BALANCED if you're consuming
+		// multiple streams concurrently and want more consistent stream sizes.
+		ShardingStrategy: bqStoragepb.ShardingStrategy_LIQUID,
 	}
 
 	// Set a snapshot time if it's been specified.
@@ -158,8 +165,10 @@ func printDatum(d interface{}) {
 	// Go's map implementation returns keys in a random ordering, so we sort
 	// the keys before accessing.
 	keys := make([]string, len(m))
+	i := 0
 	for k := range m {
-		keys = append(keys, k)
+		keys[i] = k
+		i++
 	}
 	sort.Strings(keys)
 	for _, key := range keys {
@@ -190,9 +199,13 @@ func valueFromTypeMap(field interface{}) interface{} {
 // successfully transmitted.
 func processStream(ctx context.Context, client *bqStorage.BigQueryStorageClient, st *bqStoragepb.Stream, ch chan<- *bqStoragepb.AvroRows) error {
 	var offset int64
-	streamRetry := 3
+
+	// Streams may be long-running.  Rather than using a global retry for the
+	// stream, implement a retry that resets once progress is made.
+	retryLimit := 3
 
 	for {
+		retries := 0
 		// Send the initiating request to start streaming row blocks.
 		rowStream, err := client.ReadRows(ctx, &bqStoragepb.ReadRowsRequest{
 			ReadPosition: &bqStoragepb.StreamPosition{
@@ -210,16 +223,18 @@ func processStream(ctx context.Context, client *bqStorage.BigQueryStorageClient,
 				return nil
 			}
 			if err != nil {
-				streamRetry--
-				if streamRetry <= 0 {
+				retries++
+				if retries >= retryLimit {
 					return fmt.Errorf("processStream retries exhausted: %v", err)
 				}
 			}
 
-			rc := r.GetAvroRows().GetRowCount()
+			rc := r.GetRowCount()
 			if rc > 0 {
 				// Bookmark our progress in case of retries and send the rowblock on the channel.
 				offset = offset + rc
+				// We're making progress, reset retries.
+				retries = 0
 				ch <- r.GetAvroRows()
 			}
 		}

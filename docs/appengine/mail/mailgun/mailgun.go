@@ -18,8 +18,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/mailgun/mailgun-go"
-
+	mailgun "github.com/mailgun/mailgun-go/v3"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/urlfetch"
 )
@@ -34,7 +33,7 @@ func SendSimpleMessageHandler(w http.ResponseWriter, r *http.Request) {
 	)
 	mg.SetClient(httpc)
 
-	msg, id, err := mg.Send(mg.NewMessage(
+	msg, id, err := mg.Send(appengine.NewContext(r), mg.NewMessage(
 		/* From */ "Excited User <mailgun@YOUR_DOMAIN_NAME>",
 		/* Subject */ "Hello",
 		/* Body */ "Testing some Mailgun awesomness!",
@@ -71,7 +70,7 @@ func SendComplexMessageHandler(w http.ResponseWriter, r *http.Request) {
 	message.AddAttachment("files/test.jpg")
 	message.AddAttachment("files/test.txt")
 
-	msg, id, err := mg.Send(message)
+	msg, id, err := mg.Send(appengine.NewContext(r), message)
 	if err != nil {
 		msg := fmt.Sprintf("Could not send message: %v, ID %v, %+v", err, id, msg)
 		http.Error(w, msg, http.StatusInternalServerError)

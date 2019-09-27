@@ -1,6 +1,23 @@
 #!/bin/bash
 
+# Copyright 2019 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 set -e
+
+export GO111MODULE=on # Always use modules.
+export GOPROXY=https://proxy.golang.org
 
 export GOLANG_SAMPLES_KMS_KEYRING=ring1
 export GOLANG_SAMPLES_KMS_CRYPTOKEY=key1
@@ -8,13 +25,13 @@ export GOLANG_SAMPLES_IOT_PUB=$KOKORO_GFILE_DIR/rsa_cert.pem
 export GOLANG_SAMPLES_IOT_PRIV=$KOKORO_GFILE_DIR/rsa_private.pem
 export STORAGE_HMAC_ACCESS_KEY_ID="$($KOKORO_KEYSTORE_DIR/71386_golang-samples-kokoro-gcs-hmac-secret)"
 export STORAGE_HMAC_ACCESS_SECRET_KEY="$($KOKORO_KEYSTORE_DIR/71386_golang-samples-kokoro-gcs-hmac-id)"
+export GCLOUD_ORGANIZATION=1081635000895
 
-TIMEOUT=25m
+TIMEOUT=45m
 
 # Set application credentials before using gimmeproj so it has access.
 # This is changed to a project-specific credential after a project is leased.
 export GOOGLE_APPLICATION_CREDENTIALS=$KOKORO_KEYSTORE_DIR/71386_kokoro-golang-samples-tests
-curl https://storage.googleapis.com/gimme-proj/linux_amd64/gimmeproj > /bin/gimmeproj && chmod +x /bin/gimmeproj;
 gimmeproj version;
 export GOLANG_SAMPLES_PROJECT_ID=$(gimmeproj -project golang-samples-tests lease $TIMEOUT);
 if [ -z "$GOLANG_SAMPLES_PROJECT_ID" ]; then
@@ -31,14 +48,12 @@ export GOOGLE_APPLICATION_CREDENTIALS=$KOKORO_KEYSTORE_DIR/71386_kokoro-$GOLANG_
 set -x
 
 export GOLANG_SAMPLES_SPANNER=projects/golang-samples-tests/instances/golang-samples-tests
+export GOLANG_SAMPLES_SERVICE_ACCOUNT_EMAIL=kokoro-$GOLANG_SAMPLES_PROJECT_ID@$GOLANG_SAMPLES_PROJECT_ID.iam.gserviceaccount.com
+export GOLANG_SAMPLES_BIGTABLE_PROJECT=golang-samples-tests
+export GOLANG_SAMPLES_BIGTABLE_INSTANCE=testing-instance
 
 go version
 date
-
-if [[ -d /cache ]]; then
-  time mv /cache/* .
-  echo 'Uncached'
-fi
 
 # Re-organize files
 export GOPATH=$PWD/gopath
@@ -75,30 +90,6 @@ else
   echo "Running tests in modified directories: $TARGET"
 fi
 
-# Download imports.
-GO_IMPORTS=$(go list -f '{{join .Imports "\n"}}{{"\n"}}{{join .TestImports "\n"}}' $TARGET | \
-  sort | uniq | \
-  grep -v golang-samples | \
-  grep -v mailgun)
-time go get -u -v -d $GO_IMPORTS
-
-# The latest version of mailgun-go uses a major module path (and imports),
-# which breaks on Go versions without module support (< 1.11).
-if [ -d $GOPATH/src/github.com/mailgun/mailgun-go ]; then
-  rm -rf $GOPATH/src/github.com/mailgun/mailgun-go
-fi
-git clone https://github.com/mailgun/mailgun-go.git $GOPATH/src/github.com/mailgun/mailgun-go
-pushd $GOPATH/src/github.com/mailgun/mailgun-go
-git checkout v2.0.0
-go get -v ./...
-popd
-
-# Always download internal dependencies.
-go get ./internal/...
-
-go get github.com/jstemmer/go-junit-report
-go install -v $GO_IMPORTS
-
 # Do the easy stuff before running tests. Fail fast!
 if [ $GOLANG_SAMPLES_GO_VET ]; then
   diff -u <(echo -n) <(gofmt -d -s .)
@@ -109,4 +100,10 @@ date
 
 OUTFILE=gotest.out
 2>&1 go test -timeout $TIMEOUT -v . $TARGET | tee $OUTFILE
-cat $OUTFILE | $GOPATH/bin/go-junit-report -set-exit-code > sponge_log.xml
+
+# Clear the cache so Kokoro doesn't try to copy it.
+# Must happen before calling go-junit-report since it can cause a non-zero exit
+# code, stopping execution.
+go clean -modcache
+
+cat $OUTFILE | /go/bin/go-junit-report -set-exit-code > sponge_log.xml

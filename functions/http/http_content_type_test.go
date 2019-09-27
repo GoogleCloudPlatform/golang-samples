@@ -16,7 +16,6 @@ package http
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -55,11 +54,8 @@ func TestHelloContentType(t *testing.T) {
 
 			rr := httptest.NewRecorder()
 			HelloContentType(rr, req)
-			out, err := ioutil.ReadAll(rr.Result().Body)
-			if err != nil {
-				t.Fatalf("%s (%s): ReadAll: %v", test.label, mimetype, err)
-			}
-			if got := string(out); got != test.want {
+
+			if got := rr.Body.String(); got != test.want {
 				t.Errorf("%s (%s): got %q, want %q", test.label, mimetype, got, test.want)
 			}
 		}

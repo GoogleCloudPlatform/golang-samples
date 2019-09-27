@@ -14,16 +14,17 @@
 
 // [START functions_imagemagick_setup]
 
-// Package imagemagick contains an example of using ImageMagick from a Cloud
-// Function.
+// Package imagemagick contains an example of using ImageMagick to process a
+// file uploaded to Cloud Storage.
 package imagemagick
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
-	"strings"
 
 	"cloud.google.com/go/storage"
 	vision "cloud.google.com/go/vision/apiv1"
@@ -55,8 +56,7 @@ func init() {
 
 // [START functions_imagemagick_analyze]
 
-// GCSEvent is the payload of a GCS event. Please refer to the docs for
-// additional information regarding GCS events.
+// GCSEvent is the payload of a GCS event.
 type GCSEvent struct {
 	Bucket string `json:"bucket"`
 	Name   string `json:"name"`
@@ -64,9 +64,9 @@ type GCSEvent struct {
 
 // BlurOffensiveImages blurs offensive images uploaded to GCS.
 func BlurOffensiveImages(ctx context.Context, e GCSEvent) error {
-	if strings.HasPrefix(e.Name, "blurred-") {
-		log.Printf("The image %q is already blurred", e.Name)
-		return nil
+	outputBucket := os.Getenv("BLURRED_BUCKET_NAME")
+	if outputBucket == "" {
+		return errors.New("BLURRED_BUCKET_NAME must be set")
 	}
 
 	img := vision.NewImageFromURI(fmt.Sprintf("gs://%s/%s", e.Bucket, e.Name))
@@ -78,7 +78,7 @@ func BlurOffensiveImages(ctx context.Context, e GCSEvent) error {
 
 	if resp.GetAdult() == visionpb.Likelihood_VERY_LIKELY ||
 		resp.GetViolence() == visionpb.Likelihood_VERY_LIKELY {
-		return blur(ctx, e.Bucket, e.Name)
+		return blur(ctx, e.Bucket, outputBucket, e.Name)
 	}
 	log.Printf("The image %q was detected as OK.", e.Name)
 	return nil
@@ -88,16 +88,16 @@ func BlurOffensiveImages(ctx context.Context, e GCSEvent) error {
 
 // [START functions_imagemagick_blur]
 
-// blur blurs the image stored at gs://bucket/name and stores the result in
-// gs://bucket/blurred-name.
-func blur(ctx context.Context, bucket, name string) error {
-	inputBlob := storageClient.Bucket(bucket).Object(name)
+// blur blurs the image stored at gs://inputBucket/name and stores the result in
+// gs://outputBucket/name.
+func blur(ctx context.Context, inputBucket, outputBucket, name string) error {
+	inputBlob := storageClient.Bucket(inputBucket).Object(name)
 	r, err := inputBlob.NewReader(ctx)
 	if err != nil {
 		return fmt.Errorf("NewReader: %v", err)
 	}
 
-	outputBlob := storageClient.Bucket(bucket).Object("blurred-" + name)
+	outputBlob := storageClient.Bucket(outputBucket).Object(name)
 	w := outputBlob.NewWriter(ctx)
 	defer w.Close()
 
@@ -110,7 +110,7 @@ func blur(ctx context.Context, bucket, name string) error {
 		return fmt.Errorf("cmd.Run: %v", err)
 	}
 
-	log.Printf("Blurred image has been uploaded to %s", outputBlob.ObjectName())
+	log.Printf("Blurred image uploaded to gs://%s/%s", outputBlob.BucketName(), outputBlob.ObjectName())
 
 	return nil
 }
