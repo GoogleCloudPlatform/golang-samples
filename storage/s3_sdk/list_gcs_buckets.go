@@ -1,4 +1,3 @@
-
 // Copyright 2019 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,8 +18,8 @@ package s3sdk
 // [START storage_s3_sdk_list_buckets]
 import (
 	"context"
-	"io"
 	"fmt"
+	"io"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -33,8 +32,8 @@ func listGCSBuckets(w io.Writer, googleAccessKeyID string, googleAccessKeySecret
 	// 1. Change the endpoint URL to use the Google Cloud Storage XML API endpoint.
 	// 2. Use Cloud Storage HMAC Credentials.
 	sess := session.Must(session.NewSession(&aws.Config{
-		Region:   aws.String("auto"),
-		Endpoint: aws.String("https://storage.googleapis.com"),
+		Region:      aws.String("auto"),
+		Endpoint:    aws.String("https://storage.googleapis.com"),
 		Credentials: credentials.NewStaticCredentials(googleAccessKeyID, googleAccessKeySecret, ""),
 	}))
 

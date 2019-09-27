@@ -13,19 +13,19 @@
 // limitations under the License.
 
 // Sample lists GCS buckets using the S3 SDK using interoperability mode.
-package main
+package s3sdk
 
 import (
+	"bytes"
 	"io/ioutil"
 	"log"
 	"os"
-	"time"
-	"bytes"
 	"strings"
 	"testing"
+	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/aws/aws-sdk-go/aws"
 )
 
 func TestMain(m *testing.M) {
@@ -39,6 +39,10 @@ func TestList(t *testing.T) {
 	bucketName := os.Getenv("GOOGLE_CLOUD_PROJECT_S3_SDK")
 	googleAccessKeyID := os.Getenv("STORAGE_HMAC_ACCESS_KEY_ID")
 	googleAccessKeySecret := os.Getenv("STORAGE_HMAC_ACCESS_SECRET_KEY")
+
+	if bucketName == "" || googleAccessKeyID == "" || googleAccessKeySecret == "" {
+		t.Skip()
+	}
 
 	buf := new(bytes.Buffer)
 	buckets, err := listGCSBuckets(buf, googleAccessKeyID, googleAccessKeySecret)
@@ -57,7 +61,6 @@ func TestList(t *testing.T) {
 				return
 			}
 		}
-		time.Sleep(2 * time.Second)
 		r.Errorf("got bucket list: %v; want %q in the list", buckets, bucketName)
 	})
 }
