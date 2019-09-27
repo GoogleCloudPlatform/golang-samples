@@ -24,7 +24,7 @@ import (
 )
 
 func main() {
-	if len(os.Args) <= 4 {
+	if len(os.Args) < 4 {
 		fmt.Println("Usage: Must include 3 arguments for projectID, locationID, and queueID")
 		os.Exit(1)
 	}

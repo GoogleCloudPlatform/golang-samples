@@ -18,13 +18,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 
-	asset "cloud.google.com/go/asset/v1beta1"
-	"golang.org/x/net/context"
-	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1beta1"
+	asset "cloud.google.com/go/asset/apiv1"
+	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1"
 )
 
 func main() {

@@ -33,8 +33,7 @@ func createClientEvent(w io.Writer, projectID string, requestID string, eventID 
 	// Create an eventService client.
 	c, err := talent.NewEventClient(ctx)
 	if err != nil {
-		fmt.Printf("talent.NewEventClient: %v\n", err)
-		return nil, err
+		return nil, fmt.Errorf("talent.NewEventClient: %v", err)
 	}
 
 	createTime, _ := ptypes.TimestampProto(time.Now())
@@ -58,8 +57,7 @@ func createClientEvent(w io.Writer, projectID string, requestID string, eventID 
 
 	resp, err := c.CreateClientEvent(ctx, req)
 	if err != nil {
-		fmt.Printf("Failed to create client event: %v\n", err)
-		return nil, err
+		return nil, fmt.Errorf("CreateClientEvent: %v", err)
 	}
 
 	fmt.Fprintf(w, "Client event created: %v\n", resp.GetEvent())

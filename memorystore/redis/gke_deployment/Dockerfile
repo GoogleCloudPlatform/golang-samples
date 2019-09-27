@@ -2,7 +2,7 @@ FROM golang:1.8-alpine
 
 RUN apk update && apk add git
 
-RUN go get github.com/garyburd/redigo/redis
+RUN go get github.com/gomodule/redigo/redis
 
 ADD . /go/src/visit-counter
 RUN go install visit-counter

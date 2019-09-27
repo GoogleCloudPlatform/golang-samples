@@ -32,12 +32,9 @@ func TestCreateProduct(t *testing.T) {
 
 	var buf bytes.Buffer
 
-	// Make sure the product to be created does not already exist.
-	if err := listProducts(&buf, tc.ProjectID, location); err != nil {
-		t.Fatalf("listProducts: %v", err)
-	}
-	if got := buf.String(); strings.Contains(got, productID) {
-		t.Errorf("Product ID %s already exists", productID)
+	// Ensure re-used resource names don't exist prior to test start.
+	if err := getProduct(&buf, tc.ProjectID, location, productID); err == nil {
+		deleteProduct(&buf, tc.ProjectID, location, productID)
 	}
 
 	// Create a fake product.

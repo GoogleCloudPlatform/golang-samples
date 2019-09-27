@@ -26,13 +26,13 @@ import (
 )
 
 func main() {
-	ctx := context.Background()
 
 	// [START fs_initialize]
 	// Sets your Google Cloud Platform project ID.
 	projectID := "YOUR_PROJECT_ID"
 
 	// Get a Firestore client.
+	ctx := context.Background()
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
