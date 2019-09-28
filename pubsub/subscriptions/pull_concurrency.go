@@ -42,8 +42,8 @@ func pullMsgsConcurrenyControl(w io.Writer, projectID, subName string) error {
 	// NumGoroutines is the number of goroutines sub.Receive will spawn to pull messages concurrently.
 	sub.ReceiveSettings.NumGoroutines = runtime.NumCPU()
 
-	// Receive messages for 10 seconds.
-	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	// Receive messages for 5 seconds.
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
 	// Create a channel to handle messages to as they come in.
@@ -58,7 +58,6 @@ func pullMsgsConcurrenyControl(w io.Writer, projectID, subName string) error {
 				numMsgs++
 				msg.Ack()
 			case <-ctx.Done():
-				close(cm)
 				return
 			}
 		}
@@ -72,6 +71,7 @@ func pullMsgsConcurrenyControl(w io.Writer, projectID, subName string) error {
 		return fmt.Errorf("Receive: %v", err)
 	}
 	fmt.Fprintf(w, "Received %d messages", numMsgs)
+	close(cm)
 
 	return nil
 }
