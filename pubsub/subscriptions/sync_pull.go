@@ -41,7 +41,7 @@ func pullMsgsSync(w io.Writer, projectID, subName string, topic *pubsub.Topic) e
 	// than the StreamingPull RPC, which is useful for guaranteeing MaxOutstandingMessages,
 	// the max number of messages the client will hold in memory.
 	sub.ReceiveSettings.Synchronous = true
-	sub.ReceiveSettings.MaxOutstandingMessages = 100
+	sub.ReceiveSettings.MaxOutstandingMessages = 10
 
 	// Receive messages for 5 seconds.
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)

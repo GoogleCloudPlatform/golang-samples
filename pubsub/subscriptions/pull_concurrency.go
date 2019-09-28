@@ -43,7 +43,7 @@ func pullMsgsConcurrenyControl(w io.Writer, projectID, subName string) error {
 	sub.ReceiveSettings.NumGoroutines = runtime.NumCPU()
 
 	// Receive messages for 5 seconds.
-	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
 	// Create a channel to handle messages to as they come in.
