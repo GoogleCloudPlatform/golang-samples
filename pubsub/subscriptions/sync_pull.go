@@ -19,7 +19,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"sync"
+	"time"
 
 	"cloud.google.com/go/pubsub"
 )
@@ -33,29 +33,27 @@ func pullMsgsSync(w io.Writer, projectID, subName string, topic *pubsub.Topic) e
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
+	defer client.Close()
 
-	var mu sync.Mutex
-	received := 0
 	sub := client.Subscription(subName)
 
 	// Turn on synchronous mode. This makes the subscriber use the Pull RPC rather
 	// than the StreamingPull RPC, which is useful for guaranteeing MaxOutstandingMessages,
 	// the max number of messages the client will hold in memory.
 	sub.ReceiveSettings.Synchronous = true
-	sub.ReceiveSettings.MaxOutstandingMessages = 10
+	sub.ReceiveSettings.MaxOutstandingMessages = 100
 
-	cctx, cancel := context.WithCancel(ctx)
-	err = sub.Receive(cctx, func(ctx context.Context, msg *pubsub.Message) {
-		mu.Lock()
-		defer mu.Unlock()
+	// Receive messages for 5 seconds.
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	// Receive blocks until the passed in context is done.
+	err = sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
 		fmt.Fprintf(w, "Got message :%q\n", string(msg.Data))
 		_ = msg // TODO: handle message.
 		msg.Ack()
-		if received++; received == 10 {
-			cancel()
-		}
 	})
-	if err != nil && err != context.Canceled {
+	if err != nil && err == context.Canceled {
 		return fmt.Errorf("Receive: %v", err)
 	}
 	return nil

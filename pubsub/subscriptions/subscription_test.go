@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -165,22 +164,9 @@ func TestPullMsgsSync(t *testing.T) {
 
 	topic := client.Topic(topicName)
 
-	// Publish 10 messages on the topic.
-	const numMessages = 10
-	var results []*pubsub.PublishResult
-	for i := 0; i < numMessages; i++ {
-		res := topic.Publish(ctx, &pubsub.Message{
-			Data: []byte(fmt.Sprintf("hello world #%d", i)),
-		})
-		results = append(results, res)
-	}
-
-	// Check that all messages were published.
-	for _, r := range results {
-		if _, err := r.Get(ctx); err != nil {
-			t.Fatalf("Get publish result: %v", err)
-		}
-	}
+	// Publish 5 messages on the topic.
+	const numMsgs = 5
+	publishMsgs(ctx, topic, numMsgs)
 
 	buf := new(bytes.Buffer)
 	err := pullMsgsSync(buf, tc.ProjectID, subName, topic)
@@ -188,9 +174,8 @@ func TestPullMsgsSync(t *testing.T) {
 		t.Fatalf("failed to pull messages: %v", err)
 	}
 	// Check for number of newlines, which should correspond with number of messages.
-	got := strings.Count(buf.String(), "\n")
-	if got != numMessages {
-		t.Fatalf("got %d messages, want %d", got, numMessages)
+	if got := strings.Count(buf.String(), "\n"); got != numMsgs {
+		t.Fatalf("pullMsgsSync got %d messages, want %d", got, numMsgs)
 	}
 }
 
@@ -201,23 +186,17 @@ func TestPullMsgsConcurrencyControl(t *testing.T) {
 
 	topic := client.Topic(topicName)
 
-	// Publish 100 message to test with.
-	numMsgs := 100
-	for i := 0; i < numMsgs; i++ {
-		result := topic.Publish(ctx, &pubsub.Message{
-			Data: []byte("Message " + strconv.Itoa(i)),
-		})
-		result.Get(ctx)
-	}
+	// Publish 5 message to test with.
+	const numMsgs = 5
+	publishMsgs(ctx, topic, 5)
 
 	buf := new(bytes.Buffer)
-	if err := pullMsgsConcurrenyControl(buf, tc.ProjectID, subName, 4); err != nil {
+	if err := pullMsgsConcurrenyControl(buf, tc.ProjectID, subName); err != nil {
 		t.Fatalf("failed to pull messages: %v", err)
 	}
-	got := buf.String()
 	want := fmt.Sprintf("Received %d messages", numMsgs)
-	if !strings.Contains(got, want) {
-		t.Fatalf("got output: %v, want %v", got, want)
+	if got := buf.String(); !strings.Contains(got, want) {
+		t.Fatalf("pullMsgsConcurrenyControl got:\n----\n%v\n----\nWant to contain:\n%v\n----", got, want)
 	}
 }
 
@@ -254,6 +233,23 @@ func TestDelete(t *testing.T) {
 		t.Fatalf("failed to check if sub exists: %v", err)
 	}
 	if ok {
-		t.Fatalf("got sub = %q; want none", subName)
+		t.Fatalf("sub = %q; want none", subName)
 	}
+}
+
+func publishMsgs(ctx context.Context, t *pubsub.Topic, numMsgs int) error {
+	var results []*pubsub.PublishResult
+	for i := 0; i < numMsgs; i++ {
+		res := t.Publish(ctx, &pubsub.Message{
+			Data: []byte(fmt.Sprintf("hello world #%d", i)),
+		})
+		results = append(results, res)
+	}
+	// Check that all messages were published.
+	for _, r := range results {
+		if _, err := r.Get(ctx); err != nil {
+			return fmt.Errorf("Get publish result: %v", err)
+		}
+	}
+	return nil
 }
