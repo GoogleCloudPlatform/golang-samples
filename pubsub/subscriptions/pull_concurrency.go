@@ -48,7 +48,6 @@ func pullMsgsConcurrenyControl(w io.Writer, projectID, subName string) error {
 
 	// Create a channel to handle messages to as they come in.
 	cm := make(chan *pubsub.Message)
-	numMsgs := 0
 	// Handle individual messages in a goroutine.
 	go func() {
 		for {
@@ -56,7 +55,6 @@ func pullMsgsConcurrenyControl(w io.Writer, projectID, subName string) error {
 			case msg := <-cm:
 				fmt.Fprintf(w, "Got message :%q\n", string(msg.Data))
 				_ = msg // TODO: handle message
-				numMsgs++
 				msg.Ack()
 			case <-ctx.Done():
 				return
@@ -71,7 +69,6 @@ func pullMsgsConcurrenyControl(w io.Writer, projectID, subName string) error {
 	if err != nil {
 		return fmt.Errorf("Receive: %v", err)
 	}
-	fmt.Fprintf(w, "Received %d messages", numMsgs)
 	close(cm)
 
 	return nil
