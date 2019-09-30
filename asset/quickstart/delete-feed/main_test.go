@@ -23,8 +23,11 @@ import (
 	"time"
 
 	asset "cloud.google.com/go/asset/apiv1p2beta1"
+	"cloud.google.com/go/pubsub"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1p2beta1"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func TestMain(t *testing.T) {
@@ -41,6 +44,8 @@ func TestMain(t *testing.T) {
 	feedParent := fmt.Sprintf("projects/%s", tc.ProjectID)
 	assetNames := []string{"YOUR_ASSET_NAME"}
 	topic := fmt.Sprintf("projects/%s/topics/%s", tc.ProjectID, "YOUR_TOPIC_NAME")
+
+	createTopic(ctx, t, tc.ProjectID, "YOUR_TOPIC_NAME")
 
 	req := &assetpb.CreateFeedRequest{
 		Parent: feedParent,
@@ -78,5 +83,28 @@ func TestMain(t *testing.T) {
 	want := "Deleted Feed"
 	if !strings.Contains(got, want) {
 		t.Errorf("stdout returned %s, wanted to contain %s", got, want)
+	}
+}
+
+func createTopic(ctx context.Context, t *testing.T, projectID, topicName string) {
+	client, err := pubsub.NewClient(ctx, projectID)
+	if err != nil {
+		t.Fatalf("pubsub.NewClient: %v", err)
+	}
+
+	topic := client.Topic(topicName)
+	ok, err := topic.Exists(ctx)
+	if err != nil {
+		t.Fatalf("failed to check if topic exists: %v", err)
+	}
+	if !ok {
+		_, err := client.CreateTopic(ctx, topicName)
+		// In case the topic was created in the meantime.
+		if status.Code(err) == codes.AlreadyExists {
+			return
+		}
+		if err != nil {
+			t.Fatalf("CreateTopic: %v", err)
+		}
 	}
 }
