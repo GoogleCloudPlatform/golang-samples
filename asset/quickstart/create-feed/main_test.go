@@ -27,6 +27,8 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1p2beta1"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func TestMain(t *testing.T) {
@@ -90,6 +92,10 @@ func createTopic(ctx context.Context, t *testing.T, projectID, topicName string)
 	}
 	if !ok {
 		_, err := client.CreateTopic(ctx, topicName)
+		// In case the topic was created in the meantime.
+		if status.Code(err) == codes.AlreadyExists {
+			return
+		}
 		if err != nil {
 			t.Fatalf("CreateTopic: %v", err)
 		}
