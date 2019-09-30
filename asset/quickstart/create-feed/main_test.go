@@ -23,6 +23,7 @@ import (
 	"time"
 
 	asset "cloud.google.com/go/asset/apiv1p2beta1"
+	"cloud.google.com/go/pubsub"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1p2beta1"
@@ -50,6 +51,8 @@ func TestMain(t *testing.T) {
 		t.Fatalf("asset.NewClient: %v", err)
 	}
 
+	createTopic(ctx, t, tc.ProjectID, "YOUR_TOPIC_NAME")
+
 	m := testutil.BuildMain(t)
 	defer m.Cleanup()
 
@@ -72,4 +75,23 @@ func TestMain(t *testing.T) {
 	client.DeleteFeed(ctx, &assetpb.DeleteFeedRequest{
 		Name: fmt.Sprintf("projects/%s/feeds/%s", projectNumber, feedID),
 	})
+}
+
+func createTopic(ctx context.Context, t *testing.T, projectID, topicName string) {
+	client, err := pubsub.NewClient(ctx, projectID)
+	if err != nil {
+		t.Fatalf("pubsub.NewClient: %v", err)
+	}
+
+	topic := client.Topic(topicName)
+	ok, err := topic.Exists(ctx)
+	if err != nil {
+		t.Fatalf("failed to check if topic exists: %v", err)
+	}
+	if !ok {
+		_, err := client.CreateTopic(ctx, topicName)
+		if err != nil {
+			t.Fatalf("CreateTopic: %v", err)
+		}
+	}
 }
