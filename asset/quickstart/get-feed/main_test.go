@@ -54,6 +54,8 @@ func TestMain(t *testing.T) {
 	assetNames := []string{"YOUR_ASSET_NAME"}
 	topic := fmt.Sprintf("projects/%s/topics/%s", tc.ProjectID, "YOUR_TOPIC_NAME")
 
+	createTopic(ctx, t, tc.ProjectID, "YOUR_TOPIC_NAME")
+
 	req := &assetpb.CreateFeedRequest{
 		Parent: feedParent,
 		FeedId: feedID,
@@ -71,8 +73,6 @@ func TestMain(t *testing.T) {
 	if err != nil {
 		t.Fatalf("client.CreateFeed: %v", err)
 	}
-
-	createTopic(ctx, t, tc.ProjectID, "YOUR_TOPIC_NAME")
 
 	m := testutil.BuildMain(t)
 	defer m.Cleanup()
