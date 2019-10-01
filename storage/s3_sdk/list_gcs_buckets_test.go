@@ -46,7 +46,7 @@ func TestList(t *testing.T) {
 	}
 
 	got := buf.String()
-	if want :=  "Buckets:"; !strings.Contains(got, want) {
+	if want := "Buckets:"; !strings.Contains(got, want) {
 		t.Errorf("listGCSBuckets got\n----\n%s\n----\nWant to contain\n----\n%s\n----", got, want)
 	}
 }
