@@ -22,10 +22,6 @@ import (
 	"os"
 	"strings"
 	"testing"
-	"time"
-
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"github.com/aws/aws-sdk-go/aws"
 )
 
 func TestMain(m *testing.M) {
