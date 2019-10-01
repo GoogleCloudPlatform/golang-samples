@@ -40,7 +40,7 @@ func TestList(t *testing.T) {
 	googleAccessKeySecret := os.Getenv("STORAGE_HMAC_ACCESS_SECRET_KEY")
 
 	if googleAccessKeyID == "" || googleAccessKeySecret == "" {
-		t.Skip()
+		t.Skip("STORAGE_HMAC_ACCESS_KEY_ID and STORAGE_HMAC_ACCESS_SECRET_KEY must be set. Skipping.")
 	}
 
 	buf := new(bytes.Buffer)
@@ -51,6 +51,6 @@ func TestList(t *testing.T) {
 
 	got := buf.String()
 	if want :=  "Buckets:"; !strings.Contains(got, want) {
-		t.Errorf("got %q, want %q", got, want)
+		t.Errorf("listGCSBuckets got\n----\n%s\n----\nWant to contain\n----\n%s\n----", got, want)
 	}
 }
