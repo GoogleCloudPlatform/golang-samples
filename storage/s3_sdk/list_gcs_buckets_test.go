@@ -44,7 +44,7 @@ func TestList(t *testing.T) {
 	}
 
 	buf := new(bytes.Buffer)
-	buckets, err := listGCSBuckets(buf, googleAccessKeyID, googleAccessKeySecret)
+	_, err := listGCSBuckets(buf, googleAccessKeyID, googleAccessKeySecret)
 	if err != nil {
 		t.Errorf("listGCSBuckets: %v", err)
 	}
@@ -53,13 +53,4 @@ func TestList(t *testing.T) {
 	if want :=  "Buckets:"; !strings.Contains(got, want) {
 		t.Errorf("got %q, want %q", got, want)
 	}
-
-	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) { // for eventual consistency
-		for _, b := range buckets {
-			if aws.StringValue(b.Name) == bucketName {
-				return
-			}
-		}
-		r.Errorf("got bucket list: %v; want %q in the list", buckets, bucketName)
-	})
 }
