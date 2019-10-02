@@ -12,4 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# [START getting_started_sessions_runtime]
 runtime: go112
+# [END getting_started_sessions_runtime]
