@@ -14,7 +14,7 @@
 
 # [START run_broken_dockerfile]
 
-# Use the offical golang image to create a build artifact.
+# Use the offical golang image to create a binary.
 # This is based on Debian and sets the GOPATH to /go.
 # https://hub.docker.com/_/golang
 FROM golang:1.13 as builder
@@ -24,6 +24,7 @@ WORKDIR /app
 
 # Retrieve application dependencies.
 # This allows the container build to reuse cached dependencies.
+# Expecting to copy go.mod and if present go.sum.
 COPY go.* ./
 RUN go mod download
 
