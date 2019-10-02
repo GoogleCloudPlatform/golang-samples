@@ -29,7 +29,7 @@ func TestIndex(t *testing.T) {
 		{
 			path:           "/",
 			wantStatusCode: http.StatusOK,
-			wantBody:       "Hello None\n",
+			wantBody:       "No Cloud IAP header found.\n",
 		},
 		{
 			path:           "/hello",
@@ -42,14 +42,15 @@ func TestIndex(t *testing.T) {
 		req := httptest.NewRequest("GET", test.path, nil)
 		rr := httptest.NewRecorder()
 
-		index(rr, req)
+		a := &app{} // Do not use newApp since it uses the metadata server.
+		a.index(rr, req)
 
 		if got := rr.Result().StatusCode; got != test.wantStatusCode {
-			t.Errorf("index got status code %d, want %d", got, test.wantStatusCode)
+			t.Errorf("index(%s) got status code %d, want %d", test.path, got, test.wantStatusCode)
 		}
 
 		if got := rr.Body.String(); got != test.wantBody {
-			t.Errorf("index got %q, want %q", got, test.wantBody)
+			t.Errorf("index(%s) got %q, want %q", test.path, got, test.wantBody)
 		}
 	}
 }

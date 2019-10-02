@@ -31,8 +31,20 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
+// app holds the Cloud IAP certificates and audience field for this app, which
+// are needed to verify authentication headers set by Cloud IAP.
+type app struct {
+	certs map[string]string
+	aud   string
+}
+
 func main() {
-	http.HandleFunc("/", index)
+	a, err := newApp()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	http.HandleFunc("/", a.index)
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -44,12 +56,32 @@ func main() {
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
+// newApp creates a new app, returning an error if either the Cloud IAP
+// certificates or the app's audience field cannot be obtained.
+func newApp() (*app, error) {
+	certs, err := certificates()
+	if err != nil {
+		return nil, err
+	}
+
+	aud, err := audience()
+	if err != nil {
+		return nil, err
+	}
+
+	a := &app{
+		certs: certs,
+		aud:   aud,
+	}
+	return a, nil
+}
+
 // [END getting_started_auth_setup]
 
 // [START getting_started_auth_front_controller]
 
 // index responds to requests with our greeting.
-func index(w http.ResponseWriter, r *http.Request) {
+func (a *app) index(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		http.NotFound(w, r)
 		return
@@ -57,13 +89,13 @@ func index(w http.ResponseWriter, r *http.Request) {
 
 	assertion := r.Header.Get("X-Goog-IAP-JWT-Assertion")
 	if assertion == "" {
-		fmt.Fprintln(w, "Hello None")
+		fmt.Fprintln(w, "No Cloud IAP header found.")
 		return
 	}
-	email, _, err := validateAssertion(assertion)
+	email, _, err := validateAssertion(assertion, a.certs, a.aud)
 	if err != nil {
-		log.Printf("Assertion did not validate: %s", err)
-		fmt.Fprintln(w, "Hello None")
+		log.Println(err)
+		fmt.Fprintln(w, "Could not validate assertion. Check app logs.")
 		return
 	}
 
@@ -76,12 +108,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 
 // validateAssertion validates assertion was signed by Google and returns the
 // associated email and userID.
-func validateAssertion(assertion string) (email string, userID string, err error) {
-	certificates, err := certs()
-	if err != nil {
-		return "", "", err
-	}
-
+func validateAssertion(assertion string, certs map[string]string, aud string) (email string, userID string, err error) {
 	token, err := jwt.Parse(assertion, func(token *jwt.Token) (interface{}, error) {
 		keyID := token.Header["kid"].(string)
 
@@ -90,15 +117,10 @@ func validateAssertion(assertion string) (email string, userID string, err error
 			return nil, fmt.Errorf("unexpected signing method: %q", token.Header["alg"])
 		}
 
-		cert := certificates[keyID]
+		cert := certs[keyID]
 		return jwt.ParseECPublicKeyFromPEM([]byte(cert))
 	})
 
-	if err != nil {
-		return "", "", err
-	}
-
-	aud, err := audience()
 	if err != nil {
 		return "", "", err
 	}
@@ -118,15 +140,8 @@ func validateAssertion(assertion string) (email string, userID string, err error
 
 // [START getting_started_auth_audience]
 
-// cachedAudience caches the result of audience.
-var cachedAudience string
-
 // audience returns the expected audience value for this service.
 func audience() (string, error) {
-	if cachedAudience != "" {
-		return cachedAudience, nil
-	}
-
 	projectNumber, err := metadata.NumericProjectID()
 	if err != nil {
 		return "", fmt.Errorf("metadata.NumericProjectID: %v", err)
@@ -137,24 +152,15 @@ func audience() (string, error) {
 		return "", fmt.Errorf("metadata.ProjectID: %v", err)
 	}
 
-	cachedAudience = "/projects/" + projectNumber + "/apps/" + projectID
-
-	return cachedAudience, nil
+	return "/projects/" + projectNumber + "/apps/" + projectID, nil
 }
 
 // [END getting_started_auth_audience]
 
 // [START getting_started_auth_certs]
 
-// cachedCertificates caches the result of certs.
-var cachedCertificates map[string]string
-
-// certs returns IAP's cryptographic public keys.
-func certs() (map[string]string, error) {
-	if len(cachedCertificates) != 0 { // Already got them previously
-		return cachedCertificates, nil
-	}
-
+// certificates returns Cloud IAP's cryptographic public keys.
+func certificates() (map[string]string, error) {
 	const url = "https://www.gstatic.com/iap/verify/public_key"
 	client := http.Client{
 		Timeout: 5 * time.Second,
@@ -164,12 +170,13 @@ func certs() (map[string]string, error) {
 		return nil, fmt.Errorf("Get: %v", err)
 	}
 
+	var certs map[string]string
 	dec := json.NewDecoder(resp.Body)
-	if err := dec.Decode(&cachedCertificates); err != nil {
+	if err := dec.Decode(&certs); err != nil {
 		return nil, fmt.Errorf("Decode: %v", err)
 	}
 
-	return cachedCertificates, nil
+	return certs, nil
 }
 
 // [END getting_started_auth_certs]
