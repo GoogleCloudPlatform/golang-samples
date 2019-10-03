@@ -14,7 +14,7 @@ RUN set -ex \
 RUN go get $pkg/...
 
 RUN apk update && \
-      apk add  git && \
+      apk add git && \
       cd $GOPATH/src/$pkg && \
       git checkout steps
 
