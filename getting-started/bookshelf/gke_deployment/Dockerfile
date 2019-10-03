@@ -1,16 +1,22 @@
 FROM golang:alpine
 
+ENV GO111MODULE=off
 ARG pkg=github.com/GoogleCloudPlatform/golang-samples/getting-started/bookshelf
 
 RUN apk add --no-cache ca-certificates
-
-COPY . $GOPATH/src/$pkg
 
 RUN set -ex \
       && apk add --no-cache --virtual .build-deps \
               git \
       && go get -v $pkg/... \
       && apk del .build-deps
+
+RUN go get $pkg/...
+
+RUN apk update && \
+      apk add git && \
+      cd $GOPATH/src/$pkg && \
+      git checkout steps
 
 RUN go install $pkg/...
 
