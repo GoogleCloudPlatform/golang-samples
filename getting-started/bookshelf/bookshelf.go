@@ -17,9 +17,10 @@ package main
 import (
 	"context"
 	"fmt"
-	"io"
-	"os"
+	"log"
 
+	"cloud.google.com/go/errorreporting"
+	"cloud.google.com/go/logging"
 	"cloud.google.com/go/storage"
 )
 
@@ -61,8 +62,12 @@ type Bookshelf struct {
 	StorageBucket     *storage.BucketHandle
 	StorageBucketName string
 
-	// logWriter is used for request logging and can be overridden for tests.
-	logWriter io.Writer
+	// errLogger is used for logging errors at ERROR severity.
+	errLogger *log.Logger
+	// logger is used for request logging and can be overridden for tests.
+	logger *log.Logger
+
+	errorClient *errorreporting.Client
 }
 
 // NewBookshelf creates a new Bookshelf.
@@ -80,8 +85,28 @@ func NewBookshelf(projectID string, db BookDatabase) (*Bookshelf, error) {
 		return nil, fmt.Errorf("storage.NewClient: %v", err)
 	}
 
+	loggingClient, err := logging.NewClient(ctx, projectID)
+	if err != nil {
+		log.Fatalf("logging.NewClient: %v", err)
+	}
+	logger := loggingClient.Logger("bookshelf-log")
+	noticeLogger := logger.StandardLogger(logging.Notice)
+	errLogger := logger.StandardLogger(logging.Error)
+
+	errorClient, err := errorreporting.NewClient(ctx, projectID, errorreporting.Config{
+		ServiceName: "bookshelf",
+		OnError: func(err error) {
+			errLogger.Printf("Could not log error: %v", err)
+		},
+	})
+	if err != nil {
+		return nil, fmt.Errorf("errorreporting.NewClient: %v", err)
+	}
+
 	b := &Bookshelf{
-		logWriter:         os.Stderr,
+		errLogger:         errLogger,
+		logger:            noticeLogger,
+		errorClient:       errorClient,
 		DB:                db,
 		StorageBucketName: bucketName,
 		StorageBucket:     storageClient.Bucket(bucketName),

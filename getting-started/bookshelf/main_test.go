@@ -56,6 +56,17 @@ func TestMain(m *testing.M) {
 		if err != nil {
 			log.Fatalf("firestore.NewClient: %v", err)
 		}
+
+		// Delete all docs first to start with a clean slate.
+		docs, err := client.Collection("books").DocumentRefs(ctx).GetAll()
+		if err == nil {
+			for _, d := range docs {
+				if _, err := d.Delete(ctx); err != nil {
+					log.Fatalf("Delete: %v", err)
+				}
+			}
+		}
+
 		db, err := newFirestoreDB(client)
 		if err != nil {
 			log.Fatalf("newFirestoreDB: %v", err)
@@ -73,7 +84,8 @@ func TestMain(m *testing.M) {
 
 	// Don't log anything during testing.
 	log.SetOutput(ioutil.Discard)
-	b.logWriter = ioutil.Discard
+	b.logger = log.New(ioutil.Discard, "", 0)
+	b.errLogger = log.New(ioutil.Discard, "", 0)
 
 	serv := httptest.NewServer(nil)
 	wt = webtest.New(nil, serv.Listener.Addr().String())
@@ -195,17 +207,46 @@ func TestAddAndDelete(t *testing.T) {
 			}
 		})
 	}
+}
 
+func TestSendLog(t *testing.T) {
+	buf := bytes.Buffer{}
+	oldLogger := b.logger
+	b.logger = log.New(&buf, "", 0)
+
+	bodyContains(t, wt, "/logs", "Log sent!")
+
+	b.logger = oldLogger
+
+	if got, want := buf.String(), "Good job!"; !strings.Contains(got, want) {
+		t.Errorf("/logs logged\n----\n%v\n----\nWant to contain:\n----\n%v", got, want)
+	}
+}
+
+func TestSendError(t *testing.T) {
+	buf := bytes.Buffer{}
+	oldErrLogger := b.errLogger
+	b.errLogger = log.New(&buf, "", 0)
+
+	bodyContains(t, wt, "/errors", "Check Error Reporting")
+
+	b.errLogger = oldErrLogger
+
+	if got, want := buf.String(), "uh oh"; !strings.Contains(got, want) {
+		t.Errorf("/errors logged\n----\n%v\n----\nWant to contain:\n----\n%v", got, want)
+	}
 }
 
 func bodyContains(t *testing.T, wt *webtest.W, path, contains string) (ok bool) {
+	t.Helper()
+
 	body, _, err := wt.GetBody(path)
 	if err != nil {
 		t.Error(err)
 		return false
 	}
 	if !strings.Contains(body, contains) {
-		t.Errorf("want %s to contain %s", body, contains)
+		t.Errorf("got:\n----\n%s\nWant to contain:\n----\n%s", body, contains)
 		return false
 	}
 	return true

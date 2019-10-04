@@ -28,6 +28,7 @@ import (
 	"os"
 	"path"
 
+	"cloud.google.com/go/errorreporting"
 	"cloud.google.com/go/firestore"
 	"cloud.google.com/go/storage"
 	"github.com/gofrs/uuid"
@@ -62,7 +63,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("newFirestoreDB: %v", err)
 	}
-
 	shelf, err := NewBookshelf(projectID, db)
 	if err != nil {
 		log.Fatalf("NewBookshelf: %v", err)
@@ -85,16 +85,16 @@ func (b *Bookshelf) registerHandlers() {
 		Handler(appHandler(b.listHandler))
 	r.Methods("GET").Path("/books/add").
 		Handler(appHandler(b.addFormHandler))
-	r.Methods("GET").Path("/books/{id:[0-9a-zA-Z]+}").
+	r.Methods("GET").Path("/books/{id:[0-9a-zA-Z_\\-]+}").
 		Handler(appHandler(b.detailHandler))
-	r.Methods("GET").Path("/books/{id:[0-9a-zA-Z]+}/edit").
+	r.Methods("GET").Path("/books/{id:[0-9a-zA-Z_\\-]+}/edit").
 		Handler(appHandler(b.editFormHandler))
 
 	r.Methods("POST").Path("/books").
 		Handler(appHandler(b.createHandler))
-	r.Methods("POST", "PUT").Path("/books/{id:[0-9a-zA-Z]+}").
+	r.Methods("POST", "PUT").Path("/books/{id:[0-9a-zA-Z_\\-]+}").
 		Handler(appHandler(b.updateHandler))
-	r.Methods("POST").Path("/books/{id:[0-9a-zA-Z]+}:delete").
+	r.Methods("POST").Path("/books/{id:[0-9a-zA-Z_\\-]+}:delete").
 		Handler(appHandler(b.deleteHandler)).Name("delete")
 
 	// Respond to App Engine and Compute Engine health checks.
@@ -104,11 +104,12 @@ func (b *Bookshelf) registerHandlers() {
 			w.Write([]byte("ok"))
 		})
 
-	// [START request_logging]
+	r.Methods("GET").Path("/logs").Handler(appHandler(b.sendLog))
+	r.Methods("GET").Path("/errors").Handler(appHandler(b.sendError))
+
 	// Delegate all of the HTTP routing and serving to the gorilla/mux router.
 	// Log all requests using the standard Apache format.
-	http.Handle("/", handlers.CombinedLoggingHandler(b.logWriter, r))
-	// [END request_logging]
+	http.Handle("/", handlers.CombinedLoggingHandler(b.logger.Writer(), r))
 }
 
 // listHandler displays a list with summaries of books in the database.
@@ -116,10 +117,10 @@ func (b *Bookshelf) listHandler(w http.ResponseWriter, r *http.Request) *appErro
 	ctx := r.Context()
 	books, err := b.DB.ListBooks(ctx)
 	if err != nil {
-		return appErrorf(err, "could not list books: %v", err)
+		return b.appErrorf(r, err, "could not list books: %v", err)
 	}
 
-	return listTmpl.Execute(w, r, books)
+	return listTmpl.Execute(b, w, r, books)
 }
 
 // bookFromRequest retrieves a book from the database given a book ID in the
@@ -141,16 +142,16 @@ func (b *Bookshelf) bookFromRequest(r *http.Request) (*Book, error) {
 func (b *Bookshelf) detailHandler(w http.ResponseWriter, r *http.Request) *appError {
 	book, err := b.bookFromRequest(r)
 	if err != nil {
-		return appErrorf(err, "%v", err)
+		return b.appErrorf(r, err, "%v", err)
 	}
 
-	return detailTmpl.Execute(w, r, book)
+	return detailTmpl.Execute(b, w, r, book)
 }
 
 // addFormHandler displays a form that captures details of a new book to add to
 // the database.
 func (b *Bookshelf) addFormHandler(w http.ResponseWriter, r *http.Request) *appError {
-	return editTmpl.Execute(w, r, nil)
+	return editTmpl.Execute(b, w, r, nil)
 }
 
 // editFormHandler displays a form that allows the user to edit the details of
@@ -158,10 +159,10 @@ func (b *Bookshelf) addFormHandler(w http.ResponseWriter, r *http.Request) *appE
 func (b *Bookshelf) editFormHandler(w http.ResponseWriter, r *http.Request) *appError {
 	book, err := b.bookFromRequest(r)
 	if err != nil {
-		return appErrorf(err, "%v", err)
+		return b.appErrorf(r, err, "%v", err)
 	}
 
-	return editTmpl.Execute(w, r, book)
+	return editTmpl.Execute(b, w, r, book)
 }
 
 // bookFromForm populates the fields of a Book from form values
@@ -186,6 +187,8 @@ func (b *Bookshelf) bookFromForm(r *http.Request) (*Book, error) {
 
 	return book, nil
 }
+
+// [START getting_started_bookshelf_storage]
 
 // uploadFileFromForm uploads a file if it's present in the "image" form field.
 func (b *Bookshelf) uploadFileFromForm(ctx context.Context, r *http.Request) (url string, err error) {
@@ -230,16 +233,18 @@ func (b *Bookshelf) uploadFileFromForm(ctx context.Context, r *http.Request) (ur
 	return fmt.Sprintf(publicURL, b.StorageBucketName, name), nil
 }
 
+// [END getting_started_bookshelf_storage]
+
 // createHandler adds a book to the database.
 func (b *Bookshelf) createHandler(w http.ResponseWriter, r *http.Request) *appError {
 	ctx := r.Context()
 	book, err := b.bookFromForm(r)
 	if err != nil {
-		return appErrorf(err, "could not parse book from form: %v", err)
+		return b.appErrorf(r, err, "could not parse book from form: %v", err)
 	}
 	id, err := b.DB.AddBook(ctx, book)
 	if err != nil {
-		return appErrorf(err, "could not save book: %v", err)
+		return b.appErrorf(r, err, "could not save book: %v", err)
 	}
 	http.Redirect(w, r, fmt.Sprintf("/books/%s", id), http.StatusFound)
 	return nil
@@ -250,16 +255,16 @@ func (b *Bookshelf) updateHandler(w http.ResponseWriter, r *http.Request) *appEr
 	ctx := r.Context()
 	id := mux.Vars(r)["id"]
 	if id == "" {
-		return appErrorf(errors.New("no book with empty ID"), "no book with empty ID")
+		return b.appErrorf(r, errors.New("no book with empty ID"), "no book with empty ID")
 	}
 	book, err := b.bookFromForm(r)
 	if err != nil {
-		return appErrorf(err, "could not parse book from form: %v", err)
+		return b.appErrorf(r, err, "could not parse book from form: %v", err)
 	}
 	book.ID = id
 
 	if err := b.DB.UpdateBook(ctx, book); err != nil {
-		return appErrorf(err, "UpdateBook: %v", err)
+		return b.appErrorf(r, err, "UpdateBook: %v", err)
 	}
 	http.Redirect(w, r, fmt.Sprintf("/books/%s", book.ID), http.StatusFound)
 	return nil
@@ -270,32 +275,54 @@ func (b *Bookshelf) deleteHandler(w http.ResponseWriter, r *http.Request) *appEr
 	ctx := r.Context()
 	id := mux.Vars(r)["id"]
 	if err := b.DB.DeleteBook(ctx, id); err != nil {
-		return appErrorf(err, "DeleteBook: %v", err)
+		return b.appErrorf(r, err, "DeleteBook: %v", err)
 	}
 	http.Redirect(w, r, "/books", http.StatusFound)
 	return nil
+}
+
+func (b *Bookshelf) sendLog(w http.ResponseWriter, r *http.Request) *appError {
+	b.logger.Println("Hey, you triggered a custom log entry. Good job!")
+
+	fmt.Fprintln(w, "Log sent! Check the logging section of the Cloud Console.")
+
+	return nil
+}
+
+func (b *Bookshelf) sendError(w http.ResponseWriter, r *http.Request) *appError {
+	fmt.Fprintf(w, "Logging an error. Check Error Reporting.")
+	err := errors.New("uh oh! an error occurred")
+	return b.appErrorf(r, err, "%v", err)
 }
 
 // https://blog.golang.org/error-handling-and-go
 type appHandler func(http.ResponseWriter, *http.Request) *appError
 
 type appError struct {
-	Error   error
-	Message string
-	Code    int
+	err     error
+	message string
+	code    int
+	req     *http.Request
+	b       *Bookshelf
 }
 
 func (fn appHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if e := fn(w, r); e != nil { // e is *appError, not os.Error.
-		log.Printf("Handler error: status code: %d, message: %s, underlying err: %#v", e.Code, e.Message, e.Error)
-		http.Error(w, e.Message, e.Code)
+		e.b.errorClient.Report(errorreporting.Entry{
+			Error: e.err,
+			Req:   r,
+		})
+		e.b.errLogger.Printf("Handler error: status code: %d, message: %s, underlying err: %#v", e.code, e.message, e.err)
+		http.Error(w, e.message, e.code)
 	}
 }
 
-func appErrorf(err error, format string, v ...interface{}) *appError {
+func (b *Bookshelf) appErrorf(r *http.Request, err error, format string, v ...interface{}) *appError {
 	return &appError{
-		Error:   err,
-		Message: fmt.Sprintf(format, v...),
-		Code:    500,
+		err:     err,
+		message: fmt.Sprintf(format, v...),
+		code:    500,
+		req:     r,
+		b:       b,
 	}
 }
