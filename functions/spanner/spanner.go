@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"sync"
 
 	"cloud.google.com/go/spanner"
 	"google.golang.org/api/iterator"
@@ -30,13 +31,14 @@ import (
 // client is a global Spanner client, to avoid initializing a new client for
 // every request.
 var client *spanner.Client
+var clientOnce sync.Once
 
 // db is the name of the database to query.
 var db = "projects/my-project/instances/my-instance/databases/example-db"
 
 // HelloSpanner is an example of querying Spanner from a Cloud Function.
 func HelloSpanner(w http.ResponseWriter, r *http.Request) {
-	if client == nil {
+	clientOnce.Do(func() {
 		// Declare a separate err variable to avoid shadowing client.
 		var err error
 		client, err = spanner.NewClient(context.Background(), db)
@@ -45,7 +47,7 @@ func HelloSpanner(w http.ResponseWriter, r *http.Request) {
 			log.Printf("spanner.NewClient: %v", err)
 			return
 		}
-	}
+	})
 
 	fmt.Fprintln(w, "Albums:")
 	stmt := spanner.Statement{SQL: `SELECT SingerId, AlbumId, AlbumTitle FROM Albums`}
