@@ -50,9 +50,6 @@ type BookDatabase interface {
 
 	// UpdateBook updates the entry for a given book.
 	UpdateBook(ctx context.Context, b *Book) error
-
-	// Close closes the database, freeing up any available resources.
-	Close(ctx context.Context) error
 }
 
 // Bookshelf holds a BookDatabase and storage info.

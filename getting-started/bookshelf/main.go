@@ -201,11 +201,11 @@ func (b *Bookshelf) uploadFileFromForm(ctx context.Context, r *http.Request) (ur
 	}
 
 	if b.StorageBucket == nil {
-		return "", errors.New("storage bucket is missing: check config.go")
+		return "", errors.New("storage bucket is missing: check bookshelf.go")
 	}
 	if _, err := b.StorageBucket.Attrs(ctx); err != nil {
 		if err == storage.ErrBucketNotExist {
-			return "", fmt.Errorf("bucket %q does not exist: check config.go", b.StorageBucketName)
+			return "", fmt.Errorf("bucket %q does not exist: check bookshelf.go", b.StorageBucketName)
 		}
 		return "", fmt.Errorf("could not get bucket: %v", err)
 	}

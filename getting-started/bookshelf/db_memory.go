@@ -39,16 +39,6 @@ func newMemoryDB() *memoryDB {
 	}
 }
 
-// Close closes the database.
-func (db *memoryDB) Close(context.Context) error {
-	db.mu.Lock()
-	defer db.mu.Unlock()
-
-	db.books = nil
-
-	return nil
-}
-
 // GetBook retrieves a book by its ID.
 func (db *memoryDB) GetBook(_ context.Context, id string) (*Book, error) {
 	db.mu.Lock()
