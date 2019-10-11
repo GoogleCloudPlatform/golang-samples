@@ -21,11 +21,10 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"time"
-
-	"google.golang.org/appengine"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -50,7 +49,15 @@ func main() {
 	}
 
 	http.HandleFunc("/", handle)
-	appengine.Main()
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+		log.Printf("Defaulting to port %s", port)
+	}
+
+	log.Printf("Listening on port %s", port)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
 func createTable() error {
@@ -95,9 +102,34 @@ type visit struct {
 	userIP    string
 }
 
-func recordVisit(timestamp int64, userIP string) error {
+func maskIP(addr string) (string, error) {
+	// Discard the port portion of the address.
+	userIP, _, err := net.SplitHostPort(addr)
+	if err != nil {
+		return "", err
+	}
+
+	// Parse the IP and mask a portion of it.
+	ip := net.ParseIP(userIP)
+	if ip.To4() != nil {
+		ipV4Mask := net.CIDRMask(16, 32)
+		ip = ip.Mask(ipV4Mask)
+	} else {
+		ipv6Mask := net.CIDRMask(32, 128)
+		ip = ip.Mask(ipv6Mask)
+	}
+	return ip.String(), nil
+}
+
+// recordVisit records the masked IP of the visit.
+func recordVisit(timestamp int64, addr string) error {
+	userIP, err := maskIP(addr)
+	if err != nil {
+		return err
+	}
+	// Insert the visit into the table.
 	stmt := "INSERT INTO visits (timestamp, userip) VALUES (?, ?)"
-	_, err := db.Exec(stmt, timestamp, userIP)
+	_, err = db.Exec(stmt, timestamp, userIP)
 	return err
 }
 
