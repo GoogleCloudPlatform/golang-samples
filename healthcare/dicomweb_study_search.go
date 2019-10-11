@@ -19,17 +19,18 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"io/ioutil"
 
 	healthcare "google.golang.org/api/healthcare/v1beta1"
 )
 
-// Create a struct to append the query parameter because the library does not currently
-// natively support this.
-type queryParam struct {
+// queryParamOpt is a googleapi.Option (https://godoc.org/google.golang.org/api/googleapi#CallOption)
+// that adds query parameters to an API call.
+type queryParamOpt struct {
 	key, value string
 }
 
-func (qp queryParam) Get() (string, string) { return qp.key, qp.value }
+func (qp queryParamOpt) Get() (string, string) { return qp.key, qp.value }
 
 // dicomWebSearchStudies refines a DICOMweb studies search by appending DICOM tags to the request.
 func dicomWebSearchStudies(w io.Writer, projectID, location, datasetID, dicomStoreID, dicomWebPath string) error {
@@ -53,12 +54,24 @@ func dicomWebSearchStudies(w io.Writer, projectID, location, datasetID, dicomSto
 	// Refine your search by appending DICOM tags to the
 	// request in the form of query parameters. This sample
 	// searches for studies containing a patient's name.
-	resp, err := call.Do(queryParam{"PatientName", "Sally Zhang"})
+	patientName := queryParamOpt{key: "PatientName", value: "Sally Zhang"}
+	resp, err := call.Do(patientName)
 	if err != nil {
 		return fmt.Errorf("Get: %v", err)
 	}
 
-	fmt.Fprintf(w, "Found studies: %+v\n", resp)
+	defer resp.Body.Close()
+
+	respBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("ioutil.ReadAll: %v", err)
+	}
+
+	if resp.StatusCode > 299 {
+		return fmt.Errorf("SearchForStudies: status %d %s: %s", resp.StatusCode, resp.Status, respBytes)
+	}
+	respString := string(respBytes)
+	fmt.Fprintf(w, "Found studies: %s\n", respString)
 
 	return nil
 }
