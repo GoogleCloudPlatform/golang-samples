@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START healthcare_search_studies]
+// [START healthcare_dicomweb_search_studies]
 import (
 	"context"
 	"fmt"
@@ -76,4 +76,4 @@ func dicomWebSearchStudies(w io.Writer, projectID, location, datasetID, dicomSto
 	return nil
 }
 
-// [END healthcare_search_studies]
+// [END healthcare_dicomweb_search_studies]
