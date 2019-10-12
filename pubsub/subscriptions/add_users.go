@@ -26,7 +26,7 @@ import (
 // addUsers adds all IAM users to a subscription.
 func addUsers(projectID, subName string) error {
 	// projectID := "my-project-id"
-	// subName := projectID + "-example-sub"
+	// subName := "my-sub" // subscription id
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {

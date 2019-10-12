@@ -40,8 +40,8 @@ func setup(t *testing.T) *pubsub.Client {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 
-	topicName = tc.ProjectID + "-test-sub-topic"
-	subName = tc.ProjectID + "-test-sub"
+	topicName = "test-sub-topic"
+	subName = "test-sub"
 	var err error
 	client, err := pubsub.NewClient(ctx, tc.ProjectID)
 	if err != nil {
