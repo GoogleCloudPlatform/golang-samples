@@ -28,7 +28,7 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-var topicName string
+var topicID string
 
 // once guards cleanup related operations in setup. No need to set up and tear
 // down every time, so this speeds things up.
@@ -38,7 +38,7 @@ func setup(t *testing.T) *pubsub.Client {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 
-	topicName = tc.ProjectID + "-test-topic"
+	topicID = "test-topic"
 	var err error
 	client, err := pubsub.NewClient(ctx, tc.ProjectID)
 	if err != nil {
@@ -47,14 +47,14 @@ func setup(t *testing.T) *pubsub.Client {
 
 	// Cleanup resources from the previous tests.
 	once.Do(func() {
-		topic := client.Topic(topicName)
+		topic := client.Topic(topicID)
 		ok, err := topic.Exists(ctx)
 		if err != nil {
 			t.Fatalf("failed to check if topic exists: %v", err)
 		}
 		if ok {
 			if err := topic.Delete(ctx); err != nil {
-				t.Fatalf("failed to cleanup the topic (%q): %v", topicName, err)
+				t.Fatalf("failed to cleanup the topic (%q): %v", topicID, err)
 			}
 		}
 	})
@@ -66,15 +66,15 @@ func TestCreate(t *testing.T) {
 	client := setup(t)
 	tc := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
-	if err := create(buf, tc.ProjectID, topicName); err != nil {
+	if err := create(buf, tc.ProjectID, topicID); err != nil {
 		t.Fatalf("failed to create a topic: %v", err)
 	}
-	ok, err := client.Topic(topicName).Exists(context.Background())
+	ok, err := client.Topic(topicID).Exists(context.Background())
 	if err != nil {
 		t.Fatalf("failed to check if topic exists: %v", err)
 	}
 	if !ok {
-		t.Fatalf("got none; want topic = %q", topicName)
+		t.Fatalf("got none; want topic = %q", topicID)
 	}
 }
 
@@ -88,16 +88,16 @@ func TestList(t *testing.T) {
 		}
 
 		for _, t := range topics {
-			if t.ID() == topicName {
+			if t.ID() == topicID {
 				return // PASS
 			}
 		}
 
-		topicNames := make([]string, len(topics))
+		topicIDs := make([]string, len(topics))
 		for i, t := range topics {
-			topicNames[i] = t.ID()
+			topicIDs[i] = t.ID()
 		}
-		r.Errorf("got %+v; want a list with topic = %q", topicNames, topicName)
+		r.Errorf("got %+v; want a list with topic = %q", topicIDs, topicID)
 	})
 }
 
@@ -107,9 +107,9 @@ func TestPublish(t *testing.T) {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 	client := setup(t)
-	client.CreateTopic(ctx, topicName)
+	client.CreateTopic(ctx, topicID)
 	buf := new(bytes.Buffer)
-	if err := publish(buf, tc.ProjectID, topicName, "hello world"); err != nil {
+	if err := publish(buf, tc.ProjectID, topicID, "hello world"); err != nil {
 		t.Errorf("failed to publish message: %v", err)
 	}
 }
@@ -119,9 +119,9 @@ func TestPublishThatScales(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	setup(t)
 	client := setup(t)
-	client.CreateTopic(ctx, topicName)
+	client.CreateTopic(ctx, topicID)
 	buf := new(bytes.Buffer)
-	if err := publishThatScales(buf, tc.ProjectID, topicName, 10); err != nil {
+	if err := publishThatScales(buf, tc.ProjectID, topicID, 10); err != nil {
 		t.Errorf("failed to publish message: %v", err)
 	}
 }
@@ -131,9 +131,9 @@ func TestPublishCustomAttributes(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	setup(t)
 	client := setup(t)
-	client.CreateTopic(ctx, topicName)
+	client.CreateTopic(ctx, topicID)
 	buf := new(bytes.Buffer)
-	if err := publishCustomAttributes(buf, tc.ProjectID, topicName); err != nil {
+	if err := publishCustomAttributes(buf, tc.ProjectID, topicID); err != nil {
 		t.Errorf("failed to publish message: %v", err)
 	}
 }
@@ -142,11 +142,11 @@ func TestIAM(t *testing.T) {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 	client := setup(t)
-	client.CreateTopic(ctx, topicName)
+	client.CreateTopic(ctx, topicID)
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
-		perms, err := testPermissions(buf, tc.ProjectID, topicName)
+		perms, err := testPermissions(buf, tc.ProjectID, topicID)
 		if err != nil {
 			r.Errorf("testPermissions: %v", err)
 		}
@@ -156,14 +156,14 @@ func TestIAM(t *testing.T) {
 	})
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-		if err := addUsers(tc.ProjectID, topicName); err != nil {
+		if err := addUsers(tc.ProjectID, topicID); err != nil {
 			r.Errorf("addUsers: %v", err)
 		}
 	})
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
-		policy, err := policy(buf, tc.ProjectID, topicName)
+		policy, err := policy(buf, tc.ProjectID, topicID)
 		if err != nil {
 			r.Errorf("policy: %v", err)
 		}
@@ -181,27 +181,27 @@ func TestDelete(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	client := setup(t)
 
-	topic := client.Topic(topicName)
+	topic := client.Topic(topicID)
 	ok, err := topic.Exists(ctx)
 	if err != nil {
 		t.Fatalf("failed to check if topic exists: %v", err)
 	}
 	if !ok {
-		_, err := client.CreateTopic(ctx, topicName)
+		_, err := client.CreateTopic(ctx, topicID)
 		if err != nil {
 			t.Fatalf("CreateTopic: %v", err)
 		}
 	}
 
 	buf := new(bytes.Buffer)
-	if err := delete(buf, tc.ProjectID, topicName); err != nil {
-		t.Fatalf("failed to delete topic (%q): %v", topicName, err)
+	if err := delete(buf, tc.ProjectID, topicID); err != nil {
+		t.Fatalf("failed to delete topic (%q): %v", topicID, err)
 	}
-	ok, err = client.Topic(topicName).Exists(context.Background())
+	ok, err = client.Topic(topicID).Exists(context.Background())
 	if err != nil {
 		t.Fatalf("failed to check if topic exists: %v", err)
 	}
 	if ok {
-		t.Fatalf("got topic = %q; want none", topicName)
+		t.Fatalf("got topic = %q; want none", topicID)
 	}
 }
