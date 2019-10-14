@@ -30,6 +30,7 @@ import (
 // the metadata of the DICOM file and make up the DicomWebPath
 // in the requests to retrieve studies/instances/frames/rendered.
 const (
+	studyPath          = "studies"
 	studyUID           = "studies/1.3.6.1.4.1.11129.5.5.111396399361969898205364400549799252857604/"
 	seriesUID          = "series/1.3.6.1.4.1.11129.5.5.195628213694300498946760767481291263511724/"
 	instanceUID        = "instances/1.3.6.1.4.1.11129.5.5.153751009835107614666834563294684339746480/"
@@ -82,7 +83,7 @@ func TestDICOMStore(t *testing.T) {
 			r.Errorf("getDICOMStore got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, dicomStoreName) {
-			r.Errorf("listDICOMStores got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, dicomStoreName)
+			r.Errorf("getDICOMStores got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, dicomStoreName)
 		}
 	})
 
@@ -152,6 +153,12 @@ func TestDICOMStore(t *testing.T) {
 		}
 
 		os.Remove(instanceOutputFile)
+	})
+
+	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
+		if err := dicomWebSearchStudies(ioutil.Discard, tc.ProjectID, location, datasetID, dicomStoreID, studyPath); err != nil {
+			r.Errorf("dicomWebSearchStudies got err: %v", err)
+		}
 	})
 
 	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
