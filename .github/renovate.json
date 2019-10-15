@@ -8,7 +8,7 @@
   "commitMessagePrefix": "all: ",
   "packageRules": [
     {
-      "packagePatterns": ["^cloud.google.com/go", "^google.golang.org", ],
+      "packagePatterns": ["^cloud.google.com/go", "^google.golang.org"],
       "groupName": "Google Cloud packages"
     }
   ]
