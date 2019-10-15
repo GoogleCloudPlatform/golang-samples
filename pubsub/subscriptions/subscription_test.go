@@ -31,6 +31,8 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
+var topics []string
+var subs []string
 var topicName string
 var subName string
 
@@ -44,7 +46,6 @@ func setup(t *testing.T) *pubsub.Client {
 
 	topicName = tc.ProjectID + "-test-sub-topic"
 	subName = tc.ProjectID + "-test-sub"
-	var err error
 	client, err := pubsub.NewClient(ctx, tc.ProjectID)
 	if err != nil {
 		t.Fatalf("failed to create client: %v", err)
@@ -52,24 +53,31 @@ func setup(t *testing.T) *pubsub.Client {
 
 	// Cleanup resources from the previous tests.
 	once.Do(func() {
-		topic := client.Topic(topicName)
-		ok, err := topic.Exists(ctx)
-		if err != nil {
-			t.Fatalf("failed to check if topic exists: %v", err)
-		}
-		if ok {
-			if err := topic.Delete(ctx); err != nil {
-				t.Fatalf("failed to cleanup the topic (%q): %v", topicName, err)
+		topics = append(topics, topicName, topicName+"-sync", topicName+"-concurrency")
+		subs = append(subs, subName, subName+"-sync", subName+"-concurrency")
+		for _, topicName := range topics {
+			topic := client.Topic(topicName)
+			ok, err := topic.Exists(ctx)
+			if err != nil {
+				t.Fatalf("failed to check if topic exists: %v", err)
+			}
+			if ok {
+				if err := topic.Delete(ctx); err != nil {
+					t.Fatalf("failed to cleanup the topic (%q): %v", topicName, err)
+				}
 			}
 		}
-		sub := client.Subscription(subName)
-		ok, err = sub.Exists(ctx)
-		if err != nil {
-			t.Fatalf("failed to check if subscription exists: %v", err)
-		}
-		if ok {
-			if err := sub.Delete(ctx); err != nil {
-				t.Fatalf("failed to cleanup the subscription (%q): %v", subName, err)
+
+		for _, subName := range subs {
+			sub := client.Subscription(subName)
+			ok, err := sub.Exists(ctx)
+			if err != nil {
+				t.Fatalf("failed to check if subscription exists: %v", err)
+			}
+			if ok {
+				if err := sub.Delete(ctx); err != nil {
+					t.Fatalf("failed to cleanup the subscription (%q): %v", subName, err)
+				}
 			}
 		}
 	})
@@ -157,49 +165,6 @@ func TestIAM(t *testing.T) {
 	})
 }
 
-func TestPullMsgsSync(t *testing.T) {
-	ctx := context.Background()
-	tc := testutil.SystemTest(t)
-	client := setup(t)
-
-	topic := client.Topic(topicName)
-
-	// Publish 5 messages on the topic.
-	const numMsgs = 5
-	publishMsgs(ctx, topic, numMsgs)
-
-	buf := new(bytes.Buffer)
-	err := pullMsgsSync(buf, tc.ProjectID, subName, topic)
-	if err != nil {
-		t.Fatalf("failed to pull messages: %v", err)
-	}
-	// Check for number of newlines, which should correspond with number of messages.
-	if got := strings.Count(buf.String(), "\n"); got != numMsgs {
-		t.Fatalf("pullMsgsSync got %d messages, want %d", got, numMsgs)
-	}
-}
-
-func TestPullMsgsConcurrencyControl(t *testing.T) {
-	ctx := context.Background()
-	tc := testutil.SystemTest(t)
-	client := setup(t)
-
-	topic := client.Topic(topicName)
-
-	// Publish 5 message to test with.
-	const numMsgs = 5
-	publishMsgs(ctx, topic, 5)
-
-	buf := new(bytes.Buffer)
-	if err := pullMsgsConcurrenyControl(buf, tc.ProjectID, subName); err != nil {
-		t.Fatalf("failed to pull messages: %v", err)
-	}
-	// Check for number of newlines, which should correspond with number of messages.
-	if got := strings.Count(buf.String(), "\n"); got != numMsgs {
-		t.Fatalf("pullMsgsSync got %d messages, want %d", got, numMsgs)
-	}
-}
-
 func TestDelete(t *testing.T) {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
@@ -237,11 +202,72 @@ func TestDelete(t *testing.T) {
 	}
 }
 
+func TestPullMsgsSync(t *testing.T) {
+	client := setup(t)
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	topic, err := client.CreateTopic(ctx, topics[1])
+	if err != nil {
+		t.Fatalf("CreateTopic: %v", err)
+	}
+
+	_, err = client.CreateSubscription(ctx, subs[1], pubsub.SubscriptionConfig{
+		Topic: topic,
+	})
+	if err != nil {
+		t.Fatalf("CreateSubscription: %v", err)
+	}
+
+	// Publish 5 messages on the topic.
+	const numMsgs = 5
+	publishMsgs(ctx, topic, numMsgs)
+
+	buf := new(bytes.Buffer)
+	err = pullMsgsSync(buf, tc.ProjectID, subs[1], topic)
+	if err != nil {
+		t.Fatalf("failed to pull messages: %v", err)
+	}
+	// Check for number of newlines, which should correspond with number of messages.
+	if got := strings.Count(buf.String(), "\n"); got != numMsgs {
+		t.Fatalf("pullMsgsSync got %d messages, want %d", got, numMsgs)
+	}
+}
+
+func TestPullMsgsConcurrencyControl(t *testing.T) {
+	client := setup(t)
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+
+	topic, err := client.CreateTopic(ctx, topics[2])
+	if err != nil {
+		t.Fatalf("CreateTopic: %v", err)
+	}
+
+	_, err = client.CreateSubscription(ctx, subs[2], pubsub.SubscriptionConfig{
+		Topic: topic,
+	})
+	if err != nil {
+		t.Fatalf("CreateSubscription: %v", err)
+	}
+
+	// Publish 5 message to test with.
+	const numMsgs = 5
+	publishMsgs(ctx, topic, 5)
+
+	buf := new(bytes.Buffer)
+	if err := pullMsgsConcurrenyControl(buf, tc.ProjectID, subs[2]); err != nil {
+		t.Fatalf("failed to pull messages: %v", err)
+	}
+	// Check for number of newlines, which should correspond with number of messages.
+	if got := strings.Count(buf.String(), "\n"); got != numMsgs {
+		t.Fatalf("pullMsgsConcurrencyControl got %d messages, want %d", got, numMsgs)
+	}
+}
 func publishMsgs(ctx context.Context, t *pubsub.Topic, numMsgs int) error {
 	var results []*pubsub.PublishResult
 	for i := 0; i < numMsgs; i++ {
 		res := t.Publish(ctx, &pubsub.Message{
-			Data: []byte(fmt.Sprintf("hello world #%d", i)),
+			Data: []byte(fmt.Sprintf("message#%d", i)),
 		})
 		results = append(results, res)
 	}

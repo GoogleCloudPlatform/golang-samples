@@ -51,9 +51,10 @@ require (
 	golang.org/x/exp v0.0.0-20190829153037-c13cbed26979
 	golang.org/x/net v0.0.0-20190827160401-ba9fcec4b297
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
+	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e // indirect
 	golang.org/x/sys v0.0.0-20190904154756-749cb33beabd // indirect
 	golang.org/x/text v0.3.2
-	golang.org/x/tools v0.0.0-20190905155444-2a03e9e3a71a // indirect
+	golang.org/x/tools v0.0.0-20191015150414-f936694f27bf // indirect
 	google.golang.org/api v0.9.0
 	google.golang.org/appengine v1.6.2
 	google.golang.org/genproto v0.0.0-20190905072037-92dd089d5514

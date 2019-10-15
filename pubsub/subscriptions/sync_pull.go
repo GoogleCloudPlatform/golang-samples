@@ -21,6 +21,9 @@ import (
 	"io"
 	"time"
 
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+
 	"cloud.google.com/go/pubsub"
 )
 
@@ -53,7 +56,7 @@ func pullMsgsSync(w io.Writer, projectID, subName string, topic *pubsub.Topic) e
 		_ = msg // TODO: handle message.
 		msg.Ack()
 	})
-	if err != nil && err == context.Canceled {
+	if err != nil && status.Code(err) != codes.Canceled {
 		return fmt.Errorf("Receive: %v", err)
 	}
 	return nil
