@@ -33,8 +33,8 @@ import (
 
 var topics []string
 var subs []string
-var topicName string
-var subName string
+var topicID string
+var subID string
 
 // once guards cleanup related operations in setup. No need to set up and tear
 // down every time, so this speeds things up.
@@ -44,8 +44,8 @@ func setup(t *testing.T) *pubsub.Client {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 
-	topicName = tc.ProjectID + "-test-sub-topic"
-	subName = tc.ProjectID + "-test-sub"
+	topicID = tc.ProjectID + "-test-sub-topic"
+	subID = tc.ProjectID + "-test-sub"
 	client, err := pubsub.NewClient(ctx, tc.ProjectID)
 	if err != nil {
 		t.Fatalf("failed to create client: %v", err)
@@ -53,8 +53,8 @@ func setup(t *testing.T) *pubsub.Client {
 
 	// Cleanup resources from the previous tests.
 	once.Do(func() {
-		topics = append(topics, topicName, topicName+"-sync", topicName+"-concurrency")
-		subs = append(subs, subName, subName+"-sync", subName+"-concurrency")
+		topics = append(topics, topicID, topicID+"-sync", topicID+"-concurrency")
+		subs = append(subs, subID, subID+"-sync", subID+"-concurrency")
 		for _, topicName := range topics {
 			topic := client.Topic(topicName)
 			ok, err := topic.Exists(ctx)
@@ -198,7 +198,7 @@ func TestDelete(t *testing.T) {
 		t.Fatalf("failed to check if sub exists: %v", err)
 	}
 	if ok {
-		t.Fatalf("sub = %q; want none", subName)
+		t.Fatalf("sub = %q; want none", subID)
 	}
 }
 
