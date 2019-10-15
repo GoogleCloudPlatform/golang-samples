@@ -1,0 +1,15 @@
+{
+  "extends": [
+    "config:base",
+    "schedule:weekly"
+  ],
+  "semanticCommits": false,
+  "postUpdateOptions": ["gomodTidy"],
+  "commitMessagePrefix": "all: ",
+  "packageRules": [
+    {
+      "packagePatterns": ["^cloud.google.com/go", "^google.golang.org", ],
+      "groupName": "Google Cloud packages"
+    }
+  ]
+}
