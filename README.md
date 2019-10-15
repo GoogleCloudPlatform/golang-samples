@@ -9,7 +9,14 @@ Some samples have accompanying guides on
 [cloud.google.com](https://cloud.google.com). See respective README files for
 details.
 
-## Contributing changes.
+## Depending on samples
+
+**Copy any code you need from this repository into your own project.**
+
+Warning: Do not depend directly on the samples in this repo. Breaking changes
+may be made at any time without warning.
+
+## Contributing changes
 
 Entirely new samples are not accepted. Bug fixes are welcome, either as pull
 requests or as GitHub issues.

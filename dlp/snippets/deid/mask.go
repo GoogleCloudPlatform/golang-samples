@@ -26,10 +26,10 @@ import (
 
 // mask deidentifies the input by masking all provided info types with maskingCharacter
 // and prints the result to w.
-func mask(w io.Writer, projectID, input string, infoTypes []string, maskingCharacter string, numberToMask int32) error {
+func mask(w io.Writer, projectID, input string, infoTypeNames []string, maskingCharacter string, numberToMask int32) error {
 	// projectID := "my-project-id"
 	// input := "My SSN is 111222333"
-	// infoTypes := []string{"US_SOCIAL_SECURITY_NUMBER"}
+	// infoTypeNames := []string{"US_SOCIAL_SECURITY_NUMBER"}
 	// maskingCharacter := "+"
 	// numberToMask := 6
 	// Will print "My SSN is ++++++333"
@@ -40,15 +40,15 @@ func mask(w io.Writer, projectID, input string, infoTypes []string, maskingChara
 		return fmt.Errorf("dlp.NewClient: %v", err)
 	}
 	// Convert the info type strings to a list of InfoTypes.
-	var i []*dlppb.InfoType
-	for _, it := range infoTypes {
-		i = append(i, &dlppb.InfoType{Name: it})
+	var infoTypes []*dlppb.InfoType
+	for _, it := range infoTypeNames {
+		infoTypes = append(infoTypes, &dlppb.InfoType{Name: it})
 	}
 	// Create a configured request.
 	req := &dlppb.DeidentifyContentRequest{
 		Parent: "projects/" + projectID,
 		InspectConfig: &dlppb.InspectConfig{
-			InfoTypes: i,
+			InfoTypes: infoTypes,
 		},
 		DeidentifyConfig: &dlppb.DeidentifyConfig{
 			Transformation: &dlppb.DeidentifyConfig_InfoTypeTransformations{

@@ -1,5 +1,19 @@
 #!/bin/bash
 
+# Copyright 2019 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 set -e
 
 export GO111MODULE=on # Always use modules.
@@ -16,7 +30,6 @@ TIMEOUT=45m
 # Set application credentials before using gimmeproj so it has access.
 # This is changed to a project-specific credential after a project is leased.
 export GOOGLE_APPLICATION_CREDENTIALS=$KOKORO_KEYSTORE_DIR/71386_kokoro-golang-samples-tests
-curl https://storage.googleapis.com/gimme-proj/linux_amd64/gimmeproj > /bin/gimmeproj && chmod +x /bin/gimmeproj;
 gimmeproj version;
 export GOLANG_SAMPLES_PROJECT_ID=$(gimmeproj -project golang-samples-tests lease $TIMEOUT);
 if [ -z "$GOLANG_SAMPLES_PROJECT_ID" ]; then
@@ -75,23 +88,6 @@ else
   echo "Running tests in modified directories: $TARGET"
 fi
 
-# Download imports (pre Go 1.11). Go 1.11+ uses modules.
-# TODO: remove this block once we cease support for Go 1.10.
-if ! go help mod 2>/dev/null >/dev/null; then
-  GO_IMPORTS=$(go list -f '{{join .Imports "\n"}}{{"\n"}}{{join .TestImports "\n"}}' $TARGET | \
-    sort | uniq | \
-    sed 's:github.com/mailgun/mailgun-go/v3:github.com/mailgun/mailgun-go:g' | \
-    grep -v golang-samples | \
-    grep '\.')
-  time go get -u -v -d $GO_IMPORTS
-  # Always download top-level and internal dependencies.
-  go get -t ./internal/...
-  go get -t -d .
-  go install -v $GO_IMPORTS
-fi
-
-go get github.com/jstemmer/go-junit-report
-
 # Do the easy stuff before running tests. Fail fast!
 if [ $GOLANG_SAMPLES_GO_VET ]; then
   diff -u <(echo -n) <(gofmt -d -s .)
@@ -106,8 +102,6 @@ OUTFILE=gotest.out
 # Clear the cache so Kokoro doesn't try to copy it.
 # Must happen before calling go-junit-report since it can cause a non-zero exit
 # code, stopping execution.
-if go help mod 2>/dev/null >/dev/null; then
-  go clean -modcache
-fi
+go clean -modcache
 
-cat $OUTFILE | $GOPATH/bin/go-junit-report -set-exit-code > sponge_log.xml
+cat $OUTFILE | /go/bin/go-junit-report -set-exit-code > sponge_log.xml

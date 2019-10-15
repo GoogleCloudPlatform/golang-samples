@@ -89,20 +89,20 @@ func TestCreate(t *testing.T) {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 	client := setup(t)
-	topic, err := client.CreateTopic(ctx, topicName)
+	topic, err := client.CreateTopic(ctx, topicID)
 	if err != nil {
 		t.Fatalf("CreateTopic: %v", err)
 	}
 	buf := new(bytes.Buffer)
-	if err := create(buf, tc.ProjectID, subName, topic); err != nil {
+	if err := create(buf, tc.ProjectID, subID, topic); err != nil {
 		t.Fatalf("failed to create a subscription: %v", err)
 	}
-	ok, err := client.Subscription(subName).Exists(context.Background())
+	ok, err := client.Subscription(subID).Exists(context.Background())
 	if err != nil {
 		t.Fatalf("failed to check if sub exists: %v", err)
 	}
 	if !ok {
-		t.Fatalf("got none; want sub = %q", subName)
+		t.Fatalf("got none; want sub = %q", subID)
 	}
 }
 
@@ -117,16 +117,16 @@ func TestList(t *testing.T) {
 		}
 
 		for _, sub := range subs {
-			if sub.ID() == subName {
+			if sub.ID() == subID {
 				return // PASS
 			}
 		}
 
-		subNames := make([]string, len(subs))
+		subIDs := make([]string, len(subs))
 		for i, sub := range subs {
-			subNames[i] = sub.ID()
+			subIDs[i] = sub.ID()
 		}
-		r.Errorf("got %+v; want a list with subscription %q", subNames, subName)
+		r.Errorf("got %+v; want a list with subscription %q", subIDs, subID)
 	})
 }
 
@@ -135,7 +135,7 @@ func TestIAM(t *testing.T) {
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
-		perms, err := testPermissions(buf, tc.ProjectID, subName)
+		perms, err := testPermissions(buf, tc.ProjectID, subID)
 		if err != nil {
 			r.Errorf("testPermissions: %v", err)
 		}
@@ -145,14 +145,14 @@ func TestIAM(t *testing.T) {
 	})
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-		if err := addUsers(tc.ProjectID, subName); err != nil {
+		if err := addUsers(tc.ProjectID, subID); err != nil {
 			r.Errorf("addUsers: %v", err)
 		}
 	})
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
-		policy, err := policy(buf, tc.ProjectID, subName)
+		policy, err := policy(buf, tc.ProjectID, subID)
 		if err != nil {
 			r.Errorf("policy: %v", err)
 		}
@@ -170,17 +170,17 @@ func TestDelete(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	client := setup(t)
 
-	topic := client.Topic(topicName)
+	topic := client.Topic(topicID)
 	ok, err := topic.Exists(ctx)
 	if err != nil {
 		t.Fatalf("failed to check if topic exists: %v", err)
 	}
 	if !ok {
-		topic, err := client.CreateTopic(ctx, topicName)
+		topic, err := client.CreateTopic(ctx, topicID)
 		if err != nil {
 			t.Fatalf("CreateTopic: %v", err)
 		}
-		_, err = client.CreateSubscription(ctx, subName, pubsub.SubscriptionConfig{
+		_, err = client.CreateSubscription(ctx, subID, pubsub.SubscriptionConfig{
 			Topic:       topic,
 			AckDeadline: 20 * time.Second,
 		})
@@ -190,10 +190,10 @@ func TestDelete(t *testing.T) {
 	}
 
 	buf := new(bytes.Buffer)
-	if err := delete(buf, tc.ProjectID, subName); err != nil {
-		t.Fatalf("failed to delete subscription (%q): %v", subName, err)
+	if err := delete(buf, tc.ProjectID, subID); err != nil {
+		t.Fatalf("failed to delete subscription (%q): %v", subID, err)
 	}
-	ok, err = client.Subscription(subName).Exists(context.Background())
+	ok, err = client.Subscription(subID).Exists(context.Background())
 	if err != nil {
 		t.Fatalf("failed to check if sub exists: %v", err)
 	}
