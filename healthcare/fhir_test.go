@@ -25,6 +25,8 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
+	conditionaldelete "github.com/GoogleCloudPlatform/golang-samples/healthcare/internal/fhir-resource-conditional-delete"
+	conditionalupdate "github.com/GoogleCloudPlatform/golang-samples/healthcare/internal/fhir-resource-conditional-update"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"google.golang.org/api/iterator"
 )
@@ -169,6 +171,22 @@ func TestFHIRStore(t *testing.T) {
 
 	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
 		buf.Reset()
+		patchedRes := resource{}
+		if err := conditionalupdate.ConditionalUpdateFHIRResource(buf, tc.ProjectID, location, datasetID, fhirStoreID, resourceType, false); err != nil {
+			r.Errorf("ConditionalUpdateFHIRResource got err: %v", err)
+			return
+		}
+		if err := json.Unmarshal(buf.Bytes(), &patchedRes); err != nil {
+			r.Errorf("json.Unmarshal ConditionalUpdateFHIRResource output: %v", err)
+			return
+		}
+		if patchedRes.Active {
+			r.Errorf("ConditionalUpdateFHIRResource got active=true, expected active=false")
+		}
+	})
+
+	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
+		buf.Reset()
 		if err := fhirGetPatientEverything(buf, tc.ProjectID, location, datasetID, fhirStoreID, res.ID); err != nil {
 			r.Errorf("fhirGetPatientEverything got err: %v", err)
 		}
@@ -214,6 +232,12 @@ func TestFHIRStore(t *testing.T) {
 
 		if err := importFHIRResource(ioutil.Discard, tc.ProjectID, location, datasetID, fhirStoreID, gsURIPrefix+"**"); err != nil {
 			r.Errorf("importFHIRResource got err: %v", err)
+		}
+	})
+
+	testutil.Retry(t, 1, 2*time.Second, func(r *testutil.R) {
+		if err := conditionaldelete.ConditionalDeleteFHIRResource(ioutil.Discard, tc.ProjectID, location, datasetID, fhirStoreID, resourceType); err != nil {
+			r.Errorf("ConditionalDeleteFHIRResource got err: %v", err)
 		}
 	})
 
