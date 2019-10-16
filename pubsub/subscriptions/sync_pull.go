@@ -53,7 +53,6 @@ func pullMsgsSync(w io.Writer, projectID, subName string, topic *pubsub.Topic) e
 	// Receive blocks until the passed in context is done.
 	err = sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
 		fmt.Fprintf(w, "Got message :%q\n", string(msg.Data))
-		_ = msg // TODO: handle message.
 		msg.Ack()
 	})
 	if err != nil && status.Code(err) != codes.Canceled {

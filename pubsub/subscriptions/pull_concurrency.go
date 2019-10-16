@@ -54,7 +54,6 @@ func pullMsgsConcurrenyControl(w io.Writer, projectID, subName string) error {
 			select {
 			case msg := <-cm:
 				fmt.Fprintf(w, "Got message :%q\n", string(msg.Data))
-				_ = msg // TODO: handle message
 				msg.Ack()
 			case <-ctx.Done():
 				return
