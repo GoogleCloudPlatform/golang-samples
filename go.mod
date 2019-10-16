@@ -11,7 +11,7 @@ require (
 	cloud.google.com/go/logging v1.0.0
 	cloud.google.com/go/pubsub v1.0.1
 	cloud.google.com/go/spanner v1.0.0
-	cloud.google.com/go/storage v1.1.0
+	cloud.google.com/go/storage v1.1.1
 	contrib.go.opencensus.io/exporter/stackdriver v0.12.7
 	firebase.google.com/go v3.9.0+incompatible
 	github.com/bmatcuk/doublestar v1.1.5
@@ -43,9 +43,9 @@ require (
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	golang.org/x/text v0.3.2
 	google.golang.org/api v0.11.0
-	google.golang.org/appengine v1.6.1
+	google.golang.org/appengine v1.6.5
 	google.golang.org/genproto v0.0.0-20191009194640-548a555dbc03
-	google.golang.org/grpc v1.22.1
+	google.golang.org/grpc v1.24.0
 	gopkg.in/linkedin/goavro.v1 v1.0.5 // indirect
 	gopkg.in/sendgrid/sendgrid-go.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.2.4
