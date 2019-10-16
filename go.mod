@@ -31,7 +31,7 @@ require (
 	github.com/gorilla/websocket v1.4.1
 	github.com/h2non/filetype v1.0.10
 	github.com/lib/pq v1.2.0
-	github.com/linkedin/goavro v2.1.0+incompatible
+	github.com/linkedin/goavro v2.9.7+incompatible
 	github.com/mailgun/mailgun-go/v3 v3.6.0
 	github.com/mailjet/mailjet-apiv3-go v0.0.0-20190724151621-55e56f74078c
 	github.com/philhofer/fwd v1.0.0 // indirect
