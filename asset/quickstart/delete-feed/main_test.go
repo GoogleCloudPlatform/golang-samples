@@ -72,7 +72,7 @@ func TestMain(t *testing.T) {
 		t.Errorf("failed to build app")
 	}
 
-	stdOut, stdErr, err := m.Run(env, 30*time.Second, fmt.Sprintf("--feed_id=%s", feedID))
+	stdOut, stdErr, err := m.Run(env, 2*time.Minute, fmt.Sprintf("--feed_id=%s", feedID))
 	if err != nil {
 		t.Errorf("execution failed: %v", err)
 	}
