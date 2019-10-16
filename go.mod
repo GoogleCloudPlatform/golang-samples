@@ -11,7 +11,7 @@ require (
 	cloud.google.com/go/logging v1.0.0
 	cloud.google.com/go/pubsub v1.0.1
 	cloud.google.com/go/spanner v1.0.0
-	cloud.google.com/go/storage v1.1.0
+	cloud.google.com/go/storage v1.1.1
 	contrib.go.opencensus.io/exporter/stackdriver v0.12.7
 	firebase.google.com/go v3.9.0+incompatible
 	github.com/bmatcuk/doublestar v1.1.5
