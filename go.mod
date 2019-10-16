@@ -23,7 +23,6 @@ require (
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/gofrs/uuid v3.2.0+incompatible
 	github.com/golang/protobuf v1.3.2
-	github.com/golang/snappy v0.0.1 // indirect
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/google/uuid v1.1.1
 	github.com/googleapis/gax-go/v2 v2.0.5
@@ -31,7 +30,7 @@ require (
 	github.com/gorilla/websocket v1.4.1
 	github.com/h2non/filetype v1.0.10
 	github.com/lib/pq v1.2.0
-	github.com/linkedin/goavro v2.1.0+incompatible
+	github.com/linkedin/goavro/v2 v2.9.7
 	github.com/mailgun/mailgun-go/v3 v3.6.0
 	github.com/mailjet/mailjet-apiv3-go v0.0.0-20190724151621-55e56f74078c
 	github.com/philhofer/fwd v1.0.0 // indirect
@@ -46,7 +45,6 @@ require (
 	google.golang.org/appengine v1.6.5
 	google.golang.org/genproto v0.0.0-20191009194640-548a555dbc03
 	google.golang.org/grpc v1.24.0
-	gopkg.in/linkedin/goavro.v1 v1.0.5 // indirect
 	gopkg.in/sendgrid/sendgrid-go.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.2.4
 )
