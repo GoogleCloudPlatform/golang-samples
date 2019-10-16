@@ -1,7 +1,6 @@
 {
   "extends": [
-    "config:base",
-    "schedule:weekly"
+    "config:base"
   ],
   "semanticCommits": false,
   "postUpdateOptions": ["gomodTidy"],
