@@ -23,11 +23,11 @@ import (
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
-// decryptRSA will attempt to decrypt a given cipherbytes with an
+// decryptRSA will attempt to decrypt a given ciphertext with an
 // 'RSA_DECRYPT_OAEP_2048_SHA256' private key stored on Cloud KMS.
-func decryptRSA(name string, cipherbytes []byte) ([]byte, error) {
+func decryptRSA(name string, ciphertext []byte) ([]byte, error) {
 	// name := "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
-	// cipherbytes, err := encryptRSA(rsaDecryptPath, []byte("Sample message"))
+	// ciphertext, err := encryptRSA(rsaDecryptPath, []byte("Sample message"))
 	// if err != nil {
 	//   return nil, fmt.Errorf("encryptRSA: %v", err)
 	// }
@@ -40,7 +40,7 @@ func decryptRSA(name string, cipherbytes []byte) ([]byte, error) {
 	// Build the request.
 	req := &kmspb.AsymmetricDecryptRequest{
 		Name:       name,
-		Ciphertext: cipherbytes,
+		Ciphertext: ciphertext,
 	}
 	// Call the API.
 	response, err := client.AsymmetricDecrypt(ctx, req)
