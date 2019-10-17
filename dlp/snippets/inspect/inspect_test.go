@@ -55,7 +55,9 @@ func TestInspectDatastore(t *testing.T) {
 		t.Run(test.kind, func(t *testing.T) {
 			t.Parallel()
 			buf := new(bytes.Buffer)
-			inspectDatastore(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName, subscriptionName, tc.ProjectID, "", test.kind)
+			if err := inspectDatastore(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName, subscriptionName, tc.ProjectID, "", test.kind); err != nil {
+				t.Errorf("inspectDatastore(%s) got err: %v", test.kind, err)
+			}
 			if got := buf.String(); !strings.Contains(got, test.want) {
 				t.Errorf("inspectDatastore(%s) = %q, want %q substring", test.kind, got, test.want)
 			}
@@ -119,7 +121,9 @@ func TestInspectGCS(t *testing.T) {
 		t.Run(test.fileName, func(t *testing.T) {
 			t.Parallel()
 			buf := new(bytes.Buffer)
-			inspectGCSFile(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName, subscriptionName, bucketName, test.fileName)
+			if err := inspectGCSFile(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName, subscriptionName, bucketName, test.fileName); err != nil {
+				t.Errorf("inspectGCSFile(%s) got err: %v", test.fileName, err)
+			}
 			if got := buf.String(); !strings.Contains(got, test.want) {
 				t.Errorf("inspectGCSFile(%s) = %q, want %q substring", test.fileName, got, test.want)
 			}
@@ -175,8 +179,8 @@ func writeObject(ctx context.Context, bucket *storage.BucketHandle, fileName, co
 func TestInspectString(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
-	err := inspectString(buf, tc.ProjectID, "I'm Gary and my email is gary@example.com")
-	if err != nil {
+
+	if err := inspectString(buf, tc.ProjectID, "I'm Gary and my email is gary@example.com"); err != nil {
 		t.Errorf("TestInspectFile: %v", err)
 	}
 
@@ -189,8 +193,8 @@ func TestInspectString(t *testing.T) {
 func TestInspectTextFile(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
-	err := inspectTextFile(buf, tc.ProjectID, "testdata/test.txt")
-	if err != nil {
+
+	if err := inspectTextFile(buf, tc.ProjectID, "testdata/test.txt"); err != nil {
 		t.Errorf("TestInspectTextFile: %v", err)
 	}
 
@@ -283,7 +287,9 @@ func TestInspectBigquery(t *testing.T) {
 		t.Run(test.table, func(t *testing.T) {
 			t.Parallel()
 			buf := new(bytes.Buffer)
-			inspectBigquery(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName, subscriptionName, tc.ProjectID, bqDatasetID, test.table)
+			if err := inspectBigquery(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName, subscriptionName, tc.ProjectID, bqDatasetID, test.table); err != nil {
+				t.Errorf("inspectBigquery(%s) got err: %v", test.table, err)
+			}
 			if got := buf.String(); !strings.Contains(got, test.want) {
 				t.Errorf("inspectBigquery(%s) = %q, want %q substring", test.table, got, test.want)
 			}
