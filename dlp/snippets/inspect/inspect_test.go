@@ -36,6 +36,8 @@ const (
 )
 
 func TestInspectDatastore(t *testing.T) {
+	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/1039")
+
 	tc := testutil.EndToEndTest(t)
 	writeTestDatastoreFiles(t, tc.ProjectID)
 	tests := []struct {
@@ -102,6 +104,8 @@ func writeTestDatastoreFiles(t *testing.T, projectID string) {
 }
 
 func TestInspectGCS(t *testing.T) {
+	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/1039")
+
 	tc := testutil.SystemTest(t)
 	writeTestGCSFiles(t, tc.ProjectID)
 	tests := []struct {
@@ -266,6 +270,8 @@ func uploadBigQuery(ctx context.Context, d *bigquery.Dataset, schema bigquery.Sc
 }
 
 func TestInspectBigquery(t *testing.T) {
+	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/1039")
+
 	tc := testutil.EndToEndTest(t)
 
 	mustCreateBigqueryTestFiles(t, tc.ProjectID, bqDatasetID)
