@@ -46,7 +46,7 @@ func testDB(t *testing.T, db BookDatabase) {
 		t.Error(err)
 	}
 
-	gotBook, err := db.GetBook(ctx, id)
+	gotBook, err := db.Book(ctx, id)
 	if err != nil {
 		t.Error(err)
 	}
@@ -58,7 +58,7 @@ func testDB(t *testing.T, db BookDatabase) {
 		t.Error(err)
 	}
 
-	if _, err := db.GetBook(ctx, id); err == nil {
+	if _, err := db.Book(ctx, id); err == nil {
 		t.Error("want non-nil err")
 	}
 }

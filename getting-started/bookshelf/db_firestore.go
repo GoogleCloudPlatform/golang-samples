@@ -52,8 +52,13 @@ func newFirestoreDB(client *firestore.Client) (*firestoreDB, error) {
 	}, nil
 }
 
-// GetBook retrieves a book by its ID.
-func (db *firestoreDB) GetBook(ctx context.Context, id string) (*Book, error) {
+// Close closes the database.
+func (db *firestoreDB) Close(context.Context) error {
+	return db.client.Close()
+}
+
+// Book retrieves a book by its ID.
+func (db *firestoreDB) Book(ctx context.Context, id string) (*Book, error) {
 	ds, err := db.client.Collection("books").Doc(id).Get(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("firestoredb: Get: %v", err)

@@ -131,7 +131,7 @@ func (b *Bookshelf) bookFromRequest(r *http.Request) (*Book, error) {
 	if id == "" {
 		return nil, errors.New("no book with empty ID")
 	}
-	book, err := b.DB.GetBook(ctx, id)
+	book, err := b.DB.Book(ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("could not find book: %v", err)
 	}
@@ -284,13 +284,13 @@ func (b *Bookshelf) deleteHandler(w http.ResponseWriter, r *http.Request) *appEr
 func (b *Bookshelf) sendLog(w http.ResponseWriter, r *http.Request) *appError {
 	b.logger.Println("Hey, you triggered a custom log entry. Good job!")
 
-	fmt.Fprintln(w, "Log sent! Check the logging section of the Cloud Console.")
+	fmt.Fprintln(w, `<html>Log sent! Check the <a href="http://console.cloud.google.com/logs">logging section of the Cloud Console</a>.</html>`)
 
 	return nil
 }
 
 func (b *Bookshelf) sendError(w http.ResponseWriter, r *http.Request) *appError {
-	fmt.Fprintf(w, "Logging an error. Check Error Reporting.")
+	fmt.Fprintf(w, `<html>Logging an error. Check <a href="http://console.cloud.google.com/errors">Error Reporting</a> (it may take a minute or two for the error to appear).</html>`)
 	err := errors.New("uh oh! an error occurred")
 	return b.appErrorf(r, err, "%v", err)
 }
