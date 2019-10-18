@@ -17,12 +17,17 @@
 package datastore_snippets
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"log"
+	"strings"
+	"testing"
 	"time"
 
 	"cloud.google.com/go/datastore"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"google.golang.org/api/iterator"
 )
 
@@ -643,28 +648,46 @@ func SnippetTransaction_runQuery() {
 	_ = err // Check error.
 }
 
-func Snippet_metadataNamespaces() {
+// [START datastore_namespace_run_query]
+
+func metadataNamespaces(w io.Writer, projectID string) error {
+	// projectID := "my-project"
+
 	ctx := context.Background()
-	client, _ := datastore.NewClient(ctx, "my-proj")
-	// [START datastore_namespace_run_query]
-	const (
-		startNamespace = "g"
-		endNamespace   = "h"
-	)
+	client, err := datastore.NewClient(ctx, projectID)
+	if err != nil {
+		return fmt.Errorf("datastore.NewClient: %v", err)
+	}
+
+	start := datastore.NameKey("__namespace__", "g", nil)
+	end := datastore.NameKey("__namespace__", "h", nil)
 	query := datastore.NewQuery("__namespace__").
-		Filter("__key__ >=", startNamespace).
-		Filter("__key__ <", endNamespace).
+		Filter("__key__ >=", start).
+		Filter("__key__ <", end).
 		KeysOnly()
 	keys, err := client.GetAll(ctx, query, nil)
 	if err != nil {
-		log.Fatalf("client.GetAll: %v", err)
+		return fmt.Errorf("client.GetAll: %v", err)
 	}
 
-	namespaces := make([]string, 0, len(keys))
+	fmt.Fprintln(w, "Namespaces:")
 	for _, k := range keys {
-		namespaces = append(namespaces, k.Name)
+		fmt.Fprintf(w, "\t%v", k.Namespace)
 	}
-	// [END datastore_namespace_run_query]
+	return nil
+}
+
+// [END datastore_namespace_run_query]
+
+func TestMetadaNamespaces(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := &bytes.Buffer{}
+	if err := metadataNamespaces(buf, tc.ProjectID); err != nil {
+		t.Errorf("metadataNamespaces got err: %v, want no error", err)
+	}
+	if got, want := buf.String(), "Namespaces"; !strings.Contains(got, want) {
+		t.Errorf("metadataNamespaces got\n----\n%v\n----\nWant to contain:\n----\n%v\n----", got, want)
+	}
 }
 
 func Snippet_metadataKinds() {

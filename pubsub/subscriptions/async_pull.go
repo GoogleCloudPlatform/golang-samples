@@ -25,9 +25,9 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func pullMsgs(w io.Writer, projectID, subName string, topic *pubsub.Topic) error {
+func pullMsgs(w io.Writer, projectID, subID string, topic *pubsub.Topic) error {
 	// projectID := "my-project-id"
-	// subName := projectID + "-example-sub"
+	// subID := "my-sub"
 	// topic of type https://godoc.org/cloud.google.com/go/pubsub#Topic
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
@@ -54,7 +54,7 @@ func pullMsgs(w io.Writer, projectID, subName string, topic *pubsub.Topic) error
 	// Consume 10 messages.
 	var mu sync.Mutex
 	received := 0
-	sub := client.Subscription(subName)
+	sub := client.Subscription(subID)
 	cctx, cancel := context.WithCancel(ctx)
 	err = sub.Receive(cctx, func(ctx context.Context, msg *pubsub.Message) {
 		msg.Ack()
