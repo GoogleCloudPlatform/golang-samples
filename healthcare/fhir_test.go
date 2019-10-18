@@ -26,6 +26,7 @@ import (
 
 	"cloud.google.com/go/storage"
 	conditionaldelete "github.com/GoogleCloudPlatform/golang-samples/healthcare/internal/fhir-resource-conditional-delete"
+	conditionalpatch "github.com/GoogleCloudPlatform/golang-samples/healthcare/internal/fhir-resource-conditional-patch"
 	conditionalupdate "github.com/GoogleCloudPlatform/golang-samples/healthcare/internal/fhir-resource-conditional-update"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"google.golang.org/api/iterator"
@@ -169,10 +170,24 @@ func TestFHIRStore(t *testing.T) {
 		}
 	})
 
-	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 1, 2*time.Second, func(r *testutil.R) {
 		buf.Reset()
 		patchedRes := resource{}
-		if err := conditionalupdate.ConditionalUpdateFHIRResource(buf, tc.ProjectID, location, datasetID, fhirStoreID, resourceType, false); err != nil {
+		if err := conditionalpatch.ConditionalPatchFHIRResource(buf, tc.ProjectID, location, datasetID, fhirStoreID, resourceType, false); err != nil {
+			r.Errorf("ConditionalPatchFHIRResource got err: %v", err)
+			return
+		}
+		if err := json.Unmarshal(buf.Bytes(), &patchedRes); err != nil {
+			r.Errorf("json.Unmarshal ConditionalPatchFHIRResource output: %v", err)
+			return
+		}
+		if patchedRes.Active {
+			r.Errorf("ConditionalPatchFHIRResource got active=true, expected active=false")
+		}
+
+		buf.Reset()
+		patchedRes = resource{}
+		if err := conditionalupdate.ConditionalUpdateFHIRResource(buf, tc.ProjectID, location, datasetID, fhirStoreID, resourceType, true); err != nil {
 			r.Errorf("ConditionalUpdateFHIRResource got err: %v", err)
 			return
 		}
@@ -180,8 +195,8 @@ func TestFHIRStore(t *testing.T) {
 			r.Errorf("json.Unmarshal ConditionalUpdateFHIRResource output: %v", err)
 			return
 		}
-		if patchedRes.Active {
-			r.Errorf("ConditionalUpdateFHIRResource got active=true, expected active=false")
+		if !patchedRes.Active {
+			r.Errorf("ConditionalUpdateFHIRResource got active=false, expected active=true")
 		}
 	})
 
