@@ -21,7 +21,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/alicebob/miniredis"
+	miniredis "github.com/alicebob/miniredis/v2"
 )
 
 func TestVisitCount(t *testing.T) {
