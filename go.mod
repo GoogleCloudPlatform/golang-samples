@@ -38,7 +38,7 @@ require (
 	github.com/tinylib/msgp v1.1.0 // indirect
 	go.opencensus.io v0.22.1
 	golang.org/x/exp v0.0.0-20191014171548-69215a2ee97e
-	golang.org/x/net v0.0.0-20191014212845-da9a3fd4c582
+	golang.org/x/net v0.0.0-20191021124707-24d2ffbea1e8
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	golang.org/x/text v0.3.2
 	google.golang.org/api v0.11.0
