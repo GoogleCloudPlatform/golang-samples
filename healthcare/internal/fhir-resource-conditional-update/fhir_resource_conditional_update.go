@@ -72,8 +72,8 @@ func ConditionalUpdateFHIRResource(w io.Writer, projectID, location, datasetID, 
 
 	// Refine your search by appending tags to the request in the form of query
 	// parameters. This searches for resources updated in the last 48 hours.
-	now := time.Now().Add(48 * time.Hour).Format("2006-01-02")
-	lastUpdated := queryParamOpt{key: "_lastUpdated", value: "gt" + now}
+	twoDaysAgo := time.Now().Add(-48 * time.Hour).Format("2006-01-02")
+	lastUpdated := queryParamOpt{key: "_lastUpdated", value: "gt" + twoDaysAgo}
 
 	resp, err := call.Do(lastUpdated)
 

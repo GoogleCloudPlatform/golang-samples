@@ -181,6 +181,10 @@ func TestFHIRStore(t *testing.T) {
 			r.Errorf("json.Unmarshal ConditionalPatchFHIRResource output: %v", err)
 			return
 		}
+		if patchedRes.ID != res.ID {
+			r.Errorf("ConditionalPatchFHIRResource got ID=%v, want %v", patchedRes.ID, res.ID)
+			return
+		}
 		if patchedRes.Active {
 			r.Errorf("ConditionalPatchFHIRResource got active=true, expected active=false")
 		}
@@ -193,6 +197,10 @@ func TestFHIRStore(t *testing.T) {
 		}
 		if err := json.Unmarshal(buf.Bytes(), &patchedRes); err != nil {
 			r.Errorf("json.Unmarshal ConditionalUpdateFHIRResource output: %v", err)
+			return
+		}
+		if patchedRes.ID != res.ID {
+			r.Errorf("ConditionalUpdateFHIRResource got ID=%v, want %v; wrong condition led to creating a new resource?", patchedRes.ID, res.ID)
 			return
 		}
 		if !patchedRes.Active {
