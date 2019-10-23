@@ -22,13 +22,16 @@ require (
 	github.com/fluent/fluent-logger-golang v1.4.0
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/gofrs/uuid v3.2.0+incompatible
+	github.com/golang/groupcache v0.0.0-20191002201903-404acd9df4cc // indirect
 	github.com/golang/protobuf v1.3.2
 	github.com/gomodule/redigo v2.0.0+incompatible
+	github.com/google/pprof v0.0.0-20191022163618-5260658b92d7 // indirect
 	github.com/google/uuid v1.1.1
 	github.com/googleapis/gax-go/v2 v2.0.5
 	github.com/gorilla/mux v1.7.3
 	github.com/gorilla/websocket v1.4.1
 	github.com/h2non/filetype v1.0.10
+	github.com/jstemmer/go-junit-report v0.9.1 // indirect
 	github.com/lib/pq v1.2.0
 	github.com/linkedin/goavro/v2 v2.9.7
 	github.com/mailgun/mailgun-go/v3 v3.6.1
@@ -40,7 +43,11 @@ require (
 	golang.org/x/exp v0.0.0-20191024150812-c286b889502e
 	golang.org/x/net v0.0.0-20191021144547-ec77196f6094
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
+	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e // indirect
+	golang.org/x/sys v0.0.0-20191022100944-742c48ecaeb7 // indirect
 	golang.org/x/text v0.3.2
+	golang.org/x/time v0.0.0-20190921001708-c4c64cad1fd0 // indirect
+	golang.org/x/tools v0.0.0-20191022210528-83d82311fd1f // indirect
 	google.golang.org/api v0.11.0
 	google.golang.org/appengine v1.6.5
 	google.golang.org/genproto v0.0.0-20191009194640-548a555dbc03
