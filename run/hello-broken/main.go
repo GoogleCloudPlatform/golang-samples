@@ -14,7 +14,7 @@
 
 // [START run_broken_service]
 
-// Sample hello-broken demonstrates a difficult to troubleshoot service.
+// Sample hello demonstrates a difficult to troubleshoot service.
 package main
 
 import (
@@ -25,13 +25,12 @@ import (
 )
 
 func main() {
-	log.Print("hello-broken: service started")
+	log.Print("hello: service started")
 
-	http.HandleFunc("/", brokenHandler)
+	http.HandleFunc("/", helloHandler)
 
 	// [END run_broken_service]
 	http.HandleFunc("/improved", improvedHandler)
-
 	// [START run_broken_service]
 
 	port := os.Getenv("PORT")
@@ -44,18 +43,16 @@ func main() {
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
 }
 
-func brokenHandler(w http.ResponseWriter, r *http.Request) {
-	log.Print("hello-broken: received request")
+func helloHandler(w http.ResponseWriter, r *http.Request) {
+	log.Print("hello: received request")
 
 	// [START run_broken_service_problem]
-
 	name := os.Getenv("NAME")
 	if name == "" {
 		log.Printf("Missing required server parameter")
 		// The panic stack trace appears in Stackdriver Error Reporting.
 		panic("Missing required server parameter")
 	}
-
 	// [END run_broken_service_problem]
 
 	fmt.Fprintf(w, "Hello %s!\n", name)
@@ -64,16 +61,14 @@ func brokenHandler(w http.ResponseWriter, r *http.Request) {
 // [END run_broken_service]
 
 func improvedHandler(w http.ResponseWriter, r *http.Request) {
-	log.Print("hello-broken: received request")
+	log.Print("hello: received request")
 
 	// [START run_broken_service_upgrade]
-
 	name := os.Getenv("NAME")
 	if name == "" {
 		name = "World"
 		log.Printf("warning: NAME not set, default to %s", name)
 	}
-
 	// [END run_broken_service_upgrade]
 
 	fmt.Fprintf(w, "Hello %s!\n", name)
