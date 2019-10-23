@@ -58,16 +58,19 @@ func DicomWebSearchInstances(w io.Writer, projectID, location, datasetID, dicomS
 	// request in the form of query parameters.
 	includeAllFields := queryParamOpt{key: "includefield", value: "all"}
 	resp, err := call.Do(includeAllFields)
-
 	if err != nil {
 		return fmt.Errorf("SearchForInstances: %v", err)
 	}
 
 	defer resp.Body.Close()
 
+	respBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("could not read response: %v", err)
+	}
+
 	if resp.StatusCode > 299 {
-		body, _ := ioutil.ReadAll(resp.Body)
-		return fmt.Errorf("SearchForInstances: status %d %s: %s", resp.StatusCode, resp.Status, body)
+		return fmt.Errorf("SearchForInstances: status %d %s: %s", resp.StatusCode, resp.Status, respBytes)
 	}
 
 	if _, err := io.Copy(w, resp.Body); err != nil {

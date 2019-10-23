@@ -76,7 +76,6 @@ func ConditionalUpdateFHIRResource(w io.Writer, projectID, location, datasetID, 
 	lastUpdated := queryParamOpt{key: "_lastUpdated", value: "gt" + twoDaysAgo}
 
 	resp, err := call.Do(lastUpdated)
-
 	if err != nil {
 		return fmt.Errorf("ConditionalUpdate: %v", err)
 	}
