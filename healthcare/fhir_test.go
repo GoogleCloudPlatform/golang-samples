@@ -170,7 +170,7 @@ func TestFHIRStore(t *testing.T) {
 		}
 	})
 
-	testutil.Retry(t, 1, 2*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
 		buf.Reset()
 		patchedRes := resource{}
 		if err := conditionalpatch.ConditionalPatchFHIRResource(buf, tc.ProjectID, location, datasetID, fhirStoreID, resourceType, false); err != nil {
@@ -258,7 +258,7 @@ func TestFHIRStore(t *testing.T) {
 		}
 	})
 
-	testutil.Retry(t, 1, 2*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
 		if err := conditionaldelete.ConditionalDeleteFHIRResource(ioutil.Discard, tc.ProjectID, location, datasetID, fhirStoreID, resourceType); err != nil {
 			r.Errorf("ConditionalDeleteFHIRResource got err: %v", err)
 		}
