@@ -22,18 +22,20 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"sync"
 
 	"cloud.google.com/go/storage"
 )
 
 // client is lazily initialized by LazyGlobal.
 var client *storage.Client
+var clientOnce sync.Once
 
 // LazyGlobal is an example of lazily initializing a Google Cloud Storage client.
 func LazyGlobal(w http.ResponseWriter, r *http.Request) {
-	// You may wish to add additional checks to see if the client is needed for
+	// You may wish to add different checks to see if the client is needed for
 	// this request.
-	if client == nil {
+	clientOnce.Do(func() {
 		// Pre-declare an err variable to avoid shadowing client.
 		var err error
 		client, err = storage.NewClient(context.Background())
@@ -42,7 +44,7 @@ func LazyGlobal(w http.ResponseWriter, r *http.Request) {
 			log.Printf("storage.NewClient: %v", err)
 			return
 		}
-	}
+	})
 	// Use client.
 }
 

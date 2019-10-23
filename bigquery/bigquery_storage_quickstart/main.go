@@ -36,7 +36,7 @@ import (
 	bqStorage "cloud.google.com/go/bigquery/storage/apiv1beta1"
 	"github.com/golang/protobuf/ptypes"
 	gax "github.com/googleapis/gax-go/v2"
-	"github.com/linkedin/goavro"
+	goavro "github.com/linkedin/goavro/v2"
 	bqStoragepb "google.golang.org/genproto/googleapis/cloud/bigquery/storage/v1beta1"
 	"google.golang.org/grpc"
 )

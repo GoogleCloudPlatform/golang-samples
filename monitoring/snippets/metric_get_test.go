@@ -24,21 +24,21 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-const metricType = "custom.googleapis.com/golang-samples-tests/get"
-
 func TestGetMetricDescriptor(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
+	metricType := "custom.googleapis.com/golang-samples-tests/get"
 	m, err := createCustomMetric(ioutil.Discard, tc.ProjectID, metricType)
 	if err != nil {
 		t.Fatalf("createMetric: %v", err)
 	}
 	defer deleteMetric(ioutil.Discard, m.GetName())
 
-	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 20, 10*time.Second, func(r *testutil.R) {
 		buf := &bytes.Buffer{}
 		if err := getMetricDescriptor(buf, tc.ProjectID, metricType); err != nil {
 			r.Errorf("getMetricDescriptor: %v", err)
+			return
 		}
 		want := "Name:"
 		if got := buf.String(); !strings.Contains(got, want) {

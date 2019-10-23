@@ -305,7 +305,7 @@ func createTableWithCMEK(client *bigquery.Client, datasetID, tableID string) err
 	meta := &bigquery.TableMetadata{
 		EncryptionConfig: &bigquery.EncryptionConfig{
 			// TODO: Replace this key with a key you have created in Cloud KMS.
-			KMSKeyName: "projects/cloud-samples-tests/locations/us-central1/keyRings/test/cryptoKeys/test",
+			KMSKeyName: "projects/cloud-samples-tests/locations/us/keyRings/test/cryptoKeys/test",
 		},
 	}
 	if err := tableRef.Create(ctx, meta); err != nil {

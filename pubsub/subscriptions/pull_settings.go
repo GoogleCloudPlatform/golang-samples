@@ -23,16 +23,16 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func pullMsgsSettings(w io.Writer, projectID, subName string) error {
+func pullMsgsSettings(w io.Writer, projectID, subID string) error {
 	// projectID := "my-project-id"
-	// subName := projectID + "-example-sub"
+	// subID := "my-sub"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
 
-	sub := client.Subscription(subName)
+	sub := client.Subscription(subID)
 	sub.ReceiveSettings.Synchronous = true
 	sub.ReceiveSettings.MaxOutstandingMessages = 10
 	err = sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {

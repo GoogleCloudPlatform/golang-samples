@@ -1572,7 +1572,7 @@ func queryWithTimestampParameter(ctx context.Context, w io.Writer, client *spann
 	var exampleTimestamp = time.Now()
 	stmt := spanner.Statement{
 		SQL: `SELECT VenueId, VenueName, LastUpdateTime FROM Venues
-            	WHERE LastUpdateTime < @lastUpdateTime`,
+		WHERE LastUpdateTime <= @lastUpdateTime`,
 		Params: map[string]interface{}{
 			"lastUpdateTime": exampleTimestamp,
 		},

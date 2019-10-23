@@ -19,6 +19,7 @@ package kms
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strconv"
@@ -103,7 +104,11 @@ func createKeyHelper(v TestVariables, keyID, keyPath, parent string,
 }
 
 func TestMain(m *testing.M) {
-	tc, _ := testutil.ContextMain(m)
+	tc, ok := testutil.ContextMain(m)
+	if !ok {
+		fmt.Println("Could not set up tests. Set GOLANG_SAMPLES_PROJECT_ID? Skipping.")
+		os.Exit(0)
+	}
 	v := getTestVariables(tc.ProjectID)
 	parent := "projects/" + v.projectID + "/locations/global"
 	// Create cryptokeys in the test project if needed.
