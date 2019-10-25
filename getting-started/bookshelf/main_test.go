@@ -84,8 +84,7 @@ func TestMain(m *testing.M) {
 
 	// Don't log anything during testing.
 	log.SetOutput(ioutil.Discard)
-	b.logger = log.New(ioutil.Discard, "", 0)
-	b.errLogger = log.New(ioutil.Discard, "", 0)
+	b.logWriter = ioutil.Discard
 
 	serv := httptest.NewServer(nil)
 	wt = webtest.New(nil, serv.Listener.Addr().String())
@@ -210,13 +209,13 @@ func TestAddAndDelete(t *testing.T) {
 }
 
 func TestSendLog(t *testing.T) {
-	buf := bytes.Buffer{}
-	oldLogger := b.logger
-	b.logger = log.New(&buf, "", 0)
+	buf := &bytes.Buffer{}
+	oldLogger := b.logWriter
+	b.logWriter = buf
 
 	bodyContains(t, wt, "/logs", "Log sent!")
 
-	b.logger = oldLogger
+	b.logWriter = oldLogger
 
 	if got, want := buf.String(), "Good job!"; !strings.Contains(got, want) {
 		t.Errorf("/logs logged\n----\n%v\n----\nWant to contain:\n----\n%v", got, want)
@@ -224,13 +223,13 @@ func TestSendLog(t *testing.T) {
 }
 
 func TestSendError(t *testing.T) {
-	buf := bytes.Buffer{}
-	oldErrLogger := b.errLogger
-	b.errLogger = log.New(&buf, "", 0)
+	buf := &bytes.Buffer{}
+	oldLogger := b.logWriter
+	b.logWriter = buf
 
-	bodyContains(t, wt, "/errors", "Check Error Reporting")
+	bodyContains(t, wt, "/errors", "Error Reporting")
 
-	b.errLogger = oldErrLogger
+	b.logWriter = oldLogger
 
 	if got, want := buf.String(), "uh oh"; !strings.Contains(got, want) {
 		t.Errorf("/errors logged\n----\n%v\n----\nWant to contain:\n----\n%v", got, want)

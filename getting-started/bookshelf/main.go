@@ -27,6 +27,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"runtime/debug"
 
 	"cloud.google.com/go/errorreporting"
 	"cloud.google.com/go/firestore"
@@ -63,12 +64,12 @@ func main() {
 	if err != nil {
 		log.Fatalf("newFirestoreDB: %v", err)
 	}
-	shelf, err := NewBookshelf(projectID, db)
+	b, err := NewBookshelf(projectID, db)
 	if err != nil {
 		log.Fatalf("NewBookshelf: %v", err)
 	}
 
-	shelf.registerHandlers()
+	b.registerHandlers()
 
 	log.Printf("Listening on localhost:%s", port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
@@ -109,7 +110,7 @@ func (b *Bookshelf) registerHandlers() {
 
 	// Delegate all of the HTTP routing and serving to the gorilla/mux router.
 	// Log all requests using the standard Apache format.
-	http.Handle("/", handlers.CombinedLoggingHandler(b.logger.Writer(), r))
+	http.Handle("/", handlers.CombinedLoggingHandler(b.logWriter, r))
 }
 
 // listHandler displays a list with summaries of books in the database.
@@ -281,18 +282,24 @@ func (b *Bookshelf) deleteHandler(w http.ResponseWriter, r *http.Request) *appEr
 	return nil
 }
 
+// sendLog logs a message.
+//
+// See https://cloud.google.com/logging/docs/setup/go for how to use the
+// Stackdriver logging client. Output to stdout and stderr is automaticaly
+// sent to Stackdriver when running on App Engine.
 func (b *Bookshelf) sendLog(w http.ResponseWriter, r *http.Request) *appError {
-	b.logger.Println("Hey, you triggered a custom log entry. Good job!")
+	fmt.Fprintln(b.logWriter, "Hey, you triggered a custom log entry. Good job!")
 
 	fmt.Fprintln(w, `<html>Log sent! Check the <a href="http://console.cloud.google.com/logs">logging section of the Cloud Console</a>.</html>`)
 
 	return nil
 }
 
+// sendError triggers an error that is sent to Error Reporting.
 func (b *Bookshelf) sendError(w http.ResponseWriter, r *http.Request) *appError {
-	fmt.Fprintf(w, `<html>Logging an error. Check <a href="http://console.cloud.google.com/errors">Error Reporting</a> (it may take a minute or two for the error to appear).</html>`)
+	msg := `<html>Logging an error. Check <a href="http://console.cloud.google.com/errors">Error Reporting</a> (it may take a minute or two for the error to appear).</html>`
 	err := errors.New("uh oh! an error occurred")
-	return b.appErrorf(r, err, "%v", err)
+	return b.appErrorf(r, err, msg)
 }
 
 // https://blog.golang.org/error-handling-and-go
@@ -304,6 +311,7 @@ type appError struct {
 	code    int
 	req     *http.Request
 	b       *Bookshelf
+	stack   []byte
 }
 
 func (fn appHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -311,9 +319,11 @@ func (fn appHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		e.b.errorClient.Report(errorreporting.Entry{
 			Error: e.err,
 			Req:   r,
+			Stack: e.stack,
 		})
-		e.b.errLogger.Printf("Handler error: status code: %d, message: %s, underlying err: %#v", e.code, e.message, e.err)
-		http.Error(w, e.message, e.code)
+		fmt.Fprintf(e.b.logWriter, "Handler error (reported to Error Reporting): status code: %d, message: %s, underlying err: %+v\n", e.code, e.message, e.err)
+		w.WriteHeader(e.code)
+		fmt.Fprint(w, e.message)
 	}
 }
 
@@ -324,5 +334,6 @@ func (b *Bookshelf) appErrorf(r *http.Request, err error, format string, v ...in
 		code:    500,
 		req:     r,
 		b:       b,
+		stack:   debug.Stack(),
 	}
 }
