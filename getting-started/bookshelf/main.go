@@ -316,14 +316,16 @@ type appError struct {
 
 func (fn appHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if e := fn(w, r); e != nil { // e is *appError, not os.Error.
+		fmt.Fprintf(e.b.logWriter, "Handler error (reported to Error Reporting): status code: %d, message: %s, underlying err: %+v\n", e.code, e.message, e.err)
+		w.WriteHeader(e.code)
+		fmt.Fprint(w, e.message)
+
 		e.b.errorClient.Report(errorreporting.Entry{
 			Error: e.err,
 			Req:   r,
 			Stack: e.stack,
 		})
-		fmt.Fprintf(e.b.logWriter, "Handler error (reported to Error Reporting): status code: %d, message: %s, underlying err: %+v\n", e.code, e.message, e.err)
-		w.WriteHeader(e.code)
-		fmt.Fprint(w, e.message)
+		e.b.errorClient.Flush()
 	}
 }
 
