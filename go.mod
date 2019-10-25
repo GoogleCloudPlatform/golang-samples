@@ -31,7 +31,7 @@ require (
 	github.com/h2non/filetype v1.0.10
 	github.com/lib/pq v1.2.0
 	github.com/linkedin/goavro/v2 v2.9.7
-	github.com/mailgun/mailgun-go/v3 v3.6.0
+	github.com/mailgun/mailgun-go/v3 v3.6.1
 	github.com/mailjet/mailjet-apiv3-go v0.0.0-20190724151621-55e56f74078c
 	github.com/philhofer/fwd v1.0.0 // indirect
 	github.com/sendgrid/smtpapi-go v0.6.0 // indirect
