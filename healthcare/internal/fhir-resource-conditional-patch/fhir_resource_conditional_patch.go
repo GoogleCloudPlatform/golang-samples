@@ -16,6 +16,8 @@
 // It's in a separate package so each sample can define queryParamOpt.
 package conditionalpatch
 
+// [START healthcare_conditional_patch_resource]
+
 import (
 	"bytes"
 	"context"
@@ -96,3 +98,5 @@ func ConditionalPatchFHIRResource(w io.Writer, projectID, location, datasetID, f
 
 	return nil
 }
+
+// [END healthcare_conditional_patch_resource]
