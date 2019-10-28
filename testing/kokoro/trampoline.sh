@@ -14,4 +14,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set -x
+
+date
+
+cd github/golang-samples
+
+# SIGNIFICANT_CHANGES="$(git --no-pager diff --name-only HEAD..master | egrep -v '(\.md$|^\.github)' || true)"
+SIGNIFICANT_CHANGES="$(echo ".github/renovate.json" | egrep -v '(\.md$|^\.github)' || true)" # DO NOT SUBMIT
+
+# If this is a PR with only insignificant changes, don't run any tests.
+if [[ -n ${KOKORO_GITHUB_PULL_REQUEST_NUMBER:-} ]] && [[ -z "$SIGNIFICANT_CHANGES" ]]; then
+  echo "No big changes. Not running any tests."
+  exit 0
+fi
+
+cd -
+
 python3 "${KOKORO_GFILE_DIR}/trampoline_v1.py"
