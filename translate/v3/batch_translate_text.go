@@ -35,7 +35,7 @@ func batchTranslateText(
 	sourceLang string,
 	targetLang string,
 ) error {
-	// projectID := "your-google-cloud-project-id"
+	// projectID := "my-project-id"
 	// location := "us-central1"
 	// inputURI := "gs://cloud-samples-data/text.txt"
 	// outputURI := "gs://YOUR_BUCKET_ID/path_to_store_results/"
