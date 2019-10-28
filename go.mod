@@ -41,9 +41,9 @@ require (
 	golang.org/x/net v0.0.0-20191021144547-ec77196f6094
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	golang.org/x/text v0.3.2
-	google.golang.org/api v0.11.0
+	google.golang.org/api v0.13.0
 	google.golang.org/appengine v1.6.5
-	google.golang.org/genproto v0.0.0-20191009194640-548a555dbc03
+	google.golang.org/genproto v0.0.0-20191028173616-919d9bdd9fe6
 	google.golang.org/grpc v1.24.0
 	gopkg.in/sendgrid/sendgrid-go.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.2.4
