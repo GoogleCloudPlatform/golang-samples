@@ -13,6 +13,10 @@
     {
       "packagePatterns": ["^cloud.google.com/go", "^google.golang.org"],
       "groupName": "Google Cloud packages"
+    },
+    {
+      "updateTypes": ["digest"],
+      "schedule": ["after 9pm on sunday"]
     }
   ]
 }
