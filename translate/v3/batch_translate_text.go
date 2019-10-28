@@ -43,7 +43,7 @@ func batchTranslateText(
 	// targetLang := "ja"
 
 	ctx := context.Background()
-	c, err := translate.NewTranslationClient(ctx)
+	client, err := translate.NewTranslationClient(ctx)
 	if err != nil {
 		return fmt.Errorf("NewTranslationClient: %v", err)
 	}
