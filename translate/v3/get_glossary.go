@@ -27,7 +27,7 @@ import (
 
 // getGlossary gets the specified glossary.
 func getGlossary(w io.Writer, projectID string, location string, glossaryID string) error {
-	// projectID := "your-google-cloud-project-id"
+	// projectID := "my-project-id"
 	// location := "us-central1"
 	// glossaryID := "glossary-id"
 

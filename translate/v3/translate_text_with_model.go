@@ -26,16 +26,8 @@ import (
 )
 
 // translateTextWithModel translates input text and returns translated text.
-func translateTextWithModel(
-	w io.Writer,
-	projectID string,
-	location string,
-	sourceLang string,
-	targetLang string,
-	text string,
-	modelID string,
-) error {
-	// projectID := "your-google-cloud-project-id"
+func translateTextWithModel(w io.Writer, projectID string, location string, sourceLang string, targetLang string, text string, modelID string) error {
+	// projectID := "my-project-id"
 	// location := "us-central1"
 	// sourceLang := "en"
 	// targetLang := "fr"

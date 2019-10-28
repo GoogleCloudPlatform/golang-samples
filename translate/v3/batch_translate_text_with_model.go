@@ -26,17 +26,8 @@ import (
 )
 
 // batchTranslateTextWithModel translates a large volume of text in asynchronous batch mode.
-func batchTranslateTextWithModel(
-	w io.Writer,
-	projectID string,
-	location string,
-	inputURI string,
-	outputURI string,
-	sourceLang string,
-	targetLang string,
-	modelID string,
-) error {
-	// projectID := "your-google-cloud-project-id"
+func batchTranslateTextWithModel(w io.Writer, projectID string, location string, inputURI string, outputURI string, sourceLang string, targetLang string, modelID string) error {
+	// projectID := "my-project-id"
 	// location := "us-central1"
 	// inputURI := "gs://cloud-samples-data/text.txt"
 	// outputURI := "gs://YOUR_BUCKET_ID/path_to_store_results/"

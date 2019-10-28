@@ -44,15 +44,7 @@ func TestTranslateTextWithGlossary(t *testing.T) {
 	defer deleteGlossary(&buf, tc.ProjectID, location, glossaryID)
 
 	// Translate text.
-	if err := translateTextWithGlossary(
-		&buf,
-		tc.ProjectID,
-		location,
-		sourceLang,
-		targetLang,
-		text,
-		glossaryID,
-	); err != nil {
+	if err := translateTextWithGlossary(&buf, tc.ProjectID, location, sourceLang, targetLang, text, glossaryID); err != nil {
 		t.Fatalf("translateTextWithGlossary: %v", err)
 	}
 	got = buf.String()

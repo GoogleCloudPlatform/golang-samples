@@ -48,13 +48,13 @@ func TestBatchTranslateTextWithGlossary(t *testing.T) {
 
 	// Create a temporary bucket to store annotation output.
 	ctx := context.Background()
-	c, err := storage.NewClient(ctx)
+	client, err := storage.NewClient(ctx)
 	if err != nil {
 		t.Fatalf("storage.NewClient: %v", err)
 	}
-	defer c.Close()
+	defer client.Close()
 
-	bucket := c.Bucket(bucketName)
+	bucket := client.Bucket(bucketName)
 	if err := bucket.Create(ctx, tc.ProjectID, nil); err != nil {
 		t.Fatalf("bucket.Create: %v", err)
 	}
@@ -62,16 +62,7 @@ func TestBatchTranslateTextWithGlossary(t *testing.T) {
 
 	// Translate a sample text and check the number of translated characters.
 	buf.Reset()
-	if err := batchTranslateTextWithGlossary(
-		&buf,
-		tc.ProjectID,
-		location,
-		inputURI,
-		outputURI,
-		sourceLang,
-		targetLang,
-		glossaryID,
-	); err != nil {
+	if err := batchTranslateTextWithGlossary(&buf, tc.ProjectID, location, inputURI, outputURI, sourceLang, targetLang, glossaryID); err != nil {
 		t.Fatalf("batchTranslateTextWithGlossary: %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, "Total characters: 9") {

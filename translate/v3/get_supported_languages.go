@@ -27,7 +27,7 @@ import (
 
 // getSupportedLanguages gets a list of supported language codes.
 func getSupportedLanguages(w io.Writer, projectID string) error {
-	// projectID := "your-google-cloud-project-id"
+	// projectID := "my-project-id"
 
 	ctx := context.Background()
 	c, err := translate.NewTranslationClient(ctx)

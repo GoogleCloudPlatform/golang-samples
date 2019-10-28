@@ -54,16 +54,7 @@ func TestBatchTranslateTextWithModel(t *testing.T) {
 	defer bucket.Delete(ctx)
 
 	// Translate a sample text and check the number of translated characters.
-	if err := batchTranslateTextWithModel(
-		&buf,
-		tc.ProjectID,
-		location,
-		inputURI,
-		outputURI,
-		sourceLang,
-		targetLang,
-		modelID,
-	); err != nil {
+	if err := batchTranslateTextWithModel(&buf, tc.ProjectID, location, inputURI, outputURI, sourceLang, targetLang, modelID); err != nil {
 		t.Fatalf("batchTranslateTextWithModel: %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, "Total characters: 15") {

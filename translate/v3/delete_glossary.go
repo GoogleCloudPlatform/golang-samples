@@ -27,7 +27,7 @@ import (
 
 // deleteGlossary deletes a glossary.
 func deleteGlossary(w io.Writer, projectID string, location string, glossaryID string) error {
-	// projectID := "your-google-cloud-project-id"
+	// projectID := "my-project-id"
 	// location := "us-central1"
 	// glossaryID := "glossary-id"
 

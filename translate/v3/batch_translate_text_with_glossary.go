@@ -26,17 +26,8 @@ import (
 )
 
 // batchTranslateTextWithGlossary translates a large volume of text in asynchronous batch mode.
-func batchTranslateTextWithGlossary(
-	w io.Writer,
-	projectID string,
-	location string,
-	inputURI string,
-	outputURI string,
-	sourceLang string,
-	targetLang string,
-	glossaryID string,
-) error {
-	// projectID := "your-google-cloud-project-id"
+func batchTranslateTextWithGlossary(w io.Writer, projectID string, location string, inputURI string, outputURI string, sourceLang string, targetLang string, glossaryID string) error {
+	// projectID := "my-project-id"
 	// location := "us-central1"
 	// inputURI := "gs://cloud-samples-data/text.txt"
 	// outputURI := "gs://YOUR_BUCKET_ID/path_to_store_results/"
@@ -45,11 +36,11 @@ func batchTranslateTextWithGlossary(
 	// glossaryID := "your-glossary-id"
 
 	ctx := context.Background()
-	c, err := translate.NewTranslationClient(ctx)
+	client, err := translate.NewTranslationClient(ctx)
 	if err != nil {
 		return fmt.Errorf("NewTranslationClient: %v", err)
 	}
-	defer c.Close()
+	defer client.Close()
 
 	req := &translatepb.BatchTranslateTextRequest{
 		Parent:              fmt.Sprintf("projects/%s/locations/%s", projectID, location),
@@ -79,7 +70,7 @@ func batchTranslateTextWithGlossary(
 	}
 
 	// The BatchTranslateText operation is async.
-	op, err := c.BatchTranslateText(ctx, req)
+	op, err := client.BatchTranslateText(ctx, req)
 	if err != nil {
 		return fmt.Errorf("BatchTranslateText: %v", err)
 	}

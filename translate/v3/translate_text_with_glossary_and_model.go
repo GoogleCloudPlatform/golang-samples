@@ -26,17 +26,8 @@ import (
 )
 
 // translateTextWithGlossaryAndModel translates input text and returns translated text.
-func translateTextWithGlossaryAndModel(
-	w io.Writer,
-	projectID string,
-	location string,
-	sourceLang string,
-	targetLang string,
-	text string,
-	glossaryID string,
-	modelID string,
-) error {
-	// projectID := "your-google-cloud-project-id"
+func translateTextWithGlossaryAndModel(w io.Writer, projectID string, location string, sourceLang string, targetLang string, text string, glossaryID string, modelID string) error {
+	// projectID := "my-project-id"
 	// location := "us-central1"
 	// sourceLang := "en"
 	// targetLang := "ja"

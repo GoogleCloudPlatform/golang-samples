@@ -26,15 +26,7 @@ import (
 )
 
 // batchTranslateText translates a large volume of text in asynchronous batch mode.
-func batchTranslateText(
-	w io.Writer,
-	projectID string,
-	location string,
-	inputURI string,
-	outputURI string,
-	sourceLang string,
-	targetLang string,
-) error {
+func batchTranslateText(w io.Writer, projectID string, location string, inputURI string, outputURI string, sourceLang string, targetLang string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
 	// inputURI := "gs://cloud-samples-data/text.txt"
@@ -47,7 +39,7 @@ func batchTranslateText(
 	if err != nil {
 		return fmt.Errorf("NewTranslationClient: %v", err)
 	}
-	defer c.Close()
+	defer client.Close()
 
 	req := &translatepb.BatchTranslateTextRequest{
 		Parent:              fmt.Sprintf("projects/%s/locations/%s", projectID, location),
@@ -72,7 +64,7 @@ func batchTranslateText(
 	}
 
 	// The BatchTranslateText operation is async.
-	op, err := c.BatchTranslateText(ctx, req)
+	op, err := client.BatchTranslateText(ctx, req)
 	if err != nil {
 		return fmt.Errorf("BatchTranslateText: %v", err)
 	}

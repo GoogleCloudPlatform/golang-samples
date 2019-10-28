@@ -27,7 +27,7 @@ import (
 
 // detectLanguage detects the language of a text string.
 func detectLanguage(w io.Writer, projectID string, text string) error {
-	// projectID := "your-google-cloud-project-id"
+	// projectID := "my-project-id"
 	// text := "Hello, world!"
 
 	ctx := context.Background()

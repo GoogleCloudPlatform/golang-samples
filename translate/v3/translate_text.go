@@ -27,7 +27,7 @@ import (
 
 // translateText translates input text and returns translated text.
 func translateText(w io.Writer, projectID string, sourceLang string, targetLang string, text string) error {
-	// projectID := "your-google-cloud-project-id"
+	// projectID := "my-project-id"
 	// sourceLang := "en-US"
 	// targetLang := "fr"
 	// text := "Text you wish to translate"
