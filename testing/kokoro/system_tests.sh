@@ -19,6 +19,13 @@ set -e
 go version
 date
 
+# Re-organize files
+export GOPATH=$PWD/gopath
+target=$GOPATH/src/github.com/GoogleCloudPlatform
+mkdir -p $target
+mv github/golang-samples $target
+cd $target/golang-samples
+
 CHANGES=$(git --no-pager diff --name-only HEAD..master)
 SIGNIFICANT_CHANGES=$(echo $CHANGES | tr ' ' '\n' | egrep -v '(\.md$|^\.github)')
 
@@ -67,14 +74,8 @@ export GOLANG_SAMPLES_SERVICE_ACCOUNT_EMAIL=kokoro-$GOLANG_SAMPLES_PROJECT_ID@$G
 
 set -x
 
+pwd
 date
-
-# Re-organize files
-export GOPATH=$PWD/gopath
-target=$GOPATH/src/github.com/GoogleCloudPlatform
-mkdir -p $target
-mv github/golang-samples $target
-cd $target/golang-samples
 
 if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* && -n $GOLANG_SAMPLES_GO_VET ]]; then
   echo "This test run will run end-to-end tests.";
