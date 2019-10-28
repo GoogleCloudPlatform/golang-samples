@@ -14,46 +14,48 @@
 
 package v3
 
-import (
-	"bytes"
-	"fmt"
-	"strings"
-	"testing"
+// TODO: uncomment this test once the AutoML model is set in the testing projects.
 
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"github.com/google/uuid"
-)
+// import (
+// 	"bytes"
+// 	"fmt"
+// 	"strings"
+// 	"testing"
 
-func TestTranslateTextWithGlossaryAndModel(t *testing.T) {
-	tc := testutil.SystemTest(t)
+// 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+// 	"github.com/google/uuid"
+// )
 
-	location := "us-central1"
-	sourceLang := "en"
-	targetLang := "ja"
-	text := "That' il do it. deception"
-	glossaryID := fmt.Sprintf("translate_text_with_glossary_and_model-%v", uuid.New().ID())
-	glossaryInputURI := "gs://cloud-samples-data/translation/glossary_ja.csv"
-	modelID := "TRL3128559826197068699"
+// func TestTranslateTextWithGlossaryAndModel(t *testing.T) {
+// 	tc := testutil.SystemTest(t)
 
-	// Create a glossary.
-	var buf bytes.Buffer
-	if err := createGlossary(&buf, tc.ProjectID, location, glossaryID, glossaryInputURI); err != nil {
-		t.Fatalf("createGlossary: %v", err)
-	}
-	defer deleteGlossary(&buf, tc.ProjectID, location, glossaryID)
+// 	location := "us-central1"
+// 	sourceLang := "en"
+// 	targetLang := "ja"
+// 	text := "That' il do it. deception"
+// 	glossaryID := fmt.Sprintf("translate_text_with_glossary_and_model-%v", uuid.New().ID())
+// 	glossaryInputURI := "gs://cloud-samples-data/translation/glossary_ja.csv"
+// 	modelID := "TRL3128559826197068699"
 
-	// Translate text.
-	if err := translateTextWithGlossaryAndModel(&buf, tc.ProjectID, location, sourceLang, targetLang, text, glossaryID, modelID); err != nil {
-		t.Fatalf("translateTextWithGlossaryAndModel: %v", err)
-	}
+// 	// Create a glossary.
+// 	var buf bytes.Buffer
+// 	if err := createGlossary(&buf, tc.ProjectID, location, glossaryID, glossaryInputURI); err != nil {
+// 		t.Fatalf("createGlossary: %v", err)
+// 	}
+// 	defer deleteGlossary(&buf, tc.ProjectID, location, glossaryID)
 
-	// Custom model.
-	if got, want1, want2 := buf.String(), "それはそうだ", "それじゃあ"; !strings.Contains(got, want1) && !strings.Contains(got, want2) {
-		t.Fatalf("translateTextWithGlossaryAndModel got:\n----\n%s----\nWant to contain:\n----\n%s\n----\nOR\n----\n%s\n----", got, want1, want2)
-	}
+// 	// Translate text.
+// 	if err := translateTextWithGlossaryAndModel(&buf, tc.ProjectID, location, sourceLang, targetLang, text, glossaryID, modelID); err != nil {
+// 		t.Fatalf("translateTextWithGlossaryAndModel: %v", err)
+// 	}
 
-	// Glossary.
-	if got, want := buf.String(), "欺く"; !strings.Contains(got, want) {
-		t.Fatalf("translateTextWithGlossaryAndModel got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
-	}
-}
+// 	// Custom model.
+// 	if got, want1, want2 := buf.String(), "それはそうだ", "それじゃあ"; !strings.Contains(got, want1) && !strings.Contains(got, want2) {
+// 		t.Fatalf("translateTextWithGlossaryAndModel got:\n----\n%s----\nWant to contain:\n----\n%s\n----\nOR\n----\n%s\n----", got, want1, want2)
+// 	}
+
+// 	// Glossary.
+// 	if got, want := buf.String(), "欺く"; !strings.Contains(got, want) {
+// 		t.Fatalf("translateTextWithGlossaryAndModel got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
+// 	}
+// }

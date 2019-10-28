@@ -14,58 +14,60 @@
 
 package v3
 
-import (
-	"bytes"
-	"context"
-	"fmt"
-	"strings"
-	"testing"
+// TODO: uncomment this test once the AutoML model is set in the testing projects.
 
-	"cloud.google.com/go/storage"
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"github.com/google/uuid"
-)
+// import (
+// 	"bytes"
+// 	"context"
+// 	"fmt"
+// 	"strings"
+// 	"testing"
 
-func TestBatchTranslateTextWithGlossaryAndModel(t *testing.T) {
-	tc := testutil.SystemTest(t)
+// 	"cloud.google.com/go/storage"
+// 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+// 	"github.com/google/uuid"
+// )
 
-	bucketName := fmt.Sprintf("%s-translate_glossary_model-%v", tc.ProjectID, uuid.New().ID())
-	location := "us-central1"
-	inputURI := "gs://cloud-samples-data/translation/text_with_glossary.txt"
-	outputURI := fmt.Sprintf("gs://%s/translation/output/", bucketName)
-	sourceLang := "en"
-	targetLang := "ja"
-	glossaryID := fmt.Sprintf("create_and_delete_glossary-%v", uuid.New().ID())
-	glossaryInputURI := "gs://cloud-samples-data/translation/glossary_ja.csv"
-	modelID := "TRL3128559826197068699"
+// func TestBatchTranslateTextWithGlossaryAndModel(t *testing.T) {
+// 	tc := testutil.SystemTest(t)
 
-	// Create a glossary.
-	var buf bytes.Buffer
-	if err := createGlossary(&buf, tc.ProjectID, location, glossaryID, glossaryInputURI); err != nil {
-		t.Fatalf("createGlossary: %v", err)
-	}
-	defer deleteGlossary(&buf, tc.ProjectID, location, glossaryID)
+// 	bucketName := fmt.Sprintf("%s-translate_glossary_model-%v", tc.ProjectID, uuid.New().ID())
+// 	location := "us-central1"
+// 	inputURI := "gs://cloud-samples-data/translation/text_with_glossary.txt"
+// 	outputURI := fmt.Sprintf("gs://%s/translation/output/", bucketName)
+// 	sourceLang := "en"
+// 	targetLang := "ja"
+// 	glossaryID := fmt.Sprintf("create_and_delete_glossary-%v", uuid.New().ID())
+// 	glossaryInputURI := "gs://cloud-samples-data/translation/glossary_ja.csv"
+// 	modelID := "TRL3128559826197068699"
 
-	// Create a temporary bucket to store annotation output.
-	ctx := context.Background()
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		t.Fatalf("storage.NewClient: %v", err)
-	}
-	defer client.Close()
+// 	// Create a glossary.
+// 	var buf bytes.Buffer
+// 	if err := createGlossary(&buf, tc.ProjectID, location, glossaryID, glossaryInputURI); err != nil {
+// 		t.Fatalf("createGlossary: %v", err)
+// 	}
+// 	defer deleteGlossary(&buf, tc.ProjectID, location, glossaryID)
 
-	bucket := client.Bucket(bucketName)
-	if err := bucket.Create(ctx, tc.ProjectID, nil); err != nil {
-		t.Fatalf("bucket.Create: %v", err)
-	}
-	defer deleteBucket(ctx, t, bucket)
+// 	// Create a temporary bucket to store annotation output.
+// 	ctx := context.Background()
+// 	client, err := storage.NewClient(ctx)
+// 	if err != nil {
+// 		t.Fatalf("storage.NewClient: %v", err)
+// 	}
+// 	defer client.Close()
 
-	// Translate a sample text and check the number of translated characters.
-	buf.Reset()
-	if err := batchTranslateTextWithGlossaryAndModel(&buf, tc.ProjectID, location, inputURI, outputURI, sourceLang, targetLang, glossaryID, modelID); err != nil {
-		t.Fatalf("batchTranslateTextWithGlossaryAndModel: %v", err)
-	}
-	if got, want := buf.String(), "Total characters"; !strings.Contains(got, want) {
-		t.Fatalf("batchTranslateTextWithGlossaryAndModel got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
-	}
-}
+// 	bucket := client.Bucket(bucketName)
+// 	if err := bucket.Create(ctx, tc.ProjectID, nil); err != nil {
+// 		t.Fatalf("bucket.Create: %v", err)
+// 	}
+// 	defer deleteBucket(ctx, t, bucket)
+
+// 	// Translate a sample text and check the number of translated characters.
+// 	buf.Reset()
+// 	if err := batchTranslateTextWithGlossaryAndModel(&buf, tc.ProjectID, location, inputURI, outputURI, sourceLang, targetLang, glossaryID, modelID); err != nil {
+// 		t.Fatalf("batchTranslateTextWithGlossaryAndModel: %v", err)
+// 	}
+// 	if got, want := buf.String(), "Total characters"; !strings.Contains(got, want) {
+// 		t.Fatalf("batchTranslateTextWithGlossaryAndModel got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
+// 	}
+// }

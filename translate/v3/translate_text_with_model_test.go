@@ -14,29 +14,31 @@
 
 package v3
 
-import (
-	"bytes"
-	"strings"
-	"testing"
+// TODO: uncomment this test once the AutoML model is set in the testing projects.
 
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-)
+// import (
+// 	"bytes"
+// 	"strings"
+// 	"testing"
 
-func TestTranslateTextWithModel(t *testing.T) {
-	tc := testutil.SystemTest(t)
+// 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+// )
 
-	location := "us-central1"
-	sourceLang := "en"
-	targetLang := "ja"
-	text := "That' il do it."
-	modelID := "TRL3128559826197068699"
+// func TestTranslateTextWithModel(t *testing.T) {
+// 	tc := testutil.SystemTest(t)
 
-	// Translate text.
-	var buf bytes.Buffer
-	if err := translateTextWithModel(&buf, tc.ProjectID, location, sourceLang, targetLang, text, modelID); err != nil {
-		t.Fatalf("translateTextWithModel: %v", err)
-	}
-	if got, want1, want2 := buf.String(), "それはそうだ", "それじゃあ"; !strings.Contains(got, want1) && !strings.Contains(got, want2) {
-		t.Fatalf("translateTextWithModel got:\n----\n%s----\nWant to contain:\n----\n%s\n----\nOR\n----\n%s\n----", got, want1, want2)
-	}
-}
+// 	location := "us-central1"
+// 	sourceLang := "en"
+// 	targetLang := "ja"
+// 	text := "That' il do it."
+// 	modelID := "TRL3128559826197068699"
+
+// 	// Translate text.
+// 	var buf bytes.Buffer
+// 	if err := translateTextWithModel(&buf, tc.ProjectID, location, sourceLang, targetLang, text, modelID); err != nil {
+// 		t.Fatalf("translateTextWithModel: %v", err)
+// 	}
+// 	if got, want1, want2 := buf.String(), "それはそうだ", "それじゃあ"; !strings.Contains(got, want1) && !strings.Contains(got, want2) {
+// 		t.Fatalf("translateTextWithModel got:\n----\n%s----\nWant to contain:\n----\n%s\n----\nOR\n----\n%s\n----", got, want1, want2)
+// 	}
+// }
