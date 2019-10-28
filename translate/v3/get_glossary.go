@@ -32,17 +32,17 @@ func getGlossary(w io.Writer, projectID string, location string, glossaryID stri
 	// glossaryID := "glossary-id"
 
 	ctx := context.Background()
-	c, err := translate.NewTranslationClient(ctx)
+	client, err := translate.NewTranslationClient(ctx)
 	if err != nil {
 		return fmt.Errorf("NewTranslationClient: %v", err)
 	}
-	defer c.Close()
+	defer client.Close()
 
 	req := &translatepb.GetGlossaryRequest{
 		Name: fmt.Sprintf("projects/%s/locations/%s/glossaries/%s", projectID, location, glossaryID),
 	}
 
-	resp, err := c.GetGlossary(ctx, req)
+	resp, err := client.GetGlossary(ctx, req)
 	if err != nil {
 		return fmt.Errorf("GetGlossary: %v", err)
 	}

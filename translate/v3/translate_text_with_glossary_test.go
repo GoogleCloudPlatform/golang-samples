@@ -27,9 +27,6 @@ import (
 func TestTranslateTextWithGlossary(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	var buf bytes.Buffer
-	var got string
-
 	location := "us-central1"
 	sourceLang := "en"
 	targetLang := "ja"
@@ -38,6 +35,7 @@ func TestTranslateTextWithGlossary(t *testing.T) {
 	glossaryInputURI := "gs://cloud-samples-data/translation/glossary_ja.csv"
 
 	// Create a glossary.
+	var buf bytes.Buffer
 	if err := createGlossary(&buf, tc.ProjectID, location, glossaryID, glossaryInputURI); err != nil {
 		t.Fatalf("createGlossary: %v", err)
 	}
@@ -47,8 +45,7 @@ func TestTranslateTextWithGlossary(t *testing.T) {
 	if err := translateTextWithGlossary(&buf, tc.ProjectID, location, sourceLang, targetLang, text, glossaryID); err != nil {
 		t.Fatalf("translateTextWithGlossary: %v", err)
 	}
-	got = buf.String()
-	if !strings.Contains(got, "アカウント") && !strings.Contains(got, "口座") {
-		t.Fatalf("Got '%s', expected to contain 'アカウント' or '口座'", got)
+	if got, want1, want2 := buf.String(), "アカウント", "口座"; !strings.Contains(got, want1) && !strings.Contains(got, want2) {
+		t.Fatalf("translateTextWithGlossary got:\n----\n%s----\nWant to contain:\n----\n%s\n----\nOR\n----\n%s\n----", got, want1, want2)
 	}
 }

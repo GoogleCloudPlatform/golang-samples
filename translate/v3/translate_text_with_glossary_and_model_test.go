@@ -27,9 +27,6 @@ import (
 func TestTranslateTextWithGlossaryAndModel(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	var buf bytes.Buffer
-	var got string
-
 	location := "us-central1"
 	sourceLang := "en"
 	targetLang := "ja"
@@ -39,6 +36,7 @@ func TestTranslateTextWithGlossaryAndModel(t *testing.T) {
 	modelID := "TRL3128559826197068699"
 
 	// Create a glossary.
+	var buf bytes.Buffer
 	if err := createGlossary(&buf, tc.ProjectID, location, glossaryID, glossaryInputURI); err != nil {
 		t.Fatalf("createGlossary: %v", err)
 	}
@@ -49,15 +47,13 @@ func TestTranslateTextWithGlossaryAndModel(t *testing.T) {
 		t.Fatalf("translateTextWithGlossaryAndModel: %v", err)
 	}
 
-	got = buf.String()
-
 	// Custom model.
-	if !strings.Contains(got, "それはそうだ") && !strings.Contains(got, "それじゃあ") {
-		t.Fatalf("Got '%s', expected to contain 'それはそうだ' or 'それじゃあ'", got)
+	if got, want1, want2 := buf.String(), "それはそうだ", "それじゃあ"; !strings.Contains(got, want1) && !strings.Contains(got, want2) {
+		t.Fatalf("translateTextWithGlossaryAndModel got:\n----\n%s----\nWant to contain:\n----\n%s\n----\nOR\n----\n%s\n----", got, want1, want2)
 	}
 
 	// Glossary.
-	if !strings.Contains(got, "欺く") {
-		t.Fatalf("Got '%s', expected to contain '欺く'", got)
+	if got, want := buf.String(), "欺く"; !strings.Contains(got, want) {
+		t.Fatalf("translateTextWithGlossaryAndModel got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
 	}
 }

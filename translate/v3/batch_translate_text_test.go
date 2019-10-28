@@ -29,8 +29,6 @@ import (
 func TestBatchTranslateText(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	var buf bytes.Buffer
-
 	bucketName := fmt.Sprintf("%s-batch_translate_text-%v", tc.ProjectID, uuid.New().ID())
 	location := "us-central1"
 	inputURI := "gs://cloud-samples-data/translation/text.txt"
@@ -50,13 +48,14 @@ func TestBatchTranslateText(t *testing.T) {
 	if err := bucket.Create(ctx, tc.ProjectID, nil); err != nil {
 		t.Fatalf("bucket.Create: %v", err)
 	}
-	defer bucket.Delete(ctx)
+	defer deleteBucket(ctx, t, bucket)
 
 	// Translate a sample text and check the number of translated characters.
+	var buf bytes.Buffer
 	if err := batchTranslateText(&buf, tc.ProjectID, location, inputURI, outputURI, sourceLang, targetLang); err != nil {
 		t.Fatalf("batchTranslateText: %v", err)
 	}
-	if got := buf.String(); !strings.Contains(got, "Total characters: 13") {
-		t.Fatalf("Got '%s', expected to contain 'Total characters: 13'", got)
+	if got, want := buf.String(), "Total characters"; !strings.Contains(got, want) {
+		t.Fatalf("batchTranslateText got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
 	}
 }

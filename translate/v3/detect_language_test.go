@@ -25,15 +25,14 @@ import (
 func TestDetectLanguage(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	var buf bytes.Buffer
-
 	text := "Hæ sæta"
 
 	// Detect language.
+	var buf bytes.Buffer
 	if err := detectLanguage(&buf, tc.ProjectID, text); err != nil {
 		t.Fatalf("detectLanguage: %v", err)
 	}
-	if got := buf.String(); !strings.Contains(got, "is") {
-		t.Fatalf("Got '%s', expected to contain 'is'", got)
+	if got, want := buf.String(), "is"; !strings.Contains(got, want) {
+		t.Fatalf("detectLanguage got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
 	}
 }

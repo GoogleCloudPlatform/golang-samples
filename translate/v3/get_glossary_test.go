@@ -27,14 +27,12 @@ import (
 func TestGetGlossary(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	var buf bytes.Buffer
-	var got string
-
 	location := "us-central1"
 	glossaryID := fmt.Sprintf("get_glossary-%v", uuid.New().ID())
 	glossaryInputURI := "gs://cloud-samples-data/translation/glossary_ja.csv"
 
 	// Create a glossary.
+	var buf bytes.Buffer
 	if err := createGlossary(&buf, tc.ProjectID, location, glossaryID, glossaryInputURI); err != nil {
 		t.Fatalf("createGlossary: %v", err)
 	}
@@ -44,11 +42,10 @@ func TestGetGlossary(t *testing.T) {
 	if err := getGlossary(&buf, tc.ProjectID, location, glossaryID); err != nil {
 		t.Fatalf("getGlossary: %v", err)
 	}
-	got = buf.String()
-	if !strings.Contains(got, glossaryID) {
-		t.Fatalf("Got '%s', expected to contain '%s'", got, glossaryID)
+	if got, want := buf.String(), glossaryID; !strings.Contains(got, want) {
+		t.Fatalf("getGlossary got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
 	}
-	if !strings.Contains(got, glossaryInputURI) {
-		t.Fatalf("Got '%s', expected to contain '%s'", got, glossaryInputURI)
+	if got, want := buf.String(), glossaryInputURI; !strings.Contains(got, want) {
+		t.Fatalf("getGlossary got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
 	}
 }

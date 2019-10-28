@@ -32,18 +32,18 @@ func deleteGlossary(w io.Writer, projectID string, location string, glossaryID s
 	// glossaryID := "glossary-id"
 
 	ctx := context.Background()
-	c, err := translate.NewTranslationClient(ctx)
+	client, err := translate.NewTranslationClient(ctx)
 	if err != nil {
 		return fmt.Errorf("NewTranslationClient: %v", err)
 	}
-	defer c.Close()
+	defer client.Close()
 
 	req := &translatepb.DeleteGlossaryRequest{
 		Name: fmt.Sprintf("projects/%s/locations/%s/glossaries/%s", projectID, location, glossaryID),
 	}
 
 	// The DeleteGlossary operation is async.
-	op, err := c.DeleteGlossary(ctx, req)
+	op, err := client.DeleteGlossary(ctx, req)
 	if err != nil {
 		return fmt.Errorf("DeleteGlossary: %v", err)
 	}

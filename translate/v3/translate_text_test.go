@@ -25,19 +25,16 @@ import (
 func TestTranslateText(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	var buf bytes.Buffer
-	var got string
-
 	sourceLang := "en-US"
 	targetLang := "sr-Latn"
 	text := "Hello world"
 
 	// Translate text.
+	var buf bytes.Buffer
 	if err := translateText(&buf, tc.ProjectID, sourceLang, targetLang, text); err != nil {
 		t.Fatalf("translateText: %v", err)
 	}
-	got = buf.String()
-	if !strings.Contains(got, "Zdravo svet") && !strings.Contains(got, "Pozdrav svijetu") {
-		t.Fatalf("Got '%s', expected to contain 'Zdravo svet' or 'Pozdrav svijetu'", got)
+	if got, want1, want2 := buf.String(), "Zdravo svet", "Pozdrav svijetu"; !strings.Contains(got, want1) && !strings.Contains(got, want2) {
+		t.Fatalf("translateText got:\n----\n%s----\nWant to contain:\n----\n%s\n----\nOR\n----\n%s\n----", got, want1, want2)
 	}
 }

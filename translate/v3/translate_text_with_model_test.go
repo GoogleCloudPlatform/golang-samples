@@ -25,9 +25,6 @@ import (
 func TestTranslateTextWithModel(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	var buf bytes.Buffer
-	var got string
-
 	location := "us-central1"
 	sourceLang := "en"
 	targetLang := "ja"
@@ -35,11 +32,11 @@ func TestTranslateTextWithModel(t *testing.T) {
 	modelID := "TRL3128559826197068699"
 
 	// Translate text.
+	var buf bytes.Buffer
 	if err := translateTextWithModel(&buf, tc.ProjectID, location, sourceLang, targetLang, text, modelID); err != nil {
 		t.Fatalf("translateTextWithModel: %v", err)
 	}
-	got = buf.String()
-	if !strings.Contains(got, "それはそうだ") && !strings.Contains(got, "それじゃあ") {
-		t.Fatalf("Got '%s', expected to contain 'それはそうだ' or 'それじゃあ'", got)
+	if got, want1, want2 := buf.String(), "それはそうだ", "それじゃあ"; !strings.Contains(got, want1) && !strings.Contains(got, want2) {
+		t.Fatalf("translateTextWithModel got:\n----\n%s----\nWant to contain:\n----\n%s\n----\nOR\n----\n%s\n----", got, want1, want2)
 	}
 }

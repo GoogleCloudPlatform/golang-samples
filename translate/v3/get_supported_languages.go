@@ -30,17 +30,17 @@ func getSupportedLanguages(w io.Writer, projectID string) error {
 	// projectID := "my-project-id"
 
 	ctx := context.Background()
-	c, err := translate.NewTranslationClient(ctx)
+	client, err := translate.NewTranslationClient(ctx)
 	if err != nil {
 		return fmt.Errorf("NewTranslationClient: %v", err)
 	}
-	defer c.Close()
+	defer client.Close()
 
 	req := &translatepb.GetSupportedLanguagesRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/global", projectID),
 	}
 
-	resp, err := c.GetSupportedLanguages(ctx, req)
+	resp, err := client.GetSupportedLanguages(ctx, req)
 	if err != nil {
 		return fmt.Errorf("GetSupportedLanguages: %v", err)
 	}

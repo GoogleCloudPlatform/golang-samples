@@ -35,11 +35,11 @@ func translateTextWithGlossary(w io.Writer, projectID string, location string, s
 	// glossaryID := "your-glossary-id"
 
 	ctx := context.Background()
-	c, err := translate.NewTranslationClient(ctx)
+	client, err := translate.NewTranslationClient(ctx)
 	if err != nil {
 		return fmt.Errorf("NewTranslationClient: %v", err)
 	}
-	defer c.Close()
+	defer client.Close()
 
 	req := &translatepb.TranslateTextRequest{
 		Parent:             fmt.Sprintf("projects/%s/locations/%s", projectID, location),
@@ -52,7 +52,7 @@ func translateTextWithGlossary(w io.Writer, projectID string, location string, s
 		},
 	}
 
-	resp, err := c.TranslateText(ctx, req)
+	resp, err := client.TranslateText(ctx, req)
 	if err != nil {
 		return fmt.Errorf("TranslateText: %v", err)
 	}

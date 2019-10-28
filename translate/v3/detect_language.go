@@ -31,11 +31,11 @@ func detectLanguage(w io.Writer, projectID string, text string) error {
 	// text := "Hello, world!"
 
 	ctx := context.Background()
-	c, err := translate.NewTranslationClient(ctx)
+	client, err := translate.NewTranslationClient(ctx)
 	if err != nil {
 		return fmt.Errorf("NewTranslationClient: %v", err)
 	}
-	defer c.Close()
+	defer client.Close()
 
 	req := &translatepb.DetectLanguageRequest{
 		Parent:   fmt.Sprintf("projects/%s/locations/global", projectID),
@@ -45,7 +45,7 @@ func detectLanguage(w io.Writer, projectID string, text string) error {
 		},
 	}
 
-	resp, err := c.DetectLanguage(ctx, req)
+	resp, err := client.DetectLanguage(ctx, req)
 	if err != nil {
 		return fmt.Errorf("DetectLanguage: %v", err)
 	}

@@ -29,8 +29,6 @@ import (
 func TestBatchTranslateTextWithModel(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	var buf bytes.Buffer
-
 	bucketName := fmt.Sprintf("%s-translate_model-%v", tc.ProjectID, uuid.New().ID())
 	location := "us-central1"
 	inputURI := "gs://cloud-samples-data/translation/custom_model_text.txt"
@@ -41,23 +39,24 @@ func TestBatchTranslateTextWithModel(t *testing.T) {
 
 	// Create a temporary bucket to store annotation output.
 	ctx := context.Background()
-	c, err := storage.NewClient(ctx)
+	client, err := storage.NewClient(ctx)
 	if err != nil {
 		t.Fatalf("storage.NewClient: %v", err)
 	}
-	defer c.Close()
+	defer client.Close()
 
-	bucket := c.Bucket(bucketName)
+	bucket := client.Bucket(bucketName)
 	if err := bucket.Create(ctx, tc.ProjectID, nil); err != nil {
 		t.Fatalf("bucket.Create: %v", err)
 	}
-	defer bucket.Delete(ctx)
+	defer deleteBucket(ctx, t, bucket)
 
 	// Translate a sample text and check the number of translated characters.
+	var buf bytes.Buffer
 	if err := batchTranslateTextWithModel(&buf, tc.ProjectID, location, inputURI, outputURI, sourceLang, targetLang, modelID); err != nil {
 		t.Fatalf("batchTranslateTextWithModel: %v", err)
 	}
-	if got := buf.String(); !strings.Contains(got, "Total characters: 15") {
-		t.Fatalf("Got '%s', expected to contain 'Total characters: 15'", got)
+	if got, want := buf.String(), "Total characters"; !strings.Contains(got, want) {
+		t.Fatalf("batchTranslateTextWithModel got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
 	}
 }

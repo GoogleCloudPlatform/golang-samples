@@ -32,17 +32,17 @@ func listGlossaries(w io.Writer, projectID string, location string) error {
 	// location := "us-central1"
 
 	ctx := context.Background()
-	c, err := translate.NewTranslationClient(ctx)
+	client, err := translate.NewTranslationClient(ctx)
 	if err != nil {
 		return fmt.Errorf("NewTranslationClient: %v", err)
 	}
-	defer c.Close()
+	defer client.Close()
 
 	req := &translatepb.ListGlossariesRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
 	}
 
-	it := c.ListGlossaries(ctx, req)
+	it := client.ListGlossaries(ctx, req)
 
 	// Iterate over all results
 	for {

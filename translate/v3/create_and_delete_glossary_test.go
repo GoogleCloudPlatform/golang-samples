@@ -27,27 +27,23 @@ import (
 func TestCreateAndDeleteGlossary(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	var buf bytes.Buffer
-	var got string
-
 	location := "us-central1"
 	glossaryID := fmt.Sprintf("create_and_delete_glossary-%v", uuid.New().ID())
 	glossaryInputURI := "gs://cloud-samples-data/translation/glossary_ja.csv"
 
 	// Create a glossary.
-	buf.Reset()
+	var buf bytes.Buffer
 	if err := createGlossary(&buf, tc.ProjectID, location, glossaryID, glossaryInputURI); err != nil {
 		t.Fatalf("createGlossary: %v", err)
 	}
-	got = buf.String()
-	if !strings.Contains(got, "Created") {
-		t.Fatalf("Got '%s', expected to contain 'Created'", got)
+	if got, want := buf.String(), "Created"; !strings.Contains(got, want) {
+		t.Fatalf("createGlossary got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
 	}
-	if !strings.Contains(got, glossaryID) {
-		t.Fatalf("Got '%s', expected to contain '%s'", got, glossaryID)
+	if got, want := buf.String(), glossaryID; !strings.Contains(got, want) {
+		t.Fatalf("createGlossary got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
 	}
-	if !strings.Contains(got, glossaryInputURI) {
-		t.Fatalf("Got '%s', expected to contain '%s'", got, glossaryInputURI)
+	if got, want := buf.String(), glossaryInputURI; !strings.Contains(got, want) {
+		t.Fatalf("createGlossary got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
 	}
 
 	// Delete the glossary.
@@ -55,14 +51,13 @@ func TestCreateAndDeleteGlossary(t *testing.T) {
 	if err := deleteGlossary(&buf, tc.ProjectID, location, glossaryID); err != nil {
 		t.Fatalf("deleteGlossary: %v", err)
 	}
-	got = buf.String()
-	if !strings.Contains(got, "Deleted") {
-		t.Fatalf("Got '%s', expected to contain 'Deleted'", got)
+	if got, want := buf.String(), "Deleted"; !strings.Contains(got, want) {
+		t.Fatalf("deleteGlossary got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
 	}
-	if !strings.Contains(got, location) {
-		t.Fatalf("Got '%s', expected to contain '%s'", got, location)
+	if got, want := buf.String(), location; !strings.Contains(got, want) {
+		t.Fatalf("deleteGlossary got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
 	}
-	if !strings.Contains(got, glossaryID) {
-		t.Fatalf("Got '%s', expected to contain '%s'", got, glossaryID)
+	if got, want := buf.String(), glossaryID; !strings.Contains(got, want) {
+		t.Fatalf("deleteGlossary got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
 	}
 }

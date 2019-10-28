@@ -33,11 +33,11 @@ func translateText(w io.Writer, projectID string, sourceLang string, targetLang 
 	// text := "Text you wish to translate"
 
 	ctx := context.Background()
-	c, err := translate.NewTranslationClient(ctx)
+	client, err := translate.NewTranslationClient(ctx)
 	if err != nil {
 		return fmt.Errorf("NewTranslationClient: %v", err)
 	}
-	defer c.Close()
+	defer client.Close()
 
 	req := &translatepb.TranslateTextRequest{
 		Parent:             fmt.Sprintf("projects/%s/locations/global", projectID),
@@ -47,7 +47,7 @@ func translateText(w io.Writer, projectID string, sourceLang string, targetLang 
 		Contents:           []string{text},
 	}
 
-	resp, err := c.TranslateText(ctx, req)
+	resp, err := client.TranslateText(ctx, req)
 	if err != nil {
 		return fmt.Errorf("TranslateText: %v", err)
 	}

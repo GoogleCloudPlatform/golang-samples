@@ -36,11 +36,11 @@ func batchTranslateTextWithModel(w io.Writer, projectID string, location string,
 	// modelID := "your-model-id"
 
 	ctx := context.Background()
-	c, err := translate.NewTranslationClient(ctx)
+	client, err := translate.NewTranslationClient(ctx)
 	if err != nil {
 		return fmt.Errorf("NewTranslationClient: %v", err)
 	}
-	defer c.Close()
+	defer client.Close()
 
 	req := &translatepb.BatchTranslateTextRequest{
 		Parent:              fmt.Sprintf("projects/%s/locations/%s", projectID, location),
@@ -68,7 +68,7 @@ func batchTranslateTextWithModel(w io.Writer, projectID string, location string,
 	}
 
 	// The BatchTranslateText operation is async.
-	op, err := c.BatchTranslateText(ctx, req)
+	op, err := client.BatchTranslateText(ctx, req)
 	if err != nil {
 		return fmt.Errorf("BatchTranslateText: %v", err)
 	}

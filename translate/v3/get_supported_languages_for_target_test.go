@@ -25,20 +25,17 @@ import (
 func TestGetSupportedLanguagesForTarget(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	var buf bytes.Buffer
-	var got string
-
 	languageCode := "is"
 
 	// Get supported languages.
+	var buf bytes.Buffer
 	if err := getSupportedLanguagesForTarget(&buf, tc.ProjectID, languageCode); err != nil {
-		t.Fatalf("getSupportedLanguagesWithTarget: %v", err)
+		t.Fatalf("getSupportedLanguagesForTarget: %v", err)
 	}
-	got = buf.String()
-	if !strings.Contains(got, "Language code: sq") {
-		t.Fatalf("Got '%s', expected to contain 'Language code: sq'", got)
+	if got, want := buf.String(), "Language code: sq"; !strings.Contains(got, want) {
+		t.Fatalf("getSupportedLanguagesForTarget got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
 	}
-	if !strings.Contains(got, "Display name: albanska") {
-		t.Fatalf("Got '%s', expected to contain 'Display name: albanska'", got)
+	if got, want := buf.String(), "Display name: albanska"; !strings.Contains(got, want) {
+		t.Fatalf("getSupportedLanguagesForTarget got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
 	}
 }

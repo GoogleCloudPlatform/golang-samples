@@ -33,11 +33,11 @@ func createGlossary(w io.Writer, projectID string, location string, glossaryID s
 	// glossaryInputURI := "gs://cloud-samples-data/translation/glossary.csv"
 
 	ctx := context.Background()
-	c, err := translate.NewTranslationClient(ctx)
+	client, err := translate.NewTranslationClient(ctx)
 	if err != nil {
 		return fmt.Errorf("NewTranslationClient: %v", err)
 	}
-	defer c.Close()
+	defer client.Close()
 
 	req := &translatepb.CreateGlossaryRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
@@ -59,7 +59,7 @@ func createGlossary(w io.Writer, projectID string, location string, glossaryID s
 	}
 
 	// The CreateGlossary operation is async.
-	op, err := c.CreateGlossary(ctx, req)
+	op, err := client.CreateGlossary(ctx, req)
 	if err != nil {
 		return fmt.Errorf("CreateGlossary: %v", err)
 	}
