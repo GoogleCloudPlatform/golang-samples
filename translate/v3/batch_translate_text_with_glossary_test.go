@@ -65,6 +65,6 @@ func TestBatchTranslateTextWithGlossary(t *testing.T) {
 		t.Fatalf("batchTranslateTextWithGlossary: %v", err)
 	}
 	if got, want := buf.String(), "Total characters"; !strings.Contains(got, want) {
-		t.Fatalf("batchTranslateTextWithGlossary got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
+		t.Errorf("batchTranslateTextWithGlossary got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
 	}
 }

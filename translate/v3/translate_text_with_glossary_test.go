@@ -46,6 +46,6 @@ func TestTranslateTextWithGlossary(t *testing.T) {
 		t.Fatalf("translateTextWithGlossary: %v", err)
 	}
 	if got, want1, want2 := buf.String(), "アカウント", "口座"; !strings.Contains(got, want1) && !strings.Contains(got, want2) {
-		t.Fatalf("translateTextWithGlossary got:\n----\n%s----\nWant to contain:\n----\n%s\n----\nOR\n----\n%s\n----", got, want1, want2)
+		t.Errorf("translateTextWithGlossary got:\n----\n%s----\nWant to contain:\n----\n%s\n----\nOR\n----\n%s\n----", got, want1, want2)
 	}
 }

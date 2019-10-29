@@ -37,13 +37,13 @@ func TestCreateAndDeleteGlossary(t *testing.T) {
 		t.Fatalf("createGlossary: %v", err)
 	}
 	if got, want := buf.String(), "Created"; !strings.Contains(got, want) {
-		t.Fatalf("createGlossary got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
+		t.Errorf("createGlossary got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
 	}
 	if got, want := buf.String(), glossaryID; !strings.Contains(got, want) {
-		t.Fatalf("createGlossary got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
+		t.Errorf("createGlossary got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
 	}
 	if got, want := buf.String(), glossaryInputURI; !strings.Contains(got, want) {
-		t.Fatalf("createGlossary got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
+		t.Errorf("createGlossary got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
 	}
 
 	// Delete the glossary.
@@ -52,12 +52,12 @@ func TestCreateAndDeleteGlossary(t *testing.T) {
 		t.Fatalf("deleteGlossary: %v", err)
 	}
 	if got, want := buf.String(), "Deleted"; !strings.Contains(got, want) {
-		t.Fatalf("deleteGlossary got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
+		t.Errorf("deleteGlossary got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
 	}
 	if got, want := buf.String(), location; !strings.Contains(got, want) {
-		t.Fatalf("deleteGlossary got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
+		t.Errorf("deleteGlossary got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
 	}
 	if got, want := buf.String(), glossaryID; !strings.Contains(got, want) {
-		t.Fatalf("deleteGlossary got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
+		t.Errorf("deleteGlossary got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
 	}
 }

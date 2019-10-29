@@ -33,9 +33,9 @@ func TestGetSupportedLanguagesForTarget(t *testing.T) {
 		t.Fatalf("getSupportedLanguagesForTarget: %v", err)
 	}
 	if got, want := buf.String(), "Language code: sq"; !strings.Contains(got, want) {
-		t.Fatalf("getSupportedLanguagesForTarget got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
+		t.Errorf("getSupportedLanguagesForTarget got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
 	}
 	if got, want := buf.String(), "Display name: albanska"; !strings.Contains(got, want) {
-		t.Fatalf("getSupportedLanguagesForTarget got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
+		t.Errorf("getSupportedLanguagesForTarget got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
 	}
 }

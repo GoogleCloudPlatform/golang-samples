@@ -26,7 +26,7 @@ import (
 func deleteBucket(ctx context.Context, t *testing.T, bucket *storage.BucketHandle) {
 	bucketAttrs, err := bucket.Attrs(ctx)
 	if err != nil {
-		t.Fatalf("bucket.Attrs: %v", err)
+		t.Errorf("bucket.Attrs: %v", err)
 	}
 	bucketName := bucketAttrs.Name
 	it := bucket.Objects(ctx, nil)
@@ -36,13 +36,13 @@ func deleteBucket(ctx context.Context, t *testing.T, bucket *storage.BucketHandl
 			break
 		}
 		if err != nil {
-			t.Fatalf("bucket.Objects: %v", err)
+			t.Errorf("bucket.Objects: %v", err)
 		}
 		if err := bucket.Object(attrs.Name).Delete(ctx); err != nil {
-			t.Fatalf("Bucket(%v).Object(%v).Delete: %v", bucketName, attrs.Name, err)
+			t.Errorf("Bucket(%v).Object(%v).Delete: %v", bucketName, attrs.Name, err)
 		}
 	}
 	if err := bucket.Delete(ctx); err != nil {
-		t.Fatalf("bucket.Delete: %v", err)
+		t.Errorf("bucket.Delete: %v", err)
 	}
 }

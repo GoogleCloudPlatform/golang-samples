@@ -59,6 +59,6 @@ package v3
 // 		t.Fatalf("batchTranslateTextWithModel: %v", err)
 // 	}
 // 	if got, want := buf.String(), "Total characters"; !strings.Contains(got, want) {
-// 		t.Fatalf("batchTranslateTextWithModel got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
+// 		t.Errorf("batchTranslateTextWithModel got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
 // 	}
 // }

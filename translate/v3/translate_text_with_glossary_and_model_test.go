@@ -51,11 +51,11 @@ package v3
 
 // 	// Custom model.
 // 	if got, want1, want2 := buf.String(), "それはそうだ", "それじゃあ"; !strings.Contains(got, want1) && !strings.Contains(got, want2) {
-// 		t.Fatalf("translateTextWithGlossaryAndModel got:\n----\n%s----\nWant to contain:\n----\n%s\n----\nOR\n----\n%s\n----", got, want1, want2)
+// 		t.Errorf("translateTextWithGlossaryAndModel got:\n----\n%s----\nWant to contain:\n----\n%s\n----\nOR\n----\n%s\n----", got, want1, want2)
 // 	}
 
 // 	// Glossary.
 // 	if got, want := buf.String(), "欺く"; !strings.Contains(got, want) {
-// 		t.Fatalf("translateTextWithGlossaryAndModel got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
+// 		t.Errorf("translateTextWithGlossaryAndModel got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
 // 	}
 // }

@@ -31,6 +31,6 @@ func TestGetSupportedLanguages(t *testing.T) {
 		t.Fatalf("getSupportedLanguages: %v", err)
 	}
 	if got, want := buf.String(), "zh-CN"; !strings.Contains(got, want) {
-		t.Fatalf("getSupportedLanguages got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
+		t.Errorf("getSupportedLanguages got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
 	}
 }

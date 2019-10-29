@@ -39,6 +39,6 @@ package v3
 // 		t.Fatalf("translateTextWithModel: %v", err)
 // 	}
 // 	if got, want1, want2 := buf.String(), "それはそうだ", "それじゃあ"; !strings.Contains(got, want1) && !strings.Contains(got, want2) {
-// 		t.Fatalf("translateTextWithModel got:\n----\n%s----\nWant to contain:\n----\n%s\n----\nOR\n----\n%s\n----", got, want1, want2)
+// 		t.Errorf("translateTextWithModel got:\n----\n%s----\nWant to contain:\n----\n%s\n----\nOR\n----\n%s\n----", got, want1, want2)
 // 	}
 // }

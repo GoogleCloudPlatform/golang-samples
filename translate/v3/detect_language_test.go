@@ -33,6 +33,6 @@ func TestDetectLanguage(t *testing.T) {
 		t.Fatalf("detectLanguage: %v", err)
 	}
 	if got, want := buf.String(), "is"; !strings.Contains(got, want) {
-		t.Fatalf("detectLanguage got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
+		t.Errorf("detectLanguage got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
 	}
 }

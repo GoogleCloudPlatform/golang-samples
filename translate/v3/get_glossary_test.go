@@ -43,9 +43,9 @@ func TestGetGlossary(t *testing.T) {
 		t.Fatalf("getGlossary: %v", err)
 	}
 	if got, want := buf.String(), glossaryID; !strings.Contains(got, want) {
-		t.Fatalf("getGlossary got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
+		t.Errorf("getGlossary got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
 	}
 	if got, want := buf.String(), glossaryInputURI; !strings.Contains(got, want) {
-		t.Fatalf("getGlossary got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
+		t.Errorf("getGlossary got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
 	}
 }
