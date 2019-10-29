@@ -32,8 +32,10 @@ type firestoreDB struct {
 // Ensure firestoreDB conforms to the BookDatabase interface.
 var _ BookDatabase = &firestoreDB{}
 
+// [START getting_started_bookshelf_firestore]
+
 // newFirestoreDB creates a new BookDatabase backed by Cloud Firestore.
-// See the firestore and google packages for details on creating a suitable
+// See the firestore package for details on creating a suitable
 // firestore.Client: https://godoc.org/cloud.google.com/go/firestore.
 func newFirestoreDB(client *firestore.Client) (*firestoreDB, error) {
 	ctx := context.Background()
@@ -55,7 +57,7 @@ func (db *firestoreDB) Close(context.Context) error {
 	return db.client.Close()
 }
 
-// GetBook retrieves a book by its ID.
+// Book retrieves a book by its ID.
 func (db *firestoreDB) GetBook(ctx context.Context, id string) (*Book, error) {
 	ds, err := db.client.Collection("books").Doc(id).Get(ctx)
 	if err != nil {
@@ -65,6 +67,8 @@ func (db *firestoreDB) GetBook(ctx context.Context, id string) (*Book, error) {
 	ds.DataTo(b)
 	return b, nil
 }
+
+// [END getting_started_bookshelf_firestore]
 
 // AddBook saves a given book, assigning it a new ID.
 func (db *firestoreDB) AddBook(ctx context.Context, b *Book) (id string, err error) {
