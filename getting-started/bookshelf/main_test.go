@@ -56,6 +56,17 @@ func TestMain(m *testing.M) {
 		if err != nil {
 			log.Fatalf("firestore.NewClient: %v", err)
 		}
+
+		// Delete all docs first to start with a clean slate.
+		docs, err := client.Collection("books").DocumentRefs(ctx).GetAll()
+		if err == nil {
+			for _, d := range docs {
+				if _, err := d.Delete(ctx); err != nil {
+					log.Fatalf("Delete: %v", err)
+				}
+			}
+		}
+
 		db, err := newFirestoreDB(client)
 		if err != nil {
 			log.Fatalf("newFirestoreDB: %v", err)
@@ -195,17 +206,46 @@ func TestAddAndDelete(t *testing.T) {
 			}
 		})
 	}
+}
 
+func TestSendLog(t *testing.T) {
+	buf := &bytes.Buffer{}
+	oldLogger := b.logWriter
+	b.logWriter = buf
+
+	bodyContains(t, wt, "/logs", "Log sent!")
+
+	b.logWriter = oldLogger
+
+	if got, want := buf.String(), "Good job!"; !strings.Contains(got, want) {
+		t.Errorf("/logs logged\n----\n%v\n----\nWant to contain:\n----\n%v", got, want)
+	}
+}
+
+func TestSendError(t *testing.T) {
+	buf := &bytes.Buffer{}
+	oldLogger := b.logWriter
+	b.logWriter = buf
+
+	bodyContains(t, wt, "/errors", "Error Reporting")
+
+	b.logWriter = oldLogger
+
+	if got, want := buf.String(), "uh oh"; !strings.Contains(got, want) {
+		t.Errorf("/errors logged\n----\n%v\n----\nWant to contain:\n----\n%v", got, want)
+	}
 }
 
 func bodyContains(t *testing.T, wt *webtest.W, path, contains string) (ok bool) {
+	t.Helper()
+
 	body, _, err := wt.GetBody(path)
 	if err != nil {
 		t.Error(err)
 		return false
 	}
 	if !strings.Contains(body, contains) {
-		t.Errorf("want %s to contain %s", body, contains)
+		t.Errorf("got:\n----\n%s\nWant to contain:\n----\n%s", body, contains)
 		return false
 	}
 	return true
