@@ -16,6 +16,8 @@
 
 set -e
 
+set -x
+
 go version
 date
 
@@ -26,17 +28,12 @@ mkdir -p $target
 mv github/golang-samples $target
 cd $target/golang-samples
 
-CHANGES=$(git --no-pager diff --name-only HEAD..master)
-SIGNIFICANT_CHANGES=$(echo $CHANGES | tr ' ' '\n' | egrep -v '(\.md$|^\.github)')
-
-# If this is a PR with only insignificant changes, don't run any tests.
-if [[ -n ${KOKORO_GITHUB_PULL_REQUEST_NUMBER:-} ]] && [[ -z "$SIGNIFICANT_CHANGES" ]]; then
-  echo "No big changes. Not running any tests."
-  exit 0
-fi
-
 export GO111MODULE=on # Always use modules.
 export GOPROXY=https://proxy.golang.org
+
+# Don't print environment variables in case there are secrets.
+# If you need a secret, use a keystore_resource in common.cfg.
+set +x
 
 export GOLANG_SAMPLES_KMS_KEYRING=ring1
 export GOLANG_SAMPLES_KMS_CRYPTOKEY=key1
@@ -49,6 +46,8 @@ export GCLOUD_ORGANIZATION=1081635000895
 export GOLANG_SAMPLES_SPANNER=projects/golang-samples-tests/instances/golang-samples-tests
 export GOLANG_SAMPLES_BIGTABLE_PROJECT=golang-samples-tests
 export GOLANG_SAMPLES_BIGTABLE_INSTANCE=testing-instance
+
+set -x
 
 TIMEOUT=45m
 
@@ -66,6 +65,8 @@ echo "Running tests in project $GOLANG_SAMPLES_PROJECT_ID";
 # Always return the project and clean the cache so Kokoro doesn't try to copy
 # it when exiting.
 trap "go clean -modcache; gimmeproj -project golang-samples-tests done $GOLANG_SAMPLES_PROJECT_ID" EXIT
+
+set +x
 
 # Set application credentials to the project-specific account. Some APIs do not
 # allow the service account project and GOOGLE_CLOUD_PROJECT to be different.
@@ -92,7 +93,9 @@ fi
 
 # CHANGED_DIRS is the list of significant top-level directories that changed.
 # CHANGED_DIRS will be empty when run on master.
-CHANGED_DIRS=$(echo $SIGNIFICANT_CHANGES | tr ' ' '\n' | grep "/" | cut -d/ -f1 | sort -u)
+# Also see trampoline.sh - system_tests.sh is only run when there are
+# significant changes.
+CHANGED_DIRS=$(git --no-pager diff --name-only HEAD..master | egrep -v '(\.md$|^\.github)' | grep "/" | cut -d/ -f1 | sort -u)
 # If test configuration is changed, run all tests.
 if [[ $CHANGED_DIRS =~ "testing" || $CHANGED_DIRS =~ "internal" ]]; then
   RUN_ALL_TESTS="1"
