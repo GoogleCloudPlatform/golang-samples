@@ -132,7 +132,7 @@ func (b *Bookshelf) bookFromRequest(r *http.Request) (*Book, error) {
 	if id == "" {
 		return nil, errors.New("no book with empty ID")
 	}
-	book, err := b.DB.Book(ctx, id)
+	book, err := b.DB.GetBook(ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("could not find book: %v", err)
 	}

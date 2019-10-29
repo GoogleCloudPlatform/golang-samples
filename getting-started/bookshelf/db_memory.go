@@ -49,8 +49,8 @@ func (db *memoryDB) Close(context.Context) error {
 	return nil
 }
 
-// Book retrieves a book by its ID.
-func (db *memoryDB) Book(_ context.Context, id string) (*Book, error) {
+// GetBook retrieves a book by its ID.
+func (db *memoryDB) GetBook(_ context.Context, id string) (*Book, error) {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
