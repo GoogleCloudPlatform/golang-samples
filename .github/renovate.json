@@ -1,18 +1,14 @@
 {
   "extends": [
-    "config:base"
+    "config:base",
+    "schedule:weekly"
   ],
   "semanticCommits": false,
   "postUpdateOptions": ["gomodTidy"],
   "commitMessagePrefix": "all: ",
+  "commitMessageAction": "update",
   "ignorePaths": [
     "testing/docker/Dockerfile*"
   ],
-  "commitMessageAction": "update",
-  "packageRules": [
-    {
-      "packagePatterns": ["^cloud.google.com/go", "^google.golang.org"],
-      "groupName": "Google Cloud packages"
-    }
-  ]
+  "groupName": "all"
 }
