@@ -31,6 +31,8 @@ cd $target/golang-samples
 export GO111MODULE=on # Always use modules.
 export GOPROXY=https://proxy.golang.org
 
+# Don't print environment variables in case there are secrets.
+# If you need a secret, use a keystore_resource in common.cfg.
 set +x
 
 export GOLANG_SAMPLES_KMS_KEYRING=ring1
