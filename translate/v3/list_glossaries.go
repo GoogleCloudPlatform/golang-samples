@@ -15,7 +15,7 @@
 // Package v3 contains samples for Google Cloud Translation API v3.
 package v3
 
-// [START translate_v3_list_glossaries]
+// [START translate_v3_list_glossary]
 import (
 	"context"
 	"fmt"
@@ -68,4 +68,4 @@ func listGlossaries(w io.Writer, projectID string, location string) error {
 	return nil
 }
 
-// [END translate_v3_list_glossaries]
+// [END translate_v3_list_glossary]
