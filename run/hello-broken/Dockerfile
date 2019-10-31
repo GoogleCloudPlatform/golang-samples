@@ -38,7 +38,7 @@ RUN go build -mod=readonly -v -o server
 # https://hub.docker.com/_/debian
 # https://docs.docker.com/develop/develop-images/multistage-build/#use-multi-stage-builds
 FROM debian:buster-slim
-RUN set -e && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+RUN set -x && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
