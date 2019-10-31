@@ -47,7 +47,9 @@ func main() {
 	if portStr := os.Getenv("PORT"); portStr != "" {
 		port, _ = strconv.Atoi(portStr)
 	}
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), nil))
+	if err := http.ListenAndServe(":"+strconv.Itoa(port), nil); err != nil {
+		log.Fatal(err)
+	}
 }
 
 // echoHandler reads a JSON object from the body, and writes it back out.
