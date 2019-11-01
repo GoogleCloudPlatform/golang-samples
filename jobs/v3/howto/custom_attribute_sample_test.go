@@ -24,6 +24,8 @@ import (
 )
 
 func TestFilterOnStringValueCustomAttribute(t *testing.T) {
+	t.Skip("Flaky. https://github.com/GoogleCloudPlatform/golang-samples/issues/1061.")
+
 	tc := testutil.SystemTest(t)
 	testutil.Retry(t, 10, 1*time.Second, func(r *testutil.R) {
 		buf := &bytes.Buffer{}
@@ -38,6 +40,8 @@ func TestFilterOnStringValueCustomAttribute(t *testing.T) {
 }
 
 func TestFilterOnLongValueCustomAttribute(t *testing.T) {
+	t.Skip("Flaky. https://github.com/GoogleCloudPlatform/golang-samples/issues/1061.")
+
 	tc := testutil.SystemTest(t)
 	testutil.Retry(t, 10, 1*time.Second, func(r *testutil.R) {
 		buf := &bytes.Buffer{}
@@ -52,6 +56,8 @@ func TestFilterOnLongValueCustomAttribute(t *testing.T) {
 }
 
 func TestFilterOnMultiCustomAttributes(t *testing.T) {
+	t.Skip("Flaky. https://github.com/GoogleCloudPlatform/golang-samples/issues/1061.")
+
 	tc := testutil.SystemTest(t)
 	testutil.Retry(t, 10, 1*time.Second, func(r *testutil.R) {
 		buf := &bytes.Buffer{}
