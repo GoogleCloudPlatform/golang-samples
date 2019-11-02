@@ -59,7 +59,12 @@ func main() {
 	// Exporters use Application Default Credentials to authenticate.
 	// See https://developers.google.com/identity/protocols/application-default-credentials
 	// for more details.
-	exporter, err := stackdriver.NewExporter(stackdriver.Options{})
+	exporter, err := stackdriver.NewExporter(stackdriver.Options{
+		// For demonstration the ReportingInterval is set to 10 seconds.
+		// The default value is 60 seconds. Choose the interval appropriately as it
+		// can affect the cost.
+		ReportingInterval: 10 * time.Second,
+	})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -69,7 +74,14 @@ func main() {
 	if err := exporter.StartMetricsExporter(); err != nil {
 		log.Fatalf("Error starting metric exporter: %v", err)
 	}
-	defer exporter.StopMetricsExporter()
+
+	defer func() {
+		// Sleep 10 seconds (equal to ReportingInterval) to ensure updated metrics
+		// are exported at least once.
+		fmt.Println("Waiting for one more export interval to finish")
+		time.Sleep(10 * time.Second)
+		exporter.StopMetricsExporter()
+	}()
 	// [END monitoring_opencensus_setup_exporter]
 
 	// Record 100 fake latency values between 0 and 5 seconds.
