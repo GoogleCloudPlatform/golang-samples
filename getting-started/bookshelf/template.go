@@ -43,7 +43,7 @@ type appTemplate struct {
 }
 
 // Execute writes the template using the provided data.
-func (tmpl *appTemplate) Execute(w http.ResponseWriter, r *http.Request, data interface{}) *appError {
+func (tmpl *appTemplate) Execute(b *Bookshelf, w http.ResponseWriter, r *http.Request, data interface{}) *appError {
 	d := struct {
 		Data interface{}
 	}{
@@ -51,7 +51,7 @@ func (tmpl *appTemplate) Execute(w http.ResponseWriter, r *http.Request, data in
 	}
 
 	if err := tmpl.t.Execute(w, d); err != nil {
-		return appErrorf(err, "could not write template: %v", err)
+		return b.appErrorf(r, err, "could not write template: %v", err)
 	}
 	return nil
 }
