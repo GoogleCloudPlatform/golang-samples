@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# [START getting_started_gce_startup_script]
 set -ex
 
 # Talk to the metadata server to get the project id
@@ -62,3 +63,4 @@ chmod 644 /etc/systemd/system/my-gce-app.service
 
 # Start the service.
 service my-gce-app start
+# [END getting_started_gce_startup_script]
