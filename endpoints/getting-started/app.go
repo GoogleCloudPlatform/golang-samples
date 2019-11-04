@@ -22,7 +22,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -43,11 +42,15 @@ func main() {
 		HandlerFunc(authInfoHandler)
 
 	http.Handle("/", r)
-	port := 8080
-	if portStr := os.Getenv("PORT"); portStr != "" {
-		port, _ = strconv.Atoi(portStr)
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+		log.Printf("Defaulting to port %s", port)
 	}
-	if err := http.ListenAndServe(":"+strconv.Itoa(port), nil); err != nil {
+
+	log.Printf("Listening on port %s", port)
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
 		log.Fatal(err)
 	}
 }
