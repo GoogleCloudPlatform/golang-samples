@@ -12,11 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package kms contains samples for asymmetric keys feature of Cloud Key Management Service
+// https://cloud.google.com/kms/
 package kms
 
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strconv"
@@ -67,7 +70,7 @@ func getTestVariables(projectID string) TestVariables {
 
 	sym := keyRingPath + "/cryptoKeys/" + symID
 	symVersion := sym + "/cryptoKeyVersions/1"
-	rsaDecrypt := keyRingPath + "/cryptoKeys/" + rsaDecryptID + "/cryptoKeyVersions/2"
+	rsaDecryptPath := keyRingPath + "/cryptoKeys/" + rsaDecryptID + "/cryptoKeyVersions/2"
 	rsaSign := keyRingPath + "/cryptoKeys/" + rsaSignID + "/cryptoKeyVersions/1"
 	ecSign := keyRingPath + "/cryptoKeys/" + ecSignID + "/cryptoKeyVersions/1"
 
@@ -82,7 +85,7 @@ func getTestVariables(projectID string) TestVariables {
 	waitTime := 5 * time.Second
 
 	v = TestVariables{ctx, projectID, message, location, parent, member, role, keyRing, keyRingPath,
-		sym, symVersion, rsaDecrypt, rsaSign, ecSign, symID, rsaDecryptID, rsaSignID, ecSignID, tryLimit, waitTime}
+		sym, symVersion, rsaDecryptPath, rsaSign, ecSign, symID, rsaDecryptID, rsaSignID, ecSignID, tryLimit, waitTime}
 	return v
 }
 
@@ -101,7 +104,11 @@ func createKeyHelper(v TestVariables, keyID, keyPath, parent string,
 }
 
 func TestMain(m *testing.M) {
-	tc, _ := testutil.ContextMain(m)
+	tc, ok := testutil.ContextMain(m)
+	if !ok {
+		fmt.Println("Could not set up tests. Set GOLANG_SAMPLES_PROJECT_ID? Skipping.")
+		os.Exit(0)
+	}
 	v := getTestVariables(tc.ProjectID)
 	parent := "projects/" + v.projectID + "/locations/global"
 	// Create cryptokeys in the test project if needed.

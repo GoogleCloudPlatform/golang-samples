@@ -24,6 +24,8 @@ import (
 )
 
 func TestBasicJobSearch(t *testing.T) {
+	t.Skip("Flaky. https://github.com/GoogleCloudPlatform/golang-samples/issues/1061.")
+
 	tc := testutil.SystemTest(t)
 
 	testutil.Retry(t, 10, 1*time.Second, func(r *testutil.R) {
@@ -39,6 +41,8 @@ func TestBasicJobSearch(t *testing.T) {
 }
 
 func TestCategoryFilterSearch(t *testing.T) {
+	t.Skip("Flaky. https://github.com/GoogleCloudPlatform/golang-samples/issues/1061.")
+
 	tc := testutil.SystemTest(t)
 
 	testutil.Retry(t, 10, 1*time.Second, func(r *testutil.R) {
@@ -54,6 +58,8 @@ func TestCategoryFilterSearch(t *testing.T) {
 }
 
 func TestEmploymentTypesSearch(t *testing.T) {
+	t.Skip("Flaky. https://github.com/GoogleCloudPlatform/golang-samples/issues/1061.")
+
 	tc := testutil.SystemTest(t)
 
 	testutil.Retry(t, 10, 1*time.Second, func(r *testutil.R) {
@@ -69,6 +75,8 @@ func TestEmploymentTypesSearch(t *testing.T) {
 }
 
 func TestDateRangeSearch(t *testing.T) {
+	t.Skip("Flaky. https://github.com/GoogleCloudPlatform/golang-samples/issues/1061.")
+
 	tc := testutil.SystemTest(t)
 
 	testutil.Retry(t, 10, 1*time.Second, func(r *testutil.R) {
@@ -84,6 +92,8 @@ func TestDateRangeSearch(t *testing.T) {
 }
 
 func TestLanguageCodeSearch(t *testing.T) {
+	t.Skip("Flaky. https://github.com/GoogleCloudPlatform/golang-samples/issues/1061.")
+
 	tc := testutil.SystemTest(t)
 
 	testutil.Retry(t, 10, 1*time.Second, func(r *testutil.R) {
@@ -99,6 +109,8 @@ func TestLanguageCodeSearch(t *testing.T) {
 }
 
 func TestCompanyDisplayNameSearch(t *testing.T) {
+	t.Skip("Flaky. https://github.com/GoogleCloudPlatform/golang-samples/issues/1061.")
+
 	tc := testutil.SystemTest(t)
 
 	testutil.Retry(t, 10, 1*time.Second, func(r *testutil.R) {
@@ -114,6 +126,8 @@ func TestCompanyDisplayNameSearch(t *testing.T) {
 }
 
 func TestCompensationSearch(t *testing.T) {
+	t.Skip("Flaky. https://github.com/GoogleCloudPlatform/golang-samples/issues/1061.")
+
 	tc := testutil.SystemTest(t)
 
 	testutil.Retry(t, 10, 1*time.Second, func(r *testutil.R) {

@@ -15,7 +15,6 @@
 package tips
 
 import (
-	"io/ioutil"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -25,12 +24,9 @@ func TestScopeDemo(t *testing.T) {
 	req := httptest.NewRequest("GET", "/", strings.NewReader(""))
 	rr := httptest.NewRecorder()
 	ScopeDemo(rr, req)
-	out, err := ioutil.ReadAll(rr.Result().Body)
-	if err != nil {
-		t.Fatalf("ReadAll: %v", err)
-	}
+
 	want := `Global: "slow", Local: "fast"`
-	if got := string(out); got != want {
+	if got := rr.Body.String(); got != want {
 		t.Errorf("ScopeDemo got %q, want %q", got, want)
 	}
 }

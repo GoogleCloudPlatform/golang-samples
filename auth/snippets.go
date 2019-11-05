@@ -54,14 +54,8 @@ func implicit() {
 	}
 
 	// For packages whose import path is starting with "google.golang.org/api",
-	// such as google.golang.org/api/cloudkms/v1, use the
-	// golang.org/x/oauth2/google package as shown below.
-	oauthClient, err := google.DefaultClient(ctx, cloudkms.CloudPlatformScope)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	kmsService, err := cloudkms.New(oauthClient)
+	// such as google.golang.org/api/cloudkms/v1, use NewService to create the client.
+	kmsService, err := cloudkms.NewService(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}

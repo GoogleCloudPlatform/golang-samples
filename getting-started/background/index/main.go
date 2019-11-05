@@ -67,7 +67,9 @@ func main() {
 	}
 
 	log.Printf("Listening on localhost:%v", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
+		log.Fatal(err)
+	}
 }
 
 // newApp creates a new app.
