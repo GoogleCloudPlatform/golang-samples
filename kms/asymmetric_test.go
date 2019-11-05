@@ -19,7 +19,6 @@ import (
 	"bytes"
 	"crypto/ecdsa"
 	"crypto/rsa"
-	"encoding/base64"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -60,23 +59,22 @@ func TestRSAEncryptDecrypt(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	v := getTestVariables(tc.ProjectID)
 
-	cipherBytes, err := encryptRSA(v.rsaDecryptPath, []byte(v.message))
-	ciphertext := base64.StdEncoding.EncodeToString(cipherBytes)
+	ciphertext, err := encryptRSA(v.rsaDecryptPath, []byte(v.message))
 	if err != nil {
 		t.Fatalf("encryptRSA(%s, %s): %v", v.rsaDecryptPath, []byte(v.message), err)
 	}
-	if len(cipherBytes) != 256 {
-		t.Fatalf("ciphertext length = %d; want: %d", len(ciphertext), 256)
+	if len(ciphertext) != 256 {
+		t.Fatalf("len(ciphertext) = %d; want: %d", len(ciphertext), 256)
 	}
-	plainBytes, err := decryptRSA(v.rsaDecryptPath, cipherBytes)
+	plainBytes, err := decryptRSA(v.rsaDecryptPath, ciphertext)
 	if err != nil {
 		t.Fatalf("decryptRSA(%s, %s): %v", ciphertext, v.rsaDecryptPath, err)
 	}
 	if !bytes.Equal(plainBytes, []byte(v.message)) {
 		t.Fatalf("decrypted plaintext does not match input message: want %s, got %s", []byte(v.message), plainBytes)
 	}
-	if bytes.Equal(cipherBytes, []byte(v.message)) {
-		t.Fatalf("ciphertext and plaintext bytes are identical: %s", cipherBytes)
+	if bytes.Equal(ciphertext, []byte(v.message)) {
+		t.Fatalf("ciphertext and plaintext bytes are identical: %s", ciphertext)
 	}
 	plaintext := string(plainBytes)
 	if plaintext != v.message {

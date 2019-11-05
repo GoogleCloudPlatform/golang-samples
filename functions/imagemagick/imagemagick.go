@@ -14,8 +14,8 @@
 
 // [START functions_imagemagick_setup]
 
-// Package imagemagick contains an example of using ImageMagick from a Cloud
-// Function.
+// Package imagemagick contains an example of using ImageMagick to process a
+// file uploaded to Cloud Storage.
 package imagemagick
 
 import (
@@ -110,7 +110,7 @@ func blur(ctx context.Context, inputBucket, outputBucket, name string) error {
 		return fmt.Errorf("cmd.Run: %v", err)
 	}
 
-	log.Printf("Blurred image has been uploaded to %s", outputBlob.ObjectName())
+	log.Printf("Blurred image uploaded to gs://%s/%s", outputBlob.BucketName(), outputBlob.ObjectName())
 
 	return nil
 }

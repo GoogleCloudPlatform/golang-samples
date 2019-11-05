@@ -40,11 +40,11 @@ func main() {
 	}
 
 	// The resource name of the key rings.
-	parentName := fmt.Sprintf("projects/%s/locations/%s", projectID, locationID)
+	parent := fmt.Sprintf("projects/%s/locations/%s", projectID, locationID)
 
 	// Build the request.
 	req := &kmspb.ListKeyRingsRequest{
-		Parent: parentName,
+		Parent: parent,
 	}
 	// Query the API.
 	it := client.ListKeyRings(ctx, req)

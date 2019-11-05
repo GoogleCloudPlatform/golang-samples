@@ -15,7 +15,6 @@
 package sql
 
 import (
-	"io/ioutil"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -27,12 +26,8 @@ func TestPostgresDemo(t *testing.T) {
 	}
 	rr := httptest.NewRecorder()
 	PostgresDemo(rr, nil)
-	out, err := ioutil.ReadAll(rr.Result().Body)
-	if err != nil {
-		t.Fatalf("ioutil.ReadAll: %v", err)
-	}
-	want := "Now:"
-	if got := string(out); !strings.Contains(got, want) {
+
+	if got, want := rr.Body.String(), "Now:"; !strings.Contains(got, want) {
 		t.Fatalf("PostgresDemo got %q, want to contain %q", got, want)
 	}
 }

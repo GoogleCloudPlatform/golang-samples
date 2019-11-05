@@ -74,6 +74,10 @@ var allowList = []string{
 	// Cloud Functions codelab picture.
 	"functions/codelabs/gopher/gophercolor.png",
 
+	// Cloud Functions configs.
+	"functions/ocr/app/config.json",
+	"functions/slack/config.json",
+
 	// Samples that aren't really code. Legacy.
 	"**/appengine/**/*.txt",
 
@@ -88,8 +92,8 @@ var allowList = []string{
 	"storage/objects/notes.txt",
 	"videointelligence/resources/**/*",
 
-	// TODO: remove when all DLP snippets are moved to canonical format.
-	"dlp/dlp_snippets/testdata/.gitignore",
+	// Renovate configuration.
+	".github/renovate.json",
 }
 
 // Check whether accidental binary files have been checked in.

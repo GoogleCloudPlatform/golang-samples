@@ -37,11 +37,11 @@ func main() {
 		log.Fatalf("Failed to create client: %v", err)
 	}
 
-	// Sets the name for the new topic.
-	topicName := "my-topic"
+	// Sets the id for the new topic.
+	topicID := "my-topic"
 
 	// Creates the new topic.
-	topic, err := client.CreateTopic(ctx, topicName)
+	topic, err := client.CreateTopic(ctx, topicID)
 	if err != nil {
 		log.Fatalf("Failed to create topic: %v", err)
 	}
