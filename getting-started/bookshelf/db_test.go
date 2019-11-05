@@ -29,8 +29,6 @@ func testDB(t *testing.T, db BookDatabase) {
 
 	ctx := context.Background()
 
-	defer db.Close(ctx)
-
 	b := &Book{
 		Author:      "testy mc testface",
 		Title:       fmt.Sprintf("t-%d", time.Now().Unix()),

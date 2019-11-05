@@ -12,30 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package howto
+package v3
 
 import (
 	"bytes"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestSearchForAlerts(t *testing.T) {
-	t.Skip("Flaky. https://github.com/GoogleCloudPlatform/golang-samples/issues/1061.")
-
+func TestGetSupportedLanguages(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	testutil.Retry(t, 10, 1*time.Second, func(r *testutil.R) {
-		buf := &bytes.Buffer{}
-		if _, err := searchForAlerts(buf, tc.ProjectID, testCompany.Name); err != nil {
-			r.Errorf("searchForAlerts: %v", err)
-		}
-		want := testJob.Name
-		if got := buf.String(); !strings.Contains(got, want) {
-			r.Errorf("searchForAlerts got %q, want to contain %q", got, want)
-		}
-	})
+	// Get supported languages.
+	var buf bytes.Buffer
+	if err := getSupportedLanguages(&buf, tc.ProjectID); err != nil {
+		t.Fatalf("getSupportedLanguages: %v", err)
+	}
+	if got, want := buf.String(), "zh-CN"; !strings.Contains(got, want) {
+		t.Errorf("getSupportedLanguages got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
+	}
 }

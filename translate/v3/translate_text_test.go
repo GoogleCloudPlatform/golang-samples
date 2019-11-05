@@ -12,30 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package howto
+package v3
 
 import (
 	"bytes"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestSearchForAlerts(t *testing.T) {
-	t.Skip("Flaky. https://github.com/GoogleCloudPlatform/golang-samples/issues/1061.")
-
+func TestTranslateText(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	testutil.Retry(t, 10, 1*time.Second, func(r *testutil.R) {
-		buf := &bytes.Buffer{}
-		if _, err := searchForAlerts(buf, tc.ProjectID, testCompany.Name); err != nil {
-			r.Errorf("searchForAlerts: %v", err)
-		}
-		want := testJob.Name
-		if got := buf.String(); !strings.Contains(got, want) {
-			r.Errorf("searchForAlerts got %q, want to contain %q", got, want)
-		}
-	})
+	sourceLang := "en-US"
+	targetLang := "sr-Latn"
+	text := "Hello world"
+
+	// Translate text.
+	var buf bytes.Buffer
+	if err := translateText(&buf, tc.ProjectID, sourceLang, targetLang, text); err != nil {
+		t.Fatalf("translateText: %v", err)
+	}
+	if got, want1, want2 := buf.String(), "Zdravo svet", "Pozdrav svijetu"; !strings.Contains(got, want1) && !strings.Contains(got, want2) {
+		t.Errorf("translateText got:\n----\n%s----\nWant to contain:\n----\n%s\n----\nOR\n----\n%s\n----", got, want1, want2)
+	}
 }
