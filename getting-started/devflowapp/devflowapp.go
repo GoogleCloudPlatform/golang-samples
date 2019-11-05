@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/GoogleCloudPlatform/golang-samples/getting-started/devflowapp/services"
 )
@@ -96,8 +97,15 @@ func main() {
 	http.HandleFunc("/messages", handleCheckMessages)
 	http.HandleFunc("/send", handleSend)
 	http.HandleFunc("/_ah/health", healthCheckHandler)
-	log.Print("Listening on port 8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	log.Printf("Listening on port %s", port)
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
+		log.Fatal(err)
+	}
 }
 
 // Health check for the load balancer

@@ -95,7 +95,7 @@ fi
 # CHANGED_DIRS will be empty when run on master.
 # Also see trampoline.sh - system_tests.sh is only run when there are
 # significant changes.
-CHANGED_DIRS=$(git --no-pager diff --name-only HEAD..master | egrep -v '(\.md$|^\.github)' | grep "/" | cut -d/ -f1 | sort -u)
+CHANGED_DIRS=$(git --no-pager diff --name-only HEAD..master | egrep -v '(\.md$|^\.github)' | grep "/" | cut -d/ -f1 | sort -u | tr '\n' ' ')
 # If test configuration is changed, run all tests.
 if [[ $CHANGED_DIRS =~ "testing" || $CHANGED_DIRS =~ "internal" ]]; then
   RUN_ALL_TESTS="1"
@@ -103,7 +103,7 @@ fi
 
 # Filter out directories that don't exist (the current PR deleted them).
 TARGET_DIRS=""
-for d in "$CHANGED_DIRS"; do
+for d in $CHANGED_DIRS; do
   if [ -d "$d" ]; then
     TARGET_DIRS="$TARGET_DIRS $d"
   fi
