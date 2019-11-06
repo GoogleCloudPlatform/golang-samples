@@ -17,8 +17,6 @@ package testutil
 
 import (
 	"errors"
-	"fmt"
-	"go/build"
 	"log"
 	"os"
 	"path/filepath"
@@ -88,11 +86,11 @@ func testContext() (Context, error) {
 		return tc, noProjectID
 	}
 
-	pkg, err := build.Import("github.com/GoogleCloudPlatform/golang-samples", "", build.FindOnly)
-	if err != nil {
-		return tc, fmt.Errorf("Could not find golang-samples on GOPATH: %v", err)
-	}
-	tc.Dir = pkg.Dir
+	// pkg, err := build.Import("github.com/GoogleCloudPlatform/golang-samples", "", build.FindOnly)
+	// if err != nil {
+	// 	return tc, fmt.Errorf("Could not find golang-samples on GOPATH: %v", err)
+	// }
+	tc.Dir = "."
 
 	return tc, nil
 }

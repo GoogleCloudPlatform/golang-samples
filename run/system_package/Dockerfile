@@ -21,7 +21,8 @@ WORKDIR /app
 COPY . .
 
 # Build the release artifact.
-RUN CGO_ENABLED=0 GOOS=linux go build -v -o graphviz-web
+# -mod=vendor is necessary until cloudrunci is merged.
+RUN CGO_ENABLED=0 GOOS=linux go build -mod=vendor -v -o graphviz-web
 
 # Use a Docker multi-stage build to create a lean production image.
 # https://docs.docker.com/develop/develop-images/multistage-build/#use-multi-stage-builds

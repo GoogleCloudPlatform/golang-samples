@@ -17,14 +17,15 @@ package main
 import (
 	"net/http"
 	"net/url"
-	"os"
 	"testing"
 
-	"github.com/GoogleCloudPlatform/golang-samples/testing/cloudrunci"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/cloudrunci"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestDiagramService(t *testing.T) {
-	service := cloudrunci.NewService("diagram", os.Getenv("GOOGLE_CLOUD_PROJECT"))
+	tc := testutil.EndToEndTest(t)
+	service := cloudrunci.NewService("diagram", tc.ProjectID)
 	if err := service.Deploy(); err != nil {
 		t.Fatalf("could not deploy %s: %v", service.Name, err)
 	}
