@@ -19,7 +19,6 @@ import (
 	"context"
 	"crypto/tls"
 	"flag"
-	"io"
 	"log"
 	"os"
 	"time"
@@ -37,7 +36,6 @@ var (
 	serverHost = flag.String("server-host", "", "Host name to which server IP should resolve")
 	insecure   = flag.Bool("insecure", false, "Skip SSL validation? [false]")
 	skipVerify = flag.Bool("skip-verify", false, "Skip server hostname verification in SSL validation [false]")
-	streamSize = flag.Int("stream", 0, "Number of messages to stream [0]")
 	message    = flag.String("message", "Hi there", "The body of the content sent to server")
 )
 
@@ -63,12 +61,7 @@ func main() {
 	}
 	defer conn.Close()
 	client := pb.NewPingServiceClient(conn)
-
-	if *streamSize == 0 {
-		send(client)
-	} else {
-		sendStream(client)
-	}
+	send(client)
 }
 
 func send(client pb.PingServiceClient) {
@@ -86,44 +79,4 @@ func send(client pb.PingServiceClient) {
 	logger.Println("Unary Request/Unary Response")
 	logger.Printf("  Sent Ping: %s", *message)
 	logger.Printf("  Received:\n    Pong: %s\n    Server Time: %s", respMessage, timestamp)
-}
-
-func sendStream(client pb.PingServiceClient) {
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
-	defer cancel()
-
-	stream, err := client.SendStream(ctx)
-	if err != nil {
-		logger.Fatalf("Error client (%v) PingStream: %v", client, err)
-	}
-
-	waitCh := make(chan struct{})
-	go func() {
-		logger.Println("Unary Request/Stream Response")
-		for {
-			in, err := stream.Recv()
-			if err == io.EOF {
-				close(waitCh)
-				return
-			}
-			if err != nil {
-				logger.Fatalf("Failed to receive a response: %v", err)
-			}
-			c := in.GetPong()
-			logger.Printf("  Stream[%d] - Server Time: %s",
-				c.GetIndex(), ptypes.TimestampString(c.GetReceivedOn()))
-		}
-	}()
-
-	i := 0
-	for i < *streamSize {
-		if err := stream.Send(&pb.Request{
-			Message: *message,
-		}); err != nil {
-			logger.Fatalf("Failed to Send: %v", err)
-		}
-		i++
-	}
-	stream.CloseSend()
-	<-waitCh
 }

@@ -16,15 +16,15 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"io"
 	"log"
 
 	pb "github.com/GoogleCloudPlatform/golang-samples/run/grpc-ping/pkg/api/v1"
 	ptypes "github.com/golang/protobuf/ptypes"
 )
 
-type pingService struct{}
+type pingService struct {
+	pb.UnimplementedPingServiceServer
+}
 
 func (s *pingService) Send(ctx context.Context, req *pb.Request) (*pb.Response, error) {
 	log.Print("sending ping response")
@@ -35,34 +35,4 @@ func (s *pingService) Send(ctx context.Context, req *pb.Request) (*pb.Response, 
 			ReceivedOn: ptypes.TimestampNow(),
 		},
 	}, nil
-}
-
-func (s *pingService) SendStream(stream pb.PingService_SendStreamServer) error {
-	var i int32
-	for {
-		req, err := stream.Recv()
-		if err == io.EOF {
-			log.Println("Client disconnected")
-			return nil
-		}
-		if err != nil {
-			return fmt.Errorf("stream.Recv: %v", err)
-		}
-
-		m := req.GetMessage()
-		i++
-		log.Printf("Replying to send[%d]: %+v", i, m)
-
-		err = stream.Send(&pb.Response{
-			Pong: &pb.Pong{
-				Index:      i,
-				Message:    m,
-				ReceivedOn: ptypes.TimestampNow(),
-			},
-		})
-
-		if err != nil {
-			return fmt.Errorf("stream.Send: failed to send pong: %v", err)
-		}
-	}
 }
