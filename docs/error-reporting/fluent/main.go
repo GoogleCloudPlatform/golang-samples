@@ -20,6 +20,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 	"runtime"
 
 	"github.com/fluent/fluent-logger-golang/fluent"
@@ -38,7 +39,15 @@ func main() {
 	}
 
 	http.HandleFunc("/demo", demoHandler)
-	http.ListenAndServe(":8080", nil)
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	log.Printf("Listening on port %s", port)
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func report(stackTrace string, r *http.Request) {

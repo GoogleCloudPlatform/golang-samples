@@ -20,6 +20,7 @@ import (
 	"io"
 	"os"
 
+	"cloud.google.com/go/errorreporting"
 	"cloud.google.com/go/storage"
 )
 
@@ -49,9 +50,6 @@ type BookDatabase interface {
 
 	// UpdateBook updates the entry for a given book.
 	UpdateBook(ctx context.Context, b *Book) error
-
-	// Close closes the database, freeing up any available resources.
-	Close(ctx context.Context) error
 }
 
 // Bookshelf holds a BookDatabase and storage info.
@@ -62,7 +60,13 @@ type Bookshelf struct {
 	StorageBucketName string
 
 	// logWriter is used for request logging and can be overridden for tests.
+	//
+	// See https://cloud.google.com/logging/docs/setup/go for how to use the
+	// Stackdriver logging client. Output to stdout and stderr is automaticaly
+	// sent to Stackdriver when running on App Engine.
 	logWriter io.Writer
+
+	errorClient *errorreporting.Client
 }
 
 // NewBookshelf creates a new Bookshelf.
@@ -80,8 +84,19 @@ func NewBookshelf(projectID string, db BookDatabase) (*Bookshelf, error) {
 		return nil, fmt.Errorf("storage.NewClient: %v", err)
 	}
 
+	errorClient, err := errorreporting.NewClient(ctx, projectID, errorreporting.Config{
+		ServiceName: "bookshelf",
+		OnError: func(err error) {
+			fmt.Fprintf(os.Stderr, "Could not log error: %v", err)
+		},
+	})
+	if err != nil {
+		return nil, fmt.Errorf("errorreporting.NewClient: %v", err)
+	}
+
 	b := &Bookshelf{
 		logWriter:         os.Stderr,
+		errorClient:       errorClient,
 		DB:                db,
 		StorageBucketName: bucketName,
 		StorageBucket:     storageClient.Bucket(bucketName),

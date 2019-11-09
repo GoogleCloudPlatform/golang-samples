@@ -133,7 +133,9 @@ func main() {
 	http.HandleFunc("/reset", func(w http.ResponseWriter, r *http.Request) { handleReset(w, r, *tableName, adminClient) })
 	http.HandleFunc("/copy", func(w http.ResponseWriter, r *http.Request) { handleCopy(w, r, *tableName, client, adminClient) })
 	http.HandleFunc("/", handleMain)
-	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(*port), nil))
+	if err := http.ListenAndServe(":"+strconv.Itoa(*port), nil); err != nil {
+		log.Fatal(err)
+	}
 }
 
 // handleMain outputs the home page.
