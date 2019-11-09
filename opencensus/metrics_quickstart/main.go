@@ -59,38 +59,28 @@ func main() {
 	// Exporters use Application Default Credentials to authenticate.
 	// See https://developers.google.com/identity/protocols/application-default-credentials
 	// for more details.
-	exporter, err := stackdriver.NewExporter(stackdriver.Options{
-		// For demonstration the ReportingInterval is set to 10 seconds.
-		// The default value is 60 seconds. Choose the interval appropriately as it
-		// can affect the cost.
-		ReportingInterval: 10 * time.Second,
-	})
+	exporter, err := stackdriver.NewExporter(stackdriver.Options{})
 	if err != nil {
 		log.Fatal(err)
 	}
-	// Flush must be called before main() exits to ensure metrics are recorded.
-	defer exporter.Flush()
 
 	if err := exporter.StartMetricsExporter(); err != nil {
 		log.Fatalf("Error starting metric exporter: %v", err)
 	}
-
-	defer func() {
-		// Sleep 10 seconds (equal to ReportingInterval) to ensure updated metrics
-		// are exported at least once.
-		fmt.Println("Waiting for one more export interval to finish")
-		time.Sleep(10 * time.Second)
-		exporter.StopMetricsExporter()
-	}()
 	// [END monitoring_opencensus_setup_exporter]
 
-	// Record 100 fake latency values between 0 and 5 seconds.
-	for i := 0; i < 100; i++ {
+	// Record 50 fake latency values between 0 and 5 seconds.
+	for i := 0; i < 50; i++ {
 		ms := float64(5*time.Second/time.Millisecond) * rand.Float64()
 		fmt.Printf("Latency %d: %f\n", i, ms)
 		stats.Record(ctx, latencyMs.M(ms))
 		time.Sleep(1 * time.Second)
 	}
+
+	// Metrics are reported every 60 seconds to the backend. If number of
+	// iteration is changed above or if the interval between iteration is changed
+	// then adjust the sleep below to allow for all iterations to be exported.
+	time.Sleep(15 * time.Second)
 
 	fmt.Println("Done recording metrics")
 }
