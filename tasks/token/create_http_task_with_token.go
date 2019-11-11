@@ -44,7 +44,7 @@ func createHTTPTaskWithToken(projectID, locationID, queueID, url, email, message
 		Parent: queuePath,
 		Task: &taskspb.Task{
 			// https://godoc.org/google.golang.org/genproto/googleapis/cloud/tasks/v2#HttpRequest
-			PayloadType: &taskspb.Task_HttpRequest{
+			MessageType: &taskspb.Task_HttpRequest{
 				HttpRequest: &taskspb.HttpRequest{
 					HttpMethod: taskspb.HttpMethod_POST,
 					Url:        url,
