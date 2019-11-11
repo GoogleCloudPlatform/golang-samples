@@ -31,7 +31,7 @@ func TestMain(m *testing.M) {
 	os.Exit(s)
 }
 
-func TestList(t *testing.T) {
+func TestBucketList(t *testing.T) {
 	googleAccessKeyID := os.Getenv("STORAGE_HMAC_ACCESS_KEY_ID")
 	googleAccessKeySecret := os.Getenv("STORAGE_HMAC_ACCESS_SECRET_KEY")
 
@@ -48,5 +48,25 @@ func TestList(t *testing.T) {
 	got := buf.String()
 	if want := "Buckets:"; !strings.Contains(got, want) {
 		t.Errorf("listGCSBuckets got\n----\n%s\n----\nWant to contain\n----\n%s\n----", got, want)
+	}
+}
+
+func TestObjectList(t *testing.T) {
+	googleAccessKeyID := os.Getenv("STORAGE_HMAC_ACCESS_KEY_ID")
+	googleAccessKeySecret := os.Getenv("STORAGE_HMAC_ACCESS_SECRET_KEY")
+
+	if googleAccessKeyID == "" || googleAccessKeySecret == "" {
+		t.Skip("STORAGE_HMAC_ACCESS_KEY_ID and STORAGE_HMAC_ACCESS_SECRET_KEY must be set. Skipping.")
+	}
+
+	buf := new(bytes.Buffer)
+	_, err := listGCSObjects(buf, "cloud-samples-data", googleAccessKeyID, googleAccessKeySecret)
+	if err != nil {
+		t.Errorf("listGCSBuckets: %v", err)
+	}
+
+	got := buf.String()
+	if want := "Objects:"; !strings.Contains(got, want) {
+		t.Errorf("listGCSObjects got\n----\n%s\n----\nWant to contain\n----\n%s\n----", got, want)
 	}
 }
