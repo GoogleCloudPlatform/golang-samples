@@ -28,6 +28,10 @@ import (
 )
 
 func listGCSObjects(w io.Writer, bucketName string, googleAccessKeyID string, googleAccessKeySecret string) (error) {
+	// bucketName := fmt.Sprintf("your-gcs-bucket-name")
+	// googleAccessKeyID := fmt.Sprintf("Your Google Access Key ID")
+	// googleAccessKeySecret := fmt.Sprintf("Your Google Access Key Secret")
+
 	// Create a new client and do the following:
 	// 1. Change the endpoint URL to use the Google Cloud Storage XML API endpoint.
 	// 2. Use Cloud Storage HMAC Credentials.
