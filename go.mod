@@ -39,17 +39,17 @@ require (
 	github.com/philhofer/fwd v1.0.0 // indirect
 	github.com/sendgrid/smtpapi-go v0.6.0 // indirect
 	github.com/tinylib/msgp v1.1.0 // indirect
-	go.opencensus.io v0.22.1
+	go.opencensus.io v0.22.2
 	golang.org/x/exp v0.0.0-20191030013958-a1ab85dbe136
-	golang.org/x/net v0.0.0-20191105084925-a882066a44e0
+	golang.org/x/net v0.0.0-20191109021931-daa7c04131f5
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	golang.org/x/sys v0.0.0-20191105231009-c1f44814a5cd // indirect
 	golang.org/x/text v0.3.2
 	golang.org/x/tools v0.0.0-20191106180341-622ba90fc810 // indirect
 	google.golang.org/api v0.13.0
 	google.golang.org/appengine v1.6.5
-	google.golang.org/genproto v0.0.0-20191028173616-919d9bdd9fe6
-	google.golang.org/grpc v1.25.0
+	google.golang.org/genproto v0.0.0-20191108220845-16a3f7862a1a
+	google.golang.org/grpc v1.25.1
 	gopkg.in/sendgrid/sendgrid-go.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.2.5
 )
