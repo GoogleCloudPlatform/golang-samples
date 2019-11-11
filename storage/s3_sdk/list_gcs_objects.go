@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package s3sdk lists GCS buckets using the S3 SDK using interoperability mode.
+// Package s3sdk lists GCS objects using the S3 SDK using interoperability mode.
 package s3sdk
 
-// [START storage_s3_sdk_list_buckets]
+// [START storage_s3_sdk_list_objects]
 import (
 	"context"
 	"fmt"
@@ -59,4 +59,4 @@ func listGCSObjects(w io.Writer, bucketName string, googleAccessKeyID string, go
 	return nil
 }
 
-// [END storage_s3_sdk_list_buckets]
+// [END storage_s3_sdk_list_objects]
