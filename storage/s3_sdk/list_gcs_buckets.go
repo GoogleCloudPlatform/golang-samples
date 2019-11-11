@@ -27,7 +27,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 )
 
-func listGCSBuckets(w io.Writer, googleAccessKeyID string, googleAccessKeySecret string) (error) {
+func listGCSBuckets(w io.Writer, googleAccessKeyID string, googleAccessKeySecret string) error {
 	// googleAccessKeyID := fmt.Sprintf("Your Google Access Key ID")
 	// googleAccessKeySecret := fmt.Sprintf("Your Google Access Key Secret")
 

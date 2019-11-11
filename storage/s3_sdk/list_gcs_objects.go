@@ -27,7 +27,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 )
 
-func listGCSObjects(w io.Writer, bucketName string, googleAccessKeyID string, googleAccessKeySecret string) (error) {
+func listGCSObjects(w io.Writer, bucketName string, googleAccessKeyID string, googleAccessKeySecret string) error {
 	// bucketName := fmt.Sprintf("your-gcs-bucket-name")
 	// googleAccessKeyID := fmt.Sprintf("Your Google Access Key ID")
 	// googleAccessKeySecret := fmt.Sprintf("Your Google Access Key Secret")
