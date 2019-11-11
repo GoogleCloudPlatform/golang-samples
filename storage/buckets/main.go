@@ -397,59 +397,59 @@ func setDefaultKMSkey(c *storage.Client, bucketName string, keyName string) erro
 	return nil
 }
 
-func enableBucketPolicyOnly(c *storage.Client, bucketName string) error {
+func enableUniformBucketLevelAccess(c *storage.Client, bucketName string) error {
 	ctx := context.Background()
 
-	// [START storage_enable_bucket_policy_only]
+	// [START storage_enable_uniform_bucket_level_access]
 	bucket := c.Bucket(bucketName)
-	enableBucketPolicyOnly := storage.BucketAttrsToUpdate{
-		BucketPolicyOnly: &storage.BucketPolicyOnly{
+	enableUniformBucketLevelAccess := storage.BucketAttrsToUpdate{
+		UniformBucketLevelAccess: &storage.UniformBucketLevelAccess{
 			Enabled: true,
 		},
 	}
-	if _, err := bucket.Update(ctx, enableBucketPolicyOnly); err != nil {
+	if _, err := bucket.Update(ctx, enableUniformBucketLevelAccess); err != nil {
 		return err
 	}
-	// [END storage_enable_bucket_policy_only]
+	// [END storage_enable_uniform_bucket_level_access]
 	return nil
 }
 
-func disableBucketPolicyOnly(c *storage.Client, bucketName string) error {
+func disableUniformBucketLevelAccess(c *storage.Client, bucketName string) error {
 	ctx := context.Background()
 
-	// [START storage_disable_bucket_policy_only]
+	// [START storage_disable_uniform_bucket_level_access]
 	bucket := c.Bucket(bucketName)
-	disableBucketPolicyOnly := storage.BucketAttrsToUpdate{
-		BucketPolicyOnly: &storage.BucketPolicyOnly{
+	disableUniformBucketLevelAccess := storage.BucketAttrsToUpdate{
+		UniformBucketLevelAccess: &storage.UniformBucketLevelAccess{
 			Enabled: false,
 		},
 	}
-	if _, err := bucket.Update(ctx, disableBucketPolicyOnly); err != nil {
+	if _, err := bucket.Update(ctx, disableUniformBucketLevelAccess); err != nil {
 		return err
 	}
-	// [END storage_disable_bucket_policy_only]
+	// [END storage_disable_uniform_bucket_level_access]
 	return nil
 }
 
-func getBucketPolicyOnly(c *storage.Client, bucketName string) (*storage.BucketAttrs, error) {
+func getUniformBucketLevelAccess(c *storage.Client, bucketName string) (*storage.BucketAttrs, error) {
 	ctx := context.Background()
 
-	// [START storage_get_bucket_policy_only]
+	// [START storage_get_uniform_bucket_level_access]
 	attrs, err := c.Bucket(bucketName).Attrs(ctx)
 	if err != nil {
 		return nil, err
 	}
-	bucketPolicyOnly := attrs.BucketPolicyOnly
-	if bucketPolicyOnly.Enabled {
-		log.Printf("Bucket Policy Only is enabled for %q.\n",
+	uniformBucketLevelAccess := attrs.UniformBucketLevelAccess
+	if uniformBucketLevelAccess.Enabled {
+		log.Printf("Uniform bucket-level access is enabled for %q.\n",
 			attrs.Name)
 		log.Printf("Bucket will be locked on %q.\n",
-			bucketPolicyOnly.LockedTime)
+			uniformBucketLevelAccess.LockedTime)
 	} else {
-		log.Printf("Bucket Policy Only is not enabled for %q.\n",
+		log.Printf("Uniform bucket-level access is not enabled for %q.\n",
 			attrs.Name)
 	}
 
-	// [END storage_get_bucket_policy_only]
+	// [END storage_get_uniform_bucket_level_access]
 	return attrs, nil
 }
