@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# [START run_broken_dockerfile]
+
 # Use the offical golang image to create a binary.
 # This is based on Debian and sets the GOPATH to /go.
 # https://hub.docker.com/_/golang
@@ -30,27 +32,20 @@ RUN go mod download
 COPY . ./
 
 # Build the binary.
-RUN CGO_ENABLED=0 go build -mod=readonly -v -o server
+RUN go build -mod=readonly -v -o server
 
-# Use a Docker multi-stage build to create a lean production image.
+# Use the official Debian slim image for a lean production container.
+# https://hub.docker.com/_/debian
 # https://docs.docker.com/develop/develop-images/multistage-build/#use-multi-stage-builds
-FROM alpine:3
-
-# [START run_imageproc_dockerfile_imagemagick]
-
-# Install Imagemagick into the container image.
-# For more on system packages review the system packages tutorial.
-# https://cloud.google.com/run/docs/tutorials/system-packages#dockerfile
-RUN apk add --no-cache imagemagick
-
-# [END run_imageproc_dockerfile_imagemagick]
-
-# Install certificates for secure communication with network services.
-# For production containers, a single RUN statement should install all system packages.
-RUN apk add --no-cache ca-certificates
+FROM debian:buster-slim
+RUN set -x && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 
 # Copy the binary to the production image from the builder stage.
-COPY --from=builder /app/server .
+COPY --from=builder /app/server /server
 
 # Run the web service on container startup.
 CMD ["/server"]
+
+# [END run_broken_dockerfile]
