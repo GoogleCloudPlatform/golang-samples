@@ -48,7 +48,7 @@ func listGCSObjects(w io.Writer, bucketName string, googleAccessKeyID string, go
 		Bucket: aws.String(bucketName),
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("ListObjectsWithContext: %v", err)
 	}
 
 	fmt.Fprintf(w, "Objects:")
