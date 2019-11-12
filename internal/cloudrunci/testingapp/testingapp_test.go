@@ -17,18 +17,19 @@ package main_test
 import (
 	"io/ioutil"
 	"log"
-	"os"
 	"strings"
 	"testing"
 
 	cr "github.com/GoogleCloudPlatform/golang-samples/internal/cloudrunci"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 // TestApp shows the simplest approach to create e2e tests with cloudrun-ci.
 // It uses Cloud Run (fully managed) in the us-central1 region, and will manage
 // container images as needed for the test.
 func TestApp(t *testing.T) {
-	helloworld := cr.NewService("hello", os.Getenv("GOOGLE_CLOUD_PROJECT"))
+	tc := testutil.EndToEndTest(t)
+	helloworld := cr.NewService("hello", tc.ProjectID)
 	if err := helloworld.Deploy(); err != nil {
 		t.Fatalf("could not deploy %s: %v", helloworld.Name, err)
 	}

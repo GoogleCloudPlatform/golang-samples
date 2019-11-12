@@ -17,7 +17,7 @@
 // This is a specialized tool that could be used in addition to unit tests. It
 // calls the `gcloud beta run` command directly.
 //
-// gcloud(https://cloud.google.com/sdk) must be installed. You must be authorized via
+// gcloud (https://cloud.google.com/sdk) must be installed. You must be authorized via
 // the gcloud command-line tool (`gcloud auth login`).
 //
 // You may specify the location of gcloud via the GCLOUD_BIN environment variable.
