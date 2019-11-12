@@ -6,7 +6,7 @@ import "google/protobuf/timestamp.proto";
 
 service PingService {
   rpc Send(Request) returns (Response) {}
-  rpc SendStream(stream Request) returns (stream Response) {}
+  rpc SendUpstream(Request) returns (Response) {}
 }
 
 message Request {

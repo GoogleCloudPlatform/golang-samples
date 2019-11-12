@@ -16,10 +16,12 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"os"
 
 	pb "github.com/GoogleCloudPlatform/golang-samples/run/grpc-ping/pkg/api/v1"
-	ptypes "github.com/golang/protobuf/ptypes"
+	"github.com/golang/protobuf/ptypes"
 )
 
 type pingService struct {
@@ -34,5 +36,26 @@ func (s *pingService) Send(ctx context.Context, req *pb.Request) (*pb.Response, 
 			Message:    req.GetMessage(),
 			ReceivedOn: ptypes.TimestampNow(),
 		},
+	}, nil
+}
+
+func (s *pingService) SendUpstream(ctx context.Context, req *pb.Request) (*pb.Response, error) {
+	if Conn == nil {
+		return nil, fmt.Errorf("no upstream connection configured")
+	}
+
+	p := &pb.Request{
+		Message: req.GetMessage() + " (relayed)",
+	}
+	url := "https://" + os.Getenv("GRPC_PING_HOST")
+	resp, err := PingRequest(Conn, p, url, os.Getenv("GRPC_PING_UNAUTHENTICATED") == "")
+	if err != nil {
+		log.Printf("PingRequest: %q", err)
+		return nil, fmt.Errorf("could not reach ping service")
+	}
+
+	log.Print("received upstream pong")
+	return &pb.Response{
+		Pong: resp.Pong,
 	}, nil
 }

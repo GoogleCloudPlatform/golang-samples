@@ -12,10 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Sample ping demonstrates a ping echo service over gRPC.
+// Sample relay acts as an intermediary to the ping service.
 package main
-
-// [START run_grpc_server]
 
 import (
 	"log"
@@ -28,7 +26,7 @@ import (
 )
 
 func main() {
-	log.Printf("grpg-ping: starting server...")
+	log.Printf("grpc-ping: starting server...")
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -49,3 +47,18 @@ func main() {
 }
 
 // [END run_grpc_server]
+
+// Conn holds an open connection to the ping service.
+var Conn *grpc.ClientConn
+
+func init() {
+	if os.Getenv("GRPC_PING_HOST") != "" {
+		var err error
+		Conn, err = NewConn(os.Getenv("GRPC_PING_HOST"), os.Getenv("GRPC_PING_PORT"), os.Getenv("GRPC_PING_INSECURE") != "")
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		log.Println("Starting without support for SendUpstream: configure with 'GRPC_PING_HOST' environment variable. E.g., example.com")
+	}
+}

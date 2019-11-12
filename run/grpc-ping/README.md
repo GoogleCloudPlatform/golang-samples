@@ -2,6 +2,10 @@
 
 For a general introduction to gRPC on Go, see the [official gRPC quickstart](https://grpc.io/docs/quickstart/go/).
 
+This sample presents a single server which is built to one container image.
+
+To demonstrate service-to-service gRPC requests, this container image is deployed as two services: "ping" and "ping-upstream". ping is made public and ping-upstream is the data provider.
+
 ## Deploying to Cloud Run
 
 1. Build & Deploy the gRPC services:
@@ -9,17 +13,17 @@ For a general introduction to gRPC on Go, see the [official gRPC quickstart](htt
    ```sh
    export GOOGLE_CLOUD_PROJECT=[PROJECT_ID]
    # Build and push container images.
-   gcloud builds submit
+   gcloud builds submit --tag gcr.io/$GOOGLE_CLOUD_PROJECT/grpc-ping
 
    # Deploy ping service for private access.
-   gcloud beta run deploy ping --image gcr.io/$GOOGLE_CLOUD_PROJECT/grpc-ping
+   gcloud beta run deploy ping-upstream --image gcr.io/$GOOGLE_CLOUD_PROJECT/grpc-ping
 
    # Get the host name of the ping service.
-   PING_URL=$(gcloud beta run services describe ping --format='value(status.url)')
+   PING_URL=$(gcloud beta run services describe ping-upstream --format='value(status.url)')
    PING_DOMAIN=${PING_URL#https://}
 
    # Deploy ping-relay service for public access.
-   gcloud beta run deploy ping-relay --image gcr.io/$GOOGLE_CLOUD_PROJECT/grpc-ping-relay \
+   gcloud beta run deploy ping --image gcr.io/$GOOGLE_CLOUD_PROJECT/grpc-ping \
        --set-env-vars GRPC_PING_HOST=${PING_DOMAIN} \
        --allow-unauthenticated
    ```
@@ -29,20 +33,15 @@ For a general introduction to gRPC on Go, see the [official gRPC quickstart](htt
    Use the client CLI to send a request:
 
    ```
-   go run . -server [RELAY-SERVICE-DOMAIN]:443  -message "Hello Friend"
-   ```
-
-   Use curl to make an HTTP request:
-   ```
-   curl [RELAY-SERVICE-URL] -d "Howdy HTTP Friends!"
+   go run ./client -server [RELAY-SERVICE-DOMAIN]:443 -relay -message "Hello Friend"
    ```
 
 If you later make some code changes, updating is more concise:
 
 ```sh
 export GOOGLE_CLOUD_PROJECT=[PROJECT_ID]
-gcloud beta run deploy ping --image gcr.io/$PROJECT_ID/grpc-ping
-gcloud beta run deploy ping-relay --image gcr.io/$GOOGLE_CLOUD_PROJECT/grpc-ping-relay
+gcloud beta run deploy ping --image gcr.io/$GOOGLE_CLOUD_PROJECT/grpc-ping
+gcloud beta run deploy ping-relay --image gcr.io/$GOOGLE_CLOUD_PROJECT/grpc-ping
 ```
 
 See below for instructions on updating the proto.
@@ -57,13 +56,12 @@ See below for instructions on updating the proto.
 ## Building Locally
 
 ```sh
-docker build --build-arg=SERVICE="ping" -t grpc-ping .
-docker build --build-arg=SERVICE="relay" -t grpc-ping-relay .
+docker build -t grpc-ping .
 ```
 
 ## Running Locally
 
-### Running client &rArr; ping
+### Running client &rArr; server ping
 
 ```sh
 cd ping
@@ -72,11 +70,13 @@ go run .
 
 Open another terminal at the grpc-ping directory:
 
-```
-go run . -server localhost:8080 -insecure -message "Hello Friend!"
+```sh
+go run ./client -server localhost:8080 -insecure -message "Hello Friend!"
 ```
 
-### Running client &rArr; relay &rArr; ping
+ping-j6jtwetqdq-uc.a.run.app
+
+### Running client &rArr; server &rArr; server ping
 
 1. Start the ping service:
 
@@ -96,13 +96,7 @@ go run . -server localhost:8080 -insecure -message "Hello Friend!"
 3. From the grpc-ping directory use the grpc client to send a request:
 
    ```sh
-   go run . -server localhost:8080 -insecure -message "Hello Relayed Friend!"
-   ```
-
-   Because **relay** also supports HTTP you can also use `curl`:
-
-   ```sh
-   curl http://localhost:8080/ -d "Howdy HTTP Friends!"
+   go run ./client -server localhost:8080 -insecure -relay -message "Hello Relayed Friend!"
    ```
 
 ## Updating the Proto

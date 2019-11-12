@@ -32,9 +32,7 @@ RUN go mod download
 COPY . ./
 
 # Build the binary.
-# Select the service to build: ping or relay.
-ARG SERVICE=ping
-RUN go build -mod=readonly -v -o server ./$SERVICE
+RUN go build -mod=readonly -v -o server
 
 # Use the official Debian slim image for a lean production container.
 # https://hub.docker.com/_/debian
