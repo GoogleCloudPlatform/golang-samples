@@ -23,13 +23,13 @@ import (
 	"strings"
 )
 
-// GcloudBin is the path to the gcloud executable.
-var GcloudBin string
+// gcloudBin is the path to the gcloud executable.
+var gcloudBin string
 
 func init() {
-	GcloudBin = os.Getenv("GCLOUD_BIN")
-	if GcloudBin == "" {
-		GcloudBin = "gcloud"
+	gcloudBin = os.Getenv("GCLOUD_BIN")
+	if gcloudBin == "" {
+		gcloudBin = "gcloud"
 	}
 }
 
@@ -57,7 +57,7 @@ func createIDToken(_ string) (string, error) {
 		"print-identity-token",
 	}
 
-	cmd := exec.Command(GcloudBin, args...)
+	cmd := exec.Command(gcloudBin, args...)
 
 	out, err := gcloud("operation [id-token]", cmd)
 	if err != nil {

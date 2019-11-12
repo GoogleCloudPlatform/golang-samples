@@ -2,7 +2,7 @@
 
 This utility facilitates deploying temporary Cloud Run services for testing purposes.
 
-It has a hard dependency on gcloud, the [Cloud SDK](https://cloud.google.com/sdk/).
+It has a hard dependency on `gcloud`, the [Cloud SDK](https://cloud.google.com/sdk/).
 
 Please install and authenticate gcloud before using cloudrunci in your test.
 

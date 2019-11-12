@@ -28,6 +28,7 @@ import (
 	"fmt"
 	"net/http"
 	"os/exec"
+	"path"
 	"time"
 )
 
@@ -95,20 +96,18 @@ func (s *Service) NewRequest(method, path string) (*http.Request, error) {
 	if !s.deployed {
 		return nil, errors.New("NewRequest called before Deploy")
 	}
-	url, _ := s.URL(path)
+	url, err := s.URL(path)
+	if err != nil {
+		return nil, fmt.Errorf("service.URL: %v", err)
+	}
 	return s.Platform.NewRequest(method, url)
 }
 
 // URL prepends the deployed service's base URL to the given path.
 // Returns an error if the application has not been deployed.
-func (s *Service) URL(path string) (string, error) {
+func (s *Service) URL(p string) (string, error) {
 	if !s.deployed {
 		return "", errors.New("URL called before Deploy")
-	}
-
-	// Ensure the path is absolute.
-	if path == "" || path[0:1] != "/" {
-		path = "/" + path
 	}
 
 	out, err := gcloud(s.operationLabel("get url"), s.urlCmd())
@@ -116,7 +115,7 @@ func (s *Service) URL(path string) (string, error) {
 		return "", fmt.Errorf("gcloud: %s: %q", s.Name, err)
 	}
 
-	return string(out) + path, nil
+	return path.Join(string(out), p), nil
 }
 
 // validate confirms all required service properties are present.
@@ -241,7 +240,7 @@ func (s *Service) deployCmd() *exec.Cmd {
 	// NOTE: if the "beta" component is not available, and this is run in parallel,
 	// gcloud will attempt to install those components multiple
 	// times and will eventually fail on IO.
-	cmd := exec.Command(GcloudBin, args...)
+	cmd := exec.Command(gcloudBin, args...)
 	cmd.Dir = s.Dir
 	return cmd
 }
@@ -260,7 +259,7 @@ func (s *Service) buildCmd() *exec.Cmd {
 	// NOTE: if the "beta" component is not available, and this is run in parallel,
 	// gcloud will attempt to install those components multiple
 	// times and will eventually fail on IO.
-	cmd := exec.Command(GcloudBin, args...)
+	cmd := exec.Command(gcloudBin, args...)
 	cmd.Dir = s.Dir
 	return cmd
 }
@@ -277,7 +276,7 @@ func (s *Service) deleteImageCmd() *exec.Cmd {
 	// NOTE: if the "beta" component is not available, and this is run in parallel,
 	// gcloud will attempt to install those components multiple
 	// times and will eventually fail on IO.
-	cmd := exec.Command(GcloudBin, args...)
+	cmd := exec.Command(gcloudBin, args...)
 	cmd.Dir = s.Dir
 	return cmd
 }
@@ -297,7 +296,7 @@ func (s *Service) deleteServiceCmd() *exec.Cmd {
 	// NOTE: if the "beta" component is not available, and this is run in parallel,
 	// gcloud will attempt to install those components multiple
 	// times and will eventually fail on IO.
-	cmd := exec.Command(GcloudBin, args...)
+	cmd := exec.Command(gcloudBin, args...)
 	cmd.Dir = s.Dir
 	return cmd
 }
@@ -319,7 +318,7 @@ func (s *Service) urlCmd() *exec.Cmd {
 	// NOTE: if the "beta" component is not available, and this is run in parallel,
 	// gcloud will attempt to install those components multiple
 	// times and will eventually fail on IO.
-	cmd := exec.Command(GcloudBin, args...)
+	cmd := exec.Command(gcloudBin, args...)
 	cmd.Dir = s.Dir
 	return cmd
 }
