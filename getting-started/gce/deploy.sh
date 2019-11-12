@@ -16,6 +16,18 @@
 
 set -ex
 
+if [ -z "$DEPLOY_DIR" ]; then
+  echo "Must set \$DEPLOY_DIR. For example: DEPLOY_DIR=gs://my-bucket"
+  exit 1
+fi
+
+if [ -z "$DEPLOY_FILENAME" ]; then
+  echo "Must set \$DEPLOY_FILENAME. For example: DEPLOY_FILENAME=app.tar.gz"
+  exit 1
+fi
+
+gcloud builds submit --substitutions=_DEPLOY_DIR="$DEPLOY_DIR",_DEPLOY_FILENAME="$DEPLOY_FILENAME"
+
 ZONE=us-central1-f
 
 gcloud compute instances create my-app-instance \
@@ -24,6 +36,7 @@ gcloud compute instances create my-app-instance \
     --machine-type=g1-small \
     --scopes userinfo-email,cloud-platform \
     --metadata-from-file startup-script=startup-script.sh \
+    --metadata app-location="${DEPLOY_DIR%/}/${DEPLOY_FILENAME}" \
     --zone $ZONE \
     --tags http-server
 
