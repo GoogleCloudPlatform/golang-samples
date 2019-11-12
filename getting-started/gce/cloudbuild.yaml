@@ -12,12 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# [START getting_started_gce_cloud_build]
 steps:
-  - name: mirror.gcr.io/library/golang
+  # Print the Go version being used.
+  - name: 'mirror.gcr.io/library/golang'
     args: ['go', 'version']
+  # Make a deploy directory we'll tar after building the app.
   - name: 'debian'
     args: ['mkdir', '-p', 'deploy/etc/systemd/system/', 'deploy/usr/bin']
-  - name: mirror.gcr.io/library/golang
+  # Build the app.
+  - name: 'mirror.gcr.io/library/golang'
     env: [
       'GO111MODULE=on',
       'GOPROXY=https://proxy.golang.org,direct',
@@ -25,11 +29,15 @@ steps:
       'GOARCH=amd64'
     ]
     args: ['go', 'build', '-o', 'deploy/usr/bin/app', '.']
+  # Copy the systemd service file into the deploy directory.
   - name: 'debian'
     args: ['cp', 'my-app.service', 'deploy/etc/systemd/system/']
+  # Compress the depoy directory.
   - name: 'debian'
     args: ['tar', '-czf', '${_DEPLOY_FILENAME}', '-C', './deploy', '.']
+# Upload the tarball to Cloud Storage.
 artifacts:
   objects:
     location: '${_DEPLOY_DIR}'
     paths: ['${_DEPLOY_FILENAME}']
+# [END getting_started_gce_cloud_build]
