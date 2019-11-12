@@ -96,7 +96,7 @@ var allowList = []string{
 	".github/renovate.json",
 
 	// Getting Started on GCE systemd service file.
-	"getting-started/gce/my-app.service",
+	"**/gce/**/*.service",
 }
 
 // Check whether accidental binary files have been checked in.
