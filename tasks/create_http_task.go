@@ -21,15 +21,15 @@ import (
 	"context"
 	"fmt"
 
-	cloudtasks "cloud.google.com/go/cloudtasks/apiv2beta3"
-	taskspb "google.golang.org/genproto/googleapis/cloud/tasks/v2beta3"
+	cloudtasks "cloud.google.com/go/cloudtasks/apiv2"
+	taskspb "google.golang.org/genproto/googleapis/cloud/tasks/v2"
 )
 
 // createHTTPTask creates a new task in your with a HTTP target.
 func createHTTPTask(projectID, locationID, queueID, url, message string) (*taskspb.Task, error) {
 
 	// Create a new Cloud Tasks client instance.
-	// See https://godoc.org/cloud.google.com/go/cloudtasks/apiv2beta3
+	// See https://godoc.org/cloud.google.com/go/cloudtasks/apiv2
 	ctx := context.Background()
 	client, err := cloudtasks.NewClient(ctx)
 	if err != nil {
@@ -40,12 +40,12 @@ func createHTTPTask(projectID, locationID, queueID, url, message string) (*tasks
 	queuePath := fmt.Sprintf("projects/%s/locations/%s/queues/%s", projectID, locationID, queueID)
 
 	// Build the Task payload.
-	// https://godoc.org/google.golang.org/genproto/googleapis/cloud/tasks/v2beta3#CreateTaskRequest
+	// https://godoc.org/google.golang.org/genproto/googleapis/cloud/tasks/v2#CreateTaskRequest
 	req := &taskspb.CreateTaskRequest{
 		Parent: queuePath,
 		Task: &taskspb.Task{
-			// https://godoc.org/google.golang.org/genproto/googleapis/cloud/tasks/v2beta3#HttpRequest
-			PayloadType: &taskspb.Task_HttpRequest{
+			// https://godoc.org/google.golang.org/genproto/googleapis/cloud/tasks/v2#HttpRequest
+			MessageType: &taskspb.Task_HttpRequest{
 				HttpRequest: &taskspb.HttpRequest{
 					HttpMethod: taskspb.HttpMethod_POST,
 					Url:        url,
