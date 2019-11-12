@@ -7,7 +7,7 @@ require (
 	cloud.google.com/go/bigquery v1.1.0
 	cloud.google.com/go/bigtable v1.0.0
 	cloud.google.com/go/datastore v1.0.0
-	cloud.google.com/go/firestore v1.0.0
+	cloud.google.com/go/firestore v1.1.0
 	cloud.google.com/go/logging v1.0.0
 	cloud.google.com/go/pubsub v1.0.1
 	cloud.google.com/go/spanner v1.0.0
@@ -46,7 +46,6 @@ require (
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	golang.org/x/sys v0.0.0-20191105231009-c1f44814a5cd // indirect
 	golang.org/x/text v0.3.2
-	golang.org/x/tools v0.0.0-20191106180341-622ba90fc810 // indirect
 	google.golang.org/api v0.13.0
 	google.golang.org/appengine v1.6.5
 	google.golang.org/genproto v0.0.0-20191108220845-16a3f7862a1a

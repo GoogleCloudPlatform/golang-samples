@@ -249,11 +249,31 @@ func createMultipleStartAtQuery(client *firestore.Client) {
 	// [END fs_start_at_multiple]
 }
 
+func createInQuery(ctx context.Context, client *firestore.Client) error {
+	cities := client.Collection("cities")
+	// [START fs_in_query]
+	query := cities.Where("regions", "in", [][]string{{"west_coast"}, {"east_coast"}}).Documents(ctx)
+	// [END fs_in_query]
+
+	_ = query
+	return nil
+}
+
 func createArrayContainsQuery(ctx context.Context, client *firestore.Client) error {
 	cities := client.Collection("cities")
 	// [START fs_array_contains_query]
 	query := cities.Where("regions", "array-contains", "west_coast").Documents(ctx)
 	// [END fs_array_contains_query]
+
+	_ = query
+	return nil
+}
+
+func createArrayContainsAnyQuery(ctx context.Context, client *firestore.Client) error {
+	cities := client.Collection("cities")
+	// [START fs_array_contains_any_query]
+	query := cities.Where("regions", "array-contains-any", []string{"west_coast", "east_coast"}).Documents(ctx)
+	// [END fs_array_contains_any_query]
 
 	_ = query
 	return nil
