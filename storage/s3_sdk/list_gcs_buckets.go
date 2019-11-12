@@ -28,8 +28,8 @@ import (
 )
 
 func listGCSBuckets(w io.Writer, googleAccessKeyID string, googleAccessKeySecret string) error {
-	// googleAccessKeyID := fmt.Sprintf("Your Google Access Key ID")
-	// googleAccessKeySecret := fmt.Sprintf("Your Google Access Key Secret")
+	// googleAccessKeyID := "Your Google Access Key ID"
+	// googleAccessKeySecret := "Your Google Access Key Secret"
 
 	// Create a new client and do the following:
 	// 1. Change the endpoint URL to use the Google Cloud Storage XML API endpoint.
