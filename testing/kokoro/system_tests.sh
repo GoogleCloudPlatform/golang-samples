@@ -41,8 +41,8 @@ export GOLANG_SAMPLES_KMS_CRYPTOKEY=key1
 export GOLANG_SAMPLES_IOT_PUB=$KOKORO_GFILE_DIR/rsa_cert.pem
 export GOLANG_SAMPLES_IOT_PRIV=$KOKORO_GFILE_DIR/rsa_private.pem
 
-export STORAGE_HMAC_ACCESS_KEY_ID="$($KOKORO_KEYSTORE_DIR/71386_golang-samples-kokoro-gcs-hmac-secret)"
-export STORAGE_HMAC_ACCESS_SECRET_KEY="$($KOKORO_KEYSTORE_DIR/71386_golang-samples-kokoro-gcs-hmac-id)"
+export STORAGE_HMAC_ACCESS_KEY_ID=$KOKORO_KEYSTORE_DIR/71386_golang-samples-kokoro-gcs-hmac-secret
+export STORAGE_HMAC_ACCESS_SECRET_KEY=$KOKORO_KEYSTORE_DIR/71386_golang-samples-kokoro-gcs-hmac-id
 
 export GCLOUD_ORGANIZATION=1081635000895
 
