@@ -18,6 +18,7 @@ import (
 	"net/http"
 	"net/url"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/cloudrunci"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -37,7 +38,9 @@ func TestDiagramService(t *testing.T) {
 		t.Errorf("service.NewRequest: %q", err)
 		return
 	}
-	resp, err := http.DefaultClient.Do(req)
+
+	client := http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
 	if err != nil {
 		t.Errorf("Get: %v", err)
 		return
@@ -48,13 +51,11 @@ func TestDiagramService(t *testing.T) {
 		t.Errorf("response status: got %d, want %d", got, 200)
 	}
 
-	want := "image/png"
-	if got := resp.Header.Get("Content-Type"); got != want {
+	if got, want := resp.Header.Get("Content-Type"), "image/png"; got != want {
 		t.Errorf("response Content-Type: got %q, want %s", got, want)
 	}
 
-	want = "public, max-age=86400"
-	if got := resp.Header.Get("Cache-Control"); got != want {
+	if got, want := resp.Header.Get("Cache-Control"), "public, max-age=86400"; got != want {
 		t.Errorf("response Cache-Control: got %q, want %q", got, want)
 	}
 }
