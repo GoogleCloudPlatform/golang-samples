@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Sample Manual Logging shows how to leverage Cloud Run structured logging without a client library.
+// Sample logging-manual shows how to leverage Cloud Run structured logging without a client library.
 package main
 
 import (
@@ -34,7 +34,7 @@ func main() {
 		projectID, _ = metadata.ProjectID()
 	}
 	if projectID == "" {
-		log.Println("Could not determine Google Cloud Project. Running without log correlation. For local use set the $GOOGLE_CLOUD_PROJECT environment variable.")
+		log.Println("Could not determine Google Cloud Project. Running without log correlation. For local use set the GOOGLE_CLOUD_PROJECT environment variable.")
 	}
 
 	http.HandleFunc("/", indexHandler)
@@ -59,16 +59,19 @@ type Entry struct {
 	Severity string `json:"severity,omitempty"`
 	Trace    string `json:"logging.googleapis.com/trace,omitempty"`
 
-	// Log viewer accesses 'component' as 'jsonPayload.component'.
+	// Stackdriver Log Viewer allows filtering and display of this as `jsonPayload.component`.
 	Component string `json:"component,omitempty"`
 }
 
-// String renders an enty structure to the JSON format expected by Stackdriver.
+// String renders an entry structure to the JSON format expected by Stackdriver.
 func (e Entry) String() string {
 	if e.Severity == "" {
 		e.Severity = "INFO"
 	}
-	out, _ := json.Marshal(e)
+	out, err := json.Marshal(e)
+	if err != nil {
+		log.Printf("json.Marshal: %v", err)
+	}
 	return string(out)
 }
 

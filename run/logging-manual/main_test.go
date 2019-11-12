@@ -15,12 +15,12 @@
 package main
 
 import (
+	"bufio"
+	"bytes"
 	"encoding/json"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
 )
 
@@ -38,19 +38,19 @@ func TestIndexHandler(t *testing.T) {
 			want:        "",
 		},
 		{
-			name:        "no project, trace",
+			name:        "no project and trace",
 			project:     "",
 			traceHeader: "123/456",
 			want:        "",
 		},
 		{
-			name:        "project, trace",
+			name:        "project and trace",
 			project:     "example",
 			traceHeader: "123/456",
 			want:        "projects/example/traces/123",
 		},
 		{
-			name:        "project, invalid trace",
+			name:        "project and invalid trace",
 			project:     "example",
 			traceHeader: "/123",
 			want:        "",
@@ -62,36 +62,33 @@ func TestIndexHandler(t *testing.T) {
 		req.Header.Add("X-Cloud-Trace-Context", test.traceHeader)
 		rr := httptest.NewRecorder()
 
-		r := callHandler(indexHandler, rr, req)
-
-		out, err := ioutil.ReadAll(r)
-		if err != nil {
-			t.Fatalf("ReadAll: %v", err)
-		}
+		b := callHandler(indexHandler, rr, req)
 
 		var e Entry
-		if err := json.Unmarshal(out, &e); err != nil {
-			t.Errorf("json.Unmarshal: %q", err)
+		if err := json.Unmarshal(b.Bytes(), &e); err != nil {
+			t.Errorf("json.Unmarshal: %v", err)
 		}
 
 		if e.Trace != test.want {
-			t.Errorf("entry(%s): want (%s), got (%s)", test.name, test.want, e.Trace)
+			t.Errorf("indexHandler %q: want %q, got %q", test.name, test.want, e.Trace)
 		}
 	}
 }
 
-func callHandler(h func(w http.ResponseWriter, r *http.Request), rr http.ResponseWriter, req *http.Request) *os.File {
-	r, w, _ := os.Pipe()
+// callHandler calls an HTTP handler with the provided request and returns the log output.
+func callHandler(h func(w http.ResponseWriter, r *http.Request), rr http.ResponseWriter, req *http.Request) bytes.Buffer {
+	var buf bytes.Buffer
+	writer := bufio.NewWriter(&buf)
+
 	originalWriter := log.Writer()
-	log.SetOutput(w)
+	log.SetOutput(writer)
+	defer log.SetOutput(originalWriter)
+
 	originalFlags := log.Flags()
 	log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
+	defer log.SetFlags(originalFlags)
 
 	h(rr, req)
-
-	w.Close()
-	log.SetOutput(originalWriter)
-	log.SetFlags(originalFlags)
-
-	return r
+	writer.Flush()
+	return buf
 }
