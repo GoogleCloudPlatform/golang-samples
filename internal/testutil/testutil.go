@@ -17,10 +17,13 @@ package testutil
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"golang.org/x/tools/go/packages"
 )
 
 var noProjectID = errors.New("GOLANG_SAMPLES_PROJECT_ID not set")
@@ -86,11 +89,11 @@ func testContext() (Context, error) {
 		return tc, noProjectID
 	}
 
-	// pkg, err := build.Import("github.com/GoogleCloudPlatform/golang-samples", "", build.FindOnly)
-	// if err != nil {
-	// 	return tc, fmt.Errorf("Could not find golang-samples on GOPATH: %v", err)
-	// }
-	tc.Dir = "."
+	pkgs, err := packages.Load(&packages.Config{Mode: packages.NeedName}, "github.com/GoogleCloudPlatform/golang-samples")
+	if err != nil {
+		return tc, fmt.Errorf("Could not find golang-samples: %v", err)
+	}
+	tc.Dir = pkgs[0].PkgPath
 
 	return tc, nil
 }
