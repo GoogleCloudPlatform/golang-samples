@@ -42,7 +42,7 @@ func TestBucketList(t *testing.T) {
 	buf := new(bytes.Buffer)
 	err := listGCSBuckets(buf, googleAccessKeyID, googleAccessKeySecret)
 	if err != nil {
-		t.Errorf("%v", err)
+		t.Errorf("listGCSBuckets: %v", err)
 	}
 
 	got := buf.String()
@@ -62,7 +62,7 @@ func TestObjectList(t *testing.T) {
 	buf := new(bytes.Buffer)
 	err := listGCSObjects(buf, "cloud-samples-data", googleAccessKeyID, googleAccessKeySecret)
 	if err != nil {
-		t.Errorf("%v", err)
+		t.Errorf("listGCSObjects: %v", err)
 	}
 
 	got := buf.String()
