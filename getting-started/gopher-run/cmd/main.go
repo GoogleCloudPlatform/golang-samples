@@ -63,7 +63,9 @@ func main() {
 		port = "8080"
 	}
 	fmt.Printf("Starting server on port %v\n", port)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (a *app) predictionRequest(w http.ResponseWriter, r *http.Request) {

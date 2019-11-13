@@ -41,6 +41,9 @@ export GOLANG_SAMPLES_KMS_CRYPTOKEY=key1
 export GOLANG_SAMPLES_IOT_PUB=$KOKORO_GFILE_DIR/rsa_cert.pem
 export GOLANG_SAMPLES_IOT_PRIV=$KOKORO_GFILE_DIR/rsa_private.pem
 
+export STORAGE_HMAC_ACCESS_KEY_ID="$($KOKORO_KEYSTORE_DIR/71386_golang-samples-kokoro-gcs-hmac-secret)"
+export STORAGE_HMAC_ACCESS_SECRET_KEY="$($KOKORO_KEYSTORE_DIR/71386_golang-samples-kokoro-gcs-hmac-id)"
+
 export GCLOUD_ORGANIZATION=1081635000895
 
 export GOLANG_SAMPLES_SPANNER=projects/golang-samples-tests/instances/golang-samples-tests
@@ -95,7 +98,7 @@ fi
 # CHANGED_DIRS will be empty when run on master.
 # Also see trampoline.sh - system_tests.sh is only run when there are
 # significant changes.
-CHANGED_DIRS=$(git --no-pager diff --name-only HEAD..master | egrep -v '(\.md$|^\.github)' | grep "/" | cut -d/ -f1 | sort -u)
+CHANGED_DIRS=$(git --no-pager diff --name-only HEAD..master | egrep -v '(\.md$|^\.github)' | grep "/" | cut -d/ -f1 | sort -u | tr '\n' ' ')
 # If test configuration is changed, run all tests.
 if [[ $CHANGED_DIRS =~ "testing" || $CHANGED_DIRS =~ "internal" ]]; then
   RUN_ALL_TESTS="1"
@@ -103,7 +106,7 @@ fi
 
 # Filter out directories that don't exist (the current PR deleted them).
 TARGET_DIRS=""
-for d in "$CHANGED_DIRS"; do
+for d in $CHANGED_DIRS; do
   if [ -d "$d" ]; then
     TARGET_DIRS="$TARGET_DIRS $d"
   fi

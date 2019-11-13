@@ -22,7 +22,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -43,11 +42,17 @@ func main() {
 		HandlerFunc(authInfoHandler)
 
 	http.Handle("/", r)
-	port := 8080
-	if portStr := os.Getenv("PORT"); portStr != "" {
-		port, _ = strconv.Atoi(portStr)
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+		log.Printf("Defaulting to port %s", port)
 	}
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), nil))
+
+	log.Printf("Listening on port %s", port)
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
+		log.Fatal(err)
+	}
 }
 
 // echoHandler reads a JSON object from the body, and writes it back out.
