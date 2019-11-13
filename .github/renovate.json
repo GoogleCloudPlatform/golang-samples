@@ -6,10 +6,9 @@
   "semanticCommits": false,
   "postUpdateOptions": ["gomodTidy"],
   "commitMessagePrefix": "all: ",
-  "packageRules": [
-    {
-      "packagePatterns": ["^cloud.google.com/go", "^google.golang.org"],
-      "groupName": "Google Cloud packages"
-    }
-  ]
+  "commitMessageAction": "update",
+  "ignorePaths": [
+    "testing/docker/Dockerfile*"
+  ],
+  "groupName": "all"
 }
