@@ -131,6 +131,9 @@ func main() {
 	if err := createInQuery(ctx, client); err != nil {
 		log.Fatalf("Cannot get query results using in: %v", err)
 	}
+	if err := createInQueryWithArray(ctx, client); err != nil {
+		log.Fatalf("Cannot get query results using in with array: %v", err)
+	}
 	if err := createArrayContainsQuery(ctx, client); err != nil {
 		log.Fatalf("Cannot get query results using array-contains: %v", err)
 	}

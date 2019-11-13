@@ -250,10 +250,20 @@ func createMultipleStartAtQuery(client *firestore.Client) {
 }
 
 func createInQuery(ctx context.Context, client *firestore.Client) error {
+	// [START fs_query_filter_in]
 	cities := client.Collection("cities")
-	// [START fs_in_query]
+	query := cities.Where("country", "in", []string{"USA", "Japan"}).Documents(ctx)
+	// [END fs_query_filter_in]
+
+	_ = query
+	return nil
+}
+
+func createInQueryWithArray(ctx context.Context, client *firestore.Client) error {
+	// [START fs_query_filter_in_with_array]
+	cities := client.Collection("cities")
 	query := cities.Where("regions", "in", [][]string{{"west_coast"}, {"east_coast"}}).Documents(ctx)
-	// [END fs_in_query]
+	// [END fs_query_filter_in_with_array]
 
 	_ = query
 	return nil
@@ -270,10 +280,10 @@ func createArrayContainsQuery(ctx context.Context, client *firestore.Client) err
 }
 
 func createArrayContainsAnyQuery(ctx context.Context, client *firestore.Client) error {
+	// [START fs_query_filter_array_contains_any]
 	cities := client.Collection("cities")
-	// [START fs_array_contains_any_query]
 	query := cities.Where("regions", "array-contains-any", []string{"west_coast", "east_coast"}).Documents(ctx)
-	// [END fs_array_contains_any_query]
+	// [END fs_query_filter_array_contains_any]
 
 	_ = query
 	return nil
