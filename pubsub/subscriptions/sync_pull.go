@@ -42,7 +42,7 @@ func pullMsgsSync(w io.Writer, projectID, subName string, topic *pubsub.Topic) e
 
 	// Turn on synchronous mode. This makes the subscriber use the Pull RPC rather
 	// than the StreamingPull RPC, which is useful for guaranteeing MaxOutstandingMessages,
-	// the max number of messages the client will hold in memory.
+	// the max number of messages the client will hold in memory at a time.
 	sub.ReceiveSettings.Synchronous = true
 	sub.ReceiveSettings.MaxOutstandingMessages = 10
 
@@ -50,14 +50,30 @@ func pullMsgsSync(w io.Writer, projectID, subName string, topic *pubsub.Topic) e
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
+	// Create a channel to handle messages to as they come in.
+	cm := make(chan *pubsub.Message)
+	// Handle individual messages in a goroutine.
+	go func() {
+		for {
+			select {
+			case msg := <-cm:
+				fmt.Fprintf(w, "Got message :%q\n", string(msg.Data))
+				msg.Ack()
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
+
 	// Receive blocks until the passed in context is done.
 	err = sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
-		fmt.Fprintf(w, "Got message :%q\n", string(msg.Data))
-		msg.Ack()
+		cm <- msg
 	})
 	if err != nil && status.Code(err) != codes.Canceled {
 		return fmt.Errorf("Receive: %v", err)
 	}
+	close(cm)
+
 	return nil
 }
 

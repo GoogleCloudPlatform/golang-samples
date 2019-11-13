@@ -263,6 +263,7 @@ func TestPullMsgsConcurrencyControl(t *testing.T) {
 		t.Fatalf("pullMsgsConcurrencyControl got %d messages, want %d", got, numMsgs)
 	}
 }
+
 func publishMsgs(ctx context.Context, t *pubsub.Topic, numMsgs int) error {
 	var results []*pubsub.PublishResult
 	for i := 0; i < numMsgs; i++ {
