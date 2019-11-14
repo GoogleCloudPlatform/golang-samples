@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Client grpc-ping makes requests to the grpc-ping service.
+// Package client is a CLI to make requests to the grpc-ping service.
 package main
 
 import (
@@ -58,7 +58,7 @@ func main() {
 
 	conn, err := grpc.Dial(*serverAddr, opts...)
 	if err != nil {
-		logger.Fatalf("Failed to dial: %v", err)
+		logger.Printf("Failed to dial: %v", err)
 	}
 	defer conn.Close()
 	client := pb.NewPingServiceClient(conn)

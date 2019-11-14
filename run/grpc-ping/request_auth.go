@@ -30,13 +30,15 @@ import (
 
 // pingRequestWithAuth mints a new ID Token with the compute metadata server for each request.
 // In practice, this token has a 1 hour expiry and should be reused.
-func pingRequestWithAuth(conn *grpc.ClientConn, p *pb.Request, url string) (*pb.Response, error) {
+// This function will only work on Google Cloud with an available compute metadata server and compute identity.
+// audience is the auto-assigned URL of the Cloud Run service.
+func pingRequestWithAuth(conn *grpc.ClientConn, p *pb.Request, audience string) (*pb.Response, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	// Create an ID Token as shown in service-to-service authentication in the documentation.
 	// https://cloud.google.com/run/docs/authenticating/service-to-service
-	tokenURL := fmt.Sprintf("/instance/service-accounts/default/identity?audience=%s", url)
+	tokenURL := fmt.Sprintf("/instance/service-accounts/default/identity?audience=%s", audience)
 	idToken, err := metadata.Get(tokenURL)
 	if err != nil {
 		return nil, fmt.Errorf("metadata.Get: failed to query id_token: %+v", err)

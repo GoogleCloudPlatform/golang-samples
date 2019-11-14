@@ -47,8 +47,8 @@ func (s *pingService) SendUpstream(ctx context.Context, req *pb.Request) (*pb.Re
 	p := &pb.Request{
 		Message: req.GetMessage() + " (relayed)",
 	}
-	url := "https://" + os.Getenv("GRPC_PING_HOST")
-	resp, err := PingRequest(Conn, p, url, os.Getenv("GRPC_PING_UNAUTHENTICATED") == "")
+	tokenAudience := "https://" + os.Getenv("GRPC_PING_HOST")
+	resp, err := PingRequest(Conn, p, tokenAudience, os.Getenv("GRPC_PING_UNAUTHENTICATED") == "")
 	if err != nil {
 		log.Printf("PingRequest: %q", err)
 		return nil, fmt.Errorf("could not reach ping service")

@@ -26,7 +26,9 @@ import (
 
 // pingRequest sends a new gRPC ping request to the server configured in the connection.
 func pingRequest(conn *grpc.ClientConn, p *pb.Request) (*pb.Response, error) {
-	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
 	client := pb.NewPingServiceClient(conn)
 	return client.Send(ctx, p)
 }

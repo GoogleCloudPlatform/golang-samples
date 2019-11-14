@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Sample relay acts as an intermediary to the ping service.
+// Sample grpc-ping acts as an intermediary to the ping service.
 package main
 
 import (
