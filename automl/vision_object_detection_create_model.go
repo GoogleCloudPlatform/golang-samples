@@ -29,8 +29,8 @@ import (
 func visionObjectDetectionCreateModel(w io.Writer, projectID string, location string, datasetID string, modelName string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
-	// datasetID := "dataset-id"
-	// modelName := "model-display-name"
+	// datasetID := "IOD2041621568966098944"
+	// modelName := "model_display_name"
 
 	ctx := context.Background()
 	client, err := automl.NewClient(ctx)

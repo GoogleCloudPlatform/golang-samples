@@ -29,7 +29,7 @@ import (
 func visionObjectDetectionCreateDataset(w io.Writer, projectID string, location string, datasetName string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
-	// datasetName := "dataset-display-name"
+	// datasetName := "dataset_display_name"
 
 	ctx := context.Background()
 	client, err := automl.NewClient(ctx)

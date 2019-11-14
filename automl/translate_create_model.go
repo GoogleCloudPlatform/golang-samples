@@ -29,8 +29,8 @@ import (
 func translateCreateModel(w io.Writer, projectID string, location string, datasetID string, modelName string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
-	// datasetID := "dataset-id"
-	// modelName := "model-display-name"
+	// datasetID := "TRL5140661062550421504"
+	// modelName := "model_display_name"
 
 	ctx := context.Background()
 	client, err := automl.NewClient(ctx)

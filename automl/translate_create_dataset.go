@@ -29,7 +29,7 @@ import (
 func translateCreateDataset(w io.Writer, projectID string, location string, datasetName string, sourceLanguageCode string, targetLanguageCode string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
-	// datasetName := "dataset-display-name"
+	// datasetName := "dataset_display_name"
 	// sourceLanguageCode := "en"
 	// targetLanguageCode := "ja"
 

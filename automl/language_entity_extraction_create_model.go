@@ -29,8 +29,8 @@ import (
 func languageEntityExtractionCreateModel(w io.Writer, projectID string, location string, datasetID string, modelName string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
-	// datasetID := "dataset-id"
-	// modelName := "model-display-name"
+	// datasetID := "TEN8762118112909721600"
+	// modelName := "model_display_name"
 
 	ctx := context.Background()
 	client, err := automl.NewClient(ctx)

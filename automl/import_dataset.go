@@ -29,7 +29,7 @@ import (
 func importDataset(w io.Writer, projectID string, location string, datasetID string, inputURI string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
-	// datasetID := "dataset-id"
+	// datasetID := "TRL5140661062550421504"
 	// inputURI := "gs://BUCKET_ID/path_to_training_data.csv"
 
 	ctx := context.Background()
