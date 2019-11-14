@@ -53,8 +53,10 @@ small section of code to print out the `metadata` field.
 * [List Models](list_models.go)
 * [List Model Evaluations](list_model_evaluations.go)
 * [Get Model](get_model.go)
-* [Get Model Evaluation](get_model_evaluation)
+* [Get Model Evaluation](get_model_evaluation.go)
 * [Delete Model](delete_model.go)
+* [Deploy Model](deploy_model.go) - Not supported by Translation
+* [Uneploy Model](undeploy_model.go) - Not supported by Translation
 
 ### Operation Management
 
@@ -68,3 +70,38 @@ small section of code to print out the `metadata` field.
 * [Translate Create Dataset](translate_create_dataset.go)
 * [Translate Create Model](translate_create_model.go)
 * [Translate Predict](translate_predict.go)
+
+### Natural Language Entity Extraction
+
+* [Entity Extraction Create Dataset](language_entity_extraction_create_dataset.go)
+* [Entity Extraction Create Model](language_entity_extraction_create_model.go)
+* [Entity Extraction Predict](language_entity_extraction_predict.go)
+* [Entity Extraction Batch Predict](language_batch_predict.go)
+
+### Natural Language Sentiment Analysis
+
+* [Sentiment Analysis Create Dataset](language_sentiment_analysis_create_dataset.go)
+* [Sentiment Analysis Create Model](language_sentiment_analysis_create_model.go)
+* [Sentiment Analysis Predict](language_sentiment_analysis_predict.go)
+
+### Natural Language Text Classification
+
+* [Text Classification Create Dataset](language_text_classification_create_dataset.go)
+* [Text Classification Create Model](language_text_classification_create_model.go)
+* [Text Classification Predict](language_text_classification_predict.go)
+
+### Vision Classification
+
+* [Classification Create Dataset](vision_classification_create_dataset.go)
+* [Classification Create Model](vision_classification_create_model.go)
+* [Classification Predict](vision_classification_predict.go)
+* [Classification Batch Predict](vision_batch_predict.go)
+* [Deploy Node Count](vision_classification_deploy_model_node_count.go)
+
+### Vision Object Detection
+
+* [Object Detection Create Dataset](vision_object_detection_create_dataset.go)
+* [Object Detection Create Model](vision_object_detection_create_model.go)
+* [Object Detection Predict](vision_object_detection_predict.go)
+* [Object Detection Batch Predict](vision_batch_predict.go)
+* [Deploy Node Count](vision_object_detection_deploy_model_node_count.go)
