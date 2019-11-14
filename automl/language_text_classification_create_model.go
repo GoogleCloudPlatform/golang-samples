@@ -43,7 +43,7 @@ func languageTextClassificationCreateModel(w io.Writer, projectID string, locati
 		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
 		Model: &automlpb.Model{
 			DisplayName: modelName,
-			DatasetId:   fmt.Sprintf("projects/%s/locations/%s/datasets/%s", projectID, location, datasetID),
+			DatasetId:   datasetID,
 			ModelMetadata: &automlpb.Model_TextClassificationModelMetadata{
 				TextClassificationModelMetadata: &automlpb.TextClassificationModelMetadata{},
 			},
