@@ -7,7 +7,7 @@ require (
 	cloud.google.com/go/bigquery v1.1.0
 	cloud.google.com/go/bigtable v1.0.0
 	cloud.google.com/go/datastore v1.0.0
-	cloud.google.com/go/firestore v1.0.0
+	cloud.google.com/go/firestore v1.1.0
 	cloud.google.com/go/logging v1.0.0
 	cloud.google.com/go/pubsub v1.0.1
 	cloud.google.com/go/spanner v1.0.0
