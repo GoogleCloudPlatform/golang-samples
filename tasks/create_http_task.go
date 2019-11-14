@@ -25,7 +25,7 @@ import (
 	taskspb "google.golang.org/genproto/googleapis/cloud/tasks/v2"
 )
 
-// createHTTPTask creates a new task in your with a HTTP target.
+// createHTTPTask creates a new task with a HTTP target then adds it to a Queue.
 func createHTTPTask(projectID, locationID, queueID, url, message string) (*taskspb.Task, error) {
 
 	// Create a new Cloud Tasks client instance.
