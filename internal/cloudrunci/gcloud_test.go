@@ -21,6 +21,7 @@ import (
 )
 
 func TestCreateIDToken(t *testing.T) {
+	testutil.EndToEndTest(t)
 	// TODO assign to token
 	_, err := createIDToken("http://example.com")
 	if err != nil {
@@ -31,14 +32,14 @@ func TestCreateIDToken(t *testing.T) {
 }
 
 func TestGcloud(t *testing.T) {
+	testutil.EndToEndTest(t)
 	out, err := gcloud("label", exec.Command(gcloudBin, "help"))
 	if err != nil {
 		t.Errorf("createIDToken: %q", err)
 	}
-
-	got := string(out)[0:500]
+	
 	want := "gcloud - manage Google Cloud Platform resources and developer workflow"
-	if !strings.Contains(got, want) {
+	if got := string(out); !strings.Contains(got, want) {
 		t.Errorf("gcloud: got (%s), want (%s)", got, want)
 	}
 }
