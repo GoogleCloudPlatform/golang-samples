@@ -32,7 +32,7 @@ func visionObjectDetectionPredict(w io.Writer, projectID string, location string
 	// projectID := "my-project-id"
 	// location := "us-central1"
 	// modelID := "model-id"
-	// file_path := "resources/salad.jpg"
+	// file_path := "testdata/salad.jpg"
 
 	ctx := context.Background()
 	client, err := automl.NewPredictionClient(ctx)
