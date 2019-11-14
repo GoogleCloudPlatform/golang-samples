@@ -33,7 +33,7 @@ func TestIndexHandler(t *testing.T) {
 	}{
 		{
 			name:        "no project, no trace",
-			project:     "example",
+			project:     "",
 			traceHeader: "",
 			want:        "",
 		},
