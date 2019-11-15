@@ -27,9 +27,9 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func pullMsgsSync(w io.Writer, projectID, subName string, topic *pubsub.Topic) error {
+func pullMsgsSync(w io.Writer, projectID, subID string, topic *pubsub.Topic) error {
 	// projectID := "my-project-id"
-	// subName := projectID + "-example-sub"
+	// subID := "my-sub"
 	// topic of type https://godoc.org/cloud.google.com/go/pubsub#Topic
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
@@ -38,7 +38,7 @@ func pullMsgsSync(w io.Writer, projectID, subName string, topic *pubsub.Topic) e
 	}
 	defer client.Close()
 
-	sub := client.Subscription(subName)
+	sub := client.Subscription(subID)
 
 	// Turn on synchronous mode. This makes the subscriber use the Pull RPC rather
 	// than the StreamingPull RPC, which is useful for guaranteeing MaxOutstandingMessages,

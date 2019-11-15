@@ -25,9 +25,9 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func pullMsgsConcurrenyControl(w io.Writer, projectID, subName string) error {
+func pullMsgsConcurrenyControl(w io.Writer, projectID, subID string) error {
 	// projectID := "my-project-id"
-	// subName := projectID + "-example-sub"
+	// subID := "my-sub"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
@@ -35,7 +35,7 @@ func pullMsgsConcurrenyControl(w io.Writer, projectID, subName string) error {
 	}
 	defer client.Close()
 
-	sub := client.Subscription(subName)
+	sub := client.Subscription(subID)
 	// Must set ReceiveSettings.Synchronous to false (or leave as default) to enable
 	// concurrency settings. Otherwise, NumGoroutines will be set to 1.
 	sub.ReceiveSettings.Synchronous = false

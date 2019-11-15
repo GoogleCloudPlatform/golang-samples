@@ -205,13 +205,16 @@ func TestPullMsgsSync(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateTopic: %v", err)
 	}
+	defer topic.Delete(ctx)
+	defer topic.Stop()
 
-	_, err = client.CreateSubscription(ctx, subIDSync, pubsub.SubscriptionConfig{
+	sub, err := client.CreateSubscription(ctx, subIDSync, pubsub.SubscriptionConfig{
 		Topic: topic,
 	})
 	if err != nil {
 		t.Fatalf("CreateSubscription: %v", err)
 	}
+	defer sub.Delete(ctx)
 
 	// Publish 5 messages on the topic.
 	const numMsgs = 5
@@ -239,13 +242,16 @@ func TestPullMsgsConcurrencyControl(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateTopic: %v", err)
 	}
+	defer topic.Delete(ctx)
+	defer topic.Stop()
 
-	_, err = client.CreateSubscription(ctx, subIDConc, pubsub.SubscriptionConfig{
+	sub, err := client.CreateSubscription(ctx, subIDConc, pubsub.SubscriptionConfig{
 		Topic: topic,
 	})
 	if err != nil {
 		t.Fatalf("CreateSubscription: %v", err)
 	}
+	defer sub.Delete(ctx)
 
 	// Publish 5 message to test with.
 	const numMsgs = 5
