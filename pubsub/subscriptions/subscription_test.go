@@ -201,18 +201,16 @@ func TestPullMsgsSync(t *testing.T) {
 	topicIDSync := topicID + "-sync"
 	subIDSync := subID + "-sync"
 
-	topic, err := client.CreateTopic(ctx, topicIDSync)
+	topic, err := getOrCreateTopic(ctx, client, topicIDSync)
 	if err != nil {
-		t.Fatalf("CreateTopic: %v", err)
+		t.Fatalf("getOrCreateTopic: %v", err)
 	}
 	defer topic.Delete(ctx)
 	defer topic.Stop()
 
-	sub, err := client.CreateSubscription(ctx, subIDSync, pubsub.SubscriptionConfig{
-		Topic: topic,
-	})
+	sub, err := getOrCreateSub(ctx, client, topic, subIDSync)
 	if err != nil {
-		t.Fatalf("CreateSubscription: %v", err)
+		t.Fatalf("getOrCreateSub: %v", err)
 	}
 	defer sub.Delete(ctx)
 
@@ -238,18 +236,16 @@ func TestPullMsgsConcurrencyControl(t *testing.T) {
 	topicIDConc := topicID + "-conc"
 	subIDConc := subID + "-conc"
 
-	topic, err := client.CreateTopic(ctx, topicIDConc)
+	topic, err := getOrCreateTopic(ctx, client, topicIDConc)
 	if err != nil {
-		t.Fatalf("CreateTopic: %v", err)
+		t.Fatalf("getOrCreateTopic: %v", err)
 	}
 	defer topic.Delete(ctx)
 	defer topic.Stop()
 
-	sub, err := client.CreateSubscription(ctx, subIDConc, pubsub.SubscriptionConfig{
-		Topic: topic,
-	})
+	sub, err := getOrCreateSub(ctx, client, topic, subIDConc)
 	if err != nil {
-		t.Fatalf("CreateSubscription: %v", err)
+		t.Fatalf("getOrCreateSub: %v", err)
 	}
 	defer sub.Delete(ctx)
 
@@ -282,4 +278,38 @@ func publishMsgs(ctx context.Context, t *pubsub.Topic, numMsgs int) error {
 		}
 	}
 	return nil
+}
+
+// getOrCreateTopic gets a topic or creates it if it doesn't exist.
+func getOrCreateTopic(ctx context.Context, client *pubsub.Client, topicID string) (*pubsub.Topic, error) {
+	topic := client.Topic(topicID)
+	ok, err := topic.Exists(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to check if topic exists: %v", err)
+	}
+	if !ok {
+		topic, err = client.CreateTopic(ctx, topicID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create topic (%q): %v", topicID, err)
+		}
+	}
+	return topic, nil
+}
+
+// getOrCreateSub gets a subscription or creates it if it doesn't exist.
+func getOrCreateSub(ctx context.Context, client *pubsub.Client, topic *pubsub.Topic, subID string) (*pubsub.Subscription, error) {
+	sub := client.Subscription(subID)
+	ok, err := sub.Exists(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to check if subscription exists: %v", err)
+	}
+	if !ok {
+		sub, err = client.CreateSubscription(ctx, subID, pubsub.SubscriptionConfig{
+			Topic: topic,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("failed to create subscription (%q): %v", topicID, err)
+		}
+	}
+	return sub, nil
 }
