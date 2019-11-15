@@ -29,7 +29,7 @@ import (
 func exportDataset(w io.Writer, projectID string, location string, datasetID string, gcsURI string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
-	// datasetID := "TRL5140661062550421504"
+	// datasetID := "TRL123456789..."
 	// gcsURI := "gs://BUCKET_ID/path_to_export/"
 
 	ctx := context.Background()

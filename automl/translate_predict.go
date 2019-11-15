@@ -29,7 +29,7 @@ import (
 func translatePredict(w io.Writer, projectID string, location string, modelID string, content string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
-	// modelID := "model-id"
+	// modelID := "TRL123456789..."
 	// content := "text to translate"
 
 	ctx := context.Background()

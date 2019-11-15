@@ -29,7 +29,7 @@ import (
 func visionClassificationCreateModel(w io.Writer, projectID string, location string, datasetID string, modelName string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
-	// datasetID := "ICN8234071056600530944"
+	// datasetID := "ICN123456789..."
 	// modelName := "model_display_name"
 
 	ctx := context.Background()

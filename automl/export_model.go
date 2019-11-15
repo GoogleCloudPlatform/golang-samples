@@ -29,7 +29,7 @@ import (
 func exportModel(w io.Writer, projectID string, location string, modelID string, gcsURI string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
-	// modelID := "model-id"
+	// modelID := "TRL123456789..."
 	// gcsURI := "gs://BUCKET_ID/path_to_export/"
 
 	ctx := context.Background()

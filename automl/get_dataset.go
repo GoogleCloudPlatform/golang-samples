@@ -29,7 +29,7 @@ import (
 func getDataset(w io.Writer, projectID string, location string, datasetID string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
-	// datasetID := "TRL5140661062550421504"
+	// datasetID := "TRL123456789..."
 
 	ctx := context.Background()
 	client, err := automl.NewClient(ctx)

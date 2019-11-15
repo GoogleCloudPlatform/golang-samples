@@ -29,7 +29,7 @@ import (
 func visionClassificationDeployModelWithNodeCount(w io.Writer, projectID string, location string, modelID string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
-	// modelID := "model-id"
+	// modelID := "ICN123456789..."
 
 	ctx := context.Background()
 	client, err := automl.NewClient(ctx)

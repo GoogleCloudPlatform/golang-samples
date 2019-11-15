@@ -29,7 +29,7 @@ import (
 func getOperationStatus(w io.Writer, projectID string, location string, operationID string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
-	// operationID := "TRL3743729340437757952"
+	// operationID := "TRL123456789..."
 
 	ctx := context.Background()
 	client, err := automl.NewClient(ctx)

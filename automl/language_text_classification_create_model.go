@@ -29,7 +29,7 @@ import (
 func languageTextClassificationCreateModel(w io.Writer, projectID string, location string, datasetID string, modelName string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
-	// datasetID := "TCN6594197842284249088"
+	// datasetID := "TCN123456789..."
 	// modelName := "model_display_name"
 
 	ctx := context.Background()

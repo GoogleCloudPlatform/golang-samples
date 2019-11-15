@@ -29,8 +29,8 @@ import (
 func languageSentimentAnalysisPredict(w io.Writer, projectID string, location string, modelID string, content string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
-	// modelID := "model-id"
-	// content := "text to predict"
+	// modelID := "TST123456789..."
+	// content := "text to analyze sentiment"
 
 	ctx := context.Background()
 	client, err := automl.NewPredictionClient(ctx)

@@ -29,8 +29,8 @@ import (
 func languageTextClassificationPredict(w io.Writer, projectID string, location string, modelID string, content string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
-	// modelID := "model-id"
-	// content := "text to predict"
+	// modelID := "TCN123456789..."
+	// content := "text to classify"
 
 	ctx := context.Background()
 	client, err := automl.NewPredictionClient(ctx)

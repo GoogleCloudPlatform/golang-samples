@@ -29,7 +29,7 @@ import (
 func visionBatchPredict(w io.Writer, projectID string, location string, modelID string, inputURI string, outputURI string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
-	// modelID := "model-id"
+	// modelID := "ICN123456789..."
 	// input_uri := "gs://BUCKET_ID/path_to_your_input_file.txt"
 	// output_uri := "gs://BUCKET_ID/path_to_save_results/"
 

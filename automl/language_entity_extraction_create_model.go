@@ -29,7 +29,7 @@ import (
 func languageEntityExtractionCreateModel(w io.Writer, projectID string, location string, datasetID string, modelName string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
-	// datasetID := "TEN8762118112909721600"
+	// datasetID := "TEN123456789..."
 	// modelName := "model_display_name"
 
 	ctx := context.Background()

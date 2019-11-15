@@ -30,6 +30,9 @@ func translateCreateDataset(w io.Writer, projectID string, location string, data
 	// projectID := "my-project-id"
 	// location := "us-central1"
 	// datasetName := "dataset_display_name"
+
+	// Supported languages:
+	//   https://cloud.google.com/translate/automl/docs/languages
 	// sourceLanguageCode := "en"
 	// targetLanguageCode := "ja"
 

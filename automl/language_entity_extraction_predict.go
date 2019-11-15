@@ -29,8 +29,8 @@ import (
 func languageEntityExtractionPredict(w io.Writer, projectID string, location string, modelID string, content string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
-	// modelID := "model-id"
-	// content := "text to predict"
+	// modelID := "TEN123456789..."
+	// content := "text to extract entities"
 
 	ctx := context.Background()
 	client, err := automl.NewPredictionClient(ctx)

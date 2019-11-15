@@ -31,7 +31,7 @@ import (
 func visionClassificationPredict(w io.Writer, projectID string, location string, modelID string, filePath string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
-	// modelID := "model-id"
+	// modelID := "ICN123456789..."
 	// file_path := "testdata/test.png"
 
 	ctx := context.Background()
