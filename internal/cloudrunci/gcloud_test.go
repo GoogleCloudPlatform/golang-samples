@@ -37,7 +37,7 @@ func TestGcloud(t *testing.T) {
 	if err != nil {
 		t.Errorf("createIDToken: %q", err)
 	}
-	
+
 	want := "gcloud - manage Google Cloud Platform resources and developer workflow"
 	if got := string(out); !strings.Contains(got, want) {
 		t.Errorf("gcloud: got (%s), want (%s)", got, want)
