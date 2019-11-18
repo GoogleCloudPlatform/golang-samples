@@ -14,7 +14,7 @@ require (
 	cloud.google.com/go/storage v1.3.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.12.8
 	firebase.google.com/go v3.10.0+incompatible
-	github.com/aws/aws-sdk-go v1.23.20
+	github.com/aws/aws-sdk-go v1.25.36
 	github.com/bmatcuk/doublestar v1.1.5
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
 	github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b
@@ -42,15 +42,14 @@ require (
 	github.com/tinylib/msgp v1.1.0 // indirect
 	go.opencensus.io v0.22.2
 	golang.org/x/exp v0.0.0-20191030013958-a1ab85dbe136
-	golang.org/x/net v0.0.0-20191112182307-2180aed22343
+	golang.org/x/net v0.0.0-20191116160921-f9c825593386
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	golang.org/x/sys v0.0.0-20191113165036-4c7a9d0fe056 // indirect
 	golang.org/x/text v0.3.2
-	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	golang.org/x/tools v0.0.0-20191113232020-e2727e816f5a // indirect
-	google.golang.org/api v0.13.0
+	google.golang.org/api v0.14.0
 	google.golang.org/appengine v1.6.5
-	google.golang.org/genproto v0.0.0-20191108220845-16a3f7862a1a
+	google.golang.org/genproto v0.0.0-20191115221424-83cc0476cb11
 	google.golang.org/grpc v1.25.1
 	gopkg.in/sendgrid/sendgrid-go.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.2.5
