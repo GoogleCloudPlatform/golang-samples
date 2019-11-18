@@ -15,7 +15,7 @@
 // Package automl contains samples for Google Cloud AutoML API v1beta1.
 package automl
 
-// [START automl_export_dataset]
+// [START automl_export_model]
 import (
 	"context"
 	"fmt"
@@ -25,12 +25,12 @@ import (
 	automlpb "google.golang.org/genproto/googleapis/cloud/automl/v1beta1"
 )
 
-// exportDataset exports a dataset.
-func exportDataset(w io.Writer, projectID string, location string, datasetID string, gcsURI string) error {
+// exportModel exports a model.
+func exportModel(w io.Writer, projectID string, location string, modelID string, outputURI string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
-	// datasetID := "TRL123456789..."
-	// gcsURI := "gs://BUCKET_ID/path_to_export/"
+	// modelID := "TRL123456789..."
+	// outputURI := "gs://BUCKET_ID/path_to_export/"
 
 	ctx := context.Background()
 	client, err := automl.NewClient(ctx)
@@ -39,20 +39,20 @@ func exportDataset(w io.Writer, projectID string, location string, datasetID str
 	}
 	defer client.Close()
 
-	req := &automlpb.ExportDataRequest{
-		Name: fmt.Sprintf("projects/%s/locations/%s/datasets/%s", projectID, location, datasetID),
-		OutputConfig: &automlpb.OutputConfig{
-			Destination: &automlpb.OutputConfig_GcsDestination{
+	req := &automlpb.ExportModelRequest{
+		Name: fmt.Sprintf("projects/%s/locations/%s/models/%s", projectID, location, modelID),
+		OutputConfig: &automlpb.ModelExportOutputConfig{
+			Destination: &automlpb.ModelExportOutputConfig_GcsDestination{
 				GcsDestination: &automlpb.GcsDestination{
-					OutputUriPrefix: gcsURI,
+					OutputUriPrefix: outputURI,
 				},
 			},
 		},
 	}
 
-	op, err := client.ExportData(ctx, req)
+	op, err := client.ExportModel(ctx, req)
 	if err != nil {
-		return fmt.Errorf("ExportData: %v", err)
+		return fmt.Errorf("ExportModel: %v", err)
 	}
 	fmt.Fprintf(w, "Processing operation name: %q\n", op.Name())
 
@@ -60,9 +60,9 @@ func exportDataset(w io.Writer, projectID string, location string, datasetID str
 		return fmt.Errorf("Wait: %v", err)
 	}
 
-	fmt.Fprintf(w, "Dataset exported.\n")
+	fmt.Fprintf(w, "Model exported.\n")
 
 	return nil
 }
 
-// [END automl_export_dataset]
+// [END automl_export_model]

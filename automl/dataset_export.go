@@ -15,7 +15,7 @@
 // Package automl contains samples for Google Cloud AutoML API v1beta1.
 package automl
 
-// [START automl_language_batch_predict]
+// [START automl_export_dataset]
 import (
 	"context"
 	"fmt"
@@ -25,32 +25,24 @@ import (
 	automlpb "google.golang.org/genproto/googleapis/cloud/automl/v1beta1"
 )
 
-// languageBatchPredict does a batch prediction.
-func languageBatchPredict(w io.Writer, projectID string, location string, modelID string, inputURI string, outputURI string) error {
+// exportDataset exports a dataset.
+func exportDataset(w io.Writer, projectID string, location string, datasetID string, outputURI string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
-	// modelID := "TRL123456789..."
-	// input_uri := "gs://BUCKET_ID/path_to_your_input_file.txt"
-	// output_uri := "gs://BUCKET_ID/path_to_save_results/"
+	// datasetID := "TRL123456789..."
+	// outputURI := "gs://BUCKET_ID/path_to_export/"
 
 	ctx := context.Background()
-	client, err := automl.NewPredictionClient(ctx)
+	client, err := automl.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewPredictionClient: %v", err)
+		return fmt.Errorf("NewClient: %v", err)
 	}
 	defer client.Close()
 
-	req := &automlpb.BatchPredictRequest{
-		Name: fmt.Sprintf("projects/%s/locations/%s/models/%s", projectID, location, modelID),
-		InputConfig: &automlpb.BatchPredictInputConfig{
-			Source: &automlpb.BatchPredictInputConfig_GcsSource{
-				GcsSource: &automlpb.GcsSource{
-					InputUris: []string{inputURI},
-				},
-			},
-		},
-		OutputConfig: &automlpb.BatchPredictOutputConfig{
-			Destination: &automlpb.BatchPredictOutputConfig_GcsDestination{
+	req := &automlpb.ExportDataRequest{
+		Name: fmt.Sprintf("projects/%s/locations/%s/datasets/%s", projectID, location, datasetID),
+		OutputConfig: &automlpb.OutputConfig{
+			Destination: &automlpb.OutputConfig_GcsDestination{
 				GcsDestination: &automlpb.GcsDestination{
 					OutputUriPrefix: outputURI,
 				},
@@ -58,21 +50,19 @@ func languageBatchPredict(w io.Writer, projectID string, location string, modelI
 		},
 	}
 
-	op, err := client.BatchPredict(ctx, req)
+	op, err := client.ExportData(ctx, req)
 	if err != nil {
-		return fmt.Errorf("BatchPredict: %v", err)
+		return fmt.Errorf("ExportData: %v", err)
 	}
 	fmt.Fprintf(w, "Processing operation name: %q\n", op.Name())
 
-	resp, err := op.Wait(ctx)
-	if err != nil {
+	if err := op.Wait(ctx); err != nil {
 		return fmt.Errorf("Wait: %v", err)
 	}
 
-	fmt.Fprintf(w, "Batch Prediction results saved to Cloud Storage bucket.\n")
-	fmt.Fprintf(w, "%v", resp)
+	fmt.Fprintf(w, "Dataset exported.\n")
 
 	return nil
 }
 
-// [END automl_language_batch_predict]
+// [END automl_export_dataset]

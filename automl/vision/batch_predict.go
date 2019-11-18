@@ -30,8 +30,8 @@ func visionBatchPredict(w io.Writer, projectID string, location string, modelID 
 	// projectID := "my-project-id"
 	// location := "us-central1"
 	// modelID := "ICN123456789..."
-	// input_uri := "gs://BUCKET_ID/path_to_your_input_file.txt"
-	// output_uri := "gs://BUCKET_ID/path_to_save_results/"
+	// inputURI := "gs://BUCKET_ID/path_to_your_input_file.txt"
+	// outputURI := "gs://BUCKET_ID/path_to_save_results/"
 
 	ctx := context.Background()
 	client, err := automl.NewPredictionClient(ctx)

@@ -54,24 +54,36 @@ func getDataset(w io.Writer, projectID string, location string, datasetID string
 	fmt.Fprintf(w, "\tnanos: %v\n", dataset.GetCreateTime().GetNanos())
 
 	// Language entity extraction
-	fmt.Fprintf(w, "Text extraction dataset metadata: %v\n", dataset.GetTextExtractionDatasetMetadata())
+	if metadata := dataset.GetTextExtractionDatasetMetadata(); metadata != nil {
+		fmt.Fprintf(w, "Text extraction dataset metadata: %v\n", metadata)
+	}
 
 	// Language sentiment analysis
-	fmt.Fprintf(w, "Text sentiment dataset metadata: %v\n", dataset.GetTextSentimentDatasetMetadata())
+	if metadata := dataset.GetTextSentimentDatasetMetadata(); metadata != nil {
+		fmt.Fprintf(w, "Text sentiment dataset metadata: %v\n", metadata)
+	}
 
 	// Language text classification
-	fmt.Fprintf(w, "Text classification dataset metadata: %v\n", dataset.GetTextClassificationDatasetMetadata())
+	if metadata := dataset.GetTextClassificationDatasetMetadata(); metadata != nil {
+		fmt.Fprintf(w, "Text classification dataset metadata: %v\n", metadata)
+	}
 
 	// Translate
-	fmt.Fprintf(w, "Translation dataset metadata:\n")
-	fmt.Fprintf(w, "\tsource_language_code: %v\n", dataset.GetTranslationDatasetMetadata().GetSourceLanguageCode())
-	fmt.Fprintf(w, "\ttarget_language_code: %v\n", dataset.GetTranslationDatasetMetadata().GetTargetLanguageCode())
+	if metadata := dataset.GetTranslationDatasetMetadata(); metadata != nil {
+		fmt.Fprintf(w, "Translation dataset metadata:\n")
+		fmt.Fprintf(w, "\tsource_language_code: %v\n", metadata.GetSourceLanguageCode())
+		fmt.Fprintf(w, "\ttarget_language_code: %v\n", metadata.GetTargetLanguageCode())
+	}
 
 	// Vision classification
-	fmt.Fprintf(w, "Image classification dataset metadata: %v\n", dataset.GetImageClassificationDatasetMetadata())
+	if metadata := dataset.GetImageClassificationDatasetMetadata(); metadata != nil {
+		fmt.Fprintf(w, "Image classification dataset metadata: %v\n", metadata)
+	}
 
 	// Vision object detection
-	fmt.Fprintf(w, "Image object detection dataset metadata: %v\n", dataset.GetImageObjectDetectionDatasetMetadata())
+	if metadata := dataset.GetImageObjectDetectionDatasetMetadata(); metadata != nil {
+		fmt.Fprintf(w, "Image object detection dataset metadata: %v\n", metadata)
+	}
 
 	return nil
 }

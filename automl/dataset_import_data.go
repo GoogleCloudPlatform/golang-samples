@@ -25,8 +25,8 @@ import (
 	automlpb "google.golang.org/genproto/googleapis/cloud/automl/v1beta1"
 )
 
-// importDataset imports data into a dataset.
-func importDataset(w io.Writer, projectID string, location string, datasetID string, inputURI string) error {
+// importDataIntoDataset imports data into a dataset.
+func importDataIntoDataset(w io.Writer, projectID string, location string, datasetID string, inputURI string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
 	// datasetID := "TRL123456789..."

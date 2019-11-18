@@ -15,7 +15,7 @@
 // Package automl contains samples for Google Cloud AutoML API v1beta1.
 package automl
 
-// [START automl_vision_object_detection_predict]
+// [START automl_vision_classification_predict]
 import (
 	"context"
 	"fmt"
@@ -27,12 +27,12 @@ import (
 	automlpb "google.golang.org/genproto/googleapis/cloud/automl/v1beta1"
 )
 
-// visionObjectDetectionPredict does a prediction for image classification.
-func visionObjectDetectionPredict(w io.Writer, projectID string, location string, modelID string, filePath string) error {
+// visionClassificationPredict does a prediction for image classification.
+func visionClassificationPredict(w io.Writer, projectID string, location string, modelID string, filePath string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
-	// modelID := "IOD123456789..."
-	// file_path := "testdata/salad.jpg"
+	// modelID := "ICN123456789..."
+	// filePath := "path/to/image.jpg"
 
 	ctx := context.Background()
 	client, err := automl.NewPredictionClient(ctx)
@@ -76,15 +76,10 @@ func visionObjectDetectionPredict(w io.Writer, projectID string, location string
 
 	for _, payload := range resp.GetPayload() {
 		fmt.Fprintf(w, "Predicted class name: %v\n", payload.GetDisplayName())
-		fmt.Fprintf(w, "Predicted class score: %v\n", payload.GetImageObjectDetection().GetScore())
-		boundingBox := payload.GetImageObjectDetection().GetBoundingBox()
-		fmt.Fprintf(w, "Normalized vertices:\n")
-		for _, vertex := range boundingBox.GetNormalizedVertices() {
-			fmt.Fprintf(w, "\tX: %v, Y: %v\n", vertex.GetX(), vertex.GetY())
-		}
+		fmt.Fprintf(w, "Predicted class score: %v\n", payload.GetClassification().GetScore())
 	}
 
 	return nil
 }
 
-// [END automl_vision_object_detection_predict]
+// [END automl_vision_classification_predict]
