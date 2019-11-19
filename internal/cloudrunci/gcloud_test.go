@@ -18,6 +18,8 @@ import (
 	"os/exec"
 	"strings"
 	"testing"
+
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestCreateIDToken(t *testing.T) {
