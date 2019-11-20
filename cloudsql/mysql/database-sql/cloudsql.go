@@ -130,7 +130,8 @@ func currentTotals() (templateData, error) {
 		return templateData{}, err
 	}
 
-	// voteMargin is string representation of the current voting margin.
+	// voteMargin is string representation of the current voting margin,
+	// such as "1 vote" (singular) or "2 votes" (plural).
 	voteDiff := int(math.Abs(float64(tabVotes) - float64(spaceVotes)))
 	var voteMargin string
 	if voteDiff == 1 {
@@ -168,7 +169,7 @@ func showTotals(w http.ResponseWriter, r *http.Request) error {
 func saveVote(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	team := r.Form["team"][0]
-	// [START cloud_sql_mysql_database-sql_connection]
+	// [START cloud_sql_mysql_databasesql_connection]
 	sqlInsert := "INSERT INTO votes (candidate) VALUES (?)"
 	if team == "TABS" || team == "SPACES" {
 		if _, err := db.Exec(sqlInsert, team); err != nil {
@@ -177,7 +178,7 @@ func saveVote(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(w, "Vote successfully cast for %s!\n", team)
 		}
 	}
-	// [END cloud_sql_mysql_database-sql_connection]
+	// [END cloud_sql_mysql_databasesql_connection]
 }
 
 // mustGetEnv is a helper function for getting environment variables.
@@ -190,7 +191,7 @@ func mustGetenv(k string) string {
 	return v
 }
 
-// [START cloud_sql_mysql_database-sql_create]
+// [START cloud_sql_mysql_databasesql_create]
 
 // initConnectionPool initializes a database connection for a Cloud SQL instance.
 func initConnectionPool() (*sql.DB, error) {
@@ -214,19 +215,19 @@ func initConnectionPool() (*sql.DB, error) {
 		return nil, err
 	}
 
-	// [START cloud_sql_mysql_database-sql_limit]
+	// [START cloud_sql_mysql_databasesql_limit]
 	dbConn.SetMaxIdleConns(5)
 	dbConn.SetMaxOpenConns(7)
-	// [END cloud_sql_mysql_database-sql_limit]
+	// [END cloud_sql_mysql_databasesql_limit]
 
-	// [START cloud_sql_mysql_database-sql_lifetime]
+	// [START cloud_sql_mysql_databasesql_lifetime]
 	dbConn.SetConnMaxLifetime(1800)
-	// [END cloud_sql_mysql_database-sql_lifetime]
+	// [END cloud_sql_mysql_databasesql_lifetime]
 
 	return dbConn, nil
 }
 
-// [END cloud_sql_mysql_database-sql_create]
+// [END cloud_sql_mysql_databasesql_create]
 
 // initDBSchema creates the votes table if it does not exist.
 func initDBSchema() error {
