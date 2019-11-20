@@ -19,16 +19,26 @@ name.
 [instructions](https://cloud.google.com/sql/docs/mysql/connect-external-app#4_if_required_by_your_authentication_method_create_a_service_account).
 Download a JSON key to use to authenticate your connection. 
 
-1. Use the information noted in the previous steps:
+1. Use the information noted in the previous steps to set environment variables for local development and testing. Follow the instructions below for your local operating system. Note: Saving credentials in environment variables is convenient, but not secure - consider a more
+secure solution such as [Cloud KMS](https://cloud.google.com/kms/) to help keep secrets safe.
+
+### Linux / Mac OS
 ```bash
 export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service/account/key.json
 export INSTANCE_CONNECTION_NAME='<MY-PROJECT>:<INSTANCE-REGION>:<INSTANCE-NAME>'
-export DB_USER='my-db-user'
-export DB_PASS='my-db-pass'
-export DB_NAME='my_db'
+export DB_USER='<DB_USER_NAME>'
+export DB_PASS='<DB_PASSWORD>'
+export DB_NAME='<DB_NAME>'
 ```
-Note: Saving credentials in environment variables is convenient, but not secure - consider a more
-secure solution such as [Cloud KMS](https://cloud.google.com/kms/) to help keep secrets safe.
+
+### Windows/PowerShell
+```powershell
+$env:GOOGLE_APPLICATION_CREDENTIALS="<CREDENTIALS_JSON_FILE>"
+$env:INSTANCE_CONNECTION_NAME="<MY-PROJECT>:<INSTANCE-REGION>:<INSTANCE-NAME>"
+$env:DB_USER="<DB_USER_NAME>"
+$env:DB_PASS="<DB_PASSWORD>"
+$env:DB_NAME="<DB_NAME>"
+```
 
 ## Running locally
 
@@ -37,7 +47,7 @@ following the instructions
 [here](https://cloud.google.com/sql/docs/mysql/sql-proxy#install). Once the
 proxy has been downloaded, use the following commands start it running in the background for local testing on either Linux/Mac OS or Windows.
 
-### launch the proxy on Linux/Mac OS
+### Launch the proxy on Linux/Mac OS
 
 Linux environments use a Unix socket for the Cloud SQL proxy, so you'll need to create the `/cloudsql`
 directory and give the user running the proxy the appropriate permissions:
@@ -63,7 +73,7 @@ Windows environments use a TCP connection for the Cloud SQL proxy. Use this Powe
 Start-Process -filepath "C:\<path to proxy exe>" -ArgumentList "-instances=<project-id>:<region>:<instance-name>=tcp:3306"
 ```
 
-### testing the application
+### Testing the application
 
 To test the application locally, follow these steps after the proxy is running:
 
