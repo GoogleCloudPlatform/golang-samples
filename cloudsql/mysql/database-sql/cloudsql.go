@@ -82,7 +82,11 @@ func main() {
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		showTotals(w, r)
+		err := showTotals(w, r)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+		}
 	case "POST":
 		saveVote(w, r)
 	default:
@@ -91,34 +95,40 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // recentVotes returns a slice of the last 5 votes cast.
-func recentVotes() []vote {
+func recentVotes() ([]vote, error) {
 	var votes []vote
 	rows, err := db.Query(`SELECT candidate, time_cast FROM votes ORDER BY time_cast DESC LIMIT 5`)
 	if err != nil {
-		log.Print(err)
-		return votes
+		return votes, err
 	}
 	defer rows.Close()
 	for rows.Next() {
 		nextVote := vote{}
-		if err := rows.Scan(&nextVote.Candidate, &nextVote.VoteTime); err != nil {
-			log.Fatalf("unable to scan row returned by SELECT statement: %s", err)
+		rowError := rows.Scan(&nextVote.Candidate, &nextVote.VoteTime)
+		if err != nil {
+			return votes, rowError
 		}
 		votes = append(votes, nextVote)
 	}
 	if err = rows.Err(); err != nil {
-		log.Fatalf("error reading selected rows: %s", err)
+		return votes, err
 	}
-	return votes
+	return votes, nil
 }
 
 // currentTotals returns a templateData structure for populating the web page.
-func currentTotals() templateData {
+func currentTotals() (templateData, error) {
 
 	// get total votes for each candidate
 	var tabVotes, spaceVotes uint
-	_ = db.QueryRow(`SELECT count(vote_id) FROM votes WHERE candidate='TABS'`).Scan(&tabVotes)
-	_ = db.QueryRow(`SELECT count(vote_id) FROM votes WHERE candidate='SPACES'`).Scan(&spaceVotes)
+	err := db.QueryRow(`SELECT count(vote_id) FROM votes WHERE candidate='TABS'`).Scan(&tabVotes)
+	if err != nil {
+		return templateData{}, err
+	}
+	err = db.QueryRow(`SELECT count(vote_id) FROM votes WHERE candidate='SPACES'`).Scan(&spaceVotes)
+	if err != nil {
+		return templateData{}, err
+	}
 
 	// voteMargin is string representation of the current voting margin.
 	voteDiff := int(math.Abs(float64(tabVotes) - float64(spaceVotes)))
@@ -128,21 +138,30 @@ func currentTotals() templateData {
 	}
 	voteMargin = strconv.Itoa(voteDiff) + " votes"
 
-	return templateData{tabVotes, spaceVotes, voteMargin, recentVotes()}
+	latestVotesCast, err := recentVotes()
+	if err != nil {
+		return templateData{}, err
+	}
+	return templateData{tabVotes, spaceVotes, voteMargin, latestVotesCast}, nil
 
 }
 
 // showTotals renders an HTML template showing the current vote totals.
-func showTotals(w http.ResponseWriter, r *http.Request) {
+func showTotals(w http.ResponseWriter, r *http.Request) error {
 	t, err := template.ParseFiles("templates/index.html")
 	if err != nil {
 		log.Fatalf("unable to parse template file: %s", err)
 	}
 
-	err = t.Execute(w, currentTotals())
+	totals, err := currentTotals()
 	if err != nil {
-		log.Fatalf("unable to execute template: %s", err)
+		return err
 	}
+	err = t.Execute(w, totals)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // saveVote handles POST requests and saves a vote passed as http.Request form data.
