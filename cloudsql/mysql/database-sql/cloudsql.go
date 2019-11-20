@@ -14,7 +14,7 @@
 
 // [START gae_cloudsql]
 
-// This sample demonstrates connection to a Cloud SQL instance from App Engine
+// Sample database-sql demonstrates connection to a Cloud SQL instance from App Engine
 // standard. The application is a Golang version of the "Tabs vs Spaces" web
 // app presented at Cloud Next '19 as seen in this video:
 // https://www.youtube.com/watch?v=qVgzP3PsXFw&t=1833s
@@ -32,10 +32,9 @@ import (
 	"strconv"
 
 	"github.com/go-sql-driver/mysql"
-	_ "github.com/go-sql-driver/mysql"
 )
 
-// Global db variable holds the database connection.
+// db is the database connection.
 var db *sql.DB
 
 // The vote struct stores a row from the votes table in the Cloud SQL instance.
@@ -58,7 +57,7 @@ func main() {
 
 	db, err = initConnectionPool()
 	if err != nil {
-		log.Fatalf("unable to initialize database connection pool: %s", err)
+		log.Fatalf("initConnectionPool: unable to initialize database connection pool: %s", err)
 	}
 
 	if err = initDBSchema(); err != nil {
@@ -73,7 +72,10 @@ func main() {
 	}
 
 	log.Printf("Listening on port %s", port)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
+		log.Fatal(err)
+	}
+
 }
 
 // indexHandler handles requests to the / route.
@@ -84,7 +86,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		saveVote(w, r)
 	default:
-		fmt.Fprintf(w, "Unsupported HTTP verb: %s\n", r.Method)
+		http.Error(w, fmt.Sprintf("HTTP Method %s Not Allowed", r.Method), http.StatusMethodNotAllowed)
 	}
 }
 
@@ -93,7 +95,7 @@ func recentVotes() []vote {
 	var votes []vote
 	rows, err := db.Query(`SELECT candidate, time_cast FROM votes ORDER BY time_cast DESC LIMIT 5`)
 	if err != nil {
-		fmt.Println(err)
+		log.Print(err)
 		return votes
 	}
 	defer rows.Close()
@@ -115,10 +117,10 @@ func currentTotals() templateData {
 
 	// get total votes for each candidate
 	var tabVotes, spaceVotes uint
-	_ = db.QueryRow(`select count(vote_id) from votes where candidate='TABS'`).Scan(&tabVotes)
-	_ = db.QueryRow(`select count(vote_id) from votes where candidate='SPACES'`).Scan(&spaceVotes)
+	_ = db.QueryRow(`SELECT count(vote_id) FROM votes WHERE candidate='TABS'`).Scan(&tabVotes)
+	_ = db.QueryRow(`SELECT count(vote_id) FROM votes WHERE candidate='SPACES'`).Scan(&spaceVotes)
 
-	// voteMargin is string representation of current voting margin.
+	// voteMargin is string representation of the current voting margin.
 	voteDiff := int(math.Abs(float64(tabVotes) - float64(spaceVotes)))
 	var voteMargin string
 	if voteDiff == 1 {
