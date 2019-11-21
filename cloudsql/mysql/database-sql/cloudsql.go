@@ -204,14 +204,25 @@ func initConnectionPool() (*sql.DB, error) {
 		dbName                 = mustGetenv("DB_NAME")
 	)
 
-	// Default connection string format for App Engine deployment (UNIX socket syntax).
-	dbURI := fmt.Sprintf("%s:%s@unix(/cloudsql/%s)/%s", dbUser, dbPass, instanceConnectionName, dbName)
+	// connectionType can be "Unix socket" or "TCP". Unix socket is used for
+	// deployment on App Engine.
+	connectionType := "Unix socket"
 	if runtime.GOOS == "windows" {
-		// If running on Windows (local dev machine), connect via Cloud SQL Proxy.
+		// The Cloud SQL Proxy currently only supports TCP connections on
+		// Windows, so must use TCP if running locally on Windows.
+		connectionType = "TCP"
+	}
+
+	var dbURI string
+	switch connectionType {
+	case "Unix socket":
+		dbURI = fmt.Sprintf("%s:%s@unix(/cloudsql/%s)/%s", dbUser, dbPass, instanceConnectionName, dbName)
+	case "TCP":
 		instanceConnectionName = "127.0.0.1:3306"
 		dbURI = fmt.Sprintf("%s:%s@tcp(%s)/%s", dbUser, dbPass, instanceConnectionName, dbName)
 	}
 
+	// Open database connection.
 	dbConn, err := sql.Open("mysql", dbURI)
 	if err != nil {
 		return nil, err
