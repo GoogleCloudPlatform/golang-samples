@@ -34,8 +34,9 @@ import (
 	"github.com/go-sql-driver/mysql"
 )
 
-// db is the database connection.
+// db is global database connection, parsedTemplate is parsed HTML template.
 var db *sql.DB
+var parsedTemplate *template.Template
 
 // The vote struct stores a row from the votes table in the Cloud SQL instance.
 // Each vote includes a candidate ("TABS" or "SPACES") and a timestamp.
@@ -54,6 +55,11 @@ type templateData struct {
 
 func main() {
 	var err error
+
+	parsedTemplate, err = template.ParseFiles("templates/index.html")
+	if err != nil {
+		log.Fatalf("unable to parse template file: %s", err)
+	}
 
 	db, err = initConnectionPool()
 	if err != nil {
@@ -149,16 +155,12 @@ func currentTotals() (templateData, error) {
 
 // showTotals renders an HTML template showing the current vote totals.
 func showTotals(w http.ResponseWriter, r *http.Request) error {
-	t, err := template.ParseFiles("templates/index.html")
-	if err != nil {
-		log.Fatalf("unable to parse template file: %s", err)
-	}
 
 	totals, err := currentTotals()
 	if err != nil {
 		return err
 	}
-	err = t.Execute(w, totals)
+	err = parsedTemplate.Execute(w, totals)
 	if err != nil {
 		return err
 	}
