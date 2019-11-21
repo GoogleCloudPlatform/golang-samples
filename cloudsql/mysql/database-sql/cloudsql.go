@@ -218,12 +218,23 @@ func initConnectionPool() (*sql.DB, error) {
 	}
 
 	// [START cloud_sql_mysql_databasesql_limit]
+
+	// Set maximum number of connections in idle connection pool.
+	// For more information see https://golang.org/pkg/database/sql/#DB.SetMaxIdleConns
 	dbConn.SetMaxIdleConns(5)
+
+	// Set maximum number of open connections to the database.
+	// For more information see https://golang.org/pkg/database/sql/#DB.SetMaxOpenConns
 	dbConn.SetMaxOpenConns(7)
+
 	// [END cloud_sql_mysql_databasesql_limit]
 
 	// [START cloud_sql_mysql_databasesql_lifetime]
+
+	// Set Maximum time (in seconds) that a connection can remain open.
+	// For more information see https://golang.org/pkg/database/sql/#DB.SetConnMaxLifetime
 	dbConn.SetConnMaxLifetime(1800)
+
 	// [END cloud_sql_mysql_databasesql_lifetime]
 
 	return dbConn, nil
