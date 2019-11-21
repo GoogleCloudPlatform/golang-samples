@@ -73,6 +73,8 @@ Windows environments use a TCP connection for the Cloud SQL proxy. Use this Powe
 Start-Process -filepath "C:\<path to proxy exe>" -ArgumentList "-instances=<project-id>:<region>:<instance-name>=tcp:3306"
 ```
 
+Note the the port number is set to ```3306``` in the above example, so the proxy will listen on that port locally and within the sample source code the instanceConnection string is set to the same port (```127.0.0.1:3306```). If you want to use a different port number (for example, because a different MySQL instance is using port 3306 locally), you'll need to change both the proxy invocation command and the instanceConnection variable in the sample.
+
 ### Testing the application
 
 To test the application locally, follow these steps after the proxy is running:
