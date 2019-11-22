@@ -34,7 +34,21 @@ func pullMsgsSettings(w io.Writer, projectID, subID string) error {
 
 	sub := client.Subscription(subID)
 	sub.ReceiveSettings.Synchronous = true
+	// MaxOutstandingMessages is the maximum number of unprocessed messages the
+	// client will pull from the server before pausing.
+	//
+	// This is only guaranteed when ReceiveSettings.Synchronous is set to true.
+	// When Synchronous is set to false, the StreamingPull RPC is used which
+	// can pull a single large batch of messages at once that is greater than
+	// MaxOustandingMessages before pausing. For more info, see
+	// https://cloud.google.com/pubsub/docs/pull#streamingpull_dealing_with_large_backlogs_of_small_messages.
 	sub.ReceiveSettings.MaxOutstandingMessages = 10
+	// MaxOutstandingBytes is the maximum size of unprocessed messages,
+	// that the client will pull from the server before pausing. Similar
+	// to MaxOutstandingMessages, this may be exceeded with a large batch
+	// of messages since we cannot control the size of a batch of messages
+	// from the server (even with the synchronous Pull RPC).
+	sub.ReceiveSettings.MaxOutstandingBytes = 1e10
 	err = sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
 		fmt.Fprintf(w, "Got message: %q\n", string(msg.Data))
 		msg.Ack()
