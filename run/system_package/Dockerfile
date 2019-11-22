@@ -14,18 +14,25 @@
 
 # Use the offical Golang image to create a build artifact.
 # https://hub.docker.com/_/golang
-FROM golang:1.13 as builder
+FROM golang:1.13-buster as builder
+
+# Create and change to the app directory.
+WORKDIR /app
+
+# Retrieve application dependencies.
+# This allows the container build to reuse cached dependencies.
+# Expecting to copy go.mod and if present go.sum.
+COPY go.* ./
+RUN go mod download
 
 # Copy local code to the container image.
-WORKDIR /app
-COPY . .
+COPY . ./
 
-# Build the release artifact.
-RUN CGO_ENABLED=0 GOOS=linux go build -v -o graphviz-web
-
+# Build the binary.
+RUN go build -mod=readonly -v -o server
 # Use a Docker multi-stage build to create a lean production image.
 # https://docs.docker.com/develop/develop-images/multistage-build/#use-multi-stage-builds
-# https://hub.docker.com/_/alpine
+# https://hub.docker.com/_/ubuntu
 FROM ubuntu
 
 # [START run_system_package_ubuntu]
@@ -35,7 +42,7 @@ RUN apt-get update -y && apt-get install -y \
 # [END run_system_package_ubuntu]
 
 # Copy the binary to the production image from the builder stage.
-COPY --from=builder /app/graphviz-web .
+COPY --from=builder /app/server /server
 
 # Run the web service on container startup.
-CMD ["/graphviz-web"]
+CMD ["/server"]
