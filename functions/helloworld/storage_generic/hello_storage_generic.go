@@ -50,11 +50,6 @@ type GCSEvent struct {
 	ContentDisposition      string    `json:"contentDisposition"`
 	CacheControl            string    `json:"cacheControl"`
 	Metadata map[string]interface{} `json:"metadata"`
-
-	Owner struct {
-		Entity   string `json:"entity"`
-		EntityId string `json:"entityId"`
-	}
 	Crc32c             string `json:"crc32c"`
 	ComponentCount     int    `json:"componentCount"`
 	Etag               string `json:"etag"`
