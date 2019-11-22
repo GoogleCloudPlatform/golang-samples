@@ -15,7 +15,7 @@
 // Package automl contains samples for Google Cloud AutoML API v1beta1.
 package automl
 
-// [START automl_import_dataset]
+// [START automl_import_data]
 import (
 	"context"
 	"fmt"
@@ -65,4 +65,4 @@ func importDataIntoDataset(w io.Writer, projectID string, location string, datas
 	return nil
 }
 
-// [END automl_import_dataset]
+// [END automl_import_data]
