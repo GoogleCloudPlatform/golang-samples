@@ -57,7 +57,8 @@ type GCSEvent struct {
 		EncryptionAlgorithm string `json:"encryptionAlgorithm"`
 		KeySha256           string `json:"keySha256"`
 	}
-	KMSKeyName string `json:"kmsKeyName"`
+	KMSKeyName    string `json:"kmsKeyName"`
+	ResourceState string `json:"resourceState"`
 }
 
 // HelloGCSInfo prints information about a GCS event.
