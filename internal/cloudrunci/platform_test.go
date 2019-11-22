@@ -19,9 +19,11 @@ import (
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/cloudrunci"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestManagedPlatformRequest(t *testing.T) {
+	testutil.EndToEndTest(t)
 	p := cloudrunci.ManagedPlatform{}
 
 	req, err := p.NewRequest("GET", "http://example.com")
@@ -35,6 +37,7 @@ func TestManagedPlatformRequest(t *testing.T) {
 }
 
 func TestGKEPlatformRequest(t *testing.T) {
+	testutil.EndToEndTest(t)
 	p := cloudrunci.GKEPlatform{}
 
 	req, err := p.NewRequest("GET", "http://example.com")
@@ -48,6 +51,7 @@ func TestGKEPlatformRequest(t *testing.T) {
 }
 
 func TestKubernetesPlatformRequest(t *testing.T) {
+	testutil.EndToEndTest(t)
 	p := cloudrunci.KubernetesPlatform{}
 
 	req, err := p.NewRequest("GET", "http://example.com")
