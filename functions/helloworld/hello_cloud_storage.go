@@ -40,20 +40,21 @@ type GCSEvent struct {
 	StorageClass            string                 `json:"storageClass"`
 	TimeStorageClassUpdated time.Time              `json:"timeStorageClassUpdated"`
 	Size                    string                 `json:"size"`
-	Md5Hash                 string                 `json:"md5Hash"`
+	MD5Hash                 string                 `json:"md5Hash"`
 	MediaLink               string                 `json:"mediaLink"`
 	ContentEncoding         string                 `json:"contentEncoding"`
 	ContentDisposition      string                 `json:"contentDisposition"`
 	CacheControl            string                 `json:"cacheControl"`
 	Metadata                map[string]interface{} `json:"metadata"`
-	Crc32c                  string                 `json:"crc32c"`
+	CRC32C                  string                 `json:"crc32c"`
 	ComponentCount          int                    `json:"componentCount"`
 	Etag                    string                 `json:"etag"`
 	CustomerEncryption      struct {
 		EncryptionAlgorithm string `json:"encryptionAlgorithm"`
 		KeySha256           string `json:"keySha256"`
 	}
-	KmsKeyName string `json:"kmsKeyName"`
+	KMSKeyName    string `json:"kmsKeyName"`
+	ResourceState string `json:"resourceState"`
 }
 
 // HelloGCS consumes a GCS event.
