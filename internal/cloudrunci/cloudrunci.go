@@ -27,6 +27,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os/exec"
 	"path"
 	"time"
@@ -115,7 +116,14 @@ func (s *Service) URL(p string) (string, error) {
 		return "", fmt.Errorf("gcloud: %s: %q", s.Name, err)
 	}
 
-	return path.Join(string(out), p), nil
+	sURL := string(out)
+	u, err := url.Parse(sURL)
+	if err != nil {
+		return "", fmt.Errorf("url.Parse: %v", err)
+	}
+	u.Path = path.Join(u.Path, p)
+
+	return u.String(), nil
 }
 
 // validate confirms all required service properties are present.
