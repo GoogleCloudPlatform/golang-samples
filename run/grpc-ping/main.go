@@ -49,7 +49,7 @@ func main() {
 // [END run_grpc_server]
 
 // Conn holds an open connection to the ping service.
-var Conn *grpc.ClientConn
+var conn *grpc.ClientConn
 
 func init() {
 	if os.Getenv("GRPC_PING_HOST") != "" {
