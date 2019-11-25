@@ -51,7 +51,7 @@ func signAsymmetric(name string, message []byte) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("AsymmetricSign: %v", err)
 	}
-	// Signature is base64 encoded.
+	// Return the signature bytes.
 	return response.Signature, nil
 }
 
