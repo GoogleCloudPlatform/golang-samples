@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Command infinite_streaming pipes the stdin audio data to
-// Google Speech API and outputs the transcript.
+// Command infinite_mic pipes the audio data from microphone
+// input to Google Speech API and outputs the transcript.
 
 // To run this program, SoX could be used to capture mic input:
 // sox -d -e signed -b 16 -c 1 -q mic.wav | go run infinite_mic.go
