@@ -62,7 +62,7 @@ func (p ManagedPlatform) CommandFlags() []string {
 func (p ManagedPlatform) NewRequest(method, url string) (*http.Request, error) {
 	req, err := p.platformBase.NewRequest(method, url)
 	if err == nil {
-		token, err := createIDToken(url)
+		token, err := CreateIDToken(url)
 		if err != nil {
 			return req, err
 		}
