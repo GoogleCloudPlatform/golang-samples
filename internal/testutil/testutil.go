@@ -21,6 +21,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"golang.org/x/tools/go/packages"
@@ -89,11 +90,22 @@ func testContext() (Context, error) {
 		return tc, noProjectID
 	}
 
-	pkgs, err := packages.Load(&packages.Config{Mode: packages.NeedName}, "github.com/GoogleCloudPlatform/golang-samples")
-	if err != nil {
-		return tc, fmt.Errorf("Could not find golang-samples: %v", err)
+	cfg := &packages.Config{
+		Mode:  packages.NeedName | packages.NeedFiles,
+		Tests: true,
 	}
-	tc.Dir = pkgs[0].PkgPath
+	pkgs, err := packages.Load(cfg, "github.com/GoogleCloudPlatform/golang-samples")
+	if err != nil {
+		return tc, fmt.Errorf("could not find golang-samples: %v", err)
+	}
+	for _, pkg := range pkgs {
+		if len(pkg.GoFiles) > 0 && strings.HasSuffix(pkg.GoFiles[0], ".go") {
+			tc.Dir = filepath.Dir(pkg.GoFiles[0])
+		}
+	}
+	if tc.Dir == "" {
+		return tc, fmt.Errorf("could not find golang-samples directory")
+	}
 
 	return tc, nil
 }
