@@ -35,8 +35,7 @@ func TestDiagramService(t *testing.T) {
 	requestPath := "/diagram.png"
 	req, err := service.NewRequest("GET", requestPath)
 	if err != nil {
-		t.Errorf("service.NewRequest: %q", err)
-		return
+		t.Fatalf("service.NewRequest: %q", err)
 	}
 	q := req.URL.Query()
 	q.Add("dot", "digraph G { A -> {B, C, D} -> {F} }")
@@ -45,8 +44,7 @@ func TestDiagramService(t *testing.T) {
 	client := http.Client{Timeout: 10 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
-		t.Errorf("client.Do: %v", err)
-		return
+		t.Fatalf("client.Do: %v", err)
 	}
 	defer resp.Body.Close()
 	fmt.Printf("client.Do: %s %s\n", req.Method, req.URL)
