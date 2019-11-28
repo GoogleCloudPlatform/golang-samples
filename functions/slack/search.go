@@ -19,8 +19,10 @@
 package slack
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -46,6 +48,10 @@ type Message struct {
 // by a Slack command.
 func KGSearch(w http.ResponseWriter, r *http.Request) {
 	setup(r.Context())
+
+	bodyBytes, _ := ioutil.ReadAll(r.Body)
+	r.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+
 	if r.Method != "POST" {
 		http.Error(w, "Only POST requests are accepted", 405)
 	}
@@ -53,7 +59,10 @@ func KGSearch(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Couldn't parse form", 400)
 		log.Fatalf("ParseForm: %v", err)
 	}
-	if err := verifyWebHook(r.Form); err != nil {
+
+	// Reset r.Body as ParseForm depletes it by reading the io.ReadCloser
+	r.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+	if err := verifyWebhookWithSigning(r); err != nil {
 		log.Fatalf("verifyWebhook: %v", err)
 	}
 	if len(r.Form["text"]) == 0 {
@@ -80,6 +89,20 @@ func verifyWebHook(form url.Values) error {
 	if t != config.Token {
 		return fmt.Errorf("invalid request/credentials: %q", t[0])
 	}
+	return nil
+}
+
+func verifyWebhookWithSigning(r *http.Request) error {
+	result, err := verifyRequestSignature(r, config.Secret)
+
+	if err != nil {
+		log.Fatalf("Received error while verifying request was correctly signed: %v", err)
+	}
+
+	if !result {
+		return fmt.Errorf("invalid request/credentials")
+	}
+
 	return nil
 }
 
