@@ -19,6 +19,8 @@ package subscriptions
 import (
 	"bytes"
 	"context"
+	"fmt"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -188,6 +190,126 @@ func TestDelete(t *testing.T) {
 		t.Fatalf("failed to check if sub exists: %v", err)
 	}
 	if ok {
-		t.Fatalf("got sub = %q; want none", subID)
+		t.Fatalf("sub = %q; want none", subID)
 	}
+}
+
+func TestPullMsgsSync(t *testing.T) {
+	client := setup(t)
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	topicIDSync := topicID + "-sync"
+	subIDSync := subID + "-sync"
+
+	topic, err := getOrCreateTopic(ctx, client, topicIDSync)
+	if err != nil {
+		t.Fatalf("getOrCreateTopic: %v", err)
+	}
+	defer topic.Delete(ctx)
+	defer topic.Stop()
+
+	sub, err := getOrCreateSub(ctx, client, topic, subIDSync)
+	if err != nil {
+		t.Fatalf("getOrCreateSub: %v", err)
+	}
+	defer sub.Delete(ctx)
+
+	// Publish 5 messages on the topic.
+	const numMsgs = 5
+	publishMsgs(ctx, topic, numMsgs)
+
+	buf := new(bytes.Buffer)
+	err = pullMsgsSync(buf, tc.ProjectID, subIDSync, topic)
+	if err != nil {
+		t.Fatalf("failed to pull messages: %v", err)
+	}
+	// Check for number of newlines, which should correspond with number of messages.
+	if got := strings.Count(buf.String(), "\n"); got != numMsgs {
+		t.Fatalf("pullMsgsSync got %d messages, want %d", got, numMsgs)
+	}
+}
+
+func TestPullMsgsConcurrencyControl(t *testing.T) {
+	client := setup(t)
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	topicIDConc := topicID + "-conc"
+	subIDConc := subID + "-conc"
+
+	topic, err := getOrCreateTopic(ctx, client, topicIDConc)
+	if err != nil {
+		t.Fatalf("getOrCreateTopic: %v", err)
+	}
+	defer topic.Delete(ctx)
+	defer topic.Stop()
+
+	sub, err := getOrCreateSub(ctx, client, topic, subIDConc)
+	if err != nil {
+		t.Fatalf("getOrCreateSub: %v", err)
+	}
+	defer sub.Delete(ctx)
+
+	// Publish 5 message to test with.
+	const numMsgs = 5
+	publishMsgs(ctx, topic, 5)
+
+	buf := new(bytes.Buffer)
+	if err := pullMsgsConcurrenyControl(buf, tc.ProjectID, subIDConc); err != nil {
+		t.Fatalf("failed to pull messages: %v", err)
+	}
+	// Check for number of newlines, which should correspond with number of messages.
+	if got := strings.Count(buf.String(), "\n"); got != numMsgs {
+		t.Fatalf("pullMsgsConcurrencyControl got %d messages, want %d", got, numMsgs)
+	}
+}
+
+func publishMsgs(ctx context.Context, t *pubsub.Topic, numMsgs int) error {
+	var results []*pubsub.PublishResult
+	for i := 0; i < numMsgs; i++ {
+		res := t.Publish(ctx, &pubsub.Message{
+			Data: []byte(fmt.Sprintf("message#%d", i)),
+		})
+		results = append(results, res)
+	}
+	// Check that all messages were published.
+	for _, r := range results {
+		if _, err := r.Get(ctx); err != nil {
+			return fmt.Errorf("Get publish result: %v", err)
+		}
+	}
+	return nil
+}
+
+// getOrCreateTopic gets a topic or creates it if it doesn't exist.
+func getOrCreateTopic(ctx context.Context, client *pubsub.Client, topicID string) (*pubsub.Topic, error) {
+	topic := client.Topic(topicID)
+	ok, err := topic.Exists(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to check if topic exists: %v", err)
+	}
+	if !ok {
+		topic, err = client.CreateTopic(ctx, topicID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create topic (%q): %v", topicID, err)
+		}
+	}
+	return topic, nil
+}
+
+// getOrCreateSub gets a subscription or creates it if it doesn't exist.
+func getOrCreateSub(ctx context.Context, client *pubsub.Client, topic *pubsub.Topic, subID string) (*pubsub.Subscription, error) {
+	sub := client.Subscription(subID)
+	ok, err := sub.Exists(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to check if subscription exists: %v", err)
+	}
+	if !ok {
+		sub, err = client.CreateSubscription(ctx, subID, pubsub.SubscriptionConfig{
+			Topic: topic,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("failed to create subscription (%q): %v", topicID, err)
+		}
+	}
+	return sub, nil
 }
