@@ -19,6 +19,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"google.golang.org/api/option"
 	"io"
 	"log"
 	"os"
@@ -1820,12 +1821,17 @@ func queryWithHistory(ctx context.Context, w io.Writer, client *spanner.Client) 
 }
 
 func createClients(ctx context.Context, db string) (*database.DatabaseAdminClient, *spanner.Client) {
-	adminClient, err := database.NewDatabaseAdminClient(ctx)
+	testEndpoint := os.Getenv("GOLANG_SAMPLES_ENDPOINT")
+	var opts []option.ClientOption
+	if testEndpoint != "" {
+		opts = append(opts, option.WithEndpoint(testEndpoint))
+	}
+	adminClient, err := database.NewDatabaseAdminClient(ctx, opts...)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	dataClient, err := spanner.NewClient(ctx, db)
+	dataClient, err := spanner.NewClient(ctx, db, opts...)
 	if err != nil {
 		log.Fatal(err)
 	}
