@@ -28,7 +28,6 @@ import (
 // It uses Cloud Run (fully managed) in the us-central1 region, and will manage
 // container images as needed for the test.
 func TestApp(t *testing.T) {
-	t.Skip()
 	tc := testutil.EndToEndTest(t)
 	helloworld := cr.NewService("hello", tc.ProjectID)
 	if err := helloworld.Deploy(); err != nil {
