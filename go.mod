@@ -14,8 +14,8 @@ require (
 	cloud.google.com/go/storage v1.3.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.12.8
 	firebase.google.com/go v3.10.0+incompatible
-	github.com/aws/aws-sdk-go v1.25.41
-	github.com/bmatcuk/doublestar v1.1.5
+	github.com/aws/aws-sdk-go v1.25.44
+	github.com/bmatcuk/doublestar v1.2.0
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
 	github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -41,12 +41,12 @@ require (
 	github.com/sendgrid/smtpapi-go v0.6.0 // indirect
 	github.com/tinylib/msgp v1.1.0 // indirect
 	go.opencensus.io v0.22.2
-	golang.org/x/exp v0.0.0-20191030013958-a1ab85dbe136
-	golang.org/x/net v0.0.0-20191125084936-ffdde1057850
+	golang.org/x/exp v0.0.0-20191129062945-2f5052295587
+	golang.org/x/net v0.0.0-20191126235420-ef20fe5d7933
 	golang.org/x/oauth2 v0.0.0-20191122200657-5d9234df094c
 	golang.org/x/sys v0.0.0-20191113165036-4c7a9d0fe056 // indirect
 	golang.org/x/text v0.3.2
-	golang.org/x/tools v0.0.0-20191125011157-cc15fab314e3
+	golang.org/x/tools v0.0.0-20191130070609-6e064ea0cf2d
 	google.golang.org/api v0.14.0
 	google.golang.org/appengine v1.6.5
 	google.golang.org/genproto v0.0.0-20191115221424-83cc0476cb11
