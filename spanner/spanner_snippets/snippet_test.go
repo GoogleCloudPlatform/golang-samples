@@ -247,4 +247,7 @@ func TestSample(t *testing.T) {
 	assertContains(t, out, "4 Venue 4")
 	assertContains(t, out, "19 Venue 19")
 	assertContains(t, out, "42 Venue 42")
+
+	out = runCommand(t, "createbackup", dbName)
+	assertContains(t, out, "Created backup [my-backup] from database")
 }

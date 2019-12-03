@@ -101,6 +101,7 @@ var (
 		"createtablewithdatatypes":        createTableWithDatatypes,
 		"createtabledocswithtimestamp":    createTableDocumentsWithTimestamp,
 		"createtabledocswithhistorytable": createTableDocumentsWithHistoryTable,
+		"createbackup":					   createBackup,
 	}
 )
 
@@ -1820,6 +1821,28 @@ func queryWithHistory(ctx context.Context, w io.Writer, client *spanner.Client) 
 	}
 }
 
+// [START spanner_create_backup]
+
+func createBackup(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	dbMatches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
+	if dbMatches == nil || len(dbMatches) != 3 {
+		return fmt.Errorf("Invalid database id %s", database)
+	}
+	backupID := "my-backup"
+	expires := time.Now().AddDate(0, 0, 1)
+	op, err := adminClient.CreateNewBackup(ctx, backupID, database, expires)
+	if err != nil {
+		return err
+	}
+	if _, err := op.Wait(ctx); err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "Created backup [%s] from database [%s]\n", backupID, database)
+	return nil
+}
+
+// [END spanner_create_backup]
+
 func createClients(ctx context.Context, db string) (*database.DatabaseAdminClient, *spanner.Client) {
 	testEndpoint := os.Getenv("GOLANG_SAMPLES_ENDPOINT")
 	var opts []option.ClientOption
@@ -1876,7 +1899,7 @@ func main() {
 		dmlwithtimestamp, dmlwriteread, dmlwrite, dmlwritetxn, querywithparameter, dmlupdatepart,
 		dmldeletepart, dmlbatchupdate, createtablewithdatatypes, writedatatypesdata, querywitharray,
 		querywithbool, querywithbytes, querywithdate, querywithfloat, querywithint, querywithstring,
-		querywithtimestampparameter
+		querywithtimestampparameter, createbackup
 
 Examples:
 	spanner_snippets createdatabase projects/my-project/instances/my-instance/databases/example-db
