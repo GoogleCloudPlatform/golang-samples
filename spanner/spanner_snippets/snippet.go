@@ -102,6 +102,7 @@ var (
 		"createtabledocswithtimestamp":    createTableDocumentsWithTimestamp,
 		"createtabledocswithhistorytable": createTableDocumentsWithHistoryTable,
 		"createbackup":					   createBackup,
+		"deletebackup":                    deleteBackup,
 	}
 )
 
@@ -1840,6 +1841,25 @@ func createBackup(ctx context.Context, w io.Writer, adminClient *database.Databa
 }
 
 // [END spanner_create_backup]
+
+// [START spanner_delete_backup]
+
+func deleteBackup(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	backupID := "my-backup"
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
+	if matches == nil || len(matches) != 3 {
+		return fmt.Errorf("Invalid database id %s", database)
+	}
+	backupName := matches[1] + "/backups/" + backupID
+	if err := adminClient.DeleteBackup(ctx, &adminpb.DeleteBackupRequest{Name: backupName}); err != nil {
+		return err
+	}
+
+	fmt.Fprintf(w, "Deleted backup [%s]\n", backupID)
+	return nil
+}
+
+// [END spanner_delete_backup]
 
 func createClients(ctx context.Context, db string) (*database.DatabaseAdminClient, *spanner.Client) {
 	testEndpoint := os.Getenv("GOLANG_SAMPLES_ENDPOINT")
