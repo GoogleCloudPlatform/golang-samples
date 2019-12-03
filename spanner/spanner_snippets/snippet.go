@@ -1824,10 +1824,6 @@ func queryWithHistory(ctx context.Context, w io.Writer, client *spanner.Client) 
 // [START spanner_create_backup]
 
 func createBackup(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
-	dbMatches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
-	if dbMatches == nil || len(dbMatches) != 3 {
-		return fmt.Errorf("Invalid database id %s", database)
-	}
 	backupID := "my-backup"
 	expires := time.Now().AddDate(0, 0, 1)
 	op, err := adminClient.CreateNewBackup(ctx, backupID, database, expires)
