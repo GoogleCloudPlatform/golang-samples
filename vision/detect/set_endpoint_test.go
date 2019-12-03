@@ -16,17 +16,42 @@ package main
 
 import (
 	"bytes"
+	"context"
+	"fmt"
 	"strings"
 	"testing"
+
+	visionpb "google.golang.org/genproto/googleapis/cloud/vision/v1"
 )
 
 func TestSetEndpoint(t *testing.T) {
+	ctx := context.Background()
+
 	const endpoint = "eu-vision.googleapis.com:443"
 
-	var buf bytes.Buffer
-
-	if err := setEndpoint(&buf, endpoint); err != nil {
+	client, err := setEndpoint(ctx, endpoint)
+	if err != nil {
 		t.Fatalf("setEndpoint: %v", err)
+	}
+	defer client.Close()
+
+	image := &visionpb.Image{
+		Source: &visionpb.ImageSource{
+			GcsImageUri: "gs://cloud-samples-data/vision/text/screen.jpg",
+		},
+	}
+	texts, err := client.DetectTexts(ctx, image, nil, 1)
+	if err != nil {
+		t.Fatalf("DetectTexts: %v", err)
+	}
+
+	var buf bytes.Buffer
+	fmt.Fprintf(&buf, "Texts:\n")
+	for _, text := range texts {
+		fmt.Fprintf(&buf, "%v\n", text.GetDescription())
+		for _, vertex := range text.GetBoundingPoly().GetVertices() {
+			fmt.Fprintf(&buf, "  bounding vertex: %v, %v\n", vertex.GetX(), vertex.GetY())
+		}
 	}
 
 	if got, want := buf.String(), "System"; !strings.Contains(got, want) {

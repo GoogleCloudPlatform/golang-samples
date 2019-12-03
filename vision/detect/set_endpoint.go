@@ -18,46 +18,23 @@ package main
 import (
 	"context"
 	"fmt"
-	"io"
 
 	vision "cloud.google.com/go/vision/apiv1"
 	"google.golang.org/api/option"
-	visionpb "google.golang.org/genproto/googleapis/cloud/vision/v1"
 )
 
 // setEndpoint changes your endpoint.
-func setEndpoint(w io.Writer, endpoint string) error {
+func setEndpoint(ctx context.Context, endpoint string) (*vision.ImageAnnotatorClient, error) {
 	// endpoint := "eu-vision.googleapis.com:443"
 
-	// Create a client with a custom endpoint.
-	ctx := context.Background()
+	// ctx := context.Background()
 	client, err := vision.NewImageAnnotatorClient(ctx, option.WithEndpoint(endpoint))
 	if err != nil {
-		return fmt.Errorf("NewImageAnnotatorClient: %v", err)
+		return nil, fmt.Errorf("NewImageAnnotatorClient: %v", err)
 	}
-	defer client.Close()
+	// defer client.Close()
 
-	// Use the client with custom endpoint to detect texts on an image.
-	image := &visionpb.Image{
-		Source: &visionpb.ImageSource{
-			GcsImageUri: "gs://cloud-samples-data/vision/text/screen.jpg",
-		},
-	}
-	maxResults := 3
-	texts, err := client.DetectTexts(ctx, image, nil, maxResults)
-	if err != nil {
-		return fmt.Errorf("DetectTexts: %v", err)
-	}
-
-	fmt.Fprintf(w, "Texts:\n")
-	for _, text := range texts {
-		fmt.Fprintf(w, "%v\n", text.GetDescription())
-		for _, vertex := range text.GetBoundingPoly().GetVertices() {
-			fmt.Fprintf(w, "  bounding vertex: %v, %v\n", vertex.GetX(), vertex.GetY())
-		}
-	}
-
-	return nil
+	return client, nil
 }
 
 // [END vision_set_endpoint]
