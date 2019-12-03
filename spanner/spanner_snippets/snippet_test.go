@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"google.golang.org/api/iterator"
 	"os"
 	"strings"
 	"testing"
@@ -54,6 +55,23 @@ func TestSample(t *testing.T) {
 	if db, err := adminClient.GetDatabase(ctx, &adminpb.GetDatabaseRequest{Name: dbName}); err == nil {
 		t.Logf("database %s exists in state %s. delete result: %v", db.GetName(), db.GetState().String(),
 			adminClient.DropDatabase(ctx, &adminpb.DropDatabaseRequest{Database: dbName}))
+	}
+
+	// Check for any backups that were created from that database and delete those as well
+	backupsIterator := adminClient.ListBackups(ctx, &adminpb.ListBackupsRequest{
+		Parent: instance,
+		Filter: "Database:" + dbName,
+	})
+	for {
+		resp, err := backupsIterator.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			t.Errorf("Failed to list backups for database %s", dbName)
+		}
+		t.Logf("backup %s exists. delete result: %v", resp.Name,
+			adminClient.DeleteBackup(ctx, &adminpb.DeleteBackupRequest{Name: resp.Name}))
 	}
 
 	assertContains := func(t *testing.T, out string, sub string) {
