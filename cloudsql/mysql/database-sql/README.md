@@ -32,9 +32,10 @@ export DB_NAME='<DB_NAME>'
 ```
 
 ### Windows/PowerShell
+The Cloud SQL Proxy currently requires the use of TCP on Windows. The optional ```DB_TCP_HOST``` environment variable can be used to specify the proxy's local address, and the ```INSTANCE_CONNECTION_NAME``` environment variable is not needed in this case.
 ```powershell
 $env:GOOGLE_APPLICATION_CREDENTIALS="<CREDENTIALS_JSON_FILE>"
-$env:INSTANCE_CONNECTION_NAME="<MY-PROJECT>:<INSTANCE-REGION>:<INSTANCE-NAME>"
+$env:DB_TCP_HOST="127.0.0.1:3306"
 $env:DB_USER="<DB_USER_NAME>"
 $env:DB_PASS="<DB_PASSWORD>"
 $env:DB_NAME="<DB_NAME>"
@@ -73,7 +74,7 @@ Windows environments use a TCP connection for the Cloud SQL proxy. Use this Powe
 Start-Process -filepath "C:\<path to proxy exe>" -ArgumentList "-instances=<project-id>:<region>:<instance-name>=tcp:3306"
 ```
 
-Note the the port number is set to ```3306``` in the above example, so the proxy will listen on that port locally and within the sample source code the instanceConnection string is set to the same port (```127.0.0.1:3306```). If you want to use a different port number (for example, because a different MySQL instance is using port 3306 locally), you'll need to change both the proxy invocation command and the instanceConnection variable in the sample.
+Note the the port number is set to ```3306``` in the above example, so the proxy will listen on that port locally. The same port number was used in the ```DB_TCP_HOST``` environment variable we set earlier, which tells the sample code the address and port number for local communication with the proxy. If you want to use a different port number (for example, because a different MySQL instance is using port 3306 locally), you'll need to change both the ```tcp``` parameter in the proxy invocation command and the ```DB_TCP_HOST``` environment variable.
 
 ### Testing the application
 

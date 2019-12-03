@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START gae_cloudsql]
-
 // Sample database-sql demonstrates connection to a Cloud SQL instance from App Engine
 // standard. The application is a Golang version of the "Tabs vs Spaces" web
 // app presented at Cloud Next '19 as seen in this video:
@@ -28,24 +26,36 @@ import (
 	"math"
 	"net/http"
 	"os"
-	"runtime"
 	"strconv"
 
 	"github.com/go-sql-driver/mysql"
 )
 
-// db is global database connection, parsedTemplate is parsed HTML template.
+// db is the global database connection pool.
 var db *sql.DB
+
+// parsedTemplate is the global parsed HTML template.
 var parsedTemplate *template.Template
 
-// The vote struct stores a row from the votes table in the Cloud SQL instance.
+// vote struct contains a single row from the votes table in the database.
 // Each vote includes a candidate ("TABS" or "SPACES") and a timestamp.
 type vote struct {
 	Candidate string
 	VoteTime  mysql.NullTime
 }
 
-// The templateData struct is used to pass data to the HTML template.
+// voteDiff is used to provide a string representation of the current voting
+// margin, such as "1 vote" (singular) or "2 votes" (plural).
+type voteDiff int
+
+func (v voteDiff) String() string {
+	if v == 1 {
+		return "1 vote"
+	}
+	return strconv.Itoa(int(v)) + " votes"
+}
+
+// templateData struct is used to pass data to the HTML template.
 type templateData struct {
 	TabsCount   uint
 	SpacesCount uint
@@ -61,12 +71,26 @@ func main() {
 		log.Fatalf("unable to parse template file: %s", err)
 	}
 
-	db, err = initConnectionPool()
-	if err != nil {
-		log.Fatalf("initConnectionPool: unable to initialize database connection pool: %s", err)
+	// If the optional DB_TCP_HOST environment variable is set, it contains
+	// the IP address and port number of a TCP connection pool to be created,
+	// such as "127.0.0.1:3306". If DB_TCP_HOST is not set, a Unix socket
+	// connection pool will be created instead.
+	if os.Getenv("DB_TCP_HOST") == "" {
+		db, err = initSocketConnectionPool()
+		if err != nil {
+			log.Fatalf("initSocketConnectionPool: unable to connect: %s", err)
+		}
+	} else {
+		db, err = initTcpConnectionPool()
+		if err != nil {
+			log.Fatalf("initTcpConnectionPool: unable to connect: %s", err)
+		}
 	}
 
-	if err = initDBSchema(); err != nil {
+	// Create the votes table if it does not already exist.
+	if _, err = db.Exec(`CREATE TABLE IF NOT EXISTS votes
+	( vote_id SERIAL NOT NULL, time_cast timestamp NOT NULL,
+	candidate CHAR(6) NOT NULL, PRIMARY KEY (vote_id) );`); err != nil {
 		log.Fatalf("unable to create table: %s", err)
 	}
 
@@ -136,20 +160,13 @@ func currentTotals() (templateData, error) {
 		return templateData{}, err
 	}
 
-	// voteMargin is string representation of the current voting margin,
-	// such as "1 vote" (singular) or "2 votes" (plural).
-	voteDiff := int(math.Abs(float64(tabVotes) - float64(spaceVotes)))
-	var voteMargin string
-	if voteDiff == 1 {
-		voteMargin = "1 vote"
-	}
-	voteMargin = strconv.Itoa(voteDiff) + " votes"
+	var voteDiffStr string = voteDiff(int(math.Abs(float64(tabVotes) - float64(spaceVotes)))).String()
 
 	latestVotesCast, err := recentVotes()
 	if err != nil {
 		return templateData{}, err
 	}
-	return templateData{tabVotes, spaceVotes, voteMargin, latestVotesCast}, nil
+	return templateData{tabVotes, spaceVotes, voteDiffStr, latestVotesCast}, nil
 
 }
 
@@ -193,72 +210,79 @@ func mustGetenv(k string) string {
 	return v
 }
 
-// [START cloud_sql_mysql_databasesql_create]
-
-// initConnectionPool initializes a database connection for a Cloud SQL instance.
-func initConnectionPool() (*sql.DB, error) {
+// initSocketConnectionPool initializes a Unix socket connection pool for
+// a Cloud SQL instance of MySQL.
+func initSocketConnectionPool() (*sql.DB, error) {
+	// [START cloud_sql_mysql_databasesql_create_socket]
 	var (
 		dbUser                 = mustGetenv("DB_USER")
-		dbPass                 = mustGetenv("DB_PASS")
+		dbPwd                  = mustGetenv("DB_PASS")
 		instanceConnectionName = mustGetenv("INSTANCE_CONNECTION_NAME")
 		dbName                 = mustGetenv("DB_NAME")
 	)
 
-	// connectionType can be "Unix socket" or "TCP". Unix socket is used for
-	// deployment on App Engine.
-	connectionType := "Unix socket"
-	if runtime.GOOS == "windows" {
-		// The Cloud SQL Proxy currently only supports TCP connections on
-		// Windows, so must use TCP if running locally on Windows.
-		connectionType = "TCP"
-	}
-
 	var dbURI string
-	switch connectionType {
-	case "Unix socket":
-		dbURI = fmt.Sprintf("%s:%s@unix(/cloudsql/%s)/%s", dbUser, dbPass, instanceConnectionName, dbName)
-	case "TCP":
-		instanceConnectionName = "127.0.0.1:3306"
-		dbURI = fmt.Sprintf("%s:%s@tcp(%s)/%s", dbUser, dbPass, instanceConnectionName, dbName)
-	}
+	dbURI = fmt.Sprintf("%s:%s@unix(/cloudsql/%s)/%s", dbUser, dbPwd, instanceConnectionName, dbName)
 
-	// Open database connection.
-	dbConn, err := sql.Open("mysql", dbURI)
+	// dbPool is the pool of database connections.
+	dbPool, err := sql.Open("mysql", dbURI)
 	if err != nil {
 		return nil, err
 	}
 
+	// [START_EXCLUDE]
+	configureConnectionPool(dbPool)
+	// [END_EXCLUDE]
+
+	return dbPool, nil
+	// [END cloud_sql_mysql_databasesql_create_socket]
+}
+
+// initTcpConnectionPool initializes a TCP connection pool for a Cloud SQL
+// instance of MySQL.
+func initTcpConnectionPool() (*sql.DB, error) {
+	// [START cloud_sql_mysql_databasesql_create_tcp]
+	var (
+		dbUser    = mustGetenv("DB_USER")
+		dbPwd     = mustGetenv("DB_PASS")
+		dbTcpHost = mustGetenv("DB_TCP_HOST")
+		dbName    = mustGetenv("DB_NAME")
+	)
+
+	var dbURI string
+	dbURI = fmt.Sprintf("%s:%s@tcp(%s)/%s", dbUser, dbPwd, dbTcpHost, dbName)
+
+	// dbPool is the pool of database connections.
+	dbPool, err := sql.Open("mysql", dbURI)
+	if err != nil {
+		return nil, err
+	}
+
+	// [START_EXCLUDE]
+	configureConnectionPool(dbPool)
+	// [END_EXCLUDE]
+
+	return dbPool, nil
+	// [END cloud_sql_mysql_databasesql_create_tcp]
+}
+
+// configureConnectionPool sets database connection pool properties.
+// For more information, see https://golang.org/pkg/database/sql
+func configureConnectionPool(dbPool *sql.DB) {
 	// [START cloud_sql_mysql_databasesql_limit]
 
 	// Set maximum number of connections in idle connection pool.
-	// For more information see https://golang.org/pkg/database/sql/#DB.SetMaxIdleConns
-	dbConn.SetMaxIdleConns(5)
+	dbPool.SetMaxIdleConns(5)
 
 	// Set maximum number of open connections to the database.
-	// For more information see https://golang.org/pkg/database/sql/#DB.SetMaxOpenConns
-	dbConn.SetMaxOpenConns(7)
+	dbPool.SetMaxOpenConns(7)
 
 	// [END cloud_sql_mysql_databasesql_limit]
 
 	// [START cloud_sql_mysql_databasesql_lifetime]
 
 	// Set Maximum time (in seconds) that a connection can remain open.
-	// For more information see https://golang.org/pkg/database/sql/#DB.SetConnMaxLifetime
-	dbConn.SetConnMaxLifetime(1800)
+	dbPool.SetConnMaxLifetime(1800)
 
 	// [END cloud_sql_mysql_databasesql_lifetime]
-
-	return dbConn, nil
 }
-
-// [END cloud_sql_mysql_databasesql_create]
-
-// initDBSchema creates the votes table if it does not exist.
-func initDBSchema() error {
-	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS votes
-	( vote_id SERIAL NOT NULL, time_cast timestamp NOT NULL,
-	candidate CHAR(6) NOT NULL, PRIMARY KEY (vote_id) );`)
-	return err
-}
-
-// [END gae_cloudsql]
