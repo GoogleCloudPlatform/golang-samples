@@ -48,9 +48,9 @@ func gcloud(label string, cmd *exec.Cmd) ([]byte, error) {
 	return bytes.TrimSpace(out), err
 }
 
-// createIDToken generates an ID token for requests to the fully managed platform.
+// CreateIDToken generates an ID token for requests to the fully managed platform.
 // In the future the URL of the targeted service will be used to scope the audience.
-func createIDToken(_ string) (string, error) {
+func CreateIDToken(_ string) (string, error) {
 	args := []string{
 		"--quiet",
 		"auth",
