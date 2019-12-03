@@ -100,13 +100,14 @@ if [ -z ${KOKORO_GITHUB_PULL_REQUEST_NUMBER:-} ]; then
   RUN_ALL_TESTS="1"
 fi
 
-# CHANGED_DIRS is the list of significant top-level directories that changed.
-# CHANGED_DIRS will be empty when run on master.
 # Also see trampoline.sh - system_tests.sh is only run when there are
 # significant changes.
-CHANGED_DIRS=$(git --no-pager diff --name-only HEAD..master | egrep -v '(\.md$|^\.github)' | grep "/" | cut -d/ -f1 | sort -u | tr '\n' ' ')
-# If test configuration is changed, run all tests.
-if [[ $CHANGED_DIRS =~ "testing" || $CHANGED_DIRS =~ "internal" ]]; then
+SIGNIFICANT_CHANGES=$(git --no-pager diff --name-only HEAD..master | egrep -v '(\.md$|^\.github)')
+# CHANGED_DIRS is the list of significant top-level directories that changed.
+# CHANGED_DIRS will be empty when run on master.
+CHANGED_DIRS=$(echo $SIGNIFICANT_CHANGES | tr ' ' '\n' | grep "/" | cut -d/ -f1 | sort -u | tr '\n' ' ')
+
+if echo $SIGNIFICANT_CHANGES | tr ' ' '\n' | grep "^go.mod$" || [[ $CHANGED_DIRS =~ "testing" || $CHANGED_DIRS =~ "internal" ]]; then
   RUN_ALL_TESTS="1"
 fi
 
