@@ -268,6 +268,8 @@ func TestSample(t *testing.T) {
 
 	out = runCommand(t, "createbackup", dbName)
 	assertContains(t, out, "Created backup [my-backup] from database")
+	out = runCommand(t, "updatebackup", dbName)
+	assertContains(t, out, "Updated backup [my-backup]")
 	out = runCommand(t, "deletebackup", dbName)
 	assertContains(t, out, "Deleted backup [my-backup]")
 }

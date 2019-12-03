@@ -32,7 +32,9 @@ import (
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
 	"google.golang.org/api/iterator"
 
+	pbt "github.com/golang/protobuf/ptypes/timestamp"
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
+	"google.golang.org/genproto/protobuf/field_mask"
 )
 
 type command func(ctx context.Context, w io.Writer, client *spanner.Client) error
@@ -102,6 +104,7 @@ var (
 		"createtabledocswithtimestamp":    createTableDocumentsWithTimestamp,
 		"createtabledocswithhistorytable": createTableDocumentsWithHistoryTable,
 		"createbackup":					   createBackup,
+		"updatebackup":                    updateBackup,
 		"deletebackup":                    deleteBackup,
 	}
 )
@@ -1841,6 +1844,35 @@ func createBackup(ctx context.Context, w io.Writer, adminClient *database.Databa
 }
 
 // [END spanner_create_backup]
+
+// [START spanner_update_backup]
+
+func updateBackup(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	backupID := "my-backup"
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
+	if matches == nil || len(matches) != 3 {
+		return fmt.Errorf("Invalid database id %s", database)
+	}
+	backupName := matches[1] + "/backups/" + backupID
+	expires := time.Now().AddDate(0, 0, 5)
+	expirespb := &pbt.Timestamp{Seconds: expires.Unix(), Nanos: int32(expires.Nanosecond())}
+
+	_, err := adminClient.UpdateBackup(ctx, &adminpb.UpdateBackupRequest{
+		Backup:     &adminpb.Backup{
+			Name:       backupName,
+			ExpireTime: expirespb,
+		},
+		UpdateMask: &field_mask.FieldMask{Paths: []string{"expire_time"}},
+	})
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprintf(w, "Updated backup [%s]\n", backupID)
+	return nil
+}
+
+// [END spanner_update_backup]
 
 // [START spanner_delete_backup]
 
