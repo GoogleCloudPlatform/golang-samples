@@ -21,15 +21,21 @@ set -x
 go version
 date
 
-# Re-organize files
-export GOPATH=$PWD/gopath
-target=$GOPATH/src/github.com/GoogleCloudPlatform
-mkdir -p $target
-mv github/golang-samples $target
-cd $target/golang-samples
+cd github/golang-samples
 
 export GO111MODULE=on # Always use modules.
 export GOPROXY=https://proxy.golang.org
+
+# Fail if a dependency was added without the necessary go.mod/go.sum change
+# being part of the commit.
+# Do this before reserving a project since this doens't need a project.
+for i in `find . -name go.mod`; do
+  pushd `dirname $i` > /dev/null;
+    go mod tidy;
+    git diff go.mod | tee /dev/stderr | (! read)
+    [ -f go.sum ] && git diff go.sum | tee /dev/stderr | (! read)
+  popd > /dev/null;
+done
 
 # Don't print environment variables in case there are secrets.
 # If you need a secret, use a keystore_resource in common.cfg.
