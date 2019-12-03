@@ -104,6 +104,7 @@ var (
 		"createtabledocswithtimestamp":    createTableDocumentsWithTimestamp,
 		"createtabledocswithhistorytable": createTableDocumentsWithHistoryTable,
 		"createbackup":					   createBackup,
+		"listbackups":                     listBackups,
 		"updatebackup":                    updateBackup,
 		"deletebackup":                    deleteBackup,
 	}
@@ -1874,6 +1875,38 @@ func updateBackup(ctx context.Context, w io.Writer, adminClient *database.Databa
 
 // [END spanner_update_backup]
 
+// [START spanner_list_backups]
+
+func listBackups(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
+	if matches == nil || len(matches) != 3 {
+		return fmt.Errorf("Invalid database id %s", database)
+	}
+	instanceName := matches[1]
+	counter := 0
+	backupsIterator := adminClient.ListBackups(ctx, &adminpb.ListBackupsRequest{
+		Parent: instanceName,
+		// List backups only for this specific database
+		Filter: "Database:" + database,
+	})
+	for {
+		resp, err := backupsIterator.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "%s [%v] - %d bytes\n", resp.Name, resp.State, resp.SizeBytes)
+		counter++
+	}
+	fmt.Fprintf(w, "Backup count: %d\n", counter)
+
+	return nil
+}
+
+// [END spanner_list_backups]
+
 // [START spanner_delete_backup]
 
 func deleteBackup(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
@@ -1949,7 +1982,7 @@ func main() {
 		dmlwithtimestamp, dmlwriteread, dmlwrite, dmlwritetxn, querywithparameter, dmlupdatepart,
 		dmldeletepart, dmlbatchupdate, createtablewithdatatypes, writedatatypesdata, querywitharray,
 		querywithbool, querywithbytes, querywithdate, querywithfloat, querywithint, querywithstring,
-		querywithtimestampparameter, createbackup
+		querywithtimestampparameter, createbackup, listbackups, updatebackup, deletebackup
 
 Examples:
 	spanner_snippets createdatabase projects/my-project/instances/my-instance/databases/example-db
