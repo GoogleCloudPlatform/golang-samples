@@ -1834,10 +1834,12 @@ func createBackup(ctx context.Context, w io.Writer, adminClient *database.Databa
 	if err != nil {
 		return err
 	}
-	if _, err := op.Wait(ctx); err != nil {
+	backup, err := op.Wait(ctx)
+	if err != nil {
 		return err
 	}
-	fmt.Fprintf(w, "Created backup [%s] from database [%s]\n", backupID, database)
+
+	fmt.Fprintf(w, "Created backup [%s] from database [%s], size = %d bytes\n", backupID, database, backup.SizeBytes)
 	return nil
 }
 
