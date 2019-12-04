@@ -107,6 +107,7 @@ var (
 		"listbackups":                     listBackups,
 		"updatebackup":                    updateBackup,
 		"deletebackup":                    deleteBackup,
+		"restorebackup":                   restoreBackup,
 	}
 )
 
@@ -1875,6 +1876,37 @@ func updateBackup(ctx context.Context, w io.Writer, adminClient *database.Databa
 
 // [END spanner_update_backup]
 
+// [START spanner_restore_backup]
+
+func restoreBackup(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	backupID := "my-backup"
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
+	if matches == nil || len(matches) != 3 {
+		return fmt.Errorf("Invalid database id %s", database)
+	}
+	instanceName := matches[1]
+	databaseId := matches[2]
+	backupName := instanceName + "/backups/" + backupID
+
+
+	restoreOp, err := adminClient.RestoreDatabase(ctx, &adminpb.RestoreDatabaseRequest{
+		Parent:     instanceName,
+		DatabaseId: databaseId,
+		Source:     &adminpb.RestoreDatabaseRequest_Backup{
+			Backup: backupName,
+		},
+	})
+	if err != nil {
+		return err
+	}
+	_, err = restoreOp.Wait(ctx)
+
+	fmt.Fprintf(w, "Restored backup [%s] to database [%s]\n", backupID, database)
+	return nil
+}
+
+// [END spanner_restore_backup]
+
 // [START spanner_list_backups]
 
 func listBackups(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
@@ -1982,7 +2014,7 @@ func main() {
 		dmlwithtimestamp, dmlwriteread, dmlwrite, dmlwritetxn, querywithparameter, dmlupdatepart,
 		dmldeletepart, dmlbatchupdate, createtablewithdatatypes, writedatatypesdata, querywitharray,
 		querywithbool, querywithbytes, querywithdate, querywithfloat, querywithint, querywithstring,
-		querywithtimestampparameter, createbackup, listbackups, updatebackup, deletebackup
+		querywithtimestampparameter, createbackup, listbackups, updatebackup, deletebackup, restorebackup
 
 Examples:
 	spanner_snippets createdatabase projects/my-project/instances/my-instance/databases/example-db

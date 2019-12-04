@@ -39,6 +39,7 @@ func TestSample(t *testing.T) {
 		t.Fatal("Spanner instance ref must be in the form of 'projects/PROJECT_ID/instances/INSTANCE_ID'")
 	}
 	dbFragment := fmt.Sprintf("test-%s", tc.ProjectID)
+	restoreDbFragment := fmt.Sprintf("test-restore-%s", tc.ProjectID)
 
 	// Maximum length of database name is 30 characters, so trim if the generated name is too long
 	if len(dbFragment) > 30 {
@@ -46,7 +47,13 @@ func TestSample(t *testing.T) {
 		t.Logf("Database name '%s' trimmed to '%s'", dbFragment, trimmedDbFragment)
 		dbFragment = trimmedDbFragment
 	}
+	if len(restoreDbFragment) > 30 {
+		trimmedDbFragment := restoreDbFragment[:30]
+		t.Logf("Restore database name '%s' trimmed to '%s'", restoreDbFragment, trimmedDbFragment)
+		restoreDbFragment = trimmedDbFragment
+	}
 	dbName := fmt.Sprintf("%s/databases/%s", instance, dbFragment)
+	restoreDbName := fmt.Sprintf("%s/databases/%s", instance, restoreDbFragment)
 
 	ctx := context.Background()
 	adminClient, dataClient := createClients(ctx, dbName)
@@ -58,6 +65,10 @@ func TestSample(t *testing.T) {
 	if db, err := adminClient.GetDatabase(ctx, &adminpb.GetDatabaseRequest{Name: dbName}); err == nil {
 		t.Logf("database %s exists in state %s. delete result: %v", db.GetName(), db.GetState().String(),
 			adminClient.DropDatabase(ctx, &adminpb.DropDatabaseRequest{Database: dbName}))
+	}
+	if db, err := adminClient.GetDatabase(ctx, &adminpb.GetDatabaseRequest{Name: restoreDbName}); err == nil {
+		t.Logf("database %s exists in state %s. delete result: %v", db.GetName(), db.GetState().String(),
+			adminClient.DropDatabase(ctx, &adminpb.DropDatabaseRequest{Database: restoreDbName}))
 	}
 
 	// Check for any backups that were created from that database and delete those as well
@@ -105,6 +116,12 @@ func TestSample(t *testing.T) {
 			err := adminClient.DropDatabase(ctx, &adminpb.DropDatabaseRequest{Database: dbName})
 			if err != nil {
 				r.Errorf("DropDatabase(%q): %v", dbName, err)
+			}
+		})
+		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+			err := adminClient.DropDatabase(ctx, &adminpb.DropDatabaseRequest{Database: restoreDbName})
+			if err != nil {
+				r.Errorf("DropDatabase(%q): %v", restoreDbName, err)
 			}
 		})
 	}()
@@ -276,6 +293,8 @@ func TestSample(t *testing.T) {
 	assertContains(t, out, "Backup count: ")
 	out = runCommand(t, "updatebackup", dbName)
 	assertContains(t, out, "Updated backup [my-backup]")
+	out = runCommand(t, "restorebackup", restoreDbName)
+	assertContains(t, out, "Restored backup [my-backup]")
 	out = runCommand(t, "deletebackup", dbName)
 	assertContains(t, out, "Deleted backup [my-backup]")
 }
