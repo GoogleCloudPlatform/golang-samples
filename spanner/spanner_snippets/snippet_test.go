@@ -39,9 +39,12 @@ func TestSample(t *testing.T) {
 		t.Fatal("Spanner instance ref must be in the form of 'projects/PROJECT_ID/instances/INSTANCE_ID'")
 	}
 	dbFragment := fmt.Sprintf("test-%s", tc.ProjectID)
+
+	// Maximum length of database name is 30 characters, so trim if the generated name is too long
 	if len(dbFragment) > 30 {
-		t.Logf("Database name trimmed to: %s", dbFragment)
-		dbFragment = dbFragment[:30]
+		trimmedDbFragment := dbFragment[:30]
+		t.Logf("Database name '%s' trimmed to '%s'", dbFragment, trimmedDbFragment)
+		dbFragment = trimmedDbFragment
 	}
 	dbName := fmt.Sprintf("%s/databases/%s", instance, dbFragment)
 
