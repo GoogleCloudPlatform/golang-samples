@@ -24,17 +24,17 @@ import (
 )
 
 // setEndpoint changes your endpoint.
-func setEndpoint(ctx context.Context, endpoint string) (*vision.ImageAnnotatorClient, error) {
+func setEndpoint(endpoint string) error {
 	// endpoint := "eu-vision.googleapis.com:443"
 
-	// ctx := context.Background()
+	ctx := context.Background()
 	client, err := vision.NewImageAnnotatorClient(ctx, option.WithEndpoint(endpoint))
 	if err != nil {
-		return nil, fmt.Errorf("NewImageAnnotatorClient: %v", err)
+		return fmt.Errorf("NewImageAnnotatorClient: %v", err)
 	}
-	// defer client.Close()
+	defer client.Close()
 
-	return client, nil
+	return nil
 }
 
 // [END vision_set_endpoint]

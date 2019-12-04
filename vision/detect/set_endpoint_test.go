@@ -15,23 +15,29 @@
 package main
 
 import (
-	"bytes"
 	"context"
-	"fmt"
 	"strings"
 	"testing"
 
+	vision "cloud.google.com/go/vision/apiv1"
+	"google.golang.org/api/option"
 	visionpb "google.golang.org/genproto/googleapis/cloud/vision/v1"
 )
 
 func TestSetEndpoint(t *testing.T) {
-	ctx := context.Background()
-
 	const endpoint = "eu-vision.googleapis.com:443"
 
-	client, err := setEndpoint(ctx, endpoint)
+	// Run the code sample to check for errors.
+	err := setEndpoint(endpoint)
 	if err != nil {
 		t.Fatalf("setEndpoint: %v", err)
+	}
+
+	// Since we're not returning the client from the code sample, we create an equivalent client here.
+	ctx := context.Background()
+	client, err := vision.NewImageAnnotatorClient(ctx, option.WithEndpoint(endpoint))
+	if err != nil {
+		t.Fatalf("NewImageAnnotatorClient: %v", err)
 	}
 	defer client.Close()
 
@@ -45,19 +51,11 @@ func TestSetEndpoint(t *testing.T) {
 		t.Fatalf("DetectTexts: %v", err)
 	}
 
-	var buf bytes.Buffer
-	fmt.Fprintf(&buf, "Texts:\n")
-	for _, text := range texts {
-		fmt.Fprintf(&buf, "%v\n", text.GetDescription())
-		for _, vertex := range text.GetBoundingPoly().GetVertices() {
-			fmt.Fprintf(&buf, "  bounding vertex: %v, %v\n", vertex.GetX(), vertex.GetY())
-		}
+	text := texts[0]
+	if got, want := text.GetDescription(), "System"; !strings.Contains(got, want) {
+		t.Errorf("text.GetDescription() got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
 	}
-
-	if got, want := buf.String(), "System"; !strings.Contains(got, want) {
-		t.Errorf("setEndpoint got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
-	}
-	if got, want := buf.String(), "bounding vertex:"; !strings.Contains(got, want) {
-		t.Errorf("setEndpoint got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
+	if len(text.GetBoundingPoly().GetVertices()) == 0 {
+		t.Errorf("text.GetBoundingPoly().getVertices() must have at least one vertex")
 	}
 }
