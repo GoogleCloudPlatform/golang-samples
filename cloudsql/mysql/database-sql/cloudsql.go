@@ -75,15 +75,15 @@ func main() {
 	// the IP address and port number of a TCP connection pool to be created,
 	// such as "127.0.0.1:3306". If DB_TCP_HOST is not set, a Unix socket
 	// connection pool will be created instead.
-	if os.Getenv("DB_TCP_HOST") == "" {
-		db, err = initSocketConnectionPool()
-		if err != nil {
-			log.Fatalf("initSocketConnectionPool: unable to connect: %s", err)
-		}
-	} else {
+	if os.Getenv("DB_TCP_HOST") != "" {
 		db, err = initTcpConnectionPool()
 		if err != nil {
 			log.Fatalf("initTcpConnectionPool: unable to connect: %s", err)
+		}
+	} else {
+		db, err = initSocketConnectionPool()
+		if err != nil {
+			log.Fatalf("initSocketConnectionPool: unable to connect: %s", err)
 		}
 	}
 
@@ -98,7 +98,6 @@ func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
-		log.Printf("Defaulting to port %s", port)
 	}
 
 	log.Printf("Listening on port %s", port)
@@ -192,7 +191,7 @@ func saveVote(w http.ResponseWriter, r *http.Request) {
 	sqlInsert := "INSERT INTO votes (candidate) VALUES (?)"
 	if team == "TABS" || team == "SPACES" {
 		if _, err := db.Exec(sqlInsert, team); err != nil {
-			log.Fatalf("unable to save vote: %s", err)
+			fmt.Fprintf(w, "unable to save vote: %s", err)
 		} else {
 			fmt.Fprintf(w, "Vote successfully cast for %s!\n", team)
 		}

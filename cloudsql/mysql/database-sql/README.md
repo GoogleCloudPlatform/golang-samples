@@ -17,22 +17,37 @@ name.
 
 1. Create a service account with the 'Cloud SQL Client' permissions by following these 
 [instructions](https://cloud.google.com/sql/docs/mysql/connect-external-app#4_if_required_by_your_authentication_method_create_a_service_account).
-Download a JSON key to use to authenticate your connection. 
+Download a JSON key to use to authenticate your connection.
 
-1. Use the information noted in the previous steps to set environment variables for local development and testing. Follow the instructions below for your local operating system. Note: Saving credentials in environment variables is convenient, but not secure - consider a more
-secure solution such as [Cloud KMS](https://cloud.google.com/kms/) to help keep secrets safe.
+## Running locally
 
-### Linux / Mac OS
+To run this application locally, download and install the `cloud_sql_proxy` by
+following the instructions
+[here](https://cloud.google.com/sql/docs/mysql/sql-proxy#install).
+
+Instructions are provided below for using the proxy with a TCP connection or a Unix Domain Socket. On Linux or Mac OS you can use either option, but on Windows the proxy currently requires a TCP connection.
+
+### Launch proxy with TCP
+
+To run the sample locally with a TCP connection, set environment variables and launch the proxy as shown below.
+
+#### Linux / Mac OS
+Use these terminal commands to initialize environment variables:
 ```bash
 export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service/account/key.json
-export INSTANCE_CONNECTION_NAME='<MY-PROJECT>:<INSTANCE-REGION>:<INSTANCE-NAME>'
+export DB_TCP_HOST='127.0.0.1:3306'
 export DB_USER='<DB_USER_NAME>'
 export DB_PASS='<DB_PASSWORD>'
 export DB_NAME='<DB_NAME>'
 ```
 
-### Windows/PowerShell
-The Cloud SQL Proxy currently requires the use of TCP on Windows. The optional ```DB_TCP_HOST``` environment variable can be used to specify the proxy's local address, and the ```INSTANCE_CONNECTION_NAME``` environment variable is not needed in this case.
+Then use this command to launch the proxy in the background:
+```bash
+./cloud_sql_proxy -instances=<project-id>:<region>:<instance-name>=tcp:3306 -credential_file=$GOOGLE_APPLICATION_CREDENTIALS &
+```
+
+#### Windows/PowerShell
+Use these PowerShell commands to initialize environment variables:
 ```powershell
 $env:GOOGLE_APPLICATION_CREDENTIALS="<CREDENTIALS_JSON_FILE>"
 $env:DB_TCP_HOST="127.0.0.1:3306"
@@ -41,53 +56,46 @@ $env:DB_PASS="<DB_PASSWORD>"
 $env:DB_NAME="<DB_NAME>"
 ```
 
-## Running locally
+Then use this command to launch the proxy in a separate PowerShell session:
+```powershell
+Start-Process -filepath "C:\<path to proxy exe>" -ArgumentList "-instances=<project-id>:<region>:<instance-name>=tcp:3306 -credential_file=<CREDENTIALS_JSON_FILE>"
+```
 
-To run this application locally, download and install the `cloud_sql_proxy` by
-following the instructions
-[here](https://cloud.google.com/sql/docs/mysql/sql-proxy#install). Once the
-proxy has been downloaded, use the following commands start it running in the background for local testing on either Linux/Mac OS or Windows.
+### Launch proxy with Unix Domain Socket
+NOTE: this option is currently only supported on Linux and Mac OS. Windows users should use the [Launch proxy with TCP](#launch-proxy-with-tcp) option.
 
-### Launch the proxy on Linux/Mac OS
-
-Linux environments use a Unix socket for the Cloud SQL proxy, so you'll need to create the `/cloudsql`
-directory and give the user running the proxy the appropriate permissions:
+To use a Unix socket, you'll need to create the `/cloudsql` directory and give write access to the user running the proxy. Use these commands to create the directory and set permissions:
 ```bash
 sudo mkdir /cloudsql
 sudo chown -R $USER /cloudsql
 ```
 
-Once the `/cloudsql` directory is ready, use the following command to start the proxy in the
-background:
+Use these terminal commands to initialize environment variables:
 ```bash
-./cloud_sql_proxy -dir=/cloudsql --instances=$CLOUD_SQL_CONNECTION_NAME --credential_file=$GOOGLE_APPLICATION_CREDENTIALS
-```
-Note: Make sure to run the command under a user with write access in the 
-`/cloudsql` directory. This proxy will use this folder to create a unix socket
-the application will use to connect to Cloud SQL. 
-
-### launch the proxy on Windows
-
-Windows environments use a TCP connection for the Cloud SQL proxy. Use this PowerShell command to launch the proxy:
-
-```powershell
-Start-Process -filepath "C:\<path to proxy exe>" -ArgumentList "-instances=<project-id>:<region>:<instance-name>=tcp:3306"
+export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service/account/key.json
+export INSTANCE_CONNECTION_NAME='<MY-PROJECT>:<INSTANCE-REGION>:<INSTANCE-NAME>'
+export DB_USER='<DB_USER_NAME>'
+export DB_PASS='<DB_PASSWORD>'
+export DB_NAME='<DB_NAME>'
 ```
 
-Note the the port number is set to ```3306``` in the above example, so the proxy will listen on that port locally. The same port number was used in the ```DB_TCP_HOST``` environment variable we set earlier, which tells the sample code the address and port number for local communication with the proxy. If you want to use a different port number (for example, because a different MySQL instance is using port 3306 locally), you'll need to change both the ```tcp``` parameter in the proxy invocation command and the ```DB_TCP_HOST``` environment variable.
+Then use this command to launch the proxy in the background:
+```bash
+./cloud_sql_proxy -dir=/cloudsql --instances=$INSTANCE_CONNECTION_NAME --credential_file=$GOOGLE_APPLICATION_CREDENTIALS &
+```
 
 ### Testing the application
 
 To test the application locally, follow these steps after the proxy is running:
 
-* Install the MySQL driver: `go get github.com/go-sql-driver/mysql`
+* Install dependencies: `go get ./...`
 * Run the application: `go run cloudsql.go`
 * Navigate to `http://127.0.0.1:8080` in a web browser to verify your application is running correctly.
 
-## Google App Engine Standard
+## Deploying to App Engine Standard
 
-To run on GAE-Standard, create an App Engine project by following the setup for these 
-[instructions](https://cloud.google.com/appengine/docs/standard/python3/quickstart#before-you-begin).
+To run the sample on GAE-Standard, create an App Engine project by following the setup for these 
+[instructions](https://cloud.google.com/appengine/docs/standard/go/quickstart#before-you-begin).
 
 First, create an `app.yaml` with the correct values to pass the environment 
 variables into the runtime. Your app.yaml file should look like this:
@@ -96,10 +104,13 @@ variables into the runtime. Your app.yaml file should look like this:
 runtime: go111
 env_variables:
   INSTANCE_CONNECTION_NAME: <project-id>:<region>:<instance-name>
-  DB_USER: root
-  DB_PASS: <password for root user>
-  DB_NAME: my_db
+  DB_USER: YOUR_DB_USER
+  DB_PASS: YOUR_DB_PASS
+  DB_NAME: YOUR_DB
 ```
+
+Note: Saving credentials in environment variables is convenient, but not secure - consider a more
+secure solution such as [Cloud KMS](https://cloud.google.com/kms/) to help keep secrets safe.
 
 Next, the following command will deploy the application to your Google Cloud project:
 ```bash
