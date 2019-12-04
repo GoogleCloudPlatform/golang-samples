@@ -103,7 +103,7 @@ var (
 		"createtablewithdatatypes":        createTableWithDatatypes,
 		"createtabledocswithtimestamp":    createTableDocumentsWithTimestamp,
 		"createtabledocswithhistorytable": createTableDocumentsWithHistoryTable,
-		"createbackup":					   createBackup,
+		"createbackup":                    createBackup,
 		"listbackups":                     listBackups,
 		"updatebackup":                    updateBackup,
 		"deletebackup":                    deleteBackup,
