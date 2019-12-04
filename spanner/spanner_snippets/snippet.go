@@ -1900,6 +1900,9 @@ func restoreBackup(ctx context.Context, w io.Writer, adminClient *database.Datab
 		return err
 	}
 	_, err = restoreOp.Wait(ctx)
+	if err != nil {
+		return err
+	}
 
 	fmt.Fprintf(w, "Restored backup [%s] to database [%s]\n", backupID, database)
 	return nil
