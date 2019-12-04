@@ -1888,7 +1888,6 @@ func restoreBackup(ctx context.Context, w io.Writer, adminClient *database.Datab
 	databaseId := matches[2]
 	backupName := instanceName + "/backups/" + backupID
 
-
 	restoreOp, err := adminClient.RestoreDatabase(ctx, &adminpb.RestoreDatabaseRequest{
 		Parent:     instanceName,
 		DatabaseId: databaseId,
