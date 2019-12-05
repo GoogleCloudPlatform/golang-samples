@@ -20,6 +20,7 @@ package main
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"html/template"
 	"log"
@@ -113,8 +114,8 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	case "GET":
 		err := showTotals(w, r)
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(err.Error()))
+			log.Fatalf("indexHandler: error returned from showTotals: %s", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	case "POST":
 		saveVote(w, r)
@@ -183,19 +184,30 @@ func showTotals(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-// saveVote handles POST requests and saves a vote passed as http.Request form data.
-func saveVote(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
-	team := r.Form["team"][0]
+// saveVote saves a vote passed as http.Request form data.
+func saveVote(w http.ResponseWriter, r *http.Request) error {
+	if err := r.ParseForm(); err != nil {
+		return err
+	}
+
+	var team string
+	if teamprop, ok := r.Form["team"]; ok {
+		team = teamprop[0]
+	} else {
+		return errors.New("saveVote: team property missing from form response")
+	}
+
 	// [START cloud_sql_mysql_databasesql_connection]
 	sqlInsert := "INSERT INTO votes (candidate) VALUES (?)"
 	if team == "TABS" || team == "SPACES" {
 		if _, err := db.Exec(sqlInsert, team); err != nil {
 			fmt.Fprintf(w, "unable to save vote: %s", err)
+			return err
 		} else {
 			fmt.Fprintf(w, "Vote successfully cast for %s!\n", team)
 		}
 	}
+	return nil
 	// [END cloud_sql_mysql_databasesql_connection]
 }
 
