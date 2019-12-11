@@ -47,4 +47,4 @@ func patchDataset(w io.Writer, projectID, location, datasetID, newTimeZone strin
 	return nil
 }
 
-// [END healthcare_get_dataset]
+// [END healthcare_patch_dataset]
