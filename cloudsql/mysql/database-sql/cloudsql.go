@@ -20,7 +20,6 @@ package main
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"html/template"
 	"log"
@@ -92,7 +91,7 @@ func main() {
 	if _, err = db.Exec(`CREATE TABLE IF NOT EXISTS votes
 	( vote_id SERIAL NOT NULL, time_cast timestamp NOT NULL,
 	candidate CHAR(6) NOT NULL, PRIMARY KEY (vote_id) );`); err != nil {
-		log.Fatalf("unable to create table: %s", err)
+		log.Fatalf("DB.Exec: unable to create table: %s", err)
 	}
 
 	http.HandleFunc("/", indexHandler)
@@ -112,13 +111,15 @@ func main() {
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		err := showTotals(w, r)
-		if err != nil {
-			log.Fatalf("indexHandler: error returned from showTotals: %s", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+		if err := showTotals(w, r); err != nil {
+			log.Printf("showTotals: %v", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		}
 	case "POST":
-		saveVote(w, r)
+		if err := saveVote(w, r); err != nil {
+			log.Printf("saveVote: %v", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		}
 	default:
 		http.Error(w, fmt.Sprintf("HTTP Method %s Not Allowed", r.Method), http.StatusMethodNotAllowed)
 	}
@@ -129,19 +130,16 @@ func recentVotes() ([]vote, error) {
 	var votes []vote
 	rows, err := db.Query(`SELECT candidate, time_cast FROM votes ORDER BY time_cast DESC LIMIT 5`)
 	if err != nil {
-		return votes, err
+		return votes, fmt.Errorf("DB.Query: %v", err)
 	}
 	defer rows.Close()
 	for rows.Next() {
 		nextVote := vote{}
-		rowError := rows.Scan(&nextVote.Candidate, &nextVote.VoteTime)
+		err := rows.Scan(&nextVote.Candidate, &nextVote.VoteTime)
 		if err != nil {
-			return votes, rowError
+			return votes, fmt.Errorf("Rows.Scan: %v", err)
 		}
 		votes = append(votes, nextVote)
-	}
-	if err = rows.Err(); err != nil {
-		return votes, err
 	}
 	return votes, nil
 }
@@ -153,18 +151,18 @@ func currentTotals() (templateData, error) {
 	var tabVotes, spaceVotes uint
 	err := db.QueryRow(`SELECT count(vote_id) FROM votes WHERE candidate='TABS'`).Scan(&tabVotes)
 	if err != nil {
-		return templateData{}, err
+		return templateData{}, fmt.Errorf("DB.QueryRow: %v", err)
 	}
 	err = db.QueryRow(`SELECT count(vote_id) FROM votes WHERE candidate='SPACES'`).Scan(&spaceVotes)
 	if err != nil {
-		return templateData{}, err
+		return templateData{}, fmt.Errorf("DB.QueryRow: %v", err)
 	}
 
 	var voteDiffStr string = voteDiff(int(math.Abs(float64(tabVotes) - float64(spaceVotes)))).String()
 
 	latestVotesCast, err := recentVotes()
 	if err != nil {
-		return templateData{}, err
+		return templateData{}, fmt.Errorf("recentVotes: %v", err)
 	}
 	return templateData{tabVotes, spaceVotes, voteDiffStr, latestVotesCast}, nil
 
@@ -175,11 +173,11 @@ func showTotals(w http.ResponseWriter, r *http.Request) error {
 
 	totals, err := currentTotals()
 	if err != nil {
-		return err
+		return fmt.Errorf("currentTotals: %v", err)
 	}
 	err = parsedTemplate.Execute(w, totals)
 	if err != nil {
-		return err
+		return fmt.Errorf("Template.Execute: %v", err)
 	}
 	return nil
 }
@@ -187,14 +185,14 @@ func showTotals(w http.ResponseWriter, r *http.Request) error {
 // saveVote saves a vote passed as http.Request form data.
 func saveVote(w http.ResponseWriter, r *http.Request) error {
 	if err := r.ParseForm(); err != nil {
-		return err
+		return fmt.Errorf("Request.ParseForm: %v", err)
 	}
 
 	var team string
 	if teamprop, ok := r.Form["team"]; ok {
 		team = teamprop[0]
 	} else {
-		return errors.New("saveVote: team property missing from form response")
+		return fmt.Errorf("team property missing from form submission")
 	}
 
 	// [START cloud_sql_mysql_databasesql_connection]
@@ -202,7 +200,7 @@ func saveVote(w http.ResponseWriter, r *http.Request) error {
 	if team == "TABS" || team == "SPACES" {
 		if _, err := db.Exec(sqlInsert, team); err != nil {
 			fmt.Fprintf(w, "unable to save vote: %s", err)
-			return err
+			return fmt.Errorf("DB.Exec: %v", err)
 		} else {
 			fmt.Fprintf(w, "Vote successfully cast for %s!\n", team)
 		}
@@ -216,7 +214,7 @@ func saveVote(w http.ResponseWriter, r *http.Request) error {
 func mustGetenv(k string) string {
 	v := os.Getenv(k)
 	if v == "" {
-		fmt.Printf("Warning: %s environment variable not set.\n", k)
+		log.Printf("Warning: %s environment variable not set.\n", k)
 	}
 	return v
 }
@@ -238,7 +236,7 @@ func initSocketConnectionPool() (*sql.DB, error) {
 	// dbPool is the pool of database connections.
 	dbPool, err := sql.Open("mysql", dbURI)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("sql.Open: %v", err)
 	}
 
 	// [START_EXCLUDE]
@@ -266,7 +264,7 @@ func initTcpConnectionPool() (*sql.DB, error) {
 	// dbPool is the pool of database connections.
 	dbPool, err := sql.Open("mysql", dbURI)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("sql.Open: %v", err)
 	}
 
 	// [START_EXCLUDE]
