@@ -46,7 +46,7 @@ func visionClassificationCreateModel(w io.Writer, projectID string, location str
 			DatasetId:   datasetID,
 			ModelMetadata: &automlpb.Model_ImageClassificationModelMetadata{
 				ImageClassificationModelMetadata: &automlpb.ImageClassificationModelMetadata{
-					TrainBudget: 8, // Train budget of creating a model, expressed in hours.
+					TrainBudgetMilliNodeHours: 1000, // 1000 milli-node hours are 1 hour
 				},
 			},
 		},

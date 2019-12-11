@@ -53,9 +53,15 @@ func languageTextClassificationCreateDataset(w io.Writer, projectID string, loca
 		},
 	}
 
-	dataset, err := client.CreateDataset(ctx, req)
+	op, err := client.CreateDataset(ctx, req)
 	if err != nil {
 		return fmt.Errorf("CreateDataset: %v", err)
+	}
+	fmt.Fprintf(w, "Processing operation name: %q\n", op.Name())
+
+	dataset, err := op.Wait(ctx)
+	if err != nil {
+		return fmt.Errorf("Wait: %v", err)
 	}
 
 	fmt.Fprintf(w, "Dataset name: %v\n", dataset.GetName())
