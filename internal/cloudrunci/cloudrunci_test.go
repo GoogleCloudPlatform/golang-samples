@@ -94,3 +94,29 @@ func TestServiceURL(t *testing.T) {
 		t.Errorf("service.URL: got %s, want %s", got, want)
 	}
 }
+
+func TestDeployArgs(t *testing.T) {
+	service := NewService("my-serivce", "my-project")
+	service.Image = "gcr.io/my-project/my-service"
+	service.Env = EnvVars{
+		"NAME1": "value1",
+		"NAME2": "value2",
+	}
+
+	cmd := service.deployCmd()
+	for i, v := range service.Env {
+		if !contains(cmd.Args, fmt.Sprintf("%s=%s", i, v)) {
+			t.Errorf("Environment variable (%s) missing from deploy command", i)
+		}
+	}
+}
+
+// contains searches for a string value in a string slice.
+func contains(haystack []string, needle string) bool {
+	for _, i := range haystack {
+		if i == needle {
+			return true
+		}
+	}
+	return false
+}

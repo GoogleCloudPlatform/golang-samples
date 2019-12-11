@@ -266,7 +266,9 @@ func (s *Service) deployCmd() *exec.Cmd {
 	}, s.Platform.CommandFlags()...)
 
 	if s.Env != nil {
-		args = append(args, "--set-env-vars", s.Env.String())
+		for k := range s.Env {
+			args = append(args, "--set-env-vars", s.Env.Variable(k))
+		}
 	}
 
 	// NOTE: if the "beta" component is not available, and this is run in parallel,
