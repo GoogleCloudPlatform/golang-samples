@@ -18,11 +18,13 @@ package testutil
 import (
 	"errors"
 	"fmt"
-	"go/build"
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
+
+	"golang.org/x/tools/go/packages"
 )
 
 var noProjectID = errors.New("GOLANG_SAMPLES_PROJECT_ID not set")
@@ -88,11 +90,29 @@ func testContext() (Context, error) {
 		return tc, noProjectID
 	}
 
-	pkg, err := build.Import("github.com/GoogleCloudPlatform/golang-samples", "", build.FindOnly)
-	if err != nil {
-		return tc, fmt.Errorf("Could not find golang-samples on GOPATH: %v", err)
+	cfg := &packages.Config{
+		Mode:  packages.NeedName | packages.NeedFiles,
+		Tests: true,
 	}
-	tc.Dir = pkg.Dir
+	pkgs, err := packages.Load(cfg, "github.com/GoogleCloudPlatform/golang-samples")
+	if err != nil {
+		return tc, fmt.Errorf("could not find golang-samples: %v", err)
+	}
+	// packages.Load returns multiple values, some with files and some without.
+	// Some of the files are generated as part of the build and some are the
+	// normal Go source files we're looking for.
+	// We can probably assume the one we want is pkgs[2], but loop through
+	// looking for the one we want in case it ever changes.
+	for _, pkg := range pkgs {
+		if len(pkg.GoFiles) > 0 && strings.HasSuffix(pkg.GoFiles[0], ".go") {
+			// Use the directory of a file in the root package as the module
+			// root directory.
+			tc.Dir = filepath.Dir(pkg.GoFiles[0])
+		}
+	}
+	if tc.Dir == "" {
+		return tc, fmt.Errorf("could not find golang-samples directory")
+	}
 
 	return tc, nil
 }
