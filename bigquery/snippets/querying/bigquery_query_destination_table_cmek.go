@@ -15,7 +15,6 @@
 package querying
 
 // [START bigquery_query_destination_table_cmek]
-
 import (
 	"cloud.google.com/go/bigquery"
 	"context"

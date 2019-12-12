@@ -15,7 +15,6 @@
 package table
 
 // [START bigquery_create_view]
-
 import (
 	"cloud.google.com/go/bigquery"
 	"context"

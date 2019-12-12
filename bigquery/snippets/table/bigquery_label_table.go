@@ -15,7 +15,6 @@
 package table
 
 // [START bigquery_label_table]
-
 import (
 	"cloud.google.com/go/bigquery"
 	"context"

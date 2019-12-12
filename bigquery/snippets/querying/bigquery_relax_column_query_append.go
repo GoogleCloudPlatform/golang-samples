@@ -15,7 +15,6 @@
 package querying
 
 // [START bigquery_relax_column_query_append]
-
 import (
 	"cloud.google.com/go/bigquery"
 	"context"

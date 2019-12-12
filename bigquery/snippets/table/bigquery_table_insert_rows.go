@@ -15,7 +15,6 @@
 package table
 
 // [START bigquery_table_insert_rows]
-
 import (
 	"cloud.google.com/go/bigquery"
 	"context"

@@ -15,7 +15,6 @@
 package querying
 
 // [START bigquery_query_partitioned_table]
-
 import (
 	"cloud.google.com/go/bigquery"
 	"context"

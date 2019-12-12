@@ -15,7 +15,6 @@
 package querying
 
 // [START bigquery_query_no_cache]
-
 import (
 	"cloud.google.com/go/bigquery"
 	"context"

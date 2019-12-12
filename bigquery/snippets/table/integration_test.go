@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package dataset demonstrates interactions with BigQuery's dataset resources.
-// Examples include lifecycle operations such as creation, modification, and
-// deletion.
+// Package table demonstrates interactions with BigQuery Table resources,
+// which included managed tables, federation, and logical views.
 package table
 
 import (
@@ -27,7 +26,7 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestAll(t *testing.T) {
+func TestTables(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 

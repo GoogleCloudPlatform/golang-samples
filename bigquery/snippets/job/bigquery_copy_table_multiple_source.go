@@ -15,7 +15,6 @@
 package job
 
 // [START bigquery_copy_table_multiple_source]
-
 import (
 	"cloud.google.com/go/bigquery"
 	"context"

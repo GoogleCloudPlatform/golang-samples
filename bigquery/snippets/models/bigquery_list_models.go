@@ -15,7 +15,6 @@
 package models
 
 // [START bigquery_list_models]
-
 import (
 	"context"
 	"fmt"

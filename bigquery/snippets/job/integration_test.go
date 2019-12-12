@@ -14,7 +14,7 @@
 
 // Package job demonstrates interactions with BigQuery's job resources, which
 // allow for execution of multiple kinds of workloads including queries, loads,
-// and data extracts.
+// copies, and data extracts.
 package job
 
 import (
@@ -30,7 +30,7 @@ import (
 	"time"
 )
 
-func TestAll(t *testing.T) {
+func TestJobs(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 
@@ -60,7 +60,6 @@ func TestAll(t *testing.T) {
 }
 
 func TestCopiesAndExtracts(t *testing.T) {
-
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 
@@ -117,17 +116,17 @@ func TestCopiesAndExtracts(t *testing.T) {
 	}
 
 	gcsURI := fmt.Sprintf("gs://%s/%s", bucket, "shakespeare.csv")
-	if err := exportSampleTableAsCSV(tc.ProjectID, gcsURI); err != nil {
-		t.Errorf("exportSampleTableAsCSV(%s): %v", gcsURI, err)
+	if err := exportTableAsCSV(tc.ProjectID, gcsURI); err != nil {
+		t.Errorf("exportTableAsCSV(%s): %v", gcsURI, err)
 	}
 	gcsURI = fmt.Sprintf("gs://%s/%s", bucket, "shakespeare.csv.gz")
-	if err := exportSampleTableAsCompressedCSV(tc.ProjectID, gcsURI); err != nil {
-		t.Errorf("exportSampleTableAsCompressedCSV(%s): %v", gcsURI, err)
+	if err := exportTableAsCompressedCSV(tc.ProjectID, gcsURI); err != nil {
+		t.Errorf("exportTableAsCompressedCSV(%s): %v", gcsURI, err)
 	}
 
 	gcsURI = fmt.Sprintf("gs://%s/%s", bucket, "shakespeare.json")
-	if err := exportSampleTableAsJSON(tc.ProjectID, gcsURI); err != nil {
-		t.Errorf("exportSampleTableAsJSON(%s): %v", gcsURI, err)
+	if err := exportTableAsJSON(tc.ProjectID, gcsURI); err != nil {
+		t.Errorf("exportTableAsJSON(%s): %v", gcsURI, err)
 	}
 
 	// Walk the bucket and delete objects

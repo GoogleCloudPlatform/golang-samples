@@ -15,7 +15,6 @@
 package querying
 
 // [START bigquery_query_dry_run]
-
 import (
 	"cloud.google.com/go/bigquery"
 	"context"

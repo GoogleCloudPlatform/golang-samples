@@ -15,7 +15,6 @@
 package dataset
 
 // [START bigquery_delete_dataset]
-
 import (
 	"context"
 	"fmt"

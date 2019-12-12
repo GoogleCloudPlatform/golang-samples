@@ -15,7 +15,6 @@
 package table
 
 // [START bigquery_update_table_expiration]
-
 import (
 	"cloud.google.com/go/bigquery"
 	"context"

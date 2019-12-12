@@ -15,7 +15,6 @@
 package job
 
 // [START bigquery_list_jobs]
-
 import (
 	"cloud.google.com/go/bigquery"
 	"context"
@@ -35,6 +34,7 @@ func listJobs(w io.Writer, projectID string) error {
 	}
 
 	it := client.Jobs(ctx)
+	// List up to 10 jobs to demonstrate iteration.
 	for i := 0; i < 10; i++ {
 		j, err := it.Next()
 		if err == iterator.Done {

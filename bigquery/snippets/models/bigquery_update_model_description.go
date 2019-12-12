@@ -15,7 +15,6 @@
 package models
 
 // [START bigquery_update_model_description]
-
 import (
 	"context"
 	"fmt"

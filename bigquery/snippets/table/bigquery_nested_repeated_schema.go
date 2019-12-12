@@ -15,7 +15,6 @@
 package table
 
 // [START bigquery_nested_repeated_schema]
-
 import (
 	"cloud.google.com/go/bigquery"
 	"context"

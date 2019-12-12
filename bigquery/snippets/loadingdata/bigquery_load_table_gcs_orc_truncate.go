@@ -15,7 +15,6 @@
 package loadingdata
 
 // [START bigquery_load_table_gcs_orc_truncate]
-
 import (
 	"cloud.google.com/go/bigquery"
 	"context"

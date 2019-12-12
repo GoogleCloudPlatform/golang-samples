@@ -15,14 +15,13 @@
 package loadingdata
 
 // [START bigquery_load_table_clustered]
-
 import (
 	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
 )
 
-func importClusteredSampleTable(projectID, destDatasetID, destTableID string) error {
+func importClusteredTable(projectID, destDatasetID, destTableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"
 	// tableID := "mytable"

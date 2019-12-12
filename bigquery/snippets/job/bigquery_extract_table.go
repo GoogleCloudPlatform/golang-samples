@@ -15,14 +15,13 @@
 package job
 
 // [START bigquery_extract_table]
-
 import (
 	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
 )
 
-func exportSampleTableAsCSV(projectID, gcsURI string) error {
+func exportTableAsCSV(projectID, gcsURI string) error {
 	// projectID := "my-project-id"
 	// gcsUri := "gs://mybucket/shakespeare.csv"
 	ctx := context.Background()

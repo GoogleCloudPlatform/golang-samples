@@ -15,7 +15,6 @@
 package table
 
 // [START bigquery_update_table_description]
-
 import (
 	"cloud.google.com/go/bigquery"
 	"context"

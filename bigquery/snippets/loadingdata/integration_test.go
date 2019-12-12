@@ -155,18 +155,18 @@ func TestImportSnippets(t *testing.T) {
 				t.Errorf("relaxTableImport(%q): %v", testDatasetID, err)
 			}
 		})
-		t.Run("importPartitionedSampleTable", func(t *testing.T) {
+		t.Run("importPartitionedTable", func(t *testing.T) {
 			t.Parallel()
 			tableID := "bigquery_load_table_partitioned"
-			if err := importPartitionedSampleTable(tc.ProjectID, testDatasetID, tableID); err != nil {
-				t.Errorf("importPartitionedSampleTable(%q): %v", testDatasetID, err)
+			if err := importPartitionedTable(tc.ProjectID, testDatasetID, tableID); err != nil {
+				t.Errorf("importPartitionedTable(%q): %v", testDatasetID, err)
 			}
 		})
 		t.Run("importClusteredSampleTable", func(t *testing.T) {
 			t.Parallel()
 			tableID := "bigquery_load_table_clustered"
-			if err := importClusteredSampleTable(tc.ProjectID, testDatasetID, tableID); err != nil {
-				t.Errorf("importClusteredSampleTable(%q): %v", testDatasetID, err)
+			if err := importClusteredTable(tc.ProjectID, testDatasetID, tableID); err != nil {
+				t.Errorf("importClusteredTable(%q): %v", testDatasetID, err)
 			}
 		})
 	})

@@ -15,7 +15,6 @@
 package loadingdata
 
 // [START bigquery_load_from_file]
-
 import (
 	"cloud.google.com/go/bigquery"
 	"context"

@@ -15,7 +15,6 @@
 package querying
 
 // [START bigquery_query_params_timestamps]
-
 import (
 	"cloud.google.com/go/bigquery"
 	"context"

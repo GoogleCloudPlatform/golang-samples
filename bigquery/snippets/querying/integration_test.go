@@ -26,7 +26,7 @@ import (
 	"time"
 )
 
-func TestAll(t *testing.T) {
+func TestQueries(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 

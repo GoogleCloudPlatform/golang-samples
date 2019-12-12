@@ -15,7 +15,6 @@
 package dataset
 
 // [START bigquery_get_dataset]
-
 import (
 	"context"
 	"fmt"

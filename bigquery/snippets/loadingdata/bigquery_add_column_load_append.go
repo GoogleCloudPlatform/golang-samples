@@ -15,7 +15,6 @@
 package loadingdata
 
 // [START bigquery_add_column_load_append]
-
 import (
 	"cloud.google.com/go/bigquery"
 	"context"

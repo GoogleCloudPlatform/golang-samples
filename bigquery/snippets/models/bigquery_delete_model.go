@@ -15,7 +15,6 @@
 package models
 
 // [START bigquery_delete_model]
-
 import (
 	"context"
 	"fmt"

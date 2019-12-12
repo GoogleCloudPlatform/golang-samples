@@ -15,7 +15,6 @@
 package querying
 
 // [START bigquery_query_legacy_large_results]
-
 import (
 	"cloud.google.com/go/bigquery"
 	"context"

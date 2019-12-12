@@ -15,7 +15,6 @@
 package dataset
 
 // [START bigquery_list_datasets_by_label]
-
 import (
 	"context"
 	"fmt"

@@ -15,7 +15,6 @@
 package querying
 
 // [START bigquery_query_clustered_table]
-
 import (
 	"cloud.google.com/go/bigquery"
 	"context"

@@ -23,7 +23,7 @@ import (
 	"time"
 )
 
-func importPartitionedSampleTable(projectID, destDatasetID, destTableID string) error {
+func importPartitionedTable(projectID, destDatasetID, destTableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"
 	// tableID := "mytable"

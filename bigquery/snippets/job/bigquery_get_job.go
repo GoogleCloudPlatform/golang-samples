@@ -15,7 +15,6 @@
 package job
 
 // [START bigquery_get_job]
-
 import (
 	"cloud.google.com/go/bigquery"
 	"context"
