@@ -19,7 +19,6 @@ package loadingdata
 
 import (
 	"context"
-	"io/ioutil"
 	"testing"
 
 	"cloud.google.com/go/bigquery"
@@ -27,7 +26,7 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestAll(t *testing.T) {
+func TestImportSnippets(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 
@@ -37,7 +36,7 @@ func TestAll(t *testing.T) {
 	}
 
 	// Control a job lifecycle explicitly: create, report status, cancel.
-	testDatasetID, err := bqtestutil.UniqueBQName("snippet_table_tests")
+	testDatasetID, err := bqtestutil.UniqueBQName("golang_snippets_loading")
 	if err != nil {
 		t.Fatalf("couldn't generate unique resource name: %v", err)
 	}
@@ -50,5 +49,126 @@ func TestAll(t *testing.T) {
 	}
 	// Cleanup dataset at end of test.
 	defer client.Dataset(testDatasetID).DeleteWithContents(ctx)
+
+	// Run these in a group.  They're batch workloads and can run concurrently.
+	t.Run("group", func(t *testing.T) {
+		t.Run("importCSVFromFile", func(t *testing.T) {
+			t.Parallel()
+			tableID := "bigquery_load_from_file"
+			filename := "../testdata/people.csv"
+			if err := importCSVFromFile(tc.ProjectID, testDatasetID, tableID, filename); err != nil {
+				t.Errorf("importCSVFromFile(%q): %v", testDatasetID, err)
+			}
+		})
+		t.Run("importCSVAutodetectSchema", func(t *testing.T) {
+			t.Parallel()
+			tableID := "bigquery_load_table_gcs_csv_autodetect"
+			if err := importCSVAutodetectSchema(tc.ProjectID, testDatasetID, tableID); err != nil {
+				t.Errorf("importCSVAutodetectSchema(%q): %v", testDatasetID, err)
+			}
+		})
+		t.Run("importCSVTruncate", func(t *testing.T) {
+			t.Parallel()
+			tableID := "bigquery_load_table_gcs_csv_truncate"
+			if err := importCSVTruncate(tc.ProjectID, testDatasetID, tableID); err != nil {
+				t.Errorf("importCSVTruncate(%q): %v", testDatasetID, err)
+			}
+		})
+		t.Run("importCSVExplicitSchema", func(t *testing.T) {
+			t.Parallel()
+			tableID := "bigquery_load_table_gcs_csv"
+			if err := importCSVExplicitSchema(tc.ProjectID, testDatasetID, tableID); err != nil {
+				t.Errorf("importCSVExplicitSchema(%q): %v", testDatasetID, err)
+			}
+		})
+		t.Run("importJSONExplicitSchema", func(t *testing.T) {
+			t.Parallel()
+			tableID := "bigquery_load_table_gcs_json"
+			if err := importJSONExplicitSchema(tc.ProjectID, testDatasetID, tableID); err != nil {
+				t.Errorf("importJSONExplicitSchema(%q): %v", testDatasetID, err)
+			}
+		})
+		t.Run("importJSONAutodetectSchema", func(t *testing.T) {
+			t.Parallel()
+			tableID := "bigquery_load_table_gcs_json_autodetect"
+			if err := importJSONAutodetectSchema(tc.ProjectID, testDatasetID, tableID); err != nil {
+				t.Errorf("importJSONAutodetectSchema(%q): %v", testDatasetID, err)
+			}
+		})
+		/*
+		t.Run("importJSONWithCMEK", func(t *testing.T) {
+			t.Parallel()
+			tableID := "bigquery_load_table_gcs_json_cmek"
+			if err := importJSONWithCMEK(tc.ProjectID, testDatasetID, tableID); err != nil {
+				t.Errorf("importJSONWithCMEK(%q): %v", testDatasetID, err)
+			}
+		})
+		*/
+		t.Run("importJSONTruncate", func(t *testing.T) {
+			t.Parallel()
+			tableID := "bigquery_load_table_gcs_json_truncate"
+			if err := importJSONTruncate(tc.ProjectID, testDatasetID, tableID); err != nil {
+				t.Errorf("importJSONTruncate(%q): %v", testDatasetID, err)
+			}
+		})
+		t.Run("importORC", func(t *testing.T) {
+			t.Parallel()
+			tableID := "bigquery_load_table_gcs_orc"
+			if err := importORC(tc.ProjectID, testDatasetID, tableID); err != nil {
+				t.Errorf("importORC(%q): %v", testDatasetID, err)
+			}
+		})
+		t.Run("importORCTruncate", func(t *testing.T) {
+			t.Parallel()
+			tableID := "bigquery_load_table_gcs_orc_truncate"
+			if err := importORCTruncate(tc.ProjectID, testDatasetID, tableID); err != nil {
+				t.Errorf("importORCTruncate(%q): %v", testDatasetID, err)
+			}
+		})
+		t.Run("importParquet", func(t *testing.T) {
+			t.Parallel()
+			tableID := "bigquery_load_table_gcs_parquet"
+			if err := importParquet(tc.ProjectID, testDatasetID, tableID); err != nil {
+				t.Errorf("importParquet(%q): %v", testDatasetID, err)
+			}
+		})
+		t.Run("importParquetTruncate", func(t *testing.T) {
+			t.Parallel()
+			tableID := "bigquery_load_table_gcs_parquet_truncate"
+			if err := importParquetTruncate(tc.ProjectID, testDatasetID, tableID); err != nil {
+				t.Errorf("importParquetTruncate(%q): %v", testDatasetID, err)
+			}
+		})
+		t.Run("createTableAndWidenLoad", func(t *testing.T) {
+			t.Parallel()
+			tableID := "bigquery_add_column_load_append"
+			filename := "../testdata/people.csv"
+			if err := createTableAndWidenLoad(tc.ProjectID, testDatasetID, tableID, filename); err != nil {
+				t.Errorf("createTableAndWidenLoad(%q): %v", testDatasetID, err)
+			}
+		})
+		t.Run("relaxTableImport", func(t *testing.T) {
+			t.Parallel()
+			tableID := "bigquery_relax_column_load_append"
+			filename := "../testdata/people.csv"
+			if err := relaxTableImport(tc.ProjectID, testDatasetID, tableID, filename); err != nil {
+				t.Errorf("relaxTableImport(%q): %v", testDatasetID, err)
+			}
+		})
+		t.Run("importPartitionedSampleTable", func(t *testing.T) {
+			t.Parallel()
+			tableID := "bigquery_load_table_partitioned"
+			if err := importPartitionedSampleTable(tc.ProjectID, testDatasetID, tableID); err != nil {
+				t.Errorf("importPartitionedSampleTable(%q): %v", testDatasetID, err)
+			}
+		})
+		t.Run("ImportClusteredSampleTable", func(t *testing.T) {
+			t.Parallel()
+			tableID := "bigquery_load_table_clustered"
+			if err := ImportClusteredSampleTable(tc.ProjectID, testDatasetID, tableID); err != nil {
+				t.Errorf("ImportClusteredSampleTable(%q): %v", testDatasetID, err)
+			}
+		})
+	})
 
 }
