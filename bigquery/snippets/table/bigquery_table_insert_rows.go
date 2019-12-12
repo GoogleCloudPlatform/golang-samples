@@ -31,8 +31,8 @@ type Item struct {
 // Save implements the ValueSaver interface.
 func (i *Item) Save() (map[string]bigquery.Value, string, error) {
 	return map[string]bigquery.Value{
-		"Name": i.Name,
-		"Age":  i.Age,
+		"full_name": i.Name,
+		"age":       i.Age,
 	}, "", nil
 }
 

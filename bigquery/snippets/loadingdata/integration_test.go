@@ -96,13 +96,13 @@ func TestImportSnippets(t *testing.T) {
 			}
 		})
 		/*
-		t.Run("importJSONWithCMEK", func(t *testing.T) {
-			t.Parallel()
-			tableID := "bigquery_load_table_gcs_json_cmek"
-			if err := importJSONWithCMEK(tc.ProjectID, testDatasetID, tableID); err != nil {
-				t.Errorf("importJSONWithCMEK(%q): %v", testDatasetID, err)
-			}
-		})
+			t.Run("importJSONWithCMEK", func(t *testing.T) {
+				t.Parallel()
+				tableID := "bigquery_load_table_gcs_json_cmek"
+				if err := importJSONWithCMEK(tc.ProjectID, testDatasetID, tableID); err != nil {
+					t.Errorf("importJSONWithCMEK(%q): %v", testDatasetID, err)
+				}
+			})
 		*/
 		t.Run("importJSONTruncate", func(t *testing.T) {
 			t.Parallel()
@@ -162,11 +162,11 @@ func TestImportSnippets(t *testing.T) {
 				t.Errorf("importPartitionedSampleTable(%q): %v", testDatasetID, err)
 			}
 		})
-		t.Run("ImportClusteredSampleTable", func(t *testing.T) {
+		t.Run("importClusteredSampleTable", func(t *testing.T) {
 			t.Parallel()
 			tableID := "bigquery_load_table_clustered"
-			if err := ImportClusteredSampleTable(tc.ProjectID, testDatasetID, tableID); err != nil {
-				t.Errorf("ImportClusteredSampleTable(%q): %v", testDatasetID, err)
+			if err := importClusteredSampleTable(tc.ProjectID, testDatasetID, tableID); err != nil {
+				t.Errorf("importClusteredSampleTable(%q): %v", testDatasetID, err)
 			}
 		})
 	})
