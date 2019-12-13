@@ -38,7 +38,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"sort"
 	"strings"
 
@@ -230,7 +229,7 @@ func readWithFilter(w io.Writer, projectID, instanceID string, tableName string,
 		}, bigtable.RowFilter(filter))
 
 	if err = client.Close(); err != nil {
-		log.Fatalf("Could not close data operations client: %v", err)
+		return fmt.Errorf("client.Close(): %v", err)
 	}
 
 	return nil

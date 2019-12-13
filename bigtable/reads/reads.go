@@ -109,7 +109,7 @@ func readRows(w io.Writer, projectID, instanceID string, tableName string) error
 		})
 
 	if err = client.Close(); err != nil {
-		log.Fatalf("Could not close data operations client: %v", err)
+		return fmt.Errorf("client.Close(): %v", err)
 	}
 
 	return nil
@@ -136,7 +136,7 @@ func readRowRange(w io.Writer, projectID, instanceID string, tableName string) e
 		})
 
 	if err = client.Close(); err != nil {
-		log.Fatalf("Could not close data operations client: %v", err)
+		return fmt.Errorf("client.Close(): %v", err)
 	}
 
 	return nil
@@ -166,7 +166,7 @@ func readRowRanges(w io.Writer, projectID, instanceID string, tableName string) 
 		})
 
 	if err = client.Close(); err != nil {
-		log.Fatalf("Could not close data operations client: %v", err)
+		return fmt.Errorf("client.Close(): %v", err)
 	}
 
 	return nil
@@ -193,7 +193,7 @@ func readPrefix(w io.Writer, projectID, instanceID string, tableName string) err
 		})
 
 	if err = client.Close(); err != nil {
-		log.Fatalf("Could not close data operations client: %v", err)
+		return fmt.Errorf("client.Close(): %v", err)
 	}
 
 	return nil
@@ -220,7 +220,7 @@ func readFilter(w io.Writer, projectID, instanceID string, tableName string) err
 		}, bigtable.RowFilter(bigtable.ValueFilter("PQ2A.*$")))
 
 	if err = client.Close(); err != nil {
-		log.Fatalf("Could not close data operations client: %v", err)
+		return fmt.Errorf("client.Close(): %v", err)
 	}
 
 	return nil
