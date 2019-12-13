@@ -105,7 +105,6 @@ func readRows(w io.Writer, projectID, instanceID string, tableName string) error
 	err = tbl.ReadRows(ctx, bigtable.RowList{"phone#4c410523#20190501", "phone#4c410523#20190502"},
 		func(row bigtable.Row) bool {
 			printRow(w, row)
-			fmt.Fprintf(w, "\n")
 			return true
 		})
 
@@ -133,7 +132,6 @@ func readRowRange(w io.Writer, projectID, instanceID string, tableName string) e
 	err = tbl.ReadRows(ctx, bigtable.NewRange("phone#4c410523#20190501", "phone#4c410523#201906201"),
 		func(row bigtable.Row) bool {
 			printRow(w, row)
-			fmt.Fprintf(w, "\n")
 			return true
 		})
 
@@ -164,7 +162,6 @@ func readRowRanges(w io.Writer, projectID, instanceID string, tableName string) 
 	},
 		func(row bigtable.Row) bool {
 			printRow(w, row)
-			fmt.Fprintf(w, "\n")
 			return true
 		})
 
@@ -192,7 +189,6 @@ func readPrefix(w io.Writer, projectID, instanceID string, tableName string) err
 	err = tbl.ReadRows(ctx, bigtable.PrefixRange("phone#"),
 		func(row bigtable.Row) bool {
 			printRow(w, row)
-			fmt.Fprintf(w, "\n")
 			return true
 		})
 
@@ -220,7 +216,6 @@ func readFilter(w io.Writer, projectID, instanceID string, tableName string) err
 	err = tbl.ReadRows(ctx, bigtable.RowRange{},
 		func(row bigtable.Row) bool {
 			printRow(w, row)
-			fmt.Fprintf(w, "\n")
 			return true
 		}, bigtable.RowFilter(bigtable.ValueFilter("PQ2A.*$")))
 
@@ -246,10 +241,10 @@ func printRow(w io.Writer, row bigtable.Row) {
 		fmt.Fprintf(w, "Column Family %s\n", columnFamily)
 		for _, col := range cols {
 			qualifier := col.Column[strings.IndexByte(col.Column, ':')+1:]
-			//labels := col.
 			fmt.Fprintf(w, "\t%s: %s @%d\n", qualifier, col.Value, col.Timestamp)
 		}
 	}
+	fmt.Fprintln(w)
 }
 
 // [END bigtable_reads_row]

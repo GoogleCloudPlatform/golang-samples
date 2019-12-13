@@ -67,118 +67,104 @@ import (
 // [START bigtable_filters_limit_row_sample]
 func filterLimitRowSample(w io.Writer, projectID, instanceID string, tableName string) error {
 	filter := bigtable.RowSampleFilter(.75)
-	readFilter(w, projectID, instanceID, tableName, filter)
-	return nil
+	return readWithFilter(w, projectID, instanceID, tableName, filter)
 }
 
 // [END bigtable_filters_limit_row_sample]
 // [START bigtable_filters_limit_row_regex]
 func filterLimitRowRegex(w io.Writer, projectID, instanceID string, tableName string) error {
 	filter := bigtable.RowKeyFilter(".*#20190501$")
-	readFilter(w, projectID, instanceID, tableName, filter)
-	return nil
+	return readWithFilter(w, projectID, instanceID, tableName, filter)
 }
 
 // [END bigtable_filters_limit_row_regex]
 // [START bigtable_filters_limit_cells_per_col]
 func filterLimitCellsPerCol(w io.Writer, projectID, instanceID string, tableName string) error {
 	filter := bigtable.LatestNFilter(2)
-	readFilter(w, projectID, instanceID, tableName, filter)
-	return nil
+	return readWithFilter(w, projectID, instanceID, tableName, filter)
 }
 
 // [END bigtable_filters_limit_cells_per_col]
 // [START bigtable_filters_limit_cells_per_row]
 func filterLimitCellsPerRow(w io.Writer, projectID, instanceID string, tableName string) error {
 	filter := bigtable.CellsPerRowLimitFilter(2)
-	readFilter(w, projectID, instanceID, tableName, filter)
-	return nil
+	return readWithFilter(w, projectID, instanceID, tableName, filter)
 }
 
 // [END bigtable_filters_limit_cells_per_row]
 // [START bigtable_filters_limit_cells_per_row_offset]
 func filterLimitCellsPerRowOffset(w io.Writer, projectID, instanceID string, tableName string) error {
 	filter := bigtable.CellsPerRowOffsetFilter(2)
-	readFilter(w, projectID, instanceID, tableName, filter)
-	return nil
+	return readWithFilter(w, projectID, instanceID, tableName, filter)
 }
 
 // [END bigtable_filters_limit_cells_per_row_offset]
 // [START bigtable_filters_limit_col_family_regex]
 func filterLimitColFamilyRegex(w io.Writer, projectID, instanceID string, tableName string) error {
 	filter := bigtable.FamilyFilter("stats_.*$")
-	readFilter(w, projectID, instanceID, tableName, filter)
-	return nil
+	return readWithFilter(w, projectID, instanceID, tableName, filter)
 }
 
 // [END bigtable_filters_limit_col_family_regex]
 // [START bigtable_filters_limit_col_qualifier_regex]
 func filterLimitColQualifierRegex(w io.Writer, projectID, instanceID string, tableName string) error {
 	filter := bigtable.ColumnFilter("connected_.*$")
-	readFilter(w, projectID, instanceID, tableName, filter)
-	return nil
+	return readWithFilter(w, projectID, instanceID, tableName, filter)
 }
 
 // [END bigtable_filters_limit_col_qualifier_regex]
 // [START bigtable_filters_limit_col_range]
 func filterLimitColRange(w io.Writer, projectID, instanceID string, tableName string) error {
 	filter := bigtable.ColumnRangeFilter("cell_plan", "data_plan_01gb", "data_plan_10gb")
-	readFilter(w, projectID, instanceID, tableName, filter)
-	return nil
+	return readWithFilter(w, projectID, instanceID, tableName, filter)
 }
 
 // [END bigtable_filters_limit_col_range]
 // [START bigtable_filters_limit_value_range]
 func filterLimitValueRange(w io.Writer, projectID, instanceID string, tableName string) error {
 	filter := bigtable.ValueRangeFilter([]byte("PQ2A.190405"), []byte("PQ2A.190406"))
-	readFilter(w, projectID, instanceID, tableName, filter)
-	return nil
+	return readWithFilter(w, projectID, instanceID, tableName, filter)
 }
 
 // [END bigtable_filters_limit_value_range]
 // [START bigtable_filters_limit_value_regex]
 func filterLimitValueRegex(w io.Writer, projectID, instanceID string, tableName string) error {
 	filter := bigtable.ValueFilter("PQ2A.*$")
-	readFilter(w, projectID, instanceID, tableName, filter)
-	return nil
+	return readWithFilter(w, projectID, instanceID, tableName, filter)
 }
 
 // [END bigtable_filters_limit_value_regex]
 // [START bigtable_filters_limit_timestamp_range]
 func filterLimitTimestampRange(w io.Writer, projectID, instanceID string, tableName string) error {
+	startTime := (bigtable.Timestamp(0)).Time()
+	timestampMinusHr := bigtable.Timestamp(bigtable.Now().TruncateToMilliseconds() - 60*60*1000*1000)
+	endTime := timestampMinusHr.Time()
 	filter := bigtable.TimestampRangeFilter(
-		(bigtable.Timestamp(0)).Time(),
-		bigtable.Timestamp(bigtable.Now().TruncateToMilliseconds() - 60*60*1000*1000).Time())
+		startTime,
+		endTime)
 
-	//filter := bigtable.TimestampRangeFilterMicros()
-	//filter := bigtable.ValueFilter("PQ2A.*$")
-
-	readFilter(w, projectID, instanceID, tableName, filter)
-	return nil
+	return readWithFilter(w, projectID, instanceID, tableName, filter)
 }
 
 // [END bigtable_filters_limit_timestamp_range]
 // [START bigtable_filters_limit_block_all]
 func filterLimitBlockAll(w io.Writer, projectID, instanceID string, tableName string) error {
 	filter := bigtable.BlockAllFilter()
-	readFilter(w, projectID, instanceID, tableName, filter)
-	return nil
+	return readWithFilter(w, projectID, instanceID, tableName, filter)
 }
 
 // [END bigtable_filters_limit_block_all]
 // [START bigtable_filters_limit_pass_all]
 func filterLimitPassAll(w io.Writer, projectID, instanceID string, tableName string) error {
 	filter := bigtable.PassAllFilter()
-	readFilter(w, projectID, instanceID, tableName, filter)
-	return nil
+	return readWithFilter(w, projectID, instanceID, tableName, filter)
 }
 
 // [END bigtable_filters_limit_pass_all]
 // [START bigtable_filters_modify_strip_value]
 func filterModifyStripValue(w io.Writer, projectID, instanceID string, tableName string) error {
 	filter := bigtable.StripValueFilter()
-	readFilter(w, projectID, instanceID, tableName, filter)
-	return nil
+	return readWithFilter(w, projectID, instanceID, tableName, filter)
 }
 
 // [END bigtable_filters_modify_strip_value]
@@ -186,31 +172,24 @@ func filterModifyStripValue(w io.Writer, projectID, instanceID string, tableName
 // [START bigtable_filters_composing_chain]
 func filterComposingChain(w io.Writer, projectID, instanceID string, tableName string) error {
 	filter := bigtable.ChainFilters(bigtable.LatestNFilter(1), bigtable.FamilyFilter("cell_plan"))
-	readFilter(w, projectID, instanceID, tableName, filter)
-	return nil
+	return readWithFilter(w, projectID, instanceID, tableName, filter)
 }
 
 // [END bigtable_filters_composing_chain]
 // [START bigtable_filters_composing_interleave]
 func filterComposingInterleave(w io.Writer, projectID, instanceID string, tableName string) error {
-	filter := bigtable.InterleaveFilters(
-		bigtable.ValueFilter("true"),
-		bigtable.ColumnFilter("os_build"))
-	readFilter(w, projectID, instanceID, tableName, filter)
-	return nil
+	filter := bigtable.InterleaveFilters(bigtable.ValueFilter("true"), bigtable.ColumnFilter("os_build"))
+	return readWithFilter(w, projectID, instanceID, tableName, filter)
 }
 
 // [END bigtable_filters_composing_interleave]
 // [START bigtable_filters_composing_condition]
 func filterComposingCondition(w io.Writer, projectID, instanceID string, tableName string) error {
 	filter := bigtable.ConditionFilter(
-		bigtable.ChainFilters(
-			bigtable.ColumnFilter("data_plan_10gb"),
-			bigtable.ValueFilter("true")),
+		bigtable.ChainFilters(bigtable.ColumnFilter("data_plan_10gb"), bigtable.ValueFilter("true")),
 		bigtable.StripValueFilter(),
 		bigtable.PassAllFilter())
-	readFilter(w, projectID, instanceID, tableName, filter)
-	return nil
+	return readWithFilter(w, projectID, instanceID, tableName, filter)
 }
 
 // [END bigtable_filters_composing_condition]
@@ -233,7 +212,7 @@ func filterComposingCondition(w io.Writer, projectID, instanceID string, tableNa
 // [START bigtable_filters_composing_chain]
 // [START bigtable_filters_composing_interleave]
 // [START bigtable_filters_composing_condition]
-func readFilter(w io.Writer, projectID, instanceID string, tableName string, filter bigtable.Filter) error {
+func readWithFilter(w io.Writer, projectID, instanceID string, tableName string, filter bigtable.Filter) error {
 	// projectID := "my-project-id"
 	// instanceID := "my-instance-id"
 	// tableName := "mobile-time-series"
@@ -247,7 +226,6 @@ func readFilter(w io.Writer, projectID, instanceID string, tableName string, fil
 	err = tbl.ReadRows(ctx, bigtable.RowRange{},
 		func(row bigtable.Row) bool {
 			printRow(w, row)
-			fmt.Fprintf(w, "\n")
 			return true
 		}, bigtable.RowFilter(filter))
 
@@ -271,10 +249,10 @@ func printRow(w io.Writer, row bigtable.Row) {
 
 		for _, col := range cols {
 			qualifier := col.Column[strings.IndexByte(col.Column, ':')+1:]
-			//labels := col.
 			fmt.Fprintf(w, "\t%s: %s @%d\n", qualifier, col.Value, col.Timestamp)
 		}
 	}
+	fmt.Fprintln(w)
 }
 
 // [END bigtable_filters_limit_row_sample]

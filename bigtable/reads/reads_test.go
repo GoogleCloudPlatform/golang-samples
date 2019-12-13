@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
+	"io"
 	"os"
 	"strings"
 	"testing"
@@ -55,47 +56,25 @@ func TestReads(t *testing.T) {
 	timestamp := bigtable.Now().TruncateToMilliseconds()
 	writeTestData(err, ctx, project, instance, tableName, timestamp, t)
 
-	// Test read row
-	buf := new(bytes.Buffer)
-	if err = readRow(buf, project, instance, tableName); err != nil {
-		t.Errorf("TestReadRow: %v", err)
-	}
-
-	got := buf.String()
-	want := fmt.Sprintf(
-		`Reading data for phone#4c410523#20190501:
+	tests := []struct {
+		name   string
+		filter func(io.Writer, string, string, string) error
+		want   string
+	}{
+		{name: "readRow", filter: readRow, want: fmt.Sprintf(
+			`Reading data for phone#4c410523#20190501:
 Column Family stats_summary
 	connected_cell: 1 @%[1]d
 	connected_wifi: 1 @%[1]d
-	os_build: PQ2A.190405.003 @%[1]d`, timestamp)
-
-	if diff := cmp.Diff(want, strings.TrimSpace(got)); diff != "" {
-		t.Errorf("mismatch (-want +got):\n%s", diff)
-	}
-	buf.Reset()
-
-	// Test read row partial
-	if err = readRowPartial(buf, project, instance, tableName); err != nil {
-		t.Errorf("TestReadRowPartial: %v", err)
-	}
-	got = buf.String()
-	want = fmt.Sprintf(
-		`Reading data for phone#4c410523#20190501:
+	os_build: PQ2A.190405.003 @%[1]d`, timestamp),
+		},
+		{name: "readRowPartial", filter: readRowPartial, want: fmt.Sprintf(
+			`Reading data for phone#4c410523#20190501:
 Column Family stats_summary
-	os_build: PQ2A.190405.003 @%[1]d`, timestamp)
-
-	if diff := cmp.Diff(want, strings.TrimSpace(got)); diff != "" {
-		t.Errorf("mismatch (-want +got):\n%s", diff)
-	}
-	buf.Reset()
-
-	// Test read rows
-	if err = readRows(buf, project, instance, tableName); err != nil {
-		t.Errorf("TestReadRows: %v", err)
-	}
-	got = buf.String()
-	want = fmt.Sprintf(
-		`Reading data for phone#4c410523#20190501:
+	os_build: PQ2A.190405.003 @%[1]d`, timestamp),
+		},
+		{name: "readRows", filter: readRows, want: fmt.Sprintf(
+			`Reading data for phone#4c410523#20190501:
 Column Family stats_summary
 	connected_cell: 1 @%[1]d
 	connected_wifi: 1 @%[1]d
@@ -105,19 +84,10 @@ Reading data for phone#4c410523#20190502:
 Column Family stats_summary
 	connected_cell: 1 @%[1]d
 	connected_wifi: 1 @%[1]d
-	os_build: PQ2A.190405.004 @%[1]d`, timestamp)
-	if diff := cmp.Diff(want, strings.TrimSpace(got)); diff != "" {
-		t.Errorf("mismatch (-want +got):\n%s", diff)
-	}
-	buf.Reset()
-
-	// Test read row range
-	if err = readRowRange(buf, project, instance, tableName); err != nil {
-		t.Errorf("TestReadRowRange: %v", err)
-	}
-	got = buf.String()
-	want = fmt.Sprintf(
-		`Reading data for phone#4c410523#20190501:
+	os_build: PQ2A.190405.004 @%[1]d`, timestamp),
+		},
+		{name: "readRowRange", filter: readRowRange, want: fmt.Sprintf(
+			`Reading data for phone#4c410523#20190501:
 Column Family stats_summary
 	connected_cell: 1 @%[1]d
 	connected_wifi: 1 @%[1]d
@@ -133,19 +103,10 @@ Reading data for phone#4c410523#20190505:
 Column Family stats_summary
 	connected_cell: 0 @%[1]d
 	connected_wifi: 1 @%[1]d
-	os_build: PQ2A.190406.000 @%[1]d`, timestamp)
-	if diff := cmp.Diff(want, strings.TrimSpace(got)); diff != "" {
-		t.Errorf("mismatch (-want +got):\n%s", diff)
-	}
-	buf.Reset()
-
-	// Test read row ranges
-	if err = readRowRanges(buf, project, instance, tableName); err != nil {
-		t.Errorf("TestReadRowRanges: %v", err)
-	}
-	got = buf.String()
-	want = fmt.Sprintf(
-		`Reading data for phone#4c410523#20190501:
+	os_build: PQ2A.190406.000 @%[1]d`, timestamp),
+		},
+		{name: "readRowRanges", filter: readRowRanges, want: fmt.Sprintf(
+			`Reading data for phone#4c410523#20190501:
 Column Family stats_summary
 	connected_cell: 1 @%[1]d
 	connected_wifi: 1 @%[1]d
@@ -173,19 +134,10 @@ Reading data for phone#5c10102#20190502:
 Column Family stats_summary
 	connected_cell: 1 @%[1]d
 	connected_wifi: 0 @%[1]d
-	os_build: PQ2A.190406.000 @%[1]d`, timestamp)
-	if diff := cmp.Diff(want, strings.TrimSpace(got)); diff != "" {
-		t.Errorf("mismatch (-want +got):\n%s", diff)
-	}
-	buf.Reset()
-
-	// Test read prefix
-	if err = readPrefix(buf, project, instance, tableName); err != nil {
-		t.Errorf("TestReadPrefix: %v", err)
-	}
-	got = buf.String()
-	want = fmt.Sprintf(
-		`Reading data for phone#4c410523#20190501:
+	os_build: PQ2A.190406.000 @%[1]d`, timestamp),
+		},
+		{name: "readPrefix", filter: readPrefix, want: fmt.Sprintf(
+			`Reading data for phone#4c410523#20190501:
 Column Family stats_summary
 	connected_cell: 1 @%[1]d
 	connected_wifi: 1 @%[1]d
@@ -213,19 +165,10 @@ Reading data for phone#5c10102#20190502:
 Column Family stats_summary
 	connected_cell: 1 @%[1]d
 	connected_wifi: 0 @%[1]d
-	os_build: PQ2A.190406.000 @%[1]d`, timestamp)
-	if diff := cmp.Diff(want, strings.TrimSpace(got)); diff != "" {
-		t.Errorf("mismatch (-want +got):\n%s", diff)
-	}
-	buf.Reset()
-
-	// Test read
-	if err = readFilter(buf, project, instance, tableName); err != nil {
-		t.Errorf("TestReadFilter: %v", err)
-	}
-	got = buf.String()
-	want = fmt.Sprintf(
-		`Reading data for phone#4c410523#20190501:
+	os_build: PQ2A.190406.000 @%[1]d`, timestamp),
+		},
+		{name: "readFilter", filter: readFilter, want: fmt.Sprintf(
+			`Reading data for phone#4c410523#20190501:
 Column Family stats_summary
 	os_build: PQ2A.190405.003 @%[1]d
 
@@ -243,11 +186,24 @@ Column Family stats_summary
 
 Reading data for phone#5c10102#20190502:
 Column Family stats_summary
-	os_build: PQ2A.190406.000 @%[1]d`, timestamp)
-	if diff := cmp.Diff(want, strings.TrimSpace(got)); diff != "" {
-		t.Errorf("mismatch (-want +got):\n%s", diff)
+	os_build: PQ2A.190406.000 @%[1]d`, timestamp),
+		},
 	}
-	buf.Reset()
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			buf := new(bytes.Buffer)
+			if err = tt.filter(buf, project, instance, tableName); err != nil {
+				t.Errorf("Testing %s: %v", tt.name, err)
+			}
+
+			got := buf.String()
+
+			if diff := cmp.Diff(tt.want, strings.TrimSpace(got)); diff != "" {
+				t.Errorf("mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
 
 	adminClient.DeleteTable(ctx, tableName)
 }

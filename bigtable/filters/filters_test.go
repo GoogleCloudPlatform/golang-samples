@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
+	"io"
 	"os"
 	"strings"
 	"testing"
@@ -62,27 +63,16 @@ func TestFilters(t *testing.T) {
 
 	writeTestData(err, ctx, project, instance, tableName, timestamp, t)
 
-	// Test read row
-	buf := new(bytes.Buffer)
-	if err = filterLimitRowSample(buf, project, instance, tableName); err != nil {
-		t.Errorf("TestFilterLimitRowSample: %v", err)
-	}
-
-	got := buf.String()
-	want := "Reading data for"
-
-	if !strings.Contains(got, want) {
-		t.Errorf("got %q, want %q", got, want)
-	}
-	buf.Reset()
-
-	// Test Limit Row Regex
-	if err = filterLimitRowRegex(buf, project, instance, tableName); err != nil {
-		t.Errorf("testFilterLimitRowRegex: %v", err)
-	}
-	got = buf.String()
-	want = fmt.Sprintf(
-		`Reading data for phone#4c410523#20190501:
+	tests := []struct {
+		name   string
+		filter func(io.Writer, string, string, string) error
+		want   string
+	}{
+		{
+			name:   "filterLimitRowRegex",
+			filter: filterLimitRowRegex,
+			want: fmt.Sprintf(
+				`Reading data for phone#4c410523#20190501:
 Column Family cell_plan
 	data_plan_01gb: false @%[1]d
 	data_plan_01gb: true @%[2]d
@@ -98,20 +88,12 @@ Column Family cell_plan
 Column Family stats_summary
 	connected_cell: 1 @%[1]d
 	connected_wifi: 1 @%[1]d
-	os_build: PQ2A.190401.002 @%[1]d`, timestamp, timestampMinusHr)
-
-	if diff := cmp.Diff(want, strings.TrimSpace(got)); diff != "" {
-		t.Errorf("mismatch (-want +got):\n%s", diff)
-	}
-	buf.Reset()
-
-	// Test filterLimitCellsPerCol
-	if err = filterLimitCellsPerCol(buf, project, instance, tableName); err != nil {
-		t.Errorf("TestFilterLimitCellsPerCol: %v", err)
-	}
-	got = buf.String()
-	want = fmt.Sprintf(
-		`Reading data for phone#4c410523#20190501:
+	os_build: PQ2A.190401.002 @%[1]d`, timestamp, timestampMinusHr),},
+		{
+			name:   "filterLimitCellsPerCol",
+			filter: filterLimitCellsPerCol,
+			want: fmt.Sprintf(
+				`Reading data for phone#4c410523#20190501:
 Column Family cell_plan
 	data_plan_01gb: false @%[1]d
 	data_plan_01gb: true @%[2]d
@@ -151,20 +133,12 @@ Column Family cell_plan
 Column Family stats_summary
 	connected_cell: 1 @%[1]d
 	connected_wifi: 0 @%[1]d
-	os_build: PQ2A.190406.000 @%[1]d`, timestamp, timestampMinusHr)
-
-	if diff := cmp.Diff(want, strings.TrimSpace(got)); diff != "" {
-		t.Errorf("mismatch (-want +got):\n%s", diff)
-	}
-	buf.Reset()
-
-	// Test filterLimitCellsPerRow
-	if err = filterLimitCellsPerRow(buf, project, instance, tableName); err != nil {
-		t.Errorf("TestFilterLimitCellsPerRow: %v", err)
-	}
-	got = buf.String()
-	want = fmt.Sprintf(
-		`Reading data for phone#4c410523#20190501:
+	os_build: PQ2A.190406.000 @%[1]d`, timestamp, timestampMinusHr),},
+		{
+			name:   "filterLimitCellsPerRow",
+			filter: filterLimitCellsPerRow,
+			want: fmt.Sprintf(
+				`Reading data for phone#4c410523#20190501:
 Column Family stats_summary
 	connected_cell: 1 @%[1]d
 	connected_wifi: 1 @%[1]d
@@ -187,21 +161,12 @@ Column Family stats_summary
 Reading data for phone#5c10102#20190502:
 Column Family stats_summary
 	connected_cell: 1 @%[1]d
-	connected_wifi: 0 @%[1]d`, timestamp, timestampMinusHr)
-
-	if diff := cmp.Diff(want, strings.TrimSpace(got)); diff != "" {
-		t.Errorf("mismatch (-want +got):\n%s", diff)
-	}
-	buf.Reset()
-
-	// Test filterLimitCellsPerRowOffset
-	if err = filterLimitCellsPerRowOffset(buf, project, instance, tableName); err != nil {
-		t.Errorf("TestFilterLimitCellsPerRowOffset: %v", err)
-	}
-	got = buf.String()
-	// TODO: look into ordering of this
-	want = fmt.Sprintf(
-		`Reading data for phone#4c410523#20190501:
+	connected_wifi: 0 @%[1]d`, timestamp, timestampMinusHr),},
+		{
+			name:   "filterLimitCellsPerRowOffset",
+			filter: filterLimitCellsPerRowOffset,
+			want: fmt.Sprintf(
+				`Reading data for phone#4c410523#20190501:
 Column Family cell_plan
 	data_plan_01gb: false @%[1]d
 	data_plan_01gb: true @%[2]d
@@ -231,20 +196,12 @@ Reading data for phone#5c10102#20190502:
 Column Family cell_plan
 	data_plan_10gb: true @%[1]d
 Column Family stats_summary
-	os_build: PQ2A.190406.000 @%[1]d`, timestamp, timestampMinusHr)
-
-	if diff := cmp.Diff(want, strings.TrimSpace(got)); diff != "" {
-		t.Errorf("mismatch (-want +got):\n%s", diff)
-	}
-	buf.Reset()
-
-	// Test filterLimitColFamilyRegex
-	if err = filterLimitColFamilyRegex(buf, project, instance, tableName); err != nil {
-		t.Errorf("TestFilterLimitColFamilyRegex: %v", err)
-	}
-	got = buf.String()
-	want = fmt.Sprintf(
-		`Reading data for phone#4c410523#20190501:
+	os_build: PQ2A.190406.000 @%[1]d`, timestamp, timestampMinusHr),},
+		{
+			name:   "filterLimitColFamilyRegex",
+			filter: filterLimitColFamilyRegex,
+			want: fmt.Sprintf(
+				`Reading data for phone#4c410523#20190501:
 Column Family stats_summary
 	connected_cell: 1 @%[1]d
 	connected_wifi: 1 @%[1]d
@@ -272,20 +229,12 @@ Reading data for phone#5c10102#20190502:
 Column Family stats_summary
 	connected_cell: 1 @%[1]d
 	connected_wifi: 0 @%[1]d
-	os_build: PQ2A.190406.000 @%[1]d`, timestamp, timestampMinusHr)
-
-	if diff := cmp.Diff(want, strings.TrimSpace(got)); diff != "" {
-		t.Errorf("mismatch (-want +got):\n%s", diff)
-	}
-	buf.Reset()
-
-	// Test filterLimitColQualifierRegex
-	if err = filterLimitColQualifierRegex(buf, project, instance, tableName); err != nil {
-		t.Errorf("TestFilterLimitColQualifierRegex: %v", err)
-	}
-	got = buf.String()
-	want = fmt.Sprintf(
-		`Reading data for phone#4c410523#20190501:
+	os_build: PQ2A.190406.000 @%[1]d`, timestamp, timestampMinusHr),},
+		{
+			name:   "filterLimitColQualifierRegex",
+			filter: filterLimitColQualifierRegex,
+			want: fmt.Sprintf(
+				`Reading data for phone#4c410523#20190501:
 Column Family stats_summary
 	connected_cell: 1 @%[1]d
 	connected_wifi: 1 @%[1]d
@@ -308,20 +257,12 @@ Column Family stats_summary
 Reading data for phone#5c10102#20190502:
 Column Family stats_summary
 	connected_cell: 1 @%[1]d
-	connected_wifi: 0 @%[1]d`, timestamp, timestampMinusHr)
-
-	if diff := cmp.Diff(want, strings.TrimSpace(got)); diff != "" {
-		t.Errorf("mismatch (-want +got):\n%s", diff)
-	}
-	buf.Reset()
-
-	// Test filterLimitColRange
-	if err = filterLimitColRange(buf, project, instance, tableName); err != nil {
-		t.Errorf("filtFrLimitColRangePartial: %v", err)
-	}
-	got = buf.String()
-	want = fmt.Sprintf(
-		`Reading data for phone#4c410523#20190501:
+	connected_wifi: 0 @%[1]d`, timestamp, timestampMinusHr),},
+		{
+			name:   "filterLimitColRange",
+			filter: filterLimitColRange,
+			want: fmt.Sprintf(
+				`Reading data for phone#4c410523#20190501:
 Column Family cell_plan
 	data_plan_01gb: false @%[1]d
 	data_plan_01gb: true @%[2]d
@@ -333,39 +274,23 @@ Column Family cell_plan
 
 Reading data for phone#4c410523#20190505:
 Column Family cell_plan
-	data_plan_05gb: true @%[1]d`, timestamp, timestampMinusHr)
-
-	if diff := cmp.Diff(want, strings.TrimSpace(got)); diff != "" {
-		t.Errorf("mismatch (-want +got):\n%s", diff)
-	}
-	buf.Reset()
-
-	// Test filterLimitValueRange
-	if err = filterLimitValueRange(buf, project, instance, tableName); err != nil {
-		t.Errorf("filtFrLimitValueRangePartial: %v", err)
-	}
-	got = buf.String()
-	want = fmt.Sprintf(
-		`Reading data for phone#4c410523#20190501:
+	data_plan_05gb: true @%[1]d`, timestamp, timestampMinusHr),},
+		{
+			name:   "filterLimitValueRange",
+			filter: filterLimitValueRange,
+			want: fmt.Sprintf(
+				`Reading data for phone#4c410523#20190501:
 Column Family stats_summary
 	os_build: PQ2A.190405.003 @%[1]d
 
 Reading data for phone#4c410523#20190502:
 Column Family stats_summary
-	os_build: PQ2A.190405.004 @%[1]d`, timestamp, timestampMinusHr)
-
-	if diff := cmp.Diff(want, strings.TrimSpace(got)); diff != "" {
-		t.Errorf("mismatch (-want +got):\n%s", diff)
-	}
-	buf.Reset()
-
-	// Test filterLimitValueRegex
-	if err = filterLimitValueRegex(buf, project, instance, tableName); err != nil {
-		t.Errorf("filtFrLimitValueRegexPartial: %v", err)
-	}
-	got = buf.String()
-	want = fmt.Sprintf(
-		`Reading data for phone#4c410523#20190501:
+	os_build: PQ2A.190405.004 @%[1]d`, timestamp, timestampMinusHr),},
+		{
+			name:   "filterLimitValueRegex",
+			filter: filterLimitValueRegex,
+			want: fmt.Sprintf(
+				`Reading data for phone#4c410523#20190501:
 Column Family stats_summary
 	os_build: PQ2A.190405.003 @%[1]d
 
@@ -383,46 +308,24 @@ Column Family stats_summary
 
 Reading data for phone#5c10102#20190502:
 Column Family stats_summary
-	os_build: PQ2A.190406.000 @%[1]d`, timestamp, timestampMinusHr)
-
-	if diff := cmp.Diff(want, strings.TrimSpace(got)); diff != "" {
-		t.Errorf("mismatch (-want +got):\n%s", diff)
-	}
-	buf.Reset()
-
-	// Test filterLimitTimestampRange
-	if err = filterLimitTimestampRange(buf, project, instance, tableName); err != nil {
-		t.Errorf("TestFilterLimitTimestampRange: %v", err)
-	}
-	got = buf.String()
-	want = fmt.Sprintf(
-		`Reading data for phone#4c410523#20190501:
+	os_build: PQ2A.190406.000 @%[1]d`, timestamp, timestampMinusHr),},
+		{
+			name:   "filterLimitTimestampRange",
+			filter: filterLimitTimestampRange,
+			want: fmt.Sprintf(
+				`Reading data for phone#4c410523#20190501:
 Column Family cell_plan
-	data_plan_01gb: true @%d`, timestampMinusHr)
-
-	if diff := cmp.Diff(want, strings.TrimSpace(got)); diff != "" {
-		t.Errorf("mismatch (-want +got):\n%s", diff)
-	}
-	buf.Reset()
-
-	// Test filterLimitBlockAll
-	if err = filterLimitBlockAll(buf, project, instance, tableName); err != nil {
-		t.Errorf("filtFrLimitBlockAllPartial: %v", err)
-	}
-	got = buf.String()
-	want = ""
-
-	if diff := cmp.Diff(want, strings.TrimSpace(got)); diff != "" {
-		t.Errorf("mismatch (-want +got):\n%s", diff)
-	}
-	buf.Reset()
-
-	// Test filterLimitPassAll
-	if err = filterLimitPassAll(buf, project, instance, tableName); err != nil {
-		t.Errorf("testFilteFLimitPassAllRowPartial: %v", err)
-	}
-	got = buf.String()
-	want = fmt.Sprintf(`Reading data for phone#4c410523#20190501:
+	data_plan_01gb: true @%d`, timestampMinusHr),},
+		{
+			name:   "filterLimitBlockAll",
+			filter: filterLimitBlockAll,
+			want:   "",
+		},
+		{
+			name:   "filterLimitPassAll",
+			filter: filterLimitPassAll,
+			want: fmt.Sprintf(
+				`Reading data for phone#4c410523#20190501:
 Column Family cell_plan
 	data_plan_01gb: false @%[1]d
 	data_plan_01gb: true @%[2]d
@@ -462,20 +365,12 @@ Column Family cell_plan
 Column Family stats_summary
 	connected_cell: 1 @%[1]d
 	connected_wifi: 0 @%[1]d
-	os_build: PQ2A.190406.000 @%[1]d`, timestamp, timestampMinusHr)
-
-	if diff := cmp.Diff(want, strings.TrimSpace(got)); diff != "" {
-		t.Errorf("mismatch (-want +got):\n%s", diff)
-	}
-	buf.Reset()
-
-	// Test filterModifyStripValue
-	if err = filterModifyStripValue(buf, project, instance, tableName); err != nil {
-		t.Errorf("TestFilterModifyStripValue: %v", err)
-	}
-	got = buf.String()
-	want = fmt.Sprintf(
-		`Reading data for phone#4c410523#20190501:
+	os_build: PQ2A.190406.000 @%[1]d`, timestamp, timestampMinusHr),},
+		{
+			name:   "filterModifyStripValue",
+			filter: filterModifyStripValue,
+			want: fmt.Sprintf(
+				`Reading data for phone#4c410523#20190501:
 Column Family cell_plan
 	data_plan_01gb:  @%[1]d
 	data_plan_01gb:  @%[2]d
@@ -515,20 +410,12 @@ Column Family cell_plan
 Column Family stats_summary
 	connected_cell:  @%[1]d
 	connected_wifi:  @%[1]d
-	os_build:  @%[1]d`, timestamp, timestampMinusHr)
-
-	if diff := cmp.Diff(want, strings.TrimSpace(got)); diff != "" {
-		t.Errorf("mismatch (-want +got):\n%s", diff)
-	}
-	buf.Reset()
-
-	// Test filterComposingChain
-	if err = filterComposingChain(buf, project, instance, tableName); err != nil {
-		t.Errorf("filtFrComposingChainPartial: %v", err)
-	}
-	got = buf.String()
-	want = fmt.Sprintf(
-		`Reading data for phone#4c410523#20190501:
+	os_build:  @%[1]d`, timestamp, timestampMinusHr),},
+		{
+			name:   "filterComposingChain",
+			filter: filterComposingChain,
+			want: fmt.Sprintf(
+				`Reading data for phone#4c410523#20190501:
 Column Family cell_plan
 	data_plan_01gb: false @%[1]d
 	data_plan_05gb: true @%[1]d
@@ -547,20 +434,12 @@ Column Family cell_plan
 
 Reading data for phone#5c10102#20190502:
 Column Family cell_plan
-	data_plan_10gb: true @%[1]d`, timestamp, timestampMinusHr)
-
-	if diff := cmp.Diff(want, strings.TrimSpace(got)); diff != "" {
-		t.Errorf("mismatch (-want +got):\n%s", diff)
-	}
-	buf.Reset()
-
-	// Test filterComposingInterleave
-	if err = filterComposingInterleave(buf, project, instance, tableName); err != nil {
-		t.Errorf("TestFilterComposingInterleave: %v", err)
-	}
-	got = buf.String()
-	want = fmt.Sprintf(
-		`Reading data for phone#4c410523#20190501:
+	data_plan_10gb: true @%[1]d`, timestamp, timestampMinusHr),},
+		{
+			name:   "filterComposingInterleave",
+			filter: filterComposingInterleave,
+			want: fmt.Sprintf(
+				`Reading data for phone#4c410523#20190501:
 Column Family cell_plan
 	data_plan_01gb: true @%[2]d
 	data_plan_05gb: true @%[1]d
@@ -589,20 +468,12 @@ Reading data for phone#5c10102#20190502:
 Column Family cell_plan
 	data_plan_10gb: true @%[1]d
 Column Family stats_summary
-	os_build: PQ2A.190406.000 @%[1]d`, timestamp, timestampMinusHr)
-
-	if diff := cmp.Diff(want, strings.TrimSpace(got)); diff != "" {
-		t.Errorf("mismatch (-want +got):\n%s", diff)
-	}
-	buf.Reset()
-
-	// Test filterComposingCondition
-	if err = filterComposingCondition(buf, project, instance, tableName); err != nil {
-		t.Errorf("TestFilterComposingCondition: %v", err)
-	}
-	got = buf.String()
-	want = fmt.Sprintf(
-		`Reading data for phone#4c410523#20190501:
+	os_build: PQ2A.190406.000 @%[1]d`, timestamp, timestampMinusHr),},
+		{
+			name:   "filterComposingCondition",
+			filter: filterComposingCondition,
+			want: fmt.Sprintf(
+				`Reading data for phone#4c410523#20190501:
 Column Family cell_plan
 	data_plan_01gb: false @%[1]d
 	data_plan_01gb: true @%[2]d
@@ -642,12 +513,37 @@ Column Family cell_plan
 Column Family stats_summary
 	connected_cell:  @%[1]d
 	connected_wifi:  @%[1]d
-	os_build:  @%[1]d`, timestamp, timestampMinusHr)
-
-	if diff := cmp.Diff(want, strings.TrimSpace(got)); diff != "" {
-		t.Errorf("mismatch (-want +got):\n%s", diff)
+	os_build:  @%[1]d`, timestamp, timestampMinusHr),
+		},
 	}
-	buf.Reset()
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			buf := new(bytes.Buffer)
+			if err = tt.filter(buf, project, instance, tableName); err != nil {
+				t.Errorf("Testing %s: %v", tt.name, err)
+			}
+
+			got := buf.String()
+
+			if diff := cmp.Diff(tt.want, strings.TrimSpace(got)); diff != "" {
+				t.Errorf("mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+
+	// Test row sample
+	buf := new(bytes.Buffer)
+	if err = filterLimitRowSample(buf, project, instance, tableName); err != nil {
+		t.Errorf("TestFilterLimitRowSample: %v", err)
+	}
+
+	got := buf.String()
+	want := "Reading data for"
+
+	if !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
 
 	adminClient.DeleteTable(ctx, tableName)
 }
