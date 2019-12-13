@@ -1878,11 +1878,11 @@ func updateBackup(ctx context.Context, w io.Writer, adminClient *database.Databa
 
 // [START spanner_restore_backup]
 
-func restoreBackup(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+func restoreBackup(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, databaseName string) error {
 	backupID := "my-backup"
-	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(databaseName)
 	if matches == nil || len(matches) != 3 {
-		return fmt.Errorf("Invalid database id %s", database)
+		return fmt.Errorf("Invalid database id %s", databaseName)
 	}
 	instanceName := matches[1]
 	databaseId := matches[2]
@@ -1898,12 +1898,11 @@ func restoreBackup(ctx context.Context, w io.Writer, adminClient *database.Datab
 	if err != nil {
 		return err
 	}
-	_, err = restoreOp.Wait(ctx)
+	database, err := restoreOp.Wait(ctx)
 	if err != nil {
 		return err
 	}
-
-	fmt.Fprintf(w, "Restored backup [%s] to database [%s]\n", backupID, database)
+	fmt.Fprintf(w, "Restored backup [%s] to database [%s]\n", backupID, database.Name)
 	return nil
 }
 
