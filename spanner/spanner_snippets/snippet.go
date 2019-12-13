@@ -1902,7 +1902,11 @@ func restoreBackup(ctx context.Context, w io.Writer, adminClient *database.Datab
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(w, "Restored backup [%s] to database [%s]\n", backupID, database.Name)
+	backupInfoFromRestore := database.RestoreInfo.GetBackupInfo()
+	if backupInfoFromRestore != nil {
+		fmt.Fprintf(w, "Restored backup [%s] to database [%s]\n", backupInfoFromRestore.Backup, database.Name)
+	}
+
 	return nil
 }
 

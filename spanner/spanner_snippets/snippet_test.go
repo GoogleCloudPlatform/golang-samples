@@ -294,7 +294,8 @@ func TestSample(t *testing.T) {
 	out = runCommand(t, "updatebackup", dbName)
 	assertContains(t, out, "Updated backup [my-backup]")
 	out = runCommand(t, "restorebackup", restoreDbName)
-	assertContains(t, out, "Restored backup [my-backup]")
+	assertContains(t, out, "Restored backup [")
+	assertContains(t, out, "/backups/my-backup]")
 	out = runCommand(t, "deletebackup", dbName)
 	assertContains(t, out, "Deleted backup [my-backup]")
 }
