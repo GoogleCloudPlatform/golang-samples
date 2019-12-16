@@ -106,6 +106,7 @@ var (
 		"createbackup":                    createBackup,
 		"listbackups":                     listBackups,
 		"listbackupsbyname":			   listBackupsByName,
+		"listsmallbackups":				   listSmallBackups,
 		"listinstancebackups":			   listInstanceBackups,
 		"updatebackup":                    updateBackup,
 		"deletebackup":                    deleteBackup,
@@ -1941,6 +1942,38 @@ func listBackupsByName(ctx context.Context, w io.Writer, adminClient *database.D
 }
 
 // [END spanner_list_backups_by_name]
+
+// [START spanner_list_small_backups]
+
+func listSmallBackups(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
+	if matches == nil || len(matches) != 3 {
+		return fmt.Errorf("Invalid database id %s", database)
+	}
+	instanceName := matches[1]
+	counter := 0
+	backupsIterator := adminClient.ListBackups(ctx, &adminpb.ListBackupsRequest{
+		Parent: instanceName,
+		// Only include backups in READY state and with size < 64K
+		Filter: "(state:READY) AND (size_bytes < 65536)",
+	})
+	for {
+		resp, err := backupsIterator.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "%s [%v] - %d bytes\n", resp.Name, resp.State, resp.SizeBytes)
+		counter++
+	}
+	fmt.Fprintf(w, "Backup count: %d\n", counter)
+
+	return nil
+}
+
+// [END spanner_list_small_backups]
 
 // [START spanner_list_instance_backups]
 
