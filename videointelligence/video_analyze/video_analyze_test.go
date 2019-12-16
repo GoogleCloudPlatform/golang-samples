@@ -43,18 +43,18 @@ func TestAnalyze(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if tt.gcs == nil {
-				t.Fatal("gcs not set")
-			}
+		if tt.gcs == nil {
+			t.Fatal("gcs not set")
+		}
 
-			time.Sleep(5 * time.Second) // Give buffer between tests for quota.
+		testutil.Retry(t, 10, 20*time.Second, func(r *testutil.R) {
 			var buf bytes.Buffer
 			if err := tt.gcs(&buf, tt.path); err != nil {
-				t.Fatalf("GCS %s(%q): got %v, want nil err", tt.name, tt.path, err)
+				r.Errorf("GCS %s(%q): got %v, want nil err", tt.name, tt.path, err)
+				return
 			}
 			if got := buf.String(); !strings.Contains(got, tt.wantContain) {
-				t.Errorf("GCS %s(%q): got %q, want to contain %q", tt.name, tt.path, got, tt.wantContain)
+				r.Errorf("GCS %s(%q): got %q, want to contain %q", tt.name, tt.path, got, tt.wantContain)
 			}
 		})
 	}
