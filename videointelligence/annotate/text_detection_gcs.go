@@ -18,15 +18,12 @@ package annotate
 // [START videointelligence_text_detection_gcs]
 
 import (
+	"context"
 	"fmt"
 	"io"
-	"log"
-
-	"context"
-
-	"github.com/golang/protobuf/ptypes"
 
 	video "cloud.google.com/go/videointelligence/apiv1"
+	"github.com/golang/protobuf/ptypes"
 	videopb "google.golang.org/genproto/googleapis/cloud/videointelligence/v1"
 )
 
@@ -39,7 +36,7 @@ func textDetectionGCS(w io.Writer, gcsURI string) error {
 	// Creates a client.
 	client, err := video.NewClient(ctx)
 	if err != nil {
-		log.Fatalf("Failed to create client: %v", err)
+		return fmt.Errorf("video.NewClient: %v", err)
 	}
 
 	op, err := client.AnnotateVideo(ctx, &videopb.AnnotateVideoRequest{
@@ -49,12 +46,12 @@ func textDetectionGCS(w io.Writer, gcsURI string) error {
 		},
 	})
 	if err != nil {
-		log.Fatalf("Failed to start annotation job: %v", err)
+		return fmt.Errorf("AnnotateVideo: %v", err)
 	}
 
 	resp, err := op.Wait(ctx)
 	if err != nil {
-		log.Fatalf("Failed to annotate: %v", err)
+		return fmt.Errorf("Wait: %v", err)
 	}
 
 	// Only one video was processed, so get the first result.
