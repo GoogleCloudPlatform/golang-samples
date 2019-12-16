@@ -22,8 +22,8 @@ dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7
 firebase.google.com/go v3.10.0+incompatible/go.mod h1:xlah6XbEyW6tbfSklcfe5FHJIwjt8toICdV5Wh9ptHs=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
-github.com/GoogleCloudPlatform/golang-samples v0.0.0-20191202200948-986fc2229d49 h1:QNEjI5cR5+voyPljarZEuSetmaN3QglBEVvu4h0vaNU=
-github.com/GoogleCloudPlatform/golang-samples v0.0.0-20191202200948-986fc2229d49/go.mod h1:jJR4mRyKzA7WCR2M40FGvTF4Rzacvkt/SWgoAy2qQ8Q=
+github.com/GoogleCloudPlatform/golang-samples v0.0.0-20191213180649-075666adf0a8 h1:VXE0+c7w7UfvdOWBgmsf0IVckAULmuxuIw26JLbXr84=
+github.com/GoogleCloudPlatform/golang-samples v0.0.0-20191213180649-075666adf0a8/go.mod h1:jJR4mRyKzA7WCR2M40FGvTF4Rzacvkt/SWgoAy2qQ8Q=
 github.com/aws/aws-sdk-go v1.23.20/go.mod h1:KmX6BPdI08NWTb3/sm4ZGu5ShLoqVDhKgpiN924inxo=
 github.com/aws/aws-sdk-go v1.25.44/go.mod h1:KmX6BPdI08NWTb3/sm4ZGu5ShLoqVDhKgpiN924inxo=
 github.com/bmatcuk/doublestar v1.2.0 h1:78hES0pLRDR9cRJMQugZf11C+ZwEeGykuY4R7AZYGy0=

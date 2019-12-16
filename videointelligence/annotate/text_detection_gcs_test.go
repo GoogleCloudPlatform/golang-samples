@@ -18,12 +18,13 @@ import (
 	"bytes"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestTextDetectionGCS(t *testing.T) {
-	testutil.SystemTest(t)
+	testutil.EndToEndTest(t)
 
 	gcsURI := "gs://python-docs-samples-tests/video/googlework_short.mp4"
 	possibleTexts := []string{
@@ -31,16 +32,19 @@ func TestTextDetectionGCS(t *testing.T) {
 		"LONDRES", "OMAR", "PARIS", "METRO", "RUE", "CARLO",
 	}
 
-	var buf bytes.Buffer
-	if err := textDetectionGCS(&buf, gcsURI); err != nil {
-		t.Fatal(err)
-	}
-
-	output := strings.ToUpper(buf.String())
-	for _, text := range possibleTexts {
-		if strings.Contains(output, text) {
+	testutil.Retry(t, 10, 20*time.Second, func(r *testutil.R) {
+		var buf bytes.Buffer
+		if err := textDetectionGCS(&buf, gcsURI); err != nil {
+			r.Errorf("textDetectionGCS: %v", err)
 			return
 		}
-	}
-	t.Fatalf(`textDetectionGCS(%q) didn't contain any of the possibleTexts`, gcsURI)
+
+		output := strings.ToUpper(buf.String())
+		for _, text := range possibleTexts {
+			if strings.Contains(output, text) {
+				return
+			}
+		}
+		r.Errorf(`textDetectionGCS(%q) didn't contain any of the possibleTexts`, gcsURI)
+	})
 }
