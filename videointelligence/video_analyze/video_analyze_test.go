@@ -19,6 +19,7 @@ import (
 	"io"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
@@ -27,7 +28,7 @@ const catVideo = "gs://cloud-samples-data/video/cat.mp4"
 const googleworkVideo = "gs://python-docs-samples-tests/video/googlework_short.mp4"
 
 func TestAnalyze(t *testing.T) {
-	testutil.SystemTest(t)
+	testutil.EndToEndTest(t)
 
 	tests := []struct {
 		name        string
@@ -47,9 +48,9 @@ func TestAnalyze(t *testing.T) {
 				t.Fatal("gcs not set")
 			}
 
+			time.Sleep(5 * time.Second) // Give buffer between tests for quota.
 			var buf bytes.Buffer
-			err := tt.gcs(&buf, tt.path)
-			if err != nil {
+			if err := tt.gcs(&buf, tt.path); err != nil {
 				t.Fatalf("GCS %s(%q): got %v, want nil err", tt.name, tt.path, err)
 			}
 			if got := buf.String(); !strings.Contains(got, tt.wantContain) {
