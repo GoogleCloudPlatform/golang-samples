@@ -105,6 +105,7 @@ var (
 		"createtabledocswithhistorytable": createTableDocumentsWithHistoryTable,
 		"createbackup":                    createBackup,
 		"listbackups":                     listBackups,
+		"listinstancebackups":			   listInstanceBackups,
 		"updatebackup":                    updateBackup,
 		"deletebackup":                    deleteBackup,
 	}
@@ -1907,6 +1908,41 @@ func listBackups(ctx context.Context, w io.Writer, adminClient *database.Databas
 }
 
 // [END spanner_list_backups]
+
+// [START spanner_list_instance_backups]
+
+func listInstanceBackups(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
+	if matches == nil || len(matches) != 3 {
+		return fmt.Errorf("Invalid database id %s", database)
+	}
+	instanceName := matches[1]
+	request := &adminpb.ListBackupsRequest{
+		Parent: instanceName,
+		PageSize: 3,
+	}
+	backupsIterator := adminClient.ListBackups(ctx, request)
+	for {
+		resp, err := backupsIterator.Next()
+		if err == iterator.Done {
+			pageToken := backupsIterator.PageInfo().Token
+			if pageToken == "" {
+				break
+			} else {
+				request.PageToken = pageToken
+				backupsIterator = adminClient.ListBackups(ctx, request)
+			}
+		}
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "%s [%v] - %d bytes\n", resp.Name, resp.State, resp.SizeBytes)
+	}
+
+	return nil
+}
+
+// [END spanner_list_instance_backups]
 
 // [START spanner_delete_backup]
 
