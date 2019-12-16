@@ -107,6 +107,7 @@ var (
 		"listbackups":                     listBackups,
 		"listbackupsbyname":			   listBackupsByName,
 		"listsmallbackups":				   listSmallBackups,
+		"listnewbackups":				   listNewBackups,
 		"listinstancebackups":			   listInstanceBackups,
 		"updatebackup":                    updateBackup,
 		"deletebackup":                    deleteBackup,
@@ -1974,6 +1975,42 @@ func listSmallBackups(ctx context.Context, w io.Writer, adminClient *database.Da
 }
 
 // [END spanner_list_small_backups]
+
+// [START spanner_list_new_backups]
+
+func listNewBackups(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
+	if matches == nil || len(matches) != 3 {
+		return fmt.Errorf("Invalid database id %s", database)
+	}
+	instanceName := matches[1]
+	counter := 0
+	minCreateTime := time.Now().AddDate(0, 0, -1)
+	maxExpireTime := time.Now().AddDate(0, 0, 3)
+
+	backupsIterator := adminClient.ListBackups(ctx, &adminpb.ListBackupsRequest{
+		Parent: instanceName,
+		// Only include backups that were created recently and expire soon
+		Filter: fmt.Sprintf(`(state:READY) AND (create_time > "%s") AND (expire_time < "%s")`,
+						minCreateTime.Format(time.RFC3339), maxExpireTime.Format(time.RFC3339)),
+	})
+	for {
+		resp, err := backupsIterator.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "%s [%v] - %d bytes\n", resp.Name, resp.State, resp.SizeBytes)
+		counter++
+	}
+	fmt.Fprintf(w, "Backup count: %d\n", counter)
+
+	return nil
+}
+
+// [END spanner_list_new_backups]
 
 // [START spanner_list_instance_backups]
 
