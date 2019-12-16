@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package automl contains samples for Google Cloud AutoML API v1beta1.
+// Package automl contains samples for Google Cloud AutoML API v1.
 package automl
 
 // [START automl_list_models]
@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"io"
 
-	automl "cloud.google.com/go/automl/apiv1beta1"
+	automl "cloud.google.com/go/automl/apiv1"
 	"google.golang.org/api/iterator"
-	automlpb "google.golang.org/genproto/googleapis/cloud/automl/v1beta1"
+	automlpb "google.golang.org/genproto/googleapis/cloud/automl/v1"
 )
 
 // listModels lists existing models.
