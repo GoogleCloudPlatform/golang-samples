@@ -38,15 +38,15 @@ func TestSample(t *testing.T) {
 	if !strings.HasPrefix(instance, "projects/") {
 		t.Fatal("Spanner instance ref must be in the form of 'projects/PROJECT_ID/instances/INSTANCE_ID'")
 	}
-	dbFragment := fmt.Sprintf("test-%s", tc.ProjectID)
+	databaseId := fmt.Sprintf("test-%s", tc.ProjectID)
 
 	// Maximum length of database name is 30 characters, so trim if the generated name is too long
-	if len(dbFragment) > 30 {
-		trimmedDbFragment := dbFragment[:30]
-		t.Logf("Database name '%s' trimmed to '%s'", dbFragment, trimmedDbFragment)
-		dbFragment = trimmedDbFragment
+	if len(databaseId) > 30 {
+		trimmedDatabaseId := databaseId[:30]
+		t.Logf("Database name '%s' trimmed to '%s'", databaseId, trimmedDatabaseId)
+		databaseId = trimmedDatabaseId
 	}
-	dbName := fmt.Sprintf("%s/databases/%s", instance, dbFragment)
+	dbName := fmt.Sprintf("%s/databases/%s", instance, databaseId)
 
 	ctx := context.Background()
 	adminClient, dataClient := createClients(ctx, dbName)
