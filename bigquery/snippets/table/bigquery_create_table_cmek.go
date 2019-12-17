@@ -16,9 +16,10 @@ package table
 
 // [START bigquery_create_table_cmek]
 import (
-	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
+
+	"cloud.google.com/go/bigquery"
 )
 
 func createTableWithCMEK(projectID, datasetID, tableID string) error {

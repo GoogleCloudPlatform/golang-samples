@@ -16,11 +16,12 @@ package querying
 
 // [START bigquery_query]
 import (
-	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
-	"google.golang.org/api/iterator"
 	"io"
+
+	"cloud.google.com/go/bigquery"
+	"google.golang.org/api/iterator"
 )
 
 func queryBasic(w io.Writer, projectID string) error {

@@ -16,14 +16,15 @@
 package querying
 
 import (
-	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
-	"github.com/GoogleCloudPlatform/golang-samples/bigquery/snippets/bqtestutil"
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"io/ioutil"
 	"testing"
 	"time"
+
+	"cloud.google.com/go/bigquery"
+	"github.com/GoogleCloudPlatform/golang-samples/bigquery/snippets/bqtestutil"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestQueries(t *testing.T) {
@@ -104,15 +105,13 @@ func TestQueries(t *testing.T) {
 				t.Errorf("queryWithDestination: %v", err)
 			}
 		})
-		/*
-			t.Run("queryWithDestinationCMEK", func(t *testing.T) {
-				t.Parallel()
-				tableID := "bigquery_query_destination_table_cmek"
-				if err := queryWithDestinationCMEK(ioutil.Discard, tc.ProjectID, testDatasetID, tableID); err != nil {
-					t.Errorf("queryWithDestinationCMEK: %v", err)
-				}
-			})
-		*/
+		t.Run("queryWithDestinationCMEK", func(t *testing.T) {
+			t.Parallel()
+			tableID := "bigquery_query_destination_table_cmek"
+			if err := queryWithDestinationCMEK(ioutil.Discard, tc.ProjectID, testDatasetID, tableID); err != nil {
+				t.Errorf("queryWithDestinationCMEK: %v", err)
+			}
+		})
 		t.Run("queryWithArrayParams", func(t *testing.T) {
 			t.Parallel()
 			if err := queryWithArrayParams(ioutil.Discard, tc.ProjectID); err != nil {

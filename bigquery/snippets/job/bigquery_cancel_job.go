@@ -16,9 +16,10 @@ package job
 
 // [START bigquery_cancel_job]
 import (
-	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
+
+	"cloud.google.com/go/bigquery"
 )
 
 func cancelJob(projectID, jobID string) error {

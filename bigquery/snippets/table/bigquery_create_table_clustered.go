@@ -16,10 +16,11 @@ package table
 
 // [START bigquery_create_table_clustered]
 import (
-	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
 	"time"
+
+	"cloud.google.com/go/bigquery"
 )
 
 func createTableClustered(projectID, datasetID, tableID string) error {

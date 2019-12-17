@@ -16,11 +16,12 @@ package querying
 
 // [START bigquery_query_legacy_large_results]
 import (
-	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
-	"google.golang.org/api/iterator"
 	"io"
+
+	"cloud.google.com/go/bigquery"
+	"google.golang.org/api/iterator"
 )
 
 func queryLegacyLargeResults(w io.Writer, projectID, datasetID, tableID string) error {

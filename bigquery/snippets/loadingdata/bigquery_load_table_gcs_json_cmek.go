@@ -16,9 +16,10 @@ package loadingdata
 
 // [START bigquery_load_table_gcs_json_cmek]
 import (
-	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
+
+	"cloud.google.com/go/bigquery"
 )
 
 func importJSONWithCMEK(projectID, datasetID, tableID string) error {

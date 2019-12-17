@@ -16,9 +16,10 @@ package job
 
 // [START bigquery_extract_table]
 import (
-	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
+
+	"cloud.google.com/go/bigquery"
 )
 
 func exportTableAsCSV(projectID, gcsURI string) error {

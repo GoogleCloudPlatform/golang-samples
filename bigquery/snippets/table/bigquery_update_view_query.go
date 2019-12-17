@@ -16,9 +16,10 @@ package table
 
 // [START bigquery_update_view_query]
 import (
-	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
+
+	"cloud.google.com/go/bigquery"
 )
 
 func updateView(projectID, datasetID, viewID string) error {

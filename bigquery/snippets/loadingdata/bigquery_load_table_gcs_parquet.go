@@ -16,9 +16,10 @@ package loadingdata
 
 // [START bigquery_load_table_gcs_parquet]
 import (
-	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
+
+	"cloud.google.com/go/bigquery"
 )
 
 func importParquet(projectID, datasetID, tableID string) error {

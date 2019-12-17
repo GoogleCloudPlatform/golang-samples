@@ -16,9 +16,10 @@ package table
 
 // [START bigquery_add_empty_column]
 import (
-	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
+
+	"cloud.google.com/go/bigquery"
 )
 
 func updateTableAddColumn(projectID, datasetID, tableID string) error {

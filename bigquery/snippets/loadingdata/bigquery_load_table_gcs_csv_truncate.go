@@ -16,9 +16,10 @@ package loadingdata
 
 // [START bigquery_load_table_gcs_csv_truncate]
 import (
-	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
+
+	"cloud.google.com/go/bigquery"
 )
 
 func importCSVTruncate(projectID, datasetID, tableID string) error {

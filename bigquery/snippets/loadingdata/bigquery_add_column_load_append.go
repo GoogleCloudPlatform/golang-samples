@@ -16,10 +16,11 @@ package loadingdata
 
 // [START bigquery_add_column_load_append]
 import (
-	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
 	"os"
+
+	"cloud.google.com/go/bigquery"
 )
 
 func createTableAndWidenLoad(projectID, datasetID, tableID, filename string) error {

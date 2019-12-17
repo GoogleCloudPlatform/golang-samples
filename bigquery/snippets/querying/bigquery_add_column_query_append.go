@@ -16,9 +16,10 @@ package querying
 
 // [START bigquery_add_column_query_append]
 import (
-	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
+
+	"cloud.google.com/go/bigquery"
 )
 
 func createTableAndWidenQuery(projectID, datasetID, tableID string) error {

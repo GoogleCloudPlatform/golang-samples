@@ -16,10 +16,11 @@ package table
 
 // [START bigquery_get_table_labels]
 import (
-	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
 	"io"
+
+	"cloud.google.com/go/bigquery"
 )
 
 func tableLabels(w io.Writer, projectID, datasetID, tableID string) error {

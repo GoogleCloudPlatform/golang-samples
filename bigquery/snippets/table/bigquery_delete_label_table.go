@@ -16,9 +16,10 @@ package table
 
 // [START bigquery_delete_label_table]
 import (
-	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
+
+	"cloud.google.com/go/bigquery"
 )
 
 func deleteTableLabel(projectID, datasetID, tableID string) error {

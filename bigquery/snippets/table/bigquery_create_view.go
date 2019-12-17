@@ -16,9 +16,10 @@ package table
 
 // [START bigquery_create_view]
 import (
-	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
+
+	"cloud.google.com/go/bigquery"
 )
 
 func createView(projectID, datasetID, tableID string) error {

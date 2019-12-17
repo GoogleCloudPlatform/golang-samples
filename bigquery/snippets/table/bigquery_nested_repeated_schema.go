@@ -16,10 +16,11 @@ package table
 
 // [START bigquery_nested_repeated_schema]
 import (
-	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
 	"io"
+
+	"cloud.google.com/go/bigquery"
 )
 
 func createTableComplexSchema(w io.Writer, projectID, datasetID, tableID string) error {

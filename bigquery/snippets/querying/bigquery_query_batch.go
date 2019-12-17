@@ -16,11 +16,12 @@ package querying
 
 // [START bigquery_query_batch]
 import (
-	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
 	"io"
 	"time"
+
+	"cloud.google.com/go/bigquery"
 )
 
 func queryBatch(w io.Writer, projectID, dstDatasetID, dstTableID string) error {

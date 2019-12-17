@@ -16,9 +16,10 @@ package loadingdata
 
 // [START bigquery_load_table_gcs_orc]
 import (
-	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
+
+	"cloud.google.com/go/bigquery"
 )
 
 func importORC(projectID, datasetID, tableID string) error {

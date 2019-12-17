@@ -17,10 +17,11 @@ package loadingdata
 // [START bigquery_load_table_partitioned]
 
 import (
-	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
 	"time"
+
+	"cloud.google.com/go/bigquery"
 )
 
 func importPartitionedTable(projectID, destDatasetID, destTableID string) error {

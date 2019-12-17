@@ -16,11 +16,12 @@ package table
 
 // [START bigquery_list_tables]
 import (
-	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
-	"google.golang.org/api/iterator"
 	"io"
+
+	"cloud.google.com/go/bigquery"
+	"google.golang.org/api/iterator"
 )
 
 func listTables(w io.Writer, projectID, datasetID string) error {

@@ -16,10 +16,11 @@ package querying
 
 // [START bigquery_query_dry_run]
 import (
-	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
 	"io"
+
+	"cloud.google.com/go/bigquery"
 )
 
 func queryDryRun(w io.Writer, projectID string) error {

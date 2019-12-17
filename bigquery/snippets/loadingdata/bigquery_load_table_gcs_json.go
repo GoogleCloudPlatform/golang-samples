@@ -16,9 +16,10 @@ package loadingdata
 
 // [START bigquery_load_table_gcs_json]
 import (
-	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
+
+	"cloud.google.com/go/bigquery"
 )
 
 func importJSONExplicitSchema(projectID, datasetID, tableID string) error {

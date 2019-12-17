@@ -16,12 +16,13 @@ package querying
 
 // [START bigquery_query_params_timestamps]
 import (
-	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
-	"google.golang.org/api/iterator"
 	"io"
 	"time"
+
+	"cloud.google.com/go/bigquery"
+	"google.golang.org/api/iterator"
 )
 
 func queryWithTimestampParam(w io.Writer, projectID string) error {

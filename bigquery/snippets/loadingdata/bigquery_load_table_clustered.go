@@ -16,9 +16,10 @@ package loadingdata
 
 // [START bigquery_load_table_clustered]
 import (
-	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
+
+	"cloud.google.com/go/bigquery"
 )
 
 func importClusteredTable(projectID, destDatasetID, destTableID string) error {

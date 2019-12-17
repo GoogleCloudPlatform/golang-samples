@@ -16,10 +16,11 @@ package loadingdata
 
 // [START bigquery_load_from_file]
 import (
-	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
 	"os"
+
+	"cloud.google.com/go/bigquery"
 )
 
 func importCSVFromFile(projectID, datasetID, tableID, filename string) error {

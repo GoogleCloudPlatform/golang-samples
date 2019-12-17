@@ -16,9 +16,10 @@ package table
 
 // [START bigquery_grant_view_access]
 import (
-	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
+
+	"cloud.google.com/go/bigquery"
 )
 
 func updateViewDelegated(projectID, srcDatasetID, viewDatasetID, viewID string) error {

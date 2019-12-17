@@ -16,11 +16,12 @@ package querying
 
 // [START bigquery_query_params_positional]
 import (
-	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
-	"google.golang.org/api/iterator"
 	"io"
+
+	"cloud.google.com/go/bigquery"
+	"google.golang.org/api/iterator"
 )
 
 func queryWithPositionalParams(w io.Writer, projectID string) error {

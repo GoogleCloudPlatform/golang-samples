@@ -16,11 +16,12 @@ package table
 
 // [START bigquery_browse_table]
 import (
-	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
-	"google.golang.org/api/iterator"
 	"io"
+
+	"cloud.google.com/go/bigquery"
+	"google.golang.org/api/iterator"
 )
 
 func browseTable(w io.Writer, projectID, datasetID, tableID string) error {

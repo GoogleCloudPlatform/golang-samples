@@ -16,9 +16,10 @@ package job
 
 // [START bigquery_copy_table]
 import (
-	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
+
+	"cloud.google.com/go/bigquery"
 )
 
 func copyTable(projectID, datasetID, srcID, dstID string) error {

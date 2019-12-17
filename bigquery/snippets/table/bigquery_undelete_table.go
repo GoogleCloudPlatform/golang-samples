@@ -16,10 +16,11 @@ package table
 
 // [START bigquery_undelete_table]
 import (
-	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
 	"time"
+
+	"cloud.google.com/go/bigquery"
 )
 
 func deleteAndUndeleteTable(projectID, datasetID, tableID string) error {

@@ -16,10 +16,11 @@ package job
 
 // [START bigquery_get_job]
 import (
-	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
 	"io"
+
+	"cloud.google.com/go/bigquery"
 )
 
 func getJobInfo(w io.Writer, projectID, jobID string) error {

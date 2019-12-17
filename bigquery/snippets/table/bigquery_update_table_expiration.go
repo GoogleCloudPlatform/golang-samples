@@ -16,10 +16,11 @@ package table
 
 // [START bigquery_update_table_expiration]
 import (
-	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
 	"time"
+
+	"cloud.google.com/go/bigquery"
 )
 
 func updateTableExpiration(projectID, datasetID, tableID string) error {
