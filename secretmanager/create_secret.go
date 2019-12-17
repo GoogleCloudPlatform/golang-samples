@@ -27,9 +27,9 @@ import (
 // createSecret creates a new secret with the given name. A secret is a logical
 // wrapper around a collection of secret versions. Secret versions hold the
 // actual secret material.
-func createSecret(w io.Writer, parent, name string) error {
+func createSecret(w io.Writer, parent, id string) error {
 	// parent := "projects/my-project"
-	// name := "my-secret"
+	// id := "my-secret"
 
 	// Create the client.
 	ctx := context.Background()
@@ -41,7 +41,7 @@ func createSecret(w io.Writer, parent, name string) error {
 	// Build the request.
 	req := &secretspb.CreateSecretRequest{
 		Parent:   parent,
-		SecretId: name,
+		SecretId: id,
 		Secret: &secretspb.Secret{
 			Replication: &secretspb.Replication{
 				Replication: &secretspb.Replication_Automatic_{
