@@ -19,6 +19,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/api/option"
 	"io"
 	"log"
@@ -109,6 +110,7 @@ var (
 		"listsmallbackups":                listSmallBackups,
 		"listnewbackups":                  listNewBackups,
 		"listinstancebackups":             listInstanceBackups,
+		"listbackupoperations":			   listBackupOperations,
 		"updatebackup":                    updateBackup,
 		"deletebackup":                    deleteBackup,
 	}
@@ -1917,6 +1919,48 @@ func listBackups(ctx context.Context, w io.Writer, adminClient *database.Databas
 }
 
 // [END spanner_list_backups]
+
+// [START spanner_list_backup_operations]
+
+func listBackupOperations(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
+	if matches == nil || len(matches) != 3 {
+		return fmt.Errorf("Invalid database id %s", database)
+	}
+	instanceName := matches[1]
+	counter := 0
+	backupOperationsIterator := adminClient.ListBackupOperations(ctx, &adminpb.ListBackupOperationsRequest{
+		Parent: instanceName,
+		// List backup operations only for this specific database
+		Filter: fmt.Sprintf("(metadata.database:%s) AND (metadata.@type:type.googleapis.com/google.spanner.admin.database.v1.CreateBackupMetadata)", database),
+	})
+	for {
+		resp, err := backupOperationsIterator.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		createBackupMetadata := &adminpb.CreateBackupMetadata{}
+		if err := ptypes.UnmarshalAny(resp.Metadata, createBackupMetadata); err != nil {
+			return err
+		}
+		var detail string
+		if resp.Done {
+			detail = "completed"
+		} else {
+			detail = fmt.Sprintf("in progress (%d %%)", createBackupMetadata.Progress.ProgressPercent)
+		}
+		fmt.Fprintf(w, "%s - %s\n", resp.Name, detail)
+		counter++
+	}
+	fmt.Fprintf(w, "Backup operation count: %d\n", counter)
+
+	return nil
+}
+
+// [END spanner_list_backup_operations]
 
 // [START spanner_list_backups_by_name]
 
