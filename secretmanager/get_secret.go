@@ -47,8 +47,8 @@ func getSecret(w io.Writer, name string) error {
 		return fmt.Errorf("failed to get secret: %v", err)
 	}
 
-	fmt.Fprintf(w, "Found secret %s with replication policy %s\n",
-		result.Name, result.Replication.Replication)
+	replication := result.Replication.Replication
+	fmt.Fprintf(w, "Found secret %s with replication policy %s\n", result.Name, replication)
 	return nil
 }
 
