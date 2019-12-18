@@ -15,7 +15,6 @@
 package models
 
 // [START bigquery_get_model]
-
 import (
 	"context"
 	"fmt"
@@ -24,6 +23,8 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// printModelInfo demonstrates fetching metadata about a BigQuery ML model and printing some of
+// it to an io.Writer.
 func printModelInfo(w io.Writer, projectID, datasetID, modelID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

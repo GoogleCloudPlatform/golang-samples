@@ -24,20 +24,20 @@ import (
 // EnvVars is a collection of environment variables.
 type EnvVars map[string]string
 
-// keyRegex defines valid environment variable name.
-// Regex arranged so the first submatch will have the name without whitespace.
-// https://stackoverflow.com/questions/2821043/allowed-characters-in-linux-environment-variable-names
-var keyRegex = regexp.MustCompile(`^\s*([a-zA-Z_]+\w*)\s*$`)
-
 func (e EnvVars) String() string {
 	s := make([]string, len(e))
 	i := 0
-	for k, v := range e {
-		s[i] = fmt.Sprintf("%s=%s", strings.TrimSpace(k), v)
+	for k := range e {
+		s[i] = e.Variable(k)
 		i++
 	}
 	sort.Strings(s)
 	return strings.Join(s, ",")
+}
+
+// Variable retrieves an environment variable assignment as a string.
+func (e EnvVars) Variable(k string) string {
+	return fmt.Sprintf("%s=%s", strings.TrimSpace(k), strings.TrimSpace(e[k]))
 }
 
 // KeyString converts the environment variables names to a comma-delimited list.
@@ -51,6 +51,11 @@ func (e EnvVars) KeyString() string {
 	sort.Strings(s)
 	return strings.Join(s, ",")
 }
+
+// keyRegex defines valid environment variable name.
+// Regex arranged so the first submatch will have the name without whitespace.
+// https://stackoverflow.com/questions/2821043/allowed-characters-in-linux-environment-variable-names
+var keyRegex = regexp.MustCompile(`^\s*([a-zA-Z_]+\w*)\s*$`)
 
 // Validate confirms all environment variables are valid.
 func (e EnvVars) Validate() error {

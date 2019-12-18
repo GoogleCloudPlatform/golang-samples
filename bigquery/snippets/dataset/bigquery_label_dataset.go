@@ -15,7 +15,6 @@
 package dataset
 
 // [START bigquery_label_dataset]
-
 import (
 	"context"
 	"fmt"
@@ -23,6 +22,7 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// addDatasetLabel demonstrates adding label metadata to an existing dataset.
 func addDatasetLabel(projectID, datasetID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

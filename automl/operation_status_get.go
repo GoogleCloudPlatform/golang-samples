@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package automl contains samples for Google Cloud AutoML API v1beta1.
+// Package automl contains samples for Google Cloud AutoML API v1.
 package automl
 
 // [START automl_get_operation_status]
@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"io"
 
-	automl "cloud.google.com/go/automl/apiv1beta1"
+	automl "cloud.google.com/go/automl/apiv1"
 	"google.golang.org/genproto/googleapis/longrunning"
 )
 
