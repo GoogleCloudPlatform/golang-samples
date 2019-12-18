@@ -120,14 +120,14 @@ func TestAccessSecretVersion(t *testing.T) {
 	}
 }
 
-func TestCreateSecretVersion(t *testing.T) {
+func TestAddSecretVersion(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 
 	secret, cleanup := testSecret(t, tc.ProjectID)
 	defer cleanup()
 
 	var b bytes.Buffer
-	if err := createSecretVersion(&b, secret.Name); err != nil {
+	if err := addSecretVersion(&b, secret.Name); err != nil {
 		t.Fatal(err)
 	}
 

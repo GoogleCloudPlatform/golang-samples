@@ -14,7 +14,7 @@
 
 package secretmanager
 
-// [START secretmanager_create_secret_version]
+// [START secretmanager_add_secret_version]
 import (
 	"context"
 	"fmt"
@@ -24,9 +24,9 @@ import (
 	secretspb "google.golang.org/genproto/googleapis/cloud/secrets/v1beta1"
 )
 
-// createSecretVersion adds a new secret version to the given secret with the
+// addSecretVersion adds a new secret version to the given secret with the
 // provided payload.
-func createSecretVersion(w io.Writer, parent string) error {
+func addSecretVersion(w io.Writer, parent string) error {
 	// parent := "projects/my-project/secrets/my-secret"
 
 	// Declare the payload to store.
@@ -56,4 +56,4 @@ func createSecretVersion(w io.Writer, parent string) error {
 	return nil
 }
 
-// [END secretmanager_create_secret_version]
+// [END secretmanager_add_secret_version]
