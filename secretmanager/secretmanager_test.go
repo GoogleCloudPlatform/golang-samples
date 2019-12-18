@@ -36,7 +36,7 @@ func testClient(tb testing.TB) (*secretmanager.Client, context.Context) {
 	ctx := context.Background()
 	client, err := secretmanager.NewClient(ctx)
 	if err != nil {
-		tb.Fatalf("failed to create client: %v", err)
+		tb.Fatalf("testClient: failed to create client: %v", err)
 	}
 	return client, ctx
 }
@@ -46,7 +46,7 @@ func testName(tb testing.TB) string {
 
 	u, err := uuid.NewV4()
 	if err != nil {
-		tb.Fatalf("failed to generate uuid: %v", err)
+		tb.Fatalf("testName: failed to generate uuid: %v", err)
 	}
 	return u.String()
 }
@@ -69,7 +69,7 @@ func testSecret(tb testing.TB, projectID string) (*secretspb.Secret, func()) {
 		},
 	})
 	if err != nil {
-		tb.Fatalf("failed to create secret: %v", err)
+		tb.Fatalf("testSecret: failed to create secret: %v", err)
 	}
 
 	return secret, func() { testCleanupSecret(tb, secret.Name) }
@@ -87,7 +87,7 @@ func testSecretVersion(tb testing.TB, parent string, payload []byte) *secretspb.
 		},
 	})
 	if err != nil {
-		tb.Fatalf("failed to create secret version: %v", err)
+		tb.Fatalf("testSecretVersion: failed to create secret version: %v", err)
 	}
 	return version
 }
@@ -115,8 +115,8 @@ func TestAccessSecretVersion(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if act, exp := b.String(), string(payload); !strings.Contains(act, exp) {
-		t.Errorf("expected %q to contain %q", act, exp)
+	if got, want := b.String(), string(payload); !strings.Contains(got, want) {
+		t.Errorf("accessSecretVersion: expected %q to contain %q", got, want)
 	}
 }
 
@@ -131,8 +131,8 @@ func TestAddSecretVersion(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if act, exp := b.String(), "Added secret version:"; !strings.Contains(act, exp) {
-		t.Errorf("expected %q to contain %q", act, exp)
+	if got, want := b.String(), "Added secret version:"; !strings.Contains(got, want) {
+		t.Errorf("addSecretVersion: expected %q to contain %q", got, want)
 	}
 }
 
@@ -148,8 +148,8 @@ func TestCreateSecret(t *testing.T) {
 	}
 	defer testCleanupSecret(t, fmt.Sprintf("%s/secrets/%s", parent, name))
 
-	if act, exp := b.String(), "Created secret:"; !strings.Contains(act, exp) {
-		t.Errorf("expected %q to contain %q", act, exp)
+	if got, want := b.String(), "Created secret:"; !strings.Contains(got, want) {
+		t.Errorf("createSecret: expected %q to contain %q", got, want)
 	}
 }
 
@@ -168,7 +168,7 @@ func TestDeleteSecret(t *testing.T) {
 		Name: secret.Name,
 	})
 	if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
-		t.Errorf("expected %v to be not found", err)
+		t.Errorf("deleteSecret: expected %v to be not found", err)
 	}
 }
 
@@ -191,8 +191,8 @@ func TestDestroySecretVersion(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if act, exp := v.State, secretspb.SecretVersion_DESTROYED; act != exp {
-		t.Errorf("expected %v to be %v", act, exp)
+	if got, want := v.State, secretspb.SecretVersion_DESTROYED; got != want {
+		t.Errorf("testSecretVersion: expected %v to be %v", got, want)
 	}
 }
 
@@ -215,8 +215,8 @@ func TestDisableEnableSecretVersion(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if act, exp := v.State, secretspb.SecretVersion_DISABLED; act != exp {
-		t.Errorf("expected %v to be %v", act, exp)
+	if got, want := v.State, secretspb.SecretVersion_DISABLED; got != want {
+		t.Errorf("testSecretVersion: expected %v to be %v", got, want)
 	}
 
 	if err := enableSecretVersion(version.Name); err != nil {
@@ -229,8 +229,8 @@ func TestDisableEnableSecretVersion(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if act, exp := v.State, secretspb.SecretVersion_ENABLED; act != exp {
-		t.Errorf("expected %v to be %v", act, exp)
+	if got, want := v.State, secretspb.SecretVersion_ENABLED; got != want {
+		t.Errorf("testSecretVersion: expected %v to be %v", got, want)
 	}
 }
 
@@ -247,8 +247,8 @@ func TestGetSecretVersion(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if act, exp := b.String(), "Found secret version"; !strings.Contains(act, exp) {
-		t.Errorf("expected %q to contain %q", act, exp)
+	if got, want := b.String(), "Found secret version"; !strings.Contains(got, want) {
+		t.Errorf("testSecretVersion: expected %q to contain %q", got, want)
 	}
 }
 
@@ -263,8 +263,8 @@ func TestGetSecret(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if act, exp := b.String(), "Found secret"; !strings.Contains(act, exp) {
-		t.Errorf("expected %q to contain %q", act, exp)
+	if got, want := b.String(), "Found secret"; !strings.Contains(got, want) {
+		t.Errorf("getSecret: expected %q to contain %q", got, want)
 	}
 }
 
@@ -283,12 +283,12 @@ func TestListSecretVersions(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if act, exp := b.String(), fmt.Sprintf("%s with state ENABLED", version1.Name); !strings.Contains(act, exp) {
-		t.Errorf("expected %q to contain %q", act, exp)
+	if got, want := b.String(), fmt.Sprintf("%s with state ENABLED", version1.Name); !strings.Contains(got, want) {
+		t.Errorf("listSecretVersions: expected %q to contain %q", got, want)
 	}
 
-	if act, exp := b.String(), fmt.Sprintf("%s with state ENABLED", version2.Name); !strings.Contains(act, exp) {
-		t.Errorf("expected %q to contain %q", act, exp)
+	if got, want := b.String(), fmt.Sprintf("%s with state ENABLED", version2.Name); !strings.Contains(got, want) {
+		t.Errorf("listSecretVersions: expected %q to contain %q", got, want)
 	}
 }
 
@@ -306,12 +306,12 @@ func TestListSecrets(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if act, exp := b.String(), secret1.Name; !strings.Contains(act, exp) {
-		t.Errorf("expected %q to contain %q", act, exp)
+	if got, want := b.String(), secret1.Name; !strings.Contains(got, want) {
+		t.Errorf("listSecrets: expected %q to contain %q", got, want)
 	}
 
-	if act, exp := b.String(), secret2.Name; !strings.Contains(act, exp) {
-		t.Errorf("expected %q to contain %q", act, exp)
+	if got, want := b.String(), secret2.Name; !strings.Contains(got, want) {
+		t.Errorf("listSecrets: expected %q to contain %q", got, want)
 	}
 }
 
@@ -326,8 +326,8 @@ func TestUpdateSecret(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if act, exp := b.String(), "Updated secret"; !strings.Contains(act, exp) {
-		t.Errorf("expected %q to contain %q", act, exp)
+	if got, want := b.String(), "Updated secret"; !strings.Contains(got, want) {
+		t.Errorf("updateSecret: expected %q to contain %q", got, want)
 	}
 
 	client, ctx := testClient(t)
@@ -338,7 +338,7 @@ func TestUpdateSecret(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if act, exp := s.Labels, map[string]string{"secretmanager": "rocks"}; !reflect.DeepEqual(act, exp) {
-		t.Errorf("expected %q to be %q", act, exp)
+	if got, want := s.Labels, map[string]string{"secretmanager": "rocks"}; !reflect.DeepEqual(got, want) {
+		t.Errorf("updateSecret: expected %q to be %q", got, want)
 	}
 }
