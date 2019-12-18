@@ -110,7 +110,8 @@ var (
 		"listsmallbackups":                listSmallBackups,
 		"listnewbackups":                  listNewBackups,
 		"listinstancebackups":             listInstanceBackups,
-		"listbackupoperations":			   listBackupOperations,
+		"listbackupoperations":            listBackupOperations,
+		"listdatabaseoperations":          listDatabaseOperations,
 		"updatebackup":                    updateBackup,
 		"deletebackup":                    deleteBackup,
 	}
@@ -1961,6 +1962,42 @@ func listBackupOperations(ctx context.Context, w io.Writer, adminClient *databas
 }
 
 // [END spanner_list_backup_operations]
+
+// [START spanner_list_database_operations]
+
+func listDatabaseOperations(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
+	if matches == nil || len(matches) != 3 {
+		return fmt.Errorf("Invalid database id %s", database)
+	}
+	instanceName := matches[1]
+	counter := 0
+	databaseOperationsIterator := adminClient.ListDatabaseOperations(ctx, &adminpb.ListDatabaseOperationsRequest{
+		Parent: instanceName,
+	})
+	for {
+		resp, err := databaseOperationsIterator.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		var detail string
+		if resp.Done {
+			detail = "completed"
+		} else {
+			detail = "in progress"
+		}
+		fmt.Fprintf(w, "%s - %s\n", resp.Name, detail)
+		counter++
+	}
+	fmt.Fprintf(w, "Database operation count: %d\n", counter)
+
+	return nil
+}
+
+// [END spanner_list_database_operations]
 
 // [START spanner_list_backups_by_name]
 
