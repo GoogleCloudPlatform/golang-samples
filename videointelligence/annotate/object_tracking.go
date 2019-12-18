@@ -18,16 +18,13 @@ package annotate
 // [START videointelligence_object_tracking]
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
-
-	"context"
-
-	"github.com/golang/protobuf/ptypes"
 
 	video "cloud.google.com/go/videointelligence/apiv1"
+	"github.com/golang/protobuf/ptypes"
 	videopb "google.golang.org/genproto/googleapis/cloud/videointelligence/v1"
 )
 
@@ -40,7 +37,7 @@ func objectTracking(w io.Writer, filename string) error {
 	// Creates a client.
 	client, err := video.NewClient(ctx)
 	if err != nil {
-		log.Fatalf("Failed to create client: %v", err)
+		return fmt.Errorf("video.NewClient: %v", err)
 	}
 
 	fileBytes, err := ioutil.ReadFile(filename)
@@ -55,12 +52,12 @@ func objectTracking(w io.Writer, filename string) error {
 		},
 	})
 	if err != nil {
-		log.Fatalf("Failed to start annotation job: %v", err)
+		return fmt.Errorf("AnnotateVideo: %v", err)
 	}
 
 	resp, err := op.Wait(ctx)
 	if err != nil {
-		log.Fatalf("Failed to annotate: %v", err)
+		return fmt.Errorf("Wait: %v", err)
 	}
 
 	// Only one video was processed, so get the first result.
