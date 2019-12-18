@@ -24,6 +24,7 @@ import (
 	"google.golang.org/api/iterator"
 )
 
+// queryDisableCache demonstrates issuing a query and requesting that the query cache is bypassed.
 func queryDisableCache(w io.Writer, projectID string) error {
 	// projectID := "my-project-id"
 	ctx := context.Background()

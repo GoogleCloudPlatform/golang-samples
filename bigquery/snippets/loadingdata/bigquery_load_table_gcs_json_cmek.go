@@ -22,6 +22,8 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// importJSONWithCMEK demonstrates loading newline-delimited JSON from Cloud Storage,
+// and protecting the data with a customer-managed encryption key.
 func importJSONWithCMEK(projectID, datasetID, tableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

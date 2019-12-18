@@ -23,6 +23,8 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// queryDryRun demonstrates issuing a dry run query to validate query structure and
+// provide an estimate of the bytes scanned.
 func queryDryRun(w io.Writer, projectID string) error {
 	// projectID := "my-project-id"
 	ctx := context.Background()

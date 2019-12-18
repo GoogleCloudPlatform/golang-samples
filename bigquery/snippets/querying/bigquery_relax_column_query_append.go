@@ -22,6 +22,8 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// relaxTableQuery demonstrates relaxing the schema of a table by appending query results to
+// enable the table to allow NULL values.
 func relaxTableQuery(projectID, datasetID, tableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

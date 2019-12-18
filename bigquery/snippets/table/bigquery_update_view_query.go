@@ -22,6 +22,7 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// updateView demonstrates updating the query metadata that defines a logical view.
 func updateView(projectID, datasetID, viewID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

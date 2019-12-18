@@ -23,6 +23,7 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// getView demonstrates fetching the metadata from a BigQuery logical view and printing it to an io.Writer.
 func getView(w io.Writer, projectID, datasetID, viewID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

@@ -22,6 +22,8 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// importCSVTruncate demonstrates loading data from CSV data in Cloud Storage and overwriting/truncating
+// data in the existing table.
 func importCSVTruncate(projectID, datasetID, tableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

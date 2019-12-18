@@ -22,6 +22,8 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// relaxTableAPI demonstrates modifying the schema of a table to remove the requirement that columns allow
+// no NULL values.
 func relaxTableAPI(projectID, datasetID, tableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydatasetid"

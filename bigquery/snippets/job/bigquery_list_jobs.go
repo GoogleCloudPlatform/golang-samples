@@ -24,6 +24,7 @@ import (
 	"google.golang.org/api/iterator"
 )
 
+// listJobs demonstrates iterating through the BigQuery jobs collection.
 func listJobs(w io.Writer, projectID string) error {
 	// projectID := "my-project-id"
 	// jobID := "my-job-id"

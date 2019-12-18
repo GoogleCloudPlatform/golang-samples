@@ -23,6 +23,8 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// createTableClustered demonstrates creating a BigQuery table with advanced properties like
+// partitioning and clustering features.
 func createTableClustered(projectID, datasetID, tableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydatasetid"

@@ -23,6 +23,7 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// createTablePartitioned demonstrates creating a table and specifying a time partitioning configuration.
 func createTablePartitioned(projectID, datasetID, tableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydatasetid"

@@ -24,6 +24,8 @@ import (
 	"google.golang.org/api/iterator"
 )
 
+// queryWithDestinationCMEK demonstrates saving query results to a destination table and protecting those results
+// by specifying a customer managed encryption key.
 func queryWithDestinationCMEK(w io.Writer, projectID, dstDatasetID, dstTableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

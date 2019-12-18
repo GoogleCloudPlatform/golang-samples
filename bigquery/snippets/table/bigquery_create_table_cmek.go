@@ -22,6 +22,7 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// createTableWithCMEK demonstrates creating a table protected with a customer managed encryption key.
 func createTableWithCMEK(projectID, datasetID, tableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydatasetid"

@@ -24,6 +24,8 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// importPartitionedTable demonstrates specifing time partitioning for a BigQuery table when loading
+// CSV data from Cloud Storage.
 func importPartitionedTable(projectID, destDatasetID, destTableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

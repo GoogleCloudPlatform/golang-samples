@@ -22,6 +22,7 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// updateTableChangeCMEK demonstrates how to change the customer managed encryption key that protects a table.
 func updateTableChangeCMEK(projectID, datasetID, tableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydatasetid"

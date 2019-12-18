@@ -22,6 +22,7 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// deleteDatasetLabel demonstrates removing a specific label from a dataset's metadata.
 func deleteDatasetLabel(projectID, datasetID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

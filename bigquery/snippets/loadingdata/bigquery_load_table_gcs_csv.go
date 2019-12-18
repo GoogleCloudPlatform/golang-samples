@@ -22,6 +22,8 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// importCSVExplicitSchema demonstrates loading CSV data from Cloud Storage into a BigQuery
+// table and providing an explicit schema for the data.
 func importCSVExplicitSchema(projectID, datasetID, tableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

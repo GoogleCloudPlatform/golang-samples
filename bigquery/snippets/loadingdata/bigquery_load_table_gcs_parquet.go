@@ -22,6 +22,7 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// importParquet demonstrates loading Apache Parquet data from Cloud Storage into a table.
 func importParquet(projectID, datasetID, tableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

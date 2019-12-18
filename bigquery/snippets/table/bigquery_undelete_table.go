@@ -23,6 +23,8 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// deleteAndUndeleteTable demonstrates how to recover a deleted table by copying it from a point in time
+// that predates the deletion event.
 func deleteAndUndeleteTable(projectID, datasetID, tableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

@@ -25,6 +25,7 @@ import (
 	"google.golang.org/api/iterator"
 )
 
+// queryWithTimestampParam demonstrates issuing a query and supplying a timestamp query parameter.
 func queryWithTimestampParam(w io.Writer, projectID string) error {
 	// projectID := "my-project-id"
 	ctx := context.Background()

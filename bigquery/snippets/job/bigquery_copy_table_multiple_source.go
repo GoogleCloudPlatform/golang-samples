@@ -22,6 +22,7 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// copyMultiTable demonstrates using a copy job to copy multiple source tables into a single destination table.
 func copyMultiTable(projectID, srcDatasetID string, srcTableIDs []string, dstDatasetID, dstTableID string) error {
 	// projectID := "my-project-id"
 	// srcDatasetID := "sourcedataset"

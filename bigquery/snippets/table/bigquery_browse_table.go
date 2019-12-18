@@ -24,6 +24,8 @@ import (
 	"google.golang.org/api/iterator"
 )
 
+// browseTable demonstrates reading data from a BigQuery table directly without the use of a query.
+// For large tables, we also recommend the BigQuery Storage API.
 func browseTable(w io.Writer, projectID, datasetID, tableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

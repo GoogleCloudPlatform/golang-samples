@@ -22,6 +22,8 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// exportTableAsJSON demonstrates using an export job to
+// write the contents of a table into Cloud Storage as newline delimited JSON.
 func exportTableAsJSON(projectID, gcsURI string) error {
 	// projectID := "my-project-id"
 	// gcsUri := "gs://mybucket/shakespeare.json"

@@ -22,6 +22,8 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// updateViewDelegated demonstrates the setup of an authorized view, which allows access to a view's results
+// without the caller having direct access to the underlying source data.
 func updateViewDelegated(projectID, srcDatasetID, viewDatasetID, viewID string) error {
 	// projectID := "my-project-id"
 	// srcDatasetID := "sourcedata"

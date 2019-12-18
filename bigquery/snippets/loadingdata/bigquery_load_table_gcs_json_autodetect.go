@@ -22,6 +22,8 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// importJSONAutodetectSchema demonstrates loading data from newline-delimited JSON data in Cloud Storage
+// and using schema autodetection to identify the available columns.
 func importJSONAutodetectSchema(projectID, datasetID, tableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

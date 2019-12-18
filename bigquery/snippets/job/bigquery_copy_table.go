@@ -22,6 +22,8 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// copyTable demonstrates copying a table from a source to a destination, and
+// allowing the copy to overwrite existing data by using truncation.
 func copyTable(projectID, datasetID, srcID, dstID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

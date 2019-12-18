@@ -24,6 +24,7 @@ import (
 	"google.golang.org/api/iterator"
 )
 
+// queryBasic demonstrates issuing a query and reading results.
 func queryBasic(w io.Writer, projectID string) error {
 	// projectID := "my-project-id"
 	ctx := context.Background()

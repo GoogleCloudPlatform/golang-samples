@@ -23,6 +23,8 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// relaxTableImport demonstrates amending the schema of a table to relax columns from
+// not allowing NULL values to allowing them.
 func relaxTableImport(projectID, datasetID, tableID, filename string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

@@ -24,6 +24,7 @@ import (
 	"google.golang.org/api/iterator"
 )
 
+// queryLegacy demonstrates running a query using Legacy SQL.
 func queryLegacy(w io.Writer, projectID, sqlString string) error {
 	// projectID := "my-project-id"
 	// sqlString = "SELECT 3 as somenum"

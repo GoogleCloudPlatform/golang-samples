@@ -22,6 +22,7 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// updateTableDescription demonstrates how to fetch a table's metadata and updates the Description metadata.
 func updateTableDescription(projectID, datasetID, tableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

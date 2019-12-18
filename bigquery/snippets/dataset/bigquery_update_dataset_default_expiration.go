@@ -23,6 +23,8 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// updateDatasetDefaultExpiration demonstrats setting the default expiration of a dataset
+// to a specific retention period.
 func updateDatasetDefaultExpiration(projectID, datasetID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

@@ -24,6 +24,7 @@ import (
 	"google.golang.org/api/iterator"
 )
 
+// queryWithNamedParams demonstrate issuing a query using named query parameters.
 func queryWithNamedParams(w io.Writer, projectID string) error {
 	// projectID := "my-project-id"
 	ctx := context.Background()

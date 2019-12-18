@@ -24,6 +24,7 @@ import (
 	"google.golang.org/api/iterator"
 )
 
+// queryWithPostionalParams demonstrate issuing a query using positional query parameters.
 func queryWithPositionalParams(w io.Writer, projectID string) error {
 	// projectID := "my-project-id"
 	ctx := context.Background()

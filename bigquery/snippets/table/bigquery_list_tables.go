@@ -24,6 +24,7 @@ import (
 	"google.golang.org/api/iterator"
 )
 
+// listTables demonstrates iterating through the collection of tables in a given dataset.
 func listTables(w io.Writer, projectID, datasetID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

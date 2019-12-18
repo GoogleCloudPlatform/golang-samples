@@ -24,6 +24,8 @@ import (
 	"google.golang.org/api/iterator"
 )
 
+// queryWithArrayParams demonstrates issuing a query and specifying query parameters that include an
+// array of strings.
 func queryWithArrayParams(w io.Writer, projectID string) error {
 	// projectID := "my-project-id"
 	ctx := context.Background()

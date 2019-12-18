@@ -24,6 +24,8 @@ import (
 	"google.golang.org/api/iterator"
 )
 
+// queryWithDestination demonstrates saving the results of a query to a specific table by setting the destination
+// via the API properties.
 func queryWithDestination(w io.Writer, projectID, destDatasetID, destTableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

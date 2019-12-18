@@ -23,6 +23,8 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// getJobInfo demonstrates retrieval of a job, which can be used to monitor
+// completion or print metadata about the job.
 func getJobInfo(w io.Writer, projectID, jobID string) error {
 	// projectID := "my-project-id"
 	// jobID := "my-job-id"

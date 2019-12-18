@@ -23,6 +23,8 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// createTableComplexSchema demonstrates creating a BigQuery table and specifying a complex schema that includes
+// an array of Struct types.
 func createTableComplexSchema(w io.Writer, projectID, datasetID, tableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydatasetid"

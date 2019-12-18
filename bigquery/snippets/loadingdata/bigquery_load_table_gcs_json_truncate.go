@@ -22,6 +22,8 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// importJSONTruncate demonstrates loading data from newline-delimeted JSON data in Cloud Storage
+// and overwriting/truncating data in the existing table.
 func importJSONTruncate(projectID, datasetID, tableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

@@ -23,6 +23,8 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// updateTableExpiration demonstrates setting the table expiration of a table to a specific point in time
+// in the future, at which time it will be deleted.
 func updateTableExpiration(projectID, datasetID, tableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

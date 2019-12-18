@@ -23,6 +23,7 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// createTableExplicitSchema demonstrates creating a new BigQuery table and specifying a schema.
 func createTableExplicitSchema(projectID, datasetID, tableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydatasetid"

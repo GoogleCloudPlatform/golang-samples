@@ -22,6 +22,8 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// cancelJob demonstrates how a job cancellation request can be issued for a specific
+// BigQuery job.
 func cancelJob(projectID, jobID string) error {
 	// projectID := "my-project-id"
 	// jobID := "my-job-id"

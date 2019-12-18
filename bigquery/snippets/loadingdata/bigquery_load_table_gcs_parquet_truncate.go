@@ -22,6 +22,8 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// importParquetTruncate demonstrates loading Apache Parquet data from Cloud Storage into a table
+// and overwriting/truncating existing data in the table.
 func importParquetTruncate(projectID, datasetID, tableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

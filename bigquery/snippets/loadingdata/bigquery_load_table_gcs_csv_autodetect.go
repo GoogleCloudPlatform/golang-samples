@@ -22,6 +22,8 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// importCSVAutodetectSchema demonstrates loading data from CSV data in Cloud Storage
+// and using schema autodetection to identify the available columns.
 func importCSVAutodetectSchema(projectID, datasetID, tableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

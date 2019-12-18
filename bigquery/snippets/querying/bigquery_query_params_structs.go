@@ -24,6 +24,8 @@ import (
 	"google.golang.org/api/iterator"
 )
 
+// queryWithStructParam demonstrates running a query and providing query parameters that include struct
+// types.
 func queryWithStructParam(w io.Writer, projectID string) error {
 	// projectID := "my-project-id"
 	ctx := context.Background()

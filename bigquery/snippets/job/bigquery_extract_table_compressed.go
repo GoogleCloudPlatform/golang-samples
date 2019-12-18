@@ -22,6 +22,8 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// exportTableAsCompressedCSV demonstrates using an export job to
+// write the contents of a table into Cloud Storage as compressed CSV.
 func exportTableAsCompressedCSV(projectID, gcsURI string) error {
 	// projectID := "my-project-id"
 	// gcsUri := "gs://mybucket/shakespeare.csv"

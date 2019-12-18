@@ -24,6 +24,8 @@ import (
 	"google.golang.org/api/iterator"
 )
 
+// queryLegacyLargeResults demonstrates issuing a legacy SQL query and writing a large result set
+// into a destination table.
 func queryLegacyLargeResults(w io.Writer, projectID, datasetID, tableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "destinationdataset"

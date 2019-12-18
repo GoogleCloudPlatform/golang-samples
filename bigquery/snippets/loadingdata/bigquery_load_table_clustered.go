@@ -22,6 +22,8 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// importClusteredTable demonstrates creating a table from a load job and defining partitioning and clustering
+// properties.
 func importClusteredTable(projectID, destDatasetID, destTableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

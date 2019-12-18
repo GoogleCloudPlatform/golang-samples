@@ -22,6 +22,8 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// createTableAndWidenQuery demonstrates how the schema of a table can be modified to add columns by appending
+// query results that include the new columns.
 func createTableAndWidenQuery(projectID, datasetID, tableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

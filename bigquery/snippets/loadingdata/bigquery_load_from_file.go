@@ -23,6 +23,7 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// importCSVFromFile demonstrates loading data into a BigQuery table using a file on the local filesystem.
 func importCSVFromFile(projectID, datasetID, tableID, filename string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

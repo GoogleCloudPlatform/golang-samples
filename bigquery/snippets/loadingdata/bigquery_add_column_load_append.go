@@ -23,6 +23,7 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// createTableAndWidenLoad demonstrates augmenting a table's schema to add a new column via a load job.
 func createTableAndWidenLoad(projectID, datasetID, tableID, filename string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

@@ -23,6 +23,7 @@ import (
 	"io"
 )
 
+// queryClusteredTable demonstrates querying a table that has a clustering specification.
 func queryClusteredTable(w io.Writer, projectID, datasetID, tableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

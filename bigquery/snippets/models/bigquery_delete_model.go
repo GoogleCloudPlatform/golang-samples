@@ -22,6 +22,7 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// deleteModel demonstrates deletion of BigQuery ML model.
 func deleteModel(projectID, datasetID, modelID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

@@ -24,6 +24,7 @@ import (
 	"google.golang.org/api/iterator"
 )
 
+// printDatasetInfo demonstrates fetching dataset metadata and printing some of it to an io.Writer.
 func printDatasetInfo(w io.Writer, projectID, datasetID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

@@ -36,6 +36,7 @@ func (i *Item) Save() (map[string]bigquery.Value, string, error) {
 	}, "", nil
 }
 
+// insertRows demonstrates inserting data into a table using the streaming insert mechanism.
 func insertRows(projectID, datasetID, tableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

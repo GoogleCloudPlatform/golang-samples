@@ -24,6 +24,7 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// queryBatch demonstrates issuing a query job using batch priority.
 func queryBatch(w io.Writer, projectID, dstDatasetID, dstTableID string) error {
 	// projectID := "my-project-id"
 	// dstDatasetID := "mydataset"

@@ -23,6 +23,7 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// tableLabels demonstrates fetching metadata from a table and printing the Label metadata to an io.Writer.
 func tableLabels(w io.Writer, projectID, datasetID, tableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

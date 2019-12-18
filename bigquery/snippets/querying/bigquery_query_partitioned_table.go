@@ -24,6 +24,8 @@ import (
 	"google.golang.org/api/iterator"
 )
 
+// queryPartitionedTable demonstrates querying a time partitioned table and using a predicate that
+// leverages the partitioned column.
 func queryPartitionedTable(w io.Writer, projectID, datasetID, tableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

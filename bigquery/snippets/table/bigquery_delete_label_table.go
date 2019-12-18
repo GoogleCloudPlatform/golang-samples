@@ -22,6 +22,7 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// deleteTableLabel demonstrates how to remove a specific metadata Label from a BigQuery table.
 func deleteTableLabel(projectID, datasetID, tableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

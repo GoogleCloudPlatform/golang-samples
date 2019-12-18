@@ -22,6 +22,8 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// importORCTruncate demonstrates loading Apache ORC data from Cloud Storage into a table
+// and overwriting/truncating existing data in the table.
 func importORCTruncate(projectID, datasetID, tableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

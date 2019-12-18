@@ -22,6 +22,7 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// updateTableAddColumn demonstrates modifying the schema of a table to append an additional column.
 func updateTableAddColumn(projectID, datasetID, tableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

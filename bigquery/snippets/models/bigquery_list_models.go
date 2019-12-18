@@ -24,6 +24,8 @@ import (
 	"google.golang.org/api/iterator"
 )
 
+// listModels demonstrates iterating through the collection of ML models in a dataset
+// and printing a basic identifier of the model.
 func listModels(w io.Writer, projectID, datasetID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"
