@@ -1860,10 +1860,16 @@ func updateBackup(ctx context.Context, w io.Writer, adminClient *database.Databa
 		return fmt.Errorf("Invalid database id %s", database)
 	}
 	backupName := matches[1] + "/backups/" + backupID
-	expires := time.Now().AddDate(0, 0, 5)
+
+	backup, err := adminClient.GetBackup(ctx, &adminpb.GetBackupRequest{Name: backupName})
+	if err != nil {
+		return err
+	}
+
+	expires := time.Unix(backup.CreateTime.GetSeconds(), int64(backup.CreateTime.Nanos)).AddDate(0, 0, 30)
 	expirespb := &pbt.Timestamp{Seconds: expires.Unix(), Nanos: int32(expires.Nanosecond())}
 
-	_, err := adminClient.UpdateBackup(ctx, &adminpb.UpdateBackupRequest{
+	_, err = adminClient.UpdateBackup(ctx, &adminpb.UpdateBackupRequest{
 		Backup:     &adminpb.Backup{
 			Name:       backupName,
 			ExpireTime: expirespb,
