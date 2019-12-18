@@ -33,7 +33,7 @@ func listSecrets(w io.Writer, parent string) error {
 	ctx := context.Background()
 	client, err := secretmanager.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to create secretmanager client: %w", err)
+		return fmt.Errorf("failed to create secretmanager client: %v", err)
 	}
 
 	// Build the request.
@@ -50,7 +50,7 @@ func listSecrets(w io.Writer, parent string) error {
 		}
 
 		if err != nil {
-			return fmt.Errorf("failed to list secret versions: %w", err)
+			return fmt.Errorf("failed to list secret versions: %v", err)
 		}
 
 		fmt.Fprintf(w, "Found secret %s\n", resp.Name)

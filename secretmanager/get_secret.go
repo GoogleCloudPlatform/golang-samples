@@ -33,7 +33,7 @@ func getSecret(w io.Writer, name string) error {
 	ctx := context.Background()
 	client, err := secretmanager.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to create secretmanager client: %w", err)
+		return fmt.Errorf("failed to create secretmanager client: %v", err)
 	}
 
 	// Build the request.
@@ -44,7 +44,7 @@ func getSecret(w io.Writer, name string) error {
 	// Call the API.
 	result, err := client.GetSecret(ctx, req)
 	if err != nil {
-		return fmt.Errorf("failed to get secret: %w", err)
+		return fmt.Errorf("failed to get secret: %v", err)
 	}
 
 	fmt.Fprintf(w, "Found secret %s with replication policy %s\n",
