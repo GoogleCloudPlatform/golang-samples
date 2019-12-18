@@ -54,9 +54,9 @@ type Service struct {
 	// Additional runtime environment variable overrides for the app.
 	Env EnvVars
 
-	deployed bool   // Whether the service has been deployed.
-	built    bool   // Whether the container image has been built.
-	url      string // The url of the deployed service.
+	deployed bool     // Whether the service has been deployed.
+	built    bool     // Whether the container image has been built.
+	url      *url.URL // The url of the deployed service.
 }
 
 // runID is an identifier that changes between runs.
@@ -107,23 +107,47 @@ func (s *Service) NewRequest(method, path string) (*http.Request, error) {
 // URL prepends the deployed service's base URL to the given path.
 // Returns an error if the application has not been deployed.
 func (s *Service) URL(p string) (string, error) {
+	u, err := s.ParsedURL()
+	if err != nil {
+		return "", fmt.Errorf("service.ParsedURL: %v", err)
+	}
+	modified := &url.URL{}
+	*modified = *u
+	modified.Path = path.Join(modified.Path, p)
+
+	return modified.String(), nil
+}
+
+// Host returns the host:port of the service to facilitate new gRPC connections.
+func (s *Service) Host() (string, error) {
+	u, err := s.ParsedURL()
+	if err != nil {
+		return "", fmt.Errorf("service.ParsedURL: %v", err)
+	}
+	return u.Host + ":443", nil
+}
+
+// ParsedURL retrieves the parsed URL of the service.
+// This URL is stored on the service struct for repeated retrieval.
+func (s *Service) ParsedURL() (*url.URL, error) {
 	if !s.deployed {
-		return "", errors.New("URL called before Deploy")
+		return nil, errors.New("URL called before Deploy")
 	}
+	if s.url == nil {
+		out, err := gcloud(s.operationLabel("get url"), s.urlCmd())
+		if err != nil {
+			return nil, fmt.Errorf("gcloud: %s: %q", s.Name, err)
+		}
 
-	out, err := gcloud(s.operationLabel("get url"), s.urlCmd())
-	if err != nil {
-		return "", fmt.Errorf("gcloud: %s: %q", s.Name, err)
+		sURL := string(out)
+		u, err := url.Parse(sURL)
+		if err != nil {
+			return nil, fmt.Errorf("url.Parse: %v", err)
+		}
+
+		s.url = u
 	}
-
-	sURL := string(out)
-	u, err := url.Parse(sURL)
-	if err != nil {
-		return "", fmt.Errorf("url.Parse: %v", err)
-	}
-	u.Path = path.Join(u.Path, p)
-
-	return u.String(), nil
+	return s.url, nil
 }
 
 // validate confirms all required service properties are present.
@@ -242,7 +266,9 @@ func (s *Service) deployCmd() *exec.Cmd {
 	}, s.Platform.CommandFlags()...)
 
 	if s.Env != nil {
-		args = append(args, "--set-env-vars", s.Env.String())
+		for k := range s.Env {
+			args = append(args, "--set-env-vars", s.Env.Variable(k))
+		}
 	}
 
 	// NOTE: if the "beta" component is not available, and this is run in parallel,
