@@ -79,6 +79,9 @@ func (e Entry) String() string {
 // [START run_manual_logging]
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
+        // Disable log timestamps, these are added automatically.
+        log.SetFlags(0)
+
 	// Uncomment and populate this variable in your code:
 	// projectID = "The project ID of your Cloud Run service"
 
