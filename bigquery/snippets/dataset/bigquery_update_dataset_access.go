@@ -15,7 +15,6 @@
 package dataset
 
 // [START bigquery_update_dataset_access]
-
 import (
 	"context"
 	"fmt"
@@ -23,6 +22,8 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// updateDatasetAccessControl demonstrates how the access control policy of a dataset
+// can be amended by adding an additional entry corresponding to a specific user identity.
 func updateDatasetAccessControl(projectID, datasetID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

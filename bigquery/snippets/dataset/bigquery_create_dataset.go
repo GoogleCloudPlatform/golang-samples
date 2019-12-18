@@ -15,7 +15,6 @@
 package dataset
 
 // [START bigquery_create_dataset]
-
 import (
 	"context"
 	"fmt"
@@ -23,6 +22,7 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// createDataset demonstrates creation of a new dataset using an explicit destination location.
 func createDataset(projectID, datasetID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"
