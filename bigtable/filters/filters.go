@@ -40,6 +40,7 @@ import (
 	"io"
 	"sort"
 	"strings"
+	"time"
 
 	"cloud.google.com/go/bigtable"
 )
@@ -135,12 +136,9 @@ func filterLimitValueRegex(w io.Writer, projectID, instanceID string, tableName 
 // [END bigtable_filters_limit_value_regex]
 // [START bigtable_filters_limit_timestamp_range]
 func filterLimitTimestampRange(w io.Writer, projectID, instanceID string, tableName string) error {
-	startTime := (bigtable.Timestamp(0)).Time()
-	timestampMinusHr := bigtable.Timestamp(bigtable.Now().TruncateToMilliseconds() - 60*60*1000*1000)
-	endTime := timestampMinusHr.Time()
-	filter := bigtable.TimestampRangeFilter(
-		startTime,
-		endTime)
+	endTime := time.Now()
+	startTime := endTime.Add(-1*time.Hour)
+	filter := bigtable.TimestampRangeFilter(startTime, endTime)
 
 	return readWithFilter(w, projectID, instanceID, tableName, filter)
 }

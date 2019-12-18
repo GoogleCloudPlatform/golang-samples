@@ -61,19 +61,22 @@ func TestReads(t *testing.T) {
 		filter func(io.Writer, string, string, string) error
 		want   string
 	}{
-		{name: "readRow", filter: readRow, want: fmt.Sprintf(
+		{
+			name: "readRow", filter: readRow, want: fmt.Sprintf(
 			`Reading data for phone#4c410523#20190501:
 Column Family stats_summary
 	connected_cell: 1 @%[1]d
 	connected_wifi: 1 @%[1]d
 	os_build: PQ2A.190405.003 @%[1]d`, timestamp),
 		},
-		{name: "readRowPartial", filter: readRowPartial, want: fmt.Sprintf(
+		{
+			name: "readRowPartial", filter: readRowPartial, want: fmt.Sprintf(
 			`Reading data for phone#4c410523#20190501:
 Column Family stats_summary
 	os_build: PQ2A.190405.003 @%[1]d`, timestamp),
 		},
-		{name: "readRows", filter: readRows, want: fmt.Sprintf(
+		{
+			name: "readRows", filter: readRows, want: fmt.Sprintf(
 			`Reading data for phone#4c410523#20190501:
 Column Family stats_summary
 	connected_cell: 1 @%[1]d
@@ -86,7 +89,8 @@ Column Family stats_summary
 	connected_wifi: 1 @%[1]d
 	os_build: PQ2A.190405.004 @%[1]d`, timestamp),
 		},
-		{name: "readRowRange", filter: readRowRange, want: fmt.Sprintf(
+		{
+			name: "readRowRange", filter: readRowRange, want: fmt.Sprintf(
 			`Reading data for phone#4c410523#20190501:
 Column Family stats_summary
 	connected_cell: 1 @%[1]d
@@ -105,38 +109,8 @@ Column Family stats_summary
 	connected_wifi: 1 @%[1]d
 	os_build: PQ2A.190406.000 @%[1]d`, timestamp),
 		},
-		{name: "readRowRanges", filter: readRowRanges, want: fmt.Sprintf(
-			`Reading data for phone#4c410523#20190501:
-Column Family stats_summary
-	connected_cell: 1 @%[1]d
-	connected_wifi: 1 @%[1]d
-	os_build: PQ2A.190405.003 @%[1]d
-
-Reading data for phone#4c410523#20190502:
-Column Family stats_summary
-	connected_cell: 1 @%[1]d
-	connected_wifi: 1 @%[1]d
-	os_build: PQ2A.190405.004 @%[1]d
-
-Reading data for phone#4c410523#20190505:
-Column Family stats_summary
-	connected_cell: 0 @%[1]d
-	connected_wifi: 1 @%[1]d
-	os_build: PQ2A.190406.000 @%[1]d
-
-Reading data for phone#5c10102#20190501:
-Column Family stats_summary
-	connected_cell: 1 @%[1]d
-	connected_wifi: 1 @%[1]d
-	os_build: PQ2A.190401.002 @%[1]d
-
-Reading data for phone#5c10102#20190502:
-Column Family stats_summary
-	connected_cell: 1 @%[1]d
-	connected_wifi: 0 @%[1]d
-	os_build: PQ2A.190406.000 @%[1]d`, timestamp),
-		},
-		{name: "readPrefix", filter: readPrefix, want: fmt.Sprintf(
+		{
+			name: "readRowRanges", filter: readRowRanges, want: fmt.Sprintf(
 			`Reading data for phone#4c410523#20190501:
 Column Family stats_summary
 	connected_cell: 1 @%[1]d
@@ -167,7 +141,40 @@ Column Family stats_summary
 	connected_wifi: 0 @%[1]d
 	os_build: PQ2A.190406.000 @%[1]d`, timestamp),
 		},
-		{name: "readFilter", filter: readFilter, want: fmt.Sprintf(
+		{
+			name: "readPrefix", filter: readPrefix, want: fmt.Sprintf(
+			`Reading data for phone#4c410523#20190501:
+Column Family stats_summary
+	connected_cell: 1 @%[1]d
+	connected_wifi: 1 @%[1]d
+	os_build: PQ2A.190405.003 @%[1]d
+
+Reading data for phone#4c410523#20190502:
+Column Family stats_summary
+	connected_cell: 1 @%[1]d
+	connected_wifi: 1 @%[1]d
+	os_build: PQ2A.190405.004 @%[1]d
+
+Reading data for phone#4c410523#20190505:
+Column Family stats_summary
+	connected_cell: 0 @%[1]d
+	connected_wifi: 1 @%[1]d
+	os_build: PQ2A.190406.000 @%[1]d
+
+Reading data for phone#5c10102#20190501:
+Column Family stats_summary
+	connected_cell: 1 @%[1]d
+	connected_wifi: 1 @%[1]d
+	os_build: PQ2A.190401.002 @%[1]d
+
+Reading data for phone#5c10102#20190502:
+Column Family stats_summary
+	connected_cell: 1 @%[1]d
+	connected_wifi: 0 @%[1]d
+	os_build: PQ2A.190406.000 @%[1]d`, timestamp),
+		},
+		{
+			name: "readFilter", filter: readFilter, want: fmt.Sprintf(
 			`Reading data for phone#4c410523#20190501:
 Column Family stats_summary
 	os_build: PQ2A.190405.003 @%[1]d

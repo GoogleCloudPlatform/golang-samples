@@ -88,7 +88,8 @@ Column Family cell_plan
 Column Family stats_summary
 	connected_cell: 1 @%[1]d
 	connected_wifi: 1 @%[1]d
-	os_build: PQ2A.190401.002 @%[1]d`, timestamp, timestampMinusHr),},
+	os_build: PQ2A.190401.002 @%[1]d`, timestamp, timestampMinusHr),
+		},
 		{
 			name:   "filterLimitCellsPerCol",
 			filter: filterLimitCellsPerCol,
@@ -133,7 +134,8 @@ Column Family cell_plan
 Column Family stats_summary
 	connected_cell: 1 @%[1]d
 	connected_wifi: 0 @%[1]d
-	os_build: PQ2A.190406.000 @%[1]d`, timestamp, timestampMinusHr),},
+	os_build: PQ2A.190406.000 @%[1]d`, timestamp, timestampMinusHr),
+		},
 		{
 			name:   "filterLimitCellsPerRow",
 			filter: filterLimitCellsPerRow,
@@ -161,7 +163,8 @@ Column Family stats_summary
 Reading data for phone#5c10102#20190502:
 Column Family stats_summary
 	connected_cell: 1 @%[1]d
-	connected_wifi: 0 @%[1]d`, timestamp, timestampMinusHr),},
+	connected_wifi: 0 @%[1]d`, timestamp, timestampMinusHr),
+		},
 		{
 			name:   "filterLimitCellsPerRowOffset",
 			filter: filterLimitCellsPerRowOffset,
@@ -196,7 +199,8 @@ Reading data for phone#5c10102#20190502:
 Column Family cell_plan
 	data_plan_10gb: true @%[1]d
 Column Family stats_summary
-	os_build: PQ2A.190406.000 @%[1]d`, timestamp, timestampMinusHr),},
+	os_build: PQ2A.190406.000 @%[1]d`, timestamp, timestampMinusHr),
+		},
 		{
 			name:   "filterLimitColFamilyRegex",
 			filter: filterLimitColFamilyRegex,
@@ -229,7 +233,8 @@ Reading data for phone#5c10102#20190502:
 Column Family stats_summary
 	connected_cell: 1 @%[1]d
 	connected_wifi: 0 @%[1]d
-	os_build: PQ2A.190406.000 @%[1]d`, timestamp, timestampMinusHr),},
+	os_build: PQ2A.190406.000 @%[1]d`, timestamp, timestampMinusHr),
+		},
 		{
 			name:   "filterLimitColQualifierRegex",
 			filter: filterLimitColQualifierRegex,
@@ -257,7 +262,8 @@ Column Family stats_summary
 Reading data for phone#5c10102#20190502:
 Column Family stats_summary
 	connected_cell: 1 @%[1]d
-	connected_wifi: 0 @%[1]d`, timestamp, timestampMinusHr),},
+	connected_wifi: 0 @%[1]d`, timestamp, timestampMinusHr),
+		},
 		{
 			name:   "filterLimitColRange",
 			filter: filterLimitColRange,
@@ -274,7 +280,8 @@ Column Family cell_plan
 
 Reading data for phone#4c410523#20190505:
 Column Family cell_plan
-	data_plan_05gb: true @%[1]d`, timestamp, timestampMinusHr),},
+	data_plan_05gb: true @%[1]d`, timestamp, timestampMinusHr),
+		},
 		{
 			name:   "filterLimitValueRange",
 			filter: filterLimitValueRange,
@@ -285,7 +292,8 @@ Column Family stats_summary
 
 Reading data for phone#4c410523#20190502:
 Column Family stats_summary
-	os_build: PQ2A.190405.004 @%[1]d`, timestamp, timestampMinusHr),},
+	os_build: PQ2A.190405.004 @%[1]d`, timestamp, timestampMinusHr),
+		},
 		{
 			name:   "filterLimitValueRegex",
 			filter: filterLimitValueRegex,
@@ -308,7 +316,8 @@ Column Family stats_summary
 
 Reading data for phone#5c10102#20190502:
 Column Family stats_summary
-	os_build: PQ2A.190406.000 @%[1]d`, timestamp, timestampMinusHr),},
+	os_build: PQ2A.190406.000 @%[1]d`, timestamp, timestampMinusHr),
+		},
 		{
 			name:   "filterLimitTimestampRange",
 			filter: filterLimitTimestampRange,
@@ -365,7 +374,8 @@ Column Family cell_plan
 Column Family stats_summary
 	connected_cell: 1 @%[1]d
 	connected_wifi: 0 @%[1]d
-	os_build: PQ2A.190406.000 @%[1]d`, timestamp, timestampMinusHr),},
+	os_build: PQ2A.190406.000 @%[1]d`, timestamp, timestampMinusHr),
+		},
 		{
 			name:   "filterModifyStripValue",
 			filter: filterModifyStripValue,
@@ -410,7 +420,8 @@ Column Family cell_plan
 Column Family stats_summary
 	connected_cell:  @%[1]d
 	connected_wifi:  @%[1]d
-	os_build:  @%[1]d`, timestamp, timestampMinusHr),},
+	os_build:  @%[1]d`, timestamp, timestampMinusHr),
+		},
 		{
 			name:   "filterComposingChain",
 			filter: filterComposingChain,
@@ -434,7 +445,8 @@ Column Family cell_plan
 
 Reading data for phone#5c10102#20190502:
 Column Family cell_plan
-	data_plan_10gb: true @%[1]d`, timestamp, timestampMinusHr),},
+	data_plan_10gb: true @%[1]d`, timestamp, timestampMinusHr),
+		},
 		{
 			name:   "filterComposingInterleave",
 			filter: filterComposingInterleave,
@@ -468,7 +480,8 @@ Reading data for phone#5c10102#20190502:
 Column Family cell_plan
 	data_plan_10gb: true @%[1]d
 Column Family stats_summary
-	os_build: PQ2A.190406.000 @%[1]d`, timestamp, timestampMinusHr),},
+	os_build: PQ2A.190406.000 @%[1]d`, timestamp, timestampMinusHr),
+		},
 		{
 			name:   "filterComposingCondition",
 			filter: filterComposingCondition,
