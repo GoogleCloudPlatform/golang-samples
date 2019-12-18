@@ -63,4 +63,5 @@ func searchFHIRResources(w io.Writer, projectID, location, datasetID, fhirStoreI
 
 	return nil
 }
+
 // [END healthcare_search_resources]
