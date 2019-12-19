@@ -19,9 +19,11 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	pb "github.com/GoogleCloudPlatform/golang-samples/run/grpc-ping/pkg/api/v1"
 	"github.com/golang/protobuf/ptypes"
+	"google.golang.org/grpc/status"
 )
 
 type pingService struct {
@@ -47,7 +49,9 @@ func (s *pingService) SendUpstream(ctx context.Context, req *pb.Request) (*pb.Re
 	p := &pb.Request{
 		Message: req.GetMessage() + " (relayed)",
 	}
-	tokenAudience := "https://" + os.Getenv("GRPC_PING_HOST")
+
+	hostWithoutPort := strings.Split(os.Getenv("GRPC_PING_HOST"), ":")[0]
+	tokenAudience := "https://" + hostWithoutPort
 	resp, err := PingRequest(conn, p, tokenAudience, os.Getenv("GRPC_PING_UNAUTHENTICATED") == "")
 	if err != nil {
 		log.Printf("PingRequest: %q", err)

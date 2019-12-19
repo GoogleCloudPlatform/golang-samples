@@ -16,15 +16,15 @@ To demonstrate service-to-service gRPC requests, this container image is deploye
    gcloud builds submit --tag gcr.io/$GOOGLE_CLOUD_PROJECT/grpc-ping
 
    # Deploy ping service for private access.
-   gcloud beta run deploy ping-upstream --image gcr.io/$GOOGLE_CLOUD_PROJECT/grpc-ping
+   gcloud run deploy ping-upstream --image gcr.io/$GOOGLE_CLOUD_PROJECT/grpc-ping
 
    # Get the host name of the ping service.
-   PING_URL=$(gcloud beta run services describe ping-upstream --format='value(status.url)')
+   PING_URL=$(gcloud run services describe ping-upstream --format='value(status.url)')
    PING_DOMAIN=${PING_URL#https://}
 
    # Deploy ping-relay service for public access.
-   gcloud beta run deploy ping --image gcr.io/$GOOGLE_CLOUD_PROJECT/grpc-ping \
-       --set-env-vars GRPC_PING_HOST=${PING_DOMAIN} \
+   gcloud run deploy ping --image gcr.io/$GOOGLE_CLOUD_PROJECT/grpc-ping \
+       --set-env-vars GRPC_PING_HOST=${PING_DOMAIN}:443 \
        --allow-unauthenticated
    ```
 
@@ -48,8 +48,7 @@ See below for instructions on updating the proto.
 
 ## Environment Variable Configuration Options
 
-* `GRPC_PING_HOST`: [relay: required] Ping service host nanme.
-* `GRPC_PING_PORT`: [relay: `443`] Ping service port number.
+* `GRPC_PING_HOST`: [relay: `example.com:443`; required] Ping upstream service host nanme.
 * `GRPC_PING_INSECURE`: [relay: `false`] Use an insecure connection to the ping service. Primarily for local development.
 * `GRPC_PING_UNAUTHENTICATED`: [relay: `false`] Make unauthenticated requests to the ping service. Primarily for local development.
 
@@ -89,7 +88,7 @@ ping-j6jtwetqdq-uc.a.run.app
 
    ```sh
    cd ./relay
-   GRPC_PING_INSECURE=1 GRPC_PING_HOST=localhost GRPC_PING_PORT=9090 GRPC_PING_UNAUTHENTICATED=1 \
+   GRPC_PING_INSECURE=1 GRPC_PING_HOST=localhost:9090 GRPC_PING_UNAUTHENTICATED=1 \
        go run .
    ```
 

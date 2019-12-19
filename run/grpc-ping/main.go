@@ -48,17 +48,17 @@ func main() {
 
 // [END run_grpc_server]
 
-// Conn holds an open connection to the ping service.
+// conn holds an open connection to the ping service.
 var conn *grpc.ClientConn
 
 func init() {
 	if os.Getenv("GRPC_PING_HOST") != "" {
 		var err error
-		Conn, err = NewConn(os.Getenv("GRPC_PING_HOST"), os.Getenv("GRPC_PING_PORT"), os.Getenv("GRPC_PING_INSECURE") != "")
+		conn, err = NewConn(os.Getenv("GRPC_PING_HOST"), os.Getenv("GRPC_PING_INSECURE") != "")
 		if err != nil {
 			log.Fatal(err)
 		}
 	} else {
-		log.Println("Starting without support for SendUpstream: configure with 'GRPC_PING_HOST' environment variable. E.g., example.com")
+		log.Println("Starting without support for SendUpstream: configure with 'GRPC_PING_HOST' environment variable. E.g., example.com:443")
 	}
 }

@@ -25,14 +25,10 @@ import (
 )
 
 // NewConn creates a new gRPC connection.
-func NewConn(host string, port string, insecure bool) (*grpc.ClientConn, error) {
-	if port == "" {
-		port = "443"
-	}
-
-	var serverAddr = host + ":" + port
+// host should be of the form domain:port, e.g., example.com:443
+func NewConn(host string, insecure bool) (*grpc.ClientConn, error) {
 	var opts []grpc.DialOption
-	if serverAddr != "" {
+	if host != "" {
 		opts = append(opts, grpc.WithAuthority(host))
 	}
 
@@ -49,7 +45,7 @@ func NewConn(host string, port string, insecure bool) (*grpc.ClientConn, error) 
 		opts = append(opts, grpc.WithTransportCredentials(cred))
 	}
 
-	return grpc.Dial(serverAddr, opts...)
+	return grpc.Dial(host, opts...)
 }
 
 // [END run_grpc_conn]
