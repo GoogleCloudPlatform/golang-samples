@@ -326,7 +326,7 @@ func TestSample(t *testing.T) {
 		if restoreDb.GetState() != adminpb.Database_READY_OPTIMIZING {
 			break
 		}
-		time.Sleep(1 * time.Second)
+		time.Sleep(1 * time.Minute)
 	}
 
 	out = runCommand(t, "deletebackup", dbName)
