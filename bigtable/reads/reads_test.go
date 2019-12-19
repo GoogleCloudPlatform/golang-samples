@@ -26,12 +26,9 @@ import (
 	"testing"
 
 	"cloud.google.com/go/bigtable"
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestReads(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
 	ctx := context.Background()
 	project := os.Getenv("GOLANG_SAMPLES_BIGTABLE_PROJECT")
 	instance := os.Getenv("GOLANG_SAMPLES_BIGTABLE_INSTANCE")
