@@ -19,7 +19,9 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/api/option"
+	"google.golang.org/genproto/googleapis/longrunning"
 	"io"
 	"log"
 	"os"
@@ -104,7 +106,14 @@ var (
 		"createtabledocswithtimestamp":    createTableDocumentsWithTimestamp,
 		"createtabledocswithhistorytable": createTableDocumentsWithHistoryTable,
 		"createbackup":                    createBackup,
+		"cancelbackup":                    cancelBackup,
 		"listbackups":                     listBackups,
+		"listbackupsbyname":               listBackupsByName,
+		"listsmallbackups":                listSmallBackups,
+		"listnewbackups":                  listNewBackups,
+		"listinstancebackups":             listInstanceBackups,
+		"listbackupoperations":            listBackupOperations,
+		"listdatabaseoperations":          listDatabaseOperations,
 		"updatebackup":                    updateBackup,
 		"deletebackup":                    deleteBackup,
 		"restorebackup":                   restoreBackup,
@@ -1841,11 +1850,33 @@ func createBackup(ctx context.Context, w io.Writer, adminClient *database.Databa
 		return err
 	}
 
-	fmt.Fprintf(w, "Created backup [%s] from database [%s], size = %d bytes\n", backupID, database, backup.SizeBytes)
+	fmt.Fprintf(w, "Created backup [%s] from database [%s], size = %d bytes, created at = %s\n", backup.Name, backup.Database,
+		backup.SizeBytes, time.Unix(backup.CreateTime.Seconds, backup.CreateTime.Seconds).Format(time.RFC3339))
 	return nil
 }
 
 // [END spanner_create_backup]
+
+// [START spanner_cancel_backup]
+
+func cancelBackup(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	backupID := "my-backup-cancelled"
+	expires := time.Now().AddDate(0, 0, 1)
+	op, err := adminClient.CreateNewBackup(ctx, backupID, database, expires)
+	if err != nil {
+		return err
+	}
+
+	err = adminClient.LROClient.CancelOperation(ctx, &longrunning.CancelOperationRequest{Name: op.Name()})
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprintf(w, "Backup cancelled.\n")
+	return nil
+}
+
+// [END spanner_cancel_backup]
 
 // [START spanner_update_backup]
 
@@ -1856,10 +1887,16 @@ func updateBackup(ctx context.Context, w io.Writer, adminClient *database.Databa
 		return fmt.Errorf("Invalid database id %s", database)
 	}
 	backupName := matches[1] + "/backups/" + backupID
-	expires := time.Now().AddDate(0, 0, 5)
+
+	backup, err := adminClient.GetBackup(ctx, &adminpb.GetBackupRequest{Name: backupName})
+	if err != nil {
+		return err
+	}
+
+	expires := time.Unix(backup.CreateTime.GetSeconds(), int64(backup.CreateTime.Nanos)).AddDate(0, 0, 30)
 	expirespb := &pbt.Timestamp{Seconds: expires.Unix(), Nanos: int32(expires.Nanosecond())}
 
-	_, err := adminClient.UpdateBackup(ctx, &adminpb.UpdateBackupRequest{
+	_, err = adminClient.UpdateBackup(ctx, &adminpb.UpdateBackupRequest{
 		Backup:     &adminpb.Backup{
 			Name:       backupName,
 			ExpireTime: expirespb,
@@ -1943,6 +1980,219 @@ func listBackups(ctx context.Context, w io.Writer, adminClient *database.Databas
 }
 
 // [END spanner_list_backups]
+
+// [START spanner_list_backup_operations]
+
+func listBackupOperations(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
+	if matches == nil || len(matches) != 3 {
+		return fmt.Errorf("Invalid database id %s", database)
+	}
+	instanceName := matches[1]
+	counter := 0
+	backupOperationsIterator := adminClient.ListBackupOperations(ctx, &adminpb.ListBackupOperationsRequest{
+		Parent: instanceName,
+		// List backup operations only for this specific database
+		Filter: fmt.Sprintf("(metadata.database:%s) AND (metadata.@type:type.googleapis.com/google.spanner.admin.database.v1.CreateBackupMetadata)", database),
+	})
+	for {
+		resp, err := backupOperationsIterator.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		createBackupMetadata := &adminpb.CreateBackupMetadata{}
+		if err := ptypes.UnmarshalAny(resp.Metadata, createBackupMetadata); err != nil {
+			return err
+		}
+		var detail string
+		if resp.Done {
+			detail = "completed"
+		} else {
+			detail = fmt.Sprintf("in progress (%d %%)", createBackupMetadata.Progress.ProgressPercent)
+		}
+		fmt.Fprintf(w, "%s - %s\n", resp.Name, detail)
+		counter++
+	}
+	fmt.Fprintf(w, "Backup operation count: %d\n", counter)
+
+	return nil
+}
+
+// [END spanner_list_backup_operations]
+
+// [START spanner_list_database_operations]
+
+func listDatabaseOperations(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
+	if matches == nil || len(matches) != 3 {
+		return fmt.Errorf("Invalid database id %s", database)
+	}
+	instanceName := matches[1]
+	counter := 0
+	databaseOperationsIterator := adminClient.ListDatabaseOperations(ctx, &adminpb.ListDatabaseOperationsRequest{
+		Parent: instanceName,
+	})
+	for {
+		resp, err := databaseOperationsIterator.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		var detail string
+		if resp.Done {
+			detail = "completed"
+		} else {
+			detail = "in progress"
+		}
+		fmt.Fprintf(w, "%s - %s\n", resp.Name, detail)
+		counter++
+	}
+	fmt.Fprintf(w, "Database operation count: %d\n", counter)
+
+	return nil
+}
+
+// [END spanner_list_database_operations]
+
+// [START spanner_list_backups_by_name]
+
+func listBackupsByName(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
+	if matches == nil || len(matches) != 3 {
+		return fmt.Errorf("Invalid database id %s", database)
+	}
+	instanceName := matches[1]
+	counter := 0
+	backupsIterator := adminClient.ListBackups(ctx, &adminpb.ListBackupsRequest{
+		Parent: instanceName,
+		// Only include backups with matching names
+		Filter: "Name:my-backup",
+	})
+	for {
+		resp, err := backupsIterator.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "%s [%v] - %d bytes\n", resp.Name, resp.State, resp.SizeBytes)
+		counter++
+	}
+	fmt.Fprintf(w, "Backup count: %d\n", counter)
+
+	return nil
+}
+
+// [END spanner_list_backups_by_name]
+
+// [START spanner_list_small_backups]
+
+func listSmallBackups(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
+	if matches == nil || len(matches) != 3 {
+		return fmt.Errorf("Invalid database id %s", database)
+	}
+	instanceName := matches[1]
+	counter := 0
+	backupsIterator := adminClient.ListBackups(ctx, &adminpb.ListBackupsRequest{
+		Parent: instanceName,
+		// Only include backups in READY state and with size < 64K
+		Filter: "(state:READY) AND (size_bytes < 65536)",
+	})
+	for {
+		resp, err := backupsIterator.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "%s [%v] - %d bytes\n", resp.Name, resp.State, resp.SizeBytes)
+		counter++
+	}
+	fmt.Fprintf(w, "Backup count: %d\n", counter)
+
+	return nil
+}
+
+// [END spanner_list_small_backups]
+
+// [START spanner_list_new_backups]
+
+func listNewBackups(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
+	if matches == nil || len(matches) != 3 {
+		return fmt.Errorf("Invalid database id %s", database)
+	}
+	instanceName := matches[1]
+	counter := 0
+	minCreateTime := time.Now().AddDate(0, 0, -1)
+	maxExpireTime := time.Now().AddDate(0, 0, 3)
+
+	backupsIterator := adminClient.ListBackups(ctx, &adminpb.ListBackupsRequest{
+		Parent: instanceName,
+		// Only include backups that were created recently and expire soon
+		Filter: fmt.Sprintf(`(state:READY) AND (create_time > "%s") AND (expire_time < "%s")`,
+						minCreateTime.Format(time.RFC3339), maxExpireTime.Format(time.RFC3339)),
+	})
+	for {
+		resp, err := backupsIterator.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "%s [%v] - %d bytes\n", resp.Name, resp.State, resp.SizeBytes)
+		counter++
+	}
+	fmt.Fprintf(w, "Backup count: %d\n", counter)
+
+	return nil
+}
+
+// [END spanner_list_new_backups]
+
+// [START spanner_list_instance_backups]
+
+func listInstanceBackups(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
+	if matches == nil || len(matches) != 3 {
+		return fmt.Errorf("Invalid database id %s", database)
+	}
+	instanceName := matches[1]
+	request := &adminpb.ListBackupsRequest{
+		Parent: instanceName,
+		PageSize: 3,
+	}
+	backupsIterator := adminClient.ListBackups(ctx, request)
+	for {
+		resp, err := backupsIterator.Next()
+		if err == iterator.Done {
+			pageToken := backupsIterator.PageInfo().Token
+			if pageToken == "" {
+				break
+			} else {
+				request.PageToken = pageToken
+				backupsIterator = adminClient.ListBackups(ctx, request)
+			}
+		}
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "%s [%v] - %d bytes\n", resp.Name, resp.State, resp.SizeBytes)
+	}
+
+	return nil
+}
+
+// [END spanner_list_instance_backups]
 
 // [START spanner_delete_backup]
 
