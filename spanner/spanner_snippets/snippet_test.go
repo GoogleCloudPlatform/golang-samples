@@ -316,6 +316,19 @@ func TestSample(t *testing.T) {
 	out = runCommand(t, "restorebackup", restoreDbName)
 	assertContains(t, out, "Restored backup [")
 	assertContains(t, out, "/backups/my-backup]")
+
+	// Wait for database to finish optimizing - cannot delete a backup if a database restored from it
+	for {
+		restoreDb, err := adminClient.GetDatabase(ctx, &adminpb.GetDatabaseRequest{Name: restoreDbName})
+		if err != nil {
+			t.Errorf("GetDatabase(%q): %v", restoreDbName, err)
+		}
+		if restoreDb.GetState() != adminpb.Database_READY_OPTIMIZING {
+			break
+		}
+		time.Sleep(1 * time.Second)
+	}
+
 	out = runCommand(t, "deletebackup", dbName)
 	assertContains(t, out, "Deleted backup [my-backup]")
 }
