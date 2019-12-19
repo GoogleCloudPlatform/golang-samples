@@ -1841,7 +1841,7 @@ func queryWithHistory(ctx context.Context, w io.Writer, client *spanner.Client) 
 func createBackup(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
 	backupID := "my-backup"
 	expires := time.Now().AddDate(0, 0, 1)
-	op, err := adminClient.CreateNewBackup(ctx, backupID, database, expires)
+	op, err := adminClient.StartBackupOperation(ctx, backupID, database, expires)
 	if err != nil {
 		return err
 	}
@@ -1862,7 +1862,7 @@ func createBackup(ctx context.Context, w io.Writer, adminClient *database.Databa
 func cancelBackup(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
 	backupID := "my-backup-cancelled"
 	expires := time.Now().AddDate(0, 0, 1)
-	op, err := adminClient.CreateNewBackup(ctx, backupID, database, expires)
+	op, err := adminClient.StartBackupOperation(ctx, backupID, database, expires)
 	if err != nil {
 		return err
 	}
