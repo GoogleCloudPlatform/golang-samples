@@ -105,6 +105,7 @@ var (
 		"createtabledocswithtimestamp":    createTableDocumentsWithTimestamp,
 		"createtabledocswithhistorytable": createTableDocumentsWithHistoryTable,
 		"createbackup":                    createBackup,
+		"cancelbackup":                    cancelBackup,
 		"listbackups":                     listBackups,
 		"listbackupsbyname":               listBackupsByName,
 		"listsmallbackups":                listSmallBackups,
@@ -1853,6 +1854,25 @@ func createBackup(ctx context.Context, w io.Writer, adminClient *database.Databa
 }
 
 // [END spanner_create_backup]
+
+// [START spanner_cancel_backup]
+
+func cancelBackup(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	ctx, cancel := context.WithCancel(ctx)
+
+	backupID := "my-backup-cancelled"
+	expires := time.Now().AddDate(0, 0, 1)
+	_, err := adminClient.CreateNewBackup(ctx, backupID, database, expires)
+	if err != nil {
+		return err
+	}
+	cancel()
+
+	fmt.Fprintf(w, "Backup cancelled.\n")
+	return nil
+}
+
+// [END spanner_cancel_backup]
 
 // [START spanner_update_backup]
 
