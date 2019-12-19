@@ -41,7 +41,7 @@ func TestFilters(t *testing.T) {
 	adminClient, err := bigtable.NewAdminClient(ctx, project, instance)
 
 	uuid, err := uuid.NewRandom()
-	tableName := fmt.Sprintf("mobile-time-series--%s-%s", tc.ProjectID, uuid.String()[:8])
+	tableName := fmt.Sprintf("mobile-time-series-%s", uuid.String()[:8])
 	adminClient.DeleteTable(ctx, tableName)
 
 	if err := adminClient.CreateTable(ctx, tableName); err != nil {
