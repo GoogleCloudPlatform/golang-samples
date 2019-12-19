@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/api/option"
+	"google.golang.org/genproto/googleapis/longrunning"
 	"io"
 	"log"
 	"os"
@@ -1858,15 +1859,17 @@ func createBackup(ctx context.Context, w io.Writer, adminClient *database.Databa
 // [START spanner_cancel_backup]
 
 func cancelBackup(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
-	ctx, cancel := context.WithCancel(ctx)
-
 	backupID := "my-backup-cancelled"
 	expires := time.Now().AddDate(0, 0, 1)
-	_, err := adminClient.CreateNewBackup(ctx, backupID, database, expires)
+	op, err := adminClient.CreateNewBackup(ctx, backupID, database, expires)
 	if err != nil {
 		return err
 	}
-	cancel()
+
+	err = adminClient.LROClient.CancelOperation(ctx, &longrunning.CancelOperationRequest{Name: op.Name()})
+	if err != nil {
+		return err
+	}
 
 	fmt.Fprintf(w, "Backup cancelled.\n")
 	return nil
