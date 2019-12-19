@@ -48,9 +48,9 @@ func TestSample(t *testing.T) {
 		databaseId = trimmedDatabaseId
 	}
 	if len(restoreDatabaseId) > 30 {
-		trimmedDbFragment := restoreDatabaseId[:30]
-		t.Logf("Restore database name '%s' trimmed to '%s'", restoreDatabaseId, trimmedDbFragment)
-		restoreDatabaseId = trimmedDbFragment
+		trimmedDatabaseId := restoreDatabaseId[:30]
+		t.Logf("Restore database name '%s' trimmed to '%s'", restoreDatabaseId, trimmedDatabaseId)
+		restoreDatabaseId = trimmedDatabaseId
 	}
 	dbName := fmt.Sprintf("%s/databases/%s", instance, databaseId)
 	restoreDbName := fmt.Sprintf("%s/databases/%s", instance, restoreDatabaseId)
