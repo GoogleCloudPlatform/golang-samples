@@ -55,7 +55,8 @@ func (s *pingService) SendUpstream(ctx context.Context, req *pb.Request) (*pb.Re
 	resp, err := PingRequest(conn, p, tokenAudience, os.Getenv("GRPC_PING_UNAUTHENTICATED") == "")
 	if err != nil {
 		log.Printf("PingRequest: %q", err)
-		return nil, fmt.Errorf("could not reach ping service")
+		c := status.Code(err)
+		return nil, status.Errorf(c, "Could not reach ping service: %s", status.Convert(err).Message())
 	}
 
 	log.Print("received upstream pong")
