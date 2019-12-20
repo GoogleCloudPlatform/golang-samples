@@ -18,12 +18,13 @@ import (
 	"bytes"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestTextDetection(t *testing.T) {
-	testutil.SystemTest(t)
+	testutil.EndToEndTest(t)
 
 	filename := "../resources/googlework_short.mp4"
 	possibleTexts := []string{
@@ -31,16 +32,19 @@ func TestTextDetection(t *testing.T) {
 		"LONDRES", "OMAR", "PARIS", "METRO", "RUE", "CARLO",
 	}
 
-	var buf bytes.Buffer
-	if err := textDetection(&buf, filename); err != nil {
-		t.Fatal(err)
-	}
-
-	output := strings.ToUpper(buf.String())
-	for _, text := range possibleTexts {
-		if strings.Contains(output, text) {
+	testutil.Retry(t, 10, 20*time.Second, func(r *testutil.R) {
+		var buf bytes.Buffer
+		if err := textDetection(&buf, filename); err != nil {
+			r.Errorf("textDetection: %v", err)
 			return
 		}
-	}
-	t.Fatalf(`textDetection(%q) didn't contain any of the possibleTexts`, filename)
+
+		output := strings.ToUpper(buf.String())
+		for _, text := range possibleTexts {
+			if strings.Contains(output, text) {
+				return
+			}
+		}
+		r.Errorf(`textDetection(%q) didn't contain any of the possibleTexts`, filename)
+	})
 }
