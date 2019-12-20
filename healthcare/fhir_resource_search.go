@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START healthcare_search_resources]
+// [START healthcare_search_resources_post]
 import (
 	"context"
 	"fmt"
@@ -64,4 +64,4 @@ func searchFHIRResources(w io.Writer, projectID, location, datasetID, fhirStoreI
 	return nil
 }
 
-// [END healthcare_search_resources]
+// [END healthcare_search_resources_post]
