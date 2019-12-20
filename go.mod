@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/golang-samples
 go 1.11
 
 require (
-	cloud.google.com/go v0.49.0
+	cloud.google.com/go v0.50.0
 	cloud.google.com/go/bigquery v1.3.0
 	cloud.google.com/go/bigtable v1.1.0
 	cloud.google.com/go/datastore v1.0.0
@@ -42,14 +42,14 @@ require (
 	github.com/tinylib/msgp v1.1.0 // indirect
 	go.opencensus.io v0.22.2
 	golang.org/x/exp v0.0.0-20191129062945-2f5052295587
-	golang.org/x/net v0.0.0-20191126235420-ef20fe5d7933
-	golang.org/x/oauth2 v0.0.0-20191122200657-5d9234df094c
-	golang.org/x/sys v0.0.0-20191113165036-4c7a9d0fe056 // indirect
+	golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553
+	golang.org/x/oauth2 v0.0.0-20191202225959-858c2ad4c8b6
+	golang.org/x/sys v0.0.0-20191210023423-ac6580df4449 // indirect
 	golang.org/x/text v0.3.2
-	golang.org/x/tools v0.0.0-20191130070609-6e064ea0cf2d
+	golang.org/x/tools v0.0.0-20191216173652-a0e659d51361
 	google.golang.org/api v0.14.0
 	google.golang.org/appengine v1.6.5
-	google.golang.org/genproto v0.0.0-20191115221424-83cc0476cb11
+	google.golang.org/genproto v0.0.0-20191216205247-b31c10ee225f
 	google.golang.org/grpc v1.25.1
 	gopkg.in/sendgrid/sendgrid-go.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.2.7
