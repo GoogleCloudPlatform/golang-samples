@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	asset "cloud.google.com/go/asset/apiv1"
 	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1"
@@ -35,6 +36,7 @@ func main() {
 		log.Fatal(err)
 	}
 	bucketName := fmt.Sprintf("%s-for-assets", projectID)
+	datasetID := strings.ReplaceAll(bucketName, "-", "_")
 	assetDumpFile := fmt.Sprintf("gs://%s/my-assets.txt", bucketName)
 	req := &assetpb.ExportAssetsRequest{
 		Parent: fmt.Sprintf("projects/%s", projectID),
@@ -57,6 +59,29 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Print(response)
+	// Export to BigQuery
+	dataset := fmt.Sprintf("projects/%s/datasets/%s", projectID, datasetID)
+	table := "test"
+	req_bq := &assetpb.ExportAssetsRequest{
+		Parent: fmt.Sprintf("projects/%s", projectID),
+		OutputConfig: &assetpb.OutputConfig{
+			Destination: &assetpb.OutputConfig_BigqueryDestination{
+				BigqueryDestination: &assetpb.BigQueryDestination{
+					Dataset: string(dataset),
+					Table:   string(table),
+				},
+			},
+		},
+	}
+	operation_bq, err := client.ExportAssets(ctx, req_bq)
+	if err != nil {
+		log.Fatal(err)
+	}
+	response_bq, err := operation_bq.Wait(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Print(response_bq)
 }
 
 // [END asset_quickstart_export_assets]

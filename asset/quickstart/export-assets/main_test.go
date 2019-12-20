@@ -22,6 +22,7 @@ import (
 	"strings"
 	"testing"
 
+	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"google.golang.org/api/iterator"
@@ -40,6 +41,14 @@ func TestMain(t *testing.T) {
 
 	// Delete the bucket (if it exists) then recreate it.
 	cleanBucket(ctx, t, client, tc.ProjectID, bucketName)
+
+	// Creates a bigquery client.
+	client_bq, err_bq := bigquery.NewClient(ctx, tc.ProjectID)
+	if err_bq != nil {
+		t.Fatalf("failed to create bigquery client: %v", err_bq)
+	}
+	datasetID := strings.ReplaceAll(bucketName, "-", "_")
+	createDataset(ctx, t, client_bq, datasetID)
 
 	oldStdout := os.Stdout
 	r, w, _ := os.Pipe()
@@ -95,5 +104,20 @@ func deleteBucketIfExists(ctx context.Context, t *testing.T, client *storage.Cli
 	// Then delete the bucket itself
 	if err := b.Delete(ctx); err != nil {
 		t.Fatalf("Bucket.Delete(%q): %v", bucket, err)
+	}
+}
+
+func createDataset(ctx context.Context, t *testing.T, client *bigquery.Client, datasetID string) {
+	d := client.Dataset(datasetID)
+	if _, err := d.Metadata(ctx); err == nil {
+		if err_d := d.DeleteWithContents(ctx); err_d != nil {
+			t.Fatalf("Dataset.Delete(%q): %v", datasetID, err_d)
+		}
+	}
+	meta := &bigquery.DatasetMetadata{
+		Location: "US", // See https://cloud.google.com/bigquery/docs/locations
+	}
+	if err := client.Dataset(datasetID).Create(ctx, meta); err != nil {
+		t.Fatalf("Dataset.Create(%q): %v", datasetID, err)
 	}
 }
