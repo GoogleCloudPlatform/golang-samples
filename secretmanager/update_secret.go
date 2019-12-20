@@ -21,7 +21,7 @@ import (
 	"io"
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1beta1"
-	secretspb "google.golang.org/genproto/googleapis/cloud/secrets/v1beta1"
+	secretmanagerpb "google.golang.org/genproto/googleapis/cloud/secretmanager/v1beta1"
 	"google.golang.org/genproto/protobuf/field_mask"
 )
 
@@ -37,8 +37,8 @@ func updateSecret(w io.Writer, name string) error {
 	}
 
 	// Build the request.
-	req := &secretspb.UpdateSecretRequest{
-		Secret: &secretspb.Secret{
+	req := &secretmanagerpb.UpdateSecretRequest{
+		Secret: &secretmanagerpb.Secret{
 			Name: name,
 			Labels: map[string]string{
 				"secretmanager": "rocks",

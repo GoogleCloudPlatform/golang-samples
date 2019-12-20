@@ -20,7 +20,7 @@ import (
 	"fmt"
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1beta1"
-	secretspb "google.golang.org/genproto/googleapis/cloud/secrets/v1beta1"
+	secretmanagerpb "google.golang.org/genproto/googleapis/cloud/secretmanager/v1beta1"
 )
 
 // deleteSecret deletes the secret with the given name and all of its versions.
@@ -35,7 +35,7 @@ func deleteSecret(name string) error {
 	}
 
 	// Build the request.
-	req := &secretspb.DeleteSecretRequest{
+	req := &secretmanagerpb.DeleteSecretRequest{
 		Name: name,
 	}
 

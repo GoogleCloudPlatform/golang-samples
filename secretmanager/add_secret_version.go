@@ -21,7 +21,7 @@ import (
 	"io"
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1beta1"
-	secretspb "google.golang.org/genproto/googleapis/cloud/secrets/v1beta1"
+	secretmanagerpb "google.golang.org/genproto/googleapis/cloud/secretmanager/v1beta1"
 )
 
 // addSecretVersion adds a new secret version to the given secret with the
@@ -40,9 +40,9 @@ func addSecretVersion(w io.Writer, parent string) error {
 	}
 
 	// Build the request.
-	req := &secretspb.AddSecretVersionRequest{
+	req := &secretmanagerpb.AddSecretVersionRequest{
 		Parent: parent,
-		Payload: &secretspb.SecretPayload{
+		Payload: &secretmanagerpb.SecretPayload{
 			Data: payload,
 		},
 	}

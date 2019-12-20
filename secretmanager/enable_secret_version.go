@@ -20,7 +20,7 @@ import (
 	"fmt"
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1beta1"
-	secretspb "google.golang.org/genproto/googleapis/cloud/secrets/v1beta1"
+	secretmanagerpb "google.golang.org/genproto/googleapis/cloud/secretmanager/v1beta1"
 )
 
 // enableSecretVersion enables the given secret version, enabling it to be
@@ -37,7 +37,7 @@ func enableSecretVersion(name string) error {
 	}
 
 	// Build the request.
-	req := &secretspb.EnableSecretVersionRequest{
+	req := &secretmanagerpb.EnableSecretVersionRequest{
 		Name: name,
 	}
 

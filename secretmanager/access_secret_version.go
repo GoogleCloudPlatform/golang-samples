@@ -21,7 +21,7 @@ import (
 	"io"
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1beta1"
-	secretspb "google.golang.org/genproto/googleapis/cloud/secrets/v1beta1"
+	secretmanagerpb "google.golang.org/genproto/googleapis/cloud/secretmanager/v1beta1"
 )
 
 // accessSecretVersion accesses the payload for the given secret version if one
@@ -39,7 +39,7 @@ func accessSecretVersion(w io.Writer, name string) error {
 	}
 
 	// Build the request.
-	req := &secretspb.AccessSecretVersionRequest{
+	req := &secretmanagerpb.AccessSecretVersionRequest{
 		Name: name,
 	}
 

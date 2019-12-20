@@ -20,7 +20,7 @@ import (
 	"fmt"
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1beta1"
-	secretspb "google.golang.org/genproto/googleapis/cloud/secrets/v1beta1"
+	secretmanagerpb "google.golang.org/genproto/googleapis/cloud/secretmanager/v1beta1"
 )
 
 // disableSecretVersion disables the given secret version. Future requests will
@@ -37,7 +37,7 @@ func disableSecretVersion(name string) error {
 	}
 
 	// Build the request.
-	req := &secretspb.DisableSecretVersionRequest{
+	req := &secretmanagerpb.DisableSecretVersionRequest{
 		Name: name,
 	}
 

@@ -22,7 +22,7 @@ import (
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1beta1"
 	"google.golang.org/api/iterator"
-	secretspb "google.golang.org/genproto/googleapis/cloud/secrets/v1beta1"
+	secretmanagerpb "google.golang.org/genproto/googleapis/cloud/secretmanager/v1beta1"
 )
 
 // listSecretVersions lists all secret versions in the given secret and their
@@ -38,7 +38,7 @@ func listSecretVersions(w io.Writer, parent string) error {
 	}
 
 	// Build the request.
-	req := &secretspb.ListSecretVersionsRequest{
+	req := &secretmanagerpb.ListSecretVersionsRequest{
 		Parent: parent,
 	}
 

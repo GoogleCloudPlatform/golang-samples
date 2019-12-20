@@ -24,7 +24,7 @@ import (
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1beta1"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	secretspb "google.golang.org/genproto/googleapis/cloud/secrets/v1beta1"
+	secretmanagerpb "google.golang.org/genproto/googleapis/cloud/secretmanager/v1beta1"
 	grpccodes "google.golang.org/grpc/codes"
 	grpcstatus "google.golang.org/grpc/status"
 )
@@ -40,17 +40,17 @@ func testClient(tb testing.TB) (*secretmanager.Client, context.Context) {
 	return client, ctx
 }
 
-func testSecret(tb testing.TB, projectID, secretID string) *secretspb.Secret {
+func testSecret(tb testing.TB, projectID, secretID string) *secretmanagerpb.Secret {
 	tb.Helper()
 
 	client, ctx := testClient(tb)
-	secret, err := client.CreateSecret(ctx, &secretspb.CreateSecretRequest{
+	secret, err := client.CreateSecret(ctx, &secretmanagerpb.CreateSecretRequest{
 		Parent:   fmt.Sprintf("projects/%s", projectID),
 		SecretId: secretID,
-		Secret: &secretspb.Secret{
-			Replication: &secretspb.Replication{
-				Replication: &secretspb.Replication_Automatic_{
-					Automatic: &secretspb.Replication_Automatic{},
+		Secret: &secretmanagerpb.Secret{
+			Replication: &secretmanagerpb.Replication{
+				Replication: &secretmanagerpb.Replication_Automatic_{
+					Automatic: &secretmanagerpb.Replication_Automatic{},
 				},
 			},
 		},
@@ -62,14 +62,14 @@ func testSecret(tb testing.TB, projectID, secretID string) *secretspb.Secret {
 	return secret
 }
 
-func testSecretVersion(tb testing.TB, parent string, payload []byte) *secretspb.SecretVersion {
+func testSecretVersion(tb testing.TB, parent string, payload []byte) *secretmanagerpb.SecretVersion {
 	tb.Helper()
 
 	client, ctx := testClient(tb)
 
-	version, err := client.AddSecretVersion(ctx, &secretspb.AddSecretVersionRequest{
+	version, err := client.AddSecretVersion(ctx, &secretmanagerpb.AddSecretVersionRequest{
 		Parent: parent,
-		Payload: &secretspb.SecretPayload{
+		Payload: &secretmanagerpb.SecretPayload{
 			Data: payload,
 		},
 	})
@@ -84,7 +84,7 @@ func testCleanupSecret(tb testing.TB, projectID, secretID string) {
 
 	client, ctx := testClient(tb)
 
-	if err := client.DeleteSecret(ctx, &secretspb.DeleteSecretRequest{
+	if err := client.DeleteSecret(ctx, &secretmanagerpb.DeleteSecretRequest{
 		Name: fmt.Sprintf("projects/%s/secrets/%s", projectID, secretID),
 	}); err != nil {
 		if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
@@ -166,7 +166,7 @@ func TestDeleteSecret(t *testing.T) {
 	}
 
 	client, ctx := testClient(t)
-	_, err := client.GetSecret(ctx, &secretspb.GetSecretRequest{
+	_, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
 		Name: secret.Name,
 	})
 	if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
@@ -190,13 +190,13 @@ func TestDestroySecretVersion(t *testing.T) {
 	}
 
 	client, ctx := testClient(t)
-	v, err := client.GetSecretVersion(ctx, &secretspb.GetSecretVersionRequest{
+	v, err := client.GetSecretVersion(ctx, &secretmanagerpb.GetSecretVersionRequest{
 		Name: version.Name,
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got, want := v.State, secretspb.SecretVersion_DESTROYED; got != want {
+	if got, want := v.State, secretmanagerpb.SecretVersion_DESTROYED; got != want {
 		t.Errorf("testSecretVersion: expected %v to be %v", got, want)
 	}
 }
@@ -217,13 +217,13 @@ func TestDisableEnableSecretVersion(t *testing.T) {
 	}
 
 	client, ctx := testClient(t)
-	v, err := client.GetSecretVersion(ctx, &secretspb.GetSecretVersionRequest{
+	v, err := client.GetSecretVersion(ctx, &secretmanagerpb.GetSecretVersionRequest{
 		Name: version.Name,
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got, want := v.State, secretspb.SecretVersion_DISABLED; got != want {
+	if got, want := v.State, secretmanagerpb.SecretVersion_DISABLED; got != want {
 		t.Errorf("testSecretVersion: expected %v to be %v", got, want)
 	}
 
@@ -231,13 +231,13 @@ func TestDisableEnableSecretVersion(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	v, err = client.GetSecretVersion(ctx, &secretspb.GetSecretVersionRequest{
+	v, err = client.GetSecretVersion(ctx, &secretmanagerpb.GetSecretVersionRequest{
 		Name: version.Name,
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got, want := v.State, secretspb.SecretVersion_ENABLED; got != want {
+	if got, want := v.State, secretmanagerpb.SecretVersion_ENABLED; got != want {
 		t.Errorf("testSecretVersion: expected %v to be %v", got, want)
 	}
 }
@@ -356,7 +356,7 @@ func TestUpdateSecret(t *testing.T) {
 	}
 
 	client, ctx := testClient(t)
-	s, err := client.GetSecret(ctx, &secretspb.GetSecretRequest{
+	s, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
 		Name: secret.Name,
 	})
 	if err != nil {

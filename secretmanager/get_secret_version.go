@@ -21,7 +21,7 @@ import (
 	"io"
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1beta1"
-	secretspb "google.golang.org/genproto/googleapis/cloud/secrets/v1beta1"
+	secretmanagerpb "google.golang.org/genproto/googleapis/cloud/secretmanager/v1beta1"
 )
 
 // getSecretVersion gets information about the given secret version. It does not
@@ -38,7 +38,7 @@ func getSecretVersion(w io.Writer, name string) error {
 	}
 
 	// Build the request.
-	req := &secretspb.GetSecretVersionRequest{
+	req := &secretmanagerpb.GetSecretVersionRequest{
 		Name: name,
 	}
 

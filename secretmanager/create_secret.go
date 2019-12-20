@@ -21,7 +21,7 @@ import (
 	"io"
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1beta1"
-	secretspb "google.golang.org/genproto/googleapis/cloud/secrets/v1beta1"
+	secretmanagerpb "google.golang.org/genproto/googleapis/cloud/secretmanager/v1beta1"
 )
 
 // createSecret creates a new secret with the given name. A secret is a logical
@@ -39,13 +39,13 @@ func createSecret(w io.Writer, parent, id string) error {
 	}
 
 	// Build the request.
-	req := &secretspb.CreateSecretRequest{
+	req := &secretmanagerpb.CreateSecretRequest{
 		Parent:   parent,
 		SecretId: id,
-		Secret: &secretspb.Secret{
-			Replication: &secretspb.Replication{
-				Replication: &secretspb.Replication_Automatic_{
-					Automatic: &secretspb.Replication_Automatic{},
+		Secret: &secretmanagerpb.Secret{
+			Replication: &secretmanagerpb.Replication{
+				Replication: &secretmanagerpb.Replication_Automatic_{
+					Automatic: &secretmanagerpb.Replication_Automatic{},
 				},
 			},
 		},
