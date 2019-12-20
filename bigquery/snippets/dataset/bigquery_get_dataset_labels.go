@@ -15,7 +15,6 @@
 package dataset
 
 // [START bigquery_get_dataset_labels]
-
 import (
 	"context"
 	"fmt"
@@ -24,6 +23,7 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// printDatasetLabels retrieves label metadata from a dataset and prints it to an io.Writer.
 func printDatasetLabels(w io.Writer, projectID, datasetID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

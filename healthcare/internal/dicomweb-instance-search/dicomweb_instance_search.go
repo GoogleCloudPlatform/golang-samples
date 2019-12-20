@@ -80,4 +80,4 @@ func DicomWebSearchInstances(w io.Writer, projectID, location, datasetID, dicomS
 	return nil
 }
 
-// [END healthcare_dicomweb_retrieve_instance]
+// [END healthcare_dicomweb_search_instances]

@@ -408,6 +408,7 @@ func TestFindHighVulnerabilities(t *testing.T) {
 			ResourceUri: v.imageURL,
 			Details: &grafeaspb.Occurrence_Vulnerability{
 				Vulnerability: &grafeaspb.VulnerabilityOccurrence{
+					EffectiveSeverity: grafeaspb.Severity_CRITICAL,
 					PackageIssue: []*grafeaspb.VulnerabilityOccurrence_PackageIssue{
 						{
 							AffectedCpeUri:  "your-uri-here",
