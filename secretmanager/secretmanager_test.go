@@ -24,6 +24,7 @@ import (
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1beta1"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/gofrs/uuid"
 	secretmanagerpb "google.golang.org/genproto/googleapis/cloud/secretmanager/v1beta1"
 	grpccodes "google.golang.org/grpc/codes"
 	grpcstatus "google.golang.org/grpc/status"
@@ -40,8 +41,20 @@ func testClient(tb testing.TB) (*secretmanager.Client, context.Context) {
 	return client, ctx
 }
 
-func testSecret(tb testing.TB, projectID, secretID string) *secretmanagerpb.Secret {
+func testName(tb testing.TB) string {
 	tb.Helper()
+
+	u, err := uuid.NewV4()
+	if err != nil {
+		tb.Fatalf("testName: failed to generate uuid: %v", err)
+	}
+	return u.String()
+}
+
+func testSecret(tb testing.TB, projectID string) *secretmanagerpb.Secret {
+	tb.Helper()
+
+	secretID := testName(tb)
 
 	client, ctx := testClient(tb)
 	secret, err := client.CreateSecret(ctx, &secretmanagerpb.CreateSecretRequest{
@@ -79,13 +92,13 @@ func testSecretVersion(tb testing.TB, parent string, payload []byte) *secretmana
 	return version
 }
 
-func testCleanupSecret(tb testing.TB, projectID, secretID string) {
+func testCleanupSecret(tb testing.TB, name string) {
 	tb.Helper()
 
 	client, ctx := testClient(tb)
 
 	if err := client.DeleteSecret(ctx, &secretmanagerpb.DeleteSecretRequest{
-		Name: fmt.Sprintf("projects/%s/secrets/%s", projectID, secretID),
+		Name: name,
 	}); err != nil {
 		if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
 			tb.Fatalf("testCleanupSecret: failed to delete secret: %v", err)
@@ -96,12 +109,10 @@ func testCleanupSecret(tb testing.TB, projectID, secretID string) {
 func TestAccessSecretVersion(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	secretID := "accessSecretVersion"
-	testCleanupSecret(t, tc.ProjectID, secretID)
-	defer testCleanupSecret(t, tc.ProjectID, secretID)
-
 	payload := []byte("my-secret")
-	secret := testSecret(t, tc.ProjectID, secretID)
+	secret := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret.Name)
+
 	version := testSecretVersion(t, secret.Name, payload)
 
 	var b bytes.Buffer
@@ -117,11 +128,8 @@ func TestAccessSecretVersion(t *testing.T) {
 func TestAddSecretVersion(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	secretID := "addSecretVersion"
-	testCleanupSecret(t, tc.ProjectID, secretID)
-	defer testCleanupSecret(t, tc.ProjectID, secretID)
-
-	secret := testSecret(t, tc.ProjectID, secretID)
+	secret := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret.Name)
 
 	var b bytes.Buffer
 	if err := addSecretVersion(&b, secret.Name); err != nil {
@@ -137,10 +145,9 @@ func TestCreateSecret(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	secretID := "createSecret"
-	testCleanupSecret(t, tc.ProjectID, secretID)
-	defer testCleanupSecret(t, tc.ProjectID, secretID)
 
 	parent := fmt.Sprintf("projects/%s", tc.ProjectID)
+	defer testCleanupSecret(t, fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID))
 
 	var b bytes.Buffer
 	if err := createSecret(&b, parent, secretID); err != nil {
@@ -155,11 +162,8 @@ func TestCreateSecret(t *testing.T) {
 func TestDeleteSecret(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	secretID := "deleteSecret"
-	testCleanupSecret(t, tc.ProjectID, secretID)
-	defer testCleanupSecret(t, tc.ProjectID, secretID)
-
-	secret := testSecret(t, tc.ProjectID, secretID)
+	secret := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret.Name)
 
 	if err := deleteSecret(secret.Name); err != nil {
 		t.Fatal(err)
@@ -177,12 +181,10 @@ func TestDeleteSecret(t *testing.T) {
 func TestDestroySecretVersion(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	secretID := "destroySecretVersion"
-	testCleanupSecret(t, tc.ProjectID, secretID)
-	defer testCleanupSecret(t, tc.ProjectID, secretID)
-
 	payload := []byte("my-secret")
-	secret := testSecret(t, tc.ProjectID, secretID)
+	secret := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret.Name)
+
 	version := testSecretVersion(t, secret.Name, payload)
 
 	if err := destroySecretVersion(version.Name); err != nil {
@@ -204,12 +206,10 @@ func TestDestroySecretVersion(t *testing.T) {
 func TestDisableEnableSecretVersion(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	secretID := "disableEnableSecretVersion"
-	testCleanupSecret(t, tc.ProjectID, secretID)
-	defer testCleanupSecret(t, tc.ProjectID, secretID)
-
 	payload := []byte("my-secret")
-	secret := testSecret(t, tc.ProjectID, secretID)
+	secret := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret.Name)
+
 	version := testSecretVersion(t, secret.Name, payload)
 
 	if err := disableSecretVersion(version.Name); err != nil {
@@ -245,12 +245,10 @@ func TestDisableEnableSecretVersion(t *testing.T) {
 func TestGetSecretVersion(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	secretID := "getSecretVersion"
-	testCleanupSecret(t, tc.ProjectID, secretID)
-	defer testCleanupSecret(t, tc.ProjectID, secretID)
-
 	payload := []byte("my-secret")
-	secret := testSecret(t, tc.ProjectID, secretID)
+	secret := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret.Name)
+
 	version := testSecretVersion(t, secret.Name, payload)
 
 	var b bytes.Buffer
@@ -266,11 +264,8 @@ func TestGetSecretVersion(t *testing.T) {
 func TestGetSecret(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	secretID := "getSecret"
-	testCleanupSecret(t, tc.ProjectID, secretID)
-	defer testCleanupSecret(t, tc.ProjectID, secretID)
-
-	secret := testSecret(t, tc.ProjectID, secretID)
+	secret := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret.Name)
 
 	var b bytes.Buffer
 	if err := getSecret(&b, secret.Name); err != nil {
@@ -285,12 +280,9 @@ func TestGetSecret(t *testing.T) {
 func TestListSecretVersions(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	secretID := "listSecretVersions"
-	testCleanupSecret(t, tc.ProjectID, secretID)
-	defer testCleanupSecret(t, tc.ProjectID, secretID)
-
 	payload := []byte("my-secret")
-	secret := testSecret(t, tc.ProjectID, secretID)
+	secret := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret.Name)
 
 	version1 := testSecretVersion(t, secret.Name, payload)
 	version2 := testSecretVersion(t, secret.Name, payload)
@@ -312,16 +304,11 @@ func TestListSecretVersions(t *testing.T) {
 func TestListSecrets(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	secretID1 := "listSecrets1"
-	testCleanupSecret(t, tc.ProjectID, secretID1)
-	defer testCleanupSecret(t, tc.ProjectID, secretID1)
+	secret1 := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret1.Name)
 
-	secretID2 := "listSecrets2"
-	testCleanupSecret(t, tc.ProjectID, secretID2)
-	defer testCleanupSecret(t, tc.ProjectID, secretID2)
-
-	secret1 := testSecret(t, tc.ProjectID, secretID1)
-	secret2 := testSecret(t, tc.ProjectID, secretID2)
+	secret2 := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret2.Name)
 
 	var b bytes.Buffer
 	if err := listSecrets(&b, fmt.Sprintf("projects/%s", tc.ProjectID)); err != nil {
@@ -340,11 +327,8 @@ func TestListSecrets(t *testing.T) {
 func TestUpdateSecret(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	secretID := "updateSecret"
-	testCleanupSecret(t, tc.ProjectID, secretID)
-	defer testCleanupSecret(t, tc.ProjectID, secretID)
-
-	secret := testSecret(t, tc.ProjectID, secretID)
+	secret := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret.Name)
 
 	var b bytes.Buffer
 	if err := updateSecret(&b, secret.Name); err != nil {
