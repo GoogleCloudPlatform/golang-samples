@@ -59,15 +59,15 @@ var keyRegex = regexp.MustCompile(`^\s*([a-zA-Z_]+\w*)\s*$`)
 
 // Validate confirms all environment variables are valid.
 func (e EnvVars) Validate() error {
+	broken := EnvVars{}
 	for k := range e {
 		match := keyRegex.FindStringSubmatch(k)
-		if len(match) > 0 {
-			delete(e, k)
+		if len(match) == 0 {
+			broken[k] = ""
 		}
 	}
-
-	if len(e) > 0 {
-		return fmt.Errorf("invalid environment variable names: %s", e.KeyString())
+	if len(broken) > 0 {
+		return fmt.Errorf("invalid environment variable names: %s", broken.KeyString())
 	}
 
 	return nil
