@@ -18,21 +18,25 @@ import (
 	"bytes"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestObjectTrackingGCS(t *testing.T) {
-	testutil.SystemTest(t)
+	testutil.EndToEndTest(t)
 
 	gcsURI := "gs://cloud-samples-data/video/cat.mp4"
 
-	var buf bytes.Buffer
-	if err := objectTrackingGCS(&buf, gcsURI); err != nil {
-		t.Fatal(err)
-	}
+	testutil.Retry(t, 10, 20*time.Second, func(r *testutil.R) {
+		var buf bytes.Buffer
+		if err := objectTrackingGCS(&buf, gcsURI); err != nil {
+			r.Errorf("objectTrackingGCS: %v", err)
+			return
+		}
 
-	if got := buf.String(); !strings.Contains(got, "cat") {
-		t.Fatalf(`objectTrackingGCS(%q) = %q; want "cat"`, gcsURI, got)
-	}
+		if got := buf.String(); !strings.Contains(got, "cat") {
+			r.Errorf(`objectTrackingGCS(%q) = %q; want "cat"`, gcsURI, got)
+		}
+	})
 }

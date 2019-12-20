@@ -19,6 +19,7 @@ import (
 	"io"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
@@ -27,7 +28,7 @@ const catVideo = "gs://cloud-samples-data/video/cat.mp4"
 const googleworkVideo = "gs://python-docs-samples-tests/video/googlework_short.mp4"
 
 func TestAnalyze(t *testing.T) {
-	testutil.SystemTest(t)
+	testutil.EndToEndTest(t)
 
 	tests := []struct {
 		name        string
@@ -42,18 +43,18 @@ func TestAnalyze(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if tt.gcs == nil {
-				t.Fatal("gcs not set")
-			}
+		if tt.gcs == nil {
+			t.Fatal("gcs not set")
+		}
 
+		testutil.Retry(t, 10, 20*time.Second, func(r *testutil.R) {
 			var buf bytes.Buffer
-			err := tt.gcs(&buf, tt.path)
-			if err != nil {
-				t.Fatalf("GCS %s(%q): got %v, want nil err", tt.name, tt.path, err)
+			if err := tt.gcs(&buf, tt.path); err != nil {
+				r.Errorf("GCS %s(%q): got %v, want nil err", tt.name, tt.path, err)
+				return
 			}
 			if got := buf.String(); !strings.Contains(got, tt.wantContain) {
-				t.Errorf("GCS %s(%q): got %q, want to contain %q", tt.name, tt.path, got, tt.wantContain)
+				r.Errorf("GCS %s(%q): got %q, want to contain %q", tt.name, tt.path, got, tt.wantContain)
 			}
 		})
 	}
