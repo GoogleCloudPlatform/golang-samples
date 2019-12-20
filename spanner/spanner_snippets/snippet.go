@@ -22,6 +22,7 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/api/option"
 	"google.golang.org/genproto/googleapis/longrunning"
+	"google.golang.org/grpc/codes"
 	"io"
 	"log"
 	"os"
@@ -37,6 +38,7 @@ import (
 	pbt "github.com/golang/protobuf/ptypes/timestamp"
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 	"google.golang.org/genproto/protobuf/field_mask"
+	"google.golang.org/grpc/status"
 )
 
 type command func(ctx context.Context, w io.Writer, client *spanner.Client) error
@@ -1869,6 +1871,18 @@ func cancelBackup(ctx context.Context, w io.Writer, adminClient *database.Databa
 	err = adminClient.LROClient.CancelOperation(ctx, &longrunning.CancelOperationRequest{Name: op.Name()})
 	if err != nil {
 		return err
+	}
+
+	// Should be cancelled, but might have finished before cancel took effect in which case delete the backup
+	backup, err := op.Wait(ctx)
+	if err != nil {
+		if waitStatus, ok := status.FromError(err); !ok || waitStatus.Code() != codes.Canceled {
+			return err
+		}
+	}
+	if backup != nil {
+		// The backup actually finished
+		err = adminClient.DeleteBackup(ctx, &adminpb.DeleteBackupRequest{Name: backup.Name})
 	}
 
 	fmt.Fprintf(w, "Backup cancelled.\n")
