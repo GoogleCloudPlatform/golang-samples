@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"io"
 
-	automl "cloud.google.com/go/automl/apiv1beta1"
-	automlpb "google.golang.org/genproto/googleapis/cloud/automl/v1beta1"
+	automl "cloud.google.com/go/automl/apiv1"
+	automlpb "google.golang.org/genproto/googleapis/cloud/automl/v1"
 )
 
 // batchPredict does a batch prediction.
