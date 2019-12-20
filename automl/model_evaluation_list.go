@@ -75,7 +75,7 @@ func listModelEvaluations(w io.Writer, projectID string, location string, modelI
 		// [END automl_language_entity_extraction_list_model_evaluations]
 
 		// [START automl_language_sentiment_analysis_list_model_evaluations]
-		fmt.Fprintf(w, "Sentiment analysis model evaluation metrics: %v\n", evaluation.GetTextSentimentAnalysisEvaluationMetrics())
+		fmt.Fprintf(w, "Sentiment analysis model evaluation metrics: %v\n", evaluation.GetTextSentimentEvaluationMetrics())
 		// [END automl_language_sentiment_analysis_list_model_evaluations]
 
 		// [START automl_language_text_classification_list_model_evaluations]
