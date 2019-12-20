@@ -30,7 +30,7 @@ func labelURI(w io.Writer, file string) error {
 	ctx := context.Background()
 	client, err := video.NewClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("video.NewClient: %v", err)
 	}
 
 	op, err := client.AnnotateVideo(ctx, &videopb.AnnotateVideoRequest{
@@ -40,11 +40,12 @@ func labelURI(w io.Writer, file string) error {
 		InputUri: file,
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("AnnotateVideo: %v", err)
 	}
+
 	resp, err := op.Wait(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("Wait: %v", err)
 	}
 
 	printLabels := func(labels []*videopb.LabelAnnotation) {

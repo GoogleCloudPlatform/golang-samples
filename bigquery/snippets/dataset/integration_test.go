@@ -29,7 +29,7 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestAll(t *testing.T) {
+func TestDatasets(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 

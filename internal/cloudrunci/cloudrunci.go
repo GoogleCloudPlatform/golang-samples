@@ -255,7 +255,6 @@ func (s *Service) operationLabel(op string) string {
 func (s *Service) deployCmd() *exec.Cmd {
 	args := append([]string{
 		"--quiet",
-		"beta",
 		"run",
 		"deploy",
 		s.version(),
@@ -318,7 +317,6 @@ func (s *Service) deleteImageCmd() *exec.Cmd {
 func (s *Service) deleteServiceCmd() *exec.Cmd {
 	args := append([]string{
 		"--quiet",
-		"beta",
 		"run",
 		"services",
 		"delete",
@@ -338,7 +336,6 @@ func (s *Service) deleteServiceCmd() *exec.Cmd {
 func (s *Service) urlCmd() *exec.Cmd {
 	args := append([]string{
 		"--quiet",
-		"beta",
 		"run",
 		"services",
 		"describe",
