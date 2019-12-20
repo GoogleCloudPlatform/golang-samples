@@ -1993,6 +1993,125 @@ func listBackups(ctx context.Context, w io.Writer, adminClient *database.Databas
 	return nil
 }
 
+func listBackupsByName(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
+	if matches == nil || len(matches) != 3 {
+		return fmt.Errorf("Invalid database id %s", database)
+	}
+	instanceName := matches[1]
+	counter := 0
+	backupsIterator := adminClient.ListBackups(ctx, &adminpb.ListBackupsRequest{
+		Parent: instanceName,
+		// Only include backups with matching names
+		Filter: "Name:my-backup",
+	})
+	for {
+		resp, err := backupsIterator.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "%s [%v] - %d bytes\n", resp.Name, resp.State, resp.SizeBytes)
+		counter++
+	}
+	fmt.Fprintf(w, "Backup count: %d\n", counter)
+
+	return nil
+}
+
+func listSmallBackups(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
+	if matches == nil || len(matches) != 3 {
+		return fmt.Errorf("Invalid database id %s", database)
+	}
+	instanceName := matches[1]
+	counter := 0
+	backupsIterator := adminClient.ListBackups(ctx, &adminpb.ListBackupsRequest{
+		Parent: instanceName,
+		// Only include backups in READY state and with size < 64K
+		Filter: "(state:READY) AND (size_bytes < 65536)",
+	})
+	for {
+		resp, err := backupsIterator.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "%s [%v] - %d bytes\n", resp.Name, resp.State, resp.SizeBytes)
+		counter++
+	}
+	fmt.Fprintf(w, "Backup count: %d\n", counter)
+
+	return nil
+}
+
+func listNewBackups(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
+	if matches == nil || len(matches) != 3 {
+		return fmt.Errorf("Invalid database id %s", database)
+	}
+	instanceName := matches[1]
+	counter := 0
+	minCreateTime := time.Now().AddDate(0, 0, -1)
+	maxExpireTime := time.Now().AddDate(0, 0, 3)
+
+	backupsIterator := adminClient.ListBackups(ctx, &adminpb.ListBackupsRequest{
+		Parent: instanceName,
+		// Only include backups that were created recently and expire soon
+		Filter: fmt.Sprintf(`(state:READY) AND (create_time > "%s") AND (expire_time < "%s")`,
+			minCreateTime.Format(time.RFC3339), maxExpireTime.Format(time.RFC3339)),
+	})
+	for {
+		resp, err := backupsIterator.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "%s [%v] - %d bytes\n", resp.Name, resp.State, resp.SizeBytes)
+		counter++
+	}
+	fmt.Fprintf(w, "Backup count: %d\n", counter)
+
+	return nil
+}
+
+func listInstanceBackups(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
+	if matches == nil || len(matches) != 3 {
+		return fmt.Errorf("Invalid database id %s", database)
+	}
+	instanceName := matches[1]
+	request := &adminpb.ListBackupsRequest{
+		Parent: instanceName,
+		PageSize: 3,
+	}
+	backupsIterator := adminClient.ListBackups(ctx, request)
+	for {
+		resp, err := backupsIterator.Next()
+		if err == iterator.Done {
+			pageToken := backupsIterator.PageInfo().Token
+			if pageToken == "" {
+				break
+			} else {
+				request.PageToken = pageToken
+				backupsIterator = adminClient.ListBackups(ctx, request)
+			}
+		}
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "%s [%v] - %d bytes\n", resp.Name, resp.State, resp.SizeBytes)
+	}
+
+	return nil
+}
+
 // [END spanner_list_backups]
 
 // [START spanner_list_backup_operations]
@@ -2072,141 +2191,6 @@ func listDatabaseOperations(ctx context.Context, w io.Writer, adminClient *datab
 }
 
 // [END spanner_list_database_operations]
-
-// [START spanner_list_backups_by_name]
-
-func listBackupsByName(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
-	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
-	if matches == nil || len(matches) != 3 {
-		return fmt.Errorf("Invalid database id %s", database)
-	}
-	instanceName := matches[1]
-	counter := 0
-	backupsIterator := adminClient.ListBackups(ctx, &adminpb.ListBackupsRequest{
-		Parent: instanceName,
-		// Only include backups with matching names
-		Filter: "Name:my-backup",
-	})
-	for {
-		resp, err := backupsIterator.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return err
-		}
-		fmt.Fprintf(w, "%s [%v] - %d bytes\n", resp.Name, resp.State, resp.SizeBytes)
-		counter++
-	}
-	fmt.Fprintf(w, "Backup count: %d\n", counter)
-
-	return nil
-}
-
-// [END spanner_list_backups_by_name]
-
-// [START spanner_list_small_backups]
-
-func listSmallBackups(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
-	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
-	if matches == nil || len(matches) != 3 {
-		return fmt.Errorf("Invalid database id %s", database)
-	}
-	instanceName := matches[1]
-	counter := 0
-	backupsIterator := adminClient.ListBackups(ctx, &adminpb.ListBackupsRequest{
-		Parent: instanceName,
-		// Only include backups in READY state and with size < 64K
-		Filter: "(state:READY) AND (size_bytes < 65536)",
-	})
-	for {
-		resp, err := backupsIterator.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return err
-		}
-		fmt.Fprintf(w, "%s [%v] - %d bytes\n", resp.Name, resp.State, resp.SizeBytes)
-		counter++
-	}
-	fmt.Fprintf(w, "Backup count: %d\n", counter)
-
-	return nil
-}
-
-// [END spanner_list_small_backups]
-
-// [START spanner_list_new_backups]
-
-func listNewBackups(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
-	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
-	if matches == nil || len(matches) != 3 {
-		return fmt.Errorf("Invalid database id %s", database)
-	}
-	instanceName := matches[1]
-	counter := 0
-	minCreateTime := time.Now().AddDate(0, 0, -1)
-	maxExpireTime := time.Now().AddDate(0, 0, 3)
-
-	backupsIterator := adminClient.ListBackups(ctx, &adminpb.ListBackupsRequest{
-		Parent: instanceName,
-		// Only include backups that were created recently and expire soon
-		Filter: fmt.Sprintf(`(state:READY) AND (create_time > "%s") AND (expire_time < "%s")`,
-						minCreateTime.Format(time.RFC3339), maxExpireTime.Format(time.RFC3339)),
-	})
-	for {
-		resp, err := backupsIterator.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return err
-		}
-		fmt.Fprintf(w, "%s [%v] - %d bytes\n", resp.Name, resp.State, resp.SizeBytes)
-		counter++
-	}
-	fmt.Fprintf(w, "Backup count: %d\n", counter)
-
-	return nil
-}
-
-// [END spanner_list_new_backups]
-
-// [START spanner_list_instance_backups]
-
-func listInstanceBackups(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
-	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
-	if matches == nil || len(matches) != 3 {
-		return fmt.Errorf("Invalid database id %s", database)
-	}
-	instanceName := matches[1]
-	request := &adminpb.ListBackupsRequest{
-		Parent: instanceName,
-		PageSize: 3,
-	}
-	backupsIterator := adminClient.ListBackups(ctx, request)
-	for {
-		resp, err := backupsIterator.Next()
-		if err == iterator.Done {
-			pageToken := backupsIterator.PageInfo().Token
-			if pageToken == "" {
-				break
-			} else {
-				request.PageToken = pageToken
-				backupsIterator = adminClient.ListBackups(ctx, request)
-			}
-		}
-		if err != nil {
-			return err
-		}
-		fmt.Fprintf(w, "%s [%v] - %d bytes\n", resp.Name, resp.State, resp.SizeBytes)
-	}
-
-	return nil
-}
-
-// [END spanner_list_instance_backups]
 
 // [START spanner_delete_backup]
 
