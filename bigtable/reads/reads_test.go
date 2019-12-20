@@ -60,7 +60,7 @@ func TestReads(t *testing.T) {
 	}{
 		{
 			name: "readRow", filter: readRow, want: fmt.Sprintf(
-			`Reading data for phone#4c410523#20190501:
+				`Reading data for phone#4c410523#20190501:
 Column Family stats_summary
 	connected_cell: 1 @%[1]d
 	connected_wifi: 1 @%[1]d
@@ -68,13 +68,13 @@ Column Family stats_summary
 		},
 		{
 			name: "readRowPartial", filter: readRowPartial, want: fmt.Sprintf(
-			`Reading data for phone#4c410523#20190501:
+				`Reading data for phone#4c410523#20190501:
 Column Family stats_summary
 	os_build: PQ2A.190405.003 @%[1]d`, timestamp),
 		},
 		{
 			name: "readRows", filter: readRows, want: fmt.Sprintf(
-			`Reading data for phone#4c410523#20190501:
+				`Reading data for phone#4c410523#20190501:
 Column Family stats_summary
 	connected_cell: 1 @%[1]d
 	connected_wifi: 1 @%[1]d
@@ -88,7 +88,7 @@ Column Family stats_summary
 		},
 		{
 			name: "readRowRange", filter: readRowRange, want: fmt.Sprintf(
-			`Reading data for phone#4c410523#20190501:
+				`Reading data for phone#4c410523#20190501:
 Column Family stats_summary
 	connected_cell: 1 @%[1]d
 	connected_wifi: 1 @%[1]d
@@ -108,7 +108,7 @@ Column Family stats_summary
 		},
 		{
 			name: "readRowRanges", filter: readRowRanges, want: fmt.Sprintf(
-			`Reading data for phone#4c410523#20190501:
+				`Reading data for phone#4c410523#20190501:
 Column Family stats_summary
 	connected_cell: 1 @%[1]d
 	connected_wifi: 1 @%[1]d
@@ -140,7 +140,7 @@ Column Family stats_summary
 		},
 		{
 			name: "readPrefix", filter: readPrefix, want: fmt.Sprintf(
-			`Reading data for phone#4c410523#20190501:
+				`Reading data for phone#4c410523#20190501:
 Column Family stats_summary
 	connected_cell: 1 @%[1]d
 	connected_wifi: 1 @%[1]d
@@ -172,7 +172,7 @@ Column Family stats_summary
 		},
 		{
 			name: "readFilter", filter: readFilter, want: fmt.Sprintf(
-			`Reading data for phone#4c410523#20190501:
+				`Reading data for phone#4c410523#20190501:
 Column Family stats_summary
 	os_build: PQ2A.190405.003 @%[1]d
 

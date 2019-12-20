@@ -137,7 +137,7 @@ func filterLimitValueRegex(w io.Writer, projectID, instanceID string, tableName 
 // [START bigtable_filters_limit_timestamp_range]
 func filterLimitTimestampRange(w io.Writer, projectID, instanceID string, tableName string) error {
 	startTime := time.Unix(0, 0)
-	endTime := time.Now().Add(-1*time.Hour)
+	endTime := time.Now().Add(-1 * time.Hour)
 	filter := bigtable.TimestampRangeFilter(startTime, endTime)
 
 	return readWithFilter(w, projectID, instanceID, tableName, filter)

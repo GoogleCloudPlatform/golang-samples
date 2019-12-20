@@ -321,7 +321,7 @@ Column Family stats_summary
 			want: fmt.Sprintf(
 				`Reading data for phone#4c410523#20190501:
 Column Family cell_plan
-	data_plan_01gb: true @%d`, timestampMinusHr),},
+	data_plan_01gb: true @%d`, timestampMinusHr)},
 		{
 			name:   "filterLimitBlockAll",
 			filter: filterLimitBlockAll,
