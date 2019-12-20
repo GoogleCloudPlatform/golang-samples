@@ -50,7 +50,7 @@ require (
 	golang.org/x/tools v0.0.0-20191219230827-5e752206af05
 	google.golang.org/api v0.15.0
 	google.golang.org/appengine v1.6.5
-	google.golang.org/genproto v0.0.0-20191220162840-803ea799ed88
+	google.golang.org/genproto v0.0.0-20191220175831-5c49e3ecc1c1
 	google.golang.org/grpc v1.26.0
 	gopkg.in/sendgrid/sendgrid-go.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.2.7
