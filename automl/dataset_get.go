@@ -110,7 +110,6 @@ func getDataset(w io.Writer, projectID string, location string, datasetID string
 	// [START automl_translate_get_dataset]
 	// [START automl_vision_classification_get_dataset]
 
-
 	return nil
 }
 

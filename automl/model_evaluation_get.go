@@ -77,7 +77,6 @@ func getModelEvaluation(w io.Writer, projectID string, location string, modelID 
 	// [END automl_language_text_classification_get_model_evaluation]
 	// [END automl_vision_classification_get_model_evaluation]
 
-
 	// [START automl_translate_get_model_evaluation]
 	fmt.Fprintf(w, "Translation model evaluation metrics: %v\n", evaluation.GetTranslationEvaluationMetrics())
 	// [END automl_translate_get_model_evaluation]
