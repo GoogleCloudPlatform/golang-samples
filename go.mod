@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/golang-samples
 go 1.11
 
 require (
-	cloud.google.com/go v0.49.0
+	cloud.google.com/go v0.50.1-0.20191220172628-cc3fae1a98d2
 	cloud.google.com/go/bigquery v1.3.0
 	cloud.google.com/go/bigtable v1.1.0
 	cloud.google.com/go/datastore v1.0.0
@@ -44,13 +44,13 @@ require (
 	golang.org/x/exp v0.0.0-20191129062945-2f5052295587
 	golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553
 	golang.org/x/oauth2 v0.0.0-20191202225959-858c2ad4c8b6
-	golang.org/x/sys v0.0.0-20191113165036-4c7a9d0fe056 // indirect
+	golang.org/x/sys v0.0.0-20191220142924-d4481acd189f // indirect
 	golang.org/x/text v0.3.2
-	golang.org/x/tools v0.0.0-20191216052735-49a3e744a425
-	google.golang.org/api v0.14.0
+	golang.org/x/tools v0.0.0-20191219230827-5e752206af05
+	google.golang.org/api v0.15.0
 	google.golang.org/appengine v1.6.5
-	google.golang.org/genproto v0.0.0-20191206224255-0243a4be9c8f
-	google.golang.org/grpc v1.25.1
+	google.golang.org/genproto v0.0.0-20191220162840-803ea799ed88
+	google.golang.org/grpc v1.26.0
 	gopkg.in/sendgrid/sendgrid-go.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.2.7
 )
