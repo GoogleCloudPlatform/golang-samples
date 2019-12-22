@@ -33,6 +33,14 @@ import (
 	"time"
 )
 
+type oldTimeStampError struct {
+	s string
+}
+
+func (e *oldTimeStampError) Error() string {
+	return e.s
+}
+
 const (
 	version                     = "v0"
 	slackRequestTimestampHeader = "X-Slack-Request-Timestamp"
@@ -76,9 +84,14 @@ func KGSearch(w http.ResponseWriter, r *http.Request) {
 
 	// Reset r.Body as ParseForm depletes it by reading the io.ReadCloser.
 	r.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
-	if err := verifyWebHook(r, config.Secret); err != nil {
+	result, err := verifyWebHook(r, config.Secret)
+	if err != nil {
 		log.Fatalf("verifyWebhook: %v", err)
 	}
+	if !result {
+		log.Fatalf("signatures did not match.")
+	}
+
 	if len(r.Form["text"]) == 0 {
 		log.Fatalf("emtpy text in form")
 	}
@@ -107,20 +120,46 @@ func makeSearchRequest(query string) (*Message, error) {
 
 // [START functions_verify_webhook]
 
-// VeryfyWebhook now uses signature verification instead of tokens.
+// VeryfyWebhook uses signature verification instead of tokens.
 // see https://api.slack.com/docs/verifying-requests-from-slack
-func verifyWebHook(r *http.Request, secret string) error {
-	result, err := verifyRequestSignature(r, secret)
+func verifyWebHook(r *http.Request, slackSigningSecret string) (bool, error) {
+	timeStamp := r.Header.Get(slackRequestTimestampHeader)
+	slackSignature := r.Header.Get(slackSignatureHeader)
+
+	t, err := strconv.ParseInt(timeStamp, 10, 64)
+	if err != nil {
+		return false, fmt.Errorf("strconv.ParseInt(%s): %v", timeStamp, err)
+	}
+
+	if ageOk, age := checkTimestamp(t); !ageOk {
+		return false, &oldTimeStampError{fmt.Sprintf("checkTimestamp(%v): %v %v", t, ageOk, age)}
+		// return false, fmt.Errorf("checkTimestamp(%v): %v %v", t, ageOk, age)
+	}
+
+	if timeStamp == "" || slackSignature == "" {
+		return false, fmt.Errorf("either timeStamp or signature headers were blank")
+	}
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return false, fmt.Errorf("ioutil.ReadAll(%v): %v", r.Body, err)
+	}
+
+	// Reset the body so other calls won't fail.
+	r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+
+	baseString := fmt.Sprintf("%s:%s:%s", version, timeStamp, body)
+
+	signature := getSignature([]byte(baseString), []byte(slackSigningSecret))
+
+	trimmed := strings.TrimPrefix(slackSignature, fmt.Sprintf("%s=", version))
+	signatureInHeader, err := hex.DecodeString(trimmed)
 
 	if err != nil {
-		return fmt.Errorf("verifyWebHook: %v", err)
+		return false, fmt.Errorf("hex.DecodeString(%v): %v", trimmed, err)
 	}
 
-	if !result {
-		return fmt.Errorf("invalid request/credentials")
-	}
-
-	return nil
+	return hmac.Equal(signature, signatureInHeader), nil
 }
 
 func getSignature(base []byte, secret []byte) []byte {
@@ -135,44 +174,6 @@ func checkTimestamp(timeStamp int64) (bool, time.Duration) {
 	t := time.Since(time.Unix(timeStamp, 0))
 
 	return t.Minutes() <= 5, t
-}
-
-func verifyRequestSignature(r *http.Request, slackSigningSecret string) (bool, error) {
-	timeStamp := r.Header.Get(slackRequestTimestampHeader)
-	slackSignature := r.Header.Get(slackSignatureHeader)
-
-	t, err := strconv.ParseInt(timeStamp, 10, 64)
-	if err != nil {
-		return false, fmt.Errorf("error: %v | got timeStamp: %s", err, timeStamp)
-	}
-
-	if ageOk, age := checkTimestamp(t); !ageOk {
-		return false, fmt.Errorf("error: timestamp too old, got: %s", age)
-	}
-
-	if timeStamp == "" || slackSignature == "" {
-		return false, fmt.Errorf("error: either timeStamp or signature headers were blank")
-	}
-
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		return false, fmt.Errorf("error: ioutil.ReadAll: %v", err)
-	}
-
-	// Reset the body so other calls won't fail.
-	r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
-
-	baseString := fmt.Sprintf("%s:%s:%s", version, timeStamp, body)
-
-	signature := getSignature([]byte(baseString), []byte(slackSigningSecret))
-
-	signatureInHeader, err := hex.DecodeString(strings.TrimPrefix(slackSignature, fmt.Sprintf("%s=", version)))
-
-	if err != nil {
-		return false, err
-	}
-
-	return hmac.Equal(signature, signatureInHeader), nil
 }
 
 // [END functions_verify_webhook]

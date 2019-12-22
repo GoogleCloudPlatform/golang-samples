@@ -10,66 +10,41 @@ import (
 	"time"
 )
 
-func TestGoodSignature(t *testing.T) {
+func TestSigningWithSecret(t *testing.T) {
+	type testCase struct {
+		name       string
+		signature  string
+		timeStamp  string
+		wantResult bool
+	}
 
 	secret := "talesfromthecrypt"
 	ts := strconv.FormatInt(time.Now().Unix(), 10)
 	body := "somebody"
-	base := fmt.Sprintf("v0:%s:%s", ts, body)
-	correctSHA2Signature := fmt.Sprintf("v0=%s", hex.EncodeToString(getSignature([]byte(base), []byte("talesfromthecrypt"))))
+	base := fmt.Sprintf("%s:%s:%s", version, ts, body)
+	correctSHA2Signature := fmt.Sprintf("%s=%s", version, hex.EncodeToString(getSignature([]byte(base), []byte(secret))))
 
-	goodReq := httptest.NewRequest("POST", "https://someurl.com", strings.NewReader(body))
-	goodReq.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	goodReq.Header.Add("X-Slack-Request-Timestamp", ts)
-	goodReq.Header.Add("X-Slack-Signature", correctSHA2Signature)
-
-	goodResult, err := verifyRequestSignature(goodReq, secret)
-	if err != nil {
-		t.Errorf("TestGoodSignature got an error: %s", err)
+	tests := []testCase{
+		{name: "Good request", signature: correctSHA2Signature, timeStamp: ts, wantResult: true},
+		{name: "Bad signature", signature: "v0=146abde6763faeba19adc4d9fe4961668f4be11f7405a1c05b636f29312eac2e", timeStamp: ts, wantResult: false},
+		{name: "Old timestamp", signature: correctSHA2Signature, timeStamp: "12345", wantResult: false},
 	}
-	if !goodResult {
-		t.Errorf("TestGoodSignature failed. Got: %v | Expected: %v", goodResult, !goodResult)
-	}
-}
 
-func TestBadSignature(t *testing.T) {
+	for _, tc := range tests {
+		rq := httptest.NewRequest("POST", "https://someurl.com", strings.NewReader("somebody"))
+		rq.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+		rq.Header.Add("X-Slack-Request-Timestamp", tc.timeStamp)
+		rq.Header.Add("X-Slack-Signature", tc.signature)
 
-	secret := "talesfromthecrypt"
-	wrongSHA2Signature := "v0=146abde6763faeba19adc4d9fe4961668f4be11f7405a1c05b636f29312eac2e"
-	body := "somebody"
-
-	badReq := httptest.NewRequest("POST", "https://someurl.com", strings.NewReader(body))
-	badReq.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	badReq.Header.Add("X-Slack-Request-Timestamp", strconv.FormatInt(time.Now().Unix(), 10))
-	badReq.Header.Add("X-Slack-Signature", wrongSHA2Signature)
-
-	badResult, err := verifyRequestSignature(badReq, secret)
-	if err != nil {
-		t.Errorf("TestBadSignature got an error: %s", err)
-	}
-	if badResult {
-		t.Errorf("TestBadSignature failed. Got: %v | Expected: %v", badResult, badResult)
-	}
-}
-
-func TestBadTimestamp(t *testing.T) {
-
-	secret := "talesfromthecrypt"
-	ts := "1504928418"
-	body := "somebody"
-	base := fmt.Sprintf("v0:%s:%s", ts, body)
-	correctSHA2Signature := fmt.Sprintf("v0=%s", hex.EncodeToString(getSignature([]byte(base), []byte("talesfromthecrypt"))))
-
-	badTSReq := httptest.NewRequest("POST", "https://someurl.com", strings.NewReader(body))
-	badTSReq.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	badTSReq.Header.Add("X-Slack-Request-Timestamp", ts)
-	badTSReq.Header.Add("X-Slack-Signature", correctSHA2Signature)
-
-	badResult, err := verifyRequestSignature(badTSReq, secret)
-	if err == nil {
-		t.Errorf("TestBadTimestamp expected an error but got nil")
-	}
-	if badResult {
-		t.Errorf("TestBadTimestamp failed. Got: %v | Expected: %v", badResult, badResult)
+		got, err := verifyWebHook(rq, secret)
+		if err != nil {
+			// Any error other then the expected one is a failed test.
+			if _, ok := err.(*oldTimeStampError); !ok {
+				t.Errorf("verifyWebHook: %v", err)
+			}
+		}
+		if tc.wantResult != got {
+			t.Errorf("Test: %v - Wanted: %v but got: %v", tc.name, tc.wantResult, got)
+		}
 	}
 }
