@@ -34,7 +34,7 @@ func TestTranslateText(t *testing.T) {
 	if err := translateText(&buf, tc.ProjectID, sourceLang, targetLang, text); err != nil {
 		t.Fatalf("translateText: %v", err)
 	}
-	if got, want1, want2 := buf.String(), "Zdravo svet", "Pozdrav svijetu"; !strings.Contains(got, want1) && !strings.Contains(got, want2) {
+	if got, want1, want2 := buf.String(), "Zdravo", "Pozdrav"; !strings.Contains(got, want1) && !strings.Contains(got, want2) {
 		t.Errorf("translateText got:\n----\n%s----\nWant to contain:\n----\n%s\n----\nOR\n----\n%s\n----", got, want1, want2)
 	}
 }
