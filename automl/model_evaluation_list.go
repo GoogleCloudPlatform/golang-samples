@@ -15,7 +15,12 @@
 // Package automl contains samples for Google Cloud AutoML API v1.
 package automl
 
-// [START automl_list_model_evaluations]
+// [START automl_language_entity_extraction_list_model_evaluations]
+// [START automl_language_sentiment_analysis_list_model_evaluations]
+// [START automl_language_text_classification_list_model_evaluations]
+// [START automl_translate_list_model_evaluations]
+// [START automl_vision_classification_list_model_evaluations]
+// [START automl_vision_object_detection_list_model_evaluations]
 import (
 	"context"
 	"fmt"
@@ -61,10 +66,43 @@ func listModelEvaluations(w io.Writer, projectID string, location string, modelI
 		fmt.Fprintf(w, "\tseconds: %v\n", evaluation.GetCreateTime().GetSeconds())
 		fmt.Fprintf(w, "\tnanos: %v\n", evaluation.GetCreateTime().GetNanos())
 		fmt.Fprintf(w, "Evaluation example count: %v\n", evaluation.GetEvaluatedExampleCount())
-		fmt.Fprintf(w, "Model evaluation metrics: %v\n", evaluation.GetTranslationEvaluationMetrics())
+		// [END automl_language_sentiment_analysis_list_model_evaluations]
+		// [END automl_language_text_classification_list_model_evaluations]
+		// [END automl_translate_list_model_evaluations]
+		// [END automl_vision_classification_list_model_evaluations]
+		// [END automl_vision_object_detection_list_model_evaluations]
+		fmt.Fprintf(w, "Entity extraction model evaluation metrics: %v\n", evaluation.GetTextExtractionEvaluationMetrics())
+		// [END automl_language_entity_extraction_list_model_evaluations]
+
+		// [START automl_language_sentiment_analysis_list_model_evaluations]
+		fmt.Fprintf(w, "Sentiment analysis model evaluation metrics: %v\n", evaluation.GetTextSentimentEvaluationMetrics())
+		// [END automl_language_sentiment_analysis_list_model_evaluations]
+
+		// [START automl_language_text_classification_list_model_evaluations]
+		// [START automl_vision_classification_list_model_evaluations]
+		fmt.Fprintf(w, "Classification model evaluation metrics: %v\n", evaluation.GetClassificationEvaluationMetrics())
+		// [END automl_language_text_classification_list_model_evaluations]
+		// [END automl_vision_classification_list_model_evaluations]
+
+		// [START automl_translate_list_model_evaluations]
+		fmt.Fprintf(w, "Translation model evaluation metrics: %v\n", evaluation.GetTranslationEvaluationMetrics())
+		// [END automl_translate_list_model_evaluations]
+
+		// [START automl_vision_object_detection_list_model_evaluations]
+		fmt.Fprintf(w, "Object detection model evaluation metrics: %v\n", evaluation.GetImageObjectDetectionEvaluationMetrics())
+		// [START automl_language_entity_extraction_list_model_evaluations]
+		// [START automl_language_sentiment_analysis_list_model_evaluations]
+		// [START automl_language_text_classification_list_model_evaluations]
+		// [START automl_translate_list_model_evaluations]
+		// [START automl_vision_classification_list_model_evaluations]
 	}
 
 	return nil
 }
 
-// [END automl_list_model_evaluations]
+// [END automl_language_entity_extraction_list_model_evaluations]
+// [END automl_language_sentiment_analysis_list_model_evaluations]
+// [END automl_language_text_classification_list_model_evaluations]
+// [END automl_translate_list_model_evaluations]
+// [END automl_vision_classification_list_model_evaluations]
+// [END automl_vision_object_detection_list_model_evaluations]
