@@ -33,23 +33,30 @@ import (
 	dataprocpb "google.golang.org/genproto/googleapis/cloud/dataproc/v1"
 )
 
-// TODO (DEVELOPER): Set the following variables. 
+// [END dataproc_quickstart]
 var (
-	projectID   = "YOUR_PROJECT_ID"
-	region      = "YOUR_REGION"
-	clusterName = "YOUR_CLUSTER_NAME"
-	jobFilePath = "YOUR_JOB_FILE_PATH"  
+	projectID string
+	region string
+	clusterName string
+	jobFilePath string
 )
 
-func init() {
-	flag.StringVar(&projectID, "project_id", projectID, "Cloud Project ID, used for creating resources.")
-	flag.StringVar(&region, "region", region, "Region that resources should be created in.")
-	flag.StringVar(&clusterName, "cluster_name", clusterName, "Name of Cloud Dataproc cluster to create.")
-	flag.StringVar(&jobFilePath, "job_file_path", jobFilePath, "Path to job file in GCS.")
+func init () {
+	flag.StringVar(&projectID, "project_id", "", "Cloud Project ID, used for creating resources.")
+	flag.StringVar(&region, "region", "", "Region that resources should be created in.")
+	flag.StringVar(&clusterName, "cluster_name", "", "Name of Cloud Dataproc cluster to create.")
+	flag.StringVar(&jobFilePath, "job_file_path", "", "Path to job file in GCS.")
 }
-
+// [START dataproc_quickstart]
 func main() {
+	// TODO (Developer): Set the following variables.
+	// projectID = "your-project-id"
+	// region = "us-central1"
+	// clusterName = "your-cluster-name"
+	// jobFilePath = "gs://your_file/location"
+	// [END dataproc_quickstart]
 	flag.Parse()
+	// [START dataproc_quickstart]
 	ctx := context.Background()
 
 	// Create the cluster client
