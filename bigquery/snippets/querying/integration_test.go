@@ -114,7 +114,7 @@ func TestQueries(t *testing.T) {
 				}
 			})
 		} else {
-			t.Log("skipping queryWithDesitinationCMEK")
+			t.Log("skipping queryWithDestinationCMEK testing")
 		}
 		t.Run("queryWithArrayParams", func(t *testing.T) {
 			t.Parallel()

@@ -103,6 +103,8 @@ func TestImportSnippets(t *testing.T) {
 					t.Errorf("importJSONWithCMEK(%q): %v", testDatasetID, err)
 				}
 			})
+		} else {
+			t.Log("skipping importJSONWithCMEK testing")
 		}
 		t.Run("importJSONTruncate", func(t *testing.T) {
 			t.Parallel()
