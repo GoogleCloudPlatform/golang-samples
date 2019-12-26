@@ -93,8 +93,12 @@ func TestCopiesAndExtracts(t *testing.T) {
 		t.Errorf("copyTable(%s): %v", testDatasetID, err)
 	}
 
-	if err := copyTableWithCMEK(tc.ProjectID, testDatasetID, "copycmek"); err != nil {
-		t.Errorf("copyTableWithCMEK(%s): %v", testDatasetID, err)
+	if bqtestutil.RunCMEKTests() {
+		if err := copyTableWithCMEK(tc.ProjectID, testDatasetID, "copycmek"); err != nil {
+			t.Errorf("copyTableWithCMEK(%s): %v", testDatasetID, err)
+		}
+	} else {
+		t.Log("skipping copyTableWithCMEK testing")
 	}
 
 	if err := copyMultiTable(tc.ProjectID, testDatasetID, []string{"table1", "table2"}, testDatasetID, "copymulti"); err != nil {
