@@ -13,9 +13,9 @@ require (
 	cloud.google.com/go/spanner v1.1.0
 	cloud.google.com/go/storage v1.3.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.12.8
-	firebase.google.com/go v3.10.0+incompatible
-	github.com/aws/aws-sdk-go v1.26.2
-	github.com/bmatcuk/doublestar v1.2.1
+	firebase.google.com/go v3.11.0+incompatible
+	github.com/aws/aws-sdk-go v1.26.7
+	github.com/bmatcuk/doublestar v1.2.2
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
 	github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -34,7 +34,7 @@ require (
 	github.com/gorilla/websocket v1.4.1
 	github.com/h2non/filetype v1.0.10
 	github.com/jstemmer/go-junit-report v0.9.1 // indirect
-	github.com/lib/pq v1.2.0
+	github.com/lib/pq v1.3.0
 	github.com/linkedin/goavro/v2 v2.9.7
 	github.com/mailgun/mailgun-go/v3 v3.6.3
 	github.com/mailjet/mailjet-apiv3-go v0.0.0-20190724151621-55e56f74078c
@@ -47,10 +47,10 @@ require (
 	golang.org/x/oauth2 v0.0.0-20191202225959-858c2ad4c8b6
 	golang.org/x/sys v0.0.0-20191220142924-d4481acd189f // indirect
 	golang.org/x/text v0.3.2
-	golang.org/x/tools v0.0.0-20191219230827-5e752206af05
+	golang.org/x/tools v0.0.0-20191220234730-f13409bbebaf
 	google.golang.org/api v0.15.0
 	google.golang.org/appengine v1.6.5
-	google.golang.org/genproto v0.0.0-20191220162840-803ea799ed88
+	google.golang.org/genproto v0.0.0-20191220175831-5c49e3ecc1c1
 	google.golang.org/grpc v1.26.0
 	gopkg.in/sendgrid/sendgrid-go.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.2.7

@@ -15,7 +15,12 @@
 // Package automl contains samples for Google Cloud AutoML API v1.
 package automl
 
-// [START automl_get_dataset]
+// [START automl_language_entity_extraction_get_dataset]
+// [START automl_language_sentiment_analysis_get_dataset]
+// [START automl_language_text_classification_get_dataset]
+// [START automl_translate_get_dataset]
+// [START automl_vision_classification_get_dataset]
+// [START automl_vision_object_detection_get_dataset]
 import (
 	"context"
 	"fmt"
@@ -53,39 +58,64 @@ func getDataset(w io.Writer, projectID string, location string, datasetID string
 	fmt.Fprintf(w, "\tseconds: %v\n", dataset.GetCreateTime().GetSeconds())
 	fmt.Fprintf(w, "\tnanos: %v\n", dataset.GetCreateTime().GetNanos())
 
+	// [END automl_language_sentiment_analysis_get_dataset]
+	// [END automl_language_text_classification_get_dataset]
+	// [END automl_translate_get_dataset]
+	// [END automl_vision_classification_get_dataset]
+	// [END automl_vision_object_detection_get_dataset]
 	// Language entity extraction
 	if metadata := dataset.GetTextExtractionDatasetMetadata(); metadata != nil {
 		fmt.Fprintf(w, "Text extraction dataset metadata: %v\n", metadata)
 	}
+	// [END automl_language_entity_extraction_get_dataset]
 
+	// [START automl_language_sentiment_analysis_get_dataset]
 	// Language sentiment analysis
 	if metadata := dataset.GetTextSentimentDatasetMetadata(); metadata != nil {
 		fmt.Fprintf(w, "Text sentiment dataset metadata: %v\n", metadata)
 	}
+	// [END automl_language_sentiment_analysis_get_dataset]
 
+	// [START automl_language_text_classification_get_dataset]
 	// Language text classification
 	if metadata := dataset.GetTextClassificationDatasetMetadata(); metadata != nil {
 		fmt.Fprintf(w, "Text classification dataset metadata: %v\n", metadata)
 	}
+	// [END automl_language_text_classification_get_dataset]
 
+	// [START automl_translate_get_dataset]
 	// Translate
 	if metadata := dataset.GetTranslationDatasetMetadata(); metadata != nil {
 		fmt.Fprintf(w, "Translation dataset metadata:\n")
 		fmt.Fprintf(w, "\tsource_language_code: %v\n", metadata.GetSourceLanguageCode())
 		fmt.Fprintf(w, "\ttarget_language_code: %v\n", metadata.GetTargetLanguageCode())
 	}
+	// [END automl_translate_get_dataset]
 
+	// [START automl_vision_classification_get_dataset]
 	// Vision classification
 	if metadata := dataset.GetImageClassificationDatasetMetadata(); metadata != nil {
 		fmt.Fprintf(w, "Image classification dataset metadata: %v\n", metadata)
 	}
+	// [END automl_vision_classification_get_dataset]
 
+	// [START automl_vision_object_detection_get_dataset]
 	// Vision object detection
 	if metadata := dataset.GetImageObjectDetectionDatasetMetadata(); metadata != nil {
 		fmt.Fprintf(w, "Image object detection dataset metadata: %v\n", metadata)
 	}
+	// [START automl_language_entity_extraction_get_dataset]
+	// [START automl_language_sentiment_analysis_get_dataset]
+	// [START automl_language_text_classification_get_dataset]
+	// [START automl_translate_get_dataset]
+	// [START automl_vision_classification_get_dataset]
 
 	return nil
 }
 
-// [END automl_get_dataset]
+// [END automl_language_entity_extraction_get_dataset]
+// [END automl_language_sentiment_analysis_get_dataset]
+// [END automl_language_text_classification_get_dataset]
+// [END automl_translate_get_dataset]
+// [END automl_vision_classification_get_dataset]
+// [END automl_vision_object_detection_get_dataset]

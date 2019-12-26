@@ -4,4 +4,4 @@ go 1.13
 
 replace github.com/GoogleCloudPlatform/golang-samples/ => ../../..
 
-require github.com/GoogleCloudPlatform/golang-samples v0.0.0-20191213180649-075666adf0a8
+require github.com/GoogleCloudPlatform/golang-samples v0.0.0-20191221185019-170995aaffa2
