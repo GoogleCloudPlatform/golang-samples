@@ -35,18 +35,19 @@ import (
 
 // [END dataproc_quickstart]
 var (
-	projectID string
-	region string
+	projectID   string
+	region      string
 	clusterName string
 	jobFilePath string
 )
 
-func init () {
+func init() {
 	flag.StringVar(&projectID, "project_id", "", "Cloud Project ID, used for creating resources.")
 	flag.StringVar(&region, "region", "", "Region that resources should be created in.")
 	flag.StringVar(&clusterName, "cluster_name", "", "Name of Cloud Dataproc cluster to create.")
 	flag.StringVar(&jobFilePath, "job_file_path", "", "Path to job file in GCS.")
 }
+
 // [START dataproc_quickstart]
 func main() {
 	// TODO (Developer): Set the following variables.
@@ -59,16 +60,14 @@ func main() {
 	// [START dataproc_quickstart]
 	ctx := context.Background()
 
-	// Create the cluster client
+	// Create the cluster client.
 	endpoint := fmt.Sprintf("%s-dataproc.googleapis.com:443", region)
-	fmt.Printf("projectId: %s", projectID)
-	fmt.Printf("region: %s", region)
 	clusterClient, err := dataproc.NewClusterControllerClient(ctx, option.WithEndpoint(endpoint))
 	if err != nil {
 		log.Fatalf("error creating the cluster client: %s", err)
 	}
 
-	// Create the cluster config
+	// Create the cluster config.
 	createReq := &dataprocpb.CreateClusterRequest{
 		ProjectId: projectID,
 		Region:    region,
@@ -88,7 +87,7 @@ func main() {
 		},
 	}
 
-	// Create the cluster
+	// Create the cluster.
 	createOp, err := clusterClient.CreateCluster(ctx, createReq)
 	if err != nil {
 		log.Fatalf("error submitting the cluster creation request: %v", err)
@@ -99,13 +98,13 @@ func main() {
 		log.Fatalf("error creating the cluster: %v", err)
 	}
 
-	// Output a success message
+	// Output a success message.
 	fmt.Printf("Cluster created successfully: %q", createResp.ClusterName)
 
-	// Create the job client
+	// Create the job client.
 	jobClient, err := dataproc.NewJobControllerClient(ctx, option.WithEndpoint(endpoint))
 
-	// Create the job config
+	// Create the job config.
 	submitJobReq := &dataprocpb.SubmitJobRequest{
 		ProjectId: projectID,
 		Region:    region,
@@ -130,27 +129,32 @@ func main() {
 
 	fmt.Printf("Submitted job %q", id)
 
-	// These states all signify that a job has terminated, successfully or not
+	// These states all signify that a job has terminated, successfully or not.
 	terminalStates := map[dataprocpb.JobStatus_State]bool{
 		dataprocpb.JobStatus_ERROR:     true,
 		dataprocpb.JobStatus_CANCELLED: true,
 		dataprocpb.JobStatus_DONE:      true,
 	}
 
-	// We can create a timeout such that the job gets cancelled if not in a terminal state after a certain amount of time
+	// We can create a timeout such that the job gets cancelled if not in a terminal state after a certain amount of time.
 	timeout := 5 * time.Minute
-	start := time.Now().UTC()
+	start := time.Now()
 
 	state := submitJobResp.Status.State
 	for !terminalStates[state] {
-		if time.Now().UTC().Sub(start) > timeout {
+		if time.Since(start) > timeout {
 			cancelReq := &dataprocpb.CancelJobRequest{
 				ProjectId: projectID,
 				Region:    region,
 				JobId:     id,
 			}
-			jobClient.CancelJob(ctx, cancelReq)
-			fmt.Errorf("job %q timed out after threshold of %d seconds", id, int64(timeout.Seconds()))
+
+			_, err := jobClient.CancelJob(ctx, cancelReq)
+			if err != nil {
+				fmt.Errorf("error cancelling job: %v", err)
+			}
+			fmt.Errorf("job %q timed out after %d minutes", id, int64(timeout.Minutes()))
+			break
 		}
 
 		getJobReq := &dataprocpb.GetJobRequest{
@@ -177,28 +181,28 @@ func main() {
 
 	resp, err := clusterClient.GetCluster(ctx, getCReq)
 	if err != nil {
-		log.Fatalf("error getting cluster %q with error: %v", clusterName, err)
+		fmt.Errorf("error getting cluster %q: %v", clusterName, err)
 	}
 
 	storageClient, err := storage.NewClient(ctx)
 	if err != nil {
-		log.Fatalf("error creating storage client with error: %v", err)
+		fmt.Errorf("error creating storage client: %v", err)
 	}
 
 	obj := fmt.Sprintf("google-cloud-dataproc-metainfo/%s/jobs/%s/driveroutput.000000000", resp.ClusterUuid, id)
 	reader, err := storageClient.Bucket(resp.Config.ConfigBucket).Object(obj).NewReader(ctx)
 	if err != nil {
-		log.Fatalf("error reading job output: %v", err)
+		fmt.Errorf("error reading job output: %v", err)
 	}
 
 	defer reader.Close()
 
 	body, err := ioutil.ReadAll(reader)
 	if err != nil {
-		log.Fatalf("could not read output from Dataproc Job %q", id)
+		fmt.Errorf("could not read output from Dataproc Job %q", id)
 	}
 
-	fmt.Printf("Job %q finished with state %s:\n%s", id, state, body)
+	fmt.Printf("job %q finished with state %s:\n%s", id, state, body)
 
 	// Delete the cluster once the job has terminated
 	dReq := &dataprocpb.DeleteClusterRequest{
@@ -209,7 +213,7 @@ func main() {
 	deleteOp, err := clusterClient.DeleteCluster(ctx, dReq)
 	deleteOp.Wait(ctx)
 	if err != nil {
-		log.Fatalf("error deleting cluster %q: %v", clusterName, err)
+		fmt.Errorf("error deleting cluster %q: %v", clusterName, err)
 	}
 	fmt.Printf("Cluster %q successfully deleted", clusterName)
 }
