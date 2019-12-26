@@ -65,6 +65,6 @@ func RunCMEKTests() bool {
 
 	// If you're running locally and want CMEK testing to happen regardless, use
 	// the RUN_CMEK_TESTS environment variable.
-	_, ok := os.LookupEnv("RUN_CMEK_TESTS")
+	_, ok = os.LookupEnv("RUN_CMEK_TESTS")
 	return ok
 }
