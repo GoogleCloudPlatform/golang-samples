@@ -141,7 +141,7 @@ date
 OUTFILE=gotest.out
 2>&1 go test -timeout $TIMEOUT -v . $TARGET | tee $OUTFILE
 
-set +x
+set +e
 
 cat $OUTFILE | /go/bin/go-junit-report -set-exit-code > sponge_log.xml
 EXIT_CODE=$?
