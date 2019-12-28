@@ -22,10 +22,10 @@ import (
 	"testing"
 	"time"
 
-	asset "cloud.google.com/go/asset/apiv1p2beta1"
+	asset "cloud.google.com/go/asset/apiv1"
 	"cloud.google.com/go/pubsub"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1p2beta1"
+	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
