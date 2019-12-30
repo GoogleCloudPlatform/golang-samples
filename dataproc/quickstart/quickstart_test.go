@@ -47,8 +47,8 @@ func setup(t *testing.T, tc testutil.Context) {
 	ctx := context.Background()
 	flag.Parse()
 
-	_clusterName = "golang-dataproc-quickstart-test-" + tc.ProjectID
-	bktName = "golang-dataproc-quickstart-test-" + tc.ProjectID
+	_clusterName = "go-qs-test-" + tc.ProjectID
+	bktName = "go-dataproc-qs-test-" + tc.ProjectID
 	_jobFilePath = fmt.Sprintf("gs://%s/%s", bktName, jobFName)
 
 	sc, err := storage.NewClient(ctx)

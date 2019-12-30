@@ -49,7 +49,7 @@ func teardown(t *testing.T, tc testutil.Context, clusterName, region string) {
 func TestCreateCluster(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	clusterName := fmt.Sprintf("%s-test-dataproc-create-cluster", tc.ProjectID)
+	clusterName := fmt.Sprintf("go-cc-test-%s", tc.ProjectID)
 	region := "us-central1"
 	
 	defer teardown(t, tc, clusterName, region)
