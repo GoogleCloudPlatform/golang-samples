@@ -105,17 +105,16 @@ func TestQueries(t *testing.T) {
 				t.Errorf("queryWithDestination: %v", err)
 			}
 		})
-		if bqtestutil.RunCMEKTests() {
-			t.Run("queryWithDestinationCMEK", func(t *testing.T) {
-				t.Parallel()
-				tableID := "bigquery_query_destination_table_cmek"
-				if err := queryWithDestinationCMEK(ioutil.Discard, tc.ProjectID, testDatasetID, tableID); err != nil {
-					t.Errorf("queryWithDestinationCMEK: %v", err)
-				}
-			})
-		} else {
-			t.Log("skipping queryWithDestinationCMEK testing")
-		}
+		t.Run("queryWithDestinationCMEK", func(t *testing.T) {
+			if bqtestutil.RunCMEKTests() {
+				t.Skip("skipping CMEK tests")
+			}
+			t.Parallel()
+			tableID := "bigquery_query_destination_table_cmek"
+			if err := queryWithDestinationCMEK(ioutil.Discard, tc.ProjectID, testDatasetID, tableID); err != nil {
+				t.Errorf("queryWithDestinationCMEK: %v", err)
+			}
+		})
 		t.Run("queryWithArrayParams", func(t *testing.T) {
 			t.Parallel()
 			if err := queryWithArrayParams(ioutil.Discard, tc.ProjectID); err != nil {

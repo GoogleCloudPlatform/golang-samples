@@ -112,17 +112,18 @@ func TestTables(t *testing.T) {
 	if err != nil {
 		t.Fatalf("couldn't generate unique table id: %v", err)
 	}
-	if bqtestutil.RunCMEKTests() {
 
+	t.Run("cmektests", func(t *testing.T) {
+		if bqtestutil.RunCMEKTests() {
+			t.Skip("skipping CMEK tests")
+		}
 		if err := createTableWithCMEK(tc.ProjectID, testDatasetID, testTableID); err != nil {
 			t.Fatalf("createTableWithCMEK(%q %q): %v", testDatasetID, testTableID, err)
 		}
 		if err := updateTableChangeCMEK(tc.ProjectID, testDatasetID, testTableID); err != nil {
 			t.Fatalf("updateTableChangeCMEK(%q %q): %v", testDatasetID, testTableID, err)
 		}
-	} else {
-		t.Log("skipping createTableWithCMEK and updateTableChangeCMEK testing")
-	}
+	})
 
 	testTableID, err = bqtestutil.UniqueBQName("testtable")
 	if err != nil {

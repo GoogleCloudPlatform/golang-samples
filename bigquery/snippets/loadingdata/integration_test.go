@@ -95,17 +95,16 @@ func TestImportSnippets(t *testing.T) {
 				t.Errorf("importJSONAutodetectSchema(%q): %v", testDatasetID, err)
 			}
 		})
-		if bqtestutil.RunCMEKTests() {
-			t.Run("importJSONWithCMEK", func(t *testing.T) {
-				t.Parallel()
-				tableID := "bigquery_load_table_gcs_json_cmek"
-				if err := importJSONWithCMEK(tc.ProjectID, testDatasetID, tableID); err != nil {
-					t.Errorf("importJSONWithCMEK(%q): %v", testDatasetID, err)
-				}
-			})
-		} else {
-			t.Log("skipping importJSONWithCMEK testing")
-		}
+		t.Run("importJSONWithCMEK", func(t *testing.T) {
+			if bqtestutil.RunCMEKTests() {
+				t.Skip("skipping CMEK tests")
+			}
+			t.Parallel()
+			tableID := "bigquery_load_table_gcs_json_cmek"
+			if err := importJSONWithCMEK(tc.ProjectID, testDatasetID, tableID); err != nil {
+				t.Errorf("importJSONWithCMEK(%q): %v", testDatasetID, err)
+			}
+		})
 		t.Run("importJSONTruncate", func(t *testing.T) {
 			t.Parallel()
 			tableID := "bigquery_load_table_gcs_json_truncate"
