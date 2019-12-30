@@ -56,9 +56,9 @@ func sanitize(s string, allowedSeparator string) string {
 
 // RunCMEKTests probes whether CMEK-based tests should run.
 func RunCMEKTests() bool {
-	// TRAMPOLINE_BUILD_FILE is set by the CI testing we use, and is a quick
+	// KOKORO_BUILD_ID is set by the CI testing we use, and is a quick
 	// heuristic for testing whether this is a CI-based build.
-	_, ok := os.LookupEnv("TRAMPOLINE_BUILD_FILE")
+	_, ok := os.LookupEnv("KOKORO_BUILD_ID")
 	if ok {
 		return true
 	}
