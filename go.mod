@@ -26,6 +26,7 @@ require (
 	github.com/golang/groupcache v0.0.0-20191027212112-611e8accdfc9 // indirect
 	github.com/golang/protobuf v1.3.2
 	github.com/gomodule/redigo v2.0.0+incompatible
+	github.com/google/go-cmp v0.3.1
 	github.com/google/pprof v0.0.0-20191105193234-27840fff0d09 // indirect
 	github.com/google/uuid v1.1.1
 	github.com/googleapis/gax-go/v2 v2.0.5
@@ -46,7 +47,7 @@ require (
 	golang.org/x/oauth2 v0.0.0-20191202225959-858c2ad4c8b6
 	golang.org/x/sys v0.0.0-20191220220014-0732a990476f // indirect
 	golang.org/x/text v0.3.2
-	golang.org/x/tools v0.0.0-20191216173652-a0e659d51361
+	golang.org/x/tools v0.0.0-20191220234730-f13409bbebaf
 	google.golang.org/api v0.15.0
 	google.golang.org/appengine v1.6.5
 	google.golang.org/genproto v0.0.0-20191220175831-5c49e3ecc1c1

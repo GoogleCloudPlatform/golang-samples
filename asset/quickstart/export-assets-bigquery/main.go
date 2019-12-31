@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START asset_quickstart_export_assets]
+// [START asset_quickstart_export_assets_bigquery]
 
-// Sample asset-quickstart exports assets to given path.
+// Sample asset-quickstart exports assets to given bigquery table.
 package main
 
 import (
@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	asset "cloud.google.com/go/asset/apiv1"
 	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1"
@@ -34,29 +35,29 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	bucketName := fmt.Sprintf("%s-for-assets", projectID)
-	assetDumpFile := fmt.Sprintf("gs://%s/my-assets.txt", bucketName)
-	req := &assetpb.ExportAssetsRequest{
+	datasetID := strings.ReplaceAll(fmt.Sprintf("%s-for-assets", projectID), "-", "_")
+	dataset := fmt.Sprintf("projects/%s/datasets/%s", projectID, datasetID)
+	table := "test"
+	req_bq := &assetpb.ExportAssetsRequest{
 		Parent: fmt.Sprintf("projects/%s", projectID),
 		OutputConfig: &assetpb.OutputConfig{
-			Destination: &assetpb.OutputConfig_GcsDestination{
-				GcsDestination: &assetpb.GcsDestination{
-					ObjectUri: &assetpb.GcsDestination_Uri{
-						Uri: string(assetDumpFile),
-					},
+			Destination: &assetpb.OutputConfig_BigqueryDestination{
+				BigqueryDestination: &assetpb.BigQueryDestination{
+					Dataset: string(dataset),
+					Table:   string(table),
 				},
 			},
 		},
 	}
-	operation, err := client.ExportAssets(ctx, req)
+	operation_bq, err := client.ExportAssets(ctx, req_bq)
 	if err != nil {
 		log.Fatal(err)
 	}
-	response, err := operation.Wait(ctx)
+	response_bq, err := operation_bq.Wait(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Print(response)
+	fmt.Print(response_bq)
 }
 
-// [END asset_quickstart_export_assets]
+// [END asset_quickstart_export_assets_bigquery]
