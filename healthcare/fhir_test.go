@@ -112,6 +112,16 @@ func TestFHIRStore(t *testing.T) {
 
 	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
 		buf.Reset()
+		if err := searchFHIRResources(buf, tc.ProjectID, location, datasetID, fhirStoreID, resourceType); err != nil {
+			r.Errorf("searchFHIRResources got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, res.ID) {
+			r.Errorf("searchFHIRResources got\n----\n%s\n----\nWant to contain:\n----\n%s\n----\n", got, resourceType)
+		}
+	})
+
+	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
+		buf.Reset()
 		if err := updateFHIRResource(buf, tc.ProjectID, location, datasetID, fhirStoreID, resourceType, res.ID, false); err != nil {
 			r.Errorf("updateFHIRResource got err: %v", err)
 			return
