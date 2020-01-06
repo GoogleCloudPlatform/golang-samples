@@ -39,10 +39,7 @@ func TestGRPCPingService(t *testing.T) {
 
 	// Prepare the container image for both services.
 	pingService := cloudrunci.NewService("grpc-ping", tc.ProjectID)
-	//pingService.Build()
-	// Skip build during test troubleshooting by reusing this image.
-	// This will cause container cleanup to be skipped as well.
-	pingService.Image = "gcr.io/adamross-svls-kibble/grpc-ping:latest"
+	pingService.Build()
 
 	// Deploy the ping-upstream service.
 	upstreamService := cloudrunci.NewService("grpc-ping-upstream", tc.ProjectID)
