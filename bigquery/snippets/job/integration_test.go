@@ -89,17 +89,32 @@ func TestCopiesAndExtracts(t *testing.T) {
 		t.Fatalf("failed to generate example table2: %v", err)
 	}
 
-	if err := copyTable(tc.ProjectID, testDatasetID, "table1", "copy1"); err != nil {
-		t.Errorf("copyTable(%s): %v", testDatasetID, err)
-	}
+	// Run copy job tests in parallel.
+	t.Run("copy", func(t *testing.T) {
+		t.Run("copyTable", func(t *testing.T) {
+			t.Parallel()
+			if err := copyTable(tc.ProjectID, testDatasetID, "table1", "copy1"); err != nil {
+				t.Errorf("copyTable(%s): %v", testDatasetID, err)
+			}
+		})
 
-	if err := copyTableWithCMEK(tc.ProjectID, testDatasetID, "copycmek"); err != nil {
-		t.Errorf("copyTableWithCMEK(%s): %v", testDatasetID, err)
-	}
+		t.Run("copyTableWithCMEK", func(t *testing.T) {
+			if !bqtestutil.RunCMEKTests() {
+				t.Skip("Skipping CMEK tests")
+			}
+			t.Parallel()
+			if err := copyTableWithCMEK(tc.ProjectID, testDatasetID, "copycmek"); err != nil {
+				t.Errorf("copyTableWithCMEK(%s): %v", testDatasetID, err)
+			}
+		})
 
-	if err := copyMultiTable(tc.ProjectID, testDatasetID, []string{"table1", "table2"}, testDatasetID, "copymulti"); err != nil {
-		t.Errorf("copyMultiTable(%s): %v", testDatasetID, err)
-	}
+		t.Run("copyMultiTable", func(t *testing.T) {
+			t.Parallel()
+			if err := copyMultiTable(tc.ProjectID, testDatasetID, []string{"table1", "table2"}, testDatasetID, "copymulti"); err != nil {
+				t.Errorf("copyMultiTable(%s): %v", testDatasetID, err)
+			}
+		})
+	})
 
 	// Extract tests - setup bucket
 	storageClient, err := storage.NewClient(ctx)
@@ -115,19 +130,33 @@ func TestCopiesAndExtracts(t *testing.T) {
 		t.Fatalf("cannot create bucket: %v", err)
 	}
 
-	gcsURI := fmt.Sprintf("gs://%s/%s", bucket, "shakespeare.csv")
-	if err := exportTableAsCSV(tc.ProjectID, gcsURI); err != nil {
-		t.Errorf("exportTableAsCSV(%s): %v", gcsURI, err)
-	}
-	gcsURI = fmt.Sprintf("gs://%s/%s", bucket, "shakespeare.csv.gz")
-	if err := exportTableAsCompressedCSV(tc.ProjectID, gcsURI); err != nil {
-		t.Errorf("exportTableAsCompressedCSV(%s): %v", gcsURI, err)
-	}
+	// Run extract job tests in parallel.
+	t.Run("extract", func(t *testing.T) {
+		t.Run("exportTableAsCSV", func(t *testing.T) {
+			t.Parallel()
+			gcsURI := fmt.Sprintf("gs://%s/%s", bucket, "shakespeare.csv")
+			if err := exportTableAsCSV(tc.ProjectID, gcsURI); err != nil {
+				t.Errorf("exportTableAsCSV(%s): %v", gcsURI, err)
+			}
+		})
 
-	gcsURI = fmt.Sprintf("gs://%s/%s", bucket, "shakespeare.json")
-	if err := exportTableAsJSON(tc.ProjectID, gcsURI); err != nil {
-		t.Errorf("exportTableAsJSON(%s): %v", gcsURI, err)
-	}
+		t.Run("exportTableAsCompressedCSV", func(t *testing.T) {
+			t.Parallel()
+			gcsURI := fmt.Sprintf("gs://%s/%s", bucket, "shakespeare.csv.gz")
+			if err := exportTableAsCompressedCSV(tc.ProjectID, gcsURI); err != nil {
+				t.Errorf("exportTableAsCompressedCSV(%s): %v", gcsURI, err)
+			}
+
+		})
+		t.Run("exportTableAsJSON", func(t *testing.T) {
+			t.Parallel()
+			gcsURI := fmt.Sprintf("gs://%s/%s", bucket, "shakespeare.json")
+			if err := exportTableAsJSON(tc.ProjectID, gcsURI); err != nil {
+				t.Errorf("exportTableAsJSON(%s): %v", gcsURI, err)
+			}
+
+		})
+	})
 
 	// Walk the bucket and delete objects
 	it := storageClient.Bucket(bucket).Objects(ctx, nil)
