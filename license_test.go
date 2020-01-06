@@ -44,6 +44,7 @@ var skip = map[string]bool{
 	"endpoints/getting-started-grpc/client/main.go":              true,
 	"endpoints/getting-started-grpc/server/main.go":              true,
 	"endpoints/getting-started-grpc/helloworld/helloworld.pb.go": true,
+	"run/grpc-ping/pkg/api/v1/message.pb.go":                     true,
 }
 
 func TestLicense(t *testing.T) {
