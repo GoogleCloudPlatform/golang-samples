@@ -2,4 +2,4 @@ module github.com/GoogleCloudPlatform/golang-samples/run/logging-manual
 
 go 1.12
 
-require cloud.google.com/go v0.49.0
+require cloud.google.com/go v0.50.0
