@@ -1,4 +1,4 @@
-module infinite/audio
+module github.com/GoogleCloudPlatform/golang-samples/speech/infinite_streaming_from_file
 
 go 1.13
 
