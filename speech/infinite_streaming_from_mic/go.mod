@@ -1,4 +1,4 @@
-module infinite/mic
+module github.com/GoogleCloudPlatform/golang-samples/speech/infinite_streaming_from_mic
 
 go 1.13
 
