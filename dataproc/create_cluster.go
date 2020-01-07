@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package dataproc package shows how you can use the Cloud Dataproc Client library to create a
+// Package dataproc shows how you can use the Cloud Dataproc Client library to create a
 // Cloud Dataproc cluster.
 package dataproc
 
