@@ -12,25 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package automl contains samples for Google Cloud AutoML API v1beta1.
+// Package automl contains samples for Google Cloud AutoML API.
 package automl
 
-// [START automl_vision_batch_predict]
+// [START automl_batch_predict]
 import (
 	"context"
 	"fmt"
 	"io"
 
-	automl "cloud.google.com/go/automl/apiv1beta1"
-	automlpb "google.golang.org/genproto/googleapis/cloud/automl/v1beta1"
+	automl "cloud.google.com/go/automl/apiv1"
+	automlpb "google.golang.org/genproto/googleapis/cloud/automl/v1"
 )
 
-// visionBatchPredict does a batch prediction.
-func visionBatchPredict(w io.Writer, projectID string, location string, modelID string, inputURI string, outputURI string) error {
+// batchPredict does a batch prediction.
+func batchPredict(w io.Writer, projectID string, location string, modelID string, inputURI string, outputURI string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
 	// modelID := "ICN123456789..."
-	// inputURI := "gs://BUCKET_ID/path_to_your_input_file.txt"
+	// inputURI := "gs://BUCKET_ID/path_to_your_input_csv_or_jsonl"
 	// outputURI := "gs://BUCKET_ID/path_to_save_results/"
 
 	ctx := context.Background()
@@ -78,4 +78,4 @@ func visionBatchPredict(w io.Writer, projectID string, location string, modelID 
 	return nil
 }
 
-// [END automl_vision_batch_predict]
+// [END automl_batch_predict]

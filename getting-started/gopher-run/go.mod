@@ -6,6 +6,6 @@ require (
 	cloud.google.com/go v0.47.0 // indirect
 	cloud.google.com/go/firestore v1.0.0
 	cloud.google.com/go/storage v1.0.0
-	golang.org/x/oauth2 v0.0.0-20191122200657-5d9234df094c
-	google.golang.org/api v0.14.0
+	golang.org/x/oauth2 v0.0.0-20200107160858-eca82077e2d1
+	google.golang.org/api v0.15.0
 )

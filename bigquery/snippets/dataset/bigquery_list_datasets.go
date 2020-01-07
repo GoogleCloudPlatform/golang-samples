@@ -15,7 +15,6 @@
 package dataset
 
 // [START bigquery_list_datasets]
-
 import (
 	"context"
 	"fmt"
@@ -25,6 +24,7 @@ import (
 	"google.golang.org/api/iterator"
 )
 
+// listDatasets demonstrates iterating through the collection of datasets in a project.
 func listDatasets(projectID string, w io.Writer) error {
 	// projectID := "my-project-id"
 	ctx := context.Background()

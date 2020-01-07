@@ -21,15 +21,21 @@ set -x
 go version
 date
 
-# Re-organize files
-export GOPATH=$PWD/gopath
-target=$GOPATH/src/github.com/GoogleCloudPlatform
-mkdir -p $target
-mv github/golang-samples $target
-cd $target/golang-samples
+cd github/golang-samples
 
 export GO111MODULE=on # Always use modules.
 export GOPROXY=https://proxy.golang.org
+
+# Fail if a dependency was added without the necessary go.mod/go.sum change
+# being part of the commit.
+# Do this before reserving a project since this doens't need a project.
+for i in `find . -name go.mod`; do
+  pushd `dirname $i` > /dev/null;
+    go mod tidy;
+    git diff go.mod | tee /dev/stderr | (! read)
+    [ -f go.sum ] && git diff go.sum | tee /dev/stderr | (! read)
+  popd > /dev/null;
+done
 
 # Don't print environment variables in case there are secrets.
 # If you need a secret, use a keystore_resource in common.cfg.
@@ -94,13 +100,14 @@ if [ -z ${KOKORO_GITHUB_PULL_REQUEST_NUMBER:-} ]; then
   RUN_ALL_TESTS="1"
 fi
 
+# Also see trampoline.sh - system_tests.sh is only run for PRs when there are
+# significant changes.
+SIGNIFICANT_CHANGES=$(git --no-pager diff --name-only HEAD..master | egrep -v '(\.md$|^\.github)' || true)
 # CHANGED_DIRS is the list of significant top-level directories that changed.
 # CHANGED_DIRS will be empty when run on master.
-# Also see trampoline.sh - system_tests.sh is only run when there are
-# significant changes.
-CHANGED_DIRS=$(git --no-pager diff --name-only HEAD..master | egrep -v '(\.md$|^\.github)' | grep "/" | cut -d/ -f1 | sort -u | tr '\n' ' ')
-# If test configuration is changed, run all tests.
-if [[ $CHANGED_DIRS =~ "testing" || $CHANGED_DIRS =~ "internal" ]]; then
+CHANGED_DIRS=$(echo $SIGNIFICANT_CHANGES | tr ' ' '\n' | grep "/" | cut -d/ -f1 | sort -u | tr '\n' ' ')
+
+if echo $SIGNIFICANT_CHANGES | tr ' ' '\n' | grep "^go.mod$" || [[ $CHANGED_DIRS =~ "testing" || $CHANGED_DIRS =~ "internal" ]]; then
   RUN_ALL_TESTS="1"
 fi
 
@@ -134,4 +141,36 @@ date
 OUTFILE=gotest.out
 2>&1 go test -timeout $TIMEOUT -v . $TARGET | tee $OUTFILE
 
+set +e
+
 cat $OUTFILE | /go/bin/go-junit-report -set-exit-code > sponge_log.xml
+EXIT_CODE=$?
+
+# If we're running system tests, send the test log to the Build Cop Bot.
+# See https://github.com/googleapis/repo-automation-bots/tree/master/packages/buildcop.
+if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]]; then
+  # Use the service account with access to the repo-automation-bots project.
+  gcloud auth activate-service-account --key-file $KOKORO_KEYSTORE_DIR/71386_kokoro-golang-samples-tests
+  gcloud config set project repo-automation-bots
+
+  XML=$(base64 -w 0 sponge_log.xml)
+
+  # See https://github.com/apps/build-cop-bot/installations/5943459.
+  MESSAGE=$(cat <<EOF
+  {
+      "Name": "buildcop",
+      "Type" : "function",
+      "Location": "us-central1",
+      "installation": {"id": "5943459"},
+      "repo": "GoogleCloudPlatform/golang-samples",
+      "buildID": "commit:$KOKORO_GIT_COMMIT",
+      "buildURL": "https://source.cloud.google.com/results/invocations/$KOKORO_BUILD_ID",
+      "xunitXML": "$XML"
+  }
+EOF
+  )
+
+  gcloud pubsub topics publish passthrough --message="$MESSAGE"
+fi
+
+exit $EXIT_CODE
