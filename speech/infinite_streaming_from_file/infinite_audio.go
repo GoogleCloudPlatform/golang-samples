@@ -42,13 +42,15 @@ import (
 	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"
 )
 
-const sampleRate int = 16000                                      // Audio sample rate hertz.
-const inputChannel int = 1                                        // Number of audio input channel.
-const outputChannel int = 0                                       // Number of audio output channel.
-const bytesPerSample int = 2                                      // Number of bytes each sample consists of.
-const bytesPerSecond = sampleRate * inputChannel * bytesPerSample // Number of bytes each second audio consists of.
-const streamTimeLimit = 290 * time.Second                         // Streaming API Limit( ≈ 5 mins).
-const sampleDuration int64 = 1000                                 // The duration of each sample is 1000 ms.
+const(
+        sampleRate int = 16000                                      // Audio sample rate hertz.
+        inputChannel int = 1                                        // Number of audio input channel.
+        outputChannel int = 0                                       // Number of audio output channel.
+        bytesPerSample int = 2                                      // Number of bytes each sample consists of.
+        bytesPerSecond = sampleRate * inputChannel * bytesPerSample // Number of bytes each second audio consists of.
+        streamTimeLimit = 290 * time.Second                         // Streaming API Limit( ≈ 5 mins).
+        sampleDuration int64 = 1000                                 // The duration of each sample is 1000 ms.
+)
 
 func main() {
 	// Define data storage buffer.
@@ -227,11 +229,7 @@ func main() {
 
 			}
 			// If there is no more data to read from input, then the program will terminate.
-			if inputIsNull {
-				return true
-			} else {
-				return false
-			}
+			return inputIsNull
 		}()
 		wg.Wait()
 	}
