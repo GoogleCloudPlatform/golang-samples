@@ -41,13 +41,13 @@ import (
 )
 
 const(
-      sampleRate int = 44100                                      // Audio sample rate hertz.
-      inputChannel int = 1                                        // Number of audio input channel.
-      outputChannel int = 0                                       // Number of audio output channel.
-      bytesPerSample int = 2                                      // Number of bytes each sample consists of.
-      bytesPerSecond = sampleRate * inputChannel * bytesPerSample // Number of bytes each second audio consists of.
-      streamTimeLimit = 290 * time.Second                         // Streaming API Limit( ≈ 5 mins).
-      sampleDuration int64 = 1000                                 // The duration of each sample is 1000ms.
+        sampleRate = 44100                                          // Audio sample rate hertz.
+        inputChannel = 1                                            // Number of audio input channel.
+        outputChannel = 0                                           // Number of audio output channel.
+        bytesPerSample = 2                                          // Number of bytes each sample consists of.
+        bytesPerSecond = sampleRate * inputChannel * bytesPerSample // Number of bytes each second audio consists of.
+        streamTimeLimit = 290 * time.Second                         // Streaming API Limit( ≈ 5 mins).
+        sampleDuration int64 = 1000                                 // The duration of each sample is 1000ms.
 )
 
 func main() {
