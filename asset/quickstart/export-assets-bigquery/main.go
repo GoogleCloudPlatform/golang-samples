@@ -43,7 +43,7 @@ func main() {
 		OutputConfig: &assetpb.OutputConfig{
 			Destination: &assetpb.OutputConfig_BigqueryDestination{
 				BigqueryDestination: &assetpb.BigQueryDestination{
-					Dataset: string(dataset),
+					Dataset: dataset,
 					Table:   string(table),
 				},
 			},
