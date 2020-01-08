@@ -33,7 +33,7 @@ func main() {
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	client, err := asset.NewClient(ctx)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("asset.NewClient: %v", err)
 	}
 	datasetID := strings.ReplaceAll(fmt.Sprintf("%s-for-assets", projectID), "-", "_")
 	dataset := fmt.Sprintf("projects/%s/datasets/%s", projectID, datasetID)
