@@ -106,6 +106,9 @@ func TestQueries(t *testing.T) {
 			}
 		})
 		t.Run("queryWithDestinationCMEK", func(t *testing.T) {
+			if bqtestutil.RunCMEKTests() {
+				t.Skip("skipping CMEK tests")
+			}
 			t.Parallel()
 			tableID := "bigquery_query_destination_table_cmek"
 			if err := queryWithDestinationCMEK(ioutil.Discard, tc.ProjectID, testDatasetID, tableID); err != nil {
