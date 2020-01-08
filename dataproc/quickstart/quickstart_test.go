@@ -30,36 +30,67 @@ import (
 	dataprocpb "google.golang.org/genproto/googleapis/cloud/dataproc/v1"
 )
 
-// Underscored names so as to not collide with sample declarations
 var (
-	_clusterName string
-	bktName      string
-	_jobFilePath string
-	jobFName     = "sum.py"
-	code         = `import pyspark
+	clusterName string
+	bktName     string
+	jobFilePath string
+	jobFName    = "sum.py"
+	code        = `import pyspark
 sc = pyspark.SparkContext()
 rdd = sc.parallelize((1,2,3,4,5))
 sum = rdd.reduce(lambda x, y: x + y)`
-	_region = "us-central1"
+	region = "us-central1"
 )
+
+func cleanBucket(t *testing.T, ctx context.Context, client *storage.Client, projectID, bucket string) {
+	b := client.Bucket(bucket)
+	_, err := b.Attrs(ctx)
+	if err == nil {
+		it := b.Objects(ctx, nil)
+		for {
+			attrs, err := it.Next()
+			if err == iterator.Done {
+				break
+			}
+			if err != nil {
+				t.Fatalf("Bucket.Objects(%q): %v", bucket, err)
+			}
+			if attrs.EventBasedHold || attrs.TemporaryHold {
+				if _, err := b.Object(attrs.Name).Update(ctx, storage.ObjectAttrsToUpdate{
+					TemporaryHold:  false,
+					EventBasedHold: false,
+				}); err != nil {
+					t.Fatalf("Bucket(%q).Object(%q).Update: %v", bucket, attrs.Name, err)
+				}
+			}
+			if err := b.Object(attrs.Name).Delete(ctx); err != nil {
+				t.Fatalf("Bucket(%q).Object(%q).Delete: %v", bucket, attrs.Name, err)
+			}
+		}
+		if err := b.Delete(ctx); err != nil {
+			t.Fatalf("Bucket.Delete(%q): %v", bucket, err)
+		}
+	}
+	if err := b.Create(ctx, projectID, nil); err != nil {
+		t.Fatalf("Bucket.Create(%q): %v", bucket, err)
+	}
+}
 
 func setup(t *testing.T, tc testutil.Context) {
 	ctx := context.Background()
 	flag.Parse()
 
-	_clusterName = "go-qs-test-" + tc.ProjectID
+	clusterName = "go-qs-test-" + tc.ProjectID
 	bktName = "go-dataproc-qs-test-" + tc.ProjectID
-	_jobFilePath = fmt.Sprintf("gs://%s/%s", bktName, jobFName)
+	jobFilePath = fmt.Sprintf("gs://%s/%s", bktName, jobFName)
 
 	sc, err := storage.NewClient(ctx)
 	if err != nil {
 		t.Errorf("Error creating storage client with error: %v", err)
 	}
 
+	cleanBucket(t, ctx, sc, tc.ProjectID, bktName)
 	bkt := sc.Bucket(bktName)
-	if err := bkt.Create(ctx, tc.ProjectID, nil); err != nil {
-		t.Errorf("Error creating bucket %q: %v", bktName, err)
-	}
 
 	obj := bkt.Object(jobFName)
 
@@ -93,13 +124,13 @@ func teardown(t *testing.T, tc testutil.Context) {
 		t.Errorf("Error deleting bucket: %v", err)
 	}
 
-	ep := fmt.Sprintf("%s-dataproc.googleapis.com:443", _region)
-	client, err := dataproc.NewClusterControllerClient(ctx, option.WithEndpoint(ep))
+	endpoint := fmt.Sprintf("%s-dataproc.googleapis.com:443", region)
+	client, err := dataproc.NewClusterControllerClient(ctx, option.WithEndpoint(endpoint))
 	if err != nil {
 		t.Errorf("Error creating the cluster client: %s", err)
 	}
 
-	lReq := &dataprocpb.ListClustersRequest{ProjectId: tc.ProjectID, Region: _region}
+	lReq := &dataprocpb.ListClustersRequest{ProjectId: tc.ProjectID, Region: region}
 	it := client.ListClusters(ctx, lReq)
 
 	for {
@@ -110,13 +141,13 @@ func teardown(t *testing.T, tc testutil.Context) {
 		if err != nil {
 			t.Fatalf("Error listing clusters: %v", err)
 		}
-		if resp.ClusterName == _clusterName {
-			dReq := &dataprocpb.DeleteClusterRequest{ProjectId: tc.ProjectID, Region: _region, ClusterName: _clusterName}
+		if resp.ClusterName == clusterName {
+			dReq := &dataprocpb.DeleteClusterRequest{ProjectId: tc.ProjectID, Region: region, ClusterName: clusterName}
 			op, err := client.DeleteCluster(ctx, dReq)
 
 			op.Wait(ctx)
 			if err != nil {
-				t.Fatalf("Error deleting cluster %s: %s", _clusterName, err)
+				t.Fatalf("Error deleting cluster %s: %s", clusterName, err)
 			}
 		}
 	}
@@ -134,9 +165,9 @@ func TestQuickstart(t *testing.T) {
 
 	stdOut, stdErr, err := m.Run(nil, 10*time.Minute,
 		"--project_id", tc.ProjectID,
-		"--region", _region,
-		"--cluster_name", _clusterName,
-        "--job_file_path", _jobFilePath,
+		"--region", region,
+		"--cluster_name", clusterName,
+		"--job_file_path", jobFilePath,
 	)
 	if err != nil {
 		t.Errorf("stdout: %v", string(stdOut))

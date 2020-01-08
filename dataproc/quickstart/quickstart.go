@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// [START dataproc_quickstart]
+
 // This quickstart shows how you can use the Cloud Dataproc Client library to create a
 // Cloud Dataproc cluster, submit a PySpark job to the cluster, wait for the job to finish
 // and finally delete the cluster.
-
-// [START dataproc_quickstart]
 package main
 
 import (
@@ -33,29 +33,19 @@ import (
 	dataprocpb "google.golang.org/genproto/googleapis/cloud/dataproc/v1"
 )
 
-// [END dataproc_quickstart]
-var (
-	projectID   string
-	region      string
-	clusterName string
-	jobFilePath string
-)
-
-func init() {
-	flag.StringVar(&projectID, "project_id", "", "Cloud Project ID, used for creating resources.")
-	flag.StringVar(&region, "region", "", "Region that resources should be created in.")
-	flag.StringVar(&clusterName, "cluster_name", "", "Name of Cloud Dataproc cluster to create.")
-	flag.StringVar(&jobFilePath, "job_file_path", "", "Path to job file in GCS.")
-}
-
-// [START dataproc_quickstart]
 func main() {
 	// TODO (Developer): Set the following variables.
-	// projectID = "your-project-id"
-	// region = "us-central1"
-	// clusterName = "your-cluster-name"
-	// jobFilePath = "gs://your_file/location"
+	// projectID := "your-project-id"
+	// region := "us-central1"
+	// clusterName := "your-cluster-name"
+	// jobFilePath := "gs://your_file/location"
 	// [END dataproc_quickstart]
+	var projectID, clusterName, region, jobFilePath string
+	flag.StringVar(&projectID, "project_id", "", "Cloud Project ID, used for creating resources.")
+	flag.StringVar(&clusterName, "cluster_name", "", "Name of Cloud Dataproc cluster to create.")
+	flag.StringVar(&region, "region", "", "Region that resources should be created in.")
+	flag.StringVar(&jobFilePath, "job_file_path", "", "Path to job file in GCS.")
+
 	flag.Parse()
 	// [START dataproc_quickstart]
 	ctx := context.Background()
@@ -98,8 +88,24 @@ func main() {
 		log.Fatalf("error creating the cluster: %v", err)
 	}
 
+	// Defer cluster deletion.
+	defer func() {
+		dReq := &dataprocpb.DeleteClusterRequest{
+			ProjectId:   projectID,
+			Region:      region,
+			ClusterName: clusterName,
+		}
+		deleteOp, err := clusterClient.DeleteCluster(ctx, dReq)
+		deleteOp.Wait(ctx)
+		if err != nil {
+			fmt.Println(fmt.Errorf("error deleting cluster %q: %v", clusterName, err))
+		} else {
+			fmt.Println(fmt.Sprintf("Cluster %q successfully deleted", clusterName))
+		}
+	}()
+
 	// Output a success message.
-	fmt.Printf("Cluster created successfully: %q", createResp.ClusterName)
+	fmt.Println(fmt.Sprintf("Cluster created successfully: %q", createResp.ClusterName))
 
 	// Create the job client.
 	jobClient, err := dataproc.NewJobControllerClient(ctx, option.WithEndpoint(endpoint))
@@ -122,12 +128,13 @@ func main() {
 
 	submitJobResp, err := jobClient.SubmitJob(ctx, submitJobReq)
 	if err != nil {
-		fmt.Errorf("error submitting job: %v", err)
+		fmt.Println(fmt.Errorf("error submitting job: %v", err))
+		return
 	}
 
 	id := submitJobResp.Reference.JobId
 
-	fmt.Printf("Submitted job %q", id)
+	fmt.Println(fmt.Sprintf("Submitted job %q", id))
 
 	// These states all signify that a job has terminated, successfully or not.
 	terminalStates := map[dataprocpb.JobStatus_State]bool{
@@ -140,8 +147,8 @@ func main() {
 	timeout := 5 * time.Minute
 	start := time.Now()
 
-	state := submitJobResp.Status.State
-	for !terminalStates[state] {
+	var state dataprocpb.JobStatus_State
+	for {
 		if time.Since(start) > timeout {
 			cancelReq := &dataprocpb.CancelJobRequest{
 				ProjectId: projectID,
@@ -149,12 +156,11 @@ func main() {
 				JobId:     id,
 			}
 
-			_, err := jobClient.CancelJob(ctx, cancelReq)
-			if err != nil {
-				fmt.Errorf("error cancelling job: %v", err)
+			if _, err := jobClient.CancelJob(ctx, cancelReq); err != nil {
+				fmt.Println(fmt.Errorf("error cancelling job: %v", err))
 			}
-			fmt.Errorf("job %q timed out after %d minutes", id, int64(timeout.Minutes()))
-			break
+			fmt.Println(fmt.Errorf("job %q timed out after %d minutes", id, int64(timeout.Minutes())))
+			return
 		}
 
 		getJobReq := &dataprocpb.GetJobRequest{
@@ -164,11 +170,15 @@ func main() {
 		}
 		getJobResp, err := jobClient.GetJob(ctx, getJobReq)
 		if err != nil {
-			fmt.Errorf("error getting job %q with error: %v", id, err)
+			fmt.Println(fmt.Errorf("error getting job %q with error: %v", id, err))
 			break
 		}
 		state = getJobResp.Status.State
+		if terminalStates[state] {
+			break
+		}
 
+		// Sleep as to not excessively poll the API.
 		time.Sleep(1 * time.Second)
 	}
 
@@ -181,41 +191,27 @@ func main() {
 
 	resp, err := clusterClient.GetCluster(ctx, getCReq)
 	if err != nil {
-		fmt.Errorf("error getting cluster %q: %v", clusterName, err)
+		fmt.Println(fmt.Errorf("error getting cluster %q: %v", clusterName, err))
 	}
 
 	storageClient, err := storage.NewClient(ctx)
 	if err != nil {
-		fmt.Errorf("error creating storage client: %v", err)
+		fmt.Println(fmt.Errorf("error creating storage client: %v", err))
 	}
 
 	obj := fmt.Sprintf("google-cloud-dataproc-metainfo/%s/jobs/%s/driveroutput.000000000", resp.ClusterUuid, id)
 	reader, err := storageClient.Bucket(resp.Config.ConfigBucket).Object(obj).NewReader(ctx)
 	if err != nil {
-		fmt.Errorf("error reading job output: %v", err)
+		fmt.Println(fmt.Errorf("error reading job output: %v", err))
 	}
 
 	defer reader.Close()
 
 	body, err := ioutil.ReadAll(reader)
 	if err != nil {
-		fmt.Errorf("could not read output from Dataproc Job %q", id)
+		fmt.Println(fmt.Errorf("could not read output from Dataproc Job %q", id))
 	}
 
 	fmt.Printf("job %q finished with state %s:\n%s", id, state, body)
-
-	// Delete the cluster once the job has terminated
-	dReq := &dataprocpb.DeleteClusterRequest{
-		ProjectId:   projectID,
-		Region:      region,
-		ClusterName: clusterName,
-	}
-	deleteOp, err := clusterClient.DeleteCluster(ctx, dReq)
-	deleteOp.Wait(ctx)
-	if err != nil {
-		fmt.Errorf("error deleting cluster %q: %v", clusterName, err)
-	}
-	fmt.Printf("Cluster %q successfully deleted", clusterName)
 }
-
 // [END dataproc_quickstart]

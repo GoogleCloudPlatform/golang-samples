@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package dataproc shows how you can use the Cloud Dataproc Client library to create a
-// Cloud Dataproc cluster.
+// Package cluster shows how you can use the Cloud Dataproc Client library to manage
+// Cloud Dataproc clusters. In this example, we'll show how to create a cluster.
 package dataproc
 
 // [START dataproc_create_cluster]
@@ -28,15 +28,16 @@ import (
 )
 
 func createCluster(w io.Writer, projectID, region, clusterName string) error {
-	// projectID = "your-project-id"
-	// region = "us-central1"
-	// clusterName = "your-cluster"
+	// projectID := "your-project-id"
+	// region := "us-central1"
+	// clusterName := "your-cluster"
 	ctx := context.Background()
 
 	// Create the cluster client.
-	clusterClient, err := dataproc.NewClusterControllerClient(ctx, option.WithEndpoint(region + "-dataproc.googleapis.com:443"))
+	endpoint := region + "-dataproc.googleapis.com:443"
+	clusterClient, err := dataproc.NewClusterControllerClient(ctx, option.WithEndpoint(endpoint))
 	if err != nil {
-		return fmt.Errorf("CreateCluster: %v", err)
+		return fmt.Errorf("dataproc.NewClusterControllerClient: %v", err)
 	}
 
 	// Create the cluster config.
@@ -72,6 +73,6 @@ func createCluster(w io.Writer, projectID, region, clusterName string) error {
 
 	// Output a success message.
 	fmt.Fprintf(w, "Cluster created successfully: %s", resp.ClusterName)
-	return nil
+	return nil	
 }
 // [END dataproc_create_cluster]
