@@ -49,7 +49,7 @@ func main() {
 			},
 		},
 	}
-	operation_bq, err := client.ExportAssets(ctx, req_bq)
+	op, err := client.ExportAssets(ctx, req)
 	if err != nil {
 		log.Fatal(err)
 	}
