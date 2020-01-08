@@ -53,7 +53,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	response_bq, err := operation_bq.Wait(ctx)
+	resp, err := op.Wait(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
