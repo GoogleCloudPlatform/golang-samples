@@ -79,8 +79,9 @@ func (e Entry) String() string {
 // [START run_manual_logging]
 
 func init() {
-	// Disable log timestamps, these are added automatically.
-	// Prefix text leads to malformed JSON.
+	// Disable log prefixes such as the default timestamp.
+	// Prefix text prevents the message from being parsed as JSON.
+	// A timestamp is added when shipping logs to Stackdriver.
 	log.SetFlags(0)
 }
 
