@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Command infinite_audio pipes the stdin audio data to
-// Google Speech API and outputs the transcript.
-
 // Before executing this program, the sampleRate parameter needs to be adjusted
 // to match your audio file, 16000 is used in this program as an example
 
@@ -22,8 +19,8 @@
 // cat [your_audio_filename].wav | go run infinite_audio.go
 
 /*
-The infinite_streaming_from_file program reads audio data from file 
-and sends it to Speech to Text API to get transcriptions infinitely.
+The infinite_streaming_from_file program reads audio data from file
+and pipes it to Google Speech API to output the transcript infinitely.
 */
 package main
 
@@ -42,14 +39,14 @@ import (
 	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"
 )
 
-const(
-        sampleRate = 16000                                          // Audio sample rate hertz.
-        inputChannel = 1                                            // Number of audio input channel.
-        outputChannel = 0                                           // Number of audio output channel.
-        bytesPerSample = 2                                          // Number of bytes each sample consists of.
-        bytesPerSecond = sampleRate * inputChannel * bytesPerSample // Number of bytes each second audio consists of.
-        streamTimeLimit = 290 * time.Second                         // Streaming API Limit( ≈ 5 mins).
-        sampleDuration int64 = 1000                                 // The duration of each sample is 1000 ms.
+const (
+	sampleRate            = 16000                                      // Audio sample rate hertz.
+	inputChannel          = 1                                          // Number of audio input channel.
+	outputChannel         = 0                                          // Number of audio output channel.
+	bytesPerSample        = 2                                          // Number of bytes each sample consists of.
+	bytesPerSecond        = sampleRate * inputChannel * bytesPerSample // Number of bytes each second audio consists of.
+	streamTimeLimit       = 290 * time.Second                          // Streaming API Limit( ≈ 5 mins).
+	sampleDuration  int64 = 1000                                       // The duration of each sample is 1000 ms.
 )
 
 func main() {
