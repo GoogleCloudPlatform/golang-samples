@@ -12,15 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Command infinite_mic pipes the audio data from microphone
-// input to Google Speech API and outputs the transcript.
-
 // To run this program, SoX could be used to capture mic input:
 // sox -d -e signed -b 16 -c 1 -q mic.wav | go run infinite_mic.go
 
 /*
-The infinite_streaming_from_mic program reads audio data from microphone 
-and sends it to Speech to Text API to get transcriptions infinitely.
+The infinite_streaming_from_mic program reads audio data from microphone
+and pipes it to Google Speech API to output the transcript infinitely.
 */
 package main
 
@@ -40,14 +37,14 @@ import (
 	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"
 )
 
-const(
-        sampleRate = 44100                                          // Audio sample rate hertz.
-        inputChannel = 1                                            // Number of audio input channel.
-        outputChannel = 0                                           // Number of audio output channel.
-        bytesPerSample = 2                                          // Number of bytes each sample consists of.
-        bytesPerSecond = sampleRate * inputChannel * bytesPerSample // Number of bytes each second audio consists of.
-        streamTimeLimit = 290 * time.Second                         // Streaming API Limit( ≈ 5 mins).
-        sampleDuration int64 = 1000                                 // The duration of each sample is 1000ms.
+const (
+	sampleRate            = 44100                                      // Audio sample rate hertz.
+	inputChannel          = 1                                          // Number of audio input channel.
+	outputChannel         = 0                                          // Number of audio output channel.
+	bytesPerSample        = 2                                          // Number of bytes each sample consists of.
+	bytesPerSecond        = sampleRate * inputChannel * bytesPerSample // Number of bytes each second audio consists of.
+	streamTimeLimit       = 290 * time.Second                          // Streaming API Limit( ≈ 5 mins).
+	sampleDuration  int64 = 1000                                       // The duration of each sample is 1000ms.
 )
 
 func main() {
@@ -239,7 +236,7 @@ func main() {
 				}
 			}
 			// If there is no more data to read from input, then the program will terminate.
-			return inputIsNull 
+			return inputIsNull
 		}()
 		wg.Wait()
 	}
