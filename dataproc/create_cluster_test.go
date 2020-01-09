@@ -32,7 +32,7 @@ func teardown(t *testing.T, tc testutil.Context, clusterName, region string) {
 	ctx := context.Background()
 
 	clusterClient, err := dataproc.NewClusterControllerClient(ctx, option.WithEndpoint(fmt.Sprintf("%s-dataproc.googleapis.com:443", region)))
-	
+
 	req := &dataprocpb.DeleteClusterRequest{
 		ProjectId:   tc.ProjectID,
 		Region:      region,
@@ -51,7 +51,7 @@ func TestCreateCluster(t *testing.T) {
 
 	clusterName := fmt.Sprintf("go-cc-test-%s", tc.ProjectID)
 	region := "us-central1"
-	
+
 	defer teardown(t, tc, clusterName, region)
 
 	buf := new(bytes.Buffer)

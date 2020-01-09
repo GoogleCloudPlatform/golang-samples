@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package cluster shows how you can use the Cloud Dataproc Client library to manage
+// Package dataproc shows how you can use the Cloud Dataproc Client library to manage
 // Cloud Dataproc clusters. In this example, we'll show how to create a cluster.
 package dataproc
 
@@ -73,6 +73,7 @@ func createCluster(w io.Writer, projectID, region, clusterName string) error {
 
 	// Output a success message.
 	fmt.Fprintf(w, "Cluster created successfully: %s", resp.ClusterName)
-	return nil	
+	return nil
 }
+
 // [END dataproc_create_cluster]
