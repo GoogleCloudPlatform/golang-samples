@@ -163,7 +163,7 @@ if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]]; then
       "Location": "us-central1",
       "installation": {"id": "5943459"},
       "repo": "GoogleCloudPlatform/golang-samples",
-      "buildID": "$KOKORO_BUILD_ID",
+      "buildID": "commit:$KOKORO_GIT_COMMIT",
       "buildURL": "https://source.cloud.google.com/results/invocations/$KOKORO_BUILD_ID",
       "xunitXML": "$XML"
   }
