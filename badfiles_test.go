@@ -45,6 +45,7 @@ var allowList = []string{
 	"**/*.js",
 	"**/*.sql",
 	"**/*.dot",
+	"**/*.proto",
 
 	"LICENSE",
 	"**/*Dockerfile*",

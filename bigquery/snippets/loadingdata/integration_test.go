@@ -96,6 +96,9 @@ func TestImportSnippets(t *testing.T) {
 			}
 		})
 		t.Run("importJSONWithCMEK", func(t *testing.T) {
+			if bqtestutil.RunCMEKTests() {
+				t.Skip("skipping CMEK tests")
+			}
 			t.Parallel()
 			tableID := "bigquery_load_table_gcs_json_cmek"
 			if err := importJSONWithCMEK(tc.ProjectID, testDatasetID, tableID); err != nil {
