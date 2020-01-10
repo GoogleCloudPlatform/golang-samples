@@ -24,7 +24,6 @@ and pipes it to Google Speech API to output the transcript infinitely.
 */
 package main
 
-// [START speech_transcribe_streaming]
 import (
 	"context"
 	"io"
@@ -107,7 +106,7 @@ func main() {
 					StreamingConfig: &speechpb.StreamingRecognitionConfig{
 						Config: &speechpb.RecognitionConfig{
 							Encoding:        speechpb.RecognitionConfig_LINEAR16,
-							SampleRateHertz: 16000,
+							SampleRateHertz: sampleRate,
 							LanguageCode:    "en-US",
 						},
 					},
