@@ -187,7 +187,7 @@ In your quickstart:
 func main() {
 	var projectID, resourceName string
 	flag.StringVar(&projectID, "project_id", "", "Cloud Project ID")
-	flag.StringVar(&clusterName, "resourceName", "", "Name of resource")
+	flag.StringVar(&resourceName, "resourceName", "", "Name of resource")
 	flag.Parse()
 
 	fmt.Printf("projectID: %s, resource_name: %s", projectID, resourceName)
@@ -202,10 +202,12 @@ func TestQuickstart(t *testing.T) {
 	if !m.Built() {
 		t.Fatalf("failed to build app")
 	}
-
+	
+	testResourceName := "my-resource-name"
+	
 	stdOut, stdErr, err := m.Run(nil, 10*time.Minute,
 		"--project_id", tc.ProjectID,
-		"--resource_name", "my-resource"
+		"--resource_name", testResourceName
 	)
 
 	if err != nil {
@@ -216,9 +218,8 @@ func TestQuickstart(t *testing.T) {
 
     // example test
 	got := string(stdOut)
-	want := "my-resource"
-	if !strings.Contains(got, want) {
-        t.Errorf("got %q, want to contain %q", got, want)
+	if !strings.Contains(got, testResourceName) {
+        t.Errorf("got %q, want to contain %q", got, testResourceName)
 	}
 ```
 
