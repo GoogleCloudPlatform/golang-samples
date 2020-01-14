@@ -90,7 +90,10 @@ date
 if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* && -n $GOLANG_SAMPLES_GO_VET ]]; then
   echo "This test run will run end-to-end tests.";
   export GOLANG_SAMPLES_E2E_TEST=1
-  export PATH="$PATH:/tmp/google-cloud-sdk/bin";
+fi
+
+export PATH="$PATH:/tmp/google-cloud-sdk/bin";
+if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]]; then
   ./testing/kokoro/configure_gcloud.bash;
 fi
 
@@ -163,7 +166,7 @@ if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]]; then
       "Location": "us-central1",
       "installation": {"id": "5943459"},
       "repo": "GoogleCloudPlatform/golang-samples",
-      "buildID": "$KOKORO_BUILD_ID",
+      "buildID": "commit:$KOKORO_GIT_COMMIT",
       "buildURL": "https://source.cloud.google.com/results/invocations/$KOKORO_BUILD_ID",
       "xunitXML": "$XML"
   }
