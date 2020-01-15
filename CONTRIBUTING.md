@@ -153,7 +153,7 @@ understand where the `ctx` comes from.
 + }
 ```
 
-## Function arguments
+## Function arguments for snippets
 
 There should be as few function arguments as possible. An `io.Writer` and
 project ID are the most common. If you need additional arguments (for example,
