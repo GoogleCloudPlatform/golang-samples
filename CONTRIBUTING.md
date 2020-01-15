@@ -153,7 +153,7 @@ understand where the `ctx` comes from.
 + }
 ```
 
-## Function arguments
+## Function arguments for snippets
 
 There should be as few function arguments as possible. An `io.Writer` and
 project ID are the most common. If you need additional arguments (for example,
@@ -190,6 +190,7 @@ func main() {
 	flag.Parse()
 
 	fmt.Printf("projectID: %s, resource_name: %s", projectID, resourceName)
+
 ```
 
 In your quickstart test:
@@ -201,9 +202,9 @@ func TestQuickstart(t *testing.T) {
 	if !m.Built() {
 		t.Fatalf("failed to build app")
 	}
-	
+
 	testResourceName := "my-resource-name"
-	
+
 	stdOut, stdErr, err := m.Run(nil, 10*time.Minute,
 		"--project_id", tc.ProjectID,
 		"--resource_name", testResourceName
@@ -220,6 +221,7 @@ func TestQuickstart(t *testing.T) {
 	if !strings.Contains(got, testResourceName) {
         t.Errorf("got %q, want to contain %q", got, testResourceName)
 	}
+
 ```
 
 ## Don't export sample functions
