@@ -178,8 +178,7 @@ func delete(w io.Writer, name string) error {
 
 ## Function arguments for quickstarts
 
-Since [quickstarts use `package main`](#only-quickstarts-have-package-main), try to minimize these as much as possible. However, quickstarts will likely
-always need access to the projectID. As such, use the `flag` module for 
+Since [quickstarts use `package main`](#only-quickstarts-have-package-main), we use the `flag` package for 
 passing parameters into your quickstart, and use `testutil.BuildMain` to build and test your quickstart.
 
 In your quickstart:
@@ -374,12 +373,14 @@ See [Testing](#testing).
 Tests are required for all samples. When writing a pull request, be sure to
 write and run the tests in any modified directories. 
 
+See [Use `testutil` for tests](#use-testutil-for-tests) and
+[Print to an `io.Writer`](#print-to-an-iowriter).
+
+## Creating resources for tests
+
 When creating resources for tests, avoid using UUIDs. Instead, prefer 
 resource names that incorporate aspects of your test, such as `tc.ProjectID +
 -golang-test-mypai-mysnippet`. 
-
-See [Use `testutil` for tests](#use-testutil-for-tests) and
-[Print to an `io.Writer`](#print-to-an-iowriter).
 
 ## Running system tests
 
