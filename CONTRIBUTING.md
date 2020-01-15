@@ -209,7 +209,7 @@ func TestQuickstart(t *testing.T) {
 
 	stdOut, stdErr, err := m.Run(nil, 10*time.Minute,
 		"--project_id", tc.ProjectID,
-		"--resource_name", testResourceName
+		"--resource_name", testResourceName,
 	)
 
 	if err != nil {
@@ -218,12 +218,12 @@ func TestQuickstart(t *testing.T) {
 		t.Errorf("execution failed: %v", err)
 	}
 
-      // example test
-      got := string(stdOut)
-      if !strings.Contains(got, testResourceName) {
-          t.Errorf("got %q, want to contain %q", got, testResourceName)
-      }
-
+	// example test
+	got := string(stdOut)
+	if !strings.Contains(got, testResourceName) {
+		t.Errorf("got %q, want to contain %q", got, testResourceName)
+	}
+}
 ```
 
 ## Don't export sample functions
