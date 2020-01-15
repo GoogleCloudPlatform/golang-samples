@@ -220,7 +220,7 @@ func TestQuickstart(t *testing.T) {
 
     // example test
     got := string(stdOut)
-	if !strings.Contains(got, testResourceName) {
+    if !strings.Contains(got, testResourceName) {
         t.Errorf("got %q, want to contain %q", got, testResourceName)
 	}
 
@@ -375,7 +375,7 @@ See [Testing](#testing).
 # Testing
 
 Tests are required for all samples. When writing a pull request, be sure to
-write and run the tests in any modified directories. 
+write and run the tests in any modified directories.
 
 See [Use `testutil` for tests](#use-testutil-for-tests) and
 [Print to an `io.Writer`](#print-to-an-iowriter).
