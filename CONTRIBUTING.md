@@ -218,11 +218,11 @@ func TestQuickstart(t *testing.T) {
 		t.Errorf("execution failed: %v", err)
 	}
 
-    // example test
-    got := string(stdOut)
-    if !strings.Contains(got, testResourceName) {
-        t.Errorf("got %q, want to contain %q", got, testResourceName)
-	}
+      // example test
+      got := string(stdOut)
+      if !strings.Contains(got, testResourceName) {
+          t.Errorf("got %q, want to contain %q", got, testResourceName)
+      }
 
 ```
 
