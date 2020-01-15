@@ -92,7 +92,9 @@ For snippets, the region should _not_ include the package declaration.
 
 Also see [Imports](#imports).
 
-## Print to an `io.Writer` (doesn't apply to quickstarts)
+## Print to an `io.Writer` for snippets
+
+(Note: this doesn't apply to quickstarts) 
 
 Do not print to `stdout` or `stderr`. Pass `w io.Writer` as the first argument
 to the sample function and print to it with `fmt.Fprintf(w, ...)`.
@@ -179,7 +181,7 @@ func delete(w io.Writer, name string) error {
 ## Function arguments for quickstarts
 
 Since [quickstarts use `package main`](#only-quickstarts-have-package-main), we use the `flag` package for 
-passing parameters into your quickstart, and use `testutil.BuildMain` to build and test your quickstart.
+passing parameters into a quickstart, and use `testutil.BuildMain` to build and test your quickstart.
 
 In your quickstart:
 ```go
@@ -217,7 +219,7 @@ func TestQuickstart(t *testing.T) {
 	}
 
     // example test
-	got := string(stdOut)
+    got := string(stdOut)
 	if !strings.Contains(got, testResourceName) {
         t.Errorf("got %q, want to contain %q", got, testResourceName)
 	}
