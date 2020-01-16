@@ -184,7 +184,7 @@ func TestQuickstart(t *testing.T) {
 	}
 	for _, want := range wants {
 		if !strings.Contains(got, want) {
-			t.Errorf("got %q, want to contain %q", stdOut, want)
+			t.Errorf("got %q, want to contain %q", got, want)
 		}
 	}
 }
