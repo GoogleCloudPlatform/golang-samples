@@ -57,7 +57,7 @@ func TestCreateCluster(t *testing.T) {
 	clusterName := fmt.Sprintf("go-cc-test-%s", tc.ProjectID)
 	region := "us-central1"
 
-	deleteCluster(tc.ProjectID, clusterName, region) // Delete the cluster if it already exists.
+	deleteCluster(tc.ProjectID, clusterName, region) // Delete the cluster if it already exists, ignoring any errors.
 	defer deleteCluster(tc.ProjectID, clusterName, region)
 
 	buf := new(bytes.Buffer)
