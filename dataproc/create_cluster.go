@@ -68,7 +68,7 @@ func createCluster(w io.Writer, projectID, region, clusterName string) error {
 
 	resp, err := op.Wait(ctx)
 	if err != nil {
-		return fmt.Errorf("CreateCluster: %v", err)
+		return fmt.Errorf("CreateCluster.Wait: %v", err)
 	}
 
 	// Output a success message.

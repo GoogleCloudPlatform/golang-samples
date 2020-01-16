@@ -42,7 +42,7 @@ sum = rdd.reduce(lambda x, y: x + y)`
 	region = "us-central1"
 )
 
-func cleanBucket(t *testing.T, ctx context.Context, client *storage.Client, projectID, bucket string) {
+func cleanBucket(ctx context.Context, t *testing.T, client *storage.Client, projectID, bucket string) {
 	b := client.Bucket(bucket)
 	_, err := b.Attrs(ctx)
 	if err == nil {
@@ -76,20 +76,20 @@ func cleanBucket(t *testing.T, ctx context.Context, client *storage.Client, proj
 	}
 }
 
-func setup(t *testing.T, tc testutil.Context) {
+func setup(t *testing.T, projectID string) {
 	ctx := context.Background()
 	flag.Parse()
 
-	clusterName = "go-qs-test-" + tc.ProjectID
-	bktName = "go-dataproc-qs-test-" + tc.ProjectID
+	clusterName = "go-qs-test-" + projectID
+	bktName = "go-dataproc-qs-test-" + projectID
 	jobFilePath = fmt.Sprintf("gs://%s/%s", bktName, jobFName)
 
 	sc, err := storage.NewClient(ctx)
 	if err != nil {
-		t.Errorf("Error creating storage client with error: %v", err)
+		t.Errorf("storage.NewClient: %v", err)
 	}
 
-	cleanBucket(t, ctx, sc, tc.ProjectID, bktName)
+	cleanBucket(ctx, t, sc, projectID, bktName)
 	bkt := sc.Bucket(bktName)
 
 	obj := bkt.Object(jobFName)
@@ -106,14 +106,16 @@ func setup(t *testing.T, tc testutil.Context) {
 	if err := w.Close(); err != nil {
 		t.Errorf("Error closing file: %v", err)
 	}
+
+	deleteClusters(ctx, projectID) // Ignore any errors.
 }
 
-func teardown(t *testing.T, tc testutil.Context) {
+func teardown(t *testing.T, projectID string) {
 	ctx := context.Background()
 
 	sc, err := storage.NewClient(ctx)
 	if err != nil {
-		t.Errorf("Error creating storage client with error: %v", err)
+		t.Errorf("storage.NewClient: %v", err)
 	}
 
 	if err := sc.Bucket(bktName).Object(jobFName).Delete(ctx); err != nil {
@@ -124,13 +126,19 @@ func teardown(t *testing.T, tc testutil.Context) {
 		t.Errorf("Error deleting bucket: %v", err)
 	}
 
+	if err := deleteClusters(ctx, projectID); err != nil {
+		t.Errorf("deleteClusters: %v", err)
+	}
+}
+
+func deleteClusters(ctx context.Context, projectID string) error {
 	endpoint := fmt.Sprintf("%s-dataproc.googleapis.com:443", region)
 	client, err := dataproc.NewClusterControllerClient(ctx, option.WithEndpoint(endpoint))
 	if err != nil {
-		t.Errorf("Error creating the cluster client: %s", err)
+		return fmt.Errorf("dataproc.NewClusterControllerClient: %v", err)
 	}
 
-	lReq := &dataprocpb.ListClustersRequest{ProjectId: tc.ProjectID, Region: region}
+	lReq := &dataprocpb.ListClustersRequest{ProjectId: projectID, Region: region}
 	it := client.ListClusters(ctx, lReq)
 
 	for {
@@ -139,25 +147,28 @@ func teardown(t *testing.T, tc testutil.Context) {
 			break
 		}
 		if err != nil {
-			t.Fatalf("Error listing clusters: %v", err)
+			return fmt.Errorf("ListClusters.Next: %v", err)
 		}
 		if resp.ClusterName == clusterName {
-			dReq := &dataprocpb.DeleteClusterRequest{ProjectId: tc.ProjectID, Region: region, ClusterName: clusterName}
+			dReq := &dataprocpb.DeleteClusterRequest{ProjectId: projectID, Region: region, ClusterName: clusterName}
 			op, err := client.DeleteCluster(ctx, dReq)
-
-			op.Wait(ctx)
 			if err != nil {
-				t.Fatalf("Error deleting cluster %s: %s", clusterName, err)
+				return fmt.Errorf("DeleteCluster: %v", err)
+			}
+
+			if err := op.Wait(ctx); err != nil {
+				return fmt.Errorf("DeleteCluster.Wait: %v", err)
 			}
 		}
 	}
+	return nil
 }
 
 func TestQuickstart(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	m := testutil.BuildMain(t)
-	setup(t, tc)
-	defer teardown(t, tc)
+	setup(t, tc.ProjectID)
+	defer teardown(t, tc.ProjectID)
 
 	if !m.Built() {
 		t.Fatalf("failed to build app")
