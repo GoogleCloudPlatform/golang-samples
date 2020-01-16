@@ -39,7 +39,9 @@ func TestGRPCPingService(t *testing.T) {
 
 	// Prepare the container image for both services.
 	pingService := cloudrunci.NewService("grpc-ping", tc.ProjectID)
-	pingService.Build()
+	if err := pingService.Build(); err != nil {
+		t.Fatalf("Service.Build %q: %v", pingService.Name, err)
+	}
 
 	// Deploy the ping-upstream service.
 	upstreamService := cloudrunci.NewService("grpc-ping-upstream", tc.ProjectID)
@@ -53,7 +55,7 @@ func TestGRPCPingService(t *testing.T) {
 	// Deploy the ping service.
 	upstreamHost, err := upstreamService.Host()
 	if err != nil {
-		t.Errorf("Service.Host %q: %v", upstreamService.Name, err)
+		t.Fatalf("Service.Host %q: %v", upstreamService.Name, err)
 	}
 	pingService.Env = cloudrunci.EnvVars{
 		"GRPC_PING_HOST": upstreamHost,
@@ -66,7 +68,7 @@ func TestGRPCPingService(t *testing.T) {
 	// Test a gRPC Request.
 	pingURL, err := pingService.ParsedURL()
 	if err != nil {
-		t.Errorf("Service.ParsedURL %q: %v", pingService.Name, err)
+		t.Fatalf("Service.ParsedURL %q: %v", pingService.Name, err)
 	}
 
 	message := "Hello Tester"
