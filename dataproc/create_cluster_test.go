@@ -27,23 +27,28 @@ import (
 	dataprocpb "google.golang.org/genproto/googleapis/cloud/dataproc/v1"
 )
 
-func teardown(t *testing.T, tc testutil.Context, clusterName, region string) {
-	t.Helper()
+func deleteCluster(projectID string, clusterName, region string) error {
 	ctx := context.Background()
 
 	clusterClient, err := dataproc.NewClusterControllerClient(ctx, option.WithEndpoint(fmt.Sprintf("%s-dataproc.googleapis.com:443", region)))
+	if err != nil {
+		return fmt.Errorf("dataproc.NewClusterControllerClient: %v", err)
+	}
 
 	req := &dataprocpb.DeleteClusterRequest{
-		ProjectId:   tc.ProjectID,
+		ProjectId:   projectID,
 		Region:      region,
 		ClusterName: clusterName,
 	}
 	op, err := clusterClient.DeleteCluster(ctx, req)
-
-	op.Wait(ctx)
 	if err != nil {
-		t.Errorf("Error deleting cluster %q: %v", clusterName, err)
+		return fmt.Errorf("DeleteCluster: %v", err)
 	}
+
+	if err := op.Wait(ctx); err != nil {
+		return fmt.Errorf("DeleteCluster.Wait: %v", err)
+	}
+	return nil
 }
 
 func TestCreateCluster(t *testing.T) {
@@ -52,7 +57,8 @@ func TestCreateCluster(t *testing.T) {
 	clusterName := fmt.Sprintf("go-cc-test-%s", tc.ProjectID)
 	region := "us-central1"
 
-	defer teardown(t, tc, clusterName, region)
+	deleteCluster(tc.ProjectID, clusterName, region) // Delete the cluster if it already exists, ignoring any errors.
+	defer deleteCluster(tc.ProjectID, clusterName, region)
 
 	buf := new(bytes.Buffer)
 
