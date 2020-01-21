@@ -11,6 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+// Sample setEventBasedHold demonstrates setting event-based holding for an object.
 package objects
 
 // [START storage_set_event_based_hold]
@@ -20,8 +22,15 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-func setEventBasedHold(client *storage.Client, bucket, object string) error {
+// setEventBasedHold sets EventBasedHold flag of an object to true.
+func setEventBasedHold(bucket, object string) error {
+	// bucket := "bucket-name"
+	// object := "object-name"
 	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
 	o := client.Bucket(bucket).Object(object)
 	objectAttrsToUpdate := storage.ObjectAttrsToUpdate{
 		EventBasedHold: true,

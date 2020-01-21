@@ -11,6 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+// Sample move demonstrates moving object into another location.
 package objects
 
 // [START move_file]
@@ -20,8 +22,15 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-func move(client *storage.Client, bucket, object string) error {
+// move moves an object into another location.
+func move(bucket, object string) error {
+	// bucket := "bucket-name"
+	// object := "object-name"
 	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
 	dstName := object + "-rename"
 
 	src := client.Bucket(bucket).Object(object)

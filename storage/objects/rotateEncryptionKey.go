@@ -11,6 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+// Sample rotateEncryptionKey demonstrates object encryption rotation.
 package objects
 
 // [START storage_rotate_encryption_key]
@@ -20,7 +22,12 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-func rotateEncryptionKey(client *storage.Client, bucket, object string, key, newKey []byte) error {
+// rotateEncryptionKey encrypts an object with new key.
+func rotateEncryptionKey(bucket, object string, key, newKey []byte) error {
+	// bucket := "bucket-name"
+	// object := "object-name"
+	// key := []byte("encryption-key")
+	// newKey := []byte("new-encryption-key")
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {

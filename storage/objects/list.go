@@ -11,6 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+// Sample list demonstrates objects listing.
 package objects
 
 // [START storage_list_files]
@@ -23,8 +25,14 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-func list(w io.Writer, client *storage.Client, bucket string) error {
+// list lists objects of a specific bucket.
+func list(w io.Writer, bucket string) error {
+	// bucket := "bucket-name"
 	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
 	it := client.Bucket(bucket).Objects(ctx, nil)
 	for {
 		attrs, err := it.Next()

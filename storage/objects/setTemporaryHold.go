@@ -11,6 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+// Sample setTemporaryHold demonstrates setting an object as temporary held one.
 package objects
 
 // [START storage_set_temporary_hold]
@@ -20,8 +22,15 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-func setTemporaryHold(client *storage.Client, bucket, object string) error {
+// setTemporaryHold sets TemporaryHold flag of an object to true.
+func setTemporaryHold(bucket, object string) error {
+	// bucket := "bucket-name"
+	// object := "object-name"
 	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
 	o := client.Bucket(bucket).Object(object)
 	objectAttrsToUpdate := storage.ObjectAttrsToUpdate{
 		TemporaryHold: true,

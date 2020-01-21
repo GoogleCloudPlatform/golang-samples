@@ -11,6 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+// Sample releaseTemporaryHold demonstrates an object temporary hold release.
 package objects
 
 // [START storage_release_temporary_hold]
@@ -20,8 +22,15 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-func releaseTemporaryHold(client *storage.Client, bucket, object string) error {
+// releaseTemporaryHold releases object with temporary hold.
+func releaseTemporaryHold(bucket, object string) error {
+	// bucket := "bucket-name"
+	// object := "object-name"
 	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
 	o := client.Bucket(bucket).Object(object)
 	objectAttrsToUpdate := storage.ObjectAttrsToUpdate{
 		TemporaryHold: false,

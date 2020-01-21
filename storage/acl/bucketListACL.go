@@ -12,38 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Sample writeWithKMSKey demonstrates writing an object using Cloud KMS.
-package objects
+// Sample bucketListACL demonstrates listing bucket ACL.
+package acl
 
-// [START storage_upload_with_kms_key]
+// [START bucket_list_acl]
 import (
 	"context"
+	"fmt"
 
 	"cloud.google.com/go/storage"
 )
 
-// writeWithKMSKey writes an object using Cloud KMS encryption.
-func writeWithKMSKey(bucket, object string, keyName string) error {
+// bucketListACL lists bucket ACL.
+func bucketListACL(bucket string) error {
 	// bucket := "bucket-name"
-	// object := "object-name"
-	// keyName := "projects/projectId/locations/global/keyRings/keyRingID/cryptoKeys/cryptoKeyID"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
 		return err
 	}
 
-	obj := client.Bucket(bucket).Object(object)
-	// Encrypt the object's contents
-	wc := obj.NewWriter(ctx)
-	wc.KMSKeyName = keyName
-	if _, err := wc.Write([]byte("top secret")); err != nil {
+	rules, err := client.Bucket(bucket).ACL().List(ctx)
+	if err != nil {
 		return err
 	}
-	if err := wc.Close(); err != nil {
-		return err
+	for _, rule := range rules {
+		fmt.Printf("ACL rule: %v\n", rule)
 	}
 	return nil
 }
 
-// [END storage_upload_with_kms_key]
+// [END bucket_list_acl]

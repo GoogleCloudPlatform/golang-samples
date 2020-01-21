@@ -11,6 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+// Sample write demonstrates uploading a Storage object.
 package objects
 
 // [START upload_file]
@@ -22,14 +24,23 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-func write(client *storage.Client, bucket, object string) error {
+// write uploads an object.
+func write(bucket, object string) error {
+	// bucket := "bucket-name"
+	// object := "object-name"
 	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	// Open a file.
 	f, err := os.Open("notes.txt")
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 
+	// Upload an object with Writer.
 	wc := client.Bucket(bucket).Object(object).NewWriter(ctx)
 	if _, err = io.Copy(wc, f); err != nil {
 		return err

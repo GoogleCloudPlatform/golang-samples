@@ -11,6 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+// Sample readEncryptedObject demonstrates reading an encrypted object using Cloud KMS key.
 package objects
 
 // [START storage_download_encrypted_file]
@@ -21,8 +23,16 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-func readEncryptedObject(client *storage.Client, bucket, object string, secretKey []byte) ([]byte, error) {
+// readEncryptedObject reads an encrypted object.
+func readEncryptedObject(bucket, object string, secretKey []byte) ([]byte, error) {
+	// bucket := "bucket-name"
+	// object := "object-name"
+	// key := []byte("secret-encryption-key")
 	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	obj := client.Bucket(bucket).Object(object)
 	rc, err := obj.Key(secretKey).NewReader(ctx)

@@ -11,6 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+// Sample downloadUsingRequesterPays demonstrates downloading an object using billing project.
 package objects
 
 // [START storage_download_file_requester_pays]
@@ -23,12 +25,22 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-func downloadUsingRequesterPays(client *storage.Client, object, bucketName, localpath, billingProjectID string) error {
+// downloadUsingRequesterPays downloads an object using billing project.
+func downloadUsingRequesterPays(object, bucket, billingProjectID string) error {
+	// bucket := "bucket-name"
+	// object := "object-name"
+	// billingProjectID := "billing_account.json"
 	ctx := context.Background()
-	bucket := client.Bucket(bucketName).UserProject(billingProjectID)
-	src := bucket.Object(object)
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	b := client.Bucket(bucket).UserProject(billingProjectID)
+	src := b.Object(object)
 
-	f, err := os.OpenFile(localpath, os.O_RDWR|os.O_CREATE, 0755)
+	// Open local file.
+	localPath := "notes.txt"
+	f, err := os.OpenFile(localPath, os.O_RDWR|os.O_CREATE, 0755)
 	if err != nil {
 		return err
 	}

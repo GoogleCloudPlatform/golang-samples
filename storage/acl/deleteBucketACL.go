@@ -12,38 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Sample writeWithKMSKey demonstrates writing an object using Cloud KMS.
-package objects
+// Sample deleteBucketACL demonstrates deleting ACL from bucket.
+package acl
 
-// [START storage_upload_with_kms_key]
+// [START delete_bucket_acl]
 import (
 	"context"
 
 	"cloud.google.com/go/storage"
 )
 
-// writeWithKMSKey writes an object using Cloud KMS encryption.
-func writeWithKMSKey(bucket, object string, keyName string) error {
+// deleteBucketACL deletes ACL from a bucket.
+func deleteBucketACL(bucket string) error {
 	// bucket := "bucket-name"
-	// object := "object-name"
-	// keyName := "projects/projectId/locations/global/keyRings/keyRingID/cryptoKeys/cryptoKeyID"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
 		return err
 	}
 
-	obj := client.Bucket(bucket).Object(object)
-	// Encrypt the object's contents
-	wc := obj.NewWriter(ctx)
-	wc.KMSKeyName = keyName
-	if _, err := wc.Write([]byte("top secret")); err != nil {
-		return err
-	}
-	if err := wc.Close(); err != nil {
+	acl := client.Bucket(bucket).ACL()
+	if err := acl.Delete(ctx, storage.AllAuthenticatedUsers); err != nil {
 		return err
 	}
 	return nil
 }
 
-// [END storage_upload_with_kms_key]
+// [END delete_bucket_acl]

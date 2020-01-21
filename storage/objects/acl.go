@@ -14,7 +14,6 @@
 package objects
 
 import (
-	"context"
 	"fmt"
 	"io/ioutil"
 	"time"
@@ -22,125 +21,7 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// TODO(jbd): Add START and END tags once the names are finalized.
-
-func addBucketACL(client *storage.Client, bucket string) error {
-	ctx := context.Background()
-
-	acl := client.Bucket(bucket).ACL()
-	if err := acl.Set(ctx, storage.AllAuthenticatedUsers, storage.RoleReader); err != nil {
-		return err
-	}
-	return nil
-}
-
-func addDefaultBucketACL(client *storage.Client, bucket string) error {
-	ctx := context.Background()
-
-	acl := client.Bucket(bucket).DefaultObjectACL()
-	if err := acl.Set(ctx, storage.AllAuthenticatedUsers, storage.RoleReader); err != nil {
-		return err
-	}
-	return nil
-}
-
-func bucketACL(client *storage.Client, bucket string) error {
-	ctx := context.Background()
-
-	rules, err := client.Bucket(bucket).ACL().List(ctx)
-	if err != nil {
-		return err
-	}
-	for _, rule := range rules {
-		fmt.Printf("ACL rule: %v\n", rule)
-	}
-	return nil
-}
-
-func bucketACLFiltered(client *storage.Client, bucket string, entity storage.ACLEntity) error {
-	ctx := context.Background()
-
-	rules, err := client.Bucket(bucket).ACL().List(ctx)
-	if err != nil {
-		return err
-	}
-	for _, r := range rules {
-		if r.Entity == entity {
-			fmt.Printf("ACL rule role: %v\n", r.Role)
-		}
-	}
-	return nil
-}
-
-func addObjectACL(client *storage.Client, bucket, object string) error {
-	ctx := context.Background()
-
-	acl := client.Bucket(bucket).Object(object).ACL()
-	if err := acl.Set(ctx, storage.AllAuthenticatedUsers, storage.RoleReader); err != nil {
-		return err
-	}
-	return nil
-}
-
-func objectACL(client *storage.Client, bucket, object string) error {
-	ctx := context.Background()
-
-	rules, err := client.Bucket(bucket).Object(object).ACL().List(ctx)
-	if err != nil {
-		return err
-	}
-	for _, rule := range rules {
-		fmt.Printf("ACL rule: %v\n", rule)
-	}
-	return nil
-}
-
-func objectACLFiltered(client *storage.Client, bucket, object string, entity storage.ACLEntity) error {
-	ctx := context.Background()
-
-	rules, err := client.Bucket(bucket).ACL().List(ctx)
-	if err != nil {
-		return err
-	}
-	for _, r := range rules {
-		if r.Entity == entity {
-			fmt.Printf("ACL rule role: %v\n", r.Role)
-		}
-	}
-	return nil
-}
-
-func deleteBucketACL(client *storage.Client, bucket string) error {
-	ctx := context.Background()
-
-	acl := client.Bucket(bucket).ACL()
-	if err := acl.Delete(ctx, storage.AllAuthenticatedUsers); err != nil {
-		return err
-	}
-	return nil
-}
-
-func deleteDefaultBucketACL(client *storage.Client, bucket string) error {
-	ctx := context.Background()
-
-	acl := client.Bucket(bucket).DefaultObjectACL()
-	if err := acl.Delete(ctx, storage.AllAuthenticatedUsers); err != nil {
-		return err
-	}
-	return nil
-}
-
-func deleteObjectACL(client *storage.Client, bucket, object string) error {
-	ctx := context.Background()
-
-	acl := client.Bucket(bucket).Object(object).ACL()
-	if err := acl.Delete(ctx, storage.AllAuthenticatedUsers); err != nil {
-		return err
-	}
-	return nil
-}
-
-func signedURL(client *storage.Client, bucket, object string) error {
+func signedURL(bucket, object string) error {
 	// Download a p12 service account private key from the Google Developers Console.
 	// And convert it to PEM by running the command below:
 	//	$ openssl pkcs12 -in key.p12 -passin pass:notasecret -out my-private-key.pem -nodes

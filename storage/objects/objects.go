@@ -12,21 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Sample objects creates, list, deletes objects and runs
-// other similar operations on them by using the Google Storage API.
+// Package objects contains samples for creation, listing, deleting objects
+// and runs other similar operations on them by using the Google Storage API.
 // More documentation is available at
 // https://cloud.google.com/storage/docs/json_api/v1/.
 package objects
 
 import (
-	"context"
 	"flag"
 	"fmt"
 	"log"
 	"os"
 	"strings"
-
-	"cloud.google.com/go/storage"
 )
 
 func main() {
@@ -49,35 +46,29 @@ func main() {
 		usage("missing subcommand")
 	}
 
-	ctx := context.Background()
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	switch os.Args[2] {
 	case "write":
-		if err := write(client, bucket, object); err != nil {
+		if err := write(bucket, object); err != nil {
 			log.Fatalf("Cannot write object: %v", err)
 		}
 	case "read":
-		data, err := read(client, bucket, object)
+		data, err := read(bucket, object)
 		if err != nil {
 			log.Fatalf("Cannot read object: %v", err)
 		}
 		fmt.Printf("Object contents: %s\n", data)
 	case "metadata":
-		attrs, err := attrs(client, bucket, object)
+		attrs, err := attrs(bucket, object)
 		if err != nil {
 			log.Fatalf("Cannot get object metadata: %v", err)
 		}
 		fmt.Printf("Object metadata: %v\n", attrs)
 	case "makepublic":
-		if err := makePublic(client, bucket, object); err != nil {
+		if err := makePublic(bucket, object); err != nil {
 			log.Fatalf("Cannot to make object public: %v", err)
 		}
 	case "delete":
-		if err := delete(client, bucket, object); err != nil {
+		if err := delete(bucket, object); err != nil {
 			log.Fatalf("Cannot to delete object: %v", err)
 		}
 	}

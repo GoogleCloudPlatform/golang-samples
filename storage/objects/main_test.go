@@ -59,17 +59,17 @@ func TestObjects(t *testing.T) {
 	cleanBucket(t, ctx, client, tc.ProjectID, bucket)
 	cleanBucket(t, ctx, client, tc.ProjectID, dstBucket)
 
-	if err := write(client, bucket, object1); err != nil {
+	if err := write(bucket, object1); err != nil {
 		t.Fatalf("write(%q): %v", object1, err)
 	}
-	if err := write(client, bucket, object2); err != nil {
+	if err := write(bucket, object2); err != nil {
 		t.Fatalf("write(%q): %v", object2, err)
 	}
 
 	{
 		// Should only show "foo/a.txt", not "foo.txt"
 		var buf bytes.Buffer
-		if err := list(&buf, client, bucket); err != nil {
+		if err := list(&buf, bucket); err != nil {
 			t.Fatalf("cannot list objects: %v", err)
 		}
 		if got, want := buf.String(), object1; !strings.Contains(got, want) {
@@ -84,7 +84,7 @@ func TestObjects(t *testing.T) {
 		// Should only show "foo/a.txt", not "foo.txt"
 		const prefix = "foo/"
 		var buf bytes.Buffer
-		if err := listByPrefix(&buf, client, bucket, prefix, ""); err != nil {
+		if err := listByPrefix(&buf, bucket, prefix, ""); err != nil {
 			t.Fatalf("cannot list objects by prefix: %v", err)
 		}
 		if got, want := buf.String(), object1; strings.Contains(got, want) {
@@ -95,28 +95,28 @@ func TestObjects(t *testing.T) {
 		}
 	}
 
-	data, err := read(client, bucket, object1)
+	data, err := read(bucket, object1)
 	if err != nil {
 		t.Fatalf("cannot read object: %v", err)
 	}
 	if got, want := string(data), "Hello\nworld"; got != want {
 		t.Errorf("contents = %q; want %q", got, want)
 	}
-	_, err = attrs(client, bucket, object1)
+	_, err = attrs(bucket, object1)
 	if err != nil {
 		t.Errorf("cannot get object metadata: %v", err)
 	}
-	if err := makePublic(client, bucket, object1); err != nil {
+	if err := makePublic(bucket, object1); err != nil {
 		t.Errorf("cannot to make object public: %v", err)
 	}
-	err = move(client, bucket, object1)
+	err = move(bucket, object1)
 	if err != nil {
 		t.Fatalf("cannot move object: %v", err)
 	}
 	// object1's new name.
 	object1 = object1 + "-rename"
 
-	if err := copyToBucket(client, dstBucket, bucket, object1); err != nil {
+	if err := copyToBucket(dstBucket, bucket, object1); err != nil {
 		t.Errorf("cannot copy object to bucket: %v", err)
 	}
 	if err := addBucketACL(client, bucket); err != nil {
@@ -153,23 +153,23 @@ func TestObjects(t *testing.T) {
 	key := []byte("my-secret-AES-256-encryption-key")
 	newKey := []byte("My-secret-AES-256-encryption-key")
 
-	if err := writeEncryptedObject(client, bucket, object1, key); err != nil {
+	if err := writeEncryptedObject(bucket, object1, key); err != nil {
 		t.Errorf("cannot write an encrypted object: %v", err)
 	}
-	data, err = readEncryptedObject(client, bucket, object1, key)
+	data, err = readEncryptedObject(bucket, object1, key)
 	if err != nil {
 		t.Errorf("cannot read the encrypted object: %v", err)
 	}
 	if got, want := string(data), "top secret"; got != want {
 		t.Errorf("object content = %q; want %q", got, want)
 	}
-	if err := rotateEncryptionKey(client, bucket, object1, key, newKey); err != nil {
+	if err := rotateEncryptionKey(bucket, object1, key, newKey); err != nil {
 		t.Errorf("cannot encrypt the object with the new key: %v", err)
 	}
-	if err := delete(client, bucket, object1); err != nil {
+	if err := delete(bucket, object1); err != nil {
 		t.Errorf("cannot to delete object: %v", err)
 	}
-	if err := delete(client, bucket, object2); err != nil {
+	if err := delete(bucket, object2); err != nil {
 		t.Errorf("cannot to delete object: %v", err)
 	}
 
@@ -182,7 +182,7 @@ func TestObjects(t *testing.T) {
 	})
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-		if err := delete(client, dstBucket, object1+"-copy"); err != nil {
+		if err := delete(dstBucket, object1+"-copy"); err != nil {
 			r.Errorf("cannot to delete copy object: %v", err)
 		}
 	})
@@ -220,7 +220,7 @@ func TestKMSObjects(t *testing.T) {
 
 	kmsKeyName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", tc.ProjectID, "global", keyRingID, cryptoKeyID)
 
-	if err := writeWithKMSKey(client, bucket, object1, kmsKeyName); err != nil {
+	if err := writeWithKMSKey(bucket, object1, kmsKeyName); err != nil {
 		t.Errorf("cannot write a KMS encrypted object: %v", err)
 	}
 }
@@ -239,7 +239,7 @@ func TestV4SignedURL(t *testing.T) {
 
 	cleanBucket(t, ctx, client, tc.ProjectID, bucketName)
 	putBuf := new(bytes.Buffer)
-	putURL, err := generateV4PutObjectSignedURL(putBuf, client, bucketName, objectName, serviceAccount)
+	putURL, err := generateV4PutObjectSignedURL(putBuf, bucketName, objectName, serviceAccount)
 	if err != nil {
 		t.Errorf("generateV4PutObjectSignedURL: %v", err)
 	}
@@ -257,7 +257,7 @@ func TestV4SignedURL(t *testing.T) {
 		t.Errorf("httpClient.Do: %v", err)
 	}
 	getBuf := new(bytes.Buffer)
-	getURL, err := generateV4GetObjectSignedURL(getBuf, client, bucketName, objectName, serviceAccount)
+	getURL, err := generateV4GetObjectSignedURL(getBuf, bucketName, objectName, serviceAccount)
 	if err != nil {
 		t.Errorf("generateV4GetObjectSignedURL: %v", err)
 	}
@@ -302,7 +302,7 @@ func TestObjectBucketLock(t *testing.T) {
 	cleanBucket(t, ctx, client, tc.ProjectID, bucketName)
 	bucket := client.Bucket(bucketName)
 
-	if err := write(client, bucketName, objectName); err != nil {
+	if err := write(bucketName, objectName); err != nil {
 		t.Fatalf("write(%q): %v", objectName, err)
 	}
 	if _, err := bucket.Update(ctx, storage.BucketAttrsToUpdate{
@@ -312,20 +312,20 @@ func TestObjectBucketLock(t *testing.T) {
 	}); err != nil {
 		t.Errorf("unable to set retention policy (%q): %v", bucketName, err)
 	}
-	if err := setEventBasedHold(client, bucketName, objectName); err != nil {
+	if err := setEventBasedHold(bucketName, objectName); err != nil {
 		t.Errorf("unable to set event-based hold (%q/%q): %v", bucketName, objectName, err)
 	}
-	oAttrs, err := attrs(client, bucketName, objectName)
+	oAttrs, err := attrs(bucketName, objectName)
 	if err != nil {
 		t.Errorf("cannot get object metadata: %v", err)
 	}
 	if !oAttrs.EventBasedHold {
 		t.Errorf("event-based hold is not enabled")
 	}
-	if err := releaseEventBasedHold(client, bucketName, objectName); err != nil {
+	if err := releaseEventBasedHold(bucketName, objectName); err != nil {
 		t.Errorf("unable to set event-based hold (%q/%q): %v", bucketName, objectName, err)
 	}
-	oAttrs, err = attrs(client, bucketName, objectName)
+	oAttrs, err = attrs(bucketName, objectName)
 	if err != nil {
 		t.Errorf("cannot get object metadata: %v", err)
 	}
@@ -337,20 +337,20 @@ func TestObjectBucketLock(t *testing.T) {
 	}); err != nil {
 		t.Errorf("unable to remove retention policy (%q): %v", bucketName, err)
 	}
-	if err := setTemporaryHold(client, bucketName, objectName); err != nil {
+	if err := setTemporaryHold(bucketName, objectName); err != nil {
 		t.Errorf("unable to set temporary hold (%q/%q): %v", bucketName, objectName, err)
 	}
-	oAttrs, err = attrs(client, bucketName, objectName)
+	oAttrs, err = attrs(bucketName, objectName)
 	if err != nil {
 		t.Errorf("cannot get object metadata: %v", err)
 	}
 	if !oAttrs.TemporaryHold {
 		t.Errorf("temporary hold is not disabled")
 	}
-	if err := releaseTemporaryHold(client, bucketName, objectName); err != nil {
+	if err := releaseTemporaryHold(bucketName, objectName); err != nil {
 		t.Errorf("unable to release temporary hold (%q/%q): %v", bucketName, objectName, err)
 	}
-	oAttrs, err = attrs(client, bucketName, objectName)
+	oAttrs, err = attrs(bucketName, objectName)
 	if err != nil {
 		t.Errorf("cannot get object metadata: %v", err)
 	}

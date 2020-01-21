@@ -11,6 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+// Sample generateV4GetObjectSignedURL demonstrates objects signed URl generation.
 package objects
 
 // [START storage_generate_signed_url_v4]
@@ -24,7 +26,11 @@ import (
 	"golang.org/x/oauth2/google"
 )
 
-func generateV4GetObjectSignedURL(w io.Writer, client *storage.Client, bucketName, objectName, serviceAccount string) (string, error) {
+// generateV4GetObjectSignedURL generates object signed URL with GET method.
+func generateV4GetObjectSignedURL(w io.Writer, bucket, object, serviceAccount string) (string, error) {
+	// bucket := "bucket-name"
+	// object := "object-name"
+	// serviceAccount := "service_account.json"
 	jsonKey, err := ioutil.ReadFile(serviceAccount)
 	if err != nil {
 		return "", fmt.Errorf("cannot read the JSON key file, err: %v", err)
@@ -43,7 +49,7 @@ func generateV4GetObjectSignedURL(w io.Writer, client *storage.Client, bucketNam
 		Expires:        time.Now().Add(15 * time.Minute),
 	}
 
-	u, err := storage.SignedURL(bucketName, objectName, opts)
+	u, err := storage.SignedURL(bucket, object, opts)
 	if err != nil {
 		return "", fmt.Errorf("Unable to generate a signed URL: %v", err)
 	}

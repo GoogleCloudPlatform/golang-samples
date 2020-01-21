@@ -11,6 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+// Sample writeEncryptedObject demonstrates writing into encrypted object.
 package objects
 
 // [START storage_upload_encrypted_file]
@@ -20,8 +22,16 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-func writeEncryptedObject(client *storage.Client, bucket, object string, secretKey []byte) error {
+// writeEncryptedObject writes an encrypted object.
+func writeEncryptedObject(bucket, object string, secretKey []byte) error {
+	// bucket := "bucket-name"
+	// object := "object-name"
+	// secretKey := []byte("secret-key")
 	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
 
 	obj := client.Bucket(bucket).Object(object)
 	// Encrypt the object's contents.

@@ -11,6 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+// Sample attrs demonstrates object attributes.
 package objects
 
 // [START get_metadata]
@@ -21,8 +23,14 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-func attrs(client *storage.Client, bucket, object string) (*storage.ObjectAttrs, error) {
+// attrs prints all of the object attributes.
+func attrs(bucket, object string) (*storage.ObjectAttrs, error) {
 	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	o := client.Bucket(bucket).Object(object)
 	attrs, err := o.Attrs(ctx)
 	if err != nil {

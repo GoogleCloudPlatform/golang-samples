@@ -11,6 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+// Sample read demonstrates simple object reading.
 package objects
 
 // [START download_file]
@@ -21,8 +23,15 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-func read(client *storage.Client, bucket, object string) ([]byte, error) {
+// read reads an object.
+func read(bucket, object string) ([]byte, error) {
+	// bucket := "bucket-name"
+	// object := "object-name"
 	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return nil, err
+	}
 	rc, err := client.Bucket(bucket).Object(object).NewReader(ctx)
 	if err != nil {
 		return nil, err

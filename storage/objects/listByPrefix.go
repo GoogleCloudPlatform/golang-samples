@@ -11,6 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+// Sample listByPrefix demonstrates using prefixes and delimeters while listing objects.
 package objects
 
 // [START storage_list_files_with_prefix]
@@ -23,8 +25,16 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-func listByPrefix(w io.Writer, client *storage.Client, bucket, prefix, delim string) error {
+// listByPrefix lists objects using prefix and delimeter.
+func listByPrefix(w io.Writer, bucket, prefix, delim string) error {
+	// bucket := "bucket-name"
+	// prefix := "/foo"
+	// delim := "_"
 	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
 	// Prefixes and delimiters can be used to emulate directory listings.
 	// Prefixes can be used filter objects starting with prefix.
 	// The delimiter argument can be used to restrict the results to only the

@@ -11,6 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+// Sample makePublic demonstrates giving public access to an object.
 package objects
 
 // [START public]
@@ -20,8 +22,15 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-func makePublic(client *storage.Client, bucket, object string) error {
+// makePublic gives a read access to an object to all users.
+func makePublic(bucket, object string) error {
+	// bucket := "bucket-name"
+	// object := "object-name"
 	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
 	acl := client.Bucket(bucket).Object(object).ACL()
 	if err := acl.Set(ctx, storage.AllUsers, storage.RoleReader); err != nil {
 		return err

@@ -11,6 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+// Sample copyToBucket demonstrates coping an object into another bucket.
 package objects
 
 // [START copy_file]
@@ -20,8 +22,16 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-func copyToBucket(client *storage.Client, dstBucket, srcBucket, srcObject string) error {
+// copyToBucket copies an object into specified bucket.
+func copyToBucket(dstBucket, srcBucket, srcObject string) error {
+	// dstBucket := "bucket-1"
+	// srcBucket := "bucket-2"
+	// srcObject := "object"
 	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
 	dstObject := srcObject + "-copy"
 	src := client.Bucket(srcBucket).Object(srcObject)
 	dst := client.Bucket(dstBucket).Object(dstObject)

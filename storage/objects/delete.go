@@ -11,6 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+// Sample delete demonstrates deleting an object.
 package objects
 
 // [START delete_file]
@@ -20,8 +22,15 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-func delete(client *storage.Client, bucket, object string) error {
+// delete deletes specified object.
+func delete(bucket, object string) error {
+	// bucket := "bucket-name"
+	// object := "object-name"
 	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
 	o := client.Bucket(bucket).Object(object)
 	if err := o.Delete(ctx); err != nil {
 		return err
