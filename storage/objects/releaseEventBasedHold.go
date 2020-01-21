@@ -11,8 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-// Sample releaseEventBasedHold demonstrates an object event-based hold release.
 package objects
 
 // [START storage_release_event_based_hold]

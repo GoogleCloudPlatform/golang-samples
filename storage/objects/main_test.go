@@ -11,7 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package objects
 
 import (
@@ -118,36 +117,6 @@ func TestObjects(t *testing.T) {
 
 	if err := copyToBucket(dstBucket, bucket, object1); err != nil {
 		t.Errorf("cannot copy object to bucket: %v", err)
-	}
-	if err := addBucketACL(client, bucket); err != nil {
-		t.Errorf("cannot add bucket acl: %v", err)
-	}
-	if err := addDefaultBucketACL(client, bucket); err != nil {
-		t.Errorf("cannot add bucket default acl: %v", err)
-	}
-	if err := bucketACL(client, bucket); err != nil {
-		t.Errorf("cannot get bucket acl: %v", err)
-	}
-	if err := bucketACLFiltered(client, bucket, storage.AllAuthenticatedUsers); err != nil {
-		t.Errorf("cannot filter bucket acl: %v", err)
-	}
-	if err := deleteDefaultBucketACL(client, bucket); err != nil {
-		t.Errorf("cannot delete bucket default acl: %v", err)
-	}
-	if err := deleteBucketACL(client, bucket); err != nil {
-		t.Errorf("cannot delete bucket acl: %v", err)
-	}
-	if err := addObjectACL(client, bucket, object1); err != nil {
-		t.Errorf("cannot add object acl: %v", err)
-	}
-	if err := objectACL(client, bucket, object1); err != nil {
-		t.Errorf("cannot get object acl: %v", err)
-	}
-	if err := objectACLFiltered(client, bucket, object1, storage.AllAuthenticatedUsers); err != nil {
-		t.Errorf("cannot filter object acl: %v", err)
-	}
-	if err := deleteObjectACL(client, bucket, object1); err != nil {
-		t.Errorf("cannot delete object acl: %v", err)
 	}
 
 	key := []byte("my-secret-AES-256-encryption-key")

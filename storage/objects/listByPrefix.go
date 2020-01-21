@@ -11,8 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-// Sample listByPrefix demonstrates using prefixes and delimeters while listing objects.
 package objects
 
 // [START storage_list_files_with_prefix]

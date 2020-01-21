@@ -11,8 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-// Sample setEventBasedHold demonstrates setting event-based holding for an object.
 package objects
 
 // [START storage_set_event_based_hold]

@@ -11,8 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-// Sample downloadUsingRequesterPays demonstrates downloading an object using billing project.
 package objects
 
 // [START storage_download_file_requester_pays]
