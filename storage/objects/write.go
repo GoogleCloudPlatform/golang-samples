@@ -31,14 +31,14 @@ func write(bucket, object string) error {
 	if err != nil {
 		return err
 	}
-	// Open a file.
+	// Open local file.
 	f, err := os.Open("notes.txt")
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 
-	// Upload an object with Writer.
+	// Upload an object with storage.Writer.
 	wc := client.Bucket(bucket).Object(object).NewWriter(ctx)
 	if _, err = io.Copy(wc, f); err != nil {
 		return err

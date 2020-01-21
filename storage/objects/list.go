@@ -23,7 +23,7 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-// list lists objects of a specific bucket.
+// list lists objects within specified bucket.
 func list(w io.Writer, bucket string) error {
 	// bucket := "bucket-name"
 	ctx := context.Background()

@@ -21,7 +21,7 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// read reads an object.
+// read downloads an object.
 func read(bucket, object string) ([]byte, error) {
 	// bucket := "bucket-name"
 	// object := "object-name"

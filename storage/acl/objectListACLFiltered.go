@@ -21,16 +21,16 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// objectListACLFiltered lists ACL of the specified object using a filter.
+// objectListACLFiltered lists ACL of the specified object with filter.
 func objectListACLFiltered(bucket, object string, entity storage.ACLEntity) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
+	// entity := storage.AllAuthenticatedUsers
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
 		return err
 	}
-
 	rules, err := client.Bucket(bucket).ACL().List(ctx)
 	if err != nil {
 		return err

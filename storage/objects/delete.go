@@ -20,7 +20,7 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// delete deletes specified object.
+// delete removes specified object.
 func delete(bucket, object string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"

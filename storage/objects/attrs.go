@@ -23,6 +23,8 @@ import (
 
 // attrs prints all of the object attributes.
 func attrs(bucket, object string) (*storage.ObjectAttrs, error) {
+	// bucket := "bucket-name"
+	// object := "object-name"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -58,7 +60,6 @@ func attrs(bucket, object string) (*storage.ObjectAttrs, error) {
 	for key, value := range attrs.Metadata {
 		log.Printf("\t%v = %v\n", key, value)
 	}
-
 	return attrs, nil
 }
 

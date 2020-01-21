@@ -30,9 +30,8 @@ func writeWithKMSKey(bucket, object string, keyName string) error {
 	if err != nil {
 		return err
 	}
-
 	obj := client.Bucket(bucket).Object(object)
-	// Encrypt the object's contents
+	// Encrypt the object's contents.
 	wc := obj.NewWriter(ctx)
 	wc.KMSKeyName = keyName
 	if _, err := wc.Write([]byte("top secret")); err != nil {

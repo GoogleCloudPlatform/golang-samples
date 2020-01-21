@@ -20,7 +20,7 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// deleteObjectACL deletes default ACL from object.
+// deleteObjectACL removes default ACL from object.
 func deleteObjectACL(bucket, object string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
@@ -29,7 +29,6 @@ func deleteObjectACL(bucket, object string) error {
 	if err != nil {
 		return err
 	}
-
 	acl := client.Bucket(bucket).Object(object).ACL()
 	if err := acl.Delete(ctx, storage.AllAuthenticatedUsers); err != nil {
 		return err

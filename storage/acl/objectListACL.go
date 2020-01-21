@@ -30,7 +30,6 @@ func objectListACL(bucket, object string) error {
 	if err != nil {
 		return err
 	}
-
 	rules, err := client.Bucket(bucket).Object(object).ACL().List(ctx)
 	if err != nil {
 		return err

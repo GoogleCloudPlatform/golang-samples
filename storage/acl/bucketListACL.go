@@ -17,25 +17,25 @@ package acl
 import (
 	"context"
 	"fmt"
+	"io"
 
 	"cloud.google.com/go/storage"
 )
 
 // bucketListACL lists bucket ACL.
-func bucketListACL(bucket string) error {
+func bucketListACL(w io.Writer, bucket string) error {
 	// bucket := "bucket-name"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
 		return err
 	}
-
 	rules, err := client.Bucket(bucket).ACL().List(ctx)
 	if err != nil {
 		return err
 	}
 	for _, rule := range rules {
-		fmt.Printf("ACL rule: %v\n", rule)
+		fmt.Fprintf(w, "ACL rule: %v\n", rule)
 	}
 	return nil
 }

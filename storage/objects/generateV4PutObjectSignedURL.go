@@ -37,7 +37,6 @@ func generateV4PutObjectSignedURL(w io.Writer, bucket, object, serviceAccount st
 	if err != nil {
 		return "", fmt.Errorf("google.JWTConfigFromJSON: %v", err)
 	}
-
 	opts := &storage.SignedURLOptions{
 		Scheme: storage.SigningSchemeV4,
 		Method: "PUT",
@@ -48,12 +47,10 @@ func generateV4PutObjectSignedURL(w io.Writer, bucket, object, serviceAccount st
 		PrivateKey:     conf.PrivateKey,
 		Expires:        time.Now().Add(15 * time.Minute),
 	}
-
 	u, err := storage.SignedURL(bucket, object, opts)
 	if err != nil {
 		return "", fmt.Errorf("Unable to generate a signed URL: %v", err)
 	}
-
 	fmt.Fprintln(w, "Generated PUT signed URL:")
 	fmt.Fprintf(w, "%q\n", u)
 	fmt.Fprintln(w, "You can use this URL with any user agent, for example:")

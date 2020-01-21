@@ -20,7 +20,7 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// makePublic gives a read access to an object to all users.
+// makePublic gives all users read access to an object.
 func makePublic(bucket, object string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"

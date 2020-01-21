@@ -20,7 +20,7 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// addBucketACL adds ACL to a bucket.
+// addBucketACL adds ACL to the specified bucket.
 func addBucketACL(bucket string) error {
 	// bucket := "bucket-name"
 	ctx := context.Background()
@@ -28,7 +28,6 @@ func addBucketACL(bucket string) error {
 	if err != nil {
 		return err
 	}
-
 	acl := client.Bucket(bucket).ACL()
 	if err := acl.Set(ctx, storage.AllAuthenticatedUsers, storage.RoleReader); err != nil {
 		return err

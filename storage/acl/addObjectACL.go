@@ -29,7 +29,6 @@ func addObjectACL(bucket, object string) error {
 	if err != nil {
 		return err
 	}
-
 	acl := client.Bucket(bucket).Object(object).ACL()
 	if err := acl.Set(ctx, storage.AllAuthenticatedUsers, storage.RoleReader); err != nil {
 		return err

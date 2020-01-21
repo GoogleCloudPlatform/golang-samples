@@ -24,7 +24,7 @@ import (
 )
 
 // downloadUsingRequesterPays downloads an object using billing project.
-func downloadUsingRequesterPays(object, bucket, billingProjectID string) error {
+func downloadUsingRequesterPays(w io.Writer, object, bucket, billingProjectID string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	// billingProjectID := "billing_account.json"
@@ -52,7 +52,7 @@ func downloadUsingRequesterPays(object, bucket, billingProjectID string) error {
 	if err := rc.Close(); err != nil {
 		return err
 	}
-	fmt.Printf("Downloaded using %v as billing project.\n", billingProjectID)
+	fmt.Fprintf(w, "Downloaded using %v as billing project.\n", billingProjectID)
 	return nil
 }
 
