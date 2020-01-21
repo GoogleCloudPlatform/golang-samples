@@ -24,7 +24,7 @@ import (
 )
 
 // objectListACL lists ACL of the specified object.
-func objectACL(bucket, object string) error {
+func objectListACL(bucket, object string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	ctx := context.Background()
