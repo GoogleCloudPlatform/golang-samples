@@ -40,8 +40,8 @@ If you later make some code changes, updating is more concise:
 
 ```sh
 export GOOGLE_CLOUD_PROJECT=[PROJECT_ID]
-gcloud beta run deploy ping --image gcr.io/$GOOGLE_CLOUD_PROJECT/grpc-ping
-gcloud beta run deploy ping-relay --image gcr.io/$GOOGLE_CLOUD_PROJECT/grpc-ping
+gcloud run deploy ping --image gcr.io/$GOOGLE_CLOUD_PROJECT/grpc-ping
+gcloud run deploy ping-relay --image gcr.io/$GOOGLE_CLOUD_PROJECT/grpc-ping
 ```
 
 See below for instructions on updating the proto.
