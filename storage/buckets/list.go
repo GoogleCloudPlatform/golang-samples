@@ -21,8 +21,14 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-func list(client *storage.Client, projectID string) ([]string, error) {
+// list lists buckets in the project.
+func list(projectID string) ([]string, error) {
+	// projectID := "my-project-id"
 	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return nil, err
+	}
 	var buckets []string
 	it := client.Buckets(ctx, projectID)
 	for {

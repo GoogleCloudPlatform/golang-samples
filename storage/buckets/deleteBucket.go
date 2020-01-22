@@ -20,8 +20,14 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-func deleteBucket(client *storage.Client, bucketName string) error {
+// deleteBucket deletes the bucket.
+func deleteBucket(bucketName string) error {
+	// bucketName := "bucket-name"
 	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
 	if err := client.Bucket(bucketName).Delete(ctx); err != nil {
 		return err
 	}

@@ -21,10 +21,16 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-func checkRequesterPays(c *storage.Client, bucketName string) error {
+// checkRequesterPays gets requester pays status.
+func checkRequesterPays(bucketName string) error {
+	// bucketName := "bucket-name"
 	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
 
-	attrs, err := c.Bucket(bucketName).Attrs(ctx)
+	attrs, err := client.Bucket(bucketName).Attrs(ctx)
 	if err != nil {
 		return err
 	}

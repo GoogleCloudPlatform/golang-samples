@@ -21,10 +21,15 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-func getUniformBucketLevelAccess(c *storage.Client, bucketName string) (*storage.BucketAttrs, error) {
+// getUniformBucketLevelAccess gets uniform bucket-level access.
+func getUniformBucketLevelAccess(bucketName string) (*storage.BucketAttrs, error) {
+	// bucketName := "bucket-name"
 	ctx := context.Background()
-
-	attrs, err := c.Bucket(bucketName).Attrs(ctx)
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+	attrs, err := client.Bucket(bucketName).Attrs(ctx)
 	if err != nil {
 		return nil, err
 	}

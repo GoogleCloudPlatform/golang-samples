@@ -20,10 +20,16 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-func disableUniformBucketLevelAccess(c *storage.Client, bucketName string) error {
+// disableUniformBucketLevelAccess sets uniform bucket-level access to false.
+func disableUniformBucketLevelAccess(bucketName string) error {
+	// bucketName := "bucket-name"
 	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
 
-	bucket := c.Bucket(bucketName)
+	bucket := client.Bucket(bucketName)
 	disableUniformBucketLevelAccess := storage.BucketAttrsToUpdate{
 		UniformBucketLevelAccess: &storage.UniformBucketLevelAccess{
 			Enabled: false,

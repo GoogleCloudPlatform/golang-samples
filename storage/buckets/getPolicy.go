@@ -22,10 +22,15 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-func getPolicy(c *storage.Client, bucketName string) (*iam.Policy, error) {
+// getPolicy gets the bucket IAM policy.
+func getPolicy(bucketName string) (*iam.Policy, error) {
+	// bucketName := "bucket-name"
 	ctx := context.Background()
-
-	policy, err := c.Bucket(bucketName).IAM().Policy(ctx)
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+	policy, err := client.Bucket(bucketName).IAM().Policy(ctx)
 	if err != nil {
 		return nil, err
 	}

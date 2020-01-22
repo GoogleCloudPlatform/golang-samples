@@ -20,8 +20,16 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-func createWithAttrs(client *storage.Client, projectID, bucketName string) error {
+// createWithAttrs creates the bucket in the project with storage class and
+// location.
+func createWithAttrs(projectID, bucketName string) error {
+	// projectID := "my-project-id"
+	// bucketName := "bucket-name"
 	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
 	bucket := client.Bucket(bucketName)
 	if err := bucket.Create(ctx, projectID, &storage.BucketAttrs{
 		StorageClass: "COLDLINE",

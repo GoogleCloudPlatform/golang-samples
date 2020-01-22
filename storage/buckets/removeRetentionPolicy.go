@@ -21,12 +21,18 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-func removeRetentionPolicy(c *storage.Client, bucketName string) error {
+// removeRetentionPolicy removes bucket retention policy.
+func removeRetentionPolicy(bucketName string) error {
+	// bucketName := "bucket-name"
 	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
 
-	bucket := c.Bucket(bucketName)
+	bucket := client.Bucket(bucketName)
 
-	attrs, err := c.Bucket(bucketName).Attrs(ctx)
+	attrs, err := client.Bucket(bucketName).Attrs(ctx)
 	if err != nil {
 		return err
 	}

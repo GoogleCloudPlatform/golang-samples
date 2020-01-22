@@ -20,8 +20,15 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-func create(client *storage.Client, projectID, bucketName string) error {
+// create creates the bucket in the project.
+func create(projectID, bucketName string) error {
+	// projectID := "my-project-id"
+	// bucketName := "bucket-name"
 	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
 	if err := client.Bucket(bucketName).Create(ctx, projectID, nil); err != nil {
 		return err
 	}

@@ -21,10 +21,16 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-func setRetentionPolicy(c *storage.Client, bucketName string, retentionPeriod time.Duration) error {
+// setRetentionPolicy sets the bucket retention period.
+func setRetentionPolicy(bucketName string, retentionPeriod time.Duration) error {
+	// bucketName := "bucket-name"
+	// retentionPeriod := time.Second
 	ctx := context.Background()
-
-	bucket := c.Bucket(bucketName)
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	bucket := client.Bucket(bucketName)
 	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
 		RetentionPolicy: &storage.RetentionPolicy{
 			RetentionPeriod: retentionPeriod,

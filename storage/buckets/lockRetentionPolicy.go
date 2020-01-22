@@ -21,11 +21,16 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-func lockRetentionPolicy(c *storage.Client, bucketName string) error {
+// lockRetentionPolicy locks bucket retention policy.
+func lockRetentionPolicy(bucketName string) error {
+	// bucketName := "bucket-name"
 	ctx := context.Background()
-
-	bucket := c.Bucket(bucketName)
-	attrs, err := c.Bucket(bucketName).Attrs(ctx)
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	bucket := client.Bucket(bucketName)
+	attrs, err := client.Bucket(bucketName).Attrs(ctx)
 	if err != nil {
 		return err
 	}
@@ -37,7 +42,7 @@ func lockRetentionPolicy(c *storage.Client, bucketName string) error {
 		return err
 	}
 
-	lockedAttrs, err := c.Bucket(bucketName).Attrs(ctx)
+	lockedAttrs, err := client.Bucket(bucketName).Attrs(ctx)
 	if err != nil {
 		return err
 	}

@@ -16,7 +16,7 @@
 // using the Google Storage API. More documentation is available at
 // https://cloud.google.com/storage/docs/json_api/v1/.
 
-package main
+package buckets
 
 // [START storage_get_bucket_metadata]
 import (
@@ -28,7 +28,8 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-func getBucketMetadata(w io.Writer, client *storage.Client, bucketName string) (*storage.BucketAttrs, error) {
+// getBucketMetadata gets the bucket metadata.
+func getBucketMetadata(w io.Writer, bucketName string) (*storage.BucketAttrs, error) {
 	// bucketName := "bucket-name"
 	ctx := context.Background()
 

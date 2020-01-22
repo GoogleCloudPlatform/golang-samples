@@ -20,10 +20,16 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-func removeUser(c *storage.Client, bucketName string) error {
+// removeUser removes the bucket IAM member.
+func removeUser(bucketName string) error {
+	// bucketName := "bucket-name"
 	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
 
-	bucket := c.Bucket(bucketName)
+	bucket := client.Bucket(bucketName)
 	policy, err := bucket.IAM().Policy(ctx)
 	if err != nil {
 		return err

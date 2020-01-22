@@ -20,10 +20,16 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-func addUser(c *storage.Client, bucketName string) error {
+// addUser adds the bucket IAM member to permission role.
+func addUser(bucketName string) error {
+	// bucketName := "bucket-name"
 	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
 
-	bucket := c.Bucket(bucketName)
+	bucket := client.Bucket(bucketName)
 	policy, err := bucket.IAM().Policy(ctx)
 	if err != nil {
 		return err

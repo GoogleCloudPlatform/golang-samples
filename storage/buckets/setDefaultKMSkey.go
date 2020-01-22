@@ -20,10 +20,16 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-func setDefaultKMSkey(c *storage.Client, bucketName string, keyName string) error {
+// setDefaultKMSkey sets the Cloud KMS encryption key.
+func setDefaultKMSkey(bucketName string, keyName string) error {
+	// bucketName := "bucket-name"
+	// keyName := "key"
 	ctx := context.Background()
-
-	bucket := c.Bucket(bucketName)
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	bucket := client.Bucket(bucketName)
 	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
 		Encryption: &storage.BucketEncryption{DefaultKMSKeyName: keyName},
 	}

@@ -20,10 +20,15 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-func disableDefaultEventBasedHold(c *storage.Client, bucketName string) error {
+// disableDefaultEventBasedHold sets event-based hold to false.
+func disableDefaultEventBasedHold(bucketName string) error {
+	// bucketName := "bucket-name"
 	ctx := context.Background()
-
-	bucket := c.Bucket(bucketName)
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	bucket := client.Bucket(bucketName)
 	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
 		DefaultEventBasedHold: false,
 	}

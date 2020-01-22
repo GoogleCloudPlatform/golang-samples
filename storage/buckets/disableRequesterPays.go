@@ -20,10 +20,15 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-func disableRequesterPays(c *storage.Client, bucketName string) error {
+// disableRequesterPays sets requester pays status to false.
+func disableRequesterPays(bucketName string) error {
+	// bucketName := "bucket-name"
 	ctx := context.Background()
-
-	bucket := c.Bucket(bucketName)
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	bucket := client.Bucket(bucketName)
 	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
 		RequesterPays: false,
 	}
