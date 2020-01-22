@@ -29,8 +29,9 @@ func move(bucket, object string) error {
 	if err != nil {
 		return err
 	}
-	dstName := object + "-rename"
+	defer client.Close()
 
+	dstName := object + "-rename"
 	src := client.Bucket(bucket).Object(object)
 	dst := client.Bucket(bucket).Object(dstName)
 

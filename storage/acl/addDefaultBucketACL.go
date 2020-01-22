@@ -28,6 +28,8 @@ func addDefaultBucketACL(bucket string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
+
 	acl := client.Bucket(bucket).DefaultObjectACL()
 	if err := acl.Set(ctx, storage.AllAuthenticatedUsers, storage.RoleReader); err != nil {
 		return err

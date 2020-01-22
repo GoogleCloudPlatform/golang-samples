@@ -31,6 +31,8 @@ func write(bucket, object string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
+
 	// Open local file.
 	f, err := os.Open("notes.txt")
 	if err != nil {

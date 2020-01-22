@@ -31,6 +31,8 @@ func rotateEncryptionKey(bucket, object string, key, newKey []byte) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
+
 	obj := client.Bucket(bucket).Object(object)
 	// obj is encrypted with key, we are encrypting it with the newKey.
 	_, err = obj.Key(newKey).CopierFrom(obj.Key(key)).Run(ctx)

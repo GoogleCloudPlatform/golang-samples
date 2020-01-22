@@ -31,6 +31,8 @@ func list(w io.Writer, bucket string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
+
 	it := client.Bucket(bucket).Objects(ctx, nil)
 	for {
 		attrs, err := it.Next()

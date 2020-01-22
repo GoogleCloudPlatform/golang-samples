@@ -48,6 +48,7 @@ func TestObjects(t *testing.T) {
 	if err != nil {
 		t.Fatalf("storage.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	var (
 		bucket    = tc.ProjectID + "-samples-object-bucket-1"
@@ -103,14 +104,16 @@ func TestObjects(t *testing.T) {
 		}
 	}
 
+	var buf bytes.Buffer
 	data, err := read(bucket, object1)
+
 	if err != nil {
 		t.Fatalf("cannot read object: %v", err)
 	}
 	if got, want := string(data), "Hello\nworld"; got != want {
 		t.Errorf("contents = %q; want %q", got, want)
 	}
-	_, err = attrs(bucket, object1)
+	_, err = attrs(&buf, bucket, object1)
 	if err != nil {
 		t.Errorf("cannot get object metadata: %v", err)
 	}
@@ -179,6 +182,7 @@ func TestKMSObjects(t *testing.T) {
 	if err != nil {
 		t.Fatalf("storage.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	keyRingID := os.Getenv("GOLANG_SAMPLES_KMS_KEYRING")
 	cryptoKeyID := os.Getenv("GOLANG_SAMPLES_KMS_CRYPTOKEY")
@@ -210,6 +214,7 @@ func TestV4SignedURL(t *testing.T) {
 	if err != nil {
 		t.Fatalf("storage.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	bucketName := tc.ProjectID + "-signed-url-bucket-name"
 	objectName := "foo.txt"
@@ -258,7 +263,6 @@ func TestV4SignedURL(t *testing.T) {
 	if got, want := string(body), "hello world"; got != want {
 		t.Errorf("object content = %q; want %q", got, want)
 	}
-
 }
 
 func TestObjectBucketLock(t *testing.T) {
@@ -268,13 +272,13 @@ func TestObjectBucketLock(t *testing.T) {
 	if err != nil {
 		t.Fatalf("storage.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	var (
-		bucketName = tc.ProjectID + "-retent-samples-object-bucket"
-
-		objectName = "foo.txt"
-
+		bucketName      = tc.ProjectID + "-retent-samples-object-bucket"
+		objectName      = "foo.txt"
 		retentionPeriod = 5 * time.Second
+		buf             bytes.Buffer
 	)
 
 	cleanBucket(t, ctx, client, tc.ProjectID, bucketName)
@@ -293,7 +297,7 @@ func TestObjectBucketLock(t *testing.T) {
 	if err := setEventBasedHold(bucketName, objectName); err != nil {
 		t.Errorf("unable to set event-based hold (%q/%q): %v", bucketName, objectName, err)
 	}
-	oAttrs, err := attrs(bucketName, objectName)
+	oAttrs, err := attrs(&buf, bucketName, objectName)
 	if err != nil {
 		t.Errorf("cannot get object metadata: %v", err)
 	}
@@ -303,7 +307,7 @@ func TestObjectBucketLock(t *testing.T) {
 	if err := releaseEventBasedHold(bucketName, objectName); err != nil {
 		t.Errorf("unable to set event-based hold (%q/%q): %v", bucketName, objectName, err)
 	}
-	oAttrs, err = attrs(bucketName, objectName)
+	oAttrs, err = attrs(&buf, bucketName, objectName)
 	if err != nil {
 		t.Errorf("cannot get object metadata: %v", err)
 	}
@@ -318,7 +322,7 @@ func TestObjectBucketLock(t *testing.T) {
 	if err := setTemporaryHold(bucketName, objectName); err != nil {
 		t.Errorf("unable to set temporary hold (%q/%q): %v", bucketName, objectName, err)
 	}
-	oAttrs, err = attrs(bucketName, objectName)
+	oAttrs, err = attrs(&buf, bucketName, objectName)
 	if err != nil {
 		t.Errorf("cannot get object metadata: %v", err)
 	}
@@ -328,7 +332,7 @@ func TestObjectBucketLock(t *testing.T) {
 	if err := releaseTemporaryHold(bucketName, objectName); err != nil {
 		t.Errorf("unable to release temporary hold (%q/%q): %v", bucketName, objectName, err)
 	}
-	oAttrs, err = attrs(bucketName, objectName)
+	oAttrs, err = attrs(&buf, bucketName, objectName)
 	if err != nil {
 		t.Errorf("cannot get object metadata: %v", err)
 	}

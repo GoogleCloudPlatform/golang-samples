@@ -30,6 +30,8 @@ func writeEncryptedObject(bucket, object string, secretKey []byte) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
+
 	obj := client.Bucket(bucket).Object(object)
 	// Encrypt the object's contents.
 	wc := obj.Key(secretKey).NewWriter(ctx)

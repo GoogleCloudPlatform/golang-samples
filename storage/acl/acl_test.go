@@ -40,11 +40,6 @@ func TestMain(m *testing.M) {
 // TestAcls runs all of the package tests.
 func TestAcls(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	ctx := context.Background()
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		t.Fatalf("storage.NewClient: %v", err)
-	}
 
 	var (
 		bucket  = tc.ProjectID + "-samples-object-bucket-1"
@@ -83,6 +78,13 @@ func TestAcls(t *testing.T) {
 	if err := deleteObjectACL(bucket, object1); err != nil {
 		t.Errorf("cannot delete object acl: %v", err)
 	}
+
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+	defer client.Close()
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		// Cleanup, this part won't be executed if Fatal happens.

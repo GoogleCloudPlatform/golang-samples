@@ -16,13 +16,14 @@ package objects
 // [START get_metadata]
 import (
 	"context"
-	"log"
+	"fmt"
+	"io"
 
 	"cloud.google.com/go/storage"
 )
 
 // attrs prints all of the object attributes.
-func attrs(bucket, object string) (*storage.ObjectAttrs, error) {
+func attrs(w io.Writer, bucket, object string) (*storage.ObjectAttrs, error) {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	ctx := context.Background()
@@ -30,35 +31,36 @@ func attrs(bucket, object string) (*storage.ObjectAttrs, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer client.Close()
 
 	o := client.Bucket(bucket).Object(object)
 	attrs, err := o.Attrs(ctx)
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("Bucket: %v\n", attrs.Bucket)
-	log.Printf("CacheControl: %v\n", attrs.CacheControl)
-	log.Printf("ContentDisposition: %v\n", attrs.ContentDisposition)
-	log.Printf("ContentEncoding: %v\n", attrs.ContentEncoding)
-	log.Printf("ContentLanguage: %v\n", attrs.ContentLanguage)
-	log.Printf("ContentType: %v\n", attrs.ContentType)
-	log.Printf("Crc32c: %v\n", attrs.CRC32C)
-	log.Printf("Generation: %v\n", attrs.Generation)
-	log.Printf("KmsKeyName: %v\n", attrs.KMSKeyName)
-	log.Printf("Md5Hash: %v\n", attrs.MD5)
-	log.Printf("MediaLink: %v\n", attrs.MediaLink)
-	log.Printf("Metageneration: %v\n", attrs.Metageneration)
-	log.Printf("Name: %v\n", attrs.Name)
-	log.Printf("Size: %v\n", attrs.Size)
-	log.Printf("StorageClass: %v\n", attrs.StorageClass)
-	log.Printf("TimeCreated: %v\n", attrs.Created)
-	log.Printf("Updated: %v\n", attrs.Updated)
-	log.Printf("Event-based hold enabled? %t\n", attrs.EventBasedHold)
-	log.Printf("Temporary hold enabled? %t\n", attrs.TemporaryHold)
-	log.Printf("Retention expiration time %v\n", attrs.RetentionExpirationTime)
-	log.Print("\n\nMetadata\n")
+	fmt.Fprintf(w, "Bucket: %v\n", attrs.Bucket)
+	fmt.Fprintf(w, "CacheControl: %v\n", attrs.CacheControl)
+	fmt.Fprintf(w, "ContentDisposition: %v\n", attrs.ContentDisposition)
+	fmt.Fprintf(w, "ContentEncoding: %v\n", attrs.ContentEncoding)
+	fmt.Fprintf(w, "ContentLanguage: %v\n", attrs.ContentLanguage)
+	fmt.Fprintf(w, "ContentType: %v\n", attrs.ContentType)
+	fmt.Fprintf(w, "Crc32c: %v\n", attrs.CRC32C)
+	fmt.Fprintf(w, "Generation: %v\n", attrs.Generation)
+	fmt.Fprintf(w, "KmsKeyName: %v\n", attrs.KMSKeyName)
+	fmt.Fprintf(w, "Md5Hash: %v\n", attrs.MD5)
+	fmt.Fprintf(w, "MediaLink: %v\n", attrs.MediaLink)
+	fmt.Fprintf(w, "Metageneration: %v\n", attrs.Metageneration)
+	fmt.Fprintf(w, "Name: %v\n", attrs.Name)
+	fmt.Fprintf(w, "Size: %v\n", attrs.Size)
+	fmt.Fprintf(w, "StorageClass: %v\n", attrs.StorageClass)
+	fmt.Fprintf(w, "TimeCreated: %v\n", attrs.Created)
+	fmt.Fprintf(w, "Updated: %v\n", attrs.Updated)
+	fmt.Fprintf(w, "Event-based hold enabled? %t\n", attrs.EventBasedHold)
+	fmt.Fprintf(w, "Temporary hold enabled? %t\n", attrs.TemporaryHold)
+	fmt.Fprintf(w, "Retention expiration time %v\n", attrs.RetentionExpirationTime)
+	fmt.Fprintf(w, "\n\nMetadata\n")
 	for key, value := range attrs.Metadata {
-		log.Printf("\t%v = %v\n", key, value)
+		fmt.Fprintf(w, "\t%v = %v\n", key, value)
 	}
 	return attrs, nil
 }

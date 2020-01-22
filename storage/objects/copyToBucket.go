@@ -30,6 +30,8 @@ func copyToBucket(dstBucket, srcBucket, srcObject string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
+
 	dstObject := srcObject + "-copy"
 	src := client.Bucket(srcBucket).Object(srcObject)
 	dst := client.Bucket(dstBucket).Object(dstObject)

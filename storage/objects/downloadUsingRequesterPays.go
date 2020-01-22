@@ -33,6 +33,8 @@ func downloadUsingRequesterPays(w io.Writer, bucket, object, billingProjectID st
 	if err != nil {
 		return err
 	}
+	defer client.Close()
+
 	b := client.Bucket(bucket).UserProject(billingProjectID)
 	src := b.Object(object)
 

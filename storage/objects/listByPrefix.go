@@ -33,6 +33,7 @@ func listByPrefix(w io.Writer, bucket, prefix, delim string) error {
 	if err != nil {
 		return err
 	}
+    defer client.Close()
 	// Prefixes and delimiters can be used to emulate directory listings.
 	// Prefixes can be used filter objects starting with prefix.
 	// The delimiter argument can be used to restrict the results to only the

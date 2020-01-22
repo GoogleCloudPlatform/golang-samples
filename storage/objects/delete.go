@@ -29,6 +29,8 @@ func delete(bucket, object string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
+
 	o := client.Bucket(bucket).Object(object)
 	if err := o.Delete(ctx); err != nil {
 		return err

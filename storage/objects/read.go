@@ -30,6 +30,8 @@ func read(bucket, object string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer client.Close()
+
 	rc, err := client.Bucket(bucket).Object(object).NewReader(ctx)
 	if err != nil {
 		return nil, err

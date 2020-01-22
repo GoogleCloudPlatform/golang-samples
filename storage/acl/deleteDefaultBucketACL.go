@@ -28,6 +28,8 @@ func deleteDefaultBucketACL(bucket string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
+
 	acl := client.Bucket(bucket).DefaultObjectACL()
 	if err := acl.Delete(ctx, storage.AllAuthenticatedUsers); err != nil {
 		return err

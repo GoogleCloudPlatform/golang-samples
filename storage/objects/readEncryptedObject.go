@@ -31,6 +31,8 @@ func readEncryptedObject(bucket, object string, secretKey []byte) ([]byte, error
 	if err != nil {
 		return nil, err
 	}
+	defer client.Close()
+
 	obj := client.Bucket(bucket).Object(object)
 	rc, err := obj.Key(secretKey).NewReader(ctx)
 	if err != nil {

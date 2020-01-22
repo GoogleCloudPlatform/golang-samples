@@ -31,6 +31,8 @@ func bucketListACLFiltered(w io.Writer, bucket string, entity storage.ACLEntity)
 	if err != nil {
 		return err
 	}
+	defer client.Close()
+
 	rules, err := client.Bucket(bucket).ACL().List(ctx)
 	if err != nil {
 		return err

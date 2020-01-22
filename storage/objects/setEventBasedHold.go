@@ -29,6 +29,8 @@ func setEventBasedHold(bucket, object string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
+
 	o := client.Bucket(bucket).Object(object)
 	objectAttrsToUpdate := storage.ObjectAttrsToUpdate{
 		EventBasedHold: true,
