@@ -17,12 +17,13 @@ package acl
 import (
 	"context"
 	"fmt"
+	"io"
 
 	"cloud.google.com/go/storage"
 )
 
 // objectListACLFiltered lists ACL of the specified object with filter.
-func objectListACLFiltered(bucket, object string, entity storage.ACLEntity) error {
+func objectListACLFiltered(w io.Writer, bucket, object string, entity storage.ACLEntity) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	// entity := storage.AllAuthenticatedUsers
@@ -39,7 +40,7 @@ func objectListACLFiltered(bucket, object string, entity storage.ACLEntity) erro
 	}
 	for _, r := range rules {
 		if r.Entity == entity {
-			fmt.Printf("ACL rule role: %v\n", r.Role)
+			fmt.Fprintf(w, "ACL rule role: %v\n", r.Role)
 		}
 	}
 	return nil

@@ -17,12 +17,13 @@ package acl
 import (
 	"context"
 	"fmt"
+	"io"
 
 	"cloud.google.com/go/storage"
 )
 
 // objectListACL lists ACL of the specified object.
-func objectListACL(bucket, object string) error {
+func objectListACL(w io.Writer, bucket, object string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	ctx := context.Background()
@@ -37,7 +38,7 @@ func objectListACL(bucket, object string) error {
 		return err
 	}
 	for _, rule := range rules {
-		fmt.Printf("ACL rule: %v\n", rule)
+		fmt.Fprintf(w, "ACL rule: %v\n", rule)
 	}
 	return nil
 }

@@ -40,13 +40,11 @@ func TestMain(m *testing.M) {
 // TestAcls runs all of the package tests.
 func TestAcls(t *testing.T) {
 	tc := testutil.SystemTest(t)
-
 	var (
-		bucket  = tc.ProjectID + "-samples-object-bucket-1"
-		object1 = "foo.txt"
+		bucket = tc.ProjectID + "-samples-object-bucket-1"
+		object = "foo.txt"
+		buf    bytes.Buffer
 	)
-
-	var buf bytes.Buffer
 
 	if err := addBucketACL(bucket); err != nil {
 		t.Errorf("cannot add bucket acl: %v", err)
@@ -66,16 +64,16 @@ func TestAcls(t *testing.T) {
 	if err := deleteBucketACL(bucket); err != nil {
 		t.Errorf("cannot delete bucket acl: %v", err)
 	}
-	if err := addObjectACL(bucket, object1); err != nil {
+	if err := addObjectACL(bucket, object); err != nil {
 		t.Errorf("cannot add object acl: %v", err)
 	}
-	if err := objectListACL(bucket, object1); err != nil {
+	if err := objectListACL(&buf, bucket, object); err != nil {
 		t.Errorf("cannot get object acl: %v", err)
 	}
-	if err := objectListACLFiltered(bucket, object1, storage.AllAuthenticatedUsers); err != nil {
+	if err := objectListACLFiltered(&buf, bucket, object, storage.AllAuthenticatedUsers); err != nil {
 		t.Errorf("cannot filter object acl: %v", err)
 	}
-	if err := deleteObjectACL(bucket, object1); err != nil {
+	if err := deleteObjectACL(bucket, object); err != nil {
 		t.Errorf("cannot delete object acl: %v", err)
 	}
 
