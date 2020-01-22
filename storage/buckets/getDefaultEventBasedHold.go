@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// getDefaultEventBasedHold gets default event-based hold.
+// getDefaultEventBasedHold gets default event-based hold state.
 func getDefaultEventBasedHold(bucketName string) (*storage.BucketAttrs, error) {
 	// bucketName := "bucket-name"
 	ctx := context.Background()
@@ -29,6 +29,8 @@ func getDefaultEventBasedHold(bucketName string) (*storage.BucketAttrs, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer client.Close()
+
 	attrs, err := client.Bucket(bucketName).Attrs(ctx)
 	if err != nil {
 		return nil, err

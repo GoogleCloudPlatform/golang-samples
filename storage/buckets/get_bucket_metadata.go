@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
 // Sample buckets creates a bucket, lists buckets and deletes a bucket
 // using the Google Storage API. More documentation is available at
 // https://cloud.google.com/storage/docs/json_api/v1/.
-
 package buckets
 
 // [START storage_get_bucket_metadata]
@@ -32,8 +31,6 @@ import (
 func getBucketMetadata(w io.Writer, bucketName string) (*storage.BucketAttrs, error) {
 	// bucketName := "bucket-name"
 	ctx := context.Background()
-
-	// Initialize client.
 	client, err := storage.NewClient(ctx)
 	if err != nil {
 		log.Fatal(err)
@@ -44,7 +41,6 @@ func getBucketMetadata(w io.Writer, bucketName string) (*storage.BucketAttrs, er
 	if err != nil {
 		return nil, err
 	}
-
 	fmt.Fprintf(w, "BucketName: %v\n", attrs.Name)
 	fmt.Fprintf(w, "Location: %v\n", attrs.Location)
 	fmt.Fprintf(w, "LocationType: %v\n", attrs.LocationType)
@@ -77,7 +73,6 @@ func getBucketMetadata(w io.Writer, bucketName string) (*storage.BucketAttrs, er
 			fmt.Fprintf(w, "\t%v = %v\n", key, value)
 		}
 	}
-
 	return attrs, nil
 }
 

@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,6 +30,8 @@ func getPolicy(bucketName string) (*iam.Policy, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer client.Close()
+
 	policy, err := client.Bucket(bucketName).IAM().Policy(ctx)
 	if err != nil {
 		return nil, err

@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ func deleteBucket(bucketName string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
+
 	if err := client.Bucket(bucketName).Delete(ctx); err != nil {
 		return err
 	}

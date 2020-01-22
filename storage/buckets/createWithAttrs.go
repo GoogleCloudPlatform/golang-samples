@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// createWithAttrs creates the bucket in the project with storage class and
+// createWithAttrs creates a new bucket in the project with Storage class and
 // location.
 func createWithAttrs(projectID, bucketName string) error {
 	// projectID := "my-project-id"
@@ -30,6 +30,8 @@ func createWithAttrs(projectID, bucketName string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
+
 	bucket := client.Bucket(bucketName)
 	if err := bucket.Create(ctx, projectID, &storage.BucketAttrs{
 		StorageClass: "COLDLINE",
