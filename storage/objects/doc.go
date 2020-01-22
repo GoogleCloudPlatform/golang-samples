@@ -11,33 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package acl
 
-// [START bucket_list_acl]
-import (
-	"context"
-	"fmt"
-	"io"
-
-	"cloud.google.com/go/storage"
-)
-
-// bucketListACL lists bucket ACL.
-func bucketListACL(w io.Writer, bucket string) error {
-	// bucket := "bucket-name"
-	ctx := context.Background()
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		return err
-	}
-	rules, err := client.Bucket(bucket).ACL().List(ctx)
-	if err != nil {
-		return err
-	}
-	for _, rule := range rules {
-		fmt.Fprintf(w, "ACL rule: %v\n", rule)
-	}
-	return nil
-}
-
-// [END bucket_list_acl]
+// Package objects contains samples for creating/moving/deleting and
+// tweaking Storage objects.
+package objects

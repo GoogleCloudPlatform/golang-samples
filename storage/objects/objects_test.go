@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -39,6 +39,8 @@ func TestMain(m *testing.M) {
 	log.SetOutput(os.Stderr)
 	os.Exit(s)
 }
+
+// TestObjects runs all samples tests of the package.
 func TestObjects(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
@@ -91,6 +93,13 @@ func TestObjects(t *testing.T) {
 		}
 		if got, want := buf.String(), object2; !strings.Contains(got, want) {
 			t.Errorf("List(%q) got %q; want to contain %q", prefix, got, want)
+		}
+	}
+
+	{
+		var buf bytes.Buffer
+		if err := downloadUsingRequesterPays(&buf, bucket, object1, tc.ProjectID); err != nil {
+			t.Errorf("cannot download using requester pays: %v", err)
 		}
 	}
 

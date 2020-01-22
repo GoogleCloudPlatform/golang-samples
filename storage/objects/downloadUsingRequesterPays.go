@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,10 +24,10 @@ import (
 )
 
 // downloadUsingRequesterPays downloads an object using billing project.
-func downloadUsingRequesterPays(w io.Writer, object, bucket, billingProjectID string) error {
+func downloadUsingRequesterPays(w io.Writer, bucket, object, billingProjectID string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
-	// billingProjectID := "billing_account.json"
+	// billingProjectID := "billing_account_id"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -37,8 +37,7 @@ func downloadUsingRequesterPays(w io.Writer, object, bucket, billingProjectID st
 	src := b.Object(object)
 
 	// Open local file.
-	localPath := "notes.txt"
-	f, err := os.OpenFile(localPath, os.O_RDWR|os.O_CREATE, 0755)
+	f, err := os.OpenFile("notes.txt", os.O_RDWR|os.O_CREATE, 0755)
 	if err != nil {
 		return err
 	}

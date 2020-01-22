@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,7 +37,8 @@ func TestMain(m *testing.M) {
 	os.Exit(s)
 }
 
-func TestObjects(t *testing.T) {
+// TestAcls runs all of the package tests.
+func TestAcls(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
