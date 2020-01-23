@@ -16,14 +16,15 @@ package buckets
 // [START storage_get_bucket_policy]
 import (
 	"context"
-	"log"
+	"fmt"
+	"io"
 
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/storage"
 )
 
 // getPolicy gets the bucket IAM policy.
-func getPolicy(bucketName string) (*iam.Policy, error) {
+func getPolicy(w io.Writer, bucketName string) (*iam.Policy, error) {
 	// bucketName := "bucket-name"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
@@ -37,7 +38,7 @@ func getPolicy(bucketName string) (*iam.Policy, error) {
 		return nil, err
 	}
 	for _, role := range policy.Roles() {
-		log.Printf("%q: %q", role, policy.Members(role))
+		fmt.Fprintf(w, "%q: %q", role, policy.Members(role))
 	}
 	return policy, nil
 }

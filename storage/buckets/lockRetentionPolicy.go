@@ -16,13 +16,14 @@ package buckets
 // [START storage_lock_retention_policy]
 import (
 	"context"
-	"log"
+	"fmt"
+	"io"
 
 	"cloud.google.com/go/storage"
 )
 
 // lockRetentionPolicy locks bucket retention policy.
-func lockRetentionPolicy(bucketName string) error {
+func lockRetentionPolicy(w io.Writer, bucketName string) error {
 	// bucketName := "bucket-name"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
@@ -48,8 +49,9 @@ func lockRetentionPolicy(bucketName string) error {
 	if err != nil {
 		return err
 	}
-	log.Printf("Retention policy for %v is now locked\n", bucketName)
-	log.Printf("Retention policy effective as of %v\n",
+
+	fmt.Fprintf(w, "Retention policy for %v is now locked\n", bucketName)
+	fmt.Fprintf(w, "Retention policy effective as of %v\n",
 		lockedAttrs.RetentionPolicy.EffectiveTime)
 	return nil
 }

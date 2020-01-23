@@ -16,13 +16,14 @@ package buckets
 // [START storage_get_uniform_bucket_level_access]
 import (
 	"context"
-	"log"
+	"fmt"
+	"io"
 
 	"cloud.google.com/go/storage"
 )
 
 // getUniformBucketLevelAccess gets uniform bucket-level access.
-func getUniformBucketLevelAccess(bucketName string) (*storage.BucketAttrs, error) {
+func getUniformBucketLevelAccess(w io.Writer, bucketName string) (*storage.BucketAttrs, error) {
 	// bucketName := "bucket-name"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
@@ -37,12 +38,12 @@ func getUniformBucketLevelAccess(bucketName string) (*storage.BucketAttrs, error
 	}
 	uniformBucketLevelAccess := attrs.UniformBucketLevelAccess
 	if uniformBucketLevelAccess.Enabled {
-		log.Printf("Uniform bucket-level access is enabled for %q.\n",
+		fmt.Fprintf(w, "Uniform bucket-level access is enabled for %q.\n",
 			attrs.Name)
-		log.Printf("Bucket will be locked on %q.\n",
+		fmt.Fprintf(w, "Bucket will be locked on %q.\n",
 			uniformBucketLevelAccess.LockedTime)
 	} else {
-		log.Printf("Uniform bucket-level access is not enabled for %q.\n",
+		fmt.Fprintf(w, "Uniform bucket-level access is not enabled for %q.\n",
 			attrs.Name)
 	}
 

@@ -16,13 +16,14 @@ package buckets
 // [START get_requester_pays_status]
 import (
 	"context"
-	"log"
+	"fmt"
+	"io"
 
 	"cloud.google.com/go/storage"
 )
 
 // checkRequesterPays gets requester pays status.
-func checkRequesterPays(bucketName string) error {
+func checkRequesterPays(w io.Writer, bucketName string) error {
 	// bucketName := "bucket-name"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
@@ -35,7 +36,7 @@ func checkRequesterPays(bucketName string) error {
 	if err != nil {
 		return err
 	}
-	log.Printf("Is requester pays enabled? %v\n", attrs.RequesterPays)
+	fmt.Fprintf(w, "Is requester pays enabled? %v\n", attrs.RequesterPays)
 	return nil
 }
 

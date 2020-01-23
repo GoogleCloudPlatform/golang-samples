@@ -16,13 +16,14 @@ package buckets
 // [START storage_get_retention_policy]
 import (
 	"context"
-	"log"
+	"fmt"
+	"io"
 
 	"cloud.google.com/go/storage"
 )
 
 // getRetentionPolicy gets bucket retention policy.
-func getRetentionPolicy(bucketName string) (*storage.BucketAttrs, error) {
+func getRetentionPolicy(w io.Writer, bucketName string) (*storage.BucketAttrs, error) {
 	// bucketName := "bucket-name"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
@@ -36,10 +37,10 @@ func getRetentionPolicy(bucketName string) (*storage.BucketAttrs, error) {
 		return nil, err
 	}
 	if attrs.RetentionPolicy != nil {
-		log.Print("Retention Policy\n")
-		log.Printf("period: %v\n", attrs.RetentionPolicy.RetentionPeriod)
-		log.Printf("effective time: %v\n", attrs.RetentionPolicy.EffectiveTime)
-		log.Printf("policy locked: %v\n", attrs.RetentionPolicy.IsLocked)
+		fmt.Fprintln(w, "Retention Policy")
+		fmt.Fprintf(w, "period: %v\n", attrs.RetentionPolicy.RetentionPeriod)
+		fmt.Fprintf(w, "effective time: %v\n", attrs.RetentionPolicy.EffectiveTime)
+		fmt.Fprintf(w, "policy locked: %v\n", attrs.RetentionPolicy.IsLocked)
 	}
 	return attrs, nil
 }

@@ -20,8 +20,8 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// setDefaultKMSkey sets the Cloud KMS encryption key.
-func setDefaultKMSkey(bucketName string, keyName string) error {
+// setDefaultKMSkey sets the Cloud KMS encryption key for the bucket.
+func setDefaultKMSkey(bucketName, keyName string) error {
 	// bucketName := "bucket-name"
 	// keyName := "key"
 	ctx := context.Background()

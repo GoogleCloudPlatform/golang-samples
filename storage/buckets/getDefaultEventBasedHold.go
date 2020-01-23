@@ -16,13 +16,14 @@ package buckets
 // [START storage_get_default_event_based_hold]
 import (
 	"context"
-	"log"
+	"fmt"
+	"io"
 
 	"cloud.google.com/go/storage"
 )
 
 // getDefaultEventBasedHold gets default event-based hold state.
-func getDefaultEventBasedHold(bucketName string) (*storage.BucketAttrs, error) {
+func getDefaultEventBasedHold(w io.Writer, bucketName string) (*storage.BucketAttrs, error) {
 	// bucketName := "bucket-name"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
@@ -35,7 +36,7 @@ func getDefaultEventBasedHold(bucketName string) (*storage.BucketAttrs, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("Default event-based hold enabled? %t\n",
+	fmt.Fprintf(w, "Default event-based hold enabled? %t\n",
 		attrs.DefaultEventBasedHold)
 	return attrs, nil
 }

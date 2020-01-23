@@ -35,7 +35,7 @@ func getBucketMetadata(w io.Writer, bucketName string) (*storage.BucketAttrs, er
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer client.Close() // Closing the client safely cleans up background resources.
+	defer client.Close()
 
 	attrs, err := client.Bucket(bucketName).Attrs(ctx)
 	if err != nil {
