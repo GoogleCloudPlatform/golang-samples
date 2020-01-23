@@ -20,7 +20,7 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// releaseEventBasedHold releases object with event-based hold.
+// releaseEventBasedHold releases an object with event-based hold.
 func releaseEventBasedHold(bucket, object string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"

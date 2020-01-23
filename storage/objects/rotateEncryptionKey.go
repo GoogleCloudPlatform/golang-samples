@@ -20,7 +20,7 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// rotateEncryptionKey encrypts an object with new key.
+// rotateEncryptionKey encrypts an object with the newKey.
 func rotateEncryptionKey(bucket, object string, key, newKey []byte) error {
 	// bucket := "bucket-name"
 	// object := "object-name"

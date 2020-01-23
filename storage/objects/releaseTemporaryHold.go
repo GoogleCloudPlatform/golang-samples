@@ -20,7 +20,7 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// releaseTemporaryHold releases object with temporary hold.
+// releaseTemporaryHold releases an object with temporary hold.
 func releaseTemporaryHold(bucket, object string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"

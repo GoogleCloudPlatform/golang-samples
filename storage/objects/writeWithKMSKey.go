@@ -21,7 +21,7 @@ import (
 )
 
 // writeWithKMSKey writes an object using Cloud KMS encryption.
-func writeWithKMSKey(bucket, object string, keyName string) error {
+func writeWithKMSKey(bucket, object, keyName string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	// keyName := "projects/projectId/locations/global/keyRings/keyRingID/cryptoKeys/cryptoKeyID"

@@ -12,6 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package acl contains samples for tweaking ACLs for
+// Package acl contains samples for configuring ACLs for
 // Storage buckets and objects.
 package acl

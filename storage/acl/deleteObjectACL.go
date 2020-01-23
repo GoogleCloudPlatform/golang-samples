@@ -20,7 +20,7 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// deleteObjectACL removes default ACL from object.
+// deleteObjectACL removes default ACL from the given object.
 func deleteObjectACL(bucket, object string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
