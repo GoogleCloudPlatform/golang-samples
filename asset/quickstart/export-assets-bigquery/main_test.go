@@ -36,7 +36,7 @@ func TestMain(t *testing.T) {
 	if err_bq != nil {
 		t.Fatalf("failed to create bigquery client: %v", err_bq)
 	}
-	datasetID := strings.ReplaceAll(fmt.Sprintf("%s-for-assets", tc.ProjectID), "-", "_")
+	datasetID := strings.Replace(fmt.Sprintf("%s-for-assets", tc.ProjectID), "-", "_", -1)
 	createDataset(ctx, t, client_bq, datasetID)
 
 	oldStdout := os.Stdout
