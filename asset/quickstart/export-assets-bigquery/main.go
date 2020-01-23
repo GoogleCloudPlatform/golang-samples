@@ -57,7 +57,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Print(response_bq)
+	fmt.Print(resp)
 }
 
 // [END asset_quickstart_export_assets_bigquery]
