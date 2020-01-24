@@ -84,10 +84,6 @@ func callHandler(h func(w http.ResponseWriter, r *http.Request), rr http.Respons
 	log.SetOutput(writer)
 	defer log.SetOutput(originalWriter)
 
-	originalFlags := log.Flags()
-	log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
-	defer log.SetFlags(originalFlags)
-
 	h(rr, req)
 	writer.Flush()
 	return buf
