@@ -97,6 +97,7 @@ func main() {
 func create(client *storage.Client, projectID, bucketName string) error {
 	// [START create_bucket]
 	ctx := context.Background()
+
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 	if err := client.Bucket(bucketName).Create(ctx, projectID, nil); err != nil {
@@ -148,6 +149,7 @@ func list(client *storage.Client, projectID string) ([]string, error) {
 func deleteBucket(client *storage.Client, bucketName string) error {
 	// [START delete_bucket]
 	ctx := context.Background()
+
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 	if err := client.Bucket(bucketName).Delete(ctx); err != nil {
@@ -160,6 +162,7 @@ func deleteBucket(client *storage.Client, bucketName string) error {
 func getPolicy(c *storage.Client, bucketName string) (*iam.Policy, error) {
 	// [START storage_get_bucket_policy]
 	ctx := context.Background()
+
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 	policy, err := c.Bucket(bucketName).IAM().Policy(ctx)
@@ -176,6 +179,7 @@ func getPolicy(c *storage.Client, bucketName string) (*iam.Policy, error) {
 func addUser(c *storage.Client, bucketName string) error {
 	// [START add_bucket_iam_member]
 	ctx := context.Background()
+
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 	bucket := c.Bucket(bucketName)
@@ -200,6 +204,7 @@ func addUser(c *storage.Client, bucketName string) error {
 func removeUser(c *storage.Client, bucketName string) error {
 	// [START remove_bucket_iam_member]
 	ctx := context.Background()
+
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 	bucket := c.Bucket(bucketName)
@@ -352,6 +357,7 @@ func disableDefaultEventBasedHold(c *storage.Client, bucketName string) error {
 func getDefaultEventBasedHold(c *storage.Client, bucketName string) (*storage.BucketAttrs, error) {
 	// [START storage_get_default_event_based_hold]
 	ctx := context.Background()
+
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 	attrs, err := c.Bucket(bucketName).Attrs(ctx)
@@ -401,6 +407,7 @@ func disableRequesterPays(c *storage.Client, bucketName string) error {
 func checkRequesterPays(c *storage.Client, bucketName string) error {
 	// [START get_requester_pays_status]
 	ctx := context.Background()
+
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 	attrs, err := c.Bucket(bucketName).Attrs(ctx)
@@ -470,6 +477,7 @@ func disableUniformBucketLevelAccess(c *storage.Client, bucketName string) error
 func getUniformBucketLevelAccess(c *storage.Client, bucketName string) (*storage.BucketAttrs, error) {
 	// [START storage_get_uniform_bucket_level_access]
 	ctx := context.Background()
+
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 	attrs, err := c.Bucket(bucketName).Attrs(ctx)

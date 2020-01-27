@@ -114,6 +114,7 @@ func write(client *storage.Client, bucket, object string) error {
 func list(w io.Writer, client *storage.Client, bucket string) error {
 	// [START storage_list_files]
 	ctx := context.Background()
+
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 	it := client.Bucket(bucket).Objects(ctx, nil)
@@ -150,6 +151,7 @@ func listByPrefix(w io.Writer, client *storage.Client, bucket, prefix, delim str
 	// However, if you specify prefix="a/" and delim="/", you'll get back:
 	//   /a/1.txt
 	ctx := context.Background()
+
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 	it := client.Bucket(bucket).Objects(ctx, &storage.Query{
@@ -173,6 +175,7 @@ func listByPrefix(w io.Writer, client *storage.Client, bucket, prefix, delim str
 func read(client *storage.Client, bucket, object string) ([]byte, error) {
 	// [START download_file]
 	ctx := context.Background()
+
 	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
 	defer cancel()
 	rc, err := client.Bucket(bucket).Object(object).NewReader(ctx)
@@ -192,6 +195,7 @@ func read(client *storage.Client, bucket, object string) ([]byte, error) {
 func attrs(client *storage.Client, bucket, object string) (*storage.ObjectAttrs, error) {
 	// [START get_metadata]
 	ctx := context.Background()
+
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 	o := client.Bucket(bucket).Object(object)
@@ -231,6 +235,7 @@ func attrs(client *storage.Client, bucket, object string) (*storage.ObjectAttrs,
 func setEventBasedHold(client *storage.Client, bucket, object string) error {
 	// [START storage_set_event_based_hold]
 	ctx := context.Background()
+
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 	o := client.Bucket(bucket).Object(object)
@@ -247,6 +252,7 @@ func setEventBasedHold(client *storage.Client, bucket, object string) error {
 func releaseEventBasedHold(client *storage.Client, bucket, object string) error {
 	// [START storage_release_event_based_hold]
 	ctx := context.Background()
+
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 	o := client.Bucket(bucket).Object(object)
@@ -263,6 +269,7 @@ func releaseEventBasedHold(client *storage.Client, bucket, object string) error 
 func setTemporaryHold(client *storage.Client, bucket, object string) error {
 	// [START storage_set_temporary_hold]
 	ctx := context.Background()
+
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 	o := client.Bucket(bucket).Object(object)
@@ -279,6 +286,7 @@ func setTemporaryHold(client *storage.Client, bucket, object string) error {
 func releaseTemporaryHold(client *storage.Client, bucket, object string) error {
 	// [START storage_release_temporary_hold]
 	ctx := context.Background()
+
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 	o := client.Bucket(bucket).Object(object)
@@ -295,6 +303,7 @@ func releaseTemporaryHold(client *storage.Client, bucket, object string) error {
 func makePublic(client *storage.Client, bucket, object string) error {
 	// [START public]
 	ctx := context.Background()
+
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 	acl := client.Bucket(bucket).Object(object).ACL()
@@ -308,6 +317,7 @@ func makePublic(client *storage.Client, bucket, object string) error {
 func move(client *storage.Client, bucket, object string) error {
 	// [START move_file]
 	ctx := context.Background()
+
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 	dstName := object + "-rename"
@@ -328,6 +338,7 @@ func move(client *storage.Client, bucket, object string) error {
 func copyToBucket(client *storage.Client, dstBucket, srcBucket, srcObject string) error {
 	// [START copy_file]
 	ctx := context.Background()
+
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 	dstObject := srcObject + "-copy"
@@ -344,6 +355,7 @@ func copyToBucket(client *storage.Client, dstBucket, srcBucket, srcObject string
 func delete(client *storage.Client, bucket, object string) error {
 	// [START delete_file]
 	ctx := context.Background()
+
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 	o := client.Bucket(bucket).Object(object)
