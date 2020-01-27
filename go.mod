@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/golang-samples
 go 1.11
 
 require (
-	cloud.google.com/go v0.51.0
+	cloud.google.com/go v0.52.0
 	cloud.google.com/go/bigquery v1.3.0
 	cloud.google.com/go/bigtable v1.1.0
 	cloud.google.com/go/datastore v1.0.0
@@ -14,7 +14,7 @@ require (
 	cloud.google.com/go/storage v1.3.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.12.9
 	firebase.google.com/go v3.12.0+incompatible
-	github.com/aws/aws-sdk-go v1.28.6
+	github.com/aws/aws-sdk-go v1.28.9
 	github.com/bmatcuk/doublestar v1.2.2
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
 	github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b
@@ -43,11 +43,11 @@ require (
 	golang.org/x/net v0.0.0-20200114155413-6afb5195e5aa
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/text v0.3.2
-	golang.org/x/tools v0.0.0-20200121145236-13c74800b9d2
+	golang.org/x/tools v0.0.0-20200125223703-d33eef8e6825
 	google.golang.org/api v0.15.0
 	google.golang.org/appengine v1.6.5
-	google.golang.org/genproto v0.0.0-20200117163144-32f20d992d24
+	google.golang.org/genproto v0.0.0-20200122232147-0452cf42e150
 	google.golang.org/grpc v1.26.0
 	gopkg.in/sendgrid/sendgrid-go.v2 v2.0.0
-	gopkg.in/yaml.v2 v2.2.7
+	gopkg.in/yaml.v2 v2.2.8
 )
