@@ -138,7 +138,7 @@ if [ $GOLANG_SAMPLES_GO_VET ]; then
   diff -u <(echo -n) <(gofmt -d -s .)
 
   # Remove the golang-only triple-dot suffix.
-  target_dir="${TARGET%/...}"
+  target_dir=$(echo "$TARGET" | sed -r 's/\/\.\.\.$//')
   # Generate a list of all go files not inside a go submodule.
   files=$(find $target_dir \( -exec [ -f {}/go.mod ] \; -prune \) -o -name "*.go" -print)
   # Display the list of files to facilitate troubleshooting.
