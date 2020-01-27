@@ -136,7 +136,32 @@ fi
 # Do the easy stuff before running tests. Fail fast!
 if [ $GOLANG_SAMPLES_GO_VET ]; then
   diff -u <(echo -n) <(gofmt -d -s .)
-  go vet $TARGET
+
+  # Remove the golang-only triple-dot suffix.
+  target_dir="${TARGET%/...}"
+  # Generate a list of all go files not inside a go submodule.
+  files=$(find $target_dir \( -exec [ -f {}/go.mod ] \; -prune \) -o -name "*.go" -print)
+  # Display the list of files to facilitate troubleshooting.
+  # Current risk behavior: if find outputs anything to stdout go vet is attempted.
+  echo "$files"
+
+  # If there are no go files, skip go vet $TARGET.
+  if [ -z "$files" ]; then
+    echo "No *.go files found, skipping go vet on $TARGET"
+  else
+    go vet $TARGET
+  fi
+
+  # Run go vet inside each sub-module.
+  # Recursive submodules are not supported.
+  for i in $(find $target_dir -name "go.mod")
+  do
+    mod="$(dirname $i)"
+    echo "Running 'go vet' in $mod"
+    pushd "$mod"
+    go vet ./...
+    popd
+  done
 fi
 
 date
