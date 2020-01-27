@@ -36,7 +36,7 @@ func activateHMACKey(w io.Writer, accessID string, projectID string) (*storage.H
 
 	handle := client.HMACKeyHandle(projectID, accessID)
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	key, err := handle.Update(ctx, storage.HMACKeyAttrsToUpdate{State: "ACTIVE"})
 	if err != nil {
 		return nil, fmt.Errorf("Update: %v", err)

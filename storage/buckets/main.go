@@ -98,7 +98,7 @@ func create(client *storage.Client, projectID, bucketName string) error {
 	// [START create_bucket]
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	if err := client.Bucket(bucketName).Create(ctx, projectID, nil); err != nil {
 		return err
 	}
@@ -112,7 +112,7 @@ func createWithAttrs(client *storage.Client, projectID, bucketName string) error
 	bucket := client.Bucket(bucketName)
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	if err := bucket.Create(ctx, projectID, &storage.BucketAttrs{
 		StorageClass: "COLDLINE",
 		Location:     "asia",
@@ -129,7 +129,7 @@ func list(client *storage.Client, projectID string) ([]string, error) {
 
 	var buckets []string
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	it := client.Buckets(ctx, projectID)
 	for {
 		battrs, err := it.Next()
@@ -149,7 +149,7 @@ func deleteBucket(client *storage.Client, bucketName string) error {
 	// [START delete_bucket]
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	if err := client.Bucket(bucketName).Delete(ctx); err != nil {
 		return err
 	}
@@ -161,7 +161,7 @@ func getPolicy(c *storage.Client, bucketName string) (*iam.Policy, error) {
 	// [START storage_get_bucket_policy]
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	policy, err := c.Bucket(bucketName).IAM().Policy(ctx)
 	if err != nil {
 		return nil, err
@@ -177,7 +177,7 @@ func addUser(c *storage.Client, bucketName string) error {
 	// [START add_bucket_iam_member]
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	bucket := c.Bucket(bucketName)
 	policy, err := bucket.IAM().Policy(ctx)
 	if err != nil {
@@ -201,7 +201,7 @@ func removeUser(c *storage.Client, bucketName string) error {
 	// [START remove_bucket_iam_member]
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	bucket := c.Bucket(bucketName)
 	policy, err := bucket.IAM().Policy(ctx)
 	if err != nil {
@@ -232,7 +232,7 @@ func setRetentionPolicy(c *storage.Client, bucketName string, retentionPeriod ti
 		},
 	}
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
 		return err
 	}
@@ -257,7 +257,7 @@ func removeRetentionPolicy(c *storage.Client, bucketName string) error {
 		RetentionPolicy: &storage.RetentionPolicy{},
 	}
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
 		return err
 	}
@@ -271,7 +271,7 @@ func lockRetentionPolicy(c *storage.Client, bucketName string) error {
 	bucket := c.Bucket(bucketName)
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
-	defer cancel() // Add a timeout for these actions.
+	defer cancel()
 	attrs, err := c.Bucket(bucketName).Attrs(ctx)
 	if err != nil {
 		return err
@@ -300,7 +300,7 @@ func getRetentionPolicy(c *storage.Client, bucketName string) (*storage.BucketAt
 	ctx := context.Background()
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	attrs, err := c.Bucket(bucketName).Attrs(ctx)
 	if err != nil {
 		return nil, err
@@ -324,7 +324,7 @@ func enableDefaultEventBasedHold(c *storage.Client, bucketName string) error {
 		DefaultEventBasedHold: true,
 	}
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
 		return err
 	}
@@ -341,7 +341,7 @@ func disableDefaultEventBasedHold(c *storage.Client, bucketName string) error {
 		DefaultEventBasedHold: false,
 	}
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
 		return err
 	}
@@ -353,7 +353,7 @@ func getDefaultEventBasedHold(c *storage.Client, bucketName string) (*storage.Bu
 	// [START storage_get_default_event_based_hold]
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	attrs, err := c.Bucket(bucketName).Attrs(ctx)
 	if err != nil {
 		return nil, err
@@ -373,7 +373,7 @@ func enableRequesterPays(c *storage.Client, bucketName string) error {
 		RequesterPays: true,
 	}
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
 		return err
 	}
@@ -390,7 +390,7 @@ func disableRequesterPays(c *storage.Client, bucketName string) error {
 		RequesterPays: false,
 	}
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
 		return err
 	}
@@ -402,7 +402,7 @@ func checkRequesterPays(c *storage.Client, bucketName string) error {
 	// [START get_requester_pays_status]
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	attrs, err := c.Bucket(bucketName).Attrs(ctx)
 	if err != nil {
 		return err
@@ -421,7 +421,7 @@ func setDefaultKMSkey(c *storage.Client, bucketName string, keyName string) erro
 		Encryption: &storage.BucketEncryption{DefaultKMSKeyName: keyName},
 	}
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
 		return err
 	}
@@ -440,7 +440,7 @@ func enableUniformBucketLevelAccess(c *storage.Client, bucketName string) error 
 		},
 	}
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	if _, err := bucket.Update(ctx, enableUniformBucketLevelAccess); err != nil {
 		return err
 	}
@@ -459,7 +459,7 @@ func disableUniformBucketLevelAccess(c *storage.Client, bucketName string) error
 		},
 	}
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	if _, err := bucket.Update(ctx, disableUniformBucketLevelAccess); err != nil {
 		return err
 	}
@@ -471,7 +471,7 @@ func getUniformBucketLevelAccess(c *storage.Client, bucketName string) (*storage
 	// [START storage_get_uniform_bucket_level_access]
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	attrs, err := c.Bucket(bucketName).Attrs(ctx)
 	if err != nil {
 		return nil, err

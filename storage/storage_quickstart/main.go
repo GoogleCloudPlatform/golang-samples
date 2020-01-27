@@ -46,7 +46,7 @@ func main() {
 
 	// Creates the new bucket.
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	if err := bucket.Create(ctx, projectID, nil); err != nil {
 		log.Fatalf("Failed to create bucket: %v", err)
 	}

@@ -99,7 +99,7 @@ func write(client *storage.Client, bucket, object string) error {
 	defer f.Close()
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	wc := client.Bucket(bucket).Object(object).NewWriter(ctx)
 	if _, err = io.Copy(wc, f); err != nil {
 		return err
@@ -115,7 +115,7 @@ func list(w io.Writer, client *storage.Client, bucket string) error {
 	// [START storage_list_files]
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	it := client.Bucket(bucket).Objects(ctx, nil)
 	for {
 		attrs, err := it.Next()
@@ -151,7 +151,7 @@ func listByPrefix(w io.Writer, client *storage.Client, bucket, prefix, delim str
 	//   /a/1.txt
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	it := client.Bucket(bucket).Objects(ctx, &storage.Query{
 		Prefix:    prefix,
 		Delimiter: delim,
@@ -174,7 +174,7 @@ func read(client *storage.Client, bucket, object string) ([]byte, error) {
 	// [START download_file]
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	rc, err := client.Bucket(bucket).Object(object).NewReader(ctx)
 	if err != nil {
 		return nil, err
@@ -193,7 +193,7 @@ func attrs(client *storage.Client, bucket, object string) (*storage.ObjectAttrs,
 	// [START get_metadata]
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	o := client.Bucket(bucket).Object(object)
 	attrs, err := o.Attrs(ctx)
 	if err != nil {
@@ -232,7 +232,7 @@ func setEventBasedHold(client *storage.Client, bucket, object string) error {
 	// [START storage_set_event_based_hold]
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	o := client.Bucket(bucket).Object(object)
 	objectAttrsToUpdate := storage.ObjectAttrsToUpdate{
 		EventBasedHold: true,
@@ -248,7 +248,7 @@ func releaseEventBasedHold(client *storage.Client, bucket, object string) error 
 	// [START storage_release_event_based_hold]
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	o := client.Bucket(bucket).Object(object)
 	objectAttrsToUpdate := storage.ObjectAttrsToUpdate{
 		EventBasedHold: false,
@@ -264,7 +264,7 @@ func setTemporaryHold(client *storage.Client, bucket, object string) error {
 	// [START storage_set_temporary_hold]
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	o := client.Bucket(bucket).Object(object)
 	objectAttrsToUpdate := storage.ObjectAttrsToUpdate{
 		TemporaryHold: true,
@@ -280,7 +280,7 @@ func releaseTemporaryHold(client *storage.Client, bucket, object string) error {
 	// [START storage_release_temporary_hold]
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	o := client.Bucket(bucket).Object(object)
 	objectAttrsToUpdate := storage.ObjectAttrsToUpdate{
 		TemporaryHold: false,
@@ -296,7 +296,7 @@ func makePublic(client *storage.Client, bucket, object string) error {
 	// [START public]
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	acl := client.Bucket(bucket).Object(object).ACL()
 	if err := acl.Set(ctx, storage.AllUsers, storage.RoleReader); err != nil {
 		return err
@@ -309,7 +309,7 @@ func move(client *storage.Client, bucket, object string) error {
 	// [START move_file]
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	dstName := object + "-rename"
 
 	src := client.Bucket(bucket).Object(object)
@@ -329,7 +329,7 @@ func copyToBucket(client *storage.Client, dstBucket, srcBucket, srcObject string
 	// [START copy_file]
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	dstObject := srcObject + "-copy"
 	src := client.Bucket(srcBucket).Object(srcObject)
 	dst := client.Bucket(dstBucket).Object(dstObject)
@@ -345,7 +345,7 @@ func delete(client *storage.Client, bucket, object string) error {
 	// [START delete_file]
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	o := client.Bucket(bucket).Object(object)
 	if err := o.Delete(ctx); err != nil {
 		return err
@@ -361,7 +361,7 @@ func writeEncryptedObject(client *storage.Client, bucket, object string, secretK
 	obj := client.Bucket(bucket).Object(object)
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 
 	// Encrypt the object's contents.
 	wc := obj.Key(secretKey).NewWriter(ctx)
@@ -382,7 +382,7 @@ func writeWithKMSKey(client *storage.Client, bucket, object string, keyName stri
 	obj := client.Bucket(bucket).Object(object)
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 
 	// Encrypt the object's contents
 	wc := obj.NewWriter(ctx)
@@ -403,7 +403,7 @@ func readEncryptedObject(client *storage.Client, bucket, object string, secretKe
 	obj := client.Bucket(bucket).Object(object)
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	rc, err := obj.Key(secretKey).NewReader(ctx)
 	if err != nil {
 		return nil, err
@@ -429,7 +429,7 @@ func rotateEncryptionKey(client *storage.Client, bucket, object string, key, new
 	obj := client.Bucket(bucket).Object(object)
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	// obj is encrypted with key, we are encrypting it with the newKey.
 	_, err = obj.Key(newKey).CopierFrom(obj.Key(key)).Run(ctx)
 	if err != nil {
@@ -452,7 +452,7 @@ func downloadUsingRequesterPays(client *storage.Client, object, bucketName, loca
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	rc, err := src.NewReader(ctx)
 	if err != nil {
 		return err

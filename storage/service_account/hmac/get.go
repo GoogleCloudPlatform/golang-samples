@@ -36,7 +36,7 @@ func getHMACKey(w io.Writer, accessID string, projectID string) (*storage.HMACKe
 
 	handle := client.HMACKeyHandle(projectID, accessID)
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	key, err := handle.Get(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("Get: %v", err)

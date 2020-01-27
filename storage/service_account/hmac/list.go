@@ -36,7 +36,7 @@ func listHMACKeys(w io.Writer, projectID string) ([]*storage.HMACKey, error) {
 	defer client.Close() // Closing the client safely cleans up background resources.
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel() // Add a timeout for this call.
+	defer cancel()
 	iter := client.ListHMACKeys(ctx, projectID)
 	var keys []*storage.HMACKey
 	for {
