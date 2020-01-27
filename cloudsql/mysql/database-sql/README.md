@@ -116,3 +116,59 @@ Next, the following command will deploy the application to your Google Cloud pro
 ```bash
 gcloud app deploy
 ```
+
+## Deploy to Google App Engine Flexible
+
+First, update `app.flexible.yaml` with the correct values to pass the environment 
+variables into the runtime.
+
+Next, the following command will deploy the application to your Google Cloud project:
+```bash
+gcloud app deploy app.flexible.yaml
+```
+
+To launch your browser and view the app at https://[YOUR_PROJECT_ID].appspot.com, run the following
+command:
+```bash
+gcloud app browse
+```
+
+## Deploy to Cloud Run
+
+See the [Cloud Run documentation](https://cloud.google.com/sql/docs/mysql/connect-run)
+for more details on connecting a Cloud Run service to Cloud SQL.
+
+1. Build the container image:
+
+```sh
+gcloud builds submit --tag gcr.io/[YOUR_PROJECT_ID]/run-sql
+```
+
+2. Deploy the service to Cloud Run:
+
+```sh
+gcloud run deploy run-sql --image gcr.io/[YOUR_PROJECT_ID]/run-sql
+```
+
+Take note of the URL output at the end of the deployment process.
+
+3. Configure the service for use with Cloud Run
+
+```sh
+gcloud beta run services update run-sql \
+    --add-cloudsql-instances [INSTANCE_CONNECTION_NAME] \
+    --set-env-vars INSTANCE_CONNECTION_NAME=[INSTANCE_CONNECTION_NAME] \
+    --set-env-vars DB_USER=[YOUR_DB_USER] \
+    --set-env-vars DB_PASS=[YOUR_DB_PASS] \
+    --set-env-vars DB_NAME=[YOUR_DB]
+```
+
+Replace environment variables with the correct values for your Cloud SQL
+instance configuration.
+
+This step can be done as part of deployment but is separated for clarity.
+
+4. Navigate your browser to the URL noted in step 2.
+
+For more details about using Cloud Run see http://cloud.run.
+Review other [Go on Cloud Run samples](../../../run/).
