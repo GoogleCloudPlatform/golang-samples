@@ -1,0 +1,80 @@
+package main
+
+// [START run_secure_request]
+import (
+	"bytes"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"time"
+
+	"cloud.google.com/go/compute/metadata"
+)
+
+// RenderService represents our upstream render service.
+type RenderService struct {
+	// URL is the render service address.
+	URL string
+	// Authenticated determines whether identity token authentication will be used.
+	Authenticated bool
+}
+
+// NewRequest creates a new HTTP request with IAM ID Token credential.
+// This token is automatically handled by private Cloud Run (fully managed) and Cloud Functions.
+func (s *RenderService) NewRequest(method string) (*http.Request, error) {
+	req, err := http.NewRequest(method, s.URL, nil)
+	if err != nil {
+		return nil, fmt.Errorf("http.NewRequest: %w", err)
+	}
+
+	// Skip authentication if not using HTTPS, such as for local development.
+	if !s.Authenticated {
+		return req, nil
+	}
+
+	// Query the id_token with ?audience as the serviceURL
+	tokenURL := fmt.Sprintf("/instance/service-accounts/default/identity?audience=%s", s.URL)
+	token, err := metadata.Get(tokenURL)
+	if err != nil {
+		return req, fmt.Errorf("metadata.Get: failed to query id_token: %w", err)
+	}
+
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+
+	return req, nil
+}
+
+// [END run_secure_request]
+
+// [START run_secure_request_do]
+
+var renderClient = &http.Client{Timeout: 30 * time.Second}
+var errNotOk = fmt.Errorf("request not OK")
+
+// Render converts the Markdown text to HTML.
+func (s *RenderService) Render(in []byte) ([]byte, error) {
+	req, err := s.NewRequest(http.MethodPost)
+	if err != nil {
+		return nil, fmt.Errorf("RenderService.NewRequest: %w", err)
+	}
+	req.Body = ioutil.NopCloser(bytes.NewReader(in))
+	defer req.Body.Close()
+
+	resp, err := renderClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("http.Client.Do: %w", err)
+	}
+
+	out, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("ioutil.ReadAll: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return out, fmt.Errorf("http.Client.Do: %s (%d): %w", http.StatusText(resp.StatusCode), resp.StatusCode, errNotOk)
+	}
+
+	return out, nil
+}
+
+// [END run_secure_request_do]
