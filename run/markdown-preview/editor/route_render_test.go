@@ -24,21 +24,21 @@ import (
 
 func TestRenderHandlerErrors(t *testing.T) {
 	tests := []struct {
-		label string
-		req *http.Request
-		wantBody string
+		label      string
+		req        *http.Request
+		wantBody   string
 		wantStatus int
 	}{
 		{
-			label: "Invalid Method",
-			req: httptest.NewRequest("GET", "/render", strings.NewReader("")),
-			wantBody: http.StatusText(http.StatusMethodNotAllowed),
+			label:      "Invalid Method",
+			req:        httptest.NewRequest("GET", "/render", strings.NewReader("")),
+			wantBody:   http.StatusText(http.StatusMethodNotAllowed),
 			wantStatus: http.StatusMethodNotAllowed,
 		},
 		{
-			label: "Invalid JSON",
-			req: httptest.NewRequest("POST", "/render", strings.NewReader("**markdown**")),
-			wantBody: http.StatusText(http.StatusBadRequest),
+			label:      "Invalid JSON",
+			req:        httptest.NewRequest("POST", "/render", strings.NewReader("**markdown**")),
+			wantBody:   http.StatusText(http.StatusBadRequest),
 			wantStatus: http.StatusBadRequest,
 		},
 	}
