@@ -38,13 +38,10 @@ func getUniformBucketLevelAccess(w io.Writer, bucketName string) (*storage.Bucke
 	}
 	uniformBucketLevelAccess := attrs.UniformBucketLevelAccess
 	if uniformBucketLevelAccess.Enabled {
-		fmt.Fprintf(w, "Uniform bucket-level access is enabled for %q.\n",
-			attrs.Name)
-		fmt.Fprintf(w, "Bucket will be locked on %q.\n",
-			uniformBucketLevelAccess.LockedTime)
+		fmt.Fprintf(w, "Uniform bucket-level access is enabled for %q.\n", attrs.Name)
+		fmt.Fprintf(w, "Bucket will be locked on %q.\n", uniformBucketLevelAccess.LockedTime)
 	} else {
-		fmt.Fprintf(w, "Uniform bucket-level access is not enabled for %q.\n",
-			attrs.Name)
+		fmt.Fprintf(w, "Uniform bucket-level access is not enabled for %q.\n", attrs.Name)
 	}
 
 	return attrs, nil

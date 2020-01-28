@@ -51,8 +51,7 @@ func lockRetentionPolicy(w io.Writer, bucketName string) error {
 	}
 
 	fmt.Fprintf(w, "Retention policy for %v is now locked\n", bucketName)
-	fmt.Fprintf(w, "Retention policy effective as of %v\n",
-		lockedAttrs.RetentionPolicy.EffectiveTime)
+	fmt.Fprintf(w, "Retention policy effective as of %v\n", lockedAttrs.RetentionPolicy.EffectiveTime)
 	return nil
 }
 
