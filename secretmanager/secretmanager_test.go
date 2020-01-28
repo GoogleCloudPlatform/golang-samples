@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -107,7 +108,14 @@ func testCleanupSecret(tb testing.TB, name string) {
 }
 
 func testIamUser(tb testing.TB) string {
-	return "user:sethvargo@google.com"
+	tb.Helper()
+
+	v := os.Getenv("GOLANG_SAMPLES_SERVICE_ACCOUNT_EMAIL")
+	if v == "" {
+		tb.Fatalf("testIamUser: missing GOLANG_SAMPLES_SERVICE_ACCOUNT_EMAIL")
+	}
+
+	return fmt.Sprintf("serviceAccount:%s", v)
 }
 
 func TestAccessSecretVersion(t *testing.T) {
