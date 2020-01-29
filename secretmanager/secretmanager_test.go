@@ -112,7 +112,7 @@ func testIamUser(tb testing.TB) string {
 
 	v := os.Getenv("GOLANG_SAMPLES_SERVICE_ACCOUNT_EMAIL")
 	if v == "" {
-		tb.Fatalf("testIamUser: missing GOLANG_SAMPLES_SERVICE_ACCOUNT_EMAIL")
+		tb.Skip("testIamUser: missing GOLANG_SAMPLES_SERVICE_ACCOUNT_EMAIL")
 	}
 
 	return fmt.Sprintf("serviceAccount:%s", v)
