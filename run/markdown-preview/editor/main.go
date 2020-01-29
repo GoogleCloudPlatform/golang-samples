@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START run_microservices_server]
-
 // Sample editor provides a frontend to a markdown rendering microservice.
 package main
 
@@ -23,9 +21,17 @@ import (
 	"os"
 )
 
+var s *Service
+
 func main() {
-	http.HandleFunc("/", indexHandler)
-	http.HandleFunc("/render", renderHandler)
+	// Remove timestamp prefix from log messages for easier display in Stackdriver Log Viewer.
+	log.SetFlags(0)
+
+	var err error
+	if s, err = NewServiceFromEnv(); err != nil {
+		log.Fatalf("NewServiceFromEnv: %v", err)
+	}
+	mux := s.RegisterHandlers()
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -34,10 +40,8 @@ func main() {
 	}
 
 	log.Printf("Listening on port %s", port)
-	err := http.ListenAndServe(":"+port, nil)
+	err = http.ListenAndServe(":"+port, mux)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
-
-// [END run_microservices_server]
