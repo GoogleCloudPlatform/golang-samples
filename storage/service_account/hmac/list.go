@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"google.golang.org/api/iterator"
 	"io"
+	"time"
 )
 
 // listHMACKeys lists all HMAC keys associated with the project.
@@ -34,6 +35,8 @@ func listHMACKeys(w io.Writer, projectID string) ([]*storage.HMACKey, error) {
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 	iter := client.ListHMACKeys(ctx, projectID)
 	var keys []*storage.HMACKey
 	for {
