@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# [START run_broken_dockerfile]
-
 # Use the offical golang image to create a binary.
 # This is based on Debian and sets the GOPATH to /go.
 # https://hub.docker.com/_/golang
@@ -49,5 +47,3 @@ COPY ./templates /app/templates
 
 # Run the web service on container startup.
 CMD ["/app/server"]
-
-# [END run_broken_dockerfile]
