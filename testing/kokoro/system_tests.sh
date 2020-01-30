@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2019 Google LLC
+# Copyright 2020 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,28 +14,116 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -e
-
-set -x
+set -ex
 
 go version
 date
 
-cd github/golang-samples
+cd "${1:-github/golang-samples}"
 
 export GO111MODULE=on # Always use modules.
 export GOPROXY=https://proxy.golang.org
+TIMEOUT=45m
+
+# Also see trampoline.sh - system_tests.sh is only run for PRs when there are
+# significant changes.
+SIGNIFICANT_CHANGES=$(git --no-pager diff --name-only HEAD..master | egrep -v '(\.md$|^\.github)' || true)
+# CHANGED_DIRS is the list of significant top-level directories that changed.
+# CHANGED_DIRS will be empty when run on master.
+CHANGED_DIRS=$(echo $SIGNIFICANT_CHANGES | tr ' ' '\n' | grep "/" | cut -d/ -f1 | sort -u | tr '\n' ' ')
+
+# Filter out directories that don't exist (the current PR deleted them).
+TARGET_DIRS=""
+for d in $CHANGED_DIRS; do
+  if [ -d "$d" ]; then
+    TARGET_DIRS="$TARGET_DIRS $d"
+  fi
+done
+# Clean up whitespace around target directories:
+TARGET_DIRS=$(echo "$TARGET_DIRS" | xargs)
+
+# List all sub-modules in changed directories.
+# If running on master will collect all sub-modules in the repo, including the root module.
+GO_SUBMODULES=$(find "${TARGET_DIRS:-.}" -name go.mod)
+
+RUN_ALL_TESTS="0"
+# If this is a nightly test (not a PR), run all tests.
+if [ -z ${KOKORO_GITHUB_PULL_REQUEST_NUMBER:-} ]; then
+  RUN_ALL_TESTS="1"
+# If the change touches a repo-spanning file or directory of significance, run all tests.
+elif echo $SIGNIFICANT_CHANGES | tr ' ' '\n' | grep "^go.mod$" || [[ $CHANGED_DIRS =~ "testing" || $CHANGED_DIRS =~ "internal" ]]; then
+  RUN_ALL_TESTS="1"
+fi
+
+## Static Analysis
+# Do the easy stuff before running tests. Fail fast!
+set +x
 
 # Fail if a dependency was added without the necessary go.mod/go.sum change
 # being part of the commit.
 # Do this before reserving a project since this doens't need a project.
-for i in `find . -name go.mod`; do
-  pushd `dirname $i` > /dev/null;
+for i in $GO_SUBMODULES; do
+  mod="$(dirname $i)"
+  pushd $mod > /dev/null;
+    echo "Running 'go.mod/go.sum sync check' in '$mod'..."
+    set -x
     go mod tidy;
     git diff go.mod | tee /dev/stderr | (! read)
     [ -f go.sum ] && git diff go.sum | tee /dev/stderr | (! read)
+    set +x
   popd > /dev/null;
 done
+
+if [ $GOLANG_SAMPLES_GO_VET ]; then
+  echo "Running 'gofmt compliance check..."
+  set -x
+  diff -u <(echo -n) <(gofmt -d -s .)
+  set +x
+
+  for i in $GO_SUBMODULES; do
+    mod="$(dirname $i)"
+    pushd $mod > /dev/null;
+      echo "Running 'gofmt compliance check' in '$mod'..."
+      set -x
+      diff -u <(echo -n) <(gofmt -d -s .)
+      set +x
+    popd > /dev/null;
+  done
+
+  # Generate a list of all go files not inside a go submodule.
+  # This is necessary because go vet throws an error if you run it and no files
+  # are found to process.
+  set -x
+  files=$(find $TARGET_DIRS \( -exec [ -f {}/go.mod ] \; -prune \) -o -name "*.go" -print)
+  # Display the list of files to facilitate troubleshooting.
+  # If find has anything go vet will be run.
+  # Risk: Any unexpected find output could falsely trigger go vet.
+  # echo "$files"
+
+  # If there are no go files, skip go vet $TARGET.
+  set +x
+  if [ -z "$files" ]; then
+    echo "No *.go files found, skipping go vet on $TARGET"
+  else
+    echo "Running 'go vet'..."
+    set -x
+    go vet $TARGET
+    set +x
+  fi
+
+  # Run go vet inside each sub-module.
+  # Recursive submodules are not supported.
+  set +x
+  for i in $GO_SUBMODULES; do
+    mod="$(dirname $i)"
+    pushd $mod > /dev/null;
+      echo "Running 'go vet' in '$mod'..."
+      set -x
+      go vet ./...
+      set +x
+    popd > /dev/null;
+  done
+fi
 
 # Don't print environment variables in case there are secrets.
 # If you need a secret, use a keystore_resource in common.cfg.
@@ -57,8 +145,6 @@ export GOLANG_SAMPLES_BIGTABLE_PROJECT=golang-samples-tests
 export GOLANG_SAMPLES_BIGTABLE_INSTANCE=testing-instance
 
 set -x
-
-TIMEOUT=45m
 
 # Set application credentials before using gimmeproj so it has access.
 # This is changed to a project-specific credential after a project is leased.
@@ -97,72 +183,18 @@ if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]]; then
   ./testing/kokoro/configure_gcloud.bash;
 fi
 
-RUN_ALL_TESTS="0"
-# If this is a nightly test (not a PR), run all tests.
-if [ -z ${KOKORO_GITHUB_PULL_REQUEST_NUMBER:-} ]; then
-  RUN_ALL_TESTS="1"
-fi
-
-# Also see trampoline.sh - system_tests.sh is only run for PRs when there are
-# significant changes.
-SIGNIFICANT_CHANGES=$(git --no-pager diff --name-only HEAD..master | egrep -v '(\.md$|^\.github)' || true)
-# CHANGED_DIRS is the list of significant top-level directories that changed.
-# CHANGED_DIRS will be empty when run on master.
-CHANGED_DIRS=$(echo $SIGNIFICANT_CHANGES | tr ' ' '\n' | grep "/" | cut -d/ -f1 | sort -u | tr '\n' ' ')
-
-if echo $SIGNIFICANT_CHANGES | tr ' ' '\n' | grep "^go.mod$" || [[ $CHANGED_DIRS =~ "testing" || $CHANGED_DIRS =~ "internal" ]]; then
-  RUN_ALL_TESTS="1"
-fi
-
-# Filter out directories that don't exist (the current PR deleted them).
-TARGET_DIRS=""
-for d in $CHANGED_DIRS; do
-  if [ -d "$d" ]; then
-    TARGET_DIRS="$TARGET_DIRS $d"
-  fi
-done
+date
 
 if [[ $RUN_ALL_TESTS = "1" ]]; then
-  TARGET="./..."
+  GO_TEST_TARGET="./..."
   echo "Running all tests"
 elif [[ -z "${TARGET_DIRS// }" ]]; then
-  TARGET=""
+  GO_TEST_TARGET=""
   echo "Only running root tests"
 else
-  TARGET=$(printf "./%s/... " $TARGET_DIRS)
+  GO_TEST_TARGET=$(printf "./%s/... " $TARGET_DIRS)
   echo "Running tests in modified directories: $TARGET"
 fi
-
-# Do the easy stuff before running tests. Fail fast!
-if [ $GOLANG_SAMPLES_GO_VET ]; then
-  diff -u <(echo -n) <(gofmt -d -s .)
-
-  # Generate a list of all go files not inside a go submodule.
-  files=$(find $TARGET_DIRS \( -exec [ -f {}/go.mod ] \; -prune \) -o -name "*.go" -print)
-  # Display the list of files to facilitate troubleshooting.
-  # Current risk behavior: if find outputs anything to stdout go vet is attempted.
-  echo "$files"
-
-  # If there are no go files, skip go vet $TARGET.
-  if [ -z "$files" ]; then
-    echo "No *.go files found, skipping go vet on $TARGET"
-  else
-    go vet $TARGET
-  fi
-
-  # Run go vet inside each sub-module.
-  # Recursive submodules are not supported.
-  for i in $(find "$TARGET_DIRS" -name 'go.mod')
-  do
-    mod="$(dirname $i)"
-    echo "Running 'go vet' in $mod"
-    pushd "$mod"
-    go vet ./...
-    popd
-  done
-fi
-
-date
 
 OUTFILE=gotest.out
 2>&1 go test -timeout $TIMEOUT -v . $TARGET | tee $OUTFILE
