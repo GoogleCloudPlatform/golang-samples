@@ -34,6 +34,7 @@ func createTask(projectID, locationID, queueID, message string) (*taskspb.Task, 
 	if err != nil {
 		return nil, fmt.Errorf("NewClient: %v", err)
 	}
+	defer client.Close()
 
 	// Build the Task queue path.
 	queuePath := fmt.Sprintf("projects/%s/locations/%s/queues/%s", projectID, locationID, queueID)
@@ -60,9 +61,6 @@ func createTask(projectID, locationID, queueID, message string) (*taskspb.Task, 
 	if err != nil {
 		return nil, fmt.Errorf("cloudtasks.CreateTask: %v", err)
 	}
-
-	// Closing the client is important, if not done then it will result in Memory spike
-	defer client.Close()
 
 	return createdTask, nil
 }
