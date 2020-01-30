@@ -61,6 +61,9 @@ func createTask(projectID, locationID, queueID, message string) (*taskspb.Task, 
 		return nil, fmt.Errorf("cloudtasks.CreateTask: %v", err)
 	}
 
+	// Closing the client is important, if not done then it will result in Memory spike
+	defer client.Close()
+
 	return createdTask, nil
 }
 
