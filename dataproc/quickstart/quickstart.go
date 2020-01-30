@@ -17,7 +17,7 @@
 // This quickstart shows how you can use the Cloud Dataproc Client library to create a
 // Cloud Dataproc cluster, submit a PySpark job to the cluster, wait for the job to finish
 // and finally delete the cluster.
-// 
+//
 // Usage:
 //     go build
 //     ./quickstart --project_id <PROJECT_ID> --region <REGION> \
