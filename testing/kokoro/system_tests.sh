@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2020 Google LLC
+# Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -58,7 +58,6 @@ TARGET_DIRS=$(echo "$TARGET_DIRS" | xargs)
 # If running on master will collect all modules in the repo, including the root module.
 GO_CHANGED_MODULES=$(find ${TARGET_DIRS:-.} -name go.mod)
 # Exclude the root module if present.
-# Used by go vet analysis.
 GO_CHANGED_SUBMODULES=${GO_CHANGED_MODULES#./go.mod}
 
 # Override to determine if all go tests should be run.
@@ -103,14 +102,11 @@ if [ $GOLANG_SAMPLES_GO_VET ]; then
   done
 
   # Generate a list of all go files not inside a go submodule.
-  # This is necessary because go vet throws an error if you run it and no files
-  # are found to process.
-  set -x
-  files=$(find $TARGET_DIRS \( -exec [ -f {}/go.mod ] \; -prune \) -o -name "*.go" -print)
-  # Display the list of files to facilitate troubleshooting.
+  # go vet throws an error if you run it and no files are found to process.
   # If find has anything go vet will be run.
   # Risk: Any unexpected find output could falsely trigger go vet.
-  # echo "$files"
+  set -x
+  files=$(find $TARGET_DIRS \( -exec [ -f {}/go.mod ] \; -prune \) -o -name "*.go" -print)
 
   # If there are no go files, skip go vet $TARGET.
   set +x
