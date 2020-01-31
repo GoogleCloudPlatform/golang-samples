@@ -194,17 +194,30 @@ date
 
 if [[ $RUN_ALL_TESTS = "1" ]]; then
   GO_TEST_TARGET="./..."
+  GO_TEST_MODULES=$(find . -name go.mod)
   echo "Running all tests"
 elif [[ -z "${TARGET_DIRS// }" ]]; then
   GO_TEST_TARGET=""
+  GO_TEST_MODULES="./go.mod"
   echo "Only running root tests"
 else
-  GO_TEST_TARGET=$(printf "./%s/... " $TARGET_DIRS)
-  echo "Running tests in modified directories: $TARGET"
+  GO_TEST_TARGET="./..."
+  GO_TEST_MODULES="$GO_CHANGED_SUBMODULES"
+  echo "Running tests in modified directories: $GO_TEST_TARGET"
 fi
 
-OUTFILE=gotest.out
-2>&1 go test -timeout $TIMEOUT -v . $GO_TEST_TARGET | tee $OUTFILE
+# Run tests in changed directories that are not in modules.
+OUTFILE="$PWD/gotest.out"
+rm $OUTFILE || true
+for i in $GO_TEST_MODULES; do
+  mod="$(dirname $i)"
+  pushd $mod > /dev/null;
+    echo "Running 'go test' in '$mod'..."
+    set -x
+    2>&1 go test -timeout $TIMEOUT -v ./... | tee -a $OUTFILE
+    set +x
+  popd > /dev/null;
+done
 
 set +e
 

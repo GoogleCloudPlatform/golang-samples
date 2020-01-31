@@ -37,6 +37,7 @@ func main() {
 		log.Fatal(`graphviz-web: ("/usr/bin/dot") not executable`)
 	}
 
+// Adding a change for test testing.	
 	http.HandleFunc("/diagram.png", diagramHandler)
 
 	// Determine port for HTTP service.
