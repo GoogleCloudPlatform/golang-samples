@@ -25,7 +25,7 @@ import (
 )
 
 // createJWT creates a Cloud IoT Core JWT for the given project id.
-// algorithm can be one of ["RSA256", "ES256"].
+// algorithm can be one of ["RS256", "ES256"].
 func createJWT(projectID string, privateKeyPath string, algorithm string, expiration time.Duration) (string, error) {
 	claims := jwt.StandardClaims{
 		Audience:  projectID,

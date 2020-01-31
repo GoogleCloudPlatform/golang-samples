@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -104,6 +105,17 @@ func testCleanupSecret(tb testing.TB, name string) {
 			tb.Fatalf("testCleanupSecret: failed to delete secret: %v", err)
 		}
 	}
+}
+
+func testIamUser(tb testing.TB) string {
+	tb.Helper()
+
+	v := os.Getenv("GOLANG_SAMPLES_SERVICE_ACCOUNT_EMAIL")
+	if v == "" {
+		tb.Skip("testIamUser: missing GOLANG_SAMPLES_SERVICE_ACCOUNT_EMAIL")
+	}
+
+	return fmt.Sprintf("serviceAccount:%s", v)
 }
 
 func TestAccessSecretVersion(t *testing.T) {
@@ -274,6 +286,73 @@ func TestGetSecret(t *testing.T) {
 
 	if got, want := b.String(), "Found secret"; !strings.Contains(got, want) {
 		t.Errorf("getSecret: expected %q to contain %q", got, want)
+	}
+}
+
+func TestIamGrantAccess(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secret := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret.Name)
+
+	iamUser := testIamUser(t)
+
+	var b bytes.Buffer
+	if err := iamGrantAccess(&b, secret.Name, iamUser); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Updated IAM policy"; !strings.Contains(got, want) {
+		t.Errorf("getSecret: expected %q to contain %q", got, want)
+	}
+
+	client, ctx := testClient(t)
+	policy, err := client.IAM(secret.Name).Policy(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	found := false
+	members := policy.Members("roles/secretmanager.secretAccessor")
+	for _, m := range members {
+		if m == iamUser {
+			found = true
+		}
+	}
+
+	if !found {
+		t.Errorf("expected %q to include %q", members, iamUser)
+	}
+}
+
+func TestIamRevokeAccess(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secret := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret.Name)
+
+	iamUser := testIamUser(t)
+
+	var b bytes.Buffer
+	if err := iamRevokeAccess(&b, secret.Name, iamUser); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Updated IAM policy"; !strings.Contains(got, want) {
+		t.Errorf("getSecret: expected %q to contain %q", got, want)
+	}
+
+	client, ctx := testClient(t)
+	policy, err := client.IAM(secret.Name).Policy(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	members := policy.Members("roles/secretmanager.secretAccessor")
+	for _, m := range members {
+		if m == iamUser {
+			t.Errorf("expected %q to not include %q", members, iamUser)
+		}
 	}
 }
 

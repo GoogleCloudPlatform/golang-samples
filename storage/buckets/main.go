@@ -95,8 +95,11 @@ func main() {
 }
 
 func create(client *storage.Client, projectID, bucketName string) error {
-	ctx := context.Background()
 	// [START create_bucket]
+	ctx := context.Background()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 	if err := client.Bucket(bucketName).Create(ctx, projectID, nil); err != nil {
 		return err
 	}
@@ -105,9 +108,12 @@ func create(client *storage.Client, projectID, bucketName string) error {
 }
 
 func createWithAttrs(client *storage.Client, projectID, bucketName string) error {
-	ctx := context.Background()
 	// [START create_bucket_with_storageclass_and_location]
+	ctx := context.Background()
 	bucket := client.Bucket(bucketName)
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 	if err := bucket.Create(ctx, projectID, &storage.BucketAttrs{
 		StorageClass: "COLDLINE",
 		Location:     "asia",
@@ -119,9 +125,12 @@ func createWithAttrs(client *storage.Client, projectID, bucketName string) error
 }
 
 func list(client *storage.Client, projectID string) ([]string, error) {
-	ctx := context.Background()
 	// [START list_buckets]
+	ctx := context.Background()
+
 	var buckets []string
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 	it := client.Buckets(ctx, projectID)
 	for {
 		battrs, err := it.Next()
@@ -138,8 +147,11 @@ func list(client *storage.Client, projectID string) ([]string, error) {
 }
 
 func deleteBucket(client *storage.Client, bucketName string) error {
-	ctx := context.Background()
 	// [START delete_bucket]
+	ctx := context.Background()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 	if err := client.Bucket(bucketName).Delete(ctx); err != nil {
 		return err
 	}
@@ -148,9 +160,11 @@ func deleteBucket(client *storage.Client, bucketName string) error {
 }
 
 func getPolicy(c *storage.Client, bucketName string) (*iam.Policy, error) {
+	// [START storage_get_bucket_policy]
 	ctx := context.Background()
 
-	// [START storage_get_bucket_policy]
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 	policy, err := c.Bucket(bucketName).IAM().Policy(ctx)
 	if err != nil {
 		return nil, err
@@ -163,9 +177,11 @@ func getPolicy(c *storage.Client, bucketName string) (*iam.Policy, error) {
 }
 
 func addUser(c *storage.Client, bucketName string) error {
+	// [START add_bucket_iam_member]
 	ctx := context.Background()
 
-	// [START add_bucket_iam_member]
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 	bucket := c.Bucket(bucketName)
 	policy, err := bucket.IAM().Policy(ctx)
 	if err != nil {
@@ -186,9 +202,11 @@ func addUser(c *storage.Client, bucketName string) error {
 }
 
 func removeUser(c *storage.Client, bucketName string) error {
+	// [START remove_bucket_iam_member]
 	ctx := context.Background()
 
-	// [START remove_bucket_iam_member]
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 	bucket := c.Bucket(bucketName)
 	policy, err := bucket.IAM().Policy(ctx)
 	if err != nil {
@@ -209,15 +227,17 @@ func removeUser(c *storage.Client, bucketName string) error {
 }
 
 func setRetentionPolicy(c *storage.Client, bucketName string, retentionPeriod time.Duration) error {
+	// [START storage_set_retention_policy]
 	ctx := context.Background()
 
-	// [START storage_set_retention_policy]
 	bucket := c.Bucket(bucketName)
 	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
 		RetentionPolicy: &storage.RetentionPolicy{
 			RetentionPeriod: retentionPeriod,
 		},
 	}
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
 		return err
 	}
@@ -226,9 +246,8 @@ func setRetentionPolicy(c *storage.Client, bucketName string, retentionPeriod ti
 }
 
 func removeRetentionPolicy(c *storage.Client, bucketName string) error {
-	ctx := context.Background()
-
 	// [START storage_remove_retention_policy]
+	ctx := context.Background()
 	bucket := c.Bucket(bucketName)
 
 	attrs, err := c.Bucket(bucketName).Attrs(ctx)
@@ -242,6 +261,8 @@ func removeRetentionPolicy(c *storage.Client, bucketName string) error {
 	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
 		RetentionPolicy: &storage.RetentionPolicy{},
 	}
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
 		return err
 	}
@@ -250,10 +271,12 @@ func removeRetentionPolicy(c *storage.Client, bucketName string) error {
 }
 
 func lockRetentionPolicy(c *storage.Client, bucketName string) error {
-	ctx := context.Background()
-
 	// [START storage_lock_retention_policy]
+	ctx := context.Background()
 	bucket := c.Bucket(bucketName)
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
+	defer cancel()
 	attrs, err := c.Bucket(bucketName).Attrs(ctx)
 	if err != nil {
 		return err
@@ -278,9 +301,11 @@ func lockRetentionPolicy(c *storage.Client, bucketName string) error {
 }
 
 func getRetentionPolicy(c *storage.Client, bucketName string) (*storage.BucketAttrs, error) {
+	// [START storage_get_retention_policy]
 	ctx := context.Background()
 
-	// [START storage_get_retention_policy]
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 	attrs, err := c.Bucket(bucketName).Attrs(ctx)
 	if err != nil {
 		return nil, err
@@ -296,13 +321,15 @@ func getRetentionPolicy(c *storage.Client, bucketName string) (*storage.BucketAt
 }
 
 func enableDefaultEventBasedHold(c *storage.Client, bucketName string) error {
+	// [START storage_enable_default_event_based_hold]
 	ctx := context.Background()
 
-	// [START storage_enable_default_event_based_hold]
 	bucket := c.Bucket(bucketName)
 	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
 		DefaultEventBasedHold: true,
 	}
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
 		return err
 	}
@@ -311,13 +338,15 @@ func enableDefaultEventBasedHold(c *storage.Client, bucketName string) error {
 }
 
 func disableDefaultEventBasedHold(c *storage.Client, bucketName string) error {
+	// [START storage_disable_default_event_based_hold]
 	ctx := context.Background()
 
-	// [START storage_disable_default_event_based_hold]
 	bucket := c.Bucket(bucketName)
 	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
 		DefaultEventBasedHold: false,
 	}
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
 		return err
 	}
@@ -326,9 +355,11 @@ func disableDefaultEventBasedHold(c *storage.Client, bucketName string) error {
 }
 
 func getDefaultEventBasedHold(c *storage.Client, bucketName string) (*storage.BucketAttrs, error) {
+	// [START storage_get_default_event_based_hold]
 	ctx := context.Background()
 
-	// [START storage_get_default_event_based_hold]
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 	attrs, err := c.Bucket(bucketName).Attrs(ctx)
 	if err != nil {
 		return nil, err
@@ -340,13 +371,15 @@ func getDefaultEventBasedHold(c *storage.Client, bucketName string) (*storage.Bu
 }
 
 func enableRequesterPays(c *storage.Client, bucketName string) error {
+	// [START enable_requester_pays]
 	ctx := context.Background()
 
-	// [START enable_requester_pays]
 	bucket := c.Bucket(bucketName)
 	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
 		RequesterPays: true,
 	}
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
 		return err
 	}
@@ -355,13 +388,15 @@ func enableRequesterPays(c *storage.Client, bucketName string) error {
 }
 
 func disableRequesterPays(c *storage.Client, bucketName string) error {
+	// [START disable_requester_pays]
 	ctx := context.Background()
 
-	// [START disable_requester_pays]
 	bucket := c.Bucket(bucketName)
 	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
 		RequesterPays: false,
 	}
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
 		return err
 	}
@@ -370,9 +405,11 @@ func disableRequesterPays(c *storage.Client, bucketName string) error {
 }
 
 func checkRequesterPays(c *storage.Client, bucketName string) error {
+	// [START get_requester_pays_status]
 	ctx := context.Background()
 
-	// [START get_requester_pays_status]
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 	attrs, err := c.Bucket(bucketName).Attrs(ctx)
 	if err != nil {
 		return err
@@ -383,13 +420,15 @@ func checkRequesterPays(c *storage.Client, bucketName string) error {
 }
 
 func setDefaultKMSkey(c *storage.Client, bucketName string, keyName string) error {
+	// [START storage_set_bucket_default_kms_key]
 	ctx := context.Background()
 
-	// [START storage_set_bucket_default_kms_key]
 	bucket := c.Bucket(bucketName)
 	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
 		Encryption: &storage.BucketEncryption{DefaultKMSKeyName: keyName},
 	}
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
 		return err
 	}
@@ -398,15 +437,17 @@ func setDefaultKMSkey(c *storage.Client, bucketName string, keyName string) erro
 }
 
 func enableUniformBucketLevelAccess(c *storage.Client, bucketName string) error {
+	// [START storage_enable_uniform_bucket_level_access]
 	ctx := context.Background()
 
-	// [START storage_enable_uniform_bucket_level_access]
 	bucket := c.Bucket(bucketName)
 	enableUniformBucketLevelAccess := storage.BucketAttrsToUpdate{
 		UniformBucketLevelAccess: &storage.UniformBucketLevelAccess{
 			Enabled: true,
 		},
 	}
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 	if _, err := bucket.Update(ctx, enableUniformBucketLevelAccess); err != nil {
 		return err
 	}
@@ -415,15 +456,17 @@ func enableUniformBucketLevelAccess(c *storage.Client, bucketName string) error 
 }
 
 func disableUniformBucketLevelAccess(c *storage.Client, bucketName string) error {
+	// [START storage_disable_uniform_bucket_level_access]
 	ctx := context.Background()
 
-	// [START storage_disable_uniform_bucket_level_access]
 	bucket := c.Bucket(bucketName)
 	disableUniformBucketLevelAccess := storage.BucketAttrsToUpdate{
 		UniformBucketLevelAccess: &storage.UniformBucketLevelAccess{
 			Enabled: false,
 		},
 	}
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 	if _, err := bucket.Update(ctx, disableUniformBucketLevelAccess); err != nil {
 		return err
 	}
@@ -432,9 +475,11 @@ func disableUniformBucketLevelAccess(c *storage.Client, bucketName string) error
 }
 
 func getUniformBucketLevelAccess(c *storage.Client, bucketName string) (*storage.BucketAttrs, error) {
+	// [START storage_get_uniform_bucket_level_access]
 	ctx := context.Background()
 
-	// [START storage_get_uniform_bucket_level_access]
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 	attrs, err := c.Bucket(bucketName).Attrs(ctx)
 	if err != nil {
 		return nil, err

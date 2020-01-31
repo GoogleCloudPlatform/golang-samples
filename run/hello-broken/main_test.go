@@ -31,10 +31,10 @@ func TestBrokenErrors(t *testing.T) {
 
 	defer func() {
 		if r := recover(); r == nil {
-			t.Errorf("brokenHandler: got (no panic), want (panic)")
+			t.Errorf("helloHandler: got (no panic), want (panic)")
 		}
 	}()
-	brokenHandler(rr, req)
+	helloHandler(rr, req)
 }
 
 func TestBrokenHandler(t *testing.T) {
