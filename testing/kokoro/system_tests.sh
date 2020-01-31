@@ -208,7 +208,7 @@ else
 fi
 
 OUTFILE=gotest.out
-2>&1 go test -timeout $TIMEOUT -v . $TARGET | tee $OUTFILE
+2>&1 go test -timeout $TIMEOUT -v . $GO_TEST_TARGET | tee $OUTFILE
 
 set +e
 
