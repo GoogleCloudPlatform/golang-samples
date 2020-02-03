@@ -23,7 +23,7 @@ require (
 	github.com/fluent/fluent-logger-golang v1.4.0
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gofrs/uuid v3.2.0+incompatible
-	github.com/golang/protobuf v1.3.2
+	github.com/golang/protobuf v1.3.3
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/google/go-cmp v0.4.0
 	github.com/google/uuid v1.1.1
@@ -38,16 +38,16 @@ require (
 	github.com/philhofer/fwd v1.0.0 // indirect
 	github.com/sendgrid/smtpapi-go v0.6.0 // indirect
 	github.com/tinylib/msgp v1.1.0 // indirect
-	go.opencensus.io v0.22.2
+	go.opencensus.io v0.22.3
 	golang.org/x/exp v0.0.0-20200119233911-0405dc783f0a
-	golang.org/x/net v0.0.0-20200114155413-6afb5195e5aa
+	golang.org/x/net v0.0.0-20200202094626-16171245cfb2
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/text v0.3.2
-	golang.org/x/tools v0.0.0-20200125223703-d33eef8e6825
+	golang.org/x/tools v0.0.0-20200203023011-6f24f261dadb
 	google.golang.org/api v0.15.0
 	google.golang.org/appengine v1.6.5
-	google.golang.org/genproto v0.0.0-20200122232147-0452cf42e150
-	google.golang.org/grpc v1.26.0
+	google.golang.org/genproto v0.0.0-20200128133413-58ce757ed39b
+	google.golang.org/grpc v1.27.0
 	gopkg.in/sendgrid/sendgrid-go.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.2.8
 )
