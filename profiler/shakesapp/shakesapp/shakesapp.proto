@@ -13,8 +13,7 @@
 // limitations under the License.
 
 // To update shakesapp.pb.go, run
-// protoc --go_out=plugins=grpc:. shakesapp.proto
-// --plugin=/path/to/protoc-gen-go
+// protoc --go_out=plugins=grpc:. shakesapp.proto --plugin=/path/to/protoc-gen-go
 
 syntax = "proto3";
 
