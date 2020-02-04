@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package acl
 
 // [START bucket_list_acl_filtered]
@@ -25,17 +26,17 @@ import (
 // bucketListACLFiltered lists bucket ACL using a filter.
 func bucketListACLFiltered(w io.Writer, bucket string, entity storage.ACLEntity) error {
 	// bucket := "bucket-name"
-	// entity := storage.AllAuthenticatedUsers
+	// entity := storage.AllUsers
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
 
 	rules, err := client.Bucket(bucket).ACL().List(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("ACLHandle.List: %v", err)
 	}
 	for _, r := range rules {
 		if r.Entity == entity {

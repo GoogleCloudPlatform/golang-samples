@@ -11,11 +11,13 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package objects
 
 // [START storage_rotate_encryption_key]
 import (
 	"context"
+	"fmt"
 
 	"cloud.google.com/go/storage"
 )
@@ -29,7 +31,7 @@ func rotateEncryptionKey(bucket, object string, key, newKey []byte) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
 
@@ -37,7 +39,7 @@ func rotateEncryptionKey(bucket, object string, key, newKey []byte) error {
 	// obj is encrypted with key, we are encrypting it with the newKey.
 	_, err = obj.Key(newKey).CopierFrom(obj.Key(key)).Run(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("Key.CopierFrom.Run: %v", err)
 	}
 	return nil
 }

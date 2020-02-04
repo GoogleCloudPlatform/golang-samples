@@ -11,11 +11,13 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package objects
 
 // [START move_file]
 import (
 	"context"
+	"fmt"
 
 	"cloud.google.com/go/storage"
 )
@@ -27,7 +29,7 @@ func move(bucket, object string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
 
@@ -36,10 +38,10 @@ func move(bucket, object string) error {
 	dst := client.Bucket(bucket).Object(dstName)
 
 	if _, err := dst.CopierFrom(src).Run(ctx); err != nil {
-		return err
+		return fmt.Errorf("Object.CopierFrom.Run: %v", err)
 	}
 	if err := src.Delete(ctx); err != nil {
-		return err
+		return fmt.Errorf("Object.Delete: %v", err)
 	}
 	return nil
 }

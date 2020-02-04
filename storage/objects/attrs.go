@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package objects
 
 // [START get_metadata]
@@ -29,14 +30,14 @@ func attrs(w io.Writer, bucket, object string) (*storage.ObjectAttrs, error) {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
 
 	o := client.Bucket(bucket).Object(object)
 	attrs, err := o.Attrs(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Object.Attrs: %v", err)
 	}
 	fmt.Fprintf(w, "Bucket: %v\n", attrs.Bucket)
 	fmt.Fprintf(w, "CacheControl: %v\n", attrs.CacheControl)

@@ -11,28 +11,32 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package acl
 
 // [START bucket_add_acl]
 import (
 	"context"
+	"fmt"
 
 	"cloud.google.com/go/storage"
 )
 
 // addBucketACL adds ACL to the specified bucket.
-func addBucketACL(bucket string) error {
+func addBucketACL(bucket string, entity storage.ACLEntity, role storage.ACLRole) error {
 	// bucket := "bucket-name"
+	// entity := storage.AllUsers
+	// role := storage.RoleReader
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
 
 	acl := client.Bucket(bucket).ACL()
-	if err := acl.Set(ctx, storage.AllAuthenticatedUsers, storage.RoleReader); err != nil {
-		return err
+	if err := acl.Set(ctx, entity, role); err != nil {
+		return fmt.Errorf("ACLHandle.Set: %v", err)
 	}
 	return nil
 }

@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package objects
 
 // [START storage_list_files_with_prefix]
@@ -31,7 +32,7 @@ func listByPrefix(w io.Writer, bucket, prefix, delim string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
 	// Prefixes and delimiters can be used to emulate directory listings.

@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package objects
 
 // [START storage_download_file_requester_pays]
@@ -31,7 +32,7 @@ func downloadUsingRequesterPays(w io.Writer, bucket, object, billingProjectID st
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
 
@@ -41,17 +42,17 @@ func downloadUsingRequesterPays(w io.Writer, bucket, object, billingProjectID st
 	// Open local file.
 	f, err := os.OpenFile("notes.txt", os.O_RDWR|os.O_CREATE, 0755)
 	if err != nil {
-		return err
+		return fmt.Errorf("os.OpenFile: %v", err)
 	}
 	rc, err := src.NewReader(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("Object.NewReader: %v", err)
 	}
 	if _, err := io.Copy(f, rc); err != nil {
-		return err
+		return fmt.Errorf("io.Copy: %v", err)
 	}
 	if err := rc.Close(); err != nil {
-		return err
+		return fmt.Errorf("Reader.Close: %v", err)
 	}
 	fmt.Fprintf(w, "Downloaded using %v as billing project.\n", billingProjectID)
 	return nil

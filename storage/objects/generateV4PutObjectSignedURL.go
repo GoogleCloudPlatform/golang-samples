@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package objects
 
 // [START storage_generate_upload_signed_url_v4]
@@ -31,7 +32,7 @@ func generateV4PutObjectSignedURL(w io.Writer, bucket, object, serviceAccount st
 	// serviceAccount := "service_account.json"
 	jsonKey, err := ioutil.ReadFile(serviceAccount)
 	if err != nil {
-		return "", fmt.Errorf("cannot read the JSON key file, err: %v", err)
+		return "", fmt.Errorf("ioutil.ReadFile: %v", err)
 	}
 	conf, err := google.JWTConfigFromJSON(jsonKey)
 	if err != nil {
@@ -49,7 +50,7 @@ func generateV4PutObjectSignedURL(w io.Writer, bucket, object, serviceAccount st
 	}
 	u, err := storage.SignedURL(bucket, object, opts)
 	if err != nil {
-		return "", fmt.Errorf("Unable to generate a signed URL: %v", err)
+		return "", fmt.Errorf("storage.SignedURL: %v", err)
 	}
 	fmt.Fprintln(w, "Generated PUT signed URL:")
 	fmt.Fprintf(w, "%q\n", u)

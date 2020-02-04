@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package acl
 
 // [START object_list_acl]
@@ -29,13 +30,13 @@ func objectListACL(w io.Writer, bucket, object string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
 
 	rules, err := client.Bucket(bucket).Object(object).ACL().List(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("ACLHandle.List: %v", err)
 	}
 	for _, rule := range rules {
 		fmt.Fprintf(w, "ACL rule: %v\n", rule)

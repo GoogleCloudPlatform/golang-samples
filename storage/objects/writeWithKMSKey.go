@@ -11,11 +11,13 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package objects
 
 // [START storage_upload_with_kms_key]
 import (
 	"context"
+	"fmt"
 
 	"cloud.google.com/go/storage"
 )
@@ -28,7 +30,7 @@ func writeWithKMSKey(bucket, object, keyName string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
 
@@ -37,10 +39,10 @@ func writeWithKMSKey(bucket, object, keyName string) error {
 	wc := obj.NewWriter(ctx)
 	wc.KMSKeyName = keyName
 	if _, err := wc.Write([]byte("top secret")); err != nil {
-		return err
+		return fmt.Errorf("Writer.Write: %v", err)
 	}
 	if err := wc.Close(); err != nil {
-		return err
+		return fmt.Errorf("Writer.Close: %v", err)
 	}
 	return nil
 }

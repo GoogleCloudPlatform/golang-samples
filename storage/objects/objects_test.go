@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package objects
 
 import (
@@ -18,27 +19,16 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"strings"
 	"testing"
 	"time"
 
-	"google.golang.org/api/iterator"
-
 	"cloud.google.com/go/storage"
-
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"google.golang.org/api/iterator"
 )
-
-func TestMain(m *testing.M) {
-	// These functions are noisy.
-	log.SetOutput(ioutil.Discard)
-	s := m.Run()
-	log.SetOutput(os.Stderr)
-	os.Exit(s)
-}
 
 // TestObjects runs all samples tests of the package.
 func TestObjects(t *testing.T) {
@@ -53,9 +43,10 @@ func TestObjects(t *testing.T) {
 	var (
 		bucket    = tc.ProjectID + "-samples-object-bucket-1"
 		dstBucket = tc.ProjectID + "-samples-object-bucket-2"
-
 		object1 = "foo.txt"
 		object2 = "foo/a.txt"
+		allAuthenticatedUsers = storage.AllAuthenticatedUsers
+		roleReader := storage.RoleReader
 	)
 
 	cleanBucket(t, ctx, client, tc.ProjectID, bucket)
@@ -72,7 +63,7 @@ func TestObjects(t *testing.T) {
 		// Should only show "foo/a.txt", not "foo.txt"
 		var buf bytes.Buffer
 		if err := list(&buf, bucket); err != nil {
-			t.Fatalf("cannot list objects: %v", err)
+			t.Fatalf("list: %v", err)
 		}
 		if got, want := buf.String(), object1; !strings.Contains(got, want) {
 			t.Errorf("List() got %q; want to contain %q", got, want)
@@ -87,7 +78,7 @@ func TestObjects(t *testing.T) {
 		const prefix = "foo/"
 		var buf bytes.Buffer
 		if err := listByPrefix(&buf, bucket, prefix, ""); err != nil {
-			t.Fatalf("cannot list objects by prefix: %v", err)
+			t.Fatalf("listByPrefix: %v", err)
 		}
 		if got, want := buf.String(), object1; strings.Contains(got, want) {
 			t.Errorf("List(%q) got %q; want NOT to contain %q", prefix, got, want)
@@ -100,77 +91,79 @@ func TestObjects(t *testing.T) {
 	{
 		var buf bytes.Buffer
 		if err := downloadUsingRequesterPays(&buf, bucket, object1, tc.ProjectID); err != nil {
-			t.Errorf("cannot download using requester pays: %v", err)
+			t.Errorf("downloadUsingRequesterPays: %v", err)
 		}
 	}
 
 	var buf bytes.Buffer
-	data, err := read(bucket, object1)
 
+	data, err := read(bucket, object1)
 	if err != nil {
-		t.Fatalf("cannot read object: %v", err)
+		t.Fatalf("read: %v", err)
 	}
 	if got, want := string(data), "Hello\nworld"; got != want {
 		t.Errorf("contents = %q; want %q", got, want)
 	}
+
 	_, err = attrs(&buf, bucket, object1)
 	if err != nil {
-		t.Errorf("cannot get object metadata: %v", err)
+		t.Errorf("attrs: %v", err)
 	}
-	if err := makePublic(bucket, object1); err != nil {
-		t.Errorf("cannot to make object public: %v", err)
+	if err := makePublic(bucket, object1, allAuthenticatedUsers, roleReader); err != nil {
+		t.Errorf("makePublic: %v", err)
 	}
+
 	err = move(bucket, object1)
 	if err != nil {
-		t.Fatalf("cannot move object: %v", err)
+		t.Fatalf("move: %v", err)
 	}
 	// object1's new name.
 	object1 = object1 + "-rename"
 
 	if err := copyToBucket(dstBucket, bucket, object1); err != nil {
-		t.Errorf("cannot copy object to bucket: %v", err)
+		t.Errorf("copyToBucket: %v", err)
 	}
 
 	key := []byte("my-secret-AES-256-encryption-key")
 	newKey := []byte("My-secret-AES-256-encryption-key")
 
 	if err := writeEncryptedObject(bucket, object1, key); err != nil {
-		t.Errorf("cannot write an encrypted object: %v", err)
+		t.Errorf("writeEncryptedObject: %v", err)
 	}
 	data, err = readEncryptedObject(bucket, object1, key)
 	if err != nil {
-		t.Errorf("cannot read the encrypted object: %v", err)
+		t.Errorf("readEncryptedObject: %v", err)
 	}
 	if got, want := string(data), "top secret"; got != want {
 		t.Errorf("object content = %q; want %q", got, want)
 	}
 	if err := rotateEncryptionKey(bucket, object1, key, newKey); err != nil {
-		t.Errorf("cannot encrypt the object with the new key: %v", err)
+		t.Errorf("rotateEncryptionKey: %v", err)
 	}
 	if err := delete(bucket, object1); err != nil {
-		t.Errorf("cannot to delete object: %v", err)
+		t.Errorf("delete: %v", err)
 	}
 	if err := delete(bucket, object2); err != nil {
-		t.Errorf("cannot to delete object: %v", err)
+		t.Errorf("delete: %v", err)
 	}
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		// Cleanup, this part won't be executed if Fatal happens.
 		// TODO(jbd): Implement garbage cleaning.
 		if err := client.Bucket(bucket).Delete(ctx); err != nil {
-			r.Errorf("cleanup of bucket failed: %v", err)
+			r.Errorf("Bucket.Delete: %v", err)
 		}
 	})
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		if err := delete(dstBucket, object1+"-copy"); err != nil {
-			r.Errorf("cannot to delete copy object: %v", err)
+			r.Errorf("delete: %v", err)
 		}
 	})
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		if err := client.Bucket(dstBucket).Delete(ctx); err != nil {
-			r.Errorf("cleanup of bucket failed: %v", err)
+			r.Errorf("Bucket.Delete: %v", err)
 		}
 	})
 }
@@ -193,8 +186,7 @@ func TestKMSObjects(t *testing.T) {
 	var (
 		bucket    = tc.ProjectID + "-samples-object-bucket-1"
 		dstBucket = tc.ProjectID + "-samples-object-bucket-2"
-
-		object1 = "foo.txt"
+		object1   = "foo.txt"
 	)
 
 	cleanBucket(t, ctx, client, tc.ProjectID, bucket)
@@ -203,7 +195,7 @@ func TestKMSObjects(t *testing.T) {
 	kmsKeyName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", tc.ProjectID, "global", keyRingID, cryptoKeyID)
 
 	if err := writeWithKMSKey(bucket, object1, kmsKeyName); err != nil {
-		t.Errorf("cannot write a KMS encrypted object: %v", err)
+		t.Errorf("writeWithKMSKey: %v", err)
 	}
 }
 
@@ -292,49 +284,52 @@ func TestObjectBucketLock(t *testing.T) {
 			RetentionPeriod: retentionPeriod,
 		},
 	}); err != nil {
-		t.Errorf("unable to set retention policy (%q): %v", bucketName, err)
+		t.Errorf("Bucket(%q).Update: %v", bucketName, err)
 	}
 	if err := setEventBasedHold(bucketName, objectName); err != nil {
-		t.Errorf("unable to set event-based hold (%q/%q): %v", bucketName, objectName, err)
+		t.Errorf("setEventBasedHold(%q, %q): %v", bucketName, objectName, err)
 	}
 	oAttrs, err := attrs(&buf, bucketName, objectName)
 	if err != nil {
-		t.Errorf("cannot get object metadata: %v", err)
+		t.Errorf("attrs: %v", err)
 	}
+	buf.Reset()
 	if !oAttrs.EventBasedHold {
 		t.Errorf("event-based hold is not enabled")
 	}
 	if err := releaseEventBasedHold(bucketName, objectName); err != nil {
-		t.Errorf("unable to set event-based hold (%q/%q): %v", bucketName, objectName, err)
+		t.Errorf("releaseEventBasedHold(%q, %q): %v", bucketName, objectName, err)
 	}
 	oAttrs, err = attrs(&buf, bucketName, objectName)
 	if err != nil {
-		t.Errorf("cannot get object metadata: %v", err)
+		t.Errorf("attrs: %v", err)
 	}
+	buf.Reset()
 	if oAttrs.EventBasedHold {
 		t.Errorf("event-based hold is not disabled")
 	}
 	if _, err := bucket.Update(ctx, storage.BucketAttrsToUpdate{
 		RetentionPolicy: &storage.RetentionPolicy{},
 	}); err != nil {
-		t.Errorf("unable to remove retention policy (%q): %v", bucketName, err)
+		t.Errorf("Bucket(%q).Update: %v", bucketName, err)
 	}
 	if err := setTemporaryHold(bucketName, objectName); err != nil {
-		t.Errorf("unable to set temporary hold (%q/%q): %v", bucketName, objectName, err)
+		t.Errorf("setTemporaryHold(%q, %q): %v", bucketName, objectName, err)
 	}
 	oAttrs, err = attrs(&buf, bucketName, objectName)
 	if err != nil {
-		t.Errorf("cannot get object metadata: %v", err)
+		t.Errorf("attrs: %v", err)
 	}
+	buf.Reset()
 	if !oAttrs.TemporaryHold {
 		t.Errorf("temporary hold is not disabled")
 	}
 	if err := releaseTemporaryHold(bucketName, objectName); err != nil {
-		t.Errorf("unable to release temporary hold (%q/%q): %v", bucketName, objectName, err)
+		t.Errorf("releaseTemporaryHold(%q, %q): %v", bucketName, objectName, err)
 	}
 	oAttrs, err = attrs(&buf, bucketName, objectName)
 	if err != nil {
-		t.Errorf("cannot get object metadata: %v", err)
+		t.Errorf("attrs: %v", err)
 	}
 	if oAttrs.TemporaryHold {
 		t.Errorf("temporary hold is not disabled")

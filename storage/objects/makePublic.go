@@ -11,29 +11,31 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package objects
 
 // [START public]
 import (
 	"context"
+	"fmt"
 
 	"cloud.google.com/go/storage"
 )
 
 // makePublic gives all users read access to an object.
-func makePublic(bucket, object string) error {
+func makePublic(bucket, object string, entity storage.ACLEntity, role storage.ACLRole) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
 
 	acl := client.Bucket(bucket).Object(object).ACL()
-	if err := acl.Set(ctx, storage.AllUsers, storage.RoleReader); err != nil {
-		return err
+	if err := acl.Set(ctx, entity, role); err != nil {
+		return fmt.Errorf("ACLHandle.Set: %v", err)
 	}
 	return nil
 }

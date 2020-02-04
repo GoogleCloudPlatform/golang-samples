@@ -11,29 +11,32 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package acl
 
 // [START delete_object_default_acl]
 import (
 	"context"
+	"fmt"
 
 	"cloud.google.com/go/storage"
 )
 
 // deleteObjectACL removes default ACL from the given object.
-func deleteObjectACL(bucket, object string) error {
+func deleteObjectACL(bucket, object string, entity storage.ACLEntity) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
+	// entity := storage.AllUsers
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
 
 	acl := client.Bucket(bucket).Object(object).ACL()
-	if err := acl.Delete(ctx, storage.AllAuthenticatedUsers); err != nil {
-		return err
+	if err := acl.Delete(ctx, entity); err != nil {
+		return fmt.Errorf("ACLHandle.Delete: %v", err)
 	}
 	return nil
 }
