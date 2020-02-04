@@ -14,7 +14,7 @@
 
 package objects
 
-// [START copy_file]
+// [START storage_move_file]
 import (
 	"context"
 	"fmt"
@@ -22,11 +22,10 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// copyToBucket copies an object into specified bucket.
-func copyToBucket(dstBucket, srcBucket, srcObject string) error {
-	// dstBucket := "bucket-1"
-	// srcBucket := "bucket-2"
-	// srcObject := "object"
+// moveFile moves an object into another location.
+func moveFile(bucket, object string) error {
+	// bucket := "bucket-name"
+	// object := "object-name"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -34,14 +33,17 @@ func copyToBucket(dstBucket, srcBucket, srcObject string) error {
 	}
 	defer client.Close()
 
-	dstObject := srcObject + "-copy"
-	src := client.Bucket(srcBucket).Object(srcObject)
-	dst := client.Bucket(dstBucket).Object(dstObject)
+	dstName := object + "-rename"
+	src := client.Bucket(bucket).Object(object)
+	dst := client.Bucket(bucket).Object(dstName)
 
 	if _, err := dst.CopierFrom(src).Run(ctx); err != nil {
 		return fmt.Errorf("Object.CopierFrom.Run: %v", err)
 	}
+	if err := src.Delete(ctx); err != nil {
+		return fmt.Errorf("Object.Delete: %v", err)
+	}
 	return nil
 }
 
-// [END copy_file]
+// [END storage_move_file]

@@ -14,39 +14,37 @@
 
 package objects
 
-// [START storage_download_encrypted_file]
+// [START storage_upload_with_kms_key]
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 
 	"cloud.google.com/go/storage"
 )
 
-// readEncryptedObject reads an encrypted object.
-func readEncryptedObject(bucket, object string, secretKey []byte) ([]byte, error) {
+// uploadWithKMSKey writes an object using Cloud KMS encryption.
+func uploadWithKMSKey(bucket, object, keyName string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
-	// key := []byte("secret-encryption-key")
+	// keyName := "projects/projectId/locations/global/keyRings/keyRingID/cryptoKeys/cryptoKeyID"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
 
 	obj := client.Bucket(bucket).Object(object)
-	rc, err := obj.Key(secretKey).NewReader(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("Key.NewReader: %v", err)
+	// Encrypt the object's contents.
+	wc := obj.NewWriter(ctx)
+	wc.KMSKeyName = keyName
+	if _, err := wc.Write([]byte("top secret")); err != nil {
+		return fmt.Errorf("Writer.Write: %v", err)
 	}
-	defer rc.Close()
-
-	data, err := ioutil.ReadAll(rc)
-	if err != nil {
-		return nil, fmt.Errorf("ioutil.ReadAll: %v", err)
+	if err := wc.Close(); err != nil {
+		return fmt.Errorf("Writer.Close: %v", err)
 	}
-	return data, nil
+	return nil
 }
 
-// [END storage_download_encrypted_file]
+// [END storage_upload_with_kms_key]

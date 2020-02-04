@@ -14,37 +14,34 @@
 
 package objects
 
-// [START download_file]
+// [START storage_copy_file]
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 
 	"cloud.google.com/go/storage"
 )
 
-// read downloads an object.
-func read(bucket, object string) ([]byte, error) {
-	// bucket := "bucket-name"
-	// object := "object-name"
+// copyFile copies an object into specified bucket.
+func copyFile(dstBucket, srcBucket, srcObject string) error {
+	// dstBucket := "bucket-1"
+	// srcBucket := "bucket-2"
+	// srcObject := "object"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
 
-	rc, err := client.Bucket(bucket).Object(object).NewReader(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("Object.NewReader: %v", err)
-	}
-	defer rc.Close()
+	dstObject := srcObject + "-copy"
+	src := client.Bucket(srcBucket).Object(srcObject)
+	dst := client.Bucket(dstBucket).Object(dstObject)
 
-	data, err := ioutil.ReadAll(rc)
-	if err != nil {
-		return nil, fmt.Errorf("ioutil.ReadAll: %v", err)
+	if _, err := dst.CopierFrom(src).Run(ctx); err != nil {
+		return fmt.Errorf("Object.CopierFrom.Run: %v", err)
 	}
-	return data, nil
+	return nil
 }
 
-// [END download_file]
+// [END storage_copy_file]

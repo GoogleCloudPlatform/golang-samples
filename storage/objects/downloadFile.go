@@ -14,38 +14,37 @@
 
 package objects
 
-// [START storage_list_files]
+// [START storage_download_file]
 import (
 	"context"
 	"fmt"
-	"io"
+	"io/ioutil"
 
 	"cloud.google.com/go/storage"
-	"google.golang.org/api/iterator"
 )
 
-// list lists objects within specified bucket.
-func list(w io.Writer, bucket string) error {
+// downloadFile downloads an object.
+func downloadFile(bucket, object string) ([]byte, error) {
 	// bucket := "bucket-name"
+	// object := "object-name"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return nil, fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
 
-	it := client.Bucket(bucket).Objects(ctx, nil)
-	for {
-		attrs, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return err
-		}
-		fmt.Fprintln(w, attrs.Name)
+	rc, err := client.Bucket(bucket).Object(object).NewReader(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("Object.NewReader: %v", err)
 	}
-	return nil
+	defer rc.Close()
+
+	data, err := ioutil.ReadAll(rc)
+	if err != nil {
+		return nil, fmt.Errorf("ioutil.ReadAll: %v", err)
+	}
+	return data, nil
 }
 
-// [END storage_list_files]
+// [END storage_download_file]

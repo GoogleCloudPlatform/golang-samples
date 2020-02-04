@@ -14,18 +14,19 @@
 
 package objects
 
-// [START move_file]
+// [START storage_list_files]
 import (
 	"context"
 	"fmt"
+	"io"
 
 	"cloud.google.com/go/storage"
+	"google.golang.org/api/iterator"
 )
 
-// move moves an object into another location.
-func move(bucket, object string) error {
+// listFiles lists objects within specified bucket.
+func listFiles(w io.Writer, bucket string) error {
 	// bucket := "bucket-name"
-	// object := "object-name"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -33,17 +34,18 @@ func move(bucket, object string) error {
 	}
 	defer client.Close()
 
-	dstName := object + "-rename"
-	src := client.Bucket(bucket).Object(object)
-	dst := client.Bucket(bucket).Object(dstName)
-
-	if _, err := dst.CopierFrom(src).Run(ctx); err != nil {
-		return fmt.Errorf("Object.CopierFrom.Run: %v", err)
-	}
-	if err := src.Delete(ctx); err != nil {
-		return fmt.Errorf("Object.Delete: %v", err)
+	it := client.Bucket(bucket).Objects(ctx, nil)
+	for {
+		attrs, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		fmt.Fprintln(w, attrs.Name)
 	}
 	return nil
 }
 
-// [END move_file]
+// [END storage_list_files]

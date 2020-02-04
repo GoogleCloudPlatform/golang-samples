@@ -14,7 +14,7 @@
 
 package objects
 
-// [START public]
+// [START storage_make_public]
 import (
 	"context"
 	"fmt"
@@ -40,4 +40,4 @@ func makePublic(bucket, object string, entity storage.ACLEntity, role storage.AC
 	return nil
 }
 
-// [END public]
+// [END storage_make_public]

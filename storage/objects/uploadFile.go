@@ -14,19 +14,20 @@
 
 package objects
 
-// [START storage_upload_with_kms_key]
+// [START storage_upload_file]
 import (
 	"context"
 	"fmt"
+	"io"
+	"os"
 
 	"cloud.google.com/go/storage"
 )
 
-// writeWithKMSKey writes an object using Cloud KMS encryption.
-func writeWithKMSKey(bucket, object, keyName string) error {
+// uploadFile uploads an object.
+func uploadFile(bucket, object string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
-	// keyName := "projects/projectId/locations/global/keyRings/keyRingID/cryptoKeys/cryptoKeyID"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -34,12 +35,17 @@ func writeWithKMSKey(bucket, object, keyName string) error {
 	}
 	defer client.Close()
 
-	obj := client.Bucket(bucket).Object(object)
-	// Encrypt the object's contents.
-	wc := obj.NewWriter(ctx)
-	wc.KMSKeyName = keyName
-	if _, err := wc.Write([]byte("top secret")); err != nil {
-		return fmt.Errorf("Writer.Write: %v", err)
+	// Open local file.
+	f, err := os.Open("notes.txt")
+	if err != nil {
+		return fmt.Errorf("os.Open: %v", err)
+	}
+	defer f.Close()
+
+	// Upload an object with storage.Writer.
+	wc := client.Bucket(bucket).Object(object).NewWriter(ctx)
+	if _, err = io.Copy(wc, f); err != nil {
+		return fmt.Errorf("io.Copy: %v", err)
 	}
 	if err := wc.Close(); err != nil {
 		return fmt.Errorf("Writer.Close: %v", err)
@@ -47,4 +53,4 @@ func writeWithKMSKey(bucket, object, keyName string) error {
 	return nil
 }
 
-// [END storage_upload_with_kms_key]
+// [END storage_upload_file]

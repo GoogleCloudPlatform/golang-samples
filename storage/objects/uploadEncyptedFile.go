@@ -14,7 +14,7 @@
 
 package objects
 
-// [START delete_file]
+// [START storage_upload_encrypted_file]
 import (
 	"context"
 	"fmt"
@@ -22,10 +22,11 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// delete removes specified object.
-func delete(bucket, object string) error {
+// uploadEncyptedFile writes an object using AES-256 encryption key.
+func uploadEncyptedFile(bucket, object string, secretKey []byte) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
+	// secretKey := []byte("secret-key")
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -33,11 +34,16 @@ func delete(bucket, object string) error {
 	}
 	defer client.Close()
 
-	o := client.Bucket(bucket).Object(object)
-	if err := o.Delete(ctx); err != nil {
-		return fmt.Errorf("Object.Delete: %v", err)
+	obj := client.Bucket(bucket).Object(object)
+	// Encrypt the object's contents.
+	wc := obj.Key(secretKey).NewWriter(ctx)
+	if _, err := wc.Write([]byte("top secret")); err != nil {
+		return fmt.Errorf("Writer.Write: %v", err)
+	}
+	if err := wc.Close(); err != nil {
+		return fmt.Errorf("Writer.Close: %v", err)
 	}
 	return nil
 }
 
-// [END delete_file]
+// [END storage_upload_encrypted_file]

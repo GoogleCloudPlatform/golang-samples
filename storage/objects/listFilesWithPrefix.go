@@ -24,8 +24,8 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-// listByPrefix lists objects using prefix and delimeter.
-func listByPrefix(w io.Writer, bucket, prefix, delim string) error {
+// listFilesWithPrefix lists objects using prefix and delimeter.
+func listFilesWithPrefix(w io.Writer, bucket, prefix, delim string) error {
 	// bucket := "bucket-name"
 	// prefix := "/foo"
 	// delim := "_"

@@ -52,18 +52,18 @@ func TestObjects(t *testing.T) {
 	cleanBucket(t, ctx, client, tc.ProjectID, bucket)
 	cleanBucket(t, ctx, client, tc.ProjectID, dstBucket)
 
-	if err := write(bucket, object1); err != nil {
-		t.Fatalf("write(%q): %v", object1, err)
+	if err := uploadFile(bucket, object1); err != nil {
+		t.Fatalf("uploadFile(%q): %v", object1, err)
 	}
-	if err := write(bucket, object2); err != nil {
-		t.Fatalf("write(%q): %v", object2, err)
+	if err := uploadFile(bucket, object2); err != nil {
+		t.Fatalf("uploadFile(%q): %v", object2, err)
 	}
 
 	{
 		// Should only show "foo/a.txt", not "foo.txt"
 		var buf bytes.Buffer
-		if err := list(&buf, bucket); err != nil {
-			t.Fatalf("list: %v", err)
+		if err := listFiles(&buf, bucket); err != nil {
+			t.Fatalf("listFiles: %v", err)
 		}
 		if got, want := buf.String(), object1; !strings.Contains(got, want) {
 			t.Errorf("List() got %q; want to contain %q", got, want)
@@ -77,8 +77,8 @@ func TestObjects(t *testing.T) {
 		// Should only show "foo/a.txt", not "foo.txt"
 		const prefix = "foo/"
 		var buf bytes.Buffer
-		if err := listByPrefix(&buf, bucket, prefix, ""); err != nil {
-			t.Fatalf("listByPrefix: %v", err)
+		if err := listFilesWithPrefix(&buf, bucket, prefix, ""); err != nil {
+			t.Fatalf("listFilesWithPrefix: %v", err)
 		}
 		if got, want := buf.String(), object1; strings.Contains(got, want) {
 			t.Errorf("List(%q) got %q; want NOT to contain %q", prefix, got, want)
@@ -97,42 +97,42 @@ func TestObjects(t *testing.T) {
 
 	var buf bytes.Buffer
 
-	data, err := read(bucket, object1)
+	data, err := downloadFile(bucket, object1)
 	if err != nil {
-		t.Fatalf("read: %v", err)
+		t.Fatalf("downloadFile: %v", err)
 	}
 	if got, want := string(data), "Hello\nworld"; got != want {
 		t.Errorf("contents = %q; want %q", got, want)
 	}
 
-	_, err = attrs(&buf, bucket, object1)
+	_, err = getMetadata(&buf, bucket, object1)
 	if err != nil {
-		t.Errorf("attrs: %v", err)
+		t.Errorf("getMetadata: %v", err)
 	}
 	if err := makePublic(bucket, object1, allAuthenticatedUsers, roleReader); err != nil {
 		t.Errorf("makePublic: %v", err)
 	}
 
-	err = move(bucket, object1)
+	err = moveFile(bucket, object1)
 	if err != nil {
-		t.Fatalf("move: %v", err)
+		t.Fatalf("moveFile: %v", err)
 	}
 	// object1's new name.
 	object1 = object1 + "-rename"
 
-	if err := copyToBucket(dstBucket, bucket, object1); err != nil {
-		t.Errorf("copyToBucket: %v", err)
+	if err := copyFile(dstBucket, bucket, object1); err != nil {
+		t.Errorf("copyFile: %v", err)
 	}
 
 	key := []byte("my-secret-AES-256-encryption-key")
 	newKey := []byte("My-secret-AES-256-encryption-key")
 
-	if err := writeEncryptedObject(bucket, object1, key); err != nil {
-		t.Errorf("writeEncryptedObject: %v", err)
+	if err := uploadEncyptedFile(bucket, object1, key); err != nil {
+		t.Errorf("uploadEncyptedFile: %v", err)
 	}
-	data, err = readEncryptedObject(bucket, object1, key)
+	data, err = downloadEncryptedFile(bucket, object1, key)
 	if err != nil {
-		t.Errorf("readEncryptedObject: %v", err)
+		t.Errorf("downloadEncryptedFile: %v", err)
 	}
 	if got, want := string(data), "top secret"; got != want {
 		t.Errorf("object content = %q; want %q", got, want)
@@ -140,11 +140,11 @@ func TestObjects(t *testing.T) {
 	if err := rotateEncryptionKey(bucket, object1, key, newKey); err != nil {
 		t.Errorf("rotateEncryptionKey: %v", err)
 	}
-	if err := delete(bucket, object1); err != nil {
-		t.Errorf("delete: %v", err)
+	if err := deleteFile(bucket, object1); err != nil {
+		t.Errorf("deleteFile: %v", err)
 	}
-	if err := delete(bucket, object2); err != nil {
-		t.Errorf("delete: %v", err)
+	if err := deleteFile(bucket, object2); err != nil {
+		t.Errorf("deleteFile: %v", err)
 	}
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
@@ -156,8 +156,8 @@ func TestObjects(t *testing.T) {
 	})
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-		if err := delete(dstBucket, object1+"-copy"); err != nil {
-			r.Errorf("delete: %v", err)
+		if err := deleteFile(dstBucket, object1+"-copy"); err != nil {
+			r.Errorf("deleteFile: %v", err)
 		}
 	})
 
@@ -194,8 +194,8 @@ func TestKMSObjects(t *testing.T) {
 
 	kmsKeyName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", tc.ProjectID, "global", keyRingID, cryptoKeyID)
 
-	if err := writeWithKMSKey(bucket, object1, kmsKeyName); err != nil {
-		t.Errorf("writeWithKMSKey: %v", err)
+	if err := uploadWithKMSKey(bucket, object1, kmsKeyName); err != nil {
+		t.Errorf("uploadWithKMSKey: %v", err)
 	}
 }
 
@@ -276,8 +276,8 @@ func TestObjectBucketLock(t *testing.T) {
 	cleanBucket(t, ctx, client, tc.ProjectID, bucketName)
 	bucket := client.Bucket(bucketName)
 
-	if err := write(bucketName, objectName); err != nil {
-		t.Fatalf("write(%q): %v", objectName, err)
+	if err := uploadFile(bucketName, objectName); err != nil {
+		t.Fatalf("uploadFile(%q): %v", objectName, err)
 	}
 	if _, err := bucket.Update(ctx, storage.BucketAttrsToUpdate{
 		RetentionPolicy: &storage.RetentionPolicy{
@@ -289,9 +289,9 @@ func TestObjectBucketLock(t *testing.T) {
 	if err := setEventBasedHold(bucketName, objectName); err != nil {
 		t.Errorf("setEventBasedHold(%q, %q): %v", bucketName, objectName, err)
 	}
-	oAttrs, err := attrs(&buf, bucketName, objectName)
+	oAttrs, err := getMetadata(&buf, bucketName, objectName)
 	if err != nil {
-		t.Errorf("attrs: %v", err)
+		t.Errorf("getMetadata: %v", err)
 	}
 	buf.Reset()
 	if !oAttrs.EventBasedHold {
@@ -300,9 +300,9 @@ func TestObjectBucketLock(t *testing.T) {
 	if err := releaseEventBasedHold(bucketName, objectName); err != nil {
 		t.Errorf("releaseEventBasedHold(%q, %q): %v", bucketName, objectName, err)
 	}
-	oAttrs, err = attrs(&buf, bucketName, objectName)
+	oAttrs, err = getMetadata(&buf, bucketName, objectName)
 	if err != nil {
-		t.Errorf("attrs: %v", err)
+		t.Errorf("getMetadata: %v", err)
 	}
 	buf.Reset()
 	if oAttrs.EventBasedHold {
@@ -316,9 +316,9 @@ func TestObjectBucketLock(t *testing.T) {
 	if err := setTemporaryHold(bucketName, objectName); err != nil {
 		t.Errorf("setTemporaryHold(%q, %q): %v", bucketName, objectName, err)
 	}
-	oAttrs, err = attrs(&buf, bucketName, objectName)
+	oAttrs, err = getMetadata(&buf, bucketName, objectName)
 	if err != nil {
-		t.Errorf("attrs: %v", err)
+		t.Errorf("getMetadata: %v", err)
 	}
 	buf.Reset()
 	if !oAttrs.TemporaryHold {
@@ -327,9 +327,9 @@ func TestObjectBucketLock(t *testing.T) {
 	if err := releaseTemporaryHold(bucketName, objectName); err != nil {
 		t.Errorf("releaseTemporaryHold(%q, %q): %v", bucketName, objectName, err)
 	}
-	oAttrs, err = attrs(&buf, bucketName, objectName)
+	oAttrs, err = getMetadata(&buf, bucketName, objectName)
 	if err != nil {
-		t.Errorf("attrs: %v", err)
+		t.Errorf("getMetadata: %v", err)
 	}
 	if oAttrs.TemporaryHold {
 		t.Errorf("temporary hold is not disabled")
@@ -339,7 +339,7 @@ func TestObjectBucketLock(t *testing.T) {
 // cleanBucket ensures there's a fresh bucket with a given name, deleting the existing bucket if it already exists.
 func cleanBucket(t *testing.T, ctx context.Context, client *storage.Client, projectID, bucket string) {
 	b := client.Bucket(bucket)
-	_, err := b.Attrs(ctx)
+	_, err := b.getMetadata(ctx)
 	if err == nil {
 		it := b.Objects(ctx, nil)
 		for {

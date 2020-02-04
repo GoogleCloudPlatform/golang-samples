@@ -14,7 +14,7 @@
 
 package objects
 
-// [START get_metadata]
+// [START storage_get_metadata]
 import (
 	"context"
 	"fmt"
@@ -23,8 +23,8 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// attrs prints all of the object attributes.
-func attrs(w io.Writer, bucket, object string) (*storage.ObjectAttrs, error) {
+// getMetadata prints all of the object attributes.
+func getMetadata(w io.Writer, bucket, object string) (*storage.ObjectAttrs, error) {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	ctx := context.Background()
@@ -66,4 +66,4 @@ func attrs(w io.Writer, bucket, object string) (*storage.ObjectAttrs, error) {
 	return attrs, nil
 }
 
-// [END get_metadata]
+// [END storage_get_metadata]
