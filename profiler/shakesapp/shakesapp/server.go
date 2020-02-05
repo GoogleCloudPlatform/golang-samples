@@ -29,13 +29,15 @@ import (
 	"google.golang.org/api/option"
 )
 
+// server is an implementation of the server for ShakespeareService (defined
+// in shakesapp.proto).
+type server struct{}
+
 // NewServer returns an implementation of the server for ShakespeareService
 // (defined in shakesapp.proto).
 func NewServer() ShakespeareServiceServer {
 	return &server{}
 }
-
-type server struct{}
 
 const bucketName = "dataflow-samples"
 const bucketPrefix = "shakespeare/"

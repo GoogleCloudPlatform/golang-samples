@@ -26,19 +26,17 @@ import (
 	"time"
 
 	"cloud.google.com/go/profiler"
-	"github.com/golang/glog"
 	"google.golang.org/grpc"
 
 	"shakesapp/shakesapp"
 )
 
 var (
-	version      = flag.String("version", "1.0.0", "application version")
-	projectID    = flag.String("project_id", "", "project ID to run profiler with; only required when running outside of GCP.")
-	port         = flag.Int("port", 7788, "service port")
-	numReqs      = flag.Int("num_requests", 20, "number of requests to simulate")
-	reqsInFlight = flag.Int("requests_in_flight", 1, "number of requests to run in parallel")
-	numRounds    = flag.Int("num_rounds", 0, "number of simulation rounds (0 for infinite)")
+	projectID   = flag.String("project_id", "", "project ID to run profiler with; only required when running outside of GCP.")
+	port        = flag.Int("port", 7788, "service port")
+	numReqs     = flag.Int("num_requests", 20, "number of requests to simulate")
+	concurrency = flag.Int("concurrency", 1, "number of requests to run in parallel")
+	numRounds   = flag.Int("num_rounds", 0, "number of simulation rounds (0 for infinite)")
 )
 
 func main() {
@@ -46,29 +44,29 @@ func main() {
 
 	if err := profiler.Start(profiler.Config{
 		Service:        "shakesapp",
-		ServiceVersion: *version,
+		ServiceVersion: "original",
 		ProjectID:      *projectID,
 		MutexProfiling: true,
 	}); err != nil {
-		log.Fatalf("failed to start profiler: %v", err)
+		log.Fatalf("Failed to start profiler: %v", err)
 	}
 
 	server := grpc.NewServer()
 	shakesapp.RegisterShakespeareServiceServer(server, shakesapp.NewServer())
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 	if err != nil {
-		glog.Exitf("failed to listen: %v", err)
+		log.Fatalf("Failed to listen: %v", err)
 	}
 	go server.Serve(lis)
 
 	ctx := context.Background()
 	for i := 1; *numRounds == 0 || i <= *numRounds; i++ {
 		start := time.Now()
-		glog.Infof("Simulating client requests, round %d", i)
-		if err := shakesapp.SimulateClient(ctx, fmt.Sprintf(":%d", *port), *numReqs, *reqsInFlight); err != nil {
-			glog.Exitf("Failed to simulate client requests: %v", err)
+		log.Printf("Simulating client requests, round %d", i)
+		if err := shakesapp.SimulateClient(ctx, fmt.Sprintf(":%d", *port), *numReqs, *concurrency); err != nil {
+			log.Fatalf("Failed to simulate client requests: %v", err)
 		}
 		delta := time.Since(start).Round(10 * time.Millisecond)
-		glog.Infof("Simulated %d requests in %s, rate of %f reqs / sec", *numReqs, delta, float64(*numReqs)/delta.Seconds())
+		log.Printf("Simulated %d requests in %s, rate of %f reqs / sec", *numReqs, delta, float64(*numReqs)/delta.Seconds())
 	}
 }

@@ -50,12 +50,17 @@ func SimulateClient(ctx context.Context, addr string, numReqs, reqsInFlight int)
 	for i := 0; i < numReqs; i++ {
 		go func() {
 			inFlightCh <- true
-			q := queries[rand.Intn(len(queries))]
-			resp, err := client.GetMatchCount(ctx, &ShakespeareRequest{Query: q.query})
-			if err == nil && (resp.MatchCount != q.wantMatchCount) {
-				err = fmt.Errorf("GetMatchCount(%q): got %d matches, want %d", q.query, resp.MatchCount, q.wantMatchCount)
-			}
-			respErrs <- err
+			respErrs <- func() error {
+				q := queries[rand.Intn(len(queries))]
+				resp, err := client.GetMatchCount(ctx, &ShakespeareRequest{Query: q.query})
+				if err != nil {
+					return err
+				}
+				if resp.MatchCount != q.wantMatchCount {
+					return fmt.Errorf("GetMatchCount(%q): got %d matches, want %d", q.query, resp.MatchCount, q.wantMatchCount)
+				}
+				return nil
+			}()
 			<-inFlightCh
 		}()
 	}
