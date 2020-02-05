@@ -41,12 +41,12 @@ func TestObjects(t *testing.T) {
 	defer client.Close()
 
 	var (
-		bucket    = tc.ProjectID + "-samples-object-bucket-1"
-		dstBucket = tc.ProjectID + "-samples-object-bucket-2"
-		object1 = "foo.txt"
-		object2 = "foo/a.txt"
+		bucket                = tc.ProjectID + "-samples-object-bucket-1"
+		dstBucket             = tc.ProjectID + "-samples-object-bucket-2"
+		object1               = "foo.txt"
+		object2               = "foo/a.txt"
 		allAuthenticatedUsers = storage.AllAuthenticatedUsers
-		roleReader := storage.RoleReader
+		roleReader            = storage.RoleReader
 	)
 
 	cleanBucket(t, ctx, client, tc.ProjectID, bucket)

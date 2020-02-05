@@ -22,7 +22,6 @@ import (
 
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"google.golang.org/api/iterator"
 )
 
 // TestACL runs all of the package tests.
@@ -33,11 +32,11 @@ func TestACL(t *testing.T) {
 		object                = "foo.txt"
 		buf                   bytes.Buffer
 		allAuthenticatedUsers = storage.AllAuthenticatedUsers
-		roleReader := storage.RoleReader
+		roleReader            = storage.RoleReader
 	)
 
 	if err := addBucketACL(bucket, allAuthenticatedUsers, roleReader); err != nil {
-		t.Errorf("addBucketACL %v", err)
+		t.Errorf("addBucketACL: %v", err)
 	}
 	if err := addDefaultBucketACL(bucket, allAuthenticatedUsers, roleReader); err != nil {
 		t.Errorf("addDefaultBucketACL: %v", err)
