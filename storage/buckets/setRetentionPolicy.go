@@ -11,11 +11,13 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package buckets
 
 // [START storage_set_retention_policy]
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"cloud.google.com/go/storage"
@@ -28,7 +30,7 @@ func setRetentionPolicy(bucketName string, retentionPeriod time.Duration) error 
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
 

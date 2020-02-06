@@ -11,12 +11,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package buckets
 
 // [START storage_remove_retention_policy]
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"cloud.google.com/go/storage"
 )
@@ -27,14 +29,14 @@ func removeRetentionPolicy(bucketName string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
 
 	bucket := client.Bucket(bucketName)
-	attrs, err := client.Bucket(bucketName).Attrs(ctx)
+	attrs, err := bucket.Attrs(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("Bucket.Attrs: %v", err)
 	}
 	if attrs.RetentionPolicy.IsLocked {
 		return errors.New("retention policy is locked")

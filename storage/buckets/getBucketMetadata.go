@@ -22,7 +22,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 
 	"cloud.google.com/go/storage"
 )
@@ -33,7 +32,7 @@ func getBucketMetadata(w io.Writer, bucketName string) (*storage.BucketAttrs, er
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
 

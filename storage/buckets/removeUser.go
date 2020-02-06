@@ -11,11 +11,13 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package buckets
 
 // [START remove_bucket_iam_member]
 import (
 	"context"
+	"fmt"
 
 	"cloud.google.com/go/storage"
 )
@@ -26,21 +28,21 @@ func removeUser(bucketName string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
 
 	bucket := client.Bucket(bucketName)
 	policy, err := bucket.IAM().Policy(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("bucket.IAM.Policy: %v", err)
 	}
 	// Other valid prefixes are "serviceAccount:", "user:"
 	// See the documentation for more values.
 	// https://cloud.google.com/storage/docs/access-control/iam
 	policy.Remove("group:cloud-logs@google.com", "roles/storage.objectViewer")
 	if err := bucket.IAM().SetPolicy(ctx, policy); err != nil {
-		return err
+		return fmt.Errorf("bucket.IAM.SetPolicy: %v", err)
 	}
 	// NOTE: It may be necessary to retry this operation if IAM policies are
 	// being modified concurrently. SetPolicy will return an error if the policy

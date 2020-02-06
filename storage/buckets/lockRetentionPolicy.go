@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package buckets
 
 // [START storage_lock_retention_policy]
@@ -28,14 +29,14 @@ func lockRetentionPolicy(w io.Writer, bucketName string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
 
 	bucket := client.Bucket(bucketName)
-	attrs, err := client.Bucket(bucketName).Attrs(ctx)
+	attrs, err := bucket.Attrs(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("Bucket.Attrs: %v", err)
 	}
 
 	conditions := storage.BucketConditions{
@@ -45,9 +46,9 @@ func lockRetentionPolicy(w io.Writer, bucketName string) error {
 		return err
 	}
 
-	lockedAttrs, err := client.Bucket(bucketName).Attrs(ctx)
+	lockedAttrs, err := bucket.Attrs(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("Bucket.Attrs: %v", err)
 	}
 
 	fmt.Fprintf(w, "Retention policy for %v is now locked\n", bucketName)

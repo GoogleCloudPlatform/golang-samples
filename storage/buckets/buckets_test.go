@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package buckets
 
 import (
@@ -104,7 +105,7 @@ outer:
 		t.Errorf("got bucket list: %v; want %q in the list", buckets, bucketName)
 	}
 }
-
+ 
 func TestGetBucketMetadata(t *testing.T) {
 	testutil.SystemTest(t)
 	setup(t)
@@ -116,7 +117,7 @@ func TestGetBucketMetadata(t *testing.T) {
 
 	got := buf.String()
 	if want := "BucketName:"; !strings.Contains(got, want) {
-		t.Errorf("got %q, want %q", got, want)
+		t.Errorf("contents = %q, want %q", got, want)
 	}
 }
 

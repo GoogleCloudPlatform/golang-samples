@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package buckets
 
 // [START get_requester_pays_status]
@@ -28,13 +29,13 @@ func checkRequesterPays(w io.Writer, bucketName string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
 
 	attrs, err := client.Bucket(bucketName).Attrs(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("bucket.Attrs: %v", err)
 	}
 	fmt.Fprintf(w, "Is requester pays enabled? %v\n", attrs.RequesterPays)
 	return nil

@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package buckets
 
 // [START storage_get_retention_policy]
@@ -28,7 +29,7 @@ func getRetentionPolicy(w io.Writer, bucketName string) (*storage.BucketAttrs, e
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
 
