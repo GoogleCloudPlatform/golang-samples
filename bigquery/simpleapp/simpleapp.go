@@ -55,6 +55,7 @@ func query(proj string) (*bigquery.RowIterator, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer client.Close()
 	// [END bigquery_simple_app_client]
 
 	// [START bigquery_simple_app_query]

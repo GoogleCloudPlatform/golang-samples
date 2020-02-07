@@ -33,6 +33,8 @@ func importCSVAutodetectSchema(projectID, datasetID, tableID string) error {
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
+
 
 	gcsRef := bigquery.NewGCSReference("gs://cloud-samples-data/bigquery/us-states/us-states.csv")
 	gcsRef.SourceFormat = bigquery.CSV

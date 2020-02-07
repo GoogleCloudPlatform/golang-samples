@@ -34,6 +34,7 @@ func listJobs(w io.Writer, projectID string) error {
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	it := client.Jobs(ctx)
 	// List up to 10 jobs to demonstrate iteration.
