@@ -34,7 +34,6 @@ func exportTableAsJSON(projectID, gcsURI string) error {
 	}
 	defer client.Close()
 
-
 	srcProject := "bigquery-public-data"
 	srcDataset := "samples"
 	srcTable := "shakespeare"
