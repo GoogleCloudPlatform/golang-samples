@@ -17,6 +17,11 @@
 // This quickstart shows how you can use the Cloud Dataproc Client library to create a
 // Cloud Dataproc cluster, submit a PySpark job to the cluster, wait for the job to finish
 // and finally delete the cluster.
+//
+// Usage:
+//     go build
+//     ./quickstart --project_id <PROJECT_ID> --region <REGION> \
+//         --cluster_name <CLUSTER_NAME> --job_file_path <GCS_JOB_FILE_PATH>
 package main
 
 import (
@@ -36,8 +41,8 @@ import (
 func main() {
 	var projectID, clusterName, region, jobFilePath string
 	flag.StringVar(&projectID, "project_id", "", "Cloud Project ID, used for creating resources.")
-	flag.StringVar(&clusterName, "cluster_name", "", "Name of Cloud Dataproc cluster to create.")
 	flag.StringVar(&region, "region", "", "Region that resources should be created in.")
+	flag.StringVar(&clusterName, "cluster_name", "", "Name of Cloud Dataproc cluster to create.")
 	flag.StringVar(&jobFilePath, "job_file_path", "", "Path to job file in GCS.")
 	flag.Parse()
 
