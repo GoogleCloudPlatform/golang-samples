@@ -17,7 +17,6 @@ package buckets
 // [START storage_remove_retention_policy]
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"cloud.google.com/go/storage"
@@ -36,17 +35,17 @@ func removeRetentionPolicy(bucketName string) error {
 	bucket := client.Bucket(bucketName)
 	attrs, err := bucket.Attrs(ctx)
 	if err != nil {
-		return fmt.Errorf("Bucket.Attrs: %v", err)
+		return fmt.Errorf("BucketHandle.Attrs: %v", err)
 	}
 	if attrs.RetentionPolicy.IsLocked {
-		return errors.New("retention policy is locked")
+		return fmt.Errorf("retention policy is locked")
 	}
 
 	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
 		RetentionPolicy: &storage.RetentionPolicy{},
 	}
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
-		return err
+		return fmt.Errorf("BucketHandle.Update: %v", err)
 	}
 	return nil
 }

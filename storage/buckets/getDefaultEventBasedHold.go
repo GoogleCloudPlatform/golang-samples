@@ -35,7 +35,7 @@ func getDefaultEventBasedHold(w io.Writer, bucketName string) (*storage.BucketAt
 
 	attrs, err := client.Bucket(bucketName).Attrs(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("BucketHandle.Attrs: %v", err)
 	}
 	fmt.Fprintf(w, "Default event-based hold enabled? %t\n", attrs.DefaultEventBasedHold)
 	return attrs, nil

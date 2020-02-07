@@ -33,8 +33,9 @@ func create(projectID, bucketName string) error {
 	}
 	defer client.Close()
 
-	if err := client.Bucket(bucketName).Create(ctx, projectID, nil); err != nil {
-		return err
+	bucket := client.Bucket(bucketName)
+	if err := bucket.Create(ctx, projectID, nil); err != nil {
+		return fmt.Errorf("BucketHandle.Create: %v", err)
 	}
 	return nil
 }

@@ -39,7 +39,7 @@ func disableUniformBucketLevelAccess(bucketName string) error {
 		},
 	}
 	if _, err := bucket.Update(ctx, disableUniformBucketLevelAccess); err != nil {
-		return err
+		return fmt.Errorf("BucketHandle.Update: %v", err)
 	}
 	return nil
 }

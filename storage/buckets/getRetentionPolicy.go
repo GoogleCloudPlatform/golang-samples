@@ -35,7 +35,7 @@ func getRetentionPolicy(w io.Writer, bucketName string) (*storage.BucketAttrs, e
 
 	attrs, err := client.Bucket(bucketName).Attrs(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("BucketHandle.Attrs: %v", err)
 	}
 	if attrs.RetentionPolicy != nil {
 		fmt.Fprintln(w, "Retention Policy")

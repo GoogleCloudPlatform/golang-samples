@@ -38,7 +38,7 @@ func setDefaultKMSkey(bucketName, keyName string) error {
 		Encryption: &storage.BucketEncryption{DefaultKMSKeyName: keyName},
 	}
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
-		return err
+		return fmt.Errorf("BucketHandle.Update: %v", err)
 	}
 	return nil
 }

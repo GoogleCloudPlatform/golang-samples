@@ -37,7 +37,7 @@ func disableDefaultEventBasedHold(bucketName string) error {
 		DefaultEventBasedHold: false,
 	}
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
-		return err
+		return fmt.Errorf("BucketHandle.Update: %v", err)
 	}
 	return nil
 }

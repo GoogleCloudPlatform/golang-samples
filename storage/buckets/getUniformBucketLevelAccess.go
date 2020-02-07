@@ -35,7 +35,7 @@ func getUniformBucketLevelAccess(w io.Writer, bucketName string) (*storage.Bucke
 
 	attrs, err := client.Bucket(bucketName).Attrs(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("BucketHandle.Attrs: %v", err)
 	}
 	uniformBucketLevelAccess := attrs.UniformBucketLevelAccess
 	if uniformBucketLevelAccess.Enabled {
@@ -44,7 +44,6 @@ func getUniformBucketLevelAccess(w io.Writer, bucketName string) (*storage.Bucke
 	} else {
 		fmt.Fprintf(w, "Uniform bucket-level access is not enabled for %q.\n", attrs.Name)
 	}
-
 	return attrs, nil
 }
 
