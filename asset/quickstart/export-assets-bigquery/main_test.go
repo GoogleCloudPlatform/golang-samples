@@ -32,7 +32,7 @@ func TestMain(t *testing.T) {
 
 	ctx := context.Background()
 	// Creates a bigquery client.
-	client_bq, err_bq := bigquery.NewClient(ctx, tc.ProjectID)
+	client, err := bigquery.NewClient(ctx, tc.ProjectID)
 	if err_bq != nil {
 		t.Fatalf("failed to create bigquery client: %v", err_bq)
 	}
