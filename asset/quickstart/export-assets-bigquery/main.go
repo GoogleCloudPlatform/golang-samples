@@ -37,14 +37,13 @@ func main() {
 	}
 	datasetID := strings.Replace(fmt.Sprintf("%s-for-assets", projectID), "-", "_", -1)
 	dataset := fmt.Sprintf("projects/%s/datasets/%s", projectID, datasetID)
-	table := "test"
 	req := &assetpb.ExportAssetsRequest{
 		Parent: fmt.Sprintf("projects/%s", projectID),
 		OutputConfig: &assetpb.OutputConfig{
 			Destination: &assetpb.OutputConfig_BigqueryDestination{
 				BigqueryDestination: &assetpb.BigQueryDestination{
 					Dataset: dataset,
-					Table:   string(table),
+					Table: "test",
 				},
 			},
 		},
