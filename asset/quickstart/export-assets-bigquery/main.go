@@ -55,7 +55,7 @@ func main() {
 	}
 	resp, err := op.Wait(ctx)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Wait: %v", err)
 	}
 	fmt.Print(resp)
 }
