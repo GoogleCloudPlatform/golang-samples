@@ -51,7 +51,7 @@ func main() {
 	}
 	op, err := client.ExportAssets(ctx, req)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("ExportAssets: %v", err)
 	}
 	resp, err := op.Wait(ctx)
 	if err != nil {
