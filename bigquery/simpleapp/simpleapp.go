@@ -56,7 +56,7 @@ func main() {
 	}
 }
 
-// query returns a slice of the results of a query.
+// query returns a row iterator suitable for reading query results.
 func query(ctx context.Context, client *bigquery.Client) (*bigquery.RowIterator, error) {
 
 	// [START bigquery_simple_app_query]
