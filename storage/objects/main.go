@@ -90,14 +90,16 @@ func main() {
 }
 
 func write(client *storage.Client, bucket, object string) error {
-	ctx := context.Background()
 	// [START upload_file]
+	ctx := context.Background()
 	f, err := os.Open("notes.txt")
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 
+	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
+	defer cancel()
 	wc := client.Bucket(bucket).Object(object).NewWriter(ctx)
 	if _, err = io.Copy(wc, f); err != nil {
 		return err
@@ -110,8 +112,11 @@ func write(client *storage.Client, bucket, object string) error {
 }
 
 func list(w io.Writer, client *storage.Client, bucket string) error {
-	ctx := context.Background()
 	// [START storage_list_files]
+	ctx := context.Background()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 	it := client.Bucket(bucket).Objects(ctx, nil)
 	for {
 		attrs, err := it.Next()
@@ -128,7 +133,6 @@ func list(w io.Writer, client *storage.Client, bucket string) error {
 }
 
 func listByPrefix(w io.Writer, client *storage.Client, bucket, prefix, delim string) error {
-	ctx := context.Background()
 	// [START storage_list_files_with_prefix]
 	// Prefixes and delimiters can be used to emulate directory listings.
 	// Prefixes can be used filter objects starting with prefix.
@@ -146,6 +150,10 @@ func listByPrefix(w io.Writer, client *storage.Client, bucket, prefix, delim str
 	//
 	// However, if you specify prefix="a/" and delim="/", you'll get back:
 	//   /a/1.txt
+	ctx := context.Background()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 	it := client.Bucket(bucket).Objects(ctx, &storage.Query{
 		Prefix:    prefix,
 		Delimiter: delim,
@@ -165,8 +173,11 @@ func listByPrefix(w io.Writer, client *storage.Client, bucket, prefix, delim str
 }
 
 func read(client *storage.Client, bucket, object string) ([]byte, error) {
-	ctx := context.Background()
 	// [START download_file]
+	ctx := context.Background()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
+	defer cancel()
 	rc, err := client.Bucket(bucket).Object(object).NewReader(ctx)
 	if err != nil {
 		return nil, err
@@ -182,8 +193,11 @@ func read(client *storage.Client, bucket, object string) ([]byte, error) {
 }
 
 func attrs(client *storage.Client, bucket, object string) (*storage.ObjectAttrs, error) {
-	ctx := context.Background()
 	// [START get_metadata]
+	ctx := context.Background()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 	o := client.Bucket(bucket).Object(object)
 	attrs, err := o.Attrs(ctx)
 	if err != nil {
@@ -219,8 +233,11 @@ func attrs(client *storage.Client, bucket, object string) (*storage.ObjectAttrs,
 }
 
 func setEventBasedHold(client *storage.Client, bucket, object string) error {
-	ctx := context.Background()
 	// [START storage_set_event_based_hold]
+	ctx := context.Background()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 	o := client.Bucket(bucket).Object(object)
 	objectAttrsToUpdate := storage.ObjectAttrsToUpdate{
 		EventBasedHold: true,
@@ -233,8 +250,11 @@ func setEventBasedHold(client *storage.Client, bucket, object string) error {
 }
 
 func releaseEventBasedHold(client *storage.Client, bucket, object string) error {
-	ctx := context.Background()
 	// [START storage_release_event_based_hold]
+	ctx := context.Background()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 	o := client.Bucket(bucket).Object(object)
 	objectAttrsToUpdate := storage.ObjectAttrsToUpdate{
 		EventBasedHold: false,
@@ -247,8 +267,11 @@ func releaseEventBasedHold(client *storage.Client, bucket, object string) error 
 }
 
 func setTemporaryHold(client *storage.Client, bucket, object string) error {
-	ctx := context.Background()
 	// [START storage_set_temporary_hold]
+	ctx := context.Background()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 	o := client.Bucket(bucket).Object(object)
 	objectAttrsToUpdate := storage.ObjectAttrsToUpdate{
 		TemporaryHold: true,
@@ -261,8 +284,11 @@ func setTemporaryHold(client *storage.Client, bucket, object string) error {
 }
 
 func releaseTemporaryHold(client *storage.Client, bucket, object string) error {
-	ctx := context.Background()
 	// [START storage_release_temporary_hold]
+	ctx := context.Background()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 	o := client.Bucket(bucket).Object(object)
 	objectAttrsToUpdate := storage.ObjectAttrsToUpdate{
 		TemporaryHold: false,
@@ -275,8 +301,11 @@ func releaseTemporaryHold(client *storage.Client, bucket, object string) error {
 }
 
 func makePublic(client *storage.Client, bucket, object string) error {
-	ctx := context.Background()
 	// [START public]
+	ctx := context.Background()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 	acl := client.Bucket(bucket).Object(object).ACL()
 	if err := acl.Set(ctx, storage.AllUsers, storage.RoleReader); err != nil {
 		return err
@@ -286,8 +315,11 @@ func makePublic(client *storage.Client, bucket, object string) error {
 }
 
 func move(client *storage.Client, bucket, object string) error {
-	ctx := context.Background()
 	// [START move_file]
+	ctx := context.Background()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 	dstName := object + "-rename"
 
 	src := client.Bucket(bucket).Object(object)
@@ -304,8 +336,11 @@ func move(client *storage.Client, bucket, object string) error {
 }
 
 func copyToBucket(client *storage.Client, dstBucket, srcBucket, srcObject string) error {
-	ctx := context.Background()
 	// [START copy_file]
+	ctx := context.Background()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 	dstObject := srcObject + "-copy"
 	src := client.Bucket(srcBucket).Object(srcObject)
 	dst := client.Bucket(dstBucket).Object(dstObject)
@@ -318,8 +353,11 @@ func copyToBucket(client *storage.Client, dstBucket, srcBucket, srcObject string
 }
 
 func delete(client *storage.Client, bucket, object string) error {
-	ctx := context.Background()
 	// [START delete_file]
+	ctx := context.Background()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 	o := client.Bucket(bucket).Object(object)
 	if err := o.Delete(ctx); err != nil {
 		return err
@@ -330,10 +368,13 @@ func delete(client *storage.Client, bucket, object string) error {
 
 // writeEncryptedObject writes an object encrypted with user-provided AES key to a bucket.
 func writeEncryptedObject(client *storage.Client, bucket, object string, secretKey []byte) error {
-	ctx := context.Background()
-
 	// [START storage_upload_encrypted_file]
+	ctx := context.Background()
 	obj := client.Bucket(bucket).Object(object)
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
+	defer cancel()
+
 	// Encrypt the object's contents.
 	wc := obj.Key(secretKey).NewWriter(ctx)
 	if _, err := wc.Write([]byte("top secret")); err != nil {
@@ -348,10 +389,13 @@ func writeEncryptedObject(client *storage.Client, bucket, object string, secretK
 
 // writeWithKMSKey writes an object encrypted with KMS-provided key to a bucket.
 func writeWithKMSKey(client *storage.Client, bucket, object string, keyName string) error {
-	ctx := context.Background()
-
 	// [START storage_upload_with_kms_key]
+	ctx := context.Background()
 	obj := client.Bucket(bucket).Object(object)
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
+	defer cancel()
+
 	// Encrypt the object's contents
 	wc := obj.NewWriter(ctx)
 	wc.KMSKeyName = keyName
@@ -366,10 +410,12 @@ func writeWithKMSKey(client *storage.Client, bucket, object string, keyName stri
 }
 
 func readEncryptedObject(client *storage.Client, bucket, object string, secretKey []byte) ([]byte, error) {
-	ctx := context.Background()
-
 	// [START storage_download_encrypted_file]
+	ctx := context.Background()
 	obj := client.Bucket(bucket).Object(object)
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
+	defer cancel()
 	rc, err := obj.Key(secretKey).NewReader(ctx)
 	if err != nil {
 		return nil, err
@@ -385,13 +431,17 @@ func readEncryptedObject(client *storage.Client, bucket, object string, secretKe
 }
 
 func rotateEncryptionKey(client *storage.Client, bucket, object string, key, newKey []byte) error {
-	ctx := context.Background()
 	// [START storage_rotate_encryption_key]
+	ctx := context.Background()
+
 	client, err := storage.NewClient(ctx)
 	if err != nil {
 		return err
 	}
 	obj := client.Bucket(bucket).Object(object)
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 	// obj is encrypted with key, we are encrypting it with the newKey.
 	_, err = obj.Key(newKey).CopierFrom(obj.Key(key)).Run(ctx)
 	if err != nil {
@@ -402,8 +452,9 @@ func rotateEncryptionKey(client *storage.Client, bucket, object string, key, new
 }
 
 func downloadUsingRequesterPays(client *storage.Client, object, bucketName, localpath, billingProjectID string) error {
-	ctx := context.Background()
 	// [START storage_download_file_requester_pays]
+	ctx := context.Background()
+
 	bucket := client.Bucket(bucketName).UserProject(billingProjectID)
 	src := bucket.Object(object)
 
@@ -411,6 +462,9 @@ func downloadUsingRequesterPays(client *storage.Client, object, bucketName, loca
 	if err != nil {
 		return err
 	}
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
+	defer cancel()
 	rc, err := src.NewReader(ctx)
 	if err != nil {
 		return err

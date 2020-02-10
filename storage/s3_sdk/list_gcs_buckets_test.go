@@ -32,6 +32,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestList(t *testing.T) {
+	t.Skip("HMAC secrets are not set up correctly: https://github.com/GoogleCloudPlatform/golang-samples/issues/1213")
 	googleAccessKeyID := os.Getenv("STORAGE_HMAC_ACCESS_KEY_ID")
 	googleAccessKeySecret := os.Getenv("STORAGE_HMAC_ACCESS_SECRET_KEY")
 

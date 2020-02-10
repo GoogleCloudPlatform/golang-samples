@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -40,6 +41,8 @@ func listGCSBuckets(w io.Writer, googleAccessKeyID string, googleAccessKeySecret
 	client := s3.New(sess)
 	ctx := context.Background()
 
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 	result, err := client.ListBucketsWithContext(ctx, &s3.ListBucketsInput{})
 	if err != nil {
 		return nil, err
