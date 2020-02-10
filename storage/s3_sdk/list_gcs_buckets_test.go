@@ -49,12 +49,12 @@ func TestList(t *testing.T) {
 	buf := new(bytes.Buffer)
 	_, err = listGCSBuckets(buf, key.AccessID, key.Secret)
 	if err != nil {
-		t.Errorf("listGCSBuckets: %v", err)
+		t.Fatalf("listGCSBuckets: %v", err)
 	}
 
 	got := buf.String()
 	if want := "Buckets:"; !strings.Contains(got, want) {
-		t.Errorf("listGCSBuckets got\n----\n%s\n----\nWant to contain\n----\n%s\n----", got, want)
+		t.Fatalf("listGCSBuckets got\n----\n%s\n----\nWant to contain\n----\n%s\n----", got, want)
 	}
 }
 
