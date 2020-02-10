@@ -14,7 +14,7 @@
 
 package acl
 
-// [START delete_object_default_acl]
+// [START storage_remove_file_owner]
 import (
 	"context"
 	"fmt"
@@ -22,8 +22,8 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// deleteObjectACL removes default ACL from the given object.
-func deleteObjectACL(bucket, object string, entity storage.ACLEntity) error {
+// removeFileOwner removes default ACL from the given object.
+func removeFileOwner(bucket, object string, entity storage.ACLEntity) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	// entity := storage.AllUsers
@@ -41,4 +41,4 @@ func deleteObjectACL(bucket, object string, entity storage.ACLEntity) error {
 	return nil
 }
 
-// [END delete_object_default_acl]
+// [END storage_remove_file_owner]

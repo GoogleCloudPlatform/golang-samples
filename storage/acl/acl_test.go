@@ -35,38 +35,38 @@ func TestACL(t *testing.T) {
 		roleReader            = storage.RoleReader
 	)
 
-	if err := addBucketACL(bucket, allAuthenticatedUsers, roleReader); err != nil {
-		t.Errorf("addBucketACL: %v", err)
+	if err := addBucketOwner(bucket, allAuthenticatedUsers); err != nil {
+		t.Errorf("addBucketOwner: %v", err)
 	}
-	if err := addDefaultBucketACL(bucket, allAuthenticatedUsers, roleReader); err != nil {
-		t.Errorf("addDefaultBucketACL: %v", err)
+	if err := addBucketDefaultOwner(bucket, allAuthenticatedUsers); err != nil {
+		t.Errorf("addBucketDefaultOwner: %v", err)
 	}
-	if err := bucketListACL(&buf, bucket); err != nil {
-		t.Errorf("bucketListACL: %v", err)
-	}
-	buf.Reset()
-	if err := bucketListACLFiltered(&buf, bucket, allAuthenticatedUsers); err != nil {
-		t.Errorf("bucketListACLFiltered: %v", err)
+	if err := printBucketACL(&buf, bucket); err != nil {
+		t.Errorf("printBucketACL: %v", err)
 	}
 	buf.Reset()
-	if err := deleteDefaultBucketACL(bucket, allAuthenticatedUsers); err != nil {
-		t.Errorf("deleteDefaultBucketACL: %v", err)
-	}
-	if err := deleteBucketACL(bucket, allAuthenticatedUsers); err != nil {
-		t.Errorf("deleteBucketACL: %v", err)
-	}
-	if err := addObjectACL(bucket, object, allAuthenticatedUsers, roleReader); err != nil {
-		t.Errorf("addObjectACL: %v", err)
-	}
-	if err := objectListACL(&buf, bucket, object); err != nil {
-		t.Errorf("objectListACL: %v", err)
+	if err := printBucketACLForUser(&buf, bucket, allAuthenticatedUsers); err != nil {
+		t.Errorf("printBucketACLForUser: %v", err)
 	}
 	buf.Reset()
-	if err := objectListACLFiltered(&buf, bucket, object, allAuthenticatedUsers); err != nil {
-		t.Errorf("objectListACLFiltered: %v", err)
+	if err := removeBucketDefaultOwner(bucket, allAuthenticatedUsers); err != nil {
+		t.Errorf("removeBucketDefaultOwner: %v", err)
 	}
-	if err := deleteObjectACL(bucket, object, allAuthenticatedUsers); err != nil {
-		t.Errorf("deleteObjectACL: %v", err)
+	if err := removeBucketOwner(bucket, allAuthenticatedUsers); err != nil {
+		t.Errorf("removeBucketOwner: %v", err)
+	}
+	if err := addFileOwner(bucket, object, allAuthenticatedUsers); err != nil {
+		t.Errorf("addFileOwner: %v", err)
+	}
+	if err := printFileACL(&buf, bucket, object); err != nil {
+		t.Errorf("printFileACL: %v", err)
+	}
+	buf.Reset()
+	if err := printFileACLForUser(&buf, bucket, object, allAuthenticatedUsers); err != nil {
+		t.Errorf("printFileACLForUser: %v", err)
+	}
+	if err := removeFileOwner(bucket, object, allAuthenticatedUsers); err != nil {
+		t.Errorf("removeFileOwner: %v", err)
 	}
 
 	ctx := context.Background()

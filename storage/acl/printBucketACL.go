@@ -14,18 +14,18 @@
 
 package acl
 
-// [START delete_bucket_acl]
+// [START storage_print_bucket_acl]
 import (
 	"context"
 	"fmt"
+	"io"
 
 	"cloud.google.com/go/storage"
 )
 
-// deleteBucketACL removes ACL from a bucket.
-func deleteBucketACL(bucket string, entity storage.ACLEntity) error {
+// printBucketACL lists bucket ACL.
+func printBucketACL(w io.Writer, bucket string) error {
 	// bucket := "bucket-name"
-	// entity := storage.AllUsers
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -33,11 +33,14 @@ func deleteBucketACL(bucket string, entity storage.ACLEntity) error {
 	}
 	defer client.Close()
 
-	acl := client.Bucket(bucket).ACL()
-	if err := acl.Delete(ctx, entity); err != nil {
-		return fmt.Errorf("ACLHandle.Delete: %v", err)
+	rules, err := client.Bucket(bucket).ACL().List(ctx)
+	if err != nil {
+		return fmt.Errorf("ACLHandle.List: %v", err)
+	}
+	for _, rule := range rules {
+		fmt.Fprintf(w, "ACL rule: %v\n", rule)
 	}
 	return nil
 }
 
-// [END delete_bucket_acl]
+// [END storage_print_bucket_acl]

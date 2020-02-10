@@ -14,7 +14,7 @@
 
 package acl
 
-// [START bucket_add_default_acl]
+// [START storage_remove_bucket_owner]
 import (
 	"context"
 	"fmt"
@@ -22,11 +22,10 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// addDefaultBucketACL adds default ACL to the specified bucket.
-func addDefaultBucketACL(bucket string, entity storage.ACLEntity, role storage.ACLRole) error {
+// removeBucketOwner removes ACL from a bucket.
+func removeBucketOwner(bucket string, entity storage.ACLEntity) error {
 	// bucket := "bucket-name"
 	// entity := storage.AllUsers
-	// role := storage.RoleReader
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -34,11 +33,11 @@ func addDefaultBucketACL(bucket string, entity storage.ACLEntity, role storage.A
 	}
 	defer client.Close()
 
-	acl := client.Bucket(bucket).DefaultObjectACL()
-	if err := acl.Set(ctx, entity, role); err != nil {
-		return fmt.Errorf("ACLHandle.Set: %v", err)
+	acl := client.Bucket(bucket).ACL()
+	if err := acl.Delete(ctx, entity); err != nil {
+		return fmt.Errorf("ACLHandle.Delete: %v", err)
 	}
 	return nil
 }
 
-// [END bucket_add_default_acl]
+// [END storage_remove_bucket_owner]

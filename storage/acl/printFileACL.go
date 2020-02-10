@@ -14,7 +14,7 @@
 
 package acl
 
-// [START object_list_acl]
+// [START storage_print_file_acl]
 import (
 	"context"
 	"fmt"
@@ -23,8 +23,8 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// objectListACL lists ACL of the specified object.
-func objectListACL(w io.Writer, bucket, object string) error {
+// printFileACL lists ACL of the specified object.
+func printFileACL(w io.Writer, bucket, object string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	ctx := context.Background()
@@ -44,4 +44,4 @@ func objectListACL(w io.Writer, bucket, object string) error {
 	return nil
 }
 
-// [END object_list_acl]
+// [END storage_print_file_acl]
