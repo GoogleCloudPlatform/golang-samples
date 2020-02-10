@@ -36,7 +36,7 @@ func downloadFile(bucket, object string) ([]byte, error) {
 
 	rc, err := client.Bucket(bucket).Object(object).NewReader(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("Object.NewReader: %v", err)
+		return nil, fmt.Errorf("Object(%q).NewReader: %v", object, err)
 	}
 	defer rc.Close()
 

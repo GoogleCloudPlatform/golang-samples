@@ -38,10 +38,10 @@ func moveFile(bucket, object string) error {
 	dst := client.Bucket(bucket).Object(dstName)
 
 	if _, err := dst.CopierFrom(src).Run(ctx); err != nil {
-		return fmt.Errorf("Object.CopierFrom.Run: %v", err)
+		return fmt.Errorf("Object(%q).CopierFrom(%q).Run: %v", dstName, object, err)
 	}
 	if err := src.Delete(ctx); err != nil {
-		return fmt.Errorf("Object.Delete: %v", err)
+		return fmt.Errorf("Object(%q).Delete: %v", object, err)
 	}
 	return nil
 }

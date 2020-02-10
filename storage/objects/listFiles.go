@@ -41,7 +41,7 @@ func listFiles(w io.Writer, bucket string) error {
 			break
 		}
 		if err != nil {
-			return err
+			return fmt.Errorf("Bucket(%q).Objects: %v", bucket, err)
 		}
 		fmt.Fprintln(w, attrs.Name)
 	}

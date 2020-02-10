@@ -37,7 +37,7 @@ func getMetadata(w io.Writer, bucket, object string) (*storage.ObjectAttrs, erro
 	o := client.Bucket(bucket).Object(object)
 	attrs, err := o.Attrs(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("Object.Attrs: %v", err)
+		return nil, fmt.Errorf("Object(%q).Attrs: %v", object, err)
 	}
 	fmt.Fprintf(w, "Bucket: %v\n", attrs.Bucket)
 	fmt.Fprintf(w, "CacheControl: %v\n", attrs.CacheControl)

@@ -38,7 +38,7 @@ func downloadEncryptedFile(bucket, object string, secretKey []byte) ([]byte, err
 	obj := client.Bucket(bucket).Object(object)
 	rc, err := obj.Key(secretKey).NewReader(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("Key.NewReader: %v", err)
+		return nil, fmt.Errorf("Object(%q).Key(%q).NewReader: %v", object, secretKey, err)
 	}
 	defer rc.Close()
 
