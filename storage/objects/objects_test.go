@@ -89,13 +89,10 @@ func TestObjects(t *testing.T) {
 	}
 
 	{
-		var buf bytes.Buffer
-		if err := downloadUsingRequesterPays(&buf, bucket, object1, tc.ProjectID); err != nil {
+		if err := downloadUsingRequesterPays(ioutil.Discard, bucket, object1, tc.ProjectID); err != nil {
 			t.Errorf("downloadUsingRequesterPays: %v", err)
 		}
 	}
-
-	var buf bytes.Buffer
 
 	data, err := downloadFile(bucket, object1)
 	if err != nil {
@@ -105,7 +102,7 @@ func TestObjects(t *testing.T) {
 		t.Errorf("contents = %q; want %q", got, want)
 	}
 
-	_, err = getMetadata(&buf, bucket, object1)
+	_, err = getMetadata(ioutil.Discard, bucket, object1)
 	if err != nil {
 		t.Errorf("getMetadata: %v", err)
 	}
@@ -270,7 +267,6 @@ func TestObjectBucketLock(t *testing.T) {
 		bucketName      = tc.ProjectID + "-retent-samples-object-bucket"
 		objectName      = "foo.txt"
 		retentionPeriod = 5 * time.Second
-		buf             bytes.Buffer
 	)
 
 	cleanBucket(t, ctx, client, tc.ProjectID, bucketName)
@@ -289,22 +285,20 @@ func TestObjectBucketLock(t *testing.T) {
 	if err := setEventBasedHold(bucketName, objectName); err != nil {
 		t.Errorf("setEventBasedHold(%q, %q): %v", bucketName, objectName, err)
 	}
-	oAttrs, err := getMetadata(&buf, bucketName, objectName)
+	oAttrs, err := getMetadata(ioutil.Discard, bucketName, objectName)
 	if err != nil {
 		t.Errorf("getMetadata: %v", err)
 	}
-	buf.Reset()
 	if !oAttrs.EventBasedHold {
 		t.Errorf("event-based hold is not enabled")
 	}
 	if err := releaseEventBasedHold(bucketName, objectName); err != nil {
 		t.Errorf("releaseEventBasedHold(%q, %q): %v", bucketName, objectName, err)
 	}
-	oAttrs, err = getMetadata(&buf, bucketName, objectName)
+	oAttrs, err = getMetadata(ioutil.Discard, bucketName, objectName)
 	if err != nil {
 		t.Errorf("getMetadata: %v", err)
 	}
-	buf.Reset()
 	if oAttrs.EventBasedHold {
 		t.Errorf("event-based hold is not disabled")
 	}
@@ -316,18 +310,17 @@ func TestObjectBucketLock(t *testing.T) {
 	if err := setTemporaryHold(bucketName, objectName); err != nil {
 		t.Errorf("setTemporaryHold(%q, %q): %v", bucketName, objectName, err)
 	}
-	oAttrs, err = getMetadata(&buf, bucketName, objectName)
+	oAttrs, err = getMetadata(ioutil.Discard, bucketName, objectName)
 	if err != nil {
 		t.Errorf("getMetadata: %v", err)
 	}
-	buf.Reset()
 	if !oAttrs.TemporaryHold {
 		t.Errorf("temporary hold is not disabled")
 	}
 	if err := releaseTemporaryHold(bucketName, objectName); err != nil {
 		t.Errorf("releaseTemporaryHold(%q, %q): %v", bucketName, objectName, err)
 	}
-	oAttrs, err = getMetadata(&buf, bucketName, objectName)
+	oAttrs, err = getMetadata(ioutil.Discard, bucketName, objectName)
 	if err != nil {
 		t.Errorf("getMetadata: %v", err)
 	}

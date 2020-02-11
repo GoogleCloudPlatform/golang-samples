@@ -17,6 +17,7 @@ package acl
 import (
 	"bytes"
 	"context"
+	"ioutil"
 	"testing"
 	"time"
 
@@ -30,7 +31,6 @@ func TestACL(t *testing.T) {
 	var (
 		bucket                = tc.ProjectID + "-samples-object-bucket-1"
 		object                = "foo.txt"
-		buf                   bytes.Buffer
 		allAuthenticatedUsers = storage.AllAuthenticatedUsers
 		roleReader            = storage.RoleReader
 	)
@@ -41,14 +41,12 @@ func TestACL(t *testing.T) {
 	if err := addBucketDefaultOwner(bucket, allAuthenticatedUsers); err != nil {
 		t.Errorf("addBucketDefaultOwner: %v", err)
 	}
-	if err := printBucketACL(&buf, bucket); err != nil {
+	if err := printBucketACL(ioutil.Discard, bucket); err != nil {
 		t.Errorf("printBucketACL: %v", err)
 	}
-	buf.Reset()
-	if err := printBucketACLForUser(&buf, bucket, allAuthenticatedUsers); err != nil {
+	if err := printBucketACLForUser(ioutil.Discard, bucket, allAuthenticatedUsers); err != nil {
 		t.Errorf("printBucketACLForUser: %v", err)
 	}
-	buf.Reset()
 	if err := removeBucketDefaultOwner(bucket, allAuthenticatedUsers); err != nil {
 		t.Errorf("removeBucketDefaultOwner: %v", err)
 	}
@@ -58,11 +56,10 @@ func TestACL(t *testing.T) {
 	if err := addFileOwner(bucket, object, allAuthenticatedUsers); err != nil {
 		t.Errorf("addFileOwner: %v", err)
 	}
-	if err := printFileACL(&buf, bucket, object); err != nil {
+	if err := printFileACL(ioutil.Discard, bucket, object); err != nil {
 		t.Errorf("printFileACL: %v", err)
 	}
-	buf.Reset()
-	if err := printFileACLForUser(&buf, bucket, object, allAuthenticatedUsers); err != nil {
+	if err := printFileACLForUser(ioutil.Discard, bucket, object, allAuthenticatedUsers); err != nil {
 		t.Errorf("printFileACLForUser: %v", err)
 	}
 	if err := removeFileOwner(bucket, object, allAuthenticatedUsers); err != nil {
