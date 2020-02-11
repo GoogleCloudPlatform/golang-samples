@@ -151,7 +151,7 @@ func TestObjects(t *testing.T) {
 		// Cleanup, this part won't be executed if Fatal happens.
 		// TODO(jbd): Implement garbage cleaning.
 		if err := client.Bucket(bucket).Delete(ctx); err != nil {
-			r.Errorf("Bucket.Delete: %v", err)
+			r.Errorf("Bucket(%q).Delete: %v", bucket, err)
 		}
 	})
 
@@ -163,7 +163,7 @@ func TestObjects(t *testing.T) {
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		if err := client.Bucket(dstBucket).Delete(ctx); err != nil {
-			r.Errorf("Bucket.Delete: %v", err)
+			r.Errorf("Bucket(%q).Delete: %v", dstBucket, err)
 		}
 	})
 }
@@ -348,7 +348,7 @@ func cleanBucket(t *testing.T, ctx context.Context, client *storage.Client, proj
 				break
 			}
 			if err != nil {
-				t.Fatalf("Bucket.Objects(%q): %v", bucket, err)
+				t.Fatalf("Bucket(%q).Objects: %v", bucket, err)
 			}
 			if attrs.EventBasedHold || attrs.TemporaryHold {
 				if _, err := b.Object(attrs.Name).Update(ctx, storage.ObjectAttrsToUpdate{
@@ -363,10 +363,10 @@ func cleanBucket(t *testing.T, ctx context.Context, client *storage.Client, proj
 			}
 		}
 		if err := b.Delete(ctx); err != nil {
-			t.Fatalf("Bucket.Delete(%q): %v", bucket, err)
+			t.Fatalf("Bucket(%q).Delete: %v", bucket, err)
 		}
 	}
 	if err := b.Create(ctx, projectID, nil); err != nil {
-		t.Fatalf("Bucket.Create(%q): %v", bucket, err)
+		t.Fatalf("Bucket(%q).Create: %v", bucket, err)
 	}
 }

@@ -38,7 +38,7 @@ func setTemporaryHold(bucket, object string) error {
 		TemporaryHold: true,
 	}
 	if _, err := o.Update(ctx, objectAttrsToUpdate); err != nil {
-		return fmt.Errorf("Object.Update: %v", err)
+		return fmt.Errorf("Object(%q).Update: %v", object, err)
 	}
 	return nil
 }

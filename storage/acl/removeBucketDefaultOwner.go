@@ -14,7 +14,7 @@
 
 package acl
 
-// [START delete_bucket_default_acl]
+// [START storage_remove_bucket_default_owner]
 import (
 	"context"
 	"fmt"
@@ -23,7 +23,7 @@ import (
 )
 
 // deleteDefaultBucketACL removes default ACL from a bucket.
-func deleteDefaultBucketACL(bucket string, entity storage.ACLEntity) error {
+func removeBucketDefaultOwner(bucket string, entity storage.ACLEntity) error {
 	// bucket := "bucket-name"
 	// entity := storage.AllUsers
 	ctx := context.Background()
@@ -40,4 +40,4 @@ func deleteDefaultBucketACL(bucket string, entity storage.ACLEntity) error {
 	return nil
 }
 
-// [END delete_bucket_default_acl]
+// [END storage_remove_bucket_default_owner]

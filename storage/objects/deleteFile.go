@@ -35,7 +35,7 @@ func deleteFile(bucket, object string) error {
 
 	o := client.Bucket(bucket).Object(object)
 	if err := o.Delete(ctx); err != nil {
-		return fmt.Errorf("Object.Delete: %v", err)
+		return fmt.Errorf("Object(%q).Delete: %v", object, err)
 	}
 	return nil
 }

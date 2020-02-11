@@ -14,7 +14,7 @@
 
 package acl
 
-// [START object_list_acl_filtered]
+// [START storage_print_file_acl_for_user]
 import (
 	"context"
 	"fmt"
@@ -23,8 +23,8 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// objectListACLFiltered lists ACL of the specified object with filter.
-func objectListACLFiltered(w io.Writer, bucket, object string, entity storage.ACLEntity) error {
+// printFileACLForUser lists ACL of the specified object with filter.
+func printFileACLForUser(w io.Writer, bucket, object string, entity storage.ACLEntity) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	// entity := storage.AllAuthenticatedUsers
@@ -47,4 +47,4 @@ func objectListACLFiltered(w io.Writer, bucket, object string, entity storage.AC
 	return nil
 }
 
-// [END object_list_acl_filtered]
+// [END storage_print_file_acl_for_user]

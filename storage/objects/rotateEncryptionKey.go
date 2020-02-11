@@ -39,7 +39,7 @@ func rotateEncryptionKey(bucket, object string, key, newKey []byte) error {
 	// obj is encrypted with key, we are encrypting it with the newKey.
 	_, err = obj.Key(newKey).CopierFrom(obj.Key(key)).Run(ctx)
 	if err != nil {
-		return fmt.Errorf("Key.CopierFrom.Run: %v", err)
+		return fmt.Errorf("Key(%q).CopierFrom(%q).Run: %v", newKey, key, err)
 	}
 	return nil
 }

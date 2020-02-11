@@ -38,7 +38,7 @@ func releaseEventBasedHold(bucket, object string) error {
 		EventBasedHold: false,
 	}
 	if _, err := o.Update(ctx, objectAttrsToUpdate); err != nil {
-		return fmt.Errorf("Object.Update: %v", err)
+		return fmt.Errorf("Object(%q).Update: %v", object, err)
 	}
 	return nil
 }

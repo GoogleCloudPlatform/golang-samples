@@ -46,7 +46,7 @@ func downloadUsingRequesterPays(w io.Writer, bucket, object, billingProjectID st
 	}
 	rc, err := src.NewReader(ctx)
 	if err != nil {
-		return fmt.Errorf("Object.NewReader: %v", err)
+		return fmt.Errorf("Object(%q).NewReader: %v", object, err)
 	}
 	if _, err := io.Copy(f, rc); err != nil {
 		return fmt.Errorf("io.Copy: %v", err)

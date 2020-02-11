@@ -14,7 +14,7 @@
 
 package acl
 
-// [START object_add_acl]
+// [START storage_add_file_owner]
 import (
 	"context"
 	"fmt"
@@ -22,12 +22,13 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// addObjectACL adds ACL to the specified object.
-func addObjectACL(bucket, object string, entity storage.ACLEntity, role storage.ACLRole) error {
+// addFileOwner adds ACL to the specified object.
+func addFileOwner(bucket, object string, entity storage.ACLEntity) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	// entity := storage.AllUsers
-	// role := storage.RoleReader
+	role := storage.RoleOwner
+
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -42,4 +43,4 @@ func addObjectACL(bucket, object string, entity storage.ACLEntity, role storage.
 	return nil
 }
 
-// [END object_add_acl]
+// [END storage_add_file_owner]

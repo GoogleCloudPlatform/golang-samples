@@ -39,7 +39,7 @@ func copyFile(dstBucket, srcBucket, srcObject string) error {
 	dst := client.Bucket(dstBucket).Object(dstObject)
 
 	if _, err := dst.CopierFrom(src).Run(ctx); err != nil {
-		return fmt.Errorf("Object.CopierFrom.Run: %v", err)
+		return fmt.Errorf("Object(%q).CopierFrom(%q).Run: %v", dstObject, srcObject, err)
 	}
 	return nil
 }

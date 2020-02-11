@@ -14,18 +14,20 @@
 
 package acl
 
-// [START bucket_list_acl]
+// [START storage_add_bucket_default_owner]
 import (
 	"context"
 	"fmt"
-	"io"
 
 	"cloud.google.com/go/storage"
 )
 
-// bucketListACL lists bucket ACL.
-func bucketListACL(w io.Writer, bucket string) error {
+// addBucketDefaultOwner adds default ACL to the specified bucket.
+func addBucketDefaultOwner(bucket string, entity storage.ACLEntity) error {
 	// bucket := "bucket-name"
+	// entity := storage.AllUsers
+	role := storage.RoleOwner
+
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -33,14 +35,11 @@ func bucketListACL(w io.Writer, bucket string) error {
 	}
 	defer client.Close()
 
-	rules, err := client.Bucket(bucket).ACL().List(ctx)
-	if err != nil {
-		return fmt.Errorf("ACLHandle.List: %v", err)
-	}
-	for _, rule := range rules {
-		fmt.Fprintf(w, "ACL rule: %v\n", rule)
+	acl := client.Bucket(bucket).DefaultObjectACL()
+	if err := acl.Set(ctx, entity, role); err != nil {
+		return fmt.Errorf("ACLHandle.Set: %v", err)
 	}
 	return nil
 }
 
-// [END bucket_list_acl]
+// [END storage_add_bucket_default_owner]

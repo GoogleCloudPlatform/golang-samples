@@ -14,19 +14,19 @@
 
 package acl
 
-// [START bucket_add_acl]
+// [START storage_print_bucket_acl_for_user]
 import (
 	"context"
 	"fmt"
+	"io"
 
 	"cloud.google.com/go/storage"
 )
 
-// addBucketACL adds ACL to the specified bucket.
-func addBucketACL(bucket string, entity storage.ACLEntity, role storage.ACLRole) error {
+// printBucketACLForUser lists bucket ACL using a filter.
+func printBucketACLForUser(w io.Writer, bucket string, entity storage.ACLEntity) error {
 	// bucket := "bucket-name"
 	// entity := storage.AllUsers
-	// role := storage.RoleReader
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -34,11 +34,16 @@ func addBucketACL(bucket string, entity storage.ACLEntity, role storage.ACLRole)
 	}
 	defer client.Close()
 
-	acl := client.Bucket(bucket).ACL()
-	if err := acl.Set(ctx, entity, role); err != nil {
-		return fmt.Errorf("ACLHandle.Set: %v", err)
+	rules, err := client.Bucket(bucket).ACL().List(ctx)
+	if err != nil {
+		return fmt.Errorf("ACLHandle.List: %v", err)
+	}
+	for _, r := range rules {
+		if r.Entity == entity {
+			fmt.Fprintf(w, "ACL rule role: %v\n", r.Role)
+		}
 	}
 	return nil
 }
 
-// [END bucket_add_acl]
+// [END storage_print_bucket_acl_for_user]
