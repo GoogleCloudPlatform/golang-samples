@@ -128,7 +128,7 @@ func (s *Service) renderHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		msg := http.StatusText(http.StatusInternalServerError)
-		if strings.Containers(err.Error(), "http.Client.Do") {
+		if strings.Contains(err.Error(), "http.Client.Do") {
 			msg = fmt.Sprintf("<h3>%s (%d)</h3>\n<p>The request to the upstream render service failed with the message:</p>\n<p>%s</p>", http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError, rendered)
 		}
 
