@@ -32,6 +32,7 @@ go version
 date
 
 cd "${1:-github/golang-samples}"
+ROOT_DIR=${PWD}
 
 export GO111MODULE=on # Always use modules.
 export GOPROXY=https://proxy.golang.org
@@ -56,7 +57,16 @@ TARGET_DIRS=$(echo "$TARGET_DIRS" | xargs)
 
 # List all modules in changed directories.
 # If running on master will collect all modules in the repo, including the root module.
-GO_CHANGED_MODULES=$(find ${TARGET_DIRS:-.} -name go.mod)
+GO_CHANGED_MODULES_ALL=$(find ${TARGET_DIRS:-.} -name go.mod)
+
+# Strip out modules incompatible with the current go version under test.
+GO_CHANGED_MODULES=""
+for i in $GO_CHANGED_MODULES_ALL; do
+  mod="$(dirname $i)"
+  echo "Running 'version compatibility check' for '$mod'"
+  go run $ROOT_DIR/testing/kokoro/version.go -module=$mod && READY="$GO_CHANGED_MODULES $mod"
+done
+
 # Exclude the root module if present.
 GO_CHANGED_SUBMODULES=${GO_CHANGED_MODULES#./go.mod}
 
@@ -194,7 +204,13 @@ date
 
 if [[ $RUN_ALL_TESTS = "1" ]]; then
   GO_TEST_TARGET="./..."
-  GO_TEST_MODULES=$(find . -name go.mod)
+  GO_TEST_MODULES=""
+  # Test with all go modules compatible with go version under test.
+  for i in $(find . -name go.mod); do
+    mod="$(dirname $i)"
+    echo "Running 'version compatibility check' for '$mod'"
+    go run $ROOT_DIR/testing/kokoro/version.go -module=$mod && READY="$GO_TEST_MODULES $mod"
+  done
   echo "Running all tests"
 elif [[ -z "${TARGET_DIRS// }" ]]; then
   GO_TEST_TARGET=""
