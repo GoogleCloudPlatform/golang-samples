@@ -33,6 +33,7 @@ func createTableAndWidenLoad(projectID, datasetID, tableID, filename string) err
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	sampleSchema := bigquery.Schema{
 		{Name: "full_name", Type: bigquery.StringFieldType},

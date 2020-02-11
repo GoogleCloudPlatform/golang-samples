@@ -32,6 +32,7 @@ func addTableLabel(projectID, datasetID, tableID string) error {
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	tbl := client.Dataset(datasetID).Table(tableID)
 	meta, err := tbl.Metadata(ctx)

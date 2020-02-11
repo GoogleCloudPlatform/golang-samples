@@ -38,6 +38,7 @@ func TestJobs(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer client.Close()
 
 	// Control a job lifecycle explicitly: create, report status, cancel.
 	exampleJobID, err := bqtestutil.UniqueBQName("golang_example_job")
@@ -67,6 +68,7 @@ func TestCopiesAndExtracts(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer client.Close()
 
 	meta := &bigquery.DatasetMetadata{
 		Location: "US", // See https://cloud.google.com/bigquery/docs/locations
@@ -121,6 +123,7 @@ func TestCopiesAndExtracts(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer storageClient.Close()
 
 	bucket, err := bqtestutil.UniqueBucketName("golang-example-bucket", tc.ProjectID)
 	if err != nil {
