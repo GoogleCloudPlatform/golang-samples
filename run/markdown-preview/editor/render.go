@@ -38,7 +38,7 @@ type RenderService struct {
 func (s *RenderService) NewRequest(method string) (*http.Request, error) {
 	req, err := http.NewRequest(method, s.URL, nil)
 	if err != nil {
-		return nil, fmt.Errorf("http.NewRequest: %w", err)
+		return nil, fmt.Errorf("http.NewRequest: %v", err)
 	}
 
 	// Skip authentication if not using HTTPS, such as for local development.
@@ -50,7 +50,7 @@ func (s *RenderService) NewRequest(method string) (*http.Request, error) {
 	tokenURL := fmt.Sprintf("/instance/service-accounts/default/identity?audience=%s", s.URL)
 	token, err := metadata.Get(tokenURL)
 	if err != nil {
-		return req, fmt.Errorf("metadata.Get: failed to query id_token: %w", err)
+		return req, fmt.Errorf("metadata.Get: failed to query id_token: %v", err)
 	}
 
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
