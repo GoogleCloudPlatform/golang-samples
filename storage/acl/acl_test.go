@@ -16,9 +16,8 @@ package acl
 
 import (
 	"context"
-	"io"
+	"fmt"
 	"io/ioutil"
-	"os"
 	"testing"
 	"time"
 
@@ -47,17 +46,10 @@ func TestACL(t *testing.T) {
 		t.Fatalf("Bucket(%q).Create: %v", bucket, err)
 	}
 
-	// Open local file.
-	f, err := os.Open("notes.txt")
-	if err != nil {
-		t.Errorf("os.Open: %v", err)
-	}
-	defer f.Close()
-
 	// Upload a test object with storage.Writer.
-	wc := client.Bucket(bucket).Object(object).NewWriter(ctx)
-	if _, err = io.Copy(wc, f); err != nil {
-		t.Errorf("io.Copy: %v", err)
+	wc := b.Object(object).NewWriter(ctx)
+	if _, err = fmt.Fprint(wc, "Hello\nworld"); err != nil {
+		t.Errorf("fmt.Fprint: %v", err)
 	}
 	if err := wc.Close(); err != nil {
 		t.Errorf("Writer.Close: %v", err)
