@@ -92,7 +92,6 @@ func (s *Service) editorHandler(w http.ResponseWriter, r *http.Request) {
 
 	p := map[string]string{
 		"Default": s.markdownDefault,
-		"Service": os.Getenv("K_SERVICE"),
 	}
 
 	if err := s.parsedTemplate.Execute(w, p); err != nil {
