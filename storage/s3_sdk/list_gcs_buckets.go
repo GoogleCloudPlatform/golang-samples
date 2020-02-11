@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"os"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -39,9 +38,7 @@ func listGCSBuckets(w io.Writer, googleAccessKeyID string, googleAccessKeySecret
 		Credentials: credentials.NewStaticCredentials(googleAccessKeyID, googleAccessKeySecret, ""),
 	}))
 
-	client := s3.New(sess, &aws.Config{Logger: aws.LoggerFunc(func (args ...interface{}) {
-		fmt.Fprintln(os.Stdout, args...)
-	} )})
+	client := s3.New(sess, aws.NewConfig().WithLogLevel(aws.LogDebugWithHTTPBody))
 	ctx := context.Background()
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
