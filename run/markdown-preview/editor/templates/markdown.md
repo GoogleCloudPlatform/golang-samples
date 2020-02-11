@@ -1,13 +1,17 @@
 # Playing with Markdown
 
 This UI allows a user to write Markdown text and preview the rendered HTML.
-You may be familiar with this composition workflow from sites such as Github or Wikipedia.
+
+You may be familiar with this composition workflow from sites such as Github
+or Wikipedia.
 
 In practice, this web page does the following:
 
-* On click of the "Preview Rendered Markdown" button, browser JavaScript lifts the markdown text and
-sends it to the editor UI backend, which is a public service.
-* The editor UI backend sends the text on to a private Render service which converts it to HTML and sends it back.
+* On click of the *"Preview Rendered Markdown"* button, browser JavaScript
+  lifts the markdown text and sends it to the editor UI's public backend.
+* The editor backend sends the text on to a private Render service which
+  converts it to HTML.
+* The HTML is injected into the web page in the right-side **Preview** area.
 
 ## Markdown Background
 

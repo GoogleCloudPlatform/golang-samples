@@ -27,31 +27,24 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-var tests = []struct {
-	label      string
-	req        *http.Request
-	input      string
-	want       string
-	wantStatus int
-}{
-	{
-		label:      "markdown",
-		input:      "**strong text**",
-		want:       "<p><strong>strong text</strong></p>\n",
-		wantStatus: http.StatusOK,
-	},
-}
+var (
+	editorService *cloudrunci.Service
+	renderService *cloudrunci.Service
+	client        http.Client
+)
 
 func TestEditorService(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
-	renderService := cloudrunci.NewService("render", tc.ProjectID)
-	renderService.Dir = "../render"
+	client = http.Client{Timeout: 10 * time.Second}
+
+	renderService = cloudrunci.NewService("renderer", tc.ProjectID)
+	renderService.Dir = "../renderer"
 	if err := renderService.Deploy(); err != nil {
 		t.Fatalf("service.Deploy %q: %v", renderService.Name, err)
 	}
 	defer renderService.Clean()
 
-	editorService := cloudrunci.NewService("editor", tc.ProjectID)
+	editorService = cloudrunci.NewService("editor", tc.ProjectID)
 	u, err := renderService.URL("")
 	if err != nil {
 		t.Fatalf("service.URL: %v", err)
@@ -64,37 +57,60 @@ func TestEditorService(t *testing.T) {
 	}
 	defer editorService.Clean()
 
-	for _, test := range tests {
-		req, err := editorService.NewRequest("POST", "/render")
-		if err != nil {
-			t.Fatalf("service.NewRequest: %q", err)
-		}
-		d := struct{ Data string }{Data: test.input}
-		b, err := json.Marshal(d)
-		if err != nil {
-			t.Fatalf("json.Marshall: %v", err)
-		}
-		req.Body = ioutil.NopCloser(bytes.NewReader(b))
+	t.Run("UI", caseEditorServiceUI)
+	t.Run("Render", caseEditorServiceRender)
+}
 
-		client := http.Client{Timeout: 10 * time.Second}
-		resp, err := client.Do(req)
-		if err != nil {
-			t.Fatalf("client.Do: %v", err)
-		}
-		defer resp.Body.Close()
-		fmt.Printf("client.Do: %s %s\n", req.Method, req.URL)
+func caseEditorServiceUI(t *testing.T) {
+	req, err := editorService.NewRequest(http.MethodGet, "/")
+	if err != nil {
+		t.Fatalf("service.NewRequest: %q", err)
+	}
 
-		if got := resp.StatusCode; got != test.wantStatus {
-			t.Errorf("response status: got %d, want %d", got, test.wantStatus)
-		}
+	resp, err := client.Do(req)
+	if err != nil {
+		t.Fatalf("client.Do: %v", err)
+	}
+	defer resp.Body.Close()
+	fmt.Printf("client.Do: %s %s\n", req.Method, req.URL)
 
-		out, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			t.Fatalf("ioutil.ReadAll: %v", err)
-		}
+	wantStatus := http.StatusOK
+	if got := resp.StatusCode; got != wantStatus {
+		t.Errorf("response status: got %d, want %d", got, wantStatus)
+	}
+}
 
-		if got := string(out); got != test.want {
-			t.Errorf("%s: got %q, want %q", test.label, got, test.want)
-		}
+func caseEditorServiceRender(t *testing.T) {
+	req, err := editorService.NewRequest(http.MethodPost, "/render")
+	if err != nil {
+		t.Fatalf("service.NewRequest: %q", err)
+	}
+	d := struct{ Data string }{Data: "**strong text**"}
+	b, err := json.Marshal(d)
+	if err != nil {
+		t.Fatalf("json.Marshall: %v", err)
+	}
+	req.Body = ioutil.NopCloser(bytes.NewReader(b))
+
+	resp, err := client.Do(req)
+	if err != nil {
+		t.Fatalf("client.Do: %v", err)
+	}
+	defer resp.Body.Close()
+	fmt.Printf("client.Do: %s %s\n", req.Method, req.URL)
+
+	wantStatus := http.StatusOK
+	if got := resp.StatusCode; got != wantStatus {
+		t.Errorf("response status: got %d, want %d", got, wantStatus)
+	}
+
+	out, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("ioutil.ReadAll: %v", err)
+	}
+
+	want := "<p><strong>strong text</strong></p>\n"
+	if got := string(out); got != want {
+		t.Errorf("markdown: got %q, want %q", got, want)
 	}
 }

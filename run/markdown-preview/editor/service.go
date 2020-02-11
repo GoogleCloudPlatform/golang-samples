@@ -16,7 +16,6 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"html/template"
 	"io/ioutil"
@@ -24,6 +23,9 @@ import (
 	"net/http"
 	"os"
 	"strings"
+
+	// Go 1.13 error handling in earlier versions.
+	errors "golang.org/x/xerrors"
 )
 
 // MarkdownRenderer defines an interface for rendering Markdown to HTML.
@@ -90,7 +92,12 @@ func (s *Service) editorHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := s.parsedTemplate.Execute(w, map[string]string{"Default": s.markdownDefault}); err != nil {
+	p := map[string]string{
+		"Default": s.markdownDefault,
+		"Service": os.Getenv("K_SERVICE"),
+	}
+
+	if err := s.parsedTemplate.Execute(w, p); err != nil {
 		log.Printf("template.Execute: %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 	}
