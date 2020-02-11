@@ -98,7 +98,7 @@ func TestObjects(t *testing.T) {
 	if err != nil {
 		t.Fatalf("downloadFile: %v", err)
 	}
-	if got, want := string(data), "Hello\nworld"; got != want {
+	if got, want := string(data), "Hello\r\nworld"; got != want {
 		t.Errorf("contents = %q; want %q", got, want)
 	}
 
@@ -332,7 +332,7 @@ func TestObjectBucketLock(t *testing.T) {
 // cleanBucket ensures there's a fresh bucket with a given name, deleting the existing bucket if it already exists.
 func cleanBucket(t *testing.T, ctx context.Context, client *storage.Client, projectID, bucket string) {
 	b := client.Bucket(bucket)
-	_, err := b.getMetadata(ctx)
+	_, err := b.Attrs(ctx)
 	if err == nil {
 		it := b.Objects(ctx, nil)
 		for {

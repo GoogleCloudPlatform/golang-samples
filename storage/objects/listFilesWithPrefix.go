@@ -61,7 +61,7 @@ func listFilesWithPrefix(w io.Writer, bucket, prefix, delim string) error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("Bucket(%q).Objects()", bucket, err)
+			return fmt.Errorf("Bucket(%q).Objects(): %v", bucket, err)
 		}
 		fmt.Fprintln(w, attrs.Name)
 	}

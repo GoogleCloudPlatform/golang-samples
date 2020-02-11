@@ -15,9 +15,10 @@
 package acl
 
 import (
-	"bytes"
 	"context"
-	"ioutil"
+	"io"
+	"io/ioutil"
+	"os"
 	"testing"
 	"time"
 
@@ -28,13 +29,41 @@ import (
 // TestACL runs all of the package tests.
 func TestACL(t *testing.T) {
 	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+	defer client.Close()
+
 	var (
 		bucket                = tc.ProjectID + "-samples-object-bucket-1"
 		object                = "foo.txt"
 		allAuthenticatedUsers = storage.AllAuthenticatedUsers
-		roleReader            = storage.RoleReader
 	)
 
+	b := client.Bucket(bucket)
+	if err := b.Create(ctx, tc.ProjectID, nil); err != nil {
+		t.Fatalf("Bucket(%q).Create: %v", bucket, err)
+	}
+
+	// Open local file.
+	f, err := os.Open("notes.txt")
+	if err != nil {
+		t.Errorf("os.Open: %v", err)
+	}
+	defer f.Close()
+
+	// Upload a test object with storage.Writer.
+	wc := client.Bucket(bucket).Object(object).NewWriter(ctx)
+	if _, err = io.Copy(wc, f); err != nil {
+		t.Errorf("io.Copy: %v", err)
+	}
+	if err := wc.Close(); err != nil {
+		t.Errorf("Writer.Close: %v", err)
+	}
+
+	// Run all the tests.
 	if err := addBucketOwner(bucket, allAuthenticatedUsers); err != nil {
 		t.Errorf("addBucketOwner: %v", err)
 	}
@@ -66,18 +95,15 @@ func TestACL(t *testing.T) {
 		t.Errorf("removeFileOwner: %v", err)
 	}
 
-	ctx := context.Background()
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		t.Fatalf("storage.NewClient: %v", err)
-	}
-	defer client.Close()
-
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		// Cleanup, this part won't be executed if Fatal happens.
 		// TODO(jbd): Implement garbage cleaning.
-		if err := client.Bucket(bucket).Delete(ctx); err != nil {
-			r.Errorf("Bucket.Delete: %v", err)
+		b := client.Bucket(bucket)
+		if err := b.Object(object).Delete(ctx); err != nil {
+			r.Errorf("Object(%q).Delete: %v", object, err)
+		}
+		if err := b.Delete(ctx); err != nil {
+			r.Errorf("Bucket(%q).Delete: %v", bucket, err)
 		}
 	})
 }
