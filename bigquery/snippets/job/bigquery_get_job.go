@@ -34,6 +34,7 @@ func getJobInfo(w io.Writer, projectID, jobID string) error {
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	job, err := client.JobFromID(ctx, jobID)
 	if err != nil {

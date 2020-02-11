@@ -33,6 +33,7 @@ func queryClusteredTable(w io.Writer, projectID, datasetID, tableID string) erro
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	q := client.Query(fmt.Sprintf(`
 	SELECT

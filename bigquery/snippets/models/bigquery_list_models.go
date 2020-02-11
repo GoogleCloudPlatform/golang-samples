@@ -35,6 +35,7 @@ func listModels(w io.Writer, projectID, datasetID string) error {
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	fmt.Fprintf(w, "Models contained in dataset %q\n", datasetID)
 	it := client.Dataset(datasetID).Models(ctx)

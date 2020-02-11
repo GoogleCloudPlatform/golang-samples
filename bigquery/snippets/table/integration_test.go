@@ -34,6 +34,7 @@ func TestTables(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer client.Close()
 
 	meta := &bigquery.DatasetMetadata{
 		Location: "US", // See https://cloud.google.com/bigquery/docs/locations

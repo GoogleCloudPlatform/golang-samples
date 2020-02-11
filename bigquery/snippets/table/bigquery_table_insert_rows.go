@@ -46,6 +46,7 @@ func insertRows(projectID, datasetID, tableID string) error {
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	inserter := client.Dataset(datasetID).Table(tableID).Inserter()
 	items := []*Item{

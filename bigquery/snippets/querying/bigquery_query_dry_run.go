@@ -32,6 +32,7 @@ func queryDryRun(w io.Writer, projectID string) error {
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	q := client.Query(`
 	SELECT

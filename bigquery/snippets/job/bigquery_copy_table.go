@@ -34,6 +34,8 @@ func copyTable(projectID, datasetID, srcID, dstID string) error {
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
+	
 	dataset := client.Dataset(datasetID)
 	copier := dataset.Table(dstID).CopierFrom(dataset.Table(srcID))
 	copier.WriteDisposition = bigquery.WriteTruncate
