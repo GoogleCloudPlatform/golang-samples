@@ -23,9 +23,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-
-	// Go 1.13 error handling in earlier versions.
-	errors "golang.org/x/xerrors"
 )
 
 // MarkdownRenderer defines an interface for rendering Markdown to HTML.
@@ -131,9 +128,10 @@ func (s *Service) renderHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		msg := http.StatusText(http.StatusInternalServerError)
-		if errors.Is(err, errNotOk) {
+		if strings.Containers(err.Error(), "http.Client.Do") {
 			msg = fmt.Sprintf("<h3>%s (%d)</h3>\n<p>The request to the upstream render service failed with the message:</p>\n<p>%s</p>", http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError, rendered)
 		}
+
 		http.Error(w, msg, http.StatusInternalServerError)
 		return
 	}

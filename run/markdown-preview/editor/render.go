@@ -69,23 +69,23 @@ var errNotOk = fmt.Errorf("request not OK")
 func (s *RenderService) Render(in []byte) ([]byte, error) {
 	req, err := s.NewRequest(http.MethodPost)
 	if err != nil {
-		return nil, fmt.Errorf("RenderService.NewRequest: %w", err)
+		return nil, fmt.Errorf("RenderService.NewRequest: %v", err)
 	}
 	req.Body = ioutil.NopCloser(bytes.NewReader(in))
 	defer req.Body.Close()
 
 	resp, err := renderClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("http.Client.Do: %w", err)
+		return nil, fmt.Errorf("http.Client.Do: %v", err)
 	}
 
 	out, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("ioutil.ReadAll: %w", err)
+		return nil, fmt.Errorf("ioutil.ReadAll: %v", err)
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return out, fmt.Errorf("http.Client.Do: %s (%d): %w", http.StatusText(resp.StatusCode), resp.StatusCode, errNotOk)
+		return out, fmt.Errorf("http.Client.Do: %s (%d): %v", http.StatusText(resp.StatusCode), resp.StatusCode, errNotOk)
 	}
 
 	return out, nil
