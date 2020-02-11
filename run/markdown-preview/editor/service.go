@@ -16,6 +16,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"html/template"
 	"io/ioutil"
@@ -42,7 +43,7 @@ type Service struct {
 func NewServiceFromEnv() (*Service, error) {
 	url := os.Getenv("EDITOR_UPSTREAM_RENDER_URL")
 	if url == "" {
-		return nil, fmt.Errorf("no configuration for upstream render service: add EDITOR_UPSTREAM_RENDER_URL environment variable")
+		return nil, errors.New("no configuration for upstream render service: add EDITOR_UPSTREAM_RENDER_URL environment variable")
 	}
 	auth := os.Getenv("EDITOR_UPSTREAM_UNAUTHENTICATED") == ""
 	if !auth {
@@ -54,7 +55,7 @@ func NewServiceFromEnv() (*Service, error) {
 	// discoverable and minimizes latency for the first request.
 	parsedTemplate, err := template.ParseFiles("templates/index.html")
 	if err != nil {
-		return nil, fmt.Errorf("template.ParseFiles: v", err)
+		return nil, fmt.Errorf("template.ParseFiles: %v", err)
 	}
 
 	out, err := ioutil.ReadFile("templates/markdown.md")
