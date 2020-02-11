@@ -46,6 +46,10 @@ func TestList(t *testing.T) {
 	}
 	defer deleteTestKey(ctx, client, key)
 
+	log.Printf("ProjectID: %v", tc.ProjectID)
+	log.Printf("key: %v", key.AccessID)
+	log.Printf("service account: %v", key.ServiceAccountEmail)
+
 	buf := new(bytes.Buffer)
 	_, err = listGCSBuckets(buf, key.AccessID, key.Secret)
 	if err != nil {
