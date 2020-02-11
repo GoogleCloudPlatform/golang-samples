@@ -35,7 +35,6 @@ func importCSVTruncate(projectID, datasetID, tableID string) error {
 	}
 	defer client.Close()
 
-
 	gcsRef := bigquery.NewGCSReference("gs://cloud-samples-data/bigquery/us-states/us-states.csv")
 	gcsRef.SourceFormat = bigquery.CSV
 	gcsRef.AutoDetect = true

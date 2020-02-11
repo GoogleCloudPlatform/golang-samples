@@ -35,7 +35,6 @@ func importCSVExplicitSchema(projectID, datasetID, tableID string) error {
 	}
 	defer client.Close()
 
-
 	gcsRef := bigquery.NewGCSReference("gs://cloud-samples-data/bigquery/us-states/us-states.csv")
 	gcsRef.SkipLeadingRows = 1
 	gcsRef.Schema = bigquery.Schema{

@@ -33,9 +33,9 @@ func queryBatch(w io.Writer, projectID, dstDatasetID, dstTableID string) error {
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
-	} 
+	}
 	defer client.Close()
-	
+
 	// Build an aggregate table.
 	q := client.Query(`
 		SELECT
