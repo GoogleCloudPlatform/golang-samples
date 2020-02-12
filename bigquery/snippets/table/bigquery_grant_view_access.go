@@ -34,6 +34,7 @@ func updateViewDelegated(projectID, srcDatasetID, viewDatasetID, viewID string) 
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	srcDataset := client.Dataset(srcDatasetID)
 	viewDataset := client.Dataset(viewDatasetID)

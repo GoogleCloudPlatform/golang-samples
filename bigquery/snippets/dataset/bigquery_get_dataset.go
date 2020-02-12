@@ -33,6 +33,7 @@ func printDatasetInfo(w io.Writer, projectID, datasetID string) error {
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	meta, err := client.Dataset(datasetID).Metadata(ctx)
 	if err != nil {

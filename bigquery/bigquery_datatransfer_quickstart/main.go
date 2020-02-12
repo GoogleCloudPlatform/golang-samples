@@ -40,6 +40,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
+	defer client.Close()
 
 	req := &datatransferpb.ListDataSourcesRequest{
 		Parent: fmt.Sprintf("projects/%s", projectID),
