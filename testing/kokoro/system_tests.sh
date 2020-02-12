@@ -64,7 +64,7 @@ GO_CHANGED_MODULES=""
 for i in $GO_CHANGED_MODULES_ALL; do
   mod="$(dirname $i)"
   echo "Running 'version compatibility check' for '$mod'"
-  go run $ROOT_DIR/testing/kokoro/version.go -module=$mod && READY="$GO_CHANGED_MODULES $mod"
+  go run $ROOT_DIR/testing/kokoro/version.go -module=$mod && GO_CHANGED_MODULES="$GO_CHANGED_MODULES $mod"
 done
 
 # Exclude the root module if present.
@@ -205,13 +205,15 @@ date
 if [[ $RUN_ALL_TESTS = "1" ]]; then
   GO_TEST_TARGET="./..."
   GO_TEST_MODULES=""
+  set +x
+  echo "Running all tests compatible with current go version"
   # Test with all go modules compatible with go version under test.
   for i in $(find . -name go.mod); do
     mod="$(dirname $i)"
     echo "Running 'version compatibility check' for '$mod'"
-    go run $ROOT_DIR/testing/kokoro/version.go -module=$mod && READY="$GO_TEST_MODULES $mod"
+    go run $ROOT_DIR/testing/kokoro/version.go -module=$mod && GO_TEST_MODULES="$GO_TEST_MODULES $mod"
   done
-  echo "Running all tests"
+  set -x
 elif [[ -z "${TARGET_DIRS// }" ]]; then
   GO_TEST_TARGET=""
   GO_TEST_MODULES="./go.mod"
