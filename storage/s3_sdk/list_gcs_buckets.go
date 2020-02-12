@@ -38,7 +38,7 @@ func listGCSBuckets(w io.Writer, googleAccessKeyID string, googleAccessKeySecret
 		Credentials: credentials.NewStaticCredentials(googleAccessKeyID, googleAccessKeySecret, ""),
 	}))
 
-	client := s3.New(sess, aws.NewConfig().WithLogLevel(aws.LogDebugWithHTTPBody))
+	client := s3.New(sess, aws.NewConfig().WithLogLevel(aws.LogDebugWithSigning))
 	ctx := context.Background()
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
