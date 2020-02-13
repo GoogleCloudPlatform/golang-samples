@@ -37,10 +37,10 @@ func contextClasses(w io.Writer, gcsURI string) error {
 		return fmt.Errorf("NewClient: %v", err)
 	}
 
-    // SpeechContext: to configure your speech_context see:
-    // https://cloud.google.com/speech-to-text/docs/reference/rpc/google.cloud.speech.v1#speechcontext
-    // Full list of supported phrases (class tokens) here:
-    // https://cloud.google.com/speech-to-text/docs/class-tokens
+	// SpeechContext: to configure your speech_context see:
+	// https://cloud.google.com/speech-to-text/docs/reference/rpc/google.cloud.speech.v1#speechcontext
+	// Full list of supported phrases (class tokens) here:
+	// https://cloud.google.com/speech-to-text/docs/class-tokens
 	SpeechContext := &speechpb.SpeechContext{Phrases: []string{"$TIME"}}
 
 	resp, err := client.Recognize(ctx, &speechpb.RecognizeRequest{
