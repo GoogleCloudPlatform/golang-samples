@@ -1,3 +1,16 @@
+// Copyright 2020 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 package notifications
 
 import (
@@ -94,7 +107,7 @@ func cleanupNotificationConfig(t *testing.T, notificationConfigID string) error 
 	req := &securitycenterpb.DeleteNotificationConfigRequest{
 		Name: name,
 	}
-	
+
 	if err = client.DeleteNotificationConfig(ctx, req); err != nil {
 		return fmt.Errorf("Failed to retrieve notification config: %v", err)
 	}
@@ -105,7 +118,7 @@ func cleanupNotificationConfig(t *testing.T, notificationConfigID string) error 
 func TestCreateNotificationConfig(t *testing.T) {
 	buf := new(bytes.Buffer)
 	configID := "go-test-create-config-id"
-	
+
 	if err := createNotificationConfig(buf, orgID(t), pubsubTopic(t), configID); err != nil {
 		t.Fatalf("createNotificationConfig failed: %v", err)
 	}
@@ -120,11 +133,11 @@ func TestCreateNotificationConfig(t *testing.T) {
 func TestDeleteNotificationConfig(t *testing.T) {
 	buf := new(bytes.Buffer)
 	configID := "go-test-delete-config-id"
-	
+
 	if err0 := addNotificationConfig(t, configID); err0 != nil {
 		t.Fatalf("Could not setup test environment: %v", err0)
 	}
-	
+
 	if err1 := deleteNotificationConfig(buf, orgID(t), configID); err1 != nil {
 		t.Fatalf("deleteNotificationConfig failed: %v", err1)
 	}
@@ -141,7 +154,7 @@ func TestGetNotificationConfig(t *testing.T) {
 	if err0 := addNotificationConfig(t, configID); err0 != nil {
 		t.Fatalf("Could not setup test environment: %v", err0)
 	}
-	
+
 	if err1 := getNotificationConfig(buf, orgID(t), configID); err1 != nil {
 		t.Fatalf("getNotificationConfig failed: %v", err1)
 	}
