@@ -12,25 +12,41 @@ import (
 	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1p1beta1"
 )
 
-func orgID() string {
-	return os.Getenv("GCLOUD_ORGANIZATION")
+func orgID(t *testing.T) string {
+	orgID := os.Getenv("GCLOUD_ORGANIZATION")
+	if orgID == "" {
+		t.Skip("GCLOUD_ORGANIZATION not set")
+	}
+	return orgID
 }
 
-func projectID() string {
-	return os.Getenv("GCLOUD_PROJECT")
+func projectID(t *testing.T) string {
+	projectID := os.Getenv("GCLOUD_PROJECT")
+	if projectID == "" {
+		t.Skip("GCLOUD_PROJECT not set")
+	}
+	return projectID
 }
 
-func pubsubTopic() string {
-	return os.Getenv("GCLOUD_PUBSUB_TOPIC")
+func pubsubTopic(t *testing.T) string {
+	pubsubTopic := os.Getenv("GCLOUD_PUBSUB_TOPIC")
+	if pubsubTopic == "" {
+		t.Skip("GCLOUD_PUBSUB_TOPIC not set")
+	}
+	return pubsubTopic
 }
 
-func pubsubSubscription() string {
-	return os.Getenv("GCLOUD_PUBSUB_SUBSCRIPTION")
+func pubsubSubscription(t *testing.T) string {
+	pubsubSubscription := os.Getenv("GCLOUD_PUBSUB_SUBSCRIPTION")
+	if pubsubSubscription == "" {
+		t.Skip("GCLOUD_PUBSUB_SUBSCRIPTION not set")
+	}
+	return pubsubSubscription
 }
 
-func addNotificationConfig(notificationConfigID string) error {
-	orgID := orgID()
-	pubsubTopic := pubsubTopic()
+func addNotificationConfig(t *testing.T, notificationConfigID string) error {
+	orgID := orgID(t)
+	pubsubTopic := pubsubTopic(t)
 
 	ctx := context.Background()
 	client, err0 := securitycenter.NewClient(ctx)
@@ -63,8 +79,8 @@ func addNotificationConfig(notificationConfigID string) error {
 	return nil
 }
 
-func cleanupNotificationConfig(notificationConfigID string) error {
-	orgID := orgID()
+func cleanupNotificationConfig(t *testing.T, notificationConfigID string) error {
+	orgID := orgID(t)
 
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
@@ -90,7 +106,7 @@ func TestCreateNotificationConfig(t *testing.T) {
 	buf := new(bytes.Buffer)
 	configID := "go-test-create-config-id"
 	
-	if err := createNotificationConfig(buf, orgID(), pubsubTopic(), configID); err != nil {
+	if err := createNotificationConfig(buf, orgID(t), pubsubTopic(t), configID); err != nil {
 		t.Fatalf("createNotificationConfig failed: %v", err)
 	}
 
@@ -98,18 +114,18 @@ func TestCreateNotificationConfig(t *testing.T) {
 		t.Errorf("createNotificationConfig did not create.")
 	}
 
-	cleanupNotificationConfig(configID)
+	cleanupNotificationConfig(t, configID)
 }
 
 func TestDeleteNotificationConfig(t *testing.T) {
 	buf := new(bytes.Buffer)
 	configID := "go-test-delete-config-id"
 	
-	if err0 := addNotificationConfig(configID); err0 != nil {
+	if err0 := addNotificationConfig(t, configID); err0 != nil {
 		t.Fatalf("Could not setup test environment: %v", err0)
 	}
 	
-	if err1 := deleteNotificationConfig(buf, orgID(), configID); err1 != nil {
+	if err1 := deleteNotificationConfig(buf, orgID(t), configID); err1 != nil {
 		t.Fatalf("deleteNotificationConfig failed: %v", err1)
 	}
 
@@ -122,11 +138,11 @@ func TestGetNotificationConfig(t *testing.T) {
 	buf := new(bytes.Buffer)
 	configID := "go-test-get-config-id"
 
-	if err0 := addNotificationConfig(configID); err0 != nil {
+	if err0 := addNotificationConfig(t, configID); err0 != nil {
 		t.Fatalf("Could not setup test environment: %v", err0)
 	}
 	
-	if err1 := getNotificationConfig(buf, orgID(), configID); err1 != nil {
+	if err1 := getNotificationConfig(buf, orgID(t), configID); err1 != nil {
 		t.Fatalf("getNotificationConfig failed: %v", err1)
 	}
 
@@ -134,18 +150,18 @@ func TestGetNotificationConfig(t *testing.T) {
 		t.Errorf("getNotificationConfig did not delete.")
 	}
 
-	cleanupNotificationConfig(configID)
+	cleanupNotificationConfig(t, configID)
 }
 
 func TestListNotificationConfigs(t *testing.T) {
 	buf := new(bytes.Buffer)
 	configID := "go-test-list-config-id"
 
-	if err0 := addNotificationConfig(configID); err0 != nil {
+	if err0 := addNotificationConfig(t, configID); err0 != nil {
 		t.Fatalf("Could not setup test environment: %v", err0)
 	}
 
-	if err1 := listNotificationConfigs(buf, orgID()); err1 != nil {
+	if err1 := listNotificationConfigs(buf, orgID(t)); err1 != nil {
 		t.Fatalf("listNotificationConfig failed: %v", err1)
 	}
 
@@ -153,18 +169,18 @@ func TestListNotificationConfigs(t *testing.T) {
 		t.Errorf("listNotificationConfigs did not list")
 	}
 
-	cleanupNotificationConfig(configID)
+	cleanupNotificationConfig(t, configID)
 }
 
 func TestUpdateNotificationConfigs(t *testing.T) {
 	buf := new(bytes.Buffer)
 	configID := "go-test-update-config-id"
 
-	if err0 := addNotificationConfig(configID); err0 != nil {
+	if err0 := addNotificationConfig(t, configID); err0 != nil {
 		t.Fatalf("Could not setup test environment: %v", err0)
 	}
 
-	if err1 := updateNotificationConfig(buf, orgID(), pubsubTopic(), configID); err1 != nil {
+	if err1 := updateNotificationConfig(buf, orgID(t), pubsubTopic(t), configID); err1 != nil {
 		t.Fatalf("updateNotificationConfig failed: %v", err1)
 	}
 
@@ -172,16 +188,16 @@ func TestUpdateNotificationConfigs(t *testing.T) {
 		t.Errorf("updateNotificationConfig did not update.")
 	}
 
-	cleanupNotificationConfig(configID)
+	cleanupNotificationConfig(t, configID)
 }
 
 func TestReceiveNotifications(t *testing.T) {
 	buf := new(bytes.Buffer)
-	if err := receiveMessages(buf, projectID(), pubsubSubscription()); err != nil {
+	if err := receiveMessages(buf, projectID(t), pubsubSubscription(t)); err != nil {
 		t.Fatalf("receiveNotifications failed: %v", err)
 	}
 
 	if !strings.Contains(buf.String(), "Got finding") {
-		t.Errorf("Did not receive any notifications.")
+		t.Skip("Did not receive any notifications.")
 	}
 }
