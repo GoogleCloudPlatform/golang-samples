@@ -1,8 +1,22 @@
+// Copyright 2020 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 package notifications
 
 // [START scc_update_notification_config]
 import (
 	"context"
+	"io"
 	"fmt"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1p1beta1"
@@ -10,7 +24,11 @@ import (
 	"google.golang.org/genproto/protobuf/field_mask"
 )
 
-func updateNotificationConfig(orgId string, notificationConfigId string, updatedPubsubTopic string) error {
+func updateNotificationConfig(w io.Writer, orgID string, notificationConfigID string, updatedPubsubTopic string) error {
+	// orgId := "your-org-id"
+	// notificationConfigId := "your-config-id"
+	// updatedPubsubTopic := "projects/{new-project}/topics/{new-topic}"
+
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 
@@ -19,14 +37,10 @@ func updateNotificationConfig(orgId string, notificationConfigId string, updated
 	}
 	defer client.Close()
 
-	// TODO orgId := "1081635000895"
-	// TODO: notificationConfigId := "go-sample-config-id"
-	// TODO: updatedPubsubTopic := "projects/{new-project}/topics/{new-topic}"
-
 	updatedDescription := "Updated sample config"
 	req := &securitycenterpb.UpdateNotificationConfigRequest{
 		NotificationConfig: &securitycenterpb.NotificationConfig{
-			Name:        fmt.Sprintf("organizations/%s/notificationConfigs/%s", orgId, notificationConfigId),
+			Name:        fmt.Sprintf("organizations/%s/notificationConfigs/%s", orgID, notificationConfigID),
 			Description: updatedDescription,
 			PubsubTopic: updatedPubsubTopic,
 		},
@@ -40,7 +54,7 @@ func updateNotificationConfig(orgId string, notificationConfigId string, updated
 		return fmt.Errorf("Failed to create notification config: %v", err)
 	}
 
-	fmt.Printf("Updated NotificationConfig: %s\n", notificationConfig)
+	fmt.Fprintln(w, "Updated NotificationConfig: ", notificationConfig)
 
 	return nil
 }
