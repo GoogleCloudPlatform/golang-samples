@@ -34,25 +34,25 @@ func orgID(t *testing.T) string {
 }
 
 func projectID(t *testing.T) string {
-	projectID := os.Getenv("GCLOUD_PROJECT")
+	projectID := os.Getenv("SCC_PUBSUB_PROJECT")
 	if projectID == "" {
-		t.Skip("GCLOUD_PROJECT not set")
+		t.Skip("SCC_PUBSUB_PROJECT not set")
 	}
 	return projectID
 }
 
 func pubsubTopic(t *testing.T) string {
-	pubsubTopic := os.Getenv("GCLOUD_PUBSUB_TOPIC")
+	pubsubTopic := os.Getenv("SCC_PUBSUB_TOPIC")
 	if pubsubTopic == "" {
-		t.Skip("GCLOUD_PUBSUB_TOPIC not set")
+		t.Skip("SCC_PUBSUB_TOPIC not set")
 	}
 	return pubsubTopic
 }
 
 func pubsubSubscription(t *testing.T) string {
-	pubsubSubscription := os.Getenv("GCLOUD_PUBSUB_SUBSCRIPTION")
+	pubsubSubscription := os.Getenv("SCC_PUBSUB_SUBSCRIPTION")
 	if pubsubSubscription == "" {
-		t.Skip("GCLOUD_PUBSUB_SUBSCRIPTION not set")
+		t.Skip("SCC_PUBSUB_SUBSCRIPTION not set")
 	}
 	return pubsubSubscription
 }
@@ -211,6 +211,6 @@ func TestReceiveNotifications(t *testing.T) {
 	}
 
 	if !strings.Contains(buf.String(), "Got finding") {
-		t.Skip("Did not receive any notifications.")
+		t.Errorf("Did not receive any notifications.")
 	}
 }
