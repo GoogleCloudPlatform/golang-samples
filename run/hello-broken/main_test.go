@@ -86,7 +86,7 @@ func TestImprovedHandler(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		req := httptest.NewRequest("GET", "/", strings.NewReader(""))
+		req := httptest.NewRequest("GET", "/improved", strings.NewReader(""))
 		rr := httptest.NewRecorder()
 
 		os.Setenv("NAME", test.name)
