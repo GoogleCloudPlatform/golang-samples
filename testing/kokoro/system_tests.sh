@@ -72,28 +72,22 @@ elif echo $SIGNIFICANT_CHANGES | tr ' ' '\n' | grep "^go.mod$" || [[ $CHANGED_DI
 fi
 
 ## Static Analysis
-# Do the easy stuff before running tests. Fail fast!
+# Do the easy stuff before running tests or reserving a project. Fail fast!
 set +x
-
-# Fail if a dependency was added without the necessary go.mod/go.sum change
-# being part of the commit.
-# Do this before reserving a project since this doens't need a project.
-for i in $GO_CHANGED_MODULES; do
-  mod="$(dirname $i)"
-  pushd $mod > /dev/null;
-    echo "Running 'go.mod/go.sum sync check' in '$mod'..."
-    set -x
-    go mod tidy;
-    git diff go.mod | tee /dev/stderr | (! read)
-    [ -f go.sum ] && git diff go.sum | tee /dev/stderr | (! read)
-    set +x
-  popd > /dev/null;
-done
 
 if [ $GOLANG_SAMPLES_GO_VET ]; then
   for i in $GO_CHANGED_MODULES; do
     mod="$(dirname $i)"
     pushd $mod > /dev/null;
+      # Fail if a dependency was added without the necessary go.mod/go.sum change
+      # being part of the commit.
+      echo "Running 'go.mod/go.sum sync check' in '$mod'..."
+      set -x
+      go mod tidy;
+      git diff go.mod | tee /dev/stderr | (! read)
+      [ -f go.sum ] && git diff go.sum | tee /dev/stderr | (! read)
+      set +x
+
       echo "Running 'gofmt compliance check' in '$mod'..."
       set -x
       diff -u <(echo -n) <(gofmt -d -s .)
