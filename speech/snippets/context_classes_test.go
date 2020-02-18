@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,9 +26,11 @@ func TestContextClasses(t *testing.T) {
 	testutil.SystemTest(t)
 
 	var buf bytes.Buffer
-	err := contextClasses(&buf, "gs://cloud-samples-data/speech/commercial_mono.wav")
+	gcsURI := "gs://cloud-samples-data/speech/commercial_mono.wav"
+	want := "Alternative"
+	err := contextClasses(&buf, gcsURI)
 
-	if got := buf.String(); !strings.Contains(got, "Alternative") {
-		t.Fatalf(`contextClassesgs://cloud-samples-data/speech/commercial_mono.wav) = %q; want "Alternative"`, got)
+	if got := buf.String(); !strings.Contains(got, want) {
+		t.Fatalf("contextClasses(%q): got %q, want %q", gcsURI, got, want)
 	}
 }

@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
 // Package snippets contains speech examples.
 package snippets
 
+// [START speech_context_classes]
+
 import (
 	speech "cloud.google.com/go/speech/apiv1"
 	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"
@@ -24,8 +26,6 @@ import (
 	"io"
 	"io/ioutil"
 )
-
-// [START speech_context_classes]
 
 // contextClasses provides "hints" to the speech recognizer
 // to favour specific classes of words in the results
@@ -41,6 +41,7 @@ func contextClasses(w io.Writer, gcsURI string) error {
 	// https://cloud.google.com/speech-to-text/docs/reference/rpc/google.cloud.speech.v1#speechcontext
 	// Full list of supported phrases (class tokens) here:
 	// https://cloud.google.com/speech-to-text/docs/class-tokens
+	// In this instance, the use of "$TIME" favours time of day detections 
 	SpeechContext := &speechpb.SpeechContext{Phrases: []string{"$TIME"}}
 
 	resp, err := client.Recognize(ctx, &speechpb.RecognizeRequest{
@@ -57,6 +58,7 @@ func contextClasses(w io.Writer, gcsURI string) error {
 	if err != nil {
 		return fmt.Errorf("Recognize: %v", err)
 	}
+	defer client.Close()
 
 	// Print the results.
 	for i, result := range resp.Results {

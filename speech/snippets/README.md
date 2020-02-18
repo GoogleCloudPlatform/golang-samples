@@ -12,7 +12,7 @@ For more details, see the [Getting Punctuation](https://cloud.google.com/speech-
 
 ### Speech Adaptation
 
-For more details see the [Using Speech Adaptation](https://cloud.google.com/speech-to-text/docs/context-strength#speech-context-strength-python) tutorial in the docs.
+For more details see the [Using Speech Adaptation](https://cloud.google.com/speech-to-text/docs/context-strength) tutorial in the docs.
 
 [Go Code](context_classes.go)
 
