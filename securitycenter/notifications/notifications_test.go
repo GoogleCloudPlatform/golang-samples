@@ -214,7 +214,7 @@ func TestUpdateNotificationConfig(t *testing.T) {
 		t.Fatalf("Could not setup test environment: %v", err)
 	}
 
-	if err := updateNotificationConfig(buf, orgID(t), pubsubTopic(t), configID); err != nil {
+	if err := updateNotificationConfig(buf, orgID(t), configID, pubsubTopic(t)); err != nil {
 		t.Fatalf("updateNotificationConfig failed: %v", err)
 	}
 
