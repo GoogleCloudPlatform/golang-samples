@@ -172,7 +172,7 @@ func TestGetNotificationConfig(t *testing.T) {
 		t.Fatalf("getNotificationConfig failed: %v", err)
 	}
 
-	if !strings.Contains(buf.String(), "Deleted config:") {
+	if !strings.Contains(buf.String(), "Received config:") {
 		t.Errorf("getNotificationConfig did not delete.")
 	}
 
