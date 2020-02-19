@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1p1beta1"
+	"github.com/google/uuid"
 	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1p1beta1"
 )
 
@@ -117,7 +118,11 @@ func cleanupNotificationConfig(t *testing.T, notificationConfigID string) error 
 
 func TestCreateNotificationConfig(t *testing.T) {
 	buf := new(bytes.Buffer)
-	configID := "go-test-create-config-id"
+	rand, err0 := uuid.NewUUID()
+	if err0 != nil {
+		t.Errorf("Issue generating id.")
+	}
+	configID := "go-test-create-config-id" + rand.String()
 
 	if err := createNotificationConfig(buf, orgID(t), pubsubTopic(t), configID); err != nil {
 		t.Fatalf("createNotificationConfig failed: %v", err)
@@ -132,14 +137,18 @@ func TestCreateNotificationConfig(t *testing.T) {
 
 func TestDeleteNotificationConfig(t *testing.T) {
 	buf := new(bytes.Buffer)
-	configID := "go-test-delete-config-id"
+	rand, err0 := uuid.NewUUID()
+	if err0 != nil {
+		t.Errorf("Issue generating id.")
+	}
+	configID := "go-test-delete-config-id" + rand.String()
 
-	if err0 := addNotificationConfig(t, configID); err0 != nil {
-		t.Fatalf("Could not setup test environment: %v", err0)
+	if err := addNotificationConfig(t, configID); err != nil {
+		t.Fatalf("Could not setup test environment: %v", err)
 	}
 
-	if err1 := deleteNotificationConfig(buf, orgID(t), configID); err1 != nil {
-		t.Fatalf("deleteNotificationConfig failed: %v", err1)
+	if err := deleteNotificationConfig(buf, orgID(t), configID); err != nil {
+		t.Fatalf("deleteNotificationConfig failed: %v", err)
 	}
 
 	if !strings.Contains(buf.String(), "Deleted config:") {
@@ -149,14 +158,18 @@ func TestDeleteNotificationConfig(t *testing.T) {
 
 func TestGetNotificationConfig(t *testing.T) {
 	buf := new(bytes.Buffer)
-	configID := "go-test-get-config-id"
+	rand, err0 := uuid.NewUUID()
+	if err0 != nil {
+		t.Errorf("Issue generating id.")
+	}
+	configID := "go-test-get-config-id" + rand.String()
 
-	if err0 := addNotificationConfig(t, configID); err0 != nil {
-		t.Fatalf("Could not setup test environment: %v", err0)
+	if err := addNotificationConfig(t, configID); err != nil {
+		t.Fatalf("Could not setup test environment: %v", err)
 	}
 
-	if err1 := getNotificationConfig(buf, orgID(t), configID); err1 != nil {
-		t.Fatalf("getNotificationConfig failed: %v", err1)
+	if err := getNotificationConfig(buf, orgID(t), configID); err != nil {
+		t.Fatalf("getNotificationConfig failed: %v", err)
 	}
 
 	if !strings.Contains(buf.String(), "Deleted config:") {
@@ -168,14 +181,18 @@ func TestGetNotificationConfig(t *testing.T) {
 
 func TestListNotificationConfigs(t *testing.T) {
 	buf := new(bytes.Buffer)
-	configID := "go-test-list-config-id"
+	rand, err0 := uuid.NewUUID()
+	if err0 != nil {
+		t.Errorf("Issue generating id.")
+	}
+	configID := "go-test-list-config-id" + rand.String()
 
-	if err0 := addNotificationConfig(t, configID); err0 != nil {
-		t.Fatalf("Could not setup test environment: %v", err0)
+	if err := addNotificationConfig(t, configID); err != nil {
+		t.Fatalf("Could not setup test environment: %v", err)
 	}
 
-	if err1 := listNotificationConfigs(buf, orgID(t)); err1 != nil {
-		t.Fatalf("listNotificationConfig failed: %v", err1)
+	if err := listNotificationConfigs(buf, orgID(t)); err != nil {
+		t.Fatalf("listNotificationConfig failed: %v", err)
 	}
 
 	if !strings.Contains(buf.String(), "NotificationConfig") {
@@ -185,16 +202,20 @@ func TestListNotificationConfigs(t *testing.T) {
 	cleanupNotificationConfig(t, configID)
 }
 
-func TestUpdateNotificationConfigs(t *testing.T) {
+func TestUpdateNotificationConfig(t *testing.T) {
 	buf := new(bytes.Buffer)
-	configID := "go-test-update-config-id"
+	rand, err0 := uuid.NewUUID()
+	if err0 != nil {
+		t.Errorf("Issue generating id.")
+	}
+	configID := "go-test-update-config-id" + rand.String()
 
-	if err0 := addNotificationConfig(t, configID); err0 != nil {
-		t.Fatalf("Could not setup test environment: %v", err0)
+	if err := addNotificationConfig(t, configID); err != nil {
+		t.Fatalf("Could not setup test environment: %v", err)
 	}
 
-	if err1 := updateNotificationConfig(buf, orgID(t), pubsubTopic(t), configID); err1 != nil {
-		t.Fatalf("updateNotificationConfig failed: %v", err1)
+	if err := updateNotificationConfig(buf, orgID(t), pubsubTopic(t), configID); err != nil {
+		t.Fatalf("updateNotificationConfig failed: %v", err)
 	}
 
 	if !strings.Contains(buf.String(), "Updated NotificationConfig:") {
