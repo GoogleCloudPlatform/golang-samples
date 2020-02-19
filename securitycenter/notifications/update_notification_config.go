@@ -16,8 +16,8 @@ package notifications
 // [START scc_update_notification_config]
 import (
 	"context"
-	"io"
 	"fmt"
+	"io"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1p1beta1"
 	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1p1beta1"
@@ -25,8 +25,8 @@ import (
 )
 
 func updateNotificationConfig(w io.Writer, orgID string, notificationConfigID string, updatedPubsubTopic string) error {
-	// orgId := "your-org-id"
-	// notificationConfigId := "your-config-id"
+	// orgID := "your-org-id"
+	// notificationConfigID := "your-config-id"
 	// updatedPubsubTopic := "projects/{new-project}/topics/{new-topic}"
 
 	ctx := context.Background()
@@ -51,7 +51,7 @@ func updateNotificationConfig(w io.Writer, orgID string, notificationConfigID st
 
 	notificationConfig, err := client.UpdateNotificationConfig(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Failed to create notification config: %v", err)
+		return fmt.Errorf("Failed to update notification config: %v", err)
 	}
 
 	fmt.Fprintln(w, "Updated NotificationConfig: ", notificationConfig)

@@ -26,7 +26,7 @@ import (
 )
 
 func receiveMessages(w io.Writer, projectID string, subscriptionName string) error {
-	// projectId := "your-project-id"
+	// projectID := "your-project-id"
 	// subsriptionName := "your-subscription-name"
 
 	ctx := context.Background()

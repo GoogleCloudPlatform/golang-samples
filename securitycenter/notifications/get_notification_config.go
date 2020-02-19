@@ -16,16 +16,16 @@ package notifications
 // [START scc_get_notification_config]
 import (
 	"context"
-	"io"
 	"fmt"
+	"io"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1p1beta1"
 	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1p1beta1"
 )
 
 func getNotificationConfig(w io.Writer, orgID string, notificationConfigID string) error {
-	// TODO orgID := "your-org-id"
-	// TODO notificationConfigID := "your-config-id"
+	// orgID := "your-org-id"
+	// notificationConfigID := "your-config-id"
 
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
