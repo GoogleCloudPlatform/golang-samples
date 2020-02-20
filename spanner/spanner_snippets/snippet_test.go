@@ -28,6 +28,7 @@ import (
 )
 
 func TestSample(t *testing.T) {
+	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/1146")
 	tc := testutil.SystemTest(t)
 
 	instance := os.Getenv("GOLANG_SAMPLES_SPANNER")
