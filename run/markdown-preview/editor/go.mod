@@ -1,4 +1,4 @@
-module github.com/GoogleCloudPlatform/golang-samples/run/microservices/editor
+module github.com/GoogleCloudPlatform/golang-samples/run/markdown-preview/editor
 
 go 1.13
 

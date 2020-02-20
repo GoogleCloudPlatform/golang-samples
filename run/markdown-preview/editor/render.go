@@ -63,9 +63,8 @@ func (s *RenderService) NewRequest(method string) (*http.Request, error) {
 // [START run_secure_request_do]
 
 var renderClient = &http.Client{Timeout: 30 * time.Second}
-var errNotOk = fmt.Errorf("request not OK")
 
-// Render converts the Markdown text to HTML.
+// Render converts the Markdown plaintext to HTML.
 func (s *RenderService) Render(in []byte) ([]byte, error) {
 	req, err := s.NewRequest(http.MethodPost)
 	if err != nil {
@@ -85,7 +84,7 @@ func (s *RenderService) Render(in []byte) ([]byte, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return out, fmt.Errorf("http.Client.Do: %s (%d): %v", http.StatusText(resp.StatusCode), resp.StatusCode, errNotOk)
+		return out, fmt.Errorf("http.Client.Do: %s (%d): request not OK", http.StatusText(resp.StatusCode), resp.StatusCode)
 	}
 
 	return out, nil

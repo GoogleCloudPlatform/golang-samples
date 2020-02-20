@@ -100,6 +100,7 @@ func (s *Service) editorHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// renderHandler expects a JSON body payload with a 'data' property holding plain text for rendering.
 func (s *Service) renderHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)

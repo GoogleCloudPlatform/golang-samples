@@ -15,7 +15,6 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -78,7 +77,7 @@ func TestRenderService(t *testing.T) {
 			t.Fatalf("client.Do: %v", err)
 		}
 		defer resp.Body.Close()
-		fmt.Printf("client.Do: %s %s\n", req.Method, req.URL)
+		t.Logf("client.Do: %s %s\n", req.Method, req.URL)
 
 		if got := resp.StatusCode; got != http.StatusOK {
 			t.Errorf("response status: got %d, want %d", got, http.StatusOK)

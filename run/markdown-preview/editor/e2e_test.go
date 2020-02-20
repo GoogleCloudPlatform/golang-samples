@@ -17,7 +17,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"testing"
@@ -72,7 +71,7 @@ func caseEditorServiceUI(t *testing.T) {
 		t.Fatalf("client.Do: %v", err)
 	}
 	defer resp.Body.Close()
-	fmt.Printf("client.Do: %s %s\n", req.Method, req.URL)
+	t.Logf("client.Do: %s %s\n", req.Method, req.URL)
 
 	wantStatus := http.StatusOK
 	if got := resp.StatusCode; got != wantStatus {
@@ -97,7 +96,7 @@ func caseEditorServiceRender(t *testing.T) {
 		t.Fatalf("client.Do: %v", err)
 	}
 	defer resp.Body.Close()
-	fmt.Printf("client.Do: %s %s\n", req.Method, req.URL)
+	t.Logf("client.Do: %s %s\n", req.Method, req.URL)
 
 	wantStatus := http.StatusOK
 	if got := resp.StatusCode; got != wantStatus {

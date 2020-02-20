@@ -1,4 +1,4 @@
-module github.com/GoogleCloudPlatform/golang-samples/run/microservices/render
+module github.com/GoogleCloudPlatform/golang-samples/run/markdown-preview/render
 
 go 1.13
 
