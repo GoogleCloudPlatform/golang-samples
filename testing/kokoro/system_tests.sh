@@ -221,28 +221,8 @@ EXIT_CODE=$?
 # If we're running system tests, send the test log to the Build Cop Bot.
 # See https://github.com/googleapis/repo-automation-bots/tree/master/packages/buildcop.
 if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]]; then
-  # Use the service account with access to the repo-automation-bots project.
-  gcloud auth activate-service-account --key-file $KOKORO_KEYSTORE_DIR/71386_kokoro-golang-samples-tests
-  gcloud config set project repo-automation-bots
-
-  XML=$(base64 -w 0 sponge_log.xml)
-
-  # See https://github.com/apps/build-cop-bot/installations/5943459.
-  MESSAGE=$(cat <<EOF
-  {
-      "Name": "buildcop",
-      "Type" : "function",
-      "Location": "us-central1",
-      "installation": {"id": "5943459"},
-      "repo": "GoogleCloudPlatform/golang-samples",
-      "buildID": "commit:$KOKORO_GIT_COMMIT",
-      "buildURL": "https://source.cloud.google.com/results/invocations/$KOKORO_BUILD_ID",
-      "xunitXML": "$XML"
-  }
-EOF
-  )
-
-  gcloud pubsub topics publish passthrough --message="$MESSAGE"
+  chmod +x $KOKORO_GFILE_DIR/buildcop.sh
+  $KOKORO_GFILE_DIR/buildcop.sh
 fi
 
 exit $EXIT_CODE
