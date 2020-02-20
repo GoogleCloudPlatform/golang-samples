@@ -72,28 +72,22 @@ elif echo $SIGNIFICANT_CHANGES | tr ' ' '\n' | grep "^go.mod$" || [[ $CHANGED_DI
 fi
 
 ## Static Analysis
-# Do the easy stuff before running tests. Fail fast!
+# Do the easy stuff before running tests or reserving a project. Fail fast!
 set +x
-
-# Fail if a dependency was added without the necessary go.mod/go.sum change
-# being part of the commit.
-# Do this before reserving a project since this doens't need a project.
-for i in $GO_CHANGED_MODULES; do
-  mod="$(dirname $i)"
-  pushd $mod > /dev/null;
-    echo "Running 'go.mod/go.sum sync check' in '$mod'..."
-    set -x
-    go mod tidy;
-    git diff go.mod | tee /dev/stderr | (! read)
-    [ -f go.sum ] && git diff go.sum | tee /dev/stderr | (! read)
-    set +x
-  popd > /dev/null;
-done
 
 if [ $GOLANG_SAMPLES_GO_VET ]; then
   for i in $GO_CHANGED_MODULES; do
     mod="$(dirname $i)"
     pushd $mod > /dev/null;
+      # Fail if a dependency was added without the necessary go.mod/go.sum change
+      # being part of the commit.
+      echo "Running 'go.mod/go.sum sync check' in '$mod'..."
+      set -x
+      go mod tidy;
+      git diff go.mod | tee /dev/stderr | (! read)
+      [ -f go.sum ] && git diff go.sum | tee /dev/stderr | (! read)
+      set +x
+
       echo "Running 'gofmt compliance check' in '$mod'..."
       set -x
       diff -u <(echo -n) <(gofmt -d -s .)
@@ -230,28 +224,8 @@ EXIT_CODE=$?
 # If we're running system tests, send the test log to the Build Cop Bot.
 # See https://github.com/googleapis/repo-automation-bots/tree/master/packages/buildcop.
 if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]]; then
-  # Use the service account with access to the repo-automation-bots project.
-  gcloud auth activate-service-account --key-file $KOKORO_KEYSTORE_DIR/71386_kokoro-golang-samples-tests
-  gcloud config set project repo-automation-bots
-
-  XML=$(base64 -w 0 sponge_log.xml)
-
-  # See https://github.com/apps/build-cop-bot/installations/5943459.
-  MESSAGE=$(cat <<EOF
-  {
-      "Name": "buildcop",
-      "Type" : "function",
-      "Location": "us-central1",
-      "installation": {"id": "5943459"},
-      "repo": "GoogleCloudPlatform/golang-samples",
-      "buildID": "commit:$KOKORO_GIT_COMMIT",
-      "buildURL": "https://source.cloud.google.com/results/invocations/$KOKORO_BUILD_ID",
-      "xunitXML": "$XML"
-  }
-EOF
-  )
-
-  gcloud pubsub topics publish passthrough --message="$MESSAGE"
+  chmod +x $KOKORO_GFILE_DIR/buildcop.sh
+  $KOKORO_GFILE_DIR/buildcop.sh
 fi
 
 exit $EXIT_CODE
