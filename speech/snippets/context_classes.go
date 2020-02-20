@@ -18,17 +18,17 @@ package snippets
 // [START speech_context_classes]
 
 import (
-	speech "cloud.google.com/go/speech/apiv1"
-	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"
-
 	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
+
+	speech "cloud.google.com/go/speech/apiv1"
+	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"
 )
 
 // contextClasses provides "hints" to the speech recognizer
-// to favour specific classes of words in the results
+// to favour specific classes of words in the results.
 func contextClasses(w io.Writer, gcsURI string) error {
 	ctx := context.Background()
 
@@ -36,12 +36,13 @@ func contextClasses(w io.Writer, gcsURI string) error {
 	if err != nil {
 		return fmt.Errorf("NewClient: %v", err)
 	}
+	defer client.Close()
 
 	// SpeechContext: to configure your speech_context see:
 	// https://cloud.google.com/speech-to-text/docs/reference/rpc/google.cloud.speech.v1#speechcontext
 	// Full list of supported phrases (class tokens) here:
 	// https://cloud.google.com/speech-to-text/docs/class-tokens
-	// In this instance, the use of "$TIME" favours time of day detections 
+	// In this instance, the use of "$TIME" favours time of day detections.
 	SpeechContext := &speechpb.SpeechContext{Phrases: []string{"$TIME"}}
 
 	resp, err := client.Recognize(ctx, &speechpb.RecognizeRequest{
@@ -58,7 +59,6 @@ func contextClasses(w io.Writer, gcsURI string) error {
 	if err != nil {
 		return fmt.Errorf("Recognize: %v", err)
 	}
-	defer client.Close()
 
 	// Print the results.
 	for i, result := range resp.Results {

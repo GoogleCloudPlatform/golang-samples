@@ -27,9 +27,12 @@ func TestContextClasses(t *testing.T) {
 
 	var buf bytes.Buffer
 	gcsURI := "gs://cloud-samples-data/speech/commercial_mono.wav"
-	want := "Alternative"
 	err := contextClasses(&buf, gcsURI)
+	if err != nil {
+		t.Fatal(err)
+	}
 
+	want := "Alternative"
 	if got := buf.String(); !strings.Contains(got, want) {
 		t.Fatalf("contextClasses(%q): got %q, want %q", gcsURI, got, want)
 	}
