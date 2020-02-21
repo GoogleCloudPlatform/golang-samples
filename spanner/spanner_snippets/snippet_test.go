@@ -28,6 +28,7 @@ import (
 )
 
 func TestSample(t *testing.T) {
+	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/1146")
 	tc := testutil.SystemTest(t)
 
 	instance := os.Getenv("GOLANG_SAMPLES_SPANNER")
@@ -42,6 +43,16 @@ func TestSample(t *testing.T) {
 	ctx := context.Background()
 	adminClient, dataClient := createClients(ctx, dbName)
 	defer adminClient.Close()
+	// The database should be dropped after closing the data client (defer is
+	// called in a LIFO order).
+	defer func() {
+		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+			err := adminClient.DropDatabase(ctx, &adminpb.DropDatabaseRequest{Database: dbName})
+			if err != nil {
+				r.Errorf("DropDatabase(%q): %v", dbName, err)
+			}
+		})
+	}()
 	defer dataClient.Close()
 
 	// Check for database existance prior to test start and delete, as resources may not have
@@ -73,15 +84,6 @@ func TestSample(t *testing.T) {
 		}
 		return b.String()
 	}
-
-	defer func() {
-		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-			err := adminClient.DropDatabase(ctx, &adminpb.DropDatabaseRequest{Database: dbName})
-			if err != nil {
-				r.Errorf("DropDatabase(%q): %v", dbName, err)
-			}
-		})
-	}()
 
 	// We execute all the commands of the tutorial code. These commands have to be run in a specific
 	// order since in many cases earlier commands setup the database for the subsequent commands.
