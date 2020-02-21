@@ -43,7 +43,7 @@ import (
 const maxVersionStr = "1.13"
 
 func main() {
-	// Remove timestamp prefix.
+	// Remove timestamp prefix from log output.
 	log.SetFlags(0)
 
 	modPathPtr := flag.String("module", ".", "Path to a go module")
@@ -59,11 +59,7 @@ func main() {
 		log.Printf("version.NewVersion: %v", err)
 	}
 
-	ok, err := validModule(maxVersion, envVersion, *modPathPtr)
-	if err != nil {
-		log.Printf("validModule: %v", err)
-	}
-	if !ok {
+	if !validModule(maxVersion, envVersion, *modPathPtr) {
 		os.Exit(1)
 	}
 }
@@ -72,29 +68,32 @@ func main() {
 // Any of the following criteria mean it is valid for testing:
 // - The current runtime is the most recent supported version of golang
 // - The current runtime golang version is earlier than the module's required version
-func validModule(max *version.Version, v *version.Version, module string) (bool, error) {
+// - An error is encountered performing version comparisons
+func validModule(max *version.Version, v *version.Version, module string) bool {
 	if v.GreaterThan(max) {
 		log.Printf("always run tests for most advanced go version: go%s", maxVersionStr)
-		return true, nil
+		return true
 	}
 
 	mVersionStr, err := moduleVersion(module)
 	if err != nil {
-		return true, fmt.Errorf("version.NewVersion: %v", err)
+		log.Printf("moduleVersion: %v", err)
+		return true
 	}
 
 	modVersion, err := version.NewVersion(mVersionStr)
 	if err != nil {
-		return true, fmt.Errorf("version.NewVersion: %v", err)
+		log.Printf("version.NewVersion: %v", err)
+		return true
 	}
 
 	if v.LessThan(modVersion) {
 		log.Printf("runtime version (%s) < module version (%s)", v, modVersion)
-		return false, nil
+		return false
 	}
 	log.Printf("runtime version (%s) >= module version (%s)", v, modVersion)
 
-	return true, nil
+	return true
 }
 
 // moduleVersion extracts the minimum go version from the go.mod
