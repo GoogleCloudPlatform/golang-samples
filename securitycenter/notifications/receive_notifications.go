@@ -35,6 +35,7 @@ func receiveMessages(w io.Writer, projectID string, subscriptionName string) err
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	sub := client.Subscription(subscriptionName)
 	cctx, cancel := context.WithCancel(ctx)

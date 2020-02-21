@@ -63,10 +63,10 @@ func addNotificationConfig(t *testing.T, notificationConfigID string) error {
 	pubsubTopic := pubsubTopic(t)
 
 	ctx := context.Background()
-	client, err0 := securitycenter.NewClient(ctx)
+	client, err := securitycenter.NewClient(ctx)
 
-	if err0 != nil {
-		return fmt.Errorf("securitycenter.NewClient: %v", err0)
+	if err != nil {
+		return fmt.Errorf("securitycenter.NewClient: %v", err)
 	}
 	defer client.Close()
 
@@ -85,9 +85,9 @@ func addNotificationConfig(t *testing.T, notificationConfigID string) error {
 		},
 	}
 
-	_, err1 := client.CreateNotificationConfig(ctx, req)
-	if err1 != nil {
-		return fmt.Errorf("Failed to create notification config: %v", err1)
+	_, err := client.CreateNotificationConfig(ctx, req)
+	if err != nil {
+		return fmt.Errorf("Failed to create notification config: %v", err)
 	}
 
 	return nil
@@ -118,8 +118,8 @@ func cleanupNotificationConfig(t *testing.T, notificationConfigID string) error 
 
 func TestCreateNotificationConfig(t *testing.T) {
 	buf := new(bytes.Buffer)
-	rand, err0 := uuid.NewUUID()
-	if err0 != nil {
+	rand, err := uuid.NewUUID()
+	if err != nil {
 		t.Errorf("Issue generating id.")
 	}
 	configID := "go-test-create-config-id" + rand.String()
@@ -137,8 +137,8 @@ func TestCreateNotificationConfig(t *testing.T) {
 
 func TestDeleteNotificationConfig(t *testing.T) {
 	buf := new(bytes.Buffer)
-	rand, err0 := uuid.NewUUID()
-	if err0 != nil {
+	rand, err := uuid.NewUUID()
+	if err != nil {
 		t.Errorf("Issue generating id.")
 	}
 	configID := "go-test-delete-config-id" + rand.String()
@@ -158,8 +158,8 @@ func TestDeleteNotificationConfig(t *testing.T) {
 
 func TestGetNotificationConfig(t *testing.T) {
 	buf := new(bytes.Buffer)
-	rand, err0 := uuid.NewUUID()
-	if err0 != nil {
+	rand, err := uuid.NewUUID()
+	if err != nil {
 		t.Errorf("Issue generating id.")
 	}
 	configID := "go-test-get-config-id" + rand.String()
@@ -181,8 +181,8 @@ func TestGetNotificationConfig(t *testing.T) {
 
 func TestListNotificationConfigs(t *testing.T) {
 	buf := new(bytes.Buffer)
-	rand, err0 := uuid.NewUUID()
-	if err0 != nil {
+	rand, err := uuid.NewUUID()
+	if err != nil {
 		t.Errorf("Issue generating id.")
 	}
 	configID := "go-test-list-config-id" + rand.String()
@@ -204,8 +204,8 @@ func TestListNotificationConfigs(t *testing.T) {
 
 func TestUpdateNotificationConfig(t *testing.T) {
 	buf := new(bytes.Buffer)
-	rand, err0 := uuid.NewUUID()
-	if err0 != nil {
+	rand, err := uuid.NewUUID()
+	if err != nil {
 		t.Errorf("Issue generating id.")
 	}
 	configID := "go-test-update-config-id" + rand.String()
