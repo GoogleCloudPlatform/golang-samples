@@ -64,7 +64,7 @@ GO_CHANGED_MODULES=""
 for i in $GO_CHANGED_MODULES_ALL; do
   mod="$(dirname $i)"
   echo "Running 'version compatibility check' for '$mod'"
-  go run $ROOT_DIR/testing/kokoro/version.go -module=$mod && GO_CHANGED_MODULES="$GO_CHANGED_MODULES $mod"
+  go run $ROOT_DIR/testing/kokoro/module.go -module=$mod && GO_CHANGED_MODULES="$GO_CHANGED_MODULES $mod"
 done
 
 # Exclude the root module if present.
@@ -211,10 +211,11 @@ if [[ $RUN_ALL_TESTS = "1" ]]; then
   for i in $(find . -name go.mod); do
     mod="$(dirname $i)"
     echo "Running 'version compatibility check' for '$mod'"
-    go run $ROOT_DIR/testing/kokoro/version.go -module=$mod && GO_TEST_MODULES="$GO_TEST_MODULES $mod"
+    go run $ROOT_DIR/testing/kokoro/module.go -module=$mod && GO_TEST_MODULES="$GO_TEST_MODULES $mod"
   done
   set -x
 elif [[ -z "${TARGET_DIRS// }" ]]; then
+  # Assume root module is always compatible with the oldest supported version.
   GO_TEST_TARGET=""
   GO_TEST_MODULES="./go.mod"
   echo "Only running root tests"

@@ -39,11 +39,11 @@ import (
 	"github.com/hashicorp/go-version"
 )
 
-// maxVersion is the most advanced go version in testing.
-const maxVersionStr="1.13"
-var maxVersion *version.Version
+// maxVersionStr is the most advanced go version in testing.
+const maxVersionStr = "1.13"
 
 func main() {
+	// Remove timestamp prefix.
 	log.SetFlags(0)
 
 	modPathPtr := flag.String("module", ".", "Path to a go module")
@@ -59,28 +59,25 @@ func main() {
 		log.Printf("version.NewVersion: %v", err)
 	}
 
-	ok, err := valid(maxVersion, envVersion, *modPathPtr)
+	ok, err := validModule(maxVersion, envVersion, *modPathPtr)
 	if err != nil {
-		log.Printf("compare: %v", err)
+		log.Printf("validModule: %v", err)
 	}
 	if !ok {
 		os.Exit(1)
 	}
 }
 
-// valid determines if the module should be tested.
-func valid(max *version.Version, v *version.Version, module string) (bool, error) {
+// validModule determines if the module should be tested.
+// Any of the following criteria mean it is valid for testing:
+// - The current runtime is the most recent supported version of golang
+// - The current runtime golang version is earlier than the module's required version
+func validModule(max *version.Version, v *version.Version, module string) (bool, error) {
 	if v.GreaterThan(max) {
 		log.Printf("always run tests for most advanced go version: go%s", maxVersionStr)
 		return true, nil
 	}
 
-	return compare(v, module)
-}
-
-// compare determines if the module has a newer version than the runtime.
-// This command should fail "successful".
-func compare(v *version.Version, module string) (bool, error) {
 	mVersionStr, err := moduleVersion(module)
 	if err != nil {
 		return true, fmt.Errorf("version.NewVersion: %v", err)
@@ -90,7 +87,7 @@ func compare(v *version.Version, module string) (bool, error) {
 	if err != nil {
 		return true, fmt.Errorf("version.NewVersion: %v", err)
 	}
-	
+
 	if v.LessThan(modVersion) {
 		log.Printf("runtime version (%s) < module version (%s)", v, modVersion)
 		return false, nil
@@ -106,7 +103,6 @@ func moduleVersion(m string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("filepath.Abs: (%s) %v", m, err)
 	}
-	log.Printf("parsing module %q", p)
 
 	cmd := exec.Command("go", []string{"mod", "edit", "-json"}...)
 	cmd.Dir = p
