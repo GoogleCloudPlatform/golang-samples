@@ -15,4 +15,5 @@ In practice, this web page does the following:
 ## Markdown Background
 
 Markdown is a text-to-HTML conversion tool that allows you to convert plain text to valid HTML.
-You can read more about the [syntax on Wikipedia](https://en.wikipedia.org/wiki/Markdown).
+
+Read more about the [syntax on Wikipedia](https://en.wikipedia.org/wiki/Markdown).
