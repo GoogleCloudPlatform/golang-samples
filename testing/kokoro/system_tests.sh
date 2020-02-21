@@ -140,6 +140,9 @@ export GOLANG_SAMPLES_IOT_PRIV="$KOKORO_GFILE_DIR/rsa_private.pem"
 export STORAGE_HMAC_ACCESS_KEY_ID="$KOKORO_KEYSTORE_DIR/71386_golang-samples-kokoro-gcs-hmac-secret"
 export STORAGE_HMAC_ACCESS_SECRET_KEY="$KOKORO_KEYSTORE_DIR/71386_golang-samples-kokoro-gcs-hmac-id"
 export GCLOUD_ORGANIZATION=1081635000895
+export SCC_PUBSUB_PROJECT="project-a-id"
+export SCC_PUBSUB_TOPIC="projects/project-a-id/topics/notifications-sample-topic"
+export SCC_PUBSUB_SUBSCRIPTION="notification-sample-subscription"
 
 export GOLANG_SAMPLES_SPANNER=projects/golang-samples-tests/instances/golang-samples-tests
 export GOLANG_SAMPLES_BIGTABLE_PROJECT=golang-samples-tests
