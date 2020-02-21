@@ -85,9 +85,9 @@ func addNotificationConfig(t *testing.T, notificationConfigID string) error {
 		},
 	}
 
-	_, err := client.CreateNotificationConfig(ctx, req)
-	if err != nil {
-		return fmt.Errorf("Failed to create notification config: %v", err)
+	_, err0 := client.CreateNotificationConfig(ctx, req)
+	if err0 != nil {
+		return fmt.Errorf("Failed to create notification config: %v", err0)
 	}
 
 	return nil
