@@ -29,7 +29,7 @@ func TestContextClasses(t *testing.T) {
 	gcsURI := "gs://cloud-samples-data/speech/commercial_mono.wav"
 	err := contextClasses(&buf, gcsURI)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("contextClasses got err: %v", err)
 	}
 
 	want := "Alternative"
