@@ -1,4 +1,4 @@
-module github.com/GoogleCloudPlatform/golang-samples/functions/slack/app
+module github.com/GoogleCloudPlatform/golang-samples/functions/slack
 
 go 1.11
 

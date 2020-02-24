@@ -120,8 +120,8 @@ func makeSearchRequest(query string) (*Message, error) {
 
 // [START functions_verify_webhook]
 
-// VeryfyWebhook uses signature verification instead of tokens.
-// see https://api.slack.com/docs/verifying-requests-from-slack
+// verifyWebHook verifies the request signature.
+// See https://api.slack.com/docs/verifying-requests-from-slack.
 func verifyWebHook(r *http.Request, slackSigningSecret string) (bool, error) {
 	timeStamp := r.Header.Get(slackRequestTimestampHeader)
 	slackSignature := r.Header.Get(slackSignatureHeader)
