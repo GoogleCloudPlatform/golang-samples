@@ -28,7 +28,6 @@ import (
 )
 
 func TestSample(t *testing.T) {
-	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/1146")
 	tc := testutil.SystemTest(t)
 
 	instance := os.Getenv("GOLANG_SAMPLES_SPANNER")
@@ -240,6 +239,9 @@ func TestSample(t *testing.T) {
 	out = runCommand(t, "querywithstring", dbName)
 	assertContains(t, out, "42 Venue 42")
 
+	// Wait 5 seconds to avoid a time drift issue for the next query:
+	// https://github.com/GoogleCloudPlatform/golang-samples/issues/1146.
+	time.Sleep(time.Second * 5)
 	out = runCommand(t, "querywithtimestampparameter", dbName)
 	assertContains(t, out, "4 Venue 4")
 	assertContains(t, out, "19 Venue 19")
