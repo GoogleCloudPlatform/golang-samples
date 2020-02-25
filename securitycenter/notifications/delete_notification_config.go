@@ -16,8 +16,8 @@ package notifications
 // [START scc_delete_notification_config]
 import (
 	"context"
-	"io"
 	"fmt"
+	"io"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1p1beta1"
 	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1p1beta1"
@@ -39,7 +39,7 @@ func deleteNotificationConfig(w io.Writer, orgID string, notificationConfigID st
 	req := &securitycenterpb.DeleteNotificationConfigRequest{
 		Name: name,
 	}
-	
+
 	if err = client.DeleteNotificationConfig(ctx, req); err != nil {
 		return fmt.Errorf("Failed to retrieve notification config: %v", err)
 	}

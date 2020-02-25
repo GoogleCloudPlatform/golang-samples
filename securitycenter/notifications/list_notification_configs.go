@@ -16,8 +16,8 @@ package notifications
 // [START scc_list_notification_configs]
 import (
 	"context"
-	"io"
 	"fmt"
+	"io"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1p1beta1"
 	"google.golang.org/api/iterator"

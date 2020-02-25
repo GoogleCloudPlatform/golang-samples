@@ -47,10 +47,10 @@ func contextClasses(w io.Writer, gcsURI string) error {
 
 	resp, err := client.Recognize(ctx, &speechpb.RecognizeRequest{
 		Config: &speechpb.RecognitionConfig{
-			Encoding:                            speechpb.RecognitionConfig_LINEAR16,
-			SampleRateHertz:                     8000,
-			LanguageCode:                        "en-US",
-			SpeechContexts:                      []*speechpb.SpeechContext{speechContext},
+			Encoding:        speechpb.RecognitionConfig_LINEAR16,
+			SampleRateHertz: 8000,
+			LanguageCode:    "en-US",
+			SpeechContexts:  []*speechpb.SpeechContext{speechContext},
 		},
 		Audio: &speechpb.RecognitionAudio{
 			AudioSource: &speechpb.RecognitionAudio_Uri{Uri: gcsURI},
