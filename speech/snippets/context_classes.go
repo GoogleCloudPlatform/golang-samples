@@ -43,14 +43,14 @@ func contextClasses(w io.Writer, gcsURI string) error {
 	// Full list of supported phrases (class tokens) here:
 	// https://cloud.google.com/speech-to-text/docs/class-tokens
 	// In this instance, the use of "$TIME" favours time of day detections.
-	SpeechContext := &speechpb.SpeechContext{Phrases: []string{"$TIME"}}
+	speechContext := &speechpb.SpeechContext{Phrases: []string{"$TIME"}}
 
 	resp, err := client.Recognize(ctx, &speechpb.RecognizeRequest{
 		Config: &speechpb.RecognitionConfig{
 			Encoding:                            speechpb.RecognitionConfig_LINEAR16,
 			SampleRateHertz:                     8000,
 			LanguageCode:                        "en-US",
-			SpeechContexts:                      []&speechpb.SpeechContext{SpeechContext},
+			SpeechContexts:                      []*speechpb.SpeechContext{speechContext},
 		},
 		Audio: &speechpb.RecognitionAudio{
 			AudioSource: &speechpb.RecognitionAudio_Uri{Uri: gcsURI},
