@@ -42,6 +42,16 @@ func TestSample(t *testing.T) {
 	ctx := context.Background()
 	adminClient, dataClient := createClients(ctx, dbName)
 	defer adminClient.Close()
+	// The database should be dropped after closing the data client (defer is
+	// called in a LIFO order).
+	defer func() {
+		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+			err := adminClient.DropDatabase(ctx, &adminpb.DropDatabaseRequest{Database: dbName})
+			if err != nil {
+				r.Errorf("DropDatabase(%q): %v", dbName, err)
+			}
+		})
+	}()
 	defer dataClient.Close()
 
 	// Check for database existance prior to test start and delete, as resources may not have
@@ -73,15 +83,6 @@ func TestSample(t *testing.T) {
 		}
 		return b.String()
 	}
-
-	defer func() {
-		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-			err := adminClient.DropDatabase(ctx, &adminpb.DropDatabaseRequest{Database: dbName})
-			if err != nil {
-				r.Errorf("DropDatabase(%q): %v", dbName, err)
-			}
-		})
-	}()
 
 	// We execute all the commands of the tutorial code. These commands have to be run in a specific
 	// order since in many cases earlier commands setup the database for the subsequent commands.
@@ -238,6 +239,9 @@ func TestSample(t *testing.T) {
 	out = runCommand(t, "querywithstring", dbName)
 	assertContains(t, out, "42 Venue 42")
 
+	// Wait 5 seconds to avoid a time drift issue for the next query:
+	// https://github.com/GoogleCloudPlatform/golang-samples/issues/1146.
+	time.Sleep(time.Second * 5)
 	out = runCommand(t, "querywithtimestampparameter", dbName)
 	assertContains(t, out, "4 Venue 4")
 	assertContains(t, out, "19 Venue 19")
