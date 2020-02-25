@@ -38,7 +38,7 @@ func getBucketMetadata(w io.Writer, bucketName string) (*storage.BucketAttrs, er
 
 	attrs, err := client.Bucket(bucketName).Attrs(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("BucketHandle.Attrs: %v", err)
+		return nil, fmt.Errorf("Bucket(%q).Attrs: %v", bucketName, err)
 	}
 	fmt.Fprintf(w, "BucketName: %v\n", attrs.Name)
 	fmt.Fprintf(w, "Location: %v\n", attrs.Location)

@@ -36,19 +36,19 @@ func lockRetentionPolicy(w io.Writer, bucketName string) error {
 	bucket := client.Bucket(bucketName)
 	attrs, err := bucket.Attrs(ctx)
 	if err != nil {
-		return fmt.Errorf("BucketHandle.Attrs: %v", err)
+		return fmt.Errorf("Bucket(%q).Attrs: %v", bucketName, err)
 	}
 
 	conditions := storage.BucketConditions{
 		MetagenerationMatch: attrs.MetaGeneration,
 	}
 	if err := bucket.If(conditions).LockRetentionPolicy(ctx); err != nil {
-		return fmt.Errorf("BucketHandle.LockRetentionPolicy: %v", err)
+		return fmt.Errorf("Bucket(%q).LockRetentionPolicy: %v", bucketName, err)
 	}
 
 	lockedAttrs, err := bucket.Attrs(ctx)
 	if err != nil {
-		return fmt.Errorf("BucketHandle.Attrs: lockedAttrs: %v", err)
+		return fmt.Errorf("Bucket(%q).Attrs: lockedAttrs: %v", bucketName, err)
 	}
 
 	fmt.Fprintf(w, "Retention policy for %v is now locked\n", bucketName)

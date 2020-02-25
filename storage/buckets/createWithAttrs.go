@@ -39,7 +39,7 @@ func createWithAttrs(projectID, bucketName string) error {
 		StorageClass: "COLDLINE",
 		Location:     "asia",
 	}); err != nil {
-		return fmt.Errorf("BucketHandle.Create: %v", err)
+		return fmt.Errorf("Bucket(%q).Create: %v", bucketName, err)
 	}
 	return nil
 }

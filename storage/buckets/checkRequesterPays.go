@@ -35,7 +35,7 @@ func checkRequesterPays(w io.Writer, bucketName string) error {
 
 	attrs, err := client.Bucket(bucketName).Attrs(ctx)
 	if err != nil {
-		return fmt.Errorf("BucketHandle.Attrs: %v", err)
+		return fmt.Errorf("Bucket(%q).Attrs: %v", bucketName, err)
 	}
 	fmt.Fprintf(w, "Is requester pays enabled? %v\n", attrs.RequesterPays)
 	return nil

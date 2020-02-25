@@ -34,7 +34,7 @@ func deleteBucket(bucketName string) error {
 
 	bucket := client.Bucket(bucketName)
 	if err := bucket.Delete(ctx); err != nil {
-		return fmt.Errorf("BucketHandle.Delete: %v", err)
+		return fmt.Errorf("Bucket(%q).Delete: %v", bucketName, err)
 	}
 	return nil
 }

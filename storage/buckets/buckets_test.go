@@ -79,7 +79,7 @@ outer:
 		t.Errorf("got bucket list: %v; want %q in the list", buckets, bucketName)
 	}
 }
- 
+
 func TestGetBucketMetadata(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	bucketName := tc.ProjectID + "-storage-buckets-tests"

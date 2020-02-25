@@ -35,7 +35,7 @@ func removeRetentionPolicy(bucketName string) error {
 	bucket := client.Bucket(bucketName)
 	attrs, err := bucket.Attrs(ctx)
 	if err != nil {
-		return fmt.Errorf("BucketHandle.Attrs: %v", err)
+		return fmt.Errorf("Bucket(%q).Attrs: %v", bucketName, err)
 	}
 	if attrs.RetentionPolicy.IsLocked {
 		return fmt.Errorf("retention policy is locked")
@@ -45,7 +45,7 @@ func removeRetentionPolicy(bucketName string) error {
 		RetentionPolicy: &storage.RetentionPolicy{},
 	}
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
-		return fmt.Errorf("BucketHandle.Update: %v", err)
+		return fmt.Errorf("Bucket(%q).Update: %v", bucketName, err)
 	}
 	return nil
 }

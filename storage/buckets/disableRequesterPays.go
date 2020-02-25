@@ -37,7 +37,7 @@ func disableRequesterPays(bucketName string) error {
 		RequesterPays: false,
 	}
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
-		return fmt.Errorf("BucketHandle.Update: %v", err)
+		return fmt.Errorf("Bucket(%q).Update: %v", bucketName, err)
 	}
 	return nil
 }
