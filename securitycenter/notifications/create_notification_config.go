@@ -16,8 +16,8 @@ package notifications
 // [START scc_create_notification_config]
 import (
 	"context"
-	"io"
 	"fmt"
+	"io"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1p1beta1"
 	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1p1beta1"
