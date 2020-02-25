@@ -28,25 +28,35 @@ import (
 	"cloud.google.com/go/profiler"
 	"google.golang.org/grpc"
 
-	"shakesapp/shakesapp"
+	"github.com/GoogleCloudPlatform/golang-samples/profiler/shakesapp/shakesapp"
 )
 
 var (
-	projectID   = flag.String("project_id", "", "project ID to run profiler with; only required when running outside of GCP.")
-	port        = flag.Int("port", 7788, "service port")
-	numReqs     = flag.Int("num_requests", 20, "number of requests to simulate")
-	concurrency = flag.Int("concurrency", 1, "number of requests to run in parallel")
-	numRounds   = flag.Int("num_rounds", 0, "number of simulation rounds (0 for infinite)")
+	projectID           = flag.String("project_id", "", "project ID to run profiler with; only required when running outside of GCP.")
+	version             = flag.String("version", "original", "version to run profiler with")
+	port                = flag.Int("port", 7788, "service port")
+	numReqs             = flag.Int("num_requests", 20, "number of requests to simulate")
+	concurrency         = flag.Int("concurrency", 1, "number of requests to run in parallel")
+	numRounds           = flag.Int("num_rounds", 0, "number of simulation rounds (0 for infinite)")
+	cpuProfiling        = flag.Bool("cpu_profiling", true, "enable collection of CPU profiles")
+	heapProfiling       = flag.Bool("heap_profiling", false, "enable collection of heap profiles")
+	allocProfiling      = flag.Bool("alloc_profiling", false, "enable collection of heap allocation profiles")
+	contentionProfiling = flag.Bool("contention_profiling", false, "enable collection of contention profiles")
+	threadProfiling     = flag.Bool("thread_profiling", false, "enable collection of thread profiles")
 )
 
 func main() {
 	flag.Parse()
 
 	if err := profiler.Start(profiler.Config{
-		Service:        "shakesapp",
-		ServiceVersion: "original",
-		ProjectID:      *projectID,
-		MutexProfiling: true,
+		Service:              "shakesapp",
+		ServiceVersion:       *version,
+		ProjectID:            *projectID,
+		NoCPUProfiling:       !*cpuProfiling,
+		NoHeapProfiling:      !*heapProfiling,
+		NoAllocProfiling:     !*allocProfiling,
+		NoGoroutineProfiling: !*threadProfiling,
+		MutexProfiling:       *contentionProfiling,
 	}); err != nil {
 		log.Fatalf("Failed to start profiler: %v", err)
 	}

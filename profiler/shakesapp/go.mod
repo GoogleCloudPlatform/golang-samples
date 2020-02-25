@@ -1,4 +1,4 @@
-module shakesapp
+module github.com/GoogleCloudPlatform/golang-samples/profiler/shakesapp
 
 go 1.14
 
