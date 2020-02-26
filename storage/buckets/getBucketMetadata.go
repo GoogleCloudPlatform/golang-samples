@@ -23,7 +23,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"time"
 
 	"cloud.google.com/go/storage"
