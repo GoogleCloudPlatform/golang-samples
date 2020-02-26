@@ -3,16 +3,17 @@ module github.com/GoogleCloudPlatform/golang-samples
 go 1.11
 
 require (
-	cloud.google.com/go v0.53.0
-	cloud.google.com/go/bigquery v1.3.0
+	cloud.google.com/go v0.53.1-0.20200226181226-323381ea063a
+	cloud.google.com/go/bigquery v1.4.0
 	cloud.google.com/go/bigtable v1.1.0
-	cloud.google.com/go/datastore v1.0.0
+	cloud.google.com/go/datastore v1.1.0
 	cloud.google.com/go/firestore v1.1.0
 	cloud.google.com/go/logging v1.0.0
-	cloud.google.com/go/pubsub v1.1.0
+	cloud.google.com/go/pubsub v1.2.0
 	cloud.google.com/go/spanner v1.1.0
-	cloud.google.com/go/storage v1.5.0
+	cloud.google.com/go/storage v1.6.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.0
+	github.com/GoogleCloudPlatform/golang-samples/run/image-processing v0.0.0-20200225194335-de38826d3cd2 // indirect
 	github.com/aws/aws-sdk-go v1.28.13
 	github.com/bmatcuk/doublestar v1.2.2
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
@@ -38,14 +39,14 @@ require (
 	github.com/sendgrid/smtpapi-go v0.6.0 // indirect
 	github.com/tinylib/msgp v1.1.0 // indirect
 	go.opencensus.io v0.22.3
-	golang.org/x/exp v0.0.0-20200207192155-f17229e696bd
-	golang.org/x/net v0.0.0-20200202094626-16171245cfb2
+	golang.org/x/exp v0.0.0-20200224162631-6cc2880d07d6
+	golang.org/x/net v0.0.0-20200226121028-0de0cce0169b
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/text v0.3.2
-	golang.org/x/tools v0.0.0-20200212150539-ea181f53ac56
-	google.golang.org/api v0.17.0
+	golang.org/x/tools v0.0.0-20200226180945-26f6a1b6802d
+	google.golang.org/api v0.19.0
 	google.golang.org/appengine v1.6.5
-	google.golang.org/genproto v0.0.0-20200212174721-66ed5ce911ce
+	google.golang.org/genproto v0.0.0-20200225123651-fc8f55426688
 	google.golang.org/grpc v1.27.1
 	gopkg.in/sendgrid/sendgrid-go.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.2.8

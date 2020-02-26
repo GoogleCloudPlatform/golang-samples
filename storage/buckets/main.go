@@ -28,6 +28,7 @@ import (
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/storage"
 	"google.golang.org/api/iterator"
+	iampb "google.golang.org/genproto/googleapis/iam/v1"
 )
 
 func main() {
@@ -159,18 +160,18 @@ func deleteBucket(client *storage.Client, bucketName string) error {
 	return nil
 }
 
-func getPolicy(c *storage.Client, bucketName string) (*iam.Policy, error) {
+func getPolicy(c *storage.Client, bucketName string) (*iam.Policy3, error) {
 	// [START storage_get_bucket_policy]
 	ctx := context.Background()
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
-	policy, err := c.Bucket(bucketName).IAM().Policy(ctx)
+	policy, err := c.Bucket(bucketName).IAM().V3().Policy(ctx)
 	if err != nil {
 		return nil, err
 	}
-	for _, role := range policy.Roles() {
-		log.Printf("%q: %q", role, policy.Members(role))
+	for _, binding := range policy.Bindings {
+		log.Printf("%q: %q (condition: %v)", binding.Role, binding.Members, binding.Condition)
 	}
 	// [END storage_get_bucket_policy]
 	return policy, nil
@@ -183,15 +184,18 @@ func addUser(c *storage.Client, bucketName string) error {
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 	bucket := c.Bucket(bucketName)
-	policy, err := bucket.IAM().Policy(ctx)
+	policy, err := bucket.IAM().V3().Policy(ctx)
 	if err != nil {
 		return err
 	}
 	// Other valid prefixes are "serviceAccount:", "user:"
 	// See the documentation for more values.
 	// https://cloud.google.com/storage/docs/access-control/iam
-	policy.Add("group:cloud-logs@google.com", "roles/storage.objectViewer")
-	if err := bucket.IAM().SetPolicy(ctx, policy); err != nil {
+	policy.Bindings = append(policy.Bindings, &iampb.Binding{
+		Role:    "roles/storage.objectViewer",
+		Members: []string{"group:cloud-logs@google.com"},
+	})
+	if err := bucket.IAM().V3().SetPolicy(ctx, policy); err != nil {
 		return err
 	}
 	// NOTE: It may be necessary to retry this operation if IAM policies are
@@ -208,15 +212,26 @@ func removeUser(c *storage.Client, bucketName string) error {
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 	bucket := c.Bucket(bucketName)
-	policy, err := bucket.IAM().Policy(ctx)
+	policy, err := bucket.IAM().V3().Policy(ctx)
 	if err != nil {
 		return err
 	}
 	// Other valid prefixes are "serviceAccount:", "user:"
 	// See the documentation for more values.
 	// https://cloud.google.com/storage/docs/access-control/iam
-	policy.Remove("group:cloud-logs@google.com", "roles/storage.objectViewer")
-	if err := bucket.IAM().SetPolicy(ctx, policy); err != nil {
+	for _, binding := range policy.Bindings {
+		if binding.Role == "roles/storage.objectViewer" {
+			// Filter out member.
+			i := 0
+			for _, member := range binding.Members {
+				if member != "group:cloud-logs@google.com" {
+					binding.Members[i] = member
+				}
+				binding.Members = binding.Members[:i]
+			}
+		}
+	}
+	if err := bucket.IAM().V3().SetPolicy(ctx, policy); err != nil {
 		return err
 	}
 	// NOTE: It may be necessary to retry this operation if IAM policies are
