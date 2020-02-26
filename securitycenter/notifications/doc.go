@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,22 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
-
-import (
-	"net/http"
-
-	"google.golang.org/appengine"
-)
-
-func main() {
-	http.HandleFunc("/", indexHandler)
-	appengine.Main()
-}
-
-func indexHandler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		http.Redirect(w, r, "/", http.StatusFound)
-		return
-	}
-}
+// Pacakge findings contains example snippets for working with notification configs
+// and their notifications.
+package notifications

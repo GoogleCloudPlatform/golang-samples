@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 )
 
 // createHMACKey creates a new HMAC key using the given project and service account.
@@ -33,6 +34,8 @@ func createHMACKey(w io.Writer, projectID string, serviceAccountEmail string) (*
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 	key, err := client.CreateHMACKey(ctx, projectID, serviceAccountEmail)
 	if err != nil {
 		return nil, fmt.Errorf("CreateHMACKey: %v", err)

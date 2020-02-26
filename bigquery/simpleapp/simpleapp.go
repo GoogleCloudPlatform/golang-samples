@@ -31,13 +31,23 @@ import (
 // [END bigquery_simple_app_deps]
 
 func main() {
-	proj := os.Getenv("GOOGLE_CLOUD_PROJECT")
-	if proj == "" {
+	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
+	if projectID == "" {
 		fmt.Println("GOOGLE_CLOUD_PROJECT environment variable must be set.")
 		os.Exit(1)
 	}
 
-	rows, err := query(proj)
+	// [START bigquery_simple_app_client]
+	ctx := context.Background()
+
+	client, err := bigquery.NewClient(ctx, projectID)
+	if err != nil {
+		log.Fatalf("bigquery.NewClient: %v", err)
+	}
+	defer client.Close()
+	// [END bigquery_simple_app_client]
+
+	rows, err := query(ctx, client)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -46,16 +56,8 @@ func main() {
 	}
 }
 
-// query returns a slice of the results of a query.
-func query(proj string) (*bigquery.RowIterator, error) {
-	// [START bigquery_simple_app_client]
-	ctx := context.Background()
-
-	client, err := bigquery.NewClient(ctx, proj)
-	if err != nil {
-		return nil, err
-	}
-	// [END bigquery_simple_app_client]
+// query returns a row iterator suitable for reading query results.
+func query(ctx context.Context, client *bigquery.Client) (*bigquery.RowIterator, error) {
 
 	// [START bigquery_simple_app_query]
 	query := client.Query(
@@ -87,7 +89,7 @@ func printResults(w io.Writer, iter *bigquery.RowIterator) error {
 			return nil
 		}
 		if err != nil {
-			return err
+			return fmt.Errorf("error iterating through results: %v", err)
 		}
 
 		fmt.Fprintf(w, "url: %s views: %d\n", row.URL, row.ViewCount)

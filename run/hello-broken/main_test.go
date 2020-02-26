@@ -31,10 +31,10 @@ func TestBrokenErrors(t *testing.T) {
 
 	defer func() {
 		if r := recover(); r == nil {
-			t.Errorf("brokenHandler: got (no panic), want (panic)")
+			t.Errorf("helloHandler: got (no panic), want (panic)")
 		}
 	}()
-	brokenHandler(rr, req)
+	helloHandler(rr, req)
 }
 
 func TestBrokenHandler(t *testing.T) {
@@ -86,7 +86,7 @@ func TestImprovedHandler(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		req := httptest.NewRequest("GET", "/", strings.NewReader(""))
+		req := httptest.NewRequest("GET", "/improved", strings.NewReader(""))
 		rr := httptest.NewRecorder()
 
 		os.Setenv("NAME", test.name)

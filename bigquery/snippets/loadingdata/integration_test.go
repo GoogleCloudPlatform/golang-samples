@@ -34,6 +34,7 @@ func TestImportSnippets(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer client.Close()
 
 	// Control a job lifecycle explicitly: create, report status, cancel.
 	testDatasetID, err := bqtestutil.UniqueBQName("golang_snippets_loading")

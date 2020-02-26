@@ -36,6 +36,7 @@ func TestModels(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer client.Close()
 
 	datasetID, err := bqtestutil.UniqueBQName("golang_example_dataset_model")
 	if err != nil {

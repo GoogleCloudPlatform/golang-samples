@@ -31,6 +31,7 @@ func addDatasetLabel(projectID, datasetID string) error {
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	ds := client.Dataset(datasetID)
 	meta, err := ds.Metadata(ctx)
