@@ -14,38 +14,31 @@
 
 package buckets
 
-// [START list_buckets]
+// [START storage_get_requester_pays_status]
 import (
 	"context"
 	"fmt"
+	"io"
 
 	"cloud.google.com/go/storage"
-	"google.golang.org/api/iterator"
 )
 
-// list lists buckets in the project.
-func list(projectID string) ([]string, error) {
-	// projectID := "my-project-id"
+// getRequesterPaysStatus gets requester pays status.
+func getRequesterPaysStatus(w io.Writer, bucketName string) error {
+	// bucketName := "bucket-name"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
 
-	var buckets []string
-	it := client.Buckets(ctx, projectID)
-	for {
-		battrs, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return nil, err
-		}
-		buckets = append(buckets, battrs.Name)
+	attrs, err := client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		return fmt.Errorf("Bucket(%q).Attrs: %v", bucketName, err)
 	}
-	return buckets, nil
+	fmt.Fprintf(w, "Is requester pays enabled? %v\n", attrs.RequesterPays)
+	return nil
 }
 
-// [END list_buckets]
+// [END storage_get_requester_pays_status]

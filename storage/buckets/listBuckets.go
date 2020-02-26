@@ -14,19 +14,18 @@
 
 package buckets
 
-// [START storage_get_bucket_policy]
+// [START storage_list_buckets]
 import (
 	"context"
 	"fmt"
-	"io"
 
-	"cloud.google.com/go/iam"
 	"cloud.google.com/go/storage"
+	"google.golang.org/api/iterator"
 )
 
-// getPolicy gets the bucket IAM policy.
-func getPolicy(w io.Writer, bucketName string) (*iam.Policy, error) {
-	// bucketName := "bucket-name"
+// listBuckets lists buckets in the project.
+func listBuckets(projectID string) ([]string, error) {
+	// projectID := "my-project-id"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -34,14 +33,19 @@ func getPolicy(w io.Writer, bucketName string) (*iam.Policy, error) {
 	}
 	defer client.Close()
 
-	policy, err := client.Bucket(bucketName).IAM().Policy(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("Bucket(%q).IAM.Policy: %v", bucketName, err)
+	var buckets []string
+	it := client.Buckets(ctx, projectID)
+	for {
+		battrs, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+		buckets = append(buckets, battrs.Name)
 	}
-	for _, role := range policy.Roles() {
-		fmt.Fprintf(w, "%q: %q", role, policy.Members(role))
-	}
-	return policy, nil
+	return buckets, nil
 }
 
-// [END storage_get_bucket_policy]
+// [END storage_list_buckets]

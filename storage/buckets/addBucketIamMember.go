@@ -14,7 +14,7 @@
 
 package buckets
 
-// [START remove_bucket_iam_member]
+// [START storage_add_bucket_iam_member]
 import (
 	"context"
 	"fmt"
@@ -22,8 +22,8 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// removeUser removes the bucket IAM member.
-func removeUser(bucketName string) error {
+// addBucketIamMember adds the bucket IAM member to permission role.
+func addBucketIamMember(bucketName string) error {
 	// bucketName := "bucket-name"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
@@ -40,7 +40,7 @@ func removeUser(bucketName string) error {
 	// Other valid prefixes are "serviceAccount:", "user:"
 	// See the documentation for more values.
 	// https://cloud.google.com/storage/docs/access-control/iam
-	policy.Remove("group:cloud-logs@google.com", "roles/storage.objectViewer")
+	policy.Add("group:cloud-logs@google.com", "roles/storage.objectViewer")
 	if err := bucket.IAM().SetPolicy(ctx, policy); err != nil {
 		return fmt.Errorf("Bucket(%q).IAM.SetPolicy: %v", bucketName, err)
 	}
@@ -50,4 +50,4 @@ func removeUser(bucketName string) error {
 	return nil
 }
 
-// [END remove_bucket_iam_member]
+// [END storage_add_bucket_iam_member]

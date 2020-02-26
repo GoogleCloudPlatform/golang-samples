@@ -14,7 +14,7 @@
 
 package buckets
 
-// [START storage_set_bucket_default_kms_key]
+// [START storage_create_bucket_class_location]
 import (
 	"context"
 	"fmt"
@@ -22,10 +22,11 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// setDefaultKMSkey sets the Cloud KMS encryption key for the bucket.
-func setDefaultKMSkey(bucketName, keyName string) error {
+// createBucketClassLocation creates a new bucket in the project with Storage class and
+// location.
+func createBucketClassLocation(projectID, bucketName string) error {
+	// projectID := "my-project-id"
 	// bucketName := "bucket-name"
-	// keyName := "key"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -34,13 +35,13 @@ func setDefaultKMSkey(bucketName, keyName string) error {
 	defer client.Close()
 
 	bucket := client.Bucket(bucketName)
-	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
-		Encryption: &storage.BucketEncryption{DefaultKMSKeyName: keyName},
-	}
-	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
-		return fmt.Errorf("Bucket(%q).Update: %v", bucketName, err)
+	if err := bucket.Create(ctx, projectID, &storage.BucketAttrs{
+		StorageClass: "COLDLINE",
+		Location:     "asia",
+	}); err != nil {
+		return fmt.Errorf("Bucket(%q).Create: %v", bucketName, err)
 	}
 	return nil
 }
 
-// [END storage_set_bucket_default_kms_key]
+// [END storage_create_bucket_class_location]

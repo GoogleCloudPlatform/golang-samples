@@ -14,7 +14,7 @@
 
 package buckets
 
-// [START disable_requester_pays]
+// [START storage_disable_requester_pays]
 import (
 	"context"
 	"fmt"
@@ -42,4 +42,4 @@ func disableRequesterPays(bucketName string) error {
 	return nil
 }
 
-// [END disable_requester_pays]
+// [END storage_disable_requester_pays]

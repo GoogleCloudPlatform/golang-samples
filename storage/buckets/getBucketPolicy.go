@@ -14,30 +14,34 @@
 
 package buckets
 
-// [START create_bucket]
+// [START storage_get_bucket_policy]
 import (
 	"context"
 	"fmt"
+	"io"
 
+	"cloud.google.com/go/iam"
 	"cloud.google.com/go/storage"
 )
 
-// create creates a new bucket in the project.
-func create(projectID, bucketName string) error {
-	// projectID := "my-project-id"
+// getBucketPolicy gets the bucket IAM policy.
+func getBucketPolicy(w io.Writer, bucketName string) (*iam.Policy, error) {
 	// bucketName := "bucket-name"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return nil, fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
 
-	bucket := client.Bucket(bucketName)
-	if err := bucket.Create(ctx, projectID, nil); err != nil {
-		return fmt.Errorf("Bucket(%q).Create: %v", bucketName, err)
+	policy, err := client.Bucket(bucketName).IAM().Policy(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("Bucket(%q).IAM.Policy: %v", bucketName, err)
 	}
-	return nil
+	for _, role := range policy.Roles() {
+		fmt.Fprintf(w, "%q: %q", role, policy.Members(role))
+	}
+	return policy, nil
 }
 
-// [END create_bucket]
+// [END storage_get_bucket_policy]

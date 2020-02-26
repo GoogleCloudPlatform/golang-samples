@@ -37,30 +37,30 @@ func TestCreate(t *testing.T) {
 
 	// Clean up bucket before running tests.
 	deleteBucket(bucketName)
-	if err := create(tc.ProjectID, bucketName); err != nil {
-		t.Fatalf("create: %v", err)
+	if err := createBucket(tc.ProjectID, bucketName); err != nil {
+		t.Fatalf("createBucket: %v", err)
 	}
 }
 
-func TestCreateWithAttrs(t *testing.T) {
+func TestCreateBucketClassLocation(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	name := tc.ProjectID + "-storage-buckets-tests-attrs"
 
 	// Clean up bucket before running test.
 	deleteBucket(name)
-	if err := createWithAttrs(tc.ProjectID, name); err != nil {
-		t.Fatalf("createWithAttrs: %v", err)
+	if err := createBucketClassLocation(tc.ProjectID, name); err != nil {
+		t.Fatalf("createBucketClassLocation: %v", err)
 	}
 	if err := deleteBucket(name); err != nil {
 		t.Fatalf("deleteBucket: %v", err)
 	}
 }
 
-func TestList(t *testing.T) {
+func TestListBuckets(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	bucketName := tc.ProjectID + "-storage-buckets-tests"
 
-	buckets, err := list(tc.ProjectID)
+	buckets, err := listBuckets(tc.ProjectID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -100,14 +100,14 @@ func TestIAM(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	bucketName := tc.ProjectID + "-storage-buckets-tests"
 
-	if _, err := getPolicy(ioutil.Discard, bucketName); err != nil {
-		t.Errorf("getPolicy: %#v", err)
+	if _, err := getBucketPolicy(ioutil.Discard, bucketName); err != nil {
+		t.Errorf("getBucketPolicy: %#v", err)
 	}
-	if err := addUser(bucketName); err != nil {
-		t.Errorf("addUser: %v", err)
+	if err := addBucketIamMember(bucketName); err != nil {
+		t.Errorf("addBucketIamMember: %v", err)
 	}
-	if err := removeUser(bucketName); err != nil {
-		t.Errorf("removeUser: %v", err)
+	if err := removeBucketIamMember(bucketName); err != nil {
+		t.Errorf("removeBucketIamMember: %v", err)
 	}
 }
 
@@ -121,8 +121,8 @@ func TestRequesterPays(t *testing.T) {
 	if err := disableRequesterPays(bucketName); err != nil {
 		t.Errorf("disableRequesterPays: %#v", err)
 	}
-	if err := checkRequesterPays(ioutil.Discard, bucketName); err != nil {
-		t.Errorf("checkRequesterPays: %#v", err)
+	if err := getRequesterPaysStatus(ioutil.Discard, bucketName); err != nil {
+		t.Errorf("getRequesterPaysStatus: %#v", err)
 	}
 }
 
@@ -138,8 +138,8 @@ func TestKMS(t *testing.T) {
 	}
 
 	kmsKeyName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", tc.ProjectID, "global", keyRingID, cryptoKeyID)
-	if err := setDefaultKMSkey(bucketName, kmsKeyName); err != nil {
-		t.Fatalf("setDefaultKMSkey: failed to enable default kms key (%q): %v", kmsKeyName, err)
+	if err := setBucketDefaultKmsKey(bucketName, kmsKeyName); err != nil {
+		t.Fatalf("setBucketDefaultKmsKey: failed to enable default kms key (%q): %v", kmsKeyName, err)
 	}
 }
 
@@ -213,8 +213,8 @@ func TestBucketLock(t *testing.T) {
 	deleteBucket(bucketName)
 	time.Sleep(5 * time.Second)
 
-	if err := create(tc.ProjectID, bucketName); err != nil {
-		t.Fatalf("create: %v", err)
+	if err := createBucket(tc.ProjectID, bucketName); err != nil {
+		t.Fatalf("createBucket: %v", err)
 	}
 }
 

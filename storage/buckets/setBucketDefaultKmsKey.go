@@ -14,18 +14,18 @@
 
 package buckets
 
-// [START get_requester_pays_status]
+// [START storage_set_bucket_default_kms_key]
 import (
 	"context"
 	"fmt"
-	"io"
 
 	"cloud.google.com/go/storage"
 )
 
-// checkRequesterPays gets requester pays status.
-func checkRequesterPays(w io.Writer, bucketName string) error {
+// setBucketDefaultKmsKey sets the Cloud KMS encryption key for the bucket.
+func setBucketDefaultKmsKey(bucketName, keyName string) error {
 	// bucketName := "bucket-name"
+	// keyName := "key"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -33,12 +33,14 @@ func checkRequesterPays(w io.Writer, bucketName string) error {
 	}
 	defer client.Close()
 
-	attrs, err := client.Bucket(bucketName).Attrs(ctx)
-	if err != nil {
-		return fmt.Errorf("Bucket(%q).Attrs: %v", bucketName, err)
+	bucket := client.Bucket(bucketName)
+	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
+		Encryption: &storage.BucketEncryption{DefaultKMSKeyName: keyName},
 	}
-	fmt.Fprintf(w, "Is requester pays enabled? %v\n", attrs.RequesterPays)
+	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
+		return fmt.Errorf("Bucket(%q).Update: %v", bucketName, err)
+	}
 	return nil
 }
 
-// [END get_requester_pays_status]
+// [END storage_set_bucket_default_kms_key]

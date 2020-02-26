@@ -14,7 +14,7 @@
 
 package buckets
 
-// [START delete_bucket]
+// [START storage_delete_bucket]
 import (
 	"context"
 	"fmt"
@@ -39,4 +39,4 @@ func deleteBucket(bucketName string) error {
 	return nil
 }
 
-// [END delete_bucket]
+// [END storage_delete_bucket]
