@@ -35,14 +35,14 @@ func addBucketIamMember(bucketName string) error {
 	bucket := client.Bucket(bucketName)
 	policy, err := bucket.IAM().Policy(ctx)
 	if err != nil {
-		return fmt.Errorf("Bucket(%q).IAM.Policy: %v", bucketName, err)
+		return fmt.Errorf("Bucket(%q).IAM().Policy: %v", bucketName, err)
 	}
 	// Other valid prefixes are "serviceAccount:", "user:"
 	// See the documentation for more values.
 	// https://cloud.google.com/storage/docs/access-control/iam
 	policy.Add("group:cloud-logs@google.com", "roles/storage.objectViewer")
 	if err := bucket.IAM().SetPolicy(ctx, policy); err != nil {
-		return fmt.Errorf("Bucket(%q).IAM.SetPolicy: %v", bucketName, err)
+		return fmt.Errorf("Bucket(%q).IAM().SetPolicy: %v", bucketName, err)
 	}
 	// NOTE: It may be necessary to retry this operation if IAM policies are
 	// being modified concurrently. SetPolicy will return an error if the policy

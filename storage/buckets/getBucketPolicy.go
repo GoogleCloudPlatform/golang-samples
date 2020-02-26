@@ -36,7 +36,7 @@ func getBucketPolicy(w io.Writer, bucketName string) (*iam.Policy, error) {
 
 	policy, err := client.Bucket(bucketName).IAM().Policy(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("Bucket(%q).IAM.Policy: %v", bucketName, err)
+		return nil, fmt.Errorf("Bucket(%q).IAM().Policy: %v", bucketName, err)
 	}
 	for _, role := range policy.Roles() {
 		fmt.Fprintf(w, "%q: %q", role, policy.Members(role))

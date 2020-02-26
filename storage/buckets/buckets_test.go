@@ -26,11 +26,6 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestMain(m *testing.M) {
-	s := m.Run()
-	os.Exit(s)
-}
-
 func TestCreate(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	bucketName := tc.ProjectID + "-storage-buckets-tests"
@@ -46,7 +41,7 @@ func TestCreateBucketClassLocation(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	name := tc.ProjectID + "-storage-buckets-tests-attrs"
 
-	// Clean up bucket before running test.
+	// Clean up bucket before running the test.
 	deleteBucket(name)
 	if err := createBucketClassLocation(tc.ProjectID, name); err != nil {
 		t.Fatalf("createBucketClassLocation: %v", err)
@@ -62,7 +57,7 @@ func TestListBuckets(t *testing.T) {
 
 	buckets, err := listBuckets(tc.ProjectID)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("listBuckets: %v", err)
 	}
 
 	var ok bool
@@ -92,7 +87,7 @@ func TestGetBucketMetadata(t *testing.T) {
 
 	got := buf.String()
 	if want := "BucketName:"; !strings.Contains(got, want) {
-		t.Errorf("contents = %q, want %q", got, want)
+		t.Errorf("got %q, want %q", got, want)
 	}
 }
 
