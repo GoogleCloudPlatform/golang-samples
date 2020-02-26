@@ -246,4 +246,14 @@ func TestSample(t *testing.T) {
 	assertContains(t, out, "4 Venue 4")
 	assertContains(t, out, "19 Venue 19")
 	assertContains(t, out, "42 Venue 42")
+
+	out = runCommand(t, "querywithqueryoptions", dbName)
+	assertContains(t, out, "4 Venue 4")
+	assertContains(t, out, "19 Venue 19")
+	assertContains(t, out, "42 Venue 42")
+
+	out = runCommand(t, "createclientwithqueryoptions", dbName)
+	assertContains(t, out, "4 Venue 4")
+	assertContains(t, out, "19 Venue 19")
+	assertContains(t, out, "42 Venue 42")
 }
