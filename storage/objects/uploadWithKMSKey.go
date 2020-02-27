@@ -18,6 +18,7 @@ package objects
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"cloud.google.com/go/storage"
 )
@@ -35,6 +36,10 @@ func uploadWithKMSKey(bucket, object, keyName string) error {
 	defer client.Close()
 
 	obj := client.Bucket(bucket).Object(object)
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
+	defer cancel()
+
 	// Encrypt the object's contents.
 	wc := obj.NewWriter(ctx)
 	wc.KMSKeyName = keyName

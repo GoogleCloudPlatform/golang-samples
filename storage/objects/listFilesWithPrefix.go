@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	"cloud.google.com/go/storage"
 	"google.golang.org/api/iterator"
@@ -35,6 +36,7 @@ func listFilesWithPrefix(w io.Writer, bucket, prefix, delim string) error {
 		return fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
+
 	// Prefixes and delimiters can be used to emulate directory listings.
 	// Prefixes can be used to filter objects starting with prefix.
 	// The delimiter argument can be used to restrict the results to only the
@@ -51,6 +53,9 @@ func listFilesWithPrefix(w io.Writer, bucket, prefix, delim string) error {
 	//
 	// However, if you specify prefix="a/" and delim="/", you'll get back:
 	//   /a/1.txt
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
+
 	it := client.Bucket(bucket).Objects(ctx, &storage.Query{
 		Prefix:    prefix,
 		Delimiter: delim,

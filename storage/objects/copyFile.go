@@ -18,6 +18,7 @@ package objects
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"cloud.google.com/go/storage"
 )
@@ -33,6 +34,9 @@ func copyFile(dstBucket, srcBucket, srcObject string) error {
 		return fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 
 	dstObject := srcObject + "-copy"
 	src := client.Bucket(srcBucket).Object(srcObject)

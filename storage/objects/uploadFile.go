@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"time"
 
 	"cloud.google.com/go/storage"
 )
@@ -41,6 +42,9 @@ func uploadFile(bucket, object string) error {
 		return fmt.Errorf("os.Open: %v", err)
 	}
 	defer f.Close()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
+	defer cancel()
 
 	// Upload an object with storage.Writer.
 	wc := client.Bucket(bucket).Object(object).NewWriter(ctx)

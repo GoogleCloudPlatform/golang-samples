@@ -18,6 +18,7 @@ package objects
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"cloud.google.com/go/storage"
 )
@@ -35,6 +36,10 @@ func uploadEncyptedFile(bucket, object string, secretKey []byte) error {
 	defer client.Close()
 
 	obj := client.Bucket(bucket).Object(object)
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
+	defer cancel()
+
 	// Encrypt the object's contents.
 	wc := obj.Key(secretKey).NewWriter(ctx)
 	if _, err := wc.Write([]byte("top secret")); err != nil {

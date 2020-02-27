@@ -18,6 +18,7 @@ package objects
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"cloud.google.com/go/storage"
 )
@@ -32,6 +33,9 @@ func makePublic(bucket, object string, entity storage.ACLEntity, role storage.AC
 		return fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 
 	acl := client.Bucket(bucket).Object(object).ACL()
 	if err := acl.Set(ctx, entity, role); err != nil {

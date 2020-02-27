@@ -18,6 +18,7 @@ package objects
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"cloud.google.com/go/storage"
 )
@@ -36,6 +37,10 @@ func rotateEncryptionKey(bucket, object string, key, newKey []byte) error {
 	defer client.Close()
 
 	obj := client.Bucket(bucket).Object(object)
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
+
 	// obj is encrypted with key, we are encrypting it with the newKey.
 	_, err = obj.Key(newKey).CopierFrom(obj.Key(key)).Run(ctx)
 	if err != nil {

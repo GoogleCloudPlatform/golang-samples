@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"time"
 
 	"cloud.google.com/go/storage"
 )
@@ -44,6 +45,10 @@ func downloadUsingRequesterPays(w io.Writer, bucket, object, billingProjectID st
 	if err != nil {
 		return fmt.Errorf("os.OpenFile: %v", err)
 	}
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
+	defer cancel()
+
 	rc, err := src.NewReader(ctx)
 	if err != nil {
 		return fmt.Errorf("Object(%q).NewReader: %v", object, err)

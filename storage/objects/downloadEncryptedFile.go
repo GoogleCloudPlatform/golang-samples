@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"time"
 
 	"cloud.google.com/go/storage"
 )
@@ -36,6 +37,10 @@ func downloadEncryptedFile(bucket, object string, secretKey []byte) ([]byte, err
 	defer client.Close()
 
 	obj := client.Bucket(bucket).Object(object)
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
+	defer cancel()
+
 	rc, err := obj.Key(secretKey).NewReader(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("Object(%q).Key(%q).NewReader: %v", object, secretKey, err)
