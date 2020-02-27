@@ -18,13 +18,14 @@ package objects
 import (
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	"cloud.google.com/go/storage"
 )
 
 // copyFile copies an object into specified bucket.
-func copyFile(dstBucket, srcBucket, srcObject string) error {
+func copyFile(w io.Writer, dstBucket, srcBucket, srcObject string) error {
 	// dstBucket := "bucket-1"
 	// srcBucket := "bucket-2"
 	// srcObject := "object"
@@ -45,6 +46,7 @@ func copyFile(dstBucket, srcBucket, srcObject string) error {
 	if _, err := dst.CopierFrom(src).Run(ctx); err != nil {
 		return fmt.Errorf("Object(%q).CopierFrom(%q).Run: %v", dstObject, srcObject, err)
 	}
+	fmt.Fprintf(w, "Blob %v in bucket %v copied to blob %v in bucket %v.\n", srcObject, srcBucket, dstObject, dstBucket)
 	return nil
 }
 

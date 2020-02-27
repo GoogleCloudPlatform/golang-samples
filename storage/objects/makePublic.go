@@ -18,13 +18,14 @@ package objects
 import (
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	"cloud.google.com/go/storage"
 )
 
 // makePublic gives all users read access to an object.
-func makePublic(bucket, object string, entity storage.ACLEntity, role storage.ACLRole) error {
+func makePublic(w io.Writer, bucket, object string, entity storage.ACLEntity, role storage.ACLRole) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	ctx := context.Background()
@@ -41,6 +42,7 @@ func makePublic(bucket, object string, entity storage.ACLEntity, role storage.AC
 	if err := acl.Set(ctx, entity, role); err != nil {
 		return fmt.Errorf("ACLHandle.Set: %v", err)
 	}
+	fmt.Fprintf(w, "Blob %v is now publicly accessible.\n", object)
 	return nil
 }
 

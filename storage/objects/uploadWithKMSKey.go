@@ -18,13 +18,14 @@ package objects
 import (
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	"cloud.google.com/go/storage"
 )
 
 // uploadWithKMSKey writes an object using Cloud KMS encryption.
-func uploadWithKMSKey(bucket, object, keyName string) error {
+func uploadWithKMSKey(w io.Writer, bucket, object, keyName string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	// keyName := "projects/projectId/locations/global/keyRings/keyRingID/cryptoKeys/cryptoKeyID"
@@ -49,6 +50,7 @@ func uploadWithKMSKey(bucket, object, keyName string) error {
 	if err := wc.Close(); err != nil {
 		return fmt.Errorf("Writer.Close: %v", err)
 	}
+	fmt.Fprintf(w, "Uploaded blob %v with KMS key.\n", object)
 	return nil
 }
 

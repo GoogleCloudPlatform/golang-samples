@@ -18,13 +18,14 @@ package objects
 import (
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	"cloud.google.com/go/storage"
 )
 
 // moveFile moves an object into another location.
-func moveFile(bucket, object string) error {
+func moveFile(w io.Writer, bucket, object string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	ctx := context.Background()
@@ -47,6 +48,7 @@ func moveFile(bucket, object string) error {
 	if err := src.Delete(ctx); err != nil {
 		return fmt.Errorf("Object(%q).Delete: %v", object, err)
 	}
+	fmt.Fprintf(w, "Blob %v moved to %v.\n", object, dstName)
 	return nil
 }
 

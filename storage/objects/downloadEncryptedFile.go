@@ -18,6 +18,7 @@ package objects
 import (
 	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"time"
 
@@ -25,7 +26,7 @@ import (
 )
 
 // downloadEncryptedFile reads an encrypted object.
-func downloadEncryptedFile(bucket, object string, secretKey []byte) ([]byte, error) {
+func downloadEncryptedFile(w io.Writer, bucket, object string, secretKey []byte) ([]byte, error) {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	// key := []byte("secret-encryption-key")
@@ -51,6 +52,7 @@ func downloadEncryptedFile(bucket, object string, secretKey []byte) ([]byte, err
 	if err != nil {
 		return nil, fmt.Errorf("ioutil.ReadAll: %v", err)
 	}
+	fmt.Fprintf(w, "File %v downloaded with encryption key.\n", object)
 	return data, nil
 }
 

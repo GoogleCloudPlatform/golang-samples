@@ -18,13 +18,14 @@ package objects
 import (
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	"cloud.google.com/go/storage"
 )
 
 // setTemporaryHold sets TemporaryHold flag of an object to true.
-func setTemporaryHold(bucket, object string) error {
+func setTemporaryHold(w io.Writer, bucket, object string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	ctx := context.Background()
@@ -44,6 +45,7 @@ func setTemporaryHold(bucket, object string) error {
 	if _, err := o.Update(ctx, objectAttrsToUpdate); err != nil {
 		return fmt.Errorf("Object(%q).Update: %v", object, err)
 	}
+	fmt.Fprintf(w, "Temporary hold was enabled for %v.\n", object)
 	return nil
 }
 

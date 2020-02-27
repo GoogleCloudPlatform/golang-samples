@@ -18,13 +18,14 @@ package objects
 import (
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	"cloud.google.com/go/storage"
 )
 
 // rotateEncryptionKey encrypts an object with the newKey.
-func rotateEncryptionKey(bucket, object string, key, newKey []byte) error {
+func rotateEncryptionKey(w io.Writer, bucket, object string, key, newKey []byte) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	// key := []byte("encryption-key")
@@ -46,6 +47,7 @@ func rotateEncryptionKey(bucket, object string, key, newKey []byte) error {
 	if err != nil {
 		return fmt.Errorf("Key(%q).CopierFrom(%q).Run: %v", newKey, key, err)
 	}
+	fmt.Fprintf(w, "Key rotation complete for blob %v.\n", object)
 	return nil
 }
 

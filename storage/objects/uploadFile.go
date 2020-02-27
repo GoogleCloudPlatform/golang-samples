@@ -26,7 +26,7 @@ import (
 )
 
 // uploadFile uploads an object.
-func uploadFile(bucket, object string) error {
+func uploadFile(w io.Writer, bucket, object string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	ctx := context.Background()
@@ -54,6 +54,7 @@ func uploadFile(bucket, object string) error {
 	if err := wc.Close(); err != nil {
 		return fmt.Errorf("Writer.Close: %v", err)
 	}
+	fmt.Fprintf(w, "Blob %v uploaded.\n", object)
 	return nil
 }
 

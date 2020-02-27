@@ -18,13 +18,14 @@ package objects
 import (
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	"cloud.google.com/go/storage"
 )
 
 // uploadEncyptedFile writes an object using AES-256 encryption key.
-func uploadEncyptedFile(bucket, object string, secretKey []byte) error {
+func uploadEncyptedFile(w io.Writer, bucket, object string, secretKey []byte) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	// secretKey := []byte("secret-key")
@@ -48,6 +49,7 @@ func uploadEncyptedFile(bucket, object string, secretKey []byte) error {
 	if err := wc.Close(); err != nil {
 		return fmt.Errorf("Writer.Close: %v", err)
 	}
+	fmt.Fprintf(w, "Uploaded encrypted object %v.\n", object)
 	return nil
 }
 

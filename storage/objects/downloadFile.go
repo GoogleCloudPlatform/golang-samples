@@ -18,6 +18,7 @@ package objects
 import (
 	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"time"
 
@@ -25,7 +26,7 @@ import (
 )
 
 // downloadFile downloads an object.
-func downloadFile(bucket, object string) ([]byte, error) {
+func downloadFile(w io.Writer, bucket, object string) ([]byte, error) {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	ctx := context.Background()
@@ -48,6 +49,7 @@ func downloadFile(bucket, object string) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("ioutil.ReadAll: %v", err)
 	}
+	fmt.Fprintf(w, "Blob %v downloaded.\n", object)
 	return data, nil
 }
 

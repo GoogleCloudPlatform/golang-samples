@@ -52,10 +52,10 @@ func TestObjects(t *testing.T) {
 	cleanBucket(t, ctx, client, tc.ProjectID, bucket)
 	cleanBucket(t, ctx, client, tc.ProjectID, dstBucket)
 
-	if err := uploadFile(bucket, object1); err != nil {
+	if err := uploadFile(ioutil.Discard, bucket, object1); err != nil {
 		t.Fatalf("uploadFile(%q): %v", object1, err)
 	}
-	if err := uploadFile(bucket, object2); err != nil {
+	if err := uploadFile(ioutil.Discard, bucket, object2); err != nil {
 		t.Fatalf("uploadFile(%q): %v", object2, err)
 	}
 
@@ -94,7 +94,7 @@ func TestObjects(t *testing.T) {
 		}
 	}
 
-	data, err := downloadFile(bucket, object1)
+	data, err := downloadFile(ioutil.Discard, bucket, object1)
 	if err != nil {
 		t.Fatalf("downloadFile: %v", err)
 	}
@@ -106,41 +106,41 @@ func TestObjects(t *testing.T) {
 	if err != nil {
 		t.Errorf("getMetadata: %v", err)
 	}
-	if err := makePublic(bucket, object1, allAuthenticatedUsers, roleReader); err != nil {
+	if err := makePublic(ioutil.Discard, bucket, object1, allAuthenticatedUsers, roleReader); err != nil {
 		t.Errorf("makePublic: %v", err)
 	}
 
-	err = moveFile(bucket, object1)
+	err = moveFile(ioutil.Discard, bucket, object1)
 	if err != nil {
 		t.Fatalf("moveFile: %v", err)
 	}
 	// object1's new name.
 	object1 = object1 + "-rename"
 
-	if err := copyFile(dstBucket, bucket, object1); err != nil {
+	if err := copyFile(ioutil.Discard, dstBucket, bucket, object1); err != nil {
 		t.Errorf("copyFile: %v", err)
 	}
 
 	key := []byte("my-secret-AES-256-encryption-key")
 	newKey := []byte("My-secret-AES-256-encryption-key")
 
-	if err := uploadEncyptedFile(bucket, object1, key); err != nil {
+	if err := uploadEncyptedFile(ioutil.Discard, bucket, object1, key); err != nil {
 		t.Errorf("uploadEncyptedFile: %v", err)
 	}
-	data, err = downloadEncryptedFile(bucket, object1, key)
+	data, err = downloadEncryptedFile(ioutil.Discard, bucket, object1, key)
 	if err != nil {
 		t.Errorf("downloadEncryptedFile: %v", err)
 	}
 	if got, want := string(data), "top secret"; got != want {
 		t.Errorf("object content = %q; want %q", got, want)
 	}
-	if err := rotateEncryptionKey(bucket, object1, key, newKey); err != nil {
+	if err := rotateEncryptionKey(ioutil.Discard, bucket, object1, key, newKey); err != nil {
 		t.Errorf("rotateEncryptionKey: %v", err)
 	}
-	if err := deleteFile(bucket, object1); err != nil {
+	if err := deleteFile(ioutil.Discard, bucket, object1); err != nil {
 		t.Errorf("deleteFile: %v", err)
 	}
-	if err := deleteFile(bucket, object2); err != nil {
+	if err := deleteFile(ioutil.Discard, bucket, object2); err != nil {
 		t.Errorf("deleteFile: %v", err)
 	}
 
@@ -153,7 +153,7 @@ func TestObjects(t *testing.T) {
 	})
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-		if err := deleteFile(dstBucket, object1+"-copy"); err != nil {
+		if err := deleteFile(ioutil.Discard, dstBucket, object1+"-copy"); err != nil {
 			r.Errorf("deleteFile: %v", err)
 		}
 	})
@@ -191,7 +191,7 @@ func TestKMSObjects(t *testing.T) {
 
 	kmsKeyName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", tc.ProjectID, "global", keyRingID, cryptoKeyID)
 
-	if err := uploadWithKMSKey(bucket, object1, kmsKeyName); err != nil {
+	if err := uploadWithKMSKey(ioutil.Discard, bucket, object1, kmsKeyName); err != nil {
 		t.Errorf("uploadWithKMSKey: %v", err)
 	}
 }
@@ -272,7 +272,7 @@ func TestObjectBucketLock(t *testing.T) {
 	cleanBucket(t, ctx, client, tc.ProjectID, bucketName)
 	bucket := client.Bucket(bucketName)
 
-	if err := uploadFile(bucketName, objectName); err != nil {
+	if err := uploadFile(ioutil.Discard, bucketName, objectName); err != nil {
 		t.Fatalf("uploadFile(%q): %v", objectName, err)
 	}
 	if _, err := bucket.Update(ctx, storage.BucketAttrsToUpdate{
@@ -282,7 +282,7 @@ func TestObjectBucketLock(t *testing.T) {
 	}); err != nil {
 		t.Errorf("Bucket(%q).Update: %v", bucketName, err)
 	}
-	if err := setEventBasedHold(bucketName, objectName); err != nil {
+	if err := setEventBasedHold(ioutil.Discard, bucketName, objectName); err != nil {
 		t.Errorf("setEventBasedHold(%q, %q): %v", bucketName, objectName, err)
 	}
 	oAttrs, err := getMetadata(ioutil.Discard, bucketName, objectName)
@@ -292,7 +292,7 @@ func TestObjectBucketLock(t *testing.T) {
 	if !oAttrs.EventBasedHold {
 		t.Errorf("event-based hold is not enabled")
 	}
-	if err := releaseEventBasedHold(bucketName, objectName); err != nil {
+	if err := releaseEventBasedHold(ioutil.Discard, bucketName, objectName); err != nil {
 		t.Errorf("releaseEventBasedHold(%q, %q): %v", bucketName, objectName, err)
 	}
 	oAttrs, err = getMetadata(ioutil.Discard, bucketName, objectName)
@@ -307,7 +307,7 @@ func TestObjectBucketLock(t *testing.T) {
 	}); err != nil {
 		t.Errorf("Bucket(%q).Update: %v", bucketName, err)
 	}
-	if err := setTemporaryHold(bucketName, objectName); err != nil {
+	if err := setTemporaryHold(ioutil.Discard, bucketName, objectName); err != nil {
 		t.Errorf("setTemporaryHold(%q, %q): %v", bucketName, objectName, err)
 	}
 	oAttrs, err = getMetadata(ioutil.Discard, bucketName, objectName)
@@ -317,7 +317,7 @@ func TestObjectBucketLock(t *testing.T) {
 	if !oAttrs.TemporaryHold {
 		t.Errorf("temporary hold is not disabled")
 	}
-	if err := releaseTemporaryHold(bucketName, objectName); err != nil {
+	if err := releaseTemporaryHold(ioutil.Discard, bucketName, objectName); err != nil {
 		t.Errorf("releaseTemporaryHold(%q, %q): %v", bucketName, objectName, err)
 	}
 	oAttrs, err = getMetadata(ioutil.Discard, bucketName, objectName)

@@ -18,13 +18,14 @@ package objects
 import (
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	"cloud.google.com/go/storage"
 )
 
 // deleteFile removes specified object.
-func deleteFile(bucket, object string) error {
+func deleteFile(w io.Writer, bucket, object string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	ctx := context.Background()
@@ -41,6 +42,7 @@ func deleteFile(bucket, object string) error {
 	if err := o.Delete(ctx); err != nil {
 		return fmt.Errorf("Object(%q).Delete: %v", object, err)
 	}
+	fmt.Fprintf(w, "Blob %v deleted.\n", object)
 	return nil
 }
 

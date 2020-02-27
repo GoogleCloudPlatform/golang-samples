@@ -18,13 +18,14 @@ package objects
 import (
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	"cloud.google.com/go/storage"
 )
 
 // setEventBasedHold sets EventBasedHold flag of an object to true.
-func setEventBasedHold(bucket, object string) error {
+func setEventBasedHold(w io.Writer, bucket, object string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	ctx := context.Background()
@@ -44,6 +45,7 @@ func setEventBasedHold(bucket, object string) error {
 	if _, err := o.Update(ctx, objectAttrsToUpdate); err != nil {
 		return fmt.Errorf("Object(%q).Update: %v", object, err)
 	}
+	fmt.Fprintf(w, "Default event based hold was enabled for %v.\n", object)
 	return nil
 }
 

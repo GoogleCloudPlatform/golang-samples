@@ -18,13 +18,14 @@ package objects
 import (
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	"cloud.google.com/go/storage"
 )
 
 // releaseEventBasedHold releases an object with event-based hold.
-func releaseEventBasedHold(bucket, object string) error {
+func releaseEventBasedHold(w io.Writer, bucket, object string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	ctx := context.Background()
@@ -44,6 +45,7 @@ func releaseEventBasedHold(bucket, object string) error {
 	if _, err := o.Update(ctx, objectAttrsToUpdate); err != nil {
 		return fmt.Errorf("Object(%q).Update: %v", object, err)
 	}
+	fmt.Fprintf(w, "Event based hold was released for %v.\n", object)
 	return nil
 }
 
