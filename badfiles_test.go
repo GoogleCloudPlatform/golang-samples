@@ -83,8 +83,8 @@ var allowList = []string{
 	"**/appengine/**/*.txt",
 
 	// Test output and configs.
-	"**/gotest.out",
 	"testing/kokoro/*.cfg",
+	"**/sponge_log.log",
 	"**/sponge_log.xml",
 
 	// TODO: cruft that should probably be under "testdata".

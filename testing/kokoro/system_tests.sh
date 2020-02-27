@@ -212,7 +212,7 @@ for i in $GO_TEST_MODULES; do
   pushd $mod > /dev/null;
     echo "Running 'go test' in '$mod'..."
     set -x
-    2>&1 go test -timeout $TIMEOUT -v ./... | tee gotest.out
+    2>&1 go test -timeout $TIMEOUT -v ./... | tee sponge_log.log
     cat gotest.out | /go/bin/go-junit-report -set-exit-code > sponge_log.xml
     exit_code=$(($exit_code + $?))
     set +x
