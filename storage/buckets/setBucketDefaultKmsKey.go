@@ -18,13 +18,14 @@ package buckets
 import (
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	"cloud.google.com/go/storage"
 )
 
 // setBucketDefaultKmsKey sets the Cloud KMS encryption key for the bucket.
-func setBucketDefaultKmsKey(bucketName, keyName string) error {
+func setBucketDefaultKmsKey(w io.Writer, bucketName, keyName string) error {
 	// bucketName := "bucket-name"
 	// keyName := "key"
 	ctx := context.Background()
@@ -44,6 +45,7 @@ func setBucketDefaultKmsKey(bucketName, keyName string) error {
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
 		return fmt.Errorf("Bucket(%q).Update: %v", bucketName, err)
 	}
+	fmt.Fprintf(w, "Default KMS Key Name: %v", bucketAttrsToUpdate.Encryption.DefaultKMSKeyName)
 	return nil
 }
 

@@ -18,13 +18,14 @@ package buckets
 import (
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	"cloud.google.com/go/storage"
 )
 
 // enableDefaultEventBasedHold sets event-based hold to true.
-func enableDefaultEventBasedHold(bucketName string) error {
+func enableDefaultEventBasedHold(w io.Writer, bucketName string) error {
 	// bucketName := "bucket-name"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
@@ -43,6 +44,7 @@ func enableDefaultEventBasedHold(bucketName string) error {
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
 		return fmt.Errorf("Bucket(%q).Update: %v", bucketName, err)
 	}
+	fmt.Fprintf(w, "Default event-based hold was enabled for %v\n", bucketName)
 	return nil
 }
 

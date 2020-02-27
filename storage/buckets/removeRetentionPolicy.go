@@ -18,13 +18,14 @@ package buckets
 import (
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	"cloud.google.com/go/storage"
 )
 
 // removeRetentionPolicy removes bucket retention policy.
-func removeRetentionPolicy(bucketName string) error {
+func removeRetentionPolicy(w io.Writer, bucketName string) error {
 	// bucketName := "bucket-name"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
@@ -51,6 +52,7 @@ func removeRetentionPolicy(bucketName string) error {
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
 		return fmt.Errorf("Bucket(%q).Update: %v", bucketName, err)
 	}
+	fmt.Fprintf(w, "Retention period for %v has been removed\n", bucketName)
 	return nil
 }
 

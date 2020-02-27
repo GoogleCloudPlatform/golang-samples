@@ -18,13 +18,14 @@ package buckets
 import (
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	"cloud.google.com/go/storage"
 )
 
 // disableRequesterPays sets requester pays flag to false.
-func disableRequesterPays(bucketName string) error {
+func disableRequesterPays(w io.Writer, bucketName string) error {
 	// bucketName := "bucket-name"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
@@ -43,6 +44,7 @@ func disableRequesterPays(bucketName string) error {
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
 		return fmt.Errorf("Bucket(%q).Update: %v", bucketName, err)
 	}
+	fmt.Fprintf(w, "Requester pays disabled for bucket %v\n", bucketName)
 	return nil
 }
 

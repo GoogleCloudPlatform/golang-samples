@@ -18,6 +18,7 @@ package buckets
 import (
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	"cloud.google.com/go/storage"
@@ -25,7 +26,7 @@ import (
 
 // createBucketClassLocation creates a new bucket in the project with Storage class and
 // location.
-func createBucketClassLocation(projectID, bucketName string) error {
+func createBucketClassLocation(w io.Writer, projectID, bucketName string) error {
 	// projectID := "my-project-id"
 	// bucketName := "bucket-name"
 	ctx := context.Background()
@@ -38,13 +39,15 @@ func createBucketClassLocation(projectID, bucketName string) error {
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 
-	bucket := client.Bucket(bucketName)
-	if err := bucket.Create(ctx, projectID, &storage.BucketAttrs{
+	storageClassAndLocation := &storage.BucketAttrs{
 		StorageClass: "COLDLINE",
 		Location:     "asia",
-	}); err != nil {
+	}
+	bucket := client.Bucket(bucketName)
+	if err := bucket.Create(ctx, projectID, storageClassAndLocation); err != nil {
 		return fmt.Errorf("Bucket(%q).Create: %v", bucketName, err)
 	}
+	fmt.Fprintf(w, "Created bucket %v in %v with storage class %v\n", bucketName, storageClassAndLocation.Location, storageClassAndLocation.StorageClass)
 	return nil
 }
 

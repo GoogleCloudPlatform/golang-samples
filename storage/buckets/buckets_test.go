@@ -31,8 +31,8 @@ func TestCreate(t *testing.T) {
 	bucketName := tc.ProjectID + "-storage-buckets-tests"
 
 	// Clean up bucket before running tests.
-	deleteBucket(bucketName)
-	if err := createBucket(tc.ProjectID, bucketName); err != nil {
+	deleteBucket(ioutil.Discard, bucketName)
+	if err := createBucket(ioutil.Discard, tc.ProjectID, bucketName); err != nil {
 		t.Fatalf("createBucket: %v", err)
 	}
 }
@@ -42,11 +42,11 @@ func TestCreateBucketClassLocation(t *testing.T) {
 	name := tc.ProjectID + "-storage-buckets-tests-attrs"
 
 	// Clean up bucket before running the test.
-	deleteBucket(name)
-	if err := createBucketClassLocation(tc.ProjectID, name); err != nil {
+	deleteBucket(ioutil.Discard, name)
+	if err := createBucketClassLocation(ioutil.Discard, tc.ProjectID, name); err != nil {
 		t.Fatalf("createBucketClassLocation: %v", err)
 	}
-	if err := deleteBucket(name); err != nil {
+	if err := deleteBucket(ioutil.Discard, name); err != nil {
 		t.Fatalf("deleteBucket: %v", err)
 	}
 }
@@ -55,7 +55,7 @@ func TestListBuckets(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	bucketName := tc.ProjectID + "-storage-buckets-tests"
 
-	buckets, err := listBuckets(tc.ProjectID)
+	buckets, err := listBuckets(ioutil.Discard, tc.ProjectID)
 	if err != nil {
 		t.Fatalf("listBuckets: %v", err)
 	}
@@ -98,10 +98,10 @@ func TestIAM(t *testing.T) {
 	if _, err := getBucketPolicy(ioutil.Discard, bucketName); err != nil {
 		t.Errorf("getBucketPolicy: %#v", err)
 	}
-	if err := addBucketIamMember(bucketName); err != nil {
+	if err := addBucketIamMember(ioutil.Discard, bucketName); err != nil {
 		t.Errorf("addBucketIamMember: %v", err)
 	}
-	if err := removeBucketIamMember(bucketName); err != nil {
+	if err := removeBucketIamMember(ioutil.Discard, bucketName); err != nil {
 		t.Errorf("removeBucketIamMember: %v", err)
 	}
 }
@@ -110,10 +110,10 @@ func TestRequesterPays(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	bucketName := tc.ProjectID + "-storage-buckets-tests"
 
-	if err := enableRequesterPays(bucketName); err != nil {
+	if err := enableRequesterPays(ioutil.Discard, bucketName); err != nil {
 		t.Errorf("enableRequesterPays: %#v", err)
 	}
-	if err := disableRequesterPays(bucketName); err != nil {
+	if err := disableRequesterPays(ioutil.Discard, bucketName); err != nil {
 		t.Errorf("disableRequesterPays: %#v", err)
 	}
 	if err := getRequesterPaysStatus(ioutil.Discard, bucketName); err != nil {
@@ -133,7 +133,7 @@ func TestKMS(t *testing.T) {
 	}
 
 	kmsKeyName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", tc.ProjectID, "global", keyRingID, cryptoKeyID)
-	if err := setBucketDefaultKmsKey(bucketName, kmsKeyName); err != nil {
+	if err := setBucketDefaultKmsKey(ioutil.Discard, bucketName, kmsKeyName); err != nil {
 		t.Fatalf("setBucketDefaultKmsKey: failed to enable default kms key (%q): %v", kmsKeyName, err)
 	}
 }
@@ -143,7 +143,7 @@ func TestBucketLock(t *testing.T) {
 	bucketName := tc.ProjectID + "-storage-buckets-tests"
 
 	retentionPeriod := 5 * time.Second
-	if err := setRetentionPolicy(bucketName, retentionPeriod); err != nil {
+	if err := setRetentionPolicy(ioutil.Discard, bucketName, retentionPeriod); err != nil {
 		t.Fatalf("setRetentionPolicy: %v", err)
 	}
 
@@ -154,7 +154,7 @@ func TestBucketLock(t *testing.T) {
 	if attrs.RetentionPolicy.RetentionPeriod != retentionPeriod {
 		t.Fatalf("retention period is not the expected value (%q): %v", retentionPeriod, attrs.RetentionPolicy.RetentionPeriod)
 	}
-	if err := enableDefaultEventBasedHold(bucketName); err != nil {
+	if err := enableDefaultEventBasedHold(ioutil.Discard, bucketName); err != nil {
 		t.Fatalf("enableDefaultEventBasedHold: %v", err)
 	}
 
@@ -165,7 +165,7 @@ func TestBucketLock(t *testing.T) {
 	if !attrs.DefaultEventBasedHold {
 		t.Fatalf("default event-based hold was not enabled")
 	}
-	if err := disableDefaultEventBasedHold(bucketName); err != nil {
+	if err := disableDefaultEventBasedHold(ioutil.Discard, bucketName); err != nil {
 		t.Fatalf("disableDefaultEventBasedHold: %v", err)
 	}
 
@@ -176,7 +176,7 @@ func TestBucketLock(t *testing.T) {
 	if attrs.DefaultEventBasedHold {
 		t.Fatalf("default event-based hold was not disabled")
 	}
-	if err := removeRetentionPolicy(bucketName); err != nil {
+	if err := removeRetentionPolicy(ioutil.Discard, bucketName); err != nil {
 		t.Fatalf("removeRetentionPolicy: %v", err)
 	}
 
@@ -187,7 +187,7 @@ func TestBucketLock(t *testing.T) {
 	if attrs.RetentionPolicy != nil {
 		t.Fatalf("retention period to not be set")
 	}
-	if err := setRetentionPolicy(bucketName, retentionPeriod); err != nil {
+	if err := setRetentionPolicy(ioutil.Discard, bucketName, retentionPeriod); err != nil {
 		t.Fatalf("setRetentionPolicy: %v", err)
 	}
 
@@ -205,10 +205,10 @@ func TestBucketLock(t *testing.T) {
 	})
 
 	time.Sleep(5 * time.Second)
-	deleteBucket(bucketName)
+	deleteBucket(ioutil.Discard, bucketName)
 	time.Sleep(5 * time.Second)
 
-	if err := createBucket(tc.ProjectID, bucketName); err != nil {
+	if err := createBucket(ioutil.Discard, tc.ProjectID, bucketName); err != nil {
 		t.Fatalf("createBucket: %v", err)
 	}
 }
@@ -217,7 +217,7 @@ func TestUniformBucketLevelAccess(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	bucketName := tc.ProjectID + "-storage-buckets-tests"
 
-	if err := enableUniformBucketLevelAccess(bucketName); err != nil {
+	if err := enableUniformBucketLevelAccess(ioutil.Discard, bucketName); err != nil {
 		t.Fatalf("enableUniformBucketLevelAccess: %v", err)
 	}
 
@@ -228,7 +228,7 @@ func TestUniformBucketLevelAccess(t *testing.T) {
 	if !attrs.UniformBucketLevelAccess.Enabled {
 		t.Fatalf("Uniform bucket-level access was not enabled for (%q).", bucketName)
 	}
-	if err := disableUniformBucketLevelAccess(bucketName); err != nil {
+	if err := disableUniformBucketLevelAccess(ioutil.Discard, bucketName); err != nil {
 		t.Fatalf("disableUniformBucketLevelAccess: %v", err)
 	}
 
@@ -245,7 +245,7 @@ func TestDelete(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	bucketName := tc.ProjectID + "-storage-buckets-tests"
 
-	if err := deleteBucket(bucketName); err != nil {
+	if err := deleteBucket(ioutil.Discard, bucketName); err != nil {
 		t.Fatalf("deleteBucket: %v", err)
 	}
 }

@@ -18,13 +18,14 @@ package buckets
 import (
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	"cloud.google.com/go/storage"
 )
 
 // setRetentionPolicy sets the bucket retention period.
-func setRetentionPolicy(bucketName string, retentionPeriod time.Duration) error {
+func setRetentionPolicy(w io.Writer, bucketName string, retentionPeriod time.Duration) error {
 	// bucketName := "bucket-name"
 	// retentionPeriod := time.Second
 	ctx := context.Background()
@@ -46,6 +47,7 @@ func setRetentionPolicy(bucketName string, retentionPeriod time.Duration) error 
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
 		return fmt.Errorf("Bucket(%q).Update: %v", bucketName, err)
 	}
+	fmt.Fprintf(w, "Retention policy for %v was set to %v\n", bucketName, bucketAttrsToUpdate.RetentionPolicy.RetentionPeriod)
 	return nil
 }
 

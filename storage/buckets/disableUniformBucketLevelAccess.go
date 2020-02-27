@@ -18,13 +18,14 @@ package buckets
 import (
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	"cloud.google.com/go/storage"
 )
 
 // disableUniformBucketLevelAccess sets uniform bucket-level access to false.
-func disableUniformBucketLevelAccess(bucketName string) error {
+func disableUniformBucketLevelAccess(w io.Writer, bucketName string) error {
 	// bucketName := "bucket-name"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
@@ -45,6 +46,7 @@ func disableUniformBucketLevelAccess(bucketName string) error {
 	if _, err := bucket.Update(ctx, disableUniformBucketLevelAccess); err != nil {
 		return fmt.Errorf("Bucket(%q).Update: %v", bucketName, err)
 	}
+	fmt.Fprintf(w, "Uniform bucket-level access was disabled for %v\n", bucketName)
 	return nil
 }
 

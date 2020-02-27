@@ -18,13 +18,14 @@ package buckets
 import (
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	"cloud.google.com/go/storage"
 )
 
 // createBucket creates a new bucket in the project.
-func createBucket(projectID, bucketName string) error {
+func createBucket(w io.Writer, projectID, bucketName string) error {
 	// projectID := "my-project-id"
 	// bucketName := "bucket-name"
 	ctx := context.Background()
@@ -42,6 +43,7 @@ func createBucket(projectID, bucketName string) error {
 	if err := bucket.Create(ctx, projectID, nil); err != nil {
 		return fmt.Errorf("Bucket(%q).Create: %v", bucketName, err)
 	}
+	fmt.Fprintf(w, "Bucket %v created\n", bucketName)
 	return nil
 }
 

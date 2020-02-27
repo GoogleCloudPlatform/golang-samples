@@ -18,13 +18,15 @@ package buckets
 import (
 	"context"
 	"fmt"
+	"io"
 	"time"
 
+	"cloud.google.com/go/iam"
 	"cloud.google.com/go/storage"
 )
 
 // addBucketIamMember adds the bucket IAM member to permission role.
-func addBucketIamMember(bucketName string) error {
+func addBucketIamMember(w io.Writer, bucketName string) error {
 	// bucketName := "bucket-name"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
@@ -44,13 +46,17 @@ func addBucketIamMember(bucketName string) error {
 	// Other valid prefixes are "serviceAccount:", "user:"
 	// See the documentation for more values.
 	// https://cloud.google.com/storage/docs/access-control/iam
-	policy.Add("group:cloud-logs@google.com", "roles/storage.objectViewer")
+	identity := "group:cloud-logs@google.com"
+	var role iam.RoleName = "roles/storage.objectViewer"
+
+	policy.Add(identity, role)
 	if err := bucket.IAM().SetPolicy(ctx, policy); err != nil {
 		return fmt.Errorf("Bucket(%q).IAM().SetPolicy: %v", bucketName, err)
 	}
 	// NOTE: It may be necessary to retry this operation if IAM policies are
 	// being modified concurrently. SetPolicy will return an error if the policy
 	// was modified since it was retrieved.
+	fmt.Fprintf(w, "Added %v with role %v to %v\n", identity, role, bucketName)
 	return nil
 }
 

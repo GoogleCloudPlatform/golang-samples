@@ -18,13 +18,14 @@ package buckets
 import (
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	"cloud.google.com/go/storage"
 )
 
 // deleteBucket deletes the bucket.
-func deleteBucket(bucketName string) error {
+func deleteBucket(w io.Writer, bucketName string) error {
 	// bucketName := "bucket-name"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
@@ -40,6 +41,7 @@ func deleteBucket(bucketName string) error {
 	if err := bucket.Delete(ctx); err != nil {
 		return fmt.Errorf("Bucket(%q).Delete: %v", bucketName, err)
 	}
+	fmt.Fprintf(w, "Bucket %v deleted\n", bucketName)
 	return nil
 }
 

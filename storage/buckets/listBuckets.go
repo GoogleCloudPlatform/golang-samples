@@ -18,6 +18,7 @@ package buckets
 import (
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	"cloud.google.com/go/storage"
@@ -25,7 +26,7 @@ import (
 )
 
 // listBuckets lists buckets in the project.
-func listBuckets(projectID string) ([]string, error) {
+func listBuckets(w io.Writer, projectID string) ([]string, error) {
 	// projectID := "my-project-id"
 	ctx := context.Background()
 
@@ -49,6 +50,7 @@ func listBuckets(projectID string) ([]string, error) {
 			return nil, err
 		}
 		buckets = append(buckets, battrs.Name)
+		fmt.Fprintf(w, "Bucket: %v\n", battrs.Name)
 	}
 	return buckets, nil
 }
