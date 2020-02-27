@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	"cloud.google.com/go/storage"
 )
@@ -32,6 +33,9 @@ func lockRetentionPolicy(w io.Writer, bucketName string) error {
 		return fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
+	defer cancel()
 
 	bucket := client.Bucket(bucketName)
 	attrs, err := bucket.Attrs(ctx)

@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/storage"
@@ -33,6 +34,9 @@ func getBucketPolicy(w io.Writer, bucketName string) (*iam.Policy, error) {
 		return nil, fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 
 	policy, err := client.Bucket(bucketName).IAM().Policy(ctx)
 	if err != nil {

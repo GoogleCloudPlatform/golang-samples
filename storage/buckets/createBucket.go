@@ -18,6 +18,7 @@ package buckets
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"cloud.google.com/go/storage"
 )
@@ -27,6 +28,10 @@ func createBucket(projectID, bucketName string) error {
 	// projectID := "my-project-id"
 	// bucketName := "bucket-name"
 	ctx := context.Background()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
+
 	client, err := storage.NewClient(ctx)
 	if err != nil {
 		return fmt.Errorf("storage.NewClient: %v", err)

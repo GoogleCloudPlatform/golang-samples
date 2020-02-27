@@ -34,6 +34,9 @@ func setRetentionPolicy(bucketName string, retentionPeriod time.Duration) error 
 	}
 	defer client.Close()
 
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
+
 	bucket := client.Bucket(bucketName)
 	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
 		RetentionPolicy: &storage.RetentionPolicy{

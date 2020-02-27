@@ -18,6 +18,7 @@ package buckets
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"cloud.google.com/go/storage"
 )
@@ -31,6 +32,9 @@ func addBucketIamMember(bucketName string) error {
 		return fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 
 	bucket := client.Bucket(bucketName)
 	policy, err := bucket.IAM().Policy(ctx)

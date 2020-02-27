@@ -18,6 +18,7 @@ package buckets
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"cloud.google.com/go/storage"
 	"google.golang.org/api/iterator"
@@ -27,6 +28,10 @@ import (
 func listBuckets(projectID string) ([]string, error) {
 	// projectID := "my-project-id"
 	ctx := context.Background()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
+
 	client, err := storage.NewClient(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("storage.NewClient: %v", err)
