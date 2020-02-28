@@ -29,15 +29,14 @@ func createBucket(w io.Writer, projectID, bucketName string) error {
 	// projectID := "my-project-id"
 	// bucketName := "bucket-name"
 	ctx := context.Background()
-
-	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel()
-
 	client, err := storage.NewClient(ctx)
 	if err != nil {
 		return fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 
 	bucket := client.Bucket(bucketName)
 	if err := bucket.Create(ctx, projectID, nil); err != nil {

@@ -29,15 +29,14 @@ import (
 func listBuckets(w io.Writer, projectID string) ([]string, error) {
 	// projectID := "my-project-id"
 	ctx := context.Background()
-
-	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel()
-
 	client, err := storage.NewClient(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 
 	var buckets []string
 	it := client.Buckets(ctx, projectID)
