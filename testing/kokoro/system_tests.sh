@@ -72,28 +72,22 @@ elif echo $SIGNIFICANT_CHANGES | tr ' ' '\n' | grep "^go.mod$" || [[ $CHANGED_DI
 fi
 
 ## Static Analysis
-# Do the easy stuff before running tests. Fail fast!
+# Do the easy stuff before running tests or reserving a project. Fail fast!
 set +x
-
-# Fail if a dependency was added without the necessary go.mod/go.sum change
-# being part of the commit.
-# Do this before reserving a project since this doens't need a project.
-for i in $GO_CHANGED_MODULES; do
-  mod="$(dirname $i)"
-  pushd $mod > /dev/null;
-    echo "Running 'go.mod/go.sum sync check' in '$mod'..."
-    set -x
-    go mod tidy;
-    git diff go.mod | tee /dev/stderr | (! read)
-    [ -f go.sum ] && git diff go.sum | tee /dev/stderr | (! read)
-    set +x
-  popd > /dev/null;
-done
 
 if [ $GOLANG_SAMPLES_GO_VET ]; then
   for i in $GO_CHANGED_MODULES; do
     mod="$(dirname $i)"
     pushd $mod > /dev/null;
+      # Fail if a dependency was added without the necessary go.mod/go.sum change
+      # being part of the commit.
+      echo "Running 'go.mod/go.sum sync check' in '$mod'..."
+      set -x
+      go mod tidy;
+      git diff go.mod | tee /dev/stderr | (! read)
+      [ -f go.sum ] && git diff go.sum | tee /dev/stderr | (! read)
+      set +x
+
       echo "Running 'gofmt compliance check' in '$mod'..."
       set -x
       diff -u <(echo -n) <(gofmt -d -s .)
@@ -146,6 +140,9 @@ export GOLANG_SAMPLES_IOT_PRIV="$KOKORO_GFILE_DIR/rsa_private.pem"
 export STORAGE_HMAC_ACCESS_KEY_ID="$KOKORO_KEYSTORE_DIR/71386_golang-samples-kokoro-gcs-hmac-secret"
 export STORAGE_HMAC_ACCESS_SECRET_KEY="$KOKORO_KEYSTORE_DIR/71386_golang-samples-kokoro-gcs-hmac-id"
 export GCLOUD_ORGANIZATION=1081635000895
+export SCC_PUBSUB_PROJECT="project-a-id"
+export SCC_PUBSUB_TOPIC="projects/project-a-id/topics/notifications-sample-topic"
+export SCC_PUBSUB_SUBSCRIPTION="notification-sample-subscription"
 
 export GOLANG_SAMPLES_SPANNER=projects/golang-samples-tests/instances/golang-samples-tests
 export GOLANG_SAMPLES_BIGTABLE_PROJECT=golang-samples-tests
@@ -206,49 +203,28 @@ else
   echo "Running tests in modified directories: $GO_TEST_TARGET"
 fi
 
+set +e
+
 # Run tests in changed directories that are not in modules.
-OUTFILE="$PWD/gotest.out"
-rm $OUTFILE || true
+exit_code=0
 for i in $GO_TEST_MODULES; do
   mod="$(dirname $i)"
   pushd $mod > /dev/null;
     echo "Running 'go test' in '$mod'..."
     set -x
-    2>&1 go test -timeout $TIMEOUT -v ./... | tee -a $OUTFILE
+    2>&1 go test -timeout $TIMEOUT -v ./... | tee sponge_log.log
+    cat sponge_log.log | /go/bin/go-junit-report -set-exit-code > sponge_log.xml
+    exit_code=$(($exit_code + $?))
     set +x
   popd > /dev/null;
 done
 
-set +e
-
-cat $OUTFILE | /go/bin/go-junit-report -set-exit-code > sponge_log.xml
-EXIT_CODE=$?
 
 # If we're running system tests, send the test log to the Build Cop Bot.
 # See https://github.com/googleapis/repo-automation-bots/tree/master/packages/buildcop.
 if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]]; then
-  # Use the service account with access to the repo-automation-bots project.
-  gcloud auth activate-service-account --key-file $KOKORO_KEYSTORE_DIR/71386_kokoro-golang-samples-tests
-  gcloud config set project repo-automation-bots
-
-  XML=$(base64 -w 0 sponge_log.xml)
-
-  # See https://github.com/apps/build-cop-bot/installations/5943459.
-  MESSAGE=$(cat <<EOF
-  {
-      "Name": "buildcop",
-      "Type" : "function",
-      "Location": "us-central1",
-      "installation": {"id": "5943459"},
-      "repo": "GoogleCloudPlatform/golang-samples",
-      "buildID": "commit:$KOKORO_GIT_COMMIT",
-      "buildURL": "https://source.cloud.google.com/results/invocations/$KOKORO_BUILD_ID",
-      "xunitXML": "$XML"
-  }
-EOF
-  )
-
-  gcloud pubsub topics publish passthrough --message="$MESSAGE"
+  chmod +x $KOKORO_GFILE_DIR/linux_amd64/buildcop
+  $KOKORO_GFILE_DIR/linux_amd64/buildcop
 fi
 
-exit $EXIT_CODE
+exit $exit_code

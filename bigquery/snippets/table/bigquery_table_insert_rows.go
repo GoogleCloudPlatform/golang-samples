@@ -29,11 +29,12 @@ type Item struct {
 }
 
 // Save implements the ValueSaver interface.
+// This example disables best-effort de-duplication, which allows for higher throughput.
 func (i *Item) Save() (map[string]bigquery.Value, string, error) {
 	return map[string]bigquery.Value{
 		"full_name": i.Name,
 		"age":       i.Age,
-	}, "", nil
+	}, bigquery.NoDedupeID, nil
 }
 
 // insertRows demonstrates inserting data into a table using the streaming insert mechanism.
@@ -46,6 +47,7 @@ func insertRows(projectID, datasetID, tableID string) error {
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	inserter := client.Dataset(datasetID).Table(tableID).Inserter()
 	items := []*Item{

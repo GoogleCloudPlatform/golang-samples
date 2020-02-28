@@ -32,6 +32,7 @@ func queryBasic(w io.Writer, projectID string) error {
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	q := client.Query(
 		"SELECT name FROM `bigquery-public-data.usa_names.usa_1910_2013` " +

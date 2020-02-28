@@ -3,15 +3,15 @@ module github.com/GoogleCloudPlatform/golang-samples
 go 1.11
 
 require (
-	cloud.google.com/go v0.52.0
+	cloud.google.com/go v0.53.0
 	cloud.google.com/go/bigquery v1.3.0
 	cloud.google.com/go/bigtable v1.1.0
 	cloud.google.com/go/datastore v1.0.0
 	cloud.google.com/go/firestore v1.1.0
 	cloud.google.com/go/logging v1.0.0
-	cloud.google.com/go/pubsub v1.0.1
+	cloud.google.com/go/pubsub v1.1.0
 	cloud.google.com/go/spanner v1.1.0
-	cloud.google.com/go/storage v1.3.0
+	cloud.google.com/go/storage v1.5.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.0
 	github.com/aws/aws-sdk-go v1.28.13
 	github.com/bmatcuk/doublestar v1.2.2
@@ -42,10 +42,10 @@ require (
 	golang.org/x/net v0.0.0-20200202094626-16171245cfb2
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/text v0.3.2
-	golang.org/x/tools v0.0.0-20200207224406-61798d64f025
+	golang.org/x/tools v0.0.0-20200212150539-ea181f53ac56
 	google.golang.org/api v0.17.0
 	google.golang.org/appengine v1.6.5
-	google.golang.org/genproto v0.0.0-20200210034751-acff78025515
+	google.golang.org/genproto v0.0.0-20200212174721-66ed5ce911ce
 	google.golang.org/grpc v1.27.1
 	gopkg.in/sendgrid/sendgrid-go.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.2.8

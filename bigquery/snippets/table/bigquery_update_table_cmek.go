@@ -33,6 +33,8 @@ func updateTableChangeCMEK(projectID, datasetID, tableID string) error {
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
+
 	tableRef := client.Dataset(datasetID).Table(tableID)
 	meta, err := tableRef.Metadata(ctx)
 	if err != nil {
