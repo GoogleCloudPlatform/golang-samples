@@ -16,7 +16,8 @@
 // other similar operations on them by using the Google Storage API.
 // More documentation is available at
 // https://cloud.google.com/storage/docs/json_api/v1/.
-package main
+
+package objects
 
 import (
 	"context"

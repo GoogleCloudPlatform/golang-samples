@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,34 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package objects
 
 import (
 	"bytes"
 	"context"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"strings"
 	"testing"
 	"time"
 
-	"google.golang.org/api/iterator"
-
 	"cloud.google.com/go/storage"
-
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"google.golang.org/api/iterator"
 )
 
-func TestMain(m *testing.M) {
-	// These functions are noisy.
-	log.SetOutput(ioutil.Discard)
-	s := m.Run()
-	log.SetOutput(os.Stderr)
-	os.Exit(s)
-}
+// TestObjects runs all samples tests of the package.
 func TestObjects(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
@@ -47,30 +38,32 @@ func TestObjects(t *testing.T) {
 	if err != nil {
 		t.Fatalf("storage.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	var (
-		bucket    = tc.ProjectID + "-samples-object-bucket-1"
-		dstBucket = tc.ProjectID + "-samples-object-bucket-2"
-
-		object1 = "foo.txt"
-		object2 = "foo/a.txt"
+		bucket                = tc.ProjectID + "-samples-object-bucket-1"
+		dstBucket             = tc.ProjectID + "-samples-object-bucket-2"
+		object1               = "foo.txt"
+		object2               = "foo/a.txt"
+		allAuthenticatedUsers = storage.AllAuthenticatedUsers
+		roleReader            = storage.RoleReader
 	)
 
 	cleanBucket(t, ctx, client, tc.ProjectID, bucket)
 	cleanBucket(t, ctx, client, tc.ProjectID, dstBucket)
 
-	if err := write(client, bucket, object1); err != nil {
-		t.Fatalf("write(%q): %v", object1, err)
+	if err := uploadFile(ioutil.Discard, bucket, object1); err != nil {
+		t.Fatalf("uploadFile(%q): %v", object1, err)
 	}
-	if err := write(client, bucket, object2); err != nil {
-		t.Fatalf("write(%q): %v", object2, err)
+	if err := uploadFile(ioutil.Discard, bucket, object2); err != nil {
+		t.Fatalf("uploadFile(%q): %v", object2, err)
 	}
 
 	{
 		// Should only show "foo/a.txt", not "foo.txt"
 		var buf bytes.Buffer
-		if err := list(&buf, client, bucket); err != nil {
-			t.Fatalf("cannot list objects: %v", err)
+		if err := listFiles(&buf, bucket); err != nil {
+			t.Fatalf("listFiles: %v", err)
 		}
 		if got, want := buf.String(), object1; !strings.Contains(got, want) {
 			t.Errorf("List() got %q; want to contain %q", got, want)
@@ -84,8 +77,8 @@ func TestObjects(t *testing.T) {
 		// Should only show "foo/a.txt", not "foo.txt"
 		const prefix = "foo/"
 		var buf bytes.Buffer
-		if err := listByPrefix(&buf, client, bucket, prefix, ""); err != nil {
-			t.Fatalf("cannot list objects by prefix: %v", err)
+		if err := listFilesWithPrefix(&buf, bucket, prefix, ""); err != nil {
+			t.Fatalf("listFilesWithPrefix: %v", err)
 		}
 		if got, want := buf.String(), object1; strings.Contains(got, want) {
 			t.Errorf("List(%q) got %q; want NOT to contain %q", prefix, got, want)
@@ -95,101 +88,79 @@ func TestObjects(t *testing.T) {
 		}
 	}
 
-	data, err := read(client, bucket, object1)
-	if err != nil {
-		t.Fatalf("cannot read object: %v", err)
+	{
+		if err := downloadUsingRequesterPays(ioutil.Discard, bucket, object1, tc.ProjectID); err != nil {
+			t.Errorf("downloadUsingRequesterPays: %v", err)
+		}
 	}
-	if got, want := string(data), "Hello\nworld"; got != want {
+
+	data, err := downloadFile(ioutil.Discard, bucket, object1)
+	if err != nil {
+		t.Fatalf("downloadFile: %v", err)
+	}
+	if got, want := string(data), "Hello\r\nworld"; got != want {
 		t.Errorf("contents = %q; want %q", got, want)
 	}
-	_, err = attrs(client, bucket, object1)
+
+	_, err = getMetadata(ioutil.Discard, bucket, object1)
 	if err != nil {
-		t.Errorf("cannot get object metadata: %v", err)
+		t.Errorf("getMetadata: %v", err)
 	}
-	if err := makePublic(client, bucket, object1); err != nil {
-		t.Errorf("cannot to make object public: %v", err)
+	if err := makePublic(ioutil.Discard, bucket, object1, allAuthenticatedUsers, roleReader); err != nil {
+		t.Errorf("makePublic: %v", err)
 	}
-	err = move(client, bucket, object1)
+
+	err = moveFile(ioutil.Discard, bucket, object1)
 	if err != nil {
-		t.Fatalf("cannot move object: %v", err)
+		t.Fatalf("moveFile: %v", err)
 	}
 	// object1's new name.
 	object1 = object1 + "-rename"
 
-	if err := copyToBucket(client, dstBucket, bucket, object1); err != nil {
-		t.Errorf("cannot copy object to bucket: %v", err)
-	}
-	if err := addBucketACL(client, bucket); err != nil {
-		t.Errorf("cannot add bucket acl: %v", err)
-	}
-	if err := addDefaultBucketACL(client, bucket); err != nil {
-		t.Errorf("cannot add bucket default acl: %v", err)
-	}
-	if err := bucketACL(client, bucket); err != nil {
-		t.Errorf("cannot get bucket acl: %v", err)
-	}
-	if err := bucketACLFiltered(client, bucket, storage.AllAuthenticatedUsers); err != nil {
-		t.Errorf("cannot filter bucket acl: %v", err)
-	}
-	if err := deleteDefaultBucketACL(client, bucket); err != nil {
-		t.Errorf("cannot delete bucket default acl: %v", err)
-	}
-	if err := deleteBucketACL(client, bucket); err != nil {
-		t.Errorf("cannot delete bucket acl: %v", err)
-	}
-	if err := addObjectACL(client, bucket, object1); err != nil {
-		t.Errorf("cannot add object acl: %v", err)
-	}
-	if err := objectACL(client, bucket, object1); err != nil {
-		t.Errorf("cannot get object acl: %v", err)
-	}
-	if err := objectACLFiltered(client, bucket, object1, storage.AllAuthenticatedUsers); err != nil {
-		t.Errorf("cannot filter object acl: %v", err)
-	}
-	if err := deleteObjectACL(client, bucket, object1); err != nil {
-		t.Errorf("cannot delete object acl: %v", err)
+	if err := copyFile(ioutil.Discard, dstBucket, bucket, object1); err != nil {
+		t.Errorf("copyFile: %v", err)
 	}
 
 	key := []byte("my-secret-AES-256-encryption-key")
 	newKey := []byte("My-secret-AES-256-encryption-key")
 
-	if err := writeEncryptedObject(client, bucket, object1, key); err != nil {
-		t.Errorf("cannot write an encrypted object: %v", err)
+	if err := uploadEncyptedFile(ioutil.Discard, bucket, object1, key); err != nil {
+		t.Errorf("uploadEncyptedFile: %v", err)
 	}
-	data, err = readEncryptedObject(client, bucket, object1, key)
+	data, err = downloadEncryptedFile(ioutil.Discard, bucket, object1, key)
 	if err != nil {
-		t.Errorf("cannot read the encrypted object: %v", err)
+		t.Errorf("downloadEncryptedFile: %v", err)
 	}
 	if got, want := string(data), "top secret"; got != want {
 		t.Errorf("object content = %q; want %q", got, want)
 	}
-	if err := rotateEncryptionKey(client, bucket, object1, key, newKey); err != nil {
-		t.Errorf("cannot encrypt the object with the new key: %v", err)
+	if err := rotateEncryptionKey(ioutil.Discard, bucket, object1, key, newKey); err != nil {
+		t.Errorf("rotateEncryptionKey: %v", err)
 	}
-	if err := delete(client, bucket, object1); err != nil {
-		t.Errorf("cannot to delete object: %v", err)
+	if err := deleteFile(ioutil.Discard, bucket, object1); err != nil {
+		t.Errorf("deleteFile: %v", err)
 	}
-	if err := delete(client, bucket, object2); err != nil {
-		t.Errorf("cannot to delete object: %v", err)
+	if err := deleteFile(ioutil.Discard, bucket, object2); err != nil {
+		t.Errorf("deleteFile: %v", err)
 	}
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		// Cleanup, this part won't be executed if Fatal happens.
 		// TODO(jbd): Implement garbage cleaning.
 		if err := client.Bucket(bucket).Delete(ctx); err != nil {
-			r.Errorf("cleanup of bucket failed: %v", err)
+			r.Errorf("Bucket(%q).Delete: %v", bucket, err)
 		}
 	})
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-		if err := delete(client, dstBucket, object1+"-copy"); err != nil {
-			r.Errorf("cannot to delete copy object: %v", err)
+		if err := deleteFile(ioutil.Discard, dstBucket, object1+"-copy"); err != nil {
+			r.Errorf("deleteFile: %v", err)
 		}
 	})
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		if err := client.Bucket(dstBucket).Delete(ctx); err != nil {
-			r.Errorf("cleanup of bucket failed: %v", err)
+			r.Errorf("Bucket(%q).Delete: %v", dstBucket, err)
 		}
 	})
 }
@@ -201,6 +172,7 @@ func TestKMSObjects(t *testing.T) {
 	if err != nil {
 		t.Fatalf("storage.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	keyRingID := os.Getenv("GOLANG_SAMPLES_KMS_KEYRING")
 	cryptoKeyID := os.Getenv("GOLANG_SAMPLES_KMS_CRYPTOKEY")
@@ -211,8 +183,7 @@ func TestKMSObjects(t *testing.T) {
 	var (
 		bucket    = tc.ProjectID + "-samples-object-bucket-1"
 		dstBucket = tc.ProjectID + "-samples-object-bucket-2"
-
-		object1 = "foo.txt"
+		object1   = "foo.txt"
 	)
 
 	cleanBucket(t, ctx, client, tc.ProjectID, bucket)
@@ -220,8 +191,8 @@ func TestKMSObjects(t *testing.T) {
 
 	kmsKeyName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", tc.ProjectID, "global", keyRingID, cryptoKeyID)
 
-	if err := writeWithKMSKey(client, bucket, object1, kmsKeyName); err != nil {
-		t.Errorf("cannot write a KMS encrypted object: %v", err)
+	if err := uploadWithKMSKey(ioutil.Discard, bucket, object1, kmsKeyName); err != nil {
+		t.Errorf("uploadWithKMSKey: %v", err)
 	}
 }
 
@@ -232,6 +203,7 @@ func TestV4SignedURL(t *testing.T) {
 	if err != nil {
 		t.Fatalf("storage.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	bucketName := tc.ProjectID + "-signed-url-bucket-name"
 	objectName := "foo.txt"
@@ -239,7 +211,7 @@ func TestV4SignedURL(t *testing.T) {
 
 	cleanBucket(t, ctx, client, tc.ProjectID, bucketName)
 	putBuf := new(bytes.Buffer)
-	putURL, err := generateV4PutObjectSignedURL(putBuf, client, bucketName, objectName, serviceAccount)
+	putURL, err := generateV4PutObjectSignedURL(putBuf, bucketName, objectName, serviceAccount)
 	if err != nil {
 		t.Errorf("generateV4PutObjectSignedURL: %v", err)
 	}
@@ -257,7 +229,7 @@ func TestV4SignedURL(t *testing.T) {
 		t.Errorf("httpClient.Do: %v", err)
 	}
 	getBuf := new(bytes.Buffer)
-	getURL, err := generateV4GetObjectSignedURL(getBuf, client, bucketName, objectName, serviceAccount)
+	getURL, err := generateV4GetObjectSignedURL(getBuf, bucketName, objectName, serviceAccount)
 	if err != nil {
 		t.Errorf("generateV4GetObjectSignedURL: %v", err)
 	}
@@ -280,7 +252,6 @@ func TestV4SignedURL(t *testing.T) {
 	if got, want := string(body), "hello world"; got != want {
 		t.Errorf("object content = %q; want %q", got, want)
 	}
-
 }
 
 func TestObjectBucketLock(t *testing.T) {
@@ -290,44 +261,43 @@ func TestObjectBucketLock(t *testing.T) {
 	if err != nil {
 		t.Fatalf("storage.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	var (
-		bucketName = tc.ProjectID + "-retent-samples-object-bucket"
-
-		objectName = "foo.txt"
-
+		bucketName      = tc.ProjectID + "-retent-samples-object-bucket"
+		objectName      = "foo.txt"
 		retentionPeriod = 5 * time.Second
 	)
 
 	cleanBucket(t, ctx, client, tc.ProjectID, bucketName)
 	bucket := client.Bucket(bucketName)
 
-	if err := write(client, bucketName, objectName); err != nil {
-		t.Fatalf("write(%q): %v", objectName, err)
+	if err := uploadFile(ioutil.Discard, bucketName, objectName); err != nil {
+		t.Fatalf("uploadFile(%q): %v", objectName, err)
 	}
 	if _, err := bucket.Update(ctx, storage.BucketAttrsToUpdate{
 		RetentionPolicy: &storage.RetentionPolicy{
 			RetentionPeriod: retentionPeriod,
 		},
 	}); err != nil {
-		t.Errorf("unable to set retention policy (%q): %v", bucketName, err)
+		t.Errorf("Bucket(%q).Update: %v", bucketName, err)
 	}
-	if err := setEventBasedHold(client, bucketName, objectName); err != nil {
-		t.Errorf("unable to set event-based hold (%q/%q): %v", bucketName, objectName, err)
+	if err := setEventBasedHold(ioutil.Discard, bucketName, objectName); err != nil {
+		t.Errorf("setEventBasedHold(%q, %q): %v", bucketName, objectName, err)
 	}
-	oAttrs, err := attrs(client, bucketName, objectName)
+	oAttrs, err := getMetadata(ioutil.Discard, bucketName, objectName)
 	if err != nil {
-		t.Errorf("cannot get object metadata: %v", err)
+		t.Errorf("getMetadata: %v", err)
 	}
 	if !oAttrs.EventBasedHold {
 		t.Errorf("event-based hold is not enabled")
 	}
-	if err := releaseEventBasedHold(client, bucketName, objectName); err != nil {
-		t.Errorf("unable to set event-based hold (%q/%q): %v", bucketName, objectName, err)
+	if err := releaseEventBasedHold(ioutil.Discard, bucketName, objectName); err != nil {
+		t.Errorf("releaseEventBasedHold(%q, %q): %v", bucketName, objectName, err)
 	}
-	oAttrs, err = attrs(client, bucketName, objectName)
+	oAttrs, err = getMetadata(ioutil.Discard, bucketName, objectName)
 	if err != nil {
-		t.Errorf("cannot get object metadata: %v", err)
+		t.Errorf("getMetadata: %v", err)
 	}
 	if oAttrs.EventBasedHold {
 		t.Errorf("event-based hold is not disabled")
@@ -335,24 +305,24 @@ func TestObjectBucketLock(t *testing.T) {
 	if _, err := bucket.Update(ctx, storage.BucketAttrsToUpdate{
 		RetentionPolicy: &storage.RetentionPolicy{},
 	}); err != nil {
-		t.Errorf("unable to remove retention policy (%q): %v", bucketName, err)
+		t.Errorf("Bucket(%q).Update: %v", bucketName, err)
 	}
-	if err := setTemporaryHold(client, bucketName, objectName); err != nil {
-		t.Errorf("unable to set temporary hold (%q/%q): %v", bucketName, objectName, err)
+	if err := setTemporaryHold(ioutil.Discard, bucketName, objectName); err != nil {
+		t.Errorf("setTemporaryHold(%q, %q): %v", bucketName, objectName, err)
 	}
-	oAttrs, err = attrs(client, bucketName, objectName)
+	oAttrs, err = getMetadata(ioutil.Discard, bucketName, objectName)
 	if err != nil {
-		t.Errorf("cannot get object metadata: %v", err)
+		t.Errorf("getMetadata: %v", err)
 	}
 	if !oAttrs.TemporaryHold {
 		t.Errorf("temporary hold is not disabled")
 	}
-	if err := releaseTemporaryHold(client, bucketName, objectName); err != nil {
-		t.Errorf("unable to release temporary hold (%q/%q): %v", bucketName, objectName, err)
+	if err := releaseTemporaryHold(ioutil.Discard, bucketName, objectName); err != nil {
+		t.Errorf("releaseTemporaryHold(%q, %q): %v", bucketName, objectName, err)
 	}
-	oAttrs, err = attrs(client, bucketName, objectName)
+	oAttrs, err = getMetadata(ioutil.Discard, bucketName, objectName)
 	if err != nil {
-		t.Errorf("cannot get object metadata: %v", err)
+		t.Errorf("getMetadata: %v", err)
 	}
 	if oAttrs.TemporaryHold {
 		t.Errorf("temporary hold is not disabled")
@@ -371,7 +341,7 @@ func cleanBucket(t *testing.T, ctx context.Context, client *storage.Client, proj
 				break
 			}
 			if err != nil {
-				t.Fatalf("Bucket.Objects(%q): %v", bucket, err)
+				t.Fatalf("Bucket(%q).Objects: %v", bucket, err)
 			}
 			if attrs.EventBasedHold || attrs.TemporaryHold {
 				if _, err := b.Object(attrs.Name).Update(ctx, storage.ObjectAttrsToUpdate{
@@ -386,10 +356,10 @@ func cleanBucket(t *testing.T, ctx context.Context, client *storage.Client, proj
 			}
 		}
 		if err := b.Delete(ctx); err != nil {
-			t.Fatalf("Bucket.Delete(%q): %v", bucket, err)
+			t.Fatalf("Bucket(%q).Delete: %v", bucket, err)
 		}
 	}
 	if err := b.Create(ctx, projectID, nil); err != nil {
-		t.Fatalf("Bucket.Create(%q): %v", bucket, err)
+		t.Fatalf("Bucket(%q).Create: %v", bucket, err)
 	}
 }
