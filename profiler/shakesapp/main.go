@@ -57,6 +57,7 @@ func main() {
 		NoAllocProfiling:     !*allocProfiling,
 		NoGoroutineProfiling: !*threadProfiling,
 		MutexProfiling:       *contentionProfiling,
+		DebugLogging:         true,
 	}); err != nil {
 		log.Fatalf("Failed to start profiler: %v", err)
 	}
