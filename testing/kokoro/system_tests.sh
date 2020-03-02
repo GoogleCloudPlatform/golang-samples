@@ -88,9 +88,9 @@ if [ $GOLANG_SAMPLES_GO_VET ]; then
       [ -f go.sum ] && git diff go.sum | tee /dev/stderr | (! read)
       set +x
 
-      echo "Running 'gofmt compliance check' in '$mod'..."
+      echo "Running 'goimports compliance check' in '$mod'..."
       set -x
-      diff -u <(echo -n) <(gofmt -d -s .)
+      diff -u <(echo -n) <(goimports -d .)
       set +x
     popd > /dev/null;
   done
