@@ -98,7 +98,7 @@ func TestObjects(t *testing.T) {
 	if err != nil {
 		t.Fatalf("downloadFile: %v", err)
 	}
-	if got, want := string(data), "Hello\r\nworld"; got != want {
+	if got, want := string(data), "Hello\nworld"; got != want {
 		t.Errorf("contents = %q; want %q", got, want)
 	}
 

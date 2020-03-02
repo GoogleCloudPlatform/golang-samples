@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// +build ignore
+
 // Sample objects creates, list, deletes objects and runs
 // other similar operations on them by using the Google Storage API.
 // More documentation is available at
