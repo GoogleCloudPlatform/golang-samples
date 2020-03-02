@@ -16,11 +16,12 @@ package hmac
 
 // [START storage_delete_hmac_key]
 import (
-	"cloud.google.com/go/storage"
 	"context"
 	"fmt"
 	"io"
 	"time"
+
+	"cloud.google.com/go/storage"
 )
 
 // deleteHMACKey deletes the HMAC key with the given access ID. Key must have state

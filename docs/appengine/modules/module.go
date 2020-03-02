@@ -17,11 +17,11 @@ package sample
 import (
 	"net/http"
 
+	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
 )
 
 // [START communication_between_modules_1]
-import "google.golang.org/appengine"
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)

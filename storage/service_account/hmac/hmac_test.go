@@ -17,10 +17,11 @@ package hmac
 import (
 	"context"
 	"fmt"
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"io/ioutil"
 	"os"
 	"testing"
+
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 
 	"cloud.google.com/go/storage"
 )

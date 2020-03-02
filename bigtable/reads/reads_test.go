@@ -18,12 +18,13 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/google/go-cmp/cmp"
-	"github.com/google/uuid"
 	"io"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/uuid"
 
 	"cloud.google.com/go/bigtable"
 )
