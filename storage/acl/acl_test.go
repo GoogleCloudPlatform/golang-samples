@@ -24,6 +24,8 @@ import (
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"google.golang.org/api/iterator"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // TestACL runs all of the package tests.
@@ -130,7 +132,7 @@ func cleanBucket(t *testing.T, ctx context.Context, client *storage.Client, proj
 			t.Fatalf("Bucket(%q).Delete: %v", bucket, err)
 		}
 	}
-	if err := b.Create(ctx, projectID, nil); err != nil {
+	if err := b.Create(ctx, projectID, nil); err != nil && status.Code(err) != codes.AlreadyExists {
 		t.Fatalf("Bucket(%q).Create: %v", bucket, err)
 	}
 }
