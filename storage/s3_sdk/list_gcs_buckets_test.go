@@ -47,25 +47,15 @@ func TestList(t *testing.T) {
 	}
 	defer deleteTestKey(ctx, client, key)
 
-	log.Printf("ProjectID: %v", tc.ProjectID)
-	log.Printf("key: %v", key.AccessID)
-	log.Printf("service account: %v", key.ServiceAccountEmail)
-
 	var buf *bytes.Buffer
-	// New HMAC key may take up to 15s to propagate.
-	timeout := time.After(15 * time.Second)
-	for {
-		select {
-			case <- timeout:
-				t.Fatalf("listGCSBuckets: %v", err)
-			default:
-		}
+	// New HMAC key may take up to 15s to propagate, so we need to retry for up
+	// to that amount of time.
+	testutil.Retry(t, 75, time.Millisecond*200, func (r *testutil.R) {
 		buf = new(bytes.Buffer)
-		if _, err = listGCSBuckets(buf, key.AccessID, key.Secret); err == nil {
-			break
+		if _, err := listGCSBuckets(buf, key.AccessID, key.Secret); err != nil {
+			r.Errorf("listGCSBuckets: %v", err)
 		}
-		time.Sleep(200 * time.Millisecond)
-	}
+	})
 
 	got := buf.String()
 	if want := "Buckets:"; !strings.Contains(got, want) {
