@@ -50,6 +50,7 @@ func SimulateClient(ctx context.Context, addr string, numReqs, reqsInFlight int)
 	for i := 0; i < numReqs; i++ {
 		go func() {
 			inFlightCh <- true
+			defer func() { <-inFlightCh }()
 			respErrs <- func() error {
 				q := queries[rand.Intn(len(queries))]
 				resp, err := client.GetMatchCount(ctx, &ShakespeareRequest{Query: q.query})
@@ -61,7 +62,6 @@ func SimulateClient(ctx context.Context, addr string, numReqs, reqsInFlight int)
 				}
 				return nil
 			}()
-			<-inFlightCh
 		}()
 	}
 	for i := 0; i < numReqs; i++ {

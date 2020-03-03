@@ -90,30 +90,29 @@ func readFiles(ctx context.Context, bucketName, prefix string) ([]string, error)
 			break
 		}
 		if err != nil {
-			return nil, fmt.Errorf("failed to iterate over files in %s starting with %s: %v", bucketName, prefix, err)
+			return []string{}, fmt.Errorf("failed to iterate over files in %s starting with %s: %v", bucketName, prefix, err)
 		}
 		if attrs.Name != "" {
 			paths = append(paths, attrs.Name)
 		}
 	}
 
-	resps := make([]chan resp, len(paths))
-	for i, path := range paths {
-		resps[i] = make(chan resp, 1)
-		go func(path string, ch chan<- resp) {
+	resps := make(chan resp)
+	for _, path := range paths {
+		go func(path string) {
 			obj := bucket.Object(path)
 			r, err := obj.NewReader(ctx)
 			if err != nil {
-				ch <- resp{"", err}
+				resps <- resp{"", err}
 			}
 			defer r.Close()
 			data, err := ioutil.ReadAll(r)
-			ch <- resp{string(data), err}
-		}(path, resps[i])
+			resps <- resp{string(data), err}
+		}(path)
 	}
 	ret := make([]string, len(paths))
-	for i, resp := range resps {
-		r := <-resp
+	for i := 0; i < len(paths); i++ {
+		r := <-resps
 		if r.err != nil {
 			return nil, r.err
 		}
