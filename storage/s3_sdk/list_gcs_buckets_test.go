@@ -23,6 +23,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -50,10 +51,20 @@ func TestList(t *testing.T) {
 	log.Printf("key: %v", key.AccessID)
 	log.Printf("service account: %v", key.ServiceAccountEmail)
 
-	buf := new(bytes.Buffer)
-	_, err = listGCSBuckets(buf, key.AccessID, key.Secret)
-	if err != nil {
-		t.Fatalf("listGCSBuckets: %v", err)
+	var buf *bytes.Buffer
+	// New HMAC key may take up to 15s to propagate.
+	timeout := time.After(15 * time.Second)
+	for {
+		select {
+			case <- timeout:
+				t.Fatalf("listGCSBuckets: %v", err)
+			default:
+		}
+		buf = new(bytes.Buffer)
+		if _, err = listGCSBuckets(buf, key.AccessID, key.Secret); err == nil {
+			break
+		}
+		time.Sleep(200 * time.Millisecond)
 	}
 
 	got := buf.String()
