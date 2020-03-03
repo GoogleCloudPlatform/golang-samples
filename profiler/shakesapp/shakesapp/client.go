@@ -64,10 +64,11 @@ func SimulateClient(ctx context.Context, addr string, numReqs, reqsInFlight int)
 			}()
 		}()
 	}
+	var retErr error
 	for i := 0; i < numReqs; i++ {
 		if err := <-respErrs; err != nil {
-			return err
+			retErr = err
 		}
 	}
-	return nil
+	return retErr
 }

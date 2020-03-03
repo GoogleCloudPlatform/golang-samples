@@ -114,9 +114,9 @@ func readFiles(ctx context.Context, bucketName, prefix string) ([]string, error)
 	for i := 0; i < len(paths); i++ {
 		r := <-resps
 		if r.err != nil {
-			return nil, r.err
+			err = r.err
 		}
 		ret[i] = r.s
 	}
-	return ret, nil
+	return ret, err
 }
