@@ -17,37 +17,73 @@ package s3sdk
 
 import (
 	"bytes"
-	"io/ioutil"
-	"log"
+	"context"
+	"fmt"
 	"os"
 	"strings"
 	"testing"
+	"time"
+
+	"cloud.google.com/go/storage"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestMain(m *testing.M) {
-	log.SetOutput(ioutil.Discard)
-	s := m.Run()
-	log.SetOutput(os.Stderr)
-	os.Exit(s)
-}
 
 func TestList(t *testing.T) {
-	t.Skip("HMAC secrets are not set up correctly: https://github.com/GoogleCloudPlatform/golang-samples/issues/1213")
-	googleAccessKeyID := os.Getenv("STORAGE_HMAC_ACCESS_KEY_ID")
-	googleAccessKeySecret := os.Getenv("STORAGE_HMAC_ACCESS_SECRET_KEY")
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
 
-	if googleAccessKeyID == "" || googleAccessKeySecret == "" {
-		t.Skip("STORAGE_HMAC_ACCESS_KEY_ID and STORAGE_HMAC_ACCESS_SECRET_KEY must be set. Skipping.")
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
 	}
+	defer client.Close()
+
+	// Set up service account HMAC key to use for this test.
+	key, err := createTestKey(ctx, t, client, tc.ProjectID)
+	if err != nil {
+		t.Fatalf("error setting up HMAC key: %v", err)
+	}
+	defer deleteTestKey(ctx, client, key)
 
 	buf := new(bytes.Buffer)
-	_, err := listGCSBuckets(buf, googleAccessKeyID, googleAccessKeySecret)
-	if err != nil {
-		t.Errorf("listGCSBuckets: %v", err)
-	}
+	// New HMAC key may take up to 15s to propagate, so we need to retry for up
+	// to that amount of time.
+	testutil.Retry(t, 75, time.Millisecond*200, func (r *testutil.R) {
+		buf.Reset()
+		if _, err := listGCSBuckets(buf, key.AccessID, key.Secret); err != nil {
+			r.Errorf("listGCSBuckets: %v", err)
+		}
+	})
 
 	got := buf.String()
 	if want := "Buckets:"; !strings.Contains(got, want) {
-		t.Errorf("listGCSBuckets got\n----\n%s\n----\nWant to contain\n----\n%s\n----", got, want)
+		t.Fatalf("listGCSBuckets got\n----\n%s\n----\nWant to contain\n----\n%s\n----", got, want)
+	}
+}
+
+// Create a key for testing purposes and set environment variables
+func createTestKey(ctx context.Context, t *testing.T, client *storage.Client, projectID string) (*storage.HMACKey, error) {
+	email := os.Getenv("GOLANG_SAMPLES_SERVICE_ACCOUNT_EMAIL")
+	if email == "" {
+		t.Skip("GOLANG_SAMPLES_SERVICE_ACCOUNT_EMAIL must be defined in the environment")
+		return nil, nil
+	}
+	key, err := client.CreateHMACKey(ctx, projectID, email)
+	if err != nil {
+		return nil, fmt.Errorf("CreateHMACKey: %v", err)
+	}
+
+	return key, nil
+}
+
+// Deactivate and delete the given key. Should operate as a teardown method.
+func deleteTestKey(ctx context.Context, client *storage.Client, key *storage.HMACKey) {
+	handle := client.HMACKeyHandle(key.ProjectID, key.AccessID)
+	if key.State == "ACTIVE" {
+		handle.Update(ctx, storage.HMACKeyAttrsToUpdate{State: "INACTIVE"})
+	}
+	if key.State != "DELETED" {
+		handle.Delete(ctx)
 	}
 }
