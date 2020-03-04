@@ -4,14 +4,14 @@ go 1.11
 
 require (
 	cloud.google.com/go v0.53.0
-	cloud.google.com/go/bigquery v1.3.0
+	cloud.google.com/go/bigquery v1.5.0
 	cloud.google.com/go/bigtable v1.1.0
-	cloud.google.com/go/datastore v1.0.0
+	cloud.google.com/go/datastore v1.1.0
 	cloud.google.com/go/firestore v1.1.0
 	cloud.google.com/go/logging v1.0.0
-	cloud.google.com/go/pubsub v1.1.0
+	cloud.google.com/go/pubsub v1.2.0
 	cloud.google.com/go/spanner v1.1.0
-	cloud.google.com/go/storage v1.5.0
+	cloud.google.com/go/storage v1.6.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.0
 	github.com/aws/aws-sdk-go v1.28.13
 	github.com/bmatcuk/doublestar v1.2.2
@@ -22,7 +22,7 @@ require (
 	github.com/fluent/fluent-logger-golang v1.4.0
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gofrs/uuid v3.2.0+incompatible
-	github.com/golang/protobuf v1.3.3
+	github.com/golang/protobuf v1.3.4
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/google/go-cmp v0.4.0
 	github.com/google/uuid v1.1.1
@@ -38,14 +38,14 @@ require (
 	github.com/sendgrid/smtpapi-go v0.6.0 // indirect
 	github.com/tinylib/msgp v1.1.0 // indirect
 	go.opencensus.io v0.22.3
-	golang.org/x/exp v0.0.0-20200207192155-f17229e696bd
-	golang.org/x/net v0.0.0-20200202094626-16171245cfb2
+	golang.org/x/exp v0.0.0-20200224162631-6cc2880d07d6
+	golang.org/x/net v0.0.0-20200226121028-0de0cce0169b
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/text v0.3.2
-	golang.org/x/tools v0.0.0-20200212150539-ea181f53ac56
-	google.golang.org/api v0.17.0
+	golang.org/x/tools v0.0.0-20200227222343-706bc42d1f0d
+	google.golang.org/api v0.19.0
 	google.golang.org/appengine v1.6.5
-	google.golang.org/genproto v0.0.0-20200212174721-66ed5ce911ce
+	google.golang.org/genproto v0.0.0-20200228133532-8c2c7df3a383
 	google.golang.org/grpc v1.27.1
 	gopkg.in/sendgrid/sendgrid-go.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.2.8
