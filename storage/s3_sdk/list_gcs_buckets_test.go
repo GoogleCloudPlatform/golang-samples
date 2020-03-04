@@ -67,6 +67,7 @@ func createTestKey(ctx context.Context, t *testing.T, client *storage.Client, pr
 	email := os.Getenv("GOLANG_SAMPLES_SERVICE_ACCOUNT_EMAIL")
 	if email == "" {
 		t.Skip("GOLANG_SAMPLES_SERVICE_ACCOUNT_EMAIL must be defined in the environment")
+		return nil, nil
 	}
 	key, err := client.CreateHMACKey(ctx, projectID, email)
 	if err != nil {
