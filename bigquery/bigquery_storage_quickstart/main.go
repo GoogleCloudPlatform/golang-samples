@@ -72,10 +72,13 @@ func main() {
 	}
 
 	// This example uses baby name data from the public datasets.
+	srcProjectID := "bigquery-public-data"
+	srcDatasetID := "usa_names"
+	srcTableID := "usa_1910_current"
 	readTable := fmt.Sprintf("projects/%s/datasets/%s/tables/%s",
-		"bigquery-public-data",
-		"usa_names",
-		"usa_1910_current",
+		srcProjectID,
+		srcDatasetID,
+		srcTableID,
 	)
 
 	// We limit the output columns to a subset of those allowed in the table,
