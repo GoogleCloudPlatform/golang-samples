@@ -24,8 +24,8 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// uploadEncyptedFile writes an object using AES-256 encryption key.
-func uploadEncyptedFile(w io.Writer, bucket, object string, secretKey []byte) error {
+// uploadEncryptedFile writes an object using AES-256 encryption key.
+func uploadEncryptedFile(w io.Writer, bucket, object string, secretKey []byte) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	// secretKey := []byte("secret-key")
