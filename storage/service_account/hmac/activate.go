@@ -16,11 +16,12 @@ package hmac
 
 // [START storage_activate_hmac_key]
 import (
-	"cloud.google.com/go/storage"
 	"context"
 	"fmt"
 	"io"
 	"time"
+
+	"cloud.google.com/go/storage"
 )
 
 // activateHMACKey activates the HMAC key with the given access ID.

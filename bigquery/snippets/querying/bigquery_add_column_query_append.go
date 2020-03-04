@@ -33,6 +33,7 @@ func createTableAndWidenQuery(projectID, datasetID, tableID string) error {
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	// First, we create a sample table.
 	sampleSchema := bigquery.Schema{

@@ -35,6 +35,7 @@ func queryLegacyLargeResults(w io.Writer, projectID, datasetID, tableID string) 
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	q := client.Query(
 		"SELECT corpus FROM [bigquery-public-data:samples.shakespeare] GROUP BY corpus;")

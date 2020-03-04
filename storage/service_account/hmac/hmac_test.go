@@ -17,10 +17,11 @@ package hmac
 import (
 	"context"
 	"fmt"
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"io/ioutil"
 	"os"
 	"testing"
+
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 
 	"cloud.google.com/go/storage"
 )
@@ -29,6 +30,10 @@ var serviceAccountEmail = os.Getenv("GOLANG_SAMPLES_SERVICE_ACCOUNT_EMAIL")
 var storageClient *storage.Client
 
 func TestMain(m *testing.M) {
+	if serviceAccountEmail == "" {
+		fmt.Fprint(os.Stderr, "GOLANG_SAMPLES_SERVICE_ACCOUNT_EMAIL not set. Skipping.")
+		return
+	}
 	ctx := context.Background()
 	storageClient, _ = storage.NewClient(ctx)
 	defer storageClient.Close()

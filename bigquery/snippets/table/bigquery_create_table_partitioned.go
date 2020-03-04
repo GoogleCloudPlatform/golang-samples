@@ -34,6 +34,8 @@ func createTablePartitioned(projectID, datasetID, tableID string) error {
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
+
 	sampleSchema := bigquery.Schema{
 		{Name: "name", Type: bigquery.StringFieldType},
 		{Name: "post_abbr", Type: bigquery.IntegerFieldType},
