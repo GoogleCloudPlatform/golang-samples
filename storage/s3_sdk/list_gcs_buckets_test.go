@@ -19,7 +19,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 	"testing"
@@ -36,22 +35,22 @@ func TestList(t *testing.T) {
 
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		log.Fatalf("storage.NewClient: %v", err)
+		t.Fatalf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
 
 	// Set up service account HMAC key to use for this test.
-	key, err := createTestKey(ctx, client, tc.ProjectID)
+	key, err := createTestKey(ctx, t, client, tc.ProjectID)
 	if err != nil {
-		log.Fatalf("error setting up HMAC key: %v", err)
+		t.Fatalf("error setting up HMAC key: %v", err)
 	}
 	defer deleteTestKey(ctx, client, key)
 
-	var buf *bytes.Buffer
+	buf := new(bytes.Buffer)
 	// New HMAC key may take up to 15s to propagate, so we need to retry for up
 	// to that amount of time.
 	testutil.Retry(t, 75, time.Millisecond*200, func (r *testutil.R) {
-		buf = new(bytes.Buffer)
+		buf.Reset()
 		if _, err := listGCSBuckets(buf, key.AccessID, key.Secret); err != nil {
 			r.Errorf("listGCSBuckets: %v", err)
 		}
@@ -64,10 +63,10 @@ func TestList(t *testing.T) {
 }
 
 // Create a key for testing purposes and set environment variables
-func createTestKey(ctx context.Context, client *storage.Client, projectID string) (*storage.HMACKey, error) {
+func createTestKey(ctx context.Context, t *testing.T, client *storage.Client, projectID string) (*storage.HMACKey, error) {
 	email := os.Getenv("GOLANG_SAMPLES_SERVICE_ACCOUNT_EMAIL")
 	if email == "" {
-		return nil, fmt.Errorf("GOLANG_SAMPLES_SERVICE_ACCOUNT_EMAIL must be defined in the environment")
+		t.Skip("GOLANG_SAMPLES_SERVICE_ACCOUNT_EMAIL must be defined in the environment")
 	}
 	key, err := client.CreateHMACKey(ctx, projectID, email)
 	if err != nil {
