@@ -88,9 +88,9 @@ if [ $GOLANG_SAMPLES_GO_VET ]; then
       [ -f go.sum ] && git diff go.sum | tee /dev/stderr | (! read)
       set +x
 
-      echo "Running 'gofmt compliance check' in '$mod'..."
+      echo "Running 'goimports compliance check' in '$mod'..."
       set -x
-      diff -u <(echo -n) <(gofmt -d -s .)
+      diff -u <(echo -n) <(goimports -d .)
       set +x
     popd > /dev/null;
   done
@@ -137,8 +137,6 @@ export GOLANG_SAMPLES_KMS_CRYPTOKEY=key1
 export GOLANG_SAMPLES_IOT_PUB="$KOKORO_GFILE_DIR/rsa_cert.pem"
 export GOLANG_SAMPLES_IOT_PRIV="$KOKORO_GFILE_DIR/rsa_private.pem"
 
-export STORAGE_HMAC_ACCESS_KEY_ID="$KOKORO_KEYSTORE_DIR/71386_golang-samples-kokoro-gcs-hmac-secret"
-export STORAGE_HMAC_ACCESS_SECRET_KEY="$KOKORO_KEYSTORE_DIR/71386_golang-samples-kokoro-gcs-hmac-id"
 export GCLOUD_ORGANIZATION=1081635000895
 export SCC_PUBSUB_PROJECT="project-a-id"
 export SCC_PUBSUB_TOPIC="projects/project-a-id/topics/notifications-sample-topic"
@@ -203,23 +201,22 @@ else
   echo "Running tests in modified directories: $GO_TEST_TARGET"
 fi
 
+set +e
+
 # Run tests in changed directories that are not in modules.
-OUTFILE="$PWD/gotest.out"
-rm $OUTFILE || true
+exit_code=0
 for i in $GO_TEST_MODULES; do
   mod="$(dirname $i)"
   pushd $mod > /dev/null;
     echo "Running 'go test' in '$mod'..."
     set -x
-    2>&1 go test -timeout $TIMEOUT -v ./... | tee -a $OUTFILE
+    2>&1 go test -timeout $TIMEOUT -v ./... | tee sponge_log.log
+    cat sponge_log.log | /go/bin/go-junit-report -set-exit-code > sponge_log.xml
+    exit_code=$(($exit_code + $?))
     set +x
   popd > /dev/null;
 done
 
-set +e
-
-cat $OUTFILE | /go/bin/go-junit-report -set-exit-code > sponge_log.xml
-EXIT_CODE=$?
 
 # If we're running system tests, send the test log to the Build Cop Bot.
 # See https://github.com/googleapis/repo-automation-bots/tree/master/packages/buildcop.
@@ -228,4 +225,4 @@ if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]]; then
   $KOKORO_GFILE_DIR/linux_amd64/buildcop
 fi
 
-exit $EXIT_CODE
+exit $exit_code
