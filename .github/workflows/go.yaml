@@ -27,17 +27,14 @@ jobs:
 
     - name: License check
       run: |
-        test "$( \
-          grep -riL "Copyright .* Google LLC" --include=\*.{go,sh} . | \
-          wc -l | \
-          awk '{print $1}' \
-        )" \
-        = 0
+        test -z "$( \
+          grep -riLI "Copyright \d\d\d\d Google LLC" --exclude=\*.{mod,sum,pb.go,md,dot,json,txt,ssml,cfg,csv,svg,LICENSE} . \
+        )"
 
     - name: Fix licenses on fail
       run: |
         echo "Fix the following files" && \
-        grep -riL "Copyright .* Google LLC" --include=\*.{go,sh} .
+        grep -riLI "Copyright \d\d\d\d Google LLC" --exclude=\*.{mod,sum,pb.go,md,dot,json,txt,ssml,cfg,csv,svg,LICENSE}
       if: failure()
 
     - name: Build code
