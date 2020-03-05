@@ -18,16 +18,17 @@
 package job
 
 import (
-	"cloud.google.com/go/bigquery"
-	"cloud.google.com/go/storage"
 	"context"
 	"fmt"
-	"github.com/GoogleCloudPlatform/golang-samples/bigquery/snippets/bqtestutil"
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"google.golang.org/api/iterator"
 	"io/ioutil"
 	"testing"
 	"time"
+
+	"cloud.google.com/go/bigquery"
+	"cloud.google.com/go/storage"
+	"github.com/GoogleCloudPlatform/golang-samples/bigquery/snippets/bqtestutil"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"google.golang.org/api/iterator"
 )
 
 func TestJobs(t *testing.T) {

@@ -20,20 +20,16 @@ import (
 	"fmt"
 	"io"
 
-	"golang.org/x/oauth2/google"
 	iam "google.golang.org/api/iam/v1"
 )
 
 // disableServiceAccount disables a service account.
 func disableServiceAccount(w io.Writer, email string) error {
 	// email:= service-account@your-project.iam.gserviceaccount.com
-	client, err := google.DefaultClient(context.Background(), iam.CloudPlatformScope)
+	ctx := context.Background()
+	service, err := iam.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("google.DefaultClient: %v", err)
-	}
-	service, err := iam.New(client)
-	if err != nil {
-		return fmt.Errorf("iam.New: %v", err)
+		return fmt.Errorf("iam.NewService: %v", err)
 	}
 
 	request := &iam.DisableServiceAccountRequest{}

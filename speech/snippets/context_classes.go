@@ -21,7 +21,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"strings"
 
 	speech "cloud.google.com/go/speech/apiv1"
 	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"

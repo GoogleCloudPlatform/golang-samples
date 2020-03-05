@@ -16,11 +16,12 @@ package hmac
 
 // [START storage_create_hmac_key]
 import (
-	"cloud.google.com/go/storage"
 	"context"
 	"fmt"
 	"io"
 	"time"
+
+	"cloud.google.com/go/storage"
 )
 
 // createHMACKey creates a new HMAC key using the given project and service account.

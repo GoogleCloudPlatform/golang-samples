@@ -20,19 +20,15 @@ import (
 	"fmt"
 	"io"
 
-	"golang.org/x/oauth2/google"
 	iam "google.golang.org/api/iam/v1"
 )
 
 // editRole modifies a custom role.
 func editRole(w io.Writer, projectID, name, newTitle, newDescription, newStage string, newPermissions []string) (*iam.Role, error) {
-	client, err := google.DefaultClient(context.Background(), iam.CloudPlatformScope)
+	ctx := context.Background()
+	service, err := iam.NewService(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %v", err)
-	}
-	service, err := iam.New(client)
-	if err != nil {
-		return nil, fmt.Errorf("iam.New: %v", err)
+		return nil, fmt.Errorf("iam.NewService: %v", err)
 	}
 
 	resource := "projects/" + projectID + "/roles/" + name

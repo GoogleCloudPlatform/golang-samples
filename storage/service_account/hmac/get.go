@@ -16,11 +16,12 @@ package hmac
 
 // [START storage_get_hmac_key]
 import (
-	"cloud.google.com/go/storage"
 	"context"
 	"fmt"
 	"io"
 	"time"
+
+	"cloud.google.com/go/storage"
 )
 
 // getHMACKey retrieves the HMACKeyMetadata with the given access id.
