@@ -61,19 +61,17 @@ func TestListBuckets(t *testing.T) {
 	}
 
 	var ok bool
-outer:
-	for attempt := 0; attempt < 5; attempt++ { // for eventual consistency
+	testutil.Retry(t, 5, 2*time.Second, func(r *testutil.R) { // for eventual consistency
 		for _, b := range buckets {
 			if b == bucketName {
 				ok = true
-				break outer
+				break
 			}
 		}
-		time.Sleep(2 * time.Second)
-	}
-	if !ok {
-		t.Errorf("got bucket list: %v; want %q in the list", buckets, bucketName)
-	}
+		if !ok {
+			r.Errorf("got bucket list: %v; want %q in the list", buckets, bucketName)
+		}
+	})
 }
 
 func TestGetBucketMetadata(t *testing.T) {
