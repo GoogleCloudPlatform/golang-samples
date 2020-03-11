@@ -49,8 +49,8 @@ func instantiateInlineWorkflowTemplate(w io.Writer, projectID, region string) er
 				{
 					JobType: &dataprocpb.OrderedJob_HadoopJob{
 						HadoopJob: &dataprocpb.HadoopJob{
-							JarFileUris: []string{
-								"file:///usr/lib/hadoop-mapreduce/hadoop-mapreduce-examples.jar",
+							Driver: &dataprocpb.HadoopJob_MainJarFileUri{
+								MainJarFileUri: "file:///usr/lib/hadoop-mapreduce/hadoop-mapreduce-examples.jar",
 							},
 							Args: []string{
 								"teragen",
@@ -64,8 +64,8 @@ func instantiateInlineWorkflowTemplate(w io.Writer, projectID, region string) er
 				{
 					JobType: &dataprocpb.OrderedJob_HadoopJob{
 						HadoopJob: &dataprocpb.HadoopJob{
-							JarFileUris: []string{
-								"file:///usr/lib/hadoop-mapreduce/hadoop-mapreduce-examples.jar",
+							Driver: &dataprocpb.HadoopJob_MainJarFileUri{
+								MainJarFileUri: "file:///usr/lib/hadoop-mapreduce/hadoop-mapreduce-examples.jar",
 							},
 							Args: []string{
 								"terasort",
