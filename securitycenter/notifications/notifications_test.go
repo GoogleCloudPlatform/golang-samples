@@ -21,9 +21,9 @@ import (
 	"strings"
 	"testing"
 
-	securitycenter "cloud.google.com/go/securitycenter/apiv1p1beta1"
+	securitycenter "cloud.google.com/go/securitycenter/apiv1"
 	"github.com/google/uuid"
-	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1p1beta1"
+	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
 )
 
 func orgID(t *testing.T) string {
