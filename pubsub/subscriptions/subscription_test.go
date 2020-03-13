@@ -29,6 +29,7 @@ import (
 	"cloud.google.com/go/pubsub"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/google/go-cmp/cmp"
 )
 
 var topicID string
@@ -260,6 +261,122 @@ func TestPullMsgsConcurrencyControl(t *testing.T) {
 	// Check for number of newlines, which should correspond with number of messages.
 	if got := strings.Count(buf.String(), "\n"); got != numMsgs {
 		t.Fatalf("pullMsgsConcurrencyControl got %d messages, want %d", got, numMsgs)
+	}
+}
+
+func TestCreateWithDeadLetterPolicy(t *testing.T) {
+	client := setup(t)
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	deadLetterSourceID := topicID + "-dead-letter-source"
+	deadLetterSubID := subID + "-dead-letter-sub"
+	deadLetterSinkID := topicID + "-dead-letter-sink"
+
+	deadLetterSourceTopic, err := getOrCreateTopic(ctx, client, deadLetterSourceID)
+	if err != nil {
+		t.Fatalf("getOrCreateTopic: %v", err)
+	}
+	defer deadLetterSourceTopic.Delete(ctx)
+	defer deadLetterSourceTopic.Stop()
+
+	deadLetterSinkTopic, err := getOrCreateTopic(ctx, client, deadLetterSinkID)
+	if err != nil {
+		t.Fatalf("getOrCreateTopic: %v", err)
+	}
+	defer deadLetterSinkTopic.Delete(ctx)
+	defer deadLetterSinkTopic.Stop()
+
+	buf := new(bytes.Buffer)
+	if err := createSubWithDeadLetter(buf, tc.ProjectID, deadLetterSubID, deadLetterSourceID, deadLetterSinkTopic.String()); err != nil {
+		t.Fatalf("failed to create a subscription with dead lettering: %v", err)
+	}
+	sub := client.Subscription(deadLetterSubID)
+	ok, err := sub.Exists(context.Background())
+	if err != nil {
+		t.Fatalf("failed to check if sub exists: %v", err)
+	}
+	if !ok {
+		t.Fatalf("got none; want sub = %q", deadLetterSubID)
+	}
+	defer sub.Delete(ctx)
+
+	cfg, err := sub.Config(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := cfg.DeadLetterPolicy
+	want := &pubsub.DeadLetterPolicy{
+		DeadLetterTopic:     deadLetterSinkTopic.String(),
+		MaxDeliveryAttempts: 10,
+	}
+	if !cmp.Equal(got, want) {
+		t.Fatalf("got cfg: %+v; want cfg: %+v", got, want)
+	}
+}
+
+func TestUpdateDeadLetterPolicy(t *testing.T) {
+	client := setup(t)
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	deadLetterSourceID := topicID + "-dead-letter-source"
+	deadLetterSubID := subID + "-dead-letter-sub"
+	deadLetterSinkID := topicID + "-dead-letter-sink"
+
+	deadLetterSourceTopic, err := getOrCreateTopic(ctx, client, deadLetterSourceID)
+	if err != nil {
+		t.Fatalf("getOrCreateTopic: %v", err)
+	}
+	defer deadLetterSourceTopic.Delete(ctx)
+	defer deadLetterSourceTopic.Stop()
+
+	deadLetterSinkTopic, err := getOrCreateTopic(ctx, client, deadLetterSinkID)
+	if err != nil {
+		t.Fatalf("getOrCreateTopic: %v", err)
+	}
+	defer deadLetterSinkTopic.Delete(ctx)
+	defer deadLetterSinkTopic.Stop()
+
+	buf := new(bytes.Buffer)
+	if err := createSubWithDeadLetter(buf, tc.ProjectID, deadLetterSubID, deadLetterSourceID, deadLetterSinkTopic.String()); err != nil {
+		t.Fatalf("failed to create a subscription with dead lettering: %v", err)
+	}
+	sub := client.Subscription(deadLetterSubID)
+	ok, err := sub.Exists(context.Background())
+	if err != nil {
+		t.Fatalf("failed to check if sub exists: %v", err)
+	}
+	if !ok {
+		t.Fatalf("got none; want sub = %q", deadLetterSubID)
+	}
+	defer sub.Delete(ctx)
+
+	if err := updateDeadLetter(buf, tc.ProjectID, deadLetterSubID, deadLetterSinkTopic.String()); err != nil {
+		t.Fatalf("failed to update a subscriptions's dead letter policy: %v", err)
+	}
+
+	cfg, err := sub.Config(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := cfg.DeadLetterPolicy
+	want := &pubsub.DeadLetterPolicy{
+		DeadLetterTopic:     deadLetterSinkTopic.String(),
+		MaxDeliveryAttempts: 20,
+	}
+	if !cmp.Equal(got, want) {
+		t.Fatalf("got cfg: %+v; want cfg: %+v", got, want)
+	}
+
+	if err := removeDeadLetterTopic(buf, tc.ProjectID, deadLetterSubID); err != nil {
+		t.Fatalf("got error removing dead letter policy: %v", err)
+	}
+	cfg, err = sub.Config(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got = cfg.DeadLetterPolicy
+	if got != nil {
+		t.Fatalf("got dead letter policy: %+v, want nil", got)
 	}
 }
 
