@@ -57,6 +57,7 @@ TARGET_DIRS=$(echo "$TARGET_DIRS" | xargs)
 # List all modules in changed directories.
 # If running on master will collect all modules in the repo, including the root module.
 GO_CHANGED_MODULES=$(find ${TARGET_DIRS:-.} -name go.mod)
+GO_CHANGED_MODULES=${$GO_CHANGED_MODULES:-./go.mod}
 # Exclude the root module if present.
 GO_CHANGED_SUBMODULES=${GO_CHANGED_MODULES#./go.mod}
 
@@ -76,6 +77,10 @@ fi
 set +x
 
 if [ $GOLANG_SAMPLES_GO_VET ]; then
+  echo "Running 'goimports compliance check'"
+  set -x
+  diff -u <(echo -n) <(goimports -d .)
+  set +x
   for i in $GO_CHANGED_MODULES; do
     mod="$(dirname $i)"
     pushd $mod > /dev/null;
@@ -86,11 +91,6 @@ if [ $GOLANG_SAMPLES_GO_VET ]; then
       go mod tidy;
       git diff go.mod | tee /dev/stderr | (! read)
       [ -f go.sum ] && git diff go.sum | tee /dev/stderr | (! read)
-      set +x
-
-      echo "Running 'goimports compliance check' in '$mod'..."
-      set -x
-      diff -u <(echo -n) <(goimports -d .)
       set +x
     popd > /dev/null;
   done
@@ -196,8 +196,8 @@ elif [[ -z "${TARGET_DIRS// }" ]]; then
   GO_TEST_MODULES="./go.mod"
   echo "Only running root tests"
 else
-  GO_TEST_TARGET="./..."
-  GO_TEST_MODULES="$GO_CHANGED_SUBMODULES"
+  GO_TEST_TARGET=$TARGET_DIRS
+  GO_TEST_MODULES="./go.mod"
   echo "Running tests in modified directories: $GO_TEST_TARGET"
 fi
 
