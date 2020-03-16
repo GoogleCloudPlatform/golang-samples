@@ -57,7 +57,7 @@ TARGET_DIRS=$(echo "$TARGET_DIRS" | xargs)
 # List all modules in changed directories.
 # If running on master will collect all modules in the repo, including the root module.
 GO_CHANGED_MODULES=$(find ${TARGET_DIRS:-.} -name go.mod)
-GO_CHANGED_MODULES=${$GO_CHANGED_MODULES:-./go.mod}
+GO_CHANGED_MODULES=${GO_CHANGED_MODULES:-./go.mod}
 # Exclude the root module if present.
 GO_CHANGED_SUBMODULES=${GO_CHANGED_MODULES#./go.mod}
 
