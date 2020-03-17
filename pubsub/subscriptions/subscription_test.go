@@ -252,7 +252,7 @@ func TestPullMsgsConcurrencyControl(t *testing.T) {
 
 	// Publish 5 message to test with.
 	const numMsgs = 5
-	publishMsgs(ctx, topic, 5)
+	publishMsgs(ctx, topic, numMsgs)
 
 	buf := new(bytes.Buffer)
 	if err := pullMsgsConcurrenyControl(buf, tc.ProjectID, subIDConc); err != nil {
@@ -377,6 +377,50 @@ func TestUpdateDeadLetterPolicy(t *testing.T) {
 	got = cfg.DeadLetterPolicy
 	if got != nil {
 		t.Fatalf("got dead letter policy: %+v, want nil", got)
+	}
+}
+
+func TestPullMsgsDeadLetterDeliveryAttempts(t *testing.T) {
+	client := setup(t)
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	deadLetterSourceID := topicID + "-dead-letter-source"
+	deadLetterSinkID := topicID + "-dead-letter-sink"
+	deadLetterSubID := subID + "-dead-letter"
+
+	topic, err := getOrCreateTopic(ctx, client, deadLetterSourceID)
+	if err != nil {
+		t.Fatalf("getOrCreateTopic: %v", err)
+	}
+	defer topic.Delete(ctx)
+	defer topic.Stop()
+
+	deadLetterTopic, err := getOrCreateTopic(ctx, client, deadLetterSinkID)
+	if err != nil {
+		t.Fatalf("getOrCreateTopic: %v", err)
+	}
+	defer deadLetterTopic.Delete(ctx)
+	defer topic.Stop()
+
+	buf := new(bytes.Buffer)
+	deadLetterSinkName := fmt.Sprintf("projects/%s/topics/%s", tc.ProjectID, deadLetterSinkID)
+	if err = createSubWithDeadLetter(buf, tc.ProjectID, deadLetterSubID, deadLetterSourceID, deadLetterSinkName); err != nil {
+		t.Fatalf("createSubWithDeadLetter: %v", err)
+	}
+	sub := client.Subscription(deadLetterSubID)
+	defer sub.Delete(ctx)
+
+	if err = publishMsgs(ctx, topic, 1); err != nil {
+		t.Fatalf("publishMsgs: %v", err)
+	}
+
+	if err := pullMsgsDeadLetterDeliveryAttempt(buf, tc.ProjectID, deadLetterSubID); err != nil {
+		t.Fatalf("failed to pull messages: %v", err)
+	}
+	got := buf.String()
+	want := "delivery attempts: 1"
+	if !strings.Contains(got, want) {
+		t.Fatalf("pullMsgsDeadLetterDeliveryAttempts got %s, want %s", got, want)
 	}
 }
 

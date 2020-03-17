@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	"cloud.google.com/go/pubsub"
 )
@@ -32,11 +33,16 @@ func pullMsgsDeadLetterDeliveryAttempt(w io.Writer, projectID, subID string) err
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
 
+	// Receive messages for 10 seconds.
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+
 	sub := client.Subscription(subID)
 	err = sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
-		// Access the delivery attempt field, which is populated with the number of times
+		// The delivery attempt is an int pointer with the number of times
 		// a message has attempted to be delivered if dead lettering is enabled.
-		_ = msg.DeliveryAttempt
+		// Otherwise, it is nil.
+		fmt.Fprintf(w, "message: %s, delivery attempts: %d", msg.Data, *msg.DeliveryAttempt)
 		msg.Ack()
 	})
 	if err != nil {
