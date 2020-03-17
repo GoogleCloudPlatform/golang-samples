@@ -34,6 +34,7 @@ import (
 	"google.golang.org/grpc"
 
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
+	sppb "google.golang.org/genproto/googleapis/spanner/v1"
 )
 
 type command func(ctx context.Context, w io.Writer, client *spanner.Client) error
@@ -1611,7 +1612,9 @@ func queryWithTimestampParameter(ctx context.Context, w io.Writer, client *spann
 
 func queryWithQueryOptions(ctx context.Context, w io.Writer, client *spanner.Client) error {
 	stmt := spanner.Statement{SQL: `SELECT VenueId, VenueName, LastUpdateTime FROM Venues`}
-	queryOptions := spanner.QueryOptions{OptimizerVersion: "1"}
+	queryOptions := spanner.QueryOptions{
+		Options: &sppb.ExecuteSqlRequest_QueryOptions{OptimizerVersion: "1"},
+	}
 	iter := client.Single().QueryWithOptions(ctx, stmt, queryOptions)
 	defer iter.Stop()
 	for {
@@ -1857,7 +1860,9 @@ func queryWithHistory(ctx context.Context, w io.Writer, client *spanner.Client) 
 // [START spanner_create_client_with_query_options]
 
 func createClientWithQueryOptions(ctx context.Context, w io.Writer, database string) error {
-	queryOptions := spanner.QueryOptions{OptimizerVersion: "1"}
+	queryOptions := spanner.QueryOptions{
+		Options: &sppb.ExecuteSqlRequest_QueryOptions{OptimizerVersion: "1"},
+	}
 	client, err := spanner.NewClientWithConfig(
 		ctx, database, spanner.ClientConfig{QueryOptions: queryOptions},
 	)
