@@ -36,6 +36,6 @@ func TestInstantiateInlineWorkflowTemplate(t *testing.T) {
 
 	got := buf.String()
 	if want := fmt.Sprintf("successfully"); !strings.Contains(got, want) {
-		t.Fatalf("InstantiateInlineWorkflowTemplate: got %s, want %s", got, want)
+		t.Fatalf("instantiateInlineWorkflowTemplate got %q, want %q", got, want)
 	}
 }
