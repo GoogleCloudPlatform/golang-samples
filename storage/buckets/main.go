@@ -28,6 +28,7 @@ import (
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/storage"
 	"google.golang.org/api/iterator"
+	"google.golang.org/genproto/googleapis/type/expr"
 	iampb "google.golang.org/genproto/googleapis/iam/v1"
 )
 
@@ -238,6 +239,38 @@ func removeUser(c *storage.Client, bucketName string) error {
 	// being modified concurrently. SetPolicy will return an error if the policy
 	// was modified since it was retrieved.
 	// [END remove_bucket_iam_member]
+	return nil
+}
+
+func addBucketConditionalIamBinding(c *storage.Client, bucketName string, role string, member string, title string, description string, expression string) error {
+	// [START add_bucket_conditional_iam_binding]
+	ctx := context.Background()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
+	bucket := c.Bucket(bucketName)
+	policy, err := bucket.IAM().V3().Policy(ctx)
+	if err != nil {
+		return err
+	}
+
+	policy.Bindings = append(policy.Bindings, &iampb.Binding{
+		Role: role,
+		Members: []string{member},
+		Condition: &expr.Expr{
+			Title: title,
+			Description: description,
+			Expression: expression,
+		},
+	})
+
+	if err := bucket.IAM().V3().SetPolicy(ctx, policy); err != nil {
+		return err
+	}
+	// NOTE: It may be necessary to retry this operation if IAM policies are
+	// being modified concurrently. SetPolicy will return an error if the policy
+	// was modified since it was retrieved.
+	// [END add_bucket_conditional_iam_binding]
 	return nil
 }
 
