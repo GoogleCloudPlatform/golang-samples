@@ -25,12 +25,6 @@ jobs:
       run: echo Run goimports -w .
       if: failure()
 
-    - name: License check
-      run: |
-        test -z "$( \
-          grep -riLI "Copyright \d\d\d\d Google LLC" --exclude=\*.{mod,sum,pb.go,md,dot,json,txt,ssml,cfg,csv,svg,LICENSE} . \
-        )"
-
     - name: Fix licenses on fail
       run: |
         echo "Fix the following files" && \
