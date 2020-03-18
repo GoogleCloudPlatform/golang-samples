@@ -1,0 +1,30 @@
+name: Go
+on: [push]
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Setup Go
+      uses: actions/setup-go@v2-beta
+      with:
+        go-version: '^1.14'
+        
+    - name: Install goimports
+      run: go get golang.org/x/tools/cmd/goimports
+
+    - name: Check code
+      uses: actions/checkout@v2
+    
+    - name: goimports
+      run: test -z "$($(go env GOPATH)/bin/goimports -l .)"
+        
+    - name: Fix goimports on fail
+      run: echo Run goimports -w .
+      if: failure()
+
+    - name: Build code
+      run: go build ./...
+
