@@ -98,7 +98,7 @@ func TestObjects(t *testing.T) {
 	if err != nil {
 		t.Fatalf("downloadFile: %v", err)
 	}
-	if got, want := string(data), "Hello\r\nworld"; got != want {
+	if got, want := string(data), "Hello\nworld"; got != want {
 		t.Errorf("contents = %q; want %q", got, want)
 	}
 
@@ -124,8 +124,8 @@ func TestObjects(t *testing.T) {
 	key := []byte("my-secret-AES-256-encryption-key")
 	newKey := []byte("My-secret-AES-256-encryption-key")
 
-	if err := uploadEncyptedFile(ioutil.Discard, bucket, object1, key); err != nil {
-		t.Errorf("uploadEncyptedFile: %v", err)
+	if err := uploadEncryptedFile(ioutil.Discard, bucket, object1, key); err != nil {
+		t.Errorf("uploadEncryptedFile: %v", err)
 	}
 	data, err = downloadEncryptedFile(ioutil.Discard, bucket, object1, key)
 	if err != nil {
