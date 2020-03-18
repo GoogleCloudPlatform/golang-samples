@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="7ed9cb0e-8c83-4542-afa4-23b5ba087436" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="DefaultGradleProjectSettings">
+    <option name="isMigrated" value="true" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="IgnoredFileRootStore">
+    <option name="generatedRoots">
+      <set>
+        <option value="$PROJECT_DIR$/.idea" />
+      </set>
+    </option>
+  </component>
+  <component name="ProjectId" id="1Ya9yB1NrauXlO25XYu80HpKOng" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="Git.Branch.Popup.ShowAllRemotes" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="aspect.path.notification.shown" value="true" />
+    <property name="go.import.settings.migrated" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
+    <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+  </component>
+  <component name="ServiceViewManager">
+    <option name="viewStates">
+      <list>
+        <serviceView>
+          <treeState>
+            <expand />
+            <select />
+          </treeState>
+        </serviceView>
+      </list>
+    </option>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="7ed9cb0e-8c83-4542-afa4-23b5ba087436" name="Default Changelist" comment="" />
+      <created>1583170089999</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1583170089999</updated>
+      <workItem from="1583170091922" duration="1956000" />
+      <workItem from="1583423704886" duration="1968000" />
+      <workItem from="1584543817695" duration="356000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="1058" y="217" key="RollbackChangesDialog" timestamp="1583172142267">
+      <screen x="0" y="23" width="1680" height="953" />
+    </state>
+    <state x="1058" y="217" key="RollbackChangesDialog/0.23.1680.953@0.23.1680.953" timestamp="1583172142267" />
+    <state x="560" y="23" width="1120" height="949" key="dock-window-1" timestamp="1583423725928">
+      <screen x="0" y="23" width="1680" height="949" />
+    </state>
+    <state x="560" y="23" width="1120" height="949" key="dock-window-1/0.23.1680.949@0.23.1680.949" timestamp="1583423725928" />
+    <state x="840" y="23" width="840" height="952" key="dock-window-1/0.23.1680.953@0.23.1680.953" timestamp="1583170273982" />
+    <state x="498" y="256" width="683" height="486" key="find.popup" timestamp="1583170360953">
+      <screen x="0" y="23" width="1680" height="953" />
+    </state>
+    <state x="498" y="256" width="683" height="486" key="find.popup/0.23.1680.953@0.23.1680.953" timestamp="1583170360953" />
+    <state x="505" y="232" width="670" height="676" key="search.everywhere.popup" timestamp="1583170914200">
+      <screen x="0" y="23" width="1680" height="953" />
+    </state>
+    <state x="505" y="232" width="670" height="676" key="search.everywhere.popup/0.23.1680.953@0.23.1680.953" timestamp="1583170914200" />
+  </component>
+</project>
