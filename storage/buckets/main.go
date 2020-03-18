@@ -28,8 +28,8 @@ import (
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/storage"
 	"google.golang.org/api/iterator"
-	"google.golang.org/genproto/googleapis/type/expr"
 	iampb "google.golang.org/genproto/googleapis/iam/v1"
+	"google.golang.org/genproto/googleapis/type/expr"
 )
 
 func main() {
@@ -221,7 +221,8 @@ func removeUser(c *storage.Client, bucketName string) error {
 	// See the documentation for more values.
 	// https://cloud.google.com/storage/docs/access-control/iam
 	for _, binding := range policy.Bindings {
-		if binding.Role == "roles/storage.objectViewer" {
+		// Only remove unconditional bindings matching role
+		if binding.Role == "roles/storage.objectViewer" && binding.Condition == nil {
 			// Filter out member.
 			i := 0
 			for _, member := range binding.Members {
@@ -255,12 +256,12 @@ func addBucketConditionalIamBinding(c *storage.Client, bucketName string, role s
 	}
 
 	policy.Bindings = append(policy.Bindings, &iampb.Binding{
-		Role: role,
+		Role:    role,
 		Members: []string{member},
 		Condition: &expr.Expr{
-			Title: title,
+			Title:       title,
 			Description: description,
-			Expression: expression,
+			Expression:  expression,
 		},
 	})
 
