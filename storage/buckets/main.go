@@ -275,6 +275,48 @@ func addBucketConditionalIamBinding(c *storage.Client, bucketName string, role s
 	return nil
 }
 
+func removeBucketConditionalIamBinding(c *storage.Client, bucketName string, role string, title string, description string, expression string) error {
+	// [START remove_bucket_conditional_iam_binding]
+	ctx := context.Background()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
+	bucket := c.Bucket(bucketName)
+	policy, err := bucket.IAM().V3().Policy(ctx)
+	if err != nil {
+		return err
+	}
+
+	// Find the index of the binding matching inputs
+	i := -1
+	for j, binding := range policy.Bindings {
+		if binding.Role == role && binding.Condition != nil {
+			condition := binding.Condition
+			if condition.Title == title &&
+				condition.Description == description &&
+				condition.Expression == expression {
+				i = j
+			}
+		}
+	}
+
+	if i == -1 {
+		return errors.New("No matching binding group found.")
+	}
+
+	// Get a slice of the bindings, removing the binding at index i
+	policy.Bindings = append(policy.Bindings[:i], policy.Bindings[i+1:]...)
+
+	if err := bucket.IAM().V3().SetPolicy(ctx, policy); err != nil {
+		return err
+	}
+	// NOTE: It may be necessary to retry this operation if IAM policies are
+	// being modified concurrently. SetPolicy will return an error if the policy
+	// was modified since it was retrieved.
+	// [END remove_bucket_conditional_iam_binding]
+	return nil
+}
+
 func setRetentionPolicy(c *storage.Client, bucketName string, retentionPeriod time.Duration) error {
 	// [START storage_set_retention_policy]
 	ctx := context.Background()

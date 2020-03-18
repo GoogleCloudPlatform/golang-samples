@@ -156,6 +156,10 @@ func TestIAM(t *testing.T) {
 	if err != nil {
 		t.Errorf("addBucketConditionalIamBinding: %v", err)
 	}
+
+	if err := removeBucketConditionalIamBinding(storageClient, bucketName, role, title, description, expression); err != nil {
+		t.Errorf("removeBucketConditionalIamBinding: %v", err)
+	}
 }
 
 func TestRequesterPays(t *testing.T) {
