@@ -20,6 +20,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha1"
 	"encoding/base64"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -29,10 +30,12 @@ import (
 
 // [START example]
 
-// SignURL creates a signed URL for an endpoint on Cloud CDN. url must start
-// with "https://" and should not have the "Expires", "KeyName", or "Signature"
-// query parameters. key should be in raw form (not base64url-encoded) which is
-// 16-bytes long. keyName should be added to the backend service or bucket.
+// SignURL creates a signed URL for an endpoint on Cloud CDN.
+//
+// - url must start with "https://" and should not have the "Expires", "KeyName", or "Signature"
+// query parameters.
+// - key should be in raw form (not base64url-encoded) which is 16-bytes long.
+// - keyName must match a key added to the backend service or bucket.
 func SignURL(url, keyName string, key []byte, expiration time.Time) string {
 	sep := "?"
 	if strings.Contains(url, "?") {
@@ -64,10 +67,15 @@ func readKeyFile(path string) ([]byte, error) {
 }
 
 func main() {
-	key, err := readKeyFile("/path/to/key")
+	var keyPath string
+	flag.StringVar(&keyPath, "key-file", "", "The path to a file containing the base64-encoded signing key")
+	flag.Parse()
+
+	key, err := readKeyFile(keyPath)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	url := SignURL("https://example.com", "MY-KEY", key, time.Now().Add(time.Hour*24))
 	fmt.Println(url)
 }

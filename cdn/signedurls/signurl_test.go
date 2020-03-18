@@ -45,27 +45,47 @@ func TestReadKeyFile(t *testing.T) {
 }
 
 func TestSignURL(t *testing.T) {
-	key := []byte{0x9d, 0x9b, 0x51, 0xa2, 0x17, 0x4d, 0x17, 0xd9,
+	testKey := []byte{0x9d, 0x9b, 0x51, 0xa2, 0x17, 0x4d, 0x17, 0xd9,
 		0xb7, 0x70, 0xa3, 0x36, 0xe0, 0x87, 0x0a, 0xe3} // base64url: nZtRohdNF9m3cKM24IcK4w==
 
-	// TODO(ahmetb): use subtests introduced in go1.7
 	cases := []struct {
-		url, keyName string
-		expiration   time.Time
-		out          string
+		testName   string
+		url        string
+		keyName    string
+		expiration time.Time
+		out        string
 	}{
-		{"http://35.186.234.33/index.html", "my-key", time.Unix(1558131350, 0),
-			"http://35.186.234.33/index.html?Expires=1558131350&KeyName=my-key&Signature=fm6JZSmKNsB5sys8VGr-JE4LiiE="},
-		{"https://www.google.com/", "my-key", time.Unix(1549751401, 0),
-			"https://www.google.com/?Expires=1549751401&KeyName=my-key&Signature=M_QO7BGHi2sGqrJO-MDr0uhDFuc="},
-		{"https://www.example.com/some/path?some=query&another=param", "my-key", time.Unix(1549751461, 0),
-			"https://www.example.com/some/path?some=query&another=param&Expires=1549751461&KeyName=my-key&Signature=sTqqGX5hUJmlRJ84koAIhWW_c3M="},
+		{
+			testName:   "Domain and Exact Path",
+			url:        "http://35.186.234.33/index.html",
+			keyName:    "my-key",
+			expiration: time.Unix(1558131350, 0),
+			out:        "http://35.186.234.33/index.html?Expires=1558131350&KeyName=my-key&Signature=fm6JZSmKNsB5sys8VGr-JE4LiiE=",
+		},
+		{
+			testName:   "Domain Only",
+			url:        "https://www.google.com/",
+			keyName:    "my-key",
+			expiration: time.Unix(1549751401, 0),
+			out:        "https://www.google.com/?Expires=1549751401&KeyName=my-key&Signature=M_QO7BGHi2sGqrJO-MDr0uhDFuc=",
+		},
+		{
+			testName:   "With Query Params",
+			url:        "https://www.example.com/some/path?some=query&another=param",
+			keyName:    "my-key",
+			expiration: time.Unix(1549751461, 0),
+			out:        "https://www.example.com/some/path?some=query&another=param&Expires=1549751461&KeyName=my-key&Signature=sTqqGX5hUJmlRJ84koAIhWW_c3M=",
+		},
 	}
 
 	for _, c := range cases {
-		signed := SignURL(c.url, c.keyName, key, c.expiration)
-		if signed != c.out {
-			t.Errorf("want=%v\ngot=%v", c.out, signed)
-		}
+		t.Run("%s", func(t *testing.T) {
+			signed := SignURL(
+				c.url, c.keyName, testKey, c.expiration,
+			)
+			if signed != c.out {
+				t.Errorf("want=%v\ngot=%v", c.out, signed)
+			}
+		})
 	}
 }
