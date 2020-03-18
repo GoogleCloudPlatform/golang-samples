@@ -60,7 +60,7 @@ func TestSignCookie(t *testing.T) {
 	}{
 		{
 			// Valid signature
-			testName:   "ValidDomainAndSig",
+			testName:   "Valid Domain and Sig",
 			urlPrefix:  "https://media.example.com/segments/",
 			keyName:    "my-key",
 			key:        testKey,
@@ -70,7 +70,7 @@ func TestSignCookie(t *testing.T) {
 		},
 		{
 			// Valid signature, different domain
-			testName:   "ValidDomainAndSig_2",
+			testName:   "Valid Domain #2 & Sig",
 			urlPrefix:  "https://video.example.com/manifests/123/",
 			keyName:    "my-key",
 			key:        testKey,
@@ -80,7 +80,7 @@ func TestSignCookie(t *testing.T) {
 		},
 		{
 			// Mismatched timestamps
-			testName:   "MismatchedTimestamps",
+			testName:   "Mismatched Timestamps",
 			urlPrefix:  "https://media.example.com/segments/",
 			keyName:    "my-key",
 			key:        testKey,
@@ -90,7 +90,7 @@ func TestSignCookie(t *testing.T) {
 		},
 		{
 			// Wrong key names
-			testName:   "MismatchedKeyNames",
+			testName:   "Mismatched Key Names",
 			urlPrefix:  "https://media.example.com/segments/",
 			keyName:    "bad-key",
 			key:        testKey,
@@ -100,7 +100,7 @@ func TestSignCookie(t *testing.T) {
 		},
 		{
 			// Invalid key material
-			testName:  "InvalidKeyMaterial",
+			testName:  "Invalid Key Material",
 			urlPrefix: "https://media.example.com/segments/",
 			keyName:   "my-key",
 			key: []byte{0x9d, 0x9b, 0x51, 0xa2, 0x17, 0x4d, 0x17, 0xd9,
