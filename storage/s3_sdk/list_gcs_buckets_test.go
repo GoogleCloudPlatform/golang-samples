@@ -28,7 +28,6 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-
 func TestList(t *testing.T) {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
@@ -49,7 +48,7 @@ func TestList(t *testing.T) {
 	buf := new(bytes.Buffer)
 	// New HMAC key may take up to 15s to propagate, so we need to retry for up
 	// to that amount of time.
-	testutil.Retry(t, 75, time.Millisecond*200, func (r *testutil.R) {
+	testutil.Retry(t, 75, time.Millisecond*200, func(r *testutil.R) {
 		buf.Reset()
 		if _, err := listGCSBuckets(buf, key.AccessID, key.Secret); err != nil {
 			r.Errorf("listGCSBuckets: %v", err)
