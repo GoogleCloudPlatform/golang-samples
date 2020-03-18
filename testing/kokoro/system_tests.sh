@@ -183,7 +183,7 @@ runTests() {
 
 if [[ $RUN_ALL_TESTS = "1" ]]; then
   echo "Running all tests"
-  for i in "$(find . -name go.mod)"; do
+  for i in $(find . -name go.mod); do
     pushd "$(dirname $i)" > /dev/null;
       runTests
     popd > /dev/null;
@@ -193,7 +193,7 @@ elif [[ -z "${CHANGED_DIRS// }" ]]; then
   runTests .
 else
   echo "Running tests in modified directories: $CHANGED_DIRS"
-  for d in "$CHANGED_DIRS"; do
+  for d in $CHANGED_DIRS; do
     mods="$(find $d -name go.mod)"
     # If there are no modules, just run the tests directly.
     if [[ -z "$mods" ]]; then
@@ -204,11 +204,13 @@ else
     # check to see if there are tests that aren't in a sub-module.
     else
       goDirectories="$(find $d -name "*.go" -printf "%h\n" | sort -u)"
-      for gd in "$goDirectories"; do
-        pushd "$gd" > /dev/null;
-          runTests .
-        popd > /dev/null;
-      done
+      if [[ -n "$goDirectories" ]]; then
+        for gd in "$goDirectories"; do
+          pushd "$gd" > /dev/null;
+            runTests .
+          popd > /dev/null;
+        done
+      fi
     fi
   done
 fi
