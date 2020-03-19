@@ -39,25 +39,18 @@ TIMEOUT=45m
 
 # Also see trampoline.sh - system_tests.sh is only run for PRs when there are
 # significant changes.
-SIGNIFICANT_CHANGES=$(git --no-pager diff --name-only HEAD..master | egrep -v '(\.md$|^\.github)' || true)
-# CHANGED_DIRS is the list of significant top-level directories that changed.
+SIGNIFICANT_CHANGES=$(git --no-pager diff --name-only master..HEAD | egrep -v '(\.md$|^\.github)' || true)
+# CHANGED_DIRS is the list of significant top-level directories that changed,
+# but weren't deleted by the current PR.
 # CHANGED_DIRS will be empty when run on master.
-CHANGED_DIRS=$(echo $SIGNIFICANT_CHANGES | tr ' ' '\n' | grep "/" | cut -d/ -f1 | sort -u | tr '\n' ' ')
-
-# Filter out directories that don't exist (the current PR deleted them).
-TARGET_DIRS=""
-for d in $CHANGED_DIRS; do
-  if [ -d "$d" ]; then
-    TARGET_DIRS="$TARGET_DIRS $d"
-  fi
-done
-# Clean up whitespace around target directories:
-TARGET_DIRS=$(echo "$TARGET_DIRS" | xargs)
+CHANGED_DIRS=$(echo $SIGNIFICANT_CHANGES | tr ' ' '\n' | grep "/" | cut -d/ -f1 | sort -u | tr '\n' ' ' | xargs xargs ls -d 2>/dev/null)
 
 # List all modules in changed directories.
 # If running on master will collect all modules in the repo, including the root module.
-GO_CHANGED_MODULES=$(find ${TARGET_DIRS:-.} -name go.mod)
-# Exclude the root module if present.
+GO_CHANGED_MODULES=$(find ${CHANGED_DIRS:-.} -name go.mod)
+# If we didn't find any modules, use the root module.
+GO_CHANGED_MODULES=${GO_CHANGED_MODULES:-./go.mod}
+# Exclude the root module, if present, from the list of sub-modules.
 GO_CHANGED_SUBMODULES=${GO_CHANGED_MODULES#./go.mod}
 
 # Override to determine if all go tests should be run.
@@ -76,6 +69,10 @@ fi
 set +x
 
 if [ $GOLANG_SAMPLES_GO_VET ]; then
+  echo "Running 'goimports compliance check'"
+  set -x
+  diff -u <(echo -n) <(goimports -d .)
+  set +x
   for i in $GO_CHANGED_MODULES; do
     mod="$(dirname $i)"
     pushd $mod > /dev/null;
@@ -87,31 +84,15 @@ if [ $GOLANG_SAMPLES_GO_VET ]; then
       git diff go.mod | tee /dev/stderr | (! read)
       [ -f go.sum ] && git diff go.sum | tee /dev/stderr | (! read)
       set +x
-
-      echo "Running 'goimports compliance check' in '$mod'..."
-      set -x
-      diff -u <(echo -n) <(goimports -d .)
-      set +x
     popd > /dev/null;
   done
 
-  # Generate a list of all go files not inside a go submodule.
-  # go vet throws an error if you run it and no files are found to process.
-  # If find has anything go vet will be run.
-  # Risk: Any unexpected find output could falsely trigger go vet.
-  set -x
-  files=$(find $TARGET_DIRS \( -exec [ -f {}/go.mod ] \; -prune \) -o -name "*.go" -print)
-
-  # If there are no go files, skip go vet $TARGET.
+  # Always run 'go vet' from the root, which does not look at sub-modules.
   set +x
-  if [ -z "$files" ]; then
-    echo "No *.go files found, skipping go vet on $TARGET"
-  else
-    echo "Running 'go vet'..."
-    set -x
-    go vet $TARGET
-    set +x
-  fi
+  echo "Running 'go vet' in golang-samples root..."
+  set -x
+  go vet ./...
+  set +x
 
   # Run go vet inside each sub-module.
   # Recursive submodules are not supported.
@@ -187,36 +168,54 @@ fi
 
 date
 
+exit_code=0
+
+# runTests runs the tests in the current directory. If an argument is specified,
+# it is used as the argument to `go test`.
+runTests() {
+  echo "Running 'go test' in '$(pwd)'..."
+  set -x
+  2>&1 go test -timeout $TIMEOUT -v ${1:-./...} | tee sponge_log.log
+  cat sponge_log.log | /go/bin/go-junit-report -set-exit-code > sponge_log.xml
+  exit_code=$(($exit_code + $?))
+  set +x
+}
+
 if [[ $RUN_ALL_TESTS = "1" ]]; then
-  GO_TEST_TARGET="./..."
-  GO_TEST_MODULES=$(find . -name go.mod)
   echo "Running all tests"
-elif [[ -z "${TARGET_DIRS// }" ]]; then
-  GO_TEST_TARGET=""
-  GO_TEST_MODULES="./go.mod"
+  for i in $(find . -name go.mod); do
+    pushd "$(dirname $i)" > /dev/null;
+      runTests
+    popd > /dev/null;
+  done
+elif [[ -z "${CHANGED_DIRS// }" ]]; then
   echo "Only running root tests"
+  runTests .
 else
-  GO_TEST_TARGET="./..."
-  GO_TEST_MODULES="$GO_CHANGED_SUBMODULES"
-  echo "Running tests in modified directories: $GO_TEST_TARGET"
+  echo "Running tests in modified directories: $CHANGED_DIRS"
+  for d in $CHANGED_DIRS; do
+    mods="$(find $d -name go.mod)"
+    # If there are no modules, just run the tests directly.
+    if [[ -z "$mods" ]]; then
+      pushd "$d" > /dev/null;
+        runTests
+      popd > /dev/null;
+    # Otherwise, run the tests in all Go directories. This way, we don't have to
+    # check to see if there are tests that aren't in a sub-module.
+    else
+      goDirectories="$(find $d -name "*.go" -printf "%h\n" | sort -u)"
+      if [[ -n "$goDirectories" ]]; then
+        for gd in "$goDirectories"; do
+          pushd "$gd" > /dev/null;
+            runTests .
+          popd > /dev/null;
+        done
+      fi
+    fi
+  done
 fi
 
 set +e
-
-# Run tests in changed directories that are not in modules.
-exit_code=0
-for i in $GO_TEST_MODULES; do
-  mod="$(dirname $i)"
-  pushd $mod > /dev/null;
-    echo "Running 'go test' in '$mod'..."
-    set -x
-    2>&1 go test -timeout $TIMEOUT -v ./... | tee sponge_log.log
-    cat sponge_log.log | /go/bin/go-junit-report -set-exit-code > sponge_log.xml
-    exit_code=$(($exit_code + $?))
-    set +x
-  popd > /dev/null;
-done
-
 
 # If we're running system tests, send the test log to the Build Cop Bot.
 # See https://github.com/googleapis/repo-automation-bots/tree/master/packages/buildcop.
