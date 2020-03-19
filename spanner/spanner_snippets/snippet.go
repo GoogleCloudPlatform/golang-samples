@@ -34,6 +34,8 @@ import (
 	"cloud.google.com/go/spanner"
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
 	"google.golang.org/api/iterator"
+	"google.golang.org/api/option"
+	"google.golang.org/grpc"
 
 	pbt "github.com/golang/protobuf/ptypes/timestamp"
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
@@ -2212,17 +2214,28 @@ func deleteBackup(ctx context.Context, w io.Writer, adminClient *database.Databa
 // [END spanner_delete_backup]
 
 func createClients(ctx context.Context, db string) (*database.DatabaseAdminClient, *spanner.Client) {
-	testEndpoint := os.Getenv("GOLANG_SAMPLES_ENDPOINT")
+	// [START spanner_create_admin_client_for_emulator]
+
 	var opts []option.ClientOption
-	if testEndpoint != "" {
-		opts = append(opts, option.WithEndpoint(testEndpoint))
+
+	emulatorAddr := os.Getenv("SPANNER_EMULATOR_HOST")
+	if emulatorAddr != "" {
+		opts = append(
+			opts,
+			option.WithEndpoint(emulatorAddr),
+			option.WithGRPCDialOption(grpc.WithInsecure()),
+			option.WithoutAuthentication(),
+		)
 	}
+
 	adminClient, err := database.NewDatabaseAdminClient(ctx, opts...)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	dataClient, err := spanner.NewClient(ctx, db, opts...)
+	// [END spanner_create_admin_client_for_emulator]
+
+	dataClient, err := spanner.NewClient(ctx, db)
 	if err != nil {
 		log.Fatal(err)
 	}

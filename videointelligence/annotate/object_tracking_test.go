@@ -18,21 +18,25 @@ import (
 	"bytes"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestObjectTracking(t *testing.T) {
-	testutil.SystemTest(t)
+	testutil.EndToEndTest(t)
 
 	filename := "../resources/cat.mp4"
 
-	var buf bytes.Buffer
-	if err := objectTracking(&buf, filename); err != nil {
-		t.Fatal(err)
-	}
+	testutil.Retry(t, 10, 20*time.Second, func(r *testutil.R) {
+		var buf bytes.Buffer
+		if err := objectTracking(&buf, filename); err != nil {
+			r.Errorf("objectTracking: %v", err)
+			return
+		}
 
-	if got := buf.String(); !strings.Contains(got, "cat") {
-		t.Fatalf(`objectTracking(%q) = %q; want "cat"`, filename, got)
-	}
+		if got := buf.String(); !strings.Contains(got, "cat") {
+			r.Errorf(`objectTracking(%q) = %q; want "cat"`, filename, got)
+		}
+	})
 }

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // Package sample provides code samples for the Container Analysis libraries: https://cloud.google.com/container-registry/docs/container-analysis
-package main
+package containeranalysis
 
 import (
 	"bytes"
@@ -408,6 +408,7 @@ func TestFindHighVulnerabilities(t *testing.T) {
 			ResourceUri: v.imageURL,
 			Details: &grafeaspb.Occurrence_Vulnerability{
 				Vulnerability: &grafeaspb.VulnerabilityOccurrence{
+					EffectiveSeverity: grafeaspb.Severity_CRITICAL,
 					PackageIssue: []*grafeaspb.VulnerabilityOccurrence_PackageIssue{
 						{
 							AffectedCpeUri:  "your-uri-here",

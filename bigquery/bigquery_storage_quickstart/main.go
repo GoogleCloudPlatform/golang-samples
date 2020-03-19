@@ -33,11 +33,11 @@ import (
 	"sync"
 	"time"
 
-	bqStorage "cloud.google.com/go/bigquery/storage/apiv1beta1"
+	bqStorage "cloud.google.com/go/bigquery/storage/apiv1"
 	"github.com/golang/protobuf/ptypes"
 	gax "github.com/googleapis/gax-go/v2"
 	goavro "github.com/linkedin/goavro/v2"
-	bqStoragepb "google.golang.org/genproto/googleapis/cloud/bigquery/storage/v1beta1"
+	bqStoragepb "google.golang.org/genproto/googleapis/cloud/bigquery/storage/v1"
 	"google.golang.org/grpc"
 )
 
@@ -59,11 +59,11 @@ var (
 func main() {
 	flag.Parse()
 	ctx := context.Background()
-	bqStorageClient, err := bqStorage.NewBigQueryStorageClient(ctx)
+	bqReadClient, err := bqStorage.NewBigQueryReadClient(ctx)
 	if err != nil {
 		log.Fatalf("NewBigQueryStorageClient: %v", err)
 	}
-	defer bqStorageClient.Close()
+	defer bqReadClient.Close()
 
 	// Verify we've been provided a parent project which will contain the read session.  The
 	// session may exist in a different project than the table being read.
@@ -72,31 +72,33 @@ func main() {
 	}
 
 	// This example uses baby name data from the public datasets.
-	readTable := &bqStoragepb.TableReference{
-		ProjectId: "bigquery-public-data",
-		DatasetId: "usa_names",
-		TableId:   "usa_1910_current",
-	}
+	srcProjectID := "bigquery-public-data"
+	srcDatasetID := "usa_names"
+	srcTableID := "usa_1910_current"
+	readTable := fmt.Sprintf("projects/%s/datasets/%s/tables/%s",
+		srcProjectID,
+		srcDatasetID,
+		srcTableID,
+	)
 
 	// We limit the output columns to a subset of those allowed in the table,
 	// and set a simple filter to only report names from the state of
 	// Washington (WA).
-	tableReadOptions := &bqStoragepb.TableReadOptions{
+	tableReadOptions := &bqStoragepb.ReadSession_TableReadOptions{
 		SelectedFields: []string{"name", "number", "state"},
 		RowRestriction: `state = "WA"`,
 	}
 
-	readSessionRequest := &bqStoragepb.CreateReadSessionRequest{
-		Parent:         fmt.Sprintf("projects/%s", *projectID),
-		TableReference: readTable,
-		ReadOptions:    tableReadOptions,
-		// This API can also deliver data serialized in Apache Arrow format.
-		// This example leverages Apache Avro.
-		Format: bqStoragepb.DataFormat_AVRO,
-		// We use a LIQUID strategy in this example because we only
-		// read from a single stream.  Consider BALANCED if you're consuming
-		// multiple streams concurrently and want more consistent stream sizes.
-		ShardingStrategy: bqStoragepb.ShardingStrategy_LIQUID,
+	createReadSessionRequest := &bqStoragepb.CreateReadSessionRequest{
+		Parent: fmt.Sprintf("projects/%s", *projectID),
+		ReadSession: &bqStoragepb.ReadSession{
+			Table: readTable,
+			// This API can also deliver data serialized in Apache Arrow format.
+			// This example leverages Apache Avro.
+			DataFormat:  bqStoragepb.DataFormat_AVRO,
+			ReadOptions: tableReadOptions,
+		},
+		MaxStreamCount: 1,
 	}
 
 	// Set a snapshot time if it's been specified.
@@ -105,13 +107,13 @@ func main() {
 		if err != nil {
 			log.Fatalf("Invalid snapshot millis (%d): %v", *snapshotMillis, err)
 		}
-		readSessionRequest.TableModifiers = &bqStoragepb.TableModifiers{
+		createReadSessionRequest.ReadSession.TableModifiers = &bqStoragepb.ReadSession_TableModifiers{
 			SnapshotTime: ts,
 		}
 	}
 
 	// Create the session from the request.
-	session, err := bqStorageClient.CreateReadSession(ctx, readSessionRequest, rpcOpts)
+	session, err := bqReadClient.CreateReadSession(ctx, createReadSessionRequest, rpcOpts)
 	if err != nil {
 		log.Fatalf("CreateReadSession: %v", err)
 	}
@@ -123,8 +125,8 @@ func main() {
 	// We'll use only a single stream for reading data from the table.  Because
 	// of dynamic sharding, this will yield all the rows in the table. However,
 	// if you wanted to fan out multiple readers you could do so by having a
-	// reader process each individual stream.
-	readStream := session.GetStreams()[0]
+	// increasing the MaxStreamCount.
+	readStream := session.GetStreams()[0].Name
 
 	ch := make(chan *bqStoragepb.AvroRows)
 
@@ -135,7 +137,7 @@ func main() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		if err := processStream(ctx, bqStorageClient, readStream, ch); err != nil {
+		if err := processStream(ctx, bqReadClient, readStream, ch); err != nil {
 			log.Fatalf("processStream failure: %v", err)
 		}
 		close(ch)
@@ -197,7 +199,7 @@ func valueFromTypeMap(field interface{}) interface{} {
 // data blocks to a channel. This function will retry on transient stream
 // failures and bookmark progress to avoid re-reading data that's already been
 // successfully transmitted.
-func processStream(ctx context.Context, client *bqStorage.BigQueryStorageClient, st *bqStoragepb.Stream, ch chan<- *bqStoragepb.AvroRows) error {
+func processStream(ctx context.Context, client *bqStorage.BigQueryReadClient, st string, ch chan<- *bqStoragepb.AvroRows) error {
 	var offset int64
 
 	// Streams may be long-running.  Rather than using a global retry for the
@@ -208,10 +210,9 @@ func processStream(ctx context.Context, client *bqStorage.BigQueryStorageClient,
 		retries := 0
 		// Send the initiating request to start streaming row blocks.
 		rowStream, err := client.ReadRows(ctx, &bqStoragepb.ReadRowsRequest{
-			ReadPosition: &bqStoragepb.StreamPosition{
-				Stream: st,
-				Offset: offset,
-			}}, rpcOpts)
+			ReadStream: st,
+			Offset:     offset,
+		}, rpcOpts)
 		if err != nil {
 			return fmt.Errorf("Couldn't invoke ReadRows: %v", err)
 		}

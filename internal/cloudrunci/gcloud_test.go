@@ -23,7 +23,6 @@ import (
 )
 
 func TestCreateIDToken(t *testing.T) {
-	t.Skip()
 	testutil.EndToEndTest(t)
 	// TODO assign to token
 	_, err := CreateIDToken("http://example.com")
@@ -35,7 +34,6 @@ func TestCreateIDToken(t *testing.T) {
 }
 
 func TestGcloud(t *testing.T) {
-	t.Skip()
 	testutil.EndToEndTest(t)
 	out, err := gcloud("label", exec.Command(gcloudBin, "help"))
 	if err != nil {

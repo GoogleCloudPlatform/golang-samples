@@ -20,19 +20,15 @@ import (
 	"fmt"
 	"io"
 
-	"golang.org/x/oauth2/google"
 	iam "google.golang.org/api/iam/v1"
 )
 
 // deleteKey deletes a service account key.
 func deleteKey(w io.Writer, fullKeyName string) error {
-	client, err := google.DefaultClient(context.Background(), iam.CloudPlatformScope)
+	ctx := context.Background()
+	service, err := iam.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("google.DefaultClient: %v", err)
-	}
-	service, err := iam.New(client)
-	if err != nil {
-		return fmt.Errorf("iam.New: %v", err)
+		return fmt.Errorf("iam.NewService: %v", err)
 	}
 
 	_, err = service.Projects.ServiceAccounts.Keys.Delete(fullKeyName).Do()

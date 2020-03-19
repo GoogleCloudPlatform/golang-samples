@@ -28,8 +28,8 @@ import (
 
 type configuration struct {
 	ProjectID string `json:"PROJECT_ID"`
-	Token     string `json:"SLACK_TOKEN"`
 	Key       string `json:"KG_API_KEY"`
+	Secret    string `json:"SLACK_SIGNING_SECRET"`
 }
 
 var (

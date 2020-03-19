@@ -15,7 +15,6 @@
 package dataset
 
 // [START bigquery_update_dataset_description]
-
 import (
 	"context"
 	"fmt"
@@ -23,6 +22,8 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// updateDatasetDescription demonstrates how the Description metadata of a dataset can
+// be read and modified.
 func updateDatasetDescription(projectID, datasetID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"
@@ -31,6 +32,7 @@ func updateDatasetDescription(projectID, datasetID string) error {
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	ds := client.Dataset(datasetID)
 	meta, err := ds.Metadata(ctx)

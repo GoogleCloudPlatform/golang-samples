@@ -15,7 +15,6 @@
 package models
 
 // [START bigquery_delete_model]
-
 import (
 	"context"
 	"fmt"
@@ -23,6 +22,7 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// deleteModel demonstrates deletion of BigQuery ML model.
 func deleteModel(projectID, datasetID, modelID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"
@@ -32,6 +32,7 @@ func deleteModel(projectID, datasetID, modelID string) error {
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	model := client.Dataset(datasetID).Model(modelID)
 	if err := model.Delete(ctx); err != nil {
