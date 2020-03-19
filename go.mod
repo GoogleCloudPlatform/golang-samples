@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/golang-samples
 go 1.11
 
 require (
-	cloud.google.com/go v0.54.0
+	cloud.google.com/go v0.55.0
 	cloud.google.com/go/bigquery v1.5.0
 	cloud.google.com/go/bigtable v1.1.0
 	cloud.google.com/go/datastore v1.1.0
@@ -22,7 +22,7 @@ require (
 	github.com/fluent/fluent-logger-golang v1.4.0
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gofrs/uuid v3.2.0+incompatible
-	github.com/golang/protobuf v1.3.4
+	github.com/golang/protobuf v1.3.5
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/google/go-cmp v0.4.0
 	github.com/google/uuid v1.1.1
@@ -42,11 +42,6 @@ require (
 	golang.org/x/net v0.0.0-20200301022130-244492dfa37a
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/text v0.3.2
-	golang.org/x/tools v0.0.0-20200304193943-95d2e580d8eb
-	google.golang.org/api v0.20.0
-	google.golang.org/appengine v1.6.5
-	google.golang.org/genproto v0.0.0-20200316142031-303a05041dad
-	google.golang.org/grpc v1.27.1
 	gopkg.in/sendgrid/sendgrid-go.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.2.8
 )

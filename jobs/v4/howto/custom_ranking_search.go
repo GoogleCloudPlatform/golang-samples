@@ -21,7 +21,6 @@ import (
 	"io"
 
 	talent "cloud.google.com/go/talent/apiv4beta1"
-	"google.golang.org/api/iterator"
 	talentpb "google.golang.org/genproto/googleapis/cloud/talent/v4beta1"
 )
 
@@ -60,18 +59,16 @@ func customRankingSearch(w io.Writer, projectID, companyID string) error {
 		OrderBy: "custom_ranking desc",
 	}
 
-	it := c.SearchJobs(ctx, req)
-
-	for {
-		resp, err := it.Next()
-		if err == iterator.Done {
-			return nil
-		}
-		if err != nil {
-			return fmt.Errorf("it.Next: %v", err)
-		}
-		fmt.Fprintf(w, "Job: %q\n", resp.Job.GetName())
+	resp, err := c.SearchJobs(ctx, req)
+	if err != nil {
+		return fmt.Errorf("SearchJobs: %v", err)
 	}
+
+	for _, job := range resp.GetMatchingJobs() {
+		fmt.Fprintf(w, "Job: %q\n", job.GetJob().GetName())
+	}
+
+	return nil
 }
 
 // [END job_search_custom_ranking_search]
