@@ -173,6 +173,7 @@ exit_code=0
 # runTests runs the tests in the current directory. If an argument is specified,
 # it is used as the argument to `go test`.
 runTests() {
+  set +x
   echo "Running 'go test' in '$(pwd)'..."
   set -x
   2>&1 go test -timeout $TIMEOUT -v ${1:-./...} | tee sponge_log.log
@@ -192,6 +193,7 @@ elif [[ -z "${CHANGED_DIRS// }" ]]; then
   echo "Only running root tests"
   runTests .
 else
+  runTests . # Always run root tests.
   echo "Running tests in modified directories: $CHANGED_DIRS"
   for d in $CHANGED_DIRS; do
     mods="$(find $d -name go.mod)"
