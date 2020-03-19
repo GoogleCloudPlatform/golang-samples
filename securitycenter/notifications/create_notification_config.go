@@ -19,8 +19,8 @@ import (
 	"fmt"
 	"io"
 
-	securitycenter "cloud.google.com/go/securitycenter/apiv1p1beta1"
-	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1p1beta1"
+	securitycenter "cloud.google.com/go/securitycenter/apiv1"
+	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
 )
 
 func createNotificationConfig(w io.Writer, orgID string, pubsubTopic string, notificationConfigID string) error {
@@ -42,7 +42,6 @@ func createNotificationConfig(w io.Writer, orgID string, pubsubTopic string, not
 		NotificationConfig: &securitycenterpb.NotificationConfig{
 			Description: "Go sample config",
 			PubsubTopic: pubsubTopic,
-			EventType:   securitycenterpb.NotificationConfig_FINDING,
 			NotifyConfig: &securitycenterpb.NotificationConfig_StreamingConfig_{
 				StreamingConfig: &securitycenterpb.NotificationConfig_StreamingConfig{
 					Filter: `state = "ACTIVE"`,
