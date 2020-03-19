@@ -23,7 +23,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
 
 	dialogflow "cloud.google.com/go/dialogflow/apiv2"
 	"google.golang.org/api/iterator"
@@ -72,38 +71,6 @@ func main() {
 				fmt.Printf("\t%s\n", entity.GetValue())
 			}
 		}
-	case "create":
-		creationFlagSet := flag.NewFlagSet("create", flag.ExitOnError)
-		var overrideMode, valuesRaw string
-		creationFlagSet.StringVar(&overrideMode, "override-mode", "SUPPLEMENT", "Should be either SUPPLEMENT (default) or OVERRIDE")
-		creationFlagSet.StringVar(&valuesRaw, "values", "", "Comma separated list of values corresponding to the entities that comprise this type")
-		creationFlagSet.Parse(flag.Args()[1:])
-
-		if len(creationFlagSet.Args()) != 1 {
-			log.Fatal("The create subcommand should be called with a single display name")
-		}
-		displayName := creationFlagSet.Arg(0)
-
-		values := strings.Split(valuesRaw, ",")
-
-		fmt.Printf("Creating sessionEntityType %s...\n", displayName)
-		sessionEntityTypeName, err := CreateSessionEntityType(projectID, sessionID, displayName, overrideMode, values)
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Printf("Session entity type %s created as %s\n", displayName, sessionEntityTypeName)
-	case "delete":
-		if len(flag.Args()[1:]) != 1 {
-			log.Fatal("The delete subcommand should be called with a single session entity type display name")
-		}
-		displayName := flag.Arg(1)
-
-		fmt.Printf("Deleting sessionEntityType projects/%s/agent/sessions/%s/entityTypes/%s...\n", projectID, sessionID, displayName)
-		err = DeleteSessionEntityType(projectID, sessionID, displayName)
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Printf("Done!\n")
 	default:
 		flag.Usage()
 		os.Exit(1)
@@ -137,76 +104,3 @@ func ListSessionEntityTypes(projectID, sessionID string) ([]*dialogflowpb.Sessio
 
 	return sessionEntityTypes, nil
 }
-
-// [START dialogflow_create_session_entity_type]
-func CreateSessionEntityType(projectID, sessionID, displayName, overrideMode string, values []string) (string, error) {
-	ctx := context.Background()
-
-	sessionEntityTypesClient, clientErr := dialogflow.NewSessionEntityTypesClient(ctx)
-	if clientErr != nil {
-		return "", clientErr
-	}
-	defer sessionEntityTypesClient.Close()
-
-	if projectID == "" || sessionID == "" || displayName == "" {
-		return "", errors.New(fmt.Sprintf("Received empty project (%s) or session (%s) or displayName (%s)", projectID, sessionID, displayName))
-	}
-
-	var targetOverrideMode dialogflowpb.SessionEntityType_EntityOverrideMode
-	switch overrideMode {
-	case "OVERRIDE":
-		targetOverrideMode = dialogflowpb.SessionEntityType_ENTITY_OVERRIDE_MODE_OVERRIDE
-	case "SUPPLEMENT":
-		targetOverrideMode = dialogflowpb.SessionEntityType_ENTITY_OVERRIDE_MODE_SUPPLEMENT
-	default:
-		return "", errors.New(fmt.Sprintf("Invalid override mode %s; expected OVERRIDE or SUPPLEMENT", overrideMode))
-	}
-
-	parent := fmt.Sprintf("projects/%s/agent/sessions/%s", projectID, sessionID)
-	name := fmt.Sprintf("%s/entityTypes/%s", parent, displayName)
-	var entities []*dialogflowpb.EntityType_Entity
-	for _, value := range values {
-		entity := dialogflowpb.EntityType_Entity{Value: value, Synonyms: []string{value}}
-		entities = append(entities, &entity)
-	}
-	target := dialogflowpb.SessionEntityType{Name: name, EntityOverrideMode: targetOverrideMode, Entities: entities}
-
-	request := dialogflowpb.CreateSessionEntityTypeRequest{Parent: parent, SessionEntityType: &target}
-
-	_, requestErr := sessionEntityTypesClient.CreateSessionEntityType(ctx, &request)
-	if requestErr != nil {
-		return "", requestErr
-	}
-
-	return name, nil
-}
-
-// [END dialogflow_create_session_entity_type]
-
-// [START dialogflow_delete_session_entity_type]
-func DeleteSessionEntityType(projectID, sessionID, displayName string) error {
-	ctx := context.Background()
-
-	sessionEntityTypesClient, clientErr := dialogflow.NewSessionEntityTypesClient(ctx)
-	if clientErr != nil {
-		return clientErr
-	}
-	defer sessionEntityTypesClient.Close()
-
-	if projectID == "" || sessionID == "" || displayName == "" {
-		return errors.New(fmt.Sprintf("Received empty project (%s) or sessionID (%s) or displayName (%s)", projectID, sessionID, displayName))
-	}
-
-	name := fmt.Sprintf("projects/%s/agent/sessions/%s/entityTypes/%s", projectID, sessionID, displayName)
-
-	request := dialogflowpb.DeleteSessionEntityTypeRequest{Name: name}
-
-	requestErr := sessionEntityTypesClient.DeleteSessionEntityType(ctx, &request)
-	if requestErr != nil {
-		return requestErr
-	}
-
-	return nil
-}
-
-// [END dialogflow_delete_session_entity_type]
