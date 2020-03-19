@@ -67,20 +67,6 @@ func main() {
 		for _, context := range contexts {
 			fmt.Printf("Path: %s, Lifespan: %d\n", context.Name, context.LifespanCount)
 		}
-	case "create":
-		fmt.Printf("Creating context projects/%s/agent/sessions/%s/contexts/%s...\n", projectID, sessionID, contextID)
-		err = CreateContext(projectID, sessionID, contextID)
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Printf("Done!\n")
-	case "delete":
-		fmt.Printf("Deleting context projects/%s/agent/sessions/%s/contexts/%s...\n", projectID, sessionID, contextID)
-		err = DeleteContext(projectID, sessionID, contextID)
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Printf("Done!\n")
 	default:
 		flag.Usage()
 		os.Exit(1)
@@ -114,62 +100,3 @@ func ListContexts(projectID, sessionID string) ([]*dialogflowpb.Context, error) 
 
 	return contexts, nil
 }
-
-// [START dialogflow_create_context]
-func CreateContext(projectID, sessionID, contextID string) error {
-	ctx := context.Background()
-
-	contextsClient, clientErr := dialogflow.NewContextsClient(ctx)
-	if clientErr != nil {
-		return clientErr
-	}
-	defer contextsClient.Close()
-
-	if projectID == "" || sessionID == "" || contextID == "" {
-		return errors.New(fmt.Sprintf("Received empty project (%s) or session (%s) or context (%s)", projectID, sessionID, contextID))
-	}
-
-	parent := fmt.Sprintf("projects/%s/agent/sessions/%s", projectID, sessionID)
-	targetPath := fmt.Sprintf("%s/contexts/%s", parent, contextID)
-	target := dialogflowpb.Context{Name: targetPath, LifespanCount: 10}
-
-	request := dialogflowpb.CreateContextRequest{Parent: parent, Context: &target}
-
-	_, requestErr := contextsClient.CreateContext(ctx, &request)
-	if requestErr != nil {
-		return requestErr
-	}
-
-	return nil
-}
-
-// [END dialogflow_create_context]
-
-// [START dialogflow_delete_context]
-func DeleteContext(projectID, sessionID, contextID string) error {
-	ctx := context.Background()
-
-	contextsClient, clientErr := dialogflow.NewContextsClient(ctx)
-	if clientErr != nil {
-		return clientErr
-	}
-	defer contextsClient.Close()
-
-	if projectID == "" || sessionID == "" || contextID == "" {
-		return errors.New(fmt.Sprintf("Received empty project (%s) or session (%s) or context (%s)", projectID, sessionID, contextID))
-	}
-
-	parent := fmt.Sprintf("projects/%s/agent/sessions/%s", projectID, sessionID)
-	targetPath := fmt.Sprintf("%s/contexts/%s", parent, contextID)
-
-	request := dialogflowpb.DeleteContextRequest{Name: targetPath}
-
-	requestErr := contextsClient.DeleteContext(ctx, &request)
-	if requestErr != nil {
-		return requestErr
-	}
-
-	return nil
-}
-
-// [END dialogflow_delete_context]
