@@ -81,18 +81,6 @@ func main() {
 			log.Fatal(err)
 		}
 		fmt.Printf("Entity type %s created as %s\n", displayName, entityTypeName)
-	case "delete":
-		if len(flag.Args()[1:]) != 1 {
-			log.Fatal("The delete subcommand should be called with a single entity type ID")
-		}
-		entityTypeID := flag.Arg(1)
-
-		fmt.Printf("Deleting entityType projects/%s/agent/entityTypes/%s...\n", projectID, entityTypeID)
-		err = DeleteEntityType(projectID, entityTypeID)
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Printf("Done!\n")
 	default:
 		flag.Usage()
 		os.Exit(1)
@@ -163,34 +151,3 @@ func CreateEntityType(projectID, displayName, kind string) (string, error) {
 
 	return response.GetName(), nil
 }
-
-// [END dialogflow_delete_entity_type]
-
-// [START dialogflow_delete_entity_type]
-func DeleteEntityType(projectID, entityTypeID string) error {
-	ctx := context.Background()
-
-	entityTypesClient, clientErr := dialogflow.NewEntityTypesClient(ctx)
-	if clientErr != nil {
-		return clientErr
-	}
-	defer entityTypesClient.Close()
-
-	if projectID == "" || entityTypeID == "" {
-		return errors.New(fmt.Sprintf("Received empty project (%s) or entityType (%s)", projectID, entityTypeID))
-	}
-
-	parent := fmt.Sprintf("projects/%s/agent", projectID)
-	targetPath := fmt.Sprintf("%s/entityTypes/%s", parent, entityTypeID)
-
-	request := dialogflowpb.DeleteEntityTypeRequest{Name: targetPath}
-
-	requestErr := entityTypesClient.DeleteEntityType(ctx, &request)
-	if requestErr != nil {
-		return requestErr
-	}
-
-	return nil
-}
-
-// [END dialogflow_delete_entity_type]
