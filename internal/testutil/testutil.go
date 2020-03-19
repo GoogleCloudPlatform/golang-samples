@@ -17,8 +17,11 @@ package testutil
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -27,6 +30,12 @@ var errNoProjectID = errors.New("GOLANG_SAMPLES_PROJECT_ID not set")
 // Context holds information useful for tests.
 type Context struct {
 	ProjectID string
+	Dir       string
+}
+
+func (tc Context) Path(p ...string) string {
+	p = append([]string{tc.Dir}, p...)
+	return filepath.Join(p...)
 }
 
 // ContextMain gets a test context from a TestMain function.
@@ -78,6 +87,19 @@ func testContext() (Context, error) {
 	tc.ProjectID = os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
 	if tc.ProjectID == "" {
 		return tc, errNoProjectID
+	}
+
+	dir, err := os.Getwd()
+	if err != nil {
+		return tc, fmt.Errorf("could not find current directory")
+	}
+	if !strings.Contains(dir, "golang-samples") {
+		return tc, fmt.Errorf("could not find golang-samples directory")
+	}
+	tc.Dir = dir[:strings.Index(dir, "golang-samples")+len("golang-samples")]
+
+	if tc.Dir == "" {
+		return tc, fmt.Errorf("could not find golang-samples directory")
 	}
 
 	return tc, nil
