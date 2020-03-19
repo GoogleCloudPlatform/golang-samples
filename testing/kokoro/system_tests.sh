@@ -205,7 +205,7 @@ else
     else
       goDirectories="$(find $d -name "*.go" -printf "%h\n" | sort -u)"
       if [[ -n "$goDirectories" ]]; then
-        for gd in "$goDirectories"; do
+        for gd in $goDirectories; do
           pushd "$gd" > /dev/null;
             runTests .
           popd > /dev/null;
