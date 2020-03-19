@@ -43,7 +43,7 @@ SIGNIFICANT_CHANGES=$(git --no-pager diff --name-only master..HEAD | egrep -v '(
 # CHANGED_DIRS is the list of significant top-level directories that changed,
 # but weren't deleted by the current PR.
 # CHANGED_DIRS will be empty when run on master.
-CHANGED_DIRS=$(echo $SIGNIFICANT_CHANGES | tr ' ' '\n' | grep "/" | cut -d/ -f1 | sort -u | tr '\n' ' ' | xargs xargs ls -d 2>/dev/null)
+CHANGED_DIRS=$(echo $SIGNIFICANT_CHANGES | tr ' ' '\n' | grep "/" | cut -d/ -f1 | sort -u | tr '\n' ' ' | xargs ls -d 2>/dev/null || true)
 
 # List all modules in changed directories.
 # If running on master will collect all modules in the repo, including the root module.
