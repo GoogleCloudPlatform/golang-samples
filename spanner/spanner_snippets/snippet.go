@@ -30,6 +30,8 @@ import (
 	"cloud.google.com/go/spanner"
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
 	"google.golang.org/api/iterator"
+	"google.golang.org/api/option"
+	"google.golang.org/grpc"
 
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
@@ -1820,10 +1822,26 @@ func queryWithHistory(ctx context.Context, w io.Writer, client *spanner.Client) 
 }
 
 func createClients(ctx context.Context, db string) (*database.DatabaseAdminClient, *spanner.Client) {
-	adminClient, err := database.NewDatabaseAdminClient(ctx)
+	// [START spanner_create_admin_client_for_emulator]
+
+	var opts []option.ClientOption
+
+	emulatorAddr := os.Getenv("SPANNER_EMULATOR_HOST")
+	if emulatorAddr != "" {
+		opts = append(
+			opts,
+			option.WithEndpoint(emulatorAddr),
+			option.WithGRPCDialOption(grpc.WithInsecure()),
+			option.WithoutAuthentication(),
+		)
+	}
+
+	adminClient, err := database.NewDatabaseAdminClient(ctx, opts...)
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// [END spanner_create_admin_client_for_emulator]
 
 	dataClient, err := spanner.NewClient(ctx, db)
 	if err != nil {
