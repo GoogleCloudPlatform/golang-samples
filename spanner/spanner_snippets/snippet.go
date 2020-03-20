@@ -20,7 +20,6 @@ import (
 	"flag"
 	"fmt"
 	"github.com/golang/protobuf/ptypes"
-	"google.golang.org/api/option"
 	"google.golang.org/genproto/googleapis/longrunning"
 	"google.golang.org/grpc/codes"
 	"io"
