@@ -244,7 +244,7 @@ func removeUser(c *storage.Client, bucketName string) error {
 }
 
 func addBucketConditionalIamBinding(c *storage.Client, bucketName string, role string, member string, title string, description string, expression string) error {
-	// [START add_bucket_conditional_iam_binding]
+	// [START storage_add_bucket_conditional_iam_binding]
 	ctx := context.Background()
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
@@ -271,7 +271,7 @@ func addBucketConditionalIamBinding(c *storage.Client, bucketName string, role s
 	// NOTE: It may be necessary to retry this operation if IAM policies are
 	// being modified concurrently. SetPolicy will return an error if the policy
 	// was modified since it was retrieved.
-	// [END add_bucket_conditional_iam_binding]
+	// [END storage_add_bucket_conditional_iam_binding]
 	return nil
 }
 
