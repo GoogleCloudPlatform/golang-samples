@@ -80,11 +80,54 @@ func TestSignURL(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run("%s", func(t *testing.T) {
-			signed := SignURL(
+			signedValue := SignURL(
 				c.url, c.keyName, testKey, c.expiration,
 			)
-			if signed != c.out {
-				t.Errorf("want=%v\ngot=%v", c.out, signed)
+			if signedValue != c.out {
+				t.Errorf("signed value incorrectly matched: got %s, want %s", signedValue, c.out)
+			}
+		})
+	}
+}
+
+func TestSignURLWithPrefix(t *testing.T) {
+	testKey := []byte{0x9d, 0x9b, 0x51, 0xa2, 0x17, 0x4d, 0x17, 0xd9,
+		0xb7, 0x70, 0xa3, 0x36, 0xe0, 0x87, 0x0a, 0xe3} // base64url: nZtRohdNF9m3cKM24IcK4w==
+
+	cases := []struct {
+		testName   string
+		urlPrefix  string
+		keyName    string
+		expiration time.Time
+		out        string
+	}{
+		{
+			testName:   "Domain and Simple Prefix",
+			urlPrefix:  "https://media.example.com/segments/",
+			keyName:    "my-key",
+			expiration: time.Unix(1558131350, 0),
+			out:        "URLPrefix=aHR0cHM6Ly9tZWRpYS5leGFtcGxlLmNvbS9zZWdtZW50cy8=&Expires=1558131350&Keyname=my-key&Signature=NB1csGFeIOvP5-6zsAdSA9xtxXM=",
+		},
+		{
+			testName:   "Domain Only",
+			urlPrefix:  "https://www.google.com/",
+			keyName:    "my-key",
+			expiration: time.Unix(1549751401, 0),
+			out:        "URLPrefix=aHR0cHM6Ly93d3cuZ29vZ2xlLmNvbS8=&Expires=1549751401&Keyname=my-key&Signature=2x9yY3ZVzyqkoY4OFRLjRmdFQ_4=",
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.testName, func(t *testing.T) {
+			signedValue, err := SignURLWithPrefix(
+				c.urlPrefix, c.keyName, testKey, c.expiration,
+			)
+			if err != nil {
+				t.Error(err)
+			}
+
+			if signedValue != c.out {
+				t.Errorf("signed value incorrectly matched: got %s, want %s", signedValue, c.out)
 			}
 		})
 	}

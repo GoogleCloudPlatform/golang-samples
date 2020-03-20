@@ -52,6 +52,37 @@ func SignURL(url, keyName string, key []byte, expiration time.Time) string {
 	return url
 }
 
+// SignURLWithPrefix creates a signed URL prefix for an endpoint on Cloud CDN.
+// Prefixes allow access to any URL with the same prefix, and can be useful for
+// granting access broader content without signing multiple URLs.
+//
+// - urlPrefix must start with "https://" and should not include query parameters.
+// - key should be in raw form (not base64url-encoded) which is 16-bytes long.
+// - keyName must match a key added to the backend service or bucket.
+func SignURLWithPrefix(urlPrefix, keyName string, key []byte, expiration time.Time) (string, error) {
+	if strings.Contains(urlPrefix, "?") {
+		return "", fmt.Errorf("urlPrefix must not include query params: %s", urlPrefix)
+	}
+
+	encodedURLPrefix := base64.URLEncoding.EncodeToString([]byte(urlPrefix))
+	input := fmt.Sprintf("URLPrefix=%s&Expires=%d&Keyname=%s",
+		encodedURLPrefix,
+		expiration.Unix(),
+		keyName,
+	)
+
+	mac := hmac.New(sha1.New, key)
+	mac.Write([]byte(input))
+	sig := base64.URLEncoding.EncodeToString(mac.Sum(nil))
+
+	signedValue := fmt.Sprintf("%s&Signature=%s",
+		input,
+		sig,
+	)
+
+	return signedValue, nil
+}
+
 // readKeyFile reads the base64url-encoded key file and decodes it.
 func readKeyFile(path string) ([]byte, error) {
 	b, err := ioutil.ReadFile(path)
@@ -76,8 +107,14 @@ func main() {
 		log.Fatal(err)
 	}
 
-	url := SignURL("https://example.com", "MY-KEY", key, time.Now().Add(time.Hour*24))
+	url := SignURL("https://example.com", "my-key", key, time.Now().Add(time.Hour*24))
 	fmt.Println(url)
+
+	urlPrefix, err := SignURLWithPrefix("https://www.google.com/", "my-key", key, time.Unix(1549751401, 0))
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(urlPrefix)
 }
 
 // [END example]
