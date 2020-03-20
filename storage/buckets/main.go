@@ -224,12 +224,17 @@ func removeUser(c *storage.Client, bucketName string) error {
 		// Only remove unconditional bindings matching role
 		if binding.Role == "roles/storage.objectViewer" && binding.Condition == nil {
 			// Filter out member.
-			i := 0
-			for _, member := range binding.Members {
-				if member != "group:cloud-logs@google.com" {
-					binding.Members[i] = member
+			i := -1
+			for j, member := range binding.Members {
+				if member == "group:cloud-logs@google.com" {
+					i = j
 				}
-				binding.Members = binding.Members[:i]
+			}
+
+			if i == -1 {
+				return errors.New("No matching binding group found.")
+			} else {
+				binding.Members = append(binding.Members[:i], binding.Members[i+1:]...)
 			}
 		}
 	}
