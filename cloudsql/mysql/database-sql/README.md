@@ -157,10 +157,10 @@ Take note of the URL output at the end of the deployment process.
 ```sh
 gcloud beta run services update run-sql \
     --add-cloudsql-instances [INSTANCE_CONNECTION_NAME] \
-    --set-env-vars INSTANCE_CONNECTION_NAME=[INSTANCE_CONNECTION_NAME] \
-    --set-env-vars DB_USER=[YOUR_DB_USER] \
-    --set-env-vars DB_PASS=[YOUR_DB_PASS] \
-    --set-env-vars DB_NAME=[YOUR_DB]
+    --update-env-vars INSTANCE_CONNECTION_NAME=[INSTANCE_CONNECTION_NAME] \
+    --update-env-vars DB_USER=[YOUR_DB_USER] \
+    --update-env-vars DB_PASS=[YOUR_DB_PASS] \
+    --update-env-vars DB_NAME=[YOUR_DB]
 ```
 
 Replace environment variables with the correct values for your Cloud SQL
