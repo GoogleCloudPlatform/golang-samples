@@ -276,7 +276,7 @@ func addBucketConditionalIamBinding(c *storage.Client, bucketName string, role s
 }
 
 func removeBucketConditionalIamBinding(c *storage.Client, bucketName string, role string, title string, description string, expression string) error {
-	// [START remove_bucket_conditional_iam_binding]
+	// [START storage_remove_bucket_conditional_iam_binding]
 	ctx := context.Background()
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
@@ -313,7 +313,7 @@ func removeBucketConditionalIamBinding(c *storage.Client, bucketName string, rol
 	// NOTE: It may be necessary to retry this operation if IAM policies are
 	// being modified concurrently. SetPolicy will return an error if the policy
 	// was modified since it was retrieved.
-	// [END remove_bucket_conditional_iam_binding]
+	// [END storage_remove_bucket_conditional_iam_binding]
 	return nil
 }
 
