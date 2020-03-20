@@ -9,8 +9,8 @@ require (
 	cloud.google.com/go/datastore v1.1.0
 	cloud.google.com/go/firestore v1.1.0
 	cloud.google.com/go/logging v1.0.0
-	cloud.google.com/go/pubsub v1.2.0
-	cloud.google.com/go/spanner v1.1.0
+	cloud.google.com/go/pubsub v1.3.1
+	cloud.google.com/go/spanner v1.4.0
 	cloud.google.com/go/storage v1.6.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.0
 	github.com/aws/aws-sdk-go v1.28.13
@@ -44,7 +44,7 @@ require (
 	golang.org/x/text v0.3.2
 	google.golang.org/api v0.20.0
 	google.golang.org/appengine v1.6.5
-	google.golang.org/genproto v0.0.0-20200317114155-1f3552e48f24
+	google.golang.org/genproto v0.0.0-20200318110522-7735f76e9fa5
 	google.golang.org/grpc v1.28.0
 	gopkg.in/sendgrid/sendgrid-go.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.2.8
