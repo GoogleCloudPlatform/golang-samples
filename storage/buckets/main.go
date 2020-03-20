@@ -15,7 +15,8 @@
 // Sample buckets creates a bucket, lists buckets and deletes a bucket
 // using the Google Storage API. More documentation is available at
 // https://cloud.google.com/storage/docs/json_api/v1/.
-package main
+
+package buckets
 
 import (
 	"context"
