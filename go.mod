@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/golang-samples
 go 1.11
 
 require (
-	cloud.google.com/go v0.53.1-0.20200226181226-323381ea063a
+	cloud.google.com/go v0.55.0
 	cloud.google.com/go/bigquery v1.5.0
 	cloud.google.com/go/bigtable v1.1.0
 	cloud.google.com/go/datastore v1.1.0
