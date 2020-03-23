@@ -36,7 +36,7 @@ import (
 	"google.golang.org/api/option"
 	"google.golang.org/grpc"
 
-	pbt "github.com/golang/protobuf/ptypes/timestamp"
+	pbts "github.com/golang/protobuf/ptypes"
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 	"google.golang.org/genproto/protobuf/field_mask"
 	"google.golang.org/grpc/status"
@@ -1917,7 +1917,10 @@ func updateBackup(ctx context.Context, w io.Writer, adminClient *database.Databa
 	}
 
 	expireTime := time.Unix(backup.CreateTime.Seconds, int64(backup.CreateTime.Nanos)).AddDate(0, 0, 30)
-	expirespb := &pbt.Timestamp{Seconds: expireTime.Unix(), Nanos: int32(expireTime.Nanosecond())}
+	expirespb, err := pbts.TimestampProto(expireTime)
+	if err != nil {
+		return err
+	}
 
 	_, err = adminClient.UpdateBackup(ctx, &adminpb.UpdateBackupRequest{
 		Backup:     &adminpb.Backup{
