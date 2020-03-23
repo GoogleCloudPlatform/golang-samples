@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"io"
 
-	secretmanager "cloud.google.com/go/secretmanager/apiv1beta1"
-	secretmanagerpb "google.golang.org/genproto/googleapis/cloud/secretmanager/v1beta1"
+	secretmanager "cloud.google.com/go/secretmanager/apiv1"
+	secretmanagerpb "google.golang.org/genproto/googleapis/cloud/secretmanager/v1"
 )
 
 // accessSecretVersion accesses the payload for the given secret version if one

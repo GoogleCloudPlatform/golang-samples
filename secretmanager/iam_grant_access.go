@@ -20,7 +20,8 @@ import (
 	"fmt"
 	"io"
 
-	secretmanager "cloud.google.com/go/secretmanager/apiv1beta1"
+	iampb "google3/google/iam/v1/iam_policy_go_proto"
+	secretmanager "cloud.google.com/go/secretmanager/apiv1"
 )
 
 // iamGrantAccess grants the given member access to the secret.
@@ -36,15 +37,19 @@ func iamGrantAccess(w io.Writer, name, member string) error {
 	}
 
 	// Get the current IAM policy.
-	handle := client.IAM(name)
-	policy, err := handle.Policy(ctx)
+	getReq :=  &iampb.GetIamPolicyRequest{Resource: name}
+	policy, err := client.GetIamPolicy(ctx, getReq)
 	if err != nil {
 		return fmt.Errorf("failed to get policy: %v", err)
 	}
 
 	// Grant the member access permissions.
 	policy.Add(member, "roles/secretmanager.secretAccessor")
-	if err = handle.SetPolicy(ctx, policy); err != nil {
+	setReq := &iampb.SetIamPolicyRequest{
+		Resource: name,
+		Policy: policy,
+	}
+	if err = client.SetIamPolicy(ctx, setReq); err != nil {
 		return fmt.Errorf("failed to save policy: %v", err)
 	}
 
