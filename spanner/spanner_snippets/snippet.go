@@ -1854,7 +1854,7 @@ func createBackup(ctx context.Context, w io.Writer, adminClient *database.Databa
 	}
 
 	fmt.Fprintf(w, "Created backup [%s] from database [%s], size = %d bytes, created at = %s\n", backup.Name, backup.Database,
-		backup.SizeBytes, time.Unix(backup.CreateTime.Seconds, backup.CreateTime.Seconds).Format(time.RFC3339))
+		backup.SizeBytes, time.Unix(backup.CreateTime.Seconds, int64(backup.CreateTime.Nanos)).Format(time.RFC3339))
 	return nil
 }
 
