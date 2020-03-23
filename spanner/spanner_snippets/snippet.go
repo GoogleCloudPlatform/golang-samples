@@ -98,6 +98,7 @@ var (
 		"querywithtimestampparameter": queryWithTimestampParameter,
 	}
 
+	
 	adminCommands = map[string]adminCommand{
 		"createdatabase":                  createDatabase,
 		"addnewcolumn":                    addNewColumn,
@@ -121,6 +122,10 @@ var (
 		"deletebackup":                    deleteBackup,
 		"restorebackup":                   restoreBackup,
 	}
+)
+
+var (
+	validDBPattern = regexp.MustCompile("^(.*)/databases/(.*)$")
 )
 
 // [START spanner_create_database]
@@ -1900,7 +1905,7 @@ func cancelBackup(ctx context.Context, w io.Writer, adminClient *database.Databa
 
 func updateBackup(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
 	backupID := "my-backup"
-	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
+	matches := validDBPattern.FindStringSubmatch(database)
 	if matches == nil || len(matches) != 3 {
 		return fmt.Errorf("Invalid database id %s", database)
 	}
