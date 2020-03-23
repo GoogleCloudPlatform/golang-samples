@@ -1984,7 +1984,7 @@ func listBackups(ctx context.Context, w io.Writer, adminClient *database.Databas
 	// validDBPattern is defined as regexp.MustCompile("^(.*)/databases/(.*)$")
 	matches := validDBPattern.FindStringSubmatch(database)
 	if matches == nil || len(matches) != 3 {
-		return fmt.Errorf("Invalid database id %s", database)
+		return fmt.Errorf("Invalid database name %s", database)
 	}
 	instanceName := matches[1]
 	counter := 0
@@ -2144,13 +2144,13 @@ func listBackupOperations(ctx context.Context, w io.Writer, adminClient *databas
 	}
 	instanceName := matches[1]
 	counter := 0
-	backupOperationsIterator := adminClient.ListBackupOperations(ctx, &adminpb.ListBackupOperationsRequest{
+	iter := adminClient.ListBackupOperations(ctx, &adminpb.ListBackupOperationsRequest{
 		Parent: instanceName,
 		// List backup operations only for this specific database
 		Filter: fmt.Sprintf("(metadata.database:%s) AND (metadata.@type:type.googleapis.com/google.spanner.admin.database.v1.CreateBackupMetadata)", database),
 	})
 	for {
-		resp, err := backupOperationsIterator.Next()
+		resp, err := iter.Next()
 		if err == iterator.Done {
 			break
 		}
