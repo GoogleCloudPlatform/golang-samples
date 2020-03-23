@@ -1864,8 +1864,8 @@ func createBackup(ctx context.Context, w io.Writer, adminClient *database.Databa
 
 func cancelBackup(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
 	backupID := "my-backup-cancelled"
-	expires := time.Now().AddDate(0, 0, 1)
-	op, err := adminClient.StartBackupOperation(ctx, backupID, database, expires)
+	expireTime := time.Now().AddDate(0, 0, 1)
+	op, err := adminClient.StartBackupOperation(ctx, backupID, database, expireTime)
 	if err != nil {
 		return err
 	}
