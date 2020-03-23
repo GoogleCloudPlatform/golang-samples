@@ -1875,7 +1875,7 @@ func cancelBackup(ctx context.Context, w io.Writer, adminClient *database.Databa
 		return err
 	}
 
-	// Should be cancelled, but might have finished before cancel took effect in which case delete the backup
+	// If the backup operation completed already, and cannot be cancelled, delete the backup
 	backup, err := op.Wait(ctx)
 	if err != nil {
 		if waitStatus, ok := status.FromError(err); !ok || waitStatus.Code() != codes.Canceled {
