@@ -1984,13 +1984,13 @@ func listBackups(ctx context.Context, w io.Writer, adminClient *database.Databas
 	}
 	instanceName := matches[1]
 	counter := 0
-	backupsIterator := adminClient.ListBackups(ctx, &adminpb.ListBackupsRequest{
+	iter := adminClient.ListBackups(ctx, &adminpb.ListBackupsRequest{
 		Parent: instanceName,
 		// List backups only for this specific database
 		Filter: "Database:" + database,
 	})
 	for {
-		resp, err := backupsIterator.Next()
+		resp, err := iter.Next()
 		if err == iterator.Done {
 			break
 		}
@@ -2012,13 +2012,13 @@ func listBackupsByName(ctx context.Context, w io.Writer, adminClient *database.D
 	}
 	instanceName := matches[1]
 	counter := 0
-	backupsIterator := adminClient.ListBackups(ctx, &adminpb.ListBackupsRequest{
+	iter := adminClient.ListBackups(ctx, &adminpb.ListBackupsRequest{
 		Parent: instanceName,
 		// Only include backups with matching names
 		Filter: "Name:my-backup",
 	})
 	for {
-		resp, err := backupsIterator.Next()
+		resp, err := iter.Next()
 		if err == iterator.Done {
 			break
 		}
@@ -2040,13 +2040,13 @@ func listSmallBackups(ctx context.Context, w io.Writer, adminClient *database.Da
 	}
 	instanceName := matches[1]
 	counter := 0
-	backupsIterator := adminClient.ListBackups(ctx, &adminpb.ListBackupsRequest{
+	iter := adminClient.ListBackups(ctx, &adminpb.ListBackupsRequest{
 		Parent: instanceName,
 		// Only include backups in READY state and with size < 64K
 		Filter: "(state:READY) AND (size_bytes < 65536)",
 	})
 	for {
-		resp, err := backupsIterator.Next()
+		resp, err := iter.Next()
 		if err == iterator.Done {
 			break
 		}
@@ -2071,14 +2071,14 @@ func listNewBackups(ctx context.Context, w io.Writer, adminClient *database.Data
 	minCreateTime := time.Now().AddDate(0, 0, -1)
 	maxExpireTime := time.Now().AddDate(0, 0, 3)
 
-	backupsIterator := adminClient.ListBackups(ctx, &adminpb.ListBackupsRequest{
+	iter := adminClient.ListBackups(ctx, &adminpb.ListBackupsRequest{
 		Parent: instanceName,
 		// Only include backups that were created recently and expire soon
 		Filter: fmt.Sprintf(`(state:READY) AND (create_time > "%s") AND (expire_time < "%s")`,
 			minCreateTime.Format(time.RFC3339), maxExpireTime.Format(time.RFC3339)),
 	})
 	for {
-		resp, err := backupsIterator.Next()
+		resp, err := iter.Next()
 		if err == iterator.Done {
 			break
 		}
@@ -2103,16 +2103,16 @@ func listInstanceBackups(ctx context.Context, w io.Writer, adminClient *database
 		Parent: instanceName,
 		PageSize: 3,
 	}
-	backupsIterator := adminClient.ListBackups(ctx, request)
+	iter := adminClient.ListBackups(ctx, request)
 	for {
-		resp, err := backupsIterator.Next()
+		resp, err := iter.Next()
 		if err == iterator.Done {
-			pageToken := backupsIterator.PageInfo().Token
+			pageToken := iter.PageInfo().Token
 			if pageToken == "" {
 				break
 			} else {
 				request.PageToken = pageToken
-				backupsIterator = adminClient.ListBackups(ctx, request)
+				iter = adminClient.ListBackups(ctx, request)
 			}
 		}
 		if err != nil {
