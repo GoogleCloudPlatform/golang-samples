@@ -131,6 +131,7 @@ var (
 // [START spanner_create_database]
 
 func createDatabase(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, db string) error {
+	// validDBPattern is defined as regexp.MustCompile("^(.*)/databases/(.*)$")
 	matches := validDBPattern.FindStringSubmatch(db)
 	if matches == nil || len(matches) != 3 {
 		return fmt.Errorf("Invalid database id %s", db)
@@ -1905,6 +1906,7 @@ func cancelBackup(ctx context.Context, w io.Writer, adminClient *database.Databa
 
 func updateBackup(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
 	backupID := "my-backup"
+	// validDBPattern is defined as regexp.MustCompile("^(.*)/databases/(.*)$")
 	matches := validDBPattern.FindStringSubmatch(database)
 	if matches == nil || len(matches) != 3 {
 		return fmt.Errorf("Invalid database id %s", database)
@@ -1943,6 +1945,7 @@ func updateBackup(ctx context.Context, w io.Writer, adminClient *database.Databa
 
 func restoreBackup(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
 	backupID := "my-backup"
+	// validDBPattern is defined as regexp.MustCompile("^(.*)/databases/(.*)$")
 	matches := validDBPattern.FindStringSubmatch(database)
 	if matches == nil || len(matches) != 3 {
 		return fmt.Errorf("Invalid database id %s", database)
@@ -1978,6 +1981,7 @@ func restoreBackup(ctx context.Context, w io.Writer, adminClient *database.Datab
 // [START spanner_list_backups]
 
 func listBackups(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	// validDBPattern is defined as regexp.MustCompile("^(.*)/databases/(.*)$")
 	matches := validDBPattern.FindStringSubmatch(database)
 	if matches == nil || len(matches) != 3 {
 		return fmt.Errorf("Invalid database id %s", database)
@@ -2006,6 +2010,7 @@ func listBackups(ctx context.Context, w io.Writer, adminClient *database.Databas
 }
 
 func listBackupsByName(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	// validDBPattern is defined as regexp.MustCompile("^(.*)/databases/(.*)$")
 	matches := validDBPattern.FindStringSubmatch(database)
 	if matches == nil || len(matches) != 3 {
 		return fmt.Errorf("Invalid database id %s", database)
@@ -2034,6 +2039,7 @@ func listBackupsByName(ctx context.Context, w io.Writer, adminClient *database.D
 }
 
 func listSmallBackups(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	// validDBPattern is defined as regexp.MustCompile("^(.*)/databases/(.*)$")
 	matches := validDBPattern.FindStringSubmatch(database)
 	if matches == nil || len(matches) != 3 {
 		return fmt.Errorf("Invalid database id %s", database)
@@ -2062,6 +2068,7 @@ func listSmallBackups(ctx context.Context, w io.Writer, adminClient *database.Da
 }
 
 func listNewBackups(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	// validDBPattern is defined as regexp.MustCompile("^(.*)/databases/(.*)$")
 	matches := validDBPattern.FindStringSubmatch(database)
 	if matches == nil || len(matches) != 3 {
 		return fmt.Errorf("Invalid database id %s", database)
@@ -2094,6 +2101,7 @@ func listNewBackups(ctx context.Context, w io.Writer, adminClient *database.Data
 }
 
 func listInstanceBackups(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	// validDBPattern is defined as regexp.MustCompile("^(.*)/databases/(.*)$")
 	matches := validDBPattern.FindStringSubmatch(database)
 	if matches == nil || len(matches) != 3 {
 		return fmt.Errorf("Invalid database id %s", database)
@@ -2129,6 +2137,7 @@ func listInstanceBackups(ctx context.Context, w io.Writer, adminClient *database
 // [START spanner_list_backup_operations]
 
 func listBackupOperations(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	// validDBPattern is defined as regexp.MustCompile("^(.*)/databases/(.*)$")
 	matches := validDBPattern.FindStringSubmatch(database)
 	if matches == nil || len(matches) != 3 {
 		return fmt.Errorf("Invalid database id %s", database)
@@ -2171,6 +2180,7 @@ func listBackupOperations(ctx context.Context, w io.Writer, adminClient *databas
 // [START spanner_list_database_operations]
 
 func listDatabaseOperations(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	// validDBPattern is defined as regexp.MustCompile("^(.*)/databases/(.*)$")
 	matches := validDBPattern.FindStringSubmatch(database)
 	if matches == nil || len(matches) != 3 {
 		return fmt.Errorf("Invalid database id %s", database)
@@ -2208,6 +2218,7 @@ func listDatabaseOperations(ctx context.Context, w io.Writer, adminClient *datab
 
 func deleteBackup(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
 	backupID := "my-backup"
+	// validDBPattern is defined as regexp.MustCompile("^(.*)/databases/(.*)$")
 	matches := validDBPattern.FindStringSubmatch(database)
 	if matches == nil || len(matches) != 3 {
 		return fmt.Errorf("Invalid database id %s", database)
