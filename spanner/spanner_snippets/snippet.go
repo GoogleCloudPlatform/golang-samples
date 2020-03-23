@@ -1945,12 +1945,12 @@ func restoreBackup(ctx context.Context, w io.Writer, adminClient *database.Datab
 		return fmt.Errorf("Invalid database id %s", database)
 	}
 	instanceName := matches[1]
-	databaseId := matches[2]
+	databaseID := matches[2]
 	backupName := instanceName + "/backups/" + backupID
 
 	restoreOp, err := adminClient.RestoreDatabase(ctx, &adminpb.RestoreDatabaseRequest{
 		Parent:     instanceName,
-		DatabaseId: databaseId,
+		DatabaseId: databaseID,
 		Source:     &adminpb.RestoreDatabaseRequest_Backup{
 			Backup: backupName,
 		},
