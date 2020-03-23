@@ -168,7 +168,10 @@ fi
 
 date
 
+# exit_code collects all of the exit codes of the tests, and is used to set the
+# exit code at the end of the script.
 exit_code=0
+set +e # Don't exit on errors to make sure we run all tests.
 
 # runTests runs the tests in the current directory. If an argument is specified,
 # it is used as the argument to `go test`.
@@ -216,8 +219,6 @@ else
     fi
   done
 fi
-
-set +e
 
 # If we're running system tests, send the test log to the Build Cop Bot.
 # See https://github.com/googleapis/repo-automation-bots/tree/master/packages/buildcop.
