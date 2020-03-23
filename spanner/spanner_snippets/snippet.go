@@ -1916,8 +1916,8 @@ func updateBackup(ctx context.Context, w io.Writer, adminClient *database.Databa
 		return err
 	}
 
-	expires := time.Unix(backup.CreateTime.GetSeconds(), int64(backup.CreateTime.Nanos)).AddDate(0, 0, 30)
-	expirespb := &pbt.Timestamp{Seconds: expires.Unix(), Nanos: int32(expires.Nanosecond())}
+	expireTime := time.Unix(backup.CreateTime.GetSeconds(), int64(backup.CreateTime.Nanos)).AddDate(0, 0, 30)
+	expirespb := &pbt.Timestamp{Seconds: expireTime.Unix(), Nanos: int32(expireTime.Nanosecond())}
 
 	_, err = adminClient.UpdateBackup(ctx, &adminpb.UpdateBackupRequest{
 		Backup:     &adminpb.Backup{
