@@ -169,6 +169,7 @@ fi
 date
 
 exit_code=0
+set +e
 
 # runTests runs the tests in the current directory. If an argument is specified,
 # it is used as the argument to `go test`.
@@ -216,8 +217,6 @@ else
     fi
   done
 fi
-
-set +e
 
 # If we're running system tests, send the test log to the Build Cop Bot.
 # See https://github.com/googleapis/repo-automation-bots/tree/master/packages/buildcop.
