@@ -1883,7 +1883,7 @@ func cancelBackup(ctx context.Context, w io.Writer, adminClient *database.Databa
 		}
 	}
 	if backup != nil {
-		// The backup actually finished
+		// The backup operation finished before it could be cancelled
 		err = adminClient.DeleteBackup(ctx, &adminpb.DeleteBackupRequest{Name: backup.Name})
 	}
 
