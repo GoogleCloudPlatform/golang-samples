@@ -39,7 +39,7 @@ func TestACL(t *testing.T) {
 	defer client.Close()
 
 	var (
-		bucket                = tc.ProjectID + "-samples-object-bucket-1"
+		bucket                = tc.ProjectID + "-samples-acl-bucket-1"
 		object                = "foo.txt"
 		allAuthenticatedUsers = storage.AllAuthenticatedUsers
 	)

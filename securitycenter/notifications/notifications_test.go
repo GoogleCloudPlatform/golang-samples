@@ -76,7 +76,6 @@ func addNotificationConfig(t *testing.T, notificationConfigID string) error {
 		NotificationConfig: &securitycenterpb.NotificationConfig{
 			Description: "Go sample config",
 			PubsubTopic: pubsubTopic,
-			EventType:   securitycenterpb.NotificationConfig_FINDING,
 			NotifyConfig: &securitycenterpb.NotificationConfig_StreamingConfig_{
 				StreamingConfig: &securitycenterpb.NotificationConfig_StreamingConfig{
 					Filter: `state = "ACTIVE"`,
