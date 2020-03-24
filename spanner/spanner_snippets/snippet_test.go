@@ -38,22 +38,22 @@ func TestSample(t *testing.T) {
 	if !strings.HasPrefix(instance, "projects/") {
 		t.Fatal("Spanner instance ref must be in the form of 'projects/PROJECT_ID/instances/INSTANCE_ID'")
 	}
-	databaseId := fmt.Sprintf("test-%s", tc.ProjectID)
-	restoreDatabaseId := fmt.Sprintf("test-restore-%s", tc.ProjectID)
+	databaseID := fmt.Sprintf("test-%s", tc.ProjectID)
+	restoreDatabaseID := fmt.Sprintf("test-restore-%s", tc.ProjectID)
 
 	// Maximum length of database name is 30 characters, so trim if the generated name is too long
-	if len(databaseId) > 30 {
-		trimmedDatabaseId := databaseId[:30]
-		t.Logf("Database name '%s' trimmed to '%s'", databaseId, trimmedDatabaseId)
-		databaseId = trimmedDatabaseId
+	if len(databaseID) > 30 {
+		trimmedDatabaseID := databaseID[:30]
+		t.Logf("Database name '%s' trimmed to '%s'", databaseID, trimmedDatabaseID)
+		databaseID = trimmedDatabaseID
 	}
-	if len(restoreDatabaseId) > 30 {
-		trimmedDatabaseId := restoreDatabaseId[:30]
-		t.Logf("Restore database name '%s' trimmed to '%s'", restoreDatabaseId, trimmedDatabaseId)
-		restoreDatabaseId = trimmedDatabaseId
+	if len(restoreDatabaseID) > 30 {
+		trimmedDatabaseID := restoreDatabaseID[:30]
+		t.Logf("Restore database name '%s' trimmed to '%s'", restoreDatabaseID, trimmedDatabaseID)
+		restoreDatabaseID = trimmedDatabaseID
 	}
-	dbName := fmt.Sprintf("%s/databases/%s", instance, databaseId)
-	restoreDbName := fmt.Sprintf("%s/databases/%s", instance, restoreDatabaseId)
+	dbName := fmt.Sprintf("%s/databases/%s", instance, databaseID)
+	restoreDBName := fmt.Sprintf("%s/databases/%s", instance, restoreDatabaseID)
 
 	ctx := context.Background()
 	adminClient, dataClient := createClients(ctx, dbName)
@@ -68,9 +68,9 @@ func TestSample(t *testing.T) {
 			}
 		})
 		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-			err := adminClient.DropDatabase(ctx, &adminpb.DropDatabaseRequest{Database: restoreDbName})
+			err := adminClient.DropDatabase(ctx, &adminpb.DropDatabaseRequest{Database: restoreDBName})
 			if err != nil {
-				r.Errorf("DropDatabase(%q): %v", restoreDbName, err)
+				r.Errorf("DropDatabase(%q): %v", restoreDBName, err)
 			}
 		})
 	}()
@@ -82,9 +82,9 @@ func TestSample(t *testing.T) {
 		t.Logf("database %s exists in state %s. delete result: %v", db.GetName(), db.GetState().String(),
 			adminClient.DropDatabase(ctx, &adminpb.DropDatabaseRequest{Database: dbName}))
 	}
-	if db, err := adminClient.GetDatabase(ctx, &adminpb.GetDatabaseRequest{Name: restoreDbName}); err == nil {
+	if db, err := adminClient.GetDatabase(ctx, &adminpb.GetDatabaseRequest{Name: restoreDBName}); err == nil {
 		t.Logf("database %s exists in state %s. delete result: %v", db.GetName(), db.GetState().String(),
-			adminClient.DropDatabase(ctx, &adminpb.DropDatabaseRequest{Database: restoreDbName}))
+			adminClient.DropDatabase(ctx, &adminpb.DropDatabaseRequest{Database: restoreDBName}))
 	}
 
 	// Check for any backups that were created from that database and delete those as well
@@ -317,17 +317,17 @@ func TestSample(t *testing.T) {
 	assertContains(t, out, "Database operation count: ")
 	out = runCommand(t, "updatebackup", dbName)
 	assertContains(t, out, "Updated backup [my-backup]")
-	out = runCommand(t, "restorebackup", restoreDbName)
+	out = runCommand(t, "restorebackup", restoreDBName)
 	assertContains(t, out, "Restored backup [")
 	assertContains(t, out, "/backups/my-backup]")
 
 	// Wait for database to finish optimizing - cannot delete a backup if a database restored from it
 	for {
-		restoreDb, err := adminClient.GetDatabase(ctx, &adminpb.GetDatabaseRequest{Name: restoreDbName})
+		restoreDB, err := adminClient.GetDatabase(ctx, &adminpb.GetDatabaseRequest{Name: restoreDBName})
 		if err != nil {
-			t.Errorf("GetDatabase(%q): %v", restoreDbName, err)
+			t.Errorf("GetDatabase(%q): %v", restoreDBName, err)
 		}
-		if restoreDb.GetState() != adminpb.Database_READY_OPTIMIZING {
+		if restoreDB.GetState() != adminpb.Database_READY_OPTIMIZING {
 			break
 		}
 		time.Sleep(1 * time.Minute)
