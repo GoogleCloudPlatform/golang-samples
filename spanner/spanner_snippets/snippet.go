@@ -2224,7 +2224,8 @@ func deleteBackup(ctx context.Context, w io.Writer, adminClient *database.Databa
 		return fmt.Errorf("Invalid database id %s", database)
 	}
 	backupName := matches[1] + "/backups/" + backupID
-	if err := adminClient.DeleteBackup(ctx, &adminpb.DeleteBackupRequest{Name: backupName}); err != nil {
+	err := adminClient.DeleteBackup(ctx, &adminpb.DeleteBackupRequest{Name: backupName})
+	if  err != nil {
 		return err
 	}
 
