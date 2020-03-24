@@ -19,6 +19,7 @@ package topics
 import (
 	"bytes"
 	"context"
+	"io/ioutil"
 	"sync"
 	"testing"
 	"time"
@@ -132,8 +133,7 @@ func TestPublishWithSettings(t *testing.T) {
 	setup(t)
 	client := setup(t)
 	client.CreateTopic(ctx, topicID)
-	buf := new(bytes.Buffer)
-	if err := publishWithSettings(buf, tc.ProjectID, topicID, 10); err != nil {
+	if err := publishWithSettings(ioutil.Discard, tc.ProjectID, topicID); err != nil {
 		t.Errorf("failed to publish message: %v", err)
 	}
 }
