@@ -14,7 +14,7 @@
 
 package subscriptions
 
-// [START pubsub_dead_letter_update]
+// [START pubsub_dead_letter_update_subscription]
 import (
 	"context"
 	"fmt"
@@ -49,4 +49,4 @@ func updateDeadLetter(w io.Writer, projectID, subID string, fullyQualifiedDeadLe
 	return nil
 }
 
-// [END pubsub_dead_letter_update]
+// [END pubsub_dead_letter_update_subscription]
