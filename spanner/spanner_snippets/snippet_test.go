@@ -18,11 +18,12 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"google.golang.org/api/iterator"
 	"os"
 	"strings"
 	"testing"
 	"time"
+
+	"google.golang.org/api/iterator"
 
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
