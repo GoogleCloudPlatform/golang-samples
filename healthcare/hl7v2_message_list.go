@@ -43,7 +43,7 @@ func listHL7V2Messages(w io.Writer, projectID, location, datasetID, hl7V2StoreID
 
 	fmt.Fprintln(w, "HL7V2 messages:")
         for _, s := range resp.Hl7V2Messages {
-                fmt.Fprintln(os.Stdout, s.Name)
+                fmt.Fprintln(w, s.Name)
         }
 	return nil
 }
