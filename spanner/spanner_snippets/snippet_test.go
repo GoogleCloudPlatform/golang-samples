@@ -38,20 +38,8 @@ func TestSample(t *testing.T) {
 	if !strings.HasPrefix(instance, "projects/") {
 		t.Fatal("Spanner instance ref must be in the form of 'projects/PROJECT_ID/instances/INSTANCE_ID'")
 	}
-	databaseID := fmt.Sprintf("test-%s", tc.ProjectID)
-	restoreDatabaseID := fmt.Sprintf("test-restore-%s", tc.ProjectID)
-
-	// Maximum length of database name is 30 characters, so trim if the generated name is too long
-	if len(databaseID) > 30 {
-		trimmedDatabaseID := databaseID[:30]
-		t.Logf("Database name '%s' trimmed to '%s'", databaseID, trimmedDatabaseID)
-		databaseID = trimmedDatabaseID
-	}
-	if len(restoreDatabaseID) > 30 {
-		trimmedDatabaseID := restoreDatabaseID[:30]
-		t.Logf("Restore database name '%s' trimmed to '%s'", restoreDatabaseID, trimmedDatabaseID)
-		restoreDatabaseID = trimmedDatabaseID
-	}
+	databaseID := validLength(fmt.Sprintf("test-%s", tc.ProjectID), t)
+	restoreDatabaseID := validLength(fmt.Sprintf("test-restore-%s", tc.ProjectID), t)
 	dbName := fmt.Sprintf("%s/databases/%s", instance, databaseID)
 	restoreDBName := fmt.Sprintf("%s/databases/%s", instance, restoreDatabaseID)
 
@@ -335,4 +323,15 @@ func TestSample(t *testing.T) {
 
 	out = runCommand(t, "deletebackup", dbName)
 	assertContains(t, out, "Deleted backup [my-backup]")
+}
+
+// Maximum length of database name is 30 characters, so trim if the generated name is too long
+func validLength (databaseName string, t *testing.T) (trimmedName string) {
+	if len(databaseName) > 30 {
+		trimmedName := databaseName[:30]
+		t.Logf("Name too long, '%s' trimmed to '%s'", databaseName, trimmedName)
+		return trimmedName
+	}
+
+	return databaseName
 }
