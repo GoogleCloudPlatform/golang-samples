@@ -1968,9 +1968,9 @@ func restoreBackup(ctx context.Context, w io.Writer, adminClient *database.Datab
 	if err != nil {
 		return err
 	}
-	backupInfoFromRestore := db.RestoreInfo.GetBackupInfo()
-	if backupInfoFromRestore != nil {
-		fmt.Fprintf(w, "Restored backup [%s] to database [%s]\n", backupInfoFromRestore.Backup, db.Name)
+	backupInfo := db.RestoreInfo.GetBackupInfo()
+	if backupInfo != nil {
+		fmt.Fprintf(w, "Restored backup [%s] to database [%s]\n", backupInfo.Backup, db.Name)
 	}
 
 	return nil
