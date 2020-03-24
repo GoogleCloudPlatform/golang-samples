@@ -19,15 +19,15 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"strconv"
 	"time"
 
 	"cloud.google.com/go/pubsub"
 )
 
-func publishWithSettings(w io.Writer, projectID, topicID, msg string) error {
+func publishWithSettings(w io.Writer, projectID, topicID string, n int) error {
 	// projectID := "my-project-id"
 	// topicID := "my-topic"
-	// msg := "Hello World"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
@@ -39,14 +39,18 @@ func publishWithSettings(w io.Writer, projectID, topicID, msg string) error {
 	t.PublishSettings.CountThreshold = 10
 	t.PublishSettings.DelayThreshold = 100 * time.Millisecond
 
-	result := t.Publish(ctx, &pubsub.Message{Data: []byte(msg)})
-	// Block until the result is returned and a server-generated
-	// ID is returned for the published message.
-	id, err := result.Get(ctx)
-	if err != nil {
-		return fmt.Errorf("Get: %v", err)
+	for i := 0; i < n; i++ {
+		result := t.Publish(ctx, &pubsub.Message{
+			Data: []byte("Message " + strconv.Itoa(i)),
+		})
+		// Block until the result is returned and a server-generated
+		// ID is returned for the published message.
+		id, err := result.Get(ctx)
+		if err != nil {
+			return fmt.Errorf("Get: %v", err)
+		}
+		fmt.Fprintf(w, "Published a message; msg ID: %v\n", id)
 	}
-	fmt.Fprintf(w, "Published a message; msg ID: %v\n", id)
 	return nil
 }
 
