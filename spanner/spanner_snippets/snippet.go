@@ -98,7 +98,6 @@ var (
 		"querywithtimestampparameter": queryWithTimestampParameter,
 	}
 
-	
 	adminCommands = map[string]adminCommand{
 		"createdatabase":                  createDatabase,
 		"addnewcolumn":                    addNewColumn,
@@ -1925,7 +1924,7 @@ func updateBackup(ctx context.Context, w io.Writer, adminClient *database.Databa
 	}
 
 	_, err = adminClient.UpdateBackup(ctx, &adminpb.UpdateBackupRequest{
-		Backup:     &adminpb.Backup{
+		Backup: &adminpb.Backup{
 			Name:       backupName,
 			ExpireTime: expirespb,
 		},
@@ -1957,7 +1956,7 @@ func restoreBackup(ctx context.Context, w io.Writer, adminClient *database.Datab
 	restoreOp, err := adminClient.RestoreDatabase(ctx, &adminpb.RestoreDatabaseRequest{
 		Parent:     instanceName,
 		DatabaseId: databaseID,
-		Source:     &adminpb.RestoreDatabaseRequest_Backup{
+		Source: &adminpb.RestoreDatabaseRequest_Backup{
 			Backup: backupName,
 		},
 	})
@@ -2108,7 +2107,7 @@ func listInstanceBackups(ctx context.Context, w io.Writer, adminClient *database
 	}
 	instanceName := matches[1]
 	request := &adminpb.ListBackupsRequest{
-		Parent: instanceName,
+		Parent:   instanceName,
 		PageSize: 3,
 	}
 	iter := adminClient.ListBackups(ctx, request)
@@ -2225,7 +2224,7 @@ func deleteBackup(ctx context.Context, w io.Writer, adminClient *database.Databa
 	}
 	backupName := matches[1] + "/backups/" + backupID
 	err := adminClient.DeleteBackup(ctx, &adminpb.DeleteBackupRequest{Name: backupName})
-	if  err != nil {
+	if err != nil {
 		return err
 	}
 
