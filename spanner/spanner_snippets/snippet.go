@@ -2302,7 +2302,9 @@ func main() {
 		dmlwithtimestamp, dmlwriteread, dmlwrite, dmlwritetxn, querywithparameter, dmlupdatepart,
 		dmldeletepart, dmlbatchupdate, createtablewithdatatypes, writedatatypesdata, querywitharray,
 		querywithbool, querywithbytes, querywithdate, querywithfloat, querywithint, querywithstring,
-		querywithtimestampparameter, createbackup, listbackups, updatebackup, deletebackup, restorebackup
+		querywithtimestampparameter, createbackup, listbackups, updatebackup, deletebackup, restorebackup,
+		listbackupsbyname,listsmallbackups,listnewbackups,listinstancebackups,listbackupoperations,
+		listdatabaseoperations
 
 Examples:
 	spanner_snippets createdatabase projects/my-project/instances/my-instance/databases/example-db
