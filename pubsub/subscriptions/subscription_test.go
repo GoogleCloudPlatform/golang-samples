@@ -266,6 +266,7 @@ func TestPullMsgsConcurrencyControl(t *testing.T) {
 
 func TestCreateWithDeadLetterPolicy(t *testing.T) {
 	client := setup(t)
+	defer client.Close()
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 	deadLetterSourceID := topicID + "-dead-letter-source"
@@ -288,12 +289,12 @@ func TestCreateWithDeadLetterPolicy(t *testing.T) {
 
 	buf := new(bytes.Buffer)
 	if err := createSubWithDeadLetter(buf, tc.ProjectID, deadLetterSubID, deadLetterSourceID, deadLetterSinkTopic.String()); err != nil {
-		t.Fatalf("failed to create a subscription with dead lettering: %v", err)
+		t.Fatalf("createSubWithDeadLetter failed: %v", err)
 	}
 	sub := client.Subscription(deadLetterSubID)
 	ok, err := sub.Exists(context.Background())
 	if err != nil {
-		t.Fatalf("failed to check if sub exists: %v", err)
+		t.Fatalf("sub.Exists failed: %v", err)
 	}
 	if !ok {
 		t.Fatalf("got none; want sub = %q", deadLetterSubID)
@@ -316,11 +317,12 @@ func TestCreateWithDeadLetterPolicy(t *testing.T) {
 
 func TestUpdateDeadLetterPolicy(t *testing.T) {
 	client := setup(t)
+	defer client.Close()
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
-	deadLetterSourceID := topicID + "-dead-letter-source"
-	deadLetterSubID := subID + "-dead-letter-sub"
-	deadLetterSinkID := topicID + "-dead-letter-sink"
+	deadLetterSourceID := topicID + "-update-source"
+	deadLetterSubID := subID + "-update-sub"
+	deadLetterSinkID := topicID + "-update-sink"
 
 	deadLetterSourceTopic, err := getOrCreateTopic(ctx, client, deadLetterSourceID)
 	if err != nil {
@@ -338,12 +340,12 @@ func TestUpdateDeadLetterPolicy(t *testing.T) {
 
 	buf := new(bytes.Buffer)
 	if err := createSubWithDeadLetter(buf, tc.ProjectID, deadLetterSubID, deadLetterSourceID, deadLetterSinkTopic.String()); err != nil {
-		t.Fatalf("failed to create a subscription with dead lettering: %v", err)
+		t.Fatalf("createSubWithDeadLetter failed: %v", err)
 	}
 	sub := client.Subscription(deadLetterSubID)
 	ok, err := sub.Exists(context.Background())
 	if err != nil {
-		t.Fatalf("failed to check if sub exists: %v", err)
+		t.Fatalf("sub.Exists failed: %v", err)
 	}
 	if !ok {
 		t.Fatalf("got none; want sub = %q", deadLetterSubID)
@@ -351,7 +353,7 @@ func TestUpdateDeadLetterPolicy(t *testing.T) {
 	defer sub.Delete(ctx)
 
 	if err := updateDeadLetter(buf, tc.ProjectID, deadLetterSubID, deadLetterSinkTopic.String()); err != nil {
-		t.Fatalf("failed to update a subscriptions's dead letter policy: %v", err)
+		t.Fatalf("updateDeadLetter failed: %v", err)
 	}
 
 	cfg, err := sub.Config(ctx)
@@ -368,7 +370,7 @@ func TestUpdateDeadLetterPolicy(t *testing.T) {
 	}
 
 	if err := removeDeadLetterTopic(buf, tc.ProjectID, deadLetterSubID); err != nil {
-		t.Fatalf("got error removing dead letter policy: %v", err)
+		t.Fatalf("removeDeadLetterTopic failed: %v", err)
 	}
 	cfg, err = sub.Config(ctx)
 	if err != nil {
@@ -382,40 +384,41 @@ func TestUpdateDeadLetterPolicy(t *testing.T) {
 
 func TestPullMsgsDeadLetterDeliveryAttempts(t *testing.T) {
 	client := setup(t)
+	defer client.Close()
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
-	deadLetterSourceID := topicID + "-dead-letter-source"
-	deadLetterSinkID := topicID + "-dead-letter-sink"
-	deadLetterSubID := subID + "-dead-letter"
+	deadLetterSourceID := topicID + "-delivery-source"
+	deadLetterSinkID := topicID + "-delivery-sink"
+	deadLetterSubID := subID + "-delivery-sub"
 
-	topic, err := getOrCreateTopic(ctx, client, deadLetterSourceID)
+	deadLetterSourceTopic, err := getOrCreateTopic(ctx, client, deadLetterSourceID)
 	if err != nil {
 		t.Fatalf("getOrCreateTopic: %v", err)
 	}
-	defer topic.Delete(ctx)
-	defer topic.Stop()
+	defer deadLetterSourceTopic.Delete(ctx)
+	defer deadLetterSourceTopic.Stop()
 
-	deadLetterTopic, err := getOrCreateTopic(ctx, client, deadLetterSinkID)
+	deadLetterSinkTopic, err := getOrCreateTopic(ctx, client, deadLetterSinkID)
 	if err != nil {
 		t.Fatalf("getOrCreateTopic: %v", err)
 	}
-	defer deadLetterTopic.Delete(ctx)
-	defer topic.Stop()
+	defer deadLetterSinkTopic.Delete(ctx)
+	defer deadLetterSinkTopic.Stop()
 
 	buf := new(bytes.Buffer)
 	deadLetterSinkName := fmt.Sprintf("projects/%s/topics/%s", tc.ProjectID, deadLetterSinkID)
 	if err = createSubWithDeadLetter(buf, tc.ProjectID, deadLetterSubID, deadLetterSourceID, deadLetterSinkName); err != nil {
-		t.Fatalf("createSubWithDeadLetter: %v", err)
+		t.Fatalf("createSubWithDeadLetter failed: %v", err)
 	}
 	sub := client.Subscription(deadLetterSubID)
 	defer sub.Delete(ctx)
 
-	if err = publishMsgs(ctx, topic, 1); err != nil {
-		t.Fatalf("publishMsgs: %v", err)
+	if err = publishMsgs(ctx, deadLetterSourceTopic, 1); err != nil {
+		t.Fatalf("publishMsgs failed: %v", err)
 	}
 
 	if err := pullMsgsDeadLetterDeliveryAttempt(buf, tc.ProjectID, deadLetterSubID); err != nil {
-		t.Fatalf("failed to pull messages: %v", err)
+		t.Fatalf("pullMsgsDeadLetterDeliveryAttempt failed: %v", err)
 	}
 	got := buf.String()
 	want := "delivery attempts: 1"

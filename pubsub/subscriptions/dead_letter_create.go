@@ -24,11 +24,12 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func createSubWithDeadLetter(w io.Writer, projectID, subID string, topicID string, deadLetterTopicName string) error {
+// createSubWithDeadLetter creates a subscription with a dead letter policy.
+func createSubWithDeadLetter(w io.Writer, projectID, subID string, topicID string, fullyQualifiedDeadLetterTopic string) error {
 	// projectID := "my-project-id"
 	// subID := "my-sub"
 	// topicID := "my-topic"
-	// deadLetterTopicName := "projects/my-project/topics/my-dead-letter-topic"
+	// fullyQualifiedDeadLetterTopic := "projects/my-project/topics/my-dead-letter-topic"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
@@ -37,18 +38,21 @@ func createSubWithDeadLetter(w io.Writer, projectID, subID string, topicID strin
 
 	topic := client.Topic(topicID)
 
-	sub, err := client.CreateSubscription(ctx, subID, pubsub.SubscriptionConfig{
+	subConfig := pubsub.SubscriptionConfig{
 		Topic:       topic,
 		AckDeadline: 20 * time.Second,
 		DeadLetterPolicy: &pubsub.DeadLetterPolicy{
-			DeadLetterTopic:     deadLetterTopicName,
+			DeadLetterTopic:     fullyQualifiedDeadLetterTopic,
 			MaxDeliveryAttempts: 10,
 		},
-	})
+	}
+
+	sub, err := client.CreateSubscription(ctx, subID, subConfig)
 	if err != nil {
 		return fmt.Errorf("CreateSubscription: %v", err)
 	}
-	fmt.Fprintf(w, "Created subscription (%s) with dead letter topic (%s)\n", sub.String(), deadLetterTopicName)
+	fmt.Fprintf(w, "Created subscription (%s) with dead letter topic (%s)\n", sub.String(), fullyQualifiedDeadLetterTopic)
+	fmt.Fprintln(w, "To process dead letter messages, remember to add a subscription to your dead letter topic.")
 	return nil
 }
 

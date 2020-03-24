@@ -39,14 +39,16 @@ func pullMsgsDeadLetterDeliveryAttempt(w io.Writer, projectID, subID string) err
 
 	sub := client.Subscription(subID)
 	err = sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
-		// The delivery attempt is an int pointer with the number of times
-		// a message has attempted to be delivered if dead lettering is enabled.
-		// Otherwise, it is nil.
-		fmt.Fprintf(w, "message: %s, delivery attempts: %d", msg.Data, *msg.DeliveryAttempt)
+		// When dead lettering is enabled, the delivery attempt field is a pointer to the
+		// the number of times the service has attempted to delivery a message.
+		// Otherwise, the field is nil.
+		if msg.DeliveryAttempt != nil {
+			fmt.Fprintf(w, "message: %s, delivery attempts: %d", msg.Data, *msg.DeliveryAttempt)
+		}
 		msg.Ack()
 	})
 	if err != nil {
-		return fmt.Errorf("receive: %v", err)
+		return fmt.Errorf("got error in Receive: %v", err)
 	}
 	return nil
 }

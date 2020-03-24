@@ -23,26 +23,29 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func updateDeadLetter(w io.Writer, projectID, subID string, deadLetterTopicName string) error {
+// updateDeadLetter updates an existing subscription with a dead letter policy.
+func updateDeadLetter(w io.Writer, projectID, subID string, fullyQualifiedDeadLetterTopic string) error {
 	// projectID := "my-project-id"
 	// subID := "my-sub"
-	// deadLetterTopicName := "projects/my-project/topics/my-dead-letter-topic"
+	// fullyQualifiedDeadLetterTopic := "projects/my-project/topics/my-dead-letter-topic"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
 
-	subConfig, err := client.Subscription(subID).Update(ctx, pubsub.SubscriptionConfigToUpdate{
+	updateConfig := pubsub.SubscriptionConfigToUpdate{
 		DeadLetterPolicy: &pubsub.DeadLetterPolicy{
-			DeadLetterTopic:     deadLetterTopicName,
+			DeadLetterTopic:     fullyQualifiedDeadLetterTopic,
 			MaxDeliveryAttempts: 20,
 		},
-	})
+	}
+
+	subConfig, err := client.Subscription(subID).Update(ctx, updateConfig)
 	if err != nil {
 		return fmt.Errorf("Update: %v", err)
 	}
-	fmt.Fprintf(w, "Updated subscription config: %v\n", subConfig)
+	fmt.Fprintf(w, "Updated subscription config: %+v\n", subConfig)
 	return nil
 }
 

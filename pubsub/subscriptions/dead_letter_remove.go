@@ -23,6 +23,7 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
+// removeDeadLetterTopic removes the dead letter policy from a subscription.
 func removeDeadLetterTopic(w io.Writer, projectID, subID string) error {
 	// projectID := "my-project-id"
 	// subID := "my-sub"
@@ -38,7 +39,7 @@ func removeDeadLetterTopic(w io.Writer, projectID, subID string) error {
 	if err != nil {
 		return fmt.Errorf("Update: %v", err)
 	}
-	fmt.Fprintf(w, "Updated subscription config: %v\n", subConfig)
+	fmt.Fprintf(w, "Updated subscription config: %+v\n", subConfig)
 	return nil
 }
 
