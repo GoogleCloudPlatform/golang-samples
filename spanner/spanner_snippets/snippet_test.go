@@ -76,12 +76,12 @@ func TestSample(t *testing.T) {
 	}
 
 	// Check for any backups that were created from that database and delete those as well
-	backupsIterator := adminClient.ListBackups(ctx, &adminpb.ListBackupsRequest{
+	iter := adminClient.ListBackups(ctx, &adminpb.ListBackupsRequest{
 		Parent: instance,
 		Filter: "Database:" + dbName,
 	})
 	for {
-		resp, err := backupsIterator.Next()
+		resp, err := iter.Next()
 		if err == iterator.Done {
 			break
 		}
