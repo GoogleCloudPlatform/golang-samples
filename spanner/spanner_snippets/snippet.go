@@ -1984,7 +1984,7 @@ func listBackups(ctx context.Context, w io.Writer, adminClient *database.Databas
 	// validDBPattern is defined as regexp.MustCompile("^(.*)/databases/(.*)$")
 	matches := validDBPattern.FindStringSubmatch(database)
 	if matches == nil || len(matches) != 3 {
-		return fmt.Errorf("Invalid database name %s", database)
+		return fmt.Errorf("Invalid database id %s", database)
 	}
 	instanceName := matches[1]
 	counter := 0
