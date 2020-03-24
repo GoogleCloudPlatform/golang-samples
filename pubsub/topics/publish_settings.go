@@ -45,10 +45,11 @@ func publishWithSettings(w io.Writer, projectID, topicID string) error {
 		})
 		// Block until the result is returned and a server-generated
 		// ID is returned for the published message.
-		_, err := result.Get(ctx)
+		id, err := result.Get(ctx)
 		if err != nil {
 			return fmt.Errorf("Get: %v", err)
 		}
+		fmt.Fprintf(w, "Published a message; msg ID: %v\n", id)
 	}
 	fmt.Fprintf(w, "Published messages with batch settings.")
 	return nil
