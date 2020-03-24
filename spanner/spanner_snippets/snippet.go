@@ -31,18 +31,20 @@ import (
 
 	"cloud.google.com/go/civil"
 	"cloud.google.com/go/spanner"
-	database "cloud.google.com/go/spanner/admin/database/apiv1"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc"
 
+	database "cloud.google.com/go/spanner/admin/database/apiv1"
 	pbts "github.com/golang/protobuf/ptypes"
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
+	sppb "google.golang.org/genproto/googleapis/spanner/v1"
 	"google.golang.org/genproto/protobuf/field_mask"
 	"google.golang.org/grpc/status"
 )
 
 type command func(ctx context.Context, w io.Writer, client *spanner.Client) error
+type newClientCommand func(ctx context.Context, w io.Writer, database string) error
 type adminCommand func(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error
 
 var (
@@ -96,6 +98,11 @@ var (
 		"querywithint":                queryWithInt,
 		"querywithstring":             queryWithString,
 		"querywithtimestampparameter": queryWithTimestampParameter,
+		"querywithqueryoptions":       queryWithQueryOptions,
+	}
+
+	newClientCommands = map[string]newClientCommand{
+		"createclientwithqueryoptions": createClientWithQueryOptions,
 	}
 
 	adminCommands = map[string]adminCommand{
@@ -1624,6 +1631,35 @@ func queryWithTimestampParameter(ctx context.Context, w io.Writer, client *spann
 
 // [END spanner_query_with_timestamp_parameter]
 
+// [START spanner_query_with_query_options]
+
+func queryWithQueryOptions(ctx context.Context, w io.Writer, client *spanner.Client) error {
+	stmt := spanner.Statement{SQL: `SELECT VenueId, VenueName, LastUpdateTime FROM Venues`}
+	queryOptions := spanner.QueryOptions{
+		Options: &sppb.ExecuteSqlRequest_QueryOptions{OptimizerVersion: "1"},
+	}
+	iter := client.Single().QueryWithOptions(ctx, stmt, queryOptions)
+	defer iter.Stop()
+	for {
+		row, err := iter.Next()
+		if err == iterator.Done {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		var venueID int64
+		var venueName string
+		var lastUpdateTime time.Time
+		if err := row.Columns(&venueID, &venueName, &lastUpdateTime); err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "%d %s %s\n", venueID, venueName, lastUpdateTime)
+	}
+}
+
+// [END spanner_query_with_query_options]
+
 func queryNewTable(ctx context.Context, w io.Writer, client *spanner.Client) error {
 	stmt := spanner.Statement{
 		SQL: `SELECT SingerId, VenueId, EventDate, Revenue, LastUpdateTime FROM Performances
@@ -1843,6 +1879,43 @@ func queryWithHistory(ctx context.Context, w io.Writer, client *spanner.Client) 
 		fmt.Fprintf(w, "%d %d %s %s %s\n", userID, documentID, contents, timestamp, previousContents)
 	}
 }
+
+// [START spanner_create_client_with_query_options]
+
+func createClientWithQueryOptions(ctx context.Context, w io.Writer, database string) error {
+	queryOptions := spanner.QueryOptions{
+		Options: &sppb.ExecuteSqlRequest_QueryOptions{OptimizerVersion: "1"},
+	}
+	client, err := spanner.NewClientWithConfig(
+		ctx, database, spanner.ClientConfig{QueryOptions: queryOptions},
+	)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	stmt := spanner.Statement{SQL: `SELECT VenueId, VenueName, LastUpdateTime FROM Venues`}
+	iter := client.Single().Query(ctx, stmt)
+	defer iter.Stop()
+	for {
+		row, err := iter.Next()
+		if err == iterator.Done {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		var venueID int64
+		var venueName string
+		var lastUpdateTime time.Time
+		if err := row.Columns(&venueID, &venueName, &lastUpdateTime); err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "%d %s %s\n", venueID, venueName, lastUpdateTime)
+	}
+}
+
+// [END spanner_create_client_with_query_options]
 
 // [START spanner_create_backup]
 
@@ -2273,6 +2346,15 @@ func run(ctx context.Context, adminClient *database.DatabaseAdminClient, dataCli
 		return err
 	}
 
+	// Command that needs to create a new client.
+	if newClientCmdFn := newClientCommands[cmd]; newClientCmdFn != nil {
+		err := newClientCmdFn(ctx, w, db)
+		if err != nil {
+			fmt.Fprintf(w, "%s failed with %v", cmd, err)
+		}
+		return err
+	}
+
 	// Normal mode
 	cmdFn := commands[cmd]
 	if cmdFn == nil {
@@ -2303,7 +2385,7 @@ func main() {
 		querywithbool, querywithbytes, querywithdate, querywithfloat, querywithint, querywithstring,
 		querywithtimestampparameter, createbackup, listbackups, updatebackup, deletebackup, restorebackup,
 		listbackupsbyname,listsmallbackups,listnewbackups,listinstancebackups,listbackupoperations,
-		listdatabaseoperations
+		listdatabaseoperations,	querywithtimestampparameter, querywithqueryoptions, createclientwithqueryoptions
 
 Examples:
 	spanner_snippets createdatabase projects/my-project/instances/my-instance/databases/example-db
