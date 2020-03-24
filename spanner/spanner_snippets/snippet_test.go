@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	database "cloud.google.com/go/spanner/admin/database/apiv1"
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
@@ -308,7 +309,12 @@ func TestSample(t *testing.T) {
 	out = runCommand(t, "restorebackup", restoreDBName)
 	assertContains(t, out, "Restored backup [")
 	assertContains(t, out, "/backups/my-backup]")
+	WaitForDBReadyOptimizing(ctx,adminClient,restoreDBName,t)
+	out = runCommand(t, "deletebackup", dbName)
+	assertContains(t, out, "Deleted backup [my-backup]")
+}
 
+func WaitForDBReadyOptimizing(ctx context.Context, adminClient *database.DatabaseAdminClient,restoreDBName string, t *testing.T){
 	// Wait for database to finish optimizing - cannot delete a backup if a database restored from it
 	for {
 		restoreDB, err := adminClient.GetDatabase(ctx, &adminpb.GetDatabaseRequest{Name: restoreDBName})
@@ -321,8 +327,6 @@ func TestSample(t *testing.T) {
 		time.Sleep(1 * time.Minute)
 	}
 
-	out = runCommand(t, "deletebackup", dbName)
-	assertContains(t, out, "Deleted backup [my-backup]")
 }
 
 // Maximum length of database name is 30 characters, so trim if the generated name is too long
