@@ -14,7 +14,7 @@
 
 package subscriptions
 
-// [START pubsub_subscriber_dead_letter_delivery_attempt]
+// [START pubsub_dead_letter_delivery_attempt]
 import (
 	"context"
 	"fmt"
@@ -53,4 +53,4 @@ func pullMsgsDeadLetterDeliveryAttempt(w io.Writer, projectID, subID string) err
 	return nil
 }
 
-// [END pubsub_subscriber_dead_letter_delivery_attempt]
+// [END pubsub_dead_letter_delivery_attempt]

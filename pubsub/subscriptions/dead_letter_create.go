@@ -14,7 +14,7 @@
 
 package subscriptions
 
-// [START pubsub_create_subscription_dead_letter]
+// [START pubsub_dead_letter_create_subscription]
 import (
 	"context"
 	"fmt"
@@ -56,4 +56,4 @@ func createSubWithDeadLetter(w io.Writer, projectID, subID string, topicID strin
 	return nil
 }
 
-// [END pubsub_create_subscription_dead_letter]
+// [END pubsub_dead_letter_create_subscription]
