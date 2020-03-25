@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"io"
 
-	secretmanager "cloud.google.com/go/secretmanager/apiv1beta1"
+	secretmanager "cloud.google.com/go/secretmanager/apiv1"
 )
 
 // iamGrantAccess grants the given member access to the secret.
