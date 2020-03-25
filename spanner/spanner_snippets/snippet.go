@@ -35,7 +35,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 
-	spadmindb "cloud.google.com/go/spanner/admin/database/apiv1"
+	database "cloud.google.com/go/spanner/admin/database/apiv1"
 	pbts "github.com/golang/protobuf/ptypes"
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 	sppb "google.golang.org/genproto/googleapis/spanner/v1"
@@ -45,8 +45,8 @@ import (
 
 type command func(ctx context.Context, w io.Writer, client *spanner.Client) error
 type newClientCommand func(ctx context.Context, w io.Writer, database string) error
-type adminCommand func(ctx context.Context, w io.Writer, adminClient *spadmindb.DatabaseAdminClient, database string) error
-type backupCommand func(ctx context.Context, w io.Writer, adminClient *spadmindb.DatabaseAdminClient, database, backupID string) error
+type adminCommand func(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error
+type backupCommand func(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database, backupID string) error
 
 var (
 	commands = map[string]command{
@@ -130,13 +130,10 @@ var (
 	}
 )
 
-var validDBPattern = regexp.MustCompile("^(.*)/databases/(.*)$")
-
 // [START spanner_create_database]
 
-func createDatabase(ctx context.Context, w io.Writer, adminClient *spadmindb.DatabaseAdminClient, db string) error {
-	// validDBPattern is defined as regexp.MustCompile("^(.*)/databases/(.*)$")
-	matches := validDBPattern.FindStringSubmatch(db)
+func createDatabase(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, db string) error {
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(db)
 	if matches == nil || len(matches) != 3 {
 		return fmt.Errorf("Invalid database id %s", db)
 	}
@@ -172,7 +169,7 @@ func createDatabase(ctx context.Context, w io.Writer, adminClient *spadmindb.Dat
 
 // [START spanner_create_table_with_timestamp_column]
 
-func createTableWithTimestamp(ctx context.Context, w io.Writer, adminClient *spadmindb.DatabaseAdminClient, database string) error {
+func createTableWithTimestamp(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
 	op, err := adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
 		Database: database,
 		Statements: []string{
@@ -198,7 +195,7 @@ func createTableWithTimestamp(ctx context.Context, w io.Writer, adminClient *spa
 
 // [END spanner_create_table_with_timestamp_column]
 
-func createTableDocumentsWithTimestamp(ctx context.Context, w io.Writer, adminClient *spadmindb.DatabaseAdminClient, database string) error {
+func createTableDocumentsWithTimestamp(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
 	op, err := adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
 		Database: database,
 		Statements: []string{
@@ -220,7 +217,7 @@ func createTableDocumentsWithTimestamp(ctx context.Context, w io.Writer, adminCl
 	return nil
 }
 
-func createTableDocumentsWithHistoryTable(ctx context.Context, w io.Writer, adminClient *spadmindb.DatabaseAdminClient, database string) error {
+func createTableDocumentsWithHistoryTable(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
 	op, err := adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
 		Database: database,
 		Statements: []string{
@@ -538,7 +535,7 @@ func read(ctx context.Context, w io.Writer, client *spanner.Client) error {
 
 // [START spanner_add_column]
 
-func addNewColumn(ctx context.Context, w io.Writer, adminClient *spadmindb.DatabaseAdminClient, database string) error {
+func addNewColumn(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
 	op, err := adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
 		Database: database,
 		Statements: []string{
@@ -648,7 +645,7 @@ func queryNewColumn(ctx context.Context, w io.Writer, client *spanner.Client) er
 
 // [START spanner_create_index]
 
-func addIndex(ctx context.Context, w io.Writer, adminClient *spadmindb.DatabaseAdminClient, database string) error {
+func addIndex(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
 	op, err := adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
 		Database: database,
 		Statements: []string{
@@ -739,7 +736,7 @@ func readUsingIndex(ctx context.Context, w io.Writer, client *spanner.Client) er
 
 // [START spanner_create_storing_index]
 
-func addStoringIndex(ctx context.Context, w io.Writer, adminClient *spadmindb.DatabaseAdminClient, database string) error {
+func addStoringIndex(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
 	op, err := adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
 		Database: database,
 		Statements: []string{
@@ -912,7 +909,7 @@ func readBatchData(ctx context.Context, w io.Writer, client *spanner.Client) err
 
 // [START spanner_add_timestamp_column]
 
-func addCommitTimestamp(ctx context.Context, w io.Writer, adminClient *spadmindb.DatabaseAdminClient, database string) error {
+func addCommitTimestamp(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
 	op, err := adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
 		Database: database,
 		Statements: []string{
@@ -1311,7 +1308,7 @@ func updateUsingBatchDML(ctx context.Context, w io.Writer, client *spanner.Clien
 
 // Creates a Cloud Spanner table comprised of columns for each supported data type
 // See https://cloud.google.com/spanner/docs/data-types
-func createTableWithDatatypes(ctx context.Context, w io.Writer, adminClient *spadmindb.DatabaseAdminClient, database string) error {
+func createTableWithDatatypes(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
 	op, err := adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
 		Database: database,
 		Statements: []string{
@@ -1917,7 +1914,7 @@ func createClientWithQueryOptions(ctx context.Context, w io.Writer, database str
 
 // [START spanner_create_backup]
 
-func createBackup(ctx context.Context, w io.Writer, adminClient *spadmindb.DatabaseAdminClient, database, backupID string) error {
+func createBackup(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database, backupID string) error {
 	expireTime := time.Now().AddDate(0, 0, 14)
 	// Create a backup.
 	op, err := adminClient.StartBackupOperation(ctx, backupID, database, expireTime)
@@ -1940,7 +1937,7 @@ func createBackup(ctx context.Context, w io.Writer, adminClient *spadmindb.Datab
 
 // [START spanner_cancel_backup_create]
 
-func cancelBackup(ctx context.Context, w io.Writer, adminClient *spadmindb.DatabaseAdminClient, database, backupID string) error {
+func cancelBackup(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database, backupID string) error {
 	expireTime := time.Now().AddDate(0, 0, 14)
 	// Create a backup.
 	op, err := adminClient.StartBackupOperation(ctx, backupID, database, expireTime)
@@ -1978,15 +1975,14 @@ func cancelBackup(ctx context.Context, w io.Writer, adminClient *spadmindb.Datab
 
 // [START spanner_list_backups]
 
-func listBackups(ctx context.Context, w io.Writer, adminClient *spadmindb.DatabaseAdminClient, database, backupID string) error {
-	// validDBPattern is defined as regexp.MustCompile("^(.*)/databases/(.*)$")
-	matches := validDBPattern.FindStringSubmatch(database)
+func listBackups(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, db, backupID string) error {
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(db)
 	if matches == nil || len(matches) != 3 {
-		return fmt.Errorf("Invalid database id %s", database)
+		return fmt.Errorf("Invalid database id %s", db)
 	}
 	instanceName := matches[1]
 
-	printBackups := func(iter *spadmindb.BackupIterator) error {
+	printBackups := func(iter *database.BackupIterator) error {
 		for {
 			resp, err := iter.Next()
 			if err == iterator.Done {
@@ -1999,7 +1995,7 @@ func listBackups(ctx context.Context, w io.Writer, adminClient *spadmindb.Databa
 		}
 	}
 
-	var iter *spadmindb.BackupIterator
+	var iter *database.BackupIterator
 	var filter string
 	// List all backups.
 	iter = adminClient.ListBackups(ctx, &adminpb.ListBackupsRequest{
@@ -2032,7 +2028,7 @@ func listBackups(ctx context.Context, w io.Writer, adminClient *spadmindb.Databa
 	// List all backups for a database that contains a name.
 	iter = adminClient.ListBackups(ctx, &adminpb.ListBackupsRequest{
 		Parent: instanceName,
-		Filter: "database:" + database,
+		Filter: "database:" + db,
 	})
 	if err := printBackups(iter); err != nil {
 		return err
@@ -2087,9 +2083,8 @@ func listBackups(ctx context.Context, w io.Writer, adminClient *spadmindb.Databa
 
 // [START spanner_list_backup_operations]
 
-func listBackupOperations(ctx context.Context, w io.Writer, adminClient *spadmindb.DatabaseAdminClient, database string) error {
-	// validDBPattern is defined as regexp.MustCompile("^(.*)/databases/(.*)$")
-	matches := validDBPattern.FindStringSubmatch(database)
+func listBackupOperations(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
 	if matches == nil || len(matches) != 3 {
 		return fmt.Errorf("Invalid database id %s", database)
 	}
@@ -2125,9 +2120,8 @@ func listBackupOperations(ctx context.Context, w io.Writer, adminClient *spadmin
 
 // [START spanner_list_database_operations]
 
-func listDatabaseOperations(ctx context.Context, w io.Writer, adminClient *spadmindb.DatabaseAdminClient, database string) error {
-	// validDBPattern is defined as regexp.MustCompile("^(.*)/databases/(.*)$")
-	matches := validDBPattern.FindStringSubmatch(database)
+func listDatabaseOperations(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
 	if matches == nil || len(matches) != 3 {
 		return fmt.Errorf("Invalid database id %s", database)
 	}
@@ -2162,9 +2156,8 @@ func listDatabaseOperations(ctx context.Context, w io.Writer, adminClient *spadm
 
 // [START spanner_update_backup]
 
-func updateBackup(ctx context.Context, w io.Writer, adminClient *spadmindb.DatabaseAdminClient, database, backupID string) error {
-	// validDBPattern is defined as regexp.MustCompile("^(.*)/databases/(.*)$")
-	matches := validDBPattern.FindStringSubmatch(database)
+func updateBackup(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database, backupID string) error {
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
 	if matches == nil || len(matches) != 3 {
 		return fmt.Errorf("Invalid database id %s", database)
 	}
@@ -2201,9 +2194,8 @@ func updateBackup(ctx context.Context, w io.Writer, adminClient *spadmindb.Datab
 
 // [START spanner_restore_backup]
 
-func restoreBackup(ctx context.Context, w io.Writer, adminClient *spadmindb.DatabaseAdminClient, database, backupID string) error {
-	// validDBPattern is defined as regexp.MustCompile("^(.*)/databases/(.*)$")
-	matches := validDBPattern.FindStringSubmatch(database)
+func restoreBackup(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database, backupID string) error {
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
 	if matches == nil || len(matches) != 3 {
 		return fmt.Errorf("Invalid database id %s", database)
 	}
@@ -2240,9 +2232,8 @@ func restoreBackup(ctx context.Context, w io.Writer, adminClient *spadmindb.Data
 
 // [START spanner_delete_backup]
 
-func deleteBackup(ctx context.Context, w io.Writer, adminClient *spadmindb.DatabaseAdminClient, database, backupID string) error {
-	// validDBPattern is defined as regexp.MustCompile("^(.*)/databases/(.*)$")
-	matches := validDBPattern.FindStringSubmatch(database)
+func deleteBackup(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database, backupID string) error {
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
 	if matches == nil || len(matches) != 3 {
 		return fmt.Errorf("Invalid database id %s", database)
 	}
@@ -2258,7 +2249,7 @@ func deleteBackup(ctx context.Context, w io.Writer, adminClient *spadmindb.Datab
 
 // [END spanner_delete_backup]
 
-func createClients(ctx context.Context, db string) (*spadmindb.DatabaseAdminClient, *spanner.Client) {
+func createClients(ctx context.Context, db string) (*database.DatabaseAdminClient, *spanner.Client) {
 	// [START spanner_create_admin_client_for_emulator]
 
 	var opts []option.ClientOption
@@ -2273,7 +2264,7 @@ func createClients(ctx context.Context, db string) (*spadmindb.DatabaseAdminClie
 		)
 	}
 
-	adminClient, err := spadmindb.NewDatabaseAdminClient(ctx, opts...)
+	adminClient, err := database.NewDatabaseAdminClient(ctx, opts...)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -2288,7 +2279,7 @@ func createClients(ctx context.Context, db string) (*spadmindb.DatabaseAdminClie
 	return adminClient, dataClient
 }
 
-func run(ctx context.Context, adminClient *spadmindb.DatabaseAdminClient, dataClient *spanner.Client, w io.Writer, cmd string, db string, backupID string) error {
+func run(ctx context.Context, adminClient *database.DatabaseAdminClient, dataClient *spanner.Client, w io.Writer, cmd string, db string, backupID string) error {
 	if adminCmdFn := adminCommands[cmd]; adminCmdFn != nil {
 		err := adminCmdFn(ctx, w, adminClient, db)
 		if err != nil {
