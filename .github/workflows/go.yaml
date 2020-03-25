@@ -24,10 +24,14 @@ jobs:
     - name: goimports
       run: test -z "$($(go env GOPATH)/bin/goimports -l .)"
         
-    - name: Fix goimports on fail
+    - name: Open this to see how to fix goimports if it fails
       run: echo Run goimports -w .
       if: failure()
 
     - name: Build code
-      run: go build ./...
-
+      run: \
+        for mod in $(find . -name go.mod); do \
+          cd "$(dirname $mod)"; \
+          go build ./...; \
+          cd - >/dev/null; \
+        done
