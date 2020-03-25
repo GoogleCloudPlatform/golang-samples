@@ -38,7 +38,7 @@ func TestLogoDetection(t *testing.T) {
 		wants := [3]string{"Description", "Confidence", "Segment"}
 		for _, want := range wants {
 			if got := buf.String(); !strings.Contains(got, want) {
-				r.Errorf(`logoDetection(%q): got %q, want %q`, file, got, want)
+				r.Errorf("logoDetection(%q): got %q, want %q", file, got, want)
 			}
 		}
 	})

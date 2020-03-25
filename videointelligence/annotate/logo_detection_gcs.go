@@ -16,7 +16,6 @@
 package annotate
 
 // [START video_detect_logo_gcs]
-
 import (
 	"context"
 	"fmt"
@@ -38,6 +37,7 @@ func logoDetectionGCS(w io.Writer, gcsURI string) error {
 	if err != nil {
 		return fmt.Errorf("video.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	op, err := client.AnnotateVideo(ctx, &videopb.AnnotateVideoRequest{
 		InputUri: gcsURI,
@@ -60,8 +60,8 @@ func logoDetectionGCS(w io.Writer, gcsURI string) error {
 	// Annotations for list of logos detected, tracked and recognized in video.
 	for _, annotation := range result.LogoRecognitionAnnotations {
 		fmt.Fprintf(w, "Description: %q\n", annotation.Entity.GetDescription())
-		// Opaque entity ID. Some IDs may be available in [Google Knowledge
-		// Graph Search API](https://developers.google.com/knowledge-graph/).
+		// Opaque entity ID. Some IDs may be available in Google Knowledge
+		// Graph Search API (https://developers.google.com/knowledge-graph/).
 		if len(annotation.Entity.EntityId) > 0 {
 			fmt.Fprintf(w, "\tEntity ID: %q\n", annotation.Entity.GetEntityId())
 		}
