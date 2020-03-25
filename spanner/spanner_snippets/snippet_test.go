@@ -41,9 +41,11 @@ func TestSample(t *testing.T) {
 		t.Fatal("Spanner instance ref must be in the form of 'projects/PROJECT_ID/instances/INSTANCE_ID'")
 	}
 	databaseID := validLength(fmt.Sprintf("test-%s", tc.ProjectID), t)
-	restoreDatabaseID := validLength(fmt.Sprintf("test-restore-%s", tc.ProjectID), t)
+	restoreDatabaseID := validLength(fmt.Sprintf("restore-%s", tc.ProjectID), t)
 	dbName := fmt.Sprintf("%s/databases/%s", instance, databaseID)
 	restoreDBName := fmt.Sprintf("%s/databases/%s", instance, restoreDatabaseID)
+	backupID := validLength(fmt.Sprintf("backup-%s", tc.ProjectID), t)
+	cancelledBackupID := validLength(fmt.Sprintf("cancel-%s", tc.ProjectID), t)
 
 	ctx := context.Background()
 	adminClient, dataClient := createClients(ctx, dbName)
@@ -80,7 +82,7 @@ func TestSample(t *testing.T) {
 	// Check for any backups that were created from that database and delete those as well
 	iter := adminClient.ListBackups(ctx, &adminpb.ListBackupsRequest{
 		Parent: instance,
-		Filter: "Database:" + dbName,
+		Filter: "database:" + dbName,
 	})
 	for {
 		resp, err := iter.Next()
@@ -103,7 +105,7 @@ func TestSample(t *testing.T) {
 	runCommand := func(t *testing.T, cmd string, dbName string) string {
 		t.Helper()
 		var b bytes.Buffer
-		if err := run(context.Background(), adminClient, dataClient, &b, cmd, dbName); err != nil {
+		if err := run(context.Background(), adminClient, dataClient, &b, cmd, dbName, ""); err != nil {
 			t.Errorf("run(%q, %q): %v", cmd, dbName, err)
 		}
 		return b.String()
@@ -111,8 +113,16 @@ func TestSample(t *testing.T) {
 	mustRunCommand := func(t *testing.T, cmd string, dbName string) string {
 		t.Helper()
 		var b bytes.Buffer
-		if err := run(context.Background(), adminClient, dataClient, &b, cmd, dbName); err != nil {
+		if err := run(context.Background(), adminClient, dataClient, &b, cmd, dbName, ""); err != nil {
 			t.Fatalf("run(%q, %q): %v", cmd, dbName, err)
+		}
+		return b.String()
+	}
+	runBackupCommand := func(t *testing.T, cmd, dbName, backupID string) string {
+		t.Helper()
+		var b bytes.Buffer
+		if err := run(context.Background(), adminClient, dataClient, &b, cmd, dbName, backupID); err != nil {
+			t.Errorf("run(%q, %q): %v", cmd, dbName, err)
 		}
 		return b.String()
 	}
@@ -288,39 +298,33 @@ func TestSample(t *testing.T) {
 	assertContains(t, out, "19 Venue 19")
 	assertContains(t, out, "42 Venue 42")
 
-	out = runCommand(t, "createbackup", dbName)
-	assertContains(t, out, "Created backup [")
-	assertContains(t, out, "/backups/my-backup] from database")
-	out = runCommand(t, "cancelbackup", dbName)
+	out = runBackupCommand(t, "createbackup", dbName, backupID)
+	assertContains(t, out, fmt.Sprintf("backups/%s", backupID))
+
+	out = runBackupCommand(t, "cancelbackup", dbName, cancelledBackupID)
 	assertContains(t, out, "Backup cancelled.")
-	out = runCommand(t, "listbackups", dbName)
-	assertContains(t, out, "/backups/my-backup [READY] - ")
-	assertContains(t, out, "Backup count: ")
-	out = runCommand(t, "listbackupsbyname", dbName)
-	assertContains(t, out, "/backups/my-backup [READY] - ")
-	assertContains(t, out, "Backup count: ")
-	out = runCommand(t, "listsmallbackups", dbName)
-	assertContains(t, out, "/backups/my-backup [READY] - ")
-	assertContains(t, out, "Backup count: ")
-	out = runCommand(t, "listnewbackups", dbName)
-	assertContains(t, out, "/backups/my-backup [READY] - ")
-	assertContains(t, out, "Backup count: ")
-	out = runCommand(t, "listinstancebackups", dbName)
-	assertContains(t, out, "/backups/")
+
+	out = runBackupCommand(t, "listbackups", dbName, backupID)
+	assertContains(t, out, fmt.Sprintf("/backups/%s", backupID))
+	assertContains(t, out, "Backups listed.")
+
 	out = runCommand(t, "listbackupoperations", dbName)
-	assertContains(t, out, "/operations/")
-	assertContains(t, out, "Backup operation count: ")
-	out = runCommand(t, "listdatabaseoperations", dbName)
-	assertContains(t, out, "/operations/")
-	assertContains(t, out, "Database operation count: ")
-	out = runCommand(t, "updatebackup", dbName)
-	assertContains(t, out, "Updated backup [my-backup]")
-	out = runCommand(t, "restorebackup", restoreDBName)
-	assertContains(t, out, "Restored backup [")
-	assertContains(t, out, "/backups/my-backup]")
+	assertContains(t, out, fmt.Sprintf("on database %s", dbName))
+
+	out = runBackupCommand(t, "updatebackup", dbName, backupID)
+	assertContains(t, out, fmt.Sprintf("Updated backup %s", backupID))
+
+	out = runBackupCommand(t, "restorebackup", restoreDBName, backupID)
+	assertContains(t, out, fmt.Sprintf("Source database %s restored from backup", dbName))
+
 	WaitForDBReadyOptimizing(ctx, adminClient, restoreDBName, t)
-	out = runCommand(t, "deletebackup", dbName)
-	assertContains(t, out, "Deleted backup [my-backup]")
+
+	// This command runs after a restore operation.
+	out = runCommand(t, "listdatabaseoperations", restoreDBName)
+	assertContains(t, out, fmt.Sprintf("Database %s restored from backup", restoreDBName))
+
+	out = runBackupCommand(t, "deletebackup", dbName, backupID)
+	assertContains(t, out, fmt.Sprintf("Deleted backup %s", backupID))
 }
 
 func WaitForDBReadyOptimizing(ctx context.Context, adminClient *database.DatabaseAdminClient, restoreDBName string, t *testing.T) {
