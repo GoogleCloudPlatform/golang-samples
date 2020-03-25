@@ -30,7 +30,7 @@ func TestLogoDetection(t *testing.T) {
 
 	testutil.Retry(t, 10, 20*time.Second, func(r *testutil.R) {
 		var buf bytes.Buffer
-		if err := logoDetection(&buf, filename); err != nil {
+		if err := logoDetection(&buf, file); err != nil {
 			r.Errorf("logoDetection: %v", err)
 			return
 		}

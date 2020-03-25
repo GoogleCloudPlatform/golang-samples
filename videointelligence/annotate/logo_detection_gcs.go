@@ -27,8 +27,8 @@ import (
 	videopb "google.golang.org/genproto/googleapis/cloud/videointelligence/v1"
 )
 
-// logoDetectionGcs analyzes a video and extracts logos with their bounding boxes.
-func logoDetectionGcs(w io.Writer, gcsURI string) error {
+// logoDetectionGCS analyzes a video and extracts logos with their bounding boxes.
+func logoDetectionGCS(w io.Writer, gcsURI string) error {
 	// gcsURI := "gs://cloud-samples-data/video/googlework_tiny.mp4"
 
 	ctx := context.Background()
