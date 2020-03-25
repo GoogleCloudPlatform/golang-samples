@@ -23,10 +23,9 @@ import (
 	"testing"
 	"time"
 
-	"google.golang.org/api/iterator"
-
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"google.golang.org/api/iterator"
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
@@ -90,7 +89,7 @@ func TestSample(t *testing.T) {
 			break
 		}
 		if err != nil {
-			t.Errorf("Failed to list backups for database %s", dbName)
+			t.Errorf("Failed to list backups for database %s: %v", dbName, err)
 		}
 		t.Logf("backup %s exists. delete result: %v", resp.Name,
 			adminClient.DeleteBackup(ctx, &adminpb.DeleteBackupRequest{Name: resp.Name}))

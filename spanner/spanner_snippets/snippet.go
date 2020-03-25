@@ -26,15 +26,14 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/golang/protobuf/ptypes"
-	"google.golang.org/genproto/googleapis/longrunning"
-	"google.golang.org/grpc/codes"
-
 	"cloud.google.com/go/civil"
 	"cloud.google.com/go/spanner"
+	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
+	"google.golang.org/genproto/googleapis/longrunning"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 
 	spadmindb "cloud.google.com/go/spanner/admin/database/apiv1"
 	pbts "github.com/golang/protobuf/ptypes"
@@ -131,9 +130,7 @@ var (
 	}
 )
 
-var (
-	validDBPattern = regexp.MustCompile("^(.*)/databases/(.*)$")
-)
+var validDBPattern = regexp.MustCompile("^(.*)/databases/(.*)$")
 
 // [START spanner_create_database]
 
@@ -1934,8 +1931,8 @@ func createBackup(ctx context.Context, w io.Writer, adminClient *spadmindb.Datab
 	}
 
 	// Get the name, create time and backup size.
-	fmt.Fprintf(w, "Backup %s of size %d bytes was created at %s\n", backup.Name,
-		backup.SizeBytes, time.Unix(backup.CreateTime.Seconds, int64(backup.CreateTime.Nanos)).Format(time.RFC3339))
+	createTime := time.Unix(backup.CreateTime.Seconds, int64(backup.CreateTime.Nanos))
+	fmt.Fprintf(w, "Backup %s of size %d bytes was created at %s\n", backup.Name, backup.SizeBytes, createTime.Format(time.RFC3339))
 	return nil
 }
 
@@ -2255,7 +2252,6 @@ func deleteBackup(ctx context.Context, w io.Writer, adminClient *spadmindb.Datab
 	if err != nil {
 		return err
 	}
-
 	fmt.Fprintf(w, "Deleted backup %s\n", backupID)
 	return nil
 }
