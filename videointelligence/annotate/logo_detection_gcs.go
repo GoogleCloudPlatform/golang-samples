@@ -77,10 +77,10 @@ func logoDetectionGcs(w io.Writer, filename string) error {
 			fmt.Fprintf(w, "\tConfidence: %f\n", track.GetConfidence())
 
 			// The object with timestamp and attributes per frame in the track.
-			for _, timeStampedObject := range annotation.TimestampedObjects {
+			for _, timestampedObject := range track.TimestampedObjects {
 				// Normalized Bounding box in a frame, where the object is
 				// located.
-				box := timeStampedObject.GetNormalizedBoundingBox()
+				box := timestampedObject.GetNormalizedBoundingBox()
 				fmt.Fprintf(w, "\tBounding box position:\n")
 				fmt.Fprintf(w, "\t\tleft  : %f\n", box.GetLeft())
 				fmt.Fprintf(w, "\t\ttop   : %f\n", box.GetTop())
@@ -88,7 +88,7 @@ func logoDetectionGcs(w io.Writer, filename string) error {
 				fmt.Fprintf(w, "\t\tbottom: %f\n", box.GetBottom())
 
 				// Optional. The attributes of the object in the bounding box.
-				for _, attribute := range timeStampedObject.Attributes {
+				for _, attribute := range timestampedObject.Attributes {
 					fmt.Fprintf(w, "\t\t\tName: %f\n", attribute.GetName())
 					fmt.Fprintf(w, "\t\t\tConfidence: %f\n", attribute.GetConfidence())
 					fmt.Fprintf(w, "\t\t\tValue: %f\n", attribute.GetValue())
@@ -106,8 +106,8 @@ func logoDetectionGcs(w io.Writer, filename string) error {
 		// All video segments where the recognized logo appears. There might be
 		// multiple instances of the same logo class appearing in one VideoSegment.
 		for _, segment := range annotation.Segments {
-			start, _ := ptypes.Duration(segment.GetSegment().GetStartTimeOffset())
-			end, _ := ptypes.Duration(segment.GetSegment().GetEndTimeOffset())
+			start, _ := ptypes.Duration(segment.GetStartTimeOffset())
+			end, _ := ptypes.Duration(segment.GetEndTimeOffset())
 			fmt.Fprintf(w, "\tSegment: %v to %v\n", start, end)
 		}
 	}
