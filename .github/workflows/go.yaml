@@ -22,11 +22,11 @@ jobs:
       uses: actions/checkout@v2
     
     - name: goimports
-      run: test -z "$($(go env GOPATH)/bin/goimports -l . | tee goimports.out)" || cat goimports.out && exit 1
+      run: test -z "$(set -o pipefail && $(go env GOPATH)/bin/goimports -l . | tee goimports.out)" || { cat goimports.out && exit 1; }
         
     - name: Open this to see how to fix goimports if it fails
       run: echo Run goimports -w .
       if: failure()
 
     - name: Build code
-      run: test -z "$(set -o pipefail && find . -name go.mod -execdir go build ./... \; 2>&1 | tee build.out)" || cat build.out && exit 1
+      run: test -z "$(set -o pipefail && find . -name go.mod -execdir go build ./... \; 2>&1 | tee build.out)" || { cat build.out && exit 1; }
