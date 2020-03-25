@@ -30,7 +30,7 @@ jobs:
 
     - name: Build code
       run: \
-        for mod in $(find . -name go.mod); do \
+        for mod in $(find . -name go.mod); do ; \
           cd "$(dirname $mod)"; \
           go build ./...; \
           cd - >/dev/null; \
