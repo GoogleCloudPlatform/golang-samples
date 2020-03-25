@@ -29,4 +29,7 @@ jobs:
       if: failure()
 
     - name: Build code
-      run: test -z "$(set -o pipefail && find . -name go.mod -execdir go build ./... \; 2>&1 | tee build.out)" || { cat build.out && exit 1; }
+      # Use find to build all modules. '-execdir ... ;' doesn't set an exit code
+      # based on command results. So, create a file if a build fails and check
+      # if the file exists to set the right exit code.
+      run: find . -name go.mod -execdir sh -c 'go build ./... || touch build_failed.txt' \; ; test ! -f build_failed.txt
