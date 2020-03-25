@@ -66,8 +66,8 @@ func logoDetection(w io.Writer, filename string) error {
 	// Annotations for list of logos detected, tracked and recognized in video.
 	for _, annotation := range result.LogoRecognitionAnnotations {
 		fmt.Fprintf(w, "Description: %q\n", annotation.Entity.GetDescription())
-		// Opaque entity ID. Some IDs may be available in [Google Knowledge
-		// Graph Search API](https://developers.google.com/knowledge-graph/).
+		// Opaque entity ID. Some IDs may be available in Google Knowledge
+		// Graph Search API (https://developers.google.com/knowledge-graph/).
 		if len(annotation.Entity.EntityId) > 0 {
 			fmt.Fprintf(w, "\tEntity ID: %q\n", annotation.Entity.GetEntityId())
 		}
