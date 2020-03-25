@@ -95,17 +95,17 @@ func logoDetection(w io.Writer, filename string) error {
 
 				// Optional. The attributes of the object in the bounding box.
 				for _, attribute := range timestampedObject.Attributes {
-					fmt.Fprintf(w, "\t\t\tName: %f\n", attribute.GetName())
+					fmt.Fprintf(w, "\t\t\tName: %q\n", attribute.GetName())
 					fmt.Fprintf(w, "\t\t\tConfidence: %f\n", attribute.GetConfidence())
-					fmt.Fprintf(w, "\t\t\tValue: %f\n", attribute.GetValue())
+					fmt.Fprintf(w, "\t\t\tValue: %q\n", attribute.GetValue())
 				}
 			}
 
 			// Optional. Attributes in the track level.
 			for _, trackAttribute := range track.Attributes {
-				fmt.Fprintf(w, "\t\tName: %f\n", trackAttribute.GetName())
+				fmt.Fprintf(w, "\t\tName: %q\n", trackAttribute.GetName())
 				fmt.Fprintf(w, "\t\tConfidence: %f\n", trackAttribute.GetConfidence())
-				fmt.Fprintf(w, "\t\tValue: %f\n", trackAttribute.GetValue())
+				fmt.Fprintf(w, "\t\tValue: %q\n", trackAttribute.GetValue())
 			}
 		}
 
