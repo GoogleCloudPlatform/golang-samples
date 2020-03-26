@@ -28,18 +28,25 @@ import (
 
 	"cloud.google.com/go/civil"
 	"cloud.google.com/go/spanner"
-	database "cloud.google.com/go/spanner/admin/database/apiv1"
+	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
+	"google.golang.org/genproto/googleapis/longrunning"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 
+	database "cloud.google.com/go/spanner/admin/database/apiv1"
+	pbts "github.com/golang/protobuf/ptypes"
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 	sppb "google.golang.org/genproto/googleapis/spanner/v1"
+	"google.golang.org/genproto/protobuf/field_mask"
+	"google.golang.org/grpc/status"
 )
 
 type command func(ctx context.Context, w io.Writer, client *spanner.Client) error
 type newClientCommand func(ctx context.Context, w io.Writer, database string) error
 type adminCommand func(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error
+type backupCommand func(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database, backupID string) error
 
 var (
 	commands = map[string]command{
@@ -109,6 +116,17 @@ var (
 		"createtablewithdatatypes":        createTableWithDatatypes,
 		"createtabledocswithtimestamp":    createTableDocumentsWithTimestamp,
 		"createtabledocswithhistorytable": createTableDocumentsWithHistoryTable,
+		"listbackupoperations":            listBackupOperations,
+		"listdatabaseoperations":          listDatabaseOperations,
+	}
+
+	backupCommands = map[string]backupCommand{
+		"createbackup":  createBackup,
+		"cancelbackup":  cancelBackup,
+		"listbackups":   listBackups,
+		"updatebackup":  updateBackup,
+		"deletebackup":  deleteBackup,
+		"restorebackup": restoreBackup,
 	}
 )
 
@@ -1894,6 +1912,343 @@ func createClientWithQueryOptions(ctx context.Context, w io.Writer, database str
 
 // [END spanner_create_client_with_query_options]
 
+// [START spanner_create_backup]
+
+func createBackup(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database, backupID string) error {
+	expireTime := time.Now().AddDate(0, 0, 14)
+	// Create a backup.
+	op, err := adminClient.StartBackupOperation(ctx, backupID, database, expireTime)
+	if err != nil {
+		return err
+	}
+	// Wait for backup operation to complete.
+	backup, err := op.Wait(ctx)
+	if err != nil {
+		return err
+	}
+
+	// Get the name, create time and backup size.
+	createTime := time.Unix(backup.CreateTime.Seconds, int64(backup.CreateTime.Nanos))
+	fmt.Fprintf(w, "Backup %s of size %d bytes was created at %s\n", backup.Name, backup.SizeBytes, createTime.Format(time.RFC3339))
+	return nil
+}
+
+// [END spanner_create_backup]
+
+// [START spanner_cancel_backup_create]
+
+func cancelBackup(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database, backupID string) error {
+	expireTime := time.Now().AddDate(0, 0, 14)
+	// Create a backup.
+	op, err := adminClient.StartBackupOperation(ctx, backupID, database, expireTime)
+	if err != nil {
+		return err
+	}
+
+	// Cancel backup creation.
+	err = adminClient.LROClient.CancelOperation(ctx, &longrunning.CancelOperationRequest{Name: op.Name()})
+	if err != nil {
+		return err
+	}
+
+	// Cancel operations are best effort so either it will complete or be
+	// cancelled.
+	backup, err := op.Wait(ctx)
+	if err != nil {
+		if waitStatus, ok := status.FromError(err); !ok || waitStatus.Code() != codes.Canceled {
+			return err
+		}
+	} else {
+		// Backup was completed before it could be cancelled so delete the
+		// unwanted backup.
+		err = adminClient.DeleteBackup(ctx, &adminpb.DeleteBackupRequest{Name: backup.Name})
+		if err != nil {
+			return err
+		}
+	}
+
+	fmt.Fprintf(w, "Backup cancelled.\n")
+	return nil
+}
+
+// [END spanner_cancel_backup_create]
+
+// [START spanner_list_backups]
+
+func listBackups(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, db, backupID string) error {
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(db)
+	if matches == nil || len(matches) != 3 {
+		return fmt.Errorf("Invalid database id %s", db)
+	}
+	instanceName := matches[1]
+
+	printBackups := func(iter *database.BackupIterator) error {
+		for {
+			resp, err := iter.Next()
+			if err == iterator.Done {
+				return nil
+			}
+			if err != nil {
+				return err
+			}
+			fmt.Fprintf(w, "Backup %s\n", resp.Name)
+		}
+	}
+
+	var iter *database.BackupIterator
+	var filter string
+	// List all backups.
+	iter = adminClient.ListBackups(ctx, &adminpb.ListBackupsRequest{
+		Parent: instanceName,
+	})
+	if err := printBackups(iter); err != nil {
+		return err
+	}
+
+	// List all backups that contain a name.
+	iter = adminClient.ListBackups(ctx, &adminpb.ListBackupsRequest{
+		Parent: instanceName,
+		Filter: "name:" + backupID,
+	})
+	if err := printBackups(iter); err != nil {
+		return err
+	}
+
+	// List all backups that expire before a timestamp.
+	expireTime := time.Now().AddDate(0, 0, 30)
+	filter = fmt.Sprintf(`expire_time < "%s"`, expireTime.Format(time.RFC3339))
+	iter = adminClient.ListBackups(ctx, &adminpb.ListBackupsRequest{
+		Parent: instanceName,
+		Filter: filter,
+	})
+	if err := printBackups(iter); err != nil {
+		return err
+	}
+
+	// List all backups for a database that contains a name.
+	iter = adminClient.ListBackups(ctx, &adminpb.ListBackupsRequest{
+		Parent: instanceName,
+		Filter: "database:" + db,
+	})
+	if err := printBackups(iter); err != nil {
+		return err
+	}
+
+	// List all backups with a size greater than some bytes.
+	iter = adminClient.ListBackups(ctx, &adminpb.ListBackupsRequest{
+		Parent: instanceName,
+		Filter: "size_bytes > 100",
+	})
+	if err := printBackups(iter); err != nil {
+		return err
+	}
+
+	// List backups that were created after a timestamp that are also ready.
+	createTime := time.Now().AddDate(0, 0, -1)
+	filter = fmt.Sprintf(
+		`create_time >= "%s" AND state:READY`,
+		createTime.Format(time.RFC3339),
+	)
+	iter = adminClient.ListBackups(ctx, &adminpb.ListBackupsRequest{
+		Parent: instanceName,
+		Filter: filter,
+	})
+	if err := printBackups(iter); err != nil {
+		return err
+	}
+
+	// List backups with pagination.
+	request := &adminpb.ListBackupsRequest{
+		Parent:   instanceName,
+		PageSize: 10,
+	}
+	for {
+		iter = adminClient.ListBackups(ctx, request)
+		if err := printBackups(iter); err != nil {
+			return err
+		}
+		pageToken := iter.PageInfo().Token
+		if pageToken == "" {
+			break
+		} else {
+			request.PageToken = pageToken
+		}
+	}
+
+	fmt.Fprintf(w, "Backups listed.\n")
+	return nil
+}
+
+// [END spanner_list_backups]
+
+// [START spanner_list_backup_operations]
+
+func listBackupOperations(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
+	if matches == nil || len(matches) != 3 {
+		return fmt.Errorf("Invalid database id %s", database)
+	}
+	instanceName := matches[1]
+	// List the CreateBackup operations.
+	filter := fmt.Sprintf("(metadata.database:%s) AND (metadata.@type:type.googleapis.com/google.spanner.admin.database.v1.CreateBackupMetadata)", database)
+	iter := adminClient.ListBackupOperations(ctx, &adminpb.ListBackupOperationsRequest{
+		Parent: instanceName,
+		Filter: filter,
+	})
+	for {
+		resp, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		metadata := &adminpb.CreateBackupMetadata{}
+		if err := ptypes.UnmarshalAny(resp.Metadata, metadata); err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "Backup %s on database %s is %d%% complete.\n",
+			metadata.Name,
+			metadata.Database,
+			metadata.Progress.ProgressPercent,
+		)
+	}
+	return nil
+}
+
+// [END spanner_list_backup_operations]
+
+// [START spanner_list_database_operations]
+
+func listDatabaseOperations(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
+	if matches == nil || len(matches) != 3 {
+		return fmt.Errorf("Invalid database id %s", database)
+	}
+	instanceName := matches[1]
+	// List the databases that are being optimized after a restore operation.
+	filter := "(metadata.@type:type.googleapis.com/google.spanner.admin.database.v1.OptimizeRestoredDatabaseMetadata)"
+	iter := adminClient.ListDatabaseOperations(ctx, &adminpb.ListDatabaseOperationsRequest{
+		Parent: instanceName,
+		Filter: filter,
+	})
+	for {
+		resp, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		metadata := &adminpb.OptimizeRestoredDatabaseMetadata{}
+		if err := ptypes.UnmarshalAny(resp.Metadata, metadata); err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "Database %s restored from backup is %d%% optimized.\n",
+			metadata.Name,
+			metadata.Progress.ProgressPercent,
+		)
+	}
+	return nil
+}
+
+// [END spanner_list_database_operations]
+
+// [START spanner_update_backup]
+
+func updateBackup(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database, backupID string) error {
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
+	if matches == nil || len(matches) != 3 {
+		return fmt.Errorf("Invalid database id %s", database)
+	}
+	backupName := matches[1] + "/backups/" + backupID
+
+	backup, err := adminClient.GetBackup(ctx, &adminpb.GetBackupRequest{Name: backupName})
+	if err != nil {
+		return err
+	}
+
+	// Expire time must be within 366 days of the create time of the backup.
+	expireTime := time.Unix(backup.CreateTime.Seconds, int64(backup.CreateTime.Nanos)).AddDate(0, 0, 30)
+	expirespb, err := pbts.TimestampProto(expireTime)
+	if err != nil {
+		return err
+	}
+
+	_, err = adminClient.UpdateBackup(ctx, &adminpb.UpdateBackupRequest{
+		Backup: &adminpb.Backup{
+			Name:       backupName,
+			ExpireTime: expirespb,
+		},
+		UpdateMask: &field_mask.FieldMask{Paths: []string{"expire_time"}},
+	})
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprintf(w, "Updated backup %s\n", backupID)
+	return nil
+}
+
+// [END spanner_update_backup]
+
+// [START spanner_restore_backup]
+
+func restoreBackup(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database, backupID string) error {
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
+	if matches == nil || len(matches) != 3 {
+		return fmt.Errorf("Invalid database id %s", database)
+	}
+	instanceName := matches[1]
+	databaseID := matches[2]
+	backupName := instanceName + "/backups/" + backupID
+
+	// Start restoring backup to a new database.
+	restoreOp, err := adminClient.RestoreDatabase(ctx, &adminpb.RestoreDatabaseRequest{
+		Parent:     instanceName,
+		DatabaseId: databaseID,
+		Source: &adminpb.RestoreDatabaseRequest_Backup{
+			Backup: backupName,
+		},
+	})
+	if err != nil {
+		return err
+	}
+	// Wait for restore operation to complete.
+	db, err := restoreOp.Wait(ctx)
+	if err != nil {
+		return err
+	}
+	// Newly created database has restore information.
+	backupInfo := db.RestoreInfo.GetBackupInfo()
+	if backupInfo != nil {
+		fmt.Fprintf(w, "Source database %s restored from backup %s\n", backupInfo.SourceDatabase, backupInfo.Backup)
+	}
+
+	return nil
+}
+
+// [END spanner_restore_backup]
+
+// [START spanner_delete_backup]
+
+func deleteBackup(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database, backupID string) error {
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(database)
+	if matches == nil || len(matches) != 3 {
+		return fmt.Errorf("Invalid database id %s", database)
+	}
+	backupName := matches[1] + "/backups/" + backupID
+	// Delete the backup.
+	err := adminClient.DeleteBackup(ctx, &adminpb.DeleteBackupRequest{Name: backupName})
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "Deleted backup %s\n", backupID)
+	return nil
+}
+
+// [END spanner_delete_backup]
+
 func createClients(ctx context.Context, db string) (*database.DatabaseAdminClient, *spanner.Client) {
 	// [START spanner_create_admin_client_for_emulator]
 
@@ -1924,9 +2279,18 @@ func createClients(ctx context.Context, db string) (*database.DatabaseAdminClien
 	return adminClient, dataClient
 }
 
-func run(ctx context.Context, adminClient *database.DatabaseAdminClient, dataClient *spanner.Client, w io.Writer, cmd string, db string) error {
+func run(ctx context.Context, adminClient *database.DatabaseAdminClient, dataClient *spanner.Client, w io.Writer, cmd string, db string, backupID string) error {
 	if adminCmdFn := adminCommands[cmd]; adminCmdFn != nil {
 		err := adminCmdFn(ctx, w, adminClient, db)
+		if err != nil {
+			fmt.Fprintf(w, "%s failed with %v", cmd, err)
+		}
+		return err
+	}
+
+	// Command that needs a backup ID.
+	if backupCmdFn := backupCommands[cmd]; backupCmdFn != nil {
+		err := backupCmdFn(ctx, w, adminClient, db, backupID)
 		if err != nil {
 			fmt.Fprintf(w, "%s failed with %v", cmd, err)
 		}
@@ -1957,7 +2321,7 @@ func run(ctx context.Context, adminClient *database.DatabaseAdminClient, dataCli
 
 func main() {
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, `Usage: spanner_snippets <command> <database_name>
+		fmt.Fprintf(os.Stderr, `Usage: spanner_snippets <command> <database_name> <backup_id>
 
 	Command can be one of: createdatabase, write, query, read, update,
 		writetransaction, addnewcolumn, querynewcolumn, addindex, queryindex, readindex,
@@ -1970,25 +2334,28 @@ func main() {
 		dmlwithtimestamp, dmlwriteread, dmlwrite, dmlwritetxn, querywithparameter, dmlupdatepart,
 		dmldeletepart, dmlbatchupdate, createtablewithdatatypes, writedatatypesdata, querywitharray,
 		querywithbool, querywithbytes, querywithdate, querywithfloat, querywithint, querywithstring,
-		querywithtimestampparameter, querywithqueryoptions, createclientwithqueryoptions
+		querywithtimestampparameter, createbackup, listbackups, updatebackup, deletebackup, restorebackup,
+		listbackupoperations, listdatabaseoperations, querywithtimestampparameter, querywithqueryoptions,
+		createclientwithqueryoptions
 
 Examples:
 	spanner_snippets createdatabase projects/my-project/instances/my-instance/databases/example-db
 	spanner_snippets write projects/my-project/instances/my-instance/databases/example-db
+	spanner_snippets createbackup projects/my-project/instances/my-instance/databases/example-db my-backup
 `)
 	}
 
 	flag.Parse()
-	if len(flag.Args()) != 2 {
+	if len(flag.Args()) < 2 {
 		flag.Usage()
 		os.Exit(2)
 	}
 
-	cmd, db := flag.Arg(0), flag.Arg(1)
+	cmd, db, backupID := flag.Arg(0), flag.Arg(1), flag.Arg(2)
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
 	defer cancel()
 	adminClient, dataClient := createClients(ctx, db)
-	if err := run(ctx, adminClient, dataClient, os.Stdout, cmd, db); err != nil {
+	if err := run(ctx, adminClient, dataClient, os.Stdout, cmd, db, backupID); err != nil {
 		os.Exit(1)
 	}
 }
