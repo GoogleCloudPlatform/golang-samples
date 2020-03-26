@@ -25,8 +25,8 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// addBucketIamMember adds the bucket IAM member to permission role.
-func addBucketIamMember(w io.Writer, bucketName string) error {
+// addBucketIAMMember adds the bucket IAM member to permission role.
+func addBucketIAMMember(w io.Writer, bucketName string) error {
 	// bucketName := "bucket-name"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)

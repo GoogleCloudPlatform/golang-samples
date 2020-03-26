@@ -26,8 +26,8 @@ import (
 	"google.golang.org/genproto/googleapis/type/expr"
 )
 
-// addBucketConditionalIamBinding adds bucket conditional IAM binding.
-func addBucketConditionalIamBinding(w io.Writer, bucketName, role, member, title, description, expression string) error {
+// addBucketConditionalIAMBinding adds bucket conditional IAM binding.
+func addBucketConditionalIAMBinding(w io.Writer, bucketName, role, member, title, description, expression string) error {
 	// bucketName := "bucket-name"
 	// role := "bucket-level IAM role"
 	// member := "bucket-level IAM member"

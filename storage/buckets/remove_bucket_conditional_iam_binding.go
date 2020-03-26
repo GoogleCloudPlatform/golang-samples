@@ -24,8 +24,8 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// removeBucketConditionalIamBinding removes bucket conditional IAM binding.
-func removeBucketConditionalIamBinding(w io.Writer, bucketName, role, title, description, expression string) error {
+// removeBucketConditionalIAMBinding removes bucket conditional IAM binding.
+func removeBucketConditionalIAMBinding(w io.Writer, bucketName, role, title, description, expression string) error {
 	// bucketName := "bucket-name"
 	// role := "bucket-level IAM role"
 	// title := "condition title"
@@ -47,7 +47,7 @@ func removeBucketConditionalIamBinding(w io.Writer, bucketName, role, title, des
 		return fmt.Errorf("Bucket(%q).IAM().V3().Policy: %v", bucketName, err)
 	}
 
-	// Find the index of the binding matching inputs
+	// Find the index of the binding matching inputs.
 	i := -1
 	for j, binding := range policy.Bindings {
 		if binding.Role == role && binding.Condition != nil {
@@ -64,7 +64,7 @@ func removeBucketConditionalIamBinding(w io.Writer, bucketName, role, title, des
 		return fmt.Errorf("no matching binding group found")
 	}
 
-	// Get a slice of the bindings, removing the binding at index i
+	// Get a slice of the bindings, removing the binding at index i.
 	policy.Bindings = append(policy.Bindings[:i], policy.Bindings[i+1:]...)
 
 	if err := bucket.IAM().V3().SetPolicy(ctx, policy); err != nil {

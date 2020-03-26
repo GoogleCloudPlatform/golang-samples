@@ -96,11 +96,11 @@ func TestIAM(t *testing.T) {
 	if _, err := getBucketPolicy(ioutil.Discard, bucketName); err != nil {
 		t.Errorf("getBucketPolicy: %#v", err)
 	}
-	if err := addBucketIamMember(ioutil.Discard, bucketName); err != nil {
-		t.Errorf("addBucketIamMember: %v", err)
+	if err := addBucketIAMMember(ioutil.Discard, bucketName); err != nil {
+		t.Errorf("addBucketIAMMember: %v", err)
 	}
-	if err := removeBucketIamMember(ioutil.Discard, bucketName); err != nil {
-		t.Errorf("removeBucketIamMember: %v", err)
+	if err := removeBucketIAMMember(ioutil.Discard, bucketName); err != nil {
+		t.Errorf("removeBucketIAMMember: %v", err)
 	}
 
 	// Uniform bucket-level access is required to use IAM with conditions.
@@ -113,22 +113,12 @@ func TestIAM(t *testing.T) {
 	title := "title"
 	description := "description"
 	expression := "resource.name.startsWith(\"projects/_/buckets/bucket-name/objects/prefix-a-\")"
-	err := addBucketConditionalIamBinding(
-		ioutil.Discard,
-		bucketName,
-		role,
-		member,
-		title,
-		description,
-		expression,
-	)
 
-	if err != nil {
-		t.Errorf("addBucketConditionalIamBinding: %v", err)
+	if err := addBucketConditionalIAMBinding(ioutil.Discard, bucketName, role, member, title, description, expression); err != nil {
+		t.Errorf("addBucketConditionalIAMBinding: %v", err)
 	}
-
-	if err := removeBucketConditionalIamBinding(ioutil.Discard, bucketName, role, title, description, expression); err != nil {
-		t.Errorf("removeBucketConditionalIamBinding: %v", err)
+	if err := removeBucketConditionalIAMBinding(ioutil.Discard, bucketName, role, title, description, expression); err != nil {
+		t.Errorf("removeBucketConditionalIAMBinding: %v", err)
 	}
 }
 

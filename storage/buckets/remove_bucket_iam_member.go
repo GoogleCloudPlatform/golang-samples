@@ -25,8 +25,8 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// removeBucketIamMember removes the bucket IAM member.
-func removeBucketIamMember(w io.Writer, bucketName string) error {
+// removeBucketIAMMember removes the bucket IAM member.
+func removeBucketIAMMember(w io.Writer, bucketName string) error {
 	// bucketName := "bucket-name"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
