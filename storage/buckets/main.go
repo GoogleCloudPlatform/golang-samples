@@ -28,6 +28,8 @@ import (
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/storage"
 	"google.golang.org/api/iterator"
+	iampb "google.golang.org/genproto/googleapis/iam/v1"
+	"google.golang.org/genproto/googleapis/type/expr"
 )
 
 func main() {
@@ -159,18 +161,18 @@ func deleteBucket(client *storage.Client, bucketName string) error {
 	return nil
 }
 
-func getPolicy(c *storage.Client, bucketName string) (*iam.Policy, error) {
+func getPolicy(c *storage.Client, bucketName string) (*iam.Policy3, error) {
 	// [START storage_get_bucket_policy]
 	ctx := context.Background()
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
-	policy, err := c.Bucket(bucketName).IAM().Policy(ctx)
+	policy, err := c.Bucket(bucketName).IAM().V3().Policy(ctx)
 	if err != nil {
 		return nil, err
 	}
-	for _, role := range policy.Roles() {
-		log.Printf("%q: %q", role, policy.Members(role))
+	for _, binding := range policy.Bindings {
+		log.Printf("%q: %q (condition: %v)", binding.Role, binding.Members, binding.Condition)
 	}
 	// [END storage_get_bucket_policy]
 	return policy, nil
@@ -183,15 +185,18 @@ func addUser(c *storage.Client, bucketName string) error {
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 	bucket := c.Bucket(bucketName)
-	policy, err := bucket.IAM().Policy(ctx)
+	policy, err := bucket.IAM().V3().Policy(ctx)
 	if err != nil {
 		return err
 	}
 	// Other valid prefixes are "serviceAccount:", "user:"
 	// See the documentation for more values.
 	// https://cloud.google.com/storage/docs/access-control/iam
-	policy.Add("group:cloud-logs@google.com", "roles/storage.objectViewer")
-	if err := bucket.IAM().SetPolicy(ctx, policy); err != nil {
+	policy.Bindings = append(policy.Bindings, &iampb.Binding{
+		Role:    "roles/storage.objectViewer",
+		Members: []string{"group:cloud-logs@google.com"},
+	})
+	if err := bucket.IAM().V3().SetPolicy(ctx, policy); err != nil {
 		return err
 	}
 	// NOTE: It may be necessary to retry this operation if IAM policies are
@@ -208,21 +213,112 @@ func removeUser(c *storage.Client, bucketName string) error {
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 	bucket := c.Bucket(bucketName)
-	policy, err := bucket.IAM().Policy(ctx)
+	policy, err := bucket.IAM().V3().Policy(ctx)
 	if err != nil {
 		return err
 	}
 	// Other valid prefixes are "serviceAccount:", "user:"
 	// See the documentation for more values.
 	// https://cloud.google.com/storage/docs/access-control/iam
-	policy.Remove("group:cloud-logs@google.com", "roles/storage.objectViewer")
-	if err := bucket.IAM().SetPolicy(ctx, policy); err != nil {
+	for _, binding := range policy.Bindings {
+		// Only remove unconditional bindings matching role
+		if binding.Role == "roles/storage.objectViewer" && binding.Condition == nil {
+			// Filter out member.
+			i := -1
+			for j, member := range binding.Members {
+				if member == "group:cloud-logs@google.com" {
+					i = j
+				}
+			}
+
+			if i == -1 {
+				return errors.New("No matching binding group found.")
+			} else {
+				binding.Members = append(binding.Members[:i], binding.Members[i+1:]...)
+			}
+		}
+	}
+	if err := bucket.IAM().V3().SetPolicy(ctx, policy); err != nil {
 		return err
 	}
 	// NOTE: It may be necessary to retry this operation if IAM policies are
 	// being modified concurrently. SetPolicy will return an error if the policy
 	// was modified since it was retrieved.
 	// [END remove_bucket_iam_member]
+	return nil
+}
+
+func addBucketConditionalIamBinding(c *storage.Client, bucketName string, role string, member string, title string, description string, expression string) error {
+	// [START storage_add_bucket_conditional_iam_binding]
+	ctx := context.Background()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
+	bucket := c.Bucket(bucketName)
+	policy, err := bucket.IAM().V3().Policy(ctx)
+	if err != nil {
+		return err
+	}
+
+	policy.Bindings = append(policy.Bindings, &iampb.Binding{
+		Role:    role,
+		Members: []string{member},
+		Condition: &expr.Expr{
+			Title:       title,
+			Description: description,
+			Expression:  expression,
+		},
+	})
+
+	if err := bucket.IAM().V3().SetPolicy(ctx, policy); err != nil {
+		return err
+	}
+	// NOTE: It may be necessary to retry this operation if IAM policies are
+	// being modified concurrently. SetPolicy will return an error if the policy
+	// was modified since it was retrieved.
+	// [END storage_add_bucket_conditional_iam_binding]
+	return nil
+}
+
+func removeBucketConditionalIamBinding(c *storage.Client, bucketName string, role string, title string, description string, expression string) error {
+	// [START storage_remove_bucket_conditional_iam_binding]
+	ctx := context.Background()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
+	bucket := c.Bucket(bucketName)
+	policy, err := bucket.IAM().V3().Policy(ctx)
+	if err != nil {
+		return err
+	}
+
+	// Find the index of the binding matching inputs
+	i := -1
+	for j, binding := range policy.Bindings {
+		if binding.Role == role && binding.Condition != nil {
+			condition := binding.Condition
+			if condition.Title == title &&
+				condition.Description == description &&
+				condition.Expression == expression {
+				i = j
+			}
+		}
+	}
+
+	if i == -1 {
+		return errors.New("No matching binding group found.")
+	}
+
+	// Get a slice of the bindings, removing the binding at index i
+	policy.Bindings = append(policy.Bindings[:i], policy.Bindings[i+1:]...)
+
+	if err := bucket.IAM().V3().SetPolicy(ctx, policy); err != nil {
+		return err
+	}
+	// NOTE: It may be necessary to retry this operation if IAM policies are
+	// being modified concurrently. SetPolicy will return an error if the policy
+	// was modified since it was retrieved.
+	// [END storage_remove_bucket_conditional_iam_binding]
 	return nil
 }
 
