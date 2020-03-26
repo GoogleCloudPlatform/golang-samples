@@ -23,49 +23,23 @@ import (
 	"testing"
 	"time"
 
+	"cloud.google.com/go/spanner"
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"google.golang.org/api/iterator"
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
-func TestSample(t *testing.T) {
-	tc := testutil.SystemTest(t)
+type runCommandFunc func(t *testing.T, cmd, dbName string) string
+type runBackupCommandFunc func(t *testing.T, cmd, dbName, backupID string) string
 
-	instance := os.Getenv("GOLANG_SAMPLES_SPANNER")
-	if instance == "" {
-		t.Skip("Skipping spanner integration test. Set GOLANG_SAMPLES_SPANNER.")
-	}
-	if !strings.HasPrefix(instance, "projects/") {
-		t.Fatal("Spanner instance ref must be in the form of 'projects/PROJECT_ID/instances/INSTANCE_ID'")
-	}
-	databaseID := validLength(fmt.Sprintf("test-%s", tc.ProjectID), t)
-	restoreDatabaseID := validLength(fmt.Sprintf("restore-%s", tc.ProjectID), t)
-	dbName := fmt.Sprintf("%s/databases/%s", instance, databaseID)
-	restoreDBName := fmt.Sprintf("%s/databases/%s", instance, restoreDatabaseID)
-	backupID := validLength(fmt.Sprintf("backup-%s", tc.ProjectID), t)
-	cancelledBackupID := validLength(fmt.Sprintf("cancel-%s", tc.ProjectID), t)
+func initTest(t *testing.T, projectID string) (dbName string, adminClient *database.DatabaseAdminClient, dataClient *spanner.Client, runCommand runCommandFunc, mustRunCommand runCommandFunc, cleanup func()) {
+	instance := getInstance(t)
+	databaseID := validLength(fmt.Sprintf("test-%s", projectID), t)
+	dbName = fmt.Sprintf("%s/databases/%s", instance, databaseID)
 
 	ctx := context.Background()
-	adminClient, dataClient := createClients(ctx, dbName)
-	defer adminClient.Close()
-	// The database should be dropped after closing the data client (defer is
-	// called in a LIFO order).
-	defer func() {
-		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-			err := adminClient.DropDatabase(ctx, &adminpb.DropDatabaseRequest{Database: dbName})
-			if err != nil {
-				r.Errorf("DropDatabase(%q): %v", dbName, err)
-			}
-		})
-		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-			err := adminClient.DropDatabase(ctx, &adminpb.DropDatabaseRequest{Database: restoreDBName})
-			if err != nil {
-				r.Errorf("DropDatabase(%q): %v", restoreDBName, err)
-			}
-		})
-	}()
-	defer dataClient.Close()
+	adminClient, dataClient = createClients(ctx, dbName)
 
 	// Check for database existance prior to test start and delete, as resources may not have
 	// been cleaned up from previous invocations.
@@ -73,6 +47,44 @@ func TestSample(t *testing.T) {
 		t.Logf("database %s exists in state %s. delete result: %v", db.GetName(), db.GetState().String(),
 			adminClient.DropDatabase(ctx, &adminpb.DropDatabaseRequest{Database: dbName}))
 	}
+
+	runCommand = func(t *testing.T, cmd, dbName string) string {
+		t.Helper()
+		var b bytes.Buffer
+		if err := run(context.Background(), adminClient, dataClient, &b, cmd, dbName, ""); err != nil {
+			t.Errorf("run(%q, %q): %v", cmd, dbName, err)
+		}
+		return b.String()
+	}
+	mustRunCommand = func(t *testing.T, cmd, dbName string) string {
+		t.Helper()
+		var b bytes.Buffer
+		if err := run(context.Background(), adminClient, dataClient, &b, cmd, dbName, ""); err != nil {
+			t.Fatalf("run(%q, %q): %v", cmd, dbName, err)
+		}
+		return b.String()
+	}
+	cleanup = func() {
+		dataClient.Close()
+		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+			err := adminClient.DropDatabase(ctx, &adminpb.DropDatabaseRequest{Database: dbName})
+			if err != nil {
+				r.Errorf("DropDatabase(%q): %v", dbName, err)
+			}
+		})
+		adminClient.Close()
+	}
+	return
+}
+
+func initBackupTest(t *testing.T, projectID, dbName string, adminClient *database.DatabaseAdminClient, dataClient *spanner.Client) (restoreDBName, backupID, cancelledBackupID string, runBackupCommand runBackupCommandFunc, cleanup func()) {
+	instance := getInstance(t)
+	restoreDatabaseID := validLength(fmt.Sprintf("restore-%s", projectID), t)
+	restoreDBName = fmt.Sprintf("%s/databases/%s", instance, restoreDatabaseID)
+	backupID = validLength(fmt.Sprintf("backup-%s", projectID), t)
+	cancelledBackupID = validLength(fmt.Sprintf("cancel-%s", projectID), t)
+
+	ctx := context.Background()
 	if db, err := adminClient.GetDatabase(ctx, &adminpb.GetDatabaseRequest{Name: restoreDBName}); err == nil {
 		t.Logf("database %s exists in state %s. delete result: %v", db.GetName(), db.GetState().String(),
 			adminClient.DropDatabase(ctx, &adminpb.DropDatabaseRequest{Database: restoreDBName}))
@@ -95,29 +107,7 @@ func TestSample(t *testing.T) {
 			adminClient.DeleteBackup(ctx, &adminpb.DeleteBackupRequest{Name: resp.Name}))
 	}
 
-	assertContains := func(t *testing.T, out string, sub string) {
-		t.Helper()
-		if !strings.Contains(out, sub) {
-			t.Errorf("got output %q; want it to contain %q", out, sub)
-		}
-	}
-	runCommand := func(t *testing.T, cmd string, dbName string) string {
-		t.Helper()
-		var b bytes.Buffer
-		if err := run(context.Background(), adminClient, dataClient, &b, cmd, dbName, ""); err != nil {
-			t.Errorf("run(%q, %q): %v", cmd, dbName, err)
-		}
-		return b.String()
-	}
-	mustRunCommand := func(t *testing.T, cmd string, dbName string) string {
-		t.Helper()
-		var b bytes.Buffer
-		if err := run(context.Background(), adminClient, dataClient, &b, cmd, dbName, ""); err != nil {
-			t.Fatalf("run(%q, %q): %v", cmd, dbName, err)
-		}
-		return b.String()
-	}
-	runBackupCommand := func(t *testing.T, cmd, dbName, backupID string) string {
+	runBackupCommand = func(t *testing.T, cmd, dbName, backupID string) string {
 		t.Helper()
 		var b bytes.Buffer
 		if err := run(context.Background(), adminClient, dataClient, &b, cmd, dbName, backupID); err != nil {
@@ -125,6 +115,22 @@ func TestSample(t *testing.T) {
 		}
 		return b.String()
 	}
+	cleanup = func() {
+		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+			err := adminClient.DropDatabase(ctx, &adminpb.DropDatabaseRequest{Database: restoreDBName})
+			if err != nil {
+				r.Errorf("DropDatabase(%q): %v", restoreDBName, err)
+			}
+		})
+	}
+	return
+}
+
+func TestSample(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	dbName, _, _, runCommand, mustRunCommand, cleanup := initTest(t, tc.ProjectID)
+	defer cleanup()
 
 	// We execute all the commands of the tutorial code. These commands have to be run in a specific
 	// order since in many cases earlier commands setup the database for the subsequent commands.
@@ -296,7 +302,29 @@ func TestSample(t *testing.T) {
 	assertContains(t, out, "4 Venue 4")
 	assertContains(t, out, "19 Venue 19")
 	assertContains(t, out, "42 Venue 42")
+}
 
+func TestBackupSample(t *testing.T) {
+	tc := testutil.EndToEndTest(t)
+
+	dbName, adminClient, dataClient, runCommand, mustRunCommand, cleanup := initTest(t, tc.ProjectID)
+	defer cleanup()
+	restoreDBName, backupID, cancelledBackupID, runBackupCommand, cleanupBackup := initBackupTest(t, tc.ProjectID, dbName, adminClient, dataClient)
+	defer cleanupBackup()
+
+	var out string
+	// Set up the database for testing backup operations.
+	mustRunCommand(t, "createdatabase", dbName)
+	runCommand(t, "write", dbName)
+	runCommand(t, "writestructdata", dbName)
+	runCommand(t, "createtabledocswithtimestamp", dbName)
+	runCommand(t, "writetodocstable", dbName)
+	runCommand(t, "createtabledocswithhistorytable", dbName)
+	runCommand(t, "writewithhistory", dbName)
+	runCommand(t, "createtablewithdatatypes", dbName)
+	runCommand(t, "writedatatypesdata", dbName)
+
+	// Start testing backup operations.
 	out = runBackupCommand(t, "createbackup", dbName, backupID)
 	assertContains(t, out, fmt.Sprintf("backups/%s", backupID))
 
@@ -316,14 +344,32 @@ func TestSample(t *testing.T) {
 	out = runBackupCommand(t, "restorebackup", restoreDBName, backupID)
 	assertContains(t, out, fmt.Sprintf("Source database %s restored from backup", dbName))
 
-	WaitForDBReadyOptimizing(ctx, adminClient, restoreDBName, t)
+	WaitForDBReadyOptimizing(context.Background(), adminClient, restoreDBName, t)
 
-	// This command runs after a restore operation.
+	// This command should run after a restore operation.
 	out = runCommand(t, "listdatabaseoperations", restoreDBName)
 	assertContains(t, out, fmt.Sprintf("Database %s restored from backup", restoreDBName))
 
 	out = runBackupCommand(t, "deletebackup", dbName, backupID)
 	assertContains(t, out, fmt.Sprintf("Deleted backup %s", backupID))
+}
+
+func getInstance(t *testing.T) string {
+	instance := os.Getenv("GOLANG_SAMPLES_SPANNER")
+	if instance == "" {
+		t.Skip("Skipping spanner integration test. Set GOLANG_SAMPLES_SPANNER.")
+	}
+	if !strings.HasPrefix(instance, "projects/") {
+		t.Fatal("Spanner instance ref must be in the form of 'projects/PROJECT_ID/instances/INSTANCE_ID'")
+	}
+	return instance
+}
+
+func assertContains(t *testing.T, out string, sub string) {
+	t.Helper()
+	if !strings.Contains(out, sub) {
+		t.Errorf("got output %q; want it to contain %q", out, sub)
+	}
 }
 
 func WaitForDBReadyOptimizing(ctx context.Context, adminClient *database.DatabaseAdminClient, restoreDBName string, t *testing.T) {

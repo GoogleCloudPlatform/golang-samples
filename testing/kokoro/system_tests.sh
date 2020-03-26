@@ -35,7 +35,7 @@ cd "${1:-github/golang-samples}"
 
 export GO111MODULE=on # Always use modules.
 export GOPROXY=https://proxy.golang.org
-TIMEOUT=45m
+TIMEOUT=60m
 
 # Also see trampoline.sh - system_tests.sh is only run for PRs when there are
 # significant changes.
