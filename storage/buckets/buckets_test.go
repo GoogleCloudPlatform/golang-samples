@@ -102,6 +102,34 @@ func TestIAM(t *testing.T) {
 	if err := removeBucketIamMember(ioutil.Discard, bucketName); err != nil {
 		t.Errorf("removeBucketIamMember: %v", err)
 	}
+
+	// Uniform bucket-level access is required to use IAM with conditions.
+	if err := enableUniformBucketLevelAccess(ioutil.Discard, bucketName); err != nil {
+		t.Fatalf("enableUniformBucketLevelAccess:  %v", err)
+	}
+
+	role := "roles/storage.objectViewer"
+	member := "group:cloud-logs@google.com"
+	title := "title"
+	description := "description"
+	expression := "resource.name.startsWith(\"projects/_/buckets/bucket-name/objects/prefix-a-\")"
+	err := addBucketConditionalIamBinding(
+		ioutil.Discard,
+		bucketName,
+		role,
+		member,
+		title,
+		description,
+		expression,
+	)
+
+	if err != nil {
+		t.Errorf("addBucketConditionalIamBinding: %v", err)
+	}
+
+	if err := removeBucketConditionalIamBinding(ioutil.Discard, bucketName, role, title, description, expression); err != nil {
+		t.Errorf("removeBucketConditionalIamBinding: %v", err)
+	}
 }
 
 func TestRequesterPays(t *testing.T) {
