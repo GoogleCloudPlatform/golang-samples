@@ -16,37 +16,34 @@
 // using the Google Storage API. More documentation is available at
 // https://cloud.google.com/storage/docs/json_api/v1/.
 
-package main
+package buckets
 
 // [START storage_get_bucket_metadata]
 import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"time"
 
 	"cloud.google.com/go/storage"
 )
 
-func getBucketMetadata(w io.Writer, client *storage.Client, bucketName string) (*storage.BucketAttrs, error) {
+// getBucketMetadata gets the bucket metadata.
+func getBucketMetadata(w io.Writer, bucketName string) (*storage.BucketAttrs, error) {
 	// bucketName := "bucket-name"
 	ctx := context.Background()
-
-	// Initialize client.
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("storage.NewClient: %v", err)
 	}
-	defer client.Close() // Closing the client safely cleans up background resources.
+	defer client.Close()
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 	attrs, err := client.Bucket(bucketName).Attrs(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Bucket(%q).Attrs: %v", bucketName, err)
 	}
-
 	fmt.Fprintf(w, "BucketName: %v\n", attrs.Name)
 	fmt.Fprintf(w, "Location: %v\n", attrs.Location)
 	fmt.Fprintf(w, "LocationType: %v\n", attrs.LocationType)
@@ -79,7 +76,6 @@ func getBucketMetadata(w io.Writer, client *storage.Client, bucketName string) (
 			fmt.Fprintf(w, "\t%v = %v\n", key, value)
 		}
 	}
-
 	return attrs, nil
 }
 
