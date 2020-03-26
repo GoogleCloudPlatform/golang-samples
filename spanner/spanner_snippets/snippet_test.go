@@ -310,7 +310,6 @@ func TestBackupSample(t *testing.T) {
 	dbName, adminClient, dataClient, runCommand, mustRunCommand, cleanup := initTest(t, tc.ProjectID)
 	defer cleanup()
 	restoreDBName, backupID, cancelledBackupID, runBackupCommand, cleanupBackup := initBackupTest(t, tc.ProjectID, dbName, adminClient, dataClient)
-	defer cleanupBackup()
 
 	var out string
 	// Set up the database for testing backup operations.
@@ -344,11 +343,12 @@ func TestBackupSample(t *testing.T) {
 	out = runBackupCommand(t, "restorebackup", restoreDBName, backupID)
 	assertContains(t, out, fmt.Sprintf("Source database %s restored from backup", dbName))
 
-	WaitForDBReadyOptimizing(context.Background(), adminClient, restoreDBName, t)
-
 	// This command should run after a restore operation.
 	out = runCommand(t, "listdatabaseoperations", restoreDBName)
 	assertContains(t, out, fmt.Sprintf("Database %s restored from backup", restoreDBName))
+
+	// Delete the restore DB.
+	cleanupBackup()
 
 	out = runBackupCommand(t, "deletebackup", dbName, backupID)
 	assertContains(t, out, fmt.Sprintf("Deleted backup %s", backupID))
@@ -370,21 +370,6 @@ func assertContains(t *testing.T, out string, sub string) {
 	if !strings.Contains(out, sub) {
 		t.Errorf("got output %q; want it to contain %q", out, sub)
 	}
-}
-
-func WaitForDBReadyOptimizing(ctx context.Context, adminClient *database.DatabaseAdminClient, restoreDBName string, t *testing.T) {
-	// Wait for database to finish optimizing - cannot delete a backup if a database restored from it
-	for {
-		restoreDB, err := adminClient.GetDatabase(ctx, &adminpb.GetDatabaseRequest{Name: restoreDBName})
-		if err != nil {
-			t.Errorf("GetDatabase(%q): %v", restoreDBName, err)
-		}
-		if restoreDB.GetState() != adminpb.Database_READY_OPTIMIZING {
-			break
-		}
-		time.Sleep(1 * time.Minute)
-	}
-
 }
 
 // Maximum length of database name is 30 characters, so trim if the generated name is too long

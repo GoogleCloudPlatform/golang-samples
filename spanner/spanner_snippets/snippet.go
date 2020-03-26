@@ -2015,7 +2015,7 @@ func listBackups(ctx context.Context, w io.Writer, adminClient *database.Databas
 	}
 
 	// List all backups that expire before a timestamp.
-	expireTime := time.Now().AddDate(0, 0, 15)
+	expireTime := time.Now().AddDate(0, 0, 30)
 	filter = fmt.Sprintf(`expire_time < "%s"`, expireTime.Format(time.RFC3339))
 	iter = adminClient.ListBackups(ctx, &adminpb.ListBackupsRequest{
 		Parent: instanceName,
@@ -2037,7 +2037,7 @@ func listBackups(ctx context.Context, w io.Writer, adminClient *database.Databas
 	// List all backups with a size greater than some bytes.
 	iter = adminClient.ListBackups(ctx, &adminpb.ListBackupsRequest{
 		Parent: instanceName,
-		Filter: "size_bytes > 1000",
+		Filter: "size_bytes > 100",
 	})
 	if err := printBackups(iter); err != nil {
 		return err
