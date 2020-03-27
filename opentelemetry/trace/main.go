@@ -19,11 +19,11 @@ package main
 // [START opentelemetry_trace_import]
 import (
 	"context"
-	"log"
-	"os"
 	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 	"go.opentelemetry.io/otel/api/global"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"log"
+	"os"
 )
 
 // [END opentelemetry_trace_import]
