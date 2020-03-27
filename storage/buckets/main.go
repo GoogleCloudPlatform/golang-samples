@@ -15,7 +15,9 @@
 // Sample buckets creates a bucket, lists buckets and deletes a bucket
 // using the Google Storage API. More documentation is available at
 // https://cloud.google.com/storage/docs/json_api/v1/.
-package main
+// +build ignore
+
+package buckets
 
 import (
 	"context"
@@ -248,7 +250,7 @@ func removeUser(c *storage.Client, bucketName string) error {
 	return nil
 }
 
-func addBucketConditionalIamBinding(c *storage.Client, bucketName string, role string, member string, title string, description string, expression string) error {
+func addBucketConditionalIAMBinding(c *storage.Client, bucketName string, role string, member string, title string, description string, expression string) error {
 	// [START storage_add_bucket_conditional_iam_binding]
 	ctx := context.Background()
 
@@ -280,7 +282,7 @@ func addBucketConditionalIamBinding(c *storage.Client, bucketName string, role s
 	return nil
 }
 
-func removeBucketConditionalIamBinding(c *storage.Client, bucketName string, role string, title string, description string, expression string) error {
+func removeBucketConditionalIAMBinding(c *storage.Client, bucketName string, role string, title string, description string, expression string) error {
 	// [START storage_remove_bucket_conditional_iam_binding]
 	ctx := context.Background()
 
