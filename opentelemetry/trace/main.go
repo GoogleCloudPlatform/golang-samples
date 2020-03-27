@@ -16,25 +16,24 @@
 // Cloud Trace.
 package main
 
-// [START import]
+// [START opentelemetry_trace_import]
 import (
 	"context"
 	"log"
 	"os"
-
 	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 	"go.opentelemetry.io/otel/api/global"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
-// [END import]
+// [END opentelemetry_trace_import]
 // [START main_function]
 func main() {
-	// Create exporter
+	// Create exporter.
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	exporter, err := texporter.NewExporter(texporter.WithProjectID(projectID))
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("texporter.NewExporter: %v", err)
 	}
 
 	// Create trace provider with the exporter
@@ -53,7 +52,7 @@ func main() {
 
 	// [START custom_span]
 	// Create custom span
-	tracer := global.TraceProvider().Tracer("example.com/basic")
+	tracer := global.TraceProvider().Tracer("example.com/trace")
 	tracer.WithSpan(context.Background(), "foo",
 		func(_ context.Context) error {
 			// Do some work.
