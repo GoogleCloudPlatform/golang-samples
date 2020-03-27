@@ -28,7 +28,7 @@ import (
 )
 
 // [END opentelemetry_trace_import]
-// [START main_function]
+// [START opentelemetry_trace_main_function]
 func main() {
 	// Create exporter.
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
@@ -37,7 +37,7 @@ func main() {
 		log.Fatalf("texporter.NewExporter: %v", err)
 	}
 
-	// Create trace provider with the exporter
+	// Create trace provider with the exporter.
 	//
 	// By default it uses AlwaysSample() which samples all traces.
 	// In a production environment or high QPS setup please use
@@ -51,15 +51,15 @@ func main() {
 	}
 	global.SetTraceProvider(tp)
 
-	// [START custom_span]
-	// Create custom span
+	// [START opentelemetry_trace_custom_span]
+	// Create custom span.
 	tracer := global.TraceProvider().Tracer("example.com/trace")
 	tracer.WithSpan(context.Background(), "foo",
 		func(_ context.Context) error {
 			// Do some work.
 			return nil
 		})
-	// [END custom_span]
+	// [END opentelemetry_trace_custom_span]
 }
 
-// [END main_function]
+// [END opentelemetry_trace_main_function]
