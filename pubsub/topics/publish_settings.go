@@ -20,8 +20,6 @@ import (
 	"fmt"
 	"io"
 	"strconv"
-	"sync"
-	"sync/atomic"
 	"time"
 
 	"cloud.google.com/go/pubsub"
@@ -35,9 +33,8 @@ func publishWithSettings(w io.Writer, projectID, topicID string) error {
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
-
-	var wg sync.WaitGroup
-	var totalErrors uint64
+	var resultSlice []*pubsub.PublishResult
+	var errors []error
 	t := client.Topic(topicID)
 	t.PublishSettings.ByteThreshold = 5000
 	t.PublishSettings.CountThreshold = 10
@@ -47,26 +44,20 @@ func publishWithSettings(w io.Writer, projectID, topicID string) error {
 		result := t.Publish(ctx, &pubsub.Message{
 			Data: []byte("Message " + strconv.Itoa(i)),
 		})
-
-		wg.Add(1)
-		go func(i int, res *pubsub.PublishResult) {
-			defer wg.Done()
-			// The Get method blocks until a server-generated ID or
-			// an error is returned for the published message.
-			id, err := res.Get(ctx)
-			if err != nil {
-				fmt.Fprintf(w, "Failed to publish: %v", err)
-				atomic.AddUint64(&totalErrors, 1)
-				return
-			}
-			fmt.Fprintf(w, "Published message %d; msg ID: %v\n", i, id)
-		}(i, result)
+		resultSlice = append(resultSlice, result)
 	}
-
-	wg.Wait()
-
-	if totalErrors > 0 {
-		return fmt.Errorf("%d of 10 messages did not publish successfully", totalErrors)
+	// The Get method blocks until a server-generated ID or
+	// an error is returned for the published message.
+	for i, res := range resultSlice {
+		id, err := res.Get(ctx)
+		if err != nil {
+			errors = append(errors, err)
+			fmt.Fprintf(w, "Failed to publish: %v", err)
+		}
+		fmt.Fprintf(w, "Published message %d; msg ID: %v\n", i, id)
+	}
+	if errors != nil {
+		return fmt.Errorf("%d of 10 messages did not publish successfully", len(errors))
 	}
 	fmt.Fprintf(w, "Published messages with batch settings.")
 	return nil
