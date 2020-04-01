@@ -21,7 +21,6 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
-	"regexp"
 	"strings"
 
 	"cloud.google.com/go/storage"
@@ -52,13 +51,7 @@ func (s *server) GetMatchCount(ctx context.Context, req *ShakespeareRequest) (*S
 	for _, text := range texts {
 		for _, line := range strings.Split(text, "\n") {
 			line, query := strings.ToLower(line), strings.ToLower(req.Query)
-			// TODO: Compiling and matching a regular expression on every request
-			// might be too expensive? Consider optimizing.
-			isMatch, err := regexp.MatchString(query, line)
-			if err != nil {
-				return resp, err
-			}
-			if isMatch {
+			if strings.Contains(line, query) {
 				resp.MatchCount++
 			}
 		}

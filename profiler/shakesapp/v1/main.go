@@ -28,12 +28,12 @@ import (
 	"cloud.google.com/go/profiler"
 	"google.golang.org/grpc"
 
-	"github.com/GoogleCloudPlatform/golang-samples/profiler/shakesapp/shakesapp"
+	"github.com/GoogleCloudPlatform/golang-samples/profiler/shakesapp/v1/shakesapp"
 )
 
 var (
 	projectID   = flag.String("project_id", "", "project ID to run profiler with; only required when running outside of GCP.")
-	version     = flag.String("version", "original", "version to run profiler with")
+	version     = flag.String("version", "optimized", "version to run profiler with")
 	port        = flag.Int("port", 7788, "service port")
 	numReqs     = flag.Int("num_requests", 20, "number of requests to simulate")
 	concurrency = flag.Int("concurrency", 1, "number of requests to run in parallel")
