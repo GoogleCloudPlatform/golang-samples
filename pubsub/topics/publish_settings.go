@@ -33,8 +33,8 @@ func publishWithSettings(w io.Writer, projectID, topicID string) error {
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
-	var resultSlice []*pubsub.PublishResult
-	var errors []error
+	var results []*pubsub.PublishResult
+	var resultErrors []error
 	t := client.Topic(topicID)
 	t.PublishSettings.ByteThreshold = 5000
 	t.PublishSettings.CountThreshold = 10
@@ -44,20 +44,20 @@ func publishWithSettings(w io.Writer, projectID, topicID string) error {
 		result := t.Publish(ctx, &pubsub.Message{
 			Data: []byte("Message " + strconv.Itoa(i)),
 		})
-		resultSlice = append(resultSlice, result)
+		results = append(results, result)
 	}
 	// The Get method blocks until a server-generated ID or
 	// an error is returned for the published message.
-	for i, res := range resultSlice {
+	for i, res := range results {
 		id, err := res.Get(ctx)
 		if err != nil {
-			errors = append(errors, err)
+			resultErrors = append(resultErrors, err)
 			fmt.Fprintf(w, "Failed to publish: %v", err)
 		}
 		fmt.Fprintf(w, "Published message %d; msg ID: %v\n", i, id)
 	}
-	if errors != nil {
-		return fmt.Errorf("%d of 10 messages did not publish successfully", len(errors))
+	if resultErrors != nil {
+		return fmt.Errorf("Get: %v", resultErrors[len(resultErrors)-1])
 	}
 	fmt.Fprintf(w, "Published messages with batch settings.")
 	return nil
