@@ -2,4 +2,4 @@ module github.com/GoogleCloudPlatform/golang-samples/functions/slack
 
 go 1.11
 
-require google.golang.org/api v0.17.0
+require google.golang.org/api v0.20.0
