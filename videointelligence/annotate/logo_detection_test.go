@@ -26,7 +26,7 @@ import (
 func TestLogoDetection(t *testing.T) {
 	testutil.EndToEndTest(t)
 
-	file := "../resources/googlework_tiny.mp4"
+	file := "../testdata/googlework_short.mp4"
 
 	testutil.Retry(t, 10, 20*time.Second, func(r *testutil.R) {
 		var buf bytes.Buffer

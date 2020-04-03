@@ -30,7 +30,7 @@ import (
 
 // textDetection analyzes a video and extracts the text from the video's audio.
 func textDetection(w io.Writer, filename string) error {
-	// filename := "resources/googlework_short.mp4"
+	// filename := "../testdata/googlework_short.mp4"
 
 	ctx := context.Background()
 

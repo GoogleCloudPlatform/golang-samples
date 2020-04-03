@@ -30,7 +30,7 @@ import (
 
 // objectTracking analyzes a video and extracts entities with their bounding boxes.
 func objectTracking(w io.Writer, filename string) error {
-	// filename := "resources/cat.mp4"
+	// filename := "../testdata/cat.mp4"
 
 	ctx := context.Background()
 
