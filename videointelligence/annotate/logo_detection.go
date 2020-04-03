@@ -29,7 +29,7 @@ import (
 
 // logoDetection analyzes a video and extracts logos with their bounding boxes.
 func logoDetection(w io.Writer, filename string) error {
-	// filename := "resources/googlework_tiny.mp4"
+	// filename := "../testdata/googlework_short.mp4"
 
 	ctx := context.Background()
 

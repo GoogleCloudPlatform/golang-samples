@@ -59,6 +59,7 @@ var allowList = []string{
 	"**/testdata/**/*.png",
 	"**/testdata/**/*.txt",
 	"**/testdata/**/*.csv",
+	"**/testdata/**/*.mp4",
 
 	// Healthcare data.
 	"healthcare/testdata/dicom_00000001_000.dcm",
@@ -92,7 +93,6 @@ var allowList = []string{
 	"dialogflow/resources/**/*",
 	"texttospeech/**/*",
 	"storage/objects/notes.txt",
-	"videointelligence/resources/**/*",
 
 	// Renovate configuration.
 	".github/renovate.json",
