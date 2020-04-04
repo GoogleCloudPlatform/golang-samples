@@ -35,3 +35,5 @@ openssl req -x509 -newkey rsa:2048 -days 3650 -keyout rsa_private.pem -nodes -ou
 openssl ecparam -genkey -name prime256v1 -noout -out ec_private.pem
 openssl ec -in ec_private.pem -pubout -out ec_public.pem
 ```
+
+Example of [how to generate elliptic curve in golang](https://gist.github.com/LukaGiorgadze/85b9e09d2008a03adfdfd5eea5964f93)
