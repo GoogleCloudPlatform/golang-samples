@@ -118,7 +118,6 @@ func TestPublish(t *testing.T) {
 func TestPublishThatScales(t *testing.T) {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
-	setup(t)
 	client := setup(t)
 	client.CreateTopic(ctx, topicID)
 	buf := new(bytes.Buffer)
@@ -130,7 +129,6 @@ func TestPublishThatScales(t *testing.T) {
 func TestPublishWithSettings(t *testing.T) {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
-	setup(t)
 	client := setup(t)
 	client.CreateTopic(ctx, topicID)
 	if err := publishWithSettings(ioutil.Discard, tc.ProjectID, topicID); err != nil {
@@ -141,7 +139,6 @@ func TestPublishWithSettings(t *testing.T) {
 func TestPublishCustomAttributes(t *testing.T) {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
-	setup(t)
 	client := setup(t)
 	client.CreateTopic(ctx, topicID)
 	buf := new(bytes.Buffer)

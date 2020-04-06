@@ -53,10 +53,11 @@ func publishWithSettings(w io.Writer, projectID, topicID string) error {
 		if err != nil {
 			resultErrors = append(resultErrors, err)
 			fmt.Fprintf(w, "Failed to publish: %v", err)
+			continue
 		}
 		fmt.Fprintf(w, "Published message %d; msg ID: %v\n", i, id)
 	}
-	if resultErrors != nil {
+	if len(resultErrors) != 0 {
 		return fmt.Errorf("Get: %v", resultErrors[len(resultErrors)-1])
 	}
 	fmt.Fprintf(w, "Published messages with batch settings.")
