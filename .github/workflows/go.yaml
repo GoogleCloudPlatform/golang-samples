@@ -22,12 +22,14 @@ jobs:
       uses: actions/checkout@v2
     
     - name: goimports
-      run: test -z "$($(go env GOPATH)/bin/goimports -l .)"
+      run: test -z "$(set -o pipefail && $(go env GOPATH)/bin/goimports -l . | tee goimports.out)" || { cat goimports.out && exit 1; }
         
-    - name: Fix goimports on fail
+    - name: Open this to see how to fix goimports if it fails
       run: echo Run goimports -w .
       if: failure()
 
     - name: Build code
-      run: go build ./...
-
+      # Use find to build all modules. '-execdir ... ;' doesn't set an exit code
+      # based on command results. So, create a file if a build fails and check
+      # if the file exists to set the right exit code.
+      run: find . -name go.mod -execdir sh -c 'go build ./... || touch build_failed.txt' \; ; test ! -f build_failed.txt

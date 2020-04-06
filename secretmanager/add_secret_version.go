@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"io"
 
-	secretmanager "cloud.google.com/go/secretmanager/apiv1beta1"
-	secretmanagerpb "google.golang.org/genproto/googleapis/cloud/secretmanager/v1beta1"
+	secretmanager "cloud.google.com/go/secretmanager/apiv1"
+	secretmanagerpb "google.golang.org/genproto/googleapis/cloud/secretmanager/v1"
 )
 
 // addSecretVersion adds a new secret version to the given secret with the
