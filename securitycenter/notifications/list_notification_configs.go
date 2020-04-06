@@ -19,9 +19,9 @@ import (
 	"fmt"
 	"io"
 
-	securitycenter "cloud.google.com/go/securitycenter/apiv1p1beta1"
+	securitycenter "cloud.google.com/go/securitycenter/apiv1"
 	"google.golang.org/api/iterator"
-	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1p1beta1"
+	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
 )
 
 func listNotificationConfigs(w io.Writer, orgID string) error {

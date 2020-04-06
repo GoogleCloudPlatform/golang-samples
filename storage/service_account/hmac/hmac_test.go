@@ -31,7 +31,7 @@ var storageClient *storage.Client
 
 func TestMain(m *testing.M) {
 	if serviceAccountEmail == "" {
-		fmt.Fprint(os.Stderr, "GOLANG_SAMPLES_SERVICE_ACCOUNT_EMAIL not set. Skipping.")
+		fmt.Fprintln(os.Stderr, "GOLANG_SAMPLES_SERVICE_ACCOUNT_EMAIL not set. Skipping.")
 		return
 	}
 	ctx := context.Background()

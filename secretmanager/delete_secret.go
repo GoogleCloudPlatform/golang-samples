@@ -19,8 +19,8 @@ import (
 	"context"
 	"fmt"
 
-	secretmanager "cloud.google.com/go/secretmanager/apiv1beta1"
-	secretmanagerpb "google.golang.org/genproto/googleapis/cloud/secretmanager/v1beta1"
+	secretmanager "cloud.google.com/go/secretmanager/apiv1"
+	secretmanagerpb "google.golang.org/genproto/googleapis/cloud/secretmanager/v1"
 )
 
 // deleteSecret deletes the secret with the given name and all of its versions.

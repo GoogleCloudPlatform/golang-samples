@@ -20,7 +20,7 @@ date
 
 cd github/golang-samples
 
-SIGNIFICANT_CHANGES="$(git --no-pager diff --name-only HEAD..master | egrep -v '(\.md$|^\.github)' || true)"
+SIGNIFICANT_CHANGES="$(git --no-pager diff --name-only master..HEAD | egrep -v '(\.md$|^\.github)' || true)"
 
 # If this is a PR with only insignificant changes, don't run any tests.
 if [[ -n ${KOKORO_GITHUB_PULL_REQUEST_NUMBER:-} ]] && [[ -z "$SIGNIFICANT_CHANGES" ]]; then

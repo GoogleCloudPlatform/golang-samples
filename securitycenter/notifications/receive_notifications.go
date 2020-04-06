@@ -22,7 +22,7 @@ import (
 
 	"cloud.google.com/go/pubsub"
 	"github.com/golang/protobuf/jsonpb"
-	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1p1beta1"
+	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
 )
 
 func receiveMessages(w io.Writer, projectID string, subscriptionName string) error {
