@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,335 +19,581 @@ package kms
 import (
 	"bytes"
 	"context"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/sha256"
+	"crypto/x509"
+	"encoding/pem"
 	"fmt"
-	"io/ioutil"
+	"log"
 	"os"
-	"strconv"
 	"strings"
 	"testing"
-	"time"
 
-	"cloud.google.com/go/iam"
-	cloudkms "cloud.google.com/go/kms/apiv1"
+	kms "cloud.google.com/go/kms/apiv1"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
-type TestVariables struct {
-	ctx            context.Context
-	projectID      string
-	message        string
-	location       string
-	parent         string
-	member         string
-	role           iam.RoleName
-	keyRing        string
-	keyRingPath    string
-	symPath        string
-	symVersionPath string
-	rsaDecryptPath string
-	rsaSignPath    string
-	ecSignPath     string
-	symID          string
-	rsaDecryptID   string
-	rsaSignID      string
-	ecSignID       string
-	tryLimit       int
-	waitTime       time.Duration
-}
-
-func getTestVariables(projectID string) TestVariables {
-	var v TestVariables
-	location := "global"
-	parent := "projects/" + projectID + "/locations/" + location
-	keyRing := "kms-samples"
-	keyRingPath := parent + "/keyRings/" + keyRing
-
-	symID := "symmetric"
-	rsaDecryptID := "rsa-decrypt"
-	rsaSignID := "rsa-sign"
-	ecSignID := "ec-sign"
-
-	sym := keyRingPath + "/cryptoKeys/" + symID
-	symVersion := sym + "/cryptoKeyVersions/1"
-	rsaDecryptPath := keyRingPath + "/cryptoKeys/" + rsaDecryptID + "/cryptoKeyVersions/2"
-	rsaSign := keyRingPath + "/cryptoKeys/" + rsaSignID + "/cryptoKeyVersions/1"
-	ecSign := keyRingPath + "/cryptoKeys/" + ecSignID + "/cryptoKeyVersions/1"
-
-	message := "test message 123"
-
-	ctx := context.Background()
-
-	member := "group:test@google.com"
-	role := iam.Viewer
-
-	tryLimit := 20
-	waitTime := 5 * time.Second
-
-	v = TestVariables{ctx, projectID, message, location, parent, member, role, keyRing, keyRingPath,
-		sym, symVersion, rsaDecryptPath, rsaSign, ecSign, symID, rsaDecryptID, rsaSignID, ecSignID, tryLimit, waitTime}
-	return v
-}
-
-func createKeyHelper(v TestVariables, keyID, keyPath, parent string,
-	purpose kmspb.CryptoKey_CryptoKeyPurpose, algorithm kmspb.CryptoKeyVersion_CryptoKeyVersionAlgorithm) bool {
-	client, _ := cloudkms.NewKeyManagementClient(v.ctx)
-	if _, err := getAsymmetricPublicKey(keyPath); err != nil {
-		versionObj := &kmspb.CryptoKeyVersionTemplate{Algorithm: algorithm}
-		keyObj := &kmspb.CryptoKey{Purpose: purpose, VersionTemplate: versionObj}
-
-		client.CreateKeyRing(v.ctx, &kmspb.CreateKeyRingRequest{Parent: parent, KeyRingId: v.keyRing})
-		client.CreateCryptoKey(v.ctx, &kmspb.CreateCryptoKeyRequest{Parent: parent + "/keyRings/" + v.keyRing, CryptoKeyId: keyID, CryptoKey: keyObj})
-		return true
-	}
-	return false
-}
+var fixture *kmsFixture
 
 func TestMain(m *testing.M) {
 	tc, ok := testutil.ContextMain(m)
 	if !ok {
-		fmt.Println("Could not set up tests. Set GOLANG_SAMPLES_PROJECT_ID? Skipping.")
-		os.Exit(0)
+		log.Fatal("failed to set up kms tests - missing GOLANG_SAMPLES_PROJECT_ID?")
 	}
-	v := getTestVariables(tc.ProjectID)
-	parent := "projects/" + v.projectID + "/locations/global"
-	// Create cryptokeys in the test project if needed.
-	s1 := createKeyHelper(v, v.rsaDecryptID, v.rsaDecryptPath, parent, kmspb.CryptoKey_ASYMMETRIC_DECRYPT, kmspb.CryptoKeyVersion_RSA_DECRYPT_OAEP_2048_SHA256)
-	s2 := createKeyHelper(v, v.rsaSignID, v.rsaSignPath, parent, kmspb.CryptoKey_ASYMMETRIC_SIGN, kmspb.CryptoKeyVersion_RSA_SIGN_PSS_2048_SHA256)
-	s3 := createKeyHelper(v, v.ecSignID, v.ecSignPath, parent, kmspb.CryptoKey_ASYMMETRIC_SIGN, kmspb.CryptoKeyVersion_EC_SIGN_P256_SHA256)
-	s4 := createKeyHelper(v, v.symID, v.symPath, parent, kmspb.CryptoKey_ENCRYPT_DECRYPT, kmspb.CryptoKeyVersion_GOOGLE_SYMMETRIC_ENCRYPTION)
-	if s1 || s2 || s3 || s4 {
-		// Leave time for keys to initialize.
-		time.Sleep(30 * time.Second)
+
+	var err error
+	fixture, err = NewKMSFixture(tc.ProjectID)
+	if err != nil {
+		log.Fatalf("failed to create fixture: %s", err)
 	}
-	// Restore any disabled keys
-	for _, keyPath := range []string{v.symVersionPath, v.rsaDecryptPath, v.ecSignPath} {
-		restoreCryptoKeyVersion(ioutil.Discard, keyPath)
-		enableCryptoKeyVersion(ioutil.Discard, keyPath)
-	}
-	// Run tests.
+
 	exitCode := m.Run()
+
+	if err := fixture.Cleanup(); err != nil {
+		log.Fatalf("failed to cleanup resources: %s", err)
+	}
+
 	os.Exit(exitCode)
 }
 
+func TestCreateKeyAsymmetricDecrypt(t *testing.T) {
+	testutil.SystemTest(t)
+
+	parent, id := fixture.KeyRingName, fixture.RandomID()
+
+	var b bytes.Buffer
+	if err := createKeyAsymmetricDecrypt(&b, parent, id); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Created key:"; !strings.Contains(got, want) {
+		t.Errorf("createKeyAsymmetricDecrypt: expected %q to contain %q", got, want)
+	}
+}
+
+func TestCreateKeyAsymmetricSign(t *testing.T) {
+	testutil.SystemTest(t)
+
+	parent, id := fixture.KeyRingName, fixture.RandomID()
+
+	var b bytes.Buffer
+	if err := createKeyAsymmetricSign(&b, parent, id); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Created key:"; !strings.Contains(got, want) {
+		t.Errorf("createKeyAsymmetricSign: expected %q to contain %q", got, want)
+	}
+}
+
+func TestCreateKeyHSM(t *testing.T) {
+	testutil.SystemTest(t)
+
+	parent, id := fixture.KeyRingName, fixture.RandomID()
+
+	var b bytes.Buffer
+	if err := createKeyHSM(&b, parent, id); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Created key:"; !strings.Contains(got, want) {
+		t.Errorf("createKeyHSM: expected %q to contain %q", got, want)
+	}
+}
+
+func TestCreateKeyLabels(t *testing.T) {
+	testutil.SystemTest(t)
+
+	parent, id := fixture.KeyRingName, fixture.RandomID()
+
+	var b bytes.Buffer
+	if err := createKeyLabels(&b, parent, id); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Created key:"; !strings.Contains(got, want) {
+		t.Errorf("createKeyLabels: expected %q to contain %q", got, want)
+	}
+}
+
+func TestCreateKeySymmetricEncryptDecrypt(t *testing.T) {
+	testutil.SystemTest(t)
+
+	parent, id := fixture.KeyRingName, fixture.RandomID()
+
+	var b bytes.Buffer
+	if err := createKeySymmetricEncryptDecrypt(&b, parent, id); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Created key:"; !strings.Contains(got, want) {
+		t.Errorf("createKeySymmetricEncryptDecrypt: expected %q to contain %q", got, want)
+	}
+}
+
+func TestCreateKeyRotationSchedule(t *testing.T) {
+	testutil.SystemTest(t)
+
+	parent, id := fixture.KeyRingName, fixture.RandomID()
+
+	var b bytes.Buffer
+	if err := createKeyRotationSchedule(&b, parent, id); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Created key:"; !strings.Contains(got, want) {
+		t.Errorf("createKeyRotationSchedule: expected %q to contain %q", got, want)
+	}
+}
+
+func TestCreateKeyVersion(t *testing.T) {
+	testutil.SystemTest(t)
+
+	parent := fixture.SymmetricKeyName
+
+	var b bytes.Buffer
+	if err := createKeyVersion(&b, parent); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Created key version:"; !strings.Contains(got, want) {
+		t.Errorf("createKeyVersion: expected %q to contain %q", got, want)
+	}
+}
+
 func TestCreateKeyRing(t *testing.T) {
-	t.Skip("TestCreateKeyRing skipped. There's currently no method to delete keyrings, so we should avoid creating resources")
-	tc := testutil.SystemTest(t)
-	v := getTestVariables(tc.ProjectID)
+	testutil.SystemTest(t)
 
-	ringID := v.keyRing + "testcreate"
-	err := createKeyRing(ioutil.Discard, v.parent, ringID)
-	if err != nil {
-		t.Fatalf("createKeyRing(%s, %s): %v", v.projectID, ringID, err)
+	parent, id := fixture.LocationName, fixture.RandomID()
+
+	var b bytes.Buffer
+	if err := createKeyRing(&b, parent, id); err != nil {
+		t.Fatal(err)
 	}
-	client, _ := cloudkms.NewKeyManagementClient(v.ctx)
-	resp, err := client.GetKeyRing(v.ctx, &kmspb.GetKeyRingRequest{Name: ringID})
-	if err != nil {
-		t.Fatalf("GetKeyRing(%s): %v", ringID, err)
-	}
-	if !strings.Contains(resp.Name, ringID) {
-		t.Fatalf("new ring %s does not contain requested ID %s: %v", resp.Name, ringID, err)
+
+	if got, want := b.String(), "Created key ring:"; !strings.Contains(got, want) {
+		t.Errorf("createKeyRing: expected %q to contain %q", got, want)
 	}
 }
 
-func TestCreateCryptoKey(t *testing.T) {
-	t.Skip("TestCreateCryptoKey skipped. There's currently no method to delete keys, so we should avoid creating resources")
-	tc := testutil.SystemTest(t)
-	v := getTestVariables(tc.ProjectID)
+func TestDecryptAsymmetric(t *testing.T) {
+	testutil.SystemTest(t)
 
-	keyID := "test-" + strconv.Itoa(int(time.Now().Unix()))
-	err := createCryptoKey(ioutil.Discard, v.keyRingPath, keyID)
+	name := fmt.Sprintf("%s/cryptoKeyVersions/1", fixture.AsymmetricDecryptKeyName)
+
+	// Encrypt some data to decrypt.
+	ctx := context.Background()
+	client, err := kms.NewKeyManagementClient(ctx)
 	if err != nil {
-		t.Fatalf("createKey(%s, %s): %v", v.keyRingPath, keyID, err)
+		t.Fatal(err)
 	}
-	client, _ := cloudkms.NewKeyManagementClient(v.ctx)
-	keyPath := v.keyRingPath + "/cryptoKeys/" + keyID
-	resp, err := client.GetCryptoKey(v.ctx, &kmspb.GetCryptoKeyRequest{Name: keyPath})
+	response, err := client.GetPublicKey(ctx, &kmspb.GetPublicKeyRequest{
+		Name: name,
+	})
 	if err != nil {
-		t.Fatalf("GetCryptoKey(%s): %v", keyPath, err)
+		t.Fatal(err)
 	}
-	if !strings.Contains(resp.Name, keyID) {
-		t.Fatalf("new key %s does not contain requested ID %s: %v", resp.Name, keyID, err)
+
+	block, _ := pem.Decode([]byte(response.Pem))
+	publicKey, err := x509.ParsePKIXPublicKey(block.Bytes)
+	if err != nil {
+		t.Fatal(err)
 	}
-	// mark for destruction
-	destroyCryptoKeyVersion(ioutil.Discard, keyPath+"/cryptoKeyVersions/1")
-}
+	rsaKey, ok := publicKey.(*rsa.PublicKey)
+	if !ok {
+		t.Fatalf("public key is not rsa")
+	}
 
-// tests disable/enable/destroy/restore
-func TestChangeKeyVersionState(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	v := getTestVariables(tc.ProjectID)
-	client, _ := cloudkms.NewKeyManagementClient(v.ctx)
+	// Encrypt data using the RSA public key.
+	ciphertext, err := rsa.EncryptOAEP(sha256.New(), rand.Reader, rsaKey, []byte("fruitloops"), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	for _, keyPath := range []string{v.symVersionPath, v.rsaDecryptPath, v.ecSignPath} {
-		// test disable
-		testutil.Retry(t, v.tryLimit, v.waitTime, func(r *testutil.R) {
-			if err := disableCryptoKeyVersion(ioutil.Discard, keyPath); err != nil {
-				r.Errorf("disableCryptoKeyVersion(%s): %v", keyPath, err)
-			}
-			resp, err := client.GetCryptoKeyVersion(v.ctx, &kmspb.GetCryptoKeyVersionRequest{Name: keyPath})
-			if err != nil {
-				r.Errorf("GetCryptoKeyVersion(%s): %v", keyPath, err)
-			}
-			if resp.State != kmspb.CryptoKeyVersion_DISABLED {
-				r.Errorf("failed to disable cryptokey version. current state: %v", resp.State)
-			}
-		})
-		// test destroy
-		testutil.Retry(t, v.tryLimit, v.waitTime, func(r *testutil.R) {
-			if err := destroyCryptoKeyVersion(ioutil.Discard, keyPath); err != nil {
-				r.Errorf("destroyCryptoKeyVersion(%s): %v", keyPath, err)
-			}
-			resp, err := client.GetCryptoKeyVersion(v.ctx, &kmspb.GetCryptoKeyVersionRequest{Name: keyPath})
-			if err != nil {
-				r.Errorf("GetCryptoKeyVersion(%s): %v", keyPath, err)
-			}
-			if resp.State != kmspb.CryptoKeyVersion_DESTROY_SCHEDULED {
-				r.Errorf("failed to destroy cryptokey version. current state: %v", resp.State)
-			}
-		})
-		// test restore
-		testutil.Retry(t, v.tryLimit, v.waitTime, func(r *testutil.R) {
-			if err := restoreCryptoKeyVersion(ioutil.Discard, keyPath); err != nil {
-				r.Errorf("restoreCryptoKeyVersion(%s): %v", keyPath, err)
-			}
-			resp, err := client.GetCryptoKeyVersion(v.ctx, &kmspb.GetCryptoKeyVersionRequest{Name: keyPath})
-			if err != nil {
-				r.Errorf("GetCryptoKeyVersion(%s): %v", keyPath, err)
-			}
-			if resp.State != kmspb.CryptoKeyVersion_DISABLED {
-				r.Errorf("failed to restore cryptokey version. current state: %v", resp.State)
-			}
-		})
-		// test re-enable
-		testutil.Retry(t, v.tryLimit, v.waitTime, func(r *testutil.R) {
-			if err := enableCryptoKeyVersion(ioutil.Discard, keyPath); err != nil {
-				r.Errorf("enableCryptoKeyVersion(%s): %v", keyPath, err)
-			}
-			resp, err := client.GetCryptoKeyVersion(v.ctx, &kmspb.GetCryptoKeyVersionRequest{Name: keyPath})
-			if err != nil {
-				r.Errorf("GetCryptoKeyVersion(%s): %v", keyPath, err)
-			}
-			if resp.State != kmspb.CryptoKeyVersion_ENABLED {
-				r.Errorf("failed to enable cryptokey version. current state: %v", resp.State)
-			}
-		})
+	var b bytes.Buffer
+	if err := decryptAsymmetric(&b, name, ciphertext); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Decrypted plaintext:"; !strings.Contains(got, want) {
+		t.Errorf("decryptAsymmetric: expected %q to contain %q", got, want)
 	}
 }
 
-func TestGetRingPolicy(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	v := getTestVariables(tc.ProjectID)
+func TestDecryptSymmetric(t *testing.T) {
+	testutil.SystemTest(t)
 
-	policy, err := getRingPolicy(ioutil.Discard, v.keyRingPath)
+	name := fixture.SymmetricKeyName
+
+	// Encrypt some data to decrypt.
+	ctx := context.Background()
+	client, err := kms.NewKeyManagementClient(ctx)
 	if err != nil {
-		t.Fatalf("GetRingPolicy(%s): %v", v.keyRingPath, err)
+		t.Fatal(err)
 	}
-	if policy == nil {
-		t.Fatalf("GetRingPolicy(%s) returned nil policy", v.keyRingPath)
+	result, err := client.Encrypt(ctx, &kmspb.EncryptRequest{
+		Name:      name,
+		Plaintext: []byte("fruitloops"),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var b bytes.Buffer
+	if err := decryptSymmetric(&b, name, result.Ciphertext); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Decrypted plaintext:"; !strings.Contains(got, want) {
+		t.Errorf("decryptSymmetric: expected %q to contain %q", got, want)
 	}
 }
 
-func TestAddMemberRingPolicy(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	v := getTestVariables(tc.ProjectID)
+func TestDestroyKeyVersion(t *testing.T) {
+	testutil.SystemTest(t)
 
-	// add member
-	testutil.Retry(t, v.tryLimit, v.waitTime, func(r *testutil.R) {
-		if err := addMemberRingPolicy(ioutil.Discard, v.keyRingPath, v.member, v.role); err != nil {
-			r.Errorf("addMemberRingPolicy(%s, %s, %s): %v", v.keyRingPath, v.member, v.role, err)
+	parent, err := fixture.CreateSymmetricKey(fixture.KeyRingName)
+	if err != nil {
+		t.Fatal(err)
+	}
+	name := fmt.Sprintf("%s/cryptoKeyVersions/1", parent)
+
+	t.Run("destroy", func(t *testing.T) {
+		var b bytes.Buffer
+		if err := destroyKeyVersion(&b, name); err != nil {
+			t.Fatal(err)
+		}
+
+		if got, want := b.String(), "Destroyed key version:"; !strings.Contains(got, want) {
+			t.Errorf("destroyKeyVersion: expected %q to contain %q", got, want)
+		}
+
+		t.Run("restore", func(t *testing.T) {
+			var b bytes.Buffer
+			if err := restoreKeyVersion(&b, name); err != nil {
+				t.Fatal(err)
+			}
+
+			if got, want := b.String(), "Restored key version:"; !strings.Contains(got, want) {
+				t.Errorf("restoreKeyVersion: expected %q to contain %q", got, want)
+			}
+		})
+	})
+}
+
+func TestDisableRestoreKeyVersion(t *testing.T) {
+	testutil.SystemTest(t)
+
+	parent, err := fixture.CreateSymmetricKey(fixture.KeyRingName)
+	if err != nil {
+		t.Fatal(err)
+	}
+	name := fmt.Sprintf("%s/cryptoKeyVersions/1", parent)
+
+	t.Run("disable", func(t *testing.T) {
+		var b bytes.Buffer
+		if err := disableKeyVersion(&b, name); err != nil {
+			t.Fatal(err)
+		}
+
+		if got, want := b.String(), "Disabled key version:"; !strings.Contains(got, want) {
+			t.Errorf("disableKeyVersion: expected %q to contain %q", got, want)
 		}
 	})
-	policy, _ := getRingPolicy(ioutil.Discard, v.keyRingPath)
-	found := false
-	for _, m := range policy.Members(v.role) {
-		if m == v.member {
-			found = true
+
+	t.Run("enable", func(t *testing.T) {
+		var b bytes.Buffer
+		if err := enableKeyVersion(&b, name); err != nil {
+			t.Fatal(err)
 		}
-	}
-	if found == false {
-		t.Fatalf("could not find member '%s' for role '%s'", v.member, v.role)
-	}
-	// remove member
-	testutil.Retry(t, v.tryLimit, v.waitTime, func(r *testutil.R) {
-		if err := removeMemberRingPolicy(ioutil.Discard, v.keyRingPath, v.member, v.role); err != nil {
-			r.Errorf("removeMemberCryptoKeyPolicy(%s, %s, %s): %v", v.symPath, v.member, v.role, err)
+
+		if got, want := b.String(), "Enabled key version:"; !strings.Contains(got, want) {
+			t.Errorf("enableKeyVersion: expected %q to contain %q", got, want)
 		}
 	})
-	policy, _ = getRingPolicy(ioutil.Discard, v.keyRingPath)
-	found = false
-	for _, m := range policy.Members(v.role) {
-		if m == v.member {
-			found = true
-		}
+}
+
+func TestEncryptAsymmetric(t *testing.T) {
+	testutil.SystemTest(t)
+
+	name := fmt.Sprintf("%s/cryptoKeyVersions/1", fixture.AsymmetricDecryptKeyName)
+
+	var b bytes.Buffer
+	if err := encryptAsymmetric(&b, name, "fruitloops"); err != nil {
+		t.Fatal(err)
 	}
-	if found == true {
-		t.Fatalf("member '%s' found after attempted delete", v.member)
+
+	if got, want := b.String(), "Encrypted ciphertext:"; !strings.Contains(got, want) {
+		t.Errorf("encryptAsymmetric: expected %q to contain %q", got, want)
 	}
 }
 
-func TestAddRemoveMemberCryptoKey(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	v := getTestVariables(tc.ProjectID)
+func TestEncryptSymmetric(t *testing.T) {
+	testutil.SystemTest(t)
 
-	rsaPath := v.keyRingPath + "/cryptoKeys/" + v.rsaDecryptID
-	ecPath := v.keyRingPath + "/cryptoKeys/" + v.ecSignID
-	for _, keyPath := range []string{v.symPath, rsaPath, ecPath} {
-		// add member
-		testutil.Retry(t, v.tryLimit, v.waitTime, func(r *testutil.R) {
-			if err := addMemberCryptoKeyPolicy(ioutil.Discard, keyPath, v.member, v.role); err != nil {
-				r.Errorf("addMemberCryptoKeyPolicy(%s, %s, %s): %v", keyPath, v.member, v.role, err)
-			}
-		})
-		policy, _ := getCryptoKeyPolicy(ioutil.Discard, keyPath)
-		found := false
-		for _, m := range policy.Members(v.role) {
-			if m == v.member {
-				found = true
-			}
-		}
-		if found == false {
-			t.Fatalf("could not find member '%s' for role '%s' in key: %s", v.member, v.role, keyPath)
-		}
-		// remove member
-		testutil.Retry(t, v.tryLimit, v.waitTime, func(r *testutil.R) {
-			if err := removeMemberCryptoKeyPolicy(ioutil.Discard, keyPath, v.member, v.role); err != nil {
-				r.Errorf("removeMemberCryptoKeyPolicy(%s, %s, %s): %v", keyPath, v.member, v.role, err)
-			}
-		})
-		policy, _ = getCryptoKeyPolicy(ioutil.Discard, keyPath)
-		found = false
-		for _, m := range policy.Members(v.role) {
-			if m == v.member {
-				found = true
-			}
-		}
-		if found != false {
-			t.Fatalf("member '%s' found in key %s after attempted delete", v.member, keyPath)
-		}
+	name := fixture.SymmetricKeyName
+
+	var b bytes.Buffer
+	if err := encryptSymmetric(&b, name, "fruitloops"); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Encrypted ciphertext:"; !strings.Contains(got, want) {
+		t.Errorf("encryptSymmetric: expected %q to contain %q", got, want)
 	}
 }
 
-func TestSymmetricEncryptDecrypt(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	v := getTestVariables(tc.ProjectID)
+func TestGetKeyLabels(t *testing.T) {
+	testutil.SystemTest(t)
 
-	cipherBytes, err := encryptSymmetric(v.symPath, []byte(v.message))
+	name := fixture.SymmetricKeyName
+
+	var b bytes.Buffer
+	if err := getKeyLabels(&b, name); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "foo=bar"; !strings.Contains(got, want) {
+		t.Errorf("getKeyLabels: expected %q to contain %q", got, want)
+	}
+}
+
+func TestGetPublicKey(t *testing.T) {
+	testutil.SystemTest(t)
+
+	name := fmt.Sprintf("%s/cryptoKeyVersions/1", fixture.AsymmetricDecryptKeyName)
+
+	var b bytes.Buffer
+	if err := getPublicKey(&b, name); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Retrieved public key:"; !strings.Contains(got, want) {
+		t.Errorf("getPublicKey: expected %q to contain %q", got, want)
+	}
+}
+
+func TestIamAddMember(t *testing.T) {
+	testutil.SystemTest(t)
+
+	name := fixture.SymmetricKeyName
+
+	var b bytes.Buffer
+	if err := iamAddMember(&b, name, "group:test@google.com"); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Updated IAM"; !strings.Contains(got, want) {
+		t.Errorf("iamAddMember: expected %q to contain %q", got, want)
+	}
+}
+
+func TestIamGetPolicy(t *testing.T) {
+	testutil.SystemTest(t)
+
+	name := fixture.SymmetricKeyName
+
+	ctx := context.Background()
+	client, err := kms.NewKeyManagementClient(ctx)
 	if err != nil {
-		t.Fatalf("encrypt(%s, %s): %v", v.symPath, []byte(v.message), err)
+		t.Fatal(err)
 	}
-	plainBytes, err := decryptSymmetric(v.symPath, cipherBytes)
+
+	handle := client.ResourceIAM(name)
+
+	policy, err := handle.Policy(ctx)
 	if err != nil {
-		t.Fatalf("decrypt(%s, %s): %v", v.symPath, cipherBytes, err)
+		t.Fatal(err)
 	}
-	if !bytes.Equal(plainBytes, []byte(v.message)) {
-		t.Fatalf("decrypted plaintext does not match input message: want %s, got %s", []byte(v.message), plainBytes)
+	policy.Add("group:test@google.com", "roles/cloudkms.cryptoKeyEncrypterDecrypter")
+
+	if err := handle.SetPolicy(ctx, policy); err != nil {
+		t.Fatal(err)
 	}
-	if bytes.Equal(cipherBytes, []byte(v.message)) {
-		t.Fatalf("ciphertext and plaintext bytes are identical: %s", cipherBytes)
+
+	var b bytes.Buffer
+	if err := iamGetPolicy(&b, name); err != nil {
+		t.Fatal(err)
 	}
-	plaintext := string(plainBytes)
-	if plaintext != v.message {
-		t.Fatalf("failed to decypt expected plaintext: want %s, got %s", v.message, plaintext)
+
+	if got, want := b.String(), "test@google.com"; !strings.Contains(got, want) {
+		t.Errorf("iamGetPolicy: expected %q to contain %q", got, want)
+	}
+}
+
+func TestIamRemoveMember(t *testing.T) {
+	testutil.SystemTest(t)
+
+	name := fixture.SymmetricKeyName
+
+	var b bytes.Buffer
+	if err := iamRemoveMember(&b, name, "group:test@google.com"); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Updated IAM"; !strings.Contains(got, want) {
+		t.Errorf("iamRemoveMember: expected %q to contain %q", got, want)
+	}
+}
+
+func TestSignAsymmetric(t *testing.T) {
+	testutil.SystemTest(t)
+
+	name := fmt.Sprintf("%s/cryptoKeyVersions/1", fixture.AsymmetricSignRSAKeyName)
+
+	var b bytes.Buffer
+	if err := signAsymmetric(&b, name, "applejacks"); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Signed digest:"; !strings.Contains(got, want) {
+		t.Errorf("signAsymmetric: expected %q to contain %q", got, want)
+	}
+}
+
+func TestUpdateKeyUpdateLabels(t *testing.T) {
+	testutil.SystemTest(t)
+
+	name := fixture.SymmetricKeyName
+
+	var b bytes.Buffer
+	if err := updateKeyUpdateLabels(&b, name); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "new_label=new_value"; !strings.Contains(got, want) {
+		t.Errorf("updateKeyUpdateLabels: expected %q to contain %q", got, want)
+	}
+}
+
+func TestUpdateKeyAddRotation(t *testing.T) {
+	testutil.SystemTest(t)
+
+	name := fixture.SymmetricKeyName
+
+	var b bytes.Buffer
+	if err := addRotationSchedule(&b, name); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Updated key:"; !strings.Contains(got, want) {
+		t.Errorf("addRotationSchedule: expected %q to contain %q", got, want)
+	}
+}
+
+func TestUpdateKeyRemoveLabels(t *testing.T) {
+	testutil.SystemTest(t)
+
+	name := fixture.SymmetricKeyName
+
+	var b bytes.Buffer
+	if err := updateKeyRemoveLabels(&b, name); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Updated key:"; !strings.Contains(got, want) {
+		t.Errorf("updateKeyRemoveLabels: expected %q to contain %q", got, want)
+	}
+}
+
+func TestUpdateKeyRemoveRotation(t *testing.T) {
+	testutil.SystemTest(t)
+
+	name := fixture.SymmetricKeyName
+
+	var b bytes.Buffer
+	if err := removeRotationSchedule(&b, name); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Updated key:"; !strings.Contains(got, want) {
+		t.Errorf("removeRotationSchedule: expected %q to contain %q", got, want)
+	}
+}
+
+func TestUpdateKeySetPrimary(t *testing.T) {
+	testutil.SystemTest(t)
+
+	name := fixture.SymmetricKeyName
+
+	var b bytes.Buffer
+	if err := updateKeySetPrimary(&b, name, "1"); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Updated key primary:"; !strings.Contains(got, want) {
+		t.Errorf("updateKeySetPrimary: expected %q to contain %q", got, want)
+	}
+}
+
+func TestVerifyAsymmetricEC(t *testing.T) {
+	testutil.SystemTest(t)
+
+	message := []byte("applejacks")
+	name := fmt.Sprintf("%s/cryptoKeyVersions/1", fixture.AsymmetricSignECKeyName)
+
+	ctx := context.Background()
+	client, err := kms.NewKeyManagementClient(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	digest := sha256.Sum256(message)
+	result, err := client.AsymmetricSign(ctx, &kmspb.AsymmetricSignRequest{
+		Name: name,
+		Digest: &kmspb.Digest{
+			Digest: &kmspb.Digest_Sha256{
+				Sha256: digest[:],
+			},
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var b bytes.Buffer
+	if err := verifyAsymmetricSignatureEC(&b, name, message, result.Signature); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Verified signature"; !strings.Contains(got, want) {
+		t.Errorf("verifyAsymmetricEC: expected %q to contain %q", got, want)
+	}
+}
+
+func TestVerifyAsymmetricRSA(t *testing.T) {
+	testutil.SystemTest(t)
+
+	message := []byte("applejacks")
+	name := fmt.Sprintf("%s/cryptoKeyVersions/1", fixture.AsymmetricSignRSAKeyName)
+
+	ctx := context.Background()
+	client, err := kms.NewKeyManagementClient(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	digest := sha256.Sum256(message)
+	result, err := client.AsymmetricSign(ctx, &kmspb.AsymmetricSignRequest{
+		Name: name,
+		Digest: &kmspb.Digest{
+			Digest: &kmspb.Digest_Sha256{
+				Sha256: digest[:],
+			},
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var b bytes.Buffer
+	if err := verifyAsymmetricSignatureRSA(&b, name, message, result.Signature); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Verified signature"; !strings.Contains(got, want) {
+		t.Errorf("verifyAsymmetricRSA: expected %q to contain %q", got, want)
 	}
 }

@@ -14,7 +14,7 @@
 
 package kms
 
-// [START kms_destroy_key_version]
+// [START kms_create_key_hsm]
 import (
 	"context"
 	"fmt"
@@ -24,10 +24,10 @@ import (
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
-// destroyKeyVersion marks a specified key version for deletion. The key can be
-// restored if requested within 24 hours.
-func destroyKeyVersion(w io.Writer, name string) error {
-	// parent := "projects/my-project/locations/us-east1/keyRings/my-key-ring/cryptoKeys/my-key/cryptoKeyVersions/123"
+// createKeyHSM creates a new symmetric encrypt/decrypt key on Cloud KMS.
+func createKeyHSM(w io.Writer, parent, id string) error {
+	// parent := "projects/my-project/locations/us-east1/keyRings/my-key-ring"
+	// id := "my-hsm-encryption-key"
 
 	// Create the client.
 	ctx := context.Background()
@@ -37,17 +37,25 @@ func destroyKeyVersion(w io.Writer, name string) error {
 	}
 
 	// Build the request.
-	req := &kmspb.DestroyCryptoKeyVersionRequest{
-		Name: name,
+	req := &kmspb.CreateCryptoKeyRequest{
+		Parent:      parent,
+		CryptoKeyId: id,
+		CryptoKey: &kmspb.CryptoKey{
+			Purpose: kmspb.CryptoKey_ENCRYPT_DECRYPT,
+			VersionTemplate: &kmspb.CryptoKeyVersionTemplate{
+				ProtectionLevel: kmspb.ProtectionLevel_HSM,
+				Algorithm:       kmspb.CryptoKeyVersion_GOOGLE_SYMMETRIC_ENCRYPTION,
+			},
+		},
 	}
 
 	// Call the API.
-	result, err := client.DestroyCryptoKeyVersion(ctx, req)
+	result, err := client.CreateCryptoKey(ctx, req)
 	if err != nil {
-		return fmt.Errorf("failed to destroy key version: %v", err)
+		return fmt.Errorf("failed to create key: %v", err)
 	}
-	fmt.Fprintf(w, "Destroyed key version: %s\n", result)
+	fmt.Fprintf(w, "Created key: %s\n", result.Name)
 	return nil
 }
 
-// [END kms_destroy_key_version]
+// [END kms_create_key_hsm]

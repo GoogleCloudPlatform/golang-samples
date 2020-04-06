@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,43 +14,56 @@
 
 package kms
 
-// [START kms_get_asymmetric_public]
+// [START kms_get_public_key]
 import (
 	"context"
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"io"
 
-	cloudkms "cloud.google.com/go/kms/apiv1"
+	kms "cloud.google.com/go/kms/apiv1"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
-// getAsymmetricPublicKey retrieves the public key from a saved asymmetric key pair on KMS.
-func getAsymmetricPublicKey(name string) (interface{}, error) {
-	// name: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
+// getPublicKey retrieves the public key from an asymmetric key pair on
+// Cloud KMS.
+func getPublicKey(w io.Writer, name string) error {
+	// parent := "projects/my-project/locations/us-east1/keyRings/my-key-ring/cryptoKeys/my-key/cryptoKeyVersions/123"
+
+	// Create the client.
 	ctx := context.Background()
-	client, err := cloudkms.NewKeyManagementClient(ctx)
+	client, err := kms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("cloudkms.NewKeyManagementClient: %v", err)
+		return fmt.Errorf("failed to create kms client: %v", err)
 	}
 
 	// Build the request.
 	req := &kmspb.GetPublicKeyRequest{
 		Name: name,
 	}
+
 	// Call the API.
-	response, err := client.GetPublicKey(ctx, req)
+	result, err := client.GetPublicKey(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("GetPublicKey: %v", err)
+		return fmt.Errorf("failed to get public key: %v", err)
 	}
-	// Parse the key.
-	keyBytes := []byte(response.Pem)
-	block, _ := pem.Decode(keyBytes)
+
+	// The 'Pem' field is the raw string representation of the public key.
+	key := result.Pem
+
+	//
+	// Optional - parse the public key. This transforms the string key into a Go
+	// PublicKey.
+	//
+
+	block, _ := pem.Decode([]byte(key))
 	publicKey, err := x509.ParsePKIXPublicKey(block.Bytes)
 	if err != nil {
-		return nil, fmt.Errorf("x509.ParsePKIXPublicKey: %v", err)
+		return fmt.Errorf("failed to parse public key: %v", err)
 	}
-	return publicKey, nil
+	fmt.Fprintf(w, "Retrieved public key: %v\n", publicKey)
+	return nil
 }
 
-// [END kms_get_asymmetric_public]
+// [END kms_get_public_key]

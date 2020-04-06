@@ -14,7 +14,7 @@
 
 package kms
 
-// [START kms_iam_remove_member]
+// [START kms_iam_add_member]
 import (
 	"context"
 	"fmt"
@@ -23,9 +23,11 @@ import (
 	kms "cloud.google.com/go/kms/apiv1"
 )
 
-// iamRemoveMember removes the IAM member from the Cloud KMS key, if they exist.
-func iamRemoveMember(w io.Writer, name, member string) error {
-	// NOTE: The resource name can be either a key or a key ring.
+// iamAddMember adds a new IAM member to the Cloud KMS key
+func iamAddMember(w io.Writer, name, member string) error {
+	// NOTE: The resource name can be either a key or a key ring. If IAM
+	// permissions are granted on the key ring, the permissions apply to all keys
+	// in the key ring.
 	//
 	// name := "projects/my-project/locations/us-east1/keyRings/my-key-ring/cryptoKeys/my-key"
 	// member := "user:foo@example.com"
@@ -46,7 +48,7 @@ func iamRemoveMember(w io.Writer, name, member string) error {
 
 	// Grant the member permissions. This example grants permission to use the key
 	// to encrypt data.
-	policy.Remove(member, "roles/cloudkms.cryptoKeyEncrypterDecrypter")
+	policy.Add(member, "roles/cloudkms.cryptoKeyEncrypterDecrypter")
 	if err := handle.SetPolicy(ctx, policy); err != nil {
 		return fmt.Errorf("failed to save policy: %v", err)
 	}
@@ -55,4 +57,4 @@ func iamRemoveMember(w io.Writer, name, member string) error {
 	return nil
 }
 
-// [END kms_iam_remove_member]
+// [END kms_iam_add_member]

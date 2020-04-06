@@ -14,21 +14,23 @@
 
 package kms
 
-// [START kms_create_key_asymmetric_decrypt]
+// [START kms_create_key_rotation_schedule]
 import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	kms "cloud.google.com/go/kms/apiv1"
+	"github.com/golang/protobuf/ptypes/duration"
+	"github.com/golang/protobuf/ptypes/timestamp"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
-// createKeyAsymmetricDecrypt creates a new asymmetric RSA encrypt/decrypt key
-// pair where the private key is stored in Cloud KMS.
-func createKeyAsymmetricDecrypt(w io.Writer, parent, id string) error {
-	// parent := "projects/my-project/locations/us-east1/keyRings/my-key-ring"
-	// id := "my-asymmetric-encryption-key"
+// createKeyRotationSchedule creates a key with a rotation schedule.
+func createKeyRotationSchedule(w io.Writer, parent, id string) error {
+	// name := "projects/my-project/locations/us-east1/keyRings/my-key-ring"
+	// id := "my-key-with-rotation-schedule"
 
 	// Create the client.
 	ctx := context.Background()
@@ -42,9 +44,21 @@ func createKeyAsymmetricDecrypt(w io.Writer, parent, id string) error {
 		Parent:      parent,
 		CryptoKeyId: id,
 		CryptoKey: &kmspb.CryptoKey{
-			Purpose: kmspb.CryptoKey_ASYMMETRIC_DECRYPT,
+			Purpose: kmspb.CryptoKey_ENCRYPT_DECRYPT,
 			VersionTemplate: &kmspb.CryptoKeyVersionTemplate{
-				Algorithm: kmspb.CryptoKeyVersion_RSA_DECRYPT_OAEP_2048_SHA256,
+				Algorithm: kmspb.CryptoKeyVersion_GOOGLE_SYMMETRIC_ENCRYPTION,
+			},
+
+			// Rotate the key every 30 days
+			RotationSchedule: &kmspb.CryptoKey_RotationPeriod{
+				RotationPeriod: &duration.Duration{
+					Seconds: int64(60 * 60 * 24 * 30), // 30 days
+				},
+			},
+
+			// Start the first rotation in 24 hours
+			NextRotationTime: &timestamp.Timestamp{
+				Seconds: time.Now().Add(24 * time.Hour).Unix(),
 			},
 		},
 	}
@@ -58,4 +72,4 @@ func createKeyAsymmetricDecrypt(w io.Writer, parent, id string) error {
 	return nil
 }
 
-// [END kms_create_key_asymmetric_decrypt]
+// [END kms_create_key_rotation_schedule]

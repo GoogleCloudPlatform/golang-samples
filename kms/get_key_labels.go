@@ -14,7 +14,7 @@
 
 package kms
 
-// [START kms_destroy_key_version]
+// [START kms_get_key_labels]
 import (
 	"context"
 	"fmt"
@@ -24,10 +24,9 @@ import (
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
-// destroyKeyVersion marks a specified key version for deletion. The key can be
-// restored if requested within 24 hours.
-func destroyKeyVersion(w io.Writer, name string) error {
-	// parent := "projects/my-project/locations/us-east1/keyRings/my-key-ring/cryptoKeys/my-key/cryptoKeyVersions/123"
+// getKeyLabels fetches the labels on a KMS key/
+func getKeyLabels(w io.Writer, name string) error {
+	// name := "projects/my-project/locations/us-east1/keyRings/my-key-ring/cryptoKeys/my-key"
 
 	// Create the client.
 	ctx := context.Background()
@@ -37,17 +36,22 @@ func destroyKeyVersion(w io.Writer, name string) error {
 	}
 
 	// Build the request.
-	req := &kmspb.DestroyCryptoKeyVersionRequest{
+	req := &kmspb.GetCryptoKeyRequest{
 		Name: name,
 	}
 
 	// Call the API.
-	result, err := client.DestroyCryptoKeyVersion(ctx, req)
+	result, err := client.GetCryptoKey(ctx, req)
 	if err != nil {
-		return fmt.Errorf("failed to destroy key version: %v", err)
+		return fmt.Errorf("failed to get key: %v", err)
 	}
-	fmt.Fprintf(w, "Destroyed key version: %s\n", result)
+
+	// Extract and print the labels.
+	labels := result.Labels
+	for k, v := range labels {
+		fmt.Fprintf(w, "%s=%s\n", k, v)
+	}
 	return nil
 }
 
-// [END kms_destroy_key_version]
+// [END kms_get_key_labels]

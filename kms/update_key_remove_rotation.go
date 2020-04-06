@@ -14,7 +14,7 @@
 
 package kms
 
-// [START kms_destroy_key_version]
+// [START kms_update_key_remove_rotation_schedule]
 import (
 	"context"
 	"fmt"
@@ -22,12 +22,13 @@ import (
 
 	kms "cloud.google.com/go/kms/apiv1"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
+	"google.golang.org/genproto/protobuf/field_mask"
 )
 
-// destroyKeyVersion marks a specified key version for deletion. The key can be
-// restored if requested within 24 hours.
-func destroyKeyVersion(w io.Writer, name string) error {
-	// parent := "projects/my-project/locations/us-east1/keyRings/my-key-ring/cryptoKeys/my-key/cryptoKeyVersions/123"
+// removeRotationSchedule updates a key to remove a rotation schedule, if one
+// exists.
+func removeRotationSchedule(w io.Writer, name string) error {
+	// name := "projects/my-project/locations/us-east1/keyRings/my-key-ring/cryptoKeys/my-key"
 
 	// Create the client.
 	ctx := context.Background()
@@ -37,17 +38,27 @@ func destroyKeyVersion(w io.Writer, name string) error {
 	}
 
 	// Build the request.
-	req := &kmspb.DestroyCryptoKeyVersionRequest{
-		Name: name,
+	req := &kmspb.UpdateCryptoKeyRequest{
+		CryptoKey: &kmspb.CryptoKey{
+			// Provide the name of the key to update
+			Name: name,
+
+			// Remove any rotation fields.
+			RotationSchedule: nil,
+			NextRotationTime: nil,
+		},
+		UpdateMask: &field_mask.FieldMask{
+			Paths: []string{"rotation_period", "next_rotation_time"},
+		},
 	}
 
 	// Call the API.
-	result, err := client.DestroyCryptoKeyVersion(ctx, req)
+	result, err := client.UpdateCryptoKey(ctx, req)
 	if err != nil {
-		return fmt.Errorf("failed to destroy key version: %v", err)
+		return fmt.Errorf("failed to update key: %v", err)
 	}
-	fmt.Fprintf(w, "Destroyed key version: %s\n", result)
+	fmt.Fprintf(w, "Updated key: %s\n", result.Name)
 	return nil
 }
 
-// [END kms_destroy_key_version]
+// [END kms_update_key_remove_rotation_schedule]

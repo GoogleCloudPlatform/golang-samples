@@ -14,20 +14,22 @@
 
 package kms
 
-// [START kms_destroy_key_version]
+// [START kms_iam_get_policy]
 import (
 	"context"
 	"fmt"
 	"io"
 
 	kms "cloud.google.com/go/kms/apiv1"
-	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
-// destroyKeyVersion marks a specified key version for deletion. The key can be
-// restored if requested within 24 hours.
-func destroyKeyVersion(w io.Writer, name string) error {
-	// parent := "projects/my-project/locations/us-east1/keyRings/my-key-ring/cryptoKeys/my-key/cryptoKeyVersions/123"
+// iamGetPolicy retrieves and prints the Cloud IAM policy associated with the
+// Cloud KMS key.
+func iamGetPolicy(w io.Writer, name string) error {
+	// NOTE: The resource name can be either a key or a key ring.
+	//
+	// name := "projects/my-project/locations/us-east1/keyRings/my-key-ring/cryptoKeys/my-key"
+	// name := "projects/my-project/locations/us-east1/keyRings/my-key-ring"
 
 	// Create the client.
 	ctx := context.Background()
@@ -36,18 +38,21 @@ func destroyKeyVersion(w io.Writer, name string) error {
 		return fmt.Errorf("failed to create kms client: %v", err)
 	}
 
-	// Build the request.
-	req := &kmspb.DestroyCryptoKeyVersionRequest{
-		Name: name,
+	// Get the current policy.
+	policy, err := client.ResourceIAM(name).Policy(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to get IAM policy: %v", err)
 	}
 
-	// Call the API.
-	result, err := client.DestroyCryptoKeyVersion(ctx, req)
-	if err != nil {
-		return fmt.Errorf("failed to destroy key version: %v", err)
+	// Print the policy members.
+	for _, role := range policy.Roles() {
+		fmt.Fprintf(w, "%s\n", role)
+		for _, member := range policy.Members(role) {
+			fmt.Fprintf(w, "- %s\n", member)
+		}
+		fmt.Fprintf(w, "\n")
 	}
-	fmt.Fprintf(w, "Destroyed key version: %s\n", result)
 	return nil
 }
 
-// [END kms_destroy_key_version]
+// [END kms_iam_get_policy]

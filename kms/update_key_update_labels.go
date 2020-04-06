@@ -14,7 +14,7 @@
 
 package kms
 
-// [START kms_encrypt_symmetric]
+// [START kms_update_key_update_labels]
 import (
 	"context"
 	"fmt"
@@ -22,13 +22,12 @@ import (
 
 	kms "cloud.google.com/go/kms/apiv1"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
+	"google.golang.org/genproto/protobuf/field_mask"
 )
 
-// encryptSymmetric encrypts the input plaintext with the specified symmetric
-// Cloud KMS key.
-func encryptSymmetric(w io.Writer, name string, plaintext string) error {
+// updateKeyUpdateLabels updates an existing KMS key, adding a new label.
+func updateKeyUpdateLabels(w io.Writer, name string) error {
 	// name := "projects/my-project/locations/us-east1/keyRings/my-key-ring/cryptoKeys/my-key"
-	// plaintext := "Sample message"
 
 	// Create the client.
 	ctx := context.Background()
@@ -37,19 +36,50 @@ func encryptSymmetric(w io.Writer, name string, plaintext string) error {
 		return fmt.Errorf("failed to create kms client: %v", err)
 	}
 
+	//
+	// Step 1 - get the current set of labels on the key
+	//
+
 	// Build the request.
-	req := &kmspb.EncryptRequest{
-		Name:      name,
-		Plaintext: []byte(plaintext),
+	getReq := &kmspb.GetCryptoKeyRequest{
+		Name: name,
 	}
 
 	// Call the API.
-	result, err := client.Encrypt(ctx, req)
+	result, err := client.GetCryptoKey(ctx, getReq)
 	if err != nil {
-		return fmt.Errorf("failed to encrypt: %v", err)
+		return fmt.Errorf("failed to get key: %v", err)
 	}
-	fmt.Fprintf(w, "Encrypted ciphertext: %s", result.Ciphertext)
+
+	//
+	// Step 2 - add a label to the list of labels
+	//
+
+	labels := result.Labels
+	labels["new_label"] = "new_value"
+
+	// Build the request.
+	updateReq := &kmspb.UpdateCryptoKeyRequest{
+		CryptoKey: &kmspb.CryptoKey{
+			Name:   name,
+			Labels: labels,
+		},
+		UpdateMask: &field_mask.FieldMask{
+			Paths: []string{"labels"},
+		},
+	}
+
+	// Call the API.
+	result, err = client.UpdateCryptoKey(ctx, updateReq)
+	if err != nil {
+		return fmt.Errorf("failed to update key: %v", err)
+	}
+
+	// Print the labels.
+	for k, v := range result.Labels {
+		fmt.Fprintf(w, "%s=%s\n", k, v)
+	}
 	return nil
 }
 
-// [END kms_encrypt_symmetric]
+// [END kms_update_key_update_labels]

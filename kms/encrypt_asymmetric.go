@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 package kms
 
-// [START kms_encrypt_rsa]
+// [START kms_encrypt_asymmetric]
 import (
 	"context"
 	"crypto/rand"
@@ -23,43 +23,54 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"io"
 
-	cloudkms "cloud.google.com/go/kms/apiv1"
+	kms "cloud.google.com/go/kms/apiv1"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
-// encryptRSA will encrypt data locally using an 'RSA_DECRYPT_OAEP_2048_SHA256'
-// public key retrieved from Cloud KMS.
-func encryptRSA(name string, plaintext []byte) ([]byte, error) {
-	// name: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
-	// plaintext := []byte("Sample message")
+// encryptAsymmetric encrypts data on your local machine using an
+// 'RSA_DECRYPT_OAEP_2048_SHA256' public key retrieved from Cloud KMS.
+func encryptAsymmetric(w io.Writer, name string, plaintext string) error {
+	// name := "projects/my-project/locations/us-east1/keyRings/my-key-ring/cryptoKeys/my-key/cryptoKeyVersions/123"
+	// plaintext := "Sample message"
+
+	// Create the client.
 	ctx := context.Background()
-	client, err := cloudkms.NewKeyManagementClient(ctx)
+	client, err := kms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("cloudkms.NewKeyManagementClient: %v", err)
+		return fmt.Errorf("failed to create kms client: %v", err)
 	}
 
-	// Retrieve the public key from KMS.
-	response, err := client.GetPublicKey(ctx, &kmspb.GetPublicKeyRequest{Name: name})
+	// Retrieve the public key from Cloud KMS. This is the only operation that
+	// involves Cloud KMS. The remaining operations take place on your local
+	// machine.
+	response, err := client.GetPublicKey(ctx, &kmspb.GetPublicKeyRequest{
+		Name: name,
+	})
 	if err != nil {
-		return nil, fmt.Errorf("GetPublicKey: %v", err)
+		return fmt.Errorf("failed to get public key: %v", err)
 	}
-	// Parse the key.
+
+	// Parse the public key. Note, this example assumes the public key is in the
+	// RSA format.
 	block, _ := pem.Decode([]byte(response.Pem))
-	abstractKey, err := x509.ParsePKIXPublicKey(block.Bytes)
+	publicKey, err := x509.ParsePKIXPublicKey(block.Bytes)
 	if err != nil {
-		return nil, fmt.Errorf("x509.ParsePKIXPublicKey: %+v", err)
+		return fmt.Errorf("failed to parse public key: %v", err)
 	}
-	rsaKey, ok := abstractKey.(*rsa.PublicKey)
+	rsaKey, ok := publicKey.(*rsa.PublicKey)
 	if !ok {
-		return nil, fmt.Errorf("key %q is not RSA", name)
+		return fmt.Errorf("public key is not rsa")
 	}
+
 	// Encrypt data using the RSA public key.
-	ciphertext, err := rsa.EncryptOAEP(sha256.New(), rand.Reader, rsaKey, plaintext, nil)
+	ciphertext, err := rsa.EncryptOAEP(sha256.New(), rand.Reader, rsaKey, []byte(plaintext), nil)
 	if err != nil {
-		return nil, fmt.Errorf("rsa.EncryptOAEP: %v", err)
+		return fmt.Errorf("rsa.EncryptOAEP: %v", err)
 	}
-	return ciphertext, nil
+	fmt.Fprintf(w, "Encrypted ciphertext: %s", ciphertext)
+	return nil
 }
 
-// [END kms_encrypt_rsa]
+// [END kms_encrypt_asymmetric]

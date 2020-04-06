@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 package kms
 
-// [START kms_verify_signature_ec]
+// [START kms_verify_asymmetric_signature_ec]
 import (
 	"context"
 	"crypto/ecdsa"
@@ -23,47 +23,56 @@ import (
 	"encoding/asn1"
 	"encoding/pem"
 	"fmt"
+	"io"
 	"math/big"
 
-	cloudkms "cloud.google.com/go/kms/apiv1"
+	kms "cloud.google.com/go/kms/apiv1"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
-// verifySignatureEC will verify that an 'EC_SIGN_P256_SHA256' signature is valid for a given message.
-func verifySignatureEC(name string, signature, message []byte) error {
-	// name := "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
+// verifyAsymmetricSignatureEC will verify that an 'EC_SIGN_P256_SHA256' signature is
+// valid for a given message.
+func verifyAsymmetricSignatureEC(w io.Writer, name string, message, signature []byte) error {
+	// name := "projects/my-project/locations/us-east1/keyRings/my-key-ring/cryptoKeys/my-key/cryptoKeyVersions/123"
+	// message := []byte("...")  // Response from a sign request
+
+	// Create the client.
 	ctx := context.Background()
-	client, err := cloudkms.NewKeyManagementClient(ctx)
+	client, err := kms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return fmt.Errorf("cloudkms.NewKeyManagementClient: %v", err)
+		return fmt.Errorf("failed to create kms client: %v", err)
 	}
+
 	// Retrieve the public key from KMS.
 	response, err := client.GetPublicKey(ctx, &kmspb.GetPublicKeyRequest{Name: name})
 	if err != nil {
-		return fmt.Errorf("GetPublicKey: %v", err)
+		return fmt.Errorf("failed to get public key: %v", err)
 	}
-	// Parse the key.
+
+	// Parse the public key. Note, this example assumes the public key is in the
+	// ECDSA format.
 	block, _ := pem.Decode([]byte(response.Pem))
-	abstractKey, err := x509.ParsePKIXPublicKey(block.Bytes)
+	publicKey, err := x509.ParsePKIXPublicKey(block.Bytes)
 	if err != nil {
-		return fmt.Errorf("x509.ParsePKIXPublicKey: %v", err)
+		return fmt.Errorf("failed to parse public key: %v", err)
 	}
-	ecKey, ok := abstractKey.(*ecdsa.PublicKey)
+	ecKey, ok := publicKey.(*ecdsa.PublicKey)
 	if !ok {
-		return fmt.Errorf("key '%s' is not EC", name)
+		return fmt.Errorf("public key is not rsa")
 	}
+
 	// Verify Elliptic Curve signature.
 	var parsedSig struct{ R, S *big.Int }
 	if _, err = asn1.Unmarshal(signature, &parsedSig); err != nil {
 		return fmt.Errorf("asn1.Unmarshal: %v", err)
 	}
-	hash := sha256.New()
-	hash.Write(message)
-	digest := hash.Sum(nil)
-	if !ecdsa.Verify(ecKey, digest, parsedSig.R, parsedSig.S) {
-		return fmt.Errorf("ecdsa.Verify failed on key: %s", name)
+
+	digest := sha256.Sum256(message)
+	if !ecdsa.Verify(ecKey, digest[:], parsedSig.R, parsedSig.S) {
+		return fmt.Errorf("failed to verify signature")
 	}
+	fmt.Fprintf(w, "Verified signature!")
 	return nil
 }
 
-// [END kms_verify_signature_ec]
+// [END kms_verify_asymmetric_signature_ec]

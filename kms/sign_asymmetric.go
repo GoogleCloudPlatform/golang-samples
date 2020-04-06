@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,25 +19,33 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
+	"io"
 
-	cloudkms "cloud.google.com/go/kms/apiv1"
+	kms "cloud.google.com/go/kms/apiv1"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
-// signAsymmetric will sign a plaintext message using a saved asymmetric private key.
-func signAsymmetric(name string, message []byte) ([]byte, error) {
-	// name: "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
-	// Note: some key algorithms will require a different hash function.
-	// For example, EC_SIGN_P384_SHA384 requires SHA-384.
+// signAsymmetric will sign a plaintext message using a saved asymmetric private
+// key stored in Cloud KMS.
+func signAsymmetric(w io.Writer, name string, message string) error {
+	// name := "projects/my-project/locations/us-east1/keyRings/my-key-ring/cryptoKeys/my-key/cryptoKeyVersions/123"
+	// ciphertext := []byte("...")  // result of an asymmetric encryption call
+
+	// Create the client.
 	ctx := context.Background()
-	client, err := cloudkms.NewKeyManagementClient(ctx)
+	client, err := kms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("cloudkms.NewKeyManagementClient: %v", err)
+		return fmt.Errorf("failed to create kms client: %v", err)
 	}
-	// Find the digest of the message.
+
+	// Calculate the digest of the message.
 	digest := sha256.New()
-	digest.Write(message)
+	digest.Write([]byte(message))
+
 	// Build the signing request.
+	//
+	// Note: Key algorithms will require a varying hash function. For example,
+	// EC_SIGN_P384_SHA384 requires SHA-384.
 	req := &kmspb.AsymmetricSignRequest{
 		Name: name,
 		Digest: &kmspb.Digest{
@@ -46,13 +54,14 @@ func signAsymmetric(name string, message []byte) ([]byte, error) {
 			},
 		},
 	}
+
 	// Call the API.
-	response, err := client.AsymmetricSign(ctx, req)
+	result, err := client.AsymmetricSign(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("AsymmetricSign: %v", err)
+		return fmt.Errorf("failed to sign digest: %v", err)
 	}
-	// Return the signature bytes.
-	return response.Signature, nil
+	fmt.Fprintf(w, "Signed digest: %s", result.Signature)
+	return nil
 }
 
 // [END kms_sign_asymmetric]
