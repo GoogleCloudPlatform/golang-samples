@@ -1,0 +1,46 @@
+---
+ profiler/shakesapp/main.go             | 2 +-
+ profiler/shakesapp/shakesapp/server.go | 9 +--------
+ 2 files changed, 2 insertions(+), 9 deletions(-)
+
+diff --git a/profiler/shakesapp/main.go b/profiler/shakesapp/main.go
+index bedeb89..93690d9 100644
+--- a/profiler/shakesapp/main.go
++++ b/profiler/shakesapp/main.go
+@@ -33,7 +33,7 @@ import (
+ 
+ var (
+ 	projectID   = flag.String("project_id", "", "project ID to run profiler with; only required when running outside of GCP.")
+-	version     = flag.String("version", "original", "version to run profiler with")
++	version     = flag.String("version", "string_comparison", "version to run profiler with")
+ 	port        = flag.Int("port", 7788, "service port")
+ 	numReqs     = flag.Int("num_requests", 20, "number of requests to simulate")
+ 	concurrency = flag.Int("concurrency", 1, "number of requests to run in parallel")
+diff --git a/profiler/shakesapp/shakesapp/server.go b/profiler/shakesapp/shakesapp/server.go
+index 445645e..61277a7 100644
+--- a/profiler/shakesapp/shakesapp/server.go
++++ b/profiler/shakesapp/shakesapp/server.go
+@@ -21,7 +21,6 @@ import (
+ 	"context"
+ 	"fmt"
+ 	"io/ioutil"
+-	"regexp"
+ 	"strings"
+ 
+ 	"cloud.google.com/go/storage"
+@@ -52,13 +51,7 @@ func (s *server) GetMatchCount(ctx context.Context, req *ShakespeareRequest) (*S
+ 	for _, text := range texts {
+ 		for _, line := range strings.Split(text, "\n") {
+ 			line, query := strings.ToLower(line), strings.ToLower(req.Query)
+-			// TODO: Compiling and matching a regular expression on every request
+-			// might be too expensive? Consider optimizing.
+-			isMatch, err := regexp.MatchString(query, line)
+-			if err != nil {
+-				return resp, err
+-			}
+-			if isMatch {
++			if strings.Contains(line, query) {
+ 				resp.MatchCount++
+ 			}
+ 		}
+--

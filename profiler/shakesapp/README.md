@@ -21,3 +21,15 @@ this application, and can be used identify how to optimize the server.
     ```sh
     go run .
     ```
+
+## Applying optimizations to the patch file
+
+This application's server is intentionally non-optimal. The patch in 
+`optimizations/string_comparison.patch` contains one optimization for this
+application, and updates the version which profiles will be uploaded with.
+
+This patch can be applied by running:
+
+```sh
+git apply optimizations/string_comparison.patch
+```
