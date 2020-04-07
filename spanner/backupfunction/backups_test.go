@@ -80,11 +80,11 @@ func initIntegrationTests(t *testing.T) (cleanup func()) {
 	// }
 
 	// Create InstanceAdmin and DatabaseAdmin clients.
-	instanceAdmin, err = instance.NewInstanceAdminClient(ctx)//, opts)
+	instanceAdmin, err = instance.NewInstanceAdminClient(ctx) //, opts)
 	if err != nil {
 		t.Fatalf("cannot create instance databaseAdmin client: %v", err)
 	}
-	databaseAdmin, err = database.NewDatabaseAdminClient(ctx)//, opts)
+	databaseAdmin, err = database.NewDatabaseAdminClient(ctx) //, opts)
 	if err != nil {
 		t.Fatalf("cannot create databaseAdmin client: %v", err)
 	}
@@ -235,7 +235,7 @@ func TestIntegrationCreateBackup(t *testing.T) {
 
 	backupPrefix := "go-test-"
 	expires := time.Duration(time.Hour * 7)
-	op, err := CreateBackup(ctx,os.Stdout,databaseAdmin, testDatabaseName, expires,backupPrefix)
+	op, err := CreateBackup(ctx, os.Stdout, databaseAdmin, testDatabaseName, expires, backupPrefix)
 	if err != nil {
 		t.Fatal(err)
 	}
