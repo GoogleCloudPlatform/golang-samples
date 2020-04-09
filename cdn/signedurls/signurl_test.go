@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package main
+package signedurl
 
 import (
 	"bytes"
@@ -79,8 +79,8 @@ func TestSignURL(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		t.Run("%s", func(t *testing.T) {
-			signedValue := SignURL(
+		t.Run(c.testName, func(t *testing.T) {
+			signedValue := signURL(
 				c.url, c.keyName, testKey, c.expiration,
 			)
 			if signedValue != c.out {
@@ -119,7 +119,7 @@ func TestSignURLWithPrefix(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.testName, func(t *testing.T) {
-			signedValue, err := SignURLWithPrefix(
+			signedValue, err := signURLWithPrefix(
 				c.urlPrefix, c.keyName, testKey, c.expiration,
 			)
 			if err != nil {

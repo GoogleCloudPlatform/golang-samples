@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package main
+package signedcookie
 
 import (
 	"bytes"
@@ -50,88 +50,79 @@ func TestSignCookie(t *testing.T) {
 		0xb7, 0x70, 0xa3, 0x36, 0xe0, 0x87, 0x0a, 0xe3} // base64url: nZtRohdNF9m3cKM24IcK4w==
 
 	cases := []struct {
-		testName   string
-		urlPrefix  string
-		keyName    string
-		key        []byte
-		expiration time.Time
-		out        string
-		shouldPass bool
+		testName    string
+		urlPrefix   string
+		keyName     string
+		key         []byte
+		expiration  time.Time
+		out         string
+		shouldMatch bool
 	}{
 		{
-			// Valid signature
-			testName:   "Valid Domain and Sig",
-			urlPrefix:  "https://media.example.com/segments/",
-			keyName:    "my-key",
-			key:        testKey,
-			expiration: time.Unix(1558131350, 0),
-			out:        "URLPrefix=aHR0cHM6Ly9tZWRpYS5leGFtcGxlLmNvbS9zZWdtZW50cy8=:Expires=1558131350:Keyname=my-key:Signature=QMZgLb8pS9MkhTxcPOQTM5nzJXc=",
-			shouldPass: true,
+			testName:    "Valid Domain and Sig",
+			urlPrefix:   "https://media.example.com/segments/",
+			keyName:     "my-key",
+			key:         testKey,
+			expiration:  time.Unix(1558131350, 0),
+			out:         "URLPrefix=aHR0cHM6Ly9tZWRpYS5leGFtcGxlLmNvbS9zZWdtZW50cy8=:Expires=1558131350:Keyname=my-key:Signature=QMZgLb8pS9MkhTxcPOQTM5nzJXc=",
+			shouldMatch: true,
 		},
 		{
-			// Valid signature, different domain
-			testName:   "Valid Domain #2 & Sig",
-			urlPrefix:  "https://video.example.com/manifests/123/",
-			keyName:    "my-key",
-			key:        testKey,
-			expiration: time.Unix(1558131350, 0),
-			out:        "URLPrefix=aHR0cHM6Ly92aWRlby5leGFtcGxlLmNvbS9tYW5pZmVzdHMvMTIzLw==:Expires=1558131350:Keyname=my-key:Signature=vZdfJ4EnJTsADeKG5-TSwLqdtiw=",
-			shouldPass: true,
+			testName:    "Valid Domain #2 & Sig",
+			urlPrefix:   "https://video.example.com/manifests/123/",
+			keyName:     "my-key",
+			key:         testKey,
+			expiration:  time.Unix(1558131350, 0),
+			out:         "URLPrefix=aHR0cHM6Ly92aWRlby5leGFtcGxlLmNvbS9tYW5pZmVzdHMvMTIzLw==:Expires=1558131350:Keyname=my-key:Signature=vZdfJ4EnJTsADeKG5-TSwLqdtiw=",
+			shouldMatch: true,
 		},
 		{
-			// Mismatched timestamps
-			testName:   "Mismatched Timestamps",
-			urlPrefix:  "https://media.example.com/segments/",
-			keyName:    "my-key",
-			key:        testKey,
-			expiration: time.Unix(1558131350, 0),
-			out:        "URLPrefix=aHR0cHM6Ly9tZWRpYS5leGFtcGxlLmNvbS9zZWdtZW50cy8=:Expires=1858131350:Keyname=my-key:Signature=QMZgLb8pS9MkhTxcPOQTM5nzJXc=",
-			shouldPass: false,
+			testName:    "Mismatched Timestamps",
+			urlPrefix:   "https://media.example.com/segments/",
+			keyName:     "my-key",
+			key:         testKey,
+			expiration:  time.Unix(1558131350, 0),
+			out:         "URLPrefix=aHR0cHM6Ly9tZWRpYS5leGFtcGxlLmNvbS9zZWdtZW50cy8=:Expires=1858131350:Keyname=my-key:Signature=QMZgLb8pS9MkhTxcPOQTM5nzJXc=",
+			shouldMatch: false,
 		},
 		{
-			// Wrong key names
-			testName:   "Mismatched Key Names",
-			urlPrefix:  "https://media.example.com/segments/",
-			keyName:    "bad-key",
-			key:        testKey,
-			expiration: time.Unix(1558131350, 0),
-			out:        "URLPrefix=aHR0cHM6Ly9tZWRpYS5leGFtcGxlLmNvbS9zZWdtZW50cy8=:Expires=1858131350:Keyname=my-key:Signature=QMZgLb8pS9MkhTxcPOQTM5nzJXc=",
-			shouldPass: false,
+			testName:    "Mismatched Key Names",
+			urlPrefix:   "https://media.example.com/segments/",
+			keyName:     "bad-key",
+			key:         testKey,
+			expiration:  time.Unix(1558131350, 0),
+			out:         "URLPrefix=aHR0cHM6Ly9tZWRpYS5leGFtcGxlLmNvbS9zZWdtZW50cy8=:Expires=1858131350:Keyname=my-key:Signature=QMZgLb8pS9MkhTxcPOQTM5nzJXc=",
+			shouldMatch: false,
 		},
 		{
-			// Invalid key material
 			testName:  "Invalid Key Material",
 			urlPrefix: "https://media.example.com/segments/",
 			keyName:   "my-key",
 			key: []byte{0x9d, 0x9b, 0x51, 0xa2, 0x17, 0x4d, 0x17, 0xd9,
 				0xb7, 0x70, 0xa3, 0x36, 0xe0, 0x87, 0x0a},
-			expiration: time.Unix(1558131350, 0),
-			out:        "URLPrefix=aHR0cHM6Ly9tZWRpYS5leGFtcGxlLmNvbS9zZWdtZW50cy8=:Expires=1858131350:Keyname=my-key:Signature=QMZgLb8pS9MkhTxcPOQTM5nzJXc=",
-			shouldPass: false,
+			expiration:  time.Unix(1558131350, 0),
+			out:         "URLPrefix=aHR0cHM6Ly9tZWRpYS5leGFtcGxlLmNvbS9zZWdtZW50cy8=:Expires=1858131350:Keyname=my-key:Signature=QMZgLb8pS9MkhTxcPOQTM5nzJXc=",
+			shouldMatch: false,
 		},
 	}
 
 	for _, c := range cases {
 		t.Run(
-			fmt.Sprintf("%s (shouldPass: %t)", c.testName, c.shouldPass), func(t *testing.T) {
-				signedValue, err := SignCookie(
-					c.urlPrefix,
-					c.keyName,
-					c.key,
-					c.expiration,
-				)
+			fmt.Sprintf("%s (shouldMatch: %t)", c.testName, c.shouldMatch), func(t *testing.T) {
+				signedValue, err := signCookie(c.urlPrefix, c.keyName,
+					c.key, c.expiration)
 				if err != nil {
 					t.Errorf("SignCookie returned an error: %s", err)
 				}
 
-				if signedValue != c.out && c.shouldPass {
+				if signedValue != c.out && c.shouldMatch {
 					t.Errorf("signed value did not match: got: %s, want: %s", signedValue, c.out)
 				}
 
 				// Test for invalid matches - e.g. where the strings are empty,
 				// or where the same signature is being calculated across test
 				// cases.
-				if signedValue == c.out && !c.shouldPass {
+				if signedValue == c.out && !c.shouldMatch {
 					t.Errorf("signed value incorrectly matched: got %s, want %s", signedValue, c.out)
 				}
 

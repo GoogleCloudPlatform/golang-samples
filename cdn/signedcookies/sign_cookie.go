@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Command signedurls creates a signed URL for a Cloud CDN endpoint with the
+// Package signedcookie creates a signed URL for a Cloud CDN endpoint with the
 // given key.
-package main
+package signedcookie
 
+// [START cdn_signedcookie_example]
 import (
 	"crypto/hmac"
 	"crypto/sha1"
@@ -29,16 +30,14 @@ import (
 	"time"
 )
 
-// [START example]
-
-// SignCookie creates a signed cookie for an endpoint served by Cloud CDN.
+// signCookie creates a signed cookie for an endpoint served by Cloud CDN.
 //
 // - urlPrefix must start with "https://" and should include the path prefix
 // for which the cookie will authorize access to.
 // - key should be in raw form (not base64url-encoded) which is
 // 16-bytes long.
 // - keyName must match a key added to the backend service or bucket.
-func SignCookie(urlPrefix, keyName string, key []byte, expiration time.Time) (string, error) {
+func signCookie(urlPrefix, keyName string, key []byte, expiration time.Time) (string, error) {
 	if !strings.HasPrefix(urlPrefix, "http") {
 		return "", fmt.Errorf("the provided urlPrefix is missing the protocol: %s", urlPrefix)
 	}
@@ -76,7 +75,7 @@ func readKeyFile(path string) ([]byte, error) {
 	return d[:n], nil
 }
 
-func main() {
+func example() {
 	var keyPath string
 	flag.StringVar(&keyPath, "key-file", "", "The path to a file containing the base64-encoded signing key")
 	flag.Parse()
@@ -94,7 +93,7 @@ func main() {
 		keyName    = "my-key"
 		expiration = time.Hour * 2
 	)
-	signedValue, err := SignCookie(
+	signedValue, err := signCookie(
 		fmt.Sprintf("https://%s%s", domain, path),
 		keyName,
 		key,
@@ -117,4 +116,4 @@ func main() {
 	fmt.Println(cookie)
 }
 
-// [END example]
+// [END cdn_signedcookie_example]

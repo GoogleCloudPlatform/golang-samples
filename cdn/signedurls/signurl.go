@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Command signedurls creates a signed URL for a Cloud CDN endpoint with the
+// Package signedurl creates a signed URL for a Cloud CDN endpoint with the
 // given key.
-package main
+package signedurl
 
+// [START example]
 import (
 	"crypto/hmac"
 	"crypto/sha1"
@@ -28,15 +29,13 @@ import (
 	"time"
 )
 
-// [START example]
-
 // SignURL creates a signed URL for an endpoint on Cloud CDN.
 //
 // - url must start with "https://" and should not have the "Expires", "KeyName", or "Signature"
 // query parameters.
 // - key should be in raw form (not base64url-encoded) which is 16-bytes long.
 // - keyName must match a key added to the backend service or bucket.
-func SignURL(url, keyName string, key []byte, expiration time.Time) string {
+func signURL(url, keyName string, key []byte, expiration time.Time) string {
 	sep := "?"
 	if strings.Contains(url, "?") {
 		sep = "&"
@@ -59,7 +58,7 @@ func SignURL(url, keyName string, key []byte, expiration time.Time) string {
 // - urlPrefix must start with "https://" and should not include query parameters.
 // - key should be in raw form (not base64url-encoded) which is 16-bytes long.
 // - keyName must match a key added to the backend service or bucket.
-func SignURLWithPrefix(urlPrefix, keyName string, key []byte, expiration time.Time) (string, error) {
+func signURLWithPrefix(urlPrefix, keyName string, key []byte, expiration time.Time) (string, error) {
 	if strings.Contains(urlPrefix, "?") {
 		return "", fmt.Errorf("urlPrefix must not include query params: %s", urlPrefix)
 	}
@@ -97,7 +96,7 @@ func readKeyFile(path string) ([]byte, error) {
 	return d[:n], nil
 }
 
-func main() {
+func example() {
 	var keyPath string
 	flag.StringVar(&keyPath, "key-file", "", "The path to a file containing the base64-encoded signing key")
 	flag.Parse()
@@ -107,10 +106,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	url := SignURL("https://example.com", "my-key", key, time.Now().Add(time.Hour*24))
+	url := signURL("https://example.com", "my-key", key, time.Now().Add(time.Hour*24))
 	fmt.Println(url)
 
-	urlPrefix, err := SignURLWithPrefix("https://www.google.com/", "my-key", key, time.Unix(1549751401, 0))
+	urlPrefix, err := signURLWithPrefix("https://www.google.com/", "my-key", key, time.Unix(1549751401, 0))
 	if err != nil {
 		log.Fatal(err)
 	}
