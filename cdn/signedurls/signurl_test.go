@@ -40,7 +40,7 @@ func TestReadKeyFile(t *testing.T) {
 		t.Fatal(err)
 	}
 	if !bytes.Equal(b, expected) {
-		t.Fatalf("got=%v; expected=%v", b, expected)
+		t.Fatalf("the signed cookie value did not match: got=%v; expected=%v", b, expected)
 	}
 }
 
@@ -106,14 +106,14 @@ func TestSignURLWithPrefix(t *testing.T) {
 			urlPrefix:  "https://media.example.com/segments/",
 			keyName:    "my-key",
 			expiration: time.Unix(1558131350, 0),
-			out:        "URLPrefix=aHR0cHM6Ly9tZWRpYS5leGFtcGxlLmNvbS9zZWdtZW50cy8=&Expires=1558131350&Keyname=my-key&Signature=NB1csGFeIOvP5-6zsAdSA9xtxXM=",
+			out:        "URLPrefix=aHR0cHM6Ly9tZWRpYS5leGFtcGxlLmNvbS9zZWdtZW50cy8=&Expires=1558131350&KeyName=my-key&Signature=HWE5tBTZgnYVoZzVLG7BtRnOsgk=",
 		},
 		{
 			testName:   "Domain Only",
 			urlPrefix:  "https://www.google.com/",
 			keyName:    "my-key",
 			expiration: time.Unix(1549751401, 0),
-			out:        "URLPrefix=aHR0cHM6Ly93d3cuZ29vZ2xlLmNvbS8=&Expires=1549751401&Keyname=my-key&Signature=2x9yY3ZVzyqkoY4OFRLjRmdFQ_4=",
+			out:        "URLPrefix=aHR0cHM6Ly93d3cuZ29vZ2xlLmNvbS8=&Expires=1549751401&KeyName=my-key&Signature=o0zZ77jb7BgtGRPQEaXmX3cCLh8=",
 		},
 	}
 

@@ -23,6 +23,7 @@ import (
 	"encoding/base64"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"strings"
@@ -64,7 +65,7 @@ func signURLWithPrefix(urlPrefix, keyName string, key []byte, expiration time.Ti
 	}
 
 	encodedURLPrefix := base64.URLEncoding.EncodeToString([]byte(urlPrefix))
-	input := fmt.Sprintf("URLPrefix=%s&Expires=%d&Keyname=%s",
+	input := fmt.Sprintf("URLPrefix=%s&Expires=%d&KeyName=%s",
 		encodedURLPrefix,
 		expiration.Unix(),
 		keyName,
@@ -96,7 +97,7 @@ func readKeyFile(path string) ([]byte, error) {
 	return d[:n], nil
 }
 
-func example() {
+func example(w io.Writer) {
 	var keyPath string
 	flag.StringVar(&keyPath, "key-file", "", "The path to a file containing the base64-encoded signing key")
 	flag.Parse()
@@ -113,7 +114,8 @@ func example() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(urlPrefix)
+
+	fmt.Fprintln(w, urlPrefix)
 }
 
 // [END example]

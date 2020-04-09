@@ -23,6 +23,7 @@ import (
 	"encoding/base64"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -43,7 +44,7 @@ func signCookie(urlPrefix, keyName string, key []byte, expiration time.Time) (st
 	}
 
 	encodedURLPrefix := base64.URLEncoding.EncodeToString([]byte(urlPrefix))
-	input := fmt.Sprintf("URLPrefix=%s:Expires=%d:Keyname=%s",
+	input := fmt.Sprintf("URLPrefix=%s:Expires=%d:KeyName=%s",
 		encodedURLPrefix,
 		expiration.Unix(),
 		keyName,
@@ -75,7 +76,7 @@ func readKeyFile(path string) ([]byte, error) {
 	return d[:n], nil
 }
 
-func example() {
+func example(w io.Writer) {
 	var keyPath string
 	flag.StringVar(&keyPath, "key-file", "", "The path to a file containing the base64-encoded signing key")
 	flag.Parse()
@@ -93,27 +94,27 @@ func example() {
 		keyName    = "my-key"
 		expiration = time.Hour * 2
 	)
+
 	signedValue, err := signCookie(
 		fmt.Sprintf("https://%s%s", domain, path),
 		keyName,
 		key,
-		//time.Now().Add(expiration),
-		time.Unix(1558131350, 0),
+		time.Now().Add(expiration),
 	)
 
 	// Use Go's http.Cookie type to construct a cookie.
 	cookie := &http.Cookie{
 		Name:   "Cloud-CDN-Cookie",
 		Value:  signedValue,
-		Path:   "/segments/", // Best practice: only send the cookie for paths it is valid for
-		Domain: "media.example.com",
+		Path:   path, // Best practice: only send the cookie for paths it is valid for
+		Domain: domain,
 		MaxAge: int(expiration.Seconds()),
 	}
 
 	// We print this to stdout in this example.
 	// Use http.ResponseWriter.SetCookie to write a cookie to an authenticated
 	// client in a real application.
-	fmt.Println(cookie)
+	fmt.Fprintln(w, cookie)
 }
 
 // [END cdn_signedcookie_example]

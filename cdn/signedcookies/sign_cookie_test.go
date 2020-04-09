@@ -41,7 +41,7 @@ func TestReadKeyFile(t *testing.T) {
 		t.Fatal(err)
 	}
 	if !bytes.Equal(b, expected) {
-		t.Fatalf("got=%v; expected=%v", b, expected)
+		t.Fatalf("the signed cookie value did not match: got=%v; expected=%v", b, expected)
 	}
 }
 
@@ -64,7 +64,7 @@ func TestSignCookie(t *testing.T) {
 			keyName:     "my-key",
 			key:         testKey,
 			expiration:  time.Unix(1558131350, 0),
-			out:         "URLPrefix=aHR0cHM6Ly9tZWRpYS5leGFtcGxlLmNvbS9zZWdtZW50cy8=:Expires=1558131350:Keyname=my-key:Signature=QMZgLb8pS9MkhTxcPOQTM5nzJXc=",
+			out:         "URLPrefix=aHR0cHM6Ly9tZWRpYS5leGFtcGxlLmNvbS9zZWdtZW50cy8=:Expires=1558131350:KeyName=my-key:Signature=_qwhz38bxCKdiDqENLIx4ujrw-U=",
 			shouldMatch: true,
 		},
 		{
@@ -73,7 +73,7 @@ func TestSignCookie(t *testing.T) {
 			keyName:     "my-key",
 			key:         testKey,
 			expiration:  time.Unix(1558131350, 0),
-			out:         "URLPrefix=aHR0cHM6Ly92aWRlby5leGFtcGxlLmNvbS9tYW5pZmVzdHMvMTIzLw==:Expires=1558131350:Keyname=my-key:Signature=vZdfJ4EnJTsADeKG5-TSwLqdtiw=",
+			out:         "URLPrefix=aHR0cHM6Ly92aWRlby5leGFtcGxlLmNvbS9tYW5pZmVzdHMvMTIzLw==:Expires=1558131350:KeyName=my-key:Signature=0ZSSGg0VdRH29siXG8wiPTV5LOE=",
 			shouldMatch: true,
 		},
 		{
@@ -82,7 +82,7 @@ func TestSignCookie(t *testing.T) {
 			keyName:     "my-key",
 			key:         testKey,
 			expiration:  time.Unix(1558131350, 0),
-			out:         "URLPrefix=aHR0cHM6Ly9tZWRpYS5leGFtcGxlLmNvbS9zZWdtZW50cy8=:Expires=1858131350:Keyname=my-key:Signature=QMZgLb8pS9MkhTxcPOQTM5nzJXc=",
+			out:         "URLPrefix=aHR0cHM6Ly9tZWRpYS5leGFtcGxlLmNvbS9zZWdtZW50cy8=:Expires=1858131350:KeyName=my-key:Signature=QMZgLb8pS9MkhTxcPOQTM5nzJXc=",
 			shouldMatch: false,
 		},
 		{
@@ -91,7 +91,7 @@ func TestSignCookie(t *testing.T) {
 			keyName:     "bad-key",
 			key:         testKey,
 			expiration:  time.Unix(1558131350, 0),
-			out:         "URLPrefix=aHR0cHM6Ly9tZWRpYS5leGFtcGxlLmNvbS9zZWdtZW50cy8=:Expires=1858131350:Keyname=my-key:Signature=QMZgLb8pS9MkhTxcPOQTM5nzJXc=",
+			out:         "URLPrefix=aHR0cHM6Ly9tZWRpYS5leGFtcGxlLmNvbS9zZWdtZW50cy8=:Expires=1858131350:KeyName=my-key:Signature=QMZgLb8pS9MkhTxcPOQTM5nzJXc=",
 			shouldMatch: false,
 		},
 		{
@@ -101,7 +101,7 @@ func TestSignCookie(t *testing.T) {
 			key: []byte{0x9d, 0x9b, 0x51, 0xa2, 0x17, 0x4d, 0x17, 0xd9,
 				0xb7, 0x70, 0xa3, 0x36, 0xe0, 0x87, 0x0a},
 			expiration:  time.Unix(1558131350, 0),
-			out:         "URLPrefix=aHR0cHM6Ly9tZWRpYS5leGFtcGxlLmNvbS9zZWdtZW50cy8=:Expires=1858131350:Keyname=my-key:Signature=QMZgLb8pS9MkhTxcPOQTM5nzJXc=",
+			out:         "URLPrefix=aHR0cHM6Ly9tZWRpYS5leGFtcGxlLmNvbS9zZWdtZW50cy8=:Expires=1858131350:KeyName=my-key:Signature=QMZgLb8pS9MkhTxcPOQTM5nzJXc=",
 			shouldMatch: false,
 		},
 	}
