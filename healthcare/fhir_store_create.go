@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2019, 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,10 +34,10 @@ func createFHIRStore(w io.Writer, projectID, location, datasetID, fhirStoreID st
 
 	storesService := healthcareService.Projects.Locations.Datasets.FhirStores
 
-	store := &healthcare.FhirStore{}
 	parent := fmt.Sprintf("projects/%s/locations/%s/datasets/%s", projectID, location, datasetID)
+        version := "STU3"
 
-	resp, err := storesService.Create(parent, store).FhirStoreId(fhirStoreID).Do()
+	resp, err := storesService.Create(parent, &healthcare.FhirStore{Version: version}).FhirStoreId(fhirStoreID).Do()
 	if err != nil {
 		return fmt.Errorf("Create: %v", err)
 	}
