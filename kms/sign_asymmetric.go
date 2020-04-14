@@ -29,7 +29,7 @@ import (
 // key stored in Cloud KMS.
 func signAsymmetric(w io.Writer, name string, message string) error {
 	// name := "projects/my-project/locations/us-east1/keyRings/my-key-ring/cryptoKeys/my-key/cryptoKeyVersions/123"
-	// ciphertext := []byte("...")  // result of an asymmetric encryption call
+	// message := "my message"
 
 	// Create the client.
 	ctx := context.Background()

@@ -251,7 +251,7 @@ func TestDecryptSymmetric(t *testing.T) {
 	}
 }
 
-func TestDestroyKeyVersion(t *testing.T) {
+func TestDestroyRestoreKeyVersion(t *testing.T) {
 	testutil.SystemTest(t)
 
 	parent, err := fixture.CreateSymmetricKey(fixture.KeyRingName)
@@ -283,7 +283,7 @@ func TestDestroyKeyVersion(t *testing.T) {
 	})
 }
 
-func TestDisableRestoreKeyVersion(t *testing.T) {
+func TestDisableEnableKeyVersion(t *testing.T) {
 	testutil.SystemTest(t)
 
 	parent, err := fixture.CreateSymmetricKey(fixture.KeyRingName)
@@ -375,7 +375,7 @@ func TestGetPublicKey(t *testing.T) {
 	}
 }
 
-func TestIamAddMember(t *testing.T) {
+func TestIAMAddMember(t *testing.T) {
 	testutil.SystemTest(t)
 
 	name := fixture.SymmetricKeyName
@@ -386,11 +386,11 @@ func TestIamAddMember(t *testing.T) {
 	}
 
 	if got, want := b.String(), "Updated IAM"; !strings.Contains(got, want) {
-		t.Errorf("iamAddMember: expected %q to contain %q", got, want)
+		t.Errorf("IAMAddMember: expected %q to contain %q", got, want)
 	}
 }
 
-func TestIamGetPolicy(t *testing.T) {
+func TestIAMGetPolicy(t *testing.T) {
 	testutil.SystemTest(t)
 
 	name := fixture.SymmetricKeyName
@@ -423,7 +423,7 @@ func TestIamGetPolicy(t *testing.T) {
 	}
 }
 
-func TestIamRemoveMember(t *testing.T) {
+func TestIAMRemoveMember(t *testing.T) {
 	testutil.SystemTest(t)
 
 	name := fixture.SymmetricKeyName

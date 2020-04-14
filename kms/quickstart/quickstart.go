@@ -31,7 +31,7 @@ func main() {
 	// GCP project with which to communicate.
 	projectID := "your-project-id"
 
-	// Location in which to list KeyRings.
+	// Location in which to list key rings.
 	locationID := "global"
 
 	// Create the client.

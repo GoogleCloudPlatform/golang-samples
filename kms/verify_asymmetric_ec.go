@@ -34,7 +34,8 @@ import (
 // valid for a given message.
 func verifyAsymmetricSignatureEC(w io.Writer, name string, message, signature []byte) error {
 	// name := "projects/my-project/locations/us-east1/keyRings/my-key-ring/cryptoKeys/my-key/cryptoKeyVersions/123"
-	// message := []byte("...")  // Response from a sign request
+	// message := "my message"
+	// signature := []byte("...")  // Response from a sign request
 
 	// Create the client.
 	ctx := context.Background()

@@ -24,7 +24,7 @@ import (
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
-// getKeyLabels fetches the labels on a KMS key/
+// getKeyLabels fetches the labels on a KMS key.
 func getKeyLabels(w io.Writer, name string) error {
 	// name := "projects/my-project/locations/us-east1/keyRings/my-key-ring/cryptoKeys/my-key"
 
@@ -47,8 +47,7 @@ func getKeyLabels(w io.Writer, name string) error {
 	}
 
 	// Extract and print the labels.
-	labels := result.Labels
-	for k, v := range labels {
+	for k, v := range result.Labels {
 		fmt.Fprintf(w, "%s=%s\n", k, v)
 	}
 	return nil

@@ -27,7 +27,7 @@ import (
 // restoreKeyVersion attempts to recover a key that has been marked for
 // destruction in the past 24h.
 func restoreKeyVersion(w io.Writer, name string) error {
-	// parent := "projects/my-project/locations/us-east1/keyRings/my-key-ring/cryptoKeys/my-key/cryptoKeyVersions/123"
+	// name := "projects/my-project/locations/us-east1/keyRings/my-key-ring/cryptoKeys/my-key/cryptoKeyVersions/123"
 
 	// Create the client.
 	ctx := context.Background()

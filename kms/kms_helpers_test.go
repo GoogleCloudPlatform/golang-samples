@@ -97,7 +97,7 @@ func (k *kmsFixture) Cleanup() error {
 		if err == iterator.Done {
 			break
 		}
-		if terr, ok := grpcstatus.FromError(err); ok && terr.Code() == grpccodes.NotFound {
+		if grpcstatus.Code(err) == grpccodes.NotFound {
 			break
 		}
 		if err != nil {
@@ -131,7 +131,7 @@ func (k *kmsFixture) Cleanup() error {
 			if err == iterator.Done {
 				break
 			}
-			if terr, ok := grpcstatus.FromError(err); ok && terr.Code() == grpccodes.NotFound {
+			if grpcstatus.Code(err) == grpccodes.NotFound {
 				break
 			}
 			if err != nil {
