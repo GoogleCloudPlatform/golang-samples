@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import (
 	"io"
 	"time"
 
-	healthcare "google.golang.org/api/healthcare/v1beta1"
+	healthcare "google.golang.org/api/healthcare/v1"
 )
 
 // exportFHIRResource exports the resources in the FHIR store.
@@ -37,7 +37,7 @@ func exportFHIRResource(w io.Writer, projectID, location, datasetID, fhirStoreID
 
 	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/fhirStores/%s", projectID, location, datasetID, fhirStoreID)
 	req := &healthcare.ExportResourcesRequest{
-		GcsDestination: &healthcare.GoogleCloudHealthcareV1beta1FhirRestGcsDestination{
+		GcsDestination: &healthcare.GoogleCloudHealthcareV1FhirGcsDestination{
 			UriPrefix: gcsURIPrefix,
 		},
 	}

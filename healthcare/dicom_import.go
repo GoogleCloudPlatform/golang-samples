@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"io"
 
-	healthcare "google.golang.org/api/healthcare/v1beta1"
+	healthcare "google.golang.org/api/healthcare/v1"
 )
 
 // importDICOMInstance imports DICOM objects from GCS.
@@ -35,7 +35,7 @@ func importDICOMInstance(w io.Writer, projectID, location, datasetID, dicomStore
 	storesService := healthcareService.Projects.Locations.Datasets.DicomStores
 
 	req := &healthcare.ImportDicomDataRequest{
-		GcsSource: &healthcare.GoogleCloudHealthcareV1beta1DicomGcsSource{
+		GcsSource: &healthcare.GoogleCloudHealthcareV1DicomGcsSource{
 			Uri: contentURI,
 		},
 	}
