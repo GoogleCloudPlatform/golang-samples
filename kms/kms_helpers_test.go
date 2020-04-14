@@ -26,7 +26,7 @@ import (
 	"github.com/gofrs/uuid"
 	"google.golang.org/api/iterator"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
-	"google.golang.org/genproto/protobuf/field_mask"
+	fieldmask "google.golang.org/genproto/protobuf/field_mask"
 	grpccodes "google.golang.org/grpc/codes"
 	grpcstatus "google.golang.org/grpc/status"
 )
@@ -112,7 +112,7 @@ func (k *kmsFixture) Cleanup() error {
 					RotationSchedule: nil,
 					NextRotationTime: nil,
 				},
-				UpdateMask: &field_mask.FieldMask{
+				UpdateMask: &fieldmask.FieldMask{
 					Paths: []string{"rotation_period", "next_rotation_time"},
 				},
 			}); err != nil {

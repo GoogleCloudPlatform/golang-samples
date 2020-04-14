@@ -25,7 +25,7 @@ import (
 	"github.com/golang/protobuf/ptypes/duration"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
-	"google.golang.org/genproto/protobuf/field_mask"
+	fieldmask "google.golang.org/genproto/protobuf/field_mask"
 )
 
 // addRotationSchedule updates a key to add a rotation schedule. If the key
@@ -58,7 +58,7 @@ func addRotationSchedule(w io.Writer, name string) error {
 				Seconds: time.Now().Add(24 * time.Hour).Unix(),
 			},
 		},
-		UpdateMask: &field_mask.FieldMask{
+		UpdateMask: &fieldmask.FieldMask{
 			Paths: []string{"rotation_period", "next_rotation_time"},
 		},
 	}

@@ -22,7 +22,7 @@ import (
 
 	kms "cloud.google.com/go/kms/apiv1"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
-	"google.golang.org/genproto/protobuf/field_mask"
+	fieldmask "google.golang.org/genproto/protobuf/field_mask"
 )
 
 // removeRotationSchedule updates a key to remove a rotation schedule, if one
@@ -47,7 +47,7 @@ func removeRotationSchedule(w io.Writer, name string) error {
 			RotationSchedule: nil,
 			NextRotationTime: nil,
 		},
-		UpdateMask: &field_mask.FieldMask{
+		UpdateMask: &fieldmask.FieldMask{
 			Paths: []string{"rotation_period", "next_rotation_time"},
 		},
 	}

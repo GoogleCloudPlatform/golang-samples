@@ -22,7 +22,7 @@ import (
 
 	kms "cloud.google.com/go/kms/apiv1"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
-	"google.golang.org/genproto/protobuf/field_mask"
+	fieldmask "google.golang.org/genproto/protobuf/field_mask"
 )
 
 // updateKeyUpdateLabels updates an existing KMS key, adding a new label.
@@ -64,7 +64,7 @@ func updateKeyUpdateLabels(w io.Writer, name string) error {
 			Name:   name,
 			Labels: labels,
 		},
-		UpdateMask: &field_mask.FieldMask{
+		UpdateMask: &fieldmask.FieldMask{
 			Paths: []string{"labels"},
 		},
 	}

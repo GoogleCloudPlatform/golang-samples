@@ -22,7 +22,7 @@ import (
 
 	kms "cloud.google.com/go/kms/apiv1"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
-	"google.golang.org/genproto/protobuf/field_mask"
+	fieldmask "google.golang.org/genproto/protobuf/field_mask"
 )
 
 // updateKeyRemoveLabels removes all labels from an existing Cloud KMS key.
@@ -42,7 +42,7 @@ func updateKeyRemoveLabels(w io.Writer, name string) error {
 			Name:   name,
 			Labels: nil,
 		},
-		UpdateMask: &field_mask.FieldMask{
+		UpdateMask: &fieldmask.FieldMask{
 			Paths: []string{"labels"},
 		},
 	}

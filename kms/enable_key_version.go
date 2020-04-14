@@ -22,7 +22,7 @@ import (
 
 	kms "cloud.google.com/go/kms/apiv1"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
-	"google.golang.org/genproto/protobuf/field_mask"
+	fieldmask "google.golang.org/genproto/protobuf/field_mask"
 )
 
 // enableKeyVersion disables the specified key version on Cloud KMS.
@@ -42,7 +42,7 @@ func enableKeyVersion(w io.Writer, name string) error {
 			Name:  name,
 			State: kmspb.CryptoKeyVersion_ENABLED,
 		},
-		UpdateMask: &field_mask.FieldMask{
+		UpdateMask: &fieldmask.FieldMask{
 			Paths: []string{"state"},
 		},
 	}
