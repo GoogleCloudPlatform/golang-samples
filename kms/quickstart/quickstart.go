@@ -56,10 +56,10 @@ func main() {
 			break
 		}
 		if err != nil {
-			log.Fatalf("Failed to list KeyRings: %v", err)
+			log.Fatalf("Failed to list key rings: %v", err)
 		}
 
-		fmt.Printf("KeyRing: %s\n", resp.Name)
+		fmt.Printf("key ring: %s\n", resp.Name)
 	}
 }
 
