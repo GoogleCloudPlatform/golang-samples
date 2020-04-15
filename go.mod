@@ -13,8 +13,8 @@ require (
 	cloud.google.com/go/spanner v1.4.0
 	cloud.google.com/go/storage v1.6.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.1
-	github.com/aws/aws-sdk-go v1.30.4
-	github.com/bmatcuk/doublestar v1.2.2
+	github.com/aws/aws-sdk-go v1.30.7
+	github.com/bmatcuk/doublestar v1.2.3
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
 	github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -44,8 +44,8 @@ require (
 	golang.org/x/text v0.3.2
 	google.golang.org/api v0.21.0
 	google.golang.org/appengine v1.6.5
-	google.golang.org/genproto v0.0.0-20200403120447-c50568487044
-	google.golang.org/grpc v1.28.0
+	google.golang.org/genproto v0.0.0-20200413115906-b5235f65be36
+	google.golang.org/grpc v1.28.1
 	gopkg.in/sendgrid/sendgrid-go.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.2.8
 )
