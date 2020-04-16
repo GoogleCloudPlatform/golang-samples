@@ -35,7 +35,7 @@ func createHMACKey(w io.Writer, projectID string, serviceAccountEmail string) (*
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
-	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	ctx, cancel := context.WithTimeout(ctx, time.Minute)
 	defer cancel()
 	key, err := client.CreateHMACKey(ctx, projectID, serviceAccountEmail)
 	if err != nil {

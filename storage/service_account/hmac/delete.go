@@ -37,7 +37,7 @@ func deleteHMACKey(w io.Writer, accessID string, projectID string) error {
 	defer client.Close() // Closing the client safely cleans up background resources.
 
 	handle := client.HMACKeyHandle(projectID, accessID)
-	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	ctx, cancel := context.WithTimeout(ctx, time.Minute)
 	defer cancel()
 	if err = handle.Delete(ctx); err != nil {
 		return fmt.Errorf("Delete: %v", err)
