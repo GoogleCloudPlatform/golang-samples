@@ -228,6 +228,9 @@ func processStream(ctx context.Context, client *bqStorage.BigQueryReadClient, st
 				if retries >= retryLimit {
 					return fmt.Errorf("processStream retries exhausted: %v", err)
 				}
+				// break the inner loop, and try to recover by starting a new streaming
+				// ReadRows call at the last known good offset.
+				break
 			}
 
 			rc := r.GetRowCount()
