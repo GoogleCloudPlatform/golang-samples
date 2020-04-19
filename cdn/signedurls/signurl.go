@@ -21,11 +21,10 @@ import (
 	"crypto/hmac"
 	"crypto/sha1"
 	"encoding/base64"
-	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
+	"os"
 	"strings"
 	"time"
 )
@@ -66,19 +65,13 @@ func signURLWithPrefix(urlPrefix, keyName string, key []byte, expiration time.Ti
 
 	encodedURLPrefix := base64.URLEncoding.EncodeToString([]byte(urlPrefix))
 	input := fmt.Sprintf("URLPrefix=%s&Expires=%d&KeyName=%s",
-		encodedURLPrefix,
-		expiration.Unix(),
-		keyName,
-	)
+		encodedURLPrefix, expiration.Unix(), keyName)
 
 	mac := hmac.New(sha1.New, key)
 	mac.Write([]byte(input))
 	sig := base64.URLEncoding.EncodeToString(mac.Sum(nil))
 
-	signedValue := fmt.Sprintf("%s&Signature=%s",
-		input,
-		sig,
-	)
+	signedValue := fmt.Sprintf("%s&Signature=%s", input, sig)
 
 	return signedValue, nil
 }
@@ -97,25 +90,30 @@ func readKeyFile(path string) ([]byte, error) {
 	return d[:n], nil
 }
 
-func example(w io.Writer) {
-	var keyPath string
-	flag.StringVar(&keyPath, "key-file", "", "The path to a file containing the base64-encoded signing key")
-	flag.Parse()
+func generateSignedURLs(w io.Writer) error {
+	// The path to a file containing the base64-encoded signing key
+	keyPath := os.Getenv("KEY_PATH")
 
+	// Note: consider using the GCP Secret Manager for managing access to your
+	// signing key(s).
 	key, err := readKeyFile(keyPath)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
-	url := signURL("https://example.com", "my-key", key, time.Now().Add(time.Hour*24))
-	fmt.Println(url)
+	// Generate a signed URL for a specific URL
+	url := signURL("https://example.com/media/1234.m3e8", "my-key", key, time.Now().Add(time.Hour*24))
+	fmt.Fprintln(w, url)
 
+	// Generate a signed URL for
 	urlPrefix, err := signURLWithPrefix("https://www.google.com/", "my-key", key, time.Unix(1549751401, 0))
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	fmt.Fprintln(w, urlPrefix)
+
+	return nil
 }
 
 // [END example]

@@ -21,13 +21,11 @@ import (
 	"crypto/hmac"
 	"crypto/sha1"
 	"encoding/base64"
-	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
-	"strings"
+	"os"
 	"time"
 )
 
@@ -39,16 +37,9 @@ import (
 // 16-bytes long.
 // - keyName must match a key added to the backend service or bucket.
 func signCookie(urlPrefix, keyName string, key []byte, expiration time.Time) (string, error) {
-	if !strings.HasPrefix(urlPrefix, "http") {
-		return "", fmt.Errorf("the provided urlPrefix is missing the protocol: %s", urlPrefix)
-	}
-
 	encodedURLPrefix := base64.URLEncoding.EncodeToString([]byte(urlPrefix))
 	input := fmt.Sprintf("URLPrefix=%s:Expires=%d:KeyName=%s",
-		encodedURLPrefix,
-		expiration.Unix(),
-		keyName,
-	)
+		encodedURLPrefix, expiration.Unix(), keyName)
 
 	mac := hmac.New(sha1.New, key)
 	mac.Write([]byte(input))
@@ -76,14 +67,15 @@ func readKeyFile(path string) ([]byte, error) {
 	return d[:n], nil
 }
 
-func example(w io.Writer) {
-	var keyPath string
-	flag.StringVar(&keyPath, "key-file", "", "The path to a file containing the base64-encoded signing key")
-	flag.Parse()
+func generateSignedCookie(w io.Writer) error {
+	// The path to a file containing the base64-encoded signing key
+	keyPath := os.Getenv("KEY_PATH")
 
+	// Note: consider using the GCP Secret Manager for managing access to your
+	// signing key(s).
 	key, err := readKeyFile(keyPath)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	var (
@@ -95,12 +87,11 @@ func example(w io.Writer) {
 		expiration = time.Hour * 2
 	)
 
-	signedValue, err := signCookie(
-		fmt.Sprintf("https://%s%s", domain, path),
-		keyName,
-		key,
-		time.Now().Add(expiration),
-	)
+	signedValue, err := signCookie(fmt.Sprintf("https://%s%s", domain,
+		path), keyName, key, time.Now().Add(expiration))
+	if err != nil {
+		return err
+	}
 
 	// Use Go's http.Cookie type to construct a cookie.
 	cookie := &http.Cookie{
@@ -111,10 +102,12 @@ func example(w io.Writer) {
 		MaxAge: int(expiration.Seconds()),
 	}
 
-	// We print this to stdout in this example.
-	// Use http.ResponseWriter.SetCookie to write a cookie to an authenticated
-	// client in a real application.
+	// We print this to stdout in this example. In a real application, use the
+	// SetCookie method on a http.ResponseWriter to write the cookie to the
+	// user.
 	fmt.Fprintln(w, cookie)
+
+	return nil
 }
 
 // [END cdn_signedcookie_example]
