@@ -26,9 +26,9 @@ import (
 
 // encryptSymmetric encrypts the input plaintext with the specified symmetric
 // Cloud KMS key.
-func encryptSymmetric(w io.Writer, name string, plaintext string) error {
+func encryptSymmetric(w io.Writer, name string, message string) error {
 	// name := "projects/my-project/locations/us-east1/keyRings/my-key-ring/cryptoKeys/my-key"
-	// plaintext := "Sample message"
+	// message := "Sample message"
 
 	// Create the client.
 	ctx := context.Background()
@@ -37,10 +37,14 @@ func encryptSymmetric(w io.Writer, name string, plaintext string) error {
 		return fmt.Errorf("failed to create kms client: %v", err)
 	}
 
+	// Convert the message into bytes. Cryptographic plaintexts and
+	// ciphertexts are always byte arrays.
+	plaintext := []byte(message)
+
 	// Build the request.
 	req := &kmspb.EncryptRequest{
 		Name:      name,
-		Plaintext: []byte(plaintext),
+		Plaintext: plaintext,
 	}
 
 	// Call the API.
@@ -48,6 +52,7 @@ func encryptSymmetric(w io.Writer, name string, plaintext string) error {
 	if err != nil {
 		return fmt.Errorf("failed to encrypt: %v", err)
 	}
+
 	fmt.Fprintf(w, "Encrypted ciphertext: %s", result.Ciphertext)
 	return nil
 }

@@ -38,9 +38,15 @@ func signAsymmetric(w io.Writer, name string, message string) error {
 		return fmt.Errorf("failed to create kms client: %v", err)
 	}
 
+	// Convert the message into bytes. Cryptographic plaintexts and
+	// ciphertexts are always byte arrays.
+	plaintext := []byte(message)
+
 	// Calculate the digest of the message.
 	digest := sha256.New()
-	digest.Write([]byte(message))
+	if _, err := digest.Write(plaintext); err != nil {
+		return fmt.Errorf("failed to create digest: %v", err)
+	}
 
 	// Build the signing request.
 	//
