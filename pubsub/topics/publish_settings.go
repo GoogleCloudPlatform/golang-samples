@@ -19,34 +19,48 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"strconv"
 	"time"
 
 	"cloud.google.com/go/pubsub"
 )
 
-func publishWithSettings(w io.Writer, projectID, topicID, msg string) error {
+func publishWithSettings(w io.Writer, projectID, topicID string) error {
 	// projectID := "my-project-id"
 	// topicID := "my-topic"
-	// msg := "Hello World"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
-
+	var results []*pubsub.PublishResult
+	var resultErrors []error
 	t := client.Topic(topicID)
 	t.PublishSettings.ByteThreshold = 5000
 	t.PublishSettings.CountThreshold = 10
 	t.PublishSettings.DelayThreshold = 100 * time.Millisecond
 
-	result := t.Publish(ctx, &pubsub.Message{Data: []byte(msg)})
-	// Block until the result is returned and a server-generated
-	// ID is returned for the published message.
-	id, err := result.Get(ctx)
-	if err != nil {
-		return fmt.Errorf("Get: %v", err)
+	for i := 0; i < 10; i++ {
+		result := t.Publish(ctx, &pubsub.Message{
+			Data: []byte("Message " + strconv.Itoa(i)),
+		})
+		results = append(results, result)
 	}
-	fmt.Fprintf(w, "Published a message; msg ID: %v\n", id)
+	// The Get method blocks until a server-generated ID or
+	// an error is returned for the published message.
+	for i, res := range results {
+		id, err := res.Get(ctx)
+		if err != nil {
+			resultErrors = append(resultErrors, err)
+			fmt.Fprintf(w, "Failed to publish: %v", err)
+			continue
+		}
+		fmt.Fprintf(w, "Published message %d; msg ID: %v\n", i, id)
+	}
+	if len(resultErrors) != 0 {
+		return fmt.Errorf("Get: %v", resultErrors[len(resultErrors)-1])
+	}
+	fmt.Fprintf(w, "Published messages with batch settings.")
 	return nil
 }
 

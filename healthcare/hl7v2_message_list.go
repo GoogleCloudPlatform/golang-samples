@@ -34,16 +34,16 @@ func listHL7V2Messages(w io.Writer, projectID, location, datasetID, hl7V2StoreID
 
 	messagesService := healthcareService.Projects.Locations.Datasets.Hl7V2Stores.Messages
 
-	parent := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/hl7v2Stores/%s", projectID, location, datasetID, hl7V2StoreID)
+	parent := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/hl7V2Stores/%s", projectID, location, datasetID, hl7V2StoreID)
 
 	resp, err := messagesService.List(parent).Do()
 	if err != nil {
-		return fmt.Errorf("Create: %v", err)
+		return fmt.Errorf("List: %v", err)
 	}
 
 	fmt.Fprintln(w, "HL7V2 messages:")
-	for _, s := range resp.Messages {
-		fmt.Fprintln(w, s)
+	for _, s := range resp.Hl7V2Messages {
+		fmt.Fprintln(w, s.Name)
 	}
 	return nil
 }
