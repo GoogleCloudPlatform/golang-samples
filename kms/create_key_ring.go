@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,36 +14,41 @@
 
 package kms
 
-// [START kms_encrypt]
+// [START kms_create_key_ring]
 import (
 	"context"
 	"fmt"
+	"io"
 
-	cloudkms "cloud.google.com/go/kms/apiv1"
+	kms "cloud.google.com/go/kms/apiv1"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
-// encryptSymmetric will encrypt the input plaintext with the specified symmetric key.
-func encryptSymmetric(name string, plaintext []byte) ([]byte, error) {
-	// name := "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID"
-	// plaintext := []byte("Sample message")
+// createKeyRing creates a new ring to store keys on KMS.
+func createKeyRing(w io.Writer, parent, id string) error {
+	// parent := "projects/PROJECT_ID/locations/global"
+	// id := "my-key-ring"
+
+	// Create the client.
 	ctx := context.Background()
-	client, err := cloudkms.NewKeyManagementClient(ctx)
+	client, err := kms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("cloudkms.NewKeyManagementClient: %v", err)
+		return fmt.Errorf("failed to create kms client: %v", err)
 	}
 
 	// Build the request.
-	req := &kmspb.EncryptRequest{
-		Name:      name,
-		Plaintext: plaintext,
+	req := &kmspb.CreateKeyRingRequest{
+		Parent:    parent,
+		KeyRingId: id,
 	}
+
 	// Call the API.
-	resp, err := client.Encrypt(ctx, req)
+	result, err := client.CreateKeyRing(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("Encrypt: %v", err)
+		return fmt.Errorf("failed to create key ring: %v", err)
 	}
-	return resp.Ciphertext, nil
+	fmt.Fprintf(w, "Created key ring: %s\n", result.Name)
+	return nil
 }
 
-// [END kms_encrypt]
+// [END kms_create_key_ring]

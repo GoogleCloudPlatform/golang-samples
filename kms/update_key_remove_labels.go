@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,42 +14,46 @@
 
 package kms
 
-// [START kms_disable_cryptokey_version]
+// [START kms_update_key_remove_labels]
 import (
 	"context"
 	"fmt"
 	"io"
 
-	cloudkms "cloud.google.com/go/kms/apiv1"
+	kms "cloud.google.com/go/kms/apiv1"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 	fieldmask "google.golang.org/genproto/protobuf/field_mask"
 )
 
-// disableCryptoKeyVersion disables a specified key version on KMS.
-func disableCryptoKeyVersion(w io.Writer, name string) error {
-	// name := "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
+// updateKeyRemoveLabels removes all labels from an existing Cloud KMS key.
+func updateKeyRemoveLabels(w io.Writer, name string) error {
+	// name := "projects/my-project/locations/us-east1/keyRings/my-key-ring/cryptoKeys/my-key"
+
+	// Create the client.
 	ctx := context.Background()
-	client, err := cloudkms.NewKeyManagementClient(ctx)
+	client, err := kms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return fmt.Errorf("cloudkms.NewKeyManagementClient: %v", err)
+		return fmt.Errorf("failed to create kms client: %v", err)
 	}
+
 	// Build the request.
-	req := &kmspb.UpdateCryptoKeyVersionRequest{
-		CryptoKeyVersion: &kmspb.CryptoKeyVersion{
-			Name:  name,
-			State: kmspb.CryptoKeyVersion_DISABLED,
+	req := &kmspb.UpdateCryptoKeyRequest{
+		CryptoKey: &kmspb.CryptoKey{
+			Name:   name,
+			Labels: nil,
 		},
 		UpdateMask: &fieldmask.FieldMask{
-			Paths: []string{"state"},
+			Paths: []string{"labels"},
 		},
 	}
+
 	// Call the API.
-	result, err := client.UpdateCryptoKeyVersion(ctx, req)
+	result, err := client.UpdateCryptoKey(ctx, req)
 	if err != nil {
-		return fmt.Errorf("UpdateCryptoKeyVersion: %v", err)
+		return fmt.Errorf("failed to update key: %v", err)
 	}
-	fmt.Fprintf(w, "Disabled crypto key version: %s", result)
+	fmt.Fprintf(w, "Updated key: %s\n", result.Name)
 	return nil
 }
 
-// [END kms_disable_cryptokey_version]
+// [END kms_update_key_remove_labels]

@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,42 +14,46 @@
 
 package kms
 
-// [START kms_enable_cryptokey_version]
+// [START kms_disable_key_version]
 import (
 	"context"
 	"fmt"
 	"io"
 
-	cloudkms "cloud.google.com/go/kms/apiv1"
+	kms "cloud.google.com/go/kms/apiv1"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 	fieldmask "google.golang.org/genproto/protobuf/field_mask"
 )
 
-// enableCryptoKeyVersion enables a previously disabled key version on KMS.
-func enableCryptoKeyVersion(w io.Writer, name string) error {
-	// name := "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
+// disableKeyVersion disables the specified key version on Cloud KMS.
+func disableKeyVersion(w io.Writer, name string) error {
+	// parent := "projects/my-project/locations/us-east1/keyRings/my-key-ring/cryptoKeys/my-key/cryptoKeyVersions/123"
+
+	// Create the client.
 	ctx := context.Background()
-	client, err := cloudkms.NewKeyManagementClient(ctx)
+	client, err := kms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return fmt.Errorf("cloudkms.NewKeyManagementClient: %v", err)
+		return fmt.Errorf("failed to create kms client: %v", err)
 	}
+
 	// Build the request.
 	req := &kmspb.UpdateCryptoKeyVersionRequest{
 		CryptoKeyVersion: &kmspb.CryptoKeyVersion{
 			Name:  name,
-			State: kmspb.CryptoKeyVersion_ENABLED,
+			State: kmspb.CryptoKeyVersion_DISABLED,
 		},
 		UpdateMask: &fieldmask.FieldMask{
 			Paths: []string{"state"},
 		},
 	}
+
 	// Call the API.
 	result, err := client.UpdateCryptoKeyVersion(ctx, req)
 	if err != nil {
-		return fmt.Errorf("UpdateCryptoKeyVersion: %v", err)
+		return fmt.Errorf("failed to update key version: %v", err)
 	}
-	fmt.Fprintf(w, "Enabled crypto key version: %s", result)
+	fmt.Fprintf(w, "Disabled key version: %s\n", result)
 	return nil
 }
 
-// [END kms_enable_cryptokey_version]
+// [END kms_disable_key_version]

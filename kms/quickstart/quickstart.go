@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,34 +22,34 @@ import (
 	"fmt"
 	"log"
 
-	cloudkms "cloud.google.com/go/kms/apiv1"
+	kms "cloud.google.com/go/kms/apiv1"
 	"google.golang.org/api/iterator"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
 func main() {
+	// GCP project with which to communicate.
 	projectID := "your-project-id"
-	// Location of the key rings.
+
+	// Location in which to list key rings.
 	locationID := "global"
 
-	// Create the KMS client.
+	// Create the client.
 	ctx := context.Background()
-	client, err := cloudkms.NewKeyManagementClient(ctx)
+	client, err := kms.NewKeyManagementClient(ctx)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("failed to setup client: %v", err)
 	}
 
-	// The resource name of the key rings.
-	parent := fmt.Sprintf("projects/%s/locations/%s", projectID, locationID)
-
-	// Build the request.
-	req := &kmspb.ListKeyRingsRequest{
-		Parent: parent,
+	// Create the request to list KeyRings.
+	listKeyRingsReq := &kmspb.ListKeyRingsRequest{
+		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, locationID),
 	}
-	// Query the API.
-	it := client.ListKeyRings(ctx, req)
 
-	// Iterate and print results.
+	// List the KeyRings.
+	it := client.ListKeyRings(ctx, listKeyRingsReq)
+
+	// Iterate and print the results.
 	for {
 		resp, err := it.Next()
 		if err == iterator.Done {
@@ -58,7 +58,8 @@ func main() {
 		if err != nil {
 			log.Fatalf("Failed to list key rings: %v", err)
 		}
-		fmt.Printf("KeyRing: %q\n", resp.Name)
+
+		fmt.Printf("key ring: %s\n", resp.Name)
 	}
 }
 
