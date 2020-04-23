@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,44 +14,52 @@
 
 package kms
 
-// [START kms_create_cryptokey]
+// [START kms_create_key_labels]
 import (
 	"context"
 	"fmt"
 	"io"
 
-	cloudkms "cloud.google.com/go/kms/apiv1"
+	kms "cloud.google.com/go/kms/apiv1"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
-// createCryptoKey creates a new symmetric encrypt/decrypt key on KMS.
-func createCryptoKey(w io.Writer, keyRingName, keyID string) error {
-	// keyRingName := "projects/PROJECT_ID/locations/global/keyRings/RING_ID"
-	// keyID := "key-" + strconv.Itoa(int(time.Now().Unix()))
+// createKeyLabels creates a new KMS key with labels.
+func createKeyLabels(w io.Writer, parent, id string) error {
+	// parent := "projects/my-project/locations/us-east1/keyRings/my-key-ring"
+	// id := "my-labeled-key"
+
+	// Create the client.
 	ctx := context.Background()
-	client, err := cloudkms.NewKeyManagementClient(ctx)
+	client, err := kms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return fmt.Errorf("cloudkms.NewKeyManagementClient: %v", err)
+		return fmt.Errorf("failed to create kms client: %v", err)
 	}
 
 	// Build the request.
 	req := &kmspb.CreateCryptoKeyRequest{
-		Parent:      keyRingName,
-		CryptoKeyId: keyID,
+		Parent:      parent,
+		CryptoKeyId: id,
 		CryptoKey: &kmspb.CryptoKey{
 			Purpose: kmspb.CryptoKey_ENCRYPT_DECRYPT,
 			VersionTemplate: &kmspb.CryptoKeyVersionTemplate{
 				Algorithm: kmspb.CryptoKeyVersion_GOOGLE_SYMMETRIC_ENCRYPTION,
 			},
+
+			Labels: map[string]string{
+				"team":        "alpha",
+				"cost_center": "cc1234",
+			},
 		},
 	}
+
 	// Call the API.
 	result, err := client.CreateCryptoKey(ctx, req)
 	if err != nil {
-		return fmt.Errorf("CreateCryptoKey: %v", err)
+		return fmt.Errorf("failed to create key: %v", err)
 	}
-	fmt.Fprintf(w, "Created crypto key. %s", result)
+	fmt.Fprintf(w, "Created key: %s\n", result.Name)
 	return nil
 }
 
-// [END kms_create_cryptokey]
+// [END kms_create_key_labels]

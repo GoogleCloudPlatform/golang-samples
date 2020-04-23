@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,36 +14,43 @@
 
 package kms
 
-// [START kms_create_keyring]
+// [START kms_get_key_labels]
 import (
 	"context"
 	"fmt"
 	"io"
 
-	cloudkms "cloud.google.com/go/kms/apiv1"
+	kms "cloud.google.com/go/kms/apiv1"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
-// createKeyRing creates a new ring to store keys on KMS.
-func createKeyRing(w io.Writer, parent, keyRingID string) error {
-	// parent := "projects/PROJECT_ID/locations/global/"
+// getKeyLabels fetches the labels on a KMS key.
+func getKeyLabels(w io.Writer, name string) error {
+	// name := "projects/my-project/locations/us-east1/keyRings/my-key-ring/cryptoKeys/my-key"
+
+	// Create the client.
 	ctx := context.Background()
-	client, err := cloudkms.NewKeyManagementClient(ctx)
+	client, err := kms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return fmt.Errorf("cloudkms.NewKeyManagementClient: %v", err)
+		return fmt.Errorf("failed to create kms client: %v", err)
 	}
+
 	// Build the request.
-	req := &kmspb.CreateKeyRingRequest{
-		Parent:    parent,
-		KeyRingId: keyRingID,
+	req := &kmspb.GetCryptoKeyRequest{
+		Name: name,
 	}
+
 	// Call the API.
-	result, err := client.CreateKeyRing(ctx, req)
+	result, err := client.GetCryptoKey(ctx, req)
 	if err != nil {
-		return fmt.Errorf("CreateKeyRing: %v", err)
+		return fmt.Errorf("failed to get key: %v", err)
 	}
-	fmt.Fprintf(w, "Created key ring: %s", result)
+
+	// Extract and print the labels.
+	for k, v := range result.Labels {
+		fmt.Fprintf(w, "%s=%s\n", k, v)
+	}
 	return nil
 }
 
-// [END kms_create_keyring]
+// [END kms_get_key_labels]

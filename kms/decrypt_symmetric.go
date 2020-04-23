@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,27 +14,26 @@
 
 package kms
 
-// [START kms_decrypt]
+// [START kms_decrypt_symmetric]
 import (
 	"context"
 	"fmt"
+	"io"
 
-	cloudkms "cloud.google.com/go/kms/apiv1"
+	kms "cloud.google.com/go/kms/apiv1"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
 // decryptSymmetric will decrypt the input ciphertext bytes using the specified symmetric key.
-func decryptSymmetric(name string, ciphertext []byte) ([]byte, error) {
-	// name := "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID"
-	// cipherBytes, err := encryptRSA(rsaDecryptPath, []byte("Sample message"))
-	// if err != nil {
-	//   return nil, fmt.Errorf("encryptRSA: %v", err)
-	// }
-	// ciphertext := base64.StdEncoding.EncodeToString(cipherBytes)
+func decryptSymmetric(w io.Writer, name string, ciphertext []byte) error {
+	// name := "projects/my-project/locations/us-east1/keyRings/my-key-ring/cryptoKeys/my-key"
+	// ciphertext := []byte("...")  // result of a symmetric encryption call
+
+	// Create the client.
 	ctx := context.Background()
-	client, err := cloudkms.NewKeyManagementClient(ctx)
+	client, err := kms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("cloudkms.NewKeyManagementClient: %v", err)
+		return fmt.Errorf("failed to create kms client: %v", err)
 	}
 
 	// Build the request.
@@ -42,12 +41,14 @@ func decryptSymmetric(name string, ciphertext []byte) ([]byte, error) {
 		Name:       name,
 		Ciphertext: ciphertext,
 	}
+
 	// Call the API.
-	resp, err := client.Decrypt(ctx, req)
+	result, err := client.Decrypt(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("Decrypt: %v", err)
+		return fmt.Errorf("failed to decrypt ciphertext: %v", err)
 	}
-	return resp.Plaintext, nil
+	fmt.Fprintf(w, "Decrypted plaintext: %s", result.Plaintext)
+	return nil
 }
 
-// [END kms_decrypt]
+// [END kms_decrypt_symmetric]

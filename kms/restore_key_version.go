@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,35 +14,40 @@
 
 package kms
 
-// [START kms_restore_cryptokey_version]
+// [START kms_restore_key_version]
 import (
 	"context"
 	"fmt"
 	"io"
 
-	cloudkms "cloud.google.com/go/kms/apiv1"
+	kms "cloud.google.com/go/kms/apiv1"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
-// restoreCryptoKeyVersion attempts to recover a key that has been marked for destruction within the last 24 hours.
-func restoreCryptoKeyVersion(w io.Writer, keyVersionName string) error {
-	// keyVersionName := "projects/PROJECT_ID/locations/global/keyRings/RING_ID/cryptoKeys/KEY_ID/cryptoKeyVersions/1"
+// restoreKeyVersion attempts to recover a key that has been marked for
+// destruction in the past 24h.
+func restoreKeyVersion(w io.Writer, name string) error {
+	// name := "projects/my-project/locations/us-east1/keyRings/my-key-ring/cryptoKeys/my-key/cryptoKeyVersions/123"
+
+	// Create the client.
 	ctx := context.Background()
-	client, err := cloudkms.NewKeyManagementClient(ctx)
+	client, err := kms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return fmt.Errorf("cloudkms.NewKeyManagementClient: %v", err)
+		return fmt.Errorf("failed to create kms client: %v", err)
 	}
+
 	// Build the request.
 	req := &kmspb.RestoreCryptoKeyVersionRequest{
-		Name: keyVersionName,
+		Name: name,
 	}
+
 	// Call the API.
 	result, err := client.RestoreCryptoKeyVersion(ctx, req)
 	if err != nil {
-		return fmt.Errorf("RestoreCryptoKeyVersion: %v", err)
+		return fmt.Errorf("failed to restore key version: %v", err)
 	}
-	fmt.Fprintf(w, "Restored crypto key version: %s", result)
+	fmt.Fprintf(w, "Restored key version: %s\n", result)
 	return nil
 }
 
-// [END kms_restore_cryptokey_version]
+// [END kms_restore_key_version]
