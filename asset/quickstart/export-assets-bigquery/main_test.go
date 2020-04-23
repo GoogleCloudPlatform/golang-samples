@@ -33,7 +33,7 @@ func TestMain(t *testing.T) {
 	ctx := context.Background()
 	// Creates a bigquery client.
 	client, err := bigquery.NewClient(ctx, tc.ProjectID)
-	if err_bq != nil {
+	if err != nil {
 		t.Fatalf("failed to create bigquery client: %v", err_bq)
 	}
 	datasetID := strings.Replace(fmt.Sprintf("%s-for-assets", tc.ProjectID), "-", "_", -1)
