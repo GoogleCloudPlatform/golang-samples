@@ -43,7 +43,7 @@ func main() {
 			Destination: &assetpb.OutputConfig_BigqueryDestination{
 				BigqueryDestination: &assetpb.BigQueryDestination{
 					Dataset: dataset,
-					Table: "test",
+					Table:   "test",
 				},
 			},
 		},
@@ -54,7 +54,7 @@ func main() {
 	}
 	resp, err := op.Wait(ctx)
 	if err != nil {
-		log.Fatal("Wait: %v", err)
+		log.Fatalf("Wait: %v", err)
 	}
 	fmt.Print(resp)
 }

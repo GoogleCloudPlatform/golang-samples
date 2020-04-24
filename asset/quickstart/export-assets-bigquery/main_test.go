@@ -34,10 +34,10 @@ func TestMain(t *testing.T) {
 	// Creates a bigquery client.
 	client, err := bigquery.NewClient(ctx, tc.ProjectID)
 	if err != nil {
-		t.Fatalf("failed to create bigquery client: %v", err_bq)
+		t.Fatalf("failed to create bigquery client: %v", err)
 	}
 	datasetID := strings.Replace(fmt.Sprintf("%s-for-assets", tc.ProjectID), "-", "_", -1)
-	createDataset(ctx, t, client_bq, datasetID)
+	createDataset(ctx, t, client, datasetID)
 
 	oldStdout := os.Stdout
 	r, w, _ := os.Pipe()
@@ -63,8 +63,8 @@ func TestMain(t *testing.T) {
 func createDataset(ctx context.Context, t *testing.T, client *bigquery.Client, datasetID string) {
 	d := client.Dataset(datasetID)
 	if _, err := d.Metadata(ctx); err == nil {
-		if err_d := d.DeleteWithContents(ctx); err_d != nil {
-			t.Fatalf("Dataset.Delete(%q): %v", datasetID, err_d)
+		if errDelete := d.DeleteWithContents(ctx); errDelete != nil {
+			t.Fatalf("Dataset.Delete(%q): %v", datasetID, errDelete)
 		}
 	}
 	meta := &bigquery.DatasetMetadata{
