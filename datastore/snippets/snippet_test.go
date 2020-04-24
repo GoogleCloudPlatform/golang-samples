@@ -672,7 +672,7 @@ func metadataNamespaces(w io.Writer, projectID string) error {
 
 	fmt.Fprintln(w, "Namespaces:")
 	for _, k := range keys {
-		fmt.Fprintf(w, "\t%v", k.Namespace)
+		fmt.Fprintf(w, "\t%v", k.Name)
 	}
 	return nil
 }

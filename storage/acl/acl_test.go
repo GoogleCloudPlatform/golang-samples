@@ -23,9 +23,6 @@ import (
 
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"google.golang.org/api/iterator"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 // TestACL runs all of the package tests.
@@ -44,7 +41,7 @@ func TestACL(t *testing.T) {
 		allAuthenticatedUsers = storage.AllAuthenticatedUsers
 	)
 
-	cleanBucket(t, ctx, client, tc.ProjectID, bucket)
+	testutil.CleanBucket(ctx, t, tc.ProjectID, bucket)
 
 	b := client.Bucket(bucket)
 
@@ -100,39 +97,4 @@ func TestACL(t *testing.T) {
 			r.Errorf("Bucket(%q).Delete: %v", bucket, err)
 		}
 	})
-}
-
-// cleanBucket ensures there's a fresh bucket with a given name, deleting the existing bucket if it already exists.
-func cleanBucket(t *testing.T, ctx context.Context, client *storage.Client, projectID, bucket string) {
-	b := client.Bucket(bucket)
-	_, err := b.Attrs(ctx)
-	if err == nil {
-		it := b.Objects(ctx, nil)
-		for {
-			attrs, err := it.Next()
-			if err == iterator.Done {
-				break
-			}
-			if err != nil {
-				t.Fatalf("Bucket(%q).Objects: %v", bucket, err)
-			}
-			if attrs.EventBasedHold || attrs.TemporaryHold {
-				if _, err := b.Object(attrs.Name).Update(ctx, storage.ObjectAttrsToUpdate{
-					TemporaryHold:  false,
-					EventBasedHold: false,
-				}); err != nil {
-					t.Fatalf("Bucket(%q).Object(%q).Update: %v", bucket, attrs.Name, err)
-				}
-			}
-			if err := b.Object(attrs.Name).Delete(ctx); err != nil {
-				t.Fatalf("Bucket(%q).Object(%q).Delete: %v", bucket, attrs.Name, err)
-			}
-		}
-		if err := b.Delete(ctx); err != nil {
-			t.Fatalf("Bucket(%q).Delete: %v", bucket, err)
-		}
-	}
-	if err := b.Create(ctx, projectID, nil); err != nil && status.Code(err) != codes.AlreadyExists {
-		t.Fatalf("Bucket(%q).Create: %v", bucket, err)
-	}
 }

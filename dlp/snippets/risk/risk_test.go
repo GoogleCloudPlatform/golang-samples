@@ -39,13 +39,13 @@ func TestRisk(t *testing.T) {
 			name: "Numerical",
 			fn: func(r *testutil.R) {
 				buf := new(bytes.Buffer)
-				riskNumerical(buf, tc.ProjectID, "bigquery-public-data", riskTopicName, riskSubscriptionName, "nhtsa_traffic_fatalities", "accident_2015", "state_number")
-				wants := []string{"Created job", "Value range", "Value at"}
-				got := buf.String()
-				for _, want := range wants {
-					if !strings.Contains(got, want) {
-						r.Errorf("riskNumerical got %s, want substring %q", got, want)
-					}
+				err := riskNumerical(buf, tc.ProjectID, "bigquery-public-data", riskTopicName, riskSubscriptionName, "nhtsa_traffic_fatalities", "accident_2015", "state_number")
+				if err != nil {
+					r.Errorf("riskNumerical got err: %v", err)
+					return
+				}
+				if got, want := buf.String(), "Created job"; !strings.Contains(got, want) {
+					r.Errorf("riskNumerical got %s, want substring %q", got, want)
 				}
 			},
 		},
@@ -53,13 +53,13 @@ func TestRisk(t *testing.T) {
 			name: "Categorical",
 			fn: func(r *testutil.R) {
 				buf := new(bytes.Buffer)
-				riskCategorical(buf, tc.ProjectID, "bigquery-public-data", riskTopicName, riskSubscriptionName, "nhtsa_traffic_fatalities", "accident_2015", "state_number")
-				wants := []string{"Created job", "Histogram bucket", "Most common value occurs"}
-				got := buf.String()
-				for _, want := range wants {
-					if !strings.Contains(got, want) {
-						r.Errorf("riskCategorical got %s, want substring %q", got, want)
-					}
+				err := riskCategorical(buf, tc.ProjectID, "bigquery-public-data", riskTopicName, riskSubscriptionName, "nhtsa_traffic_fatalities", "accident_2015", "state_number")
+				if err != nil {
+					r.Errorf("riskCategorical got err: %v", err)
+					return
+				}
+				if got, want := buf.String(), "Created job"; !strings.Contains(got, want) {
+					r.Errorf("riskCategorical got %s, want substring %q", got, want)
 				}
 			},
 		},
@@ -67,13 +67,13 @@ func TestRisk(t *testing.T) {
 			name: "K Anonymity",
 			fn: func(r *testutil.R) {
 				buf := new(bytes.Buffer)
-				riskKAnonymity(buf, tc.ProjectID, "bigquery-public-data", riskTopicName, riskSubscriptionName, "nhtsa_traffic_fatalities", "accident_2015", "state_number", "county")
-				wants := []string{"Created job", "Histogram bucket", "Size range"}
-				got := buf.String()
-				for _, want := range wants {
-					if !strings.Contains(got, want) {
-						r.Errorf("riskKAnonymity got %s, want substring %q", got, want)
-					}
+				err := riskKAnonymity(buf, tc.ProjectID, "bigquery-public-data", riskTopicName, riskSubscriptionName, "nhtsa_traffic_fatalities", "accident_2015", "state_number", "county")
+				if err != nil {
+					r.Errorf("riskKAnonymity got err: %v", err)
+					return
+				}
+				if got, want := buf.String(), "Created job"; !strings.Contains(got, want) {
+					r.Errorf("riskKAnonymity got %s, want substring %q", got, want)
 				}
 			},
 		},
@@ -81,13 +81,13 @@ func TestRisk(t *testing.T) {
 			name: "L Diversity",
 			fn: func(r *testutil.R) {
 				buf := new(bytes.Buffer)
-				riskLDiversity(buf, tc.ProjectID, "bigquery-public-data", riskTopicName, riskSubscriptionName, "nhtsa_traffic_fatalities", "accident_2015", "city", "state_number", "county")
-				wants := []string{"Created job", "Histogram bucket", "Size range"}
-				got := buf.String()
-				for _, want := range wants {
-					if !strings.Contains(got, want) {
-						r.Errorf("riskLDiversity got %s, want substring %q", got, want)
-					}
+				err := riskLDiversity(buf, tc.ProjectID, "bigquery-public-data", riskTopicName, riskSubscriptionName, "nhtsa_traffic_fatalities", "accident_2015", "city", "state_number", "county")
+				if err != nil {
+					r.Errorf("riskLDiversity got err: %v", err)
+					return
+				}
+				if got, want := buf.String(), "Created job"; !strings.Contains(got, want) {
+					r.Errorf("riskLDiversity got %s, want substring %q", got, want)
 				}
 			},
 		},
@@ -96,12 +96,8 @@ func TestRisk(t *testing.T) {
 			fn: func(r *testutil.R) {
 				buf := new(bytes.Buffer)
 				riskKMap(buf, tc.ProjectID, "bigquery-public-data", riskTopicName, riskSubscriptionName, "san_francisco", "bikeshare_trips", "US", "zip_code")
-				wants := []string{"Created job", "Histogram bucket", "Anonymity range"}
-				got := buf.String()
-				for _, want := range wants {
-					if !strings.Contains(got, want) {
-						r.Errorf("riskKMap got %s, want substring %q", got, want)
-					}
+				if got, want := buf.String(), "Created job"; !strings.Contains(got, want) {
+					r.Errorf("riskKMap got %s, want substring %q", got, want)
 				}
 			},
 		},

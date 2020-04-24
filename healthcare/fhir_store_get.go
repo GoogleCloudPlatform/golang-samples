@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"io"
 
-	healthcare "google.golang.org/api/healthcare/v1beta1"
+	healthcare "google.golang.org/api/healthcare/v1"
 )
 
 // getFHIRStore gets an FHIR store.
