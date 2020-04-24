@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,43 +14,48 @@
 
 package kms
 
-// [START kms_create_asymmetric_key]
+// [START kms_create_key_hsm]
 import (
 	"context"
 	"fmt"
 	"io"
 
-	cloudkms "cloud.google.com/go/kms/apiv1"
+	kms "cloud.google.com/go/kms/apiv1"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
-// createAsymmetricKey creates a new RSA encrypt/decrypt key pair on KMS.
-func createAsymmetricKey(w io.Writer, keyRingName, keyID string) error {
-	// keyRingName := "projects/PROJECT_ID/locations/global/keyRings/RING_ID"
-	// keyID := "key-" + strconv.Itoa(int(time.Now().Unix()))
+// createKeyHSM creates a new symmetric encrypt/decrypt key on Cloud KMS.
+func createKeyHSM(w io.Writer, parent, id string) error {
+	// parent := "projects/my-project/locations/us-east1/keyRings/my-key-ring"
+	// id := "my-hsm-encryption-key"
+
+	// Create the client.
 	ctx := context.Background()
-	client, err := cloudkms.NewKeyManagementClient(ctx)
+	client, err := kms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return fmt.Errorf("cloudkms.NewKeyManagementClient: %v", err)
+		return fmt.Errorf("failed to create kms client: %v", err)
 	}
+
 	// Build the request.
 	req := &kmspb.CreateCryptoKeyRequest{
-		Parent:      keyRingName,
-		CryptoKeyId: keyID,
+		Parent:      parent,
+		CryptoKeyId: id,
 		CryptoKey: &kmspb.CryptoKey{
-			Purpose: kmspb.CryptoKey_ASYMMETRIC_DECRYPT,
+			Purpose: kmspb.CryptoKey_ENCRYPT_DECRYPT,
 			VersionTemplate: &kmspb.CryptoKeyVersionTemplate{
-				Algorithm: kmspb.CryptoKeyVersion_RSA_DECRYPT_OAEP_2048_SHA256,
+				ProtectionLevel: kmspb.ProtectionLevel_HSM,
+				Algorithm:       kmspb.CryptoKeyVersion_GOOGLE_SYMMETRIC_ENCRYPTION,
 			},
 		},
 	}
+
 	// Call the API.
 	result, err := client.CreateCryptoKey(ctx, req)
 	if err != nil {
-		return fmt.Errorf("CreateCryptoKey: %v", err)
+		return fmt.Errorf("failed to create key: %v", err)
 	}
-	fmt.Fprintf(w, "Created crypto key. %s", result)
+	fmt.Fprintf(w, "Created key: %s\n", result.Name)
 	return nil
 }
 
-// [END kms_create_asymmetric_key]
+// [END kms_create_key_hsm]

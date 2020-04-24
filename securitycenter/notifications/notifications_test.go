@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package notifications
 
 import (
@@ -116,6 +117,7 @@ func cleanupNotificationConfig(t *testing.T, notificationConfigID string) error 
 }
 
 func TestCreateNotificationConfig(t *testing.T) {
+	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/1352")
 	buf := new(bytes.Buffer)
 	rand, err := uuid.NewUUID()
 	if err != nil {
@@ -135,6 +137,7 @@ func TestCreateNotificationConfig(t *testing.T) {
 }
 
 func TestDeleteNotificationConfig(t *testing.T) {
+	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/1353")
 	buf := new(bytes.Buffer)
 	rand, err := uuid.NewUUID()
 	if err != nil {
@@ -156,6 +159,7 @@ func TestDeleteNotificationConfig(t *testing.T) {
 }
 
 func TestGetNotificationConfig(t *testing.T) {
+	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/1354")
 	buf := new(bytes.Buffer)
 	rand, err := uuid.NewUUID()
 	if err != nil {
@@ -179,6 +183,7 @@ func TestGetNotificationConfig(t *testing.T) {
 }
 
 func TestListNotificationConfigs(t *testing.T) {
+	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/1355")
 	buf := new(bytes.Buffer)
 	rand, err := uuid.NewUUID()
 	if err != nil {
@@ -202,6 +207,7 @@ func TestListNotificationConfigs(t *testing.T) {
 }
 
 func TestUpdateNotificationConfig(t *testing.T) {
+	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/1356")
 	buf := new(bytes.Buffer)
 	rand, err := uuid.NewUUID()
 	if err != nil {

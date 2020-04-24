@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"io"
 
-	healthcare "google.golang.org/api/healthcare/v1beta1"
+	healthcare "google.golang.org/api/healthcare/v1"
 )
 
 // patchHL7V2Store updates (patches) a HL7V2 store by updating its Pub/sub topic name.
@@ -37,10 +37,12 @@ func patchHL7V2Store(w io.Writer, projectID, location, datasetID, hl7v2StoreID, 
 	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/hl7v2Stores/%s", projectID, location, datasetID, hl7v2StoreID)
 
 	if _, err := storesService.Patch(name, &healthcare.Hl7V2Store{
-		NotificationConfig: &healthcare.NotificationConfig{
-			PubsubTopic: topicName, // format is "projects/*/locations/*/topics/*"
+		NotificationConfigs: []*healthcare.Hl7V2NotificationConfig{
+			{
+				PubsubTopic: topicName, // format is "projects/*/locations/*/topics/*"
+			},
 		},
-	}).UpdateMask("notificationConfig").Do(); err != nil {
+	}).UpdateMask("notificationConfigs").Do(); err != nil {
 		return fmt.Errorf("Patch: %v", err)
 	}
 
