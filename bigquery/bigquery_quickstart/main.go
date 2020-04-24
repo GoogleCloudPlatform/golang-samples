@@ -34,8 +34,9 @@ func main() {
 	// Creates a client.
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
-		log.Fatalf("Failed to create client: %v", err)
+		log.Fatalf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	// Sets the name for the new dataset.
 	datasetName := "my_new_dataset"

@@ -53,6 +53,7 @@ func Query(proj, q string) ([][]bigquery.Value, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer client.Close()
 
 	query := client.Query(q)
 	iter, err := query.Read(ctx)

@@ -33,6 +33,7 @@ func createView(projectID, datasetID, tableID string) error {
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	meta := &bigquery.TableMetadata{
 		// This example shows how to create a view of the shakespeare sample dataset, which

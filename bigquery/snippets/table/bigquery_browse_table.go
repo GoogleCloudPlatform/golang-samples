@@ -35,6 +35,7 @@ func browseTable(w io.Writer, projectID, datasetID, tableID string) error {
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	table := client.Dataset(datasetID).Table(tableID)
 	it := table.Read(ctx)

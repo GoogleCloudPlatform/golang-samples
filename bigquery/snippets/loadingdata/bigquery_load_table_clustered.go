@@ -33,6 +33,8 @@ func importClusteredTable(projectID, destDatasetID, destTableID string) error {
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
+
 	gcsRef := bigquery.NewGCSReference("gs://cloud-samples-data/bigquery/sample-transactions/transactions.csv")
 	gcsRef.SkipLeadingRows = 1
 	gcsRef.Schema = bigquery.Schema{

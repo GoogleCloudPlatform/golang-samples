@@ -34,6 +34,7 @@ func copyMultiTable(projectID, srcDatasetID string, srcTableIDs []string, dstDat
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	srcDataset := client.Dataset(srcDatasetID)
 	dstDataset := client.Dataset(dstDatasetID)

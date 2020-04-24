@@ -35,6 +35,8 @@ func createTableClustered(projectID, datasetID, tableID string) error {
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
+
 	sampleSchema := bigquery.Schema{
 		{Name: "timestamp", Type: bigquery.TimestampFieldType},
 		{Name: "origin", Type: bigquery.StringFieldType},

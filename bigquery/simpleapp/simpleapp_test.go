@@ -16,16 +16,24 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"strings"
 	"testing"
 
+	"cloud.google.com/go/bigquery"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestSimpleApp(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	rows, err := query(tc.ProjectID)
+	ctx := context.Background()
+	client, err := bigquery.NewClient(ctx, tc.ProjectID)
+	if err != nil {
+		t.Fatalf("bigquery.NewClient: %v", err)
+	}
+
+	rows, err := query(ctx, client)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -24,9 +24,10 @@ import (
 )
 
 func TestObjectTracking(t *testing.T) {
+	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/1322")
 	testutil.EndToEndTest(t)
 
-	filename := "../resources/cat.mp4"
+	filename := "../testdata/cat.mp4"
 
 	testutil.Retry(t, 10, 20*time.Second, func(r *testutil.R) {
 		var buf bytes.Buffer

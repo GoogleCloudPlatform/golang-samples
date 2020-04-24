@@ -34,6 +34,7 @@ func relaxTableImport(projectID, datasetID, tableID, filename string) error {
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	sampleSchema := bigquery.Schema{
 		{Name: "full_name", Type: bigquery.StringFieldType, Required: true},

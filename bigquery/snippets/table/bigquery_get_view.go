@@ -33,6 +33,7 @@ func getView(w io.Writer, projectID, datasetID, viewID string) error {
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	view := client.Dataset(datasetID).Table(viewID)
 	meta, err := view.Metadata(ctx)

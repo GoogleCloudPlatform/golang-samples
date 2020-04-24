@@ -16,12 +16,13 @@ package hmac
 
 // [START storage_list_hmac_keys]
 import (
-	"cloud.google.com/go/storage"
 	"context"
 	"fmt"
-	"google.golang.org/api/iterator"
 	"io"
 	"time"
+
+	"cloud.google.com/go/storage"
+	"google.golang.org/api/iterator"
 )
 
 // listHMACKeys lists all HMAC keys associated with the project.
@@ -35,7 +36,7 @@ func listHMACKeys(w io.Writer, projectID string) ([]*storage.HMACKey, error) {
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
-	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	ctx, cancel := context.WithTimeout(ctx, time.Minute)
 	defer cancel()
 	iter := client.ListHMACKeys(ctx, projectID)
 	var keys []*storage.HMACKey

@@ -34,6 +34,7 @@ func listTables(w io.Writer, projectID, datasetID string) error {
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	ts := client.Dataset(datasetID).Tables(ctx)
 	for {

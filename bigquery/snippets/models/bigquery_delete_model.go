@@ -32,6 +32,7 @@ func deleteModel(projectID, datasetID, modelID string) error {
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	model := client.Dataset(datasetID).Model(modelID)
 	if err := model.Delete(ctx); err != nil {

@@ -32,6 +32,7 @@ func exportTableAsCompressedCSV(projectID, gcsURI string) error {
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	srcProject := "bigquery-public-data"
 	srcDataset := "samples"

@@ -16,11 +16,12 @@ package hmac
 
 // [START storage_activate_hmac_key]
 import (
-	"cloud.google.com/go/storage"
 	"context"
 	"fmt"
 	"io"
 	"time"
+
+	"cloud.google.com/go/storage"
 )
 
 // activateHMACKey activates the HMAC key with the given access ID.
@@ -35,7 +36,7 @@ func activateHMACKey(w io.Writer, accessID string, projectID string) (*storage.H
 	defer client.Close() // Closing the client safely cleans up background resources.
 
 	handle := client.HMACKeyHandle(projectID, accessID)
-	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	ctx, cancel := context.WithTimeout(ctx, time.Minute)
 	defer cancel()
 	key, err := handle.Update(ctx, storage.HMACKeyAttrsToUpdate{State: "ACTIVE"})
 	if err != nil {

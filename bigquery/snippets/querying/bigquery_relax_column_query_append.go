@@ -33,6 +33,8 @@ func relaxTableQuery(projectID, datasetID, tableID string) error {
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
+
 	sampleSchema := bigquery.Schema{
 		{Name: "full_name", Type: bigquery.StringFieldType, Required: true},
 		{Name: "age", Type: bigquery.IntegerFieldType, Required: true},

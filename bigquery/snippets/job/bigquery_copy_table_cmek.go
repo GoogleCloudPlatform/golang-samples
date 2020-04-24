@@ -33,6 +33,7 @@ func copyTableWithCMEK(projectID, datasetID, tableID string) error {
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	srcTable := client.DatasetInProject("bigquery-public-data", "samples").Table("shakespeare")
 	copier := client.Dataset(datasetID).Table(tableID).CopierFrom(srcTable)

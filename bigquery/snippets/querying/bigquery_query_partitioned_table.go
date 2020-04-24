@@ -35,6 +35,7 @@ func queryPartitionedTable(w io.Writer, projectID, datasetID, tableID string) er
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	q := client.Query(fmt.Sprintf("SELECT * FROM `%s.%s` WHERE `date` BETWEEN DATE('1800-01-01') AND DATE('1899-12-31')", datasetID, tableID))
 	// Run the query and print results when the query job is completed.

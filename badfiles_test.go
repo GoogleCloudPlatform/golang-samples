@@ -59,6 +59,7 @@ var allowList = []string{
 	"**/testdata/**/*.png",
 	"**/testdata/**/*.txt",
 	"**/testdata/**/*.csv",
+	"**/testdata/**/*.mp4",
 
 	// Healthcare data.
 	"healthcare/testdata/dicom_00000001_000.dcm",
@@ -83,15 +84,15 @@ var allowList = []string{
 	"**/appengine/**/*.txt",
 
 	// Test output and configs.
-	"gotest.out",
 	"testing/kokoro/*.cfg",
+	"**/sponge_log.log",
+	"**/sponge_log.xml",
 
 	// TODO: cruft that should probably be under "testdata".
 	"appengine_flexible/pubsub/sample_message.json",
 	"dialogflow/resources/**/*",
 	"texttospeech/**/*",
 	"storage/objects/notes.txt",
-	"videointelligence/resources/**/*",
 
 	// Renovate configuration.
 	".github/renovate.json",

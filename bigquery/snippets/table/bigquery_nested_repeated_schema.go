@@ -35,6 +35,7 @@ func createTableComplexSchema(w io.Writer, projectID, datasetID, tableID string)
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	sampleSchema := bigquery.Schema{
 		{Name: "id", Type: bigquery.StringFieldType},

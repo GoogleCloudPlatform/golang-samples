@@ -35,6 +35,7 @@ func queryWithDestinationCMEK(w io.Writer, projectID, dstDatasetID, dstTableID s
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	q := client.Query("SELECT 17 as my_col")
 	q.Location = "US" // Location must match the dataset(s) referenced in query.

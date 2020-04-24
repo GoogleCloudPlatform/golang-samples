@@ -32,6 +32,7 @@ func listDatasets(projectID string, w io.Writer) error {
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	it := client.Datasets(ctx)
 	for {

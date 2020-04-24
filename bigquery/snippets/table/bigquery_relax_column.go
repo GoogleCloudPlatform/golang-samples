@@ -34,6 +34,7 @@ func relaxTableAPI(projectID, datasetID, tableID string) error {
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	// Setup: We first create a table with a schema that's restricts NULL values.
 	sampleSchema := bigquery.Schema{

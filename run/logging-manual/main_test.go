@@ -21,6 +21,7 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 )
 
@@ -80,7 +81,7 @@ func callHandler(h func(w http.ResponseWriter, r *http.Request), rr http.Respons
 	var buf bytes.Buffer
 	writer := bufio.NewWriter(&buf)
 
-	originalWriter := log.Writer()
+	originalWriter := os.Stderr
 	log.SetOutput(writer)
 	defer log.SetOutput(originalWriter)
 

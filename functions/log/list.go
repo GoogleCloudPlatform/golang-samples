@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/logging/apiv2"
+	logging "cloud.google.com/go/logging/apiv2"
 	"google.golang.org/api/iterator"
 	loggingpb "google.golang.org/genproto/googleapis/logging/v2"
 )

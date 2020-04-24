@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // Package sample provides code samples for the Container Analysis libraries: https://cloud.google.com/container-registry/docs/container-analysis
-package main
+package containeranalysis
 
 import (
 	"bytes"

@@ -16,11 +16,12 @@ package hmac
 
 // [START storage_get_hmac_key]
 import (
-	"cloud.google.com/go/storage"
 	"context"
 	"fmt"
 	"io"
 	"time"
+
+	"cloud.google.com/go/storage"
 )
 
 // getHMACKey retrieves the HMACKeyMetadata with the given access id.
@@ -35,7 +36,7 @@ func getHMACKey(w io.Writer, accessID string, projectID string) (*storage.HMACKe
 	defer client.Close() // Closing the client safely cleans up background resources.
 
 	handle := client.HMACKeyHandle(projectID, accessID)
-	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	ctx, cancel := context.WithTimeout(ctx, time.Minute)
 	defer cancel()
 	key, err := handle.Get(ctx)
 	if err != nil {

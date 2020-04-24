@@ -35,6 +35,7 @@ func TestQueries(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer client.Close()
 
 	testDatasetID, err := bqtestutil.UniqueBQName("snippet_table_tests")
 	if err != nil {

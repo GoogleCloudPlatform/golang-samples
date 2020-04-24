@@ -33,6 +33,7 @@ func queryLegacy(w io.Writer, projectID, sqlString string) error {
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	q := client.Query(sqlString)
 	q.UseLegacySQL = true
