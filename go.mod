@@ -4,13 +4,13 @@ go 1.11
 
 require (
 	cloud.google.com/go v0.56.0
-	cloud.google.com/go/bigquery v1.5.0
+	cloud.google.com/go/bigquery v1.6.0
 	cloud.google.com/go/bigtable v1.3.0
 	cloud.google.com/go/datastore v1.1.0
 	cloud.google.com/go/firestore v1.1.1
 	cloud.google.com/go/logging v1.0.0
 	cloud.google.com/go/pubsub v1.3.1
-	cloud.google.com/go/spanner v1.4.0
+	cloud.google.com/go/spanner v1.5.1
 	cloud.google.com/go/storage v1.6.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.1
 	github.com/aws/aws-sdk-go v1.30.7
@@ -22,7 +22,7 @@ require (
 	github.com/fluent/fluent-logger-golang v1.5.0
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gofrs/uuid v3.2.0+incompatible
-	github.com/golang/protobuf v1.3.5
+	github.com/golang/protobuf v1.4.0
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/google/go-cmp v0.4.0
 	github.com/google/uuid v1.1.1
@@ -41,12 +41,10 @@ require (
 	golang.org/x/exp v0.0.0-20200331195152-e8c3332aa8e5
 	golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
-	golang.org/x/sys v0.0.0-20200413165638-669c56c373c4 // indirect
 	golang.org/x/text v0.3.2
-	golang.org/x/tools v0.0.0-20200414184246-912958979a1a // indirect
 	google.golang.org/api v0.22.0
 	google.golang.org/appengine v1.6.5
-	google.golang.org/genproto v0.0.0-20200413115906-b5235f65be36
+	google.golang.org/genproto v0.0.0-20200416231807-8751e049a2a0
 	google.golang.org/grpc v1.28.1
 	gopkg.in/sendgrid/sendgrid-go.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.2.8
