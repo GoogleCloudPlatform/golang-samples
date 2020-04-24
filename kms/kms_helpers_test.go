@@ -40,6 +40,7 @@ type kmsFixture struct {
 	AsymmetricDecryptKeyName string
 	AsymmetricSignECKeyName  string
 	AsymmetricSignRSAKeyName string
+	HSMKeyName               string
 	SymmetricKeyName         string
 }
 
@@ -74,6 +75,11 @@ func NewKMSFixture(projectID string) (*kmsFixture, error) {
 	k.AsymmetricSignRSAKeyName, err = k.CreateAsymmetricSignRSAKey(k.KeyRingName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create asymmetric sign rsa key: %v", err)
+	}
+
+	k.HSMKeyName, err = k.CreateHSMKey(k.KeyRingName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create hsm key: %v", err)
 	}
 
 	k.SymmetricKeyName, err = k.CreateSymmetricKey(k.KeyRingName)
@@ -221,7 +227,7 @@ func (k *kmsFixture) CreateAsymmetricSignRSAKey(parent string) (string, error) {
 	return key.Name, nil
 }
 
-// testAsymmetricSignECKey creates a new asymmetric EC key.
+// CreateAsymmetricSignECKey creates a new asymmetric EC key.
 func (k *kmsFixture) CreateAsymmetricSignECKey(parent string) (string, error) {
 	ctx := context.Background()
 	key, err := k.client.CreateCryptoKey(ctx, &kmspb.CreateCryptoKeyRequest{
@@ -231,6 +237,31 @@ func (k *kmsFixture) CreateAsymmetricSignECKey(parent string) (string, error) {
 			Purpose: kmspb.CryptoKey_ASYMMETRIC_SIGN,
 			VersionTemplate: &kmspb.CryptoKeyVersionTemplate{
 				Algorithm: kmspb.CryptoKeyVersion_EC_SIGN_P256_SHA256,
+			},
+			Labels: map[string]string{
+				"foo": "bar",
+				"zip": "zap",
+			},
+		},
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return key.Name, nil
+}
+
+// CreateHSMKey creates a new key backed by an HSM.
+func (k *kmsFixture) CreateHSMKey(parent string) (string, error) {
+	ctx := context.Background()
+	key, err := k.client.CreateCryptoKey(ctx, &kmspb.CreateCryptoKeyRequest{
+		Parent:      parent,
+		CryptoKeyId: k.RandomID(),
+		CryptoKey: &kmspb.CryptoKey{
+			Purpose: kmspb.CryptoKey_ENCRYPT_DECRYPT,
+			VersionTemplate: &kmspb.CryptoKeyVersionTemplate{
+				Algorithm:       kmspb.CryptoKeyVersion_GOOGLE_SYMMETRIC_ENCRYPTION,
+				ProtectionLevel: kmspb.ProtectionLevel_HSM,
 			},
 			Labels: map[string]string{
 				"foo": "bar",

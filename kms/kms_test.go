@@ -345,6 +345,21 @@ func TestEncryptSymmetric(t *testing.T) {
 	}
 }
 
+func TestGetKeyVersionAttestation(t *testing.T) {
+	testutil.SystemTest(t)
+
+	name := fmt.Sprintf("%s/cryptoKeyVersions/1", fixture.HSMKeyName)
+
+	var b bytes.Buffer
+	if err := getKeyVersionAttestation(&b, name); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "CAVIUM"; !strings.Contains(got, want) {
+		t.Errorf("getKeyVersionAttestation: expected %q to contain %q", got, want)
+	}
+}
+
 func TestGetKeyLabels(t *testing.T) {
 	testutil.SystemTest(t)
 
