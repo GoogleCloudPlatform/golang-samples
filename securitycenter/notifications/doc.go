@@ -12,6 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Pacakge findings contains example snippets for working with notification configs
-// and their notifications.
+// Package notifications contains example snippets for working with notification
+// configs and their notifications.
 package notifications
