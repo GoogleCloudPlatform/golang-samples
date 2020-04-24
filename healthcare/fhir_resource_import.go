@@ -21,7 +21,7 @@ import (
 	"io"
 	"time"
 
-	healthcare "google.golang.org/api/healthcare/v1beta1"
+	healthcare "google.golang.org/api/healthcare/v1"
 )
 
 // importsFHIRResource imports an FHIR resource.
@@ -38,7 +38,7 @@ func importFHIRResource(w io.Writer, projectID, location, datasetID, fhirStoreID
 	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/fhirStores/%s", projectID, location, datasetID, fhirStoreID)
 	req := &healthcare.ImportResourcesRequest{
 		ContentStructure: "RESOURCE",
-		GcsSource: &healthcare.GoogleCloudHealthcareV1beta1FhirRestGcsSource{
+		GcsSource: &healthcare.GoogleCloudHealthcareV1FhirGcsSource{
 			Uri: gcsURI,
 		},
 	}
