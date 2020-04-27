@@ -40,7 +40,8 @@ var fixture *kmsFixture
 func TestMain(m *testing.M) {
 	tc, ok := testutil.ContextMain(m)
 	if !ok {
-		log.Fatal("failed to set up kms tests - missing GOLANG_SAMPLES_PROJECT_ID?")
+		log.Print("skipping - unset GOLANG_SAMPLES_PROJECT_ID?")
+		return
 	}
 
 	var err error
