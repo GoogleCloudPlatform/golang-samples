@@ -26,7 +26,7 @@ import (
 // validateJWTFromAppEngine validates a JWT found in the
 // "x-goog-iap-jwt-assertion" header.
 func validateJWTFromAppEngine(w io.Writer, iapJWT, projectNumber, projectID string) error {
-	// iapJWT := "base64.encoded.jwt"
+	// iapJWT := "YmFzZQ==.ZW5jb2RlZA==.and0" // req.Header.Get("X-Goog-IAP-JWT-Assertion")
 	// projectNumber := "123456789"
 	// projectID := "your-project-id"
 	ctx := context.Background()
@@ -46,7 +46,7 @@ func validateJWTFromAppEngine(w io.Writer, iapJWT, projectNumber, projectID stri
 // validateJWTFromComputeEngine validates a JWT found in the
 // "x-goog-iap-jwt-assertion" header.
 func validateJWTFromComputeEngine(w io.Writer, iapJWT, projectNumber, backendServiceID string) error {
-	// iapJWT := "base64.encoded.jwt"
+	// iapJWT := "YmFzZQ==.ZW5jb2RlZA==.and0" // req.Header.Get("X-Goog-IAP-JWT-Assertion")
 	// projectNumber := "123456789"
 	// backendServiceID := "backend-service-id"
 	ctx := context.Background()

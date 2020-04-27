@@ -27,12 +27,15 @@ import (
 )
 
 // makeIAPRequest makes a request to an application protected by Identity-Aware
-// Proxy with the given iapClientID.
-func makeIAPRequest(w io.Writer, request *http.Request, iapClientID string) error {
+// Proxy with the given audience.
+func makeIAPRequest(w io.Writer, request *http.Request, audience string) error {
 	// request, err := http.NewRequest("GET", "http://example.com", nil)
-	// iapClientID := "IAP_CLIENT_ID.apps.googleusercontent.com"
+	// audience := "IAP_CLIENT_ID.apps.googleusercontent.com"
 	ctx := context.Background()
-	client, err := idtoken.NewClient(ctx, iapClientID)
+
+	// client is a http.Client that automatically adds an "Authorization" header
+	// to any requests made.
+	client, err := idtoken.NewClient(ctx, audience)
 	if err != nil {
 		return fmt.Errorf("idtoken.NewClient: %v", err)
 	}
