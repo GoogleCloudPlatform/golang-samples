@@ -200,7 +200,6 @@ func TestListAllProjectAssets(t *testing.T) {
 }
 
 func TestListAllProjectAssetsAtTime(t *testing.T) {
-	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/1375")
 	orgID := setup(t)
 	buf := new(bytes.Buffer)
 	var nothingInstant = time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC)
@@ -217,7 +216,7 @@ func TestListAllProjectAssetsAtTime(t *testing.T) {
 	}
 
 	buf.Reset()
-	var somethingInstant = time.Date(2019, 3, 15, 0, 0, 0, 0, time.UTC)
+	var somethingInstant = time.Now()
 	err = listAllProjectAssetsAtTime(buf, orgID, somethingInstant)
 	if err != nil {
 		t.Fatalf("listAllProjectAssetsAtTime(%s, %v) failed: %v", orgID, somethingInstant, err)
