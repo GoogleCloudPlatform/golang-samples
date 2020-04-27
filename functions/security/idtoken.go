@@ -40,11 +40,9 @@ func callFunction(w io.Writer, functionURL string) error {
 		return fmt.Errorf("client.Get: %v", err)
 	}
 	defer resp.Body.Close()
-	b, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return fmt.Errorf("ioutil.ReadAll: %v", err)
+	if _, err := io.Copy(w, resp.Body); err != nil {
+		return fmt.Errorf("io.Copy: %v", err)
 	}
-	fmt.Fprintf(w, "body: %v", string(b))
 
 	return nil
 }
