@@ -42,40 +42,6 @@ sum = rdd.reduce(lambda x, y: x + y)`
 	region = "us-central1"
 )
 
-func cleanBucket(ctx context.Context, t *testing.T, client *storage.Client, projectID, bucket string) {
-	b := client.Bucket(bucket)
-	_, err := b.Attrs(ctx)
-	if err == nil {
-		it := b.Objects(ctx, nil)
-		for {
-			attrs, err := it.Next()
-			if err == iterator.Done {
-				break
-			}
-			if err != nil {
-				t.Fatalf("Bucket.Objects(%q): %v", bucket, err)
-			}
-			if attrs.EventBasedHold || attrs.TemporaryHold {
-				if _, err := b.Object(attrs.Name).Update(ctx, storage.ObjectAttrsToUpdate{
-					TemporaryHold:  false,
-					EventBasedHold: false,
-				}); err != nil {
-					t.Fatalf("Bucket(%q).Object(%q).Update: %v", bucket, attrs.Name, err)
-				}
-			}
-			if err := b.Object(attrs.Name).Delete(ctx); err != nil {
-				t.Fatalf("Bucket(%q).Object(%q).Delete: %v", bucket, attrs.Name, err)
-			}
-		}
-		if err := b.Delete(ctx); err != nil {
-			t.Fatalf("Bucket.Delete(%q): %v", bucket, err)
-		}
-	}
-	if err := b.Create(ctx, projectID, nil); err != nil {
-		t.Fatalf("Bucket.Create(%q): %v", bucket, err)
-	}
-}
-
 func setup(t *testing.T, projectID string) {
 	ctx := context.Background()
 	flag.Parse()
@@ -89,7 +55,7 @@ func setup(t *testing.T, projectID string) {
 		t.Errorf("storage.NewClient: %v", err)
 	}
 
-	cleanBucket(ctx, t, sc, projectID, bktName)
+	testutil.CleanBucket(ctx, t, projectID, bktName)
 	bkt := sc.Bucket(bktName)
 
 	obj := bkt.Object(jobFName)

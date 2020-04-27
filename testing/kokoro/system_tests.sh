@@ -35,7 +35,7 @@ cd "${1:-github/golang-samples}"
 
 export GO111MODULE=on # Always use modules.
 export GOPROXY=https://proxy.golang.org
-TIMEOUT=45m
+TIMEOUT=60m
 
 # Also see trampoline.sh - system_tests.sh is only run for PRs when there are
 # significant changes.
@@ -168,11 +168,15 @@ fi
 
 date
 
+# exit_code collects all of the exit codes of the tests, and is used to set the
+# exit code at the end of the script.
 exit_code=0
+set +e # Don't exit on errors to make sure we run all tests.
 
 # runTests runs the tests in the current directory. If an argument is specified,
 # it is used as the argument to `go test`.
 runTests() {
+  set +x
   echo "Running 'go test' in '$(pwd)'..."
   set -x
   2>&1 go test -timeout $TIMEOUT -v ${1:-./...} | tee sponge_log.log
@@ -192,6 +196,7 @@ elif [[ -z "${CHANGED_DIRS// }" ]]; then
   echo "Only running root tests"
   runTests .
 else
+  runTests . # Always run root tests.
   echo "Running tests in modified directories: $CHANGED_DIRS"
   for d in $CHANGED_DIRS; do
     mods="$(find $d -name go.mod)"
@@ -214,8 +219,6 @@ else
     fi
   done
 fi
-
-set +e
 
 # If we're running system tests, send the test log to the Build Cop Bot.
 # See https://github.com/googleapis/repo-automation-bots/tree/master/packages/buildcop.

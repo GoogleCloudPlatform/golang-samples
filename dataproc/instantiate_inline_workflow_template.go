@@ -41,59 +41,67 @@ func instantiateInlineWorkflowTemplate(w io.Writer, projectID, region string) er
 		return fmt.Errorf("dataproc.NewWorkflowTemplateClient: %v", err)
 	}
 
+	// Create jobs for the workflow.
+	teragenJob := &dataprocpb.OrderedJob{
+		JobType: &dataprocpb.OrderedJob_HadoopJob{
+			HadoopJob: &dataprocpb.HadoopJob{
+				Driver: &dataprocpb.HadoopJob_MainJarFileUri{
+					MainJarFileUri: "file:///usr/lib/hadoop-mapreduce/hadoop-mapreduce-examples.jar",
+				},
+				Args: []string{
+					"teragen",
+					"1000",
+					"hdfs:///gen/",
+				},
+			},
+		},
+		StepId: "teragen",
+	}
+
+	terasortJob := &dataprocpb.OrderedJob{
+		JobType: &dataprocpb.OrderedJob_HadoopJob{
+			HadoopJob: &dataprocpb.HadoopJob{
+				Driver: &dataprocpb.HadoopJob_MainJarFileUri{
+					MainJarFileUri: "file:///usr/lib/hadoop-mapreduce/hadoop-mapreduce-examples.jar",
+				},
+				Args: []string{
+					"terasort",
+					"hdfs:///gen/",
+					"hdfs:///sort/",
+				},
+			},
+		},
+		StepId: "terasort",
+		PrerequisiteStepIds: []string{
+			"teragen",
+		},
+	}
+
+	// Create the cluster placement.
+	clusterPlacement := &dataprocpb.WorkflowTemplatePlacement{
+		Placement: &dataprocpb.WorkflowTemplatePlacement_ManagedCluster{
+			ManagedCluster: &dataprocpb.ManagedCluster{
+				ClusterName: "my-managed-cluster",
+				Config: &dataprocpb.ClusterConfig{
+					GceClusterConfig: &dataprocpb.GceClusterConfig{
+						// Leave "ZoneUri" empty for "Auto Zone Placement"
+						// ZoneUri: ""
+						ZoneUri: "us-central1-a",
+					},
+				},
+			},
+		},
+	}
+
 	// Create the Instantiate Inline Workflow Template Request.
 	req := &dataprocpb.InstantiateInlineWorkflowTemplateRequest{
 		Parent: fmt.Sprintf("projects/%s/regions/%s", projectID, region),
 		Template: &dataprocpb.WorkflowTemplate{
 			Jobs: []*dataprocpb.OrderedJob{
-				{
-					JobType: &dataprocpb.OrderedJob_HadoopJob{
-						HadoopJob: &dataprocpb.HadoopJob{
-							Driver: &dataprocpb.HadoopJob_MainJarFileUri{
-								MainJarFileUri: "file:///usr/lib/hadoop-mapreduce/hadoop-mapreduce-examples.jar",
-							},
-							Args: []string{
-								"teragen",
-								"1000",
-								"hdfs:///gen/",
-							},
-						},
-					},
-					StepId: "teragen",
-				},
-				{
-					JobType: &dataprocpb.OrderedJob_HadoopJob{
-						HadoopJob: &dataprocpb.HadoopJob{
-							Driver: &dataprocpb.HadoopJob_MainJarFileUri{
-								MainJarFileUri: "file:///usr/lib/hadoop-mapreduce/hadoop-mapreduce-examples.jar",
-							},
-							Args: []string{
-								"terasort",
-								"hdfs:///gen/",
-								"hdfs:///sort/",
-							},
-						},
-					},
-					StepId: "terasort",
-					PrerequisiteStepIds: []string{
-						"teragen",
-					},
-				},
+				teragenJob,
+				terasortJob,
 			},
-			Placement: &dataprocpb.WorkflowTemplatePlacement{
-				Placement: &dataprocpb.WorkflowTemplatePlacement_ManagedCluster{
-					ManagedCluster: &dataprocpb.ManagedCluster{
-						ClusterName: "my-managed-cluster",
-						Config: &dataprocpb.ClusterConfig{
-							GceClusterConfig: &dataprocpb.GceClusterConfig{
-								// Leave "ZoneUri" empty for "Auto Zone Placement"
-								// ZoneUri: ""
-								ZoneUri: "us-central1-a",
-							},
-						},
-					},
-				},
-			},
+			Placement: clusterPlacement,
 		},
 	}
 
