@@ -18,41 +18,49 @@ package iap
 import (
 	"context"
 	"fmt"
+	"io"
 
 	"google.golang.org/api/idtoken"
 )
 
 // validateJWTFromAppEngine validates a JWT found in the
 // "x-goog-iap-jwt-assertion" header.
-func validateJWTFromAppEngine(iapJWT, projectNumber, projectID string) error {
+func validateJWTFromAppEngine(w io.Writer, iapJWT, projectNumber, projectID string) error {
+	// iapJWT := "base64.encoded.jwt"
+	// projectNumber := "123456789"
+	// projectID := "your-project-id"
 	ctx := context.Background()
 	aud := fmt.Sprintf("/projects/%s/apps/%s", projectNumber, projectID)
 
 	payload, err := idtoken.Validate(ctx, iapJWT, aud)
 	if err != nil {
-		return err
+		return fmt.Errorf("idtoken.Validate: %v", err)
 	}
 
 	// payload contains the JWT claims for further inspection or validation
-	_ = payload
+	fmt.Fprintf(w, "payload: %v", payload)
 
 	return nil
 }
 
 // validateJWTFromComputeEngine validates a JWT found in the
 // "x-goog-iap-jwt-assertion" header.
-func validateJWTFromComputeEngine(iapJWT, projectNumber, backendServiceID string) error {
+func validateJWTFromComputeEngine(w io.Writer, iapJWT, projectNumber, backendServiceID string) error {
+	// iapJWT := "base64.encoded.jwt"
+	// projectNumber := "123456789"
+	// backendServiceID := "backend-service-id"
 	ctx := context.Background()
 	aud := fmt.Sprintf("/projects/%s/global/backendServices/%s", projectNumber, backendServiceID)
 
 	payload, err := idtoken.Validate(ctx, iapJWT, aud)
 	if err != nil {
-		return err
+		return fmt.Errorf("idtoken.Validate: %v", err)
 	}
 
 	// payload contains the JWT claims for further inspection or validation
-	_ = payload
+	fmt.Fprintf(w, "payload: %v", payload)
 
 	return nil
 }
+
 // [END iap_validate_jwt]

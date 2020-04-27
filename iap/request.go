@@ -12,11 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package iap contains Identity-Aware Proxy samples.
 package iap
 
 // [START iap_make_request]
 import (
 	"context"
+	"fmt"
+	"io"
+	"io/ioutil"
 	"net/http"
 
 	"google.golang.org/api/idtoken"
@@ -24,20 +28,27 @@ import (
 
 // makeIAPRequest makes a request to an application protected by Identity-Aware
 // Proxy with the given iapClientID.
-func makeIAPRequest(request *http.Request, iapClientID string) error {
+func makeIAPRequest(w io.Writer, request *http.Request, iapClientID string) error {
+	// request, err := http.NewRequest("GET", "http://example.com", nil)
+	// iapClientID := "IAP_CLIENT_ID.apps.googleusercontent.com"
 	ctx := context.Background()
 	client, err := idtoken.NewClient(ctx, iapClientID)
 	if err != nil {
-		return err
-	}
-	response, err := client.Do(request)
-	if err != nil {
-		return err
+		return fmt.Errorf("idtoken.NewClient: %v", err)
 	}
 
-	// Use the response
-	_ = response
+	response, err := client.Do(request)
+	if err != nil {
+		return fmt.Errorf("client.Do: %v", err)
+	}
+	defer response.Body.Close()
+	b, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return fmt.Errorf("ioutil.ReadAll: %v", err)
+	}
+	fmt.Fprintf(w, "body: %v", string(b))
 
 	return nil
 }
+
 // [END iap_make_request]
