@@ -200,7 +200,6 @@ func TestListAllProjectAssets(t *testing.T) {
 }
 
 func TestListAllProjectAssetsAtTime(t *testing.T) {
-	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/1375")
 	orgID := setup(t)
 	buf := new(bytes.Buffer)
 	var nothingInstant = time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC)
