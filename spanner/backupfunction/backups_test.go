@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,10 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START spanner_functions_backup_util]
-
-// Package backupfunction is a Cloud function that can be periodically triggered to create a backup
-// for the specified database.
 package backupfunction
 
 import (
@@ -23,6 +19,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -30,31 +28,23 @@ import (
 	instance "cloud.google.com/go/spanner/admin/instance/apiv1"
 	"github.com/google/uuid"
 
-	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
+	"google.golang.org/api/iterator"
+	databasepb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 	instancepb "google.golang.org/genproto/googleapis/spanner/admin/instance/v1"
 )
+
+const instancePrefix = "gotest"
 
 var (
 	// testProjectID specifies the project used for testing. It can be changed
 	// by setting environment variable GCLOUD_TESTS_GOLANG_PROJECT_ID.
-	testProjectID    = projID()
-	testInstanceName = os.Getenv("GCLOUD_TESTS_GOLANG_INSTANCE_NAME")
-	testEndpoint     = os.Getenv("GCLOUD_TESTS_GOLANG_ENDPOINT")
+	testProjectID    = os.Getenv("GCLOUD_TESTS_GOLANG_PROJECT_ID")
+	testInstanceID   = os.Getenv("GCLOUD_TESTS_GOLANG_INSTANCE_ID")
+	testInstanceName = fmt.Sprintf("projects/%s/instances/%s", testProjectID, testInstanceID)
 
 	databaseAdmin *database.DatabaseAdminClient
 	instanceAdmin *instance.InstanceAdminClient
 )
-
-const (
-	envProjID     = "GCLOUD_TESTS_GOLANG_PROJECT_ID"
-	envPrivateKey = "GCLOUD_TESTS_GOLANG_KEY"
-)
-
-// ProjID returns the project ID to use in integration tests, or the empty
-// string if none is configured.
-func projID() string {
-	return os.Getenv(envProjID)
-}
 
 func initIntegrationTests(t *testing.T) (cleanup func()) {
 	ctx := context.Background()
@@ -72,30 +62,23 @@ func initIntegrationTests(t *testing.T) (cleanup func()) {
 
 	var err error
 
-	// Check if a specific endpoint is set for the integration test
-	// var opts apioption.ClientOption
-	// if testEndpoint != "" {
-	// 	t.Logf("Running integration test with endpoint %s", testEndpoint)
-	// 	opts = apioption.WithEndpoint(testEndpoint)
-	// }
-
 	// Create InstanceAdmin and DatabaseAdmin clients.
-	instanceAdmin, err = instance.NewInstanceAdminClient(ctx) //, opts)
+	instanceAdmin, err = instance.NewInstanceAdminClient(ctx)
 	if err != nil {
 		t.Fatalf("cannot create instance databaseAdmin client: %v", err)
 	}
-	databaseAdmin, err = database.NewDatabaseAdminClient(ctx) //, opts)
+	databaseAdmin, err = database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		t.Fatalf("cannot create databaseAdmin client: %v", err)
 	}
 
 	// If a specific instance was selected for testing, use that.  Otherwise create a new instance for testing and
 	// tear it down after the test.
-	createInstanceForTest := testInstanceName == ""
+	createInstanceForTest := testInstanceID == ""
 	if createInstanceForTest {
-		testInstanceName = fmt.Sprintf("go-test-%s", uuid.New())
-		// limit testInstanceName to length  of 40
-		testInstanceName = testInstanceName[0:39]
+		testInstanceID = fmt.Sprintf("%s-%d", instancePrefix, time.Now().UTC().Unix())
+		testInstanceName = fmt.Sprintf("projects/%s/instances/%s", testProjectID, testInstanceID)
+
 		// Get the list of supported instance configs for the project that is used
 		// for the integration tests. The supported instance configs can differ per
 		// project. The integration tests will use the first instance config that
@@ -112,15 +95,15 @@ func initIntegrationTests(t *testing.T) (cleanup func()) {
 		// Create a test instance to use for this test run.
 		op, err := instanceAdmin.CreateInstance(ctx, &instancepb.CreateInstanceRequest{
 			Parent:     fmt.Sprintf("projects/%s", testProjectID),
-			InstanceId: testInstanceName,
+			InstanceId: testInstanceID,
 			Instance: &instancepb.Instance{
 				Config:      config.Name,
-				DisplayName: testInstanceName,
+				DisplayName: testInstanceID,
 				NodeCount:   1,
 			},
 		})
 		if err != nil {
-			t.Fatalf("could not create instance with id %s: %v", fmt.Sprintf("projects/%s/instances/%s", testProjectID, testInstanceName), err)
+			t.Fatalf("could not create instance with id %s: %v", testInstanceName, err)
 		}
 		// Wait for the instance creation to finish.
 		i, err := op.Wait(ctx)
@@ -139,7 +122,7 @@ func initIntegrationTests(t *testing.T) (cleanup func()) {
 					testInstanceName, err)
 			}
 			// Delete other test instances that may be lingering around.
-			cleanupInstances(t, testInstanceName)
+			cleanupInstances(t)
 		}
 
 		databaseAdmin.Close()
@@ -154,12 +137,12 @@ func prepareIntegrationTest(ctx context.Context, t *testing.T) (string, func()) 
 	}
 	// Construct a unique test DB name.
 	dbName := fmt.Sprintf("test%s", uuid.New())
-	// limit dbName to length  of 30
+	// limit dbName to length of 10
 	dbName = dbName[0:10]
-	dbPath := fmt.Sprintf("projects/%v/instances/%v/databases/%v", testProjectID, testInstanceName, dbName)
+	dbPath := fmt.Sprintf("projects/%v/instances/%v/databases/%v", testProjectID, testInstanceID, dbName)
 	/// Create database and tables.
-	op, err := databaseAdmin.CreateDatabase(ctx, &adminpb.CreateDatabaseRequest{
-		Parent:          fmt.Sprintf("projects/%v/instances/%v", testProjectID, testInstanceName),
+	op, err := databaseAdmin.CreateDatabase(ctx, &databasepb.CreateDatabaseRequest{
+		Parent:          fmt.Sprintf("projects/%v/instances/%v", testProjectID, testInstanceID),
 		CreateStatement: "CREATE DATABASE " + dbName,
 		ExtraStatements: []string{
 			`CREATE TABLE Singers (
@@ -202,7 +185,7 @@ func prepareIntegrationTest(ctx context.Context, t *testing.T) (string, func()) 
 	}
 
 	return dbPath, func() {
-		err := databaseAdmin.DropDatabase(ctx, &adminpb.DropDatabaseRequest{
+		err := databaseAdmin.DropDatabase(ctx, &databasepb.DropDatabaseRequest{
 			Database: dbPath,
 		})
 		if err != nil {
@@ -211,43 +194,98 @@ func prepareIntegrationTest(ctx context.Context, t *testing.T) (string, func()) 
 	}
 }
 
-func cleanupInstances(t *testing.T, instanceName string) {
-	ctx := context.Background()
-	if testInstanceName == "" {
-		t.Logf("Deleting instance %s", instanceName)
+func isOlder(t *testing.T, instanceID string, expireAge time.Duration) bool {
+	items := strings.Split(instanceID, "-")
+	num, err := strconv.ParseInt(items[1], 10, 64)
+	if err != nil {
+		t.Logf("Failed to parse timestamp from %s", instanceID)
+		return false
+	}
+	ts := time.Unix(num, 0)
+	return ts.Add(expireAge).Before(time.Now())
+}
 
-		if err := instanceAdmin.DeleteInstance(ctx, &instancepb.DeleteInstanceRequest{Name: instanceName}); err != nil {
-			t.Logf("failed to delete instance %s (error %v), might need a manual removal",
-				instanceName, err)
+func cleanupInstances(t *testing.T) {
+	if instanceAdmin == nil {
+		// Integration tests skipped.
+		return
+	}
+
+	ctx := context.Background()
+	parent := fmt.Sprintf("projects/%v", testProjectID)
+	iter := instanceAdmin.ListInstances(ctx, &instancepb.ListInstancesRequest{
+		Parent: parent,
+		Filter: fmt.Sprintf("name:%s-", instancePrefix),
+	})
+	expireAge := 24 * time.Hour
+
+	for {
+		inst, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			panic(err)
+		}
+		if isOlder(t, inst.Name, expireAge) {
+			t.Logf("Deleting instance %s", inst.Name)
+
+			// First delete any lingering backups that might have been left on
+			// the instance.
+			backups := databaseAdmin.ListBackups(ctx, &databasepb.ListBackupsRequest{Parent: inst.Name})
+			for {
+				backup, err := backups.Next()
+				if err == iterator.Done {
+					break
+				}
+				if err != nil {
+					t.Logf("failed to retrieve backups from instance %s because of error %v", inst.Name, err)
+					break
+				}
+				if err := databaseAdmin.DeleteBackup(ctx, &databasepb.DeleteBackupRequest{Name: backup.Name}); err != nil {
+					t.Logf("failed to delete backup %s (error %v)", backup.Name, err)
+				}
+			}
+
+			if err := instanceAdmin.DeleteInstance(ctx, &instancepb.DeleteInstanceRequest{Name: inst.Name}); err != nil {
+				t.Logf("failed to delete instance %s (error %v), might need a manual removal",
+					inst.Name, err)
+			}
 		}
 	}
 }
 
-func TestIntegrationCreateBackup(t *testing.T) {
+func TestIntegration_CreateBackup(t *testing.T) {
 	ctx := context.Background()
 	instanceCleanup := initIntegrationTests(t)
 	defer instanceCleanup()
-	if databaseAdmin == nil {
-		t.Skip("Integration tests skipped")
-	}
 	testDatabaseName, cleanup := prepareIntegrationTest(ctx, t)
 	defer cleanup()
 
-	backupPrefix := "go-test-"
-	expires := time.Duration(time.Hour * 7)
-	op, err := CreateBackup(ctx, os.Stdout, databaseAdmin, testDatabaseName, expires, backupPrefix)
+	var err error
+	client, err = database.NewDatabaseAdminClient(context.Background())
 	if err != nil {
-		t.Fatal(err)
+		t.Errorf("Failed to create an instance of DatabaseAdminClient: %v", err)
+		return
 	}
-	backup, completionErr := op.Wait(ctx)
-	if completionErr != nil {
-		t.Logf("Error completing backup: %v", completionErr)
+
+	backupID := fmt.Sprintf("backup-test-%d", time.Now().Unix())
+	expires := time.Duration(time.Hour * 6)
+	op, err := createBackup(ctx, backupID, testDatabaseName, expires)
+	if err != nil {
+		t.Errorf("Failed to create a backup: %v", err)
+		return
+	}
+	backup, err := op.Wait(ctx)
+	if err != nil {
+		t.Logf("Failed to complete the backup operation: %v", err)
 	}
 
 	defer func() {
-		err := databaseAdmin.DeleteBackup(ctx, &adminpb.DeleteBackupRequest{Name: backup.Name})
+		err := databaseAdmin.DeleteBackup(ctx, &databasepb.DeleteBackupRequest{Name: backup.Name})
 		if err != nil {
-			t.Fatal(err)
+			t.Errorf("Failed to delete a backup %s: %v", backup.Name, err)
+			return
 		}
 	}()
 }

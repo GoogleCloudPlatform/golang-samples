@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,17 +14,16 @@
 
 // [START spanner_functions_backup_util]
 
-// Package backupfunction is a Cloud function that can be periodically triggered to create a backup
-// for the specified database.
+// Package backupfunction is a Cloud function that can be periodically triggered
+// to create a backup for the specified database.
 package backupfunction
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	"io"
 	"log"
-	"os"
-	"strings"
+	"regexp"
 	"sync"
 	"time"
 
@@ -36,49 +35,84 @@ import (
 var client *database.DatabaseAdminClient
 var clientOnce sync.Once
 
+var (
+	validDBPattern = regexp.MustCompile("^projects/(?P<project>[^/]+)/instances/(?P<instance>[^/]+)/databases/(?P<database>[^/]+)$")
+)
+
+func parseDatabaseName(db string) (project, instance, database string, err error) {
+	matches := validDBPattern.FindStringSubmatch(db)
+	if len(matches) == 0 {
+		return "", "", "", fmt.Errorf("Failed to parse database name from %q according to pattern %q",
+			db, validDBPattern.String())
+	}
+	return matches[1], matches[2], matches[3], nil
+}
+
 // PubSubMessage is the payload of a Pub/Sub event.
 type PubSubMessage struct {
 	Data []byte `json:"data"`
 }
 
-// Backupfunction is intended to be called by a scheduled cloud event that generates a PubSub message.
-// The PubSubMessage can contain the parameters to call the backup function if required
-func Backupfunction(ctx context.Context, m PubSubMessage) error {
+// Meta is the payload of the `Data` field.
+type Meta struct {
+	BackupID string `json:"backupId"`
+	Database string `json:"database"`
+	Expire   string `json:"expire"`
+}
+
+// SpannerCreateBackup is intended to be called by a scheduled cloud event that
+// is passed in as a PubSub message. The PubSubMessage can contain the
+// parameters to call the backup function if required.
+func SpannerCreateBackup(ctx context.Context, m PubSubMessage) error {
 	clientOnce.Do(func() {
 		// Declare a separate err variable to avoid shadowing client.
 		var err error
 		client, err = database.NewDatabaseAdminClient(context.Background())
 		if err != nil {
-			log.Printf("database.NewDatabaseAdminClient: %v", err)
-			return
-		}
-		// Alternatively parameters defined below can be passed as part of the event, and can be parsed from PubSubMessage
-		databaseName := "projects/my-project/instances/my-instance/databases/example-db" // set the name of the database to be backed up
-		// DEFAULT Set expire to be the minimum expire duration of 6 hours
-		expire := 6 * time.Hour             //The time.Duration after which the backup will expire
-		backupPrefix := "example-db-backup" //Prefix for backup name, where backup name will be prefix+timestamp
-		// Logging can be customised as per	https://cloud.google.com/functions/docs/monitoring/logging
-		_, err = CreateBackup(ctx, os.Stdout, client, databaseName, expire, backupPrefix)
-		if err != nil {
-			log.Printf("CreateBackup encountered error: %v", err)
+			log.Printf("Failed to create an instance of DatabaseAdminClient: %v", err)
 			return
 		}
 	})
+
+	var meta Meta
+	err := json.Unmarshal(m.Data, &meta)
+	if err != nil {
+		log.Printf("Failed to parse data %s: %v", string(m.Data), err)
+		return err
+	}
+	expire, err := time.ParseDuration(meta.Expire)
+	if err != nil {
+		log.Printf("Failed to parse expire duration %s: %v", meta.Expire, err)
+		return err
+	}
+	_, err = createBackup(ctx, meta.BackupID, meta.Database, expire)
+	if err != nil {
+		log.Printf("Failed to create a backup: %v", err)
+		return err
+	}
 	return nil
 }
 
-// CreateBackup calls StartBackupOperation on behalf of main (CLI) or Backupfunction which is executed by Cloud Function
-func CreateBackup(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, databaseName string, expiry time.Duration, backupPrefix string) (lrop *database.CreateBackupOperation, err error) {
-	timeNow := time.Now()
-	backupID := backupPrefix + strings.Replace(timeNow.Format("20060102150405.000000000"), ".", "", -1)
-	fmt.Fprintf(w, "backupID = %s\n", backupID)
-	expires := timeNow.Add(expiry)
-	op, err := adminClient.StartBackupOperation(ctx, backupID, databaseName, expires)
+// createBackup starts a backup operation but not waiting for its completion.
+func createBackup(ctx context.Context, backupID, dbName string, expire time.Duration) (*database.CreateBackupOperation, error) {
+	now := time.Now()
+	if backupID == "" {
+		_, _, dbID, err := parseDatabaseName(dbName)
+		if err != nil {
+			log.Printf("Failed to start a backup operation for database [%s]: %v", dbName, err)
+			return nil, err
+		}
+		backupID = fmt.Sprintf("%s-%d", dbID, now.UTC().Unix())
+	}
+	log.Printf("backupID = %s\n", backupID)
+	expireTime := now.Add(expire)
+	op, err := client.StartBackupOperation(ctx, backupID, dbName, expireTime)
 	if err != nil {
-		log.SetOutput(w)
-		log.Printf("Create backup operation FAILED for database [%s], set to expire at [%s], backupID = %s\n with ERROR=%s", databaseName, expires.Format(time.RFC3339), backupID, err)
+		log.Printf("Failed to start a backup operation for database [%s], expire time [%s], backupID = [%s] with error = %v", dbName, expireTime.Format(time.RFC3339), backupID, err)
 		return nil, err
 	}
-	fmt.Fprintf(w, "Create backup operation [%s] started for database [%s], set to expire at [%s], backupID = %s\n", op.Name(), databaseName, expires.Format(time.RFC3339), backupID)
+	log.Printf("Create backup operation [%s] started for database [%s], expire time [%s], backupID = [%s]", op.Name(), dbName, expireTime.Format(time.RFC3339), backupID)
 	return op, nil
 }
+
+// [END spanner_functions_backup_util]
