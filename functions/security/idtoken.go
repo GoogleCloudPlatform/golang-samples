@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 
 	"google.golang.org/api/idtoken"
 )
@@ -30,6 +29,9 @@ import (
 func callFunction(w io.Writer, functionURL string) error {
 	// functionURL := "https://REGION-PROJECT.cloudfunctions.net/RECEIVING_FUNCTION"
 	ctx := context.Background()
+
+	// client is a http.Client that automatically adds an "Authorization" header
+	// to any requests made.
 	client, err := idtoken.NewClient(ctx, functionURL)
 	if err != nil {
 		return fmt.Errorf("idtoken.NewClient: %v", err)
