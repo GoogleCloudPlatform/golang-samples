@@ -217,7 +217,7 @@ func TestListAllProjectAssetsAtTime(t *testing.T) {
 	}
 
 	buf.Reset()
-  var somethingInstant = time.Now()
+	var somethingInstant = time.Now()
 	err = listAllProjectAssetsAtTime(buf, orgID, somethingInstant)
 	if err != nil {
 		t.Fatalf("listAllProjectAssetsAtTime(%s, %v) failed: %v", orgID, somethingInstant, err)
