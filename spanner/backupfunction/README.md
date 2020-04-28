@@ -8,8 +8,7 @@ a schedule for creating Cloud Spanner backups.
 Start a terminal for running a local server:
 
 ```bash
-cd cmd
-go run main.go
+go run cmd/local_func_server/main.go
 ```
 
 Start another terminal for calling the function:
@@ -36,4 +35,17 @@ Call the `SpannerCreateBackup` function from command-line:
 
 ```bash
 DATA=$(printf '{"database":"projects/[PROJECT_ID]/instances/[INSTANCE_ID]/databases/[DATABASE_ID]", "expire": "6h"}'|base64) && gcloud functions call SpannerCreateBackup --data '{"data":"'$DATA'"}'
+```
+
+## Deploy scheduled jobs to Cloud Scheduler
+
+Note: To use Cloud Scheduler, we must [create an App Engine app](https://cloud.google.com/scheduler/docs#supported_regions).
+
+Make a copy of `schedule-template.yaml` and replace `PROJECT_ID`, `INSTANCE_ID`,
+`DATABASE_ID` with your configurations.
+
+Deploy scheduled jobs for creating backups:
+
+```bash
+go run cmd/scheduler/main.go -config schedule-template.yaml
 ```

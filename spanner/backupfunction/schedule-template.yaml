@@ -1,0 +1,7 @@
+name: PROJECT_ID
+instances:
+  - name: INSTANCE_ID
+    databases:
+      - name: DATABASE_ID
+        schedule: 0 * * * * # run hourly
+        expire: 6h # the backup will expire after 6 hours
