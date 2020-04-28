@@ -107,7 +107,7 @@ func main() {
 			if err != nil {
 				log.Fatalf("Failed to create a cloud scheduler job: %v", err)
 			}
-			log.Println("resp:", resp)
+			log.Printf("Create a scheduled backup job: %v\n", resp)
 		}
 	}
 }
