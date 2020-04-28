@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 
 	"google.golang.org/api/idtoken"
@@ -45,11 +44,9 @@ func makeIAPRequest(w io.Writer, request *http.Request, audience string) error {
 		return fmt.Errorf("client.Do: %v", err)
 	}
 	defer response.Body.Close()
-	b, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return fmt.Errorf("ioutil.ReadAll: %v", err)
+	if _, err := io.Copy(w, response.Body); err != nil {
+		return fmt.Errorf("io.Copy: %v", err)
 	}
-	fmt.Fprintf(w, "body: %v", string(b))
 
 	return nil
 }
