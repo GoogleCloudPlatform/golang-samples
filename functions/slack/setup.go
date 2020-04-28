@@ -18,7 +18,6 @@ package slack
 
 import (
 	"context"
-	"encoding/json"
 	"log"
 	"os"
 
@@ -26,33 +25,18 @@ import (
 	"google.golang.org/api/option"
 )
 
-type configuration struct {
-	ProjectID string `json:"PROJECT_ID"`
-	Key       string `json:"KG_API_KEY"`
-	Secret    string `json:"SLACK_SIGNING_SECRET"`
-}
-
 var (
 	entitiesService *kgsearch.EntitiesService
-	config          *configuration
+	kgKey           string
+	slackSecret     string
 )
 
 func setup(ctx context.Context) {
-	if config == nil {
-		cfgFile, err := os.Open("config.json")
-		if err != nil {
-			log.Fatalf("os.Open: %v", err)
-		}
-
-		d := json.NewDecoder(cfgFile)
-		config = &configuration{}
-		if err = d.Decode(config); err != nil {
-			log.Fatalf("Decode: %v", err)
-		}
-	}
+	kgKey = os.Getenv("KG_API_KEY")
+	slackSecret = os.Getenv("SLACK_SECRET")
 
 	if entitiesService == nil {
-		kgService, err := kgsearch.NewService(ctx, option.WithAPIKey(config.Key))
+		kgService, err := kgsearch.NewService(ctx, option.WithAPIKey(kgKey))
 		if err != nil {
 			log.Fatalf("kgsearch.NewClient: %v", err)
 		}
