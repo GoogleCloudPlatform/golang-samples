@@ -30,33 +30,37 @@ import (
 
 func TestBigtableRead(t *testing.T) {
 	ctx := context.Background()
-	tc := testutil.SystemTest(t)
-	instance := os.Getenv("GOLANG_SAMPLES_BIGTABLE_INSTANCE")
-	if instance == "" {
-		t.Skip("Skipping functions bigtable integration test. Set GOLANG_SAMPLES_BIGTABLE_INSTANCE.")
+	testutil.SystemTest(t)
+	projectID := os.Getenv("GOLANG_SAMPLES_BIGTABLE_PROJECT")
+	instanceID := os.Getenv("GOLANG_SAMPLES_BIGTABLE_INSTANCE")
+	if projectID == "" || instanceID == "" {
+		t.Skip("Skipping functions bigtable integration test. Set GOLANG_SAMPLES_BIGTABLE_PROJECT and GOLANG_SAMPLES_BIGTABLE_INSTANCE.")
 	}
 
-	adminClient, _ := bigtable.NewAdminClient(ctx, tc.ProjectID, instance)
+	adminClient, err := bigtable.NewAdminClient(ctx, projectID, instanceID)
+	if err != nil {
+		t.Fatalf("bigtable.NewAdminClient: %v", err)
+	}
 
 	uuid, _ := uuid.NewRandom()
 	tableID := fmt.Sprintf("mobile-time-series-%s", uuid.String()[:8])
 	adminClient.DeleteTable(ctx, tableID)
 
 	if err := adminClient.CreateTable(ctx, tableID); err != nil {
-		t.Fatalf("Could not create table %s: %v", tableID, err)
+		t.Fatalf("adminClient.CreateTable %s: %v", tableID, err)
 	}
 
 	if err := adminClient.CreateColumnFamily(ctx, tableID, "stats_summary"); err != nil {
 		adminClient.DeleteTable(ctx, tableID)
-		t.Fatalf("CreateColumnFamily(%s): %v", "stats_summary", err)
+		t.Fatalf("adminClient.CreateColumnFamily(%s): %v", "stats_summary", err)
 	}
 
 	timestamp := bigtable.Now().TruncateToMilliseconds()
-	writeTestData(ctx, tc.ProjectID, instance, tableID, timestamp, t)
+	writeTestData(ctx, projectID, instanceID, tableID, timestamp, t)
 
 	req := httptest.NewRequest("GET", "/", nil)
-	req.Header.Set("projectId", tc.ProjectID)
-	req.Header.Set("instanceId", instance)
+	req.Header.Set("projectId", projectID)
+	req.Header.Set("instanceId", instanceID)
 	req.Header.Set("tableID", tableID)
 	rr := httptest.NewRecorder()
 	BigtableRead(rr, req)
