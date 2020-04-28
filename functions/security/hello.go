@@ -19,7 +19,7 @@ import (
 	"net/http"
 )
 
-// HelloHTTP is an HTTP Cloud Function with a request parameter.
+// HelloHTTP is an HTTP Cloud Function.
 func HelloHTTP(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Hello, World!")
 }
