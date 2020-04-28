@@ -18,6 +18,7 @@
 package bigtable
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -36,7 +37,7 @@ func BigtableRead(w http.ResponseWriter, r *http.Request) {
 	clientOnce.Do(func() {
 		// Declare a separate err variable to avoid shadowing client.
 		var err error
-		client, err = bigtable.NewClient(r.Context(), r.Header.Get("projectId"), r.Header.Get("instanceId"))
+		client, err = bigtable.NewClient(context.Background(), r.Header.Get("projectID"), r.Header.Get("instanceId"))
 		if err != nil {
 			http.Error(w, "Error initializing client", http.StatusInternalServerError)
 			log.Printf("bigtable.NewClient: %v", err)
@@ -44,8 +45,8 @@ func BigtableRead(w http.ResponseWriter, r *http.Request) {
 		}
 	})
 
-	tbl := client.Open(r.Header.Get("tableId"))
-	if err := tbl.ReadRows(r.Context(), bigtable.PrefixRange("phone#"),
+	tbl := client.Open(r.Header.Get("tableID"))
+	err := tbl.ReadRows(r.Context(), bigtable.PrefixRange("phone#"),
 		func(row bigtable.Row) bool {
 			osBuild := ""
 			for _, col := range row["stats_summary"] {
@@ -56,7 +57,9 @@ func BigtableRead(w http.ResponseWriter, r *http.Request) {
 
 			fmt.Fprintf(w, "Rowkey: %s, os_build:  %s\n", row.Key(), osBuild)
 			return true
-		}); err != nil {
+		})
+
+	if err != nil {
 		http.Error(w, "Error reading rows", http.StatusInternalServerError)
 		log.Printf("tbl.ReadRows(): %v", err)
 	}

@@ -24,64 +24,64 @@ import (
 	"testing"
 
 	"cloud.google.com/go/bigtable"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
 )
 
 func TestBigtableRead(t *testing.T) {
 	ctx := context.Background()
-	project := os.Getenv("GOLANG_SAMPLES_BIGTABLE_PROJECT")
+	tc := testutil.SystemTest(t)
 	instance := os.Getenv("GOLANG_SAMPLES_BIGTABLE_INSTANCE")
-	if project == "" || instance == "" {
-		t.Skip("Skipping functions bigtable integration test. Set GOLANG_SAMPLES_BIGTABLE_PROJECT and GOLANG_SAMPLES_BIGTABLE_INSTANCE.")
+	if instance == "" {
+		t.Skip("Skipping functions bigtable integration test. Set GOLANG_SAMPLES_BIGTABLE_INSTANCE.")
 	}
 
-	adminClient, err := bigtable.NewAdminClient(ctx, project, instance)
+	adminClient, _ := bigtable.NewAdminClient(ctx, tc.ProjectID, instance)
 
-	uuid, err := uuid.NewRandom()
-	tableId := fmt.Sprintf("mobile-time-series-%s", uuid.String()[:8])
-	adminClient.DeleteTable(ctx, tableId)
+	uuid, _ := uuid.NewRandom()
+	tableID := fmt.Sprintf("mobile-time-series-%s", uuid.String()[:8])
+	adminClient.DeleteTable(ctx, tableID)
 
-	if err := adminClient.CreateTable(ctx, tableId); err != nil {
-		t.Fatalf("Could not create table %s: %v", tableId, err)
+	if err := adminClient.CreateTable(ctx, tableID); err != nil {
+		t.Fatalf("Could not create table %s: %v", tableID, err)
 	}
 
-	if err := adminClient.CreateColumnFamily(ctx, tableId, "stats_summary"); err != nil {
-		adminClient.DeleteTable(ctx, tableId)
+	if err := adminClient.CreateColumnFamily(ctx, tableID, "stats_summary"); err != nil {
+		adminClient.DeleteTable(ctx, tableID)
 		t.Fatalf("CreateColumnFamily(%s): %v", "stats_summary", err)
 	}
 
 	timestamp := bigtable.Now().TruncateToMilliseconds()
-	writeTestData(err, ctx, project, instance, tableId, timestamp, t)
+	writeTestData(ctx, tc.ProjectID, instance, tableID, timestamp, t)
 
 	req := httptest.NewRequest("GET", "/", nil)
-	req.Header.Set("projectId", project)
+	req.Header.Set("projectId", tc.ProjectID)
 	req.Header.Set("instanceId", instance)
-	req.Header.Set("tableId", tableId)
+	req.Header.Set("tableID", tableID)
 	rr := httptest.NewRecorder()
 	BigtableRead(rr, req)
 
-	t.Log(rr.Body.String())
-	got := (rr.Body.String())
-	if want :=
+	want :=
 		`Rowkey: phone#4c410523#20190501, os_build:  PQ2A.190405.003
 Rowkey: phone#4c410523#20190502, os_build:  PQ2A.190405.004
 Rowkey: phone#4c410523#20190505, os_build:  PQ2A.190406.000
 Rowkey: phone#5c10102#20190501, os_build:  PQ2A.190401.002
-Rowkey: phone#5c10102#20190502, os_build:  PQ2A.190406.000`; !strings.Contains(got, want) {
-		t.Errorf("got %q, want %q", got, want)
+Rowkey: phone#5c10102#20190502, os_build:  PQ2A.190406.000`
+	if got := rr.Body.String(); !strings.Contains(got, want) {
+		t.Errorf("TestBigtableRead(): got %q, want %q", got, want)
 	}
 
 	if rr.Code != http.StatusOK {
 		t.Fatalf("BigtableRead got code %v, want %v", rr.Code, http.StatusOK)
 	}
 
-	adminClient.DeleteTable(ctx, tableId)
+	adminClient.DeleteTable(ctx, tableID)
 }
 
-func writeTestData(err error, ctx context.Context, project string, instance string, tableId string, timestamp bigtable.Timestamp, t *testing.T) {
+func writeTestData(ctx context.Context, project string, instance string, tableID string, timestamp bigtable.Timestamp, t *testing.T) {
 
-	client, err := bigtable.NewClient(ctx, project, instance)
-	tbl := client.Open(tableId)
+	client, _ := bigtable.NewClient(ctx, project, instance)
+	tbl := client.Open(tableID)
 
 	var muts []*bigtable.Mutation
 	rowKeys := []string{
