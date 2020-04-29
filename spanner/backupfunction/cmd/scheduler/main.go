@@ -26,6 +26,9 @@ import (
 	scheduler "cloud.google.com/go/scheduler/apiv1"
 	"github.com/GoogleCloudPlatform/golang-samples/spanner/backupfunction"
 	schedulerpb "google.golang.org/genproto/googleapis/cloud/scheduler/v1"
+	"google.golang.org/genproto/protobuf/field_mask"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"gopkg.in/yaml.v2"
 )
 
@@ -33,17 +36,24 @@ const defaultLocation = "us-central1"
 const pubsubTopic = "cloud-spanner-scheduled-backups"
 const jobPrefix = "spanner-backup"
 
+// Project contains the information of a GCP project.
 type Project struct {
-	Name      string `yaml:"name"`
-	Instances []struct {
-		Name      string `yaml:"name"`
-		Databases []struct {
-			Name     string `yaml:"name"`
-			Schedule string `yaml:"schedule"`
-			Expire   string `yaml:"expire"`
-			Location string `yaml:"location"`
-		}
-	} `yaml:"instances"`
+	Name      string     `yaml:"name"`
+	Instances []Instance `yaml:"instances"`
+}
+
+// Instance contains the information of an instance.
+type Instance struct {
+	Name      string     `yaml:"name"`
+	Databases []Database `yaml:"databases"`
+}
+
+// Database contains the backup schedule configuration for a database.
+type Database struct {
+	Name     string `yaml:"name"`
+	Schedule string `yaml:"schedule"`
+	Expire   string `yaml:"expire"`
+	Location string `yaml:"location"`
 }
 
 func main() {
@@ -62,7 +72,7 @@ func main() {
 
 	err = yaml.Unmarshal(content, &project)
 	if err != nil {
-		panic(err)
+		log.Fatalf("Failed to parse the config file: %v", err)
 	}
 
 	ctx := context.Background()
@@ -72,6 +82,8 @@ func main() {
 	}
 	defer client.Close()
 
+	topicPath := fmt.Sprintf("projects/%s/topics/%s", project.Name, pubsubTopic)
+
 	for _, instance := range project.Instances {
 		for _, db := range instance.Databases {
 			dbPath := fmt.Sprintf("projects/%s/instances/%s/databases/%s", project.Name, instance.Name, db.Name)
@@ -80,34 +92,87 @@ func main() {
 			if loc == "" {
 				loc = defaultLocation
 			}
+			locPath := fmt.Sprintf("projects/%s/locations/%s", project.Name, loc)
+			jobID := fmt.Sprintf("%s-%s", jobPrefix, db.Name)
+			jobName := fmt.Sprintf("%s/jobs/%s", locPath, jobID)
 
-			jobName := fmt.Sprintf("%s-%s", jobPrefix, db.Name)
-			meta := backupfunction.Meta{Database: dbPath, Expire: db.Expire}
-			data, err := json.Marshal(meta)
+			err = updateJob(ctx, client, jobName, locPath, dbPath, topicPath, db)
 			if err != nil {
-				log.Fatalf("Failed to marshal data: %v", err)
+				if errCode(err) == codes.NotFound {
+					// Create a new job if the job does not exist.
+					createJob(ctx, client, jobName, locPath, dbPath, topicPath, db)
+				} else {
+					log.Printf("Failed to update a job: %v\n", err)
+				}
 			}
-
-			// Create a new job.
-			req := &schedulerpb.CreateJobRequest{
-				Parent: fmt.Sprintf("projects/%s/locations/%s", project.Name, loc),
-				Job: &schedulerpb.Job{
-					Name:        fmt.Sprintf("projects/%s/locations/%s/jobs/%s", project.Name, loc, jobName),
-					Description: fmt.Sprintf("A scheduling job for Cloud Spanner database %s", dbPath),
-					Target: &schedulerpb.Job_PubsubTarget{
-						PubsubTarget: &schedulerpb.PubsubTarget{
-							TopicName: fmt.Sprintf("projects/%s/topics/%s", project.Name, pubsubTopic),
-							Data:      data,
-						},
-					},
-					Schedule: db.Schedule,
-				},
-			}
-			resp, err := client.CreateJob(ctx, req)
-			if err != nil {
-				log.Fatalf("Failed to create a cloud scheduler job: %v", err)
-			}
-			log.Printf("Create a scheduled backup job: %v\n", resp)
 		}
 	}
+}
+
+// errCode extracts the canonical error code from a Go error.
+func errCode(err error) codes.Code {
+	s, ok := status.FromError(err)
+	if !ok {
+		return codes.Unknown
+	}
+	return s.Code()
+}
+
+func updateJob(ctx context.Context, client *scheduler.CloudSchedulerClient, jobName, locPath, dbPath, topicPath string, db Database) error {
+	meta := backupfunction.Meta{Database: dbPath, Expire: db.Expire}
+	data, err := json.Marshal(meta)
+	if err != nil {
+		log.Fatalf("Failed to marshal data: %v", err)
+	}
+
+	// Update a job.
+	req := &schedulerpb.UpdateJobRequest{
+		Job: &schedulerpb.Job{
+			Name: jobName,
+			Target: &schedulerpb.Job_PubsubTarget{
+				PubsubTarget: &schedulerpb.PubsubTarget{
+					TopicName: topicPath,
+					Data:      data,
+				},
+			},
+			Schedule: db.Schedule,
+		},
+		UpdateMask: &field_mask.FieldMask{
+			Paths: []string{"schedule", "pubsub_target.data"},
+		},
+	}
+	_, err = client.UpdateJob(ctx, req)
+	if err == nil {
+		log.Printf("Update the job %v.", jobName)
+	}
+	return err
+}
+
+func createJob(ctx context.Context, client *scheduler.CloudSchedulerClient, jobName, locPath, dbPath, topicPath string, db Database) {
+	meta := backupfunction.Meta{Database: dbPath, Expire: db.Expire}
+	data, err := json.Marshal(meta)
+	if err != nil {
+		log.Fatalf("Failed to marshal data: %v", err)
+	}
+
+	// Create a new job.
+	req := &schedulerpb.CreateJobRequest{
+		Parent: locPath,
+		Job: &schedulerpb.Job{
+			Name:        jobName,
+			Description: fmt.Sprintf("A scheduling job for Cloud Spanner database %s", dbPath),
+			Target: &schedulerpb.Job_PubsubTarget{
+				PubsubTarget: &schedulerpb.PubsubTarget{
+					TopicName: topicPath,
+					Data:      data,
+				},
+			},
+			Schedule: db.Schedule,
+		},
+	}
+	resp, err := client.CreateJob(ctx, req)
+	if err != nil {
+		log.Fatalf("Failed to create a cloud scheduler job: %v", err)
+	}
+	log.Printf("Create a scheduled backup job: %v\n", resp)
 }

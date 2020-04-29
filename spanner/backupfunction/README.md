@@ -41,11 +41,11 @@ DATA=$(printf '{"database":"projects/[PROJECT_ID]/instances/[INSTANCE_ID]/databa
 
 Note: To use Cloud Scheduler, we must [create an App Engine app](https://cloud.google.com/scheduler/docs#supported_regions).
 
-Make a copy of `schedule-template.yaml` and replace `PROJECT_ID`, `INSTANCE_ID`,
-`DATABASE_ID` with your configurations.
+Make a copy of `schedule-template.yaml`, name it as `schedule.config.yaml` and
+replace `PROJECT_ID`, `INSTANCE_ID`, `DATABASE_ID` with your configurations.
 
 Deploy scheduled jobs for creating backups:
 
 ```bash
-go run cmd/scheduler/main.go -config schedule-template.yaml
+go run cmd/scheduler/main.go -config schedule.config.yaml
 ```
