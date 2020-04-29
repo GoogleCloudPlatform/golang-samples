@@ -31,6 +31,10 @@ func UploadFile(w http.ResponseWriter, r *http.Request) {
 	// The whole request body is parsed and up to a total of maxMemory bytes of
 	// its file parts are stored in memory, with the remainder stored on
 	// disk in temporary files.
+
+	// Note that any files saved during a particular invocation may not
+	// persist after the current invocation completes; persistent files
+	// should be stored elsewhere, such as in a Cloud Storage bucket.
 	if err := r.ParseMultipartForm(maxMemory); err != nil {
 		http.Error(w, "Unable to parse form", http.StatusBadRequest)
 		log.Printf("Error parsing form: %v", err)

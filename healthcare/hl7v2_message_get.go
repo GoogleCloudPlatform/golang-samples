@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"io"
 
-	healthcare "google.golang.org/api/healthcare/v1beta1"
+	healthcare "google.golang.org/api/healthcare/v1"
 )
 
 // getHL7V2Message gets an HL7V2 message.

@@ -4,8 +4,8 @@ go 1.12
 
 require (
 	cloud.google.com/go v0.56.0
-	cloud.google.com/go/firestore v1.0.0
-	cloud.google.com/go/pubsub v1.2.0
+	cloud.google.com/go/firestore v1.2.0
+	cloud.google.com/go/pubsub v1.3.1
 	golang.org/x/text v0.3.2
-	google.golang.org/grpc v1.28.1
+	google.golang.org/grpc v1.29.1
 )

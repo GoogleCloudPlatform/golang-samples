@@ -162,7 +162,7 @@ func setup(t *testing.T) string {
 
 func TestMain(m *testing.M) {
 	if err := initAssetForManipulation(); err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to initialize assets test environment: %v", err)
+		fmt.Fprintf(os.Stderr, "Unable to initialize assets test environment: %v\n", err)
 		return
 	}
 	rand.Seed(time.Now().UTC().UnixNano())
@@ -215,8 +215,8 @@ func TestListAllProjectAssetsAtTime(t *testing.T) {
 		t.Errorf("listAllProjectAssetsAtTime(%s, %v) Results not 0: %d", orgID, nothingInstant, got)
 	}
 
-	buf.Truncate(0)
-	var somethingInstant = time.Date(2019, 3, 15, 0, 0, 0, 0, time.UTC)
+	buf.Reset()
+	var somethingInstant = time.Now()
 	err = listAllProjectAssetsAtTime(buf, orgID, somethingInstant)
 	if err != nil {
 		t.Fatalf("listAllProjectAssetsAtTime(%s, %v) failed: %v", orgID, somethingInstant, err)
@@ -273,7 +273,7 @@ func TestDeleteSecurityMarks(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Setup for deleteSecurityMarks(%s) failed %v", marksAssetName, err)
 	}
-	buf.Truncate(0)
+	buf.Reset()
 
 	err = deleteSecurityMarks(buf, marksAssetName)
 	if err != nil {
@@ -281,12 +281,12 @@ func TestDeleteSecurityMarks(t *testing.T) {
 	}
 
 	got := buf.String()
-	if dont_want := "key_a = value_a"; strings.Contains(got, dont_want) {
-		t.Errorf("deleteSecurityMarks(%s) got: %s dont_want %s", marksAssetName, got, dont_want)
+	if dontWant := "key_a = value_a"; strings.Contains(got, dontWant) {
+		t.Errorf("deleteSecurityMarks(%s) got: %s dont want %q", marksAssetName, got, dontWant)
 	}
 
-	if dont_want := "key_b = value_b"; strings.Contains(got, dont_want) {
-		t.Errorf("deleteSecurityMarks(%s) got: %s dont_want %s", marksAssetName, got, dont_want)
+	if dontWant := "key_b = value_b"; strings.Contains(got, dontWant) {
+		t.Errorf("deleteSecurityMarks(%s) got: %s dont want %q", marksAssetName, got, dontWant)
 	}
 }
 
@@ -297,7 +297,7 @@ func TestAddDeleteSecurityMarks(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Setup for addDeleteSecurityMarks(%s) failed %v", marksAssetName, err)
 	}
-	buf.Truncate(0)
+	buf.Reset()
 
 	err = addDeleteSecurityMarks(buf, marksAssetName)
 	if err != nil {
@@ -309,8 +309,8 @@ func TestAddDeleteSecurityMarks(t *testing.T) {
 		t.Errorf("addDeleteSecurityMarks(%s) got: %s want %s", marksAssetName, got, want)
 	}
 
-	if dont_want := "key_b = value_b"; strings.Contains(got, dont_want) {
-		t.Errorf("addDeleteSecurityMarks(%s) got: %s dont_want %s", marksAssetName, got, dont_want)
+	if dontWant := "key_b = value_b"; strings.Contains(got, dontWant) {
+		t.Errorf("addDeleteSecurityMarks(%s) got: %s dont want %q", marksAssetName, got, dontWant)
 	}
 }
 

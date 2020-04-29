@@ -21,7 +21,7 @@ import (
 	"io"
 	"io/ioutil"
 
-	healthcare "google.golang.org/api/healthcare/v1beta1"
+	healthcare "google.golang.org/api/healthcare/v1"
 )
 
 // searchFhirResources searches for FHIR resources in a given FHIR store.
