@@ -9,5 +9,6 @@ require (
 	github.com/google/uuid v1.1.1
 	google.golang.org/api v0.21.0
 	google.golang.org/genproto v0.0.0-20200424135956-bca184e23272
+	google.golang.org/grpc v1.28.1
 	gopkg.in/yaml.v2 v2.2.2
 )
