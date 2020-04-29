@@ -54,6 +54,7 @@ type Database struct {
 	Schedule string `yaml:"schedule"`
 	Expire   string `yaml:"expire"`
 	Location string `yaml:"location"`
+	TimeZone string `yaml:"time_zone"`
 }
 
 func main() {
@@ -136,9 +137,10 @@ func updateJob(ctx context.Context, client *scheduler.CloudSchedulerClient, jobN
 				},
 			},
 			Schedule: db.Schedule,
+			TimeZone: db.TimeZone,
 		},
 		UpdateMask: &field_mask.FieldMask{
-			Paths: []string{"schedule", "pubsub_target.data"},
+			Paths: []string{"schedule", "pubsub_target.data", "time_zone"},
 		},
 	}
 	_, err = client.UpdateJob(ctx, req)
@@ -168,6 +170,7 @@ func createJob(ctx context.Context, client *scheduler.CloudSchedulerClient, jobN
 				},
 			},
 			Schedule: db.Schedule,
+			TimeZone: db.TimeZone,
 		},
 	}
 	resp, err := client.CreateJob(ctx, req)

@@ -5,3 +5,4 @@ instances:
       - name: DATABASE_ID
         schedule: 0 * * * * # run hourly
         expire: 6h # the backup will expire after 6 hours
+        time_zone: Australia/Sydney # optional. "utc" is the default value.
