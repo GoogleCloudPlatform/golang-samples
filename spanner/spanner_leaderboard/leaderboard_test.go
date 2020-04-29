@@ -37,7 +37,7 @@ func TestSample(t *testing.T) {
 	if !strings.HasPrefix(instance, "projects/") {
 		t.Fatal("Spanner instance ref must be in the form of 'projects/PROJECT_ID/instances/INSTANCE_ID'")
 	}
-	dbName := fmt.Sprintf("%s/databases/test--%s", instance, tc.ProjectID)
+	dbName := fmt.Sprintf("%s/databases/test-%s", instance, tc.ProjectID)
 
 	ctx := context.Background()
 	adminClient, dataClient := createClients(ctx, dbName)
