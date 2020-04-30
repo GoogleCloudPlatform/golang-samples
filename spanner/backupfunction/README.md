@@ -70,7 +70,8 @@ to create custom metrics.
 gcloud deployment-manager deployments create schedule-backup-metrics-deployment --config resources.yaml
 ```
 
-After this, we should see three user-defined metrics under `Logs-based Metrics` in Cloud Logging.
+After this, we should see three user-defined metrics under `Logs-based Metrics`
+in Cloud Logging.
 
 ### Create alerting policies
 
