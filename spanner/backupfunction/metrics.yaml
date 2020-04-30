@@ -1,0 +1,23 @@
+resources:
+- type: logging.v2.metric
+  name: backup-cloud-scheduler-errors
+  properties:
+    metric: backup-cloud-scheduler-errors
+    description: The failures of scheduled jobs
+    filter: resource.type="cloud_scheduler_job" severity>=WARNING jsonPayload.jobName:"jobs/spanner-backup"
+- type: logging.v2.metric
+  name: backup-cloud-function-errors
+  properties:
+    metric: backup-cloud-function-errors
+    description: The failures of starting a backup operation
+    filter: resource.type="cloud_function" resource.labels.function_name="SpannerCreateBackup" "Function error"
+- type: logging.v2.metric
+  name: backup-cloud-spanner-errors
+  properties:
+    metric: backup-cloud-spanner-errors
+    description: The failures of backup operations
+    filter: >
+      resource.type="spanner_instance"
+      severity >= ERROR
+      protoPayload.methodName="google.spanner.admin.database.v1.DatabaseAdmin.CreateBackup"
+      protoPayload.resourceName:"backups/schedule-"

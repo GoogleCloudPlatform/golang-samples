@@ -49,3 +49,42 @@ Deploy scheduled jobs for creating backups:
 ```bash
 go run cmd/scheduler/main.go -config schedule.config.yaml
 ```
+
+## Email notification of backup failures
+
+To get email notification, we need to do the following three steps.
+
+### Set up email notification channel
+
+We can follow this [guide](https://cloud.google.com/monitoring/support/notification-options#email)
+to add our email address as a notification channel.
+
+### Add logs-based metrics
+
+We can add [logs-based metrics](https://cloud.google.com/logging/docs/logs-based-metrics/)
+via GCP Console, API, gcloud, etc. Here, for convenience, we use
+[deployment manager](https://cloud.google.com/deployment-manager/docs/quickstart)
+to create custom metrics.
+
+```bash
+gcloud deployment-manager deployments create schedule-backup-metrics-deployment --config resources.yaml
+```
+
+After this, we should see three user-defined metrics under `Logs-based Metrics` in Cloud Logging.
+
+### Create alerting policies
+
+We need to create [alerting policies](https://cloud.google.com/monitoring/alerts)
+that defines the condition when we should send an alerting notification.
+
+Cloud monitoring API is still under alpha, so we would recommend to use GCP
+console to create the alerting policies. 
+
+An easist way is to go to Logs-based Metrics under Cloud Logging and for each
+user-defined metric, there is an option `Create alert from metric`. From there, 
+we can choose `Aggregrator`, such as `sum` or `mean`, for the target metric, and
+define what the condition of triggering an alert is, e.g., any time series
+violates that the value is abvoe 0 for 1 minute.
+
+At last, we need to add notification channels, e.g., email, to alerting
+policies.

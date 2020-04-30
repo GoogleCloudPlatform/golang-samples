@@ -73,21 +73,21 @@ func SpannerCreateBackup(ctx context.Context, m PubSubMessage) error {
 			return
 		}
 	})
+	if client == nil {
+		return fmt.Errorf("Client should not be nil")
+	}
 
 	var meta Meta
 	err := json.Unmarshal(m.Data, &meta)
 	if err != nil {
-		log.Printf("Failed to parse data %s: %v", string(m.Data), err)
-		return err
+		return fmt.Errorf("Failed to parse data %s: %v", string(m.Data), err)
 	}
 	expire, err := time.ParseDuration(meta.Expire)
 	if err != nil {
-		log.Printf("Failed to parse expire duration %s: %v", meta.Expire, err)
-		return err
+		return fmt.Errorf("Failed to parse expire duration %s: %v", meta.Expire, err)
 	}
 	_, err = createBackup(ctx, meta.BackupID, meta.Database, expire)
 	if err != nil {
-		log.Printf("Failed to create a backup: %v", err)
 		return err
 	}
 	return nil
@@ -99,17 +99,14 @@ func createBackup(ctx context.Context, backupID, dbName string, expire time.Dura
 	if backupID == "" {
 		_, _, dbID, err := parseDatabaseName(dbName)
 		if err != nil {
-			log.Printf("Failed to start a backup operation for database [%s]: %v", dbName, err)
-			return nil, err
+			return nil, fmt.Errorf("Failed to start a backup operation for database [%s]: %v", dbName, err)
 		}
-		backupID = fmt.Sprintf("%s-%d", dbID, now.UTC().Unix())
+		backupID = fmt.Sprintf("schedule-%s-%d", dbID, now.UTC().Unix())
 	}
-	log.Printf("backupID = %s\n", backupID)
 	expireTime := now.Add(expire)
 	op, err := client.StartBackupOperation(ctx, backupID, dbName, expireTime)
 	if err != nil {
-		log.Printf("Failed to start a backup operation for database [%s], expire time [%s], backupID = [%s] with error = %v", dbName, expireTime.Format(time.RFC3339), backupID, err)
-		return nil, err
+		return nil, fmt.Errorf("Failed to start a backup operation for database [%s], expire time [%s], backupID = [%s] with error = %v", dbName, expireTime.Format(time.RFC3339), backupID, err)
 	}
 	log.Printf("Create backup operation [%s] started for database [%s], expire time [%s], backupID = [%s]", op.Name(), dbName, expireTime.Format(time.RFC3339), backupID)
 	return op, nil
