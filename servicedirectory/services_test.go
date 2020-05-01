@@ -24,8 +24,7 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-
-func TestService(t * testing.T) {
+func TestService(t *testing.T) {
 	// <test setup code>
 	tc := testutil.SystemTest(t)
 	createBuf := new(bytes.Buffer)
@@ -80,4 +79,3 @@ func TestService(t * testing.T) {
 		fmt.Printf("Failed to delete namespace in test tear down: %v.", deleteErr)
 	}
 }
-

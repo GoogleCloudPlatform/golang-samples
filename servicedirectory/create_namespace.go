@@ -50,4 +50,3 @@ func createNamespace(w io.Writer, projectId string) error {
 }
 
 // [END servicedirectory_create_namespace]
-

@@ -54,7 +54,7 @@ func TestEndpoint(t *testing.T) {
 			t.Errorf("got %q, want %q", got, want)
 		}
 	})
-	t.Run("delete", func(t * testing.T) {
+	t.Run("delete", func(t *testing.T) {
 		tc := testutil.SystemTest(t)
 		err := deleteEndpoint(tc.ProjectID)
 
@@ -70,4 +70,3 @@ func TestEndpoint(t *testing.T) {
 		fmt.Printf("Failed to delete namespace in test tear down: %v.", deleteErr)
 	}
 }
-
