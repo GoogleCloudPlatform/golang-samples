@@ -45,7 +45,7 @@ func generateSignedPostPolicyV4(w io.Writer, bucket, object, serviceAccountJSON 
 		GoogleAccessID: conf.Email,
 		PrivateKey:     conf.PrivateKey,
 		Expires:        time.Now().Add(10 * time.Minute),
-		Fields:         &storage.PolicyV4Fields{Metadata:metadata},
+		Fields:         &storage.PolicyV4Fields{Metadata: metadata},
 	}
 
 	policy, err := storage.GenerateSignedPostPolicyV4(bucket, object, opts)
@@ -62,9 +62,10 @@ func generateSignedPostPolicyV4(w io.Writer, bucket, object, serviceAccountJSON 
 	}
 
 	fmt.Fprint(w, "  <input type='file' name='file'/><br />\n")
-	fmt.Fprint(w,  "  <input type='submit' value='Upload File' name='submit'/><br />\n")
+	fmt.Fprint(w, "  <input type='submit' value='Upload File' name='submit'/><br />\n")
 	fmt.Fprint(w, "</form>")
 
 	return policy, nil
 }
+
 // [END storage_generate_signed_post_policy_v4]
