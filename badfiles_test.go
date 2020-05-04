@@ -51,6 +51,7 @@ var allowList = []string{
 	"**/*Dockerfile*",
 	"**/.dockerignore",
 	"**/Makefile",
+	".gitignore",
 
 	// Primarily ML APIs.
 	"**/testdata/**/*.jpg",
