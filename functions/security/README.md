@@ -2,7 +2,7 @@
 
 ## System Tests
 
-1. `gcloud alpha functions deploy HelloHTTP --region=us-central1 --runtime=go111 --trigger-http`
+1. `gcloud alpha functions deploy HelloHTTP --region=us-central1 --runtime=go111 --trigger-http --source=../helloworld`
 
 1. `export GOOGLE_APPLICATION_CREDENTIALS="/path/to/service/account"`
 
