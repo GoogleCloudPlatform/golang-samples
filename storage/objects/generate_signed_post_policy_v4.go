@@ -45,7 +45,9 @@ func generateSignedPostPolicyV4(w io.Writer, bucket, object, serviceAccountJSON 
 		GoogleAccessID: conf.Email,
 		PrivateKey:     conf.PrivateKey,
 		Expires:        time.Now().Add(10 * time.Minute),
-		Fields:         &storage.PolicyV4Fields{Metadata: metadata},
+		Fields: &storage.PolicyV4Fields{
+			Metadata: metadata,
+		},
 	}
 
 	policy, err := storage.GenerateSignedPostPolicyV4(bucket, object, opts)
