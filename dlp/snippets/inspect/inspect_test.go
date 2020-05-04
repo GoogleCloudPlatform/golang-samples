@@ -36,8 +36,6 @@ const (
 )
 
 func TestInspectDatastore(t *testing.T) {
-	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/1039")
-
 	tc := testutil.EndToEndTest(t)
 	writeTestDatastoreFiles(t, tc.ProjectID)
 	tests := []struct {
@@ -46,11 +44,11 @@ func TestInspectDatastore(t *testing.T) {
 	}{
 		{
 			kind: "SSNTask",
-			want: "US_SOCIAL_SECURITY_NUMBER",
+			want: "Created job",
 		},
 		{
 			kind: "BoringTask",
-			want: "No results",
+			want: "Created job",
 		},
 	}
 	for _, test := range tests {
@@ -104,8 +102,6 @@ func writeTestDatastoreFiles(t *testing.T, projectID string) {
 }
 
 func TestInspectGCS(t *testing.T) {
-	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/1039")
-
 	tc := testutil.SystemTest(t)
 	writeTestGCSFiles(t, tc.ProjectID)
 	tests := []struct {
@@ -114,11 +110,11 @@ func TestInspectGCS(t *testing.T) {
 	}{
 		{
 			fileName: ssnFileName,
-			want:     "US_SOCIAL_SECURITY_NUMBER",
+			want:     "Created job",
 		},
 		{
 			fileName: nothingEventfulFileName,
-			want:     "No results",
+			want:     "Created job",
 		},
 	}
 	for _, test := range tests {
@@ -270,8 +266,6 @@ func uploadBigQuery(ctx context.Context, d *bigquery.Dataset, schema bigquery.Sc
 }
 
 func TestInspectBigquery(t *testing.T) {
-	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/1039")
-
 	tc := testutil.EndToEndTest(t)
 
 	mustCreateBigqueryTestFiles(t, tc.ProjectID, bqDatasetID)
@@ -282,11 +276,11 @@ func TestInspectBigquery(t *testing.T) {
 	}{
 		{
 			table: harmfulTable,
-			want:  "US_SOCIAL_SECURITY_NUMBER",
+			want:  "Created job",
 		},
 		{
 			table: harmlessTable,
-			want:  "No results",
+			want:  "Created job",
 		},
 	}
 	for _, test := range tests {
