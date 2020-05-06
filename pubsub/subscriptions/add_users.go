@@ -24,16 +24,16 @@ import (
 )
 
 // addUsers adds all IAM users to a subscription.
-func addUsers(projectID, subName string) error {
+func addUsers(projectID, subID string) error {
 	// projectID := "my-project-id"
-	// subName := projectID + "-example-sub"
+	// subID := "my-sub"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
 
-	sub := client.Subscription(subName)
+	sub := client.Subscription(subID)
 	policy, err := sub.IAM().Policy(ctx)
 	if err != nil {
 		return fmt.Errorf("Policy: %v", err)

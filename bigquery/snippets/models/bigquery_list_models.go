@@ -15,7 +15,6 @@
 package models
 
 // [START bigquery_list_models]
-
 import (
 	"context"
 	"fmt"
@@ -25,6 +24,8 @@ import (
 	"google.golang.org/api/iterator"
 )
 
+// listModels demonstrates iterating through the collection of ML models in a dataset
+// and printing a basic identifier of the model.
 func listModels(w io.Writer, projectID, datasetID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"
@@ -34,6 +35,7 @@ func listModels(w io.Writer, projectID, datasetID string) error {
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	fmt.Fprintf(w, "Models contained in dataset %q\n", datasetID)
 	it := client.Dataset(datasetID).Models(ctx)

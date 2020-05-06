@@ -21,21 +21,15 @@ import (
 	"context"
 	"log"
 
-	"golang.org/x/oauth2/google"
 	"google.golang.org/api/iam/v1"
 )
 
 func main() {
-	// Get credentials.
-	client, err := google.DefaultClient(context.Background(), iam.CloudPlatformScope)
-	if err != nil {
-		log.Fatalf("google.DefaultClient: %v", err)
-	}
-
 	// Create the Cloud IAM service object.
-	service, err := iam.New(client)
+	ctx := context.Background()
+	service, err := iam.NewService(ctx)
 	if err != nil {
-		log.Fatalf("iam.New: %v", err)
+		log.Fatalf("iam.NewService: %v", err)
 	}
 
 	// Call the Cloud IAM Roles API.
@@ -46,7 +40,7 @@ func main() {
 
 	// Process the response.
 	for _, role := range resp.Roles {
-		log.Println("Tile: " + role.Title)
+		log.Println("Title: " + role.Title)
 		log.Println("Name: " + role.Name)
 		log.Println("Description: " + role.Description)
 	}

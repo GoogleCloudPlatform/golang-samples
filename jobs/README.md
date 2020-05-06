@@ -1,1 +1,1 @@
-See https://cloud.google.com/job-discovery/docs/before-you-begin.
+See https://cloud.google.com/talent-solution/job-search/docs/before-you-begin.

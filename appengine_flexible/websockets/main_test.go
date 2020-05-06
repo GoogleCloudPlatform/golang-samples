@@ -16,7 +16,6 @@ package main
 
 import (
 	"bytes"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -60,13 +59,7 @@ func TestHealthCheckHandler(t *testing.T) {
 	rr := httptest.NewRecorder()
 	healthCheckHandler(rr, req)
 
-	out, err := ioutil.ReadAll(rr.Result().Body)
-	if err != nil {
-		t.Fatalf("ReadAll: %v", err)
-	}
-
-	want := "ok"
-	if got := string(out); got != want {
+	if got, want := rr.Body.String(), "ok"; got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }

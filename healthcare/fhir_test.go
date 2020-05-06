@@ -24,9 +24,10 @@ import (
 	"testing"
 	"time"
 
-	"cloud.google.com/go/storage"
+	conditionaldelete "github.com/GoogleCloudPlatform/golang-samples/healthcare/internal/fhir-resource-conditional-delete"
+	conditionalpatch "github.com/GoogleCloudPlatform/golang-samples/healthcare/internal/fhir-resource-conditional-patch"
+	conditionalupdate "github.com/GoogleCloudPlatform/golang-samples/healthcare/internal/fhir-resource-conditional-update"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"google.golang.org/api/iterator"
 )
 
 // TestFHIRStore runs all FHIR store tests to avoid having to
@@ -109,6 +110,16 @@ func TestFHIRStore(t *testing.T) {
 
 	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
 		buf.Reset()
+		if err := searchFHIRResources(buf, tc.ProjectID, location, datasetID, fhirStoreID, resourceType); err != nil {
+			r.Errorf("searchFHIRResources got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, res.ID) {
+			r.Errorf("searchFHIRResources got\n----\n%s\n----\nWant to contain:\n----\n%s\n----\n", got, resourceType)
+		}
+	})
+
+	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
+		buf.Reset()
 		if err := updateFHIRResource(buf, tc.ProjectID, location, datasetID, fhirStoreID, resourceType, res.ID, false); err != nil {
 			r.Errorf("updateFHIRResource got err: %v", err)
 			return
@@ -169,6 +180,44 @@ func TestFHIRStore(t *testing.T) {
 
 	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
 		buf.Reset()
+		patchedRes := resource{}
+		if err := conditionalpatch.ConditionalPatchFHIRResource(buf, tc.ProjectID, location, datasetID, fhirStoreID, resourceType, false); err != nil {
+			r.Errorf("ConditionalPatchFHIRResource got err: %v", err)
+			return
+		}
+		if err := json.Unmarshal(buf.Bytes(), &patchedRes); err != nil {
+			r.Errorf("json.Unmarshal ConditionalPatchFHIRResource output: %v", err)
+			return
+		}
+		if patchedRes.ID != res.ID {
+			r.Errorf("ConditionalPatchFHIRResource got ID=%v, want %v", patchedRes.ID, res.ID)
+			return
+		}
+		if patchedRes.Active {
+			r.Errorf("ConditionalPatchFHIRResource got active=true, expected active=false")
+		}
+
+		buf.Reset()
+		patchedRes = resource{}
+		if err := conditionalupdate.ConditionalUpdateFHIRResource(buf, tc.ProjectID, location, datasetID, fhirStoreID, resourceType, true); err != nil {
+			r.Errorf("ConditionalUpdateFHIRResource got err: %v", err)
+			return
+		}
+		if err := json.Unmarshal(buf.Bytes(), &patchedRes); err != nil {
+			r.Errorf("json.Unmarshal ConditionalUpdateFHIRResource output: %v", err)
+			return
+		}
+		if patchedRes.ID != res.ID {
+			r.Errorf("ConditionalUpdateFHIRResource got ID=%v, want %v; wrong condition led to creating a new resource?", patchedRes.ID, res.ID)
+			return
+		}
+		if !patchedRes.Active {
+			r.Errorf("ConditionalUpdateFHIRResource got active=false, expected active=true")
+		}
+	})
+
+	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
+		buf.Reset()
 		if err := fhirGetPatientEverything(buf, tc.ProjectID, location, datasetID, fhirStoreID, res.ID); err != nil {
 			r.Errorf("fhirGetPatientEverything got err: %v", err)
 		}
@@ -197,7 +246,8 @@ func TestFHIRStore(t *testing.T) {
 		}
 	})
 
-	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
+	// Longer retry time to avoid bucket create/delete API quota issues.
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
 		buf.Reset()
 		// Delete the bucket (if it exists) then recreate it, optimistically
 		// ignoring errors.
@@ -206,7 +256,7 @@ func TestFHIRStore(t *testing.T) {
 		// fail until they give the agent access to the bucket.
 		bucketName := tc.ProjectID + "-healthcare-test"
 		gsURIPrefix := "gs://" + bucketName + "/fhir-export/"
-		cleanBucket(tc.ProjectID, bucketName)
+		testutil.CleanBucket(context.Background(), t, tc.ProjectID, bucketName)
 
 		if err := exportFHIRResource(buf, tc.ProjectID, location, datasetID, fhirStoreID, gsURIPrefix); err != nil {
 			r.Errorf("exportFHIRResource got err: %v", err)
@@ -214,6 +264,12 @@ func TestFHIRStore(t *testing.T) {
 
 		if err := importFHIRResource(ioutil.Discard, tc.ProjectID, location, datasetID, fhirStoreID, gsURIPrefix+"**"); err != nil {
 			r.Errorf("importFHIRResource got err: %v", err)
+		}
+	})
+
+	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
+		if err := conditionaldelete.ConditionalDeleteFHIRResource(ioutil.Discard, tc.ProjectID, location, datasetID, fhirStoreID, resourceType); err != nil {
+			r.Errorf("ConditionalDeleteFHIRResource got err: %v", err)
 		}
 	})
 
@@ -255,47 +311,4 @@ func TestFHIRStore(t *testing.T) {
 			r.Errorf("deleteDataset got err: %v", err)
 		}
 	})
-}
-
-func cleanBucket(projectID, bucket string) error {
-	ctx := context.Background()
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
-	}
-	deleteBucketIfExists(ctx, client, bucket)
-
-	b := client.Bucket(bucket)
-	// Now create it
-	if err := b.Create(ctx, projectID, nil); err != nil {
-		return fmt.Errorf("Bucket.Create(%q): %v", bucket, err)
-	}
-	return nil
-}
-
-func deleteBucketIfExists(ctx context.Context, client *storage.Client, bucket string) error {
-	b := client.Bucket(bucket)
-	if _, err := b.Attrs(ctx); err != nil {
-		return nil
-	}
-
-	// Delete all the elements in the already existent bucket
-	it := b.Objects(ctx, nil)
-	for {
-		attrs, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return fmt.Errorf("Bucket.Objects(%q): %v", bucket, err)
-		}
-		if err := b.Object(attrs.Name).Delete(ctx); err != nil {
-			return fmt.Errorf("Bucket(%q).Object(%q).Delete: %v", bucket, attrs.Name, err)
-		}
-	}
-	// Then delete the bucket itself
-	if err := b.Delete(ctx); err != nil {
-		return fmt.Errorf("Bucket.Delete(%q): %v", bucket, err)
-	}
-	return nil
 }

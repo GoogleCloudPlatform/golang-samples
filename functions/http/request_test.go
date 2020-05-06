@@ -15,7 +15,6 @@
 package http
 
 import (
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -33,12 +32,8 @@ func TestMakeRequest(t *testing.T) {
 	req := httptest.NewRequest("GET", "/", strings.NewReader(""))
 	rr := httptest.NewRecorder()
 	MakeRequest(rr, req)
-	out, err := ioutil.ReadAll(rr.Result().Body)
-	if err != nil {
-		t.Fatalf("ReadAll: %v", err)
-	}
-	want := "ok"
-	if got := string(out); got != want {
+
+	if got, want := rr.Body.String(), "ok"; got != want {
 		t.Errorf("MakeRequest got %q, want %q", got, want)
 	}
 }

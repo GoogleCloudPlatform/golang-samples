@@ -37,7 +37,7 @@ func TestIndex(t *testing.T) {
 
 	a.index(rr, r)
 
-	if got, want := rr.Body.String(), "Views 1"; !strings.Contains(got, want) {
+	if got, want := rr.Body.String(), "1 view"; !strings.Contains(got, want) {
 		t.Errorf("index first visit got:\n----\n%v\n----\nWant to contain %q", got, want)
 	}
 
@@ -49,7 +49,7 @@ func TestIndex(t *testing.T) {
 
 	a.index(rr, r)
 
-	if got, want := rr.Body.String(), "Views 2"; !strings.Contains(got, want) {
+	if got, want := rr.Body.String(), "2 views"; !strings.Contains(got, want) {
 		t.Errorf("index second visit got:\n----\n%v\n----\nWant to contain %q", got, want)
 	}
 }
@@ -72,7 +72,7 @@ func TestIndexCorrupted(t *testing.T) {
 
 	a.index(rr, r)
 
-	if got, want := rr.Body.String(), "Views 1"; !strings.Contains(got, want) {
+	if got, want := rr.Body.String(), "1 view"; !strings.Contains(got, want) {
 		t.Errorf("index first visit got:\n----\n%v\n----\nWant to contain %q", got, want)
 	}
 }

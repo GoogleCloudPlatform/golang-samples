@@ -24,9 +24,9 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func create(w io.Writer, projectID, subName string, topic *pubsub.Topic) error {
+func create(w io.Writer, projectID, subID string, topic *pubsub.Topic) error {
 	// projectID := "my-project-id"
-	// subName := projectID + "-example-sub"
+	// subID := "my-sub"
 	// topic of type https://godoc.org/cloud.google.com/go/pubsub#Topic
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
@@ -34,7 +34,7 @@ func create(w io.Writer, projectID, subName string, topic *pubsub.Topic) error {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
 
-	sub, err := client.CreateSubscription(ctx, subName, pubsub.SubscriptionConfig{
+	sub, err := client.CreateSubscription(ctx, subID, pubsub.SubscriptionConfig{
 		Topic:       topic,
 		AckDeadline: 20 * time.Second,
 	})

@@ -17,7 +17,6 @@ package http
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"mime/multipart"
 	"net/http/httptest"
 	"testing"
@@ -39,12 +38,8 @@ func TestUploadFile(t *testing.T) {
 
 	UploadFile(rr, req)
 
-	out, err := ioutil.ReadAll(rr.Result().Body)
-	if err != nil {
-		t.Fatalf("ReadAll: %v", err)
-	}
 	want := `File uploaded: "my_file.txt" (18 bytes)`
-	if got := string(out); got != want {
+	if got := rr.Body.String(); got != want {
 		t.Errorf("UploadFile got %q, want to contain %q", got, want)
 	}
 }

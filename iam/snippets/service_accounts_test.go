@@ -50,7 +50,19 @@ func TestServiceAccounts(t *testing.T) {
 		t.Fatalf("renameServiceAccount: account.DisplayName is %q, wanted %q", account.Name, wantDispName)
 	}
 
-	// listServiceAccounts test
+	// disableServiceAccount test.
+	err = disableServiceAccount(buf, account.Email)
+	if err != nil {
+		t.Fatalf("disableServiceAccount: %v", err)
+	}
+
+	// enableServiceAccount test.
+	err = enableServiceAccount(buf, account.Email)
+	if err != nil {
+		t.Fatalf("enableServiceAccount: %v", err)
+	}
+
+	// listServiceAccounts test.
 	accounts, err := listServiceAccounts(buf, tc.ProjectID)
 	if err != nil {
 		t.Fatalf("listServiceAccounts: %v", err)

@@ -15,7 +15,6 @@
 package tips
 
 import (
-	"io/ioutil"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -26,12 +25,7 @@ func TestListFiles(t *testing.T) {
 	rr := httptest.NewRecorder()
 	ListFiles(rr, req)
 
-	out, err := ioutil.ReadAll(rr.Result().Body)
-	if err != nil {
-		t.Fatalf("ReadAll: %v", err)
-	}
-	want := "Files:"
-	if got := string(out); !strings.Contains(got, want) {
+	if got, want := rr.Body.String(), "Files:"; !strings.Contains(got, want) {
 		t.Errorf("ListFiles got %q, want to contain %q", got, want)
 	}
 }

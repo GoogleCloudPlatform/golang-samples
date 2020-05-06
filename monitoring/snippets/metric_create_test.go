@@ -26,6 +26,7 @@ import (
 func TestCreateCustomMetric(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
+	metricType := "custom.googleapis.com/golang-samples-tests/create"
 	buf := &bytes.Buffer{}
 	m, err := createCustomMetric(buf, tc.ProjectID, metricType)
 	if err != nil {

@@ -15,7 +15,6 @@
 package dataset
 
 // [START bigquery_list_datasets_by_label]
-
 import (
 	"context"
 	"fmt"
@@ -25,6 +24,8 @@ import (
 	"google.golang.org/api/iterator"
 )
 
+// listDatasetsByLabel demonstrates walking the collection of datasets in a project, and
+// filtering that list to a subset that has specific label metadata.
 func listDatasetsByLabel(w io.Writer, projectID string) error {
 	// projectID := "my-project-id"
 	ctx := context.Background()
@@ -32,6 +33,7 @@ func listDatasetsByLabel(w io.Writer, projectID string) error {
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	it := client.Datasets(ctx)
 	it.Filter = "labels.color:green"

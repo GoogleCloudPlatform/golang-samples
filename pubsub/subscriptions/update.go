@@ -23,9 +23,9 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func updateEndpoint(w io.Writer, projectID, subName string, endpoint string) error {
+func updateEndpoint(w io.Writer, projectID, subID string, endpoint string) error {
 	// projectID := "my-project-id"
-	// subName := projectID + "-example-sub"
+	// subID := "my-sub"
 	// endpoint := "https://my-test-project.appspot.com/push"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
@@ -33,7 +33,7 @@ func updateEndpoint(w io.Writer, projectID, subName string, endpoint string) err
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
 
-	subConfig, err := client.Subscription(subName).Update(ctx, pubsub.SubscriptionConfigToUpdate{
+	subConfig, err := client.Subscription(subID).Update(ctx, pubsub.SubscriptionConfigToUpdate{
 		PushConfig: &pubsub.PushConfig{Endpoint: endpoint},
 	})
 	if err != nil {

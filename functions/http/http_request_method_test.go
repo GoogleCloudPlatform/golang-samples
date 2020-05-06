@@ -15,7 +15,6 @@
 package http
 
 import (
-	"io/ioutil"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -38,11 +37,8 @@ func TestHelloHTTPMethod(t *testing.T) {
 		rr := httptest.NewRecorder()
 
 		HelloHTTPMethod(rr, req)
-		out, err := ioutil.ReadAll(rr.Result().Body)
-		if err != nil {
-			t.Fatalf("%s: ReadAll: %v", test.method, err)
-		}
-		if got := string(out); got != test.want {
+
+		if got := rr.Body.String(); got != test.want {
 			t.Errorf("%s: got %q, want %q", test.method, got, test.want)
 		}
 	}

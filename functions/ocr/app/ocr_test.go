@@ -146,7 +146,7 @@ func TestTranslateText(t *testing.T) {
 		t.Errorf("language.Parse: %v", err)
 	}
 	data, err := json.Marshal(ocrMessage{
-		Text:     "Hello",
+		Text:     "Thanks",
 		FileName: menuName,
 		Lang:     fr,
 		SrcLang:  en,
@@ -165,7 +165,7 @@ func TestTranslateText(t *testing.T) {
 		t.Errorf("translateText: %v", err)
 	}
 	got := buf.String()
-	if want := "Bonjour"; !strings.Contains(got, want) {
+	if want := "Merci"; !strings.Contains(got, want) {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }
@@ -180,7 +180,7 @@ func TestDetectText(t *testing.T) {
 		t.Errorf("TestDetectText: %v", err)
 	}
 	got := buf.String()
-	if want := "Filets de Boeuf"; !strings.Contains(got, want) {
+	if want := "Filets de Bœuf"; !strings.Contains(got, want) {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }

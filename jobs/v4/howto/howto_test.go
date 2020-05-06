@@ -32,6 +32,8 @@ var testCompany *talentpb.Company
 var testJob *talentpb.Job
 
 func TestBasicUsage(t *testing.T) {
+	t.Skip("Flaky. https://github.com/GoogleCloudPlatform/golang-samples/issues/1061.")
+
 	tc := testutil.SystemTest(t)
 
 	externalID := fmt.Sprintf("company-%s", uuid.Must(uuid.NewV4()).String())
@@ -201,6 +203,7 @@ func TestBatchDeleteJobs(t *testing.T) {
 }
 
 func TestCreateJobWithCustomAttributes(t *testing.T) {
+	t.Skip("Flaky. https://github.com/GoogleCloudPlatform/golang-samples/issues/1061.")
 	tc := testutil.SystemTest(t)
 	// Company setup.
 	externalID := fmt.Sprintf("company-%s", uuid.Must(uuid.NewV4()).String())

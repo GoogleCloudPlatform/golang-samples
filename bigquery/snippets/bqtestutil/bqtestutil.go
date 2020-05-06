@@ -16,6 +16,7 @@ package bqtestutil
 
 import (
 	"fmt"
+	"os"
 	"regexp"
 
 	"github.com/gofrs/uuid"
@@ -51,4 +52,19 @@ func sanitize(s string, allowedSeparator string) string {
 		return s
 	}
 	return reg.ReplaceAllString(s, "")
+}
+
+// RunCMEKTests probes whether CMEK-based tests should run.
+func RunCMEKTests() bool {
+	// KOKORO_BUILD_ID is set by the CI testing we use, and is a quick
+	// heuristic for testing whether this is a CI-based build.
+	_, ok := os.LookupEnv("KOKORO_BUILD_ID")
+	if ok {
+		return true
+	}
+
+	// If you're running locally and want CMEK testing to happen regardless, use
+	// the RUN_CMEK_TESTS environment variable.
+	_, ok = os.LookupEnv("RUN_CMEK_TESTS")
+	return ok
 }

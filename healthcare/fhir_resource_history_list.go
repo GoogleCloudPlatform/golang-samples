@@ -21,7 +21,7 @@ import (
 	"io"
 	"io/ioutil"
 
-	healthcare "google.golang.org/api/healthcare/v1beta1"
+	healthcare "google.golang.org/api/healthcare/v1"
 )
 
 // listFHIRResourceHistory lists an FHIR resource's history.

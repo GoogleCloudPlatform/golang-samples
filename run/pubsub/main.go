@@ -19,7 +19,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -36,7 +35,9 @@ func main() {
 	}
 	// Start HTTP server.
 	log.Printf("Listening on port %s", port)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
+		log.Fatal(err)
+	}
 }
 
 // [END run_pubsub_server]
@@ -57,7 +58,7 @@ func HelloPubSub(w http.ResponseWriter, r *http.Request) {
 	var m PubSubMessage
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Printf("iotuil.ReadAll: %v", err)
+		log.Printf("ioutil.ReadAll: %v", err)
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}

@@ -19,13 +19,21 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
 	http.HandleFunc("/", handle)
 	http.HandleFunc("/_ah/health", healthCheckHandler)
-	log.Print("Listening on port 8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	log.Printf("Listening on port %s", port)
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func handle(w http.ResponseWriter, r *http.Request) {

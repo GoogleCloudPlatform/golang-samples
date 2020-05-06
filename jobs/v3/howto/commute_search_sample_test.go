@@ -22,6 +22,8 @@ import (
 )
 
 func TestCommuteSearch(t *testing.T) {
+	t.Skip("Flaky. https://github.com/GoogleCloudPlatform/golang-samples/issues/1061.")
+
 	tc := testutil.SystemTest(t)
 	if _, err := commuteSearch(ioutil.Discard, tc.ProjectID, testCompany.Name); err != nil {
 		t.Fatalf("commuteSearch: %v", err)

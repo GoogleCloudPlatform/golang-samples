@@ -23,13 +23,12 @@ import (
 	"testing"
 	"time"
 
-	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
-
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
 func TestSample(t *testing.T) {
-	tc := testutil.SystemTest(t)
+	tc := testutil.EndToEndTest(t)
 
 	instance := os.Getenv("GOLANG_SAMPLES_SPANNER")
 	if instance == "" {
@@ -38,14 +37,21 @@ func TestSample(t *testing.T) {
 	if !strings.HasPrefix(instance, "projects/") {
 		t.Fatal("Spanner instance ref must be in the form of 'projects/PROJECT_ID/instances/INSTANCE_ID'")
 	}
-	dbName := fmt.Sprintf("%s/databases/test--%s", instance, tc.ProjectID)
+	dbName := fmt.Sprintf("%s/databases/test-%s", instance, tc.ProjectID)
 
 	ctx := context.Background()
 	adminClient, dataClient := createClients(ctx, dbName)
 	defer adminClient.Close()
 	defer dataClient.Close()
 
-	assertContains := func(out string, sub string) {
+	// Check for database existance prior to test start and delete, as resources may not have
+	// been cleaned up from previous invocations.
+	if db, err := adminClient.GetDatabase(ctx, &adminpb.GetDatabaseRequest{Name: dbName}); err == nil {
+		t.Logf("database %s exists in state %s. delete result: %v", db.GetName(), db.GetState().String(),
+			adminClient.DropDatabase(ctx, &adminpb.DropDatabaseRequest{Database: dbName}))
+	}
+
+	assertContains := func(t *testing.T, out string, sub string) {
 		if !strings.Contains(out, sub) {
 			t.Errorf("got output %q; want it to contain %q", out, sub)
 		}
@@ -79,20 +85,12 @@ func TestSample(t *testing.T) {
 	// These commands have to be run in a specific order
 	// since earlier commands setup the database for the subsequent commands.
 	mustRunCommand(t, "createdatabase", dbName, 0)
-	assertContains(runCommand(t, "insertplayers", dbName, 0), "Inserted players")
-	assertContains(runCommand(t, "insertplayers", dbName, 0), "Inserted players")
-	assertContains(runCommand(t, "insertscores", dbName, 0), "Inserted scores")
-	assertContains(runCommand(t, "insertscores", dbName, 0), "Inserted scores")
-	assertContains(runCommand(t, "insertscores", dbName, 0), "Inserted scores")
-	assertContains(runCommand(t, "insertscores", dbName, 0), "Inserted scores")
-	assertContains(runCommand(t, "insertscores", dbName, 0), "Inserted scores")
-	assertContains(runCommand(t, "insertscores", dbName, 0), "Inserted scores")
-	assertContains(runCommand(t, "insertscores", dbName, 0), "Inserted scores")
-	assertContains(runCommand(t, "insertscores", dbName, 0), "Inserted scores")
-	assertContains(runCommand(t, "insertscores", dbName, 0), "Inserted scores")
-	assertContains(runCommand(t, "insertscores", dbName, 0), "Inserted scores")
-	assertContains(runCommand(t, "query", dbName, 0), "PlayerId: ")
-	assertContains(runCommand(t, "querywithtimespan", dbName, 168), "PlayerId: ")
-	assertContains(runCommand(t, "querywithtimespan", dbName, 730), "PlayerId: ")
-	assertContains(runCommand(t, "querywithtimespan", dbName, 6870), "PlayerId: ")
+	assertContains(t, runCommand(t, "insertplayers", dbName, 0), "Inserted players")
+	assertContains(t, runCommand(t, "insertplayers", dbName, 0), "Inserted players")
+	assertContains(t, runCommand(t, "insertscores", dbName, 0), "Inserted scores")
+	assertContains(t, runCommand(t, "insertscores", dbName, 0), "Inserted scores")
+	assertContains(t, runCommand(t, "query", dbName, 0), "PlayerId: ")
+	assertContains(t, runCommand(t, "querywithtimespan", dbName, 168), "PlayerId: ")
+	assertContains(t, runCommand(t, "querywithtimespan", dbName, 730), "PlayerId: ")
+	assertContains(t, runCommand(t, "querywithtimespan", dbName, 6870), "PlayerId: ")
 }

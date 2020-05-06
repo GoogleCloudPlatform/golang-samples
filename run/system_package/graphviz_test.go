@@ -56,12 +56,8 @@ func TestDiagramHandlerErrors(t *testing.T) {
 		req := httptest.NewRequest("GET", "/?dot="+url.QueryEscape(test.data), strings.NewReader(""))
 		rr := httptest.NewRecorder()
 		diagramHandler(rr, req)
-		out, err := ioutil.ReadAll(rr.Result().Body)
-		if err != nil {
-			t.Fatalf("ReadAll: %v", err)
-		}
 
-		if got := string(out); got != test.want {
+		if got := rr.Body.String(); got != test.want {
 			t.Errorf("png.Decode: response (%s): got %q, want %q", test.label, got, test.want)
 		}
 

@@ -25,6 +25,8 @@ import (
 )
 
 func TestGetJob(t *testing.T) {
+	t.Skip("Flaky. https://github.com/GoogleCloudPlatform/golang-samples/issues/1061.")
+
 	buf := &bytes.Buffer{}
 	if _, err := getJob(buf, testJob.Name); err != nil {
 		t.Fatalf("getJob: %v", err)
@@ -36,6 +38,8 @@ func TestGetJob(t *testing.T) {
 }
 
 func TestUpdateJob(t *testing.T) {
+	t.Skip("Flaky. https://github.com/GoogleCloudPlatform/golang-samples/issues/1061.")
+
 	testJob.Qualifications = "foo"
 	j, err := updateJob(ioutil.Discard, testJob.Name, testJob)
 	if err != nil {
@@ -55,6 +59,8 @@ func TestUpdateJob(t *testing.T) {
 }
 
 func TestUpdateJobWithMask(t *testing.T) {
+	t.Skip("Flaky. https://github.com/GoogleCloudPlatform/golang-samples/issues/1061.")
+
 	testJob.Qualifications = "foo"
 	j, err := updateJobWithMask(ioutil.Discard, testJob.Name, "qualifications", testJob)
 	if err != nil {
@@ -74,6 +80,8 @@ func TestUpdateJobWithMask(t *testing.T) {
 }
 
 func TestListJobs(t *testing.T) {
+	t.Skip("Flaky. https://github.com/GoogleCloudPlatform/golang-samples/issues/1061.")
+
 	tc := testutil.SystemTest(t)
 
 	buf := &bytes.Buffer{}

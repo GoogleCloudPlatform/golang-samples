@@ -21,5 +21,5 @@ automatic_scaling:
 # [START gae_flex_golang_redis_yaml]
 env_variables:
   REDIS_ADDR: "<REDIS_HOST>:<REDIS_PORT>"
-  REDIS_PASSSWORD: ""
+  REDIS_PASSWORD: ""
 # [END gae_flex_golang_redis_yaml]

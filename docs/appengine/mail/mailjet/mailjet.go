@@ -21,12 +21,12 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/mailjet/mailjet-apiv3-go"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/urlfetch"
 )
 
 // [START import]
-import "github.com/mailjet/mailjet-apiv3-go"
 
 // [END import]
 

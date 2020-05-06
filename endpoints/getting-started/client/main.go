@@ -66,7 +66,7 @@ func generateJWT(saKeyfile, saEmail, audience string, expiryLength int64) (strin
 	// Build the JWT payload.
 	jwt := &jws.ClaimSet{
 		Iat: now,
-		// expires after 'expiraryLength' seconds.
+		// expires after 'expiryLength' seconds.
 		Exp: now + expiryLength,
 		// Iss must match 'issuer' in the security configuration in your
 		// swagger spec (e.g. service account email). It can be any string.

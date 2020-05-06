@@ -74,10 +74,12 @@ func main() {
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = ":8080"
+		port = "8080"
 	}
-	log.Printf("Listening on localhost%s", port)
-	log.Fatal(http.ListenAndServe("localhost"+port, &ochttp.Handler{}))
+	log.Printf("Listening on port %s", port)
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
+		log.Fatal(err)
+	}
 }
 
 // [END trace_setup_go_quickstart]

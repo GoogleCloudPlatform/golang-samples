@@ -18,15 +18,16 @@ package testutil
 import (
 	"errors"
 	"fmt"
-	"go/build"
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
-var noProjectID = errors.New("GOLANG_SAMPLES_PROJECT_ID not set")
+var errNoProjectID = errors.New("GOLANG_SAMPLES_PROJECT_ID not set")
 
+// Context holds information useful for tests.
 type Context struct {
 	ProjectID string
 	Dir       string
@@ -42,7 +43,7 @@ func (tc Context) Path(p ...string) string {
 // ok is false if the project is not set up properly for system tests.
 func ContextMain(m *testing.M) (tc Context, ok bool) {
 	c, err := testContext()
-	if err == noProjectID {
+	if err == errNoProjectID {
 		return c, false
 	} else if err != nil {
 		log.Fatal(err)
@@ -54,7 +55,7 @@ func ContextMain(m *testing.M) (tc Context, ok bool) {
 // The test is skipped if the GOLANG_SAMPLES_PROJECT_ID environment variable is not set.
 func SystemTest(t *testing.T) Context {
 	tc, err := testContext()
-	if err == noProjectID {
+	if err == errNoProjectID {
 		t.Skip(err)
 	} else if err != nil {
 		t.Fatal(err)
@@ -85,14 +86,21 @@ func testContext() (Context, error) {
 
 	tc.ProjectID = os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
 	if tc.ProjectID == "" {
-		return tc, noProjectID
+		return tc, errNoProjectID
 	}
 
-	pkg, err := build.Import("github.com/GoogleCloudPlatform/golang-samples", "", build.FindOnly)
+	dir, err := os.Getwd()
 	if err != nil {
-		return tc, fmt.Errorf("Could not find golang-samples on GOPATH: %v", err)
+		return tc, fmt.Errorf("could not find current directory")
 	}
-	tc.Dir = pkg.Dir
+	if !strings.Contains(dir, "golang-samples") {
+		return tc, fmt.Errorf("could not find golang-samples directory")
+	}
+	tc.Dir = dir[:strings.Index(dir, "golang-samples")+len("golang-samples")]
+
+	if tc.Dir == "" {
+		return tc, fmt.Errorf("could not find golang-samples directory")
+	}
 
 	return tc, nil
 }

@@ -10,6 +10,12 @@ For more details, see the [Getting Punctuation](https://cloud.google.com/speech-
 
 [Go Code](auto_punctuation.go)
 
+### Speech Adaptation
+
+For more details see the [Using Speech Adaptation](https://cloud.google.com/speech-to-text/docs/context-strength) tutorial in the docs.
+
+[Go Code](context_classes.go)
+
 ### Enhanced Model
 
 For more details, see the [Using Enhanced Models](https://cloud.google.com/speech-to-text/docs/enhanced-models) tutorial in the docs.
