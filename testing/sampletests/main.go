@@ -39,6 +39,7 @@ package main
 
 import (
 	"fmt"
+	"go/ast"
 	"io/ioutil"
 	"log"
 	"os"
@@ -46,10 +47,9 @@ import (
 	"regexp"
 	"strings"
 
-	"golang.org/x/tools/go/callgraph"
-	"golang.org/x/tools/go/callgraph/cha"
+	"golang.org/x/tools/go/ast/astutil"
 	"golang.org/x/tools/go/packages"
-	"golang.org/x/tools/go/ssa/ssautil"
+	"golang.org/x/tools/go/types/typeutil"
 )
 
 var (
@@ -188,72 +188,56 @@ func testCoverage() (map[string][]testRange, error) {
 	result := map[string][]testRange{}
 
 	config := &packages.Config{
-		Mode:  packages.NeedName | packages.NeedFiles | packages.NeedCompiledGoFiles | packages.NeedImports | packages.NeedDeps | packages.NeedExportsFile | packages.NeedSyntax | packages.NeedTypes | packages.NeedTypesInfo | packages.NeedTypesSizes,
+		Mode:  packages.NeedName | packages.NeedSyntax | packages.NeedTypes | packages.NeedTypesInfo,
 		Tests: true,
 	}
 
-	initial, err := packages.Load(config, "./...")
+	pkgs, err := packages.Load(config, "./...")
 	if err != nil {
 		return nil, fmt.Errorf("packages.Load: %v", err)
 	}
-
-	prog, pkgs := ssautil.AllPackages(initial, 0)
-	prog.Build()
-	cg := cha.CallGraph(prog)
-	// tests := []*callgraph.Node{}
-	err = callgraph.GraphVisitEdges(cg, func(e *callgraph.Edge) error {
-		fmt.Println(e)
-		return nil
-	})
-	if err != nil {
-		return nil, err
-	}
 	for _, pkg := range pkgs {
-		fmt.Println(len(pkg.Members))
+		for id, obj := range pkg.TypesInfo.Defs {
+			if !strings.HasPrefix(id.Name, "Test") {
+				continue
+			}
+			var file *ast.File
+			for _, f := range pkg.Syntax {
+				if f.Pos() <= id.Pos() && id.Pos() <= f.End() {
+					file = f
+				}
+			}
+			if file == nil {
+				return nil, fmt.Errorf("file for %q not found", id.Name)
+			}
+			path, exact := astutil.PathEnclosingInterval(file, id.Pos(), id.End())
+			if !exact {
+				return nil, fmt.Errorf("PathEnclosingInterval got not exact path for %q in %v", id.Name, file)
+			}
+			ast.Inspect(path[1], func(node ast.Node) bool {
+				call, ok := node.(*ast.CallExpr)
+				if !ok {
+					return true
+				}
+				callee := typeutil.StaticCallee(pkg.TypesInfo, call)
+				if callee == nil {
+					return true
+				}
+				if callee.Pkg() != obj.Pkg() {
+					return true
+				}
+				calleeScope := callee.Scope()
+				calleePos := pkg.Fset.Position(calleeScope.Pos())
+				calleeEnd := pkg.Fset.Position(calleeScope.End())
+				result[calleePos.Filename] = append(result[calleePos.Filename], testRange{
+					testName: id.Name,
+					start:    calleePos.Line,
+					end:      calleeEnd.Line,
+				})
+				return true
+			})
+		}
 	}
-
-	// for _, pkg := range initial {
-	// 	for id, obj := range pkg.TypesInfo.Defs {
-	// 		if !strings.HasPrefix(id.Name, "Test") {
-	// 			continue
-	// 		}
-	// 		var file *ast.File
-	// 		for _, f := range pkg.Syntax {
-	// 			if f.Pos() <= id.Pos() && id.Pos() <= f.End() {
-	// 				file = f
-	// 			}
-	// 		}
-	// 		if file == nil {
-	// 			return nil, fmt.Errorf("file for %q not found", id.Name)
-	// 		}
-	// 		path, exact := astutil.PathEnclosingInterval(file, id.Pos(), id.End())
-	// 		if !exact {
-	// 			return nil, fmt.Errorf("PathEnclosingInterval got not exact path for %q in %v", id.Name, file)
-	// 		}
-	// 		ast.Inspect(path[1], func(node ast.Node) bool {
-	// 			call, ok := node.(*ast.CallExpr)
-	// 			if !ok {
-	// 				return true
-	// 			}
-	// 			callee := typeutil.StaticCallee(pkg.TypesInfo, call)
-	// 			if callee == nil {
-	// 				return true
-	// 			}
-	// 			if callee.Pkg() != obj.Pkg() {
-	// 				return true
-	// 			}
-	// 			calleeScope := callee.Scope()
-	// 			calleePos := pkg.Fset.Position(calleeScope.Pos())
-	// 			calleeEnd := pkg.Fset.Position(calleeScope.End())
-	// 			result[calleePos.Filename] = append(result[calleePos.Filename], testRange{
-	// 				testName: id.Name,
-	// 				start:    calleePos.Line,
-	// 				end:      calleeEnd.Line,
-	// 			})
-	// 			return true
-	// 		})
-	// 	}
-	// }
 
 	return result, nil
 }
