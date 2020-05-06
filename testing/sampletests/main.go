@@ -77,7 +77,7 @@ func main() {
 
 	suites := &formatter.JUnitTestSuites{}
 	if err := xml.Unmarshal(inputBytes, suites); err != nil {
-		log.Fatal("xml.Unmarshal: %v", err)
+		log.Fatalf("xml.Unmarshal: %v", err)
 	}
 	for i := range suites.Suites {
 		suite := &suites.Suites[i]
