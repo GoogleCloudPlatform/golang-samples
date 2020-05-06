@@ -13,8 +13,8 @@ these containers.
 
 ```
 gcloud config set project golang-samples-tests
-for v in go111 go112 go113;
-  sudo docker build -f Dockerfile.$v --tag gcr.io/golang-samples-tests/$v .
-  sudo docker push gcr.io/golang-samples-tests/$v
+for v in go111 go112 go113 go114; do
+  docker build --pull --rm --no-cache -f Dockerfile.$v --tag gcr.io/golang-samples-tests/$v .
+  docker push gcr.io/golang-samples-tests/$v
 done
 ```

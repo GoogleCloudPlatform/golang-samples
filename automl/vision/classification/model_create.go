@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package automl contains samples for Google Cloud AutoML API v1beta1.
+// Package automl contains samples for Google Cloud AutoML API v1.
 package automl
 
 // [START automl_vision_classification_create_model]
@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"io"
 
-	automl "cloud.google.com/go/automl/apiv1beta1"
-	automlpb "google.golang.org/genproto/googleapis/cloud/automl/v1beta1"
+	automl "cloud.google.com/go/automl/apiv1"
+	automlpb "google.golang.org/genproto/googleapis/cloud/automl/v1"
 )
 
 // visionClassificationCreateModel creates a model for image classification.
@@ -46,7 +46,7 @@ func visionClassificationCreateModel(w io.Writer, projectID string, location str
 			DatasetId:   datasetID,
 			ModelMetadata: &automlpb.Model_ImageClassificationModelMetadata{
 				ImageClassificationModelMetadata: &automlpb.ImageClassificationModelMetadata{
-					TrainBudget: 8, // Train budget of creating a model, expressed in hours.
+					TrainBudgetMilliNodeHours: 1000, // 1000 milli-node hours are 1 hour
 				},
 			},
 		},

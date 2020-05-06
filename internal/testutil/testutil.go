@@ -23,12 +23,11 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-
-	"golang.org/x/tools/go/packages"
 )
 
-var noProjectID = errors.New("GOLANG_SAMPLES_PROJECT_ID not set")
+var errNoProjectID = errors.New("GOLANG_SAMPLES_PROJECT_ID not set")
 
+// Context holds information useful for tests.
 type Context struct {
 	ProjectID string
 	Dir       string
@@ -44,7 +43,7 @@ func (tc Context) Path(p ...string) string {
 // ok is false if the project is not set up properly for system tests.
 func ContextMain(m *testing.M) (tc Context, ok bool) {
 	c, err := testContext()
-	if err == noProjectID {
+	if err == errNoProjectID {
 		return c, false
 	} else if err != nil {
 		log.Fatal(err)
@@ -56,7 +55,7 @@ func ContextMain(m *testing.M) (tc Context, ok bool) {
 // The test is skipped if the GOLANG_SAMPLES_PROJECT_ID environment variable is not set.
 func SystemTest(t *testing.T) Context {
 	tc, err := testContext()
-	if err == noProjectID {
+	if err == errNoProjectID {
 		t.Skip(err)
 	} else if err != nil {
 		t.Fatal(err)
@@ -87,29 +86,18 @@ func testContext() (Context, error) {
 
 	tc.ProjectID = os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
 	if tc.ProjectID == "" {
-		return tc, noProjectID
+		return tc, errNoProjectID
 	}
 
-	cfg := &packages.Config{
-		Mode:  packages.NeedName | packages.NeedFiles,
-		Tests: true,
-	}
-	pkgs, err := packages.Load(cfg, "github.com/GoogleCloudPlatform/golang-samples")
+	dir, err := os.Getwd()
 	if err != nil {
-		return tc, fmt.Errorf("could not find golang-samples: %v", err)
+		return tc, fmt.Errorf("could not find current directory")
 	}
-	// packages.Load returns multiple values, some with files and some without.
-	// Some of the files are generated as part of the build and some are the
-	// normal Go source files we're looking for.
-	// We can probably assume the one we want is pkgs[2], but loop through
-	// looking for the one we want in case it ever changes.
-	for _, pkg := range pkgs {
-		if len(pkg.GoFiles) > 0 && strings.HasSuffix(pkg.GoFiles[0], ".go") {
-			// Use the directory of a file in the root package as the module
-			// root directory.
-			tc.Dir = filepath.Dir(pkg.GoFiles[0])
-		}
+	if !strings.Contains(dir, "golang-samples") {
+		return tc, fmt.Errorf("could not find golang-samples directory")
 	}
+	tc.Dir = dir[:strings.Index(dir, "golang-samples")+len("golang-samples")]
+
 	if tc.Dir == "" {
 		return tc, fmt.Errorf("could not find golang-samples directory")
 	}

@@ -260,9 +260,9 @@ func SnippetClient_PutMulti() {
 func SnippetClient_GetMulti() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
-	var taskKeys []*datastore.Key // Populated with incomplete keys.
 	// [START datastore_batch_lookup]
-	var tasks []*Task
+	var taskKeys []*datastore.Key // Populated with incomplete keys.
+	tasks := make([]*Task, len(taskKeys))
 	err := client.GetMulti(ctx, taskKeys, &tasks)
 	// [END datastore_batch_lookup]
 	_ = err // Make sure you check err.
@@ -672,7 +672,7 @@ func metadataNamespaces(w io.Writer, projectID string) error {
 
 	fmt.Fprintln(w, "Namespaces:")
 	for _, k := range keys {
-		fmt.Fprintf(w, "\t%v", k.Namespace)
+		fmt.Fprintf(w, "\t%v", k.Name)
 	}
 	return nil
 }

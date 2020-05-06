@@ -29,7 +29,7 @@ import (
 func createGlossary(w io.Writer, projectID string, location string, glossaryID string, glossaryInputURI string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
-	// glossaryID := "glossary-id"
+	// glossaryID := "my-glossary-display-name"
 	// glossaryInputURI := "gs://cloud-samples-data/translation/glossary.csv"
 
 	ctx := context.Background()

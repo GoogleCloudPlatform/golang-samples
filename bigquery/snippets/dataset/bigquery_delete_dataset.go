@@ -15,7 +15,6 @@
 package dataset
 
 // [START bigquery_delete_dataset]
-
 import (
 	"context"
 	"fmt"
@@ -23,6 +22,7 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// deleteDataset demonstrates the deletion of an empty dataset.
 func deleteDataset(projectID, datasetID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"
@@ -32,6 +32,7 @@ func deleteDataset(projectID, datasetID string) error {
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	// To recursively delete a dataset and contents, use DeleteWithContents.
 	if err := client.Dataset(datasetID).Delete(ctx); err != nil {

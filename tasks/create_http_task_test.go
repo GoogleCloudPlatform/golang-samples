@@ -15,8 +15,9 @@
 package main
 
 import (
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"testing"
+
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestCreateHTTPTask(t *testing.T) {

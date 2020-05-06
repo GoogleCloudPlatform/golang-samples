@@ -23,7 +23,7 @@ import (
 	"io"
 	"io/ioutil"
 
-	healthcare "google.golang.org/api/healthcare/v1beta1"
+	healthcare "google.golang.org/api/healthcare/v1"
 )
 
 // queryParamOpt is a googleapi.Option (https://godoc.org/google.golang.org/api/googleapi#CallOption)
@@ -80,4 +80,4 @@ func DicomWebSearchInstances(w io.Writer, projectID, location, datasetID, dicomS
 	return nil
 }
 
-// [END healthcare_dicomweb_retrieve_instance]
+// [END healthcare_dicomweb_search_instances]

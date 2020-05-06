@@ -15,6 +15,8 @@
 package cloudrunci
 
 import (
+	"fmt"
+	"net/url"
 	"strings"
 	"testing"
 )
@@ -34,7 +36,7 @@ func TestServiceValidateErrors(t *testing.T) {
 
 // TestServiceStateErrors checks that a service in the wrong state will be blocked from the requested operation.
 func TestServiceStateErrors(t *testing.T) {
-	service := NewService("my-serivce", "my-project")
+	service := NewService("my-service", "my-project")
 
 	want := "Request called before Deploy"
 	if _, err := service.Request("GET", "/"); !strings.Contains(err.Error(), want) {
@@ -56,4 +58,65 @@ func TestServiceStateErrors(t *testing.T) {
 	if err := service.Build(); !strings.Contains(err.Error(), want) {
 		t.Errorf("service.Build: error expected '%s', got %s", want, err.Error())
 	}
+}
+
+func TestServiceURL(t *testing.T) {
+	want := "https://example.com"
+	service := NewService("my-serivce", "my-project")
+	mock, err := url.Parse(want)
+	if err != nil {
+		t.Fatalf("url.Parse: %v", err)
+	}
+	service.url = mock
+	service.deployed = true
+
+	u, err := service.ParsedURL()
+	if err != nil {
+		t.Errorf("service.ParsedURL: %v", err)
+	}
+	if u.String() != service.url.String() {
+		t.Errorf("service.ParsedURL: got %s, want %s", u, service.url)
+	}
+
+	got, err := service.URL("/handler")
+	if err != nil {
+		t.Errorf("service.URL: %v", err)
+	}
+	if want := service.url.String() + "/handler"; got != want {
+		t.Errorf("service.URL: got %s, want %s", got, want)
+	}
+
+	got, err = service.Host()
+	if err != nil {
+		t.Errorf("service.Host: %v", err)
+	}
+	if want := service.url.Host + ":443"; got != want {
+		t.Errorf("service.URL: got %s, want %s", got, want)
+	}
+}
+
+func TestDeployArgs(t *testing.T) {
+	service := NewService("my-serivce", "my-project")
+	service.Image = "gcr.io/my-project/my-service"
+	service.Env = EnvVars{
+		"NAME1": "value1",
+		"NAME2": "value2",
+	}
+
+	cmd := service.deployCmd()
+	for i, v := range service.Env {
+		if !contains(cmd.Args, fmt.Sprintf("%s=%s", i, v)) {
+			t.Errorf("Environment variable (%s) missing from deploy command", i)
+		}
+	}
+}
+
+// contains searches for a string value in a string slice.
+func contains(haystack []string, needle string) bool {
+	for _, i := range haystack {
+		if i == needle {
+			return true
+		}
+	}
+	return false
 }

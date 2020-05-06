@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package automl contains samples for Google Cloud AutoML API v1beta1.
+// Package automl contains samples for Google Cloud AutoML API v1.
 package automl
 
 // [START automl_vision_classification_create_dataset]
@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"io"
 
-	automl "cloud.google.com/go/automl/apiv1beta1"
-	automlpb "google.golang.org/genproto/googleapis/cloud/automl/v1beta1"
+	automl "cloud.google.com/go/automl/apiv1"
+	automlpb "google.golang.org/genproto/googleapis/cloud/automl/v1"
 )
 
 // visionClassificationCreateDataset creates a dataset for image classification.
@@ -53,9 +53,15 @@ func visionClassificationCreateDataset(w io.Writer, projectID string, location s
 		},
 	}
 
-	dataset, err := client.CreateDataset(ctx, req)
+	op, err := client.CreateDataset(ctx, req)
 	if err != nil {
 		return fmt.Errorf("CreateDataset: %v", err)
+	}
+	fmt.Fprintf(w, "Processing operation name: %q\n", op.Name())
+
+	dataset, err := op.Wait(ctx)
+	if err != nil {
+		return fmt.Errorf("Wait: %v", err)
 	}
 
 	fmt.Fprintf(w, "Dataset name: %v\n", dataset.GetName())

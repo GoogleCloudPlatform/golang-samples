@@ -78,6 +78,13 @@ func (e Entry) String() string {
 // [END run_manual_logging_object]
 // [START run_manual_logging]
 
+func init() {
+	// Disable log prefixes such as the default timestamp.
+	// Prefix text prevents the message from being parsed as JSON.
+	// A timestamp is added when shipping logs to Stackdriver.
+	log.SetFlags(0)
+}
+
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	// Uncomment and populate this variable in your code:
 	// projectID = "The project ID of your Cloud Run service"

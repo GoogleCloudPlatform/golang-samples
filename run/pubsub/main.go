@@ -58,7 +58,7 @@ func HelloPubSub(w http.ResponseWriter, r *http.Request) {
 	var m PubSubMessage
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Printf("iotuil.ReadAll: %v", err)
+		log.Printf("ioutil.ReadAll: %v", err)
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}

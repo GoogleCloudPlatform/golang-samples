@@ -57,8 +57,8 @@ type MyData struct {
 	} `json:"original"`
 }
 
-// GCLOUD_PROJECT is automatically set by the Cloud Functions runtime.
-var projectID = os.Getenv("GCLOUD_PROJECT")
+// GOOGLE_CLOUD_PROJECT is automatically set by the Cloud Functions runtime.
+var projectID = os.Getenv("GOOGLE_CLOUD_PROJECT")
 
 // client is a Firestore client, reused between function invocations.
 var client *firestore.Client

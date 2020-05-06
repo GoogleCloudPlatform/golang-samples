@@ -17,10 +17,12 @@ package hmac
 import (
 	"context"
 	"fmt"
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"io/ioutil"
 	"os"
 	"testing"
+	"time"
+
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 
 	"cloud.google.com/go/storage"
 )
@@ -29,6 +31,10 @@ var serviceAccountEmail = os.Getenv("GOLANG_SAMPLES_SERVICE_ACCOUNT_EMAIL")
 var storageClient *storage.Client
 
 func TestMain(m *testing.M) {
+	if serviceAccountEmail == "" {
+		fmt.Fprintln(os.Stderr, "GOLANG_SAMPLES_SERVICE_ACCOUNT_EMAIL not set. Skipping.")
+		return
+	}
 	ctx := context.Background()
 	storageClient, _ = storage.NewClient(ctx)
 	defer storageClient.Close()
@@ -41,16 +47,18 @@ func TestListKeys(t *testing.T) {
 	key, err := createTestKey(tc.ProjectID)
 	defer deleteTestKey(key)
 	if err != nil {
-		t.Errorf("Error in key creation: %s", err)
+		t.Fatalf("Error in key creation: %s", err)
 	}
 
-	keys, err := listHMACKeys(ioutil.Discard, tc.ProjectID)
-	if err != nil {
-		t.Errorf("listHMACKeys raised error: %s", err)
-	}
-	if len(keys) < 1 {
-		t.Errorf("Should have at least one key listed.")
-	}
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
+		keys, err := listHMACKeys(ioutil.Discard, tc.ProjectID)
+		if err != nil {
+			r.Errorf("listHMACKeys raised error: %s", err)
+		}
+		if len(keys) < 1 {
+			r.Errorf("Should have at least one key listed.")
+		}
+	})
 }
 
 func TestCreateKey(t *testing.T) {

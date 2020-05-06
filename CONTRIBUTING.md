@@ -67,7 +67,7 @@ If there are many samples to write in the same directory, use filename prefixes
 to group the files acting on similar types (for example, when writing
 create/update/delete type samples).
 
-## Include imports in region tags
+## Include imports and flags in region tags
 
 The sample region (e.g. `[START foo]` and `[END foo`]) should include the import
 block.
@@ -86,13 +86,15 @@ func hello(w io.Writer) {
 // [END hello]
 ```
 
-For quickstarts, the region should include the package declaration.
+For quickstarts, the region should include the package declaration as well as any [flags](#function-arguments-for-quickstarts).
 
 For snippets, the region should _not_ include the package declaration.
 
 Also see [Imports](#imports).
 
-## Print to an `io.Writer`
+## Print to an `io.Writer` for snippets
+
+(Note: this doesn't apply to quickstarts) 
 
 Do not print to `stdout` or `stderr`. Pass `w io.Writer` as the first argument
 to the sample function and print to it with `fmt.Fprintf(w, ...)`.
@@ -131,6 +133,15 @@ Quickstarts should use an example project ID or add a project ID flag.
 
 If a project ID is needed, snippets should have a `projectID string` argument.
 
+## Only quickstarts have `package main`
+
+Sample code should not include a runnable binary. Binaries should only be
+included for quickstarts (which should all be `package main` with the example
+code in `func main`).
+
+Quickstarts need to be in a separate directories from snippets because they need
+to be in different packages.
+
 ## Declare a `context.Context` as needed
 
 Don't pass a `context.Context` as an argument. New Go developers may not
@@ -144,7 +155,7 @@ understand where the `ctx` comes from.
 + }
 ```
 
-## Function arguments
+## Function arguments for snippets
 
 There should be as few function arguments as possible. An `io.Writer` and
 project ID are the most common. If you need additional arguments (for example,
@@ -167,21 +178,60 @@ func delete(w io.Writer, name string) error {
 }
 ```
 
+## Function arguments for quickstarts
+
+Since [quickstarts use `package main`](#only-quickstarts-have-package-main), we use the `flag` package for 
+passing parameters into a quickstart, and use `testutil.BuildMain` to build and test your quickstart.
+
+In your quickstart:
+```go
+func main() {
+	var projectID, resourceName string
+	flag.StringVar(&projectID, "project_id", "", "Cloud Project ID")
+	flag.StringVar(&resourceName, "resourceName", "", "Name of resource")
+	flag.Parse()
+
+	fmt.Printf("projectID: %s, resource_name: %s", projectID, resourceName)
+
+```
+
+In your quickstart test:
+```go
+func TestQuickstart(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	m := testutil.BuildMain(t)
+
+	if !m.Built() {
+		t.Fatalf("failed to build app")
+	}
+
+	testResourceName := "my-resource-name"
+
+	stdOut, stdErr, err := m.Run(nil, 10*time.Minute,
+		"--project_id", tc.ProjectID,
+		"--resource_name", testResourceName,
+	)
+
+	if err != nil {
+		t.Errorf("stdout: %v", string(stdOut))
+		t.Errorf("stderr: %v", string(stdErr))
+		t.Errorf("execution failed: %v", err)
+	}
+
+	// example test
+	got := string(stdOut)
+	if !strings.Contains(got, testResourceName) {
+		t.Errorf("got %q, want to contain %q", got, testResourceName)
+	}
+}
+```
+
 ## Don't export sample functions
 
 Sample functions should not be
 [exported](https://golang.org/ref/spec#Exported_identifiers). Users should not
 be depending directly on this sample code. So, the function name should start
 with a lower case letter.
-
-## Only quickstarts have `package main`
-
-Sample code should not include a runnable binary. Binaries should only be
-included for quickstarts (which should all be `package main` with the example
-code in `func main`).
-
-Quickstarts need to be in a separate directories from snippets because they need
-to be in different packages.
 
 ## Prefer inline proto declarations
 
@@ -329,6 +379,12 @@ write and run the tests in any modified directories.
 
 See [Use `testutil` for tests](#use-testutil-for-tests) and
 [Print to an `io.Writer`](#print-to-an-iowriter).
+
+## Creating resources for tests
+
+When creating resources for tests, avoid using UUIDs. Instead, prefer 
+resource names that incorporate aspects of your test, such as `tc.ProjectID +
+-golang-test-mypai-mysnippet`. 
 
 ## Running system tests
 

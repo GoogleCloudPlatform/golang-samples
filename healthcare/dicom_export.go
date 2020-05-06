@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"io"
 
-	healthcare "google.golang.org/api/healthcare/v1beta1"
+	healthcare "google.golang.org/api/healthcare/v1"
 )
 
 // exportDICOMInstance exports DICOM objects to GCS.
@@ -35,7 +35,7 @@ func exportDICOMInstance(w io.Writer, projectID, location, datasetID, dicomStore
 	storesService := healthcareService.Projects.Locations.Datasets.DicomStores
 
 	req := &healthcare.ExportDicomDataRequest{
-		GcsDestination: &healthcare.GoogleCloudHealthcareV1beta1DicomGcsDestination{
+		GcsDestination: &healthcare.GoogleCloudHealthcareV1DicomGcsDestination{
 			UriPrefix: destination, // "gs://my-bucket/path/to/prefix/"
 		},
 	}

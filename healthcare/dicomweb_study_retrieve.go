@@ -21,7 +21,7 @@ import (
 	"io"
 	"os"
 
-	healthcare "google.golang.org/api/healthcare/v1beta1"
+	healthcare "google.golang.org/api/healthcare/v1"
 )
 
 // dicomWebRetrieveStudy retrieves all instances in the given dicomWebPath
