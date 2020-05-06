@@ -30,6 +30,7 @@ require (
 	github.com/gorilla/mux v1.7.4
 	github.com/gorilla/websocket v1.4.2
 	github.com/h2non/filetype v1.0.12
+	github.com/jstemmer/go-junit-report v0.9.1
 	github.com/lib/pq v1.5.0
 	github.com/linkedin/goavro/v2 v2.9.7
 	github.com/mailgun/mailgun-go/v3 v3.6.4
@@ -50,3 +51,6 @@ require (
 	gopkg.in/sendgrid/sendgrid-go.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.2.8
 )
+
+// https://github.com/jstemmer/go-junit-report/issues/107
+replace github.com/jstemmer/go-junit-report => github.com/tbpg/go-junit-report v0.9.2-0.20200506144438-50086c54f894

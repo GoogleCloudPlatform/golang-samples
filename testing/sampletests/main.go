@@ -12,32 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// The sampletests command adds the region tags tested by each test to the test
-// name. It reads from stdin and writes to stdout.
-//
-// For example, if TestFoo tests the regions foo_hello_world and
-// foo_hello_gopher, the result will be:
-//     TestFoo -> TestFoo__foo_hello_world__foo_hello_gopher
-//
-// It only looks at direct function calls by tests, not transitive calls.
-//
-// There are some duplicate region tags, but they aren't tracked anywhere else,
-// so it's OK if they are "applied" to more than one test.
-//
-// There are some duplicate test names, which means it's possible to get names
-// like:
-//     TestCreate__spanner_create__bigtable_create
-// Again, this is an acceptable tradeoff. It only happens when both regions are
-// tested. If only one is tested, only one would show up. Failures are
-// attributed to both snippets, though.
-//
-// The test coverage over all regions is printed at the end.
-//
-// To get the number of unique region tags in the repo manually, run:
-//     grep -RoPh '\[START \K(.+)\]' | sort -u | wc -l
+/*The sampletests command adds the region tags tested by each test to the XML
+properties of that test case. It reads JUnit XML from stdin and writes JUnit
+XML to stdout.
+
+For example, if TestFoo tests the regions foo_hello_world and
+foo_hello_gopher, the TestFoo element will have the following property:
+    <property name="region_tags" value="foo_hello_world,foo_hello_gopher"></property>
+
+sampletests only looks at direct function calls by tests, not transitive calls.
+
+There are some duplicate region tags, but they aren't tracked anywhere else,
+so it's OK if they are "applied" to more than one test.
+
+The test coverage over all regions is printed to stderr at the end.
+
+To get the number of unique region tags in the repo manually, run:
+	grep -RoPh '\[START \K(.+)\]' | sort -u | wc -l
+*/
 package main
 
 import (
+	"encoding/xml"
 	"fmt"
 	"go/ast"
 	"io/ioutil"
@@ -47,20 +43,22 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/jstemmer/go-junit-report/formatter"
 	"golang.org/x/tools/go/ast/astutil"
 	"golang.org/x/tools/go/packages"
 	"golang.org/x/tools/go/types/typeutil"
 )
 
 var (
-	startRe = regexp.MustCompile("\\[START ([^\\]]+)\\]")
-	endRe   = regexp.MustCompile("\\[END ([^\\]]+)\\]")
+	startRe = regexp.MustCompile("\\[START ([[:word:]]+)\\]")
+	endRe   = regexp.MustCompile("\\[END ([[:word:]]+)\\]")
 )
 
 // testRange includes the name of the test and the line number ranges it tests.
 // testRange does not include the name of the file being tested - file names are
 // tracked separately.
 type testRange struct {
+	pkgPath    string
 	testName   string
 	start, end int
 }
@@ -72,56 +70,70 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Read all input, make replacements.
 	inputBytes, err := ioutil.ReadAll(os.Stdin)
 	if err != nil {
 		log.Fatalf("ioutil.ReadAll: %v", err)
 	}
-	input := string(inputBytes)
+
+	suites := &formatter.JUnitTestSuites{}
+	if err := xml.Unmarshal(inputBytes, suites); err != nil {
+		log.Fatal("xml.Unmarshal: %v", err)
+	}
+	for i := range suites.Suites {
+		suite := &suites.Suites[i]
+		pkgPath := suite.Name
+		for j := range suite.TestCases {
+			testCase := &suite.TestCases[j]
+			testName := testCase.Name
+			regionsTested := testRegionTags[pkgPath][testName]
+			regions := []string{}
+			for r := range regionsTested {
+				regions = append(regions, r)
+			}
+			if len(regions) > 0 {
+				regionsString := strings.Join(regions, ",")
+				testCase.Properties = []formatter.JUnitProperty{
+					{Name: "region_tags", Value: regionsString},
+				}
+			}
+		}
+	}
 
 	testedRegionTags := map[string]struct{}{}
-	newTestNames := map[string]string{}
-	for test, regionsTested := range testRegionTags {
-		regions := []string{}
-		for r := range regionsTested {
-			regions = append(regions, r)
-			testedRegionTags[r] = struct{}{}
+	for _, regionsTested := range testRegionTags {
+		for _, regions := range regionsTested {
+			for r := range regions {
+				testedRegionTags[r] = struct{}{}
+			}
 		}
-		newName := test
-		if len(regions) > 0 {
-			newName = fmt.Sprintf("%v__%v", test, strings.Join(regions, "__"))
-		}
-		newTestNames[test] = newName
 	}
 
-	for test, newName := range newTestNames {
-		// Include whitespace to avoid replacing prefixes (TestFoo of
-		// TestFooBar).
-		input = strings.Replace(input, " "+test+" ", " "+newName+" ", -1)
-		input = strings.Replace(input, " "+test+"\n", " "+newName+"\n", -1)
+	bytes, err := xml.MarshalIndent(suites, "", "\t")
+	if err != nil {
+		log.Fatalf("xml.MarshalIdent: %v", err)
 	}
-
-	fmt.Println(input)
-	fmt.Printf("%d/%d (%.2f%%) of region tags are tested.\n", len(testedRegionTags), len(uniqueRegionTags), 100*float64(len(testedRegionTags))/float64(len(uniqueRegionTags)))
+	fmt.Println(string(bytes))
+	fmt.Fprintf(os.Stderr, "%d/%d (%.2f%%) of region tags are tested.\n", len(testedRegionTags), len(uniqueRegionTags), 100*float64(len(testedRegionTags))/float64(len(uniqueRegionTags)))
 }
 
 // testsToRegionTags returns the total unique region tags in the current
 // directory, a map from test to sets of regions, and an error.
-func testsToRegionTags() (unique map[string]struct{}, testRegionTags map[string]map[string]struct{}, err error) {
+func testsToRegionTags() (unique map[string]struct{}, testRegionTags map[string]map[string]map[string]struct{}, err error) {
 	// Get map from file to []testRange.
 	testFileRanges, err := testCoverage()
 	if err != nil {
 		return nil, nil, err
 	}
 
-	// testRegionTags is a map from test to sets of regions.
+	// testRegionTags is a map from package path -> test name -> sets of
+	// regions.
 	// Uses a set of regions instead of a slice to avoid duplication.
-	testRegionTags = map[string]map[string]struct{}{}
+	testRegionTags = map[string]map[string]map[string]struct{}{}
 
 	// Initialize the map values of testRegionTags.
 	for _, t := range testFileRanges {
 		for _, r := range t {
-			testRegionTags[r.testName] = map[string]struct{}{}
+			testRegionTags[r.pkgPath] = map[string]map[string]struct{}{}
 		}
 	}
 
@@ -157,7 +169,10 @@ func testsToRegionTags() (unique map[string]struct{}, testRegionTags map[string]
 				uniqueRegionTags[region] = struct{}{}
 				for _, r := range testFileRanges[path] {
 					if r.start >= lineNum && r.end >= lineNum {
-						testRegionTags[r.testName][region] = struct{}{}
+						if testRegionTags[r.pkgPath][r.testName] == nil {
+							testRegionTags[r.pkgPath][r.testName] = map[string]struct{}{}
+						}
+						testRegionTags[r.pkgPath][r.testName][region] = struct{}{}
 					}
 				}
 			}
@@ -165,7 +180,7 @@ func testsToRegionTags() (unique map[string]struct{}, testRegionTags map[string]
 				region := regions[0][1]
 				for _, r := range testFileRanges[path] {
 					if r.start >= lineNum && r.end >= lineNum {
-						testRegionTags[r.testName][region] = struct{}{}
+						testRegionTags[r.pkgPath][r.testName][region] = struct{}{}
 					}
 				}
 			}
@@ -230,6 +245,7 @@ func testCoverage() (map[string][]testRange, error) {
 				calleePos := pkg.Fset.Position(calleeScope.Pos())
 				calleeEnd := pkg.Fset.Position(calleeScope.End())
 				result[calleePos.Filename] = append(result[calleePos.Filename], testRange{
+					pkgPath:  pkg.PkgPath,
 					testName: id.Name,
 					start:    calleePos.Line,
 					end:      calleeEnd.Line,
