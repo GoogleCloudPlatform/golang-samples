@@ -28,7 +28,7 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestList(t *testing.T) {
+func TestListGCSBuckets(t *testing.T) {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 
@@ -50,7 +50,7 @@ func TestList(t *testing.T) {
 	// to that amount of time.
 	testutil.Retry(t, 75, time.Millisecond*200, func(r *testutil.R) {
 		buf.Reset()
-		if _, err := listGCSBuckets(buf, key.AccessID, key.Secret); err != nil {
+		if err := listGCSBuckets(buf, key.AccessID, key.Secret); err != nil {
 			r.Errorf("listGCSBuckets: %v", err)
 		}
 	})
@@ -87,17 +87,25 @@ func deleteTestKey(ctx context.Context, client *storage.Client, key *storage.HMA
 	}
 }
 
-func TestObjectList(t *testing.T) {
-	googleAccessKeyID := os.Getenv("STORAGE_HMAC_ACCESS_KEY_ID")
-	googleAccessKeySecret := os.Getenv("STORAGE_HMAC_ACCESS_SECRET_KEY")
+func TestListGCSObjects(t *testing.T) {
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
 
-	if googleAccessKeyID == "" || googleAccessKeySecret == "" {
-		t.Skip("STORAGE_HMAC_ACCESS_KEY_ID and STORAGE_HMAC_ACCESS_SECRET_KEY must be set. Skipping.")
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
 	}
+	defer client.Close()
+
+	// Set up service account HMAC key to use for this test.
+	key, err := createTestKey(ctx, t, client, tc.ProjectID)
+	if err != nil {
+		t.Fatalf("error setting up HMAC key: %v", err)
+	}
+	defer deleteTestKey(ctx, client, key)
 
 	buf := new(bytes.Buffer)
-	err := listGCSObjects(buf, "cloud-samples-data", googleAccessKeyID, googleAccessKeySecret)
-	if err != nil {
+	if err := listGCSObjects(buf, "cloud-samples-data", key.AccessID, key.Secret); err != nil {
 		t.Errorf("listGCSObjects: %v", err)
 	}
 
