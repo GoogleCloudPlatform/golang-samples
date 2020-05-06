@@ -186,6 +186,7 @@ runTests() {
   exit_code=$(($exit_code + $?))
   # Add region tags tested to test case properties.
   cat raw_log.xml | sampletests > sponge_log.xml
+  rm raw_log.xml # No need to keep this around.
   set +x
 }
 

@@ -27,8 +27,9 @@ so it's OK if they are "applied" to more than one test.
 
 The test coverage over all regions is printed to stderr at the end.
 
-To get the number of unique region tags in the repo manually, run:
-	grep -RoPh '\[START \K(.+)\]' | sort -u | wc -l
+To get the number of unique region tags in the repo manually, run the following
+command without the space between [ and START:
+	grep -RoPh '\[ START \K(.+)\]' | sort -u | wc -l
 */
 package main
 
