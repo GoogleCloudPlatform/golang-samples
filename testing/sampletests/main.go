@@ -25,11 +25,20 @@ sampletests only looks at direct function calls by tests, not transitive calls.
 There are some duplicate region tags, but they aren't tracked anywhere else,
 so it's OK if they are "applied" to more than one test.
 
-The test coverage over all regions is printed to stderr at the end.
+sampletests only looks in the current module, which matches the behavior of
+`go test`. So, if you run `go test ./...` and sampletests in the same directory
+they should both find the same set of packages.
+
+The test coverage over all regions is printed to stderr at the end. The coverage
+is based on the entire module, not just the tests that happen to be in the
+given XML input. The XML may not be for for all tests in the module.
+
+Warnings are printed to stderr for invalid region tags (e.g. mis-matched START
+and END tags).
 
 To get the number of unique region tags in the repo manually, run the following
 command without the space between [ and START:
-	grep -RoPh '\[ START \K(.+)\]' | sort -u | wc -l
+	grep -ERho '\[START .+' | sort -u | wc -l
 */
 package main
 
@@ -64,9 +73,18 @@ type testRange struct {
 	start, end int
 }
 
+// regionTag represents a single region tag. There may be many regions in a
+// single file, regions with duplicate names in the same file or separate files,
+// or any other combination.
+type regionTag struct {
+	filePath   string
+	name       string
+	start, end int
+}
+
 func main() {
 	// Get a set of all region tags and a map from test names to region tags.
-	uniqueRegionTags, testRegionTags, err := testsToRegionTags()
+	uniqueRegionTags, testRegionTags, err := testsToRegionTags(".")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -117,82 +135,59 @@ func main() {
 	fmt.Fprintf(os.Stderr, "%d/%d (%.2f%%) of region tags are tested.\n", len(testedRegionTags), len(uniqueRegionTags), 100*float64(len(testedRegionTags))/float64(len(uniqueRegionTags)))
 }
 
-// testsToRegionTags returns the total unique region tags in the current
-// directory, a map from test to sets of regions, and an error.
-func testsToRegionTags() (unique map[string]struct{}, testRegionTags map[string]map[string]map[string]struct{}, err error) {
-	// Get map from file to []testRange.
-	testFileRanges, err := testCoverage()
+// testsToRegionTags gets region tag info.
+//
+// testedRegions is a map from package path -> test name -> set of regions.
+// allRegions is a set of all regions in the current module.
+func testsToRegionTags(dir string) (allRegions map[string]struct{}, testedRegions map[string]map[string]map[string]struct{}, err error) {
+	testFileRanges, err := testCoverage(dir)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	// testRegionTags is a map from package path -> test name -> sets of
-	// regions.
-	// Uses a set of regions instead of a slice to avoid duplication.
-	testRegionTags = map[string]map[string]map[string]struct{}{}
-
-	// Initialize the map values of testRegionTags.
-	for _, t := range testFileRanges {
-		for _, r := range t {
-			testRegionTags[r.pkgPath] = map[string]map[string]struct{}{}
-		}
-	}
-
-	uniqueRegionTags := map[string]struct{}{}
-
-	// Iterate through every file.
-	// Note: implicitly, if a file isn't tested, neither are its regions. But,
-	// we walk through every file so we can get all region tags to compute
-	// region tag coverage.
-	err = filepath.Walk(".", func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-
-		if info.IsDir() {
-			return nil
-		}
-
-		path, err = filepath.Abs(path)
-		if err != nil {
-			return err
-		}
-
-		src, err := ioutil.ReadFile(path)
-		if err != nil {
-			return err
-		}
-
-		lines := strings.Split(string(src), "\n")
-		for lineNum, line := range lines {
-			if regions := startRe.FindAllStringSubmatch(line, -1); len(regions) > 0 {
-				region := regions[0][1]
-				uniqueRegionTags[region] = struct{}{}
-				for _, r := range testFileRanges[path] {
-					if r.start >= lineNum && r.end >= lineNum {
-						if testRegionTags[r.pkgPath][r.testName] == nil {
-							testRegionTags[r.pkgPath][r.testName] = map[string]struct{}{}
-						}
-						testRegionTags[r.pkgPath][r.testName][region] = struct{}{}
-					}
-				}
-			}
-			if regions := endRe.FindAllStringSubmatch(line, -1); len(regions) > 0 {
-				region := regions[0][1]
-				for _, r := range testFileRanges[path] {
-					if r.start >= lineNum && r.end >= lineNum {
-						testRegionTags[r.pkgPath][r.testName][region] = struct{}{}
-					}
-				}
-			}
-		}
-		return nil
-	})
+	regionFileRanges, err := regionTags(dir)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	return uniqueRegionTags, testRegionTags, nil
+	// testedRegions is a map from package path -> test name -> set of
+	// region tags.
+	testedRegions = map[string]map[string]map[string]struct{}{}
+
+	allRegions = map[string]struct{}{}
+	for _, ranges := range regionFileRanges {
+		for regionName := range ranges {
+			allRegions[regionName] = struct{}{}
+		}
+	}
+
+	for file, testRanges := range testFileRanges {
+		for _, tr := range testRanges {
+			if testedRegions[tr.pkgPath] == nil {
+				testedRegions[tr.pkgPath] = map[string]map[string]struct{}{}
+			}
+			if testedRegions[tr.pkgPath][tr.testName] == nil {
+				testedRegions[tr.pkgPath][tr.testName] = map[string]struct{}{}
+			}
+
+			for regionName, regions := range regionFileRanges[file] {
+				for _, region := range regions {
+					// If the test range start falls within the region, it's
+					// tested.
+					if tr.start >= region.start && tr.start <= region.end {
+						testedRegions[tr.pkgPath][tr.testName][regionName] = struct{}{}
+					}
+					// If the test range end falls within the region, it's
+					// tested.
+					if tr.end >= region.start && tr.end <= region.end {
+						testedRegions[tr.pkgPath][tr.testName][regionName] = struct{}{}
+					}
+				}
+			}
+		}
+	}
+
+	return allRegions, testedRegions, nil
 }
 
 // testCoverage returns a map from file path to a slice of testRanges, which
@@ -200,7 +195,7 @@ func testsToRegionTags() (unique map[string]struct{}, testRegionTags map[string]
 //
 // testCoverage only looks at direct function calls from the given test, it
 // does not look at transitive calls. This may lead to missing some region tags.
-func testCoverage() (map[string][]testRange, error) {
+func testCoverage(dir string) (map[string][]testRange, error) {
 	result := map[string][]testRange{}
 
 	config := &packages.Config{
@@ -208,7 +203,7 @@ func testCoverage() (map[string][]testRange, error) {
 		Tests: true,
 	}
 
-	pkgs, err := packages.Load(config, "./...")
+	pkgs, err := packages.Load(config, dir+"/...")
 	if err != nil {
 		return nil, fmt.Errorf("packages.Load: %v", err)
 	}
@@ -230,6 +225,8 @@ func testCoverage() (map[string][]testRange, error) {
 			if !exact {
 				return nil, fmt.Errorf("PathEnclosingInterval got not exact path for %q in %v", id.Name, file)
 			}
+			// Use path[1] because we don't want the token, we want the actual
+			// function call.
 			ast.Inspect(path[1], func(node ast.Node) bool {
 				call, ok := node.(*ast.CallExpr)
 				if !ok {
@@ -256,5 +253,96 @@ func testCoverage() (map[string][]testRange, error) {
 		}
 	}
 
+	return result, nil
+}
+
+// regionTags returns a map from file name -> region name -> []*regionTag.
+// Regions may be duplicated within a single file. So, we
+// can't assume there is only one *regionTag with a given name.
+//
+// regionTags logs warnings for malformed region tags.
+func regionTags(dir string) (map[string]map[string][]*regionTag, error) {
+	result := map[string]map[string][]*regionTag{}
+	// Iterate through every file.
+	// We use filepath.Walk instead of go/packages because we want to find _all_
+	// regions, not just those in .go files.
+	//
+	// Note: implicitly, if a file isn't tested, neither are its regions. But,
+	// we walk through every file so we can get all region tags to compute
+	// region tag coverage.
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() {
+			// If this is the argument directory, always check it.
+			if info.Name() == dir {
+				return nil
+			}
+			// Skip the .git directory.
+			if info.Name() == ".git" {
+				return filepath.SkipDir
+			}
+			// If the directory contains a go.mod file, skip it since those
+			// files aren't in the current module.
+			if _, err := os.Stat(filepath.Join(path, "go.mod")); err == nil {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+
+		path, err = filepath.Abs(path)
+		if err != nil {
+			return err
+		}
+
+		src, err := ioutil.ReadFile(path)
+		if err != nil {
+			return err
+		}
+
+		result[path] = map[string][]*regionTag{}
+
+		lines := strings.Split(string(src), "\n")
+		for lineNum, line := range lines {
+			startRegion := startRe.FindStringSubmatch(line)
+			if len(startRegion) > 0 {
+				name := startRegion[1]
+				region := &regionTag{
+					filePath: path,
+					name:     name,
+					start:    lineNum,
+					// Don't know the end yet.
+				}
+				result[path][name] = append(result[path][name], region)
+			}
+
+			endRegion := endRe.FindStringSubmatch(line)
+			if len(endRegion) > 0 {
+				name := endRegion[1]
+				// This end corresponds to the most recent START with this name.
+				// The same region name may show in the same file more than
+				// once.
+				i := len(result[path][name]) - 1
+				if i < 0 {
+					fmt.Fprintf(os.Stderr, "WARNING: found region tag END without START: %v:%v %v\n", path, lineNum, name)
+				} else {
+					result[path][name][i].end = lineNum
+				}
+			}
+		}
+		for _, regions := range result[path] {
+			for _, region := range regions {
+				if region.end == 0 {
+					fmt.Fprintf(os.Stderr, "WARNING: found region tag START without END: %v:%v %v\n", region.filePath, region.start, region.name)
+				}
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
 	return result, nil
 }
