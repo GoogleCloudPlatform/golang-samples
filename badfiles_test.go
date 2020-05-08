@@ -95,8 +95,9 @@ var allowList = []string{
 	"texttospeech/**/*",
 	"storage/objects/notes.txt",
 
-	// Renovate configuration.
+	// GitHub configuration.
 	".github/renovate.json",
+	".github/CODEOWNERS",
 
 	// Getting Started on GCE systemd service file.
 	"**/gce/**/*.service",
