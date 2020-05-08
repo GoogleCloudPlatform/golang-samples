@@ -36,6 +36,9 @@ given XML input. The XML may not be for for all tests in the module.
 Warnings are printed to stderr for invalid region tags (e.g. mis-matched START
 and END tags).
 
+The -enable_xml flag can be used to disable XML processing and only print
+warnings and coverage.
+
 To get the number of unique region tags in the repo manually, run the following
 command without the space between [ and START:
 	grep -ERho '\[START .+' | sort -u | wc -l
@@ -105,14 +108,16 @@ func main() {
 	fmt.Fprintf(os.Stderr, "%d/%d (%.2f%%) of region tags are tested.\n", len(testedRegionTags), len(uniqueRegionTags), 100*float64(len(testedRegionTags))/float64(len(uniqueRegionTags)))
 
 	if *enableXML {
-		processXML(os.Stdin, os.Stdout, testRegionTags)
+		if err := processXML(os.Stdin, os.Stdout, testRegionTags); err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
 // testsToRegionTags gets region tag info.
 //
-// testedRegions is a map from package path -> test name -> set of regions.
 // allRegions is a set of all regions in the current module.
+// testedRegions is a map from package path -> test name -> set of regions.
 func testsToRegionTags(dir string) (allRegions map[string]struct{}, testedRegions map[string]map[string]map[string]struct{}, err error) {
 	testFileRanges, err := testCoverage(dir)
 	if err != nil {
@@ -124,16 +129,16 @@ func testsToRegionTags(dir string) (allRegions map[string]struct{}, testedRegion
 		return nil, nil, err
 	}
 
-	// testedRegions is a map from package path -> test name -> set of
-	// region tags.
-	testedRegions = map[string]map[string]map[string]struct{}{}
-
 	allRegions = map[string]struct{}{}
 	for _, ranges := range regionFileRanges {
 		for regionName := range ranges {
 			allRegions[regionName] = struct{}{}
 		}
 	}
+
+	// testedRegions is a map from package path -> test name -> set of
+	// region tags.
+	testedRegions = map[string]map[string]map[string]struct{}{}
 
 	for file, testRanges := range testFileRanges {
 		for _, tr := range testRanges {
@@ -169,6 +174,7 @@ func testsToRegionTags(dir string) (allRegions map[string]struct{}, testedRegion
 //
 // testCoverage only looks at direct function calls from the given test, it
 // does not look at transitive calls. This may lead to missing some region tags.
+// See https://github.com/GoogleCloudPlatform/golang-samples/issues/1402.
 func testCoverage(dir string) (map[string][]testRange, error) {
 	result := map[string][]testRange{}
 
@@ -321,15 +327,15 @@ func regionTags(dir string) (map[string]map[string][]*regionTag, error) {
 	return result, nil
 }
 
-func processXML(in io.Reader, out io.Writer, testRegionTags map[string]map[string]map[string]struct{}) {
+func processXML(in io.Reader, out io.Writer, testRegionTags map[string]map[string]map[string]struct{}) error {
 	inputBytes, err := ioutil.ReadAll(in)
 	if err != nil {
-		log.Fatalf("ioutil.ReadAll: %v", err)
+		return fmt.Errorf("ioutil.ReadAll: %v", err)
 	}
 
 	suites := &formatter.JUnitTestSuites{}
 	if err := xml.Unmarshal(inputBytes, suites); err != nil {
-		log.Fatalf("xml.Unmarshal: %v", err)
+		return fmt.Errorf("xml.Unmarshal: %v", err)
 	}
 	for i := range suites.Suites {
 		suite := &suites.Suites[i]
@@ -351,10 +357,11 @@ func processXML(in io.Reader, out io.Writer, testRegionTags map[string]map[strin
 		}
 	}
 
-	bytes, err := xml.MarshalIndent(suites, "", "\t")
-	if err != nil {
-		log.Fatalf("xml.MarshalIdent: %v", err)
+	enc := xml.NewEncoder(out)
+	enc.Indent("", "\t")
+	if err := enc.Encode(suites); err != nil {
+		return fmt.Errorf("Encode: %v", err)
 	}
-	out.Write(bytes)
 	fmt.Fprintln(out)
+	return nil
 }
