@@ -38,7 +38,6 @@ const (
 )
 
 var (
-	bucketName      string
 	imageBucketName string
 )
 
@@ -49,9 +48,12 @@ func setupTests(t *testing.T) {
 		t.Skip("GOLANG_SAMPLES_PROJECT_ID is unset")
 	}
 	resultBucket = fmt.Sprintf("%s-result", projectID)
-	resultTopic = "test-result-topic"
-	translateTopic = "test-translate-topic"
-	toLang = []string{"en", "fr", "es", "ja", "ru"}
+	os.Setenv("GOOGLE_CLOUD_PROJECT", projectID)
+	os.Setenv("RESULT_BUCKET", resultBucket)
+	os.Setenv("RESULT_TOPIC", "test-result-topic")
+	os.Setenv("TO_LANG", "en,fr,es,ja,ru")
+	os.Setenv("TRANSLATE_TOPIC", "test-translate-topic")
+
 	imageBucketName = "cloud-samples-data/functions"
 
 	var err error // Prevent shadowing clients with :=.
@@ -75,8 +77,8 @@ func setupTests(t *testing.T) {
 		t.Fatalf("storage.NewClient: %v", err)
 	}
 
-	if _, err := storageClient.Bucket(bucketName).Attrs(ctx); err != nil {
-		t.Skipf("Could not get bucket %v: %v", bucketName, err)
+	if _, err := storageClient.Bucket(resultBucket).Attrs(ctx); err != nil {
+		t.Skipf("Could not get bucket %v: %v", resultBucket, err)
 	}
 }
 
@@ -111,7 +113,7 @@ func TestSaveResult(t *testing.T) {
 	}
 
 	// Check for saved object.
-	r, err := storageClient.Bucket(bucketName).Object(fmt.Sprintf("%s_%s.txt", menuName, en)).NewReader(ctx)
+	r, err := storageClient.Bucket(os.Getenv("RESULT_BUCKET")).Object(fmt.Sprintf("%s_%s.txt", menuName, en)).NewReader(ctx)
 	if err != nil {
 		t.Errorf("NewReader: %v", err)
 	}

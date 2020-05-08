@@ -68,7 +68,7 @@ var (
 )
 
 func setup(ctx context.Context) error {
-	projectID = os.Getenv("PROJECT_ID")
+	projectID = os.Getenv("GOOGLE_CLOUD_PROJECT")
 	resultBucket = os.Getenv("RESULT_BUCKET")
 	resultTopic = os.Getenv("RESULT_TOPIC")
 	toLang = strings.Split(os.Getenv("TO_LANG"), ",")
