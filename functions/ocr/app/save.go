@@ -23,8 +23,9 @@ import (
 	"log"
 )
 
-// SaveResult is executed when a message is published to the Cloud Pub/Sub topic specified by
-// RESULT_TOPIC in config.json file, and saves the data packet to a file in GCS.
+// SaveResult is executed when a message is published to the Cloud Pub/Sub topic
+// specified by the RESULT_TOPIC environment vairable, and saves the data packet
+// to a file in GCS.
 func SaveResult(ctx context.Context, event PubSubMessage) error {
 	if err := setup(ctx); err != nil {
 		return fmt.Errorf("ProcessImage: %v", err)
@@ -38,11 +39,10 @@ func SaveResult(ctx context.Context, event PubSubMessage) error {
 	}
 	log.Printf("Received request to save file %q.", message.FileName)
 
-	bucketName := config.ResultBucket
 	resultFilename := fmt.Sprintf("%s_%s.txt", message.FileName, message.Lang)
-	bucket := storageClient.Bucket(bucketName)
+	bucket := storageClient.Bucket(resultBucket)
 
-	log.Printf("Saving result to %q in bucket %q.", resultFilename, bucketName)
+	log.Printf("Saving result to %q in bucket %q.", resultFilename, resultBucket)
 
 	w := bucket.Object(resultFilename).NewWriter(ctx)
 	defer w.Close()

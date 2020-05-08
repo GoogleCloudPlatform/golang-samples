@@ -38,28 +38,21 @@ const (
 )
 
 var (
-	projectID       string
 	bucketName      string
 	imageBucketName string
 )
 
-// TestMain sets up the config rather than using the config file
-// which contains placeholder values.
 func setupTests(t *testing.T) {
 	ctx := context.Background()
 	projectID = os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
 	if projectID == "" {
 		t.Skip("GOLANG_SAMPLES_PROJECT_ID is unset")
 	}
-	bucketName = fmt.Sprintf("%s-result", projectID)
+	resultBucket = fmt.Sprintf("%s-result", projectID)
+	resultTopic = "test-result-topic"
+	translateTopic = "test-translate-topic"
+	toLang = []string{"en", "fr", "es", "ja", "ru"}
 	imageBucketName = "cloud-samples-data/functions"
-	config = &configuration{
-		ProjectID:      projectID,
-		ResultTopic:    "test-result-topic",
-		ResultBucket:   bucketName,
-		TranslateTopic: "test-translate-topic",
-		ToLang:         []string{"en", "fr", "es", "ja", "ru"},
-	}
 
 	var err error // Prevent shadowing clients with :=.
 	visionClient, err = vision.NewImageAnnotatorClient(ctx)
