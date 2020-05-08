@@ -33,7 +33,7 @@ func TestTestsToRegionTags(t *testing.T) {
 		"fakesamples_package_decl_not_tested": {},
 		"fakesamples_tested":                  {},
 		"fakesamples_not_tested":              {},
-		"samemodule_untested":                 {},
+		"samemodule_not_tested":               {},
 	}
 	if diff := cmp.Diff(uniqueRegionTags, wantRegionTags); diff != "" {
 		t.Errorf("testsToRegionTags got uniqueRegionTags (%+v), want (%+v). Diff: %v", uniqueRegionTags, wantRegionTags, diff)

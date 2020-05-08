@@ -14,9 +14,9 @@
 
 package samemodule
 
-// [START samemodule_untested]
-func untested() string {
-	return "untested"
+// [START samemodule_not_tested]
+func notTested() string {
+	return "not tested"
 }
 
-// [END samemodule_untested]
+// [END samemodule_not_tested]
