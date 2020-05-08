@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package differentmodule
+package samemodule
 
-// [START samemodule_unchecked]
-func unchecked() string {
-	return "unchecked"
+// [START samemodule_untested]
+func untested() string {
+	return "untested"
 }
 
-// [END samemodule_unchecked]
+// [END samemodule_untested]

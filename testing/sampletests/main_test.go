@@ -15,6 +15,9 @@
 package main
 
 import (
+	"bytes"
+	"os"
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -30,7 +33,7 @@ func TestTestsToRegionTags(t *testing.T) {
 		"fakesamples_package_decl_not_tested": {},
 		"fakesamples_tested":                  {},
 		"fakesamples_not_tested":              {},
-		"samemodule_unchecked":                {},
+		"samemodule_untested":                 {},
 	}
 	if diff := cmp.Diff(uniqueRegionTags, wantRegionTags); diff != "" {
 		t.Errorf("testsToRegionTags got uniqueRegionTags (%+v), want (%+v). Diff: %v", uniqueRegionTags, wantRegionTags, diff)
@@ -70,5 +73,26 @@ func TestTestCoverage(t *testing.T) {
 		if gotRange != want {
 			t.Errorf("testCoverage found incorrect range: got %+v, want %+v", gotRange, want)
 		}
+	}
+}
+
+func TestProcessXML(t *testing.T) {
+	_, testRegionTags, err := testsToRegionTags("./fakesamples")
+	if err != nil {
+		t.Fatalf("testsToRegionTags got err: %v", err)
+	}
+
+	input, err := os.Open("testdata/raw_log.xml")
+	if err != nil {
+		t.Fatalf("os.Open: %v", err)
+	}
+
+	buf := &bytes.Buffer{}
+
+	processXML(input, buf, testRegionTags)
+
+	want := `<property name="region_tags" value="fakesamples_tested"></property>`
+	if got := buf.String(); !strings.Contains(got, want) {
+		t.Errorf("processXML got\n\n----\n%v\n----\nWant to contain:\n\n----\n%v", got, want)
 	}
 }

@@ -100,6 +100,8 @@ var allowList = []string{
 
 	// Getting Started on GCE systemd service file.
 	"**/gce/**/*.service",
+
+	"testing/sampletests/tesdata/raw_log.xml",
 }
 
 // Check whether accidental binary files have been checked in.

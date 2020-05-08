@@ -44,8 +44,10 @@ package main
 
 import (
 	"encoding/xml"
+	"flag"
 	"fmt"
 	"go/ast"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -83,39 +85,13 @@ type regionTag struct {
 }
 
 func main() {
+	enableXML := flag.Bool("enable_xml", true, "Enable XML processing")
+	flag.Parse()
+
 	// Get a set of all region tags and a map from test names to region tags.
 	uniqueRegionTags, testRegionTags, err := testsToRegionTags(".")
 	if err != nil {
 		log.Fatal(err)
-	}
-
-	inputBytes, err := ioutil.ReadAll(os.Stdin)
-	if err != nil {
-		log.Fatalf("ioutil.ReadAll: %v", err)
-	}
-
-	suites := &formatter.JUnitTestSuites{}
-	if err := xml.Unmarshal(inputBytes, suites); err != nil {
-		log.Fatalf("xml.Unmarshal: %v", err)
-	}
-	for i := range suites.Suites {
-		suite := &suites.Suites[i]
-		pkgPath := suite.Name
-		for j := range suite.TestCases {
-			testCase := &suite.TestCases[j]
-			testName := testCase.Name
-			regionsTested := testRegionTags[pkgPath][testName]
-			regions := []string{}
-			for r := range regionsTested {
-				regions = append(regions, r)
-			}
-			if len(regions) > 0 {
-				regionsString := strings.Join(regions, ",")
-				testCase.Properties = []formatter.JUnitProperty{
-					{Name: "region_tags", Value: regionsString},
-				}
-			}
-		}
 	}
 
 	testedRegionTags := map[string]struct{}{}
@@ -126,13 +102,11 @@ func main() {
 			}
 		}
 	}
-
-	bytes, err := xml.MarshalIndent(suites, "", "\t")
-	if err != nil {
-		log.Fatalf("xml.MarshalIdent: %v", err)
-	}
-	fmt.Println(string(bytes))
 	fmt.Fprintf(os.Stderr, "%d/%d (%.2f%%) of region tags are tested.\n", len(testedRegionTags), len(uniqueRegionTags), 100*float64(len(testedRegionTags))/float64(len(uniqueRegionTags)))
+
+	if *enableXML {
+		processXML(os.Stdin, os.Stdout, testRegionTags)
+	}
 }
 
 // testsToRegionTags gets region tag info.
@@ -345,4 +319,42 @@ func regionTags(dir string) (map[string]map[string][]*regionTag, error) {
 		return nil, err
 	}
 	return result, nil
+}
+
+func processXML(in io.Reader, out io.Writer, testRegionTags map[string]map[string]map[string]struct{}) {
+	inputBytes, err := ioutil.ReadAll(in)
+	if err != nil {
+		log.Fatalf("ioutil.ReadAll: %v", err)
+	}
+
+	suites := &formatter.JUnitTestSuites{}
+	if err := xml.Unmarshal(inputBytes, suites); err != nil {
+		log.Fatalf("xml.Unmarshal: %v", err)
+	}
+	for i := range suites.Suites {
+		suite := &suites.Suites[i]
+		pkgPath := suite.Name
+		for j := range suite.TestCases {
+			testCase := &suite.TestCases[j]
+			testName := testCase.Name
+			regionsTested := testRegionTags[pkgPath][testName]
+			regions := []string{}
+			for r := range regionsTested {
+				regions = append(regions, r)
+			}
+			if len(regions) > 0 {
+				regionsString := strings.Join(regions, ",")
+				testCase.Properties = []formatter.JUnitProperty{
+					{Name: "region_tags", Value: regionsString},
+				}
+			}
+		}
+	}
+
+	bytes, err := xml.MarshalIndent(suites, "", "\t")
+	if err != nil {
+		log.Fatalf("xml.MarshalIdent: %v", err)
+	}
+	out.Write(bytes)
+	fmt.Fprintln(out)
 }
