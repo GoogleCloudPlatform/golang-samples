@@ -328,14 +328,10 @@ func regionTags(dir string) (map[string]map[string][]*regionTag, error) {
 }
 
 func processXML(in io.Reader, out io.Writer, testRegionTags map[string]map[string]map[string]struct{}) error {
-	inputBytes, err := ioutil.ReadAll(in)
-	if err != nil {
-		return fmt.Errorf("ioutil.ReadAll: %v", err)
-	}
-
 	suites := &formatter.JUnitTestSuites{}
-	if err := xml.Unmarshal(inputBytes, suites); err != nil {
-		return fmt.Errorf("xml.Unmarshal: %v", err)
+	dec := xml.NewDecoder(in)
+	if err := dec.Decode(suites); err != nil {
+		return fmt.Errorf("Decode: %v", err)
 	}
 	for i := range suites.Suites {
 		suite := &suites.Suites[i]
