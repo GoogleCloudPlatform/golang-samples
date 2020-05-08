@@ -39,8 +39,7 @@ and END tags).
 The -enable_xml flag can be used to disable XML processing and only print
 warnings and coverage.
 
-To get the number of unique region tags in the repo manually, run the following
-command without the space between [ and START:
+To get the number of unique region tags in the repo manually, run:
 	grep -ERho '\[START .+' | sort -u | wc -l
 */
 package main
@@ -56,6 +55,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/jstemmer/go-junit-report/formatter"
@@ -153,12 +153,13 @@ func testsToRegionTags(dir string) (allRegions map[string]struct{}, testedRegion
 				for _, region := range regions {
 					// If the test range start falls within the region, it's
 					// tested.
-					if tr.start >= region.start && tr.start <= region.end {
-						testedRegions[tr.pkgPath][tr.testName][regionName] = struct{}{}
-					}
-					// If the test range end falls within the region, it's
-					// tested.
-					if tr.end >= region.start && tr.end <= region.end {
+					switch {
+					case
+						tr.start >= region.start && tr.start <= region.end,
+						tr.end >= region.start && tr.end <= region.end,
+						region.start >= tr.start && region.start <= tr.end,
+						region.end >= tr.start && region.end <= tr.end:
+
 						testedRegions[tr.pkgPath][tr.testName][regionName] = struct{}{}
 					}
 				}
@@ -292,7 +293,7 @@ func regionTags(dir string) (map[string]map[string][]*regionTag, error) {
 				region := &regionTag{
 					filePath: path,
 					name:     name,
-					start:    lineNum,
+					start:    lineNum + 1,
 					// Don't know the end yet.
 				}
 				result[path][name] = append(result[path][name], region)
@@ -308,7 +309,7 @@ func regionTags(dir string) (map[string]map[string][]*regionTag, error) {
 				if i < 0 {
 					fmt.Fprintf(os.Stderr, "WARNING: found region tag END without START: %v:%v %v\n", path, lineNum, name)
 				} else {
-					result[path][name][i].end = lineNum
+					result[path][name][i].end = lineNum + 1
 				}
 			}
 		}
@@ -344,6 +345,7 @@ func processXML(in io.Reader, out io.Writer, testRegionTags map[string]map[strin
 			for r := range regionsTested {
 				regions = append(regions, r)
 			}
+			sort.Strings(regions)
 			if len(regions) > 0 {
 				regionsString := strings.Join(regions, ",")
 				testCase.Properties = []formatter.JUnitProperty{

@@ -31,7 +31,10 @@ func TestTestsToRegionTags(t *testing.T) {
 
 	wantRegionTags := map[string]struct{}{
 		"fakesamples_package_decl_not_tested": {},
-		"fakesamples_tested":                  {},
+		"fakesamples_tested_0":                {},
+		"fakesamples_tested_1":                {},
+		"fakesamples_tested_2":                {},
+		"fakesamples_tested_3":                {},
 		"fakesamples_not_tested":              {},
 		"samemodule_not_tested":               {},
 	}
@@ -41,7 +44,10 @@ func TestTestsToRegionTags(t *testing.T) {
 	wantTestRegionTags := map[string]map[string]map[string]struct{}{
 		"github.com/GoogleCloudPlatform/golang-samples/testing/sampletests/fakesamples": {
 			"TestHello": {
-				"fakesamples_tested": {},
+				"fakesamples_tested_0": {},
+				"fakesamples_tested_1": {},
+				"fakesamples_tested_2": {},
+				"fakesamples_tested_3": {},
 			},
 		},
 	}
@@ -67,12 +73,35 @@ func TestTestCoverage(t *testing.T) {
 		want := testRange{
 			pkgPath:  "github.com/GoogleCloudPlatform/golang-samples/testing/sampletests/fakesamples",
 			testName: "TestHello",
-			start:    25, // If hello.go changes, this test will intentionally break.
-			end:      27,
+			start:    26, // If hello.go changes, this test will intentionally break.
+			end:      34,
 		}
 		if gotRange != want {
 			t.Errorf("testCoverage found incorrect range: got %+v, want %+v", gotRange, want)
 		}
+	}
+}
+
+func TestRegionTags(t *testing.T) {
+	got, err := regionTags("./fakesamples")
+	if err != nil {
+		t.Fatalf("regionTags got err: %v", err)
+	}
+	gotRegions := map[string]regionTag{}
+	for _, region := range got {
+		for name, regionsWithName := range region {
+			if len(regionsWithName) != 1 {
+				t.Fatalf("regionTags found %d for region %q, want 1", len(regionsWithName), name)
+			}
+			gotRegions[name] = *regionsWithName[0]
+		}
+	}
+	gotTestRegion := gotRegions["fakesamples_tested_1"]
+	if gotStart, want := gotTestRegion.start, 24; gotStart != want {
+		t.Errorf("regionTags %v got start %v, want %v", gotTestRegion.name, gotStart, want)
+	}
+	if gotEnd, want := gotTestRegion.end, 36; gotEnd != want {
+		t.Errorf("regionTags %v got end %v, want %v", gotTestRegion.name, gotEnd, want)
 	}
 }
 
@@ -91,7 +120,7 @@ func TestProcessXML(t *testing.T) {
 
 	processXML(input, buf, testRegionTags)
 
-	want := `<property name="region_tags" value="fakesamples_tested"></property>`
+	want := `<property name="region_tags" value="fakesamples_tested_0,fakesamples_tested_1,fakesamples_tested_2,fakesamples_tested_3"></property>`
 	if got := buf.String(); !strings.Contains(got, want) {
 		t.Errorf("processXML got\n\n----\n%v\n----\nWant to contain:\n\n----\n%v", got, want)
 	}

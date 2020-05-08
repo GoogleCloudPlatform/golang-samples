@@ -20,13 +20,21 @@ package hello
 
 // [END fakesamples_package_decl_not_tested]
 
-// [START fakesamples_tested]
+// [START fakesamples_tested_0]
+// [START fakesamples_tested_1]
 
 func hello() string {
+
+	// [END fakesamples_tested_0]
+	// [START fakesamples_tested_3]
+	// [START fakesamples_tested_2]
 	return "Hello!"
+	// [END fakesamples_tested_2]
+
 }
 
-// [END fakesamples_tested]
+// [END fakesamples_tested_1]
+// [END fakesamples_tested_3]
 
 // [START fakesamples_not_tested]
 
