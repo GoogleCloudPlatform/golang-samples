@@ -51,6 +51,7 @@ var allowList = []string{
 	"**/*Dockerfile*",
 	"**/.dockerignore",
 	"**/Makefile",
+	".gitignore",
 
 	// Primarily ML APIs.
 	"**/testdata/**/*.jpg",
@@ -94,8 +95,9 @@ var allowList = []string{
 	"texttospeech/**/*",
 	"storage/objects/notes.txt",
 
-	// Renovate configuration.
+	// GitHub configuration.
 	".github/renovate.json",
+	".github/CODEOWNERS",
 
 	// Getting Started on GCE systemd service file.
 	"**/gce/**/*.service",

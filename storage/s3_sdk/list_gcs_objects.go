@@ -12,15 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package s3sdk lists GCS buckets using the S3 SDK using interoperability mode.
+// Package s3sdk lists GCS objects using the S3 SDK using interoperability mode.
 package s3sdk
 
-// [START storage_s3_sdk_list_buckets]
+// [START storage_s3_sdk_list_objects]
 import (
 	"context"
 	"fmt"
 	"io"
-	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -28,7 +27,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 )
 
-func listGCSBuckets(w io.Writer, googleAccessKeyID string, googleAccessKeySecret string) error {
+func listGCSObjects(w io.Writer, bucketName string, googleAccessKeyID string, googleAccessKeySecret string) error {
+	// bucketName := "your-gcs-bucket-name"
 	// googleAccessKeyID := "Your Google Access Key ID"
 	// googleAccessKeySecret := "Your Google Access Key Secret"
 
@@ -44,19 +44,19 @@ func listGCSBuckets(w io.Writer, googleAccessKeyID string, googleAccessKeySecret
 	client := s3.New(sess)
 	ctx := context.Background()
 
-	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel()
-	result, err := client.ListBucketsWithContext(ctx, &s3.ListBucketsInput{})
+	result, err := client.ListObjectsWithContext(ctx, &s3.ListObjectsInput{
+		Bucket: aws.String(bucketName),
+	})
 	if err != nil {
-		return fmt.Errorf("ListBucketsWithContext: %v", err)
+		return fmt.Errorf("ListObjectsWithContext: %v", err)
 	}
 
-	fmt.Fprintf(w, "Buckets:")
-	for _, b := range result.Buckets {
-		fmt.Fprintf(w, "%s\n", aws.StringValue(b.Name))
+	fmt.Fprintf(w, "Objects:")
+	for _, o := range result.Contents {
+		fmt.Fprintf(w, "%s\n", aws.StringValue(o.Key))
 	}
 
 	return nil
 }
 
-// [END storage_s3_sdk_list_buckets]
+// [END storage_s3_sdk_list_objects]
