@@ -57,27 +57,34 @@ func generateSignedPostPolicyV4(w io.Writer, bucket, object, serviceAccountJSONP
 	}
 
 	// Create an HTML form with the provided policy.
-	raw := fmt.Sprint("<form action='{{ index .url 0 }}' method='POST' enctype='multipart/form-data'>\n")
+	var form = `<form action='{{ .URL }}' method='POST' enctype='multipart/form-data'>
+	{{- range .Fields }}
+  <input name='{{ .Name }}' value='{{ .Value }}' type='hidden'/>
+	{{- end }}
+	<input type='file' name='file'/><br />
+	<input type='submit' value='Upload File' name='submit'/><br />
+</form>`
+
+	var tmpl *template.Template
+	tmpl = template.Must(template.New("policyV4").Parse(form))
 
 	// Include all fields returned in the HTML form as they're required.
-	var data []string
-	var i int
+	var data struct {
+		URL    string
+		Fields []struct {
+			Name  string
+			Value string
+		}
+	}
+	data.URL = policy.URL
 	for k, v := range policy.Fields {
-		raw += fmt.Sprintf("  <input name='{{ index .data %v }}' value='{{ index .data %v }}' type='hidden'/>\n", i, i+1)
-		data = append(data, k, v)
-		i += 2
+		data.Fields = append(data.Fields, struct {
+			Name  string
+			Value string
+		}{Name: k, Value: v})
 	}
-	raw += fmt.Sprint("  <input type='file' name='file'/><br />\n")
-	raw += fmt.Sprint("  <input type='submit' value='Upload File' name='submit'/><br />\n")
-	raw += fmt.Sprint("</form>")
 
-	t := template.New("post form")
-	t, err = t.Parse(raw)
-	if err != nil {
-		return policy, fmt.Errorf("parsing template: %v", err)
-	}
-	err = t.Execute(w, map[string][]string{"data": data, "url": {policy.URL}})
-	if err != nil {
+	if err = tmpl.Execute(w, data); err != nil {
 		return policy, fmt.Errorf("executing template: %v", err)
 	}
 
