@@ -17,6 +17,7 @@ package servicedirectory
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
@@ -27,14 +28,12 @@ import (
 func TestEndpoint(t *testing.T) {
 	// <test setup code>
 	tc := testutil.SystemTest(t)
-	createNsBuf := new(bytes.Buffer)
-	createNsErr := createNamespace(createNsBuf, tc.ProjectID)
+	createNsErr := createNamespace(ioutil.Discard, tc.ProjectID)
 	if createNsErr != nil {
 		fmt.Printf("Failed to create namespace in test setup. Skipping: %v", createNsErr)
 		os.Exit(0)
 	}
-	createServiceBuf := new(bytes.Buffer)
-	createServiceErr := createService(createServiceBuf, tc.ProjectID)
+	createServiceErr := createService(ioutil.Discard, tc.ProjectID)
 	if createServiceErr != nil {
 		fmt.Printf("Failed to create service in test setup. Skipping: %v", createServiceErr)
 		os.Exit(0)
@@ -67,6 +66,6 @@ func TestEndpoint(t *testing.T) {
 	deleteErr := deleteNamespace(tc.ProjectID)
 
 	if deleteErr != nil {
-		fmt.Printf("Failed to delete namespace in test tear down: %v.", deleteErr)
+		t.Errorf("Failed to delete namespace in test tear down: %v", deleteErr)
 	}
 }

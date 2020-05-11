@@ -24,21 +24,22 @@ import (
 	sdpb "google.golang.org/genproto/googleapis/cloud/servicedirectory/v1beta1"
 )
 
-func createService(w io.Writer, projectId string) error {
+func createService(w io.Writer, projectID string) error {
+	// projectID := fmt.Sprintf("/projects/my-project")
 	location := "us-east4"
-	namespaceId := "golang-test-namespace"
-	serviceId := "golang-test-service"
+	namespaceID := "golang-test-namespace"
+	serviceID := "golang-test-service"
 
 	ctx := context.Background()
 	// Create a registration client.
 	client, err := servicedirectory.NewRegistrationClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("ServiceDirectory.NewRegistrationClient: %v", err)
 	}
 	// Create a Service.
 	createServiceReq := &sdpb.CreateServiceRequest{
-		Parent:    fmt.Sprintf("projects/%s/locations/%s/namespaces/%s", projectId, location, namespaceId),
-		ServiceId: serviceId,
+		Parent:    fmt.Sprintf("projects/%s/locations/%s/namespaces/%s", projectID, location, namespaceID),
+		ServiceId: serviceID,
 		Service: &sdpb.Service{
 			Metadata: map[string]string{
 				"key1": "value1",
@@ -48,7 +49,7 @@ func createService(w io.Writer, projectId string) error {
 	}
 	service, err := client.CreateService(ctx, createServiceReq)
 	if err != nil {
-		return err
+		return fmt.Errorf("CreateSerice: %v", err)
 	}
 	fmt.Fprintf(w, "servicedirectory.Createservice result %s\n", service.Name)
 	return nil

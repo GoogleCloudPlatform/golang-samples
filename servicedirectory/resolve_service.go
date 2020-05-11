@@ -24,24 +24,25 @@ import (
 	sdpb "google.golang.org/genproto/googleapis/cloud/servicedirectory/v1beta1"
 )
 
-func resolveService(w io.Writer, projectId string) error {
+func resolveService(w io.Writer, projectID string) error {
+	// projectID := fmt.Sprintf("/projects/my-project")
 	location := "us-east4"
-	namespaceId := "golang-test-namespace"
-	serviceId := "golang-test-service"
+	namespaceID := "golang-test-namespace"
+	serviceID := "golang-test-service"
 
 	ctx := context.Background()
 	// Create a lookup client.
 	resolver, err := servicedirectory.NewLookupClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("ServiceDirectory.NewRegistrationClient: %v", err)
 	}
 	// Now Resolve the service.
 	lookupRequest := &sdpb.ResolveServiceRequest{
-		Name: fmt.Sprintf("projects/%s/locations/%s/namespaces/%s/services/%s", projectId, location, namespaceId, serviceId),
+		Name: fmt.Sprintf("projects/%s/locations/%s/namespaces/%s/services/%s", projectID, location, namespaceID, serviceID),
 	}
 	result, err := resolver.ResolveService(ctx, lookupRequest)
 	if err != nil {
-		return err
+		return fmt.Errorf("ResolveService: %v", err)
 	}
 
 	fmt.Fprintf(w, "Successfully Resolved Service %v\n", result)

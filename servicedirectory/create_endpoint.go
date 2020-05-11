@@ -24,23 +24,24 @@ import (
 	sdpb "google.golang.org/genproto/googleapis/cloud/servicedirectory/v1beta1"
 )
 
-func createEndpoint(w io.Writer, projectId string) error {
+func createEndpoint(w io.Writer, projectID string) error {
+	// projectID := fmt.Sprintf("/projects/my-project")
 	location := "us-east4"
-	namespaceId := "golang-test-namespace"
-	serviceId := "golang-test-service"
-	endpointId := "golang-test-endpoint"
+	namespaceID := "golang-test-namespace"
+	serviceID := "golang-test-service"
+	endpointID := "golang-test-endpoint"
 
 	ctx := context.Background()
 	// Create a registration client.
 	client, err := servicedirectory.NewRegistrationClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("ServiceDirectory.NewRegistrationClient: %v", err)
 	}
 
 	// Create an Endpoint.
 	createEndpointReq := &sdpb.CreateEndpointRequest{
-		Parent:     fmt.Sprintf("projects/%s/locations/%s/namespaces/%s/services/%s", projectId, location, namespaceId, serviceId),
-		EndpointId: endpointId,
+		Parent:     fmt.Sprintf("projects/%s/locations/%s/namespaces/%s/services/%s", projectID, location, namespaceID, serviceID),
+		EndpointId: endpointID,
 		Endpoint: &sdpb.Endpoint{
 			Address: "10.10.10.10",
 			Port:    8080,
@@ -52,7 +53,7 @@ func createEndpoint(w io.Writer, projectId string) error {
 	}
 	endpoint, err := client.CreateEndpoint(ctx, createEndpointReq)
 	if err != nil {
-		return err
+		return fmt.Errorf("CreateEndpoint: %v", err)
 	}
 	fmt.Fprintf(w, "servicedirectory.CreateEndpoint result: %s", endpoint.Name)
 	return nil

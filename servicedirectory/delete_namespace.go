@@ -23,24 +23,25 @@ import (
 	sdpb "google.golang.org/genproto/googleapis/cloud/servicedirectory/v1beta1"
 )
 
-func deleteNamespace(projectId string) error {
+func deleteNamespace(projectID string) error {
+	// projectID := fmt.Sprintf("/projects/my-project")
 	location := "us-east4"
-	namespaceId := "golang-test-namespace"
+	namespaceID := "golang-test-namespace"
 
 	ctx := context.Background()
 	// Create a registration client.
 	client, err := servicedirectory.NewRegistrationClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("ServiceDirectory.NewRegistrationClient: %v", err)
 	}
 
 	// Delete a Namespace.
 	deleteNsReq := &sdpb.DeleteNamespaceRequest{
-		Name: fmt.Sprintf("projects/%s/locations/%s/namespaces/%s", projectId, location, namespaceId),
+		Name: fmt.Sprintf("projects/%s/locations/%s/namespaces/%s", projectID, location, namespaceID),
 	}
 	deleteErr := client.DeleteNamespace(ctx, deleteNsReq)
 	if deleteErr != nil {
-		return deleteErr
+		return fmt.Errorf("DeleteNamespace: %v", deleteErr)
 	}
 	return nil
 }

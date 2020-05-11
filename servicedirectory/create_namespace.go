@@ -24,26 +24,26 @@ import (
 	sdpb "google.golang.org/genproto/googleapis/cloud/servicedirectory/v1beta1"
 )
 
-func createNamespace(w io.Writer, projectId string) error {
+func createNamespace(w io.Writer, projectID string) error {
+	// projectID := fmt.Sprintf("/projects/my-project")
 	location := "us-east4"
-	namespaceId := "golang-test-namespace"
+	namespaceID := "golang-test-namespace"
 
 	ctx := context.Background()
 	// Create a registration client.
 	client, err := servicedirectory.NewRegistrationClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("ServiceDirectory.NewRegistrationClient: %v", err)
 	}
-	fmt.Printf("create request %s, %s, %s", projectId, location, namespaceId)
 	// Create a Namespace.
 	createNsReq := &sdpb.CreateNamespaceRequest{
-		Parent:      fmt.Sprintf("projects/%s/locations/%s", projectId, location),
-		NamespaceId: namespaceId,
+		Parent:      fmt.Sprintf("projects/%s/locations/%s", projectID, location),
+		NamespaceId: namespaceID,
 	}
 	resp, err := client.CreateNamespace(ctx, createNsReq)
 	fmt.Printf("create request response %v error: %v", resp, err)
 	if err != nil {
-		return err
+		return fmt.Errorf("createNamespace: %v", err)
 	}
 	fmt.Fprintf(w, "servicedirectory.CreateNamespace result: %s\n", resp.Name)
 	return nil

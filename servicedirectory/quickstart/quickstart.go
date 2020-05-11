@@ -14,37 +14,37 @@
 
 // [START servicedirectory_quickstart]
 
-// Sample quickstart is a basic program that uses Cloud Service Directory.
+// Sample quickstart is a program that uses Cloud Service Directory
+// create. delete, and resolve functionality.
 package main
 
 import (
 	"context"
 	"fmt"
+	"log"
 
 	servicedirectory "cloud.google.com/go/servicedirectory/apiv1beta1"
 	sdpb "google.golang.org/genproto/googleapis/cloud/servicedirectory/v1beta1"
 )
 
 func main() {
-	projectId := "your-project-id"
+	projectID := "your-project-id"
 	location := "us-west1"
-	serviceId := "golang-quickstart-service"
-	namespaceId := "golang-quickstart-namespace"
-	endpointId := "golang-quickstart-endpoint"
+	serviceID := "golang-quickstart-service"
+	namespaceID := "golang-quickstart-namespace"
+	endpointID := "golang-quickstart-endpoint"
 
 	ctx := context.Background()
 	// Create a registration client.
 	registry, err := servicedirectory.NewRegistrationClient(ctx)
 	if err != nil {
-		fmt.Printf("servicedirectory.NewRegistrationClient: %v", err)
-		return
+		log.Fatalf("servicedirectory.NewRegistrationClient: %v", err)
 	}
 
 	// Create a lookup client.
 	resolver, err := servicedirectory.NewLookupClient(ctx)
 	if err != nil {
-		fmt.Printf("servicedirectory.NewLookupClient: %v", err)
-		return
+		log.Fatalf("servicedirectory.NewLookupClient: %v", err)
 	}
 
 	// Create a Namespace.
@@ -54,8 +54,7 @@ func main() {
 	}
 	namespace, err := registry.CreateNamespace(ctx, createNsReq)
 	if err != nil {
-		fmt.Printf("servicedirectory.CreateNamespace: %v", err)
-		return
+		log.Fatalf("servicedirectory.CreateNamespace: %v", err)
 	}
 
 	// Create a Service.
@@ -71,8 +70,7 @@ func main() {
 	}
 	service, err := registry.CreateService(ctx, createServiceReq)
 	if err != nil {
-		fmt.Printf("servicedirectory.CreateService: %v", err)
-		return
+		log.Fatalf("servicedirectory.CreateService: %v", err)
 	}
 
 	// Create an Endpoint.
@@ -90,8 +88,7 @@ func main() {
 	}
 	_, err = registry.CreateEndpoint(ctx, createEndpointReq)
 	if err != nil {
-		fmt.Printf("servicedirectory.CreateEndpoint: %v", err)
-		return
+		log.Fatalf("servicedirectory.CreateEndpoint: %v", err)
 	}
 
 	// Now Resolve the service.
@@ -100,7 +97,7 @@ func main() {
 	}
 	result, err := resolver.ResolveService(ctx, lookupRequest)
 	if err != nil {
-		fmt.Printf("servicedirectory.ResolveService: %v", err)
+		log.Fatalf("servicedirectory.ResolveService: %v", err)
 		return
 	}
 

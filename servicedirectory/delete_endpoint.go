@@ -23,25 +23,26 @@ import (
 	sdpb "google.golang.org/genproto/googleapis/cloud/servicedirectory/v1beta1"
 )
 
-func deleteEndpoint(projectId string) error {
+func deleteEndpoint(projectID string) error {
+	// projectID := fmt.Sprintf("/projects/my-project")
 	location := "us-east4"
-	namespaceId := "golang-test-namespace"
-	serviceId := "golang-test-service"
-	endpointId := "golang-test-endpoint"
+	namespaceID := "golang-test-namespace"
+	serviceID := "golang-test-service"
+	endpointID := "golang-test-endpoint"
 
 	ctx := context.Background()
 	// Create a registration client.
 	client, err := servicedirectory.NewRegistrationClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("ServiceDirectory.NewRegistrationClient: %v", err)
 	}
 
 	deleteEndpointReq := &sdpb.DeleteEndpointRequest{
-		Name: fmt.Sprintf("projects/%s/locations/%s/namespaces/%s/services/%s/endpoints/%s", projectId, location, namespaceId, serviceId, endpointId),
+		Name: fmt.Sprintf("projects/%s/locations/%s/namespaces/%s/services/%s/endpoints/%s", projectID, location, namespaceID, serviceID, endpointID),
 	}
 	deleteErr := client.DeleteEndpoint(ctx, deleteEndpointReq)
 	if deleteErr != nil {
-		return deleteErr
+		return fmt.Errorf("DeleteEndpoint: %v", deleteErr)
 	}
 	return nil
 }
