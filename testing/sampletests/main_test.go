@@ -73,8 +73,8 @@ func TestTestCoverage(t *testing.T) {
 		want := testRange{
 			pkgPath:  "github.com/GoogleCloudPlatform/golang-samples/testing/sampletests/fakesamples",
 			testName: "TestHello",
-			start:    26, // If hello.go changes, this test will intentionally break.
-			end:      34,
+			start:    27, // If hello.go changes, this test will intentionally break.
+			end:      35,
 		}
 		if gotRange != want {
 			t.Errorf("testCoverage found incorrect range: got %+v, want %+v", gotRange, want)
@@ -100,7 +100,7 @@ func TestRegionTags(t *testing.T) {
 	if gotStart, want := gotTestRegion.start, 24; gotStart != want {
 		t.Errorf("regionTags %v got start %v, want %v", gotTestRegion.name, gotStart, want)
 	}
-	if gotEnd, want := gotTestRegion.end, 36; gotEnd != want {
+	if gotEnd, want := gotTestRegion.end, 37; gotEnd != want {
 		t.Errorf("regionTags %v got end %v, want %v", gotTestRegion.name, gotEnd, want)
 	}
 }

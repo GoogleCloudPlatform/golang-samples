@@ -23,7 +23,8 @@ package hello
 // [START fakesamples_tested_0]
 // [START fakesamples_tested_1]
 
-func hello() string {
+// Hello returns hello. Only for testing. May change at any time.
+func Hello() string {
 
 	// [END fakesamples_tested_0]
 	// [START fakesamples_tested_3]

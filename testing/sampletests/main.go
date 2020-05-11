@@ -217,14 +217,14 @@ func testCoverage(dir string) (map[string][]testRange, error) {
 				if callee == nil {
 					return true
 				}
-				if callee.Pkg() != obj.Pkg() {
+				if callee.Pkg() != obj.Pkg() && callee.Pkg().Name()+"_test" != obj.Pkg().Name() {
 					return true
 				}
 				calleeScope := callee.Scope()
 				calleePos := pkg.Fset.Position(calleeScope.Pos())
 				calleeEnd := pkg.Fset.Position(calleeScope.End())
 				result[calleePos.Filename] = append(result[calleePos.Filename], testRange{
-					pkgPath:  pkg.PkgPath,
+					pkgPath:  callee.Pkg().Path(),
 					testName: id.Name,
 					start:    calleePos.Line,
 					end:      calleeEnd.Line,

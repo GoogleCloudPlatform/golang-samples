@@ -12,12 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package hello
+package hello_test
 
-import "testing"
+import (
+	"testing"
+
+	hello "github.com/GoogleCloudPlatform/golang-samples/testing/sampletests/fakesamples"
+)
 
 func TestHello(t *testing.T) {
-	if got, want := hello(), "Hello!"; got != want {
+	if got, want := hello.Hello(), "Hello!"; got != want {
 		t.Errorf("hello got %q, want %q", got, want)
 	}
 }
