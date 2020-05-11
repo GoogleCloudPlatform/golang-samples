@@ -61,10 +61,10 @@ func detectText(ctx context.Context, bucketName, fileName string) error {
 	log.Printf("Detected language %q for text %q.", srcLang, text)
 
 	// Submit a message to the bus for each target language
-	for _, targetLang := range config.ToLang {
-		topicName := config.TranslateTopic
+	for _, targetLang := range toLang {
+		topicName := translateTopic
 		if srcLang == targetLang || srcLang == "und" { // detection returns "und" for undefined language
-			topicName = config.ResultTopic
+			topicName = resultTopic
 		}
 		targetTag, err := language.Parse(targetLang)
 		if err != nil {
