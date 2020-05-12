@@ -44,3 +44,12 @@ func notTested() string {
 }
 
 // [END fakesamples_not_tested]
+
+// [START fakesamples_indirect_test]
+
+// IndirectlyTested returns a string. Only for testing. May change at any time.
+func IndirectlyTested() string {
+	return "This function is tested via a function reference rather than a direct call"
+}
+
+// [END fakesamples_indirect_test]

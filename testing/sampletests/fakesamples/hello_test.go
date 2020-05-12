@@ -15,6 +15,7 @@
 package hello_test
 
 import (
+	"strings"
 	"testing"
 
 	hello "github.com/GoogleCloudPlatform/golang-samples/testing/sampletests/fakesamples"
@@ -23,5 +24,22 @@ import (
 func TestHello(t *testing.T) {
 	if got, want := hello.Hello(), "Hello!"; got != want {
 		t.Errorf("hello got %q, want %q", got, want)
+	}
+}
+
+func TestIndirectlyTested(t *testing.T) {
+	tests := []struct {
+		indirectFunc func() string
+		want         string
+	}{
+		{
+			indirectFunc: hello.IndirectlyTested,
+			want:         "This",
+		},
+	}
+	for _, test := range tests {
+		if got := test.indirectFunc(); !strings.HasPrefix(got, test.want) {
+			t.Errorf("indirectlyTested got %q, want prefix %q", got, test.want)
+		}
 	}
 }

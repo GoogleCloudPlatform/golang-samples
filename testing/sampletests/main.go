@@ -20,7 +20,9 @@ For example, if TestFoo tests the regions foo_hello_world and
 foo_hello_gopher, the TestFoo element will have the following property:
     <property name="region_tags" value="foo_hello_world,foo_hello_gopher"></property>
 
-sampletests only looks at direct function calls by tests, not transitive calls.
+sampletests only looks at direct function calls or references by tests. So, if
+you have a map from string -> function reference in the global scope and test
+functions only reference the string, sampletests will not work.
 
 There are some duplicate region tags, but they aren't tracked anywhere else,
 so it's OK if they are "applied" to more than one test.
@@ -49,6 +51,7 @@ import (
 	"flag"
 	"fmt"
 	"go/ast"
+	"go/types"
 	"io"
 	"io/ioutil"
 	"log"
@@ -61,7 +64,6 @@ import (
 	"github.com/jstemmer/go-junit-report/formatter"
 	"golang.org/x/tools/go/ast/astutil"
 	"golang.org/x/tools/go/packages"
-	"golang.org/x/tools/go/types/typeutil"
 )
 
 var (
@@ -209,12 +211,20 @@ func testCoverage(dir string) (map[string][]testRange, error) {
 			// Use path[1] because we don't want the token, we want the actual
 			// function call.
 			ast.Inspect(path[1], func(node ast.Node) bool {
-				call, ok := node.(*ast.CallExpr)
+				// Look up identifiers instead of using typeutil.StaticCallee
+				// because not all functions are called directly. Some table
+				// driven tests use function references which don't get
+				// dereferenced by StaticCallee.
+				ident, ok := node.(*ast.Ident)
 				if !ok {
 					return true
 				}
-				callee := typeutil.StaticCallee(pkg.TypesInfo, call)
-				if callee == nil {
+				callee, ok := pkg.TypesInfo.Uses[ident].(*types.Func)
+				if !ok {
+					return true
+				}
+
+				if callee == nil || callee.Pkg() == nil {
 					return true
 				}
 				if callee.Pkg() != obj.Pkg() && callee.Pkg().Name()+"_test" != obj.Pkg().Name() {
