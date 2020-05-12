@@ -49,8 +49,8 @@ func main() {
 
 	// Create a Namespace.
 	createNsReq := &sdpb.CreateNamespaceRequest{
-		Parent:      fmt.Sprintf("projects/%s/locations/%s", projectId, location),
-		NamespaceId: namespaceId,
+		Parent:      fmt.Sprintf("projects/%s/locations/%s", projectID, location),
+		NamespaceId: namespaceID,
 	}
 	namespace, err := registry.CreateNamespace(ctx, createNsReq)
 	if err != nil {
@@ -60,7 +60,7 @@ func main() {
 	// Create a Service.
 	createServiceReq := &sdpb.CreateServiceRequest{
 		Parent:    namespace.Name,
-		ServiceId: serviceId,
+		ServiceId: serviceID,
 		Service: &sdpb.Service{
 			Metadata: map[string]string{
 				"key1": "value1",
@@ -76,9 +76,9 @@ func main() {
 	// Create an Endpoint.
 	createEndpointReq := &sdpb.CreateEndpointRequest{
 		Parent:     service.Name,
-		EndpointId: endpointId,
+		EndpointId: endpointID,
 		Endpoint: &sdpb.Endpoint{
-			Address: "10.10.10.10",
+			Address: "8.8.8.8",
 			Port:    8080,
 			Metadata: map[string]string{
 				"key1": "value1",
@@ -106,7 +106,7 @@ func main() {
 	// Delete the namespace.
 	deleteNsReq := &sdpb.DeleteNamespaceRequest{
 		Name: fmt.Sprintf("projects/%s/locations/%s/namespaces/%s",
-			projectId, location, namespaceId),
+			projectID, location, namespaceID),
 	}
 	registry.DeleteNamespace(ctx, deleteNsReq) // Ignore results.
 }
