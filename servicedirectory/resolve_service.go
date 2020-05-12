@@ -37,10 +37,10 @@ func resolveService(w io.Writer, projectID string) error {
 		return fmt.Errorf("ServiceDirectory.NewRegistrationClient: %v", err)
 	}
 	// Now Resolve the service.
-	lookupRequest := &sdpb.ResolveServiceRequest{
+	req := &sdpb.ResolveServiceRequest{
 		Name: fmt.Sprintf("projects/%s/locations/%s/namespaces/%s/services/%s", projectID, location, namespaceID, serviceID),
 	}
-	result, err := resolver.ResolveService(ctx, lookupRequest)
+	result, err := resolver.ResolveService(ctx, req)
 	if err != nil {
 		return fmt.Errorf("ResolveService: %v", err)
 	}

@@ -26,7 +26,6 @@ import (
 )
 
 func TestEndpoint(t *testing.T) {
-	// <test setup code>
 	tc := testutil.SystemTest(t)
 	createNsErr := createNamespace(ioutil.Discard, tc.ProjectID)
 	if createNsErr != nil {
@@ -41,9 +40,7 @@ func TestEndpoint(t *testing.T) {
 	t.Run("create", func(t *testing.T) {
 		tc := testutil.SystemTest(t)
 		buf := new(bytes.Buffer)
-		err := createEndpoint(buf, tc.ProjectID)
-
-		if err != nil {
+		if err := createEndpoint(buf, tc.ProjectID); err != nil {
 			t.Errorf("CreateEndpoint %v", err)
 		}
 
@@ -55,14 +52,11 @@ func TestEndpoint(t *testing.T) {
 	})
 	t.Run("delete", func(t *testing.T) {
 		tc := testutil.SystemTest(t)
-		err := deleteEndpoint(tc.ProjectID)
-
-		if err != nil {
+		if err := deleteEndpoint(tc.ProjectID); err != nil {
 			t.Errorf("DeleteEndpoint: %v", err)
 		}
 	})
 
-	// <test tear-down code>
 	deleteErr := deleteNamespace(tc.ProjectID)
 
 	if deleteErr != nil {

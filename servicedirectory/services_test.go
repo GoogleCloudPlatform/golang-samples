@@ -36,9 +36,7 @@ func TestService(t *testing.T) {
 	t.Run("create", func(t *testing.T) {
 		tc := testutil.SystemTest(t)
 		buf := new(bytes.Buffer)
-		err := createService(buf, tc.ProjectID)
-
-		if err != nil {
+		if err := createService(buf, tc.ProjectID); err != nil {
 			t.Errorf("CreateService: %v", err)
 		}
 
@@ -51,9 +49,7 @@ func TestService(t *testing.T) {
 	t.Run("resolve", func(t *testing.T) {
 		tc := testutil.SystemTest(t)
 		buf := new(bytes.Buffer)
-		err := resolveService(buf, tc.ProjectID)
-
-		if err != nil {
+		if err := resolveService(buf, tc.ProjectID); err != nil {
 			t.Errorf("CreateService: %v", err)
 		}
 
@@ -65,9 +61,7 @@ func TestService(t *testing.T) {
 	})
 	t.Run("delete", func(t *testing.T) {
 		tc := testutil.SystemTest(t)
-		err := deleteService(tc.ProjectID)
-
-		if err != nil {
+		if err := deleteService(tc.ProjectID); err != nil {
 			t.Errorf("DeleteService: %v", err)
 		}
 	})

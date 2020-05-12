@@ -36,10 +36,10 @@ func deleteNamespace(projectID string) error {
 	}
 
 	// Delete a Namespace.
-	deleteNsReq := &sdpb.DeleteNamespaceRequest{
+	req := &sdpb.DeleteNamespaceRequest{
 		Name: fmt.Sprintf("projects/%s/locations/%s/namespaces/%s", projectID, location, namespaceID),
 	}
-	deleteErr := client.DeleteNamespace(ctx, deleteNsReq)
+	deleteErr := client.DeleteNamespace(ctx, req)
 	if deleteErr != nil {
 		return fmt.Errorf("DeleteNamespace: %v", deleteErr)
 	}

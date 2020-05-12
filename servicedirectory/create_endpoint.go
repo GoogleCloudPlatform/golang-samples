@@ -39,11 +39,11 @@ func createEndpoint(w io.Writer, projectID string) error {
 	}
 
 	// Create an Endpoint.
-	createEndpointReq := &sdpb.CreateEndpointRequest{
+	req := &sdpb.CreateEndpointRequest{
 		Parent:     fmt.Sprintf("projects/%s/locations/%s/namespaces/%s/services/%s", projectID, location, namespaceID, serviceID),
 		EndpointId: endpointID,
 		Endpoint: &sdpb.Endpoint{
-			Address: "10.10.10.10",
+			Address: "8.8.8.8",
 			Port:    8080,
 			Metadata: map[string]string{
 				"key1": "value1",
@@ -51,7 +51,7 @@ func createEndpoint(w io.Writer, projectID string) error {
 			},
 		},
 	}
-	endpoint, err := client.CreateEndpoint(ctx, createEndpointReq)
+	endpoint, err := client.CreateEndpoint(ctx, req)
 	if err != nil {
 		return fmt.Errorf("CreateEndpoint: %v", err)
 	}

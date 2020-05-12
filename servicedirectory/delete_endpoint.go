@@ -37,10 +37,10 @@ func deleteEndpoint(projectID string) error {
 		return fmt.Errorf("ServiceDirectory.NewRegistrationClient: %v", err)
 	}
 
-	deleteEndpointReq := &sdpb.DeleteEndpointRequest{
+	req := &sdpb.DeleteEndpointRequest{
 		Name: fmt.Sprintf("projects/%s/locations/%s/namespaces/%s/services/%s/endpoints/%s", projectID, location, namespaceID, serviceID, endpointID),
 	}
-	deleteErr := client.DeleteEndpoint(ctx, deleteEndpointReq)
+	deleteErr := client.DeleteEndpoint(ctx, req)
 	if deleteErr != nil {
 		return fmt.Errorf("DeleteEndpoint: %v", deleteErr)
 	}

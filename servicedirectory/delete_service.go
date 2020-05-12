@@ -36,10 +36,10 @@ func deleteService(projectID string) error {
 		return fmt.Errorf("ServiceDirectory.NewRegistrationClient: %v", err)
 	}
 
-	deleteServiceReq := &sdpb.DeleteServiceRequest{
+	req := &sdpb.DeleteServiceRequest{
 		Name: fmt.Sprintf("projects/%s/locations/%s/namespaces/%s/services/%s", projectID, location, namespaceID, serviceID),
 	}
-	deleteErr := client.DeleteService(ctx, deleteServiceReq)
+	deleteErr := client.DeleteService(ctx, req)
 	if deleteErr != nil {
 		return fmt.Errorf("DeleteService: %v", deleteErr)
 	}

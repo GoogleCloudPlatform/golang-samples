@@ -36,11 +36,11 @@ func createNamespace(w io.Writer, projectID string) error {
 		return fmt.Errorf("ServiceDirectory.NewRegistrationClient: %v", err)
 	}
 	// Create a Namespace.
-	createNsReq := &sdpb.CreateNamespaceRequest{
+	req := &sdpb.CreateNamespaceRequest{
 		Parent:      fmt.Sprintf("projects/%s/locations/%s", projectID, location),
 		NamespaceId: namespaceID,
 	}
-	resp, err := client.CreateNamespace(ctx, createNsReq)
+	resp, err := client.CreateNamespace(ctx, req)
 	fmt.Printf("create request response %v error: %v", resp, err)
 	if err != nil {
 		return fmt.Errorf("createNamespace: %v", err)

@@ -37,7 +37,7 @@ func createService(w io.Writer, projectID string) error {
 		return fmt.Errorf("ServiceDirectory.NewRegistrationClient: %v", err)
 	}
 	// Create a Service.
-	createServiceReq := &sdpb.CreateServiceRequest{
+	req := &sdpb.CreateServiceRequest{
 		Parent:    fmt.Sprintf("projects/%s/locations/%s/namespaces/%s", projectID, location, namespaceID),
 		ServiceId: serviceID,
 		Service: &sdpb.Service{
@@ -47,7 +47,7 @@ func createService(w io.Writer, projectID string) error {
 			},
 		},
 	}
-	service, err := client.CreateService(ctx, createServiceReq)
+	service, err := client.CreateService(ctx, req)
 	if err != nil {
 		return fmt.Errorf("CreateSerice: %v", err)
 	}
