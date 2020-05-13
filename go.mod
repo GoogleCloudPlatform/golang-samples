@@ -49,3 +49,6 @@ require (
 	gopkg.in/sendgrid/sendgrid-go.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.2.8
 )
+
+// https://github.com/jstemmer/go-junit-report/issues/107
+replace github.com/jstemmer/go-junit-report => github.com/tbpg/go-junit-report v0.9.2-0.20200506144438-50086c54f894
