@@ -26,6 +26,22 @@ import (
 	"golang.org/x/oauth2/google"
 )
 
+// form is a template for an HTML form that will use the data from the signed
+// post policy.
+var form = `<form action="{{ .URL }}" method="POST" enctype="multipart/form-data">
+	{{- range $name, $value := .Fields }}
+  <input name="{{ $name }}" value="{{ $value }}" type="hidden"/>
+	{{- end }}
+	<input type="file" name="file"/><br />
+	<input type="submit" value="Upload File" name="submit"/><br />
+</form>`
+
+var tmpl *template.Template
+
+func init() {
+	tmpl = template.Must(template.New("policyV4").Parse(form))
+}
+
 // generateSignedPostPolicyV4 generates a signed post policy.
 func generateSignedPostPolicyV4(w io.Writer, bucket, object, serviceAccountJSONPath string) (*storage.PostPolicyV4, error) {
 	// bucket := "bucket-name"
@@ -56,35 +72,8 @@ func generateSignedPostPolicyV4(w io.Writer, bucket, object, serviceAccountJSONP
 		return nil, fmt.Errorf("storage.GenerateSignedPostPolicyV4: %v", err)
 	}
 
-	// Create an HTML form with the provided policy.
-	var form = `<form action='{{ .URL }}' method='POST' enctype='multipart/form-data'>
-	{{- range .Fields }}
-  <input name='{{ .Name }}' value='{{ .Value }}' type='hidden'/>
-	{{- end }}
-	<input type='file' name='file'/><br />
-	<input type='submit' value='Upload File' name='submit'/><br />
-</form>`
-
-	var tmpl *template.Template
-	tmpl = template.Must(template.New("policyV4").Parse(form))
-
-	// Include all fields returned in the HTML form as they're required.
-	var data struct {
-		URL    string
-		Fields []struct {
-			Name  string
-			Value string
-		}
-	}
-	data.URL = policy.URL
-	for k, v := range policy.Fields {
-		data.Fields = append(data.Fields, struct {
-			Name  string
-			Value string
-		}{Name: k, Value: v})
-	}
-
-	if err = tmpl.Execute(w, data); err != nil {
+	// Generate the form, using the data from the policy.
+	if err = tmpl.Execute(w, policy); err != nil {
 		return policy, fmt.Errorf("executing template: %v", err)
 	}
 
