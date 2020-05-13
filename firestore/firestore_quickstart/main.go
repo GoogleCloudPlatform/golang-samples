@@ -34,6 +34,9 @@ func createClient(ctx context.Context) *firestore.Client {
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
+	// Close client when done.
+	defer client.Close()
+
 	return client
 }
 
@@ -43,8 +46,6 @@ func main() {
 	// Get a Firestore client.
 	ctx := context.Background()
 	client := createClient(ctx)
-	// Close client when done.
-	defer client.Close()
 
 	// [START fs_add_data_1]
 	_, _, err := client.Collection("users").Add(ctx, map[string]interface{}{
