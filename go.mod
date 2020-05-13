@@ -30,6 +30,7 @@ require (
 	github.com/gorilla/mux v1.7.4
 	github.com/gorilla/websocket v1.4.2
 	github.com/h2non/filetype v1.0.12
+	github.com/jstemmer/go-junit-report v0.9.1
 	github.com/lib/pq v1.5.0
 	github.com/linkedin/goavro/v2 v2.9.7
 	github.com/mailgun/mailgun-go/v3 v3.6.4
