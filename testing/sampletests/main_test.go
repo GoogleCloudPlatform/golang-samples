@@ -36,6 +36,7 @@ func TestTestsToRegionTags(t *testing.T) {
 		"fakesamples_tested_2":                {},
 		"fakesamples_tested_3":                {},
 		"fakesamples_not_tested":              {},
+		"fakesamples_indirect_test":           {},
 		"samemodule_not_tested":               {},
 	}
 	if diff := cmp.Diff(uniqueRegionTags, wantRegionTags); diff != "" {
@@ -48,6 +49,9 @@ func TestTestsToRegionTags(t *testing.T) {
 				"fakesamples_tested_1": {},
 				"fakesamples_tested_2": {},
 				"fakesamples_tested_3": {},
+			},
+			"TestIndirectlyTested": {
+				"fakesamples_indirect_test": {},
 			},
 		},
 	}
@@ -65,19 +69,36 @@ func TestTestCoverage(t *testing.T) {
 	if gotLen, wantLen := len(got), 1; gotLen != wantLen {
 		t.Fatalf("testCoverage found %d test files, want %d", gotLen, wantLen)
 	}
-	for _, ranges := range got {
-		if gotLen, wantLen := len(ranges), 1; gotLen != wantLen {
-			t.Fatalf("testCoverage found %d test ranges, want %d", gotLen, wantLen)
+	for _, gotRanges := range got {
+		want := []testRange{
+			{
+				pkgPath:  "github.com/GoogleCloudPlatform/golang-samples/testing/sampletests/fakesamples",
+				testName: "TestIndirectlyTested",
+				start:    51, // If hello.go changes, this test will intentionally break.
+				end:      53,
+			},
+			{
+				pkgPath:  "github.com/GoogleCloudPlatform/golang-samples/testing/sampletests/fakesamples",
+				testName: "TestHello",
+				start:    27, // If hello.go changes, this test will intentionally break.
+				end:      35,
+			},
 		}
-		gotRange := ranges[0]
-		want := testRange{
-			pkgPath:  "github.com/GoogleCloudPlatform/golang-samples/testing/sampletests/fakesamples",
-			testName: "TestHello",
-			start:    27, // If hello.go changes, this test will intentionally break.
-			end:      35,
+		if len(gotRanges) != len(want) {
+			t.Fatalf("testCoverage found %d ranges, want %d", len(gotRanges), len(want))
 		}
-		if gotRange != want {
-			t.Errorf("testCoverage found incorrect range: got %+v, want %+v", gotRange, want)
+		// Don't rely on the order of the slice.
+		for _, wantRange := range want {
+			found := false
+			for _, gotRange := range gotRanges {
+				if wantRange == gotRange {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Errorf("testCoverage found incorrect ranges: got %v, want to contain %v", gotRanges, wantRange)
+			}
 		}
 	}
 }
