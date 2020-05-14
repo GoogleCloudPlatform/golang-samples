@@ -129,6 +129,8 @@ export GOLANG_SAMPLES_BIGTABLE_INSTANCE=testing-instance
 
 set -x
 
+go install ./testing/sampletests
+
 # Set application credentials before using gimmeproj so it has access.
 # This is changed to a project-specific credential after a project is leased.
 export GOOGLE_APPLICATION_CREDENTIALS=$KOKORO_KEYSTORE_DIR/71386_kokoro-golang-samples-tests
@@ -180,8 +182,11 @@ runTests() {
   echo "Running 'go test' in '$(pwd)'..."
   set -x
   2>&1 go test -timeout $TIMEOUT -v ${1:-./...} | tee sponge_log.log
-  cat sponge_log.log | /go/bin/go-junit-report -set-exit-code > sponge_log.xml
+  cat sponge_log.log | /go/bin/go-junit-report -set-exit-code > raw_log.xml
   exit_code=$(($exit_code + $?))
+  # Add region tags tested to test case properties.
+  cat raw_log.xml | sampletests > sponge_log.xml
+  rm raw_log.xml # No need to keep this around.
   set +x
 }
 
