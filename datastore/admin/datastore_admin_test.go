@@ -15,7 +15,7 @@
 package samples
 
 import (
-	"golang-samples/internal/testutil"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"io/ioutil"
 	"testing"
 )
