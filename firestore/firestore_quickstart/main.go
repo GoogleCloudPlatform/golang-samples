@@ -15,6 +15,7 @@
 // Sample firestore_quickstart demonstrates how to connect to Firestore, and add and list documents.
 package main
 
+// [START fs_initialize]
 import (
 	"context"
 	"fmt"
@@ -25,25 +26,29 @@ import (
 	"cloud.google.com/go/firestore"
 )
 
-func main() {
-
-	// [START fs_initialize]
+func createClient(ctx context.Context) *firestore.Client {
 	// Sets your Google Cloud Platform project ID.
 	projectID := "YOUR_PROJECT_ID"
 
-	// Get a Firestore client.
-	ctx := context.Background()
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
+	// Close client when done with
+	// defer client.Close()
+	return client
+}
 
-	// Close client when done.
+// [END fs_initialize]
+
+func main() {
+	// Get a Firestore client.
+	ctx := context.Background()
+	client := createClient(ctx)
 	defer client.Close()
-	// [END fs_initialize]
 
 	// [START fs_add_data_1]
-	_, _, err = client.Collection("users").Add(ctx, map[string]interface{}{
+	_, _, err := client.Collection("users").Add(ctx, map[string]interface{}{
 		"first": "Ada",
 		"last":  "Lovelace",
 		"born":  1815,
