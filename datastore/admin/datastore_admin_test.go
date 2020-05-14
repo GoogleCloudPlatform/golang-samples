@@ -15,9 +15,10 @@
 package samples
 
 import (
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"io/ioutil"
 	"testing"
+
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestCreate(t *testing.T) {
