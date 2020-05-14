@@ -21,9 +21,11 @@ import (
 )
 
 func TestCreate(t *testing.T) {
-	if _, err := clientCreate(ioutil.Discard); err != nil {
+	client, err := clientCreate(ioutil.Discard)
+	if err != nil {
 		t.Fatalf("clientCreate: %v", err)
 	}
+	defer client.Close()
 }
 
 func TestIndexList(t *testing.T) {
