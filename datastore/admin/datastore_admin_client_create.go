@@ -24,16 +24,16 @@ import (
 )
 
 // clientCreate creates a new Datastore admin client.
-func clientCreate(w io.Writer) error {
+func clientCreate(w io.Writer) (*admin.DatastoreAdminClient, error) {
 	ctx := context.Background()
 	client, err := admin.NewDatastoreAdminClient(ctx)
 	if err != nil {
-		return fmt.Errorf("admin.NewDatastoreAdminClient: %v", err)
+		return nil, fmt.Errorf("admin.NewDatastoreAdminClient: %v", err)
 	}
 	defer client.Close()
 
 	fmt.Fprintf(w, "Admin client created\n")
-	return nil
+	return client, nil
 }
 
 // [END datastore_admin_client_create]

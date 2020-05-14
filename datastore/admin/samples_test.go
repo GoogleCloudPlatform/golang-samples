@@ -21,7 +21,7 @@ import (
 )
 
 func TestCreate(t *testing.T) {
-	if err := clientCreate(ioutil.Discard); err != nil {
+	if _, err := clientCreate(ioutil.Discard); err != nil {
 		t.Fatalf("clientCreate: %v", err)
 	}
 }

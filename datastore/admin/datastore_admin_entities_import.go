@@ -26,6 +26,8 @@ import (
 
 // entitiesImport imports entities into Google Cloud Datastore.
 func entitiesImport(w io.Writer, projectID, inputURL string) error {
+	// projectID := "project-id"
+	// inputURL := "gs://bucket-name/overall-export-metadata-file"
 	ctx := context.Background()
 	client, err := admin.NewDatastoreAdminClient(ctx)
 	if err != nil {
@@ -40,12 +42,10 @@ func entitiesImport(w io.Writer, projectID, inputURL string) error {
 	if err != nil {
 		return fmt.Errorf("ImportEntities: %v", err)
 	}
-
 	err = op.Wait(ctx)
 	if err != nil {
 		return fmt.Errorf("Wait: %v", err)
 	}
-
 	fmt.Fprintf(w, "Entities were imported\n")
 	return nil
 }
