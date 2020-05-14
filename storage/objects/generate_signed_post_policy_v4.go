@@ -30,7 +30,7 @@ import (
 // post policy.
 var form = `<form action="{{ .URL }}" method="POST" enctype="multipart/form-data">
 	{{- range $name, $value := .Fields }}
-  <input name="{{ $name }}" value="{{ $value }}" type="hidden"/>
+	<input name="{{ $name }}" value="{{ $value }}" type="hidden"/>
 	{{- end }}
 	<input type="file" name="file"/><br />
 	<input type="submit" value="Upload File" name="submit"/><br />
