@@ -20,9 +20,9 @@ package ocr
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"cloud.google.com/go/pubsub"
@@ -31,14 +31,6 @@ import (
 	vision "cloud.google.com/go/vision/apiv1"
 	"golang.org/x/text/language"
 )
-
-type configuration struct {
-	ProjectID      string   `json:"PROJECT_ID"`
-	ResultTopic    string   `json:"RESULT_TOPIC"`
-	ResultBucket   string   `json:"RESULT_BUCKET"`
-	TranslateTopic string   `json:"TRANSLATE_TOPIC"`
-	ToLang         []string `json:"TO_LANG"`
-}
 
 type ocrMessage struct {
 	Text     string       `json:"text"`
@@ -67,22 +59,20 @@ var (
 	translateClient *translate.Client
 	pubsubClient    *pubsub.Client
 	storageClient   *storage.Client
-	config          *configuration
+
+	projectID      string
+	resultBucket   string
+	resultTopic    string
+	toLang         []string
+	translateTopic string
 )
 
 func setup(ctx context.Context) error {
-	if config == nil {
-		cfgFile, err := os.Open("config.json")
-		if err != nil {
-			return fmt.Errorf("os.Open: %v", err)
-		}
-
-		d := json.NewDecoder(cfgFile)
-		config = &configuration{}
-		if err = d.Decode(config); err != nil {
-			return fmt.Errorf("Decode: %v", err)
-		}
-	}
+	projectID = os.Getenv("GOOGLE_CLOUD_PROJECT")
+	resultBucket = os.Getenv("RESULT_BUCKET")
+	resultTopic = os.Getenv("RESULT_TOPIC")
+	toLang = strings.Split(os.Getenv("TO_LANG"), ",")
+	translateTopic = os.Getenv("TRANSLATE_TOPIC")
 
 	var err error // Prevent shadowing clients with :=.
 
@@ -101,7 +91,7 @@ func setup(ctx context.Context) error {
 	}
 
 	if pubsubClient == nil {
-		pubsubClient, err = pubsub.NewClient(ctx, config.ProjectID)
+		pubsubClient, err = pubsub.NewClient(ctx, projectID)
 		if err != nil {
 			return fmt.Errorf("translate.NewClient: %v", err)
 		}
