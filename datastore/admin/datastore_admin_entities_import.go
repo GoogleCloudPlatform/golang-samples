@@ -37,7 +37,8 @@ func entitiesImport(w io.Writer, projectID, inputURL string) error {
 
 	req := &adminpb.ImportEntitiesRequest{
 		ProjectId: projectID,
-		InputUrl:  inputURL}
+		InputUrl:  inputURL,
+	}
 	op, err := client.ImportEntities(ctx, req)
 	if err != nil {
 		return fmt.Errorf("ImportEntities: %v", err)

@@ -38,7 +38,8 @@ func entitiesExport(w io.Writer, projectID, outputURLPrefix string) error {
 
 	req := &adminpb.ExportEntitiesRequest{
 		ProjectId:       projectID,
-		OutputUrlPrefix: outputURLPrefix}
+		OutputUrlPrefix: outputURLPrefix,
+	}
 	op, err := client.ExportEntities(ctx, req)
 	if err != nil {
 		return fmt.Errorf("ExportEntities: %v", err)
