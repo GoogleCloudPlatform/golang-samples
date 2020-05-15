@@ -30,7 +30,7 @@ type PubSubMessage struct {
 
 // HelloPubSub consumes a Pub/Sub message.
 func HelloPubSub(ctx context.Context, m PubSubMessage) error {
-	name := string(m.Data). // Decode from base64
+	name := string(m.Data) // Decode from base64
 	if name == "" {
 		name = "World"
 	}
