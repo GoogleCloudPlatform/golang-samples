@@ -25,7 +25,7 @@ import (
 )
 
 func createNamespace(w io.Writer, projectID string) error {
-	// projectID := fmt.Sprintf("/projects/my-project")
+	// projectID := "my-project"
 	location := "us-east4"
 	namespaceID := "golang-test-namespace"
 
@@ -35,15 +35,16 @@ func createNamespace(w io.Writer, projectID string) error {
 	if err != nil {
 		return fmt.Errorf("ServiceDirectory.NewRegistrationClient: %v", err)
 	}
+
+	defer client.Close()
 	// Create a Namespace.
 	req := &sdpb.CreateNamespaceRequest{
 		Parent:      fmt.Sprintf("projects/%s/locations/%s", projectID, location),
 		NamespaceId: namespaceID,
 	}
 	resp, err := client.CreateNamespace(ctx, req)
-	fmt.Printf("create request response %v error: %v", resp, err)
 	if err != nil {
-		return fmt.Errorf("createNamespace: %v", err)
+		return fmt.Errorf("CreateNamespace: %v", err)
 	}
 	fmt.Fprintf(w, "servicedirectory.CreateNamespace result: %s\n", resp.Name)
 	return nil

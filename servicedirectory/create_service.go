@@ -25,7 +25,7 @@ import (
 )
 
 func createService(w io.Writer, projectID string) error {
-	// projectID := fmt.Sprintf("/projects/my-project")
+	// projectID := "my-project"
 	location := "us-east4"
 	namespaceID := "golang-test-namespace"
 	serviceID := "golang-test-service"
@@ -36,6 +36,8 @@ func createService(w io.Writer, projectID string) error {
 	if err != nil {
 		return fmt.Errorf("ServiceDirectory.NewRegistrationClient: %v", err)
 	}
+
+	defer client.Close()
 	// Create a Service.
 	req := &sdpb.CreateServiceRequest{
 		Parent:    fmt.Sprintf("projects/%s/locations/%s/namespaces/%s", projectID, location, namespaceID),

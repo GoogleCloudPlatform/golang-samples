@@ -24,7 +24,7 @@ import (
 )
 
 func deleteEndpoint(projectID string) error {
-	// projectID := fmt.Sprintf("/projects/my-project")
+	// projectID := "my-project"
 	location := "us-east4"
 	namespaceID := "golang-test-namespace"
 	serviceID := "golang-test-service"
@@ -37,12 +37,13 @@ func deleteEndpoint(projectID string) error {
 		return fmt.Errorf("ServiceDirectory.NewRegistrationClient: %v", err)
 	}
 
+	defer client.Close()
+	// Delete an Endpoint
 	req := &sdpb.DeleteEndpointRequest{
 		Name: fmt.Sprintf("projects/%s/locations/%s/namespaces/%s/services/%s/endpoints/%s", projectID, location, namespaceID, serviceID, endpointID),
 	}
-	deleteErr := client.DeleteEndpoint(ctx, req)
-	if deleteErr != nil {
-		return fmt.Errorf("DeleteEndpoint: %v", deleteErr)
+	if err := client.DeleteEndpoint(ctx, req); err != nil {
+		return fmt.Errorf("DeleteEndpoint: %v", err)
 	}
 	return nil
 }

@@ -24,7 +24,7 @@ import (
 )
 
 func deleteService(projectID string) error {
-	// projectID := fmt.Sprintf("/projects/my-project")
+	// projectID := "my-project"
 	location := "us-east4"
 	namespaceID := "golang-test-namespace"
 	serviceID := "golang-test-service"
@@ -36,12 +36,13 @@ func deleteService(projectID string) error {
 		return fmt.Errorf("ServiceDirectory.NewRegistrationClient: %v", err)
 	}
 
+	defer client.Close()
+	// Delete a service
 	req := &sdpb.DeleteServiceRequest{
 		Name: fmt.Sprintf("projects/%s/locations/%s/namespaces/%s/services/%s", projectID, location, namespaceID, serviceID),
 	}
-	deleteErr := client.DeleteService(ctx, req)
-	if deleteErr != nil {
-		return fmt.Errorf("DeleteService: %v", deleteErr)
+	if err := client.DeleteService(ctx, req); err != nil {
+		return fmt.Errorf("DeleteService: %v", err)
 	}
 	return nil
 }

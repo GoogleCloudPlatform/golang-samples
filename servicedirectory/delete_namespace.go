@@ -24,7 +24,7 @@ import (
 )
 
 func deleteNamespace(projectID string) error {
-	// projectID := fmt.Sprintf("/projects/my-project")
+	// projectID := "my-project"
 	location := "us-east4"
 	namespaceID := "golang-test-namespace"
 
@@ -35,13 +35,13 @@ func deleteNamespace(projectID string) error {
 		return fmt.Errorf("ServiceDirectory.NewRegistrationClient: %v", err)
 	}
 
+	defer client.Close()
 	// Delete a Namespace.
 	req := &sdpb.DeleteNamespaceRequest{
 		Name: fmt.Sprintf("projects/%s/locations/%s/namespaces/%s", projectID, location, namespaceID),
 	}
-	deleteErr := client.DeleteNamespace(ctx, req)
-	if deleteErr != nil {
-		return fmt.Errorf("DeleteNamespace: %v", deleteErr)
+	if err := client.DeleteNamespace(ctx, req); err != nil {
+		return fmt.Errorf("DeleteNamespace: %v", err)
 	}
 	return nil
 }

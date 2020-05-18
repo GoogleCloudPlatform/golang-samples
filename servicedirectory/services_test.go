@@ -26,7 +26,6 @@ import (
 )
 
 func TestService(t *testing.T) {
-	// <test setup code>
 	tc := testutil.SystemTest(t)
 	err := createNamespace(ioutil.Discard, tc.ProjectID)
 	if err != nil {
@@ -34,7 +33,6 @@ func TestService(t *testing.T) {
 		os.Exit(0)
 	}
 	t.Run("create", func(t *testing.T) {
-		tc := testutil.SystemTest(t)
 		buf := new(bytes.Buffer)
 		if err := createService(buf, tc.ProjectID); err != nil {
 			t.Errorf("CreateService: %v", err)
@@ -47,7 +45,6 @@ func TestService(t *testing.T) {
 		}
 	})
 	t.Run("resolve", func(t *testing.T) {
-		tc := testutil.SystemTest(t)
 		buf := new(bytes.Buffer)
 		if err := resolveService(buf, tc.ProjectID); err != nil {
 			t.Errorf("CreateService: %v", err)
@@ -60,16 +57,12 @@ func TestService(t *testing.T) {
 		}
 	})
 	t.Run("delete", func(t *testing.T) {
-		tc := testutil.SystemTest(t)
 		if err := deleteService(tc.ProjectID); err != nil {
 			t.Errorf("DeleteService: %v", err)
 		}
 	})
 
-	// <test tear-down>
-	deleteErr := deleteNamespace(tc.ProjectID)
-
-	if deleteErr != nil {
-		t.Errorf("Failed to delete namespace in test tear down: %v.", deleteErr)
+	if err := deleteNamespace(tc.ProjectID); err != nil {
+		t.Errorf("Failed to delete namespace in test tear down: %v.", err)
 	}
 }
