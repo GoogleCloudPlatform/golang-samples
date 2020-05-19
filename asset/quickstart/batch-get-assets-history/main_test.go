@@ -40,10 +40,7 @@ func TestMain(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to read stdout: %v", err)
 	}
-	got := string(out)
-
-	want := "assets:<window:<start_time"
-	if !strings.Contains(got, want) && len(got) > 0 {
+	if got, want := string(out), "assets:"; !strings.Contains(got, want) && len(got) > 0 {
 		t.Errorf("stdout returned %s, wanted either empty or contain %s", got, want)
 	}
 }
