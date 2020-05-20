@@ -12,35 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package hello_test
 
 import (
-	"io/ioutil"
-	"os"
 	"strings"
 	"testing"
 
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	hello "github.com/GoogleCloudPlatform/golang-samples/testing/sampletests/fakesamples"
 )
 
-func TestMain(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	os.Setenv("GOOGLE_CLOUD_PROJECT", tc.ProjectID)
-
-	oldStdout := os.Stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
-
-	main()
-
-	w.Close()
-	os.Stdout = oldStdout
-
-	out, err := ioutil.ReadAll(r)
-	if err != nil {
-		t.Fatalf("Failed to read stdout: %v", err)
+func TestHello(t *testing.T) {
+	if got, want := hello.Hello(), "Hello!"; got != want {
+		t.Errorf("hello got %q, want %q", got, want)
 	}
-	if got, want := string(out), "assets:"; !strings.Contains(got, want) && len(got) > 0 {
-		t.Errorf("stdout returned %s, wanted either empty or contain %s", got, want)
+}
+
+func TestIndirectlyTested(t *testing.T) {
+	tests := []struct {
+		indirectFunc func() string
+		want         string
+	}{
+		{
+			indirectFunc: hello.IndirectlyTested,
+			want:         "This",
+		},
+	}
+	for _, test := range tests {
+		if got := test.indirectFunc(); !strings.HasPrefix(got, test.want) {
+			t.Errorf("indirectlyTested got %q, want prefix %q", got, test.want)
+		}
 	}
 }
