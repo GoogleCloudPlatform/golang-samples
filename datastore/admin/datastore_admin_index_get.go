@@ -37,7 +37,8 @@ func indexGet(w io.Writer, projectID, indexID string) error {
 
 	req := &adminpb.GetIndexRequest{
 		ProjectId: projectID,
-		IndexId:   indexID}
+		IndexId:   indexID,
+	}
 	index, err := client.GetIndex(ctx, req)
 	if err != nil {
 		return fmt.Errorf("client.GetIndex: %v", err)

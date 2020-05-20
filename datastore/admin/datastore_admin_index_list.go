@@ -36,9 +36,10 @@ func indexList(w io.Writer, projectID string) ([]*adminpb.Index, error) {
 	defer client.Close()
 
 	req := &adminpb.ListIndexesRequest{
-		ProjectId: projectID}
+		ProjectId: projectID,
+	}
 	it := client.ListIndexes(ctx, req)
-	var indexArr []*adminpb.Index
+	var indices []*adminpb.Index
 	for {
 		index, err := it.Next()
 		if err == iterator.Done {
@@ -47,12 +48,12 @@ func indexList(w io.Writer, projectID string) ([]*adminpb.Index, error) {
 		if err != nil {
 			return nil, fmt.Errorf("ListIndexes: %v", err)
 		}
-		indexArr = append(indexArr, index)
+		indices = append(indices, index)
 		fmt.Fprintf(w, "Got index: %v\n", index.IndexId)
 	}
 
 	fmt.Fprintf(w, "Got lists of indexes\n")
-	return indexArr, nil
+	return indices, nil
 }
 
 // [END datastore_admin_index_list]

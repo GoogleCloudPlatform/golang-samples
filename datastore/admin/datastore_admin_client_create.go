@@ -30,7 +30,7 @@ func clientCreate(w io.Writer) (*admin.DatastoreAdminClient, error) {
 	if err != nil {
 		return nil, fmt.Errorf("admin.NewDatastoreAdminClient: %v", err)
 	}
-	// Close client when done with
+	// Close client when done using it.
 	// defer client.Close()
 	fmt.Fprintf(w, "Admin client created\n")
 	return client, nil

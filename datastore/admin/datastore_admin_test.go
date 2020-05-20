@@ -39,9 +39,11 @@ func TestIndexList(t *testing.T) {
 func TestIndexGet(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	// Get first index from the list of indexes.
-	indexes, _ := indexList(ioutil.Discard, tc.ProjectID)
-	indexID := indexes[0].IndexId
-
+	indices, _ := indexList(ioutil.Discard, tc.ProjectID)
+	indexID := indices[0].IndexId
+	if len(indices) == 0 {
+		t.Skip("Skipping datastore test. At least one index should present in database.")
+	}
 	if err := indexGet(ioutil.Discard, tc.ProjectID, indexID); err != nil {
 		t.Fatalf("indexGet: %v", err)
 	}

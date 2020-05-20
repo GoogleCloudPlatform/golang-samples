@@ -24,7 +24,7 @@ import (
 	adminpb "google.golang.org/genproto/googleapis/datastore/admin/v1"
 )
 
-// entitiesImport imports entities into Google Cloud Datastore.
+// entitiesImport imports entities into Datastore.
 func entitiesImport(w io.Writer, projectID, inputURL string) error {
 	// projectID := "project-id"
 	// inputURL := "gs://bucket-name/overall-export-metadata-file"

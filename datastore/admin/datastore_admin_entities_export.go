@@ -24,8 +24,8 @@ import (
 	adminpb "google.golang.org/genproto/googleapis/datastore/admin/v1"
 )
 
-// entitiesExport exports a copy of all or a subset of entities from Google
-// Cloud Datastore to another storage system, such as Google Cloud Storage.
+// entitiesExport exports a copy of all or a subset of entities from
+// Datastore to another storage system, such as Cloud Storage.
 func entitiesExport(w io.Writer, projectID, outputURLPrefix string) error {
 	// projectID := "project-id"
 	// outputURLPrefix := "gs://bucket-name"
@@ -44,11 +44,10 @@ func entitiesExport(w io.Writer, projectID, outputURLPrefix string) error {
 	if err != nil {
 		return fmt.Errorf("ExportEntities: %v", err)
 	}
-	_, err = op.Wait(ctx)
-	if err != nil {
+	if _, err := op.Wait(ctx); err != nil {
 		return fmt.Errorf("Wait: %v", err)
 	}
-	fmt.Fprintf(w, "Entities were exported\n")
+	fmt.Fprintln(w, "Entities were exported")
 	return nil
 }
 
