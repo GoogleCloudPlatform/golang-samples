@@ -77,7 +77,10 @@ func main() {
 		port = "8080"
 	}
 	log.Printf("Listening on port %s", port)
-	if err := http.ListenAndServe(":"+port, nil); err != nil {
+	if err := http.ListenAndServe(":"+port, &ochttp.Handler {
+        // Use Google Cloud propagation format.
+        Propagation: &propagation.HTTPFormat{},
+        }); err != nil {
 		log.Fatal(err)
 	}
 }
