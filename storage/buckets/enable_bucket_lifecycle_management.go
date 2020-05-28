@@ -42,7 +42,7 @@ func enableBucketLifecycleManagement(w io.Writer, bucketName string) error {
 	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
 		Lifecycle: &storage.Lifecycle{
 			Rules: []storage.LifecycleRule{
-				storage.LifecycleRule{
+				{
 					Action: storage.LifecycleAction{Type: "Delete"},
 					Condition: storage.LifecycleCondition{
 						AgeInDays: 100,
