@@ -16,6 +16,7 @@ package buckets
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -277,6 +278,9 @@ func TestUniformBucketLevelAccess(t *testing.T) {
 func TestLifecycleManagement(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	bucketName := tc.ProjectID + "-storage-buckets-tests"
+
+	ctx := context.Background()
+	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName)
 
 	if err := enableBucketLifecycleManagement(ioutil.Discard, bucketName); err != nil {
 		t.Errorf("enableBucketLifecycleManagement: %v", err)
