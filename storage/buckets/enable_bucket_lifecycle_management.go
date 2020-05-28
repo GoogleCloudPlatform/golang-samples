@@ -25,7 +25,7 @@ import (
 )
 
 // enableBucketLifecycleManagement adds a lifecycle delete rule with the
-// condition that the bucket is 100 days old.
+// condition that the object is 100 days old.
 func enableBucketLifecycleManagement(w io.Writer, bucketName string) error {
 	// bucketName := "bucket-name"
 	ctx := context.Background()
