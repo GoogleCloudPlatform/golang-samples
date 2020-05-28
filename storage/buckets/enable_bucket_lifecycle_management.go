@@ -56,7 +56,11 @@ func enableBucketLifecycleManagement(w io.Writer, bucketName string) error {
 	if err != nil {
 		return fmt.Errorf("Bucket(%q).Update: %v", bucketName, err)
 	}
-	fmt.Fprintf(w, "Lifecycle management is enabled for bucket %v\n and the rules are:\n%+v", bucketName, attrs.Lifecycle.Rules)
+	fmt.Fprintf(w, "Lifecycle management is enabled for bucket %v\n and the rules are:\n", bucketName)
+	for _, rule := range attrs.Lifecycle.Rules {
+		fmt.Fprintf(w, "Action: %v\n", rule.Action)
+		fmt.Fprintf(w, "Condition: %v\n", rule.Condition)
+	}
 
 	return nil
 }
