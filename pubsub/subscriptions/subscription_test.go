@@ -195,6 +195,41 @@ func TestDelete(t *testing.T) {
 	}
 }
 
+func TestPullMsgsAsync(t *testing.T) {
+	client := setup(t)
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	asyncTopicID := topicID + "-async"
+	asyncSubID := subID + "-async"
+
+	topic, err := getOrCreateTopic(ctx, client, asyncTopicID)
+	if err != nil {
+		t.Fatalf("getOrCreateTopic: %v", err)
+	}
+	defer topic.Delete(ctx)
+	defer topic.Stop()
+
+	sub, err := getOrCreateSub(ctx, client, topic, asyncSubID)
+	if err != nil {
+		t.Fatalf("getOrCreateSub: %v", err)
+	}
+	defer sub.Delete(ctx)
+
+	// Publish 10 messages on the topic.
+	const numMsgs = 10
+	publishMsgs(ctx, topic, numMsgs)
+
+	buf := new(bytes.Buffer)
+	err = pullMsgs(buf, tc.ProjectID, asyncSubID)
+	if err != nil {
+		t.Fatalf("failed to pull messages: %v", err)
+	}
+	// Check for number of newlines, which should correspond with number of messages.
+	if got := strings.Count(buf.String(), "\n"); got != numMsgs {
+		t.Fatalf("pullMsgsSync got %d messages, want %d", got, numMsgs)
+	}
+}
+
 func TestPullMsgsSync(t *testing.T) {
 	client := setup(t)
 	ctx := context.Background()
@@ -220,7 +255,7 @@ func TestPullMsgsSync(t *testing.T) {
 	publishMsgs(ctx, topic, numMsgs)
 
 	buf := new(bytes.Buffer)
-	err = pullMsgsSync(buf, tc.ProjectID, subIDSync, topic)
+	err = pullMsgsSync(buf, tc.ProjectID, subIDSync)
 	if err != nil {
 		t.Fatalf("failed to pull messages: %v", err)
 	}
