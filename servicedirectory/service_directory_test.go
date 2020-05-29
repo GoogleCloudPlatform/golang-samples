@@ -27,26 +27,22 @@ func TestServiceDirectory(t *testing.T) {
 	t.Run("createNamespace", func(t *testing.T) {
 		buf := new(bytes.Buffer)
 		if err := createNamespace(buf, tc.ProjectID); err != nil {
-			t.Errorf("CreateNamespace: %v", err)
-			t.Skip("Skipping rest of tests because CreateNamespace Failed")
+			t.Fatalf("CreateNamespace: %v", err)
 		}
 		got := buf.String()
 		if want := "namespaces/golang-test-namespace"; !strings.Contains(got, want) {
-			t.Errorf("got %q, want %q", got, want)
-			t.Skip("Skipping rest of tests because the CreateNamespace response did not match expected")
+			t.Fatalf("got %q, want %q", got, want)
 		}
 	})
 	t.Run("createService", func(t *testing.T) {
 		buf := new(bytes.Buffer)
 		if err := createService(buf, tc.ProjectID); err != nil {
-			t.Errorf("CreateService: %v", err)
-			t.Skip("Skipping rest of tests because CreateService failed")
+			t.Fatalf("CreateService: %v", err)
 		}
 
 		got := buf.String()
 		if want := "services/golang-test-service"; !strings.Contains(got, want) {
-			t.Errorf("got %q, want %q", got, want)
-			t.Skip("Skipping rest of tests because CreateService response did not match expected")
+			t.Fatalf("got %q, want %q", got, want)
 		}
 	})
 	t.Run("resolveService", func(t *testing.T) {
