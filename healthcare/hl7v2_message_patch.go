@@ -22,7 +22,7 @@ import (
 	"io"
 	"io/ioutil"
 
-	healthcare "google.golang.org/api/healthcare/v1beta1"
+	healthcare "google.golang.org/api/healthcare/v1"
 )
 
 // patchHL7V2Message patches an HL7V2 message.

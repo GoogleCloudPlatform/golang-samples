@@ -77,7 +77,14 @@ func main() {
 		port = "8080"
 	}
 	log.Printf("Listening on port %s", port)
-	if err := http.ListenAndServe(":"+port, nil); err != nil {
+
+	// Use an ochttp.Handler in order to instrument OpenCensus for incoming
+	// requests.
+	httpHandler := &ochttp.Handler{
+		// Use the Google Cloud propagation format.
+		Propagation: &propagation.HTTPFormat{},
+	}
+	if err := http.ListenAndServe(":"+port, httpHandler); err != nil {
 		log.Fatal(err)
 	}
 }

@@ -38,28 +38,23 @@ const (
 )
 
 var (
-	projectID       string
-	bucketName      string
 	imageBucketName string
 )
 
-// TestMain sets up the config rather than using the config file
-// which contains placeholder values.
 func setupTests(t *testing.T) {
 	ctx := context.Background()
 	projectID = os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
 	if projectID == "" {
 		t.Skip("GOLANG_SAMPLES_PROJECT_ID is unset")
 	}
-	bucketName = fmt.Sprintf("%s-result", projectID)
+	resultBucket = fmt.Sprintf("%s-result", projectID)
+	os.Setenv("GOOGLE_CLOUD_PROJECT", projectID)
+	os.Setenv("RESULT_BUCKET", resultBucket)
+	os.Setenv("RESULT_TOPIC", "test-result-topic")
+	os.Setenv("TO_LANG", "en,fr,es,ja,ru")
+	os.Setenv("TRANSLATE_TOPIC", "test-translate-topic")
+
 	imageBucketName = "cloud-samples-data/functions"
-	config = &configuration{
-		ProjectID:      projectID,
-		ResultTopic:    "test-result-topic",
-		ResultBucket:   bucketName,
-		TranslateTopic: "test-translate-topic",
-		ToLang:         []string{"en", "fr", "es", "ja", "ru"},
-	}
 
 	var err error // Prevent shadowing clients with :=.
 	visionClient, err = vision.NewImageAnnotatorClient(ctx)
@@ -82,8 +77,8 @@ func setupTests(t *testing.T) {
 		t.Fatalf("storage.NewClient: %v", err)
 	}
 
-	if _, err := storageClient.Bucket(bucketName).Attrs(ctx); err != nil {
-		t.Skipf("Could not get bucket %v: %v", bucketName, err)
+	if _, err := storageClient.Bucket(resultBucket).Attrs(ctx); err != nil {
+		t.Skipf("Could not get bucket %v: %v", resultBucket, err)
 	}
 }
 
@@ -118,7 +113,7 @@ func TestSaveResult(t *testing.T) {
 	}
 
 	// Check for saved object.
-	r, err := storageClient.Bucket(bucketName).Object(fmt.Sprintf("%s_%s.txt", menuName, en)).NewReader(ctx)
+	r, err := storageClient.Bucket(os.Getenv("RESULT_BUCKET")).Object(fmt.Sprintf("%s_%s.txt", menuName, en)).NewReader(ctx)
 	if err != nil {
 		t.Errorf("NewReader: %v", err)
 	}

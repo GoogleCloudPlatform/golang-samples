@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"io"
 
-	healthcare "google.golang.org/api/healthcare/v1beta1"
+	healthcare "google.golang.org/api/healthcare/v1"
 )
 
 // listHL7V2Messages prints a list of HL7V2 messages to w.

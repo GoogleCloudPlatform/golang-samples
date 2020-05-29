@@ -21,7 +21,7 @@ import (
 	"io"
 	"time"
 
-	healthcare "google.golang.org/api/healthcare/v1beta1"
+	healthcare "google.golang.org/api/healthcare/v1"
 )
 
 // deidentifyDataset creates a new dataset containing de-identified data from the source dataset.

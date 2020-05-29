@@ -23,7 +23,7 @@ import (
 	"io"
 	"io/ioutil"
 
-	healthcare "google.golang.org/api/healthcare/v1beta1"
+	healthcare "google.golang.org/api/healthcare/v1"
 )
 
 // updateFHIRResource updates an FHIR resource to be active or not.

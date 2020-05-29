@@ -12,14 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# [START functions_ci_cd_cloud_build_go]
+# [START functions_ci_cd_cloud_build]
 steps:
   - name: 'mirror.gcr.io/library/golang'
     args: ['go', 'version']
   - name: 'mirror.gcr.io/library/golang'
     args: ['go', 'test']
-    dir: 'functions/autodeploy'
+    dir: 'function/dir/from/repo/root'
   - name: 'gcr.io/cloud-builders/gcloud'
-    args: ['functions', 'deploy', '[YOUR_DEPLOYED_FUNCTION_NAME]', '[YOUR_FUNCTION_TRIGGER]', '--runtime', '[YOUR_RUNTIME]', '--entry-point', '[YOUR_FUNCTION_NAME_IN_CODE]']
-    dir: 'functions/autodeploy'
-# [END functions_ci_cd_cloud_build_go]
+    args: ['functions', 'deploy', '[YOUR_DEPLOYED_FUNCTION_NAME]', '[YOUR_FUNCTION_TRIGGER]', '--runtime', 'go113', '--entry-point', '[YOUR_FUNCTION_NAME_IN_CODE]']
+    dir: 'function/dir/from/repo/root'
+# [END functions_ci_cd_cloud_build]

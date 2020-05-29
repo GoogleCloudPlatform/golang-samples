@@ -149,7 +149,7 @@ func TestKMS(t *testing.T) {
 	}
 
 	kmsKeyName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", tc.ProjectID, "global", keyRingID, cryptoKeyID)
-	if err := setBucketDefaultKmsKey(ioutil.Discard, bucketName, kmsKeyName); err != nil {
+	if err := setBucketDefaultKMSKey(ioutil.Discard, bucketName, kmsKeyName); err != nil {
 		t.Fatalf("setBucketDefaultKmsKey: failed to enable default kms key (%q): %v", kmsKeyName, err)
 	}
 }
@@ -159,7 +159,7 @@ func TestBucketLock(t *testing.T) {
 	bucketName := tc.ProjectID + "-storage-buckets-tests"
 
 	retentionPeriod := 5 * time.Second
-	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
 		if err := setRetentionPolicy(ioutil.Discard, bucketName, retentionPeriod); err != nil {
 			r.Errorf("setRetentionPolicy: %v", err)
 		}
@@ -172,7 +172,7 @@ func TestBucketLock(t *testing.T) {
 	if attrs.RetentionPolicy.RetentionPeriod != retentionPeriod {
 		t.Fatalf("retention period is not the expected value (%q): %v", retentionPeriod, attrs.RetentionPolicy.RetentionPeriod)
 	}
-	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
 		if err := enableDefaultEventBasedHold(ioutil.Discard, bucketName); err != nil {
 			r.Errorf("enableDefaultEventBasedHold: %v", err)
 		}
@@ -185,7 +185,7 @@ func TestBucketLock(t *testing.T) {
 	if !attrs.DefaultEventBasedHold {
 		t.Fatalf("default event-based hold was not enabled")
 	}
-	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
 		if err := disableDefaultEventBasedHold(ioutil.Discard, bucketName); err != nil {
 			r.Errorf("disableDefaultEventBasedHold: %v", err)
 		}
@@ -198,7 +198,7 @@ func TestBucketLock(t *testing.T) {
 	if attrs.DefaultEventBasedHold {
 		t.Fatalf("default event-based hold was not disabled")
 	}
-	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
 		if err := removeRetentionPolicy(ioutil.Discard, bucketName); err != nil {
 			r.Errorf("removeRetentionPolicy: %v", err)
 		}
@@ -211,11 +211,13 @@ func TestBucketLock(t *testing.T) {
 	if attrs.RetentionPolicy != nil {
 		t.Fatalf("retention period to not be set")
 	}
-	if err := setRetentionPolicy(ioutil.Discard, bucketName, retentionPeriod); err != nil {
-		t.Fatalf("setRetentionPolicy: %v", err)
-	}
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
+		if err := setRetentionPolicy(ioutil.Discard, bucketName, retentionPeriod); err != nil {
+			r.Errorf("setRetentionPolicy: %v", err)
+		}
+	})
 
-	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
 		if err := lockRetentionPolicy(ioutil.Discard, bucketName); err != nil {
 			r.Errorf("lockRetentionPolicy: %v", err)
 		}
@@ -241,7 +243,7 @@ func TestUniformBucketLevelAccess(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	bucketName := tc.ProjectID + "-storage-buckets-tests"
 
-	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
 		if err := enableUniformBucketLevelAccess(ioutil.Discard, bucketName); err != nil {
 			r.Errorf("enableUniformBucketLevelAccess: %v", err)
 		}
@@ -254,9 +256,12 @@ func TestUniformBucketLevelAccess(t *testing.T) {
 	if !attrs.UniformBucketLevelAccess.Enabled {
 		t.Fatalf("Uniform bucket-level access was not enabled for (%q).", bucketName)
 	}
-	if err := disableUniformBucketLevelAccess(ioutil.Discard, bucketName); err != nil {
-		t.Fatalf("disableUniformBucketLevelAccess: %v", err)
-	}
+
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
+		if err := disableUniformBucketLevelAccess(ioutil.Discard, bucketName); err != nil {
+			r.Errorf("disableUniformBucketLevelAccess: %v", err)
+		}
+	})
 
 	attrs, err = getUniformBucketLevelAccess(ioutil.Discard, bucketName)
 	if err != nil {
