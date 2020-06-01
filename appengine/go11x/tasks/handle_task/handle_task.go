@@ -56,7 +56,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 // taskHandler processes task requests.
 func taskHandler(w http.ResponseWriter, r *http.Request) {
 	taskName := r.Header.Get("X-Appengine-Taskname")
-	if len(taskName) == 0 {
+	if taskName == "" {
 		// You may use the presence of the X-Appengine-Taskname header to validate
 		// the request comes from Cloud Tasks.
 		log.Println("Invalid Task: No X-Appengine-Taskname request header found")
