@@ -37,4 +37,4 @@ jobs:
     name: shellcheck
     runs-on: ubuntu-latest
     steps:
-      - run: find . -name "*.sh" | xargs shellcheck
+      - run: find . -name '*.sh' | xargs shellcheck
