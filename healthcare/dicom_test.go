@@ -147,10 +147,11 @@ func TestDICOMStore(t *testing.T) {
 		stat, err := os.Stat(instanceOutputFile)
 		if err != nil {
 			r.Errorf("os.Stat: %v", err)
+			return
 		}
 
 		if stat.Size() == 0 {
-			t.Error("Empty output DICOM instance file")
+			r.Errorf("Empty output DICOM instance file")
 		}
 
 		os.Remove(instanceOutputFile)
