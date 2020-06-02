@@ -26,7 +26,7 @@ import (
 	"fmt"
 	"log"
 
-	bqReservation "cloud.google.com/go/bigquery/reservation/apiv1"
+	reservationapi "cloud.google.com/go/bigquery/reservation/apiv1"
 	"google.golang.org/api/iterator"
 	reservationpb "google.golang.org/genproto/googleapis/cloud/bigquery/reservation/v1"
 )
@@ -41,33 +41,44 @@ var (
 
 func main() {
 	flag.Parse()
+	validateFlags()
 	ctx := context.Background()
-	bqResClient, err := bqReservation.NewClient(ctx)
+	bqResClient, err := reservationapi.NewClient(ctx)
 	if err != nil {
 		log.Fatalf("NewClient: %v", err)
 	}
 	defer bqResClient.Close()
 
-	b, err := printCapacityCommitments(ctx, bqResClient)
+	s, err := reportCapacityCommitments(ctx, bqResClient, *projectID, *location)
 	if err != nil {
 		log.Fatalf("printCapacityCommitments: %v", err)
 	}
-	fmt.Println(string(b))
+	fmt.Println(s)
 
-	b, err = printReservations(ctx, bqResClient)
+	s, err = reportReservations(ctx, bqResClient, *projectID, *location)
 	if err != nil {
 		log.Fatalf("printReservations: %v", err)
 	}
-	fmt.Println(string(b))
+	fmt.Println(s)
+}
+
+// validateFlags does some basic validation of the command line flags.
+func validateFlags() {
+	if *projectID == "" {
+		log.Fatal("empty --project_id specified, please provide a valid project ID")
+	}
+	if *location == "" {
+		log.Fatal("empty --location specified, please provide a valid location")
+	}
 }
 
 // printCapacityCommitments iterates through the capacity commitments and returns a byte buffer with details.
-func printCapacityCommitments(ctx context.Context, client *bqReservation.Client) ([]byte, error) {
+func reportCapacityCommitments(ctx context.Context, client *reservationapi.Client, projectID, location string) (string, error) {
 	var buf bytes.Buffer
-	fmt.Fprintf(&buf, "Capacity commitments in project %s in location %s:\n", *projectID, *location)
+	fmt.Fprintf(&buf, "Capacity commitments in project %s in location %s:\n", projectID, location)
 
 	req := &reservationpb.ListCapacityCommitmentsRequest{
-		Parent: fmt.Sprintf("projects/%s/locations/%s", *projectID, *location),
+		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
 	}
 	totalCommitments := 0
 	it := client.ListCapacityCommitments(ctx, req)
@@ -77,22 +88,22 @@ func printCapacityCommitments(ctx context.Context, client *bqReservation.Client)
 			break
 		}
 		if err != nil {
-			return nil, err
+			return "", err
 		}
 		fmt.Fprintf(&buf, "\tCommitment %s in state %s\n", commitment.GetName(), commitment.GetState().String())
 		totalCommitments++
 	}
 	fmt.Fprintf(&buf, "\n%d commitments processed.\n", totalCommitments)
-	return buf.Bytes(), nil
+	return buf.String(), nil
 }
 
 // printReservations iterates through reservations defined in an admin project.
-func printReservations(ctx context.Context, client *bqReservation.Client) ([]byte, error) {
+func reportReservations(ctx context.Context, client *reservationapi.Client, projectID, location string) (string, error) {
 	var buf bytes.Buffer
-	fmt.Fprintf(&buf, "Reservations in project %s in location %s:\n", *projectID, *location)
+	fmt.Fprintf(&buf, "Reservations in project %s in location %s:\n", projectID, location)
 
 	req := &reservationpb.ListReservationsRequest{
-		Parent: fmt.Sprintf("projects/%s/locations/%s", *projectID, *location),
+		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
 	}
 	totalReservations := 0
 	it := client.ListReservations(ctx, req)
@@ -102,13 +113,13 @@ func printReservations(ctx context.Context, client *bqReservation.Client) ([]byt
 			break
 		}
 		if err != nil {
-			return nil, err
+			return "", err
 		}
 		fmt.Fprintf(&buf, "\tReservation %s has %d slot capacity.\n", reservation.GetName(), reservation.GetSlotCapacity())
 		totalReservations++
 	}
 	fmt.Fprintf(&buf, "\n%d reservations processed.\n", totalReservations)
-	return buf.Bytes(), nil
+	return buf.String(), nil
 }
 
 // [END bigqueryreservation_quickstart]
