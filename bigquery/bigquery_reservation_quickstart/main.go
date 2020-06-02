@@ -26,22 +26,29 @@ import (
 	"fmt"
 	"log"
 
-	reservationapi "cloud.google.com/go/bigquery/reservation/apiv1"
+	reservation "cloud.google.com/go/bigquery/reservation/apiv1"
 	"google.golang.org/api/iterator"
 	reservationpb "google.golang.org/genproto/googleapis/cloud/bigquery/reservation/v1"
 )
 
-// Define two command line flags for controlling the behavior of this quickstart.
-var (
-	projectID = flag.String("project_id", "", "Cloud Project ID, used for session creation.")
-	location  = flag.String("location", "US", "BigQuery location used for interactions")
-)
-
 func main() {
+
+	// Define two command line flags for controlling the behavior of this quickstart.
+	var (
+		projectID = flag.String("project_id", "", "Cloud Project ID, used for session creation.")
+		location  = flag.String("location", "US", "BigQuery location used for interactions.")
+	)
+	// Parse flags and do some minimal validation.
 	flag.Parse()
-	validateFlags()
+	if *projectID == "" {
+		log.Fatal("empty --project_id specified, please provide a valid project ID")
+	}
+	if *location == "" {
+		log.Fatal("empty --location specified, please provide a valid location")
+	}
+
 	ctx := context.Background()
-	bqResClient, err := reservationapi.NewClient(ctx)
+	bqResClient, err := reservation.NewClient(ctx)
 	if err != nil {
 		log.Fatalf("NewClient: %v", err)
 	}
@@ -60,18 +67,8 @@ func main() {
 	fmt.Println(s)
 }
 
-// validateFlags does some basic validation of the command line flags.
-func validateFlags() {
-	if *projectID == "" {
-		log.Fatal("empty --project_id specified, please provide a valid project ID")
-	}
-	if *location == "" {
-		log.Fatal("empty --location specified, please provide a valid location")
-	}
-}
-
 // printCapacityCommitments iterates through the capacity commitments and returns a byte buffer with details.
-func reportCapacityCommitments(ctx context.Context, client *reservationapi.Client, projectID, location string) (string, error) {
+func reportCapacityCommitments(ctx context.Context, client *reservation.Client, projectID, location string) (string, error) {
 	var buf bytes.Buffer
 	fmt.Fprintf(&buf, "Capacity commitments in project %s in location %s:\n", projectID, location)
 
@@ -96,7 +93,7 @@ func reportCapacityCommitments(ctx context.Context, client *reservationapi.Clien
 }
 
 // printReservations iterates through reservations defined in an admin project.
-func reportReservations(ctx context.Context, client *reservationapi.Client, projectID, location string) (string, error) {
+func reportReservations(ctx context.Context, client *reservation.Client, projectID, location string) (string, error) {
 	var buf bytes.Buffer
 	fmt.Fprintf(&buf, "Reservations in project %s in location %s:\n", projectID, location)
 
