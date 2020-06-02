@@ -37,5 +37,6 @@ jobs:
     name: shellcheck
     runs-on: ubuntu-latest
     steps:
-      - run: ls
-      - run: shellcheck testing/kokoro/system_test.sh
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - run: find . -name "*.sh" -exec shellcheck {} \;
