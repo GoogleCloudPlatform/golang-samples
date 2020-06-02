@@ -33,3 +33,5 @@ jobs:
       # based on command results. So, create a file if a build fails and check
       # if the file exists to set the right exit code.
       run: find . -name go.mod -execdir sh -c 'go build ./... || touch build_failed.txt' \; ; test ! -f build_failed.txt
+    - name: shellcheck
+      run: find . -name "*.sh" -exec shellcheck {} \;

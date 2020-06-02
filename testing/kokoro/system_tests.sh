@@ -39,15 +39,16 @@ TIMEOUT=60m
 
 # Also see trampoline.sh - system_tests.sh is only run for PRs when there are
 # significant changes.
-SIGNIFICANT_CHANGES=$(git --no-pager diff --name-only master..HEAD | egrep -v '(\.md$|^\.github)' || true)
+SIGNIFICANT_CHANGES=$(git --no-pager diff --name-only master..HEAD | grep -Ev '(\.md$|^\.github)' || true)
 # CHANGED_DIRS is the list of significant top-level directories that changed,
 # but weren't deleted by the current PR.
 # CHANGED_DIRS will be empty when run on master.
-CHANGED_DIRS=$(echo $SIGNIFICANT_CHANGES | tr ' ' '\n' | grep "/" | cut -d/ -f1 | sort -u | tr '\n' ' ' | xargs ls -d 2>/dev/null || true)
+CHANGED_DIRS=$(echo "$SIGNIFICANT_CHANGES" | tr ' ' '\n' | grep "/" | cut -d/ -f1 | sort -u | tr '\n' ' ' | xargs ls -d 2>/dev/null || true)
 
 # List all modules in changed directories.
 # If running on master will collect all modules in the repo, including the root module.
-GO_CHANGED_MODULES=$(find ${CHANGED_DIRS:-.} -name go.mod)
+# shellcheck disable=SC2086
+GO_CHANGED_MODULES="$(find ${CHANGED_DIRS:-.} -name go.mod)"
 # If we didn't find any modules, use the root module.
 GO_CHANGED_MODULES=${GO_CHANGED_MODULES:-./go.mod}
 # Exclude the root module, if present, from the list of sub-modules.
@@ -57,10 +58,10 @@ GO_CHANGED_SUBMODULES=${GO_CHANGED_MODULES#./go.mod}
 # Does not include static analysis checks.
 RUN_ALL_TESTS="0"
 # If this is a nightly test (not a PR), run all tests.
-if [ -z ${KOKORO_GITHUB_PULL_REQUEST_NUMBER:-} ]; then
+if [ -z "${KOKORO_GITHUB_PULL_REQUEST_NUMBER:-}" ]; then
   RUN_ALL_TESTS="1"
 # If the change touches a repo-spanning file or directory of significance, run all tests.
-elif echo $SIGNIFICANT_CHANGES | tr ' ' '\n' | grep "^go.mod$" || [[ $CHANGED_DIRS =~ "testing" || $CHANGED_DIRS =~ "internal" ]]; then
+elif echo "$SIGNIFICANT_CHANGES" | tr ' ' '\n' | grep "^go.mod$" || [[ $CHANGED_DIRS =~ "testing" || $CHANGED_DIRS =~ "internal" ]]; then
   RUN_ALL_TESTS="1"
 fi
 
@@ -68,20 +69,22 @@ fi
 # Do the easy stuff before running tests or reserving a project. Fail fast!
 set +x
 
-if [ $GOLANG_SAMPLES_GO_VET ]; then
+if [ "$GOLANG_SAMPLES_GO_VET" ]; then
   echo "Running 'goimports compliance check'"
   set -x
   diff -u <(echo -n) <(goimports -d .)
   set +x
   for i in $GO_CHANGED_MODULES; do
-    mod="$(dirname $i)"
-    pushd $mod > /dev/null;
+    mod=$(dirname "$i")
+    pushd "$mod" > /dev/null;
       # Fail if a dependency was added without the necessary go.mod/go.sum change
       # being part of the commit.
       echo "Running 'go.mod/go.sum sync check' in '$mod'..."
       set -x
       go mod tidy;
+      # shellcheck disable=SC2162
       git diff go.mod | tee /dev/stderr | (! read)
+      # shellcheck disable=SC2162
       [ -f go.sum ] && git diff go.sum | tee /dev/stderr | (! read)
       set +x
     popd > /dev/null;
@@ -98,8 +101,8 @@ if [ $GOLANG_SAMPLES_GO_VET ]; then
   # Recursive submodules are not supported.
   set +x
   for i in $GO_CHANGED_SUBMODULES; do
-    mod="$(dirname $i)"
-    pushd $mod > /dev/null;
+    mod=$(dirname "$i")
+    pushd "$mod" > /dev/null;
       echo "Running 'go vet' in '$mod'..."
       set -x
       go vet ./...
@@ -137,7 +140,8 @@ go install ./testing/sampletests
 # This is changed to a project-specific credential after a project is leased.
 export GOOGLE_APPLICATION_CREDENTIALS=$KOKORO_KEYSTORE_DIR/71386_kokoro-golang-samples-tests
 gimmeproj version;
-export GOLANG_SAMPLES_PROJECT_ID=$(gimmeproj -project golang-samples-tests lease $TIMEOUT);
+GOLANG_SAMPLES_PROJECT_ID=$(gimmeproj -project golang-samples-tests lease $TIMEOUT);
+export GOLANG_SAMPLES_PROJECT_ID
 if [ -z "$GOLANG_SAMPLES_PROJECT_ID" ]; then
   echo "Lease failed."
   exit 1
@@ -146,6 +150,7 @@ echo "Running tests in project $GOLANG_SAMPLES_PROJECT_ID";
 
 # Always return the project and clean the cache so Kokoro doesn't try to copy
 # it when exiting.
+# shellcheck disable=SC2064
 trap "go clean -modcache; gimmeproj -project golang-samples-tests done $GOLANG_SAMPLES_PROJECT_ID" EXIT
 
 set +x
@@ -183,19 +188,20 @@ runTests() {
   set +x
   echo "Running 'go test' in '$(pwd)'..."
   set -x
-  2>&1 go test -timeout $TIMEOUT -v ${1:-./...} | tee sponge_log.log
-  cat sponge_log.log | /go/bin/go-junit-report -set-exit-code > raw_log.xml
-  exit_code=$(($exit_code + $?))
+  2>&1 go test -timeout $TIMEOUT -v "${1:-./...}" | tee sponge_log.log
+  /go/bin/go-junit-report -set-exit-code < sponge_log.log > raw_log.xml
+  exit_code=$((exit_code + $?))
   # Add region tags tested to test case properties.
-  cat raw_log.xml | sampletests > sponge_log.xml
+  sampletests < raw_log.xml > sponge_log.xml
   rm raw_log.xml # No need to keep this around.
   set +x
 }
 
 if [[ $RUN_ALL_TESTS = "1" ]]; then
   echo "Running all tests"
+  # shellcheck disable=SC2044
   for i in $(find . -name go.mod); do
-    pushd "$(dirname $i)" > /dev/null;
+    pushd "$(dirname "$i")" > /dev/null;
       runTests
     popd > /dev/null;
   done
@@ -206,7 +212,7 @@ else
   runTests . # Always run root tests.
   echo "Running tests in modified directories: $CHANGED_DIRS"
   for d in $CHANGED_DIRS; do
-    mods="$(find $d -name go.mod)"
+    mods=$(find "$d" -name go.mod)
     # If there are no modules, just run the tests directly.
     if [[ -z "$mods" ]]; then
       pushd "$d" > /dev/null;
@@ -215,7 +221,7 @@ else
     # Otherwise, run the tests in all Go directories. This way, we don't have to
     # check to see if there are tests that aren't in a sub-module.
     else
-      goDirectories="$(find $d -name "*.go" -printf "%h\n" | sort -u)"
+      goDirectories="$(find "$d" -name "*.go" -printf "%h\n" | sort -u)"
       if [[ -n "$goDirectories" ]]; then
         for gd in $goDirectories; do
           pushd "$gd" > /dev/null;
@@ -230,8 +236,8 @@ fi
 # If we're running system tests, send the test log to the Build Cop Bot.
 # See https://github.com/googleapis/repo-automation-bots/tree/master/packages/buildcop.
 if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]]; then
-  chmod +x $KOKORO_GFILE_DIR/linux_amd64/buildcop
-  $KOKORO_GFILE_DIR/linux_amd64/buildcop
+  chmod +x "$KOKORO_GFILE_DIR"/linux_amd64/buildcop
+  "$KOKORO_GFILE_DIR"/linux_amd64/buildcop
 fi
 
 exit $exit_code
