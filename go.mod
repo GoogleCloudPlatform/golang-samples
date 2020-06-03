@@ -14,7 +14,7 @@ require (
 	cloud.google.com/go/storage v1.8.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.1
 	github.com/aws/aws-sdk-go v1.31.5
-	github.com/bmatcuk/doublestar v1.3.0
+	github.com/bmatcuk/doublestar v1.3.1
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
 	github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
