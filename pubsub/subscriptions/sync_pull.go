@@ -27,10 +27,9 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func pullMsgsSync(w io.Writer, projectID, subID string, topic *pubsub.Topic) error {
+func pullMsgsSync(w io.Writer, projectID, subID string) error {
 	// projectID := "my-project-id"
 	// subID := "my-sub"
-	// topic of type https://godoc.org/cloud.google.com/go/pubsub#Topic
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
