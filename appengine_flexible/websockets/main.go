@@ -18,7 +18,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -29,7 +28,6 @@ import (
 func main() {
 	http.Handle("/", http.FileServer(http.Dir("static")))
 	http.HandleFunc("/ws", socketHandler)
-	http.HandleFunc("/_ah/health", healthCheckHandler)
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -68,11 +66,6 @@ func socketHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-}
-
-// healthCheckHandler is used by App Engine Flex to check instance health.
-func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "ok")
 }
 
 // [END gae_flex_websockets_app]
