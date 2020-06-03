@@ -26,7 +26,7 @@ import (
 
 // ListFiles lists the files in the current directory.
 func ListFiles(w http.ResponseWriter, r *http.Request) {
-	files, err := ioutil.ReadDir("./")
+	files, err := ioutil.ReadDir("./serverless_function_source_code")
 	if err != nil {
 		http.Error(w, "Unable to read files", http.StatusInternalServerError)
 		log.Printf("ioutil.ListFiles: %v", err)
