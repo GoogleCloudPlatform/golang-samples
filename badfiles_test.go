@@ -96,7 +96,7 @@ var allowList = []string{
 	"storage/objects/notes.txt",
 
 	// GitHub configuration.
-	".github/renovate.json",
+	".github/dependabot.yml",
 	".github/CODEOWNERS",
 
 	// Getting Started on GCE systemd service file.
