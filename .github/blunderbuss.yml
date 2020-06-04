@@ -1,0 +1,7 @@
+assign_issues_by:
+- labels: ['api: storage']
+  to:
+  - tritone
+- labels: ['api: bigquery']
+  to:
+  - shollyman
