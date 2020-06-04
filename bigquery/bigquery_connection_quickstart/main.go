@@ -34,10 +34,9 @@ import (
 func main() {
 
 	// Define two command line flags for controlling the behavior of this quickstart.
-	var (
-		projectID = flag.String("project_id", "", "Cloud Project ID, used for session creation.")
-		location  = flag.String("location", "US", "BigQuery location used for interactions.")
-	)
+	projectID := flag.String("project_id", "", "Cloud Project ID, used for session creation.")
+	location := flag.String("location", "US", "BigQuery location used for interactions.")
+
 	// Parse flags and do some minimal validation.
 	flag.Parse()
 	if *projectID == "" {
@@ -86,7 +85,7 @@ func reportConnections(ctx context.Context, client *connection.Client, projectID
 	return buf.String(), nil
 }
 
-// A simple helper function to convert the epoch-millisecond representations used by the API into a time.Time representation.
+// unixMillisToTime converts epoch-millisecond representations used by the API into a time.Time representation.
 func unixMillisToTime(m int64) time.Time {
 	if m == 0 {
 		return time.Time{}
