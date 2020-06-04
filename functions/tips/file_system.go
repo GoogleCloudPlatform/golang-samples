@@ -25,6 +25,8 @@ import (
 )
 
 // ListFiles lists the files in the current directory.
+// Uses directory "serverless_function_source_code" as defined in the Go Functions Framework Buildpack
+// See https://github.com/GoogleCloudPlatform/buildpacks/blob/56eaad4dfe6c7bd0ecc4a175de030d2cfab9ae1c/cmd/go/functions_framework/main.go#L38
 func ListFiles(w http.ResponseWriter, r *http.Request) {
 	files, err := ioutil.ReadDir("./serverless_function_source_code")
 	if err != nil {
