@@ -99,6 +99,9 @@ var allowList = []string{
 	".github/dependabot.yml",
 	".github/CODEOWNERS",
 
+	// Bot configuration.
+	".config/*",
+
 	// Getting Started on GCE systemd service file.
 	"**/gce/**/*.service",
 
