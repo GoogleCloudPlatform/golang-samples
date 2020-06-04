@@ -4,7 +4,7 @@ go 1.11
 
 require (
 	cloud.google.com/go v0.57.0
-	cloud.google.com/go/bigquery v1.7.0
+	cloud.google.com/go/bigquery v1.8.0
 	cloud.google.com/go/bigtable v1.3.0
 	cloud.google.com/go/datastore v1.1.0
 	cloud.google.com/go/firestore v1.2.0
