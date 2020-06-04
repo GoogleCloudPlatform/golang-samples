@@ -39,7 +39,7 @@ TIMEOUT=60m
 
 # Also see trampoline.sh - system_tests.sh is only run for PRs when there are
 # significant changes.
-SIGNIFICANT_CHANGES=$(git --no-pager diff --name-only master..HEAD | grep -Ev '(\.md$|^\.github|^\.config)' || true)
+SIGNIFICANT_CHANGES=$(git --no-pager diff --name-only master..HEAD | grep -Ev '(\.md$|^\.github)' || true)
 # CHANGED_DIRS is the list of significant top-level directories that changed,
 # but weren't deleted by the current PR.
 # CHANGED_DIRS will be empty when run on master.
