@@ -27,6 +27,12 @@ import (
 func HelloLogging(w http.ResponseWriter, r *http.Request) {
 	log.Println("This is stderr")
 	fmt.Println("This is stdout")
+
+	// Structured logging can be used to set severity levels.
+	// See https://cloud.google.com/logging/docs/structured-logging.
+	fmt.Println(`{"message": "This has ERROR severity", "severity": "error"}`)
+
+	// cloud.google.com/go/logging can optionally be used for additional options.
 }
 
 // [END functions_log_helloworld]
