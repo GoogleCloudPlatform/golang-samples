@@ -51,13 +51,12 @@ func pullMsgsConcurrenyControl(w io.Writer, projectID, subID string) error {
 	// Handle individual messages in a goroutine.
 	go func() {
 		for {
-			select {
-			case msg := <-cm:
-				fmt.Fprintf(w, "Got message :%q\n", string(msg.Data))
-				msg.Ack()
-			case <-ctx.Done():
+			msg, ok := <-cm
+			if !ok {
 				return
 			}
+			fmt.Fprintf(w, "Got message :%q\n", string(msg.Data))
+			msg.Ack()
 		}
 	}()
 
