@@ -158,23 +158,23 @@ func recentVotes(app *app) ([]vote, error) {
 }
 
 // currentTotals returns a templateData structure for populating the web page.
-func currentTotals(app *app) (templateData, error) {
+func currentTotals(app *app) (*templateData, error) {
 	// get total votes for each candidate
 	var tabVotes, spaceVotes uint
 	err := app.db.QueryRow(`SELECT count(vote_id) FROM votes WHERE candidate='TABS'`).Scan(&tabVotes)
 	if err != nil {
-		return templateData{}, fmt.Errorf("DB.QueryRow: %v", err)
+		return nil, fmt.Errorf("DB.QueryRow: %v", err)
 	}
 	err = app.db.QueryRow(`SELECT count(vote_id) FROM votes WHERE candidate='SPACES'`).Scan(&spaceVotes)
 	if err != nil {
-		return templateData{}, fmt.Errorf("DB.QueryRow: %v", err)
+		return nil, fmt.Errorf("DB.QueryRow: %v", err)
 	}
 
 	var voteDiffStr string = voteDiff(int(math.Abs(float64(tabVotes) - float64(spaceVotes)))).String()
 
 	latestVotesCast, err := recentVotes(app)
 	if err != nil {
-		return templateData{}, fmt.Errorf("recentVotes: %v", err)
+		return nil, fmt.Errorf("recentVotes: %v", err)
 	}
 
 	var pageData templateData
@@ -183,7 +183,7 @@ func currentTotals(app *app) (templateData, error) {
 	pageData.VoteMargin = voteDiffStr
 	pageData.RecentVotes = latestVotesCast
 
-	return pageData, nil
+	return &pageData, nil
 }
 
 // showTotals renders an HTML template showing the current vote totals.
