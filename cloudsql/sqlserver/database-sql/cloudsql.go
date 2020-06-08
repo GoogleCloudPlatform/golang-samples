@@ -31,9 +31,6 @@ import (
 	_ "github.com/denisenkom/go-mssqldb"
 )
 
-// parsedTemplate is the global parsed HTML template.
-var parsedTemplate *template.Template
-
 // vote struct contains a single row from the votes table in the database.
 // Each vote includes a candidate ("TABS" or "SPACES") and a timestamp.
 type vote struct {
@@ -60,14 +57,16 @@ type templateData struct {
 	RecentVotes []vote
 }
 
-// App struct contains global state.
-type App struct {
+// app struct contains global state.
+type app struct {
 	// db is the global database connection pool.
 	db *sql.DB
+	// tmpl is the parsed HTML template.
+	tmpl *template.Template
 }
 
 // indexHandler handles requests to the / route.
-func (app *App) indexHandler(w http.ResponseWriter, r *http.Request) {
+func (app *app) indexHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
 		if err := showTotals(w, r, app); err != nil {
@@ -88,12 +87,15 @@ func main() {
 
 	var err error
 
+	var parsedTemplate *template.Template
 	parsedTemplate, err = template.ParseFiles("templates/index.html")
 	if err != nil {
 		log.Fatalf("unable to parse template file: %s", err)
 	}
 
-	app := &App{}
+	app := &app{
+		tmpl: parsedTemplate,
+	}
 
 	// If the optional DB_TCP_HOST environment variable is set, it contains
 	// the IP address and port number of a TCP connection pool to be created,
@@ -116,9 +118,10 @@ func main() {
 		log.Fatalf("DB.Exec: unable to drop votes table: %s", err)
 	}
 	// Create the votes table.
-	if _, err = app.db.Exec(`CREATE TABLE votes
+	_, err = app.db.Exec(`CREATE TABLE votes
 	( vote_id int IDENTITY(1,1) PRIMARY KEY, time_cast DATETIME NOT NULL,
-	candidate CHAR(6) NOT NULL );`); err != nil {
+	candidate CHAR(6) NOT NULL );`)
+	if err != nil {
 		log.Fatalf("DB.Exec: unable to create votes table: %s", err)
 	}
 
@@ -136,7 +139,7 @@ func main() {
 }
 
 // recentVotes returns a slice of the last 5 votes cast.
-func recentVotes(app *App) ([]vote, error) {
+func recentVotes(app *app) ([]vote, error) {
 	var votes []vote
 	rows, err := app.db.Query(`SELECT TOP 5 candidate, time_cast FROM votes ORDER BY time_cast DESC`)
 	if err != nil {
@@ -155,7 +158,7 @@ func recentVotes(app *App) ([]vote, error) {
 }
 
 // currentTotals returns a templateData structure for populating the web page.
-func currentTotals(app *App) (templateData, error) {
+func currentTotals(app *app) (templateData, error) {
 	// get total votes for each candidate
 	var tabVotes, spaceVotes uint
 	err := app.db.QueryRow(`SELECT count(vote_id) FROM votes WHERE candidate='TABS'`).Scan(&tabVotes)
@@ -173,17 +176,23 @@ func currentTotals(app *App) (templateData, error) {
 	if err != nil {
 		return templateData{}, fmt.Errorf("recentVotes: %v", err)
 	}
-	return templateData{tabVotes, spaceVotes, voteDiffStr, latestVotesCast}, nil
 
+	var pageData templateData
+	pageData.TabsCount = tabVotes
+	pageData.SpacesCount = spaceVotes
+	pageData.VoteMargin = voteDiffStr
+	pageData.RecentVotes = latestVotesCast
+
+	return pageData, nil
 }
 
 // showTotals renders an HTML template showing the current vote totals.
-func showTotals(w http.ResponseWriter, r *http.Request, app *App) error {
+func showTotals(w http.ResponseWriter, r *http.Request, app *app) error {
 	totals, err := currentTotals(app)
 	if err != nil {
 		return fmt.Errorf("currentTotals: %v", err)
 	}
-	err = parsedTemplate.Execute(w, totals)
+	err = app.tmpl.Execute(w, totals)
 	if err != nil {
 		return fmt.Errorf("Template.Execute: %v", err)
 	}
@@ -191,7 +200,7 @@ func showTotals(w http.ResponseWriter, r *http.Request, app *App) error {
 }
 
 // saveVote saves a vote passed as http.Request form data.
-func saveVote(w http.ResponseWriter, r *http.Request, app *App) error {
+func saveVote(w http.ResponseWriter, r *http.Request, app *app) error {
 	if err := r.ParseForm(); err != nil {
 		return fmt.Errorf("Request.ParseForm: %v", err)
 	}

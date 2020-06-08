@@ -1,4 +1,4 @@
-module sample-sqlserver
+module github.com/GoogleCloudPlatform/golang-samples/cloudsql/sqlserver/database-sql
 
 go 1.13
 
