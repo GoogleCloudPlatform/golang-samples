@@ -97,7 +97,7 @@ func TestImportSnippets(t *testing.T) {
 			}
 		})
 		t.Run("importJSONWithCMEK", func(t *testing.T) {
-			if bqtestutil.RunCMEKTests() {
+			if bqtestutil.SkipCMEKTests() {
 				t.Skip("skipping CMEK tests")
 			}
 			t.Parallel()
