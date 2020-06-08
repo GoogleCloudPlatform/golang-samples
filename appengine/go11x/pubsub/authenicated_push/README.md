@@ -28,7 +28,7 @@ if set, remember to modify the audience field check in `main.go`.
 
 ```
 $ gcloud pubsub topics create [your-topic-name]
-$ gcloud beta pubsub subscriptions create [your-subscription-name] \
+$ gcloud pubsub subscriptions create [your-subscription-name] \
     --topic=[your-topic-name] \
     --push-endpoint= https://[your-app-id].appspot.com/pubsub/message/receive?token=[your-verification-token] \
     --ack-deadline=30 \

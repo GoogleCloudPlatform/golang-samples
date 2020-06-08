@@ -25,22 +25,31 @@ import (
 
 	"google.golang.org/api/idtoken"
 	"google.golang.org/api/option"
+	"google.golang.org/api/pubsub/v1"
 )
 
-var (
+type app struct {
+	// pubsubVerificationToken is a shared secret between the the publisher of
+	// the message and this application.
+	pubsubVerificationToken string
+
 	// Messages received by this instance.
 	messagesMu sync.Mutex
-	messages   [][]byte
+	messages   []string
 
 	// defaultHTTPClient aliases http.DefaultClient for testing
-	defaultHTTPClient = http.DefaultClient
-)
+	defaultHTTPClient *http.Client
+}
 
 const maxMessages = 10
 
 func main() {
-	http.HandleFunc("/pubsub/message/list", listHandler)
-	http.HandleFunc("/pubsub/message/receive", receiveMessagesHandler)
+	app := &app{
+		defaultHTTPClient:       http.DefaultClient,
+		pubsubVerificationToken: os.Getenv("PUBSUB_VERIFICATION_TOKEN"),
+	}
+	http.HandleFunc("/pubsub/message/list", app.listHandler)
+	http.HandleFunc("/pubsub/message/receive", app.receiveMessagesHandler)
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -56,28 +65,22 @@ func main() {
 
 // pushRequest represents the payload of a Pub/Sub push message.
 type pushRequest struct {
-	Message      message `json:"message"`
-	Subscription string  `json:"subscription"`
-}
-
-type message struct {
-	Attributes map[string]string `json:"attributes"`
-	Data       []byte            `json:"data"`
-	ID         string            `json:"messageId"`
+	Message      pubsub.PubsubMessage `json:"message"`
+	Subscription string               `json:"subscription"`
 }
 
 // [START gae_standard_pubsub_auth_push]
 // receiveMessagesHandler validates authentication token and caches the Pub/Sub
 // message received.
-func receiveMessagesHandler(w http.ResponseWriter, r *http.Request) {
+func (a *app) receiveMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 		return
 	}
 
-	pubsubVerificationToken := os.Getenv("PUBSUB_VERIFICATION_TOKEN")
 	// Verify that the request originates from the application.
-	if token, ok := r.URL.Query()["token"]; !ok || len(token) != 1 || token[0] != pubsubVerificationToken {
+	// a.pubsubVerificationToken = os.Getenv("PUBSUB_VERIFICATION_TOKEN")
+	if token, ok := r.URL.Query()["token"]; !ok || len(token) != 1 || token[0] != a.pubsubVerificationToken {
 		http.Error(w, "Bad token", http.StatusBadRequest)
 		return
 	}
@@ -92,7 +95,7 @@ func receiveMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	// Verify and decode the JWT.
 	// If you don't need to control the HTTP client used you can use the
 	// convenience method idtoken.Validate instead of creating a Validator.
-	v, err := idtoken.NewValidator(r.Context(), option.WithHTTPClient(defaultHTTPClient))
+	v, err := idtoken.NewValidator(r.Context(), option.WithHTTPClient(a.defaultHTTPClient))
 	if err != nil {
 		http.Error(w, "Unable to create Validator", http.StatusBadRequest)
 		return
@@ -106,7 +109,6 @@ func receiveMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	if payload.Issuer != "accounts.google.com" && payload.Issuer != "https://accounts.google.com" {
 		http.Error(w, "Wrong Issuer", http.StatusBadRequest)
-
 	}
 
 	var pr pushRequest
@@ -115,12 +117,12 @@ func receiveMessagesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	messagesMu.Lock()
-	defer messagesMu.Unlock()
+	a.messagesMu.Lock()
+	defer a.messagesMu.Unlock()
 	// Limit to ten.
-	messages = append(messages, pr.Message.Data)
-	if len(messages) > maxMessages {
-		messages = messages[len(messages)-maxMessages:]
+	a.messages = append(a.messages, pr.Message.Data)
+	if len(a.messages) > maxMessages {
+		a.messages = a.messages[len(a.messages)-maxMessages:]
 	}
 
 	fmt.Fprint(w, "OK")
@@ -128,12 +130,12 @@ func receiveMessagesHandler(w http.ResponseWriter, r *http.Request) {
 
 // [END gae_standard_pubsub_auth_push]
 
-func listHandler(w http.ResponseWriter, r *http.Request) {
-	messagesMu.Lock()
-	defer messagesMu.Unlock()
+func (a *app) listHandler(w http.ResponseWriter, r *http.Request) {
+	a.messagesMu.Lock()
+	defer a.messagesMu.Unlock()
 
 	fmt.Fprintln(w, "Messages:")
-	for _, v := range messages {
-		fmt.Fprintf(w, "Message: %v\n", string(v))
+	for _, v := range a.messages {
+		fmt.Fprintf(w, "Message: %v\n", v)
 	}
 }

@@ -28,19 +28,16 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"os"
 	"testing"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"google.golang.org/api/idtoken"
+	"google.golang.org/api/pubsub/v1"
 )
 
 func TestReceiveMessagesHandler(t *testing.T) {
-	oldToken := os.Getenv("PUBSUB_VERIFICATION_TOKEN")
 	testToken := "test-verification-token"
-	os.Setenv("PUBSUB_VERIFICATION_TOKEN", testToken)
-	defer func() { os.Setenv("PUBSUB_VERIFICATION_TOKEN", oldToken) }()
 
 	tests := []struct {
 		name    string
@@ -70,12 +67,13 @@ func TestReceiveMessagesHandler(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			authToken, pk := createRS256JWT(t, tt.aud)
-			defaultHTTPClient = createClient(t, pk)
+			app := &app{pubsubVerificationToken: testToken}
+			app.defaultHTTPClient = createClient(t, pk)
 			pr := &pushRequest{
-				Message: message{
+				Message: pubsub.PubsubMessage{
 					Attributes: map[string]string{"key": "value"},
-					Data:       []byte("Hello Cloud Pub/Sub! Here is my message!"),
-					ID:         "136969346945",
+					Data:       "Hello Cloud Pub/Sub! Here is my message!",
+					MessageId:  "136969346945",
 				},
 				Subscription: "test-sub",
 			}
@@ -92,7 +90,7 @@ func TestReceiveMessagesHandler(t *testing.T) {
 			req.Header.Set("Content-Type", "application/json")
 			rr := httptest.NewRecorder()
 
-			receiveMessagesHandler(rr, req)
+			app.receiveMessagesHandler(rr, req)
 
 			if !tt.wantErr && rr.Code != 200 {
 				t.Fatalf("code: got %v, want 200", rr.Code)
@@ -104,11 +102,11 @@ func TestReceiveMessagesHandler(t *testing.T) {
 			if tt.wantErr {
 				return
 			}
-			if len(messages) != 1 {
-				t.Fatalf("len(messages): got %v, want 1", len(messages))
+			if len(app.messages) != 1 {
+				t.Fatalf("len(messages): got %v, want 1", len(app.messages))
 			}
-			if !cmp.Equal(messages[0], pr.Message.Data) {
-				t.Fatalf("got %+v, want %+v", messages[0], pr)
+			if !cmp.Equal(app.messages[0], pr.Message.Data) {
+				t.Fatalf("got %+v, want %+v", app.messages[0], pr)
 			}
 		})
 	}
