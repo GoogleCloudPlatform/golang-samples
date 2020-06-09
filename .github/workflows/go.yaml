@@ -27,6 +27,18 @@ jobs:
     name: Build and Lint
     runs-on: ubuntu-latest
     steps:
+    - name: Remove trigger-ci label if needed
+      if: contains( github.event.pull_request.labels.*.name, 'trigger-ci')
+      uses: actions/github-script@v2
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN}}
+        script: |
+          github.issues.removeLabel({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            name: 'trigger-ci'
+          })
     - name: Setup Go
       uses: actions/setup-go@v2-beta
       with:
@@ -51,15 +63,3 @@ jobs:
       run: find . -name go.mod -execdir sh -c 'go build ./... || touch build_failed.txt' \; ; test ! -f build_failed.txt
     - name: shellcheck
       run: find . -name "*.sh" -exec shellcheck {} \;
-    - name: Remove trigger-ci label if needed
-      if: contains( github.event.pull_request.labels.*.name, 'trigger-ci')
-      uses: actions/github-script@v2
-      with:
-        github-token: ${{secrets.GITHUB_TOKEN}}
-        script: |
-          github.issues.removeLabel({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            issue_number: context.issue.number,
-            name: 'trigger-ci'
-          })
