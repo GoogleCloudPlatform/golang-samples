@@ -20,7 +20,8 @@ jobs:
           # Specify ref to get a working git environment.
           ref: ${{ github.event.pull_request.head.ref }}
       - run: goimports -w .
-      - run: go mod tidy
+      - name: Run go mod tidy on all modules
+        run: find . -name go.mod -execdir go mod tidy \;
       - name: Commit changes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

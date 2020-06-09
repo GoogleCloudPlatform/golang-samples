@@ -8,25 +8,24 @@ on:
       - master
     types:
       - labeled
+      - opened
       - synchronize
       - reopened
-      # Don't include opened because the CLA bot labels the PR right away.
 jobs:
   build:
     if: |
       github.event.action != 'labeled' ||
-      contains(github.event.pull_request.labels.*.name, 'cla: yes') ||
-      contains(github.event.pull_request.labels.*.name, 'cla: no') ||
       contains(github.event.pull_request.labels.*.name, 'trigger-ci') ||
       contains(github.event.pull_request.labels.*.name, 'kokoro:run') ||
       contains(github.event.pull_request.labels.*.name, 'kokoro:force-run')
     name: Build and Lint
     runs-on: ubuntu-latest
     steps:
+    - run: echo ${{ github.event }}
     - name: Setup Go
       uses: actions/setup-go@v2-beta
       with:
-        go-version: '^1.14'   
+        go-version: '^1.14'
     - name: Install goimports
       run: go get golang.org/x/tools/cmd/goimports
     - name: Check code
