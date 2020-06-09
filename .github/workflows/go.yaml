@@ -21,7 +21,7 @@ jobs:
     name: Build and Lint
     runs-on: ubuntu-latest
     steps:
-    - run: echo ${{ github.event }}
+    - run: echo ${{ toJson(github.event) }}
     - name: Setup Go
       uses: actions/setup-go@v2-beta
       with:
