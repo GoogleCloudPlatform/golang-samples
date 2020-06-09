@@ -23,7 +23,7 @@ jobs:
       github.event.label.name == 'cla: no' ||
       github.event.label.name == 'trigger-ci' ||
       github.event.label.name == 'kokoro:run' ||
-      github.event.label.name == 'kokoro:force-run')
+      github.event.label.name == 'kokoro:force-run'
     name: Build and Lint
     runs-on: ubuntu-latest
     steps:
