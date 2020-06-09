@@ -4,30 +4,40 @@ on:
     branches:
       - master
   pull_request:
+    branches:
+      - master
+    types:
+      - labeled
+      - opened
+      - synchronize
+      - reopened
 jobs:
   build:
+    if: |
+      github.event.action != 'labeled' ||
+      contains(github.event.pull_request.labels.*.name, 'trigger-ci') ||
+      contains(github.event.pull_request.labels.*.name, 'kokoro:run') ||
+      contains(github.event.pull_request.labels.*.name, 'kokoro:force-run')
     name: Build and Lint
     runs-on: ubuntu-latest
     steps:
-
     - name: Setup Go
       uses: actions/setup-go@v2-beta
       with:
-        go-version: '^1.14'
-        
+        go-version: '^1.14'   
     - name: Install goimports
       run: go get golang.org/x/tools/cmd/goimports
-
     - name: Check code
       uses: actions/checkout@v2
-    
-    - name: goimports
-      run: test -z "$(set -o pipefail && $(go env GOPATH)/bin/goimports -l . | tee goimports.out)" || { cat goimports.out && exit 1; }
-        
-    - name: Open this to see how to fix goimports if it fails
-      run: echo Run goimports -w .
-      if: failure()
-
+    - run: goimports -w .
+    - name: Run go mod tidy on all modules
+      run: find . -name go.mod -execdir go mod tidy \;
+    # If there are any diffs from goimports or go mod tidy, fail.
+    - name: Verify no changes from goimports and go mod tidy. Run goimports -w and go mod tidy or add the autoformat label if this fails.
+      run: |
+        if [ -n "$(git status --porcelain)" ]; then
+          exit 1
+        fi
     - name: Build code
       # Use find to build all modules. '-execdir ... ;' doesn't set an exit code
       # based on command results. So, create a file if a build fails and check
