@@ -4,30 +4,58 @@ on:
     branches:
       - master
   pull_request:
+    branches:
+      - master
+    types:
+      - labeled
+      - synchronize
+      - reopened
+      # Don't listen for opened events because the CLA bot labels right away
+      # then could make it look like this workflow isn't run.
+      # We'll retrigger whenever the CLA label changes, but that's better than
+      # running twice every time and having the second run set the status to
+      # skipped.
 jobs:
   build:
+    if: |
+      github.event.action != 'labeled' ||
+      github.event.label.name == 'cla: yes' ||
+      github.event.label.name == 'cla: no' ||
+      github.event.label.name == 'trigger-ci' ||
+      github.event.label.name == 'kokoro:run' ||
+      github.event.label.name == 'kokoro:force-run'
     name: Build and Lint
     runs-on: ubuntu-latest
     steps:
-
+    - name: Remove trigger-ci label if needed
+      if: contains( github.event.pull_request.labels.*.name, 'trigger-ci')
+      uses: actions/github-script@v2
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN}}
+        script: |
+          github.issues.removeLabel({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            name: 'trigger-ci'
+          })
     - name: Setup Go
       uses: actions/setup-go@v2-beta
       with:
         go-version: '^1.14'
-        
     - name: Install goimports
       run: go get golang.org/x/tools/cmd/goimports
-
     - name: Check code
       uses: actions/checkout@v2
-    
-    - name: goimports
-      run: test -z "$(set -o pipefail && $(go env GOPATH)/bin/goimports -l . | tee goimports.out)" || { cat goimports.out && exit 1; }
-        
-    - name: Open this to see how to fix goimports if it fails
-      run: echo Run goimports -w .
-      if: failure()
-
+    - run: goimports -w .
+    - name: Run go mod tidy on all modules
+      run: find . -name go.mod -execdir go mod tidy \;
+    # If there are any diffs from goimports or go mod tidy, fail.
+    - name: Verify no changes from goimports and go mod tidy. Run goimports -w and go mod tidy or add the autoformat label if this fails.
+      run: |
+        if [ -n "$(git status --porcelain)" ]; then
+          exit 1
+        fi
     - name: Build code
       # Use find to build all modules. '-execdir ... ;' doesn't set an exit code
       # based on command results. So, create a file if a build fails and check
