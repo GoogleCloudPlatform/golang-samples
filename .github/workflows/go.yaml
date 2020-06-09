@@ -8,13 +8,15 @@ on:
       - master
     types:
       - labeled
-      - opened
       - synchronize
       - reopened
+      # Don't include opened because the CLA bot labels the PR right away.
 jobs:
   build:
     if: |
       github.event.action != 'labeled' ||
+      contains(github.event.pull_request.labels.*.name, 'cla: yes') ||
+      contains(github.event.pull_request.labels.*.name, 'cla: no') ||
       contains(github.event.pull_request.labels.*.name, 'trigger-ci') ||
       contains(github.event.pull_request.labels.*.name, 'kokoro:run') ||
       contains(github.event.pull_request.labels.*.name, 'kokoro:force-run')
