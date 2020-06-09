@@ -8,20 +8,25 @@ on:
       - master
     types:
       - labeled
-      - opened
       - synchronize
       - reopened
+      # Don't listen for opened events because the CLA bot labels right away
+      # then could make it look like this workflow isn't run.
+      # We'll retrigger whenever the CLA label changes, but that's better than
+      # running twice every time and having the second run set the status to
+      # skipped.
 jobs:
   build:
     if: |
       github.event.action != 'labeled' ||
-      contains(github.event.pull_request.labels.*.name, 'trigger-ci') ||
-      contains(github.event.pull_request.labels.*.name, 'kokoro:run') ||
-      contains(github.event.pull_request.labels.*.name, 'kokoro:force-run')
+      github.event.label.name == 'cla: yes' ||
+      github.event.label.name == 'cla: no' ||
+      github.event.label.name == 'trigger-ci' ||
+      github.event.label.name == 'kokoro:run' ||
+      github.event.label.name == 'kokoro:force-run')
     name: Build and Lint
     runs-on: ubuntu-latest
     steps:
-    - run: echo ${{ toJson(github.event) }}
     - name: Setup Go
       uses: actions/setup-go@v2-beta
       with:
@@ -46,3 +51,15 @@ jobs:
       run: find . -name go.mod -execdir sh -c 'go build ./... || touch build_failed.txt' \; ; test ! -f build_failed.txt
     - name: shellcheck
       run: find . -name "*.sh" -exec shellcheck {} \;
+    - name: Remove trigger-ci label if needed
+      if: contains( github.event.pull_request.labels.*.name, 'trigger-ci')
+      uses: actions/github-script@v2
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN}}
+        script: |
+          github.issues.removeLabel({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            name: 'trigger-ci'
+          })
