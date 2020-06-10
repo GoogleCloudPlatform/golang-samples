@@ -8,7 +8,30 @@ jobs:
     runs-on: ubuntu-latest
     if: contains(github.event.pull_request.labels.*.name, 'autoformat')
     steps:
-      - run: echo "${{ toJson(github.event) }}"
+      - name: Remove autoformat label
+        uses: actions/github-script@v2
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.issues.removeLabel({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              name: 'autoformat'
+            })
+      - name: Check we're not running on a fork
+        if: ! startsWith(github.event.pull_request.head.label, "GoogleCloudPlatform")
+        uses: actions/github-script@v2
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: 'Sorry, autoformat cannot be used for forks'
+            });
+            throw "";
       - name: Install Go
         uses: actions/setup-go@v2
         with:
@@ -35,14 +58,3 @@ jobs:
             git commit --author "yoshi-automation <yoshi-automation@google.com>" --message "Run goimports and go mod tidy"
             git push
           fi
-      - name: Remove autoformat label
-        uses: actions/github-script@v2
-        with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          script: |
-            github.issues.removeLabel({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              name: 'autoformat'
-            })
