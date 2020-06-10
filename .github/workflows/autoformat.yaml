@@ -8,6 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     if: contains(github.event.pull_request.labels.*.name, 'autoformat')
     steps:
+      - run: echo "${{ toJson(github.event) }}"
       - name: Install Go
         uses: actions/setup-go@v2
         with:
