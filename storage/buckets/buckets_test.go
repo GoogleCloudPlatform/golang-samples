@@ -283,17 +283,17 @@ func TestLifecycleManagement(t *testing.T) {
 	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName)
 
 	if err := enableBucketLifecycleManagement(ioutil.Discard, bucketName); err != nil {
-		t.Errorf("enableBucketLifecycleManagement: %v", err)
+		t.Fatalf("enableBucketLifecycleManagement: %v", err)
 	}
 
 	// verify lifecycle is set
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		t.Errorf("storage.NewClient: %v", err)
+		t.Fatalf("storage.NewClient: %v", err)
 	}
 	attrs, err := client.Bucket(bucketName).Attrs(ctx)
 	if err != nil {
-		t.Errorf("Bucket(%q).Attrs: %v", bucketName, err)
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
 	}
 
 	want := storage.LifecycleRule{
@@ -301,7 +301,12 @@ func TestLifecycleManagement(t *testing.T) {
 		Condition: storage.LifecycleCondition{AgeInDays: 100},
 	}
 
-	if r := attrs.Lifecycle.Rules[0]; !reflect.DeepEqual(r, want) {
+	r := attrs.Lifecycle.Rules
+	if len(r) == 0 {
+		t.Fatalf("Lifecycle rule is empty.")
+	}
+
+	if !reflect.DeepEqual(r, want) {
 		t.Fatalf("Unexpected lifecycle rule: got: %v, want: %v", r, want)
 	}
 }
