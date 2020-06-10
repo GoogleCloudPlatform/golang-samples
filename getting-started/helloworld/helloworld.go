@@ -24,7 +24,6 @@ import (
 
 func main() {
 	http.HandleFunc("/", handle)
-	http.HandleFunc("/_ah/health", healthCheckHandler)
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -42,8 +41,4 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Fprint(w, "Hello world!")
-}
-
-func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "ok")
 }
