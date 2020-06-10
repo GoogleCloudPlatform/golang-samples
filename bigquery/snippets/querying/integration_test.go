@@ -107,7 +107,7 @@ func TestQueries(t *testing.T) {
 			}
 		})
 		t.Run("queryWithDestinationCMEK", func(t *testing.T) {
-			if bqtestutil.RunCMEKTests() {
+			if bqtestutil.SkipCMEKTests() {
 				t.Skip("skipping CMEK tests")
 			}
 			t.Parallel()

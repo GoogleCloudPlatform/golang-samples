@@ -156,8 +156,8 @@ func SnippetClient_Put_upsert() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	task := &Task{} // Populated with appropriate data.
-	key := datastore.IncompleteKey("Task", nil)
 	// [START datastore_upsert]
+	key := datastore.IncompleteKey("Task", nil)
 	key, err := client.Put(ctx, key, task)
 	// [END datastore_upsert]
 	_ = err // Make sure you check err.
@@ -168,8 +168,8 @@ func SnippetTransaction_insert() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	task := Task{} // Populated with appropriate data.
-	taskKey := datastore.NameKey("Task", "sampleTask", nil)
 	// [START datastore_insert]
+	taskKey := datastore.NameKey("Task", "sampleTask", nil)
 	_, err := client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
 		// We first check that there is no entity stored with the given key.
 		var empty Task
@@ -187,9 +187,9 @@ func SnippetTransaction_insert() {
 func SnippetClient_Get() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
-	taskKey := datastore.NameKey("Task", "sampleTask", nil)
 	// [START datastore_lookup]
 	var task Task
+	taskKey := datastore.NameKey("Task", "sampleTask", nil)
 	err := client.Get(ctx, taskKey, &task)
 	// [END datastore_lookup]
 	_ = err // Make sure you check err.
@@ -198,8 +198,8 @@ func SnippetClient_Get() {
 func SnippetTransaction_update() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
-	taskKey := datastore.NameKey("Task", "sampleTask", nil)
 	// [START datastore_update]
+	taskKey := datastore.NameKey("Task", "sampleTask", nil)
 	tx, err := client.NewTransaction(ctx)
 	if err != nil {
 		log.Fatalf("client.NewTransaction: %v", err)
@@ -221,8 +221,8 @@ func SnippetTransaction_update() {
 func SnippetClient_Delete() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
-	key := datastore.NameKey("Task", "sampletask", nil)
 	// [START datastore_delete]
+	key := datastore.NameKey("Task", "sampletask", nil)
 	err := client.Delete(ctx, key)
 	// [END datastore_delete]
 	_ = err // Make sure you check err.
