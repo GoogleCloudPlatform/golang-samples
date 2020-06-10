@@ -48,6 +48,7 @@ func pullMsgsConcurrenyControl(w io.Writer, projectID, subID string) error {
 
 	// Create a channel to handle messages to as they come in.
 	cm := make(chan *pubsub.Message)
+	defer close(cm)
 	// Handle individual messages in a goroutine.
 	go func() {
 		for msg := range cm {
