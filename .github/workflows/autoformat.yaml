@@ -20,7 +20,7 @@ jobs:
               name: 'autoformat'
             })
       - name: Check we're not running on a fork
-        if: \! startsWith(github.event.pull_request.head.label, "GoogleCloudPlatform")
+        if: ${{ !startsWith(github.event.pull_request.head.label, "GoogleCloudPlatform") }}
         uses: actions/github-script@v2
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
