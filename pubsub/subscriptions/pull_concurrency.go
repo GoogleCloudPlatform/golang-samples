@@ -64,7 +64,6 @@ func pullMsgsConcurrenyControl(w io.Writer, projectID, subID string) error {
 	if err != nil {
 		return fmt.Errorf("Receive: %v", err)
 	}
-	close(cm)
 
 	return nil
 }
