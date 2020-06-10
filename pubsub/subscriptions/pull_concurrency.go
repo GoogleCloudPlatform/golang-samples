@@ -50,11 +50,7 @@ func pullMsgsConcurrenyControl(w io.Writer, projectID, subID string) error {
 	cm := make(chan *pubsub.Message)
 	// Handle individual messages in a goroutine.
 	go func() {
-		for {
-			msg, ok := <-cm
-			if !ok {
-				return
-			}
+		for msg := range cm {
 			fmt.Fprintf(w, "Got message :%q\n", string(msg.Data))
 			msg.Ack()
 		}
