@@ -306,7 +306,7 @@ func TestLifecycleManagement(t *testing.T) {
 		t.Fatalf("Lifecycle rule is empty.")
 	}
 
-	if !reflect.DeepEqual(r, want) {
+	if !reflect.DeepEqual(r[0], want) {
 		t.Fatalf("Unexpected lifecycle rule: got: %v, want: %v", r, want)
 	}
 }
