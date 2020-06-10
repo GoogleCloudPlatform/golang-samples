@@ -102,7 +102,7 @@ func TestCopiesAndExtracts(t *testing.T) {
 		})
 
 		t.Run("copyTableWithCMEK", func(t *testing.T) {
-			if !bqtestutil.RunCMEKTests() {
+			if bqtestutil.SkipCMEKTests() {
 				t.Skip("Skipping CMEK tests")
 			}
 			t.Parallel()
