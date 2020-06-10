@@ -29,7 +29,7 @@ require (
 	github.com/googleapis/gax-go/v2 v2.0.5
 	github.com/gorilla/mux v1.7.4
 	github.com/gorilla/websocket v1.4.2
-	github.com/h2non/filetype v1.0.12
+	github.com/h2non/filetype v1.1.0
 	github.com/jstemmer/go-junit-report v0.9.1
 	github.com/lib/pq v1.6.0
 	github.com/linkedin/goavro/v2 v2.9.7
