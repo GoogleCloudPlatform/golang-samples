@@ -291,6 +291,8 @@ func TestLifecycleManagement(t *testing.T) {
 	if err != nil {
 		t.Fatalf("storage.NewClient: %v", err)
 	}
+	defer client.Close()
+
 	attrs, err := client.Bucket(bucketName).Attrs(ctx)
 	if err != nil {
 		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
@@ -302,8 +304,8 @@ func TestLifecycleManagement(t *testing.T) {
 	}
 
 	r := attrs.Lifecycle.Rules
-	if len(r) == 0 {
-		t.Fatalf("Lifecycle rule is empty.")
+	if len(r) != 1 {
+		t.Fatalf("Length of lifecycle rules should be 1, got %d", len(r))
 	}
 
 	if !reflect.DeepEqual(r[0], want) {
