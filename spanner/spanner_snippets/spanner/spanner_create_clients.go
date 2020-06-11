@@ -14,35 +14,33 @@
 
 package spanner
 
-// [START spanner_delete_data]
+// [START spanner_create_clients]
 
 import (
 	"context"
 	"io"
 
 	"cloud.google.com/go/spanner"
+	database "cloud.google.com/go/spanner/admin/database/apiv1"
 )
 
-func delete(w io.Writer, db string) error {
+func createClients(w io.Writer, db string) error {
 	ctx := context.Background()
-	client, err := spanner.NewClient(ctx, db)
+
+	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		return err
 	}
-	defer client.Close()
 
-	m := []*spanner.Mutation{
-		// Delete individual rows.
-		spanner.Delete("Albums", spanner.Key{2, 1}),
-		spanner.Delete("Albums", spanner.Key{2, 3}),
-		// Delete a range of rows where the column key is >=3 and <5.
-		spanner.Delete("Singers", spanner.KeyRange{Start: spanner.Key{3}, End: spanner.Key{5}, Kind: spanner.ClosedOpen}),
-		// Delete remaining Singers rows, which will also delete the remaining
-		// Albums rows because Albums was defined with ON DELETE CASCADE.
-		spanner.Delete("Singers", spanner.AllKeys()),
+	dataClient, err := spanner.NewClient(ctx, db)
+	if err != nil {
+		return err
 	}
-	_, err = client.Apply(ctx, m)
-	return err
+
+	_ = adminClient
+	_ = dataClient
+
+	return nil
 }
 
-// [END spanner_delete_data]
+// [END spanner_create_clients]
