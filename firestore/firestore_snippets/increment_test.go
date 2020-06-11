@@ -20,9 +20,11 @@ import (
 	"testing"
 
 	"cloud.google.com/go/firestore"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestUpdateDocumentIncrement(t *testing.T) {
+	testutil.EndToEndTest(t)
 	// TODO(#559): revert this to testutil.SystemTest(t).ProjectID
 	// when datastore and firestore can co-exist in a project.
 	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
