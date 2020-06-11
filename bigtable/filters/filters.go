@@ -158,7 +158,7 @@ func filterComposingCondition(w io.Writer, projectID, instanceID string, tableNa
 
 // [END bigtable_filters_composing_condition]
 
-// [START bigtable_filters_generic]
+// [START bigtable_filters_print]
 func readWithFilter(w io.Writer, projectID, instanceID string, tableName string, filter bigtable.Filter) error {
 	// projectID := "my-project-id"
 	// instanceID := "my-instance-id"
@@ -202,4 +202,4 @@ func printRow(w io.Writer, row bigtable.Row) {
 	fmt.Fprintln(w)
 }
 
-// [END bigtable_filters_generic]
+// [END bigtable_filters_print]
