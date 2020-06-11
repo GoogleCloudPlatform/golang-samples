@@ -140,28 +140,31 @@ func TestQuickstart(t *testing.T) {
 		t.Fatalf("failed to build app")
 	}
 
-	stdOut, stdErr, err := m.Run(nil, 10*time.Minute,
-		"--project_id", tc.ProjectID,
-		"--region", region,
-		"--cluster_name", clusterName,
-		"--job_file_path", jobFilePath,
-	)
-	if err != nil {
-		t.Errorf("stdout: %v", string(stdOut))
-		t.Errorf("stderr: %v", string(stdErr))
-		t.Errorf("execution failed: %v", err)
-	}
-
-	got := string(stdOut)
-	wants := []string{
-		"Cluster created successfully",
-		"Submitted job",
-		"finished with state DONE:",
-		"successfully deleted",
-	}
-	for _, want := range wants {
-		if !strings.Contains(got, want) {
-			t.Errorf("got %q, want to contain %q", got, want)
+	testutil.Retry(t, 3, 30*time.Second, func(r *testutil.R) {
+		stdOut, stdErr, err := m.Run(nil, 10*time.Minute,
+			"--project_id", tc.ProjectID,
+			"--region", region,
+			"--cluster_name", clusterName,
+			"--job_file_path", jobFilePath,
+		)
+		if err != nil {
+			r.Errorf("stdout: %v", string(stdOut))
+			r.Errorf("stderr: %v", string(stdErr))
+			r.Errorf("execution failed: %v", err)
+			return
 		}
-	}
+
+		got := string(stdOut)
+		wants := []string{
+			"Cluster created successfully",
+			"Submitted job",
+			"finished with state DONE:",
+			"successfully deleted",
+		}
+		for _, want := range wants {
+			if !strings.Contains(got, want) {
+				r.Errorf("got %q, want to contain %q", got, want)
+			}
+		}
+	})
 }

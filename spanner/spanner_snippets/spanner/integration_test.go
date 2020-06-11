@@ -115,6 +115,7 @@ func TestSample(t *testing.T) {
 
 	var out string
 	mustRunSample(t, createDatabase, dbName, "failed to create a database")
+	runSample(t, createClients, dbName, "failed to create clients")
 	runSample(t, write, dbName, "failed to insert data")
 	runSample(t, addNewColumn, dbName, "failed to add new column")
 	runSample(t, delete, dbName, "failed to delete data")
