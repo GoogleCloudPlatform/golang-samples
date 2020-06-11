@@ -119,7 +119,7 @@ func TestSample(t *testing.T) {
 
 	var out string
 
-	instanceID := fmt.Sprintf("sample-test-%s", uuid.New().String()[:8])
+	instanceID := fmt.Sprintf("go-sample-test-%s", uuid.New().String()[:8])
 	runInstanceSample(t, createInstance, tc.ProjectID, instanceID, "failed to create an instance")
 	if err := cleanupInstance(tc.ProjectID, instanceID); err != nil {
 		t.Logf("cleanupInstance error: %s", err)
