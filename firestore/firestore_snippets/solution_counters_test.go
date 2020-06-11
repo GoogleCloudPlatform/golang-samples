@@ -20,9 +20,11 @@ import (
 	"testing"
 
 	"cloud.google.com/go/firestore"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestDistributedCounter(t *testing.T) {
+	testutil.EndToEndTest(t)
 	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
 	if projectID == "" {
 		t.Skip("Skipping firestore test. Set GOLANG_SAMPLES_FIRESTORE_PROJECT.")
