@@ -16,13 +16,16 @@ package buckets
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
 
+	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
@@ -269,6 +272,44 @@ func TestUniformBucketLevelAccess(t *testing.T) {
 	}
 	if attrs.UniformBucketLevelAccess.Enabled {
 		t.Fatalf("Uniform bucket-level access was not disabled for (%q).", bucketName)
+	}
+}
+
+func TestLifecycleManagement(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	bucketName := tc.ProjectID + "-storage-buckets-tests"
+
+	ctx := context.Background()
+	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName)
+
+	if err := enableBucketLifecycleManagement(ioutil.Discard, bucketName); err != nil {
+		t.Fatalf("enableBucketLifecycleManagement: %v", err)
+	}
+
+	// verify lifecycle is set
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+	defer client.Close()
+
+	attrs, err := client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+
+	want := storage.LifecycleRule{
+		Action:    storage.LifecycleAction{Type: "Delete"},
+		Condition: storage.LifecycleCondition{AgeInDays: 100},
+	}
+
+	r := attrs.Lifecycle.Rules
+	if len(r) != 1 {
+		t.Fatalf("Length of lifecycle rules should be 1, got %d", len(r))
+	}
+
+	if !reflect.DeepEqual(r[0], want) {
+		t.Fatalf("Unexpected lifecycle rule: got: %v, want: %v", r, want)
 	}
 }
 
