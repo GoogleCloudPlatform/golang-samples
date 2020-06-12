@@ -39,7 +39,7 @@ func createInstance(w io.Writer, projectID, instanceID string) error {
 		Instance: &instancepb.Instance{
 			Config:      "regional-us-central1",
 			DisplayName: instanceID,
-			NodeCount:   2,
+			NodeCount:   1,
 			Labels:      map[string]string{"cloud_spanner_samples": "true"},
 		},
 	})

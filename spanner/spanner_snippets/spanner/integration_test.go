@@ -111,6 +111,17 @@ func initBackupTest(t *testing.T, projectID, dbName string) (restoreDBName, back
 	return
 }
 
+func TestCreateInstance(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	instanceID := fmt.Sprintf("go-sample-test-%s", uuid.New().String()[:8])
+	out := runInstanceSample(t, createInstance, tc.ProjectID, instanceID, "failed to create an instance")
+	if err := cleanupInstance(tc.ProjectID, instanceID); err != nil {
+		t.Logf("cleanupInstance error: %s", err)
+	}
+	assertContains(t, out, fmt.Sprintf("Created instance [%s]", instanceID))
+}
+
 func TestSample(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -118,14 +129,6 @@ func TestSample(t *testing.T) {
 	defer cleanup()
 
 	var out string
-
-	instanceID := fmt.Sprintf("go-sample-test-%s", uuid.New().String()[:8])
-	runInstanceSample(t, createInstance, tc.ProjectID, instanceID, "failed to create an instance")
-	if err := cleanupInstance(tc.ProjectID, instanceID); err != nil {
-		t.Logf("cleanupInstance error: %s", err)
-	}
-	assertContains(t, out, fmt.Sprintf("Created instance [%s]", instanceID))
-
 	mustRunSample(t, createDatabase, dbName, "failed to create a database")
 	runSample(t, write, dbName, "failed to insert data")
 	runSample(t, addNewColumn, dbName, "failed to add new column")
