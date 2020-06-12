@@ -46,7 +46,7 @@ func mask(w io.Writer, projectID, input string, infoTypeNames []string, maskingC
 	}
 	// Create a configured request.
 	req := &dlppb.DeidentifyContentRequest{
-		Parent: "projects/" + projectID,
+		Parent: fmt.Sprintf("projects/%s/locations/global", projectID),
 		InspectConfig: &dlppb.InspectConfig{
 			InfoTypes: infoTypes,
 		},
