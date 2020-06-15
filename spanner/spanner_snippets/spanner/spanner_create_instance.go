@@ -37,7 +37,7 @@ func createInstance(w io.Writer, projectID, instanceID string) error {
 		Parent:     fmt.Sprintf("projects/%s", projectID),
 		InstanceId: instanceID,
 		Instance: &instancepb.Instance{
-			Config:      "regional-us-central1",
+			Config:      fmt.Sprintf("projects/%s/instanceConfigs/%s", projectID, "regional-us-central1"),
 			DisplayName: instanceID,
 			NodeCount:   1,
 			Labels:      map[string]string{"cloud_spanner_samples": "true"},
