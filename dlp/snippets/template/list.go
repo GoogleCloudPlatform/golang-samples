@@ -40,7 +40,7 @@ func listInspectTemplates(w io.Writer, projectID string) error {
 
 	// Create a configured request.
 	req := &dlppb.ListInspectTemplatesRequest{
-		Parent: "projects/" + projectID,
+		Parent: fmt.Sprintf("projects/%s/locations/global", projectID),
 	}
 
 	// Send the request and iterate over the results.
