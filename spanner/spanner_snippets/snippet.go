@@ -16,12 +16,10 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"fmt"
 	"io"
 	"os"
-	"time"
 
 	. "github.com/GoogleCloudPlatform/golang-samples/spanner/spanner_snippets/spanner"
 )
@@ -105,7 +103,7 @@ var (
 	}
 )
 
-func run(ctx context.Context, w io.Writer, cmd string, db string, backupID string) error {
+func run(w io.Writer, cmd string, db string, backupID string) error {
 	// Command that needs a backup ID.
 	if backupCmdFn := backupCommands[cmd]; backupCmdFn != nil {
 		err := backupCmdFn(w, db, backupID)
@@ -161,9 +159,7 @@ Examples:
 	}
 
 	cmd, db, backupID := flag.Arg(0), flag.Arg(1), flag.Arg(2)
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
-	defer cancel()
-	if err := run(ctx, os.Stdout, cmd, db, backupID); err != nil {
+	if err := run(os.Stdout, cmd, db, backupID); err != nil {
 		os.Exit(1)
 	}
 }
