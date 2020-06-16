@@ -18,11 +18,12 @@ package spanner
 
 import (
 	"context"
+	"io"
 
 	"cloud.google.com/go/spanner"
 )
 
-func writeWithTimestamp(db string) error {
+func WriteWithTimestamp(w io.Writer, db string) error {
 	ctx := context.Background()
 
 	client, err := spanner.NewClient(ctx, db)

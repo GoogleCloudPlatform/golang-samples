@@ -23,7 +23,7 @@ import (
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
-func createTableDocumentsWithHistoryTable(w io.Writer, db string) error {
+func CreateTableDocumentsWithHistoryTable(w io.Writer, db string) error {
 	ctx := context.Background()
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {

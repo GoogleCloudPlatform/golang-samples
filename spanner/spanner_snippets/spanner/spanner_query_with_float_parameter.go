@@ -25,7 +25,7 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-func queryWithFloat(w io.Writer, db string) error {
+func QueryWithFloat(w io.Writer, db string) error {
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)
 	if err != nil {

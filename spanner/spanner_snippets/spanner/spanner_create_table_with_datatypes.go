@@ -25,9 +25,10 @@ import (
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
-// Creates a Cloud Spanner table comprised of columns for each supported data type
+// CreateTableWithDatatypes creates a Cloud Spanner table comprised of columns
+// for each supported data type.
 // See https://cloud.google.com/spanner/docs/data-types
-func createTableWithDatatypes(w io.Writer, db string) error {
+func CreateTableWithDatatypes(w io.Writer, db string) error {
 	ctx := context.Background()
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {

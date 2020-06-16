@@ -27,7 +27,7 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-func queryWithArray(w io.Writer, db string) error {
+func QueryWithArray(w io.Writer, db string) error {
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)
 	if err != nil {

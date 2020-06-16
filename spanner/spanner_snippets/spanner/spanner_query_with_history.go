@@ -24,7 +24,7 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-func queryWithHistory(w io.Writer, db string) error {
+func QueryWithHistory(w io.Writer, db string) error {
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)
 	if err != nil {

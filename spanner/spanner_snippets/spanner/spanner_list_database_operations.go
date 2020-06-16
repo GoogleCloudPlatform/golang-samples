@@ -28,7 +28,7 @@ import (
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
-func listDatabaseOperations(w io.Writer, db string) error {
+func ListDatabaseOperations(w io.Writer, db string) error {
 	ctx := context.Background()
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {

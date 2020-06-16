@@ -27,7 +27,7 @@ import (
 	sppb "google.golang.org/genproto/googleapis/spanner/v1"
 )
 
-func createClientWithQueryOptions(w io.Writer, database string) error {
+func CreateClientWithQueryOptions(w io.Writer, database string) error {
 	ctx := context.Background()
 	queryOptions := spanner.QueryOptions{
 		Options: &sppb.ExecuteSqlRequest_QueryOptions{OptimizerVersion: "1"},

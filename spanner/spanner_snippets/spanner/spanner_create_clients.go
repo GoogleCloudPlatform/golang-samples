@@ -24,7 +24,7 @@ import (
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
 )
 
-func createClients(w io.Writer, db string) error {
+func CreateClients(w io.Writer, db string) error {
 	ctx := context.Background()
 
 	adminClient, err := database.NewDatabaseAdminClient(ctx)

@@ -22,7 +22,7 @@ import (
 	"cloud.google.com/go/spanner"
 )
 
-func update(w io.Writer, db string) error {
+func Update(w io.Writer, db string) error {
 	ctx := context.Background()
 
 	client, err := spanner.NewClient(ctx, db)

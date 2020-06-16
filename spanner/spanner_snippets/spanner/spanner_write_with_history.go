@@ -21,7 +21,7 @@ import (
 	"cloud.google.com/go/spanner"
 )
 
-func writeWithHistory(w io.Writer, db string) error {
+func WriteWithHistory(w io.Writer, db string) error {
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)
 	if err != nil {

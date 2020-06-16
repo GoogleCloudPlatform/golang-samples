@@ -114,179 +114,179 @@ func TestSample(t *testing.T) {
 	defer cleanup()
 
 	var out string
-	mustRunSample(t, createDatabase, dbName, "failed to create a database")
-	runSample(t, createClients, dbName, "failed to create clients")
-	runSample(t, write, dbName, "failed to insert data")
-	runSample(t, addNewColumn, dbName, "failed to add new column")
-	runSample(t, delete, dbName, "failed to delete data")
-	runSample(t, write, dbName, "failed to insert data")
-	runSample(t, update, dbName, "failed to update data")
-	out = runSample(t, writeWithTransactionUsingDML, dbName, "failed to write with transaction using DML")
+	mustRunSample(t, CreateDatabase, dbName, "failed to create a database")
+	runSample(t, CreateClients, dbName, "failed to create clients")
+	runSample(t, Write, dbName, "failed to insert data")
+	runSample(t, AddNewColumn, dbName, "failed to add new column")
+	runSample(t, Delete, dbName, "failed to delete data")
+	runSample(t, Write, dbName, "failed to insert data")
+	runSample(t, Update, dbName, "failed to update data")
+	out = runSample(t, WriteWithTransactionUsingDML, dbName, "failed to write with transaction using DML")
 	assertContains(t, out, "Moved 200000 from Album2's MarketingBudget to Album1")
-	out = runSample(t, queryNewColumn, dbName, "failed to query new column")
+	out = runSample(t, QueryNewColumn, dbName, "failed to query new column")
 	assertContains(t, out, "1 1 300000")
 	assertContains(t, out, "2 2 300000")
 
-	runSample(t, delete, dbName, "failed to delete data")
-	runSample(t, write, dbName, "failed to insert data")
-	runSample(t, update, dbName, "failed to update data")
-	out = runSample(t, writeWithTransaction, dbName, "failed to write with transaction")
+	runSample(t, Delete, dbName, "failed to delete data")
+	runSample(t, Write, dbName, "failed to insert data")
+	runSample(t, Update, dbName, "failed to update data")
+	out = runSample(t, WriteWithTransaction, dbName, "failed to write with transaction")
 	assertContains(t, out, "Moved 200000 from Album2's MarketingBudget to Album1")
-	out = runSample(t, queryNewColumn, dbName, "failed to query new column")
+	out = runSample(t, QueryNewColumn, dbName, "failed to query new column")
 	assertContains(t, out, "1 1 300000")
 	assertContains(t, out, "2 2 300000")
 
-	runSample(t, delete, dbName, "failed to delete data")
-	runSample(t, write, dbName, "failed to insert data")
+	runSample(t, Delete, dbName, "failed to delete data")
+	runSample(t, Write, dbName, "failed to insert data")
 	writeTime := time.Now()
 
-	out = runSample(t, read, dbName, "failed to read data")
+	out = runSample(t, Read, dbName, "failed to read data")
 	assertContains(t, out, "1 1 Total Junk")
-	out = runSample(t, query, dbName, "failed to query data")
+	out = runSample(t, Query, dbName, "failed to query data")
 	assertContains(t, out, "1 1 Total Junk")
 
-	runSample(t, addIndex, dbName, "failed to add index")
-	out = runSample(t, queryUsingIndex, dbName, "failed to query using index")
+	runSample(t, AddIndex, dbName, "failed to add index")
+	out = runSample(t, QueryUsingIndex, dbName, "failed to query using index")
 	assertContains(t, out, "Go, Go, Go")
 	assertContains(t, out, "Forever Hold Your Peace")
 	if strings.Contains(out, "Green") {
 		t.Errorf("got output %q; should not contain Green", out)
 	}
 
-	out = runSample(t, readUsingIndex, dbName, "failed to read using index")
+	out = runSample(t, ReadUsingIndex, dbName, "failed to read using index")
 	assertContains(t, out, "Go, Go, Go")
 	assertContains(t, out, "Forever Hold Your Peace")
 	assertContains(t, out, "Green")
 
-	runSample(t, delete, dbName, "failed to delete data")
-	runSample(t, write, dbName, "failed to insert data")
-	runSample(t, update, dbName, "failed to update data")
+	runSample(t, Delete, dbName, "failed to delete data")
+	runSample(t, Write, dbName, "failed to insert data")
+	runSample(t, Update, dbName, "failed to update data")
 
-	runSample(t, addStoringIndex, dbName, "failed to add storing index")
+	runSample(t, AddStoringIndex, dbName, "failed to add storing index")
 
-	out = runSample(t, readStoringIndex, dbName, "failed to read storing index")
+	out = runSample(t, ReadStoringIndex, dbName, "failed to read storing index")
 	assertContains(t, out, "500000")
-	out = runSample(t, readOnlyTransaction, dbName, "failed to read with ReadOnlyTransaction")
+	out = runSample(t, ReadOnlyTransaction, dbName, "failed to read with ReadOnlyTransaction")
 	if strings.Count(out, "Total Junk") != 2 {
 		t.Errorf("got output %q; wanted it to contain 2 occurrences of Total Junk", out)
 	}
 
 	// Wait at least 15 seconds since the write.
 	time.Sleep(time.Until(writeTime.Add(16 * time.Second)))
-	out = runSample(t, readStaleData, dbName, "failed to read stale data")
+	out = runSample(t, ReadStaleData, dbName, "failed to read stale data")
 	assertContains(t, out, "Go, Go, Go")
 	assertContains(t, out, "Forever Hold Your Peace")
 	assertContains(t, out, "Green")
 
-	out = runSample(t, readBatchData, dbName, "failed to read batch data")
+	out = runSample(t, ReadBatchData, dbName, "failed to read batch data")
 	assertContains(t, out, "1 Marc Richards")
 
-	runSample(t, addCommitTimestamp, dbName, "failed to add commit timestamp")
-	runSample(t, updateWithTimestamp, dbName, "failed to update with timestamp")
-	out = runSample(t, queryWithTimestamp, dbName, "failed to query with timestamp")
+	runSample(t, AddCommitTimestamp, dbName, "failed to add commit timestamp")
+	runSample(t, UpdateWithTimestamp, dbName, "failed to update with timestamp")
+	out = runSample(t, QueryWithTimestamp, dbName, "failed to query with timestamp")
 	assertContains(t, out, "1000000")
 
-	runSample(t, writeStructData, dbName, "failed to write struct data")
-	out = runSample(t, queryWithStruct, dbName, "failed to query with struct")
+	runSample(t, WriteStructData, dbName, "failed to write struct data")
+	out = runSample(t, QueryWithStruct, dbName, "failed to query with struct")
 	assertContains(t, out, "6")
-	out = runSample(t, queryWithArrayOfStruct, dbName, "failed to query with array of struct")
+	out = runSample(t, QueryWithArrayOfStruct, dbName, "failed to query with array of struct")
 	assertContains(t, out, "6")
 	assertContains(t, out, "7")
 	assertContains(t, out, "8")
-	out = runSample(t, queryWithStructField, dbName, "failed to query with struct field")
+	out = runSample(t, QueryWithStructField, dbName, "failed to query with struct field")
 	assertContains(t, out, "6")
-	out = runSample(t, queryWithNestedStructField, dbName, "failed to query with nested struct field")
+	out = runSample(t, QueryWithNestedStructField, dbName, "failed to query with nested struct field")
 	assertContains(t, out, "6 Imagination")
 	assertContains(t, out, "9 Imagination")
 
-	runSample(t, createTableDocumentsWithTimestamp, dbName, "failed to create documents table with timestamp")
-	runSample(t, writeToDocumentsTable, dbName, "failed to write to documents table")
-	runSample(t, updateDocumentsTable, dbName, "failed to update documents table")
+	runSample(t, CreateTableDocumentsWithTimestamp, dbName, "failed to create documents table with timestamp")
+	runSample(t, WriteToDocumentsTable, dbName, "failed to write to documents table")
+	runSample(t, UpdateDocumentsTable, dbName, "failed to update documents table")
 
-	out = runSample(t, queryDocumentsTable, dbName, "failed to query documents table")
+	out = runSample(t, QueryDocumentsTable, dbName, "failed to query documents table")
 	assertContains(t, out, "Hello World 1 Updated")
 
-	runSample(t, createTableDocumentsWithHistoryTable, dbName, "failed to create documents table with history table")
-	runSample(t, writeWithHistory, dbName, "failed to write with history")
-	runSample(t, updateWithHistory, dbName, "failed to update with history")
+	runSample(t, CreateTableDocumentsWithHistoryTable, dbName, "failed to create documents table with history table")
+	runSample(t, WriteWithHistory, dbName, "failed to write with history")
+	runSample(t, UpdateWithHistory, dbName, "failed to update with history")
 
-	out = runSample(t, queryWithHistory, dbName, "failed to query with history")
+	out = runSample(t, QueryWithHistory, dbName, "failed to query with history")
 	assertContains(t, out, "1 1 Hello World 1 Updated")
 
-	out = runSample(t, insertUsingDML, dbName, "failed to insert using DML")
+	out = runSample(t, InsertUsingDML, dbName, "failed to insert using DML")
 	assertContains(t, out, "record(s) inserted")
 
-	out = runSample(t, updateUsingDML, dbName, "failed to update using DML")
+	out = runSample(t, UpdateUsingDML, dbName, "failed to update using DML")
 	assertContains(t, out, "record(s) updated")
 
-	out = runSample(t, deleteUsingDML, dbName, "failed to delete using DML")
+	out = runSample(t, DeleteUsingDML, dbName, "failed to delete using DML")
 	assertContains(t, out, "record(s) deleted")
 
-	out = runSample(t, updateUsingDMLWithTimestamp, dbName, "failed to update using DML with timestamp")
+	out = runSample(t, UpdateUsingDMLWithTimestamp, dbName, "failed to update using DML with timestamp")
 	assertContains(t, out, "record(s) updated")
 
-	out = runSample(t, writeAndReadUsingDML, dbName, "failed to write and read using DML")
+	out = runSample(t, WriteAndReadUsingDML, dbName, "failed to write and read using DML")
 	assertContains(t, out, "Found record name with ")
 
-	out = runSample(t, updateUsingDMLStruct, dbName, "failed to update using DML with struct")
+	out = runSample(t, UpdateUsingDMLStruct, dbName, "failed to update using DML with struct")
 	assertContains(t, out, "record(s) inserted")
 
-	out = runSample(t, writeUsingDML, dbName, "failed to write using DML")
+	out = runSample(t, WriteUsingDML, dbName, "failed to write using DML")
 	assertContains(t, out, "record(s) inserted")
 
-	out = runSample(t, queryWithParameter, dbName, "failed to query with parameter")
+	out = runSample(t, QueryWithParameter, dbName, "failed to query with parameter")
 	assertContains(t, out, "12 Melissa Garcia")
 
-	out = runSample(t, updateUsingPartitionedDML, dbName, "failed to update using partitioned DML")
+	out = runSample(t, UpdateUsingPartitionedDML, dbName, "failed to update using partitioned DML")
 	assertContains(t, out, "record(s) updated")
 
-	out = runSample(t, deleteUsingPartitionedDML, dbName, "failed to delete using partitioned DML")
+	out = runSample(t, DeleteUsingPartitionedDML, dbName, "failed to delete using partitioned DML")
 	assertContains(t, out, "record(s) deleted")
 
-	out = runSample(t, updateUsingBatchDML, dbName, "failed to update using batch DML")
+	out = runSample(t, UpdateUsingBatchDML, dbName, "failed to update using batch DML")
 	assertContains(t, out, "Executed 2 SQL statements using Batch DML.")
 
-	out = runSample(t, createTableWithDatatypes, dbName, "failed to create table with data types")
+	out = runSample(t, CreateTableWithDatatypes, dbName, "failed to create table with data types")
 	assertContains(t, out, "Created Venues table")
 
-	runSample(t, writeDatatypesData, dbName, "failed to write data with different data types")
-	out = runSample(t, queryWithArray, dbName, "failed to query with array")
+	runSample(t, WriteDatatypesData, dbName, "failed to write data with different data types")
+	out = runSample(t, QueryWithArray, dbName, "failed to query with array")
 	assertContains(t, out, "19 Venue 19 2020-11-01")
 	assertContains(t, out, "42 Venue 42 2020-10-01")
 
-	out = runSample(t, queryWithBool, dbName, "failed to query with bool")
+	out = runSample(t, QueryWithBool, dbName, "failed to query with bool")
 	assertContains(t, out, "19 Venue 19 true")
 
-	out = runSample(t, queryWithBytes, dbName, "failed to query with bytes")
+	out = runSample(t, QueryWithBytes, dbName, "failed to query with bytes")
 	assertContains(t, out, "4 Venue 4")
 
-	out = runSample(t, queryWithDate, dbName, "failed to query with date")
+	out = runSample(t, QueryWithDate, dbName, "failed to query with date")
 	assertContains(t, out, "4 Venue 4 2018-09-02")
 	assertContains(t, out, "42 Venue 42 2018-10-01")
 
-	out = runSample(t, queryWithFloat, dbName, "failed to query with float")
+	out = runSample(t, QueryWithFloat, dbName, "failed to query with float")
 	assertContains(t, out, "4 Venue 4 0.8")
 	assertContains(t, out, "19 Venue 19 0.9")
 
-	out = runSample(t, queryWithInt, dbName, "failed to query with int")
+	out = runSample(t, QueryWithInt, dbName, "failed to query with int")
 	assertContains(t, out, "19 Venue 19 6300")
 	assertContains(t, out, "42 Venue 42 3000")
 
-	out = runSample(t, queryWithString, dbName, "failed to query with string")
+	out = runSample(t, QueryWithString, dbName, "failed to query with string")
 	assertContains(t, out, "42 Venue 42")
 
 	// Wait 5 seconds to avoid a time drift issue for the next query:
 	// https://github.com/GoogleCloudPlatform/golang-samples/issues/1146.
 	time.Sleep(time.Second * 5)
-	out = runSample(t, queryWithTimestampParameter, dbName, "failed to query with timestamp parameter")
+	out = runSample(t, QueryWithTimestampParameter, dbName, "failed to query with timestamp parameter")
 	assertContains(t, out, "4 Venue 4")
 	assertContains(t, out, "19 Venue 19")
 	assertContains(t, out, "42 Venue 42")
-	out = runSample(t, queryWithQueryOptions, dbName, "failed to query with query options")
+	out = runSample(t, QueryWithQueryOptions, dbName, "failed to query with query options")
 	assertContains(t, out, "4 Venue 4")
 	assertContains(t, out, "19 Venue 19")
 	assertContains(t, out, "42 Venue 42")
-	out = runSample(t, createClientWithQueryOptions, dbName, "failed to create a client with query options")
+	out = runSample(t, CreateClientWithQueryOptions, dbName, "failed to create a client with query options")
 	assertContains(t, out, "4 Venue 4")
 	assertContains(t, out, "19 Venue 19")
 	assertContains(t, out, "42 Venue 42")
@@ -301,37 +301,37 @@ func TestBackupSample(t *testing.T) {
 
 	var out string
 	// Set up the database for testing backup operations.
-	mustRunSample(t, createDatabase, dbName, "failed to create a database")
-	runSample(t, write, dbName, "failed to insert data")
+	mustRunSample(t, CreateDatabase, dbName, "failed to create a database")
+	runSample(t, Write, dbName, "failed to insert data")
 
 	// Start testing backup operations.
-	out = runBackupSample(t, createBackup, dbName, backupID, "failed to create a backup")
+	out = runBackupSample(t, CreateBackup, dbName, backupID, "failed to create a backup")
 	assertContains(t, out, fmt.Sprintf("backups/%s", backupID))
 
-	out = runBackupSample(t, cancelBackup, dbName, cancelledBackupID, "failed to cancel a backup")
+	out = runBackupSample(t, CancelBackup, dbName, cancelledBackupID, "failed to cancel a backup")
 	assertContains(t, out, "Backup cancelled.")
 
-	out = runBackupSample(t, listBackups, dbName, backupID, "failed to list backups")
+	out = runBackupSample(t, ListBackups, dbName, backupID, "failed to list backups")
 	assertContains(t, out, fmt.Sprintf("/backups/%s", backupID))
 	assertContains(t, out, "Backups listed.")
 
-	out = runSample(t, listBackupOperations, dbName, "failed to list backup operations")
+	out = runSample(t, ListBackupOperations, dbName, "failed to list backup operations")
 	assertContains(t, out, fmt.Sprintf("on database %s", dbName))
 
-	out = runBackupSample(t, updateBackup, dbName, backupID, "failed to update a backup")
+	out = runBackupSample(t, UpdateBackup, dbName, backupID, "failed to update a backup")
 	assertContains(t, out, fmt.Sprintf("Updated backup %s", backupID))
 
-	out = runBackupSample(t, restoreBackup, restoreDBName, backupID, "failed to restore a backup")
+	out = runBackupSample(t, RestoreBackup, restoreDBName, backupID, "failed to restore a backup")
 	assertContains(t, out, fmt.Sprintf("Source database %s restored from backup", dbName))
 
 	// This sample should run after a restore operation.
-	out = runSample(t, listDatabaseOperations, restoreDBName, "failed to list database operations")
+	out = runSample(t, ListDatabaseOperations, restoreDBName, "failed to list database operations")
 	assertContains(t, out, fmt.Sprintf("Database %s restored from backup", restoreDBName))
 
 	// Delete the restore DB.
 	cleanupBackup()
 
-	out = runBackupSample(t, deleteBackup, dbName, backupID, "failed to delete a backup")
+	out = runBackupSample(t, DeleteBackup, dbName, backupID, "failed to delete a backup")
 	assertContains(t, out, fmt.Sprintf("Deleted backup %s", backupID))
 }
 

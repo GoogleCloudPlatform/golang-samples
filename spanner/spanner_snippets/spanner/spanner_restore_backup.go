@@ -26,7 +26,7 @@ import (
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
-func restoreBackup(w io.Writer, db, backupID string) error {
+func RestoreBackup(w io.Writer, db, backupID string) error {
 	ctx := context.Background()
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {

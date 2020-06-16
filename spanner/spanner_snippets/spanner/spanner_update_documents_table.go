@@ -21,7 +21,7 @@ import (
 	"cloud.google.com/go/spanner"
 )
 
-func updateDocumentsTable(w io.Writer, db string) error {
+func UpdateDocumentsTable(w io.Writer, db string) error {
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)
 	if err != nil {

@@ -24,7 +24,7 @@ import (
 	"cloud.google.com/go/spanner"
 )
 
-func writeWithTransactionUsingDML(w io.Writer, db string) error {
+func WriteWithTransactionUsingDML(w io.Writer, db string) error {
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)
 	if err != nil {

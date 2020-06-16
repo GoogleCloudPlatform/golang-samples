@@ -25,7 +25,7 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-func readBatchData(w io.Writer, db string) error {
+func ReadBatchData(w io.Writer, db string) error {
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)
 	if err != nil {

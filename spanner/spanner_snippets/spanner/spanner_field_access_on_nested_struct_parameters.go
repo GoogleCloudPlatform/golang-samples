@@ -25,7 +25,7 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-func queryWithNestedStructField(w io.Writer, db string) error {
+func QueryWithNestedStructField(w io.Writer, db string) error {
 	ctx := context.Background()
 
 	client, err := spanner.NewClient(ctx, db)

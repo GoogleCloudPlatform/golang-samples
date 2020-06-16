@@ -23,7 +23,7 @@ import (
 	"cloud.google.com/go/spanner"
 )
 
-func writeStructData(w io.Writer, db string) error {
+func WriteStructData(w io.Writer, db string) error {
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)
 	if err != nil {

@@ -25,7 +25,7 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-func queryWithInt(w io.Writer, db string) error {
+func QueryWithInt(w io.Writer, db string) error {
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)
 	if err != nil {

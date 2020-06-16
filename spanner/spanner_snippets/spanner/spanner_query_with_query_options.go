@@ -27,7 +27,7 @@ import (
 	sppb "google.golang.org/genproto/googleapis/spanner/v1"
 )
 
-func queryWithQueryOptions(w io.Writer, db string) error {
+func QueryWithQueryOptions(w io.Writer, db string) error {
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)
 	if err != nil {

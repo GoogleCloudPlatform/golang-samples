@@ -28,7 +28,7 @@ import (
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
-func listBackups(w io.Writer, db, backupID string) error {
+func ListBackups(w io.Writer, db, backupID string) error {
 	ctx := context.Background()
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {

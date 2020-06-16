@@ -29,7 +29,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func cancelBackup(w io.Writer, db, backupID string) error {
+func CancelBackup(w io.Writer, db, backupID string) error {
 	ctx := context.Background()
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {

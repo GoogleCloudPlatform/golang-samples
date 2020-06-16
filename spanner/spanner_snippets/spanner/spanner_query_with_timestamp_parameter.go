@@ -26,7 +26,7 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-func queryWithTimestampParameter(w io.Writer, db string) error {
+func QueryWithTimestampParameter(w io.Writer, db string) error {
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)
 	if err != nil {
