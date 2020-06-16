@@ -33,19 +33,19 @@ func TestMain(t *testing.T) {
 	defer m.Cleanup()
 
 	if !m.Built() {
-	  t.Errorf("failed to build app")
+		t.Errorf("failed to build app")
 	}
 
 	stdOut, stdErr, err := m.Run(env, 2*time.Minute, fmt.Sprintf("--scope=%s", scope), fmt.Sprintf("--query=%s", query))
 
 	if err != nil {
-	  t.Errorf("execution failed: %v", err)
+		t.Errorf("execution failed: %v", err)
 	}
 	if len(stdErr) > 0 {
-	  t.Errorf("did not expect stderr output, got %d bytes: %s", len(stdErr), string(stdErr))
+		t.Errorf("did not expect stderr output, got %d bytes: %s", len(stdErr), string(stdErr))
 	}
 	got := string(stdOut)
 	if !strings.Contains(got, "roles/owner") {
-	  t.Errorf("stdout returned %s, wanted to contain %s", got, "roles/owner")
+		t.Errorf("stdout returned %s, wanted to contain %s", got, "roles/owner")
 	}
 }
