@@ -54,6 +54,6 @@ func FiniteRetryPubSub(ctx context.Context, m PubSubMessage) error {
 
 // processTheMessage is a stand-in for the domain logic of your function.
 func processTheMessage(m PubSubMessage) error {
-	// Throw an error to retry this function execution
+	// Return an error to retry this function execution.
 	return fmt.Errorf("processTheMessage: runtime error")
 }
