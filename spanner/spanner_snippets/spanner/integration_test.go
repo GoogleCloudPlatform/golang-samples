@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -39,8 +40,8 @@ type backupSampleFunc func(w io.Writer, dbName, backupID string) error
 
 func initTest(t *testing.T, projectID string) (dbName string, cleanup func()) {
 	instance := getInstance(t)
-	databaseID := validLength(fmt.Sprintf("test-%s", projectID), t)
-	dbName = fmt.Sprintf("%s/databases/%s", instance, databaseID)
+	dbID := validLength(fmt.Sprintf("smpl-%s", projectID), t)
+	dbName = fmt.Sprintf("%s/databases/%s", instance, dbID)
 
 	ctx := context.Background()
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
@@ -123,9 +124,7 @@ func TestCreateInstance(t *testing.T) {
 }
 
 func TestSample(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	dbName, cleanup := initTest(t, tc.ProjectID)
+	dbName, cleanup := initTest(t, randomProjectID())
 	defer cleanup()
 
 	var out string
@@ -308,11 +307,10 @@ func TestSample(t *testing.T) {
 }
 
 func TestBackupSample(t *testing.T) {
-	tc := testutil.EndToEndTest(t)
-
-	dbName, cleanup := initTest(t, tc.ProjectID)
+	projectID := randomProjectID()
+	dbName, cleanup := initTest(t, projectID)
 	defer cleanup()
-	restoreDBName, backupID, cancelledBackupID, cleanupBackup := initBackupTest(t, tc.ProjectID, dbName)
+	restoreDBName, backupID, cancelledBackupID, cleanupBackup := initBackupTest(t, projectID, dbName)
 
 	var out string
 	// Set up the database for testing backup operations.
@@ -425,4 +423,9 @@ func cleanupInstance(projectID, instanceID string) error {
 			instanceName, err)
 	}
 	return nil
+}
+
+func randomProjectID() string {
+	now := time.Now().UTC()
+	return fmt.Sprintf("%s-%s", strconv.FormatInt(now.Unix(), 10), uuid.New().String()[:8])
 }
