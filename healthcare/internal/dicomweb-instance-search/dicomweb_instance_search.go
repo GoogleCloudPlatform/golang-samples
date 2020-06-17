@@ -26,22 +26,12 @@ import (
 	healthcare "google.golang.org/api/healthcare/v1"
 )
 
-// queryParamOpt is a googleapi.Option (https://godoc.org/google.golang.org/api/googleapi#CallOption)
-// that adds query parameters to an API call.
-type queryParamOpt struct {
-	key, value string
-}
-
-func (qp queryParamOpt) Get() (string, string) { return qp.key, qp.value }
-
 // DicomWebSearchInstances searches instances.
-func DicomWebSearchInstances(w io.Writer, projectID, location, datasetID, dicomStoreID, dicomWebPath string) error {
+func DicomWebSearchInstances(w io.Writer, projectID, location, datasetID, dicomStoreID string) error {
 	// projectID := "my-project"
 	// location := "us-central1"
 	// datasetID := "my-dataset"
 	// dicomStoreID := "my-dicom-store"
-	// dicomWebPath := "studies/1.3.6.1.4.1.11129.5.5.1113639985/series/1.3.6.1.4.1.11129.5.5.1953511724/instances/1.3.6.1.4.1.11129.5.5.9562821369"
-
 	ctx := context.Background()
 
 	healthcareService, err := healthcare.NewService(ctx)
@@ -53,29 +43,24 @@ func DicomWebSearchInstances(w io.Writer, projectID, location, datasetID, dicomS
 
 	parent := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/dicomStores/%s", projectID, location, datasetID, dicomStoreID)
 
-	call := storesService.SearchForInstances(parent, dicomWebPath)
-	// Refine your search by appending DICOM tags to the
-	// request in the form of query parameters.
-	includeAllFields := queryParamOpt{key: "includefield", value: "all"}
-	resp, err := call.Do(includeAllFields)
-	if err != nil {
-		return fmt.Errorf("SearchForInstances: %v", err)
-	}
+        resp, err := storesService.SearchForInstances(parent, "instances").Do()
+        if err != nil {
+                return fmt.Errorf("SearchForInstances: %v", err)
+        }
+	
+        defer resp.Body.Close()
 
-	defer resp.Body.Close()
+        respBytes, err := ioutil.ReadAll(resp.Body)
+        if err != nil {
+                return fmt.Errorf("ioutil.ReadAll: %v", err)
+        }
 
-	respBytes, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return fmt.Errorf("could not read response: %v", err)
-	}
+        if resp.StatusCode > 299 {
+                return fmt.Errorf("SearchForInstances: status %d %s: %s", resp.StatusCode, resp.Status, respBytes)
+        }
 
-	if resp.StatusCode > 299 {
-		return fmt.Errorf("SearchForInstances: status %d %s: %s", resp.StatusCode, resp.Status, respBytes)
-	}
-
-	if _, err := io.Copy(w, resp.Body); err != nil {
-		return fmt.Errorf("io.Copy: %v", err)
-	}
+        respString := string(respBytes)
+        fmt.Fprintf(w, "Found instances: %s\n", respString)
 
 	return nil
 }
