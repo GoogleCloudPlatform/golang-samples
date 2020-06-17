@@ -17,6 +17,7 @@ package uptime
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"io"
 
@@ -95,6 +96,7 @@ func createPost(w io.Writer, projectID string) (*monitoringpb.UptimeCheckConfig,
 					ContentType:   monitoringpb.UptimeCheckConfig_HttpCheck_URL_ENCODED,
 					Path:          "/",
 					Port:          80,
+					Body:          []byte(base64.URLEncoding.EncodeToString([]byte("key: value"))),
 				},
 			},
 			Timeout: &duration.Duration{Seconds: 10},
