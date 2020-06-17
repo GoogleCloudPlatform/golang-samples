@@ -1,0 +1,20 @@
+assign_issues_by:
+- labels:
+  - 'api: bigtable'
+  - 'api: datastore'
+  - 'api: firestore'
+  - 'api: storage'
+  to:
+  - tritone
+- labels:
+  - 'api: bigquery'
+  to:
+  - shollyman
+- labels:
+  - 'api: pubsub'
+  to:
+  - hongalex
+- labels:
+  - 'api: spanner'
+  to:
+  - skuruppu
