@@ -1,0 +1,16 @@
+{
+  "extends": [
+    "config:base",
+    "schedule:weekly"
+  ],
+  "semanticCommits": false,
+  "postUpdateOptions": [
+    "gomodTidy"
+  ],
+  "commitMessagePrefix": "all: ",
+  "commitMessageAction": "update",
+  "ignorePaths": [
+    "testing/docker/Dockerfile*"
+  ],
+  "groupName": "all"
+}
