@@ -14,6 +14,8 @@
 
 package spanner
 
+// [START spanner_read_stale_data]
+
 import (
 	"context"
 	"fmt"
@@ -23,8 +25,6 @@ import (
 	"cloud.google.com/go/spanner"
 	"google.golang.org/api/iterator"
 )
-
-// [START spanner_read_stale_data]
 
 func readStaleData(w io.Writer, db string) error {
 	ctx := context.Background()

@@ -40,7 +40,7 @@ func listTriggers(w io.Writer, projectID string) error {
 
 	// Create a configured request.
 	req := &dlppb.ListJobTriggersRequest{
-		Parent: "projects/" + projectID,
+		Parent: fmt.Sprintf("projects/%s/locations/global", projectID),
 	}
 	// Send the request and iterate over the results.
 	it := client.ListJobTriggers(ctx, req)
