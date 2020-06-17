@@ -24,7 +24,7 @@ import (
 )
 
 func TestUpdateDocumentIncrement(t *testing.T) {
-	testutil.EndToEndTest(t)
+	tc := testutil.SystemTest(t)
 	// TODO(#559): revert this to testutil.SystemTest(t).ProjectID
 	// when datastore and firestore can co-exist in a project.
 	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
@@ -40,11 +40,12 @@ func TestUpdateDocumentIncrement(t *testing.T) {
 	}
 	defer client.Close()
 
-	dc := client.Collection("cities").Doc("DC")
+	city := tc.ProjectID + "-DC"
+	dc := client.Collection("cities").Doc(city)
 	data := map[string]int{"population": 100}
 	dc.Set(ctx, data)
 
-	if err := updateDocumentIncrement(projectID); err != nil {
+	if err := updateDocumentIncrement(projectID, city); err != nil {
 		t.Fatalf("updateDocumentIncrement: %v", err)
 	}
 
