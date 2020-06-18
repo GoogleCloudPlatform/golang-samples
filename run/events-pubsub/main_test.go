@@ -17,7 +17,7 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"log"
 	"testing"
 	"time"
 
@@ -34,7 +34,7 @@ func TestHelloPubSubCloudEvent(t *testing.T) {
 	}
 	data, err := json.Marshal(pubsubEvent)
 	if err != nil {
-		fmt.Sprintf(`{"error":%q}`, err.Error())
+		log.Printf("json.Marshal: %v", err)
 	}
 	ce := &cloudevents.Event{
 		Context: cloudevents.EventContextV1{

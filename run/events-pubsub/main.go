@@ -35,7 +35,7 @@ func main() {
 	ctx := context.Background()
 	p, err := cloudevents.NewHTTP()
 	if err != nil {
-		fmt.Errorf("failed to create protocol: %v", err)
+		log.Fatal(err)
 	}
 	handleFn, err := cloudevents.NewHTTPReceiveHandler(ctx, p, HelloPubSub)
 	handler.Handle("/", handleFn)
