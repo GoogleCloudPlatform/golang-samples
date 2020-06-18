@@ -26,40 +26,40 @@ import (
 
 // dicomWebSearchInstances searches instances.
 func dicomWebSearchInstances(w io.Writer, projectID, location, datasetID, dicomStoreID string) error {
-        // projectID := "my-project"
-        // location := "us-central1"
-        // datasetID := "my-dataset"
-        // dicomStoreID := "my-dicom-store"
-        ctx := context.Background()
+	// projectID := "my-project"
+	// location := "us-central1"
+	// datasetID := "my-dataset"
+	// dicomStoreID := "my-dicom-store"
+	ctx := context.Background()
 
-        healthcareService, err := healthcare.NewService(ctx)
-        if err != nil {
-                return fmt.Errorf("healthcare.NewService: %v", err)
-        }
+	healthcareService, err := healthcare.NewService(ctx)
+	if err != nil {
+		return fmt.Errorf("healthcare.NewService: %v", err)
+	}
 
-        storesService := healthcareService.Projects.Locations.Datasets.DicomStores
+	storesService := healthcareService.Projects.Locations.Datasets.DicomStores
 
-        parent := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/dicomStores/%s", projectID, location, datasetID, dicomStoreID)
+	parent := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/dicomStores/%s", projectID, location, datasetID, dicomStoreID)
 
-        resp, err := storesService.SearchForInstances(parent, "instances").Do()
-        if err != nil {
-                return fmt.Errorf("SearchForInstances: %v", err)
-        }
+	resp, err := storesService.SearchForInstances(parent, "instances").Do()
+	if err != nil {
+		return fmt.Errorf("SearchForInstances: %v", err)
+	}
 
-        defer resp.Body.Close()
+	defer resp.Body.Close()
 
-        respBytes, err := ioutil.ReadAll(resp.Body)
-        if err != nil {
-                return fmt.Errorf("ioutil.ReadAll: %v", err)
-        }
+	respBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("ioutil.ReadAll: %v", err)
+	}
 
-        if resp.StatusCode > 299 {
-                return fmt.Errorf("SearchForInstances: status %d %s: %s", resp.StatusCode, resp.Status, respBytes)
-        }
+	if resp.StatusCode > 299 {
+		return fmt.Errorf("SearchForInstances: status %d %s: %s", resp.StatusCode, resp.Status, respBytes)
+	}
 
-        respString := string(respBytes)
-        fmt.Fprintf(w, "Found instances: %s\n", respString)
-        return nil
+	respString := string(respBytes)
+	fmt.Fprintf(w, "Found instances: %s\n", respString)
+	return nil
 }
 
 // [END healthcare_dicomweb_search_instances]
