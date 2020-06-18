@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START run_pubsub_server]
+// [START run_events_pubsub_server]
 
 // Sample run-pubsub is a Cloud Run service which handles Pub/Sub messages.
 package main
@@ -53,9 +53,9 @@ func main() {
 	}
 }
 
-// [END run_pubsub_server]
+// [END run_events_pubsub_server]
 
-// [START run_pubsub_handler]
+// [START run_events_pubsub_handler]
 
 // PubSubMessage is the payload of the Pub/Sub message.
 type PubSubMessage struct {
@@ -86,4 +86,4 @@ func HelloPubSub(ctx context.Context, event cloudevents.Event) string {
 	return s
 }
 
-// [END run_pubsub_handler]
+// [END run_events_pubsub_handler]
