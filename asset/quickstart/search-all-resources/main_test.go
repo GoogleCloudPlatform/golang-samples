@@ -37,7 +37,7 @@ func TestMain(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create bigquery client: %v", err)
 	}
-	datasetID := strings.Replace(fmt.Sprintf("%s-for-assets", tc.ProjectID), "-", "_", -1)
+	datasetID := strings.Replace(fmt.Sprintf("%s-for-asset-search", tc.ProjectID), "-", "_", -1)
 
 	m := testutil.BuildMain(t)
 	defer m.Cleanup()
