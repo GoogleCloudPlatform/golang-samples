@@ -50,8 +50,8 @@ func TestHelloPubSubCloudEvent(t *testing.T) {
 		t.Log("aweg")
 	}
 
-	s := HelloPubSub(context.Background(), *ce)
-	if s != "Hello, foo! ID: 321-CBA" {
-		t.Error("Didn't get CloudEvent message.")
+	got := HelloPubSub(context.Background(), *ce)
+	if want := "Hello, foo! ID: 321-CBA"; got != want {
+		t.Errorf("HelloPubSub: got %q, want %q", got, want)
 	}
 }
