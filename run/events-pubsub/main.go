@@ -74,20 +74,20 @@ type PubSub struct {
 }
 
 // HelloPubSub receives and processes a Pub/Sub CloudEvent.
-func HelloPubSub(ctx context.Context, event cloudevents.Event) string {
+func HelloPubSub(ctx context.Context, event cloudevents.Event) (string, error) {
 	// Try to decode the request body into the struct.
 	var m PubSub
 	err := event.DataAs(&m)
+	s := ""
 	if err != nil {
 		// Error parsing CloudEvent
-		log.Printf("event.DataAs: could not read CloudEvent: %v", err)
-		return ""
+		s = fmt.Sprintf("event.DataAs: could not read CloudEvent: %v", err)
+	} else {
+		// Print and return the data from the Pub/Sub CloudEvent.
+		s = fmt.Sprintf("Hello, %s! ID: %s", string(m.Message.Data), event.ID())
 	}
-
-	// Print and return the data from the Pub/Sub CloudEvent.
-	s := fmt.Sprintf("Hello, %s! ID: %s", string(m.Message.Data), event.ID())
-	log.Print(s)
-	return s
+	log.Printf(s)
+	return s, err
 }
 
 // [END run_events_pubsub_handler]

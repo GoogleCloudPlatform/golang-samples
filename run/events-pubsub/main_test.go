@@ -46,11 +46,11 @@ func TestHelloPubSubCloudEvent(t *testing.T) {
 		}.AsV1(),
 		DataEncoded: data,
 	}
-	if ce == nil {
-		t.Log("aweg")
-	}
 
-	got := HelloPubSub(context.Background(), *ce)
+	got, e := HelloPubSub(context.Background(), *ce)
+	if e != nil {
+		t.Errorf("HelloPubSub: %q", e)
+	}
 	if want := "Hello, foo! ID: 321-CBA"; got != want {
 		t.Errorf("HelloPubSub: got %q, want %q", got, want)
 	}
