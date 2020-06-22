@@ -33,11 +33,15 @@ var (
 
 func main() {
 	ctx := context.Background()
+	// Create a new HTTP client for CloudEvents
 	p, err := cloudevents.NewHTTP()
 	if err != nil {
 		log.Fatal(err)
 	}
 	handleFn, err := cloudevents.NewHTTPReceiveHandler(ctx, p, HelloPubSub)
+	if err != nil {
+		log.Fatal(err)
+	}
 	handler.Handle("/", handleFn)
 
 	// Determine port for HTTP service.
@@ -76,11 +80,11 @@ func HelloPubSub(ctx context.Context, event cloudevents.Event) string {
 	err := event.DataAs(&m)
 	if err != nil {
 		// Error parsing CloudEvent
-		log.Printf("Could not read CloudEvent: %v", err)
+		log.Printf("event.DataAs: could not read CloudEvent: %v", err)
 		return ""
 	}
 
-	// Print and return the data from the CloudEvent
+	// Print and return the data from the Pub/Sub CloudEvent.
 	s := fmt.Sprintf("Hello, %s! ID: %s", string(m.Message.Data), event.ID())
 	log.Print(s)
 	return s
