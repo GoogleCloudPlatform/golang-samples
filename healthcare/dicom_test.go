@@ -23,7 +23,6 @@ import (
 	"testing"
 	"time"
 
-	dicomwebsearchinstances "github.com/GoogleCloudPlatform/golang-samples/healthcare/internal/dicomweb-instance-search"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
@@ -94,12 +93,6 @@ func TestDICOMStore(t *testing.T) {
 		}
 	})
 
-	// testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
-	// 	if err := dicomWebSearchInstances(ioutil.Discard, tc.ProjectID, location, datasetID, dicomStoreID, "studies/1.3.6.1.4.1.11129.5.5.111396399361969898205364400549799252857604"); err != nil {
-	// 		r.Errorf("dicomWebSearchInstances got err: %v", err)
-	// 	}
-	// })
-
 	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
 		// Remove the output file if it already exists.
 		os.Remove(studyOutputFile)
@@ -164,7 +157,7 @@ func TestDICOMStore(t *testing.T) {
 	})
 
 	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
-		if err := dicomwebsearchinstances.DicomWebSearchInstances(ioutil.Discard, tc.ProjectID, location, datasetID, dicomStoreID, studyPath); err != nil {
+		if err := dicomWebSearchInstances(ioutil.Discard, tc.ProjectID, location, datasetID, dicomStoreID); err != nil {
 			r.Errorf("dicomWebSearchInstances got err: %v", err)
 		}
 	})
