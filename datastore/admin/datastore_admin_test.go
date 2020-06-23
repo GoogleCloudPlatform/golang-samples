@@ -27,9 +27,7 @@ func TestCreate(t *testing.T) {
 		t.Fatalf("clientCreate: %v", err)
 	}
 	defer client.Close()
-}
 
-func TestIndexListAndGet(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	indices, err := indexList(ioutil.Discard, tc.ProjectID)
 	if err != nil {
