@@ -25,13 +25,13 @@ import (
 )
 
 // indexGet gets an index.
-func indexGet(w io.Writer, projectID, indexID string) error {
+func indexGet(w io.Writer, projectID, indexID string) (*adminpb.Index, error) {
 	// projectID := "my-project-id"
 	// indexID := "my-index"
 	ctx := context.Background()
 	client, err := admin.NewDatastoreAdminClient(ctx)
 	if err != nil {
-		return fmt.Errorf("admin.NewDatastoreAdminClient: %v", err)
+		return nil, fmt.Errorf("admin.NewDatastoreAdminClient: %v", err)
 	}
 	defer client.Close()
 
@@ -41,11 +41,11 @@ func indexGet(w io.Writer, projectID, indexID string) error {
 	}
 	index, err := client.GetIndex(ctx, req)
 	if err != nil {
-		return fmt.Errorf("client.GetIndex: %v", err)
+		return nil, fmt.Errorf("client.GetIndex: %v", err)
 	}
 
 	fmt.Fprintf(w, "Got index: %v\n", index.IndexId)
-	return nil
+	return index, nil
 }
 
 // [END datastore_admin_index_get]

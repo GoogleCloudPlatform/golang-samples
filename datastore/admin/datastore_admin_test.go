@@ -29,22 +29,22 @@ func TestCreate(t *testing.T) {
 	defer client.Close()
 }
 
-func TestIndexList(t *testing.T) {
+func TestIndexListAndGet(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	if _, err := indexList(ioutil.Discard, tc.ProjectID); err != nil {
+	indices, err := indexList(ioutil.Discard, tc.ProjectID)
+	if err != nil {
 		t.Fatalf("indexList: %v", err)
 	}
-}
-
-func TestIndexGet(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	// Get first index from the list of indexes.
-	indices, _ := indexList(ioutil.Discard, tc.ProjectID)
-	indexID := indices[0].IndexId
 	if len(indices) == 0 {
 		t.Skip("Skipping datastore test. At least one index should present in database.")
 	}
-	if err := indexGet(ioutil.Discard, tc.ProjectID, indexID); err != nil {
+	want := indices[0].IndexId
+	// Get the first index from the list of indexes.
+	got, err := indexGet(ioutil.Discard, tc.ProjectID, want)
+	if err != nil {
 		t.Fatalf("indexGet: %v", err)
+	}
+	if got.IndexId != want {
+		t.Fatalf("Unexpected indexID: got %v, want %v", got.IndexId, want)
 	}
 }
