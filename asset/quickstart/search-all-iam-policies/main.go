@@ -14,7 +14,7 @@
 
 // [START asset_quickstart_search_all_iam_policies]
 
-// Sample search-all-iam-policies search all iam policies within the given scope.
+// Sample search-all-iam-policies searches all IAM policies within the given scope.
 package main
 
 import (
@@ -28,21 +28,18 @@ import (
 	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1"
 )
 
-// Command-line flags.
-var (
-	scope = flag.String("scope", "", "Scope of the search.")
-	query = flag.String("query", "", "Query statement.")
-)
-
 func main() {
+  scope := flag.String("scope", "", "Scope of the search.")
+  query := flag.String("query", "", "Query statement.")
 	flag.Parse()
 	ctx := context.Background()
 	client, err := asset.NewClient(ctx)
 	if err != nil {
 		log.Fatalf("asset.NewClient: %v", err)
 	}
+	defer client.Close()
 
-	pageSize := 0
+	pageSize := 20
 	pageToken := ""
 
 	req := &assetpb.SearchAllIamPoliciesRequest{
@@ -51,20 +48,13 @@ func main() {
 		PageSize:  int32(pageSize),
 		PageToken: pageToken,
 	}
-	response := client.SearchAllIamPolicies(ctx, req)
-	for {
-		policy, err := response.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println(policy)
-		if response.PageInfo().Remaining() == 0 {
-			break
-		}
+	it := client.SearchAllIamPolicies(ctx, req)
+	var policies []*assetpb.IamPolicySearchResult
+	_, err = iterator.NewPager(it, pageSize, "").NextPage(&policies)
+	if err != nil {
+	  log.Fatal(err)
 	}
+	fmt.Println(policies)
 }
 
 // [END asset_quickstart_search_all_iam_policies]

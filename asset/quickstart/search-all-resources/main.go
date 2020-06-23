@@ -14,7 +14,7 @@
 
 // [START asset_quickstart_search_all_resources]
 
-// Sample search-all-resources search all resources within the given scope.
+// Sample search-all-resources searches all resources within the given scope.
 package main
 
 import (
@@ -28,22 +28,19 @@ import (
 	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1"
 )
 
-// Command-line flags.
-var (
-	scope = flag.String("scope", "", "Scope of the search.")
-	query = flag.String("query", "", "Query statement.")
-)
-
 func main() {
+  scope := flag.String("scope", "", "Scope of the search.")
+	query := flag.String("query", "", "Query statement.")
 	flag.Parse()
 	ctx := context.Background()
 	client, err := asset.NewClient(ctx)
 	if err != nil {
 		log.Fatalf("asset.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	assetTypes := []string{}
-	pageSize := 0
+	pageSize := 20
 	pageToken := ""
 	orderBy := ""
 
@@ -55,20 +52,13 @@ func main() {
 		PageToken:  pageToken,
 		OrderBy:    orderBy,
 	}
-	response := client.SearchAllResources(ctx, req)
-	for {
-		resource, err := response.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println(resource)
-		if response.PageInfo().Remaining() == 0 {
-			break
-		}
+	it := client.SearchAllResources(ctx, req)
+	var resources []*assetpb.ResourceSearchResult
+	_, err = iterator.NewPager(it, pageSize, "").NextPage(&resources)
+	if err != nil {
+	  log.Fatal(err)
 	}
+	fmt.Println(resources)
 }
 
 // [END asset_quickstart_search_all_resources]
