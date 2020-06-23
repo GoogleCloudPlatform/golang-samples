@@ -30,7 +30,6 @@ import (
 
 // [END bigtable_filters_imports]
 
-
 // [START bigtable_filters_limit_row_sample]
 func filterLimitRowSample(w io.Writer, projectID, instanceID string, tableName string) error {
 	filter := bigtable.RowSampleFilter(.75)
