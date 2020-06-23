@@ -4,7 +4,9 @@
     "schedule:weekly"
   ],
   "semanticCommits": false,
-  "postUpdateOptions": ["gomodTidy"],
+  "postUpdateOptions": [
+    "gomodTidy"
+  ],
   "commitMessagePrefix": "all: ",
   "commitMessageAction": "update",
   "ignorePaths": [

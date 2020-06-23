@@ -25,6 +25,7 @@ import (
 	pb "github.com/GoogleCloudPlatform/golang-samples/run/grpc-ping/pkg/api/v1"
 )
 
+// [START run_grpc_server]
 func main() {
 	log.Printf("grpc-ping: starting server...")
 

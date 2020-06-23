@@ -15,13 +15,7 @@
 // Package reads contains snippets related to reading data from Cloud Bigtable.
 package reads
 
-// [START bigtable_reads_row]
-// [START bigtable_reads_row_partial]
-// [START bigtable_reads_rows]
-// [START bigtable_reads_row_range]
-// [START bigtable_reads_row_ranges]
-// [START bigtable_reads_prefix]
-// [START bigtable_reads_filter]
+// [START bigtable_reads_imports]
 import (
 	"context"
 	"fmt"
@@ -32,13 +26,7 @@ import (
 	"cloud.google.com/go/bigtable"
 )
 
-// [END bigtable_reads_row]
-// [END bigtable_reads_row_partial]
-// [END bigtable_reads_rows]
-// [END bigtable_reads_row_range]
-// [END bigtable_reads_row_ranges]
-// [END bigtable_reads_prefix]
-// [END bigtable_reads_filter]
+// [END bigtable_reads_imports]
 
 // [START bigtable_reads_row]
 func readRow(w io.Writer, projectID, instanceID string, tableName string) error {
@@ -228,13 +216,7 @@ func readFilter(w io.Writer, projectID, instanceID string, tableName string) err
 
 // [END bigtable_reads_filter]
 
-// [START bigtable_reads_row]
-// [START bigtable_reads_row_partial]
-// [START bigtable_reads_rows]
-// [START bigtable_reads_row_range]
-// [START bigtable_reads_row_ranges]
-// [START bigtable_reads_prefix]
-// [START bigtable_reads_filter]
+// [START bigtable_reads_print]
 func printRow(w io.Writer, row bigtable.Row) {
 	fmt.Fprintf(w, "Reading data for %s:\n", row.Key())
 	for columnFamily, cols := range row {
@@ -247,10 +229,4 @@ func printRow(w io.Writer, row bigtable.Row) {
 	fmt.Fprintln(w)
 }
 
-// [END bigtable_reads_row]
-// [END bigtable_reads_row_partial]
-// [END bigtable_reads_rows]
-// [END bigtable_reads_row_range]
-// [END bigtable_reads_row_ranges]
-// [END bigtable_reads_prefix]
-// [END bigtable_reads_filter]
+// [END bigtable_reads_print]

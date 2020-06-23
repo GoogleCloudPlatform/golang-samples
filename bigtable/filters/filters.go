@@ -16,24 +16,7 @@
 // with various filters.
 package filters
 
-// [START bigtable_filters_limit_row_sample]
-// [START bigtable_filters_limit_row_regex]
-// [START bigtable_filters_limit_cells_per_col]
-// [START bigtable_filters_limit_cells_per_row]
-// [START bigtable_filters_limit_cells_per_row_offset]
-// [START bigtable_filters_limit_col_family_regex]
-// [START bigtable_filters_limit_col_qualifier_regex]
-// [START bigtable_filters_limit_col_range]
-// [START bigtable_filters_limit_value_range]
-// [START bigtable_filters_limit_value_regex]
-// [START bigtable_filters_limit_timestamp_range]
-// [START bigtable_filters_limit_block_all]
-// [START bigtable_filters_limit_pass_all]
-// [START bigtable_filters_modify_strip_value]
-// [START bigtable_filters_modify_apply_label]
-// [START bigtable_filters_composing_chain]
-// [START bigtable_filters_composing_interleave]
-// [START bigtable_filters_composing_condition]
+// [START bigtable_filters_imports]
 import (
 	"context"
 	"fmt"
@@ -45,24 +28,7 @@ import (
 	"cloud.google.com/go/bigtable"
 )
 
-// [END bigtable_filters_limit_row_sample]
-// [END bigtable_filters_limit_row_regex]
-// [END bigtable_filters_limit_cells_per_col]
-// [END bigtable_filters_limit_cells_per_row]
-// [END bigtable_filters_limit_cells_per_row_offset]
-// [END bigtable_filters_limit_col_family_regex]
-// [END bigtable_filters_limit_col_qualifier_regex]
-// [END bigtable_filters_limit_col_range]
-// [END bigtable_filters_limit_value_range]
-// [END bigtable_filters_limit_value_regex]
-// [END bigtable_filters_limit_timestamp_range]
-// [END bigtable_filters_limit_block_all]
-// [END bigtable_filters_limit_pass_all]
-// [END bigtable_filters_modify_strip_value]
-// [END bigtable_filters_modify_apply_label]
-// [END bigtable_filters_composing_chain]
-// [END bigtable_filters_composing_interleave]
-// [END bigtable_filters_composing_condition]
+// [END bigtable_filters_imports]
 
 // [START bigtable_filters_limit_row_sample]
 func filterLimitRowSample(w io.Writer, projectID, instanceID string, tableName string) error {
@@ -191,24 +157,7 @@ func filterComposingCondition(w io.Writer, projectID, instanceID string, tableNa
 
 // [END bigtable_filters_composing_condition]
 
-// [START bigtable_filters_limit_row_sample]
-// [START bigtable_filters_limit_row_regex]
-// [START bigtable_filters_limit_cells_per_col]
-// [START bigtable_filters_limit_cells_per_row]
-// [START bigtable_filters_limit_cells_per_row_offset]
-// [START bigtable_filters_limit_col_family_regex]
-// [START bigtable_filters_limit_col_qualifier_regex]
-// [START bigtable_filters_limit_col_range]
-// [START bigtable_filters_limit_value_range]
-// [START bigtable_filters_limit_value_regex]
-// [START bigtable_filters_limit_timestamp_range]
-// [START bigtable_filters_limit_block_all]
-// [START bigtable_filters_limit_pass_all]
-// [START bigtable_filters_modify_strip_value]
-// [START bigtable_filters_modify_apply_label]
-// [START bigtable_filters_composing_chain]
-// [START bigtable_filters_composing_interleave]
-// [START bigtable_filters_composing_condition]
+// [START bigtable_filters_print]
 func readWithFilter(w io.Writer, projectID, instanceID string, tableName string, filter bigtable.Filter) error {
 	// projectID := "my-project-id"
 	// instanceID := "my-instance-id"
@@ -252,21 +201,4 @@ func printRow(w io.Writer, row bigtable.Row) {
 	fmt.Fprintln(w)
 }
 
-// [END bigtable_filters_limit_row_sample]
-// [END bigtable_filters_limit_row_regex]
-// [END bigtable_filters_limit_cells_per_col]
-// [END bigtable_filters_limit_cells_per_row]
-// [END bigtable_filters_limit_cells_per_row_offset]
-// [END bigtable_filters_limit_col_family_regex]
-// [END bigtable_filters_limit_col_qualifier_regex]
-// [END bigtable_filters_limit_col_range]
-// [END bigtable_filters_limit_value_range]
-// [END bigtable_filters_limit_value_regex]
-// [END bigtable_filters_limit_timestamp_range]
-// [END bigtable_filters_limit_block_all]
-// [END bigtable_filters_limit_pass_all]
-// [END bigtable_filters_modify_strip_value]
-// [END bigtable_filters_modify_apply_label]
-// [END bigtable_filters_composing_chain]
-// [END bigtable_filters_composing_interleave]
-// [END bigtable_filters_composing_condition]
+// [END bigtable_filters_print]

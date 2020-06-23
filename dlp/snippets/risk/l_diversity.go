@@ -67,7 +67,7 @@ func riskLDiversity(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub,
 
 	// Create a configured request.
 	req := &dlppb.CreateDlpJobRequest{
-		Parent: "projects/" + projectID,
+		Parent: fmt.Sprintf("projects/%s/locations/global", projectID),
 		Job: &dlppb.CreateDlpJobRequest_RiskJob{
 			RiskJob: &dlppb.RiskAnalysisJobConfig{
 				// PrivacyMetric configures what to compute.

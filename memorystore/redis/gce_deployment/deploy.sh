@@ -18,7 +18,7 @@ fi
 
 if [ -z "$ZONE" ]; then
   ZONE=$(gcloud config get-value compute/zone -q)
-  echo $ZONE
+  echo "$ZONE"
 fi
 
 
@@ -36,8 +36,8 @@ gcloud compute instances create my-instance \
     --machine-type=g1-small \
     --scopes cloud-platform \
     --metadata-from-file startup-script=startup-script.sh \
-    --metadata gcs-bucket=$GCS_BUCKET_NAME,redis-host=$REDISHOST,redis-port=$REDISPORT \
-    --zone $ZONE \
+    --metadata gcs-bucket="$GCS_BUCKET_NAME",redis-host="$REDISHOST",redis-port="$REDISPORT" \
+    --zone "$ZONE" \
     --tags http-server
 
 gcloud compute firewall-rules create allow-http-server-8080 \

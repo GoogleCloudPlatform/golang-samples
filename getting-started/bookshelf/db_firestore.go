@@ -26,7 +26,8 @@ import (
 // firestoreDB persists books to Cloud Firestore.
 // See https://cloud.google.com/firestore/docs.
 type firestoreDB struct {
-	client *firestore.Client
+	client     *firestore.Client
+	collection string
 }
 
 // Ensure firestoreDB conforms to the BookDatabase interface.
@@ -48,7 +49,8 @@ func newFirestoreDB(client *firestore.Client) (*firestoreDB, error) {
 		return nil, fmt.Errorf("firestoredb: could not connect: %v", err)
 	}
 	return &firestoreDB{
-		client: client,
+		client:     client,
+		collection: "books",
 	}, nil
 }
 
@@ -59,7 +61,7 @@ func (db *firestoreDB) Close(context.Context) error {
 
 // Book retrieves a book by its ID.
 func (db *firestoreDB) GetBook(ctx context.Context, id string) (*Book, error) {
-	ds, err := db.client.Collection("books").Doc(id).Get(ctx)
+	ds, err := db.client.Collection(db.collection).Doc(id).Get(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("firestoredb: Get: %v", err)
 	}
@@ -72,7 +74,7 @@ func (db *firestoreDB) GetBook(ctx context.Context, id string) (*Book, error) {
 
 // AddBook saves a given book, assigning it a new ID.
 func (db *firestoreDB) AddBook(ctx context.Context, b *Book) (id string, err error) {
-	ref := db.client.Collection("books").NewDoc()
+	ref := db.client.Collection(db.collection).NewDoc()
 	b.ID = ref.ID
 	if _, err := ref.Create(ctx, b); err != nil {
 		return "", fmt.Errorf("Create: %v", err)
@@ -82,7 +84,7 @@ func (db *firestoreDB) AddBook(ctx context.Context, b *Book) (id string, err err
 
 // DeleteBook removes a given book by its ID.
 func (db *firestoreDB) DeleteBook(ctx context.Context, id string) error {
-	if _, err := db.client.Collection("books").Doc(id).Delete(ctx); err != nil {
+	if _, err := db.client.Collection(db.collection).Doc(id).Delete(ctx); err != nil {
 		return fmt.Errorf("firestore: Delete: %v", err)
 	}
 	return nil
@@ -90,7 +92,7 @@ func (db *firestoreDB) DeleteBook(ctx context.Context, id string) error {
 
 // UpdateBook updates the entry for a given book.
 func (db *firestoreDB) UpdateBook(ctx context.Context, b *Book) error {
-	if _, err := db.client.Collection("books").Doc(b.ID).Set(ctx, b); err != nil {
+	if _, err := db.client.Collection(db.collection).Doc(b.ID).Set(ctx, b); err != nil {
 		return fmt.Errorf("firestsore: Set: %v", err)
 	}
 	return nil
@@ -99,7 +101,7 @@ func (db *firestoreDB) UpdateBook(ctx context.Context, b *Book) error {
 // ListBooks returns a list of books, ordered by title.
 func (db *firestoreDB) ListBooks(ctx context.Context) ([]*Book, error) {
 	books := make([]*Book, 0)
-	iter := db.client.Collection("books").Query.OrderBy("Title", firestore.Asc).Documents(ctx)
+	iter := db.client.Collection(db.collection).Query.OrderBy("Title", firestore.Asc).Documents(ctx)
 	defer iter.Stop()
 	for {
 		doc, err := iter.Next()
