@@ -34,7 +34,7 @@ func getHL7V2Store(w io.Writer, projectID, location, datasetID, hl7v2StoreID str
 
 	storesService := healthcareService.Projects.Locations.Datasets.Hl7V2Stores
 
-	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/hl7v2Stores/%s", projectID, location, datasetID, hl7v2StoreID)
+	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/hl7V2Stores/%s", projectID, location, datasetID, hl7v2StoreID)
 
 	store, err := storesService.Get(name).Do()
 	if err != nil {
