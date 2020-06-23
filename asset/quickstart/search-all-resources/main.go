@@ -29,7 +29,7 @@ import (
 )
 
 func main() {
-  scope := flag.String("scope", "", "Scope of the search.")
+	scope := flag.String("scope", "", "Scope of the search.")
 	query := flag.String("query", "", "Query statement.")
 	flag.Parse()
 	ctx := context.Background()
@@ -56,7 +56,7 @@ func main() {
 	var resources []*assetpb.ResourceSearchResult
 	_, err = iterator.NewPager(it, pageSize, "").NextPage(&resources)
 	if err != nil {
-	  log.Fatal(err)
+		log.Fatal(err)
 	}
 	fmt.Println(resources)
 }

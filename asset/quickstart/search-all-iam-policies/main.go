@@ -29,8 +29,8 @@ import (
 )
 
 func main() {
-  scope := flag.String("scope", "", "Scope of the search.")
-  query := flag.String("query", "", "Query statement.")
+	scope := flag.String("scope", "", "Scope of the search.")
+	query := flag.String("query", "", "Query statement.")
 	flag.Parse()
 	ctx := context.Background()
 	client, err := asset.NewClient(ctx)
@@ -52,7 +52,7 @@ func main() {
 	var policies []*assetpb.IamPolicySearchResult
 	_, err = iterator.NewPager(it, pageSize, "").NextPage(&policies)
 	if err != nil {
-	  log.Fatal(err)
+		log.Fatal(err)
 	}
 	fmt.Println(policies)
 }
