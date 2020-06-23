@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go v0.58.0
 	cloud.google.com/go/bigquery v1.8.0
 	cloud.google.com/go/bigtable v1.3.0
-	cloud.google.com/go/datastore v1.1.0
+	cloud.google.com/go/datastore v1.2.0
 	cloud.google.com/go/firestore v1.2.0
 	cloud.google.com/go/logging v1.0.0
 	cloud.google.com/go/pubsub v1.4.0
@@ -43,10 +43,10 @@ require (
 	golang.org/x/net v0.0.0-20200602114024-627f9648deb9
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/text v0.3.2
-	golang.org/x/tools v0.0.0-20200606014950-c42cb6316fb6
+	golang.org/x/tools v0.0.0-20200612220849-54c614fe050c
 	google.golang.org/api v0.26.0
 	google.golang.org/appengine v1.6.6
-	google.golang.org/genproto v0.0.0-20200608115520-7c474a2e3482
+	google.golang.org/genproto v0.0.0-20200612171551-7676ae05be11
 	google.golang.org/grpc v1.29.1
 	gopkg.in/sendgrid/sendgrid-go.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.3.0

@@ -115,7 +115,7 @@ func inspectBigquery(w io.Writer, projectID string, infoTypeNames []string, cust
 
 	// Create a configured request.
 	req := &dlppb.CreateDlpJobRequest{
-		Parent: "projects/" + projectID,
+		Parent: fmt.Sprintf("projects/%s/locations/global", projectID),
 		Job: &dlppb.CreateDlpJobRequest_InspectJob{
 			InspectJob: &dlppb.InspectJobConfig{
 				// StorageConfig describes where to find the data.

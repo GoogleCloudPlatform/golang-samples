@@ -48,7 +48,7 @@ func reidentifyFPE(w io.Writer, projectID, input, keyFileName, cryptoKeyName, su
 	}
 	// Create a configured request.
 	req := &dlppb.ReidentifyContentRequest{
-		Parent: "projects/" + projectID,
+		Parent: fmt.Sprintf("projects/%s/locations/global", projectID),
 		ReidentifyConfig: &dlppb.DeidentifyConfig{
 			Transformation: &dlppb.DeidentifyConfig_InfoTypeTransformations{
 				InfoTypeTransformations: &dlppb.InfoTypeTransformations{

@@ -24,13 +24,30 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestCreate(t *testing.T) {
+func TestCreateGet(t *testing.T) {
 	c := testutil.SystemTest(t)
 	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
-		config, err := create(buf, c.ProjectID)
+		config, err := createGet(buf, c.ProjectID)
 		if err != nil {
 			r.Errorf("create: %v", err)
+			return
+		}
+		want := "Successfully"
+		if got := buf.String(); !strings.Contains(got, want) {
+			r.Errorf("%q not found in output: %q", want, got)
+		}
+		delete(ioutil.Discard, config.GetName())
+	})
+}
+
+func TestCreatePost(t *testing.T) {
+	c := testutil.SystemTest(t)
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+		config, err := createPost(buf, c.ProjectID)
+		if err != nil {
+			r.Errorf("create POST: %v", err)
 			return
 		}
 		want := "Successfully"
@@ -67,7 +84,7 @@ func TestListIPs(t *testing.T) {
 
 func TestGet(t *testing.T) {
 	c := testutil.SystemTest(t)
-	config, err := create(ioutil.Discard, c.ProjectID)
+	config, err := createPost(ioutil.Discard, c.ProjectID)
 	if err != nil {
 		t.Fatalf("create: %v", err)
 	}
@@ -84,7 +101,7 @@ func TestGet(t *testing.T) {
 
 func TestUpdate(t *testing.T) {
 	c := testutil.SystemTest(t)
-	config, err := create(ioutil.Discard, c.ProjectID)
+	config, err := createGet(ioutil.Discard, c.ProjectID)
 	if err != nil {
 		t.Fatalf("create: %v", err)
 	}
@@ -111,7 +128,7 @@ func TestUpdate(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	c := testutil.SystemTest(t)
-	config, err := create(ioutil.Discard, c.ProjectID)
+	config, err := createPost(ioutil.Discard, c.ProjectID)
 	if err != nil {
 		t.Fatalf("create: %v", err)
 	}

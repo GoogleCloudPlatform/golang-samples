@@ -25,12 +25,16 @@ import (
 	"time"
 
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
+	instance "cloud.google.com/go/spanner/admin/instance/apiv1"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/google/uuid"
 	"google.golang.org/api/iterator"
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
+	instancepb "google.golang.org/genproto/googleapis/spanner/admin/instance/v1"
 )
 
 type sampleFunc func(w io.Writer, dbName string) error
+type instanceSampleFunc func(w io.Writer, projectID, instanceID string) error
 type backupSampleFunc func(w io.Writer, dbName, backupID string) error
 
 func initTest(t *testing.T, projectID string) (dbName string, cleanup func()) {
@@ -105,6 +109,17 @@ func initBackupTest(t *testing.T, projectID, dbName string) (restoreDBName, back
 		})
 	}
 	return
+}
+
+func TestCreateInstance(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	instanceID := fmt.Sprintf("go-sample-test-%s", uuid.New().String()[:8])
+	out := runInstanceSample(t, createInstance, tc.ProjectID, instanceID, "failed to create an instance")
+	if err := cleanupInstance(tc.ProjectID, instanceID); err != nil {
+		t.Logf("cleanupInstance error: %s", err)
+	}
+	assertContains(t, out, fmt.Sprintf("Created instance [%s]", instanceID))
 }
 
 func TestSample(t *testing.T) {
@@ -351,6 +366,14 @@ func runBackupSample(t *testing.T, f backupSampleFunc, dbName, backupID, errMsg 
 	return b.String()
 }
 
+func runInstanceSample(t *testing.T, f instanceSampleFunc, projectID, instanceID, errMsg string) string {
+	var b bytes.Buffer
+	if err := f(&b, projectID, instanceID); err != nil {
+		t.Errorf("%s: %v", errMsg, err)
+	}
+	return b.String()
+}
+
 func mustRunSample(t *testing.T, f sampleFunc, dbName, errMsg string) string {
 	var b bytes.Buffer
 	if err := f(&b, dbName); err != nil {
@@ -386,4 +409,20 @@ func validLength(databaseName string, t *testing.T) (trimmedName string) {
 	}
 
 	return databaseName
+}
+
+func cleanupInstance(projectID, instanceID string) error {
+	ctx := context.Background()
+	instanceAdmin, err := instance.NewInstanceAdminClient(ctx)
+	if err != nil {
+		return fmt.Errorf("cannot create instance databaseAdmin client: %v", err)
+	}
+	defer instanceAdmin.Close()
+
+	instanceName := fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID)
+	if err := instanceAdmin.DeleteInstance(ctx, &instancepb.DeleteInstanceRequest{Name: instanceName}); err != nil {
+		return fmt.Errorf("failed to delete instance %s (error %v), might need a manual removal",
+			instanceName, err)
+	}
+	return nil
 }
