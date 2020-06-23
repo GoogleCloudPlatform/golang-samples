@@ -68,7 +68,7 @@ func main() {
 
 	// Construct request.
 	req := &dlppb.InspectContentRequest{
-		Parent: "projects/" + projectID,
+		Parent: fmt.Sprintf("projects/%s/locations/global", projectID),
 		InspectConfig: &dlppb.InspectConfig{
 			InfoTypes:     infoTypes,
 			MinLikelihood: minLikelihood,
