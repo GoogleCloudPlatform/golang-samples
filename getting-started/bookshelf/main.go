@@ -100,13 +100,6 @@ func (b *Bookshelf) registerHandlers() {
 	r.Methods("POST").Path("/books/{id:[0-9a-zA-Z_\\-]+}:delete").
 		Handler(appHandler(b.deleteHandler)).Name("delete")
 
-	// Respond to App Engine and Compute Engine health checks.
-	// Indicate the server is healthy.
-	r.Methods("GET").Path("/_ah/health").HandlerFunc(
-		func(w http.ResponseWriter, r *http.Request) {
-			w.Write([]byte("ok"))
-		})
-
 	r.Methods("GET").Path("/logs").Handler(appHandler(b.sendLog))
 	r.Methods("GET").Path("/errors").Handler(appHandler(b.sendError))
 

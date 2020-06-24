@@ -50,7 +50,7 @@ func TestMain(t *testing.T) {
 	}
 	got := string(out)
 
-	want := fmt.Sprintf("output_config:<gcs_destination:<uri:\"gs://%s/my-assets.txt\" > >", bucketName)
+	want := fmt.Sprintf(`"gs://%s/my-assets.txt`, bucketName)
 	if !strings.Contains(got, want) {
 		t.Errorf("stdout returned %s, wanted to contain %s", got, want)
 	}

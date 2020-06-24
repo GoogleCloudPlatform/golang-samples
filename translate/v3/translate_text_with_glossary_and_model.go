@@ -60,7 +60,7 @@ func translateTextWithGlossaryAndModel(w io.Writer, projectID string, location s
 	}
 
 	// Display the translation for each input text provided
-	for _, translation := range resp.GetTranslations() {
+	for _, translation := range resp.GetGlossaryTranslations() {
 		fmt.Fprintf(w, "Translated text: %v\n", translation.GetTranslatedText())
 	}
 
