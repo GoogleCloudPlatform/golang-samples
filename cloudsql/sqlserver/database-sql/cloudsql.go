@@ -84,11 +84,7 @@ func (app *app) indexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-
-	var err error
-
-	var parsedTemplate *template.Template
-	parsedTemplate, err = template.ParseFiles("templates/index.html")
+	parsedTemplate, err := template.ParseFiles("templates/index.html")
 	if err != nil {
 		log.Fatalf("unable to parse template file: %s", err)
 	}
@@ -102,9 +98,9 @@ func main() {
 	// such as "127.0.0.1:1433". If DB_TCP_HOST is not set, a Unix socket
 	// connection pool will be created instead.
 	if os.Getenv("DB_TCP_HOST") != "" {
-		app.db, err = initTcpConnectionPool()
+		app.db, err = initTCPConnectionPool()
 		if err != nil {
-			log.Fatalf("initTcpConnectionPool: unable to connect: %s", err)
+			log.Fatalf("initTCPConnectionPool: unable to connect: %s", err)
 		}
 	} else {
 		app.db, err = initSocketConnectionPool()
@@ -264,9 +260,9 @@ func initSocketConnectionPool() (*sql.DB, error) {
 	// [END cloud_sql_sqlserver_databasesql_create_socket]
 }
 
-// initTcpConnectionPool initializes a TCP connection pool for a Cloud SQL
+// initTCPConnectionPool initializes a TCP connection pool for a Cloud SQL
 // instance of SQL Server.
-func initTcpConnectionPool() (*sql.DB, error) {
+func initTCPConnectionPool() (*sql.DB, error) {
 	// [START cloud_sql_sqlserver_databasesql_create_tcp]
 	var (
 		dbUser    = mustGetenv("DB_USER")
