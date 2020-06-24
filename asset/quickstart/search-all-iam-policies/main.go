@@ -39,22 +39,21 @@ func main() {
 	}
 	defer client.Close()
 
-	pageSize := 20
-	pageToken := ""
-
 	req := &assetpb.SearchAllIamPoliciesRequest{
-		Scope:     *scope,
-		Query:     *query,
-		PageSize:  int32(pageSize),
-		PageToken: pageToken,
+		Scope: *scope,
+		Query: *query,
 	}
 	it := client.SearchAllIamPolicies(ctx, req)
-	var policies []*assetpb.IamPolicySearchResult
-	_, err = iterator.NewPager(it, pageSize, "").NextPage(&policies)
-	if err != nil {
-		log.Fatal(err)
+	for {
+		policy, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(policy)
 	}
-	fmt.Println(policies)
 }
 
 // [END asset_quickstart_search_all_iam_policies]

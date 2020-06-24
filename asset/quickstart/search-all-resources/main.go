@@ -39,26 +39,21 @@ func main() {
 	}
 	defer client.Close()
 
-	assetTypes := []string{}
-	pageSize := 20
-	pageToken := ""
-	orderBy := ""
-
 	req := &assetpb.SearchAllResourcesRequest{
-		Scope:      *scope,
-		Query:      *query,
-		AssetTypes: assetTypes,
-		PageSize:   int32(pageSize),
-		PageToken:  pageToken,
-		OrderBy:    orderBy,
+		Scope: *scope,
+		Query: *query,
 	}
 	it := client.SearchAllResources(ctx, req)
-	var resources []*assetpb.ResourceSearchResult
-	_, err = iterator.NewPager(it, pageSize, "").NextPage(&resources)
-	if err != nil {
-		log.Fatal(err)
+	for {
+		resource, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(resource)
 	}
-	fmt.Println(resources)
 }
 
 // [END asset_quickstart_search_all_resources]
