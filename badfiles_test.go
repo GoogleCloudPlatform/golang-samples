@@ -97,7 +97,7 @@ var allowList = []string{
 
 	// GitHub configuration.
 	".github/blunderbuss.yml",
-	".github/dependabot.yml",
+	".github/renovate.json",
 	".github/CODEOWNERS",
 
 	// Getting Started on GCE systemd service file.

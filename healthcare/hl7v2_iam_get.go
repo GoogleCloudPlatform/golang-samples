@@ -34,7 +34,7 @@ func hl7V2IAMPolicy(w io.Writer, projectID, location, datasetID, hl7V2StoreID st
 
 	storesService := healthcareService.Projects.Locations.Datasets.Hl7V2Stores
 
-	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/hl7v2Stores/%s", projectID, location, datasetID, hl7V2StoreID)
+	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/hl7V2Stores/%s", projectID, location, datasetID, hl7V2StoreID)
 
 	policy, err := storesService.GetIamPolicy(name).Do()
 	if err != nil {
