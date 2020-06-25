@@ -173,11 +173,12 @@ func currentTotals(app *app) (*templateData, error) {
 		return nil, fmt.Errorf("recentVotes: %v", err)
 	}
 
-	var pageData templateData
-	pageData.TabsCount = tabVotes
-	pageData.SpacesCount = spaceVotes
-	pageData.VoteMargin = voteDiffStr
-	pageData.RecentVotes = latestVotesCast
+	pageData := templateData{
+		TabsCount:   tabVotes,
+		SpacesCount: spaceVotes,
+		VoteMargin:  voteDiffStr,
+		RecentVotes: latestVotesCast,
+	}
 
 	return &pageData, nil
 }
@@ -201,11 +202,9 @@ func saveVote(w http.ResponseWriter, r *http.Request, app *app) error {
 		return fmt.Errorf("Request.ParseForm: %v", err)
 	}
 
-	var team string
-	if teamprop, ok := r.Form["team"]; ok {
-		team = teamprop[0]
-	} else {
-		return fmt.Errorf("team property missing from form submission")
+	team := r.FormValue("team")
+	if team == "" {
+		fmt.Errorf("team property missing from form submission")
 	}
 
 	// [START cloud_sql_sqlserver_databasesql_connection]
