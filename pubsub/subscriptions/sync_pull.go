@@ -27,10 +27,9 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func pullMsgsSync(w io.Writer, projectID, subID string, topic *pubsub.Topic) error {
+func pullMsgsSync(w io.Writer, projectID, subID string) error {
 	// projectID := "my-project-id"
 	// subID := "my-sub"
-	// topic of type https://godoc.org/cloud.google.com/go/pubsub#Topic
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
@@ -52,16 +51,12 @@ func pullMsgsSync(w io.Writer, projectID, subID string, topic *pubsub.Topic) err
 
 	// Create a channel to handle messages to as they come in.
 	cm := make(chan *pubsub.Message)
+	defer close(cm)
 	// Handle individual messages in a goroutine.
 	go func() {
-		for {
-			select {
-			case msg := <-cm:
-				fmt.Fprintf(w, "Got message :%q\n", string(msg.Data))
-				msg.Ack()
-			case <-ctx.Done():
-				return
-			}
+		for msg := range cm {
+			fmt.Fprintf(w, "Got message :%q\n", string(msg.Data))
+			msg.Ack()
 		}
 	}()
 
@@ -72,7 +67,6 @@ func pullMsgsSync(w io.Writer, projectID, subID string, topic *pubsub.Topic) err
 	if err != nil && status.Code(err) != codes.Canceled {
 		return fmt.Errorf("Receive: %v", err)
 	}
-	close(cm)
 
 	return nil
 }

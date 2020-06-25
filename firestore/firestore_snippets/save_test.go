@@ -22,9 +22,11 @@ import (
 	"testing"
 
 	"cloud.google.com/go/firestore"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestSave(t *testing.T) {
+	testutil.EndToEndTest(t)
 	// TODO: revert this to testutil.SystemTest(t).ProjectID
 	// when datastore and firestore can co-exist in a project.
 	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")

@@ -24,6 +24,7 @@ GO111MODULE=off go get github.com/GoogleCloudPlatform/golang-samples/testing/gim
     github.com/jstemmer/go-junit-report \
     golang.org/x/tools/cmd/goimports
 
+(
 # Get the SDK tar and untar it.
 cd /tmp
 
@@ -40,5 +41,4 @@ rm $TARFILE
 
 ./google-cloud-sdk/bin/gcloud -q components update
 ./google-cloud-sdk/bin/gcloud -q components install app-engine-go
-
-cd -
+)
