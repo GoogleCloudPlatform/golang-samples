@@ -51,16 +51,12 @@ func pullMsgsSync(w io.Writer, projectID, subID string) error {
 
 	// Create a channel to handle messages to as they come in.
 	cm := make(chan *pubsub.Message)
+	defer close(cm)
 	// Handle individual messages in a goroutine.
 	go func() {
-		for {
-			select {
-			case msg := <-cm:
-				fmt.Fprintf(w, "Got message :%q\n", string(msg.Data))
-				msg.Ack()
-			case <-ctx.Done():
-				return
-			}
+		for msg := range cm {
+			fmt.Fprintf(w, "Got message :%q\n", string(msg.Data))
+			msg.Ack()
 		}
 	}()
 
@@ -71,7 +67,6 @@ func pullMsgsSync(w io.Writer, projectID, subID string) error {
 	if err != nil && status.Code(err) != codes.Canceled {
 		return fmt.Errorf("Receive: %v", err)
 	}
-	close(cm)
 
 	return nil
 }

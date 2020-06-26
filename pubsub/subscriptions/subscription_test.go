@@ -209,7 +209,10 @@ func TestPullMsgsAsync(t *testing.T) {
 	defer topic.Delete(ctx)
 	defer topic.Stop()
 
-	sub, err := getOrCreateSub(ctx, client, topic, asyncSubID)
+	cfg := &pubsub.SubscriptionConfig{
+		Topic: topic,
+	}
+	sub, err := getOrCreateSub(ctx, client, asyncSubID, cfg)
 	if err != nil {
 		t.Fatalf("getOrCreateSub: %v", err)
 	}
@@ -244,7 +247,10 @@ func TestPullMsgsSync(t *testing.T) {
 	defer topic.Delete(ctx)
 	defer topic.Stop()
 
-	sub, err := getOrCreateSub(ctx, client, topic, subIDSync)
+	cfg := &pubsub.SubscriptionConfig{
+		Topic: topic,
+	}
+	sub, err := getOrCreateSub(ctx, client, subIDSync, cfg)
 	if err != nil {
 		t.Fatalf("getOrCreateSub: %v", err)
 	}
@@ -279,7 +285,10 @@ func TestPullMsgsConcurrencyControl(t *testing.T) {
 	defer topic.Delete(ctx)
 	defer topic.Stop()
 
-	sub, err := getOrCreateSub(ctx, client, topic, subIDConc)
+	cfg := &pubsub.SubscriptionConfig{
+		Topic: topic,
+	}
+	sub, err := getOrCreateSub(ctx, client, subIDConc, cfg)
 	if err != nil {
 		t.Fatalf("getOrCreateSub: %v", err)
 	}
@@ -440,18 +449,20 @@ func TestPullMsgsDeadLetterDeliveryAttempts(t *testing.T) {
 	defer deadLetterSinkTopic.Delete(ctx)
 	defer deadLetterSinkTopic.Stop()
 
-	buf := new(bytes.Buffer)
-	deadLetterSinkName := fmt.Sprintf("projects/%s/topics/%s", tc.ProjectID, deadLetterSinkID)
-	if err = createSubWithDeadLetter(buf, tc.ProjectID, deadLetterSubID, deadLetterSourceID, deadLetterSinkName); err != nil {
-		t.Fatalf("createSubWithDeadLetter failed: %v", err)
-	}
-	sub := client.Subscription(deadLetterSubID)
+	sub, err := getOrCreateSub(ctx, client, deadLetterSubID, &pubsub.SubscriptionConfig{
+		Topic: deadLetterSourceTopic,
+		DeadLetterPolicy: &pubsub.DeadLetterPolicy{
+			DeadLetterTopic:     deadLetterSinkTopic.String(),
+			MaxDeliveryAttempts: 10,
+		},
+	})
 	defer sub.Delete(ctx)
 
 	if err = publishMsgs(ctx, deadLetterSourceTopic, 1); err != nil {
 		t.Fatalf("publishMsgs failed: %v", err)
 	}
 
+	buf := new(bytes.Buffer)
 	if err := pullMsgsDeadLetterDeliveryAttempt(buf, tc.ProjectID, deadLetterSubID); err != nil {
 		t.Fatalf("pullMsgsDeadLetterDeliveryAttempt failed: %v", err)
 	}
@@ -496,16 +507,14 @@ func getOrCreateTopic(ctx context.Context, client *pubsub.Client, topicID string
 }
 
 // getOrCreateSub gets a subscription or creates it if it doesn't exist.
-func getOrCreateSub(ctx context.Context, client *pubsub.Client, topic *pubsub.Topic, subID string) (*pubsub.Subscription, error) {
+func getOrCreateSub(ctx context.Context, client *pubsub.Client, subID string, cfg *pubsub.SubscriptionConfig) (*pubsub.Subscription, error) {
 	sub := client.Subscription(subID)
 	ok, err := sub.Exists(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to check if subscription exists: %v", err)
 	}
 	if !ok {
-		sub, err = client.CreateSubscription(ctx, subID, pubsub.SubscriptionConfig{
-			Topic: topic,
-		})
+		sub, err = client.CreateSubscription(ctx, subID, *cfg)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create subscription (%q): %v", topicID, err)
 		}

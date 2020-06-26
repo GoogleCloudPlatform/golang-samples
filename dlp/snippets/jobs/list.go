@@ -38,7 +38,7 @@ func listJobs(w io.Writer, projectID, filter, jobType string) error {
 
 	// Create a configured request.
 	req := &dlppb.ListDlpJobsRequest{
-		Parent: "projects/" + projectID,
+		Parent: fmt.Sprintf("projects/%s/locations/global", projectID),
 		Filter: filter,
 		Type:   dlppb.DlpJobType(dlppb.DlpJobType_value[jobType]),
 	}

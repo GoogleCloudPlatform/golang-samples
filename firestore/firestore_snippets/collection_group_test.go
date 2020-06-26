@@ -26,7 +26,7 @@ import (
 )
 
 func TestCollectionGroup(t *testing.T) {
-	testutil.EndToEndTest(t)
+	tc := testutil.SystemTest(t)
 	// TODO(#559): revert this to testutil.SystemTest(t).ProjectID
 	// when datastore and firestore can co-exist in a project.
 	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
@@ -42,8 +42,10 @@ func TestCollectionGroup(t *testing.T) {
 	}
 	defer client.Close()
 
+	collection := tc.ProjectID + "-collection-group-cities"
+
 	// Delete all docs first to make sure collectionGroupSetup works.
-	docs, err := client.Collection("cities").DocumentRefs(ctx).GetAll()
+	docs, err := client.Collection(collection).DocumentRefs(ctx).GetAll()
 	// Ignore errors; this isn't essential.
 	if err == nil {
 		for _, d := range docs {
@@ -51,7 +53,7 @@ func TestCollectionGroup(t *testing.T) {
 		}
 	}
 
-	if err := collectionGroupSetup(projectID); err != nil {
+	if err := collectionGroupSetup(projectID, collection); err != nil {
 		t.Fatalf("collectionGroupSetup: %v", err)
 	}
 
