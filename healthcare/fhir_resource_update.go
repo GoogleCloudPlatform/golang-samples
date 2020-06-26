@@ -38,9 +38,9 @@ func updateFHIRResource(w io.Writer, projectID, location, datasetID, fhirStoreID
 	fhirService := healthcareService.Projects.Locations.Datasets.FhirStores.Fhir
 
 	// The payload shown works with a Patient resource and is not guaranteed
-        // to work with other types of FHIR resources. If necessary,
-        // supply a new body with data that corresponds to the resource you
-        // are updating.
+      // to work with other types of FHIR resources. If necessary,
+      // supply a new body with data that corresponds to the resource you
+      // are updating.
 	payload := map[string]interface{}{
 		"resourceType": resourceType,
 		"id":           fhirResourceID,
