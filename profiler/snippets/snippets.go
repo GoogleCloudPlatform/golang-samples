@@ -30,9 +30,11 @@ func main() {
 		// ProjectID must be set if not running on GCP.
 		// ProjectID: "my-project",
 	},
-		// For OpenCensus user for Cloud Trace and Cloud Monitoring:
-		// This option prevents the Profiler agent to send Span data
-		// when the agent send profile data to the backend.
+		// For OpenCensus users that use Cloud Trace and Cloud Monitoring:
+		// cloud.google.com/go/profiler creates its own spans when making its
+		// own requests to send profiling data to the server, which can be
+		// noisy. This option prevents the profiler package from adding spans
+		// for its own requests.
 		option.WithTelemetryDisabled(),
 	); err != nil {
 		// TODO: Handle error.
