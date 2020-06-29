@@ -65,52 +65,6 @@ elif echo "$SIGNIFICANT_CHANGES" | tr ' ' '\n' | grep "^go.mod$" || [[ $CHANGED_
   RUN_ALL_TESTS="1"
 fi
 
-## Static Analysis
-# Do the easy stuff before running tests or reserving a project. Fail fast!
-set +x
-
-if [ "$GOLANG_SAMPLES_GO_VET" ]; then
-  echo "Running 'goimports compliance check'"
-  set -x
-  diff -u <(echo -n) <(goimports -d .)
-  set +x
-  for i in $GO_CHANGED_MODULES; do
-    mod=$(dirname "$i")
-    pushd "$mod" > /dev/null;
-      # Fail if a dependency was added without the necessary go.mod/go.sum change
-      # being part of the commit.
-      echo "Running 'go.mod/go.sum sync check' in '$mod'..."
-      set -x
-      go mod tidy;
-      # shellcheck disable=SC2162
-      git diff go.mod | tee /dev/stderr | (! read)
-      # shellcheck disable=SC2162
-      [ -f go.sum ] && git diff go.sum | tee /dev/stderr | (! read)
-      set +x
-    popd > /dev/null;
-  done
-
-  # Always run 'go vet' from the root, which does not look at sub-modules.
-  set +x
-  echo "Running 'go vet' in golang-samples root..."
-  set -x
-  go vet ./...
-  set +x
-
-  # Run go vet inside each sub-module.
-  # Recursive submodules are not supported.
-  set +x
-  for i in $GO_CHANGED_SUBMODULES; do
-    mod=$(dirname "$i")
-    pushd "$mod" > /dev/null;
-      echo "Running 'go vet' in '$mod'..."
-      set -x
-      go vet ./...
-      set +x
-    popd > /dev/null;
-  done
-fi
-
 # Don't print environment variables in case there are secrets.
 # If you need a secret, use a keystore_resource in common.cfg.
 set +x
