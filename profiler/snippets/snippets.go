@@ -19,6 +19,7 @@ package main
 
 import (
 	"cloud.google.com/go/profiler"
+	"google.golang.org/api/option"
 )
 
 func main() {
@@ -28,7 +29,12 @@ func main() {
 		ServiceVersion: "1.0.0",
 		// ProjectID must be set if not running on GCP.
 		// ProjectID: "my-project",
-	}); err != nil {
+	},
+		// For OpenCensus user for Cloud Trace and Cloud Monitoring:
+		// This option prevents the Profiler agent to send Span data
+		// when the agent send profile data to the backend.
+		option.WithTelemetryDisabled(),
+	); err != nil {
 		// TODO: Handle error.
 	}
 }
