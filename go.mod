@@ -49,7 +49,7 @@ require (
 	google.golang.org/genproto v0.0.0-20200623002339-fbb79eadd5eb
 	google.golang.org/grpc v1.30.0
 	google.golang.org/grpc/examples v0.0.0-20200617041141-9a465503579e
-	gopkg.in/sendgrid/sendgrid-go.v2 v2.0.0
+	gopkg.in/sendgrid/sendgrid-go.v3 v3.6.0
 	gopkg.in/yaml.v2 v2.3.0
 )
 
