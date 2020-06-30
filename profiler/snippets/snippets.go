@@ -23,20 +23,22 @@ import (
 )
 
 func main() {
-	// Profiler initialization, best done as early as possible.
-	if err := profiler.Start(profiler.Config{
+	cfg := profiler.Config{
 		Service:        "myservice",
 		ServiceVersion: "1.0.0",
 		// ProjectID must be set if not running on GCP.
 		// ProjectID: "my-project",
-	},
-		// For OpenCensus users that use Cloud Trace and Cloud Monitoring:
-		// cloud.google.com/go/profiler creates its own spans when making its
-		// own requests to send profiling data to the server, which can be
-		// noisy. This option prevents the profiler package from adding spans
-		// for its own requests.
-		option.WithTelemetryDisabled(),
-	); err != nil {
+	}
+
+	// For OpenCensus users that use Cloud Trace and Cloud Monitoring:
+	// cloud.google.com/go/profiler creates its own spans when making its
+	// own requests to send profiling data to the server, which can be
+	// noisy. This option prevents the profiler package from adding spans
+	// for its own requests.
+	opts := []option.ClientOption{option.WithTelemetryDisabled()}
+
+	// Profiler initialization, best done as early as possible.
+	if err := profiler.Start(cfg, opts...); err != nil {
 		// TODO: Handle error.
 	}
 }
