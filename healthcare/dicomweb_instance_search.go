@@ -12,9 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package dicomwebsearchinstances contains a sample for searching instances.
-// It's in a separate package so each search sample can define queryParamOpt.
-package dicomwebsearchinstances
+package snippets
 
 // [START healthcare_dicomweb_search_instances]
 import (
@@ -26,22 +24,12 @@ import (
 	healthcare "google.golang.org/api/healthcare/v1"
 )
 
-// queryParamOpt is a googleapi.Option (https://godoc.org/google.golang.org/api/googleapi#CallOption)
-// that adds query parameters to an API call.
-type queryParamOpt struct {
-	key, value string
-}
-
-func (qp queryParamOpt) Get() (string, string) { return qp.key, qp.value }
-
-// DicomWebSearchInstances searches instances.
-func DicomWebSearchInstances(w io.Writer, projectID, location, datasetID, dicomStoreID, dicomWebPath string) error {
+// dicomWebSearchInstances searches instances.
+func dicomWebSearchInstances(w io.Writer, projectID, location, datasetID, dicomStoreID string) error {
 	// projectID := "my-project"
 	// location := "us-central1"
 	// datasetID := "my-dataset"
 	// dicomStoreID := "my-dicom-store"
-	// dicomWebPath := "studies/1.3.6.1.4.1.11129.5.5.1113639985/series/1.3.6.1.4.1.11129.5.5.1953511724/instances/1.3.6.1.4.1.11129.5.5.9562821369"
-
 	ctx := context.Background()
 
 	healthcareService, err := healthcare.NewService(ctx)
@@ -53,11 +41,7 @@ func DicomWebSearchInstances(w io.Writer, projectID, location, datasetID, dicomS
 
 	parent := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/dicomStores/%s", projectID, location, datasetID, dicomStoreID)
 
-	call := storesService.SearchForInstances(parent, dicomWebPath)
-	// Refine your search by appending DICOM tags to the
-	// request in the form of query parameters.
-	includeAllFields := queryParamOpt{key: "includefield", value: "all"}
-	resp, err := call.Do(includeAllFields)
+	resp, err := storesService.SearchForInstances(parent, "instances").Do()
 	if err != nil {
 		return fmt.Errorf("SearchForInstances: %v", err)
 	}
@@ -66,17 +50,15 @@ func DicomWebSearchInstances(w io.Writer, projectID, location, datasetID, dicomS
 
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("could not read response: %v", err)
+		return fmt.Errorf("ioutil.ReadAll: %v", err)
 	}
 
 	if resp.StatusCode > 299 {
 		return fmt.Errorf("SearchForInstances: status %d %s: %s", resp.StatusCode, resp.Status, respBytes)
 	}
 
-	if _, err := io.Copy(w, resp.Body); err != nil {
-		return fmt.Errorf("io.Copy: %v", err)
-	}
-
+	respString := string(respBytes)
+	fmt.Fprintf(w, "Found instances: %s\n", respString)
 	return nil
 }
 

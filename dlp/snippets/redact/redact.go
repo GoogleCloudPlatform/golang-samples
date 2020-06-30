@@ -65,7 +65,7 @@ func redactImage(w io.Writer, projectID string, infoTypeNames []string, bytesTyp
 
 	// Create a configured request.
 	req := &dlppb.RedactImageRequest{
-		Parent: "projects/" + projectID,
+		Parent: fmt.Sprintf("projects/%s/locations/global", projectID),
 		InspectConfig: &dlppb.InspectConfig{
 			InfoTypes:     infoTypes,
 			MinLikelihood: dlppb.Likelihood_POSSIBLE,

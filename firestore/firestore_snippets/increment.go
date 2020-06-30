@@ -22,9 +22,9 @@ import (
 	"cloud.google.com/go/firestore"
 )
 
-// updateDocumentIncrement increments the population of the DC document in the
+// updateDocumentIncrement increments the population of the city document in the
 // cities collection by 50.
-func updateDocumentIncrement(projectID string) error {
+func updateDocumentIncrement(projectID, city string) error {
 	// projectID := "my-project"
 
 	ctx := context.Background()
@@ -34,7 +34,7 @@ func updateDocumentIncrement(projectID string) error {
 		return fmt.Errorf("firestore.NewClient: %v", err)
 	}
 
-	dc := client.Collection("cities").Doc("DC")
+	dc := client.Collection("cities").Doc(city)
 	_, err = dc.Update(ctx, []firestore.Update{
 		{Path: "population", Value: firestore.Increment(50)},
 	})
