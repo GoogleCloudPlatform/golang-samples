@@ -40,9 +40,7 @@ func disableBucketLifecycleManagement(w io.Writer, bucketName string) error {
 
 	bucket := client.Bucket(bucketName)
 	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
-		Lifecycle: &storage.Lifecycle{
-			Rules: []storage.LifecycleRule{},
-		},
+		Lifecycle: &storage.Lifecycle{},
 	}
 
 	_, err = bucket.Update(ctx, bucketAttrsToUpdate)
