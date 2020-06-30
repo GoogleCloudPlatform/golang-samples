@@ -204,7 +204,7 @@ func saveVote(w http.ResponseWriter, r *http.Request, app *app) error {
 
 	team := r.FormValue("team")
 	if team == "" {
-		fmt.Errorf("team property missing from form submission")
+		return fmt.Errorf("team property missing from form submission")
 	}
 
 	// [START cloud_sql_sqlserver_databasesql_connection]
