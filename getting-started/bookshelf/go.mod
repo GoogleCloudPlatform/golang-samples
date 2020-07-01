@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/golang-samples/getting-started/bookshelf
 go 1.11
 
 require (
-	cloud.google.com/go v0.58.0
+	cloud.google.com/go v0.60.0
 	cloud.google.com/go/firestore v1.2.0
 	cloud.google.com/go/storage v1.8.0
 	github.com/gofrs/uuid v3.3.0+incompatible
