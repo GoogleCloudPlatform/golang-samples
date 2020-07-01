@@ -29,11 +29,8 @@ func main() {
 		// ProjectID: "my-project",
 
 		// For OpenCensus users:
-		// By default, Cloud Profiler disables OpenCensus telemetries to
-		// avoid noisy span data sent to APM backend.
-		// If you need span data of profiler's requests to its own gRPC API
-		// and want them to be sent to distributed trace backend via OpenCensus,
-		// turn on EnableOCTelemetry flag.
+		// To see Profiler agent spans in APM backend,
+		// set EnableOCTelemetry to true
 		// EnableOCTelemetry: true,
 	}
 
