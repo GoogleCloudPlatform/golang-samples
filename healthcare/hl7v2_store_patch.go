@@ -34,7 +34,7 @@ func patchHL7V2Store(w io.Writer, projectID, location, datasetID, hl7v2StoreID, 
 
 	storesService := healthcareService.Projects.Locations.Datasets.Hl7V2Stores
 
-	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/hl7v2Stores/%s", projectID, location, datasetID, hl7v2StoreID)
+	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/hl7V2Stores/%s", projectID, location, datasetID, hl7v2StoreID)
 
 	if _, err := storesService.Patch(name, &healthcare.Hl7V2Store{
 		NotificationConfigs: []*healthcare.Hl7V2NotificationConfig{
