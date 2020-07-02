@@ -16,12 +16,13 @@ package samples
 
 import (
 	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestCreate(t *testing.T) {
+func TestAdmin(t *testing.T) {
 	client, err := clientCreate(ioutil.Discard)
 	if err != nil {
 		t.Fatalf("clientCreate: %v", err)
@@ -44,5 +45,22 @@ func TestCreate(t *testing.T) {
 	}
 	if got.IndexId != want {
 		t.Fatalf("Unexpected indexID: got %v, want %v", got.IndexId, want)
+	}
+
+	bucket := os.Getenv("GOLANG_SAMPLES_STORAGE_BUCKET")
+	if bucket == "" {
+		t.Skip("Skipping datastore test. GOLANG_SAMPLES_STORAGE_BUCKET must be set.")
+	}
+	resp, err := entitiesExport(ioutil.Discard, tc.ProjectID, "gs://"+bucket)
+	if err != nil {
+		t.Fatalf("entitiesExport: %v", err)
+	}
+	metadata, err := resp.Metadata()
+	if err != nil {
+		t.Fatalf("ExportEntitiesOperation.Metadata: %v", err)
+	}
+
+	if err := entitiesImport(ioutil.Discard, tc.ProjectID, metadata.OutputUrlPrefix); err != nil {
+		t.Fatalf("entitiesImport: %v", err)
 	}
 }
