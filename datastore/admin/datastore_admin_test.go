@@ -55,12 +55,8 @@ func TestAdmin(t *testing.T) {
 	if err != nil {
 		t.Fatalf("entitiesExport: %v", err)
 	}
-	
-	metadata, err := resp.Metadata()
-	if err != nil {
-		t.Fatalf("ExportEntitiesOperation.Metadata: %v", err)
-	}
-	if err := entitiesImport(ioutil.Discard, tc.ProjectID, metadata.OutputUrlPrefix); err != nil {
+
+	if err := entitiesImport(ioutil.Discard, tc.ProjectID, resp.OutputUrl); err != nil {
 		t.Fatalf("entitiesImport: %v", err)
 	}
 }

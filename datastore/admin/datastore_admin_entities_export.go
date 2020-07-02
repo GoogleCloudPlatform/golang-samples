@@ -26,7 +26,7 @@ import (
 
 // entitiesExport exports a copy of all or a subset of entities from
 // Datastore to another storage system, such as Cloud Storage.
-func entitiesExport(w io.Writer, projectID, outputURLPrefix string) (*admin.ExportEntitiesOperation, error) {
+func entitiesExport(w io.Writer, projectID, outputURLPrefix string) (*adminpb.ExportEntitiesResponse, error) {
 	// projectID := "project-id"
 	// outputURLPrefix := "gs://bucket-name"
 	ctx := context.Background()
@@ -44,11 +44,12 @@ func entitiesExport(w io.Writer, projectID, outputURLPrefix string) (*admin.Expo
 	if err != nil {
 		return nil, fmt.Errorf("ExportEntities: %v", err)
 	}
-	if _, err := op.Wait(ctx); err != nil {
+	resp, err := op.Wait(ctx)
+	if err != nil {
 		return nil, fmt.Errorf("Wait: %v", err)
 	}
 	fmt.Fprintln(w, "Entities were exported")
-	return op, nil
+	return resp, nil
 }
 
 // [END datastore_admin_entities_export]
