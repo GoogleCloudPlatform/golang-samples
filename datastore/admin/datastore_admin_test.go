@@ -23,9 +23,10 @@ import (
 )
 
 func TestAdmin(t *testing.T) {
-	// Roles to be set in your Service Account and App Engine default service account:
-	// `Datastore Import Export Admin`, or `Cloud Datastore Owner`, or `Owner`
-	// `Storage Admin`, or `Owner.
+	// Roles to be set in your Service Account and App Engine default service account
+	// to run this test: 
+	// `Datastore Import Export Admin`, or `Cloud Datastore Owner`, or `Owner`,
+	// `Storage Admin`, or `Owner`.
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 	client, err := clientCreate(ioutil.Discard)
