@@ -15,15 +15,19 @@
 package samples
 
 import (
+	"context"
 	"io/ioutil"
-	"os"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestAdmin(t *testing.T) {
+	// Roles to be set in your Service Account and App Engine default service account:
+	// `Datastore Import Export Admin`, or `Cloud Datastore Owner`, or `Owner`
+	// `Storage Admin`, or `Owner.
 	tc := testutil.SystemTest(t)
+	ctx := context.Background()
 	client, err := clientCreate(ioutil.Discard)
 	if err != nil {
 		t.Fatalf("clientCreate: %v", err)
@@ -46,16 +50,14 @@ func TestAdmin(t *testing.T) {
 	if got.IndexId != want {
 		t.Fatalf("Unexpected indexID: got %v, want %v", got.IndexId, want)
 	}
+	// Create bucket for Export/Import entities.
+	bucketName := tc.ProjectID + "-storage-bucket-test"
+	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName)
 
-	bucket := os.Getenv("GOLANG_SAMPLES_STORAGE_BUCKET")
-	if bucket == "" {
-		t.Skip("Skipping datastore test. GOLANG_SAMPLES_STORAGE_BUCKET must be set.")
-	}
-	resp, err := entitiesExport(ioutil.Discard, tc.ProjectID, "gs://"+bucket)
+	resp, err := entitiesExport(ioutil.Discard, tc.ProjectID, "gs://"+bucketName)
 	if err != nil {
 		t.Fatalf("entitiesExport: %v", err)
 	}
-
 	if err := entitiesImport(ioutil.Discard, tc.ProjectID, resp.OutputUrl); err != nil {
 		t.Fatalf("entitiesImport: %v", err)
 	}
