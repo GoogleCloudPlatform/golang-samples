@@ -23,13 +23,13 @@ import (
 )
 
 func TestAdmin(t *testing.T) {
+	tc := testutil.SystemTest(t)
 	client, err := clientCreate(ioutil.Discard)
 	if err != nil {
 		t.Fatalf("clientCreate: %v", err)
 	}
 	defer client.Close()
 
-	tc := testutil.SystemTest(t)
 	indices, err := indexList(ioutil.Discard, tc.ProjectID)
 	if err != nil {
 		t.Fatalf("indexList: %v", err)
@@ -55,11 +55,11 @@ func TestAdmin(t *testing.T) {
 	if err != nil {
 		t.Fatalf("entitiesExport: %v", err)
 	}
+	
 	metadata, err := resp.Metadata()
 	if err != nil {
 		t.Fatalf("ExportEntitiesOperation.Metadata: %v", err)
 	}
-
 	if err := entitiesImport(ioutil.Discard, tc.ProjectID, metadata.OutputUrlPrefix); err != nil {
 		t.Fatalf("entitiesImport: %v", err)
 	}
