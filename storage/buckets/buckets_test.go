@@ -311,6 +311,19 @@ func TestLifecycleManagement(t *testing.T) {
 	if !reflect.DeepEqual(r[0], want) {
 		t.Fatalf("Unexpected lifecycle rule: got: %v, want: %v", r, want)
 	}
+
+	if err := disableBucketLifecycleManagement(ioutil.Discard, bucketName); err != nil {
+		t.Fatalf("disableBucketLifecycleManagement: %v", err)
+	}
+
+	attrs, err = client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+
+	if n := len(attrs.Lifecycle.Rules); n != 0 {
+		t.Fatalf("Length of lifecycle rules should be 0, got %d", n)
+	}
 }
 
 func TestDelete(t *testing.T) {

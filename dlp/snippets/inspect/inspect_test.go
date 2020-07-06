@@ -24,11 +24,12 @@ import (
 	"cloud.google.com/go/datastore"
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/gofrs/uuid"
 )
 
 const (
-	topicName        = "dlp-inspect-test-topic"
-	subscriptionName = "dlp-inspect-test-sub"
+	topicName        = "dlp-inspect-test-topic-"
+	subscriptionName = "dlp-inspect-test-sub-"
 
 	ssnFileName = "fake_ssn.txt"
 	bucketName  = "golang-samples-dlp-test"
@@ -49,8 +50,9 @@ func TestInspectDatastore(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.kind, func(t *testing.T) {
 			t.Parallel()
+			u := uuid.Must(uuid.NewV4()).String()[:8]
 			buf := new(bytes.Buffer)
-			if err := inspectDatastore(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName, subscriptionName, tc.ProjectID, "", test.kind); err != nil {
+			if err := inspectDatastore(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName+u, subscriptionName+u, tc.ProjectID, "", test.kind); err != nil {
 				t.Errorf("inspectDatastore(%s) got err: %v", test.kind, err)
 			}
 			if got := buf.String(); !strings.Contains(got, test.want) {
@@ -101,8 +103,9 @@ func TestInspectGCS(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.fileName, func(t *testing.T) {
 			t.Parallel()
+			u := uuid.Must(uuid.NewV4()).String()[:8]
 			buf := new(bytes.Buffer)
-			if err := inspectGCSFile(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName, subscriptionName, bucketName, test.fileName); err != nil {
+			if err := inspectGCSFile(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName+u, subscriptionName+u, bucketName, test.fileName); err != nil {
 				t.Errorf("inspectGCSFile(%s) got err: %v", test.fileName, err)
 			}
 			if got := buf.String(); !strings.Contains(got, test.want) {
@@ -256,8 +259,9 @@ func TestInspectBigquery(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.table, func(t *testing.T) {
 			t.Parallel()
+			u := uuid.Must(uuid.NewV4()).String()[:8]
 			buf := new(bytes.Buffer)
-			if err := inspectBigquery(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName, subscriptionName, tc.ProjectID, bqDatasetID, test.table); err != nil {
+			if err := inspectBigquery(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName+u, subscriptionName+u, tc.ProjectID, bqDatasetID, test.table); err != nil {
 				t.Errorf("inspectBigquery(%s) got err: %v", test.table, err)
 			}
 			if got := buf.String(); !strings.Contains(got, test.want) {
