@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// +build ignore
+
 // Command spanner_snippets contains runnable snippet code for Cloud Spanner.
 package main
 
@@ -1032,7 +1034,7 @@ func updateUsingDML(ctx context.Context, w io.Writer, client *spanner.Client) er
 
 func deleteUsingDML(ctx context.Context, w io.Writer, client *spanner.Client) error {
 	_, err := client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
-		stmt := spanner.Statement{SQL: `DELETE Singers WHERE FirstName = 'Alice'`}
+		stmt := spanner.Statement{SQL: `DELETE FROM Singers WHERE FirstName = 'Alice'`}
 		rowCount, err := txn.Update(ctx, stmt)
 		if err != nil {
 			return err
@@ -1268,7 +1270,7 @@ func updateUsingPartitionedDML(ctx context.Context, w io.Writer, client *spanner
 // [START spanner_dml_partitioned_delete]
 
 func deleteUsingPartitionedDML(ctx context.Context, w io.Writer, client *spanner.Client) error {
-	stmt := spanner.Statement{SQL: "DELETE Singers WHERE SingerId > 10"}
+	stmt := spanner.Statement{SQL: "DELETE FROM Singers WHERE SingerId > 10"}
 	rowCount, err := client.PartitionedUpdate(ctx, stmt)
 	if err != nil {
 		return err

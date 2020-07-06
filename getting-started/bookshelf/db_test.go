@@ -68,6 +68,10 @@ func TestMemoryDB(t *testing.T) {
 }
 
 func TestFirestoreDB(t *testing.T) {
+	generalProjectID := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
+	if generalProjectID == "" {
+		t.Skip("GOLANG_SAMPLES_PROJECT_ID not set")
+	}
 	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
 	if projectID == "" {
 		t.Skip("GOLANG_SAMPLES_FIRESTORE_PROJECT not set")
@@ -83,6 +87,7 @@ func TestFirestoreDB(t *testing.T) {
 	if err != nil {
 		t.Fatalf("newFirestoreDB: %v", err)
 	}
+	db.collection = generalProjectID + "-books"
 
 	testDB(t, db)
 }

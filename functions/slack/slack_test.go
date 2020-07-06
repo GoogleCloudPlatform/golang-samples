@@ -31,37 +31,24 @@ import (
 	"google.golang.org/api/option"
 )
 
-var projectID string
 var slackURL string
 
 // TestMain sets up the config rather than using the config file
 // which contains placeholder values.
 func TestMain(m *testing.M) {
 	ctx := context.Background()
-	projectID = os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
-	if projectID == "" {
-		log.Print("GOLANG_SAMPLES_PROJECT_ID is unset. Skipping.")
-		return
-	}
 	slackURL = os.Getenv("GOLANG_SAMPLES_SLACK_URL")
-	if projectID == "" {
-		log.Print("GOLANG_SAMPLES_SLACK_URL is unset. Skipping.")
-		return
-	}
-	config = &configuration{
-		ProjectID: projectID,
-		Secret:    os.Getenv("GOLANG_SAMPLES_SLACK_SECRET"),
-		Key:       os.Getenv("GOLANG_SAMPLES_KG_KEY"),
-	}
-	if config.Secret == "" {
-		log.Print("GOLANG_SAMPLES_SLACK_SECRET is unset. Skipping.")
-		return
-	}
-	if config.Key == "" {
+	kgKey = os.Getenv("GOLANG_SAMPLES_KG_KEY")
+	if kgKey == "" {
 		log.Print("GOLANG_SAMPLES_KG_KEY is unset. Skipping.")
 		return
 	}
-	kgService, err := kgsearch.NewService(ctx, option.WithAPIKey(config.Key))
+	slackSecret = os.Getenv("GOLANG_SAMPLES_SLACK_SECRET")
+	if slackSecret == "" {
+		log.Print("GOLANG_SAMPLES_SLACK_SECRET is unset. Skipping.")
+		return
+	}
+	kgService, err := kgsearch.NewService(ctx, option.WithAPIKey(kgKey))
 	if err != nil {
 		log.Fatalf("kgsearch.NewClient: %v", err)
 	}
@@ -129,11 +116,10 @@ func TestKGSearch(t *testing.T) {
 		"text": []string{"Google"},
 	}
 
-	secret := config.Secret
 	ts := strconv.FormatInt(time.Now().Unix(), 10)
 	body := form.Encode()
 	base := fmt.Sprintf("v0:%s:%s", ts, body)
-	correctSHA2Signature := fmt.Sprintf("v0=%s", hex.EncodeToString(getSignature([]byte(base), []byte(secret))))
+	correctSHA2Signature := fmt.Sprintf("v0=%s", hex.EncodeToString(getSignature([]byte(base), []byte(slackSecret))))
 
 	req := httptest.NewRequest("POST", slackURL, strings.NewReader(body))
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")

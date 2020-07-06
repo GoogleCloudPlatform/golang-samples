@@ -18,9 +18,9 @@ set -x
 
 date
 
-cd github/golang-samples
+cd github/golang-samples || exit 1
 
-SIGNIFICANT_CHANGES="$(git --no-pager diff --name-only master..HEAD | egrep -v '(\.md$|^\.github)' || true)"
+SIGNIFICANT_CHANGES="$(git --no-pager diff --name-only master..HEAD | grep -Ev '(\.md$|^\.github)' || true)"
 
 # If this is a PR with only insignificant changes, don't run any tests.
 if [[ -n ${KOKORO_GITHUB_PULL_REQUEST_NUMBER:-} ]] && [[ -z "$SIGNIFICANT_CHANGES" ]]; then
@@ -28,11 +28,11 @@ if [[ -n ${KOKORO_GITHUB_PULL_REQUEST_NUMBER:-} ]] && [[ -z "$SIGNIFICANT_CHANGE
   exit 0
 fi
 
-cd -
+cd - || exit 1
 
 function cleanup() {
-    chmod +x ${KOKORO_GFILE_DIR}/trampoline_cleanup.sh
-    ${KOKORO_GFILE_DIR}/trampoline_cleanup.sh
+    chmod +x "${KOKORO_GFILE_DIR}"/trampoline_cleanup.sh
+    "${KOKORO_GFILE_DIR}"/trampoline_cleanup.sh
     echo "cleanup";
 }
 trap cleanup EXIT

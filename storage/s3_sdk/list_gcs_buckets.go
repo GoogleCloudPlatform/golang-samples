@@ -28,7 +28,10 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 )
 
-func listGCSBuckets(w io.Writer, googleAccessKeyID string, googleAccessKeySecret string) ([]*s3.Bucket, error) {
+func listGCSBuckets(w io.Writer, googleAccessKeyID string, googleAccessKeySecret string) error {
+	// googleAccessKeyID := "Your Google Access Key ID"
+	// googleAccessKeySecret := "Your Google Access Key Secret"
+
 	// Create a new client and do the following:
 	// 1. Change the endpoint URL to use the Google Cloud Storage XML API endpoint.
 	// 2. Use Cloud Storage HMAC Credentials.
@@ -45,7 +48,7 @@ func listGCSBuckets(w io.Writer, googleAccessKeyID string, googleAccessKeySecret
 	defer cancel()
 	result, err := client.ListBucketsWithContext(ctx, &s3.ListBucketsInput{})
 	if err != nil {
-		return nil, err
+		return fmt.Errorf("ListBucketsWithContext: %v", err)
 	}
 
 	fmt.Fprintf(w, "Buckets:")
@@ -53,7 +56,7 @@ func listGCSBuckets(w io.Writer, googleAccessKeyID string, googleAccessKeySecret
 		fmt.Fprintf(w, "%s\n", aws.StringValue(b.Name))
 	}
 
-	return result.Buckets, nil
+	return nil
 }
 
 // [END storage_s3_sdk_list_buckets]

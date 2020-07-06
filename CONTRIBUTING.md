@@ -186,13 +186,13 @@ passing parameters into a quickstart, and use `testutil.BuildMain` to build and 
 In your quickstart:
 ```go
 func main() {
-	var projectID, resourceName string
-	flag.StringVar(&projectID, "project_id", "", "Cloud Project ID")
-	flag.StringVar(&resourceName, "resourceName", "", "Name of resource")
+	projectID := flag.String("project_id", "", "Cloud Project ID")
+	resourceName := flag.String("resourceName", "", "Name of resource")
 	flag.Parse()
 
-	fmt.Printf("projectID: %s, resource_name: %s", projectID, resourceName)
-
+	fmt.Printf("projectID: %s, resource_name: %s", *projectID, *resourceName)
+	// ...
+}
 ```
 
 In your quickstart test:
@@ -218,9 +218,7 @@ func TestQuickstart(t *testing.T) {
 		t.Errorf("execution failed: %v", err)
 	}
 
-	// example test
-	got := string(stdOut)
-	if !strings.Contains(got, testResourceName) {
+	if got := string(stdOut); !strings.Contains(got, testResourceName) {
 		t.Errorf("got %q, want to contain %q", got, testResourceName)
 	}
 }
@@ -362,11 +360,21 @@ https://golang.org/doc/effective_go.html#names.
 
 See [Don't export sample functions](#dont-export-sample-functions).
 
+## Reflection
+
+Do not use the `reflect` package.
+
 ## Use `testutil` for tests
 
 All tests should use `testutil.SystemTest` or variants. `testutil` checks the
 `GOLANG_SAMPLES_PROJECT_ID` environment variable exists, and skips the test if
 not.
+
+If the test takes longer than ~2 minutes, use `testutil.EndToEndTest`.
+
+If you can't use `testutil` for some reason, be sure to skip tests if
+`GOLANG_SAMPLES_PROJECT_ID` is not set. This makes sure tests pass when someone
+clones the repo and runs tests.
 
 See [Print to an `io.Writer`](#print-to-an-iowriter) for a full test example.
 
@@ -401,7 +409,7 @@ resource names that incorporate aspects of your test, such as `tc.ProjectID +
 Note: You may want to `cd` to the directory you're modifying and run
 `go test -v ./...` to avoid running every test in the repo.
 
-## Contributor License Agreements
+# Contributor License Agreements
 
 Before we can accept your pull requests you'll need to sign a Contributor
 License Agreement (CLA):

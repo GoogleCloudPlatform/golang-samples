@@ -24,20 +24,18 @@ import (
 	"cloud.google.com/go/datastore"
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/gofrs/uuid"
 )
 
 const (
-	topicName        = "dlp-inspect-test-topic"
-	subscriptionName = "dlp-inspect-test-sub"
+	topicName        = "dlp-inspect-test-topic-"
+	subscriptionName = "dlp-inspect-test-sub-"
 
-	ssnFileName             = "fake_ssn.txt"
-	nothingEventfulFileName = "nothing_eventful.txt"
-	bucketName              = "golang-samples-dlp-test"
+	ssnFileName = "fake_ssn.txt"
+	bucketName  = "golang-samples-dlp-test"
 )
 
 func TestInspectDatastore(t *testing.T) {
-	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/1039")
-
 	tc := testutil.EndToEndTest(t)
 	writeTestDatastoreFiles(t, tc.ProjectID)
 	tests := []struct {
@@ -46,18 +44,15 @@ func TestInspectDatastore(t *testing.T) {
 	}{
 		{
 			kind: "SSNTask",
-			want: "US_SOCIAL_SECURITY_NUMBER",
-		},
-		{
-			kind: "BoringTask",
-			want: "No results",
+			want: "Created job",
 		},
 	}
 	for _, test := range tests {
 		t.Run(test.kind, func(t *testing.T) {
 			t.Parallel()
+			u := uuid.Must(uuid.NewV4()).String()[:8]
 			buf := new(bytes.Buffer)
-			if err := inspectDatastore(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName, subscriptionName, tc.ProjectID, "", test.kind); err != nil {
+			if err := inspectDatastore(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName+u, subscriptionName+u, tc.ProjectID, "", test.kind); err != nil {
 				t.Errorf("inspectDatastore(%s) got err: %v", test.kind, err)
 			}
 			if got := buf.String(); !strings.Contains(got, test.want) {
@@ -91,21 +86,9 @@ func writeTestDatastoreFiles(t *testing.T, projectID string) {
 	if _, err := client.Put(ctx, ssnKey, &task); err != nil {
 		t.Fatalf("Failed to save task: %v", err)
 	}
-
-	kind = "BoringTask"
-	name = "boringtask1"
-	boringKey := datastore.NameKey(kind, name, nil)
-	boringTask := BoringTask{
-		Description: "Nothing meaningful",
-	}
-	if _, err := client.Put(ctx, boringKey, &boringTask); err != nil {
-		t.Fatalf("Failed to save task: %v", err)
-	}
 }
 
 func TestInspectGCS(t *testing.T) {
-	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/1039")
-
 	tc := testutil.SystemTest(t)
 	writeTestGCSFiles(t, tc.ProjectID)
 	tests := []struct {
@@ -114,18 +97,15 @@ func TestInspectGCS(t *testing.T) {
 	}{
 		{
 			fileName: ssnFileName,
-			want:     "US_SOCIAL_SECURITY_NUMBER",
-		},
-		{
-			fileName: nothingEventfulFileName,
-			want:     "No results",
+			want:     "Created job",
 		},
 	}
 	for _, test := range tests {
 		t.Run(test.fileName, func(t *testing.T) {
 			t.Parallel()
+			u := uuid.Must(uuid.NewV4()).String()[:8]
 			buf := new(bytes.Buffer)
-			if err := inspectGCSFile(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName, subscriptionName, bucketName, test.fileName); err != nil {
+			if err := inspectGCSFile(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName+u, subscriptionName+u, bucketName, test.fileName); err != nil {
 				t.Errorf("inspectGCSFile(%s) got err: %v", test.fileName, err)
 			}
 			if got := buf.String(); !strings.Contains(got, test.want) {
@@ -155,9 +135,6 @@ func writeTestGCSFiles(t *testing.T, projectID string) {
 		}
 	}
 	if err := writeObject(ctx, bucket, ssnFileName, "My SSN is 111222333"); err != nil {
-		t.Fatalf("writeObject: %v", err)
-	}
-	if err := writeObject(ctx, bucket, nothingEventfulFileName, "Nothing eventful"); err != nil {
 		t.Fatalf("writeObject: %v", err)
 	}
 }
@@ -216,9 +193,8 @@ type Item struct {
 }
 
 const (
-	harmlessTable = "harmless"
-	harmfulTable  = "harmful"
-	bqDatasetID   = "golang_samples_dlp"
+	harmfulTable = "harmful"
+	bqDatasetID  = "golang_samples_dlp"
 )
 
 func mustCreateBigqueryTestFiles(t *testing.T, projectID, datasetID string) {
@@ -239,9 +215,6 @@ func mustCreateBigqueryTestFiles(t *testing.T, projectID, datasetID string) {
 	schema, err := bigquery.InferSchema(Item{})
 	if err != nil {
 		t.Fatalf("InferSchema: %v", err)
-	}
-	if err := uploadBigQuery(ctx, d, schema, harmlessTable, "Nothing meaningful"); err != nil {
-		t.Fatalf("uploadBigQuery: %v", err)
 	}
 	if err := uploadBigQuery(ctx, d, schema, harmfulTable, "My SSN is 111222333"); err != nil {
 		t.Fatalf("uploadBigQuery: %v", err)
@@ -270,8 +243,6 @@ func uploadBigQuery(ctx context.Context, d *bigquery.Dataset, schema bigquery.Sc
 }
 
 func TestInspectBigquery(t *testing.T) {
-	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/1039")
-
 	tc := testutil.EndToEndTest(t)
 
 	mustCreateBigqueryTestFiles(t, tc.ProjectID, bqDatasetID)
@@ -282,18 +253,15 @@ func TestInspectBigquery(t *testing.T) {
 	}{
 		{
 			table: harmfulTable,
-			want:  "US_SOCIAL_SECURITY_NUMBER",
-		},
-		{
-			table: harmlessTable,
-			want:  "No results",
+			want:  "Created job",
 		},
 	}
 	for _, test := range tests {
 		t.Run(test.table, func(t *testing.T) {
 			t.Parallel()
+			u := uuid.Must(uuid.NewV4()).String()[:8]
 			buf := new(bytes.Buffer)
-			if err := inspectBigquery(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName, subscriptionName, tc.ProjectID, bqDatasetID, test.table); err != nil {
+			if err := inspectBigquery(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName+u, subscriptionName+u, tc.ProjectID, bqDatasetID, test.table); err != nil {
 				t.Errorf("inspectBigquery(%s) got err: %v", test.table, err)
 			}
 			if got := buf.String(); !strings.Contains(got, test.want) {
