@@ -37,6 +37,9 @@ func patchFHIRResource(w io.Writer, projectID, location, datasetID, fhirStoreID,
 
 	fhirService := healthcareService.Projects.Locations.Datasets.FhirStores.Fhir
 
+	// The following payload works with a Patient resource and is not intended to work with
+	// other types of FHIR resources. If necessary, supply a new payload with data that
+	// corresponds to the FHIR resource you are patching.
 	payload := []map[string]interface{}{
 		{
 			"op":    "replace",
