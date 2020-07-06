@@ -13,7 +13,7 @@ require (
 	cloud.google.com/go/spanner v1.6.0
 	cloud.google.com/go/storage v1.10.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.2
-	github.com/aws/aws-sdk-go v1.32.13
+	github.com/aws/aws-sdk-go v1.33.1
 	github.com/bmatcuk/doublestar v1.3.1
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
 	github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b
@@ -43,10 +43,10 @@ require (
 	golang.org/x/net v0.0.0-20200625001655-4c5254603344
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/text v0.3.3
-	golang.org/x/tools v0.0.0-20200630154851-b2d8b0336632
+	golang.org/x/tools v0.0.0-20200702044944-0cc1aa72b347
 	google.golang.org/api v0.28.0
 	google.golang.org/appengine v1.6.6
-	google.golang.org/genproto v0.0.0-20200626011028-ee7919e894b5
+	google.golang.org/genproto v0.0.0-20200706141556-5779274c8e96
 	google.golang.org/grpc v1.30.0
 	google.golang.org/grpc/examples v0.0.0-20200617041141-9a465503579e
 	gopkg.in/sendgrid/sendgrid-go.v2 v2.0.0
