@@ -27,6 +27,7 @@ func TestAdmin(t *testing.T) {
 	// to run this test:
 	// `Datastore Import Export Admin`, or `Cloud Datastore Owner`, or `Owner`,
 	// `Storage Admin`, or `Owner`.
+	// See https://cloud.google.com/datastore/docs/export-import-entities#permissions for full details
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 	client, err := clientCreate(ioutil.Discard)
