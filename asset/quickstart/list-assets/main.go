@@ -20,9 +20,10 @@ package main
 import (
 	"context"
 	"fmt"
-	"google.golang.org/api/iterator"
 	"log"
 	"os"
+
+	"google.golang.org/api/iterator"
 
 	asset "cloud.google.com/go/asset/apiv1p5beta1"
 	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1p5beta1"
