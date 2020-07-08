@@ -105,11 +105,11 @@ To test the application locally, follow these steps after the proxy is running:
 To run the sample on GAE-Standard, create an App Engine project by following the setup for these 
 [instructions](https://cloud.google.com/appengine/docs/standard/go/quickstart#before-you-begin).
 
-First, create an `app.yaml` with the correct values to pass the environment 
-variables into the runtime. Your app.yaml file should look like this:
+First, update `app.yaml` with the correct values to pass the environment 
+variables into the runtime. Your `app.yaml` file should look like this:
 
 ```yaml
-runtime: go111
+runtime: go113
 env_variables:
   INSTANCE_CONNECTION_NAME: <project-id>:<region>:<instance-name>
   DB_USER: YOUR_DB_USER
