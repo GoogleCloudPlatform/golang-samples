@@ -237,8 +237,13 @@ func initSocketConnectionPool() (*sql.DB, error) {
 		dbName                 = mustGetenv("DB_NAME")
 	)
 
+	socketDir, isSet := os.LookupEnv("DB_SOCKET_DIR")
+	if !isSet {
+		socketPath = "/cloudsql"
+	}
+
 	var dbURI string
-	dbURI = fmt.Sprintf("%s:%s@unix(/cloudsql/%s)/%s", dbUser, dbPwd, instanceConnectionName, dbName)
+	dbURI = fmt.Sprintf("%s:%s@unix(%s/%s)/%s", dbUser, dbPwd, socketDir, instanceConnectionName, dbName)
 
 	// dbPool is the pool of database connections.
 	dbPool, err := sql.Open("pgx", dbURI)
