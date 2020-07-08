@@ -105,8 +105,8 @@ To test the application locally, follow these steps after the proxy is running:
 To run the sample on GAE-Standard, create an App Engine project by following the setup for these 
 [instructions](https://cloud.google.com/appengine/docs/standard/go/quickstart#before-you-begin).
 
-First, update `app.yaml` with the correct values to pass the environment 
-variables into the runtime. Your `app.yaml` file should look like this:
+First, update `app.standard.yaml` with the correct values to pass the environment 
+variables into the runtime. Your `app.standard.yaml` file should look like this:
 
 ```yaml
 runtime: go113
@@ -118,9 +118,77 @@ env_variables:
 ```
 
 Note: Saving credentials in environment variables is convenient, but not secure - consider a more
-secure solution such as [Cloud KMS](https://cloud.google.com/kms/) to help keep secrets safe.
+secure solution such as [Cloud Secret Manager](https://cloud.google.com/secret-manager) to help keep secrets safe.
 
 Next, the following command will deploy the application to your Google Cloud project:
 ```bash
-gcloud app deploy
+gcloud app deploy app.standard.yaml
 ```
+
+## Deploying to App Engine Flexible
+
+To run the sample on GAE-Flex, create an App Engine project by following the setup for these 
+[instructions](https://cloud.google.com/appengine/docs/standard/go/quickstart#before-you-begin).
+
+First, update `app.flexible.yaml` with the correct values to pass the environment 
+variables into the runtime. Your `app.flexible.yaml` file should look like this:
+```yaml
+runtime: custom
+env: flex
+
+env_variables:
+  INSTANCE_CONNECTION_NAME: <project>:<region>:<instance>
+  DB_USER: <your_database_username>
+  DB_PASS: <your_database_password>
+  DB_NAME: <your_database_name>
+
+beta_settings: 
+  cloud_sql_instances: <project>:<region>:<instance>
+```
+
+Note: Saving credentials in environment variables is convenient, but not secure - consider a more
+secure solution such as [Cloud Secret Manager](https://cloud.google.com/secret-manager) to help keep secrets safe.
+
+Next, the following command will deploy the application to your Google Cloud project:
+```bash
+gcloud app deploy app.flexible.yaml
+```
+## Deploy to Cloud Run
+
+See the [Cloud Run documentation](https://cloud.google.com/sql/docs/postgres/connect-run)
+for more details on connecting a Cloud Run service to Cloud SQL.
+
+1. Build the container image:
+
+```sh
+gcloud builds submit --tag gcr.io/[YOUR_PROJECT_ID]/run-sql
+```
+
+1. Make sure the following environment variables are set:
+```sh
+export INSTANCE_CONNECTION_NAME='<MY-PROJECT>:<INSTANCE-REGION>:<INSTANCE-NAME>'
+export DB_USER='<DB_USER_NAME>'
+export DB_PASS='<DB_PASSWORD>'
+export DB_NAME='<DB_NAME>'
+```
+
+1. Deploy the service to Cloud Run:
+
+```sh
+gcloud run deploy run-sql --image gcr.io/[YOUR_PROJECT_ID]/run-sql\
+--add-cloudsql-instances $INSTANCE_CONNECTION_NAME\
+--set-env-vars INSTANCE_CONNECTION_NAME=$INSTANCE_CONNECTION_NAME,\
+DB_USER=$DB_USER,DB_PASS=$DB_PASS,DB_NAME=$DB_NAME
+```
+
+Take note of the URL output at the end of the deployment process.
+
+
+Replace environment variables with the correct values for your Cloud SQL
+instance configuration.
+
+This step can be done as part of deployment but is separated for clarity.
+
+4. Navigate your browser to the URL noted in step 2.
+
+For more details about using Cloud Run see http://cloud.run.
