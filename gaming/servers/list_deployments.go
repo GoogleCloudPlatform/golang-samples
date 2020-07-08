@@ -14,7 +14,7 @@
 
 package servers
 
-// [START cloud_game_servers_realm_list]
+// [START cloud_game_servers_deployment_list]
 
 import (
 	"context"
@@ -26,25 +26,25 @@ import (
 	gamingpb "google.golang.org/genproto/googleapis/cloud/gaming/v1beta"
 )
 
-// listRealms lists the realms in a location.
-func listRealms(w io.Writer, projectID, location string) error {
+// listGameServerDeployments lists the game server deployments.
+func listGameServerDeployments(w io.Writer, projectID, location string) error {
 	// projectID := "my-project"
 	// location := "global"
 	// realmID := "myrealm"
 	ctx := context.Background()
-	client, err := gaming.NewRealmsClient(ctx)
+	client, err := gaming.NewGameServerDeploymentsClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewRealmsClient: %v", err)
+		return fmt.Errorf("NewGameServerDeploymentsClient: %v", err)
 	}
 	defer client.Close()
 
-	req := &gamingpb.ListRealmsRequest{
+	req := &gamingpb.ListGameServerDeploymentsRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
 	}
 
-	it := client.ListRealms(ctx, req)
+	it := client.ListGameServerDeployments(ctx, req)
 	for {
-		realm, err := it.Next()
+		resp, err := it.Next()
 		if err == iterator.Done {
 			break
 		}
@@ -52,10 +52,10 @@ func listRealms(w io.Writer, projectID, location string) error {
 			return fmt.Errorf("Next: %v", err)
 		}
 
-		fmt.Fprintf(w, "Realm listed: %v\n", realm.Name)
+		fmt.Fprintf(w, "Deployment listed: %v\n", resp.Name)
 	}
 
 	return nil
 }
 
-// [END cloud_game_servers_realm_list]
+// [END cloud_game_servers_deployment_list]

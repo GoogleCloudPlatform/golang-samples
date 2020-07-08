@@ -41,12 +41,12 @@ func getRealm(w io.Writer, projectID, location, realmID string) error {
 		Name: fmt.Sprintf("projects/%s/locations/%s/realms/%s", projectID, location, realmID),
 	}
 
-	realm, err := client.GetRealm(ctx, req)
+	resp, err := client.GetRealm(ctx, req)
 	if err != nil {
 		return fmt.Errorf("GetRealm: %v", err)
 	}
 
-	fmt.Fprintf(w, "Realm retrieved: %v", realm.Name)
+	fmt.Fprintf(w, "Realm retrieved: %v", resp.Name)
 	return nil
 }
 

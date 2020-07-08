@@ -21,11 +21,11 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestInspectString(t *testing.T) {
+func TestRealms(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	buf := new(bytes.Buffer)
 
-	{
+	t.Run("create realm", func(t *testing.T) {
+		buf := new(bytes.Buffer)
 		if err := createRealm(buf, tc.ProjectID, "global", "myrealm"); err != nil {
 			t.Errorf("createRealm: %v", err)
 		}
@@ -35,11 +35,10 @@ func TestInspectString(t *testing.T) {
 		if got != want {
 			t.Errorf("createRealm got %q, want %q", got, want)
 		}
-	}
+	})
 
-	buf.Reset()
-
-	{
+	t.Run("get created realm", func(t *testing.T) {
+		buf := new(bytes.Buffer)
 		if err := getRealm(buf, tc.ProjectID, "global", "myrealm"); err != nil {
 			t.Errorf("getRealm: %v", err)
 		}
@@ -49,25 +48,23 @@ func TestInspectString(t *testing.T) {
 		if got != want {
 			t.Errorf("getRealm got %q, want %q", got, want)
 		}
-	}
+	})
 
-	buf.Reset()
-
-	{
+	t.Run("list created realm", func(t *testing.T) {
+		buf := new(bytes.Buffer)
 		if err := listRealms(buf, tc.ProjectID, "global"); err != nil {
 			t.Errorf("listRealms: %v", err)
 		}
 
 		got := buf.String()
-		want := "Realm listed: projects/" + tc.ProjectID + "/locations/global/realms/myrealm"
+		want := "Realm listed: projects/" + tc.ProjectID + "/locations/global/realms/myrealm\n"
 		if got != want {
 			t.Errorf("listRealms got %q, want %q", got, want)
 		}
-	}
+	})
 
-	buf.Reset()
-
-	{
+	t.Run("delete realm", func(t *testing.T) {
+		buf := new(bytes.Buffer)
 		if err := deleteRealm(buf, tc.ProjectID, "global", "myrealm"); err != nil {
 			t.Errorf("deleteRealm: %v", err)
 		}
@@ -77,5 +74,162 @@ func TestInspectString(t *testing.T) {
 		if got != want {
 			t.Errorf("deleteRealm got %q, want %q", got, want)
 		}
-	}
+	})
+
+	t.Run("list no realms", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+		if err := listRealms(buf, tc.ProjectID, "global"); err != nil {
+			t.Errorf("listRealms: %v", err)
+		}
+
+		got := buf.String()
+		want := ""
+		if got != want {
+			t.Errorf("listRealms got %q, want %q", got, want)
+		}
+	})
+}
+
+func TestGameServerDeployments(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	t.Run("create deployment", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+		if err := createGameServerDeployment(buf, tc.ProjectID, "global", "mydeployment"); err != nil {
+			t.Errorf("createGameServerDeployment: %v", err)
+		}
+
+		got := buf.String()
+		want := "Deployment created: projects/" + tc.ProjectID + "/locations/global/gameServerDeployments/mydeployment"
+		if got != want {
+			t.Errorf("createGameServerDeployment got %q, want %q", got, want)
+		}
+	})
+
+	t.Run("get created deployment", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+		if err := getGameServerDeployment(buf, tc.ProjectID, "global", "mydeployment"); err != nil {
+			t.Errorf("getGameServerDeployment: %v", err)
+		}
+
+		got := buf.String()
+		want := "Deployment retrieved: projects/" + tc.ProjectID + "/locations/global/gameServerDeployments/mydeployment"
+		if got != want {
+			t.Errorf("getGameServerDeployment got %q, want %q", got, want)
+		}
+	})
+
+	t.Run("list created deployment", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+		if err := listGameServerDeployments(buf, tc.ProjectID, "global"); err != nil {
+			t.Errorf("listGameServerDeployments: %v", err)
+		}
+
+		got := buf.String()
+		want := "Deployment listed: projects/" + tc.ProjectID + "/locations/global/gameServerDeployments/mydeployment\n"
+		if got != want {
+			t.Errorf("listGameServerDeployments got %q, want %q", got, want)
+		}
+	})
+
+	t.Run("config tests", innerTestGameServerFleet)
+
+	t.Run("delete deployment", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+		if err := deleteGameServerDeployment(buf, tc.ProjectID, "global", "mydeployment"); err != nil {
+			t.Errorf("deleteGameServerDeployment: %v", err)
+		}
+
+		got := buf.String()
+		want := "Deployment deleted."
+		if got != want {
+			t.Errorf("deleteGameServerDeployment got %q, want %q", got, want)
+		}
+	})
+
+	t.Run("list no deployments", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+		if err := listGameServerDeployments(buf, tc.ProjectID, "global"); err != nil {
+			t.Errorf("listGameServerDeployments: %v", err)
+		}
+
+		got := buf.String()
+		want := ""
+		if got != want {
+			t.Errorf("listGameServerDeployments got %q, want %q", got, want)
+		}
+	})
+}
+
+func innerTestGameServerFleet(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	t.Run("create config", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+
+		if err := createGameServerConfig(buf, tc.ProjectID, "global", "mydeployment", "myconfig"); err != nil {
+			t.Errorf("createGameServerConfig: %v", err)
+		}
+
+		got := buf.String()
+		want := "Config created: projects/" + tc.ProjectID + "/locations/global/gameServerDeployments/mydeployment/configs/myconfig"
+		if got != want {
+			t.Errorf("createGameServerConfig got %q, want %q", got, want)
+		}
+	})
+
+	t.Run("get created config", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+
+		if err := getGameServerConfig(buf, tc.ProjectID, "global", "mydeployment", "myconfig"); err != nil {
+			t.Errorf("getGameServerConfig: %v", err)
+		}
+
+		got := buf.String()
+		want := "Config retrieved: projects/" + tc.ProjectID + "/locations/global/gameServerDeployments/mydeployment/configs/myconfig"
+		if got != want {
+			t.Errorf("getGameServerConfig got %q, want %q", got, want)
+		}
+	})
+
+	t.Run("list created config", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+
+		if err := listGameServerConfigs(buf, tc.ProjectID, "global", "mydeployment"); err != nil {
+			t.Errorf("listGameServerConfigs: %v", err)
+		}
+
+		got := buf.String()
+		want := "Config listed: projects/" + tc.ProjectID + "/locations/global/gameServerDeployments/mydeployment/configs/myconfig\n"
+		if got != want {
+			t.Errorf("listGameServerConfigs got %q, want %q", got, want)
+		}
+	})
+
+	t.Run("delete config", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+		if err := deleteGameServerConfig(buf, tc.ProjectID, "global", "mydeployment", "myconfig"); err != nil {
+			t.Errorf("deleteGameServerConfig: %v", err)
+		}
+
+		got := buf.String()
+		want := "Config deleted."
+		if got != want {
+			t.Errorf("deleteGameServerConfig got %q, want %q", got, want)
+		}
+	})
+
+	t.Run("list no configs", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+
+		if err := listGameServerConfigs(buf, tc.ProjectID, "global", "mydeployment"); err != nil {
+			t.Errorf("listGameServerConfigs: %v", err)
+		}
+
+		got := buf.String()
+		want := ""
+		if got != want {
+			t.Errorf("listGameServerConfigs got %q, want %q", got, want)
+		}
+	})
 }

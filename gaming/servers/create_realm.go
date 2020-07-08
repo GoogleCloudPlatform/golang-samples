@@ -50,12 +50,12 @@ func createRealm(w io.Writer, projectID, location, realmID string) error {
 	if err != nil {
 		return fmt.Errorf("CreateRealm: %v", err)
 	}
-	realm, err := op.Wait(ctx)
+	resp, err := op.Wait(ctx)
 	if err != nil {
 		return fmt.Errorf("Wait: %v", err)
 	}
 
-	fmt.Fprintf(w, "Realm created: %v", realm.Name)
+	fmt.Fprintf(w, "Realm created: %v", resp.Name)
 	return nil
 }
 

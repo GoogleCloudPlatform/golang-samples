@@ -14,7 +14,7 @@
 
 package servers
 
-// [START cloud_game_servers_realm_list]
+// [START cloud_game_servers_config_delete]
 
 import (
 	"context"
@@ -22,40 +22,37 @@ import (
 	"io"
 
 	gaming "cloud.google.com/go/gaming/apiv1beta"
-	"google.golang.org/api/iterator"
 	gamingpb "google.golang.org/genproto/googleapis/cloud/gaming/v1beta"
 )
 
-// listRealms lists the realms in a location.
-func listRealms(w io.Writer, projectID, location string) error {
+// deleteGameServerConfig deletes a game server config.
+func deleteGameServerConfig(w io.Writer, projectID, location, deploymentID, configID string) error {
 	// projectID := "my-project"
 	// location := "global"
-	// realmID := "myrealm"
+	// deploymentID := "mydeployment"
+	// configID := "myconfig"
 	ctx := context.Background()
-	client, err := gaming.NewRealmsClient(ctx)
+	client, err := gaming.NewGameServerConfigsClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewRealmsClient: %v", err)
+		return fmt.Errorf("NewGameServerConfigsClient: %v", err)
 	}
 	defer client.Close()
 
-	req := &gamingpb.ListRealmsRequest{
-		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
+	req := &gamingpb.DeleteGameServerConfigRequest{
+		Name: fmt.Sprintf("projects/%s/locations/%s/gameServerDeployments/%s/configs/%s", projectID, location, deploymentID, configID),
 	}
 
-	it := client.ListRealms(ctx, req)
-	for {
-		realm, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return fmt.Errorf("Next: %v", err)
-		}
-
-		fmt.Fprintf(w, "Realm listed: %v\n", realm.Name)
+	op, err := client.DeleteGameServerConfig(ctx, req)
+	if err != nil {
+		return fmt.Errorf("DeleteGameServerConfig: %v", err)
+	}
+	err = op.Wait(ctx)
+	if err != nil {
+		return fmt.Errorf("Wait: %v", err)
 	}
 
+	fmt.Fprintf(w, "Config deleted.")
 	return nil
 }
 
-// [END cloud_game_servers_realm_list]
+// [END cloud_game_servers_config_delete]

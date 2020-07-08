@@ -14,7 +14,7 @@
 
 package servers
 
-// [START cloud_game_servers_realm_delete]
+// [START cloud_game_servers_deployment_create]
 
 import (
 	"context"
@@ -25,33 +25,37 @@ import (
 	gamingpb "google.golang.org/genproto/googleapis/cloud/gaming/v1beta"
 )
 
-// deleteRealm deletes a game server realm.
-func deleteRealm(w io.Writer, projectID, location, realmID string) error {
+// createGameServerDeployment creates a game server deployment.
+func createGameServerDeployment(w io.Writer, projectID, location, deploymentID string) error {
 	// projectID := "my-project"
 	// location := "global"
-	// realmID := "myrealm"
+	// deploymentID := "mydeployment"
 	ctx := context.Background()
-	client, err := gaming.NewRealmsClient(ctx)
+	client, err := gaming.NewGameServerDeploymentsClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewRealmsClient: %v", err)
+		return fmt.Errorf("NewGameServerDeploymentsClient: %v", err)
 	}
 	defer client.Close()
 
-	req := &gamingpb.DeleteRealmRequest{
-		Name: fmt.Sprintf("projects/%s/locations/%s/realms/%s", projectID, location, realmID),
+	req := &gamingpb.CreateGameServerDeploymentRequest{
+		Parent:       fmt.Sprintf("projects/%s/locations/%s", projectID, location),
+		DeploymentId: deploymentID,
+		GameServerDeployment: &gamingpb.GameServerDeployment{
+			Description: "My Game Server Deployment",
+		},
 	}
 
-	op, err := client.DeleteRealm(ctx, req)
+	op, err := client.CreateGameServerDeployment(ctx, req)
 	if err != nil {
-		return fmt.Errorf("DeleteRealm: %v", err)
+		return fmt.Errorf("CreateGameServerDeployment: %v", err)
 	}
-	err = op.Wait(ctx)
+	resp, err := op.Wait(ctx)
 	if err != nil {
 		return fmt.Errorf("Wait: %v", err)
 	}
 
-	fmt.Fprintf(w, "Realm deleted.")
+	fmt.Fprintf(w, "Deployment created: %v", resp.Name)
 	return nil
 }
 
-// [END cloud_game_servers_realm_delete]
+// [END cloud_game_servers_deployment_create]
