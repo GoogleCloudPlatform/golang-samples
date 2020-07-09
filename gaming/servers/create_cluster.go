@@ -30,6 +30,8 @@ func createCluster(w io.Writer, projectID, location, realmID, clusterID, gkeClus
 	// projectID := "my-project"
 	// location := "global"
 	// realmID := "myrealm"
+	// clusterID := "mycluster"
+	// gkeClusterName := "projects/1234/locations/us-central1/clusters/gke-shared-default"
 	ctx := context.Background()
 	client, err := gaming.NewGameServerClustersClient(ctx)
 	if err != nil {

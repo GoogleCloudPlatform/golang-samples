@@ -102,7 +102,7 @@ func innerTestGameServerCluster(t *testing.T) {
 		}
 
 		got := buf.String()
-		want := "Cluster created: projects/" + tc.ProjectID + "/locations/global/realms/myrealm"
+		want := "Cluster created: projects/" + tc.ProjectID + "/locations/global/realms/myrealm/gameServerClusters/mycluster"
 		if got != want {
 			t.Errorf("createCluster got %q, want %q", got, want)
 		}

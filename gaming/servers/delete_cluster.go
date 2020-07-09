@@ -39,7 +39,7 @@ func deleteCluster(w io.Writer, projectID, location, realmID, clusterID string) 
 	defer client.Close()
 
 	req := &gamingpb.DeleteGameServerClusterRequest{
-		Name: fmt.Sprintf("projects/%s/locations/%s/realms/%s/clusters/%s", projectID, location, realmID, clusterID),
+		Name: fmt.Sprintf("projects/%s/locations/%s/realms/%s/gameServerClusters/%s", projectID, location, realmID, clusterID),
 	}
 
 	op, err := client.DeleteGameServerCluster(ctx, req)
