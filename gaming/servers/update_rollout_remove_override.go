@@ -28,9 +28,8 @@ import (
 
 // updateRolloutClearOverrideConfig removes any config overrides on a game
 // server deployment.
-func updateRolloutClearOverrideConfig(w io.Writer, projectID, location, deploymentID string) error {
+func updateRolloutClearOverrideConfig(w io.Writer, projectID, deploymentID string) error {
 	// projectID := "my-project"
-	// location := "global"
 	// deploymentID := "mydeployment"
 	// configID := "myconfig"
 	ctx := context.Background()
@@ -42,7 +41,7 @@ func updateRolloutClearOverrideConfig(w io.Writer, projectID, location, deployme
 
 	req := &gamingpb.UpdateGameServerDeploymentRolloutRequest{
 		Rollout: &gamingpb.GameServerDeploymentRollout{
-			Name: fmt.Sprintf("projects/%s/locations/%s/gameServerDeployments/%s", projectID, location, deploymentID),
+			Name: fmt.Sprintf("projects/%s/locations/global/gameServerDeployments/%s", projectID, deploymentID),
 
 			DefaultGameServerConfig: "",
 		},
@@ -55,7 +54,7 @@ func updateRolloutClearOverrideConfig(w io.Writer, projectID, location, deployme
 
 	op, err := client.UpdateGameServerDeploymentRollout(ctx, req)
 	if err != nil {
-		return fmt.Errorf("CreateGameServerDeployment: %v", err)
+		return fmt.Errorf("UpdateGameServerDeploymentRollout: %v", err)
 	}
 	resp, err := op.Wait(ctx)
 	if err != nil {

@@ -26,7 +26,7 @@ func TestGameServerDeployments(t *testing.T) {
 
 	t.Run("create deployment", func(t *testing.T) {
 		buf := new(bytes.Buffer)
-		if err := createGameServerDeployment(buf, tc.ProjectID, "global", "mydeployment"); err != nil {
+		if err := createGameServerDeployment(buf, tc.ProjectID, "mydeployment"); err != nil {
 			t.Errorf("createGameServerDeployment: %v", err)
 		}
 
@@ -39,7 +39,7 @@ func TestGameServerDeployments(t *testing.T) {
 
 	t.Run("get created deployment", func(t *testing.T) {
 		buf := new(bytes.Buffer)
-		if err := getGameServerDeployment(buf, tc.ProjectID, "global", "mydeployment"); err != nil {
+		if err := getGameServerDeployment(buf, tc.ProjectID, "mydeployment"); err != nil {
 			t.Errorf("getGameServerDeployment: %v", err)
 		}
 
@@ -52,7 +52,7 @@ func TestGameServerDeployments(t *testing.T) {
 
 	t.Run("list created deployment", func(t *testing.T) {
 		buf := new(bytes.Buffer)
-		if err := listGameServerDeployments(buf, tc.ProjectID, "global"); err != nil {
+		if err := listGameServerDeployments(buf, tc.ProjectID); err != nil {
 			t.Errorf("listGameServerDeployments: %v", err)
 		}
 
@@ -67,7 +67,7 @@ func TestGameServerDeployments(t *testing.T) {
 
 	t.Run("delete deployment", func(t *testing.T) {
 		buf := new(bytes.Buffer)
-		if err := deleteGameServerDeployment(buf, tc.ProjectID, "global", "mydeployment"); err != nil {
+		if err := deleteGameServerDeployment(buf, tc.ProjectID, "mydeployment"); err != nil {
 			t.Errorf("deleteGameServerDeployment: %v", err)
 		}
 
@@ -80,7 +80,7 @@ func TestGameServerDeployments(t *testing.T) {
 
 	t.Run("list no deployments", func(t *testing.T) {
 		buf := new(bytes.Buffer)
-		if err := listGameServerDeployments(buf, tc.ProjectID, "global"); err != nil {
+		if err := listGameServerDeployments(buf, tc.ProjectID); err != nil {
 			t.Errorf("listGameServerDeployments: %v", err)
 		}
 
@@ -98,7 +98,7 @@ func innerTestGameServerFleet(t *testing.T) {
 	t.Run("create config", func(t *testing.T) {
 		buf := new(bytes.Buffer)
 
-		if err := createGameServerConfig(buf, tc.ProjectID, "global", "mydeployment", "myconfig"); err != nil {
+		if err := createGameServerConfig(buf, tc.ProjectID, "mydeployment", "myconfig"); err != nil {
 			t.Errorf("createGameServerConfig: %v", err)
 		}
 
@@ -112,7 +112,7 @@ func innerTestGameServerFleet(t *testing.T) {
 	t.Run("get created config", func(t *testing.T) {
 		buf := new(bytes.Buffer)
 
-		if err := getGameServerConfig(buf, tc.ProjectID, "global", "mydeployment", "myconfig"); err != nil {
+		if err := getGameServerConfig(buf, tc.ProjectID, "mydeployment", "myconfig"); err != nil {
 			t.Errorf("getGameServerConfig: %v", err)
 		}
 
@@ -126,7 +126,7 @@ func innerTestGameServerFleet(t *testing.T) {
 	t.Run("list created config", func(t *testing.T) {
 		buf := new(bytes.Buffer)
 
-		if err := listGameServerConfigs(buf, tc.ProjectID, "global", "mydeployment"); err != nil {
+		if err := listGameServerConfigs(buf, tc.ProjectID, "mydeployment"); err != nil {
 			t.Errorf("listGameServerConfigs: %v", err)
 		}
 
@@ -141,7 +141,7 @@ func innerTestGameServerFleet(t *testing.T) {
 
 	t.Run("delete config", func(t *testing.T) {
 		buf := new(bytes.Buffer)
-		if err := deleteGameServerConfig(buf, tc.ProjectID, "global", "mydeployment", "myconfig"); err != nil {
+		if err := deleteGameServerConfig(buf, tc.ProjectID, "mydeployment", "myconfig"); err != nil {
 			t.Errorf("deleteGameServerConfig: %v", err)
 		}
 
@@ -155,7 +155,7 @@ func innerTestGameServerFleet(t *testing.T) {
 	t.Run("list no configs", func(t *testing.T) {
 		buf := new(bytes.Buffer)
 
-		if err := listGameServerConfigs(buf, tc.ProjectID, "global", "mydeployment"); err != nil {
+		if err := listGameServerConfigs(buf, tc.ProjectID, "mydeployment"); err != nil {
 			t.Errorf("listGameServerConfigs: %v", err)
 		}
 
@@ -173,7 +173,7 @@ func innerTestGameServerDeploymentRollout(t *testing.T) {
 	t.Run("rollout set default", func(t *testing.T) {
 		buf := new(bytes.Buffer)
 
-		if err := updateRolloutDefaultConfig(buf, tc.ProjectID, "global", "mydeployment", "myconfig"); err != nil {
+		if err := updateRolloutDefaultConfig(buf, tc.ProjectID, "mydeployment", "myconfig"); err != nil {
 			t.Errorf("updateRolloutDefaultConfig: %v", err)
 		}
 
@@ -187,7 +187,7 @@ func innerTestGameServerDeploymentRollout(t *testing.T) {
 	t.Run("get rollout with default", func(t *testing.T) {
 		buf := new(bytes.Buffer)
 
-		if err := getGameServerDeploymentRollout(buf, tc.ProjectID, "global", "mydeployment"); err != nil {
+		if err := getGameServerDeploymentRollout(buf, tc.ProjectID, "mydeployment"); err != nil {
 			t.Errorf("getGameServerDeploymentRollout: %v", err)
 		}
 
@@ -201,7 +201,7 @@ func innerTestGameServerDeploymentRollout(t *testing.T) {
 	t.Run("rollout remove default", func(t *testing.T) {
 		buf := new(bytes.Buffer)
 
-		if err := updateRolloutClearDefaultConfig(buf, tc.ProjectID, "global", "mydeployment"); err != nil {
+		if err := updateRolloutClearDefaultConfig(buf, tc.ProjectID, "mydeployment"); err != nil {
 			t.Errorf("updateRolloutClearDefaultConfig: %v", err)
 		}
 
@@ -215,7 +215,7 @@ func innerTestGameServerDeploymentRollout(t *testing.T) {
 	t.Run("get rollout with no default", func(t *testing.T) {
 		buf := new(bytes.Buffer)
 
-		if err := getGameServerDeploymentRollout(buf, tc.ProjectID, "global", "mydeployment"); err != nil {
+		if err := getGameServerDeploymentRollout(buf, tc.ProjectID, "mydeployment"); err != nil {
 			t.Errorf("getGameServerDeploymentRollout: %v", err)
 		}
 
@@ -229,7 +229,7 @@ func innerTestGameServerDeploymentRollout(t *testing.T) {
 	t.Run("rollout set override", func(t *testing.T) {
 		buf := new(bytes.Buffer)
 
-		if err := updateRolloutOverrideConfig(buf, tc.ProjectID, "global", "myrealm", "global", "mydeployment", "myconfig"); err != nil {
+		if err := updateRolloutOverrideConfig(buf, tc.ProjectID, "global", "myrealm", "mydeployment", "myconfig"); err != nil {
 			t.Errorf("updateRolloutOverrideConfig: %v", err)
 		}
 
@@ -243,7 +243,7 @@ func innerTestGameServerDeploymentRollout(t *testing.T) {
 	t.Run("get rollout with override", func(t *testing.T) {
 		buf := new(bytes.Buffer)
 
-		if err := getGameServerDeploymentRollout(buf, tc.ProjectID, "global", "mydeployment"); err != nil {
+		if err := getGameServerDeploymentRollout(buf, tc.ProjectID, "mydeployment"); err != nil {
 			t.Errorf("getGameServerDeploymentRollout: %v", err)
 		}
 
@@ -256,7 +256,7 @@ func innerTestGameServerDeploymentRollout(t *testing.T) {
 	t.Run("rollout remove override", func(t *testing.T) {
 		buf := new(bytes.Buffer)
 
-		if err := updateRolloutClearOverrideConfig(buf, tc.ProjectID, "global", "mydeployment"); err != nil {
+		if err := updateRolloutClearOverrideConfig(buf, tc.ProjectID, "mydeployment"); err != nil {
 			t.Errorf("updateRolloutClearOverrideConfig: %v", err)
 		}
 
@@ -270,7 +270,7 @@ func innerTestGameServerDeploymentRollout(t *testing.T) {
 	t.Run("get rollout with no override", func(t *testing.T) {
 		buf := new(bytes.Buffer)
 
-		if err := getGameServerDeploymentRollout(buf, tc.ProjectID, "global", "mydeployment"); err != nil {
+		if err := getGameServerDeploymentRollout(buf, tc.ProjectID, "mydeployment"); err != nil {
 			t.Errorf("getGameServerDeploymentRollout: %v", err)
 		}
 

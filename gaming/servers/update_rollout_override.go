@@ -27,11 +27,10 @@ import (
 )
 
 // updateRolloutOverrideConfig sets the override config for a realm.
-func updateRolloutOverrideConfig(w io.Writer, projectID, realmLocation, realmID, deploymentLocation, deploymentID, configID string) error {
+func updateRolloutOverrideConfig(w io.Writer, projectID, realmLocation, realmID, deploymentID, configID string) error {
 	// projectID := "my-project"
 	// realmLocation := "global"
 	// realmID := "myrealm"
-	// deploymentLocation := "global"
 	// deploymentID := "mydeployment"
 	// configID := "myconfig"
 	ctx := context.Background()
@@ -43,7 +42,7 @@ func updateRolloutOverrideConfig(w io.Writer, projectID, realmLocation, realmID,
 
 	req := &gamingpb.UpdateGameServerDeploymentRolloutRequest{
 		Rollout: &gamingpb.GameServerDeploymentRollout{
-			Name: fmt.Sprintf("projects/%s/locations/%s/gameServerDeployments/%s", projectID, deploymentLocation, deploymentID),
+			Name: fmt.Sprintf("projects/%s/locations/global/gameServerDeployments/%s", projectID, deploymentID),
 
 			GameServerConfigOverrides: []*gamingpb.GameServerConfigOverride{
 				&gamingpb.GameServerConfigOverride{

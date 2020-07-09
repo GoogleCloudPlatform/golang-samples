@@ -27,9 +27,8 @@ import (
 )
 
 // listGameServerDeployments lists the game server deployments.
-func listGameServerDeployments(w io.Writer, projectID, location string) error {
+func listGameServerDeployments(w io.Writer, projectID string) error {
 	// projectID := "my-project"
-	// location := "global"
 	// realmID := "myrealm"
 	ctx := context.Background()
 	client, err := gaming.NewGameServerDeploymentsClient(ctx)
@@ -39,7 +38,7 @@ func listGameServerDeployments(w io.Writer, projectID, location string) error {
 	defer client.Close()
 
 	req := &gamingpb.ListGameServerDeploymentsRequest{
-		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
+		Parent: fmt.Sprintf("projects/%s/locations/global", projectID),
 	}
 
 	it := client.ListGameServerDeployments(ctx, req)

@@ -26,9 +26,8 @@ import (
 )
 
 // deleteGameServerConfig deletes a game server config.
-func deleteGameServerConfig(w io.Writer, projectID, location, deploymentID, configID string) error {
+func deleteGameServerConfig(w io.Writer, projectID, deploymentID, configID string) error {
 	// projectID := "my-project"
-	// location := "global"
 	// deploymentID := "mydeployment"
 	// configID := "myconfig"
 	ctx := context.Background()
@@ -39,7 +38,7 @@ func deleteGameServerConfig(w io.Writer, projectID, location, deploymentID, conf
 	defer client.Close()
 
 	req := &gamingpb.DeleteGameServerConfigRequest{
-		Name: fmt.Sprintf("projects/%s/locations/%s/gameServerDeployments/%s/configs/%s", projectID, location, deploymentID, configID),
+		Name: fmt.Sprintf("projects/%s/locations/global/gameServerDeployments/%s/configs/%s", projectID, deploymentID, configID),
 	}
 
 	op, err := client.DeleteGameServerConfig(ctx, req)

@@ -26,9 +26,8 @@ import (
 )
 
 // createGameServerDeployment creates a game server deployment.
-func createGameServerDeployment(w io.Writer, projectID, location, deploymentID string) error {
+func createGameServerDeployment(w io.Writer, projectID, deploymentID string) error {
 	// projectID := "my-project"
-	// location := "global"
 	// deploymentID := "mydeployment"
 	ctx := context.Background()
 	client, err := gaming.NewGameServerDeploymentsClient(ctx)
@@ -38,7 +37,7 @@ func createGameServerDeployment(w io.Writer, projectID, location, deploymentID s
 	defer client.Close()
 
 	req := &gamingpb.CreateGameServerDeploymentRequest{
-		Parent:       fmt.Sprintf("projects/%s/locations/%s", projectID, location),
+		Parent:       fmt.Sprintf("projects/%s/locations/global", projectID),
 		DeploymentId: deploymentID,
 		GameServerDeployment: &gamingpb.GameServerDeployment{
 			Description: "My Game Server Deployment",

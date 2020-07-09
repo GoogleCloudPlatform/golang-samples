@@ -27,9 +27,8 @@ import (
 )
 
 // updateRolloutDefaultConfig sets the default config for a game deployment.
-func updateRolloutDefaultConfig(w io.Writer, projectID, location, deploymentID, configID string) error {
+func updateRolloutDefaultConfig(w io.Writer, projectID, deploymentID, configID string) error {
 	// projectID := "my-project"
-	// location := "global"
 	// deploymentID := "mydeployment"
 	// configID := "myconfig"
 	ctx := context.Background()
@@ -41,7 +40,7 @@ func updateRolloutDefaultConfig(w io.Writer, projectID, location, deploymentID, 
 
 	req := &gamingpb.UpdateGameServerDeploymentRolloutRequest{
 		Rollout: &gamingpb.GameServerDeploymentRollout{
-			Name: fmt.Sprintf("projects/%s/locations/%s/gameServerDeployments/%s", projectID, location, deploymentID),
+			Name: fmt.Sprintf("projects/%s/locations/global/gameServerDeployments/%s", projectID, deploymentID),
 
 			DefaultGameServerConfig: configID,
 		},
@@ -54,7 +53,7 @@ func updateRolloutDefaultConfig(w io.Writer, projectID, location, deploymentID, 
 
 	op, err := client.UpdateGameServerDeploymentRollout(ctx, req)
 	if err != nil {
-		return fmt.Errorf("CreateGameServerDeployment: %v", err)
+		return fmt.Errorf("UpdateGameServerDeploymentRollout: %v", err)
 	}
 	resp, err := op.Wait(ctx)
 	if err != nil {

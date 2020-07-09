@@ -27,9 +27,8 @@ import (
 )
 
 // listGameServerConfigs lists the game server configs.
-func listGameServerConfigs(w io.Writer, projectID, location, deploymentID string) error {
+func listGameServerConfigs(w io.Writer, projectID, deploymentID string) error {
 	// projectID := "my-project"
-	// location := "global"
 	// deploymentID := "mydeployment"
 	ctx := context.Background()
 	client, err := gaming.NewGameServerConfigsClient(ctx)
@@ -39,7 +38,7 @@ func listGameServerConfigs(w io.Writer, projectID, location, deploymentID string
 	defer client.Close()
 
 	req := &gamingpb.ListGameServerConfigsRequest{
-		Parent: fmt.Sprintf("projects/%s/locations/%s/gameServerDeployments/%s", projectID, location, deploymentID),
+		Parent: fmt.Sprintf("projects/%s/locations/global/gameServerDeployments/%s", projectID, deploymentID),
 	}
 
 	it := client.ListGameServerConfigs(ctx, req)

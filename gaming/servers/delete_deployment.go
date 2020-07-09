@@ -26,9 +26,8 @@ import (
 )
 
 // deleteGameServerDeployment deletes a game server deployment.
-func deleteGameServerDeployment(w io.Writer, projectID, location, deploymentID string) error {
+func deleteGameServerDeployment(w io.Writer, projectID, deploymentID string) error {
 	// projectID := "my-project"
-	// location := "global"
 	// deploymentID := "mydeployment"
 	ctx := context.Background()
 	client, err := gaming.NewGameServerDeploymentsClient(ctx)
@@ -38,7 +37,7 @@ func deleteGameServerDeployment(w io.Writer, projectID, location, deploymentID s
 	defer client.Close()
 
 	req := &gamingpb.DeleteGameServerDeploymentRequest{
-		Name: fmt.Sprintf("projects/%s/locations/%s/gameServerDeployments/%s", projectID, location, deploymentID),
+		Name: fmt.Sprintf("projects/%s/locations/global/gameServerDeployments/%s", projectID, deploymentID),
 	}
 
 	op, err := client.DeleteGameServerDeployment(ctx, req)

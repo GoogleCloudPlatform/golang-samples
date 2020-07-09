@@ -26,9 +26,8 @@ import (
 )
 
 // getGameServerDeploymentRollout retrieves info on a game server deployment's rollout.
-func getGameServerDeploymentRollout(w io.Writer, projectID, location, deploymentID string) error {
+func getGameServerDeploymentRollout(w io.Writer, projectID, deploymentID string) error {
 	// projectID := "my-project"
-	// location := "global"
 	// deploymentID := "mydeployment"
 	ctx := context.Background()
 	client, err := gaming.NewGameServerDeploymentsClient(ctx)
@@ -38,7 +37,7 @@ func getGameServerDeploymentRollout(w io.Writer, projectID, location, deployment
 	defer client.Close()
 
 	req := &gamingpb.GetGameServerDeploymentRolloutRequest{
-		Name: fmt.Sprintf("projects/%s/locations/%s/gameServerDeployments/%s", projectID, location, deploymentID),
+		Name: fmt.Sprintf("projects/%s/locations/global/gameServerDeployments/%s", projectID, deploymentID),
 	}
 
 	resp, err := client.GetGameServerDeploymentRollout(ctx, req)

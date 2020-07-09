@@ -87,9 +87,8 @@ const fleet = `
 `
 
 // createGameServerConfig creates a game server config.
-func createGameServerConfig(w io.Writer, projectID, location, deploymentID, configID string) error {
+func createGameServerConfig(w io.Writer, projectID, deploymentID, configID string) error {
 	// projectID := "my-project"
-	// location := "global"
 	// deploymentID := "mydeployment"
 	// configID := "mydeployment"
 	ctx := context.Background()
@@ -100,7 +99,7 @@ func createGameServerConfig(w io.Writer, projectID, location, deploymentID, conf
 	defer client.Close()
 
 	req := &gamingpb.CreateGameServerConfigRequest{
-		Parent:   fmt.Sprintf("projects/%s/locations/%s/gameServerDeployments/%s", projectID, location, deploymentID),
+		Parent:   fmt.Sprintf("projects/%s/locations/global/gameServerDeployments/%s", projectID, deploymentID),
 		ConfigId: configID,
 		GameServerConfig: &gamingpb.GameServerConfig{
 			FleetConfigs: []*gamingpb.FleetConfig{

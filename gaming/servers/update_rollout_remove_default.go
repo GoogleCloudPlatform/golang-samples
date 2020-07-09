@@ -27,9 +27,8 @@ import (
 )
 
 // updateRolloutClearDefaultConfig sets the default config for a game deployment.
-func updateRolloutClearDefaultConfig(w io.Writer, projectID, location, deploymentID string) error {
+func updateRolloutClearDefaultConfig(w io.Writer, projectID, deploymentID string) error {
 	// projectID := "my-project"
-	// location := "global"
 	// deploymentID := "mydeployment"
 	// configID := "myconfig"
 	ctx := context.Background()
@@ -41,7 +40,7 @@ func updateRolloutClearDefaultConfig(w io.Writer, projectID, location, deploymen
 
 	req := &gamingpb.UpdateGameServerDeploymentRolloutRequest{
 		Rollout: &gamingpb.GameServerDeploymentRollout{
-			Name: fmt.Sprintf("projects/%s/locations/%s/gameServerDeployments/%s", projectID, location, deploymentID),
+			Name: fmt.Sprintf("projects/%s/locations/global/gameServerDeployments/%s", projectID, deploymentID),
 
 			DefaultGameServerConfig: "",
 		},
