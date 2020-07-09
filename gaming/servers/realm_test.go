@@ -63,6 +63,8 @@ func TestRealms(t *testing.T) {
 		}
 	})
 
+	t.Run("cluster tests", innerTestGameServerCluster)
+
 	t.Run("delete realm", func(t *testing.T) {
 		buf := new(bytes.Buffer)
 		if err := deleteRealm(buf, tc.ProjectID, "global", "myrealm"); err != nil {
@@ -90,146 +92,32 @@ func TestRealms(t *testing.T) {
 	})
 }
 
-func TestGameServerDeployments(t *testing.T) {
+func innerTestGameServerCluster(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	t.Run("create deployment", func(t *testing.T) {
+	t.Run("create cluster", func(t *testing.T) {
 		buf := new(bytes.Buffer)
-		if err := createGameServerDeployment(buf, tc.ProjectID, "global", "mydeployment"); err != nil {
-			t.Errorf("createGameServerDeployment: %v", err)
+		if err := createCluster(buf, tc.ProjectID, "global", "myrealm", "mycluster", "projects/217093627905/locations/us-central1/clusters/gke-shared-default"); err != nil {
+			t.Errorf("createCluster: %v", err)
 		}
 
 		got := buf.String()
-		want := "Deployment created: projects/" + tc.ProjectID + "/locations/global/gameServerDeployments/mydeployment"
+		want := "Cluster created: projects/" + tc.ProjectID + "/locations/global/realms/myrealm"
 		if got != want {
-			t.Errorf("createGameServerDeployment got %q, want %q", got, want)
+			t.Errorf("createCluster got %q, want %q", got, want)
 		}
 	})
 
-	t.Run("get created deployment", func(t *testing.T) {
+	t.Run("delete cluster", func(t *testing.T) {
 		buf := new(bytes.Buffer)
-		if err := getGameServerDeployment(buf, tc.ProjectID, "global", "mydeployment"); err != nil {
-			t.Errorf("getGameServerDeployment: %v", err)
+		if err := deleteCluster(buf, tc.ProjectID, "global", "myrealm", "mycluster"); err != nil {
+			t.Errorf("deleteCluster: %v", err)
 		}
 
 		got := buf.String()
-		want := "Deployment retrieved: projects/" + tc.ProjectID + "/locations/global/gameServerDeployments/mydeployment"
+		want := "Cluster deleted."
 		if got != want {
-			t.Errorf("getGameServerDeployment got %q, want %q", got, want)
-		}
-	})
-
-	t.Run("list created deployment", func(t *testing.T) {
-		buf := new(bytes.Buffer)
-		if err := listGameServerDeployments(buf, tc.ProjectID, "global"); err != nil {
-			t.Errorf("listGameServerDeployments: %v", err)
-		}
-
-		got := buf.String()
-		want := "Deployment listed: projects/" + tc.ProjectID + "/locations/global/gameServerDeployments/mydeployment\n"
-		if got != want {
-			t.Errorf("listGameServerDeployments got %q, want %q", got, want)
-		}
-	})
-
-	t.Run("config tests", innerTestGameServerFleet)
-
-	t.Run("delete deployment", func(t *testing.T) {
-		buf := new(bytes.Buffer)
-		if err := deleteGameServerDeployment(buf, tc.ProjectID, "global", "mydeployment"); err != nil {
-			t.Errorf("deleteGameServerDeployment: %v", err)
-		}
-
-		got := buf.String()
-		want := "Deployment deleted."
-		if got != want {
-			t.Errorf("deleteGameServerDeployment got %q, want %q", got, want)
-		}
-	})
-
-	t.Run("list no deployments", func(t *testing.T) {
-		buf := new(bytes.Buffer)
-		if err := listGameServerDeployments(buf, tc.ProjectID, "global"); err != nil {
-			t.Errorf("listGameServerDeployments: %v", err)
-		}
-
-		got := buf.String()
-		want := ""
-		if got != want {
-			t.Errorf("listGameServerDeployments got %q, want %q", got, want)
-		}
-	})
-}
-
-func innerTestGameServerFleet(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	t.Run("create config", func(t *testing.T) {
-		buf := new(bytes.Buffer)
-
-		if err := createGameServerConfig(buf, tc.ProjectID, "global", "mydeployment", "myconfig"); err != nil {
-			t.Errorf("createGameServerConfig: %v", err)
-		}
-
-		got := buf.String()
-		want := "Config created: projects/" + tc.ProjectID + "/locations/global/gameServerDeployments/mydeployment/configs/myconfig"
-		if got != want {
-			t.Errorf("createGameServerConfig got %q, want %q", got, want)
-		}
-	})
-
-	t.Run("get created config", func(t *testing.T) {
-		buf := new(bytes.Buffer)
-
-		if err := getGameServerConfig(buf, tc.ProjectID, "global", "mydeployment", "myconfig"); err != nil {
-			t.Errorf("getGameServerConfig: %v", err)
-		}
-
-		got := buf.String()
-		want := "Config retrieved: projects/" + tc.ProjectID + "/locations/global/gameServerDeployments/mydeployment/configs/myconfig"
-		if got != want {
-			t.Errorf("getGameServerConfig got %q, want %q", got, want)
-		}
-	})
-
-	t.Run("list created config", func(t *testing.T) {
-		buf := new(bytes.Buffer)
-
-		if err := listGameServerConfigs(buf, tc.ProjectID, "global", "mydeployment"); err != nil {
-			t.Errorf("listGameServerConfigs: %v", err)
-		}
-
-		got := buf.String()
-		want := "Config listed: projects/" + tc.ProjectID + "/locations/global/gameServerDeployments/mydeployment/configs/myconfig\n"
-		if got != want {
-			t.Errorf("listGameServerConfigs got %q, want %q", got, want)
-		}
-	})
-
-	t.Run("delete config", func(t *testing.T) {
-		buf := new(bytes.Buffer)
-		if err := deleteGameServerConfig(buf, tc.ProjectID, "global", "mydeployment", "myconfig"); err != nil {
-			t.Errorf("deleteGameServerConfig: %v", err)
-		}
-
-		got := buf.String()
-		want := "Config deleted."
-		if got != want {
-			t.Errorf("deleteGameServerConfig got %q, want %q", got, want)
-		}
-	})
-
-	t.Run("list no configs", func(t *testing.T) {
-		buf := new(bytes.Buffer)
-
-		if err := listGameServerConfigs(buf, tc.ProjectID, "global", "mydeployment"); err != nil {
-			t.Errorf("listGameServerConfigs: %v", err)
-		}
-
-		got := buf.String()
-		want := ""
-		if got != want {
-			t.Errorf("listGameServerConfigs got %q, want %q", got, want)
+			t.Errorf("deleteCluster got %q, want %q", got, want)
 		}
 	})
 }
