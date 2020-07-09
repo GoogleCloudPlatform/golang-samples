@@ -39,7 +39,7 @@ func updateNotificationConfig(w io.Writer, orgID string, notificationConfigID st
 	defer client.Close()
 
 	updatedDescription := "Updated sample config"
-	updatedFilter := `state = \"INACTIVE\"`
+	updatedFilter := `state = "INACTIVE"`
 	req := &securitycenterpb.UpdateNotificationConfigRequest{
 		NotificationConfig: &securitycenterpb.NotificationConfig{
 			Name:        fmt.Sprintf("organizations/%s/notificationConfigs/%s", orgID, notificationConfigID),
