@@ -36,6 +36,9 @@ func createGameServerDeployment(w io.Writer, projectID, deploymentID string) err
 	}
 	defer client.Close()
 
+	// Location is hard coded as global, as Game Server Deployments can only be
+	// created in global.  This is done for all operations on Game Server
+	// Deployments, as well as for its child resource types.
 	req := &gamingpb.CreateGameServerDeploymentRequest{
 		Parent:       fmt.Sprintf("projects/%s/locations/global", projectID),
 		DeploymentId: deploymentID,
