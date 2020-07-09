@@ -14,7 +14,7 @@
 
 package servers
 
-// [START cloud_game_servers_deployment_rollout_default]
+// [START cloud_game_servers_deployment_rollout_override]
 
 import (
 	"context"
@@ -68,7 +68,7 @@ func updateRolloutOverrideConfig(w io.Writer, projectID, realmLocation, realmID,
 
 	op, err := client.UpdateGameServerDeploymentRollout(ctx, req)
 	if err != nil {
-		return fmt.Errorf("CreateGameServerDeployment: %v", err)
+		return fmt.Errorf("UpdateGameServerDeploymentRollout: %v", err)
 	}
 	resp, err := op.Wait(ctx)
 	if err != nil {
@@ -79,4 +79,4 @@ func updateRolloutOverrideConfig(w io.Writer, projectID, realmLocation, realmID,
 	return nil
 }
 
-// [END cloud_game_servers_deployment_rollout_default]
+// [END cloud_game_servers_deployment_rollout_override]

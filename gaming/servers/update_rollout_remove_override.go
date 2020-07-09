@@ -14,7 +14,7 @@
 
 package servers
 
-// [START cloud_game_servers_deployment_rollout_default]
+// [START cloud_game_servers_deployment_rollout_remove_override]
 
 import (
 	"context"
@@ -31,7 +31,6 @@ import (
 func updateRolloutClearOverrideConfig(w io.Writer, projectID, deploymentID string) error {
 	// projectID := "my-project"
 	// deploymentID := "mydeployment"
-	// configID := "myconfig"
 	ctx := context.Background()
 	client, err := gaming.NewGameServerDeploymentsClient(ctx)
 	if err != nil {
@@ -65,4 +64,4 @@ func updateRolloutClearOverrideConfig(w io.Writer, projectID, deploymentID strin
 	return nil
 }
 
-// [END cloud_game_servers_deployment_rollout_default]
+// [END cloud_game_servers_deployment_rollout_remove_override]

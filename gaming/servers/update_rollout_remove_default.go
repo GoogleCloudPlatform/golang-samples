@@ -14,7 +14,7 @@
 
 package servers
 
-// [START cloud_game_servers_deployment_rollout_default]
+// [START cloud_game_servers_deployment_rollout_remove_default]
 
 import (
 	"context"
@@ -26,11 +26,10 @@ import (
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
-// updateRolloutClearDefaultConfig sets the default config for a game deployment.
+// updateRolloutClearDefaultConfig removes the default config for a game deployment.
 func updateRolloutClearDefaultConfig(w io.Writer, projectID, deploymentID string) error {
 	// projectID := "my-project"
 	// deploymentID := "mydeployment"
-	// configID := "myconfig"
 	ctx := context.Background()
 	client, err := gaming.NewGameServerDeploymentsClient(ctx)
 	if err != nil {
@@ -53,7 +52,7 @@ func updateRolloutClearDefaultConfig(w io.Writer, projectID, deploymentID string
 
 	op, err := client.UpdateGameServerDeploymentRollout(ctx, req)
 	if err != nil {
-		return fmt.Errorf("CreateGameServerDeployment: %v", err)
+		return fmt.Errorf("UpdateGameServerDeploymentRollout: %v", err)
 	}
 	resp, err := op.Wait(ctx)
 	if err != nil {
@@ -64,4 +63,4 @@ func updateRolloutClearDefaultConfig(w io.Writer, projectID, deploymentID string
 	return nil
 }
 
-// [END cloud_game_servers_deployment_rollout_default]
+// [END cloud_game_servers_deployment_rollout_remove_default]
