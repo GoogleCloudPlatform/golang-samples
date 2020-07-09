@@ -68,14 +68,14 @@ NOTE: this option is currently only supported on Linux and Mac OS. Windows users
 
 To use a Unix socket, you'll need to create a directory and give write access to the user running the proxy. For example:
 ```bash
-sudo mkdir /path/to/the/new/directory
-sudo chown -R $USER /path/to/the/new/directory
+sudo mkdir ./cloudsql
+sudo chown -R $USER ./cloudsql
 ```
 
 You'll also need to initialize an environment variable containing the directory you just created:
 
 ```bash
-export DB_SOCKET_DIR=/path/to/the/new/directory
+export DB_SOCKET_DIR=./cloudsql
 ```
 
 Use these terminal commands to initialize environment variables:
@@ -164,21 +164,15 @@ for more details on connecting a Cloud Run service to Cloud SQL.
 gcloud builds submit --tag gcr.io/[YOUR_PROJECT_ID]/run-sql
 ```
 
-1. Make sure the following environment variables are set:
-```sh
-export INSTANCE_CONNECTION_NAME='<MY-PROJECT>:<INSTANCE-REGION>:<INSTANCE-NAME>'
-export DB_USER='<DB_USER_NAME>'
-export DB_PASS='<DB_PASSWORD>'
-export DB_NAME='<DB_NAME>'
-```
-
 1. Deploy the service to Cloud Run:
 
 ```sh
-gcloud run deploy run-sql --image gcr.io/[YOUR_PROJECT_ID]/run-sql \
-  --add-cloudsql-instances $INSTANCE_CONNECTION_NAME \
-  --set-env-vars INSTANCE_CONNECTION_NAME=$INSTANCE_CONNECTION_NAME \
-  --set-env-vars DB_USER=$DB_USER,DB_PASS=$DB_PASS,DB_NAME=$DB_NAME 
+gcloud run deploy run-sql --image gcr.io/[YOUR_PROJECT_ID]/run-sql \              
+  --add-cloudsql-instances '<MY-PROJECT>:<INSTANCE-REGION>:<INSTANCE-NAME>' \
+  --set-env-vars INSTANCE_CONNECTION_NAME='<MY-PROJECT>:<INSTANCE-REGION>:<INSTANCE-NAME>' \
+  --set-env-vars DB_USER='<DB_USER_NAME>' \
+  --set-env-vars DB_PASS='<DB_PASSWORD>' \
+  --set-env-vars DB_NAME='<DB_NAME>'
 ```
 
 Take note of the URL output at the end of the deployment process.
