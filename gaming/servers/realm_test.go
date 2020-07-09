@@ -108,6 +108,32 @@ func innerTestGameServerCluster(t *testing.T) {
 		}
 	})
 
+	t.Run("get created cluster", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+		if err := getGameServerCluster(buf, tc.ProjectID, "global", "myrealm", "mycluster"); err != nil {
+			t.Errorf("getGameServerCluster: %v", err)
+		}
+
+		got := buf.String()
+		want := "Cluster retrieved: projects/" + tc.ProjectID + "/locations/global/realms/myrealm/gameServerClusters/mycluster"
+		if got != want {
+			t.Errorf("getGameServerCluster got %q, want %q", got, want)
+		}
+	})
+
+	t.Run("list created cluster", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+		if err := listGameServerClusters(buf, tc.ProjectID, "global", "myrealm"); err != nil {
+			t.Errorf("listGameServerClusters: %v", err)
+		}
+
+		got := buf.String()
+		want := "Cluster listed: projects/" + tc.ProjectID + "/locations/global/realms/myrealm/gameServerClusters/mycluster\n"
+		if got != want {
+			t.Errorf("listGameServerClusters got %q, want %q", got, want)
+		}
+	})
+
 	t.Run("delete cluster", func(t *testing.T) {
 		buf := new(bytes.Buffer)
 		if err := deleteCluster(buf, tc.ProjectID, "global", "myrealm", "mycluster"); err != nil {

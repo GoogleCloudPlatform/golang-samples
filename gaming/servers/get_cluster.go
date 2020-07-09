@@ -14,7 +14,7 @@
 
 package servers
 
-// [START cloud_game_servers_realm_list]
+// [START cloud_game_servers_cluster_get]
 
 import (
 	"context"
@@ -22,39 +22,33 @@ import (
 	"io"
 
 	gaming "cloud.google.com/go/gaming/apiv1beta"
-	"google.golang.org/api/iterator"
 	gamingpb "google.golang.org/genproto/googleapis/cloud/gaming/v1beta"
 )
 
-// listRealms lists the realms in a location.
-func listRealms(w io.Writer, projectID, location string) error {
+// getGameServerCluster retrieves info on a game server cluster.
+func getGameServerCluster(w io.Writer, projectID, location, realmID, clusterID string) error {
 	// projectID := "my-project"
 	// location := "global"
+	// realmID := "myrealm"
+	// clusterID := "mycluster"
 	ctx := context.Background()
-	client, err := gaming.NewRealmsClient(ctx)
+	client, err := gaming.NewGameServerClustersClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewRealmsClient: %v", err)
+		return fmt.Errorf("NewGameServerClustersClient: %v", err)
 	}
 	defer client.Close()
 
-	req := &gamingpb.ListRealmsRequest{
-		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
+	req := &gamingpb.GetGameServerClusterRequest{
+		Name: fmt.Sprintf("projects/%s/locations/%s/realms/%s/gameServerClusters/%s", projectID, location, realmID, clusterID),
 	}
 
-	it := client.ListRealms(ctx, req)
-	for {
-		resp, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return fmt.Errorf("Next: %v", err)
-		}
-
-		fmt.Fprintf(w, "Realm listed: %v\n", resp.Name)
+	resp, err := client.GetGameServerCluster(ctx, req)
+	if err != nil {
+		return fmt.Errorf("GetGameServerCluster: %v", err)
 	}
 
+	fmt.Fprintf(w, "Cluster retrieved: %v", resp.Name)
 	return nil
 }
 
-// [END cloud_game_servers_realm_list]
+// [END cloud_game_servers_cluster_get]
