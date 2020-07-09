@@ -203,7 +203,7 @@ func saveVote(w http.ResponseWriter, r *http.Request, app *app) error {
 	}
 
 	// [START cloud_sql_mysql_databasesql_connection]
-	sqlInsert := "INSERT INTO votes(candidate, time_cast) VALUES($1, NOW())"
+	sqlInsert := "INSERT INTO votes(candidate, time_cast) VALUES(?, NOW())"
 	if team == "TABS" || team == "SPACES" {
 		if _, err := app.db.Exec(sqlInsert, team); err != nil {
 			fmt.Fprintf(w, "unable to save vote: %s", err)
@@ -243,7 +243,7 @@ func initSocketConnectionPool() (*sql.DB, error) {
 	}
 
 	var dbURI string
-	dbURI = fmt.Sprintf("%s:%s@unix(/%s/%s)/%s", dbUser, dbPwd, socketDir, instanceConnectionName, dbName)
+	dbURI = fmt.Sprintf("%s:%s@unix(/%s/%s)/%s?parseTime=true", dbUser, dbPwd, socketDir, instanceConnectionName, dbName)
 
 	// dbPool is the pool of database connections.
 	dbPool, err := sql.Open("mysql", dbURI)
@@ -272,7 +272,7 @@ func initTCPConnectionPool() (*sql.DB, error) {
 	)
 
 	var dbURI string
-	dbURI = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUser, dbPwd, dbTcpHost, dbPort, dbName)
+	dbURI = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", dbUser, dbPwd, dbTcpHost, dbPort, dbName)
 
 	// dbPool is the pool of database connections.
 	dbPool, err := sql.Open("mysql", dbURI)

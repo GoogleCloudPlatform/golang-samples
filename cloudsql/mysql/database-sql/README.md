@@ -175,10 +175,10 @@ export DB_NAME='<DB_NAME>'
 1. Deploy the service to Cloud Run:
 
 ```sh
-gcloud run deploy run-sql --image gcr.io/[YOUR_PROJECT_ID]/run-sql\
---add-cloudsql-instances $INSTANCE_CONNECTION_NAME\
---set-env-vars INSTANCE_CONNECTION_NAME=$INSTANCE_CONNECTION_NAME,\
-DB_USER=$DB_USER,DB_PASS=$DB_PASS,DB_NAME=$DB_NAME
+gcloud run deploy run-sql --image gcr.io/[YOUR_PROJECT_ID]/run-sql \
+  --add-cloudsql-instances $INSTANCE_CONNECTION_NAME \
+  --set-env-vars INSTANCE_CONNECTION_NAME=$INSTANCE_CONNECTION_NAME \
+  --set-env-vars DB_USER=$DB_USER,DB_PASS=$DB_PASS,DB_NAME=$DB_NAME 
 ```
 
 Take note of the URL output at the end of the deployment process.
