@@ -40,11 +40,12 @@ var (
 func TestMain(m *testing.M) {
 	ctx := context.Background()
 
-	projectID := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
-	if projectID == "" {
+	generalProjectID := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
+	if generalProjectID == "" {
 		log.Println("GOLANG_SAMPLES_PROJECT_ID not set. Skipping.")
 		return
 	}
+	projectID := generalProjectID
 
 	memoryDB := newMemoryDB()
 	testDBs["memory"] = memoryDB
@@ -57,8 +58,9 @@ func TestMain(m *testing.M) {
 			log.Fatalf("firestore.NewClient: %v", err)
 		}
 
+		collection := generalProjectID + "-main-books"
 		// Delete all docs first to start with a clean slate.
-		docs, err := client.Collection("books").DocumentRefs(ctx).GetAll()
+		docs, err := client.Collection(collection).DocumentRefs(ctx).GetAll()
 		if err == nil {
 			for _, d := range docs {
 				if _, err := d.Delete(ctx); err != nil {
@@ -71,6 +73,7 @@ func TestMain(m *testing.M) {
 		if err != nil {
 			log.Fatalf("newFirestoreDB: %v", err)
 		}
+		db.collection = collection
 		testDBs["firestore"] = db
 	} else {
 		log.Println("GOLANG_SAMPES_FIRESTORE_PROJECT not set. Skipping Firestore database tests.")
