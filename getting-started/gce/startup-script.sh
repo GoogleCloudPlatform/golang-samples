@@ -22,7 +22,7 @@ curl -s "https://storage.googleapis.com/signals-agents/logging/google-fluentd-in
 service google-fluentd restart &
 
 APP_LOCATION=$(curl -s "http://metadata.google.internal/computeMetadata/v1/instance/attributes/app-location" -H "Metadata-Flavor: Google")
-gsutil cp $APP_LOCATION app.tar.gz
+gsutil cp "$APP_LOCATION" app.tar.gz
 tar -xzf app.tar.gz
 
 # Start the service included in app.tar.gz.

@@ -115,7 +115,7 @@ func TestTables(t *testing.T) {
 	}
 
 	t.Run("cmektests", func(t *testing.T) {
-		if bqtestutil.RunCMEKTests() {
+		if bqtestutil.SkipCMEKTests() {
 			t.Skip("skipping CMEK tests")
 		}
 		if err := createTableWithCMEK(tc.ProjectID, testDatasetID, testTableID); err != nil {

@@ -47,7 +47,7 @@ func createInspectTemplate(w io.Writer, projectID string, templateID, displayNam
 
 	// Create a configured request.
 	req := &dlppb.CreateInspectTemplateRequest{
-		Parent:     "projects/" + projectID,
+		Parent:     fmt.Sprintf("projects/%s/locations/global", projectID),
 		TemplateId: templateID,
 		InspectTemplate: &dlppb.InspectTemplate{
 			DisplayName: displayName,

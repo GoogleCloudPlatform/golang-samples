@@ -52,10 +52,7 @@ func TestMain(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to read stdout: %v", err)
 	}
-	got := string(out)
-
-	want := fmt.Sprintf("output_config:<bigquery_destination:<dataset:\"projects/%s/datasets/%s\" table:\"test\" > >", tc.ProjectID, datasetID)
-	if !strings.Contains(got, want) {
+	if got, want := string(out), "output_config:"; !strings.Contains(got, want) {
 		t.Errorf("stdout returned %s, wanted to contain %s", got, want)
 	}
 }
