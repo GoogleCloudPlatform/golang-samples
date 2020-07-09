@@ -14,7 +14,7 @@
 
 // [START asset_quickstart_list_assets]
 
-// Sample asset-quickstart list assets.
+// Sample list-assets list assets.
 package main
 
 import (
@@ -45,18 +45,18 @@ func main() {
 	}
 
 	// Call ListAssets API to get an asset iterator.
-	assetIterator := client.ListAssets(ctx, req)
+	it := client.ListAssets(ctx, req)
 
 	// Traverse and print the listed assets in response.
 	for {
-		response, err := assetIterator.Next()
+		response, err := it.Next()
 		if err == iterator.Done {
 			break
 		}
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Print(response)
+		fmt.Println(response)
 	}
 }
 
