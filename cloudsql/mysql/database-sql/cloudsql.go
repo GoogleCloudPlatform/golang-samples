@@ -95,7 +95,7 @@ func main() {
 
 	// If the optional DB_TCP_HOST environment variable is set, it contains
 	// the IP address and port number of a TCP connection pool to be created,
-	// such as "127.0.0.1:1433". If DB_TCP_HOST is not set, a Unix socket
+	// such as "127.0.0.1:3306". If DB_TCP_HOST is not set, a Unix socket
 	// connection pool will be created instead.
 	if os.Getenv("DB_TCP_HOST") != "" {
 		app.db, err = initTCPConnectionPool()
