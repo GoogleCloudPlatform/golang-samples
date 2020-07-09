@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START asset_quickstart_batch_get_assets_history]
+// [START asset_quickstart_list_assets]
 
 // Sample asset-quickstart list assets.
 package main
@@ -60,4 +60,4 @@ func main() {
 	}
 }
 
-// [END asset_quickstart_batch_get_assets_history]
+// [END asset_quickstart_list_assets]
