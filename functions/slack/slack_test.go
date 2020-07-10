@@ -27,7 +27,6 @@ import (
 	"testing"
 	"time"
 
-	"google.golang.org/api/kgsearch/v1"
 	"google.golang.org/api/option"
 )
 

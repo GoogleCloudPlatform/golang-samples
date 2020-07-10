@@ -21,7 +21,6 @@ import (
 	"log"
 	"os"
 
-	"google.golang.org/api/kgsearch/v1"
 	"google.golang.org/api/option"
 )
 

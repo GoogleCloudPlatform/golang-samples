@@ -22,7 +22,6 @@ import (
 	"os"
 
 	"github.com/microcosm-cc/bluemonday"
-	"github.com/russross/blackfriday/v2"
 )
 
 func main() {
