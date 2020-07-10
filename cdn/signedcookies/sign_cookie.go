@@ -35,7 +35,7 @@ import (
 // for which the cookie will authorize access to.
 // - key should be in raw form (not base64url-encoded) which is
 // 16-bytes long.
-// - keyName must match a key added to the backend service or bucket.
+// - keyName must match a key added to the backend service or backend bucket.
 func signCookie(urlPrefix, keyName string, key []byte, expiration time.Time) (string, error) {
 	encodedURLPrefix := base64.URLEncoding.EncodeToString([]byte(urlPrefix))
 	input := fmt.Sprintf("URLPrefix=%s:Expires=%d:KeyName=%s",
@@ -71,7 +71,7 @@ func generateSignedCookie(w io.Writer) error {
 	// The path to a file containing the base64-encoded signing key
 	keyPath := os.Getenv("KEY_PATH")
 
-	// Note: consider using the GCP Secret Manager for managing access to your
+	// Note: Consider using Google Cloud Secret Manager for managing access to your
 	// signing key(s).
 	key, err := readKeyFile(keyPath)
 	if err != nil {
@@ -97,7 +97,7 @@ func generateSignedCookie(w io.Writer) error {
 	cookie := &http.Cookie{
 		Name:   "Cloud-CDN-Cookie",
 		Value:  signedValue,
-		Path:   path, // Best practice: only send the cookie for paths it is valid for
+		Path:   path, // Best practice: only send the cookie for paths it is valid for.
 		Domain: domain,
 		MaxAge: int(expiration.Seconds()),
 	}
