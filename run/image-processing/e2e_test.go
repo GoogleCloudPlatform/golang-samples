@@ -36,7 +36,7 @@ func TestImageProcessingService(t *testing.T) {
 	requestPath := "/"
 	req, err := service.NewRequest("POST", requestPath)
 	if err != nil {
-		t.Fatalf("service.NewRequest: %q", err)
+		t.Fatalf("service.NewRequest: %v", err)
 	}
 
 	client := http.Client{Timeout: 10 * time.Second}

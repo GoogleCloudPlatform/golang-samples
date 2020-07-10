@@ -24,17 +24,17 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestPubSubService(t *testing.T) {
+func TestRendererServiceDeploy(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 
-	service := cloudrunci.NewService("pubsub", tc.ProjectID)
+	service := cloudrunci.NewService("renderer", tc.ProjectID)
 	if err := service.Deploy(); err != nil {
 		t.Fatalf("service.Deploy %q: %v", service.Name, err)
 	}
 	defer service.Clean()
 
 	requestPath := "/"
-	req, err := service.NewRequest("GET", requestPath)
+	req, err := service.NewRequest("POST", requestPath)
 	if err != nil {
 		t.Fatalf("service.NewRequest: %v", err)
 	}
@@ -47,7 +47,7 @@ func TestPubSubService(t *testing.T) {
 	defer resp.Body.Close()
 	fmt.Printf("client.Do: %s %s\n", req.Method, req.URL)
 
-	if got := resp.StatusCode; got != http.StatusBadRequest {
-		t.Errorf("response status: got %d, want %d", got, http.StatusBadRequest)
+	if got := resp.StatusCode; got != http.StatusOK {
+		t.Errorf("response status: got %d, want %d", got, http.StatusOK)
 	}
 }
