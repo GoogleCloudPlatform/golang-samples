@@ -18,6 +18,8 @@ package slack
 
 import (
 	"fmt"
+
+	"google.golang.org/api/kgsearch/v1"
 )
 
 func formatSlackMessage(query string, response *kgsearch.SearchResponse) (*Message, error) {

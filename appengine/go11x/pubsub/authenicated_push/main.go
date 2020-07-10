@@ -25,7 +25,7 @@ import (
 
 	"google.golang.org/api/idtoken"
 	"google.golang.org/api/option"
-	pubsub "google.golang.org/genproto/googleapis/pubsub/v1"
+	"google.golang.org/api/pubsub/v1"
 )
 
 type app struct {

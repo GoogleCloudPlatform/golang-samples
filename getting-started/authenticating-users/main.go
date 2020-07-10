@@ -28,6 +28,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/compute/metadata"
+	"github.com/dgrijalva/jwt-go"
 )
 
 // app holds the Cloud IAP certificates and audience field for this app, which

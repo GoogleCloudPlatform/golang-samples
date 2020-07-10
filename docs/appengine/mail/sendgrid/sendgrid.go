@@ -19,6 +19,8 @@ package sendgrid
 import (
 	"net/http"
 
+	"gopkg.in/sendgrid/sendgrid-go.v2"
+
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/urlfetch"
 )
