@@ -34,9 +34,7 @@ require (
 	github.com/lib/pq v1.7.0
 	github.com/linkedin/goavro/v2 v2.9.8
 	github.com/mailgun/mailgun-go/v3 v3.6.4
-	github.com/mailjet/mailjet-apiv3-go v0.0.0-20190724151621-55e56f74078c
 	github.com/philhofer/fwd v1.0.0 // indirect
-	github.com/sendgrid/smtpapi-go v0.6.0 // indirect
 	github.com/tinylib/msgp v1.1.2 // indirect
 	go.opencensus.io v0.22.4
 	golang.org/x/exp v0.0.0-20200513190911-00229845015e
@@ -49,7 +47,6 @@ require (
 	google.golang.org/genproto v0.0.0-20200708133552-18036109789b
 	google.golang.org/grpc v1.30.0
 	google.golang.org/grpc/examples v0.0.0-20200707005602-4258d12073b4
-	gopkg.in/sendgrid/sendgrid-go.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.3.0
 )
 

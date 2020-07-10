@@ -33,7 +33,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"google.golang.org/api/idtoken"
-	"google.golang.org/api/pubsub/v1"
+	pubsub "google.golang.org/genproto/googleapis/pubsub/v1"
 )
 
 func TestReceiveMessagesHandler(t *testing.T) {
