@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,5 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package snippets contains IRM samples.
-package snippets
+package main
+
+import (
+	"go/build"
+	"log"
+)
+
+func main() {
+	log.Print(build.Default.Dir) // new in 1.14
+}

@@ -65,52 +65,6 @@ elif echo "$SIGNIFICANT_CHANGES" | tr ' ' '\n' | grep "^go.mod$" || [[ $CHANGED_
   RUN_ALL_TESTS="1"
 fi
 
-## Static Analysis
-# Do the easy stuff before running tests or reserving a project. Fail fast!
-set +x
-
-if [ "$GOLANG_SAMPLES_GO_VET" ]; then
-  echo "Running 'goimports compliance check'"
-  set -x
-  diff -u <(echo -n) <(goimports -d .)
-  set +x
-  for i in $GO_CHANGED_MODULES; do
-    mod=$(dirname "$i")
-    pushd "$mod" > /dev/null;
-      # Fail if a dependency was added without the necessary go.mod/go.sum change
-      # being part of the commit.
-      echo "Running 'go.mod/go.sum sync check' in '$mod'..."
-      set -x
-      go mod tidy;
-      # shellcheck disable=SC2162
-      git diff go.mod | tee /dev/stderr | (! read)
-      # shellcheck disable=SC2162
-      [ -f go.sum ] && git diff go.sum | tee /dev/stderr | (! read)
-      set +x
-    popd > /dev/null;
-  done
-
-  # Always run 'go vet' from the root, which does not look at sub-modules.
-  set +x
-  echo "Running 'go vet' in golang-samples root..."
-  set -x
-  go vet ./...
-  set +x
-
-  # Run go vet inside each sub-module.
-  # Recursive submodules are not supported.
-  set +x
-  for i in $GO_CHANGED_SUBMODULES; do
-    mod=$(dirname "$i")
-    pushd "$mod" > /dev/null;
-      echo "Running 'go vet' in '$mod'..."
-      set -x
-      go vet ./...
-      set +x
-    popd > /dev/null;
-  done
-fi
-
 # Don't print environment variables in case there are secrets.
 # If you need a secret, use a keystore_resource in common.cfg.
 set +x
@@ -185,6 +139,13 @@ set +e # Don't exit on errors to make sure we run all tests.
 # runTests runs the tests in the current directory. If an argument is specified,
 # it is used as the argument to `go test`.
 runTests() {
+  if goVersionShouldSkip; then
+    set +x
+    echo "SKIPPING: module's minimum version is newer than the current Go version."
+    set -x
+    return 0
+  fi
+
   set +x
   echo "Running 'go test' in '$(pwd)'..."
   set -x
@@ -195,6 +156,18 @@ runTests() {
   sampletests < raw_log.xml > sponge_log.xml
   rm raw_log.xml # No need to keep this around.
   set +x
+}
+
+# Returns 0 if the test should be skipped because the current Go
+# version is too old for the current module.
+goVersionShouldSkip() {
+  modVersion="$(go list -m -f '{{.GoVersion}}')"
+  if [ -z "$modVersion" ]; then
+    # Not in a module or minimum Go version not specified, don't skip.
+    return 1
+  fi
+
+  go list -f "{{context.ReleaseTags}}" | grep -q -v "go$modVersion\b"
 }
 
 if [[ $RUN_ALL_TESTS = "1" ]]; then
