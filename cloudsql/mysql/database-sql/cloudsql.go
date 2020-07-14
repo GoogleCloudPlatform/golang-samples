@@ -100,12 +100,12 @@ func main() {
 	if os.Getenv("DB_TCP_HOST") != "" {
 		app.db, err = initTCPConnectionPool()
 		if err != nil {
-			log.Fatalf("initTCPConnectionPool: unable to connect: %s", err)
+			log.Fatalf("initTCPConnectionPool: unable to connect: %v", err)
 		}
 	} else {
 		app.db, err = initSocketConnectionPool()
 		if err != nil {
-			log.Fatalf("initSocketConnectionPool: unable to connect: %s", err)
+			log.Fatalf("initSocketConnectionPool: unable to connect: %v", err)
 		}
 	}
 
