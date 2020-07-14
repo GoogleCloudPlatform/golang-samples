@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ import (
 	gamingpb "google.golang.org/genproto/googleapis/cloud/gaming/v1beta"
 )
 
+// fleet is the spec portion of an agones Fleet.  It must be in JSON format.
+// See https://agones.dev/site/docs/reference/fleet/ for more on fleets.
 const fleet = `
 {
    "replicas": 10,
