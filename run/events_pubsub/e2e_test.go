@@ -24,17 +24,18 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestBrokenService(t *testing.T) {
+func TestPubSubEventsService(t *testing.T) {
+	t.Skip("Service is broken: https://github.com/GoogleCloudPlatform/golang-samples/issues/1566")
 	tc := testutil.EndToEndTest(t)
 
-	service := cloudrunci.NewService("hello-broken", tc.ProjectID)
+	service := cloudrunci.NewService("pubsub-events", tc.ProjectID)
 	if err := service.Deploy(); err != nil {
 		t.Fatalf("service.Deploy %q: %v", service.Name, err)
 	}
 	defer service.Clean()
 
-	requestPath := "/improved"
-	req, err := service.NewRequest("GET", requestPath)
+	requestPath := "/"
+	req, err := service.NewRequest("POST", requestPath)
 	if err != nil {
 		t.Fatalf("service.NewRequest: %v", err)
 	}
@@ -47,7 +48,7 @@ func TestBrokenService(t *testing.T) {
 	defer resp.Body.Close()
 	fmt.Printf("client.Do: %s %s\n", req.Method, req.URL)
 
-	if got := resp.StatusCode; got != http.StatusOK {
-		t.Errorf("response status: got %d, want %d", got, http.StatusOK)
+	if got := resp.StatusCode; got != http.StatusBadRequest {
+		t.Errorf("response status: got %d, want %d", got, http.StatusBadRequest)
 	}
 }
