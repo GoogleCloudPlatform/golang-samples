@@ -129,6 +129,12 @@ if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]]; then
   ./testing/kokoro/configure_gcloud.bash;
 fi
 
+# only set with mtls_smoketest
+# TODO(cbro): remove with mtls_smoketest.cfg
+if [[ $GOOGLE_API_USE_MTLS = "always" ]]; then
+  ./testing/kokoro/mtls_smoketest.bash
+fi
+
 date
 
 # exit_code collects all of the exit codes of the tests, and is used to set the
