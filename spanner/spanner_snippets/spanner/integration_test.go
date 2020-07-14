@@ -20,6 +20,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -37,10 +39,14 @@ type sampleFunc func(w io.Writer, dbName string) error
 type instanceSampleFunc func(w io.Writer, projectID, instanceID string) error
 type backupSampleFunc func(w io.Writer, dbName, backupID string) error
 
-func initTest(t *testing.T, projectID string) (dbName string, cleanup func()) {
+var (
+	validInstancePattern = regexp.MustCompile("^projects/(?P<project>[^/]+)/instances/(?P<instance>[^/]+)$")
+)
+
+func initTest(t *testing.T, id string) (dbName string, cleanup func()) {
 	instance := getInstance(t)
-	databaseID := validLength(fmt.Sprintf("test-%s", projectID), t)
-	dbName = fmt.Sprintf("%s/databases/%s", instance, databaseID)
+	dbID := validLength(fmt.Sprintf("smpl-%s", id), t)
+	dbName = fmt.Sprintf("%s/databases/%s", instance, dbID)
 
 	ctx := context.Background()
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
@@ -66,12 +72,12 @@ func initTest(t *testing.T, projectID string) (dbName string, cleanup func()) {
 	return
 }
 
-func initBackupTest(t *testing.T, projectID, dbName string) (restoreDBName, backupID, cancelledBackupID string, cleanup func()) {
+func initBackupTest(t *testing.T, id, dbName string) (restoreDBName, backupID, cancelledBackupID string, cleanup func()) {
 	instance := getInstance(t)
-	restoreDatabaseID := validLength(fmt.Sprintf("restore-%s", projectID), t)
+	restoreDatabaseID := validLength(fmt.Sprintf("restore-%s", id), t)
 	restoreDBName = fmt.Sprintf("%s/databases/%s", instance, restoreDatabaseID)
-	backupID = validLength(fmt.Sprintf("backup-%s", projectID), t)
-	cancelledBackupID = validLength(fmt.Sprintf("cancel-%s", projectID), t)
+	backupID = validLength(fmt.Sprintf("backup-%s", id), t)
+	cancelledBackupID = validLength(fmt.Sprintf("cancel-%s", id), t)
 
 	ctx := context.Background()
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
@@ -112,20 +118,24 @@ func initBackupTest(t *testing.T, projectID, dbName string) (restoreDBName, back
 }
 
 func TestCreateInstance(t *testing.T) {
-	tc := testutil.SystemTest(t)
+	_ = testutil.SystemTest(t)
+
+	projectID, _, err := parseInstanceName(getInstance(t))
+	if err != nil {
+		t.Fatalf("failed to parse instance name: %v", err)
+	}
 
 	instanceID := fmt.Sprintf("go-sample-test-%s", uuid.New().String()[:8])
-	out := runInstanceSample(t, createInstance, tc.ProjectID, instanceID, "failed to create an instance")
-	if err := cleanupInstance(tc.ProjectID, instanceID); err != nil {
+	out := runInstanceSample(t, createInstance, projectID, instanceID, "failed to create an instance")
+	if err := cleanupInstance(projectID, instanceID); err != nil {
 		t.Logf("cleanupInstance error: %s", err)
 	}
 	assertContains(t, out, fmt.Sprintf("Created instance [%s]", instanceID))
 }
 
 func TestSample(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	dbName, cleanup := initTest(t, tc.ProjectID)
+	_ = testutil.SystemTest(t)
+	dbName, cleanup := initTest(t, randomID())
 	defer cleanup()
 
 	var out string
@@ -308,11 +318,12 @@ func TestSample(t *testing.T) {
 }
 
 func TestBackupSample(t *testing.T) {
-	tc := testutil.EndToEndTest(t)
+	_ = testutil.EndToEndTest(t)
 
-	dbName, cleanup := initTest(t, tc.ProjectID)
+	id := randomID()
+	dbName, cleanup := initTest(t, id)
 	defer cleanup()
-	restoreDBName, backupID, cancelledBackupID, cleanupBackup := initBackupTest(t, tc.ProjectID, dbName)
+	restoreDBName, backupID, cancelledBackupID, cleanupBackup := initBackupTest(t, id, dbName)
 
 	var out string
 	// Set up the database for testing backup operations.
@@ -425,4 +436,18 @@ func cleanupInstance(projectID, instanceID string) error {
 			instanceName, err)
 	}
 	return nil
+}
+
+func randomID() string {
+	now := time.Now().UTC()
+	return fmt.Sprintf("%s-%s", strconv.FormatInt(now.Unix(), 10), uuid.New().String()[:8])
+}
+
+func parseInstanceName(instanceName string) (project, instance string, err error) {
+	matches := validInstancePattern.FindStringSubmatch(instanceName)
+	if len(matches) == 0 {
+		return "", "", fmt.Errorf("failed to parse database name from %q according to pattern %q",
+			instanceName, validInstancePattern.String())
+	}
+	return matches[1], matches[2], nil
 }

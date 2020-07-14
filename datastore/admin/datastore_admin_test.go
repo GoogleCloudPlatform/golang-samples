@@ -15,20 +15,27 @@
 package samples
 
 import (
+	"context"
 	"io/ioutil"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestCreate(t *testing.T) {
+func TestAdmin(t *testing.T) {
+	// Roles to be set in your Service Account and App Engine default service account
+	// to run this test:
+	// `Datastore Import Export Admin`, or `Cloud Datastore Owner`, or `Owner`,
+	// `Storage Admin`, or `Owner`.
+	// See https://cloud.google.com/datastore/docs/export-import-entities#permissions for full details
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
 	client, err := clientCreate(ioutil.Discard)
 	if err != nil {
 		t.Fatalf("clientCreate: %v", err)
 	}
 	defer client.Close()
 
-	tc := testutil.SystemTest(t)
 	indices, err := indexList(ioutil.Discard, tc.ProjectID)
 	if err != nil {
 		t.Fatalf("indexList: %v", err)
@@ -44,5 +51,16 @@ func TestCreate(t *testing.T) {
 	}
 	if got.IndexId != want {
 		t.Fatalf("Unexpected indexID: got %v, want %v", got.IndexId, want)
+	}
+	// Create bucket for Export/Import entities.
+	bucketName := tc.ProjectID + "-storage-bucket-test"
+	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName)
+
+	resp, err := entitiesExport(ioutil.Discard, tc.ProjectID, "gs://"+bucketName)
+	if err != nil {
+		t.Fatalf("entitiesExport: %v", err)
+	}
+	if err := entitiesImport(ioutil.Discard, tc.ProjectID, resp.OutputUrl); err != nil {
+		t.Fatalf("entitiesImport: %v", err)
 	}
 }
