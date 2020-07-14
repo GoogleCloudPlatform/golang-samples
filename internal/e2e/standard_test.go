@@ -41,6 +41,8 @@ func TestHelloWorld(t *testing.T) {
 }
 
 func TestGo11xStatic(t *testing.T) {
+	t.Skip("Flaky - see Issue 1420")
+
 	tc := testutil.EndToEndTest(t)
 
 	helloworld := &aeintegrate.App{
