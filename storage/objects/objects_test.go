@@ -189,9 +189,11 @@ func TestKMSObjects(t *testing.T) {
 
 	kmsKeyName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", tc.ProjectID, "global", keyRingID, cryptoKeyID)
 
-	if err := uploadWithKMSKey(ioutil.Discard, bucket, object, kmsKeyName); err != nil {
-		t.Errorf("uploadWithKMSKey: %v", err)
-	}
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		if err := uploadWithKMSKey(ioutil.Discard, bucket, object, kmsKeyName); err != nil {
+			r.Errorf("uploadWithKMSKey: %v", err)
+		}
+	})
 }
 
 func TestV4SignedURL(t *testing.T) {
