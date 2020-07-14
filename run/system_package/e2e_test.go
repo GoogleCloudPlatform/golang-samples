@@ -35,7 +35,7 @@ func TestDiagramService(t *testing.T) {
 	requestPath := "/diagram.png"
 	req, err := service.NewRequest("GET", requestPath)
 	if err != nil {
-		t.Fatalf("service.NewRequest: %q", err)
+		t.Fatalf("service.NewRequest: %v", err)
 	}
 	q := req.URL.Query()
 	q.Add("dot", "digraph G { A -> {B, C, D} -> {F} }")

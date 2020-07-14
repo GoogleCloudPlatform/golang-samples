@@ -14,7 +14,7 @@
 
 // [START run_events_pubsub_server]
 
-// Sample run-pubsub is a Cloud Run service which handles Pub/Sub messages.
+// Sample run-pubsub-events is a Cloud Run service which handles Pub/Sub messages.
 package main
 
 import (
