@@ -56,7 +56,7 @@ func TestMarkdownHandler(t *testing.T) {
 	}
 }
 
-func TestRenderService(t *testing.T) {
+func TestRendererService(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 	service := cloudrunci.NewService("render", tc.ProjectID)
 	if err := service.Deploy(); err != nil {
