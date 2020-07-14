@@ -24,17 +24,17 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestBrokenService(t *testing.T) {
+func TestRendererServiceDeploy(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 
-	service := cloudrunci.NewService("hello-broken", tc.ProjectID)
+	service := cloudrunci.NewService("renderer", tc.ProjectID)
 	if err := service.Deploy(); err != nil {
 		t.Fatalf("service.Deploy %q: %v", service.Name, err)
 	}
 	defer service.Clean()
 
-	requestPath := "/improved"
-	req, err := service.NewRequest("GET", requestPath)
+	requestPath := "/"
+	req, err := service.NewRequest("POST", requestPath)
 	if err != nil {
 		t.Fatalf("service.NewRequest: %v", err)
 	}
