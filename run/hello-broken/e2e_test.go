@@ -36,7 +36,7 @@ func TestBrokenService(t *testing.T) {
 	requestPath := "/improved"
 	req, err := service.NewRequest("GET", requestPath)
 	if err != nil {
-		t.Fatalf("service.NewRequest: %q", err)
+		t.Fatalf("service.NewRequest: %v", err)
 	}
 
 	client := http.Client{Timeout: 10 * time.Second}

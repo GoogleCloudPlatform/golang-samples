@@ -15,6 +15,10 @@ assign_issues_by:
   to:
   - hongalex
 - labels:
+  - 'api: run'
+  to:
+  - grayside
+- labels:
   - 'api: spanner'
   to:
   - skuruppu

@@ -55,12 +55,12 @@ func NewServiceFromEnv() (*Service, error) {
 	// discoverable and minimizes latency for the first request.
 	parsedTemplate, err := template.ParseFiles("templates/index.html")
 	if err != nil {
-		return nil, fmt.Errorf("template.ParseFiles: %v", err)
+		return nil, fmt.Errorf("template.ParseFiles: %w", err)
 	}
 
 	out, err := ioutil.ReadFile("templates/markdown.md")
 	if err != nil {
-		return nil, fmt.Errorf("ioutil.ReadFile: %v", err)
+		return nil, fmt.Errorf("ioutil.ReadFile: %w", err)
 	}
 	markdownDefault := string(out)
 
