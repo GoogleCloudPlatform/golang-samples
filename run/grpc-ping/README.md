@@ -24,7 +24,7 @@ To demonstrate service-to-service gRPC requests, this container image is deploye
 
    # Deploy ping-relay service for public access.
    gcloud run deploy ping --image gcr.io/$GOOGLE_CLOUD_PROJECT/grpc-ping \
-       --set-env-vars GRPC_PING_HOST=${PING_DOMAIN}:443 \
+       --update-env-vars GRPC_PING_HOST=${PING_DOMAIN}:443 \
        --allow-unauthenticated
    ```
 
@@ -32,7 +32,7 @@ To demonstrate service-to-service gRPC requests, this container image is deploye
 
    Use the client CLI to send a request:
 
-   ```
+   ```sh
    go run ./client -server [RELAY-SERVICE-DOMAIN]:443 -relay -message "Hello Friend"
    ```
 
