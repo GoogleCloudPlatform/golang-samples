@@ -26,3 +26,19 @@ for f in $(find . -name go.mod); do
     go get cloud.google.com/go@master
   popd
 done
+
+# List of tests to skip during mtls_smoketest.
+# Any test skipped should have an equivalent test in internal/mtls_smoketest
+# that will start failing when the tests should be un-skipped.
+skip=(
+  bigquery/bigquery_storage_quickstart
+  gaming/servers
+  run/image-processing/imagemagick
+  functions/imagemagick
+  vision/detect
+  vision/label
+  vision/product_search
+)
+for pkg in "${skip[@]}"; do
+  rm "$pkg"/*_test.go
+done
