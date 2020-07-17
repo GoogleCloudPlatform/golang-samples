@@ -14,7 +14,7 @@
 
 package servers
 
-// [START cloud_game_servers_realm_delete]
+// [START cloud_game_servers_cluster_delete]
 
 import (
 	"context"
@@ -55,4 +55,4 @@ func deleteCluster(w io.Writer, projectID, location, realmID, clusterID string) 
 	return nil
 }
 
-// [END cloud_game_servers_realm_delete]
+// [END cloud_game_servers_cluster_delete]
