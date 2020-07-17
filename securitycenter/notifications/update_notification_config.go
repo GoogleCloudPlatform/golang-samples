@@ -45,7 +45,7 @@ func updateNotificationConfig(w io.Writer, orgID string, notificationConfigID st
 			Name:        fmt.Sprintf("organizations/%s/notificationConfigs/%s", orgID, notificationConfigID),
 			Description: updatedDescription,
 			PubsubTopic: updatedPubsubTopic,
-			StreamingConfig: &securitycenterpb.StreamingConfig{Filter: updatedFilter},
+			StreamingConfig: &securitycenterpb.NotificationConfig_StreamingConfig_{Filter: updatedFilter},
 		},
 		UpdateMask: &field_mask.FieldMask{
 			Paths: []string{"description", "pubsub_topic", "streaming_config.filter"},
