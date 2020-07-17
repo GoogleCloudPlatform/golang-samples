@@ -26,6 +26,7 @@ import (
 )
 
 func TestSetEndpoint(t *testing.T) {
+	testutil.KnownBadMTLS(t)
 	testutil.SystemTest(t)
 
 	const endpoint = "eu-vision.googleapis.com:443"
