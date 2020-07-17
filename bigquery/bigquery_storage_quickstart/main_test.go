@@ -23,8 +23,6 @@ import (
 )
 
 func TestApp(t *testing.T) {
-	testutil.KnownBadMTLS(t)
-
 	tc := testutil.SystemTest(t)
 	m := testutil.BuildMain(t)
 	defer m.Cleanup()
