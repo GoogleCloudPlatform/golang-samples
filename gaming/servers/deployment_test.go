@@ -22,7 +22,6 @@ import (
 )
 
 func TestGameServerDeployments(t *testing.T) {
-	testutil.KnownBadMTLS(t)
 	tc := testutil.SystemTest(t)
 
 	t.Run("create deployment", func(t *testing.T) {

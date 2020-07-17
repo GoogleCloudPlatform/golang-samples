@@ -21,7 +21,6 @@ import (
 )
 
 func TestLabel(t *testing.T) {
-	testutil.KnownBadMTLS(t)
 	testutil.SystemTest(t)
 
 	labels, err := findLabels("../testdata/cat.jpg")
