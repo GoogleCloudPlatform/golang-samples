@@ -42,9 +42,9 @@ func updateNotificationConfig(w io.Writer, orgID string, notificationConfigID st
 	updatedFilter := `state = "INACTIVE"`
 	req := &securitycenterpb.UpdateNotificationConfigRequest{
 		NotificationConfig: &securitycenterpb.NotificationConfig{
-			Name:        fmt.Sprintf("organizations/%s/notificationConfigs/%s", orgID, notificationConfigID),
-			Description: updatedDescription,
-			PubsubTopic: updatedPubsubTopic,
+			Name:            fmt.Sprintf("organizations/%s/notificationConfigs/%s", orgID, notificationConfigID),
+			Description:     updatedDescription,
+			PubsubTopic:     updatedPubsubTopic,
 			StreamingConfig: &securitycenterpb.NotificationConfig_StreamingConfig_{Filter: updatedFilter},
 		},
 		UpdateMask: &field_mask.FieldMask{
