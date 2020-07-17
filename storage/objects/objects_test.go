@@ -114,7 +114,6 @@ func TestObjects(t *testing.T) {
 		if err := listFilesAllVersion(&buf, bucketVersioning); err != nil {
 			t.Fatalf("listFilesAllVersion: %v", err)
 		}
-		//fmt.Println(buf.String())
 
 		for _, line := range strings.Split(strings.TrimSuffix(buf.String(), "\n"), "\n") {
 			fmt.Println(line)
