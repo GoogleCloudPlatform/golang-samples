@@ -12,23 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package productsearch
 
 import (
+	"log"
+	"os"
 	"testing"
-
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestLabel(t *testing.T) {
-	testutil.KnownBadMTLS(t)
-	testutil.SystemTest(t)
+// NOTE(cbro): delete me when mtls_smoketest indicates vision.mtls.googleapis.com is ready to use.
 
-	labels, err := findLabels("../testdata/cat.jpg")
-	if err != nil {
-		t.Fatalf("got %v, want nil err", err)
+func TestMain(m *testing.M) {
+	// Like testutil.KnownBadMTLS() but for the whole package.
+	if os.Getenv("GOOGLE_API_USE_MTLS") == "always" {
+		log.Print("SKIP - known bad when $GOOGLE_API_USE_MTLS=always")
+		os.Exit(0)
 	}
-	if len(labels) == 0 {
-		t.Fatalf("want non-empty slice of labels")
-	}
+	os.Exit(m.Run())
 }

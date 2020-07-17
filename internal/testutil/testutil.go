@@ -64,6 +64,15 @@ func SystemTest(t *testing.T) Context {
 	return tc
 }
 
+// KnownBadMTLS skips the test in mtls_smoketest mode.
+// Any test skipped should have an equivalent test in internal/mtls_smoketest
+// that will start failing when the tests should be un-skipped.
+func KnownBadMTLS(t *testing.T) {
+	if os.Getenv("GOOGLE_API_USE_MTLS") == "always" {
+		t.Skip("Test is known to be bad when $GOOGLE_API_USE_MTLS=always")
+	}
+}
+
 // EndToEndTest gets the test context, and sets the test as Parallel.
 // The test is skipped if the GOLANG_SAMPLES_E2E_TEST environment variable is not set.
 func EndToEndTest(t *testing.T) Context {

@@ -27,6 +27,7 @@ import (
 )
 
 func TestDetect(t *testing.T) {
+	testutil.KnownBadMTLS(t)
 	testutil.SystemTest(t)
 
 	tests := []struct {
@@ -84,6 +85,7 @@ func TestDetect(t *testing.T) {
 }
 
 func TestDetectAsyncDocument(t *testing.T) {
+	testutil.KnownBadMTLS(t)
 	tc := testutil.SystemTest(t)
 
 	ctx := context.Background()
