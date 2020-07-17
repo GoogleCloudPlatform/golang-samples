@@ -116,7 +116,6 @@ func TestObjects(t *testing.T) {
 		}
 
 		for _, line := range strings.Split(strings.TrimSuffix(buf.String(), "\n"), "\n") {
-			fmt.Println(line)
 			if got, want := line, object1; !strings.Contains(got, want) {
 				t.Errorf("List(Versions: true) got %q; want to contain %q", got, want)
 			}

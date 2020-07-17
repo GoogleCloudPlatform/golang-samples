@@ -14,6 +14,7 @@
 
 package objects
 
+// [START storage_list_file_archived_generations]
 import (
 	"context"
 	"fmt"
@@ -53,3 +54,5 @@ func listFilesAllVersion(w io.Writer, bucket string) error {
 	}
 	return nil
 }
+
+// [END storage_list_file_archived_generations]
