@@ -132,6 +132,18 @@ fi
 # only set with mtls_smoketest
 # TODO(cbro): remove with mtls_smoketest.cfg
 if [[ $GOOGLE_API_USE_MTLS = "always" ]]; then
+  RUN_ALL_TESTS="0"
+  # List of tests to skip during mtls_smoketest.
+  # Any test skipped should have an equivalent test in internal/mtls_smoketest
+  # that will start failing when the tests should be un-skipped.
+  CHANGED_DIRS="$(find . -type d \
+  | grep -v 'bigquery/bigquery_storage_quickstart$' \
+  | grep -v 'gaming/servers$' \
+  | grep -v 'run/image-processing/imagemagick$' \
+  | grep -v 'vision/detect$' \
+  | grep -v 'vision/label$' \
+  | grep -v 'vision/product_search$' \
+  )"
   ./testing/kokoro/mtls_smoketest.bash
 fi
 

@@ -41,8 +41,6 @@ func updateRolloutClearOverrideConfig(w io.Writer, projectID, deploymentID strin
 	req := &gamingpb.UpdateGameServerDeploymentRolloutRequest{
 		Rollout: &gamingpb.GameServerDeploymentRollout{
 			Name: fmt.Sprintf("projects/%s/locations/global/gameServerDeployments/%s", projectID, deploymentID),
-
-			DefaultGameServerConfig: "",
 		},
 		UpdateMask: &fieldmaskpb.FieldMask{
 			Paths: []string{
