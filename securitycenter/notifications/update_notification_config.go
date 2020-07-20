@@ -49,6 +49,7 @@ func updateNotificationConfig(w io.Writer, orgID string, notificationConfigID st
 				StreamingConfig: &securitycenterpb.NotificationConfig_StreamingConfig{
 					Filter: updatedFilter,
 				},
+			}
 		},
 		UpdateMask: &field_mask.FieldMask{
 			Paths: []string{"description", "pubsub_topic", "streaming_config.filter"},
