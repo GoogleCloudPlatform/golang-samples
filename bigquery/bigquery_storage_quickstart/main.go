@@ -205,9 +205,9 @@ func processStream(ctx context.Context, client *bqStorage.BigQueryReadClient, st
 	// Streams may be long-running.  Rather than using a global retry for the
 	// stream, implement a retry that resets once progress is made.
 	retryLimit := 3
-
+	retries := 0
+	
 	for {
-		retries := 0
 		// Send the initiating request to start streaming row blocks.
 		rowStream, err := client.ReadRows(ctx, &bqStoragepb.ReadRowsRequest{
 			ReadStream: st,
