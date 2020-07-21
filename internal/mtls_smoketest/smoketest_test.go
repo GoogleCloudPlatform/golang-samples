@@ -43,12 +43,13 @@ func checkErr(err error, t *testing.T) {
 	}
 }
 
-// When this test starts failing, delete it and the corresponding lines in system_tests.bash
+// When this test starts failing, delete it and the corresponding lines in mtls_smoketest.bash
 //
+// run/image-processing/imagemagick
+// functions/imagemagick
 // vision/detect
 // vision/label
 // vision/product_search
-// run/image-processing/imagemagick
 func TestVision(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 
@@ -76,7 +77,7 @@ func TestVision(t *testing.T) {
 	checkErr(err, t)
 }
 
-// When this test starts failing, delete it and the corresponding lines in system_tests.bash
+// When this test starts failing, delete it and the corresponding lines in mtls_smoketest.bash
 //
 // bigquery/bigquery_storage_quickstart
 func TestBigquerystorage(t *testing.T) {
@@ -106,7 +107,7 @@ func TestBigquerystorage(t *testing.T) {
 	checkErr(err, t)
 }
 
-// When this test starts failing, delete it and the corresponding lines in system_tests.bash
+// When this test starts failing, delete it and the corresponding lines in mtls_smoketest.bash
 //
 // gaming/servers
 func TestGameservices(t *testing.T) {
