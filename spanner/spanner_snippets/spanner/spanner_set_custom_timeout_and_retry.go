@@ -56,7 +56,7 @@ func setCustomTimeoutAndRetry(w io.Writer, db string) error {
 	_, err = client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
 		stmt := spanner.Statement{
 			SQL: `INSERT Singers (SingerId, FirstName, LastName)
-					VALUES (11, 'George', 'Washington')`,
+					VALUES (20, 'George', 'Washington')`,
 		}
 
 		rowCount, err := txn.Update(ctx, stmt)
