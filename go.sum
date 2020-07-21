@@ -50,8 +50,6 @@ cloud.google.com/go/pubsub v1.3.1 h1:ukjixP1wl0LpnZ6LWtZJ0mX5tBmjp1f8Sqer8Z2OMUU
 cloud.google.com/go/pubsub v1.3.1/go.mod h1:i+ucay31+CNRpDW4Lu78I4xXG+O1r/MAHgjpRVR+TSU=
 cloud.google.com/go/pubsub v1.5.0 h1:9cH52jizPUVSSrSe+J16RC9wB0QI7i/cfuCm5UUCcIk=
 cloud.google.com/go/pubsub v1.5.0/go.mod h1:ZEwJccE3z93Z2HWvstpri00jOg7oO4UZDtKhwDwqF0w=
-cloud.google.com/go/spanner v1.7.0 h1:mvgDB+f4CfKXebTIi36aqY02eVG4nU/Z3KV6stQaYCc=
-cloud.google.com/go/spanner v1.7.0/go.mod h1:sd3K2gZ9Fd0vMPLXzeCrF6fq4i63Q7aTLW/lBIfBkIk=
 cloud.google.com/go/spanner v1.8.0 h1:l4mz6H404S0pRz6Pp/reUAb7tEPKrukvzUcCI/6GPn8=
 cloud.google.com/go/spanner v1.8.0/go.mod h1:mdAPDiFUbE9vCmhHHlxyDUtaPPsIK+pUdf5KmHaUfT8=
 cloud.google.com/go/storage v1.0.0/go.mod h1:IhtSnM/ZTZV8YYJWCY8RULGVqBDmpoyjwiyrjsg+URw=
