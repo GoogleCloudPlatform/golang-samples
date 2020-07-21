@@ -58,8 +58,8 @@ func TestObjects(t *testing.T) {
 
 	{
 		// Enable versioning
-		_, err := client.Bucket(bucketVersioning).Update(ctx,
-			storage.BucketAttrsToUpdate{VersioningEnabled: true})
+		attr := storage.BucketAttrsToUpdate{VersioningEnabled: true}
+		_, err := client.Bucket(bucketVersioning).Update(ctx, attr)
 		if err != nil {
 			t.Fatalf("storage.BucketAttrsToUpdate{VersioningEnabled: true}: %v", err)
 		}
@@ -115,10 +115,15 @@ func TestObjects(t *testing.T) {
 			t.Fatalf("listFilesAllVersion: %v", err)
 		}
 
+		i := 0
 		for _, line := range strings.Split(strings.TrimSuffix(buf.String(), "\n"), "\n") {
 			if got, want := line, object1; !strings.Contains(got, want) {
 				t.Errorf("List(Versions: true) got %q; want to contain %q", got, want)
 			}
+			i++
+		}
+		if i != 2 {
+			t.Errorf("listFilesAllVersion should show 2 versions of foo.txt; got %d", i)
 		}
 	}
 
