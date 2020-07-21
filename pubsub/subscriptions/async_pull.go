@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"io"
 	"sync"
+	"sync/atomic"
 
 	"cloud.google.com/go/pubsub"
 )
@@ -36,7 +37,7 @@ func pullMsgs(w io.Writer, projectID, subID string) error {
 
 	// Consume 10 messages.
 	var mu sync.Mutex
-	received := 0
+	var received int32
 	sub := client.Subscription(subID)
 	cctx, cancel := context.WithCancel(ctx)
 	err = sub.Receive(cctx, func(ctx context.Context, msg *pubsub.Message) {
@@ -44,7 +45,8 @@ func pullMsgs(w io.Writer, projectID, subID string) error {
 		defer mu.Unlock()
 		fmt.Fprintf(w, "Got message: %q\n", string(msg.Data))
 		msg.Ack()
-		received++
+		atomic.AddInt32(&received, 1)
+
 		if received == 10 {
 			cancel()
 		}
