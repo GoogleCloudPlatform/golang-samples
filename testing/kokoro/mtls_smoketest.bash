@@ -46,5 +46,9 @@ skip=(
   vision/product_search
 )
 for pkg in "${skip[@]}"; do
-  rm "$pkg"/*_test.go
+  rm -f "$pkg"/*_test.go
 done
+
+# E2E tests that build with mod=readonly, which conflicts with the "go get @master" commands above.
+rm run/**/e2e_test.go
+rm run/**/**/e2e_test.go
