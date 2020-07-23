@@ -45,8 +45,9 @@ func checkErr(err error, t *testing.T) {
 
 // When this test starts failing, delete it and the corresponding lines in mtls_smoketest.bash
 //
-// run/image-processing/imagemagick
 // functions/imagemagick
+// functions/ocr/app
+// run/image-processing/imagemagick
 // vision/detect
 // vision/label
 // vision/product_search

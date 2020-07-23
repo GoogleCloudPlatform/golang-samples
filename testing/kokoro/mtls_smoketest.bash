@@ -31,10 +31,16 @@ done
 # Any test skipped should have an equivalent test in internal/mtls_smoketest
 # that will start failing when the tests should be un-skipped.
 skip=(
+  # bigquerystorage.mtls.googleapis.com
   bigquery/bigquery_storage_quickstart
+
+  # gameservices.mtls.googleapis.com
   gaming/servers
-  run/image-processing/imagemagick
+
+  # vision.mtls.googleapis.com
+  functions/ocr/app
   functions/imagemagick
+  run/image-processing/imagemagick
   vision/detect
   vision/label
   vision/product_search
