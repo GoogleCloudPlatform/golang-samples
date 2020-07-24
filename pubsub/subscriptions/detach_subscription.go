@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,6 +32,9 @@ func detachSubscription(w io.Writer, projectID, subName string) error {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
 
+	// Call DetachSubscription, which detaches a subscription from
+	// a topic you own. This can only be done if you have the
+	// pubsub.topics.detachSubscription role on the topic.
 	_, err = client.DetachSubscription(ctx, subName)
 	if err != nil {
 		return fmt.Errorf("detach subscription failed: %v", err)
