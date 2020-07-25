@@ -31,14 +31,16 @@ func detachSubscription(w io.Writer, projectID, subName string) error {
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	// Call DetachSubscription, which detaches a subscription from
-	// a topic you own. This can only be done if you have the
-	// pubsub.topics.detachSubscription role on the topic.
+	// a topic. This can only be done if you have the
+	// `pubsub.topics.detachSubscription` role on the topic.
 	_, err = client.DetachSubscription(ctx, subName)
 	if err != nil {
 		return fmt.Errorf("detach subscription failed: %v", err)
 	}
+
 	fmt.Fprintf(w, "Detached subscription %s", subName)
 	return nil
 }
