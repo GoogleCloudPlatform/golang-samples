@@ -24,8 +24,11 @@ import (
 )
 
 func detachSubscription(w io.Writer, projectID, subName string) error {
+	// projectID is the project which contains the topic you manage.
+	// This might differ from the project which contains the subscription
+	// you wish to detach, which can exist in any GCP project.
 	// projectID := "my-project-id"
-	// subName := "projects/my-project/subscriptions/my-sub"
+	// subName := "projects/some-project/subscriptions/my-sub"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
