@@ -11,6 +11,10 @@ assign_issues_by:
   to:
   - shollyman
 - labels:
+  - 'api: dataproc'
+  to:
+  - bradmiro
+- labels:
   - 'api: pubsub'
   to:
   - hongalex
