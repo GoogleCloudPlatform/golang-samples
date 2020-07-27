@@ -62,7 +62,7 @@ func TestCreateCluster(t *testing.T) {
 	defer deleteCluster(tc.ProjectID, clusterName, region)
 
 	buf := new(bytes.Buffer)
-	
+
 	testutil.Retry(t, 3, 30*time.Second, func(r *testutil.R) {
 		if err := createCluster(buf, tc.ProjectID, region, clusterName); err != nil {
 			r.Errorf("createCluster got err: %v", err)
