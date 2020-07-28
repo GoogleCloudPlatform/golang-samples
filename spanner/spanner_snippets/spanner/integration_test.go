@@ -241,6 +241,9 @@ func TestSample(t *testing.T) {
 	out = runSample(t, insertUsingDML, dbName, "failed to insert using DML")
 	assertContains(t, out, "record(s) inserted")
 
+	out = runSample(t, setCustomTimeoutAndRetry, dbName, "failed to insert using DML with custom timeout and retry")
+	assertContains(t, out, "record(s) inserted")
+
 	out = runSample(t, updateUsingDML, dbName, "failed to update using DML")
 	assertContains(t, out, "record(s) updated")
 
