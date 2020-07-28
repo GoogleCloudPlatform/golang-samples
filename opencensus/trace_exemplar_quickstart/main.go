@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,49 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// +build go1.8
-
 // Sample opencensus_spanner_quickstart contains a sample application that
 // uses Google Spanner Go client, and reports metrics
 // and traces for the outgoing requests.
 package main
 
+// [START monitoring_opencensus_configure_trace_exemplar]
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
-	"os"
 	"time"
 
 	monitoring "cloud.google.com/go/monitoring/apiv3"
 	googlepb "github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/pkg/errors"
-	"google.golang.org/api/iterator"
 	distributionpb "google.golang.org/genproto/googleapis/api/distribution"
 	metricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 )
 
-func main() {
-	ctx := context.Background()
-
-	// Creates a client.
-	client, err := monitoring.NewMetricClient(ctx)
-	if err != nil {
-		log.Fatal(errors.Wrap(err, "failed to create client"))
-	}
-
-	// Sets your Google Cloud Platform project ID.
-	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
-
-	// [START monitoring_opencensus_configure_trace_exemplar]
-	// Prepares an individual data point
+func createDataPointWithExemplar() *monitoringpb.Point {
 	end := time.Now().Unix()
 	dataPoint := &monitoringpb.Point{
 		Interval: &monitoringpb.TimeInterval{
-			EndTime:   &googlepb.Timestamp{Seconds: end},
 			StartTime: &googlepb.Timestamp{Seconds: end - 60},
+			EndTime:   &googlepb.Timestamp{Seconds: end},
 		},
 		Value: &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_DistributionValue{
 			DistributionValue: &distributionpb.Distribution{
@@ -70,8 +55,19 @@ func main() {
 			},
 		}},
 	}
-	// [END monitoring_opencensus_configure_trace_exemplar]
+	return dataPoint
+}
 
+// [END monitoring_opencensus_configure_trace_exemplar]
+
+func writeTimeSeriesData(w io.Writer, projectID string) error {
+	ctx := context.Background()
+	dataPoint := createDataPointWithExemplar()
+	// Creates a client.
+	client, err := monitoring.NewMetricClient(ctx)
+	if err != nil {
+		log.Fatal(errors.Wrap(err, "failed to create client"))
+	}
 	// Writes time series data.
 	if err := client.CreateTimeSeries(ctx, &monitoringpb.CreateTimeSeriesRequest{
 		Name: monitoring.MetricProjectPath(projectID),
@@ -86,30 +82,9 @@ func main() {
 			Points: []*monitoringpb.Point{dataPoint},
 		}},
 	}); err != nil {
-		log.Fatal(errors.Wrap(err, "failed to write time series data"))
+		return err
+	} else {
+		fmt.Fprintln(w, "Done")
 	}
-
-	// Reads that time series data.
-	it := client.ListTimeSeries(ctx, &monitoringpb.ListTimeSeriesRequest{
-		Name:   monitoring.MetricProjectPath(projectID),
-		Filter: "resource.type=generic_node metric.type=\"custom.googleapis.com/distribution\"",
-		Interval: &monitoringpb.TimeInterval{
-			EndTime:   &googlepb.Timestamp{Seconds: end},
-			StartTime: &googlepb.Timestamp{Seconds: end - 60},
-		},
-	})
-	for {
-		if response, err := it.Next(); err == iterator.Done {
-			break
-		} else if err != nil {
-			log.Fatal(errors.Wrap(err, "failed to query time series data"))
-		} else {
-			fmt.Println(response.GetPoints()[0].GetValue().GetDistributionValue().GetExemplars())
-		}
-	}
-
-	// Closes the client and flushes the data to Stackdriver.
-	if err := client.Close(); err != nil {
-		log.Fatal(errors.Wrap(err, "failed to close client"))
-	}
+	return nil
 }
