@@ -15,7 +15,7 @@
 // Sample opencensus_spanner_quickstart contains a sample application that
 // uses Google Spanner Go client, and reports metrics
 // and traces for the outgoing requests.
-package main
+package trace_exemplar_quickstart
 
 // [START monitoring_opencensus_configure_trace_exemplar]
 import (
