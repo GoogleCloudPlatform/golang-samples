@@ -19,7 +19,6 @@
 // and traces for the outgoing requests.
 package main
 
-
 import (
 	"context"
 	"fmt"
