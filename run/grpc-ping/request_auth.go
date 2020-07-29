@@ -36,13 +36,11 @@ func pingRequestWithAuth(conn *grpc.ClientConn, p *pb.Request, audience string) 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	// Create an ID Token.
+	// Create an identity token.
 	tokenSource, err := idtoken.NewTokenSource(ctx, audience)
 	if err != nil {
 		return nil, fmt.Errorf("idtoken.NewTokenSource: %v", err)
 	}
-
-	// Create an identity token.
 	token, err := tokenSource.Token()
 	if err != nil {
 		return nil, fmt.Errorf("TokenSource.Token: %v", err)
