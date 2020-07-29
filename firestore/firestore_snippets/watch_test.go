@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package watch
+package main
 
 import (
 	"io/ioutil"
@@ -23,7 +23,7 @@ import (
 
 func TestListenDocument(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	if _, err := listenDocument(ioutil.Discard, tc.ProjectID); err != nil {
+	if err := listenDocument(ioutil.Discard, tc.ProjectID); err != nil {
 		t.Errorf("listenDocument: %v", err)
 	}
 }

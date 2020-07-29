@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package watch
+package main
 
 // [START firestore_listen_document]
 import (
@@ -21,38 +21,35 @@ import (
 	"io"
 
 	"cloud.google.com/go/firestore"
-	"google.golang.org/api/iterator"
 )
 
-func listenDocument(w io.Writer, projectID string) ([]*firestore.DocumentSnapshot, error) {
+func listenDocument(w io.Writer, projectID string) error {
 	// projectID := "project-id"
 	ctx := context.Background()
+
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
-		return nil, fmt.Errorf("firestore.NewClient: %v", err)
+		return fmt.Errorf("firestore.NewClient: %v", err)
 	}
 	defer client.Close()
 
-	iter := client.Doc("cities/SF").Snapshots(ctx)
-	defer iter.Stop()
-
-	var docSnapshots []*firestore.DocumentSnapshot
-	for {
-		docSnaphot, err := iter.Next()
-		if docSnaphot == nil {
-			return nil, fmt.Errorf("current data: null")
-		}
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return nil, fmt.Errorf("Snapshots: listen failed: %v", err)
-		}
-		docSnapshots = append(docSnapshots, docSnaphot)
-		fmt.Fprintf(w, "Received document snapshot: %v", docSnaphot.Ref.ID)
+	data := map[string]string{"Name": "San Francisco"}
+	if _, err := client.Collection("cities").Doc("SF").Set(ctx, data); err != nil {
+		return fmt.Errorf("DocumentRef.Set: %v", err)
 	}
-	fmt.Fprintf(w, "Document snapshots were received")
-	return docSnapshots, nil
+
+	dsnap := client.Doc("cities/SF").Snapshots(ctx)
+	defer dsnap.Stop()
+
+	snap, err := dsnap.Next()
+	if snap == nil {
+		return fmt.Errorf("current data: null")
+	}
+	if err != nil {
+		return fmt.Errorf("Snapshots: %v", err)
+	}
+	fmt.Fprintf(w, "Received document snapshot: %v\n", snap.Data())
+	return nil
 }
 
 // [END firestore_listen_document]
