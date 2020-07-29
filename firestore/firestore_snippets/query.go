@@ -153,7 +153,7 @@ func createOrderByNameLimitToLastQuery(client *firestore.Client) {
 	cities := client.Collection("cities")
 	// [START fs_order_by_name_limit_to_last_query]
 	query := cities.OrderBy("name", firestore.Asc).LimitToLast(3)
-	// [END fs_order_by_name_limit__to_last_query]
+	// [END fs_order_by_name_limit_to_last_query]
 
 	_ = query
 }
