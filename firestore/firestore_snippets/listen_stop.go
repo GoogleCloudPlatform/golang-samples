@@ -14,16 +14,31 @@
 
 package main
 
+// [START fs_detach_listener]
 import (
-	"io/ioutil"
-	"testing"
+	"context"
+	"fmt"
+	"io"
 
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"cloud.google.com/go/firestore"
 )
 
-func TestListenDocument(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	if err := listenDocument(ioutil.Discard, tc.ProjectID); err != nil {
-		t.Errorf("listenDocument: %v", err)
+// listenStop demonstrates how to detach a listener.
+func listenStop(w io.Writer, projectID string) error {
+	// projectID := "project-id"
+	ctx := context.Background()
+
+	client, err := firestore.NewClient(ctx, projectID)
+	if err != nil {
+		return fmt.Errorf("firestore.NewClient: %v", err)
 	}
+	defer client.Close()
+
+	qsnap := client.Collection("cities").Where("state", "==", "CA").Snapshots(ctx)
+	// Stop listening for changes
+	qsnap.Stop()
+
+	return nil
 }
+
+// [END fs_detach_listener]

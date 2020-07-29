@@ -14,7 +14,7 @@
 
 package main
 
-// [START firestore_listen_document]
+// [START fs_listen_errors]
 import (
 	"context"
 	"fmt"
@@ -23,7 +23,8 @@ import (
 	"cloud.google.com/go/firestore"
 )
 
-func listenDocument(w io.Writer, projectID string) error {
+// listenErrors demonstrates how to handle listening errors.
+func listenErrors(w io.Writer, projectID string) error {
 	// projectID := "project-id"
 	ctx := context.Background()
 
@@ -33,23 +34,17 @@ func listenDocument(w io.Writer, projectID string) error {
 	}
 	defer client.Close()
 
-	data := map[string]string{"Name": "San Francisco"}
-	if _, err := client.Collection("cities").Doc("SF").Set(ctx, data); err != nil {
-		return fmt.Errorf("DocumentRef.Set: %v", err)
-	}
-
-	dsnap := client.Doc("cities/SF").Snapshots(ctx)
-	defer dsnap.Stop()
-
-	snap, err := dsnap.Next()
-	if snap == nil {
-		return fmt.Errorf("current data: null")
-	}
+	qsnap := client.Collection("cities").Snapshots(ctx)
+	snap, err := qsnap.Next()
 	if err != nil {
-		return fmt.Errorf("Snapshots: %v", err)
+		return fmt.Errorf("listen failed: %v", err)
 	}
-	fmt.Fprintf(w, "Received document snapshot: %v\n", snap.Data())
+	for _, change := range snap.Changes {
+		if change.Kind == firestore.DocumentAdded {
+			fmt.Fprintf(w, "New city: %v\n", change.Doc.Data())
+		}
+	}
 	return nil
 }
 
-// [END firestore_listen_document]
+// [END fs_listen_errors]
