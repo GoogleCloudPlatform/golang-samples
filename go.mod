@@ -7,7 +7,7 @@ require (
 	cloud.google.com/go/bigquery v1.9.0
 	cloud.google.com/go/bigtable v1.4.0
 	cloud.google.com/go/datastore v1.2.0
-	cloud.google.com/go/firestore v1.2.0
+	cloud.google.com/go/firestore v1.3.0
 	cloud.google.com/go/logging v1.0.0
 	cloud.google.com/go/pubsub v1.5.0
 	cloud.google.com/go/spanner v1.8.0
@@ -24,7 +24,7 @@ require (
 	github.com/gofrs/uuid v3.3.0+incompatible
 	github.com/golang/protobuf v1.4.2
 	github.com/gomodule/redigo v2.0.0+incompatible
-	github.com/google/go-cmp v0.5.0
+	github.com/google/go-cmp v0.5.1
 	github.com/google/uuid v1.1.1
 	github.com/googleapis/gax-go/v2 v2.0.5
 	github.com/gorilla/mux v1.7.4
@@ -43,10 +43,10 @@ require (
 	golang.org/x/net v0.0.0-20200707034311-ab3426394381
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/text v0.3.3
-	golang.org/x/tools v0.0.0-20200717024301-6ddee64345a6
+	golang.org/x/tools v0.0.0-20200727233628-55644ead90ce
 	google.golang.org/api v0.29.0
 	google.golang.org/appengine v1.6.6
-	google.golang.org/genproto v0.0.0-20200720141249-1244ee217b7e
+	google.golang.org/genproto v0.0.0-20200728010541-3dc8dca74b7b
 	google.golang.org/grpc v1.30.0
 	google.golang.org/grpc/examples v0.0.0-20200707005602-4258d12073b4
 	google.golang.org/protobuf v1.25.0
