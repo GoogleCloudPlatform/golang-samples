@@ -50,6 +50,7 @@ var allowList = []string{
 	"LICENSE",
 	"**/*Dockerfile*",
 	"**/.dockerignore",
+	"**/.gcloudignore",
 	"**/Makefile",
 	".gitignore",
 
