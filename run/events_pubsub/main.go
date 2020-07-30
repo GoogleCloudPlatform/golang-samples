@@ -21,45 +21,25 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"net/http"
-	"os"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 )
 
-var (
-	handler = http.DefaultServeMux
-)
-
 func main() {
 	ctx := context.Background()
-	// Create a new HTTP client for CloudEvents
 	p, err := cloudevents.NewHTTP()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("failed to create protocol: %s", err.Error())
 	}
-	handleFn, err := cloudevents.NewHTTPReceiveHandler(ctx, p, HelloPubSub)
+
+	c, err := cloudevents.NewClient(p)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("failed to create client, %v", err)
 	}
-	handler.Handle("/", handleFn)
 
-	// Determine port for HTTP service.
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-		log.Printf("Defaulting to port %s", port)
-	}
-	// Start HTTP server.
-	log.Printf("Listening on port %s", port)
-	if err := http.ListenAndServe(":"+port, nil); err != nil {
-		log.Fatal(err)
-	}
+	log.Printf("Listening on http://localhost:8080\n")
+	log.Fatalf("Failed to start receiver: %s", c.StartReceiver(ctx, HelloPubSub))
 }
-
-// [END run_events_pubsub_server]
-
-// [START run_events_pubsub_handler]
 
 // PubSubMessage is the payload of the Pub/Sub message.
 type PubSubMessage struct {
@@ -74,18 +54,21 @@ type PubSub struct {
 }
 
 // HelloPubSub receives and processes a Pub/Sub CloudEvent.
-func HelloPubSub(ctx context.Context, event cloudevents.Event) (string, error) {
+func HelloPubSub(ctx context.Context, event cloudevents.Event) {
 	// Try to decode the request body into the struct.
 	var m PubSub
 	err := event.DataAs(&m)
 	if err != nil {
 		// Error parsing CloudEvent
-		return "", fmt.Errorf("event.DataAs: could not read CloudEvent: %v", err)
+		log.Fatalf("event.DataAs: could not read CloudEvent: %v", err)
 	}
-	// Print and return the data from the Pub/Sub CloudEvent.
-	s := fmt.Sprintf("Hello, %s! ID: %s", string(m.Message.Data), event.ID())
-	log.Printf(s)
-	return s, nil
+	// Print the data from the Pub/Sub CloudEvent.
+	name := string(m.Message.Data)
+	if name == "" {
+		name = "World"
+	}
+	s := fmt.Sprintf("Hello, %s! ID: %s", name, event.ID())
+	log.Print(s)
 }
 
-// [END run_events_pubsub_handler]
+// [END run_events_pubsub_server]
