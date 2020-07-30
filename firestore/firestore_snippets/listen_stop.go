@@ -35,7 +35,7 @@ func listenStop(w io.Writer, projectID string) error {
 	defer client.Close()
 
 	qsnap := client.Collection("cities").Where("state", "==", "CA").Snapshots(ctx)
-	// Stop listening for changes
+	// Stop listening for changes.
 	qsnap.Stop()
 
 	return nil
