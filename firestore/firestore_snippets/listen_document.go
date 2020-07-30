@@ -35,20 +35,17 @@ func listenDocument(w io.Writer, projectID string) error {
 	}
 	defer client.Close()
 
-	dsnap := client.Doc("cities/SF").Snapshots(ctx)
-	defer dsnap.Stop()
+	dsnap := client.Collection("cities").Doc("SF").Snapshots(ctx)
 
-	for {
-		snap, err := dsnap.Next()
-		if !snap.Exists() {
-			return fmt.Errorf("current data: null")
-		}
-		if err != nil {
-			return fmt.Errorf("listen failed: %v", err)
-		}
-		fmt.Fprintf(w, "Received document snapshot: %v\n", snap.Data())
-		return nil
+	snap, err := dsnap.Next()
+	if !snap.Exists() {
+		return fmt.Errorf("current data: null")
 	}
+	if err != nil {
+		return fmt.Errorf("listen failed: %v", err)
+	}
+	fmt.Fprintf(w, "Received document snapshot: %v\n", snap.Data())
+	return nil
 }
 
 // [END fs_listen_document]

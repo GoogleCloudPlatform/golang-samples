@@ -24,20 +24,24 @@ import (
 	"cloud.google.com/go/firestore"
 )
 
-func TestListen(t *testing.T) {
+func setup(ctx context.Context) (*firestore.Client, string) {
 	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
+
+	client, err := firestore.NewClient(ctx, projectID)
+	if err != nil {
+		log.Fatalf("firestore.NewClient: %v", err)
+	}
+	return client, projectID
+}
+
+func TestListen(t *testing.T) {
+	ctx := context.Background()
+	client, projectID := setup(ctx)
+	defer client.Close()
+
 	if projectID == "" {
 		t.Skip("Skipping firestore test. Set GOLANG_SAMPLES_FIRESTORE_PROJECT.")
 	}
-
-	ctx := context.Background()
-	client, err := firestore.NewClient(ctx, projectID)
-	if err != nil {
-		t.Fatalf("firestore.NewClient: %v", err)
-	}
-	defer client.Close()
-
-	// Set prepareQuery for all listen tests.
 	if err := prepareQuery(ctx, client); err != nil {
 		log.Fatalf("prepareQuery: %v", err)
 	}
@@ -46,72 +50,52 @@ func TestListen(t *testing.T) {
 	}
 }
 func TestListenMultiple(t *testing.T) {
-	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
+	ctx := context.Background()
+	client, projectID := setup(ctx)
+	defer client.Close()
+
 	if projectID == "" {
 		t.Skip("Skipping firestore test. Set GOLANG_SAMPLES_FIRESTORE_PROJECT.")
 	}
-
-	ctx := context.Background()
-	client, err := firestore.NewClient(ctx, projectID)
-	if err != nil {
-		t.Fatalf("firestore.NewClient: %v", err)
-	}
-	defer client.Close()
-
 	if err := listenMultiple(ioutil.Discard, projectID); err != nil {
 		t.Errorf("listenMultiple: %v", err)
 	}
 }
 
 func TestListenChanges(t *testing.T) {
-	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
+	ctx := context.Background()
+	client, projectID := setup(ctx)
+	defer client.Close()
+
 	if projectID == "" {
 		t.Skip("Skipping firestore test. Set GOLANG_SAMPLES_FIRESTORE_PROJECT.")
 	}
-
-	ctx := context.Background()
-	client, err := firestore.NewClient(ctx, projectID)
-	if err != nil {
-		t.Fatalf("firestore.NewClient: %v", err)
-	}
-	defer client.Close()
-
 	if err := listenChanges(ioutil.Discard, projectID); err != nil {
 		t.Errorf("listenChanges: %v", err)
 	}
 }
 
 func TestListenStop(t *testing.T) {
-	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
+	ctx := context.Background()
+	client, projectID := setup(ctx)
+	defer client.Close()
+
 	if projectID == "" {
 		t.Skip("Skipping firestore test. Set GOLANG_SAMPLES_FIRESTORE_PROJECT.")
 	}
-
-	ctx := context.Background()
-	client, err := firestore.NewClient(ctx, projectID)
-	if err != nil {
-		t.Fatalf("firestore.NewClient: %v", err)
-	}
-	defer client.Close()
-
 	if err := listenStop(ioutil.Discard, projectID); err != nil {
 		t.Errorf("listenStop: %v", err)
 	}
 }
 
 func TestListenErrors(t *testing.T) {
-	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
+	ctx := context.Background()
+	client, projectID := setup(ctx)
+	defer client.Close()
+
 	if projectID == "" {
 		t.Skip("Skipping firestore test. Set GOLANG_SAMPLES_FIRESTORE_PROJECT.")
 	}
-
-	ctx := context.Background()
-	client, err := firestore.NewClient(ctx, projectID)
-	if err != nil {
-		t.Fatalf("firestore.NewClient: %v", err)
-	}
-	defer client.Close()
-
 	if err := listenErrors(ioutil.Discard, projectID); err != nil {
 		t.Errorf("listenErrors: %v", err)
 	}
