@@ -60,8 +60,7 @@ func (s *RenderService) NewRequest(method string) (*http.Request, error) {
 			return nil, fmt.Errorf("idtoken.NewTokenSource: %w", err)
 		}
 		// Create a caching token source to reuse tokens until expiration.
-		//s.tokenSource = oauth2.ReuseTokenSource(nil, tokenSource)
-		s.tokenSource = tokenSource
+		s.tokenSource = oauth2.ReuseTokenSource(nil, tokenSource)
 	}
 
 	token, err := s.tokenSource.Token()
