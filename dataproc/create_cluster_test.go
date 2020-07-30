@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	dataproc "cloud.google.com/go/dataproc/apiv1"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -62,12 +63,16 @@ func TestCreateCluster(t *testing.T) {
 
 	buf := new(bytes.Buffer)
 
-	if err := createCluster(buf, tc.ProjectID, region, clusterName); err != nil {
-		t.Fatalf("createCluster got err: %v", err)
-	}
+	testutil.Retry(t, 3, 30*time.Second, func(r *testutil.R) {
+		if err := createCluster(buf, tc.ProjectID, region, clusterName); err != nil {
+			r.Errorf("createCluster got err: %v", err)
+			return
+		}
 
-	got := buf.String()
-	if want := fmt.Sprintf("successfully: %s", clusterName); !strings.Contains(got, want) {
-		t.Fatalf("CreateCluster: got %s, want %s", got, want)
-	}
+		got := buf.String()
+		if want := fmt.Sprintf("successfully: %s", clusterName); !strings.Contains(got, want) {
+			r.Errorf("CreateCluster: got %s, want %s", got, want)
+			return
+		}
+	})
 }
