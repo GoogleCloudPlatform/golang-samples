@@ -30,7 +30,7 @@ import (
 
 // pingRequestWithAuth mints a new Identity Token for each request.
 // This token has a 1 hour expiry and should be reused.
-// See https://godoc.org/golang.org/x/oauth2#ReuseTokenSource
+// See https://godoc.org/golang.org/x/oauth2#ReuseTokenSource.
 // audience must be the auto-assigned URL of a Cloud Run service or HTTP Cloud Function without port number.
 func pingRequestWithAuth(conn *grpc.ClientConn, p *pb.Request, audience string) (*pb.Response, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
