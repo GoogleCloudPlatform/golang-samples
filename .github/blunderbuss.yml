@@ -11,9 +11,17 @@ assign_issues_by:
   to:
   - shollyman
 - labels:
+  - 'api: dataproc'
+  to:
+  - bradmiro
+- labels:
   - 'api: pubsub'
   to:
   - hongalex
+- labels:
+  - 'api: run'
+  to:
+  - grayside
 - labels:
   - 'api: spanner'
   to:
