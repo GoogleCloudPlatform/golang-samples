@@ -56,6 +56,3 @@ require (
 
 // https://github.com/jstemmer/go-junit-report/issues/107
 replace github.com/jstemmer/go-junit-report => github.com/tbpg/go-junit-report v0.9.2-0.20200506144438-50086c54f894
-
-go get cloud.google.com/go/firestore@v1.3.0
-go mod tidy
