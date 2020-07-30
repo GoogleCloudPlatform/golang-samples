@@ -15,22 +15,14 @@
 // Sample opencensus_spanner_quickstart contains a sample application that
 // uses Google Spanner Go client, and reports metrics
 // and traces for the outgoing requests.
-package trace_exemplar_quickstart
+package opencensus
 
 // [START monitoring_opencensus_configure_trace_exemplar]
 import (
-	"context"
-	"fmt"
-	"io"
-	"log"
 	"time"
 
-	monitoring "cloud.google.com/go/monitoring/apiv3"
 	googlepb "github.com/golang/protobuf/ptypes/timestamp"
-	"github.com/pkg/errors"
 	distributionpb "google.golang.org/genproto/googleapis/api/distribution"
-	metricpb "google.golang.org/genproto/googleapis/api/metric"
-	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 )
 
@@ -59,32 +51,3 @@ func createDataPointWithExemplar() *monitoringpb.Point {
 }
 
 // [END monitoring_opencensus_configure_trace_exemplar]
-
-func writeTimeSeriesData(w io.Writer, projectID string) error {
-	ctx := context.Background()
-	dataPoint := createDataPointWithExemplar()
-	// Creates a client.
-	client, err := monitoring.NewMetricClient(ctx)
-	if err != nil {
-		log.Fatal(errors.Wrap(err, "failed to create client"))
-	}
-	// Writes time series data.
-	if err := client.CreateTimeSeries(ctx, &monitoringpb.CreateTimeSeriesRequest{
-		Name: monitoring.MetricProjectPath(projectID),
-		TimeSeries: []*monitoringpb.TimeSeries{{
-			Metric:     &metricpb.Metric{Type: "custom.googleapis.com/distribution"},
-			MetricKind: metricpb.MetricDescriptor_CUMULATIVE,
-			ValueType:  metricpb.MetricDescriptor_DISTRIBUTION,
-			Resource: &monitoredrespb.MonitoredResource{
-				Type:   "generic_node",
-				Labels: map[string]string{"location": "us-east1-a", "namespace": "space", "node_id": "1"},
-			},
-			Points: []*monitoringpb.Point{dataPoint},
-		}},
-	}); err != nil {
-		return err
-	} else {
-		fmt.Fprintln(w, "Done")
-	}
-	return nil
-}
