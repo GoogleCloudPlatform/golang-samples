@@ -17,12 +17,14 @@ package main
 // [START run_secure_request]
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
 
-	"cloud.google.com/go/compute/metadata"
+	"golang.org/x/oauth2"
+	"google.golang.org/api/idtoken"
 )
 
 // RenderService represents our upstream render service.
@@ -31,6 +33,8 @@ type RenderService struct {
 	URL string
 	// Authenticated determines whether identity token authentication will be used.
 	Authenticated bool
+	// tokenSource provides an identity token for requests to the Render Service.
+	tokenSource oauth2.TokenSource
 }
 
 // NewRequest creates a new HTTP request with IAM ID Token credential.
@@ -46,14 +50,25 @@ func (s *RenderService) NewRequest(method string) (*http.Request, error) {
 		return req, nil
 	}
 
-	// Query the id_token with ?audience as the serviceURL
-	tokenURL := fmt.Sprintf("/instance/service-accounts/default/identity?audience=%s", s.URL)
-	token, err := metadata.Get(tokenURL)
-	if err != nil {
-		return req, fmt.Errorf("metadata.Get: failed to query id_token: %w", err)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// Create a TokenSource if none exists.
+	if s.tokenSource == nil {
+		tokenSource, err := idtoken.NewTokenSource(ctx, s.URL)
+		if err != nil {
+			return nil, fmt.Errorf("idtoken.NewTokenSource: %w", err)
+		}
+		// Create a caching token source to reuse tokens until expiration.
+		//s.tokenSource = oauth2.ReuseTokenSource(nil, tokenSource)
+		s.tokenSource = tokenSource
 	}
 
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+	token, err := s.tokenSource.Token()
+	if err != nil {
+		return nil, fmt.Errorf("TokenSource.Token: %w", err)
+	}
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token.AccessToken))
 
 	return req, nil
 }
