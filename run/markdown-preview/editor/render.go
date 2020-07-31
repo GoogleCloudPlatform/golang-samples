@@ -31,8 +31,6 @@ import (
 type RenderService struct {
 	// URL is the render service address.
 	URL string
-	// Authenticated determines whether identity token authentication will be used.
-	Authenticated bool
 	// tokenSource provides an identity token for requests to the Render Service.
 	tokenSource oauth2.TokenSource
 }
@@ -43,11 +41,6 @@ func (s *RenderService) NewRequest(method string) (*http.Request, error) {
 	req, err := http.NewRequest(method, s.URL, nil)
 	if err != nil {
 		return nil, fmt.Errorf("http.NewRequest: %w", err)
-	}
-
-	// Skip authentication if not using HTTPS, such as for local development.
-	if !s.Authenticated {
-		return req, nil
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
