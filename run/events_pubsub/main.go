@@ -12,80 +12,66 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START run_events_pubsub_server]
+// [START run_events_pubsub_handler]
 
-// Sample run-pubsub-events is a Cloud Run service which handles Pub/Sub messages.
+// Cloud Run service which handles Pub/Sub messages.
 package main
 
 import (
-	"context"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
-
-	cloudevents "github.com/cloudevents/sdk-go/v2"
 )
 
-var (
-	handler = http.DefaultServeMux
-)
+// PubSubMessage is the payload of a Pub/Sub event.
+type PubSubMessage struct {
+	Message struct {
+		Data []byte `json:"data,omitempty"`
+		ID   string `json:"id"`
+	} `json:"message"`
+	Subscription string `json:"subscription"`
+}
+
+// HelloEventsPubSub receives and processes a Pub/Sub message via a CloudEvent.
+func HelloEventsPubSub(w http.ResponseWriter, r *http.Request) {
+	var m PubSubMessage
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Printf("ioutil.ReadAll: %v", err)
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+	if err := json.Unmarshal(body, &m); err != nil {
+		log.Printf("json.Unmarshal: %v", err)
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	var name = string(m.Message.Data)
+	if name == "" {
+		name = "World"
+	}
+
+	s := fmt.Sprintf("Hello, %s! ID: %s", name, string(r.Header.Get("Ce-Id")))
+	log.Printf(s)
+	fmt.Printf(s)
+}
 
 func main() {
-	ctx := context.Background()
-	// Create a new HTTP client for CloudEvents
-	p, err := cloudevents.NewHTTP()
-	if err != nil {
-		log.Fatal(err)
-	}
-	handleFn, err := cloudevents.NewHTTPReceiveHandler(ctx, p, HelloPubSub)
-	if err != nil {
-		log.Fatal(err)
-	}
-	handler.Handle("/", handleFn)
+	log.Print("run_events_pubsub: starting server...")
 
-	// Determine port for HTTP service.
+	http.HandleFunc("/", HelloEventsPubSub)
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
-		log.Printf("Defaulting to port %s", port)
 	}
-	// Start HTTP server.
-	log.Printf("Listening on port %s", port)
-	if err := http.ListenAndServe(":"+port, nil); err != nil {
-		log.Fatal(err)
-	}
-}
 
-// [END run_events_pubsub_server]
-
-// [START run_events_pubsub_handler]
-
-// PubSubMessage is the payload of the Pub/Sub message.
-type PubSubMessage struct {
-	Data []byte `json:"data,omitempty"`
-	ID   string `json:"id"`
-}
-
-// PubSub is the whole payload of a Pub/Sub event.
-type PubSub struct {
-	Message      PubSubMessage `json:"message"`
-	Subscription string        `json:"subscription"`
-}
-
-// HelloPubSub receives and processes a Pub/Sub CloudEvent.
-func HelloPubSub(ctx context.Context, event cloudevents.Event) (string, error) {
-	// Try to decode the request body into the struct.
-	var m PubSub
-	err := event.DataAs(&m)
-	if err != nil {
-		// Error parsing CloudEvent
-		return "", fmt.Errorf("event.DataAs: could not read CloudEvent: %v", err)
-	}
-	// Print and return the data from the Pub/Sub CloudEvent.
-	s := fmt.Sprintf("Hello, %s! ID: %s", string(m.Message.Data), event.ID())
-	log.Printf(s)
-	return s, nil
+	log.Printf("run_events_pubsub: listening on port %s", port)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
 }
 
 // [END run_events_pubsub_handler]

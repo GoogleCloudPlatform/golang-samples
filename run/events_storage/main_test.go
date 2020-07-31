@@ -15,8 +15,6 @@
 package main
 
 import (
-	"encoding/base64"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -26,41 +24,12 @@ import (
 	"testing"
 )
 
-func TestHelloEventsPubSubErrors(t *testing.T) {
+func TestHelloEventsStorage(t *testing.T) {
 	tests := []struct {
-		name    string
-		message string
+		subject string
+		want    string
 	}{
-		{
-			name:    "no_payload",
-			message: "",
-		},
-		{
-			name:    "not_base64",
-			message: `{"message":{"data":"Gopher","id":"test-123"}}`,
-		},
-	}
-	for _, test := range tests {
-		payload := strings.NewReader(test.message)
-		req := httptest.NewRequest("POST", "/", payload)
-		rr := httptest.NewRecorder()
-
-		HelloEventsPubSub(rr, req)
-
-		if code := rr.Result().StatusCode; code != http.StatusBadRequest {
-			t.Errorf("HelloEventsPubSub(%q): got (%q), want (%q)", test.name, code, http.StatusBadRequest)
-		}
-	}
-}
-
-func TestHelloEventsPubSub(t *testing.T) {
-	tests := []struct {
-		data string
-		want string
-		ID   string
-	}{
-		{want: "Hello, World! ID: \n"},
-		{data: "Go", want: "Hello, Go! ID: 1234\n", ID: "1234"},
+		{subject: "1234", want: "GCS CloudEvent type: 1234\n"},
 	}
 	for _, test := range tests {
 		r, w, _ := os.Pipe()
@@ -69,23 +38,18 @@ func TestHelloEventsPubSub(t *testing.T) {
 		log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
 
 		payload := strings.NewReader("{}")
-		if test.data != "" {
-			encoded := base64.StdEncoding.EncodeToString([]byte(test.data))
-			jsonStr := fmt.Sprintf(`{"message":{"data":"%s"}}`, encoded)
-			payload = strings.NewReader(jsonStr)
-		}
 		req := httptest.NewRequest("POST", "/", payload)
-		req.Header.Set("ce-id", test.ID)
+		req.Header.Set("ce-subject", test.subject)
 
 		rr := httptest.NewRecorder()
-		HelloEventsPubSub(rr, req)
+		HelloEventsStorage(rr, req)
 
 		w.Close()
 		log.SetOutput(os.Stderr)
 		log.SetFlags(originalFlags)
 
 		if code := rr.Result().StatusCode; code == http.StatusBadRequest {
-			t.Errorf("HelloEventsPubSub(%q) invalid input, status code (%q)", test.data, code)
+			t.Errorf("HelloEventsStorage(%q) invalid input, status code (%q)", test.subject, code)
 		}
 
 		out, err := ioutil.ReadAll(r)
@@ -93,7 +57,7 @@ func TestHelloEventsPubSub(t *testing.T) {
 			t.Fatalf("ReadAll: %v", err)
 		}
 		if got := string(out); got != test.want {
-			t.Errorf("HelloEventsPubSub(%q): got %q, want %q", test.data, got, test.want)
+			t.Errorf("HelloEventsStorage(%q): got %q, want %q", test.subject, got, test.want)
 		}
 	}
 }
