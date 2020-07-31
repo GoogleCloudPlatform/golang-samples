@@ -37,8 +37,8 @@ type RenderService struct {
 	tokenSource oauth2.TokenSource
 }
 
-// NewRequest creates a new HTTP request with IAM ID Token credential.
-// This token is automatically handled by private Cloud Run (fully managed) and Cloud Functions.
+// NewRequest creates a new HTTP request to the Render service.
+// If authentication is enabled, an Identity Token is created and added.
 func (s *RenderService) NewRequest(method string) (*http.Request, error) {
 	req, err := http.NewRequest(method, s.URL, nil)
 	if err != nil {
@@ -55,19 +55,18 @@ func (s *RenderService) NewRequest(method string) (*http.Request, error) {
 
 	// Create a TokenSource if none exists.
 	if s.tokenSource == nil {
-		tokenSource, err := idtoken.NewTokenSource(ctx, s.URL)
+		s.tokenSource, err = idtoken.NewTokenSource(ctx, s.URL)
 		if err != nil {
 			return nil, fmt.Errorf("idtoken.NewTokenSource: %w", err)
 		}
-		// Create a caching token source to reuse tokens until expiration.
-		s.tokenSource = oauth2.ReuseTokenSource(nil, tokenSource)
 	}
 
+	// Retrieve an identity token. Will reuse tokens until refresh needed.
 	token, err := s.tokenSource.Token()
 	if err != nil {
 		return nil, fmt.Errorf("TokenSource.Token: %w", err)
 	}
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token.AccessToken))
+	token.SetAuthHeader(req)
 
 	return req, nil
 }
