@@ -63,4 +63,5 @@ func TestHelloGCS(t *testing.T) {
 		}
 	}
 }
+
 // [END functions_storage_unit_test]
