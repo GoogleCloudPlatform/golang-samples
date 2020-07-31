@@ -47,8 +47,8 @@ func main() {
 	// Call ListAssets API to get an asset iterator.
 	it := client.ListAssets(ctx, req)
 
-	// Traverse and print the listed assets in response.
-	for {
+	// Traverse and print the first 10 listed assets in response.
+	for i := 0; i < 10; i++ {
 		response, err := it.Next()
 		if err == iterator.Done {
 			break
