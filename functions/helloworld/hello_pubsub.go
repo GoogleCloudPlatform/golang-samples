@@ -13,7 +13,6 @@
 // limitations under the License.
 
 // [START functions_helloworld_pubsub]
-// [START functions_helloworld_background]
 
 // Package helloworld provides a set of Cloud Functions samples.
 package helloworld
@@ -38,5 +37,4 @@ func HelloPubSub(ctx context.Context, m PubSubMessage) error {
 	return nil
 }
 
-// [END functions_helloworld_background]
 // [END functions_helloworld_pubsub]
