@@ -25,7 +25,6 @@ import (
 )
 
 func TestHelloPubSubCloudEvent(t *testing.T) {
-	t.Skip("test requires Go 1.13+. See: https://github.com/GoogleCloudPlatform/golang-samples/issues/1224")
 	pubsubEvent := &PubSub{
 		Message: PubSubMessage{
 			Data: []byte("foo"),
