@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"log"
 	"time"
+
+	"cloud.google.com/go/functions/metadata"
 )
 
 // GCSEvent is the payload of a GCS event.
