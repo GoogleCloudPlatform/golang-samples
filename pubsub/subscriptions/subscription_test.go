@@ -473,6 +473,40 @@ func TestPullMsgsDeadLetterDeliveryAttempts(t *testing.T) {
 	}
 }
 
+func TestCreateWithOrdering(t *testing.T) {
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	client := setup(t)
+	defer client.Close()
+	orderingSubID := subID + "-ordering"
+
+	topic, err := getOrCreateTopic(ctx, client, topicID)
+	if err != nil {
+		t.Fatalf("CreateTopic: %v", err)
+	}
+	buf := new(bytes.Buffer)
+	if err := createWithOrdering(buf, tc.ProjectID, orderingSubID, topic); err != nil {
+		t.Fatalf("failed to create a subscription: %v", err)
+	}
+
+	orderingSub := client.Subscription(orderingSubID)
+	defer orderingSub.Delete(ctx)
+	ok, err := orderingSub.Exists(context.Background())
+	if err != nil {
+		t.Fatalf("failed to check if sub exists: %v", err)
+	}
+	if !ok {
+		t.Fatalf("got none; want sub = %q", orderingSubID)
+	}
+	cfg, err := orderingSub.Config(ctx)
+	if err != nil {
+		t.Fatalf("failed to get config for ordering sub: %v", err)
+	}
+	if !cfg.EnableMessageOrdering {
+		t.Fatalf("expected EnableMessageOrdering to be true for sub %s", orderingSubID)
+	}
+}
+
 func publishMsgs(ctx context.Context, t *pubsub.Topic, numMsgs int) error {
 	var results []*pubsub.PublishResult
 	for i := 0; i < numMsgs; i++ {
