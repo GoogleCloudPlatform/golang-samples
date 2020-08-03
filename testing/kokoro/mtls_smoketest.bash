@@ -27,24 +27,34 @@ for f in $(find . -name go.mod); do
   popd
 done
 
-# List of tests to skip during mtls_smoketest.
-# Any test skipped should have an equivalent test in internal/mtls_smoketest
-# that will start failing when the tests should be un-skipped.
-skip=(
-  # bigquerystorage.mtls.googleapis.com
-  bigquery/bigquery_storage_quickstart
-
-  # gameservices.mtls.googleapis.com
-  gaming/servers
-
-  # vision.mtls.googleapis.com
-  functions/ocr/app
-  functions/imagemagick
-  run/image-processing/imagemagick
-  vision/detect
-  vision/label
-  vision/product_search
+# List of tests to include during mtls_smoketest.
+scope=(
+  automl/
+  bigtable/
+  cloudsql/
+  container/
+  container_registry/
+  dataproc/
+  datastore/
+  dlp/
+  kms/
+  logging/
+  pubsub/
+  spanner/
+  speech/
+  trace/
+  translate/
 )
-for pkg in "${skip[@]}"; do
-  rm "$pkg"/*_test.go
+
+for d in */; do
+  in_scope=0
+  for pkg in "${scope[@]}"; do
+    if [ $pkg = $d ]; then
+      in_scope=1
+      break
+    fi
+  done
+  if [ $in_scope = 0 ]; then
+    find "./$d" -name '*_test.go' -exec rm -r {} \;
+  fi
 done
