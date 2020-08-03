@@ -46,8 +46,9 @@ var skip = map[string]bool{
 	"endpoints/getting-started-grpc/helloworld/helloworld.pb.go": true,
 
 	// Generated .pg.go files.
-	"run/grpc-ping/pkg/api/v1/message.pb.go":       true,
-	"profiler/shakesapp/shakesapp/shakesapp.pb.go": true,
+	"profiler/shakesapp/shakesapp/shakesapp.pb.go":           true,
+	"run/grpc-ping/pkg/api/v1/message.pb.go":                 true,
+	"run/grpc-server-streaming/pkg/api/v1/timeservice.pb.go": true,
 }
 
 func TestLicense(t *testing.T) {
