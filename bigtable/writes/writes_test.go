@@ -42,7 +42,7 @@ func TestWrites(t *testing.T) {
 
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
 		if err := adminClient.CreateTable(ctx, tableName); err != nil {
-			t.Errorf("Could not create table %s: %v", tableName, err)
+			r.Errorf("Could not create table %s: %v", tableName, err)
 		}
 	})
 
