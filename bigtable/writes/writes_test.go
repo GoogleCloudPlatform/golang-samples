@@ -20,6 +20,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"cloud.google.com/go/bigtable"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
