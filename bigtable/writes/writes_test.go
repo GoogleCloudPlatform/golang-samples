@@ -39,7 +39,13 @@ func TestWrites(t *testing.T) {
 	tableName := "mobile-time-series-" + tc.ProjectID
 	adminClient.DeleteTable(ctx, tableName)
 
-	if err := adminClient.CreateTable(ctx, tableName); err != nil {
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
+		if err := adminClient.CreateTable(ctx, tableName); err != nil {
+			t.Errorf("Could not create table %s: %v", tableName, err)
+		}
+	})
+
+	if err != nil {
 		t.Fatalf("Could not create table %s: %v", tableName, err)
 	}
 
