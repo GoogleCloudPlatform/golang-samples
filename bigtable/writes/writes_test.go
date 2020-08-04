@@ -45,6 +45,9 @@ func TestWrites(t *testing.T) {
 			r.Errorf("Could not create table %s: %v", tableName, err)
 		}
 	})
+	if t.Failed() {
+		return
+	}
 
 	if err != nil {
 		t.Fatalf("Could not create table %s: %v", tableName, err)
