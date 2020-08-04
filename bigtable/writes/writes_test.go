@@ -49,10 +49,6 @@ func TestWrites(t *testing.T) {
 		return
 	}
 
-	if err != nil {
-		t.Fatalf("Could not create table %s: %v", tableName, err)
-	}
-
 	columnFamilyName := "stats_summary"
 	if err := adminClient.CreateColumnFamily(ctx, tableName, columnFamilyName); err != nil {
 		adminClient.DeleteTable(ctx, tableName)
