@@ -17,12 +17,14 @@ package main
 // [START run_secure_request]
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
 
-	"cloud.google.com/go/compute/metadata"
+	"golang.org/x/oauth2"
+	"google.golang.org/api/idtoken"
 )
 
 // RenderService represents our upstream render service.
@@ -31,10 +33,12 @@ type RenderService struct {
 	URL string
 	// Authenticated determines whether identity token authentication will be used.
 	Authenticated bool
+	// tokenSource provides an identity token for requests to the Render Service.
+	tokenSource oauth2.TokenSource
 }
 
-// NewRequest creates a new HTTP request with IAM ID Token credential.
-// This token is automatically handled by private Cloud Run (fully managed) and Cloud Functions.
+// NewRequest creates a new HTTP request to the Render service.
+// If authentication is enabled, an Identity Token is created and added.
 func (s *RenderService) NewRequest(method string) (*http.Request, error) {
 	req, err := http.NewRequest(method, s.URL, nil)
 	if err != nil {
@@ -46,14 +50,23 @@ func (s *RenderService) NewRequest(method string) (*http.Request, error) {
 		return req, nil
 	}
 
-	// Query the id_token with ?audience as the serviceURL
-	tokenURL := fmt.Sprintf("/instance/service-accounts/default/identity?audience=%s", s.URL)
-	token, err := metadata.Get(tokenURL)
-	if err != nil {
-		return req, fmt.Errorf("metadata.Get: failed to query id_token: %w", err)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// Create a TokenSource if none exists.
+	if s.tokenSource == nil {
+		s.tokenSource, err = idtoken.NewTokenSource(ctx, s.URL)
+		if err != nil {
+			return nil, fmt.Errorf("idtoken.NewTokenSource: %w", err)
+		}
 	}
 
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+	// Retrieve an identity token. Will reuse tokens until refresh needed.
+	token, err := s.tokenSource.Token()
+	if err != nil {
+		return nil, fmt.Errorf("TokenSource.Token: %w", err)
+	}
+	token.SetAuthHeader(req)
 
 	return req, nil
 }

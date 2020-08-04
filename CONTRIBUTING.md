@@ -2,20 +2,20 @@
 
 1. Sign one of the contributor license agreements below.
 1. [Install Go](https://golang.org/doc/install).
-1. Get the package:
+1. Clone the repo:
 
-    `go get -d github.com/GoogleCloudPlatform/golang-samples`
+    `git clone https://github.com/GoogleCloudPlatform/golang-samples.git`
 1. Change into the checked out source:
 
-    `cd $(go env GOPATH)/src/github.com/GoogleCloudPlatform/golang-samples`
+    `cd golang-samples`
 1. Fork the repo.
 1. Set your fork as a remote:
 
-    `git remote add fork git@github.com:GITHUB_USERNAME/golang-samples.git`
-1. Make changes (see [Formatting](#formatting) and [Style](#style)), commit to
-   your fork. Commit messages should follow the
-   [Go project style](https://github.com/golang/go/wiki/CommitMessage) (e.g.
-   `functions: add gophers codelab`).
+    `git remote add fork https://github.com/GITHUB_USERNAME/golang-samples.git`
+1. Make changes (see [Formatting](#formatting) and [Style](#style)) and commit
+   to your fork. Initial commit messages should follow the
+   [Conventional Commits](https://www.conventionalcommits.org/) style (e.g.
+   `feat(functions): add gophers codelab`).
 1. Send a pull request with your changes.
 1. A maintainer will review the pull request and make comments. Prefer adding
    additional commits over ammending and force-pushing since it can be difficult

@@ -19,8 +19,11 @@ package helloworld
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
+
+	"cloud.google.com/go/functions/metadata"
 )
 
 // GCSEvent is the payload of a GCS event.
@@ -60,17 +63,17 @@ type GCSEvent struct {
 
 // HelloGCS consumes a GCS event.
 func HelloGCS(ctx context.Context, e GCSEvent) error {
-	if e.ResourceState == "not_exists" {
-		log.Printf("File %v deleted.", e.Name)
-		return nil
+	meta, err := metadata.FromContext(ctx)
+	if err != nil {
+		return fmt.Errorf("metadata.FromContext: %v", err)
 	}
-	if e.Metageneration == "1" {
-		// The metageneration attribute is updated on metadata changes.
-		// The on create value is 1.
-		log.Printf("File %v created.", e.Name)
-		return nil
-	}
-	log.Printf("File %v metadata updated.", e.Name)
+	log.Printf("Event ID: %v\n", meta.EventID)
+	log.Printf("Event type: %v\n", meta.EventType)
+	log.Printf("Bucket: %v\n", e.Bucket)
+	log.Printf("File: %v\n", e.Name)
+	log.Printf("Metageneration: %v\n", e.Metageneration)
+	log.Printf("Created: %v\n", e.TimeCreated)
+	log.Printf("Updated: %v\n", e.Updated)
 	return nil
 }
 
