@@ -34,6 +34,7 @@ import (
 // TestGRPCServerStreamingService is an end-to-end test that confirms the image builds, deploys and runs on
 // Cloud Run and can stream messages from server.
 func TestGRPCServerStreamingService(t *testing.T) {
+	t.Skip("Feature not yet available (https://github.com/GoogleCloudPlatform/golang-samples/issues/1628)")
 	tc := testutil.EndToEndTest(t)
 
 	service := cloudrunci.NewService("grpc-server-streaming", tc.ProjectID)
