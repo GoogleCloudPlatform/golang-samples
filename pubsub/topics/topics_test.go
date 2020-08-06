@@ -239,8 +239,8 @@ func TestResumePublishWithOrderingKey(t *testing.T) {
 	resumePublishWithOrderingKey(buf, tc.ProjectID, topicID)
 
 	got := buf.String()
-	want := "Published 4 messages with ordering keys successfully\n"
+	want := "Published a message with ordering key successfully\n"
 	if got != want {
-		t.Fatalf("failed to publish with ordering keys:\n got: %v", got)
+		t.Fatalf("failed to resume with ordering keys:\n got: %v", got)
 	}
 }

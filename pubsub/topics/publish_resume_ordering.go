@@ -19,8 +19,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"sync"
-	"sync/atomic"
 
 	"cloud.google.com/go/pubsub"
 	"google.golang.org/api/option"
@@ -41,65 +39,26 @@ func resumePublishWithOrderingKey(w io.Writer, projectID, topicID string) {
 	}
 	defer client.Close()
 
-	var wg sync.WaitGroup
-	var totalErrors uint64
 	t := client.Topic(topicID)
 	t.EnableMessageOrdering = true
+	const key = "some-ordering-key"
 
-	messages := []struct {
-		message     string
-		orderingKey string
-	}{
-		{
-			message:     "message1",
-			orderingKey: "key1",
-		},
-		{
-			message:     "message2",
-			orderingKey: "key2",
-		},
-		{
-			message:     "message3",
-			orderingKey: "key1",
-		},
-		{
-			message:     "message4",
-			orderingKey: "key2",
-		},
-	}
-	for _, m := range messages {
-		result := t.Publish(ctx, &pubsub.Message{
-			Data:        []byte(m.message),
-			OrderingKey: m.orderingKey,
-		})
+	res := t.Publish(ctx, &pubsub.Message{
+		Data:        []byte("some-message"),
+		OrderingKey: key,
+	})
+	_, err = res.Get(ctx)
+	if err != nil {
+		// Error handling code can be added here.
+		fmt.Printf("Failed to publish: %s\n", err)
 
-		wg.Add(1)
-		go func(orderingKey string, res *pubsub.PublishResult) {
-			defer wg.Done()
-			// The Get method blocks until a server-generated ID or
-			// an error is returned for the published message.
-			_, err := res.Get(ctx)
-			if err != nil {
-				// Error handling code can be added here.
-				fmt.Printf("Failed to publish: %s\n", err)
-				atomic.AddUint64(&totalErrors, 1)
-
-				// Resume publish on an ordering key that has had unrecoverable errors.
-				t.ResumePublish(orderingKey)
-
-				return
-			}
-		}(m.orderingKey, result)
+		// Resume publish on an ordering key that has had unrecoverable errors.
+		// Until this method is not called, subsequent publishes with this ordering
+		// key will fail.
+		t.ResumePublish(key)
 	}
 
-	wg.Wait()
-
-	if totalErrors > 0 {
-		fmt.Fprintf(w, "%d of 4 messages did not publish successfully", totalErrors)
-		return
-	}
-
-	fmt.Fprint(w, "Published 4 messages with ordering keys successfully\n")
+	fmt.Fprint(w, "Published a message with ordering key successfully\n")
 }
 
 // [END pubsub_resume_publish_with_ordering_keys]

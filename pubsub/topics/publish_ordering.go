@@ -67,12 +67,17 @@ func publishWithOrderingKey(w io.Writer, projectID, topicID string) {
 			orderingKey: "key2",
 		},
 	}
+
+	var publishResults []*pubsub.PublishResult
 	for _, m := range messages {
 		result := t.Publish(ctx, &pubsub.Message{
 			Data:        []byte(m.message),
 			OrderingKey: m.orderingKey,
 		})
+		publishResults = append(publishResults, result)
+	}
 
+	for _, res := range publishResults {
 		wg.Add(1)
 		go func(res *pubsub.PublishResult) {
 			defer wg.Done()
@@ -85,7 +90,7 @@ func publishWithOrderingKey(w io.Writer, projectID, topicID string) {
 				atomic.AddUint64(&totalErrors, 1)
 				return
 			}
-		}(result)
+		}(res)
 	}
 
 	wg.Wait()

@@ -508,7 +508,7 @@ func TestCreateWithOrdering(t *testing.T) {
 	if !cfg.EnableMessageOrdering {
 		t.Fatalf("expected EnableMessageOrdering to be true for sub %s", orderingSubID)
 	}
-)
+}
 
 func TestDetachSubscription(t *testing.T) {
 	client := setup(t)
