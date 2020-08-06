@@ -456,6 +456,9 @@ func TestPullMsgsDeadLetterDeliveryAttempts(t *testing.T) {
 			MaxDeliveryAttempts: 10,
 		},
 	})
+	if err != nil {
+		t.Fatalf("getOrCreateSub: %v", err)
+	}
 	defer sub.Delete(ctx)
 
 	if err = publishMsgs(ctx, deadLetterSourceTopic, 1); err != nil {
@@ -504,6 +507,48 @@ func TestCreateWithOrdering(t *testing.T) {
 	}
 	if !cfg.EnableMessageOrdering {
 		t.Fatalf("expected EnableMessageOrdering to be true for sub %s", orderingSubID)
+	}
+)
+
+func TestDetachSubscription(t *testing.T) {
+	client := setup(t)
+	defer client.Close()
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	detachTopicID := topicID + "-detach"
+	detachSubID := "testdetachsubsxyz-" + subID
+
+	topic, err := getOrCreateTopic(ctx, client, detachTopicID)
+	if err != nil {
+		t.Fatalf("getOrCreateTopic: %v", err)
+	}
+	defer topic.Delete(ctx)
+	defer topic.Stop()
+
+	sub, err := getOrCreateSub(ctx, client, detachSubID, &pubsub.SubscriptionConfig{
+		Topic: topic,
+	})
+	if err != nil {
+		t.Fatalf("getOrCreateSub: %v", err)
+	}
+	defer sub.Delete(ctx)
+
+	buf := new(bytes.Buffer)
+	if err = detachSubscription(buf, tc.ProjectID, sub.String()); err != nil {
+		t.Fatalf("detachSubscription: %v", err)
+	}
+	got := buf.String()
+	want := fmt.Sprintf("Detached subscription %s", sub.String())
+	if got != want {
+		t.Fatalf("detachSubscription got %s, want %s", got, want)
+	}
+
+	cfg, err := sub.Config(ctx)
+	if err != nil {
+		t.Fatalf("get sub config err: %v", err)
+	}
+	if !cfg.Detached {
+		t.Fatalf("detached subscripion should have detached=true")
 	}
 }
 
