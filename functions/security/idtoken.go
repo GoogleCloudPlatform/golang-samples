@@ -16,6 +16,8 @@
 package security
 
 // [START functions_bearer_token]
+// [START run_service_to_service_auth]
+
 import (
 	"context"
 	"fmt"
@@ -24,20 +26,19 @@ import (
 	"google.golang.org/api/idtoken"
 )
 
-// callFunction makes a request to the provided functionURL with an
-// authenticated client.
-func callFunction(w io.Writer, functionURL string) error {
-	// functionURL := "https://REGION-PROJECT.cloudfunctions.net/RECEIVING_FUNCTION"
+// makeGetRequest makes a request to the provided targetURL with an authenticated client.
+func makeGetRequest(w io.Writer, targetURL string) error {
+	// functionURL := "https://TARGET_URL"
 	ctx := context.Background()
 
 	// client is a http.Client that automatically adds an "Authorization" header
 	// to any requests made.
-	client, err := idtoken.NewClient(ctx, functionURL)
+	client, err := idtoken.NewClient(ctx, targetURL)
 	if err != nil {
 		return fmt.Errorf("idtoken.NewClient: %v", err)
 	}
 
-	resp, err := client.Get(functionURL)
+	resp, err := client.Get(targetURL)
 	if err != nil {
 		return fmt.Errorf("client.Get: %v", err)
 	}
@@ -49,4 +50,5 @@ func callFunction(w io.Writer, functionURL string) error {
 	return nil
 }
 
+// [END run_service_to_service_auth]
 // [END functions_bearer_token]
