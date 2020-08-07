@@ -41,7 +41,7 @@ func resumePublishWithOrderingKey(w io.Writer, projectID, topicID string) {
 
 	t := client.Topic(topicID)
 	t.EnableMessageOrdering = true
-	const key = "some-ordering-key"
+	key := "some-ordering-key"
 
 	res := t.Publish(ctx, &pubsub.Message{
 		Data:        []byte("some-message"),

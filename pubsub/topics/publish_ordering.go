@@ -68,16 +68,12 @@ func publishWithOrderingKey(w io.Writer, projectID, topicID string) {
 		},
 	}
 
-	var publishResults []*pubsub.PublishResult
 	for _, m := range messages {
-		result := t.Publish(ctx, &pubsub.Message{
+		res := t.Publish(ctx, &pubsub.Message{
 			Data:        []byte(m.message),
 			OrderingKey: m.orderingKey,
 		})
-		publishResults = append(publishResults, result)
-	}
 
-	for _, res := range publishResults {
 		wg.Add(1)
 		go func(res *pubsub.PublishResult) {
 			defer wg.Done()
