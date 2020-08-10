@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2019 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,13 +14,13 @@
 
 // [START run_events_pubsub_handler]
 
-// Cloud Run service which handles Pub/Sub messages.
+// Sample run-events-pubsub is a Cloud Run service which handles Pub/Sub messages.
 package main
 
 import (
+	b64 "encoding/base64"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -29,49 +29,43 @@ import (
 // PubSubMessage is the payload of a Pub/Sub event.
 type PubSubMessage struct {
 	Message struct {
-		Data []byte `json:"data,omitempty"`
+		Data string `json:"data,omitempty"`
 		ID   string `json:"id"`
 	} `json:"message"`
 	Subscription string `json:"subscription"`
 }
 
-// HelloEventsPubSub receives and processes a Pub/Sub message via a CloudEvent.
+// HelloEventsPubSub receives and processes a Pub/Sub push message.
 func HelloEventsPubSub(w http.ResponseWriter, r *http.Request) {
-	var m PubSubMessage
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		log.Printf("ioutil.ReadAll: %v", err)
+	var e PubSubMessage
+	if err := json.NewDecoder(r.Body).Decode(&e); err != nil {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
-	if err := json.Unmarshal(body, &m); err != nil {
-		log.Printf("json.Unmarshal: %v", err)
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
-
-	var name = string(m.Message.Data)
+	dataBase64 := e.Message.Data
+	nameBytes, _ := b64.StdEncoding.DecodeString(dataBase64)
+	name := string(nameBytes)
 	if name == "" {
 		name = "World"
 	}
-
 	s := fmt.Sprintf("Hello, %s! ID: %s", name, string(r.Header.Get("Ce-Id")))
 	log.Printf(s)
-	fmt.Printf(s)
+	fmt.Fprintln(w, s)
 }
 
 func main() {
-	log.Print("run_events_pubsub: starting server...")
-
 	http.HandleFunc("/", HelloEventsPubSub)
-
+	// Determine port for HTTP service.
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
+		log.Printf("Defaulting to port %s", port)
 	}
-
-	log.Printf("run_events_pubsub: listening on port %s", port)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
+	// Start HTTP server.
+	log.Printf("Listening on port %s", port)
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
+		log.Fatal(err)
+	}
 }
 
 // [END run_events_pubsub_handler]

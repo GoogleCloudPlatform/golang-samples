@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2019 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,41 +26,16 @@ import (
 	"testing"
 )
 
-func TestHelloEventsPubSubErrors(t *testing.T) {
-	tests := []struct {
-		name    string
-		message string
-	}{
-		{
-			name:    "no_payload",
-			message: "",
-		},
-		{
-			name:    "not_base64",
-			message: `{"message":{"data":"Gopher","id":"test-123"}}`,
-		},
-	}
-	for _, test := range tests {
-		payload := strings.NewReader(test.message)
-		req := httptest.NewRequest("POST", "/", payload)
-		rr := httptest.NewRecorder()
-
-		HelloEventsPubSub(rr, req)
-
-		if code := rr.Result().StatusCode; code != http.StatusBadRequest {
-			t.Errorf("HelloEventsPubSub(%q): got (%q), want (%q)", test.name, code, http.StatusBadRequest)
-		}
-	}
-}
-
-func TestHelloEventsPubSub(t *testing.T) {
+func TestHelloPubSubCloudEvent(t *testing.T) {
 	tests := []struct {
 		data string
 		want string
-		ID   string
+		id   string
 	}{
-		{want: "Hello, World! ID: \n"},
-		{data: "Go", want: "Hello, Go! ID: 1234\n", ID: "1234"},
+		{want: "Hello, World! ID: \n", id: ""},
+		{want: "Hello, World! ID: 12345\n", id: "12345"},
+		{data: "Go", want: "Hello, Go! ID: \n"},
+		{data: "Go", want: "Hello, Go! ID: 1234\n", id: "1234"},
 	}
 	for _, test := range tests {
 		r, w, _ := os.Pipe()
@@ -71,13 +46,13 @@ func TestHelloEventsPubSub(t *testing.T) {
 		payload := strings.NewReader("{}")
 		if test.data != "" {
 			encoded := base64.StdEncoding.EncodeToString([]byte(test.data))
-			jsonStr := fmt.Sprintf(`{"message":{"data":"%s"}}`, encoded)
+			jsonStr := fmt.Sprintf(`{"message":{"data":"%s","id":"%s"}}`, encoded, test.id)
 			payload = strings.NewReader(jsonStr)
 		}
 		req := httptest.NewRequest("POST", "/", payload)
-		req.Header.Set("ce-id", test.ID)
-
+		req.Header.Set("Ce-Id", test.id)
 		rr := httptest.NewRecorder()
+
 		HelloEventsPubSub(rr, req)
 
 		w.Close()
