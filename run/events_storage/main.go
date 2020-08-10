@@ -14,7 +14,7 @@
 
 // [START run_events_gcs_handler]
 
-// Cloud Run service which handles Audit Logs from Cloud Storage.
+// Sample run-events-storage is a Cloud Run service which handles Cloud Audit Log messages with Cloud Storage data.
 package main
 
 import (
@@ -28,21 +28,21 @@ import (
 func HelloEventsStorage(w http.ResponseWriter, r *http.Request) {
 	s := fmt.Sprintf("GCS CloudEvent type: %s", string(r.Header.Get("Ce-Subject")))
 	log.Printf(s)
-	fmt.Printf(s)
+	fmt.Fprintln(w, s)
 }
 
 func main() {
-	log.Print("run_events_gcs: starting server...")
-
 	http.HandleFunc("/", HelloEventsStorage)
-
+	// Determine port for HTTP service.
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
-
-	log.Printf("run_events_gcs: listening on port %s", port)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
+	// Start HTTP server.
+	log.Printf("Listening on port %s", port)
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
+		log.Fatal(err)
+	}
 }
 
 // [END run_events_gcs_handler]

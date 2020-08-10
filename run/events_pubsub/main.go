@@ -18,7 +18,7 @@
 package main
 
 import (
-	b64 "encoding/base64"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -39,11 +39,16 @@ type PubSubMessage struct {
 func HelloEventsPubSub(w http.ResponseWriter, r *http.Request) {
 	var e PubSubMessage
 	if err := json.NewDecoder(r.Body).Decode(&e); err != nil {
-		http.Error(w, "Bad Request", http.StatusBadRequest)
+		http.Error(w, "Bad HTTP Request", http.StatusBadRequest)
+		log.Printf("Bad HTTP Request: %v", http.StatusBadRequest)
 		return
 	}
-	dataBase64 := e.Message.Data
-	nameBytes, _ := b64.StdEncoding.DecodeString(dataBase64)
+	nameBytes, err := base64.StdEncoding.DecodeString(e.Message.Data)
+	if err != nil {
+		http.Error(w, "Bad Base64 Data", http.StatusBadRequest)
+		log.Printf("Bad Base64 Data: %v", http.StatusBadRequest)
+		return
+	}
 	name := string(nameBytes)
 	if name == "" {
 		name = "World"
