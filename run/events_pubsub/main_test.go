@@ -37,11 +37,10 @@ func TestHelloPubSubCloudEvent(t *testing.T) {
 		{data: "Go", want: "Hello, Go! ID: \n"},
 		{data: "Go", want: "Hello, Go! ID: 1234\n", id: "1234"},
 	}
+	log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
 	for _, test := range tests {
 		r, w, _ := os.Pipe()
 		log.SetOutput(w)
-		originalFlags := log.Flags()
-		log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
 
 		payload := strings.NewReader("{}")
 		if test.data != "" {
@@ -57,7 +56,6 @@ func TestHelloPubSubCloudEvent(t *testing.T) {
 
 		w.Close()
 		log.SetOutput(os.Stderr)
-		log.SetFlags(originalFlags)
 
 		if code := rr.Result().StatusCode; code == http.StatusBadRequest {
 			t.Errorf("HelloEventsPubSub(%q) invalid input, status code (%q)", test.data, code)
