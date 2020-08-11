@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
 package main
 
 import (
-	"encoding/base64"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -26,39 +24,32 @@ import (
 	"testing"
 )
 
-func TestHelloPubSubCloudEvent(t *testing.T) {
+func TestHelloEventsStorage(t *testing.T) {
 	tests := []struct {
-		data string
-		want string
-		id   string
+		subject string
+		want    string
 	}{
-		{want: "Hello, World! ID: \n", id: ""},
-		{want: "Hello, World! ID: 12345\n", id: "12345"},
-		{data: "Go", want: "Hello, Go! ID: \n"},
-		{data: "Go", want: "Hello, Go! ID: 1234\n", id: "1234"},
+		{subject: "1234", want: "GCS CloudEvent type: 1234\n"},
 	}
-	log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
 	for _, test := range tests {
 		r, w, _ := os.Pipe()
 		log.SetOutput(w)
 		defer log.SetOutput(os.Stderr)
 
-		payload := strings.NewReader("{}")
-		if test.data != "" {
-			encoded := base64.StdEncoding.EncodeToString([]byte(test.data))
-			jsonStr := fmt.Sprintf(`{"message":{"data":"%s","id":"%s"}}`, encoded, test.id)
-			payload = strings.NewReader(jsonStr)
-		}
+		originalFlags := log.Flags()
+		defer log.SetFlags(originalFlags)
+		log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
 
+		payload := strings.NewReader("{}")
 		req := httptest.NewRequest("POST", "/", payload)
-		req.Header.Set("Ce-Id", test.id)
+		req.Header.Set("ce-subject", test.subject)
 		rr := httptest.NewRecorder()
-		HelloEventsPubSub(rr, req)
+		HelloEventsStorage(rr, req)
 
 		w.Close()
 
 		if code := rr.Result().StatusCode; code == http.StatusBadRequest {
-			t.Errorf("HelloEventsPubSub(%q) invalid input, status code (%q)", test.data, code)
+			t.Errorf("HelloEventsStorage(%q) invalid input, status code (%q)", test.subject, code)
 		}
 
 		out, err := ioutil.ReadAll(r)
@@ -66,7 +57,7 @@ func TestHelloPubSubCloudEvent(t *testing.T) {
 			t.Fatalf("ReadAll: %v", err)
 		}
 		if got := string(out); got != test.want {
-			t.Errorf("HelloEventsPubSub(%q): got %q, want %q", test.data, got, test.want)
+			t.Errorf("HelloEventsStorage(%q): got %q, want %q", test.subject, got, test.want)
 		}
 	}
 }
