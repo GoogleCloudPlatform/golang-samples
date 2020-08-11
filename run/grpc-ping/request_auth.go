@@ -21,30 +21,36 @@ import (
 	"fmt"
 	"time"
 
-	"cloud.google.com/go/compute/metadata"
+	"google.golang.org/api/idtoken"
 	"google.golang.org/grpc"
 	grpcMetadata "google.golang.org/grpc/metadata"
 
 	pb "github.com/GoogleCloudPlatform/golang-samples/run/grpc-ping/pkg/api/v1"
 )
 
-// pingRequestWithAuth mints a new ID Token with the compute metadata server for each request.
+// pingRequestWithAuth mints a new Identity Token for each request.
 // This token has a 1 hour expiry and should be reused.
-// This function will only work on Google Cloud with an available compute metadata server and compute identity.
-// audience is the auto-assigned URL of the Cloud Run service (do not include port number)
+// audience must be the auto-assigned URL of a Cloud Run service or HTTP Cloud Function without port number.
 func pingRequestWithAuth(conn *grpc.ClientConn, p *pb.Request, audience string) (*pb.Response, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	// Create an ID Token as shown in service-to-service authentication in the documentation.
-	// https://cloud.google.com/run/docs/authenticating/service-to-service
-	tokenURL := fmt.Sprintf("/instance/service-accounts/default/identity?audience=%s", audience)
-	idToken, err := metadata.Get(tokenURL)
+	// Create an identity token.
+	// With a global TokenSource tokens would be reused and auto-refreshed at need.
+	// A given TokenSource is specific to the audience.
+	tokenSource, err := idtoken.NewTokenSource(ctx, audience)
 	if err != nil {
-		return nil, fmt.Errorf("metadata.Get: failed to query id_token: %v", err)
+		return nil, fmt.Errorf("idtoken.NewTokenSource: %v", err)
 	}
-	ctx = grpcMetadata.AppendToOutgoingContext(ctx, "authorization", "Bearer "+idToken)
+	token, err := tokenSource.Token()
+	if err != nil {
+		return nil, fmt.Errorf("TokenSource.Token: %v", err)
+	}
 
+	// Add token to gRPC Request.
+	ctx = grpcMetadata.AppendToOutgoingContext(ctx, "authorization", "Bearer "+token.AccessToken)
+
+	// Send the request.
 	client := pb.NewPingServiceClient(conn)
 	return client.Send(ctx, p)
 }
