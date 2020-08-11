@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html"
+	"log"
 	"net/http"
 )
 
@@ -29,6 +30,7 @@ func HelloWorld(w http.ResponseWriter, r *http.Request) {
 		Message string `json:"message"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&d); err != nil {
+		log.Printf("json.NewDecoder: %v", err)
 		fmt.Fprint(w, "Hello, World!")
 		return
 	}
