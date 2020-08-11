@@ -97,7 +97,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("initTCPConnectionPool: unable to connect: %s", err)
 	}
-	
 
 	// Drop the votes table if it already exists.
 	if _, err = app.db.Exec(`DROP TABLE IF EXISTS votes;`); err != nil {
@@ -220,7 +219,6 @@ func mustGetenv(k string) string {
 	}
 	return v
 }
-
 
 // initTCPConnectionPool initializes a TCP connection pool for a Cloud SQL
 // instance of SQL Server.
