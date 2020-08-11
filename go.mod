@@ -9,7 +9,7 @@ require (
 	cloud.google.com/go/datastore v1.2.0
 	cloud.google.com/go/firestore v1.3.0
 	cloud.google.com/go/logging v1.0.0
-	cloud.google.com/go/pubsub v1.5.0
+	cloud.google.com/go/pubsub v1.6.1
 	cloud.google.com/go/spanner v1.8.0
 	cloud.google.com/go/storage v1.10.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.2
