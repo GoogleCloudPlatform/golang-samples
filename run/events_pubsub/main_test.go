@@ -41,6 +41,7 @@ func TestHelloPubSubCloudEvent(t *testing.T) {
 	for _, test := range tests {
 		r, w, _ := os.Pipe()
 		log.SetOutput(w)
+		defer log.SetOutput(os.Stderr)
 
 		payload := strings.NewReader("{}")
 		if test.data != "" {
@@ -48,14 +49,13 @@ func TestHelloPubSubCloudEvent(t *testing.T) {
 			jsonStr := fmt.Sprintf(`{"message":{"data":"%s","id":"%s"}}`, encoded, test.id)
 			payload = strings.NewReader(jsonStr)
 		}
+
 		req := httptest.NewRequest("POST", "/", payload)
 		req.Header.Set("Ce-Id", test.id)
 		rr := httptest.NewRecorder()
-
 		HelloEventsPubSub(rr, req)
 
 		w.Close()
-		log.SetOutput(os.Stderr)
 
 		if code := rr.Result().StatusCode; code == http.StatusBadRequest {
 			t.Errorf("HelloEventsPubSub(%q) invalid input, status code (%q)", test.data, code)

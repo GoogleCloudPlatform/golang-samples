@@ -34,19 +34,19 @@ func TestHelloEventsStorage(t *testing.T) {
 	for _, test := range tests {
 		r, w, _ := os.Pipe()
 		log.SetOutput(w)
+		defer log.SetOutput(os.Stderr)
+
 		originalFlags := log.Flags()
+		defer log.SetFlags(originalFlags)
 		log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
 
 		payload := strings.NewReader("{}")
 		req := httptest.NewRequest("POST", "/", payload)
 		req.Header.Set("ce-subject", test.subject)
-
 		rr := httptest.NewRecorder()
 		HelloEventsStorage(rr, req)
 
 		w.Close()
-		log.SetOutput(os.Stderr)
-		log.SetFlags(originalFlags)
 
 		if code := rr.Result().StatusCode; code == http.StatusBadRequest {
 			t.Errorf("HelloEventsStorage(%q) invalid input, status code (%q)", test.subject, code)
