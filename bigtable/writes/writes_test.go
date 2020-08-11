@@ -20,6 +20,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"cloud.google.com/go/bigtable"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -39,8 +40,13 @@ func TestWrites(t *testing.T) {
 	tableName := "mobile-time-series-" + tc.ProjectID
 	adminClient.DeleteTable(ctx, tableName)
 
-	if err := adminClient.CreateTable(ctx, tableName); err != nil {
-		t.Fatalf("Could not create table %s: %v", tableName, err)
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
+		if err := adminClient.CreateTable(ctx, tableName); err != nil {
+			r.Errorf("Could not create table %s: %v", tableName, err)
+		}
+	})
+	if t.Failed() {
+		return
 	}
 
 	columnFamilyName := "stats_summary"

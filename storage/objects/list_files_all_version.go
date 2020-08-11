@@ -12,49 +12,47 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package servers
+package objects
 
-// [START cloud_game_servers_realm_list]
-
+// [START storage_list_file_archived_generations]
 import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
-	gaming "cloud.google.com/go/gaming/apiv1"
+	"cloud.google.com/go/storage"
 	"google.golang.org/api/iterator"
-	gamingpb "google.golang.org/genproto/googleapis/cloud/gaming/v1"
 )
 
-// listRealms lists the realms in a location.
-func listRealms(w io.Writer, projectID, location string) error {
-	// projectID := "my-project"
-	// location := "global"
+// listFilesAllVersion lists both live and noncurrent versions of objects within specified bucket.
+func listFilesAllVersion(w io.Writer, bucket string) error {
+	// bucket := "bucket-name"
 	ctx := context.Background()
-	client, err := gaming.NewRealmsClient(ctx)
+	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewRealmsClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
 
-	req := &gamingpb.ListRealmsRequest{
-		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
-	}
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 
-	it := client.ListRealms(ctx, req)
+	it := client.Bucket(bucket).Objects(ctx, &storage.Query{
+		// Versions true to output all generations of objects
+		Versions: true,
+	})
 	for {
-		resp, err := it.Next()
+		attrs, err := it.Next()
 		if err == iterator.Done {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("Next: %v", err)
+			return fmt.Errorf("Bucket(%q).Objects(): %v", bucket, err)
 		}
-
-		fmt.Fprintf(w, "Realm listed: %v\n", resp.Name)
+		fmt.Fprintln(w, attrs.Name, attrs.Generation, attrs.Metageneration)
 	}
-
 	return nil
 }
 
-// [END cloud_game_servers_realm_list]
+// [END storage_list_file_archived_generations]
