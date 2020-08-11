@@ -18,7 +18,6 @@
 package main
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -29,7 +28,7 @@ import (
 // PubSubMessage is the payload of a Pub/Sub event.
 type PubSubMessage struct {
 	Message struct {
-		Data string `json:"data,omitempty"`
+		Data []byte `json:"data,omitempty"`
 		ID   string `json:"id"`
 	} `json:"message"`
 	Subscription string `json:"subscription"`
@@ -43,13 +42,7 @@ func HelloEventsPubSub(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Bad HTTP Request: %v", http.StatusBadRequest)
 		return
 	}
-	nameBytes, err := base64.StdEncoding.DecodeString(e.Message.Data)
-	if err != nil {
-		http.Error(w, "Bad Base64 Data", http.StatusBadRequest)
-		log.Printf("Bad Base64 Data: %v", http.StatusBadRequest)
-		return
-	}
-	name := string(nameBytes)
+	name := string(e.Message.Data)
 	if name == "" {
 		name = "World"
 	}
