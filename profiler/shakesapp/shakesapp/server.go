@@ -79,6 +79,7 @@ func readFiles(ctx context.Context, bucketName, prefix string) ([]string, error)
 	if err != nil {
 		return []string{}, fmt.Errorf("failed to create storage client: %s", err)
 	}
+	defer client.Close()
 
 	bucket := client.Bucket(bucketName)
 
