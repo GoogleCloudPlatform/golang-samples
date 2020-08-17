@@ -14,7 +14,7 @@ require (
 	cloud.google.com/go/storage v1.10.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.2
 	github.com/aws/aws-sdk-go v1.33.4
-	github.com/bmatcuk/doublestar v1.3.1
+	github.com/bmatcuk/doublestar/v2/v2 v2.0.1
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
 	github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -48,9 +48,9 @@ require (
 	google.golang.org/appengine v1.6.6
 	google.golang.org/genproto v0.0.0-20200806141610-86f49bd18e98
 	google.golang.org/grpc v1.31.0
-	google.golang.org/grpc/examples v0.0.0-20200707005602-4258d12073b4
+	google.golang.org/grpc/examples v1.31.0
 	google.golang.org/protobuf v1.25.0
-	gopkg.in/sendgrid/sendgrid-go.v2 v2.0.0
+	gopkg.in/sendgrid/sendgrid-go.v3 v3.6.1
 	gopkg.in/yaml.v2 v2.3.0
 )
 
