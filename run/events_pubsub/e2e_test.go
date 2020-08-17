@@ -27,7 +27,7 @@ import (
 func TestPubSubEventsService(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 
-	service := cloudrunci.NewService("run_events_pubsub", tc.ProjectID)
+	service := cloudrunci.NewService("run-events-pubsub", tc.ProjectID)
 	if err := service.Deploy(); err != nil {
 		t.Fatalf("service.Deploy %q: %v", service.Name, err)
 	}
