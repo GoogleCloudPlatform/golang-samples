@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	"cloud.google.com/go/firestore"
 )
@@ -26,7 +27,8 @@ import (
 // listenChanges listens to a query, returning the list of document changes.
 func listenChanges(w io.Writer, projectID string) error {
 	// projectID := "project-id"
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
@@ -34,24 +36,26 @@ func listenChanges(w io.Writer, projectID string) error {
 	}
 	defer client.Close()
 
-	snap, err := client.Collection("cities").Where("state", "==", "CA").Snapshots(ctx).Next()
-	if err != nil {
-		return fmt.Errorf("Snapshots: listen failed: %v", err)
-	}
-	if snap.Size == 0 {
-		return fmt.Errorf("current data: null")
-	}
-	for _, change := range snap.Changes {
-		switch change.Kind {
-		case firestore.DocumentAdded:
-			fmt.Fprintf(w, "New city: %v\n", change.Doc.Data())
-		case firestore.DocumentModified:
-			fmt.Fprintf(w, "Modified city: %v\n", change.Doc.Data())
-		case firestore.DocumentRemoved:
-			fmt.Fprintf(w, "Removed city: %v\n", change.Doc.Data())
+	it := client.Collection("cities").Where("state", "==", "CA").Snapshots(ctx)
+	for {
+		snap, err := it.Next()
+		if err != nil {
+			return fmt.Errorf("Snapshots: listen failed: %v", err)
+		}
+		if snap.Size == 0 {
+			return fmt.Errorf("current data: null")
+		}
+		for _, change := range snap.Changes {
+			switch change.Kind {
+			case firestore.DocumentAdded:
+				fmt.Fprintf(w, "New city: %v\n", change.Doc.Data())
+			case firestore.DocumentModified:
+				fmt.Fprintf(w, "Modified city: %v\n", change.Doc.Data())
+			case firestore.DocumentRemoved:
+				fmt.Fprintf(w, "Removed city: %v\n", change.Doc.Data())
+			}
 		}
 	}
-	return nil
 }
 
 // [END fs_listen_changes]

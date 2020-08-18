@@ -19,14 +19,18 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	"cloud.google.com/go/firestore"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // listenDocument listens to a single document.
 func listenDocument(w io.Writer, projectID string) error {
 	// projectID := "project-id"
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
@@ -34,17 +38,22 @@ func listenDocument(w io.Writer, projectID string) error {
 	}
 	defer client.Close()
 
-	dsnap := client.Collection("cities").Doc("SF").Snapshots(ctx)
-
-	snap, err := dsnap.Next()
-	if !snap.Exists() {
-		return fmt.Errorf("current data: null")
+	it := client.Collection("cities").Doc("SF").Snapshots(ctx)
+	for {
+		snap, err := it.Next()
+		// DeadlineExceeded will be returned when ctx is cancelled.
+		if status.Code(err) == codes.DeadlineExceeded {
+			return nil
+		}
+		if err != nil {
+			return fmt.Errorf("Snapshots.Next: %v", err)
+		}
+		if !snap.Exists() {
+			fmt.Fprintf(w, "Document no longer exists")
+			return nil
+		}
+		fmt.Fprintf(w, "Received document snapshot: %v\n", snap.Data())
 	}
-	if err != nil {
-		return fmt.Errorf("listen failed: %v", err)
-	}
-	fmt.Fprintf(w, "Received document snapshot: %v\n", snap.Data())
-	return nil
 }
 
 // [END fs_listen_document]

@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	"cloud.google.com/go/firestore"
 )
@@ -26,7 +27,8 @@ import (
 // listenErrors demonstrates how to handle listening errors.
 func listenErrors(w io.Writer, projectID string) error {
 	// projectID := "project-id"
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
@@ -34,17 +36,18 @@ func listenErrors(w io.Writer, projectID string) error {
 	}
 	defer client.Close()
 
-	qsnap := client.Collection("cities").Snapshots(ctx)
-	snap, err := qsnap.Next()
-	if err != nil {
-		return fmt.Errorf("listen failed: %v", err)
-	}
-	for _, change := range snap.Changes {
-		if change.Kind == firestore.DocumentAdded {
-			fmt.Fprintf(w, "New city: %v\n", change.Doc.Data())
+	it := client.Collection("cities").Snapshots(ctx)
+	for {
+		snap, err := it.Next()
+		if err != nil {
+			return fmt.Errorf("listen failed: %v", err)
+		}
+		for _, change := range snap.Changes {
+			if change.Kind == firestore.DocumentAdded {
+				fmt.Fprintf(w, "New city: %v\n", change.Doc.Data())
+			}
 		}
 	}
-	return nil
 }
 
 // [END fs_listen_errors]

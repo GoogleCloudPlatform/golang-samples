@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	"cloud.google.com/go/firestore"
 	"google.golang.org/api/iterator"
@@ -28,7 +29,8 @@ import (
 // for a state.
 func listenMultiple(w io.Writer, projectID string) error {
 	// projectID := "project-id"
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
@@ -36,24 +38,26 @@ func listenMultiple(w io.Writer, projectID string) error {
 	}
 	defer client.Close()
 
-	snap, err := client.Collection("cities").Where("state", "==", "CA").Snapshots(ctx).Next()
-	if err != nil {
-		return fmt.Errorf("Snapshots: listen failed: %v", err)
-	}
-	if snap.Size == 0 {
-		return fmt.Errorf("current data: null")
-	}
+	it := client.Collection("cities").Where("state", "==", "CA").Snapshots(ctx)
 	for {
-		doc, err := snap.Documents.Next()
-		if err == iterator.Done {
-			break
-		}
+		snap, err := it.Next()
 		if err != nil {
-			return fmt.Errorf("listen failed: %v", err)
+			return fmt.Errorf("Snapshots: listen failed: %v", err)
 		}
-		fmt.Fprintf(w, "Current cities in California: %v\n", doc.Ref.ID)
+		if snap.Size == 0 {
+			return fmt.Errorf("current data: null")
+		}
+		for {
+			doc, err := snap.Documents.Next()
+			if err == iterator.Done {
+				break
+			}
+			if err != nil {
+				return fmt.Errorf("listen failed: %v", err)
+			}
+			fmt.Fprintf(w, "Current cities in California: %v\n", doc.Ref.ID)
+		}
 	}
-	return nil
 }
 
 // [END fs_listen_multiple]
