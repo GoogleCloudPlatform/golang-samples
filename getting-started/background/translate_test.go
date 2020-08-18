@@ -15,11 +15,13 @@
 package background
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	"cloud.google.com/go/firestore"
 )
@@ -38,50 +40,78 @@ func TestTranslate(t *testing.T) {
 		t.Fatalf("firestore.NewClient: %v", err)
 	}
 
-	// Remove any old translations.
-	if err := deleteAll(ctx, client, projectID); err != nil {
-		t.Fatalf("deleteAll: %v", err)
+	maxRetries := 5
+	sleep := 5 * time.Second
+	failureLog := &bytes.Buffer{}
+	errorf := func(format string, args ...interface{}) {
+		fmt.Fprintf(failureLog, format, args...)
 	}
+	for retry := 0; retry < maxRetries; retry++ {
+		failureLog.Reset()
+		pass := func() bool {
+			// Remove any old translations.
+			if err := deleteAll(ctx, client, projectID); err != nil {
+				errorf("deleteAll: %v", err)
+				return false
+			}
 
-	msg, err := json.Marshal(Translation{
-		Original: "Hello",
-		Language: "fr",
-	})
-	if err != nil {
-		t.Fatalf("json.Marshal: %v", err)
-	}
-	m := PubSubMessage{Data: msg}
-	if err := Translate(ctx, m); err != nil {
-		t.Fatalf("Translate: %v", err)
-	}
-	translations, err := getAll(ctx, client, projectID)
-	if err != nil {
-		t.Fatalf("getAll: %v", err)
-	}
-	if len(translations) != 1 {
-		t.Fatalf("Translate got %d translations, want 1", len(translations))
-	}
-	want := Translation{
-		Original:         "Hello",
-		OriginalLanguage: "en",
-		Language:         "fr",
-		Translated:       "Bonjour",
-	}
-	if translations[0] != want {
-		t.Fatalf("Translate got:\n%+v\nWant:\n%+v", translations[0], want)
-	}
+			msg, err := json.Marshal(Translation{
+				Original: "Hello",
+				Language: "fr",
+			})
+			if err != nil {
+				errorf("json.Marshal: %v", err)
+				return false
+			}
+			m := PubSubMessage{Data: msg}
+			if err := Translate(ctx, m); err != nil {
+				errorf("Translate: %v", err)
+				return false
+			}
+			translations, err := getAll(ctx, client, projectID)
+			if err != nil {
+				errorf("getAll: %v", err)
+				return false
+			}
+			if len(translations) != 1 {
+				errorf("Translate got %d translations, want 1", len(translations))
+				return false
+			}
+			want := Translation{
+				Original:         "Hello",
+				OriginalLanguage: "en",
+				Language:         "fr",
+				Translated:       "Bonjour",
+			}
+			if translations[0] != want {
+				errorf("Translate got:\n%+v\nWant:\n%+v", translations[0], want)
+				return false
+			}
 
-	// Ensure duplicate requests are only processed once.
-	if err := Translate(ctx, m); err != nil {
-		t.Fatalf("Translate: %v", err)
+			// Ensure duplicate requests are only processed once.
+			if err := Translate(ctx, m); err != nil {
+				errorf("Translate: %v", err)
+				return false
+			}
+			translations, err = getAll(ctx, client, projectID)
+			if err != nil {
+				errorf("getAll: %v", err)
+				return false
+			}
+			if len(translations) != 1 {
+				errorf("Translate got %d translations, want 1", len(translations))
+				return false
+			}
+			return true
+		}()
+		if pass {
+			return
+		}
+		if retry < maxRetries-1 {
+			time.Sleep(sleep)
+		}
 	}
-	translations, err = getAll(ctx, client, projectID)
-	if err != nil {
-		t.Fatalf("getAll: %v", err)
-	}
-	if len(translations) != 1 {
-		t.Fatalf("Translate got %d translations, want 1", len(translations))
-	}
+	t.Fatalf("Translate failed after %d attempts: %v", maxRetries, failureLog.String())
 }
 
 func deleteAll(ctx context.Context, client *firestore.Client, projectID string) error {
