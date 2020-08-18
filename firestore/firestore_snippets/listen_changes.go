@@ -23,8 +23,7 @@ import (
 	"cloud.google.com/go/firestore"
 )
 
-// listenChanges listens to a query, returning the list of document changes
-// in the first snapshot.
+// listenChanges listens to a query, returning the list of document changes.
 func listenChanges(w io.Writer, projectID string) error {
 	// projectID := "project-id"
 	ctx := context.Background()

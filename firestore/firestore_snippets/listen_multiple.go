@@ -25,7 +25,7 @@ import (
 )
 
 // listenMultiple listens to a query, returning the names of all cities
-// in the first snapshot.
+// for a state.
 func listenMultiple(w io.Writer, projectID string) error {
 	// projectID := "project-id"
 	ctx := context.Background()

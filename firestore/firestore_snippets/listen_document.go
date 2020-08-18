@@ -23,8 +23,7 @@ import (
 	"cloud.google.com/go/firestore"
 )
 
-// listenDocument listens to a single document, returning data
-// after the first snapshot.
+// listenDocument listens to a single document.
 func listenDocument(w io.Writer, projectID string) error {
 	// projectID := "project-id"
 	ctx := context.Background()
