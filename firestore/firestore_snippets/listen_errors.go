@@ -22,6 +22,8 @@ import (
 	"time"
 
 	"cloud.google.com/go/firestore"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // listenErrors demonstrates how to handle listening errors.
@@ -39,8 +41,12 @@ func listenErrors(w io.Writer, projectID string) error {
 	it := client.Collection("cities").Snapshots(ctx)
 	for {
 		snap, err := it.Next()
+		// DeadlineExceeded will be returned when ctx is cancelled.
+		if status.Code(err) == codes.DeadlineExceeded {
+			return nil
+		}
 		if err != nil {
-			return fmt.Errorf("listen failed: %v", err)
+			return fmt.Errorf("Snapshots.Next: %v", err)
 		}
 		for _, change := range snap.Changes {
 			if change.Kind == firestore.DocumentAdded {

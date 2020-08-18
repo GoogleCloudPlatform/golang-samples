@@ -29,6 +29,7 @@ import (
 // listenDocument listens to a single document.
 func listenDocument(w io.Writer, projectID string) error {
 	// projectID := "project-id"
+	// Сontext with timeout stops listening to changes.
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -49,7 +50,7 @@ func listenDocument(w io.Writer, projectID string) error {
 			return fmt.Errorf("Snapshots.Next: %v", err)
 		}
 		if !snap.Exists() {
-			fmt.Fprintf(w, "Document no longer exists")
+			fmt.Fprintf(w, "Document no longer exists\n")
 			return nil
 		}
 		fmt.Fprintf(w, "Received document snapshot: %v\n", snap.Data())

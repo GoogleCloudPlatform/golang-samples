@@ -23,6 +23,8 @@ import (
 
 	"cloud.google.com/go/firestore"
 	"google.golang.org/api/iterator"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // listenMultiple listens to a query, returning the names of all cities
@@ -41,11 +43,12 @@ func listenMultiple(w io.Writer, projectID string) error {
 	it := client.Collection("cities").Where("state", "==", "CA").Snapshots(ctx)
 	for {
 		snap, err := it.Next()
-		if err != nil {
-			return fmt.Errorf("Snapshots: listen failed: %v", err)
+		// DeadlineExceeded will be returned when ctx is cancelled.
+		if status.Code(err) == codes.DeadlineExceeded {
+			return nil
 		}
-		if snap.Size == 0 {
-			return fmt.Errorf("current data: null")
+		if err != nil {
+			return fmt.Errorf("Snapshots.Next: %v", err)
 		}
 		for {
 			doc, err := snap.Documents.Next()
@@ -53,7 +56,7 @@ func listenMultiple(w io.Writer, projectID string) error {
 				break
 			}
 			if err != nil {
-				return fmt.Errorf("listen failed: %v", err)
+				return fmt.Errorf("Documents.Next: %v", err)
 			}
 			fmt.Fprintf(w, "Current cities in California: %v\n", doc.Ref.ID)
 		}

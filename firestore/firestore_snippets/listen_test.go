@@ -82,16 +82,6 @@ func TestListenChanges(t *testing.T) {
 	}
 }
 
-func TestListenStop(t *testing.T) {
-	ctx := context.Background()
-	client, projectID := setup(ctx, t)
-	defer client.Close()
-
-	if err := listenStop(ioutil.Discard, projectID); err != nil {
-		t.Errorf("listenStop: %v", err)
-	}
-}
-
 func TestListenErrors(t *testing.T) {
 	ctx := context.Background()
 	client, projectID := setup(ctx, t)

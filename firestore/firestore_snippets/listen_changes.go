@@ -22,6 +22,8 @@ import (
 	"time"
 
 	"cloud.google.com/go/firestore"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // listenChanges listens to a query, returning the list of document changes.
@@ -39,11 +41,12 @@ func listenChanges(w io.Writer, projectID string) error {
 	it := client.Collection("cities").Where("state", "==", "CA").Snapshots(ctx)
 	for {
 		snap, err := it.Next()
-		if err != nil {
-			return fmt.Errorf("Snapshots: listen failed: %v", err)
+		// DeadlineExceeded will be returned when ctx is cancelled.
+		if status.Code(err) == codes.DeadlineExceeded {
+			return nil
 		}
-		if snap.Size == 0 {
-			return fmt.Errorf("current data: null")
+		if err != nil {
+			return fmt.Errorf("Snapshots.Next: %v", err)
 		}
 		for _, change := range snap.Changes {
 			switch change.Kind {
