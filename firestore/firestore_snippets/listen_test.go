@@ -20,16 +20,18 @@ import (
 	"log"
 	"os"
 	"testing"
+	"time"
 
 	"cloud.google.com/go/firestore"
 )
+
+var duration time.Duration = 3 * time.Second
 
 func setup(ctx context.Context, t *testing.T) (*firestore.Client, string) {
 	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
 	if projectID == "" {
 		t.Skip("Skipping firestore test. Set GOLANG_SAMPLES_FIRESTORE_PROJECT.")
 	}
-
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
 		t.Fatalf("firestore.NewClient: %v", err)
@@ -41,6 +43,9 @@ func TestListen(t *testing.T) {
 	ctx := context.Background()
 	client, projectID := setup(ctx, t)
 	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(ctx, duration)
+	defer cancel()
 
 	cityCollection := []struct {
 		city, name, state string
@@ -58,7 +63,7 @@ func TestListen(t *testing.T) {
 			log.Fatalf("Set: %v", err)
 		}
 	}
-	if err := listenDocument(ioutil.Discard, projectID); err != nil {
+	if err := listenDocument(ctx, ioutil.Discard, projectID); err != nil {
 		t.Errorf("listenDocument: %v", err)
 	}
 }
@@ -67,7 +72,10 @@ func TestListenMultiple(t *testing.T) {
 	client, projectID := setup(ctx, t)
 	defer client.Close()
 
-	if err := listenMultiple(ioutil.Discard, projectID); err != nil {
+	ctx, cancel := context.WithTimeout(ctx, duration)
+	defer cancel()
+
+	if err := listenMultiple(ctx, ioutil.Discard, projectID); err != nil {
 		t.Errorf("listenMultiple: %v", err)
 	}
 }
@@ -77,7 +85,10 @@ func TestListenChanges(t *testing.T) {
 	client, projectID := setup(ctx, t)
 	defer client.Close()
 
-	if err := listenChanges(ioutil.Discard, projectID); err != nil {
+	ctx, cancel := context.WithTimeout(ctx, duration)
+	defer cancel()
+
+	if err := listenChanges(ctx, ioutil.Discard, projectID); err != nil {
 		t.Errorf("listenChanges: %v", err)
 	}
 }
@@ -87,7 +98,10 @@ func TestListenErrors(t *testing.T) {
 	client, projectID := setup(ctx, t)
 	defer client.Close()
 
-	if err := listenErrors(ioutil.Discard, projectID); err != nil {
+	ctx, cancel := context.WithTimeout(ctx, duration)
+	defer cancel()
+
+	if err := listenErrors(ctx, ioutil.Discard, projectID); err != nil {
 		t.Errorf("listenErrors: %v", err)
 	}
 }

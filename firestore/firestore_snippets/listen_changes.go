@@ -27,9 +27,9 @@ import (
 )
 
 // listenChanges listens to a query, returning the list of document changes.
-func listenChanges(w io.Writer, projectID string) error {
+func listenChanges(ctx context.Context, w io.Writer, projectID string) error {
 	// projectID := "project-id"
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
 	client, err := firestore.NewClient(ctx, projectID)

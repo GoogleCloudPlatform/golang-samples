@@ -27,10 +27,10 @@ import (
 )
 
 // listenDocument listens to a single document.
-func listenDocument(w io.Writer, projectID string) error {
+func listenDocument(ctx context.Context, w io.Writer, projectID string) error {
 	// projectID := "project-id"
 	// Сontext with timeout stops listening to changes.
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
 	client, err := firestore.NewClient(ctx, projectID)

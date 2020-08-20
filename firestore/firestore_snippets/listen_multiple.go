@@ -29,9 +29,9 @@ import (
 
 // listenMultiple listens to a query, returning the names of all cities
 // for a state.
-func listenMultiple(w io.Writer, projectID string) error {
+func listenMultiple(ctx context.Context, w io.Writer, projectID string) error {
 	// projectID := "project-id"
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
 	client, err := firestore.NewClient(ctx, projectID)
