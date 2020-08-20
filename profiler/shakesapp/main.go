@@ -32,12 +32,16 @@ import (
 )
 
 var (
-	projectID   = flag.String("project_id", "", "project ID to run profiler with; only required when running outside of GCP.")
-	version     = flag.String("version", "original", "version to run profiler with")
-	port        = flag.Int("port", 7788, "service port")
-	numReqs     = flag.Int("num_requests", 20, "number of requests to simulate")
-	concurrency = flag.Int("concurrency", 1, "number of requests to run in parallel")
-	numRounds   = flag.Int("num_rounds", 0, "number of simulation rounds (0 for infinite)")
+	projectID        = flag.String("project_id", "", "project ID to run profiler with; only required when running outside of GCP.")
+	version          = flag.String("version", "original", "version to run profiler with")
+	port             = flag.Int("port", 7788, "service port")
+	numReqs          = flag.Int("num_requests", 20, "number of requests to simulate")
+	concurrency      = flag.Int("concurrency", 1, "number of requests to run in parallel")
+	numRounds        = flag.Int("num_rounds", 0, "number of simulation rounds (0 for infinite)")
+	enableHeap       = flag.Bool("heap", false, "enable heap profile collection")
+	enableHeapAlloc  = flag.Bool("heap_alloc", false, "enable heap allocation profile collection")
+	enableThread     = flag.Bool("thread", false, "enable thread profile collection")
+	enableContention = flag.Bool("contention", false, "enable contention profile collection")
 )
 
 func main() {
@@ -47,9 +51,10 @@ func main() {
 		Service:              "shakesapp",
 		ServiceVersion:       *version,
 		ProjectID:            *projectID,
-		NoHeapProfiling:      true,
-		NoAllocProfiling:     true,
-		NoGoroutineProfiling: true,
+		NoHeapProfiling:      !*enableHeap,
+		NoAllocProfiling:     !*enableHeapAlloc,
+		NoGoroutineProfiling: !*enableThread,
+		MutexProfiling:       *enableContention,
 		DebugLogging:         true,
 	}); err != nil {
 		log.Fatalf("Failed to start profiler: %v", err)
