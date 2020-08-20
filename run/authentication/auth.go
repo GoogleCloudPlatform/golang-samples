@@ -19,6 +19,7 @@ package authentication
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"cloud.google.com/go/compute/metadata"
 )
@@ -27,8 +28,10 @@ import (
 // serviceURL (must be a complete URL) by authenticating with the ID token
 // obtained from the Metadata API.
 func makeGetRequest(serviceURL string) (*http.Response, error) {
-	// query the id_token with ?audience as the serviceURL
-	tokenURL := fmt.Sprintf("/instance/service-accounts/default/identity?audience=%s", serviceURL)
+	v := url.Values{}
+	v.Set("audience", serviceURL)
+	// query the id_token with audience as the serviceURL
+	tokenURL := "/instance/service-accounts/default/identity?" + v.Encode()
 	idToken, err := metadata.Get(tokenURL)
 	if err != nil {
 		return nil, fmt.Errorf("metadata.Get: failed to query id_token: %+v", err)
