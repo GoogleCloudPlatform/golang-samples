@@ -32,7 +32,7 @@ func setup(ctx context.Context, t *testing.T) (*firestore.Client, string) {
 
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
-		log.Fatalf("firestore.NewClient: %v", err)
+		t.Fatalf("firestore.NewClient: %v", err)
 	}
 	return client, projectID
 }
