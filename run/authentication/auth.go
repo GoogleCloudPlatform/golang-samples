@@ -30,7 +30,7 @@ import (
 func makeGetRequest(serviceURL string) (*http.Response, error) {
 	v := url.Values{}
 	v.Set("audience", serviceURL)
-	// query the id_token with audience as the serviceURL
+	// Query the id_token with the serviceURL as the audience.
 	tokenURL := "/instance/service-accounts/default/identity?" + v.Encode()
 	idToken, err := metadata.Get(tokenURL)
 	if err != nil {
