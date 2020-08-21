@@ -69,7 +69,7 @@ create/update/delete type samples).
 
 ## Include imports and flags in region tags
 
-The sample region (e.g. `[START foo]` and `[END foo`]) should include the import
+The sample region (e.g. `[START foo]` and `[END foo]`) should include the import
 block.
 
 ```go
