@@ -15,7 +15,7 @@
 // Package automl contains samples for Google Cloud AutoML API v1.
 package automl
 
-// [START automl_language_entity_extraction_create_model]
+// [START automl_language_text_classification_create_model]
 import (
 	"context"
 	"fmt"
@@ -60,4 +60,4 @@ func languageTextClassificationCreateModel(w io.Writer, projectID string, locati
 	return nil
 }
 
-// [END automl_language_entity_extraction_create_dataset]
+// [END automl_language_text_classification_create_model]
