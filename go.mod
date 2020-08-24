@@ -48,9 +48,9 @@ require (
 	google.golang.org/appengine v1.6.6
 	google.golang.org/genproto v0.0.0-20200806141610-86f49bd18e98
 	google.golang.org/grpc v1.31.0
-	google.golang.org/grpc/examples v0.0.0-20200707005602-4258d12073b4
+	google.golang.org/grpc/examples v1.31.0
 	google.golang.org/protobuf v1.25.0
-	gopkg.in/sendgrid/sendgrid-go.v2 v2.0.0
+	gopkg.in/sendgrid/sendgrid-go.v3 v3.6.2
 	gopkg.in/yaml.v2 v2.3.0
 )
 
