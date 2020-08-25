@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"io"
 
-	healthcare "google.golang.org/api/healthcare/v1beta1"
+	healthcare "google.golang.org/api/healthcare/v1"
 )
 
 // setDatasetIAMPolicy sets an IAM policy for the dataset.

@@ -15,7 +15,6 @@
 package models
 
 // [START bigquery_update_model_description]
-
 import (
 	"context"
 	"fmt"
@@ -23,6 +22,8 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// updateModelDescription demonstrates fetching BigQuery ML model metadata and updating the
+// Description metadata.
 func updateModelDescription(projectID, datasetID, modelID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"
@@ -32,6 +33,7 @@ func updateModelDescription(projectID, datasetID, modelID string) error {
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	model := client.Dataset(datasetID).Model(modelID)
 	oldMeta, err := model.Metadata(ctx)

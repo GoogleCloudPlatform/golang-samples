@@ -24,7 +24,6 @@ import (
 
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"google.golang.org/api/iterator"
 )
 
 func TestDetect(t *testing.T) {
@@ -96,7 +95,7 @@ func TestDetectAsyncDocument(t *testing.T) {
 
 	bucketName := fmt.Sprintf("%s-vision", tc.ProjectID)
 	bucket := client.Bucket(bucketName)
-	cleanBucket(ctx, t, client, tc.ProjectID, bucketName)
+	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName)
 
 	var buf bytes.Buffer
 	gcsSourceURI := "gs://python-docs-samples-tests/HodgeConj.pdf"
@@ -117,41 +116,5 @@ func TestDetectAsyncDocument(t *testing.T) {
 		if err != nil {
 			t.Fatalf("wanted object %q, got error: %v", filename, err)
 		}
-	}
-}
-
-func cleanBucket(ctx context.Context, t *testing.T, client *storage.Client, projectID, bucket string) {
-	deleteBucketIfExists(ctx, t, client, bucket)
-
-	b := client.Bucket(bucket)
-	// Now create it
-	if err := b.Create(ctx, projectID, nil); err != nil {
-		t.Fatalf("Bucket.Create(%q): %v", bucket, err)
-	}
-}
-
-func deleteBucketIfExists(ctx context.Context, t *testing.T, client *storage.Client, bucket string) {
-	b := client.Bucket(bucket)
-	if _, err := b.Attrs(ctx); err != nil {
-		return
-	}
-
-	// Delete all the elements in the already existent bucket
-	it := b.Objects(ctx, nil)
-	for {
-		attrs, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			t.Fatalf("Bucket.Objects(%q): %v", bucket, err)
-		}
-		if err := b.Object(attrs.Name).Delete(ctx); err != nil {
-			t.Fatalf("Bucket(%q).Object(%q).Delete: %v", bucket, attrs.Name, err)
-		}
-	}
-	// Then delete the bucket itself
-	if err := b.Delete(ctx); err != nil {
-		t.Fatalf("Bucket.Delete(%q): %v", bucket, err)
 	}
 }

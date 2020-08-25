@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"time"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
 	"cloud.google.com/go/pubsub"
@@ -114,7 +115,7 @@ func inspectBigquery(w io.Writer, projectID string, infoTypeNames []string, cust
 
 	// Create a configured request.
 	req := &dlppb.CreateDlpJobRequest{
-		Parent: "projects/" + projectID,
+		Parent: fmt.Sprintf("projects/%s/locations/global", projectID),
 		Job: &dlppb.CreateDlpJobRequest_InspectJob{
 			InspectJob: &dlppb.InspectJobConfig{
 				// StorageConfig describes where to find the data.
@@ -160,7 +161,10 @@ func inspectBigquery(w io.Writer, projectID string, infoTypeNames []string, cust
 	fmt.Fprintf(w, "Created job: %v\n", j.GetName())
 
 	// Wait for the inspect job to finish by waiting for a PubSub message.
-	ctx, cancel := context.WithCancel(ctx)
+	// This only waits for 10 minutes. For long jobs, consider using a truly
+	// asynchronous execution model such as Cloud Functions.
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Minute)
+	defer cancel()
 	err = s.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
 		// If this is the wrong job, do not process the result.
 		if msg.Attributes["DlpJobName"] != j.GetName() {

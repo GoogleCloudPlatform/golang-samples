@@ -52,7 +52,9 @@ func main() {
 	}
 
 	log.Printf("Listening on port %s", port)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
+		log.Fatal(err)
+	}
 }
 
 // setup executes per-instance one-time warmup and initialization actions.

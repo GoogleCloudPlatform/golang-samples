@@ -116,7 +116,7 @@ func structuredWrite(client *logging.Client) {
 		},
 		Severity: logging.Debug,
 	})
-	// [END logging_write_log_entry]
+	// [END write_structured_log_entry]
 }
 
 func deleteLog(adminClient *logadmin.Client) error {

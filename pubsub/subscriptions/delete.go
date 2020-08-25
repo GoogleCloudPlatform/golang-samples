@@ -23,20 +23,20 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func delete(w io.Writer, projectID, subName string) error {
+func delete(w io.Writer, projectID, subID string) error {
 	// projectID := "my-project-id"
-	// subName := projectID + "-example-sub"
+	// subID := "my-sub"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
 
-	sub := client.Subscription(subName)
+	sub := client.Subscription(subID)
 	if err := sub.Delete(ctx); err != nil {
 		return fmt.Errorf("Delete: %v", err)
 	}
-	fmt.Fprintf(w, "Subscription %q deleted.", subName)
+	fmt.Fprintf(w, "Subscription %q deleted.", subID)
 	return nil
 }
 

@@ -26,7 +26,7 @@ func TestTriggersSamples(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
 
-	fullID := "projects/" + tc.ProjectID + "/jobTriggers/my-trigger"
+	fullID := "projects/" + tc.ProjectID + "/locations/global/jobTriggers/my-trigger"
 
 	// Delete the trigger if it already exists since the same ID is used every
 	// time.

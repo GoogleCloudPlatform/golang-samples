@@ -25,9 +25,9 @@ import (
 	"os"
 	"strconv"
 
-	asset "cloud.google.com/go/asset/apiv1p2beta1"
+	asset "cloud.google.com/go/asset/apiv1"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
-	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1p2beta1"
+	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1"
 	field_mask "google.golang.org/genproto/protobuf/field_mask"
 )
 

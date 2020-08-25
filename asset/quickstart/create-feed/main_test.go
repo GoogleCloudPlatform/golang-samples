@@ -22,16 +22,20 @@ import (
 	"testing"
 	"time"
 
-	asset "cloud.google.com/go/asset/apiv1p2beta1"
+	asset "cloud.google.com/go/asset/apiv1"
+	"cloud.google.com/go/pubsub"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/gofrs/uuid"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
-	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1p2beta1"
+	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func TestMain(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	env := map[string]string{"GOOGLE_CLOUD_PROJECT": tc.ProjectID}
-	feedID := fmt.Sprintf("FEED-%s", strconv.FormatInt(time.Now().UnixNano(), 10))
+	feedID := fmt.Sprintf("FEED-%s", uuid.Must(uuid.NewV4()).String()[:8])
 
 	ctx := context.Background()
 	cloudresourcemanagerClient, err := cloudresourcemanager.NewService(ctx)
@@ -50,26 +54,53 @@ func TestMain(t *testing.T) {
 		t.Fatalf("asset.NewClient: %v", err)
 	}
 
+	createTopic(ctx, t, tc.ProjectID, "YOUR_TOPIC_NAME")
+
 	m := testutil.BuildMain(t)
 	defer m.Cleanup()
 
 	if !m.Built() {
-		t.Errorf("failed to build app")
+		t.Fatalf("failed to build app")
 	}
 
-	stdOut, stdErr, err := m.Run(env, 30*time.Second, fmt.Sprintf("--feed_id=%s", feedID))
-	if err != nil {
-		t.Errorf("execution failed: %v", err)
-	}
-	if len(stdErr) > 0 {
-		t.Errorf("did not expect stderr output, got %d bytes: %s", len(stdErr), string(stdErr))
-	}
-	got := string(stdOut)
-	if !strings.Contains(got, feedID) {
-		t.Errorf("stdout returned %s, wanted to contain %s", got, feedID)
-	}
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		stdOut, stdErr, err := m.Run(env, 2*time.Minute, fmt.Sprintf("--feed_id=%s", feedID))
+		if err != nil {
+			r.Errorf("execution failed: %v", err)
+		}
+		if len(stdErr) > 0 {
+			r.Errorf("did not expect stderr output, got %d bytes: %s", len(stdErr), string(stdErr))
+		}
+		got := string(stdOut)
+		if !strings.Contains(got, feedID) {
+			r.Errorf("stdout returned %s, wanted to contain %s", got, feedID)
+		}
+	})
 
 	client.DeleteFeed(ctx, &assetpb.DeleteFeedRequest{
 		Name: fmt.Sprintf("projects/%s/feeds/%s", projectNumber, feedID),
 	})
+}
+
+func createTopic(ctx context.Context, t *testing.T, projectID, topicName string) {
+	client, err := pubsub.NewClient(ctx, projectID)
+	if err != nil {
+		t.Fatalf("pubsub.NewClient: %v", err)
+	}
+
+	topic := client.Topic(topicName)
+	ok, err := topic.Exists(ctx)
+	if err != nil {
+		t.Fatalf("failed to check if topic exists: %v", err)
+	}
+	if !ok {
+		_, err := client.CreateTopic(ctx, topicName)
+		// In case the topic was created in the meantime.
+		if status.Code(err) == codes.AlreadyExists {
+			return
+		}
+		if err != nil {
+			t.Fatalf("CreateTopic: %v", err)
+		}
+	}
 }

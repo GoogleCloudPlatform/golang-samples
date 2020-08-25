@@ -28,7 +28,7 @@ import (
 )
 
 func TestSample(t *testing.T) {
-	tc := testutil.SystemTest(t)
+	tc := testutil.EndToEndTest(t)
 
 	instance := os.Getenv("GOLANG_SAMPLES_SPANNER")
 	if instance == "" {
@@ -37,7 +37,9 @@ func TestSample(t *testing.T) {
 	if !strings.HasPrefix(instance, "projects/") {
 		t.Fatal("Spanner instance ref must be in the form of 'projects/PROJECT_ID/instances/INSTANCE_ID'")
 	}
-	dbName := fmt.Sprintf("%s/databases/test--%s", instance, tc.ProjectID)
+	// "test-l-" is different from the database name in snippet_test.go because
+	// this prevents from running against the same database.
+	dbName := fmt.Sprintf("%s/databases/test-l-%s", instance, tc.ProjectID)
 
 	ctx := context.Background()
 	adminClient, dataClient := createClients(ctx, dbName)
@@ -87,14 +89,6 @@ func TestSample(t *testing.T) {
 	mustRunCommand(t, "createdatabase", dbName, 0)
 	assertContains(t, runCommand(t, "insertplayers", dbName, 0), "Inserted players")
 	assertContains(t, runCommand(t, "insertplayers", dbName, 0), "Inserted players")
-	assertContains(t, runCommand(t, "insertscores", dbName, 0), "Inserted scores")
-	assertContains(t, runCommand(t, "insertscores", dbName, 0), "Inserted scores")
-	assertContains(t, runCommand(t, "insertscores", dbName, 0), "Inserted scores")
-	assertContains(t, runCommand(t, "insertscores", dbName, 0), "Inserted scores")
-	assertContains(t, runCommand(t, "insertscores", dbName, 0), "Inserted scores")
-	assertContains(t, runCommand(t, "insertscores", dbName, 0), "Inserted scores")
-	assertContains(t, runCommand(t, "insertscores", dbName, 0), "Inserted scores")
-	assertContains(t, runCommand(t, "insertscores", dbName, 0), "Inserted scores")
 	assertContains(t, runCommand(t, "insertscores", dbName, 0), "Inserted scores")
 	assertContains(t, runCommand(t, "insertscores", dbName, 0), "Inserted scores")
 	assertContains(t, runCommand(t, "query", dbName, 0), "PlayerId: ")

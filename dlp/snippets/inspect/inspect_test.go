@@ -24,15 +24,15 @@ import (
 	"cloud.google.com/go/datastore"
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/gofrs/uuid"
 )
 
 const (
-	topicName        = "dlp-inspect-test-topic"
-	subscriptionName = "dlp-inspect-test-sub"
+	topicName        = "dlp-inspect-test-topic-"
+	subscriptionName = "dlp-inspect-test-sub-"
 
-	ssnFileName             = "fake_ssn.txt"
-	nothingEventfulFileName = "nothing_eventful.txt"
-	bucketName              = "golang-samples-dlp-test"
+	ssnFileName = "fake_ssn.txt"
+	bucketName  = "golang-samples-dlp-test"
 )
 
 func TestInspectDatastore(t *testing.T) {
@@ -44,18 +44,17 @@ func TestInspectDatastore(t *testing.T) {
 	}{
 		{
 			kind: "SSNTask",
-			want: "US_SOCIAL_SECURITY_NUMBER",
-		},
-		{
-			kind: "BoringTask",
-			want: "No results",
+			want: "Created job",
 		},
 	}
 	for _, test := range tests {
 		t.Run(test.kind, func(t *testing.T) {
 			t.Parallel()
+			u := uuid.Must(uuid.NewV4()).String()[:8]
 			buf := new(bytes.Buffer)
-			inspectDatastore(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName, subscriptionName, tc.ProjectID, "", test.kind)
+			if err := inspectDatastore(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName+u, subscriptionName+u, tc.ProjectID, "", test.kind); err != nil {
+				t.Errorf("inspectDatastore(%s) got err: %v", test.kind, err)
+			}
 			if got := buf.String(); !strings.Contains(got, test.want) {
 				t.Errorf("inspectDatastore(%s) = %q, want %q substring", test.kind, got, test.want)
 			}
@@ -87,16 +86,6 @@ func writeTestDatastoreFiles(t *testing.T, projectID string) {
 	if _, err := client.Put(ctx, ssnKey, &task); err != nil {
 		t.Fatalf("Failed to save task: %v", err)
 	}
-
-	kind = "BoringTask"
-	name = "boringtask1"
-	boringKey := datastore.NameKey(kind, name, nil)
-	boringTask := BoringTask{
-		Description: "Nothing meaningful",
-	}
-	if _, err := client.Put(ctx, boringKey, &boringTask); err != nil {
-		t.Fatalf("Failed to save task: %v", err)
-	}
 }
 
 func TestInspectGCS(t *testing.T) {
@@ -108,18 +97,17 @@ func TestInspectGCS(t *testing.T) {
 	}{
 		{
 			fileName: ssnFileName,
-			want:     "US_SOCIAL_SECURITY_NUMBER",
-		},
-		{
-			fileName: nothingEventfulFileName,
-			want:     "No results",
+			want:     "Created job",
 		},
 	}
 	for _, test := range tests {
 		t.Run(test.fileName, func(t *testing.T) {
 			t.Parallel()
+			u := uuid.Must(uuid.NewV4()).String()[:8]
 			buf := new(bytes.Buffer)
-			inspectGCSFile(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName, subscriptionName, bucketName, test.fileName)
+			if err := inspectGCSFile(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName+u, subscriptionName+u, bucketName, test.fileName); err != nil {
+				t.Errorf("inspectGCSFile(%s) got err: %v", test.fileName, err)
+			}
 			if got := buf.String(); !strings.Contains(got, test.want) {
 				t.Errorf("inspectGCSFile(%s) = %q, want %q substring", test.fileName, got, test.want)
 			}
@@ -149,9 +137,6 @@ func writeTestGCSFiles(t *testing.T, projectID string) {
 	if err := writeObject(ctx, bucket, ssnFileName, "My SSN is 111222333"); err != nil {
 		t.Fatalf("writeObject: %v", err)
 	}
-	if err := writeObject(ctx, bucket, nothingEventfulFileName, "Nothing eventful"); err != nil {
-		t.Fatalf("writeObject: %v", err)
-	}
 }
 
 func writeObject(ctx context.Context, bucket *storage.BucketHandle, fileName, content string) error {
@@ -175,8 +160,8 @@ func writeObject(ctx context.Context, bucket *storage.BucketHandle, fileName, co
 func TestInspectString(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
-	err := inspectString(buf, tc.ProjectID, "I'm Gary and my email is gary@example.com")
-	if err != nil {
+
+	if err := inspectString(buf, tc.ProjectID, "I'm Gary and my email is gary@example.com"); err != nil {
 		t.Errorf("TestInspectFile: %v", err)
 	}
 
@@ -189,8 +174,8 @@ func TestInspectString(t *testing.T) {
 func TestInspectTextFile(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
-	err := inspectTextFile(buf, tc.ProjectID, "testdata/test.txt")
-	if err != nil {
+
+	if err := inspectTextFile(buf, tc.ProjectID, "testdata/test.txt"); err != nil {
 		t.Errorf("TestInspectTextFile: %v", err)
 	}
 
@@ -208,9 +193,8 @@ type Item struct {
 }
 
 const (
-	harmlessTable = "harmless"
-	harmfulTable  = "harmful"
-	bqDatasetID   = "golang_samples_dlp"
+	harmfulTable = "harmful"
+	bqDatasetID  = "golang_samples_dlp"
 )
 
 func mustCreateBigqueryTestFiles(t *testing.T, projectID, datasetID string) {
@@ -231,9 +215,6 @@ func mustCreateBigqueryTestFiles(t *testing.T, projectID, datasetID string) {
 	schema, err := bigquery.InferSchema(Item{})
 	if err != nil {
 		t.Fatalf("InferSchema: %v", err)
-	}
-	if err := uploadBigQuery(ctx, d, schema, harmlessTable, "Nothing meaningful"); err != nil {
-		t.Fatalf("uploadBigQuery: %v", err)
 	}
 	if err := uploadBigQuery(ctx, d, schema, harmfulTable, "My SSN is 111222333"); err != nil {
 		t.Fatalf("uploadBigQuery: %v", err)
@@ -272,18 +253,17 @@ func TestInspectBigquery(t *testing.T) {
 	}{
 		{
 			table: harmfulTable,
-			want:  "US_SOCIAL_SECURITY_NUMBER",
-		},
-		{
-			table: harmlessTable,
-			want:  "No results",
+			want:  "Created job",
 		},
 	}
 	for _, test := range tests {
 		t.Run(test.table, func(t *testing.T) {
 			t.Parallel()
+			u := uuid.Must(uuid.NewV4()).String()[:8]
 			buf := new(bytes.Buffer)
-			inspectBigquery(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName, subscriptionName, tc.ProjectID, bqDatasetID, test.table)
+			if err := inspectBigquery(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName+u, subscriptionName+u, tc.ProjectID, bqDatasetID, test.table); err != nil {
+				t.Errorf("inspectBigquery(%s) got err: %v", test.table, err)
+			}
 			if got := buf.String(); !strings.Contains(got, test.want) {
 				t.Errorf("inspectBigquery(%s) = %q, want %q substring", test.table, got, test.want)
 			}

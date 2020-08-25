@@ -19,10 +19,10 @@ import (
 
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
+	"google.golang.org/appengine/memcache"
 )
 
 // [START intro_1]
-import "google.golang.org/appengine/memcache"
 
 // [END intro_1]
 

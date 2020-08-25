@@ -69,7 +69,9 @@ func readTimeSeriesReduce(w io.Writer, projectID string) error {
 		}
 		fmt.Fprintln(w, "Average CPU utilization across all GCE instances:")
 		fmt.Fprintf(w, "\tNow: %.4f\n", resp.GetPoints()[0].GetValue().GetDoubleValue())
-		fmt.Fprintf(w, "\t10 minutes ago: %.4f\n", resp.GetPoints()[1].GetValue().GetDoubleValue())
+		if len(resp.GetPoints()) > 1 {
+			fmt.Fprintf(w, "\t10 minutes ago: %.4f\n", resp.GetPoints()[1].GetValue().GetDoubleValue())
+		}
 	}
 	fmt.Fprintln(w, "Done")
 	return nil

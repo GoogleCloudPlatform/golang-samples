@@ -24,6 +24,8 @@ import (
 )
 
 func TestGetCompany(t *testing.T) {
+	t.Skip("Flaky. https://github.com/GoogleCloudPlatform/golang-samples/issues/1061.")
+
 	buf := &bytes.Buffer{}
 	if _, err := getCompany(buf, testCompany.Name); err != nil {
 		t.Fatalf("getCompany: %v", err)
@@ -35,6 +37,8 @@ func TestGetCompany(t *testing.T) {
 }
 
 func TestUpdateCompany(t *testing.T) {
+	t.Skip("Flaky. https://github.com/GoogleCloudPlatform/golang-samples/issues/1061.")
+
 	testCompany.HiringAgency = false
 	c, err := updateCompany(ioutil.Discard, testCompany.Name, testCompany)
 	if err != nil {
@@ -54,6 +58,8 @@ func TestUpdateCompany(t *testing.T) {
 }
 
 func TestUpdateCompanyWithMask(t *testing.T) {
+	t.Skip("Flaky. https://github.com/GoogleCloudPlatform/golang-samples/issues/1061.")
+
 	testCompany.HiringAgency = false
 	c, err := updateCompanyWithMask(ioutil.Discard, testCompany.Name, "hiring_agency", testCompany)
 	if err != nil {
@@ -73,6 +79,8 @@ func TestUpdateCompanyWithMask(t *testing.T) {
 }
 
 func TestListCompanies(t *testing.T) {
+	t.Skip("Flaky. https://github.com/GoogleCloudPlatform/golang-samples/issues/1061.")
+
 	tc := testutil.SystemTest(t)
 
 	buf := &bytes.Buffer{}
