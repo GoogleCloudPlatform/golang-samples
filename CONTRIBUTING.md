@@ -23,6 +23,11 @@
 
    Commits will be squashed when they're merged.
 
+## Tested Go versions
+
+We test using the oldest and newest supported Go versions. We do not test the
+intermediate versions. See [testing/kokoro](testing/kokoro).
+
 # Formatting
 
 All code must be formatted with `gofmt` (with the latest Go version) and pass
