@@ -96,9 +96,10 @@ func addBinding(crmService *cloudresourcemanager.Service, projectID, member, rol
 		binding.Members = append(binding.Members, member)
 	} else {
 		// If the binding does not exist, adds a new binding to the policy
-		binding = new(cloudresourcemanager.Binding)
-		binding.Role = role
-		binding.Members = []string{member}
+		binding = &cloudresourcemanager.Binding{
+			Role:    role,
+			Members: []string{member},
+		}
 		policy.Bindings = append(policy.Bindings, binding)
 	}
 
