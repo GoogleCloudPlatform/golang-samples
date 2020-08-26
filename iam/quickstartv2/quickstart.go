@@ -32,6 +32,8 @@ func main() {
 	projectID := flag.String("project_id", "", "Cloud Project ID")
 	// TODO: Add the ID of your member in the form "user:member@example.com"
 	member := flag.String("member_id", "", "Your member ID")
+	flag.Parse()
+
 	// The role to be granted
 	var role string = "roles/logging.logWriter"
 

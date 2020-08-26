@@ -40,7 +40,7 @@ func TestQuickstart(t *testing.T) {
 
 	stdOut, stdErr, err := m.Run(nil, 10*time.Minute,
 		"--project_id", tc.ProjectID,
-		"--member", testMember,
+		"--member_id", testMember,
 	)
 
 	if err != nil {
