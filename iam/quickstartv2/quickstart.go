@@ -45,11 +45,11 @@ func main() {
 
 	// Gets the project's policy and prints all members with the "Log Writer" role
 	policy := getPolicy(crmService, *projectID)
-	var binding *cloudresourcemanager.Binding = nil
-	bindings := policy.Bindings
-	for b := range bindings {
-		if bindings[b].Role == role {
-			binding = bindings[b]
+	// Find the policy binding for role. Only one binding can have the role.
+	var binding *cloudresourcemanager.Binding
+	for _, b := range policy.Bindings {
+		if b.Role == role {
+			binding = b
 			break
 		}
 	}
