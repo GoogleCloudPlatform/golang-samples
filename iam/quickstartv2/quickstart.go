@@ -21,13 +21,13 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
 func main() {
-
 	// TODO: Add your project ID
 	projectID := flag.String("project_id", "", "Cloud Project ID")
 	// TODO: Add the ID of your member in the form "user:member@example.com"
@@ -38,7 +38,11 @@ func main() {
 	var role string = "roles/logging.logWriter"
 
 	// Initializes the Cloud Resource Manager service
-	crmService := initializeService()
+	ctx := context.Background()
+	crmService, err := cloudresourcemanager.NewService(ctx)
+	if err != nil {
+		log.Fatalf("cloudresourcemanager.NewService: %v", err)
+	}
 
 	// Grants your member the "Log writer" role for your project
 	addBinding(crmService, *projectID, *member, role)
@@ -54,25 +58,10 @@ func main() {
 		}
 	}
 	fmt.Println("Role: ", binding.Role)
-	fmt.Print("Members: ")
-	for m := range binding.Members {
-		fmt.Print("[", binding.Members[m], "] ")
-	}
+	fmt.Print("Members: ", strings.Join(binding.Members, ", "))
 
 	// Removes member from the "Log writer" role
 	removeMember(crmService, *projectID, *member, role)
-
-}
-
-// initializeService initializes a new Cloud Resource Manager service
-func initializeService() *cloudresourcemanager.Service {
-
-	ctx := context.Background()
-	crmService, err := cloudresourcemanager.NewService(ctx)
-	if err != nil {
-		log.Fatalf("cloudresourcemanager.NewService: %v", err)
-	}
-	return crmService
 
 }
 
@@ -81,12 +70,11 @@ func addBinding(crmService *cloudresourcemanager.Service, projectID, member, rol
 
 	policy := getPolicy(crmService, projectID)
 
-	// Finds the role binding in the policy, if it exists
-	bindings := policy.Bindings
-	var binding *cloudresourcemanager.Binding = nil
-	for b := range bindings {
-		if bindings[b].Role == role {
-			binding = bindings[b]
+	// Find the policy binding for role. Only one binding can have the role.
+	var binding *cloudresourcemanager.Binding
+	for _, b := range policy.Bindings {
+		if b.Role == role {
+			binding = b
 			break
 		}
 	}
@@ -112,14 +100,13 @@ func removeMember(crmService *cloudresourcemanager.Service, projectID, member, r
 
 	policy := getPolicy(crmService, projectID)
 
-	// Finds the binding in the policy
-	bindings := policy.Bindings
-	var binding *cloudresourcemanager.Binding = nil
+	// Find the policy binding for role. Only one binding can have the role.
+	var binding *cloudresourcemanager.Binding
 	var bindingIndex int
-	for b := range bindings {
-		if bindings[b].Role == role {
-			binding = bindings[b]
-			bindingIndex = b
+	for i, b := range policy.Bindings {
+		if b.Role == role {
+			binding = b
+			bindingIndex = i
 			break
 		}
 	}
@@ -128,10 +115,9 @@ func removeMember(crmService *cloudresourcemanager.Service, projectID, member, r
 	// into the removed spot and shrink the slice.
 	if len(binding.Members) == 1 {
 		// If the member is the only member in the binding, removes the binding
-		last := len(bindings) - 1
-		bindings[bindingIndex] = bindings[last]
-		bindings[last] = nil
-		policy.Bindings = bindings[:last]
+		last := len(policy.Bindings) - 1
+		policy.Bindings[bindingIndex] = policy.Bindings[last]
+		policy.Bindings = policy.Bindings[:last]
 	} else {
 		// If there is more than one member in the binding, removes the member
 		var memberIndex int
@@ -140,9 +126,8 @@ func removeMember(crmService *cloudresourcemanager.Service, projectID, member, r
 				memberIndex = i
 			}
 		}
-		last := len(bindings[bindingIndex].Members) - 1
+		last := len(policy.Bindings[bindingIndex].Members) - 1
 		binding.Members[memberIndex] = binding.Members[last]
-		binding.Members[last] = ""
 		binding.Members = binding.Members[:last]
 	}
 
