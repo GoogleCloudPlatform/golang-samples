@@ -48,9 +48,11 @@ func listenErrors(ctx context.Context, w io.Writer, projectID string) error {
 		if err != nil {
 			return fmt.Errorf("Snapshots.Next: %v", err)
 		}
-		for _, change := range snap.Changes {
-			if change.Kind == firestore.DocumentAdded {
-				fmt.Fprintf(w, "New city: %v\n", change.Doc.Data())
+		if snap != nil {
+			for _, change := range snap.Changes {
+				if change.Kind == firestore.DocumentAdded {
+					fmt.Fprintf(w, "New city: %v\n", change.Doc.Data())
+				}
 			}
 		}
 	}

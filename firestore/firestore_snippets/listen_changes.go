@@ -27,35 +27,43 @@ import (
 )
 
 // listenChanges listens to a query, returning the list of document changes.
-func listenChanges(ctx context.Context, w io.Writer, projectID string) error {
+func listenChanges(ctx context.Context, w io.Writer, projectID string) ([]firestore.DocumentChange, error) {
 	// projectID := "project-id"
 	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("firestore.NewClient: %v", err)
+		return nil, fmt.Errorf("firestore.NewClient: %v", err)
 	}
 	defer client.Close()
 
+	modified := false
+	changes := make([]firestore.DocumentChange, 0)
 	it := client.Collection("cities").Where("state", "==", "CA").Snapshots(ctx)
 	for {
 		snap, err := it.Next()
-		// DeadlineExceeded will be returned when ctx is cancelled.
-		if status.Code(err) == codes.DeadlineExceeded {
-			return nil
-		}
 		if err != nil {
-			return fmt.Errorf("Snapshots.Next: %v", err)
+			// DeadlineExceeded will be returned when ctx is cancelled.
+			if status.Code(err) == codes.DeadlineExceeded && modified {
+				return changes, nil
+			} else if status.Code(err) == codes.DeadlineExceeded && !modified {
+				return changes, fmt.Errorf("expected document wasn't modified")
+			}
+			return nil, fmt.Errorf("Snapshots.Next: %v", err)
 		}
-		for _, change := range snap.Changes {
-			switch change.Kind {
-			case firestore.DocumentAdded:
-				fmt.Fprintf(w, "New city: %v\n", change.Doc.Data())
-			case firestore.DocumentModified:
-				fmt.Fprintf(w, "Modified city: %v\n", change.Doc.Data())
-			case firestore.DocumentRemoved:
-				fmt.Fprintf(w, "Removed city: %v\n", change.Doc.Data())
+		if snap != nil {
+			for _, change := range snap.Changes {
+				changes = append(changes, change)
+				switch change.Kind {
+				case firestore.DocumentAdded:
+					fmt.Fprintf(w, "New city: %v\n", change.Doc.Data())
+				case firestore.DocumentModified:
+					modified = true
+					fmt.Fprintf(w, "Modified city: %v\n", change.Doc.Data())
+				case firestore.DocumentRemoved:
+					fmt.Fprintf(w, "Removed city: %v\n", change.Doc.Data())
+				}
 			}
 		}
 	}

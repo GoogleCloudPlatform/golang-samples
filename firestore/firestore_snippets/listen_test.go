@@ -25,7 +25,7 @@ import (
 	"cloud.google.com/go/firestore"
 )
 
-var duration time.Duration = 3 * time.Second
+var duration time.Duration = 6 * time.Second
 
 func setup(ctx context.Context, t *testing.T) (*firestore.Client, string) {
 	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
@@ -47,6 +47,13 @@ func TestListen(t *testing.T) {
 	ctx, cancel := context.WithTimeout(ctx, duration)
 	defer cancel()
 
+	// Delete all docs first to make sure setup works.
+	docs, err := client.Collection("cities").Documents(ctx).GetAll()
+	if err == nil {
+		for _, doc := range docs {
+			doc.Ref.Delete(ctx)
+		}
+	}
 	cityCollection := []struct {
 		city, name, state string
 	}{
@@ -88,8 +95,30 @@ func TestListenChanges(t *testing.T) {
 	ctx, cancel := context.WithTimeout(ctx, duration)
 	defer cancel()
 
-	if err := listenChanges(ctx, ioutil.Discard, projectID); err != nil {
-		t.Errorf("listenChanges: %v", err)
+	c := make(chan []firestore.DocumentChange)
+	go func() {
+		defer close(c)
+		changes, err := listenChanges(ctx, ioutil.Discard, projectID)
+		if err != nil {
+			t.Errorf("listenChanges: %v", err)
+		}
+		c <- changes
+	}()
+	// Add some changes to data in parallel.
+	time.Sleep(time.Second)
+	var pop int64 = 3900000
+	if _, err := client.Collection("cities").Doc("LA").Update(ctx, []firestore.Update{
+		{Path: "population", Value: pop},
+	}); err != nil {
+		log.Fatalf("Doc.Update: %v", err)
+	}
+	result := <-c
+	if len(result) != 3 {
+		t.Errorf("got %v changes, want %v changes", len(result), 3)
+	}
+	got := result[len(result)-1]
+	if pop != got.Doc.Data()["population"].(int64) {
+		t.Errorf("got %v, want %v", got.Doc.Data()["population"].(int64), pop)
 	}
 }
 

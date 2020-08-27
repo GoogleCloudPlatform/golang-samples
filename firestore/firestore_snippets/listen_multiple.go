@@ -50,15 +50,17 @@ func listenMultiple(ctx context.Context, w io.Writer, projectID string) error {
 		if err != nil {
 			return fmt.Errorf("Snapshots.Next: %v", err)
 		}
-		for {
-			doc, err := snap.Documents.Next()
-			if err == iterator.Done {
-				break
+		if snap != nil {
+			for {
+				doc, err := snap.Documents.Next()
+				if err == iterator.Done {
+					break
+				}
+				if err != nil {
+					return fmt.Errorf("Documents.Next: %v", err)
+				}
+				fmt.Fprintf(w, "Current cities in California: %v\n", doc.Ref.ID)
 			}
-			if err != nil {
-				return fmt.Errorf("Documents.Next: %v", err)
-			}
-			fmt.Fprintf(w, "Current cities in California: %v\n", doc.Ref.ID)
 		}
 	}
 }
