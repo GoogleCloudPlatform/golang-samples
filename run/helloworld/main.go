@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START run_helloworld_server]
+// [START run_helloworld_service]
 
 // Sample run-helloworld is a minimal Cloud Run service.
 package main
@@ -50,4 +50,4 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello %s!\n", name)
 }
 
-// [END run_helloworld_server]
+// [END run_helloworld_service]
