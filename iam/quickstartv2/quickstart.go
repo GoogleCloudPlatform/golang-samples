@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START iam_quickstartv2]
+// [START iam_quickstart_v2]
 
 package main
 
@@ -166,4 +166,4 @@ func setPolicy(crmService *cloudresourcemanager.Service, projectID string, polic
 	}
 }
 
-// [END iam_quickstartv2]
+// [END iam_quickstart_v2]
