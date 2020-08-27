@@ -19,6 +19,9 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
+
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func setup(t *testing.T) string {
@@ -30,41 +33,45 @@ func setup(t *testing.T) string {
 }
 
 func TestEnableAssetDiscovery(t *testing.T) {
-	orgID := setup(t)
-	buf := new(bytes.Buffer)
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		orgID := setup(t)
+		buf := new(bytes.Buffer)
 
-	err := enableAssetDiscovery(buf, orgID)
+		err := enableAssetDiscovery(buf, orgID)
 
-	if err != nil {
-		t.Fatalf("enableAssetDiscovery(%s) had error: %v", orgID, err)
-	}
+		if err != nil {
+			r.Errorf("enableAssetDiscovery(%s) had error: %v", orgID, err)
+			return
+		}
 
-	got := buf.String()
-	if want := "Asset discovery on? true"; !strings.Contains(got, want) {
-		t.Errorf("enableAssetDiscovery(%s) got: %s want %s", orgID, got, want)
-	}
-	if !strings.Contains(got, orgID) {
-		t.Errorf("enableAssetDiscovery(%s) got: %s want %s", orgID, got, orgID)
-	}
-
+		got := buf.String()
+		if want := "Asset discovery on? true"; !strings.Contains(got, want) {
+			r.Errorf("enableAssetDiscovery(%s) got: %s want %s", orgID, got, want)
+		}
+		if !strings.Contains(got, orgID) {
+			r.Errorf("enableAssetDiscovery(%s) got: %s want %s", orgID, got, orgID)
+		}
+	})
 }
 
 func TestGetOrgSettings(t *testing.T) {
-	orgID := setup(t)
-	buf := new(bytes.Buffer)
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		orgID := setup(t)
+		buf := new(bytes.Buffer)
 
-	err := getOrgSettings(buf, orgID)
+		err := getOrgSettings(buf, orgID)
 
-	if err != nil {
-		t.Fatalf("getOrgSettings(%s) had error: %v", orgID, err)
-	}
+		if err != nil {
+			r.Errorf("getOrgSettings(%s) had error: %v", orgID, err)
+			return
+		}
 
-	got := buf.String()
-	if want := "Asset Discovery on? "; !strings.Contains(got, want) {
-		t.Errorf("getOrgSettings(%s) got: %s want %s", orgID, got, want)
-	}
-	if !strings.Contains(got, orgID) {
-		t.Errorf("getOrgSettings(%s) got: %s want %s", orgID, got, orgID)
-	}
-
+		got := buf.String()
+		if want := "Asset Discovery on? "; !strings.Contains(got, want) {
+			r.Errorf("getOrgSettings(%s) got: %s want %s", orgID, got, want)
+		}
+		if !strings.Contains(got, orgID) {
+			r.Errorf("getOrgSettings(%s) got: %s want %s", orgID, got, orgID)
+		}
+	})
 }
