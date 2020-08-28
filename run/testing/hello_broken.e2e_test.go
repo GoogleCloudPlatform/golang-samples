@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package testing
+package cloudruntests
 
 import (
 	"fmt"
@@ -28,6 +28,7 @@ func TestBrokenService(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 
 	service := cloudrunci.NewService("hello-broken", tc.ProjectID)
+	service.Dir = "../hello-broken"
 	if err := service.Deploy(); err != nil {
 		t.Fatalf("service.Deploy %q: %v", service.Name, err)
 	}

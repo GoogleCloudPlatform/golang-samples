@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package testing
+package cloudruntests
 
 import (
 	"bytes"
@@ -44,7 +44,7 @@ func TestEditorService(t *testing.T) {
 	defer renderService.Clean()
 
 	editorService = cloudrunci.NewService("editor", tc.ProjectID)
-	editorService.Dir = "../markdown-preview/renderer"
+	editorService.Dir = "../markdown-preview/editor"
 	u, err := renderService.URL("")
 	if err != nil {
 		t.Fatalf("service.URL: %v", err)

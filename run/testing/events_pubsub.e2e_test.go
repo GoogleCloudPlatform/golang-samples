@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package testing
+package cloudruntests
 
 import (
 	"fmt"
@@ -27,7 +27,7 @@ import (
 func TestPubSubEventsService(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 
-	service := cloudrunci.NewService("run-events-pubsub", tc.ProjectID)
+	service := cloudrunci.NewService("events-pubsub", tc.ProjectID)
 	service.Dir = "../events_pubsub"
 	if err := service.Deploy(); err != nil {
 		t.Fatalf("service.Deploy %q: %v", service.Name, err)

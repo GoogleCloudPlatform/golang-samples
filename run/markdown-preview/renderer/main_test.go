@@ -15,15 +15,9 @@
 package main
 
 import (
-	"io/ioutil"
-	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
-	"time"
-
-	"github.com/GoogleCloudPlatform/golang-samples/internal/cloudrunci"
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 var tests = []struct {
@@ -51,44 +45,6 @@ func TestMarkdownHandler(t *testing.T) {
 		markdownHandler(rr, req)
 
 		if got := rr.Body.String(); got != test.want {
-			t.Errorf("%s: got %q, want %q", test.label, got, test.want)
-		}
-	}
-}
-
-func TestRendererService(t *testing.T) {
-	tc := testutil.EndToEndTest(t)
-	service := cloudrunci.NewService("render", tc.ProjectID)
-	if err := service.Deploy(); err != nil {
-		t.Fatalf("service.Deploy %q: %v", service.Name, err)
-	}
-	defer service.Clean()
-
-	for _, test := range tests {
-		req, err := service.NewRequest("POST", "/")
-		if err != nil {
-			t.Fatalf("service.NewRequest: %q", err)
-		}
-		req.Body = ioutil.NopCloser(strings.NewReader(test.input))
-
-		client := http.Client{Timeout: 10 * time.Second}
-		resp, err := client.Do(req)
-		if err != nil {
-			t.Fatalf("client.Do: %v", err)
-		}
-		defer resp.Body.Close()
-		t.Logf("client.Do: %s %s\n", req.Method, req.URL)
-
-		if got := resp.StatusCode; got != http.StatusOK {
-			t.Errorf("response status: got %d, want %d", got, http.StatusOK)
-		}
-
-		out, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			t.Fatalf("ioutil.ReadAll: %v", err)
-		}
-
-		if got := string(out); got != test.want {
 			t.Errorf("%s: got %q, want %q", test.label, got, test.want)
 		}
 	}

@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package testing
+package cloudruntests
 
 import (
-	"fmt"
+	"io/ioutil"
 	"net/http"
+	"strings"
 	"testing"
 	"time"
 
@@ -24,31 +25,58 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestRendererServiceDeploy(t *testing.T) {
+func TestRendererService(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
-
-	service := cloudrunci.NewService("renderer", tc.ProjectID)
+	service := cloudrunci.NewService("render", tc.ProjectID)
 	service.Dir = "../markdown-preview/renderer"
 	if err := service.Deploy(); err != nil {
 		t.Fatalf("service.Deploy %q: %v", service.Name, err)
 	}
 	defer service.Clean()
 
-	requestPath := "/"
-	req, err := service.NewRequest("POST", requestPath)
-	if err != nil {
-		t.Fatalf("service.NewRequest: %v", err)
+	var tests = []struct {
+		label string
+		input string
+		want  string
+	}{
+		{
+			label: "markdown",
+			input: "**strong text**",
+			want:  "<p><strong>strong text</strong></p>\n",
+		},
+		{
+			label: "sanitize",
+			input: `<a onblur="alert(secret)" href="http://www.google.com">Google</a>`,
+			want:  `<p><a href="http://www.google.com" rel="nofollow">Google</a></p>` + "\n",
+		},
 	}
 
-	client := http.Client{Timeout: 10 * time.Second}
-	resp, err := client.Do(req)
-	if err != nil {
-		t.Fatalf("client.Do: %v", err)
-	}
-	defer resp.Body.Close()
-	fmt.Printf("client.Do: %s %s\n", req.Method, req.URL)
+	for _, test := range tests {
+		req, err := service.NewRequest("POST", "/")
+		if err != nil {
+			t.Fatalf("service.NewRequest: %q", err)
+		}
+		req.Body = ioutil.NopCloser(strings.NewReader(test.input))
 
-	if got := resp.StatusCode; got != http.StatusOK {
-		t.Errorf("response status: got %d, want %d", got, http.StatusOK)
+		client := http.Client{Timeout: 10 * time.Second}
+		resp, err := client.Do(req)
+		if err != nil {
+			t.Fatalf("client.Do: %v", err)
+		}
+		defer resp.Body.Close()
+		t.Logf("client.Do: %s %s\n", req.Method, req.URL)
+
+		if got := resp.StatusCode; got != http.StatusOK {
+			t.Errorf("response status: got %d, want %d", got, http.StatusOK)
+		}
+
+		out, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			t.Fatalf("ioutil.ReadAll: %v", err)
+		}
+
+		if got := string(out); got != test.want {
+			t.Errorf("%s: got %q, want %q", test.label, got, test.want)
+		}
 	}
 }
