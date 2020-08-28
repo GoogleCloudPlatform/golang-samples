@@ -4,8 +4,13 @@ go 1.13
 
 require (
 <<<<<<< HEAD
+<<<<<<< HEAD
 	github.com/microcosm-cc/bluemonday v1.0.3
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+=======
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20200827165204-e30e9fe1da10
+	github.com/microcosm-cc/bluemonday v1.0.4
+>>>>>>> origin/master
 =======
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20200827165204-e30e9fe1da10
 	github.com/microcosm-cc/bluemonday v1.0.4
