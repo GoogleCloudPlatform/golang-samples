@@ -27,7 +27,7 @@ import (
 func TestPubSubEventsService(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 
-	service := cloudrunci.NewService("run-events-storage", tc.ProjectID)
+	service := cloudrunci.NewService("events-storage", tc.ProjectID)
 	if err := service.Deploy(); err != nil {
 		t.Fatalf("service.Deploy %q: %v", service.Name, err)
 	}
@@ -47,7 +47,7 @@ func TestPubSubEventsService(t *testing.T) {
 	defer resp.Body.Close()
 	fmt.Printf("client.Do: %s %s\n", req.Method, req.URL)
 
-	if got := resp.StatusCode; got != http.StatusBadRequest {
-		t.Errorf("response status: got %d, want %d", got, http.StatusBadRequest)
+	if got := resp.StatusCode; got != http.StatusOK {
+		t.Errorf("response status: got %d, want %d", got, http.StatusOK)
 	}
 }
