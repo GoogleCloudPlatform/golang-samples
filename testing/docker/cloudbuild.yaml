@@ -14,18 +14,6 @@
 
 steps:
   - name: 'gcr.io/cloud-builders/docker'
-    args: [ 'build', '--build-arg', 'BASE_IMAGE=golang:1.11', '-t', 'gcr.io/$PROJECT_ID/go111', '.' ]
-    waitFor: ['-']
-  - name: 'gcr.io/cloud-builders/docker'
-    args: [ 'build', '--build-arg', 'BASE_IMAGE=golang:1.12', '-t', 'gcr.io/$PROJECT_ID/go112', '.' ]
-    waitFor: ['-']
-  - name: 'gcr.io/cloud-builders/docker'
-    args: [ 'build', '--build-arg', 'BASE_IMAGE=golang:1.13', '-t', 'gcr.io/$PROJECT_ID/go113', '.' ]
-    waitFor: ['-']
-  - name: 'gcr.io/cloud-builders/docker'
-    args: [ 'build', '--build-arg', 'BASE_IMAGE=golang:1.14', '-t', 'gcr.io/$PROJECT_ID/go114', '.' ]
-    waitFor: ['-']
-  - name: 'gcr.io/cloud-builders/docker'
     args: [ 'build', '--build-arg', 'BASE_IMAGE=golang:1.15', '-t', 'gcr.io/$PROJECT_ID/go115', '.' ]
     waitFor: ['-']
 
