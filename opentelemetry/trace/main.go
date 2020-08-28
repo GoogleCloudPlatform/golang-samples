@@ -52,13 +52,17 @@ func main() {
 	global.SetTraceProvider(tp)
 
 	// [START opentelemetry_trace_custom_span]
+	ctx := context.Background()
 	// Create custom span.
 	tracer := global.TraceProvider().Tracer("example.com/trace")
-	tracer.WithSpan(context.Background(), "foo",
-		func(_ context.Context) error {
-			// Do some work.
-			return nil
-		})
+	err = func(ctx context.Context) error {
+		ctx, span := tracer.Start(ctx, "foo")
+		defer span.End()
+
+		// Do some work.
+
+		return nil
+	}(ctx)
 	// [END opentelemetry_trace_custom_span]
 }
 
