@@ -13,62 +13,53 @@
 // limitations under the License.
 
 // [START functions_storage_unit_test]
-
 package helloworld
 
 import (
 	"context"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 	"testing"
+
+	"cloud.google.com/go/functions/metadata"
 )
 
 func TestHelloGCS(t *testing.T) {
+	r, w, _ := os.Pipe()
+	log.SetOutput(w)
+	originalFlags := log.Flags()
+	log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
+
 	name := "hello_gcs.txt"
-	tests := []struct {
-		resourceState  string
-		metageneration string
-		want           string
-	}{
-		{
-			resourceState: "not_exists",
-			want:          fmt.Sprintf("File %s deleted.\n", name),
-		},
-		{
-			metageneration: "1",
-			want:           fmt.Sprintf("File %s created.\n", name),
-		},
-		{
-			want: fmt.Sprintf("File %s metadata updated.\n", name),
-		},
+	e := GCSEvent{
+		Name: name,
+	}
+	meta := &metadata.Metadata{
+		EventID: "event ID",
+	}
+	ctx := metadata.NewContext(context.Background(), meta)
+
+	HelloGCS(ctx, e)
+
+	w.Close()
+	log.SetOutput(os.Stderr)
+	log.SetFlags(originalFlags)
+
+	out, err := ioutil.ReadAll(r)
+	if err != nil {
+		t.Fatalf("ReadAll: %v", err)
 	}
 
-	for _, test := range tests {
-		r, w, _ := os.Pipe()
-		log.SetOutput(w)
-		originalFlags := log.Flags()
-		log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
-
-		e := GCSEvent{
-			Name:           name,
-			ResourceState:  test.resourceState,
-			Metageneration: test.metageneration,
-		}
-		HelloGCS(context.Background(), e)
-
-		w.Close()
-		log.SetOutput(os.Stderr)
-		log.SetFlags(originalFlags)
-
-		out, err := ioutil.ReadAll(r)
-		if err != nil {
-			t.Fatalf("ReadAll: %v", err)
-		}
-
-		if got := string(out); got != test.want {
-			t.Errorf("HelloGCS(%+v) = %q, want %q", e, got, test.want)
+	got := string(out)
+	wants := []string{
+		"File: " + name,
+		"Event ID: " + meta.EventID,
+	}
+	for _, want := range wants {
+		if !strings.Contains(got, want) {
+			t.Errorf("HelloGCS(%v) = %q, want to contain %q", e, got, want)
 		}
 	}
 }

@@ -25,10 +25,9 @@ import (
 )
 
 func TestPubSubEventsService(t *testing.T) {
-	t.Skip("Service is broken: https://github.com/GoogleCloudPlatform/golang-samples/issues/1566")
 	tc := testutil.EndToEndTest(t)
 
-	service := cloudrunci.NewService("pubsub-events", tc.ProjectID)
+	service := cloudrunci.NewService("run-events-pubsub", tc.ProjectID)
 	if err := service.Deploy(); err != nil {
 		t.Fatalf("service.Deploy %q: %v", service.Name, err)
 	}

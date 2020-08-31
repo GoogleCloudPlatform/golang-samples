@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"io"
 
-	gaming "cloud.google.com/go/gaming/apiv1beta"
-	gamingpb "google.golang.org/genproto/googleapis/cloud/gaming/v1beta"
+	gaming "cloud.google.com/go/gaming/apiv1"
+	gamingpb "google.golang.org/genproto/googleapis/cloud/gaming/v1"
 )
 
 // createRealm creates a game server realm.

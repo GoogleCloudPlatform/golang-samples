@@ -14,7 +14,7 @@
 
 package howto
 
-// [START job_search_list_company]
+// [START job_search_list_companies]
 import (
 	"context"
 	"fmt"

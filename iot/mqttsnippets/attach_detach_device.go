@@ -58,4 +58,4 @@ func detachDevice(deviceID string, client mqtt.Client, jwt string) error {
 	return nil
 }
 
-// [END iot_detatch_device]
+// [END iot_detach_device]

@@ -33,12 +33,18 @@ jobs:
       # Use find to build all modules. '-execdir ... ;' doesn't set an exit code
       # based on command results. So, create a file if a build fails and check
       # if the file exists to set the right exit code.
-      run: find . -name go.mod -execdir sh -c 'go vet ./... || touch vet_failed.txt' \; ; test ! -f vet_failed.txt
+      run: |
+        ROOT_DIR=$(pwd) \
+        find . -name go.mod -execdir sh -c 'go vet ./... || touch $ROOT_DIR/vet_failed.txt' \; ; \
+        test ! -f vet_failed.txt
     - name: Build code
       # Use find to build all modules. '-execdir ... ;' doesn't set an exit code
       # based on command results. So, create a file if a build fails and check
       # if the file exists to set the right exit code.
-      run: find . -name go.mod -execdir sh -c 'go build ./... || touch build_failed.txt' \; ; test ! -f build_failed.txt
+      run: |
+        ROOT_DIR=$(pwd) \
+        find . -name go.mod -execdir sh -c 'go build ./... || touch $ROOT_DIR/build_failed.txt' \; ; \
+        test ! -f build_failed.txt
     - name: shellcheck
       run: find . -name "*.sh" -exec shellcheck {} \;
   test:

@@ -20,15 +20,15 @@ import (
 	"testing"
 )
 
-func TestCallFunction(t *testing.T) {
+func TestMakeGetRequest(t *testing.T) {
 	baseURL := os.Getenv("BASE_URL")
 	if baseURL == "" {
 		t.Skip("BASE_URL not set")
 	}
 	url := baseURL + "/HelloHTTP"
 	var b bytes.Buffer
-	if err := callFunction(&b, url); err != nil {
-		t.Fatalf("callFunction: %v", err)
+	if err := makeGetRequest(&b, url); err != nil {
+		t.Fatalf("makeGetRequest: %v", err)
 	}
 	got := b.String()
 	if got != "Hello, World!" {

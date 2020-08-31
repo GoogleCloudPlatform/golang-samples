@@ -15,43 +15,58 @@
 package main
 
 import (
-	"context"
-	"encoding/json"
+	"encoding/base64"
+	"fmt"
+	"io/ioutil"
 	"log"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"strings"
 	"testing"
-	"time"
-
-	cloudevents "github.com/cloudevents/sdk-go/v2"
 )
 
 func TestHelloPubSubCloudEvent(t *testing.T) {
-	pubsubEvent := &PubSub{
-		Message: PubSubMessage{
-			Data: []byte("foo"),
-			ID:   "id",
-		},
-		Subscription: "sub",
+	tests := []struct {
+		data string
+		want string
+		id   string
+	}{
+		{want: "Hello, World! ID: \n", id: ""},
+		{want: "Hello, World! ID: 12345\n", id: "12345"},
+		{data: "Go", want: "Hello, Go! ID: \n"},
+		{data: "Go", want: "Hello, Go! ID: 1234\n", id: "1234"},
 	}
-	data, err := json.Marshal(pubsubEvent)
-	if err != nil {
-		log.Printf("json.Marshal: %v", err)
-	}
-	ce := &cloudevents.Event{
-		Context: cloudevents.EventContextV1{
-			ID:              "321-CBA",
-			Type:            "unit.test.client.response",
-			Time:            &cloudevents.Timestamp{Time: time.Now()},
-			Source:          *cloudevents.ParseURIRef("/unit/test/client"),
-			DataContentType: cloudevents.StringOfApplicationJSON(),
-		}.AsV1(),
-		DataEncoded: data,
-	}
+	log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
+	for _, test := range tests {
+		r, w, _ := os.Pipe()
+		log.SetOutput(w)
+		defer log.SetOutput(os.Stderr)
 
-	got, e := HelloPubSub(context.Background(), *ce)
-	if e != nil {
-		t.Errorf("HelloPubSub: %q", e)
-	}
-	if want := "Hello, foo! ID: 321-CBA"; got != want {
-		t.Errorf("HelloPubSub: got %q, want %q", got, want)
+		payload := strings.NewReader("{}")
+		if test.data != "" {
+			encoded := base64.StdEncoding.EncodeToString([]byte(test.data))
+			jsonStr := fmt.Sprintf(`{"message":{"data":"%s","id":"%s"}}`, encoded, test.id)
+			payload = strings.NewReader(jsonStr)
+		}
+
+		req := httptest.NewRequest("POST", "/", payload)
+		req.Header.Set("Ce-Id", test.id)
+		rr := httptest.NewRecorder()
+		HelloEventsPubSub(rr, req)
+
+		w.Close()
+
+		if code := rr.Result().StatusCode; code == http.StatusBadRequest {
+			t.Errorf("HelloEventsPubSub(%q) invalid input, status code (%q)", test.data, code)
+		}
+
+		out, err := ioutil.ReadAll(r)
+		if err != nil {
+			t.Fatalf("ReadAll: %v", err)
+		}
+		if got := string(out); got != test.want {
+			t.Errorf("HelloEventsPubSub(%q): got %q, want %q", test.data, got, test.want)
+		}
 	}
 }
