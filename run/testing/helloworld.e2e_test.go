@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main_test
+package cloudruntests
 
 import (
 	"fmt"
@@ -30,6 +30,7 @@ func TestHelloworldService(t *testing.T) {
 
 	service := cloudrunci.NewService("helloworld", tc.ProjectID)
 	service.Env = cloudrunci.EnvVars{"NAME": "Override"}
+	service.Dir = "../helloworld"
 	if err := service.Deploy(); err != nil {
 		t.Fatalf("service.Deploy %q: %v", service.Name, err)
 	}
@@ -59,5 +60,4 @@ func TestHelloworldService(t *testing.T) {
 	if got := resp.StatusCode; got != http.StatusOK {
 		t.Errorf("response status: got %d, want %d", got, http.StatusOK)
 	}
-
 }
