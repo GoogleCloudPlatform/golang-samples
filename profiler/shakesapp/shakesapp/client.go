@@ -40,6 +40,7 @@ func SimulateClient(ctx context.Context, addr string, numReqs, reqsInFlight int)
 	if err != nil {
 		return err
 	}
+	defer conn.Close()
 	client := NewShakespeareServiceClient(conn)
 
 	ctx, cancel := context.WithCancel(ctx)

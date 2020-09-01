@@ -60,4 +60,4 @@ func languageEntityExtractionCreateModel(w io.Writer, projectID string, location
 	return nil
 }
 
-// [END automl_language_entity_extraction_create_dataset]
+// [END automl_language_entity_extraction_create_model]

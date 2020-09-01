@@ -334,7 +334,7 @@ func (p *App) Cleanup() error {
 	for try := 0; try < 10; try++ {
 		_, err = p.adminService.Apps.Services.Versions.Delete(p.ProjectID, p.Service, p.version()).Do()
 		if err == nil {
-			log.Printf("(%s) Succesfully cleaned up.", p.Name)
+			log.Printf("(%s) Successfully cleaned up.", p.Name)
 			break
 		}
 		time.Sleep(time.Second)

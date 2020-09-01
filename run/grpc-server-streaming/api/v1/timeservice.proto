@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,28 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package log
+syntax = "proto3";
 
-import (
-	"bytes"
-	"os"
-	"strings"
-	"testing"
-)
+package timeservice;
 
-func TestLogEntries(t *testing.T) {
-	// TODO: Use testutil to get the project.
-	projectID := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
-	if projectID == "" {
-		t.Skip("Missing GOLANG_SAMPLES_PROJECT_ID.")
-	}
+import "google/protobuf/timestamp.proto";
 
-	buf := new(bytes.Buffer)
-	if err := logEntries(buf, projectID); err != nil {
-		t.Fatalf("logEntries: %v", err)
-	}
-	want := "Entries:"
-	if got := buf.String(); !strings.Contains(got, want) {
-		t.Errorf("logEntries got %q, want to contain %q", got, want)
-	}
+service TimeService {
+  rpc StreamTime(Request) returns (stream TimeResponse) {}
+}
+
+message Request {
+  uint32 duration_secs = 2;
+}
+
+message TimeResponse {
+  google.protobuf.Timestamp current_time = 1;
 }
