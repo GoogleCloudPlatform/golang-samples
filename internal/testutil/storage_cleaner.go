@@ -58,8 +58,11 @@ func deleteBucketIfExists(ctx context.Context, t *testing.T, client *storage.Cli
 		return
 	}
 
-	// Delete all of the elements in the already existent bucket.
-	it := b.Objects(ctx, nil)
+	// Delete all of the elements in the already existent bucket, including noncurrent objects.
+	it := b.Objects(ctx, &storage.Query{
+		// Versions true to output all generations of objects.
+		Versions: true,
+	})
 	for {
 		attrs, err := it.Next()
 		if err == iterator.Done {
@@ -76,9 +79,11 @@ func deleteBucketIfExists(ctx context.Context, t *testing.T, client *storage.Cli
 				t.Errorf("Bucket(%q).Object(%q).Update: %v", bucket, attrs.Name, err)
 			}
 		}
-		if err := b.Object(attrs.Name).Delete(ctx); err != nil {
+		obj := b.Object(attrs.Name).Generation(attrs.Generation)
+		if err := obj.Delete(ctx); err != nil {
 			t.Errorf("Bucket(%q).Object(%q).Delete: %v", bucket, attrs.Name, err)
 		}
+
 	}
 
 	// Then delete the bucket itself.

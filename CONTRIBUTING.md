@@ -2,26 +2,31 @@
 
 1. Sign one of the contributor license agreements below.
 1. [Install Go](https://golang.org/doc/install).
-1. Get the package:
+1. Clone the repo:
 
-    `go get -d github.com/GoogleCloudPlatform/golang-samples`
+    `git clone https://github.com/GoogleCloudPlatform/golang-samples.git`
 1. Change into the checked out source:
 
-    `cd $(go env GOPATH)/src/github.com/GoogleCloudPlatform/golang-samples`
+    `cd golang-samples`
 1. Fork the repo.
 1. Set your fork as a remote:
 
-    `git remote add fork git@github.com:GITHUB_USERNAME/golang-samples.git`
-1. Make changes (see [Formatting](#formatting) and [Style](#style)), commit to
-   your fork. Commit messages should follow the
-   [Go project style](https://github.com/golang/go/wiki/CommitMessage) (e.g.
-   `functions: add gophers codelab`).
+    `git remote add fork https://github.com/GITHUB_USERNAME/golang-samples.git`
+1. Make changes (see [Formatting](#formatting) and [Style](#style)) and commit
+   to your fork. Initial commit messages should follow the
+   [Conventional Commits](https://www.conventionalcommits.org/) style (e.g.
+   `feat(functions): add gophers codelab`).
 1. Send a pull request with your changes.
 1. A maintainer will review the pull request and make comments. Prefer adding
    additional commits over ammending and force-pushing since it can be difficult
    to follow code reviews when the commit history changes.
 
    Commits will be squashed when they're merged.
+
+## Tested Go versions
+
+We test using the oldest and newest supported Go versions. We do not test the
+intermediate versions. See [testing/kokoro](testing/kokoro).
 
 # Formatting
 
@@ -69,7 +74,7 @@ create/update/delete type samples).
 
 ## Include imports and flags in region tags
 
-The sample region (e.g. `[START foo]` and `[END foo`]) should include the import
+The sample region (e.g. `[START foo]` and `[END foo]`) should include the import
 block.
 
 ```go
@@ -186,13 +191,13 @@ passing parameters into a quickstart, and use `testutil.BuildMain` to build and 
 In your quickstart:
 ```go
 func main() {
-	var projectID, resourceName string
-	flag.StringVar(&projectID, "project_id", "", "Cloud Project ID")
-	flag.StringVar(&resourceName, "resourceName", "", "Name of resource")
+	projectID := flag.String("project_id", "", "Cloud Project ID")
+	resourceName := flag.String("resourceName", "", "Name of resource")
 	flag.Parse()
 
-	fmt.Printf("projectID: %s, resource_name: %s", projectID, resourceName)
-
+	fmt.Printf("projectID: %s, resource_name: %s", *projectID, *resourceName)
+	// ...
+}
 ```
 
 In your quickstart test:
@@ -218,9 +223,7 @@ func TestQuickstart(t *testing.T) {
 		t.Errorf("execution failed: %v", err)
 	}
 
-	// example test
-	got := string(stdOut)
-	if !strings.Contains(got, testResourceName) {
+	if got := string(stdOut); !strings.Contains(got, testResourceName) {
 		t.Errorf("got %q, want to contain %q", got, testResourceName)
 	}
 }
@@ -362,11 +365,21 @@ https://golang.org/doc/effective_go.html#names.
 
 See [Don't export sample functions](#dont-export-sample-functions).
 
+## Reflection
+
+Do not use the `reflect` package.
+
 ## Use `testutil` for tests
 
 All tests should use `testutil.SystemTest` or variants. `testutil` checks the
 `GOLANG_SAMPLES_PROJECT_ID` environment variable exists, and skips the test if
 not.
+
+If the test takes longer than ~2 minutes, use `testutil.EndToEndTest`.
+
+If you can't use `testutil` for some reason, be sure to skip tests if
+`GOLANG_SAMPLES_PROJECT_ID` is not set. This makes sure tests pass when someone
+clones the repo and runs tests.
 
 See [Print to an `io.Writer`](#print-to-an-iowriter) for a full test example.
 
@@ -401,7 +414,7 @@ resource names that incorporate aspects of your test, such as `tc.ProjectID +
 Note: You may want to `cd` to the directory you're modifying and run
 `go test -v ./...` to avoid running every test in the repo.
 
-## Contributor License Agreements
+# Contributor License Agreements
 
 Before we can accept your pull requests you'll need to sign a Contributor
 License Agreement (CLA):

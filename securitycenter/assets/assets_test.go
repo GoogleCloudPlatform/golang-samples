@@ -26,6 +26,7 @@ import (
 	"time"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"google.golang.org/api/iterator"
 	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
 	"google.golang.org/genproto/protobuf/field_mask"
@@ -155,7 +156,8 @@ func setup(t *testing.T) string {
 	if orgID == "" {
 		t.Skip("GCLOUD_ORGANIZATION not set")
 	} else if marksAssetName == "" {
-		t.Fatalf("marksAssetName wasn't initialized.")
+		t.Errorf("marksAssetName wasn't initialized.")
+		os.Exit(1)
 	}
 	return orgID
 }
@@ -171,165 +173,193 @@ func TestMain(m *testing.M) {
 }
 
 func TestListAllAssets(t *testing.T) {
-	buf := new(bytes.Buffer)
-	orgID := setup(t)
-	err := listAllAssets(buf, orgID)
-	if err != nil {
-		t.Fatalf("listAllAssets(%s) failed: %v", orgID, err)
-	}
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+		orgID := setup(t)
+		err := listAllAssets(buf, orgID)
+		if err != nil {
+			r.Errorf("listAllAssets(%s) failed: %v", orgID, err)
+			return
+		}
 
-	want := 59
-	got := strings.Count(buf.String(), "\n")
-	if got < want {
-		t.Errorf("listAllAssets(%s) Not enough results: %d Want >= %d", orgID, got, want)
-	}
+		want := 59
+		got := strings.Count(buf.String(), "\n")
+		if got < want {
+			r.Errorf("listAllAssets(%s) Not enough results: %d Want >= %d", orgID, got, want)
+		}
+	})
 }
 
 func TestListAllProjectAssets(t *testing.T) {
-	buf := new(bytes.Buffer)
-	orgID := setup(t)
-	err := listAllProjectAssets(buf, orgID)
-	if err != nil {
-		t.Fatalf("listAllAssets(%s) failed: %v", orgID, err)
-	}
-	want := 3
-	got := strings.Count(buf.String(), "\n")
-	if got != want {
-		t.Errorf("listAllAssets(%s) Unexpected number of results: %d Want: %d", orgID, got, want)
-	}
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+		orgID := setup(t)
+		err := listAllProjectAssets(buf, orgID)
+		if err != nil {
+			r.Errorf("listAllAssets(%s) failed: %v", orgID, err)
+			return
+		}
+		want := 3
+		got := strings.Count(buf.String(), "\n")
+		if got != want {
+			r.Errorf("listAllAssets(%s) Unexpected number of results: %d Want: %d", orgID, got, want)
+		}
+	})
 }
 
 func TestListAllProjectAssetsAtTime(t *testing.T) {
-	orgID := setup(t)
-	buf := new(bytes.Buffer)
-	var nothingInstant = time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC)
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		orgID := setup(t)
+		buf := new(bytes.Buffer)
+		var nothingInstant = time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC)
 
-	err := listAllProjectAssetsAtTime(buf, orgID, nothingInstant)
+		err := listAllProjectAssetsAtTime(buf, orgID, nothingInstant)
 
-	if err != nil {
-		t.Fatalf("listAllProjectAssetsAtTime(%s, %v) failed: %v", orgID, nothingInstant, err)
-	}
+		if err != nil {
+			r.Errorf("listAllProjectAssetsAtTime(%s, %v) failed: %v", orgID, nothingInstant, err)
+			return
+		}
 
-	got := strings.Count(buf.String(), "\n")
-	if got != 0 {
-		t.Errorf("listAllProjectAssetsAtTime(%s, %v) Results not 0: %d", orgID, nothingInstant, got)
-	}
+		got := strings.Count(buf.String(), "\n")
+		if got != 0 {
+			r.Errorf("listAllProjectAssetsAtTime(%s, %v) Results not 0: %d", orgID, nothingInstant, got)
+		}
 
-	buf.Reset()
-	var somethingInstant = time.Now()
-	err = listAllProjectAssetsAtTime(buf, orgID, somethingInstant)
-	if err != nil {
-		t.Fatalf("listAllProjectAssetsAtTime(%s, %v) failed: %v", orgID, somethingInstant, err)
-	}
-	want := 3
-	got = strings.Count(buf.String(), "\n")
-	if got != want {
-		t.Errorf("listAllProjectAssetsAtTime(%s, %v) Unexpected number of projects: %d Want: %d", orgID, somethingInstant, got, want)
-	}
+		buf.Reset()
+		var somethingInstant = time.Now()
+		err = listAllProjectAssetsAtTime(buf, orgID, somethingInstant)
+		if err != nil {
+			r.Errorf("listAllProjectAssetsAtTime(%s, %v) failed: %v", orgID, somethingInstant, err)
+			return
+		}
+		want := 3
+		got = strings.Count(buf.String(), "\n")
+		if got != want {
+			r.Errorf("listAllProjectAssetsAtTime(%s, %v) Unexpected number of projects: %d Want: %d", orgID, somethingInstant, got, want)
+		}
+	})
 }
 
 func TestListAllProjectAssetsAndStateChanges(t *testing.T) {
-	buf := new(bytes.Buffer)
-	orgID := setup(t)
-	err := listAllProjectAssetsAndStateChanges(buf, orgID)
-	if err != nil {
-		t.Fatalf("listAllProjectAssetsAndStateChanges(%s) failed: %v", orgID, err)
-	}
-	got := strings.Count(buf.String(), "\n")
-	want := 3
-	if got != want {
-		t.Errorf("listAllProjectAssetsAndStateChanges(%s) Unexpected number of results: %d Want: %d", orgID, got, want)
-	}
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+		orgID := setup(t)
+		err := listAllProjectAssetsAndStateChanges(buf, orgID)
+		if err != nil {
+			r.Errorf("listAllProjectAssetsAndStateChanges(%s) failed: %v", orgID, err)
+			return
+		}
+		got := strings.Count(buf.String(), "\n")
+		want := 3
+		if got != want {
+			r.Errorf("listAllProjectAssetsAndStateChanges(%s) Unexpected number of results: %d Want: %d", orgID, got, want)
+		}
+	})
 }
 
 func TestAddSecurityMarks(t *testing.T) {
-	buf := new(bytes.Buffer)
 	setup(t)
-	err := deleteSecurityMarks(buf, marksAssetName)
-	if err != nil {
-		t.Fatalf("Setup for addSecurityMarks(%s) failed %v", marksAssetName, err)
-	}
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+		err := deleteSecurityMarks(buf, marksAssetName)
+		if err != nil {
+			r.Errorf("Setup for addSecurityMarks(%s) failed %v", marksAssetName, err)
+			return
+		}
 
-	err = addSecurityMarks(buf, marksAssetName)
-	if err != nil {
-		t.Fatalf("addSecurityMarks(%s) failed %v", marksAssetName, err)
-	}
+		err = addSecurityMarks(buf, marksAssetName)
+		if err != nil {
+			r.Errorf("addSecurityMarks(%s) failed %v", marksAssetName, err)
+			return
+		}
 
-	got := buf.String()
-	if want := "key_a = value_a"; !strings.Contains(got, want) {
-		t.Errorf("addSecurityMarks(%s) got: %s want %s", marksAssetName, got, want)
-	}
+		got := buf.String()
+		if want := "key_a = value_a"; !strings.Contains(got, want) {
+			r.Errorf("addSecurityMarks(%s) got: %s want %s", marksAssetName, got, want)
+		}
 
-	if want := "key_b = value_b"; !strings.Contains(got, want) {
-		t.Errorf("addSecurityMarks(%s) got: %s want %s", marksAssetName, got, want)
-	}
-
+		if want := "key_b = value_b"; !strings.Contains(got, want) {
+			r.Errorf("addSecurityMarks(%s) got: %s want %s", marksAssetName, got, want)
+		}
+	})
 }
 
 func TestDeleteSecurityMarks(t *testing.T) {
-	buf := new(bytes.Buffer)
 	setup(t)
-	err := addSecurityMarks(buf, marksAssetName)
-	if err != nil {
-		t.Fatalf("Setup for deleteSecurityMarks(%s) failed %v", marksAssetName, err)
-	}
-	buf.Reset()
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+		err := addSecurityMarks(buf, marksAssetName)
+		if err != nil {
+			r.Errorf("Setup for deleteSecurityMarks(%s) failed %v", marksAssetName, err)
+			return
+		}
+		buf.Reset()
 
-	err = deleteSecurityMarks(buf, marksAssetName)
-	if err != nil {
-		t.Fatalf("deleteSecurityMarks(%s) failed %v", marksAssetName, err)
-	}
+		err = deleteSecurityMarks(buf, marksAssetName)
+		if err != nil {
+			r.Errorf("deleteSecurityMarks(%s) failed %v", marksAssetName, err)
+			return
+		}
 
-	got := buf.String()
-	if dontWant := "key_a = value_a"; strings.Contains(got, dontWant) {
-		t.Errorf("deleteSecurityMarks(%s) got: %s dont want %q", marksAssetName, got, dontWant)
-	}
+		got := buf.String()
+		if dontWant := "key_a = value_a"; strings.Contains(got, dontWant) {
+			r.Errorf("deleteSecurityMarks(%s) got: %s dont want %q", marksAssetName, got, dontWant)
+		}
 
-	if dontWant := "key_b = value_b"; strings.Contains(got, dontWant) {
-		t.Errorf("deleteSecurityMarks(%s) got: %s dont want %q", marksAssetName, got, dontWant)
-	}
+		if dontWant := "key_b = value_b"; strings.Contains(got, dontWant) {
+			r.Errorf("deleteSecurityMarks(%s) got: %s dont want %q", marksAssetName, got, dontWant)
+		}
+	})
 }
 
 func TestAddDeleteSecurityMarks(t *testing.T) {
-	buf := new(bytes.Buffer)
 	setup(t)
-	err := addSecurityMarks(buf, marksAssetName)
-	if err != nil {
-		t.Fatalf("Setup for addDeleteSecurityMarks(%s) failed %v", marksAssetName, err)
-	}
-	buf.Reset()
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+		err := addSecurityMarks(buf, marksAssetName)
+		if err != nil {
+			r.Errorf("Setup for addDeleteSecurityMarks(%s) failed %v", marksAssetName, err)
+			return
+		}
+		buf.Reset()
 
-	err = addDeleteSecurityMarks(buf, marksAssetName)
-	if err != nil {
-		t.Fatalf("addDeleteSecurityMarks(%s) failed %v", marksAssetName, err)
-	}
+		err = addDeleteSecurityMarks(buf, marksAssetName)
+		if err != nil {
+			r.Errorf("addDeleteSecurityMarks(%s) failed %v", marksAssetName, err)
+			return
+		}
 
-	got := buf.String()
-	if want := "key_a = new_value_a"; !strings.Contains(got, want) {
-		t.Errorf("addDeleteSecurityMarks(%s) got: %s want %s", marksAssetName, got, want)
-	}
+		got := buf.String()
+		if want := "key_a = new_value_a"; !strings.Contains(got, want) {
+			r.Errorf("addDeleteSecurityMarks(%s) got: %s want %s", marksAssetName, got, want)
+		}
 
-	if dontWant := "key_b = value_b"; strings.Contains(got, dontWant) {
-		t.Errorf("addDeleteSecurityMarks(%s) got: %s dont want %q", marksAssetName, got, dontWant)
-	}
+		if dontWant := "key_b = value_b"; strings.Contains(got, dontWant) {
+			r.Errorf("addDeleteSecurityMarks(%s) got: %s dont want %q", marksAssetName, got, dontWant)
+		}
+	})
 }
 
 func TestListWithSecurityMarks(t *testing.T) {
-	buf := new(bytes.Buffer)
-	orgID := setup(t)
-	err := addSecurityMarks(buf, marksAssetName)
-	if err != nil {
-		t.Fatalf("Setup for ListWithSecurityMarks(%s) failed %v", orgID, err)
-	}
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+		orgID := setup(t)
+		err := addSecurityMarks(buf, marksAssetName)
+		if err != nil {
+			r.Errorf("Setup for ListWithSecurityMarks(%s) failed %v", orgID, err)
+			return
+		}
 
-	err = listAssetsWithMarks(buf, orgID)
+		err = listAssetsWithMarks(buf, orgID)
 
-	if err != nil {
-		t.Fatalf("listAssetsWithMarks(%s) failed %v", orgID, err)
-	}
+		if err != nil {
+			r.Errorf("listAssetsWithMarks(%s) failed %v", orgID, err)
+			return
+		}
 
-	got := buf.String()
-	if !strings.Contains(got, marksAssetName) {
-		t.Errorf("addDeleteSecurityMarks(%s) got: %s want %s", orgID, got, marksAssetName)
-	}
+		got := buf.String()
+		if !strings.Contains(got, marksAssetName) {
+			r.Errorf("addDeleteSecurityMarks(%s) got: %s want %s", orgID, got, marksAssetName)
+		}
+	})
 }

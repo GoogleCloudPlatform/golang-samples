@@ -26,7 +26,7 @@ func TestTemplateSamples(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	buf := new(bytes.Buffer)
-	fullID := "projects/" + tc.ProjectID + "/inspectTemplates/golang-samples-test-template"
+	fullID := "projects/" + tc.ProjectID + "/locations/global/inspectTemplates/golang-samples-test-template"
 	// Delete template before trying to create it since the test uses the same name every time.
 	if err := listInspectTemplates(buf, tc.ProjectID); err != nil {
 		t.Errorf("listInspectTemplates: %v", err)

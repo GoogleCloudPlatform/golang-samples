@@ -30,9 +30,6 @@ import (
 
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"google.golang.org/api/iterator"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 // TestObjects runs all samples tests of the package.
@@ -48,20 +45,38 @@ func TestObjects(t *testing.T) {
 	var (
 		bucket                = tc.ProjectID + "-samples-object-bucket-1"
 		dstBucket             = tc.ProjectID + "-samples-object-bucket-2"
+		bucketVersioning      = tc.ProjectID + "-bucket-versioning-enabled"
 		object1               = "foo.txt"
 		object2               = "foo/a.txt"
 		allAuthenticatedUsers = storage.AllAuthenticatedUsers
 		roleReader            = storage.RoleReader
 	)
 
-	cleanBucket(t, ctx, client, tc.ProjectID, bucket)
-	cleanBucket(t, ctx, client, tc.ProjectID, dstBucket)
+	testutil.CleanBucket(ctx, t, tc.ProjectID, bucket)
+	testutil.CleanBucket(ctx, t, tc.ProjectID, dstBucket)
+	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketVersioning)
+
+	{
+		// Enable versioning
+		attr := storage.BucketAttrsToUpdate{VersioningEnabled: true}
+		_, err := client.Bucket(bucketVersioning).Update(ctx, attr)
+		if err != nil {
+			t.Fatalf("storage.BucketAttrsToUpdate{VersioningEnabled: true}: %v", err)
+		}
+	}
 
 	if err := uploadFile(ioutil.Discard, bucket, object1); err != nil {
 		t.Fatalf("uploadFile(%q): %v", object1, err)
 	}
 	if err := uploadFile(ioutil.Discard, bucket, object2); err != nil {
 		t.Fatalf("uploadFile(%q): %v", object2, err)
+	}
+
+	if err := uploadFile(ioutil.Discard, bucketVersioning, object1); err != nil {
+		t.Fatalf("uploadFile(%q): %v", object1, err)
+	}
+	if err := uploadFile(ioutil.Discard, bucketVersioning, object1); err != nil {
+		t.Fatalf("uploadFile(%q): %v", object1, err)
 	}
 
 	{
@@ -90,6 +105,25 @@ func TestObjects(t *testing.T) {
 		}
 		if got, want := buf.String(), object2; !strings.Contains(got, want) {
 			t.Errorf("List(%q) got %q; want to contain %q", prefix, got, want)
+		}
+	}
+
+	{
+		// Should show 2 versions of foo.txt
+		var buf bytes.Buffer
+		if err := listFilesAllVersion(&buf, bucketVersioning); err != nil {
+			t.Fatalf("listFilesAllVersion: %v", err)
+		}
+
+		i := 0
+		for _, line := range strings.Split(strings.TrimSuffix(buf.String(), "\n"), "\n") {
+			if got, want := line, object1; !strings.Contains(got, want) {
+				t.Errorf("List(Versions: true) got %q; want to contain %q", got, want)
+			}
+			i++
+		}
+		if i != 2 {
+			t.Errorf("listFilesAllVersion should show 2 versions of foo.txt; got %d", i)
 		}
 	}
 
@@ -168,6 +202,14 @@ func TestObjects(t *testing.T) {
 			r.Errorf("Bucket(%q).Delete: %v", dstBucket, err)
 		}
 	})
+
+	// CleanBucket to delete versioned objects in bucket
+	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketVersioning)
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		if err := client.Bucket(bucketVersioning).Delete(ctx); err != nil {
+			r.Errorf("Bucket(%q).Delete: %v", bucketVersioning, err)
+		}
+	})
 }
 
 func TestKMSObjects(t *testing.T) {
@@ -185,20 +227,18 @@ func TestKMSObjects(t *testing.T) {
 		t.Skip("GOLANG_SAMPLES_KMS_KEYRING and GOLANG_SAMPLES_KMS_CRYPTOKEY must be set")
 	}
 
-	var (
-		bucket    = tc.ProjectID + "-samples-object-bucket-1"
-		dstBucket = tc.ProjectID + "-samples-object-bucket-2"
-		object1   = "foo.txt"
-	)
+	bucket := tc.ProjectID + "-samples-object-bucket-1"
+	object := "foo.txt"
 
-	cleanBucket(t, ctx, client, tc.ProjectID, bucket)
-	cleanBucket(t, ctx, client, tc.ProjectID, dstBucket)
+	testutil.CleanBucket(ctx, t, tc.ProjectID, bucket)
 
 	kmsKeyName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", tc.ProjectID, "global", keyRingID, cryptoKeyID)
 
-	if err := uploadWithKMSKey(ioutil.Discard, bucket, object1, kmsKeyName); err != nil {
-		t.Errorf("uploadWithKMSKey: %v", err)
-	}
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		if err := uploadWithKMSKey(ioutil.Discard, bucket, object, kmsKeyName); err != nil {
+			r.Errorf("uploadWithKMSKey: %v", err)
+		}
+	})
 }
 
 func TestV4SignedURL(t *testing.T) {
@@ -214,7 +254,7 @@ func TestV4SignedURL(t *testing.T) {
 	objectName := "foo.txt"
 	serviceAccount := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
 
-	cleanBucket(t, ctx, client, tc.ProjectID, bucketName)
+	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName)
 	putBuf := new(bytes.Buffer)
 	putURL, err := generateV4PutObjectSignedURL(putBuf, bucketName, objectName, serviceAccount)
 	if err != nil {
@@ -369,7 +409,7 @@ func TestObjectBucketLock(t *testing.T) {
 		retentionPeriod = 5 * time.Second
 	)
 
-	cleanBucket(t, ctx, client, tc.ProjectID, bucketName)
+	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName)
 	bucket := client.Bucket(bucketName)
 
 	if err := uploadFile(ioutil.Discard, bucketName, objectName); err != nil {
@@ -426,40 +466,5 @@ func TestObjectBucketLock(t *testing.T) {
 	}
 	if oAttrs.TemporaryHold {
 		t.Errorf("temporary hold is not disabled")
-	}
-}
-
-// cleanBucket ensures there's a fresh bucket with a given name, deleting the existing bucket if it already exists.
-func cleanBucket(t *testing.T, ctx context.Context, client *storage.Client, projectID, bucket string) {
-	b := client.Bucket(bucket)
-	_, err := b.Attrs(ctx)
-	if err == nil {
-		it := b.Objects(ctx, nil)
-		for {
-			attrs, err := it.Next()
-			if err == iterator.Done {
-				break
-			}
-			if err != nil {
-				t.Fatalf("Bucket(%q).Objects: %v", bucket, err)
-			}
-			if attrs.EventBasedHold || attrs.TemporaryHold {
-				if _, err := b.Object(attrs.Name).Update(ctx, storage.ObjectAttrsToUpdate{
-					TemporaryHold:  false,
-					EventBasedHold: false,
-				}); err != nil {
-					t.Fatalf("Bucket(%q).Object(%q).Update: %v", bucket, attrs.Name, err)
-				}
-			}
-			if err := b.Object(attrs.Name).Delete(ctx); err != nil {
-				t.Fatalf("Bucket(%q).Object(%q).Delete: %v", bucket, attrs.Name, err)
-			}
-		}
-		if err := b.Delete(ctx); err != nil {
-			t.Fatalf("Bucket(%q).Delete: %v", bucket, err)
-		}
-	}
-	if err := b.Create(ctx, projectID, nil); err != nil && status.Code(err) != codes.AlreadyExists {
-		t.Fatalf("Bucket(%q).Create: %v", bucket, err)
 	}
 }
