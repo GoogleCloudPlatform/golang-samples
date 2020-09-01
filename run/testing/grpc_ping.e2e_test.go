@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main_test
+package cloudruntests
 
 import (
 	"context"
@@ -39,6 +39,7 @@ func TestGRPCPingService(t *testing.T) {
 
 	// Prepare the container image for both services.
 	pingService := cloudrunci.NewService("grpc-ping", tc.ProjectID)
+	pingService.Dir = "../grpc-ping"
 	if err := pingService.Build(); err != nil {
 		t.Fatalf("Service.Build %q: %v", pingService.Name, err)
 	}
@@ -46,7 +47,7 @@ func TestGRPCPingService(t *testing.T) {
 	// Deploy the ping-upstream service.
 	upstreamService := cloudrunci.NewService("grpc-ping-upstream", tc.ProjectID)
 	upstreamService.Image = pingService.Image
-
+	upstreamService.Dir = "../grpc-ping"
 	if err := upstreamService.Deploy(); err != nil {
 		t.Fatalf("Service.Deploy %q: %v", upstreamService.Name, err)
 	}

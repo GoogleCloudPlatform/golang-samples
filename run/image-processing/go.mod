@@ -5,6 +5,8 @@ go 1.12
 require (
 	cloud.google.com/go v0.65.0
 	cloud.google.com/go/storage v1.10.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20200901140421-b993d0229728
+	github.com/google/go-cmp v0.5.2 // indirect
+	golang.org/x/tools v0.0.0-20200827163409-021d7c6f1ec3 // indirect
 	google.golang.org/genproto v0.0.0-20200831141814-d751682dd103
+	google.golang.org/grpc v1.31.1 // indirect
 )

@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package cloudruntests
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"testing"
 	"time"
@@ -24,17 +25,18 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestPubSubService(t *testing.T) {
+func TestHelloworldService(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 
-	service := cloudrunci.NewService("pubsub", tc.ProjectID)
+	service := cloudrunci.NewService("helloworld", tc.ProjectID)
+	service.Env = cloudrunci.EnvVars{"NAME": "Override"}
+	service.Dir = "../helloworld"
 	if err := service.Deploy(); err != nil {
 		t.Fatalf("service.Deploy %q: %v", service.Name, err)
 	}
 	defer service.Clean()
 
-	requestPath := "/"
-	req, err := service.NewRequest("GET", requestPath)
+	req, err := service.NewRequest("GET", "/")
 	if err != nil {
 		t.Fatalf("service.NewRequest: %v", err)
 	}
@@ -44,10 +46,18 @@ func TestPubSubService(t *testing.T) {
 	if err != nil {
 		t.Fatalf("client.Do: %v", err)
 	}
-	defer resp.Body.Close()
 	fmt.Printf("client.Do: %s %s\n", req.Method, req.URL)
 
-	if got := resp.StatusCode; got != http.StatusBadRequest {
-		t.Errorf("response status: got %d, want %d", got, http.StatusBadRequest)
+	out, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("ioutil.ReadAll: %v", err)
+	}
+
+	if got, want := string(out), "Hello Override!\n"; got != want {
+		t.Errorf("body: got %q, want %q", got, want)
+	}
+
+	if got := resp.StatusCode; got != http.StatusOK {
+		t.Errorf("response status: got %d, want %d", got, http.StatusOK)
 	}
 }

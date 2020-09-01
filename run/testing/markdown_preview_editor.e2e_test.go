@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package cloudruntests
 
 import (
 	"bytes"
@@ -37,13 +37,14 @@ func TestEditorService(t *testing.T) {
 	client = http.Client{Timeout: 10 * time.Second}
 
 	renderService = cloudrunci.NewService("renderer", tc.ProjectID)
-	renderService.Dir = "../renderer"
+	renderService.Dir = "../markdown-preview/renderer"
 	if err := renderService.Deploy(); err != nil {
 		t.Fatalf("service.Deploy %q: %v", renderService.Name, err)
 	}
 	defer renderService.Clean()
 
 	editorService = cloudrunci.NewService("editor", tc.ProjectID)
+	editorService.Dir = "../markdown-preview/editor"
 	u, err := renderService.URL("")
 	if err != nil {
 		t.Fatalf("service.URL: %v", err)
