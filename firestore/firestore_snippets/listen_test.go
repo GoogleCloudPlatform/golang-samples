@@ -15,10 +15,12 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -95,14 +97,15 @@ func TestListenChanges(t *testing.T) {
 	ctx, cancel := context.WithTimeout(ctx, duration)
 	defer cancel()
 
-	c := make(chan []firestore.DocumentChange)
+	buf := &bytes.Buffer{}
+	c := make(chan *bytes.Buffer)
 	go func() {
 		defer close(c)
-		changes, err := listenChanges(ctx, ioutil.Discard, projectID)
+		err := listenChanges(ctx, buf, projectID)
 		if err != nil {
 			t.Errorf("listenChanges: %v", err)
 		}
-		c <- changes
+		c <- buf
 	}()
 	// Add some changes to data in parallel.
 	time.Sleep(time.Second)
@@ -112,13 +115,10 @@ func TestListenChanges(t *testing.T) {
 	}); err != nil {
 		log.Fatalf("Doc.Update: %v", err)
 	}
-	result := <-c
-	if len(result) != 3 {
-		t.Errorf("got %v changes, want %v changes", len(result), 3)
-	}
-	got := result[len(result)-1]
-	if pop != got.Doc.Data()["population"].(int64) {
-		t.Errorf("got %v, want %v", got.Doc.Data()["population"].(int64), pop)
+	<-c
+	want := "population:3900000"
+	if got := buf.String(); !strings.Contains(got, want) {
+		t.Errorf("listenChanges got\n----\n%s\n----\nWant to contain:\n----\n%s\n----", got, want)
 	}
 }
 
