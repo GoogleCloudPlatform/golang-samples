@@ -26,8 +26,8 @@ import (
 	"google.golang.org/api/idtoken"
 )
 
-// makeGetRequest makes a request to the provided targetURL with an authenticated client.
-func makeGetRequest(w io.Writer, targetURL string) error {
+// MakeGetRequest makes a request to the provided targetURL with an authenticated client.
+func MakeGetRequest(w io.Writer, targetURL string) error {
 	// functionURL := "https://TARGET_URL"
 	ctx := context.Background()
 
