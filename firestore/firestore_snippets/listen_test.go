@@ -69,7 +69,7 @@ func TestListen(t *testing.T) {
 			"name":  c.name,
 			"state": c.state,
 		}); err != nil {
-			log.Fatalf("Set: %v", err)
+			t.Fatalf("Set: %v", err)
 		}
 	}
 	if err := listenDocument(ctx, ioutil.Discard, projectID); err != nil {
