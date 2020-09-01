@@ -2,4 +2,4 @@ module github.com/GoogleCloudPlatform/golang-samples/cloudsql/sqlserver/database
 
 go 1.13
 
-require github.com/denisenkom/go-mssqldb v0.0.0-20200620013148-b91950f658ec
+require github.com/denisenkom/go-mssqldb v0.0.0-20200831201914-36b6ff1bbc10
