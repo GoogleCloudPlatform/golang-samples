@@ -9,5 +9,5 @@ require (
 	github.com/gofrs/uuid v3.3.0+incompatible
 	github.com/gorilla/handlers v1.5.0
 	github.com/gorilla/mux v1.8.0
-	google.golang.org/api v0.30.0
+	google.golang.org/api v0.31.0
 )
