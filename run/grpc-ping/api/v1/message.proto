@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START protodef]
+// [START run_grpc_protodef]
 syntax = "proto3";
 
 package ping;
@@ -37,4 +37,4 @@ message Pong {
 message Response {
   Pong pong = 1;
 }
-// [END protodef]
+// [END run_grpc_protodef]
