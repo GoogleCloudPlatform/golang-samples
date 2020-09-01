@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package cloudruntests
 
 import (
 	"fmt"
@@ -24,20 +24,23 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestRendererServiceDeploy(t *testing.T) {
+func TestDiagramService(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
-
-	service := cloudrunci.NewService("renderer", tc.ProjectID)
+	service := cloudrunci.NewService("diagram", tc.ProjectID)
+	service.Dir = "../system_package"
 	if err := service.Deploy(); err != nil {
 		t.Fatalf("service.Deploy %q: %v", service.Name, err)
 	}
 	defer service.Clean()
 
-	requestPath := "/"
-	req, err := service.NewRequest("POST", requestPath)
+	requestPath := "/diagram.png"
+	req, err := service.NewRequest("GET", requestPath)
 	if err != nil {
 		t.Fatalf("service.NewRequest: %v", err)
 	}
+	q := req.URL.Query()
+	q.Add("dot", "digraph G { A -> {B, C, D} -> {F} }")
+	req.URL.RawQuery = q.Encode()
 
 	client := http.Client{Timeout: 10 * time.Second}
 	resp, err := client.Do(req)
@@ -47,7 +50,15 @@ func TestRendererServiceDeploy(t *testing.T) {
 	defer resp.Body.Close()
 	fmt.Printf("client.Do: %s %s\n", req.Method, req.URL)
 
-	if got := resp.StatusCode; got != http.StatusOK {
-		t.Errorf("response status: got %d, want %d", got, http.StatusOK)
+	if got := resp.StatusCode; got != 200 {
+		t.Errorf("response status: got %d, want %d", got, 200)
+	}
+
+	if got, want := resp.Header.Get("Content-Type"), "image/png"; got != want {
+		t.Errorf("response Content-Type: got %q, want %s", got, want)
+	}
+
+	if got, want := resp.Header.Get("Cache-Control"), "public, max-age=86400"; got != want {
+		t.Errorf("response Cache-Control: got %q, want %q", got, want)
 	}
 }

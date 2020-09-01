@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package cloudruntests
 
 import (
 	"fmt"
@@ -24,10 +24,11 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestPubSubEventsService(t *testing.T) {
+func TestLoggingManualService(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 
-	service := cloudrunci.NewService("run-events-pubsub", tc.ProjectID)
+	service := cloudrunci.NewService("logging-manual", tc.ProjectID)
+	service.Dir = "../logging-manual"
 	if err := service.Deploy(); err != nil {
 		t.Fatalf("service.Deploy %q: %v", service.Name, err)
 	}
@@ -47,7 +48,7 @@ func TestPubSubEventsService(t *testing.T) {
 	defer resp.Body.Close()
 	fmt.Printf("client.Do: %s %s\n", req.Method, req.URL)
 
-	if got := resp.StatusCode; got != http.StatusBadRequest {
-		t.Errorf("response status: got %d, want %d", got, http.StatusBadRequest)
+	if got := resp.StatusCode; got != http.StatusOK {
+		t.Errorf("response status: got %d, want %d", got, http.StatusOK)
 	}
 }

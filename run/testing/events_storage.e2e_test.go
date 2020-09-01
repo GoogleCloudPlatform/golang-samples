@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package cloudruntests
 
 import (
 	"fmt"
@@ -24,10 +24,11 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestLoggingManualService(t *testing.T) {
+func TestPubSubStorageService(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 
-	service := cloudrunci.NewService("logging-manual", tc.ProjectID)
+	service := cloudrunci.NewService("events-storage", tc.ProjectID)
+	service.Dir = "../events_storage"
 	if err := service.Deploy(); err != nil {
 		t.Fatalf("service.Deploy %q: %v", service.Name, err)
 	}
