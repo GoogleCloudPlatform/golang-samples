@@ -4,6 +4,6 @@ go 1.12
 
 require (
 	cloud.google.com/go v0.65.0
-	cloud.google.com/go/storage v1.11.0
-	google.golang.org/genproto v0.0.0-20200828030656-73b5761be4c5
+	cloud.google.com/go/storage v1.10.0
+	google.golang.org/genproto v0.0.0-20200827165113-ac2560b5e952
 )
