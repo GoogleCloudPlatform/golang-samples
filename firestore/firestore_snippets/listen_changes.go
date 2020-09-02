@@ -27,7 +27,7 @@ import (
 )
 
 // listenChanges listens to a query, returning the list of document changes.
-func listenChanges(ctx context.Context, w io.Writer, projectID string) error {
+func listenChanges(ctx context.Context, w io.Writer, projectID, collection string) error {
 	// projectID := "project-id"
 	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
@@ -38,7 +38,7 @@ func listenChanges(ctx context.Context, w io.Writer, projectID string) error {
 	}
 	defer client.Close()
 
-	it := client.Collection("cities").Where("state", "==", "CA").Snapshots(ctx)
+	it := client.Collection(collection).Where("state", "==", "CA").Snapshots(ctx)
 	for {
 		snap, err := it.Next()
 		// DeadlineExceeded will be returned when ctx is cancelled.

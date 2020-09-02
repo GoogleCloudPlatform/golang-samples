@@ -27,7 +27,7 @@ import (
 )
 
 // listenDocument listens to a single document.
-func listenDocument(ctx context.Context, w io.Writer, projectID string) error {
+func listenDocument(ctx context.Context, w io.Writer, projectID, collection string) error {
 	// projectID := "project-id"
 	// [START fs_detach_listener]
 	// Сontext with timeout stops listening to changes.
@@ -41,7 +41,7 @@ func listenDocument(ctx context.Context, w io.Writer, projectID string) error {
 	}
 	defer client.Close()
 
-	it := client.Collection("cities").Doc("SF").Snapshots(ctx)
+	it := client.Collection(collection).Doc("SF").Snapshots(ctx)
 	for {
 		snap, err := it.Next()
 		// DeadlineExceeded will be returned when ctx is cancelled.

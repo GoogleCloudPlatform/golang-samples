@@ -25,32 +25,36 @@ import (
 	"time"
 
 	"cloud.google.com/go/firestore"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 var duration time.Duration = 6 * time.Second
 
-func setup(ctx context.Context, t *testing.T) (*firestore.Client, string) {
+func setup(ctx context.Context, t *testing.T) (*firestore.Client, string, string) {
+	tc := testutil.SystemTest(t)
 	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
 	if projectID == "" {
 		t.Skip("Skipping firestore test. Set GOLANG_SAMPLES_FIRESTORE_PROJECT.")
 	}
+	collection := tc.ProjectID + "-collection-cities"
+
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
 		t.Fatalf("firestore.NewClient: %v", err)
 	}
-	return client, projectID
+	return client, projectID, collection
 }
 
 func TestListen(t *testing.T) {
 	ctx := context.Background()
-	client, projectID := setup(ctx, t)
+	client, projectID, collection := setup(ctx, t)
 	defer client.Close()
 
 	ctx, cancel := context.WithTimeout(ctx, duration)
 	defer cancel()
 
 	// Delete all docs first to make sure setup works.
-	docs, err := client.Collection("cities").Documents(ctx).GetAll()
+	docs, err := client.Collection(collection).Documents(ctx).GetAll()
 	if err == nil {
 		for _, doc := range docs {
 			doc.Ref.Delete(ctx)
@@ -65,33 +69,33 @@ func TestListen(t *testing.T) {
 	}
 
 	for _, c := range cityCollection {
-		if _, err := client.Collection("cities").Doc(c.city).Set(ctx, map[string]string{
+		if _, err := client.Collection(collection).Doc(c.city).Set(ctx, map[string]string{
 			"name":  c.name,
 			"state": c.state,
 		}); err != nil {
 			log.Fatalf("Set: %v", err)
 		}
 	}
-	if err := listenDocument(ctx, ioutil.Discard, projectID); err != nil {
+	if err := listenDocument(ctx, ioutil.Discard, projectID, collection); err != nil {
 		t.Errorf("listenDocument: %v", err)
 	}
 }
 func TestListenMultiple(t *testing.T) {
 	ctx := context.Background()
-	client, projectID := setup(ctx, t)
+	client, projectID, collection := setup(ctx, t)
 	defer client.Close()
 
 	ctx, cancel := context.WithTimeout(ctx, duration)
 	defer cancel()
 
-	if err := listenMultiple(ctx, ioutil.Discard, projectID); err != nil {
+	if err := listenMultiple(ctx, ioutil.Discard, projectID, collection); err != nil {
 		t.Errorf("listenMultiple: %v", err)
 	}
 }
 
 func TestListenChanges(t *testing.T) {
 	ctx := context.Background()
-	client, projectID := setup(ctx, t)
+	client, projectID, collection := setup(ctx, t)
 	defer client.Close()
 
 	ctx, cancel := context.WithTimeout(ctx, duration)
@@ -101,7 +105,7 @@ func TestListenChanges(t *testing.T) {
 	c := make(chan *bytes.Buffer)
 	go func() {
 		defer close(c)
-		err := listenChanges(ctx, buf, projectID)
+		err := listenChanges(ctx, buf, projectID, collection)
 		if err != nil {
 			t.Errorf("listenChanges: %v", err)
 		}
@@ -110,7 +114,7 @@ func TestListenChanges(t *testing.T) {
 	// Add some changes to data in parallel.
 	time.Sleep(time.Second)
 	var pop int64 = 3900000
-	if _, err := client.Collection("cities").Doc("LA").Update(ctx, []firestore.Update{
+	if _, err := client.Collection(collection).Doc("LA").Update(ctx, []firestore.Update{
 		{Path: "population", Value: pop},
 	}); err != nil {
 		log.Fatalf("Doc.Update: %v", err)
@@ -124,13 +128,13 @@ func TestListenChanges(t *testing.T) {
 
 func TestListenErrors(t *testing.T) {
 	ctx := context.Background()
-	client, projectID := setup(ctx, t)
+	client, projectID, collection := setup(ctx, t)
 	defer client.Close()
 
 	ctx, cancel := context.WithTimeout(ctx, duration)
 	defer cancel()
 
-	if err := listenErrors(ctx, ioutil.Discard, projectID); err != nil {
+	if err := listenErrors(ctx, ioutil.Discard, projectID, collection); err != nil {
 		t.Errorf("listenErrors: %v", err)
 	}
 }

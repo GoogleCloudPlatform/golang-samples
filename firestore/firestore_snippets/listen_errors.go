@@ -27,7 +27,7 @@ import (
 )
 
 // listenErrors demonstrates how to handle listening errors.
-func listenErrors(ctx context.Context, w io.Writer, projectID string) error {
+func listenErrors(ctx context.Context, w io.Writer, projectID, collection string) error {
 	// projectID := "project-id"
 	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
@@ -38,7 +38,7 @@ func listenErrors(ctx context.Context, w io.Writer, projectID string) error {
 	}
 	defer client.Close()
 
-	it := client.Collection("cities").Snapshots(ctx)
+	it := client.Collection(collection).Snapshots(ctx)
 	for {
 		snap, err := it.Next()
 		// DeadlineExceeded will be returned when ctx is cancelled.
