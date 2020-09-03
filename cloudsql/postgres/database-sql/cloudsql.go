@@ -27,7 +27,10 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-
+	
+	// Note: If connecting using the App Engine Flex Go runtime, use 
+	// "github.com/jackc/pgx/stdlib" instead, since v4 requires
+	// Go modules which are not supported by App Engine Flex.
 	_ "github.com/jackc/pgx/v4/stdlib"
 )
 
