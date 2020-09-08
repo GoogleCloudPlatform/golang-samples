@@ -16,33 +16,37 @@ package main
 
 import (
 	"net/http/httptest"
-	"strings"
+	"os"
 	"testing"
 )
 
-var tests = []struct {
-	label string
-	input string
-	want  string
-}{
-	{
-		label: "markdown",
-		input: "**strong text**",
-		want:  "<p><strong>strong text</strong></p>\n",
-	},
-	{
-		label: "sanitize",
-		input: `<a onblur="alert(secret)" href="http://www.google.com">Google</a>`,
-		want:  `<p><a href="http://www.google.com" rel="nofollow">Google</a></p>` + "\n",
-	},
-}
+func TestHandler(t *testing.T) {
+	tests := []struct {
+		label string
+		want  string
+		name  string
+	}{
+		{
+			label: "default",
+			want:  "Hello World!\n",
+			name:  "",
+		},
+		{
+			label: "override",
+			want:  "Hello Override!\n",
+			name:  "Override",
+		},
+	}
 
-func TestMarkdownHandler(t *testing.T) {
+	originalName := os.Getenv("NAME")
+	defer os.Setenv("NAME", originalName)
+
 	for _, test := range tests {
-		req := httptest.NewRequest("POST", "/", strings.NewReader(test.input))
+		os.Setenv("NAME", test.name)
 
+		req := httptest.NewRequest("GET", "/", nil)
 		rr := httptest.NewRecorder()
-		markdownHandler(rr, req)
+		handler(rr, req)
 
 		if got := rr.Body.String(); got != test.want {
 			t.Errorf("%s: got %q, want %q", test.label, got, test.want)

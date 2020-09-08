@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main_test
+package cloudruntests
 
 import (
 	"context"
@@ -38,6 +38,7 @@ func TestGRPCServerStreamingService(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 
 	service := cloudrunci.NewService("grpc-server-streaming", tc.ProjectID)
+	service.Dir = "../grpc-server-streaming"
 	service.AllowUnauthenticated = true
 
 	if err := service.Build(); err != nil {

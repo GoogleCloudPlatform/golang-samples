@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package cloudruntests
 
 import (
 	"fmt"
@@ -24,10 +24,11 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestImageProcessingService(t *testing.T) {
+func TestPubSubStorageService(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 
-	service := cloudrunci.NewService("imageproc", tc.ProjectID)
+	service := cloudrunci.NewService("events-storage", tc.ProjectID)
+	service.Dir = "../events_storage"
 	if err := service.Deploy(); err != nil {
 		t.Fatalf("service.Deploy %q: %v", service.Name, err)
 	}
@@ -47,7 +48,7 @@ func TestImageProcessingService(t *testing.T) {
 	defer resp.Body.Close()
 	fmt.Printf("client.Do: %s %s\n", req.Method, req.URL)
 
-	if got := resp.StatusCode; got != http.StatusBadRequest {
-		t.Errorf("response status: got %d, want %d", got, http.StatusBadRequest)
+	if got := resp.StatusCode; got != http.StatusOK {
+		t.Errorf("response status: got %d, want %d", got, http.StatusOK)
 	}
 }

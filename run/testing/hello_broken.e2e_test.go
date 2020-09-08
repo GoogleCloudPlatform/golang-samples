@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package cloudruntests
 
 import (
 	"fmt"
@@ -24,17 +24,18 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestLoggingManualService(t *testing.T) {
+func TestBrokenService(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 
-	service := cloudrunci.NewService("logging-manual", tc.ProjectID)
+	service := cloudrunci.NewService("hello-broken", tc.ProjectID)
+	service.Dir = "../hello-broken"
 	if err := service.Deploy(); err != nil {
 		t.Fatalf("service.Deploy %q: %v", service.Name, err)
 	}
 	defer service.Clean()
 
-	requestPath := "/"
-	req, err := service.NewRequest("POST", requestPath)
+	requestPath := "/improved"
+	req, err := service.NewRequest("GET", requestPath)
 	if err != nil {
 		t.Fatalf("service.NewRequest: %v", err)
 	}
