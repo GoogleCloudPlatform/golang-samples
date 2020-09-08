@@ -551,6 +551,22 @@ func removeDefaultKMSkey(c *storage.Client, bucketName string) error {
 	return nil
 }
 
+func setBucketLabel(c *storage.Client, bucketName string) error {
+	// [START storage_add_bucket_label]
+	ctx := context.Background()
+
+	bucket := c.Bucket(bucketName)
+	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{}
+	bucketAttrsToUpdate.SetLabel("labelName", "labelValue")
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
+	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
+		return err
+	}
+	// [END storage_add_bucket_label]
+	return nil
+}
+
 func enableUniformBucketLevelAccess(c *storage.Client, bucketName string) error {
 	// [START storage_enable_uniform_bucket_level_access]
 	ctx := context.Background()

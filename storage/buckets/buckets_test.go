@@ -329,6 +329,18 @@ func TestLifecycleManagement(t *testing.T) {
 	}
 }
 
+func TestBucketLabel(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	bucketName := tc.ProjectID + "-storage-buckets-tests"
+
+	ctx := context.Background()
+	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName)
+
+	if err := addBucketLabel(ioutil.Discard, bucketName, "labelName", "labelValue"); err != nil {
+		t.Fatalf("addBucketLabel:%v", err)
+	}
+}
+
 func TestDelete(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	bucketName := tc.ProjectID + "-storage-buckets-tests"
