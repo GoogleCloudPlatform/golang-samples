@@ -35,8 +35,8 @@ dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/DataDog/sketches-go v0.0.1/go.mod h1:Q5DbzQ+3AkgGwymQO7aZFNP7ns2lZKGtvRBzRXfdi60=
-github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v0.10.1-0.20200828070728-ba72e89a4087 h1:efPNH5f5HYQeg7MtDLAWq+ZMJP+qPywXAsFcOsI3IdI=
-github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v0.10.1-0.20200828070728-ba72e89a4087/go.mod h1:9UXMQ7EPapZsvIvvNm2eByNGGyTT5e9hxDvi0ijJAhc=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v0.11.0 h1:Uqu3+sAKK2WLRiVJEDwXK08lt6aIgpKerNqI+auSmlY=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v0.11.0/go.mod h1:9UXMQ7EPapZsvIvvNm2eByNGGyTT5e9hxDvi0ijJAhc=
 github.com/benbjohnson/clock v1.0.3 h1:vkLuvpK4fmtSCuo60+yC63p7y0BmQ8gm5ZXGuBCJyXg=
 github.com/benbjohnson/clock v1.0.3/go.mod h1:bGMdMPoPVvcYyt1gHDf4J2KE153Yf9BuiUKYMaxlTDM=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
