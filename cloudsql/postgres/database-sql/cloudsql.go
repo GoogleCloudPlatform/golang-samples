@@ -31,6 +31,10 @@ import (
 	_ "github.com/jackc/pgx/v4/stdlib"
 )
 
+// Note: If connecting using the App Engine Flex Go runtime, use
+// "github.com/jackc/pgx/stdlib" instead, since v4 requires
+// Go modules which are not supported by App Engine Flex.
+
 // vote struct contains a single row from the votes table in the database.
 // Each vote includes a candidate ("TABS" or "SPACES") and a timestamp.
 type vote struct {
