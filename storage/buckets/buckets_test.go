@@ -153,7 +153,10 @@ func TestKMS(t *testing.T) {
 
 	kmsKeyName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", tc.ProjectID, "global", keyRingID, cryptoKeyID)
 	if err := setBucketDefaultKMSKey(ioutil.Discard, bucketName, kmsKeyName); err != nil {
-		t.Fatalf("setBucketDefaultKmsKey: failed to enable default kms key (%q): %v", kmsKeyName, err)
+		t.Fatalf("setBucketDefaultKmsKey: failed to enable default KMS key (%q): %v", kmsKeyName, err)
+	}
+	if err := removeBucketDefaultKMSKey(ioutil.Discard, bucketName); err != nil {
+		t.Fatalf("removeBucketDefaultKmsKey: failed to remove default KMS key: %v", err)
 	}
 }
 

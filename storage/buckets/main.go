@@ -534,6 +534,23 @@ func setDefaultKMSkey(c *storage.Client, bucketName string, keyName string) erro
 	return nil
 }
 
+func removeDefaultKMSkey(c *storage.Client, bucketName string) error {
+	// [START storage_bucket_delete_default_kms_key]
+	ctx := context.Background()
+
+	bucket := c.Bucket(bucketName)
+	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
+		Encryption: &storage.BucketEncryption{DefaultKMSKeyName: ""},
+	}
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
+	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
+		return err
+	}
+	// [END storage_bucket_delete_default_kms_key]
+	return nil
+}
+
 func enableUniformBucketLevelAccess(c *storage.Client, bucketName string) error {
 	// [START storage_enable_uniform_bucket_level_access]
 	ctx := context.Background()
