@@ -344,6 +344,36 @@ func TestBucketLabel(t *testing.T) {
 	}
 }
 
+func TestDefineBucketWebsiteConfiguration(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	bucketName := tc.ProjectID + "-storage-buckets-tests"
+
+	ctx := context.Background()
+	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName)
+
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+	defer client.Close()
+
+	index := "index.html"
+	notFoundPage := "404.html"
+	if err := defineBucketWebsiteConfiguration(ioutil.Discard, bucketName, index, notFoundPage); err != nil {
+		t.Fatalf("defineBucketWebsiteConfiguration: %v", err)
+	}
+	attrs, err := client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	if attrs.Website.MainPageSuffix != index {
+		t.Fatalf("got index page: %v, want %v", attrs.Website.MainPageSuffix, index)
+	}
+	if attrs.Website.NotFoundPage != notFoundPage {
+		t.Fatalf("got not found page: %v, want %v", attrs.Website.NotFoundPage, notFoundPage)
+	}
+}
+
 func TestDelete(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	bucketName := tc.ProjectID + "-storage-buckets-tests"

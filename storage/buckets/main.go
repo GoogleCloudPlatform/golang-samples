@@ -551,13 +551,13 @@ func removeDefaultKMSkey(c *storage.Client, bucketName string) error {
 	return nil
 }
 
-func setBucketLabel(c *storage.Client, bucketName string) error {
+func setBucketLabel(c *storage.Client, bucketName, labelName, labelValue string) error {
 	// [START storage_add_bucket_label]
 	ctx := context.Background()
 
 	bucket := c.Bucket(bucketName)
 	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{}
-	bucketAttrsToUpdate.SetLabel("labelName", "labelValue")
+	bucketAttrsToUpdate.SetLabel(labelName, labelValue)
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
@@ -628,4 +628,25 @@ func getUniformBucketLevelAccess(c *storage.Client, bucketName string) (*storage
 
 	// [END storage_get_uniform_bucket_level_access]
 	return attrs, nil
+}
+
+func defineBucketWebsiteConfiguration(c *storage.Client, bucketName, indexPage, notFoundPage string) error {
+	// [START storage_define_bucket_website_configuration]
+	ctx := context.Background()
+
+	bucket := c.Bucket(bucketName)
+	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
+		Website: &storage.BucketWebsite{
+			MainPageSuffix: indexPage,
+			NotFoundPage:   notFoundPage,
+		},
+	}
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
+	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
+		return err
+	}
+
+	// [END storage_define_bucket_website_configuration]
+	return nil
 }
