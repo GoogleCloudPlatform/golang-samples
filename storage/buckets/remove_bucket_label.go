@@ -14,7 +14,7 @@
 
 package buckets
 
-// [START storage_add_bucket_label]
+// [START storage_remove_bucket_label]
 import (
 	"context"
 	"fmt"
@@ -24,11 +24,10 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// addBucketLabel adds a label on a bucket.
-func addBucketLabel(w io.Writer, bucketName, labelName, labelValue string) error {
+// removeBucketLabel removes a label on a bucket.
+func removeBucketLabel(w io.Writer, bucketName, labelName string) error {
 	// bucketName := "bucket-name"
 	// labelName := "label-name"
-	// labelValue := "label-value"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -41,12 +40,12 @@ func addBucketLabel(w io.Writer, bucketName, labelName, labelValue string) error
 
 	bucket := client.Bucket(bucketName)
 	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{}
-	bucketAttrsToUpdate.SetLabel(labelName, labelValue)
+	bucketAttrsToUpdate.DeleteLabel(labelName)
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
 		return fmt.Errorf("Bucket(%q).Update: %v", bucketName, err)
 	}
-	fmt.Fprintf(w, "Added label %q with value %q to bucket %v\n", labelName, labelValue, bucketName)
+	fmt.Fprintf(w, "Removed label %q from bucket %v\n", labelName, bucketName)
 	return nil
 }
 
-// [END storage_add_bucket_label]
+// [END storage_remove_bucket_label]
