@@ -25,6 +25,7 @@ import (
 	"testing"
 	"time"
 
+	"cloud.google.com/go/iam"
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
@@ -371,6 +372,31 @@ func TestDefineBucketWebsiteConfiguration(t *testing.T) {
 	}
 	if attrs.Website.NotFoundPage != notFoundPage {
 		t.Fatalf("got not found page: %v, want %v", attrs.Website.NotFoundPage, notFoundPage)
+	}
+}
+
+func TestSetBucketPublicIAM(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	bucketName := tc.ProjectID + "-storage-buckets-tests"
+
+	ctx := context.Background()
+	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName)
+
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+	defer client.Close()
+
+	policy, err := client.Bucket(bucketName).IAM().Policy(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).IAM().Policy: %v", bucketName, err)
+	}
+	if err := setBucketPublicIAM(ioutil.Discard, bucketName, *policy); err != nil {
+		t.Fatalf("setBucketPublicIAM: %v", err)
+	}
+	if !policy.HasRole(iam.AllUsers, iam.RoleName("roles/storage.objectViewer")) {
+		t.Fatalf("Public policy was not set: %v", err)
 	}
 }
 

@@ -180,6 +180,25 @@ func getPolicy(c *storage.Client, bucketName string) (*iam.Policy3, error) {
 	return policy, nil
 }
 
+func makeBucketPublicIAM(c *storage.Client, bucketName string) error {
+	// [START storage_set_bucket_public_iam]
+	ctx := context.Background()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
+	policy, err := c.Bucket(bucketName).IAM().Policy(ctx)
+	if err != nil {
+		return err
+	}
+	role := iam.RoleName("roles/storage.objectViewer")
+	policy.Add(iam.AllUsers, role)
+	if err := client.Bucket(bucketName).IAM().SetPolicy(ctx, &policy); err != nil {
+		return err
+	}
+	return nil
+	// [END storage_set_bucket_public_iam]
+}
+
 func addUser(c *storage.Client, bucketName string) error {
 	// [START add_bucket_iam_member]
 	ctx := context.Background()
