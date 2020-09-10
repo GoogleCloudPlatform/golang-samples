@@ -154,6 +154,16 @@ func TestCORSConfiguration(t *testing.T) {
 	if !reflect.DeepEqual(attrs.CORS, want) {
 		t.Fatalf("Unexpected CORS Configuration: got: %v, want: %v", attrs.CORS, want)
 	}
+	if err := removeBucketCORSConfiguration(ioutil.Discard, bucketName); err != nil {
+		t.Fatalf("removeBucketCORSConfiguration: %v", err)
+	}
+	attrs, err = client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	if attrs.CORS != nil {
+		t.Fatalf("Unexpected CORS Configuration: got: %v, want: %v", attrs.CORS, []storage.CORS{})
+	}
 }
 
 func TestRequesterPays(t *testing.T) {
