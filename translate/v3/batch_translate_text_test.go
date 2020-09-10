@@ -27,6 +27,7 @@ import (
 )
 
 func TestBatchTranslateText(t *testing.T) {
+	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/1572")
 	tc := testutil.SystemTest(t)
 
 	bucketName := fmt.Sprintf("%s-batch_translate_text-%v", tc.ProjectID, uuid.New().ID())
