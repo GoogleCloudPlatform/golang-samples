@@ -125,6 +125,36 @@ func TestIAM(t *testing.T) {
 		t.Errorf("removeBucketConditionalIAMBinding: %v", err)
 	}
 }
+func TestCORSConfiguration(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	bucketName := tc.ProjectID + "-storage-buckets-tests"
+
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+	defer client.Close()
+
+	want := []storage.CORS{
+		{
+			MaxAge:          time.Hour,
+			Methods:         []string{"GET"},
+			Origins:         []string{"some-origin.com"},
+			ResponseHeaders: []string{"Content-Type"},
+		},
+	}
+	if err := setBucketCORSConfiguration(ioutil.Discard, bucketName, want[0].MaxAge, want[0].Methods, want[0].Origins, want[0].ResponseHeaders); err != nil {
+		t.Fatalf("setBucketCORSConfiguration: %v", err)
+	}
+	attrs, err := client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	if !reflect.DeepEqual(attrs.CORS, want) {
+		t.Fatalf("Unexpected CORS Configuration: got: %v, want: %v", attrs.CORS, want)
+	}
+}
 
 func TestRequesterPays(t *testing.T) {
 	tc := testutil.SystemTest(t)
