@@ -180,25 +180,6 @@ func getPolicy(c *storage.Client, bucketName string) (*iam.Policy3, error) {
 	return policy, nil
 }
 
-func makeBucketPublicIAM(c *storage.Client, bucketName string) error {
-	// [START storage_set_bucket_public_iam]
-	ctx := context.Background()
-
-	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel()
-	policy, err := c.Bucket(bucketName).IAM().Policy(ctx)
-	if err != nil {
-		return err
-	}
-	role := iam.RoleName("roles/storage.objectViewer")
-	policy.Add(iam.AllUsers, role)
-	if err := client.Bucket(bucketName).IAM().SetPolicy(ctx, &policy); err != nil {
-		return err
-	}
-	return nil
-	// [END storage_set_bucket_public_iam]
-}
-
 func addUser(c *storage.Client, bucketName string) error {
 	// [START add_bucket_iam_member]
 	ctx := context.Background()
@@ -553,39 +534,6 @@ func setDefaultKMSkey(c *storage.Client, bucketName string, keyName string) erro
 	return nil
 }
 
-func removeDefaultKMSkey(c *storage.Client, bucketName string) error {
-	// [START storage_bucket_delete_default_kms_key]
-	ctx := context.Background()
-
-	bucket := c.Bucket(bucketName)
-	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
-		Encryption: &storage.BucketEncryption{DefaultKMSKeyName: ""},
-	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel()
-	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
-		return err
-	}
-	// [END storage_bucket_delete_default_kms_key]
-	return nil
-}
-
-func setBucketLabel(c *storage.Client, bucketName, labelName, labelValue string) error {
-	// [START storage_add_bucket_label]
-	ctx := context.Background()
-
-	bucket := c.Bucket(bucketName)
-	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{}
-	bucketAttrsToUpdate.SetLabel(labelName, labelValue)
-	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel()
-	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
-		return err
-	}
-	// [END storage_add_bucket_label]
-	return nil
-}
-
 func enableUniformBucketLevelAccess(c *storage.Client, bucketName string) error {
 	// [START storage_enable_uniform_bucket_level_access]
 	ctx := context.Background()
@@ -647,25 +595,4 @@ func getUniformBucketLevelAccess(c *storage.Client, bucketName string) (*storage
 
 	// [END storage_get_uniform_bucket_level_access]
 	return attrs, nil
-}
-
-func defineBucketWebsiteConfiguration(c *storage.Client, bucketName, indexPage, notFoundPage string) error {
-	// [START storage_define_bucket_website_configuration]
-	ctx := context.Background()
-
-	bucket := c.Bucket(bucketName)
-	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
-		Website: &storage.BucketWebsite{
-			MainPageSuffix: indexPage,
-			NotFoundPage:   notFoundPage,
-		},
-	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel()
-	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
-		return err
-	}
-
-	// [END storage_define_bucket_website_configuration]
-	return nil
 }
