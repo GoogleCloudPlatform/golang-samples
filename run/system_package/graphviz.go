@@ -27,7 +27,7 @@ import (
 )
 
 func main() {
-	// Verify the the dot utility is available at startup
+	// Verify the dot utility is available at startup
 	// instead of waiting for a first request.
 	fileInfo, err := os.Stat("/usr/bin/dot")
 	if err != nil {
