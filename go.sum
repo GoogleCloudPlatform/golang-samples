@@ -55,6 +55,8 @@ cloud.google.com/go/pubsub v1.6.1 h1:lhCQrTgu7f5SjWm5yJO0geSsPORQ2OAD+Eq1AMyBW8Y
 cloud.google.com/go/pubsub v1.6.1/go.mod h1:kvW9rcn9OLEx6eTIzMBbWbpB8YsK3vu9jxgPolVz+p4=
 cloud.google.com/go/spanner v1.8.0 h1:l4mz6H404S0pRz6Pp/reUAb7tEPKrukvzUcCI/6GPn8=
 cloud.google.com/go/spanner v1.8.0/go.mod h1:mdAPDiFUbE9vCmhHHlxyDUtaPPsIK+pUdf5KmHaUfT8=
+cloud.google.com/go/spanner v1.10.0 h1:B2I4WJY5DyY2LW1iCeY+23hCTyWlsQWsupKlTW7l6ws=
+cloud.google.com/go/spanner v1.10.0/go.mod h1:eVM2ifUL7rm+wM4gAXMuwO8CpNjbAJXK7CKZjUtt8Jw=
 cloud.google.com/go/storage v1.0.0/go.mod h1:IhtSnM/ZTZV8YYJWCY8RULGVqBDmpoyjwiyrjsg+URw=
 cloud.google.com/go/storage v1.5.0/go.mod h1:tpKbwo567HUNpVclU5sGELwQWBDZ8gh0ZeosJ0Rtdos=
 cloud.google.com/go/storage v1.6.0 h1:UDpwYIwla4jHGzZJaEJYx1tOejbgSoNqsAfHAUYe2r8=
@@ -449,6 +451,7 @@ golang.org/x/tools v0.0.0-20200817023811-d00afeaade8f/go.mod h1:njjCfa9FT2d7l9Bc
 golang.org/x/tools v0.0.0-20200825202427-b303f430e36d/go.mod h1:njjCfa9FT2d7l9Bc6FUM5FLjQPp3cFF28FI3qnDFljA=
 golang.org/x/tools v0.0.0-20200827163409-021d7c6f1ec3/go.mod h1:njjCfa9FT2d7l9Bc6FUM5FLjQPp3cFF28FI3qnDFljA=
 golang.org/x/tools v0.0.0-20200828161849-5deb26317202/go.mod h1:njjCfa9FT2d7l9Bc6FUM5FLjQPp3cFF28FI3qnDFljA=
+golang.org/x/tools v0.0.0-20200903185744-af4cc2cd812e/go.mod h1:Cj7w3i3Rnn0Xh82ur9kSqwfTHTeVxaDqrfMjpcNT6bE=
 golang.org/x/tools v0.0.0-20200904185747-39188db58858 h1:xLt+iB5ksWcZVxqc+g9K41ZHy+6MKWfXCDsjSThnsPA=
 golang.org/x/tools v0.0.0-20200904185747-39188db58858/go.mod h1:Cj7w3i3Rnn0Xh82ur9kSqwfTHTeVxaDqrfMjpcNT6bE=
 golang.org/x/xerrors v0.0.0-20190717185122-a985d3407aa7/go.mod h1:I/5z698sn9Ka8TeJc9MKroUUfqBBauWjQqLJ2OPfmY0=
