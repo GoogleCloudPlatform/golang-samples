@@ -37,7 +37,7 @@ func queryWithNumericParameter(w io.Writer, db string) error {
 	stmt := spanner.Statement{
 		SQL: `SELECT VenueId, Revenue FROM Venues WHERE Revenue < @revenue`,
 		Params: map[string]interface{}{
-			"revenue": 100000,
+			"revenue": big.NewRat(100000, 1),
 		},
 	}
 	iter := client.Single().Query(ctx, stmt)
@@ -55,7 +55,7 @@ func queryWithNumericParameter(w io.Writer, db string) error {
 		if err := row.Columns(&venueID, &revenue); err != nil {
 			return err
 		}
-		fmt.Fprintf(w, "VenueId: %v, Revenue: %v\n", venueID, revenue)
+		fmt.Fprintf(w, "%v %v\n", venueID, revenue)
 	}
 }
 

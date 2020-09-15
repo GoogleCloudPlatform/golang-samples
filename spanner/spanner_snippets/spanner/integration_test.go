@@ -320,9 +320,9 @@ func TestSample(t *testing.T) {
 	assertContains(t, out, "42 Venue 42")
 
 	runSample(t, addNumericColumn, dbName, "failed to add numeric column")
-	runSample(t, updateDataWithNumeric, dbName, "failed to update data with numeric")
+	runSample(t, updateDataWithNumericColumn, dbName, "failed to update data with numeric")
 	out = runSample(t, queryWithNumericParameter, dbName, "failed to query with numeric parameter")
-	assertContains(t, out, "VenueId: 4, Revenue:")
+	assertContains(t, out, "4 ")
 	assertContains(t, out, "35000")
 }
 

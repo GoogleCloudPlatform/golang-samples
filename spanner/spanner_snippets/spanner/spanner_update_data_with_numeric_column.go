@@ -14,7 +14,7 @@
 
 package spanner
 
-// [START spanner_update_data_with_numeric]
+// [START spanner_update_data_with_numeric_column]
 import (
 	"context"
 	"io"
@@ -22,7 +22,7 @@ import (
 	"cloud.google.com/go/spanner"
 )
 
-func updateDataWithNumeric(w io.Writer, db string) error {
+func updateDataWithNumericColumn(w io.Writer, db string) error {
 	ctx := context.Background()
 
 	client, err := spanner.NewClient(ctx, db)
@@ -40,4 +40,4 @@ func updateDataWithNumeric(w io.Writer, db string) error {
 	return err
 }
 
-// [END spanner_update_data_with_numeric]
+// [END spanner_update_data_with_numeric_column]
