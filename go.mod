@@ -30,7 +30,6 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/h2non/filetype v1.1.0
-	github.com/jstemmer/go-junit-report v0.9.1
 	github.com/lib/pq v1.8.0
 	github.com/linkedin/goavro/v2 v2.9.8
 	github.com/mailgun/mailgun-go/v3 v3.6.4
@@ -43,7 +42,7 @@ require (
 	golang.org/x/net v0.0.0-20200904194848-62affa334b73
 	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43
 	golang.org/x/text v0.3.3
-	golang.org/x/tools v0.0.0-20200904185747-39188db58858
+	golang.org/x/tools v0.0.0-20200904185747-39188db58858 // indirect
 	google.golang.org/api v0.31.0
 	google.golang.org/appengine v1.6.6
 	google.golang.org/genproto v0.0.0-20200904004341-0bd0a958aa1d
