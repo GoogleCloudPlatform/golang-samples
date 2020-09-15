@@ -7,3 +7,6 @@ require (
 	github.com/jstemmer/go-junit-report v0.9.1
 	golang.org/x/tools v0.0.0-20200915031644-64986481280e
 )
+
+// https://github.com/jstemmer/go-junit-report/issues/107
+replace github.com/jstemmer/go-junit-report => github.com/tbpg/go-junit-report v0.9.2-0.20200506144438-50086c54f894
