@@ -5,7 +5,7 @@ go 1.12
 require (
 	github.com/google/go-cmp v0.5.2
 	github.com/jstemmer/go-junit-report v0.9.1
-	golang.org/x/tools v0.0.0-20200915031644-64986481280e
+	golang.org/x/tools v0.0.0-20200904185747-39188db58858
 )
 
 // https://github.com/jstemmer/go-junit-report/issues/107
