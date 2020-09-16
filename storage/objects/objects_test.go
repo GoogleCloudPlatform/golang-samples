@@ -70,6 +70,12 @@ func TestObjects(t *testing.T) {
 	if err := uploadFile(ioutil.Discard, bucketVersioning, object1); err != nil {
 		t.Fatalf("uploadFile(%q): %v", object1, err)
 	}
+	obj := client.Bucket(bucketVersioning).Object(object1)
+	attrs, err := obj.Attrs(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	gen := attrs.Generation
 	if err := uploadFile(ioutil.Discard, bucketVersioning, object1); err != nil {
 		t.Fatalf("uploadFile(%q): %v", object1, err)
 	}
@@ -128,6 +134,10 @@ func TestObjects(t *testing.T) {
 		}
 	}
 
+	// delete first version of an object1 for a bucketVersioning.
+	if err := deleteFileArchivedGeneration(ioutil.Discard, bucketVersioning, object1, gen); err != nil {
+		t.Fatalf("deleteFileArchivedGeneration: %v", err)
+	}
 	data, err := downloadFile(ioutil.Discard, bucket, object1)
 	if err != nil {
 		t.Fatalf("downloadFile: %v", err)
