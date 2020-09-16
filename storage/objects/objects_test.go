@@ -134,6 +134,9 @@ func TestObjects(t *testing.T) {
 		}
 	}
 
+	if err := copyFileArchivedGeneration(ioutil.Discard, bucketVersioning, bucketVersioning, object1, gen); err != nil {
+		t.Fatalf("copyFileArchivedGeneration: %v", err)
+	}
 	// delete first version of an object1 for a bucketVersioning.
 	if err := deleteFileArchivedGeneration(ioutil.Discard, bucketVersioning, object1, gen); err != nil {
 		t.Fatalf("deleteFileArchivedGeneration: %v", err)
