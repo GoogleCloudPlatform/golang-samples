@@ -56,13 +56,8 @@ func TestObjects(t *testing.T) {
 	testutil.CleanBucket(ctx, t, tc.ProjectID, dstBucket)
 	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketVersioning)
 
-	{
-		// Enable versioning
-		attr := storage.BucketAttrsToUpdate{VersioningEnabled: true}
-		_, err := client.Bucket(bucketVersioning).Update(ctx, attr)
-		if err != nil {
-			t.Fatalf("storage.BucketAttrsToUpdate{VersioningEnabled: true}: %v", err)
-		}
+	if err := enableVersioning(ioutil.Discard, bucketVersioning); err != nil {
+		t.Fatalf("enableVersioning: %v", err)
 	}
 
 	if err := uploadFile(ioutil.Discard, bucket, object1); err != nil {
