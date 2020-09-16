@@ -158,6 +158,9 @@ func TestObjects(t *testing.T) {
 	key := []byte("my-secret-AES-256-encryption-key")
 	newKey := []byte("My-secret-AES-256-encryption-key")
 
+	if err := generateEncryptionKey(ioutil.Discard); err != nil {
+		t.Errorf("generateEncryptionKey: %v", err)
+	}
 	if err := uploadEncryptedFile(ioutil.Discard, bucket, object1, key); err != nil {
 		t.Errorf("uploadEncryptedFile: %v", err)
 	}
