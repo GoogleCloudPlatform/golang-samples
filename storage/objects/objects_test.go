@@ -177,6 +177,9 @@ func TestObjects(t *testing.T) {
 	if err := deleteFile(ioutil.Discard, bucket, object2); err != nil {
 		t.Errorf("deleteFile: %v", err)
 	}
+	if err := disableVersioning(ioutil.Discard, bucketVersioning); err != nil {
+		t.Fatalf("disableVersioning: %v", err)
+	}
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		// Cleanup, this part won't be executed if Fatal happens.
