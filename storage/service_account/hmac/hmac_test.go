@@ -128,10 +128,11 @@ func TestGetKey(t *testing.T) {
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
 		key, err = getHMACKey(ioutil.Discard, key.AccessID, key.ProjectID)
 		if err != nil {
-			t.Errorf("Error in getHMACKey: %s", err)
+			r.Errorf("Error in getHMACKey: %s", err)
+			return
 		}
 		if key == nil {
-			t.Errorf("Returned nil key.")
+			r.Errorf("Returned nil key.")
 		}
 	})
 }
