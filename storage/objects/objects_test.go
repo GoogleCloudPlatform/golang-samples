@@ -48,6 +48,7 @@ func TestObjects(t *testing.T) {
 		bucketVersioning      = tc.ProjectID + "-bucket-versioning-enabled"
 		object1               = "foo.txt"
 		object2               = "foo/a.txt"
+		dstObj                = "bar.txt"
 		allAuthenticatedUsers = storage.AllAuthenticatedUsers
 		roleReader            = storage.RoleReader
 	)
@@ -159,6 +160,9 @@ func TestObjects(t *testing.T) {
 	if err := copyFile(ioutil.Discard, dstBucket, bucket, object1); err != nil {
 		t.Errorf("copyFile: %v", err)
 	}
+	if err := composeFile(ioutil.Discard, bucket, object1, object2, dstObj); err != nil {
+		t.Errorf("composeFile: %v", err)
+	}
 
 	key := []byte("my-secret-AES-256-encryption-key")
 	newKey := []byte("My-secret-AES-256-encryption-key")
@@ -180,6 +184,9 @@ func TestObjects(t *testing.T) {
 		t.Errorf("deleteFile: %v", err)
 	}
 	if err := deleteFile(ioutil.Discard, bucket, object2); err != nil {
+		t.Errorf("deleteFile: %v", err)
+	}
+	if err := deleteFile(ioutil.Discard, bucket, dstObj); err != nil {
 		t.Errorf("deleteFile: %v", err)
 	}
 
