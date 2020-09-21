@@ -377,10 +377,12 @@ func TestBucketLabel(t *testing.T) {
 	ctx := context.Background()
 	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName)
 
-	if err := addBucketLabel(ioutil.Discard, bucketName, "labelName", "labelValue"); err != nil {
-		t.Fatalf("addBucketLabel: %v", err)
-	}
-	if err := removeBucketLabel(ioutil.Discard, bucketName, "labelName"); err != nil {
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
+		if err := addBucketLabel(ioutil.Discard, bucketName, "label-name", "label-value"); err != nil {
+			r.Errorf("addBucketLabel: %v", err)
+		}
+	})
+	if err := removeBucketLabel(ioutil.Discard, bucketName, "label-name"); err != nil {
 		t.Fatalf("removeBucketLabel: %v", err)
 	}
 }
