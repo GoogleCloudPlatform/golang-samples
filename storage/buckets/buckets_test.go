@@ -387,7 +387,7 @@ func TestBucketLabel(t *testing.T) {
 	}
 }
 
-func TestDefineBucketWebsiteConfiguration(t *testing.T) {
+func TestBucketWebsiteInfo(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	bucketName := tc.ProjectID + "-storage-buckets-tests"
 
