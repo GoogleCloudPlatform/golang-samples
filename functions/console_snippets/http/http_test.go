@@ -1,36 +1,36 @@
 package p
 
 import (
-	"bufio"
-	"bytes"
-	"log"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"strings"
 	"testing"
 )
 
 func TestHelloWorld(t *testing.T) {
 	tests := []struct {
-		name string
-		want string
-		data string
+		name     string
+		data     string
+		want     string
+		wantCode int
 	}{
 		{
-			name: "valid",
-			want: "Greetings, Ocean!",
-			data: `{"message": "Greetings, Ocean!"}`,
+			name:     "valid",
+			data:     `{"message": "Greetings, Ocean!"}`,
+			want:     "Greetings, Ocean!",
+			wantCode: http.StatusOK,
 		},
 		{
-			name: "empty",
-			want: "Hello, World!",
-			data: "",
+			name:     "empty",
+			data:     "",
+			want:     "Hello, World!",
+			wantCode: http.StatusOK,
 		},
 		{
-			name: "invalid",
-			want: "Hello, World!",
-			data: "not-valid-JSON",
+			name:     "invalid",
+			data:     "not-valid-JSON",
+			want:     http.StatusText(http.StatusBadRequest) + "\n",
+			wantCode: http.StatusBadRequest,
 		},
 	}
 
@@ -39,34 +39,12 @@ func TestHelloWorld(t *testing.T) {
 		rr := httptest.NewRecorder()
 		HelloWorld(rr, req)
 
+		if got := rr.Result().StatusCode; got != test.wantCode {
+			t.Errorf("HelloWorld(%s) Status: got '%d', want '%d'", test.name, got, test.wantCode)
+		}
+
 		if got := rr.Body.String(); got != test.want {
-			t.Errorf("HelloWorld(%s) got %q, want %q", test.name, got, test.want)
+			t.Errorf("HelloWorld(%s) Body: got %q, want %q", test.name, got, test.want)
 		}
 	}
-}
-
-func TestHelloWorldErrors(t *testing.T) {
-	req := httptest.NewRequest("POST", "/", strings.NewReader("not-valid-JSON"))
-	rr := httptest.NewRecorder()
-	got := runHandler(http.HandlerFunc(HelloWorld), rr, req).String()
-	if want := "json.NewDecoder"; !strings.Contains(got, want) {
-		t.Errorf("HelloWorld: got %q, want %q", got, want)
-	}
-}
-
-func runHandler(h http.Handler, rr http.ResponseWriter, req *http.Request) *bytes.Buffer {
-	var buf bytes.Buffer
-	writer := bufio.NewWriter(&buf)
-
-	originalWriter := os.Stderr
-	log.SetOutput(writer)
-	defer log.SetOutput(originalWriter)
-
-	originalFlags := log.Flags()
-	log.SetFlags(0)
-	defer log.SetFlags(originalFlags)
-
-	h.ServeHTTP(rr, req)
-	writer.Flush()
-	return &buf
 }
