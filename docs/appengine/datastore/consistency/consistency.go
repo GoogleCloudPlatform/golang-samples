@@ -29,14 +29,14 @@ func guestbookKey(ctx context.Context) *datastore.Key {
 }
 
 func example() {
-	// [START master_slave_data_definition_code]
+	// [START gae_consistency_data_definition_code]
 	g := Greeting{ /* ... */ }
 	key := datastore.NewIncompleteKey(ctx, "Greeting", nil)
-	// [END master_slave_data_definition_code]
+	// [END gae_consistency_data_definition_code]
 
-	// [START master_slave_query_code]
+	// [START gae_consistency_query_code]
 	q := datastore.NewQuery("Greeting").Order("-Date").Limit(10)
-	// [END master_slave_query_code]
+	// [END gae_consistency_query_code]
 
 	_ = g
 	_ = key
@@ -44,14 +44,14 @@ func example() {
 }
 
 func example2() {
-	// [START high_replication_data_definition_code]
+	// [START gae_consistency_high_replication_data_definition_code]
 	g := Greeting{ /* ... */ }
 	key := datastore.NewIncompleteKey(ctx, "Greeting", guestbookKey(ctx))
-	// [END high_replication_data_definition_code]
+	// [END gae_consistency_high_replication_data_definition_code]
 
-	// [START high_replication_query_code]
+	// [START gae_consistency_high_replication_query_code]
 	q := datastore.NewQuery("Greeting").Ancestor(guestbookKey(ctx)).Order("-Date").Limit(10)
-	// [END high_replication_query_code]
+	// [END gae_consistency_high_replication_query_code]
 
 	_ = g
 	_ = key
