@@ -377,13 +377,39 @@ func TestBucketLabel(t *testing.T) {
 	ctx := context.Background()
 	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName)
 
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+	defer client.Close()
+
+	labelName := "label-name"
+	labelValue := "label-value"
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
-		if err := addBucketLabel(ioutil.Discard, bucketName, "label-name", "label-value"); err != nil {
+		if err := addBucketLabel(ioutil.Discard, bucketName, labelName, labelValue); err != nil {
 			r.Errorf("addBucketLabel: %v", err)
 		}
 	})
-	if err := removeBucketLabel(ioutil.Discard, bucketName, "label-name"); err != nil {
+	attrs, err := client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	if got, ok := attrs.Labels[labelName]; ok {
+		if got != labelValue {
+			t.Fatalf("The label(%q) was set incorrectly on a bucket(%v): got value %v, want value %v", labelName, bucketName, got, labelValue)
+		}
+	} else {
+		t.Fatalf("The label(%q) was not set on a bucket(%v)", labelName, bucketName)
+	}
+	if err := removeBucketLabel(ioutil.Discard, bucketName, labelName); err != nil {
 		t.Fatalf("removeBucketLabel: %v", err)
+	}
+	attrs, err = client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	if _, ok := attrs.Labels[labelName]; ok {
+		t.Fatalf("The label(%q) was not removed from a bucket(%v)", labelName, bucketName)
 	}
 }
 
