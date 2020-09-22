@@ -39,7 +39,7 @@ func removeBucketDefaultKMSKey(w io.Writer, bucketName string) error {
 
 	bucket := client.Bucket(bucketName)
 	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
-		Encryption: &storage.BucketEncryption{DefaultKMSKeyName: ""},
+		Encryption: &storage.BucketEncryption{},
 	}
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
 		return fmt.Errorf("Bucket(%q).Update: %v", bucketName, err)

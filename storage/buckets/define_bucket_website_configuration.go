@@ -24,8 +24,8 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// defineBucketWebsiteConfiguration sets website configuration on a bucket.
-func defineBucketWebsiteConfiguration(w io.Writer, bucketName, indexPage, notFoundPage string) error {
+// setBucketWebsiteInfo sets website configuration on a bucket.
+func setBucketWebsiteInfo(w io.Writer, bucketName, indexPage, notFoundPage string) error {
 	// bucketName := "www.example.com"
 	// indexPage := "index.html"
 	// notFoundPage := "404.html"
@@ -49,7 +49,7 @@ func defineBucketWebsiteConfiguration(w io.Writer, bucketName, indexPage, notFou
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
 		return fmt.Errorf("Bucket(%q).Update: %v", bucketName, err)
 	}
-	fmt.Fprintf(w, "Static website bucket %v is set up to use %v as the index page and not found page is %v \n", bucketName, indexPage, notFoundPage)
+	fmt.Fprintf(w, "Static website bucket %v is set up to use %v as the index page and %v as the 404 page\n", bucketName, indexPage, notFoundPage)
 	return nil
 }
 

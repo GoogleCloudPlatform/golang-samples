@@ -194,10 +194,10 @@ func TestKMS(t *testing.T) {
 
 	kmsKeyName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", tc.ProjectID, "global", keyRingID, cryptoKeyID)
 	if err := setBucketDefaultKMSKey(ioutil.Discard, bucketName, kmsKeyName); err != nil {
-		t.Fatalf("setBucketDefaultKmsKey: failed to enable default KMS key (%q): %v", kmsKeyName, err)
+		t.Fatalf("setBucketDefaultKMSKey: failed to enable default KMS key (%q): %v", kmsKeyName, err)
 	}
 	if err := removeBucketDefaultKMSKey(ioutil.Discard, bucketName); err != nil {
-		t.Fatalf("removeBucketDefaultKmsKey: failed to remove default KMS key: %v", err)
+		t.Fatalf("removeBucketDefaultKMSKey: failed to remove default KMS key: %v", err)
 	}
 }
 
@@ -402,8 +402,8 @@ func TestDefineBucketWebsiteConfiguration(t *testing.T) {
 
 	index := "index.html"
 	notFoundPage := "404.html"
-	if err := defineBucketWebsiteConfiguration(ioutil.Discard, bucketName, index, notFoundPage); err != nil {
-		t.Fatalf("defineBucketWebsiteConfiguration: %v", err)
+	if err := setBucketWebsiteInfo(ioutil.Discard, bucketName, index, notFoundPage); err != nil {
+		t.Fatalf("setBucketWebsiteInfo: %v", err)
 	}
 	attrs, err := client.Bucket(bucketName).Attrs(ctx)
 	if err != nil {
