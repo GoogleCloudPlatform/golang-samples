@@ -1,5 +1,5 @@
 module github.com/GoogleCloudPlatform/golang-samples/functions/firebase/hello
 
-require cloud.google.com/go v0.65.0
+require cloud.google.com/go v0.66.0
 
 go 1.11
