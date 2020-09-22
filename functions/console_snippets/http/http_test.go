@@ -27,6 +27,18 @@ func TestHelloWorld(t *testing.T) {
 			wantCode: http.StatusOK,
 		},
 		{
+			name:     "empty+braces",
+			data:     "{}",
+			want:     "Hello, World!",
+			wantCode: http.StatusOK,
+		},
+		{
+			name:     "valid-no-message",
+			data:     `{"data": "unused"}`,
+			want:     "Hello, World!",
+			wantCode: http.StatusOK,
+		},
+		{
 			name:     "invalid",
 			data:     "not-valid-JSON",
 			want:     http.StatusText(http.StatusBadRequest) + "\n",
