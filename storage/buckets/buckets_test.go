@@ -185,6 +185,15 @@ func TestKMS(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	bucketName := tc.ProjectID + "-storage-buckets-tests"
 
+	ctx := context.Background()
+	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName)
+
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+	defer client.Close()
+
 	keyRingID := os.Getenv("GOLANG_SAMPLES_KMS_KEYRING")
 	cryptoKeyID := os.Getenv("GOLANG_SAMPLES_KMS_CRYPTOKEY")
 
@@ -196,8 +205,22 @@ func TestKMS(t *testing.T) {
 	if err := setBucketDefaultKMSKey(ioutil.Discard, bucketName, kmsKeyName); err != nil {
 		t.Fatalf("setBucketDefaultKMSKey: failed to enable default KMS key (%q): %v", kmsKeyName, err)
 	}
+	attrs, err := client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	if attrs.Encryption.DefaultKMSKeyName != kmsKeyName {
+		t.Fatalf("Default KMS key was not set correctly: got %v, want %v", attrs.Encryption.DefaultKMSKeyName, kmsKeyName)
+	}
 	if err := removeBucketDefaultKMSKey(ioutil.Discard, bucketName); err != nil {
 		t.Fatalf("removeBucketDefaultKMSKey: failed to remove default KMS key: %v", err)
+	}
+	attrs, err = client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	if attrs.Encryption != nil {
+		t.Fatalf("Default KMS key was not removed from a bucket(%v)", bucketName)
 	}
 }
 
