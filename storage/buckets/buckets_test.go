@@ -28,6 +28,7 @@ import (
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	iampb "google.golang.org/genproto/googleapis/iam/v1"
 )
 
 func TestCreate(t *testing.T) {
@@ -479,15 +480,20 @@ func TestSetBucketPublicIAM(t *testing.T) {
 	}
 	defer client.Close()
 
-	policy, err := client.Bucket(bucketName).IAM().Policy(ctx)
-	if err != nil {
-		t.Fatalf("Bucket(%q).IAM().Policy: %v", bucketName, err)
-	}
-	if err := setBucketPublicIAM(ioutil.Discard, bucketName, *policy); err != nil {
+	if err := setBucketPublicIAM(ioutil.Discard, bucketName); err != nil {
 		t.Fatalf("setBucketPublicIAM: %v", err)
 	}
-	if !policy.HasRole(iam.AllUsers, iam.RoleName("roles/storage.objectViewer")) {
-		t.Fatalf("Public policy was not set: %v", err)
+	policy, err := client.Bucket(bucketName).IAM().V3().Policy(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).IAM().V3().Policy: %v", bucketName, err)
+	}
+	want := new(iam.Policy3)
+	want.Bindings = append(want.Bindings, &iampb.Binding{
+		Role:    "roles/storage.objectViewer",
+		Members: []string{iam.AllUsers},
+	})
+	if !reflect.DeepEqual(policy.Bindings[len((policy.Bindings))-1], want.Bindings[0]) {
+		t.Fatalf("Public policy was not set: \ngot: %v, \nwant: %v\n", policy.Bindings[len((policy.Bindings))-1], want.Bindings[0])
 	}
 }
 

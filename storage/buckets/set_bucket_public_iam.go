@@ -21,14 +21,13 @@ import (
 	"io"
 
 	"cloud.google.com/go/iam"
-
 	"cloud.google.com/go/storage"
+	iampb "google.golang.org/genproto/googleapis/iam/v1"
 )
 
 // setBucketPublicIAM makes all objects in a bucket publicly readable.
-func setBucketPublicIAM(w io.Writer, bucketName string, policy iam.Policy) error {
+func setBucketPublicIAM(w io.Writer, bucketName string) error {
 	// bucketName := "bucket-name"
-	// policy := client.Bucket(bucketName).IAM().Policy(ctx)
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -36,9 +35,16 @@ func setBucketPublicIAM(w io.Writer, bucketName string, policy iam.Policy) error
 	}
 	defer client.Close()
 
-	role := iam.RoleName("roles/storage.objectViewer")
-	policy.Add(iam.AllUsers, role)
-	if err := client.Bucket(bucketName).IAM().SetPolicy(ctx, &policy); err != nil {
+	policy, err := client.Bucket(bucketName).IAM().V3().Policy(ctx)
+	if err != nil {
+		return fmt.Errorf("Bucket(%q).IAM().V3().Policy: %v", bucketName, err)
+	}
+	role := "roles/storage.objectViewer"
+	policy.Bindings = append(policy.Bindings, &iampb.Binding{
+		Role:    role,
+		Members: []string{iam.AllUsers},
+	})
+	if err := client.Bucket(bucketName).IAM().V3().SetPolicy(ctx, policy); err != nil {
 		return fmt.Errorf("Bucket(%q).IAM().SetPolicy: %v", bucketName, err)
 	}
 	fmt.Fprintf(w, "Bucket %v is now publicly readable\n", bucketName)
