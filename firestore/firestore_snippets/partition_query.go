@@ -52,7 +52,7 @@ func partitionQuery(ctx context.Context, w io.Writer, parent string) error {
 			break
 		}
 		if err != nil {
-			return err
+			return fmt.Errorf("PartitionQuery: %v", err)
 		}
 		fmt.Fprintf(w, "Got partition cursor: %v\n", resp)
 	}
