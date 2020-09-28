@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START run_events_gcs_handler]
+// [START eventarc_gcs_handler]
 
 // Sample run-events-storage is a Cloud Run service which handles Cloud Audit Log messages with Cloud Storage data.
 package main
@@ -31,6 +31,9 @@ func HelloEventsStorage(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, s)
 }
 
+// [END eventarc_gcs_handler]
+// [START eventarc_gcs_server]
+
 func main() {
 	http.HandleFunc("/", HelloEventsStorage)
 	// Determine port for HTTP service.
@@ -45,4 +48,4 @@ func main() {
 	}
 }
 
-// [END run_events_gcs_handler]
+// [END eventarc_gcs_server]
