@@ -105,9 +105,9 @@ func TestHL7V2Store(t *testing.T) {
 		if err := listHL7V2Messages(buf, tc.ProjectID, location, datasetID, hl7V2StoreID); err != nil {
 			r.Errorf("listHL7V2Messages got err: %v", err)
 		}
-                if got := buf.String(); !strings.Contains(got, messageID) {
+		if got := buf.String(); !strings.Contains(got, messageID) {
 			r.Errorf("listHL7V2Messages got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, messageID)
-                }
+		}
 	})
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
