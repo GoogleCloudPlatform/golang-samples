@@ -37,19 +37,19 @@ func TestHelloWorld(t *testing.T) {
 		{
 			name:     "empty",
 			data:     "",
-			want:     "Hello, World!",
+			want:     "Hello World!",
 			wantCode: http.StatusOK,
 		},
 		{
 			name:     "empty+braces",
 			data:     "{}",
-			want:     "Hello, World!",
+			want:     "Hello World!",
 			wantCode: http.StatusOK,
 		},
 		{
 			name:     "valid-no-message",
 			data:     `{"data": "unused"}`,
-			want:     "Hello, World!",
+			want:     "Hello World!",
 			wantCode: http.StatusOK,
 		},
 		{
