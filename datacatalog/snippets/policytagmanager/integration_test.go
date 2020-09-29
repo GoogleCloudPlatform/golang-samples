@@ -37,9 +37,33 @@ func TestPolicyTagManager(t *testing.T) {
 	if err != nil {
 		t.Errorf("createTaxonomy: %v", err)
 	}
+
 	if err := listTaxonomies(tc.ProjectID, location, output); err != nil {
 		t.Errorf("listTaxonomies: %v", err)
 	}
+
+	// Create some policy tags
+	displayName := "PII Tag"
+	tagOne, err := createPolicyTag(taxID, displayName, "", output)
+	if err != nil {
+		t.Errorf("createPolicyTag(%s): %v", displayName, err)
+	}
+
+	displayName = "Child PII Tag"
+	tagTwo, err := createPolicyTag(taxID, displayName, tagOne, output)
+	if err != nil {
+		t.Errorf("createPolicyTag(%s): %v", displayName, err)
+	}
+
+	if err := listPolicyTags(taxID, output); err != nil {
+		t.Errorf("listPolicyTags: %v", err)
+	}
+
+	// delete a Policy tag
+	if err := deletePolicyTag(tagTwo, output); err != nil {
+		t.Errorf("deletePolicy(%s): %v", tagTwo, err)
+	}
+
 	if err := deleteTaxonomy(taxID, output); err != nil {
 		t.Errorf("deleteTaxonomy: %v", err)
 	}
