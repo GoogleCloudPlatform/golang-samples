@@ -21,15 +21,13 @@ import (
 
 	datacatalog "cloud.google.com/go/datacatalog/apiv1beta1"
 	"google.golang.org/api/iterator"
-	"google.golang.org/api/option"
 	datacatalogpb "google.golang.org/genproto/googleapis/cloud/datacatalog/v1beta1"
 )
 
 func listTaxonomies(projectID, location string, w io.Writer) error {
 	// projectID := "my-project-id"
 	ctx := context.Background()
-	policyClient, err := datacatalog.NewPolicyTagManagerClient(ctx,
-		option.WithEndpoint("staging-datacatalog.sandbox.googleapis.com:443"))
+	policyClient, err := datacatalog.NewPolicyTagManagerClient(ctx)
 	if err != nil {
 		return fmt.Errorf("datacatalog.NewPolicyTagManagerClient: %v", err)
 	}

@@ -20,7 +20,6 @@ import (
 	"io"
 
 	datacatalog "cloud.google.com/go/datacatalog/apiv1beta1"
-	"google.golang.org/api/option"
 	datacatalogpb "google.golang.org/genproto/googleapis/cloud/datacatalog/v1beta1"
 )
 
@@ -28,8 +27,7 @@ import (
 func createTaxonomy(projectID, location string, w io.Writer) (string, error) {
 	// projectID := "my-project-id"
 	ctx := context.Background()
-	policyClient, err := datacatalog.NewPolicyTagManagerClient(ctx,
-		option.WithEndpoint("staging-datacatalog.sandbox.googleapis.com:443"))
+	policyClient, err := datacatalog.NewPolicyTagManagerClient(ctx)
 	if err != nil {
 		return "", fmt.Errorf("datacatalog.NewPolicyTagManagerClient: %v", err)
 	}
@@ -38,7 +36,7 @@ func createTaxonomy(projectID, location string, w io.Writer) (string, error) {
 	req := &datacatalogpb.CreateTaxonomyRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
 		Taxonomy: &datacatalogpb.Taxonomy{
-			DisplayName: "Sample Taxonomy",
+			DisplayName: "Sample Taxonomy 2",
 			Description: "Taxonomy created via basic snippet testing",
 		},
 	}

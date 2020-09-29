@@ -19,28 +19,19 @@
 package policytagmanager
 
 import (
-	"context"
-	"io/ioutil"
+	"os"
 	"testing"
 
-	datacatalog "cloud.google.com/go/datacatalog/apiv1beta1"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestPolicyTagManager(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	ctx := context.Background()
-
-	client, err := datacatalog.NewPolicyTagManagerClient(ctx)
-	if err != nil {
-		t.Fatalf("datacatalog.NewPolicyTagManagerClient: %v", err)
-	}
-	defer client.Close()
 
 	location := "us"
 	// If you wish to capture output, change the output to os.Stdout.
 	// Normal operation should use an instance of ioutil.Discard.
-	output := ioutil.Discard
+	output := os.Stdout
 
 	taxID, err := createTaxonomy(tc.ProjectID, location, output)
 	if err != nil {
