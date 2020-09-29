@@ -20,7 +20,7 @@ package policytagmanager
 
 import (
 	"context"
-	"os"
+	"io/ioutil"
 	"testing"
 
 	datacatalog "cloud.google.com/go/datacatalog/apiv1beta1"
@@ -37,7 +37,20 @@ func TestPolicyTagManager(t *testing.T) {
 	}
 	defer client.Close()
 
-	if err := listTaxonomies(tc.ProjectID, os.Stdout); err != nil {
-		t.Fatalf("listTaxonomies: %v", err)
+	location := "us"
+	// If you wish to capture output, change the output to os.Stdout.
+	// Normal operation should use an instance of ioutil.Discard.
+	output := ioutil.Discard
+
+	taxID, err := createTaxonomy(tc.ProjectID, location, output)
+	if err != nil {
+		t.Errorf("createTaxonomy: %v", err)
 	}
+	if err := listTaxonomies(tc.ProjectID, location, output); err != nil {
+		t.Errorf("listTaxonomies: %v", err)
+	}
+	if err := deleteTaxonomy(taxID, output); err != nil {
+		t.Errorf("deleteTaxonomy: %v", err)
+	}
+
 }

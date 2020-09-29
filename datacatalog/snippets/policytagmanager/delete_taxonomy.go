@@ -20,12 +20,12 @@ import (
 	"io"
 
 	datacatalog "cloud.google.com/go/datacatalog/apiv1beta1"
-	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 	datacatalogpb "google.golang.org/genproto/googleapis/cloud/datacatalog/v1beta1"
 )
 
-func listTaxonomies(projectID, location string, w io.Writer) error {
+// deleteTaxonomy removes an existing taxonomy resource.
+func deleteTaxonomy(taxonomyID string, w io.Writer) error {
 	// projectID := "my-project-id"
 	ctx := context.Background()
 	policyClient, err := datacatalog.NewPolicyTagManagerClient(ctx,
@@ -35,21 +35,8 @@ func listTaxonomies(projectID, location string, w io.Writer) error {
 	}
 	defer policyClient.Close()
 
-	req := &datacatalogpb.ListTaxonomiesRequest{
-		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
+	req := &datacatalogpb.DeleteTaxonomyRequest{
+		Name: taxonomyID,
 	}
-	it := policyClient.ListTaxonomies(ctx, req)
-	fmt.Fprintf(w, "listing taxonomies in project %s and location %s\n", projectID, location)
-	for {
-		resp, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return fmt.Errorf("ListTaxonomies iteration error: %v", err)
-		}
-
-		fmt.Fprintf(w, "\t- %s: %s\n", resp.Name, resp.DisplayName)
-	}
-	return nil
+	return policyClient.DeleteTaxonomy(ctx, req)
 }
