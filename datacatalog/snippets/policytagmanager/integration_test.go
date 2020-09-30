@@ -60,7 +60,26 @@ func TestPolicyTagManager(t *testing.T) {
 	}
 
 	if err := getPolicyTag(tagOne, output); err != nil {
-		t.Errorf("getPolicyTag: %v", err)
+		t.Errorf("getPolicyTag(%s): %v", tagOne, err)
+	}
+
+	probedPermissions := []string{
+		"datacatalog.categories.fineGrainedGet",
+	}
+	if err := testIamPermissions(tagOne, probedPermissions, output); err != nil {
+		t.Errorf("testIamPermissions(%s): %v", tagOne, err)
+	}
+
+	if err := setIamPolicy(tagOne, output); err != nil {
+		t.Errorf("setIamPolicy(%s): %v", tagOne, err)
+	}
+
+	if err := testIamPermissions(tagOne, probedPermissions, output); err != nil {
+		t.Errorf("testIamPermissions(%s): %v", tagOne, err)
+	}
+
+	if err := getIamPolicy(tagOne, output); err != nil {
+		t.Errorf("getIamPolicy(%s): %v", tagOne, err)
 	}
 
 	if err := listPolicyTags(taxID, output); err != nil {
