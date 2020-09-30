@@ -24,10 +24,11 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// deleteFileArchivedGeneration deletes a noncurrent version of an object.
-func deleteFileArchivedGeneration(w io.Writer, bucketName, objectName string, gen int64) error {
+// deleteOldVersionOfObject deletes a noncurrent version of an object.
+func deleteOldVersionOfObject(w io.Writer, bucketName, objectName string, gen int64) error {
 	// bucketName := "bucket-name"
 	// objectName := "object-name"
+	// gen stands for the generation of srcObject to copy.
 	// gen := 1587012235914578
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)

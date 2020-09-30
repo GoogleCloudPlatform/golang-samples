@@ -134,12 +134,12 @@ func TestObjects(t *testing.T) {
 		}
 	}
 
-	if err := copyFileArchivedGeneration(ioutil.Discard, bucketVersioning, bucketVersioning, object1, gen); err != nil {
-		t.Fatalf("copyFileArchivedGeneration: %v", err)
+	if err := copyOldVersionOfObject(ioutil.Discard, bucketVersioning, bucketVersioning, object1, gen); err != nil {
+		t.Fatalf("copyOldVersionOfObject: %v", err)
 	}
 	// delete the first version of an object1 for a bucketVersioning.
-	if err := deleteFileArchivedGeneration(ioutil.Discard, bucketVersioning, object1, gen); err != nil {
-		t.Fatalf("deleteFileArchivedGeneration: %v", err)
+	if err := deleteOldVersionOfObject(ioutil.Discard, bucketVersioning, object1, gen); err != nil {
+		t.Fatalf("deleteOldVersionOfObject: %v", err)
 	}
 	data, err := downloadFile(ioutil.Discard, bucket, object1)
 	if err != nil {

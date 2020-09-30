@@ -24,11 +24,12 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// copyFileArchivedGeneration copies a noncurrent version of an object.
-func copyFileArchivedGeneration(w io.Writer, dstBucket, srcBucket, srcObject string, gen int64) error {
-	// dstBucket := "destination-bucket-name"
+// copyOldVersionOfObject copies a noncurrent version of an object.
+func copyOldVersionOfObject(w io.Writer, srcBucket, srcObject, dstObject string, gen int64) error {
 	// srcBucket := "source-bucket-name"
 	// srcObject := "source-object-name"
+	// dstObject := "destination-object-name"
+	// gen stands for the generation of srcObject to copy.
 	// gen := 1587012235914578
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
@@ -40,14 +41,13 @@ func copyFileArchivedGeneration(w io.Writer, dstBucket, srcBucket, srcObject str
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 
-	dstObject := fmt.Sprintf("%v-copy-%v", srcObject, gen)
 	src := client.Bucket(srcBucket).Object(srcObject)
-	dst := client.Bucket(dstBucket).Object(dstObject)
+	dst := client.Bucket(srcBucket).Object(dstObject)
 
 	if _, err := dst.CopierFrom(src.Generation(gen)).Run(ctx); err != nil {
 		return fmt.Errorf("Object(%q).CopierFrom(%q).Generation(%v).Run: %v", dstObject, srcObject, gen, err)
 	}
-	fmt.Fprintf(w, "Generation %v of object %v in bucket %v was copied to %v in bucket %v\n", gen, srcObject, srcBucket, dstObject, dstBucket)
+	fmt.Fprintf(w, "Generation %v of object %v in bucket %v was copied to %v\n", gen, srcObject, srcBucket, dstObject)
 	return nil
 }
 
