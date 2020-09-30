@@ -31,7 +31,7 @@ func TestAutoPunctuation(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if got := buf.String(); !strings.Contains(got, "Okay. Sure.") {
-		t.Fatalf(`autoPunctuation(../testdata/commercial_mono.wav) = %q; want "Okay. Sure"`, got)
+	if got, want := buf.String(), "I'm here"; !strings.Contains(got, want) {
+		t.Fatalf(`autoPunctuation(../testdata/commercial_mono.wav) = %q; want %q`, got, want)
 	}
 }

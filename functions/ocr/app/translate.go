@@ -26,8 +26,9 @@ import (
 	"cloud.google.com/go/translate"
 )
 
-// TranslateText is executed when a message is published to the Cloud Pub/Sub topic specified
-// by TRANSLATE_TOPIC in config.json, and translates the text using the Google Translate API.
+// TranslateText is executed when a message is published to the Cloud Pub/Sub
+// topic specified by the TRANSLATE_TOPIC environment variable, and translates
+// the text using the Google Translate API.
 func TranslateText(ctx context.Context, event PubSubMessage) error {
 	if err := setup(ctx); err != nil {
 		return fmt.Errorf("setup: %v", err)
@@ -63,13 +64,13 @@ func TranslateText(ctx context.Context, event PubSubMessage) error {
 		return fmt.Errorf("json.Marshal: %v", err)
 	}
 
-	topic := pubsubClient.Topic(config.ResultTopic)
+	topic := pubsubClient.Topic(resultTopic)
 	ok, err := topic.Exists(ctx)
 	if err != nil {
 		return fmt.Errorf("Exists: %v", err)
 	}
 	if !ok {
-		topic, err = pubsubClient.CreateTopic(ctx, config.ResultTopic)
+		topic, err = pubsubClient.CreateTopic(ctx, resultTopic)
 		if err != nil {
 			return fmt.Errorf("CreateTopic: %v", err)
 		}

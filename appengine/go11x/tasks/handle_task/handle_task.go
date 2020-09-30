@@ -39,7 +39,9 @@ func main() {
 	}
 
 	log.Printf("Listening on port %s", port)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
+		log.Fatal(err)
+	}
 }
 
 // indexHandler responds to requests with our greeting.
@@ -53,22 +55,17 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 
 // taskHandler processes task requests.
 func taskHandler(w http.ResponseWriter, r *http.Request) {
-	t, ok := r.Header["X-Appengine-Taskname"]
-	if !ok || len(t[0]) == 0 {
+	taskName := r.Header.Get("X-Appengine-Taskname")
+	if taskName == "" {
 		// You may use the presence of the X-Appengine-Taskname header to validate
 		// the request comes from Cloud Tasks.
 		log.Println("Invalid Task: No X-Appengine-Taskname request header found")
 		http.Error(w, "Bad Request - Invalid Task", http.StatusBadRequest)
 		return
 	}
-	taskName := t[0]
 
 	// Pull useful headers from Task request.
-	q, ok := r.Header["X-Appengine-Queuename"]
-	queueName := ""
-	if ok {
-		queueName = q[0]
-	}
+	queueName := r.Header.Get("X-Appengine-Queuename")
 
 	// Extract the request body for further task details.
 	body, err := ioutil.ReadAll(r.Body)

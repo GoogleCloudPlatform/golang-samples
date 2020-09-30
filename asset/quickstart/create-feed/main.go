@@ -24,8 +24,8 @@ import (
 	"log"
 	"os"
 
-	asset "cloud.google.com/go/asset/apiv1p2beta1"
-	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1p2beta1"
+	asset "cloud.google.com/go/asset/apiv1"
+	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1"
 )
 
 // Command-line flags.

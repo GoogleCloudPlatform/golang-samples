@@ -24,6 +24,8 @@ import (
 )
 
 func TestHistogramSearch(t *testing.T) {
+	t.Skip("Flaky. https://github.com/GoogleCloudPlatform/golang-samples/issues/1061.")
+
 	tc := testutil.SystemTest(t)
 
 	testutil.Retry(t, 10, 1*time.Second, func(r *testutil.R) {

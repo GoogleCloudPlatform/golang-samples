@@ -12,23 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package bookshelf
+package main
 
 import (
 	"context"
 	"fmt"
 	"os"
-	"strconv"
 	"testing"
 	"time"
 
-	"cloud.google.com/go/datastore"
-
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"cloud.google.com/go/firestore"
 )
 
 func testDB(t *testing.T, db BookDatabase) {
-	defer db.Close()
+	t.Helper()
+
+	ctx := context.Background()
 
 	b := &Book{
 		Author:      "testy mc testface",
@@ -36,18 +35,18 @@ func testDB(t *testing.T, db BookDatabase) {
 		Description: "desc",
 	}
 
-	id, err := db.AddBook(b)
+	id, err := db.AddBook(ctx, b)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	b.ID = id
 	b.Description = "newdesc"
-	if err := db.UpdateBook(b); err != nil {
+	if err := db.UpdateBook(ctx, b); err != nil {
 		t.Error(err)
 	}
 
-	gotBook, err := db.GetBook(id)
+	gotBook, err := db.GetBook(ctx, id)
 	if err != nil {
 		t.Error(err)
 	}
@@ -55,11 +54,11 @@ func testDB(t *testing.T, db BookDatabase) {
 		t.Errorf("Update description: got %q, want %q", got, want)
 	}
 
-	if err := db.DeleteBook(id); err != nil {
+	if err := db.DeleteBook(ctx, id); err != nil {
 		t.Error(err)
 	}
 
-	if _, err := db.GetBook(id); err == nil {
+	if _, err := db.GetBook(ctx, id); err == nil {
 		t.Error("want non-nil err")
 	}
 }
@@ -68,48 +67,27 @@ func TestMemoryDB(t *testing.T) {
 	testDB(t, newMemoryDB())
 }
 
-func TestDatastoreDB(t *testing.T) {
-	tc := testutil.SystemTest(t)
+func TestFirestoreDB(t *testing.T) {
+	generalProjectID := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
+	if generalProjectID == "" {
+		t.Skip("GOLANG_SAMPLES_PROJECT_ID not set")
+	}
+	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
+	if projectID == "" {
+		t.Skip("GOLANG_SAMPLES_FIRESTORE_PROJECT not set")
+	}
 	ctx := context.Background()
-
-	client, err := datastore.NewClient(ctx, tc.ProjectID)
+	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("firestore.NewClient: %v", err)
 	}
 	defer client.Close()
 
-	db, err := newDatastoreDB(client)
+	db, err := newFirestoreDB(client)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("newFirestoreDB: %v", err)
 	}
-	testDB(t, db)
-}
+	db.collection = generalProjectID + "-books"
 
-func TestMySQLDB(t *testing.T) {
-	t.Parallel()
-
-	host := os.Getenv("GOLANG_SAMPLES_MYSQL_HOST")
-	port := os.Getenv("GOLANG_SAMPLES_MYSQL_PORT")
-
-	if host == "" {
-		t.Skip("GOLANG_SAMPLES_MYSQL_HOST not set.")
-	}
-	if port == "" {
-		port = "3306"
-	}
-
-	p, err := strconv.Atoi(port)
-	if err != nil {
-		t.Fatalf("Could not parse port: %v", err)
-	}
-
-	db, err := newMySQLDB(MySQLConfig{
-		Username: "root",
-		Host:     host,
-		Port:     p,
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
 	testDB(t, db)
 }

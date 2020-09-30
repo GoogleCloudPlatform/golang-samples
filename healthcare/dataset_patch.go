@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"io"
 
-	healthcare "google.golang.org/api/healthcare/v1beta1"
+	healthcare "google.golang.org/api/healthcare/v1"
 )
 
 // patchDataset updates (patches) a dataset by updating its timezone..
@@ -47,4 +47,4 @@ func patchDataset(w io.Writer, projectID, location, datasetID, newTimeZone strin
 	return nil
 }
 
-// [END healthcare_get_dataset]
+// [END healthcare_patch_dataset]

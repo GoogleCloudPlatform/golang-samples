@@ -16,85 +16,45 @@ package slack
 
 import (
 	"context"
+	"encoding/hex"
+	"fmt"
 	"log"
 	"net/http/httptest"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"google.golang.org/api/kgsearch/v1"
 	"google.golang.org/api/option"
 )
 
-var projectID string
 var slackURL string
 
 // TestMain sets up the config rather than using the config file
 // which contains placeholder values.
 func TestMain(m *testing.M) {
 	ctx := context.Background()
-	projectID = os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
-	if projectID == "" {
-		log.Print("GOLANG_SAMPLES_PROJECT_ID is unset. Skipping.")
-		return
-	}
 	slackURL = os.Getenv("GOLANG_SAMPLES_SLACK_URL")
-	if projectID == "" {
-		log.Print("GOLANG_SAMPLES_SLACK_URL is unset. Skipping.")
-		return
-	}
-	config = &configuration{
-		ProjectID: projectID,
-		Token:     os.Getenv("GOLANG_SAMPLES_SLACK_TOKEN"),
-		Key:       os.Getenv("GOLANG_SAMPLES_KG_KEY"),
-	}
-	if config.Token == "" {
-		log.Print("GOLANG_SAMPLES_SLACK_TOKEN is unset. Skipping.")
-		return
-	}
-	if config.Key == "" {
+	kgKey = os.Getenv("GOLANG_SAMPLES_KG_KEY")
+	if kgKey == "" {
 		log.Print("GOLANG_SAMPLES_KG_KEY is unset. Skipping.")
 		return
 	}
-	kgService, err := kgsearch.NewService(ctx, option.WithAPIKey(config.Key))
+	slackSecret = os.Getenv("GOLANG_SAMPLES_SLACK_SECRET")
+	if slackSecret == "" {
+		log.Print("GOLANG_SAMPLES_SLACK_SECRET is unset. Skipping.")
+		return
+	}
+	kgService, err := kgsearch.NewService(ctx, option.WithAPIKey(kgKey))
 	if err != nil {
 		log.Fatalf("kgsearch.NewClient: %v", err)
 	}
 	entitiesService = kgsearch.NewEntitiesService(kgService)
 
 	os.Exit(m.Run())
-}
-
-func TestVerifyWebHook(t *testing.T) {
-	tests := []struct {
-		token   string
-		wantErr bool
-	}{
-		{
-			token:   config.Token,
-			wantErr: false,
-		},
-		{
-			token:   "this is not the token",
-			wantErr: true,
-		},
-		{
-			token:   "",
-			wantErr: true,
-		},
-	}
-	for _, test := range tests {
-		v := make(url.Values)
-		v.Set("token", test.token)
-		err := verifyWebHook(v)
-		if test.wantErr && err == nil {
-			t.Errorf("verifyWebHook(%v) got no error, expected error", test.token)
-		}
-		if !test.wantErr && err != nil {
-			t.Errorf("verifyWebHook(%v) got %v, want no error", test.token, err)
-		}
-	}
 }
 
 func TestFormatSlackMessage(t *testing.T) {
@@ -153,11 +113,19 @@ func TestMakeSearchRequest(t *testing.T) {
 func TestKGSearch(t *testing.T) {
 	w := httptest.NewRecorder()
 	form := url.Values{
-		"token": []string{config.Token},
-		"text":  []string{"Google"},
+		"text": []string{"Google"},
 	}
-	req := httptest.NewRequest("POST", slackURL, strings.NewReader(form.Encode()))
+
+	ts := strconv.FormatInt(time.Now().Unix(), 10)
+	body := form.Encode()
+	base := fmt.Sprintf("v0:%s:%s", ts, body)
+	correctSHA2Signature := fmt.Sprintf("v0=%s", hex.EncodeToString(getSignature([]byte(base), []byte(slackSecret))))
+
+	req := httptest.NewRequest("POST", slackURL, strings.NewReader(body))
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Add("X-Slack-Request-Timestamp", ts)
+	req.Header.Add("X-Slack-Signature", correctSHA2Signature)
+
 	KGSearch(w, req)
 	got := w.Body.String()
 	if want := "Google"; !strings.Contains(got, want) {

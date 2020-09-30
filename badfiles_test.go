@@ -19,7 +19,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/bmatcuk/doublestar"
+	doublestar "github.com/bmatcuk/doublestar/v2"
 	"github.com/h2non/filetype"
 )
 
@@ -45,11 +45,14 @@ var allowList = []string{
 	"**/*.js",
 	"**/*.sql",
 	"**/*.dot",
+	"**/*.proto",
 
 	"LICENSE",
 	"**/*Dockerfile*",
 	"**/.dockerignore",
+	"**/.gcloudignore",
 	"**/Makefile",
+	".gitignore",
 
 	// Primarily ML APIs.
 	"**/testdata/**/*.jpg",
@@ -58,6 +61,7 @@ var allowList = []string{
 	"**/testdata/**/*.png",
 	"**/testdata/**/*.txt",
 	"**/testdata/**/*.csv",
+	"**/testdata/**/*.mp4",
 
 	// Healthcare data.
 	"healthcare/testdata/dicom_00000001_000.dcm",
@@ -82,18 +86,26 @@ var allowList = []string{
 	"**/appengine/**/*.txt",
 
 	// Test output and configs.
-	"gotest.out",
 	"testing/kokoro/*.cfg",
+	"**/sponge_log.log",
+	"**/sponge_log.xml",
 
 	// TODO: cruft that should probably be under "testdata".
 	"appengine_flexible/pubsub/sample_message.json",
 	"dialogflow/resources/**/*",
 	"texttospeech/**/*",
 	"storage/objects/notes.txt",
-	"videointelligence/resources/**/*",
 
-	// TODO: remove when all DLP snippets are moved to canonical format.
-	"dlp/dlp_snippets/testdata/.gitignore",
+	// GitHub configuration.
+	".github/blunderbuss.yml",
+	".github/renovate.json",
+	".github/CODEOWNERS",
+
+	// Getting Started on GCE systemd service file.
+	"**/gce/**/*.service",
+
+	// sampletests testdata.
+	"testing/sampletests/testdata/raw_log.xml",
 }
 
 // Check whether accidental binary files have been checked in.

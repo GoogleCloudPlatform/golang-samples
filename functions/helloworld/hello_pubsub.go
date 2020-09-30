@@ -13,7 +13,6 @@
 // limitations under the License.
 
 // [START functions_helloworld_pubsub]
-// [START functions_helloworld_background]
 
 // Package helloworld provides a set of Cloud Functions samples.
 package helloworld
@@ -30,7 +29,7 @@ type PubSubMessage struct {
 
 // HelloPubSub consumes a Pub/Sub message.
 func HelloPubSub(ctx context.Context, m PubSubMessage) error {
-	name := string(m.Data)
+	name := string(m.Data) // Automatically decoded from base64.
 	if name == "" {
 		name = "World"
 	}
@@ -38,5 +37,4 @@ func HelloPubSub(ctx context.Context, m PubSubMessage) error {
 	return nil
 }
 
-// [END functions_helloworld_background]
 // [END functions_helloworld_pubsub]

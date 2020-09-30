@@ -51,7 +51,15 @@ func main() {
 	}, maxConnections)
 
 	http.HandleFunc("/", incrementHandler)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	log.Printf("Listening on port %s", port)
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
+		log.Fatal(err)
+	}
 }
 
 // [END memorystore_main_go]

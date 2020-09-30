@@ -27,7 +27,7 @@ import (
 )
 
 func main() {
-	// Verify the the dot utility is available at startup
+	// Verify the dot utility is available at startup
 	// instead of waiting for a first request.
 	fileInfo, err := os.Stat("/usr/bin/dot")
 	if err != nil {
@@ -48,7 +48,9 @@ func main() {
 
 	// Start HTTP server.
 	log.Printf("Listening on port %s", port)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
+		log.Fatal(err)
+	}
 }
 
 // [START run_system_package_handler]

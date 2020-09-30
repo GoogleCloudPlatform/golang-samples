@@ -67,8 +67,10 @@ func main() {
 
 	http.HandleFunc("/", a.index)
 
-	log.Printf("Listening on :%v", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	log.Printf("Listening on port %s", port)
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
+		log.Fatal(err)
+	}
 }
 
 // newApp creates a new app.

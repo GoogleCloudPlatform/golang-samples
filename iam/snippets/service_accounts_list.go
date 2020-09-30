@@ -20,19 +20,15 @@ import (
 	"fmt"
 	"io"
 
-	"golang.org/x/oauth2/google"
 	iam "google.golang.org/api/iam/v1"
 )
 
 // listServiceAccounts lists a project's service accounts.
 func listServiceAccounts(w io.Writer, projectID string) ([]*iam.ServiceAccount, error) {
-	client, err := google.DefaultClient(context.Background(), iam.CloudPlatformScope)
+	ctx := context.Background()
+	service, err := iam.NewService(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %v", err)
-	}
-	service, err := iam.New(client)
-	if err != nil {
-		return nil, fmt.Errorf("iam.New: %v", err)
+		return nil, fmt.Errorf("iam.NewService: %v", err)
 	}
 
 	response, err := service.Projects.ServiceAccounts.List("projects/" + projectID).Do()

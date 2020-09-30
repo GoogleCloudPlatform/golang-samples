@@ -4,6 +4,12 @@ This directory contains [Cloud Video Intelligence API](https://cloud.google.com/
 
 ## Snippets
 
+### Logo Recognition
+
+For more details, see the [Logo Recognition](https://cloud.google.com/video-intelligence/docs/logo-recognition) tutorial in the docs.
+
+[Go Code](logo_detection.go)
+
 ### Object Tracking
 
 For more details, see the [Object Tracking](https://cloud.google.com/video-intelligence/docs/object-tracking) tutorial in the docs.

@@ -24,6 +24,8 @@ import (
 )
 
 func TestBasicLocationSearch(t *testing.T) {
+	t.Skip("Flaky. https://github.com/GoogleCloudPlatform/golang-samples/issues/1061.")
+
 	tc := testutil.SystemTest(t)
 
 	testutil.Retry(t, 10, 1*time.Second, func(r *testutil.R) {
@@ -39,6 +41,8 @@ func TestBasicLocationSearch(t *testing.T) {
 }
 
 func TestCityLocationSearch(t *testing.T) {
+	t.Skip("Flaky. https://github.com/GoogleCloudPlatform/golang-samples/issues/1061.")
+
 	tc := testutil.SystemTest(t)
 
 	testutil.Retry(t, 10, 1*time.Second, func(r *testutil.R) {
@@ -54,6 +58,8 @@ func TestCityLocationSearch(t *testing.T) {
 }
 
 func TestBroadeningLocationSearch(t *testing.T) {
+	t.Skip("Flaky. https://github.com/GoogleCloudPlatform/golang-samples/issues/1061.")
+
 	tc := testutil.SystemTest(t)
 
 	testutil.Retry(t, 10, 1*time.Second, func(r *testutil.R) {
@@ -69,6 +75,8 @@ func TestBroadeningLocationSearch(t *testing.T) {
 }
 
 func TestKeywordLocationSearch(t *testing.T) {
+	t.Skip("Flaky. https://github.com/GoogleCloudPlatform/golang-samples/issues/1061.")
+
 	tc := testutil.SystemTest(t)
 
 	testutil.Retry(t, 10, 1*time.Second, func(r *testutil.R) {
@@ -84,6 +92,8 @@ func TestKeywordLocationSearch(t *testing.T) {
 }
 
 func TestMultiLocationsSearch(t *testing.T) {
+	t.Skip("Flaky. https://github.com/GoogleCloudPlatform/golang-samples/issues/1061.")
+
 	tc := testutil.SystemTest(t)
 
 	testutil.Retry(t, 10, 1*time.Second, func(r *testutil.R) {

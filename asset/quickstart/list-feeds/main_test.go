@@ -22,10 +22,13 @@ import (
 	"testing"
 	"time"
 
-	asset "cloud.google.com/go/asset/apiv1p2beta1"
+	asset "cloud.google.com/go/asset/apiv1"
+	"cloud.google.com/go/pubsub"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
-	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1p2beta1"
+	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func TestMain(t *testing.T) {
@@ -53,6 +56,8 @@ func TestMain(t *testing.T) {
 	assetNames := []string{"YOUR_ASSET_NAME"}
 	topic := fmt.Sprintf("projects/%s/topics/%s", tc.ProjectID, "YOUR_TOPIC_NAME")
 
+	createTopic(ctx, t, tc.ProjectID, "YOUR_TOPIC_NAME")
+
 	req := &assetpb.CreateFeedRequest{
 		Parent: feedParent,
 		FeedId: feedID,
@@ -78,7 +83,7 @@ func TestMain(t *testing.T) {
 		t.Errorf("failed to build app")
 	}
 
-	stdOut, stdErr, err := m.Run(env, 30*time.Second)
+	stdOut, stdErr, err := m.Run(env, 2*time.Minute)
 	if err != nil {
 		t.Errorf("execution failed: %v", err)
 	}
@@ -93,4 +98,27 @@ func TestMain(t *testing.T) {
 	client.DeleteFeed(ctx, &assetpb.DeleteFeedRequest{
 		Name: fmt.Sprintf("projects/%s/feeds/%s", projectNumber, feedID),
 	})
+}
+
+func createTopic(ctx context.Context, t *testing.T, projectID, topicName string) {
+	client, err := pubsub.NewClient(ctx, projectID)
+	if err != nil {
+		t.Fatalf("pubsub.NewClient: %v", err)
+	}
+
+	topic := client.Topic(topicName)
+	ok, err := topic.Exists(ctx)
+	if err != nil {
+		t.Fatalf("failed to check if topic exists: %v", err)
+	}
+	if !ok {
+		_, err := client.CreateTopic(ctx, topicName)
+		// In case the topic was created in the meantime.
+		if status.Code(err) == codes.AlreadyExists {
+			return
+		}
+		if err != nil {
+			t.Fatalf("CreateTopic: %v", err)
+		}
+	}
 }

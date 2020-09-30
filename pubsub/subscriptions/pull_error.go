@@ -23,9 +23,9 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func pullMsgsError(w io.Writer, projectID, subName string) error {
+func pullMsgsError(w io.Writer, projectID, subID string) error {
 	// projectID := "my-project-id"
-	// subName := projectID + "-example-sub"
+	// subID := "my-sub"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
@@ -34,7 +34,7 @@ func pullMsgsError(w io.Writer, projectID, subName string) error {
 
 	// If the service returns a non-retryable error, Receive returns that error after
 	// all of the outstanding calls to the handler have returned.
-	err = client.Subscription(subName).Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
+	err = client.Subscription(subID).Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
 		fmt.Fprintf(w, "Got message: %q\n", string(msg.Data))
 		msg.Ack()
 	})

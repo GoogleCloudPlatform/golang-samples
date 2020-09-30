@@ -22,13 +22,20 @@ import (
 )
 
 func main() {
-	// Profiler initialization, best done as early as possible.
-	if err := profiler.Start(profiler.Config{
+	cfg := profiler.Config{
 		Service:        "myservice",
 		ServiceVersion: "1.0.0",
 		// ProjectID must be set if not running on GCP.
 		// ProjectID: "my-project",
-	}); err != nil {
+
+		// For OpenCensus users:
+		// To see Profiler agent spans in APM backend,
+		// set EnableOCTelemetry to true
+		// EnableOCTelemetry: true,
+	}
+
+	// Profiler initialization, best done as early as possible.
+	if err := profiler.Start(cfg); err != nil {
 		// TODO: Handle error.
 	}
 }

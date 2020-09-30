@@ -24,7 +24,7 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func publish(w io.Writer, projectID, topic, msg string) error {
+func publish(w io.Writer, projectID, topicID, msg string) error {
 	// projectID := "my-project-id"
 	// topicID := "my-topic"
 	// msg := "Hello World"
@@ -34,7 +34,7 @@ func publish(w io.Writer, projectID, topic, msg string) error {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
 
-	t := client.Topic(topic)
+	t := client.Topic(topicID)
 	result := t.Publish(ctx, &pubsub.Message{
 		Data: []byte(msg),
 	})

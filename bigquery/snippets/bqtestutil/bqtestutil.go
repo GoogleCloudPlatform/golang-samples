@@ -16,6 +16,7 @@ package bqtestutil
 
 import (
 	"fmt"
+	"os"
 	"regexp"
 
 	"github.com/gofrs/uuid"
@@ -51,4 +52,20 @@ func sanitize(s string, allowedSeparator string) string {
 		return s
 	}
 	return reg.ReplaceAllString(s, "")
+}
+
+// SkipCMEKTests probes whether CMEK-based tests should be skipped.
+func SkipCMEKTests() bool {
+	// KOKORO_BUILD_ID is set by the CI testing we use, and is a quick
+	// heuristic for testing whether this is a CI-based build.
+	if _, onKokoro := os.LookupEnv("KOKORO_BUILD_ID"); onKokoro {
+		// don't skip, we're running in kokoro where we have everything setup
+		return false
+	}
+
+	// If you're running locally and want CMEK testing to happen regardless, use
+	// the RUN_CMEK_TESTS environment variable.
+	_, runCMEK := os.LookupEnv("RUN_CMEK_TESTS")
+	// invert for the skip
+	return !runCMEK
 }

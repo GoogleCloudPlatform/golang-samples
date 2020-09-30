@@ -22,7 +22,6 @@ import (
 
 	talent "cloud.google.com/go/talent/apiv4beta1"
 	"github.com/golang/protobuf/ptypes/duration"
-	"google.golang.org/api/iterator"
 	talentpb "google.golang.org/genproto/googleapis/cloud/talent/v4beta1"
 	"google.golang.org/genproto/googleapis/type/latlng"
 )
@@ -69,19 +68,17 @@ func commuteSearch(w io.Writer, projectID, companyID string) error {
 		JobQuery: jobQuery,
 	}
 
-	it := c.SearchJobs(ctx, req)
-
-	for {
-		resp, err := it.Next()
-		if err == iterator.Done {
-			return nil
-		}
-		if err != nil {
-			return fmt.Errorf("it.Next: %v", err)
-		}
-		fmt.Fprintf(w, "Matcing job: %q\n", resp.GetJob().GetName())
-		fmt.Fprintf(w, "Job address: %v\n", resp.GetCommuteInfo().GetJobLocation().GetPostalAddress().GetAddressLines())
+	resp, err := c.SearchJobs(ctx, req)
+	if err != nil {
+		return fmt.Errorf("SearchJobs: %v", err)
 	}
+
+	for _, job := range resp.GetMatchingJobs() {
+		fmt.Fprintf(w, "Matcing Job: %q\n", job.GetJob().GetName())
+		fmt.Fprintf(w, "Job address: %v\n", job.GetCommuteInfo().GetJobLocation().GetPostalAddress().GetAddressLines())
+	}
+
+	return nil
 }
 
 // [END job_search_commute_search]

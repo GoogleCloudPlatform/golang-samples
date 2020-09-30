@@ -18,9 +18,9 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/websocket"
 )
@@ -28,9 +28,15 @@ import (
 func main() {
 	http.Handle("/", http.FileServer(http.Dir("static")))
 	http.HandleFunc("/ws", socketHandler)
-	http.HandleFunc("/_ah/health", healthCheckHandler)
-	log.Print("Listening on port 8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	log.Printf("Listening on port %s", port)
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
+		log.Fatal(err)
+	}
 }
 
 // upgrader holds the websocket connection.
@@ -60,11 +66,6 @@ func socketHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-}
-
-// healthCheckHandler is used by App Engine Flex to check instance health.
-func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "ok")
 }
 
 // [END gae_flex_websockets_app]

@@ -6,4 +6,4 @@ handlers:
 - url: /report/weekly
   script: _go_app
   login: admin
-// [END uploading_cron]
+// [END securing_URLs_for_cron]

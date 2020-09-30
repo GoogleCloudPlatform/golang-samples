@@ -38,7 +38,7 @@ func TestTranslateText(t *testing.T) {
 }
 
 func TestTranslateWithModel(t *testing.T) {
-	t.Skip("Project must be whitelisted")
+	t.Skip("Project must be added to allow list")
 
 	testutil.SystemTest(t)
 

@@ -17,12 +17,17 @@
 package datastore_snippets
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"log"
+	"strings"
+	"testing"
 	"time"
 
 	"cloud.google.com/go/datastore"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"google.golang.org/api/iterator"
 )
 
@@ -151,8 +156,8 @@ func SnippetClient_Put_upsert() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	task := &Task{} // Populated with appropriate data.
-	key := datastore.IncompleteKey("Task", nil)
 	// [START datastore_upsert]
+	key := datastore.IncompleteKey("Task", nil)
 	key, err := client.Put(ctx, key, task)
 	// [END datastore_upsert]
 	_ = err // Make sure you check err.
@@ -163,8 +168,8 @@ func SnippetTransaction_insert() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	task := Task{} // Populated with appropriate data.
-	taskKey := datastore.NameKey("Task", "sampleTask", nil)
 	// [START datastore_insert]
+	taskKey := datastore.NameKey("Task", "sampleTask", nil)
 	_, err := client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
 		// We first check that there is no entity stored with the given key.
 		var empty Task
@@ -182,9 +187,9 @@ func SnippetTransaction_insert() {
 func SnippetClient_Get() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
-	taskKey := datastore.NameKey("Task", "sampleTask", nil)
 	// [START datastore_lookup]
 	var task Task
+	taskKey := datastore.NameKey("Task", "sampleTask", nil)
 	err := client.Get(ctx, taskKey, &task)
 	// [END datastore_lookup]
 	_ = err // Make sure you check err.
@@ -193,8 +198,8 @@ func SnippetClient_Get() {
 func SnippetTransaction_update() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
-	taskKey := datastore.NameKey("Task", "sampleTask", nil)
 	// [START datastore_update]
+	taskKey := datastore.NameKey("Task", "sampleTask", nil)
 	tx, err := client.NewTransaction(ctx)
 	if err != nil {
 		log.Fatalf("client.NewTransaction: %v", err)
@@ -216,8 +221,8 @@ func SnippetTransaction_update() {
 func SnippetClient_Delete() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
-	key := datastore.NameKey("Task", "sampletask", nil)
 	// [START datastore_delete]
+	key := datastore.NameKey("Task", "sampletask", nil)
 	err := client.Delete(ctx, key)
 	// [END datastore_delete]
 	_ = err // Make sure you check err.
@@ -255,9 +260,9 @@ func SnippetClient_PutMulti() {
 func SnippetClient_GetMulti() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
-	var taskKeys []*datastore.Key // Populated with incomplete keys.
 	// [START datastore_batch_lookup]
-	var tasks []*Task
+	var taskKeys []*datastore.Key // Populated with incomplete keys.
+	tasks := make([]*Task, len(taskKeys))
 	err := client.GetMulti(ctx, taskKeys, &tasks)
 	// [END datastore_batch_lookup]
 	_ = err // Make sure you check err.
@@ -643,28 +648,46 @@ func SnippetTransaction_runQuery() {
 	_ = err // Check error.
 }
 
-func Snippet_metadataNamespaces() {
+// [START datastore_namespace_run_query]
+
+func metadataNamespaces(w io.Writer, projectID string) error {
+	// projectID := "my-project"
+
 	ctx := context.Background()
-	client, _ := datastore.NewClient(ctx, "my-proj")
-	// [START datastore_namespace_run_query]
-	const (
-		startNamespace = "g"
-		endNamespace   = "h"
-	)
+	client, err := datastore.NewClient(ctx, projectID)
+	if err != nil {
+		return fmt.Errorf("datastore.NewClient: %v", err)
+	}
+
+	start := datastore.NameKey("__namespace__", "g", nil)
+	end := datastore.NameKey("__namespace__", "h", nil)
 	query := datastore.NewQuery("__namespace__").
-		Filter("__key__ >=", startNamespace).
-		Filter("__key__ <", endNamespace).
+		Filter("__key__ >=", start).
+		Filter("__key__ <", end).
 		KeysOnly()
 	keys, err := client.GetAll(ctx, query, nil)
 	if err != nil {
-		log.Fatalf("client.GetAll: %v", err)
+		return fmt.Errorf("client.GetAll: %v", err)
 	}
 
-	namespaces := make([]string, 0, len(keys))
+	fmt.Fprintln(w, "Namespaces:")
 	for _, k := range keys {
-		namespaces = append(namespaces, k.Name)
+		fmt.Fprintf(w, "\t%v", k.Name)
 	}
-	// [END datastore_namespace_run_query]
+	return nil
+}
+
+// [END datastore_namespace_run_query]
+
+func TestMetadaNamespaces(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := &bytes.Buffer{}
+	if err := metadataNamespaces(buf, tc.ProjectID); err != nil {
+		t.Errorf("metadataNamespaces got err: %v, want no error", err)
+	}
+	if got, want := buf.String(), "Namespaces"; !strings.Contains(got, want) {
+		t.Errorf("metadataNamespaces got\n----\n%v\n----\nWant to contain:\n----\n%v\n----", got, want)
+	}
 }
 
 func Snippet_metadataKinds() {

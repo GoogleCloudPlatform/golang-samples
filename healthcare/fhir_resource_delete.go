@@ -20,10 +20,14 @@ import (
 	"fmt"
 	"io"
 
-	healthcare "google.golang.org/api/healthcare/v1beta1"
+	healthcare "google.golang.org/api/healthcare/v1"
 )
 
 // deleteFHIRResource deletes an FHIR resource.
+// Regardless of whether the operation succeeds or
+// fails, the server returns a 200 OK HTTP status code. To check that the
+// resource was successfully deleted, search for or get the resource and
+// see if it exists.
 func deleteFHIRResource(w io.Writer, projectID, location, datasetID, fhirStoreID, resourceType, fhirResourceID string) error {
 	ctx := context.Background()
 

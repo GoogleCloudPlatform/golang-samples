@@ -23,6 +23,8 @@ import (
 )
 
 func TestJobTitleAutoComplete(t *testing.T) {
+	t.Skip("Flaky. https://github.com/GoogleCloudPlatform/golang-samples/issues/1061.")
+
 	tc := testutil.SystemTest(t)
 
 	buf := &bytes.Buffer{}
