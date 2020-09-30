@@ -134,13 +134,6 @@ func TestGetKey(t *testing.T) {
 	}
 }
 
-func TestGetServiceAccount(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	if err := getServiceAccount(ioutil.Discard, tc.ProjectID); err != nil {
-		t.Errorf("getServiceAccount: %s", err)
-	}
-}
-
 func TestDeleteKey(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	key, err := createTestKey(tc.ProjectID)

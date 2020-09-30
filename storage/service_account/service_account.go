@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,19 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package hmac
+package serviceaccount
 
 // [START storage_get_service_account]
 import (
 	"context"
 	"fmt"
 	"io"
-	"time"
 
 	"cloud.google.com/go/storage"
 )
 
-// getServiceAccount gets a service account.
+// getServiceAccount gets the default Cloud Storage service account email address.
 func getServiceAccount(w io.Writer, projectID string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
@@ -32,9 +31,6 @@ func getServiceAccount(w io.Writer, projectID string) error {
 		return fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
-
-	ctx, cancel := context.WithTimeout(ctx, time.Minute)
-	defer cancel()
 
 	serviceAccount, err := client.ServiceAccount(ctx, projectID)
 	if err != nil {
