@@ -71,11 +71,19 @@ func TestObjects(t *testing.T) {
 	if err := uploadFile(ioutil.Discard, bucketVersioning, object1); err != nil {
 		t.Fatalf("uploadFile(%q): %v", object1, err)
 	}
-	obj := client.Bucket(bucketVersioning).Object(object1)
+	// Check enableVersioning correctly work.
+	bkt := client.Bucket(bucketVersioning)
+	bAttrs, err := bkt.Attrs(ctx)
+	if !bAttrs.VersioningEnabled {
+		t.Fatalf("object versioning is not enabled")
+	}
+	obj := bkt.Object(object1)
 	attrs, err := obj.Attrs(ctx)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("Bucket(%q).Object(%q).Attrs: %v", bucketVersioning, object1, err)
 	}
+	// Keep the original generation of object1 before re-uploading
+	// to use in the versioning samples.
 	gen := attrs.Generation
 	if err := uploadFile(ioutil.Discard, bucketVersioning, object1); err != nil {
 		t.Fatalf("uploadFile(%q): %v", object1, err)
@@ -137,7 +145,7 @@ func TestObjects(t *testing.T) {
 	if err := copyOldVersionOfObject(ioutil.Discard, bucketVersioning, object1, object3, gen); err != nil {
 		t.Fatalf("copyOldVersionOfObject: %v", err)
 	}
-	// delete the first version of an object1 for a bucketVersioning.
+	// Delete the first version of an object1 for a bucketVersioning.
 	if err := deleteOldVersionOfObject(ioutil.Discard, bucketVersioning, object1, gen); err != nil {
 		t.Fatalf("deleteOldVersionOfObject: %v", err)
 	}
@@ -197,6 +205,13 @@ func TestObjects(t *testing.T) {
 		t.Fatalf("disableVersioning: %v", err)
 	}
 
+	bAttrs, err = bkt.Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketVersioning, err)
+	}
+	if bAttrs.VersioningEnabled {
+		t.Fatalf("object versioning is not disabled")
+	}
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		// Cleanup, this part won't be executed if Fatal happens.
 		// TODO(jbd): Implement garbage cleaning.
