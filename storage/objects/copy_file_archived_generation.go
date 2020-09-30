@@ -29,7 +29,8 @@ func copyOldVersionOfObject(w io.Writer, srcBucket, srcObject, dstObject string,
 	// srcBucket := "source-bucket-name"
 	// srcObject := "source-object-name"
 	// dstObject := "destination-object-name"
-	// gen stands for the generation of srcObject to copy.
+
+	// gen is the generation of srcObject to copy.
 	// gen := 1587012235914578
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)

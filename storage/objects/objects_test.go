@@ -48,6 +48,7 @@ func TestObjects(t *testing.T) {
 		bucketVersioning      = tc.ProjectID + "-bucket-versioning-enabled"
 		object1               = "foo.txt"
 		object2               = "foo/a.txt"
+		object3               = "bar.txt"
 		allAuthenticatedUsers = storage.AllAuthenticatedUsers
 		roleReader            = storage.RoleReader
 	)
@@ -133,8 +134,7 @@ func TestObjects(t *testing.T) {
 			t.Errorf("downloadUsingRequesterPays: %v", err)
 		}
 	}
-
-	if err := copyOldVersionOfObject(ioutil.Discard, bucketVersioning, bucketVersioning, object1, gen); err != nil {
+	if err := copyOldVersionOfObject(ioutil.Discard, bucketVersioning, object1, object3, gen); err != nil {
 		t.Fatalf("copyOldVersionOfObject: %v", err)
 	}
 	// delete the first version of an object1 for a bucketVersioning.
