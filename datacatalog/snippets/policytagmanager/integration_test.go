@@ -38,6 +38,10 @@ func TestPolicyTagManager(t *testing.T) {
 		t.Errorf("createTaxonomy: %v", err)
 	}
 
+	if err := getTaxonomy(taxID, output); err != nil {
+		t.Errorf("getTaxonomy: %v", err)
+	}
+
 	if err := listTaxonomies(tc.ProjectID, location, output); err != nil {
 		t.Errorf("listTaxonomies: %v", err)
 	}
@@ -53,6 +57,10 @@ func TestPolicyTagManager(t *testing.T) {
 	tagTwo, err := createPolicyTag(taxID, displayName, tagOne, output)
 	if err != nil {
 		t.Errorf("createPolicyTag(%s): %v", displayName, err)
+	}
+
+	if err := getPolicyTag(tagOne, output); err != nil {
+		t.Errorf("getPolicyTag: %v", err)
 	}
 
 	if err := listPolicyTags(taxID, output); err != nil {
