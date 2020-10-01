@@ -48,7 +48,7 @@ func TestRetryAttempts(t *testing.T) {
 }
 
 func TestRetryWithoutTest(t *testing.T) {
-	Retry(5, time.Millisecond, func(r *R) {
+	RetryWithoutTest(5, time.Millisecond, func(r *R) {
 		if r.Attempt == 2 {
 			return
 		}
