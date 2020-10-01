@@ -74,6 +74,7 @@ func RetryWithoutTest(maxAttempts int, sleep time.Duration, f func(r *R)) bool {
 	}
 	return false
 }
+
 // R is passed to each run of a flaky test run, manages state and accumulates log statements.
 type R struct {
 	// The number of current attempt.

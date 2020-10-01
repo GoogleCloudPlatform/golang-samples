@@ -42,7 +42,7 @@ func gcloud(label string, cmd *exec.Cmd) ([]byte, error) {
 	var out []byte
 	var err error
 
-	success := testutil.RetryWithoutTest(3, 2 * time.Second, func(r *testutil.R) {
+	success := testutil.RetryWithoutTest(3, 2*time.Second, func(r *testutil.R) {
 		out, err = gcloudExec(fmt.Sprintf("Attempt #%d: ", r.Attempt), label, cmd)
 		if err != nil {
 			log.Printf("gcloudExec: %v", err)
