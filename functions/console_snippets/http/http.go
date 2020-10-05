@@ -25,7 +25,7 @@ import (
 )
 
 // HelloWorld prints the JSON encoded "message" field in the body
-// of the request or "Hello, World!" if there isn't one.
+// of the request or "Hello World!" if there isn't one.
 func HelloWorld(w http.ResponseWriter, r *http.Request) {
 	var d struct {
 		Message string `json:"message"`
@@ -34,7 +34,7 @@ func HelloWorld(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewDecoder(r.Body).Decode(&d); err != nil {
 		switch err {
 		case io.EOF:
-			fmt.Fprint(w, "Hello, World!")
+			fmt.Fprint(w, "Hello World!")
 			return
 		default:
 			log.Printf("json.NewDecoder: %v", err)
@@ -44,7 +44,7 @@ func HelloWorld(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if d.Message == "" {
-		fmt.Fprint(w, "Hello, World!")
+		fmt.Fprint(w, "Hello World!")
 		return
 	}
 	fmt.Fprint(w, html.EscapeString(d.Message))
