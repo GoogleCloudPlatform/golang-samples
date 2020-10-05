@@ -350,8 +350,9 @@ func TestBackupSample(t *testing.T) {
 	assertContains(t, out, fmt.Sprintf("/backups/%s", backupID))
 	assertContains(t, out, "Backups listed.")
 
-	out = runSample(t, listBackupOperations, dbName, "failed to list backup operations")
-	assertContains(t, out, fmt.Sprintf("on database %s", dbName))
+	// TODO: Unskip when prod issue is fixed. See #1745.
+	// out = runSample(t, listBackupOperations, dbName, "failed to list backup operations")
+	// assertContains(t, out, fmt.Sprintf("on database %s", dbName))
 
 	out = runBackupSample(t, updateBackup, dbName, backupID, "failed to update a backup")
 	assertContains(t, out, fmt.Sprintf("Updated backup %s", backupID))
