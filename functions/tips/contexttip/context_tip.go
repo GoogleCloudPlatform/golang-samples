@@ -14,6 +14,7 @@
 
 // [START functions_golang_context]
 // [START functions_tips_gcp_apis]
+// [START functions_pubsub_setup]
 
 // Package contexttip is an example of how to use Pub/Sub and context.Context in
 // a Cloud Function.
@@ -23,7 +24,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -49,43 +49,47 @@ func init() {
 	}
 }
 
-type publishRequest struct {
-	Topic string `json:"topic"`
-}
+// [END functions_pubsub_setup]
+
+// [START functions_pubsub_publish]
 
 // PublishMessage publishes a message to Pub/Sub. PublishMessage only works
 // with topics that already exist.
 func PublishMessage(w http.ResponseWriter, r *http.Request) {
-	// Read the request body.
-	data, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		log.Printf("ioutil.ReadAll: %v", err)
-		http.Error(w, "Error reading request", http.StatusBadRequest)
-		return
+	// Parse the request body to get the topic name and message.
+	var d struct {
+		Topic   string `json:"topic"`
+		Message string `json:"message"`
 	}
 
-	// Parse the request body to get the topic name.
-	p := publishRequest{}
-	if err := json.Unmarshal(data, &p); err != nil {
-		log.Printf("json.Unmarshal: %v", err)
+	if err := json.NewDecoder(r.Body).Decode(&d); err != nil {
+		log.Printf("json.NewDecoder: %v", err)
 		http.Error(w, "Error parsing request", http.StatusBadRequest)
 		return
 	}
 
+	if d.Topic == "" || d.Message == "" {
+		s := "missing 'topic' or 'message' parameter"
+		log.Println(s)
+		http.Error(w, s, http.StatusBadRequest)
+		return
+	}
+
 	m := &pubsub.Message{
-		Data: []byte("Test message"),
+		Data: []byte(d.Message),
 	}
 	// Publish and Get use r.Context() because they are only needed for this
 	// function invocation. If this were a background function, they would use
 	// the ctx passed as an argument.
-	id, err := client.Topic(p.Topic).Publish(r.Context(), m).Get(r.Context())
+	id, err := client.Topic(d.Topic).Publish(r.Context(), m).Get(r.Context())
 	if err != nil {
-		log.Printf("topic(%s).Publish.Get: %v", p.Topic, err)
+		log.Printf("topic(%s).Publish.Get: %v", d.Topic, err)
 		http.Error(w, "Error publishing message", http.StatusInternalServerError)
 		return
 	}
-	fmt.Fprintf(w, "Published msg: %v", id)
+	fmt.Fprintf(w, "Message published: %v", id)
 }
 
+// [END functions_pubsub_publish]
 // [END functions_tips_gcp_apis]
 // [END functions_golang_context]
