@@ -26,3 +26,35 @@ for f in $(find . -name go.mod); do
     go get cloud.google.com/go@master
   popd
 done
+
+# List of tests to include during mtls_smoketest.
+scope=(
+  automl/
+  bigtable/
+  cloudsql/
+  container/
+  container_registry/
+  dataproc/
+  datastore/
+  dlp/
+  kms/
+  logging/
+  pubsub/
+  spanner/
+  speech/
+  trace/
+  translate/
+)
+
+for d in */; do
+  in_scope=0
+  for pkg in "${scope[@]}"; do
+    if [ $pkg = $d ]; then
+      in_scope=1
+      break
+    fi
+  done
+  if [ $in_scope = 0 ]; then
+    find "./$d" -name '*_test.go' -exec rm -r {} \;
+  fi
+done

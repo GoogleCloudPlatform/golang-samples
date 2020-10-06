@@ -45,6 +45,7 @@ func TestObjects(t *testing.T) {
 	var (
 		bucket                = tc.ProjectID + "-samples-object-bucket-1"
 		dstBucket             = tc.ProjectID + "-samples-object-bucket-2"
+		bucketVersioning      = tc.ProjectID + "-bucket-versioning-enabled"
 		object1               = "foo.txt"
 		object2               = "foo/a.txt"
 		allAuthenticatedUsers = storage.AllAuthenticatedUsers
@@ -53,12 +54,29 @@ func TestObjects(t *testing.T) {
 
 	testutil.CleanBucket(ctx, t, tc.ProjectID, bucket)
 	testutil.CleanBucket(ctx, t, tc.ProjectID, dstBucket)
+	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketVersioning)
+
+	{
+		// Enable versioning
+		attr := storage.BucketAttrsToUpdate{VersioningEnabled: true}
+		_, err := client.Bucket(bucketVersioning).Update(ctx, attr)
+		if err != nil {
+			t.Fatalf("storage.BucketAttrsToUpdate{VersioningEnabled: true}: %v", err)
+		}
+	}
 
 	if err := uploadFile(ioutil.Discard, bucket, object1); err != nil {
 		t.Fatalf("uploadFile(%q): %v", object1, err)
 	}
 	if err := uploadFile(ioutil.Discard, bucket, object2); err != nil {
 		t.Fatalf("uploadFile(%q): %v", object2, err)
+	}
+
+	if err := uploadFile(ioutil.Discard, bucketVersioning, object1); err != nil {
+		t.Fatalf("uploadFile(%q): %v", object1, err)
+	}
+	if err := uploadFile(ioutil.Discard, bucketVersioning, object1); err != nil {
+		t.Fatalf("uploadFile(%q): %v", object1, err)
 	}
 
 	{
@@ -87,6 +105,25 @@ func TestObjects(t *testing.T) {
 		}
 		if got, want := buf.String(), object2; !strings.Contains(got, want) {
 			t.Errorf("List(%q) got %q; want to contain %q", prefix, got, want)
+		}
+	}
+
+	{
+		// Should show 2 versions of foo.txt
+		var buf bytes.Buffer
+		if err := listFilesAllVersion(&buf, bucketVersioning); err != nil {
+			t.Fatalf("listFilesAllVersion: %v", err)
+		}
+
+		i := 0
+		for _, line := range strings.Split(strings.TrimSuffix(buf.String(), "\n"), "\n") {
+			if got, want := line, object1; !strings.Contains(got, want) {
+				t.Errorf("List(Versions: true) got %q; want to contain %q", got, want)
+			}
+			i++
+		}
+		if i != 2 {
+			t.Errorf("listFilesAllVersion should show 2 versions of foo.txt; got %d", i)
 		}
 	}
 
@@ -163,6 +200,14 @@ func TestObjects(t *testing.T) {
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		if err := client.Bucket(dstBucket).Delete(ctx); err != nil {
 			r.Errorf("Bucket(%q).Delete: %v", dstBucket, err)
+		}
+	})
+
+	// CleanBucket to delete versioned objects in bucket
+	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketVersioning)
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		if err := client.Bucket(bucketVersioning).Delete(ctx); err != nil {
+			r.Errorf("Bucket(%q).Delete: %v", bucketVersioning, err)
 		}
 	})
 }

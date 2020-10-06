@@ -63,29 +63,6 @@ Then use this command to launch the proxy in a separate PowerShell session:
 Start-Process -filepath "C:\<path to proxy exe>" -ArgumentList "-instances=<project-id>:<region>:<instance-name>=tcp:1433 -credential_file=<CREDENTIALS_JSON_FILE>"
 ```
 
-### Launch proxy with Unix Domain Socket
-NOTE: this option is currently only supported on Linux and Mac OS. Windows users should use the [Launch proxy with TCP](#launch-proxy-with-tcp) option.
-
-To use a Unix socket, you'll need to create the `/cloudsql` directory and give write access to the user running the proxy. Use these commands to create the directory and set permissions:
-```bash
-sudo mkdir /cloudsql
-sudo chown -R $USER /cloudsql
-```
-
-Use these terminal commands to initialize environment variables:
-```bash
-export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service/account/key.json
-export INSTANCE_CONNECTION_NAME='<MY-PROJECT>:<INSTANCE-REGION>:<INSTANCE-NAME>'
-export DB_USER='<DB_USER_NAME>'
-export DB_PASS='<DB_PASSWORD>'
-export DB_NAME='<DB_NAME>'
-```
-
-Then use this command to launch the proxy in the background:
-```bash
-./cloud_sql_proxy -dir=/cloudsql --instances=$INSTANCE_CONNECTION_NAME --credential_file=$GOOGLE_APPLICATION_CREDENTIALS &
-```
-
 ### Testing the application
 
 To test the application locally, follow these steps after the proxy is running:

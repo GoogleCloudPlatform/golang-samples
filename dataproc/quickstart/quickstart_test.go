@@ -131,7 +131,7 @@ func deleteClusters(ctx context.Context, projectID string) error {
 }
 
 func TestQuickstart(t *testing.T) {
-	tc := testutil.SystemTest(t)
+	tc := testutil.EndToEndTest(t)
 	m := testutil.BuildMain(t)
 	setup(t, tc.ProjectID)
 	defer teardown(t, tc.ProjectID)
@@ -141,6 +141,10 @@ func TestQuickstart(t *testing.T) {
 	}
 
 	testutil.Retry(t, 3, 30*time.Second, func(r *testutil.R) {
+		if err := deleteClusters(context.Background(), tc.ProjectID); err != nil {
+			r.Errorf("failed to deleteClusters: %v", err)
+			return
+		}
 		stdOut, stdErr, err := m.Run(nil, 10*time.Minute,
 			"--project_id", tc.ProjectID,
 			"--region", region,

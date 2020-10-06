@@ -63,6 +63,7 @@ func getMetadata(w io.Writer, bucket, object string) (*storage.ObjectAttrs, erro
 	fmt.Fprintf(w, "Event-based hold enabled? %t\n", attrs.EventBasedHold)
 	fmt.Fprintf(w, "Temporary hold enabled? %t\n", attrs.TemporaryHold)
 	fmt.Fprintf(w, "Retention expiration time %v\n", attrs.RetentionExpirationTime)
+	fmt.Fprintf(w, "Custom time %v\n", attrs.CustomTime)
 	fmt.Fprintf(w, "\n\nMetadata\n")
 	for key, value := range attrs.Metadata {
 		fmt.Fprintf(w, "\t%v = %v\n", key, value)

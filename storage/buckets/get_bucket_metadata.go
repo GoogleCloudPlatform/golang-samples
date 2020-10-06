@@ -70,6 +70,15 @@ func getBucketMetadata(w io.Writer, bucketName string) (*storage.BucketAttrs, er
 		fmt.Fprintf(w, "LogBucket: %v\n", attrs.Logging.LogBucket)
 		fmt.Fprintf(w, "LogObjectPrefix: %v\n", attrs.Logging.LogObjectPrefix)
 	}
+	if attrs.CORS != nil {
+		fmt.Fprintln(w, "CORS:")
+		for _, v := range attrs.CORS {
+			fmt.Fprintf(w, "\tMaxAge: %v\n", v.MaxAge)
+			fmt.Fprintf(w, "\tMethods: %v\n", v.Methods)
+			fmt.Fprintf(w, "\tOrigins: %v\n", v.Origins)
+			fmt.Fprintf(w, "\tResponseHeaders: %v\n", v.ResponseHeaders)
+		}
+	}
 	if attrs.Labels != nil {
 		fmt.Fprintf(w, "\n\n\nLabels:")
 		for key, value := range attrs.Labels {

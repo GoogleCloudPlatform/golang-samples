@@ -101,6 +101,16 @@ func TestHL7V2Store(t *testing.T) {
 	})
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		buf.Reset()
+		if err := listHL7V2Messages(buf, tc.ProjectID, location, datasetID, hl7V2StoreID); err != nil {
+			r.Errorf("listHL7V2Messages got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, messageID) {
+			r.Errorf("listHL7V2Messages got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, messageID)
+		}
+	})
+
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		if err := patchHL7V2Message(ioutil.Discard, tc.ProjectID, location, datasetID, hl7V2StoreID, messageID, dataFile); err != nil {
 			r.Errorf("patchHL7V2Message got err: %v", err)
 		}

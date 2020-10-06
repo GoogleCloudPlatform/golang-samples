@@ -19,7 +19,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/bmatcuk/doublestar"
+	doublestar "github.com/bmatcuk/doublestar/v2"
 	"github.com/h2non/filetype"
 )
 
@@ -50,6 +50,7 @@ var allowList = []string{
 	"LICENSE",
 	"**/*Dockerfile*",
 	"**/.dockerignore",
+	"**/.gcloudignore",
 	"**/Makefile",
 	".gitignore",
 
