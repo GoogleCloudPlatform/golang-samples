@@ -22,26 +22,39 @@ import (
 
 	firestore "cloud.google.com/go/firestore/apiv1"
 	"google.golang.org/api/iterator"
-	firestorepb "google.golang.org/genproto/googleapis/firestore/v1"
+	pb "google.golang.org/genproto/googleapis/firestore/v1"
 )
 
 // partitionQuery partitions a query by returning partition cursors.
-func partitionQuery(ctx context.Context, w io.Writer, parent string) error {
-	// projectID := "project-id"
+func partitionQuery(w io.Writer, parent, collectionGroup string) error {
+	// parent := "projects/projectID/databases/(default)/documents"
+	// collectionGroup := "collection-group-name"
+	ctx := context.Background()
 	client, err := firestore.NewClient(ctx)
 	if err != nil {
 		return fmt.Errorf("firestore.NewClient: %v", err)
 	}
 	defer client.Close()
 
-	structuredQuery := &firestorepb.StructuredQuery{
-		Select: &firestorepb.StructuredQuery_Projection{}}
-
-	req := &firestorepb.PartitionQueryRequest{
+	documentID := "__name__"
+	from := []*pb.StructuredQuery_CollectionSelector{{
+		CollectionId:   collectionGroup,
+		AllDescendants: true,
+	}}
+	orderBy := []*pb.StructuredQuery_Order{{
+		Field: &pb.StructuredQuery_FieldReference{
+			FieldPath: documentID,
+		},
+		Direction: pb.StructuredQuery_ASCENDING,
+	}}
+	structuredQuery := &pb.StructuredQuery{
+		From:    from,
+		OrderBy: orderBy,
+	}
+	req := &pb.PartitionQueryRequest{
 		Parent:         parent,
 		PartitionCount: 3,
-		PageSize:       2,
-		QueryType: &firestorepb.PartitionQueryRequest_StructuredQuery{
+		QueryType: &pb.PartitionQueryRequest_StructuredQuery{
 			StructuredQuery: structuredQuery,
 		},
 	}
