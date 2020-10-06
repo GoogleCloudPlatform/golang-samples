@@ -53,22 +53,24 @@ func init() {
 
 // [START functions_pubsub_publish]
 
+type publishRequest struct {
+	Topic   string `json:"topic"`
+	Message string `json:"message"`
+}
+
 // PublishMessage publishes a message to Pub/Sub. PublishMessage only works
 // with topics that already exist.
 func PublishMessage(w http.ResponseWriter, r *http.Request) {
 	// Parse the request body to get the topic name and message.
-	var d struct {
-		Topic   string `json:"topic"`
-		Message string `json:"message"`
-	}
+	p := publishRequest{}
 
-	if err := json.NewDecoder(r.Body).Decode(&d); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&p); err != nil {
 		log.Printf("json.NewDecoder: %v", err)
 		http.Error(w, "Error parsing request", http.StatusBadRequest)
 		return
 	}
 
-	if d.Topic == "" || d.Message == "" {
+	if p.Topic == "" || p.Message == "" {
 		s := "missing 'topic' or 'message' parameter"
 		log.Println(s)
 		http.Error(w, s, http.StatusBadRequest)
@@ -76,14 +78,14 @@ func PublishMessage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	m := &pubsub.Message{
-		Data: []byte(d.Message),
+		Data: []byte(p.Message),
 	}
 	// Publish and Get use r.Context() because they are only needed for this
 	// function invocation. If this were a background function, they would use
 	// the ctx passed as an argument.
-	id, err := client.Topic(d.Topic).Publish(r.Context(), m).Get(r.Context())
+	id, err := client.Topic(p.Topic).Publish(r.Context(), m).Get(r.Context())
 	if err != nil {
-		log.Printf("topic(%s).Publish.Get: %v", d.Topic, err)
+		log.Printf("topic(%s).Publish.Get: %v", p.Topic, err)
 		http.Error(w, "Error publishing message", http.StatusInternalServerError)
 		return
 	}
