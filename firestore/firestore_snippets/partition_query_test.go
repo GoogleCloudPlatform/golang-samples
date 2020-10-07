@@ -20,7 +20,6 @@ import (
 	"io/ioutil"
 	"os"
 	"strconv"
-	"strings"
 	"testing"
 
 	"cloud.google.com/go/firestore"
@@ -60,7 +59,7 @@ func TestPartion(t *testing.T) {
 			t.Errorf("Set: %v", err)
 		}
 	}
-	parent := strings.Replace(collection.Path, "/"+collectionID, "", 1)
+	parent := fmt.Sprintf("projects/%v/databases/(default)/documents", projectID)
 	if err := partitionQuery(ioutil.Discard, parent, collectionGroupID); err != nil {
 		t.Fatalf("partitionQuery: %v", err)
 	}
