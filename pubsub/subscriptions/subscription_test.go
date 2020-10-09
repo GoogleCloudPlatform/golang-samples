@@ -344,8 +344,9 @@ func TestPullMsgsCustomAttributes(t *testing.T) {
 		t.Fatalf("failed to pull messages: %v", err)
 	}
 	// Check for number of newlines, which should correspond with number of messages.
-	if !strings.Contains(buf.String(), "foo = bar") {
-		t.Fatalf("pullMsgsCustomAttributes, expected 'foo = bar'\ngot: %s", buf.String())
+	want := "foo = bar"
+	if !strings.Contains(buf.String(), want) {
+		t.Fatalf("pullMsgsCustomAttributes, got: %s, want %s", buf.String(), want)
 	}
 }
 
