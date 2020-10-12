@@ -23,8 +23,8 @@ import (
 	datacatalogpb "google.golang.org/genproto/googleapis/cloud/datacatalog/v1beta1"
 )
 
-// createTaxonomy creates a sample taxonomy resource.
-func createTaxonomy(projectID, location string, w io.Writer) (string, error) {
+// createTaxonomy creates a taxonomy resource, which can contain PolicyTag resources.
+func createTaxonomy(projectID, location, displayName string, w io.Writer) (string, error) {
 	// projectID := "my-project-id"
 	ctx := context.Background()
 	policyClient, err := datacatalog.NewPolicyTagManagerClient(ctx)
@@ -36,8 +36,11 @@ func createTaxonomy(projectID, location string, w io.Writer) (string, error) {
 	req := &datacatalogpb.CreateTaxonomyRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
 		Taxonomy: &datacatalogpb.Taxonomy{
-			DisplayName: "Sample Taxonomy 2",
+			DisplayName: displayName,
 			Description: "Taxonomy created via basic snippet testing",
+			ActivatedPolicyTypes: []datacatalogpb.Taxonomy_PolicyType{
+				datacatalogpb.Taxonomy_FINE_GRAINED_ACCESS_CONTROL,
+			},
 		},
 	}
 	resp, err := policyClient.CreateTaxonomy(ctx, req)

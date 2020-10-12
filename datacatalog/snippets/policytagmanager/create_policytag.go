@@ -23,7 +23,7 @@ import (
 	datacatalogpb "google.golang.org/genproto/googleapis/cloud/datacatalog/v1beta1"
 )
 
-// createPolicyTag creates a sample policy tag.
+// createPolicyTag creates a simple policyTag, and associates with an optional parent.
 func createPolicyTag(parent, displayName, parentPolicyTag string, w io.Writer) (string, error) {
 	// parent := "projects/myproject/locations/us/taxonomies/1234"
 	// displayName := "PII Policy"

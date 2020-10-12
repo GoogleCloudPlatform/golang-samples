@@ -19,7 +19,9 @@
 package policytagmanager
 
 import (
-	"os"
+	"bytes"
+	"io/ioutil"
+	"strings"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -31,7 +33,7 @@ func TestPolicyTagManager(t *testing.T) {
 	location := "us"
 	// If you wish to capture output, change the output to os.Stdout.
 	// Normal operation should use an instance of ioutil.Discard.
-	output := os.Stdout
+	output := ioutil.Discard
 
 	taxID, err := createTaxonomy(tc.ProjectID, location, output)
 	if err != nil {
@@ -66,17 +68,29 @@ func TestPolicyTagManager(t *testing.T) {
 	probedPermissions := []string{
 		"datacatalog.categories.fineGrainedGet",
 	}
-	if err := testIamPermissions(tagOne, probedPermissions, output); err != nil {
+	// check before setting policy
+	var buf bytes.Buffer
+	if err := testIamPermissions(tagOne, probedPermissions, &buf); err != nil {
 		t.Errorf("testIamPermissions(%s): %v", tagOne, err)
 	}
+	wantedResp := "of the 1 permissions probed, caller has 0 permissions"
+	if !strings.Contains(buf.String(), wantedResp) {
+		t.Errorf("unexpected output (%q) did not contain (%s)", buf.String(), wantedResp)
+	}
+	buf.Reset()
 
 	if err := setIamPolicy(tagOne, output); err != nil {
 		t.Errorf("setIamPolicy(%s): %v", tagOne, err)
 	}
 
-	if err := testIamPermissions(tagOne, probedPermissions, output); err != nil {
+	if err := testIamPermissions(tagOne, probedPermissions, &buf); err != nil {
 		t.Errorf("testIamPermissions(%s): %v", tagOne, err)
 	}
+	wantedResp = "of the 1 permissions probed, caller has 1 permissions: datacatalog.categories.fineGrainedGet"
+	if !strings.Contains(buf.String(), wantedResp) {
+		t.Errorf("unexpected output (%q) did not contain (%s)", buf.String(), wantedResp)
+	}
+	buf.Reset()
 
 	if err := getIamPolicy(tagOne, output); err != nil {
 		t.Errorf("getIamPolicy(%s): %v", tagOne, err)
