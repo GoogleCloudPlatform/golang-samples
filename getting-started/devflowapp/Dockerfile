@@ -1,4 +1,4 @@
-FROM golang:1.13
+FROM golang:1.15
 
 COPY devflowapp.go .
 COPY services/ /go/src/github.com/GoogleCloudPlatform/golang-samples/getting-started/devflowapp/services/
