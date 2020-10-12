@@ -61,7 +61,10 @@ func TestSample(t *testing.T) {
 	runCommand := func(t *testing.T, cmd string, dbName string, timespan int) string {
 		t.Helper()
 		var b bytes.Buffer
-		if err := run(context.Background(), adminClient, dataClient, &b, cmd, dbName, timespan); err != nil {
+		// Set timeout to 60s so it should avoid DeadlineExceeded error.
+		cctx, cancel := context.WithTimeout(ctx, 60000*time.Millisecond)
+		defer cancel()
+		if err := run(cctx, adminClient, dataClient, &b, cmd, dbName, timespan); err != nil {
 			t.Errorf("run(%q, %q): %v", cmd, dbName, err)
 		}
 		return b.String()
