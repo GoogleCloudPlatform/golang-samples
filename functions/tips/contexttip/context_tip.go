@@ -14,7 +14,7 @@
 
 // [START functions_golang_context]
 // [START functions_tips_gcp_apis]
-// [START functions_pubsub_setup]
+// [START functions_pubsub_publish]
 
 // Package contexttip is an example of how to use Pub/Sub and context.Context in
 // a Cloud Function.
@@ -31,8 +31,8 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-// GCP_PROJECT is a user-set environment variable.
-var projectID = os.Getenv("GCP_PROJECT")
+// GOOGLE_CLOUD_PROJECT is a user-set environment variable.
+var projectID = os.Getenv("GOOGLE_CLOUD_PROJECT")
 
 // client is a global Pub/Sub client, initialized once per instance.
 var client *pubsub.Client
@@ -48,10 +48,6 @@ func init() {
 		log.Fatalf("pubsub.NewClient: %v", err)
 	}
 }
-
-// [END functions_pubsub_setup]
-
-// [START functions_pubsub_publish]
 
 type publishRequest struct {
 	Topic   string `json:"topic"`
