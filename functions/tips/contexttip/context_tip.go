@@ -14,6 +14,7 @@
 
 // [START functions_golang_context]
 // [START functions_tips_gcp_apis]
+// [START functions_pubsub_setup]
 
 // Package contexttip is an example of how to use Pub/Sub and context.Context in
 // a Cloud Function.
@@ -23,7 +24,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -49,31 +49,36 @@ func init() {
 	}
 }
 
+// [END functions_pubsub_setup]
+
+// [START functions_pubsub_publish]
+
 type publishRequest struct {
-	Topic string `json:"topic"`
+	Topic   string `json:"topic"`
+	Message string `json:"message"`
 }
 
 // PublishMessage publishes a message to Pub/Sub. PublishMessage only works
 // with topics that already exist.
 func PublishMessage(w http.ResponseWriter, r *http.Request) {
-	// Read the request body.
-	data, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		log.Printf("ioutil.ReadAll: %v", err)
-		http.Error(w, "Error reading request", http.StatusBadRequest)
-		return
-	}
-
-	// Parse the request body to get the topic name.
+	// Parse the request body to get the topic name and message.
 	p := publishRequest{}
-	if err := json.Unmarshal(data, &p); err != nil {
-		log.Printf("json.Unmarshal: %v", err)
+
+	if err := json.NewDecoder(r.Body).Decode(&p); err != nil {
+		log.Printf("json.NewDecoder: %v", err)
 		http.Error(w, "Error parsing request", http.StatusBadRequest)
 		return
 	}
 
+	if p.Topic == "" || p.Message == "" {
+		s := "missing 'topic' or 'message' parameter"
+		log.Println(s)
+		http.Error(w, s, http.StatusBadRequest)
+		return
+	}
+
 	m := &pubsub.Message{
-		Data: []byte("Test message"),
+		Data: []byte(p.Message),
 	}
 	// Publish and Get use r.Context() because they are only needed for this
 	// function invocation. If this were a background function, they would use
@@ -84,8 +89,9 @@ func PublishMessage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error publishing message", http.StatusInternalServerError)
 		return
 	}
-	fmt.Fprintf(w, "Published msg: %v", id)
+	fmt.Fprintf(w, "Message published: %v", id)
 }
 
+// [END functions_pubsub_publish]
 // [END functions_tips_gcp_apis]
 // [END functions_golang_context]

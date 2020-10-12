@@ -1,4 +1,4 @@
-runtime: go111
+runtime: go114
 
 inbound_services:
   - warmup
@@ -6,4 +6,3 @@ inbound_services:
 handlers:
   - url: /_ah/warmup
     script: auto
-    login: admin
