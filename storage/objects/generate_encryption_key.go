@@ -22,8 +22,12 @@ import (
 	"io"
 )
 
-// generateEncryptionKey generates a base64-encoded encryption key.
+// generateEncryptionKey generates a 256 bit (32 byte) AES encryption key and
+// prints the base64 representation.
 func generateEncryptionKey(w io.Writer) error {
+	// This is included for demonstration purposes. You should generate your own
+	// key. Please remember that encryption keys should be handled with a
+	// comprehensive security policy.
 	key := make([]byte, 32)
 	if _, err := rand.Read(key); err != nil {
 		return fmt.Errorf("rand.Read: %v", err)

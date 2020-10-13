@@ -15,7 +15,8 @@
 package serviceaccount
 
 import (
-	"io/ioutil"
+	"bytes"
+	"strings"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -23,7 +24,12 @@ import (
 
 func TestGetServiceAccount(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	if err := getServiceAccount(ioutil.Discard, tc.ProjectID); err != nil {
+	buf := &bytes.Buffer{}
+	if err := getServiceAccount(buf, tc.ProjectID); err != nil {
 		t.Errorf("getServiceAccount: %s", err)
+	}
+	got := buf.String()
+	if want := "gserviceaccount.com"; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
 	}
 }
