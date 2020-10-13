@@ -425,9 +425,11 @@ func TestBucketLabel(t *testing.T) {
 	} else {
 		t.Fatalf("The label(%q) was not set on a bucket(%v)", labelName, bucketName)
 	}
-	if err := removeBucketLabel(ioutil.Discard, bucketName, labelName); err != nil {
-		t.Fatalf("removeBucketLabel: %v", err)
-	}
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
+		if err := removeBucketLabel(ioutil.Discard, bucketName, labelName); err != nil {
+			r.Errorf("removeBucketLabel: %v", err)
+		}
+	})
 	attrs, err = client.Bucket(bucketName).Attrs(ctx)
 	if err != nil {
 		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
