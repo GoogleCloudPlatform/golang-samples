@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import (
 
 func TestGenericCloudEvent(t *testing.T) {
 	tests := []struct {
-		data string
 		want string
 	}{
 		{want: "Event received!"},
@@ -52,16 +51,15 @@ func TestGenericCloudEvent(t *testing.T) {
 		w.Close()
 
 		if code := rr.Result().StatusCode; code == http.StatusBadRequest {
-			t.Errorf("GenericHandler(%q) invalid input, status code (%q)", test.data, code)
+			t.Errorf("GenericHandler invalid input, status code (%q)", code)
 		}
 
 		out, err := ioutil.ReadAll(r)
 		if err != nil {
 			t.Fatalf("ReadAll: %v", err)
 		}
-		print(out)
 		if got := string(out); strings.Contains(got, test.want) != true {
-			t.Errorf("\nGenericHandler(%q): \ngot: %q\nwant to contain: %q", test.data, got, test.want)
+			t.Errorf("\nGenericHandler: \ngot: %q\nwant to contain: %q", got, test.want)
 		}
 	}
 }
