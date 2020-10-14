@@ -28,9 +28,11 @@ import (
 func TestGenericCloudEvent(t *testing.T) {
 	tests := []struct {
 		want string
+		omit string
 	}{
 		{want: "Event received!"},
 		{want: `"Ce-Id": "1234"`},
+		{omit: `"super-secret-value"`},
 		{want: `{"message": "some string"}`},
 	}
 	log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
@@ -44,6 +46,7 @@ func TestGenericCloudEvent(t *testing.T) {
 
 		req := httptest.NewRequest("POST", "/", payload)
 		req.Header.Set("Ce-Id", "1234")
+		req.Header.Set("Authorization", "super-secret-value")
 		req.Header.Set("Ce-Source", "//storage.googleapis.com/projects/YOUR-PROJECT")
 		rr := httptest.NewRecorder()
 		GenericHandler(rr, req)
@@ -58,8 +61,11 @@ func TestGenericCloudEvent(t *testing.T) {
 		if err != nil {
 			t.Fatalf("ReadAll: %v", err)
 		}
-		if got := string(out); strings.Contains(got, test.want) != true {
+		if got := string(out); test.want != "" && strings.Contains(got, test.want) != true {
 			t.Errorf("\nGenericHandler: \ngot: %q\nwant to contain: %q", got, test.want)
+		}
+		if got := string(out); test.omit != "" && strings.Contains(got, test.omit) == true {
+			t.Errorf("\nGenericHandler: \ngot: %q\nwant to omit: %q", got, test.omit)
 		}
 	}
 }
