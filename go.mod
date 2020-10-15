@@ -42,7 +42,7 @@ require (
 	golang.org/x/net v0.0.0-20200904194848-62affa334b73
 	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43
 	golang.org/x/text v0.3.3
-	golang.org/x/tools v0.0.0-20200904185747-39188db58858 // indirect
+	golang.org/x/tools v0.0.0-20201015182029-a5d9e455e9c4 // indirect
 	google.golang.org/api v0.31.0
 	google.golang.org/appengine v1.6.6
 	google.golang.org/genproto v0.0.0-20200904004341-0bd0a958aa1d

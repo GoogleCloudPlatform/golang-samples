@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package intent_mgmt
+package intentmgmt
 
 import (
 	"fmt"
 	"strings"
 	"testing"
 	"time"
+
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 

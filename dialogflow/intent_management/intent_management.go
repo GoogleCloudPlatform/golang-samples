@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package intent_mgmt
+package intentmgmt
 
 // [START import_libraries]
 import (
 	"context"
 	"errors"
 	"fmt"
+
 	dialogflow "cloud.google.com/go/dialogflow/apiv2"
 	"google.golang.org/api/iterator"
 	dialogflowpb "google.golang.org/genproto/googleapis/cloud/dialogflow/v2"
