@@ -134,6 +134,38 @@ func TestObjects(t *testing.T) {
 		}
 	}
 
+	{
+		defaultStorageClass := "STANDARD"
+		// The bucket should have the default storage class.
+		bkt := client.Bucket(bucket)
+		obj := bkt.Object(object1)
+		battrs, err := obj.Attrs(ctx)
+		if err != nil {
+			t.Errorf("obj.Attrs: %v", err)
+		}
+		if battrs.StorageClass != defaultStorageClass {
+			t.Errorf("bucket storage class: got %q, want %q", battrs.StorageClass, defaultStorageClass)
+		}
+		oattrs, err := obj.Attrs(ctx)
+		if err != nil {
+			t.Errorf("obj.Attrs: %v", err)
+		}
+		if oattrs.StorageClass != defaultStorageClass {
+			t.Errorf("object storage class: got %q, want %q", oattrs.StorageClass, defaultStorageClass)
+		}
+		if err := changeObjectStorageClass(ioutil.Discard, bucket, object1); err != nil {
+			t.Errorf("changeObjectStorageClass: %v", err)
+		}
+		wantStorageClass := "COLDLINE"
+		oattrs, err = obj.Attrs(ctx)
+		if err != nil {
+			t.Errorf("obj.Attrs: %v", err)
+		}
+		if oattrs.StorageClass != wantStorageClass {
+			t.Errorf("object storage class: got %q, want %q", oattrs.StorageClass, wantStorageClass)
+		}
+	}
+
 	data, err := downloadFile(ioutil.Discard, bucket, object1)
 	if err != nil {
 		t.Fatalf("downloadFile: %v", err)
