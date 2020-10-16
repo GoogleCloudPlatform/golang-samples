@@ -95,8 +95,6 @@ func TestSample(t *testing.T) {
 	// since earlier commands setup the database for the subsequent commands.
 	mustRunCommand(t, "createdatabase", dbName, 0)
 	assertContains(t, runCommand(t, "insertplayers", dbName, 0), "Inserted players")
-	assertContains(t, runCommand(t, "insertplayers", dbName, 0), "Inserted players")
-	assertContains(t, runCommand(t, "insertscores", dbName, 0), "Inserted scores")
 	assertContains(t, runCommand(t, "insertscores", dbName, 0), "Inserted scores")
 	assertContains(t, runCommand(t, "query", dbName, 0), "PlayerId: ")
 	assertContains(t, runCommand(t, "querywithtimespan", dbName, 168), "PlayerId: ")
