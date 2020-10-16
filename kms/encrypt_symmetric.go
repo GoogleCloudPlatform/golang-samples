@@ -45,6 +45,9 @@ func encryptSymmetric(w io.Writer, name string, message string) error {
 	req := &kmspb.EncryptRequest{
 		Name:      name,
 		Plaintext: plaintext,
+		
+		// Sample: DO NOT MERGE, demoing how to open a PR to someone
+		PlaintextCrc32C: nil,
 	}
 
 	// Call the API.
