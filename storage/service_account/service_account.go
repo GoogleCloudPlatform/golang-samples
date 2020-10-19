@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	"cloud.google.com/go/storage"
 )
@@ -31,6 +32,9 @@ func getServiceAccount(w io.Writer, projectID string) error {
 		return fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 
 	serviceAccount, err := client.ServiceAccount(ctx, projectID)
 	if err != nil {

@@ -25,8 +25,8 @@ import (
 )
 
 // copyOldVersionOfObject copies a noncurrent version of an object.
-func copyOldVersionOfObject(w io.Writer, srcBucket, srcObject, dstObject string, gen int64) error {
-	// srcBucket := "source-bucket-name"
+func copyOldVersionOfObject(w io.Writer, bucket, srcObject, dstObject string, gen int64) error {
+	// bucket := "bucket-name"
 	// srcObject := "source-object-name"
 	// dstObject := "destination-object-name"
 
@@ -42,13 +42,13 @@ func copyOldVersionOfObject(w io.Writer, srcBucket, srcObject, dstObject string,
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 
-	src := client.Bucket(srcBucket).Object(srcObject)
-	dst := client.Bucket(srcBucket).Object(dstObject)
+	src := client.Bucket(bucket).Object(srcObject)
+	dst := client.Bucket(bucket).Object(dstObject)
 
 	if _, err := dst.CopierFrom(src.Generation(gen)).Run(ctx); err != nil {
 		return fmt.Errorf("Object(%q).CopierFrom(%q).Generation(%v).Run: %v", dstObject, srcObject, gen, err)
 	}
-	fmt.Fprintf(w, "Generation %v of object %v in bucket %v was copied to %v\n", gen, srcObject, srcBucket, dstObject)
+	fmt.Fprintf(w, "Generation %v of object %v in bucket %v was copied to %v\n", gen, srcObject, bucket, dstObject)
 	return nil
 }
 
