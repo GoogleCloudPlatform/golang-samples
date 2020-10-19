@@ -14,6 +14,7 @@
 
 package policytagmanager
 
+// [START data_catalog_ptm_list_taxonomies]
 import (
 	"context"
 	"fmt"
@@ -24,8 +25,11 @@ import (
 	datacatalogpb "google.golang.org/genproto/googleapis/cloud/datacatalog/v1beta1"
 )
 
+// listTaxonomies prints information about the taxonomies contained within a specific
+// project and location.
 func listTaxonomies(projectID, location string, w io.Writer) error {
 	// projectID := "my-project-id"
+	// location := "us"
 	ctx := context.Background()
 	policyClient, err := datacatalog.NewPolicyTagManagerClient(ctx)
 	if err != nil {
@@ -51,3 +55,5 @@ func listTaxonomies(projectID, location string, w io.Writer) error {
 	}
 	return nil
 }
+
+// [END data_catalog_ptm_list_taxonomies]

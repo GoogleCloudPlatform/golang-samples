@@ -14,6 +14,7 @@
 
 package policytagmanager
 
+// [START data_catalog_ptm_list_policytags]
 import (
 	"context"
 	"fmt"
@@ -24,7 +25,10 @@ import (
 	datacatalogpb "google.golang.org/genproto/googleapis/cloud/datacatalog/v1beta1"
 )
 
+// listPolicyTags prints information about the policy tags within a given taxonomy
+// resource.
 func listPolicyTags(parentTaxonomyID string, w io.Writer) error {
+	// parentTaxonomyID := projects/myproject/locations/us/taxonomies/1234"
 	ctx := context.Background()
 	policyClient, err := datacatalog.NewPolicyTagManagerClient(ctx)
 	if err != nil {
@@ -54,3 +58,5 @@ func listPolicyTags(parentTaxonomyID string, w io.Writer) error {
 	}
 	return nil
 }
+
+// [END data_catalog_ptm_list_policytags]

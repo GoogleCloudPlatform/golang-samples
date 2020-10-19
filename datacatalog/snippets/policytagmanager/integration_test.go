@@ -13,16 +13,18 @@
 // limitations under the License.
 
 // Package policytagmanager demonstrates interactions with the Policy
-// Tag Manager Client, used for managing Policy Tags.  This construct
+// Tag Manager client, used for managing Policy Tags.  This functionality
 // underpins features in other services such as BigQuery's ability to
 // define column-level access control.
 package policytagmanager
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
@@ -35,10 +37,12 @@ func TestPolicyTagManager(t *testing.T) {
 	// Normal operation should use an instance of ioutil.Discard.
 	output := ioutil.Discard
 
-	taxID, err := createTaxonomy(tc.ProjectID, location, output)
+	taxonomyName := fmt.Sprintf("example-taxonomy-%d", time.Now().UnixNano())
+	taxID, err := createTaxonomy(tc.ProjectID, location, taxonomyName, output)
 	if err != nil {
 		t.Errorf("createTaxonomy: %v", err)
 	}
+	defer deleteTaxonomy(taxID)
 
 	if err := getTaxonomy(taxID, output); err != nil {
 		t.Errorf("getTaxonomy: %v", err)
@@ -79,7 +83,7 @@ func TestPolicyTagManager(t *testing.T) {
 	}
 	buf.Reset()
 
-	if err := setIamPolicy(tagOne, output); err != nil {
+	if err := setIamPolicy(tagOne, "allAuthenticatedUsers", output); err != nil {
 		t.Errorf("setIamPolicy(%s): %v", tagOne, err)
 	}
 
@@ -101,11 +105,11 @@ func TestPolicyTagManager(t *testing.T) {
 	}
 
 	// delete a Policy tag
-	if err := deletePolicyTag(tagTwo, output); err != nil {
+	if err := deletePolicyTag(tagTwo); err != nil {
 		t.Errorf("deletePolicy(%s): %v", tagTwo, err)
 	}
 
-	if err := deleteTaxonomy(taxID, output); err != nil {
+	if err := deleteTaxonomy(taxID); err != nil {
 		t.Errorf("deleteTaxonomy: %v", err)
 	}
 

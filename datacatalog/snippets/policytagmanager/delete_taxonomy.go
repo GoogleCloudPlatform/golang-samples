@@ -14,18 +14,18 @@
 
 package policytagmanager
 
+// [START data_catalog_ptm_delete_taxonomy]
 import (
 	"context"
 	"fmt"
-	"io"
 
 	datacatalog "cloud.google.com/go/datacatalog/apiv1beta1"
 	datacatalogpb "google.golang.org/genproto/googleapis/cloud/datacatalog/v1beta1"
 )
 
 // deleteTaxonomy removes an existing taxonomy resource.
-func deleteTaxonomy(taxonomyID string, w io.Writer) error {
-	// projectID := "my-project-id"
+func deleteTaxonomy(taxonomyID string) error {
+	// taxonomyID := "projects/myproject/locations/us/taxonomies/1234"
 	ctx := context.Background()
 	policyClient, err := datacatalog.NewPolicyTagManagerClient(ctx)
 	if err != nil {
@@ -38,3 +38,5 @@ func deleteTaxonomy(taxonomyID string, w io.Writer) error {
 	}
 	return policyClient.DeleteTaxonomy(ctx, req)
 }
+
+// [END data_catalog_ptm_delete_taxonomy]

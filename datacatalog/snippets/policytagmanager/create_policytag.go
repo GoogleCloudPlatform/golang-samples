@@ -14,6 +14,7 @@
 
 package policytagmanager
 
+// [START data_catalog_ptm_create_policytag]
 import (
 	"context"
 	"fmt"
@@ -23,10 +24,14 @@ import (
 	datacatalogpb "google.golang.org/genproto/googleapis/cloud/datacatalog/v1beta1"
 )
 
-// createPolicyTag creates a simple policyTag, and associates with an optional parent.
+// createPolicyTag creates a policy tag resource under a given parent taxonomy.
+//
+// It optionally accepts a parent ID, which can be used to create a hierarchical
+// relationship between tags.
 func createPolicyTag(parent, displayName, parentPolicyTag string, w io.Writer) (string, error) {
 	// parent := "projects/myproject/locations/us/taxonomies/1234"
-	// displayName := "PII Policy"
+	// displayName := "Example Policy Tag"
+	// parentPolicyTag := "projects/myproject/locations/us/taxonomies/1234/policyTags/5678"
 	ctx := context.Background()
 	policyClient, err := datacatalog.NewPolicyTagManagerClient(ctx)
 	if err != nil {
@@ -52,3 +57,5 @@ func createPolicyTag(parent, displayName, parentPolicyTag string, w io.Writer) (
 	fmt.Fprintf(w, "PolicyTag %s was created.\n", resp.Name)
 	return resp.Name, nil
 }
+
+// [END data_catalog_ptm_create_policytag]

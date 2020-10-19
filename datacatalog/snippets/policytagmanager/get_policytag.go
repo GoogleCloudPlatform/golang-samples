@@ -14,6 +14,7 @@
 
 package policytagmanager
 
+// [START data_catalog_ptm_get_policytag]
 import (
 	"context"
 	"fmt"
@@ -23,8 +24,9 @@ import (
 	datacatalogpb "google.golang.org/genproto/googleapis/cloud/datacatalog/v1beta1"
 )
 
-// deleteTaxonomy removes an existing taxonomy resource.
+// getPolicyTag prints information about a given policy tag.
 func getPolicyTag(policyTagID string, w io.Writer) error {
+	// policyTagID := "projects/myproject/locations/us/taxonomies/1234/policyTags/5678"
 	ctx := context.Background()
 	policyClient, err := datacatalog.NewPolicyTagManagerClient(ctx)
 	if err != nil {
@@ -49,3 +51,5 @@ func getPolicyTag(policyTagID string, w io.Writer) error {
 	fmt.Fprintln(w)
 	return nil
 }
+
+// [END data_catalog_ptm_get_policytag]

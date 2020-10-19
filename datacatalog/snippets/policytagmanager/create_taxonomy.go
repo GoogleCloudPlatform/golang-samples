@@ -14,6 +14,7 @@
 
 package policytagmanager
 
+// [START data_catalog_ptm_create_taxonomy]
 import (
 	"context"
 	"fmt"
@@ -23,9 +24,14 @@ import (
 	datacatalogpb "google.golang.org/genproto/googleapis/cloud/datacatalog/v1beta1"
 )
 
-// createTaxonomy creates a taxonomy resource, which can contain PolicyTag resources.
+// createTaxonomy creates a taxonomy resource, which holds the collection of policy tags.
+//
+// This example marks the taxonomy as valid for defining fine grained access control, also
+// known as column-level access control when used in conjunction with BigQuery.
 func createTaxonomy(projectID, location, displayName string, w io.Writer) (string, error) {
 	// projectID := "my-project-id"
+	// location := "us"
+	// displayName := "example-taxonomy"
 	ctx := context.Background()
 	policyClient, err := datacatalog.NewPolicyTagManagerClient(ctx)
 	if err != nil {
@@ -51,3 +57,5 @@ func createTaxonomy(projectID, location, displayName string, w io.Writer) (strin
 	fmt.Fprintf(w, "Taxonomy %s was created.\n", resp.Name)
 	return resp.Name, nil
 }
+
+// [END data_catalog_ptm_create_taxonomy]

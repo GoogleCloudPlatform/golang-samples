@@ -14,6 +14,7 @@
 
 package policytagmanager
 
+// [START data_catalog_ptm_test_iam_permissions]
 import (
 	"context"
 	"fmt"
@@ -24,8 +25,10 @@ import (
 	iampb "google.golang.org/genproto/googleapis/iam/v1"
 )
 
-// getIAMPolicy prints information about the policy associated with a taxonomy or tag.
+// testIamPermissions demonstrates a caller probing what permissions they hold on a given taxonomy
+// or policy tag resource.
 func testIamPermissions(resourceID string, permissions []string, w io.Writer) error {
+	// permissions := []string{"datacatalog.categories.fineGrainedGet"}
 	ctx := context.Background()
 	policyClient, err := datacatalog.NewPolicyTagManagerClient(ctx)
 	if err != nil {
@@ -48,3 +51,5 @@ func testIamPermissions(resourceID string, permissions []string, w io.Writer) er
 	fmt.Fprintln(w)
 	return nil
 }
+
+// [END data_catalog_ptm_test_iam_permissions]

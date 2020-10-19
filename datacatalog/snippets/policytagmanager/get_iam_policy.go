@@ -14,6 +14,7 @@
 
 package policytagmanager
 
+// [START data_catalog_ptm_get_iam_policy]
 import (
 	"context"
 	"fmt"
@@ -24,8 +25,10 @@ import (
 	iampb "google.golang.org/genproto/googleapis/iam/v1"
 )
 
-// getIAMPolicy prints information about the policy associated with a taxonomy or tag.
+// getIAMPolicy prints information about the IAM policy associated with a
+// given taxonomy or policy tag resource.
 func getIamPolicy(resourceID string, w io.Writer) error {
+	// resourceID := "projects/myproject/locations/us/taxonomies/1234"
 	ctx := context.Background()
 	policyClient, err := datacatalog.NewPolicyTagManagerClient(ctx)
 	if err != nil {
@@ -51,3 +54,5 @@ func getIamPolicy(resourceID string, w io.Writer) error {
 	}
 	return nil
 }
+
+// [START data_catalog_ptm_get_iam_policy]

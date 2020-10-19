@@ -14,17 +14,18 @@
 
 package policytagmanager
 
+// [START data_catalog_ptm_delete_policytag]
 import (
 	"context"
 	"fmt"
-	"io"
 
 	datacatalog "cloud.google.com/go/datacatalog/apiv1beta1"
 	datacatalogpb "google.golang.org/genproto/googleapis/cloud/datacatalog/v1beta1"
 )
 
-// deletePolicyTag removes an existing policy tag.
-func deletePolicyTag(policyTagID string, w io.Writer) error {
+// deletePolicyTag deletes a given policy tag.
+func deletePolicyTag(policyTagID string) error {
+	// policyTagID := "projects/myproject/locations/us/taxonomies/1234/policyTags/5678"
 	ctx := context.Background()
 	policyClient, err := datacatalog.NewPolicyTagManagerClient(ctx)
 	if err != nil {
@@ -37,3 +38,5 @@ func deletePolicyTag(policyTagID string, w io.Writer) error {
 	}
 	return policyClient.DeletePolicyTag(ctx, req)
 }
+
+// [END data_catalog_ptm_delete_policytag]

@@ -14,6 +14,7 @@
 
 package policytagmanager
 
+// [START data_catalog_ptm_get_taxonomy]
 import (
 	"context"
 	"fmt"
@@ -23,8 +24,9 @@ import (
 	datacatalogpb "google.golang.org/genproto/googleapis/cloud/datacatalog/v1beta1"
 )
 
-// getTaxonomy reports basic information about a given taxonomy.
+// getTaxonomy prints information about a given taxonomy.
 func getTaxonomy(taxonomyID string, w io.Writer) error {
+	// taxonomyID := "projects/myproject/locations/us/taxonomies/1234"
 	ctx := context.Background()
 	policyClient, err := datacatalog.NewPolicyTagManagerClient(ctx)
 	if err != nil {
@@ -42,3 +44,5 @@ func getTaxonomy(taxonomyID string, w io.Writer) error {
 	fmt.Fprintf(w, "Taxonomy %s has Display Name %s and Description: %s\n", resp.Name, resp.DisplayName, resp.Description)
 	return nil
 }
+
+// [END data_catalog_ptm_get_taxonomy]
