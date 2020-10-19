@@ -272,6 +272,28 @@ func TestKMSObjects(t *testing.T) {
 	testutil.CleanBucket(ctx, t, tc.ProjectID, bucket)
 
 	kmsKeyName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", tc.ProjectID, "global", keyRingID, cryptoKeyID)
+	{
+		object1 := "foo.txt"
+		key := []byte("my-secret-AES-256-encryption-key")
+		obj := client.Bucket(bucket).Object(object1)
+		wc := obj.Key(key).NewWriter(ctx)
+		if _, err := wc.Write([]byte("top secret")); err != nil {
+			t.Errorf("Writer.Write: %v", err)
+		}
+		if err := wc.Close(); err != nil {
+			t.Errorf("Writer.Close: %v", err)
+		}
+		if err := сhangeObjectCSEKtoKMS(ioutil.Discard, bucket, object1, key, kmsKeyName); err != nil {
+			t.Errorf("сhangeObjectCSEKtoKMS: %v", err)
+		}
+		attrs, err := obj.Attrs(ctx)
+		if err != nil {
+			t.Errorf("obj.Attrs: %v", err)
+		}
+		if attrs.KMSKeyName != kmsKeyName {
+			t.Errorf("got %v want %v", attrs.KMSKeyName, kmsKeyName)
+		}
+	}
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		if err := uploadWithKMSKey(ioutil.Discard, bucket, object, kmsKeyName); err != nil {
