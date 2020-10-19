@@ -27,7 +27,7 @@ type PubSubMessage struct {
 	Data []byte `json:"data"`
 }
 
-// ProcessLogEntry processes a Pub/Sub message from Stackdriver.
+// ProcessLogEntry processes a Pub/Sub message from Cloud Logging.
 func ProcessLogEntry(ctx context.Context, m PubSubMessage) error {
 	log.Printf("Log entry data: %s", string(m.Data))
 	return nil
