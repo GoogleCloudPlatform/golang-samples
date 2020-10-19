@@ -15,6 +15,10 @@ assign_issues_by:
   to:
   - bradmiro
 - labels:
+  - 'api: logging'
+  to:
+  - nicoleczhu
+- labels:
   - 'api: pubsub'
   to:
   - hongalex
