@@ -68,4 +68,4 @@ func setIamPolicy(resourceID, member string, w io.Writer) error {
 	return nil
 }
 
-// [START data_catalog_ptm_set_iam_policy]
+// [END data_catalog_ptm_set_iam_policy]
