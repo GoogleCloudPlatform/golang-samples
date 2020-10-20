@@ -10,3 +10,4 @@
 *                               @googleapis/yoshi-go-admins
 
 /storage/        @GoogleCloudPlatform/storage-dpe @googleapis/yoshi-go-admins
+/logging/        @GoogleCloudPlatform/observability-devx @googleapis/yoshi-go-admins @nicoleczhu
