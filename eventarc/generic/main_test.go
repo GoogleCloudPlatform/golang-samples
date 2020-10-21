@@ -25,7 +25,7 @@ import (
 	"testing"
 )
 
-func TestGenericCloudEvent(t *testing.T) {
+func TestGenericHandler(t *testing.T) {
 	tests := []struct {
 		want string
 		omit string
@@ -61,11 +61,12 @@ func TestGenericCloudEvent(t *testing.T) {
 		if err != nil {
 			t.Fatalf("ReadAll: %v", err)
 		}
-		if got := string(out); test.want != "" && strings.Contains(got, test.want) != true {
-			t.Errorf("\nGenericHandler: \ngot: %q\nwant to contain: %q", got, test.want)
+		got := string(out)
+		if !strings.Contains(got, test.want) {
+			t.Errorf("GenericHandler: \ngot: %q\nwant to contain: %q", got, test.want)
 		}
-		if got := string(out); test.omit != "" && strings.Contains(got, test.omit) == true {
-			t.Errorf("\nGenericHandler: \ngot: %q\nwant to omit: %q", got, test.omit)
+		if test.omit != "" && strings.Contains(got, test.omit) {
+			t.Errorf("GenericHandler: \ngot: %q\nwant to omit: %q", got, test.omit)
 		}
 	}
 }

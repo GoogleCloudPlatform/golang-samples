@@ -14,7 +14,7 @@
 
 // [START eventarc_generic_handler]
 
-// Sample eventarc-generic is a Cloud Run service which logs and echos received requests.
+// Sample generic is a Cloud Run service which logs and echos received requests.
 package main
 
 import (
@@ -36,12 +36,15 @@ func GenericHandler(w http.ResponseWriter, r *http.Request) {
 	logAndRespond(w, "Event received!")
 
 	// Log all headers besides authorization header
+	// Assumes headers don't have duplicate keys
 	logAndRespond(w, "HEADERS:")
-	delete(r.Header, "Authorization")
 	headerMap := make(map[string]string)
 	for k, v := range r.Header {
-		headerMap[k] = string(v[0])
-		logAndRespond(w, fmt.Sprintf("%q: %q\n", k, v[0]))
+		val := v[0]
+		if k != "Authorization" {
+			headerMap[k] = string(val)
+			logAndRespond(w, fmt.Sprintf("%q: %q\n", k, val))
+		}
 	}
 
 	// Log body
@@ -62,11 +65,10 @@ func GenericHandler(w http.ResponseWriter, r *http.Request) {
 		Headers: headerMap,
 		Body:    body,
 	}
-	out, err := json.Marshal(res)
-	if err != nil {
-		panic(err)
+	if err := json.NewEncoder(w).Encode(res); err != nil {
+		http.Error(w, "Could not marshal JSON output", 500)
 	}
-	fmt.Fprintln(w, string(out))
+	fmt.Fprintln(w)
 }
 
 // [END eventarc_generic_handler]
