@@ -12,4 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-runtime: go112 # replace with go111 for Go 1.11
+runtime: go114 # replace with go111 for Go 1.11
