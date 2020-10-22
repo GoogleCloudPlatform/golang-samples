@@ -151,7 +151,7 @@ func explicitContentURI(w io.Writer, file string) error {
 
 // [END video_analyze_explicit_content]
 
-// [START video_analyze_speech_transcription_gcs]
+// [START video_speech_transcription_gcs]
 
 func speechTranscriptionURI(w io.Writer, file string) error {
 	ctx := context.Background()
@@ -209,4 +209,4 @@ func speechTranscriptionURI(w io.Writer, file string) error {
 	return nil
 }
 
-// [END video_analyze_speech_transcription_gcs]
+// [END video_speech_transcription_gcs]
