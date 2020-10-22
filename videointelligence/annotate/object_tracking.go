@@ -15,7 +15,7 @@
 // Package annotate contains speech examples.
 package annotate
 
-// [START videointelligence_object_tracking]
+// [START video_object_tracking]
 
 import (
 	"context"
@@ -93,4 +93,4 @@ func objectTracking(w io.Writer, filename string) error {
 	return nil
 }
 
-// [END videointelligence_object_tracking]
+// [END video_object_tracking]
