@@ -15,7 +15,7 @@
 // Package annotate contains speech examples.
 package annotate
 
-// [START videointelligence_object_tracking_gcs]
+// [START video_object_tracking_gcs]
 
 import (
 	"context"
@@ -87,4 +87,4 @@ func objectTrackingGCS(w io.Writer, gcsURI string) error {
 	return nil
 }
 
-// [END videointelligence_object_tracking_gcs]
+// [END video_object_tracking_gcs]
