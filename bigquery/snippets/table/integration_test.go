@@ -150,6 +150,12 @@ func TestTables(t *testing.T) {
 	if err := updateTableAddColumn(tc.ProjectID, testDatasetID, testTableID); err != nil {
 		t.Fatalf("updateTableAddColumn(%q %q): %v", testDatasetID, testTableID, err)
 	}
+
+	// Change tables to avoid hitting metadata update limits in a short period.
+	testTableID, err = bqtestutil.UniqueBQName("testtable")
+	if err := createTableExplicitSchema(tc.ProjectID, testDatasetID, testTableID); err != nil {
+		t.Fatalf("createTableExplicitSchema(%q %q): %v", testDatasetID, testTableID, err)
+	}
 	if err := addTableLabel(tc.ProjectID, testDatasetID, testTableID); err != nil {
 		t.Fatalf("addTableLabel(%q %q): %v", testDatasetID, testTableID, err)
 	}
@@ -164,7 +170,7 @@ func TestTables(t *testing.T) {
 	}
 
 	if err := listTables(ioutil.Discard, tc.ProjectID, testDatasetID); err != nil {
-		t.Fatalf("deleteTable(%q): %v", testDatasetID, err)
+		t.Fatalf("listTables(%q): %v", testDatasetID, err)
 	}
 
 }

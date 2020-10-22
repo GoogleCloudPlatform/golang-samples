@@ -15,18 +15,86 @@
 package main
 
 import (
+	"context"
+	"log"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"golang.org/x/oauth2/google"
+	"google.golang.org/api/iam/v1"
 )
 
-func TestMain(t *testing.T) {
-	testutil.SystemTest(t)
+func TestQuickstart(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	m := testutil.BuildMain(t)
 
-	r := testutil.BuildMain(t)
-	if stdout, stderr, err := r.Run(nil, 10*time.Second); err != nil {
-		t.Errorf("error running main: %v\n\nstdout:\n----\n%v\n----\nstderr:\n----\n%v\n----", err, string(stdout), string(stderr))
+	if !m.Built() {
+		t.Fatalf("failed to build app")
 	}
-	r.Cleanup()
+
+	// create a service account to use in the test
+	testServiceAccount := createServiceAccount(tc.ProjectID, "iam-quickstart-service-account", "IAM test account")
+	testMember := "serviceAccount:" + testServiceAccount.Email
+
+	stdOut, stdErr, err := m.Run(nil, 10*time.Minute,
+		"--project_id", tc.ProjectID,
+		"--member_id", testMember,
+	)
+
+	if err != nil {
+		t.Errorf("stdout: %v", string(stdOut))
+		t.Errorf("stderr: %v", string(stdErr))
+		t.Errorf("execution failed: %v", err)
+	}
+
+	if got := string(stdOut); !strings.Contains(got, testMember) {
+		t.Errorf("got %q, want to contain %q", got, testMember)
+	}
+
+	// delete the service account used in the test
+	deleteServiceAccount(testServiceAccount.Email)
+
+}
+
+// createServiceAccount creates a service account.
+func createServiceAccount(projectID, name, displayName string) *iam.ServiceAccount {
+	client, err := google.DefaultClient(context.Background(), iam.CloudPlatformScope)
+	if err != nil {
+		log.Fatalf("google.DefaultClient: %v", err)
+	}
+	service, err := iam.New(client)
+	if err != nil {
+		log.Fatalf("iam.New: %v", err)
+	}
+
+	request := &iam.CreateServiceAccountRequest{
+		AccountId: name,
+		ServiceAccount: &iam.ServiceAccount{
+			DisplayName: displayName,
+		},
+	}
+	account, err := service.Projects.ServiceAccounts.Create("projects/"+projectID, request).Do()
+	if err != nil {
+		log.Fatalf("Projects.ServiceAccounts.Create: %v", err)
+	}
+	return account
+}
+
+// deleteServiceAccount deletes a service account.
+func deleteServiceAccount(email string) {
+	client, err := google.DefaultClient(context.Background(), iam.CloudPlatformScope)
+	if err != nil {
+		log.Fatalf("google.DefaultClient: %v", err)
+	}
+	service, err := iam.New(client)
+	if err != nil {
+		log.Fatalf("iam.New: %v", err)
+	}
+
+	_, err = service.Projects.ServiceAccounts.Delete("projects/-/serviceAccounts/" + email).Do()
+	if err != nil {
+		log.Fatalf("Projects.ServiceAccounts.Delete: %v", err)
+	}
 }
