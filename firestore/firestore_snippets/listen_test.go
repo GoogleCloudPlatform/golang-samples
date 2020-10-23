@@ -18,7 +18,6 @@ import (
 	"bytes"
 	"context"
 	"io/ioutil"
-	"log"
 	"os"
 	"strings"
 	"testing"
@@ -98,7 +97,7 @@ func TestListenChanges(t *testing.T) {
 	client, projectID, collection := setup(ctx, t)
 	defer client.Close()
 
-	ctx, cancel := context.WithTimeout(ctx, duration)
+	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 
 	buf := &bytes.Buffer{}
@@ -114,11 +113,14 @@ func TestListenChanges(t *testing.T) {
 	// Add some changes to data in parallel.
 	time.Sleep(time.Second)
 	var pop int64 = 3900000
-	if _, err := client.Collection(collection).Doc("LA").Update(ctx, []firestore.Update{
-		{Path: "population", Value: pop},
-	}); err != nil {
-		log.Fatalf("Doc.Update: %v", err)
-	}
+
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
+		if _, err := client.Collection(collection).Doc("LA").Update(ctx, []firestore.Update{
+			{Path: "population", Value: pop},
+		}); err != nil {
+			r.Errorf("Doc.Update: %v", err)
+		}
+	})
 	<-c
 	want := "population:3900000"
 	if got := buf.String(); !strings.Contains(got, want) {
