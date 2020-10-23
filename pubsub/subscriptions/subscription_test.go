@@ -308,6 +308,48 @@ func TestPullMsgsConcurrencyControl(t *testing.T) {
 	}
 }
 
+func TestPullMsgsCustomAttributes(t *testing.T) {
+	client := setup(t)
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	topicIDAttributes := topicID + "-attributes"
+	subIDAttributes := subID + "-attributes"
+
+	topic, err := getOrCreateTopic(ctx, client, topicIDAttributes)
+	if err != nil {
+		t.Fatalf("getOrCreateTopic: %v", err)
+	}
+	defer topic.Delete(ctx)
+	defer topic.Stop()
+
+	cfg := &pubsub.SubscriptionConfig{
+		Topic: topic,
+	}
+	sub, err := getOrCreateSub(ctx, client, subIDAttributes, cfg)
+	if err != nil {
+		t.Fatalf("getOrCreateSub: %v", err)
+	}
+	defer sub.Delete(ctx)
+
+	res := topic.Publish(ctx, &pubsub.Message{
+		Data:       []byte("message with custom attributes"),
+		Attributes: map[string]string{"foo": "bar"},
+	})
+	if _, err := res.Get(ctx); err != nil {
+		t.Fatalf("Get publish result: %v", err)
+	}
+
+	buf := new(bytes.Buffer)
+	if err := pullMsgsCustomAttributes(buf, tc.ProjectID, subIDAttributes); err != nil {
+		t.Fatalf("failed to pull messages: %v", err)
+	}
+
+	want := "foo = bar"
+	if !strings.Contains(buf.String(), want) {
+		t.Fatalf("pullMsgsCustomAttributes, got: %s, want %s", buf.String(), want)
+	}
+}
+
 func TestCreateWithDeadLetterPolicy(t *testing.T) {
 	client := setup(t)
 	defer client.Close()

@@ -50,7 +50,7 @@ func helloHandler(w http.ResponseWriter, r *http.Request) {
 	name := os.Getenv("NAME")
 	if name == "" {
 		log.Printf("Missing required server parameter")
-		// The panic stack trace appears in Stackdriver Error Reporting.
+		// The panic stack trace appears in Cloud Error Reporting.
 		panic("Missing required server parameter")
 	}
 	// [END run_broken_service_problem]

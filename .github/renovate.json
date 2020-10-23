@@ -7,10 +7,16 @@
   "postUpdateOptions": [
     "gomodTidy"
   ],
-  "commitMessagePrefix": "all: ",
+  "commitMessagePrefix": "chore(all): ",
   "commitMessageAction": "update",
   "ignorePaths": [
     "testing/docker/Dockerfile*"
   ],
-  "groupName": "all"
+  "groupName": "all",
+  "packageRules": [
+    {
+      "updateTypes": ["major"],
+      "enabled": false
+    }
+  ]
 }

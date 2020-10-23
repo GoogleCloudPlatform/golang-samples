@@ -15,6 +15,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -24,40 +25,47 @@ import (
 	"testing"
 )
 
-func TestHelloEventsStorage(t *testing.T) {
+func TestGenericCloudEvent(t *testing.T) {
 	tests := []struct {
-		subject string
-		want    string
+		want string
+		omit string
 	}{
-		{subject: "1234", want: "GCS CloudEvent type: 1234\n"},
+		{want: "Event received!"},
+		{want: `"Ce-Id": "1234"`},
+		{omit: `"super-secret-value"`},
+		{want: `{"message": "some string"}`},
 	}
+	log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
 	for _, test := range tests {
 		r, w, _ := os.Pipe()
 		log.SetOutput(w)
 		defer log.SetOutput(os.Stderr)
 
-		originalFlags := log.Flags()
-		defer log.SetFlags(originalFlags)
-		log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
+		jsonStr := fmt.Sprintf(`{"message": "some string"}`)
+		payload := strings.NewReader(jsonStr)
 
-		payload := strings.NewReader("{}")
 		req := httptest.NewRequest("POST", "/", payload)
-		req.Header.Set("ce-subject", test.subject)
+		req.Header.Set("Ce-Id", "1234")
+		req.Header.Set("Authorization", "super-secret-value")
+		req.Header.Set("Ce-Source", "//storage.googleapis.com/projects/YOUR-PROJECT")
 		rr := httptest.NewRecorder()
-		HelloEventsStorage(rr, req)
+		GenericHandler(rr, req)
 
 		w.Close()
 
 		if code := rr.Result().StatusCode; code == http.StatusBadRequest {
-			t.Errorf("HelloEventsStorage(%q) invalid input, status code (%q)", test.subject, code)
+			t.Errorf("GenericHandler invalid input, status code (%q)", code)
 		}
 
 		out, err := ioutil.ReadAll(r)
 		if err != nil {
 			t.Fatalf("ReadAll: %v", err)
 		}
-		if got := string(out); got != test.want {
-			t.Errorf("HelloEventsStorage(%q): got %q, want %q", test.subject, got, test.want)
+		if got := string(out); test.want != "" && strings.Contains(got, test.want) != true {
+			t.Errorf("\nGenericHandler: \ngot: %q\nwant to contain: %q", got, test.want)
+		}
+		if got := string(out); test.omit != "" && strings.Contains(got, test.omit) == true {
+			t.Errorf("\nGenericHandler: \ngot: %q\nwant to omit: %q", got, test.omit)
 		}
 	}
 }

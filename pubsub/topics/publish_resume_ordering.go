@@ -53,8 +53,8 @@ func resumePublishWithOrderingKey(w io.Writer, projectID, topicID string) {
 		fmt.Printf("Failed to publish: %s\n", err)
 
 		// Resume publish on an ordering key that has had unrecoverable errors.
-		// Until this method is not called, subsequent publishes with this ordering
-		// key will fail.
+		// After such an error publishes with this ordering key will fail
+		// until this method is called.
 		t.ResumePublish(key)
 	}
 

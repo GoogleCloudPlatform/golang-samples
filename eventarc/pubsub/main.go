@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START run_events_pubsub_handler]
+// [START eventarc_pubsub_handler]
 
 // Sample run-events-pubsub is a Cloud Run service which handles Pub/Sub messages.
 package main
@@ -51,6 +51,9 @@ func HelloEventsPubSub(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, s)
 }
 
+// [END eventarc_pubsub_handler]
+// [START eventarc_pubsub_server]
+
 func main() {
 	http.HandleFunc("/", HelloEventsPubSub)
 	// Determine port for HTTP service.
@@ -66,4 +69,4 @@ func main() {
 	}
 }
 
-// [END run_events_pubsub_handler]
+// [END eventarc_pubsub_server]

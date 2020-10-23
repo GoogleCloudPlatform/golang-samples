@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2019 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,11 +24,11 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestPubSubStorageService(t *testing.T) {
+func TestPubSubSinkService(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 
-	service := cloudrunci.NewService("events-storage", tc.ProjectID)
-	service.Dir = "../events_storage"
+	service := cloudrunci.NewService("pubsub", tc.ProjectID)
+	service.Dir = "../pubsub"
 	if err := service.Deploy(); err != nil {
 		t.Fatalf("service.Deploy %q: %v", service.Name, err)
 	}
@@ -48,7 +48,7 @@ func TestPubSubStorageService(t *testing.T) {
 	defer resp.Body.Close()
 	fmt.Printf("client.Do: %s %s\n", req.Method, req.URL)
 
-	if got := resp.StatusCode; got != http.StatusOK {
-		t.Errorf("response status: got %d, want %d", got, http.StatusOK)
+	if got := resp.StatusCode; got != http.StatusBadRequest {
+		t.Errorf("response status: got %d, want %d", got, http.StatusBadRequest)
 	}
 }
