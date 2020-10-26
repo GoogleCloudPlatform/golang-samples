@@ -61,6 +61,7 @@ func GenericHandler(w http.ResponseWriter, r *http.Request) {
 		Body:    body,
 	}
 	if err := json.NewEncoder(w).Encode(res); err != nil {
+		log.Printf("error encoding response: %v", err)
 		http.Error(w, "Could not marshal JSON output", 500)
 	}
 	fmt.Fprintln(w)
