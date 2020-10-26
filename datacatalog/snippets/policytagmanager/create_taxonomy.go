@@ -28,7 +28,7 @@ import (
 //
 // This example marks the taxonomy as valid for defining fine grained access control, also
 // known as column-level access control when used in conjunction with BigQuery.
-func createTaxonomy(projectID, location, displayName string, w io.Writer) (string, error) {
+func createTaxonomy(w io.Writer, projectID, location, displayName string) (string, error) {
 	// projectID := "my-project-id"
 	// location := "us"
 	// displayName := "example-taxonomy"

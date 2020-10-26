@@ -25,7 +25,7 @@ import (
 )
 
 // getTaxonomy prints information about a given taxonomy.
-func getTaxonomy(taxonomyID string, w io.Writer) error {
+func getTaxonomy(w io.Writer, taxonomyID string) error {
 	// taxonomyID := "projects/myproject/locations/us/taxonomies/1234"
 	ctx := context.Background()
 	policyClient, err := datacatalog.NewPolicyTagManagerClient(ctx)

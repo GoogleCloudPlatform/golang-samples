@@ -27,7 +27,7 @@ import (
 // setIAMPolicy demonstrates altering the policy of a given taxonomy or policy
 // tag resource.  In this example, we append a binding to the existing policy
 // to add the fine grained reader role to a specific member.
-func setIamPolicy(resourceID, member string, w io.Writer) error {
+func setIAMPolicy(w io.Writer, resourceID, member string) error {
 	// resourceID := "projects/myproject/locations/us/taxonomies/1234/policyTags/5678"
 	// member := "group:my-trusted-group@example.com"
 	ctx := context.Background()

@@ -25,7 +25,7 @@ import (
 )
 
 // getPolicyTag prints information about a given policy tag.
-func getPolicyTag(policyTagID string, w io.Writer) error {
+func getPolicyTag(w io.Writer, policyTagID string) error {
 	// policyTagID := "projects/myproject/locations/us/taxonomies/1234/policyTags/5678"
 	ctx := context.Background()
 	policyClient, err := datacatalog.NewPolicyTagManagerClient(ctx)

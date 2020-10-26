@@ -27,7 +27,7 @@ import (
 
 // listTaxonomies prints information about the taxonomies contained within a specific
 // project and location.
-func listTaxonomies(projectID, location string, w io.Writer) error {
+func listTaxonomies(w io.Writer, projectID, location string) error {
 	// projectID := "my-project-id"
 	// location := "us"
 	ctx := context.Background()

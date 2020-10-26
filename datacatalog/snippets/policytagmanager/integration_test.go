@@ -38,34 +38,34 @@ func TestPolicyTagManager(t *testing.T) {
 	output := ioutil.Discard
 
 	taxonomyName := fmt.Sprintf("example-taxonomy-%d", time.Now().UnixNano())
-	taxID, err := createTaxonomy(tc.ProjectID, location, taxonomyName, output)
+	taxID, err := createTaxonomy(output, tc.ProjectID, location, taxonomyName)
 	if err != nil {
 		t.Errorf("createTaxonomy: %v", err)
 	}
 	defer deleteTaxonomy(taxID)
 
-	if err := getTaxonomy(taxID, output); err != nil {
+	if err := getTaxonomy(output, taxID); err != nil {
 		t.Errorf("getTaxonomy: %v", err)
 	}
 
-	if err := listTaxonomies(tc.ProjectID, location, output); err != nil {
+	if err := listTaxonomies(output, tc.ProjectID, location); err != nil {
 		t.Errorf("listTaxonomies: %v", err)
 	}
 
 	// Create some policy tags
 	displayName := "PII Tag"
-	tagOne, err := createPolicyTag(taxID, displayName, "", output)
+	tagOne, err := createPolicyTag(output, taxID, displayName, "")
 	if err != nil {
 		t.Errorf("createPolicyTag(%s): %v", displayName, err)
 	}
 
 	displayName = "Child PII Tag"
-	tagTwo, err := createPolicyTag(taxID, displayName, tagOne, output)
+	tagTwo, err := createPolicyTag(output, taxID, displayName, tagOne)
 	if err != nil {
 		t.Errorf("createPolicyTag(%s): %v", displayName, err)
 	}
 
-	if err := getPolicyTag(tagOne, output); err != nil {
+	if err := getPolicyTag(output, tagOne); err != nil {
 		t.Errorf("getPolicyTag(%s): %v", tagOne, err)
 	}
 
@@ -74,8 +74,8 @@ func TestPolicyTagManager(t *testing.T) {
 	}
 	// check before setting policy
 	var buf bytes.Buffer
-	if err := testIamPermissions(tagOne, probedPermissions, &buf); err != nil {
-		t.Errorf("testIamPermissions(%s): %v", tagOne, err)
+	if err := testIAMPermissions(&buf, tagOne, probedPermissions); err != nil {
+		t.Errorf("testIAMPermissions(%s): %v", tagOne, err)
 	}
 	wantedResp := "of the 1 permissions probed, caller has 0 permissions"
 	if !strings.Contains(buf.String(), wantedResp) {
@@ -83,12 +83,12 @@ func TestPolicyTagManager(t *testing.T) {
 	}
 	buf.Reset()
 
-	if err := setIamPolicy(tagOne, "allAuthenticatedUsers", output); err != nil {
-		t.Errorf("setIamPolicy(%s): %v", tagOne, err)
+	if err := setIAMPolicy(output, tagOne, "allAuthenticatedUsers"); err != nil {
+		t.Errorf("setIAMPolicy(%s): %v", tagOne, err)
 	}
 
-	if err := testIamPermissions(tagOne, probedPermissions, &buf); err != nil {
-		t.Errorf("testIamPermissions(%s): %v", tagOne, err)
+	if err := testIAMPermissions(&buf, tagOne, probedPermissions); err != nil {
+		t.Errorf("testIAMPermissions(%s): %v", tagOne, err)
 	}
 	wantedResp = "of the 1 permissions probed, caller has 1 permissions: datacatalog.categories.fineGrainedGet"
 	if !strings.Contains(buf.String(), wantedResp) {
@@ -96,11 +96,11 @@ func TestPolicyTagManager(t *testing.T) {
 	}
 	buf.Reset()
 
-	if err := getIamPolicy(tagOne, output); err != nil {
-		t.Errorf("getIamPolicy(%s): %v", tagOne, err)
+	if err := getIAMPolicy(output, tagOne); err != nil {
+		t.Errorf("getIAMPolicy(%s): %v", tagOne, err)
 	}
 
-	if err := listPolicyTags(taxID, output); err != nil {
+	if err := listPolicyTags(output, taxID); err != nil {
 		t.Errorf("listPolicyTags: %v", err)
 	}
 

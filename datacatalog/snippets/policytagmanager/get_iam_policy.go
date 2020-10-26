@@ -27,7 +27,7 @@ import (
 
 // getIAMPolicy prints information about the IAM policy associated with a
 // given taxonomy or policy tag resource.
-func getIamPolicy(resourceID string, w io.Writer) error {
+func getIAMPolicy(w io.Writer, resourceID string) error {
 	// resourceID := "projects/myproject/locations/us/taxonomies/1234"
 	ctx := context.Background()
 	policyClient, err := datacatalog.NewPolicyTagManagerClient(ctx)

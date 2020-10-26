@@ -28,7 +28,7 @@ import (
 //
 // It optionally accepts a parent ID, which can be used to create a hierarchical
 // relationship between tags.
-func createPolicyTag(parent, displayName, parentPolicyTag string, w io.Writer) (string, error) {
+func createPolicyTag(w io.Writer, parent, displayName, parentPolicyTag string) (string, error) {
 	// parent := "projects/myproject/locations/us/taxonomies/1234"
 	// displayName := "Example Policy Tag"
 	// parentPolicyTag := "projects/myproject/locations/us/taxonomies/1234/policyTags/5678"

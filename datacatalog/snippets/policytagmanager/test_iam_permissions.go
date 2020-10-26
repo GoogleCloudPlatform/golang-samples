@@ -25,9 +25,9 @@ import (
 	iampb "google.golang.org/genproto/googleapis/iam/v1"
 )
 
-// testIamPermissions demonstrates a caller probing what permissions they hold on a given taxonomy
+// testIAMPermissions demonstrates a caller probing what permissions they hold on a given taxonomy
 // or policy tag resource.
-func testIamPermissions(resourceID string, permissions []string, w io.Writer) error {
+func testIAMPermissions(w io.Writer, resourceID string, permissions []string) error {
 	// permissions := []string{"datacatalog.categories.fineGrainedGet"}
 	ctx := context.Background()
 	policyClient, err := datacatalog.NewPolicyTagManagerClient(ctx)
