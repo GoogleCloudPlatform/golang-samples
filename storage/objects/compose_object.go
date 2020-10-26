@@ -38,13 +38,15 @@ func composeFile(w io.Writer, bucket, object1, object2, toObject string) error {
 	}
 	defer client.Close()
 
-	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 
 	src1 := client.Bucket(bucket).Object(object1)
 	src2 := client.Bucket(bucket).Object(object2)
 	dst := client.Bucket(bucket).Object(toObject)
 
+	// ComposerFrom takes varargs, so you can put as many objects here
+	// as you want.
 	_, err = dst.ComposerFrom(src1, src2).Run(ctx)
 	if err != nil {
 		return fmt.Errorf("ComposerFrom: %v", err)
