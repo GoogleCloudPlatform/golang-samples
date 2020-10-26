@@ -137,9 +137,13 @@ func getEntries(adminClient *logadmin.Client, projID string) ([]*logging.Entry, 
 	// [START logging_list_log_entries]
 	var entries []*logging.Entry
 	const name = "log-example"
+	lastHour := time.Now().Add(-1 * time.Hour).Format(time.RFC3339)
+
 	iter := adminClient.Entries(ctx,
 		// Only get entries from the log-example log.
 		logadmin.Filter(fmt.Sprintf(`logName = "projects/%s/logs/%s"`, projID, name)),
+		// Only queries from the last 1 hour.
+		logadmin.Filter(fmt.Sprintf(`timestamp > "%s"`, lastHour)),
 		// Get most recent entries first.
 		logadmin.NewestFirst(),
 	)

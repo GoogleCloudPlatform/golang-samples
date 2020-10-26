@@ -67,11 +67,6 @@ func TestSimplelog(t *testing.T) {
 			return
 		}
 
-		if got, want := len(entries), 2; got != want {
-			r.Errorf("len(entries) = %d; want %d", got, want)
-			return
-		}
-
 		wantContain := map[string]*logging.Entry{
 			"Anything":                            entries[0],
 			"The payload can be any type!":        entries[0],
