@@ -15,7 +15,7 @@
 // Package annotate contains speech examples.
 package annotate
 
-// [START videointelligence_text_detection]
+// [START video_detect_text]
 
 import (
 	"context"
@@ -89,4 +89,4 @@ func textDetection(w io.Writer, filename string) error {
 	return nil
 }
 
-// [END videointelligence_text_detection]
+// [END video_detect_text]

@@ -25,8 +25,10 @@ import (
 	"testing"
 	"time"
 
+	"cloud.google.com/go/iam"
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	iampb "google.golang.org/genproto/googleapis/iam/v1"
 )
 
 func TestCreate(t *testing.T) {
@@ -124,6 +126,46 @@ func TestIAM(t *testing.T) {
 		t.Errorf("removeBucketConditionalIAMBinding: %v", err)
 	}
 }
+func TestCORSConfiguration(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	bucketName := tc.ProjectID + "-storage-buckets-tests"
+
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+	defer client.Close()
+
+	want := []storage.CORS{
+		{
+			MaxAge:          time.Hour,
+			Methods:         []string{"GET"},
+			Origins:         []string{"some-origin.com"},
+			ResponseHeaders: []string{"Content-Type"},
+		},
+	}
+	if err := setBucketCORSConfiguration(ioutil.Discard, bucketName, want[0].MaxAge, want[0].Methods, want[0].Origins, want[0].ResponseHeaders); err != nil {
+		t.Fatalf("setBucketCORSConfiguration: %v", err)
+	}
+	attrs, err := client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	if !reflect.DeepEqual(attrs.CORS, want) {
+		t.Fatalf("Unexpected CORS Configuration: got: %v, want: %v", attrs.CORS, want)
+	}
+	if err := removeBucketCORSConfiguration(ioutil.Discard, bucketName); err != nil {
+		t.Fatalf("removeBucketCORSConfiguration: %v", err)
+	}
+	attrs, err = client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	if attrs.CORS != nil {
+		t.Fatalf("Unexpected CORS Configuration: got: %v, want: %v", attrs.CORS, []storage.CORS{})
+	}
+}
 
 func TestRequesterPays(t *testing.T) {
 	tc := testutil.SystemTest(t)
@@ -144,6 +186,15 @@ func TestKMS(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	bucketName := tc.ProjectID + "-storage-buckets-tests"
 
+	ctx := context.Background()
+	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName)
+
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+	defer client.Close()
+
 	keyRingID := os.Getenv("GOLANG_SAMPLES_KMS_KEYRING")
 	cryptoKeyID := os.Getenv("GOLANG_SAMPLES_KMS_CRYPTOKEY")
 
@@ -153,7 +204,24 @@ func TestKMS(t *testing.T) {
 
 	kmsKeyName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", tc.ProjectID, "global", keyRingID, cryptoKeyID)
 	if err := setBucketDefaultKMSKey(ioutil.Discard, bucketName, kmsKeyName); err != nil {
-		t.Fatalf("setBucketDefaultKmsKey: failed to enable default kms key (%q): %v", kmsKeyName, err)
+		t.Fatalf("setBucketDefaultKMSKey: failed to enable default KMS key (%q): %v", kmsKeyName, err)
+	}
+	attrs, err := client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	if attrs.Encryption.DefaultKMSKeyName != kmsKeyName {
+		t.Fatalf("Default KMS key was not set correctly: got %v, want %v", attrs.Encryption.DefaultKMSKeyName, kmsKeyName)
+	}
+	if err := removeBucketDefaultKMSKey(ioutil.Discard, bucketName); err != nil {
+		t.Fatalf("removeBucketDefaultKMSKey: failed to remove default KMS key: %v", err)
+	}
+	attrs, err = client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	if attrs.Encryption != nil {
+		t.Fatalf("Default KMS key was not removed from a bucket(%v)", bucketName)
 	}
 }
 
@@ -323,6 +391,111 @@ func TestLifecycleManagement(t *testing.T) {
 
 	if n := len(attrs.Lifecycle.Rules); n != 0 {
 		t.Fatalf("Length of lifecycle rules should be 0, got %d", n)
+	}
+}
+
+func TestBucketLabel(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	bucketName := tc.ProjectID + "-storage-buckets-tests"
+
+	ctx := context.Background()
+	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName)
+
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+	defer client.Close()
+
+	labelName := "label-name"
+	labelValue := "label-value"
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
+		if err := addBucketLabel(ioutil.Discard, bucketName, labelName, labelValue); err != nil {
+			r.Errorf("addBucketLabel: %v", err)
+		}
+	})
+	attrs, err := client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	if got, ok := attrs.Labels[labelName]; ok {
+		if got != labelValue {
+			t.Fatalf("The label(%q) was set incorrectly on a bucket(%v): got value %v, want value %v", labelName, bucketName, got, labelValue)
+		}
+	} else {
+		t.Fatalf("The label(%q) was not set on a bucket(%v)", labelName, bucketName)
+	}
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
+		if err := removeBucketLabel(ioutil.Discard, bucketName, labelName); err != nil {
+			r.Errorf("removeBucketLabel: %v", err)
+		}
+	})
+	attrs, err = client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	if _, ok := attrs.Labels[labelName]; ok {
+		t.Fatalf("The label(%q) was not removed from a bucket(%v)", labelName, bucketName)
+	}
+}
+
+func TestBucketWebsiteInfo(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	bucketName := tc.ProjectID + "-storage-buckets-tests"
+
+	ctx := context.Background()
+	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName)
+
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+	defer client.Close()
+
+	index := "index.html"
+	notFoundPage := "404.html"
+	if err := setBucketWebsiteInfo(ioutil.Discard, bucketName, index, notFoundPage); err != nil {
+		t.Fatalf("setBucketWebsiteInfo: %v", err)
+	}
+	attrs, err := client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	if attrs.Website.MainPageSuffix != index {
+		t.Fatalf("got index page: %v, want %v", attrs.Website.MainPageSuffix, index)
+	}
+	if attrs.Website.NotFoundPage != notFoundPage {
+		t.Fatalf("got not found page: %v, want %v", attrs.Website.NotFoundPage, notFoundPage)
+	}
+}
+
+func TestSetBucketPublicIAM(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	bucketName := tc.ProjectID + "-storage-buckets-tests"
+
+	ctx := context.Background()
+	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName)
+
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+	defer client.Close()
+
+	if err := setBucketPublicIAM(ioutil.Discard, bucketName); err != nil {
+		t.Fatalf("setBucketPublicIAM: %v", err)
+	}
+	policy, err := client.Bucket(bucketName).IAM().V3().Policy(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).IAM().V3().Policy: %v", bucketName, err)
+	}
+	want := new(iam.Policy3)
+	want.Bindings = append(want.Bindings, &iampb.Binding{
+		Role:    "roles/storage.objectViewer",
+		Members: []string{iam.AllUsers},
+	})
+	if !reflect.DeepEqual(policy.Bindings[len((policy.Bindings))-1], want.Bindings[0]) {
+		t.Fatalf("Public policy was not set: \ngot: %v, \nwant: %v\n", policy.Bindings[len((policy.Bindings))-1], want.Bindings[0])
 	}
 }
 
