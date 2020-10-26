@@ -24,37 +24,32 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 )
-
-func logAndRespond(w http.ResponseWriter, msg string) {
-	log.Println(msg)
-	fmt.Fprintln(w, msg)
-}
 
 // GenericHandler receives and echos a HTTP request's headers and body.
 func GenericHandler(w http.ResponseWriter, r *http.Request) {
-	logAndRespond(w, "Event received!")
+	log.Println("Event received!")
 
 	// Log all headers besides authorization header
-	// Assumes headers don't have duplicate keys
-	logAndRespond(w, "HEADERS:")
+	log.Println("HEADERS:")
 	headerMap := make(map[string]string)
 	for k, v := range r.Header {
-		val := v[0]
+		val := strings.Join(v, ",")
 		if k != "Authorization" {
 			headerMap[k] = string(val)
-			logAndRespond(w, fmt.Sprintf("%q: %q\n", k, val))
+			log.Println(fmt.Sprintf("%q: %q\n", k, val))
 		}
 	}
 
 	// Log body
-	logAndRespond(w, "BODY:")
+	log.Println("BODY:")
 	bodyBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Printf("error parsing body: %v", err)
 	}
 	body := string(bodyBytes)
-	logAndRespond(w, body)
+	log.Println(body)
 
 	// Format and print full output
 	type result struct {
