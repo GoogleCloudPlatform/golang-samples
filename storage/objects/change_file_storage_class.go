@@ -24,11 +24,10 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// changeObjectStorageClass changes the storage class of objects
-// within a bucket.
-func changeObjectStorageClass(w io.Writer, bucketName, objectName string) error {
-	// bucketName := "bucket-name"
-	// objectName := "object-name"
+// changeObjectStorageClass changes the storage class of a single object.
+func changeObjectStorageClass(w io.Writer, bucket, object string) error {
+	// bucket:= "bucket-name"
+	// object := "object-name"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -39,20 +38,20 @@ func changeObjectStorageClass(w io.Writer, bucketName, objectName string) error 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 
-	bucket := client.Bucket(bucketName)
-	object := bucket.Object(objectName)
+	bkt := client.Bucket(bucket)
+	obj := bkt.Object(object)
 	// See the StorageClass documentation for other valid storage classes:
 	// https://cloud.google.com/storage/docs/storage-classes
 	newStorageClass := "COLDLINE"
 	// You can't change an object's storage class directly, the only way is
 	// to rewrite the object with the desired storage class.
-	copier := object.CopierFrom(object)
+	copier := obj.CopierFrom(obj)
 	copier.StorageClass = newStorageClass
 	_, err = copier.Run(ctx)
 	if err != nil {
 		return fmt.Errorf("copier.Run: %v", err)
 	}
-	fmt.Fprintf(w, "Object %v in bucket %v had its storage class set to %v\n", objectName, bucketName, newStorageClass)
+	fmt.Fprintf(w, "Object %v in bucket %v had its storage class set to %v\n", object, bucket, newStorageClass)
 	return nil
 }
 
