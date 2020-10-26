@@ -14,7 +14,7 @@
 
 // [START logging_stdlogging]
 
-// Sample stdlogging writes log.Logger logs to the Stackdriver Logging.
+// Sample stdlogging writes log.Logger logs to the Cloud Logging.
 package main
 
 import (
@@ -43,7 +43,7 @@ func main() {
 	logger := client.Logger(logName).StandardLogger(logging.Info)
 
 	// Logs "hello world", log entry is visible at
-	// Stackdriver Logs.
+	// Cloud Logs.
 	logger.Println("hello world")
 }
 
