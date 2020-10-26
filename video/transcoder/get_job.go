@@ -74,7 +74,6 @@ func getJobState(w io.Writer, projectID string, location string, jobID string) e
 	if err != nil {
 		return fmt.Errorf("GetJob: %v", err)
 	}
-	fmt.Fprintf(w, "Job state: %v", response.State)
-
+	fmt.Fprintf(w, "Job state: %v\n----\nJob failure reason:%v\n----\nJob failure details:%v\n", response.State, response.FailureReason, response.FailureDetails)
 	return nil
 }
