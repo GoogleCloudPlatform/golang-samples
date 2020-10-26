@@ -134,37 +134,21 @@ func TestObjects(t *testing.T) {
 		}
 	}
 
-	{
-		defaultStorageClass := "STANDARD"
-		// The bucket should have the default storage class.
+	t.Run("changeObjectStorageClass", func(t *testing.T) {
 		bkt := client.Bucket(bucket)
 		obj := bkt.Object(object1)
-		battrs, err := obj.Attrs(ctx)
-		if err != nil {
-			t.Errorf("obj.Attrs: %v", err)
-		}
-		if battrs.StorageClass != defaultStorageClass {
-			t.Errorf("bucket storage class: got %q, want %q", battrs.StorageClass, defaultStorageClass)
-		}
-		oattrs, err := obj.Attrs(ctx)
-		if err != nil {
-			t.Errorf("obj.Attrs: %v", err)
-		}
-		if oattrs.StorageClass != defaultStorageClass {
-			t.Errorf("object storage class: got %q, want %q", oattrs.StorageClass, defaultStorageClass)
-		}
 		if err := changeObjectStorageClass(ioutil.Discard, bucket, object1); err != nil {
 			t.Errorf("changeObjectStorageClass: %v", err)
 		}
 		wantStorageClass := "COLDLINE"
-		oattrs, err = obj.Attrs(ctx)
+		oattrs, err := obj.Attrs(ctx)
 		if err != nil {
 			t.Errorf("obj.Attrs: %v", err)
 		}
 		if oattrs.StorageClass != wantStorageClass {
 			t.Errorf("object storage class: got %q, want %q", oattrs.StorageClass, wantStorageClass)
 		}
-	}
+	})
 
 	data, err := downloadFile(ioutil.Discard, bucket, object1)
 	if err != nil {
@@ -192,9 +176,19 @@ func TestObjects(t *testing.T) {
 	if err := copyFile(ioutil.Discard, dstBucket, bucket, object1); err != nil {
 		t.Errorf("copyFile: %v", err)
 	}
-	if err := composeFile(ioutil.Discard, bucket, object1, object2, dstObj); err != nil {
-		t.Errorf("composeFile: %v", err)
-	}
+	t.Run("composeFile", func(t *testing.T) {
+		if err := composeFile(ioutil.Discard, bucket, object1, object2, dstObj); err != nil {
+			t.Errorf("composeFile: %v", err)
+		}
+		bkt := client.Bucket(bucket)
+		obj := bkt.Object(dstObj)
+		_, err = obj.Attrs(ctx)
+		if err == storage.ErrObjectNotExist {
+			t.Errorf("Destination object was not created")
+		} else if err != nil {
+			t.Errorf("object.Attrs: %v", err)
+		}
+	})
 
 	key := []byte("my-secret-AES-256-encryption-key")
 	newKey := []byte("My-secret-AES-256-encryption-key")
@@ -272,17 +266,20 @@ func TestKMSObjects(t *testing.T) {
 	testutil.CleanBucket(ctx, t, tc.ProjectID, bucket)
 
 	kmsKeyName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", tc.ProjectID, "global", keyRingID, cryptoKeyID)
-	{
+	t.Run("сhangeObjectCSEKtoKMS", func(t *testing.T) {
 		object1 := "foo.txt"
 		key := []byte("my-secret-AES-256-encryption-key")
 		obj := client.Bucket(bucket).Object(object1)
-		wc := obj.Key(key).NewWriter(ctx)
-		if _, err := wc.Write([]byte("top secret")); err != nil {
-			t.Errorf("Writer.Write: %v", err)
-		}
-		if err := wc.Close(); err != nil {
-			t.Errorf("Writer.Close: %v", err)
-		}
+
+		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+			wc := obj.Key(key).NewWriter(ctx)
+			if _, err := wc.Write([]byte("top secret")); err != nil {
+				r.Errorf("Writer.Write: %v", err)
+			}
+			if err := wc.Close(); err != nil {
+				r.Errorf("Writer.Close: %v", err)
+			}
+		})
 		if err := сhangeObjectCSEKtoKMS(ioutil.Discard, bucket, object1, key, kmsKeyName); err != nil {
 			t.Errorf("сhangeObjectCSEKtoKMS: %v", err)
 		}
@@ -293,7 +290,7 @@ func TestKMSObjects(t *testing.T) {
 		if attrs.KMSKeyName != kmsKeyName {
 			t.Errorf("got %v want %v", attrs.KMSKeyName, kmsKeyName)
 		}
-	}
+	})
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		if err := uploadWithKMSKey(ioutil.Discard, bucket, object, kmsKeyName); err != nil {
