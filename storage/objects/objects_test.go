@@ -43,14 +43,14 @@ func TestObjects(t *testing.T) {
 	defer client.Close()
 
 	var (
-		bucket                = tc.ProjectID + "-samples-object-bucket-1"
-		dstBucket             = tc.ProjectID + "-samples-object-bucket-2"
-		bucketVersioning      = tc.ProjectID + "-bucket-versioning-enabled"
-		object1               = "foo.txt"
-		object2               = "foo/a.txt"
-		dstObj                = "bar.txt"
-		allAuthenticatedUsers = storage.AllAuthenticatedUsers
-		roleReader            = storage.RoleReader
+		bucket           = tc.ProjectID + "-samples-object-bucket-1"
+		dstBucket        = tc.ProjectID + "-samples-object-bucket-2"
+		bucketVersioning = tc.ProjectID + "-bucket-versioning-enabled"
+		object1          = "foo.txt"
+		object2          = "foo/a.txt"
+		dstObj           = "bar.txt"
+		allUsers         = storage.AllUsers
+		roleReader       = storage.RoleReader
 	)
 
 	testutil.CleanBucket(ctx, t, tc.ProjectID, bucket)
@@ -162,9 +162,18 @@ func TestObjects(t *testing.T) {
 	if err != nil {
 		t.Errorf("getMetadata: %v", err)
 	}
-	if err := makePublic(ioutil.Discard, bucket, object1, allAuthenticatedUsers, roleReader); err != nil {
-		t.Errorf("makePublic: %v", err)
-	}
+	t.Run("publicFile", func(t *testing.T) {
+		if err := makePublic(ioutil.Discard, bucket, object1, allUsers, roleReader); err != nil {
+			t.Errorf("makePublic: %v", err)
+		}
+		data, err = downloadPublicFile(ioutil.Discard, bucket, object1)
+		if err != nil {
+			t.Fatalf("downloadPublicFile: %v", err)
+		}
+		if got, want := string(data), "Hello\nworld"; got != want {
+			t.Errorf("contents = %q; want %q", got, want)
+		}
+	})
 
 	err = moveFile(ioutil.Discard, bucket, object1)
 	if err != nil {
