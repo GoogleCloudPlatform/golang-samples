@@ -16,6 +16,7 @@ assign_issues_by:
   - bradmiro
 - labels:
   - 'api: logging'
+  - 'api: clouderrorreporting'
   to:
   - nicoleczhu
 - labels:
