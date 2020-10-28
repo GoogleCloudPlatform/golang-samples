@@ -26,7 +26,6 @@ import (
 )
 
 func main() {
-	
 	ctx := context.Background()
 
 	// Creates a client.
