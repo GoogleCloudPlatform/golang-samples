@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// [START logging_write_log_entry_advanced]
+
+// Writes an advanced log entry to Cloud Logging.
 package main
 
 import (
@@ -23,7 +26,7 @@ import (
 )
 
 func main() {
-	// [START logging_write_log_entry_advanced]
+	
 	ctx := context.Background()
 
 	// Creates a client.
@@ -48,5 +51,6 @@ func main() {
 		},
 	}
 	logger.Log(httpEntry)
-	// [END logging_write_log_entry_advanced]
 }
+
+// [END logging_write_log_entry_advanced]
