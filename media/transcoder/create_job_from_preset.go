@@ -14,23 +14,25 @@
 
 package transcoder
 
-// [START transcoder_list_jobs]
+// [START transcoder_create_job_from_preset]
 import (
 	"context"
 	"fmt"
-	"google.golang.org/api/iterator"
 	"io"
 
 	transcoder "cloud.google.com/go/video/transcoder/apiv1beta1"
 	transcoderpb "google.golang.org/genproto/googleapis/cloud/video/transcoder/v1beta1"
 )
 
-// listJobs lists all jobs for a given location. See
-// https://cloud.google.com/transcoder/docs/how-to/jobs#list_jobs for more
-// information.
-func listJobs(w io.Writer, projectID string, location string) error {
-	// projectID := fmt.Sprintf("my-project-id")
-	// location := fmt.Sprintf("us-central1")
+// createJobFromPreset creates a job based on a given preset. See
+// https://cloud.google.com/transcoder/docs/how-to/jobs#create_jobs_presets
+// for more information.
+func createJobFromPreset(w io.Writer, projectID string, location string, inputURI string, outputURI string, preset string) error {
+	// projectID := "my-project-id"
+	// location := "us-central1"
+	// inputURI := "gs://my-bucket/my-video-file"
+	// outputURI := "gs://my-bucket/my-output-folder"
+	// preset := "preset/web-hd"
 	ctx := context.Background()
 	client, err := transcoder.NewClient(ctx)
 	if err != nil {
@@ -38,25 +40,25 @@ func listJobs(w io.Writer, projectID string, location string) error {
 	}
 	defer client.Close()
 
-	req := &transcoderpb.ListJobsRequest{
+	req := &transcoderpb.CreateJobRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
+		Job: &transcoderpb.Job{
+			InputUri:  inputURI,
+			OutputUri: outputURI,
+			JobConfig: &transcoderpb.Job_TemplateId{
+				TemplateId: preset,
+			},
+		},
+	}
+	// Creates the job, Jobs take a variable amount of time to run.
+	// You can query for the job state.
+	response, err := client.CreateJob(ctx, req)
+	if err != nil {
+		return fmt.Errorf("createJobFromPreset: %v", err)
 	}
 
-	it := client.ListJobs(ctx, req)
-	fmt.Fprintln(w, "Jobs:")
-
-	for {
-		response, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return fmt.Errorf("ListJobs: %v", err)
-		}
-		fmt.Fprintln(w, response.GetName())
-		_ = response
-	}
+	fmt.Fprintf(w, "Job: %v", response.GetName())
 	return nil
 }
 
-// [END transcoder_list_jobs]
+// [END transcoder_create_job_from_preset]

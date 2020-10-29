@@ -28,9 +28,9 @@ import (
 // https://cloud.google.com/transcoder/docs/how-to/job-templates#create_job_templates
 // for more information.
 func createJobTemplate(w io.Writer, projectID string, location string, templateID string) error {
-	// projectID := fmt.Sprintf("my-project-id")
-	// location := fmt.Sprintf("us-central1")
-	// templateID := fmt.Sprintf("my-job-template")
+	// projectID := "my-project-id"
+	// location := "us-central1"
+	// templateID := "my-job-template"
 	ctx := context.Background()
 	client, err := transcoder.NewClient(ctx)
 	if err != nil {

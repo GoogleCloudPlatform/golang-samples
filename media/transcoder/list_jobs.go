@@ -14,25 +14,23 @@
 
 package transcoder
 
-// [START transcoder_create_job_from_template]
+// [START transcoder_list_jobs]
 import (
 	"context"
 	"fmt"
+	"google.golang.org/api/iterator"
 	"io"
 
 	transcoder "cloud.google.com/go/video/transcoder/apiv1beta1"
 	transcoderpb "google.golang.org/genproto/googleapis/cloud/video/transcoder/v1beta1"
 )
 
-// createJobFromTemplate creates a job from a template. See
-// https://cloud.google.com/transcoder/docs/how-to/jobs#create_jobs_templates
-// for more information.
-func createJobFromTemplate(w io.Writer, projectID string, location string, inputUri string, outputUri string, templateID string) error {
-	// projectID := fmt.Sprintf("my-project-id")
-	// location := fmt.Sprintf("us-central1")
-	// inputUri := fmt.Sprintf("gs://my-bucket/my-video-file")
-	// outputUri := fmt.Sprintf("gs://my-bucket/my-output-folder")
-	// templateID := fmt.Sprintf("my-job-template")
+// listJobs lists all jobs for a given location. See
+// https://cloud.google.com/transcoder/docs/how-to/jobs#list_jobs for more
+// information.
+func listJobs(w io.Writer, projectID string, location string) error {
+	// projectID := "my-project-id"
+	// location := "us-central1"
 	ctx := context.Background()
 	client, err := transcoder.NewClient(ctx)
 	if err != nil {
@@ -40,24 +38,24 @@ func createJobFromTemplate(w io.Writer, projectID string, location string, input
 	}
 	defer client.Close()
 
-	req := &transcoderpb.CreateJobRequest{
+	req := &transcoderpb.ListJobsRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
-		Job: &transcoderpb.Job{
-			InputUri:  inputUri,
-			OutputUri: outputUri,
-			JobConfig: &transcoderpb.Job_TemplateId{
-				TemplateId: templateID,
-			},
-		},
 	}
 
-	response, err := client.CreateJob(ctx, req)
-	if err != nil {
-		return fmt.Errorf("createJobFromTemplate: %v", err)
-	}
+	it := client.ListJobs(ctx, req)
+	fmt.Fprintln(w, "Jobs:")
 
-	fmt.Fprintf(w, "Job: %v", response.GetName())
+	for {
+		response, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return fmt.Errorf("ListJobs: %v", err)
+		}
+		fmt.Fprintln(w, response.GetName())
+	}
 	return nil
 }
 
-// [END transcoder_create_job_from_template]
+// [END transcoder_list_jobs]

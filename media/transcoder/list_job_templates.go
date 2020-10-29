@@ -30,8 +30,8 @@ import (
 // https://cloud.google.com/transcoder/docs/how-to/job-templates#list_job_template
 // for more information.
 func listJobTemplates(w io.Writer, projectID string, location string) error {
-	// projectID := fmt.Sprintf("my-project-id")
-	// location := fmt.Sprintf("us-central1")
+	// projectID := "my-project-id"
+	// location := "us-central1"
 	ctx := context.Background()
 	client, err := transcoder.NewClient(ctx)
 	if err != nil {
@@ -54,7 +54,6 @@ func listJobTemplates(w io.Writer, projectID string, location string) error {
 			return fmt.Errorf("ListJobTemplates: %v", err)
 		}
 		fmt.Fprintln(w, response.GetName())
-		_ = response
 	}
 
 	return nil

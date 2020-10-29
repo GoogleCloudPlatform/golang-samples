@@ -28,9 +28,9 @@ import (
 // https://cloud.google.com/transcoder/docs/how-to/jobs#delete_jobs for more
 // information.
 func deleteJob(w io.Writer, projectID string, location string, jobID string) error {
-	// projectID := fmt.Sprintf("my-project-id")
-	// templateID := fmt.Sprintf("my-job-template")
-	// location := fmt.Sprintf("us-central1")
+	// projectID := "my-project-id"
+	// location := "us-central1"
+	// jobID := "my-job-id"
 	ctx := context.Background()
 	client, err := transcoder.NewClient(ctx)
 	if err != nil {

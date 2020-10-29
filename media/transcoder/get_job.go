@@ -27,9 +27,9 @@ import (
 // getJob gets a previously-created job. See https://cloud.google.com/transcoder/docs/how-to/jobs#check_job_status
 // for more information.
 func getJob(w io.Writer, projectID string, location string, jobID string) error {
-	// projectID := fmt.Sprintf("my-project-id")
-	// location := fmt.Sprintf("us-central1")
-	// jobID := fmt.Sprintf("my-job-id")
+	// projectID := "my-project-id"
+	// location := "us-central1"
+	// jobID := "my-job-id"
 	ctx := context.Background()
 	client, err := transcoder.NewClient(ctx)
 	if err != nil {
@@ -51,29 +51,3 @@ func getJob(w io.Writer, projectID string, location string, jobID string) error 
 }
 
 // [END transcoder_get_job]
-
-// getJobState gets the state for a previously-created job. See
-// https://cloud.google.com/transcoder/docs/how-to/jobs#check_job_status for
-// more information.
-func getJobState(w io.Writer, projectID string, location string, jobID string) error {
-	// projectID := fmt.Sprintf("my-project-id")
-	// location := fmt.Sprintf("us-central1")
-	// jobID := fmt.Sprintf("my-job-id")
-	ctx := context.Background()
-	client, err := transcoder.NewClient(ctx)
-	if err != nil {
-		return fmt.Errorf("NewClient: %v", err)
-	}
-	defer client.Close()
-
-	req := &transcoderpb.GetJobRequest{
-		Name: fmt.Sprintf("projects/%s/locations/%s/jobs/%s", projectID, location, jobID),
-	}
-
-	response, err := client.GetJob(ctx, req)
-	if err != nil {
-		return fmt.Errorf("GetJob: %v", err)
-	}
-	fmt.Fprintf(w, "Job state: %v\n----\nJob failure reason:%v\n----\nJob failure details:%v\n", response.State, response.FailureReason, response.FailureDetails)
-	return nil
-}

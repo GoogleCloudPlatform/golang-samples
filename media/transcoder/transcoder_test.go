@@ -39,10 +39,10 @@ const (
 	testVideoFileName     = "ChromeCast.mp4"
 	testVideoFileLocation = "../testdata/"
 	bucketName            = "golang-samples-transcoder-test"
-	inputUri              = "gs://" + bucketName + "/" + testVideoFileName
-	outputUriForPreset    = "gs://" + bucketName + "/test-output-preset/"
-	outputUriForTemplate  = "gs://" + bucketName + "/test-output-template/"
-	outputUriForAdHoc     = "gs://" + bucketName + "/test-output-adhoc/"
+	inputURI              = "gs://" + bucketName + "/" + testVideoFileName
+	outputURIForPreset    = "gs://" + bucketName + "/test-output-preset/"
+	outputURIForTemplate  = "gs://" + bucketName + "/test-output-template/"
+	outputURIForAdHoc     = "gs://" + bucketName + "/test-output-adhoc/"
 	preset                = "preset/web-hd"
 )
 
@@ -184,7 +184,7 @@ func testJobFromPreset(t *testing.T, projectNumber string) {
 
 	// Create the job.
 	jobName := fmt.Sprintf("projects/%s/locations/%s/jobs/", projectNumber, location)
-	if err := createJobFromPreset(buf, tc.ProjectID, location, inputUri, outputUriForPreset, preset); err != nil {
+	if err := createJobFromPreset(buf, tc.ProjectID, location, inputURI, outputURIForPreset, preset); err != nil {
 		t.Errorf("createJobFromPreset got err: %v", err)
 	}
 	got := buf.String()
@@ -257,7 +257,7 @@ func testJobFromTemplate(t *testing.T, projectNumber string) {
 	})
 
 	jobName := fmt.Sprintf("projects/%s/locations/%s/jobs/", projectNumber, location)
-	if err := createJobFromTemplate(buf, tc.ProjectID, location, inputUri, outputUriForTemplate, templateID); err != nil {
+	if err := createJobFromTemplate(buf, tc.ProjectID, location, inputURI, outputURIForTemplate, templateID); err != nil {
 		t.Errorf("createJobFromTemplate got err: %v", err)
 	}
 	got := buf.String()
@@ -308,7 +308,7 @@ func testJobFromAdHoc(t *testing.T, projectNumber string) {
 
 	// Create the job.
 	jobName := fmt.Sprintf("projects/%s/locations/%s/jobs/", projectNumber, location)
-	if err := createJobFromAdHoc(buf, tc.ProjectID, location, inputUri, outputUriForAdHoc); err != nil {
+	if err := createJobFromAdHoc(buf, tc.ProjectID, location, inputURI, outputURIForAdHoc); err != nil {
 		t.Errorf("createJobFromAdHoc got err: %v", err)
 	}
 	got := buf.String()

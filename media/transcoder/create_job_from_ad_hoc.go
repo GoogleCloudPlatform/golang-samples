@@ -27,11 +27,11 @@ import (
 // createJobFromAdHoc creates a job based on a given configuration. See
 // https://cloud.google.com/transcoder/docs/how-to/jobs#create_jobs_ad_hoc
 // for more information.
-func createJobFromAdHoc(w io.Writer, projectID string, location string, inputUri string, outputUri string) error {
-	// projectID := fmt.Sprintf("my-project-id")
-	// location := fmt.Sprintf("us-central1")
-	// inputUri := fmt.Sprintf("gs://my-bucket/my-video-file")
-	// outputUri := fmt.Sprintf("gs://my-bucket/my-output-folder")
+func createJobFromAdHoc(w io.Writer, projectID string, location string, inputURI string, outputURI string) error {
+	// projectID := "my-project-id"
+	// location := "us-central1"
+	// inputURI := "gs://my-bucket/my-video-file"
+	// outputURI := "gs://my-bucket/my-output-folder"
 	ctx := context.Background()
 	client, err := transcoder.NewClient(ctx)
 	if err != nil {
@@ -42,8 +42,8 @@ func createJobFromAdHoc(w io.Writer, projectID string, location string, inputUri
 	req := &transcoderpb.CreateJobRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
 		Job: &transcoderpb.Job{
-			InputUri:  inputUri,
-			OutputUri: outputUri,
+			InputUri:  inputURI,
+			OutputUri: outputURI,
 			JobConfig: &transcoderpb.Job_Config{
 				Config: &transcoderpb.JobConfig{
 					ElementaryStreams: []*transcoderpb.ElementaryStream{
@@ -97,7 +97,8 @@ func createJobFromAdHoc(w io.Writer, projectID string, location string, inputUri
 			},
 		},
 	}
-
+	// Creates the job, Jobs take a variable amount of time to run.
+	// You can query for the job state.
 	response, err := client.CreateJob(ctx, req)
 	if err != nil {
 		return fmt.Errorf("createJobFromAdHoc: %v", err)

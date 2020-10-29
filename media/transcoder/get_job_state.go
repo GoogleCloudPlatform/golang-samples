@@ -14,7 +14,7 @@
 
 package transcoder
 
-// [START transcoder_get_job_template]
+// [START transcoder_get_job_state]
 import (
 	"context"
 	"fmt"
@@ -24,13 +24,13 @@ import (
 	transcoderpb "google.golang.org/genproto/googleapis/cloud/video/transcoder/v1beta1"
 )
 
-// getJobTemplate gets a previously-created job template. See
-// https://cloud.google.com/transcoder/docs/how-to/job-templates#get_job_template
-// for more information.
-func getJobTemplate(w io.Writer, projectID string, location string, templateID string) error {
-	// projectID := fmt.Sprintf("my-project-id")
-	// location := fmt.Sprintf("us-central1")
-	// templateID := fmt.Sprintf("my-job-template")
+// getJobState gets the state for a previously-created job. See
+// https://cloud.google.com/transcoder/docs/how-to/jobs#check_job_status for
+// more information.
+func getJobState(w io.Writer, projectID string, location string, jobID string) error {
+	// projectID := "my-project-id"
+	// location := "us-central1"
+	// jobID := "my-job-id"
 	ctx := context.Background()
 	client, err := transcoder.NewClient(ctx)
 	if err != nil {
@@ -38,17 +38,16 @@ func getJobTemplate(w io.Writer, projectID string, location string, templateID s
 	}
 	defer client.Close()
 
-	req := &transcoderpb.GetJobTemplateRequest{
-		Name: fmt.Sprintf("projects/%s/locations/%s/jobTemplates/%s", projectID, location, templateID),
+	req := &transcoderpb.GetJobRequest{
+		Name: fmt.Sprintf("projects/%s/locations/%s/jobs/%s", projectID, location, jobID),
 	}
 
-	response, err := client.GetJobTemplate(ctx, req)
+	response, err := client.GetJob(ctx, req)
 	if err != nil {
-		return fmt.Errorf("GetJobTemplate: %v", err)
+		return fmt.Errorf("GetJob: %v", err)
 	}
-
-	fmt.Fprintf(w, "Job template: %v", response.GetName())
+	fmt.Fprintf(w, "Job state: %v\n----\nJob failure reason:%v\n----\nJob failure details:%v\n", response.State, response.FailureReason, response.FailureDetails)
 	return nil
 }
 
-// [END transcoder_get_job_template]
+// [END transcoder_get_job_state]
