@@ -454,9 +454,11 @@ func TestBucketWebsiteInfo(t *testing.T) {
 
 	index := "index.html"
 	notFoundPage := "404.html"
-	if err := setBucketWebsiteInfo(ioutil.Discard, bucketName, index, notFoundPage); err != nil {
-		t.Fatalf("setBucketWebsiteInfo: %v", err)
-	}
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
+		if err := setBucketWebsiteInfo(ioutil.Discard, bucketName, index, notFoundPage); err != nil {
+			r.Errorf("setBucketWebsiteInfo: %v", err)
+		}
+	})
 	attrs, err := client.Bucket(bucketName).Attrs(ctx)
 	if err != nil {
 		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
