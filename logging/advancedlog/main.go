@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -38,14 +38,15 @@ func main() {
 	// Sets the name of the log to write to.
 	logger := client.Logger("my-log")
 
-	// Logs a basic entry
+	// Logs a basic entry.
 	logger.Log(logging.Entry{Payload: "hello world"})
 
-	// Logs an HTTPRequest type entry
+	// Logs an HTTPRequest type entry.
 	httpEntry := logging.Entry{
 		Payload: "optional message",
 		HTTPRequest: &logging.HTTPRequest{
-			// TODO: pass in request
+			// TODO(developer): pass in the request.
+			// Some request metadata will be autopopulated in the log entry.
 			Request: &http.Request{},
 		},
 	}
