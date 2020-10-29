@@ -21,6 +21,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"os"
 
 	"cloud.google.com/go/logging"
 )
@@ -29,7 +30,8 @@ func main() {
 	ctx := context.Background()
 
 	// Creates a client.
-	client, err := logging.NewClient(ctx, "YOUR_PROJECT_ID")
+	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
+	client, err := logging.NewClient(ctx, projectID)
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}

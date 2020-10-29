@@ -15,9 +15,6 @@
 package main
 
 import (
-	// "fmt"
-	// "log"
-	// "strings"
 	"testing"
 	"time"
 
@@ -26,24 +23,19 @@ import (
 
 func TestMain(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	// testResourceName := "my-resource-name"
 	m := testutil.BuildMain(t)
 	defer m.Cleanup()
-
 	if !m.Built() {
 		t.Fatalf("failed to build app")
 	}
 
-	// testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
-	_, stdErr, err := m.Run(nil, 2*time.Minute,
-		"--project_id", tc.ProjectID,
-		// "--resource_name", testResourceName,
-	)
+	env := map[string]string{"GOOGLE_CLOUD_PROJECT": tc.ProjectID}
+
+	_, stdErr, err := m.Run(env, 2*time.Minute, "--project_id", tc.ProjectID)
 	if err != nil {
 		t.Errorf("execution failed: %v", err)
 	}
 	if len(stdErr) > 0 {
-		// r.Errorf("did not expect stderr output, got %d bytes: %s", len(stdErr), string(stdErr))
+		t.Errorf("did not expect stderr output, got %d bytes: %s", len(stdErr), string(stdErr))
 	}
-	// })
 }
