@@ -35,9 +35,9 @@ func GenericHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("HEADERS:")
 	headerMap := make(map[string]string)
 	for k, v := range r.Header {
-		val := strings.Join(v, ",")
 		if k != "Authorization" {
-			headerMap[k] = string(val)
+			val := strings.Join(v, ",")
+			headerMap[k] = val
 			log.Println(fmt.Sprintf("%q: %q\n", k, val))
 		}
 	}
@@ -63,6 +63,7 @@ func GenericHandler(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(res); err != nil {
 		log.Printf("error encoding response: %v", err)
 		http.Error(w, "Could not marshal JSON output", 500)
+		return
 	}
 	fmt.Fprintln(w)
 }
