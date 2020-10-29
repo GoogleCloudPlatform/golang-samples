@@ -12,40 +12,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package buckets
+package serviceaccount
 
-// [START storage_view_bucket_iam_members]
+// [START storage_get_service_account]
 import (
 	"context"
 	"fmt"
 	"io"
 	"time"
 
-	"cloud.google.com/go/iam"
 	"cloud.google.com/go/storage"
 )
 
-// getBucketPolicy gets the bucket IAM policy.
-func getBucketPolicy(w io.Writer, bucketName string) (*iam.Policy3, error) {
-	// bucketName := "bucket-name"
+// getServiceAccount gets the default Cloud Storage service account email address.
+func getServiceAccount(w io.Writer, projectID string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 
-	policy, err := client.Bucket(bucketName).IAM().V3().Policy(ctx)
+	serviceAccount, err := client.ServiceAccount(ctx, projectID)
 	if err != nil {
-		return nil, fmt.Errorf("Bucket(%q).IAM().V3().Policy: %v", bucketName, err)
+		return fmt.Errorf("ServiceAccount: %v", err)
 	}
-	for _, binding := range policy.Bindings {
-		fmt.Fprintf(w, "%q: %q (condition: %v)\n", binding.Role, binding.Members, binding.Condition)
-	}
-	return policy, nil
+
+	fmt.Fprintf(w, "The GCS service account for project %v is: %v\n", projectID, serviceAccount)
+	return nil
 }
 
-// [END storage_view_bucket_iam_members]
+// [END storage_get_service_account]

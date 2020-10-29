@@ -12,40 +12,41 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package buckets
+package objects
 
-// [START storage_view_bucket_iam_members]
+// [START storage_delete_file_archived_generation]
 import (
 	"context"
 	"fmt"
 	"io"
 	"time"
 
-	"cloud.google.com/go/iam"
 	"cloud.google.com/go/storage"
 )
 
-// getBucketPolicy gets the bucket IAM policy.
-func getBucketPolicy(w io.Writer, bucketName string) (*iam.Policy3, error) {
+// deleteOldVersionOfObject deletes a noncurrent version of an object.
+func deleteOldVersionOfObject(w io.Writer, bucketName, objectName string, gen int64) error {
 	// bucketName := "bucket-name"
+	// objectName := "object-name"
+
+	// gen is the generation of objectName to delete.
+	// gen := 1587012235914578
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 
-	policy, err := client.Bucket(bucketName).IAM().V3().Policy(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("Bucket(%q).IAM().V3().Policy: %v", bucketName, err)
+	obj := client.Bucket(bucketName).Object(objectName)
+	if err := obj.Generation(gen).Delete(ctx); err != nil {
+		return fmt.Errorf("Bucket(%q).Object(%q).Generation(%v).Delete: %v", bucketName, objectName, gen, err)
 	}
-	for _, binding := range policy.Bindings {
-		fmt.Fprintf(w, "%q: %q (condition: %v)\n", binding.Role, binding.Members, binding.Condition)
-	}
-	return policy, nil
+	fmt.Fprintf(w, "Generation %v of object %v was deleted from %v\n", gen, objectName, bucketName)
+	return nil
 }
 
-// [END storage_view_bucket_iam_members]
+// [END storage_delete_file_archived_generation]

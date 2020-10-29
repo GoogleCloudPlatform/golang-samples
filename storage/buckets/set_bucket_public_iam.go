@@ -14,38 +14,41 @@
 
 package buckets
 
-// [START storage_view_bucket_iam_members]
+// [START storage_set_bucket_public_iam]
 import (
 	"context"
 	"fmt"
 	"io"
-	"time"
 
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/storage"
+	iampb "google.golang.org/genproto/googleapis/iam/v1"
 )
 
-// getBucketPolicy gets the bucket IAM policy.
-func getBucketPolicy(w io.Writer, bucketName string) (*iam.Policy3, error) {
+// setBucketPublicIAM makes all objects in a bucket publicly readable.
+func setBucketPublicIAM(w io.Writer, bucketName string) error {
 	// bucketName := "bucket-name"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
 
-	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel()
-
 	policy, err := client.Bucket(bucketName).IAM().V3().Policy(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("Bucket(%q).IAM().V3().Policy: %v", bucketName, err)
+		return fmt.Errorf("Bucket(%q).IAM().V3().Policy: %v", bucketName, err)
 	}
-	for _, binding := range policy.Bindings {
-		fmt.Fprintf(w, "%q: %q (condition: %v)\n", binding.Role, binding.Members, binding.Condition)
+	role := "roles/storage.objectViewer"
+	policy.Bindings = append(policy.Bindings, &iampb.Binding{
+		Role:    role,
+		Members: []string{iam.AllUsers},
+	})
+	if err := client.Bucket(bucketName).IAM().V3().SetPolicy(ctx, policy); err != nil {
+		return fmt.Errorf("Bucket(%q).IAM().SetPolicy: %v", bucketName, err)
 	}
-	return policy, nil
+	fmt.Fprintf(w, "Bucket %v is now publicly readable\n", bucketName)
+	return nil
 }
 
-// [END storage_view_bucket_iam_members]
+// [END storage_set_bucket_public_iam]
