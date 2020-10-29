@@ -41,13 +41,15 @@ func main() {
 	// Logs a basic entry.
 	logger.Log(logging.Entry{Payload: "hello world"})
 
+	// TODO(developer): replace with your request value.
+	r, err := http.NewRequest("GET", "http://example.com", nil)
+
 	// Logs an HTTPRequest type entry.
+	// Some request metadata will be autopopulated in the log entry.
 	httpEntry := logging.Entry{
 		Payload: "optional message",
 		HTTPRequest: &logging.HTTPRequest{
-			// TODO(developer): pass in the request.
-			// Some request metadata will be autopopulated in the log entry.
-			Request: &http.Request{},
+			Request: r,
 		},
 	}
 	logger.Log(httpEntry)
