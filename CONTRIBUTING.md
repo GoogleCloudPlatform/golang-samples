@@ -170,7 +170,7 @@ body of the sample function.
 ```go
 // delete deletes the resource identified by name.
 func delete(w io.Writer, name string) error {
-	// name := fmt.Sprintf("/projects/my-project/resources/my-resource")
+	// name := "/projects/my-project/resources/my-resource"
 	ctx := context.Background()
 	client, err := foo.NewClient(ctx)
 	if err != nil {
