@@ -1,3 +1,3 @@
-module github.com/GoogleCloudPlatform/golang-samples/run/events-pubsub
+module github.com/GoogleCloudPlatform/golang-samples/eventarc/generic
 
 go 1.13

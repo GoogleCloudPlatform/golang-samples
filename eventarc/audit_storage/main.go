@@ -14,7 +14,7 @@
 
 // [START eventarc_gcs_handler]
 
-// Sample run-events-storage is a Cloud Run service which handles Cloud Audit Log messages with Cloud Storage data.
+// Sample audit_storage is a Cloud Run service which handles Cloud Audit Log messages with Cloud Storage data.
 package main
 
 import (
