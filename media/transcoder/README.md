@@ -1,3 +1,3 @@
-# Cloud Transcoder API Go samples
+# Transcoder API Go samples
 
-This directory contains [Cloud Transcoder API](https://cloud.google.com/transcoder/) Go samples and tests.
+This directory contains [Transcoder API](https://cloud.google.com/transcoder/) Go samples and tests.

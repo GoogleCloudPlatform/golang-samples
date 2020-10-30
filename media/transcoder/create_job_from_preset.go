@@ -24,7 +24,7 @@ import (
 	transcoderpb "google.golang.org/genproto/googleapis/cloud/video/transcoder/v1beta1"
 )
 
-// createJobFromPreset creates a job based on a given preset. See
+// createJobFromPreset creates a job based on a given preset template. See
 // https://cloud.google.com/transcoder/docs/how-to/jobs#create_jobs_presets
 // for more information.
 func createJobFromPreset(w io.Writer, projectID string, location string, inputURI string, outputURI string, preset string) error {
