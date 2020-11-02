@@ -105,12 +105,15 @@ func TestListGCSObjects(t *testing.T) {
 	defer deleteTestKey(ctx, client, key)
 
 	buf := new(bytes.Buffer)
-	if err := listGCSObjects(buf, "cloud-samples-data", key.AccessID, key.Secret); err != nil {
-		t.Errorf("listGCSObjects: %v", err)
-	}
+	testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+		if err := listGCSObjects(buf, "cloud-samples-data", key.AccessID, key.Secret); err != nil {
+			r.Errorf("listGCSObjects: %v", err)
+		}
 
-	got := buf.String()
-	if want := "Objects:"; !strings.Contains(got, want) {
-		t.Errorf("listGCSObjects got\n----\n%s\n----\nWant to contain\n----\n%s\n----", got, want)
-	}
+		got := buf.String()
+		if want := "Objects:"; !strings.Contains(got, want) {
+			r.Errorf("listGCSObjects got\n----\n%s\n----\nWant to contain\n----\n%s\n----", got, want)
+		}
+	})
+
 }
