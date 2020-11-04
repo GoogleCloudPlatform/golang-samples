@@ -59,11 +59,11 @@ type Entry struct {
 	Severity string `json:"severity,omitempty"`
 	Trace    string `json:"logging.googleapis.com/trace,omitempty"`
 
-	// Stackdriver Log Viewer allows filtering and display of this as `jsonPayload.component`.
+	// Cloud Log Viewer allows filtering and display of this as `jsonPayload.component`.
 	Component string `json:"component,omitempty"`
 }
 
-// String renders an entry structure to the JSON format expected by Stackdriver.
+// String renders an entry structure to the JSON format expected by Cloud Logging.
 func (e Entry) String() string {
 	if e.Severity == "" {
 		e.Severity = "INFO"
@@ -81,7 +81,7 @@ func (e Entry) String() string {
 func init() {
 	// Disable log prefixes such as the default timestamp.
 	// Prefix text prevents the message from being parsed as JSON.
-	// A timestamp is added when shipping logs to Stackdriver.
+	// A timestamp is added when shipping logs to Cloud Logging.
 	log.SetFlags(0)
 }
 
