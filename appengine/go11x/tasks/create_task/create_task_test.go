@@ -44,7 +44,7 @@ func TestCreateTask(t *testing.T) {
 		testutil.Retry(t, 3, 3*time.Second, func(r *testutil.R) {
 			_, err := createTask(tc.ProjectID, locationID, queueID, test.message)
 			if err != nil {
-				t.Errorf("CreateTask(%s): %v", test.name, err)
+				r.Errorf("CreateTask(%s): %v", test.name, err)
 			}
 		})
 	}
