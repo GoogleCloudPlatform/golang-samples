@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/golang-samples
 go 1.11
 
 require (
-	cloud.google.com/go v0.69.1
+	cloud.google.com/go v0.71.0
 	cloud.google.com/go/bigquery v1.9.0
 	cloud.google.com/go/bigtable v1.4.0
 	cloud.google.com/go/datastore v1.2.0
@@ -22,7 +22,7 @@ require (
 	github.com/fluent/fluent-logger-golang v1.5.0
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gofrs/uuid v3.3.0+incompatible
-	github.com/golang/protobuf v1.4.2
+	github.com/golang/protobuf v1.4.3
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/google/go-cmp v0.5.2
 	github.com/google/uuid v1.1.2
@@ -39,13 +39,15 @@ require (
 	github.com/tinylib/msgp v1.1.2 // indirect
 	go.opencensus.io v0.22.5
 	golang.org/x/exp v0.0.0-20200901203048-c4f52b2c50aa
-	golang.org/x/net v0.0.0-20201010224723-4f7140c49acb
+	golang.org/x/net v0.0.0-20201031054903-ff519b6c9102
 	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43
-	golang.org/x/text v0.3.3
-	google.golang.org/api v0.33.0
-	google.golang.org/appengine v1.6.6
-	google.golang.org/genproto v0.0.0-20201014134559-03b6142f0dc9
-	google.golang.org/grpc v1.32.0
+	golang.org/x/sys v0.0.0-20201101102859-da207088b7d1 // indirect
+	golang.org/x/text v0.3.4
+	golang.org/x/tools v0.0.0-20201104193857-22bd85271a8b // indirect
+	google.golang.org/api v0.34.0
+	google.golang.org/appengine v1.6.7
+	google.golang.org/genproto v0.0.0-20201103154000-415bd0cd5df6
+	google.golang.org/grpc v1.33.1
 	google.golang.org/grpc/examples v0.0.0-20200707005602-4258d12073b4
 	google.golang.org/protobuf v1.25.0
 	gopkg.in/sendgrid/sendgrid-go.v2 v2.0.0
