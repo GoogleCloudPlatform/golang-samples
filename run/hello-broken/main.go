@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// [START cloudrun_broken_service]
 // [START run_broken_service]
 
 // Sample hello demonstrates a difficult to troubleshoot service.
@@ -30,7 +31,9 @@ func main() {
 	http.HandleFunc("/", helloHandler)
 
 	// [END run_broken_service]
+	// [END cloudrun_broken_service]
 	http.HandleFunc("/improved", improvedHandler)
+	// [START cloudrun_broken_service]
 	// [START run_broken_service]
 
 	port := os.Getenv("PORT")
@@ -46,6 +49,7 @@ func main() {
 func helloHandler(w http.ResponseWriter, r *http.Request) {
 	log.Print("hello: received request")
 
+	// [START cloudrun_broken_service_problem]
 	// [START run_broken_service_problem]
 	name := os.Getenv("NAME")
 	if name == "" {
@@ -54,15 +58,18 @@ func helloHandler(w http.ResponseWriter, r *http.Request) {
 		panic("Missing required server parameter")
 	}
 	// [END run_broken_service_problem]
+	// [END cloudrun_broken_service_problem]
 
 	fmt.Fprintf(w, "Hello %s!\n", name)
 }
 
 // [END run_broken_service]
+// [END cloudrun_broken_service]
 
 func improvedHandler(w http.ResponseWriter, r *http.Request) {
 	log.Print("hello: received request")
 
+	// [START cloudrun_broken_service_upgrade]
 	// [START run_broken_service_upgrade]
 	name := os.Getenv("NAME")
 	if name == "" {
@@ -70,6 +77,7 @@ func improvedHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("warning: NAME not set, default to %s", name)
 	}
 	// [END run_broken_service_upgrade]
+	// [END cloudrun_broken_service_upgrade]
 
 	fmt.Fprintf(w, "Hello %s!\n", name)
 }
