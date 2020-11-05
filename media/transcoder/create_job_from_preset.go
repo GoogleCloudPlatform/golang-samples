@@ -31,7 +31,7 @@ func createJobFromPreset(w io.Writer, projectID string, location string, inputUR
 	// projectID := "my-project-id"
 	// location := "us-central1"
 	// inputURI := "gs://my-bucket/my-video-file"
-	// outputURI := "gs://my-bucket/my-output-folder"
+	// outputURI := "gs://my-bucket/my-output-folder/"
 	// preset := "preset/web-hd"
 	ctx := context.Background()
 	client, err := transcoder.NewClient(ctx)

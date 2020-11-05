@@ -31,7 +31,7 @@ func createJobFromAdHoc(w io.Writer, projectID string, location string, inputURI
 	// projectID := "my-project-id"
 	// location := "us-central1"
 	// inputURI := "gs://my-bucket/my-video-file"
-	// outputURI := "gs://my-bucket/my-output-folder"
+	// outputURI := "gs://my-bucket/my-output-folder/"
 	ctx := context.Background()
 	client, err := transcoder.NewClient(ctx)
 	if err != nil {
