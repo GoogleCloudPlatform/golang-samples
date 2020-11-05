@@ -503,6 +503,7 @@ func TestPullMsgsDeadLetterDeliveryAttempts(t *testing.T) {
 		deadLetterSourceTopic, err := getOrCreateTopic(ctx, client, deadLetterSourceID)
 		if err != nil {
 			r.Errorf("getOrCreateTopic: %v", err)
+			return
 		}
 		defer deadLetterSourceTopic.Delete(ctx)
 		defer deadLetterSourceTopic.Stop()
@@ -510,6 +511,7 @@ func TestPullMsgsDeadLetterDeliveryAttempts(t *testing.T) {
 		deadLetterSinkTopic, err := getOrCreateTopic(ctx, client, deadLetterSinkID)
 		if err != nil {
 			r.Errorf("getOrCreateTopic: %v", err)
+			return
 		}
 		defer deadLetterSinkTopic.Delete(ctx)
 		defer deadLetterSinkTopic.Stop()
@@ -523,21 +525,25 @@ func TestPullMsgsDeadLetterDeliveryAttempts(t *testing.T) {
 		})
 		if err != nil {
 			r.Errorf("getOrCreateSub: %v", err)
+			return
 		}
 		defer sub.Delete(ctx)
 
 		if err = publishMsgs(ctx, deadLetterSourceTopic, 1); err != nil {
 			r.Errorf("publishMsgs failed: %v", err)
+			return
 		}
 
 		buf := new(bytes.Buffer)
 		if err := pullMsgsDeadLetterDeliveryAttempt(buf, tc.ProjectID, deadLetterSubID); err != nil {
 			r.Errorf("pullMsgsDeadLetterDeliveryAttempt failed: %v", err)
+			return
 		}
 		got := buf.String()
 		want := "delivery attempts: 1"
 		if !strings.Contains(got, want) {
 			r.Errorf("pullMsgsDeadLetterDeliveryAttempts got %s, want %s", got, want)
+			return
 		}
 	})
 }
