@@ -12,40 +12,40 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package buckets
+package objects
 
-// [START storage_view_bucket_iam_members]
+// [START storage_disable_versioning]
 import (
 	"context"
 	"fmt"
 	"io"
 	"time"
 
-	"cloud.google.com/go/iam"
 	"cloud.google.com/go/storage"
 )
 
-// getBucketPolicy gets the bucket IAM policy.
-func getBucketPolicy(w io.Writer, bucketName string) (*iam.Policy3, error) {
+// disableVersioning disables object versioning on a bucket.
+func disableVersioning(w io.Writer, bucketName string) error {
 	// bucketName := "bucket-name"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 
-	policy, err := client.Bucket(bucketName).IAM().V3().Policy(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("Bucket(%q).IAM().V3().Policy: %v", bucketName, err)
+	bucket := client.Bucket(bucketName)
+	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
+		VersioningEnabled: false,
 	}
-	for _, binding := range policy.Bindings {
-		fmt.Fprintf(w, "%q: %q (condition: %v)\n", binding.Role, binding.Members, binding.Condition)
+	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
+		return fmt.Errorf("Bucket(%q).Update: %v", bucketName, err)
 	}
-	return policy, nil
+	fmt.Fprintf(w, "Versioning was disabled for %v\n", bucketName)
+	return nil
 }
 
-// [END storage_view_bucket_iam_members]
+// [END storage_disable_versioning]

@@ -15,7 +15,7 @@
 // Package annotate contains speech examples.
 package annotate
 
-// [START videointelligence_text_detection_gcs]
+// [START video_detect_text_gcs]
 
 import (
 	"context"
@@ -83,4 +83,4 @@ func textDetectionGCS(w io.Writer, gcsURI string) error {
 	return nil
 }
 
-// [END videointelligence_text_detection_gcs]
+// [END video_detect_text_gcs]
