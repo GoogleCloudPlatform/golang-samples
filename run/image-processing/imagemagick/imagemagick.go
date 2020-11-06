@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// [START cloudrun_imageproc_handler_setup]
 // [START run_imageproc_handler_setup]
 
 // Package imagemagick contains an example of using ImageMagick to process a
@@ -53,7 +54,9 @@ func init() {
 }
 
 // [END run_imageproc_handler_setup]
+// [END cloudrun_imageproc_handler_setup]
 
+// [START cloudrun_imageproc_handler_analyze]
 // [START run_imageproc_handler_analyze]
 
 // GCSEvent is the payload of a GCS event.
@@ -85,7 +88,9 @@ func BlurOffensiveImages(ctx context.Context, e GCSEvent) error {
 }
 
 // [END run_imageproc_handler_analyze]
+// [END cloudrun_imageproc_handler_analyze]
 
+// [START cloudrun_imageproc_handler_blur]
 // [START run_imageproc_handler_blur]
 
 // blur blurs the image stored at gs://inputBucket/name and stores the result in
@@ -116,3 +121,4 @@ func blur(ctx context.Context, inputBucket, outputBucket, name string) error {
 }
 
 // [END run_imageproc_handler_blur]
+// [END cloudrun_imageproc_handler_blur]
