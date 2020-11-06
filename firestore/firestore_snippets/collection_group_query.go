@@ -14,6 +14,7 @@
 
 package main
 
+// [START fs_collection_group_query]
 // [START firestore_query_collection_group_filter_eq]
 import (
 	"context"
@@ -51,3 +52,4 @@ func collectionGroupQuery(w io.Writer, projectID string) error {
 }
 
 // [END firestore_query_collection_group_filter_eq]
+// [END fs_collection_group_query]
