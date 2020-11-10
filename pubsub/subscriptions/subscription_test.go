@@ -299,10 +299,9 @@ func TestPullMsgsConcurrencyControl(t *testing.T) {
 	publishMsgs(ctx, topic, numMsgs)
 
 	buf := new(bytes.Buffer)
-	if err := pullMsgsConcurrenyControl(buf, tc.ProjectID, subIDConc); err != nil {
+	if err := pullMsgsConcurrenyControl(buf, tc.ProjectID, subIDConc); err != nil jj
 		t.Fatalf("failed to pull messages: %v", err)
 	}
-	// Check the counter, it should correspond with number of messages.
 	got := buf.String()
 	want := fmt.Sprintf("Received %d messages\n", numMsgs)
 	if got != want {
