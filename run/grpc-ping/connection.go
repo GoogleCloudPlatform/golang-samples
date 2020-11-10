@@ -14,6 +14,7 @@
 
 package main
 
+// [START cloudrun_grpc_conn]
 // [START run_grpc_conn]
 
 import (
@@ -49,3 +50,4 @@ func NewConn(host string, insecure bool) (*grpc.ClientConn, error) {
 }
 
 // [END run_grpc_conn]
+// [END cloudrun_grpc_conn]
