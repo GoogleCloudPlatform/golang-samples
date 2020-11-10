@@ -40,6 +40,7 @@ import (
 	"net"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/examples/helloworld/helloworld"
 	pb "google.golang.org/grpc/examples/helloworld/helloworld"
 	"google.golang.org/grpc/reflection"
 )
@@ -49,7 +50,9 @@ var (
 )
 
 // server is used to implement helloworld.GreeterServer.
-type server struct{}
+type server struct {
+	helloworld.UnimplementedGreeterServer
+}
 
 // SayHello implements helloworld.GreeterServer
 func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {

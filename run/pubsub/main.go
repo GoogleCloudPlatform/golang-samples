@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// [START cloudrun_pubsub_server]
 // [START run_pubsub_server]
 
 // Sample run-pubsub is a Cloud Run service which handles Pub/Sub messages.
@@ -41,7 +42,9 @@ func main() {
 }
 
 // [END run_pubsub_server]
+// [END cloudrun_pubsub_server]
 
+// [START cloudrun_pubsub_handler]
 // [START run_pubsub_handler]
 
 // PubSubMessage is the payload of a Pub/Sub event.
@@ -76,3 +79,4 @@ func HelloPubSub(w http.ResponseWriter, r *http.Request) {
 }
 
 // [END run_pubsub_handler]
+// [END cloudrun_pubsub_handler]

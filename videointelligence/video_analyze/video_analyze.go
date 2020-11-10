@@ -159,7 +159,7 @@ func explicitContent(w io.Writer, file string) error {
 	return nil
 }
 
-// [START video_analyze_speech_transcription]
+// [START video_speech_transcription]
 
 func speechTranscription(w io.Writer, file string) error {
 	ctx := context.Background()
@@ -222,4 +222,4 @@ func speechTranscription(w io.Writer, file string) error {
 	return nil
 }
 
-// [END video_analyze_speech_transcription]
+// [END video_speech_transcription]
