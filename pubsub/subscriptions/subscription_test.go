@@ -362,7 +362,7 @@ func TestCreateWithDeadLetterPolicy(t *testing.T) {
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		deadLetterSourceTopic, err := getOrCreateTopic(ctx, client, deadLetterSourceID)
 		if err != nil {
-			t.Errorf("getOrCreateTopic: %v", err)
+			r.Errorf("getOrCreateTopic: %v", err)
 			return
 		}
 		defer deadLetterSourceTopic.Delete(ctx)
