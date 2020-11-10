@@ -299,7 +299,7 @@ func TestPullMsgsConcurrencyControl(t *testing.T) {
 	publishMsgs(ctx, topic, numMsgs)
 
 	buf := new(bytes.Buffer)
-	if err := pullMsgsConcurrenyControl(buf, tc.ProjectID, subIDConc); err != nil jj
+	if err := pullMsgsConcurrenyControl(buf, tc.ProjectID, subIDConc); err != nil {
 		t.Fatalf("failed to pull messages: %v", err)
 	}
 	got := buf.String()
