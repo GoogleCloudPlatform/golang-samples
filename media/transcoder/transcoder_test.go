@@ -38,11 +38,6 @@ const (
 	jobSucceededState     = "SUCCEEDED"
 	testVideoFileName     = "ChromeCast.mp4"
 	testVideoFileLocation = "../testdata/"
-	bucketName            = "golang-samples-transcoder-test"
-	inputURI              = "gs://" + bucketName + "/" + testVideoFileName
-	outputURIForPreset    = "gs://" + bucketName + "/test-output-preset/"
-	outputURIForTemplate  = "gs://" + bucketName + "/test-output-template/"
-	outputURIForAdHoc     = "gs://" + bucketName + "/test-output-adhoc/"
 	preset                = "preset/web-hd"
 )
 
@@ -60,6 +55,12 @@ func TestJobTemplatesAndJobs(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 
+	bucketName := tc.ProjectID + "-golang-samples-transcoder-test"
+	inputURI := "gs://" + bucketName + "/" + testVideoFileName
+	outputURIForPreset := "gs://" + bucketName + "/test-output-preset/"
+	outputURIForTemplate := "gs://" + bucketName + "/test-output-template/"
+	outputURIForAdHoc := "gs://" + bucketName + "/test-output-adhoc/"
+
 	// Get the project number
 	cloudresourcemanagerClient, err := cloudresourcemanager.NewService(ctx)
 	if err != nil {
@@ -73,13 +74,13 @@ func TestJobTemplatesAndJobs(t *testing.T) {
 
 	testJobTemplates(t, projectNumber)
 	t.Logf("\ntestJobTemplates() completed\n")
-	writeTestGCSFile(t, tc.ProjectID)
+	writeTestGCSFile(t, tc.ProjectID, bucketName)
 	t.Logf("\nwriteTestGCSFile() completed\n")
-	testJobFromPreset(t, projectNumber)
+	testJobFromPreset(t, projectNumber, inputURI, outputURIForPreset)
 	t.Logf("\ntestJobFromPreset() completed\n")
-	testJobFromTemplate(t, projectNumber)
+	testJobFromTemplate(t, projectNumber, inputURI, outputURIForTemplate)
 	t.Logf("\ntestJobFromTemplate() completed\n")
-	testJobFromAdHoc(t, projectNumber)
+	testJobFromAdHoc(t, projectNumber, inputURI, outputURIForAdHoc)
 	t.Logf("\ntestJobFromAdHoc() completed\n")
 }
 
@@ -144,7 +145,7 @@ func testJobTemplates(t *testing.T, projectNumber string) {
 }
 
 // writeTestGCSFile deletes the GCS test bucket and uploads a test video file to it.
-func writeTestGCSFile(t *testing.T, projectID string) {
+func writeTestGCSFile(t *testing.T, projectID string, bucketName string) {
 	t.Helper()
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
@@ -177,7 +178,7 @@ func writeTestGCSFile(t *testing.T, projectID string) {
 
 // testJobFromPreset tests major operations on a job created from a preset. It
 // will wait until the job successfully completes as part of the test.
-func testJobFromPreset(t *testing.T, projectNumber string) {
+func testJobFromPreset(t *testing.T, projectNumber string, inputURI string, outputURIForPreset string) {
 	tc := testutil.SystemTest(t)
 	buf := &bytes.Buffer{}
 	jobID := ""
@@ -240,7 +241,7 @@ func testJobFromPreset(t *testing.T, projectNumber string) {
 
 // testJobFromTemplate tests major operations on a job created from a template. It
 // will wait until the job successfully completes as part of the test.
-func testJobFromTemplate(t *testing.T, projectNumber string) {
+func testJobFromTemplate(t *testing.T, projectNumber string, inputURI string, outputURIForTemplate string) {
 	tc := testutil.SystemTest(t)
 	buf := &bytes.Buffer{}
 	jobID := ""
@@ -301,7 +302,7 @@ func testJobFromTemplate(t *testing.T, projectNumber string) {
 
 // testJobFromAdHoc tests major operations on a job created from an ad-hoc configuration. It
 // will wait until the job successfully completes as part of the test.
-func testJobFromAdHoc(t *testing.T, projectNumber string) {
+func testJobFromAdHoc(t *testing.T, projectNumber string, inputURI string, outputURIForAdHoc string) {
 	tc := testutil.SystemTest(t)
 	buf := &bytes.Buffer{}
 	jobID := ""
