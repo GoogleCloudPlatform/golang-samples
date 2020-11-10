@@ -298,13 +298,15 @@ func TestPullMsgsConcurrencyControl(t *testing.T) {
 	const numMsgs = 5
 	publishMsgs(ctx, topic, numMsgs)
 
-	var counter int32
-	if err := pullMsgsConcurrenyControl(&counter, tc.ProjectID, subIDConc); err != nil {
+	buf := new(bytes.Buffer)
+	if err := pullMsgsConcurrenyControl(buf, tc.ProjectID, subIDConc); err != nil {
 		t.Fatalf("failed to pull messages: %v", err)
 	}
 	// Check the counter, it should correspond with number of messages.
-	if counter != numMsgs {
-		t.Fatalf("pullMsgsConcurrencyControl got %d messages, want %d", counter, numMsgs)
+	got := buf.String()
+	want := fmt.Sprintf("Received %d messages\n", numMsgs)
+	if got != want {
+		t.Fatalf("pullMsgsConcurrencyControl got %s\nwant %s", got, want)
 	}
 }
 

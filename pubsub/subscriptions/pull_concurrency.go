@@ -18,6 +18,7 @@ package subscriptions
 import (
 	"context"
 	"fmt"
+	"io"
 	"runtime"
 	"sync/atomic"
 	"time"
@@ -25,7 +26,7 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func pullMsgsConcurrenyControl(counter *int32, projectID, subID string) error {
+func pullMsgsConcurrenyControl(w io.Writer, projectID, subID string) error {
 	// projectID := "my-project-id"
 	// subID := "my-sub"
 	ctx := context.Background()
@@ -47,16 +48,19 @@ func pullMsgsConcurrenyControl(counter *int32, projectID, subID string) error {
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
+	var counter int32
+
 	// Receive blocks until the context is cancelled or an error occurs.
 	err = sub.Receive(ctx, func(_ context.Context, msg *pubsub.Message) {
 		// Receive may be called concurrently, it's okay to process the messages concurrently
 		// but synchronize access to shared memory.
-		atomic.AddInt32(counter, 1)
+		atomic.AddInt32(&counter, 1)
 		msg.Ack()
 	})
 	if err != nil {
-		return fmt.Errorf("Receive: %v", err)
+		return fmt.Errorf("pubsub: Receive returned error: %v", err)
 	}
+	fmt.Fprintf(w, "Received %d messages\n", counter)
 
 	return nil
 }
