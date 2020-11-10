@@ -52,8 +52,9 @@ func pullMsgsConcurrenyControl(w io.Writer, projectID, subID string) error {
 
 	// Receive blocks until the context is cancelled or an error occurs.
 	err = sub.Receive(ctx, func(_ context.Context, msg *pubsub.Message) {
-		// Receive may be called concurrently, it's okay to process the messages concurrently
-		// but synchronize access to shared memory.
+		// The message handler passed to Receive may be called concurrently
+		// so it's okay to process the messages concurrently but make sure
+		// to synchronize access to shared memory.
 		atomic.AddInt32(&counter, 1)
 		msg.Ack()
 	})
