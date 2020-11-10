@@ -5,13 +5,14 @@
 # You may obtain a copy of the License at
 #
 #    https://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# [START cloudrun_grpc_dockerfile]
 # [START run_grpc_dockerfile]
 
 # Use the offical golang image to create a binary.
@@ -49,3 +50,4 @@ COPY --from=builder /bin/server /server
 CMD ["/server"]
 
 # [END run_grpc_dockerfile]
+# [END cloudrun_grpc_dockerfile]

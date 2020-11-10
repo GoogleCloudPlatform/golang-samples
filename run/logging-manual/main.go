@@ -51,6 +51,7 @@ func main() {
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
+// [START cloudrun_manual_logging_object]
 // [START run_manual_logging_object]
 
 // Entry defines a log entry.
@@ -76,6 +77,9 @@ func (e Entry) String() string {
 }
 
 // [END run_manual_logging_object]
+// [END cloudrun_manual_logging_object]
+
+// [START cloudrun_manual_logging]
 // [START run_manual_logging]
 
 func init() {
@@ -110,3 +114,4 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // [END run_manual_logging]
+// [END cloudrun_manual_logging]
