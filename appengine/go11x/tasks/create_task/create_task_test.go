@@ -16,6 +16,7 @@ package main
 
 import (
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
@@ -40,9 +41,11 @@ func TestCreateTask(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		_, err := createTask(tc.ProjectID, locationID, queueID, test.message)
-		if err != nil {
-			t.Errorf("CreateTask(%s): %v", test.name, err)
-		}
+		testutil.Retry(t, 3, 3*time.Second, func(r *testutil.R) {
+			_, err := createTask(tc.ProjectID, locationID, queueID, test.message)
+			if err != nil {
+				r.Errorf("CreateTask(%s): %v", test.name, err)
+			}
+		})
 	}
 }

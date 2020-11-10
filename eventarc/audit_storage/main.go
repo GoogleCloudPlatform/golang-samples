@@ -14,7 +14,7 @@
 
 // [START eventarc_gcs_handler]
 
-// Sample run-events-storage is a Cloud Run service which handles Cloud Audit Log messages with Cloud Storage data.
+// Sample audit_storage is a Cloud Run service which handles Cloud Audit Log messages with Cloud Storage data.
 package main
 
 import (
@@ -26,7 +26,7 @@ import (
 
 // HelloEventsStorage receives and processes a Pub/Sub message via a CloudEvent.
 func HelloEventsStorage(w http.ResponseWriter, r *http.Request) {
-	s := fmt.Sprintf("GCS CloudEvent type: %s", string(r.Header.Get("Ce-Subject")))
+	s := fmt.Sprintf("Detected change in GCS bucket: %s", string(r.Header.Get("Ce-Subject")))
 	log.Printf(s)
 	fmt.Fprintln(w, s)
 }

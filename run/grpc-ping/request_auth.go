@@ -14,6 +14,7 @@
 
 package main
 
+// [START cloudrun_grpc_request_auth]
 // [START run_grpc_request_auth]
 
 import (
@@ -56,3 +57,4 @@ func pingRequestWithAuth(conn *grpc.ClientConn, p *pb.Request, audience string) 
 }
 
 // [END run_grpc_request_auth]
+// [END cloudrun_grpc_request_auth]
