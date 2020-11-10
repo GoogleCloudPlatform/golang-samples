@@ -21,6 +21,7 @@ import (
 )
 
 // [START functions_tips_scopes]
+// [START cloudrun_tips_global_scope]
 // [START run_tips_global_scope]
 
 // h is in the global (instance-wide) scope.
@@ -40,6 +41,7 @@ func ScopeDemo(w http.ResponseWriter, r *http.Request) {
 }
 
 // [END run_tips_global_scope]
+// [END cloudrun_tips_global_scope]
 // [END functions_tips_scopes]
 
 func heavyComputation() string {
