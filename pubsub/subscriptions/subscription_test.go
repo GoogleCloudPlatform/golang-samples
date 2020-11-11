@@ -302,9 +302,10 @@ func TestPullMsgsConcurrencyControl(t *testing.T) {
 	if err := pullMsgsConcurrenyControl(buf, tc.ProjectID, subIDConc); err != nil {
 		t.Fatalf("failed to pull messages: %v", err)
 	}
-	// Check for number of newlines, which should correspond with number of messages.
-	if got := strings.Count(buf.String(), "\n"); got != numMsgs {
-		t.Fatalf("pullMsgsConcurrencyControl got %d messages, want %d", got, numMsgs)
+	got := buf.String()
+	want := fmt.Sprintf("Received %d messages\n", numMsgs)
+	if got != want {
+		t.Fatalf("pullMsgsConcurrencyControl got %s\nwant %s", got, want)
 	}
 }
 
