@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"io"
 	"runtime"
+	"sync/atomic"
 	"time"
 
 	"cloud.google.com/go/pubsub"
@@ -39,31 +40,28 @@ func pullMsgsConcurrenyControl(w io.Writer, projectID, subID string) error {
 	// Must set ReceiveSettings.Synchronous to false (or leave as default) to enable
 	// concurrency settings. Otherwise, NumGoroutines will be set to 1.
 	sub.ReceiveSettings.Synchronous = false
-	// NumGoroutines is the number of goroutines sub.Receive will spawn to pull messages concurrently.
+	// NumGoroutines is the number of goroutines sub.Receive will spawn to pull
+	// messages concurrently.
 	sub.ReceiveSettings.NumGoroutines = runtime.NumCPU()
 
 	// Receive messages for 10 seconds.
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
-	// Create a channel to handle messages to as they come in.
-	cm := make(chan *pubsub.Message)
-	defer close(cm)
-	// Handle individual messages in a goroutine.
-	go func() {
-		for msg := range cm {
-			fmt.Fprintf(w, "Got message :%q\n", string(msg.Data))
-			msg.Ack()
-		}
-	}()
+	var counter int32
 
 	// Receive blocks until the context is cancelled or an error occurs.
-	err = sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
-		cm <- msg
+	err = sub.Receive(ctx, func(_ context.Context, msg *pubsub.Message) {
+		// The message handler passed to Receive may be called concurrently
+		// so it's okay to process the messages concurrently but make sure
+		// to synchronize access to shared memory.
+		atomic.AddInt32(&counter, 1)
+		msg.Ack()
 	})
 	if err != nil {
-		return fmt.Errorf("Receive: %v", err)
+		return fmt.Errorf("pubsub: Receive returned error: %v", err)
 	}
+	fmt.Fprintf(w, "Received %d messages\n", counter)
 
 	return nil
 }
