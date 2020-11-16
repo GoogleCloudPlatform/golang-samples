@@ -63,7 +63,7 @@ func encryptSymmetric(w io.Writer, name string, message string) error {
         // For more details on ensuring E2E in-transit integrity to and from Cloud KMS visit:
         // https://cloud.google.com/kms/docs/data-integrity-guidelines
 	if result.VerifiedPlaintextCrc32C == false {
-		return fmt.Errorf("The request sent to the server was corrupted in-transit.")
+		return fmt.Errorf("Encrypt: request corrupted in-transit")
 	}
 	if crc32c(result.Ciphertext) != result.CiphertextCrc32C {
 		return fmt.Errorf("The response received from the server was corrupted in-transit.")
