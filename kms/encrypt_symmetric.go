@@ -44,7 +44,7 @@ func encryptSymmetric(w io.Writer, name string, message string) error {
 	
 	// Optional, but recommended: Compute plaintext's CRC32C.
 	// See crc32c() function below.
-	plaintextCrc32c = crc32c(plaintext)
+	plaintextCRC32C = crc32c(plaintext)
 
 	// Build the request.
 	req := &kmspb.EncryptRequest{
