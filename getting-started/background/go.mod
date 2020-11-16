@@ -6,7 +6,6 @@ require (
 	cloud.google.com/go v0.72.0
 	cloud.google.com/go/firestore v1.3.0
 	cloud.google.com/go/pubsub v1.6.1
-	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	golang.org/x/text v0.3.4
 	google.golang.org/grpc v1.33.2
 )

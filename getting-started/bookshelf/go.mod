@@ -7,7 +7,6 @@ require (
 	cloud.google.com/go/firestore v1.2.0
 	cloud.google.com/go/storage v1.10.0
 	github.com/gofrs/uuid v3.3.0+incompatible
-	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
 	google.golang.org/api v0.35.0
