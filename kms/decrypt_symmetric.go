@@ -18,6 +18,7 @@ package kms
 import (
 	"context"
 	"fmt"
+	"hash/crc32"
 	"io"
 
 	kms "cloud.google.com/go/kms/apiv1"
@@ -36,10 +37,15 @@ func decryptSymmetric(w io.Writer, name string, ciphertext []byte) error {
 		return fmt.Errorf("failed to create kms client: %v", err)
 	}
 
+	// Optional, but recommended: Compute ciphertext's CRC32C.
+	// See crc32c() function below.
+	ciphertextCRC32C = crc32c(ciphertext)
+
 	// Build the request.
 	req := &kmspb.DecryptRequest{
-		Name:       name,
-		Ciphertext: ciphertext,
+		Name:             name,
+		Ciphertext:       ciphertext,
+		CiphertextCrc32C: ciphertextCRC32C,
 	}
 
 	// Call the API.
@@ -47,8 +53,22 @@ func decryptSymmetric(w io.Writer, name string, ciphertext []byte) error {
 	if err != nil {
 		return fmt.Errorf("failed to decrypt ciphertext: %v", err)
 	}
+
+	// Optional, but recommended: perform integrity verification on result.
+	// For more details on ensuring E2E in-transit integrity to and from Cloud KMS visit:
+	// https://cloud.google.com/kms/docs/data-integrity-guidelines
+	if crc32c(result.Plaintext) != result.PlaintextCrc32C {
+		return fmt.Errorf("Decrypt: response corrupted in-transit")
+	}
+	// End integrity verification
+
 	fmt.Fprintf(w, "Decrypted plaintext: %s", result.Plaintext)
 	return nil
+}
+
+func crc32c(data []byte) uint32 {
+	t := crc32.MakeTable(crc32.Castagnoli)
+	return crc32.Checksum(data, t)
 }
 
 // [END kms_decrypt_symmetric]

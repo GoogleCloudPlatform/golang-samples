@@ -42,15 +42,15 @@ func encryptSymmetric(w io.Writer, name string, message string) error {
 	// ciphertexts are always byte arrays.
 	plaintext := []byte(message)
 
-	// Optional, but recommended: Compute plaintext's CRC32C.
+	// Optional but recommended: Compute plaintext's CRC32C.
 	// See crc32c() function below.
-	plaintextCRC32C = crc32c(plaintext)
+	plaintextCRC32C := crc32c(plaintext)
 
 	// Build the request.
 	req := &kmspb.EncryptRequest{
 		Name:            name,
 		Plaintext:       plaintext,
-		PlaintextCrc32C: plaintextCrc32c,
+		PlaintextCrc32C: plaintextCRC32C,
 	}
 
 	// Call the API.
@@ -66,7 +66,7 @@ func encryptSymmetric(w io.Writer, name string, message string) error {
 		return fmt.Errorf("Encrypt: request corrupted in-transit")
 	}
 	if crc32c(result.Ciphertext) != result.CiphertextCrc32C {
-		return fmt.Errorf("The response received from the server was corrupted in-transit.")
+		return fmt.Errorf("Encrypt: response corrupted in-transit")
 	}
 	// End integrity verification
 
