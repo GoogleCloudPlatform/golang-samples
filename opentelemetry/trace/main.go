@@ -31,11 +31,13 @@ import (
 // [START opentelemetry_trace_main_function]
 func main() {
 	// Create exporter.
+	ctx := context.Background()
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	exporter, err := texporter.NewExporter(texporter.WithProjectID(projectID))
 	if err != nil {
 		log.Fatalf("texporter.NewExporter: %v", err)
 	}
+	defer exporter.Shutdown(ctx) // flushes any pending spans
 
 	// Create trace provider with the exporter.
 	//
@@ -44,17 +46,13 @@ func main() {
 	// ProbabilitySampler set at the desired probability.
 	// Example:
 	//   config := sdktrace.Config{DefaultSampler:sdktrace.ProbabilitySampler(0.0001)}
-	//   tp, err := sdktrace.NewProvider(sdktrace.WithConfig(config), ...)
-	tp, err := sdktrace.NewProvider(sdktrace.WithSyncer(exporter))
-	if err != nil {
-		log.Fatal(err)
-	}
-	global.SetTraceProvider(tp)
+	//   tp := sdktrace.NewTracerProvider(sdktrace.WithConfig(config), ...)
+	tp := sdktrace.NewTracerProvider(sdktrace.WithSyncer(exporter))
+	global.SetTracerProvider(tp)
 
 	// [START opentelemetry_trace_custom_span]
-	ctx := context.Background()
 	// Create custom span.
-	tracer := global.TraceProvider().Tracer("example.com/trace")
+	tracer := global.TracerProvider().Tracer("example.com/trace")
 	err = func(ctx context.Context) error {
 		ctx, span := tracer.Start(ctx, "foo")
 		defer span.End()

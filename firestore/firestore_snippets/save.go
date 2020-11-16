@@ -139,8 +139,19 @@ func updateDoc(ctx context.Context, client *firestore.Client) error {
 	// [START fs_update_doc]
 	// [START firestore_data_set_field]
 	_, err := client.Collection("cities").Doc("DC").Set(ctx, map[string]interface{}{
-		"capital": true,
-	}, firestore.MergeAll)
+		"name":    "District of Columbia",
+		"country": "USA",
+	})
+	if err != nil {
+		log.Printf("adding city DC: %s", err)
+	}
+	// [START fs_update_doc]
+	_, err = client.Collection("cities").Doc("DC").Update(ctx, []firestore.Update{
+		{
+			Path:  "capital",
+			Value: true,
+		},
+	})
 	if err != nil {
 		// Handle any errors in an appropriate way, such as returning them.
 		log.Printf("An error has occurred: %s", err)
