@@ -39,7 +39,7 @@ func decryptSymmetric(w io.Writer, name string, ciphertext []byte) error {
 
 	// Optional, but recommended: Compute ciphertext's CRC32C.
 	// See crc32c() function below.
-	ciphertextCRC32C = crc32c(ciphertext)
+	ciphertextCRC32C := crc32c(ciphertext)
 
 	// Build the request.
 	req := &kmspb.DecryptRequest{
