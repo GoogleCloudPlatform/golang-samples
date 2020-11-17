@@ -65,7 +65,7 @@ func decryptAsymmetric(w io.Writer, name string, ciphertext []byte) error {
 	if result.VerifiedCiphertextCrc32C == false {
 		return fmt.Errorf("AsymmetricDecrypt: request corrupted in-transit")
 	}
-	if crc32c(result.Plaintext) != result.PlaintextCrc32C {
+	if crc32c(result.Plaintext) != result.PlaintextCrc32C.Value {
 		return fmt.Errorf("AsymmetricDecrypt: response corrupted in-transit")
 	}
 	// End integrity verification

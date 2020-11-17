@@ -58,7 +58,7 @@ func getPublicKey(w io.Writer, name string) error {
 		return crc32.Checksum(data, t)
 	}
 
-	if crc32c(result.Pem) != result.PemCrc32C {
+	if crc32c(result.Pem) != result.PemCrc32C.Value {
 		return fmt.Errorf("Encrypt: response corrupted in-transit")
 	}
 	// End integrity verification

@@ -61,7 +61,7 @@ func decryptSymmetric(w io.Writer, name string, ciphertext []byte) error {
 	// Optional, but recommended: perform integrity verification on result.
 	// For more details on ensuring E2E in-transit integrity to and from Cloud KMS visit:
 	// https://cloud.google.com/kms/docs/data-integrity-guidelines
-	if crc32c(result.Plaintext) != result.PlaintextCrc32C {
+	if crc32c(result.Plaintext) != result.PlaintextCrc32C.Value {
 		return fmt.Errorf("Decrypt: response corrupted in-transit")
 	}
 	// End integrity verification

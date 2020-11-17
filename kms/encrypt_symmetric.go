@@ -69,7 +69,7 @@ func encryptSymmetric(w io.Writer, name string, message string) error {
 	if result.VerifiedPlaintextCrc32C == false {
 		return fmt.Errorf("Encrypt: request corrupted in-transit")
 	}
-	if crc32c(result.Ciphertext) != result.CiphertextCrc32C {
+	if crc32c(result.Ciphertext) != result.CiphertextCrc32C.Value {
 		return fmt.Errorf("Encrypt: response corrupted in-transit")
 	}
 	// End integrity verification
