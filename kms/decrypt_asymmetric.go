@@ -39,7 +39,11 @@ func decryptAsymmetric(w io.Writer, name string, ciphertext []byte) error {
 	}
 
 	// Optional but recommended: Compute ciphertext's CRC32C.
-	// See crc32c() function below.
+	crc32c := func(data []byte) uint32 {
+		t := crc32.MakeTable(crc32.Castagnoli)
+		return crc32.Checksum(data, t)
+	}
+
 	ciphertextCRC32C := crc32c(ciphertext)
 
 	// Build the request.
@@ -68,11 +72,6 @@ func decryptAsymmetric(w io.Writer, name string, ciphertext []byte) error {
 
 	fmt.Fprintf(w, "Decrypted plaintext: %s", result.Plaintext)
 	return nil
-}
-
-func crc32c(data []byte) uint32 {
-	t := crc32.MakeTable(crc32.Castagnoli)
-	return crc32.Checksum(data, t)
 }
 
 // [END kms_decrypt_asymmetric]

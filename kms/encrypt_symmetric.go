@@ -43,7 +43,11 @@ func encryptSymmetric(w io.Writer, name string, message string) error {
 	plaintext := []byte(message)
 
 	// Optional but recommended: Compute plaintext's CRC32C.
-	// See crc32c() function below.
+	crc32c := func(data []byte) uint32 {
+		t := crc32.MakeTable(crc32.Castagnoli)
+		return crc32.Checksum(data, t)
+	}
+
 	plaintextCRC32C := crc32c(plaintext)
 
 	// Build the request.
@@ -72,11 +76,6 @@ func encryptSymmetric(w io.Writer, name string, message string) error {
 
 	fmt.Fprintf(w, "Encrypted ciphertext: %s", result.Ciphertext)
 	return nil
-}
-
-func crc32c(data []byte) uint32 {
-	t := crc32.MakeTable(crc32.Castagnoli)
-	return crc32.Checksum(data, t)
 }
 
 // [END kms_encrypt_symmetric]

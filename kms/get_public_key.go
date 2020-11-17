@@ -20,6 +20,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"hash/crc32"
 	"io"
 
 	kms "cloud.google.com/go/kms/apiv1"
@@ -49,6 +50,19 @@ func getPublicKey(w io.Writer, name string) error {
 		return fmt.Errorf("failed to get public key: %v", err)
 	}
 
+	// Optional, but recommended: perform integrity verification on result.
+	// For more details on ensuring E2E in-transit integrity to and from Cloud KMS visit:
+	// https://cloud.google.com/kms/docs/data-integrity-guidelines
+	crc32c := func(data []byte) uint32 {
+		t := crc32.MakeTable(crc32.Castagnoli)
+		return crc32.Checksum(data, t)
+	}
+
+	if crc32c(result.Pem) != result.PemCrc32C {
+		return fmt.Errorf("Encrypt: response corrupted in-transit")
+	}
+	// End integrity verification
+
 	// The 'Pem' field is the raw string representation of the public key.
 	key := result.Pem
 
@@ -56,7 +70,6 @@ func getPublicKey(w io.Writer, name string) error {
 	// Optional - parse the public key. This transforms the string key into a Go
 	// PublicKey.
 	//
-
 	block, _ := pem.Decode([]byte(key))
 	publicKey, err := x509.ParsePKIXPublicKey(block.Bytes)
 	if err != nil {
