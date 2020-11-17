@@ -23,7 +23,7 @@ import (
 
 	kms "cloud.google.com/go/kms/apiv1"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
-	wrapperspb "google.golang.org/protobuf/types/known"
+	wrapperspb "google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 // decryptAsymmetric will attempt to decrypt a given ciphertext with an
