@@ -50,6 +50,10 @@ func getPublicKey(w io.Writer, name string) error {
 		return fmt.Errorf("failed to get public key: %v", err)
 	}
 
+	// The 'Pem' field is the raw string representation of the public key.
+	// Convert 'Pem' into bytes for further processing.
+	key := []byte(result.Pem)
+
 	// Optional, but recommended: perform integrity verification on result.
 	// For more details on ensuring E2E in-transit integrity to and from Cloud KMS visit:
 	// https://cloud.google.com/kms/docs/data-integrity-guidelines
@@ -57,17 +61,13 @@ func getPublicKey(w io.Writer, name string) error {
 		t := crc32.MakeTable(crc32.Castagnoli)
 		return crc32.Checksum(data, t)
 	}
-
-	if crc32c([]byte(result.Pem)) != result.PemCrc32C.Value {
+	if int64(crc32c(key)) != result.PemCrc32C.Value {
 		return fmt.Errorf("getPublicKey: response corrupted in-transit")
 	}
 
-	// The 'Pem' field is the raw string representation of the public key.
-	key := result.Pem
-
 	// Optional - parse the public key. This transforms the string key into a Go
 	// PublicKey.
-	block, _ := pem.Decode([]byte(key))
+	block, _ := pem.Decode(key)
 	publicKey, err := x509.ParsePKIXPublicKey(block.Bytes)
 	if err != nil {
 		return fmt.Errorf("failed to parse public key: %v", err)

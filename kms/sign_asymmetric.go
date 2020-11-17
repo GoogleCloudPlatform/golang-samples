@@ -88,7 +88,7 @@ func signAsymmetric(w io.Writer, name string, message string) error {
 	// if result.Name != req.Name {
 	//	return fmt.Errorf("AsymmetricSign: request corrupted in-transit")
 	// }
-	if crc32c(result.Signature) != result.SignatureCrc32C.Value {
+	if int64(crc32c(result.Signature)) != result.SignatureCrc32C.Value {
 		return fmt.Errorf("AsymmetricSign: response corrupted in-transit")
 	}
 
