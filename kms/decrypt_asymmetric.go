@@ -23,6 +23,7 @@ import (
 
 	kms "cloud.google.com/go/kms/apiv1"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
+	wrapperspb "google.golang.org/protobuf/types/known"
 )
 
 // decryptAsymmetric will attempt to decrypt a given ciphertext with an
@@ -50,7 +51,7 @@ func decryptAsymmetric(w io.Writer, name string, ciphertext []byte) error {
 	req := &kmspb.AsymmetricDecryptRequest{
 		Name:             name,
 		Ciphertext:       ciphertext,
-		CiphertextCrc32C: ciphertextCRC32C,
+		CiphertextCrc32C: wrapperspb.Int64(ciphertextCRC32C),
 	}
 
 	// Call the API.
