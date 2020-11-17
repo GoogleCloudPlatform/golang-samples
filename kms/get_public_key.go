@@ -53,9 +53,10 @@ func getPublicKey(w io.Writer, name string) error {
 	// Optional, but recommended: perform integrity verification on result.
 	// For more details on ensuring E2E in-transit integrity to and from Cloud KMS visit:
 	// https://cloud.google.com/kms/docs/data-integrity-guidelines
-	crc32c := func(data []byte) uint32 {
+	crc32c := func(data []byte) int64 {
 		t := crc32.MakeTable(crc32.Castagnoli)
-		return crc32.Checksum(data, t)
+		// Convert to int64 to match API's use of Int64Value wrapper for CRC32C fields
+		return int64(crc32.Checksum(data, t))
 	}
 
 	if crc32c(result.Pem) != result.PemCrc32C.Value {
@@ -66,10 +67,8 @@ func getPublicKey(w io.Writer, name string) error {
 	// The 'Pem' field is the raw string representation of the public key.
 	key := result.Pem
 
-	//
 	// Optional - parse the public key. This transforms the string key into a Go
 	// PublicKey.
-	//
 	block, _ := pem.Decode([]byte(key))
 	publicKey, err := x509.ParsePKIXPublicKey(block.Bytes)
 	if err != nil {

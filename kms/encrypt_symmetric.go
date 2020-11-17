@@ -23,6 +23,7 @@ import (
 
 	kms "cloud.google.com/go/kms/apiv1"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
+	wrapperspb "google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 // encryptSymmetric encrypts the input plaintext with the specified symmetric
@@ -43,9 +44,10 @@ func encryptSymmetric(w io.Writer, name string, message string) error {
 	plaintext := []byte(message)
 
 	// Optional but recommended: Compute plaintext's CRC32C.
-	crc32c := func(data []byte) uint32 {
+	crc32c := func(data []byte) int64 {
 		t := crc32.MakeTable(crc32.Castagnoli)
-		return crc32.Checksum(data, t)
+		// Convert to int64 to match API's use of Int64Value wrapper for CRC32C fields
+		return int64(crc32.Checksum(data, t))
 	}
 
 	plaintextCRC32C := crc32c(plaintext)
@@ -54,7 +56,7 @@ func encryptSymmetric(w io.Writer, name string, message string) error {
 	req := &kmspb.EncryptRequest{
 		Name:            name,
 		Plaintext:       plaintext,
-		PlaintextCrc32C: plaintextCRC32C,
+		PlaintextCrc32C: wrapperspb.Int64(plaintextCRC32C),
 	}
 
 	// Call the API.
