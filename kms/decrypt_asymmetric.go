@@ -40,9 +40,10 @@ func decryptAsymmetric(w io.Writer, name string, ciphertext []byte) error {
 	}
 
 	// Optional but recommended: Compute ciphertext's CRC32C.
-	crc32c := func(data []byte) uint32 {
+	crc32c := func(data []byte) int64 {
 		t := crc32.MakeTable(crc32.Castagnoli)
-		return crc32.Checksum(data, t)
+		// Convert to int64 to match API's use of Int64Value wrapper for CRC32C fields
+		return int64(crc32.Checksum(data, t))
 	}
 
 	ciphertextCRC32C := crc32c(ciphertext)
