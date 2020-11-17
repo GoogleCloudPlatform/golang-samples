@@ -23,7 +23,7 @@ import (
 
 	kms "cloud.google.com/go/kms/apiv1"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
-	wrapperspb "google.golang.org/protobuf/types/known/wrapperspb"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 // decryptSymmetric will decrypt the input ciphertext bytes using the specified symmetric key.
@@ -39,19 +39,17 @@ func decryptSymmetric(w io.Writer, name string, ciphertext []byte) error {
 	}
 
 	// Optional, but recommended: Compute ciphertext's CRC32C.
-	crc32c := func(data []byte) int64 {
+	crc32c := func(data []byte) uint32 {
 		t := crc32.MakeTable(crc32.Castagnoli)
-		// Convert to int64 to match API's use of Int64Value wrapper for CRC32C fields
-		return int64(crc32.Checksum(data, t))
+		return crc32.Checksum(data, t)
 	}
-
 	ciphertextCRC32C := crc32c(ciphertext)
 
 	// Build the request.
 	req := &kmspb.DecryptRequest{
 		Name:             name,
 		Ciphertext:       ciphertext,
-		CiphertextCrc32C: wrapperspb.Int64(ciphertextCRC32C),
+		CiphertextCrc32C: wrapperspb.Int64(int64(ciphertextCRC32C)),
 	}
 
 	// Call the API.
@@ -66,7 +64,6 @@ func decryptSymmetric(w io.Writer, name string, ciphertext []byte) error {
 	if crc32c(result.Plaintext) != result.PlaintextCrc32C.Value {
 		return fmt.Errorf("Decrypt: response corrupted in-transit")
 	}
-	// End integrity verification
 
 	fmt.Fprintf(w, "Decrypted plaintext: %s", result.Plaintext)
 	return nil
