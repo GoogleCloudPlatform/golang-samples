@@ -316,7 +316,7 @@ func TestKMSObjects(t *testing.T) {
 				r.Errorf("Writer.Close: %v", err)
 			}
 		})
-		if err := сhangeObjectCSEKtoKMS(ioutil.Discard, bucket, object1, key, kmsKeyName); err != nil {
+		if err := сhangeObjectCSEKToKMS(ioutil.Discard, bucket, object1, key, kmsKeyName); err != nil {
 			t.Errorf("сhangeObjectCSEKtoKMS: %v", err)
 		}
 		attrs, err := obj.Attrs(ctx)

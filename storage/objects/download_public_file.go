@@ -22,9 +22,8 @@ import (
 	"io/ioutil"
 	"time"
 
-	"google.golang.org/api/option"
-
 	"cloud.google.com/go/storage"
+	"google.golang.org/api/option"
 )
 
 // downloadPublicFile downloads a public object.

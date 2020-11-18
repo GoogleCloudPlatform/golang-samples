@@ -26,11 +26,11 @@ import (
 
 // сhangeObjectCSEKtoKMS changes the key used to encrypt an object from
 // a customer-supplied encryption key to a customer-managed encryption key.
-func сhangeObjectCSEKToKMS(w io.Writer, bucket, object string, encryptionKey []byte, KMSKeyName string) error {
+func сhangeObjectCSEKToKMS(w io.Writer, bucket, object string, encryptionKey []byte, kmsKeyName string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	// encryptionKey := []byte("encryption-key")
-	// KMSKeyName := "projects/projectId/locations/global/keyRings/keyRingID/cryptoKeys/cryptoKeyID"
+	// kmsKeyName := "projects/projectId/locations/global/keyRings/keyRingID/cryptoKeys/cryptoKeyID"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -45,11 +45,11 @@ func сhangeObjectCSEKToKMS(w io.Writer, bucket, object string, encryptionKey []
 	obj := bkt.Object(object)
 	src := obj.Key(encryptionKey)
 	c := obj.CopierFrom(src)
-	c.DestinationKMSKeyName = KMSKeyName
+	c.DestinationKMSKeyName = kmsKeyName
 	if _, err := c.Run(ctx); err != nil {
 		return fmt.Errorf("Copier.Run: %v", err)
 	}
-	fmt.Fprintf(w, "Object %v in bucket %v is now managed by the KMS key %v instead of a customer-supplied encryption key\n", object, bucket, KMSKeyName)
+	fmt.Fprintf(w, "Object %v in bucket %v is now managed by the KMS key %v instead of a customer-supplied encryption key\n", object, bucket, kmsKeyName)
 	return nil
 }
 
