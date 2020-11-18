@@ -28,8 +28,6 @@ func TestMain(t *testing.T) {
 	env := map[string]string{"GOOGLE_CLOUD_PROJECT": tc.ProjectID}
 	scope := fmt.Sprintf("projects/%s", tc.ProjectID)
 	identity := "user:user1@example.com"
-	expandResources := true
-	outputResourceEdges := true
 
 	m := testutil.BuildMain(t)
 	defer m.Cleanup()
@@ -38,7 +36,7 @@ func TestMain(t *testing.T) {
 		t.Errorf("failed to build app")
 	}
 
-	stdOut, stdErr, err := m.Run(env, 2*time.Minute, fmt.Sprintf("--scope=%s", scope), fmt.Sprintf("--identity=%s", identity), fmt.Sprintf("--expandResources=%t", expandResources), fmt.Sprintf("--outputResourceEdges=%t", outputResourceEdges))
+	stdOut, stdErr, err := m.Run(env, 2*time.Minute, fmt.Sprintf("--scope=%s", scope), fmt.Sprintf("--identity=%s", identity))
 
 	if err != nil {
 		t.Errorf("execution failed: %v", err)
@@ -51,3 +49,4 @@ func TestMain(t *testing.T) {
 		t.Errorf("stdout returned %s, wanted to contain %s", got, "user:user1@example.com")
 	}
 }
+

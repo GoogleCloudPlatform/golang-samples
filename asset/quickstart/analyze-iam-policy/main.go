@@ -30,8 +30,6 @@ import (
 func main() {
 	scope := flag.String("scope", "", "Scope of the analysis.")
 	identity := flag.String("identity", "", "Query identity.")
-	expandResources := flag.Bool("expandResources", false, "Query option of expanding resources.")
-	outputResourceEdges := flag.Bool("outputResourceEdges", false, "Query option of outputing resource edges.")
 	flag.Parse()
 	ctx := context.Background()
 	client, err := asset.NewClient(ctx)
@@ -47,8 +45,8 @@ func main() {
 				Identity: *identity,
 			},
 			Options: &assetpb.IamPolicyAnalysisQuery_Options{
-				ExpandResources:     *expandResources,
-				OutputResourceEdges: *outputResourceEdges,
+				ExpandResources:     true,
+				OutputResourceEdges: true,
 			},
 		},
 	}
