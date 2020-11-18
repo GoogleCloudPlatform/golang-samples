@@ -14,7 +14,7 @@
 
 package main
 
-// [START fs_listen_errors]
+// [START firestore_listen_handle_error]
 import (
 	"context"
 	"fmt"
@@ -58,4 +58,4 @@ func listenErrors(ctx context.Context, w io.Writer, projectID, collection string
 	}
 }
 
-// [END fs_listen_errors]
+// [END firestore_listen_handle_error]
