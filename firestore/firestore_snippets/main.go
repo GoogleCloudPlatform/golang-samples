@@ -25,6 +25,7 @@ import (
 )
 
 // [START fs_class_definition]
+// [START firestore_data_custom_type_definition]
 
 // City represents a city.
 type City struct {
@@ -36,6 +37,7 @@ type City struct {
 	Regions    []string `firestore:"regions,omitempty"`
 }
 
+// [END firestore_data_custom_type_definition]
 // [END fs_class_definition]
 
 func main() {

@@ -14,7 +14,7 @@
 
 package main
 
-// [START fs_listen_document]
+// [START firestore_listen_document]
 import (
 	"context"
 	"fmt"
@@ -29,11 +29,11 @@ import (
 // listenDocument listens to a single document.
 func listenDocument(ctx context.Context, w io.Writer, projectID, collection string) error {
 	// projectID := "project-id"
-	// [START fs_detach_listener]
+	// [START firestore_listen_detach]
 	// Сontext with timeout stops listening to changes.
 	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
-	// [END fs_detach_listener]
+	// [END firestore_listen_detach]
 
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
@@ -59,4 +59,4 @@ func listenDocument(ctx context.Context, w io.Writer, projectID, collection stri
 	}
 }
 
-// [END fs_listen_document]
+// [END firestore_listen_document]
