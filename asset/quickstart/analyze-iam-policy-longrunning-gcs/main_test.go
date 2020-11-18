@@ -15,6 +15,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"testing"
@@ -36,7 +37,13 @@ func TestMain(t *testing.T) {
 		t.Errorf("failed to build app")
 	}
 
-	stdOut, stdErr, err := m.Run(env, 2*time.Minute, fmt.Sprintf("--scope=%s", scope), fmt.Sprintf("--fullResourceName=%s", fullResourceName))
+	// Delete the bucket (if it exists) then recreate it.
+	ctx := context.Background()
+	bucketName := fmt.Sprintf("%s-for-assets", tc.ProjectID)
+	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName)
+	uri := fmt.Sprintf("gs://%s/client_library_obj", bucketName)
+
+	stdOut, stdErr, err := m.Run(env, 2*time.Minute, fmt.Sprintf("--scope=%s", scope), fmt.Sprintf("--fullResourceName=%s", fullResourceName), fmt.Sprintf("--uri=%s", uri))
 
 	if err != nil {
 		t.Errorf("execution failed: %v", err)
@@ -45,8 +52,8 @@ func TestMain(t *testing.T) {
 		t.Errorf("did not expect stderr output, got %d bytes: %s", len(stdErr), string(stdErr))
 	}
 	got := string(stdOut)
-	if !strings.Contains(got, fullResourceName) {
-		t.Errorf("stdout returned %s, wanted to contain %s", got, fullResourceName)
+	if !strings.Contains(got, "output_config") {
+		t.Errorf("stdout returned %s, wanted to contain %s", got, "output_config")
 	}
 }
 

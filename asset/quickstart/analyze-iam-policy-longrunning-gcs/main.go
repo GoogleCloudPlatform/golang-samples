@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START asset_quickstart_analyze_iam_policy]
+// [START asset_quickstart_analyze_iam_policy_longrunning_gcs]
 
-// Sample analyze_iam_policy analyzes accessible IAM policies that match a request.
+// Sample analyze_iam_policy_longrunning analyzes accessible IAM policies that match a request.
 package main
 
 import (
@@ -30,6 +30,7 @@ import (
 func main() {
 	scope := flag.String("scope", "", "Scope of the analysis.")
 	fullResourceName := flag.String("fullResourceName", "", "Query resource.")
+	uri := flag.String("uri", "", "Output GCS uri.")
 	flag.Parse()
 	ctx := context.Background()
 	client, err := asset.NewClient(ctx)
@@ -38,7 +39,7 @@ func main() {
 	}
 	defer client.Close()
 
-	req := &assetpb.AnalyzeIamPolicyRequest{
+	req := &assetpb.AnalyzeIamPolicyLongrunningRequest{
 		AnalysisQuery: &assetpb.IamPolicyAnalysisQuery{
 			Scope: *scope,
 			ResourceSelector: &assetpb.IamPolicyAnalysisQuery_ResourceSelector{
@@ -49,16 +50,21 @@ func main() {
 				OutputGroupEdges: true,
 			},
 		},
+		OutputConfig: &assetpb.IamPolicyAnalysisOutputConfig{
+			Destination: &assetpb.IamPolicyAnalysisOutputConfig_GcsDestination_{
+				GcsDestination: &assetpb.IamPolicyAnalysisOutputConfig_GcsDestination{
+					Uri: *uri,
+				},
+			},
+		},
 	}
 
-	op, err := client.AnalyzeIamPolicy(ctx, req)
+	op, err := client.AnalyzeIamPolicyLongrunning(ctx, req)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("AnalyzeIamPolicyLongrunning: %v", err)
 	}
-	for index, result := range op.MainAnalysis.AnalysisResults {
-		fmt.Println(index, result)
-	}
+	fmt.Print(op.Metadata())
 }
 
-// [END asset_quickstart_analyze_iam_policy]
+// [END asset_quickstart_analyze_iam_policy_longrunning_gcs]
 
