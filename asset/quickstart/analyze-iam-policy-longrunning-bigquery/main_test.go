@@ -76,4 +76,3 @@ func createDataset(ctx context.Context, t *testing.T, client *bigquery.Client, d
 		t.Fatalf("Dataset.Create(%q): %v", datasetID, err)
 	}
 }
-

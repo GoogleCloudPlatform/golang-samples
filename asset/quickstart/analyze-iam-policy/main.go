@@ -61,4 +61,3 @@ func main() {
 }
 
 // [END asset_quickstart_analyze_iam_policy]
-

@@ -49,4 +49,3 @@ func TestMain(t *testing.T) {
 		t.Errorf("stdout returned %s, wanted to contain %s", got, fullResourceName)
 	}
 }
-
