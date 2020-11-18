@@ -77,23 +77,3 @@ func createDataset(ctx context.Context, t *testing.T, client *bigquery.Client, d
 	}
 }
 
-// func createDataset(ctx context.Context, t *testing.T, client *bigquery.Client, datasetID string) {
-// 	d := client.Dataset(datasetID)
-// 	if _, err := d.Metadata(ctx); err == nil {
-// 		deleteDataset(ctx, t, client, datasetID)
-// 	}
-// 	meta := &bigquery.DatasetMetadata{
-// 		Location: "US", // See https://cloud.google.com/bigquery/docs/locations
-// 	}
-// 	if err := client.Dataset(datasetID).Create(ctx, meta); err != nil {
-// 		t.Fatalf("Dataset.Create(%q): %v", datasetID, err)
-// 	}
-// }
-
-// func deleteDataset(ctx context.Context, t *testing.T, client *bigquery.Client, datasetID string) {
-// 	d := client.Dataset(datasetID)
-// 	if errDelete := d.DeleteWithContents(ctx); errDelete != nil {
-// 		t.Fatalf("Dataset.Delete(%q): %v", datasetID, errDelete)
-// 	}
-// }
-
