@@ -26,7 +26,7 @@ import (
 
 // сhangeObjectCSEKtoKMS changes the key used to encrypt an object from
 // a customer-supplied encryption key to a customer-managed encryption key.
-func сhangeObjectCSEKtoKMS(w io.Writer, bucket, object string, encryptionKey []byte, KMSKeyName string) error {
+func сhangeObjectCSEKToKMS(w io.Writer, bucket, object string, encryptionKey []byte, KMSKeyName string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	// encryptionKey := []byte("encryption-key")
@@ -49,8 +49,7 @@ func сhangeObjectCSEKtoKMS(w io.Writer, bucket, object string, encryptionKey []
 	if _, err := c.Run(ctx); err != nil {
 		return fmt.Errorf("Copier.Run: %v", err)
 	}
-	fmt.Fprintf(w, "Object %v in bucket %v is now managed by the KMS key %v instead of a customer-supplied encryption key\n",
-		object, bucket, KMSKeyName)
+	fmt.Fprintf(w, "Object %v in bucket %v is now managed by the KMS key %v instead of a customer-supplied encryption key\n", object, bucket, KMSKeyName)
 	return nil
 }
 

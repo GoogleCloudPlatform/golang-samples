@@ -26,7 +26,7 @@ import (
 
 // changeObjectStorageClass changes the storage class of a single object.
 func changeObjectStorageClass(w io.Writer, bucket, object string) error {
-	// bucket:= "bucket-name"
+	// bucket := "bucket-name"
 	// object := "object-name"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
@@ -47,8 +47,7 @@ func changeObjectStorageClass(w io.Writer, bucket, object string) error {
 	// to rewrite the object with the desired storage class.
 	copier := obj.CopierFrom(obj)
 	copier.StorageClass = newStorageClass
-	_, err = copier.Run(ctx)
-	if err != nil {
+	if _, err := copier.Run(ctx); err != nil {
 		return fmt.Errorf("copier.Run: %v", err)
 	}
 	fmt.Fprintf(w, "Object %v in bucket %v had its storage class set to %v\n", object, bucket, newStorageClass)
