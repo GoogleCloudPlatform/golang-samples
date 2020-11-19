@@ -239,8 +239,9 @@ func TestObjects(t *testing.T) {
 	if err := deleteFile(ioutil.Discard, bucket, object2); err != nil {
 		t.Errorf("deleteFile: %v", err)
 	}
-	if err := deleteFile(ioutil.Discard, bucket, dstObj); err != nil {
-		t.Errorf("deleteFile: %v", err)
+	o := client.Bucket(bucket).Object(dstObj)
+	if err := o.Delete(ctx); err != nil {
+		t.Errorf("Object(%q).Delete: %v", dstObj, err)
 	}
 	if err := disableVersioning(ioutil.Discard, bucketVersioning); err != nil {
 		t.Fatalf("disableVersioning: %v", err)
