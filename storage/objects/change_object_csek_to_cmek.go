@@ -29,7 +29,12 @@ import (
 func сhangeObjectCSEKToKMS(w io.Writer, bucket, object string, encryptionKey []byte, kmsKeyName string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
-	// encryptionKey := []byte("encryption-key")
+
+	// encryptionKey is the Base64 encoded decryption key, which should be the same
+	// key originally used to encrypt the object.
+	// encryptionKey := []byte("TIbv/fjexq+VmtXzAlc63J4z5kFmWJ6NdAPQulQBT7g=")
+
+	// kmsKeyName is the name of the KMS key to manage this object with.
 	// kmsKeyName := "projects/projectId/locations/global/keyRings/keyRingID/cryptoKeys/cryptoKeyID"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
