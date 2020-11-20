@@ -69,11 +69,11 @@ func main() {
 
 	// Wait for the longrunning operation complete.
 	resp, err := op.Wait(ctx)
-	if err != nil && !op.Done(){
+	if err != nil && !op.Done() {
 		fmt.Println("failed to fetch operation status", err)
 		return
 	}
-	if err != nil && op.Done(){
+	if err != nil && op.Done() {
 		fmt.Println("operation completed with error", err)
 		return
 	}
