@@ -69,13 +69,15 @@ func main() {
 
 	// Wait for the longrunning operation complete.
 	resp, err := op.Wait(ctx)
-	if err != nil && !op.Done() {
+	if err != nil && !op.Done(){
 		fmt.Println("failed to fetch operation status", err)
-	} else if err != nil && op.Done() {
-		fmt.Println("operation completed with error", err)
-	} else {
-		fmt.Println("operation completed successfully", resp)
+		return
 	}
+	if err != nil && op.Done(){
+		fmt.Println("operation completed with error", err)
+		return
+	}
+	fmt.Println("operation completed successfully", resp)
 }
 
 // [END asset_quickstart_analyze_iam_policy_longrunning_bigquery]
