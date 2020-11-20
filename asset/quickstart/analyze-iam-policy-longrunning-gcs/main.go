@@ -64,6 +64,16 @@ func main() {
 		log.Fatalf("AnalyzeIamPolicyLongrunning: %v", err)
 	}
 	fmt.Print(op.Metadata())
+
+	// Wait for the longrunning operation complete.
+	resp, err := op.Wait(ctx)
+	if err != nil && !op.Done() {
+		fmt.Println("failed to fetch operation status", err)
+	} else if err != nil && op.Done() {
+		fmt.Println("operation completed with error", err)
+	} else {
+		fmt.Println("operation completed successfully", resp)
+	}
 }
 
 // [END asset_quickstart_analyze_iam_policy_longrunning_gcs]

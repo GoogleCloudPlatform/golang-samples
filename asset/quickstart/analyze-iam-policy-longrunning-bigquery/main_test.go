@@ -57,8 +57,8 @@ func TestMain(t *testing.T) {
 		t.Errorf("did not expect stderr output, got %d bytes: %s", len(stdErr), string(stdErr))
 	}
 	got := string(stdOut)
-	if !strings.Contains(got, "output_config") {
-		t.Errorf("stdout returned %s, wanted to contain %s", got, "output_config")
+	if !strings.Contains(got, dataset) {
+		t.Errorf("stdout returned %s, wanted to contain %s", got, dataset)
 	}
 }
 
