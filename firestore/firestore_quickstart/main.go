@@ -16,6 +16,7 @@
 package main
 
 // [START fs_initialize]
+// [START firestore_setup_client_create]
 import (
 	"context"
 	"fmt"
@@ -39,6 +40,7 @@ func createClient(ctx context.Context) *firestore.Client {
 	return client
 }
 
+// [END firestore_setup_client_create]
 // [END fs_initialize]
 
 func main() {
@@ -48,6 +50,7 @@ func main() {
 	defer client.Close()
 
 	// [START fs_add_data_1]
+	// [START firestore_setup_dataset_pt1]
 	_, _, err := client.Collection("users").Add(ctx, map[string]interface{}{
 		"first": "Ada",
 		"last":  "Lovelace",
@@ -56,9 +59,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed adding alovelace: %v", err)
 	}
+	// [END firestore_setup_dataset_pt1]
 	// [END fs_add_data_1]
 
 	// [START fs_add_data_2]
+	// [START firestore_setup_dataset_pt2]
 	_, _, err = client.Collection("users").Add(ctx, map[string]interface{}{
 		"first":  "Alan",
 		"middle": "Mathison",
@@ -68,9 +73,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed adding aturing: %v", err)
 	}
+	// [END firestore_setup_dataset_pt2]
 	// [END fs_add_data_2]
 
 	// [START fs_get_all_users]
+	// [START firestore_setup_dataset_read]
 	iter := client.Collection("users").Documents(ctx)
 	for {
 		doc, err := iter.Next()
@@ -82,5 +89,6 @@ func main() {
 		}
 		fmt.Println(doc.Data())
 	}
+	// [END firestore_setup_dataset_read]
 	// [END fs_get_all_users]
 }

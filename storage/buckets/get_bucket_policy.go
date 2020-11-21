@@ -14,7 +14,7 @@
 
 package buckets
 
-// [START storage_get_bucket_policy]
+// [START storage_view_bucket_iam_members]
 import (
 	"context"
 	"fmt"
@@ -26,7 +26,7 @@ import (
 )
 
 // getBucketPolicy gets the bucket IAM policy.
-func getBucketPolicy(w io.Writer, bucketName string) (*iam.Policy, error) {
+func getBucketPolicy(w io.Writer, bucketName string) (*iam.Policy3, error) {
 	// bucketName := "bucket-name"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
@@ -38,14 +38,14 @@ func getBucketPolicy(w io.Writer, bucketName string) (*iam.Policy, error) {
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 
-	policy, err := client.Bucket(bucketName).IAM().Policy(ctx)
+	policy, err := client.Bucket(bucketName).IAM().V3().Policy(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("Bucket(%q).IAM().Policy: %v", bucketName, err)
+		return nil, fmt.Errorf("Bucket(%q).IAM().V3().Policy: %v", bucketName, err)
 	}
-	for _, role := range policy.Roles() {
-		fmt.Fprintf(w, "%q: %q", role, policy.Members(role))
+	for _, binding := range policy.Bindings {
+		fmt.Fprintf(w, "%q: %q (condition: %v)\n", binding.Role, binding.Members, binding.Condition)
 	}
 	return policy, nil
 }
 
-// [END storage_get_bucket_policy]
+// [END storage_view_bucket_iam_members]

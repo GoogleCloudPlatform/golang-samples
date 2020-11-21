@@ -11,3 +11,4 @@
 
 /storage/        @GoogleCloudPlatform/storage-dpe @googleapis/yoshi-go-admins
 /logging/        @GoogleCloudPlatform/observability-devx @googleapis/yoshi-go-admins @nicoleczhu
+/errorreporting/ @GoogleCloudPlatform/observability-devx @googleapis/yoshi-go-admins @nicoleczhu
