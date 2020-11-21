@@ -29,10 +29,10 @@ import (
 // getOccurrencesForImage retrieves all the Occurrences associated with a specified image.
 // Here, all Occurrences are simply printed and counted.
 func getOccurrencesForImage(w io.Writer, resourceURL, projectID string) (int, error) {
-	// Use this style of URL when you use Google Container Registry
-	// resourceURL := fmt.Sprintf("https://gcr.io/my-project/my-repo/my-image")
-	// Use this style of URL when you use Google Artifact Registry
-	// resourceURL := fmt.Sprintf("https://LOCATION-docker.pkg.dev/my-project/my-repo/my-image")
+	// Use this style of URL when you use Google Container Registry.
+	// resourceURL := "https://gcr.io/my-project/my-repo/my-image"
+	// Use this style of URL when you use Google Artifact Registry.
+	// resourceURL := "https://LOCATION-docker.pkg.dev/my-project/my-repo/my-image"
 	ctx := context.Background()
 	client, err := containeranalysis.NewClient(ctx)
 	if err != nil {
