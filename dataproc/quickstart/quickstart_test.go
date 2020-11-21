@@ -145,7 +145,7 @@ func TestQuickstart(t *testing.T) {
 			r.Errorf("failed to deleteClusters: %v", err)
 			return
 		}
-		stdOut, stdErr, err := m.Run(nil, 10*time.Minute,
+		stdOut, stdErr, err := m.Run(nil, 15*time.Minute,
 			"--project_id", tc.ProjectID,
 			"--region", region,
 			"--cluster_name", clusterName,
