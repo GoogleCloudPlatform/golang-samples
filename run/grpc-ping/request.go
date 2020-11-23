@@ -14,6 +14,7 @@
 
 package main
 
+// [START cloudrun_grpc_request]
 // [START run_grpc_request]
 
 import (
@@ -34,6 +35,7 @@ func pingRequest(conn *grpc.ClientConn, p *pb.Request) (*pb.Response, error) {
 }
 
 // [END run_grpc_request]
+// [END cloudrun_grpc_request]
 
 // PingRequest creates a new gRPC request to the upstream ping gRPC service.
 func PingRequest(conn *grpc.ClientConn, p *pb.Request, url string, authenticated bool) (*pb.Response, error) {
