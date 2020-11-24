@@ -324,8 +324,8 @@ func TestKMSObjects(t *testing.T) {
 		if err != nil {
 			t.Errorf("obj.Attrs: %v", err)
 		}
-		if attrs.KMSKeyName != kmsKeyName {
-			t.Errorf("got %v want %v", attrs.KMSKeyName, kmsKeyName)
+		if got, want := attrs.KMSKeyName, kmsKeyName; !strings.Contains(got, want) {
+			t.Errorf("attrs.KMSKeyName expected %q to contain %q", got, want)
 		}
 	})
 
