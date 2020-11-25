@@ -26,8 +26,11 @@ import (
 
 // createsOccurrence creates and returns a new Occurrence of a previously created vulnerability Note.
 func createOccurrence(resourceURL, noteID, occProjectID, noteProjectID string) (*grafeaspb.Occurrence, error) {
-	// resourceURL := fmt.Sprintf("https://gcr.io/my-project/my-image")
-	// noteID := fmt.Sprintf("my-note")
+	// Use this style of URL when you use Google Container Registry.
+	// resourceURL := "https://gcr.io/my-project/my-repo/my-image"
+	// Use this style of URL when you use Google Artifact Registry.
+	// resourceURL := "https://LOCATION-docker.pkg.dev/my-project/my-repo/my-image"
+	// noteID := "my-note"
 	ctx := context.Background()
 	client, err := containeranalysis.NewClient(ctx)
 	if err != nil {
