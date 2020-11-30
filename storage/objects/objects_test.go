@@ -43,14 +43,15 @@ func TestObjects(t *testing.T) {
 	defer client.Close()
 
 	var (
-		bucket                = tc.ProjectID + "-samples-object-bucket-1"
-		dstBucket             = tc.ProjectID + "-samples-object-bucket-2"
-		bucketVersioning      = tc.ProjectID + "-bucket-versioning-enabled"
-		object1               = "foo.txt"
-		object2               = "foo/a.txt"
-		object3               = "bar.txt"
-		allAuthenticatedUsers = storage.AllAuthenticatedUsers
-		roleReader            = storage.RoleReader
+		bucket           = tc.ProjectID + "-samples-object-bucket-1"
+		dstBucket        = tc.ProjectID + "-samples-object-bucket-2"
+		bucketVersioning = tc.ProjectID + "-bucket-versioning-enabled"
+		object1          = "foo.txt"
+		object2          = "foo/a.txt"
+		object3          = "bar.txt"
+		dstObj           = "foobar.txt"
+		allUsers         = storage.AllUsers
+		roleReader       = storage.RoleReader
 	)
 
 	testutil.CleanBucket(ctx, t, tc.ProjectID, bucket)
@@ -142,6 +143,21 @@ func TestObjects(t *testing.T) {
 			t.Errorf("downloadUsingRequesterPays: %v", err)
 		}
 	}
+	t.Run("changeObjectStorageClass", func(t *testing.T) {
+		bkt := client.Bucket(bucket)
+		obj := bkt.Object(object1)
+		if err := changeObjectStorageClass(ioutil.Discard, bucket, object1); err != nil {
+			t.Errorf("changeObjectStorageClass: %v", err)
+		}
+		wantStorageClass := "COLDLINE"
+		oattrs, err := obj.Attrs(ctx)
+		if err != nil {
+			t.Errorf("obj.Attrs: %v", err)
+		}
+		if oattrs.StorageClass != wantStorageClass {
+			t.Errorf("object storage class: got %q, want %q", oattrs.StorageClass, wantStorageClass)
+		}
+	})
 	if err := copyOldVersionOfObject(ioutil.Discard, bucketVersioning, object1, object3, gen); err != nil {
 		t.Fatalf("copyOldVersionOfObject: %v", err)
 	}
@@ -161,9 +177,18 @@ func TestObjects(t *testing.T) {
 	if err != nil {
 		t.Errorf("getMetadata: %v", err)
 	}
-	if err := makePublic(ioutil.Discard, bucket, object1, allAuthenticatedUsers, roleReader); err != nil {
-		t.Errorf("makePublic: %v", err)
-	}
+	t.Run("publicFile", func(t *testing.T) {
+		if err := makePublic(ioutil.Discard, bucket, object1, allUsers, roleReader); err != nil {
+			t.Errorf("makePublic: %v", err)
+		}
+		data, err = downloadPublicFile(ioutil.Discard, bucket, object1)
+		if err != nil {
+			t.Fatalf("downloadPublicFile: %v", err)
+		}
+		if got, want := string(data), "Hello\nworld"; got != want {
+			t.Errorf("contents = %q; want %q", got, want)
+		}
+	})
 
 	err = moveFile(ioutil.Discard, bucket, object1)
 	if err != nil {
@@ -175,6 +200,19 @@ func TestObjects(t *testing.T) {
 	if err := copyFile(ioutil.Discard, dstBucket, bucket, object1); err != nil {
 		t.Errorf("copyFile: %v", err)
 	}
+	t.Run("composeFile", func(t *testing.T) {
+		if err := composeFile(ioutil.Discard, bucket, object1, object2, dstObj); err != nil {
+			t.Errorf("composeFile: %v", err)
+		}
+		bkt := client.Bucket(bucket)
+		obj := bkt.Object(dstObj)
+		_, err = obj.Attrs(ctx)
+		if err == storage.ErrObjectNotExist {
+			t.Errorf("Destination object was not created")
+		} else if err != nil {
+			t.Errorf("object.Attrs: %v", err)
+		}
+	})
 
 	key := []byte("my-secret-AES-256-encryption-key")
 	newKey := []byte("My-secret-AES-256-encryption-key")
@@ -201,10 +239,13 @@ func TestObjects(t *testing.T) {
 	if err := deleteFile(ioutil.Discard, bucket, object2); err != nil {
 		t.Errorf("deleteFile: %v", err)
 	}
+	o := client.Bucket(bucket).Object(dstObj)
+	if err := o.Delete(ctx); err != nil {
+		t.Errorf("Object(%q).Delete: %v", dstObj, err)
+	}
 	if err := disableVersioning(ioutil.Discard, bucketVersioning); err != nil {
 		t.Fatalf("disableVersioning: %v", err)
 	}
-
 	bAttrs, err = bkt.Attrs(ctx)
 	if err != nil {
 		t.Fatalf("Bucket(%q).Attrs: %v", bucketVersioning, err)
@@ -262,6 +303,31 @@ func TestKMSObjects(t *testing.T) {
 	testutil.CleanBucket(ctx, t, tc.ProjectID, bucket)
 
 	kmsKeyName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", tc.ProjectID, "global", keyRingID, cryptoKeyID)
+	t.Run("сhangeObjectCSEKtoKMS", func(t *testing.T) {
+		object1 := "foo.txt"
+		key := []byte("my-secret-AES-256-encryption-key")
+		obj := client.Bucket(bucket).Object(object1)
+
+		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+			wc := obj.Key(key).NewWriter(ctx)
+			if _, err := wc.Write([]byte("top secret")); err != nil {
+				r.Errorf("Writer.Write: %v", err)
+			}
+			if err := wc.Close(); err != nil {
+				r.Errorf("Writer.Close: %v", err)
+			}
+		})
+		if err := сhangeObjectCSEKToKMS(ioutil.Discard, bucket, object1, key, kmsKeyName); err != nil {
+			t.Errorf("сhangeObjectCSEKtoKMS: %v", err)
+		}
+		attrs, err := obj.Attrs(ctx)
+		if err != nil {
+			t.Errorf("obj.Attrs: %v", err)
+		}
+		if got, want := attrs.KMSKeyName, kmsKeyName; !strings.Contains(got, want) {
+			t.Errorf("attrs.KMSKeyName expected %q to contain %q", got, want)
+		}
+	})
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		if err := uploadWithKMSKey(ioutil.Discard, bucket, object, kmsKeyName); err != nil {
