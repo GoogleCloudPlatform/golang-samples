@@ -51,8 +51,9 @@ contrib.go.opencensus.io/exporter/stackdriver v0.13.4/go.mod h1:aXENhDJ1Y4lIg4EU
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
-github.com/GoogleCloudPlatform/golang-samples/run/grpc-server-streaming v0.0.0-20201113163810-8bf1fa39bf2b h1:4cbMon1qIJabu/mbdFKfnYkpJytOLiFHAEv08so4uJA=
-github.com/GoogleCloudPlatform/golang-samples/run/grpc-server-streaming v0.0.0-20201113163810-8bf1fa39bf2b/go.mod h1:iprT2HyH50HN5uakQT7JfhsmsLt/p+0ZXqI7sFRZjdM=
+github.com/GoogleCloudPlatform/golang-samples v0.0.0-20201125203603-a12e2fd198c0/go.mod h1:poulIHau2BZo+vdoqJROxS15hGsbRkcFAG5rBTKSfvA=
+github.com/GoogleCloudPlatform/golang-samples/run/grpc-ping v0.0.0-20201125203603-a12e2fd198c0/go.mod h1:1ZVpv9dvahsss5LdTfaqNCl3RoTqGAtdEFUv2B16/UY=
+github.com/GoogleCloudPlatform/golang-samples/run/grpc-server-streaming v0.0.0-20201125203603-a12e2fd198c0/go.mod h1:p3eS/KZ4pic9RGSHaREA4jCzGkpD38NQFn3dtBEr8BQ=
 github.com/aws/aws-sdk-go v1.23.20/go.mod h1:KmX6BPdI08NWTb3/sm4ZGu5ShLoqVDhKgpiN924inxo=
 github.com/aws/aws-sdk-go v1.35.28/go.mod h1:tlPOdRjfxPBpNIwqDj61rmsnA85v9jc0Ps9+muhnW+k=
 github.com/bmatcuk/doublestar/v2 v2.0.3/go.mod h1:QMmcs3H2AUQICWhfzLXz+IYln8lRQmTZRptLie8RgRw=
@@ -483,7 +484,6 @@ google.golang.org/grpc v1.30.0/go.mod h1:N36X2cJ7JwdamYAgDz+s+rVMFjt3numwzf/HckM
 google.golang.org/grpc v1.31.0/go.mod h1:N36X2cJ7JwdamYAgDz+s+rVMFjt3numwzf/HckM8pak=
 google.golang.org/grpc v1.31.1 h1:SfXqXS5hkufcdZ/mHtYCh53P2b+92WQq/DZcKLgsFRs=
 google.golang.org/grpc v1.31.1/go.mod h1:N36X2cJ7JwdamYAgDz+s+rVMFjt3numwzf/HckM8pak=
-google.golang.org/grpc v1.32.0/go.mod h1:N36X2cJ7JwdamYAgDz+s+rVMFjt3numwzf/HckM8pak=
 google.golang.org/grpc v1.33.2 h1:EQyQC3sa8M+p6Ulc8yy9SWSS2GVwyRc83gAbG8lrl4o=
 google.golang.org/grpc v1.33.2/go.mod h1:JMHMWHQWaTccqQQlmk3MJZS+GWXOdAesneDmEnv2fbc=
 google.golang.org/grpc/examples v0.0.0-20200707005602-4258d12073b4/go.mod h1:5j1uub0jRGhRiSghIlrThmBUgcgLXOVJQ/l1getT4uo=
