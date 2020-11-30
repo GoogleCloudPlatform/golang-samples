@@ -131,7 +131,7 @@ func deleteClusters(ctx context.Context, projectID string) error {
 }
 
 func TestQuickstart(t *testing.T) {
-	tc := testutil.EndToEndTest(t)
+	tc := testutil.SystemTest(t)
 	m := testutil.BuildMain(t)
 	setup(t, tc.ProjectID)
 	defer teardown(t, tc.ProjectID)
@@ -145,7 +145,7 @@ func TestQuickstart(t *testing.T) {
 			r.Errorf("failed to deleteClusters: %v", err)
 			return
 		}
-		stdOut, stdErr, err := m.Run(nil, 15*time.Minute,
+		stdOut, stdErr, err := m.Run(nil, 10*time.Minute,
 			"--project_id", tc.ProjectID,
 			"--region", region,
 			"--cluster_name", clusterName,
@@ -161,8 +161,7 @@ func TestQuickstart(t *testing.T) {
 		got := string(stdOut)
 		wants := []string{
 			"Cluster created successfully",
-			"Submitted job",
-			"finished with state DONE:",
+			"Job finished successfully",
 			"successfully deleted",
 		}
 		for _, want := range wants {
