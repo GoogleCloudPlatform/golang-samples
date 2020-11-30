@@ -25,8 +25,8 @@ import (
 	"google.golang.org/genproto/protobuf/field_mask"
 )
 
-// addSecurityMarks adds/updates a the security marks for the assetName.
-// Specifically, it sets "key_a" an "key_b" to "value_a" and "value_b"
+// addSecurityMarks adds/updates the security marks for the assetName.
+// Specifically, it sets "key_a" and "key_b" to "value_a" and "value_b"
 // respectively.  assetName is the resource path for an asset.
 func addSecurityMarks(w io.Writer, assetName string) error {
 	// assetName := "organizations/123123342/assets/12312321"

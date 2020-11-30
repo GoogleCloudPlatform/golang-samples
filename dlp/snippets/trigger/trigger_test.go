@@ -44,7 +44,7 @@ func TestTriggersSamples(t *testing.T) {
 	}
 
 	if err := createTrigger(buf, tc.ProjectID, "my-trigger", "My Trigger", "Test trigger", "my-bucket", nil); err != nil {
-		t.Errorf("createTrigger: %v", err)
+		t.Fatalf("createTrigger: %v", err)
 	}
 	if got, want := buf.String(), "Successfully created trigger"; !strings.Contains(got, want) {
 		t.Errorf("createTrigger got\n----\n%v\n----\nWant to contain:\n----\n%v\n----", got, want)
