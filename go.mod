@@ -13,8 +13,8 @@ require (
 	cloud.google.com/go/spanner v1.10.0
 	cloud.google.com/go/storage v1.11.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.4
-	github.com/aws/aws-sdk-go v1.35.28
-	github.com/bmatcuk/doublestar/v2 v2.0.3
+	github.com/aws/aws-sdk-go v1.35.35
+	github.com/bmatcuk/doublestar/v2 v2.0.4
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
 	github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -24,14 +24,14 @@ require (
 	github.com/gofrs/uuid v3.3.0+incompatible
 	github.com/golang/protobuf v1.4.3
 	github.com/gomodule/redigo v2.0.0+incompatible
-	github.com/google/go-cmp v0.5.3
+	github.com/google/go-cmp v0.5.4
 	github.com/google/uuid v1.1.2
 	github.com/googleapis/gax-go/v2 v2.0.5
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/h2non/filetype v1.1.0
 	github.com/lib/pq v1.8.0
-	github.com/linkedin/goavro/v2 v2.9.8
+	github.com/linkedin/goavro/v2 v2.10.0
 	github.com/mailgun/mailgun-go/v3 v3.6.4
 	github.com/mailjet/mailjet-apiv3-go v0.0.0-20190724151621-55e56f74078c
 	github.com/philhofer/fwd v1.0.0 // indirect
@@ -45,12 +45,12 @@ require (
 	golang.org/x/text v0.3.4
 	google.golang.org/api v0.35.0
 	google.golang.org/appengine v1.6.7
-	google.golang.org/genproto v0.0.0-20201116144945-7adebfbe6a3f
+	google.golang.org/genproto v0.0.0-20201119123407-9b1e624d6bc4
 	google.golang.org/grpc v1.33.2
 	google.golang.org/grpc/examples v0.0.0-20200707005602-4258d12073b4
 	google.golang.org/protobuf v1.25.0
 	gopkg.in/sendgrid/sendgrid-go.v2 v2.0.0
-	gopkg.in/yaml.v2 v2.3.0
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 // https://github.com/jstemmer/go-junit-report/issues/107
