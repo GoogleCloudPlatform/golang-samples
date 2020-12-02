@@ -78,7 +78,7 @@ func submitJob(w io.Writer, projectID, region, clusterName string) error {
 	re := regexp.MustCompile("gs://(.*?)/(.*)")
 	matches := re.FindStringSubmatch(submitJobResp.DriverOutputResourceUri)
 
-	// Dataproc job outget gets saved to a GCS bucket allocated to it.
+	// Dataproc job output gets saved to a GCS bucket allocated to it.
 	storageClient, err := storage.NewClient(ctx)
 	if err != nil {
 		return fmt.Errorf("error creating storage client: %v", err)
