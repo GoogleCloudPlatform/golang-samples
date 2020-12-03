@@ -136,7 +136,7 @@ func main() {
 		return
 	}
 
-	re := regexp.MustCompile("gs://(.*?)/(.*)")
+	re := regexp.MustCompile("gs://(.+?)/(.+)")
 	matches := re.FindStringSubmatch(submitJobResp.DriverOutputResourceUri)
 
 	if len(matches) < 3 {
