@@ -139,6 +139,11 @@ func main() {
 	re := regexp.MustCompile("gs://(.*?)/(.*)")
 	matches := re.FindStringSubmatch(submitJobResp.DriverOutputResourceUri)
 
+	if len(matches) < 3 {
+		fmt.Printf("regex error: %s\n", submitJobResp.DriverOutputResourceUri)
+		return
+	}
+
 	// Dataproc job outget gets saved to a GCS bucket allocated to it.
 	storageClient, err := storage.NewClient(ctx)
 	if err != nil {

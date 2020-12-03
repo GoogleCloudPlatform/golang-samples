@@ -131,7 +131,7 @@ func deleteClusters(ctx context.Context, projectID string) error {
 }
 
 func TestQuickstart(t *testing.T) {
-	tc := testutil.SystemTest(t)
+	tc := testutil.EndToEndTest(t)
 	m := testutil.BuildMain(t)
 	setup(t, tc.ProjectID)
 	defer teardown(t, tc.ProjectID)

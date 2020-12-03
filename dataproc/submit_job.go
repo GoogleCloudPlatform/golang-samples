@@ -64,7 +64,6 @@ func submitJob(w io.Writer, projectID, region, clusterName string) error {
 		},
 	}
 
-	// Create the job client.
 	submitJobOp, err := jobClient.SubmitJobAsOperation(ctx, submitJobReq)
 	if err != nil {
 		return fmt.Errorf("error with request to submitting job: %v", err)
@@ -75,10 +74,14 @@ func submitJob(w io.Writer, projectID, region, clusterName string) error {
 		return fmt.Errorf("error submitting job: %v", err)
 	}
 
-	re := regexp.MustCompile("gs://(.*?)/(.*)")
+	re := regexp.MustCompile("gs://(.+?)/(.+)")
 	matches := re.FindStringSubmatch(submitJobResp.DriverOutputResourceUri)
+	
+	if len(matches) < 3 {
+		return fmt.Errorf("regex error: %s", submitJobResp.DriverOutputResourceUri)
+	}
 
-	// Dataproc job outget gets saved to a GCS bucket allocated to it.
+	// Dataproc job output gets saved to a GCS bucket allocated to it.
 	storageClient, err := storage.NewClient(ctx)
 	if err != nil {
 		return fmt.Errorf("error creating storage client: %v", err)
