@@ -72,6 +72,9 @@ If there are many samples to write in the same directory, use filename prefixes
 to group the files acting on similar types (for example, when writing
 create/update/delete type samples).
 
+Hosting platform samples may require a different directory and file structure.
+When possible, follow the pattern of existing samples for that product.
+
 ## Include imports and flags in region tags
 
 The sample region (e.g. `[START foo]` and `[END foo]`) should include the import
@@ -170,7 +173,7 @@ body of the sample function.
 ```go
 // delete deletes the resource identified by name.
 func delete(w io.Writer, name string) error {
-	// name := fmt.Sprintf("/projects/my-project/resources/my-resource")
+	// name := "/projects/my-project/resources/my-resource"
 	ctx := context.Background()
 	client, err := foo.NewClient(ctx)
 	if err != nil {
@@ -369,6 +372,14 @@ See [Don't export sample functions](#dont-export-sample-functions).
 
 Do not use the `reflect` package.
 
+## Go version in go.mod files
+
+The Go version in `go.mod` files is the minimum version of Go supported by the
+module. Generally, this should be the minimum version supported & tested by the
+repo. There are some cases where we need a higher minimum version.
+
+Do not update the minimum version unless required.
+
 ## Use `testutil` for tests
 
 All tests should use `testutil.SystemTest` or variants. `testutil` checks the
@@ -399,11 +410,17 @@ When creating resources for tests, avoid using UUIDs. Instead, prefer
 resource names that incorporate aspects of your test, such as `tc.ProjectID +
 -golang-test-mypai-mysnippet`. 
 
+The intention for this is that test can be run in parallel with different
+versions of Go without race conditions. You may need a different or more
+specific identifier, depending on the sample and test.
+
 ## Running system tests
 
+1. To run the system test yourself, you need a Google Cloud Project and a service account. During the creation of the service account, you should download the JSON credential file.
+1. Ensure the IAM roles needed by the tests are added to the service account.
+1. Ensure you are logged in using `gcloud auth login`.
 1. Set the `GOLANG_SAMPLES_PROJECT_ID` environment variable to a suitable test project.
-1. Ensure you are logged in using `gcloud auth login` or set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable to the path of your credentials file.
-   Tests are authenticated using [Application Default Credentials](https://developers.google.com/identity/protocols/application-default-credentials).
+1. Set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable to the credential file path. Tests are authenticated using [Application Default Credentials](https://developers.google.com/identity/protocols/application-default-credentials).
 1. Install the test dependencies:
 
     `go get -t -d github.com/GoogleCloudPlatform/golang-samples/...`

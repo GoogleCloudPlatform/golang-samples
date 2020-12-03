@@ -34,6 +34,7 @@ var allowList = []string{
 	"**/*.go",
 	"**/*.md",
 	"**/*.yaml",
+	"**/*.yml",
 	"**/*.sh",
 	"**/*.bash",
 	"**/*.mod",

@@ -16,6 +16,7 @@
 package security
 
 // [START functions_bearer_token]
+// [START cloudrun_service_to_service_auth]
 // [START run_service_to_service_auth]
 
 import (
@@ -51,4 +52,5 @@ func makeGetRequest(w io.Writer, targetURL string) error {
 }
 
 // [END run_service_to_service_auth]
+// [END cloudrun_service_to_service_auth]
 // [END functions_bearer_token]
