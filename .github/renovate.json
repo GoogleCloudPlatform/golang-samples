@@ -17,6 +17,10 @@
     {
       "updateTypes": ["major"],
       "enabled": false
+    },
+    {
+      "packageNames": ["golang.org/x/tools"],
+      "enabled": false
     }
   ]
 }
