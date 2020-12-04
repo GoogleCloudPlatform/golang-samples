@@ -56,7 +56,7 @@ func TestTranslate(t *testing.T) {
 			}
 
 			msg, err := json.Marshal(Translation{
-				Original: "Hello",
+				Original: "Me",
 				Language: "fr",
 			})
 			if err != nil {
@@ -78,10 +78,10 @@ func TestTranslate(t *testing.T) {
 				return false
 			}
 			want := Translation{
-				Original:         "Hello",
+				Original:         "Me",
 				OriginalLanguage: "en",
 				Language:         "fr",
-				Translated:       "Bonjour",
+				Translated:       "Moi",
 			}
 			if translations[0] != want {
 				errorf("Translate got:\n%+v\nWant:\n%+v", translations[0], want)
