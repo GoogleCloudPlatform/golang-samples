@@ -76,7 +76,7 @@ func submitJob(w io.Writer, projectID, region, clusterName string) error {
 
 	re := regexp.MustCompile("gs://(.+?)/(.+)")
 	matches := re.FindStringSubmatch(submitJobResp.DriverOutputResourceUri)
-	
+
 	if len(matches) < 3 {
 		return fmt.Errorf("regex error: %s", submitJobResp.DriverOutputResourceUri)
 	}
