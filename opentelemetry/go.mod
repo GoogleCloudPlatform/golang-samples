@@ -6,8 +6,8 @@ require (
 	cloud.google.com/go v0.71.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v0.13.0
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	go.opentelemetry.io/otel v0.14.0
-	go.opentelemetry.io/otel/sdk v0.14.0
+	go.opentelemetry.io/otel v0.13.0
+	go.opentelemetry.io/otel/sdk v0.13.0
 	golang.org/x/net v0.0.0-20201109172640-a11eb1b685be // indirect
 	golang.org/x/oauth2 v0.0.0-20201109201403-9fd604954f58 // indirect
 	golang.org/x/sys v0.0.0-20201109165425-215b40eba54c // indirect
