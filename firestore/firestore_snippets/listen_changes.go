@@ -14,7 +14,7 @@
 
 package main
 
-// [START fs_listen_changes]
+// [START firestore_listen_query_changes]
 import (
 	"context"
 	"fmt"
@@ -63,4 +63,4 @@ func listenChanges(ctx context.Context, w io.Writer, projectID, collection strin
 	}
 }
 
-// [END fs_listen_changes]
+// [END firestore_listen_query_changes]

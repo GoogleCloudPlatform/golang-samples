@@ -537,6 +537,8 @@ Examples:
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
 	defer cancel()
 	adminClient, dataClient := createClients(ctx, db)
+	defer adminClient.Close()
+	defer dataClient.Close()
 	if err := run(ctx, adminClient, dataClient, os.Stdout, cmd, db); err != nil {
 		os.Exit(1)
 	}

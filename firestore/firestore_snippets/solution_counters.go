@@ -15,6 +15,7 @@
 package main
 
 // [START fs_counter_classes]
+// [START firestore_solution_sharded_counter_custom_type]
 import (
 	"context"
 	"fmt"
@@ -37,9 +38,11 @@ type Shard struct {
 	Count int
 }
 
+// [END firestore_solution_sharded_counter_custom_type]
 // [END fs_counter_classes]
 
 // [START fs_create_counter]
+// [START firestore_solution_sharded_counter_create]
 
 // initCounter creates a given number of shards as
 // subcollection of specified document.
@@ -57,9 +60,11 @@ func (c *Counter) initCounter(ctx context.Context, docRef *firestore.DocumentRef
 	return nil
 }
 
+// [END firestore_solution_sharded_counter_create]
 // [END fs_create_counter]
 
 // [START fs_increment_counter]
+// [START firestore_solution_sharded_counter_increment]
 
 // incrementCounter increments a randomly picked shard.
 func (c *Counter) incrementCounter(ctx context.Context, docRef *firestore.DocumentRef) (*firestore.WriteResult, error) {
@@ -71,9 +76,11 @@ func (c *Counter) incrementCounter(ctx context.Context, docRef *firestore.Docume
 	})
 }
 
+// [END firestore_solution_sharded_counter_increment]
 // [END fs_increment_counter]
 
 // [START fs_get_count]
+// [START firestore_solution_sharded_counter_get]
 
 // getCount returns a total count across all shards.
 func (c *Counter) getCount(ctx context.Context, docRef *firestore.DocumentRef) (int64, error) {
@@ -98,4 +105,5 @@ func (c *Counter) getCount(ctx context.Context, docRef *firestore.DocumentRef) (
 	return total, nil
 }
 
+// [END firestore_solution_sharded_counter_get]
 // [END fs_get_count]

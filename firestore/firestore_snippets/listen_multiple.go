@@ -14,7 +14,7 @@
 
 package main
 
-// [START fs_listen_multiple]
+// [START firestore_listen_query_snapshots]
 import (
 	"context"
 	"fmt"
@@ -65,4 +65,4 @@ func listenMultiple(ctx context.Context, w io.Writer, projectID, collection stri
 	}
 }
 
-// [END fs_listen_multiple]
+// [END firestore_listen_query_snapshots]
