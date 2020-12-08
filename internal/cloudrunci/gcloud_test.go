@@ -15,6 +15,8 @@
 package cloudrunci
 
 import (
+	"io/ioutil"
+	"log"
 	"os/exec"
 	"strings"
 	"testing"
@@ -47,6 +49,10 @@ func TestGcloud(t *testing.T) {
 }
 
 func TestGcloudRetry(t *testing.T) {
+	originalWriter := log.Writer()
+	log.SetOutput(ioutil.Discard)
+	defer log.SetOutput(originalWriter)
+
 	_, err := gcloud("failing", exec.Command("command-does-not-exist"))
 	if err == nil {
 		t.Errorf("gcloud: %v", err)
