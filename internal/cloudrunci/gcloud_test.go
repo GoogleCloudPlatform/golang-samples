@@ -17,7 +17,7 @@ package cloudrunci
 import (
 	"io/ioutil"
 	"log"
-        "os"
+	"os"
 	"os/exec"
 	"strings"
 	"testing"
