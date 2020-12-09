@@ -52,10 +52,10 @@ func deleteCluster(projectID string, clusterName, region string) error {
 	return nil
 }
 
-func TestCreateCluster(t *testing.T) {
+func TestDataproc(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	clusterName := fmt.Sprintf("go-cc-test-%s", tc.ProjectID)
+	clusterName := fmt.Sprintf("go-dp-test-%s", tc.ProjectID)
 	region := "us-central1"
 
 	deleteCluster(tc.ProjectID, clusterName, region) // Delete the cluster if it already exists, ignoring any errors.
@@ -72,6 +72,17 @@ func TestCreateCluster(t *testing.T) {
 		got := buf.String()
 		if want := fmt.Sprintf("successfully: %s", clusterName); !strings.Contains(got, want) {
 			r.Errorf("CreateCluster: got %s, want %s", got, want)
+			return
+		}
+
+		if err := submitJob(buf, tc.ProjectID, region, clusterName); err != nil {
+			r.Errorf("submitJob got err: %v", err)
+			return
+		}
+
+		got = buf.String()
+		if want := fmt.Sprint("Job finished successfully"); !strings.Contains(got, want) {
+			r.Errorf("submitJob: got %s, want %s", got, want)
 			return
 		}
 	})
