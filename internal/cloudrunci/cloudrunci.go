@@ -217,7 +217,8 @@ func (s *Service) Build() error {
 		s.Image = fmt.Sprintf("gcr.io/%s/%s:%s", s.ProjectID, s.Name, runID)
 	}
 
-	if _, err := gcloud(s.operationLabel("build container image"), s.buildCmd()); err != nil {
+	if out, err := gcloud(s.operationLabel("build container image"), s.buildCmd()); err != nil {
+		fmt.Printf(string(out))
 		return fmt.Errorf("gcloud: %s: %q", s.Image, err)
 	}
 	s.built = true
