@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -51,7 +52,7 @@ func TestBatchTranslateText(t *testing.T) {
 	defer deleteBucket(ctx, t, bucket)
 
 	// Translate a sample text and check the number of translated characters.
-	testutil.Retry(t, 3, 10*time.Second, func(r * testutil.R) {
+	testutil.Retry(t, 3, 10*time.Second, func(r *testutil.R) {
 		var buf bytes.Buffer
 		if err := batchTranslateText(&buf, tc.ProjectID, location, inputURI, outputURI, sourceLang, targetLang); err != nil {
 			t.Fatalf("batchTranslateText: %v", err)
@@ -59,5 +60,5 @@ func TestBatchTranslateText(t *testing.T) {
 		if got, want := buf.String(), "Total characters"; !strings.Contains(got, want) {
 			t.Errorf("batchTranslateText got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
 		}
-	}
+	})
 }
