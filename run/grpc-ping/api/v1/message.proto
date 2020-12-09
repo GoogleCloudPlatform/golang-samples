@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// [START cloudrun_grpc_protodef]
 // [START run_grpc_protodef]
 syntax = "proto3";
 
@@ -38,3 +39,4 @@ message Response {
   Pong pong = 1;
 }
 // [END run_grpc_protodef]
+// [END cloudrun_grpc_protodef]

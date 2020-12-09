@@ -36,7 +36,27 @@ import (
 )
 
 type command func(ctx context.Context, w io.Writer, client *spanner.Client) error
-type adminCommand func(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error
+type uniqueRand struct {
+	used map[int64]bool
+	rand *rand.Rand
+}
+
+func newUniqueRand() uniqueRand {
+	return uniqueRand{
+		used: map[int64]bool{},
+		rand: rand.New(rand.NewSource(time.Now().UnixNano())),
+	}
+}
+
+func (r *uniqueRand) rnd(min, max int64) int64 {
+	for {
+		rnd := r.rand.Int63n(max) + min
+		if !r.used[rnd] {
+			r.used[rnd] = true
+			return rnd
+		}
+	}
+}
 
 var (
 	commands = map[string]command{
@@ -94,15 +114,16 @@ func insertPlayers(ctx context.Context, w io.Writer, client *spanner.Client) err
 		return err
 	}
 	// Intialize values for random PlayerId
-	rand.Seed(time.Now().UnixNano())
-	min := 1000000000
-	max := 9000000000
+	min := int64(1000000000)
+	max := int64(9000000000)
+	rnd := newUniqueRand()
 	// Insert 100 player records into the Players table
 	_, err = client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
 		stmts := []spanner.Statement{}
 		for i := 1; i <= 100; i++ {
 			numberOfPlayers++
-			playerID := rand.Intn(max-min) + min
+			playerID := rnd.rnd(min, max)
+
 			playerName := fmt.Sprintf("Player %d", numberOfPlayers)
 			stmts = append(stmts, spanner.Statement{
 				SQL: `INSERT INTO Players

@@ -14,7 +14,7 @@
 
 // [START logging_quickstart]
 
-// Sample logging-quickstart writes a log entry to Stackdriver Logging.
+// Sample logging-quickstart writes a log entry to Cloud Logging.
 package main
 
 import (
@@ -49,7 +49,7 @@ func main() {
 	// Adds an entry to the log buffer.
 	logger.Log(logging.Entry{Payload: text})
 
-	// Closes the client and flushes the buffer to the Stackdriver Logging
+	// Closes the client and flushes the buffer to the Cloud Logging
 	// service.
 	if err := client.Close(); err != nil {
 		log.Fatalf("Failed to close client: %v", err)

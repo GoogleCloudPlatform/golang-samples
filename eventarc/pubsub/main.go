@@ -14,7 +14,7 @@
 
 // [START eventarc_pubsub_handler]
 
-// Sample run-events-pubsub is a Cloud Run service which handles Pub/Sub messages.
+// Sample pubsub is a Cloud Run service which handles Pub/Sub messages.
 package main
 
 import (
