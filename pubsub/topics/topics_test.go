@@ -214,3 +214,33 @@ func TestDelete(t *testing.T) {
 		t.Fatalf("got topic = %q; want none", topicID)
 	}
 }
+
+func TestPublishWithOrderingKey(t *testing.T) {
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	client := setup(t)
+	client.CreateTopic(ctx, topicID)
+	buf := new(bytes.Buffer)
+	publishWithOrderingKey(buf, tc.ProjectID, topicID)
+
+	got := buf.String()
+	want := "Published 4 messages with ordering keys successfully\n"
+	if got != want {
+		t.Fatalf("failed to publish with ordering keys:\n got: %v", got)
+	}
+}
+
+func TestResumePublishWithOrderingKey(t *testing.T) {
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	client := setup(t)
+	client.CreateTopic(ctx, topicID)
+	buf := new(bytes.Buffer)
+	resumePublishWithOrderingKey(buf, tc.ProjectID, topicID)
+
+	got := buf.String()
+	want := "Published a message with ordering key successfully\n"
+	if got != want {
+		t.Fatalf("failed to resume with ordering keys:\n got: %v", got)
+	}
+}

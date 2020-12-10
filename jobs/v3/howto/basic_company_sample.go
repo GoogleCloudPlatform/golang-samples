@@ -164,7 +164,7 @@ func deleteCompany(w io.Writer, name string) error {
 	return nil
 }
 
-// [END delete_company
+// [END delete_company]
 
 // [START list_companies]
 

@@ -15,6 +15,7 @@
 package main
 
 // [START fs_update_document_increment]
+// [START firestore_data_set_numeric_increment]
 import (
 	"context"
 	"fmt"
@@ -45,4 +46,5 @@ func updateDocumentIncrement(projectID, city string) error {
 	return nil
 }
 
+// [END firestore_data_set_numeric_increment]
 // [END fs_update_document_increment]

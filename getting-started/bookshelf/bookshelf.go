@@ -62,8 +62,8 @@ type Bookshelf struct {
 	// logWriter is used for request logging and can be overridden for tests.
 	//
 	// See https://cloud.google.com/logging/docs/setup/go for how to use the
-	// Stackdriver logging client. Output to stdout and stderr is automaticaly
-	// sent to Stackdriver when running on App Engine.
+	// Cloud Logging client. Output to stdout and stderr is automaticaly
+	// sent to Cloud Logging when running on App Engine.
 	logWriter io.Writer
 
 	errorClient *errorreporting.Client

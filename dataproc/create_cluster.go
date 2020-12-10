@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package dataproc shows how you can use the Cloud Dataproc Client library to manage
-// Cloud Dataproc clusters. In this example, we'll show how to create a cluster.
+// Package dataproc shows how you can use the Dataproc Client library to manage
+// Dataproc clusters. In this example, we'll show how to create a cluster.
 package dataproc
 
 // [START dataproc_create_cluster]

@@ -31,6 +31,10 @@ import (
 	_ "github.com/jackc/pgx/v4/stdlib"
 )
 
+// Note: If connecting using the App Engine Flex Go runtime, use
+// "github.com/jackc/pgx/stdlib" instead, since v4 requires
+// Go modules which are not supported by App Engine Flex.
+
 // vote struct contains a single row from the votes table in the database.
 // Each vote includes a candidate ("TABS" or "SPACES") and a timestamp.
 type vote struct {
@@ -231,10 +235,10 @@ func mustGetenv(k string) string {
 func initSocketConnectionPool() (*sql.DB, error) {
 	// [START cloud_sql_postgres_databasesql_create_socket]
 	var (
-		dbUser                 = mustGetenv("DB_USER")
-		dbPwd                  = mustGetenv("DB_PASS")
-		instanceConnectionName = mustGetenv("INSTANCE_CONNECTION_NAME")
-		dbName                 = mustGetenv("DB_NAME")
+		dbUser                 = mustGetenv("DB_USER")                  // e.g. 'my-db-user'
+		dbPwd                  = mustGetenv("DB_PASS")                  // e.g. 'my-db-password'
+		instanceConnectionName = mustGetenv("INSTANCE_CONNECTION_NAME") // e.g. 'project:region:instance'
+		dbName                 = mustGetenv("DB_NAME")                  // e.g. 'my-database'
 	)
 
 	socketDir, isSet := os.LookupEnv("DB_SOCKET_DIR")
@@ -264,11 +268,11 @@ func initSocketConnectionPool() (*sql.DB, error) {
 func initTCPConnectionPool() (*sql.DB, error) {
 	// [START cloud_sql_postgres_databasesql_create_tcp]
 	var (
-		dbUser    = mustGetenv("DB_USER")
-		dbPwd     = mustGetenv("DB_PASS")
-		dbTcpHost = mustGetenv("DB_TCP_HOST")
-		dbPort    = mustGetenv("DB_PORT")
-		dbName    = mustGetenv("DB_NAME")
+		dbUser    = mustGetenv("DB_USER")     // e.g. 'my-db-user'
+		dbPwd     = mustGetenv("DB_PASS")     // e.g. 'my-db-password'
+		dbTcpHost = mustGetenv("DB_TCP_HOST") // e.g. '127.0.0.1' ('172.17.0.1' if deployed to GAE Flex)
+		dbPort    = mustGetenv("DB_PORT")     // e.g. '5432'
+		dbName    = mustGetenv("DB_NAME")     // e.g. 'my-database'
 	)
 
 	var dbURI string

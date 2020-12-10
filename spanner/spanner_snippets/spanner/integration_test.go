@@ -318,6 +318,12 @@ func TestSample(t *testing.T) {
 	assertContains(t, out, "4 Venue 4")
 	assertContains(t, out, "19 Venue 19")
 	assertContains(t, out, "42 Venue 42")
+
+	runSample(t, addNumericColumn, dbName, "failed to add numeric column")
+	runSample(t, updateDataWithNumericColumn, dbName, "failed to update data with numeric")
+	out = runSample(t, queryWithNumericParameter, dbName, "failed to query with numeric parameter")
+	assertContains(t, out, "4 ")
+	assertContains(t, out, "35000")
 }
 
 func TestBackupSample(t *testing.T) {

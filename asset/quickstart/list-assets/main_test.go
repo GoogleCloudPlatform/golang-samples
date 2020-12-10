@@ -19,6 +19,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
@@ -27,20 +28,23 @@ func TestMain(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	os.Setenv("GOOGLE_CLOUD_PROJECT", tc.ProjectID)
 
-	oldStdout := os.Stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		oldStdout := os.Stdout
+		re, w, _ := os.Pipe()
+		os.Stdout = w
 
-	main()
+		main()
 
-	w.Close()
-	os.Stdout = oldStdout
+		w.Close()
+		os.Stdout = oldStdout
 
-	out, err := ioutil.ReadAll(r)
-	if err != nil {
-		t.Fatalf("Failed to read stdout: %v", err)
-	}
-	if got, want := string(out), "asset"; !strings.Contains(got, want) && len(got) > 0 {
-		t.Errorf("stdout returned %s, wanted either empty or contain %s", got, want)
-	}
+		out, err := ioutil.ReadAll(re)
+		if err != nil {
+			r.Errorf("Failed to read stdout: %v", err)
+			return
+		}
+		if got, want := string(out), "asset"; !strings.Contains(got, want) && len(got) > 0 {
+			r.Errorf("stdout returned %s, wanted either empty or contain %s", got, want)
+		}
+	})
 }

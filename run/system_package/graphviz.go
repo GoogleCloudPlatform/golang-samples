@@ -27,7 +27,7 @@ import (
 )
 
 func main() {
-	// Verify the the dot utility is available at startup
+	// Verify the dot utility is available at startup
 	// instead of waiting for a first request.
 	fileInfo, err := os.Stat("/usr/bin/dot")
 	if err != nil {
@@ -53,6 +53,7 @@ func main() {
 	}
 }
 
+// [START cloudrun_system_package_handler]
 // [START run_system_package_handler]
 
 // diagramHandler renders a diagram using HTTP request parameters and the dot command.
@@ -88,7 +89,9 @@ func diagramHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // [END run_system_package_handler]
+// [END cloudrun_system_package_handler]
 
+// [START cloudrun_system_package_exec]
 // [START run_system_package_exec]
 
 // createDiagram generates a diagram image from the provided io.Reader written to the io.Writer.
@@ -115,3 +118,4 @@ func createDiagram(w io.Writer, r io.Reader) error {
 }
 
 // [END run_system_package_exec]
+// [END cloudrun_system_package_exec]
