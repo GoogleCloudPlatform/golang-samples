@@ -52,8 +52,13 @@ func createTableExternalHivePartitioned(projectID, datasetID, tableID string) er
 
 	// The layout of the files in here is compatible with the layout requirements for hive partitioning,
 	// so we can add an optional Hive partitioning configuration to leverage the object paths for deriving
-	// partitioning column information.  We'll also require queries against this table to specify a partitioning
-	// predicate to reduce the number of parquet files scanned.
+	// partitioning column information.
+	//
+	// For more information on how partitions are extracted, see:
+	// https://cloud.google.com/bigquery/docs/hive-partitioned-queries-gcs
+	//
+	// We have a "/dt=YYYY-MM-DD/" path component in our example files as documented above.  Autolayout will
+	// expose this as a column named "dt" of type DATE.
 	metadata.ExternalDataConfig.HivePartitioningOptions = &bigquery.HivePartitioningOptions{
 		Mode:                   bigquery.AutoHivePartitioningMode,
 		SourceURIPrefix:        "gs://cloud-samples-data/bigquery/hive-partitioning-samples/autolayout/",
@@ -66,6 +71,7 @@ func createTableExternalHivePartitioned(projectID, datasetID, tableID string) er
 		return fmt.Errorf("table creation failure: %v", err)
 	}
 	return nil
+
 }
 
 // [END bigquery_create_table_external_hivepartitioned]
