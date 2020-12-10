@@ -59,7 +59,7 @@ func TestBatchTranslateText(t *testing.T) {
 			return
 		}
 		if got, want := buf.String(), "Total characters"; !strings.Contains(got, want) {
-			t.Errorf("batchTranslateText got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
+			r.Errorf("batchTranslateText got:\n----\n%s----\nWant to contain:\n----\n%s\n----", got, want)
 		}
 	})
 }
