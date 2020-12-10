@@ -40,7 +40,6 @@ func createTableExternalHivePartitioned(projectID, datasetID, tableID string) er
 	//
 	// Example file:
 	// gs://cloud-samples-data/bigquery/hive-partitioning-samples/autolayout/dt=2020-11-15/file1.parquet
-
 	metadata := &bigquery.TableMetadata{
 		Description: "An example table that demonstrates hive partitioning against external parquet files",
 		ExternalDataConfig: &bigquery.ExternalDataConfig{
@@ -71,7 +70,6 @@ func createTableExternalHivePartitioned(projectID, datasetID, tableID string) er
 		return fmt.Errorf("table creation failure: %v", err)
 	}
 	return nil
-
 }
 
 // [END bigquery_create_table_external_hivepartitioned]
