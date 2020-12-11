@@ -1,8 +1,8 @@
 # Docker Containers for golang-samples
 
-We run tests for all supported versions of Go in Docker containers. This
-directory contains `Dockerfile`s for each version of Go. You can run tests in
-these containers to make sure your setup is the same as the test environment.
+We run tests for all supported versions of Go in Docker containers. You can run
+tests in these containers to make sure your setup is the same as the test
+environment.
 
 See [`CONTRIBUTING.md`](/CONTRIBUTING.md),
 [`system_tests.sh`](/testing/kokoro/system_tests.sh), and the `.cfg` files in
@@ -12,9 +12,8 @@ When new minor versions are released, we should build and push new versions of
 these containers.
 
 ```
-gcloud config set project golang-samples-tests
-for v in go111 go112 go113 go114; do
-  docker build --pull --rm --no-cache -f Dockerfile.$v --tag gcr.io/golang-samples-tests/$v .
-  docker push gcr.io/golang-samples-tests/$v
-done
+gcloud builds submit \
+    --timeout 1h \  
+    --project=golang-samples-tests \
+    --config=cloudbuild.yaml .
 ```

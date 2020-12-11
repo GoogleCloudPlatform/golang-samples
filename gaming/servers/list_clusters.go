@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"io"
 
-	gaming "cloud.google.com/go/gaming/apiv1beta"
+	gaming "cloud.google.com/go/gaming/apiv1"
 	"google.golang.org/api/iterator"
-	gamingpb "google.golang.org/genproto/googleapis/cloud/gaming/v1beta"
+	gamingpb "google.golang.org/genproto/googleapis/cloud/gaming/v1"
 )
 
 // listGameServerClusters lists the clusters registered with a realm.

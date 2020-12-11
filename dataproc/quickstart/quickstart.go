@@ -14,8 +14,8 @@
 
 // [START dataproc_quickstart]
 
-// This quickstart shows how you can use the Cloud Dataproc Client library to create a
-// Cloud Dataproc cluster, submit a PySpark job to the cluster, wait for the job to finish
+// This quickstart shows how you can use the Dataproc Client library to create a
+// Dataproc cluster, submit a PySpark job to the cluster, wait for the job to finish
 // and finally delete the cluster.
 //
 // Usage:
@@ -30,7 +30,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"time"
+	"regexp"
 
 	dataproc "cloud.google.com/go/dataproc/apiv1"
 	"cloud.google.com/go/storage"
@@ -124,83 +124,35 @@ func main() {
 		},
 	}
 
-	submitJobResp, err := jobClient.SubmitJob(ctx, submitJobReq)
+	submitJobOp, err := jobClient.SubmitJobAsOperation(ctx, submitJobReq)
+	if err != nil {
+		fmt.Printf("error with request to submitting job: %v\n", err)
+		return
+	}
+
+	submitJobResp, err := submitJobOp.Wait(ctx)
 	if err != nil {
 		fmt.Printf("error submitting job: %v\n", err)
 		return
 	}
 
-	id := submitJobResp.Reference.JobId
+	re := regexp.MustCompile("gs://(.+?)/(.+)")
+	matches := re.FindStringSubmatch(submitJobResp.DriverOutputResourceUri)
 
-	fmt.Printf("Submitted job %q\n", id)
-
-	// These states all signify that a job has terminated, successfully or not.
-	terminalStates := map[dataprocpb.JobStatus_State]bool{
-		dataprocpb.JobStatus_ERROR:     true,
-		dataprocpb.JobStatus_CANCELLED: true,
-		dataprocpb.JobStatus_DONE:      true,
-	}
-
-	// We can create a timeout such that the job gets cancelled if not in a terminal state after a certain amount of time.
-	timeout := 5 * time.Minute
-	start := time.Now()
-
-	var state dataprocpb.JobStatus_State
-	for {
-		if time.Since(start) > timeout {
-			cancelReq := &dataprocpb.CancelJobRequest{
-				ProjectId: projectID,
-				Region:    region,
-				JobId:     id,
-			}
-
-			if _, err := jobClient.CancelJob(ctx, cancelReq); err != nil {
-				fmt.Printf("error cancelling job: %v\n", err)
-			}
-			fmt.Printf("job %q timed out after %d minutes\n", id, int64(timeout.Minutes()))
-			return
-		}
-
-		getJobReq := &dataprocpb.GetJobRequest{
-			ProjectId: projectID,
-			Region:    region,
-			JobId:     id,
-		}
-		getJobResp, err := jobClient.GetJob(ctx, getJobReq)
-		if err != nil {
-			fmt.Printf("error getting job %q with error: %v\n", id, err)
-			return
-		}
-		state = getJobResp.Status.State
-		if terminalStates[state] {
-			break
-		}
-
-		// Sleep as to not excessively poll the API.
-		time.Sleep(1 * time.Second)
-	}
-
-	// Cloud Dataproc job outget gets saved to a GCS bucket allocated to it.
-	getCReq := &dataprocpb.GetClusterRequest{
-		ProjectId:   projectID,
-		Region:      region,
-		ClusterName: clusterName,
-	}
-
-	resp, err := clusterClient.GetCluster(ctx, getCReq)
-	if err != nil {
-		fmt.Printf("error getting cluster %q: %v\n", clusterName, err)
+	if len(matches) < 3 {
+		fmt.Printf("regex error: %s\n", submitJobResp.DriverOutputResourceUri)
 		return
 	}
 
+	// Dataproc job outget gets saved to a GCS bucket allocated to it.
 	storageClient, err := storage.NewClient(ctx)
 	if err != nil {
 		fmt.Printf("error creating storage client: %v\n", err)
 		return
 	}
 
-	obj := fmt.Sprintf("google-cloud-dataproc-metainfo/%s/jobs/%s/driveroutput.000000000", resp.ClusterUuid, id)
-	reader, err := storageClient.Bucket(resp.Config.ConfigBucket).Object(obj).NewReader(ctx)
+	obj := fmt.Sprintf("%s.000000000", matches[2])
+	reader, err := storageClient.Bucket(matches[1]).Object(obj).NewReader(ctx)
 	if err != nil {
 		fmt.Printf("error reading job output: %v\n", err)
 		return
@@ -210,11 +162,11 @@ func main() {
 
 	body, err := ioutil.ReadAll(reader)
 	if err != nil {
-		fmt.Printf("could not read output from Dataproc Job %q\n", id)
+		fmt.Printf("could not read output from Dataproc Job: %v\n", err)
 		return
 	}
 
-	fmt.Printf("job %q finished with state %s:\n%s\n", id, state, body)
+	fmt.Printf("Job finished successfully: %s", body)
 }
 
 // [END dataproc_quickstart]

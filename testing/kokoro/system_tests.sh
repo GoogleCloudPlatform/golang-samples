@@ -88,7 +88,9 @@ export GOLANG_SAMPLES_FIRESTORE_PROJECT=golang-samples-fire-0
 
 set -x
 
-go install ./testing/sampletests
+pushd testing/sampletests
+go install .
+popd
 
 # Set application credentials before using gimmeproj so it has access.
 # This is changed to a project-specific credential after a project is leased.

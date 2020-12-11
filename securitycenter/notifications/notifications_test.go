@@ -21,8 +21,10 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
 	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
 )
@@ -117,121 +119,147 @@ func cleanupNotificationConfig(t *testing.T, notificationConfigID string) error 
 }
 
 func TestCreateNotificationConfig(t *testing.T) {
-	buf := new(bytes.Buffer)
-	rand, err := uuid.NewUUID()
-	if err != nil {
-		t.Errorf("Issue generating id.")
-	}
-	configID := "go-test-create-config-id" + rand.String()
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+		rand, err := uuid.NewUUID()
+		if err != nil {
+			r.Errorf("Issue generating id.")
+			return
+		}
+		configID := "go-test-create-config-id" + rand.String()
 
-	if err := createNotificationConfig(buf, orgID(t), pubsubTopic(t), configID); err != nil {
-		t.Fatalf("createNotificationConfig failed: %v", err)
-	}
+		if err := createNotificationConfig(buf, orgID(t), pubsubTopic(t), configID); err != nil {
+			r.Errorf("createNotificationConfig failed: %v", err)
+			return
+		}
 
-	if !strings.Contains(buf.String(), "New NotificationConfig created") {
-		t.Errorf("createNotificationConfig did not create.")
-	}
+		if !strings.Contains(buf.String(), "New NotificationConfig created") {
+			r.Errorf("createNotificationConfig did not create.")
+		}
 
-	cleanupNotificationConfig(t, configID)
+		cleanupNotificationConfig(t, configID)
+	})
 }
 
 func TestDeleteNotificationConfig(t *testing.T) {
-	buf := new(bytes.Buffer)
-	rand, err := uuid.NewUUID()
-	if err != nil {
-		t.Errorf("Issue generating id.")
-	}
-	configID := "go-test-delete-config-id" + rand.String()
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+		rand, err := uuid.NewUUID()
+		if err != nil {
+			r.Errorf("Issue generating id.")
+			return
+		}
+		configID := "go-test-delete-config-id" + rand.String()
 
-	if err := addNotificationConfig(t, configID); err != nil {
-		t.Fatalf("Could not setup test environment: %v", err)
-	}
+		if err := addNotificationConfig(t, configID); err != nil {
+			r.Errorf("Could not setup test environment: %v", err)
+			return
+		}
 
-	if err := deleteNotificationConfig(buf, orgID(t), configID); err != nil {
-		t.Fatalf("deleteNotificationConfig failed: %v", err)
-	}
+		if err := deleteNotificationConfig(buf, orgID(t), configID); err != nil {
+			r.Errorf("deleteNotificationConfig failed: %v", err)
+			return
+		}
 
-	if !strings.Contains(buf.String(), "Deleted config:") {
-		t.Errorf("deleteNotificationConfig did not delete.")
-	}
+		if !strings.Contains(buf.String(), "Deleted config:") {
+			r.Errorf("deleteNotificationConfig did not delete.")
+		}
+	})
 }
 
 func TestGetNotificationConfig(t *testing.T) {
-	buf := new(bytes.Buffer)
-	rand, err := uuid.NewUUID()
-	if err != nil {
-		t.Errorf("Issue generating id.")
-	}
-	configID := "go-test-get-config-id" + rand.String()
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+		rand, err := uuid.NewUUID()
+		if err != nil {
+			r.Errorf("Issue generating id.")
+			return
+		}
+		configID := "go-test-get-config-id" + rand.String()
 
-	if err := addNotificationConfig(t, configID); err != nil {
-		t.Fatalf("Could not setup test environment: %v", err)
-	}
+		if err := addNotificationConfig(t, configID); err != nil {
+			r.Errorf("Could not setup test environment: %v", err)
+			return
+		}
 
-	if err := getNotificationConfig(buf, orgID(t), configID); err != nil {
-		t.Fatalf("getNotificationConfig failed: %v", err)
-	}
+		if err := getNotificationConfig(buf, orgID(t), configID); err != nil {
+			r.Errorf("getNotificationConfig failed: %v", err)
+			return
+		}
 
-	if !strings.Contains(buf.String(), "Received config:") {
-		t.Errorf("getNotificationConfig did not delete.")
-	}
+		if !strings.Contains(buf.String(), "Received config:") {
+			r.Errorf("getNotificationConfig did not delete.")
+		}
 
-	cleanupNotificationConfig(t, configID)
+		cleanupNotificationConfig(t, configID)
+	})
 }
 
 func TestListNotificationConfigs(t *testing.T) {
-	buf := new(bytes.Buffer)
-	rand, err := uuid.NewUUID()
-	if err != nil {
-		t.Errorf("Issue generating id.")
-	}
-	configID := "go-test-list-config-id" + rand.String()
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+		rand, err := uuid.NewUUID()
+		if err != nil {
+			r.Errorf("Issue generating id.")
+			return
+		}
+		configID := "go-test-list-config-id" + rand.String()
 
-	if err := addNotificationConfig(t, configID); err != nil {
-		t.Fatalf("Could not setup test environment: %v", err)
-	}
+		if err := addNotificationConfig(t, configID); err != nil {
+			r.Errorf("Could not setup test environment: %v", err)
+			return
+		}
 
-	if err := listNotificationConfigs(buf, orgID(t)); err != nil {
-		t.Fatalf("listNotificationConfig failed: %v", err)
-	}
+		if err := listNotificationConfigs(buf, orgID(t)); err != nil {
+			r.Errorf("listNotificationConfig failed: %v", err)
+			return
+		}
 
-	if !strings.Contains(buf.String(), "NotificationConfig") {
-		t.Errorf("listNotificationConfigs did not list")
-	}
+		if !strings.Contains(buf.String(), "NotificationConfig") {
+			r.Errorf("listNotificationConfigs did not list")
+		}
 
-	cleanupNotificationConfig(t, configID)
+		cleanupNotificationConfig(t, configID)
+	})
 }
 
 func TestUpdateNotificationConfig(t *testing.T) {
-	buf := new(bytes.Buffer)
-	rand, err := uuid.NewUUID()
-	if err != nil {
-		t.Errorf("Issue generating id.")
-	}
-	configID := "go-test-update-config-id" + rand.String()
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+		rand, err := uuid.NewUUID()
+		if err != nil {
+			r.Errorf("Issue generating id.")
+			return
+		}
+		configID := "go-test-update-config-id" + rand.String()
 
-	if err := addNotificationConfig(t, configID); err != nil {
-		t.Fatalf("Could not setup test environment: %v", err)
-	}
+		if err := addNotificationConfig(t, configID); err != nil {
+			r.Errorf("Could not setup test environment: %v", err)
+			return
+		}
 
-	if err := updateNotificationConfig(buf, orgID(t), configID, pubsubTopic(t)); err != nil {
-		t.Fatalf("updateNotificationConfig failed: %v", err)
-	}
+		if err := updateNotificationConfig(buf, orgID(t), configID, pubsubTopic(t)); err != nil {
+			r.Errorf("updateNotificationConfig failed: %v", err)
+			return
+		}
 
-	if !strings.Contains(buf.String(), "Updated NotificationConfig:") {
-		t.Errorf("updateNotificationConfig did not update.")
-	}
-
-	cleanupNotificationConfig(t, configID)
+		if !strings.Contains(buf.String(), "Updated NotificationConfig:") {
+			r.Errorf("updateNotificationConfig did not update.")
+		}
+		cleanupNotificationConfig(t, configID)
+	})
 }
 
 func TestReceiveNotifications(t *testing.T) {
-	buf := new(bytes.Buffer)
-	if err := receiveMessages(buf, projectID(t), pubsubSubscription(t)); err != nil {
-		t.Fatalf("receiveNotifications failed: %v", err)
-	}
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+		if err := receiveMessages(buf, projectID(t), pubsubSubscription(t)); err != nil {
+			r.Errorf("receiveNotifications failed: %v", err)
+			return
+		}
 
-	if !strings.Contains(buf.String(), "Got finding") {
-		t.Errorf("Did not receive any notifications.")
-	}
+		if !strings.Contains(buf.String(), "Got finding") {
+			r.Errorf("Did not receive any notifications.")
+		}
+	})
 }

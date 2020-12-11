@@ -40,21 +40,6 @@ func TestHelloWorld(t *testing.T) {
 	bodyShouldContain(t, helloworld, "/", "Hello, World!")
 }
 
-func TestGo11xStatic(t *testing.T) {
-	t.Skip("Flaky - see https://github.com/GoogleCloudPlatform/golang-samples/issues/1420")
-
-	tc := testutil.EndToEndTest(t)
-
-	helloworld := &aeintegrate.App{
-		Name:      "static",
-		Dir:       tc.Path("appengine", "go11x", "static"),
-		ProjectID: tc.ProjectID,
-	}
-	defer helloworld.Cleanup()
-
-	bodyShouldContain(t, helloworld, "/", "The Gopher Network")
-}
-
 func bodyShouldContain(t *testing.T, p *aeintegrate.App, path, shouldContain string) {
 	if p.Deployed() {
 		t.Fatalf("[%s] expected non-deployed app", p.Name)

@@ -24,7 +24,7 @@ import (
 )
 
 func TestInstantiateInlineWorkflowTemplate(t *testing.T) {
-	tc := testutil.SystemTest(t)
+	tc := testutil.EndToEndTest(t)
 
 	region := "us-central1"
 

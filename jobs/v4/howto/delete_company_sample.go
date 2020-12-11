@@ -52,4 +52,4 @@ func deleteCompany(w io.Writer, projectID, companyID string) error {
 	return nil
 }
 
-// [END job_search_delete_company
+// [END job_search_delete_company]
