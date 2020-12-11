@@ -14,6 +14,7 @@
 
 package notifications
 
+// [START securitycenter_delete_notification_config]
 // [START scc_delete_notification_config]
 import (
 	"context"
@@ -50,3 +51,4 @@ func deleteNotificationConfig(w io.Writer, orgID string, notificationConfigID st
 }
 
 // [END scc_delete_notification_config]
+// [END securitycenter_delete_notification_config]
