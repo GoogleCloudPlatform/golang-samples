@@ -56,7 +56,7 @@ func TestBatchTranslateText(t *testing.T) {
 	testutil.Retry(t, 3, 10*time.Second, func(r *testutil.R) {
 		var buf bytes.Buffer
 		if err := batchTranslateText(&buf, tc.ProjectID, location, inputURI, outputURI, sourceLang, targetLang); err != nil {
-			r.Fatalf("batchTranslateText: %v", err)
+			r.Errorf("batchTranslateText: %v", err)
 			return
 		}
 		if got, want := buf.String(), "Total characters"; !strings.Contains(got, want) {
