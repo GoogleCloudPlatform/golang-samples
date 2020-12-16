@@ -21,6 +21,9 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
+
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 // gcloudBin is the path to the gcloud executable.
@@ -33,16 +36,50 @@ func init() {
 	}
 }
 
-// gcloud provides a common mechanism for executing gcloud commands to handle output and errors.
+// gcloud provides a common mechanism for executing gcloud commands.
+// It will attempt to retry failed commands 3 times with 2 second wait intervals.
 func gcloud(label string, cmd *exec.Cmd) ([]byte, error) {
-	log.Printf("Running %s...", label)
-	log.Println("Executing:", cmd.Path, strings.Join(cmd.Args[1:], " "))
+	var out []byte
+	var err error
+
+	success := testutil.RetryWithoutTest(3, 2*time.Second, func(r *testutil.R) {
+		out, err = gcloudExec(fmt.Sprintf("Attempt #%d: ", r.Attempt), label, cmd)
+		if err != nil {
+			log.Printf("gcloudExec: %v", err)
+			r.Fail()
+		}
+		// Reset stdout for retry.
+		cmd.Stdout = nil
+		cmd.Stderr = nil
+	})
+
+	if success {
+		return out, nil
+	}
+
+	return out, fmt.Errorf("gcloudExec: %s: gave up after 3 failed attempts", label)
+}
+
+// gcloudWithoutRetry provides a common mechanism for executing gcloud commands.
+func gcloudWithoutRetry(label string, cmd *exec.Cmd) ([]byte, error) {
+	return gcloudExec("", label, cmd)
+}
+
+// gcloudExec adds output prefixing to the execution of the provided command.
+func gcloudExec(prefix string, label string, cmd *exec.Cmd) ([]byte, error) {
+	log.Printf("%sRunning: %s...", prefix, label)
+	log.Printf("%sExecuting: %s: %s: %s", prefix, label, cmd.Path, strings.Join(cmd.Args[1:], " "))
 	// TODO: add a flag for verbose output (e.g. when running with binary created with `go test -c`)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Printf("Error Output for %s:", label)
-		os.Stderr.Write(out)
-		return []byte{}, fmt.Errorf("%s: %q", label, err)
+		os.Stderr.Write([]byte(fmt.Sprintf("%s%s: Error Output\n###\n", prefix, label)))
+		if len(out) > 0 {
+			os.Stderr.Write(out)
+		} else {
+			os.Stderr.Write([]byte("no output produced"))
+		}
+		os.Stderr.Write([]byte("\n###\n"))
+		return out, fmt.Errorf("%s%s: %q", prefix, label, err)
 	}
 
 	return bytes.TrimSpace(out), err

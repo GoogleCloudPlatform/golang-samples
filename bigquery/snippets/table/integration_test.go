@@ -173,4 +173,9 @@ func TestTables(t *testing.T) {
 		t.Fatalf("listTables(%q): %v", testDatasetID, err)
 	}
 
+	testTableID, err = bqtestutil.UniqueBQName("testtable")
+	if err := createTableExternalHivePartitioned(tc.ProjectID, testDatasetID, testTableID); err != nil {
+		t.Fatalf("createTableExternalHivePartitioned(%q %q): %v", testDatasetID, testTableID, err)
+	}
+
 }
