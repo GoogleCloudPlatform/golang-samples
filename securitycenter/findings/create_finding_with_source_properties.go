@@ -14,6 +14,7 @@
 
 package findings
 
+// [START securitycenter_create_finding_with_source_properties]
 // [START create_finding_with_source_properties]
 import (
 	"context"
@@ -85,3 +86,4 @@ func createFindingWithProperties(w io.Writer, sourceName string) error {
 }
 
 // [END create_finding_with_source_properties]
+// [END securitycenter_create_finding_with_source_properties]

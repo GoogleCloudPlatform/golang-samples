@@ -14,6 +14,7 @@
 
 package findings
 
+// [START securitycenter_list_filtered_findings]
 // [START list_filtered_findings]
 import (
 	"context"
@@ -63,3 +64,4 @@ func listFilteredFindings(w io.Writer, sourceName string) error {
 }
 
 // [END list_filtered_findings]
+// [END securitycenter_list_filtered_findings]

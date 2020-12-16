@@ -14,6 +14,7 @@
 
 package findings
 
+// [START securitycenter_create_source]
 // [START create_source]
 import (
 	"context"
@@ -54,3 +55,4 @@ func createSource(w io.Writer, orgID string) error {
 }
 
 // [END create_source]
+// [END securitycenter_create_source]
