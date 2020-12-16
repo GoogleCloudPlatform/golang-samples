@@ -34,6 +34,9 @@ func TestApp(t *testing.T) {
 	stdOut, stdErr, err := m.Run(nil, 30*time.Second, fmt.Sprintf("--project_id=%s", tc.ProjectID))
 	if err != nil {
 		t.Errorf("execution failed: %v", err)
+		// TODO(shollyman): remove after https://github.com/GoogleCloudPlatform/golang-samples/issues/1866 deflaked.
+		// We're running over the 30s timeout, but unclear why; normal execution is sub-5s.
+		t.Logf("stderr: %s", string(stdErr))
 	}
 
 	// We don't look for specific strings, just expect at least 1kb of output.
