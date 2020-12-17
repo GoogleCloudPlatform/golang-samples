@@ -84,7 +84,7 @@ func (app *app) indexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	app := startApp()
+	app := newApp()
 	http.HandleFunc("/", app.indexHandler)
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -98,7 +98,7 @@ func main() {
 
 }
 
-func startApp() app {
+func newApp() *app {
 	parsedTemplate, err := template.ParseFiles("templates/index.html")
 	if err != nil {
 		log.Fatalf("unable to parse template file: %s", err)
@@ -124,7 +124,7 @@ func startApp() app {
 	if err != nil {
 		log.Fatalf("DB.Exec: unable to create votes table: %s", err)
 	}
-	return *app
+	return app
 }
 
 // recentVotes returns a slice of the last 5 votes cast.

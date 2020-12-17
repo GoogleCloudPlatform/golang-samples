@@ -16,41 +16,42 @@ package main
 
 import (
 	"bytes"
-	"io/ioutil"
 	"net/http/httptest"
 	"strings"
 	"testing"
 )
 
 func TestIndex(t *testing.T) {
-	app := startApp()
-	writer := httptest.NewRecorder()
+	app := newApp()
+	rr := httptest.NewRecorder()
 	request := httptest.NewRequest("GET", "/", nil)
-	app.indexHandler(writer, request)
-	resp := writer.Result()
-	body, _ := ioutil.ReadAll(resp.Body)
+	app.indexHandler(rr, request)
+	resp := rr.Result()
+	body := rr.Body.String()
 
 	if resp.StatusCode != 200 {
 		t.Errorf("Expected StatusCode of 200. Got %d", resp.StatusCode)
 	}
-	if !strings.Contains(string(body[:]), "Tabs VS Spaces") {
-		t.Errorf("Expected to see 'Tabs VS Spaces' in index response body")
+	want := "Tabs VS Spaces"
+	if !strings.Contains(string(body[:]), want) {
+		t.Errorf("Expected to see '%s' in index response body", want)
 	}
 }
 
 func TestCastVote(t *testing.T) {
-	app := startApp()
-	writer := httptest.NewRecorder()
+	app := newApp()
+	rr := httptest.NewRecorder()
 	request := httptest.NewRequest("POST", "/", bytes.NewBuffer([]byte("team=SPACES")))
 	request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	app.indexHandler(writer, request)
-	resp := writer.Result()
-	body, _ := ioutil.ReadAll(resp.Body)
+	app.indexHandler(rr, request)
+	resp := rr.Result()
+	body := rr.Body.String()
 
 	if resp.StatusCode != 200 {
 		t.Errorf("Expected StatusCode of 200. Got %d", resp.StatusCode)
 	}
-	if !strings.Contains(string(body[:]), "Vote successfully cast for SPACES") {
-		t.Errorf("Expected to see 'Vote successfully cast for SPACES' in response body")
+	want := "Vote successfully cast for SPACES"
+	if !strings.Contains(string(body[:]), want) {
+		t.Errorf("Expected to see '%s' in response body", want)
 	}
 }
