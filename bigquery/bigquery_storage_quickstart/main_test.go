@@ -32,6 +32,7 @@ func TestApp(t *testing.T) {
 		t.Errorf("failed to build app")
 	}
 
+	// TODO(shollyman): reduce this timeout back to 30s once underlying issues addressed
 	stdOut, stdErr, err := m.Run(nil, 5*time.Minute, fmt.Sprintf("--project_id=%s", tc.ProjectID))
 	if err != nil {
 		t.Errorf("execution failed: %v", err)
