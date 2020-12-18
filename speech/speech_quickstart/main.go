@@ -21,7 +21,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"log"
 
 	speech "cloud.google.com/go/speech/apiv1"
@@ -38,13 +37,7 @@ func main() {
 	}
 
 	// Sets the name of the audio file to transcribe.
-	filename := "/path/to/audio.raw"
-
-	// Reads the audio file into memory.
-	data, err := ioutil.ReadFile(filename)
-	if err != nil {
-		log.Fatalf("Failed to read file: %v", err)
-	}
+	gcsURI := "gs://cloud-samples-data/speech/brooklyn_bridge.raw"
 
 	// Detects speech in the audio file.
 	resp, err := client.Recognize(ctx, &speechpb.RecognizeRequest{
@@ -54,7 +47,7 @@ func main() {
 			LanguageCode:    "en-US",
 		},
 		Audio: &speechpb.RecognitionAudio{
-			AudioSource: &speechpb.RecognitionAudio_Content{Content: data},
+			AudioSource: &speechpb.RecognitionAudio_Uri{Uri: gcsURI},
 		},
 	})
 	if err != nil {
