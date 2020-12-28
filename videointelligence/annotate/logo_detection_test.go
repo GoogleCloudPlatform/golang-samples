@@ -28,7 +28,7 @@ func TestLogoDetection(t *testing.T) {
 
 	file := "../testdata/googlework_short.mp4"
 
-	testutil.Retry(t, 10, 20*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 10, 180*time.Second, func(r *testutil.R) {
 		var buf bytes.Buffer
 		if err := logoDetection(&buf, file); err != nil {
 			r.Errorf("logoDetection: %v", err)
