@@ -140,6 +140,17 @@ if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]]; then
   ./testing/kokoro/configure_gcloud.bash;
 fi
 
+# Download and prepare Cloud SQL Proxy
+wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64
+mv cloud_sql_proxy.linux.amd64 /cloud_sql_proxy
+chmod +x /cloud_sql_proxy
+mkdir /cloudsql && chmod 0777 /cloudsql
+
+# TODO: These variable names need to be populated.
+cloud_sql_proxy -instances="${MYSQL_INSTANCE}"=tcp:3306,${MYSQL_INSTANCE} -dir /cloudsql
+cloud_sql_proxy -instances="${POSTGRES_INSTANCE}"=tcp:5432,${POSTGRES_INSTANCE} -dir /cloudsql
+cloud_sql_proxy -instances="${SQLSERVER_INSTANCE}"=tcp:1433
+
 # only set with mtls_smoketest
 # TODO(cbro): remove with mtls_smoketest.cfg
 if [[ $GOOGLE_API_USE_MTLS = "always" ]]; then
@@ -166,7 +177,11 @@ runTests() {
   set +x
   echo "Running 'go test' in '$(pwd)'..."
   set -x
-  2>&1 go test -timeout $TIMEOUT -v "${1:-./...}" | tee sponge_log.log
+  if [[ -f "run_tests" ]]; then
+    2>&1 run_tests
+  else
+    2>&1 go test -timeout $TIMEOUT -v "${1:-./...}" | tee sponge_log.log
+  fi
   /go/bin/go-junit-report -set-exit-code < sponge_log.log > raw_log.xml
   exit_code=$((exit_code + $?))
   # Add region tags tested to test case properties.
