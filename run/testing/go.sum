@@ -53,8 +53,12 @@ contrib.go.opencensus.io/exporter/stackdriver v0.13.4/go.mod h1:aXENhDJ1Y4lIg4EU
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
-github.com/GoogleCloudPlatform/golang-samples/run/grpc-server-streaming v0.0.0-20201204214603-1ac3a85e136e h1:4giD5me8hbUM2kwiud3z3nB/RDCDnlCTCPAgniMYDEs=
-github.com/GoogleCloudPlatform/golang-samples/run/grpc-server-streaming v0.0.0-20201204214603-1ac3a85e136e/go.mod h1:p3eS/KZ4pic9RGSHaREA4jCzGkpD38NQFn3dtBEr8BQ=
+github.com/GoogleCloudPlatform/golang-samples v0.0.0-20201216233243-555da975282a h1:7VTdE0WGgj80ecPjIpKWHfjYHUhwTiOQ24iU1BjJJeM=
+github.com/GoogleCloudPlatform/golang-samples v0.0.0-20201216233243-555da975282a/go.mod h1:NLgFN0wEXamfuT3z2Arh3dXqxevz8pVkBrNJzpaiCaU=
+github.com/GoogleCloudPlatform/golang-samples/run/grpc-ping v0.0.0-20201216233243-555da975282a h1:3jrjajFYdc7vOm7QmSJxFN20ceO8/zFUNSMi5uvZKh4=
+github.com/GoogleCloudPlatform/golang-samples/run/grpc-ping v0.0.0-20201216233243-555da975282a/go.mod h1:ijDwzjLjf5EDHWeIrqkeTfQEQPEqt7i/w0rRbkVeujQ=
+github.com/GoogleCloudPlatform/golang-samples/run/grpc-server-streaming v0.0.0-20201216233243-555da975282a h1:3QoJzt0CuSC6UO+0mUN8LTR5NtE5AFzvSYr7dXJLdSM=
+github.com/GoogleCloudPlatform/golang-samples/run/grpc-server-streaming v0.0.0-20201216233243-555da975282a/go.mod h1:YorXqDMZdELAYt365rOGQ5b9ieVdfkoJBEETNOboQzA=
 github.com/aws/aws-sdk-go v1.23.20/go.mod h1:KmX6BPdI08NWTb3/sm4ZGu5ShLoqVDhKgpiN924inxo=
 github.com/aws/aws-sdk-go v1.36.2/go.mod h1:hcU610XS61/+aQV88ixoOzUoG7v3b31pl2zKMmprdro=
 github.com/bmatcuk/doublestar/v2 v2.0.4/go.mod h1:QMmcs3H2AUQICWhfzLXz+IYln8lRQmTZRptLie8RgRw=
