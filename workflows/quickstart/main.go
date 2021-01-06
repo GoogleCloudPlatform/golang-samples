@@ -15,14 +15,69 @@
 // Simple CLI to run the executeWorkflow function.
 // Used for one-off testing and development.
 
+// [START workflows_api_quickstart]
+
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"os"
+	"time"
+
+	executions "cloud.google.com/go/workflows/executions/apiv1beta"
+	executionspb "google.golang.org/genproto/googleapis/cloud/workflows/executions/v1beta"
 )
+
+// executeWorkflow executes a workflow and returns the results from the workflow.
+func executeWorkflow(projectID, locationID, workflowID string) (string, error) {
+	ctx := context.Background()
+
+	// Creates a client.
+	client, err := executions.NewClient(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	if workflowID == "" {
+		workflowID = "myFirstWorkflow"
+	}
+	workflowPath := fmt.Sprintf("projects/%s/locations/%s/workflows/%s", projectID, locationID, workflowID)
+
+	exe, err := client.CreateExecution(ctx, &executionspb.CreateExecutionRequest{
+		Parent: workflowPath,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	name := exe.GetName()
+	fmt.Fprintf(os.Stdout, "Created execution: %v\n", name)
+
+	// Wait for execution to finish, then print results.
+	backoffDelay := 1 * time.Second // Start wait with delay of 1s.
+	fmt.Println("Poll for result...")
+	for {
+		e, err := client.GetExecution(ctx, &executionspb.GetExecutionRequest{
+			Name: name,
+		})
+		if err != nil {
+			return "", err
+		}
+
+		// If we haven't seen the result yet, wait a second.
+		if e.State == executionspb.Execution_ACTIVE {
+			fmt.Printf("- Waiting %ds for results...\n", backoffDelay/time.Second)
+			time.Sleep(backoffDelay)
+			backoffDelay *= 2 // Double the delay to provide exponential backoff.
+		} else {
+			fmt.Printf("Execution finished with state: %v\n", e.State)
+			return e.Result, nil
+		}
+	}
+}
 
 func main() {
 	if len(os.Args) < 3 {
@@ -38,10 +93,12 @@ func main() {
 
 	res, err := executeWorkflow(projectID, locationID, workflowID)
 	if err != nil {
-		log.Fatalf("executeWorkflow: %v", err)
+		log.Fatalf("Failure in workflow execution: %v", err)
 	}
 	var jsonStringArr []string
 	err = json.Unmarshal([]byte(res), &jsonStringArr)
 
 	fmt.Print(jsonStringArr)
 }
+
+// [END workflows_api_quickstart]
