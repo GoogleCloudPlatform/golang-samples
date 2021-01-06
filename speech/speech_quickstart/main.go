@@ -36,8 +36,8 @@ func main() {
 		log.Fatalf("Failed to create client: %v", err)
 	}
 
-	// Sets the name of the audio file to transcribe.
-	gcsURI := "gs://cloud-samples-data/speech/brooklyn_bridge.raw"
+	// The path to the remote audio file to transcribe.
+	fileURI := "gs://cloud-samples-data/speech/brooklyn_bridge.raw"
 
 	// Detects speech in the audio file.
 	resp, err := client.Recognize(ctx, &speechpb.RecognizeRequest{
@@ -47,7 +47,7 @@ func main() {
 			LanguageCode:    "en-US",
 		},
 		Audio: &speechpb.RecognitionAudio{
-			AudioSource: &speechpb.RecognitionAudio_Uri{Uri: gcsURI},
+			AudioSource: &speechpb.RecognitionAudio_Uri{Uri: fileURI},
 		},
 	})
 	if err != nil {
