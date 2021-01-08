@@ -19,9 +19,12 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestIndex(t *testing.T) {
+	testutil.EndToEndTest(t)
 	app := newApp()
 	rr := httptest.NewRecorder()
 	request := httptest.NewRequest("GET", "/", nil)
@@ -33,12 +36,13 @@ func TestIndex(t *testing.T) {
 		t.Errorf("Expected StatusCode of 200. Got %d", resp.StatusCode)
 	}
 	want := "Tabs VS Spaces"
-	if !strings.Contains(string(body[:]), want) {
+	if !strings.Contains(body, want) {
 		t.Errorf("Expected to see '%s' in index response body", want)
 	}
 }
 
 func TestCastVote(t *testing.T) {
+	testutil.EndToEndTest(t)
 	app := newApp()
 	rr := httptest.NewRecorder()
 	request := httptest.NewRequest("POST", "/", bytes.NewBuffer([]byte("team=SPACES")))
@@ -51,7 +55,7 @@ func TestCastVote(t *testing.T) {
 		t.Errorf("Expected StatusCode of 200. Got %d", resp.StatusCode)
 	}
 	want := "Vote successfully cast for SPACES"
-	if !strings.Contains(string(body[:]), want) {
+	if !strings.Contains(body, want) {
 		t.Errorf("Expected to see '%s' in response body", want)
 	}
 }
