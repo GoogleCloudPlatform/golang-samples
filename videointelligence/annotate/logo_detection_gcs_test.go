@@ -28,7 +28,7 @@ func TestLogoDetectionGCS(t *testing.T) {
 
 	gcsURI := "gs://cloud-samples-data/video/googlework_tiny.mp4"
 
-	testutil.Retry(t, 10, 180*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 10, 20*time.Second, func(r *testutil.R) {
 		var buf bytes.Buffer
 		if err := logoDetectionGCS(&buf, gcsURI); err != nil {
 			r.Errorf("logoDetectionGCS: %v", err)
