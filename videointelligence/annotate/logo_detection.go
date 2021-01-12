@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"time"
 
 	video "cloud.google.com/go/videointelligence/apiv1"
 	"github.com/golang/protobuf/ptypes"
@@ -39,6 +40,9 @@ func logoDetection(w io.Writer, filename string) error {
 		return fmt.Errorf("video.NewClient: %v", err)
 	}
 	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*180)
+	defer cancel()
 
 	fileBytes, err := ioutil.ReadFile(filename)
 	if err != nil {
