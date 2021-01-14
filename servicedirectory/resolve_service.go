@@ -34,7 +34,7 @@ func resolveService(w io.Writer, projectID string) error {
 	// Create a lookup client.
 	resolver, err := servicedirectory.NewLookupClient(ctx)
 	if err != nil {
-		return fmt.Errorf("ServiceDirectory.NewRegistrationClient: %v", err)
+		return fmt.Errorf("ServiceDirectory.NewLookupClient: %v", err)
 	}
 
 	defer resolver.Close()
