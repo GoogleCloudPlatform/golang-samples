@@ -127,7 +127,7 @@ func newApp() *app {
 	// Create the votes table if it does not already exist.
 	if _, err = app.db.Exec(`CREATE TABLE IF NOT EXISTS votes
 	( id SERIAL NOT NULL, created_at datetime NOT NULL, updated_at datetime  NOT NULL,
-	candidate CHAR(6) NOT NULL, PRIMARY KEY (id) );`); err != nil {
+	candidate VARCHAR(6) NOT NULL, PRIMARY KEY (id) );`); err != nil {
 		log.Fatalf("DB.Exec: unable to create table: %s", err)
 	}
 	return app

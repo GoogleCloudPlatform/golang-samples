@@ -33,11 +33,12 @@ func TestIndex(t *testing.T) {
 	body := rr.Body.String()
 
 	if resp.StatusCode != 200 {
-		t.Errorf("Expected StatusCode of 200. Got %d", resp.StatusCode)
+		t.Errorf("indexHandler got status code %d, want 200", resp.StatusCode)
 	}
+
 	want := "Tabs VS Spaces"
 	if !strings.Contains(body, want) {
-		t.Errorf("Expected to see '%s' in index response body", want)
+		t.Errorf("Expected to see '%s' in indexHandler response body", want)
 	}
 }
 
@@ -52,10 +53,10 @@ func TestCastVote(t *testing.T) {
 	body := rr.Body.String()
 
 	if resp.StatusCode != 200 {
-		t.Errorf("Expected StatusCode of 200. Got %d", resp.StatusCode)
+		t.Errorf("indexHandler got status code %d, want 200", resp.StatusCode)
 	}
 	want := "Vote successfully cast for SPACES"
 	if !strings.Contains(body, want) {
-		t.Errorf("Expected to see '%s' in response body", want)
+		t.Errorf("Expected to see '%s' in indexHandler response body", want)
 	}
 }
