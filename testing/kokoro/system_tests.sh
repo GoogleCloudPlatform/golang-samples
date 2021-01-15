@@ -64,7 +64,7 @@ if [[ $KOKORO_JOB_NAME == *"system-tests"* ]]; then
   # Submodule job name must have the format: "golang-samples/system-tests/[OPTIONAL_MODULE_NAME]/[GO_VERSION]"
   ARR=(${KOKORO_JOB_NAME//// })
   # Gets the "/" deliminated token after "system-tests".
-  SUBMODULE_NAME=${ARR[4]} # Gets the token after "nightly/".
+  SUBMODULE_NAME=${ARR[4]}
   if [[ -n $SUBMODULE_NAME ]] && [[ -d "./$SUBMODULE_NAME" ]]; then
     RUN_ALL_TESTS="0"
     CHANGED_DIRS=$SUBMODULE_NAME
