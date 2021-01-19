@@ -23,7 +23,7 @@ import (
 	"os"
 
 	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
-	"go.opentelemetry.io/otel/api/global"
+	"go.opentelemetry.io/otel"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
@@ -48,11 +48,11 @@ func main() {
 	//   config := sdktrace.Config{DefaultSampler:sdktrace.ProbabilitySampler(0.0001)}
 	//   tp := sdktrace.NewTracerProvider(sdktrace.WithConfig(config), ...)
 	tp := sdktrace.NewTracerProvider(sdktrace.WithSyncer(exporter))
-	global.SetTracerProvider(tp)
+	otel.SetTracerProvider(tp)
 
 	// [START opentelemetry_trace_custom_span]
 	// Create custom span.
-	tracer := global.TracerProvider().Tracer("example.com/trace")
+	tracer := otel.GetTracerProvider().Tracer("example.com/trace")
 	err = func(ctx context.Context) error {
 		ctx, span := tracer.Start(ctx, "foo")
 		defer span.End()

@@ -57,9 +57,18 @@ GO_CHANGED_SUBMODULES=${GO_CHANGED_MODULES#./go.mod}
 # Override to determine if all go tests should be run.
 # Does not include static analysis checks.
 RUN_ALL_TESTS="0"
-# If this is a nightly test (not a PR), run all tests.
-if [ -z "${KOKORO_GITHUB_PULL_REQUEST_NUMBER:-}" ]; then
+if [[ $KOKORO_JOB_NAME == *"system-tests"* ]]; then
+  # If this is a standard nightly test, run all modules tests.
   RUN_ALL_TESTS="1"
+  # If this is a nightly test for a specific submodule, run submodule tests only.
+  # Submodule job name must have the format: "golang-samples/system-tests/[OPTIONAL_MODULE_NAME]/[GO_VERSION]"
+  ARR=(${KOKORO_JOB_NAME//// })
+  # Gets the "/" deliminated token after "system-tests".
+  SUBMODULE_NAME=${ARR[4]}
+  if [[ -n $SUBMODULE_NAME ]] && [[ -d "./$SUBMODULE_NAME" ]]; then
+    RUN_ALL_TESTS="0"
+    CHANGED_DIRS=$SUBMODULE_NAME
+  fi
 # If the change touches a repo-spanning file or directory of significance, run all tests.
 elif echo "$SIGNIFICANT_CHANGES" | tr ' ' '\n' | grep "^go.mod$" || [[ $CHANGED_DIRS =~ "testing" || $CHANGED_DIRS =~ "internal" ]]; then
   RUN_ALL_TESTS="1"
