@@ -38,7 +38,7 @@ func executeWorkflow(projectID, locationID, workflowID string) (string, error) {
 	// Creates a client.
 	client, err := executions.NewClient(ctx)
 	if err != nil {
-		return "", fmt.Errorf("executions.NewClient: %w", err)
+		return "", fmt.Errorf("executions.NewClient: %v", err)
 	}
 
 	if workflowID == "" {
@@ -50,7 +50,7 @@ func executeWorkflow(projectID, locationID, workflowID string) (string, error) {
 		Parent: workflowPath,
 	})
 	if err != nil {
-		return "", fmt.Errorf("client.CreateExecution: %w", err)
+		return "", fmt.Errorf("client.CreateExecution: %v", err)
 	}
 
 	name := exe.GetName()
@@ -64,7 +64,7 @@ func executeWorkflow(projectID, locationID, workflowID string) (string, error) {
 			Name: name,
 		})
 		if err != nil {
-			return "", fmt.Errorf("client.GetExecution: %w", err)
+			return "", fmt.Errorf("client.GetExecution: %v", err)
 		}
 
 		// If we haven't seen the result yet, wait a second.

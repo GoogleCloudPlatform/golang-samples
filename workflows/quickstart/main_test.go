@@ -45,13 +45,13 @@ func TestExecuteWorkflow(t *testing.T) {
 func deployWorkflow(projectID, locationID, workflowID string) error {
 	workflowExists, err := workflowExists(projectID, locationID, workflowID)
 	if workflowExists == true && err != nil {
-		return fmt.Errorf("deployWorkflow: %w", err)
+		return fmt.Errorf("deployWorkflow: %v", err)
 	}
 
 	ctx := context.Background()
 	client, err := workflows.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("workflows.NewClient: %w", err)
+		return fmt.Errorf("workflows.NewClient: %v", err)
 	}
 	workflowPath := fmt.Sprintf("projects/%s/locations/%s/workflows/%s", projectID, locationID, workflowID)
 	print(workflowPath)
@@ -67,21 +67,21 @@ func deployWorkflow(projectID, locationID, workflowID string) error {
 		},
 		WorkflowId: workflowID,
 	})
-	return fmt.Errorf("client.CreateWorkflow: %w", err)
+	return fmt.Errorf("client.CreateWorkflow: %v", err)
 }
 
 func workflowExists(projectID, locationID, workflowID string) (bool, error) {
 	ctx := context.Background()
 	client, err := workflows.NewClient(ctx)
 	if err != nil {
-		return false, fmt.Errorf("workflows.NewClient: %w", err)
+		return false, fmt.Errorf("workflows.NewClient: %v", err)
 	}
 	workflowPath := fmt.Sprintf("projects/%s/locations/%s/workflows/%s", projectID, locationID, workflowID)
 	wf, err := client.GetWorkflow(ctx, &workflowspb.GetWorkflowRequest{
 		Name: workflowPath,
 	})
 	if err != nil {
-		return false, fmt.Errorf("client.GetWorkflow: %w", err)
+		return false, fmt.Errorf("client.GetWorkflow: %v", err)
 	}
 	return wf.State == workflowspb.Workflow_ACTIVE, nil
 }
