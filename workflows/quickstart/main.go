@@ -38,7 +38,7 @@ func executeWorkflow(projectID, locationID, workflowID string) (string, error) {
 	// Creates a client.
 	client, err := executions.NewClient(ctx)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("executions.NewClient: %w", err)
 	}
 
 	if workflowID == "" {
@@ -50,31 +50,31 @@ func executeWorkflow(projectID, locationID, workflowID string) (string, error) {
 		Parent: workflowPath,
 	})
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("client.CreateExecution: %w", err)
 	}
 
 	name := exe.GetName()
-	fmt.Fprintf(os.Stdout, "Created execution: %v\n", name)
+	fmt.Printf("Created execution: %v\n", name)
 
 	// Wait for execution to finish, then print results.
 	backoffDelay := 1 * time.Second // Start wait with delay of 1s.
 	fmt.Println("Poll for result...")
 	for {
-		e, err := client.GetExecution(ctx, &executionspb.GetExecutionRequest{
+		exe, err := client.GetExecution(ctx, &executionspb.GetExecutionRequest{
 			Name: name,
 		})
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("client.GetExecution: %w", err)
 		}
 
 		// If we haven't seen the result yet, wait a second.
-		if e.State == executionspb.Execution_ACTIVE {
+		if exe.State == executionspb.Execution_ACTIVE {
 			fmt.Printf("- Waiting %ds for results...\n", backoffDelay/time.Second)
 			time.Sleep(backoffDelay)
 			backoffDelay *= 2 // Double the delay to provide exponential backoff.
 		} else {
-			fmt.Printf("Execution finished with state: %v\n", e.State)
-			return e.Result, nil
+			fmt.Printf("Execution finished with state: %v\n", exe.State)
+			return exe.Result, nil
 		}
 	}
 }
