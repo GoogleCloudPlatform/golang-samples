@@ -46,3 +46,31 @@ func TestRetryAttempts(t *testing.T) {
 		t.Errorf("attempts=%d; want %d", attempts, 5)
 	}
 }
+
+func TestRetryWithoutTest(t *testing.T) {
+	RetryWithoutTest(5, time.Millisecond, func(r *R) {
+		if r.Attempt == 2 {
+			return
+		}
+		r.Fail()
+	})
+}
+
+func TestRetryWithoutTestAttempts(t *testing.T) {
+	var attempts int
+	RetryWithoutTest(10, time.Millisecond, func(r *R) {
+		r.Logf("This line should appear only once.")
+		r.Logf("attempt=%d", r.Attempt)
+		attempts = r.Attempt
+
+		// Retry 5 times.
+		if r.Attempt == 5 {
+			return
+		}
+		r.Fail()
+	})
+
+	if attempts != 5 {
+		t.Errorf("attempts=%d; want %d", attempts, 5)
+	}
+}

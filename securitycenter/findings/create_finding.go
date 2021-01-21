@@ -14,6 +14,7 @@
 
 package findings
 
+// [START securitycenter_create_finding]
 // [START create_finding]
 import (
 	"context"
@@ -68,3 +69,4 @@ func createFinding(w io.Writer, sourceName string) error {
 }
 
 // [END create_finding]
+// [END securitycenter_create_finding]

@@ -14,6 +14,7 @@
 
 package assets
 
+// [START securitycenter_list_project_assets]
 // [START list_project_assets]
 import (
 	"context"
@@ -62,3 +63,4 @@ func listAllProjectAssets(w io.Writer, orgID string) error {
 }
 
 // [END list_project_assets]
+// [END securitycenter_list_project_assets]

@@ -14,6 +14,7 @@
 
 package findings
 
+// [START securitycenter_get_source]
 // [START get_source]
 import (
 	"context"
@@ -50,3 +51,4 @@ func getSource(w io.Writer, sourceName string) error {
 }
 
 // [END get_source]
+// [END securitycenter_get_source]

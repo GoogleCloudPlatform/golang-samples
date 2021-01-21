@@ -171,12 +171,18 @@ func TestRequesterPays(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	bucketName := tc.ProjectID + "-storage-buckets-tests"
 
-	if err := enableRequesterPays(ioutil.Discard, bucketName); err != nil {
-		t.Errorf("enableRequesterPays: %#v", err)
-	}
-	if err := disableRequesterPays(ioutil.Discard, bucketName); err != nil {
-		t.Errorf("disableRequesterPays: %#v", err)
-	}
+	// Tests which update the bucket metadata must be retried in order to avoid
+	// flakes from rate limits.
+	testutil.Retry(t, 5, 2*time.Second, func(r *testutil.R) {
+		if err := enableRequesterPays(ioutil.Discard, bucketName); err != nil {
+			r.Errorf("enableRequesterPays: %#v", err)
+		}
+	})
+	testutil.Retry(t, 5, 2*time.Second, func(r *testutil.R) {
+		if err := disableRequesterPays(ioutil.Discard, bucketName); err != nil {
+			r.Errorf("disableRequesterPays: %#v", err)
+		}
+	})
 	if err := getRequesterPaysStatus(ioutil.Discard, bucketName); err != nil {
 		t.Errorf("getRequesterPaysStatus: %#v", err)
 	}

@@ -14,6 +14,7 @@
 
 package notifications
 
+// [START securitycenter_create_notification_config]
 // [START scc_create_notification_config]
 import (
 	"context"
@@ -61,3 +62,4 @@ func createNotificationConfig(w io.Writer, orgID string, pubsubTopic string, not
 }
 
 // [END scc_create_notification_config]
+// [END securitycenter_create_notification_config]
