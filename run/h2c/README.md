@@ -15,7 +15,7 @@ Alternatively, you can use the `gcloud` SDK:
 
 ```sh
 git clone https://github.com/GoogleCloudPlatform/golang-samples.git
-cd ./run/h2c
+cd ./golang-samples/run/h2c
 gcloud beta run deploy http2-test --use-http2 --source=.
 ```
 
