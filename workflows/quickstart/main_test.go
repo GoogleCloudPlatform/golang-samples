@@ -30,14 +30,16 @@ func TestExecuteWorkflow(t *testing.T) {
 	locationID := "us-central1"
 	workflowName := "myFirstWorkflow"
 
+	fmt.Printf("deployWorkflow(%v, %v, %v)\n", tc.ProjectID, locationID, workflowName)
 	err := deployWorkflow(tc.ProjectID, locationID, workflowName)
 	if err != nil {
-		t.Errorf("deployWorkflow(deploy): %v", err)
+		t.Errorf("deployWorkflow(%v, %v, %v): %v", tc.ProjectID, locationID, workflowName, err)
 	}
 
+	fmt.Printf("executeWorkflow(%v, %v, %v)\n", tc.ProjectID, locationID, workflowName)
 	_, err = executeWorkflow(tc.ProjectID, locationID, workflowName)
 	if err != nil {
-		t.Errorf("ExecuteWorkflow(execute): %v", err)
+		t.Errorf("executeWorkflow(%v, %v, %v): %v", tc.ProjectID, locationID, workflowName, err)
 	}
 }
 
