@@ -45,4 +45,5 @@ func getPublicAccessPrevention(w io.Writer, bucketName string) error {
 	fmt.Fprintf(w, "Public access prevention is %v for %v", attrs.PublicAccessPrevention.String(), bucketName)
 	return nil
 }
+
 // [END storage_get_public_access_prevention]

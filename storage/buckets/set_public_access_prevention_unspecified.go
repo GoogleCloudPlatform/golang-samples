@@ -48,4 +48,5 @@ func setPublicAccessPreventionUnspecified(w io.Writer, bucketName string) error 
 	fmt.Fprintf(w, "Public access prevention is 'unspecified' for %v", bucketName)
 	return nil
 }
+
 // [END storage_set_public_access_prevention_unspecified]
