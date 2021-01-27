@@ -38,7 +38,7 @@ func TestIndex(t *testing.T) {
 
 	want := "Tabs VS Spaces"
 	if !strings.Contains(body, want) {
-		t.Errorf("Expected to see '%s' in indexHandler response body", want)
+		t.Errorf("indexHandler got response body %q, want to contain %q", body, want)
 	}
 }
 
