@@ -167,11 +167,7 @@ runTests() {
   set +x
   echo "Running 'go test' in '$(pwd)'..."
   set -x
-  if [[ -f "run_tests" ]]; then
-    2>&1 run_tests
-  else
-    2>&1 go test -timeout $TIMEOUT -v "${1:-./...}" | tee sponge_log.log
-  fi
+  2>&1 go test -timeout $TIMEOUT -v "${1:-./...}" | tee sponge_log.log
   /go/bin/go-junit-report -set-exit-code < sponge_log.log > raw_log.xml
   exit_code=$((exit_code + $?))
   # Add region tags tested to test case properties.

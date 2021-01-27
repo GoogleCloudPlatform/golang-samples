@@ -25,7 +25,22 @@ import (
 
 func TestIndex(t *testing.T) {
 	testutil.EndToEndTest(t)
-	app := newApp()
+	tcpApp := createTCPApp()
+	loadIndex(tcpApp, t)
+}
+
+func TestCastVote(t *testing.T) {
+	testutil.EndToEndTest(t)
+	tcpApp := createTCPApp()
+	castVote(tcpApp, t)
+
+}
+
+func createTCPApp() *app {
+	return newApp()
+}
+
+func loadIndex(app *app, t *testing.T) {
 	rr := httptest.NewRecorder()
 	request := httptest.NewRequest("GET", "/", nil)
 	app.indexHandler(rr, request)
@@ -42,9 +57,7 @@ func TestIndex(t *testing.T) {
 	}
 }
 
-func TestCastVote(t *testing.T) {
-	testutil.EndToEndTest(t)
-	app := newApp()
+func castVote(app *app, t *testing.T) {
 	rr := httptest.NewRecorder()
 	request := httptest.NewRequest("POST", "/", bytes.NewBuffer([]byte("team=SPACES")))
 	request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
@@ -55,6 +68,7 @@ func TestCastVote(t *testing.T) {
 	if resp.StatusCode != 200 {
 		t.Errorf("indexHandler got status code %d, want 200", resp.StatusCode)
 	}
+
 	want := "Vote successfully cast for SPACES"
 	if !strings.Contains(body, want) {
 		t.Errorf("Expected to see '%s' in indexHandler response body", want)

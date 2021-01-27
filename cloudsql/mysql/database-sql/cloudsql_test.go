@@ -17,6 +17,7 @@ package main
 import (
 	"bytes"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 
@@ -25,7 +26,34 @@ import (
 
 func TestIndex(t *testing.T) {
 	testutil.EndToEndTest(t)
+	tcpApp := createTCPApp()
+	loadIndex(tcpApp, t)
+	unixApp := createUnixApp()
+	loadIndex(unixApp, t)
+}
+
+func TestCastVote(t *testing.T) {
+	testutil.EndToEndTest(t)
+	tcpApp := createTCPApp()
+	castVote(tcpApp, t)
+	unixApp := createUnixApp()
+	castVote(unixApp, t)
+
+}
+
+func createTCPApp() *app {
+	return newApp()
+}
+
+func createUnixApp() *app {
+	dbHost := os.Getenv("DB_HOST")
+	os.Unsetenv("DB_HOST")
 	app := newApp()
+	os.Setenv("DB_HOST", dbHost)
+	return app
+}
+
+func loadIndex(app *app, t *testing.T) {
 	rr := httptest.NewRecorder()
 	request := httptest.NewRequest("GET", "/", nil)
 	app.indexHandler(rr, request)
@@ -38,13 +66,11 @@ func TestIndex(t *testing.T) {
 
 	want := "Tabs VS Spaces"
 	if !strings.Contains(body, want) {
-		t.Errorf("indexHandler got response body %q, want to contain %q", body, want)
+		t.Errorf("Expected to see '%s' in indexHandler response body", want)
 	}
 }
 
-func TestCastVote(t *testing.T) {
-	testutil.EndToEndTest(t)
-	app := newApp()
+func castVote(app *app, t *testing.T) {
 	rr := httptest.NewRecorder()
 	request := httptest.NewRequest("POST", "/", bytes.NewBuffer([]byte("team=SPACES")))
 	request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
