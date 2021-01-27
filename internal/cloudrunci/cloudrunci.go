@@ -57,6 +57,12 @@ type Service struct {
 	// Additional runtime environment variable overrides for the app.
 	Env EnvVars
 
+	// Build the image without Dockerfile, using Google Cloud buildpacks.
+	AsBuildpack bool
+
+	// Strictly HTTP/2 serving
+	HTTP2 bool
+
 	deployed bool     // Whether the service has been deployed.
 	built    bool     // Whether the container image has been built.
 	url      *url.URL // The url of the deployed service.
@@ -259,6 +265,7 @@ func (s *Service) operationLabel(op string) string {
 func (s *Service) deployCmd() *exec.Cmd {
 	args := append([]string{
 		"--quiet",
+		"alpha", // TODO until --use-http2 goes GA
 		"run",
 		"deploy",
 		s.version(),
@@ -276,6 +283,9 @@ func (s *Service) deployCmd() *exec.Cmd {
 	if s.AllowUnauthenticated {
 		args = append(args, "--allow-unauthenticated")
 	}
+	if s.HTTP2 {
+		args = append(args, "--use-http2")
+	}
 
 	// NOTE: if the "beta" component is not available, and this is run in parallel,
 	// gcloud will attempt to install those components multiple
@@ -288,12 +298,17 @@ func (s *Service) deployCmd() *exec.Cmd {
 func (s *Service) buildCmd() *exec.Cmd {
 	args := []string{
 		"--quiet",
+		"beta", // TODO until --pack goes to GA
 		"builds",
 		"submit",
 		"--project",
 		s.ProjectID,
-		"--tag",
-		s.Image,
+	}
+
+	if !s.AsBuildpack {
+		args = append(args, "--tag", s.Image)
+	} else {
+		args = append(args, "--pack=image="+s.Image)
 	}
 
 	// NOTE: if the "beta" component is not available, and this is run in parallel,
