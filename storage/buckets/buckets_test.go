@@ -375,7 +375,7 @@ func TestPublicAccessPrevention(t *testing.T) {
 		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
 	}
 	if attrs.PublicAccessPrevention != storage.PublicAccessPreventionEnforced {
-		t.Errorf("PublicAccessPrevention: got %v, want %v", attrs.PublicAccessPrevention.String(), storage.PublicAccessPreventionEnforced.String())
+		t.Errorf("PublicAccessPrevention: got %s, want %s", attrs.PublicAccessPrevention, storage.PublicAccessPreventionEnforced)
 	}
 
 	buf := new(bytes.Buffer)
@@ -398,7 +398,7 @@ func TestPublicAccessPrevention(t *testing.T) {
 		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
 	}
 	if attrs.PublicAccessPrevention != storage.PublicAccessPreventionUnspecified {
-		t.Errorf("PublicAccessPrevention: got %v, want %v", attrs.PublicAccessPrevention.String(), storage.PublicAccessPreventionUnspecified.String())
+		t.Errorf("PublicAccessPrevention: got %s, want %s", attrs.PublicAccessPrevention, storage.PublicAccessPreventionUnspecified)
 	}
 
 }

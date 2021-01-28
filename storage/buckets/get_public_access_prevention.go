@@ -42,7 +42,7 @@ func getPublicAccessPrevention(w io.Writer, bucketName string) error {
 	if err != nil {
 		return fmt.Errorf("Bucket(%q).Attrs: %v", bucketName, err)
 	}
-	fmt.Fprintf(w, "Public access prevention is %v for %v", attrs.PublicAccessPrevention.String(), bucketName)
+	fmt.Fprintf(w, "Public access prevention is %s for %v", attrs.PublicAccessPrevention, bucketName)
 	return nil
 }
 
