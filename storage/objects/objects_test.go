@@ -50,8 +50,6 @@ func TestObjects(t *testing.T) {
 		object2          = "foo/a.txt"
 		object3          = "bar.txt"
 		dstObj           = "foobar.txt"
-		allUsers         = storage.AllUsers
-		roleReader       = storage.RoleReader
 	)
 
 	testutil.CleanBucket(ctx, t, tc.ProjectID, bucket)
@@ -178,7 +176,7 @@ func TestObjects(t *testing.T) {
 		t.Errorf("getMetadata: %v", err)
 	}
 	t.Run("publicFile", func(t *testing.T) {
-		if err := makePublic(ioutil.Discard, bucket, object1, allUsers, roleReader); err != nil {
+		if err := makePublic(ioutil.Discard, bucket, object1); err != nil {
 			t.Errorf("makePublic: %v", err)
 		}
 		data, err = downloadPublicFile(ioutil.Discard, bucket, object1)
