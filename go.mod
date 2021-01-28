@@ -16,7 +16,6 @@ require (
 	github.com/aws/aws-sdk-go v1.36.20
 	github.com/bmatcuk/doublestar/v2 v2.0.4
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
-	github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/eclipse/paho.mqtt.golang v1.3.1
 	github.com/fluent/fluent-logger-golang v1.5.0
@@ -30,7 +29,6 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/h2non/filetype v1.1.0
-	github.com/lib/pq v1.9.0
 	github.com/linkedin/goavro/v2 v2.10.0
 	github.com/mailgun/mailgun-go/v3 v3.6.4
 	github.com/mailjet/mailjet-apiv3-go v0.0.0-20190724151621-55e56f74078c
@@ -42,6 +40,7 @@ require (
 	golang.org/x/net v0.0.0-20201224014010-6772e930b67b
 	golang.org/x/oauth2 v0.0.0-20201208152858-08078c50e5b5
 	golang.org/x/text v0.3.4
+	golang.org/x/tools v0.1.0 // indirect
 	google.golang.org/api v0.36.0
 	google.golang.org/appengine v1.6.7
 	google.golang.org/genproto v0.0.0-20201214200347-8c77b98c765d
