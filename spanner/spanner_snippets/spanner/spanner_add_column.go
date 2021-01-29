@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"time"
 
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
@@ -43,8 +42,6 @@ func addNewColumn(w io.Writer, db string) error {
 	if err != nil {
 		return err
 	}
-	ctx, cancel := context.WithTimeout(ctx, 60 * time.Second)
-	defer cancel()
 	if err := op.Wait(ctx); err != nil {
 		return err
 	}

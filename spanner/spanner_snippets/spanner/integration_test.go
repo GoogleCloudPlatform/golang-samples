@@ -135,6 +135,12 @@ func TestCreateInstance(t *testing.T) {
 
 func TestSample(t *testing.T) {
 	_ = testutil.SystemTest(t)
+
+	// Temporarily disable default deadlines during samples tests.
+	current := os.Getenv("GOOGLE_API_GO_EXPERIMENTAL_DISABLE_DEFAULT_DEADLINE")
+	defer os.Setenv("GOOGLE_API_GO_EXPERIMENTAL_DISABLE_DEFAULT_DEADLINE", current)
+	os.Setenv("GOOGLE_API_GO_EXPERIMENTAL_DISABLE_DEFAULT_DEADLINE", "true")
+
 	dbName, cleanup := initTest(t, randomID())
 	defer cleanup()
 
