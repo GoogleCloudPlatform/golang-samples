@@ -20,70 +20,73 @@ import (
 	"os"
 	"strings"
 	"testing"
-
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestIndex(t *testing.T) {
-	testutil.EndToEndTest(t)
-	tcpApp := createTCPApp()
-	loadIndex(tcpApp, t)
-	unixApp := createUnixApp()
-	loadIndex(unixApp, t)
+	if os.Getenv("GOLANG_SAMPLES_E2E_TEST") == "" {
+		t.Skip()
+	}
+	tests := []struct {
+		dbHost string
+	}{
+		{dbHost: ""},
+		{dbHost: os.Getenv("DB_HOST")},
+	}
+
+	for _, test := range tests {
+		oldDBHost := os.Getenv("DB_HOST")
+		os.Setenv("DB_HOST", test.dbHost)
+
+		app := newApp()
+		rr := httptest.NewRecorder()
+		request := httptest.NewRequest("GET", "/", nil)
+		app.indexHandler(rr, request)
+		resp := rr.Result()
+		body := rr.Body.String()
+
+		if resp.StatusCode != 200 {
+			t.Errorf("With dbHost='%s', indexHandler got status code %d, want 200", test.dbHost, resp.StatusCode)
+		}
+
+		want := "Tabs VS Spaces"
+		if !strings.Contains(body, want) {
+			t.Errorf("With dbHost='%s', expected to see '%s' in indexHandler response body", test.dbHost, want)
+		}
+		os.Setenv("DB_HOST", oldDBHost)
+	}
 }
 
 func TestCastVote(t *testing.T) {
-	testutil.EndToEndTest(t)
-	tcpApp := createTCPApp()
-	castVote(tcpApp, t)
-	unixApp := createUnixApp()
-	castVote(unixApp, t)
-
-}
-
-func createTCPApp() *app {
-	return newApp()
-}
-
-func createUnixApp() *app {
-	dbHost := os.Getenv("DB_HOST")
-	os.Unsetenv("DB_HOST")
-	app := newApp()
-	os.Setenv("DB_HOST", dbHost)
-	return app
-}
-
-func loadIndex(app *app, t *testing.T) {
-	rr := httptest.NewRecorder()
-	request := httptest.NewRequest("GET", "/", nil)
-	app.indexHandler(rr, request)
-	resp := rr.Result()
-	body := rr.Body.String()
-
-	if resp.StatusCode != 200 {
-		t.Errorf("indexHandler got status code %d, want 200", resp.StatusCode)
+	if os.Getenv("GOLANG_SAMPLES_E2E_TEST") == "" {
+		t.Skip()
+	}
+	tests := []struct {
+		dbHost string
+	}{
+		{dbHost: ""},
+		{dbHost: os.Getenv("DB_HOST")},
 	}
 
-	want := "Tabs VS Spaces"
-	if !strings.Contains(body, want) {
-		t.Errorf("Expected to see '%s' in indexHandler response body", want)
-	}
-}
+	for _, test := range tests {
+		oldDBHost := os.Getenv("DB_HOST")
+		os.Setenv("DB_HOST", test.dbHost)
 
-func castVote(app *app, t *testing.T) {
-	rr := httptest.NewRecorder()
-	request := httptest.NewRequest("POST", "/", bytes.NewBuffer([]byte("team=SPACES")))
-	request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	app.indexHandler(rr, request)
-	resp := rr.Result()
-	body := rr.Body.String()
+		app := newApp()
+		rr := httptest.NewRecorder()
+		request := httptest.NewRequest("POST", "/", bytes.NewBuffer([]byte("team=SPACES")))
+		request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		app.indexHandler(rr, request)
+		resp := rr.Result()
+		body := rr.Body.String()
 
-	if resp.StatusCode != 200 {
-		t.Errorf("indexHandler got status code %d, want 200", resp.StatusCode)
-	}
+		if resp.StatusCode != 200 {
+			t.Errorf("With dbHost='%s', indexHandler got status code %d, want 200", test.dbHost, resp.StatusCode)
+		}
 
-	want := "Vote successfully cast for SPACES"
-	if !strings.Contains(body, want) {
-		t.Errorf("Expected to see '%s' in indexHandler response body", want)
+		want := "Vote successfully cast for SPACES"
+		if !strings.Contains(body, want) {
+			t.Errorf("With dbHost='%s', expected to see '%s' in indexHandler response body", test.dbHost, want)
+		}
+		os.Setenv("DB_HOST", oldDBHost)
 	}
 }
