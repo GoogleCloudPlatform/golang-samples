@@ -18,7 +18,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"google.golang.org/api/option"
 	"io"
 	"os"
 	"regexp"
@@ -50,7 +49,7 @@ func initTest(t *testing.T, id string) (dbName string, cleanup func()) {
 	dbName = fmt.Sprintf("%s/databases/%s", instance, dbID)
 
 	ctx := context.Background()
-	adminClient, err := database.NewDatabaseAdminClient(ctx, option.WithEndpoint("staging-wrenchworks.sandbox.googleapis.com:443"))
+	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		t.Fatalf("failed to create DB admin client: %v", err)
 	}
