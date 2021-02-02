@@ -47,7 +47,13 @@ func createBackup(w io.Writer, db, backupID string) error {
 
 	// Get the name, create time and backup size.
 	createTime := time.Unix(backup.CreateTime.Seconds, int64(backup.CreateTime.Nanos))
-	fmt.Fprintf(w, "Backup %s of size %d bytes was created at %s\n", backup.Name, backup.SizeBytes, createTime.Format(time.RFC3339))
+	versionTime := time.Unix(backup.VersionTime.Seconds, int64(backup.VersionTime.Nanos))
+	fmt.Fprintf(w,
+		"Backup %s of size %d bytes was created at %s with version time\n",
+		backup.Name,
+		backup.SizeBytes,
+		createTime.Format(time.RFC3339),
+		versionTime.Format(time.RFC3339))
 	return nil
 }
 

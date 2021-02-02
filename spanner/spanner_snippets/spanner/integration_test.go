@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"google.golang.org/api/option"
 	"io"
 	"os"
 	"regexp"
@@ -49,7 +50,7 @@ func initTest(t *testing.T, id string) (dbName string, cleanup func()) {
 	dbName = fmt.Sprintf("%s/databases/%s", instance, dbID)
 
 	ctx := context.Background()
-	adminClient, err := database.NewDatabaseAdminClient(ctx)
+	adminClient, err := database.NewDatabaseAdminClient(ctx, option.WithEndpoint("staging-wrenchworks.sandbox.googleapis.com:443"))
 	if err != nil {
 		t.Fatalf("failed to create DB admin client: %v", err)
 	}
@@ -368,6 +369,16 @@ func TestBackupSample(t *testing.T) {
 
 	out = runBackupSample(t, deleteBackup, dbName, backupID, "failed to delete a backup")
 	assertContains(t, out, fmt.Sprintf("Deleted backup %s", backupID))
+}
+
+func TestCreateDatabaseWithRetentionPeriodSample(t *testing.T) {
+	_ = testutil.SystemTest(t)
+	dbName, cleanup := initTest(t, randomID())
+	defer cleanup()
+
+	wantRetentionPeriod := "7d"
+	out := runSample(t, createDatabaseWithRetentionPeriod, dbName, "failed to create a database with a retention period")
+	assertContains(t, out, fmt.Sprintf("Created database [%s] with version retention period '%s'", dbName, wantRetentionPeriod))
 }
 
 func runSample(t *testing.T, f sampleFunc, dbName, errMsg string) string {
