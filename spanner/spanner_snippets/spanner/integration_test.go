@@ -16,8 +16,10 @@ package spanner
 
 import (
 	"bytes"
+	"cloud.google.com/go/spanner"
 	"context"
 	"fmt"
+	"google.golang.org/grpc/codes"
 	"io"
 	"os"
 	"regexp"
@@ -380,8 +382,20 @@ func runSample(t *testing.T, f sampleFunc, dbName, errMsg string) string {
 
 func runBackupSample(t *testing.T, f backupSampleFunc, dbName, backupID, errMsg string) string {
 	var b bytes.Buffer
-	if err := f(&b, dbName, backupID); err != nil {
-		t.Errorf("%s: %v", errMsg, err)
+	attempts := 0
+	for {
+		err := f(&b, dbName, backupID)
+		if err != nil {
+			if attempts < 10 && spanner.ErrCode(err) == codes.InvalidArgument && strings.Contains(err.Error(), "Please retry the operation once the pending restores complete") {
+				attempts++
+				// Wait one minute to let other restore operations to finish.
+				time.Sleep(time.Minute)
+			} else {
+				t.Errorf("%s: %v", errMsg, err)
+			}
+		} else {
+			break
+		}
 	}
 	return b.String()
 }
