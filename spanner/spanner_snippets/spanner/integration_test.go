@@ -388,7 +388,7 @@ func runBackupSample(t *testing.T, f backupSampleFunc, dbName, backupID, errMsg 
 		if err != nil {
 			if attempts < 10 && spanner.ErrCode(err) == codes.InvalidArgument && strings.Contains(err.Error(), "Please retry the operation once the pending restores complete") {
 				attempts++
-				// Wait one minute to let other restore operations to finish.
+				// Wait one minute to let other restore operations finish.
 				time.Sleep(time.Minute)
 			} else {
 				t.Errorf("%s: %v", errMsg, err)
