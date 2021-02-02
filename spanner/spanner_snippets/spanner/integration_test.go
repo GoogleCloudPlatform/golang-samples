@@ -16,10 +16,8 @@ package spanner
 
 import (
 	"bytes"
-	"cloud.google.com/go/spanner"
 	"context"
 	"fmt"
-	"google.golang.org/grpc/codes"
 	"io"
 	"os"
 	"regexp"
@@ -28,6 +26,7 @@ import (
 	"testing"
 	"time"
 
+	"cloud.google.com/go/spanner"
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
 	instance "cloud.google.com/go/spanner/admin/instance/apiv1"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -35,6 +34,7 @@ import (
 	"google.golang.org/api/iterator"
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 	instancepb "google.golang.org/genproto/googleapis/spanner/admin/instance/v1"
+	"google.golang.org/grpc/codes"
 )
 
 type sampleFunc func(w io.Writer, dbName string) error
@@ -358,7 +358,7 @@ func TestBackupSample(t *testing.T) {
 	out = runBackupSample(t, updateBackup, dbName, backupID, "failed to update a backup")
 	assertContains(t, out, fmt.Sprintf("Updated backup %s", backupID))
 
-	out = runBackupSample(t, restoreBackup, restoreDBName, backupID, "failed to restore a backup")
+	out = runBackupSampleWithRetry(t, restoreBackup, restoreDBName, backupID, "failed to restore a backup", 10)
 	assertContains(t, out, fmt.Sprintf("Source database %s restored from backup", dbName))
 
 	// This sample should run after a restore operation.
@@ -382,20 +382,29 @@ func runSample(t *testing.T, f sampleFunc, dbName, errMsg string) string {
 
 func runBackupSample(t *testing.T, f backupSampleFunc, dbName, backupID, errMsg string) string {
 	var b bytes.Buffer
-	attempts := 0
-	for {
-		err := f(&b, dbName, backupID)
-		if err != nil {
-			if attempts < 10 && spanner.ErrCode(err) == codes.InvalidArgument && strings.Contains(err.Error(), "Please retry the operation once the pending restores complete") {
-				attempts++
-				// Wait one minute to let other restore operations finish.
-				time.Sleep(time.Minute)
+	if err := f(&b, dbName, backupID); err != nil {
+		t.Errorf("%s: %v", errMsg, err)
+	}
+	return b.String()
+}
+
+func runBackupSampleWithRetry(t *testing.T, f backupSampleFunc, dbName, backupID, errMsg string, maxAttempts int) string {
+	var b bytes.Buffer
+	var testError error
+	success := testutil.Retry(t, maxAttempts, time.Minute, func(r *testutil.R) {
+		if err := f(&b, dbName, backupID); err != nil {
+			if spanner.ErrCode(err) == codes.InvalidArgument && strings.Contains(err.Error(), "Please retry the operation once the pending restores complete") {
+				r.Fail()
 			} else {
-				t.Errorf("%s: %v", errMsg, err)
+				testError = err
 			}
-		} else {
-			break
 		}
+	})
+	if !success {
+		t.Errorf("%s: %v", errMsg, "backup test failed because it exceeded max attempts")
+	}
+	if testError != nil {
+		t.Errorf("%s: %v", errMsg, testError)
 	}
 	return b.String()
 }
