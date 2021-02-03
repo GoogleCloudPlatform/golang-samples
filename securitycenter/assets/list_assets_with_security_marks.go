@@ -14,6 +14,7 @@
 
 package assets
 
+// [START securitycenter_list_assets_with_security_marks]
 // [START list_assets_with_security_marks]
 import (
 	"context"
@@ -61,3 +62,4 @@ func listAssetsWithMarks(w io.Writer, orgID string) error {
 }
 
 // [END list_assets_with_security_marks]
+// [END securitycenter_list_assets_with_security_marks]

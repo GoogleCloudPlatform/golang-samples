@@ -117,6 +117,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("CreateReadSession: %v", err)
 	}
+	fmt.Printf("Read session: %s\n", session.GetName())
 
 	if len(session.GetStreams()) == 0 {
 		log.Fatalf("no streams in session.  if this was a small query result, consider writing to output to a named table.")

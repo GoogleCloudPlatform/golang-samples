@@ -14,6 +14,7 @@
 
 package findings
 
+// [START securitycenter_update_source]
 // [START update_source]
 import (
 	"context"
@@ -61,3 +62,4 @@ func updateSource(w io.Writer, sourceName string) error {
 }
 
 // [END update_source]
+// [END securitycenter_update_source]

@@ -14,6 +14,7 @@
 
 package findings
 
+// [START securitycenter_list_sources]
 // [START list_sources]
 import (
 	"context"
@@ -57,3 +58,4 @@ func listSources(w io.Writer, orgID string) error {
 }
 
 // [END list_sources]
+// [END securitycenter_list_sources]
