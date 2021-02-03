@@ -18,7 +18,7 @@
    `feat(functions): add gophers codelab`).
 1. Send a pull request with your changes.
 1. A maintainer will review the pull request and make comments. Prefer adding
-   additional commits over ammending and force-pushing since it can be difficult
+   additional commits over amending and force-pushing since it can be difficult
    to follow code reviews when the commit history changes.
 
    Commits will be squashed when they're merged.

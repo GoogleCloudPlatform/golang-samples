@@ -50,6 +50,31 @@ func Retry(t *testing.T, maxAttempts int, sleep time.Duration, f func(r *R)) boo
 	return false
 }
 
+// RetryWithoutTest is a variant of Retry that does not use a testing parameter.
+// It is meant for testing utilities that do not pass around the testing context, such as cloudrunci.
+func RetryWithoutTest(maxAttempts int, sleep time.Duration, f func(r *R)) bool {
+	for attempt := 1; attempt <= maxAttempts; attempt++ {
+		r := &R{Attempt: attempt, log: &bytes.Buffer{}}
+
+		f(r)
+
+		if !r.failed {
+			if r.log.Len() != 0 {
+				r.Logf("Success after %d attempts:%s", attempt, r.log.String())
+			}
+			return true
+		}
+
+		if attempt == maxAttempts {
+			r.Logf("FAILED after %d attempts:%s", attempt, r.log.String())
+			return false
+		}
+
+		time.Sleep(sleep)
+	}
+	return false
+}
+
 // R is passed to each run of a flaky test run, manages state and accumulates log statements.
 type R struct {
 	// The number of current attempt.

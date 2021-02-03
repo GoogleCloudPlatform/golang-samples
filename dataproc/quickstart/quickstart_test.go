@@ -161,8 +161,7 @@ func TestQuickstart(t *testing.T) {
 		got := string(stdOut)
 		wants := []string{
 			"Cluster created successfully",
-			"Submitted job",
-			"finished with state DONE:",
+			"Job finished successfully",
 			"successfully deleted",
 		}
 		for _, want := range wants {

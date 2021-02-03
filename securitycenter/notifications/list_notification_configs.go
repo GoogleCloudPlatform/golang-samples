@@ -14,6 +14,7 @@
 
 package notifications
 
+// [START securitycenter_list_notification_configs]
 // [START scc_list_notification_configs]
 import (
 	"context"
@@ -57,3 +58,4 @@ func listNotificationConfigs(w io.Writer, orgID string) error {
 }
 
 // [END scc_list_notification_configs]
+// [END securitycenter_list_notification_configs]

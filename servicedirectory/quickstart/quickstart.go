@@ -23,8 +23,8 @@ import (
 	"fmt"
 	"log"
 
-	servicedirectory "cloud.google.com/go/servicedirectory/apiv1beta1"
-	sdpb "google.golang.org/genproto/googleapis/cloud/servicedirectory/v1beta1"
+	servicedirectory "cloud.google.com/go/servicedirectory/apiv1"
+	sdpb "google.golang.org/genproto/googleapis/cloud/servicedirectory/v1"
 )
 
 func main() {
@@ -62,7 +62,7 @@ func main() {
 		Parent:    namespace.Name,
 		ServiceId: serviceID,
 		Service: &sdpb.Service{
-			Metadata: map[string]string{
+			Annotations: map[string]string{
 				"key1": "value1",
 				"key2": "value2",
 			},
@@ -80,7 +80,7 @@ func main() {
 		Endpoint: &sdpb.Endpoint{
 			Address: "8.8.8.8",
 			Port:    8080,
-			Metadata: map[string]string{
+			Annotations: map[string]string{
 				"key1": "value1",
 				"key2": "value2",
 			},
