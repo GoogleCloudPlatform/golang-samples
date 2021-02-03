@@ -58,6 +58,13 @@ func RetryWithoutTest(maxAttempts int, sleep time.Duration, f func(r *R)) bool {
 
 		f(r)
 
+		if r.stopped {
+			if r.log.Len() != 0 {
+				r.Logf("Stopped after %d attempts:%s", attempt, r.log.String())
+			}
+			return false
+		}
+
 		if !r.failed {
 			if r.log.Len() != 0 {
 				r.Logf("Success after %d attempts:%s", attempt, r.log.String())
@@ -80,8 +87,9 @@ type R struct {
 	// The number of current attempt.
 	Attempt int
 
-	failed bool
-	log    *bytes.Buffer
+	failed  bool
+	stopped bool
+	log     *bytes.Buffer
 }
 
 // Fail marks the run as failed, and will retry once the function returns.
@@ -89,10 +97,21 @@ func (r *R) Fail() {
 	r.failed = true
 }
 
+// FailNow stops further retries and marks f as unsuccessful.
+func (r *R) FailNow() {
+	r.stopped = true
+}
+
 // Errorf is equivalent to Logf followed by Fail.
 func (r *R) Errorf(s string, v ...interface{}) {
 	r.logf(s, v...)
 	r.Fail()
+}
+
+// FailNowf is equivalent to Logf followed by FailNow.
+func (r *R) FailNowf(s string, v ...interface{}) {
+	r.logf(s, v...)
+	r.FailNow()
 }
 
 // Logf formats its arguments and records it in the error log.

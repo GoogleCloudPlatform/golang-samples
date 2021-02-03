@@ -390,21 +390,17 @@ func runBackupSample(t *testing.T, f backupSampleFunc, dbName, backupID, errMsg 
 
 func runBackupSampleWithRetry(t *testing.T, f backupSampleFunc, dbName, backupID, errMsg string, maxAttempts int) string {
 	var b bytes.Buffer
-	var testError error
 	success := testutil.Retry(t, maxAttempts, time.Minute, func(r *testutil.R) {
 		if err := f(&b, dbName, backupID); err != nil {
 			if spanner.ErrCode(err) == codes.InvalidArgument && strings.Contains(err.Error(), "Please retry the operation once the pending restores complete") {
-				r.Fail()
+				r.Errorf("%s: %v", errMsg, err)
 			} else {
-				testError = err
+				r.FailNowf("%s: %v", errMsg, err)
 			}
 		}
 	})
 	if !success {
-		t.Errorf("%s: %v", errMsg, "backup test failed because it exceeded max attempts")
-	}
-	if testError != nil {
-		t.Errorf("%s: %v", errMsg, testError)
+		t.Errorf("%s: %v", errMsg, "backup test failed because it exceeded max attempts or was stopped")
 	}
 	return b.String()
 }
