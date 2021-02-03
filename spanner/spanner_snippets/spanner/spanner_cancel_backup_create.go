@@ -20,9 +20,11 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"regexp"
 	"time"
 
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
+	pbt "github.com/golang/protobuf/ptypes/timestamp"
 	"google.golang.org/genproto/googleapis/longrunning"
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 	"google.golang.org/grpc/codes"
@@ -30,6 +32,11 @@ import (
 )
 
 func cancelBackup(w io.Writer, db, backupID string) error {
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(db)
+	if matches == nil || len(matches) != 3 {
+		return fmt.Errorf("Invalid database id %s", db)
+	}
+
 	ctx := context.Background()
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
@@ -39,7 +46,15 @@ func cancelBackup(w io.Writer, db, backupID string) error {
 
 	expireTime := time.Now().AddDate(0, 0, 14)
 	// Create a backup.
-	op, err := adminClient.StartBackupOperation(ctx, backupID, db, expireTime)
+	request := adminpb.CreateBackupRequest{
+		Parent:   matches[1],
+		BackupId: backupID,
+		Backup: &adminpb.Backup{
+			Database:   db,
+			ExpireTime: &pbt.Timestamp{Seconds: expireTime.Unix(), Nanos: int32(expireTime.Nanosecond())},
+		},
+	}
+	op, err := adminClient.CreateBackup(ctx, &request)
 	if err != nil {
 		return err
 	}
