@@ -19,7 +19,6 @@ package spanner
 import (
 	"context"
 	"fmt"
-
 	"io"
 	"regexp"
 	"time"
@@ -44,7 +43,6 @@ func createBackup(w io.Writer, db, backupID string) error {
 
 	expireTime := time.Now().AddDate(0, 0, 14)
 	versionTime := time.Now()
-
 	// Create a backup.
 	request := adminpb.CreateBackupRequest{
 		Parent:   matches[1],
@@ -59,7 +57,6 @@ func createBackup(w io.Writer, db, backupID string) error {
 	if err != nil {
 		return err
 	}
-
 	// Wait for backup operation to complete.
 	backup, err := op.Wait(ctx)
 	if err != nil {
