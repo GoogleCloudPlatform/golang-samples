@@ -44,7 +44,7 @@ func createBackup(w io.Writer, db, backupID string) error {
 	expireTime := time.Now().AddDate(0, 0, 14)
 	versionTime := time.Now()
 	// Create a backup.
-	request := adminpb.CreateBackupRequest{
+	req := adminpb.CreateBackupRequest{
 		Parent:   matches[1],
 		BackupId: backupID,
 		Backup: &adminpb.Backup{
@@ -53,7 +53,7 @@ func createBackup(w io.Writer, db, backupID string) error {
 			VersionTime: &pbt.Timestamp{Seconds: versionTime.Unix(), Nanos: int32(versionTime.Nanosecond())},
 		},
 	}
-	op, err := adminClient.CreateBackup(ctx, &request)
+	op, err := adminClient.CreateBackup(ctx, &req)
 	if err != nil {
 		return fmt.Errorf("createBackup.CreateBackup: %v", err)
 	}
