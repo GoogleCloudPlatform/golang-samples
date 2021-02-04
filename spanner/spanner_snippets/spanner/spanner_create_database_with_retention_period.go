@@ -26,15 +26,15 @@ import (
 )
 
 func createDatabaseWithRetentionPeriod(w io.Writer, db string) error {
-	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(db)
+	matches := regexp.MustCompile("^(.+)/databases/(.+)$").FindStringSubmatch(db)
 	if matches == nil || len(matches) != 3 {
-		return fmt.Errorf("Invalid database id %s", db)
+		return fmt.Errorf("createDatabaseWithRetentionPeriod: invalid database id %q", db)
 	}
 
 	ctx := context.Background()
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("createDatabaseWithRetentionPeriod.NewDatabaseAdminClient: %v", err)
 	}
 	defer adminClient.Close()
 
@@ -44,7 +44,7 @@ func createDatabaseWithRetentionPeriod(w io.Writer, db string) error {
 		"ALTER DATABASE `%s` SET OPTIONS (version_retention_period = '%s')",
 		matches[2], retentionPeriod,
 	)
-	op, err := adminClient.CreateDatabase(ctx, &adminpb.CreateDatabaseRequest{
+	req := adminpb.CreateDatabaseRequest{
 		Parent:          matches[1],
 		CreateStatement: "CREATE DATABASE `" + matches[2] + "`",
 		ExtraStatements: []string{
@@ -62,14 +62,15 @@ func createDatabaseWithRetentionPeriod(w io.Writer, db string) error {
 			INTERLEAVE IN PARENT Singers ON DELETE CASCADE`,
 			alterDatabase,
 		},
-	})
+	}
+	op, err := adminClient.CreateDatabase(ctx, &req)
 	if err != nil {
-		return err
+		return fmt.Errorf("createDatabaseWithRetentionPeriod.CreateDatabase: %v", err)
 	}
 	if _, err := op.Wait(ctx); err != nil {
-		return err
+		return fmt.Errorf("createDatabaseWithRetentionPeriod.Wait: %v", err)
 	}
-	fmt.Fprintf(w, "Created database [%s] with version retention period '%s'\n", db, retentionPeriod)
+	fmt.Fprintf(w, "Created database [%s] with version retention period %q\n", db, retentionPeriod)
 	return nil
 }
 

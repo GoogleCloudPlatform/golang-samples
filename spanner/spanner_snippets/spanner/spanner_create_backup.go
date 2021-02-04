@@ -29,15 +29,15 @@ import (
 )
 
 func createBackup(w io.Writer, db, backupID string) error {
-	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(db)
+	matches := regexp.MustCompile("^(.+)/databases/(.+)$").FindStringSubmatch(db)
 	if matches == nil || len(matches) != 3 {
-		return fmt.Errorf("Invalid database id %s", db)
+		return fmt.Errorf("createBackup: invalid database id %q", db)
 	}
 
 	ctx := context.Background()
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("createBackup.NewDatabaseAdminClient: %v", err)
 	}
 	defer adminClient.Close()
 
@@ -55,18 +55,18 @@ func createBackup(w io.Writer, db, backupID string) error {
 	}
 	op, err := adminClient.CreateBackup(ctx, &request)
 	if err != nil {
-		return err
+		return fmt.Errorf("createBackup.CreateBackup: %v", err)
 	}
 	// Wait for backup operation to complete.
 	backup, err := op.Wait(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("createBackup.Wait: %v", err)
 	}
 
 	// Get the name, create time, version time and backup size.
 	createTime := time.Unix(backup.CreateTime.Seconds, int64(backup.CreateTime.Nanos))
 	fmt.Fprintf(w,
-		"Backup %s of size %d bytes was created at %s with version time\n",
+		"Backup %s of size %d bytes was created at %s with version time %s\n",
 		backup.Name,
 		backup.SizeBytes,
 		createTime.Format(time.RFC3339),

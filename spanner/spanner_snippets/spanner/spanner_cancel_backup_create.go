@@ -32,21 +32,21 @@ import (
 )
 
 func cancelBackup(w io.Writer, db, backupID string) error {
-	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(db)
+	matches := regexp.MustCompile("^(.+)/databases/(.+)$").FindStringSubmatch(db)
 	if matches == nil || len(matches) != 3 {
-		return fmt.Errorf("Invalid database id %s", db)
+		return fmt.Errorf("cancelBackup: invalid database id %q", db)
 	}
 
 	ctx := context.Background()
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("cancelBackup.NewDatabaseAdminClient: %v", err)
 	}
 	defer adminClient.Close()
 
 	expireTime := time.Now().AddDate(0, 0, 14)
 	// Create a backup.
-	request := adminpb.CreateBackupRequest{
+	req := adminpb.CreateBackupRequest{
 		Parent:   matches[1],
 		BackupId: backupID,
 		Backup: &adminpb.Backup{
@@ -54,15 +54,15 @@ func cancelBackup(w io.Writer, db, backupID string) error {
 			ExpireTime: &pbt.Timestamp{Seconds: expireTime.Unix(), Nanos: int32(expireTime.Nanosecond())},
 		},
 	}
-	op, err := adminClient.CreateBackup(ctx, &request)
+	op, err := adminClient.CreateBackup(ctx, &req)
 	if err != nil {
-		return err
+		return fmt.Errorf("cancelBackup.CreateBackup: %v", err)
 	}
 
 	// Cancel backup creation.
 	err = adminClient.LROClient.CancelOperation(ctx, &longrunning.CancelOperationRequest{Name: op.Name()})
 	if err != nil {
-		return err
+		return fmt.Errorf("cancelBackup.CancelOperation: %v", err)
 	}
 
 	// Cancel operations are best effort so either it will complete or be
@@ -70,14 +70,14 @@ func cancelBackup(w io.Writer, db, backupID string) error {
 	backup, err := op.Wait(ctx)
 	if err != nil {
 		if waitStatus, ok := status.FromError(err); !ok || waitStatus.Code() != codes.Canceled {
-			return err
+			return fmt.Errorf("cancelBackup.Wait: %v", err)
 		}
 	} else {
 		// Backup was completed before it could be cancelled so delete the
 		// unwanted backup.
 		err = adminClient.DeleteBackup(ctx, &adminpb.DeleteBackupRequest{Name: backup.Name})
 		if err != nil {
-			return err
+			return fmt.Errorf("cancelBackup.DeleteBackup: %v", err)
 		}
 	}
 
