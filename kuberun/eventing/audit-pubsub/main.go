@@ -27,7 +27,7 @@ func HelloAuditLogEventHandler(w http.ResponseWriter, r *http.Request) {
 	s := fmt.Sprintf("Created Pub/Sub topic: %s", string(r.Header.Get("Ce-Subject")))
 	log.Printf(s)
 
-	// send empty reply response
+	// Send empty reply response.
 	w.WriteHeader(http.StatusNoContent)
 	w.Write([]byte(""))
 }

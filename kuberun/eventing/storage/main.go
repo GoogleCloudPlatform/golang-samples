@@ -23,9 +23,9 @@ import (
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 )
 
-// Receive simply print the Ce-Subject header out
+// Receive prints the Ce-Subject header.
 func Receive(event cloudevents.Event) {
-	// do something with event.
+	// Do something with event.
 	fmt.Printf("Detected change in GCS bucket: %s\n", event.Subject())
 }
 
