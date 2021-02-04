@@ -395,7 +395,7 @@ func runBackupSampleWithRetry(t *testing.T, f backupSampleFunc, dbName, backupID
 			if spanner.ErrCode(err) == codes.InvalidArgument && strings.Contains(err.Error(), "Please retry the operation once the pending restores complete") {
 				r.Errorf("%s: %v", errMsg, err)
 			} else {
-				r.FailNowf("%s: %v", errMsg, err)
+				t.Fatalf("%s: %v", errMsg, err)
 			}
 		}
 	})
