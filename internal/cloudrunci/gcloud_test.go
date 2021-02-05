@@ -58,7 +58,7 @@ func TestGcloudRetry(t *testing.T) {
 		t.Errorf("gcloud: %v", err)
 	}
 
-	if want := "gave up after 3 failed attempts"; !strings.Contains(err.Error(), want) {
+	if want := "gave up after 5 failed attempts"; !strings.Contains(err.Error(), want) {
 		t.Errorf("gcloud: got %q, want contain %q", err.Error(), want)
 	}
 }

@@ -93,18 +93,17 @@ func main() {
 }
 
 func writeEntry(client *logging.Client) {
-	// [START logging_write_log_entry]
 	const name = "log-example"
 	logger := client.Logger(name)
 	defer logger.Flush() // Ensure the entry is written.
 
 	infolog := logger.StandardLogger(logging.Info)
 	infolog.Printf("infolog is a standard Go log.Logger with INFO severity.")
-	// [END logging_write_log_entry]
 }
 
 func structuredWrite(client *logging.Client) {
 	// [START write_structured_log_entry]
+	// [START logging_write_log_entry]
 	const name = "log-example"
 	logger := client.Logger(name)
 	defer logger.Flush() // Ensure the entry is written.
@@ -116,6 +115,7 @@ func structuredWrite(client *logging.Client) {
 		},
 		Severity: logging.Debug,
 	})
+	// [END logging_write_log_entry]
 	// [END write_structured_log_entry]
 }
 

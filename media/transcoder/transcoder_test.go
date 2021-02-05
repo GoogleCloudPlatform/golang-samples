@@ -208,7 +208,7 @@ func testJobFromPreset(t *testing.T, projectNumber string, inputURI string, outp
 	})
 
 	// Get the job state (should be succeeded).
-	testutil.Retry(t, 6, 30*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 10, 60*time.Second, func(r *testutil.R) {
 		if err := getJobState(buf, tc.ProjectID, location, jobID); err != nil {
 			r.Errorf("getJobState got err: %v", err)
 		}
@@ -270,7 +270,7 @@ func testJobFromTemplate(t *testing.T, projectNumber string, inputURI string, ou
 	jobID = strSlice[len(strSlice)-1]
 
 	// Get the job state (should be succeeded).
-	testutil.Retry(t, 6, 30*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 10, 60*time.Second, func(r *testutil.R) {
 		if err := getJobState(buf, tc.ProjectID, location, jobID); err != nil {
 			r.Errorf("getJobState got err: %v", err)
 		}
@@ -332,7 +332,7 @@ func testJobFromAdHoc(t *testing.T, projectNumber string, inputURI string, outpu
 	})
 
 	// Get the job state (should be succeeded).
-	testutil.Retry(t, 6, 30*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 10, 60*time.Second, func(r *testutil.R) {
 		if err := getJobState(buf, tc.ProjectID, location, jobID); err != nil {
 			r.Errorf("getJobState got err: %v", err)
 		}
