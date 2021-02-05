@@ -29,7 +29,6 @@ func HelloAuditLogEventHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Send empty reply response.
 	w.WriteHeader(http.StatusNoContent)
-	w.Write([]byte(""))
 }
 
 func main() {

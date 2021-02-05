@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -47,9 +47,8 @@ func HelloEventsPubSub(w http.ResponseWriter, r *http.Request) {
 	s := fmt.Sprintf("Hello, %s! ID: %s", name, string(r.Header.Get("Ce-Id")))
 	log.Printf(s)
 
-	// send empty reply response
+	// Send empty reply response.
 	w.WriteHeader(http.StatusNoContent)
-	w.Write([]byte(""))
 }
 
 func main() {

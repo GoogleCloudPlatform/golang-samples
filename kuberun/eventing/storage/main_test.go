@@ -24,10 +24,15 @@ import (
 
 func TestReceive(t *testing.T) {
 	tests := []struct {
+		source  string
 		subject string
 		want    string
 	}{
-		{subject: "objects/go-test.txt", want: "Detected change in GCS bucket: objects/go-test.txt\n"},
+		{
+			source:  "test-bucket",
+			subject: "test-object",
+			want:    "Detected change in Cloud Storage bucket: test-bucket, object: test-object\n",
+		},
 	}
 	for _, test := range tests {
 		old := os.Stdout // keep backup of the real stdout
@@ -42,6 +47,7 @@ func TestReceive(t *testing.T) {
 		event.SetSpecVersion("1.0")
 		event.SetSource("https://localhost")
 		event.SetType("example.type")
+		event.SetSource(test.source)
 		event.SetSubject(test.subject)
 		event.SetData(cloudevents.ApplicationJSON, map[string]string{"hello": "world"})
 		Receive(event)
@@ -53,7 +59,7 @@ func TestReceive(t *testing.T) {
 			t.Fatalf("ReadAll: %v", err)
 		}
 		if got := string(out); got != test.want {
-			t.Errorf("Receive(%q): got %q, want %q", test.subject, got, test.want)
+			t.Errorf("Receive(%q): got %q, want %q", test.source, got, test.want)
 		}
 	}
 }

@@ -29,11 +29,9 @@ func EventHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Log all headers besides authorization header
 	log.Println("HEADERS:")
-	headerMap := make(map[string]string)
 	for k, v := range r.Header {
 		if k != "Authorization" {
 			val := strings.Join(v, ",")
-			headerMap[k] = val
 			log.Println(fmt.Sprintf("%q: %q\n", k, val))
 		}
 	}
@@ -43,13 +41,13 @@ func EventHandler(w http.ResponseWriter, r *http.Request) {
 	bodyBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Printf("error parsing body: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
-	body := string(bodyBytes)
-	log.Println(body)
+	log.Println(string(bodyBytes))
 
-	// send empty reply response
+	// Send empty reply response.
 	w.WriteHeader(http.StatusNoContent)
-	w.Write([]byte(""))
 }
 
 func main() {
