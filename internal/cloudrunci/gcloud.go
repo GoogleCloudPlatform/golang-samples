@@ -37,12 +37,13 @@ func init() {
 }
 
 // gcloud provides a common mechanism for executing gcloud commands.
-// It will attempt to retry failed commands 3 times with 2 second wait intervals.
+// It will attempt to retry failed commands. Use gcloudWithoutRetry() for no retry.
 func gcloud(label string, cmd *exec.Cmd) ([]byte, error) {
 	var out []byte
 	var err error
 
-	success := testutil.RetryWithoutTest(3, 2*time.Second, func(r *testutil.R) {
+	maxAttempts := 5
+	success := testutil.RetryWithoutTest(maxAttempts, 2*time.Second, func(r *testutil.R) {
 		out, err = gcloudExec(fmt.Sprintf("Attempt #%d: ", r.Attempt), label, cmd)
 		if err != nil {
 			log.Printf("gcloudExec: %v", err)
@@ -57,7 +58,7 @@ func gcloud(label string, cmd *exec.Cmd) ([]byte, error) {
 		return out, nil
 	}
 
-	return out, fmt.Errorf("gcloudExec: %s: gave up after 3 failed attempts", label)
+	return out, fmt.Errorf("gcloudExec: %s: gave up after %d failed attempts", label, maxAttempts)
 }
 
 // gcloudWithoutRetry provides a common mechanism for executing gcloud commands.
