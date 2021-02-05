@@ -45,7 +45,7 @@ func setMetadata(w io.Writer, bucket, object string) error {
 		},
 	}
 	if _, err := o.Update(ctx, objectAttrsToUpdate); err != nil {
-		return fmt.Errorf("Object(%q).Update: %v", object, err)
+		return fmt.Errorf("ObjectHandle(%q).Update: %v", object, err)
 	}
 	fmt.Fprintf(w, "Updated custom metadata for object %v in bucket %v.\n", object, bucket)
 	return nil
