@@ -38,8 +38,6 @@ func changeDefaultStorageClass(w io.Writer, bucketName string) error {
 	defer cancel()
 
 	bucket := client.Bucket(bucketName)
-	// See the StorageClass documentation for other valid storage classes:
-	// https://cloud.google.com/storage/docs/storage-classes
 	newStorageClass := "COLDLINE"
 	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
 		StorageClass: newStorageClass,
