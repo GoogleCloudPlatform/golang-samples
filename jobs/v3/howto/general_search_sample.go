@@ -360,7 +360,7 @@ func companyDisplayNameSearch(w io.Writer, projectID, companyName string, compan
 
 // [END company_display_name_filter]
 
-// [START compensation_filter]
+// [START compensation_fiter]
 
 // compensationSearch searches for job on compensation.
 func compensationSearch(w io.Writer, projectID, companyName string) (*talent.SearchJobsResponse, error) {

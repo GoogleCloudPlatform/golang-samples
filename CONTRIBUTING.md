@@ -77,7 +77,7 @@ When possible, follow the pattern of existing samples for that product.
 
 ## Include imports and flags in region tags
 
-The sample region (e.g. `[START foo]` and `[END foo]`) should include the import
+The sample region (e.g. `[START foo]` and `[END foo`]) should include the import
 block.
 
 ```go
