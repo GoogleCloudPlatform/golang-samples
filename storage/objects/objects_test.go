@@ -171,6 +171,21 @@ func TestObjects(t *testing.T) {
 		t.Errorf("contents = %q; want %q", got, want)
 	}
 
+	t.Run("setMetadata", func(t *testing.T) {
+		bkt := client.Bucket(bucket)
+		obj := bkt.Object(object1)
+		err = setMetadata(ioutil.Discard, bucket, object1)
+		if err != nil {
+			t.Errorf("setMetadata: %v", err)
+		}
+		attrs, err := obj.Attrs(ctx)
+		if err != nil {
+			t.Errorf("object.Attrs: %v", err)
+		}
+		if got, want := attrs.Metadata["keyToAddOrUpdate"], "value"; got != want {
+			t.Errorf("object content = %q; want %q", got, want)
+		}
+	})
 	_, err = getMetadata(ioutil.Discard, bucket, object1)
 	if err != nil {
 		t.Errorf("getMetadata: %v", err)
