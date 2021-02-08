@@ -23,8 +23,7 @@ import (
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
-func createTableDocumentsWithTimestamp(w io.Writer, db string) error {
-	ctx := context.Background()
+func createTableDocumentsWithTimestamp(ctx context.Context, w io.Writer, db string) error {
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		return err

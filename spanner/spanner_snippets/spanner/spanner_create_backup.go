@@ -25,8 +25,7 @@ import (
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
 )
 
-func createBackup(w io.Writer, db, backupID string) error {
-	ctx := context.Background()
+func createBackup(ctx context.Context, w io.Writer, db, backupID string) error {
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		return err

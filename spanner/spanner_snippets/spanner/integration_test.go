@@ -36,8 +36,9 @@ import (
 )
 
 type sampleFunc func(w io.Writer, dbName string) error
-type instanceSampleFunc func(w io.Writer, projectID, instanceID string) error
-type backupSampleFunc func(w io.Writer, dbName, backupID string) error
+type sampleFuncWithContext func(ctx context.Context, w io.Writer, dbName string) error
+type instanceSampleFunc func(ctx context.Context, w io.Writer, projectID, instanceID string) error
+type backupSampleFunc func(ctx context.Context, w io.Writer, dbName, backupID string) error
 
 var (
 	validInstancePattern = regexp.MustCompile("^projects/(?P<project>[^/]+)/instances/(?P<instance>[^/]+)$")
@@ -79,7 +80,8 @@ func initBackupTest(t *testing.T, id, dbName string) (restoreDBName, backupID, c
 	backupID = validLength(fmt.Sprintf("backup-%s", id), t)
 	cancelledBackupID = validLength(fmt.Sprintf("cancel-%s", id), t)
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
+	defer cancel()
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		t.Fatalf("failed to create admin client: %v", err)
@@ -125,8 +127,10 @@ func TestCreateInstance(t *testing.T) {
 		t.Fatalf("failed to parse instance name: %v", err)
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
+	defer cancel()
 	instanceID := fmt.Sprintf("go-sample-test-%s", uuid.New().String()[:8])
-	out := runInstanceSample(t, createInstance, projectID, instanceID, "failed to create an instance")
+	out := runInstanceSample(ctx, t, createInstance, projectID, instanceID, "failed to create an instance")
 	if err := cleanupInstance(projectID, instanceID); err != nil {
 		t.Logf("cleanupInstance error: %s", err)
 	}
@@ -136,19 +140,17 @@ func TestCreateInstance(t *testing.T) {
 func TestSample(t *testing.T) {
 	_ = testutil.SystemTest(t)
 
-	// Temporarily disable default deadlines during samples tests.
-	current := os.Getenv("GOOGLE_API_GO_EXPERIMENTAL_DISABLE_DEFAULT_DEADLINE")
-	defer os.Setenv("GOOGLE_API_GO_EXPERIMENTAL_DISABLE_DEFAULT_DEADLINE", current)
-	os.Setenv("GOOGLE_API_GO_EXPERIMENTAL_DISABLE_DEFAULT_DEADLINE", "true")
-
 	dbName, cleanup := initTest(t, randomID())
 	defer cleanup()
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
+	defer cancel()
 
 	var out string
 	mustRunSample(t, createDatabase, dbName, "failed to create a database")
 	runSample(t, createClients, dbName, "failed to create clients")
 	runSample(t, write, dbName, "failed to insert data")
-	runSample(t, addNewColumn, dbName, "failed to add new column")
+	runSampleWithContext(ctx, t, addNewColumn, dbName, "failed to add new column")
 	runSample(t, delete, dbName, "failed to delete data")
 	runSample(t, write, dbName, "failed to insert data")
 	runSample(t, update, dbName, "failed to update data")
@@ -176,7 +178,7 @@ func TestSample(t *testing.T) {
 	out = runSample(t, query, dbName, "failed to query data")
 	assertContains(t, out, "1 1 Total Junk")
 
-	runSample(t, addIndex, dbName, "failed to add index")
+	runSampleWithContext(ctx, t, addIndex, dbName, "failed to add index")
 	out = runSample(t, queryUsingIndex, dbName, "failed to query using index")
 	assertContains(t, out, "Go, Go, Go")
 	assertContains(t, out, "Forever Hold Your Peace")
@@ -193,7 +195,7 @@ func TestSample(t *testing.T) {
 	runSample(t, write, dbName, "failed to insert data")
 	runSample(t, update, dbName, "failed to update data")
 
-	runSample(t, addStoringIndex, dbName, "failed to add storing index")
+	runSampleWithContext(ctx, t, addStoringIndex, dbName, "failed to add storing index")
 
 	out = runSample(t, readStoringIndex, dbName, "failed to read storing index")
 	assertContains(t, out, "500000")
@@ -212,7 +214,7 @@ func TestSample(t *testing.T) {
 	out = runSample(t, readBatchData, dbName, "failed to read batch data")
 	assertContains(t, out, "1 Marc Richards")
 
-	runSample(t, addCommitTimestamp, dbName, "failed to add commit timestamp")
+	runSampleWithContext(ctx, t, addCommitTimestamp, dbName, "failed to add commit timestamp")
 	runSample(t, updateWithTimestamp, dbName, "failed to update with timestamp")
 	out = runSample(t, queryWithTimestamp, dbName, "failed to query with timestamp")
 	assertContains(t, out, "1000000")
@@ -230,14 +232,14 @@ func TestSample(t *testing.T) {
 	assertContains(t, out, "6 Imagination")
 	assertContains(t, out, "9 Imagination")
 
-	runSample(t, createTableDocumentsWithTimestamp, dbName, "failed to create documents table with timestamp")
+	runSampleWithContext(ctx, t, createTableDocumentsWithTimestamp, dbName, "failed to create documents table with timestamp")
 	runSample(t, writeToDocumentsTable, dbName, "failed to write to documents table")
 	runSample(t, updateDocumentsTable, dbName, "failed to update documents table")
 
 	out = runSample(t, queryDocumentsTable, dbName, "failed to query documents table")
 	assertContains(t, out, "Hello World 1 Updated")
 
-	runSample(t, createTableDocumentsWithHistoryTable, dbName, "failed to create documents table with history table")
+	runSampleWithContext(ctx, t, createTableDocumentsWithHistoryTable, dbName, "failed to create documents table with history table")
 	runSample(t, writeWithHistory, dbName, "failed to write with history")
 	runSample(t, updateWithHistory, dbName, "failed to update with history")
 
@@ -280,7 +282,7 @@ func TestSample(t *testing.T) {
 	out = runSample(t, updateUsingBatchDML, dbName, "failed to update using batch DML")
 	assertContains(t, out, "Executed 2 SQL statements using Batch DML.")
 
-	out = runSample(t, createTableWithDatatypes, dbName, "failed to create table with data types")
+	out = runSampleWithContext(ctx, t, createTableWithDatatypes, dbName, "failed to create table with data types")
 	assertContains(t, out, "Created Venues table")
 
 	runSample(t, writeDatatypesData, dbName, "failed to write data with different data types")
@@ -325,7 +327,7 @@ func TestSample(t *testing.T) {
 	assertContains(t, out, "19 Venue 19")
 	assertContains(t, out, "42 Venue 42")
 
-	runSample(t, addNumericColumn, dbName, "failed to add numeric column")
+	runSampleWithContext(ctx, t, addNumericColumn, dbName, "failed to add numeric column")
 	runSample(t, updateDataWithNumericColumn, dbName, "failed to update data with numeric")
 	out = runSample(t, queryWithNumericParameter, dbName, "failed to query with numeric parameter")
 	assertContains(t, out, "4 ")
@@ -345,34 +347,36 @@ func TestBackupSample(t *testing.T) {
 	mustRunSample(t, createDatabase, dbName, "failed to create a database")
 	runSample(t, write, dbName, "failed to insert data")
 
+	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
+	defer cancel()
 	// Start testing backup operations.
-	out = runBackupSample(t, createBackup, dbName, backupID, "failed to create a backup")
+	out = runBackupSample(ctx, t, createBackup, dbName, backupID, "failed to create a backup")
 	assertContains(t, out, fmt.Sprintf("backups/%s", backupID))
 
-	out = runBackupSample(t, cancelBackup, dbName, cancelledBackupID, "failed to cancel a backup")
+	out = runBackupSample(ctx, t, cancelBackup, dbName, cancelledBackupID, "failed to cancel a backup")
 	assertContains(t, out, "Backup cancelled.")
 
-	out = runBackupSample(t, listBackups, dbName, backupID, "failed to list backups")
+	out = runBackupSample(ctx, t, listBackups, dbName, backupID, "failed to list backups")
 	assertContains(t, out, fmt.Sprintf("/backups/%s", backupID))
 	assertContains(t, out, "Backups listed.")
 
-	out = runSample(t, listBackupOperations, dbName, "failed to list backup operations")
+	out = runSampleWithContext(ctx, t, listBackupOperations, dbName, "failed to list backup operations")
 	assertContains(t, out, fmt.Sprintf("on database %s", dbName))
 
-	out = runBackupSample(t, updateBackup, dbName, backupID, "failed to update a backup")
+	out = runBackupSample(ctx, t, updateBackup, dbName, backupID, "failed to update a backup")
 	assertContains(t, out, fmt.Sprintf("Updated backup %s", backupID))
 
-	out = runBackupSample(t, restoreBackup, restoreDBName, backupID, "failed to restore a backup")
+	out = runBackupSample(ctx, t, restoreBackup, restoreDBName, backupID, "failed to restore a backup")
 	assertContains(t, out, fmt.Sprintf("Source database %s restored from backup", dbName))
 
 	// This sample should run after a restore operation.
-	out = runSample(t, listDatabaseOperations, restoreDBName, "failed to list database operations")
+	out = runSampleWithContext(ctx, t, listDatabaseOperations, restoreDBName, "failed to list database operations")
 	assertContains(t, out, fmt.Sprintf("Database %s restored from backup", restoreDBName))
 
 	// Delete the restore DB.
 	cleanupBackup()
 
-	out = runBackupSample(t, deleteBackup, dbName, backupID, "failed to delete a backup")
+	out = runBackupSample(ctx, t, deleteBackup, dbName, backupID, "failed to delete a backup")
 	assertContains(t, out, fmt.Sprintf("Deleted backup %s", backupID))
 }
 
@@ -384,25 +388,35 @@ func runSample(t *testing.T, f sampleFunc, dbName, errMsg string) string {
 	return b.String()
 }
 
-func runBackupSample(t *testing.T, f backupSampleFunc, dbName, backupID, errMsg string) string {
+func runSampleWithContext(ctx context.Context, t *testing.T, f sampleFuncWithContext, dbName, errMsg string) string {
 	var b bytes.Buffer
-	if err := f(&b, dbName, backupID); err != nil {
+	if err := f(ctx, &b, dbName); err != nil {
 		t.Errorf("%s: %v", errMsg, err)
 	}
 	return b.String()
 }
 
-func runInstanceSample(t *testing.T, f instanceSampleFunc, projectID, instanceID, errMsg string) string {
+func runBackupSample(ctx context.Context, t *testing.T, f backupSampleFunc, dbName, backupID, errMsg string) string {
 	var b bytes.Buffer
-	if err := f(&b, projectID, instanceID); err != nil {
+	if err := f(ctx, &b, dbName, backupID); err != nil {
 		t.Errorf("%s: %v", errMsg, err)
 	}
 	return b.String()
 }
 
-func mustRunSample(t *testing.T, f sampleFunc, dbName, errMsg string) string {
+func runInstanceSample(ctx context.Context, t *testing.T, f instanceSampleFunc, projectID, instanceID, errMsg string) string {
 	var b bytes.Buffer
-	if err := f(&b, dbName); err != nil {
+	if err := f(ctx, &b, projectID, instanceID); err != nil {
+		t.Errorf("%s: %v", errMsg, err)
+	}
+	return b.String()
+}
+
+func mustRunSample(t *testing.T, f sampleFuncWithContext, dbName, errMsg string) string {
+	var b bytes.Buffer
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+	defer cancel()
+	if err := f(ctx, &b, dbName); err != nil {
 		t.Fatalf("%s: %v", errMsg, err)
 	}
 	return b.String()
