@@ -10,7 +10,7 @@ require (
 	cloud.google.com/go/firestore v1.3.0
 	cloud.google.com/go/logging v1.0.0
 	cloud.google.com/go/pubsub v1.6.1
-	cloud.google.com/go/spanner v1.10.0
+	cloud.google.com/go/spanner v1.14.0
 	cloud.google.com/go/storage v1.13.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.4
 	github.com/aws/aws-sdk-go v1.36.20
@@ -40,9 +40,9 @@ require (
 	golang.org/x/net v0.0.0-20201224014010-6772e930b67b
 	golang.org/x/oauth2 v0.0.0-20210113205817-d3ed898aa8a3
 	golang.org/x/text v0.3.4
-	google.golang.org/api v0.38.0
+	google.golang.org/api v0.39.0
 	google.golang.org/appengine v1.6.7
-	google.golang.org/genproto v0.0.0-20210203152818-3206188e46ba
+	google.golang.org/genproto v0.0.0-20210207032614-bba0dbe2a9ea
 	google.golang.org/grpc v1.35.0
 	google.golang.org/grpc/examples v0.0.0-20200707005602-4258d12073b4
 	google.golang.org/protobuf v1.25.0
