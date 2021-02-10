@@ -43,7 +43,7 @@ func gcloud(label string, cmd *exec.Cmd) ([]byte, error) {
 	var err error
 
 	delaySeconds := 2 * time.Second
-	if strings.Contains("build container image", label) {
+	if strings.Contains(label, "build container image") {
 		delaySeconds = 60 * time.Second
 	}
 
