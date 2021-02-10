@@ -372,6 +372,16 @@ func TestBackupSample(t *testing.T) {
 	assertContains(t, out, fmt.Sprintf("Deleted backup %s", backupID))
 }
 
+func TestCreateDatabaseWithRetentionPeriodSample(t *testing.T) {
+	_ = testutil.SystemTest(t)
+	dbName, cleanup := initTest(t, randomID())
+	defer cleanup()
+
+	wantRetentionPeriod := "7d"
+	out := runSample(t, createDatabaseWithRetentionPeriod, dbName, "failed to create a database with a retention period")
+	assertContains(t, out, fmt.Sprintf("Created database [%s] with version retention period %q", dbName, wantRetentionPeriod))
+}
+
 func runSample(t *testing.T, f sampleFunc, dbName, errMsg string) string {
 	var b bytes.Buffer
 	if err := f(&b, dbName); err != nil {
