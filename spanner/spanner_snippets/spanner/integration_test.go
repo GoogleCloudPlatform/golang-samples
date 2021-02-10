@@ -379,7 +379,7 @@ func TestCreateDatabaseWithRetentionPeriodSample(t *testing.T) {
 
 	wantRetentionPeriod := "7d"
 	out := runSample(t, createDatabaseWithRetentionPeriod, dbName, "failed to create a database with a retention period")
-	assertContains(t, out, fmt.Sprintf("Created database [%s] with version retention period '%s'", dbName, wantRetentionPeriod))
+	assertContains(t, out, fmt.Sprintf("Created database [%s] with version retention period %q", dbName, wantRetentionPeriod))
 }
 
 func runSample(t *testing.T, f sampleFunc, dbName, errMsg string) string {
