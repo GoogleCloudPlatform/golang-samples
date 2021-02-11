@@ -20,34 +20,57 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"regexp"
 	"time"
 
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
+	pbt "github.com/golang/protobuf/ptypes/timestamp"
+	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
 func createBackup(w io.Writer, db, backupID string) error {
+	matches := regexp.MustCompile("^(.+)/databases/(.+)$").FindStringSubmatch(db)
+	if matches == nil || len(matches) != 3 {
+		return fmt.Errorf("createBackup: invalid database id %q", db)
+	}
+
 	ctx := context.Background()
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("createBackup.NewDatabaseAdminClient: %v", err)
 	}
 	defer adminClient.Close()
 
 	expireTime := time.Now().AddDate(0, 0, 14)
+	versionTime := time.Now()
 	// Create a backup.
-	op, err := adminClient.StartBackupOperation(ctx, backupID, db, expireTime)
+	req := adminpb.CreateBackupRequest{
+		Parent:   matches[1],
+		BackupId: backupID,
+		Backup: &adminpb.Backup{
+			Database:    db,
+			ExpireTime:  &pbt.Timestamp{Seconds: expireTime.Unix(), Nanos: int32(expireTime.Nanosecond())},
+			VersionTime: &pbt.Timestamp{Seconds: versionTime.Unix(), Nanos: int32(versionTime.Nanosecond())},
+		},
+	}
+	op, err := adminClient.CreateBackup(ctx, &req)
 	if err != nil {
-		return err
+		return fmt.Errorf("createBackup.CreateBackup: %v", err)
 	}
 	// Wait for backup operation to complete.
 	backup, err := op.Wait(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("createBackup.Wait: %v", err)
 	}
 
-	// Get the name, create time and backup size.
+	// Get the name, create time, version time and backup size.
 	createTime := time.Unix(backup.CreateTime.Seconds, int64(backup.CreateTime.Nanos))
-	fmt.Fprintf(w, "Backup %s of size %d bytes was created at %s\n", backup.Name, backup.SizeBytes, createTime.Format(time.RFC3339))
+	fmt.Fprintf(w,
+		"Backup %s of size %d bytes was created at %s with version time %s\n",
+		backup.Name,
+		backup.SizeBytes,
+		createTime.Format(time.RFC3339),
+		versionTime.Format(time.RFC3339))
 	return nil
 }
 
