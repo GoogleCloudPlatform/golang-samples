@@ -22,10 +22,10 @@ import (
 	"os/exec"
 	"strings"
 	"testing"
-	"time"
 )
 
 const RuntimeVersion = "go113"
+const FunctionsRegion = "us-central1"
 
 func TestMain(m *testing.M) {
 	// Only run end-to-end tests when configured to do so.
@@ -34,22 +34,32 @@ func TestMain(m *testing.M) {
 		os.Exit(m.Run())
 	}
 
+	if os.Getenv("GOLANG_SAMPLES_PROJECT_ID") == "" {
+		log.Println("Stopping test execution: GOLANG_SAMPLES_PROJECT_ID not set")
+		os.Exit(1)
+	}
+
 	retn, err := setupAndRun(m)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	os.Exit(retn)
 }
 
 func setupAndRun(m *testing.M) (int, error) {
-	entryPoint := "MakeGetRequestFixture"
-	targetName := entryPoint + "-" + time.Now().Format("20060102-150405")
+	projectID := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
+	region := "us-central1"
+
+	entryPoint := "MakeGetRequestCloudFunction"
+	targetName := entryPoint + "-echo"
 
 	// Setup function for tests.
 	cmd := exec.Command("gcloud", "functions", "deploy", targetName,
 		"--entry-point="+entryPoint,
 		"--runtime="+RuntimeVersion,
 		"--no-allow-unauthenticated",
+		"--project="+os.Getenv("GOLANG_SAMPLES_PROJECT_ID"),
 		"--trigger-http",
 	)
 	log.Printf("Running: %s %s", cmd.Path, strings.Join(cmd.Args, " "))
@@ -57,34 +67,16 @@ func setupAndRun(m *testing.M) (int, error) {
 		log.Println(string(err.(*exec.ExitError).Stderr))
 		return 1, fmt.Errorf("Setup: Deploy target function: %w", err)
 	}
+	defer teardown(targetName)
 
-	// Tear down the deployed function.
-	defer func() {
-		cmd = exec.Command("gcloud", "functions", "delete", targetName)
-		log.Printf("Running: %s %s", cmd.Path, strings.Join(cmd.Args, " "))
-		if _, err := cmd.Output(); err != nil {
-			log.Println(string(err.(*exec.ExitError).Stderr))
-			log.Printf("Teardown: Delete target function: %v", err)
-		}
-	}()
-
-	// Setup Relay service where the authenticated request will be run.
-	cmd = exec.Command("gcloud", "functions", "describe", targetName, "--format=value(httpsTrigger.url)")
-	log.Printf("Running: %s %s", cmd.Path, strings.Join(cmd.Args, " "))
-	out, err := cmd.Output()
-	if err != nil {
-		log.Println(string(err.(*exec.ExitError).Stderr))
-		return 1, fmt.Errorf("Setup: Get target function URL: %w", err)
-	}
-	targetURL := strings.TrimSpace(string(out))
-	relayName := entryPoint + "-relay-" + time.Now().Format("20060102-150405")
-
-	// Setup function for tests.
-	cmd = exec.Command("gcloud", "functions", "deploy", relayName,
+	// Setup function that tests directly use.
+	targetURL := fmt.Sprintf("https://%s-%s.cloudfunctions.net/%s", region, projectID, targetName)
+	cmd = exec.Command("gcloud", "functions", "deploy", entryPoint,
 		"--entry-point="+entryPoint,
 		"--runtime="+RuntimeVersion,
 		"--no-allow-unauthenticated",
-		"--update-env-vars", "TARGET="+targetURL,
+		"--update-env-vars", "TARGET_URL="+targetURL,
+		"--project="+os.Getenv("GOLANG_SAMPLES_PROJECT_ID"),
 		"--trigger-http",
 	)
 	log.Printf("Running: %s %s", cmd.Path, strings.Join(cmd.Args, " "))
@@ -92,31 +84,23 @@ func setupAndRun(m *testing.M) (int, error) {
 		log.Println(string(err.(*exec.ExitError).Stderr))
 		return 1, fmt.Errorf("Setup: Deploy relay function: %w", err)
 	}
+	defer teardown(entryPoint)
 
-	// Tear down the deployed function.
-	defer func() {
-		cmd = exec.Command("gcloud", "functions", "delete", relayName)
-		log.Printf("Running: %s %s", cmd.Path, strings.Join(cmd.Args, " "))
-		if _, err := cmd.Output(); err != nil {
-			log.Println(string(err.(*exec.ExitError).Stderr))
-			log.Printf("Teardown: Delete relay function: %v", err)
-		}
-	}()
-
-	// Retrieve URL for tests.
-	cmd = exec.Command("gcloud", "functions", "describe", relayName, "--format=value(httpsTrigger.url)")
-	log.Printf("Running: %s %s", cmd.Path, strings.Join(cmd.Args, " "))
-	out, err = cmd.Output()
-	if err != nil {
-		log.Println(string(err.(*exec.ExitError).Stderr))
-		return 1, fmt.Errorf("Setup: Get relay function URL: %w", err)
-	}
-	if err := os.Setenv("BASE_URL", strings.TrimSpace(string(out))); err != nil {
-		return 1, fmt.Errorf("Setup: os.Setenv: %w", err)
-	}
+	baseURL := fmt.Sprintf("https://%s-%s.cloudfunctions.net/", region, projectID)
+	os.Setenv("BASE_URL", baseURL)
 
 	// Run the tests.
 	return m.Run(), nil
+}
+
+func teardown(functionName string) {
+	cmd := exec.Command("gcloud", "functions", "delete", functionName)
+	log.Printf("Running: %s %s", cmd.Path, strings.Join(cmd.Args, " "))
+	return
+	if _, err := cmd.Output(); err != nil {
+		log.Println(string(err.(*exec.ExitError).Stderr))
+		log.Printf("Teardown: Delete function %s: %v", functionName, err)
+	}
 }
 
 func TestMakeGetRequest(t *testing.T) {
@@ -124,9 +108,10 @@ func TestMakeGetRequest(t *testing.T) {
 	if baseURL == "" {
 		t.Skip("BASE_URL not set")
 	}
+	url := baseURL + "MakeGetRequestCloudFunction"
 
 	var b bytes.Buffer
-	if err := makeGetRequest(&b, baseURL); err != nil {
+	if err := makeGetRequest(&b, url); err != nil {
 		t.Fatalf("makeGetRequest: %v", err)
 	}
 	got := b.String()

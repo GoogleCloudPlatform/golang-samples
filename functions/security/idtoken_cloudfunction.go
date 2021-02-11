@@ -21,8 +21,8 @@ import (
 	"os"
 )
 
-// MakeGetRequestFixture is an HTTP Cloud Function to facilitate testing security snippets.
-func MakeGetRequestFixture(w http.ResponseWriter, r *http.Request) {
+// MakeGetRequestCloudFunction wraps makeGetRequest in an HTTP Cloud Function for system test deployment.
+func MakeGetRequestCloudFunction(w http.ResponseWriter, r *http.Request) {
 	if os.Getenv("TARGET_URL") == "" {
 		w.Write([]byte("Success!"))
 		return
