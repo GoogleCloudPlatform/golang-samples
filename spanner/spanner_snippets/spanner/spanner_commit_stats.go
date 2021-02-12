@@ -28,7 +28,7 @@ func commitStats(w io.Writer, db string) error {
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)
 	if err != nil {
-		return err
+		return fmt.Errorf("commitStats.NewClient: %v", err)
 	}
 	defer client.Close()
 
@@ -45,7 +45,7 @@ func commitStats(w io.Writer, db string) error {
 		return nil
 	}, spanner.TransactionOptions{CommitOptions: spanner.CommitOptions{ReturnCommitStats: true}})
 	if err != nil {
-		return err
+		return fmt.Errorf("commitStats.ReadWriteTransactionWithOptions: %v", err)
 	}
 	fmt.Fprintf(w, "%d mutations in transaction\n", resp.CommitStats.MutationCount)
 	return nil
