@@ -14,7 +14,7 @@
 
 package objects
 
-// [START storage_make_public]
+// [START storage_set_metadata]
 import (
 	"context"
 	"fmt"
@@ -24,8 +24,8 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// makePublic gives all users read access to an object.
-func makePublic(w io.Writer, bucket, object string) error {
+// setMetadata sets an object's metadata.
+func setMetadata(w io.Writer, bucket, object string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	ctx := context.Background()
@@ -38,12 +38,17 @@ func makePublic(w io.Writer, bucket, object string) error {
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 
-	acl := client.Bucket(bucket).Object(object).ACL()
-	if err := acl.Set(ctx, storage.AllUsers, storage.RoleReader); err != nil {
-		return fmt.Errorf("ACLHandle.Set: %v", err)
+	o := client.Bucket(bucket).Object(object)
+	objectAttrsToUpdate := storage.ObjectAttrsToUpdate{
+		Metadata: map[string]string{
+			"keyToAddOrUpdate": "value",
+		},
 	}
-	fmt.Fprintf(w, "Blob %v is now publicly accessible.\n", object)
+	if _, err := o.Update(ctx, objectAttrsToUpdate); err != nil {
+		return fmt.Errorf("ObjectHandle(%q).Update: %v", object, err)
+	}
+	fmt.Fprintf(w, "Updated custom metadata for object %v in bucket %v.\n", object, bucket)
 	return nil
 }
 
-// [END storage_make_public]
+// [END storage_set_metadata]

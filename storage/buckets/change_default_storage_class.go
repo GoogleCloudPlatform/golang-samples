@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package objects
+package buckets
 
-// [START storage_make_public]
+// [START storage_change_default_storage_class]
 import (
 	"context"
 	"fmt"
@@ -24,10 +24,9 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// makePublic gives all users read access to an object.
-func makePublic(w io.Writer, bucket, object string) error {
-	// bucket := "bucket-name"
-	// object := "object-name"
+// changeDefaultStorageClass changes the storage class on a bucket.
+func changeDefaultStorageClass(w io.Writer, bucketName string) error {
+	// bucketName := "bucket-name"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -38,12 +37,16 @@ func makePublic(w io.Writer, bucket, object string) error {
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 
-	acl := client.Bucket(bucket).Object(object).ACL()
-	if err := acl.Set(ctx, storage.AllUsers, storage.RoleReader); err != nil {
-		return fmt.Errorf("ACLHandle.Set: %v", err)
+	bucket := client.Bucket(bucketName)
+	newStorageClass := "COLDLINE"
+	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
+		StorageClass: newStorageClass,
 	}
-	fmt.Fprintf(w, "Blob %v is now publicly accessible.\n", object)
+	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
+		return fmt.Errorf("Bucket(%q).Update: %v", bucketName, err)
+	}
+	fmt.Fprintf(w, "Default storage class for bucket %v has been set to %v\n", bucketName, newStorageClass)
 	return nil
 }
 
-// [END storage_make_public]
+// [END storage_change_default_storage_class]

@@ -50,8 +50,6 @@ func TestObjects(t *testing.T) {
 		object2          = "foo/a.txt"
 		object3          = "bar.txt"
 		dstObj           = "foobar.txt"
-		allUsers         = storage.AllUsers
-		roleReader       = storage.RoleReader
 	)
 
 	testutil.CleanBucket(ctx, t, tc.ProjectID, bucket)
@@ -173,12 +171,27 @@ func TestObjects(t *testing.T) {
 		t.Errorf("contents = %q; want %q", got, want)
 	}
 
+	t.Run("setMetadata", func(t *testing.T) {
+		bkt := client.Bucket(bucket)
+		obj := bkt.Object(object1)
+		err = setMetadata(ioutil.Discard, bucket, object1)
+		if err != nil {
+			t.Errorf("setMetadata: %v", err)
+		}
+		attrs, err := obj.Attrs(ctx)
+		if err != nil {
+			t.Errorf("object.Attrs: %v", err)
+		}
+		if got, want := attrs.Metadata["keyToAddOrUpdate"], "value"; got != want {
+			t.Errorf("object content = %q; want %q", got, want)
+		}
+	})
 	_, err = getMetadata(ioutil.Discard, bucket, object1)
 	if err != nil {
 		t.Errorf("getMetadata: %v", err)
 	}
 	t.Run("publicFile", func(t *testing.T) {
-		if err := makePublic(ioutil.Discard, bucket, object1, allUsers, roleReader); err != nil {
+		if err := makePublic(ioutil.Discard, bucket, object1); err != nil {
 			t.Errorf("makePublic: %v", err)
 		}
 		data, err = downloadPublicFile(ioutil.Discard, bucket, object1)
