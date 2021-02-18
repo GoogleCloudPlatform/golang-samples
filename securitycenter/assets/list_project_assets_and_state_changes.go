@@ -14,7 +14,7 @@
 
 package assets
 
-// [START securitycenter_list_project_assets_and_state_changes]
+// [START securitycenter_list_assets_and_changes]
 // [START list_project_assets_and_state_changes]
 import (
 	"context"
@@ -69,4 +69,4 @@ func listAllProjectAssetsAndStateChanges(w io.Writer, orgID string) error {
 }
 
 // [END list_project_assets_and_state_changes]
-// [END securitycenter_list_project_assets_and_state_changes]
+// [END securitycenter_list_assets_and_changes]
