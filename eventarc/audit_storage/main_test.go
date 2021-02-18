@@ -29,7 +29,7 @@ func TestHelloEventsStorage(t *testing.T) {
 		subject string
 		want    string
 	}{
-		{subject: "storage.googleapis.com/projects/_/buckets/my-bucket", want: "Detected change in GCS bucket: storage.googleapis.com/projects/_/buckets/my-bucket\n"},
+		{subject: "storage.googleapis.com/projects/_/buckets/my-bucket", want: "Detected change in Cloud Storage bucket: storage.googleapis.com/projects/_/buckets/my-bucket\n"},
 	}
 	for _, test := range tests {
 		r, w, _ := os.Pipe()
