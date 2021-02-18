@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,8 +14,6 @@
 
 package spanner
 
-// [START spanner_create_table_with_datatypes]
-
 import (
 	"context"
 	"fmt"
@@ -25,9 +23,7 @@ import (
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
-// Creates a Cloud Spanner table comprised of columns for each supported data type
-// See https://cloud.google.com/spanner/docs/data-types
-func createTableWithDatatypes(w io.Writer, db string) error {
+func dropColumn(w io.Writer, db string) error {
 	ctx := context.Background()
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
@@ -38,28 +34,15 @@ func createTableWithDatatypes(w io.Writer, db string) error {
 	op, err := adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
 		Database: db,
 		Statements: []string{
-			`CREATE TABLE Venues (
-				VenueId	INT64 NOT NULL,
-				VenueName STRING(100),
-				VenueInfo BYTES(MAX),
-				Capacity INT64,
-				AvailableDates ARRAY<DATE>,
-				LastContactDate DATE,
-				OutdoorVenue BOOL,
-				PopularityScore FLOAT64,
-				Revenue NUMERIC,
-				LastUpdateTime TIMESTAMP NOT NULL OPTIONS (allow_commit_timestamp=true)
-			) PRIMARY KEY (VenueId)`,
+			"ALTER TABLE Venues DROP COLUMN Revenue",
 		},
 	})
 	if err != nil {
-		return fmt.Errorf("UpdateDatabaseDdl: %v", err)
+		return err
 	}
 	if err := op.Wait(ctx); err != nil {
 		return err
 	}
-	fmt.Fprintf(w, "Created Venues table in database [%s]\n", db)
+	fmt.Fprintf(w, "Dropped Revenue column\n")
 	return nil
 }
-
-// [END spanner_create_table_with_datatypes]
