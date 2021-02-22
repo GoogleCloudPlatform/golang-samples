@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	t "log"
 	"regexp"
 	"time"
 
@@ -40,9 +41,12 @@ func createBackup(w io.Writer, db, backupID string) error {
 		return fmt.Errorf("createBackup.NewDatabaseAdminClient: %v", err)
 	}
 	defer adminClient.Close()
+	dbMetadata, err := adminClient.GetDatabase(ctx, &adminpb.GetDatabaseRequest{Name: db})
+	if err != nil {
+		t.Fatalf("createBackup.GetDatabase: %v", err)
+	}
 
 	expireTime := time.Now().AddDate(0, 0, 14)
-	versionTime := time.Now()
 	// Create a backup.
 	req := adminpb.CreateBackupRequest{
 		Parent:   matches[1],
@@ -50,7 +54,7 @@ func createBackup(w io.Writer, db, backupID string) error {
 		Backup: &adminpb.Backup{
 			Database:    db,
 			ExpireTime:  &pbt.Timestamp{Seconds: expireTime.Unix(), Nanos: int32(expireTime.Nanosecond())},
-			VersionTime: &pbt.Timestamp{Seconds: versionTime.Unix(), Nanos: int32(versionTime.Nanosecond())},
+			VersionTime: dbMetadata.EarliestVersionTime,
 		},
 	}
 	op, err := adminClient.CreateBackup(ctx, &req)
@@ -65,6 +69,7 @@ func createBackup(w io.Writer, db, backupID string) error {
 
 	// Get the name, create time, version time and backup size.
 	createTime := time.Unix(backup.CreateTime.Seconds, int64(backup.CreateTime.Nanos))
+	versionTime := time.Unix(dbMetadata.EarliestVersionTime.Seconds, int64(dbMetadata.EarliestVersionTime.Nanos))
 	fmt.Fprintf(w,
 		"Backup %s of size %d bytes was created at %s with version time %s\n",
 		backup.Name,
