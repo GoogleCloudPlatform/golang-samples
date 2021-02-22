@@ -96,7 +96,6 @@ func setupAndRun(m *testing.M) (int, error) {
 func teardown(functionName string) {
 	cmd := exec.Command("gcloud", "functions", "delete", functionName)
 	log.Printf("Running: %s %s", cmd.Path, strings.Join(cmd.Args, " "))
-	return
 	if _, err := cmd.Output(); err != nil {
 		log.Println(string(err.(*exec.ExitError).Stderr))
 		log.Printf("Teardown: Delete function %s: %v", functionName, err)
