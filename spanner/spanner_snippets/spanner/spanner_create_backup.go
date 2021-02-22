@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	t "log"
 	"regexp"
 	"time"
 
@@ -43,7 +42,7 @@ func createBackup(w io.Writer, db, backupID string) error {
 	defer adminClient.Close()
 	dbMetadata, err := adminClient.GetDatabase(ctx, &adminpb.GetDatabaseRequest{Name: db})
 	if err != nil {
-		t.Fatalf("createBackup.GetDatabase: %v", err)
+		return fmt.Errorf("createBackup.GetDatabase: %v", err)
 	}
 
 	expireTime := time.Now().AddDate(0, 0, 14)
