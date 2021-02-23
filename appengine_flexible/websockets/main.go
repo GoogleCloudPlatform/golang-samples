@@ -44,6 +44,7 @@ var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
 }
+var clients = make(map[*websocket.Conn]bool)
 
 // socketHandler echos websocket messages back to the client.
 func socketHandler(w http.ResponseWriter, r *http.Request) {
@@ -55,15 +56,21 @@ func socketHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	clients[conn] = true
+
 	for {
 		messageType, p, err := conn.ReadMessage()
+		log.Printf("conn.ReadMessage: message: %s", p)
 		if err != nil {
 			log.Printf("conn.ReadMessage: %v", err)
 			return
 		}
-		if err := conn.WriteMessage(messageType, p); err != nil {
-			log.Printf("conn.WriteMessage: %v", err)
-			return
+		for client := range clients {
+			err := client.WriteMessage(messageType, p)
+			if err != nil {
+				log.Printf("client.WriteMessage: %v", err)
+				delete(clients, client)
+			}
 		}
 	}
 }
