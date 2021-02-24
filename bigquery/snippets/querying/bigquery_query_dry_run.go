@@ -51,7 +51,7 @@ func queryDryRun(w io.Writer, projectID string) error {
 	}
 	// Dry run is not asynchronous, so get the latest status and statistics.
 	status := job.LastStatus()
-	if err != nil {
+	if err := status.Err(); err != nil {
 		return err
 	}
 	fmt.Fprintf(w, "This query will process %d bytes\n", status.Statistics.TotalBytesProcessed)
