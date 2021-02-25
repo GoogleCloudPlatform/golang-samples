@@ -4,14 +4,17 @@
 1. [Install Go](https://golang.org/doc/install).
 1. Clone the repo:
 
-    `git clone https://github.com/GoogleCloudPlatform/golang-samples.git`
+   `git clone https://github.com/GoogleCloudPlatform/golang-samples.git`
+
 1. Change into the checked out source:
 
-    `cd golang-samples`
+   `cd golang-samples`
+
 1. Fork the repo.
 1. Set your fork as a remote:
 
-    `git remote add fork https://github.com/GITHUB_USERNAME/golang-samples.git`
+   `git remote add fork https://github.com/GITHUB_USERNAME/golang-samples.git`
+
 1. Make changes (see [Formatting](#formatting) and [Style](#style)) and commit
    to your fork. Initial commit messages should follow the
    [Conventional Commits](https://www.conventionalcommits.org/) style (e.g.
@@ -33,6 +36,13 @@ intermediate versions. See [testing/kokoro](testing/kokoro).
 All code must be formatted with `gofmt` (with the latest Go version) and pass
 `go vet`.
 
+If your PR involves changes to `go.mod`, the following command (executed from
+the project root) should resolve any `go.mod` or `go.sum` differences:
+
+```
+$ find . -name go.mod -execdir go mod tidy \;
+```
+
 # Style
 
 Please read and follow https://github.com/golang/go/wiki/CodeReviewComments for
@@ -42,10 +52,10 @@ The following style guidelines are specific to writing Go samples.
 
 Canonical samples:
 
-* Veneer client library with complex request: [`inspect_string.go`](https://github.com/GoogleCloudPlatform/golang-samples/blob/master/dlp/snippets/inspect/inspect_string.go)
-* Apiary client with normal request: [`dicom_store_create.go`](https://github.com/GoogleCloudPlatform/golang-samples/blob/master/healthcare/dicom_store_create.go)
-* Apiary client with complex request: [`fhir_resource_create.go`](https://github.com/GoogleCloudPlatform/golang-samples/blob/master/healthcare/fhir_resource_create.go)
-* Apiary client with file I/O: [`dicomweb_instance_store.go`](https://github.com/GoogleCloudPlatform/golang-samples/blob/master/healthcare/dicomweb_instance_store.go)
+- Veneer client library with complex request: [`inspect_string.go`](https://github.com/GoogleCloudPlatform/golang-samples/blob/master/dlp/snippets/inspect/inspect_string.go)
+- Apiary client with normal request: [`dicom_store_create.go`](https://github.com/GoogleCloudPlatform/golang-samples/blob/master/healthcare/dicom_store_create.go)
+- Apiary client with complex request: [`fhir_resource_create.go`](https://github.com/GoogleCloudPlatform/golang-samples/blob/master/healthcare/fhir_resource_create.go)
+- Apiary client with file I/O: [`dicomweb_instance_store.go`](https://github.com/GoogleCloudPlatform/golang-samples/blob/master/healthcare/dicomweb_instance_store.go)
 
 ## One file per sample
 
@@ -102,7 +112,7 @@ Also see [Imports](#imports).
 
 ## Print to an `io.Writer` for snippets
 
-(Note: this doesn't apply to quickstarts) 
+(Note: this doesn't apply to quickstarts)
 
 Do not print to `stdout` or `stderr`. Pass `w io.Writer` as the first argument
 to the sample function and print to it with `fmt.Fprintf(w, ...)`.
@@ -119,6 +129,7 @@ func hello(w io.Writer) {
 The output can be verified during testing using a buffer.
 
 [inspect_test.go](https://github.com/GoogleCloudPlatform/golang-samples/blob/master/dlp/snippets/inspect/inspect_test.go)
+
 ```go
 func TestInspectString(t *testing.T) {
 	tc := testutil.SystemTest(t)
@@ -188,10 +199,11 @@ func delete(w io.Writer, name string) error {
 
 ## Function arguments for quickstarts
 
-Since [quickstarts use `package main`](#only-quickstarts-have-package-main), we use the `flag` package for 
+Since [quickstarts use `package main`](#only-quickstarts-have-package-main), we use the `flag` package for
 passing parameters into a quickstart, and use `testutil.BuildMain` to build and test your quickstart.
 
 In your quickstart:
+
 ```go
 func main() {
 	projectID := flag.String("project_id", "", "Cloud Project ID")
@@ -204,6 +216,7 @@ func main() {
 ```
 
 In your quickstart test:
+
 ```go
 func TestQuickstart(t *testing.T) {
 	tc := testutil.SystemTest(t)
@@ -305,14 +318,14 @@ func delete(w io.Writer, resourceID string) error {
 }
 ```
 
-
 ## Imports
 
 Imports should be added and sorted by
 [`goimports`](https://godoc.org/golang.org/x/tools/cmd/goimports). There should
 be at least two groups, separated by a newline:
-* Standard library
-* Everything else
+
+- Standard library
+- Everything else
 
 ```go
 import (
@@ -354,13 +367,13 @@ and https://golang.org/doc/effective_go.html#commentary.
 
 ## Common identifiers
 
-* **`ctx`**: All `context.Context` values unless the original can't be shadowed.
-* **`name`**: Fully-qualified resource names (e.g.
+- **`ctx`**: All `context.Context` values unless the original can't be shadowed.
+- **`name`**: Fully-qualified resource names (e.g.
   `/projects/my-project/resource/my-resource`).
-* **`parent`**: Partially-qualified resource names (e.g.
+- **`parent`**: Partially-qualified resource names (e.g.
   `/projects/my-project`)
-* **`req`**: Request value to send.
-* **`projectID`**: Google Cloud project ID.
+- **`req`**: Request value to send.
+- **`projectID`**: Google Cloud project ID.
 
 Names should always be camelCase, even if it's a constant. Initialisms/acronyms
 should have consistent case (e.g. `createFHIRStore` and `fhirStoreID`). See
@@ -406,9 +419,8 @@ See [Use `testutil` for tests](#use-testutil-for-tests) and
 
 ## Creating resources for tests
 
-When creating resources for tests, avoid using UUIDs. Instead, prefer 
-resource names that incorporate aspects of your test, such as `tc.ProjectID +
--golang-test-mypai-mysnippet`. 
+When creating resources for tests, avoid using UUIDs. Instead, prefer
+resource names that incorporate aspects of your test, such as `tc.ProjectID + -golang-test-mypai-mysnippet`.
 
 The intention for this is that test can be run in parallel with different
 versions of Go without race conditions. You may need a different or more
@@ -423,10 +435,11 @@ specific identifier, depending on the sample and test.
 1. Set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable to the credential file path. Tests are authenticated using [Application Default Credentials](https://developers.google.com/identity/protocols/application-default-credentials).
 1. Install the test dependencies:
 
-    `go get -t -d github.com/GoogleCloudPlatform/golang-samples/...`
+   `go get -t -d github.com/GoogleCloudPlatform/golang-samples/...`
+
 1. Run the tests:
 
-    `go test github.com/GoogleCloudPlatform/golang-samples/...`
+   `go test github.com/GoogleCloudPlatform/golang-samples/...`
 
 Note: You may want to `cd` to the directory you're modifying and run
 `go test -v ./...` to avoid running every test in the repo.
@@ -437,9 +450,9 @@ Before we can accept your pull requests you'll need to sign a Contributor
 License Agreement (CLA):
 
 - **If you are an individual writing original source code** and **you own the
-intellectual property**, then you'll need to sign an [individual CLA][indvcla].
+  intellectual property**, then you'll need to sign an [individual CLA][indvcla].
 - **If you work for a company that wants to allow you to contribute your work**,
-then you'll need to sign a [corporate CLA][corpcla].
+  then you'll need to sign a [corporate CLA][corpcla].
 
 You can sign these electronically (just scroll to the bottom). After that,
 we'll be able to accept your pull requests.
