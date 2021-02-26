@@ -125,14 +125,15 @@ set +x
 export GOOGLE_APPLICATION_CREDENTIALS=$KOKORO_KEYSTORE_DIR/71386_kokoro-$GOLANG_SAMPLES_PROJECT_ID
 export GOLANG_SAMPLES_SERVICE_ACCOUNT_EMAIL=kokoro-$GOLANG_SAMPLES_PROJECT_ID@$GOLANG_SAMPLES_PROJECT_ID.iam.gserviceaccount.com
 
-# Download and load secrets
-./testing/kokoro/decrypt-secrets.sh
-source ./testing/kokoro/test-env.sh
-
 set -x
 
 pwd
 date
+
+export PATH="$PATH:/tmp/google-cloud-sdk/bin";
+if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]]; then
+  ./testing/kokoro/configure_gcloud.bash;
+fi
 
 # if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* && -n $GOLANG_SAMPLES_GO_VET ]]; then
 echo "This test run will run end-to-end tests.";
@@ -140,10 +141,9 @@ export GOLANG_SAMPLES_E2E_TEST=1
 ./testing/kokoro/configure_cloudsql.bash;
 # fi
 
-export PATH="$PATH:/tmp/google-cloud-sdk/bin";
-if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]]; then
-  ./testing/kokoro/configure_gcloud.bash;
-fi
+# Download and load secrets
+./testing/kokoro/decrypt-secrets.sh
+source ./testing/kokoro/test-env.sh
 
 # only set with mtls_smoketest
 # TODO(cbro): remove with mtls_smoketest.cfg
