@@ -28,6 +28,7 @@ fi
 
 PROJECT_ID="golang-samples-tests"
 
-gcloud secrets versions access latest --secret="golang-samples-test-env" \
-       --project="${PROJECT_ID}" \
-       > kokoro/test-env.sh
+gcloud secrets versions access latest \
+    --secret="golang-samples-test-env" \
+    --project="${PROJECT_ID}" \
+    > kokoro/test-env.sh
