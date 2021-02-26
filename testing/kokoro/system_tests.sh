@@ -131,9 +131,9 @@ pwd
 date
 
 export PATH="$PATH:/tmp/google-cloud-sdk/bin";
-if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]]; then
-  ./testing/kokoro/configure_gcloud.bash;
-fi
+# if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]]; then
+./testing/kokoro/configure_gcloud.bash;
+# fi
 
 # Download and load secrets
 ./testing/kokoro/decrypt-secrets.sh
