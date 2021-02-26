@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set -eEuo pipefail
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 TESTING_ROOT=$( dirname "$DIR" )
 
@@ -26,7 +28,8 @@ if [[ -f "kokoro/test-env.sh" ]]; then
     exit 1
 fi
 
-PROJECT_ID="golang-samples-tests"
+# Use SECRET_MANAGER_PROJECT if set, fallback to "golang-samples-tests".
+PROJECT_ID="${SECRET_MANAGER_PROJECT:-golang-samples-tests}"
 
 gcloud secrets versions access latest \
     --secret="golang-samples-test-env" \
