@@ -84,6 +84,21 @@ func (app *app) indexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	app := newApp()
+	http.HandleFunc("/", app.indexHandler)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	log.Printf("Listening on port %s", port)
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
+		log.Fatal(err)
+	}
+
+}
+
+func newApp() *app {
 	parsedTemplate, err := template.ParseFiles("templates/index.html")
 	if err != nil {
 		log.Fatalf("unable to parse template file: %s", err)
@@ -109,18 +124,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("DB.Exec: unable to create votes table: %s", err)
 	}
-
-	http.HandleFunc("/", app.indexHandler)
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-
-	log.Printf("Listening on port %s", port)
-	if err := http.ListenAndServe(":"+port, nil); err != nil {
-		log.Fatal(err)
-	}
-
+	return app
 }
 
 // recentVotes returns a slice of the last 5 votes cast.
@@ -202,9 +206,8 @@ func saveVote(w http.ResponseWriter, r *http.Request, app *app) error {
 		if _, err := app.db.Exec(sqlInsert, team); err != nil {
 			fmt.Fprintf(w, "unable to save vote: %s", err)
 			return fmt.Errorf("DB.Exec: %v", err)
-		} else {
-			fmt.Fprintf(w, "Vote successfully cast for %s!\n", team)
 		}
+		fmt.Fprintf(w, "Vote successfully cast for %s!\n", team)
 	}
 	return nil
 	// [END cloud_sql_sqlserver_databasesql_connection]
@@ -225,15 +228,15 @@ func mustGetenv(k string) string {
 func initTCPConnectionPool() (*sql.DB, error) {
 	// [START cloud_sql_sqlserver_databasesql_create_tcp]
 	var (
-		dbUser    = mustGetenv("DB_USER")     // e.g. 'my-db-user'
-		dbPwd     = mustGetenv("DB_PASS")     // e.g. 'my-db-password'
-		dbTcpHost = mustGetenv("DB_TCP_HOST") // e.g. '127.0.0.1' ('172.17.0.1' if deployed to GAE Flex)
-		dbPort    = mustGetenv("DB_PORT")     // e.g. '1433'
-		dbName    = mustGetenv("DB_NAME")     // e.g. 'my-database'
+		dbUser    = mustGetenv("DB_USER") // e.g. 'my-db-user'
+		dbPwd     = mustGetenv("DB_PASS") // e.g. 'my-db-password'
+		dbTCPHost = mustGetenv("DB_HOST") // e.g. '127.0.0.1' ('172.17.0.1' if deployed to GAE Flex)
+		dbPort    = mustGetenv("DB_PORT") // e.g. '1433'
+		dbName    = mustGetenv("DB_NAME") // e.g. 'my-database'
 	)
 
 	var dbURI string
-	dbURI = fmt.Sprintf("server=%s;user id=%s;password=%s;port=%s;database=%s;", dbTcpHost, dbUser, dbPwd, dbPort, dbName)
+	dbURI = fmt.Sprintf("server=%s;user id=%s;password=%s;port=%s;database=%s;", dbTCPHost, dbUser, dbPwd, dbPort, dbName)
 
 	// dbPool is the pool of database connections.
 	dbPool, err := sql.Open("mssql", dbURI)

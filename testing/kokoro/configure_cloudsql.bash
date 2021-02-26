@@ -22,19 +22,12 @@
 
 set -ex
 
-if [ -z $KOKORO_BUILD_ARTIFACTS_SUBDIR ]; then
-  echo "This should only be run from Kokoro."
-  exit 1
-fi
+# Download and prepare Cloud SQL Proxy
+wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64
+mv cloud_sql_proxy.linux.amd64 /cloud_sql_proxy
+chmod +x /cloud_sql_proxy
+mkdir /cloudsql && chmod 0777 /cloudsql
 
-gcloud -q components update
-gcloud -q components install app-engine-go
-
-# Set config.
-gcloud config set disable_prompts True
-gcloud config set project $GOLANG_SAMPLES_PROJECT_ID
-gcloud config set app/promote_by_default false
-gcloud auth activate-service-account --key-file "$GOOGLE_APPLICATION_CREDENTIALS"
-
-# Diagnostic information.
-gcloud info
+/cloud_sql_proxy -instances="${MYSQL_INSTANCE}"=tcp:3306,${MYSQL_INSTANCE} -dir /cloudsql
+/cloud_sql_proxy -instances="${POSTGRES_INSTANCE}"=tcp:5432,${POSTGRES_INSTANCE} -dir /cloudsql
+/cloud_sql_proxy -instances="${SQLSERVER_INSTANCE}"=tcp:1433
