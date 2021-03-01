@@ -30,3 +30,4 @@
 # Editors
 .idea/*
 
+**/sponge_log.log
