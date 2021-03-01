@@ -1,9 +1,10 @@
 module github.com/GoogleCloudPlatform/golang-samples/functions/imagemagick
 
 require (
-	cloud.google.com/go v0.74.0
+	cloud.google.com/go v0.78.0
 	cloud.google.com/go/storage v1.10.0
-	google.golang.org/genproto v0.0.0-20201214200347-8c77b98c765d
+	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
+	google.golang.org/genproto v0.0.0-20210226172003-ab064af71705
 )
 
 go 1.11
