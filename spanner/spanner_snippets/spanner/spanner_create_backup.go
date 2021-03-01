@@ -23,6 +23,7 @@ import (
 	"regexp"
 	"time"
 
+	"cloud.google.com/go/spanner"
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
 	pbt "github.com/golang/protobuf/ptypes/timestamp"
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
@@ -40,9 +41,24 @@ func createBackup(w io.Writer, db, backupID string) error {
 		return fmt.Errorf("createBackup.NewDatabaseAdminClient: %v", err)
 	}
 	defer adminClient.Close()
-	dbMetadata, err := adminClient.GetDatabase(ctx, &adminpb.GetDatabaseRequest{Name: db})
+	client, err := spanner.NewClient(ctx, db)
 	if err != nil {
-		return fmt.Errorf("createBackup.GetDatabase: %v", err)
+		return fmt.Errorf("createBackup.NewClient: %v", err)
+	}
+	defer client.Close()
+
+	stmt := spanner.Statement{
+		SQL: `SELECT CURRENT_TIMESTAMP()`,
+	}
+	iter := client.Single().Query(ctx, stmt)
+	defer iter.Stop()
+	row, err := iter.Next()
+	if err != nil {
+		return fmt.Errorf("createBackup.Query: %v", err)
+	}
+	var versionTime time.Time
+	if err := row.Columns(&versionTime); err != nil {
+		return fmt.Errorf("createBackup.Columns: %v", err)
 	}
 
 	expireTime := time.Now().AddDate(0, 0, 14)
@@ -53,7 +69,7 @@ func createBackup(w io.Writer, db, backupID string) error {
 		Backup: &adminpb.Backup{
 			Database:    db,
 			ExpireTime:  &pbt.Timestamp{Seconds: expireTime.Unix(), Nanos: int32(expireTime.Nanosecond())},
-			VersionTime: dbMetadata.EarliestVersionTime,
+			VersionTime: &pbt.Timestamp{Seconds: versionTime.Unix(), Nanos: int32(versionTime.Nanosecond())},
 		},
 	}
 	op, err := adminClient.CreateBackup(ctx, &req)
@@ -67,14 +83,14 @@ func createBackup(w io.Writer, db, backupID string) error {
 	}
 
 	// Get the name, create time, version time and backup size.
-	createTime := time.Unix(backup.CreateTime.Seconds, int64(backup.CreateTime.Nanos))
-	versionTime := time.Unix(dbMetadata.EarliestVersionTime.Seconds, int64(dbMetadata.EarliestVersionTime.Nanos))
+	backupCreateTime := time.Unix(backup.CreateTime.Seconds, int64(backup.CreateTime.Nanos))
+	backupVersionTime := time.Unix(backup.VersionTime.Seconds, int64(backup.VersionTime.Nanos))
 	fmt.Fprintf(w,
 		"Backup %s of size %d bytes was created at %s with version time %s\n",
 		backup.Name,
 		backup.SizeBytes,
-		createTime.Format(time.RFC3339),
-		versionTime.Format(time.RFC3339))
+		backupCreateTime.Format(time.RFC3339),
+		backupVersionTime.Format(time.RFC3339))
 	return nil
 }
 
