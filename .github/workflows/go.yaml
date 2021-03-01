@@ -26,7 +26,7 @@ jobs:
     - name: Verify no changes from goimports and go mod tidy.
       run: |
         if [ -n "$(git status --porcelain)" ]; then
-          echo 'Run goimports -w . && find . -name go.mod -execdir go mod tidy \;'
+          echo 'To fix this check, run "goimports -w . && find . -name go.mod -execdir go mod tidy \;"'
           git status # Show the files that failed to pass the check.
           exit 1
         fi
