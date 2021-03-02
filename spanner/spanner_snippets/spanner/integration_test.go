@@ -100,9 +100,9 @@ func initBackupTest(t *testing.T, id, dbName string) (restoreDBName, backupID, c
 	stmt := spanner.Statement{
 		SQL: `SELECT CURRENT_TIMESTAMP()`,
 	}
-	iter := client.Single().Query(ctx, stmt)
-	defer iter.Stop()
-	row, err := iter.Next()
+	queryIter := client.Single().Query(ctx, stmt)
+	defer queryIter.Stop()
+	row, err := queryIter.Next()
 	if err != nil {
 		t.Fatalf("failed to get current time: %v", err)
 	}
