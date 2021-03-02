@@ -29,7 +29,7 @@ import (
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
-func createBackup(w io.Writer, db, backupID string) error {
+func createBackup(w io.Writer, db, backupID string, versionTime time.Time) error {
 	matches := regexp.MustCompile("^(.+)/databases/(.+)$").FindStringSubmatch(db)
 	if matches == nil || len(matches) != 3 {
 		return fmt.Errorf("createBackup: invalid database id %q", db)
@@ -46,20 +46,6 @@ func createBackup(w io.Writer, db, backupID string) error {
 		return fmt.Errorf("createBackup.NewClient: %v", err)
 	}
 	defer client.Close()
-
-	stmt := spanner.Statement{
-		SQL: `SELECT CURRENT_TIMESTAMP()`,
-	}
-	iter := client.Single().Query(ctx, stmt)
-	defer iter.Stop()
-	row, err := iter.Next()
-	if err != nil {
-		return fmt.Errorf("createBackup.Query: %v", err)
-	}
-	var versionTime time.Time
-	if err := row.Columns(&versionTime); err != nil {
-		return fmt.Errorf("createBackup.Columns: %v", err)
-	}
 
 	expireTime := time.Now().AddDate(0, 0, 14)
 	// Create a backup.
