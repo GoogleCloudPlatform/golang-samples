@@ -23,7 +23,6 @@ import (
 	"regexp"
 	"time"
 
-	"cloud.google.com/go/spanner"
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
 	pbt "github.com/golang/protobuf/ptypes/timestamp"
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
@@ -41,11 +40,6 @@ func createBackup(w io.Writer, db, backupID string, versionTime time.Time) error
 		return fmt.Errorf("createBackup.NewDatabaseAdminClient: %v", err)
 	}
 	defer adminClient.Close()
-	client, err := spanner.NewClient(ctx, db)
-	if err != nil {
-		return fmt.Errorf("createBackup.NewClient: %v", err)
-	}
-	defer client.Close()
 
 	expireTime := time.Now().AddDate(0, 0, 14)
 	// Create a backup.
