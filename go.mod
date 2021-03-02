@@ -13,12 +13,12 @@ require (
 	cloud.google.com/go/pubsublite v0.7.0
 	cloud.google.com/go/spanner v1.10.0
 	cloud.google.com/go/storage v1.13.0
-	contrib.go.opencensus.io/exporter/stackdriver v0.13.4
-	github.com/aws/aws-sdk-go v1.36.20
+	contrib.go.opencensus.io/exporter/stackdriver v0.13.5
+	github.com/aws/aws-sdk-go v1.37.20
 	github.com/bmatcuk/doublestar/v2 v2.0.4
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/eclipse/paho.mqtt.golang v1.3.1
+	github.com/eclipse/paho.mqtt.golang v1.3.2
 	github.com/fluent/fluent-logger-golang v1.5.0
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gofrs/uuid v3.4.0+incompatible
@@ -29,7 +29,7 @@ require (
 	github.com/googleapis/gax-go/v2 v2.0.5
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.4.2
-	github.com/h2non/filetype v1.1.0
+	github.com/h2non/filetype v1.1.1
 	github.com/linkedin/goavro/v2 v2.10.0
 	github.com/mailgun/mailgun-go/v3 v3.6.4
 	github.com/mailjet/mailjet-apiv3-go v0.0.0-20190724151621-55e56f74078c

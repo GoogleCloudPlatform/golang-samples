@@ -14,7 +14,7 @@
 
 package findings
 
-// [START securitycenter_add_security_marks]
+// [START securitycenter_add_finding_security_marks]
 // [START add_security_marks]
 import (
 	"context"
@@ -66,4 +66,4 @@ func addSecurityMarks(w io.Writer, findingName string) error {
 }
 
 // [END add_security_marks]
-// [END securitycenter_add_security_marks]
+// [END securitycenter_add_finding_security_marks]

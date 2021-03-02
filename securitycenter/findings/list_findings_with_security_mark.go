@@ -14,7 +14,7 @@
 
 package findings
 
-// [START securitycenter_list_findings_with_marks]
+// [START securitycenter_list_findings_with_security_marks]
 // [START list_findings_with_marks]
 import (
 	"context"
@@ -61,4 +61,4 @@ func listFindingsWithMarks(w io.Writer, sourceName string) error {
 }
 
 // [END list_findings_with_marks]
-// [END securitycenter_list_findings_with_marks]
+// [END securitycenter_list_findings_with_security_marks]
