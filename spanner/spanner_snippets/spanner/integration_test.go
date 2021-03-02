@@ -75,7 +75,31 @@ func initTest(t *testing.T, id string) (dbName string, cleanup func()) {
 	return
 }
 
-func initBackupTest(t *testing.T, id, dbName string) (restoreDBName, backupID, cancelledBackupID string, versionTime time.Time, cleanup func()) {
+func getVersionTime(t *testing.T, dbName string) (versionTime time.Time) {
+	ctx := context.Background()
+	client, err := spanner.NewClient(ctx, dbName)
+	if err != nil {
+		t.Fatalf("failed to create client: %v", err)
+	}
+	defer client.Close()
+
+	stmt := spanner.Statement{
+		SQL: `SELECT CURRENT_TIMESTAMP()`,
+	}
+	iter := client.Single().Query(ctx, stmt)
+	defer iter.Stop()
+	row, err := iter.Next()
+	if err != nil {
+		t.Fatalf("failed to get current time: %v", err)
+	}
+	if err := row.Columns(&versionTime); err != nil {
+		t.Fatalf("failed to get version time: %v", err)
+	}
+
+	return versionTime
+}
+
+func initBackupTest(t *testing.T, id, dbName string) (restoreDBName, backupID, cancelledBackupID string, cleanup func()) {
 	instance := getInstance(t)
 	restoreDatabaseID := validLength(fmt.Sprintf("restore-%s", id), t)
 	restoreDBName = fmt.Sprintf("%s/databases/%s", instance, restoreDatabaseID)
@@ -90,24 +114,6 @@ func initBackupTest(t *testing.T, id, dbName string) (restoreDBName, backupID, c
 	if db, err := adminClient.GetDatabase(ctx, &adminpb.GetDatabaseRequest{Name: restoreDBName}); err == nil {
 		t.Logf("database %s exists in state %s. delete result: %v", db.GetName(), db.GetState().String(),
 			adminClient.DropDatabase(ctx, &adminpb.DropDatabaseRequest{Database: restoreDBName}))
-	}
-	client, err := spanner.NewClient(ctx, restoreDatabaseID)
-	if err != nil {
-		t.Fatalf("failed to create client: %v", err)
-	}
-	defer client.Close()
-
-	stmt := spanner.Statement{
-		SQL: `SELECT CURRENT_TIMESTAMP()`,
-	}
-	queryIter := client.Single().Query(ctx, stmt)
-	defer queryIter.Stop()
-	row, err := queryIter.Next()
-	if err != nil {
-		t.Fatalf("failed to get current time: %v", err)
-	}
-	if err := row.Columns(&versionTime); err != nil {
-		t.Fatalf("failed to get version time: %v", err)
 	}
 
 	// Check for any backups that were created from that database and delete those as well
@@ -357,7 +363,7 @@ func TestBackupSample(t *testing.T) {
 	id := randomID()
 	dbName, cleanup := initTest(t, id)
 	defer cleanup()
-	restoreDBName, backupID, cancelledBackupID, versionTime, cleanupBackup := initBackupTest(t, id, dbName)
+	restoreDBName, backupID, cancelledBackupID, cleanupBackup := initBackupTest(t, id, dbName)
 
 	var out string
 	// Set up the database for testing backup operations.
@@ -365,6 +371,7 @@ func TestBackupSample(t *testing.T) {
 	runSample(t, write, dbName, "failed to insert data")
 
 	// Start testing backup operations.
+	versionTime := getVersionTime(t, dbName)
 	out = runCreateBackupSample(t, createBackup, dbName, backupID, versionTime, "failed to create a backup")
 	assertContains(t, out, fmt.Sprintf("backups/%s", backupID))
 
