@@ -15,7 +15,6 @@
 package assets
 
 // [START securitycenter_list_assets_and_changes]
-// [START list_project_assets_and_state_changes]
 import (
 	"context"
 	"fmt"
@@ -68,5 +67,4 @@ func listAllProjectAssetsAndStateChanges(w io.Writer, orgID string) error {
 	return nil
 }
 
-// [END list_project_assets_and_state_changes]
 // [END securitycenter_list_assets_and_changes]

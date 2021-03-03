@@ -15,7 +15,6 @@
 package notifications
 
 // [START securitycenter_list_notification_configs]
-// [START scc_list_notification_configs]
 import (
 	"context"
 	"fmt"
@@ -57,5 +56,4 @@ func listNotificationConfigs(w io.Writer, orgID string) error {
 	return nil
 }
 
-// [END scc_list_notification_configs]
 // [END securitycenter_list_notification_configs]

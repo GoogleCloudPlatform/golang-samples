@@ -15,7 +15,6 @@
 package assets
 
 // [START securitycenter_list_assets_at_time]
-// [START list_project_assets_at_time]
 import (
 	"context"
 	"fmt"
@@ -72,5 +71,4 @@ func listAllProjectAssetsAtTime(w io.Writer, orgID string, asOf time.Time) error
 	return nil
 }
 
-// [END list_project_assets_at_time]
 // [END securitycenter_list_assets_at_time]

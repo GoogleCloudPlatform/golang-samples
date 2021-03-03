@@ -15,7 +15,6 @@
 package findings
 
 // [START securitycenter_get_source_iam]
-// [START get_iam_policy_source]
 import (
 	"context"
 	"fmt"
@@ -50,5 +49,4 @@ func getSourceIamPolicy(w io.Writer, sourceName string) error {
 	return nil
 }
 
-// [END get_iam_policy_source]
 // [END securitycenter_get_source_iam]
