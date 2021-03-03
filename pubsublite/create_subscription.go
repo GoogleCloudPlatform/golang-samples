@@ -41,7 +41,7 @@ func createSubscription(w io.Writer, projectID, region, zone, topicID, subID str
 	sub, err := client.CreateSubscription(ctx, pubsublite.SubscriptionConfig{
 		Name:                fmt.Sprintf("projects/%s/locations/%s/subscriptions/%s", projectID, zone, subID),
 		Topic:               fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, zone, topicID),
-		DeliveryRequirement: pubsublite.DeliverImmediately, // can also be DeliverAfterStore
+		DeliveryRequirement: pubsublite.DeliverImmediately, // can also be DeliverAfterStored
 	})
 	if err != nil {
 		return fmt.Errorf("client.CreateSubscription got err: %v", err)
