@@ -15,7 +15,6 @@
 package assets
 
 // [START securitycenter_delete_security_marks]
-// [START delete_security_marks]
 import (
 	"context"
 	"fmt"
@@ -61,5 +60,4 @@ func deleteSecurityMarks(w io.Writer, assetName string) error {
 	return nil
 }
 
-// [END delete_security_marks]
 // [END securitycenter_delete_security_marks]
