@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pslite
+package admin
 
 import (
 	"context"
@@ -22,9 +22,9 @@ import (
 	"cloud.google.com/go/pubsublite"
 )
 
-// [START pubsublite_create_topic]
+// [START pubsublite_get_topic]
 
-func createTopic(w io.Writer, projectID, region, zone, topicID string) error {
+func getTopic(w io.Writer, projectID, region, zone, topicID string) error {
 	// projectID := "my-project-id"
 	// region := "us-central1"
 	// zone := "us-central1-a"
@@ -36,20 +36,13 @@ func createTopic(w io.Writer, projectID, region, zone, topicID string) error {
 	}
 	defer client.Close()
 
-	const gib = 1 << 30
-	topic, err := client.CreateTopic(ctx, pubsublite.TopicConfig{
-		Name:                       fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, zone, topicID),
-		PartitionCount:             2,        // Must be >= 1 and cannot decrease after creation.
-		PublishCapacityMiBPerSec:   4,        // Must be >= 4 and <= 16.
-		SubscribeCapacityMiBPerSec: 8,        // Must be >= 4 and <= 32.
-		PerPartitionBytes:          30 * gib, // Must be 30 GiB-10 TiB.
-		RetentionDuration:          pubsublite.InfiniteRetention,
-	})
+	topicName := fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, zone, topicID)
+	topic, err := client.Topic(ctx, topicName)
 	if err != nil {
-		return fmt.Errorf("client.CreateTopic got err: %v", err)
+		return fmt.Errorf("client.Topic got err: %v", err)
 	}
-	fmt.Fprintf(w, "Created topic: %s\n", topic.Name)
+	fmt.Fprintf(w, "Got topic: %#v\n", *topic)
 	return nil
 }
 
-// [END pubsublite_create_topic]
+// [END pubsublite_get_topic]

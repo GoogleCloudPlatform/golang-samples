@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pslite
+package admin
 
 import (
 	"context"
@@ -22,13 +22,13 @@ import (
 	"cloud.google.com/go/pubsublite"
 )
 
-// [START pubsublite_update_subscription]
+// [START pubsublite_create_topic]
 
-func updateSubscription(w io.Writer, projectID, region, zone, subID string) error {
+func createTopic(w io.Writer, projectID, region, zone, topicID string) error {
 	// projectID := "my-project-id"
-	// region := "us-central1"
+	// region := "us-central1" // see https://cloud.google.com/pubsub/lite/docs/locations
 	// zone := "us-central1-a"
-	// subID := "my-subscription"
+	// topicID := "my-topic"
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
 	if err != nil {
@@ -36,17 +36,20 @@ func updateSubscription(w io.Writer, projectID, region, zone, subID string) erro
 	}
 	defer client.Close()
 
-	subPath := fmt.Sprintf("projects/%s/locations/%s/subscriptions/%s", projectID, zone, subID)
-	config := pubsublite.SubscriptionConfigToUpdate{
-		Name:                subPath,
-		DeliveryRequirement: pubsublite.DeliverAfterStored,
-	}
-	updatedCfg, err := client.UpdateSubscription(ctx, config)
+	const gib = 1 << 30
+	topic, err := client.CreateTopic(ctx, pubsublite.TopicConfig{
+		Name:                       fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, zone, topicID),
+		PartitionCount:             2,        // Must be >= 1 and cannot decrease after creation.
+		PublishCapacityMiBPerSec:   4,        // Must be >= 4 and <= 16.
+		SubscribeCapacityMiBPerSec: 8,        // Must be >= 4 and <= 32.
+		PerPartitionBytes:          30 * gib, // Must be >= 30 GiB.
+		RetentionDuration:          pubsublite.InfiniteRetention,
+	})
 	if err != nil {
-		return fmt.Errorf("client.UpdateSubscription got err: %v", err)
+		return fmt.Errorf("client.CreateTopic got err: %v", err)
 	}
-	fmt.Fprintf(w, "Updated subscription: %#v\n", updatedCfg)
+	fmt.Fprintf(w, "Created topic: %s\n", topic.Name)
 	return nil
 }
 
-// [END pubsublite_update_subscription]
+// [END pubsublite_create_topic]

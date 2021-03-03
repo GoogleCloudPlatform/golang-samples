@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pslite
+package admin
 
 import (
 	"context"
@@ -20,15 +20,15 @@ import (
 	"io"
 
 	"cloud.google.com/go/pubsublite"
-	"google.golang.org/api/iterator"
 )
 
-// [START pubsublite_list_subscriptions_in_project]
+// [START pubsublite_delete_topic]
 
-func listSubscriptionsInProject(w io.Writer, projectID, region, zone string) error {
+func deleteTopic(w io.Writer, projectID, region, zone, topicID string) error {
 	// projectID := "my-project-id"
 	// region := "us-central1"
 	// zone := "us-central1-a"
+	// topicID := "my-topic"
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
 	if err != nil {
@@ -36,19 +36,12 @@ func listSubscriptionsInProject(w io.Writer, projectID, region, zone string) err
 	}
 	defer client.Close()
 
-	parent := fmt.Sprintf("projects/%s/locations/%s", projectID, zone)
-	subIter := client.Subscriptions(ctx, parent)
-	for {
-		sub, err := subIter.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return fmt.Errorf("subIter.Next() got err: %v", err)
-		}
-		fmt.Fprintf(w, "Got subscription config: %v", sub)
+	err = client.DeleteTopic(ctx, fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, zone, topicID))
+	if err != nil {
+		return fmt.Errorf("client.DeleteTopic got err: %v", err)
 	}
+	fmt.Fprint(w, "Deleted topic\n")
 	return nil
 }
 
-// [END pubsublite_list_subscriptions_in_project]
+// [END pubsublite_delete_topic]

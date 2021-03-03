@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pslite
+package admin
 
 import (
 	"context"
@@ -20,17 +20,15 @@ import (
 	"io"
 
 	"cloud.google.com/go/pubsublite"
+	"google.golang.org/api/iterator"
 )
 
-// [START pubsublite_create_subscription]
+// [START pubsublite_list_subscriptions_in_project]
 
-func createSubscription(w io.Writer, projectID, region, zone, topicID, subID string) error {
+func listSubscriptionsInProject(w io.Writer, projectID, region, zone string) error {
 	// projectID := "my-project-id"
 	// region := "us-central1"
 	// zone := "us-central1-a"
-	// NOTE: topic and subscription must be in the same zone (i.e. "us-central1-a")
-	// topicID := "my-topic"
-	// subID := "my-subscription"
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
 	if err != nil {
@@ -38,16 +36,19 @@ func createSubscription(w io.Writer, projectID, region, zone, topicID, subID str
 	}
 	defer client.Close()
 
-	sub, err := client.CreateSubscription(ctx, pubsublite.SubscriptionConfig{
-		Name:                fmt.Sprintf("projects/%s/locations/%s/subscriptions/%s", projectID, zone, subID),
-		Topic:               fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, zone, topicID),
-		DeliveryRequirement: pubsublite.DeliverImmediately, // can also be DeliverAfterStored
-	})
-	if err != nil {
-		return fmt.Errorf("client.CreateSubscription got err: %v", err)
+	parent := fmt.Sprintf("projects/%s/locations/%s", projectID, zone)
+	subIter := client.Subscriptions(ctx, parent)
+	for {
+		sub, err := subIter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return fmt.Errorf("subIter.Next() got err: %v", err)
+		}
+		fmt.Fprintf(w, "Got subscription config: %v", sub)
 	}
-	fmt.Fprintf(w, "Created subscription: %s\n", sub.Name)
 	return nil
 }
 
-// [END pubsublite_create_subscription]
+// [END pubsublite_list_subscriptions_in_project]

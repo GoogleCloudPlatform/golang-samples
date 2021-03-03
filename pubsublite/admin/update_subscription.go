@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pslite
+package admin
 
 import (
 	"context"
@@ -22,13 +22,13 @@ import (
 	"cloud.google.com/go/pubsublite"
 )
 
-// [START pubsublite_get_topic]
+// [START pubsublite_update_subscription]
 
-func getTopic(w io.Writer, projectID, region, zone, topicID string) error {
+func updateSubscription(w io.Writer, projectID, region, zone, subID string) error {
 	// projectID := "my-project-id"
 	// region := "us-central1"
 	// zone := "us-central1-a"
-	// topicID := "my-topic"
+	// subID := "my-subscription"
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
 	if err != nil {
@@ -36,13 +36,17 @@ func getTopic(w io.Writer, projectID, region, zone, topicID string) error {
 	}
 	defer client.Close()
 
-	topicName := fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, zone, topicID)
-	topic, err := client.Topic(ctx, topicName)
-	if err != nil {
-		return fmt.Errorf("client.Topic got err: %v", err)
+	subPath := fmt.Sprintf("projects/%s/locations/%s/subscriptions/%s", projectID, zone, subID)
+	config := pubsublite.SubscriptionConfigToUpdate{
+		Name:                subPath,
+		DeliveryRequirement: pubsublite.DeliverAfterStored,
 	}
-	fmt.Fprintf(w, "Got topic: %#v\n", *topic)
+	updatedCfg, err := client.UpdateSubscription(ctx, config)
+	if err != nil {
+		return fmt.Errorf("client.UpdateSubscription got err: %v", err)
+	}
+	fmt.Fprintf(w, "Updated subscription: %#v\n", updatedCfg)
 	return nil
 }
 
-// [END pubsublite_get_topic]
+// [END pubsublite_update_subscription]

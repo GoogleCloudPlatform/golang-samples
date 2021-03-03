@@ -12,9 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package subscriptions is a tool to manage Google Cloud Pub/Sub subscriptions by using the Pub/Sub API.
-// See more about Google Cloud Pub/Sub at https://cloud.google.com/pubsub/docs/overview.
-package pslite
+package admin
 
 import (
 	"bytes"

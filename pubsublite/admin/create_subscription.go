@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pslite
+package admin
 
 import (
 	"context"
@@ -22,13 +22,15 @@ import (
 	"cloud.google.com/go/pubsublite"
 )
 
-// [START pubsublite_delete_topic]
+// [START pubsublite_create_subscription]
 
-func deleteTopic(w io.Writer, projectID, region, zone, topicID string) error {
+func createSubscription(w io.Writer, projectID, region, zone, topicID, subID string) error {
 	// projectID := "my-project-id"
 	// region := "us-central1"
 	// zone := "us-central1-a"
+	// NOTE: topic and subscription must be in the same zone (i.e. "us-central1-a")
 	// topicID := "my-topic"
+	// subID := "my-subscription"
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
 	if err != nil {
@@ -36,12 +38,16 @@ func deleteTopic(w io.Writer, projectID, region, zone, topicID string) error {
 	}
 	defer client.Close()
 
-	err = client.DeleteTopic(ctx, fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, zone, topicID))
+	sub, err := client.CreateSubscription(ctx, pubsublite.SubscriptionConfig{
+		Name:                fmt.Sprintf("projects/%s/locations/%s/subscriptions/%s", projectID, zone, subID),
+		Topic:               fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, zone, topicID),
+		DeliveryRequirement: pubsublite.DeliverImmediately, // can also be DeliverAfterStored
+	})
 	if err != nil {
-		return fmt.Errorf("client.DeleteTopic got err: %v", err)
+		return fmt.Errorf("client.CreateSubscription got err: %v", err)
 	}
-	fmt.Fprint(w, "Deleted topic\n")
+	fmt.Fprintf(w, "Created subscription: %s\n", sub.Name)
 	return nil
 }
 
-// [END pubsublite_delete_topic]
+// [END pubsublite_create_subscription]
