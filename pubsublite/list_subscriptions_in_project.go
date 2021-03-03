@@ -44,7 +44,7 @@ func listSubscriptionsInProject(w io.Writer, projectID, region, zone string) err
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("SubscriptionIterator.Next() got err: %v", err)
+			return fmt.Errorf("subIter.Next() got err: %v", err)
 		}
 		fmt.Fprintf(w, "Got subscription config: %v", sub)
 	}
