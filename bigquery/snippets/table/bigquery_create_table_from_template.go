@@ -25,7 +25,6 @@ import (
 // createTableFromTemplateTable demonstrates how to use the properties of one
 // table (schema, partitioning, clustering) to create a new empty table with
 // the same configuration.
-//
 func createTableFromTemplateTable(srcProjectID, srcDatasetID, srcTableID, dstProjectID, dstDatasetID, dstTableID string) error {
 	// srcProjectID := "bigquery-public-data"
 	// srcDatasetID := "samples"
@@ -51,6 +50,9 @@ func createTableFromTemplateTable(srcProjectID, srcDatasetID, srcTableID, dstPro
 
 	dstTableRef := client.Dataset(dstDatasetID).Table(dstTableID)
 
+	// We'll use some (but not all) of the metadata from the source table
+	// to define the destination table.  Other properties to consider include
+	// attributes like expiration policy and managed encryption settings.
 	dstMeta := &bigquery.TableMetadata{
 		Description: fmt.Sprintf("table structure copied from %s.%s.%s",
 			srcTableRef.ProjectID, srcTableRef.DatasetID, srcTableRef.TableID),
