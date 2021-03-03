@@ -14,10 +14,12 @@ Click this button:
 Alternatively, you can use the `gcloud` SDK:
 
 ```sh
-gcloud beta run deploy h2c --source=. --use-http2
+git clone https://github.com/GoogleCloudPlatform/golang-samples.git
+cd ./golang-samples/run/h2c
+gcloud beta run deploy http2-test --use-http2 --source=.
 ```
 
-**Cleanup:** Remove the `h2c` Service you deployed from Cloud Run
+**Cleanup:** Remove the `http2-test` Service you deployed from Cloud Run
 using the [Cloud Console](https://console.cloud.google.com/run).
 
 ## Testing locally

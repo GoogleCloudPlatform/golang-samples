@@ -15,7 +15,6 @@
 package assets
 
 // [START securitycenter_add_security_marks]
-// [START add_security_marks]
 import (
 	"context"
 	"fmt"
@@ -64,5 +63,4 @@ func addSecurityMarks(w io.Writer, assetName string) error {
 
 }
 
-// [END add_security_marks]
 // [END securitycenter_add_security_marks]

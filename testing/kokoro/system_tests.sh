@@ -133,6 +133,7 @@ date
 if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* && -n $GOLANG_SAMPLES_GO_VET ]]; then
   echo "This test run will run end-to-end tests.";
   export GOLANG_SAMPLES_E2E_TEST=1
+  ./testing/kokoro/configure_cloudsql.bash;
 fi
 
 export PATH="$PATH:/tmp/google-cloud-sdk/bin";
@@ -223,11 +224,11 @@ else
   done
 fi
 
-# If we're running system tests, send the test log to the Build Cop Bot.
-# See https://github.com/googleapis/repo-automation-bots/tree/master/packages/buildcop.
+# If we're running system tests, send the test log to Flaky Bot.
+# See https://github.com/googleapis/repo-automation-bots/tree/master/packages/flakybot.
 if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]]; then
-  chmod +x "$KOKORO_GFILE_DIR"/linux_amd64/buildcop
-  "$KOKORO_GFILE_DIR"/linux_amd64/buildcop
+  chmod +x "$KOKORO_GFILE_DIR"/linux_amd64/flakybot
+  "$KOKORO_GFILE_DIR"/linux_amd64/flakybot
 fi
 
 exit $exit_code

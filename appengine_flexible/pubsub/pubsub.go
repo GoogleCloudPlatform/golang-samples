@@ -102,6 +102,7 @@ func pushHandler(w http.ResponseWriter, r *http.Request) {
 	// Verify the token.
 	if r.URL.Query().Get("token") != token {
 		http.Error(w, "Bad token", http.StatusBadRequest)
+		return
 	}
 	msg := &pushRequest{}
 	if err := json.NewDecoder(r.Body).Decode(msg); err != nil {
