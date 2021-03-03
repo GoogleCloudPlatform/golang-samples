@@ -6,12 +6,12 @@ require (
 	cloud.google.com/go v0.78.0
 	cloud.google.com/go/bigquery v1.14.0
 	cloud.google.com/go/bigtable v1.4.0
-	cloud.google.com/go/datastore v1.4.0
+	cloud.google.com/go/datastore v1.2.0
 	cloud.google.com/go/firestore v1.3.0
 	cloud.google.com/go/logging v1.0.0
 	cloud.google.com/go/pubsub v1.10.0
 	cloud.google.com/go/pubsublite v0.7.0
-	cloud.google.com/go/spanner v1.10.0
+	cloud.google.com/go/spanner v1.14.0
 	cloud.google.com/go/storage v1.13.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.5
 	github.com/aws/aws-sdk-go v1.37.20
@@ -37,11 +37,9 @@ require (
 	github.com/sendgrid/smtpapi-go v0.6.0 // indirect
 	github.com/tinylib/msgp v1.1.2 // indirect
 	go.opencensus.io v0.23.0
-	golang.org/x/exp v0.0.0-20201229011636-eab1b5eb1a03
+	golang.org/x/exp v0.0.0-20210220032938-85be41e4509f
 	golang.org/x/net v0.0.0-20210226172049-e18ecbb05110
 	golang.org/x/oauth2 v0.0.0-20210220000619-9bb904979d93
-	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
-	golang.org/x/sys v0.0.0-20210301091718-77cc2087c03b // indirect
 	golang.org/x/text v0.3.5
 	google.golang.org/api v0.40.0
 	google.golang.org/appengine v1.6.7
