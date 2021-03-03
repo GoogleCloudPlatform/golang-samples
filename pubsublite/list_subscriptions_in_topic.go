@@ -20,15 +20,15 @@ import (
 	"io"
 
 	"cloud.google.com/go/pubsublite"
+	"google.golang.org/api/iterator"
 )
 
-// [START pubsublite_delete_subscription]
+// [START pubsublite_list_subscriptions_in_topic]
 
-func deleteSubscription(w io.Writer, projectID, region, zone, subID string) error {
+func listSubscriptionsInTopic(w io.Writer, projectID, region, zone, topicID string) error {
 	// projectID := "my-project-id"
 	// region := "us-central1"
 	// zone := "us-central1-a"
-	// subID := "my-subscription"
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
 	if err != nil {
@@ -36,12 +36,19 @@ func deleteSubscription(w io.Writer, projectID, region, zone, subID string) erro
 	}
 	defer client.Close()
 
-	err = client.DeleteSubscription(ctx, fmt.Sprintf("projects/%s/locations/%s/subscriptions/%s", projectID, zone, subID))
-	if err != nil {
-		return fmt.Errorf("client.DeleteSubscription got err: %v", err)
+	topic := fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, zone, topicID)
+	subPathIter := client.TopicSubscriptions(ctx, topic)
+	for {
+		subPath, err := subPathIter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return fmt.Errorf("subPathIter.Next got err: %v", err)
+		}
+		fmt.Fprintf(w, "Got subscription: %s\n", subPath)
 	}
-	fmt.Fprintf(w, "Deleted subscription\n")
 	return nil
 }
 
-// [END pubsublite_delete_subscription]
+// [END pubsublite_list_subscriptions_in_topic]

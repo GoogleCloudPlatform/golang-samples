@@ -28,8 +28,6 @@ func updateSubscription(w io.Writer, projectID, region, zone, subID string) erro
 	// projectID := "my-project-id"
 	// region := "us-central1"
 	// zone := "us-central1-a"
-	// NOTE: topic and subscription must be in the same zone (i.e. "us-central1-a")
-	// topicID := "my-topic"
 	// subID := "my-subscription"
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
@@ -38,11 +36,16 @@ func updateSubscription(w io.Writer, projectID, region, zone, subID string) erro
 	}
 	defer client.Close()
 
-	client.DeleteSubscription(ctx, pubsublite.SubscriptionConfig{
-		Name:                fmt.Sprintf("projects/%s/locations/%s/subscriptions/%s", projectID, zone, subID),
-		DeliveryRequirement: pubsublite.DeliverImmediately, // can also be DeliverAfterStore
-	})
-	fmt.Fprintf(w, "Deleted subscription: %s")
+	subPath := fmt.Sprintf("projects/%s/locations/%s/subscriptions/%s", projectID, zone, subID)
+	config := pubsublite.SubscriptionConfigToUpdate{
+		Name:                subPath,
+		DeliveryRequirement: pubsublite.DeliverAfterStored,
+	}
+	updatedCfg, err := client.UpdateSubscription(ctx, config)
+	if err != nil {
+		return fmt.Errorf("client.UpdateSubscription got err: %v", err)
+	}
+	fmt.Fprintf(w, "Updated subscription: %#v\n", updatedCfg)
 	return nil
 }
 

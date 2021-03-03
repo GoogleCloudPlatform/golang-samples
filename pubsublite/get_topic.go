@@ -24,13 +24,11 @@ import (
 
 // [START pubsublite_get_topic]
 
-func getTopic(w io.Writer, projectID, region, zone, subID string) error {
+func getTopic(w io.Writer, projectID, region, zone, topicID string) error {
 	// projectID := "my-project-id"
 	// region := "us-central1"
 	// zone := "us-central1-a"
-	// NOTE: topic and subscription must be in the same zone (i.e. "us-central1-a")
 	// topicID := "my-topic"
-	// subID := "my-subscription"
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
 	if err != nil {
@@ -38,11 +36,12 @@ func getTopic(w io.Writer, projectID, region, zone, subID string) error {
 	}
 	defer client.Close()
 
-	client.DeleteSubscription(ctx, pubsublite.SubscriptionConfig{
-		Name:                fmt.Sprintf("projects/%s/locations/%s/subscriptions/%s", projectID, zone, subID),
-		DeliveryRequirement: pubsublite.DeliverImmediately, // can also be DeliverAfterStore
-	})
-	fmt.Fprintf(w, "Deleted subscription: %s")
+	topicName := fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, zone, topicID)
+	topic, err := client.Topic(ctx, topicName)
+	if err != nil {
+		return fmt.Errorf("client.Topic got err: %v", err)
+	}
+	fmt.Fprintf(w, "Got topic: %#v\n", *topic)
 	return nil
 }
 

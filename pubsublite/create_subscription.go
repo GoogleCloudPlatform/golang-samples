@@ -44,9 +44,9 @@ func createSubscription(w io.Writer, projectID, region, zone, topicID, subID str
 		DeliveryRequirement: pubsublite.DeliverImmediately, // can also be DeliverAfterStore
 	})
 	if err != nil {
-		return fmt.Errorf("CreateSubscription: %v", err)
+		return fmt.Errorf("client.CreateSubscription got err: %v", err)
 	}
-	fmt.Fprintf(w, "Created subscription: %s", sub.Name)
+	fmt.Fprintf(w, "Created subscription: %s\n", sub.Name)
 	return nil
 }
 

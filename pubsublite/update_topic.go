@@ -18,19 +18,19 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	"cloud.google.com/go/pubsublite"
 )
 
 // [START pubsublite_update_topic]
 
-func updateTopic(w io.Writer, projectID, region, zone, subID string) error {
+func updateTopic(w io.Writer, projectID, region, zone, topicID string) error {
+	// subID := "my-subscription"
 	// projectID := "my-project-id"
 	// region := "us-central1"
 	// zone := "us-central1-a"
-	// NOTE: topic and subscription must be in the same zone (i.e. "us-central1-a")
 	// topicID := "my-topic"
-	// subID := "my-subscription"
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
 	if err != nil {
@@ -38,11 +38,20 @@ func updateTopic(w io.Writer, projectID, region, zone, subID string) error {
 	}
 	defer client.Close()
 
-	client.DeleteSubscription(ctx, pubsublite.SubscriptionConfig{
-		Name:                fmt.Sprintf("projects/%s/locations/%s/subscriptions/%s", projectID, zone, subID),
-		DeliveryRequirement: pubsublite.DeliverImmediately, // can also be DeliverAfterStore
-	})
-	fmt.Fprintf(w, "Deleted subscription: %s")
+	topicPath := fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, zone, topicID)
+	config := pubsublite.TopicConfigToUpdate{
+		Name:                       topicPath,
+		PartitionCount:             3,                       // Partition count cannot decrease.
+		PublishCapacityMiBPerSec:   8,                       // Must be >= 4 and <= 16.
+		SubscribeCapacityMiBPerSec: 16,                      // Must be >= 4 and <= 32.
+		PerPartitionBytes:          60 * 1024 * 1024 * 1024, // Must be between 30 GiB-10 TiB.
+		RetentionDuration:          24 * time.Hour,
+	}
+	updatedCfg, err := client.UpdateTopic(ctx, config)
+	if err != nil {
+		return fmt.Errorf("client.UpdateTopic got err: %v", err)
+	}
+	fmt.Fprintf(w, "Updated topic: %#v\n", *updatedCfg)
 	return nil
 }
 

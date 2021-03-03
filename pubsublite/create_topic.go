@@ -39,17 +39,16 @@ func createTopic(w io.Writer, projectID, region, zone, topicID string) error {
 	const gib = 1 << 30
 	topic, err := client.CreateTopic(ctx, pubsublite.TopicConfig{
 		Name:                       fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, zone, topicID),
-		PartitionCount:             2,        // Must be >= 1.
-		PublishCapacityMiBPerSec:   4,        // Must be 4-16 MiB/s.
-		SubscribeCapacityMiBPerSec: 8,        // Must be 4-32 MiB/s.
-		PerPartitionBytes:          30 * gib, // Must be 30 GiB-10 TiB
-		// Retain messages indefinitely
-		RetentionDuration: pubsublite.InfiniteRetention,
+		PartitionCount:             2,        // Must be >= 1 and cannot decrease after creation.
+		PublishCapacityMiBPerSec:   4,        // Must be >= 4 and <= 16.
+		SubscribeCapacityMiBPerSec: 8,        // Must be >= 4 and <= 32.
+		PerPartitionBytes:          30 * gib, // Must be 30 GiB-10 TiB.
+		RetentionDuration:          pubsublite.InfiniteRetention,
 	})
 	if err != nil {
-		return fmt.Errorf("CreateTopic: %v", err)
+		return fmt.Errorf("client.CreateTopic got err: %v", err)
 	}
-	fmt.Fprintf(w, "Created topic: %s", topic.Name)
+	fmt.Fprintf(w, "Created topic: %s\n", topic.Name)
 	return nil
 }
 

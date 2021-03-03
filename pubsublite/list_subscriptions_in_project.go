@@ -20,17 +20,15 @@ import (
 	"io"
 
 	"cloud.google.com/go/pubsublite"
+	"google.golang.org/api/iterator"
 )
 
 // [START pubsublite_list_subscriptions_in_project]
 
-func listSubscriptionsInProject(w io.Writer, projectID, region, zone, subID string) error {
+func listSubscriptionsInProject(w io.Writer, projectID, region, zone string) error {
 	// projectID := "my-project-id"
 	// region := "us-central1"
 	// zone := "us-central1-a"
-	// NOTE: topic and subscription must be in the same zone (i.e. "us-central1-a")
-	// topicID := "my-topic"
-	// subID := "my-subscription"
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
 	if err != nil {
@@ -38,11 +36,18 @@ func listSubscriptionsInProject(w io.Writer, projectID, region, zone, subID stri
 	}
 	defer client.Close()
 
-	client.DeleteSubscription(ctx, pubsublite.SubscriptionConfig{
-		Name:                fmt.Sprintf("projects/%s/locations/%s/subscriptions/%s", projectID, zone, subID),
-		DeliveryRequirement: pubsublite.DeliverImmediately, // can also be DeliverAfterStore
-	})
-	fmt.Fprintf(w, "Deleted subscription: %s")
+	parent := fmt.Sprintf("projects/%s/locations/%s", projectID, zone)
+	subIter := client.Subscriptions(ctx, parent)
+	for {
+		sub, err := subIter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return fmt.Errorf("SubscriptionIterator.Next() got err: %v", err)
+		}
+		fmt.Fprintf(w, "Got subscription config: %v", sub)
+	}
 	return nil
 }
 

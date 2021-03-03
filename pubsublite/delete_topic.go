@@ -22,15 +22,13 @@ import (
 	"cloud.google.com/go/pubsublite"
 )
 
-// [START pubsublite_create_subscription]
+// [START pubsublite_delete_topic]
 
-func deleteTopic(w io.Writer, projectID, region, zone, subID string) error {
+func deleteTopic(w io.Writer, projectID, region, zone, topicID string) error {
 	// projectID := "my-project-id"
 	// region := "us-central1"
 	// zone := "us-central1-a"
-	// NOTE: topic and subscription must be in the same zone (i.e. "us-central1-a")
 	// topicID := "my-topic"
-	// subID := "my-subscription"
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
 	if err != nil {
@@ -38,12 +36,12 @@ func deleteTopic(w io.Writer, projectID, region, zone, subID string) error {
 	}
 	defer client.Close()
 
-	client.DeleteSubscription(ctx, pubsublite.SubscriptionConfig{
-		Name:                fmt.Sprintf("projects/%s/locations/%s/subscriptions/%s", projectID, zone, subID),
-		DeliveryRequirement: pubsublite.DeliverImmediately, // can also be DeliverAfterStore
-	})
-	fmt.Fprintf(w, "Deleted subscription: %s")
+	err = client.DeleteTopic(ctx, fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, zone, topicID))
+	if err != nil {
+		return fmt.Errorf("client.DeleteTopic got err: %v", err)
+	}
+	fmt.Fprint(w, "Deleted topic\n")
 	return nil
 }
 
-// [END pubsublite_create_subscription]
+// [END pubsublite_delete_topic]
