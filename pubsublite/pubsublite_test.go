@@ -255,7 +255,7 @@ func TestDeleteTopic(t *testing.T) {
 	got := buf.String()
 	want := "Deleted topic\n"
 	if got != want {
-		t.Fatalf("got: %v\nwant %v", got, want)
+		t.Fatalf("got: %v, want %v", got, want)
 	}
 }
 
@@ -449,7 +449,7 @@ func TestDeleteSubscription(t *testing.T) {
 	got := buf.String()
 	want := "Deleted subscription\n"
 	if got != want {
-		t.Fatalf("got: %v,\n want: %v", got, want)
+		t.Fatalf("got: %v, want: %v", got, want)
 	}
 
 	t.Cleanup(func() {
