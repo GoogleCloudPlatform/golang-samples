@@ -3,6 +3,9 @@ assign_issues_by:
   - 'api: bigtable'
   - 'api: datastore'
   - 'api: firestore'
+  to:
+  - crwilcox
+- labels:
   - 'api: storage'
   to:
   - tritone

@@ -133,6 +133,7 @@ date
 if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* && -n $GOLANG_SAMPLES_GO_VET ]]; then
   echo "This test run will run end-to-end tests.";
   export GOLANG_SAMPLES_E2E_TEST=1
+  ./testing/kokoro/configure_cloudsql.bash;
 fi
 
 export PATH="$PATH:/tmp/google-cloud-sdk/bin";

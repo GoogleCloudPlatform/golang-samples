@@ -264,6 +264,9 @@ func TestSample(t *testing.T) {
 	out = runSample(t, writeUsingDML, dbName, "failed to write using DML")
 	assertContains(t, out, "record(s) inserted")
 
+	out = runSample(t, commitStats, dbName, "failed to request commit stats")
+	assertContains(t, out, "3 mutations in transaction")
+
 	out = runSample(t, queryWithParameter, dbName, "failed to query with parameter")
 	assertContains(t, out, "12 Melissa Garcia")
 
@@ -321,6 +324,7 @@ func TestSample(t *testing.T) {
 	assertContains(t, out, "19 Venue 19")
 	assertContains(t, out, "42 Venue 42")
 
+	runSample(t, dropColumn, dbName, "failed to drop column")
 	runSample(t, addNumericColumn, dbName, "failed to add numeric column")
 	runSample(t, updateDataWithNumericColumn, dbName, "failed to update data with numeric")
 	out = runSample(t, queryWithNumericParameter, dbName, "failed to query with numeric parameter")

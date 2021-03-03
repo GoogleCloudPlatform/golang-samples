@@ -88,20 +88,34 @@ func (app *app) indexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	app := newApp()
+
+	http.HandleFunc("/", app.indexHandler)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	log.Printf("Listening on port %s", port)
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func newApp() *app {
 	parsedTemplate, err := template.ParseFiles("templates/index.html")
 	if err != nil {
 		log.Fatalf("unable to parse template file: %s", err)
 	}
-
 	app := &app{
 		tmpl: parsedTemplate,
 	}
 
-	// If the optional DB_TCP_HOST environment variable is set, it contains
+	// If the optional DB_HOST environment variable is set, it contains
 	// the IP address and port number of a TCP connection pool to be created,
-	// such as "127.0.0.1:5432". If DB_TCP_HOST is not set, a Unix socket
+	// such as "127.0.0.1:5432". If DB_HOST is not set, a Unix socket
 	// connection pool will be created instead.
-	if os.Getenv("DB_TCP_HOST") != "" {
+	if os.Getenv("DB_HOST") != "" {
 		app.db, err = initTCPConnectionPool()
 		if err != nil {
 			log.Fatalf("initTCPConnectionPool: unable to connect: %s", err)
@@ -115,28 +129,18 @@ func main() {
 
 	// Create the votes table if it does not already exist.
 	if _, err = app.db.Exec(`CREATE TABLE IF NOT EXISTS votes
-	( vote_id SERIAL NOT NULL, time_cast timestamp NOT NULL,
-	candidate CHAR(6) NOT NULL, PRIMARY KEY (vote_id) );`); err != nil {
+	( id SERIAL NOT NULL, created_at timestamp NOT NULL, updated_at timestamp NOT NULL,
+	candidate VARCHAR(6) NOT NULL, PRIMARY KEY (id) );`); err != nil {
 		log.Fatalf("DB.Exec: unable to create table: %s", err)
 	}
 
-	http.HandleFunc("/", app.indexHandler)
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-
-	log.Printf("Listening on port %s", port)
-	if err := http.ListenAndServe(":"+port, nil); err != nil {
-		log.Fatal(err)
-	}
-
+	return app
 }
 
 // recentVotes returns a slice of the last 5 votes cast.
 func recentVotes(app *app) ([]vote, error) {
 	var votes []vote
-	rows, err := app.db.Query(`SELECT candidate, time_cast FROM votes ORDER BY time_cast DESC LIMIT 5`)
+	rows, err := app.db.Query(`SELECT candidate, created_at FROM votes ORDER BY created_at DESC LIMIT 5`)
 	if err != nil {
 		return votes, fmt.Errorf("DB.Query: %v", err)
 	}
@@ -156,11 +160,11 @@ func recentVotes(app *app) ([]vote, error) {
 func currentTotals(app *app) (*templateData, error) {
 	// get total votes for each candidate
 	var tabVotes, spaceVotes uint
-	err := app.db.QueryRow(`SELECT count(vote_id) FROM votes WHERE candidate='TABS'`).Scan(&tabVotes)
+	err := app.db.QueryRow(`SELECT count(id) FROM votes WHERE candidate='TABS'`).Scan(&tabVotes)
 	if err != nil {
 		return nil, fmt.Errorf("DB.QueryRow: %v", err)
 	}
-	err = app.db.QueryRow(`SELECT count(vote_id) FROM votes WHERE candidate='SPACES'`).Scan(&spaceVotes)
+	err = app.db.QueryRow(`SELECT count(id) FROM votes WHERE candidate='SPACES'`).Scan(&spaceVotes)
 	if err != nil {
 		return nil, fmt.Errorf("DB.QueryRow: %v", err)
 	}
@@ -207,14 +211,13 @@ func saveVote(w http.ResponseWriter, r *http.Request, app *app) error {
 	}
 
 	// [START cloud_sql_postgres_databasesql_connection]
-	sqlInsert := "INSERT INTO votes(candidate, time_cast) VALUES($1, NOW())"
+	sqlInsert := "INSERT INTO votes(candidate, created_at, updated_at) VALUES($1, NOW(), NOW())"
 	if team == "TABS" || team == "SPACES" {
 		if _, err := app.db.Exec(sqlInsert, team); err != nil {
 			fmt.Fprintf(w, "unable to save vote: %s", err)
 			return fmt.Errorf("DB.Exec: %v", err)
-		} else {
-			fmt.Fprintf(w, "Vote successfully cast for %s!\n", team)
 		}
+		fmt.Fprintf(w, "Vote successfully cast for %s!\n", team)
 	}
 	return nil
 	// [END cloud_sql_postgres_databasesql_connection]
@@ -268,15 +271,15 @@ func initSocketConnectionPool() (*sql.DB, error) {
 func initTCPConnectionPool() (*sql.DB, error) {
 	// [START cloud_sql_postgres_databasesql_create_tcp]
 	var (
-		dbUser    = mustGetenv("DB_USER")     // e.g. 'my-db-user'
-		dbPwd     = mustGetenv("DB_PASS")     // e.g. 'my-db-password'
-		dbTcpHost = mustGetenv("DB_TCP_HOST") // e.g. '127.0.0.1' ('172.17.0.1' if deployed to GAE Flex)
-		dbPort    = mustGetenv("DB_PORT")     // e.g. '5432'
-		dbName    = mustGetenv("DB_NAME")     // e.g. 'my-database'
+		dbUser    = mustGetenv("DB_USER") // e.g. 'my-db-user'
+		dbPwd     = mustGetenv("DB_PASS") // e.g. 'my-db-password'
+		dbTCPHost = mustGetenv("DB_HOST") // e.g. '127.0.0.1' ('172.17.0.1' if deployed to GAE Flex)
+		dbPort    = mustGetenv("DB_PORT") // e.g. '5432'
+		dbName    = mustGetenv("DB_NAME") // e.g. 'my-database'
 	)
 
 	var dbURI string
-	dbURI = fmt.Sprintf("host=%s user=%s password=%s port=%s database=%s", dbTcpHost, dbUser, dbPwd, dbPort, dbName)
+	dbURI = fmt.Sprintf("host=%s user=%s password=%s port=%s database=%s", dbTCPHost, dbUser, dbPwd, dbPort, dbName)
 
 	// dbPool is the pool of database connections.
 	dbPool, err := sql.Open("pgx", dbURI)

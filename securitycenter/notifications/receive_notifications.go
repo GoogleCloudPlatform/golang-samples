@@ -15,7 +15,6 @@
 package notifications
 
 // [START securitycenter_receive_notifications]
-// [START scc_receive_notifications]
 import (
 	"bytes"
 	"context"
@@ -56,5 +55,4 @@ func receiveMessages(w io.Writer, projectID string, subscriptionName string) err
 	return nil
 }
 
-// [END scc_receive_notifications]
 // [END securitycenter_receive_notifications]
