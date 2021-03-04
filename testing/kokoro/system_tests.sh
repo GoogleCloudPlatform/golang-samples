@@ -131,9 +131,9 @@ pwd
 date
 
 export PATH="$PATH:/tmp/google-cloud-sdk/bin";
-# if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]]; then
-./testing/kokoro/configure_gcloud.bash;
-# fi
+  if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]]; then
+  ./testing/kokoro/configure_gcloud.bash;
+fi
 
 # Download and load secrets
 ./testing/kokoro/pull-secrets.sh
@@ -150,11 +150,11 @@ else
 fi
 
 
-# if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* && -n $GOLANG_SAMPLES_GO_VET ]]; then
-echo "This test run will run end-to-end tests.";
-export GOLANG_SAMPLES_E2E_TEST=1
-./testing/kokoro/configure_cloudsql.bash;
-# fi
+if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* && -n $GOLANG_SAMPLES_GO_VET ]]; then
+  echo "This test run will run end-to-end tests.";
+  export GOLANG_SAMPLES_E2E_TEST=1
+  ./testing/kokoro/configure_cloudsql.bash;
+fi
 
 
 # only set with mtls_smoketest
