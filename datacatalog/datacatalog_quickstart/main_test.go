@@ -61,7 +61,9 @@ func TestApp(t *testing.T) {
 	}
 
 	// cleanup data catalog resources
-	if cleanupDataCatalog(ctx, string(stdOut))
+	if err := cleanupDataCatalog(ctx, string(stdOut)); err != nil {
+		t.Errorf("failed cleanup: %v", err)
+	}
 
 	// cleanup the BQ resources we created to support the quickstart
 	bqCleanup()
