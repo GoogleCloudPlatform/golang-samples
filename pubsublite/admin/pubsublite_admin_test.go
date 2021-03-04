@@ -135,9 +135,7 @@ func TestCreateTopic(t *testing.T) {
 		t.Fatalf("createTopic() mismatch: -want, +got:\n%s", diff)
 	}
 
-	t.Cleanup(func() {
-		client.DeleteTopic(context.Background(), topicPath)
-	})
+	client.DeleteTopic(context.Background(), topicPath)
 }
 
 func TestGetTopic(t *testing.T) {
@@ -162,9 +160,7 @@ func TestGetTopic(t *testing.T) {
 		t.Fatalf("getTopic() mismatch: -want, +got:\n%s", diff)
 	}
 
-	t.Cleanup(func() {
-		client.DeleteTopic(ctx, topicPath)
-	})
+	client.DeleteTopic(ctx, topicPath)
 }
 
 func TestListTopics(t *testing.T) {
@@ -194,11 +190,9 @@ func TestListTopics(t *testing.T) {
 		}
 	}
 
-	t.Cleanup(func() {
-		for _, tp := range topicPaths {
-			client.DeleteTopic(ctx, tp)
-		}
-	})
+	for _, tp := range topicPaths {
+		client.DeleteTopic(ctx, tp)
+	}
 }
 
 func TestUpdateTopic(t *testing.T) {
@@ -233,9 +227,7 @@ func TestUpdateTopic(t *testing.T) {
 		t.Fatalf("updateTopic() mismatch: -want, +got:\n%s", diff)
 	}
 
-	t.Cleanup(func() {
-		client.DeleteTopic(context.Background(), topicPath)
-	})
+	client.DeleteTopic(context.Background(), topicPath)
 }
 
 func TestDeleteTopic(t *testing.T) {
@@ -308,10 +300,8 @@ func TestCreateSubscription(t *testing.T) {
 		t.Fatalf("createSubscription() mismatch: -want, +got:\n%s", diff)
 	}
 
-	t.Cleanup(func() {
-		client.DeleteTopic(ctx, topicPath)
-		client.DeleteSubscription(ctx, subPath)
-	})
+	client.DeleteTopic(ctx, topicPath)
+	client.DeleteSubscription(ctx, subPath)
 }
 
 func TestGetSubscription(t *testing.T) {
@@ -339,10 +329,8 @@ func TestGetSubscription(t *testing.T) {
 		t.Fatalf("getSubscription mismatch: -want, +got:\n%s", diff)
 	}
 
-	t.Cleanup(func() {
-		client.DeleteTopic(ctx, topicPath)
-		client.DeleteSubscription(ctx, subPath)
-	})
+	client.DeleteTopic(ctx, topicPath)
+	client.DeleteSubscription(ctx, subPath)
 }
 
 func TestListSubscriptions(t *testing.T) {
@@ -390,11 +378,10 @@ func TestListSubscriptions(t *testing.T) {
 		}
 	}
 
-	t.Cleanup(func() {
-		for _, sp := range subPaths {
-			client.DeleteTopic(ctx, sp)
-		}
-	})
+	client.DeleteTopic(ctx, topicPath)
+	for _, sp := range subPaths {
+		client.DeleteSubscription(ctx, sp)
+	}
 }
 
 func TestUpdateSubscription(t *testing.T) {
@@ -429,10 +416,8 @@ func TestUpdateSubscription(t *testing.T) {
 		t.Fatalf("updateSubscription() mismatch: -want, +got:\n%s", diff)
 	}
 
-	t.Cleanup(func() {
-		client.DeleteTopic(ctx, topicPath)
-		client.DeleteSubscription(ctx, subPath)
-	})
+	client.DeleteTopic(ctx, topicPath)
+	client.DeleteSubscription(ctx, subPath)
 }
 
 func TestDeleteSubscription(t *testing.T) {
@@ -460,10 +445,8 @@ func TestDeleteSubscription(t *testing.T) {
 		t.Fatalf("got: %v, want: %v", got, want)
 	}
 
-	t.Cleanup(func() {
-		client.DeleteTopic(ctx, topicPath)
-		client.DeleteSubscription(ctx, subPath)
-	})
+	client.DeleteTopic(ctx, topicPath)
+	client.DeleteSubscription(ctx, subPath)
 }
 
 func mustCreateSubscription(ctx context.Context, t *testing.T, client *pubsublite.AdminClient, topicPath, subPath string) *pubsublite.SubscriptionConfig {
