@@ -70,7 +70,7 @@ func TestApp(t *testing.T) {
 }
 
 // createTestTable creates a BQ dataset and table, allowing the quickstart to use the
-// entry for applying a tag.  It returns a cleanup function for exp
+// entry for applying a tag.  It returns a function for cleaning up the created resources.
 func createTestTable(ctx context.Context, projectID string) (string, func(), error) {
 	bqClient, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
