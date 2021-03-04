@@ -55,12 +55,14 @@ func main() {
 	}
 	fmt.Printf("Created tag template: %s\n", tmpl.GetName())
 
-	// Convert the tag template.
+	// Convert a BigQuery resource identifier into the equivalent datacatalog
+	// format.
 	resource, err := convertBigQueryResourceRepresentation(*table)
 	if err != nil {
 		log.Fatalf("couldn't parse --table flag (%s): %v", *table, err)
 	}
 
+	// Lookup the entry metadata for the BQ table resource.
 	entry, err := client.LookupEntry(ctx, &datacatalogpb.LookupEntryRequest{
 		TargetName: &datacatalogpb.LookupEntryRequest_LinkedResource{
 			LinkedResource: resource,
@@ -71,6 +73,7 @@ func main() {
 	}
 	fmt.Printf("Successfully looked up table entry: %s\n", entry.GetName())
 
+	// Create a tag based on the template, and apply it to the entry.
 	tag, err := createQuickstartTag(ctx, client, "my-quickstart-tag", tmpl.GetName(), entry.GetName())
 	if err != nil {
 		log.Fatalf("couldn't create tag: %v", err)
@@ -80,8 +83,7 @@ func main() {
 
 }
 
-// createQuickstartTagTemplate instantiates a tag template in datacatalog, which will allow users
-// to create tags based on the template.
+// createQuickstartTagTemplate registers a tag template in datacatalog.
 func createQuickstartTagTemplate(ctx context.Context, client *datacatalog.Client, projectID, location string) (*datacatalogpb.TagTemplate, error) {
 	loc := fmt.Sprintf("projects/%s/locations/%s", projectID, location)
 
@@ -146,7 +148,8 @@ func createQuickstartTagTemplate(ctx context.Context, client *datacatalog.Client
 
 }
 
-// createQuickstartTag populates a tag template with values, and attaches the tag to the designated entry.
+// createQuickstartTag populates tag values according to the template, and attaches
+// the tag to the designeated entry.
 func createQuickstartTag(ctx context.Context, client *datacatalog.Client, tagID, templateName, entryName string) (*datacatalogpb.Tag, error) {
 	tag := &datacatalogpb.Tag{
 		Name:     fmt.Sprintf("%s/tags/%s", entryName, tagID),
