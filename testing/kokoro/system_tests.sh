@@ -136,7 +136,7 @@ export PATH="$PATH:/tmp/google-cloud-sdk/bin";
 # fi
 
 # Download and load secrets
-./testing/kokoro/decrypt-secrets.sh
+./testing/kokoro/pull-secrets.sh
 
 if [[ -f "./testing/kokoro/test-env.sh" ]]; then
   source ./testing/kokoro/test-env.sh

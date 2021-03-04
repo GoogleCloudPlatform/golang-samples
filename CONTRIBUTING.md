@@ -39,7 +39,7 @@ If you need to add any additional secrets, execute the following command to pull
 down the secrets locally:
 
 ```sh
-$ ./testing/kokoro/decrypt-secrets.sh
+$ ./testing/kokoro/pull-secrets.sh
 ```
 
 This will write a gitignored file to your local checkout at `./testing/kokoro/test-env.sh`.
@@ -48,8 +48,11 @@ mimick their empty versions in `./testing/kokoro/test-env.tmpl.sh` for local
 testing), and then run the following command to upload the new secret values:
 
 ```
-$ ./testing/kokoro/encrypt-secrets.sh
+$ ./testing/kokoro/store-secrets.sh
 ```
+
+Lastly, return to `pull-secrets.sh` and bump the version number to match what
+you have just uploaded.
 
 # Formatting
 
