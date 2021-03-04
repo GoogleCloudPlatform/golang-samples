@@ -36,11 +36,11 @@ func getSubscription(w io.Writer, projectID, region, zone, subID string) error {
 	}
 	defer client.Close()
 
-	s, err := client.Subscription(ctx, fmt.Sprintf("projects/%s/locations/%s/subscriptions/%s", projectID, zone, subID))
+	sub, err := client.Subscription(ctx, fmt.Sprintf("projects/%s/locations/%s/subscriptions/%s", projectID, zone, subID))
 	if err != nil {
 		return fmt.Errorf("client.Subscription got err: %v", err)
 	}
-	fmt.Fprintf(w, "Got subscription: %#v\n", s)
+	fmt.Fprintf(w, "Got subscription: %#v\n", sub)
 	return nil
 }
 

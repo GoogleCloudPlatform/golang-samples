@@ -57,16 +57,16 @@ func setupAdmin(t *testing.T) *pubsublite.AdminClient {
 
 	once.Do(func() {
 		rand.Seed(time.Now().UnixNano())
-		// PubSub Lite returns project numbers in resource paths, so we need to convert from project id
+		// Pub/Sub Lite returns project numbers in resource paths, so we need to convert from project id
 		// to numbers for tests.
-		cloudresourcemanagerService, err := cloudresourcemanager.NewService(context.Background())
+		crm, err := cloudresourcemanager.NewService(context.Background())
 		if err != nil {
 			t.Fatalf("cloudresourcemanager.NewService: %v", err)
 		}
 
-		project, err := cloudresourcemanagerService.Projects.Get(tc.ProjectID).Do()
+		project, err := crm.Projects.Get(tc.ProjectID).Do()
 		if err != nil {
-			t.Fatalf("cloudresourcemanagerService.Projets.Get project: %v", err)
+			t.Fatalf("crm.Projects.Get project: %v", err)
 		}
 
 		projNumber = strconv.FormatInt(project.ProjectNumber, 10)
@@ -118,6 +118,7 @@ func cleanup(t *testing.T, client *pubsublite.AdminClient, proj string) {
 
 func TestCreateTopic(t *testing.T) {
 	client := setupAdmin(t)
+	defer client.Close()
 	tc := testutil.SystemTest(t)
 	testZone := randomZone()
 
@@ -141,6 +142,7 @@ func TestCreateTopic(t *testing.T) {
 
 func TestGetTopic(t *testing.T) {
 	client := setupAdmin(t)
+	defer client.Close()
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 	testZone := randomZone()
@@ -167,6 +169,7 @@ func TestGetTopic(t *testing.T) {
 
 func TestListTopics(t *testing.T) {
 	client := setupAdmin(t)
+	defer client.Close()
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 	testZone := randomZone()
@@ -200,6 +203,7 @@ func TestListTopics(t *testing.T) {
 
 func TestUpdateTopic(t *testing.T) {
 	client := setupAdmin(t)
+	defer client.Close()
 	ctx := context.Background()
 	testZone := randomZone()
 
@@ -236,6 +240,7 @@ func TestUpdateTopic(t *testing.T) {
 
 func TestDeleteTopic(t *testing.T) {
 	client := setupAdmin(t)
+	defer client.Close()
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 	testZone := randomZone()
@@ -280,6 +285,7 @@ func defaultTopicConfig(topicPath string) *pubsublite.TopicConfig {
 
 func TestCreateSubscription(t *testing.T) {
 	client := setupAdmin(t)
+	defer client.Close()
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 	testZone := randomZone()
@@ -310,6 +316,7 @@ func TestCreateSubscription(t *testing.T) {
 
 func TestGetSubscription(t *testing.T) {
 	client := setupAdmin(t)
+	defer client.Close()
 	ctx := context.Background()
 	testZone := randomZone()
 
@@ -340,6 +347,7 @@ func TestGetSubscription(t *testing.T) {
 
 func TestListSubscriptions(t *testing.T) {
 	client := setupAdmin(t)
+	defer client.Close()
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 	testZone := randomZone()
@@ -391,6 +399,7 @@ func TestListSubscriptions(t *testing.T) {
 
 func TestUpdateSubscription(t *testing.T) {
 	client := setupAdmin(t)
+	defer client.Close()
 	ctx := context.Background()
 	testZone := randomZone()
 
@@ -428,6 +437,7 @@ func TestUpdateSubscription(t *testing.T) {
 
 func TestDeleteSubscription(t *testing.T) {
 	client := setupAdmin(t)
+	defer client.Close()
 	ctx := context.Background()
 	testZone := randomZone()
 
