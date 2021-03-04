@@ -29,6 +29,7 @@ import (
 )
 
 func createBackup(w io.Writer, db, backupID string, versionTime time.Time) error {
+	// versionTime := time.Now().AddDate(0, 0, -1) // one day ago
 	matches := regexp.MustCompile("^(.+)/databases/(.+)$").FindStringSubmatch(db)
 	if matches == nil || len(matches) != 3 {
 		return fmt.Errorf("createBackup: invalid database id %q", db)
