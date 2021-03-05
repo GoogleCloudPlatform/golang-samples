@@ -14,6 +14,7 @@
 
 package admin
 
+// [START pubsublite_list_topics]
 import (
 	"context"
 	"fmt"
@@ -22,8 +23,6 @@ import (
 	"cloud.google.com/go/pubsublite"
 	"google.golang.org/api/iterator"
 )
-
-// [START pubsublite_list_topics]
 
 func listTopics(w io.Writer, projectID, region, zone string) error {
 	// projectID := "my-project-id"

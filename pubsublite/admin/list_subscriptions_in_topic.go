@@ -14,6 +14,7 @@
 
 package admin
 
+// [START pubsublite_list_subscriptions_in_topic]
 import (
 	"context"
 	"fmt"
@@ -23,12 +24,11 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-// [START pubsublite_list_subscriptions_in_topic]
-
 func listSubscriptionsInTopic(w io.Writer, projectID, region, zone, topicID string) error {
 	// projectID := "my-project-id"
 	// region := "us-central1"
 	// zone := "us-central1-a"
+	// topicID := "my-topic"
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
 	if err != nil {

@@ -14,6 +14,7 @@
 
 package admin
 
+// [START pubsublite_update_topic]
 import (
 	"context"
 	"fmt"
@@ -23,10 +24,7 @@ import (
 	"cloud.google.com/go/pubsublite"
 )
 
-// [START pubsublite_update_topic]
-
 func updateTopic(w io.Writer, projectID, region, zone, topicID string) error {
-	// subID := "my-subscription"
 	// projectID := "my-project-id"
 	// region := "us-central1"
 	// zone := "us-central1-a"

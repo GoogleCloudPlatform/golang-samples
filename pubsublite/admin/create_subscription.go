@@ -14,6 +14,7 @@
 
 package admin
 
+// [START pubsublite_create_subscription]
 import (
 	"context"
 	"fmt"
@@ -21,8 +22,6 @@ import (
 
 	"cloud.google.com/go/pubsublite"
 )
-
-// [START pubsublite_create_subscription]
 
 func createSubscription(w io.Writer, projectID, region, zone, topicID, subID string) error {
 	// projectID := "my-project-id"
