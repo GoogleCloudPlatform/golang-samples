@@ -16,7 +16,6 @@
 package settings
 
 // [START securitycenter_enable_asset_discovery]
-// [START get_org_settings]
 import (
 	"context"
 	"fmt"
@@ -58,5 +57,4 @@ func enableAssetDiscovery(w io.Writer, orgID string) error {
 	return nil
 }
 
-// [END get_org_settings]
 // [END securitycenter_enable_asset_discovery]
