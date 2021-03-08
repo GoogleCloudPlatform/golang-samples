@@ -49,7 +49,7 @@ func pullMsgsSettings(w io.Writer, projectID, subID string) error {
 	// of messages since we cannot control the size of a batch of messages
 	// from the server (even with the synchronous Pull RPC).
 	sub.ReceiveSettings.MaxOutstandingBytes = 1e10
-	err = sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
+	err := sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
 		fmt.Fprintf(w, "Got message: %q\n", string(msg.Data))
 		msg.Ack()
 	})
