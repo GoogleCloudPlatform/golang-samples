@@ -43,12 +43,9 @@ func TestHelloPubSubCloudEvent(t *testing.T) {
 		log.SetOutput(w)
 		defer log.SetOutput(os.Stderr)
 
-		payload := strings.NewReader("{}")
-		if test.data != "" {
-			encoded := base64.StdEncoding.EncodeToString([]byte(test.data))
-			jsonStr := fmt.Sprintf(`{"message":{"data":"%s","id":"%s"}}`, encoded, test.id)
-			payload = strings.NewReader(jsonStr)
-		}
+		encoded := base64.StdEncoding.EncodeToString([]byte(test.data))
+		jsonStr := fmt.Sprintf(`{"message":{"data":"%s","id":"%s"}}`, encoded, test.id)
+		payload := strings.NewReader(jsonStr)
 
 		req := httptest.NewRequest("POST", "/", payload)
 		req.Header.Set("Ce-Id", test.id)

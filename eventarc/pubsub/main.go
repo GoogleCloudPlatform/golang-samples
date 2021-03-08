@@ -18,33 +18,37 @@
 package main
 
 import (
-	"encoding/json"
+	"encoding/base64"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
-)
 
-// PubSubMessage is the payload of a Pub/Sub event.
-// See the documentation for more details:
-// https://cloud.google.com/pubsub/docs/reference/rest/v1/PubsubMessage
-type PubSubMessage struct {
-	Message struct {
-		Data []byte `json:"data,omitempty"`
-		ID   string `json:"id"`
-	} `json:"message"`
-	Subscription string `json:"subscription"`
-}
+	pubsub "github.com/googleapis/google-cloudevents-go/cloud/pubsub/v1"
+)
 
 // HelloEventsPubSub receives and processes a Pub/Sub push message.
 func HelloEventsPubSub(w http.ResponseWriter, r *http.Request) {
-	var e PubSubMessage
-	if err := json.NewDecoder(r.Body).Decode(&e); err != nil {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
 		http.Error(w, "Bad HTTP Request", http.StatusBadRequest)
 		log.Printf("Bad HTTP Request: %v", http.StatusBadRequest)
 		return
 	}
-	name := string(e.Message.Data)
+	e, err := pubsub.UnmarshalMessagePublishedData(body)
+	if err != nil {
+		http.Error(w, "Bad Pub/Sub Request", http.StatusBadRequest)
+		log.Printf("Bad Pub/Sub Request: %v", http.StatusBadRequest)
+		return
+	}
+	nameBytes, err := base64.URLEncoding.DecodeString(*e.Message.Data)
+	if err != nil {
+		http.Error(w, "Bad Pub/Sub message", http.StatusBadRequest)
+		log.Printf("Bad Pub/Sub message: %v", http.StatusBadRequest)
+		return
+	}
+	name := string(nameBytes)
 	if name == "" {
 		name = "World"
 	}
