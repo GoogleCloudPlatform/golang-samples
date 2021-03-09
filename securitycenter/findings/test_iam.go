@@ -15,7 +15,6 @@
 package findings
 
 // [START securitycenter_test_iam]
-// [START test_iam]
 import (
 	"context"
 	"fmt"
@@ -66,5 +65,4 @@ func testIam(w io.Writer, sourceName string) error {
 	return nil
 }
 
-// [END test_iam]
 // [END securitycenter_test_iam]

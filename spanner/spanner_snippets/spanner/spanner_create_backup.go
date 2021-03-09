@@ -28,7 +28,8 @@ import (
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
-func createBackup(w io.Writer, db, backupID string) error {
+func createBackup(w io.Writer, db, backupID string, versionTime time.Time) error {
+	// versionTime := time.Now().AddDate(0, 0, -1) // one day ago
 	matches := regexp.MustCompile("^(.+)/databases/(.+)$").FindStringSubmatch(db)
 	if matches == nil || len(matches) != 3 {
 		return fmt.Errorf("createBackup: invalid database id %q", db)
@@ -40,10 +41,6 @@ func createBackup(w io.Writer, db, backupID string) error {
 		return fmt.Errorf("createBackup.NewDatabaseAdminClient: %v", err)
 	}
 	defer adminClient.Close()
-	dbMetadata, err := adminClient.GetDatabase(ctx, &adminpb.GetDatabaseRequest{Name: db})
-	if err != nil {
-		return fmt.Errorf("createBackup.GetDatabase: %v", err)
-	}
 
 	expireTime := time.Now().AddDate(0, 0, 14)
 	// Create a backup.
@@ -53,7 +50,7 @@ func createBackup(w io.Writer, db, backupID string) error {
 		Backup: &adminpb.Backup{
 			Database:    db,
 			ExpireTime:  &pbt.Timestamp{Seconds: expireTime.Unix(), Nanos: int32(expireTime.Nanosecond())},
-			VersionTime: dbMetadata.EarliestVersionTime,
+			VersionTime: &pbt.Timestamp{Seconds: versionTime.Unix(), Nanos: int32(versionTime.Nanosecond())},
 		},
 	}
 	op, err := adminClient.CreateBackup(ctx, &req)
@@ -67,14 +64,14 @@ func createBackup(w io.Writer, db, backupID string) error {
 	}
 
 	// Get the name, create time, version time and backup size.
-	createTime := time.Unix(backup.CreateTime.Seconds, int64(backup.CreateTime.Nanos))
-	versionTime := time.Unix(dbMetadata.EarliestVersionTime.Seconds, int64(dbMetadata.EarliestVersionTime.Nanos))
+	backupCreateTime := time.Unix(backup.CreateTime.Seconds, int64(backup.CreateTime.Nanos))
+	backupVersionTime := time.Unix(backup.VersionTime.Seconds, int64(backup.VersionTime.Nanos))
 	fmt.Fprintf(w,
 		"Backup %s of size %d bytes was created at %s with version time %s\n",
 		backup.Name,
 		backup.SizeBytes,
-		createTime.Format(time.RFC3339),
-		versionTime.Format(time.RFC3339))
+		backupCreateTime.Format(time.RFC3339),
+		backupVersionTime.Format(time.RFC3339))
 	return nil
 }
 
