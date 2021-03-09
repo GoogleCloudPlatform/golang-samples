@@ -22,14 +22,15 @@ import (
 	"io"
 
 	automl "cloud.google.com/go/automl/apiv1"
-	"google.golang.org/genproto/googleapis/longrunning"
+	automlpb "google.golang.org/genproto/googleapis/cloud/automl/v1"
 )
 
 // getOperationStatus gets an operation's status.
-func getOperationStatus(w io.Writer, projectID string, location string, operationID string) error {
+func getOperationStatus(w io.Writer, projectID string, location string, datasetID string, modelName string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
-	// operationID := "TRL123456789..."
+	// datasetID := "ICN123456789..."
+	// modelName := "model_display_name"
 
 	ctx := context.Background()
 	client, err := automl.NewClient(ctx)
@@ -38,18 +39,36 @@ func getOperationStatus(w io.Writer, projectID string, location string, operatio
 	}
 	defer client.Close()
 
-	req := &longrunning.GetOperationRequest{
-		Name: fmt.Sprintf("projects/%s/locations/%s/operations/%s", projectID, location, operationID),
+	req := &automlpb.CreateModelRequest{
+		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
+		Model: &automlpb.Model{
+			DisplayName: modelName,
+			DatasetId:   datasetID,
+			ModelMetadata: &automlpb.Model_ImageClassificationModelMetadata{
+				ImageClassificationModelMetadata: &automlpb.ImageClassificationModelMetadata{
+					TrainBudgetMilliNodeHours: 1000, // 1000 milli-node hours are 1 hour
+				},
+			},
+		},
 	}
 
-	op, err := client.LROClient.GetOperation(ctx, req)
+	op, err := client.CreateModel(ctx, req)
 	if err != nil {
-		return fmt.Errorf("GetOperation: %v", err)
+		return err
 	}
+	fmt.Fprintf(w, "Name: %v\n", op.Name())
 
-	fmt.Fprintf(w, "Name: %v\n", op.GetName())
-	fmt.Fprintf(w, "Operation details:\n")
-	fmt.Fprintf(w, "%v", op)
+	// Wait for the longrunning operation complete.
+	resp, err := op.Wait(ctx)
+	if err != nil && !op.Done() {
+		fmt.Println("failed to fetch operation status", err)
+		return err
+	}
+	if err != nil && op.Done() {
+		fmt.Println("operation completed with error", err)
+		return err
+	}
+	fmt.Fprintf(w, "Response: %v\n", resp)
 
 	return nil
 }
