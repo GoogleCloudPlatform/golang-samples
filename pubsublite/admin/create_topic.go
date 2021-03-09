@@ -36,12 +36,13 @@ func createTopic(w io.Writer, projectID, region, zone, topicID string) error {
 	defer client.Close()
 
 	const gib = 1 << 30
+	// For ranges of fields in TopicConfig, see https://pkg.go.dev/cloud.google.com/go/pubsublite/#TopicConfig
 	topic, err := client.CreateTopic(ctx, pubsublite.TopicConfig{
 		Name:                       fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, zone, topicID),
-		PartitionCount:             2,        // Must be >= 1 and cannot decrease after creation.
-		PublishCapacityMiBPerSec:   4,        // Must be >= 4 and <= 16.
-		SubscribeCapacityMiBPerSec: 8,        // Must be >= 4 and <= 32.
-		PerPartitionBytes:          30 * gib, // Must be >= 30 GiB.
+		PartitionCount:             2, // Must be >= 1 and cannot decrease after creation.
+		PublishCapacityMiBPerSec:   4,
+		SubscribeCapacityMiBPerSec: 8,
+		PerPartitionBytes:          30 * gib,
 		RetentionDuration:          pubsublite.InfiniteRetention,
 	})
 	if err != nil {

@@ -37,12 +37,13 @@ func updateTopic(w io.Writer, projectID, region, zone, topicID string) error {
 	defer client.Close()
 
 	topicPath := fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, zone, topicID)
+	// For ranges of fields in TopicConfigToUpdate, see https://pkg.go.dev/cloud.google.com/go/pubsublite/#TopicConfigToUpdate
 	config := pubsublite.TopicConfigToUpdate{
 		Name:                       topicPath,
-		PartitionCount:             3,                       // Partition count cannot decrease.
-		PublishCapacityMiBPerSec:   8,                       // Must be >= 4 and <= 16.
-		SubscribeCapacityMiBPerSec: 16,                      // Must be >= 4 and <= 32.
-		PerPartitionBytes:          60 * 1024 * 1024 * 1024, // Must be >= 30 GiB.
+		PartitionCount:             3, // Partition count cannot decrease.
+		PublishCapacityMiBPerSec:   8,
+		SubscribeCapacityMiBPerSec: 16,
+		PerPartitionBytes:          60 * 1024 * 1024 * 1024,
 		RetentionDuration:          24 * time.Hour,
 	}
 	updatedCfg, err := client.UpdateTopic(ctx, config)
