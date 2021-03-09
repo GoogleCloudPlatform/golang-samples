@@ -22,7 +22,7 @@ import (
 	"testing"
 )
 
-type commonTestInfo struct {
+type testInfo struct {
 	dbName                 string
 	dbPass                 string
 	dbUser                 string
@@ -30,29 +30,25 @@ type commonTestInfo struct {
 	instanceConnectionName string
 }
 
-func getCommonTestInfo() commonTestInfo {
-	return commonTestInfo{
+func TestIndex(t *testing.T) {
+	if os.Getenv("GOLANG_SAMPLES_E2E_TEST") == "" {
+		t.Skip()
+	}
+
+	info := testInfo{
 		dbName:                 os.Getenv("POSTGRES_DATABASE"),
 		dbPass:                 os.Getenv("POSTGRES_PASSWORD"),
 		dbPort:                 os.Getenv("POSTGRES_PORT"),
 		dbUser:                 os.Getenv("POSTGRES_USER"),
 		instanceConnectionName: os.Getenv("POSTGRES_INSTANCE"),
 	}
-}
-
-func TestIndex(t *testing.T) {
-	if os.Getenv("GOLANG_SAMPLES_E2E_TEST") == "" {
-		t.Skip()
-	}
-
-	_commonTestInfo := getCommonTestInfo()
 
 	tests := []struct {
 		dbHost string
-		common commonTestInfo
+		common testInfo
 	}{
-		{dbHost: "", common: _commonTestInfo},
-		{dbHost: os.Getenv("POSTGRES_HOST"), common: _commonTestInfo},
+		{dbHost: "", common: info},
+		{dbHost: os.Getenv("POSTGRES_HOST"), common: info},
 	}
 
 	// Capture original values
@@ -104,14 +100,20 @@ func TestCastVote(t *testing.T) {
 		t.Skip()
 	}
 
-	_commonTestInfo := getCommonTestInfo()
+	info := testInfo{
+		dbName:                 os.Getenv("POSTGRES_DATABASE"),
+		dbPass:                 os.Getenv("POSTGRES_PASSWORD"),
+		dbPort:                 os.Getenv("POSTGRES_PORT"),
+		dbUser:                 os.Getenv("POSTGRES_USER"),
+		instanceConnectionName: os.Getenv("POSTGRES_INSTANCE"),
+	}
 
 	tests := []struct {
 		dbHost string
-		common commonTestInfo
+		common testInfo
 	}{
-		{dbHost: "", common: _commonTestInfo},
-		{dbHost: os.Getenv("POSTGRES_HOST"), common: _commonTestInfo},
+		{dbHost: "", common: info},
+		{dbHost: os.Getenv("POSTGRES_HOST"), common: info},
 	}
 
 	// Capture original values

@@ -22,7 +22,7 @@ import (
 	"testing"
 )
 
-type commonTestInfo struct {
+type testInfo struct {
 	dbName                 string
 	dbPass                 string
 	dbUser                 string
@@ -30,28 +30,24 @@ type commonTestInfo struct {
 	instanceConnectionName string
 }
 
-func getCommonTestInfo() commonTestInfo {
-	return commonTestInfo{
+func TestIndex(t *testing.T) {
+	if os.Getenv("GOLANG_SAMPLES_E2E_TEST") == "" {
+		t.Skip()
+	}
+
+	info := testInfo{
 		dbName:                 os.Getenv("SQLSERVER_DATABASE"),
 		dbPass:                 os.Getenv("SQLSERVER_PASSWORD"),
 		dbPort:                 os.Getenv("SQLSERVER_PORT"),
 		dbUser:                 os.Getenv("SQLSERVER_USER"),
 		instanceConnectionName: os.Getenv("SQLSERVER_INSTANCE"),
 	}
-}
-
-func TestIndex(t *testing.T) {
-	if os.Getenv("GOLANG_SAMPLES_E2E_TEST") == "" {
-		t.Skip()
-	}
-
-	_commonTestInfo := getCommonTestInfo()
 
 	tests := []struct {
 		dbHost string
-		common commonTestInfo
+		common testInfo
 	}{
-		{dbHost: os.Getenv("SQLSERVER_HOST"), common: _commonTestInfo},
+		{dbHost: os.Getenv("SQLSERVER_HOST"), common: info},
 	}
 
 	// Capture original values
@@ -101,13 +97,20 @@ func TestCastVote(t *testing.T) {
 	if os.Getenv("GOLANG_SAMPLES_E2E_TEST") == "" {
 		t.Skip()
 	}
-	_commonTestInfo := getCommonTestInfo()
+
+	info := testInfo{
+		dbName:                 os.Getenv("SQLSERVER_DATABASE"),
+		dbPass:                 os.Getenv("SQLSERVER_PASSWORD"),
+		dbPort:                 os.Getenv("SQLSERVER_PORT"),
+		dbUser:                 os.Getenv("SQLSERVER_USER"),
+		instanceConnectionName: os.Getenv("SQLSERVER_INSTANCE"),
+	}
 
 	tests := []struct {
 		dbHost string
-		common commonTestInfo
+		common testInfo
 	}{
-		{dbHost: os.Getenv("SQLSERVER_HOST"), common: _commonTestInfo},
+		{dbHost: os.Getenv("SQLSERVER_HOST"), common: info},
 	}
 
 	// Capture original values
