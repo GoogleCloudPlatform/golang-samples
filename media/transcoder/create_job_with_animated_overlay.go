@@ -134,7 +134,7 @@ func createJobWithAnimatedOverlay(w io.Writer, projectID string, location string
 		},
 	}
 	// Creates the job. Jobs take a variable amount of time to run.
-	// You can query for the job state.
+	// You can query for the job state; see getJob() in get_job.go.
 	response, err := client.CreateJob(ctx, req)
 	if err != nil {
 		return fmt.Errorf("createJobWithAnimatedOverlay: %v", err)
