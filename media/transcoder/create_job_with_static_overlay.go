@@ -18,8 +18,9 @@ package transcoder
 import (
 	"context"
 	"fmt"
-	"github.com/golang/protobuf/ptypes/duration"
 	"io"
+
+	"github.com/golang/protobuf/ptypes/duration"
 
 	transcoder "cloud.google.com/go/video/transcoder/apiv1beta1"
 	transcoderpb "google.golang.org/genproto/googleapis/cloud/video/transcoder/v1beta1"
