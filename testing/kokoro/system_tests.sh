@@ -130,16 +130,34 @@ set -x
 pwd
 date
 
+export PATH="$PATH:/tmp/google-cloud-sdk/bin";
+  if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]]; then
+  ./testing/kokoro/configure_gcloud.bash;
+fi
+
+
+
 if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* && -n $GOLANG_SAMPLES_GO_VET ]]; then
   echo "This test run will run end-to-end tests.";
+
+  # Download and load secrets
+  ./testing/kokoro/pull-secrets.sh
+
+  if [[ -f "./testing/kokoro/test-env.sh" ]]; then
+    source ./testing/kokoro/test-env.sh
+  else
+    echo "Could not find environment file"
+    echo "ls -lah ./testing"
+    ls -lah ./testing
+    echo "ls -lah ./testing/kokoro"
+    ls -lah ./testing/kokoro
+    exit 1
+  fi
+
   export GOLANG_SAMPLES_E2E_TEST=1
   ./testing/kokoro/configure_cloudsql.bash;
 fi
 
-export PATH="$PATH:/tmp/google-cloud-sdk/bin";
-if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]]; then
-  ./testing/kokoro/configure_gcloud.bash;
-fi
 
 # only set with mtls_smoketest
 # TODO(cbro): remove with mtls_smoketest.cfg

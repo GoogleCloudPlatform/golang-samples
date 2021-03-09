@@ -34,7 +34,10 @@ gcloud -q components install app-engine-go
 gcloud config set disable_prompts True
 gcloud config set project $GOLANG_SAMPLES_PROJECT_ID
 gcloud config set app/promote_by_default false
-gcloud auth activate-service-account --key-file "$GOOGLE_APPLICATION_CREDENTIALS"
+gcloud config set core/account $GOLANG_SAMPLES_PROJECT_ID@$GOLANG_SAMPLES_PROJECT_ID.iam.gserviceaccount.com
+# gcloud auth activate-service-account --key-file "$GOOGLE_APPLICATION_CREDENTIALS"
+gcloud auth activate-service-account --key-file "$GOOGLE_APPLICATION_CREDENTIALS" --project="golang-samples-tests"
 
 # Diagnostic information.
 gcloud info
+gcloud config list

@@ -22,20 +22,51 @@ import (
 	"testing"
 )
 
+type testInfo struct {
+	dbName                 string
+	dbPass                 string
+	dbUser                 string
+	dbPort                 string
+	instanceConnectionName string
+}
+
 func TestIndex(t *testing.T) {
 	if os.Getenv("GOLANG_SAMPLES_E2E_TEST") == "" {
 		t.Skip()
 	}
+
+	info := testInfo{
+		dbName:                 os.Getenv("POSTGRES_DATABASE"),
+		dbPass:                 os.Getenv("POSTGRES_PASSWORD"),
+		dbPort:                 os.Getenv("POSTGRES_PORT"),
+		dbUser:                 os.Getenv("POSTGRES_USER"),
+		instanceConnectionName: os.Getenv("POSTGRES_INSTANCE"),
+	}
+
 	tests := []struct {
 		dbHost string
 	}{
 		{dbHost: ""},
-		{dbHost: os.Getenv("DB_HOST")},
+		{dbHost: os.Getenv("POSTGRES_HOST")},
 	}
 
+	// Capture original values
+	oldDBHost := os.Getenv("DB_HOST")
+	oldDBName := os.Getenv("DB_NAME")
+	oldDBPass := os.Getenv("DB_PASS")
+	oldDBPort := os.Getenv("DB_PORT")
+	oldDBUser := os.Getenv("DB_USER")
+	oldInstance := os.Getenv("INSTANCE_CONNECTION_NAME")
+
 	for _, test := range tests {
-		oldDBHost := os.Getenv("DB_HOST")
+
+		// Set overwrites
 		os.Setenv("DB_HOST", test.dbHost)
+		os.Setenv("DB_NAME", info.dbName)
+		os.Setenv("DB_PASS", info.dbPass)
+		os.Setenv("DB_PORT", info.dbPort)
+		os.Setenv("DB_USER", info.dbUser)
+		os.Setenv("INSTANCE_CONNECTION_NAME", info.instanceConnectionName)
 
 		app := newApp()
 		rr := httptest.NewRecorder()
@@ -52,24 +83,54 @@ func TestIndex(t *testing.T) {
 		if !strings.Contains(body, want) {
 			t.Errorf("With dbHost='%s', expected to see '%s' in indexHandler response body", test.dbHost, want)
 		}
-		os.Setenv("DB_HOST", oldDBHost)
+
 	}
+	// Restore original values
+	os.Setenv("DB_HOST", oldDBHost)
+	os.Setenv("DB_NAME", oldDBName)
+	os.Setenv("DB_PASS", oldDBPass)
+	os.Setenv("DB_PORT", oldDBPort)
+	os.Setenv("DB_USER", oldDBUser)
+	os.Setenv("INSTANCE_CONNECTION_NAME", oldInstance)
 }
 
 func TestCastVote(t *testing.T) {
 	if os.Getenv("GOLANG_SAMPLES_E2E_TEST") == "" {
 		t.Skip()
 	}
+
+	info := testInfo{
+		dbName:                 os.Getenv("POSTGRES_DATABASE"),
+		dbPass:                 os.Getenv("POSTGRES_PASSWORD"),
+		dbPort:                 os.Getenv("POSTGRES_PORT"),
+		dbUser:                 os.Getenv("POSTGRES_USER"),
+		instanceConnectionName: os.Getenv("POSTGRES_INSTANCE"),
+	}
+
 	tests := []struct {
 		dbHost string
 	}{
 		{dbHost: ""},
-		{dbHost: os.Getenv("DB_HOST")},
+		{dbHost: os.Getenv("POSTGRES_HOST")},
 	}
 
+	// Capture original values
+	oldDBHost := os.Getenv("DB_HOST")
+	oldDBName := os.Getenv("DB_NAME")
+	oldDBPass := os.Getenv("DB_PASS")
+	oldDBPort := os.Getenv("DB_PORT")
+	oldDBUser := os.Getenv("DB_USER")
+	oldInstance := os.Getenv("INSTANCE_CONNECTION_NAME")
+
 	for _, test := range tests {
-		oldDBHost := os.Getenv("DB_HOST")
+
+		// Set overwrites
 		os.Setenv("DB_HOST", test.dbHost)
+		os.Setenv("DB_NAME", info.dbName)
+		os.Setenv("DB_PASS", info.dbPass)
+		os.Setenv("DB_PORT", info.dbPort)
+		os.Setenv("DB_USER", info.dbUser)
+		os.Setenv("INSTANCE_CONNECTION_NAME", info.instanceConnectionName)
 
 		app := newApp()
 		rr := httptest.NewRecorder()
@@ -89,4 +150,12 @@ func TestCastVote(t *testing.T) {
 		}
 		os.Setenv("DB_HOST", oldDBHost)
 	}
+
+	// Restore original values
+	os.Setenv("DB_HOST", oldDBHost)
+	os.Setenv("DB_NAME", oldDBName)
+	os.Setenv("DB_PASS", oldDBPass)
+	os.Setenv("DB_PORT", oldDBPort)
+	os.Setenv("DB_USER", oldDBUser)
+	os.Setenv("INSTANCE_CONNECTION_NAME", oldInstance)
 }
