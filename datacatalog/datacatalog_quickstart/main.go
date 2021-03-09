@@ -32,12 +32,9 @@ import (
 )
 
 func main() {
-
-	var (
-		projectID = flag.String("project_id", "", "Cloud Project ID, used for session creation.")
-		location  = flag.String("location", "us-central1", "data catalog region to use for the quickstart")
-		table     = flag.String("table", "myproject.mydataset.mytable", "bigquery table to tag in project.dataset.table format")
-	)
+	projectID := flag.String("project_id", "", "Cloud Project ID, used for session creation.")
+	location := flag.String("location", "us-central1", "data catalog region to use for the quickstart")
+	table := flag.String("table", "myproject.mydataset.mytable", "bigquery table to tag in project.dataset.table format")
 
 	flag.Parse()
 
@@ -78,9 +75,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("couldn't create tag: %v", err)
 	}
-
 	fmt.Printf("Created tag: %s", tag.GetName())
-
 }
 
 // createQuickstartTagTemplate registers a tag template in datacatalog.
@@ -143,7 +138,6 @@ func createQuickstartTagTemplate(ctx context.Context, client *datacatalog.Client
 	// To aid testing, we add some uniqueness to the template ID.
 	req.TagTemplateId = fmt.Sprintf("%s_%d", req.GetTagTemplateId(), time.Now().UnixNano())
 	// [START data_catalog_quickstart]
-
 	return client.CreateTagTemplate(ctx, req)
 
 }
@@ -178,7 +172,6 @@ func createQuickstartTag(ctx context.Context, client *datacatalog.Client, tagID,
 		Parent: entryName,
 		Tag:    tag,
 	}
-
 	return client.CreateTag(ctx, req)
 }
 
@@ -187,7 +180,7 @@ func createQuickstartTag(ctx context.Context, client *datacatalog.Client, tagID,
 func convertBigQueryResourceRepresentation(table string) (string, error) {
 	parts := strings.Split(table, ".")
 	if len(parts) != 3 {
-		return "", fmt.Errorf("specified table string is not in expected project.dataset.table format")
+		return "", fmt.Errorf("specified table string is not in expected project.dataset.table format: %s", table)
 	}
 	return fmt.Sprintf("//bigquery.googleapis.com/projects/%s/datasets/%s/tables/%s", parts[0], parts[1], parts[2]), nil
 }
