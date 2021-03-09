@@ -7,5 +7,5 @@ require (
 	cloud.google.com/go/pubsub v1.5.0
 	cloud.google.com/go/storage v1.10.0
 	golang.org/x/text v0.3.5
-	google.golang.org/genproto v0.0.0-20210226172003-ab064af71705
+	google.golang.org/genproto v0.0.0-20210303154014-9728d6b83eeb
 )

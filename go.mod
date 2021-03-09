@@ -13,7 +13,7 @@ require (
 	cloud.google.com/go/spanner v1.14.0
 	cloud.google.com/go/storage v1.13.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.5
-	github.com/aws/aws-sdk-go v1.37.20
+	github.com/aws/aws-sdk-go v1.37.25
 	github.com/bmatcuk/doublestar/v2 v2.0.4
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -23,7 +23,7 @@ require (
 	github.com/gofrs/uuid v3.4.0+incompatible
 	github.com/golang/protobuf v1.4.3
 	github.com/gomodule/redigo v2.0.0+incompatible
-	github.com/google/go-cmp v0.5.4
+	github.com/google/go-cmp v0.5.5
 	github.com/google/uuid v1.2.0
 	github.com/googleapis/gax-go/v2 v2.0.5
 	github.com/gorilla/mux v1.8.0
@@ -42,7 +42,7 @@ require (
 	golang.org/x/text v0.3.5
 	google.golang.org/api v0.40.0
 	google.golang.org/appengine v1.6.7
-	google.golang.org/genproto v0.0.0-20210226172003-ab064af71705
+	google.golang.org/genproto v0.0.0-20210303154014-9728d6b83eeb
 	google.golang.org/grpc v1.36.0
 	google.golang.org/grpc/examples v0.0.0-20200707005602-4258d12073b4
 	google.golang.org/protobuf v1.25.0
