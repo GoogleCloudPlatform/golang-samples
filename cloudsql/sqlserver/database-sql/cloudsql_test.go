@@ -45,9 +45,8 @@ func TestIndex(t *testing.T) {
 
 	tests := []struct {
 		dbHost string
-		common testInfo
 	}{
-		{dbHost: os.Getenv("SQLSERVER_HOST"), common: info},
+		{dbHost: os.Getenv("SQLSERVER_HOST")},
 	}
 
 	// Capture original values
@@ -61,11 +60,11 @@ func TestIndex(t *testing.T) {
 	for _, test := range tests {
 		// Set overwrites
 		os.Setenv("DB_HOST", test.dbHost)
-		os.Setenv("DB_NAME", test.common.dbName)
-		os.Setenv("DB_PASS", test.common.dbPass)
-		os.Setenv("DB_PORT", test.common.dbPort)
-		os.Setenv("DB_USER", test.common.dbUser)
-		os.Setenv("INSTANCE_CONNECTION_NAME", test.common.instanceConnectionName)
+		os.Setenv("DB_NAME", info.dbName)
+		os.Setenv("DB_PASS", info.dbPass)
+		os.Setenv("DB_PORT", info.dbPort)
+		os.Setenv("DB_USER", info.dbUser)
+		os.Setenv("INSTANCE_CONNECTION_NAME", info.instanceConnectionName)
 
 		app := newApp()
 		rr := httptest.NewRecorder()
@@ -108,9 +107,8 @@ func TestCastVote(t *testing.T) {
 
 	tests := []struct {
 		dbHost string
-		common testInfo
 	}{
-		{dbHost: os.Getenv("SQLSERVER_HOST"), common: info},
+		{dbHost: os.Getenv("SQLSERVER_HOST")},
 	}
 
 	// Capture original values
@@ -124,11 +122,11 @@ func TestCastVote(t *testing.T) {
 	for _, test := range tests {
 		// Set overwrites
 		os.Setenv("DB_HOST", test.dbHost)
-		os.Setenv("DB_NAME", test.common.dbName)
-		os.Setenv("DB_PASS", test.common.dbPass)
-		os.Setenv("DB_PORT", test.common.dbPort)
-		os.Setenv("DB_USER", test.common.dbUser)
-		os.Setenv("INSTANCE_CONNECTION_NAME", test.common.instanceConnectionName)
+		os.Setenv("DB_NAME", info.dbName)
+		os.Setenv("DB_PASS", info.dbPass)
+		os.Setenv("DB_PORT", info.dbPort)
+		os.Setenv("DB_USER", info.dbUser)
+		os.Setenv("INSTANCE_CONNECTION_NAME", info.instanceConnectionName)
 
 		app := newApp()
 		rr := httptest.NewRecorder()
