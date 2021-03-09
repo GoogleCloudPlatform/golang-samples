@@ -29,6 +29,7 @@ func publishWithBatchSettings(w io.Writer, projectID, zone, topicID string, mess
 	// projectID := "my-project-id"
 	// zone := "us-central1-a"
 	// topicID := "my-topic"
+	// messageCount := 10
 	ctx := context.Background()
 	topicPath := fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, zone, topicID)
 
