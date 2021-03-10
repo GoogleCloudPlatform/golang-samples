@@ -28,8 +28,8 @@ import (
 )
 
 const (
-	region       = "us-east1"
-	zone         = "us-east1-b"
+	region       = "europe-west1"
+	zone         = "europe-west1-b"
 	topicPrefix  = "publish-test-"
 	messageCount = 10
 )
