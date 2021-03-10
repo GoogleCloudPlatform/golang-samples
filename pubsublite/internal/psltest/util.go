@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package test contains utilities for pubsublite tests.
-package test
+// Package psltest contains utilities for pubsublite tests.
+package psltest
 
 import (
 	"context"

@@ -25,7 +25,7 @@ import (
 	"cloud.google.com/go/pubsublite"
 	"cloud.google.com/go/pubsublite/pscompat"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"github.com/GoogleCloudPlatform/golang-samples/pubsublite/internal/test"
+	"github.com/GoogleCloudPlatform/golang-samples/pubsublite/internal/psltest"
 	"github.com/google/uuid"
 )
 
@@ -49,15 +49,15 @@ func TestQuickstartSubscriber(t *testing.T) {
 		t.Fatalf("pubsublite.NewAdminClient: %v", err)
 	}
 	defer admin.Close()
-	test.Cleanup(t, admin, tc.ProjectID, []string{zone})
+	psltest.Cleanup(t, admin, tc.ProjectID, []string{zone})
 
 	resourceID := resourcePrefix + uuid.NewString()
 	topicPath := fmt.Sprintf("projects/%s/locations/%s/topics/%s", tc.ProjectID, zone, resourceID)
-	test.MustCreateTopic(ctx, t, admin, topicPath)
+	psltest.MustCreateTopic(ctx, t, admin, topicPath)
 	defer admin.DeleteTopic(ctx, topicPath)
 
 	subscriptionPath := fmt.Sprintf("projects/%s/locations/%s/subscriptions/%s", tc.ProjectID, zone, resourceID)
-	test.MustCreateSubscription(ctx, t, admin, topicPath, subscriptionPath)
+	psltest.MustCreateSubscription(ctx, t, admin, topicPath, subscriptionPath)
 	defer admin.DeleteSubscription(ctx, subscriptionPath)
 
 	publishMessages(ctx, t, topicPath, 10)

@@ -23,7 +23,7 @@ import (
 
 	"cloud.google.com/go/pubsublite"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"github.com/GoogleCloudPlatform/golang-samples/pubsublite/internal/test"
+	"github.com/GoogleCloudPlatform/golang-samples/pubsublite/internal/psltest"
 	"github.com/google/uuid"
 )
 
@@ -43,11 +43,11 @@ func TestPublish(t *testing.T) {
 	defer admin.Close()
 
 	tc := testutil.SystemTest(t)
-	test.Cleanup(t, admin, tc.ProjectID, []string{zone})
+	psltest.Cleanup(t, admin, tc.ProjectID, []string{zone})
 
 	topicID := topicPrefix + uuid.NewString()
 	topicPath := fmt.Sprintf("projects/%s/locations/%s/topics/%s", tc.ProjectID, zone, topicID)
-	test.MustCreateTopic(ctx, t, admin, topicPath)
+	psltest.MustCreateTopic(ctx, t, admin, topicPath)
 	defer admin.DeleteTopic(ctx, topicPath)
 
 	t.Run("WithBatchSettings", func(t *testing.T) {

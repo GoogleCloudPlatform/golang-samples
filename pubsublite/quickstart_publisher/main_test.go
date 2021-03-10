@@ -23,7 +23,7 @@ import (
 
 	"cloud.google.com/go/pubsublite"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"github.com/GoogleCloudPlatform/golang-samples/pubsublite/internal/test"
+	"github.com/GoogleCloudPlatform/golang-samples/pubsublite/internal/psltest"
 	"github.com/google/uuid"
 )
 
@@ -47,11 +47,11 @@ func TestQuickstartPublisher(t *testing.T) {
 		t.Fatalf("pubsublite.NewAdminClient: %v", err)
 	}
 	defer admin.Close()
-	test.Cleanup(t, admin, tc.ProjectID, []string{zone})
+	psltest.Cleanup(t, admin, tc.ProjectID, []string{zone})
 
 	topicID := topicPrefix + uuid.NewString()
 	topicPath := fmt.Sprintf("projects/%s/locations/%s/topics/%s", tc.ProjectID, zone, topicID)
-	test.MustCreateTopic(ctx, t, admin, topicPath)
+	psltest.MustCreateTopic(ctx, t, admin, topicPath)
 	defer admin.DeleteTopic(ctx, topicPath)
 
 	stdOut, stdErr, err := m.Run(nil, 10*time.Minute,
