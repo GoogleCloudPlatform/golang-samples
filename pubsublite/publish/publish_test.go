@@ -35,14 +35,13 @@ const (
 )
 
 func TestPublish(t *testing.T) {
+	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 	admin, err := pubsublite.NewAdminClient(context.Background(), region)
 	if err != nil {
 		t.Fatalf("pubsublite.NewAdminClient: %v", err)
 	}
 	defer admin.Close()
-
-	tc := testutil.SystemTest(t)
 	psltest.Cleanup(t, admin, tc.ProjectID, []string{zone})
 
 	topicID := topicPrefix + uuid.NewString()
