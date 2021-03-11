@@ -1,10 +1,12 @@
-# Copyright 2019 Google LLC
+#!/bin/bash
+
+# Copyright 2021 Google Inc. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     https://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,24 +14,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Created by .ignore support plugin (hsz.mobi)
-### Go template
-# Binaries for programs and plugins
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
+set -eEuo pipefail
 
-# Test binary, built with `go test -c`
-*.test
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+TESTING_ROOT=$( dirname "$DIR" )
 
-# Output of the go coverage tool, specifically when used with LiteIDE
-*.out
+cd $TESTING_ROOT
 
-# Editors
-.idea/*
+# Use SECRET_MANAGER_PROJECT if set, fallback to "golang-samples-tests".
+PROJECT_ID="${SECRET_MANAGER_PROJECT:-golang-samples-tests}"
 
-**/sponge_log.log
-
-testing/kokoro/test-env.sh
+gcloud secrets versions add "golang-samples-test-env" \
+       --project="${PROJECT_ID}" \
+       --data-file="kokoro/test-env.sh"
