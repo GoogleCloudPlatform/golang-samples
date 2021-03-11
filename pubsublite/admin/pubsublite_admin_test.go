@@ -27,10 +27,10 @@ import (
 
 	"cloud.google.com/go/pubsublite"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/GoogleCloudPlatform/golang-samples/pubsublite/internal/psltest"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
 	"google.golang.org/api/cloudresourcemanager/v1"
-	"google.golang.org/api/iterator"
 )
 
 const (
@@ -40,7 +40,7 @@ const (
 )
 
 var (
-	supportedZoneIDs = []string{"a", "b", "c"}
+	supportedZones = []string{"us-central1-a", "us-central1-b", "us-central1-c"}
 
 	once       sync.Once
 	projNumber string
@@ -71,49 +71,10 @@ func setupAdmin(t *testing.T) *pubsublite.AdminClient {
 
 		projNumber = strconv.FormatInt(project.ProjectNumber, 10)
 
-		cleanup(t, client, projNumber)
+		psltest.Cleanup(t, client, projNumber, supportedZones)
 	})
 
 	return client
-}
-
-// cleanup deletes all previous test topics/subscriptions from
-// previous test runs. This prevents previous test failures
-// from building up resources that count against quota.
-func cleanup(t *testing.T, client *pubsublite.AdminClient, proj string) {
-	ctx := context.Background()
-
-	for _, zoneID := range supportedZoneIDs {
-		zone := fmt.Sprintf("%s-%s", testRegion, zoneID)
-		parent := fmt.Sprintf("projects/%s/locations/%s", proj, zone)
-		topicIter := client.Topics(ctx, parent)
-		for {
-			topic, err := topicIter.Next()
-			if err == iterator.Done {
-				break
-			}
-			if err != nil {
-				t.Fatalf("topicIter.Next got err: %v", err)
-			}
-			if err := client.DeleteTopic(ctx, topic.Name); err != nil {
-				t.Fatalf("client.DeleteTopic got err: %v", err)
-			}
-		}
-
-		subIter := client.Subscriptions(ctx, parent)
-		for {
-			sub, err := subIter.Next()
-			if err == iterator.Done {
-				break
-			}
-			if err != nil {
-				t.Fatalf("subIter.Next() got err: %v", err)
-			}
-			if err := client.DeleteSubscription(ctx, sub.Name); err != nil {
-				t.Fatalf("client.DeleteSubscription got err: %v", err)
-			}
-		}
-	}
 }
 
 func TestTopicAdmin(t *testing.T) {
@@ -399,6 +360,5 @@ func defaultSubConfig(topicPath, subPath string) *pubsublite.SubscriptionConfig 
 }
 
 func randomZone() string {
-	zoneID := supportedZoneIDs[rand.Intn(len(supportedZoneIDs))]
-	return fmt.Sprintf("%s-%s", testRegion, zoneID)
+	return supportedZones[rand.Intn(len(supportedZones))]
 }
