@@ -18,8 +18,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io"
-	"os"
 	"strconv"
 	"strings"
 	"testing"
@@ -36,9 +34,10 @@ const (
 	deleteTemplateReponse    = "Deleted job template"
 	deleteJobReponse         = "Deleted job"
 	jobSucceededState        = "SUCCEEDED"
+	testBucketName           = "cloud-samples-data"
+	testBucketDirName        = "media/"
 	testVideoFileName        = "ChromeCast.mp4"
 	testOverlayImageFileName = "overlay.jpg"
-	testFilesLocation        = "../testdata/"
 	preset                   = "preset/web-hd"
 )
 
@@ -57,8 +56,8 @@ func TestJobTemplatesAndJobs(t *testing.T) {
 	ctx := context.Background()
 
 	bucketName := tc.ProjectID + "-golang-samples-transcoder-test"
-	inputURI := "gs://" + bucketName + "/" + testVideoFileName
-	inputOverlayImageURI := "gs://" + bucketName + "/" + testOverlayImageFileName
+	inputURI := "gs://" + bucketName + "/" + testBucketDirName + testVideoFileName
+	inputOverlayImageURI := "gs://" + bucketName + "/" + testBucketDirName + testOverlayImageFileName
 	outputURIForPreset := "gs://" + bucketName + "/test-output-preset/"
 	outputURIForTemplate := "gs://" + bucketName + "/test-output-template/"
 	outputURIForAdHoc := "gs://" + bucketName + "/test-output-adhoc/"
@@ -79,7 +78,7 @@ func TestJobTemplatesAndJobs(t *testing.T) {
 	testJobTemplates(t, projectNumber)
 	t.Logf("\ntestJobTemplates() completed\n")
 	writeTestGCSFiles(t, tc.ProjectID, bucketName)
-	t.Logf("\nwriteTestGCSFile() completed\n")
+	t.Logf("\nwriteTestGCSFiles() completed\n")
 	testJobFromPreset(t, projectNumber, inputURI, outputURIForPreset)
 	t.Logf("\ntestJobFromPreset() completed\n")
 	testJobFromTemplate(t, projectNumber, inputURI, outputURIForTemplate)
@@ -156,12 +155,12 @@ func writeTestGCSFiles(t *testing.T, projectID string, bucketName string) {
 	t.Helper()
 	ctx := context.Background()
 	testutil.CleanBucket(ctx, t, projectID, bucketName)
-	writeTestGCSFile(t, bucketName, testFilesLocation, testVideoFileName)
-	writeTestGCSFile(t, bucketName, testFilesLocation, testOverlayImageFileName)
+	writeTestGCSFile(t, bucketName, testBucketName, testBucketDirName+testVideoFileName)
+	writeTestGCSFile(t, bucketName, testBucketName, testBucketDirName+testOverlayImageFileName)
 }
 
 // writeTestGCSFile deletes the GCS test bucket and uploads a test video file to it.
-func writeTestGCSFile(t *testing.T, bucketName string, testFileLocation string, testFileName string) {
+func writeTestGCSFile(t *testing.T, dstBucket string, srcBucket string, srcObject string) {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -169,23 +168,15 @@ func writeTestGCSFile(t *testing.T, bucketName string, testFileLocation string, 
 	}
 	defer client.Close()
 
-	// Open local test file.
-	f, err := os.Open(testFileLocation + testFileName)
-	if err != nil {
-		t.Fatalf("os.Open: %v", err)
-	}
-	defer f.Close()
-
-	ctx, cancel := context.WithTimeout(ctx, time.Second*120)
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 
-	// Upload an object with storage.Writer.
-	wc := client.Bucket(bucketName).Object(testFileName).NewWriter(ctx)
-	if _, err = io.Copy(wc, f); err != nil {
-		t.Fatalf("io.Copy: %v", err)
-	}
-	if err := wc.Close(); err != nil {
-		t.Fatalf("Writer.Close: %v", err)
+	dstObject := srcObject
+	src := client.Bucket(srcBucket).Object(srcObject)
+	dst := client.Bucket(dstBucket).Object(dstObject)
+
+	if _, err := dst.CopierFrom(src).Run(ctx); err != nil {
+		t.Fatalf("Object(%q).CopierFrom(%q).Run: %v", dstObject, srcObject, err)
 	}
 }
 
