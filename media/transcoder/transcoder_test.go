@@ -18,8 +18,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io"
-	"os"
 	"strconv"
 	"strings"
 	"testing"
@@ -31,14 +29,16 @@ import (
 )
 
 const (
-	location              = "us-central1"
-	templateID            = "my-go-test-template"
-	deleteTemplateReponse = "Deleted job template"
-	deleteJobReponse      = "Deleted job"
-	jobSucceededState     = "SUCCEEDED"
-	testVideoFileName     = "ChromeCast.mp4"
-	testVideoFileLocation = "../testdata/"
-	preset                = "preset/web-hd"
+	location                 = "us-central1"
+	templateID               = "my-go-test-template"
+	deleteTemplateReponse    = "Deleted job template"
+	deleteJobReponse         = "Deleted job"
+	jobSucceededState        = "SUCCEEDED"
+	testBucketName           = "cloud-samples-data"
+	testBucketDirName        = "media/"
+	testVideoFileName        = "ChromeCast.mp4"
+	testOverlayImageFileName = "overlay.jpg"
+	preset                   = "preset/web-hd"
 )
 
 // To run the tests, do the following:
@@ -56,10 +56,13 @@ func TestJobTemplatesAndJobs(t *testing.T) {
 	ctx := context.Background()
 
 	bucketName := tc.ProjectID + "-golang-samples-transcoder-test"
-	inputURI := "gs://" + bucketName + "/" + testVideoFileName
+	inputURI := "gs://" + bucketName + "/" + testBucketDirName + testVideoFileName
+	inputOverlayImageURI := "gs://" + bucketName + "/" + testBucketDirName + testOverlayImageFileName
 	outputURIForPreset := "gs://" + bucketName + "/test-output-preset/"
 	outputURIForTemplate := "gs://" + bucketName + "/test-output-template/"
 	outputURIForAdHoc := "gs://" + bucketName + "/test-output-adhoc/"
+	outputURIForStaticOverlay := "gs://" + bucketName + "/test-output-static-overlay/"
+	outputURIForAnimatedOverlay := "gs://" + bucketName + "/test-output-animated-overlay/"
 
 	// Get the project number
 	cloudresourcemanagerClient, err := cloudresourcemanager.NewService(ctx)
@@ -74,14 +77,18 @@ func TestJobTemplatesAndJobs(t *testing.T) {
 
 	testJobTemplates(t, projectNumber)
 	t.Logf("\ntestJobTemplates() completed\n")
-	writeTestGCSFile(t, tc.ProjectID, bucketName)
-	t.Logf("\nwriteTestGCSFile() completed\n")
+	writeTestGCSFiles(t, tc.ProjectID, bucketName)
+	t.Logf("\nwriteTestGCSFiles() completed\n")
 	testJobFromPreset(t, projectNumber, inputURI, outputURIForPreset)
 	t.Logf("\ntestJobFromPreset() completed\n")
 	testJobFromTemplate(t, projectNumber, inputURI, outputURIForTemplate)
 	t.Logf("\ntestJobFromTemplate() completed\n")
 	testJobFromAdHoc(t, projectNumber, inputURI, outputURIForAdHoc)
 	t.Logf("\ntestJobFromAdHoc() completed\n")
+	testJobWithStaticOverlay(t, projectNumber, inputURI, inputOverlayImageURI, outputURIForStaticOverlay)
+	t.Logf("\ntestJobWithStaticOverlay() completed\n")
+	testJobWithAnimatedOverlay(t, projectNumber, inputURI, inputOverlayImageURI, outputURIForAnimatedOverlay)
+	t.Logf("\ntestJobWithAnimatedOverlay() completed\n")
 }
 
 // testJobTemplates tests major operations on job templates. Create, get,
@@ -144,9 +151,16 @@ func testJobTemplates(t *testing.T, projectNumber string) {
 	})
 }
 
-// writeTestGCSFile deletes the GCS test bucket and uploads a test video file to it.
-func writeTestGCSFile(t *testing.T, projectID string, bucketName string) {
+func writeTestGCSFiles(t *testing.T, projectID string, bucketName string) {
 	t.Helper()
+	ctx := context.Background()
+	testutil.CleanBucket(ctx, t, projectID, bucketName)
+	writeTestGCSFile(t, bucketName, testBucketName, testBucketDirName+testVideoFileName)
+	writeTestGCSFile(t, bucketName, testBucketName, testBucketDirName+testOverlayImageFileName)
+}
+
+// writeTestGCSFile deletes the GCS test bucket and uploads a test video file to it.
+func writeTestGCSFile(t *testing.T, dstBucket string, srcBucket string, srcObject string) {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -154,25 +168,15 @@ func writeTestGCSFile(t *testing.T, projectID string, bucketName string) {
 	}
 	defer client.Close()
 
-	testutil.CleanBucket(ctx, t, projectID, bucketName)
-
-	// Open local test file.
-	f, err := os.Open(testVideoFileLocation + testVideoFileName)
-	if err != nil {
-		t.Fatalf("os.Open: %v", err)
-	}
-	defer f.Close()
-
-	ctx, cancel := context.WithTimeout(ctx, time.Second*120)
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 
-	// Upload an object with storage.Writer.
-	wc := client.Bucket(bucketName).Object(testVideoFileName).NewWriter(ctx)
-	if _, err = io.Copy(wc, f); err != nil {
-		t.Fatalf("io.Copy: %v", err)
-	}
-	if err := wc.Close(); err != nil {
-		t.Fatalf("Writer.Close: %v", err)
+	dstObject := srcObject
+	src := client.Bucket(srcBucket).Object(srcObject)
+	dst := client.Bucket(dstBucket).Object(dstObject)
+
+	if _, err := dst.CopierFrom(src).Run(ctx); err != nil {
+		t.Fatalf("Object(%q).CopierFrom(%q).Run: %v", dstObject, srcObject, err)
 	}
 }
 
@@ -316,6 +320,110 @@ func testJobFromAdHoc(t *testing.T, projectNumber string, inputURI string, outpu
 
 	if !strings.Contains(got, jobName) {
 		t.Errorf("createJobFromAdHoc got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobName)
+	}
+	strSlice := strings.Split(got, "/")
+	jobID = strSlice[len(strSlice)-1]
+
+	// Get the job.
+	testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
+		jobName := fmt.Sprintf("projects/%s/locations/%s/jobs/%s", projectNumber, location, jobID)
+		if err := getJob(buf, tc.ProjectID, location, jobID); err != nil {
+			r.Errorf("getJob got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, jobName) {
+			r.Errorf("getJob got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobName)
+		}
+	})
+
+	// Get the job state (should be succeeded).
+	testutil.Retry(t, 10, 60*time.Second, func(r *testutil.R) {
+		if err := getJobState(buf, tc.ProjectID, location, jobID); err != nil {
+			r.Errorf("getJobState got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, jobSucceededState) {
+			r.Errorf("getJobState got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobSucceededState)
+		}
+	})
+
+	// Delete the job.
+	testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
+		if err := deleteJob(buf, tc.ProjectID, location, jobID); err != nil {
+			r.Errorf("deleteJob got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, deleteJobReponse) {
+			r.Errorf("deleteJob got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, deleteJobReponse)
+		}
+	})
+}
+
+// testJobWithStaticOverlay tests major operations on a job created from an ad-hoc configuration that
+// includes a static overlay. It will wait until the job successfully completes as part of the test.
+func testJobWithStaticOverlay(t *testing.T, projectNumber string, inputURI string, inputOverlayImageURI string, outputURIForStaticOverlay string) {
+	tc := testutil.SystemTest(t)
+	buf := &bytes.Buffer{}
+	jobID := ""
+
+	// Create the job.
+	jobName := fmt.Sprintf("projects/%s/locations/%s/jobs/", projectNumber, location)
+	if err := createJobWithStaticOverlay(buf, tc.ProjectID, location, inputURI, inputOverlayImageURI, outputURIForStaticOverlay); err != nil {
+		t.Errorf("createJobWithStaticOverlay got err: %v", err)
+	}
+	got := buf.String()
+
+	if !strings.Contains(got, jobName) {
+		t.Errorf("createJobWithStaticOverlay got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobName)
+	}
+	strSlice := strings.Split(got, "/")
+	jobID = strSlice[len(strSlice)-1]
+
+	// Get the job.
+	testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
+		jobName := fmt.Sprintf("projects/%s/locations/%s/jobs/%s", projectNumber, location, jobID)
+		if err := getJob(buf, tc.ProjectID, location, jobID); err != nil {
+			r.Errorf("getJob got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, jobName) {
+			r.Errorf("getJob got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobName)
+		}
+	})
+
+	// Get the job state (should be succeeded).
+	testutil.Retry(t, 10, 60*time.Second, func(r *testutil.R) {
+		if err := getJobState(buf, tc.ProjectID, location, jobID); err != nil {
+			r.Errorf("getJobState got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, jobSucceededState) {
+			r.Errorf("getJobState got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobSucceededState)
+		}
+	})
+
+	// Delete the job.
+	testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
+		if err := deleteJob(buf, tc.ProjectID, location, jobID); err != nil {
+			r.Errorf("deleteJob got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, deleteJobReponse) {
+			r.Errorf("deleteJob got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, deleteJobReponse)
+		}
+	})
+}
+
+// testJobWithAnimatedOverlay tests major operations on a job created from an ad-hoc configuration that
+// includes an animated overlay. It will wait until the job successfully completes as part of the test.
+func testJobWithAnimatedOverlay(t *testing.T, projectNumber string, inputURI string, inputOverlayImageURI string, outputURIForAnimatedOverlay string) {
+	tc := testutil.SystemTest(t)
+	buf := &bytes.Buffer{}
+	jobID := ""
+
+	// Create the job.
+	jobName := fmt.Sprintf("projects/%s/locations/%s/jobs/", projectNumber, location)
+	if err := createJobWithAnimatedOverlay(buf, tc.ProjectID, location, inputURI, inputOverlayImageURI, outputURIForAnimatedOverlay); err != nil {
+		t.Errorf("testJobWithAnimatedOverlay got err: %v", err)
+	}
+	got := buf.String()
+
+	if !strings.Contains(got, jobName) {
+		t.Errorf("testJobWithAnimatedOverlay got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobName)
 	}
 	strSlice := strings.Split(got, "/")
 	jobID = strSlice[len(strSlice)-1]
