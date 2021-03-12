@@ -11,6 +11,11 @@ assign_issues_by:
   - tritone
 - labels:
   - 'api: bigquery'
+  - 'api: bigqueryconnection'
+  - 'api: bigquerydatatransfer'
+  - 'api: bigqueryreservation'
+  - 'api: bigquerystorage'
+  - 'api: datacatalog'
   to:
   - shollyman
 - labels:
