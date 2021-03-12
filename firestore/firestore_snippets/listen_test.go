@@ -101,29 +101,31 @@ func TestListenChanges(t *testing.T) {
 	ctx, cancel := context.WithTimeout(ctx, duration)
 	defer cancel()
 
-	buf := &bytes.Buffer{}
-	c := make(chan *bytes.Buffer)
-	go func() {
-		defer close(c)
-		err := listenChanges(ctx, buf, projectID, collection)
-		if err != nil {
-			t.Errorf("listenChanges: %v", err)
+	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
+		buf := &bytes.Buffer{}
+		c := make(chan *bytes.Buffer)
+		go func() {
+			defer close(c)
+			err := listenChanges(ctx, buf, projectID, collection)
+			if err != nil {
+				r.Errorf("listenChanges: %v", err)
+			}
+			c <- buf
+		}()
+		// Add some changes to data in parallel.
+		time.Sleep(time.Second)
+		var pop int64 = 3900000
+		if _, err := client.Collection(collection).Doc("LA").Update(ctx, []firestore.Update{
+			{Path: "population", Value: pop},
+		}); err != nil {
+			log.Fatalf("Doc.Update: %v", err)
 		}
-		c <- buf
-	}()
-	// Add some changes to data in parallel.
-	time.Sleep(time.Second)
-	var pop int64 = 3900000
-	if _, err := client.Collection(collection).Doc("LA").Update(ctx, []firestore.Update{
-		{Path: "population", Value: pop},
-	}); err != nil {
-		log.Fatalf("Doc.Update: %v", err)
-	}
-	<-c
-	want := "population:3900000"
-	if got := buf.String(); !strings.Contains(got, want) {
-		t.Errorf("listenChanges got\n----\n%s\n----\nWant to contain:\n----\n%s\n----", got, want)
-	}
+		<-c
+		want := "population:3900000"
+		if got := buf.String(); !strings.Contains(got, want) {
+			r.Errorf("listenChanges got\n----\n%s\n----\nWant to contain:\n----\n%s\n----", got, want)
+		}
+	})
 }
 
 func TestListenErrors(t *testing.T) {
