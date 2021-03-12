@@ -9,6 +9,9 @@
 # explicitly taken by someone else.
 *                               @googleapis/yoshi-go-admins
 
-/storage/        @GoogleCloudPlatform/storage-dpe @googleapis/yoshi-go-admins
-/logging/        @GoogleCloudPlatform/observability-devx @googleapis/yoshi-go-admins @nicoleczhu
+/bigtable/       @googleapis/api-bigtable @googleapis/yoshi-go-admins
+/datastore/      @googleapis/firestore-dpe @googleapis/yoshi-go-admins
 /errorreporting/ @GoogleCloudPlatform/observability-devx @googleapis/yoshi-go-admins @nicoleczhu
+/firestore/      @googleapis/firestore-dpe @googleapis/yoshi-go-admins
+/logging/        @GoogleCloudPlatform/observability-devx @googleapis/yoshi-go-admins @nicoleczhu
+/storage/        @GoogleCloudPlatform/storage-dpe @googleapis/yoshi-go-admins
