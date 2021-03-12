@@ -12,9 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Setup Go
-      uses: actions/setup-go@v2-beta
+      uses: actions/setup-go@v2
       with:
-        go-version: '^1.14'
+        go-version: '^1.16'
     - name: Install goimports
       run: go get golang.org/x/tools/cmd/goimports
     - name: Check code
@@ -23,9 +23,10 @@ jobs:
     - name: Run go mod tidy on all modules
       run: find . -name go.mod -execdir go mod tidy \;
     # If there are any diffs from goimports or go mod tidy, fail.
-    - name: Verify no changes from goimports and go mod tidy. If you're reading this and the check has failed, run `goimports -w . && go mod tidy`.
+    - name: Verify no changes from goimports and go mod tidy.
       run: |
         if [ -n "$(git status --porcelain)" ]; then
+          echo 'To fix this check, run "goimports -w . && find . -name go.mod -execdir go mod tidy \;"'
           git status # Show the files that failed to pass the check.
           exit 1
         fi
@@ -52,9 +53,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup Go
-        uses: actions/setup-go@v2-beta
+        uses: actions/setup-go@v2
         with:
-          go-version: '^1.14'
+          go-version: '^1.16'
       - name: Check code
         uses: actions/checkout@v2
       - run: go test -v

@@ -14,7 +14,7 @@
 
 package notifications
 
-// [START scc_update_notification_config]
+// [START securitycenter_update_notification_config]
 import (
 	"context"
 	"fmt"
@@ -66,4 +66,4 @@ func updateNotificationConfig(w io.Writer, orgID string, notificationConfigID st
 	return nil
 }
 
-// [END scc_update_notification_config]
+// [END securitycenter_update_notification_config]

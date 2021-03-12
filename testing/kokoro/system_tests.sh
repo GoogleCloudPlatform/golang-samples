@@ -57,9 +57,18 @@ GO_CHANGED_SUBMODULES=${GO_CHANGED_MODULES#./go.mod}
 # Override to determine if all go tests should be run.
 # Does not include static analysis checks.
 RUN_ALL_TESTS="0"
-# If this is a nightly test (not a PR), run all tests.
-if [ -z "${KOKORO_GITHUB_PULL_REQUEST_NUMBER:-}" ]; then
+if [[ $KOKORO_JOB_NAME == *"system-tests"* ]]; then
+  # If this is a standard nightly test, run all modules tests.
   RUN_ALL_TESTS="1"
+  # If this is a nightly test for a specific submodule, run submodule tests only.
+  # Submodule job name must have the format: "golang-samples/system-tests/[OPTIONAL_MODULE_NAME]/[GO_VERSION]"
+  ARR=(${KOKORO_JOB_NAME//// })
+  # Gets the "/" deliminated token after "system-tests".
+  SUBMODULE_NAME=${ARR[4]}
+  if [[ -n $SUBMODULE_NAME ]] && [[ -d "./$SUBMODULE_NAME" ]]; then
+    RUN_ALL_TESTS="0"
+    CHANGED_DIRS=$SUBMODULE_NAME
+  fi
 # If the change touches a repo-spanning file or directory of significance, run all tests.
 elif echo "$SIGNIFICANT_CHANGES" | tr ' ' '\n' | grep "^go.mod$" || [[ $CHANGED_DIRS =~ "testing" || $CHANGED_DIRS =~ "internal" ]]; then
   RUN_ALL_TESTS="1"
@@ -121,15 +130,34 @@ set -x
 pwd
 date
 
-if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* && -n $GOLANG_SAMPLES_GO_VET ]]; then
-  echo "This test run will run end-to-end tests.";
-  export GOLANG_SAMPLES_E2E_TEST=1
-fi
-
 export PATH="$PATH:/tmp/google-cloud-sdk/bin";
-if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]]; then
+  if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]]; then
   ./testing/kokoro/configure_gcloud.bash;
 fi
+
+
+
+if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* && -n $GOLANG_SAMPLES_GO_VET ]]; then
+  echo "This test run will run end-to-end tests.";
+
+  # Download and load secrets
+  ./testing/kokoro/pull-secrets.sh
+
+  if [[ -f "./testing/kokoro/test-env.sh" ]]; then
+    source ./testing/kokoro/test-env.sh
+  else
+    echo "Could not find environment file"
+    echo "ls -lah ./testing"
+    ls -lah ./testing
+    echo "ls -lah ./testing/kokoro"
+    ls -lah ./testing/kokoro
+    exit 1
+  fi
+
+  export GOLANG_SAMPLES_E2E_TEST=1
+  ./testing/kokoro/configure_cloudsql.bash;
+fi
+
 
 # only set with mtls_smoketest
 # TODO(cbro): remove with mtls_smoketest.cfg
@@ -214,11 +242,11 @@ else
   done
 fi
 
-# If we're running system tests, send the test log to the Build Cop Bot.
-# See https://github.com/googleapis/repo-automation-bots/tree/master/packages/buildcop.
+# If we're running system tests, send the test log to Flaky Bot.
+# See https://github.com/googleapis/repo-automation-bots/tree/master/packages/flakybot.
 if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]]; then
-  chmod +x "$KOKORO_GFILE_DIR"/linux_amd64/buildcop
-  "$KOKORO_GFILE_DIR"/linux_amd64/buildcop
+  chmod +x "$KOKORO_GFILE_DIR"/linux_amd64/flakybot
+  "$KOKORO_GFILE_DIR"/linux_amd64/flakybot
 fi
 
 exit $exit_code

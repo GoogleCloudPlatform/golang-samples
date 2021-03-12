@@ -14,7 +14,7 @@
 
 package findings
 
-// [START list_sources]
+// [START securitycenter_list_sources]
 import (
 	"context"
 	"fmt"
@@ -56,4 +56,4 @@ func listSources(w io.Writer, orgID string) error {
 	return nil
 }
 
-// [END list_sources]
+// [END securitycenter_list_sources]

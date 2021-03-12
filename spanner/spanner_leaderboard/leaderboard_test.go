@@ -66,9 +66,9 @@ func TestSample(t *testing.T) {
 			adminClient.DropDatabase(ctx, &adminpb.DropDatabaseRequest{Database: dbName}))
 	}
 
-	assertContains := func(t *testing.T, out string, sub string) {
+	assertContains := func(t *testing.T, name, out, sub string) {
 		if !strings.Contains(out, sub) {
-			t.Errorf("got output %q; want it to contain %q", out, sub)
+			t.Errorf("%s failed: got output %q; want it to contain %q", name, out, sub)
 		}
 	}
 	runCommand := func(t *testing.T, cmd string, dbName string, timespan int) string {
@@ -94,10 +94,10 @@ func TestSample(t *testing.T) {
 	// These commands have to be run in a specific order
 	// since earlier commands setup the database for the subsequent commands.
 	mustRunCommand(t, "createdatabase", dbName, 0)
-	assertContains(t, runCommand(t, "insertplayers", dbName, 0), "Inserted players")
-	assertContains(t, runCommand(t, "insertscores", dbName, 0), "Inserted scores")
-	assertContains(t, runCommand(t, "query", dbName, 0), "PlayerId: ")
-	assertContains(t, runCommand(t, "querywithtimespan", dbName, 168), "PlayerId: ")
-	assertContains(t, runCommand(t, "querywithtimespan", dbName, 730), "PlayerId: ")
-	assertContains(t, runCommand(t, "querywithtimespan", dbName, 6870), "PlayerId: ")
+	assertContains(t, "insertplayers", runCommand(t, "insertplayers", dbName, 0), "Inserted players")
+	assertContains(t, "insertscores", runCommand(t, "insertscores", dbName, 0), "Inserted scores")
+	assertContains(t, "query", runCommand(t, "query", dbName, 0), "PlayerId: ")
+	assertContains(t, "querywithtimespan 18168", runCommand(t, "querywithtimespan", dbName, 18168), "PlayerId: ")
+	assertContains(t, "querywithtimespan 18730", runCommand(t, "querywithtimespan", dbName, 18730), "PlayerId: ")
+	assertContains(t, "querywithtimespan 186870", runCommand(t, "querywithtimespan", dbName, 186870), "PlayerId: ")
 }

@@ -14,7 +14,7 @@
 
 // [START eventarc_pubsub_handler]
 
-// Sample run-events-pubsub is a Cloud Run service which handles Pub/Sub messages.
+// Sample pubsub is a Cloud Run service which handles Pub/Sub messages.
 package main
 
 import (
@@ -26,6 +26,8 @@ import (
 )
 
 // PubSubMessage is the payload of a Pub/Sub event.
+// See the documentation for more details:
+// https://cloud.google.com/pubsub/docs/reference/rest/v1/PubsubMessage
 type PubSubMessage struct {
 	Message struct {
 		Data []byte `json:"data,omitempty"`

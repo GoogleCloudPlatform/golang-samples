@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	video "cloud.google.com/go/videointelligence/apiv1"
 	"github.com/golang/protobuf/ptypes"
@@ -38,6 +39,9 @@ func logoDetectionGCS(w io.Writer, gcsURI string) error {
 		return fmt.Errorf("video.NewClient: %v", err)
 	}
 	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*180)
+	defer cancel()
 
 	op, err := client.AnnotateVideo(ctx, &videopb.AnnotateVideoRequest{
 		InputUri: gcsURI,

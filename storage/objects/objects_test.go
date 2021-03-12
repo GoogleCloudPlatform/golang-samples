@@ -43,26 +43,21 @@ func TestObjects(t *testing.T) {
 	defer client.Close()
 
 	var (
-		bucket                = tc.ProjectID + "-samples-object-bucket-1"
-		dstBucket             = tc.ProjectID + "-samples-object-bucket-2"
-		bucketVersioning      = tc.ProjectID + "-bucket-versioning-enabled"
-		object1               = "foo.txt"
-		object2               = "foo/a.txt"
-		allAuthenticatedUsers = storage.AllAuthenticatedUsers
-		roleReader            = storage.RoleReader
+		bucket           = tc.ProjectID + "-samples-object-bucket-1"
+		dstBucket        = tc.ProjectID + "-samples-object-bucket-2"
+		bucketVersioning = tc.ProjectID + "-bucket-versioning-enabled"
+		object1          = "foo.txt"
+		object2          = "foo/a.txt"
+		object3          = "bar.txt"
+		dstObj           = "foobar.txt"
 	)
 
 	testutil.CleanBucket(ctx, t, tc.ProjectID, bucket)
 	testutil.CleanBucket(ctx, t, tc.ProjectID, dstBucket)
 	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketVersioning)
 
-	{
-		// Enable versioning
-		attr := storage.BucketAttrsToUpdate{VersioningEnabled: true}
-		_, err := client.Bucket(bucketVersioning).Update(ctx, attr)
-		if err != nil {
-			t.Fatalf("storage.BucketAttrsToUpdate{VersioningEnabled: true}: %v", err)
-		}
+	if err := enableVersioning(ioutil.Discard, bucketVersioning); err != nil {
+		t.Fatalf("enableVersioning: %v", err)
 	}
 
 	if err := uploadFile(ioutil.Discard, bucket, object1); err != nil {
@@ -75,6 +70,20 @@ func TestObjects(t *testing.T) {
 	if err := uploadFile(ioutil.Discard, bucketVersioning, object1); err != nil {
 		t.Fatalf("uploadFile(%q): %v", object1, err)
 	}
+	// Check enableVersioning correctly work.
+	bkt := client.Bucket(bucketVersioning)
+	bAttrs, err := bkt.Attrs(ctx)
+	if !bAttrs.VersioningEnabled {
+		t.Fatalf("object versioning is not enabled")
+	}
+	obj := bkt.Object(object1)
+	attrs, err := obj.Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Object(%q).Attrs: %v", bucketVersioning, object1, err)
+	}
+	// Keep the original generation of object1 before re-uploading
+	// to use in the versioning samples.
+	gen := attrs.Generation
 	if err := uploadFile(ioutil.Discard, bucketVersioning, object1); err != nil {
 		t.Fatalf("uploadFile(%q): %v", object1, err)
 	}
@@ -132,7 +141,28 @@ func TestObjects(t *testing.T) {
 			t.Errorf("downloadUsingRequesterPays: %v", err)
 		}
 	}
-
+	t.Run("changeObjectStorageClass", func(t *testing.T) {
+		bkt := client.Bucket(bucket)
+		obj := bkt.Object(object1)
+		if err := changeObjectStorageClass(ioutil.Discard, bucket, object1); err != nil {
+			t.Errorf("changeObjectStorageClass: %v", err)
+		}
+		wantStorageClass := "COLDLINE"
+		oattrs, err := obj.Attrs(ctx)
+		if err != nil {
+			t.Errorf("obj.Attrs: %v", err)
+		}
+		if oattrs.StorageClass != wantStorageClass {
+			t.Errorf("object storage class: got %q, want %q", oattrs.StorageClass, wantStorageClass)
+		}
+	})
+	if err := copyOldVersionOfObject(ioutil.Discard, bucketVersioning, object1, object3, gen); err != nil {
+		t.Fatalf("copyOldVersionOfObject: %v", err)
+	}
+	// Delete the first version of an object1 for a bucketVersioning.
+	if err := deleteOldVersionOfObject(ioutil.Discard, bucketVersioning, object1, gen); err != nil {
+		t.Fatalf("deleteOldVersionOfObject: %v", err)
+	}
 	data, err := downloadFile(ioutil.Discard, bucket, object1)
 	if err != nil {
 		t.Fatalf("downloadFile: %v", err)
@@ -141,13 +171,37 @@ func TestObjects(t *testing.T) {
 		t.Errorf("contents = %q; want %q", got, want)
 	}
 
+	t.Run("setMetadata", func(t *testing.T) {
+		bkt := client.Bucket(bucket)
+		obj := bkt.Object(object1)
+		err = setMetadata(ioutil.Discard, bucket, object1)
+		if err != nil {
+			t.Errorf("setMetadata: %v", err)
+		}
+		attrs, err := obj.Attrs(ctx)
+		if err != nil {
+			t.Errorf("object.Attrs: %v", err)
+		}
+		if got, want := attrs.Metadata["keyToAddOrUpdate"], "value"; got != want {
+			t.Errorf("object content = %q; want %q", got, want)
+		}
+	})
 	_, err = getMetadata(ioutil.Discard, bucket, object1)
 	if err != nil {
 		t.Errorf("getMetadata: %v", err)
 	}
-	if err := makePublic(ioutil.Discard, bucket, object1, allAuthenticatedUsers, roleReader); err != nil {
-		t.Errorf("makePublic: %v", err)
-	}
+	t.Run("publicFile", func(t *testing.T) {
+		if err := makePublic(ioutil.Discard, bucket, object1); err != nil {
+			t.Errorf("makePublic: %v", err)
+		}
+		data, err = downloadPublicFile(ioutil.Discard, bucket, object1)
+		if err != nil {
+			t.Fatalf("downloadPublicFile: %v", err)
+		}
+		if got, want := string(data), "Hello\nworld"; got != want {
+			t.Errorf("contents = %q; want %q", got, want)
+		}
+	})
 
 	err = moveFile(ioutil.Discard, bucket, object1)
 	if err != nil {
@@ -159,10 +213,26 @@ func TestObjects(t *testing.T) {
 	if err := copyFile(ioutil.Discard, dstBucket, bucket, object1); err != nil {
 		t.Errorf("copyFile: %v", err)
 	}
+	t.Run("composeFile", func(t *testing.T) {
+		if err := composeFile(ioutil.Discard, bucket, object1, object2, dstObj); err != nil {
+			t.Errorf("composeFile: %v", err)
+		}
+		bkt := client.Bucket(bucket)
+		obj := bkt.Object(dstObj)
+		_, err = obj.Attrs(ctx)
+		if err == storage.ErrObjectNotExist {
+			t.Errorf("Destination object was not created")
+		} else if err != nil {
+			t.Errorf("object.Attrs: %v", err)
+		}
+	})
 
 	key := []byte("my-secret-AES-256-encryption-key")
 	newKey := []byte("My-secret-AES-256-encryption-key")
 
+	if err := generateEncryptionKey(ioutil.Discard); err != nil {
+		t.Errorf("generateEncryptionKey: %v", err)
+	}
 	if err := uploadEncryptedFile(ioutil.Discard, bucket, object1, key); err != nil {
 		t.Errorf("uploadEncryptedFile: %v", err)
 	}
@@ -182,7 +252,20 @@ func TestObjects(t *testing.T) {
 	if err := deleteFile(ioutil.Discard, bucket, object2); err != nil {
 		t.Errorf("deleteFile: %v", err)
 	}
-
+	o := client.Bucket(bucket).Object(dstObj)
+	if err := o.Delete(ctx); err != nil {
+		t.Errorf("Object(%q).Delete: %v", dstObj, err)
+	}
+	if err := disableVersioning(ioutil.Discard, bucketVersioning); err != nil {
+		t.Fatalf("disableVersioning: %v", err)
+	}
+	bAttrs, err = bkt.Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketVersioning, err)
+	}
+	if bAttrs.VersioningEnabled {
+		t.Fatalf("object versioning is not disabled")
+	}
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		// Cleanup, this part won't be executed if Fatal happens.
 		// TODO(jbd): Implement garbage cleaning.
@@ -233,6 +316,31 @@ func TestKMSObjects(t *testing.T) {
 	testutil.CleanBucket(ctx, t, tc.ProjectID, bucket)
 
 	kmsKeyName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", tc.ProjectID, "global", keyRingID, cryptoKeyID)
+	t.Run("сhangeObjectCSEKtoKMS", func(t *testing.T) {
+		object1 := "foo.txt"
+		key := []byte("my-secret-AES-256-encryption-key")
+		obj := client.Bucket(bucket).Object(object1)
+
+		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+			wc := obj.Key(key).NewWriter(ctx)
+			if _, err := wc.Write([]byte("top secret")); err != nil {
+				r.Errorf("Writer.Write: %v", err)
+			}
+			if err := wc.Close(); err != nil {
+				r.Errorf("Writer.Close: %v", err)
+			}
+		})
+		if err := сhangeObjectCSEKToKMS(ioutil.Discard, bucket, object1, key, kmsKeyName); err != nil {
+			t.Errorf("сhangeObjectCSEKtoKMS: %v", err)
+		}
+		attrs, err := obj.Attrs(ctx)
+		if err != nil {
+			t.Errorf("obj.Attrs: %v", err)
+		}
+		if got, want := attrs.KMSKeyName, kmsKeyName; !strings.Contains(got, want) {
+			t.Errorf("attrs.KMSKeyName expected %q to contain %q", got, want)
+		}
+	})
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		if err := uploadWithKMSKey(ioutil.Discard, bucket, object, kmsKeyName); err != nil {
@@ -253,6 +361,9 @@ func TestV4SignedURL(t *testing.T) {
 	bucketName := tc.ProjectID + "-signed-url-bucket-name"
 	objectName := "foo.txt"
 	serviceAccount := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
+	if serviceAccount == "" {
+		t.Skip("GOOGLE_APPLICATION_CREDENTIALS must be set")
+	}
 
 	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName)
 	putBuf := new(bytes.Buffer)

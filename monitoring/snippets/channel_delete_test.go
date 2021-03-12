@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	monitoring "cloud.google.com/go/monitoring/apiv3"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -29,19 +30,24 @@ import (
 func TestDeleteChannel(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	c, err := createChannel(tc.ProjectID)
-	if err != nil {
-		t.Fatalf("Error creating test channel: %v", err)
-	}
+	testutil.Retry(t, 5, 10*time.Second, func(r *testutil.R) {
+		c, err := createChannel(tc.ProjectID)
+		if err != nil {
+			r.Errorf("Error creating test channel: %v", err)
+			return
+		}
 
-	buf := &bytes.Buffer{}
-	if err := deleteChannel(buf, c.GetName()); err != nil {
-		t.Fatalf("deleteChannel: %v", err)
-	}
-	want := "Deleted channel"
-	if got := buf.String(); !strings.Contains(got, want) {
-		t.Fatalf("deleteChannel got %q, want to contain %q", got, want)
-	}
+		buf := &bytes.Buffer{}
+		if err := deleteChannel(buf, c.GetName()); err != nil {
+			r.Errorf("deleteChannel: %v", err)
+			return
+		}
+		want := "Deleted channel"
+		if got := buf.String(); !strings.Contains(got, want) {
+			r.Errorf("deleteChannel got %q, want to contain %q", got, want)
+			return
+		}
+	})
 }
 
 // createChannel creates a channel.

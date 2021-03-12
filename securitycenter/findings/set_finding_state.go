@@ -14,7 +14,7 @@
 
 package findings
 
-// [START set_finding_state]
+// [START securitycenter_update_finding_state]
 import (
 	"context"
 	"fmt"
@@ -62,4 +62,4 @@ func setFindingState(w io.Writer, findingName string) error {
 	return nil
 }
 
-// [END set_finding_state]
+// [END securitycenter_update_finding_state]

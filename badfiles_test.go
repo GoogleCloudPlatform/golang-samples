@@ -34,6 +34,7 @@ var allowList = []string{
 	"**/*.go",
 	"**/*.md",
 	"**/*.yaml",
+	"**/*.yml",
 	"**/*.sh",
 	"**/*.bash",
 	"**/*.mod",
@@ -106,6 +107,9 @@ var allowList = []string{
 
 	// sampletests testdata.
 	"testing/sampletests/testdata/raw_log.xml",
+
+	// cloud-run-button configuration
+	"run/**/app.json",
 }
 
 // Check whether accidental binary files have been checked in.

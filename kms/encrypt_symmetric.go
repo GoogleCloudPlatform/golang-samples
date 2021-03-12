@@ -18,10 +18,12 @@ package kms
 import (
 	"context"
 	"fmt"
+	"hash/crc32"
 	"io"
 
 	kms "cloud.google.com/go/kms/apiv1"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 // encryptSymmetric encrypts the input plaintext with the specified symmetric
@@ -41,16 +43,34 @@ func encryptSymmetric(w io.Writer, name string, message string) error {
 	// ciphertexts are always byte arrays.
 	plaintext := []byte(message)
 
+	// Optional but recommended: Compute plaintext's CRC32C.
+	crc32c := func(data []byte) uint32 {
+		t := crc32.MakeTable(crc32.Castagnoli)
+		return crc32.Checksum(data, t)
+	}
+	plaintextCRC32C := crc32c(plaintext)
+
 	// Build the request.
 	req := &kmspb.EncryptRequest{
-		Name:      name,
-		Plaintext: plaintext,
+		Name:            name,
+		Plaintext:       plaintext,
+		PlaintextCrc32C: wrapperspb.Int64(int64(plaintextCRC32C)),
 	}
 
 	// Call the API.
 	result, err := client.Encrypt(ctx, req)
 	if err != nil {
 		return fmt.Errorf("failed to encrypt: %v", err)
+	}
+
+	// Optional, but recommended: perform integrity verification on result.
+	// For more details on ensuring E2E in-transit integrity to and from Cloud KMS visit:
+	// https://cloud.google.com/kms/docs/data-integrity-guidelines
+	if result.VerifiedPlaintextCrc32C == false {
+		return fmt.Errorf("Encrypt: request corrupted in-transit")
+	}
+	if int64(crc32c(result.Ciphertext)) != result.CiphertextCrc32C.Value {
+		return fmt.Errorf("Encrypt: response corrupted in-transit")
 	}
 
 	fmt.Fprintf(w, "Encrypted ciphertext: %s", result.Ciphertext)

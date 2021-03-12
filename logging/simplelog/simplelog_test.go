@@ -67,8 +67,8 @@ func TestSimplelog(t *testing.T) {
 			return
 		}
 
-		if got, want := len(entries), 2; got != want {
-			r.Errorf("len(entries) = %d; want %d", got, want)
+		if len(entries) < 2 {
+			r.Errorf("len(entries) = %d; want at least 2 entries", len(entries))
 			return
 		}
 

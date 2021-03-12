@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"io"
 
-	servicedirectory "cloud.google.com/go/servicedirectory/apiv1beta1"
-	sdpb "google.golang.org/genproto/googleapis/cloud/servicedirectory/v1beta1"
+	servicedirectory "cloud.google.com/go/servicedirectory/apiv1"
+	sdpb "google.golang.org/genproto/googleapis/cloud/servicedirectory/v1"
 )
 
 func createService(w io.Writer, projectID string) error {
@@ -43,7 +43,7 @@ func createService(w io.Writer, projectID string) error {
 		Parent:    fmt.Sprintf("projects/%s/locations/%s/namespaces/%s", projectID, location, namespaceID),
 		ServiceId: serviceID,
 		Service: &sdpb.Service{
-			Metadata: map[string]string{
+			Annotations: map[string]string{
 				"key1": "value1",
 				"key2": "value2",
 			},
