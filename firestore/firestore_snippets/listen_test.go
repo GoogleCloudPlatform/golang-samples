@@ -101,27 +101,31 @@ func TestListenChanges(t *testing.T) {
 	ctx, cancel := context.WithTimeout(ctx, duration)
 	defer cancel()
 
-	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
-		buf := &bytes.Buffer{}
-		c := make(chan *bytes.Buffer)
-		go func() {
-			defer close(c)
-			err := listenChanges(ctx, buf, projectID, collection)
-			if err != nil {
-				r.Errorf("listenChanges: %v", err)
-			}
-			c <- buf
-		}()
-		// Add some changes to data in parallel.
-		time.Sleep(time.Second)
-		var pop int64 = 3900000
-		if _, err := client.Collection(collection).Doc("LA").Update(ctx, []firestore.Update{
-			{Path: "population", Value: pop},
-		}); err != nil {
-			log.Fatalf("Doc.Update: %v", err)
+	buf := &bytes.Buffer{}
+	c := make(chan *bytes.Buffer)
+	go func() {
+		defer close(c)
+		err := listenChanges(ctx, buf, projectID, collection)
+		if err != nil {
+			t.Errorf("listenChanges: %v", err)
 		}
-		<-c
+		c <- buf
+	}()
+	// Add some changes to data in parallel.
+	time.Sleep(time.Second)
+	var pop int64 = 3900000
+	if _, err := client.Collection(collection).Doc("LA").Update(ctx, []firestore.Update{
+		{Path: "population", Value: pop},
+	}); err != nil {
+		log.Fatalf("Doc.Update: %v", err)
+	}
+
+	<-c
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		// While the content is likely here, it is possible the update event
+		// hasn't been observed yet. Retry a few times.
 		want := "population:3900000"
+
 		if got := buf.String(); !strings.Contains(got, want) {
 			r.Errorf("listenChanges got\n----\n%s\n----\nWant to contain:\n----\n%s\n----", got, want)
 		}
