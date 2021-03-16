@@ -36,7 +36,7 @@ func main() {
 	}
 
 	srv := &http.Server{
-		Addr:    ":"+port,
+		Addr:    ":" + port,
 		Handler: http.HandlerFunc(handler),
 	}
 
@@ -64,7 +64,7 @@ func main() {
 
 	defer func() {
 		// Add extra handling here to close any DB connections, redis, or flush logs
-		cancel() // Release resources 
+		cancel() // Release resources
 	}()
 
 	// Gracefully shutdown the server
