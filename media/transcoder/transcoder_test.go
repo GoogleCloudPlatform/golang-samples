@@ -26,6 +26,7 @@ import (
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
+	"google.golang.org/api/iterator"
 )
 
 const (
@@ -39,6 +40,8 @@ const (
 	testVideoFileName        = "ChromeCast.mp4"
 	testOverlayImageFileName = "overlay.jpg"
 	preset                   = "preset/web-hd"
+	smallSpriteSheetFileName = "small-sprite-sheet0000000000.jpeg"
+	largeSpriteSheetFileName = "large-sprite-sheet0000000000.jpeg"
 )
 
 // To run the tests, do the following:
@@ -63,6 +66,10 @@ func TestJobTemplatesAndJobs(t *testing.T) {
 	outputURIForAdHoc := "gs://" + bucketName + "/test-output-adhoc/"
 	outputURIForStaticOverlay := "gs://" + bucketName + "/test-output-static-overlay/"
 	outputURIForAnimatedOverlay := "gs://" + bucketName + "/test-output-animated-overlay/"
+	outputDirForSetNumberSpritesheet := "test-output-set-number-spritesheet/"
+	outputURIForSetNumberSpritesheet := "gs://" + bucketName + "/" + outputDirForSetNumberSpritesheet
+	outputDirForPeriodicSpritesheet := "test-output-periodic-spritesheet/"
+	outputURIForPeriodicSpritesheet := "gs://" + bucketName + "/" + outputDirForPeriodicSpritesheet
 
 	// Get the project number
 	cloudresourcemanagerClient, err := cloudresourcemanager.NewService(ctx)
@@ -89,6 +96,18 @@ func TestJobTemplatesAndJobs(t *testing.T) {
 	t.Logf("\ntestJobWithStaticOverlay() completed\n")
 	testJobWithAnimatedOverlay(t, projectNumber, inputURI, inputOverlayImageURI, outputURIForAnimatedOverlay)
 	t.Logf("\ntestJobWithAnimatedOverlay() completed\n")
+
+	testJobWithSetNumberImagesSpritesheet(t, projectNumber, inputURI, outputURIForSetNumberSpritesheet)
+	t.Logf("\ntestJobWithSetNumberImagesSpritesheet() completed\n")
+	// Check if the spritesheets exist.
+	checkGCSFileExists(t, bucketName, outputDirForSetNumberSpritesheet+smallSpriteSheetFileName)
+	checkGCSFileExists(t, bucketName, outputDirForSetNumberSpritesheet+largeSpriteSheetFileName)
+
+	testJobWithPeriodicImagesSpritesheet(t, projectNumber, inputURI, outputURIForPeriodicSpritesheet)
+	t.Logf("\ntestJobWithPeriodicImagesSpritesheet() completed\n")
+	// Check if the spritesheets exist.
+	checkGCSFileExists(t, bucketName, outputDirForPeriodicSpritesheet+smallSpriteSheetFileName)
+	checkGCSFileExists(t, bucketName, outputDirForPeriodicSpritesheet+largeSpriteSheetFileName)
 }
 
 // testJobTemplates tests major operations on job templates. Create, get,
@@ -178,6 +197,33 @@ func writeTestGCSFile(t *testing.T, dstBucket string, srcBucket string, srcObjec
 	if _, err := dst.CopierFrom(src).Run(ctx); err != nil {
 		t.Fatalf("Object(%q).CopierFrom(%q).Run: %v", dstObject, srcObject, err)
 	}
+}
+
+func checkGCSFileExists(t *testing.T, bucketName string, fileName string) {
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
+
+	it := client.Bucket(bucketName).Objects(ctx, nil)
+	for {
+		attrs, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			t.Fatalf("Bucket(%q).Objects: %v", bucketName, err)
+		}
+		if fileName == attrs.Name {
+			return
+		}
+	}
+	t.Fatalf("Spritesheet %q does not exist in bucket %q: %v", fileName, bucketName, err)
 }
 
 // testJobFromPreset tests major operations on a job created from a preset. It
@@ -424,6 +470,110 @@ func testJobWithAnimatedOverlay(t *testing.T, projectNumber string, inputURI str
 
 	if !strings.Contains(got, jobName) {
 		t.Errorf("testJobWithAnimatedOverlay got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobName)
+	}
+	strSlice := strings.Split(got, "/")
+	jobID = strSlice[len(strSlice)-1]
+
+	// Get the job.
+	testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
+		jobName := fmt.Sprintf("projects/%s/locations/%s/jobs/%s", projectNumber, location, jobID)
+		if err := getJob(buf, tc.ProjectID, location, jobID); err != nil {
+			r.Errorf("getJob got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, jobName) {
+			r.Errorf("getJob got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobName)
+		}
+	})
+
+	// Get the job state (should be succeeded).
+	testutil.Retry(t, 10, 60*time.Second, func(r *testutil.R) {
+		if err := getJobState(buf, tc.ProjectID, location, jobID); err != nil {
+			r.Errorf("getJobState got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, jobSucceededState) {
+			r.Errorf("getJobState got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobSucceededState)
+		}
+	})
+
+	// Delete the job.
+	testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
+		if err := deleteJob(buf, tc.ProjectID, location, jobID); err != nil {
+			r.Errorf("deleteJob got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, deleteJobReponse) {
+			r.Errorf("deleteJob got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, deleteJobReponse)
+		}
+	})
+}
+
+// testJobWithSetNumberImagesSpritesheet tests major operations on a job created from an ad-hoc configuration that
+// generates two spritesheets. It will wait until the job successfully completes as part of the test.
+func testJobWithSetNumberImagesSpritesheet(t *testing.T, projectNumber string, inputURI string, outputURIForSetNumberSpritesheet string) {
+	tc := testutil.SystemTest(t)
+	buf := &bytes.Buffer{}
+	jobID := ""
+
+	// Create the job.
+	jobName := fmt.Sprintf("projects/%s/locations/%s/jobs/", projectNumber, location)
+	if err := createJobWithSetNumberImagesSpritesheet(buf, tc.ProjectID, location, inputURI, outputURIForSetNumberSpritesheet); err != nil {
+		t.Errorf("createJobWithSetNumberImagesSpritesheet got err: %v", err)
+	}
+	got := buf.String()
+
+	if !strings.Contains(got, jobName) {
+		t.Errorf("createJobWithSetNumberImagesSpritesheet got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobName)
+	}
+	strSlice := strings.Split(got, "/")
+	jobID = strSlice[len(strSlice)-1]
+
+	// Get the job.
+	testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
+		jobName := fmt.Sprintf("projects/%s/locations/%s/jobs/%s", projectNumber, location, jobID)
+		if err := getJob(buf, tc.ProjectID, location, jobID); err != nil {
+			r.Errorf("getJob got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, jobName) {
+			r.Errorf("getJob got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobName)
+		}
+	})
+
+	// Get the job state (should be succeeded).
+	testutil.Retry(t, 10, 60*time.Second, func(r *testutil.R) {
+		if err := getJobState(buf, tc.ProjectID, location, jobID); err != nil {
+			r.Errorf("getJobState got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, jobSucceededState) {
+			r.Errorf("getJobState got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobSucceededState)
+		}
+	})
+
+	// Delete the job.
+	testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
+		if err := deleteJob(buf, tc.ProjectID, location, jobID); err != nil {
+			r.Errorf("deleteJob got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, deleteJobReponse) {
+			r.Errorf("deleteJob got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, deleteJobReponse)
+		}
+	})
+}
+
+// testJobWithPeriodicImagesSpritesheet tests major operations on a job created from an ad-hoc configuration that
+// generates two spritesheets. It will wait until the job successfully completes as part of the test.
+func testJobWithPeriodicImagesSpritesheet(t *testing.T, projectNumber string, inputURI string, outputURIForPeriodicSpritesheet string) {
+	tc := testutil.SystemTest(t)
+	buf := &bytes.Buffer{}
+	jobID := ""
+
+	// Create the job.
+	jobName := fmt.Sprintf("projects/%s/locations/%s/jobs/", projectNumber, location)
+	if err := createJobWithPeriodicImagesSpritesheet(buf, tc.ProjectID, location, inputURI, outputURIForPeriodicSpritesheet); err != nil {
+		t.Errorf("createJobWithPeriodicImagesSpritesheet got err: %v", err)
+	}
+	got := buf.String()
+
+	if !strings.Contains(got, jobName) {
+		t.Errorf("createJobWithPeriodicImagesSpritesheet got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobName)
 	}
 	strSlice := strings.Split(got, "/")
 	jobID = strSlice[len(strSlice)-1]
