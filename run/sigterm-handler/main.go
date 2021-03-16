@@ -17,22 +17,17 @@ package main
 
 import (
 	"context"
-	"cancel"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
+// [START cloudrun_sigterm_handler]
 func main() {
-	ctx, cancel := context.WithCancel(context.Background())
-	go signalHandler(cancel)
-
-	log.Print("starting server...")
-	http.HandleFunc("/", handler)
-
 	// Determine port for HTTP service.
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -40,21 +35,43 @@ func main() {
 		log.Printf("defaulting to port %s", port)
 	}
 
-	// Start HTTP server.
-	log.Printf("listening on port %s", port)
-	if err := http.ListenAndServe(":"+port, nil); err != nil {
-		log.Fatal(err)
+	srv := &http.Server{
+		Addr:    ":"+port,
+		Handler: http.HandlerFunc(handler),
 	}
-}
 
-// [START cloudrun_sigterm_handler]
-func signalHandler(cancel context.CancelFunc) {
+	// Create channel to listen for signals
 	signalChan := make(chan os.Signal, 1)
+	// SIGINT handles Ctrl+C locally
+	// SIGTERM handles Cloud Run termination signal
 	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
 
+	// Start HTTP server.
+	go func() {
+		log.Printf("listening on port %s", port)
+		if err := srv.ListenAndServe(); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	// Receive output from signalChan
 	sig := <-signalChan
-	log.Printf("%s signal caught.", sig)
-	cancel()
+	log.Printf("%s signal caught", sig)
+	log.Print("server stopped")
+
+	// Timeout if waiting for connections to return idle
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+
+	defer func() {
+		// Add extra handling here to close any DB connections, redis, or flush logs
+		cancel() // Release resources 
+	}()
+
+	// Gracefully shutdown the server
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatalf("server shutdown failed:%+v", err)
+	}
+	log.Print("server exited")
 }
 
 // [END cloudrun_sigterm_handler]
