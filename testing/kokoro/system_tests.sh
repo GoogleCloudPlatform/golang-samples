@@ -206,6 +206,10 @@ goVersionShouldSkip() {
   go list -f "{{context.ReleaseTags}}" | grep -q -v "go$modVersion\b"
 }
 
+if [[ $RUN_ALL_TESTS = "1" ]] || [[ $CHANGED_DIRS =~ "run" ]]; then
+  gcloud components install beta --quiet
+fi
+
 if [[ $RUN_ALL_TESTS = "1" ]]; then
   echo "Running all tests"
   # shellcheck disable=SC2044
