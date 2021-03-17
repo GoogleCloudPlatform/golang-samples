@@ -36,7 +36,7 @@ func TestMain(m *testing.M) {
 
 	if os.Getenv("GOLANG_SAMPLES_PROJECT_ID") == "" {
 		log.Println("Stopping test execution: GOLANG_SAMPLES_PROJECT_ID not set")
-		os.Exit(1)
+		os.Exit(0)
 	}
 
 	retn, err := setupAndRun(m)
