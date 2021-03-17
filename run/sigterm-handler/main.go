@@ -49,7 +49,7 @@ func main() {
 	// Start HTTP server.
 	go func() {
 		log.Printf("listening on port %s", port)
-		if err := srv.ListenAndServe(); err != nil {
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatal(err)
 		}
 	}()
@@ -67,7 +67,7 @@ func main() {
 		cancel() // Release resources
 	}()
 
-	// Gracefully shutdown the server
+	// Gracefully shutdown the server by waiting on existing requests (except websockets)
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatalf("server shutdown failed:%+v", err)
 	}
