@@ -29,11 +29,12 @@ import (
 )
 
 func createBackupWithCustomerManagedEncryptionKey(w io.Writer, db, backupID, kmsKeyName string) error {
+	// kmsKeyName = `projects/<project>/locations/<location>/keyRings/<key_ring>/cryptoKeys/<kms_key_name>`
 	matches := regexp.MustCompile("^(.+)/databases/(.+)$").FindStringSubmatch(db)
 	if matches == nil || len(matches) != 3 {
 		return fmt.Errorf("createBackupWithCustomerManagedEncryptionKey: invalid database id %q", db)
 	}
-	parent := matches[1]
+	instanceName := matches[1]
 
 	ctx := context.Background()
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
@@ -45,7 +46,7 @@ func createBackupWithCustomerManagedEncryptionKey(w io.Writer, db, backupID, kms
 	expireTime := time.Now().AddDate(0, 0, 14)
 	// Create a backup for a database using a Customer Managed Encryption Key
 	req := adminpb.CreateBackupRequest{
-		Parent:   parent,
+		Parent:   instanceName,
 		BackupId: backupID,
 		Backup: &adminpb.Backup{
 			Database:   db,

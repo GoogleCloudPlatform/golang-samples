@@ -26,11 +26,12 @@ import (
 )
 
 func createDatabaseWithCustomerManagedEncryptionKey(w io.Writer, db, kmsKeyName string) error {
+	// kmsKeyName = `projects/<project>/locations/<location>/keyRings/<key_ring>/cryptoKeys/<kms_key_name>`
 	matches := regexp.MustCompile("^(.+)/databases/(.+)$").FindStringSubmatch(db)
 	if matches == nil || len(matches) != 3 {
 		return fmt.Errorf("createDatabaseWithCustomerManagedEncryptionKey: invalid database id %q", db)
 	}
-	parent := matches[1]
+	instanceName := matches[1]
 	databaseId := matches[2]
 
 	ctx := context.Background()
@@ -42,7 +43,7 @@ func createDatabaseWithCustomerManagedEncryptionKey(w io.Writer, db, kmsKeyName 
 
 	// Create a database with tables using a Customer Managed Encryption Key
 	req := adminpb.CreateDatabaseRequest{
-		Parent:          parent,
+		Parent:          instanceName,
 		CreateStatement: "CREATE DATABASE `" + databaseId + "`",
 		ExtraStatements: []string{
 			`CREATE TABLE Singers (
