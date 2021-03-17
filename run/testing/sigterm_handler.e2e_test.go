@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -32,12 +33,13 @@ import (
 func TestSigtermHandlerService(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 
+	runID := time.Now().Format("20060102-150405")
 	service := cloudrunci.NewService("sigterm-handler", tc.ProjectID)
 	service.Dir = "../sigterm-handler"
 	if err := service.Deploy(); err != nil {
 		t.Fatalf("service.Deploy %q: %v", service.Name, err)
 	}
-	defer GetLogEntries(service, t)
+	defer GetLogEntries(service, runID, t)
 	defer service.Clean()
 
 	requestPath := "/"
@@ -59,25 +61,26 @@ func TestSigtermHandlerService(t *testing.T) {
 	}
 }
 
-func GetLogEntries(service *cloudrunci.Service, t *testing.T) {
+func GetLogEntries(service *cloudrunci.Service, runID string, t *testing.T) {
 	ctx := context.Background()
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	client, err := logadmin.NewClient(ctx, projectID)
 	if err != nil {
-		//FAIL?
 		t.Fatalf("Failed to create client: %v", err)
 	}
 	defer client.Close()
 
+	// Create service and timestamp filters
 	fiveMinAgo := time.Now().Add(-5 * time.Minute)
 	timeFormat := fiveMinAgo.Format(time.RFC3339)
-	filter := fmt.Sprintf(`resource.labels.service_name="%s" timestamp>="%s"`, service.Name, timeFormat)
+	filter := fmt.Sprintf(`resource.labels.service_name="%s" timestamp>="%s"`, fmt.Sprintf("%s-%s", service.Name, runID), timeFormat)
 	preparedFilter := fmt.Sprintf(`resource.type="cloud_run_revision" severity="default" %s  NOT protoPayload.serviceName="run.googleapis.com"`, filter)
+
+	fmt.Println("Waiting for logs...")
+	time.Sleep(1 * time.Minute)
 	MAX := 10
 	for i := 0; i < MAX; i++ {
-		fmt.Printf("get logs: %d \n", i)
-
-		time.Sleep(10 * time.Second)
+		fmt.Printf("Attempt #%d\n", i)
 		it := client.Entries(ctx, logadmin.Filter(preparedFilter))
 		for {
 			entry, err := it.Next()
@@ -85,13 +88,14 @@ func GetLogEntries(service *cloudrunci.Service, t *testing.T) {
 				break
 			}
 			if err != nil {
-				// TODO: Handle error.
+				t.Errorf("error fetching logs: %s", err)
 			}
-			fmt.Println(entry)
-			if entry.Payload == "terminated signal caught" {
-				break
+			if strings.Contains(fmt.Sprintf("%v", entry.Payload), "terminated signal caught") {
+				fmt.Print("log entry: found.")
+				return
 			}
 		}
+		time.Sleep(15 * time.Second)
 	}
-	t.Errorf("no log entries found.")
+	t.Errorf("log entry: not found.")
 }
