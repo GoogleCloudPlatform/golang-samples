@@ -63,7 +63,7 @@ func restoreBackupWithCustomerManagedEncryptionKey(w io.Writer, db, backupID, km
 	if err != nil {
 		return fmt.Errorf("restoreBackupWithCustomerManagedEncryptionKey.Wait: %v", err)
 	}
-	// Newly created database has restore information.
+	// Get the information from the newly restored database.
 	backupInfo := restoredDatabase.RestoreInfo.GetBackupInfo()
 	fmt.Fprintf(w, "Database %s restored from backup %s using encryption key %s\n",
 		backupInfo.SourceDatabase,

@@ -64,7 +64,7 @@ func createBackupWithCustomerManagedEncryptionKey(w io.Writer, db, backupID, kms
 		return fmt.Errorf("createBackupWithCustomerManagedEncryptionKey.Wait: %v", err)
 	}
 
-	// Get the name, create time, backup size and encryption key.
+	// Get the name, create time, backup size and encryption key from the backup.
 	backupCreateTime := time.Unix(backup.CreateTime.Seconds, int64(backup.CreateTime.Nanos))
 	fmt.Fprintf(w,
 		"Backup %s of size %d bytes was created at %s using encryption key %s\n",
