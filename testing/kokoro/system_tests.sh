@@ -131,7 +131,7 @@ pwd
 date
 
 export PATH="$PATH:/tmp/google-cloud-sdk/bin";
-  if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]]; then
+if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]] || [[ $CHANGED_DIRS =~ "run" ]]; then
   ./testing/kokoro/configure_gcloud.bash;
 fi
 
