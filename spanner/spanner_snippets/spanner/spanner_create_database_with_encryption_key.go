@@ -65,10 +65,11 @@ func createDatabaseWithCustomerManagedEncryptionKey(w io.Writer, db, kmsKeyName 
 	if err != nil {
 		return fmt.Errorf("createDatabaseWithCustomerManagedEncryptionKey.CreateDatabase: %v", err)
 	}
-	if _, err := op.Wait(ctx); err != nil {
+	dbObj, err := op.Wait(ctx)
+	if err != nil {
 		return fmt.Errorf("createDatabaseWithCustomerManagedEncryptionKey.Wait: %v", err)
 	}
-	fmt.Fprintf(w, "Created database [%s] using encryption key %q\n", db, kmsKeyName)
+	fmt.Fprintf(w, "Created database [%s] using encryption key %q\n", dbObj.Name, dbObj.EncryptionConfig.KmsKeyName)
 	return nil
 }
 
