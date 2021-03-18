@@ -137,7 +137,7 @@ fi
 
 
 
-if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* && -n $GOLANG_SAMPLES_GO_VET ]] || [[ $CHANGED_DIRS =~ "run" ]]; then
+if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]] || [[ $CHANGED_DIRS =~ "run" ]] && [[ -n $GOLANG_SAMPLES_GO_VET ]]; then
   echo "This test run will run end-to-end tests.";
 
   # Download and load secrets
