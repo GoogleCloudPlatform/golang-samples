@@ -57,24 +57,34 @@ func main() {
 	}
 
 	// Print publish results.
+	var publishedCount int
 	for _, r := range results {
 		// Get blocks until the result is ready.
 		id, err := r.Get(ctx)
 		if err != nil {
-			// NOTE: The publisher will terminate upon first error. Create a new
-			// publisher to republish failed messages.
-			log.Fatalf("Publish error: %v", err)
+			// NOTE: A failed PublishResult indicates that the publisher client
+			// encountered a fatal error and has permanently terminated. After the
+			// fatal error has been resolved, a new publisher client instance must be
+			// created to republish failed messages.
+			fmt.Printf("Publish error: %v\n", err)
+			continue
 		}
 
 		// Metadata decoded from the id contains the partition and offset.
 		metadata, err := pscompat.ParseMessageMetadata(id)
 		if err != nil {
-			log.Fatalf("Failed to parse %q: %v", id, err)
+			log.Fatalf("Failed to parse message metadata %q: %v", id, err)
 		}
+
 		fmt.Printf("Published: partition=%d, offset=%d\n", metadata.Partition, metadata.Offset)
+		publishedCount++
 	}
 
-	fmt.Printf("Published %d messages\n", *messageCount)
+	fmt.Printf("Published %d messages\n", publishedCount)
+
+	if err := publisher.Error(); err != nil {
+		fmt.Printf("Publisher client terminated due to error: %v\n", publisher.Error())
+	}
 }
 
 // [END pubsublite_quickstart_publisher]

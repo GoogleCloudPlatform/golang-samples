@@ -63,19 +63,24 @@ func publishWithBatchSettings(w io.Writer, projectID, zone, topicID string, mess
 	}
 
 	// Print publish results.
+	var publishedCount int
 	for _, r := range results {
 		// Get blocks until the result is ready.
 		id, err := r.Get(ctx)
 		if err != nil {
-			// NOTE: The publisher will terminate upon first error. Create a new
-			// publisher to republish failed messages.
-			return fmt.Errorf("publish error: %v", err)
+			// NOTE: A failed PublishResult indicates that the publisher client
+			// encountered a fatal error and has permanently terminated. After the
+			// fatal error has been resolved, a new publisher client instance must be
+			// created to republish failed messages.
+			fmt.Fprintf(w, "Publish error: %v\n", err)
+			continue
 		}
 		fmt.Fprintf(w, "Published: %v\n", id)
+		publishedCount++
 	}
 
-	fmt.Fprintf(w, "Published %d messages with batch settings\n", messageCount)
-	return nil
+	fmt.Fprintf(w, "Published %d messages with batch settings\n", publishedCount)
+	return publisher.Error()
 }
 
 // [END pubsublite_publish_batch]
