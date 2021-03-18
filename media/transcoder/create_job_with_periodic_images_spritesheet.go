@@ -26,8 +26,9 @@ import (
 	transcoderpb "google.golang.org/genproto/googleapis/cloud/video/transcoder/v1beta1"
 )
 
-// createJobWithPeriodicImagesSpritesheet creates a job from an ad-hoc configuration and generates two spritesheets from the input
-// video. Each spritesheet contains images that are captured periodically based on a user-defined time interval.
+// createJobWithPeriodicImagesSpritesheet creates a job from an ad-hoc configuration and generates
+// two spritesheets from the input video. Each spritesheet contains images that are captured
+// periodically based on a user-defined time interval.
 func createJobWithPeriodicImagesSpritesheet(w io.Writer, projectID string, location string, inputURI string, outputURI string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
@@ -103,8 +104,9 @@ func createJobWithPeriodicImagesSpritesheet(w io.Writer, projectID string, locat
 			},
 		},
 	}
-	// Creates the job, Jobs take a variable amount of time to run.
-	// You can query for the job state.
+	// Creates the job, Jobs take a variable amount of time to run. You can query for the job state.
+	// See https://cloud.google.com/transcoder/docs/how-to/jobs#check_job_status for more
+	// information.
 	response, err := client.CreateJob(ctx, req)
 	if err != nil {
 		return fmt.Errorf("createJobWithPeriodicImagesSpritesheet: %v", err)

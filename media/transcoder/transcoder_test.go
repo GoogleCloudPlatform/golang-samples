@@ -26,7 +26,6 @@ import (
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
-	"google.golang.org/api/iterator"
 )
 
 const (
@@ -210,18 +209,9 @@ func checkGCSFileExists(t *testing.T, bucketName string, fileName string) {
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 
-	it := client.Bucket(bucketName).Objects(ctx, nil)
-	for {
-		attrs, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			t.Fatalf("Bucket(%q).Objects: %v", bucketName, err)
-		}
-		if fileName == attrs.Name {
-			return
-		}
+	objAttrs, err := client.Bucket(bucketName).Object(fileName).Attrs(ctx)
+	if err == nil && objAttrs != nil {
+		return
 	}
 	t.Fatalf("Spritesheet %q does not exist in bucket %q: %v", fileName, bucketName, err)
 }
