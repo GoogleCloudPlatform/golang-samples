@@ -24,10 +24,13 @@ import (
 	"testing"
 
 	"cloud.google.com/go/pubsub"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestPublishMessage(t *testing.T) {
 	// TODO: Use testutil to get the project.
+	tc := testutil.SystemTest(t)
+	projectID := tc.ProjectID
 	projectID = os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
 	if projectID == "" {
 		t.Skip("Missing GOLANG_SAMPLES_PROJECT_ID.")

@@ -29,6 +29,7 @@ import (
 	"cloud.google.com/go/storage"
 	"cloud.google.com/go/translate"
 	vision "cloud.google.com/go/vision/apiv1"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"golang.org/x/text/language"
 )
 
@@ -43,7 +44,8 @@ var (
 
 func setupTests(t *testing.T) {
 	ctx := context.Background()
-	projectID = os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
+	tc := testutil.SystemTest(t)
+	projectID := tc.ProjectID
 	if projectID == "" {
 		t.Skip("GOLANG_SAMPLES_PROJECT_ID is unset")
 	}

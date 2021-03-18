@@ -20,10 +20,13 @@ import (
 	"log"
 	"os"
 	"testing"
+
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestBlurOffensiveImages(t *testing.T) {
-	projectID := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
+	tc := testutil.SystemTest(t)
+	projectID := tc.ProjectID
 	if projectID == "" {
 		t.Skip("GOLANG_SAMPLES_PROJECT_ID not set")
 	}

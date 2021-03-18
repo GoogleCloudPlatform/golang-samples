@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/firestore"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func testDB(t *testing.T, db BookDatabase) {
@@ -68,10 +69,8 @@ func TestMemoryDB(t *testing.T) {
 }
 
 func TestFirestoreDB(t *testing.T) {
-	generalProjectID := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
-	if generalProjectID == "" {
-		t.Skip("GOLANG_SAMPLES_PROJECT_ID not set")
-	}
+	tc := testutil.SystemTest(t)
+	generalProjectID := tc.ProjectID
 	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
 	if projectID == "" {
 		t.Skip("GOLANG_SAMPLES_FIRESTORE_PROJECT not set")
