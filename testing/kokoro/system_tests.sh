@@ -137,7 +137,7 @@ fi
 
 
 
-if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* && -n $GOLANG_SAMPLES_GO_VET ]]; then
+if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* && -n $GOLANG_SAMPLES_GO_VET ]] || [[ $CHANGED_DIRS =~ "run" ]]; then
   echo "This test run will run end-to-end tests.";
 
   # Download and load secrets
@@ -205,10 +205,6 @@ goVersionShouldSkip() {
 
   go list -f "{{context.ReleaseTags}}" | grep -q -v "go$modVersion\b"
 }
-
-if [[ $RUN_ALL_TESTS = "1" ]] || [[ $CHANGED_DIRS =~ "run" ]]; then
-  gcloud components install beta --quiet
-fi
 
 if [[ $RUN_ALL_TESTS = "1" ]]; then
   echo "Running all tests"
