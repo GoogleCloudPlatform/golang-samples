@@ -119,11 +119,17 @@ func TestListenChanges(t *testing.T) {
 	}); err != nil {
 		log.Fatalf("Doc.Update: %v", err)
 	}
+
 	<-c
-	want := "population:3900000"
-	if got := buf.String(); !strings.Contains(got, want) {
-		t.Errorf("listenChanges got\n----\n%s\n----\nWant to contain:\n----\n%s\n----", got, want)
-	}
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		// While the content is likely here, it is possible the update event
+		// hasn't been observed yet. Retry a few times.
+		want := "population:3900000"
+
+		if got := buf.String(); !strings.Contains(got, want) {
+			r.Errorf("listenChanges got\n----\n%s\n----\nWant to contain:\n----\n%s\n----", got, want)
+		}
+	})
 }
 
 func TestListenErrors(t *testing.T) {

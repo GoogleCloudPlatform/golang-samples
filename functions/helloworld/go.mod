@@ -2,4 +2,4 @@ module github.com/GoogleCloudPlatform/golang-samples/functions/helloworld
 
 go 1.11
 
-require cloud.google.com/go v0.78.0
+require cloud.google.com/go v0.79.0

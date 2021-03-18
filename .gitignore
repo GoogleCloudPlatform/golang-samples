@@ -31,3 +31,5 @@
 .idea/*
 
 **/sponge_log.log
+
+testing/kokoro/test-env.sh

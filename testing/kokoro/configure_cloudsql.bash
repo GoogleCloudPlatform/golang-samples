@@ -28,6 +28,10 @@ mv cloud_sql_proxy.linux.amd64 /cloud_sql_proxy
 chmod +x /cloud_sql_proxy
 mkdir /cloudsql && chmod 0777 /cloudsql
 
-/cloud_sql_proxy -instances="${MYSQL_INSTANCE}"=tcp:3306,${MYSQL_INSTANCE} -dir /cloudsql
-/cloud_sql_proxy -instances="${POSTGRES_INSTANCE}"=tcp:5432,${POSTGRES_INSTANCE} -dir /cloudsql
-/cloud_sql_proxy -instances="${SQLSERVER_INSTANCE}"=tcp:1433
+/cloud_sql_proxy -instances="${MYSQL_INSTANCE}"=tcp:3306,${MYSQL_INSTANCE} -dir /cloudsql &
+/cloud_sql_proxy -instances="${POSTGRES_INSTANCE}"=tcp:5432,${POSTGRES_INSTANCE} -dir /cloudsql &
+/cloud_sql_proxy -instances="${SQLSERVER_INSTANCE}"=tcp:1433 &
+
+# Give proxies a second to connect before moving on. If future restructuring of Golang's Kokoro
+# test suite ever means this isn't enough time, reordering or increasing the sleep is reasonable.
+sleep 5
