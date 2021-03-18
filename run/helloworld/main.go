@@ -51,6 +51,5 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello %s!\n", name)
 }
 
-
 // [END run_helloworld_service]
 // [END cloudrun_helloworld_service]
