@@ -71,6 +71,9 @@ func TestMemoryDB(t *testing.T) {
 func TestFirestoreDB(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	generalProjectID := tc.ProjectID
+	if generalProjectID == "" {
+		t.Skip("GOLANG_SAMPLES_PROJECT_ID not set")
+	}
 	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
 	if projectID == "" {
 		t.Skip("GOLANG_SAMPLES_FIRESTORE_PROJECT not set")
