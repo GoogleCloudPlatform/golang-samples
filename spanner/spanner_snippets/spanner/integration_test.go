@@ -412,6 +412,26 @@ func TestCreateDatabaseWithRetentionPeriodSample(t *testing.T) {
 	assertContains(t, out, fmt.Sprintf("Created database [%s] with version retention period %q", dbName, wantRetentionPeriod))
 }
 
+func TestCreateDatabaseWithEncryption(t *testing.T) {
+	_ = testutil.SystemTest(t)
+	dbName, cleanup := initTest(t, randomID())
+	defer cleanup()
+
+	var b bytes.Buffer
+	kmsKeyName := fmt.Sprintf(
+		"projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s",
+		os.Getenv("GOLANG_SAMPLES_PROJECT_ID"),
+		"us-central1",
+		"spanner-test-keyring",
+		"spanner-test-key",
+	)
+	if err := createDatabaseWithCustomerManagedEncryptionKey(&b, dbName, kmsKeyName); err != nil {
+		t.Errorf("failed to create database with customer managed encryption key: %v", err)
+	}
+	out := b.String()
+	assertContains(t, out, fmt.Sprintf("Created database [%s] using encryption key %q", dbName, kmsKeyName))
+}
+
 func runSample(t *testing.T, f sampleFunc, dbName, errMsg string) string {
 	var b bytes.Buffer
 	if err := f(&b, dbName); err != nil {

@@ -52,7 +52,10 @@ func createBackupWithCustomerManagedEncryptionKey(w io.Writer, db, backupID, kms
 			Database:   db,
 			ExpireTime: &pbt.Timestamp{Seconds: expireTime.Unix(), Nanos: int32(expireTime.Nanosecond())},
 		},
-		EncryptionConfig: &adminpb.CreateBackupEncryptionConfig{KmsKeyName: kmsKeyName},
+		EncryptionConfig: &adminpb.CreateBackupEncryptionConfig{
+			KmsKeyName:     kmsKeyName,
+			EncryptionType: adminpb.CreateBackupEncryptionConfig_CUSTOMER_MANAGED_ENCRYPTION,
+		},
 	}
 	op, err := adminClient.CreateBackup(ctx, &req)
 	if err != nil {
