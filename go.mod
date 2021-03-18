@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/golang-samples
 go 1.11
 
 require (
-	cloud.google.com/go v0.78.0
+	cloud.google.com/go v0.79.0
 	cloud.google.com/go/bigquery v1.14.0
 	cloud.google.com/go/bigtable v1.4.0
 	cloud.google.com/go/datastore v1.2.0
@@ -14,7 +14,7 @@ require (
 	cloud.google.com/go/spanner v1.14.0
 	cloud.google.com/go/storage v1.13.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.5
-	github.com/aws/aws-sdk-go v1.37.25
+	github.com/aws/aws-sdk-go v1.37.31
 	github.com/bmatcuk/doublestar/v2 v2.0.4
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -38,12 +38,12 @@ require (
 	github.com/tinylib/msgp v1.1.2 // indirect
 	go.opencensus.io v0.23.0
 	golang.org/x/exp v0.0.0-20210220032938-85be41e4509f
-	golang.org/x/net v0.0.0-20210226172049-e18ecbb05110
-	golang.org/x/oauth2 v0.0.0-20210220000619-9bb904979d93
+	golang.org/x/net v0.0.0-20210316092652-d523dce5a7f4
+	golang.org/x/oauth2 v0.0.0-20210313182246-cd4f82c27b84
 	golang.org/x/text v0.3.5
-	google.golang.org/api v0.40.0
+	google.golang.org/api v0.42.0
 	google.golang.org/appengine v1.6.7
-	google.golang.org/genproto v0.0.0-20210303154014-9728d6b83eeb
+	google.golang.org/genproto v0.0.0-20210315173758-2651cd453018
 	google.golang.org/grpc v1.36.0
 	google.golang.org/grpc/examples v0.0.0-20200707005602-4258d12073b4
 	google.golang.org/protobuf v1.25.0

@@ -283,6 +283,16 @@ API call (which uses `req`) is easier to understand.
 + }
 ```
 
+## Line length
+
+Generally, Go code does not have a strict line length limit. See
+[the Code Review Comments wiki](https://github.com/golang/go/wiki/CodeReviewComments#line-length).
+However, sample code is embedded on cloud.google.com and very long lines can be
+difficult to read in the embedded code viewer.
+
+Keep lines under around 100 characters, keeping in mind the general rules in the
+[wiki](https://github.com/golang/go/wiki/CodeReviewComments#line-length).
+
 ## Initialize clients and services in every sample
 
 Don't initialize one client for the entire set of samples and pass it as an

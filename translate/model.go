@@ -42,7 +42,7 @@ func translateTextWithModel(targetLanguage, text, model string) (string, error) 
 	defer client.Close()
 
 	resp, err := client.Translate(ctx, []string{text}, lang, &translate.Options{
-		Model: model, // Either "mnt" or "base".
+		Model: model, // Either "nmt" or "base".
 	})
 	if err != nil {
 		return "", fmt.Errorf("Translate: %v", err)
