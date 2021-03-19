@@ -30,6 +30,7 @@ fi
 gcloud -q components update
 gcloud -q components install app-engine-go
 gcloud -q components install beta # Install beta component needed for Cloud Run E2E tests
+gcloud -q components install alpha # Install beta component needed for Cloud Run E2E tests
 
 # Set config.
 gcloud config set disable_prompts True
