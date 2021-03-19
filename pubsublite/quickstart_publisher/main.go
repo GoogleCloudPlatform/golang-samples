@@ -26,6 +26,12 @@ import (
 	"cloud.google.com/go/pubsublite/pscompat"
 )
 
+// publishedMessage collects a published Pub/Sub message and result.
+type publishedMessage struct {
+	message *pubsub.Message
+	result  *pubsub.PublishResult
+}
+
 func main() {
 	// NOTE: Set these flags for an existing Pub/Sub Lite topic when running this
 	// sample.
@@ -48,25 +54,27 @@ func main() {
 	defer publisher.Stop()
 
 	// Publish messages. Messages are automatically batched.
-	var results []*pubsub.PublishResult
+	var published []*publishedMessage
 	for i := 0; i < *messageCount; i++ {
-		r := publisher.Publish(ctx, &pubsub.Message{
+		msg := &pubsub.Message{
 			Data: []byte(fmt.Sprintf("message-%d", i)),
-		})
-		results = append(results, r)
+		}
+		result := publisher.Publish(ctx, msg)
+		published = append(published, &publishedMessage{msg, result})
 	}
 
-	// Print publish results.
-	var publishedCount int
-	for _, r := range results {
+	// Print publish results and collect any messages that need to be republished.
+	var toRepublish []*pubsub.Message
+	for _, pm := range published {
 		// Get blocks until the result is ready.
-		id, err := r.Get(ctx)
+		id, err := pm.result.Get(ctx)
 		if err != nil {
 			// NOTE: A failed PublishResult indicates that the publisher client
 			// encountered a fatal error and has permanently terminated. After the
 			// fatal error has been resolved, a new publisher client instance must be
 			// created to republish failed messages.
 			fmt.Printf("Publish error: %v\n", err)
+			toRepublish = append(toRepublish, pm.message)
 			continue
 		}
 
@@ -75,13 +83,13 @@ func main() {
 		if err != nil {
 			log.Fatalf("Failed to parse message metadata %q: %v", id, err)
 		}
-
 		fmt.Printf("Published: partition=%d, offset=%d\n", metadata.Partition, metadata.Offset)
-		publishedCount++
 	}
 
-	fmt.Printf("Published %d messages\n", publishedCount)
+	fmt.Printf("Published %d messages\n", *messageCount-len(toRepublish))
 
+	// Print the error that caused the publisher client to terminate (if any),
+	// which may contain more context than PublishResults.
 	if err := publisher.Error(); err != nil {
 		fmt.Printf("Publisher client terminated due to error: %v\n", publisher.Error())
 	}
