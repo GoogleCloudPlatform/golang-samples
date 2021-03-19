@@ -101,8 +101,8 @@ func createJobWithSetNumberImagesSpritesheet(w io.Writer, projectID string, loca
 			},
 		},
 	}
-	// Creates the job. Jobs take a variable amount of time to run.
-	// You can query for the job state; see getJob() in get_job.go.
+	// Creates the job. Jobs take a variable amount of time to run. You can query for the job state.
+	// See https://cloud.google.com/transcoder/docs/how-to/jobs#check_job_status for more info.
 	response, err := client.CreateJob(ctx, req)
 	if err != nil {
 		return fmt.Errorf("createJobWithSetNumberImagesSpritesheet: %v", err)

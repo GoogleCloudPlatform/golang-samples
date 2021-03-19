@@ -213,7 +213,14 @@ func checkGCSFileExists(t *testing.T, bucketName string, fileName string) {
 	if err == nil && objAttrs != nil {
 		return
 	}
-	t.Fatalf("Spritesheet %q does not exist in bucket %q: %v", fileName, bucketName, err)
+	if err != nil {
+		switch err {
+		case storage.ErrObjectNotExist:
+			t.Fatalf("Spritesheet %q does not exist in bucket %q: %v", fileName, bucketName, err)
+		default:
+			t.Fatalf("Error getting bucket attrs: %v", err)
+		}
+	}
 }
 
 // testJobFromPreset tests major operations on a job created from a preset. It
