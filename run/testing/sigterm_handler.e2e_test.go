@@ -77,8 +77,9 @@ func GetLogEntries(service *cloudrunci.Service, runID string, projectID string, 
 	fmt.Println("Waiting for logs...")
 	time.Sleep(1 * time.Minute)
 	MAX := 10
-	for i := 0; i < MAX; i++ {
-		fmt.Printf("Attempt #%d: %s\n", i, preparedFilter)
+	fmt.Printf("Using log filter: %s\n", preparedFilter)
+	for i := 1; i < MAX; i++ {
+		fmt.Printf("Attempt #%d\n", i)
 		it := client.Entries(ctx, logadmin.Filter(preparedFilter))
 		for {
 			entry, err := it.Next()
@@ -88,15 +89,15 @@ func GetLogEntries(service *cloudrunci.Service, runID string, projectID string, 
 			if err != nil {
 				t.Errorf("error fetching logs: %s", err)
 			}
-			if (len(fmt.Sprintf("%v", entry.Payload)) > 0) {
-				fmt.Printf("Found log: %v", entry.Payload)
+			if len(fmt.Sprintf("%v", entry.Payload)) > 0 {
+				fmt.Printf("Found log: %v\n", entry.Payload)
 			}
 			if strings.Contains(fmt.Sprintf("%v", entry.Payload), "terminated signal caught") {
-				fmt.Print("SIGTERM log entry: found.")
+				fmt.Println("SIGTERM log entry: found.")
 				return
 			}
 		}
 		time.Sleep(15 * time.Second)
 	}
-	t.Errorf("SIGTERM log entry: not found.")
+	t.Error("SIGTERM log entry: not found.")
 }
