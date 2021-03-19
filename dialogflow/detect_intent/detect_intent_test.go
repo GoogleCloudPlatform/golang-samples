@@ -25,90 +25,74 @@ import (
 func TestDetectIntentText(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	projectID := tc.ProjectID
-
 	sessionID := fmt.Sprintf("golang-samples-test-session-%v", time.Now())
-
 	text := "I'd like to book a room"
-
 	languageCode := "en-US"
 
-	_, err := DetectIntentText(projectID, sessionID, text, languageCode)
-
-	if err != nil {
-		t.Error(err)
-	}
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		_, err := DetectIntentText(tc.ProjectID, sessionID, text, languageCode)
+		if err != nil {
+			r.Errorf("DetectIntentText: %v", err)
+		}
+	})
 }
 
 func TestDetectIntentAudio(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	projectID := tc.ProjectID
-
 	sessionID := fmt.Sprintf("golang-samples-test-session-%v", time.Now())
-
 	audioFile := "../resources/book_a_room.wav"
-
 	languageCode := "en-US"
 
-	_, err := DetectIntentAudio(projectID, sessionID, audioFile, languageCode)
-
-	if err != nil {
-		t.Error(err)
-	}
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		_, err := DetectIntentAudio(tc.ProjectID, sessionID, audioFile, languageCode)
+		if err != nil {
+			r.Errorf("DetectIntentAudio: %v", err)
+		}
+	})
 }
 
 func TestDetectIntentAudioWithNonexistentFile(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	projectID := tc.ProjectID
-
 	sessionID := fmt.Sprintf("golang-samples-test-session-%v", time.Now())
-
 	audioFile := "./this-file-should-not-exist.wav"
-
 	languageCode := "en-US"
 
-	_, err := DetectIntentAudio(projectID, sessionID, audioFile, languageCode)
-
-	if err == nil {
-		t.Error("Expected due to non-existent file")
-	}
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		_, err := DetectIntentAudio(tc.ProjectID, sessionID, audioFile, languageCode)
+		if err == nil {
+			r.Errorf("DetectIntentAudio expected error due to non-existent file")
+		}
+	})
 }
 
 func TestDetectIntentStream(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	projectID := tc.ProjectID
-
 	sessionID := fmt.Sprintf("golang-samples-test-session-%v", time.Now())
-
 	audioFile := "../resources/book_a_room.wav"
-
 	languageCode := "en-US"
 
-	_, err := DetectIntentAudio(projectID, sessionID, audioFile, languageCode)
-
-	if err != nil {
-		t.Error(err)
-	}
-
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		_, err := DetectIntentAudio(tc.ProjectID, sessionID, audioFile, languageCode)
+		if err != nil {
+			r.Errorf("DetectIntentAudio: %v", err)
+		}
+	})
 }
 
 func TestDetectIntentStreamWithNonexistentFile(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	projectID := tc.ProjectID
-
 	sessionID := fmt.Sprintf("golang-samples-test-session-%v", time.Now())
-
 	audioFile := "./this-file-should-not-exist.wav"
-
 	languageCode := "en-US"
 
-	_, err := DetectIntentStream(projectID, sessionID, audioFile, languageCode)
-
-	if err == nil {
-		t.Error("Expected due to non-existent file")
-	}
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		_, err := DetectIntentStream(tc.ProjectID, sessionID, audioFile, languageCode)
+		if err == nil {
+			r.Errorf("DetectIntentStream expected error due to non-existent file")
+		}
+	})
 }
