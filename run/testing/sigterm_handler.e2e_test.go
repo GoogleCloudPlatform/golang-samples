@@ -18,7 +18,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -39,7 +38,7 @@ func TestSigtermHandlerService(t *testing.T) {
 	if err := service.Deploy(); err != nil {
 		t.Fatalf("service.Deploy %q: %v", service.Name, err)
 	}
-	defer GetLogEntries(service, runID, t)
+	defer GetLogEntries(service, runID, tc.ProjectID, t)
 	defer service.Clean()
 
 	requestPath := "/"
@@ -61,9 +60,8 @@ func TestSigtermHandlerService(t *testing.T) {
 	}
 }
 
-func GetLogEntries(service *cloudrunci.Service, runID string, t *testing.T) {
+func GetLogEntries(service *cloudrunci.Service, runID string, projectID string, t *testing.T) {
 	ctx := context.Background()
-	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	client, err := logadmin.NewClient(ctx, projectID)
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
