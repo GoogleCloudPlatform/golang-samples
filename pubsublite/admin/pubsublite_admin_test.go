@@ -34,9 +34,8 @@ import (
 )
 
 const (
-	topic      = "test-topic-"
-	sub        = "test-sub-"
-	testRegion = "us-central1"
+	resourcePrefix = "admin-test-"
+	testRegion     = "us-central1"
 )
 
 var (
@@ -71,7 +70,7 @@ func setupAdmin(t *testing.T) *pubsublite.AdminClient {
 
 		projNumber = strconv.FormatInt(project.ProjectNumber, 10)
 
-		psltest.Cleanup(t, client, projNumber, supportedZones)
+		psltest.Cleanup(t, client, projNumber, resourcePrefix, supportedZones)
 	})
 
 	return client
@@ -84,7 +83,7 @@ func TestTopicAdmin(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	testZone := randomZone()
 
-	topicID := topic + uuid.NewString()
+	topicID := resourcePrefix + uuid.NewString()
 	topicPath := fmt.Sprintf("projects/%s/locations/%s/topics/%s", projNumber, testZone, topicID)
 	t.Run("CreateTopic", func(t *testing.T) {
 		buf := new(bytes.Buffer)
@@ -106,7 +105,7 @@ func TestTopicAdmin(t *testing.T) {
 			t.Fatalf("getTopic: %v", err)
 		}
 		got := buf.String()
-		want := fmt.Sprintf("Got topic: %#v\n", *defaultTopicConfig(topicPath))
+		want := fmt.Sprintf("Got topic: %#v\n", *psltest.DefaultTopicConfig(topicPath))
 		if diff := cmp.Diff(want, got); diff != "" {
 			t.Fatalf("getTopic() mismatch: -want, +got:\n%s", diff)
 		}
@@ -161,10 +160,10 @@ func TestListTopics(t *testing.T) {
 
 	var topicPaths []string
 	for i := 0; i < 3; i++ {
-		topicID := topic + uuid.NewString()
+		topicID := resourcePrefix + uuid.NewString()
 		topicPath := fmt.Sprintf("projects/%s/locations/%s/topics/%s", projNumber, testZone, topicID)
 		topicPaths = append(topicPaths, topicPath)
-		mustCreateTopic(ctx, t, client, topicPath)
+		psltest.MustCreateTopic(ctx, t, client, topicPath)
 	}
 
 	buf := new(bytes.Buffer)
@@ -184,28 +183,6 @@ func TestListTopics(t *testing.T) {
 	}
 }
 
-func mustCreateTopic(ctx context.Context, t *testing.T, client *pubsublite.AdminClient, topicPath string) *pubsublite.TopicConfig {
-	t.Helper()
-	cfg := defaultTopicConfig(topicPath)
-	topicConfig, err := client.CreateTopic(ctx, *cfg)
-	if err != nil {
-		t.Fatalf("AdminClient.CreateTopic got err: %v", err)
-	}
-	return topicConfig
-}
-
-func defaultTopicConfig(topicPath string) *pubsublite.TopicConfig {
-	cfg := &pubsublite.TopicConfig{
-		Name:                       topicPath,
-		PartitionCount:             2,
-		PublishCapacityMiBPerSec:   4,
-		SubscribeCapacityMiBPerSec: 8,
-		PerPartitionBytes:          30 * 1024 * 1024 * 1024, // 30 GiB
-		RetentionDuration:          pubsublite.InfiniteRetention,
-	}
-	return cfg
-}
-
 func TestSubscriptionAdmin(t *testing.T) {
 	t.Parallel()
 	client := setupAdmin(t)
@@ -214,12 +191,12 @@ func TestSubscriptionAdmin(t *testing.T) {
 	ctx := context.Background()
 	testZone := randomZone()
 
-	topicID := topic + uuid.NewString()
+	topicID := resourcePrefix + uuid.NewString()
 	topicPath := fmt.Sprintf("projects/%s/locations/%s/topics/%s", projNumber, testZone, topicID)
 
-	mustCreateTopic(ctx, t, client, topicPath)
+	psltest.MustCreateTopic(ctx, t, client, topicPath)
 
-	subID := sub + uuid.NewString()
+	subID := resourcePrefix + uuid.NewString()
 	subPath := fmt.Sprintf("projects/%s/locations/%s/subscriptions/%s", projNumber, testZone, subID)
 
 	t.Run("CreateSubscription", func(t *testing.T) {
@@ -242,7 +219,7 @@ func TestSubscriptionAdmin(t *testing.T) {
 			t.Fatalf("getSubscription: %v", err)
 		}
 		got := buf.String()
-		want := fmt.Sprintf("Got subscription: %#v\n", defaultSubConfig(topicPath, subPath))
+		want := fmt.Sprintf("Got subscription: %#v\n", psltest.DefaultSubConfig(topicPath, subPath))
 		if diff := cmp.Diff(want, got); diff != "" {
 			t.Fatalf("getSubscription mismatch: -want, +got:\n%s", diff)
 		}
@@ -293,14 +270,14 @@ func TestListSubscriptions(t *testing.T) {
 	testZone := randomZone()
 
 	var subPaths []string
-	topicID := topic + uuid.NewString()
+	topicID := resourcePrefix + uuid.NewString()
 	topicPath := fmt.Sprintf("projects/%s/locations/%s/topics/%s", projNumber, testZone, topicID)
-	mustCreateTopic(ctx, t, client, topicPath)
+	psltest.MustCreateTopic(ctx, t, client, topicPath)
 
 	for i := 0; i < 3; i++ {
-		subID := sub + uuid.NewString()
+		subID := resourcePrefix + uuid.NewString()
 		subPath := fmt.Sprintf("projects/%s/locations/%s/subscriptions/%s", projNumber, testZone, subID)
-		mustCreateSubscription(ctx, t, client, topicPath, subPath)
+		psltest.MustCreateSubscription(ctx, t, client, topicPath, subPath)
 		subPaths = append(subPaths, subPath)
 	}
 
@@ -338,25 +315,6 @@ func TestListSubscriptions(t *testing.T) {
 	for _, sp := range subPaths {
 		client.DeleteSubscription(ctx, sp)
 	}
-}
-
-func mustCreateSubscription(ctx context.Context, t *testing.T, client *pubsublite.AdminClient, topicPath, subPath string) *pubsublite.SubscriptionConfig {
-	t.Helper()
-	cfg := defaultSubConfig(topicPath, subPath)
-	subConfig, err := client.CreateSubscription(ctx, *cfg)
-	if err != nil {
-		t.Fatalf("AdminClient.CreateSubscription got err: %v", err)
-	}
-	return subConfig
-}
-
-func defaultSubConfig(topicPath, subPath string) *pubsublite.SubscriptionConfig {
-	cfg := &pubsublite.SubscriptionConfig{
-		Name:                subPath,
-		Topic:               topicPath,
-		DeliveryRequirement: pubsublite.DeliverImmediately,
-	}
-	return cfg
 }
 
 func randomZone() string {
