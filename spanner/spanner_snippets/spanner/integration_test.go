@@ -415,18 +415,24 @@ func TestCreateDatabaseWithRetentionPeriodSample(t *testing.T) {
 	assertContains(t, out, fmt.Sprintf("Created database [%s] with version retention period %q", dbName, wantRetentionPeriod))
 }
 
-func TestCreateDatabaseWithEncryption(t *testing.T) {
+func TestCustomerManagedEncryptionKeys(t *testing.T) {
 	_ = testutil.SystemTest(t)
 	dbName, cleanup := initTest(t, randomID())
 	defer cleanup()
+	adminClient, err := database.NewDatabaseAdminClient(context.Background())
+	if err != nil {
+		t.Errorf("failed to create admin client: %v", err)
+	}
 
 	var b bytes.Buffer
 
 	projectId := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
+	instanceName := getInstance(t)
 	locationId := "us-central1"
 	keyRingId := "spanner-test-keyring"
 	keyId := "spanner-test-key"
 
+	// Create an encryption key if it does not already exist.
 	if err := maybeCreateKey(projectId, locationId, keyRingId, keyId); err != nil {
 		t.Errorf("failed to create encryption key: %v", err)
 	}
@@ -437,11 +443,43 @@ func TestCreateDatabaseWithEncryption(t *testing.T) {
 		keyRingId,
 		keyId,
 	)
+
+	// Create an encrypted database. The database is automatically deleted by the cleanup function.
 	if err := createDatabaseWithCustomerManagedEncryptionKey(&b, dbName, kmsKeyName); err != nil {
 		t.Errorf("failed to create database with customer managed encryption key: %v", err)
 	}
 	out := b.String()
 	assertContains(t, out, fmt.Sprintf("Created database [%s] using encryption key %q", dbName, kmsKeyName))
+
+	// Try to create a backup of the encrypted database and delete it after the test.
+	backupId := fmt.Sprintf("enc-backup-%s", randomID())
+	defer func() {
+		_ = adminClient.DeleteBackup(context.Background(), &adminpb.DeleteBackupRequest{
+			Name: fmt.Sprintf("%s/backups/%s", instanceName, backupId),
+		})
+	}()
+	b = bytes.Buffer{}
+	if err := createBackupWithCustomerManagedEncryptionKey(&b, dbName, backupId, kmsKeyName); err != nil {
+		t.Errorf("failed to create backup with customer managed encryption key: %v", err)
+	}
+	out = b.String()
+	assertContains(t, out, fmt.Sprintf("backups/%s", backupId))
+	assertContains(t, out, fmt.Sprintf("using encryption key %s", kmsKeyName))
+
+	// Try to restore the encrypted database and delete the restored database after the test.
+	restoredName := fmt.Sprintf("%s/databases/rest-enc-%s", instanceName, randomID())
+	defer func() {
+		_ = adminClient.DropDatabase(context.Background(), &adminpb.DropDatabaseRequest{
+			Database: restoredName,
+		})
+	}()
+	b = bytes.Buffer{}
+	if err := restoreBackupWithCustomerManagedEncryptionKey(&b, restoredName, backupId, kmsKeyName); err != nil {
+		t.Errorf("failed to restore database with customer managed encryption key: %v", err)
+	}
+	out = b.String()
+	assertContains(t, out, fmt.Sprintf("Database %s restored", dbName))
+	assertContains(t, out, fmt.Sprintf("using encryption key %s", kmsKeyName))
 }
 
 func maybeCreateKey(projectId, locationId, keyRingId, keyId string) error {
