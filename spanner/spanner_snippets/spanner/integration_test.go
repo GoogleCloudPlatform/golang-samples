@@ -474,7 +474,7 @@ func TestCustomerManagedEncryptionKeys(t *testing.T) {
 		})
 	}()
 	restoreFunc := func(w io.Writer, dbName, backupID string) error {
-		return restoreBackupWithCustomerManagedEncryptionKey(&b, dbName, backupId, kmsKeyName)
+		return restoreBackupWithCustomerManagedEncryptionKey(w, dbName, backupId, kmsKeyName)
 	}
 	out = runBackupSampleWithRetry(t, restoreFunc, restoredName, backupId, "failed to restore database with customer managed encryption key", 10)
 	assertContains(t, out, fmt.Sprintf("Database %s restored", dbName))
