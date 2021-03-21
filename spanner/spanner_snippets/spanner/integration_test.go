@@ -547,7 +547,7 @@ func runBackupSampleWithRetry(t *testing.T, f backupSampleFunc, dbName, backupID
 	testutil.Retry(t, maxAttempts, time.Minute, func(r *testutil.R) {
 		b.Reset()
 		if err := f(&b, dbName, backupID); err != nil {
-			if spanner.ErrCode(err) == codes.InvalidArgument && strings.Contains(err.Error(), "Please retry the operation once the pending restores complete") {
+			if spanner.ErrCode(err) == codes.FailedPrecondition && strings.Contains(err.Error(), "Please retry the operation once the pending restores complete") {
 				r.Errorf("%s: %v", errMsg, err)
 			} else {
 				t.Fatalf("%s: %v", errMsg, err)
