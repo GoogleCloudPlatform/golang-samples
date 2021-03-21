@@ -26,15 +26,18 @@ import (
 	"testing"
 	"time"
 
+	kms "cloud.google.com/go/kms/apiv1"
 	"cloud.google.com/go/spanner"
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
 	instance "cloud.google.com/go/spanner/admin/instance/apiv1"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
 	"google.golang.org/api/iterator"
+	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 	instancepb "google.golang.org/genproto/googleapis/spanner/admin/instance/v1"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type sampleFunc func(w io.Writer, dbName string) error
@@ -418,18 +421,64 @@ func TestCreateDatabaseWithEncryption(t *testing.T) {
 	defer cleanup()
 
 	var b bytes.Buffer
+
+	projectId := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
+	locationId := "us-central1"
+	keyRingId := "spanner-test-keyring"
+	keyId := "spanner-test-key"
+
+	if err := maybeCreateKey(projectId, locationId, keyRingId, keyId); err != nil {
+		t.Errorf("failed to create encryption key: %v", err)
+	}
 	kmsKeyName := fmt.Sprintf(
 		"projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s",
-		os.Getenv("GOLANG_SAMPLES_PROJECT_ID"),
-		"us-central1",
-		"spanner-test-keyring",
-		"spanner-test-key",
+		projectId,
+		locationId,
+		keyRingId,
+		keyId,
 	)
 	if err := createDatabaseWithCustomerManagedEncryptionKey(&b, dbName, kmsKeyName); err != nil {
 		t.Errorf("failed to create database with customer managed encryption key: %v", err)
 	}
 	out := b.String()
 	assertContains(t, out, fmt.Sprintf("Created database [%s] using encryption key %q", dbName, kmsKeyName))
+}
+
+func maybeCreateKey(projectId, locationId, keyRingId, keyId string) error {
+	client, err := kms.NewKeyManagementClient(context.Background())
+	if err != nil {
+		return err
+	}
+
+	// Try to create a key ring
+	createKeyRingRequest := kmspb.CreateKeyRingRequest{
+		Parent:    fmt.Sprintf("projects/%s/locations/%s", projectId, locationId),
+		KeyRingId: keyRingId,
+		KeyRing:   &kmspb.KeyRing{},
+	}
+	_, err = client.CreateKeyRing(context.Background(), &createKeyRingRequest)
+	if err != nil {
+		if status, ok := status.FromError(err); !ok || status.Code() != codes.AlreadyExists {
+			return err
+		}
+	}
+
+	// Try to create a key
+	createKeyRequest := kmspb.CreateCryptoKeyRequest{
+		Parent:      fmt.Sprintf("projects/%s/locations/%s/keyRings/%s", projectId, locationId, keyRingId),
+		CryptoKeyId: keyId,
+		CryptoKey: &kmspb.CryptoKey{
+			Purpose: kmspb.CryptoKey_ENCRYPT_DECRYPT,
+		},
+	}
+	_, err = client.CreateCryptoKey(context.Background(), &createKeyRequest)
+	if err != nil {
+		if status, ok := status.FromError(err); !ok || status.Code() != codes.AlreadyExists {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func runSample(t *testing.T, f sampleFunc, dbName, errMsg string) string {
