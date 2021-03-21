@@ -473,11 +473,10 @@ func TestCustomerManagedEncryptionKeys(t *testing.T) {
 			Database: restoredName,
 		})
 	}()
-	b = bytes.Buffer{}
-	if err := restoreBackupWithCustomerManagedEncryptionKey(&b, restoredName, backupId, kmsKeyName); err != nil {
-		t.Errorf("failed to restore database with customer managed encryption key: %v", err)
+	restoreFunc := func(w io.Writer, dbName, backupID string) error {
+		return restoreBackupWithCustomerManagedEncryptionKey(&b, dbName, backupId, kmsKeyName)
 	}
-	out = b.String()
+	out = runBackupSampleWithRetry(t, restoreFunc, restoredName, backupId, "failed to restore database with customer managed encryption key", 10)
 	assertContains(t, out, fmt.Sprintf("Database %s restored", dbName))
 	assertContains(t, out, fmt.Sprintf("using encryption key %s", kmsKeyName))
 }
