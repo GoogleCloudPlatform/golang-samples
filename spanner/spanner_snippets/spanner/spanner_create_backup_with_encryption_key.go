@@ -74,7 +74,7 @@ func createBackupWithCustomerManagedEncryptionKey(w io.Writer, db, backupID, kms
 		backup.Name,
 		backup.SizeBytes,
 		backupCreateTime.Format(time.RFC3339),
-		kmsKeyName)
+		backup.EncryptionInfo.KmsKeyVersion)
 	return nil
 }
 
