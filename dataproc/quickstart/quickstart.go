@@ -65,11 +65,11 @@ func main() {
 			Config: &dataprocpb.ClusterConfig{
 				MasterConfig: &dataprocpb.InstanceGroupConfig{
 					NumInstances:   1,
-					MachineTypeUri: "n1-standard-1",
+					MachineTypeUri: "n1-standard-2",
 				},
 				WorkerConfig: &dataprocpb.InstanceGroupConfig{
 					NumInstances:   2,
-					MachineTypeUri: "n1-standard-1",
+					MachineTypeUri: "n1-standard-2",
 				},
 			},
 		},

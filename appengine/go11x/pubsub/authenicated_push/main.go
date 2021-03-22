@@ -109,6 +109,7 @@ func (a *app) receiveMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	if payload.Issuer != "accounts.google.com" && payload.Issuer != "https://accounts.google.com" {
 		http.Error(w, "Wrong Issuer", http.StatusBadRequest)
+		return
 	}
 
 	var pr pushRequest

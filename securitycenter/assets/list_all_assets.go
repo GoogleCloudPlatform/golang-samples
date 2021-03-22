@@ -15,7 +15,6 @@
 package assets
 
 // [START securitycenter_list_all_assets]
-// [START list_all_assets]
 import (
 	"context"
 	"fmt"
@@ -62,5 +61,4 @@ func listAllAssets(w io.Writer, orgID string) error {
 	return nil
 }
 
-// [END list_all_assets]
 // [END securitycenter_list_all_assets]

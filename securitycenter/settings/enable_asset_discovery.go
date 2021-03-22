@@ -15,8 +15,7 @@
 // Package settings contains snippets for working with CSCC organization settings.
 package settings
 
-// [START securitycenter_get_org_settings]
-// [START get_org_settings]
+// [START securitycenter_enable_asset_discovery]
 import (
 	"context"
 	"fmt"
@@ -58,5 +57,4 @@ func enableAssetDiscovery(w io.Writer, orgID string) error {
 	return nil
 }
 
-// [END get_org_settings]
-// [END securitycenter_get_org_settings]
+// [END securitycenter_enable_asset_discovery]

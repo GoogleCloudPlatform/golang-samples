@@ -3,11 +3,19 @@ assign_issues_by:
   - 'api: bigtable'
   - 'api: datastore'
   - 'api: firestore'
+  to:
+  - crwilcox
+- labels:
   - 'api: storage'
   to:
   - tritone
 - labels:
   - 'api: bigquery'
+  - 'api: bigqueryconnection'
+  - 'api: bigquerydatatransfer'
+  - 'api: bigqueryreservation'
+  - 'api: bigquerystorage'
+  - 'api: datacatalog'
   to:
   - shollyman
 - labels:
