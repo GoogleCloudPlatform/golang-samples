@@ -15,6 +15,7 @@ limitations under the License.
 */
 package main
 
+// [START monitoring_sli_metrics_opencensus_setup]
 import (
 	"context"
 	"flag"
@@ -31,6 +32,8 @@ import (
 	"golang.org/x/exp/rand"
 )
 
+// [END monitoring_sli_metrics_opencensus_setup]
+// [START monitoring_sli_metrics_opencensus_measure]
 // set up metrics
 var (
 	requestCount       = stats.Int64("oc_request_count", "total request count", "requests")
@@ -38,7 +41,10 @@ var (
 	responseLatency    = stats.Float64("oc_latency_distribution", "distribution of response latencies", "s")
 )
 
+// [END monitoring_sli_metrics_opencensus_measure]
+
 // set up views
+// [START monitoring_sli_metrics_opencensus_view]
 var (
 	requestCountView = &view.View{
 		Name:        "oc_request_count",
@@ -61,6 +67,8 @@ var (
 	}
 )
 
+// [END monitoring_sli_metrics_opencensus_view]
+
 func main() {
 
 	// set up project ID
@@ -71,7 +79,7 @@ func main() {
 	if err := view.Register(requestCountView, failedRequestCountView, responseLatencyView); err != nil {
 		log.Fatalf("Failed to register the views: %v", err)
 	}
-
+	// [START monitoring_sli_metrics_opencensus_exporter]
 	// set up Cloud Monitoring exporter
 	sd, err := stackdriver.NewExporter(stackdriver.Options{
 		ProjectID:         *projectID,
@@ -85,7 +93,7 @@ func main() {
 	// Start the metrics exporter
 	sd.StartMetricsExporter()
 	defer sd.StopMetricsExporter()
-
+	// [END monitoring_sli_metrics_opencensus_exporter]
 	http.HandleFunc("/", handle)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
@@ -94,6 +102,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	// create context
 	ctx, _ := tag.New(context.Background())
 	requestReceived := time.Now()
+	// [START monitoring_sli_metrics_opencensus_counts]
 	// count the request
 	stats.Record(ctx, requestCount.M(1))
 
@@ -101,9 +110,12 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	if rand.Intn(100) > 90 {
 		// count the failed request
 		stats.Record(ctx, failedRequestCount.M(1))
+		// [END monitoring_sli_metrics_opencensus_counts]
 		fmt.Fprintf(w, "intentional error!")
 		// record latency for failure
+		// [START monitoring_sli_metrics_opencensus_latency]
 		stats.Record(ctx, responseLatency.M(time.Since(requestReceived).Seconds()))
+		// [END monitoring_sli_metrics_opencensus_latency]
 		return
 	} else {
 		delay := time.Duration(rand.Intn(1000)) * time.Millisecond
