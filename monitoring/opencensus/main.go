@@ -98,7 +98,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	stats.Record(ctx, requestCount.M(1))
 
 	// fail 10% of the time
-	if rand.Intn(100) > 90 {
+	if rand.Intn(100) > 0 {
 		// count the failed request
 		stats.Record(ctx, failedRequestCount.M(1))
 		fmt.Fprintf(w, "error!")
