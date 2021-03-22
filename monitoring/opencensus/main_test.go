@@ -19,6 +19,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -41,6 +42,8 @@ func TestStartingServer(t *testing.T) {
 	rr := httptest.NewRecorder()
 	handler := http.HandlerFunc(handle)
 	handler.ServeHTTP(rr, req)
+
+	// test response status
 	gotStatus := rr.Code
 	wantStatus := http.StatusOK
 	fmt.Print("status was: " + strconv.Itoa(gotStatus) + "\n")
@@ -48,6 +51,16 @@ func TestStartingServer(t *testing.T) {
 	if gotStatus != wantStatus {
 		t.Fatalf("Returned wrong status code: got %v want %v",
 			gotStatus, wantStatus)
+	}
+
+	// test response body
+	// acceptable responses are "intentional error!" and "succeeded after ..."
+	wantSuccess := "Succeeded after "
+	wantIntentionalError := "intentional error!"
+
+	if rr.Body.String() != wantIntentionalError && !strings.Contains(rr.Body.String(), wantSuccess) {
+		t.Fatalf("Response does not match expected: got %v",
+			rr.Body.String())
 	}
 
 }
