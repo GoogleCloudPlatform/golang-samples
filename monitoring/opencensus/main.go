@@ -98,19 +98,19 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	stats.Record(ctx, requestCount.M(1))
 
 	// fail 10% of the time
-	if rand.Intn(100) > 0 {
+	if rand.Intn(100) > 90 {
 		// count the failed request
 		stats.Record(ctx, failedRequestCount.M(1))
-		fmt.Fprintf(w, "error!")
+		fmt.Fprintf(w, "intentional error!")
 		// record latency for failure
 		stats.Record(ctx, responseLatency.M(time.Since(requestReceived).Seconds()))
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	} else {
 		delay := time.Duration(rand.Intn(1000)) * time.Millisecond
 		time.Sleep(delay)
+		fmt.Fprintf(w, "Succeeded after "+strconv.Itoa(int(delay)/1000000)+" ms")
 		// record latency for success
 		stats.Record(ctx, responseLatency.M(time.Since(requestReceived).Seconds()))
-		fmt.Fprintf(w, "Succeeded after "+strconv.Itoa(int(delay)/1000000)+" ms")
+		return
 	}
 }

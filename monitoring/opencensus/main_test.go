@@ -41,11 +41,13 @@ func TestStartingServer(t *testing.T) {
 	rr := httptest.NewRecorder()
 	handler := http.HandlerFunc(handle)
 	handler.ServeHTTP(rr, req)
-	fmt.Print("status was: " + strconv.Itoa(rr.Code))
+	gotStatus := rr.Code
+	wantStatus := http.StatusOK
+	fmt.Print("status was: " + strconv.Itoa(gotStatus) + "\n")
 
-	if status := rr.Code; status != http.StatusOK {
+	if gotStatus != wantStatus {
 		t.Fatalf("Returned wrong status code: got %v want %v",
-			status, http.StatusOK)
+			gotStatus, wantStatus)
 	}
 
 }
