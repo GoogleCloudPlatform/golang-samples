@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START eventarc_gcs_handler]
+// [START eventarc_audit_storage_handler]
 
 // Sample audit_storage is a Cloud Run service which handles Cloud Audit Log events with Cloud Storage data.
 package main
@@ -31,8 +31,8 @@ func HelloEventsStorage(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, s)
 }
 
-// [END eventarc_gcs_handler]
-// [START eventarc_gcs_server]
+// [END eventarc_audit_storage_handler]
+// [START eventarc_audit_storage_server]
 
 func main() {
 	http.HandleFunc("/", HelloEventsStorage)
@@ -48,4 +48,4 @@ func main() {
 	}
 }
 
-// [END eventarc_gcs_server]
+// [END eventarc_audit_storage_server]

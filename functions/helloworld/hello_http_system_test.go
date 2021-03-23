@@ -20,20 +20,82 @@
 package helloworld
 
 import (
+	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
+	"os/exec"
 	"strings"
 	"testing"
 	"time"
 )
 
+const RuntimeVersion = "go113"
+
+func TestMain(m *testing.M) {
+	// Only run end-to-end tests when configured to do so.
+	if os.Getenv("GOLANG_SAMPLES_E2E_TEST") == "" {
+		log.Println("Skipping end-to-end tests: GOLANG_SAMPLES_E2E_TEST not set")
+		os.Exit(m.Run())
+	}
+
+	retn, err := setupAndRun(m)
+	if err != nil {
+		log.Fatal(err)
+	}
+	os.Exit(retn)
+}
+
+func setupAndRun(m *testing.M) (int, error) {
+	entryPoint := "HelloHTTP"
+	name := entryPoint + "-" + time.Now().Format("20060102-150405")
+
+	// Setup function for tests.
+	cmd := exec.Command("gcloud", "functions", "deploy", name,
+		"--entry-point="+entryPoint,
+		"--runtime="+RuntimeVersion,
+		"--allow-unauthenticated",
+		"--trigger-http",
+	)
+	log.Printf("Running: %s %s", cmd.Path, strings.Join(cmd.Args, " "))
+	if _, err := cmd.Output(); err != nil {
+		log.Println(string(err.(*exec.ExitError).Stderr))
+		return 1, fmt.Errorf("Setup: Deploy function: %w", err)
+	}
+
+	// Tear down the deployed function.
+	defer func() {
+		cmd = exec.Command("gcloud", "functions", "delete", name)
+		log.Printf("Running: %s %s", cmd.Path, strings.Join(cmd.Args, " "))
+		if _, err := cmd.Output(); err != nil {
+			log.Println(string(err.(*exec.ExitError).Stderr))
+			log.Printf("Teardown: Delete function: %v", err)
+		}
+	}()
+
+	// Retrieve URL for tests.
+	cmd = exec.Command("gcloud", "functions", "describe", name, "--format=value(httpsTrigger.url)")
+	log.Printf("Running: %s %s", cmd.Path, strings.Join(cmd.Args, " "))
+	out, err := cmd.Output()
+	if err != nil {
+		log.Println(string(err.(*exec.ExitError).Stderr))
+		return 1, fmt.Errorf("Setup: Get function URL: %w", err)
+	}
+	if err := os.Setenv("BASE_URL", strings.TrimSpace(string(out))); err != nil {
+		return 1, fmt.Errorf("Setup: os.Setenv: %w", err)
+	}
+
+	// Run the tests.
+	return m.Run(), nil
+}
+
 func TestHelloHTTPSystem(t *testing.T) {
 	client := http.Client{
 		Timeout: 10 * time.Second,
 	}
-	urlString := os.Getenv("BASE_URL") + "/HelloHTTP"
+	urlString := os.Getenv("BASE_URL")
 	testURL, err := url.Parse(urlString)
 	if err != nil {
 		t.Fatalf("url.Parse(%q): %v", urlString, err)

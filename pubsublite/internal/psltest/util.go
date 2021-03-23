@@ -18,6 +18,7 @@ package psltest
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 
 	"cloud.google.com/go/pubsublite"
@@ -27,8 +28,11 @@ import (
 // Cleanup deletes all previous test topics/subscriptions from previous test
 // runs. This prevents previous test failures from building up resources that
 // count against quota.
-func Cleanup(t *testing.T, client *pubsublite.AdminClient, proj string, zones []string) {
+func Cleanup(t *testing.T, client *pubsublite.AdminClient, proj, namePrefix string, zones []string) {
 	ctx := context.Background()
+
+	topicSubstring := "/topics/" + namePrefix
+	subscriptionSubstring := "/subscriptions/" + namePrefix
 
 	for _, zone := range zones {
 		parent := fmt.Sprintf("projects/%s/locations/%s", proj, zone)
@@ -40,6 +44,9 @@ func Cleanup(t *testing.T, client *pubsublite.AdminClient, proj string, zones []
 			}
 			if err != nil {
 				t.Fatalf("topicIter.Next got err: %v", err)
+			}
+			if !strings.Contains(topic.Name, topicSubstring) {
+				continue
 			}
 			if err := client.DeleteTopic(ctx, topic.Name); err != nil {
 				t.Fatalf("AdminClient.DeleteTopic got err: %v", err)
@@ -55,6 +62,9 @@ func Cleanup(t *testing.T, client *pubsublite.AdminClient, proj string, zones []
 			if err != nil {
 				t.Fatalf("subIter.Next() got err: %v", err)
 			}
+			if !strings.Contains(sub.Name, subscriptionSubstring) {
+				continue
+			}
 			if err := client.DeleteSubscription(ctx, sub.Name); err != nil {
 				t.Fatalf("AdminClient.DeleteSubscription got err: %v", err)
 			}
@@ -65,7 +75,8 @@ func Cleanup(t *testing.T, client *pubsublite.AdminClient, proj string, zones []
 // MustCreateTopic creates a Pub/Sub Lite topic and fails the test if
 // unsuccessful.
 func MustCreateTopic(ctx context.Context, t *testing.T, client *pubsublite.AdminClient, topicPath string) *pubsublite.TopicConfig {
-	cfg := defaultTopicConfig(topicPath)
+	t.Helper()
+	cfg := DefaultTopicConfig(topicPath)
 	topicConfig, err := client.CreateTopic(ctx, *cfg)
 	if err != nil {
 		t.Fatalf("AdminClient.CreateTopic got err: %v", err)
@@ -73,12 +84,13 @@ func MustCreateTopic(ctx context.Context, t *testing.T, client *pubsublite.Admin
 	return topicConfig
 }
 
-func defaultTopicConfig(topicPath string) *pubsublite.TopicConfig {
+// DefaultTopicConfig returns the default topic config for tests.
+func DefaultTopicConfig(topicPath string) *pubsublite.TopicConfig {
 	cfg := &pubsublite.TopicConfig{
 		Name:                       topicPath,
 		PartitionCount:             2,
 		PublishCapacityMiBPerSec:   4,
-		SubscribeCapacityMiBPerSec: 4,
+		SubscribeCapacityMiBPerSec: 8,
 		PerPartitionBytes:          30 * 1024 * 1024 * 1024, // 30 GiB
 		RetentionDuration:          pubsublite.InfiniteRetention,
 	}
@@ -88,7 +100,8 @@ func defaultTopicConfig(topicPath string) *pubsublite.TopicConfig {
 // MustCreateSubscription creates a Pub/Sub Lite subscription and fails the test
 // if unsuccessful.
 func MustCreateSubscription(ctx context.Context, t *testing.T, client *pubsublite.AdminClient, topicPath, subPath string) *pubsublite.SubscriptionConfig {
-	cfg := defaultSubConfig(topicPath, subPath)
+	t.Helper()
+	cfg := DefaultSubConfig(topicPath, subPath)
 	subConfig, err := client.CreateSubscription(ctx, *cfg)
 	if err != nil {
 		t.Fatalf("AdminClient.CreateSubscription got err: %v", err)
@@ -96,7 +109,8 @@ func MustCreateSubscription(ctx context.Context, t *testing.T, client *pubsublit
 	return subConfig
 }
 
-func defaultSubConfig(topicPath, subPath string) *pubsublite.SubscriptionConfig {
+// DefaultSubConfig returns the default subscription config for tests.
+func DefaultSubConfig(topicPath, subPath string) *pubsublite.SubscriptionConfig {
 	cfg := &pubsublite.SubscriptionConfig{
 		Name:                subPath,
 		Topic:               topicPath,
