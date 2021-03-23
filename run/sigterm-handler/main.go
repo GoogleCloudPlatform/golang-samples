@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Sample run-helloworld is a minimal Cloud Run service.
+// Sample run-sigterm shows how to gracefully shut down in response to a SIGTERM signal.
 package main
 
 import (

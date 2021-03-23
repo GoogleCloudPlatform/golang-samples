@@ -69,13 +69,13 @@ func GetLogEntries(service *cloudrunci.Service, runID string, projectID string, 
 	defer client.Close()
 
 	// Create service and timestamp filters
-	fiveMinAgo := time.Now().Add(-5 * time.Minute)
-	timeFormat := fiveMinAgo.Format(time.RFC3339)
+	minAgo := time.Now().Add(-1 * time.Minute)
+	timeFormat := minAgo.Format(time.RFC3339)
 	filter := fmt.Sprintf(`resource.labels.service_name="%s" timestamp>="%s"`, fmt.Sprintf("%s-%s", service.Name, runID), timeFormat)
 	preparedFilter := fmt.Sprintf(`resource.type="cloud_run_revision" severity="default" %s  NOT protoPayload.serviceName="run.googleapis.com"`, filter)
 
 	fmt.Println("Waiting for logs...")
-	time.Sleep(1 * time.Minute)
+	time.Sleep(2 * time.Minute)
 	MAX := 10
 	fmt.Printf("Using log filter: %s\n", preparedFilter)
 	for i := 1; i < MAX; i++ {
