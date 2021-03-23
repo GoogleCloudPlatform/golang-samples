@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# [START eventarc_gcs_dockerfile]
+# [START eventarc_audit_storage_dockerfile]
 
 # Use the offical golang image to create a binary.
 # This is based on Debian and sets the GOPATH to /go.
@@ -48,4 +48,4 @@ COPY --from=builder /app/server /server
 # Run the web service on container startup.
 CMD ["/server"]
 
-# [END eventarc_gcs_dockerfile]
+# [END eventarc_audit_storage_dockerfile]
