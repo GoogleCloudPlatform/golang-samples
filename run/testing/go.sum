@@ -56,13 +56,8 @@ dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20201218220906-28db891af037/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
-<<<<<<< HEAD
-github.com/GoogleCloudPlatform/golang-samples/run/grpc-server-streaming v0.0.0-20210319194002-1e35cc23a955 h1:9+6yna6sfK5eYmgtMr342euvumMpDdwFy/emQPwpETk=
-github.com/GoogleCloudPlatform/golang-samples/run/grpc-server-streaming v0.0.0-20210319194002-1e35cc23a955/go.mod h1:BcTipDbvpsgadsC1tMPJOKyWXIfnrZuQrMdrT9QQHjY=
-=======
 github.com/GoogleCloudPlatform/golang-samples/run/grpc-server-streaming v0.0.0-20201216233243-555da975282a h1:3QoJzt0CuSC6UO+0mUN8LTR5NtE5AFzvSYr7dXJLdSM=
 github.com/GoogleCloudPlatform/golang-samples/run/grpc-server-streaming v0.0.0-20201216233243-555da975282a/go.mod h1:YorXqDMZdELAYt365rOGQ5b9ieVdfkoJBEETNOboQzA=
->>>>>>> 037508c8 (mod tidy)
 github.com/aws/aws-sdk-go v1.23.20/go.mod h1:KmX6BPdI08NWTb3/sm4ZGu5ShLoqVDhKgpiN924inxo=
 github.com/aws/aws-sdk-go v1.38.1/go.mod h1:hcU610XS61/+aQV88ixoOzUoG7v3b31pl2zKMmprdro=
 github.com/bmatcuk/doublestar/v2 v2.0.4/go.mod h1:QMmcs3H2AUQICWhfzLXz+IYln8lRQmTZRptLie8RgRw=
