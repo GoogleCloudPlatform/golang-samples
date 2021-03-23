@@ -21,16 +21,12 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"sync"
 
 	"cloud.google.com/go/pubsub"
 	"cloud.google.com/go/pubsublite/pscompat"
+	"golang.org/x/sync/errgroup"
 )
-
-// publishedMessage collects a published Pub/Sub message and result.
-type publishedMessage struct {
-	message *pubsub.Message
-	result  *pubsub.PublishResult
-}
 
 func main() {
 	// NOTE: Set these flags for an existing Pub/Sub Lite topic when running this
@@ -53,39 +49,47 @@ func main() {
 	// Ensure the publisher will be shut down.
 	defer publisher.Stop()
 
+	// Collect any messages that need to be republished with a new publisher
+	// client.
+	var toRepublish []*pubsub.Message
+	var toRepublishMu sync.Mutex
+
 	// Publish messages. Messages are automatically batched.
-	var published []*publishedMessage
+	g := new(errgroup.Group)
 	for i := 0; i < *messageCount; i++ {
 		msg := &pubsub.Message{
 			Data: []byte(fmt.Sprintf("message-%d", i)),
 		}
 		result := publisher.Publish(ctx, msg)
-		published = append(published, &publishedMessage{msg, result})
+
+		g.Go(func() error {
+			// Get blocks until the result is ready.
+			id, err := result.Get(ctx)
+			if err != nil {
+				// NOTE: A failed PublishResult indicates that the publisher client
+				// encountered a fatal error and has permanently terminated. After the
+				// fatal error has been resolved, a new publisher client instance must
+				// be created to republish failed messages.
+				fmt.Printf("Publish error: %v\n", err)
+				toRepublishMu.Lock()
+				toRepublish = append(toRepublish, msg)
+				toRepublishMu.Unlock()
+				return err
+			}
+
+			// Metadata decoded from the id contains the partition and offset.
+			metadata, err := pscompat.ParseMessageMetadata(id)
+			if err != nil {
+				fmt.Printf("Failed to parse message metadata %q: %v\n", id, err)
+				return err
+			}
+			fmt.Printf("Published: partition=%d, offset=%d\n", metadata.Partition, metadata.Offset)
+			return nil
+		})
 	}
-
-	// Print publish results and collect any messages that need to be republished.
-	var toRepublish []*pubsub.Message
-	for _, pm := range published {
-		// Get blocks until the result is ready.
-		id, err := pm.result.Get(ctx)
-		if err != nil {
-			// NOTE: A failed PublishResult indicates that the publisher client
-			// encountered a fatal error and has permanently terminated. After the
-			// fatal error has been resolved, a new publisher client instance must be
-			// created to republish failed messages.
-			fmt.Printf("Publish error: %v\n", err)
-			toRepublish = append(toRepublish, pm.message)
-			continue
-		}
-
-		// Metadata decoded from the id contains the partition and offset.
-		metadata, err := pscompat.ParseMessageMetadata(id)
-		if err != nil {
-			log.Fatalf("Failed to parse message metadata %q: %v", id, err)
-		}
-		fmt.Printf("Published: partition=%d, offset=%d\n", metadata.Partition, metadata.Offset)
+	if err := g.Wait(); err != nil {
+		fmt.Printf("Publishing finished with error: %v\n", err)
 	}
-
 	fmt.Printf("Published %d messages\n", *messageCount-len(toRepublish))
 
 	// Print the error that caused the publisher client to terminate (if any),
