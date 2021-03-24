@@ -44,7 +44,7 @@ func configureConnectionPool(w io.Writer, projectID, instanceID string) error {
 	fmt.Fprintf(w, "Connected with pool size of %d", poolSize)
 
 	if err = client.Close(); err != nil {
-		return fmt.Errorf("Could not close data operations client: %v", err)
+		return fmt.Errorf("Close: %v", err)
 	}
 
 	return nil
