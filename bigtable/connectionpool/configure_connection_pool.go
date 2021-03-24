@@ -38,7 +38,7 @@ func configureConnectionPool(w io.Writer, projectID, instanceID string) error {
 		option.WithGRPCConnectionPool(poolSize))
 
 	if err != nil {
-		return fmt.Errorf("Could not create data operations client: %v", err)
+		return fmt.Errorf("bigtable.NewClient: %v", err)
 	}
 
 	fmt.Fprintf(w, "Connected with pool size of %d", poolSize)
