@@ -19,13 +19,16 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"io/ioutil"
 
 	"cloud.google.com/go/pubsub"
 )
 
-func createAvroSchema(w io.Writer, projectID, schemaID string) error {
+// createAvroSchema creates a schema resource from a JSON-formatted Avro schema file.
+func createAvroSchema(w io.Writer, projectID, schemaID, avscFile string) error {
 	// projectID := "my-project-id"
 	// schemaID := "my-schema"
+	// avscFile = "path/to/an/avro/schema/file(.avsc)/formatted/in/json"
 	ctx := context.Background()
 	client, err := pubsub.NewSchemaClient(ctx, projectID)
 	if err != nil {
@@ -33,15 +36,20 @@ func createAvroSchema(w io.Writer, projectID, schemaID string) error {
 	}
 	defer client.Close()
 
+	avscSource, err := ioutil.ReadFile(avscFile)
+	if err != nil {
+		return fmt.Errorf("error reading from file: %s", avscFile)
+	}
+
 	config := pubsub.SchemaConfig{
 		Type:       pubsub.SchemaAvro,
-		Definition: "",
+		Definition: string(avscSource),
 	}
 	s, err := client.CreateSchema(ctx, schemaID, config)
 	if err != nil {
 		return fmt.Errorf("CreateSchema: %v", err)
 	}
-	fmt.Fprintf(w, "Schema created: %v\n", s)
+	fmt.Fprintf(w, "Schema created: %#v\n", s)
 	return nil
 }
 

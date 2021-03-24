@@ -18,12 +18,13 @@ package schema
 import (
 	"context"
 	"fmt"
+	"io"
 
 	"cloud.google.com/go/pubsub"
 	"google.golang.org/api/iterator"
 )
 
-func listSchemas(projectID string) ([]*pubsub.SchemaConfig, error) {
+func listSchemas(w io.Writer, projectID string) ([]*pubsub.SchemaConfig, error) {
 	// projectID := "my-project-id"
 	ctx := context.Background()
 	client, err := pubsub.NewSchemaClient(ctx, projectID)
@@ -34,18 +35,20 @@ func listSchemas(projectID string) ([]*pubsub.SchemaConfig, error) {
 
 	var schemas []*pubsub.SchemaConfig
 
-	it := client.Schemas(ctx, pubsub.SchemaViewFull)
+	schemaIter := client.Schemas(ctx, pubsub.SchemaViewFull)
 	for {
-		sc, err := it.Next()
+		sc, err := schemaIter.Next()
 		if err == iterator.Done {
 			break
 		}
 		if err != nil {
-			return nil, fmt.Errorf("it.Next: %v", err)
+			return nil, fmt.Errorf("schemaIter.Next: %v", err)
 		}
+		fmt.Fprintf(w, "Got schema: %#v\n", sc)
 		schemas = append(schemas, sc)
 	}
 
+	fmt.Fprintf(w, "Got %d schemas", len(schemas))
 	return schemas, nil
 }
 

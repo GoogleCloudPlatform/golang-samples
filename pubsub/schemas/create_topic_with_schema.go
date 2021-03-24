@@ -14,7 +14,7 @@
 
 package schema
 
-// [START pubsub_get_schema]
+// [START pubsub_create_topic_with_schema]
 import (
 	"context"
 	"fmt"
@@ -23,24 +23,29 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func getSchema(w io.Writer, projectID, schemaID string) error {
+func createTopicWithSchema(w io.Writer, projectID, topicID, schemaID string, encoding pubsub.SchemaEncoding) error {
 	// projectID := "my-project-id"
-	// schemaID := "my-schema"
+	// topicID := "my-topic"
+	// schemaID := "my-schema-id"
+	// encoding := pubsub.EncodingJSON // or pubsub.EncodingBinary
 	ctx := context.Background()
-	client, err := pubsub.NewSchemaClient(ctx, projectID)
+	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("pubsub.NewSchemaClient: %v", err)
+		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
-	defer client.Close()
 
-	// Retrieve the full schema view. If you don't want to retrive the
-	// definition, pass in pubsub.SchemaViewBasic instead.
-	s, err := client.Schema(ctx, schemaID, pubsub.SchemaViewFull)
-	if err != nil {
-		return fmt.Errorf("client.Schema: %v", err)
+	tc := &pubsub.TopicConfig{
+		SchemaSettings: &pubsub.SchemaSettings{
+			Schema:   fmt.Sprintf("projects/%s/schemas/%s", projectID, schemaID),
+			Encoding: encoding,
+		},
 	}
-	fmt.Fprintf(w, "Got schema: %#v\n", s)
+	t, err := client.CreateTopicWithConfig(ctx, topicID, tc)
+	if err != nil {
+		return fmt.Errorf("CreateTopicWithConfig: %v", err)
+	}
+	fmt.Fprintf(w, "Topic with schema created: %#v\n", t)
 	return nil
 }
 
-// [END pubsub_get_schema]
+// [END pubsub_create_topic_with_schema]

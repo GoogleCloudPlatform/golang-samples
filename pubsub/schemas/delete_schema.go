@@ -23,7 +23,7 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func delete(w io.Writer, projectID, schemaID string) error {
+func deleteSchema(w io.Writer, projectID, schemaID string) error {
 	// projectID := "my-project-id"
 	// schemaID := "my-schema"
 	ctx := context.Background()

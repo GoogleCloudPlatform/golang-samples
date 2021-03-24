@@ -23,6 +23,7 @@ require (
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gofrs/uuid v3.4.0+incompatible
 	github.com/golang/protobuf v1.4.3
+	github.com/golang/snappy v0.0.3 // indirect
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/google/go-cmp v0.5.5
 	github.com/google/uuid v1.2.0
