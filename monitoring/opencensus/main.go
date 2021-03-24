@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 	"time"
 
 	"contrib.go.opencensus.io/exporter/stackdriver"
@@ -33,7 +32,7 @@ import (
 
 // [END monitoring_sli_metrics_opencensus_setup]
 // [START monitoring_sli_metrics_opencensus_measure]
-// set up metrics
+// Sets up metrics.
 var (
 	requestCount       = stats.Int64("oc_request_count", "total request count", "requests")
 	failedRequestCount = stats.Int64("oc_failed_request_count", "count of failed requests", "requests")
@@ -41,9 +40,8 @@ var (
 )
 
 // [END monitoring_sli_metrics_opencensus_measure]
-
-// set up views
 // [START monitoring_sli_metrics_opencensus_view]
+// Sets up views.
 var (
 	requestCountView = &view.View{
 		Name:        "oc_request_count",
@@ -61,7 +59,7 @@ var (
 		Name:        "oc_response_latency",
 		Measure:     responseLatency,
 		Description: "The distribution of the latencies",
-		// bucket definitions must be explicit
+		// Bucket definitions must be explicitly specified.
 		Aggregation: view.Distribution(0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000),
 	}
 )
@@ -70,16 +68,17 @@ var (
 
 func main() {
 
-	// set up project ID
+	// Expects that the project ID be provided via a flag when starting the server.
 	projectID := flag.String("project_id", "", "Cloud Project ID")
 	flag.Parse()
-
-	// register the views
+	// [START monitoring_sli_metrics_opencensus_view]
+	// Register the views.
 	if err := view.Register(requestCountView, failedRequestCountView, responseLatencyView); err != nil {
 		log.Fatalf("Failed to register the views: %v", err)
 	}
+	// [END monitoring_sli_metrics_opencensus_view]
 	// [START monitoring_sli_metrics_opencensus_exporter]
-	// set up Cloud Monitoring exporter
+	// Sets up Cloud Monitoring exporter.
 	sd, err := stackdriver.NewExporter(stackdriver.Options{
 		ProjectID:         *projectID,
 		MetricPrefix:      "opencensus-demo",
@@ -89,7 +88,7 @@ func main() {
 		log.Fatalf("Failed to create the Cloud Monitoring exporter: %v", err)
 	}
 	defer sd.Flush()
-	// Start the metrics exporter
+
 	sd.StartMetricsExporter()
 	defer sd.StopMetricsExporter()
 	// [END monitoring_sli_metrics_opencensus_exporter]
@@ -98,20 +97,19 @@ func main() {
 }
 
 func handle(w http.ResponseWriter, r *http.Request) {
-	// create context
 	ctx, _ := tag.New(context.Background())
 	requestReceived := time.Now()
 	// [START monitoring_sli_metrics_opencensus_counts]
-	// count the request
+	// Counts the request.
 	stats.Record(ctx, requestCount.M(1))
 
-	// fail 10% of the time
+	// Randomly fails 10% of the time.
 	if rand.Intn(100) > 90 {
-		// count the failed request
+		// Counts the error.
 		stats.Record(ctx, failedRequestCount.M(1))
 		// [END monitoring_sli_metrics_opencensus_counts]
 		fmt.Fprintf(w, "intentional error!")
-		// record latency for failure
+		// Records latency for failure.
 		// [START monitoring_sli_metrics_opencensus_latency]
 		stats.Record(ctx, responseLatency.M(time.Since(requestReceived).Seconds()))
 		// [END monitoring_sli_metrics_opencensus_latency]
@@ -119,8 +117,8 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	} else {
 		delay := time.Duration(rand.Intn(1000)) * time.Millisecond
 		time.Sleep(delay)
-		fmt.Fprintf(w, "Succeeded after "+strconv.Itoa(int(delay)/1000000)+" ms")
-		// record latency for success
+		fmt.Fprintf(w, "Succeeded after %v", delay)
+		// Records latency for success.
 		stats.Record(ctx, responseLatency.M(time.Since(requestReceived).Seconds()))
 		return
 	}
