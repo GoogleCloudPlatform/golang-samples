@@ -69,14 +69,14 @@ func GetLogEntries(service *cloudrunci.Service, runID string, projectID string, 
 	defer client.Close()
 
 	// Create service and timestamp filters
-	minAgo := time.Now().Add(-1 * time.Minute)
-	timeFormat := minAgo.Format(time.RFC3339)
+	minsAgo := time.Now().Add(-5 * time.Minute)
+	timeFormat := minsAgo.Format(time.RFC3339)
 	filter := fmt.Sprintf(`resource.labels.service_name="%s" timestamp>="%s"`, fmt.Sprintf("%s-%s", service.Name, runID), timeFormat)
 	preparedFilter := fmt.Sprintf(`resource.type="cloud_run_revision" severity="default" %s  NOT protoPayload.serviceName="run.googleapis.com"`, filter)
 
 	fmt.Println("Waiting for logs...")
-	time.Sleep(2 * time.Minute)
-	MAX := 10
+	time.Sleep(3 * time.Minute)
+	MAX := 5
 	fmt.Printf("Using log filter: %s\n", preparedFilter)
 	for i := 1; i < MAX; i++ {
 		fmt.Printf("Attempt #%d\n", i)
@@ -97,7 +97,7 @@ func GetLogEntries(service *cloudrunci.Service, runID string, projectID string, 
 				return
 			}
 		}
-		time.Sleep(15 * time.Second)
+		time.Sleep(30 * time.Second)
 	}
 	t.Error("SIGTERM log entry: not found.")
 }
