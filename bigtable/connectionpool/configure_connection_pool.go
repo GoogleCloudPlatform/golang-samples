@@ -14,7 +14,7 @@
 
 // [START bigtable_configure_connection_pool]
 
-// Connectionpool is a sample program demonstrating how to configure the number
+// Package connectionpool demonstrates how to configure the number
 // of connection pools the Cloud Bigtable client should use.
 package connectionpool
 
