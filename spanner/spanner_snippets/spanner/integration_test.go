@@ -437,7 +437,7 @@ func TestCustomerManagedEncryptionKeys(t *testing.T) {
 	}
 	kmsKeyName := fmt.Sprintf(
 		"projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s",
-		tc.ProjectId,
+		tc.ProjectID,
 		locationId,
 		keyRingId,
 		keyId,
