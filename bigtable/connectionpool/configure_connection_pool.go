@@ -12,12 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START bigtable_configure_connection_pool]
-
 // Package connectionpool demonstrates how to configure the number
 // of connection pools the Cloud Bigtable client should use.
 package connectionpool
 
+// [START bigtable_configure_connection_pool]
 import (
 	"context"
 	"fmt"
