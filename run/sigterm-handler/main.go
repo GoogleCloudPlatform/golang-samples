@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Sample run-sigterm shows how to gracefully shut down in response to a SIGTERM signal.
+// Sample sigterm-handler shows how to gracefully shut down in response to a SIGTERM signal.
 package main
 
+// [START cloudrun_sigterm_handler]
 import (
 	"context"
 	"fmt"
@@ -26,7 +27,6 @@ import (
 	"time"
 )
 
-// [START cloudrun_sigterm_handler]
 func main() {
 	// Determine port for HTTP service.
 	port := os.Getenv("PORT")
@@ -40,10 +40,10 @@ func main() {
 		Handler: http.HandlerFunc(handler),
 	}
 
-	// Create channel to listen for signals
+	// Create channel to listen for signals.
 	signalChan := make(chan os.Signal, 1)
-	// SIGINT handles Ctrl+C locally
-	// SIGTERM handles Cloud Run termination signal
+	// SIGINT handles Ctrl+C locally.
+	// SIGTERM handles Cloud Run termination signal.
 	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
 
 	// Start HTTP server.
@@ -54,20 +54,20 @@ func main() {
 		}
 	}()
 
-	// Receive output from signalChan
+	// Receive output from signalChan.
 	sig := <-signalChan
 	log.Printf("%s signal caught", sig)
 	log.Print("server stopped")
 
-	// Timeout if waiting for connections to return idle
+	// Timeout if waiting for connections to return idle.
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 
 	defer func() {
-		// Add extra handling here to close any DB connections, redis, or flush logs
-		cancel() // Release resources
+		// Add extra handling here to close any DB connections, redis, or flush logs.
+		cancel() // Release resources.
 	}()
 
-	// Gracefully shutdown the server by waiting on existing requests (except websockets)
+	// Gracefully shutdown the server by waiting on existing requests (except websockets).
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatalf("server shutdown failed:%+v", err)
 	}
