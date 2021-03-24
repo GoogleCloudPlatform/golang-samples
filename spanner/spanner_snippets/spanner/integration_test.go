@@ -416,7 +416,7 @@ func TestCreateDatabaseWithRetentionPeriodSample(t *testing.T) {
 }
 
 func TestCustomerManagedEncryptionKeys(t *testing.T) {
-	_ = testutil.SystemTest(t)
+	tc := testutil.SystemTest(t)
 	dbName, cleanup := initTest(t, randomID())
 	defer cleanup()
 	adminClient, err := database.NewDatabaseAdminClient(context.Background())
@@ -426,19 +426,18 @@ func TestCustomerManagedEncryptionKeys(t *testing.T) {
 
 	var b bytes.Buffer
 
-	projectId := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
 	instanceName := getInstance(t)
 	locationId := "us-central1"
 	keyRingId := "spanner-test-keyring"
 	keyId := "spanner-test-key"
 
 	// Create an encryption key if it does not already exist.
-	if err := maybeCreateKey(projectId, locationId, keyRingId, keyId); err != nil {
+	if err := maybeCreateKey(tc.ProjectID, locationId, keyRingId, keyId); err != nil {
 		t.Errorf("failed to create encryption key: %v", err)
 	}
 	kmsKeyName := fmt.Sprintf(
 		"projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s",
-		projectId,
+		tc.ProjectId,
 		locationId,
 		keyRingId,
 		keyId,
@@ -458,7 +457,7 @@ func TestCustomerManagedEncryptionKeys(t *testing.T) {
 			Name: fmt.Sprintf("%s/backups/%s", instanceName, backupId),
 		})
 	}()
-	b = bytes.Buffer{}
+	b.Reset()
 	if err := createBackupWithCustomerManagedEncryptionKey(&b, dbName, backupId, kmsKeyName); err != nil {
 		t.Errorf("failed to create backup with customer managed encryption key: %v", err)
 	}

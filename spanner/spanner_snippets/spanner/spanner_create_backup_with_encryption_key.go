@@ -29,6 +29,8 @@ import (
 )
 
 func createBackupWithCustomerManagedEncryptionKey(w io.Writer, db, backupID, kmsKeyName string) error {
+	// db = `projects/<project>/instances/<instance-id>/database/<database-id>`
+	// backupID = `my-backup-id`
 	// kmsKeyName = `projects/<project>/locations/<location>/keyRings/<key_ring>/cryptoKeys/<kms_key_name>`
 	matches := regexp.MustCompile("^(.+)/databases/(.+)$").FindStringSubmatch(db)
 	if matches == nil || len(matches) != 3 {
