@@ -21,7 +21,7 @@ import (
 	"testing"
 )
 
-func TestConnectionPool(t *testing.T) {
+func TestConfigureConnectionPool(t *testing.T) {
 	project := os.Getenv("GOLANG_SAMPLES_BIGTABLE_PROJECT")
 	instance := os.Getenv("GOLANG_SAMPLES_BIGTABLE_INSTANCE")
 	if project == "" || instance == "" {
