@@ -71,7 +71,7 @@ func publishProtoMessages(w io.Writer, projectID, topicID string) error {
 	if err != nil {
 		return fmt.Errorf("result.Get: %v", err)
 	}
-	fmt.Fprintf(w, "Published proto message: %s\n", string(msg))
+	fmt.Fprintf(w, "Published proto message with %#v encoding: %s\n", encoding, string(msg))
 	return nil
 }
 

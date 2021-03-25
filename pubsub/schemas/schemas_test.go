@@ -38,18 +38,19 @@ const (
 	avroFilePath  = "./resources/us-states.avsc"
 	protoFilePath = "./resources/us-states.proto"
 
-	topicPrefix = "test-prefix-"
+	topicPrefix = "test-topic-"
+	subPrefix   = "test-sub-"
 )
 
 // once guards cleanup related operations in setup. No need to set up and tear
 // down every time, so this speeds things up.
 var once sync.Once
 
-func setup(t *testing.T) *pubsub.SchemaClient {
+func setup(t *testing.T) *pubsub.Client {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 
-	client, err := pubsub.NewSchemaClient(ctx, tc.ProjectID)
+	client, err := pubsub.NewClient(ctx, tc.ProjectID)
 	if err != nil {
 		t.Fatalf("failed to create client: %v", err)
 	}
@@ -153,8 +154,9 @@ func TestSchemas_Admin(t *testing.T) {
 }
 
 func TestSchemas_AvroSchemaAll(t *testing.T) {
-	_ = setup(t)
+	client := setup(t)
 	tc := testutil.SystemTest(t)
+	ctx := context.Background()
 
 	topicID := topicPrefix + uuid.NewString()
 	avroSchemaID := schemaPrefix + "avro-" + uuid.NewString()
@@ -162,6 +164,7 @@ func TestSchemas_AvroSchemaAll(t *testing.T) {
 	if err != nil {
 		t.Fatalf("defaultSchemaConfig err: %v", err)
 	}
+	subID := subPrefix + uuid.NewString()
 
 	t.Run("createTopicWithSchema", func(t *testing.T) {
 		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
@@ -178,6 +181,13 @@ func TestSchemas_AvroSchemaAll(t *testing.T) {
 			want := "Topic with schema created"
 			if !strings.Contains(got, want) {
 				r.Errorf("createTopicWithSchema mismatch\ngot: %v\nwant: %v\n", got, want)
+			}
+
+			subCfg := pubsub.SubscriptionConfig{
+				Topic: client.Topic(topicID),
+			}
+			if _, err = client.CreateSubscription(ctx, subID, subCfg); err != nil {
+				r.Errorf("client.CreateSubscription err: %v", err)
 			}
 		})
 	})
@@ -196,11 +206,27 @@ func TestSchemas_AvroSchemaAll(t *testing.T) {
 			}
 		})
 	})
+
+	t.Run("subscribeAvroRecords", func(t *testing.T) {
+		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+			buf := new(bytes.Buffer)
+			err := subscribeWithAvroSchema(buf, tc.ProjectID, subID, avroFilePath)
+			if err != nil {
+				r.Errorf("subscribeWithAvroSchema: %v", err)
+			}
+			got := buf.String()
+			want := "Received a JSON-encoded message"
+			if !strings.Contains(got, want) {
+				r.Errorf("subscribeWithAvroSchema mismatch\ngot: %v\nwant: %v\n", got, want)
+			}
+		})
+	})
 }
 
 func TestSchemas_ProtoSchemaAll(t *testing.T) {
-	_ = setup(t)
+	client := setup(t)
 	tc := testutil.SystemTest(t)
+	ctx := context.Background()
 
 	topicID := topicPrefix + uuid.NewString()
 	protoSchemaID := schemaPrefix + "proto-" + uuid.NewString()
@@ -208,8 +234,9 @@ func TestSchemas_ProtoSchemaAll(t *testing.T) {
 	if err != nil {
 		t.Fatalf("defaultSchemaConfig err: %v", err)
 	}
+	subID := subPrefix + uuid.NewString()
 
-	t.Run("createTopicWithSchema", func(t *testing.T) {
+	t.Run("createResources", func(t *testing.T) {
 		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 			if err := createProtoSchema(io.Discard, tc.ProjectID, protoSchemaID, protoFilePath); err != nil {
 				r.Errorf("createProtoSchema err: %v", err)
@@ -225,6 +252,13 @@ func TestSchemas_ProtoSchemaAll(t *testing.T) {
 			if !strings.Contains(got, want) {
 				r.Errorf("createTopicWithSchema mismatch\ngot: %v\nwant: %v\n", got, want)
 			}
+
+			subCfg := pubsub.SubscriptionConfig{
+				Topic: client.Topic(topicID),
+			}
+			if _, err = client.CreateSubscription(ctx, subID, subCfg); err != nil {
+				r.Errorf("client.CreateSubscription err: %v", err)
+			}
 		})
 	})
 
@@ -236,9 +270,24 @@ func TestSchemas_ProtoSchemaAll(t *testing.T) {
 				r.Errorf("publishProtoMessages: %v", err)
 			}
 			got := buf.String()
-			want := "Published proto message: {\"name\":\"Alaska\", \"postAbbr\":\"AK\"}\n"
-			if diff := cmp.Diff(want, got); diff != "" {
-				r.Errorf("publishProtoMessages() mismatch: -want, +got:\n%s", diff)
+			want := "Published proto message"
+			if !strings.Contains(got, want) {
+				r.Errorf("createTopicWithSchema mismatch\ngot: %v\nwant: %v\n", got, want)
+			}
+		})
+	})
+
+	t.Run("subscribeProtoMessages", func(t *testing.T) {
+		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+			buf := new(bytes.Buffer)
+			err := subscribeWithProtoSchema(buf, tc.ProjectID, subID, protoFilePath)
+			if err != nil {
+				r.Errorf("subsribeWithProtoSchema: %v", err)
+			}
+			got := buf.String()
+			want := "Received a JSON-encoded message"
+			if !strings.Contains(got, want) {
+				r.Errorf("subscribeWithProtoSchema mismatch\ngot: %v\nwant: %v\n", got, want)
 			}
 		})
 	})
