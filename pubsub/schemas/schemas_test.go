@@ -31,6 +31,7 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
+	"google.golang.org/api/iterator"
 )
 
 const (
@@ -56,6 +57,7 @@ func setup(t *testing.T) *pubsub.Client {
 	}
 
 	// Cleanup resources from the previous tests.
+	// This includes schemas, topics, and subscriptions.
 	once.Do(func() {
 		scs, err := listSchemas(io.Discard, tc.ProjectID)
 		if err != nil {
@@ -65,6 +67,38 @@ func setup(t *testing.T) *pubsub.Client {
 			schemaName := strings.Split(sc.Name, "/")
 			deleteSchema(io.Discard, tc.ProjectID, schemaName[len(schemaName)-1])
 		}
+
+		go func() {
+			topicIter := client.Topics(ctx)
+			for {
+				topic, err := topicIter.Next()
+				if err == iterator.Done {
+					break
+				}
+				if err != nil {
+					fmt.Printf("topicIter.Next got err: %v", err)
+				}
+				if err := topic.Delete(ctx); err != nil {
+					fmt.Printf("topic.Delete got err: %v", err)
+				}
+			}
+		}()
+
+		go func() {
+			subIter := client.Subscriptions(ctx)
+			for {
+				sub, err := subIter.Next()
+				if err == iterator.Done {
+					break
+				}
+				if err != nil {
+					fmt.Printf("subIter.Next got err: %v", err)
+				}
+				if err := sub.Delete(ctx); err != nil {
+					fmt.Printf("sub.Delete got err: %v", err)
+				}
+			}
+		}()
 	})
 
 	return client
@@ -195,7 +229,7 @@ func TestSchemas_AvroSchemaAll(t *testing.T) {
 	t.Run("publishAvroRecords", func(t *testing.T) {
 		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 			buf := new(bytes.Buffer)
-			err := publishAvroRecords(buf, tc.ProjectID, topicID)
+			err := publishAvroRecords(buf, tc.ProjectID, topicID, avroFilePath)
 			if err != nil {
 				r.Errorf("publishAvroRecords: %v", err)
 			}
@@ -221,6 +255,10 @@ func TestSchemas_AvroSchemaAll(t *testing.T) {
 			}
 		})
 	})
+
+	deleteSchema(io.Discard, tc.ProjectID, avroSchemaID)
+	client.Subscription(subID).Delete(ctx)
+	client.Topic(topicID).Delete(ctx)
 }
 
 func TestSchemas_ProtoSchemaAll(t *testing.T) {
@@ -291,6 +329,10 @@ func TestSchemas_ProtoSchemaAll(t *testing.T) {
 			}
 		})
 	})
+
+	deleteSchema(io.Discard, tc.ProjectID, protoSchemaID)
+	client.Subscription(subID).Delete(ctx)
+	client.Topic(topicID).Delete(ctx)
 }
 
 func defaultSchemaConfig(projectID, schemaID, schemaFile string, schemaType pubsub.SchemaType) (*pubsub.SchemaConfig, error) {

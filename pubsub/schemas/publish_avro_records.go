@@ -19,35 +19,27 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"io/ioutil"
 
 	"cloud.google.com/go/pubsub"
 	"github.com/linkedin/goavro/v2"
 )
 
-func publishAvroRecords(w io.Writer, projectID, topicID string) error {
+func publishAvroRecords(w io.Writer, projectID, topicID, avscFile string) error {
 	// projectID := "my-project-id"
 	// topicID := "my-topic"
+	// avscFile = "path/to/an/avro/schema/file(.avsc)/formatted/in/json"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
 
-	codec, err := goavro.NewCodec(`
-	{
-		"type": "record",
-		"name": "State",
-		"fields": [
-			{
-				"name": "name",
-				"type": "string"
-			},
-			{
-				"name": "post_abbr",
-				"type": "string"
-			}
-		]
-	}`)
+	avroSource, err := ioutil.ReadFile(avscFile)
+	if err != nil {
+		return fmt.Errorf("ioutil.ReadFile err: %v", err)
+	}
+	codec, err := goavro.NewCodec(string(avroSource))
 	if err != nil {
 		return fmt.Errorf("goavro.NewCodec err: %v", err)
 	}
