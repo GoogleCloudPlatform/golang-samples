@@ -99,6 +99,12 @@ func main() {
 func handle(w http.ResponseWriter, r *http.Request) {
 	ctx, _ := tag.New(context.Background())
 	requestReceived := time.Now()
+	// Records latency for failure OR success.
+	// [START monitoring_sli_metrics_opencensus_latency]
+	defer func() {
+		stats.Record(ctx, responseLatency.M(time.Since(requestReceived).Seconds()))
+	}()
+	// [END monitoring_sli_metrics_opencensus_latency]
 	// [START monitoring_sli_metrics_opencensus_counts]
 	// Counts the request.
 	stats.Record(ctx, requestCount.M(1))
@@ -109,17 +115,11 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		stats.Record(ctx, failedRequestCount.M(1))
 		// [END monitoring_sli_metrics_opencensus_counts]
 		fmt.Fprintf(w, "intentional error!")
-		// Records latency for failure.
-		// [START monitoring_sli_metrics_opencensus_latency]
-		stats.Record(ctx, responseLatency.M(time.Since(requestReceived).Seconds()))
-		// [END monitoring_sli_metrics_opencensus_latency]
 		return
 	} else {
 		delay := time.Duration(rand.Intn(1000)) * time.Millisecond
 		time.Sleep(delay)
 		fmt.Fprintf(w, "Succeeded after %v", delay)
-		// Records latency for success.
-		stats.Record(ctx, responseLatency.M(time.Since(requestReceived).Seconds()))
 		return
 	}
 }

@@ -26,6 +26,7 @@ import (
 )
 
 func TestStartingServer(t *testing.T) {
+
 	// Tests build.
 	m := testutil.BuildMain(t)
 	if !m.Built() {
@@ -33,14 +34,11 @@ func TestStartingServer(t *testing.T) {
 	}
 
 	// Tests main endpoint.
-	req, err := http.NewRequest("GET", "/", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	req := httptest.NewRequest("GET", "/", strings.NewReader(""))
+	req.Header.Add("Content-Type", "application/json")
 
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(handle)
-	handler.ServeHTTP(rr, req)
+	handle(rr, req)
 
 	// Tests response status.
 	gotStatus := rr.Code
