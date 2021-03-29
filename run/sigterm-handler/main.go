@@ -69,7 +69,7 @@ func main() {
 
 	// Gracefully shutdown the server by waiting on existing requests (except websockets).
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatalf("server shutdown failed:%+v", err)
+		log.Printf("server shutdown failed:%+v", err)
 	}
 	log.Print("server exited")
 }
