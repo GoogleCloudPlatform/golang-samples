@@ -9,7 +9,7 @@ require (
 	cloud.google.com/go/datastore v1.2.0
 	cloud.google.com/go/firestore v1.3.0
 	cloud.google.com/go/logging v1.0.0
-	cloud.google.com/go/pubsub v1.9.1
+	cloud.google.com/go/pubsub v1.11.0-beta.schemas
 	cloud.google.com/go/pubsublite v0.7.0
 	cloud.google.com/go/spanner v1.14.0
 	cloud.google.com/go/storage v1.13.0
@@ -45,7 +45,6 @@ require (
 	google.golang.org/api v0.43.0
 	google.golang.org/appengine v1.6.7
 	google.golang.org/genproto v0.0.0-20210325141258-5636347f2b14
-	google.golang.org/genproto v0.0.0-20210318145829-90b20ab00860
 	google.golang.org/grpc v1.36.0
 	google.golang.org/grpc/examples v0.0.0-20200707005602-4258d12073b4
 	google.golang.org/protobuf v1.26.0
