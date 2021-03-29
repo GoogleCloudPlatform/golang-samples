@@ -14,7 +14,7 @@ require (
 	cloud.google.com/go/spanner v1.14.0
 	cloud.google.com/go/storage v1.13.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.5
-	github.com/aws/aws-sdk-go v1.37.31
+	github.com/aws/aws-sdk-go v1.38.1
 	github.com/bmatcuk/doublestar/v2 v2.0.4
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -45,6 +45,7 @@ require (
 	google.golang.org/api v0.43.0
 	google.golang.org/appengine v1.6.7
 	google.golang.org/genproto v0.0.0-20210325141258-5636347f2b14
+	google.golang.org/genproto v0.0.0-20210318145829-90b20ab00860
 	google.golang.org/grpc v1.36.0
 	google.golang.org/grpc/examples v0.0.0-20200707005602-4258d12073b4
 	google.golang.org/protobuf v1.26.0
@@ -54,5 +55,3 @@ require (
 
 // https://github.com/jstemmer/go-junit-report/issues/107
 replace github.com/jstemmer/go-junit-report => github.com/tbpg/go-junit-report v0.9.2-0.20200506144438-50086c54f894
-
-replace cloud.google.com/go/pubsub => /Users/hongalex/.go/src/cloud.google.com/go/pubsub
