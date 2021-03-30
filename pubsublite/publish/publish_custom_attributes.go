@@ -56,7 +56,7 @@ func publishWithCustomAttributes(w io.Writer, projectID, zone, topicID string) e
 	}
 
 	fmt.Fprintf(w, "Published a message with custom attributes: %v\n", id)
-	return nil
+	return publisher.Error()
 }
 
 // [END pubsublite_publish_custom_attributes]
