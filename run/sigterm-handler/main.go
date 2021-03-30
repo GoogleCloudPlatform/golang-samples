@@ -46,31 +46,30 @@ func main() {
 	// SIGTERM handles Cloud Run termination signal.
 	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
 
-	// Start HTTP server.
-	go func() {
-		log.Printf("listening on port %s", port)
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatal(err)
-		}
-	}()
-
-	// Receive output from signalChan.
-	sig := <-signalChan
-	log.Printf("%s signal caught", sig)
-	log.Print("server stopped")
-
 	// Timeout if waiting for connections to return idle.
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 
-	defer func() {
+	go func() {
+		// Receive output from signalChan.
+		sig := <-signalChan
+		log.Printf("%s signal caught", sig)
+		log.Print("server stopped")
+
 		// Add extra handling here to close any DB connections, redis, or flush logs.
-		cancel() // Release resources.
+
+		defer cancel() // Release resources.
+		// Gracefully shutdown the server by waiting on existing requests (except websockets).
+		if err := srv.Shutdown(ctx); err != nil {
+			log.Printf("server shutdown failed:%+v", err)
+		}
 	}()
 
-	// Gracefully shutdown the server by waiting on existing requests (except websockets).
-	if err := srv.Shutdown(ctx); err != nil {
-		log.Printf("server shutdown failed:%+v", err)
+	// Start HTTP server.
+	log.Printf("listening on port %s", port)
+	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		log.Fatal(err)
 	}
+
 	log.Print("server exited")
 }
 

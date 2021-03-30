@@ -76,9 +76,9 @@ func GetLogEntries(service *cloudrunci.Service, runID string, projectID string, 
 
 	fmt.Println("Waiting for logs...")
 	time.Sleep(3 * time.Minute)
-	MAX := 5
+	maxAttempts := 6
 	fmt.Printf("Using log filter: %s\n", preparedFilter)
-	for i := 1; i < MAX; i++ {
+	for i := 1; i < maxAttempts; i++ {
 		fmt.Printf("Attempt #%d\n", i)
 		it := client.Entries(ctx, logadmin.Filter(preparedFilter))
 		for {
@@ -97,7 +97,7 @@ func GetLogEntries(service *cloudrunci.Service, runID string, projectID string, 
 				return
 			}
 		}
-		time.Sleep(30 * time.Second)
+		time.Sleep(60 * time.Second)
 	}
 	t.Error("SIGTERM log entry: not found.")
 }
