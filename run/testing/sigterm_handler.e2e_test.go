@@ -15,15 +15,10 @@
 package cloudruntests
 
 import (
-	"context"
 	"fmt"
 	"net/http"
-	"strings"
 	"testing"
 	"time"
-
-	"cloud.google.com/go/logging/logadmin"
-	"google.golang.org/api/iterator"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/cloudrunci"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -32,13 +27,12 @@ import (
 func TestSigtermHandlerService(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 
-	runID := time.Now().Format("20060102-150405")
 	service := cloudrunci.NewService("sigterm-handler", tc.ProjectID)
 	service.Dir = "../sigterm-handler"
 	if err := service.Deploy(); err != nil {
 		t.Fatalf("service.Deploy %q: %v", service.Name, err)
 	}
-	defer GetLogEntries(service, runID, tc.ProjectID, t)
+	defer GetLogEntries(service, t)
 	defer service.Clean()
 
 	requestPath := "/"
@@ -60,44 +54,18 @@ func TestSigtermHandlerService(t *testing.T) {
 	}
 }
 
-func GetLogEntries(service *cloudrunci.Service, runID string, projectID string, t *testing.T) {
-	ctx := context.Background()
-	client, err := logadmin.NewClient(ctx, projectID)
-	if err != nil {
-		t.Fatalf("Failed to create client: %v", err)
-	}
-	defer client.Close()
-
-	// Create service and timestamp filters
+func GetLogEntries(service *cloudrunci.Service, t *testing.T) {
+	// Create timestamp filters
 	minsAgo := time.Now().Add(-5 * time.Minute)
 	timeFormat := minsAgo.Format(time.RFC3339)
-	filter := fmt.Sprintf(`resource.labels.service_name="%s" timestamp>="%s"`, fmt.Sprintf("%s-%s", service.Name, runID), timeFormat)
-	preparedFilter := fmt.Sprintf(`resource.type="cloud_run_revision" severity="default" %s  NOT protoPayload.serviceName="run.googleapis.com"`, filter)
+	filter := fmt.Sprintf(`timestamp>="%s" severity="default" NOT protoPayload.serviceName="run.googleapis.com"`, timeFormat)
 
 	fmt.Println("Waiting for logs...")
 	time.Sleep(3 * time.Minute)
-	maxAttempts := 6
-	fmt.Printf("Using log filter: %s\n", preparedFilter)
-	for i := 1; i < maxAttempts; i++ {
-		fmt.Printf("Attempt #%d\n", i)
-		it := client.Entries(ctx, logadmin.Filter(preparedFilter))
-		for {
-			entry, err := it.Next()
-			if err == iterator.Done {
-				break
-			}
-			if err != nil {
-				t.Errorf("error fetching logs: %s", err)
-			}
-			if len(fmt.Sprintf("%v", entry.Payload)) > 0 {
-				fmt.Printf("Found log: %v\n", entry.Payload)
-			}
-			if strings.Contains(fmt.Sprintf("%v", entry.Payload), "terminated signal caught") {
-				fmt.Println("SIGTERM log entry: found.")
-				return
-			}
-		}
-		time.Sleep(60 * time.Second)
+
+	found, err := service.LogEntries(filter, "terminated signal caught", 6)
+	if err != nil || !found {
+		t.Error("SIGTERM log entry: not found.")
 	}
-	t.Error("SIGTERM log entry: not found.")
+	return
 }

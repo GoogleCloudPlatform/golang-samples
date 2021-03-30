@@ -24,13 +24,18 @@
 package cloudrunci
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
 	"os/exec"
 	"path"
+	"strings"
 	"time"
+
+	"cloud.google.com/go/logging/logadmin"
+	"google.golang.org/api/iterator"
 )
 
 // labels are used in operation-related logs.
@@ -383,4 +388,39 @@ func (s *Service) urlCmd() *exec.Cmd {
 	cmd := exec.Command(gcloudBin, args...)
 	cmd.Dir = s.Dir
 	return cmd
+}
+
+func (s *Service) LogEntries(filter string, find string, maxAttempts int) (bool, error) {
+	ctx := context.Background()
+	client, err := logadmin.NewClient(ctx, s.ProjectID)
+	if err != nil {
+		return false, fmt.Errorf("logadmin.NewClient: %v", err)
+	}
+	defer client.Close()
+
+	preparedFilter := fmt.Sprintf(`resource.type="cloud_run_revision" resource.labels.service_name="%s" %s`, s.version(), filter)
+	fmt.Printf("Using log filter: %s\n", preparedFilter)
+
+	for i := 1; i < maxAttempts; i++ {
+		fmt.Printf("Attempt #%d\n", i)
+		it := client.Entries(ctx, logadmin.Filter(preparedFilter))
+		for {
+			entry, err := it.Next()
+			if err == iterator.Done {
+				break
+			}
+			if err != nil {
+				return false, fmt.Errorf("it.Next: %v", err)
+			}
+			if len(fmt.Sprintf("%v", entry.Payload)) > 0 {
+				fmt.Printf("entry.Payload: %v\n", entry.Payload)
+			}
+			if strings.Contains(fmt.Sprintf("%v", entry.Payload), find) {
+				fmt.Println("SIGTERM log entry: found.")
+				return true, nil
+			}
+		}
+		time.Sleep(15 * time.Second)
+	}
+	return false, nil
 }
