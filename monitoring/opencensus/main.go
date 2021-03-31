@@ -16,7 +16,6 @@ package main
 
 // [START monitoring_sli_metrics_opencensus_setup]
 import (
-	"context"
 	"flag"
 	"fmt"
 	"log"
@@ -97,10 +96,10 @@ func main() {
 }
 
 func handle(w http.ResponseWriter, r *http.Request) {
-	ctx, _ := tag.New(context.Background())
+	ctx, _ := tag.New(r.Context())
+	// [START monitoring_sli_metrics_opencensus_latency]
 	requestReceived := time.Now()
 	// Records latency for failure OR success.
-	// [START monitoring_sli_metrics_opencensus_latency]
 	defer func() {
 		stats.Record(ctx, responseLatency.M(time.Since(requestReceived).Seconds()))
 	}()
@@ -110,16 +109,15 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	stats.Record(ctx, requestCount.M(1))
 
 	// Randomly fails 10% of the time.
-	if rand.Intn(100) > 90 {
+	if rand.Intn(100) >= 90 {
 		// Counts the error.
 		stats.Record(ctx, failedRequestCount.M(1))
 		// [END monitoring_sli_metrics_opencensus_counts]
 		fmt.Fprintf(w, "intentional error!")
 		return
-	} else {
-		delay := time.Duration(rand.Intn(1000)) * time.Millisecond
-		time.Sleep(delay)
-		fmt.Fprintf(w, "Succeeded after %v", delay)
-		return
 	}
+	delay := time.Duration(rand.Intn(1000)) * time.Millisecond
+	time.Sleep(delay)
+	fmt.Fprintf(w, "Succeeded after %v", delay)
+	return
 }
