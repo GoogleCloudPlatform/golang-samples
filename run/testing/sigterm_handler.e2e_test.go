@@ -60,12 +60,11 @@ func GetLogEntries(service *cloudrunci.Service, t *testing.T) {
 	timeFormat := minsAgo.Format(time.RFC3339)
 	filter := fmt.Sprintf(`timestamp>="%s" severity="default" NOT protoPayload.serviceName="run.googleapis.com"`, timeFormat)
 
-	fmt.Println("Waiting for logs...")
-	time.Sleep(3 * time.Minute)
-
-	found, err := service.LogEntries(filter, "terminated signal caught", 6)
+	find := "terminated signal caught"
+	attempts := 6
+	found, err := service.LogEntries(filter, find, attempts)
 	if err != nil || !found {
-		t.Error("SIGTERM log entry: not found.")
+		t.Errorf("%q log entry not found.", find)
 	}
 	return
 }

@@ -401,6 +401,9 @@ func (s *Service) LogEntries(filter string, find string, maxAttempts int) (bool,
 	preparedFilter := fmt.Sprintf(`resource.type="cloud_run_revision" resource.labels.service_name="%s" %s`, s.version(), filter)
 	fmt.Printf("Using log filter: %s\n", preparedFilter)
 
+	fmt.Println("Waiting for logs...")
+	time.Sleep(3 * time.Minute)
+	
 	for i := 1; i < maxAttempts; i++ {
 		fmt.Printf("Attempt #%d\n", i)
 		it := client.Entries(ctx, logadmin.Filter(preparedFilter))
@@ -412,11 +415,12 @@ func (s *Service) LogEntries(filter string, find string, maxAttempts int) (bool,
 			if err != nil {
 				return false, fmt.Errorf("it.Next: %v", err)
 			}
-			if len(fmt.Sprintf("%v", entry.Payload)) > 0 {
+			payload := fmt.Sprintf("%v", entry.Payload)
+			if len(payload) > 0 {
 				fmt.Printf("entry.Payload: %v\n", entry.Payload)
 			}
-			if strings.Contains(fmt.Sprintf("%v", entry.Payload), find) {
-				fmt.Println("SIGTERM log entry: found.")
+			if strings.Contains(payload, find) {
+				fmt.Printf("%q log entry found.\n", find)
 				return true, nil
 			}
 		}

@@ -57,15 +57,14 @@ func main() {
 	// Receive output from signalChan.
 	sig := <-signalChan
 	log.Printf("%s signal caught", sig)
-	log.Print("server stopped")
 
 	// Timeout if waiting for connections to return idle.
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-
-	// Add extra handling here to close any DB connections, redis, or flush logs.
-
-	// Release resources.
 	defer cancel()
+
+	// Add extra handling here to clean up resources, such as flushing logs and
+	// closing any database or Redis connections.
+
 	// Gracefully shutdown the server by waiting on existing requests (except websockets).
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Printf("server shutdown failed: %+v", err)
