@@ -42,7 +42,7 @@ func TestPublish(t *testing.T) {
 		t.Fatalf("pubsublite.NewAdminClient: %v", err)
 	}
 	defer admin.Close()
-	psltest.Cleanup(t, admin, tc.ProjectID, []string{zone})
+	psltest.Cleanup(t, admin, tc.ProjectID, topicPrefix, []string{zone})
 
 	topicID := topicPrefix + uuid.NewString()
 	topicPath := fmt.Sprintf("projects/%s/locations/%s/topics/%s", tc.ProjectID, zone, topicID)

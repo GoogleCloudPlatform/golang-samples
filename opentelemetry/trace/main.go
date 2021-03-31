@@ -43,10 +43,9 @@ func main() {
 	//
 	// By default it uses AlwaysSample() which samples all traces.
 	// In a production environment or high QPS setup please use
-	// ProbabilitySampler set at the desired probability.
+	// probabilistic sampling.
 	// Example:
-	//   config := sdktrace.Config{DefaultSampler:sdktrace.ProbabilitySampler(0.0001)}
-	//   tp := sdktrace.NewTracerProvider(sdktrace.WithConfig(config), ...)
+	//   tp := sdktrace.NewTracerProvider(sdktrace.WithSampler(sdktrace.TraceIDRatioBased(0.0001)), ...)
 	tp := sdktrace.NewTracerProvider(sdktrace.WithSyncer(exporter))
 	otel.SetTracerProvider(tp)
 

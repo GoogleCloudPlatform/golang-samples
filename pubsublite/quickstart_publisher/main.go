@@ -21,9 +21,11 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"sync"
 
 	"cloud.google.com/go/pubsub"
 	"cloud.google.com/go/pubsublite/pscompat"
+	"golang.org/x/sync/errgroup"
 )
 
 func main() {
@@ -47,34 +49,54 @@ func main() {
 	// Ensure the publisher will be shut down.
 	defer publisher.Stop()
 
+	// Collect any messages that need to be republished with a new publisher
+	// client.
+	var toRepublish []*pubsub.Message
+	var toRepublishMu sync.Mutex
+
 	// Publish messages. Messages are automatically batched.
-	var results []*pubsub.PublishResult
+	g := new(errgroup.Group)
 	for i := 0; i < *messageCount; i++ {
-		r := publisher.Publish(ctx, &pubsub.Message{
+		msg := &pubsub.Message{
 			Data: []byte(fmt.Sprintf("message-%d", i)),
+		}
+		result := publisher.Publish(ctx, msg)
+
+		g.Go(func() error {
+			// Get blocks until the result is ready.
+			id, err := result.Get(ctx)
+			if err != nil {
+				// NOTE: A failed PublishResult indicates that the publisher client
+				// encountered a fatal error and has permanently terminated. After the
+				// fatal error has been resolved, a new publisher client instance must
+				// be created to republish failed messages.
+				fmt.Printf("Publish error: %v\n", err)
+				toRepublishMu.Lock()
+				toRepublish = append(toRepublish, msg)
+				toRepublishMu.Unlock()
+				return err
+			}
+
+			// Metadata decoded from the id contains the partition and offset.
+			metadata, err := pscompat.ParseMessageMetadata(id)
+			if err != nil {
+				fmt.Printf("Failed to parse message metadata %q: %v\n", id, err)
+				return err
+			}
+			fmt.Printf("Published: partition=%d, offset=%d\n", metadata.Partition, metadata.Offset)
+			return nil
 		})
-		results = append(results, r)
 	}
-
-	// Print publish results.
-	for _, r := range results {
-		// Get blocks until the result is ready.
-		id, err := r.Get(ctx)
-		if err != nil {
-			// NOTE: The publisher will terminate upon first error. Create a new
-			// publisher to republish failed messages.
-			log.Fatalf("Publish error: %v", err)
-		}
-
-		// Metadata decoded from the id contains the partition and offset.
-		metadata, err := pscompat.ParseMessageMetadata(id)
-		if err != nil {
-			log.Fatalf("Failed to parse %q: %v", id, err)
-		}
-		fmt.Printf("Published: partition=%d, offset=%d\n", metadata.Partition, metadata.Offset)
+	if err := g.Wait(); err != nil {
+		fmt.Printf("Publishing finished with error: %v\n", err)
 	}
+	fmt.Printf("Published %d messages\n", *messageCount-len(toRepublish))
 
-	fmt.Printf("Published %d messages\n", *messageCount)
+	// Print the error that caused the publisher client to terminate (if any),
+	// which may contain more context than PublishResults.
+	if err := publisher.Error(); err != nil {
+		fmt.Printf("Publisher client terminated due to error: %v\n", publisher.Error())
+	}
 }
 
 // [END pubsublite_quickstart_publisher]

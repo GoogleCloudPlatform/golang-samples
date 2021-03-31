@@ -26,15 +26,18 @@ import (
 	"testing"
 	"time"
 
+	kms "cloud.google.com/go/kms/apiv1"
 	"cloud.google.com/go/spanner"
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
 	instance "cloud.google.com/go/spanner/admin/instance/apiv1"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
 	"google.golang.org/api/iterator"
+	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 	instancepb "google.golang.org/genproto/googleapis/spanner/admin/instance/v1"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type sampleFunc func(w io.Writer, dbName string) error
@@ -412,6 +415,108 @@ func TestCreateDatabaseWithRetentionPeriodSample(t *testing.T) {
 	assertContains(t, out, fmt.Sprintf("Created database [%s] with version retention period %q", dbName, wantRetentionPeriod))
 }
 
+func TestCustomerManagedEncryptionKeys(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	dbName, cleanup := initTest(t, randomID())
+	defer cleanup()
+	adminClient, err := database.NewDatabaseAdminClient(context.Background())
+	if err != nil {
+		t.Errorf("failed to create admin client: %v", err)
+	}
+
+	var b bytes.Buffer
+
+	instanceName := getInstance(t)
+	locationId := "us-central1"
+	keyRingId := "spanner-test-keyring"
+	keyId := "spanner-test-key"
+
+	// Create an encryption key if it does not already exist.
+	if err := maybeCreateKey(tc.ProjectID, locationId, keyRingId, keyId); err != nil {
+		t.Errorf("failed to create encryption key: %v", err)
+	}
+	kmsKeyName := fmt.Sprintf(
+		"projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s",
+		tc.ProjectID,
+		locationId,
+		keyRingId,
+		keyId,
+	)
+
+	// Create an encrypted database. The database is automatically deleted by the cleanup function.
+	if err := createDatabaseWithCustomerManagedEncryptionKey(&b, dbName, kmsKeyName); err != nil {
+		t.Errorf("failed to create database with customer managed encryption key: %v", err)
+	}
+	out := b.String()
+	assertContains(t, out, fmt.Sprintf("Created database [%s] using encryption key %q", dbName, kmsKeyName))
+
+	// Try to create a backup of the encrypted database and delete it after the test.
+	backupId := fmt.Sprintf("enc-backup-%s", randomID())
+	defer func() {
+		_ = adminClient.DeleteBackup(context.Background(), &adminpb.DeleteBackupRequest{
+			Name: fmt.Sprintf("%s/backups/%s", instanceName, backupId),
+		})
+	}()
+	b.Reset()
+	if err := createBackupWithCustomerManagedEncryptionKey(&b, dbName, backupId, kmsKeyName); err != nil {
+		t.Errorf("failed to create backup with customer managed encryption key: %v", err)
+	}
+	out = b.String()
+	assertContains(t, out, fmt.Sprintf("backups/%s", backupId))
+	assertContains(t, out, fmt.Sprintf("using encryption key %s", kmsKeyName))
+
+	// Try to restore the encrypted database and delete the restored database after the test.
+	restoredName := fmt.Sprintf("%s/databases/rest-enc-%s", instanceName, randomID())
+	defer func() {
+		_ = adminClient.DropDatabase(context.Background(), &adminpb.DropDatabaseRequest{
+			Database: restoredName,
+		})
+	}()
+	restoreFunc := func(w io.Writer, dbName, backupID string) error {
+		return restoreBackupWithCustomerManagedEncryptionKey(w, dbName, backupId, kmsKeyName)
+	}
+	out = runBackupSampleWithRetry(t, restoreFunc, restoredName, backupId, "failed to restore database with customer managed encryption key", 10)
+	assertContains(t, out, fmt.Sprintf("Database %s restored", dbName))
+	assertContains(t, out, fmt.Sprintf("using encryption key %s", kmsKeyName))
+}
+
+func maybeCreateKey(projectId, locationId, keyRingId, keyId string) error {
+	client, err := kms.NewKeyManagementClient(context.Background())
+	if err != nil {
+		return err
+	}
+
+	// Try to create a key ring
+	createKeyRingRequest := kmspb.CreateKeyRingRequest{
+		Parent:    fmt.Sprintf("projects/%s/locations/%s", projectId, locationId),
+		KeyRingId: keyRingId,
+		KeyRing:   &kmspb.KeyRing{},
+	}
+	_, err = client.CreateKeyRing(context.Background(), &createKeyRingRequest)
+	if err != nil {
+		if status, ok := status.FromError(err); !ok || status.Code() != codes.AlreadyExists {
+			return err
+		}
+	}
+
+	// Try to create a key
+	createKeyRequest := kmspb.CreateCryptoKeyRequest{
+		Parent:      fmt.Sprintf("projects/%s/locations/%s/keyRings/%s", projectId, locationId, keyRingId),
+		CryptoKeyId: keyId,
+		CryptoKey: &kmspb.CryptoKey{
+			Purpose: kmspb.CryptoKey_ENCRYPT_DECRYPT,
+		},
+	}
+	_, err = client.CreateCryptoKey(context.Background(), &createKeyRequest)
+	if err != nil {
+		if status, ok := status.FromError(err); !ok || status.Code() != codes.AlreadyExists {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func runSample(t *testing.T, f sampleFunc, dbName, errMsg string) string {
 	var b bytes.Buffer
 	if err := f(&b, dbName); err != nil {
@@ -441,7 +546,7 @@ func runBackupSampleWithRetry(t *testing.T, f backupSampleFunc, dbName, backupID
 	testutil.Retry(t, maxAttempts, time.Minute, func(r *testutil.R) {
 		b.Reset()
 		if err := f(&b, dbName, backupID); err != nil {
-			if spanner.ErrCode(err) == codes.InvalidArgument && strings.Contains(err.Error(), "Please retry the operation once the pending restores complete") {
+			if strings.Contains(err.Error(), "Please retry the operation once the pending restores complete") {
 				r.Errorf("%s: %v", errMsg, err)
 			} else {
 				t.Fatalf("%s: %v", errMsg, err)
