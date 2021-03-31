@@ -403,7 +403,7 @@ func (s *Service) LogEntries(filter string, find string, maxAttempts int) (bool,
 
 	fmt.Println("Waiting for logs...")
 	time.Sleep(3 * time.Minute)
-	
+
 	for i := 1; i < maxAttempts; i++ {
 		fmt.Printf("Attempt #%d\n", i)
 		it := client.Entries(ctx, logadmin.Filter(preparedFilter))
