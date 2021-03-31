@@ -33,18 +33,14 @@ func configureConnectionPool(w io.Writer, projectID, instanceID string) error {
 
 	// Set up Bigtable data operations client.
 	poolSize := 250
-	client, err := bigtable.NewClient(ctx, projectID, instanceID,
-		option.WithGRPCConnectionPool(poolSize))
+	client, err := bigtable.NewClient(ctx, projectID, instanceID, option.WithGRPCConnectionPool(poolSize))
+  defer client.Close()
 
 	if err != nil {
 		return fmt.Errorf("bigtable.NewClient: %v", err)
 	}
 
 	fmt.Fprintf(w, "Connected with pool size of %d", poolSize)
-
-	if err = client.Close(); err != nil {
-		return fmt.Errorf("Close: %v", err)
-	}
 
 	return nil
 }
