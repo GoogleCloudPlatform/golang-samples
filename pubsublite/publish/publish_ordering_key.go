@@ -54,25 +54,30 @@ func publishWithOrderingKey(w io.Writer, projectID, zone, topicID string, messag
 	}
 
 	// Print publish results.
+	var publishedCount int
 	for _, r := range results {
 		// Get blocks until the result is ready.
 		id, err := r.Get(ctx)
 		if err != nil {
-			// NOTE: The publisher will terminate upon first error. Create a new
-			// publisher to republish failed messages.
-			return fmt.Errorf("publish error: %v", err)
+			// NOTE: A failed PublishResult indicates that the publisher client
+			// encountered a fatal error and has permanently terminated. After the
+			// fatal error has been resolved, a new publisher client instance must be
+			// created to republish failed messages.
+			fmt.Fprintf(w, "Publish error: %v\n", err)
+			continue
 		}
 
 		// Metadata decoded from the id contains the partition and offset.
 		metadata, err := pscompat.ParseMessageMetadata(id)
 		if err != nil {
-			return fmt.Errorf("failed to parse %q: %v", id, err)
+			return fmt.Errorf("failed to parse message metadata %q: %v", id, err)
 		}
 		fmt.Fprintf(w, "Published: partition=%d, offset=%d\n", metadata.Partition, metadata.Offset)
+		publishedCount++
 	}
 
-	fmt.Fprintf(w, "Published %d messages with ordering key\n", messageCount)
-	return nil
+	fmt.Fprintf(w, "Published %d messages with ordering key\n", publishedCount)
+	return publisher.Error()
 }
 
 // [END pubsublite_publish_ordering_key]
