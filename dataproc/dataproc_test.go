@@ -24,6 +24,7 @@ import (
 
 	dataproc "cloud.google.com/go/dataproc/apiv1"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/google/uuid"
 	"google.golang.org/api/option"
 	dataprocpb "google.golang.org/genproto/googleapis/cloud/dataproc/v1"
 )
@@ -55,7 +56,7 @@ func deleteCluster(projectID string, clusterName, region string) error {
 func TestDataproc(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	clusterName := fmt.Sprintf("go-dp-test-%s", tc.ProjectID)
+	clusterName := fmt.Sprintf("go-dp-test-%s", uuid.New().String())
 	region := "us-central1"
 
 	deleteCluster(tc.ProjectID, clusterName, region) // Delete the cluster if it already exists, ignoring any errors.
