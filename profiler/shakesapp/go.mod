@@ -6,7 +6,6 @@ require (
 	cloud.google.com/go v0.81.0
 	cloud.google.com/go/storage v1.10.0
 	github.com/golang/protobuf v1.5.2
-	golang.org/x/mod v0.4.1 // indirect
 	google.golang.org/api v0.43.0
 	google.golang.org/grpc v1.36.1
 )

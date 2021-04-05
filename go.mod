@@ -38,13 +38,13 @@ require (
 	github.com/tinylib/msgp v1.1.2 // indirect
 	go.opencensus.io v0.23.0
 	golang.org/x/exp v0.0.0-20210220032938-85be41e4509f
-	golang.org/x/net 0fccb6fa2b5c
-	golang.org/x/oauth2 2e8d93401602
+	golang.org/x/net v0.0.0-20210331212208-0fccb6fa2b5c
+	golang.org/x/oauth2 v0.0.0-20210402161424-2e8d93401602
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/text v0.3.6
 	google.golang.org/api v0.43.0
 	google.golang.org/appengine v1.6.7
-	google.golang.org/genproto 714cd6049ff4
+	google.golang.org/genproto v0.0.0-20210405143950-714cd6049ff4
 	google.golang.org/grpc v1.36.1
 	google.golang.org/grpc/examples v0.0.0-20200707005602-4258d12073b4
 	google.golang.org/protobuf v1.26.0
