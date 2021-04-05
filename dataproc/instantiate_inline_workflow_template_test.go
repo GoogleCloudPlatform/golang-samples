@@ -33,12 +33,14 @@ func TestInstantiateInlineWorkflowTemplate(t *testing.T) {
 		buf := new(bytes.Buffer)
 
 		if err := instantiateInlineWorkflowTemplate(buf, tc.ProjectID, region); err != nil {
-			t.Errorf("instantiateInlineWorkflowTemplate got err: %v", err)
+			r.Errorf("instantiateInlineWorkflowTemplate got err: %v", err)
+			return
 		}
 
 		got := buf.String()
 		if want := fmt.Sprintf("successfully"); !strings.Contains(got, want) {
-			t.Errorf("instantiateInlineWorkflowTemplate got %q, want %q", got, want)
+			r.Errorf("instantiateInlineWorkflowTemplate got %q, want %q", got, want)
+			return
 		}
 	})
 }
