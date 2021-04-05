@@ -34,7 +34,8 @@ func getSchema(w io.Writer, projectID, schemaID string) error {
 	defer client.Close()
 
 	// Retrieve the full schema view. If you don't want to retrive the
-	// definition, pass in pubsub.SchemaViewBasic instead.
+	// definition, pass in pubsub.SchemaViewBasic which retrieves
+	// just the name and type of the schema.
 	s, err := client.Schema(ctx, schemaID, pubsub.SchemaViewFull)
 	if err != nil {
 		return fmt.Errorf("client.Schema: %v", err)

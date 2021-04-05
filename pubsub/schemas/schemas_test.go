@@ -59,15 +59,25 @@ func setup(t *testing.T) *pubsub.Client {
 	// Cleanup resources from the previous tests.
 	// This includes schemas, topics, and subscriptions.
 	once.Do(func() {
-		scs, err := listSchemas(io.Discard, tc.ProjectID)
-		if err != nil {
-			t.Fatalf("failed to list schemas: %v", err)
-		}
-		for _, sc := range scs {
-			schemaName := strings.Split(sc.Name, "/")
-			deleteSchema(io.Discard, tc.ProjectID, schemaName[len(schemaName)-1])
-		}
+		wg := sync.WaitGroup{}
 
+		wg.Add(1)
+		go func() {
+			scs, err := listSchemas(io.Discard, tc.ProjectID)
+			if err != nil {
+				fmt.Printf("failed to list schemas: %v", err)
+			}
+			for _, sc := range scs {
+				schemaName := strings.Split(sc.Name, "/")
+				schemaID := schemaName[len(schemaName)-1]
+				if strings.HasPrefix(schemaID, schemaPrefix) {
+					deleteSchema(io.Discard, tc.ProjectID, schemaID)
+				}
+			}
+			wg.Done()
+		}()
+
+		wg.Add(1)
 		go func() {
 			topicIter := client.Topics(ctx)
 			for {
@@ -78,12 +88,16 @@ func setup(t *testing.T) *pubsub.Client {
 				if err != nil {
 					fmt.Printf("topicIter.Next got err: %v", err)
 				}
-				if err := topic.Delete(ctx); err != nil {
-					fmt.Printf("topic.Delete got err: %v", err)
+				if strings.HasPrefix(topic.ID(), topicPrefix) {
+					if err := topic.Delete(ctx); err != nil {
+						fmt.Printf("topic.Delete got err: %v", err)
+					}
 				}
 			}
+			wg.Done()
 		}()
 
+		wg.Add(1)
 		go func() {
 			subIter := client.Subscriptions(ctx)
 			for {
@@ -94,11 +108,15 @@ func setup(t *testing.T) *pubsub.Client {
 				if err != nil {
 					fmt.Printf("subIter.Next got err: %v", err)
 				}
-				if err := sub.Delete(ctx); err != nil {
-					fmt.Printf("sub.Delete got err: %v", err)
+				if strings.HasPrefix(sub.ID(), subPrefix) {
+					if err := sub.Delete(ctx); err != nil {
+						fmt.Printf("sub.Delete got err: %v", err)
+					}
 				}
 			}
+			wg.Done()
 		}()
+		wg.Wait()
 	})
 
 	return client

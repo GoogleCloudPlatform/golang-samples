@@ -27,7 +27,7 @@ func createTopicWithSchema(w io.Writer, projectID, topicID, schemaID string, enc
 	// projectID := "my-project-id"
 	// topicID := "my-topic"
 	// schemaID := "my-schema-id"
-	// encoding := pubsub.EncodingJSON // or pubsub.EncodingBinary
+	// encoding := pubsub.EncodingJSON
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {

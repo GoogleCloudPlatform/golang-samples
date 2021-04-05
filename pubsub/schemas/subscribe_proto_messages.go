@@ -38,6 +38,7 @@ func subscribeWithProtoSchema(w io.Writer, projectID, subID, protoFile string) e
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
 
+	// Create an instance of the message to be decoded (a single U.S. state).
 	state := &statepb.State{}
 
 	sub := client.Subscription(subID)

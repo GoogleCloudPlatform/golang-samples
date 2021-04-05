@@ -27,6 +27,7 @@ import (
 func createProtoSchema(w io.Writer, projectID, schemaID, protoFile string) error {
 	// projectID := "my-project-id"
 	// schemaID := "my-schema"
+	// For more info about the proto schemas see: https://cloud.google.com/pubsub/docs/schemas#protocol-buffer
 	// protoFile = "path/to/a/proto/schema/file(.proto)/formatted/in/protocol/buffers"
 	ctx := context.Background()
 	client, err := pubsub.NewSchemaClient(ctx, projectID)
