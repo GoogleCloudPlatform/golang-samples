@@ -25,6 +25,7 @@ import (
 	dataproc "cloud.google.com/go/dataproc/apiv1"
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/google/uuid"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 	dataprocpb "google.golang.org/genproto/googleapis/cloud/dataproc/v1"
@@ -46,8 +47,10 @@ func setup(t *testing.T, projectID string) {
 	ctx := context.Background()
 	flag.Parse()
 
-	clusterName = "go-qs-test-" + projectID
-	bktName = "go-dataproc-qs-test-" + projectID
+	uuid := uuid.New().String()
+
+	clusterName = "go-qs-test-" + uuid
+	bktName = "go-dataproc-qs-test-" + uuid
 	jobFilePath = fmt.Sprintf("gs://%s/%s", bktName, jobFName)
 
 	sc, err := storage.NewClient(ctx)
