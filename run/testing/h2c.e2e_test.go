@@ -25,7 +25,7 @@ import (
 	"golang.org/x/net/http2"
 )
 
-// TestGRPCServerStreamingService is an end-to-end test that confirms the image builds, deploys and runs on
+// TestHTTP2Server is an end-to-end test that confirms the image builds, deploys and runs on
 // Cloud Run and can stream messages from server.
 func TestHTTP2Server(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
