@@ -17,10 +17,9 @@ package main
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
-	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"cloud.google.com/go/bigquery"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -28,7 +27,7 @@ import (
 
 func TestMain(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	os.Setenv("GOOGLE_CLOUD_PROJECT", tc.ProjectID)
+	env := map[string]string{"GOOGLE_CLOUD_PROJECT": tc.ProjectID}
 
 	ctx := context.Background()
 	// Creates a bigquery client.
@@ -39,22 +38,18 @@ func TestMain(t *testing.T) {
 	datasetID := strings.Replace(fmt.Sprintf("%s-for-assets", tc.ProjectID), "-", "_", -1)
 	createDataset(ctx, t, client, datasetID)
 
-	oldStdout := os.Stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
+	m := testutil.BuildMain(t)
 
-	main()
-
-	w.Close()
-	os.Stdout = oldStdout
-
-	out, err := ioutil.ReadAll(r)
-	if err != nil {
-		t.Fatalf("Failed to read stdout: %v", err)
-	}
-	if got, want := string(out), "output_config:"; !strings.Contains(got, want) {
-		t.Errorf("stdout returned %s, wanted to contain %s", got, want)
-	}
+	testutil.Retry(t, 5, 10*time.Second, func(r *testutil.R) {
+		out, _, err := m.Run(env, 120*time.Second)
+		if err != nil {
+			r.Errorf("error running main: %v:\n%v", err, out)
+			return
+		}
+		if got, want := string(out), "output_config:"; !strings.Contains(got, want) {
+			r.Errorf("stdout returned %s, wanted to contain %s", got, want)
+		}
+	})
 }
 
 func createDataset(ctx context.Context, t *testing.T, client *bigquery.Client, datasetID string) {
