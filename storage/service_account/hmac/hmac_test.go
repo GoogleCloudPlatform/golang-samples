@@ -119,20 +119,21 @@ func TestDeactivateKey(t *testing.T) {
 
 func TestGetKey(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	key, err := createTestKey(tc.ProjectID)
-	defer deleteTestKey(key)
-	if err != nil {
-		t.Errorf("Error in key creation: %s", err)
-	}
-
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
+		key, err := createTestKey(tc.ProjectID)
+		defer deleteTestKey(key)
+		if err != nil {
+			t.Fatalf("Error in key creation: %s", err)
+		}
+
+		if key == nil {
+			t.Fatalf("Returned nil key.")
+		}
+
 		key, err = getHMACKey(ioutil.Discard, key.AccessID, key.ProjectID)
 		if err != nil {
 			r.Errorf("Error in getHMACKey: %s", err)
 			return
-		}
-		if key == nil {
-			r.Errorf("Returned nil key.")
 		}
 	})
 }
