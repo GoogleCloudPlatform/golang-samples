@@ -126,6 +126,8 @@ func TestGetKey(t *testing.T) {
 			t.Fatalf("Error in key creation: %s", err)
 		}
 
+		// Nil key check should not happen but is added to handle flaky
+		// "nil pointer dereference" error
 		if key == nil {
 			t.Fatalf("Returned nil key.")
 		}
