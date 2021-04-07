@@ -28,7 +28,6 @@ import (
 func createAvroSchema(w io.Writer, projectID, schemaID, avscFile string) error {
 	// projectID := "my-project-id"
 	// schemaID := "my-schema"
-	// For more info about the avro schemas see: https://cloud.google.com/pubsub/docs/schemas#avro
 	// avscFile = "path/to/an/avro/schema/file(.avsc)/formatted/in/json"
 	ctx := context.Background()
 	client, err := pubsub.NewSchemaClient(ctx, projectID)
