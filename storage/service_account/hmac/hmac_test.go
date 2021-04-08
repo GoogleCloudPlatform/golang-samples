@@ -22,9 +22,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-
 	"cloud.google.com/go/storage"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 var serviceAccountEmail = os.Getenv("GOLANG_SAMPLES_SERVICE_ACCOUNT_EMAIL")
@@ -44,7 +43,7 @@ func TestMain(m *testing.M) {
 
 func TestListKeys(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	key, err := createTestKey(tc.ProjectID)
+	key, err := createTestKey(tc.ProjectID, t)
 	defer deleteTestKey(key)
 	if err != nil {
 		t.Fatalf("Error in key creation: %s", err)
@@ -79,7 +78,7 @@ func TestCreateKey(t *testing.T) {
 
 func TestActivateKey(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	key, err := createTestKey(tc.ProjectID)
+	key, err := createTestKey(tc.ProjectID, t)
 	defer deleteTestKey(key)
 	if err != nil {
 		t.Errorf("Error in key creation: %s", err)
@@ -102,7 +101,7 @@ func TestActivateKey(t *testing.T) {
 
 func TestDeactivateKey(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	key, err := createTestKey(tc.ProjectID)
+	key, err := createTestKey(tc.ProjectID, t)
 	defer deleteTestKey(key)
 	if err != nil {
 		t.Errorf("Error in key creation: %s", err)
@@ -119,30 +118,27 @@ func TestDeactivateKey(t *testing.T) {
 
 func TestGetKey(t *testing.T) {
 	tc := testutil.SystemTest(t)
+	key, err := createTestKey(tc.ProjectID, t)
+	defer deleteTestKey(key)
+	if err != nil {
+		t.Errorf("Error in key creation: %s", err)
+	}
+
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
-		key, err := createTestKey(tc.ProjectID)
-		defer deleteTestKey(key)
-		if err != nil {
-			t.Fatalf("Error in key creation: %s", err)
-		}
-
-		// Nil key check should not happen but is added to handle flaky
-		// "nil pointer dereference" error
-		if key == nil {
-			t.Fatalf("Returned nil key.")
-		}
-
 		key, err = getHMACKey(ioutil.Discard, key.AccessID, key.ProjectID)
 		if err != nil {
 			r.Errorf("Error in getHMACKey: %s", err)
 			return
+		}
+		if key == nil {
+			r.Errorf("Returned nil key.")
 		}
 	})
 }
 
 func TestDeleteKey(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	key, err := createTestKey(tc.ProjectID)
+	key, err := createTestKey(tc.ProjectID, t)
 	defer deleteTestKey(key)
 	if err != nil {
 		t.Errorf("Error in key creation: %s", err)
@@ -165,13 +161,25 @@ func TestDeleteKey(t *testing.T) {
 }
 
 // Create a key for testing purposes.
-func createTestKey(projectID string) (*storage.HMACKey, error) {
+func createTestKey(projectID string, t *testing.T) (*storage.HMACKey, error) {
 	ctx := context.Background()
-	key, err := storageClient.CreateHMACKey(ctx, projectID, serviceAccountEmail)
-	if err != nil {
-		return nil, fmt.Errorf("storage.NewClient: %v", err)
-	}
-	return key, nil
+	var key *storage.HMACKey
+	var err error
+
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
+		key, err = storageClient.CreateHMACKey(ctx, projectID, serviceAccountEmail)
+		if err != nil {
+			t.Fatalf("Error in CreateHMACKey: %v", err)
+		}
+		// Nil key check should not happen but is added to handle flaky
+		// "nil pointer dereference" error
+		if key == nil {
+			t.Fatalf("Returned nil key.")
+		}
+		return
+	})
+
+	return key, err
 }
 
 // Deactivate and delete the given key. Should operate as a teardown method.
