@@ -168,16 +168,18 @@ func createTestKey(projectID string, t *testing.T) (*storage.HMACKey, error) {
 	var err error
 
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
-		key, err = storageClient.CreateHMACKey(ctx, projectID, serviceAccountEmail)
+		key, err = storageClient.CreateHMACKey(ctx, "projectID", serviceAccountEmail)
 		if err != nil {
-			t.Fatalf("Error in CreateHMACKey: %v", err)
+			r.Errorf("Error in CreateHMACKey: %v", err)
+			return
 		}
+
 		// Nil key check should not happen but is added to handle flaky
-		// "nil pointer dereference" error
+		// "nil pointer dereference" error. This will fail the test immediately.
 		if key == nil {
-			t.Fatalf("Returned nil key.")
+			r.Errorf("Returned nil key.")
+			return
 		}
-		return
 	})
 
 	return key, err
