@@ -175,7 +175,7 @@ func createTestKey(projectID string, t *testing.T) (*storage.HMACKey, error) {
 		}
 
 		// Nil key check should not happen but is added to handle flaky
-		// "nil pointer dereference" error. This will fail the test immediately.
+		// "nil pointer dereference" error.
 		if key == nil {
 			r.Errorf("Returned nil key.")
 			return
