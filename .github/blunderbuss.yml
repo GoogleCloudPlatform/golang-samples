@@ -39,3 +39,13 @@ assign_issues_by:
   - 'api: spanner'
   to:
   - skuruppu
+- labels:
+  - 'api: cloudiot'
+  to:
+  - attilagargyan
+
+assign_prs_by:
+- labels:
+  - 'api: cloudiot'
+  to:
+  - attilagargyan
