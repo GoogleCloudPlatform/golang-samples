@@ -168,7 +168,7 @@ func createTestKey(projectID string, t *testing.T) (*storage.HMACKey, error) {
 	var err error
 
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
-		key, err = storageClient.CreateHMACKey(ctx, "projectID", serviceAccountEmail)
+		key, err = storageClient.CreateHMACKey(ctx, projectID, serviceAccountEmail)
 		if err != nil {
 			r.Errorf("Error in CreateHMACKey: %v", err)
 			return
