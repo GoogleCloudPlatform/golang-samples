@@ -15,3 +15,4 @@
 /firestore/      @googleapis/firestore-dpe @googleapis/yoshi-go-admins
 /logging/        @GoogleCloudPlatform/observability-devx @googleapis/yoshi-go-admins @nicoleczhu
 /storage/        @GoogleCloudPlatform/storage-dpe @googleapis/yoshi-go-admins
+/iot/            @gcseh @GoogleCloudPlatform/api-iot @googleapis/yoshi-go-admins

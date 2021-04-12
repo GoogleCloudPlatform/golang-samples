@@ -1,0 +1,12 @@
+# The .gcloudignore file excludes file from upload to Cloud Build.
+# If this file is deleted, gcloud will default to .gitignore.
+#
+# https://cloud.google.com/cloud-build/docs/speeding-up-builds#gcloudignore
+# https://cloud.google.com/sdk/gcloud/reference/topic/gcloudignore
+
+# Exclude locally vendored dependencies.
+vendor/
+
+# Exclude git history and configuration.
+.git/
+.gitignore

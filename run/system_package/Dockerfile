@@ -29,7 +29,7 @@ RUN go mod download
 COPY . ./
 
 # Build the binary.
-RUN go build -mod=readonly -v -o server
+RUN go build -v -o server
 # Use a Docker multi-stage build to create a lean production image.
 # https://docs.docker.com/develop/develop-images/multistage-build/#use-multi-stage-builds
 # https://hub.docker.com/_/ubuntu
