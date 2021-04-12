@@ -23,6 +23,7 @@ import (
 
 	"cloud.google.com/go/bigquery"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"google.golang.org/api/googleapi"
 )
 
 func TestMain(t *testing.T) {
@@ -65,14 +66,35 @@ func TestMain(t *testing.T) {
 func createDataset(ctx context.Context, t *testing.T, client *bigquery.Client, datasetID string) {
 	d := client.Dataset(datasetID)
 	if _, err := d.Metadata(ctx); err == nil {
-		if errDelete := d.DeleteWithContents(ctx); errDelete != nil {
-			t.Fatalf("Dataset.Delete(%q): %v", datasetID, errDelete)
+		if err := d.DeleteWithContents(ctx); err != nil {
+			if err, ok := err.(*googleapi.Error); ok {
+				// Just in case a delete was slow to propagate.
+				if err.Code != 404 {
+					t.Fatalf("Dataset.Delete(%q): %v", datasetID, err)
+				}
+			}
 		}
 	}
+
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
+		if _, err := d.Metadata(ctx); err != nil {
+			// Deletion successful.
+			return
+		}
+		r.Errorf("Failed to delete dataset %q", datasetID)
+	})
+
+	time.Sleep(10 * time.Second) // Extra time to let the delete settle.
+
 	meta := &bigquery.DatasetMetadata{
 		Location: "US", // See https://cloud.google.com/bigquery/docs/locations
 	}
 	if err := client.Dataset(datasetID).Create(ctx, meta); err != nil {
+		if err, ok := err.(*googleapi.Error); ok {
+			if err.Code == 409 { // Already exists. Not sure why.
+				return
+			}
+		}
 		t.Fatalf("Dataset.Create(%q): %v", datasetID, err)
 	}
 }
