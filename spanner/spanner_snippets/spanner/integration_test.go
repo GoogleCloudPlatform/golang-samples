@@ -364,6 +364,7 @@ func TestBackupSample(t *testing.T) {
 	if os.Getenv("GOLANG_SAMPLES_E2E_TEST") == "" {
 		t.Skip("GOLANG_SAMPLES_E2E_TEST not set")
 	}
+	_ = testutil.SystemTest(t)
 	id := randomID()
 	dbName, cleanup := initTest(t, id)
 	defer cleanup()
