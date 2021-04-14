@@ -18,7 +18,6 @@
 package main
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -36,11 +35,7 @@ func HelloEventsPubSub(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Bad HTTP Request: %v", http.StatusBadRequest)
 		return
 	}
-	b, err := base64.URLEncoding.DecodeString(*e.Message.Data)
-	name := string(b)
-	if err != nil {
-		panic(err)
-	}
+	name := string(e.Message.Data)
 
 	if name == "" {
 		name = "World"
