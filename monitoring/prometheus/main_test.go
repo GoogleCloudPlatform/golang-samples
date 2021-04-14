@@ -17,6 +17,7 @@ package main
 import (
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -41,10 +42,12 @@ func TestStartingServer(t *testing.T) {
 
 	// Tests response status.
 	gotStatus := rr.Code
-	wantStatus := http.StatusOK
+	gotBody := rr.Body.String()
+	wantGoodStatus := http.StatusOK
+	wantBadStatus := http.StatusInternalServerError
 
-	if gotStatus != wantStatus {
-		t.Fatalf("Returned wrong status code: got %v want %v", gotStatus, wantStatus)
+	if gotStatus != wantGoodStatus && gotStatus != wantBadStatus {
+		t.Fatalf("Returned wrong status code: got %v want %v", gotStatus, strconv.Itoa(wantGoodStatus)+" or "+strconv.Itoa(wantBadStatus))
 	}
 
 	// Test response body.
@@ -52,8 +55,8 @@ func TestStartingServer(t *testing.T) {
 	wantSuccess := "Succeeded after "
 	wantIntentionalError := "intentional error!"
 
-	if rr.Body.String() != wantIntentionalError && !strings.Contains(rr.Body.String(), wantSuccess) {
-		t.Fatalf("Response does not match expected: got %v", rr.Body.String())
+	if gotBody != wantIntentionalError && !strings.Contains(gotBody, wantSuccess) {
+		t.Fatalf("Response does not match expected: got %v", gotBody)
 	}
 
 }
@@ -76,17 +79,18 @@ func TestMetricsEndpoint(t *testing.T) {
 
 	// Tests response status.
 	gotStatus := rr.Code
-	wantStatus := http.StatusOK
+	gotBody := rr.Body.String()
+	wantGoodStatus := http.StatusOK
 
-	if gotStatus != wantStatus {
-		t.Fatalf("Returned wrong status code: got %v want %v", gotStatus, wantStatus)
+	if gotStatus != wantGoodStatus {
+		t.Fatalf("Returned wrong status code: got %v want %v", gotStatus, wantGoodStatus)
 	}
 
 	// Test response body.
 	// Prometheus /metrics endpoint will contain "# HELP".
 	wantSuccess := "# HELP"
 
-	if !strings.Contains(rr.Body.String(), wantSuccess) {
+	if !strings.Contains(gotBody, wantSuccess) {
 		t.Fatalf("Response does not match expected: got %v", rr.Body.String())
 	}
 

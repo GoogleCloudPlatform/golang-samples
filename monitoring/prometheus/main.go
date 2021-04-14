@@ -68,7 +68,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	if rand.Intn(100) >= 90 {
 		log.Printf("intentional failure encountered")
 		failedRequestCount.Inc()
-		fmt.Fprintf(w, "intentional error!")
+		http.Error(w, "intentional error!", http.StatusInternalServerError)
 		return
 	}
 	// [END monitoring_sli_metrics_prometheus_counts]
