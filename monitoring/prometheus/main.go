@@ -68,10 +68,10 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	if rand.Intn(100) >= 90 {
 		log.Printf("intentional failure encountered")
 		failedRequestCount.Inc()
-		// [END monitoring_sli_metrics_prometheus_counts]
 		fmt.Fprintf(w, "intentional error!")
 		return
 	}
+	// [END monitoring_sli_metrics_prometheus_counts]
 	delay := time.Duration(rand.Intn(1000)) * time.Millisecond
 	time.Sleep(delay)
 	fmt.Fprintf(w, "Succeeded after %v", delay)
