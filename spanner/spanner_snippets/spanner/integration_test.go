@@ -361,8 +361,10 @@ func TestSample(t *testing.T) {
 }
 
 func TestBackupSample(t *testing.T) {
-	_ = testutil.EndToEndTest(t)
-
+	if os.Getenv("GOLANG_SAMPLES_E2E_TEST") == "" {
+		t.Skip("GOLANG_SAMPLES_E2E_TEST not set")
+	}
+	_ = testutil.SystemTest(t)
 	id := randomID()
 	dbName, cleanup := initTest(t, id)
 	defer cleanup()
@@ -416,6 +418,9 @@ func TestCreateDatabaseWithRetentionPeriodSample(t *testing.T) {
 }
 
 func TestCustomerManagedEncryptionKeys(t *testing.T) {
+	if os.Getenv("GOLANG_SAMPLES_E2E_TEST") == "" {
+		t.Skip("GOLANG_SAMPLES_E2E_TEST not set")
+	}
 	tc := testutil.SystemTest(t)
 	dbName, cleanup := initTest(t, randomID())
 	defer cleanup()

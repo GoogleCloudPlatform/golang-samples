@@ -15,13 +15,11 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"strings"
 	"testing"
 	"time"
 
-	"cloud.google.com/go/bigquery"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
@@ -29,15 +27,7 @@ func TestMain(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	env := map[string]string{"GOOGLE_CLOUD_PROJECT": tc.ProjectID}
 	scope := fmt.Sprintf("projects/%s", tc.ProjectID)
-	query := fmt.Sprintf("name:%s", tc.ProjectID)
-
-	ctx := context.Background()
-	// Creates a bigquery client.
-	client, err := bigquery.NewClient(ctx, tc.ProjectID)
-	if err != nil {
-		t.Fatalf("failed to create bigquery client: %v", err)
-	}
-	datasetID := strings.Replace(fmt.Sprintf("%s-for-asset-search", tc.ProjectID), "-", "_", -1)
+	query := fmt.Sprintf("updateTime>%v", time.Now().Add(-5*24*time.Hour).Unix())
 
 	m := testutil.BuildMain(t)
 	defer m.Cleanup()
@@ -46,9 +36,7 @@ func TestMain(t *testing.T) {
 		t.Errorf("failed to build app")
 	}
 
-	createDataset(ctx, t, client, datasetID)
 	stdOut, stdErr, err := m.Run(env, 2*time.Minute, fmt.Sprintf("--scope=%s", scope), fmt.Sprintf("--query=%s", query))
-	deleteDataset(ctx, t, client, datasetID)
 
 	if err != nil {
 		t.Errorf("execution failed: %v", err)
@@ -59,25 +47,5 @@ func TestMain(t *testing.T) {
 	got := string(stdOut)
 	if !strings.Contains(got, tc.ProjectID) {
 		t.Errorf("stdout returned %s, wanted to contain %s", got, tc.ProjectID)
-	}
-}
-
-func createDataset(ctx context.Context, t *testing.T, client *bigquery.Client, datasetID string) {
-	d := client.Dataset(datasetID)
-	if _, err := d.Metadata(ctx); err == nil {
-		deleteDataset(ctx, t, client, datasetID)
-	}
-	meta := &bigquery.DatasetMetadata{
-		Location: "US", // See https://cloud.google.com/bigquery/docs/locations
-	}
-	if err := client.Dataset(datasetID).Create(ctx, meta); err != nil {
-		t.Fatalf("Dataset.Create(%q): %v", datasetID, err)
-	}
-}
-
-func deleteDataset(ctx context.Context, t *testing.T, client *bigquery.Client, datasetID string) {
-	d := client.Dataset(datasetID)
-	if errDelete := d.DeleteWithContents(ctx); errDelete != nil {
-		t.Fatalf("Dataset.Delete(%q): %v", datasetID, errDelete)
 	}
 }
