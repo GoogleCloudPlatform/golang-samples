@@ -27,6 +27,7 @@ require (
 	github.com/google/go-cmp v0.5.5
 	github.com/google/uuid v1.2.0
 	github.com/googleapis/gax-go/v2 v2.0.5
+	github.com/googleapis/google-cloudevents-go v0.1.0
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/h2non/filetype v1.1.1
