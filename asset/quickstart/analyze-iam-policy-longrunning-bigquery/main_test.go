@@ -94,6 +94,16 @@ func createDataset(ctx context.Context, t *testing.T, client *bigquery.Client, d
 			Location: "US", // See https://cloud.google.com/bigquery/docs/locations.
 		}
 		if err := client.Dataset(datasetID).Create(ctx, meta); err != nil {
+			if err, ok := err.(*googleapi.Error); ok && err.Code == 409 {
+				// Already exists. Not sure why.
+				if err := d.DeleteWithContents(ctx); err != nil {
+					if err, ok := err.(*googleapi.Error); ok && err.Code != 404 {
+						// Check 404 just in case a delete was slow to propagate.
+						r.Errorf("Dataset.Delete(%q): %v", datasetID, err)
+						return
+					}
+				}
+			}
 			r.Errorf("Dataset.Create(%q): %v", datasetID, err)
 		}
 	})
