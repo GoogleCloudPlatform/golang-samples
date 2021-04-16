@@ -203,7 +203,7 @@ goVersionShouldSkip() {
     return 1
   fi
 
-  go list -f "{{context.ReleaseTags}}" | grep -q -v "go$modVersion\b"
+  go list -f "{{context.ReleaseTags}}" ./... | grep -q -v "go$modVersion\b"
 }
 
 if [[ $RUN_ALL_TESTS = "1" ]]; then
