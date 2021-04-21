@@ -25,13 +25,12 @@ import (
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
-func createDatabaseWithRetentionPeriod(w io.Writer, db string) error {
+func createDatabaseWithRetentionPeriod(ctx context.Context, w io.Writer, db string) error {
 	matches := regexp.MustCompile("^(.+)/databases/(.+)$").FindStringSubmatch(db)
 	if matches == nil || len(matches) != 3 {
 		return fmt.Errorf("createDatabaseWithRetentionPeriod: invalid database id %q", db)
 	}
 
-	ctx := context.Background()
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		return fmt.Errorf("createDatabaseWithRetentionPeriod.NewDatabaseAdminClient: %v", err)

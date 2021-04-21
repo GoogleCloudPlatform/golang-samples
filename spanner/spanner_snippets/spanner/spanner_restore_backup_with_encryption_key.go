@@ -26,7 +26,7 @@ import (
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
-func restoreBackupWithCustomerManagedEncryptionKey(w io.Writer, db, backupID, kmsKeyName string) error {
+func restoreBackupWithCustomerManagedEncryptionKey(ctx context.Context, w io.Writer, db, backupID, kmsKeyName string) error {
 	// db = `projects/<project>/instances/<instance-id>/database/<database-id>`
 	// backupID = `my-backup-id`
 	// kmsKeyName = `projects/<project>/locations/<location>/keyRings/<key_ring>/cryptoKeys/<kms_key_name>`
@@ -38,7 +38,6 @@ func restoreBackupWithCustomerManagedEncryptionKey(w io.Writer, db, backupID, km
 	databaseID := matches[2]
 	backupName := instanceName + "/backups/" + backupID
 
-	ctx := context.Background()
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		return fmt.Errorf("restoreBackupWithCustomerManagedEncryptionKey.NewDatabaseAdminClient: %v", err)
