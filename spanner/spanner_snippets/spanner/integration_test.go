@@ -26,21 +26,25 @@ import (
 	"testing"
 	"time"
 
+	kms "cloud.google.com/go/kms/apiv1"
 	"cloud.google.com/go/spanner"
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
 	instance "cloud.google.com/go/spanner/admin/instance/apiv1"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
 	"google.golang.org/api/iterator"
+	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 	instancepb "google.golang.org/genproto/googleapis/spanner/admin/instance/v1"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type sampleFunc func(w io.Writer, dbName string) error
 type sampleFuncWithContext func(ctx context.Context, w io.Writer, dbName string) error
 type instanceSampleFunc func(ctx context.Context, w io.Writer, projectID, instanceID string) error
 type backupSampleFunc func(ctx context.Context, w io.Writer, dbName, backupID string) error
+type createBackupSampleFunc func(ctx context.Context, w io.Writer, dbName, backupID string, versionTime time.Time) error
 
 var (
 	validInstancePattern = regexp.MustCompile("^projects/(?P<project>[^/]+)/instances/(?P<instance>[^/]+)$")
@@ -73,6 +77,30 @@ func initTest(t *testing.T, id string) (dbName string, cleanup func()) {
 		adminClient.Close()
 	}
 	return
+}
+
+func getVersionTime(t *testing.T, dbName string) (versionTime time.Time) {
+	ctx := context.Background()
+	client, err := spanner.NewClient(ctx, dbName)
+	if err != nil {
+		t.Fatalf("failed to create client: %v", err)
+	}
+	defer client.Close()
+
+	stmt := spanner.Statement{
+		SQL: `SELECT CURRENT_TIMESTAMP()`,
+	}
+	iter := client.Single().Query(ctx, stmt)
+	defer iter.Stop()
+	row, err := iter.Next()
+	if err != nil {
+		t.Fatalf("failed to get current time: %v", err)
+	}
+	if err := row.Columns(&versionTime); err != nil {
+		t.Fatalf("failed to get version time: %v", err)
+	}
+
+	return versionTime
 }
 
 func initBackupTest(t *testing.T, id, dbName string) (restoreDBName, backupID, cancelledBackupID string, cleanup func()) {
@@ -272,6 +300,9 @@ func TestSample(t *testing.T) {
 	out = runSample(t, writeUsingDML, dbName, "failed to write using DML")
 	assertContains(t, out, "record(s) inserted")
 
+	out = runSample(t, commitStats, dbName, "failed to request commit stats")
+	assertContains(t, out, "3 mutations in transaction")
+
 	out = runSample(t, queryWithParameter, dbName, "failed to query with parameter")
 	assertContains(t, out, "12 Melissa Garcia")
 
@@ -329,6 +360,7 @@ func TestSample(t *testing.T) {
 	assertContains(t, out, "19 Venue 19")
 	assertContains(t, out, "42 Venue 42")
 
+	runSample(t, dropColumn, dbName, "failed to drop column")
 	runSampleWithContext(ctx, t, addNumericColumn, dbName, "failed to add numeric column")
 	runSample(t, updateDataWithNumericColumn, dbName, "failed to update data with numeric")
 	out = runSample(t, queryWithNumericParameter, dbName, "failed to query with numeric parameter")
@@ -337,8 +369,10 @@ func TestSample(t *testing.T) {
 }
 
 func TestBackupSample(t *testing.T) {
-	_ = testutil.EndToEndTest(t)
-
+	if os.Getenv("GOLANG_SAMPLES_E2E_TEST") == "" {
+		t.Skip("GOLANG_SAMPLES_E2E_TEST not set")
+	}
+	_ = testutil.SystemTest(t)
 	id := randomID()
 	dbName, cleanup := initTest(t, id)
 	defer cleanup()
@@ -352,7 +386,8 @@ func TestBackupSample(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
 	defer cancel()
 	// Start testing backup operations.
-	out = runBackupSample(ctx, t, createBackup, dbName, backupID, "failed to create a backup")
+	versionTime := getVersionTime(t, dbName)
+	out = runCreateBackupSample(ctx, t, createBackup, dbName, backupID, versionTime, "failed to create a backup")
 	assertContains(t, out, fmt.Sprintf("backups/%s", backupID))
 
 	out = runBackupSample(ctx, t, cancelBackup, dbName, cancelledBackupID, "failed to cancel a backup")
@@ -382,6 +417,127 @@ func TestBackupSample(t *testing.T) {
 	assertContains(t, out, fmt.Sprintf("Deleted backup %s", backupID))
 }
 
+func TestCreateDatabaseWithRetentionPeriodSample(t *testing.T) {
+	_ = testutil.SystemTest(t)
+	dbName, cleanup := initTest(t, randomID())
+	defer cleanup()
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
+	defer cancel()
+	wantRetentionPeriod := "7d"
+	out := runSampleWithContext(ctx, t, createDatabaseWithRetentionPeriod, dbName, "failed to create a database with a retention period")
+	assertContains(t, out, fmt.Sprintf("Created database [%s] with version retention period %q", dbName, wantRetentionPeriod))
+}
+
+func TestCustomerManagedEncryptionKeys(t *testing.T) {
+	if os.Getenv("GOLANG_SAMPLES_E2E_TEST") == "" {
+		t.Skip("GOLANG_SAMPLES_E2E_TEST not set")
+	}
+	tc := testutil.SystemTest(t)
+	dbName, cleanup := initTest(t, randomID())
+	defer cleanup()
+
+	adminClient, err := database.NewDatabaseAdminClient(context.Background())
+	if err != nil {
+		t.Errorf("failed to create admin client: %v", err)
+	}
+
+	var b bytes.Buffer
+
+	instanceName := getInstance(t)
+	locationId := "us-central1"
+	keyRingId := "spanner-test-keyring"
+	keyId := "spanner-test-key"
+
+	// Create an encryption key if it does not already exist.
+	if err := maybeCreateKey(tc.ProjectID, locationId, keyRingId, keyId); err != nil {
+		t.Errorf("failed to create encryption key: %v", err)
+	}
+	kmsKeyName := fmt.Sprintf(
+		"projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s",
+		tc.ProjectID,
+		locationId,
+		keyRingId,
+		keyId,
+	)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
+	defer cancel()
+
+	// Create an encrypted database. The database is automatically deleted by the cleanup function.
+	if err := createDatabaseWithCustomerManagedEncryptionKey(ctx, &b, dbName, kmsKeyName); err != nil {
+		t.Errorf("failed to create database with customer managed encryption key: %v", err)
+	}
+	out := b.String()
+	assertContains(t, out, fmt.Sprintf("Created database [%s] using encryption key %q", dbName, kmsKeyName))
+
+	// Try to create a backup of the encrypted database and delete it after the test.
+	backupId := fmt.Sprintf("enc-backup-%s", randomID())
+	defer func() {
+		_ = adminClient.DeleteBackup(context.Background(), &adminpb.DeleteBackupRequest{
+			Name: fmt.Sprintf("%s/backups/%s", instanceName, backupId),
+		})
+	}()
+	b.Reset()
+	if err := createBackupWithCustomerManagedEncryptionKey(ctx, &b, dbName, backupId, kmsKeyName); err != nil {
+		t.Errorf("failed to create backup with customer managed encryption key: %v", err)
+	}
+	out = b.String()
+	assertContains(t, out, fmt.Sprintf("backups/%s", backupId))
+	assertContains(t, out, fmt.Sprintf("using encryption key %s", kmsKeyName))
+
+	// Try to restore the encrypted database and delete the restored database after the test.
+	restoredName := fmt.Sprintf("%s/databases/rest-enc-%s", instanceName, randomID())
+	defer func() {
+		_ = adminClient.DropDatabase(context.Background(), &adminpb.DropDatabaseRequest{
+			Database: restoredName,
+		})
+	}()
+	restoreFunc := func(ctx context.Context, w io.Writer, dbName, backupID string) error {
+		return restoreBackupWithCustomerManagedEncryptionKey(ctx, w, dbName, backupId, kmsKeyName)
+	}
+	out = runBackupSampleWithRetry(ctx, t, restoreFunc, restoredName, backupId, "failed to restore database with customer managed encryption key", 10)
+	assertContains(t, out, fmt.Sprintf("Database %s restored", dbName))
+	assertContains(t, out, fmt.Sprintf("using encryption key %s", kmsKeyName))
+}
+
+func maybeCreateKey(projectId, locationId, keyRingId, keyId string) error {
+	client, err := kms.NewKeyManagementClient(context.Background())
+	if err != nil {
+		return err
+	}
+
+	// Try to create a key ring
+	createKeyRingRequest := kmspb.CreateKeyRingRequest{
+		Parent:    fmt.Sprintf("projects/%s/locations/%s", projectId, locationId),
+		KeyRingId: keyRingId,
+		KeyRing:   &kmspb.KeyRing{},
+	}
+	_, err = client.CreateKeyRing(context.Background(), &createKeyRingRequest)
+	if err != nil {
+		if status, ok := status.FromError(err); !ok || status.Code() != codes.AlreadyExists {
+			return err
+		}
+	}
+
+	// Try to create a key
+	createKeyRequest := kmspb.CreateCryptoKeyRequest{
+		Parent:      fmt.Sprintf("projects/%s/locations/%s/keyRings/%s", projectId, locationId, keyRingId),
+		CryptoKeyId: keyId,
+		CryptoKey: &kmspb.CryptoKey{
+			Purpose: kmspb.CryptoKey_ENCRYPT_DECRYPT,
+		},
+	}
+	_, err = client.CreateCryptoKey(context.Background(), &createKeyRequest)
+	if err != nil {
+		if status, ok := status.FromError(err); !ok || status.Code() != codes.AlreadyExists {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func runSample(t *testing.T, f sampleFunc, dbName, errMsg string) string {
 	var b bytes.Buffer
 	if err := f(&b, dbName); err != nil {
@@ -393,6 +549,14 @@ func runSample(t *testing.T, f sampleFunc, dbName, errMsg string) string {
 func runSampleWithContext(ctx context.Context, t *testing.T, f sampleFuncWithContext, dbName, errMsg string) string {
 	var b bytes.Buffer
 	if err := f(ctx, &b, dbName); err != nil {
+		t.Errorf("%s: %v", errMsg, err)
+	}
+	return b.String()
+}
+
+func runCreateBackupSample(ctx context.Context, t *testing.T, f createBackupSampleFunc, dbName string, backupID string, versionTime time.Time, errMsg string) string {
+	var b bytes.Buffer
+	if err := f(ctx, &b, dbName, backupID, versionTime); err != nil {
 		t.Errorf("%s: %v", errMsg, err)
 	}
 	return b.String()
@@ -411,7 +575,7 @@ func runBackupSampleWithRetry(ctx context.Context, t *testing.T, f backupSampleF
 	testutil.Retry(t, maxAttempts, time.Minute, func(r *testutil.R) {
 		b.Reset()
 		if err := f(ctx, &b, dbName, backupID); err != nil {
-			if spanner.ErrCode(err) == codes.InvalidArgument && strings.Contains(err.Error(), "Please retry the operation once the pending restores complete") {
+			if strings.Contains(err.Error(), "Please retry the operation once the pending restores complete") {
 				r.Errorf("%s: %v", errMsg, err)
 			} else {
 				t.Fatalf("%s: %v", errMsg, err)

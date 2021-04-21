@@ -22,5 +22,10 @@
       "packageNames": ["golang.org/x/tools"],
       "enabled": false
     }
-  ]
+  ],
+  "force": {
+    "constraints": {
+      "go": "1.16"
+    }
+  }
 }

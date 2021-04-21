@@ -42,8 +42,13 @@ func gcloud(label string, cmd *exec.Cmd) ([]byte, error) {
 	var out []byte
 	var err error
 
+	delaySeconds := 2 * time.Second
+	if strings.Contains(label, labelOperationBuild) {
+		delaySeconds = 60 * time.Second
+	}
+
 	maxAttempts := 5
-	success := testutil.RetryWithoutTest(maxAttempts, 2*time.Second, func(r *testutil.R) {
+	success := testutil.RetryWithoutTest(maxAttempts, delaySeconds, func(r *testutil.R) {
 		out, err = gcloudExec(fmt.Sprintf("Attempt #%d: ", r.Attempt), label, cmd)
 		if err != nil {
 			log.Printf("gcloudExec: %v", err)

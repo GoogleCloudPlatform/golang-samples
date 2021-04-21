@@ -15,7 +15,6 @@
 package assets
 
 // [START securitycenter_list_assets_with_security_marks]
-// [START list_assets_with_security_marks]
 import (
 	"context"
 	"fmt"
@@ -61,5 +60,4 @@ func listAssetsWithMarks(w io.Writer, orgID string) error {
 	return nil
 }
 
-// [END list_assets_with_security_marks]
 // [END securitycenter_list_assets_with_security_marks]

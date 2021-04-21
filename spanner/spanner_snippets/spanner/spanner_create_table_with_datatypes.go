@@ -46,6 +46,7 @@ func createTableWithDatatypes(ctx context.Context, w io.Writer, db string) error
 				LastContactDate DATE,
 				OutdoorVenue BOOL,
 				PopularityScore FLOAT64,
+				Revenue NUMERIC,
 				LastUpdateTime TIMESTAMP NOT NULL OPTIONS (allow_commit_timestamp=true)
 			) PRIMARY KEY (VenueId)`,
 		},

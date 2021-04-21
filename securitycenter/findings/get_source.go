@@ -15,7 +15,6 @@
 package findings
 
 // [START securitycenter_get_source]
-// [START get_source]
 import (
 	"context"
 	"fmt"
@@ -50,5 +49,4 @@ func getSource(w io.Writer, sourceName string) error {
 	return nil
 }
 
-// [END get_source]
 // [END securitycenter_get_source]

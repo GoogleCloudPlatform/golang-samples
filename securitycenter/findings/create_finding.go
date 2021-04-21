@@ -15,7 +15,6 @@
 package findings
 
 // [START securitycenter_create_finding]
-// [START create_finding]
 import (
 	"context"
 	"fmt"
@@ -68,5 +67,4 @@ func createFinding(w io.Writer, sourceName string) error {
 	return nil
 }
 
-// [END create_finding]
 // [END securitycenter_create_finding]

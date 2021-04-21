@@ -19,6 +19,7 @@ import (
 	"context"
 	"strings"
 	"testing"
+	"time"
 
 	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/datastore"
@@ -50,23 +51,22 @@ func TestInspectDatastore(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.kind, func(t *testing.T) {
 			t.Parallel()
-			u := uuid.Must(uuid.NewV4()).String()[:8]
-			buf := new(bytes.Buffer)
-			if err := inspectDatastore(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName+u, subscriptionName+u, tc.ProjectID, "", test.kind); err != nil {
-				t.Errorf("inspectDatastore(%s) got err: %v", test.kind, err)
-			}
-			if got := buf.String(); !strings.Contains(got, test.want) {
-				t.Errorf("inspectDatastore(%s) = %q, want %q substring", test.kind, got, test.want)
-			}
+			testutil.Retry(t, 5, 15*time.Second, func(r *testutil.R) {
+				u := uuid.Must(uuid.NewV4()).String()[:8]
+				buf := new(bytes.Buffer)
+				if err := inspectDatastore(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName+u, subscriptionName+u, tc.ProjectID, "", test.kind); err != nil {
+					r.Errorf("inspectDatastore(%s) got err: %v", test.kind, err)
+					return
+				}
+				if got := buf.String(); !strings.Contains(got, test.want) {
+					r.Errorf("inspectDatastore(%s) = %q, want %q substring", test.kind, got, test.want)
+				}
+			})
 		})
 	}
 }
 
 type SSNTask struct {
-	Description string
-}
-
-type BoringTask struct {
 	Description string
 }
 
@@ -103,14 +103,17 @@ func TestInspectGCS(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.fileName, func(t *testing.T) {
 			t.Parallel()
-			u := uuid.Must(uuid.NewV4()).String()[:8]
-			buf := new(bytes.Buffer)
-			if err := inspectGCSFile(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName+u, subscriptionName+u, bucketName, test.fileName); err != nil {
-				t.Errorf("inspectGCSFile(%s) got err: %v", test.fileName, err)
-			}
-			if got := buf.String(); !strings.Contains(got, test.want) {
-				t.Errorf("inspectGCSFile(%s) = %q, want %q substring", test.fileName, got, test.want)
-			}
+			testutil.Retry(t, 5, 15*time.Second, func(r *testutil.R) {
+				u := uuid.Must(uuid.NewV4()).String()[:8]
+				buf := new(bytes.Buffer)
+				if err := inspectGCSFile(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName+u, subscriptionName+u, bucketName, test.fileName); err != nil {
+					r.Errorf("inspectGCSFile(%s) got err: %v", test.fileName, err)
+					return
+				}
+				if got := buf.String(); !strings.Contains(got, test.want) {
+					r.Errorf("inspectGCSFile(%s) = %q, want %q substring", test.fileName, got, test.want)
+				}
+			})
 		})
 	}
 }

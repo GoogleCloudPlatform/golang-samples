@@ -15,7 +15,6 @@
 package settings
 
 // [START securitycenter_get_org_settings]
-// [START get_org_settings]
 import (
 	"context"
 	"fmt"
@@ -49,5 +48,4 @@ func getOrgSettings(w io.Writer, orgID string) error {
 	return nil
 }
 
-// [END get_org_settings]
 // [END securitycenter_get_org_settings]
