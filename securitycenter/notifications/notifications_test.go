@@ -196,6 +196,7 @@ func TestGetNotificationConfig(t *testing.T) {
 }
 
 func TestListNotificationConfigs(t *testing.T) {
+	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2057")
 	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
 		rand, err := uuid.NewUUID()
