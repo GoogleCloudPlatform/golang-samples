@@ -48,7 +48,7 @@ func main() {
 	const maxConnections = 10
 	redisPool = &redis.Pool{
 		MaxIdle: maxConnections,
-		Dial: func () (redis.Conn, error) { return redis.Dial("tcp", redisAddr) },
+		Dial:    func() (redis.Conn, error) { return redis.Dial("tcp", redisAddr) },
 	}
 
 	http.HandleFunc("/", incrementHandler)
