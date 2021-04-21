@@ -29,8 +29,7 @@ import (
 	"google.golang.org/genproto/protobuf/field_mask"
 )
 
-func updateBackup(w io.Writer, db, backupID string) error {
-	ctx := context.Background()
+func updateBackup(ctx context.Context, w io.Writer, db, backupID string) error {
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		return err

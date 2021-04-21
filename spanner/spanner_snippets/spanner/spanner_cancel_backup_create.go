@@ -31,13 +31,12 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func cancelBackup(w io.Writer, db, backupID string) error {
+func cancelBackup(ctx context.Context, w io.Writer, db, backupID string) error {
 	matches := regexp.MustCompile("^(.+)/databases/(.+)$").FindStringSubmatch(db)
 	if matches == nil || len(matches) != 3 {
 		return fmt.Errorf("cancelBackup: invalid database id %q", db)
 	}
 
-	ctx := context.Background()
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		return fmt.Errorf("cancelBackup.NewDatabaseAdminClient: %v", err)

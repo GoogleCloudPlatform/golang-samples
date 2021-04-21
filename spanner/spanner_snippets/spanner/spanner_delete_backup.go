@@ -26,8 +26,7 @@ import (
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
-func deleteBackup(w io.Writer, db, backupID string) error {
-	ctx := context.Background()
+func deleteBackup(ctx context.Context, w io.Writer, db, backupID string) error {
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		return err

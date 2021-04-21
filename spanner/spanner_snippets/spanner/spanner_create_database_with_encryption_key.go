@@ -25,7 +25,7 @@ import (
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
-func createDatabaseWithCustomerManagedEncryptionKey(w io.Writer, db, kmsKeyName string) error {
+func createDatabaseWithCustomerManagedEncryptionKey(ctx context.Context, w io.Writer, db, kmsKeyName string) error {
 	// db = `projects/<project>/instances/<instance-id>/database/<database-id>`
 	// kmsKeyName = `projects/<project>/locations/<location>/keyRings/<key_ring>/cryptoKeys/<kms_key_name>`
 	matches := regexp.MustCompile("^(.+)/databases/(.+)$").FindStringSubmatch(db)
@@ -35,7 +35,6 @@ func createDatabaseWithCustomerManagedEncryptionKey(w io.Writer, db, kmsKeyName 
 	instanceName := matches[1]
 	databaseId := matches[2]
 
-	ctx := context.Background()
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		return fmt.Errorf("createDatabaseWithCustomerManagedEncryptionKey.NewDatabaseAdminClient: %v", err)
