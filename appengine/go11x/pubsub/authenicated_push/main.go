@@ -117,6 +117,10 @@ func (a *app) receiveMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	//   - Ensure that `payload.Claims["email"]` is equal to the expected service
 	//     account set up in the push subscription settings.
 	//   - Ensure that `payload.Claims["email_verified"]` is set to true.
+	if payload.Claims["email"] != "test-service-account-email@example.com" || payload.Claims["email_verified"] != true {
+		http.Error(w, "Unexpected email identity", http.StatusBadRequest)
+		return
+	}
 
 	var pr pushRequest
 	if err := json.NewDecoder(r.Body).Decode(&pr); err != nil {
