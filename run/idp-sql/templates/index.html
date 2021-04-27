@@ -1,0 +1,97 @@
+<!--
+Copyright 2021 Google LLC
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<html lang="en">
+<head>
+    <title>CATS v Dogs</title>
+    <link rel="icon" type="image/png" href="data:image/png;base6`4,iVBORw0KGgo=">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+</head>
+<body class="yellow lighten-5">
+<nav class="teal darken-3">
+    <div class="nav-wrapper container">
+        <div class="nav-wrapper container"><a class="brand-logo center" href="#!">CATS v DOGS</a>
+        </div>
+    </div>
+</nav>
+<div class="section" id="form">
+    <div class="center">
+        <h4>
+            {{ if eq .TabsCount .SpacesCount }}
+                TABS and SPACES are evenly matched!
+            {{ else if gt .TabsCount .SpacesCount }}
+                TABS are winning by {{ .VoteMargin }}
+            {{ else if gt .SpacesCount .TabsCount }}
+                SPACES are winning by {{ .VoteMargin }}
+            {{ end }}
+        </h4>
+    </div>
+    <div class="row center">
+        <div class="col s6 m5 offset-m1">
+            {{ if gt .CatCount .DogCount }}<div class="card-panel teal lighten-4">{{ else }}<div class="card-panel">{{ end }}
+                <i class="material-icons large">🐱</i>
+                <h3>{{ .CatCount }} votes</h3>
+                <button id="voteCats" class="btn">Vote for CATS</button>
+            </div>
+        </div>
+        <div class="col s6 m5">
+            {{ if lt .CatCount .DogCount }}<div class="card-panel teal lighten-4">{{ else }}<div class="card-panel">{{ end }}
+                <i class="material-icons large">🐶</i>
+                <h3>{{ .DogCount }} votes</h3>
+                <button id="voteDogs" class="btn">Vote for DOGS</button>
+            </div>
+        </div>
+    </div>
+    <h4 class="header center">Recent Votes</h4>
+    <ul class="container collection center">
+        {{ range .RecentVotes }}
+            <li class="collection-item avatar">
+                {{ if eq .Candidate "CATS" }}
+                    <i class="material-icons circle teal lighten-1">🐱</i>
+                {{ else if eq .Candidate "DOGS" }}
+                    <i class="material-icons circle teal lighten-1">🐶</i>
+                {{ end }}
+                <span class="title">
+                    A vote for <b>{{.Candidate}}</b> was cast at {{.VoteTime}}
+                </span>
+            </li>
+        {{ end }}
+    </ul>
+</div>
+<script>
+    function vote(team) {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function () {
+            if (this.readyState == 4) {
+                window.location.reload();
+            }
+        };
+        xhr.open("POST", "/", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.send("team=" + team);
+    }
+
+    document.getElementById("voteTabs").addEventListener("click", function () {
+        vote("CATS");
+    });
+    document.getElementById("voteSpaces").addEventListener("click", function () {
+        vote("DOGS");
+    });
+</script>
+</body>
+</html>
