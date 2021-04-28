@@ -83,7 +83,7 @@ func TestActivateKey(t *testing.T) {
 	key, err := createTestKey(tc.ProjectID, t)
 	defer deleteTestKey(key)
 	if err != nil {
-		t.Errorf("Error in key creation: %s", err)
+		t.Fatalf("Error in key creation: %s", err)
 	}
 
 	// Key must first be deactivated in order to update to active state.
@@ -106,7 +106,7 @@ func TestDeactivateKey(t *testing.T) {
 	key, err := createTestKey(tc.ProjectID, t)
 	defer deleteTestKey(key)
 	if err != nil {
-		t.Errorf("Error in key creation: %s", err)
+		t.Fatalf("Error in key creation: %s", err)
 	}
 
 	key, err = deactivateHMACKey(ioutil.Discard, key.AccessID, key.ProjectID)
@@ -143,7 +143,7 @@ func TestDeleteKey(t *testing.T) {
 	key, err := createTestKey(tc.ProjectID, t)
 	defer deleteTestKey(key)
 	if err != nil {
-		t.Errorf("Error in key creation: %s", err)
+		t.Fatalf("Error in key creation: %s", err)
 	}
 
 	// Keys must be in INACTIVE state before deletion.
