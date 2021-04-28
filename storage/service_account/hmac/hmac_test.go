@@ -189,6 +189,9 @@ func createTestKey(projectID string, t *testing.T) (*storage.HMACKey, error) {
 
 // Deactivate and delete the given key. Should operate as a teardown method.
 func deleteTestKey(key *storage.HMACKey) {
+	if key == nil {
+		return
+	}
 	ctx := context.Background()
 	handle := storageClient.HMACKeyHandle(key.ProjectID, key.AccessID)
 	if key.State == "ACTIVE" {
