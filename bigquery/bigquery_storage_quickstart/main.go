@@ -42,10 +42,10 @@ import (
 )
 
 // rpcOpts is used to configure the underlying gRPC client to accept large
-// messages.  The BigQuery Storage API may send message blocks up to 10MB
+// messages.  The BigQuery Storage API may send message blocks up to 128MB
 // in size.
 var rpcOpts = gax.WithGRPCOptions(
-	grpc.MaxCallRecvMsgSize(1024 * 1024 * 11),
+	grpc.MaxCallRecvMsgSize(1024 * 1024 * 129),
 )
 
 // Command-line flags.
