@@ -16,6 +16,7 @@ package hmac
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -82,7 +83,7 @@ func TestActivateKey(t *testing.T) {
 	key, err := createTestKey(tc.ProjectID, t)
 	defer deleteTestKey(key)
 	if err != nil {
-		t.Errorf("Error in key creation: %s", err)
+		t.Fatalf("Error in key creation: %s", err)
 	}
 
 	// Key must first be deactivated in order to update to active state.
@@ -105,7 +106,7 @@ func TestDeactivateKey(t *testing.T) {
 	key, err := createTestKey(tc.ProjectID, t)
 	defer deleteTestKey(key)
 	if err != nil {
-		t.Errorf("Error in key creation: %s", err)
+		t.Fatalf("Error in key creation: %s", err)
 	}
 
 	key, err = deactivateHMACKey(ioutil.Discard, key.AccessID, key.ProjectID)
@@ -122,7 +123,7 @@ func TestGetKey(t *testing.T) {
 	key, err := createTestKey(tc.ProjectID, t)
 	defer deleteTestKey(key)
 	if err != nil {
-		t.Errorf("Error in key creation: %s", err)
+		t.Fatalf("Error in key creation: %s", err)
 	}
 
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
@@ -142,7 +143,7 @@ func TestDeleteKey(t *testing.T) {
 	key, err := createTestKey(tc.ProjectID, t)
 	defer deleteTestKey(key)
 	if err != nil {
-		t.Errorf("Error in key creation: %s", err)
+		t.Fatalf("Error in key creation: %s", err)
 	}
 
 	// Keys must be in INACTIVE state before deletion.
@@ -177,7 +178,8 @@ func createTestKey(projectID string, t *testing.T) (*storage.HMACKey, error) {
 		// Nil key check should not happen but is added to handle flaky
 		// "nil pointer dereference" error.
 		if key == nil {
-			r.Errorf("Returned nil key.")
+			r.Errorf("CreateHMACKey returned nil key.")
+			err = errors.New("CreateHMACKey returned nil key")
 			return
 		}
 	})
@@ -187,6 +189,9 @@ func createTestKey(projectID string, t *testing.T) (*storage.HMACKey, error) {
 
 // Deactivate and delete the given key. Should operate as a teardown method.
 func deleteTestKey(key *storage.HMACKey) {
+	if key == nil {
+		return
+	}
 	ctx := context.Background()
 	handle := storageClient.HMACKeyHandle(key.ProjectID, key.AccessID)
 	if key.State == "ACTIVE" {
