@@ -159,6 +159,8 @@ func SnippetClient_Put_upsert() {
 	defer client.Close()
 	task := &Task{} // Populated with appropriate data.
 	// [START datastore_upsert]
+	// Create an incomplete key and allow datastore to create an ID.
+	// The key returned by `client.Put` will be complete.
 	key := datastore.IncompleteKey("Task", nil)
 	key, err := client.Put(ctx, key, task)
 	// [END datastore_upsert]
