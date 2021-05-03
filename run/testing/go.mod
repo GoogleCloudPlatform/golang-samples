@@ -3,10 +3,10 @@ module github.com/GoogleCloudPlatform/golang-samples/run/testing
 go 1.15
 
 require (
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20210426214444-1bff782b3539
-	github.com/GoogleCloudPlatform/golang-samples/run/grpc-ping v0.0.0-20210426214444-1bff782b3539
-	github.com/GoogleCloudPlatform/golang-samples/run/grpc-server-streaming v0.0.0-20210426214444-1bff782b3539
-	golang.org/x/net v0.0.0-20210428140749-89ef3d95e781
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20210503164456-ba08d1aac58c
+	github.com/GoogleCloudPlatform/golang-samples/run/grpc-ping v0.0.0-20210503164456-ba08d1aac58c
+	github.com/GoogleCloudPlatform/golang-samples/run/grpc-server-streaming v0.0.0-20210503164456-ba08d1aac58c
+	golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420
 	google.golang.org/grpc v1.37.0
 )
 
