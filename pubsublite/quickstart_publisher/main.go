@@ -45,6 +45,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("pscompat.NewPublisherClient error: %v", err)
 	}
+	defer client.Close()
 
 	// Ensure the publisher will be shut down.
 	defer publisher.Stop()

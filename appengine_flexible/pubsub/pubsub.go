@@ -48,6 +48,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer client.Close()
 
 	topicName := mustGetenv("PUBSUB_TOPIC")
 	topic = client.Topic(topicName)

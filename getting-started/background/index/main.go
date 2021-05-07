@@ -80,6 +80,7 @@ func newApp(projectID, templateDir string) (*app, error) {
 	if err != nil {
 		return nil, fmt.Errorf("pubsub.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	pubsubTopic := pubsubClient.Topic(topicName)
 
@@ -87,6 +88,7 @@ func newApp(projectID, templateDir string) (*app, error) {
 	if err != nil {
 		return nil, fmt.Errorf("firestore.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	// Template referenced relative to the module/app root.
 	tmpl, err := template.ParseFiles(filepath.Join(templateDir, "index.html"))

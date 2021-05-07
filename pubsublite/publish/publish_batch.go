@@ -48,6 +48,7 @@ func publishWithBatchSettings(w io.Writer, projectID, zone, topicID string, mess
 	if err != nil {
 		return fmt.Errorf("pscompat.NewPublisherClientWithSettings error: %v", err)
 	}
+	defer client.Close()
 
 	// Ensure the publisher will be shut down.
 	defer publisher.Stop()

@@ -32,6 +32,7 @@ func policy(w io.Writer, projectID, subID string) (*iam.Policy, error) {
 	if err != nil {
 		return nil, fmt.Errorf("pubsub.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	policy, err := client.Subscription(subID).IAM().Policy(ctx)
 	if err != nil {

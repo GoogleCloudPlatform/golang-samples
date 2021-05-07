@@ -77,6 +77,7 @@ func sendDataFromBoundDevice(w io.Writer, projectID string, region string, regis
 		fmt.Fprintln(w, "Failed to connect client")
 		return token.Error()
 	}
+	defer client.Close()
 
 	if err := attachDevice(deviceID, client, ""); err != nil {
 		fmt.Fprintf(w, "Failed to attach device %s\n", err)
@@ -108,6 +109,7 @@ func sendDataFromBoundDevice(w io.Writer, projectID string, region string, regis
 			backoffTime *= 2
 			client = mqtt.NewClient(opts)
 		}
+		defer client.Close()
 
 		deviceStatePayload := fmt.Sprintf("%s, #%d", payload, i)
 

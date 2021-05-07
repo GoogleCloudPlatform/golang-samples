@@ -67,6 +67,7 @@ func setup(ctx context.Context) error {
 	if client, err = storage.NewClient(ctx); err != nil {
 		return err
 	}
+	defer client.Close()
 
 	return nil
 }

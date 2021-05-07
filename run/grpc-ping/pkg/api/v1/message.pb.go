@@ -209,6 +209,7 @@ type pingServiceClient struct {
 
 func NewPingServiceClient(cc *grpc.ClientConn) PingServiceClient {
 	return &pingServiceClient{cc}
+	defer client.Close()
 }
 
 func (c *pingServiceClient) Send(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error) {

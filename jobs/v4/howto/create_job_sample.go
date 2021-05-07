@@ -33,6 +33,7 @@ func createJob(w io.Writer, projectID, companyID, requisitionID, title, URI, des
 	if err != nil {
 		return nil, fmt.Errorf("talent.NewJobClient: %v", err)
 	}
+	defer client.Close()
 
 	jobToCreate := &talentpb.Job{
 		Company:       fmt.Sprintf("projects/%s/companies/%s", projectID, companyID),

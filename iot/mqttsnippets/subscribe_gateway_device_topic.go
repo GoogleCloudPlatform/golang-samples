@@ -68,6 +68,7 @@ func subscribeGatewayToDeviceTopic(w io.Writer, projectID string, region string,
 		fmt.Fprintln(w, "Failed to connect client")
 		return token.Error()
 	}
+	defer client.Close()
 
 	if err := attachDevice(deviceID, client, ""); err != nil {
 		fmt.Fprintf(w, "AttachDevice error: %v\n", err)

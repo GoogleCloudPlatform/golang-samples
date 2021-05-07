@@ -45,6 +45,7 @@ func LazyGlobal(w http.ResponseWriter, r *http.Request) {
 			log.Printf("storage.NewClient: %v", err)
 			return
 		}
+		defer client.Close()
 	})
 	// Use client.
 }

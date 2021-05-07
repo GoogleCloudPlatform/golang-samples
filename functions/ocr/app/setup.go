@@ -83,6 +83,7 @@ func setup(ctx context.Context) error {
 		if err != nil {
 			return fmt.Errorf("vision.NewImageAnnotatorClient: %v", err)
 		}
+		defer client.Close()
 	}
 
 	if translateClient == nil {
@@ -90,6 +91,7 @@ func setup(ctx context.Context) error {
 		if err != nil {
 			return fmt.Errorf("translate.NewClient: %v", err)
 		}
+		defer client.Close()
 	}
 
 	if pubsubClient == nil {
@@ -97,6 +99,7 @@ func setup(ctx context.Context) error {
 		if err != nil {
 			return fmt.Errorf("translate.NewClient: %v", err)
 		}
+		defer client.Close()
 	}
 
 	if storageClient == nil {
@@ -104,6 +107,7 @@ func setup(ctx context.Context) error {
 		if err != nil {
 			return fmt.Errorf("storage.NewClient: %v", err)
 		}
+		defer client.Close()
 	}
 	return nil
 }

@@ -31,6 +31,7 @@ func pullMsgsSettings(w io.Writer, projectID, subID string) error {
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	sub := client.Subscription(subID)
 	sub.ReceiveSettings.Synchronous = true

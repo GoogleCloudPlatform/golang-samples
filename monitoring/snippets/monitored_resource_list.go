@@ -34,6 +34,7 @@ func listMonitoredResources(w io.Writer, projectID string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 
 	req := &monitoringpb.ListMonitoredResourceDescriptorsRequest{
 		Name: "projects/" + projectID,

@@ -63,6 +63,7 @@ func sendEmail(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Missing 'to' parameter.", http.StatusBadRequest)
 		return
 	}
+	defer client.Close()
 
 	messagesInfo := []mailjet.InfoMessagesV31{
 		{

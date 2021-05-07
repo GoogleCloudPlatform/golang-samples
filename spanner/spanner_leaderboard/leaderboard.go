@@ -296,11 +296,13 @@ func createClients(ctx context.Context, db string) (*database.DatabaseAdminClien
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer client.Close()
 
 	dataClient, err := spanner.NewClient(ctx, db)
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer client.Close()
 
 	return adminClient, dataClient
 }

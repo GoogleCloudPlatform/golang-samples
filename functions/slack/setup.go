@@ -40,6 +40,7 @@ func setup(ctx context.Context) {
 		if err != nil {
 			log.Fatalf("kgsearch.NewClient: %v", err)
 		}
+		defer client.Close()
 		entitiesService = kgsearch.NewEntitiesService(kgService)
 	}
 }

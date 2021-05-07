@@ -75,6 +75,7 @@ func initializeClients() error {
 		if err != nil {
 			return fmt.Errorf("translate.NewClient: %v", err)
 		}
+		defer client.Close()
 	}
 	if firestoreClient == nil {
 		// Pre-declare err to avoid shadowing firestoreClient.
@@ -84,6 +85,7 @@ func initializeClients() error {
 		if err != nil {
 			return fmt.Errorf("firestore.NewClient: %v", err)
 		}
+		defer client.Close()
 	}
 	return nil
 }
