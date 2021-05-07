@@ -35,7 +35,7 @@ func createCustomMetric(w io.Writer, projectID, metricType string) (*metricpb.Me
 	if err != nil {
 		return nil, err
 	}
-	defer client.Close()
+	defer c.Close()
 	md := &metric.MetricDescriptor{
 		Name: "Custom Metric",
 		Type: metricType,

@@ -35,7 +35,7 @@ func createClientEvent(w io.Writer, projectID string, requestID string, eventID 
 	if err != nil {
 		return nil, fmt.Errorf("talent.NewEventClient: %v", err)
 	}
-	defer client.Close()
+	defer c.Close()
 
 	createTime, _ := ptypes.TimestampProto(time.Now())
 	clientEventToCreate := &talentpb.ClientEvent{

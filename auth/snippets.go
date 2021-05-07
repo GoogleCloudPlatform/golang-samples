@@ -40,7 +40,7 @@ func implicit() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer client.Close()
+	defer storageClient.Close()
 
 	it := storageClient.Buckets(ctx, "project-id")
 	for {

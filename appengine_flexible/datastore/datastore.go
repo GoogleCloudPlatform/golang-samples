@@ -42,7 +42,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer client.Close()
 
 	http.HandleFunc("/", handle)
 	appengine.Main()

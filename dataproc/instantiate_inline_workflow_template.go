@@ -40,7 +40,7 @@ func instantiateInlineWorkflowTemplate(w io.Writer, projectID, region string) er
 	if err != nil {
 		return fmt.Errorf("dataproc.NewWorkflowTemplateClient: %v", err)
 	}
-	defer client.Close()
+	defer workflowTemplateClient.Close()
 
 	// Create jobs for the workflow.
 	teragenJob := &dataprocpb.OrderedJob{

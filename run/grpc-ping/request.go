@@ -31,7 +31,6 @@ func pingRequest(conn *grpc.ClientConn, p *pb.Request) (*pb.Response, error) {
 	defer cancel()
 
 	client := pb.NewPingServiceClient(conn)
-	defer client.Close()
 	return client.Send(ctx, p)
 }
 

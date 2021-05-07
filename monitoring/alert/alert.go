@@ -78,7 +78,7 @@ func backupPolicies(w io.Writer, projectID string) error {
 	if err != nil {
 		return err
 	}
-	defer client.Close()
+	defer alertClient.Close()
 	alertReq := &monitoringpb.ListAlertPoliciesRequest{
 		Name: "projects/" + projectID,
 		// Filter:  "", // See https://cloud.google.com/monitoring/api/v3/sorting-and-filtering.
@@ -101,7 +101,7 @@ func backupPolicies(w io.Writer, projectID string) error {
 	if err != nil {
 		return err
 	}
-	defer client.Close()
+	defer channelClient.Close()
 	channelReq := &monitoringpb.ListNotificationChannelsRequest{
 		Name: "projects/" + projectID,
 		// Filter:  "", // See https://cloud.google.com/monitoring/api/v3/sorting-and-filtering.
@@ -196,12 +196,12 @@ func restorePolicies(w io.Writer, projectID string, r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	defer client.Close()
+	defer alertClient.Close()
 	channelClient, err := monitoring.NewNotificationChannelClient(ctx)
 	if err != nil {
 		return err
 	}
-	defer client.Close()
+	defer channelClient.Close()
 
 	// When a channel is recreated, rather than updated, it will get
 	// a new name.  We have to update the AlertPolicy with the new

@@ -40,14 +40,14 @@ func main() {
 	if err != nil {
 		log.Fatalf("servicedirectory.NewRegistrationClient: %v", err)
 	}
-	defer client.Close()
+	defer registry.Close()
 
 	// Create a lookup client.
 	resolver, err := servicedirectory.NewLookupClient(ctx)
 	if err != nil {
 		log.Fatalf("servicedirectory.NewLookupClient: %v", err)
 	}
-	defer client.Close()
+	defer resolver.Close()
 
 	// Create a Namespace.
 	createNsReq := &sdpb.CreateNamespaceRequest{

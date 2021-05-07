@@ -39,7 +39,7 @@ func createCluster(w io.Writer, projectID, region, clusterName string) error {
 	if err != nil {
 		return fmt.Errorf("dataproc.NewClusterControllerClient: %v", err)
 	}
-	defer client.Close()
+	defer clusterClient.Close()
 
 	// Create the cluster config.
 	req := &dataprocpb.CreateClusterRequest{

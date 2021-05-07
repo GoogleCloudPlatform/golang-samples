@@ -37,7 +37,6 @@ func publishWithOrderingKey(w io.Writer, projectID, zone, topicID string, messag
 	if err != nil {
 		return fmt.Errorf("pscompat.NewPublisherClient error: %v", err)
 	}
-	defer client.Close()
 
 	// Ensure the publisher will be shut down.
 	defer publisher.Stop()

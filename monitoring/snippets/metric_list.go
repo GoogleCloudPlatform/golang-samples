@@ -34,7 +34,7 @@ func listMetrics(w io.Writer, projectID string) error {
 	if err != nil {
 		return err
 	}
-	defer client.Close()
+	defer c.Close()
 
 	req := &monitoringpb.ListMetricDescriptorsRequest{
 		Name: "projects/" + projectID,

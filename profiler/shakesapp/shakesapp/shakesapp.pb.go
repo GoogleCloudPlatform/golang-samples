@@ -149,7 +149,6 @@ type shakespeareServiceClient struct {
 
 func NewShakespeareServiceClient(cc grpc.ClientConnInterface) ShakespeareServiceClient {
 	return &shakespeareServiceClient{cc}
-	defer client.Close()
 }
 
 func (c *shakespeareServiceClient) GetMatchCount(ctx context.Context, in *ShakespeareRequest, opts ...grpc.CallOption) (*ShakespeareResponse, error) {

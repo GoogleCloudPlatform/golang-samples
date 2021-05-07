@@ -57,7 +57,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("pscompat.NewSubscriberClientWithSettings error: %v", err)
 	}
-	defer client.Close()
 
 	// Listen for messages until the timeout expires.
 	log.Printf("Listening to messages on %s for %v...\n", subscriptionPath, *timeout)

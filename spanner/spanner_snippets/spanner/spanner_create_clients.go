@@ -31,13 +31,13 @@ func createClients(w io.Writer, db string) error {
 	if err != nil {
 		return err
 	}
-	defer client.Close()
+	defer adminClient.Close()
 
 	dataClient, err := spanner.NewClient(ctx, db)
 	if err != nil {
 		return err
 	}
-	defer client.Close()
+	defer dataClient.Close()
 
 	_ = adminClient
 	_ = dataClient

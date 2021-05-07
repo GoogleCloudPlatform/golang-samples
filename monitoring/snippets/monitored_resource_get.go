@@ -35,7 +35,7 @@ func getMonitoredResource(w io.Writer, resource string) error {
 	if err != nil {
 		return fmt.Errorf("NewMetricClient: %v", err)
 	}
-	defer client.Close()
+	defer c.Close()
 	req := &monitoringpb.GetMonitoredResourceDescriptorRequest{
 		Name: fmt.Sprintf(resource),
 	}
