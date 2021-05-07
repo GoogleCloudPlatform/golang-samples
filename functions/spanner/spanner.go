@@ -47,7 +47,6 @@ func HelloSpanner(w http.ResponseWriter, r *http.Request) {
 			log.Printf("spanner.NewClient: %v", err)
 			return
 		}
-		defer client.Close()
 	})
 
 	fmt.Fprintln(w, "Albums:")

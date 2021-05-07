@@ -43,7 +43,6 @@ func BigtableRead(w http.ResponseWriter, r *http.Request) {
 			log.Printf("bigtable.NewClient: %v", err)
 			return
 		}
-		defer client.Close()
 	})
 
 	tbl := client.Open(r.Header.Get("tableID"))

@@ -80,7 +80,6 @@ func newApp(projectID string) (*app, error) {
 	if err != nil {
 		log.Fatalf("firestore.NewClient: %v", err)
 	}
-	defer client.Close()
 	store, err := firestoregorilla.New(ctx, client)
 	if err != nil {
 		log.Fatalf("firestoregorilla.New: %v", err)

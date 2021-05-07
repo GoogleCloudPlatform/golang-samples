@@ -47,7 +47,6 @@ func init() {
 	if err != nil {
 		log.Fatalf("pubsub.NewClient: %v", err)
 	}
-	defer client.Close()
 }
 
 type publishRequest struct {
