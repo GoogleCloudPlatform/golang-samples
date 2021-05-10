@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -27,13 +28,20 @@ import (
 
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
+	"google.golang.org/api/iterator"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/go-cmp/cmp"
 )
 
-var topicID string
-var subID string
+var topicResource string
+var subResource string
+
+const (
+	topicPrefix = "topic"
+	subPrefix   = "sub"
+	expireAge   = 24 * time.Hour
+)
 
 // once guards cleanup related operations in setup. No need to set up and tear
 // down every time, so this speeds things up.
@@ -43,38 +51,72 @@ func setup(t *testing.T) *pubsub.Client {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 
-	topicID = "test-sub-topic"
-	subID = "test-sub"
 	var err error
 	client, err := pubsub.NewClient(ctx, tc.ProjectID)
 	if err != nil {
 		t.Fatalf("failed to create client: %v", err)
 	}
 
-	// Cleanup resources from the previous tests.
 	once.Do(func() {
-		topic := client.Topic(topicID)
-		ok, err := topic.Exists(ctx)
-		if err != nil {
-			t.Fatalf("failed to check if topic exists: %v", err)
-		}
-		if ok {
-			if err := topic.Delete(ctx); err != nil {
-				t.Fatalf("failed to cleanup the topic (%q): %v", topicID, err)
+		topicResource = fmt.Sprintf("%s-%d", topicPrefix, time.Now().UnixNano())
+		subResource = fmt.Sprintf("%s-%d", subPrefix, time.Now().UnixNano())
+
+		// Cleanup resources from the previous tests.
+		it := client.Topics(ctx)
+		for {
+			t, err := it.Next()
+			if err == iterator.Done {
+				break
+			}
+			if err != nil {
+				return
+			}
+			tID := t.ID()
+			p := strings.Split(tID, "-")
+
+			// Only delete resources created from these tests.
+			if p[0] == topicPrefix {
+				tCreated := p[1]
+				timestamp, err := strconv.ParseInt(tCreated, 10, 64)
+				if err != nil {
+					continue
+				}
+				timeTCreated := time.Unix(0, timestamp)
+				if time.Since(timeTCreated) > expireAge {
+					if err := t.Delete(ctx); err != nil {
+						fmt.Printf("Delete topic err: %v: %v", t.String(), err)
+					}
+				}
 			}
 		}
-		sub := client.Subscription(subID)
-		ok, err = sub.Exists(ctx)
-		if err != nil {
-			t.Fatalf("failed to check if subscription exists: %v", err)
-		}
-		if ok {
-			if err := sub.Delete(ctx); err != nil {
-				t.Fatalf("failed to cleanup the subscription (%q): %v", subID, err)
+		subIter := client.Subscriptions(ctx)
+		for {
+			s, err := subIter.Next()
+			if err == iterator.Done {
+				break
+			}
+			if err != nil {
+				return
+			}
+			sID := s.ID()
+			p := strings.Split(sID, "-")
+
+			// Only delete resources created from these tests.
+			if p[0] == subPrefix {
+				tCreated := p[1]
+				timestamp, err := strconv.ParseInt(tCreated, 10, 64)
+				if err != nil {
+					continue
+				}
+				timeTCreated := time.Unix(0, timestamp)
+				if time.Since(timeTCreated) > expireAge {
+					if err := s.Delete(ctx); err != nil {
+						fmt.Printf("Delete sub err: %v: %v", s.String(), err)
+					}
+				}
 			}
 		}
 	})
-
 	return client
 }
 
@@ -82,20 +124,20 @@ func TestCreate(t *testing.T) {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 	client := setup(t)
-	topic, err := client.CreateTopic(ctx, topicID)
+	topic, err := client.CreateTopic(ctx, topicResource)
 	if err != nil {
 		t.Fatalf("CreateTopic: %v", err)
 	}
 	buf := new(bytes.Buffer)
-	if err := create(buf, tc.ProjectID, subID, topic); err != nil {
+	if err := create(buf, tc.ProjectID, subResource, topic); err != nil {
 		t.Fatalf("failed to create a subscription: %v", err)
 	}
-	ok, err := client.Subscription(subID).Exists(context.Background())
+	ok, err := client.Subscription(subResource).Exists(context.Background())
 	if err != nil {
 		t.Fatalf("failed to check if sub exists: %v", err)
 	}
 	if !ok {
-		t.Fatalf("got none; want sub = %q", subID)
+		t.Fatalf("got none; want sub = %q", subResource)
 	}
 }
 
@@ -110,7 +152,7 @@ func TestList(t *testing.T) {
 		}
 
 		for _, sub := range subs {
-			if sub.ID() == subID {
+			if sub.ID() == subResource {
 				return // PASS
 			}
 		}
@@ -119,7 +161,7 @@ func TestList(t *testing.T) {
 		for i, sub := range subs {
 			subIDs[i] = sub.ID()
 		}
-		r.Errorf("got %+v; want a list with subscription %q", subIDs, subID)
+		r.Errorf("got %+v; want a list with subscription %q", subIDs, subResource)
 	})
 }
 
@@ -128,7 +170,7 @@ func TestIAM(t *testing.T) {
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
-		perms, err := testPermissions(buf, tc.ProjectID, subID)
+		perms, err := testPermissions(buf, tc.ProjectID, subResource)
 		if err != nil {
 			r.Errorf("testPermissions: %v", err)
 		}
@@ -138,14 +180,14 @@ func TestIAM(t *testing.T) {
 	})
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-		if err := addUsers(tc.ProjectID, subID); err != nil {
+		if err := addUsers(tc.ProjectID, subResource); err != nil {
 			r.Errorf("addUsers: %v", err)
 		}
 	})
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
-		policy, err := policy(buf, tc.ProjectID, subID)
+		policy, err := policy(buf, tc.ProjectID, subResource)
 		if err != nil {
 			r.Errorf("policy: %v", err)
 		}
@@ -163,17 +205,17 @@ func TestDelete(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	client := setup(t)
 
-	topic := client.Topic(topicID)
+	topic := client.Topic(topicResource)
 	ok, err := topic.Exists(ctx)
 	if err != nil {
 		t.Fatalf("failed to check if topic exists: %v", err)
 	}
 	if !ok {
-		topic, err := client.CreateTopic(ctx, topicID)
+		topic, err := client.CreateTopic(ctx, topicResource)
 		if err != nil {
 			t.Fatalf("CreateTopic: %v", err)
 		}
-		_, err = client.CreateSubscription(ctx, subID, pubsub.SubscriptionConfig{
+		_, err = client.CreateSubscription(ctx, subResource, pubsub.SubscriptionConfig{
 			Topic:       topic,
 			AckDeadline: 20 * time.Second,
 		})
@@ -183,15 +225,15 @@ func TestDelete(t *testing.T) {
 	}
 
 	buf := new(bytes.Buffer)
-	if err := delete(buf, tc.ProjectID, subID); err != nil {
-		t.Fatalf("failed to delete subscription (%q): %v", subID, err)
+	if err := delete(buf, tc.ProjectID, subResource); err != nil {
+		t.Fatalf("failed to delete subscription (%q): %v", subResource, err)
 	}
-	ok, err = client.Subscription(subID).Exists(context.Background())
+	ok, err = client.Subscription(subResource).Exists(context.Background())
 	if err != nil {
 		t.Fatalf("failed to check if sub exists: %v", err)
 	}
 	if ok {
-		t.Fatalf("sub = %q; want none", subID)
+		t.Fatalf("sub = %q; want none", subResource)
 	}
 }
 
@@ -199,8 +241,8 @@ func TestPullMsgsAsync(t *testing.T) {
 	client := setup(t)
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
-	asyncTopicID := topicID + "-async"
-	asyncSubID := subID + "-async"
+	asyncTopicID := topicResource + "-async"
+	asyncSubID := subResource + "-async"
 
 	topic, err := getOrCreateTopic(ctx, client, asyncTopicID)
 	if err != nil {
@@ -237,8 +279,8 @@ func TestPullMsgsSync(t *testing.T) {
 	client := setup(t)
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
-	topicIDSync := topicID + "-sync"
-	subIDSync := subID + "-sync"
+	topicIDSync := topicResource + "-sync"
+	subIDSync := subResource + "-sync"
 
 	topic, err := getOrCreateTopic(ctx, client, topicIDSync)
 	if err != nil {
@@ -275,8 +317,8 @@ func TestPullMsgsConcurrencyControl(t *testing.T) {
 	client := setup(t)
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
-	topicIDConc := topicID + "-conc"
-	subIDConc := subID + "-conc"
+	topicIDConc := topicResource + "-conc"
+	subIDConc := subResource + "-conc"
 
 	topic, err := getOrCreateTopic(ctx, client, topicIDConc)
 	if err != nil {
@@ -313,8 +355,8 @@ func TestPullMsgsCustomAttributes(t *testing.T) {
 	client := setup(t)
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
-	topicIDAttributes := topicID + "-attributes"
-	subIDAttributes := subID + "-attributes"
+	topicIDAttributes := topicResource + "-attributes"
+	subIDAttributes := subResource + "-attributes"
 
 	topic, err := getOrCreateTopic(ctx, client, topicIDAttributes)
 	if err != nil {
@@ -356,9 +398,9 @@ func TestCreateWithDeadLetterPolicy(t *testing.T) {
 	defer client.Close()
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
-	deadLetterSourceID := topicID + "-dead-letter-source"
-	deadLetterSubID := subID + "-dead-letter-sub"
-	deadLetterSinkID := topicID + "-dead-letter-sink"
+	deadLetterSourceID := topicResource + "-dead-letter-source"
+	deadLetterSubID := subResource + "-dead-letter-sub"
+	deadLetterSinkID := topicResource + "-dead-letter-sink"
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		deadLetterSourceTopic, err := getOrCreateTopic(ctx, client, deadLetterSourceID)
@@ -416,9 +458,9 @@ func TestUpdateDeadLetterPolicy(t *testing.T) {
 	defer client.Close()
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
-	deadLetterSourceID := topicID + "-update-source"
-	deadLetterSubID := subID + "-update-sub"
-	deadLetterSinkID := topicID + "-update-sink"
+	deadLetterSourceID := topicResource + "-update-source"
+	deadLetterSubID := subResource + "-update-sub"
+	deadLetterSinkID := topicResource + "-update-sink"
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		deadLetterSourceTopic, err := getOrCreateTopic(ctx, client, deadLetterSourceID)
@@ -496,9 +538,9 @@ func TestPullMsgsDeadLetterDeliveryAttempts(t *testing.T) {
 	defer client.Close()
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
-	deadLetterSourceID := topicID + "-delivery-source"
-	deadLetterSinkID := topicID + "-delivery-sink"
-	deadLetterSubID := subID + "-delivery-sub"
+	deadLetterSourceID := topicResource + "-delivery-source"
+	deadLetterSinkID := topicResource + "-delivery-sink"
+	deadLetterSubID := subResource + "-delivery-sub"
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		deadLetterSourceTopic, err := getOrCreateTopic(ctx, client, deadLetterSourceID)
@@ -554,9 +596,9 @@ func TestCreateWithOrdering(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	client := setup(t)
 	defer client.Close()
-	orderingSubID := subID + "-ordering"
+	orderingSubID := subResource + "-ordering"
 
-	topic, err := getOrCreateTopic(ctx, client, topicID)
+	topic, err := getOrCreateTopic(ctx, client, topicResource)
 	if err != nil {
 		t.Fatalf("CreateTopic: %v", err)
 	}
@@ -588,8 +630,8 @@ func TestDetachSubscription(t *testing.T) {
 	defer client.Close()
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
-	detachTopicID := topicID + "-detach"
-	detachSubID := "testdetachsubsxyz-" + subID
+	detachTopicID := topicResource + "-detach"
+	detachSubID := "testdetachsubsxyz-" + subResource
 
 	topic, err := getOrCreateTopic(ctx, client, detachTopicID)
 	if err != nil {
@@ -668,7 +710,7 @@ func getOrCreateSub(ctx context.Context, client *pubsub.Client, subID string, cf
 	if !ok {
 		sub, err = client.CreateSubscription(ctx, subID, *cfg)
 		if err != nil {
-			return nil, fmt.Errorf("failed to create subscription (%q): %v", topicID, err)
+			return nil, fmt.Errorf("failed to create subscription (%q): %v", topicResource, err)
 		}
 	}
 	return sub, nil
