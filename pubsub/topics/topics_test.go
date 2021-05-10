@@ -132,8 +132,10 @@ func TestList(t *testing.T) {
 func TestPublish(t *testing.T) {
 	// Nothing much to do here, unless we are consuming.
 	// TODO(jbd): Merge topics and subscriptions programs maybe?
+	ctx := context.Background()
 	tc := testutil.SystemTest(t)
-	setup(t)
+	client := setup(t)
+	client.CreateTopic(ctx, topicID)
 	buf := new(bytes.Buffer)
 	if err := publish(buf, tc.ProjectID, topicID, "hello world"); err != nil {
 		t.Errorf("failed to publish message: %v", err)
