@@ -143,8 +143,10 @@ func TestPublish(t *testing.T) {
 }
 
 func TestPublishThatScales(t *testing.T) {
+	ctx := context.Background()
 	tc := testutil.SystemTest(t)
-	setup(t)
+	client := setup(t)
+	client.CreateTopic(ctx, topicID)
 	buf := new(bytes.Buffer)
 	if err := publishThatScales(buf, tc.ProjectID, topicID, 10); err != nil {
 		t.Errorf("failed to publish message: %v", err)
@@ -152,16 +154,20 @@ func TestPublishThatScales(t *testing.T) {
 }
 
 func TestPublishWithSettings(t *testing.T) {
+	ctx := context.Background()
 	tc := testutil.SystemTest(t)
-	setup(t)
+	client := setup(t)
+	client.CreateTopic(ctx, topicID)
 	if err := publishWithSettings(ioutil.Discard, tc.ProjectID, topicID); err != nil {
 		t.Errorf("failed to publish message: %v", err)
 	}
 }
 
 func TestPublishCustomAttributes(t *testing.T) {
+	ctx := context.Background()
 	tc := testutil.SystemTest(t)
-	setup(t)
+	client := setup(t)
+	client.CreateTopic(ctx, topicID)
 	buf := new(bytes.Buffer)
 	if err := publishCustomAttributes(buf, tc.ProjectID, topicID); err != nil {
 		t.Errorf("failed to publish message: %v", err)
@@ -169,8 +175,10 @@ func TestPublishCustomAttributes(t *testing.T) {
 }
 
 func TestIAM(t *testing.T) {
+	ctx := context.Background()
 	tc := testutil.SystemTest(t)
-	setup(t)
+	client := setup(t)
+	client.CreateTopic(ctx, topicID)
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
@@ -205,8 +213,10 @@ func TestIAM(t *testing.T) {
 }
 
 func TestPublishWithOrderingKey(t *testing.T) {
+	ctx := context.Background()
 	tc := testutil.SystemTest(t)
-	setup(t)
+	client := setup(t)
+	client.CreateTopic(ctx, topicID)
 	buf := new(bytes.Buffer)
 	publishWithOrderingKey(buf, tc.ProjectID, topicID)
 
@@ -218,8 +228,10 @@ func TestPublishWithOrderingKey(t *testing.T) {
 }
 
 func TestResumePublishWithOrderingKey(t *testing.T) {
+	ctx := context.Background()
 	tc := testutil.SystemTest(t)
-	setup(t)
+	client := setup(t)
+	client.CreateTopic(ctx, topicID)
 	buf := new(bytes.Buffer)
 	resumePublishWithOrderingKey(buf, tc.ProjectID, topicID)
 
