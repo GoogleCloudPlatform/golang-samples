@@ -54,7 +54,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create logadmin client: %v", err)
 	}
-	defer client.Close()
+	defer adminClient.Close()
 
 	client.OnError = func(err error) {
 		// Print an error to the local log.
