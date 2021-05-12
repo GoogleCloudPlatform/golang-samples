@@ -19,7 +19,10 @@
       "enabled": false
     },
     {
-      "packageNames": ["golang.org/x/tools"],
+      "packageNames": [
+        "golang.org/x/tools",
+        "cloud.google.com/go/pubsublite"
+      ],
       "enabled": false
     }
   ],
