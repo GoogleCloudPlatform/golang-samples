@@ -37,6 +37,7 @@ func listTriggers(w io.Writer, projectID string) error {
 	if err != nil {
 		return fmt.Errorf("dlp.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	// Create a configured request.
 	req := &dlppb.ListJobTriggersRequest{

@@ -69,6 +69,7 @@ func recognizeGCS(w io.Writer, gcsURI string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 
 	// Send the request with the URI (gs://...)
 	// and sample rate information to be transcripted.
@@ -103,6 +104,7 @@ func recognize(w io.Writer, file string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 
 	data, err := ioutil.ReadFile(file)
 	if err != nil {

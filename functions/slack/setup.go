@@ -38,7 +38,7 @@ func setup(ctx context.Context) {
 	if entitiesService == nil {
 		kgService, err := kgsearch.NewService(ctx, option.WithAPIKey(kgKey))
 		if err != nil {
-			log.Fatalf("kgsearch.NewClient: %v", err)
+			log.Fatalf("kgsearch.NewService: %v", err)
 		}
 		entitiesService = kgsearch.NewEntitiesService(kgService)
 	}

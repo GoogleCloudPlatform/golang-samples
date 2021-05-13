@@ -36,6 +36,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("error creating DLP client: %v", err)
 	}
+	defer client.Close()
 
 	// The string to inspect.
 	input := "Robert Frost"

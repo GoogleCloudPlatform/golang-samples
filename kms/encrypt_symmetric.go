@@ -38,6 +38,7 @@ func encryptSymmetric(w io.Writer, name string, message string) error {
 	if err != nil {
 		return fmt.Errorf("failed to create kms client: %v", err)
 	}
+	defer client.Close()
 
 	// Convert the message into bytes. Cryptographic plaintexts and
 	// ciphertexts are always byte arrays.

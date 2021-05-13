@@ -35,6 +35,7 @@ func deleteChannel(w io.Writer, channelName string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 
 	req := &monitoringpb.DeleteNotificationChannelRequest{
 		Name: channelName,

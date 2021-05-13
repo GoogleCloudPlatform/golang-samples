@@ -33,6 +33,7 @@ func batchDeleteJobs(w io.Writer, projectID, companyID, requisitionID string) er
 	if err != nil {
 		return fmt.Errorf("talent.NewJobClient: %v", err)
 	}
+	defer c.Close()
 
 	companyName := fmt.Sprintf("projects/%s/companies/%s", projectID, companyID)
 	filter := fmt.Sprintf("companyName=%q AND requisitionId=%q", companyName, requisitionID)
