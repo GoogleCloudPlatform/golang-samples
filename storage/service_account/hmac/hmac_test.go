@@ -43,7 +43,7 @@ func TestMain(m *testing.M) {
 
 	// Delete all existing HMAC keys in the project to avoid running into
 	// resource constraints during the test.
-	projectID := 	os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
+	projectID := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
 	if err := deleteAllKeys(projectID); err != nil {
 		fmt.Printf("deleting existing keys: %v", err)
 	}
