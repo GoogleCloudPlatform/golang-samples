@@ -36,6 +36,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to setup client: %v", err)
 	}
+	defer client.Close()
 
 	// Create the request to create the secret.
 	createSecretReq := &secretmanagerpb.CreateSecretRequest{

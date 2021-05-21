@@ -31,6 +31,7 @@ func delete(w io.Writer, projectID, topicID string) error {
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	t := client.Topic(topicID)
 	if err := t.Delete(ctx); err != nil {

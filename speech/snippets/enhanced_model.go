@@ -38,6 +38,7 @@ func enhancedModel(w io.Writer, path string) error {
 	if err != nil {
 		return fmt.Errorf("NewClient: %v", err)
 	}
+	defer client.Close()
 
 	// path = "../testdata/commercial_mono.wav"
 	data, err := ioutil.ReadFile(path)

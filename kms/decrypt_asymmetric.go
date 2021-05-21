@@ -38,6 +38,7 @@ func decryptAsymmetric(w io.Writer, name string, ciphertext []byte) error {
 	if err != nil {
 		return fmt.Errorf("failed to create kms client: %v", err)
 	}
+	defer client.Close()
 
 	// Optional but recommended: Compute ciphertext's CRC32C.
 	crc32c := func(data []byte) uint32 {

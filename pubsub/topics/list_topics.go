@@ -30,6 +30,7 @@ func list(projectID string) ([]*pubsub.Topic, error) {
 	if err != nil {
 		return nil, fmt.Errorf("pubsub.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	var topics []*pubsub.Topic
 

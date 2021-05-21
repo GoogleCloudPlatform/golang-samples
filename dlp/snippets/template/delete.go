@@ -35,6 +35,7 @@ func deleteInspectTemplate(w io.Writer, templateID string) error {
 	if err != nil {
 		return fmt.Errorf("dlp.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	req := &dlppb.DeleteInspectTemplateRequest{
 		Name: templateID,

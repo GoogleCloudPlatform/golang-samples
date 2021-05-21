@@ -34,6 +34,7 @@ func createWithEndpoint(w io.Writer, projectID, subID string, topic *pubsub.Topi
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	sub, err := client.CreateSubscription(ctx, subID, pubsub.SubscriptionConfig{
 		Topic:       topic,

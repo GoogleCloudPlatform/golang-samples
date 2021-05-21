@@ -33,6 +33,7 @@ func publishWithSettings(w io.Writer, projectID, topicID string) error {
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
+	defer client.Close()
 	var results []*pubsub.PublishResult
 	var resultErrors []error
 	t := client.Topic(topicID)

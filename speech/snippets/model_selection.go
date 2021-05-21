@@ -38,6 +38,7 @@ func modelSelection(w io.Writer, path string) error {
 	if err != nil {
 		return fmt.Errorf("NewClient: %v", err)
 	}
+	defer client.Close()
 
 	// path = "../testdata/Google_Gnome.wav"
 	data, err := ioutil.ReadFile(path)

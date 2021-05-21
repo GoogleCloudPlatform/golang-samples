@@ -36,6 +36,7 @@ func ListVoices(w io.Writer) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 
 	// Performs the list voices request.
 	resp, err := client.ListVoices(ctx, &texttospeechpb.ListVoicesRequest{})

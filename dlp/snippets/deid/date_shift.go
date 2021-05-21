@@ -37,6 +37,7 @@ func deidentifyDateShift(w io.Writer, projectID string, lowerBoundDays, upperBou
 	if err != nil {
 		return fmt.Errorf("dlp.NewClient: %v", err)
 	}
+	defer client.Close()
 	// Create a configured request.
 	req := &dlppb.DeidentifyContentRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/global", projectID),
