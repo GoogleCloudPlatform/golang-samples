@@ -178,8 +178,8 @@ func createRS256JWT(t *testing.T, email string, aud string) (string, rsa.PublicK
 // present in Cloud Pub/Sub JWT tokens.
 type ExtendedPayload struct {
 	idtoken.Payload
-	Email    string                 `json:"email"`
-	EmailVerified    bool           `json:"email_verified"`
+	Email         string `json:"email"`
+	EmailVerified bool   `json:"email_verified"`
 }
 
 func createAuthToken(t *testing.T, email string, aud string) *jwt {
@@ -195,7 +195,7 @@ func createAuthToken(t *testing.T, email string, aud string) *jwt {
 			Audience: aud,
 			Expires:  time.Now().Add(1 * time.Minute).Unix(),
 		},
-		Email: email,
+		Email:         email,
 		EmailVerified: true,
 	}
 
