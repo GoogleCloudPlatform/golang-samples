@@ -19,7 +19,10 @@ package topics
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io/ioutil"
+	"strconv"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -27,9 +30,15 @@ import (
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"google.golang.org/api/iterator"
 )
 
 var topicID string
+
+const (
+	topicPrefix = "topic"
+	expireAge   = 24 * time.Hour
+)
 
 // once guards cleanup related operations in setup. No need to set up and tear
 // down every time, so this speeds things up.
@@ -39,23 +48,41 @@ func setup(t *testing.T) *pubsub.Client {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 
-	topicID = "test-topic"
 	var err error
 	client, err := pubsub.NewClient(ctx, tc.ProjectID)
 	if err != nil {
 		t.Fatalf("failed to create client: %v", err)
 	}
 
-	// Cleanup resources from the previous tests.
 	once.Do(func() {
-		topic := client.Topic(topicID)
-		ok, err := topic.Exists(ctx)
-		if err != nil {
-			t.Fatalf("failed to check if topic exists: %v", err)
-		}
-		if ok {
-			if err := topic.Delete(ctx); err != nil {
-				t.Fatalf("failed to cleanup the topic (%q): %v", topicID, err)
+		topicID = fmt.Sprintf("%s-%d", topicPrefix, time.Now().UnixNano())
+
+		// Cleanup resources from previous tests.
+		it := client.Topics(ctx)
+		for {
+			t, err := it.Next()
+			if err == iterator.Done {
+				break
+			}
+			if err != nil {
+				return
+			}
+			tID := t.ID()
+			p := strings.Split(tID, "-")
+
+			// Only delete resources created from these tests.
+			if p[0] == topicPrefix {
+				tCreated := p[1]
+				timestamp, err := strconv.ParseInt(tCreated, 10, 64)
+				if err != nil {
+					continue
+				}
+				timeTCreated := time.Unix(0, timestamp)
+				if time.Since(timeTCreated) > expireAge {
+					if err := t.Delete(ctx); err != nil {
+						fmt.Printf("Delete topic err: %v: %v", t.String(), err)
+					}
+				}
 			}
 		}
 	})
@@ -185,36 +212,6 @@ func TestIAM(t *testing.T) {
 	})
 }
 
-func TestDelete(t *testing.T) {
-	ctx := context.Background()
-	tc := testutil.SystemTest(t)
-	client := setup(t)
-
-	topic := client.Topic(topicID)
-	ok, err := topic.Exists(ctx)
-	if err != nil {
-		t.Fatalf("failed to check if topic exists: %v", err)
-	}
-	if !ok {
-		_, err := client.CreateTopic(ctx, topicID)
-		if err != nil {
-			t.Fatalf("CreateTopic: %v", err)
-		}
-	}
-
-	buf := new(bytes.Buffer)
-	if err := delete(buf, tc.ProjectID, topicID); err != nil {
-		t.Fatalf("failed to delete topic (%q): %v", topicID, err)
-	}
-	ok, err = client.Topic(topicID).Exists(context.Background())
-	if err != nil {
-		t.Fatalf("failed to check if topic exists: %v", err)
-	}
-	if ok {
-		t.Fatalf("got topic = %q; want none", topicID)
-	}
-}
-
 func TestPublishWithOrderingKey(t *testing.T) {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
@@ -242,5 +239,34 @@ func TestResumePublishWithOrderingKey(t *testing.T) {
 	want := "Published a message with ordering key successfully\n"
 	if got != want {
 		t.Fatalf("failed to resume with ordering keys:\n got: %v", got)
+	}
+}
+func TestDelete(t *testing.T) {
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	client := setup(t)
+
+	topic := client.Topic(topicID)
+	ok, err := topic.Exists(ctx)
+	if err != nil {
+		t.Fatalf("failed to check if topic exists: %v", err)
+	}
+	if !ok {
+		_, err := client.CreateTopic(ctx, topicID)
+		if err != nil {
+			t.Fatalf("CreateTopic: %v", err)
+		}
+	}
+
+	buf := new(bytes.Buffer)
+	if err := delete(buf, tc.ProjectID, topicID); err != nil {
+		t.Fatalf("failed to delete topic (%q): %v", topicID, err)
+	}
+	ok, err = client.Topic(topicID).Exists(context.Background())
+	if err != nil {
+		t.Fatalf("failed to check if topic exists: %v", err)
+	}
+	if ok {
+		t.Fatalf("got topic = %q; want none", topicID)
 	}
 }

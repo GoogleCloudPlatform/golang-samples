@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -27,6 +28,7 @@ import (
 
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
+	"google.golang.org/api/iterator"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/go-cmp/cmp"
@@ -34,6 +36,12 @@ import (
 
 var topicID string
 var subID string
+
+const (
+	topicPrefix = "topic"
+	subPrefix   = "sub"
+	expireAge   = 24 * time.Hour
+)
 
 // once guards cleanup related operations in setup. No need to set up and tear
 // down every time, so this speeds things up.
@@ -43,38 +51,72 @@ func setup(t *testing.T) *pubsub.Client {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 
-	topicID = "test-sub-topic"
-	subID = "test-sub"
 	var err error
 	client, err := pubsub.NewClient(ctx, tc.ProjectID)
 	if err != nil {
 		t.Fatalf("failed to create client: %v", err)
 	}
 
-	// Cleanup resources from the previous tests.
 	once.Do(func() {
-		topic := client.Topic(topicID)
-		ok, err := topic.Exists(ctx)
-		if err != nil {
-			t.Fatalf("failed to check if topic exists: %v", err)
-		}
-		if ok {
-			if err := topic.Delete(ctx); err != nil {
-				t.Fatalf("failed to cleanup the topic (%q): %v", topicID, err)
+		topicID = fmt.Sprintf("%s-%d", topicPrefix, time.Now().UnixNano())
+		subID = fmt.Sprintf("%s-%d", subPrefix, time.Now().UnixNano())
+
+		// Cleanup resources from the previous tests.
+		it := client.Topics(ctx)
+		for {
+			t, err := it.Next()
+			if err == iterator.Done {
+				break
+			}
+			if err != nil {
+				return
+			}
+			tID := t.ID()
+			p := strings.Split(tID, "-")
+
+			// Only delete resources created from these tests.
+			if p[0] == topicPrefix {
+				tCreated := p[1]
+				timestamp, err := strconv.ParseInt(tCreated, 10, 64)
+				if err != nil {
+					continue
+				}
+				timeTCreated := time.Unix(0, timestamp)
+				if time.Since(timeTCreated) > expireAge {
+					if err := t.Delete(ctx); err != nil {
+						fmt.Printf("Delete topic err: %v: %v", t.String(), err)
+					}
+				}
 			}
 		}
-		sub := client.Subscription(subID)
-		ok, err = sub.Exists(ctx)
-		if err != nil {
-			t.Fatalf("failed to check if subscription exists: %v", err)
-		}
-		if ok {
-			if err := sub.Delete(ctx); err != nil {
-				t.Fatalf("failed to cleanup the subscription (%q): %v", subID, err)
+		subIter := client.Subscriptions(ctx)
+		for {
+			s, err := subIter.Next()
+			if err == iterator.Done {
+				break
+			}
+			if err != nil {
+				return
+			}
+			sID := s.ID()
+			p := strings.Split(sID, "-")
+
+			// Only delete resources created from these tests.
+			if p[0] == subPrefix {
+				tCreated := p[1]
+				timestamp, err := strconv.ParseInt(tCreated, 10, 64)
+				if err != nil {
+					continue
+				}
+				timeTCreated := time.Unix(0, timestamp)
+				if time.Since(timeTCreated) > expireAge {
+					if err := s.Delete(ctx); err != nil {
+						fmt.Printf("Delete sub err: %v: %v", s.String(), err)
+					}
+				}
 			}
 		}
 	})
-
 	return client
 }
 
