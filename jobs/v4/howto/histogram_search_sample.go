@@ -33,6 +33,7 @@ func histogramSearch(w io.Writer, projectID, companyID string) error {
 	if err != nil {
 		return fmt.Errorf("talent.NewJobClient: %v", err)
 	}
+	defer c.Close()
 
 	// Construct a searchJobs request.
 	req := &talentpb.SearchJobsRequest{

@@ -35,6 +35,7 @@ func transcribeMultichannel(w io.Writer, path string) error {
 	if err != nil {
 		return fmt.Errorf("NewClient: %v", err)
 	}
+	defer client.Close()
 
 	data, err := ioutil.ReadFile(path)
 	if err != nil {

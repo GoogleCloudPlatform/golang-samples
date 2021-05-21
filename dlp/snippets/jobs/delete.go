@@ -32,6 +32,7 @@ func deleteJob(w io.Writer, jobName string) error {
 	if err != nil {
 		return fmt.Errorf("dlp.NewClient: %v", err)
 	}
+	defer client.Close()
 	req := &dlppb.DeleteDlpJobRequest{
 		Name: jobName,
 	}

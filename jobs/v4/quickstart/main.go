@@ -35,6 +35,7 @@ func main() {
 		fmt.Printf("talent.NewCompanyClient: %v", err)
 		return
 	}
+	defer c.Close()
 
 	// Construct a listCompany request.
 	req := &talentpb.ListCompaniesRequest{

@@ -40,6 +40,7 @@ func redactImage(w io.Writer, projectID string, infoTypeNames []string, bytesTyp
 	if err != nil {
 		return fmt.Errorf("dlp.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	// Convert the info type strings to a list of InfoTypes.
 	var infoTypes []*dlppb.InfoType

@@ -41,6 +41,7 @@ func writeTimeSeriesValue(projectID, metricType string) error {
 	if err != nil {
 		return err
 	}
+	defer c.Close()
 	now := &timestamp.Timestamp{
 		Seconds: time.Now().Unix(),
 	}
@@ -93,6 +94,7 @@ func readTimeSeriesValue(projectID, metricType string) error {
 	if err != nil {
 		return err
 	}
+	defer c.Close()
 	startTime := time.Now().UTC().Add(time.Minute * -20).Unix()
 	endTime := time.Now().UTC().Unix()
 

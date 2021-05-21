@@ -33,6 +33,7 @@ func createWithOrdering(w io.Writer, projectID, subID string, topic *pubsub.Topi
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	// Message ordering can only be set when creating a subscription.
 	sub, err := client.CreateSubscription(ctx, subID, pubsub.SubscriptionConfig{

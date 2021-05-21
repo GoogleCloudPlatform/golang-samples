@@ -31,6 +31,7 @@ func listSubscriptions(projectID, topicID string) ([]*pubsub.Subscription, error
 	if err != nil {
 		return nil, fmt.Errorf("pubsub.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	var subs []*pubsub.Subscription
 

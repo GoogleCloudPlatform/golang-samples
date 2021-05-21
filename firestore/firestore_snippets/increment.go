@@ -34,6 +34,7 @@ func updateDocumentIncrement(projectID, city string) error {
 	if err != nil {
 		return fmt.Errorf("firestore.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	dc := client.Collection("cities").Doc(city)
 	_, err = dc.Update(ctx, []firestore.Update{

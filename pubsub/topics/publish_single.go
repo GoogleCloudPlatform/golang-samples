@@ -32,6 +32,7 @@ func publishSingleGoroutine(w io.Writer, projectID, topicID, msg string) error {
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	t := client.Topic(topicID)
 	t.PublishSettings.NumGoroutines = 1

@@ -35,6 +35,7 @@ func deleteTrigger(w io.Writer, triggerID string) error {
 	if err != nil {
 		return fmt.Errorf("dlp.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	req := &dlppb.DeleteJobTriggerRequest{
 		Name: triggerID,

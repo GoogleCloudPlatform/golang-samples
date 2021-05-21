@@ -32,6 +32,7 @@ func labelURI(w io.Writer, file string) error {
 	if err != nil {
 		return fmt.Errorf("video.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	op, err := client.AnnotateVideo(ctx, &videopb.AnnotateVideoRequest{
 		Features: []videopb.Feature{
@@ -85,6 +86,7 @@ func shotChangeURI(w io.Writer, file string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 
 	op, err := client.AnnotateVideo(ctx, &videopb.AnnotateVideoRequest{
 		Features: []videopb.Feature{
@@ -123,6 +125,7 @@ func explicitContentURI(w io.Writer, file string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 
 	op, err := client.AnnotateVideo(ctx, &videopb.AnnotateVideoRequest{
 		Features: []videopb.Feature{
@@ -159,6 +162,7 @@ func speechTranscriptionURI(w io.Writer, file string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 
 	op, err := client.AnnotateVideo(ctx, &videopb.AnnotateVideoRequest{
 		Features: []videopb.Feature{

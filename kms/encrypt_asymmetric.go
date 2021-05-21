@@ -41,6 +41,7 @@ func encryptAsymmetric(w io.Writer, name string, message string) error {
 	if err != nil {
 		return fmt.Errorf("failed to create kms client: %v", err)
 	}
+	defer client.Close()
 
 	// Retrieve the public key from Cloud KMS. This is the only operation that
 	// involves Cloud KMS. The remaining operations take place on your local

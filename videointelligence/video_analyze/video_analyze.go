@@ -33,6 +33,7 @@ func label(w io.Writer, file string) error {
 	if err != nil {
 		return fmt.Errorf("video.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	fileBytes, err := ioutil.ReadFile(file)
 	if err != nil {
@@ -89,6 +90,7 @@ func shotChange(w io.Writer, file string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 
 	fileBytes, err := ioutil.ReadFile(file)
 	if err != nil {
@@ -128,6 +130,7 @@ func explicitContent(w io.Writer, file string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 
 	fileBytes, err := ioutil.ReadFile(file)
 	if err != nil {
@@ -167,6 +170,7 @@ func speechTranscription(w io.Writer, file string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 
 	fileBytes, err := ioutil.ReadFile(file)
 	if err != nil {

@@ -43,6 +43,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("logadmin.NewClient: %v", err)
 	}
+	defer client.Close()
 	// [END create_logging_client]
 
 	switch command {

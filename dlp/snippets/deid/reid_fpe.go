@@ -41,6 +41,7 @@ func reidentifyFPE(w io.Writer, projectID, input, keyFileName, cryptoKeyName, su
 	if err != nil {
 		return fmt.Errorf("dlp.NewClient: %v", err)
 	}
+	defer client.Close()
 	// Read the key file.
 	keyBytes, err := ioutil.ReadFile(keyFileName)
 	if err != nil {
