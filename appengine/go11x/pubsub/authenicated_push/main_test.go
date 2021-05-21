@@ -41,24 +41,35 @@ func TestReceiveMessagesHandler(t *testing.T) {
 
 	tests := []struct {
 		name    string
+		email   string
 		aud     string
 		token   string
 		wantErr bool
 	}{
 		{
 			name:    "works",
+			email:   "test-service-account-email@example.com",
 			aud:     "http://example.com",
 			token:   testToken,
 			wantErr: false,
 		},
 		{
+			name:    "bad email",
+			email:   "bad-email@example.com",
+			aud:     "http://example.com",
+			token:   testToken,
+			wantErr: true,
+		},
+		{
 			name:    "bad token sent",
+			email:   "test-service-account-email@example.com",
 			aud:     "http://example.com",
 			token:   "bad token",
 			wantErr: true,
 		},
 		{
 			name:    "mismatched aud claim in auth token",
+			email:   "test-service-account-email@example.com",
 			aud:     "http://mismatched.com",
 			token:   testToken,
 			wantErr: true,
@@ -66,7 +77,7 @@ func TestReceiveMessagesHandler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			authToken, pk := createRS256JWT(t, tt.aud)
+			authToken, pk := createRS256JWT(t, tt.email, tt.aud)
 			app := &app{pubsubVerificationToken: testToken}
 			app.defaultHTTPClient = createClient(t, pk)
 			pr := &pushRequest{
@@ -148,9 +159,9 @@ type jwk struct {
 	N   string `json:"n"`
 }
 
-func createRS256JWT(t *testing.T, aud string) (string, rsa.PublicKey) {
+func createRS256JWT(t *testing.T, email string, aud string) (string, rsa.PublicKey) {
 	t.Helper()
-	token := createAuthToken(t, aud)
+	token := createAuthToken(t, email, aud)
 	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		t.Fatalf("unable to generate key: %v", err)
@@ -163,17 +174,29 @@ func createRS256JWT(t *testing.T, aud string) (string, rsa.PublicKey) {
 	return token.String(), privateKey.PublicKey
 }
 
-func createAuthToken(t *testing.T, aud string) *jwt {
+// Same as `idtoken.Payload` with the addition of `email` and `email_verified` claims
+// present in Cloud Pub/Sub JWT tokens.
+type ExtendedPayload struct {
+	idtoken.Payload
+	Email         string `json:"email"`
+	EmailVerified bool   `json:"email_verified"`
+}
+
+func createAuthToken(t *testing.T, email string, aud string) *jwt {
 	t.Helper()
 	header := jwtHeader{
 		KeyID:     "123",
 		Algorithm: "RS256",
 		Type:      "JWT",
 	}
-	payload := idtoken.Payload{
-		Issuer:   "https://accounts.google.com",
-		Audience: aud,
-		Expires:  time.Now().Add(1 * time.Minute).Unix(),
+	payload := ExtendedPayload{
+		Payload: idtoken.Payload{
+			Issuer:   "https://accounts.google.com",
+			Audience: aud,
+			Expires:  time.Now().Add(1 * time.Minute).Unix(),
+		},
+		Email:         email,
+		EmailVerified: true,
 	}
 
 	hb, err := json.Marshal(&header)
