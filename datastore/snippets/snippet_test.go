@@ -507,8 +507,8 @@ func SnippetIterator_Cursor() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	defer client.Close()
-	cursorStr := ""
 	// [START datastore_cursor_paging]
+	cursorStr := ""
 	const pageSize = 5
 	query := datastore.NewQuery("Tasks").Limit(pageSize)
 	if cursorStr != "" {
@@ -534,9 +534,10 @@ func SnippetIterator_Cursor() {
 
 	// Get the cursor for the next page of results.
 	nextCursor, err := it.Cursor()
+	// When run within a loop, this yields the cursor to continue reading results
+	cursorStr = nextCursor.String()
 	// [END datastore_cursor_paging]
 	_ = err        // Check the error.
-	_ = nextCursor // Use nextCursor.String as the next page's token.
 }
 
 func SnippetQuery_EventualConsistency() {
