@@ -537,7 +537,7 @@ func SnippetIterator_Cursor() {
 	// When run within a loop, this yields the cursor to continue reading results
 	cursorStr = nextCursor.String()
 	// [END datastore_cursor_paging]
-	_ = err        // Check the error.
+	_ = err // Check the error.
 }
 
 func SnippetQuery_EventualConsistency() {
