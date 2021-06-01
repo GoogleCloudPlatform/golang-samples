@@ -46,7 +46,7 @@ func main() {
 	// probabilistic sampling.
 	// Example:
 	//   tp := sdktrace.NewTracerProvider(sdktrace.WithSampler(sdktrace.TraceIDRatioBased(0.0001)), ...)
-	tp := sdktrace.NewTracerProvider(sdktrace.WithSyncer(exporter))
+	tp := sdktrace.NewTracerProvider(sdktrace.WithBatcher(exporter))
 	otel.SetTracerProvider(tp)
 
 	// [START opentelemetry_trace_custom_span]
