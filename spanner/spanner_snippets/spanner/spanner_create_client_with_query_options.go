@@ -30,7 +30,10 @@ import (
 func createClientWithQueryOptions(w io.Writer, database string) error {
 	ctx := context.Background()
 	queryOptions := spanner.QueryOptions{
-		Options: &sppb.ExecuteSqlRequest_QueryOptions{OptimizerVersion: "1"},
+		Options: &sppb.ExecuteSqlRequest_QueryOptions{
+			OptimizerVersion:           "1",
+			OptimizerStatisticsPackage: "auto_20191128_14_47_22UTC",
+		},
 	}
 	client, err := spanner.NewClientWithConfig(
 		ctx, database, spanner.ClientConfig{QueryOptions: queryOptions},
