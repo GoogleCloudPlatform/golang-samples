@@ -24,48 +24,39 @@ import (
 )
 
 func createDocReference(client *firestore.Client) {
-	// [START fs_doc_reference]
 	// [START firestore_data_reference_document]
 	alovelaceRef := client.Collection("users").Doc("alovelace")
 	// [END firestore_data_reference_document]
-	// [END fs_doc_reference]
 
 	_ = alovelaceRef
 }
 
 func createCollectionReference(client *firestore.Client) {
-	// [START fs_coll_reference]
 	// [START firestore_data_reference_collection]
 	usersRef := client.Collection("users")
 	// [END firestore_data_reference_collection]
-	// [END fs_coll_reference]
 
 	_ = usersRef
 }
 
 func createDocReferenceFromString(client *firestore.Client) {
-	// [START fs_doc_reference_alternate]
 	// [START firestore_data_reference_document_path]
 	alovelaceRef := client.Doc("users/alovelace")
 	// [END firestore_data_reference_document_path]
-	// [END fs_doc_reference_alternate]
 
 	_ = alovelaceRef
 }
 
 func createSubcollectionReference(client *firestore.Client) {
-	// [START fs_subcoll_reference]
 	// [START firestore_data_reference_subcollection]
 	messageRef := client.Collection("rooms").Doc("roomA").
 		Collection("messages").Doc("message1")
 	// [END firestore_data_reference_subcollection]
-	// [END fs_subcoll_reference]
 
 	_ = messageRef
 }
 
 func prepareRetrieve(ctx context.Context, client *firestore.Client) error {
-	// [START fs_retrieve_create_examples]
 	// [START firestore_data_get_dataset]
 	cities := []struct {
 		id string
@@ -84,12 +75,10 @@ func prepareRetrieve(ctx context.Context, client *firestore.Client) error {
 		}
 	}
 	// [END firestore_data_get_dataset]
-	// [END fs_retrieve_create_examples]
 	return nil
 }
 
 func docAsMap(ctx context.Context, client *firestore.Client) (map[string]interface{}, error) {
-	// [START fs_get_doc_as_map]
 	// [START firestore_data_get_as_map]
 	dsnap, err := client.Collection("cities").Doc("SF").Get(ctx)
 	if err != nil {
@@ -98,12 +87,10 @@ func docAsMap(ctx context.Context, client *firestore.Client) (map[string]interfa
 	m := dsnap.Data()
 	fmt.Printf("Document data: %#v\n", m)
 	// [END firestore_data_get_as_map]
-	// [END fs_get_doc_as_map]
 	return m, nil
 }
 
 func docAsEntity(ctx context.Context, client *firestore.Client) (*City, error) {
-	// [START fs_get_doc_as_entity]
 	// [START firestore_data_get_as_custom_type]
 	dsnap, err := client.Collection("cities").Doc("BJ").Get(ctx)
 	if err != nil {
@@ -113,12 +100,10 @@ func docAsEntity(ctx context.Context, client *firestore.Client) (*City, error) {
 	dsnap.DataTo(&c)
 	fmt.Printf("Document data: %#v\n", c)
 	// [END firestore_data_get_as_custom_type]
-	// [END fs_get_doc_as_entity]
 	return &c, nil
 }
 
 func multipleDocs(ctx context.Context, client *firestore.Client) error {
-	// [START fs_get_multiple_docs]
 	// [START firestore_data_query]
 	fmt.Println("All capital cities:")
 	iter := client.Collection("cities").Where("capital", "==", true).Documents(ctx)
@@ -133,12 +118,10 @@ func multipleDocs(ctx context.Context, client *firestore.Client) error {
 		fmt.Println(doc.Data())
 	}
 	// [END firestore_data_query]
-	// [END fs_get_multiple_docs]
 	return nil
 }
 
 func allDocs(ctx context.Context, client *firestore.Client) error {
-	// [START fs_get_all_docs]
 	// [START firestore_data_get_all_documents]
 	fmt.Println("All cities:")
 	iter := client.Collection("cities").Documents(ctx)
@@ -153,12 +136,10 @@ func allDocs(ctx context.Context, client *firestore.Client) error {
 		fmt.Println(doc.Data())
 	}
 	// [END firestore_data_get_all_documents]
-	// [END fs_get_all_docs]
 	return nil
 }
 
 func getCollections(ctx context.Context, client *firestore.Client) error {
-	// [START fs_get_collections]
 	// [START firestore_data_get_sub_collections]
 	iter := client.Collection("cities").Doc("SF").Collections(ctx)
 	for {
@@ -172,6 +153,5 @@ func getCollections(ctx context.Context, client *firestore.Client) error {
 		fmt.Printf("Found collection with id: %s\n", collRef.ID)
 	}
 	// [END firestore_data_get_sub_collections]
-	// [END fs_get_collections]
 	return nil
 }
