@@ -9,11 +9,11 @@
 # explicitly taken by someone else.
 *                               @googleapis/yoshi-go-admins
 
-/bigtable/**/*.go                     @GoogleCloudPlatform/cloud-native-db-dpes
-/cloudsql/**/*.go                     @GoogleCloudPlatform/infra-db-dpes
-/datastore/**/*.go                    @GoogleCloudPlatform/cloud-native-db-dpes
+/bigtable/                            @GoogleCloudPlatform/cloud-native-db-dpes
+/cloudsql/                            @GoogleCloudPlatform/infra-db-dpes
+/datastore/                           @GoogleCloudPlatform/cloud-native-db-dpes
 /errorreporting/                      @GoogleCloudPlatform/observability-devx @googleapis/yoshi-go-admins @nicoleczhu
 /firestore/                           @GoogleCloudPlatform/cloud-native-db-dpes
 /logging/                             @GoogleCloudPlatform/observability-devx @googleapis/yoshi-go-admins @nicoleczhu
-/storage/**/*.go                      @GoogleCloudPlatform/cloud-storage-dpes
+/storage/                              @GoogleCloudPlatform/cloud-storage-dpes
 /iot/                                 @gcseh @GoogleCloudPlatform/api-iot @googleapis/yoshi-go-admins
