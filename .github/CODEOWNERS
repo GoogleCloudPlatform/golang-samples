@@ -15,5 +15,5 @@
 /errorreporting/                      @GoogleCloudPlatform/observability-devx @googleapis/yoshi-go-admins @nicoleczhu
 /firestore/                           @GoogleCloudPlatform/cloud-native-db-dpes
 /logging/                             @GoogleCloudPlatform/observability-devx @googleapis/yoshi-go-admins @nicoleczhu
-/storage/                              @GoogleCloudPlatform/cloud-storage-dpes
+/storage/                             @GoogleCloudPlatform/cloud-storage-dpes
 /iot/                                 @gcseh @GoogleCloudPlatform/api-iot @googleapis/yoshi-go-admins
