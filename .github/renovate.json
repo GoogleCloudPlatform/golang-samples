@@ -20,6 +20,7 @@
     },
     {
       "packageNames": [
+        "golang.org/x/net",
         "golang.org/x/tools",
         "cloud.google.com/go/pubsublite"
       ],
