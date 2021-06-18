@@ -52,13 +52,13 @@ jobs:
     - name: shellcheck
       run: find . -name "*.sh" -exec shellcheck {} \;
   test:
-    name: Root tests
+    name: Root tests ${{ matrix.go }}
     runs-on: ubuntu-latest
     steps:
       - name: Setup Go
         uses: actions/setup-go@v2
         with:
-          go-version: '^1.16'
+          go-version: ${{ matrix.go }}
       - name: Check code
         uses: actions/checkout@v2
       - run: go test -v
