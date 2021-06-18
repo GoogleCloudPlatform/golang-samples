@@ -54,6 +54,9 @@ jobs:
   test:
     name: Root tests ${{ matrix.go }}
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go: [ '1.16', '1.11' ]
     steps:
       - name: Setup Go
         uses: actions/setup-go@v2
