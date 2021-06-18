@@ -8,13 +8,16 @@ on:
       - master
 jobs:
   build:
-    name: Build and Lint
+    name: Build and Lint ${{ matrix.go }}
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go: [ '1.16', '1.11' ]
     steps:
     - name: Setup Go
       uses: actions/setup-go@v2
       with:
-        go-version: '^1.16'
+        go-version: ${{ matrix.go }}
     - name: Install goimports
       run: go get golang.org/x/tools/cmd/goimports
     - name: Check code
