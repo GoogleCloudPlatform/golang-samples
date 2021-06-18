@@ -58,8 +58,12 @@ dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20201218220906-28db891af037/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
-github.com/GoogleCloudPlatform/golang-samples/run/grpc-server-streaming v0.0.0-20210503164456-ba08d1aac58c h1:99BAF+CFMibNzSG7s4WOzlKS/o+O4WWVYZgY+Bw1onU=
-github.com/GoogleCloudPlatform/golang-samples/run/grpc-server-streaming v0.0.0-20210503164456-ba08d1aac58c/go.mod h1:uyiJzRhXYHl+2dn/C2BUFiN8cSVfKAdy5N3iTdaY29Y=
+github.com/GoogleCloudPlatform/golang-samples v0.0.0-20210618111007-7e892a0cddf1 h1:Ndhy5rGaH+lpcBjk+Wlq/o4SmQZY060KmHN2j0NRrN0=
+github.com/GoogleCloudPlatform/golang-samples v0.0.0-20210618111007-7e892a0cddf1/go.mod h1:HC0hOK6wlQOGoAImCXXUqPXaQPYXHzhWAfzIVSmiWxU=
+github.com/GoogleCloudPlatform/golang-samples/run/grpc-ping v0.0.0-20210618111007-7e892a0cddf1 h1:C9e/8pamjE0ZFwOHFb6TEPs4L9KP+3VlT4Es3wsjB+o=
+github.com/GoogleCloudPlatform/golang-samples/run/grpc-ping v0.0.0-20210618111007-7e892a0cddf1/go.mod h1:jMBV99k7k6zcaW9FbAEz1YZaovF9jXeu93EBaG3E4XU=
+github.com/GoogleCloudPlatform/golang-samples/run/grpc-server-streaming v0.0.0-20210618111007-7e892a0cddf1 h1:+ggaa+NOgUfEZTsypJ4mveFvy2L40S3cXavEk6Poq90=
+github.com/GoogleCloudPlatform/golang-samples/run/grpc-server-streaming v0.0.0-20210618111007-7e892a0cddf1/go.mod h1:uyiJzRhXYHl+2dn/C2BUFiN8cSVfKAdy5N3iTdaY29Y=
 github.com/aws/aws-sdk-go v1.23.20/go.mod h1:KmX6BPdI08NWTb3/sm4ZGu5ShLoqVDhKgpiN924inxo=
 github.com/aws/aws-sdk-go v1.38.30/go.mod h1:hcU610XS61/+aQV88ixoOzUoG7v3b31pl2zKMmprdro=
 github.com/bmatcuk/doublestar/v2 v2.0.4/go.mod h1:QMmcs3H2AUQICWhfzLXz+IYln8lRQmTZRptLie8RgRw=
