@@ -37,7 +37,7 @@ require (
 	github.com/sendgrid/smtpapi-go v0.6.0 // indirect
 	github.com/tinylib/msgp v1.1.2 // indirect
 	go.opencensus.io v0.23.0
-	golang.org/x/exp v0.0.0-20210617012816-0dc655b38382
+	golang.org/x/exp v0.0.0-20210618142145-ffcf9a09ea36
 	golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420
 	golang.org/x/oauth2 v0.0.0-20210615190721-d04028783cf1
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
