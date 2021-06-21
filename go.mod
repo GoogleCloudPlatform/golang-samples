@@ -13,7 +13,7 @@ require (
 	cloud.google.com/go/pubsublite v0.8.0
 	cloud.google.com/go/spanner v1.20.0
 	cloud.google.com/go/storage v1.13.0
-	contrib.go.opencensus.io/exporter/stackdriver v0.13.8
+	contrib.go.opencensus.io/exporter/stackdriver v0.13.5
 	github.com/aws/aws-sdk-go v1.38.64
 	github.com/bmatcuk/doublestar/v2 v2.0.4
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
