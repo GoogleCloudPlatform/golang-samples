@@ -32,7 +32,7 @@ func configureConnectionPool(w io.Writer, projectID, instanceID string) error {
 	ctx := context.Background()
 
 	// Set up Bigtable data operations client.
-	poolSize := 250
+	poolSize := 10
 	client, err := bigtable.NewClient(ctx, projectID, instanceID, option.WithGRPCConnectionPool(poolSize))
 	defer client.Close()
 
