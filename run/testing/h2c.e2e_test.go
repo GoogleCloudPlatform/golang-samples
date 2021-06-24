@@ -22,6 +22,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/cloudrunci"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/hashicorp/go-retryablehttp"
 	"golang.org/x/net/http2"
 )
 
@@ -49,7 +50,10 @@ func TestHTTP2Server(t *testing.T) {
 		t.Fatalf("Service.ParsedURL: %v", err)
 	}
 
-	h2Client := &http.Client{Transport: &http2.Transport{}}
+	retryClient := retryablehttp.NewClient()
+	retryClient.RetryMax = 5
+	h2Client := retryClient.StandardClient()
+	h2Client.Transport = &http2.Transport{}
 
 	resp, err := h2Client.Get(svcURL.String())
 	if err != nil {
