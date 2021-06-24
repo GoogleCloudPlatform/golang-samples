@@ -6,7 +6,7 @@ require (
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20210618111007-7e892a0cddf1
 	github.com/GoogleCloudPlatform/golang-samples/run/grpc-ping v0.0.0-20210618111007-7e892a0cddf1
 	github.com/GoogleCloudPlatform/golang-samples/run/grpc-server-streaming v0.0.0-20210618111007-7e892a0cddf1
-	github.com/hashicorp/go-retryablehttp v0.7.0 // indirect
+	github.com/hashicorp/go-retryablehttp v0.7.0
 	golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420
 	google.golang.org/grpc v1.38.0
 )
