@@ -580,7 +580,11 @@ func createTestInstance(t *testing.T) (instanceName string, cleanup func()) {
 			t.Fatalf("failed to list existing instances: %v", err)
 		}
 		if createTimeString, ok := instance.Labels["create_time"]; ok {
-			createTime, err := time.Parse(time.RFC3339, createTimeString)
+			seconds, err := strconv.ParseInt(createTimeString, 10, 64)
+			if err != nil {
+				t.Fatalf("could not parse create time %v: %v", createTimeString, err)
+			}
+			createTime := time.Unix(seconds, 0)
 			if err != nil {
 				t.Fatalf("could not parse create time %v: %v", createTimeString, err)
 			}
@@ -601,7 +605,7 @@ func createTestInstance(t *testing.T) (instanceName string, cleanup func()) {
 			NodeCount:   1,
 			Labels: map[string]string{
 				"cloud_spanner_samples_test": "true",
-				"create_time":                time.Now().UTC().Format(time.RFC3339),
+				"create_time":                fmt.Sprintf("%v", time.Now().Unix()),
 			},
 		},
 	})
@@ -623,7 +627,7 @@ func createTestInstance(t *testing.T) (instanceName string, cleanup func()) {
 				break
 			}
 			if err != nil {
-				t.Errorf("Failed to list backups for instance %s: %v", instanceName, err)
+				t.Fatalf("Failed to list backups for instance %s: %v", instanceName, err)
 			}
 			adminClient.DeleteBackup(ctx, &adminpb.DeleteBackupRequest{Name: resp.Name})
 		}
