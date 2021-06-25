@@ -547,7 +547,7 @@ func mustRunSample(t *testing.T, f sampleFuncWithContext, dbName, errMsg string)
 	return b.String()
 }
 
-func createTestInstance(t *testing.T) (instanceName string, cleanup func ()) {
+func createTestInstance(t *testing.T) (instanceName string, cleanup func()) {
 	projectID, _, err := parseInstanceName(getInstance(t))
 	if err != nil {
 		t.Fatalf("failed to parse instance name: %v", err)
@@ -588,7 +588,7 @@ func createTestInstance(t *testing.T) (instanceName string, cleanup func ()) {
 		if i.State != instancepb.Instance_READY {
 			break
 		}
-		<- time.After(time.Second)
+		<-time.After(time.Second)
 		i, err = instanceAdmin.GetInstance(ctx, &instancepb.GetInstanceRequest{
 			Name: instanceName,
 		})
