@@ -566,6 +566,32 @@ func createTestInstance(t *testing.T) (instanceName string, cleanup func()) {
 		t.Fatalf("failed to create DatabaseAdminClient: %v", err)
 	}
 
+	// Cleanup old test instances that might not have been deleted.
+	iter := instanceAdmin.ListInstances(ctx, &instancepb.ListInstancesRequest{
+		Parent: fmt.Sprintf("projects/%v", projectID),
+		Filter: "labels.cloud_spanner_samples_test:true",
+	})
+	for {
+		instance, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			t.Fatalf("failed to list existing instances: %v", err)
+		}
+		if createTimeString, ok := instance.Labels["create_time"]; ok {
+			createTime, err := time.Parse(time.RFC3339, createTimeString)
+			if err != nil {
+				t.Fatalf("could not parse create time %v: %v", createTimeString, err)
+			}
+			diff := time.Now().Sub(createTime)
+			if diff > time.Hour*24 {
+				t.Logf("deleting stale test instance %v", instance.Name)
+				instanceAdmin.DeleteInstance(ctx, &instancepb.DeleteInstanceRequest{Name: instance.Name})
+			}
+		}
+	}
+
 	op, err := instanceAdmin.CreateInstance(ctx, &instancepb.CreateInstanceRequest{
 		Parent:     fmt.Sprintf("projects/%s", projectID),
 		InstanceId: instanceID,
@@ -573,28 +599,18 @@ func createTestInstance(t *testing.T) (instanceName string, cleanup func()) {
 			Config:      fmt.Sprintf("projects/%s/instanceConfigs/%s", projectID, "regional-us-central1"),
 			DisplayName: instanceID,
 			NodeCount:   1,
-			Labels:      map[string]string{"cloud_spanner_samples_test": "true"},
+			Labels: map[string]string{
+				"cloud_spanner_samples_test": "true",
+				"create_time":                time.Now().UTC().Format(time.RFC3339),
+			},
 		},
 	})
 	if err != nil {
 		t.Fatalf("could not create instance %s: %v", fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID), err)
 	}
-	i, err := op.Wait(ctx)
+	_, err = op.Wait(ctx)
 	if err != nil {
 		t.Fatalf("waiting for instance creation to finish failed: %v", err)
-	}
-	// Wait until the instance is ready.
-	for {
-		if i.State != instancepb.Instance_READY {
-			break
-		}
-		<-time.After(time.Second)
-		i, err = instanceAdmin.GetInstance(ctx, &instancepb.GetInstanceRequest{
-			Name: instanceName,
-		})
-		if err != nil {
-			t.Fatalf("waiting for instance to be ready failed: %v", err)
-		}
 	}
 	return instanceName, func() {
 		// Delete all backups before deleting the instance.
