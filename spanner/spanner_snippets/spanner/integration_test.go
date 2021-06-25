@@ -167,6 +167,24 @@ func TestCreateInstance(t *testing.T) {
 	assertContains(t, out, fmt.Sprintf("Created instance [%s]", instanceID))
 }
 
+func TestCreateInstanceWithProcessingUnits(t *testing.T) {
+	_ = testutil.SystemTest(t)
+
+	projectID, _, err := parseInstanceName(getInstance(t))
+	if err != nil {
+		t.Fatalf("failed to parse instance name: %v", err)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
+	defer cancel()
+	instanceID := fmt.Sprintf("go-sample-test-%s", uuid.New().String()[:8])
+	out := runInstanceSample(ctx, t, createInstanceWithProcessingUnits, projectID, instanceID, "failed to create an instance with processing units")
+	if err := cleanupInstance(projectID, instanceID); err != nil {
+		t.Logf("cleanupInstance error: %s", err)
+	}
+	assertContains(t, out, fmt.Sprintf("Created instance [%s]", instanceID))
+}
+
 func TestSample(t *testing.T) {
 	_ = testutil.SystemTest(t)
 
