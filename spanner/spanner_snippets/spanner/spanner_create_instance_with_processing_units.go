@@ -27,7 +27,7 @@ import (
 func createInstanceWithProcessingUnits(ctx context.Context, w io.Writer, projectID, instanceID string) error {
 	instanceAdmin, err := instance.NewInstanceAdminClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not create instance admin client for project %s: %v", projectID, err)
 	}
 	defer instanceAdmin.Close()
 
