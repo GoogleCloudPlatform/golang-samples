@@ -149,27 +149,14 @@ func initBackupTest(t *testing.T, id, dbName string) (restoreDBName, backupID, c
 	return
 }
 
-func TestCreateInstance(t *testing.T) {
+func TestCreateInstances(t *testing.T) {
 	_ = testutil.SystemTest(t)
 
-	projectID, _, err := parseInstanceName(getInstance(t))
-	if err != nil {
-		t.Fatalf("failed to parse instance name: %v", err)
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
-	defer cancel()
-	instanceID := fmt.Sprintf("go-sample-test-%s", uuid.New().String()[:8])
-	out := runInstanceSample(ctx, t, createInstance, projectID, instanceID, "failed to create an instance")
-	if err := cleanupInstance(projectID, instanceID); err != nil {
-		t.Logf("cleanupInstance error: %s", err)
-	}
-	assertContains(t, out, fmt.Sprintf("Created instance [%s]", instanceID))
+	runCreateInstanceSample(t, createInstance)
+	runCreateInstanceSample(t, createInstanceWithProcessingUnits)
 }
 
-func TestCreateInstanceWithProcessingUnits(t *testing.T) {
-	_ = testutil.SystemTest(t)
-
+func runCreateInstanceSample(t *testing.T, f instanceSampleFunc) {
 	projectID, _, err := parseInstanceName(getInstance(t))
 	if err != nil {
 		t.Fatalf("failed to parse instance name: %v", err)
@@ -178,7 +165,7 @@ func TestCreateInstanceWithProcessingUnits(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
 	defer cancel()
 	instanceID := fmt.Sprintf("go-sample-test-%s", uuid.New().String()[:8])
-	out := runInstanceSample(ctx, t, createInstanceWithProcessingUnits, projectID, instanceID, "failed to create an instance with processing units")
+	out := runInstanceSample(ctx, t, f, projectID, instanceID, "failed to create an instance")
 	if err := cleanupInstance(projectID, instanceID); err != nil {
 		t.Logf("cleanupInstance error: %s", err)
 	}
