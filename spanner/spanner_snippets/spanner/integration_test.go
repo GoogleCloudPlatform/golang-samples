@@ -55,12 +55,6 @@ func initTest(t *testing.T, id string) (dbName string, cleanup func()) {
 	dbID := validLength(fmt.Sprintf("smpl-%s", id), t)
 	dbName = fmt.Sprintf("%s/databases/%s", instance, dbID)
 
-	ctx := context.Background()
-	adminClient, err := database.NewDatabaseAdminClient(ctx)
-	if err != nil {
-		t.Fatalf("failed to create DB admin client: %v", err)
-	}
-	_ = adminClient.Close()
 	return
 }
 
