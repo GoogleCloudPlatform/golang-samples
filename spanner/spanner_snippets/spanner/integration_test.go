@@ -553,15 +553,14 @@ func createTestInstance(t *testing.T) (instanceName string, cleanup func()) {
 		t.Fatalf("failed to parse instance name: %v", err)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
-	defer cancel()
+	ctx := context.Background()
 	instanceID := fmt.Sprintf("go-sample-%s", uuid.New().String()[:16])
 	instanceName = fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID)
 	instanceAdmin, err := instance.NewInstanceAdminClient(ctx)
 	if err != nil {
 		t.Fatalf("failed to create InstanceAdminClient: %v", err)
 	}
-	adminClient, err := database.NewDatabaseAdminClient(ctx)
+	databaseAdmin, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		t.Fatalf("failed to create DatabaseAdminClient: %v", err)
 	}
@@ -582,16 +581,14 @@ func createTestInstance(t *testing.T) (instanceName string, cleanup func()) {
 		if createTimeString, ok := instance.Labels["create_time"]; ok {
 			seconds, err := strconv.ParseInt(createTimeString, 10, 64)
 			if err != nil {
-				t.Fatalf("could not parse create time %v: %v", createTimeString, err)
+				t.Logf("could not parse create time %v: %v", createTimeString, err)
+				continue
 			}
 			createTime := time.Unix(seconds, 0)
-			if err != nil {
-				t.Fatalf("could not parse create time %v: %v", createTimeString, err)
-			}
 			diff := time.Now().Sub(createTime)
 			if diff > time.Hour*24 {
 				t.Logf("deleting stale test instance %v", instance.Name)
-				instanceAdmin.DeleteInstance(ctx, &instancepb.DeleteInstanceRequest{Name: instance.Name})
+				deleteInstanceAndBackups(t, instance.Name, instanceAdmin, databaseAdmin)
 			}
 		}
 	}
@@ -617,24 +614,33 @@ func createTestInstance(t *testing.T) (instanceName string, cleanup func()) {
 		t.Fatalf("waiting for instance creation to finish failed: %v", err)
 	}
 	return instanceName, func() {
-		// Delete all backups before deleting the instance.
-		iter := adminClient.ListBackups(ctx, &adminpb.ListBackupsRequest{
-			Parent: instanceName,
-		})
-		for {
-			resp, err := iter.Next()
-			if err == iterator.Done {
-				break
-			}
-			if err != nil {
-				t.Fatalf("Failed to list backups for instance %s: %v", instanceName, err)
-			}
-			adminClient.DeleteBackup(ctx, &adminpb.DeleteBackupRequest{Name: resp.Name})
-		}
-		instanceAdmin.DeleteInstance(ctx, &instancepb.DeleteInstanceRequest{Name: instanceName})
+		deleteInstanceAndBackups(t, instanceName, instanceAdmin, databaseAdmin)
 		instanceAdmin.Close()
-		adminClient.Close()
+		databaseAdmin.Close()
 	}
+}
+
+func deleteInstanceAndBackups(
+	t *testing.T,
+	instanceName string,
+	instanceAdmin *instance.InstanceAdminClient,
+	databaseAdmin *database.DatabaseAdminClient) {
+	ctx := context.Background()
+	// Delete all backups before deleting the instance.
+	iter := databaseAdmin.ListBackups(ctx, &adminpb.ListBackupsRequest{
+		Parent: instanceName,
+	})
+	for {
+		resp, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			t.Fatalf("Failed to list backups for instance %s: %v", instanceName, err)
+		}
+		databaseAdmin.DeleteBackup(ctx, &adminpb.DeleteBackupRequest{Name: resp.Name})
+	}
+	instanceAdmin.DeleteInstance(ctx, &instancepb.DeleteInstanceRequest{Name: instanceName})
 }
 
 func getInstance(t *testing.T) string {
