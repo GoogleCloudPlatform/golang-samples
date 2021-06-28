@@ -51,7 +51,11 @@ var (
 )
 
 func initTest(t *testing.T, id string) (dbName string, cleanup func()) {
-	instance, cleanup := createTestInstance(t)
+	projectID, _, err := parseInstanceName(getInstance(t))
+	if err != nil {
+		t.Fatalf("failed to parse instance name: %v", err)
+	}
+	instance, cleanup := createTestInstance(t, projectID)
 	dbID := validLength(fmt.Sprintf("smpl-%s", id), t)
 	dbName = fmt.Sprintf("%s/databases/%s", instance, dbID)
 
@@ -83,7 +87,11 @@ func getVersionTime(t *testing.T, dbName string) (versionTime time.Time) {
 }
 
 func initBackupTest(t *testing.T, id string) (restoreDBName, backupID, cancelledBackupID string, cleanup func()) {
-	instance, cleanup := createTestInstance(t)
+	projectID, _, err := parseInstanceName(getInstance(t))
+	if err != nil {
+		t.Fatalf("failed to parse instance name: %v", err)
+	}
+	instance, cleanup := createTestInstance(t, projectID)
 	restoreDatabaseID := validLength(fmt.Sprintf("restore-%s", id), t)
 	restoreDBName = fmt.Sprintf("%s/databases/%s", instance, restoreDatabaseID)
 	backupID = validLength(fmt.Sprintf("backup-%s", id), t)
@@ -391,7 +399,11 @@ func TestCustomerManagedEncryptionKeys(t *testing.T) {
 
 	var b bytes.Buffer
 
-	instanceName, cleanup := createTestInstance(t)
+	projectID, _, err := parseInstanceName(getInstance(t))
+	if err != nil {
+		t.Fatalf("failed to parse instance name: %v", err)
+	}
+	instanceName, cleanup := createTestInstance(t, projectID)
 	defer cleanup()
 	locationId := "us-central1"
 	keyRingId := "spanner-test-keyring"
@@ -541,12 +553,7 @@ func mustRunSample(t *testing.T, f sampleFuncWithContext, dbName, errMsg string)
 	return b.String()
 }
 
-func createTestInstance(t *testing.T) (instanceName string, cleanup func()) {
-	projectID, _, err := parseInstanceName(getInstance(t))
-	if err != nil {
-		t.Fatalf("failed to parse instance name: %v", err)
-	}
-
+func createTestInstance(t *testing.T, projectID string) (instanceName string, cleanup func()) {
 	ctx := context.Background()
 	instanceID := fmt.Sprintf("go-sample-%s", uuid.New().String()[:16])
 	instanceName = fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID)
