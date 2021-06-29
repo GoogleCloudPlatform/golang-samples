@@ -12,8 +12,8 @@
 /bigtable/                            @GoogleCloudPlatform/cloud-native-db-dpes
 /cloudsql/                            @GoogleCloudPlatform/infra-db-dpes
 /datastore/                           @GoogleCloudPlatform/cloud-native-db-dpes
-/errorreporting/                      @GoogleCloudPlatform/observability-devx @googleapis/yoshi-go-admins @nicoleczhu
+/errorreporting/                      @GoogleCloudPlatform/observability-devx @googleapis/yoshi-go-admins
 /firestore/                           @GoogleCloudPlatform/cloud-native-db-dpes
-/logging/                             @GoogleCloudPlatform/observability-devx @googleapis/yoshi-go-admins @nicoleczhu
+/logging/                             @GoogleCloudPlatform/observability-devx @googleapis/yoshi-go-admins
 /storage/                             @GoogleCloudPlatform/cloud-storage-dpes
 /iot/                                 @gcseh @GoogleCloudPlatform/api-iot @googleapis/yoshi-go-admins
