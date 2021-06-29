@@ -56,6 +56,30 @@ func TestCreateBucketClassLocation(t *testing.T) {
 	}
 }
 
+func TestStorageClass(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	bucketName := tc.ProjectID + "-storage-buckets-tests"
+
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+	defer client.Close()
+
+	if err := changeDefaultStorageClass(ioutil.Discard, bucketName); err != nil {
+		t.Errorf("changeDefaultStorageClass: %v", err)
+	}
+	attrs, err := client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	got := attrs.StorageClass
+	if want := "COLDLINE"; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
 func TestListBuckets(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	bucketName := tc.ProjectID + "-storage-buckets-tests"

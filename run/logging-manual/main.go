@@ -60,7 +60,7 @@ type Entry struct {
 	Severity string `json:"severity,omitempty"`
 	Trace    string `json:"logging.googleapis.com/trace,omitempty"`
 
-	// Cloud Log Viewer allows filtering and display of this as `jsonPayload.component`.
+	// Logs Explorer allows filtering and display of this as `jsonPayload.component`.
 	Component string `json:"component,omitempty"`
 }
 

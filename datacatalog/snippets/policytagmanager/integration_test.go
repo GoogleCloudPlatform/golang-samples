@@ -106,7 +106,7 @@ func TestPolicyTagManager(t *testing.T) {
 
 	// delete a Policy tag
 	if err := deletePolicyTag(tagTwo); err != nil {
-		t.Errorf("deletePolicy(%s): %v", tagTwo, err)
+		t.Errorf("deletePolicyTag(%s): %v", tagTwo, err)
 	}
 
 	if err := deleteTaxonomy(taxID); err != nil {

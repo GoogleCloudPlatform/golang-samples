@@ -3,11 +3,19 @@ assign_issues_by:
   - 'api: bigtable'
   - 'api: datastore'
   - 'api: firestore'
+  to:
+  - GoogleCloudPlatform/cloud-native-db-dpes
+- labels:
   - 'api: storage'
   to:
   - tritone
 - labels:
   - 'api: bigquery'
+  - 'api: bigqueryconnection'
+  - 'api: bigquerydatatransfer'
+  - 'api: bigqueryreservation'
+  - 'api: bigquerystorage'
+  - 'api: datacatalog'
   to:
   - shollyman
 - labels:
@@ -31,3 +39,27 @@ assign_issues_by:
   - 'api: spanner'
   to:
   - skuruppu
+- labels:
+  - 'api: cloudiot'
+  to:
+  - attilagargyan
+- labels:
+  - 'api: cloudsql'
+  to:
+  - GoogleCloudPlatform/infra-db-dpes
+
+assign_prs_by:
+- labels:
+  - 'api: cloudiot'
+  to:
+  - attilagargyan
+- labels:
+  - 'api: bigtable'
+  - 'api: datastore'
+  - 'api: firestore'
+  to:
+  - GoogleCloudPlatform/cloud-native-db-dpes
+- labels:
+  - 'api: cloudsql'
+  to:
+  - GoogleCloudPlatform/infra-db-dpes

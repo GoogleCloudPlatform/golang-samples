@@ -33,6 +33,7 @@ func infoTypes(w io.Writer, languageCode, filter string) error {
 	if err != nil {
 		return fmt.Errorf("dlp.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	req := &dlppb.ListInfoTypesRequest{
 		LanguageCode: languageCode,

@@ -44,6 +44,7 @@ type Task struct {
 
 func SnippetNewIncompleteKey() {
 	// [START datastore_incomplete_key]
+	// A complete key is assigned to the entity when it is Put.
 	taskKey := datastore.IncompleteKey("Task", nil)
 	// [END datastore_incomplete_key]
 	_ = taskKey // Use the task key for datastore operations.

@@ -35,6 +35,7 @@ func restoreKeyVersion(w io.Writer, name string) error {
 	if err != nil {
 		return fmt.Errorf("failed to create kms client: %v", err)
 	}
+	defer client.Close()
 
 	// Build the request.
 	req := &kmspb.RestoreCryptoKeyVersionRequest{

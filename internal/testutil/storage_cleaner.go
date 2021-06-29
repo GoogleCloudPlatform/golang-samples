@@ -16,10 +16,12 @@ package testutil
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
 	"cloud.google.com/go/storage"
+	"google.golang.org/api/googleapi"
 	"google.golang.org/api/iterator"
 )
 
@@ -34,28 +36,44 @@ func CleanBucket(ctx context.Context, t *testing.T, projectID, bucket string) er
 	}
 
 	// Delete the bucket if it exists.
-	deleteBucketIfExists(ctx, t, client, bucket)
+	if err := deleteBucketIfExists(ctx, client, bucket); err != nil {
+		return fmt.Errorf("error deleting bucket: %v", err)
+	}
 
 	b := client.Bucket(bucket)
 
 	// Now create the bucket.
 	// Retry because the bucket can take time to fully delete.
-	Retry(t, 10, 10*time.Second, func(r *R) {
+	Retry(t, 10, 30*time.Second, func(r *R) {
 		if err := b.Create(ctx, projectID, nil); err != nil {
+			if err, ok := err.(*googleapi.Error); ok {
+				// Just in case...
+				if err.Code == 409 {
+					deleteBucketIfExists(ctx, client, bucket) // Ignore error.
+				}
+			}
 			r.Errorf("Bucket.Create(%q): %v", bucket, err)
 		}
 	})
+
+	// Wait until the bucket exists.
+	Retry(t, 10, 30*time.Second, func(r *R) {
+		if _, err := b.Attrs(ctx); err != nil {
+			// Bucket does not exist.
+			r.Errorf("Bucket was not created")
+			return
+		}
+	})
+
 	return nil
 }
 
-func deleteBucketIfExists(ctx context.Context, t *testing.T, client *storage.Client, bucket string) {
-	t.Helper()
-
+func deleteBucketIfExists(ctx context.Context, client *storage.Client, bucket string) error {
 	b := client.Bucket(bucket)
 
 	// Check if the bucket does not exist, return nil.
 	if _, err := b.Attrs(ctx); err != nil {
-		return
+		return nil
 	}
 
 	// Delete all of the elements in the already existent bucket, including noncurrent objects.
@@ -69,25 +87,39 @@ func deleteBucketIfExists(ctx context.Context, t *testing.T, client *storage.Cli
 			break
 		}
 		if err != nil {
-			t.Errorf("Bucket.Objects(%q): %v", bucket, err)
+			return fmt.Errorf("Bucket.Objects(%q): %v", bucket, err)
 		}
 		if attrs.EventBasedHold || attrs.TemporaryHold {
 			if _, err := b.Object(attrs.Name).Update(ctx, storage.ObjectAttrsToUpdate{
 				TemporaryHold:  false,
 				EventBasedHold: false,
 			}); err != nil {
-				t.Errorf("Bucket(%q).Object(%q).Update: %v", bucket, attrs.Name, err)
+				return fmt.Errorf("Bucket(%q).Object(%q).Update: %v", bucket, attrs.Name, err)
 			}
 		}
 		obj := b.Object(attrs.Name).Generation(attrs.Generation)
 		if err := obj.Delete(ctx); err != nil {
-			t.Errorf("Bucket(%q).Object(%q).Delete: %v", bucket, attrs.Name, err)
+			return fmt.Errorf("Bucket(%q).Object(%q).Delete: %v", bucket, attrs.Name, err)
 		}
 
 	}
 
 	// Then delete the bucket itself.
 	if err := b.Delete(ctx); err != nil {
-		t.Errorf("Bucket.Delete(%q): %v", bucket, err)
+		return fmt.Errorf("Bucket.Delete(%q): %v", bucket, err)
 	}
+
+	retries := 10
+	delay := 10 * time.Second
+
+	for i := 0; i < retries; i++ {
+		if _, err := b.Attrs(ctx); err != nil {
+			// Deletion successful.
+			return nil
+		}
+		// Deletion not complete.
+		time.Sleep(delay)
+	}
+
+	return fmt.Errorf("failed to delete bucket %q", bucket)
 }

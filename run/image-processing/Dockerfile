@@ -15,7 +15,7 @@
 # Use the offical golang image to create a binary.
 # This is based on Debian and sets the GOPATH to /go.
 # https://hub.docker.com/_/golang
-FROM golang:1.15-buster as builder
+FROM golang:1.16-buster as builder
 
 # Create and change to the app directory.
 WORKDIR /app
@@ -30,7 +30,7 @@ RUN go mod download
 COPY . ./
 
 # Build the binary.
-RUN CGO_ENABLED=0 go build -mod=readonly -v -o server
+RUN CGO_ENABLED=0 go build -v -o server
 
 # Use a Docker multi-stage build to create a lean production image.
 # https://docs.docker.com/develop/develop-images/multistage-build/#use-multi-stage-builds

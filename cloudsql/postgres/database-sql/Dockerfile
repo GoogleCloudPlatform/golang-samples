@@ -15,7 +15,7 @@
 # Use the offical golang image to create a binary.
 # This is based on Debian and sets the GOPATH to /go.
 # https://hub.docker.com/_/golang
-FROM golang:1.15-buster as builder
+FROM golang:1.16-buster as builder
 
 # Create and change to the app directory.
 WORKDIR /app
@@ -30,7 +30,7 @@ RUN go mod download
 COPY . ./
 
 # Build the binary.
-RUN go build -mod=readonly -v -o server
+RUN go build -v -o server
 
 # Use the official Debian slim image for a lean production container.
 # https://hub.docker.com/_/debian

@@ -31,6 +31,7 @@ func apiKey() error {
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
+	defer client.Close()
 	// Use the authenticated client.
 	_ = client
 

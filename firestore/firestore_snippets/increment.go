@@ -14,7 +14,6 @@
 
 package main
 
-// [START fs_update_document_increment]
 // [START firestore_data_set_numeric_increment]
 import (
 	"context"
@@ -34,6 +33,7 @@ func updateDocumentIncrement(projectID, city string) error {
 	if err != nil {
 		return fmt.Errorf("firestore.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	dc := client.Collection("cities").Doc(city)
 	_, err = dc.Update(ctx, []firestore.Update{
@@ -47,4 +47,3 @@ func updateDocumentIncrement(projectID, city string) error {
 }
 
 // [END firestore_data_set_numeric_increment]
-// [END fs_update_document_increment]

@@ -15,7 +15,6 @@
 package findings
 
 // [START securitycenter_update_finding_source_properties]
-// [START update_finding_source_properties]
 import (
 	"context"
 	"fmt"
@@ -77,5 +76,4 @@ func updateFindingSourceProperties(w io.Writer, findingName string) error {
 	return nil
 }
 
-// [END update_finding_source_properties]
 // [END securitycenter_update_finding_source_properties]

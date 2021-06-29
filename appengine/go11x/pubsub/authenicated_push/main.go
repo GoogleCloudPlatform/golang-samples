@@ -109,6 +109,17 @@ func (a *app) receiveMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	if payload.Issuer != "accounts.google.com" && payload.Issuer != "https://accounts.google.com" {
 		http.Error(w, "Wrong Issuer", http.StatusBadRequest)
+		return
+	}
+
+	// IMPORTANT: you should validate claim details not covered by signature
+	// and audience verification above, including:
+	//   - Ensure that `payload.Claims["email"]` is equal to the expected service
+	//     account set up in the push subscription settings.
+	//   - Ensure that `payload.Claims["email_verified"]` is set to true.
+	if payload.Claims["email"] != "test-service-account-email@example.com" || payload.Claims["email_verified"] != true {
+		http.Error(w, "Unexpected email identity", http.StatusBadRequest)
+		return
 	}
 
 	var pr pushRequest

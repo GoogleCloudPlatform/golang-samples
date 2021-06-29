@@ -24,7 +24,6 @@ import (
 	"cloud.google.com/go/firestore"
 )
 
-// [START fs_class_definition]
 // [START firestore_data_custom_type_definition]
 
 // City represents a city.
@@ -38,7 +37,6 @@ type City struct {
 }
 
 // [END firestore_data_custom_type_definition]
-// [END fs_class_definition]
 
 func main() {
 	ctx := context.Background()

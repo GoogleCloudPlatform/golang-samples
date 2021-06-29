@@ -33,6 +33,7 @@ func writeConditionally(w io.Writer, projectID, instanceID string, tableName str
 	if err != nil {
 		return fmt.Errorf("bigtable.NewAdminClient: %v", err)
 	}
+	defer client.Close()
 	tbl := client.Open(tableName)
 	columnFamilyName := "stats_summary"
 	timestamp := bigtable.Now()

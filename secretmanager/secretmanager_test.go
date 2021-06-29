@@ -153,6 +153,23 @@ func TestAddSecretVersion(t *testing.T) {
 	}
 }
 
+func TestConsumeEventNotification(t *testing.T) {
+	v, err := ConsumeEventNotification(context.Background(), PubSubMessage{
+		Attributes: PubSubAttributes{
+			SecretId:  "projects/p/secrets/s",
+			EventType: "SECRET_UPDATE",
+		},
+		Data: []byte("hello!"),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := v, `Received SECRET_UPDATE for projects/p/secrets/s. New metadata: "hello!".`; !strings.Contains(got, want) {
+		t.Errorf("consumeEventNotification: expected %q to contain %q", got, want)
+	}
+}
+
 func TestCreateSecret(t *testing.T) {
 	tc := testutil.SystemTest(t)
 

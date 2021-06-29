@@ -34,6 +34,7 @@ func deleteCompany(w io.Writer, projectID, companyID string) error {
 	if err != nil {
 		return fmt.Errorf("talent.NewCompanyClient: %v", err)
 	}
+	defer c.Close()
 
 	// Construct a deleteCompany request.
 	companyName := fmt.Sprintf("projects/%s/companies/%s", projectID, companyID)

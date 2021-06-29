@@ -32,6 +32,7 @@ func pullMsgsDeadLetterDeliveryAttempt(w io.Writer, projectID, subID string) err
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	// Receive messages for 10 seconds.
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)

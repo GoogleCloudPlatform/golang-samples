@@ -33,6 +33,7 @@ func updateDeadLetter(w io.Writer, projectID, subID string, fullyQualifiedDeadLe
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	updateConfig := pubsub.SubscriptionConfigToUpdate{
 		DeadLetterPolicy: &pubsub.DeadLetterPolicy{

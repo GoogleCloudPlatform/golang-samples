@@ -48,6 +48,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer client.Close()
 
 	topicName := mustGetenv("PUBSUB_TOPIC")
 	topic = client.Topic(topicName)
@@ -102,6 +103,7 @@ func pushHandler(w http.ResponseWriter, r *http.Request) {
 	// Verify the token.
 	if r.URL.Query().Get("token") != token {
 		http.Error(w, "Bad token", http.StatusBadRequest)
+		return
 	}
 	msg := &pushRequest{}
 	if err := json.NewDecoder(r.Body).Decode(msg); err != nil {

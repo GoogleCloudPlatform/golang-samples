@@ -34,6 +34,7 @@ func createFamilyGCNested(w io.Writer, projectID, instanceID string, tableName s
 	if err != nil {
 		return fmt.Errorf("bigtable.NewAdminClient: %v", err)
 	}
+	defer adminClient.Close()
 
 	columnFamilyName := "cf5"
 	if err := adminClient.CreateColumnFamily(ctx, tableName, columnFamilyName); err != nil {
