@@ -51,10 +51,7 @@ var (
 )
 
 func initTest(t *testing.T, id string) (dbName string, cleanup func()) {
-	projectID, _, err := parseInstanceName(getInstance(t))
-	if err != nil {
-		t.Fatalf("failed to parse instance name: %v", err)
-	}
+	projectID := getSampleProjectId(t)
 	instance, cleanup := createTestInstance(t, projectID)
 	dbID := validLength(fmt.Sprintf("smpl-%s", id), t)
 	dbName = fmt.Sprintf("%s/databases/%s", instance, dbID)
@@ -87,10 +84,7 @@ func getVersionTime(t *testing.T, dbName string) (versionTime time.Time) {
 }
 
 func initBackupTest(t *testing.T, id string) (restoreDBName, backupID, cancelledBackupID string, cleanup func()) {
-	projectID, _, err := parseInstanceName(getInstance(t))
-	if err != nil {
-		t.Fatalf("failed to parse instance name: %v", err)
-	}
+	projectID := getSampleProjectId(t)
 	instance, cleanup := createTestInstance(t, projectID)
 	restoreDatabaseID := validLength(fmt.Sprintf("restore-%s", id), t)
 	restoreDBName = fmt.Sprintf("%s/databases/%s", instance, restoreDatabaseID)
@@ -104,11 +98,7 @@ func TestCreateInstance(t *testing.T) {
 	_ = testutil.SystemTest(t)
 	t.Parallel()
 
-	projectID, _, err := parseInstanceName(getInstance(t))
-	if err != nil {
-		t.Fatalf("failed to parse instance name: %v", err)
-	}
-
+	projectID := getSampleProjectId(t)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
 	defer cancel()
 	instanceID := fmt.Sprintf("go-sample-test-%s", uuid.New().String()[:8])
@@ -399,10 +389,7 @@ func TestCustomerManagedEncryptionKeys(t *testing.T) {
 
 	var b bytes.Buffer
 
-	projectID, _, err := parseInstanceName(getInstance(t))
-	if err != nil {
-		t.Fatalf("failed to parse instance name: %v", err)
-	}
+	projectID := getSampleProjectId(t)
 	instanceName, cleanup := createTestInstance(t, projectID)
 	defer cleanup()
 	locationId := "us-central1"
@@ -644,7 +631,12 @@ func deleteInstanceAndBackups(
 	instanceAdmin.DeleteInstance(ctx, &instancepb.DeleteInstanceRequest{Name: instanceName})
 }
 
-func getInstance(t *testing.T) string {
+func getSampleProjectId(t *testing.T) string {
+	// These tests get the project id from the environment variable
+	// GOLANG_SAMPLES_SPANNER that is also used by other integration tests for
+	// Spanner samples. The tests in this file create a separate instance for
+	// each test, so only the project id is used, and the rest of the instance
+	// name is ignored.
 	instance := os.Getenv("GOLANG_SAMPLES_SPANNER")
 	if instance == "" {
 		t.Skip("Skipping spanner integration test. Set GOLANG_SAMPLES_SPANNER.")
@@ -652,7 +644,11 @@ func getInstance(t *testing.T) string {
 	if !strings.HasPrefix(instance, "projects/") {
 		t.Fatal("Spanner instance ref must be in the form of 'projects/PROJECT_ID/instances/INSTANCE_ID'")
 	}
-	return instance
+	projectId, _, err := parseInstanceName(instance)
+	if err != nil {
+		t.Fatalf("Could not parse project id from instance name %q: %v", instance, err)
+	}
+	return projectId
 }
 
 func assertContains(t *testing.T, out string, sub string) {
