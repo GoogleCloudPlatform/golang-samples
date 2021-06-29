@@ -26,7 +26,7 @@ assign_issues_by:
   - 'api: logging'
   - 'api: clouderrorreporting'
   to:
-  - nicoleczhu
+  - GoogleCloudPlatform/observability-devx
 - labels:
   - 'api: pubsub'
   to:
