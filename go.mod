@@ -12,7 +12,7 @@ require (
 	cloud.google.com/go/pubsub v1.9.1
 	cloud.google.com/go/pubsublite v0.8.0
 	cloud.google.com/go/spanner v1.20.0
-	cloud.google.com/go/storage v1.13.0
+	cloud.google.com/go/storage v1.16.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.5
 	github.com/aws/aws-sdk-go v1.38.64
 	github.com/bmatcuk/doublestar/v2 v2.0.4
@@ -42,9 +42,9 @@ require (
 	golang.org/x/oauth2 v0.0.0-20210615190721-d04028783cf1
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/text v0.3.6
-	google.golang.org/api v0.48.0
+	google.golang.org/api v0.49.0
 	google.golang.org/appengine v1.6.7
-	google.golang.org/genproto v0.0.0-20210617175327-b9e0b3197ced
+	google.golang.org/genproto v0.0.0-20210624174822-c5cf32407d0a
 	google.golang.org/grpc v1.38.0
 	google.golang.org/grpc/examples v0.0.0-20200707005602-4258d12073b4
 	google.golang.org/protobuf v1.26.0
