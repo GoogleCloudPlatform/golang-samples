@@ -53,7 +53,7 @@ func createInstanceWithProcessingUnits(ctx context.Context, w io.Writer, project
 	if i.State != instancepb.Instance_READY {
 		fmt.Fprintf(w, "instance state is not READY yet. Got state %v\n", i.State)
 	}
-	fmt.Fprintf(w, "Created instance [%s]\n", instanceID)
+	fmt.Fprintf(w, "Created instance [%s] has %d processing units.\n", instanceID, i.ProcessingUnits)
 	return nil
 }
 
