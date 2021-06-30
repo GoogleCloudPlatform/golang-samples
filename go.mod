@@ -11,7 +11,7 @@ require (
 	cloud.google.com/go/logging v1.0.0
 	cloud.google.com/go/pubsub v1.9.1
 	cloud.google.com/go/pubsublite v0.8.0
-	cloud.google.com/go/spanner v1.20.0
+	cloud.google.com/go/spanner v1.21.0
 	cloud.google.com/go/storage v1.16.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.5
 	github.com/aws/aws-sdk-go v1.38.64
