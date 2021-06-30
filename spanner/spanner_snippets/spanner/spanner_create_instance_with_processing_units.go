@@ -25,7 +25,10 @@ import (
 	"google.golang.org/genproto/protobuf/field_mask"
 )
 
-func createInstanceWithProcessingUnits(ctx context.Context, w io.Writer, projectID, instanceID string) error {
+func createInstanceWithProcessingUnits(w io.Writer, projectID, instanceID string) error {
+	// projectID := "my-project-id"
+	// instanceID := "my-instance"
+	ctx := context.Background()
 	instanceAdmin, err := instance.NewInstanceAdminClient(ctx)
 	if err != nil {
 		return fmt.Errorf("could not create instance admin client for project %s: %v", projectID, err)

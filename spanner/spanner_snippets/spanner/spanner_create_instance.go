@@ -24,7 +24,10 @@ import (
 	instancepb "google.golang.org/genproto/googleapis/spanner/admin/instance/v1"
 )
 
-func createInstance(ctx context.Context, w io.Writer, projectID, instanceID string) error {
+func createInstance(w io.Writer, projectID, instanceID string) error {
+	// projectID := "my-project-id"
+	// instanceID := "my-instance"
+	ctx := context.Background()
 	instanceAdmin, err := instance.NewInstanceAdminClient(ctx)
 	if err != nil {
 		return err
