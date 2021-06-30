@@ -22,6 +22,7 @@ import (
 
 	instance "cloud.google.com/go/spanner/admin/instance/apiv1"
 	instancepb "google.golang.org/genproto/googleapis/spanner/admin/instance/v1"
+	"google.golang.org/genproto/protobuf/field_mask"
 )
 
 func createInstanceWithProcessingUnits(ctx context.Context, w io.Writer, projectID, instanceID string) error {
@@ -31,12 +32,15 @@ func createInstanceWithProcessingUnits(ctx context.Context, w io.Writer, project
 	}
 	defer instanceAdmin.Close()
 
+	instanceName := fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID)
+	fmt.Fprintf(w, "Creating instance %s.", instanceName)
+
 	op, err := instanceAdmin.CreateInstance(ctx, &instancepb.CreateInstanceRequest{
 		Parent:     fmt.Sprintf("projects/%s", projectID),
 		InstanceId: instanceID,
 		Instance: &instancepb.Instance{
 			Config:          fmt.Sprintf("projects/%s/instanceConfigs/%s", projectID, "regional-us-central1"),
-			DisplayName:     instanceID,
+			DisplayName:     "This is a display name.",
 			ProcessingUnits: 500,
 			Labels:          map[string]string{"cloud_spanner_samples": "true"},
 		},
@@ -44,6 +48,7 @@ func createInstanceWithProcessingUnits(ctx context.Context, w io.Writer, project
 	if err != nil {
 		return fmt.Errorf("could not create instance %s: %v", fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID), err)
 	}
+	fmt.Fprintf(w, "Waiting for operation on %s to complete...", instanceID)
 	// Wait for the instance creation to finish.
 	i, err := op.Wait(ctx)
 	if err != nil {
@@ -53,7 +58,16 @@ func createInstanceWithProcessingUnits(ctx context.Context, w io.Writer, project
 	if i.State != instancepb.Instance_READY {
 		fmt.Fprintf(w, "instance state is not READY yet. Got state %v\n", i.State)
 	}
-	fmt.Fprintf(w, "Created instance [%s] has %d processing units.\n", instanceID, i.ProcessingUnits)
+	fmt.Fprintf(w, "Created instance [%s].\n", instanceID)
+
+	instance, err := instanceAdmin.GetInstance(ctx, &instancepb.GetInstanceRequest{
+		Name:      instanceName,
+		FieldMask: &field_mask.FieldMask{Paths: []string{"processing_units"}},
+	})
+	if err != nil {
+		return fmt.Errorf("failed to get instance [%s]: %v", instanceName, err)
+	}
+	fmt.Fprintf(w, "Instance %s has %d processing units.", instanceID, instance.ProcessingUnits)
 	return nil
 }
 
