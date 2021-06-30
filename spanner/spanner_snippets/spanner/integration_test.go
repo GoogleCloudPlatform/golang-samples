@@ -42,7 +42,7 @@ import (
 
 type sampleFunc func(w io.Writer, dbName string) error
 type sampleFuncWithContext func(ctx context.Context, w io.Writer, dbName string) error
-type instanceSampleFunc func(ctx context.Context, w io.Writer, projectID, instanceID string) error
+type instanceSampleFunc func(w io.Writer, projectID, instanceID string) error
 type backupSampleFunc func(ctx context.Context, w io.Writer, dbName, backupID string) error
 type createBackupSampleFunc func(ctx context.Context, w io.Writer, dbName, backupID string, versionTime time.Time) error
 
@@ -149,18 +149,21 @@ func initBackupTest(t *testing.T, id, dbName string) (restoreDBName, backupID, c
 	return
 }
 
-func TestCreateInstance(t *testing.T) {
+func TestCreateInstances(t *testing.T) {
 	_ = testutil.SystemTest(t)
 
+	runCreateInstanceSample(t, createInstance)
+	runCreateInstanceSample(t, createInstanceWithProcessingUnits)
+}
+
+func runCreateInstanceSample(t *testing.T, f instanceSampleFunc) {
 	projectID, _, err := parseInstanceName(getInstance(t))
 	if err != nil {
 		t.Fatalf("failed to parse instance name: %v", err)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
-	defer cancel()
 	instanceID := fmt.Sprintf("go-sample-test-%s", uuid.New().String()[:8])
-	out := runInstanceSample(ctx, t, createInstance, projectID, instanceID, "failed to create an instance")
+	out := runInstanceSample(t, f, projectID, instanceID, "failed to create an instance")
 	if err := cleanupInstance(projectID, instanceID); err != nil {
 		t.Logf("cleanupInstance error: %s", err)
 	}
@@ -586,9 +589,9 @@ func runBackupSampleWithRetry(ctx context.Context, t *testing.T, f backupSampleF
 	return b.String()
 }
 
-func runInstanceSample(ctx context.Context, t *testing.T, f instanceSampleFunc, projectID, instanceID, errMsg string) string {
+func runInstanceSample(t *testing.T, f instanceSampleFunc, projectID, instanceID, errMsg string) string {
 	var b bytes.Buffer
-	if err := f(ctx, &b, projectID, instanceID); err != nil {
+	if err := f(&b, projectID, instanceID); err != nil {
 		t.Errorf("%s: %v", errMsg, err)
 	}
 	return b.String()
