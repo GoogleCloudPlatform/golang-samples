@@ -7,13 +7,13 @@
 
 # The yoshi-go-admins team is the default owner for anything not
 # explicitly taken by someone else.
-*                               @googleapis/yoshi-go-admins
+*                                     @GoogleCloudPlatform/yoshi-go-admins
 
-/bigtable/                            @GoogleCloudPlatform/cloud-native-db-dpes
-/cloudsql/                            @GoogleCloudPlatform/infra-db-dpes
-/datastore/                           @GoogleCloudPlatform/cloud-native-db-dpes
-/errorreporting/                      @GoogleCloudPlatform/observability-devx @googleapis/yoshi-go-admins
-/firestore/                           @GoogleCloudPlatform/cloud-native-db-dpes
-/logging/                             @GoogleCloudPlatform/observability-devx @googleapis/yoshi-go-admins
-/storage/                             @GoogleCloudPlatform/cloud-storage-dpes
-/iot/                                 @gcseh @GoogleCloudPlatform/api-iot @googleapis/yoshi-go-admins
+/bigtable/                            @GoogleCloudPlatform/cloud-native-db-dpes @GoogleCloudPlatform/yoshi-go-admins
+/cloudsql/                            @GoogleCloudPlatform/infra-db-dpes @GoogleCloudPlatform/yoshi-go-admins
+/datastore/                           @GoogleCloudPlatform/cloud-native-db-dpes @GoogleCloudPlatform/yoshi-go-admins
+/errorreporting/                      @GoogleCloudPlatform/observability-devx @GoogleCloudPlatform/yoshi-go-admins
+/firestore/                           @GoogleCloudPlatform/cloud-native-db-dpes @GoogleCloudPlatform/yoshi-go-admins
+/logging/                             @GoogleCloudPlatform/observability-devx @GoogleCloudPlatform/yoshi-go-admins
+/storage/                             @GoogleCloudPlatform/cloud-storage-dpes @GoogleCloudPlatform/yoshi-go-admins
+/iot/                                 @gcseh @GoogleCloudPlatform/api-iot @GoogleCloudPlatform/yoshi-go-admins
