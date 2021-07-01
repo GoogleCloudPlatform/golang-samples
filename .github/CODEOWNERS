@@ -9,11 +9,11 @@
 # explicitly taken by someone else.
 *                                     @GoogleCloudPlatform/yoshi-go-admins
 
-/bigtable/                            @GoogleCloudPlatform/cloud-native-db-dpes @GoogleCloudPlatform/yoshi-go-admins
-/cloudsql/                            @GoogleCloudPlatform/infra-db-dpes @GoogleCloudPlatform/yoshi-go-admins
-/datastore/                           @GoogleCloudPlatform/cloud-native-db-dpes @GoogleCloudPlatform/yoshi-go-admins
-/errorreporting/                      @GoogleCloudPlatform/observability-devx @GoogleCloudPlatform/yoshi-go-admins
-/firestore/                           @GoogleCloudPlatform/cloud-native-db-dpes @GoogleCloudPlatform/yoshi-go-admins
-/logging/                             @GoogleCloudPlatform/observability-devx @GoogleCloudPlatform/yoshi-go-admins
-/storage/                             @GoogleCloudPlatform/cloud-storage-dpes @GoogleCloudPlatform/yoshi-go-admins
-/iot/                                 @gcseh @GoogleCloudPlatform/api-iot @GoogleCloudPlatform/yoshi-go-admins
+/bigtable/                            @GoogleCloudPlatform/yoshi-go-admins @GoogleCloudPlatform/cloud-native-db-dpes
+/cloudsql/                            @GoogleCloudPlatform/yoshi-go-admins @GoogleCloudPlatform/infra-db-dpes
+/datastore/                           @GoogleCloudPlatform/yoshi-go-admins @GoogleCloudPlatform/cloud-native-db-dpes
+/errorreporting/                      @GoogleCloudPlatform/yoshi-go-admins @GoogleCloudPlatform/observability-devx
+/firestore/                           @GoogleCloudPlatform/yoshi-go-admins @GoogleCloudPlatform/cloud-native-db-dpes
+/logging/                             @GoogleCloudPlatform/yoshi-go-admins @GoogleCloudPlatform/observability-devx
+/storage/                             @GoogleCloudPlatform/yoshi-go-admins @GoogleCloudPlatform/cloud-storage-dpes
+/iot/                                 @GoogleCloudPlatform/yoshi-go-admins @gcseh @GoogleCloudPlatform/api-iot
