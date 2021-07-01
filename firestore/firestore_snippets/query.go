@@ -14,8 +14,7 @@
 
 package main
 
-// [START fs_dependencies]
-// [START firestore_setup_dependencies]
+// [START firestore_deps]
 import (
 	"context"
 	"fmt"
@@ -23,8 +22,7 @@ import (
 	"cloud.google.com/go/firestore"
 )
 
-// [END firestore_setup_dependencies]
-// [END fs_dependencies]
+// [END firestore_deps]
 
 func prepareQuery(ctx context.Context, client *firestore.Client) error {
 	// [START fs_query_create_examples]
