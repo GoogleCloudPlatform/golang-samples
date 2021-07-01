@@ -32,6 +32,7 @@ func removeDeadLetterTopic(w io.Writer, projectID, subID string) error {
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	subConfig, err := client.Subscription(subID).Update(ctx, pubsub.SubscriptionConfigToUpdate{
 		DeadLetterPolicy: &pubsub.DeadLetterPolicy{},

@@ -35,6 +35,7 @@ func updateKeyUpdateLabels(w io.Writer, name string) error {
 	if err != nil {
 		return fmt.Errorf("failed to create kms client: %v", err)
 	}
+	defer client.Close()
 
 	//
 	// Step 1 - get the current set of labels on the key

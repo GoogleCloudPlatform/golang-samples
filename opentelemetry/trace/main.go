@@ -37,7 +37,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("texporter.NewExporter: %v", err)
 	}
-	defer exporter.Shutdown(ctx) // flushes any pending spans
 
 	// Create trace provider with the exporter.
 	//
@@ -46,7 +45,8 @@ func main() {
 	// probabilistic sampling.
 	// Example:
 	//   tp := sdktrace.NewTracerProvider(sdktrace.WithSampler(sdktrace.TraceIDRatioBased(0.0001)), ...)
-	tp := sdktrace.NewTracerProvider(sdktrace.WithSyncer(exporter))
+	tp := sdktrace.NewTracerProvider(sdktrace.WithBatcher(exporter))
+	defer tp.ForceFlush(ctx) // flushes any pending spans
 	otel.SetTracerProvider(tp)
 
 	// [START opentelemetry_trace_custom_span]

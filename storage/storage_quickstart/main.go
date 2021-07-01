@@ -37,6 +37,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
+	defer client.Close()
 
 	// Sets the name for the new bucket.
 	bucketName := "my-new-bucket"

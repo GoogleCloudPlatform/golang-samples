@@ -28,6 +28,7 @@ func betaClient() *language.Client {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer client.Close()
 	return client
 }
 

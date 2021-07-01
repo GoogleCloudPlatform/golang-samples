@@ -33,6 +33,7 @@ func getCompany(w io.Writer, projectID, companyID string) (*talentpb.Company, er
 	if err != nil {
 		return nil, fmt.Errorf("talent.NewCompanyClient: %v", err)
 	}
+	defer c.Close()
 
 	// Construct a getCompany request.
 	companyName := fmt.Sprintf("projects/%s/companies/%s", projectID, companyID)

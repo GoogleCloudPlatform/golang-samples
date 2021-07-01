@@ -37,6 +37,7 @@ func writeSimple(w io.Writer, projectID, instanceID string, tableName string) er
 	if err != nil {
 		return fmt.Errorf("bigtable.NewClient: %v", err)
 	}
+	defer client.Close()
 	tbl := client.Open(tableName)
 	columnFamilyName := "stats_summary"
 	timestamp := bigtable.Now()

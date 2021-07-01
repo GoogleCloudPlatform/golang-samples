@@ -39,6 +39,7 @@ func objectTracking(w io.Writer, filename string) error {
 	if err != nil {
 		return fmt.Errorf("video.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	fileBytes, err := ioutil.ReadFile(filename)
 	if err != nil {

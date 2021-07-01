@@ -33,6 +33,7 @@ func createCompany(w io.Writer, projectID, externalID, displayName string) (*tal
 	if err != nil {
 		return nil, fmt.Errorf("talent.NewCompanyClient: %v", err)
 	}
+	defer c.Close()
 
 	// Construct a createCompany request.
 	req := &talentpb.CreateCompanyRequest{

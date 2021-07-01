@@ -33,7 +33,7 @@ func TestConfigureConnectionPool(t *testing.T) {
 		t.Errorf("configureConnectionPool: %v", err)
 	}
 
-	if got, want := buf.String(), "Connected with pool size of 250"; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Connected with pool size of 10"; !strings.Contains(got, want) {
 		t.Errorf("configureConnectionPool got %q, want %q", got, want)
 	}
 }

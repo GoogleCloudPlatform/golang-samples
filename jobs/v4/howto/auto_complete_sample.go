@@ -34,6 +34,7 @@ func jobTitleAutocomplete(w io.Writer, projectID, query string) (*talentpb.Compl
 	if err != nil {
 		return nil, fmt.Errorf("talent.NewCompletionClient: %v", err)
 	}
+	defer c.Close()
 
 	// Construct a completeQuery request.
 	req := &talentpb.CompleteQueryRequest{

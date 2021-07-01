@@ -39,6 +39,7 @@ func SynthesizeTextFile(w io.Writer, textFile, outputFile string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 
 	text, err := ioutil.ReadFile(textFile)
 	if err != nil {
@@ -90,6 +91,7 @@ func SynthesizeSSMLFile(w io.Writer, ssmlFile, outputFile string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 
 	ssml, err := ioutil.ReadFile(ssmlFile)
 	if err != nil {

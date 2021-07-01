@@ -33,6 +33,7 @@ func pullMsgs(w io.Writer, projectID, subID string) error {
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	// Consume 10 messages.
 	var mu sync.Mutex

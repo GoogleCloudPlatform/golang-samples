@@ -35,6 +35,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
+	defer client.Close()
 
 	// The path to the remote audio file to transcribe.
 	fileURI := "gs://cloud-samples-data/speech/brooklyn_bridge.raw"
