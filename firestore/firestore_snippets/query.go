@@ -24,7 +24,6 @@ import (
 
 // [END firestore_deps]
 
-
 func prepareQuery(ctx context.Context, client *firestore.Client) error {
 	// [START firestore_query_filter_dataset]
 	cities := []struct {
