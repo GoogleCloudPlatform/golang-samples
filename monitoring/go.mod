@@ -12,5 +12,5 @@ require (
 	github.com/prometheus/client_golang v1.11.0
 	go.opencensus.io v0.23.0
 	google.golang.org/api v0.50.0
-	google.golang.org/genproto v0.0.0-20210624195500-8bfb893ecb84
+	google.golang.org/genproto v0.0.0-20210629135825-364e77e5a69d
 )
