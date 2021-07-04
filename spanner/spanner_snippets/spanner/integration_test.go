@@ -583,26 +583,36 @@ func createTestInstance(t *testing.T, projectID string) (instanceName string, cl
 		}
 	}
 
-	op, err := instanceAdmin.CreateInstance(ctx, &instancepb.CreateInstanceRequest{
-		Parent:     fmt.Sprintf("projects/%s", projectID),
-		InstanceId: instanceID,
-		Instance: &instancepb.Instance{
-			Config:      fmt.Sprintf("projects/%s/instanceConfigs/%s", projectID, "regional-us-central1"),
-			DisplayName: instanceID,
-			NodeCount:   1,
-			Labels: map[string]string{
-				"cloud_spanner_samples_test": "true",
-				"create_time":                fmt.Sprintf("%v", time.Now().Unix()),
+	testutil.Retry(t, 20, time.Minute, func(r *testutil.R) {
+		op, err := instanceAdmin.CreateInstance(ctx, &instancepb.CreateInstanceRequest{
+			Parent:     fmt.Sprintf("projects/%s", projectID),
+			InstanceId: instanceID,
+			Instance: &instancepb.Instance{
+				Config:      fmt.Sprintf("projects/%s/instanceConfigs/%s", projectID, "regional-us-central1"),
+				DisplayName: instanceID,
+				NodeCount:   1,
+				Labels: map[string]string{
+					"cloud_spanner_samples_test": "true",
+					"create_time":                fmt.Sprintf("%v", time.Now().Unix()),
+				},
 			},
-		},
+		})
+		if err != nil {
+			// Retry if the instance could not be created because there have
+			// been too many create requests in the past minute.
+			if spanner.ErrCode(err) == codes.ResourceExhausted && strings.Contains(err.Error(), "Quota exceeded for quota metric 'Instance create requests'") {
+				r.Errorf("could not create instance %s: %v", fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID), err)
+				return
+			} else {
+				t.Fatalf("could not create instance %s: %v", fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID), err)
+			}
+		}
+		_, err = op.Wait(ctx)
+		if err != nil {
+			t.Fatalf("waiting for instance creation to finish failed: %v", err)
+		}
 	})
-	if err != nil {
-		t.Fatalf("could not create instance %s: %v", fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID), err)
-	}
-	_, err = op.Wait(ctx)
-	if err != nil {
-		t.Fatalf("waiting for instance creation to finish failed: %v", err)
-	}
+
 	return instanceName, func() {
 		deleteInstanceAndBackups(t, instanceName, instanceAdmin, databaseAdmin)
 		instanceAdmin.Close()
