@@ -58,8 +58,12 @@ dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20201218220906-28db891af037/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
-github.com/GoogleCloudPlatform/golang-samples/run/grpc-server-streaming v0.0.0-20210622144803-cc3dd230907c h1:EP2GIIeNKkcffA7InULjfdRcAwHV/NUvk+u+qGrMCAM=
-github.com/GoogleCloudPlatform/golang-samples/run/grpc-server-streaming v0.0.0-20210622144803-cc3dd230907c/go.mod h1:SnFjuc3scmMIH/DEN3e3daLinQMUzC0mjz18vre2u9g=
+github.com/GoogleCloudPlatform/golang-samples v0.0.0-20210705150342-42a8597d5beb h1:RihGlxMOxkLqxiauVulBadZaoL3CP18AIA6srC/wkcU=
+github.com/GoogleCloudPlatform/golang-samples v0.0.0-20210705150342-42a8597d5beb/go.mod h1:Qt8M2wJ7GJmxAW+iiLyhKVcbkgKzdIFdlt8qcbV3gl4=
+github.com/GoogleCloudPlatform/golang-samples/run/grpc-ping v0.0.0-20210705150342-42a8597d5beb h1:25cBmVl96DuULWT+7Hmr36xNDEXCSHFnmGr01jIwQcA=
+github.com/GoogleCloudPlatform/golang-samples/run/grpc-ping v0.0.0-20210705150342-42a8597d5beb/go.mod h1:QcyY6M/i07PTFC27fyeDRoWQbjA7kgpoDdIXaHx7iKU=
+github.com/GoogleCloudPlatform/golang-samples/run/grpc-server-streaming v0.0.0-20210705150342-42a8597d5beb h1:jQ9jRcUh1Oxg7SQgtwROo71DlfJIG9QVd3A+aY1a95w=
+github.com/GoogleCloudPlatform/golang-samples/run/grpc-server-streaming v0.0.0-20210705150342-42a8597d5beb/go.mod h1:mcvWe0F0ATMIWfeuJ0fW2iJr0UbC66DLemGg3sgyl6Y=
 github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible/go.mod h1:r7JcOSlj0wfOMncg0iLm8Leh48TZaKVeNIfJntJ2wa0=
 github.com/Shopify/sarama v1.19.0/go.mod h1:FVkBWblsNy7DGZRfXLU0O9RCGt5g3g3yEuWXgklEdEo=
 github.com/Shopify/toxiproxy v2.1.4+incompatible/go.mod h1:OXgGpZ6Cli1/URJOF1DMxUHB2q5Ap20/P/eIdh4G0pI=
