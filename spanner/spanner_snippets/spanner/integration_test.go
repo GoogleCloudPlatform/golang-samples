@@ -526,9 +526,20 @@ func runBackupSampleWithRetry(ctx context.Context, t *testing.T, f backupSampleF
 
 func runInstanceSample(t *testing.T, f instanceSampleFunc, projectID, instanceID, errMsg string) string {
 	var b bytes.Buffer
-	if err := f(&b, projectID, instanceID); err != nil {
-		t.Errorf("%s: %v", errMsg, err)
-	}
+
+	testutil.Retry(t, 20, time.Minute, func(r *testutil.R) {
+		b.Reset()
+		if err := f(&b, projectID, instanceID); err != nil {
+			// Retry if the instance could not be created because there have
+			// been too many create requests in the past minute.
+			if spanner.ErrCode(err) == codes.ResourceExhausted && strings.Contains(err.Error(), "Quota exceeded for quota metric 'Instance create requests'") {
+				r.Errorf("could not create instance %s: %v", fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID), err)
+				return
+			} else {
+				t.Fatalf("%s: %v", errMsg, err)
+			}
+		}
+	})
 	return b.String()
 }
 
