@@ -45,6 +45,7 @@ func main() {
 				BigqueryDestination: &assetpb.BigQueryDestination{
 					Dataset: dataset,
 					Table:   "test",
+					Force:   true,
 				},
 			},
 		},
