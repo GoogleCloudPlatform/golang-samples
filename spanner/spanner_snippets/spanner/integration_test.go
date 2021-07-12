@@ -50,11 +50,11 @@ var (
 	validInstancePattern = regexp.MustCompile("^projects/(?P<project>[^/]+)/instances/(?P<instance>[^/]+)$")
 )
 
-func initTest(t *testing.T, id string) (dbName string, cleanup func()) {
+func initTest(t *testing.T, id string) (instName, dbName string, cleanup func()) {
 	projectID := getSampleProjectId(t)
-	instance, cleanup := createTestInstance(t, projectID)
+	instName, cleanup = createTestInstance(t, projectID)
 	dbID := validLength(fmt.Sprintf("smpl-%s", id), t)
-	dbName = fmt.Sprintf("%s/databases/%s", instance, dbID)
+	dbName = fmt.Sprintf("%s/databases/%s", instName, dbID)
 
 	return
 }
@@ -83,11 +83,9 @@ func getVersionTime(t *testing.T, dbName string) (versionTime time.Time) {
 	return versionTime
 }
 
-func initBackupTest(t *testing.T, id string) (restoreDBName, backupID, cancelledBackupID string, cleanup func()) {
-	projectID := getSampleProjectId(t)
-	instance, cleanup := createTestInstance(t, projectID)
+func initBackupTest(t *testing.T, id, instName string) (restoreDBName, backupID, cancelledBackupID string) {
 	restoreDatabaseID := validLength(fmt.Sprintf("restore-%s", id), t)
-	restoreDBName = fmt.Sprintf("%s/databases/%s", instance, restoreDatabaseID)
+	restoreDBName = fmt.Sprintf("%s/databases/%s", instName, restoreDatabaseID)
 	backupID = validLength(fmt.Sprintf("backup-%s", id), t)
 	cancelledBackupID = validLength(fmt.Sprintf("cancel-%s", id), t)
 
@@ -116,7 +114,7 @@ func TestSample(t *testing.T) {
 	_ = testutil.SystemTest(t)
 	t.Parallel()
 
-	dbName, cleanup := initTest(t, randomID())
+	_, dbName, cleanup := initTest(t, randomID())
 	defer cleanup()
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
@@ -322,9 +320,9 @@ func TestBackupSample(t *testing.T) {
 	t.Parallel()
 
 	id := randomID()
-	dbName, cleanup := initTest(t, id)
+	instName, dbName, cleanup := initTest(t, id)
 	defer cleanup()
-	restoreDBName, backupID, cancelledBackupID, cleanupBackup := initBackupTest(t, id)
+	restoreDBName, backupID, cancelledBackupID := initBackupTest(t, id, instName)
 
 	var out string
 	// Set up the database for testing backup operations.
@@ -358,9 +356,6 @@ func TestBackupSample(t *testing.T) {
 	out = runSampleWithContext(ctx, t, listDatabaseOperations, restoreDBName, "failed to list database operations")
 	assertContains(t, out, fmt.Sprintf("Database %s restored from backup", restoreDBName))
 
-	// Delete the restore DB.
-	cleanupBackup()
-
 	out = runBackupSample(ctx, t, deleteBackup, dbName, backupID, "failed to delete a backup")
 	assertContains(t, out, fmt.Sprintf("Deleted backup %s", backupID))
 }
@@ -369,7 +364,7 @@ func TestCreateDatabaseWithRetentionPeriodSample(t *testing.T) {
 	_ = testutil.SystemTest(t)
 	t.Parallel()
 
-	dbName, cleanup := initTest(t, randomID())
+	_, dbName, cleanup := initTest(t, randomID())
 	defer cleanup()
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
@@ -386,14 +381,11 @@ func TestCustomerManagedEncryptionKeys(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	t.Parallel()
 
-	dbName, cleanup := initTest(t, randomID())
+	instName, dbName, cleanup := initTest(t, randomID())
 	defer cleanup()
 
 	var b bytes.Buffer
 
-	projectID := getSampleProjectId(t)
-	instanceName, cleanup := createTestInstance(t, projectID)
-	defer cleanup()
 	locationId := "us-central1"
 	keyRingId := "spanner-test-keyring"
 	keyId := "spanner-test-key"
@@ -431,7 +423,7 @@ func TestCustomerManagedEncryptionKeys(t *testing.T) {
 	assertContains(t, out, fmt.Sprintf("using encryption key %s", kmsKeyName))
 
 	// Try to restore the encrypted database and delete the restored database after the test.
-	restoredName := fmt.Sprintf("%s/databases/rest-enc-%s", instanceName, randomID())
+	restoredName := fmt.Sprintf("%s/databases/rest-enc-%s", instName, randomID())
 	restoreFunc := func(ctx context.Context, w io.Writer, dbName, backupID string) error {
 		return restoreBackupWithCustomerManagedEncryptionKey(ctx, w, dbName, backupId, kmsKeyName)
 	}
