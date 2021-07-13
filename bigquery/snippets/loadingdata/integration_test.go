@@ -141,6 +141,28 @@ func TestImportSnippets(t *testing.T) {
 				t.Errorf("importParquetTruncate(%q): %v", testDatasetID, err)
 			}
 		})
+		t.Run("importWithHivePartitioning", func(t *testing.T) {
+			t.Parallel()
+			tableID := "bigquery_load_table_gcs_hive_partitioning"
+			if err := importWithHivePartitioning(tc.ProjectID, testDatasetID, tableID); err != nil {
+				t.Errorf("importWithHivePartitioning(%q): %v", testDatasetID, err)
+			}
+			// Verify we get the expected column.
+			meta, err := client.Dataset(testDatasetID).Table(tableID).Metadata(ctx)
+			if err != nil {
+				t.Errorf("importWithHivePartitioning table Metadata: (%q): %v", tableID, err)
+			}
+			gotHiveField := false
+			for _, f := range meta.Schema {
+				if f.Name == "pkey" {
+					gotHiveField = true
+					break
+				}
+			}
+			if !gotHiveField {
+				t.Error("importWithHivePartitioning failed to create schema with hive column")
+			}
+		})
 		t.Run("createTableAndWidenLoad", func(t *testing.T) {
 			t.Parallel()
 			tableID := "bigquery_add_column_load_append"

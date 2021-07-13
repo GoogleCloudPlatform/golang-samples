@@ -45,7 +45,7 @@ func prepareQuery(ctx context.Context, client *firestore.Client) error {
 		{
 			id: "DC",
 			c: City{Name: "Washington D.C.", Country: "USA",
-				Capital: false, Population: 680000,
+				Capital: true, Population: 680000,
 				Regions: []string{"east_coast"}},
 		},
 		{
