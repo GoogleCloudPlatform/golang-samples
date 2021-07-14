@@ -507,36 +507,43 @@ func SnippetIterator_Cursor() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	defer client.Close()
-	cursorStr := ""
 	// [START datastore_cursor_paging]
-	const pageSize = 5
-	query := datastore.NewQuery("Tasks").Limit(pageSize)
-	if cursorStr != "" {
-		cursor, err := datastore.DecodeCursor(cursorStr)
-		if err != nil {
-			log.Fatalf("Bad cursor %q: %v", cursorStr, err)
+	for {
+		cursorStr := ""
+		const pageSize = 5
+		query := datastore.NewQuery("Tasks").Limit(pageSize)
+		if cursorStr != "" {
+			cursor, err := datastore.DecodeCursor(cursorStr)
+			if err != nil {
+				log.Fatalf("Bad cursor %q: %v", cursorStr, err)
+			}
+			query = query.Start(cursor)
 		}
-		query = query.Start(cursor)
-	}
 
-	// Read the tasks.
-	var tasks []Task
-	var task Task
-	it := client.Run(ctx, query)
-	_, err := it.Next(&task)
-	for err == nil {
-		tasks = append(tasks, task)
-		_, err = it.Next(&task)
-	}
-	if err != iterator.Done {
-		log.Fatalf("Failed fetching results: %v", err)
-	}
+		// Read the tasks.
+		var tasks []Task
+		var task Task
+		it := client.Run(ctx, query)
+		_, err := it.Next(&task)
+		for err == nil {
+			tasks = append(tasks, task)
+			_, err = it.Next(&task)
+		}
+		if err != iterator.Done {
+			log.Fatalf("Failed fetching results: %v", err)
+		} else {
+			break
+		}
 
-	// Get the cursor for the next page of results.
-	nextCursor, err := it.Cursor()
+		// Get the cursor for the next page of results.
+		nextCursor, err := it.Cursor()
+		// When run within a loop, this yields the cursor to continue reading results
+		cursorStr = nextCursor.String()
+		// [END datastore_cursor_paging]
+		_ = err // Check the error.
+		// [START datastore_cursor_paging]
+	}
 	// [END datastore_cursor_paging]
-	_ = err        // Check the error.
-	_ = nextCursor // Use nextCursor.String as the next page's token.
 }
 
 func SnippetQuery_EventualConsistency() {
