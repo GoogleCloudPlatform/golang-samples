@@ -99,16 +99,18 @@ func TestTopicAdmin(t *testing.T) {
 	})
 
 	t.Run("GetTopic", func(t *testing.T) {
-		buf := new(bytes.Buffer)
-		err := getTopic(buf, tc.ProjectID, testRegion, testZone, topicID)
-		if err != nil {
-			t.Fatalf("getTopic: %v", err)
-		}
-		got := buf.String()
-		want := fmt.Sprintf("Got topic: %#v\n", *psltest.DefaultTopicConfig(topicPath))
-		if diff := cmp.Diff(want, got); diff != "" {
-			t.Fatalf("getTopic() mismatch: -want, +got:\n%s", diff)
-		}
+		testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
+			buf := new(bytes.Buffer)
+			err := getTopic(buf, tc.ProjectID, testRegion, testZone, topicID)
+			if err != nil {
+				r.Errorf("getTopic: %v", err)
+			}
+			got := buf.String()
+			want := fmt.Sprintf("Got topic: %#v\n", *psltest.DefaultTopicConfig(topicPath))
+			if diff := cmp.Diff(want, got); diff != "" {
+				r.Errorf("getTopic() mismatch: -want, +got:\n%s", diff)
+			}
+		})
 	})
 
 	t.Run("UpdateTopic", func(t *testing.T) {
@@ -166,17 +168,19 @@ func TestListTopics(t *testing.T) {
 		psltest.MustCreateTopic(ctx, t, client, topicPath)
 	}
 
-	buf := new(bytes.Buffer)
-	err := listTopics(buf, tc.ProjectID, testRegion, testZone)
-	if err != nil {
-		t.Fatalf("listTopics got err: %v", err)
-	}
-	got := buf.String()
-	for _, tp := range topicPaths {
-		if !strings.Contains(got, tp) {
-			t.Fatalf("missing topic path from list: %s", tp)
+	testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+		err := listTopics(buf, tc.ProjectID, testRegion, testZone)
+		if err != nil {
+			r.Errorf("listTopics got err: %v", err)
 		}
-	}
+		got := buf.String()
+		for _, tp := range topicPaths {
+			if !strings.Contains(got, tp) {
+				r.Errorf("missing topic path from list: %s", tp)
+			}
+		}
+	})
 
 	for _, tp := range topicPaths {
 		client.DeleteTopic(ctx, tp)
@@ -213,16 +217,18 @@ func TestSubscriptionAdmin(t *testing.T) {
 	})
 
 	t.Run("GetSubscription", func(t *testing.T) {
-		buf := new(bytes.Buffer)
-		err := getSubscription(buf, projNumber, testRegion, testZone, subID)
-		if err != nil {
-			t.Fatalf("getSubscription: %v", err)
-		}
-		got := buf.String()
-		want := fmt.Sprintf("Got subscription: %#v\n", psltest.DefaultSubConfig(topicPath, subPath))
-		if diff := cmp.Diff(want, got); diff != "" {
-			t.Fatalf("getSubscription mismatch: -want, +got:\n%s", diff)
-		}
+		testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
+			buf := new(bytes.Buffer)
+			err := getSubscription(buf, projNumber, testRegion, testZone, subID)
+			if err != nil {
+				r.Errorf("getSubscription: %v", err)
+			}
+			got := buf.String()
+			want := fmt.Sprintf("Got subscription: %#v\n", psltest.DefaultSubConfig(topicPath, subPath))
+			if diff := cmp.Diff(want, got); diff != "" {
+				r.Errorf("getSubscription mismatch: -want, +got:\n%s", diff)
+			}
+		})
 	})
 
 	t.Run("UpdateSubscription", func(t *testing.T) {
@@ -281,19 +287,20 @@ func TestListSubscriptions(t *testing.T) {
 		subPaths = append(subPaths, subPath)
 	}
 
-	// Test listSubscriptionsInProject.
 	t.Run("ListSubscriptionsInProject", func(t *testing.T) {
-		buf := new(bytes.Buffer)
-		err := listSubscriptionsInProject(buf, tc.ProjectID, testRegion, testZone)
-		if err != nil {
-			t.Fatalf("listSubscriptionsInProject got err: %v", err)
-		}
-		got := buf.String()
-		for _, sp := range subPaths {
-			if !strings.Contains(got, sp) {
-				t.Fatalf("missing sub path from list: %s", sp)
+		testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
+			buf := new(bytes.Buffer)
+			err := listSubscriptionsInProject(buf, tc.ProjectID, testRegion, testZone)
+			if err != nil {
+				r.Errorf("listSubscriptionsInProject got err: %v", err)
 			}
-		}
+			got := buf.String()
+			for _, sp := range subPaths {
+				if !strings.Contains(got, sp) {
+					r.Errorf("missing sub path from list: %s", sp)
+				}
+			}
+		})
 	})
 
 	// Test listSubscriptionsInTopic with same list of subscriptions.

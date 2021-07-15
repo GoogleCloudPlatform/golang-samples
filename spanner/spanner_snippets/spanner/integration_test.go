@@ -42,7 +42,7 @@ import (
 
 type sampleFunc func(w io.Writer, dbName string) error
 type sampleFuncWithContext func(ctx context.Context, w io.Writer, dbName string) error
-type instanceSampleFunc func(ctx context.Context, w io.Writer, projectID, instanceID string) error
+type instanceSampleFunc func(w io.Writer, projectID, instanceID string) error
 type backupSampleFunc func(ctx context.Context, w io.Writer, dbName, backupID string) error
 type createBackupSampleFunc func(ctx context.Context, w io.Writer, dbName, backupID string, versionTime time.Time) error
 
@@ -50,32 +50,12 @@ var (
 	validInstancePattern = regexp.MustCompile("^projects/(?P<project>[^/]+)/instances/(?P<instance>[^/]+)$")
 )
 
-func initTest(t *testing.T, id string) (dbName string, cleanup func()) {
-	instance := getInstance(t)
+func initTest(t *testing.T, id string) (instName, dbName string, cleanup func()) {
+	projectID := getSampleProjectId(t)
+	instName, cleanup = createTestInstance(t, projectID)
 	dbID := validLength(fmt.Sprintf("smpl-%s", id), t)
-	dbName = fmt.Sprintf("%s/databases/%s", instance, dbID)
+	dbName = fmt.Sprintf("%s/databases/%s", instName, dbID)
 
-	ctx := context.Background()
-	adminClient, err := database.NewDatabaseAdminClient(ctx)
-	if err != nil {
-		t.Fatalf("failed to create DB admin client: %v", err)
-	}
-
-	// Check for database existance prior to test start and delete, as resources
-	// may not have been cleaned up from previous invocations.
-	if db, err := adminClient.GetDatabase(ctx, &adminpb.GetDatabaseRequest{Name: dbName}); err == nil {
-		t.Logf("database %s exists in state %s. delete result: %v", db.GetName(), db.GetState().String(),
-			adminClient.DropDatabase(ctx, &adminpb.DropDatabaseRequest{Database: dbName}))
-	}
-	cleanup = func() {
-		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-			err := adminClient.DropDatabase(ctx, &adminpb.DropDatabaseRequest{Database: dbName})
-			if err != nil {
-				r.Errorf("DropDatabase(%q): %v", dbName, err)
-			}
-		})
-		adminClient.Close()
-	}
 	return
 }
 
@@ -103,64 +83,27 @@ func getVersionTime(t *testing.T, dbName string) (versionTime time.Time) {
 	return versionTime
 }
 
-func initBackupTest(t *testing.T, id, dbName string) (restoreDBName, backupID, cancelledBackupID string, cleanup func()) {
-	instance := getInstance(t)
+func initBackupTest(t *testing.T, id, instName string) (restoreDBName, backupID, cancelledBackupID string) {
 	restoreDatabaseID := validLength(fmt.Sprintf("restore-%s", id), t)
-	restoreDBName = fmt.Sprintf("%s/databases/%s", instance, restoreDatabaseID)
+	restoreDBName = fmt.Sprintf("%s/databases/%s", instName, restoreDatabaseID)
 	backupID = validLength(fmt.Sprintf("backup-%s", id), t)
 	cancelledBackupID = validLength(fmt.Sprintf("cancel-%s", id), t)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
-	defer cancel()
-	adminClient, err := database.NewDatabaseAdminClient(ctx)
-	if err != nil {
-		t.Fatalf("failed to create admin client: %v", err)
-	}
-	if db, err := adminClient.GetDatabase(ctx, &adminpb.GetDatabaseRequest{Name: restoreDBName}); err == nil {
-		t.Logf("database %s exists in state %s. delete result: %v", db.GetName(), db.GetState().String(),
-			adminClient.DropDatabase(ctx, &adminpb.DropDatabaseRequest{Database: restoreDBName}))
-	}
-
-	// Check for any backups that were created from that database and delete those as well
-	iter := adminClient.ListBackups(ctx, &adminpb.ListBackupsRequest{
-		Parent: instance,
-		Filter: "database:" + dbName,
-	})
-	for {
-		resp, err := iter.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			t.Errorf("Failed to list backups for database %s: %v", dbName, err)
-		}
-		t.Logf("backup %s exists. delete result: %v", resp.Name,
-			adminClient.DeleteBackup(ctx, &adminpb.DeleteBackupRequest{Name: resp.Name}))
-	}
-
-	cleanup = func() {
-		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-			err := adminClient.DropDatabase(ctx, &adminpb.DropDatabaseRequest{Database: restoreDBName})
-			if err != nil {
-				r.Errorf("DropDatabase(%q): %v", restoreDBName, err)
-			}
-		})
-	}
 	return
 }
 
-func TestCreateInstance(t *testing.T) {
+func TestCreateInstances(t *testing.T) {
 	_ = testutil.SystemTest(t)
+	t.Parallel()
 
-	projectID, _, err := parseInstanceName(getInstance(t))
-	if err != nil {
-		t.Fatalf("failed to parse instance name: %v", err)
-	}
+	runCreateInstanceSample(t, createInstance)
+	runCreateInstanceSample(t, createInstanceWithProcessingUnits)
+}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
-	defer cancel()
+func runCreateInstanceSample(t *testing.T, f instanceSampleFunc) {
+	projectID := getSampleProjectId(t)
 	instanceID := fmt.Sprintf("go-sample-test-%s", uuid.New().String()[:8])
-	out := runInstanceSample(ctx, t, createInstance, projectID, instanceID, "failed to create an instance")
+	out := runInstanceSample(t, f, projectID, instanceID, "failed to create an instance")
 	if err := cleanupInstance(projectID, instanceID); err != nil {
 		t.Logf("cleanupInstance error: %s", err)
 	}
@@ -169,8 +112,9 @@ func TestCreateInstance(t *testing.T) {
 
 func TestSample(t *testing.T) {
 	_ = testutil.SystemTest(t)
+	t.Parallel()
 
-	dbName, cleanup := initTest(t, randomID())
+	_, dbName, cleanup := initTest(t, randomID())
 	defer cleanup()
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
@@ -369,15 +313,16 @@ func TestSample(t *testing.T) {
 }
 
 func TestBackupSample(t *testing.T) {
-	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/1900")
 	if os.Getenv("GOLANG_SAMPLES_E2E_TEST") == "" {
 		t.Skip("GOLANG_SAMPLES_E2E_TEST not set")
 	}
 	_ = testutil.SystemTest(t)
+	t.Parallel()
+
 	id := randomID()
-	dbName, cleanup := initTest(t, id)
+	instName, dbName, cleanup := initTest(t, id)
 	defer cleanup()
-	restoreDBName, backupID, cancelledBackupID, cleanupBackup := initBackupTest(t, id, dbName)
+	restoreDBName, backupID, cancelledBackupID := initBackupTest(t, id, instName)
 
 	var out string
 	// Set up the database for testing backup operations.
@@ -411,16 +356,15 @@ func TestBackupSample(t *testing.T) {
 	out = runSampleWithContext(ctx, t, listDatabaseOperations, restoreDBName, "failed to list database operations")
 	assertContains(t, out, fmt.Sprintf("Database %s restored from backup", restoreDBName))
 
-	// Delete the restore DB.
-	cleanupBackup()
-
 	out = runBackupSample(ctx, t, deleteBackup, dbName, backupID, "failed to delete a backup")
 	assertContains(t, out, fmt.Sprintf("Deleted backup %s", backupID))
 }
 
 func TestCreateDatabaseWithRetentionPeriodSample(t *testing.T) {
 	_ = testutil.SystemTest(t)
-	dbName, cleanup := initTest(t, randomID())
+	t.Parallel()
+
+	_, dbName, cleanup := initTest(t, randomID())
 	defer cleanup()
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
@@ -435,17 +379,13 @@ func TestCustomerManagedEncryptionKeys(t *testing.T) {
 		t.Skip("GOLANG_SAMPLES_E2E_TEST not set")
 	}
 	tc := testutil.SystemTest(t)
-	dbName, cleanup := initTest(t, randomID())
-	defer cleanup()
+	t.Parallel()
 
-	adminClient, err := database.NewDatabaseAdminClient(context.Background())
-	if err != nil {
-		t.Errorf("failed to create admin client: %v", err)
-	}
+	instName, dbName, cleanup := initTest(t, randomID())
+	defer cleanup()
 
 	var b bytes.Buffer
 
-	instanceName := getInstance(t)
 	locationId := "us-central1"
 	keyRingId := "spanner-test-keyring"
 	keyId := "spanner-test-key"
@@ -474,11 +414,6 @@ func TestCustomerManagedEncryptionKeys(t *testing.T) {
 
 	// Try to create a backup of the encrypted database and delete it after the test.
 	backupId := fmt.Sprintf("enc-backup-%s", randomID())
-	defer func() {
-		_ = adminClient.DeleteBackup(context.Background(), &adminpb.DeleteBackupRequest{
-			Name: fmt.Sprintf("%s/backups/%s", instanceName, backupId),
-		})
-	}()
 	b.Reset()
 	if err := createBackupWithCustomerManagedEncryptionKey(ctx, &b, dbName, backupId, kmsKeyName); err != nil {
 		t.Errorf("failed to create backup with customer managed encryption key: %v", err)
@@ -488,12 +423,7 @@ func TestCustomerManagedEncryptionKeys(t *testing.T) {
 	assertContains(t, out, fmt.Sprintf("using encryption key %s", kmsKeyName))
 
 	// Try to restore the encrypted database and delete the restored database after the test.
-	restoredName := fmt.Sprintf("%s/databases/rest-enc-%s", instanceName, randomID())
-	defer func() {
-		_ = adminClient.DropDatabase(context.Background(), &adminpb.DropDatabaseRequest{
-			Database: restoredName,
-		})
-	}()
+	restoredName := fmt.Sprintf("%s/databases/rest-enc-%s", instName, randomID())
 	restoreFunc := func(ctx context.Context, w io.Writer, dbName, backupID string) error {
 		return restoreBackupWithCustomerManagedEncryptionKey(ctx, w, dbName, backupId, kmsKeyName)
 	}
@@ -586,11 +516,22 @@ func runBackupSampleWithRetry(ctx context.Context, t *testing.T, f backupSampleF
 	return b.String()
 }
 
-func runInstanceSample(ctx context.Context, t *testing.T, f instanceSampleFunc, projectID, instanceID, errMsg string) string {
+func runInstanceSample(t *testing.T, f instanceSampleFunc, projectID, instanceID, errMsg string) string {
 	var b bytes.Buffer
-	if err := f(ctx, &b, projectID, instanceID); err != nil {
-		t.Errorf("%s: %v", errMsg, err)
-	}
+
+	testutil.Retry(t, 20, time.Minute, func(r *testutil.R) {
+		b.Reset()
+		if err := f(&b, projectID, instanceID); err != nil {
+			// Retry if the instance could not be created because there have
+			// been too many create requests in the past minute.
+			if spanner.ErrCode(err) == codes.ResourceExhausted && strings.Contains(err.Error(), "Quota exceeded for quota metric 'Instance create requests'") {
+				r.Errorf("could not create instance %s: %v", fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID), err)
+				return
+			} else {
+				t.Fatalf("%s: %v", errMsg, err)
+			}
+		}
+	})
 	return b.String()
 }
 
@@ -604,7 +545,113 @@ func mustRunSample(t *testing.T, f sampleFuncWithContext, dbName, errMsg string)
 	return b.String()
 }
 
-func getInstance(t *testing.T) string {
+func createTestInstance(t *testing.T, projectID string) (instanceName string, cleanup func()) {
+	ctx := context.Background()
+	instanceID := fmt.Sprintf("go-sample-%s", uuid.New().String()[:16])
+	instanceName = fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID)
+	instanceAdmin, err := instance.NewInstanceAdminClient(ctx)
+	if err != nil {
+		t.Fatalf("failed to create InstanceAdminClient: %v", err)
+	}
+	databaseAdmin, err := database.NewDatabaseAdminClient(ctx)
+	if err != nil {
+		t.Fatalf("failed to create DatabaseAdminClient: %v", err)
+	}
+
+	// Cleanup old test instances that might not have been deleted.
+	iter := instanceAdmin.ListInstances(ctx, &instancepb.ListInstancesRequest{
+		Parent: fmt.Sprintf("projects/%v", projectID),
+		Filter: "labels.cloud_spanner_samples_test:true",
+	})
+	for {
+		instance, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			t.Fatalf("failed to list existing instances: %v", err)
+		}
+		if createTimeString, ok := instance.Labels["create_time"]; ok {
+			seconds, err := strconv.ParseInt(createTimeString, 10, 64)
+			if err != nil {
+				t.Logf("could not parse create time %v: %v", createTimeString, err)
+				continue
+			}
+			createTime := time.Unix(seconds, 0)
+			diff := time.Now().Sub(createTime)
+			if diff > time.Hour*24 {
+				t.Logf("deleting stale test instance %v", instance.Name)
+				deleteInstanceAndBackups(t, instance.Name, instanceAdmin, databaseAdmin)
+			}
+		}
+	}
+
+	testutil.Retry(t, 20, time.Minute, func(r *testutil.R) {
+		op, err := instanceAdmin.CreateInstance(ctx, &instancepb.CreateInstanceRequest{
+			Parent:     fmt.Sprintf("projects/%s", projectID),
+			InstanceId: instanceID,
+			Instance: &instancepb.Instance{
+				Config:      fmt.Sprintf("projects/%s/instanceConfigs/%s", projectID, "regional-us-central1"),
+				DisplayName: instanceID,
+				NodeCount:   1,
+				Labels: map[string]string{
+					"cloud_spanner_samples_test": "true",
+					"create_time":                fmt.Sprintf("%v", time.Now().Unix()),
+				},
+			},
+		})
+		if err != nil {
+			// Retry if the instance could not be created because there have
+			// been too many create requests in the past minute.
+			if spanner.ErrCode(err) == codes.ResourceExhausted && strings.Contains(err.Error(), "Quota exceeded for quota metric 'Instance create requests'") {
+				r.Errorf("could not create instance %s: %v", fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID), err)
+				return
+			} else {
+				t.Fatalf("could not create instance %s: %v", fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID), err)
+			}
+		}
+		_, err = op.Wait(ctx)
+		if err != nil {
+			t.Fatalf("waiting for instance creation to finish failed: %v", err)
+		}
+	})
+
+	return instanceName, func() {
+		deleteInstanceAndBackups(t, instanceName, instanceAdmin, databaseAdmin)
+		instanceAdmin.Close()
+		databaseAdmin.Close()
+	}
+}
+
+func deleteInstanceAndBackups(
+	t *testing.T,
+	instanceName string,
+	instanceAdmin *instance.InstanceAdminClient,
+	databaseAdmin *database.DatabaseAdminClient) {
+	ctx := context.Background()
+	// Delete all backups before deleting the instance.
+	iter := databaseAdmin.ListBackups(ctx, &adminpb.ListBackupsRequest{
+		Parent: instanceName,
+	})
+	for {
+		resp, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			t.Fatalf("Failed to list backups for instance %s: %v", instanceName, err)
+		}
+		databaseAdmin.DeleteBackup(ctx, &adminpb.DeleteBackupRequest{Name: resp.Name})
+	}
+	instanceAdmin.DeleteInstance(ctx, &instancepb.DeleteInstanceRequest{Name: instanceName})
+}
+
+func getSampleProjectId(t *testing.T) string {
+	// These tests get the project id from the environment variable
+	// GOLANG_SAMPLES_SPANNER that is also used by other integration tests for
+	// Spanner samples. The tests in this file create a separate instance for
+	// each test, so only the project id is used, and the rest of the instance
+	// name is ignored.
 	instance := os.Getenv("GOLANG_SAMPLES_SPANNER")
 	if instance == "" {
 		t.Skip("Skipping spanner integration test. Set GOLANG_SAMPLES_SPANNER.")
@@ -612,7 +659,11 @@ func getInstance(t *testing.T) string {
 	if !strings.HasPrefix(instance, "projects/") {
 		t.Fatal("Spanner instance ref must be in the form of 'projects/PROJECT_ID/instances/INSTANCE_ID'")
 	}
-	return instance
+	projectId, _, err := parseInstanceName(instance)
+	if err != nil {
+		t.Fatalf("Could not parse project id from instance name %q: %v", instance, err)
+	}
+	return projectId
 }
 
 func assertContains(t *testing.T, out string, sub string) {
@@ -634,6 +685,10 @@ func validLength(databaseName string, t *testing.T) (trimmedName string) {
 }
 
 func cleanupInstance(projectID, instanceID string) error {
+	return cleanupInstanceWithName(fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID))
+}
+
+func cleanupInstanceWithName(instanceName string) error {
 	ctx := context.Background()
 	instanceAdmin, err := instance.NewInstanceAdminClient(ctx)
 	if err != nil {
@@ -641,7 +696,6 @@ func cleanupInstance(projectID, instanceID string) error {
 	}
 	defer instanceAdmin.Close()
 
-	instanceName := fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID)
 	if err := instanceAdmin.DeleteInstance(ctx, &instancepb.DeleteInstanceRequest{Name: instanceName}); err != nil {
 		return fmt.Errorf("failed to delete instance %s (error %v), might need a manual removal",
 			instanceName, err)

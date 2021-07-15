@@ -14,7 +14,6 @@
 
 package main
 
-// [START fs_collection_group_query_data_setup]
 // [START firestore_query_collection_group_dataset]
 import (
 	"context"
@@ -62,4 +61,3 @@ func collectionGroupSetup(projectID, cityCollection string) error {
 }
 
 // [END firestore_query_collection_group_dataset]
-// [END fs_collection_group_query_data_setup]

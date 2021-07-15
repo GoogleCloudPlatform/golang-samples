@@ -377,6 +377,56 @@ func TestUniformBucketLevelAccess(t *testing.T) {
 	}
 }
 
+func TestPublicAccessPrevention(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	bucketName := tc.ProjectID + "-storage-buckets-tests"
+
+	ctx := context.Background()
+	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName)
+
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+	defer client.Close()
+
+	if err := setPublicAccessPreventionEnforced(ioutil.Discard, bucketName); err != nil {
+		t.Errorf("setPublicAccessPreventionEnforced: %v", err)
+	}
+	// Verify that PublicAccessPrevention was set correctly.
+	attrs, err := client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	if attrs.PublicAccessPrevention != storage.PublicAccessPreventionEnforced {
+		t.Errorf("PublicAccessPrevention: got %s, want %s", attrs.PublicAccessPrevention, storage.PublicAccessPreventionEnforced)
+	}
+
+	buf := new(bytes.Buffer)
+	if err := getPublicAccessPrevention(buf, bucketName); err != nil {
+		t.Errorf("getPublicAccessPrevention: %v", err)
+	}
+	// Verify that the correct value was printed.
+	got := buf.String()
+	want := "Public access prevention is enforced"
+	if !strings.Contains(got, want) {
+		t.Errorf("getPublicAccessPrevention: got %v, want %v", got, want)
+	}
+
+	if err := setPublicAccessPreventionUnspecified(ioutil.Discard, bucketName); err != nil {
+		t.Errorf("setPublicAccessPreventionUnspecified: %v", err)
+	}
+	// Verify that PublicAccessPrevention was set correctly.
+	attrs, err = client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	if attrs.PublicAccessPrevention != storage.PublicAccessPreventionUnspecified {
+		t.Errorf("PublicAccessPrevention: got %s, want %s", attrs.PublicAccessPrevention, storage.PublicAccessPreventionUnspecified)
+	}
+
+}
+
 func TestLifecycleManagement(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	bucketName := tc.ProjectID + "-storage-buckets-tests"
