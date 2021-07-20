@@ -207,6 +207,25 @@ func TestDeleteSecret(t *testing.T) {
 	}
 }
 
+func TestDeleteSecretWithEtag(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secret := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret.Name)
+
+	if err := deleteSecretWithEtag(secret.Name, secret.Etag); err != nil {
+		t.Fatal(err)
+	}
+
+	client, ctx := testClient(t)
+	_, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secret.Name,
+	})
+	if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
+		t.Errorf("deleteSecret: expected %v to be not found", err)
+	}
+}
+
 func TestDestroySecretVersion(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -217,6 +236,30 @@ func TestDestroySecretVersion(t *testing.T) {
 	version := testSecretVersion(t, secret.Name, payload)
 
 	if err := destroySecretVersion(version.Name); err != nil {
+		t.Fatal(err)
+	}
+
+	client, ctx := testClient(t)
+	v, err := client.GetSecretVersion(ctx, &secretmanagerpb.GetSecretVersionRequest{
+		Name: version.Name,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := v.State, secretmanagerpb.SecretVersion_DESTROYED; got != want {
+		t.Errorf("testSecretVersion: expected %v to be %v", got, want)
+	}
+}
+
+func TestDestroySecretVersionWithEtag(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	payload := []byte("my-secret")
+	secret := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret.Name)
+
+	version := testSecretVersion(t, secret.Name, payload)
+
+	if err := destroySecretVersionWithEtag(version.Name, version.Etag); err != nil {
 		t.Fatal(err)
 	}
 
@@ -257,6 +300,45 @@ func TestDisableEnableSecretVersion(t *testing.T) {
 	}
 
 	if err := enableSecretVersion(version.Name); err != nil {
+		t.Fatal(err)
+	}
+
+	v, err = client.GetSecretVersion(ctx, &secretmanagerpb.GetSecretVersionRequest{
+		Name: version.Name,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := v.State, secretmanagerpb.SecretVersion_ENABLED; got != want {
+		t.Errorf("testSecretVersion: expected %v to be %v", got, want)
+	}
+}
+
+func TestDisableEnableSecretVersionWithEtag(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	payload := []byte("my-secret")
+	secret := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret.Name)
+
+	version := testSecretVersion(t, secret.Name, payload)
+
+	if err := disableSecretVersionWithEtag(version.Name, version.Etag); err != nil {
+		t.Fatal(err)
+	}
+
+	client, ctx := testClient(t)
+	v, err := client.GetSecretVersion(ctx, &secretmanagerpb.GetSecretVersionRequest{
+		Name: version.Name,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := v.State, secretmanagerpb.SecretVersion_DISABLED; got != want {
+		t.Errorf("testSecretVersion: expected %v to be %v", got, want)
+	}
+
+	if err := enableSecretVersionWithEtag(version.Name, v.Etag); err != nil {
 		t.Fatal(err)
 	}
 
@@ -428,6 +510,34 @@ func TestUpdateSecret(t *testing.T) {
 
 	var b bytes.Buffer
 	if err := updateSecret(&b, secret.Name); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Updated secret"; !strings.Contains(got, want) {
+		t.Errorf("updateSecret: expected %q to contain %q", got, want)
+	}
+
+	client, ctx := testClient(t)
+	s, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secret.Name,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := s.Labels, map[string]string{"secretmanager": "rocks"}; !reflect.DeepEqual(got, want) {
+		t.Errorf("updateSecret: expected %q to be %q", got, want)
+	}
+}
+
+func TestUpdateSecretWithEtag(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secret := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret.Name)
+
+	var b bytes.Buffer
+	if err := updateSecretWithEtag(&b, secret.Name, secret.Etag); err != nil {
 		t.Fatal(err)
 	}
 
