@@ -19,6 +19,7 @@ import (
 	"net/http"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/cloudrunci"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -50,20 +51,22 @@ func TestHTTP2Server(t *testing.T) {
 	}
 
 	h2Client := &http.Client{Transport: &http2.Transport{}}
+	testutil.Retry(t, 10, 5*time.Second, func(r *testutil.R) {
+		resp, err := h2Client.Get(svcURL.String())
 
-	resp, err := h2Client.Get(svcURL.String())
-	if err != nil {
-		t.Fatalf("http2.Get failed: %v", err)
-	}
-	if resp.StatusCode != http.StatusOK {
-		t.Fatalf("http2.Get: unexpected response status: %s", resp.Status)
-	}
-	defer resp.Body.Close()
-	b, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		t.Fatalf("resp.Body.Read failed: %v", err)
-	}
-	if expected, got := "This request is served over HTTP/2.0 protocol.", string(b); !strings.Contains(got, expected) {
-		t.Fatalf("response body doesn't contain %q; got=%q", expected, got)
-	}
+		if err != nil {
+			r.Errorf("http2.Get failed: %v", err)
+		}
+		if resp.StatusCode != http.StatusOK {
+			r.Errorf("http2.Get: unexpected response status: %s", resp.Status)
+		}
+		defer resp.Body.Close()
+		b, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			r.Errorf("resp.Body.Read failed: %v", err)
+		}
+		if expected, got := "This request is served over HTTP/2.0 protocol.", string(b); !strings.Contains(got, expected) {
+			r.Errorf("response body doesn't contain %q; got=%q", expected, got)
+		}
+	})
 }
