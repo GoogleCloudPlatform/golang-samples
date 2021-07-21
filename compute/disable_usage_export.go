@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START compute_instances_list]
+// [START compute_usage_report_disable]
 import (
 	"context"
 	"fmt"
@@ -24,35 +24,26 @@ import (
 	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
 )
 
-// listInstances gets a list of instances created in given project in given zone.
-func listInstances(w io.Writer, projectID string, zone string) error {
+// disableUsageExport disables Compute Engine usage export bucket for the Cloud Project.
+func disableUsageExport(w io.Writer, projectID string) error {
 	// projectID := "your_project_id"
-	// zone := "europe-central2-b"
 	ctx := context.Background()
-	projectsClient, err := compute.NewInstancesRESTClient(ctx)
+	projectsClient, err := compute.NewProjectsRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewInstancesRESTClient: %v", err)
+		return fmt.Errorf("NewProjectsRESTClient: %v", err)
 	}
 
 	defer projectsClient.Close()
 
-	req := &computepb.ListInstancesRequest{
-		Project: projectID,
-		Zone:    zone,
+	// Updating the setting with empty UsageExportLocationResource will disable the usage report generation.
+	req := &computepb.SetUsageExportBucketProjectRequest{
+		Project:                     projectID,
+		UsageExportLocationResource: &computepb.UsageExportLocation{},
 	}
 
-	resp, err := projectsClient.List(ctx, req)
-	if err != nil {
-		return fmt.Errorf("List instances request: %v", err)
-	}
-
-	fmt.Fprintf(w, "Instances found in zone %s:\n", zone)
-
-	for _, instance := range resp.Items {
-		fmt.Fprintf(w, "- %s %s\n", *instance.Name, *instance.MachineType)
-	}
+	projectsClient.SetUsageExportBucket(ctx, req)
 
 	return nil
 }
 
-// [END compute_instances_list]
+// [END compute_usage_report_disable]
