@@ -25,8 +25,9 @@ import (
 )
 
 func createInstance(w io.Writer, projectID, instanceID string) error {
+	// projectID := "my-project-id"
+	// instanceID := "my-instance"
 	ctx := context.Background()
-
 	instanceAdmin, err := instance.NewInstanceAdminClient(ctx)
 	if err != nil {
 		return err

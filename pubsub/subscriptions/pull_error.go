@@ -31,6 +31,7 @@ func pullMsgsError(w io.Writer, projectID, subID string) error {
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	// If the service returns a non-retryable error, Receive returns that error after
 	// all of the outstanding calls to the handler have returned.

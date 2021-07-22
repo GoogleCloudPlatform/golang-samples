@@ -30,7 +30,12 @@ import (
 func createClientWithQueryOptions(w io.Writer, database string) error {
 	ctx := context.Background()
 	queryOptions := spanner.QueryOptions{
-		Options: &sppb.ExecuteSqlRequest_QueryOptions{OptimizerVersion: "1"},
+		Options: &sppb.ExecuteSqlRequest_QueryOptions{
+			OptimizerVersion: "1",
+			// The list of available statistics packages can be found by
+			// querying the "INFORMATION_SCHEMA.SPANNER_STATISTICS" table.
+			OptimizerStatisticsPackage: "latest",
+		},
 	}
 	client, err := spanner.NewClientWithConfig(
 		ctx, database, spanner.ClientConfig{QueryOptions: queryOptions},

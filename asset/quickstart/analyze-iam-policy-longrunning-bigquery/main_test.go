@@ -23,6 +23,7 @@ import (
 
 	"cloud.google.com/go/bigquery"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"google.golang.org/api/googleapi"
 )
 
 func TestMain(t *testing.T) {
@@ -48,31 +49,62 @@ func TestMain(t *testing.T) {
 	tablePrefix := "client_library_table"
 	createDataset(ctx, t, client, datasetID)
 
-	stdOut, stdErr, err := m.Run(env, 2*time.Minute, fmt.Sprintf("--scope=%s", scope), fmt.Sprintf("--fullResourceName=%s", fullResourceName), fmt.Sprintf("--dataset=%s", dataset), fmt.Sprintf("--tablePrefix=%s", tablePrefix))
+	testutil.Retry(t, 5, 10*time.Second, func(r *testutil.R) {
+		stdOut, stdErr, err := m.Run(env, 2*time.Minute, fmt.Sprintf("--scope=%s", scope), fmt.Sprintf("--fullResourceName=%s", fullResourceName), fmt.Sprintf("--dataset=%s", dataset), fmt.Sprintf("--tablePrefix=%s", tablePrefix))
 
-	if err != nil {
-		t.Errorf("execution failed: %v", err)
-	}
-	if len(stdErr) > 0 {
-		t.Errorf("did not expect stderr output, got %d bytes: %s", len(stdErr), string(stdErr))
-	}
-	got := string(stdOut)
-	if !strings.Contains(got, dataset) {
-		t.Errorf("stdout returned %s, wanted to contain %s", got, dataset)
-	}
+		if err != nil {
+			r.Errorf("execution failed: %v", err)
+			return
+		}
+		if len(stdErr) > 0 {
+			r.Errorf("did not expect stderr output, got %d bytes: %s", len(stdErr), string(stdErr))
+		}
+		got := string(stdOut)
+		if !strings.Contains(got, dataset) {
+			r.Errorf("stdout returned %s, wanted to contain %s", got, dataset)
+		}
+	})
 }
 
 func createDataset(ctx context.Context, t *testing.T, client *bigquery.Client, datasetID string) {
 	d := client.Dataset(datasetID)
 	if _, err := d.Metadata(ctx); err == nil {
-		if errDelete := d.DeleteWithContents(ctx); errDelete != nil {
-			t.Fatalf("Dataset.Delete(%q): %v", datasetID, errDelete)
+		if err := d.DeleteWithContents(ctx); err != nil {
+			if err, ok := err.(*googleapi.Error); ok {
+				// Just in case a delete was slow to propagate.
+				if err.Code != 404 {
+					t.Fatalf("Dataset.Delete(%q): %v", datasetID, err)
+				}
+			}
 		}
 	}
-	meta := &bigquery.DatasetMetadata{
-		Location: "US", // See https://cloud.google.com/bigquery/docs/locations
-	}
-	if err := client.Dataset(datasetID).Create(ctx, meta); err != nil {
-		t.Fatalf("Dataset.Create(%q): %v", datasetID, err)
-	}
+
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
+		if _, err := d.Metadata(ctx); err != nil {
+			// Deletion successful.
+			return
+		}
+		r.Errorf("Failed to delete dataset %q", datasetID)
+	})
+
+	time.Sleep(10 * time.Second) // Extra time to let the delete settle.
+
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
+		meta := &bigquery.DatasetMetadata{
+			Location: "US", // See https://cloud.google.com/bigquery/docs/locations.
+		}
+		if err := client.Dataset(datasetID).Create(ctx, meta); err != nil {
+			if err, ok := err.(*googleapi.Error); ok && err.Code == 409 {
+				// Already exists. Not sure why.
+				if err := d.DeleteWithContents(ctx); err != nil {
+					if err, ok := err.(*googleapi.Error); ok && err.Code != 404 {
+						// Check 404 just in case a delete was slow to propagate.
+						r.Errorf("Dataset.Delete(%q): %v", datasetID, err)
+						return
+					}
+				}
+			}
+			r.Errorf("Dataset.Create(%q): %v", datasetID, err)
+		}
+	})
 }

@@ -19,8 +19,18 @@
       "enabled": false
     },
     {
-      "packageNames": ["golang.org/x/tools"],
+      "packageNames": [
+        "golang.org/x/net",
+        "golang.org/x/tools",
+        "cloud.google.com/go/pubsublite",
+        "contrib.go.opencensus.io/exporter/stackdriver"
+      ],
       "enabled": false
     }
-  ]
+  ],
+  "force": {
+    "constraints": {
+      "go": "1.16"
+    }
+  }
 }

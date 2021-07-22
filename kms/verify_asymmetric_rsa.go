@@ -42,6 +42,7 @@ func verifyAsymmetricSignatureRSA(w io.Writer, name string, message, signature [
 	if err != nil {
 		return fmt.Errorf("failed to create kms client: %v", err)
 	}
+	defer client.Close()
 
 	// Retrieve the public key from KMS.
 	response, err := client.GetPublicKey(ctx, &kmspb.GetPublicKeyRequest{Name: name})

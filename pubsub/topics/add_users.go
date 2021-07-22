@@ -31,6 +31,7 @@ func addUsers(projectID, topicID string) error {
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	topic := client.Topic(topicID)
 	policy, err := topic.IAM().Policy(ctx)

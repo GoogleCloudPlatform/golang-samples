@@ -34,6 +34,7 @@ func iamRevokeAccess(w io.Writer, name, member string) error {
 	if err != nil {
 		return fmt.Errorf("failed to create secretmanager client: %v", err)
 	}
+	defer client.Close()
 
 	// Get the current IAM policy.
 	handle := client.IAM(name)

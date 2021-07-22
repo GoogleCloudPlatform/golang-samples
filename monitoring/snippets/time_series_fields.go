@@ -36,6 +36,7 @@ func readTimeSeriesFields(w io.Writer, projectID string) error {
 	if err != nil {
 		return fmt.Errorf("NewMetricClient: %v", err)
 	}
+	defer client.Close()
 	startTime := time.Now().UTC().Add(time.Minute * -20)
 	endTime := time.Now().UTC()
 	req := &monitoringpb.ListTimeSeriesRequest{

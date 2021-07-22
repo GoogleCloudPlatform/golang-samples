@@ -37,6 +37,7 @@ func createSecret(w io.Writer, parent, id string) error {
 	if err != nil {
 		return fmt.Errorf("failed to create secretmanager client: %v", err)
 	}
+	defer client.Close()
 
 	// Build the request.
 	req := &secretmanagerpb.CreateSecretRequest{

@@ -25,8 +25,8 @@ import (
 
 	"google.golang.org/api/iterator"
 
-	asset "cloud.google.com/go/asset/apiv1p5beta1"
-	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1p5beta1"
+	asset "cloud.google.com/go/asset/apiv1"
+	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1"
 )
 
 func main() {
@@ -35,6 +35,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer client.Close()
 
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	assetType := "storage.googleapis.com/Bucket"

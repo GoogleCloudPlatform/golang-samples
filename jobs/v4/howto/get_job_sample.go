@@ -33,6 +33,7 @@ func getJob(w io.Writer, projectID, jobID string) (*talentpb.Job, error) {
 	if err != nil {
 		return nil, fmt.Errorf("talent.NewJobClient: %v", err)
 	}
+	defer c.Close()
 
 	// Construct a getJob request.
 	jobName := fmt.Sprintf("projects/%s/jobs/%s", projectID, jobID)

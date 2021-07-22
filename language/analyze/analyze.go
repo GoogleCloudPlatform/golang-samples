@@ -42,6 +42,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer client.Close()
 	// [END init]
 
 	text := strings.Join(os.Args[2:], " ")

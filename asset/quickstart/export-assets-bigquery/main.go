@@ -35,6 +35,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("asset.NewClient: %v", err)
 	}
+	defer client.Close()
 	datasetID := strings.Replace(fmt.Sprintf("%s-for-assets", projectID), "-", "_", -1)
 	dataset := fmt.Sprintf("projects/%s/datasets/%s", projectID, datasetID)
 	req := &assetpb.ExportAssetsRequest{
@@ -44,6 +45,7 @@ func main() {
 				BigqueryDestination: &assetpb.BigQueryDestination{
 					Dataset: dataset,
 					Table:   "test",
+					Force:   true,
 				},
 			},
 		},

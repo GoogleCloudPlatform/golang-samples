@@ -35,6 +35,7 @@ func getMetricDescriptor(w io.Writer, projectID, metricType string) error {
 	if err != nil {
 		return fmt.Errorf("NewMetricClient: %v", err)
 	}
+	defer c.Close()
 	req := &monitoringpb.GetMetricDescriptorRequest{
 		Name: fmt.Sprintf("projects/%s/metricDescriptors/%s", projectID, metricType),
 	}

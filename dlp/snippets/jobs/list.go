@@ -35,6 +35,7 @@ func listJobs(w io.Writer, projectID, filter, jobType string) error {
 	if err != nil {
 		return fmt.Errorf("dlp.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	// Create a configured request.
 	req := &dlppb.ListDlpJobsRequest{

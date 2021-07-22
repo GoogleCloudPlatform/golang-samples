@@ -37,7 +37,12 @@ func queryWithQueryOptions(w io.Writer, db string) error {
 
 	stmt := spanner.Statement{SQL: `SELECT VenueId, VenueName, LastUpdateTime FROM Venues`}
 	queryOptions := spanner.QueryOptions{
-		Options: &sppb.ExecuteSqlRequest_QueryOptions{OptimizerVersion: "1"},
+		Options: &sppb.ExecuteSqlRequest_QueryOptions{
+			OptimizerVersion: "1",
+			// The list of available statistics packages can be found by
+			// querying the "INFORMATION_SCHEMA.SPANNER_STATISTICS" table.
+			OptimizerStatisticsPackage: "latest",
+		},
 	}
 	iter := client.Single().QueryWithOptions(ctx, stmt, queryOptions)
 	defer iter.Stop()

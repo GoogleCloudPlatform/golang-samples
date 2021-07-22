@@ -57,6 +57,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer client.Close()
 
 	if err := sendFunc(os.Stdout, client, os.Args[1]); err != nil {
 		log.Fatal(err)

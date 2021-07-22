@@ -27,7 +27,7 @@ import (
 
 // disableKeyVersion disables the specified key version on Cloud KMS.
 func disableKeyVersion(w io.Writer, name string) error {
-	// parent := "projects/my-project/locations/us-east1/keyRings/my-key-ring/cryptoKeys/my-key/cryptoKeyVersions/123"
+	// name := "projects/my-project/locations/us-east1/keyRings/my-key-ring/cryptoKeys/my-key/cryptoKeyVersions/123"
 
 	// Create the client.
 	ctx := context.Background()
@@ -35,6 +35,7 @@ func disableKeyVersion(w io.Writer, name string) error {
 	if err != nil {
 		return fmt.Errorf("failed to create kms client: %v", err)
 	}
+	defer client.Close()
 
 	// Build the request.
 	req := &kmspb.UpdateCryptoKeyVersionRequest{

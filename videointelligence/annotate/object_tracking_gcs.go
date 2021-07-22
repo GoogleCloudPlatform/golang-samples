@@ -38,6 +38,7 @@ func objectTrackingGCS(w io.Writer, gcsURI string) error {
 	if err != nil {
 		return fmt.Errorf("video.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	op, err := client.AnnotateVideo(ctx, &videopb.AnnotateVideoRequest{
 		InputUri: gcsURI,

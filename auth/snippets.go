@@ -40,6 +40,7 @@ func implicit() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer storageClient.Close()
 
 	it := storageClient.Buckets(ctx, "project-id")
 	for {
@@ -74,6 +75,7 @@ func explicit(jsonPath, projectID string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer client.Close()
 	fmt.Println("Buckets:")
 	it := client.Buckets(ctx, projectID)
 	for {
@@ -109,6 +111,7 @@ func explicitDefault(projectID string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer client.Close()
 	fmt.Println("Buckets:")
 	it := client.Buckets(ctx, projectID)
 	for {
