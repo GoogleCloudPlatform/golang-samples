@@ -14,7 +14,7 @@
 
 package spanner
 
-// [START spanner_capture_gfe_metric]
+// [START spanner_opencensus_capture_gfe_metric]
 
 import (
 	"context"
@@ -88,9 +88,8 @@ func queryWithGFELatency(w io.Writer, db string, projectID string) error {
 
 	// Execute a SQL query and retrieve the GFE server-timing header in gRPC metadata.
 	req2 := &sppb.ExecuteSqlRequest{
-		Session:   session.Name,
-		Sql:       `SELECT SingerId, AlbumId, AlbumTitle FROM Albums`,
-		QueryMode: sppb.ExecuteSqlRequest_PROFILE,
+		Session: session.Name,
+		Sql:     `SELECT SingerId, AlbumId, AlbumTitle FROM Albums`,
 	}
 	var md metadata.MD
 	resultSet, err := client.ExecuteSql(ctx, req2, gax.WithGRPCOptions(grpc.Header(&md)))
@@ -120,4 +119,4 @@ func queryWithGFELatency(w io.Writer, db string, projectID string) error {
 	return nil
 }
 
-// [END spanner_capture_gfe_metric]
+// [END spanner_opencensus_capture_gfe_metric]

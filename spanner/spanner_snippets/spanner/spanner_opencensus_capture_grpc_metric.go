@@ -14,7 +14,7 @@
 
 package spanner
 
-// [START spanner_capture_grpc_metric]
+// [START spanner_opencensus_capture_grpc_metric]
 
 import (
 	"context"
@@ -76,4 +76,4 @@ func queryWithGRPCMetric(w io.Writer, db string, projectID string) error {
 	}
 }
 
-// [END spanner_capture_grpc_metric]
+// [END spanner_opencensus_capture_grpc_metric]

@@ -14,7 +14,7 @@
 
 package spanner
 
-// [START spanner_capture_query_stats_metric]
+// [START spanner_opencensus_capture_query_stats_metric]
 
 import (
 	"context"
@@ -103,4 +103,4 @@ func queryWithQueryStats(w io.Writer, db string, projectID string) error {
 	}
 }
 
-// [END spanner_capture_query_stats_metric]
+// [END spanner_opencensus_capture_query_stats_metric]
