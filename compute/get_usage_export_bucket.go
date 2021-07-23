@@ -25,7 +25,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// getUsageExportBucketrRetrieve Compute Engine usage export bucket for the Cloud project. Replaces the empty value returned by the API with the default value used to generate report file names.
+// getUsageExportBucket retrieve Compute Engine usage export bucket for the Cloud project. Replaces the empty value returned by the API with the default value used to generate report file names.
 func getUsageExportBucket(w io.Writer, projectID string) error {
 	// projectID := "your_project_id"
 	ctx := context.Background()
@@ -33,7 +33,6 @@ func getUsageExportBucket(w io.Writer, projectID string) error {
 	if err != nil {
 		return fmt.Errorf("NewProjectsRESTClient: %v", err)
 	}
-
 	defer projectsClient.Close()
 
 	// Updating the setting with empty UsageExportLocationResource will disable the usage report generation.
@@ -43,7 +42,7 @@ func getUsageExportBucket(w io.Writer, projectID string) error {
 
 	project, err := projectsClient.Get(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Project get request: %v", err)
+		return fmt.Errorf("unable to get project: %v", err)
 	}
 
 	usageExportLocation := project.UsageExportLocation

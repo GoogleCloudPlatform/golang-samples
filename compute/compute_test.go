@@ -18,8 +18,10 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"math/rand"
 	"strings"
 	"testing"
+	"time"
 
 	compute "cloud.google.com/go/compute/apiv1"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -27,10 +29,12 @@ import (
 )
 
 func TestComputeSnippets(t *testing.T) {
+	var seededRand *rand.Rand = rand.New(
+		rand.NewSource(time.Now().UnixNano()))
 	tc := testutil.SystemTest(t)
 	zone := "europe-central2-b"
-	instanceName := "test-instance-name"
-	instanceName2 := "test-instance-name-2"
+	instanceName := "test-" + fmt.Sprint(seededRand.Int())
+	instanceName2 := "test-" + fmt.Sprint(seededRand.Int())
 	machineType := "n1-standard-1"
 	sourceImage := "projects/debian-cloud/global/images/family/debian-10"
 	networkName := "global/networks/default"
@@ -43,7 +47,7 @@ func TestComputeSnippets(t *testing.T) {
 
 	expectedResult := "Instance created"
 	if got := buf.String(); !strings.Contains(got, expectedResult) {
-		t.Errorf("createInstance got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, expectedResult)
+		t.Errorf("createInstance got %q, want %q", got, expectedResult)
 	}
 
 	buf.Reset()
@@ -55,10 +59,10 @@ func TestComputeSnippets(t *testing.T) {
 	expectedResult = "Instances found in zone"
 	expectedResult2 := fmt.Sprintf("- %s", instanceName)
 	if got := buf.String(); !strings.Contains(got, expectedResult) {
-		t.Errorf("listInstances got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, expectedResult)
+		t.Errorf("listInstances got %q, want %q", got, expectedResult)
 	}
 	if got := buf.String(); !strings.Contains(got, expectedResult2) {
-		t.Errorf("listInstances got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, expectedResult2)
+		t.Errorf("listInstances got %q, want %q", got, expectedResult2)
 	}
 
 	buf.Reset()
@@ -71,13 +75,13 @@ func TestComputeSnippets(t *testing.T) {
 	expectedResult2 = fmt.Sprintf("zones/%s\n", zone)
 	expectedResult3 := fmt.Sprintf("- %s", instanceName)
 	if got := buf.String(); !strings.Contains(got, expectedResult) {
-		t.Errorf("listAllInstances got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, expectedResult)
+		t.Errorf("listAllInstances got %q, want %q", got, expectedResult)
 	}
 	if got := buf.String(); !strings.Contains(got, expectedResult2) {
-		t.Errorf("listAllInstances got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, expectedResult2)
+		t.Errorf("listAllInstances got %q, want %q", got, expectedResult2)
 	}
 	if got := buf.String(); !strings.Contains(got, expectedResult2) {
-		t.Errorf("listAllInstances got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, expectedResult3)
+		t.Errorf("listAllInstances got %q, want %q", got, expectedResult3)
 	}
 
 	buf.Reset()
@@ -88,10 +92,8 @@ func TestComputeSnippets(t *testing.T) {
 
 	expectedResult = "Instance deleted"
 	if got := buf.String(); !strings.Contains(got, expectedResult) {
-		t.Errorf("deleteInstance got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, expectedResult)
+		t.Errorf("deleteInstance got %q, want %q", got, expectedResult)
 	}
-
-	buf.Reset()
 
 	if err := createInstance(buf, tc.ProjectID, zone, instanceName2, machineType, sourceImage, networkName); err != nil {
 		t.Errorf("createInstance got err: %v", err)
@@ -115,10 +117,16 @@ func TestComputeSnippets(t *testing.T) {
 		t.Errorf("Delete instance request: %v", err)
 	}
 
+	buf.Reset()
+
 	waitForOperation(buf, op, tc.ProjectID)
+
+	if err := waitForOperation(buf, op, tc.ProjectID); err != nil {
+		t.Errorf("waitForOperation got err: %v", err)
+	}
 
 	expectedResult = "Operation finished"
 	if got := buf.String(); !strings.Contains(got, expectedResult) {
-		t.Errorf("waitForOperation got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, expectedResult)
+		t.Errorf("waitForOperation got %q, want %q", got, expectedResult)
 	}
 }

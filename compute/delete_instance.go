@@ -44,29 +44,31 @@ func deleteInstance(w io.Writer, projectID string, zone string, instanceName str
 
 	op, err := instancesClient.Delete(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Delete instance request: %v", err)
+		return fmt.Errorf("unable to delete instance: %v", err)
 	}
 
-	if op.GetStatus() == computepb.Operation_RUNNING {
-		zoneOperationsClient, err := compute.NewZoneOperationsRESTClient(ctx)
-		if err != nil {
-			return fmt.Errorf("NewZoneOperationsRESTClient: %v", err)
-		}
-		defer zoneOperationsClient.Close()
+	zoneOperationsClient, err := compute.NewZoneOperationsRESTClient(ctx)
+	if err != nil {
+		return fmt.Errorf("NewZoneOperationsRESTClient: %v", err)
+	}
+	defer zoneOperationsClient.Close()
 
-		req := &computepb.WaitZoneOperationRequest{
-			Operation: op.GetName(),
-			Project:   projectID,
-			Zone:      zone,
-		}
-
-		zoneOperationsClient.Wait(ctx, req)
-		if err != nil {
-			return fmt.Errorf("Operation wait request: %v", err)
-		}
+	waitReq := &computepb.WaitZoneOperationRequest{
+		Operation: op.GetName(),
+		Project:   projectID,
+		Zone:      zone,
 	}
 
-	fmt.Fprintf(w, "Instance deleted\n")
+	op, err = zoneOperationsClient.Wait(ctx, waitReq)
+	if err != nil {
+		return fmt.Errorf("unable to wait for the operation: %v", err)
+	}
+
+	if op.GetStatus() == computepb.Operation_DONE {
+		fmt.Fprintf(w, "Instance deleted\n")
+	} else {
+		return fmt.Errorf("delete instance operation has status %s", op.GetStatus())
+	}
 
 	return nil
 }

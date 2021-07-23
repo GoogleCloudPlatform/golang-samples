@@ -32,7 +32,6 @@ func listAllInstances(w io.Writer, projectID string) error {
 	if err != nil {
 		return fmt.Errorf("NewInstancesRESTClient: %v", err)
 	}
-
 	defer projectsClient.Close()
 
 	req := &computepb.AggregatedListInstancesRequest{
@@ -41,7 +40,7 @@ func listAllInstances(w io.Writer, projectID string) error {
 
 	resp, err := projectsClient.AggregatedList(ctx, req)
 	if err != nil {
-		return fmt.Errorf("AggregatedList instances request: %v", err)
+		return fmt.Errorf("unable to call AggregatedList request: %v", err)
 	}
 
 	fmt.Fprintf(w, "Instances found:\n")

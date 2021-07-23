@@ -29,21 +29,20 @@ func listInstances(w io.Writer, projectID string, zone string) error {
 	// projectID := "your_project_id"
 	// zone := "europe-central2-b"
 	ctx := context.Background()
-	projectsClient, err := compute.NewInstancesRESTClient(ctx)
+	instancesClient, err := compute.NewInstancesRESTClient(ctx)
 	if err != nil {
 		return fmt.Errorf("NewInstancesRESTClient: %v", err)
 	}
-
-	defer projectsClient.Close()
+	defer instancesClient.Close()
 
 	req := &computepb.ListInstancesRequest{
 		Project: projectID,
 		Zone:    zone,
 	}
 
-	resp, err := projectsClient.List(ctx, req)
+	resp, err := instancesClient.List(ctx, req)
 	if err != nil {
-		return fmt.Errorf("List instances request: %v", err)
+		return fmt.Errorf("unable to list instances: %v", err)
 	}
 
 	fmt.Fprintf(w, "Instances found in zone %s:\n", zone)

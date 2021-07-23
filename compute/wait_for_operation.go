@@ -31,27 +31,28 @@ func waitForOperation(w io.Writer, op *computepb.Operation, projectID string) er
 	ctx := context.Background()
 	zoneArr := strings.Split(op.GetZone(), "/")
 
-	if op.GetStatus() == computepb.Operation_RUNNING {
-		fmt.Fprintf(w, "Operation finished here")
-		zoneOperationsClient, err := compute.NewZoneOperationsRESTClient(ctx)
-		if err != nil {
-			return fmt.Errorf("NewZoneOperationsRESTClient: %v", err)
-		}
-		defer zoneOperationsClient.Close()
+	zoneOperationsClient, err := compute.NewZoneOperationsRESTClient(ctx)
+	if err != nil {
+		return fmt.Errorf("NewZoneOperationsRESTClient: %v", err)
+	}
+	defer zoneOperationsClient.Close()
 
-		req := &computepb.WaitZoneOperationRequest{
-			Operation: op.GetName(),
-			Project:   projectID,
-			Zone:      zoneArr[len(zoneArr)-1],
-		}
-
-		zoneOperationsClient.Wait(ctx, req)
-		if err != nil {
-			return fmt.Errorf("Opration wait request: %v", err)
-		}
+	req := &computepb.WaitZoneOperationRequest{
+		Operation: op.GetName(),
+		Project:   projectID,
+		Zone:      zoneArr[len(zoneArr)-1],
 	}
 
-	fmt.Fprintf(w, "Operation finished")
+	zoneOperationsClient.Wait(ctx, req)
+	if err != nil {
+		return fmt.Errorf("unable to wait for the operation: %v", err)
+	}
+
+	if op.GetStatus() == computepb.Operation_DONE {
+		fmt.Fprintf(w, "Operation finished")
+	} else {
+		return fmt.Errorf("operation has status %s", op.GetStatus())
+	}
 
 	return nil
 }

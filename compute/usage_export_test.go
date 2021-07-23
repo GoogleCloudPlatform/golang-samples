@@ -32,9 +32,9 @@ import (
 func assertEqual(t *testing.T, a interface{}, b interface{}) {
 	if a == b {
 		return
+	} else {
+		t.Errorf(fmt.Sprintf("Got: %d; want %d", a, b))
 	}
-
-	t.Errorf(fmt.Sprintf("%v != %v", a, b))
 }
 
 func createBucket(t *testing.T, projectID string, bucketName string) error {
@@ -62,7 +62,7 @@ func deleteBucket(t *testing.T, bucketName string) error {
 
 	bucket := storageClient.Bucket(bucketName)
 	if err := bucket.Delete(ctx); err != nil {
-		return fmt.Errorf("Bucket(%q).Delete: %v", bucketName, err)
+		t.Errorf("Bucket(%q).Delete: %v", bucketName, err)
 	}
 
 	return nil
@@ -86,10 +86,14 @@ func TestUsageExportSnippets(t *testing.T) {
 
 	expectedResult := "Setting reportNamePrefix to empty value causes the report to have the default prefix value `usage_gce`"
 	if got := buf.String(); !strings.Contains(got, expectedResult) {
-		t.Errorf("setUsageExportBucket got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, expectedResult)
+		t.Errorf("setUsageExportBucket got %q, want %q", got, expectedResult)
+	}
+	expectedResult = "Usage export bucket has been set"
+	if got := buf.String(); !strings.Contains(got, expectedResult) {
+		t.Errorf("setUsageExportBucket got %q, want %q", got, expectedResult)
 	}
 
-	time.Sleep(5 * time.Second)
+	// time.Sleep(5 * time.Second)
 
 	projectsClient, err := compute.NewProjectsRESTClient(ctx)
 	if err != nil {
@@ -119,19 +123,26 @@ func TestUsageExportSnippets(t *testing.T) {
 
 	expectedResult = "Report name prefix not set, replacing with default value of `usage_gce`"
 	if got := buf.String(); !strings.Contains(got, expectedResult) {
-		t.Errorf("getUsageExportBucket got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, expectedResult)
+		t.Errorf("getUsageExportBucket got %q, want %q", got, expectedResult)
 	}
 
 	expectedResult = "Returned ReportNamePrefix: usage_gce"
 	if got := buf.String(); !strings.Contains(got, expectedResult) {
-		t.Errorf("getUsageExportBucket got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, expectedResult)
+		t.Errorf("getUsageExportBucket got %q, want %q", got, expectedResult)
 	}
+
+	buf.Reset()
 
 	if err := disableUsageExport(buf, tc.ProjectID); err != nil {
 		t.Errorf("disableUsageExport got err: %v", err)
 	}
 
-	time.Sleep(5 * time.Second)
+	expectedResult = "Usage export bucket has been set"
+	if got := buf.String(); !strings.Contains(got, expectedResult) {
+		t.Errorf("getUsageExportBucket got %q, want %q", got, expectedResult)
+	}
+
+	// time.Sleep(5 * time.Second)
 
 	req = &computepb.GetProjectRequest{
 		Project: tc.ProjectID,

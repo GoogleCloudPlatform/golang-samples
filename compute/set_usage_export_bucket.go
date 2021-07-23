@@ -35,7 +35,6 @@ func setUsageExportBucket(w io.Writer, projectID string, bucketName string, repo
 	if err != nil {
 		return fmt.Errorf("NewProjectsRESTClient: %v", err)
 	}
-
 	defer projectsClient.Close()
 
 	// Updating the setting with empty UsageExportLocationResource will disable the usage report generation.
@@ -52,7 +51,32 @@ func setUsageExportBucket(w io.Writer, projectID string, bucketName string, repo
 		fmt.Fprintf(w, "Setting reportNamePrefix to empty value causes the report to have the default prefix value `usage_gce`.\n")
 	}
 
-	projectsClient.SetUsageExportBucket(ctx, req)
+	op, err := projectsClient.SetUsageExportBucket(ctx, req)
+	if err != nil {
+		return fmt.Errorf("unable to set usage export bucket %v", err)
+	}
+
+	globalOperationsClient, err := compute.NewGlobalOperationsRESTClient(ctx)
+	if err != nil {
+		return fmt.Errorf("NewZoneOperationsRESTClient: %v", err)
+	}
+	defer globalOperationsClient.Close()
+
+	waitReq := &computepb.WaitGlobalOperationRequest{
+		Operation: op.GetName(),
+		Project:   projectID,
+	}
+
+	op, err = globalOperationsClient.Wait(ctx, waitReq)
+	if err != nil {
+		return fmt.Errorf("unable to wait for the operation: %v", err)
+	}
+
+	if op.GetStatus() == computepb.Operation_DONE {
+		fmt.Fprintf(w, "Usage export bucket has been set\n")
+	} else {
+		return fmt.Errorf("set usage export bucket operation has status %s", op.GetStatus())
+	}
 
 	return nil
 }

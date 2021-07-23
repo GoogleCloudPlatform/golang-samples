@@ -22,7 +22,6 @@ import (
 
 	compute "cloud.google.com/go/compute/apiv1"
 	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
-
 	"google.golang.org/protobuf/proto"
 )
 
@@ -48,7 +47,7 @@ func createInstance(w io.Writer, projectID string, zone string, instanceName str
 		InstanceResource: &computepb.Instance{
 			Name: proto.String(instanceName),
 			Disks: []*computepb.AttachedDisk{
-				&computepb.AttachedDisk{
+				{
 					InitializeParams: &computepb.AttachedDiskInitializeParams{
 						DiskSizeGb:  proto.Int64(10),
 						SourceImage: proto.String(sourceImage),
@@ -60,7 +59,7 @@ func createInstance(w io.Writer, projectID string, zone string, instanceName str
 			},
 			MachineType: proto.String(fmt.Sprintf("zones/%s/machineTypes/%s", zone, machineType)),
 			NetworkInterfaces: []*computepb.NetworkInterface{
-				&computepb.NetworkInterface{
+				{
 					Name: proto.String(networkName),
 				},
 			},
@@ -69,29 +68,31 @@ func createInstance(w io.Writer, projectID string, zone string, instanceName str
 
 	op, err := instancesClient.Insert(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Create instances request: %v", err)
+		return fmt.Errorf("unable to create instance: %v", err)
 	}
 
-	if op.GetStatus() == computepb.Operation_RUNNING {
-		zoneOperationsClient, err := compute.NewZoneOperationsRESTClient(ctx)
-		if err != nil {
-			return fmt.Errorf("NewZoneOperationsRESTClient: %v", err)
-		}
-		defer zoneOperationsClient.Close()
+	zoneOperationsClient, err := compute.NewZoneOperationsRESTClient(ctx)
+	if err != nil {
+		return fmt.Errorf("NewZoneOperationsRESTClient: %v", err)
+	}
+	defer zoneOperationsClient.Close()
 
-		req := &computepb.WaitZoneOperationRequest{
-			Operation: op.GetName(),
-			Project:   projectID,
-			Zone:      zone,
-		}
-
-		zoneOperationsClient.Wait(ctx, req)
-		if err != nil {
-			return fmt.Errorf("Operation wait request: %v", err)
-		}
+	waitReq := &computepb.WaitZoneOperationRequest{
+		Operation: op.GetName(),
+		Project:   projectID,
+		Zone:      zone,
 	}
 
-	fmt.Fprintf(w, "Instance created\n")
+	op, err = zoneOperationsClient.Wait(ctx, waitReq)
+	if err != nil {
+		return fmt.Errorf("unable to wait for the operation: %v", err)
+	}
+
+	if op.GetStatus() == computepb.Operation_DONE {
+		fmt.Fprintf(w, "Instance created\n")
+	} else {
+		return fmt.Errorf("create instance operation has status %s", op.GetStatus())
+	}
 
 	return nil
 }
