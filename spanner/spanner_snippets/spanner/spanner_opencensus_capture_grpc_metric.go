@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"regexp"
 
 	"cloud.google.com/go/spanner"
 	"google.golang.org/api/iterator"
@@ -29,7 +30,14 @@ import (
 	"go.opencensus.io/stats/view"
 )
 
-func queryWithGRPCMetric(w io.Writer, db string, projectID string) error {
+var validDatabasePattern = regexp.MustCompile("^projects/(?P<project>[^/]+)/instances/(?P<instance>[^/]+)/databases/(?P<database>[^/]+)$")
+
+func queryWithGRPCMetric(w io.Writer, db string) error {
+	projectID, _, _, err := parseDatabaseName(db)
+	if err != nil {
+		return err
+	}
+
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)
 	if err != nil {
@@ -74,6 +82,15 @@ func queryWithGRPCMetric(w io.Writer, db string, projectID string) error {
 		}
 		fmt.Fprintf(w, "%d %d %s\n", singerID, albumID, albumTitle)
 	}
+}
+
+func parseDatabaseName(databaseUri string) (project, instance, database string, err error) {
+	matches := validDatabasePattern.FindStringSubmatch(databaseUri)
+	if len(matches) == 0 {
+		return "", "", "", fmt.Errorf("failed to parse database name from %q according to pattern %q",
+			databaseUri, validDatabasePattern.String())
+	}
+	return matches[1], matches[2], matches[3], nil
 }
 
 // [END spanner_opencensus_capture_grpc_metric]

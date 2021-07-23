@@ -47,7 +47,12 @@ var (
 		TagKeys: []tag.Key{}}
 )
 
-func queryWithQueryStats(w io.Writer, db string, projectID string) error {
+func queryWithQueryStats(w io.Writer, db string) error {
+	projectID, _, _, err := parseDatabaseName(db)
+	if err != nil {
+		return err
+	}
+
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)
 	if err != nil {

@@ -51,7 +51,12 @@ var (
 		TagKeys: []tag.Key{KeyMethod}}
 )
 
-func queryWithGFELatency(w io.Writer, db string, projectID string) error {
+func queryWithGFELatency(w io.Writer, db string) error {
+	projectID, _, _, err := parseDatabaseName(db)
+	if err != nil {
+		return err
+	}
+
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx)
 	if err != nil {

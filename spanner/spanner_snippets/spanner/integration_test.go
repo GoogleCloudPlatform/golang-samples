@@ -45,7 +45,6 @@ type sampleFuncWithContext func(ctx context.Context, w io.Writer, dbName string)
 type instanceSampleFunc func(w io.Writer, projectID, instanceID string) error
 type backupSampleFunc func(ctx context.Context, w io.Writer, dbName, backupID string) error
 type createBackupSampleFunc func(ctx context.Context, w io.Writer, dbName, backupID string, versionTime time.Time) error
-type sampleFuncWithProjectID func(w io.Writer, dbName, projectID string) error
 
 var (
 	validInstancePattern = regexp.MustCompile("^projects/(?P<project>[^/]+)/instances/(?P<instance>[^/]+)$")
@@ -305,12 +304,11 @@ func TestSample(t *testing.T) {
 	assertContains(t, out, "19 Venue 19")
 	assertContains(t, out, "42 Venue 42")
 
-	projectID := getSampleProjectId(t)
-	out = runQueryWithMetricSample(t, queryWithGFELatency, dbName, projectID, "failed to query with GFE latency")
+	out = runSample(t, queryWithGFELatency, dbName, "failed to query with GFE latency")
 	assertContains(t, out, "1 1 Total Junk")
-	out = runQueryWithMetricSample(t, queryWithGRPCMetric, dbName, projectID, "failed to query with gRPC metric")
+	out = runSample(t, queryWithGRPCMetric, dbName, "failed to query with gRPC metric")
 	assertContains(t, out, "1 1 Total Junk")
-	out = runQueryWithMetricSample(t, queryWithQueryStats, dbName, projectID, "failed to query with query stats")
+	out = runSample(t, queryWithQueryStats, dbName, "failed to query with query stats")
 	assertContains(t, out, "1 1 Total Junk")
 
 	runSample(t, dropColumn, dbName, "failed to drop column")
@@ -551,14 +549,6 @@ func mustRunSample(t *testing.T, f sampleFuncWithContext, dbName, errMsg string)
 	defer cancel()
 	if err := f(ctx, &b, dbName); err != nil {
 		t.Fatalf("%s: %v", errMsg, err)
-	}
-	return b.String()
-}
-
-func runQueryWithMetricSample(t *testing.T, f sampleFuncWithProjectID, dbName, projectID, errMsg string) string {
-	var b bytes.Buffer
-	if err := f(&b, dbName, projectID); err != nil {
-		t.Errorf("%s: %v", errMsg, err)
 	}
 	return b.String()
 }
