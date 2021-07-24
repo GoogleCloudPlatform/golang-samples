@@ -304,6 +304,13 @@ func TestSample(t *testing.T) {
 	assertContains(t, out, "19 Venue 19")
 	assertContains(t, out, "42 Venue 42")
 
+	out = runSample(t, queryWithGFELatency, dbName, "failed to query with GFE latency")
+	assertContains(t, out, "1 1 Total Junk")
+	out = runSample(t, queryWithGRPCMetric, dbName, "failed to query with gRPC metric")
+	assertContains(t, out, "1 1 Total Junk")
+	out = runSample(t, queryWithQueryStats, dbName, "failed to query with query stats")
+	assertContains(t, out, "1 1 Total Junk")
+
 	runSample(t, dropColumn, dbName, "failed to drop column")
 	runSampleWithContext(ctx, t, addNumericColumn, dbName, "failed to add numeric column")
 	runSample(t, updateDataWithNumericColumn, dbName, "failed to update data with numeric")
