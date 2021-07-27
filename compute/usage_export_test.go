@@ -93,8 +93,6 @@ func TestUsageExportSnippets(t *testing.T) {
 		t.Errorf("setUsageExportBucket got %q, want %q", got, expectedResult)
 	}
 
-	// time.Sleep(5 * time.Second)
-
 	projectsClient, err := compute.NewProjectsRESTClient(ctx)
 	if err != nil {
 		t.Errorf("NewProjectsRESTClient: %v", err)
@@ -141,8 +139,6 @@ func TestUsageExportSnippets(t *testing.T) {
 	if got := buf.String(); !strings.Contains(got, expectedResult) {
 		t.Errorf("getUsageExportBucket got %q, want %q", got, expectedResult)
 	}
-
-	// time.Sleep(5 * time.Second)
 
 	req = &computepb.GetProjectRequest{
 		Project: tc.ProjectID,

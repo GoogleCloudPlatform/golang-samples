@@ -62,20 +62,20 @@ func setUsageExportBucket(w io.Writer, projectID string, bucketName string, repo
 	}
 	defer globalOperationsClient.Close()
 
-	waitReq := &computepb.WaitGlobalOperationRequest{
-		Operation: op.GetName(),
-		Project:   projectID,
-	}
+	for {
+		waitReq := &computepb.WaitGlobalOperationRequest{
+			Operation: op.GetName(),
+			Project:   projectID,
+		}
+		op, err = globalOperationsClient.Wait(ctx, waitReq)
+		if err != nil {
+			return fmt.Errorf("unable to wait for the operation: %v", err)
+		}
 
-	op, err = globalOperationsClient.Wait(ctx, waitReq)
-	if err != nil {
-		return fmt.Errorf("unable to wait for the operation: %v", err)
-	}
-
-	if op.GetStatus() == computepb.Operation_DONE {
-		fmt.Fprintf(w, "Usage export bucket has been set\n")
-	} else {
-		return fmt.Errorf("set usage export bucket operation has status %s", op.GetStatus())
+		if op.GetStatus() == computepb.Operation_DONE {
+			fmt.Fprintf(w, "Usage export bucket has been set\n")
+			break
+		}
 	}
 
 	return nil

@@ -77,21 +77,21 @@ func createInstance(w io.Writer, projectID string, zone string, instanceName str
 	}
 	defer zoneOperationsClient.Close()
 
-	waitReq := &computepb.WaitZoneOperationRequest{
-		Operation: op.GetName(),
-		Project:   projectID,
-		Zone:      zone,
-	}
+	for {
+		waitReq := &computepb.WaitZoneOperationRequest{
+			Operation: op.GetName(),
+			Project:   projectID,
+			Zone:      zone,
+		}
+		op, err = zoneOperationsClient.Wait(ctx, waitReq)
+		if err != nil {
+			return fmt.Errorf("unable to wait for the operation: %v", err)
+		}
 
-	op, err = zoneOperationsClient.Wait(ctx, waitReq)
-	if err != nil {
-		return fmt.Errorf("unable to wait for the operation: %v", err)
-	}
-
-	if op.GetStatus() == computepb.Operation_DONE {
-		fmt.Fprintf(w, "Instance created\n")
-	} else {
-		return fmt.Errorf("create instance operation has status %s", op.GetStatus())
+		if op.GetStatus() == computepb.Operation_DONE {
+			fmt.Fprintf(w, "Instance created\n")
+			break
+		}
 	}
 
 	return nil

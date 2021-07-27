@@ -37,21 +37,21 @@ func waitForOperation(w io.Writer, op *computepb.Operation, projectID string) er
 	}
 	defer zoneOperationsClient.Close()
 
-	req := &computepb.WaitZoneOperationRequest{
-		Operation: op.GetName(),
-		Project:   projectID,
-		Zone:      zoneArr[len(zoneArr)-1],
-	}
+	for {
+		waitReq := &computepb.WaitZoneOperationRequest{
+			Operation: op.GetName(),
+			Project:   projectID,
+			Zone:      zoneArr[len(zoneArr)-1],
+		}
+		op, err = zoneOperationsClient.Wait(ctx, waitReq)
+		if err != nil {
+			return fmt.Errorf("unable to wait for the operation: %v", err)
+		}
 
-	zoneOperationsClient.Wait(ctx, req)
-	if err != nil {
-		return fmt.Errorf("unable to wait for the operation: %v", err)
-	}
-
-	if op.GetStatus() == computepb.Operation_DONE {
-		fmt.Fprintf(w, "Operation finished")
-	} else {
-		return fmt.Errorf("operation has status %s", op.GetStatus())
+		if op.GetStatus() == computepb.Operation_DONE {
+			fmt.Fprintf(w, "Operation finished\n")
+			break
+		}
 	}
 
 	return nil
