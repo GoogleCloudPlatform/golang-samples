@@ -24,7 +24,7 @@ import (
 	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
 )
 
-// deleteInstance sends a delete request to GCP and waits for it to complete.
+// deleteInstance sends a delete request to the Compute Engine API and waits for it to complete.
 func deleteInstance(w io.Writer, projectID string, zone string, instanceName string) error {
 	// projectID := "your_project_id"
 	// zone := "europe-central2-b"

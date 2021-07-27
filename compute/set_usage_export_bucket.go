@@ -25,7 +25,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// setUsageExportBucket sets Compute Engine usage export bucket for the Cloud project. This sample presents how to interpret the default value for the report name prefix parameter.
+// setUsageExportBucket sets the Compute Engine usage export bucket for the Cloud project. This sample presents how to interpret the default value for the report name prefix parameter.
 func setUsageExportBucket(w io.Writer, projectID string, bucketName string, reportNamePrefix string) error {
 	// projectID := "your_project_id"
 	// bucketName := "your_bucket_name"
@@ -37,7 +37,7 @@ func setUsageExportBucket(w io.Writer, projectID string, bucketName string, repo
 	}
 	defer projectsClient.Close()
 
-	// Updating the setting with empty UsageExportLocationResource will disable the usage report generation.
+	// Updating the setting with an empty UsageExportLocationResource value disables the usage report generation.
 	req := &computepb.SetUsageExportBucketProjectRequest{
 		Project: projectID,
 		UsageExportLocationResource: &computepb.UsageExportLocation{

@@ -43,6 +43,8 @@ func waitForOperation(w io.Writer, op *computepb.Operation, projectID string) er
 			Project:   projectID,
 			Zone:      zoneArr[len(zoneArr)-1],
 		}
+
+		// Waits for the specified Operation resource to return as DONE or for the request to approach the 2 minute deadline.
 		op, err = zoneOperationsClient.Wait(ctx, waitReq)
 		if err != nil {
 			return fmt.Errorf("unable to wait for the operation: %v", err)

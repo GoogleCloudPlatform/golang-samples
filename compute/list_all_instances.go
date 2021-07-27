@@ -24,7 +24,7 @@ import (
 	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
 )
 
-// listAllInstances gets all instances present in a project, grouped by their zone.
+// listAllInstances prints all instances present in a project, grouped by their zone.
 func listAllInstances(w io.Writer, projectID string) error {
 	// zone := "europe-central2-b"
 	ctx := context.Background()

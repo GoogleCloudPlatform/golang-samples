@@ -24,7 +24,7 @@ import (
 	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
 )
 
-// listInstances gets a list of instances created in given project in given zone.
+// listInstances prints a list of instances created in given project in given zone.
 func listInstances(w io.Writer, projectID string, zone string) error {
 	// projectID := "your_project_id"
 	// zone := "europe-central2-b"
