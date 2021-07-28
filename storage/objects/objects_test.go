@@ -426,7 +426,7 @@ func TestPostPolicyV4(t *testing.T) {
 	objectName := "foo.txt"
 	serviceAccount := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
 	if serviceAccount == "" {
-		t.Skip("GOOGLE_APPLICATION_CREDENTIALS must be set")
+		t.Error("GOOGLE_APPLICATION_CREDENTIALS must be set")
 	}
 
 	if err := testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName); err != nil {
@@ -489,7 +489,7 @@ func TestPostPolicyV4(t *testing.T) {
 	// Dump the request for logging.
 	requestDump, err := httputil.DumpRequest(req, true)
 	if err != nil {
-		t.Logf("error dumping request for logging: %v", err)
+		t.Logf("requestDump: %v", err)
 	}
 
 	res, err := http.DefaultClient.Do(req)
@@ -498,7 +498,7 @@ func TestPostPolicyV4(t *testing.T) {
 	}
 	if g, w := res.StatusCode, 204; g != w {
 		blob, _ := httputil.DumpResponse(res, true)
-		t.Errorf("status code in response mismatch: got %d want %d\nBody: %s\nattempted request: %s", g, w, blob, string(requestDump))
+		t.Errorf("status code in response mismatch: got %d want %d\nRequest: %v\n\nResponse: %s\n", g, w, string(requestDump), blob)
 	}
 
 	io.Copy(ioutil.Discard, res.Body)
