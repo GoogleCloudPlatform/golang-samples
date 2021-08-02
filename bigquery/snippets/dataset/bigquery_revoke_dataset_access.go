@@ -22,8 +22,8 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
-// revokeDatasetAccess updates an access control to remove all access entries that reference a specific
-// entity.
+// revokeDatasetAccess updates the access control on a dataset to remove all
+// access entries that reference a specific entity.
 func revokeDatasetAccess(projectID, datasetID, entity string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"
