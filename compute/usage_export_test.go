@@ -37,16 +37,15 @@ func assertEqual(t *testing.T, a interface{}, b interface{}) {
 	}
 }
 
-func createBucket(t *testing.T, projectID string, bucketName string) error {
+func createBucket(t *testing.T, projectID, bucketName string) error {
 	ctx := context.Background()
-	tc := testutil.SystemTest(t)
 	storageClient, err := storage.NewClient(ctx)
 	if err != nil {
 		t.Errorf("storage.NewClient: %v", err)
 	}
 
 	bucket := storageClient.Bucket(bucketName)
-	if err := bucket.Create(ctx, tc.ProjectID, nil); err != nil {
+	if err := bucket.Create(ctx, projectID, nil); err != nil {
 		t.Errorf("Bucket(%q).Create: %v", bucketName, err)
 	}
 

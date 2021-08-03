@@ -25,7 +25,7 @@ import (
 )
 
 // listInstances prints a list of instances created in given project in given zone.
-func listInstances(w io.Writer, projectID string, zone string) error {
+func listInstances(w io.Writer, projectID, zone string) error {
 	// projectID := "your_project_id"
 	// zone := "europe-central2-b"
 	ctx := context.Background()

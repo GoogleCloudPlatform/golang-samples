@@ -28,17 +28,17 @@ import (
 func listAllInstances(w io.Writer, projectID string) error {
 	// zone := "europe-central2-b"
 	ctx := context.Background()
-	projectsClient, err := compute.NewInstancesRESTClient(ctx)
+	instancesClient, err := compute.NewInstancesRESTClient(ctx)
 	if err != nil {
 		return fmt.Errorf("NewInstancesRESTClient: %v", err)
 	}
-	defer projectsClient.Close()
+	defer instancesClient.Close()
 
 	req := &computepb.AggregatedListInstancesRequest{
 		Project: projectID,
 	}
 
-	resp, err := projectsClient.AggregatedList(ctx, req)
+	resp, err := instancesClient.AggregatedList(ctx, req)
 	if err != nil {
 		return fmt.Errorf("unable to call AggregatedList request: %v", err)
 	}

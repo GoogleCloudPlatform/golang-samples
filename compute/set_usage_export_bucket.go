@@ -26,7 +26,7 @@ import (
 )
 
 // setUsageExportBucket sets the Compute Engine usage export bucket for the Cloud project. This sample presents how to interpret the default value for the report name prefix parameter.
-func setUsageExportBucket(w io.Writer, projectID string, bucketName string, reportNamePrefix string) error {
+func setUsageExportBucket(w io.Writer, projectID, bucketName, reportNamePrefix string) error {
 	// projectID := "your_project_id"
 	// bucketName := "your_bucket_name"
 	// reportNamePrefix := ""

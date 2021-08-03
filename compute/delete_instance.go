@@ -25,7 +25,7 @@ import (
 )
 
 // deleteInstance sends a delete request to the Compute Engine API and waits for it to complete.
-func deleteInstance(w io.Writer, projectID string, zone string, instanceName string) error {
+func deleteInstance(w io.Writer, projectID, zone, instanceName string) error {
 	// projectID := "your_project_id"
 	// zone := "europe-central2-b"
 	// instanceName := "your_instance_name"

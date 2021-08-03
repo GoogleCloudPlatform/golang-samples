@@ -36,8 +36,7 @@ func disableUsageExport(w io.Writer, projectID string) error {
 
 	// Providing an empty UsageExportLocationResource value disables the usage report generation.
 	req := &computepb.SetUsageExportBucketProjectRequest{
-		Project:                     projectID,
-		UsageExportLocationResource: &computepb.UsageExportLocation{},
+		Project: projectID,
 	}
 
 	op, err := projectsClient.SetUsageExportBucket(ctx, req)

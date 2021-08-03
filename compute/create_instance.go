@@ -26,7 +26,7 @@ import (
 )
 
 // createInstance sends an instance creation request to the Compute Engine API and waits for it to complete.
-func createInstance(w io.Writer, projectID string, zone string, instanceName string, machineType string, sourceImage string, networkName string) error {
+func createInstance(w io.Writer, projectID, zone, instanceName, machineType, sourceImage, networkName string) error {
 	// projectID := "your_project_id"
 	// zone := "europe-central2-b"
 	// instanceName := "your_instance_name"
