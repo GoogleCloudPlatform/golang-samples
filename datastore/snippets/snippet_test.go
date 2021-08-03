@@ -508,7 +508,7 @@ func SnippetIterator_Cursor() {
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	defer client.Close()
 	// [START datastore_cursor_paging]
-	// cursorString is a cursor to start querying at.
+	// cursorStr is a cursor to start querying at.
 	cursorStr := ""
 
 	const pageSize = 5
