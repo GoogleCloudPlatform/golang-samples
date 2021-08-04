@@ -29,7 +29,7 @@ import (
 	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
 )
 
-func assertEqual(t *testing.T, a interface{}, b interface{}) {
+func assertEqual(t *testing.T, a, b interface{}) {
 	if a != b {
 		t.Errorf(fmt.Sprintf("Got: %d; want %d", a, b))
 	}
