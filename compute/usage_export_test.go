@@ -30,9 +30,7 @@ import (
 )
 
 func assertEqual(t *testing.T, a interface{}, b interface{}) {
-	if a == b {
-		return
-	} else {
+	if a != b {
 		t.Errorf(fmt.Sprintf("Got: %d; want %d", a, b))
 	}
 }
