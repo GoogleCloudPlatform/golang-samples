@@ -21,6 +21,7 @@ import (
 	"io"
 
 	compute "cloud.google.com/go/compute/apiv1"
+	"google.golang.org/api/iterator"
 	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
 )
 
@@ -41,17 +42,18 @@ func listInstances(w io.Writer, projectID string, zone string) error {
 		Zone:    zone,
 	}
 
-	resp, err := client.List(ctx, req)
-	if err != nil {
-		return fmt.Errorf("List instances request: %v", err)
-	}
-
+	it := client.List(ctx, req)
 	fmt.Fprintf(w, "Instances found in zone %s:\n", zone)
-
-	for _, instance := range resp.Items {
+	for {
+		instance, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
 		fmt.Fprintf(w, "- %s %s\n", *instance.Name, *instance.MachineType)
 	}
-
 	return nil
 }
 
