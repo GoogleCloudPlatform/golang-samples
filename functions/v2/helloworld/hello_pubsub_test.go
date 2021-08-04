@@ -17,7 +17,6 @@
 package helloworld
 
 import (
-	"context"
 	"io/ioutil"
 	"log"
 	"os"
@@ -41,7 +40,11 @@ func TestHelloPubSub(t *testing.T) {
 		m := PubSubMessage{
 			Data: []byte(test.data),
 		}
-		HelloPubSub(context.Background(), m)
+		cem := CloudEventMessage{
+			Message: m,
+		}
+
+		HelloPubSub(cem)
 
 		w.Close()
 		log.SetOutput(os.Stderr)

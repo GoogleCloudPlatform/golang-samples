@@ -18,7 +18,6 @@
 package helloworld
 
 import (
-	"context"
 	"log"
 )
 
@@ -26,12 +25,19 @@ import (
 // See the documentation for more details:
 // https://cloud.google.com/eventarc/docs/cloudevents#pubsub
 type CloudEventMessage struct {
-	Data []byte `json:"message"`
+	Message PubSubMessage
 }
 
-// HelloPubSub consumes a Pub/Sub message.
+// PubSubMessage is the payload of a Pub/Sub event.
+// See the documentation for more details:
+// https://cloud.google.com/pubsub/docs/reference/rest/v1/PubsubMessage
+type PubSubMessage struct {
+	Data []byte `json:"data"`
+}
+
+// HelloPubSub consumes a CloudEvent message and extracts the Pub/Sub message.
 func HelloPubSub(cem CloudEventMessage) error {
-	name := string(cem.message.data) // Automatically decoded from base64.
+	name := string(cem.Message.Data) // Automatically decoded from base64.
 	if name == "" {
 		name = "World"
 	}
