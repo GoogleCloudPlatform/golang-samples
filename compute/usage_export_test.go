@@ -29,12 +29,6 @@ import (
 	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
 )
 
-func assertEqual(t *testing.T, a, b interface{}) {
-	if a != b {
-		t.Errorf(fmt.Sprintf("Got: %d; want %d", a, b))
-	}
-}
-
 func createBucket(t *testing.T, projectID, bucketName string) error {
 	ctx := context.Background()
 	storageClient, err := storage.NewClient(ctx)
@@ -107,8 +101,12 @@ func TestUsageExportSnippets(t *testing.T) {
 
 	usageExportLocation := project.GetUsageExportLocation()
 
-	assertEqual(t, *usageExportLocation.BucketName, bucketName)
-	assertEqual(t, *usageExportLocation.ReportNamePrefix, "")
+	if *usageExportLocation.BucketName != bucketName {
+		t.Errorf(fmt.Sprintf("Got: %s; want %s", *usageExportLocation.BucketName, bucketName))
+	}
+	if *usageExportLocation.ReportNamePrefix != "" {
+		t.Errorf(fmt.Sprintf("Got: %s; want %s", *usageExportLocation.BucketName, ""))
+	}
 
 	buf.Reset()
 
