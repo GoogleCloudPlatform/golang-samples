@@ -51,7 +51,7 @@ func waitForOperation(w io.Writer, projectID, zone, opName string) error {
 			return fmt.Errorf("unable to wait for the operation: %v", err)
 		}
 
-		if op.GetStatus() == computepb.Operation_DONE {
+		if op.Proto().GetStatus() == computepb.Operation_DONE {
 			fmt.Fprintf(w, "Operation finished\n")
 			break
 		}

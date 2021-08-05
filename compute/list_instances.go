@@ -41,7 +41,7 @@ func listInstances(w io.Writer, projectID, zone string) error {
 		Zone:    zone,
 	}
 
-	it := client.List(ctx, req)
+	it := instancesClient.List(ctx, req)
 	fmt.Fprintf(w, "Instances found in zone %s:\n", zone)
 	for {
 		instance, err := it.Next()

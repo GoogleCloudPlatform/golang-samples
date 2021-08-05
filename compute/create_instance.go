@@ -79,7 +79,7 @@ func createInstance(w io.Writer, projectID, zone, instanceName, machineType, sou
 
 	for {
 		waitReq := &computepb.WaitZoneOperationRequest{
-			Operation: op.GetName(),
+			Operation: op.Proto().GetName(),
 			Project:   projectID,
 			Zone:      zone,
 		}
@@ -88,7 +88,7 @@ func createInstance(w io.Writer, projectID, zone, instanceName, machineType, sou
 			return fmt.Errorf("unable to wait for the operation: %v", err)
 		}
 
-		if op.GetStatus() == computepb.Operation_DONE {
+		if op.Proto().GetStatus() == computepb.Operation_DONE {
 			fmt.Fprintf(w, "Instance created\n")
 			break
 		}

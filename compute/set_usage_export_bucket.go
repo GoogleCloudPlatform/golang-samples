@@ -64,7 +64,7 @@ func setUsageExportBucket(w io.Writer, projectID, bucketName, reportNamePrefix s
 
 	for {
 		waitReq := &computepb.WaitGlobalOperationRequest{
-			Operation: op.GetName(),
+			Operation: op.Proto().GetName(),
 			Project:   projectID,
 		}
 		op, err = globalOperationsClient.Wait(ctx, waitReq)
@@ -72,7 +72,7 @@ func setUsageExportBucket(w io.Writer, projectID, bucketName, reportNamePrefix s
 			return fmt.Errorf("unable to wait for the operation: %v", err)
 		}
 
-		if op.GetStatus() == computepb.Operation_DONE {
+		if op.Proto().GetStatus() == computepb.Operation_DONE {
 			fmt.Fprintf(w, "Usage export bucket has been set\n")
 			break
 		}

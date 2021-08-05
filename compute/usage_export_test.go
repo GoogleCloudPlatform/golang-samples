@@ -105,7 +105,7 @@ func TestUsageExportSnippets(t *testing.T) {
 		t.Errorf(fmt.Sprintf("Got: %s; want %s", *usageExportLocation.BucketName, bucketName))
 	}
 	if *usageExportLocation.ReportNamePrefix != "" {
-		t.Errorf(fmt.Sprintf("Got: %s; want %s", *usageExportLocation.BucketName, ""))
+		t.Errorf(fmt.Sprintf("Got: %s; want %q", *usageExportLocation.BucketName, ""))
 	}
 
 	buf.Reset()

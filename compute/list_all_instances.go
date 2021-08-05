@@ -21,6 +21,7 @@ import (
 	"io"
 
 	compute "cloud.google.com/go/compute/apiv1"
+	"google.golang.org/api/iterator"
 	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
 )
 
@@ -38,22 +39,38 @@ func listAllInstances(w io.Writer, projectID string) error {
 		Project: projectID,
 	}
 
-	resp, err := instancesClient.AggregatedList(ctx, req)
-	if err != nil {
-		return fmt.Errorf("unable to call AggregatedList request: %v", err)
-	}
-
+	it := instancesClient.AggregatedList(ctx, req)
+	// if err != nil {
+	// 	return fmt.Errorf("unable to call AggregatedList request: %v", err)
+	// }
 	fmt.Fprintf(w, "Instances found:\n")
-
-	for zone := range resp.Items {
-		instances := resp.Items[zone].Instances
+	for {
+		pairIt, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		instances := pairIt.Value.Instances
 		if len(instances) > 0 {
-			fmt.Fprintf(w, "%s\n", zone)
+			fmt.Fprintf(w, "%s\n", pairIt.Key)
 			for _, instance := range instances {
 				fmt.Fprintf(w, "- %s %s\n", *instance.Name, *instance.MachineType)
 			}
 		}
+		// fmt.Fprintf(w, "- %s %s\n", pairIt.Key, pairIt.Value.Instances)
 	}
+
+	// for zone := range resp.Items {
+	// 	instances := resp.Items[zone].Instances
+	// 	if len(instances) > 0 {
+	// 		fmt.Fprintf(w, "%s\n", zone)
+	// 		for _, instance := range instances {
+	// 			fmt.Fprintf(w, "- %s %s\n", *instance.Name, *instance.MachineType)
+	// 		}
+	// 	}
+	// }
 
 	return nil
 }
