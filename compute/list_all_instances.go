@@ -40,38 +40,23 @@ func listAllInstances(w io.Writer, projectID string) error {
 	}
 
 	it := instancesClient.AggregatedList(ctx, req)
-	// if err != nil {
-	// 	return fmt.Errorf("unable to call AggregatedList request: %v", err)
-	// }
 	fmt.Fprintf(w, "Instances found:\n")
 	for {
-		pairIt, err := it.Next()
+		pair, err := it.Next()
 		if err == iterator.Done {
 			break
 		}
 		if err != nil {
 			return err
 		}
-		instances := pairIt.Value.Instances
+		instances := pair.Value.Instances
 		if len(instances) > 0 {
-			fmt.Fprintf(w, "%s\n", pairIt.Key)
+			fmt.Fprintf(w, "%s\n", pair.Key)
 			for _, instance := range instances {
 				fmt.Fprintf(w, "- %s %s\n", *instance.Name, *instance.MachineType)
 			}
 		}
-		// fmt.Fprintf(w, "- %s %s\n", pairIt.Key, pairIt.Value.Instances)
 	}
-
-	// for zone := range resp.Items {
-	// 	instances := resp.Items[zone].Instances
-	// 	if len(instances) > 0 {
-	// 		fmt.Fprintf(w, "%s\n", zone)
-	// 		for _, instance := range instances {
-	// 			fmt.Fprintf(w, "- %s %s\n", *instance.Name, *instance.MachineType)
-	// 		}
-	// 	}
-	// }
-
 	return nil
 }
 
