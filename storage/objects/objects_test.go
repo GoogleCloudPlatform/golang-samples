@@ -497,8 +497,9 @@ func TestPostPolicyV4(t *testing.T) {
 		t.Fatalf("client.Do: %v", err)
 	}
 	if g, w := res.StatusCode, 204; g != w {
-		blob, _ := httputil.DumpResponse(res, true)
-		t.Errorf("status code in response mismatch: got %d want %d\nRequest: %v\n\nResponse: %s\n", g, w, string(requestDump), blob)
+		responseDump, _ := httputil.DumpResponse(res, true)
+		t.Errorf("status code in response mismatch: got %d want %d\nRequest: %v\n\nResponse: %s\n",
+			g, w, string(requestDump), responseDump)
 	}
 
 	io.Copy(ioutil.Discard, res.Body)
