@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START compute_instances_list]
+// [START compute_instances_list_all]
 import (
 	"context"
 	"fmt"
@@ -25,9 +25,8 @@ import (
 	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
 )
 
-// listInstances prints a list of instances created in given project in given zone.
-func listInstances(w io.Writer, projectID, zone string) error {
-	// projectID := "your_project_id"
+// listAllInstances prints all instances present in a project, grouped by their zone.
+func listAllInstances(w io.Writer, projectID string) error {
 	// zone := "europe-central2-b"
 	ctx := context.Background()
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
@@ -36,24 +35,29 @@ func listInstances(w io.Writer, projectID, zone string) error {
 	}
 	defer instancesClient.Close()
 
-	req := &computepb.ListInstancesRequest{
+	req := &computepb.AggregatedListInstancesRequest{
 		Project: projectID,
-		Zone:    zone,
 	}
 
-	it := instancesClient.List(ctx, req)
-	fmt.Fprintf(w, "Instances found in zone %s:\n", zone)
+	it := instancesClient.AggregatedList(ctx, req)
+	fmt.Fprintf(w, "Instances found:\n")
 	for {
-		instance, err := it.Next()
+		pair, err := it.Next()
 		if err == iterator.Done {
 			break
 		}
 		if err != nil {
 			return err
 		}
-		fmt.Fprintf(w, "- %s %s\n", *instance.Name, *instance.MachineType)
+		instances := pair.Value.Instances
+		if len(instances) > 0 {
+			fmt.Fprintf(w, "%s\n", pair.Key)
+			for _, instance := range instances {
+				fmt.Fprintf(w, "- %s %s\n", *instance.Name, *instance.MachineType)
+			}
+		}
 	}
 	return nil
 }
 
-// [END compute_instances_list]
+// [END compute_instances_list_all]
