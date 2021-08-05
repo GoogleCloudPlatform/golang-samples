@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"regexp"
 
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
@@ -30,6 +31,11 @@ func getDatabaseDdl(ctx context.Context, w io.Writer, db string) error {
 		return err
 	}
 	defer adminClient.Close()
+
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(db)
+	if matches == nil || len(matches) != 3 {
+		return fmt.Errorf("Invalid database id %s", db)
+	}
 
 	op, err := adminClient.GetDatabaseDdl(ctx, &adminpb.GetDatabaseDdlRequest{
 		Database: db,

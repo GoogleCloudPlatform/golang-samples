@@ -25,21 +25,21 @@ import (
 )
 
 func getInstanceConfig(ctx context.Context, w io.Writer, instanceConfigName string) error {
-	adminClient, err := instance.NewInstanceAdminClient(ctx)
+	instanceAdmin, err := instance.NewInstanceAdminClient(ctx)
 	if err != nil {
 		return err
 	}
-	defer adminClient.Close()
+	defer instanceAdmin.Close()
 
-	op, err := adminClient.GetInstanceConfig(ctx, &instancepb.GetInstanceConfigRequest{
+	ic, err := instanceAdmin.GetInstanceConfig(ctx, &instancepb.GetInstanceConfigRequest{
 		Name: instanceConfigName,
 	})
 
 	if err != nil {
-		return err
+		return fmt.Errorf("could not get instance config %s: %v", instanceConfigName, err)
 	}
 
-	fmt.Fprintf(w, "Available leader options for instance config [%s]: [%s]", op.GetDisplayName(), op.GetLeaderOptions())
+	fmt.Fprintf(w, "Available leader options for instance config %s: %v\n", instanceConfigName, ic.LeaderOptions)
 
 	return nil
 }
