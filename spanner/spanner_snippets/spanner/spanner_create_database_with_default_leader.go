@@ -74,3 +74,5 @@ func createDatabaseWithDefaultLeader(ctx context.Context, w io.Writer, db string
 	return nil
 
 }
+
+// [END spanner_dml_batch_update]

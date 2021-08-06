@@ -55,3 +55,5 @@ func updateDatabaseWithDefaultLeader(ctx context.Context, w io.Writer, db string
 	fmt.Fprintf(w, "Updated the default leader\n")
 	return nil
 }
+
+// [END spanner_dml_batch_update]

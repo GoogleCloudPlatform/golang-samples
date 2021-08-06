@@ -37,7 +37,7 @@ func listDatabases(ctx context.Context, w io.Writer, instanceId string) error {
 	})
 
 	printDatabases := func(iter *database.DatabaseIterator) error {
-		fmt.Printf("Databases for instance/[%s]", instanceId)
+		fmt.Fprintf(w, "Databases for instance/[%s]", instanceId)
 		for {
 			resp, err := iter.Next()
 			if err == iterator.Done {
@@ -46,7 +46,7 @@ func listDatabases(ctx context.Context, w io.Writer, instanceId string) error {
 			if err != nil {
 				return err
 			}
-			fmt.Fprintf(w, "Backup %s\n", resp.Name)
+			fmt.Fprintf(w, "%s\n", resp.Name)
 		}
 	}
 
@@ -57,3 +57,5 @@ func listDatabases(ctx context.Context, w io.Writer, instanceId string) error {
 	return nil
 
 }
+
+// [END spanner_dml_batch_update]

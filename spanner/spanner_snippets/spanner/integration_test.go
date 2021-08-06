@@ -440,6 +440,78 @@ func TestCustomerManagedEncryptionKeys(t *testing.T) {
 	assertContains(t, out, fmt.Sprintf("using encryption key %s", kmsKeyName))
 }
 
+func TestCreateDatabaseWithDefaultLeaderSample(t *testing.T) {
+	_ = testutil.SystemTest(t)
+	t.Parallel()
+
+	instName, dbName, cleanup := initTest(t, randomID())
+	defer cleanup()
+
+	projectID := getSampleProjectId(t)
+	var b bytes.Buffer
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
+	defer cancel()
+
+	// Try to get Instance Configs
+	config := fmt.Sprintf("projects/%s/instanceConfigs/%s", projectID, "nam6")
+	if err := getInstanceConfig(ctx, &b, config); err != nil {
+		t.Errorf("failed to create get instance configs: %v", err)
+	}
+	out := b.String()
+	assertContains(t, out, fmt.Sprintf("Available leader options for instance config"))
+
+	// Try to list Instance Configs
+	b.Reset()
+	if err := listInstanceConfigs(ctx, &b, "projects/"+projectID); err != nil {
+		t.Errorf("failed to list instance configs: %v", err)
+	}
+	out = b.String()
+	assertContains(t, out, fmt.Sprintf("Available leader options for instance config"))
+
+	// Try to get list of Databases
+	b.Reset()
+	if err := listDatabases(ctx, &b, instName); err != nil {
+		t.Errorf("failed to get list of Databases: %v", err)
+	}
+	out = b.String()
+	assertContains(t, out, fmt.Sprintf("Databases for instance"))
+
+	t.SkipNow()
+	// Try to create Database with Default Leader
+	b.Reset()
+	defaultLeader := "us-east4"
+	if err := createDatabaseWithDefaultLeader(ctx, &b, dbName, defaultLeader); err != nil {
+		t.Errorf("failed to create database with default leader: %v", err)
+	}
+	out = b.String()
+	assertContains(t, out, fmt.Sprintf("Created database [%s] with default leader%q\n", dbName, defaultLeader))
+
+	// Try to update Database with Default Leader
+	b.Reset()
+	defaultLeader = "us-west3"
+	if err := updateDatabaseWithDefaultLeader(ctx, &b, dbName, defaultLeader); err != nil {
+		t.Errorf("failed to update database with default leader: %v", err)
+	}
+	out = b.String()
+	assertContains(t, out, fmt.Sprintf("Updated the default leader\n"))
+
+	// Try to get Database DDL
+	b.Reset()
+	if err := getDatabaseDdl(ctx, &b, dbName); err != nil {
+		t.Errorf("failed to get Database DDL: %v", err)
+	}
+	out = b.String()
+	assertContains(t, out, fmt.Sprintf("Database DDL is as follows"))
+
+	//Try to Query Information Schema Database Options
+	b.Reset()
+	if err := queryInformationSchemaDatabaseOptions(&b, dbName); err != nil {
+		t.Errorf("failed to query information schema database options: %v", err)
+	}
+	out = b.String()
+	assertContains(t, out, fmt.Sprintf("The result of the query to get"))
+}
 func maybeCreateKey(projectId, locationId, keyRingId, keyId string) error {
 	client, err := kms.NewKeyManagementClient(context.Background())
 	if err != nil {

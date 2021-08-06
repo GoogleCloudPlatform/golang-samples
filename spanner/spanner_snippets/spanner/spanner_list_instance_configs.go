@@ -33,8 +33,7 @@ func listInstanceConfigs(ctx context.Context, w io.Writer, projectName string) e
 	defer instanceAdmin.Close()
 
 	request := &instancepb.ListInstanceConfigsRequest{
-		Parent:   projectName,
-		PageSize: 10,
+		Parent: projectName,
 	}
 	for {
 		iter := instanceAdmin.ListInstanceConfigs(ctx, request)
@@ -46,7 +45,7 @@ func listInstanceConfigs(ctx context.Context, w io.Writer, projectName string) e
 			if err != nil {
 				return err
 			}
-			fmt.Printf("Available leader options for instance config %s: %v\n", ic.Name, ic.LeaderOptions)
+			fmt.Fprintf(w, "Available leader options for instance config %s: %v\n", ic.Name, ic.LeaderOptions)
 		}
 		pageToken := iter.PageInfo().Token
 		if pageToken == "" {
@@ -58,3 +57,5 @@ func listInstanceConfigs(ctx context.Context, w io.Writer, projectName string) e
 
 	return nil
 }
+
+// [END spanner_dml_batch_update]

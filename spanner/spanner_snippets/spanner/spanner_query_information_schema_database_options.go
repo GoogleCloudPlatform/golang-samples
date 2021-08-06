@@ -55,6 +55,8 @@ func queryInformationSchemaDatabaseOptions(w io.Writer, db string) error {
 		if err := row.Columns(&OPTION_NAME, &OPTION_VALUE); err != nil {
 			return err
 		}
-		fmt.Fprintf(w, "The %s for %s is %s", OPTION_NAME, databaseId, OPTION_VALUE)
+		fmt.Fprintf(w, "The result of the query to get %s for %s is %s", OPTION_NAME, databaseId, OPTION_VALUE)
 	}
 }
+
+// [END spanner_dml_batch_update]
