@@ -18,6 +18,7 @@
 package helloworld
 
 import (
+	"context"
 	"log"
 )
 
@@ -36,7 +37,7 @@ type PubSubMessage struct {
 }
 
 // HelloPubSub consumes a CloudEvent message and extracts the Pub/Sub message.
-func HelloPubSub(cem CloudEventMessage) error {
+func HelloPubSub(ctx context.Context, cem CloudEventMessage) error {
 	name := string(cem.Message.Data) // Automatically decoded from base64.
 	if name == "" {
 		name = "World"

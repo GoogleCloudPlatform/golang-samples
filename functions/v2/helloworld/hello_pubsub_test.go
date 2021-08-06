@@ -17,6 +17,7 @@
 package helloworld
 
 import (
+	"context"
 	"io/ioutil"
 	"log"
 	"os"
@@ -44,7 +45,7 @@ func TestHelloPubSub(t *testing.T) {
 			Message: m,
 		}
 
-		HelloPubSub(cem)
+		HelloPubSub(context.Background(), cem)
 
 		w.Close()
 		log.SetOutput(os.Stderr)
