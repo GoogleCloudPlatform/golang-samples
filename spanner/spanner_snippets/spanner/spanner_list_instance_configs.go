@@ -14,7 +14,7 @@
 
 package spanner
 
-// [START spanner_create_database]
+// [START spanner_list_instance_configs]
 import (
 	"context"
 	"fmt"

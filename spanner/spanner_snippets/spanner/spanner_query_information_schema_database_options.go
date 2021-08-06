@@ -14,7 +14,7 @@
 
 package spanner
 
-// [START spanner_create_database]
+// [START spanner_query_information_schema_database_options]
 import (
 	"context"
 	"fmt"

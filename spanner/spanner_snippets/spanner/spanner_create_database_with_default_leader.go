@@ -14,7 +14,7 @@
 
 package spanner
 
-// [START spanner_create_database]
+// [START spanner_create_database_with_default_leader]
 import (
 	"context"
 	"fmt"
