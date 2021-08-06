@@ -51,4 +51,4 @@ func getDatabaseDdl(ctx context.Context, w io.Writer, db string) error {
 
 }
 
-// [END spanner_dml_batch_update]
+// [END spanner_get_database_ddl]

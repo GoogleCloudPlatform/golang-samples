@@ -58,4 +58,4 @@ func listInstanceConfigs(ctx context.Context, w io.Writer, projectName string) e
 	return nil
 }
 
-// [END spanner_dml_batch_update]
+// [END spanner_list_instance_configs]

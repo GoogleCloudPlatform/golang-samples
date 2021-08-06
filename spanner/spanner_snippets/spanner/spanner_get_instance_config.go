@@ -44,4 +44,4 @@ func getInstanceConfig(ctx context.Context, w io.Writer, instanceConfigName stri
 	return nil
 }
 
-// [END spanner_dml_batch_update]
+// [END spanner_get_instance_config]

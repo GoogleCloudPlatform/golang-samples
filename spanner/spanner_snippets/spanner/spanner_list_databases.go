@@ -58,4 +58,4 @@ func listDatabases(ctx context.Context, w io.Writer, instanceId string) error {
 
 }
 
-// [END spanner_dml_batch_update]
+// [END spanner_list_databases]

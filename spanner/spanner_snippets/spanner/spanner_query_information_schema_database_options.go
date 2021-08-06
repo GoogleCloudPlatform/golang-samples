@@ -59,4 +59,4 @@ func queryInformationSchemaDatabaseOptions(w io.Writer, db string) error {
 	}
 }
 
-// [END spanner_dml_batch_update]
+// [END spanner_query_information_schema_database_options]
