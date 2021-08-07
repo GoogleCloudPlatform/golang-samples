@@ -22,6 +22,7 @@ import (
 	"log"
 	"os"
 	"testing"
+	"github.com/cloudevents/sdk-go/v2/event"
 )
 
 func TestHelloPubSub(t *testing.T) {
@@ -45,7 +46,11 @@ func TestHelloPubSub(t *testing.T) {
 			Message: m,
 		}
 
-		HelloPubSub(context.Background(), cem)
+		e := event.New()
+		e.SetDataContentType("application/json")
+		e.SetData(e.DataContentType(), cem) 
+
+		HelloPubSub(context.Background(), e) 
 
 		w.Close()
 		log.SetOutput(os.Stderr)

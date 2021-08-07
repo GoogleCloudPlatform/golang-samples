@@ -19,7 +19,10 @@ package helloworld
 
 import (
 	"context"
+	"encoding/json"
 	"log"
+	"net/http"
+	"github.com/cloudevents/sdk-go/v2/event"
 )
 
 // A CloudEvent containing the Pub/Sub message.
@@ -37,7 +40,12 @@ type PubSubMessage struct {
 }
 
 // HelloPubSub consumes a CloudEvent message and extracts the Pub/Sub message.
-func HelloPubSub(ctx context.Context, cem CloudEventMessage) error {
+func HelloPubSub(ctx context.Context, e event.Event) error {
+	var cem CloudEventMessage
+    if err := json.Unmarshal(e.Data(), &cem); err != nil {
+	 	log.Fatalf("Bad HTTP Request: %v", http.StatusBadRequest)
+	}
+
 	name := string(cem.Message.Data) // Automatically decoded from base64.
 	if name == "" {
 		name = "World"
