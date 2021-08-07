@@ -41,7 +41,7 @@ type PubSubMessage struct {
 
 // HelloPubSub consumes a CloudEvent message and extracts the Pub/Sub message.
 func HelloPubSub(ctx context.Context, e event.Event) error {
-	var cem CloudEventMessage
+    var cem CloudEventMessage
     if err := json.Unmarshal(e.Data(), &cem); err != nil {
 	 	log.Fatalf("Bad HTTP Request: %v", http.StatusBadRequest)
 	}
