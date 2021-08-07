@@ -17,53 +17,53 @@
 package helloworld
 
 import (
-    "context"
-    "io/ioutil"
-    "log"
-    "os"
-    "testing"
-    "github.com/cloudevents/sdk-go/v2/event"
+	"context"
+	"io/ioutil"
+	"log"
+	"os"
+	"testing"
+	"github.com/cloudevents/sdk-go/v2/event"
 )
 
 func TestHelloPubSub(t *testing.T) {
-    tests := []struct {
-        data string
-        want string
-    }{
-        {want: "Hello, World!\n"},
-        {data: "Go", want: "Hello, Go!\n"},
-    }
-    for _, test := range tests {
-        r, w, _ := os.Pipe()
-        log.SetOutput(w)
-        originalFlags := log.Flags()
-        log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
+	tests := []struct {
+		data string
+		want string
+	}{
+		{want: "Hello, World!\n"},
+		{data: "Go", want: "Hello, Go!\n"},
+	}
+	for _, test := range tests {
+		r, w, _ := os.Pipe()
+		log.SetOutput(w)
+		originalFlags := log.Flags()
+		log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
 
-        m := PubSubMessage{
-            Data: []byte(test.data),
-        }
-        cem := CloudEventMessage{
-            Message: m,
-        }
+		m := PubSubMessage{
+			Data: []byte(test.data),
+		}
+		cem := CloudEventMessage{
+			Message: m,
+		}
 
-        e := event.New()
-        e.SetDataContentType("application/json")
-        e.SetData(e.DataContentType(), cem) 
+		e := event.New()
+		e.SetDataContentType("application/json")
+		e.SetData(e.DataContentType(), cem)
 
-        HelloPubSub(context.Background(), e) 
+		HelloPubSub(context.Background(), e)
 
-        w.Close()
-        log.SetOutput(os.Stderr)
-        log.SetFlags(originalFlags)
+		w.Close()
+		log.SetOutput(os.Stderr)
+		log.SetFlags(originalFlags)
 
-        out, err := ioutil.ReadAll(r)
-        if err != nil {
-            t.Fatalf("ReadAll: %v", err)
-        }
-        if got := string(out); got != test.want {
-            t.Errorf("HelloPubSub(%q) = %q, want %q", test.data, got, test.want)
-        }
-    }
+		out, err := ioutil.ReadAll(r)
+		if err != nil {
+			t.Fatalf("ReadAll: %v", err)
+		}
+		if got := string(out); got != test.want {
+			t.Errorf("HelloPubSub(%q) = %q, want %q", test.data, got, test.want)
+		}
+	}
 }
 
 // [END functions_cloudevent_pubsub_unit_test]
