@@ -22,6 +22,7 @@ import (
 	"log"
 	"os"
 	"testing"
+
 	"github.com/cloudevents/sdk-go/v2/event"
 )
 
