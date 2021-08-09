@@ -36,22 +36,16 @@ func listDatabases(ctx context.Context, w io.Writer, instanceId string) error {
 		Parent: instanceId,
 	})
 
-	printDatabases := func(iter *database.DatabaseIterator) error {
-		fmt.Fprintf(w, "Databases for instance/[%s]", instanceId)
-		for {
-			resp, err := iter.Next()
-			if err == iterator.Done {
-				return nil
-			}
-			if err != nil {
-				return err
-			}
-			fmt.Fprintf(w, "%s\n", resp.Name)
+	fmt.Fprintf(w, "Databases for instance/[%s]", instanceId)
+	for {
+		resp, err := iter.Next()
+		if err == iterator.Done {
+			break
 		}
-	}
-
-	if err := printDatabases(iter); err != nil {
-		return err
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "%s\n", resp.Name)
 	}
 
 	return nil

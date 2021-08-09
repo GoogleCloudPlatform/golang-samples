@@ -28,7 +28,7 @@ import (
 func queryInformationSchemaDatabaseOptions(w io.Writer, db string) error {
 	matches := regexp.MustCompile("^(.+)/databases/(.+)$").FindStringSubmatch(db)
 	if matches == nil || len(matches) != 3 {
-		return fmt.Errorf("createDatabaseWithCustomerManagedEncryptionKey: invalid database id %q", db)
+		return fmt.Errorf("queryInformationSchemaDatabaseOptions: invalid database id %q", db)
 	}
 	databaseId := matches[2]
 
@@ -39,7 +39,9 @@ func queryInformationSchemaDatabaseOptions(w io.Writer, db string) error {
 	}
 	defer client.Close()
 
-	stmt := spanner.Statement{SQL: `SELECT SingerId, AlbumId, MarketingBudget FROM Albums`}
+	stmt := spanner.Statement{SQL: `SELECT OPTION_NAME, OPTION_VALUE
+									FROM INFORMATION_SCHEMA.DATABASE_OPTIONS 
+    								WHERE OPTION_NAME = 'default_leader'`}
 	iter := client.Single().Query(ctx, stmt)
 	defer iter.Stop()
 
@@ -51,11 +53,11 @@ func queryInformationSchemaDatabaseOptions(w io.Writer, db string) error {
 		if err != nil {
 			return err
 		}
-		var OPTION_NAME, OPTION_VALUE string
-		if err := row.Columns(&OPTION_NAME, &OPTION_VALUE); err != nil {
+		var option_name, option_value string
+		if err := row.Columns(&option_name, &option_value); err != nil {
 			return err
 		}
-		fmt.Fprintf(w, "The result of the query to get %s for %s is %s", OPTION_NAME, databaseId, OPTION_VALUE)
+		fmt.Fprintf(w, "The result of the query to get %s for %s is %s", option_name, databaseId, option_value)
 	}
 }
 

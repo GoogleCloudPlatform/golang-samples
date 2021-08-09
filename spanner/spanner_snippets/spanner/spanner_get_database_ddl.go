@@ -45,7 +45,7 @@ func getDatabaseDdl(ctx context.Context, w io.Writer, db string) error {
 		return err
 	}
 
-	fmt.Fprintf(w, "Database DDL is as follows: \n [%s]", op.GetStatements())
+	fmt.Fprintf(w, "Database DDL is as follows: \n [%v]", op.GetStatements())
 
 	return nil
 
