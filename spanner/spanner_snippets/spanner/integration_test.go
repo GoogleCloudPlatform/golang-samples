@@ -488,7 +488,7 @@ func TestCreateDatabaseWithDefaultLeaderSample(t *testing.T) {
 
 	// Try to create Database with Default Leader
 	b.Reset()
-	defaultLeader := "us-central1"
+	defaultLeader := "us-east1"
 	if err := createDatabaseWithDefaultLeader(ctx, &b, dbName, defaultLeader); err != nil {
 		t.Errorf("failed to create database with default leader: %v", err)
 	}
@@ -497,7 +497,7 @@ func TestCreateDatabaseWithDefaultLeaderSample(t *testing.T) {
 
 	// Try to update Database with Default Leader
 	b.Reset()
-	defaultLeader = "us-east1"
+	defaultLeader = "us-east4"
 	if err := updateDatabaseWithDefaultLeader(ctx, &b, dbName, defaultLeader); err != nil {
 		t.Errorf("failed to update database with default leader: %v", err)
 	}
