@@ -28,7 +28,7 @@ import (
 
 // listAllInstances prints all instances present in a project, grouped by their zone.
 func listAllInstances(w io.Writer, projectID string) error {
-	// zone := "europe-central2-b"
+	// projectID := "your_project_id"
 	ctx := context.Background()
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
 	if err != nil {
