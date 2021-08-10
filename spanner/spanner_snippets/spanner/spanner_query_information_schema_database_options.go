@@ -30,7 +30,7 @@ func queryInformationSchemaDatabaseOptions(w io.Writer, db string) error {
 	if matches == nil || len(matches) != 3 {
 		return fmt.Errorf("queryInformationSchemaDatabaseOptions: invalid database id %q", db)
 	}
-	databaseId := matches[2]
+	databaseID := matches[2]
 
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)
@@ -57,7 +57,7 @@ func queryInformationSchemaDatabaseOptions(w io.Writer, db string) error {
 		if err := row.Columns(&option_name, &option_value); err != nil {
 			return err
 		}
-		fmt.Fprintf(w, "The result of the query to get %s for %s is %s", option_name, databaseId, option_value)
+		fmt.Fprintf(w, "The result of the query to get %s for %s is %s", option_name, databaseID, option_value)
 	}
 }
 
