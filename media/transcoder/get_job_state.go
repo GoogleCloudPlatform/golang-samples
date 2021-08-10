@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"io"
 
-	transcoder "cloud.google.com/go/video/transcoder/apiv1beta1"
-	transcoderpb "google.golang.org/genproto/googleapis/cloud/video/transcoder/v1beta1"
+	transcoder "cloud.google.com/go/video/transcoder/apiv1"
+	transcoderpb "google.golang.org/genproto/googleapis/cloud/video/transcoder/v1"
 )
 
 // getJobState gets the state for a previously-created job. See
@@ -46,7 +46,7 @@ func getJobState(w io.Writer, projectID string, location string, jobID string) e
 	if err != nil {
 		return fmt.Errorf("GetJob: %v", err)
 	}
-	fmt.Fprintf(w, "Job state: %v\n----\nJob failure reason:%v\n----\nJob failure details:%v\n", response.State, response.FailureReason, response.FailureDetails)
+	fmt.Fprintf(w, "Job state: %v\n----\nJob failure reason:%v\n", response.State, response.Error)
 	return nil
 }
 
