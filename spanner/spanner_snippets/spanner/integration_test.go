@@ -459,12 +459,9 @@ func TestCreateDatabaseWithDefaultLeaderSample(t *testing.T) {
 	projectID := getSampleProjectId(t)
 	var b bytes.Buffer
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
-	defer cancel()
-
 	// Try to get Instance Configs
 	config := fmt.Sprintf("projects/%s/instanceConfigs/%s", projectID, "nam3")
-	if err := getInstanceConfig(ctx, &b, config); err != nil {
+	if err := getInstanceConfig(&b, config); err != nil {
 		t.Errorf("failed to create get instance configs: %v", err)
 	}
 	out := b.String()
@@ -472,7 +469,7 @@ func TestCreateDatabaseWithDefaultLeaderSample(t *testing.T) {
 
 	// Try to list Instance Configs
 	b.Reset()
-	if err := listInstanceConfigs(ctx, &b, "projects/"+projectID); err != nil {
+	if err := listInstanceConfigs(&b, "projects/"+projectID); err != nil {
 		t.Errorf("failed to list instance configs: %v", err)
 	}
 	out = b.String()
@@ -480,7 +477,7 @@ func TestCreateDatabaseWithDefaultLeaderSample(t *testing.T) {
 
 	// Try to get list of Databases
 	b.Reset()
-	if err := listDatabases(ctx, &b, instName); err != nil {
+	if err := listDatabases(&b, instName); err != nil {
 		t.Errorf("failed to get list of Databases: %v", err)
 	}
 	out = b.String()
@@ -489,7 +486,7 @@ func TestCreateDatabaseWithDefaultLeaderSample(t *testing.T) {
 	// Try to create Database with Default Leader
 	b.Reset()
 	defaultLeader := "us-east1"
-	if err := createDatabaseWithDefaultLeader(ctx, &b, dbName, defaultLeader); err != nil {
+	if err := createDatabaseWithDefaultLeader(&b, dbName, defaultLeader); err != nil {
 		t.Errorf("failed to create database with default leader: %v", err)
 	}
 	out = b.String()
@@ -498,7 +495,7 @@ func TestCreateDatabaseWithDefaultLeaderSample(t *testing.T) {
 	// Try to update Database with Default Leader
 	b.Reset()
 	defaultLeader = "us-east4"
-	if err := updateDatabaseWithDefaultLeader(ctx, &b, dbName, defaultLeader); err != nil {
+	if err := updateDatabaseWithDefaultLeader(&b, dbName, defaultLeader); err != nil {
 		t.Errorf("failed to update database with default leader: %v", err)
 	}
 	out = b.String()
@@ -506,7 +503,7 @@ func TestCreateDatabaseWithDefaultLeaderSample(t *testing.T) {
 
 	// Try to get Database DDL
 	b.Reset()
-	if err := getDatabaseDdl(ctx, &b, dbName); err != nil {
+	if err := getDatabaseDdl(&b, dbName); err != nil {
 		t.Errorf("failed to get Database DDL: %v", err)
 	}
 	out = b.String()

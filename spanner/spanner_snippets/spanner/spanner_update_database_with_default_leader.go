@@ -25,18 +25,22 @@ import (
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
-func updateDatabaseWithDefaultLeader(ctx context.Context, w io.Writer, db string, defaultLeader string) error {
+func updateDatabaseWithDefaultLeader(w io.Writer, db string, defaultLeader string) error {
+	// db = `projects/<project>/instances/<instance-id>/database/<database-id>`
+	// defaultLeader = `nam3`
 	matches := regexp.MustCompile("^(.+)/databases/(.+)$").FindStringSubmatch(db)
 	if matches == nil || len(matches) != 3 {
-		return fmt.Errorf("createDatabaseWithDefaultLeader: invalid database id %q", db)
+		return fmt.Errorf("updateDatabaseWithDefaultLeader: invalid database id %q", db)
 	}
 
+	ctx := context.Background()
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		return err
 	}
 	defer adminClient.Close()
 
+	// Update the default leader for a given database
 	op, err := adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
 		Database: db,
 		Statements: []string{

@@ -24,13 +24,16 @@ import (
 	instancepb "google.golang.org/genproto/googleapis/spanner/admin/instance/v1"
 )
 
-func getInstanceConfig(ctx context.Context, w io.Writer, instanceConfigName string) error {
+func getInstanceConfig(w io.Writer, instanceConfigName string) error {
+	// defaultLeader = `nam3`
+	ctx := context.Background()
 	instanceAdmin, err := instance.NewInstanceAdminClient(ctx)
 	if err != nil {
 		return err
 	}
 	defer instanceAdmin.Close()
 
+	// Get available leader options
 	ic, err := instanceAdmin.GetInstanceConfig(ctx, &instancepb.GetInstanceConfigRequest{
 		Name: instanceConfigName,
 	})

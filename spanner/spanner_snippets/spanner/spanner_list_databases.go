@@ -25,13 +25,16 @@ import (
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
-func listDatabases(ctx context.Context, w io.Writer, instanceId string) error {
+func listDatabases(w io.Writer, instanceId string) error {
+	// instanceId = `projects/<project>/instances/<instance-id>
+	ctx := context.Background()
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		return err
 	}
 	defer adminClient.Close()
 
+	// Get list of all databases for an instance
 	iter := adminClient.ListDatabases(ctx, &adminpb.ListDatabasesRequest{
 		Parent: instanceId,
 	})

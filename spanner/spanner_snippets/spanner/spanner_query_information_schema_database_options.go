@@ -26,6 +26,7 @@ import (
 )
 
 func queryInformationSchemaDatabaseOptions(w io.Writer, db string) error {
+	// db = `projects/<project>/instances/<instance-id>/database/<database-id>`
 	matches := regexp.MustCompile("^(.+)/databases/(.+)$").FindStringSubmatch(db)
 	if matches == nil || len(matches) != 3 {
 		return fmt.Errorf("queryInformationSchemaDatabaseOptions: invalid database id %q", db)
@@ -39,9 +40,10 @@ func queryInformationSchemaDatabaseOptions(w io.Writer, db string) error {
 	}
 	defer client.Close()
 
+	// Queries the default leader set
 	stmt := spanner.Statement{SQL: `SELECT OPTION_NAME, OPTION_VALUE
-									FROM INFORMATION_SCHEMA.DATABASE_OPTIONS 
-    								WHERE OPTION_NAME = 'default_leader'`}
+	                                FROM INFORMATION_SCHEMA.DATABASE_OPTIONS 
+                                    WHERE OPTION_NAME = 'default_leader'`}
 	iter := client.Single().Query(ctx, stmt)
 	defer iter.Stop()
 

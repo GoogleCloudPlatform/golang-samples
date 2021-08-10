@@ -25,18 +25,21 @@ import (
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
-func getDatabaseDdl(ctx context.Context, w io.Writer, db string) error {
+func getDatabaseDdl(w io.Writer, db string) error {
+	// db = `projects/<project>/instances/<instance-id>/database/<database-id>`
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(db)
+	if matches == nil || len(matches) != 3 {
+		return fmt.Errorf("getDatabaseDdl: invalid database id %s", db)
+	}
+
+	ctx := context.Background()
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		return err
 	}
 	defer adminClient.Close()
 
-	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(db)
-	if matches == nil || len(matches) != 3 {
-		return fmt.Errorf("Invalid database id %s", db)
-	}
-
+	// Get the DDL for the database
 	op, err := adminClient.GetDatabaseDdl(ctx, &adminpb.GetDatabaseDdlRequest{
 		Database: db,
 	})
