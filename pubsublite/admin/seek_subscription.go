@@ -23,6 +23,7 @@ import (
 	"cloud.google.com/go/pubsublite"
 )
 
+// seekSubscription initiates a seek operation for a subscription.
 func seekSubscription(w io.Writer, projectID, region, zone, subID string, seekTarget pubsublite.SeekTarget, waitForOperation bool) error {
 	// projectID := "my-project-id"
 	// region := "us-central1"
@@ -42,8 +43,8 @@ func seekSubscription(w io.Writer, projectID, region, zone, subID string, seekTa
 
 	// Waiting for the seek operation to complete is optional. It indicates when
 	// subscribers for all partitions are receiving messages from the seek
-	// target. If subscribers are offline, the seek will complete once they are
-	// online.
+	// target. If subscribers are offline, the operation will complete once they
+	// are online.
 
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
