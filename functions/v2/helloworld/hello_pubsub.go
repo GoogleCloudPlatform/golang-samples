@@ -20,9 +20,10 @@ package helloworld
 import (
 	"context"
 	"encoding/json"
-    "fmt"
+	"fmt"
 	"log"
 	"net/http"
+
 	"github.com/cloudevents/sdk-go/v2/event"
 )
 
@@ -44,7 +45,7 @@ type PubSubMessage struct {
 func HelloPubSub(ctx context.Context, e event.Event) error {
 	var cem CloudEventMessage
 	if err := json.Unmarshal(e.Data(), &cem); err != nil {
-        return fmt.Errorf("Bad HTTP Request: %v", http.StatusBadRequest)
+		return fmt.Errorf("Bad HTTP Request: %v", http.StatusBadRequest)
 	}
 
 	name := string(cem.Message.Data) // Automatically decoded from base64.
