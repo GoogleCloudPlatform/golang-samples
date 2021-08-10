@@ -52,16 +52,16 @@ var (
 
 func initTest(t *testing.T, id string) (instName, dbName string, cleanup func()) {
 	projectID := getSampleProjectId(t)
-	instName, cleanup = createTestInstance(t, projectID, false)
+	instName, cleanup = createTestInstance(t, projectID, "regional-us-central1")
 	dbID := validLength(fmt.Sprintf("smpl-%s", id), t)
 	dbName = fmt.Sprintf("%s/databases/%s", instName, dbID)
 
 	return
 }
 
-func initTestWithConfig(t *testing.T, id string) (instName, dbName string, cleanup func()) {
+func initTestWithConfig(t *testing.T, id string, instanceConfigName string) (instName, dbName string, cleanup func()) {
 	projectID := getSampleProjectId(t)
-	instName, cleanup = createTestInstance(t, projectID, true)
+	instName, cleanup = createTestInstance(t, projectID, instanceConfigName)
 	dbID := validLength(fmt.Sprintf("smpl-%s", id), t)
 	dbName = fmt.Sprintf("%s/databases/%s", instName, dbID)
 
@@ -453,7 +453,7 @@ func TestCreateDatabaseWithDefaultLeaderSample(t *testing.T) {
 	_ = testutil.SystemTest(t)
 	t.Parallel()
 
-	instName, dbName, cleanup := initTestWithConfig(t, randomID())
+	instName, dbName, cleanup := initTestWithConfig(t, randomID(), "nam3")
 	defer cleanup()
 
 	projectID := getSampleProjectId(t)
@@ -634,7 +634,7 @@ func mustRunSample(t *testing.T, f sampleFuncWithContext, dbName, errMsg string)
 	return b.String()
 }
 
-func createTestInstance(t *testing.T, projectID string, multiRegional bool) (instanceName string, cleanup func()) {
+func createTestInstance(t *testing.T, projectID string, instanceConfigName string) (instanceName string, cleanup func()) {
 	ctx := context.Background()
 	instanceID := fmt.Sprintf("go-sample-%s", uuid.New().String()[:16])
 	instanceName = fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID)
@@ -675,17 +675,14 @@ func createTestInstance(t *testing.T, projectID string, multiRegional bool) (ins
 		}
 	}
 
-	config := fmt.Sprintf("projects/%s/instanceConfigs/%s", projectID, "regional-us-central1")
-	if multiRegional {
-		config = fmt.Sprintf("projects/%s/instanceConfigs/%s", projectID, "nam3")
-	}
+	instanceConfigName = fmt.Sprintf("projects/%s/instanceConfigs/%s", projectID, instanceConfigName)
 
 	testutil.Retry(t, 20, time.Minute, func(r *testutil.R) {
 		op, err := instanceAdmin.CreateInstance(ctx, &instancepb.CreateInstanceRequest{
 			Parent:     fmt.Sprintf("projects/%s", projectID),
 			InstanceId: instanceID,
 			Instance: &instancepb.Instance{
-				Config:      config,
+				Config:      instanceConfigName,
 				DisplayName: instanceID,
 				NodeCount:   1,
 				Labels: map[string]string{
