@@ -14,7 +14,7 @@
 
 package downscopingoverview
 
-// [START downscoping_overview_credential_access_boundary]
+// [START auth_overview_credential_access_boundary]
 import "golang.org/x/oauth2/google/downscope"
 
 // constructCAB shows how to initialize a Credential Access Boundary for downscoping tokens.

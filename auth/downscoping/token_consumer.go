@@ -14,7 +14,7 @@
 
 package downscopingoverview
 
-// [START downscoping_overview_token_consumer]
+// [START auth_overview_downscoping_token_consumer]
 
 import (
 	"context"

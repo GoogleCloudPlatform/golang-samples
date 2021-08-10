@@ -26,7 +26,7 @@ import (
 	"golang.org/x/oauth2/google/downscope"
 )
 
-// [START downscoping_overview_credential_initialization]
+// [START auth_overview_downscoped_credential_initialization]
 
 // initializeCredentials will return a downscoped token using the provided
 // context and Access Boundary Rules.

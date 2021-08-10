@@ -23,7 +23,7 @@ import (
 	"golang.org/x/oauth2/google/downscope"
 )
 
-// [START downscoping_overview_token_broker]
+// [START auth_overview_downscoping_token_broker]
 
 // createDownscopedToken would be run on the token broker in order to generate
 // a downscoped access token.  The token broker would then pass the newly created
