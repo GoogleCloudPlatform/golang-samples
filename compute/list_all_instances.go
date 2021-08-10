@@ -23,11 +23,12 @@ import (
 	compute "cloud.google.com/go/compute/apiv1"
 	"google.golang.org/api/iterator"
 	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
+	"google.golang.org/protobuf/proto"
 )
 
 // listAllInstances prints all instances present in a project, grouped by their zone.
 func listAllInstances(w io.Writer, projectID string) error {
-	// zone := "europe-central2-b"
+	// projectID := "your_project_id"
 	ctx := context.Background()
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
 	if err != nil {
@@ -35,12 +36,17 @@ func listAllInstances(w io.Writer, projectID string) error {
 	}
 	defer instancesClient.Close()
 
+	// Use the `MaxResults` parameter to limit the number of results that the API returns per response page.
 	req := &computepb.AggregatedListInstancesRequest{
-		Project: projectID,
+		Project:    projectID,
+		MaxResults: proto.Uint32(3),
 	}
 
 	it := instancesClient.AggregatedList(ctx, req)
 	fmt.Fprintf(w, "Instances found:\n")
+	// Despite using the `MaxResults` parameter, you don't need to handle the pagination
+	// yourself. The returned iterator object handles pagination
+	// automatically, returning separated pages as you iterate over the results.
 	for {
 		pair, err := it.Next()
 		if err == iterator.Done {
