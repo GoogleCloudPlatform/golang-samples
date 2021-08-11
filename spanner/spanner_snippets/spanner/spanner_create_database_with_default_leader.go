@@ -25,6 +25,7 @@ import (
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
+// createDatabaseWithDefaultLeader creates a database with a default leader
 func createDatabaseWithDefaultLeader(w io.Writer, db string, defaultLeader string) error {
 	// db = `projects/<project>/instances/<instance-id>/database/<database-id>`
 	// defaultLeader = `my-default-leader`
@@ -40,7 +41,6 @@ func createDatabaseWithDefaultLeader(w io.Writer, db string, defaultLeader strin
 	}
 	defer adminClient.Close()
 
-	// Create a database with a default leader.
 	alterDatabase := fmt.Sprintf(
 		"ALTER DATABASE `%s` SET OPTIONS (default_leader = '%s')",
 		matches[2], defaultLeader,

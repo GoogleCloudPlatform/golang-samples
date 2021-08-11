@@ -25,6 +25,7 @@ import (
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
+// getDatabaseDdl gets the DDL for the database
 func getDatabaseDdl(w io.Writer, db string) error {
 	// db = `projects/<project>/instances/<instance-id>/database/<database-id>`
 	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(db)
@@ -39,7 +40,6 @@ func getDatabaseDdl(w io.Writer, db string) error {
 	}
 	defer adminClient.Close()
 
-	// Get the DDL for the database
 	op, err := adminClient.GetDatabaseDdl(ctx, &adminpb.GetDatabaseDdlRequest{
 		Database: db,
 	})

@@ -25,6 +25,7 @@ import (
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
+// updateDatabaseWithDefaultLeader updates the default leader for a given database
 func updateDatabaseWithDefaultLeader(w io.Writer, db string, defaultLeader string) error {
 	// db = `projects/<project>/instances/<instance-id>/database/<database-id>`
 	// defaultLeader = `nam3`
@@ -40,7 +41,6 @@ func updateDatabaseWithDefaultLeader(w io.Writer, db string, defaultLeader strin
 	}
 	defer adminClient.Close()
 
-	// Update the default leader for a given database
 	op, err := adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
 		Database: db,
 		Statements: []string{

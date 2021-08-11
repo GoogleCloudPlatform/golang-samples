@@ -25,6 +25,7 @@ import (
 	instancepb "google.golang.org/genproto/googleapis/spanner/admin/instance/v1"
 )
 
+// istInstanceConfigs gets available leader options for all instances
 func listInstanceConfigs(w io.Writer, projectName string) error {
 	// projectName = `projects/<project>
 	ctx := context.Background()
@@ -34,7 +35,6 @@ func listInstanceConfigs(w io.Writer, projectName string) error {
 	}
 	defer instanceAdmin.Close()
 
-	// Gets available leader options for all instances
 	request := &instancepb.ListInstanceConfigsRequest{
 		Parent: projectName,
 	}
