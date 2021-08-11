@@ -89,6 +89,7 @@ func writeTestDatastoreFiles(t *testing.T, projectID string) {
 }
 
 func TestInspectGCS(t *testing.T) {
+	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2165")
 	tc := testutil.SystemTest(t)
 	writeTestGCSFiles(t, tc.ProjectID)
 	tests := []struct {

@@ -251,6 +251,19 @@ func TestSubscriptionAdmin(t *testing.T) {
 		}
 	})
 
+	t.Run("SeekSubscription", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+		err := seekSubscription(buf, projNumber, testRegion, testZone, subID, pubsublite.Beginning, false)
+		if err != nil {
+			t.Fatalf("seekSubscription: %v", err)
+		}
+		got := buf.String()
+		want := "Seek operation initiated"
+		if !strings.Contains(got, want) {
+			t.Fatalf("got: %v, want %v", got, want)
+		}
+	})
+
 	t.Run("DeleteSubscription", func(t *testing.T) {
 		buf := new(bytes.Buffer)
 		err := deleteSubscription(buf, projNumber, testRegion, testZone, subID)
