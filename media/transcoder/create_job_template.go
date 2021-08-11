@@ -49,7 +49,7 @@ func createJobTemplate(w io.Writer, projectID string, location string, templateI
 						ElementaryStream: &transcoderpb.ElementaryStream_VideoStream{
 							VideoStream: &transcoderpb.VideoStream{
 								CodecSettings: &transcoderpb.VideoStream_H264{
-									&transcoderpb.VideoStream_H264CodecSettings{
+									H264: &transcoderpb.VideoStream_H264CodecSettings{
 										BitrateBps:   550000,
 										FrameRate:    60,
 										HeightPixels: 360,
@@ -64,7 +64,7 @@ func createJobTemplate(w io.Writer, projectID string, location string, templateI
 						ElementaryStream: &transcoderpb.ElementaryStream_VideoStream{
 							VideoStream: &transcoderpb.VideoStream{
 								CodecSettings: &transcoderpb.VideoStream_H264{
-									&transcoderpb.VideoStream_H264CodecSettings{
+									H264: &transcoderpb.VideoStream_H264CodecSettings{
 										BitrateBps:   2500000,
 										FrameRate:    60,
 										HeightPixels: 720,

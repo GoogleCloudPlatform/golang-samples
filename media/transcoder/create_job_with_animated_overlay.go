@@ -56,7 +56,7 @@ func createJobWithAnimatedOverlay(w io.Writer, projectID string, location string
 							ElementaryStream: &transcoderpb.ElementaryStream_VideoStream{
 								VideoStream: &transcoderpb.VideoStream{
 									CodecSettings: &transcoderpb.VideoStream_H264{
-										&transcoderpb.VideoStream_H264CodecSettings{
+										H264: &transcoderpb.VideoStream_H264CodecSettings{
 											BitrateBps:   550000,
 											FrameRate:    60,
 											HeightPixels: 360,
