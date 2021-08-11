@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"io"
 
-	transcoder "cloud.google.com/go/video/transcoder/apiv1beta1"
-	transcoderpb "google.golang.org/genproto/googleapis/cloud/video/transcoder/v1beta1"
+	transcoder "cloud.google.com/go/video/transcoder/apiv1"
+	transcoderpb "google.golang.org/genproto/googleapis/cloud/video/transcoder/v1"
 )
 
 // getJob gets a previously-created job. See https://cloud.google.com/transcoder/docs/how-to/jobs#check_job_status
