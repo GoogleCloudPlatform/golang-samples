@@ -10,7 +10,7 @@ require (
 	cloud.google.com/go/firestore v1.3.0
 	cloud.google.com/go/logging v1.0.0
 	cloud.google.com/go/pubsub v1.9.1
-	cloud.google.com/go/pubsublite v0.8.0
+	cloud.google.com/go/pubsublite v1.1.0
 	cloud.google.com/go/spanner v1.21.0
 	cloud.google.com/go/storage v1.16.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.5
@@ -25,7 +25,7 @@ require (
 	github.com/golang/protobuf v1.5.2
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/google/go-cmp v0.5.6
-	github.com/google/uuid v1.2.0
+	github.com/google/uuid v1.3.0
 	github.com/googleapis/gax-go/v2 v2.0.5
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.4.2
@@ -42,9 +42,9 @@ require (
 	golang.org/x/oauth2 v0.0.0-20210628180205-a41e5a781914
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/text v0.3.6
-	google.golang.org/api v0.51.0
+	google.golang.org/api v0.52.0
 	google.golang.org/appengine v1.6.7
-	google.golang.org/genproto v0.0.0-20210728212813-7823e685a01f
+	google.golang.org/genproto v0.0.0-20210804223703-f1db76f3300d
 	google.golang.org/grpc v1.39.0
 	google.golang.org/grpc/examples v0.0.0-20200707005602-4258d12073b4
 	google.golang.org/protobuf v1.27.1
