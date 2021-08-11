@@ -17,6 +17,8 @@
 // https://cloud.google.com/iam/docs/downscoping-short-lived-credentials
 package downscopingoverview
 
+// [START auth_overview_downscoped_credential_initialization]
+
 import (
 	"context"
 	"fmt"
@@ -25,8 +27,6 @@ import (
 	"golang.org/x/oauth2/google"
 	"golang.org/x/oauth2/google/downscope"
 )
-
-// [START auth_overview_downscoped_credential_initialization]
 
 // initializeCredentials will return a downscoped token using the provided
 // context and Access Boundary Rules.
@@ -54,4 +54,4 @@ func initializeCredentials(ctx context.Context, accessBoundary []downscope.Acces
 	return tok, nil
 }
 
-// [END downscoping_overview_credential_initialization]
+// [END auth_overview_credential_access_boundary]

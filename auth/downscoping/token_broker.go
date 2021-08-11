@@ -14,6 +14,8 @@
 
 package downscopingoverview
 
+// [START auth_overview_downscoping_token_broker]
+
 import (
 	"context"
 	"fmt"
@@ -22,8 +24,6 @@ import (
 	"golang.org/x/oauth2/google"
 	"golang.org/x/oauth2/google/downscope"
 )
-
-// [START auth_overview_downscoping_token_broker]
 
 // createDownscopedToken would be run on the token broker in order to generate
 // a downscoped access token.  The token broker would then pass the newly created
@@ -73,4 +73,4 @@ func createDownscopedToken(ctx context.Context) (*oauth2.Token, error) {
 	return tok, nil
 }
 
-// [END downscoping_overview_token_broker]
+// [END auth_overview_credential_access_boundary]
