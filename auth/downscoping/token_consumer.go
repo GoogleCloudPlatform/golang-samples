@@ -71,4 +71,4 @@ func getObjectContents(ctx context.Context) ([]byte, error) {
 	return data, err
 }
 
-// [END auth_overview_credential_access_boundary]
+// [END auth_overview_downscoping_token_consumer]
