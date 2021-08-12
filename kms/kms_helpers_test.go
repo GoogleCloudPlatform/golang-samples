@@ -42,6 +42,7 @@ type kmsFixture struct {
 	AsymmetricSignRSAKeyName string
 	HSMKeyName               string
 	SymmetricKeyName         string
+	HMACKeyName              string
 }
 
 func NewKMSFixture(projectID string) (*kmsFixture, error) {
@@ -85,6 +86,11 @@ func NewKMSFixture(projectID string) (*kmsFixture, error) {
 	k.SymmetricKeyName, err = k.CreateSymmetricKey(k.KeyRingName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create symmetric key: %v", err)
+	}
+
+	k.HMACKeyName, err = k.CreateHMACKey(k.KeyRingName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create hmac key: %v", err)
 	}
 
 	return &k, nil
@@ -286,6 +292,30 @@ func (k *kmsFixture) CreateSymmetricKey(parent string) (string, error) {
 			Purpose: kmspb.CryptoKey_ENCRYPT_DECRYPT,
 			VersionTemplate: &kmspb.CryptoKeyVersionTemplate{
 				Algorithm: kmspb.CryptoKeyVersion_GOOGLE_SYMMETRIC_ENCRYPTION,
+			},
+			Labels: map[string]string{
+				"foo": "bar",
+				"zip": "zap",
+			},
+		},
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return key.Name, nil
+}
+
+// CreateHMACKey creates a new symmetric key.
+func (k *kmsFixture) CreateHMACKey(parent string) (string, error) {
+	ctx := context.Background()
+	key, err := k.client.CreateCryptoKey(ctx, &kmspb.CreateCryptoKeyRequest{
+		Parent:      parent,
+		CryptoKeyId: k.RandomID(),
+		CryptoKey: &kmspb.CryptoKey{
+			Purpose: kmspb.CryptoKey_MAC,
+			VersionTemplate: &kmspb.CryptoKeyVersionTemplate{
+				Algorithm: kmspb.CryptoKeyVersion_HMAC_SHA256,
 			},
 			Labels: map[string]string{
 				"foo": "bar",

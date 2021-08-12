@@ -19,9 +19,11 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	kms "cloud.google.com/go/kms/apiv1"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
+	"google.golang.org/protobuf/types/known/durationpb"
 )
 
 // createKeyHSM creates a new symmetric encrypt/decrypt key on Cloud KMS.
@@ -47,6 +49,9 @@ func createKeyHSM(w io.Writer, parent, id string) error {
 				ProtectionLevel: kmspb.ProtectionLevel_HSM,
 				Algorithm:       kmspb.CryptoKeyVersion_GOOGLE_SYMMETRIC_ENCRYPTION,
 			},
+
+			// Optional: customize how long key versions should be kept before destroying.
+			DestroyScheduledDuration: durationpb.New(24 * time.Hour),
 		},
 	}
 
