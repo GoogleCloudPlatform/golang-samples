@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package downscopingoverview
+package downscopedoverview
 
-// [START auth_overview_downscoping_token_consumer]
+// [START downscoping_token_consumer]
 
 import (
 	"context"
@@ -41,8 +41,10 @@ func (localTokenSource) Token() (*oauth2.Token, error) {
 	return &remoteToken, nil
 }
 
-func getObjectContents(ctx context.Context) ([]byte, error) {
-
+// getObjectContents will read the contents of an object in Google Storage
+// named "myFile.txt", contained in the bucket "foo"
+func getObjectContents() ([]byte, error) {
+	ctx := context.Background()
 	thisTokenSource := localTokenSource{
 		requestedObject: "//storage.googleapis.com/projects/_/buckets/foo",
 		brokerURL:       "yourURL.com/internal/broker",
@@ -50,10 +52,9 @@ func getObjectContents(ctx context.Context) ([]byte, error) {
 
 	// Wrap the TokenSource in an oauth2.ReuseTokenSource to enable automatic refreshing.
 	refreshableTS := oauth2.ReuseTokenSource(nil, thisTokenSource)
-
 	// You can now use the token source to access Google Cloud Storage resources as follows.
-
 	storageClient, err := storage.NewClient(ctx, option.WithTokenSource(refreshableTS))
+	defer storageClient.Close()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create the storage client: %v", err)
 	}
@@ -71,4 +72,4 @@ func getObjectContents(ctx context.Context) ([]byte, error) {
 	return data, err
 }
 
-// [END auth_overview_credential_access_boundary]
+// [END downscoping_token_consumer]

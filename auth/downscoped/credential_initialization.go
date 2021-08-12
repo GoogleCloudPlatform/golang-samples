@@ -15,9 +15,9 @@
 // package downscopingoverview contains Google Cloud auth snippets showing how to
 // downscope credentials with Credential Access Boundaries.
 // https://cloud.google.com/iam/docs/downscoping-short-lived-credentials
-package downscopingoverview
+package downscopedoverview
 
-// [START auth_overview_downscoped_credential_initialization]
+// [START auth_downscoping_initialize_downscoped_cred]
 
 import (
 	"context"
@@ -28,9 +28,16 @@ import (
 	"golang.org/x/oauth2/google/downscope"
 )
 
-// initializeCredentials will return a downscoped token using the provided
-// context and Access Boundary Rules.
-func initializeCredentials(ctx context.Context, accessBoundary []downscope.AccessBoundaryRule) (*oauth2.Token, error) {
+// initializeCredentials will return a downscoped token using the provided Access Boundary Rules.
+//
+// accessBoundary := []downscope.AccessBoundaryRule{
+//		{
+//			AvailableResource:    "//storage.googleapis.com/projects/_/buckets/foo",
+//			AvailablePermissions: []string{"inRole:roles/storage.objectViewer"},
+//		},
+//	}
+func initializeCredentials(accessBoundary []downscope.AccessBoundaryRule) (*oauth2.Token, error) {
+	ctx := context.Background()
 	// This Source can be initialized in multiple ways; the following example uses
 	// Application Default Credentials.
 	var rootSource oauth2.TokenSource
@@ -54,4 +61,4 @@ func initializeCredentials(ctx context.Context, accessBoundary []downscope.Acces
 	return tok, nil
 }
 
-// [END auth_overview_credential_access_boundary]
+// [END auth_downscoping_initialize_downscoped_cred]

@@ -52,7 +52,16 @@ var (
 
 func initTest(t *testing.T, id string) (instName, dbName string, cleanup func()) {
 	projectID := getSampleProjectId(t)
-	instName, cleanup = createTestInstance(t, projectID)
+	instName, cleanup = createTestInstance(t, projectID, "regional-us-central1")
+	dbID := validLength(fmt.Sprintf("smpl-%s", id), t)
+	dbName = fmt.Sprintf("%s/databases/%s", instName, dbID)
+
+	return
+}
+
+func initTestWithConfig(t *testing.T, id string, instanceConfigName string) (instName, dbName string, cleanup func()) {
+	projectID := getSampleProjectId(t)
+	instName, cleanup = createTestInstance(t, projectID, instanceConfigName)
 	dbID := validLength(fmt.Sprintf("smpl-%s", id), t)
 	dbName = fmt.Sprintf("%s/databases/%s", instName, dbID)
 
@@ -440,6 +449,75 @@ func TestCustomerManagedEncryptionKeys(t *testing.T) {
 	assertContains(t, out, fmt.Sprintf("using encryption key %s", kmsKeyName))
 }
 
+func TestCreateDatabaseWithDefaultLeaderSample(t *testing.T) {
+	_ = testutil.SystemTest(t)
+	t.Parallel()
+
+	instName, dbName, cleanup := initTestWithConfig(t, randomID(), "nam3")
+	defer cleanup()
+
+	projectID := getSampleProjectId(t)
+	var b bytes.Buffer
+
+	// Try to get Instance Configs
+	config := fmt.Sprintf("projects/%s/instanceConfigs/%s", projectID, "nam3")
+	if err := getInstanceConfig(&b, config); err != nil {
+		t.Errorf("failed to create get instance configs: %v", err)
+	}
+	out := b.String()
+	assertContains(t, out, "Available leader options for instance config")
+
+	// Try to list Instance Configs
+	b.Reset()
+	if err := listInstanceConfigs(&b, "projects/"+projectID); err != nil {
+		t.Errorf("failed to list instance configs: %v", err)
+	}
+	out = b.String()
+	assertContains(t, out, "Available leader options for instance config")
+
+	// Try to get list of Databases
+	b.Reset()
+	if err := listDatabases(&b, instName); err != nil {
+		t.Errorf("failed to get list of Databases: %v", err)
+	}
+	out = b.String()
+	assertContains(t, out, "Databases for instance")
+
+	// Try to create Database with Default Leader
+	b.Reset()
+	defaultLeader := "us-east1"
+	if err := createDatabaseWithDefaultLeader(&b, dbName, defaultLeader); err != nil {
+		t.Errorf("failed to create database with default leader: %v", err)
+	}
+	out = b.String()
+	assertContains(t, out, fmt.Sprintf("Created database [%s] with default leader%q\n", dbName, defaultLeader))
+
+	// Try to update Database with Default Leader
+	b.Reset()
+	defaultLeader = "us-east4"
+	if err := updateDatabaseWithDefaultLeader(&b, dbName, defaultLeader); err != nil {
+		t.Errorf("failed to update database with default leader: %v", err)
+	}
+	out = b.String()
+	assertContains(t, out, "Updated the default leader\n")
+
+	// Try to get Database DDL
+	b.Reset()
+	if err := getDatabaseDdl(&b, dbName); err != nil {
+		t.Errorf("failed to get Database DDL: %v", err)
+	}
+	out = b.String()
+	assertContains(t, out, "Database DDL is as follows")
+
+	// Try to Query Information Schema Database Options
+	b.Reset()
+	if err := queryInformationSchemaDatabaseOptions(&b, dbName); err != nil {
+		t.Errorf("failed to query information schema database options: %v", err)
+	}
+	out = b.String()
+	assertContains(t, out, "The result of the query to get")
+}
+
 func maybeCreateKey(projectId, locationId, keyRingId, keyId string) error {
 	client, err := kms.NewKeyManagementClient(context.Background())
 	if err != nil {
@@ -553,7 +631,7 @@ func mustRunSample(t *testing.T, f sampleFuncWithContext, dbName, errMsg string)
 	return b.String()
 }
 
-func createTestInstance(t *testing.T, projectID string) (instanceName string, cleanup func()) {
+func createTestInstance(t *testing.T, projectID string, instanceConfigName string) (instanceName string, cleanup func()) {
 	ctx := context.Background()
 	instanceID := fmt.Sprintf("go-sample-%s", uuid.New().String()[:16])
 	instanceName = fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID)
@@ -594,12 +672,14 @@ func createTestInstance(t *testing.T, projectID string) (instanceName string, cl
 		}
 	}
 
+	instanceConfigName = fmt.Sprintf("projects/%s/instanceConfigs/%s", projectID, instanceConfigName)
+
 	testutil.Retry(t, 20, time.Minute, func(r *testutil.R) {
 		op, err := instanceAdmin.CreateInstance(ctx, &instancepb.CreateInstanceRequest{
 			Parent:     fmt.Sprintf("projects/%s", projectID),
 			InstanceId: instanceID,
 			Instance: &instancepb.Instance{
-				Config:      fmt.Sprintf("projects/%s/instanceConfigs/%s", projectID, "regional-us-central1"),
+				Config:      instanceConfigName,
 				DisplayName: instanceID,
 				NodeCount:   1,
 				Labels: map[string]string{

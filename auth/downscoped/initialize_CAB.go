@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package downscopingoverview
+package downscopedoverview
 
-// [START auth_overview_credential_access_boundary]
+// [START auth_downscoping_rules]
 
 import "golang.org/x/oauth2/google/downscope"
 
@@ -42,4 +42,4 @@ func constructCAB() []downscope.AccessBoundaryRule {
 	return accessBoundary
 }
 
-// [END auth_overview_credential_access_boundary]
+// [END auth_downscoping_rules]

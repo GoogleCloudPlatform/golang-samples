@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"io"
 
-	transcoder "cloud.google.com/go/video/transcoder/apiv1beta1"
-	transcoderpb "google.golang.org/genproto/googleapis/cloud/video/transcoder/v1beta1"
+	transcoder "cloud.google.com/go/video/transcoder/apiv1"
+	transcoderpb "google.golang.org/genproto/googleapis/cloud/video/transcoder/v1"
 )
 
 // createJobFromAdHoc creates a job based on a given configuration. See
@@ -51,11 +51,14 @@ func createJobFromAdHoc(w io.Writer, projectID string, location string, inputURI
 							Key: "video_stream0",
 							ElementaryStream: &transcoderpb.ElementaryStream_VideoStream{
 								VideoStream: &transcoderpb.VideoStream{
-									Codec:        "h264",
-									BitrateBps:   550000,
-									FrameRate:    60,
-									HeightPixels: 360,
-									WidthPixels:  640,
+									CodecSettings: &transcoderpb.VideoStream_H264{
+										H264: &transcoderpb.VideoStream_H264CodecSettings{
+											BitrateBps:   550000,
+											FrameRate:    60,
+											HeightPixels: 360,
+											WidthPixels:  640,
+										},
+									},
 								},
 							},
 						},
@@ -63,11 +66,14 @@ func createJobFromAdHoc(w io.Writer, projectID string, location string, inputURI
 							Key: "video_stream1",
 							ElementaryStream: &transcoderpb.ElementaryStream_VideoStream{
 								VideoStream: &transcoderpb.VideoStream{
-									Codec:        "h264",
-									BitrateBps:   2500000,
-									FrameRate:    60,
-									HeightPixels: 720,
-									WidthPixels:  1280,
+									CodecSettings: &transcoderpb.VideoStream_H264{
+										H264: &transcoderpb.VideoStream_H264CodecSettings{
+											BitrateBps:   2500000,
+											FrameRate:    60,
+											HeightPixels: 720,
+											WidthPixels:  1280,
+										},
+									},
 								},
 							},
 						},

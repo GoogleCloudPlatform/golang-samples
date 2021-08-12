@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package downscopingoverview
+package downscopedoverview
 
-// [START auth_overview_downscoping_token_broker]
+// [START auth_downscoping_token_broker]
 
 import (
 	"context"
@@ -28,10 +28,8 @@ import (
 // createDownscopedToken would be run on the token broker in order to generate
 // a downscoped access token.  The token broker would then pass the newly created
 // token to the requesting token consumer for use.
-// TO REVIEWER: should I change the signature of this function?  Passing in
-// arguments directly might make it a bit confusing, since I was asked to
-// include the initialization of the boundary and the creation of the token in the same function.
-func createDownscopedToken(ctx context.Context) (*oauth2.Token, error) {
+func createDownscopedToken() (*oauth2.Token, error) {
+	ctx := context.Background()
 	// A condition can optionally be provided to further restrict access permissions.
 	condition := downscope.AvailabilityCondition{
 		Expression:  "resource.name.startsWith('projects/_/buckets/foo/objects/profile-picture-'",
@@ -73,4 +71,4 @@ func createDownscopedToken(ctx context.Context) (*oauth2.Token, error) {
 	return tok, nil
 }
 
-// [END auth_overview_credential_access_boundary]
+// [END auth_downscoping_token_broker]
