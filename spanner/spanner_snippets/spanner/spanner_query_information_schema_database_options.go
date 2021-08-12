@@ -25,7 +25,8 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-// queryInformationSchemaDatabaseOptions queries the default leader set
+// queryInformationSchemaDatabaseOptions queries the database options from the
+// information schema table.
 func queryInformationSchemaDatabaseOptions(w io.Writer, db string) error {
 	// db = `projects/<project>/instances/<instance-id>/database/<database-id>`
 	matches := regexp.MustCompile("^(.+)/databases/(.+)$").FindStringSubmatch(db)
