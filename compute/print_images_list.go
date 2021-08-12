@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START compute_instances_list]
+// [START compute_images_list]
 import (
 	"context"
 	"fmt"
@@ -23,37 +23,41 @@ import (
 	compute "cloud.google.com/go/compute/apiv1"
 	"google.golang.org/api/iterator"
 	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
+	"google.golang.org/protobuf/proto"
 )
 
-// listInstances prints a list of instances created in given project in given zone.
-func listInstances(w io.Writer, projectID, zone string) error {
+// printImagesList prints a list of all non-deprecated image names available in given project.
+func printImagesList(w io.Writer, projectID string) error {
 	// projectID := "your_project_id"
-	// zone := "europe-central2-b"
 	ctx := context.Background()
-	instancesClient, err := compute.NewInstancesRESTClient(ctx)
+	imagesClient, err := compute.NewImagesRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewInstancesRESTClient: %v", err)
+		return fmt.Errorf("NewImagesRESTClient: %v", err)
 	}
-	defer instancesClient.Close()
+	defer imagesClient.Close()
 
-	req := &computepb.ListInstancesRequest{
-		Project: projectID,
-		Zone:    zone,
+	// Listing only non-deprecated images to reduce the size of the reply.
+	req := &computepb.ListImagesRequest{
+		Project:    projectID,
+		MaxResults: proto.Uint32(3),
+		Filter:     proto.String("deprecated.state != DEPRECATED"),
 	}
 
-	it := instancesClient.List(ctx, req)
-	fmt.Fprintf(w, "Instances found in zone %s:\n", zone)
+	// Although the `MaxResults` parameter is specified in the request, the iterator returned
+	// by the `list()` method hides the pagination mechanic. The library makes multiple
+	// requests to the API for you, so you can simply iterate over all the images.
+	it := imagesClient.List(ctx, req)
 	for {
-		instance, err := it.Next()
+		image, err := it.Next()
 		if err == iterator.Done {
 			break
 		}
 		if err != nil {
 			return err
 		}
-		fmt.Fprintf(w, "- %s %s\n", *instance.Name, *instance.MachineType)
+		fmt.Fprintf(w, "- %s\n", *image.Name)
 	}
 	return nil
 }
 
-// [END compute_instances_list]
+// [END compute_images_list]

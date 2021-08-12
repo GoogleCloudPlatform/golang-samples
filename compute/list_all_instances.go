@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START compute_instances_list]
+// [START compute_instances_list_all]
 import (
 	"context"
 	"fmt"
@@ -23,12 +23,12 @@ import (
 	compute "cloud.google.com/go/compute/apiv1"
 	"google.golang.org/api/iterator"
 	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
+	"google.golang.org/protobuf/proto"
 )
 
-// listInstances prints a list of instances created in given project in given zone.
-func listInstances(w io.Writer, projectID, zone string) error {
+// listAllInstances prints all instances present in a project, grouped by their zone.
+func listAllInstances(w io.Writer, projectID string) error {
 	// projectID := "your_project_id"
-	// zone := "europe-central2-b"
 	ctx := context.Background()
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
 	if err != nil {
@@ -36,24 +36,34 @@ func listInstances(w io.Writer, projectID, zone string) error {
 	}
 	defer instancesClient.Close()
 
-	req := &computepb.ListInstancesRequest{
-		Project: projectID,
-		Zone:    zone,
+	// Use the `MaxResults` parameter to limit the number of results that the API returns per response page.
+	req := &computepb.AggregatedListInstancesRequest{
+		Project:    projectID,
+		MaxResults: proto.Uint32(3),
 	}
 
-	it := instancesClient.List(ctx, req)
-	fmt.Fprintf(w, "Instances found in zone %s:\n", zone)
+	it := instancesClient.AggregatedList(ctx, req)
+	fmt.Fprintf(w, "Instances found:\n")
+	// Despite using the `MaxResults` parameter, you don't need to handle the pagination
+	// yourself. The returned iterator object handles pagination
+	// automatically, returning separated pages as you iterate over the results.
 	for {
-		instance, err := it.Next()
+		pair, err := it.Next()
 		if err == iterator.Done {
 			break
 		}
 		if err != nil {
 			return err
 		}
-		fmt.Fprintf(w, "- %s %s\n", *instance.Name, *instance.MachineType)
+		instances := pair.Value.Instances
+		if len(instances) > 0 {
+			fmt.Fprintf(w, "%s\n", pair.Key)
+			for _, instance := range instances {
+				fmt.Fprintf(w, "- %s %s\n", *instance.Name, *instance.MachineType)
+			}
+		}
 	}
 	return nil
 }
 
-// [END compute_instances_list]
+// [END compute_instances_list_all]

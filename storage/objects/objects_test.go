@@ -378,6 +378,9 @@ func TestV4SignedURL(t *testing.T) {
 
 	httpClient := &http.Client{}
 	request, err := http.NewRequest("PUT", putURL, strings.NewReader("hello world"))
+	if err != nil {
+		t.Fatalf("failed to compose HTTP request: %v", err)
+	}
 	request.ContentLength = 11
 	request.Header.Set("Content-Type", "application/octet-stream")
 	response, err := httpClient.Do(request)
@@ -422,6 +425,9 @@ func TestPostPolicyV4(t *testing.T) {
 	bucketName := tc.ProjectID + "-post-policy-bucket-name"
 	objectName := "foo.txt"
 	serviceAccount := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
+	if serviceAccount == "" {
+		t.Error("GOOGLE_APPLICATION_CREDENTIALS must be set")
+	}
 
 	if err := testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName); err != nil {
 		t.Fatalf("CleanBucket: %v", err)
@@ -479,14 +485,23 @@ func TestPostPolicyV4(t *testing.T) {
 		t.Fatalf("failed to compose HTTP request: %v", err)
 	}
 	req.Header.Set("Content-Type", mw.FormDataContentType())
+
+	// Dump the request for logging.
+	requestDump, err := httputil.DumpRequest(req, true)
+	if err != nil {
+		t.Logf("requestDump: %v", err)
+	}
+
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		t.Fatalf("client.Do: %v", err)
 	}
 	if g, w := res.StatusCode, 204; g != w {
-		blob, _ := httputil.DumpResponse(res, true)
-		t.Errorf("status code in response mismatch: got %d want %d\nBody: %s", g, w, blob)
+		responseDump, _ := httputil.DumpResponse(res, true)
+		t.Errorf("status code in response mismatch: got %d want %d\nRequest: %v\n\nResponse: %s\n",
+			g, w, string(requestDump), responseDump)
 	}
+
 	io.Copy(ioutil.Discard, res.Body)
 	if err := res.Body.Close(); err != nil {
 		t.Errorf("Body.Close: %v", err)
