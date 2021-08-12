@@ -73,4 +73,4 @@ func createDownscopedToken(ctx context.Context) (*oauth2.Token, error) {
 	return tok, nil
 }
 
-// [END auth_overview_credential_access_boundary]
+// [END auth_overview_downscoping_token_broker]
