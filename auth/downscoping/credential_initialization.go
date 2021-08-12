@@ -54,4 +54,4 @@ func initializeCredentials(ctx context.Context, accessBoundary []downscope.Acces
 	return tok, nil
 }
 
-// [END auth_overview_credential_access_boundary]
+// [END auth_overview_downscoped_credential_initialization]
