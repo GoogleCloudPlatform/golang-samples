@@ -19,18 +19,16 @@ package helloworld
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
+    "fmt"
 	"log"
-	"net/http"
 
 	"github.com/cloudevents/sdk-go/v2/event"
 )
 
-// A CloudEvent containing the Pub/Sub message.
+// A Message containing the Pub/Sub message.
 // See the documentation for more details:
 // https://cloud.google.com/eventarc/docs/cloudevents#pubsub
-type CloudEventMessage struct {
+type MessagePublishedData struct {
 	Message PubSubMessage
 }
 
@@ -43,12 +41,12 @@ type PubSubMessage struct {
 
 // HelloPubSub consumes a CloudEvent message and extracts the Pub/Sub message.
 func HelloPubSub(ctx context.Context, e event.Event) error {
-	var cem CloudEventMessage
-	if err := json.Unmarshal(e.Data(), &cem); err != nil {
-		return fmt.Errorf("Bad HTTP Request: %v", http.StatusBadRequest)
-	}
+    var msg MessagePublishedData
+    if err := e.DataAs(&msg); err != nil {
+        return fmt.Errorf("event.DataAs: %v", err)
+    }
 
-	name := string(cem.Message.Data) // Automatically decoded from base64.
+	name := string(msg.Message.Data) // Automatically decoded from base64.
 	if name == "" {
 		name = "World"
 	}

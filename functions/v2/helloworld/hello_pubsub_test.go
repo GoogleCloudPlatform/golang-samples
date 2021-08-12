@@ -43,13 +43,13 @@ func TestHelloPubSub(t *testing.T) {
 		m := PubSubMessage{
 			Data: []byte(test.data),
 		}
-		cem := CloudEventMessage{
+		msg := MessagePublishedData{
 			Message: m,
 		}
 
 		e := event.New()
 		e.SetDataContentType("application/json")
-		e.SetData(e.DataContentType(), cem)
+		e.SetData(e.DataContentType(), msg)
 
 		HelloPubSub(context.Background(), e)
 
