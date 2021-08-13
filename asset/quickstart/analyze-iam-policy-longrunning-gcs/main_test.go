@@ -52,7 +52,7 @@ func TestMain(t *testing.T) {
 		t.Errorf("did not expect stderr output, got %d bytes: %s", len(stdErr), string(stdErr))
 	}
 	got := string(stdOut)
-	if !strings.Contains(got, uri) {
+	if !strings.Contains(got, "operation completed successfully") {
 		t.Errorf("stdout returned %s, wanted to contain %s", got, uri)
 	}
 }
