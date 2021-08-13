@@ -9,7 +9,7 @@ require (
 	cloud.google.com/go/datastore v1.2.0
 	cloud.google.com/go/firestore v1.3.0
 	cloud.google.com/go/logging v1.0.0
-	cloud.google.com/go/pubsub v1.14.0
+	cloud.google.com/go/pubsub v1.15.0
 	cloud.google.com/go/pubsublite v1.1.0
 	cloud.google.com/go/spanner v1.21.0
 	cloud.google.com/go/storage v1.16.0
