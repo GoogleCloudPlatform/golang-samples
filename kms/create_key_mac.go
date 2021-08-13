@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 package kms
 
-// [START kms_create_key_asymmetric_decrypt]
+// [START kms_create_key_mac]
 import (
 	"context"
 	"fmt"
@@ -26,11 +26,10 @@ import (
 	"google.golang.org/protobuf/types/known/durationpb"
 )
 
-// createKeyAsymmetricDecrypt creates a new asymmetric RSA encrypt/decrypt key
-// pair where the private key is stored in Cloud KMS.
-func createKeyAsymmetricDecrypt(w io.Writer, parent, id string) error {
+// createKeyMac creates a new key for use with MacSign.
+func createKeyMac(w io.Writer, parent, id string) error {
 	// parent := "projects/my-project/locations/us-east1/keyRings/my-key-ring"
-	// id := "my-asymmetric-encryption-key"
+	// id := "my-mac-key"
 
 	// Create the client.
 	ctx := context.Background()
@@ -45,9 +44,9 @@ func createKeyAsymmetricDecrypt(w io.Writer, parent, id string) error {
 		Parent:      parent,
 		CryptoKeyId: id,
 		CryptoKey: &kmspb.CryptoKey{
-			Purpose: kmspb.CryptoKey_ASYMMETRIC_DECRYPT,
+			Purpose: kmspb.CryptoKey_MAC,
 			VersionTemplate: &kmspb.CryptoKeyVersionTemplate{
-				Algorithm: kmspb.CryptoKeyVersion_RSA_DECRYPT_OAEP_2048_SHA256,
+				Algorithm: kmspb.CryptoKeyVersion_HMAC_SHA256,
 			},
 
 			// Optional: customize how long key versions should be kept before destroying.
@@ -64,4 +63,4 @@ func createKeyAsymmetricDecrypt(w io.Writer, parent, id string) error {
 	return nil
 }
 
-// [END kms_create_key_asymmetric_decrypt]
+// [END kms_create_key_mac]

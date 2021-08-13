@@ -119,6 +119,21 @@ func TestCreateKeyLabels(t *testing.T) {
 	}
 }
 
+func TestCreateKeyMAC(t *testing.T) {
+	testutil.SystemTest(t)
+
+	parent, id := fixture.KeyRingName, fixture.RandomID()
+
+	var b bytes.Buffer
+	if err := createKeyMac(&b, parent, id); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Created key:"; !strings.Contains(got, want) {
+		t.Errorf("createKeyMac: expected %q to contain %q", got, want)
+	}
+}
+
 func TestCreateKeySymmetricEncryptDecrypt(t *testing.T) {
 	testutil.SystemTest(t)
 
@@ -346,6 +361,21 @@ func TestEncryptSymmetric(t *testing.T) {
 	}
 }
 
+func TestGenerateRandomBytes(t *testing.T) {
+	testutil.SystemTest(t)
+
+	name := fixture.LocationName
+
+	var b bytes.Buffer
+	if err := generateRandomBytes(&b, name, 256); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Random bytes:"; !strings.Contains(got, want) {
+		t.Errorf("generateRandomBytes: expected %q to contain %q", got, want)
+	}
+}
+
 func TestGetKeyVersionAttestation(t *testing.T) {
 	testutil.SystemTest(t)
 
@@ -466,6 +496,21 @@ func TestSignAsymmetric(t *testing.T) {
 
 	if got, want := b.String(), "Signed digest:"; !strings.Contains(got, want) {
 		t.Errorf("signAsymmetric: expected %q to contain %q", got, want)
+	}
+}
+
+func TestSignMac(t *testing.T) {
+	testutil.SystemTest(t)
+
+	name := fmt.Sprintf("%s/cryptoKeyVersions/1", fixture.HMACKeyName)
+
+	var b bytes.Buffer
+	if err := signMac(&b, name, "fruitloops"); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Signature:"; !strings.Contains(got, want) {
+		t.Errorf("signMac: expected %q to contain %q", got, want)
 	}
 }
 
@@ -610,6 +655,36 @@ func TestVerifyAsymmetricRSA(t *testing.T) {
 	}
 
 	if got, want := b.String(), "Verified signature"; !strings.Contains(got, want) {
+		t.Errorf("verifyAsymmetricRSA: expected %q to contain %q", got, want)
+	}
+}
+
+func TestVerifyMac(t *testing.T) {
+	testutil.SystemTest(t)
+
+	message := []byte("fruitloops")
+	name := fmt.Sprintf("%s/cryptoKeyVersions/1", fixture.HMACKeyName)
+
+	ctx := context.Background()
+	client, err := kms.NewKeyManagementClient(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	result, err := client.MacSign(ctx, &kmspb.MacSignRequest{
+		Name: name,
+		Data: message,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var b bytes.Buffer
+	if err := verifyMac(&b, name, message, result.Mac); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Verified: true"; !strings.Contains(got, want) {
 		t.Errorf("verifyAsymmetricRSA: expected %q to contain %q", got, want)
 	}
 }
