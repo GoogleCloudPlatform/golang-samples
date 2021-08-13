@@ -24,6 +24,7 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
+// createProtoSchema creates a schema resource from a schema proto file.
 func createProtoSchema(w io.Writer, projectID, schemaID, protoFile string) error {
 	// projectID := "my-project-id"
 	// schemaID := "my-schema"
