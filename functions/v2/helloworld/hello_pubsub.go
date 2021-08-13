@@ -25,7 +25,7 @@ import (
 	"github.com/cloudevents/sdk-go/v2/event"
 )
 
-// A Message containing the Pub/Sub message.
+// MessagePublishedData contains the full Pub/Sub message
 // See the documentation for more details:
 // https://cloud.google.com/eventarc/docs/cloudevents#pubsub
 type MessagePublishedData struct {
