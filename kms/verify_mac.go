@@ -48,7 +48,7 @@ func verifyMac(w io.Writer, name string, data, signature []byte) error {
 	// Verify the signature.
 	result, err := client.MacVerify(ctx, req)
 	if err != nil {
-		return fmt.Errorf("failed to verify signature: %w", err)
+		return fmt.Errorf("failed to verify signature: %v", err)
 	}
 
 	fmt.Fprintf(w, "Verified: %t", result.Success)

@@ -47,7 +47,7 @@ func signMac(w io.Writer, name string, data string) error {
 	// Generate HMAC of data.
 	result, err := client.MacSign(ctx, req)
 	if err != nil {
-		return fmt.Errorf("failed to hmac sign: %w", err)
+		return fmt.Errorf("failed to hmac sign: %v", err)
 	}
 
 	// The data comes back as raw bytes, which may include non-printable
