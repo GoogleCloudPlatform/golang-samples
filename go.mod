@@ -14,14 +14,14 @@ require (
 	cloud.google.com/go/spanner v1.21.0
 	cloud.google.com/go/storage v1.16.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.5
-	github.com/aws/aws-sdk-go v1.38.69
+	github.com/aws/aws-sdk-go v1.40.22
 	github.com/bmatcuk/doublestar/v2 v2.0.4
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
 	github.com/eclipse/paho.mqtt.golang v1.3.5
 	github.com/fluent/fluent-logger-golang v1.6.1
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/gofrs/uuid v3.4.0+incompatible
-	github.com/golang-jwt/jwt v3.2.1+incompatible
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2
 	github.com/gomodule/redigo v2.0.0+incompatible
@@ -38,15 +38,15 @@ require (
 	github.com/sendgrid/smtpapi-go v0.6.0 // indirect
 	github.com/tinylib/msgp v1.1.2 // indirect
 	go.opencensus.io v0.23.0
-	golang.org/x/exp v0.0.0-20210625193404-fa9d1d177d71
-	golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420
+	golang.org/x/exp v0.0.0-20210812203943-8c280c88aa00
+	golang.org/x/net v0.0.0-20210614182718-04defd469f4e
 	golang.org/x/oauth2 v0.0.0-20210810183815-faf39c7919d5
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/sys v0.0.0-20210809222454-d867a43fc93e // indirect
 	golang.org/x/text v0.3.7
-	google.golang.org/api v0.53.0
+	google.golang.org/api v0.54.0
 	google.golang.org/appengine v1.6.7
-	google.golang.org/genproto v0.0.0-20210811021853-ddbe55d93216
+	google.golang.org/genproto v0.0.0-20210813162853-db860fec028c
 	google.golang.org/grpc v1.40.0
 	google.golang.org/grpc/examples v0.0.0-20200707005602-4258d12073b4
 	google.golang.org/protobuf v1.27.1
