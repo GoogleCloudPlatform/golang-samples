@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/golang-samples
 go 1.11
 
 require (
-	cloud.google.com/go v0.90.0
+	cloud.google.com/go v0.91.1
 	cloud.google.com/go/bigquery v1.19.0
 	cloud.google.com/go/bigtable v1.4.0
 	cloud.google.com/go/datastore v1.2.0
@@ -22,6 +22,7 @@ require (
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/gofrs/uuid v3.4.0+incompatible
 	github.com/golang-jwt/jwt v3.2.1+incompatible
+	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/google/go-cmp v0.5.6
@@ -39,13 +40,14 @@ require (
 	go.opencensus.io v0.23.0
 	golang.org/x/exp v0.0.0-20210625193404-fa9d1d177d71
 	golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420
-	golang.org/x/oauth2 v0.0.0-20210628180205-a41e5a781914
+	golang.org/x/oauth2 v0.0.0-20210810183815-faf39c7919d5
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	golang.org/x/text v0.3.6
-	google.golang.org/api v0.52.0
+	golang.org/x/sys v0.0.0-20210809222454-d867a43fc93e // indirect
+	golang.org/x/text v0.3.7
+	google.golang.org/api v0.53.0
 	google.golang.org/appengine v1.6.7
-	google.golang.org/genproto v0.0.0-20210804223703-f1db76f3300d
-	google.golang.org/grpc v1.39.0
+	google.golang.org/genproto v0.0.0-20210811021853-ddbe55d93216
+	google.golang.org/grpc v1.40.0
 	google.golang.org/grpc/examples v0.0.0-20200707005602-4258d12073b4
 	google.golang.org/protobuf v1.27.1
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
