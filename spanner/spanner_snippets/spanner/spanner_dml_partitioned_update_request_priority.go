@@ -25,7 +25,7 @@ import (
 	sppb "google.golang.org/genproto/googleapis/spanner/v1"
 )
 
-// updateUsingBatchDMLRequestPriority updates a database using partitioned DML with request priority set
+// updateUsingPartitionedDMLRequestPriority updates a database using partitioned DML with request priority set
 func updateUsingPartitionedDMLRequestPriority(w io.Writer, db string) error {
 	// db = `projects/<project>/instances/<instance-id>/database/<database-id>`
 	ctx := context.Background()
