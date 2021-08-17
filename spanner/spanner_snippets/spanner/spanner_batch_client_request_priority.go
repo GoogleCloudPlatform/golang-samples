@@ -26,7 +26,9 @@ import (
 	sppb "google.golang.org/genproto/googleapis/spanner/v1"
 )
 
+// readBatchDataRequestPriority reads a database in batch read-only transaction with request priority set
 func readBatchDataRequestPriority(w io.Writer, db string) error {
+	// db = `projects/<project>/instances/<instance-id>/database/<database-id>`
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)
 	if err != nil {

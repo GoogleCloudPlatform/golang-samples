@@ -25,7 +25,9 @@ import (
 	sppb "google.golang.org/genproto/googleapis/spanner/v1"
 )
 
+// updateUsingBatchDMLRequestPriority updates a database using batch DML with request priority set
 func updateUsingBatchDMLRequestPriority(w io.Writer, db string) error {
+	// db = `projects/<project>/instances/<instance-id>/database/<database-id>`
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)
 	if err != nil {
