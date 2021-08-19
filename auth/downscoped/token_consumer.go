@@ -14,7 +14,7 @@
 
 package downscopedoverview
 
-// [START downscoping_token_consumer]
+// [START auth_downscoping_token_consumer]
 
 import (
 	"context"
@@ -102,4 +102,4 @@ func getObjectContents(output io.Writer, bucketName string, objectName string) e
 	return nil
 }
 
-// [END downscoping_token_consumer]
+// [END auth_downscoping_token_consumer]
