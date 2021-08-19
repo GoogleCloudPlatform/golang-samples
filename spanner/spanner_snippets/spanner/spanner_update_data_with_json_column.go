@@ -62,9 +62,9 @@ func updateDataWithJsonColumn(w io.Writer, db string) error {
 
 	cols := []string{"VenueId", "VenueDetails"}
 	_, err = client.Apply(ctx, []*spanner.Mutation{
-		spanner.Update("VenueDetails", cols, []interface{}{4, string(details_1)}),
-		spanner.Update("VenueDetails", cols, []interface{}{19, string(details_2)}),
-		spanner.Update("VenueDetails", cols, []interface{}{42, string(details_3)}),
+		spanner.Update("VenueDetails", cols, []interface{}{4, details_1}),
+		spanner.Update("VenueDetails", cols, []interface{}{19, details_2}),
+		spanner.Update("VenueDetails", cols, []interface{}{42, details_3}),
 	})
 
 	if err != nil {
