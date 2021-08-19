@@ -41,23 +41,24 @@ func updateDataWithJsonColumn(w io.Writer, db string) error {
 	defer client.Close()
 
 	type VenueDetails struct {
-		Name   interface{} `json:"name"`
-		Rating interface{} `json:"rating"`
-		Open   interface{} `json:"open"`
-		Tags   interface{} `json:"tags"`
+		Name   spanner.NullString   `json:"name"`
+		Rating spanner.NullFloat64  `json:"rating"`
+		Open   interface{}          `json:"open"`
+		Tags   []spanner.NullString `json:"tags"`
 	}
 
-	details_1, _ := NullJSON([]VenueDetails{
-		{Name: "room1", Open: true},
-		{Name: "room2", Open: false},
+	details_1, _ := spanner.NullJSON([]VenueDetails{
+		{Name: spanner.NullString{"room1", true}, Open: true},
+		{Name: spanner.NullString{"room2", true}, Open: false},
 	}, true)
-	details_2, _ := NullJSON(VenueDetails{
-		Rating: 9,
+	details_2, _ := spanner.NullJSON(VenueDetails{
+		Rating: spanner.NullFloat64{9, true},
 		Open:   true,
 	}, true)
-	details_3, _ := NullJSON(VenueDetails{
-		Name: nil,
+	details_3, _ := spanner.NullJSON(VenueDetails{
+		Name: spanner.NullString{"", false},
 		Open: map[string]bool{"monday": true, "tuesday": false},
+		Tags: []spanner.NullString{spanner.NullString{"large", true}, spanner.NullString{"airy", true}},
 	}, true)
 
 	cols := []string{"VenueId", "VenueDetails"}
