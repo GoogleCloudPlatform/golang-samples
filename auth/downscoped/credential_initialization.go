@@ -28,7 +28,7 @@ import (
 	"golang.org/x/oauth2/google/downscope"
 )
 
-// initializeCredentials will return a downscoped token using the provided Access Boundary Rules.
+// initializeCredentials will generate a downscoped token using the provided Access Boundary Rules.
 //
 // accessBoundary := []downscope.AccessBoundaryRule{
 //		{
@@ -36,7 +36,7 @@ import (
 //			AvailablePermissions: []string{"inRole:roles/storage.objectViewer"},
 //		},
 //	}
-func initializeCredentials(accessBoundary []downscope.AccessBoundaryRule) (*oauth2.Token, error) {
+func initializeCredentials(accessBoundary []downscope.AccessBoundaryRule) error {
 	ctx := context.Background()
 	// This Source can be initialized in multiple ways; the following example uses
 	// Application Default Credentials.
@@ -45,20 +45,22 @@ func initializeCredentials(accessBoundary []downscope.AccessBoundaryRule) (*oaut
 	// You must provide the "https://www.googleapis.com/auth/cloud-platform" scope.
 	rootSource, err := google.DefaultTokenSource(ctx, "https://www.googleapis.com/auth/cloud-platform")
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate rootSource: %v", err)
+		return fmt.Errorf("failed to generate rootSource: %v", err)
 	}
 
 	// downscope.NewTokenSource constructs the token source with the configuration provided.
 	dts, err := downscope.NewTokenSource(ctx, downscope.DownscopingConfig{RootSource: rootSource, Rules: accessBoundary})
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate downscoped token source: %v", err)
+		return fmt.Errorf("failed to generate downscoped token source: %v", err)
 	}
 	// Token() uses the previously declared TokenSource to generate a downscoped token.
 	tok, err := dts.Token()
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate token: %v", err)
+		return fmt.Errorf("failed to generate token: %v", err)
 	}
-	return tok, nil
+	_ = tok
+	// You can now use tok to access Google Storage resources
+	return nil
 }
 
 // [END auth_downscoping_initialize_downscoped_cred]

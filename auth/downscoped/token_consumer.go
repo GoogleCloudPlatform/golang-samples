@@ -19,7 +19,11 @@ package downscopedoverview
 import (
 	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
+
+	"golang.org/x/oauth2/google"
+	"golang.org/x/oauth2/google/downscope"
 
 	"cloud.google.com/go/storage"
 	"golang.org/x/oauth2"
@@ -31,23 +35,47 @@ import (
 // The token broker holds the root credential that is used to generate the
 // downscoped token.
 type localTokenSource struct {
-	requestedObject string
-	brokerURL       string
+	ctx        context.Context
+	bucketName string
+	brokerURL  string
 }
 
-func (localTokenSource) Token() (*oauth2.Token, error) {
-	var remoteToken oauth2.Token
-	// Retrieve remoteToken, an oauth2.Token, from token broker.
-	return &remoteToken, nil
+func (lts localTokenSource) Token() (*oauth2.Token, error) {
+	var remoteToken *oauth2.Token
+	// Usually you would now retrieve remoteToken, an oauth2.Token, from token broker.
+	// This snippet performs the same functionality locally.
+	accessBoundary := []downscope.AccessBoundaryRule{
+		{
+			AvailableResource:    "//storage.googleapis.com/projects/_/buckets/" + lts.bucketName,
+			AvailablePermissions: []string{"inRole:roles/storage.objectViewer"},
+		},
+	}
+	rootSource, err := google.DefaultTokenSource(lts.ctx, "https://www.googleapis.com/auth/cloud-platform")
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate rootSource: %v", err)
+	}
+	dts, err := downscope.NewTokenSource(lts.ctx, downscope.DownscopingConfig{RootSource: rootSource, Rules: accessBoundary})
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate downscoped token source: %v", err)
+	}
+	// Token() uses the previously declared TokenSource to generate a downscoped token.
+	remoteToken, err = dts.Token()
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate token: %v", err)
+	}
+
+	return remoteToken, nil
 }
 
 // getObjectContents will read the contents of an object in Google Storage
 // named "myFile.txt", contained in the bucket "foo"
-func getObjectContents() ([]byte, error) {
+func getObjectContents(output io.Writer, bucketName string, objectName string) error {
 	ctx := context.Background()
+
 	thisTokenSource := localTokenSource{
-		requestedObject: "//storage.googleapis.com/projects/_/buckets/foo",
-		brokerURL:       "yourURL.com/internal/broker",
+		ctx:        ctx,
+		bucketName: bucketName,
+		brokerURL:  "yourURL.com/internal/broker",
 	}
 
 	// Wrap the TokenSource in an oauth2.ReuseTokenSource to enable automatic refreshing.
@@ -56,20 +84,22 @@ func getObjectContents() ([]byte, error) {
 	storageClient, err := storage.NewClient(ctx, option.WithTokenSource(refreshableTS))
 	defer storageClient.Close()
 	if err != nil {
-		return nil, fmt.Errorf("failed to create the storage client: %v", err)
+		return fmt.Errorf("failed to create the storage client: %v", err)
 	}
-	bkt := storageClient.Bucket("foo")
-	obj := bkt.Object("myFile.txt")
+	bkt := storageClient.Bucket(bucketName)
+	obj := bkt.Object(objectName)
 	rc, err := obj.NewReader(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve the object: %v", err)
+		return fmt.Errorf("failed to retrieve the object: %v", err)
 	}
 	defer rc.Close()
 	data, err := ioutil.ReadAll(rc)
 	if err != nil {
-		return nil, fmt.Errorf("could not read the object's contents: %v", err)
+		return fmt.Errorf("could not read the object's contents: %v", err)
 	}
-	return data, err
+	// data now contains the contents of the requested object
+	output.Write(data)
+	return nil
 }
 
 // [END downscoping_token_consumer]

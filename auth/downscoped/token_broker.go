@@ -28,7 +28,7 @@ import (
 // createDownscopedToken would be run on the token broker in order to generate
 // a downscoped access token.  The token broker would then pass the newly created
 // token to the requesting token consumer for use.
-func createDownscopedToken() (*oauth2.Token, error) {
+func createDownscopedToken(bucketName string) error {
 	ctx := context.Background()
 	// A condition can optionally be provided to further restrict access permissions.
 	condition := downscope.AvailabilityCondition{
@@ -41,7 +41,7 @@ func createDownscopedToken() (*oauth2.Token, error) {
 	// permission "storage.objectViewer".
 	accessBoundary := []downscope.AccessBoundaryRule{
 		{
-			AvailableResource:    "//storage.googleapis.com/projects/_/buckets/foo",
+			AvailableResource:    "//storage.googleapis.com/projects/_/buckets/" + bucketName,
 			AvailablePermissions: []string{"inRole:roles/storage.objectViewer"},
 			Condition:            &condition, // Optional
 		},
@@ -54,21 +54,22 @@ func createDownscopedToken() (*oauth2.Token, error) {
 	// You must provide the "https://www.googleapis.com/auth/cloud-platform" scope.
 	rootSource, err := google.DefaultTokenSource(ctx, "https://www.googleapis.com/auth/cloud-platform")
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate rootSource: %v", err)
+		return fmt.Errorf("failed to generate rootSource: %v", err)
 	}
 
 	// downscope.NewTokenSource constructs the token source with the configuration provided.
 	dts, err := downscope.NewTokenSource(ctx, downscope.DownscopingConfig{RootSource: rootSource, Rules: accessBoundary})
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate downscoped token source: %v", err)
+		return fmt.Errorf("failed to generate downscoped token source: %v", err)
 	}
 	// Token() uses the previously declared TokenSource to generate a downscoped token.
 	tok, err := dts.Token()
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate token: %v", err)
+		return fmt.Errorf("failed to generate token: %v", err)
 	}
 	// Pass this token back to the token consumer.
-	return tok, nil
+	_ = tok
+	return nil
 }
 
 // [END auth_downscoping_token_broker]

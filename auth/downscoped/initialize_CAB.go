@@ -20,7 +20,7 @@ import "golang.org/x/oauth2/google/downscope"
 
 // constructCAB shows how to initialize a Credential Access Boundary for downscoping tokens.
 // This sample uses on Access Boundary Rule; up to 10 may be included.
-func constructCAB() []downscope.AccessBoundaryRule {
+func constructCAB(bucketName string) {
 	// A condition can optionally be provided to further restrict access permissions.
 	condition := downscope.AvailabilityCondition{
 		Expression:  "resource.name.startsWith('projects/_/buckets/foo/objects/profile-picture-'",
@@ -32,14 +32,14 @@ func constructCAB() []downscope.AccessBoundaryRule {
 	// permission "storage.objectViewer".
 	accessBoundary := []downscope.AccessBoundaryRule{
 		{
-			AvailableResource:    "//storage.googleapis.com/projects/_/buckets/foo",
+			AvailableResource:    "//storage.googleapis.com/projects/_/buckets/" + bucketName,
 			AvailablePermissions: []string{"inRole:roles/storage.objectViewer"},
 			Condition:            &condition, // Optional
 		},
 	}
 
 	// You can now use this accessBoundary to generate a downscoped token
-	return accessBoundary
+	_ = accessBoundary
 }
 
 // [END auth_downscoping_rules]
