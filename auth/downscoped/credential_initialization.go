@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package downscopingoverview contains Google Cloud auth snippets showing how to
+// package downscopedoverview contains Google Cloud auth snippets showing how to
 // downscope credentials with Credential Access Boundaries.
 // https://cloud.google.com/iam/docs/downscoping-short-lived-credentials
 package downscopedoverview
@@ -29,13 +29,6 @@ import (
 )
 
 // initializeCredentials will generate a downscoped token using the provided Access Boundary Rules.
-//
-// accessBoundary := []downscope.AccessBoundaryRule{
-//		{
-//			AvailableResource:    "//storage.googleapis.com/projects/_/buckets/foo",
-//			AvailablePermissions: []string{"inRole:roles/storage.objectViewer"},
-//		},
-//	}
 func initializeCredentials(accessBoundary []downscope.AccessBoundaryRule) error {
 	ctx := context.Background()
 	// This Source can be initialized in multiple ways; the following example uses
@@ -59,7 +52,7 @@ func initializeCredentials(accessBoundary []downscope.AccessBoundaryRule) error 
 		return fmt.Errorf("failed to generate token: %v", err)
 	}
 	_ = tok
-	// You can now use tok to access Google Storage resources
+	// You can now use tok to access Google Storage resources.
 	return nil
 }
 

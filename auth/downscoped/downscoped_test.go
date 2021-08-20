@@ -40,7 +40,7 @@ func TestInitializeCredentials(t *testing.T) {
 	}
 }
 
-func TestCreateObjectContents(t *testing.T) {
+func TestReadObjectContents(t *testing.T) {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 

@@ -26,18 +26,18 @@ import (
 )
 
 // createDownscopedToken would be run on the token broker in order to generate
-// a downscoped access token.  The token broker would then pass the newly created
-// token to the requesting token consumer for use.
-func createDownscopedToken(bucketName string) error {
+// a downscoped access token that only grants access to objects whose name begins with prefix.
+// The token broker would then pass the newly created token to the requesting token consumer for use.
+func createDownscopedToken(bucketName string, prefix string) error {
 	ctx := context.Background()
 	// A condition can optionally be provided to further restrict access permissions.
 	condition := downscope.AvailabilityCondition{
-		Expression:  "resource.name.startsWith('projects/_/buckets/foo/objects/profile-picture-'",
+		Expression:  "resource.name.startsWith('projects/_/buckets/" + bucketName + "/objects/" + prefix + "'",
 		Title:       "Pictures Only",
-		Description: "Restricts a token to only be able to access objects that start with `profile-picture-`",
+		Description: "Restricts a token to only be able to access objects that start with `" + prefix + "`",
 	}
 	// Initializes an accessBoundary with one Rule which restricts the downscoped
-	// token to only be able to access the bucket "foo" and only grants it the
+	// token to only be able to access the bucket "bucketName" and only grants it the
 	// permission "storage.objectViewer".
 	accessBoundary := []downscope.AccessBoundaryRule{
 		{
