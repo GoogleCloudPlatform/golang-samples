@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -39,10 +39,19 @@ func queryWithJsonParameter(w io.Writer, db string) error {
 	}
 	defer client.Close()
 
+	type VenueDetails struct {
+		Name   spanner.NullString   `json:"name"`
+		Rating spanner.NullFloat64  `json:"rating"`
+		Open   interface{}          `json:"open"`
+		Tags   []spanner.NullString `json:"tags"`
+	}
+
 	stmt := spanner.Statement{
 		SQL: `SELECT VenueId, VenueDetails FROM Venues WHERE JSON_VALUE(VenueDetails, '$.rating') = JSON_VALUE(@details, '$.rating')`,
 		Params: map[string]interface{}{
-			"details": map[string]interface{}{"rating": 9},
+			"details": spanner.NullJSON(VenueDetails{
+				Rating: spanner.NullFloat64{9, true},
+			}, true),
 		},
 	}
 	iter := client.Single().Query(ctx, stmt)
@@ -56,7 +65,7 @@ func queryWithJsonParameter(w io.Writer, db string) error {
 			return err
 		}
 		var venueID int64
-		var venueDetails string
+		var venueDetails spanner.NullJSON
 		if err := row.Columns(&venueID, &venueDetails); err != nil {
 			return err
 		}

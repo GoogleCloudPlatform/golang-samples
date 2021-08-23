@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -56,9 +56,9 @@ func updateDataWithJsonColumn(w io.Writer, db string) error {
 		Open:   true,
 	}, true)
 	details_3, _ := spanner.NullJSON(VenueDetails{
-		Name: spanner.NullString{"", false},
+		Name: spanner.NullString{Valid: false},
 		Open: map[string]bool{"monday": true, "tuesday": false},
-		Tags: []spanner.NullString{spanner.NullString{"large", true}, spanner.NullString{"airy", true}},
+		Tags: []spanner.NullString{{"large", true}, {"airy", true}},
 	}, true)
 
 	cols := []string{"VenueId", "VenueDetails"}
