@@ -56,8 +56,8 @@ func TestReadObjectContents(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to generate random UUID suffix: %v", err)
 	}
-	bucketName := "bucket-downscoping-test-golang-" + randSuffix.String()
-	objectName := "object-downscoping-test-golang-" + randSuffix.String()
+	bucketName := "bucket-downscoping-test-golang-" + randSuffix.String()[0:20]
+	objectName := "object-downscoping-test-golang-" + randSuffix.String()[0:20]
 	content := "CONTENT"
 	bucket := client.Bucket(bucketName)
 
