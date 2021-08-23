@@ -24,6 +24,7 @@ import (
 
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/google/uuid"
 	"golang.org/x/oauth2/google/downscope"
 )
 
@@ -51,8 +52,12 @@ func TestReadObjectContents(t *testing.T) {
 		t.Errorf("%v", err)
 		return
 	}
-	bucketName := "bucket-downscoping-test-golangpj"
-	objectName := "object-downscoping-test-golangpj"
+	randSuffix, err := uuid.NewRandom()
+	if err != nil {
+		t.Fatalf("Failed to generate random UUID suffix: %v", err)
+	}
+	bucketName := "bucket-downscoping-test-golang-" + randSuffix.String()
+	objectName := "object-downscoping-test-golang-" + randSuffix.String()
 	content := "CONTENT"
 	bucket := client.Bucket(bucketName)
 

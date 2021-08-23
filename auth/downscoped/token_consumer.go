@@ -68,7 +68,7 @@ func (lts localTokenSource) Token() (*oauth2.Token, error) {
 }
 
 // getObjectContents will read the contents of an object in Google Storage
-// named "myFile.txt", contained in the bucket "bucketName"
+// named objectName, contained in the bucket "bucketName".
 func getObjectContents(output io.Writer, bucketName string, objectName string) error {
 	ctx := context.Background()
 
@@ -97,7 +97,7 @@ func getObjectContents(output io.Writer, bucketName string, objectName string) e
 	if err != nil {
 		return fmt.Errorf("could not read the object's contents: %v", err)
 	}
-	// data now contains the contents of the requested object
+	// Data now contains the contents of the requested object
 	output.Write(data)
 	return nil
 }

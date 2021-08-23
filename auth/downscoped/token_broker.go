@@ -33,7 +33,7 @@ func createDownscopedToken(bucketName string, prefix string) error {
 	// A condition can optionally be provided to further restrict access permissions.
 	condition := downscope.AvailabilityCondition{
 		Expression:  "resource.name.startsWith('projects/_/buckets/" + bucketName + "/objects/" + prefix + "'",
-		Title:       "Pictures Only",
+		Title:       prefix + " Only",
 		Description: "Restricts a token to only be able to access objects that start with `" + prefix + "`",
 	}
 	// Initializes an accessBoundary with one Rule which restricts the downscoped
