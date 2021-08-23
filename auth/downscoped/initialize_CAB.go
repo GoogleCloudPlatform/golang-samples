@@ -39,7 +39,7 @@ func constructCAB(bucketName string, prefix string) {
 		},
 	}
 
-	// You can now use this accessBoundary to generate a downscoped token
+	// You can now use this accessBoundary to generate a downscoped token.
 	_ = accessBoundary
 }
 

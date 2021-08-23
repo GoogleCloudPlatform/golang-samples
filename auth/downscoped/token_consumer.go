@@ -97,7 +97,7 @@ func getObjectContents(output io.Writer, bucketName string, objectName string) e
 	if err != nil {
 		return fmt.Errorf("could not read the object's contents: %v", err)
 	}
-	// Data now contains the contents of the requested object
+	// Data now contains the contents of the requested object.
 	output.Write(data)
 	return nil
 }
