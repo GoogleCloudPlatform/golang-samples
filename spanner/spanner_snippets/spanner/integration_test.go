@@ -160,6 +160,8 @@ func TestSample(t *testing.T) {
 	assertContains(t, out, "1 1 Total Junk")
 	out = runSample(t, query, dbName, "failed to query data")
 	assertContains(t, out, "1 1 Total Junk")
+	out = runSample(t, queryRequestPriority, dbName, "failed to query data with RequestPriority")
+	assertContains(t, out, "1 1 Total Junk")
 
 	runSampleWithContext(ctx, t, addIndex, dbName, "failed to add index")
 	out = runSample(t, queryUsingIndex, dbName, "failed to query using index")
@@ -194,7 +196,15 @@ func TestSample(t *testing.T) {
 	assertContains(t, out, "Forever Hold Your Peace")
 	assertContains(t, out, "Green")
 
+	out = runSample(t, readRequestPriority, dbName, "failed to read with RequestPriority")
+	assertContains(t, out, "Go, Go, Go")
+	assertContains(t, out, "Forever Hold Your Peace")
+	assertContains(t, out, "Green")
+
 	out = runSample(t, readBatchData, dbName, "failed to read batch data")
+	assertContains(t, out, "1 Marc Richards")
+
+	out = runSample(t, readBatchDataRequestPriority, dbName, "failed to read batch data with RequestPriority")
 	assertContains(t, out, "1 Marc Richards")
 
 	runSampleWithContext(ctx, t, addCommitTimestamp, dbName, "failed to add commit timestamp")
@@ -232,6 +242,9 @@ func TestSample(t *testing.T) {
 	out = runSample(t, insertUsingDML, dbName, "failed to insert using DML")
 	assertContains(t, out, "record(s) inserted")
 
+	out = runSample(t, insertUsingDMLRequestPriority, dbName, "failed to insert using DML with RequestPriority")
+	assertContains(t, out, "record(s) inserted")
+
 	out = runSample(t, setCustomTimeoutAndRetry, dbName, "failed to insert using DML with custom timeout and retry")
 	assertContains(t, out, "record(s) inserted")
 
@@ -262,10 +275,16 @@ func TestSample(t *testing.T) {
 	out = runSample(t, updateUsingPartitionedDML, dbName, "failed to update using partitioned DML")
 	assertContains(t, out, "record(s) updated")
 
+	out = runSample(t, updateUsingPartitionedDMLRequestPriority, dbName, "failed to update using partitioned DML with RequestPriority")
+	assertContains(t, out, "record(s) updated")
+
 	out = runSample(t, deleteUsingPartitionedDML, dbName, "failed to delete using partitioned DML")
 	assertContains(t, out, "record(s) deleted")
 
 	out = runSample(t, updateUsingBatchDML, dbName, "failed to update using batch DML")
+	assertContains(t, out, "Executed 2 SQL statements using Batch DML.")
+
+	out = runSample(t, updateUsingBatchDMLRequestPriority, dbName, "failed to update using batch DML with RequestPriority")
 	assertContains(t, out, "Executed 2 SQL statements using Batch DML.")
 
 	out = runSampleWithContext(ctx, t, createTableWithDatatypes, dbName, "failed to create table with data types")
