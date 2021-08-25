@@ -7,4 +7,5 @@ require (
 	cloud.google.com/go/storage v1.10.0
 	golang.org/x/oauth2 v0.0.0-20210810183815-faf39c7919d5
 	google.golang.org/api v0.54.0
+	google.golang.org/genproto v0.0.0-20210824181836-a4879c3d0e89 // indirect
 )

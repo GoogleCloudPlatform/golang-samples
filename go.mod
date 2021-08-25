@@ -46,7 +46,7 @@ require (
 	golang.org/x/text v0.3.7
 	google.golang.org/api v0.54.0
 	google.golang.org/appengine v1.6.7
-	google.golang.org/genproto v0.0.0-20210813162853-db860fec028c
+	google.golang.org/genproto v0.0.0-20210824181836-a4879c3d0e89
 	google.golang.org/grpc v1.40.0
 	google.golang.org/grpc/examples v0.0.0-20200707005602-4258d12073b4
 	google.golang.org/protobuf v1.27.1
