@@ -46,20 +46,20 @@ func updateDataWithJsonColumn(w io.Writer, db string) error {
 		Tags   []spanner.NullString `json:"tags"`
 	}
 
-	details_1 := spanner.NullJSON{[]VenueDetails{
-		{Name: spanner.NullString{"room1", true}, Open: true},
-		{Name: spanner.NullString{"room2", true}, Open: false},
-	}, true}
-	details_2 := spanner.NullJSON{VenueDetails{
-		Rating: spanner.NullFloat64{9, true},
+	details_1 := spanner.NullJSON{Value: []VenueDetails{
+		{Name: spanner.NullString{StringVal: "room1", Valid: true}, Open: true},
+		{Name: spanner.NullString{StringVal: "room2", Valid: true}, Open: false},
+	}, Valid: true}
+	details_2 := spanner.NullJSON{Value: VenueDetails{
+		Rating: spanner.NullFloat64{Float64: 9, Valid: true},
 		Open:   true,
-	}, true}
+	}, Valid: true}
 
-	details_3 := spanner.NullJSON{VenueDetails{
+	details_3 := spanner.NullJSON{Value: VenueDetails{
 		Name: spanner.NullString{Valid: false},
 		Open: map[string]bool{"monday": true, "tuesday": false},
-		Tags: []spanner.NullString{{"large", true}, {"airy", true}},
-	}, true}
+		Tags: []spanner.NullString{{StringVal: "large", Valid: true}, {StringVal: "airy", Valid: true}},
+	}, Valid: true}
 
 	cols := []string{"VenueId", "VenueDetails"}
 	_, err = client.Apply(ctx, []*spanner.Mutation{
