@@ -82,10 +82,10 @@ func getObjectContents(output io.Writer, bucketName string, objectName string) e
 	refreshableTS := oauth2.ReuseTokenSource(nil, thisTokenSource)
 	// You can now use the token source to access Google Cloud Storage resources as follows.
 	storageClient, err := storage.NewClient(ctx, option.WithTokenSource(refreshableTS))
-	defer storageClient.Close()
 	if err != nil {
 		return fmt.Errorf("failed to create the storage client: %v", err)
 	}
+	defer storageClient.Close()
 	bkt := storageClient.Bucket(bucketName)
 	obj := bkt.Object(objectName)
 	rc, err := obj.NewReader(ctx)

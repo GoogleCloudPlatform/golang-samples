@@ -23,7 +23,6 @@ import (
 	"context"
 	"fmt"
 
-	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"golang.org/x/oauth2/google/downscope"
 )
@@ -31,11 +30,10 @@ import (
 // initializeCredentials will generate a downscoped token using the provided Access Boundary Rules.
 func initializeCredentials(accessBoundary []downscope.AccessBoundaryRule) error {
 	ctx := context.Background()
-	// This Source can be initialized in multiple ways; the following example uses
-	// Application Default Credentials.
-	var rootSource oauth2.TokenSource
 
 	// You must provide the "https://www.googleapis.com/auth/cloud-platform" scope.
+	// This Source can be initialized in multiple ways; the following example uses
+	// Application Default Credentials.
 	rootSource, err := google.DefaultTokenSource(ctx, "https://www.googleapis.com/auth/cloud-platform")
 	if err != nil {
 		return fmt.Errorf("failed to generate rootSource: %v", err)
@@ -46,13 +44,8 @@ func initializeCredentials(accessBoundary []downscope.AccessBoundaryRule) error 
 	if err != nil {
 		return fmt.Errorf("failed to generate downscoped token source: %v", err)
 	}
-	// Token() uses the previously declared TokenSource to generate a downscoped token.
-	tok, err := dts.Token()
-	if err != nil {
-		return fmt.Errorf("failed to generate token: %v", err)
-	}
-	_ = tok
-	// You can now use tok to access Google Storage resources.
+	_ = dts
+	// You can now use dts to access Google Storage resources.
 	return nil
 }
 
