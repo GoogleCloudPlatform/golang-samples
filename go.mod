@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/golang-samples
 go 1.11
 
 require (
-	cloud.google.com/go v0.91.1
+	cloud.google.com/go v0.93.3
 	cloud.google.com/go/bigquery v1.19.0
 	cloud.google.com/go/bigtable v1.4.0
 	cloud.google.com/go/datastore v1.2.0
@@ -11,7 +11,7 @@ require (
 	cloud.google.com/go/logging v1.0.0
 	cloud.google.com/go/pubsub v1.9.1
 	cloud.google.com/go/pubsublite v1.1.0
-	cloud.google.com/go/spanner v1.21.0
+	cloud.google.com/go/spanner v1.25.0
 	cloud.google.com/go/storage v1.16.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.5
 	github.com/aws/aws-sdk-go v1.38.69
@@ -26,6 +26,7 @@ require (
 	github.com/golang/protobuf v1.5.2
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/google/go-cmp v0.5.6
+	github.com/google/pprof v0.0.0-20210804190019-f964ff605595 // indirect
 	github.com/google/uuid v1.3.0
 	github.com/googleapis/gax-go/v2 v2.0.5
 	github.com/gorilla/mux v1.8.0
@@ -44,9 +45,9 @@ require (
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/sys v0.0.0-20210809222454-d867a43fc93e // indirect
 	golang.org/x/text v0.3.7
-	google.golang.org/api v0.53.0
+	google.golang.org/api v0.54.0
 	google.golang.org/appengine v1.6.7
-	google.golang.org/genproto v0.0.0-20210811021853-ddbe55d93216
+	google.golang.org/genproto v0.0.0-20210821163610-241b8fcbd6c8
 	google.golang.org/grpc v1.40.0
 	google.golang.org/grpc/examples v0.0.0-20200707005602-4258d12073b4
 	google.golang.org/protobuf v1.27.1
