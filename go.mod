@@ -6,13 +6,17 @@ require (
 	cloud.google.com/go v0.93.3
 	cloud.google.com/go/bigquery v1.19.0
 	cloud.google.com/go/bigtable v1.4.0
+	cloud.google.com/go/container v0.1.0 // indirect
 	cloud.google.com/go/datastore v1.2.0
 	cloud.google.com/go/firestore v1.3.0
+	cloud.google.com/go/kms v0.1.0 // indirect
 	cloud.google.com/go/logging v1.0.0
+	cloud.google.com/go/monitoring v0.1.0 // indirect
 	cloud.google.com/go/pubsub v1.9.1
 	cloud.google.com/go/pubsublite v1.1.0
 	cloud.google.com/go/spanner v1.25.0
 	cloud.google.com/go/storage v1.16.0
+	cloud.google.com/go/trace v0.1.0 // indirect
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.5
 	github.com/aws/aws-sdk-go v1.38.69
 	github.com/bmatcuk/doublestar/v2 v2.0.4

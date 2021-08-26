@@ -50,9 +50,9 @@ func queryWithJsonParameter(w io.Writer, db string) error {
 	stmt := spanner.Statement{
 		SQL: `SELECT VenueId, VenueDetails FROM Venues WHERE JSON_VALUE(VenueDetails, '$.rating') = JSON_VALUE(@details, '$.rating')`,
 		Params: map[string]interface{}{
-			"details": spanner.NullJSON(VenueDetails{
+			"details": spanner.NullJSON{VenueDetails{
 				Rating: spanner.NullFloat64{9, true},
-			}, true),
+			}, true},
 		},
 	}
 	iter := client.Single().Query(ctx, stmt)
