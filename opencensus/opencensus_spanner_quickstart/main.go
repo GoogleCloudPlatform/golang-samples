@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build go1.8
 // +build go1.8
 
 // Sample opencensus_spanner_quickstart contains a sample application that
