@@ -33,7 +33,6 @@ func updateDataWithJsonColumn(w io.Writer, db string) error {
 	}
 
 	ctx := context.Background()
-
 	client, err := spanner.NewClient(ctx, db)
 	if err != nil {
 		return err
@@ -64,9 +63,9 @@ func updateDataWithJsonColumn(w io.Writer, db string) error {
 
 	cols := []string{"VenueId", "VenueDetails"}
 	_, err = client.Apply(ctx, []*spanner.Mutation{
-		spanner.Update("VenueDetails", cols, []interface{}{4, details_1}),
-		spanner.Update("VenueDetails", cols, []interface{}{19, details_2}),
-		spanner.Update("VenueDetails", cols, []interface{}{42, details_3}),
+		spanner.Update("Venues", cols, []interface{}{4, details_1}),
+		spanner.Update("Venues", cols, []interface{}{19, details_2}),
+		spanner.Update("Venues", cols, []interface{}{42, details_3}),
 	})
 
 	if err != nil {

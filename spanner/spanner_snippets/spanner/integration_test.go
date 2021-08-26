@@ -348,9 +348,9 @@ func TestSample(t *testing.T) {
 
 	out = runSample(t, addJsonColumn, dbName, "failed to add json column")
 	assertContains(t, out, "Added VenueDetails column\n")
-	out = runSample(t, updateDataWithNumericColumn, dbName, "failed to update data with json")
+	out = runSample(t, updateDataWithJsonColumn, dbName, "failed to update data with json")
 	assertContains(t, out, "Updated data to VenueDetails column\n")
-	out = runSample(t, queryWithNumericParameter, dbName, "failed to query with json parameter")
+	out = runSample(t, queryWithJsonParameter, dbName, "failed to query with json parameter")
 	assertContains(t, out, "The venue details for venue id 19")
 }
 
