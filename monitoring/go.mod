@@ -5,12 +5,12 @@ go 1.13
 replace github.com/GoogleCloudPlatform/golang-samples => ./..
 
 require (
-	cloud.google.com/go v0.91.1
+	cloud.google.com/go/monitoring v0.1.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.5
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-00010101000000-000000000000
 	github.com/golang/protobuf v1.5.2
 	github.com/prometheus/client_golang v1.11.0
 	go.opencensus.io v0.23.0
-	google.golang.org/api v0.53.0
-	google.golang.org/genproto v0.0.0-20210811021853-ddbe55d93216
+	google.golang.org/api v0.54.0
+	google.golang.org/genproto v0.0.0-20210821163610-241b8fcbd6c8
 )
