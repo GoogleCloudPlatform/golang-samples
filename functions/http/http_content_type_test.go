@@ -36,7 +36,7 @@ func TestHelloContentType(t *testing.T) {
 		"application/json":                  `{"name":"%s"}`,
 		"application/octet-stream":          "%s",
 		"text/plain":                        "%s",
-		"application/x-www-form-urlencoded": "name=%s;",
+		"application/x-www-form-urlencoded": "name=%s",
 	}
 
 	for mimetype, template := range mimetypes {
