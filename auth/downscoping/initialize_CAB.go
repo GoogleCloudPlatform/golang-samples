@@ -20,7 +20,9 @@ import "golang.org/x/oauth2/google/downscope"
 
 // constructCAB shows how to initialize a Credential Access Boundary for downscoping tokens.
 func constructCAB(bucketName string, prefix string) {
-	// Example values- bucketName: "foo", prefix: "profile-picture-".
+	// bucketName := "foo"
+	// prefix := "profile-picture-"
+
 	// A condition can optionally be provided to further restrict access permissions.
 	// Note that the "profile-picture-" prefix is an arbitrary example to show how to
 	// construct an AvailabilityCondition; it can be changed to anything.
