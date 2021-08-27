@@ -3,16 +3,43 @@ module github.com/GoogleCloudPlatform/golang-samples
 go 1.11
 
 require (
-	cloud.google.com/go v0.91.1
+	cloud.google.com/go v0.93.3
+	cloud.google.com/go/asset v0.1.0
+	cloud.google.com/go/automl v0.1.0
 	cloud.google.com/go/bigquery v1.19.0
 	cloud.google.com/go/bigtable v1.4.0
+	cloud.google.com/go/cloudtasks v0.1.0
+	cloud.google.com/go/container v0.1.0 // indirect
+	cloud.google.com/go/containeranalysis v0.1.0
+	cloud.google.com/go/datacatalog v0.1.0
+	cloud.google.com/go/dataproc v0.1.0
 	cloud.google.com/go/datastore v1.2.0
+	cloud.google.com/go/dialogflow v0.1.0
+	cloud.google.com/go/dlp v0.1.0
+	cloud.google.com/go/errorreporting v0.1.0
 	cloud.google.com/go/firestore v1.3.0
+	cloud.google.com/go/gaming v0.1.0
+	cloud.google.com/go/grafeas v0.1.0 // indirect
+	cloud.google.com/go/kms v0.1.0
+	cloud.google.com/go/language v0.1.0
 	cloud.google.com/go/logging v1.0.0
+	cloud.google.com/go/monitoring v0.1.0
+	cloud.google.com/go/profiler v0.1.0
 	cloud.google.com/go/pubsub v1.9.1
 	cloud.google.com/go/pubsublite v1.1.0
-	cloud.google.com/go/spanner v1.21.0
+	cloud.google.com/go/secretmanager v0.1.0
+	cloud.google.com/go/securitycenter v0.1.0
+	cloud.google.com/go/servicedirectory v0.1.0
+	cloud.google.com/go/spanner v1.25.0
+	cloud.google.com/go/speech v0.1.0
 	cloud.google.com/go/storage v1.16.0
+	cloud.google.com/go/talent v0.1.0
+	cloud.google.com/go/texttospeech v0.1.0
+	cloud.google.com/go/trace v0.1.0 // indirect
+	cloud.google.com/go/translate v0.1.0
+	cloud.google.com/go/video v0.1.0
+	cloud.google.com/go/videointelligence v0.1.0
+	cloud.google.com/go/vision v0.1.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.5
 	github.com/aws/aws-sdk-go v1.38.69
 	github.com/bmatcuk/doublestar/v2 v2.0.4
@@ -44,9 +71,9 @@ require (
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/sys v0.0.0-20210809222454-d867a43fc93e // indirect
 	golang.org/x/text v0.3.7
-	google.golang.org/api v0.53.0
+	google.golang.org/api v0.54.0
 	google.golang.org/appengine v1.6.7
-	google.golang.org/genproto v0.0.0-20210811021853-ddbe55d93216
+	google.golang.org/genproto v0.0.0-20210821163610-241b8fcbd6c8
 	google.golang.org/grpc v1.40.0
 	google.golang.org/grpc/examples v0.0.0-20200707005602-4258d12073b4
 	google.golang.org/protobuf v1.27.1
