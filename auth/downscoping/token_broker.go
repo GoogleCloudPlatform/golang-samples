@@ -29,6 +29,7 @@ import (
 // a downscoped access token that only grants access to objects whose name begins with prefix.
 // The token broker would then pass the newly created token to the requesting token consumer for use.
 func createDownscopedToken(bucketName string, prefix string) error {
+	// Example values- bucketName: "foo", prefix: "profile-picture-".
 	ctx := context.Background()
 	// A condition can optionally be provided to further restrict access permissions.
 	condition := downscope.AvailabilityCondition{

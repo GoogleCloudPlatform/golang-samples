@@ -70,6 +70,7 @@ func (lts localTokenSource) Token() (*oauth2.Token, error) {
 // getObjectContents will read the contents of an object in Google Storage
 // named objectName, contained in the bucket "bucketName".
 func getObjectContents(output io.Writer, bucketName string, objectName string) error {
+	// Example values- bucketName: "foo", prefix: "profile-picture-".
 	ctx := context.Background()
 
 	thisTokenSource := localTokenSource{
