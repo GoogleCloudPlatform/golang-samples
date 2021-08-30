@@ -479,6 +479,30 @@ func TestListSecretVersions(t *testing.T) {
 	}
 }
 
+func TestListSecretVersionsWithFilter(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	payload := []byte("my-secret")
+	secret := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret.Name)
+
+	version1 := testSecretVersion(t, secret.Name, payload)
+	version2 := testSecretVersion(t, secret.Name, payload)
+
+	var b bytes.Buffer
+	if err := listSecretVersionsWithFilter(&b, secret.Name, fmt.Sprintf("name:%s", version1.Name)); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), fmt.Sprintf("%s with state ENABLED", version1.Name); !strings.Contains(got, want) {
+		t.Errorf("listSecretVersions: expected %q to contain %q", got, want)
+	}
+
+	if got, lacked := b.String(), fmt.Sprintf("%s with state ENABLED", version2.Name); strings.Contains(got, lacked) {
+		t.Errorf("listSecretVersions: expected %q to not contain %q", got, lacked)
+	}
+}
+
 func TestListSecrets(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -499,6 +523,29 @@ func TestListSecrets(t *testing.T) {
 
 	if got, want := b.String(), secret2.Name; !strings.Contains(got, want) {
 		t.Errorf("listSecrets: expected %q to contain %q", got, want)
+	}
+}
+
+func TestListSecretsWithFilter(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secret1 := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret1.Name)
+
+	secret2 := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret2.Name)
+
+	var b bytes.Buffer
+	if err := listSecretsWithFilter(&b, fmt.Sprintf("projects/%s", tc.ProjectID), fmt.Sprintf("name:%s", secret1.Name)); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), secret1.Name; !strings.Contains(got, want) {
+		t.Errorf("listSecrets: expected %q to contain %q", got, want)
+	}
+
+	if got, lacked := b.String(), secret2.Name; strings.Contains(got, lacked) {
+		t.Errorf("listSecrets: expected %q to not contain %q", got, lacked)
 	}
 }
 
