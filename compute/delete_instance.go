@@ -59,12 +59,12 @@ func deleteInstance(w io.Writer, projectID, zone, instanceName string) error {
 			Project:   projectID,
 			Zone:      zone,
 		}
-		op, err = zoneOperationsClient.Wait(ctx, waitReq)
+		zoneOp, err := zoneOperationsClient.Wait(ctx, waitReq)
 		if err != nil {
 			return fmt.Errorf("unable to wait for the operation: %v", err)
 		}
 
-		if op.Proto().GetStatus() == computepb.Operation_DONE {
+		if *zoneOp.Status.Enum() == computepb.Operation_DONE {
 			fmt.Fprintf(w, "Instance deleted\n")
 			break
 		}
