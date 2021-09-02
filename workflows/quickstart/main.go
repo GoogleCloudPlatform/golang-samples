@@ -47,7 +47,8 @@ func executeWorkflow(projectID, locationID, workflowID string) (string, error) {
 	workflowPath := fmt.Sprintf("projects/%s/locations/%s/workflows/%s", projectID, locationID, workflowID)
 
 	exe, err := client.CreateExecution(ctx, &executionspb.CreateExecutionRequest{
-		Parent: workflowPath,
+		Parent:    workflowPath,
+		Execution: &executionspb.Execution{},
 	})
 	if err != nil {
 		return "", fmt.Errorf("client.CreateExecution: %v", err)
