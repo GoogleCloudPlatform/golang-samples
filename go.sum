@@ -33,6 +33,7 @@ cloud.google.com/go v0.92.3/go.mod h1:8utlLll2EF5XMAV15woO4lSbWQlk8rer9aLOfLh7+Y
 cloud.google.com/go v0.93.3/go.mod h1:8utlLll2EF5XMAV15woO4lSbWQlk8rer9aLOfLh7+YI=
 cloud.google.com/go v0.94.0 h1:QDB2MZHqjTt0hGKnoEWyG/iWykue/lvkLdogLgrg10U=
 cloud.google.com/go v0.94.0/go.mod h1:qAlAugsXlC+JWO+Bke5vCtc9ONxjQT3drlTTnAplMW4=
+cloud.google.com/go v0.94.1 h1:DwuSvDZ1pTYGbXo8yOJevCTr3BoBlE+OVkHAKiYQUXc=
 cloud.google.com/go/asset v0.1.0 h1:PJ7LYN5g6r8JwDdBABrE/mtNhSu3kKCRgGukKR4v8ok=
 cloud.google.com/go/asset v0.1.0/go.mod h1:GYxqEh/Sp2Am02W0znTHRLmpuFNiqoQb5D65WSWlpfU=
 cloud.google.com/go/automl v0.1.0 h1:Ogr3mzEIEIfMEULyNA3lEyL6rPgbvYxOFzHZEZqFU/A=
@@ -122,6 +123,8 @@ cloud.google.com/go/videointelligence v0.1.0 h1:nQH44yWh9Ht9Og/k+dL8zoe76Dbd/X6X
 cloud.google.com/go/videointelligence v0.1.0/go.mod h1:mAVxBaVTPlh6M5piY3Dxuggw4PZFnzKRpreHhUd6xmE=
 cloud.google.com/go/vision v0.1.0 h1:HbJoT0LbMAoMYAQmtRPEm7zmb4xKRI+jRTo6TScTytE=
 cloud.google.com/go/vision v0.1.0/go.mod h1:X17DgbLA3TlEh4d+rQPQO7yO5yAjZg4NBVO8WpEKgNU=
+cloud.google.com/go/workflows v0.1.0 h1:USggy0OWhdRhWV8J5JQaxG6glt8T5nxKewy7dWV22XE=
+cloud.google.com/go/workflows v0.1.0/go.mod h1:sypZ0mJTB9SGmxCPBO4CiZ2Pw7aIjQGJNaMGqVV8VaY=
 contrib.go.opencensus.io/exporter/stackdriver v0.13.5 h1:TNaexHK16gPUoc7uzELKOU7JULqccn1NDuqUxmxSqfo=
 contrib.go.opencensus.io/exporter/stackdriver v0.13.5/go.mod h1:aXENhDJ1Y4lIg4EUaVTwzvYETVNZk10Pu26tevFKLUc=
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=

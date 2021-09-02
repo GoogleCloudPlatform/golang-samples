@@ -40,6 +40,7 @@ require (
 	cloud.google.com/go/video v0.1.0
 	cloud.google.com/go/videointelligence v0.1.0
 	cloud.google.com/go/vision v0.1.0
+	cloud.google.com/go/workflows v0.1.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.5
 	github.com/aws/aws-sdk-go v1.38.69
 	github.com/bmatcuk/doublestar/v2 v2.0.4
