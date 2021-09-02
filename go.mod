@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/golang-samples
 go 1.11
 
 require (
-	cloud.google.com/go v0.73.0
+	cloud.google.com/go v0.92.2
 	cloud.google.com/go/bigquery v1.14.0
 	cloud.google.com/go/bigtable v1.4.0
 	cloud.google.com/go/datastore v1.2.0
@@ -12,6 +12,7 @@ require (
 	cloud.google.com/go/pubsub v1.6.1
 	cloud.google.com/go/spanner v1.10.0
 	cloud.google.com/go/storage v1.11.0
+	cloud.google.com/go/workflows v0.1.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.4
 	github.com/aws/aws-sdk-go v1.36.2
 	github.com/bmatcuk/doublestar/v2 v2.0.4
@@ -22,9 +23,9 @@ require (
 	github.com/fluent/fluent-logger-golang v1.5.0
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gofrs/uuid v3.3.0+incompatible
-	github.com/golang/protobuf v1.4.3
+	github.com/golang/protobuf v1.5.2
 	github.com/gomodule/redigo v2.0.0+incompatible
-	github.com/google/go-cmp v0.5.4
+	github.com/google/go-cmp v0.5.6
 	github.com/google/uuid v1.1.2
 	github.com/googleapis/gax-go/v2 v2.0.5
 	github.com/gorilla/mux v1.8.0
@@ -37,17 +38,17 @@ require (
 	github.com/philhofer/fwd v1.0.0 // indirect
 	github.com/sendgrid/smtpapi-go v0.6.0 // indirect
 	github.com/tinylib/msgp v1.1.2 // indirect
-	go.opencensus.io v0.22.5
+	go.opencensus.io v0.23.0
 	golang.org/x/exp v0.0.0-20201203231725-fa01524bc59d
-	golang.org/x/net v0.0.0-20201202161906-c7110b5ffcbb
-	golang.org/x/oauth2 v0.0.0-20201207163604-931764155e3f
-	golang.org/x/text v0.3.4
-	google.golang.org/api v0.36.0
+	golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420
+	golang.org/x/oauth2 v0.0.0-20210805134026-6f1e6394065a
+	golang.org/x/text v0.3.6
+	google.golang.org/api v0.54.0
 	google.golang.org/appengine v1.6.7
-	google.golang.org/genproto v0.0.0-20201207150747-9ee31aac76e7
-	google.golang.org/grpc v1.34.0
+	google.golang.org/genproto v0.0.0-20210813162853-db860fec028c
+	google.golang.org/grpc v1.39.1
 	google.golang.org/grpc/examples v0.0.0-20200707005602-4258d12073b4
-	google.golang.org/protobuf v1.25.0
+	google.golang.org/protobuf v1.27.1
 	gopkg.in/sendgrid/sendgrid-go.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.4.0
 )

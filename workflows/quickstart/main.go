@@ -27,8 +27,8 @@ import (
 	"os"
 	"time"
 
-	executions "cloud.google.com/go/workflows/executions/apiv1beta"
-	executionspb "google.golang.org/genproto/googleapis/cloud/workflows/executions/v1beta"
+	executions "cloud.google.com/go/workflows/executions/apiv1"
+	executionspb "google.golang.org/genproto/googleapis/cloud/workflows/executions/v1"
 )
 
 // executeWorkflow executes a workflow and returns the results from the workflow.
