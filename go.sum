@@ -33,7 +33,6 @@ cloud.google.com/go v0.92.3/go.mod h1:8utlLll2EF5XMAV15woO4lSbWQlk8rer9aLOfLh7+Y
 cloud.google.com/go v0.93.3/go.mod h1:8utlLll2EF5XMAV15woO4lSbWQlk8rer9aLOfLh7+YI=
 cloud.google.com/go v0.94.0 h1:QDB2MZHqjTt0hGKnoEWyG/iWykue/lvkLdogLgrg10U=
 cloud.google.com/go v0.94.0/go.mod h1:qAlAugsXlC+JWO+Bke5vCtc9ONxjQT3drlTTnAplMW4=
-cloud.google.com/go v0.94.1 h1:DwuSvDZ1pTYGbXo8yOJevCTr3BoBlE+OVkHAKiYQUXc=
 cloud.google.com/go/asset v0.1.0 h1:PJ7LYN5g6r8JwDdBABrE/mtNhSu3kKCRgGukKR4v8ok=
 cloud.google.com/go/asset v0.1.0/go.mod h1:GYxqEh/Sp2Am02W0znTHRLmpuFNiqoQb5D65WSWlpfU=
 cloud.google.com/go/automl v0.1.0 h1:Ogr3mzEIEIfMEULyNA3lEyL6rPgbvYxOFzHZEZqFU/A=
