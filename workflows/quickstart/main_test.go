@@ -57,7 +57,7 @@ func deployWorkflow(projectID, locationID, workflowID string) error {
 	if err != nil {
 		return fmt.Errorf("workflows.NewClient: %v", err)
 	}
-	workflowPath := fmt.Sprintf("projects/%s/locations/%s/workflows/%s", projectID, locationID, workflowID)
+	workflowPath := fmt.Sprintf("projects/%s/locations/%s", projectID, locationID)
 	_, err = client.CreateWorkflow(ctx, &workflowspb.CreateWorkflowRequest{
 		Parent:     workflowPath,
 		WorkflowId: workflowID,
