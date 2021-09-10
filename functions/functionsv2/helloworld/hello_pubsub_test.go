@@ -46,7 +46,6 @@ func TestHelloPubSub(t *testing.T) {
 		msg := MessagePublishedData{
 			Message: m,
 		}
-
 		e := event.New()
 		e.SetDataContentType("application/json")
 		e.SetData(e.DataContentType(), msg)
