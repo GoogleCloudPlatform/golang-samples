@@ -43,7 +43,7 @@ func pullMsgsConcurrenyControl(w io.Writer, projectID, subID string) error {
 	// messages.
 	sub.ReceiveSettings.NumGoroutines = 16
 	// MaxOutstandingMessages limits the number of concurrent handlers of messages.
-	// In this case, up to 8 messages can be handled concurrently.
+	// In this case, up to 8 unacked messages can be handled concurrently.
 	sub.ReceiveSettings.MaxOutstandingMessages = 8
 
 	// Receive messages for 30 seconds.
