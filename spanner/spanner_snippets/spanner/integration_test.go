@@ -345,6 +345,13 @@ func TestSample(t *testing.T) {
 	out = runSample(t, queryWithNumericParameter, dbName, "failed to query with numeric parameter")
 	assertContains(t, out, "4 ")
 	assertContains(t, out, "35000")
+
+	out = runSample(t, addJsonColumn, dbName, "failed to add json column")
+	assertContains(t, out, "Added VenueDetails column\n")
+	out = runSample(t, updateDataWithJsonColumn, dbName, "failed to update data with json")
+	assertContains(t, out, "Updated data to VenueDetails column\n")
+	out = runSample(t, queryWithJsonParameter, dbName, "failed to query with json parameter")
+	assertContains(t, out, "The venue details for venue id 19")
 }
 
 func TestBackupSample(t *testing.T) {

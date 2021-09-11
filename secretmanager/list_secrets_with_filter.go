@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 package secretmanager
 
-// [START secretmanager_list_secrets]
+// [START secretmanager_list_secrets_with_filter]
 import (
 	"context"
 	"fmt"
@@ -25,9 +25,12 @@ import (
 	secretmanagerpb "google.golang.org/genproto/googleapis/cloud/secretmanager/v1"
 )
 
-// listSecrets lists all secrets in the given project.
-func listSecrets(w io.Writer, parent string) error {
+// listSecretsWithFilter lists all filter-matching secrets in the given project.
+func listSecretsWithFilter(w io.Writer, parent string, filter string) error {
 	// parent := "projects/my-project"
+	// Follow https://cloud.google.com/secret-manager/docs/filtering
+	// for filter syntax and examples.
+	// filter := "name:name-substring"
 
 	// Create the client.
 	ctx := context.Background()
@@ -40,6 +43,7 @@ func listSecrets(w io.Writer, parent string) error {
 	// Build the request.
 	req := &secretmanagerpb.ListSecretsRequest{
 		Parent: parent,
+		Filter: filter,
 	}
 
 	// Call the API.
@@ -60,4 +64,4 @@ func listSecrets(w io.Writer, parent string) error {
 	return nil
 }
 
-// [END secretmanager_list_secrets]
+// [END secretmanager_list_secrets_with_filter]

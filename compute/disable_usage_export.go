@@ -55,12 +55,12 @@ func disableUsageExport(w io.Writer, projectID string) error {
 			Operation: op.Proto().GetName(),
 			Project:   projectID,
 		}
-		op, err = globalOperationsClient.Wait(ctx, waitReq)
+		zoneOp, err := globalOperationsClient.Wait(ctx, waitReq)
 		if err != nil {
 			return fmt.Errorf("unable to wait for the operation: %v", err)
 		}
 
-		if op.Proto().GetStatus() == computepb.Operation_DONE {
+		if *zoneOp.Status.Enum() == computepb.Operation_DONE {
 			fmt.Fprintf(w, "Usage export bucket has been set\n")
 			break
 		}

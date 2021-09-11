@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 package secretmanager
 
-// [START secretmanager_list_secrets]
+// [START secretmanager_list_secret_versions_with_filter]
 import (
 	"context"
 	"fmt"
@@ -25,9 +25,13 @@ import (
 	secretmanagerpb "google.golang.org/genproto/googleapis/cloud/secretmanager/v1"
 )
 
-// listSecrets lists all secrets in the given project.
-func listSecrets(w io.Writer, parent string) error {
-	// parent := "projects/my-project"
+// listSecretVersionsWithFilter lists all filter-matching secret versions in the given
+// secret and their metadata.
+func listSecretVersionsWithFilter(w io.Writer, parent string, filter string) error {
+	// parent := "projects/my-project/secrets/my-secret"
+	// Follow https://cloud.google.com/secret-manager/docs/filtering
+	// for filter syntax and examples.
+	// filter := "create_time>2021-01-01T00:00:00Z"
 
 	// Create the client.
 	ctx := context.Background()
@@ -38,12 +42,13 @@ func listSecrets(w io.Writer, parent string) error {
 	defer client.Close()
 
 	// Build the request.
-	req := &secretmanagerpb.ListSecretsRequest{
+	req := &secretmanagerpb.ListSecretVersionsRequest{
 		Parent: parent,
+		Filter: filter,
 	}
 
 	// Call the API.
-	it := client.ListSecrets(ctx, req)
+	it := client.ListSecretVersions(ctx, req)
 	for {
 		resp, err := it.Next()
 		if err == iterator.Done {
@@ -51,13 +56,14 @@ func listSecrets(w io.Writer, parent string) error {
 		}
 
 		if err != nil {
-			return fmt.Errorf("failed to list secrets: %v", err)
+			return fmt.Errorf("failed to list secret versions: %v", err)
 		}
 
-		fmt.Fprintf(w, "Found secret %s\n", resp.Name)
+		fmt.Fprintf(w, "Found secret version %s with state %s\n",
+			resp.Name, resp.State)
 	}
 
 	return nil
 }
 
-// [END secretmanager_list_secrets]
+// [END secretmanager_list_secret_versions_with_filter]

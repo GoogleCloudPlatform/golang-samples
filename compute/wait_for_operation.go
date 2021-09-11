@@ -46,12 +46,12 @@ func waitForOperation(w io.Writer, projectID, zone, opName string) error {
 		}
 
 		// Waits for the specified Operation resource to return as DONE or for the request to approach the 2 minute deadline.
-		op, err := zoneOperationsClient.Wait(ctx, waitReq)
+		zoneOp, err := zoneOperationsClient.Wait(ctx, waitReq)
 		if err != nil {
 			return fmt.Errorf("unable to wait for the operation: %v", err)
 		}
 
-		if op.Proto().GetStatus() == computepb.Operation_DONE {
+		if *zoneOp.Status.Enum() == computepb.Operation_DONE {
 			fmt.Fprintf(w, "Operation finished\n")
 			break
 		}
