@@ -184,7 +184,7 @@ func TestSchemas_Admin(t *testing.T) {
 			buf := new(bytes.Buffer)
 			schemas, err := listSchemas(buf, tc.ProjectID)
 			if err != nil {
-				r.Errorf("failed to list topics: %v", err)
+				r.Errorf("failed to list schemas: %v", err)
 			}
 			if len(schemas) != 2 {
 				r.Errorf("expected 2 schemas, got %d", len(schemas))
