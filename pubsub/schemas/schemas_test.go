@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"strings"
 	"sync"
@@ -63,7 +62,7 @@ func setup(t *testing.T) *pubsub.Client {
 
 		wg.Add(1)
 		go func() {
-			scs, err := listSchemas(io.Discard, tc.ProjectID)
+			scs, err := listSchemas(ioutil.Discard, tc.ProjectID)
 			if err != nil {
 				fmt.Printf("failed to list schemas: %v", err)
 			}
@@ -71,7 +70,7 @@ func setup(t *testing.T) *pubsub.Client {
 				schemaName := strings.Split(sc.Name, "/")
 				schemaID := schemaName[len(schemaName)-1]
 				if strings.HasPrefix(schemaID, schemaPrefix) {
-					deleteSchema(io.Discard, tc.ProjectID, schemaID)
+					deleteSchema(ioutil.Discard, tc.ProjectID, schemaID)
 				}
 			}
 			wg.Done()
@@ -220,7 +219,7 @@ func TestSchemas_AvroSchemaAll(t *testing.T) {
 
 	t.Run("createTopicWithSchema", func(t *testing.T) {
 		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-			if err := createAvroSchema(io.Discard, tc.ProjectID, avroSchemaID, avroFilePath); err != nil {
+			if err := createAvroSchema(ioutil.Discard, tc.ProjectID, avroSchemaID, avroFilePath); err != nil {
 				r.Errorf("createAvroSchema err: %v", err)
 			}
 
@@ -274,7 +273,7 @@ func TestSchemas_AvroSchemaAll(t *testing.T) {
 		})
 	})
 
-	deleteSchema(io.Discard, tc.ProjectID, avroSchemaID)
+	deleteSchema(ioutil.Discard, tc.ProjectID, avroSchemaID)
 	client.Subscription(subID).Delete(ctx)
 	client.Topic(topicID).Delete(ctx)
 }
@@ -294,7 +293,7 @@ func TestSchemas_ProtoSchemaAll(t *testing.T) {
 
 	t.Run("createResources", func(t *testing.T) {
 		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-			if err := createProtoSchema(io.Discard, tc.ProjectID, protoSchemaID, protoFilePath); err != nil {
+			if err := createProtoSchema(ioutil.Discard, tc.ProjectID, protoSchemaID, protoFilePath); err != nil {
 				r.Errorf("createProtoSchema err: %v", err)
 			}
 
@@ -348,7 +347,7 @@ func TestSchemas_ProtoSchemaAll(t *testing.T) {
 		})
 	})
 
-	deleteSchema(io.Discard, tc.ProjectID, protoSchemaID)
+	deleteSchema(ioutil.Discard, tc.ProjectID, protoSchemaID)
 	client.Subscription(subID).Delete(ctx)
 	client.Topic(topicID).Delete(ctx)
 }
