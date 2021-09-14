@@ -51,3 +51,61 @@ func collectionGroupQuery(w io.Writer, projectID string) error {
 }
 
 // [END firestore_query_collection_group_filter_eq]
+
+func partitionQuery(ctx context.Context, client *firestore.Client) error {
+	// [START firestore_query_collection_group_partition_query]
+	cities := client.CollectionGroup("cities")
+	partitionCount := 10
+	partitionedQueries, err := cities.GetPartitionedQueries(ctx, partitionCount)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Printf("Collection Group query partitioned to %d queries\n", len(partitionedQueries))
+
+	query := partitionedQueries[0]
+	iter := query.Documents(ctx)
+	for {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		fmt.Println(doc.Data())
+	}
+
+	// [END firestore_query_collection_group_partition_query]
+	return nil
+}
+
+func serializePartitionQuery(ctx context.Context, client *firestore.Client) error {
+	// [START firestore_query_collection_group_partition_query_serialization]
+	cities := client.CollectionGroup("cities")
+	partitionCount := 10
+	partitionedQueries, err := cities.GetPartitionedQueries(ctx, partitionCount)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Printf("Collection Group query partitioned to %d queries\n", len(partitionedQueries))
+
+	query := partitionedQueries[0]
+
+	// Serialize a query created by GetPartitionedQueries
+	bytes, err := query.Serialize()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// Deserialize a query created by Query.Serialize
+	deserializedQuery, err := client.CollectionGroup("").Deserialize(bytes)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// [END firestore_query_collection_group_partition_query_serialization]
+	_ = deserializedQuery
+	return nil
+}
