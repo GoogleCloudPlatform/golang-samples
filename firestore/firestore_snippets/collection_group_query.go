@@ -53,16 +53,19 @@ func collectionGroupQuery(w io.Writer, projectID string) error {
 // [END firestore_query_collection_group_filter_eq]
 
 func partitionQuery(ctx context.Context, client *firestore.Client) error {
-	// [START firestore_query_collection_group_partition_query]
+	// [START firestore_partition_query]
 	cities := client.CollectionGroup("cities")
-	partitionCount := 10
-	partitionedQueries, err := cities.GetPartitionedQueries(ctx, partitionCount)
+
+	// Get a partioned query for the cities collection group, with a maximum
+	// partition count of 10
+	partitionedQueries, err := cities.GetPartitionedQueries(ctx, 10)
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	fmt.Printf("Collection Group query partitioned to %d queries\n", len(partitionedQueries))
 
+	// Retrieve the first query and iterate over the documents contained.
 	query := partitionedQueries[0]
 	iter := query.Documents(ctx)
 	for {
@@ -76,15 +79,17 @@ func partitionQuery(ctx context.Context, client *firestore.Client) error {
 		fmt.Println(doc.Data())
 	}
 
-	// [END firestore_query_collection_group_partition_query]
+	// [END firestore_partition_query]
 	return nil
 }
 
 func serializePartitionQuery(ctx context.Context, client *firestore.Client) error {
-	// [START firestore_query_collection_group_partition_query_serialization]
+	// [START firestore_partition_query_serialization]
 	cities := client.CollectionGroup("cities")
-	partitionCount := 10
-	partitionedQueries, err := cities.GetPartitionedQueries(ctx, partitionCount)
+
+	// Get a partioned query for the cities collection group, with a maximum
+	// partition count of 10
+	partitionedQueries, err := cities.GetPartitionedQueries(ctx, 10)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -105,7 +110,7 @@ func serializePartitionQuery(ctx context.Context, client *firestore.Client) erro
 		fmt.Println(err)
 	}
 
-	// [END firestore_query_collection_group_partition_query_serialization]
+	// [END firestore_partition_query_serialization]
 	_ = deserializedQuery
 	return nil
 }
