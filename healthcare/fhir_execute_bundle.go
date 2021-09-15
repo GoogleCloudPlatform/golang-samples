@@ -48,7 +48,7 @@ func fhirExecuteBundle(w io.Writer, projectID, location, datasetID, fhirStoreID 
 				},
 				"request": map[string]interface{}{
 					"method": "POST",
-					"url": "Patient",
+					"url":    "Patient",
 				},
 			},
 		},
