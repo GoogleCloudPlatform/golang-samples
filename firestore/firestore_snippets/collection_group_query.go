@@ -60,7 +60,7 @@ func partitionQuery(ctx context.Context, client *firestore.Client) error {
 	// partition count of 10
 	partitionedQueries, err := cities.GetPartitionedQueries(ctx, 10)
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
 
 	fmt.Printf("Collection Group query partitioned to %d queries\n", len(partitionedQueries))
@@ -91,7 +91,7 @@ func serializePartitionQuery(ctx context.Context, client *firestore.Client) erro
 	// partition count of 10
 	partitionedQueries, err := cities.GetPartitionedQueries(ctx, 10)
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
 
 	fmt.Printf("Collection Group query partitioned to %d queries\n", len(partitionedQueries))
@@ -101,13 +101,13 @@ func serializePartitionQuery(ctx context.Context, client *firestore.Client) erro
 	// Serialize a query created by GetPartitionedQueries
 	bytes, err := query.Serialize()
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
 
 	// Deserialize a query created by Query.Serialize
 	deserializedQuery, err := client.CollectionGroup("").Deserialize(bytes)
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
 
 	// [END firestore_partition_query_serialization]
