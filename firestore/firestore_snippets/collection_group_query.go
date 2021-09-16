@@ -42,7 +42,7 @@ func collectionGroupQuery(w io.Writer, projectID string) error {
 			break
 		}
 		if err != nil {
-			return err
+			return fmt.Errorf("documents iterator: %v", err)
 		}
 		fmt.Fprintf(w, "%s: %s", doc.Ref.ID, doc.Data()["name"])
 	}
@@ -60,7 +60,7 @@ func partitionQuery(ctx context.Context, client *firestore.Client) error {
 	// partition count of 10
 	partitionedQueries, err := cities.GetPartitionedQueries(ctx, 10)
 	if err != nil {
-		return err
+		return fmt.Errorf("GetPartitionedQueries: %v", err)
 	}
 
 	fmt.Printf("Collection Group query partitioned to %d queries\n", len(partitionedQueries))
@@ -74,7 +74,7 @@ func partitionQuery(ctx context.Context, client *firestore.Client) error {
 			break
 		}
 		if err != nil {
-			return err
+			return fmt.Errorf("documents iterator: %v", err)
 		}
 		fmt.Println(doc.Data())
 	}
@@ -101,13 +101,13 @@ func serializePartitionQuery(ctx context.Context, client *firestore.Client) erro
 	// Serialize a query created by GetPartitionedQueries
 	bytes, err := query.Serialize()
 	if err != nil {
-		return err
+		return fmt.Errorf("Serialize: %v", err)
 	}
 
 	// Deserialize a query created by Query.Serialize
 	deserializedQuery, err := client.CollectionGroup("").Deserialize(bytes)
 	if err != nil {
-		return err
+		return fmt.Errorf("Deserialize: %v", err)
 	}
 
 	// [END firestore_partition_query_serialization]
