@@ -25,7 +25,7 @@ import (
 	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
 )
 
-// prints the list of firewall names and their descriptions in specified project
+// listFirewallRules prints the list of firewall names and their descriptions in specified project
 func listFirewallRules(w io.Writer, projectID string) error {
 	// projectID := "your_project_id"
 

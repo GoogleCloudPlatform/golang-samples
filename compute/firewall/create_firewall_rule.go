@@ -25,7 +25,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// creates a simple firewall rule allowing for incoming HTTP and HTTPS access from the entire Internet.
+// createFirewallRule creates a firewall rule allowing for incoming HTTP and HTTPS access from the entire Internet.
 func createFirewallRule(w io.Writer, projectID, firewallRuleName, networkName string) error {
 	// projectID := "your_project_id"
 	// firewallRuleName := "europe-central2-b"

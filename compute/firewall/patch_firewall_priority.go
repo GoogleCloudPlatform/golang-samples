@@ -25,7 +25,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// modifies the priority of a given firewall rule.
+// patchFirewallPriority modifies the priority of a given firewall rule.
 func patchFirewallPriority(w io.Writer, projectID, firewallRuleName string, priority int32) error {
 	// projectID := "your_project_id"
 	// firewallRuleName := "europe-central2-b"

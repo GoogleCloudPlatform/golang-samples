@@ -32,7 +32,7 @@ func TestFirewallSnippets(t *testing.T) {
 	ctx := context.Background()
 	firewallsClient, err := compute.NewFirewallsRESTClient(ctx)
 	if err != nil {
-		t.Errorf("NewInstancesRESTClient: %v", err)
+		t.Fatalf("NewInstancesRESTClient: %v", err)
 	}
 	defer firewallsClient.Close()
 
@@ -45,7 +45,7 @@ func TestFirewallSnippets(t *testing.T) {
 	defaultNetwork := "global/networks/default"
 
 	if err := createFirewallRule(buf, tc.ProjectID, firewallRuleName, defaultNetwork); err != nil {
-		t.Errorf("createFirewallRule got err: %v", err)
+		t.Fatalf("createFirewallRule got err: %v", err)
 	}
 
 	expectedResult := "Firewall rule created"
@@ -71,7 +71,7 @@ func TestFirewallSnippets(t *testing.T) {
 
 	var newFirewallPriority int32 = 500
 	if err := patchFirewallPriority(buf, tc.ProjectID, firewallRuleName, newFirewallPriority); err != nil {
-		t.Errorf("patchFirewallPriority got err: %v", err)
+		t.Fatalf("patchFirewallPriority got err: %v", err)
 	}
 
 	expectedResult = "Firewall rule updated"
@@ -91,7 +91,7 @@ func TestFirewallSnippets(t *testing.T) {
 	buf.Reset()
 
 	if err := listFirewallRules(buf, tc.ProjectID); err != nil {
-		t.Errorf("listFirewallRules got err: %v", err)
+		t.Fatalf("listFirewallRules got err: %v", err)
 	}
 
 	expectedResult = fmt.Sprintf("- %s:", firewallRuleName)

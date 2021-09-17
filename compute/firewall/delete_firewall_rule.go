@@ -24,7 +24,7 @@ import (
 	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
 )
 
-// deletes a firewall rule from the project.
+// deleteFirewallRule deletes a firewall rule from the project.
 func deleteFirewallRule(w io.Writer, projectID, firewallRuleName string) error {
 	// projectID := "your_project_id"
 	// firewallRuleName := "europe-central2-b"
