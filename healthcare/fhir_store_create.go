@@ -35,7 +35,7 @@ func createFHIRStore(w io.Writer, projectID, location, datasetID, fhirStoreID st
 	storesService := healthcareService.Projects.Locations.Datasets.FhirStores
 
 	parent := fmt.Sprintf("projects/%s/locations/%s/datasets/%s", projectID, location, datasetID)
-	version := "STU3"
+	version := "R4"
 
 	resp, err := storesService.Create(parent, &healthcare.FhirStore{Version: version}).FhirStoreId(fhirStoreID).Do()
 	if err != nil {
