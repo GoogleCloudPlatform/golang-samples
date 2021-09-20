@@ -16,6 +16,7 @@ package servers
 
 import (
 	"bytes"
+	"strings"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -116,7 +117,7 @@ func innerTestGameServerCluster(t *testing.T) {
 
 		got := buf.String()
 		want := "Cluster retrieved: projects/" + tc.ProjectID + "/locations/global/realms/myrealm/gameServerClusters/mycluster"
-		if got != want {
+		if !strings.Contains(got, want) {
 			t.Errorf("getGameServerCluster got %q, want %q", got, want)
 		}
 	})
@@ -129,7 +130,7 @@ func innerTestGameServerCluster(t *testing.T) {
 
 		got := buf.String()
 		want := "Cluster listed: projects/" + tc.ProjectID + "/locations/global/realms/myrealm/gameServerClusters/mycluster\n"
-		if got != want {
+		if !strings.Contains(got, want) {
 			t.Errorf("listGameServerClusters got %q, want %q", got, want)
 		}
 	})
