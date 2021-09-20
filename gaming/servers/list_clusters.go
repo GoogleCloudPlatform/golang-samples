@@ -40,7 +40,7 @@ func listGameServerClusters(w io.Writer, projectID, location, realmID string) er
 
 	req := &gamingpb.ListGameServerClustersRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/%s/realms/%s", projectID, location, realmID),
-		View: gamingpb.GameServerClusterView_FULL,
+		View:   gamingpb.GameServerClusterView_FULL,
 	}
 
 	it := client.ListGameServerClusters(ctx, req)
