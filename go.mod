@@ -66,12 +66,10 @@ require (
 	github.com/tinylib/msgp v1.1.2 // indirect
 	go.opencensus.io v0.23.0
 	golang.org/x/exp v0.0.0-20210625193404-fa9d1d177d71
-	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616 // indirect
-	golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d
+	golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420
 	golang.org/x/oauth2 v0.0.0-20210819190943-2bc19b11175f
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/text v0.3.7
-	golang.org/x/tools v0.1.6 // indirect
 	google.golang.org/api v0.55.0
 	google.golang.org/appengine v1.6.7
 	google.golang.org/genproto v0.0.0-20210831024726-fe130286e0e2
@@ -85,5 +83,3 @@ require (
 
 // https://github.com/jstemmer/go-junit-report/issues/107
 replace github.com/jstemmer/go-junit-report => github.com/tbpg/go-junit-report v0.9.2-0.20200506144438-50086c54f894
-
-replace github.com/GoogleCloudPlatform/golang-samples/gaming/servers => ./servers
