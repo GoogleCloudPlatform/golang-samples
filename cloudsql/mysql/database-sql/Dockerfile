@@ -44,7 +44,7 @@ RUN set -x && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -
 COPY --from=builder /app/server /app/server
 COPY ./templates /app/templates
 # Copy any certificates IFF present.
-RUN cp *.pem /app/certs/ || echo "No certificates found"
+COPY ./certs /app/certs
 
 # Run the web service on container startup.
 WORKDIR /app
