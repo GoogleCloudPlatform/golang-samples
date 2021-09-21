@@ -169,7 +169,7 @@ func currentTotals(app *app) (*templateData, error) {
 		return nil, fmt.Errorf("DB.QueryRow: %v", err)
 	}
 
-	var voteDiffStr string = voteDiff(int(math.Abs(float64(tabVotes) - float64(spaceVotes)))).String()
+	voteDiffStr := voteDiff(int(math.Abs(float64(tabVotes) - float64(spaceVotes)))).String()
 
 	latestVotesCast, err := recentVotes(app)
 	if err != nil {
@@ -249,8 +249,7 @@ func initSocketConnectionPool() (*sql.DB, error) {
 		socketDir = "/cloudsql"
 	}
 
-	var dbURI string
-	dbURI = fmt.Sprintf("user=%s password=%s database=%s host=%s/%s", dbUser, dbPwd, dbName, socketDir, instanceConnectionName)
+	dbURI := fmt.Sprintf("user=%s password=%s database=%s host=%s/%s", dbUser, dbPwd, dbName, socketDir, instanceConnectionName)
 
 	// dbPool is the pool of database connections.
 	dbPool, err := sql.Open("pgx", dbURI)
@@ -278,8 +277,7 @@ func initTCPConnectionPool() (*sql.DB, error) {
 		dbName    = mustGetenv("DB_NAME") // e.g. 'my-database'
 	)
 
-	var dbURI string
-	dbURI = fmt.Sprintf("host=%s user=%s password=%s port=%s database=%s", dbTCPHost, dbUser, dbPwd, dbPort, dbName)
+	dbURI := fmt.Sprintf("host=%s user=%s password=%s port=%s database=%s", dbTCPHost, dbUser, dbPwd, dbPort, dbName)
 
 	// [START_EXCLUDE]
 	// [START cloud_sql_postgres_databasesql_sslcerts]
