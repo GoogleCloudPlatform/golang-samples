@@ -281,6 +281,23 @@ func initTCPConnectionPool() (*sql.DB, error) {
 	var dbURI string
 	dbURI = fmt.Sprintf("host=%s user=%s password=%s port=%s database=%s", dbTCPHost, dbUser, dbPwd, dbPort, dbName)
 
+	// [START_EXCLUDE]
+	// [START cloud_sql_postgres_databasesql_sslcerts]
+	// (OPTIONAL) Configure SSL certificates
+	// For deployments that connect directly to a Cloud SQL instance without
+	// using the Cloud SQL Proxy, configuring SSL certificates will ensure the
+	// connection is encrypted. This step is entirely OPTIONAL.
+	dbRootCert := os.Getenv("DB_ROOT_CERT") // e.g., '/path/to/my/server-ca.pem'
+	if dbRootCert != "" {
+		var (
+			dbCert = mustGetenv("DB_CERT") // e.g. '/path/to/my/client-cert.pem'
+			dbKey  = mustGetenv("DB_KEY")  // e.g. '/path/to/my/client-key.pem'
+		)
+		dbURI += fmt.Sprintf(" sslmode=require sslrootcert=%s sslcert=%s sslkey=%s", dbRootCert, dbCert, dbKey)
+	}
+	// [END cloud_sql_postgres_databasesql_sslcerts]
+	// [END_EXCLUDE]
+
 	// dbPool is the pool of database connections.
 	dbPool, err := sql.Open("pgx", dbURI)
 	if err != nil {
