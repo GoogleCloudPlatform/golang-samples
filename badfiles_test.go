@@ -54,6 +54,7 @@ var allowList = []string{
 	"**/.gcloudignore",
 	"**/Makefile",
 	".gitignore",
+	"**/.gitkeep",
 
 	// Primarily ML APIs.
 	"**/testdata/**/*.jpg",

@@ -159,7 +159,7 @@ func currentTotals(app *app) (*templateData, error) {
 		return nil, fmt.Errorf("DB.QueryRow: %v", err)
 	}
 
-	var voteDiffStr string = voteDiff(int(math.Abs(float64(tabVotes) - float64(spaceVotes)))).String()
+	voteDiffStr := voteDiff(int(math.Abs(float64(tabVotes) - float64(spaceVotes)))).String()
 
 	latestVotesCast, err := recentVotes(app)
 	if err != nil {
@@ -235,8 +235,7 @@ func initTCPConnectionPool() (*sql.DB, error) {
 		dbName    = mustGetenv("DB_NAME") // e.g. 'my-database'
 	)
 
-	var dbURI string
-	dbURI = fmt.Sprintf("server=%s;user id=%s;password=%s;port=%s;database=%s;", dbTCPHost, dbUser, dbPwd, dbPort, dbName)
+	dbURI := fmt.Sprintf("server=%s;user id=%s;password=%s;port=%s;database=%s;", dbTCPHost, dbUser, dbPwd, dbPort, dbName)
 
 	// dbPool is the pool of database connections.
 	dbPool, err := sql.Open("mssql", dbURI)
