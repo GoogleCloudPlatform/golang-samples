@@ -40,6 +40,7 @@ func listGameServerClusters(w io.Writer, projectID, location, realmID string) er
 
 	req := &gamingpb.ListGameServerClustersRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/%s/realms/%s", projectID, location, realmID),
+		View:   gamingpb.GameServerClusterView_FULL,
 	}
 
 	it := client.ListGameServerClusters(ctx, req)
@@ -53,6 +54,9 @@ func listGameServerClusters(w io.Writer, projectID, location, realmID string) er
 		}
 
 		fmt.Fprintf(w, "Cluster listed: %v\n", resp.Name)
+		fmt.Fprintf(w, "Cluster installed Agones version: %v\n", resp.ClusterState.AgonesVersionInstalled)
+		fmt.Fprintf(w, "Cluster installed Kubernetes version: %v\n", resp.ClusterState.KubernetesVersionInstalled)
+		fmt.Fprintf(w, "Cluster installation state: %v\n", resp.ClusterState.InstallationState)
 	}
 
 	return nil

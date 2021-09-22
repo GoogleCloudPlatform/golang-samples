@@ -40,6 +40,7 @@ func getGameServerCluster(w io.Writer, projectID, location, realmID, clusterID s
 
 	req := &gamingpb.GetGameServerClusterRequest{
 		Name: fmt.Sprintf("projects/%s/locations/%s/realms/%s/gameServerClusters/%s", projectID, location, realmID, clusterID),
+		View: gamingpb.GameServerClusterView_FULL,
 	}
 
 	resp, err := client.GetGameServerCluster(ctx, req)
@@ -47,7 +48,10 @@ func getGameServerCluster(w io.Writer, projectID, location, realmID, clusterID s
 		return fmt.Errorf("GetGameServerCluster: %v", err)
 	}
 
-	fmt.Fprintf(w, "Cluster retrieved: %v", resp.Name)
+	fmt.Fprintf(w, "Cluster retrieved: %v\n", resp.Name)
+	fmt.Fprintf(w, "Cluster installed Agones version: %v\n", resp.ClusterState.AgonesVersionInstalled)
+	fmt.Fprintf(w, "Cluster installed Kubernetes version: %v\n", resp.ClusterState.KubernetesVersionInstalled)
+	fmt.Fprintf(w, "Cluster installation state: %v\n", resp.ClusterState.InstallationState)
 	return nil
 }
 
