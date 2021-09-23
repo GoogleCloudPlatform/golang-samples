@@ -125,7 +125,7 @@ func TestStartStopSnippets(t *testing.T) {
 	}
 
 	key := seededRand.Int()
-	base64Key := b64.RawStdEncoding.EncodeToString([]byte(key))
+	base64Key := b64.RawStdEncoding.EncodeToString([]byte(fmt.Sprint(key)))
 
 	t.Errorf("unable to create instance: %v", base64Key)
 
