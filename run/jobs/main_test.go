@@ -28,7 +28,7 @@ func TestSuccessfulJob(t *testing.T) {
 	os.Setenv("ATTEMPT_NUM", "1")
 	os.Setenv("FAIL_RATE", "")
 
-	var buf bytes.Buffer
+	buf := bytes.Buffer
 	log.SetOutput(&buf)
 
 	main()
