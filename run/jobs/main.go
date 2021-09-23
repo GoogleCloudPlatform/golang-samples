@@ -23,15 +23,19 @@ import (
 	"time"
 )
 
-// Retrieve Job-defined env vars
-var TASK_NUM = os.Getenv("TASK_NUM")
-var ATTEMPT_NUM = os.Getenv("ATTEMPT_NUM")
+func getEnvVars()(string, string, string, string){
+	// Retrieve Job-defined env vars
+	var TASK_NUM = os.Getenv("TASK_NUM")
+	var ATTEMPT_NUM = os.Getenv("ATTEMPT_NUM")
 
-// Retrieve User-defined env vars
-var SLEEP_MS = os.Getenv("SLEEP_MS")
-var FAIL_RATE = os.Getenv("FAIL_RATE")
+	// Retrieve User-defined env vars
+	var SLEEP_MS = os.Getenv("SLEEP_MS")
+	var FAIL_RATE = os.Getenv("FAIL_RATE")
+	return TASK_NUM, ATTEMPT_NUM, SLEEP_MS, FAIL_RATE
+}
 
 func main() {
+	TASK_NUM, ATTEMPT_NUM, SLEEP_MS, FAIL_RATE := getEnvVars()
 	log.Printf("Starting Task #%s, Attempt #%s ...", TASK_NUM, ATTEMPT_NUM)
 
 	// Simulate work
@@ -63,6 +67,7 @@ func randomFailure(FAIL_RATE string) error {
 	randomFailure := rand.Float64()
 
 	if randomFailure < rate {
+		TASK_NUM, ATTEMPT_NUM, _, _ := getEnvVars()
 		return fmt.Errorf("Task #%s, Attempt #%s failed.", TASK_NUM, ATTEMPT_NUM)
 	}
 	return nil
