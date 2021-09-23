@@ -23,7 +23,6 @@ import (
 )
 
 func TestGetSimilarProductsURIWithFilter(t *testing.T) {
-	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2206")
 	tc := testutil.SystemTest(t)
 
 	const location = "us-west1"
