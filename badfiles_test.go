@@ -111,6 +111,9 @@ var allowList = []string{
 
 	// cloud-run-button configuration
 	"run/**/app.json",
+
+	// pub/sub schemas
+	"pubsub/**/*.avsc",
 }
 
 // Check whether accidental binary files have been checked in.
