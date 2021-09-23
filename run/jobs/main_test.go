@@ -15,34 +15,29 @@
 package main
 
 import (
-	"bufio"
+	//"bufio"
 	"bytes"
-	"fmt"
+	"log"
 	"os"
-	"strings"
 	"testing"
 )
 
-func TestSuccessfulJob(t *testing.T) {
+func ExampleSuccessfulRun() {
 	os.Setenv("SLEEP_MS", "0")
 	os.Setenv("TASK_NUM", "1")
 	os.Setenv("ATTEMPT_NUM", "1")
 	os.Setenv("FAIL_RATE", "")
 
 	var buf bytes.Buffer
-	writer := bufio.NewWriter(&buf)
+	log.SetOutput(&buf)
 
 	main()
+	log.SetOutput(os.Stdout)
+	log.Print(buf.String())
 
-	writer.Flush()
-	output := buf.String()
-
-	start := fmt.Sprintf("Starting Task #1, Attempt #1 ...")
-	finish := fmt.Sprintf("Completed Task #1, Attempt #1")
-
-	if !(strings.Contains(output, start) && strings.Contains(output, finish)) {
-		t.Fatalf("\nExpected string to contain:\n%s\n%s\nGot: %s", start, finish, output)
-	}
+	// Output:
+	// Started Task #1, Attempt #1
+	// Completed Task #1, Attempt #1
 }
 
 func TestRandomFailure(t *testing.T) {
