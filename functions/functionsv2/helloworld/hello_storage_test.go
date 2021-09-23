@@ -54,10 +54,10 @@ func TestHelloStorage(t *testing.T) {
 	}
 	got := string(out)
 	if want := d.Name; strings.Contains(want, got) {
-		t.Errorf("HelloStorage = %q, want %q", got, want)
+		t.Errorf("HelloStorage = %q, want to contain %q", got, want)
 	}
 	if want := d.TimeCreated.String(); strings.Contains(want, got) {
-		t.Errorf("HelloStorage = %q, want %q", got, want)
+		t.Errorf("HelloStorage = %q, want to contain %q", got, want)
 	}
 }
 

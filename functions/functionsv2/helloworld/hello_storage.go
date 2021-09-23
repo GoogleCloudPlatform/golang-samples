@@ -42,7 +42,7 @@ func HelloStorage(ctx context.Context, e event.Event) error {
 
 	var data StorageObjectData
 	if err := e.DataAs(&data); err != nil {
-		return fmt.Errorf("event.DataAs: %w", err)
+		return fmt.Errorf("event.DataAs: %v", err)
 	}
 
 	log.Printf("Bucket: %s", data.Bucket)
