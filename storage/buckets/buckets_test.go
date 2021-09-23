@@ -67,9 +67,7 @@ func TestCreate(t *testing.T) {
 	bucketName := testutil.UniqueBucketName(testPrefix)
 	ctx := context.Background()
 
-	t.Cleanup(func() {
-		testutil.DeleteBucketIfExists(ctx, client, bucketName)
-	})
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
 
 	if err := createBucket(ioutil.Discard, tc.ProjectID, bucketName); err != nil {
 		t.Fatalf("createBucket: %v", err)
@@ -81,9 +79,7 @@ func TestCreateBucketClassLocation(t *testing.T) {
 	bucketName := testutil.UniqueBucketName(testPrefix)
 	ctx := context.Background()
 
-	t.Cleanup(func() {
-		testutil.DeleteBucketIfExists(ctx, client, bucketName)
-	})
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
 
 	if err := createBucketClassLocation(ioutil.Discard, tc.ProjectID, bucketName); err != nil {
 		t.Fatalf("createBucketClassLocation: %v", err)
@@ -98,6 +94,8 @@ func TestStorageClass(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Bucket creation failed: %v", err)
 	}
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
+
 	if err := changeDefaultStorageClass(ioutil.Discard, bucketName); err != nil {
 		t.Errorf("changeDefaultStorageClass: %v", err)
 	}
@@ -119,6 +117,7 @@ func TestListBuckets(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Bucket creation failed: %v", err)
 	}
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
 
 	buckets, err := listBuckets(ioutil.Discard, tc.ProjectID)
 	if err != nil {
@@ -147,6 +146,7 @@ func TestGetBucketMetadata(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Bucket creation failed: %v", err)
 	}
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
 
 	buf := new(bytes.Buffer)
 	if _, err := getBucketMetadata(buf, bucketName); err != nil {
@@ -167,6 +167,7 @@ func TestIAM(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Bucket creation failed: %v", err)
 	}
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
 
 	if _, err := getBucketPolicy(ioutil.Discard, bucketName); err != nil {
 		t.Errorf("getBucketPolicy: %#v", err)
@@ -204,6 +205,7 @@ func TestCORSConfiguration(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Bucket creation failed: %v", err)
 	}
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
 
 	want := []storage.CORS{
 		{
@@ -243,6 +245,7 @@ func TestRequesterPays(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Bucket creation failed: %v", err)
 	}
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
 
 	// Tests which update the bucket metadata must be retried in order to avoid
 	// flakes from rate limits.
@@ -269,6 +272,7 @@ func TestKMS(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Bucket creation failed: %v", err)
 	}
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
 
 	keyRingID := os.Getenv("GOLANG_SAMPLES_KMS_KEYRING")
 	cryptoKeyID := os.Getenv("GOLANG_SAMPLES_KMS_CRYPTOKEY")
@@ -312,6 +316,7 @@ func TestBucketLock(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Bucket creation failed: %v", err)
 	}
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
 
 	retentionPeriod := 5 * time.Second
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
@@ -402,6 +407,7 @@ func TestUniformBucketLevelAccess(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Bucket creation failed: %v", err)
 	}
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
 
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
 		if err := enableUniformBucketLevelAccess(ioutil.Discard, bucketName); err != nil {
@@ -440,6 +446,7 @@ func TestPublicAccessPrevention(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Bucket creation failed: %v", err)
 	}
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
 
 	if err := setPublicAccessPreventionEnforced(ioutil.Discard, bucketName); err != nil {
 		t.Errorf("setPublicAccessPreventionEnforced: %v", err)
@@ -486,6 +493,7 @@ func TestLifecycleManagement(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Bucket creation failed: %v", err)
 	}
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
 
 	if err := enableBucketLifecycleManagement(ioutil.Discard, bucketName); err != nil {
 		t.Fatalf("enableBucketLifecycleManagement: %v", err)
@@ -533,6 +541,7 @@ func TestBucketLabel(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Bucket creation failed: %v", err)
 	}
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
 
 	labelName := "label-name"
 	labelValue := "label-value"
@@ -574,6 +583,7 @@ func TestBucketWebsiteInfo(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Bucket creation failed: %v", err)
 	}
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
 
 	index := "index.html"
 	notFoundPage := "404.html"
@@ -602,6 +612,7 @@ func TestSetBucketPublicIAM(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Bucket creation failed: %v", err)
 	}
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
 
 	if err := setBucketPublicIAM(ioutil.Discard, bucketName); err != nil {
 		t.Fatalf("setBucketPublicIAM: %v", err)
@@ -628,6 +639,7 @@ func TestDelete(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Bucket creation failed: %v", err)
 	}
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
 
 	if err := deleteBucket(ioutil.Discard, bucketName); err != nil {
 		t.Fatalf("deleteBucket: %v", err)

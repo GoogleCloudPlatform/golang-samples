@@ -28,16 +28,10 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-// CreateTestBucket creates a new bucket with the given prefix and registers a
-// cleanup function to delete the bucket at the end of the test
+// CreateTestBucket creates a new bucket with the given prefix
 func CreateTestBucket(ctx context.Context, t *testing.T, client *storage.Client, projectID, prefix string) (string, error) {
+	t.Helper()
 	bucketName := UniqueBucketName(prefix)
-	t.Cleanup(func() {
-		if err := DeleteBucketIfExists(ctx, client, bucketName); err != nil {
-			// Don't fail the test if cleanup fails
-			t.Logf("Test cleanup failed: %v", err)
-		}
-	})
 	return bucketName, cleanBucketWithClient(ctx, t, client, projectID, bucketName)
 }
 
