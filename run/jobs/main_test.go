@@ -16,7 +16,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -36,11 +35,11 @@ func TestSuccessfulJob(t *testing.T) {
 	log.SetOutput(os.Stdout)
 	output := buf.String()
 
-	start := fmt.Sprintf("Starting Task #1, Attempt #1 ...")
-	finish := fmt.Sprintf("Completed Task #1, Attempt #1")
+	start := "Starting Task #1, Attempt #1 ..."
+	finish := "Completed Task #1, Attempt #1"
 
 	if !(strings.Contains(output, start) && strings.Contains(output, finish)) {
-		t.Fatalf("\nExpected string to contain:\n%s\n%s\nGot: %s", start, finish, output)
+		t.Fatalf("\nExpected string to contain:\n%s\n%s\n\nGot:\n%s", start, finish, output)
 	}
 }
 
