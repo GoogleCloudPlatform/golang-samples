@@ -15,7 +15,6 @@
 package main
 
 import (
-	//"bufio"
 	"bytes"
 	"log"
 	"os"
