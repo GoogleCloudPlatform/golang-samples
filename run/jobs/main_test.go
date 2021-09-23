@@ -16,12 +16,14 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"log"
 	"os"
+	"strings"
 	"testing"
 )
 
-func ExampleSuccessfulRun() {
+func TestSuccessfulJob(t *testing.T) {
 	os.Setenv("SLEEP_MS", "0")
 	os.Setenv("TASK_NUM", "1")
 	os.Setenv("ATTEMPT_NUM", "1")
@@ -32,11 +34,14 @@ func ExampleSuccessfulRun() {
 
 	main()
 	log.SetOutput(os.Stdout)
-	log.Print(buf.String())
+	output := buf.String()
 
-	// Output:
-	// Started Task #1, Attempt #1
-	// Completed Task #1, Attempt #1
+	start := fmt.Sprintf("Starting Task #1, Attempt #1 ...")
+	finish := fmt.Sprintf("Completed Task #1, Attempt #1")
+
+	if !(strings.Contains(output, start) && strings.Contains(output, finish)) {
+		t.Fatalf("\nExpected string to contain:\n%s\n%s\nGot: %s", start, finish, output)
+	}
 }
 
 func TestRandomFailure(t *testing.T) {
