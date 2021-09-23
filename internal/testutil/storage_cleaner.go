@@ -155,13 +155,8 @@ func UniqueBucketName(prefix string) string {
 }
 
 // DeleteExpiredBuckets deletes old testing buckets that weren't cleaned previously
-func DeleteExpiredBuckets(projectID, prefix string, expireAge time.Duration) error {
+func DeleteExpiredBuckets(client *storage.Client, projectID, prefix string, expireAge time.Duration) error {
 	ctx := context.Background()
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		return err
-	}
-	defer client.Close()
 
 	it := client.Buckets(ctx, projectID)
 	it.Prefix = prefix

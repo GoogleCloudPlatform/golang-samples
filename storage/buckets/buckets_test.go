@@ -37,12 +37,25 @@ const (
 	bucketExpiryAge = time.Hour * 24
 )
 
+var client *storage.Client
+
 func TestMain(m *testing.M) {
+	// Initialize global vars
+	tc, _ := testutil.ContextMain(m)
+
+	ctx := context.Background()
+	c, err := storage.NewClient(ctx)
+	if err != nil {
+		log.Fatalf("storage.NewClient: %v", err)
+	}
+	client = c
+	defer client.Close()
+
+	// Run tests
 	exit := m.Run()
 
-	tc, _ := testutil.ContextMain(m)
 	// Delete old buckets whose name begins with our test prefix
-	if err := testutil.DeleteExpiredBuckets(tc.ProjectID, testPrefix, bucketExpiryAge); err != nil {
+	if err := testutil.DeleteExpiredBuckets(client, tc.ProjectID, testPrefix, bucketExpiryAge); err != nil {
 		// Don't fail the test if cleanup fails
 		log.Printf("Post-test cleanup failed: %v", err)
 	}
@@ -54,13 +67,8 @@ func TestCreate(t *testing.T) {
 	bucketName := testutil.UniqueBucketName(testPrefix)
 	ctx := context.Background()
 
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		t.Fatalf("storage.NewClient: %v", err)
-	}
 	t.Cleanup(func() {
 		testutil.DeleteBucketIfExists(ctx, client, bucketName)
-		client.Close()
 	})
 
 	if err := createBucket(ioutil.Discard, tc.ProjectID, bucketName); err != nil {
@@ -73,13 +81,8 @@ func TestCreateBucketClassLocation(t *testing.T) {
 	bucketName := testutil.UniqueBucketName(testPrefix)
 	ctx := context.Background()
 
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		t.Fatalf("storage.NewClient: %v", err)
-	}
 	t.Cleanup(func() {
 		testutil.DeleteBucketIfExists(ctx, client, bucketName)
-		client.Close()
 	})
 
 	if err := createBucketClassLocation(ioutil.Discard, tc.ProjectID, bucketName); err != nil {
@@ -90,14 +93,6 @@ func TestCreateBucketClassLocation(t *testing.T) {
 func TestStorageClass(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
-
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		t.Fatalf("storage.NewClient: %v", err)
-	}
-	t.Cleanup(func() {
-		client.Close()
-	})
 
 	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
 	if err != nil {
@@ -119,14 +114,6 @@ func TestStorageClass(t *testing.T) {
 func TestListBuckets(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
-
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		t.Fatalf("storage.NewClient: %v", err)
-	}
-	t.Cleanup(func() {
-		client.Close()
-	})
 
 	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
 	if err != nil {
@@ -156,14 +143,6 @@ func TestGetBucketMetadata(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		t.Fatalf("storage.NewClient: %v", err)
-	}
-	t.Cleanup(func() {
-		client.Close()
-	})
-
 	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
 	if err != nil {
 		t.Fatalf("Bucket creation failed: %v", err)
@@ -183,14 +162,6 @@ func TestGetBucketMetadata(t *testing.T) {
 func TestIAM(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
-
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		t.Fatalf("storage.NewClient: %v", err)
-	}
-	t.Cleanup(func() {
-		client.Close()
-	})
 
 	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
 	if err != nil {
@@ -228,14 +199,6 @@ func TestIAM(t *testing.T) {
 func TestCORSConfiguration(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
-
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		t.Fatalf("storage.NewClient: %v", err)
-	}
-	t.Cleanup(func() {
-		client.Close()
-	})
 
 	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
 	if err != nil {
@@ -276,14 +239,6 @@ func TestRequesterPays(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		t.Fatalf("storage.NewClient: %v", err)
-	}
-	t.Cleanup(func() {
-		client.Close()
-	})
-
 	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
 	if err != nil {
 		t.Fatalf("Bucket creation failed: %v", err)
@@ -309,14 +264,6 @@ func TestRequesterPays(t *testing.T) {
 func TestKMS(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
-
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		t.Fatalf("storage.NewClient: %v", err)
-	}
-	t.Cleanup(func() {
-		client.Close()
-	})
 
 	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
 	if err != nil {
@@ -360,14 +307,6 @@ func TestKMS(t *testing.T) {
 func TestBucketLock(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
-
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		t.Fatalf("storage.NewClient: %v", err)
-	}
-	t.Cleanup(func() {
-		client.Close()
-	})
 
 	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
 	if err != nil {
@@ -459,14 +398,6 @@ func TestUniformBucketLevelAccess(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		t.Fatalf("storage.NewClient: %v", err)
-	}
-	t.Cleanup(func() {
-		client.Close()
-	})
-
 	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
 	if err != nil {
 		t.Fatalf("Bucket creation failed: %v", err)
@@ -504,14 +435,6 @@ func TestUniformBucketLevelAccess(t *testing.T) {
 func TestPublicAccessPrevention(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
-
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		t.Fatalf("storage.NewClient: %v", err)
-	}
-	t.Cleanup(func() {
-		client.Close()
-	})
 
 	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
 	if err != nil {
@@ -558,14 +481,6 @@ func TestPublicAccessPrevention(t *testing.T) {
 func TestLifecycleManagement(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
-
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		t.Fatalf("storage.NewClient: %v", err)
-	}
-	t.Cleanup(func() {
-		client.Close()
-	})
 
 	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
 	if err != nil {
@@ -614,14 +529,6 @@ func TestBucketLabel(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		t.Fatalf("storage.NewClient: %v", err)
-	}
-	t.Cleanup(func() {
-		client.Close()
-	})
-
 	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
 	if err != nil {
 		t.Fatalf("Bucket creation failed: %v", err)
@@ -663,14 +570,6 @@ func TestBucketWebsiteInfo(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		t.Fatalf("storage.NewClient: %v", err)
-	}
-	t.Cleanup(func() {
-		client.Close()
-	})
-
 	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
 	if err != nil {
 		t.Fatalf("Bucket creation failed: %v", err)
@@ -699,14 +598,6 @@ func TestSetBucketPublicIAM(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		t.Fatalf("storage.NewClient: %v", err)
-	}
-	t.Cleanup(func() {
-		client.Close()
-	})
-
 	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
 	if err != nil {
 		t.Fatalf("Bucket creation failed: %v", err)
@@ -732,14 +623,6 @@ func TestSetBucketPublicIAM(t *testing.T) {
 func TestDelete(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
-
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		t.Fatalf("storage.NewClient: %v", err)
-	}
-	t.Cleanup(func() {
-		client.Close()
-	})
 
 	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
 	if err != nil {
