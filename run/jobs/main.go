@@ -23,7 +23,7 @@ import (
 	"time"
 )
 
-func getEnvVars()(string, string, string, string){
+func getEnvVars() (string, string, string, string) {
 	// Retrieve Job-defined env vars
 	var TASK_NUM = os.Getenv("TASK_NUM")
 	var ATTEMPT_NUM = os.Getenv("ATTEMPT_NUM")
