@@ -15,6 +15,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"math/rand"
 	"os"
@@ -42,25 +43,27 @@ func main() {
 
 	// Simulate errors
 	if FAIL_RATE != "" {
-		randomFailure(FAIL_RATE)
+		if err := randomFailure(FAIL_RATE); err != nil {
+			log.Fatalf("%v", err)
+		}
 	}
 
 	log.Printf("Completed Task #%s, Attempt #%s", TASK_NUM, ATTEMPT_NUM)
 }
 
 // Throw an error based on fail rate
-func randomFailure(FAIL_RATE string) {
+func randomFailure(FAIL_RATE string) error {
 	rate, err := strconv.ParseFloat(FAIL_RATE, 64)
 
 	if err != nil || rate < 0 || rate > 1 {
-		log.Printf("Invalid FAIL_RATE env var value: %s. Must be a float between 0 and 1 inclusive.", FAIL_RATE)
-		return
+		return fmt.Errorf("Invalid FAIL_RATE env var value: %s. Must be a float between 0 and 1 inclusive.", FAIL_RATE)
 	}
 
 	rand.Seed(time.Now().UnixNano())
 	randomFailure := rand.Float64()
 
 	if randomFailure < rate {
-		log.Fatalf("Task #%s, Attempt #%s failed.", TASK_NUM, ATTEMPT_NUM)
+		return fmt.Errorf("Task #%s, Attempt #%s failed.", TASK_NUM, ATTEMPT_NUM)
 	}
+	return nil
 }

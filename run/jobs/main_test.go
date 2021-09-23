@@ -23,14 +23,12 @@ import (
 	"testing"
 )
 
-func init() {
+func TestSuccessfulJob(t *testing.T) {
 	os.Setenv("SLEEP_MS", "0")
 	os.Setenv("TASK_NUM", "1")
 	os.Setenv("ATTEMPT_NUM", "1")
 	os.Setenv("FAIL_RATE", "")
-}
 
-func TestSuccessfulJob(t *testing.T) {
 	var buf bytes.Buffer
 	writer := bufio.NewWriter(&buf)
 
@@ -47,7 +45,14 @@ func TestSuccessfulJob(t *testing.T) {
 	}
 }
 
-// func TestFailingJob(t *testing.T) {
-// 	os.Setenv("FAIL_RATE", "0.9999999")
-// 	main()
-// }
+func TestRandomFailure(t *testing.T) {
+	err := randomFailure("1")
+	if err == nil {
+		t.Fatalf("Test should fail with FAIL_RATE 1")
+	}
+
+	err = randomFailure("0")
+	if err != nil {
+		t.Fatalf("Test should pass with empty FAIL_RATE")
+	}
+}
