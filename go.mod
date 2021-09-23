@@ -25,7 +25,7 @@ require (
 	cloud.google.com/go/logging v1.0.0
 	cloud.google.com/go/monitoring v0.1.0
 	cloud.google.com/go/profiler v0.1.0
-	cloud.google.com/go/pubsub v1.9.1
+	cloud.google.com/go/pubsub v1.15.0
 	cloud.google.com/go/pubsublite v1.1.0
 	cloud.google.com/go/secretmanager v0.1.0
 	cloud.google.com/go/securitycenter v0.1.0
