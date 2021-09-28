@@ -9,7 +9,6 @@ require (
 	cloud.google.com/go/bigquery v1.19.0
 	cloud.google.com/go/bigtable v1.4.0
 	cloud.google.com/go/cloudtasks v0.1.0
-	cloud.google.com/go/container v0.1.0 // indirect
 	cloud.google.com/go/containeranalysis v0.1.0
 	cloud.google.com/go/datacatalog v0.1.0
 	cloud.google.com/go/dataproc v0.1.0
@@ -23,24 +22,20 @@ require (
 	cloud.google.com/go/kms v0.1.0
 	cloud.google.com/go/language v0.1.0
 	cloud.google.com/go/logging v1.0.0
-	cloud.google.com/go/monitoring v0.1.0
 	cloud.google.com/go/profiler v0.1.0
 	cloud.google.com/go/pubsub v1.15.0
 	cloud.google.com/go/pubsublite v1.1.0
 	cloud.google.com/go/secretmanager v0.1.0
 	cloud.google.com/go/securitycenter v0.1.0
 	cloud.google.com/go/servicedirectory v0.1.0
-	cloud.google.com/go/spanner v1.25.0
 	cloud.google.com/go/speech v0.1.0
 	cloud.google.com/go/storage v1.16.0
 	cloud.google.com/go/talent v0.1.0
 	cloud.google.com/go/texttospeech v0.1.0
-	cloud.google.com/go/trace v0.1.0 // indirect
 	cloud.google.com/go/translate v0.1.0
 	cloud.google.com/go/video v0.1.0
 	cloud.google.com/go/videointelligence v0.1.0
 	cloud.google.com/go/vision v0.1.0
-	contrib.go.opencensus.io/exporter/stackdriver v0.13.5
 	github.com/aws/aws-sdk-go v1.38.69
 	github.com/bmatcuk/doublestar/v2 v2.0.4
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
@@ -64,7 +59,6 @@ require (
 	github.com/philhofer/fwd v1.0.0 // indirect
 	github.com/sendgrid/smtpapi-go v0.6.0 // indirect
 	github.com/tinylib/msgp v1.1.2 // indirect
-	go.opencensus.io v0.23.0
 	golang.org/x/exp v0.0.0-20210625193404-fa9d1d177d71
 	golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420
 	golang.org/x/oauth2 v0.0.0-20210819190943-2bc19b11175f

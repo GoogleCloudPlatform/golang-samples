@@ -73,7 +73,6 @@ cloud.google.com/go/pubsublite v1.1.0/go.mod h1:Z0ssT0rtWYLRl5MN/clrFMhXlbDqabpr
 cloud.google.com/go/secretmanager v0.1.0/go.mod h1:3nGKHvnzDUVit7U0S9KAKJ4aOsO1xtwRG+7ey5LK1bM=
 cloud.google.com/go/securitycenter v0.1.0/go.mod h1:7rFQIIVOX7EnJMjv/ip8DtB/4rp5YO9Nhw3GQ/uSZ0Q=
 cloud.google.com/go/servicedirectory v0.1.0/go.mod h1:E791MedkrGZGY0RvytQYD3UEcseFofG34TFjvfmdvNc=
-cloud.google.com/go/spanner v1.25.0/go.mod h1:kQUft3x355hzzaeFbObjsvkzZDgpDkesp3v75WBnI8w=
 cloud.google.com/go/speech v0.1.0/go.mod h1:E7DQS0NRqWE5kQwzm2b38i/intPjyDlGYgbjs1LbFK8=
 cloud.google.com/go/storage v1.0.0/go.mod h1:IhtSnM/ZTZV8YYJWCY8RULGVqBDmpoyjwiyrjsg+URw=
 cloud.google.com/go/storage v1.5.0/go.mod h1:tpKbwo567HUNpVclU5sGELwQWBDZ8gh0ZeosJ0Rtdos=
