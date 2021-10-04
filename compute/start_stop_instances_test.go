@@ -51,7 +51,7 @@ func TestStartStopSnippets(t *testing.T) {
 	buf := &bytes.Buffer{}
 
 	if err := createInstance(buf, tc.ProjectID, zone, instanceName, machineType, sourceImage, networkName); err != nil {
-		t.Errorf("createInstance got err: %v", err)
+		t.Fatalf("createInstance got err: %v", err)
 	}
 
 	instanceReq := &computepb.GetInstanceRequest{
@@ -124,10 +124,13 @@ func TestStartStopSnippets(t *testing.T) {
 		t.Errorf("deleteInstance got err: %v", err)
 	}
 
-	key := seededRand.Int()
-	base64Key := b64.RawStdEncoding.EncodeToString([]byte(fmt.Sprint(key)))
+	base64Key := b64.RawStdEncoding.EncodeToString([]byte("random-random-random-random-s123"))
 
-	t.Errorf("unable to create instance: %v", base64Key)
+	instanceReq = &computepb.GetInstanceRequest{
+		Project:  tc.ProjectID,
+		Zone:     zone,
+		Instance: instanceName2,
+	}
 
 	req := &computepb.InsertInstanceRequest{
 		Project: tc.ProjectID,
@@ -159,7 +162,7 @@ func TestStartStopSnippets(t *testing.T) {
 
 	op, err := instancesClient.Insert(ctx, req)
 	if err != nil {
-		t.Errorf("unable to create instance: %v", err)
+		t.Fatalf("unable to create instance: %v", err)
 	}
 
 	zoneOperationsClient, err := compute.NewZoneOperationsRESTClient(ctx)
@@ -186,7 +189,7 @@ func TestStartStopSnippets(t *testing.T) {
 
 	buf.Reset()
 
-	if err := stopInstance(buf, tc.ProjectID, zone, instanceName); err != nil {
+	if err := stopInstance(buf, tc.ProjectID, zone, instanceName2); err != nil {
 		t.Errorf("stopInstance got err: %v", err)
 	}
 
@@ -199,7 +202,7 @@ func TestStartStopSnippets(t *testing.T) {
 		t.Errorf("Instance is not in terminated status")
 	}
 
-	if err := startInstanceWithEncKey(buf, tc.ProjectID, zone, instanceName, base64Key); err != nil {
+	if err := startInstanceWithEncKey(buf, tc.ProjectID, zone, instanceName2, base64Key); err != nil {
 		t.Errorf("startInstanceWithEncKey got err: %v", err)
 	}
 
@@ -217,7 +220,7 @@ func TestStartStopSnippets(t *testing.T) {
 		t.Errorf("Instance is not in running status")
 	}
 
-	if err := deleteInstance(buf, tc.ProjectID, zone, instanceName); err != nil {
+	if err := deleteInstance(buf, tc.ProjectID, zone, instanceName2); err != nil {
 		t.Errorf("deleteInstance got err: %v", err)
 	}
 
