@@ -378,6 +378,7 @@ func TestUniformBucketLevelAccess(t *testing.T) {
 }
 
 func TestPublicAccessPrevention(t *testing.T) {
+	t.Skip("https://github.com/googleapis/google-cloud-go/issues/4890")
 	tc := testutil.SystemTest(t)
 	bucketName := tc.ProjectID + "-storage-buckets-tests"
 
