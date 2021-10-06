@@ -63,7 +63,7 @@ docker build -t grpc-ping .
 ### Running client &rArr; server ping
 
 ```sh
-cd ping
+cd grpc-ping
 go run .
 ```
 
