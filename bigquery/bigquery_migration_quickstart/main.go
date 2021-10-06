@@ -70,8 +70,6 @@ func executeTranslationWorkflow(ctx context.Context, client *migration.Client, p
 	// Tasks are extensible; the translation task is defined by the BigQuery Migration API.
 
 	translationDetails := &translationtaskpb.TranslationTaskDetails{
-		// TODO: we need to stage some suitable translation inputs and complete this definition.
-
 		// The path to objects in cloud storage containing queries to be translated.
 		InputPath: "gs://cloud-samples-data/bigquery/migration/translation/input/",
 		// The path to objects in cloud storage containing DDL create statements.
