@@ -25,7 +25,9 @@ import (
 	"google.golang.org/api/iterator"
 )
 
+// queryWithTag reads from a database with request tag set
 func queryWithTag(w io.Writer, db string) error {
+	// db = `projects/<project>/instances/<instance-id>/database/<database-id>`
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)
 	if err != nil {

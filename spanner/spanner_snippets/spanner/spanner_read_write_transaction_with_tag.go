@@ -24,7 +24,9 @@ import (
 	"cloud.google.com/go/spanner"
 )
 
+// readWriteTransactionWithTag executes the update and insert queries on venues table with appropriate transaction and requests tag
 func readWriteTransactionWithTag(w io.Writer, db string) error {
+	// db = `projects/<project>/instances/<instance-id>/database/<database-id>`
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)
 	if err != nil {
