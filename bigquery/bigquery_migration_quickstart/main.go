@@ -36,7 +36,7 @@ func main() {
 	// Define two command line flags for controlling the behavior of this quickstart.
 	projectID := flag.String("project_id", "", "Cloud Project ID.")
 	location := flag.String("location", "us", "BigQuery Migration location used for interactions.")
-
+	outputPath := flag.String("output", "", "Cloud Storage path for translated resources.")
 	// Parse flags and do some minimal validation.
 	flag.Parse()
 	if *projectID == "" {
@@ -44,6 +44,9 @@ func main() {
 	}
 	if *location == "" {
 		log.Fatal("empty --location specified, please provide a valid location")
+	}
+	if *outputPath == "" {
+		log.Fatalf("empty --output specified, please provide a valid cloud storage path")
 	}
 
 	ctx := context.Background()
@@ -53,7 +56,7 @@ func main() {
 	}
 	defer migClient.Close()
 
-	workflow, err := executeTranslationWorkflow(ctx, migClient, *projectID, *location)
+	workflow, err := executeTranslationWorkflow(ctx, migClient, *projectID, *location, *outputPath)
 	if err != nil {
 		log.Fatalf("workflow execution failed: %v", err)
 	}
@@ -62,14 +65,18 @@ func main() {
 }
 
 // executeTranslationWorkflow constructs a migration workflow that performs some offline SQL translation.
-func executeTranslationWorkflow(ctx context.Context, client *migration.Client, projectID, location string) (*migrationpb.MigrationWorkflow, error) {
+func executeTranslationWorkflow(ctx context.Context, client *migration.Client, projectID, location, outPath string) (*migrationpb.MigrationWorkflow, error) {
 
 	// Tasks are extensible; the translation task is defined by the BigQuery Migration API.
 
 	translationDetails := &translationtaskpb.TranslationTaskDetails{
 		// TODO: we need to stage some suitable translation inputs and complete this definition.
 
-		InputPath: "",
+		// The path to objects in cloud storage containing queries to be translated.
+		InputPath: "gs://cloud-samples-data/bigquery/migration/translation/input/",
+		// The path to objects in cloud storage containing DDL create statements.
+		SchemaPath: "gs://cloud-samples-data/bigquery/migration/translation/schema/",
+		OutputPath: outPath,
 	}
 
 	// We then convert the task details for translation into the suitable protobuf `Any` representation needed
@@ -135,3 +142,5 @@ func reportWorkflowStatus(workflow *migrationpb.MigrationWorkflow) {
 		fmt.Println()
 	}
 }
+
+// [END bigquerymigration_quickstart]

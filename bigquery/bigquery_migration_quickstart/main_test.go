@@ -15,11 +15,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"testing"
 	"time"
 
+	"cloud.google.com/go/storage"
+	"github.com/GoogleCloudPlatform/golang-samples/bigquery/snippets/bqtestutil"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
@@ -32,7 +35,14 @@ func TestApp(t *testing.T) {
 		t.Errorf("failed to build app")
 	}
 
-	stdOut, stdErr, err := m.Run(nil, 30*time.Second, fmt.Sprintf("--project_id=%s", tc.ProjectID))
+	// Setup an output bucket.
+	bucket, cleanup, err := setupStorage(tc.ProjectID)
+	if err != nil {
+		t.Fatalf("error setting up storage: %v", err)
+	}
+	defer cleanup()
+
+	stdOut, stdErr, err := m.Run(nil, 30*time.Second, fmt.Sprintf("--project_id=%s", tc.ProjectID), fmt.Sprintf("--output=%s", bucket))
 	if err != nil {
 		t.Errorf("execution failed: %v", err)
 	}
@@ -49,4 +59,26 @@ func TestApp(t *testing.T) {
 	if len(stdErr) > 0 {
 		t.Errorf("did not expect stderr output, got %d bytes: %s", len(stdErr), string(stdErr))
 	}
+}
+
+// setupStorage is responsible for setting up a temporary bucket to hold artifacts from the quickstart.
+func setupStorage(projectID string) (string, func(), error) {
+	ctx := context.Background()
+	storageClient, err := storage.NewClient(ctx)
+	if err != nil {
+		return "", nil, err
+	}
+	bucket, err := bqtestutil.UniqueBucketName("golang-migration", "")
+	if err != nil {
+		storageClient.Close()
+		return "", nil, fmt.Errorf("couldn't construct unique bucket name: %v", err)
+	}
+	if err := storageClient.Bucket(bucket).Create(ctx, projectID, nil); err != nil {
+		storageClient.Close()
+		return "", nil, fmt.Errorf("error creating output bucket: %v", err)
+	}
+	return bucket, func() {
+		storageClient.Bucket(bucket).Delete(ctx)
+		storageClient.Close()
+	}, nil
 }
