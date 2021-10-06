@@ -14,7 +14,7 @@
 
 package findings
 
-// [START list_filtered_findings]
+// [START securitycenter_list_filtered_findings]
 import (
 	"context"
 	"fmt"
@@ -62,4 +62,4 @@ func listFilteredFindings(w io.Writer, sourceName string) error {
 	return nil
 }
 
-// [END list_filtered_findings]
+// [END securitycenter_list_filtered_findings]

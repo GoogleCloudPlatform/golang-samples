@@ -94,6 +94,11 @@ func TestTables(t *testing.T) {
 	}
 
 	testTableID, err = bqtestutil.UniqueBQName("testtable")
+	if err := createTableFromTemplateTable("bigquery-public-data", "samples", "shakespeare", tc.ProjectID, testDatasetID, testTableID); err != nil {
+		t.Fatalf("createTableFromTemplateTable(%q %q): %v", testDatasetID, testTableID, err)
+	}
+
+	testTableID, err = bqtestutil.UniqueBQName("testtable")
 	if err != nil {
 		t.Fatalf("couldn't generate unique table id: %v", err)
 	}
@@ -115,7 +120,7 @@ func TestTables(t *testing.T) {
 	}
 
 	t.Run("cmektests", func(t *testing.T) {
-		if bqtestutil.RunCMEKTests() {
+		if bqtestutil.SkipCMEKTests() {
 			t.Skip("skipping CMEK tests")
 		}
 		if err := createTableWithCMEK(tc.ProjectID, testDatasetID, testTableID); err != nil {
@@ -150,6 +155,12 @@ func TestTables(t *testing.T) {
 	if err := updateTableAddColumn(tc.ProjectID, testDatasetID, testTableID); err != nil {
 		t.Fatalf("updateTableAddColumn(%q %q): %v", testDatasetID, testTableID, err)
 	}
+
+	// Change tables to avoid hitting metadata update limits in a short period.
+	testTableID, err = bqtestutil.UniqueBQName("testtable")
+	if err := createTableExplicitSchema(tc.ProjectID, testDatasetID, testTableID); err != nil {
+		t.Fatalf("createTableExplicitSchema(%q %q): %v", testDatasetID, testTableID, err)
+	}
 	if err := addTableLabel(tc.ProjectID, testDatasetID, testTableID); err != nil {
 		t.Fatalf("addTableLabel(%q %q): %v", testDatasetID, testTableID, err)
 	}
@@ -164,7 +175,12 @@ func TestTables(t *testing.T) {
 	}
 
 	if err := listTables(ioutil.Discard, tc.ProjectID, testDatasetID); err != nil {
-		t.Fatalf("deleteTable(%q): %v", testDatasetID, err)
+		t.Fatalf("listTables(%q): %v", testDatasetID, err)
+	}
+
+	testTableID, err = bqtestutil.UniqueBQName("testtable")
+	if err := createTableExternalHivePartitioned(tc.ProjectID, testDatasetID, testTableID); err != nil {
+		t.Fatalf("createTableExternalHivePartitioned(%q %q): %v", testDatasetID, testTableID, err)
 	}
 
 }

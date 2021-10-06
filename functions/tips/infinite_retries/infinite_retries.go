@@ -27,6 +27,8 @@ import (
 )
 
 // PubSubMessage is the payload of a Pub/Sub event.
+// See the documentation for more details:
+// https://cloud.google.com/pubsub/docs/reference/rest/v1/PubsubMessage
 type PubSubMessage struct {
 	Data []byte `json:"data"`
 }
@@ -54,5 +56,6 @@ func FiniteRetryPubSub(ctx context.Context, m PubSubMessage) error {
 
 // processTheMessage is a stand-in for the domain logic of your function.
 func processTheMessage(m PubSubMessage) error {
+	// Return an error to retry this function execution.
 	return fmt.Errorf("processTheMessage: runtime error")
 }

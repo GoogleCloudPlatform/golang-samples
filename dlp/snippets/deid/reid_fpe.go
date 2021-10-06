@@ -41,6 +41,7 @@ func reidentifyFPE(w io.Writer, projectID, input, keyFileName, cryptoKeyName, su
 	if err != nil {
 		return fmt.Errorf("dlp.NewClient: %v", err)
 	}
+	defer client.Close()
 	// Read the key file.
 	keyBytes, err := ioutil.ReadFile(keyFileName)
 	if err != nil {
@@ -48,7 +49,7 @@ func reidentifyFPE(w io.Writer, projectID, input, keyFileName, cryptoKeyName, su
 	}
 	// Create a configured request.
 	req := &dlppb.ReidentifyContentRequest{
-		Parent: "projects/" + projectID,
+		Parent: fmt.Sprintf("projects/%s/locations/global", projectID),
 		ReidentifyConfig: &dlppb.DeidentifyConfig{
 			Transformation: &dlppb.DeidentifyConfig_InfoTypeTransformations{
 				InfoTypeTransformations: &dlppb.InfoTypeTransformations{

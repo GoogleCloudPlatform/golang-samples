@@ -42,10 +42,10 @@ import (
 )
 
 // rpcOpts is used to configure the underlying gRPC client to accept large
-// messages.  The BigQuery Storage API may send message blocks up to 10MB
+// messages.  The BigQuery Storage API may send message blocks up to 128MB
 // in size.
 var rpcOpts = gax.WithGRPCOptions(
-	grpc.MaxCallRecvMsgSize(1024 * 1024 * 11),
+	grpc.MaxCallRecvMsgSize(1024 * 1024 * 129),
 )
 
 // Command-line flags.
@@ -117,6 +117,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("CreateReadSession: %v", err)
 	}
+	fmt.Printf("Read session: %s\n", session.GetName())
 
 	if len(session.GetStreams()) == 0 {
 		log.Fatalf("no streams in session.  if this was a small query result, consider writing to output to a named table.")
@@ -228,6 +229,9 @@ func processStream(ctx context.Context, client *bqStorage.BigQueryReadClient, st
 				if retries >= retryLimit {
 					return fmt.Errorf("processStream retries exhausted: %v", err)
 				}
+				// break the inner loop, and try to recover by starting a new streaming
+				// ReadRows call at the last known good offset.
+				break
 			}
 
 			rc := r.GetRowCount()

@@ -24,13 +24,27 @@
 package cloudrunci
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
 	"os/exec"
 	"path"
+	"strings"
 	"time"
+
+	"cloud.google.com/go/logging/logadmin"
+	"google.golang.org/api/iterator"
+)
+
+// labels are used in operation-related logs.
+const (
+	labelOperationDeploy        = "deploy service"
+	labelOperationBuild         = "build container image"
+	labelOperationDeleteService = "delete service"
+	labelOperationDeleteImage   = "delete container image"
+	labelOperationGetURL        = "get url"
 )
 
 // Service describes a Cloud Run service
@@ -56,6 +70,12 @@ type Service struct {
 
 	// Additional runtime environment variable overrides for the app.
 	Env EnvVars
+
+	// Build the image without Dockerfile, using Google Cloud buildpacks.
+	AsBuildpack bool
+
+	// Strictly HTTP/2 serving
+	HTTP2 bool
 
 	deployed bool     // Whether the service has been deployed.
 	built    bool     // Whether the container image has been built.
@@ -137,7 +157,7 @@ func (s *Service) ParsedURL() (*url.URL, error) {
 		return nil, errors.New("URL called before Deploy")
 	}
 	if s.url == nil {
-		out, err := gcloud(s.operationLabel("get url"), s.urlCmd())
+		out, err := gcloud(s.operationLabel(labelOperationGetURL), s.urlCmd())
 		if err != nil {
 			return nil, fmt.Errorf("gcloud: %s: %q", s.Name, err)
 		}
@@ -193,7 +213,7 @@ func (s *Service) Deploy() error {
 		}
 	}
 
-	if _, err := gcloud(s.operationLabel("deploy service"), s.deployCmd()); err != nil {
+	if _, err := gcloud(s.operationLabel(labelOperationDeploy), s.deployCmd()); err != nil {
 		return fmt.Errorf("gcloud: %s: %q", s.version(), err)
 	}
 
@@ -217,7 +237,8 @@ func (s *Service) Build() error {
 		s.Image = fmt.Sprintf("gcr.io/%s/%s:%s", s.ProjectID, s.Name, runID)
 	}
 
-	if _, err := gcloud(s.operationLabel("build container image"), s.buildCmd()); err != nil {
+	if out, err := gcloud(s.operationLabel(labelOperationBuild), s.buildCmd()); err != nil {
+		fmt.Printf(string(out))
 		return fmt.Errorf("gcloud: %s: %q", s.Image, err)
 	}
 	s.built = true
@@ -234,7 +255,7 @@ func (s *Service) Clean() error {
 		return err
 	}
 
-	if _, err := gcloud(s.operationLabel("delete service"), s.deleteServiceCmd()); err != nil {
+	if _, err := gcloud(s.operationLabel(labelOperationDeleteService), s.deleteServiceCmd()); err != nil {
 		return fmt.Errorf("gcloud: %v: %q", s.version(), err)
 	}
 	s.deployed = false
@@ -258,6 +279,7 @@ func (s *Service) operationLabel(op string) string {
 func (s *Service) deployCmd() *exec.Cmd {
 	args := append([]string{
 		"--quiet",
+		"alpha", // TODO until --use-http2 goes GA
 		"run",
 		"deploy",
 		s.version(),
@@ -275,6 +297,9 @@ func (s *Service) deployCmd() *exec.Cmd {
 	if s.AllowUnauthenticated {
 		args = append(args, "--allow-unauthenticated")
 	}
+	if s.HTTP2 {
+		args = append(args, "--use-http2")
+	}
 
 	// NOTE: if the "beta" component is not available, and this is run in parallel,
 	// gcloud will attempt to install those components multiple
@@ -287,12 +312,17 @@ func (s *Service) deployCmd() *exec.Cmd {
 func (s *Service) buildCmd() *exec.Cmd {
 	args := []string{
 		"--quiet",
+		"beta", // TODO until --pack goes to GA
 		"builds",
 		"submit",
 		"--project",
 		s.ProjectID,
-		"--tag",
-		s.Image,
+	}
+
+	if !s.AsBuildpack {
+		args = append(args, "--tag", s.Image)
+	} else {
+		args = append(args, "--pack=image="+s.Image)
 	}
 
 	// NOTE: if the "beta" component is not available, and this is run in parallel,
@@ -358,4 +388,43 @@ func (s *Service) urlCmd() *exec.Cmd {
 	cmd := exec.Command(gcloudBin, args...)
 	cmd.Dir = s.Dir
 	return cmd
+}
+
+func (s *Service) LogEntries(filter string, find string, maxAttempts int) (bool, error) {
+	ctx := context.Background()
+	client, err := logadmin.NewClient(ctx, s.ProjectID)
+	if err != nil {
+		return false, fmt.Errorf("logadmin.NewClient: %v", err)
+	}
+	defer client.Close()
+
+	preparedFilter := fmt.Sprintf(`resource.type="cloud_run_revision" resource.labels.service_name="%s" %s`, s.version(), filter)
+	fmt.Printf("Using log filter: %s\n", preparedFilter)
+
+	fmt.Println("Waiting for logs...")
+	time.Sleep(3 * time.Minute)
+
+	for i := 1; i < maxAttempts; i++ {
+		fmt.Printf("Attempt #%d\n", i)
+		it := client.Entries(ctx, logadmin.Filter(preparedFilter))
+		for {
+			entry, err := it.Next()
+			if err == iterator.Done {
+				break
+			}
+			if err != nil {
+				return false, fmt.Errorf("it.Next: %v", err)
+			}
+			payload := fmt.Sprintf("%v", entry.Payload)
+			if len(payload) > 0 {
+				fmt.Printf("entry.Payload: %v\n", entry.Payload)
+			}
+			if strings.Contains(payload, find) {
+				fmt.Printf("%q log entry found.\n", find)
+				return true, nil
+			}
+		}
+		time.Sleep(15 * time.Second)
+	}
+	return false, nil
 }

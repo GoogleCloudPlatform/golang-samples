@@ -21,7 +21,7 @@ import (
 	"io"
 	"os"
 
-	healthcare "google.golang.org/api/healthcare/v1beta1"
+	healthcare "google.golang.org/api/healthcare/v1"
 )
 
 // dicomWebRetrieveRendered retrieves a consumer imaging format like JPEG or PNG.
@@ -30,7 +30,7 @@ func dicomWebRetrieveRendered(w io.Writer, projectID, location, datasetID, dicom
 	// location := "us-central1"
 	// datasetID := "my-dataset"
 	// dicomStoreID := "my-dicom-store"
-	// dicomWebPath := "studies/1.3.6.1.4.1.11129.5.5.1113639985/series/1.3.6.1.4.1.11129.5.5.1953511724/instances/1.3.6.1.4.1.11129.5.5.9562821369"
+	// dicomWebPath := "studies/1.3.6.1.4.1.11129.5.5.1113639985/series/1.3.6.1.4.1.11129.5.5.1953511724/instances/1.3.6.1.4.1.11129.5.5.9562821369/rendered"
 	// outputFile := "rendered_image.png"
 	ctx := context.Background()
 

@@ -23,7 +23,7 @@ import (
 	"io"
 	"io/ioutil"
 
-	healthcare "google.golang.org/api/healthcare/v1beta1"
+	healthcare "google.golang.org/api/healthcare/v1"
 )
 
 // fhirExecuteBundle executes an FHIR bundle.
@@ -45,6 +45,10 @@ func fhirExecuteBundle(w io.Writer, projectID, location, datasetID, fhirStoreID 
 				"resource": map[string]interface{}{
 					"resourceType": "Patient",
 					"active":       true,
+				},
+				"request": map[string]interface{}{
+					"method": "POST",
+					"url":    "Patient",
 				},
 			},
 		},

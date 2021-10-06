@@ -15,7 +15,7 @@
 // Package annotate contains speech examples.
 package annotate
 
-// [START videointelligence_text_detection]
+// [START video_detect_text]
 
 import (
 	"context"
@@ -30,7 +30,7 @@ import (
 
 // textDetection analyzes a video and extracts the text from the video's audio.
 func textDetection(w io.Writer, filename string) error {
-	// filename := "resources/googlework_short.mp4"
+	// filename := "../testdata/googlework_short.mp4"
 
 	ctx := context.Background()
 
@@ -39,6 +39,7 @@ func textDetection(w io.Writer, filename string) error {
 	if err != nil {
 		return fmt.Errorf("video.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	fileBytes, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -89,4 +90,4 @@ func textDetection(w io.Writer, filename string) error {
 	return nil
 }
 
-// [END videointelligence_text_detection]
+// [END video_detect_text]

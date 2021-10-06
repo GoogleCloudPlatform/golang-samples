@@ -23,7 +23,6 @@ import (
 	"testing"
 	"time"
 
-	dicomwebsearchinstances "github.com/GoogleCloudPlatform/golang-samples/healthcare/internal/dicomweb-instance-search"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
@@ -64,8 +63,14 @@ func TestDICOMStore(t *testing.T) {
 		return
 	}
 
-	if err := createDICOMStore(buf, tc.ProjectID, location, datasetID, dicomStoreID); err != nil {
-		t.Errorf("createDICOMStore got err: %v", err)
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
+		if err := createDICOMStore(buf, tc.ProjectID, location, datasetID, dicomStoreID); err != nil {
+			r.Errorf("createDICOMStore got err: %v", err)
+		}
+	})
+
+	if t.Failed() {
+		return
 	}
 
 	dicomStoreName := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/dicomStores/%s", tc.ProjectID, location, datasetID, dicomStoreID)
@@ -93,12 +98,6 @@ func TestDICOMStore(t *testing.T) {
 			r.Errorf("dicomStoreInstance got err: %v", err)
 		}
 	})
-
-	// testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
-	// 	if err := dicomWebSearchInstances(ioutil.Discard, tc.ProjectID, location, datasetID, dicomStoreID, "studies/1.3.6.1.4.1.11129.5.5.111396399361969898205364400549799252857604"); err != nil {
-	// 		r.Errorf("dicomWebSearchInstances got err: %v", err)
-	// 	}
-	// })
 
 	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
 		// Remove the output file if it already exists.
@@ -147,10 +146,11 @@ func TestDICOMStore(t *testing.T) {
 		stat, err := os.Stat(instanceOutputFile)
 		if err != nil {
 			r.Errorf("os.Stat: %v", err)
+			return
 		}
 
 		if stat.Size() == 0 {
-			t.Error("Empty output DICOM instance file")
+			r.Errorf("Empty output DICOM instance file")
 		}
 
 		os.Remove(instanceOutputFile)
@@ -163,7 +163,7 @@ func TestDICOMStore(t *testing.T) {
 	})
 
 	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
-		if err := dicomwebsearchinstances.DicomWebSearchInstances(ioutil.Discard, tc.ProjectID, location, datasetID, dicomStoreID, studyPath); err != nil {
+		if err := dicomWebSearchInstances(ioutil.Discard, tc.ProjectID, location, datasetID, dicomStoreID); err != nil {
 			r.Errorf("dicomWebSearchInstances got err: %v", err)
 		}
 	})

@@ -22,8 +22,8 @@ import (
 	"fmt"
 	"log"
 
-	secretmanager "cloud.google.com/go/secretmanager/apiv1beta1"
-	secretmanagerpb "google.golang.org/genproto/googleapis/cloud/secretmanager/v1beta1"
+	secretmanager "cloud.google.com/go/secretmanager/apiv1"
+	secretmanagerpb "google.golang.org/genproto/googleapis/cloud/secretmanager/v1"
 )
 
 func main() {
@@ -36,6 +36,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to setup client: %v", err)
 	}
+	defer client.Close()
 
 	// Create the request to create the secret.
 	createSecretReq := &secretmanagerpb.CreateSecretRequest{

@@ -34,6 +34,7 @@ func createFamilyGCUnion(w io.Writer, projectID, instanceID string, tableName st
 	if err != nil {
 		return fmt.Errorf("bigtable.NewAdminClient: %v", err)
 	}
+	defer adminClient.Close()
 
 	columnFamilyName := "cf3"
 	if err := adminClient.CreateColumnFamily(ctx, tableName, columnFamilyName); err != nil {

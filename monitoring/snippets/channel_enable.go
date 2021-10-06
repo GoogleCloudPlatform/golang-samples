@@ -37,6 +37,7 @@ func enableChannel(w io.Writer, channelName string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 
 	req := &monitoringpb.UpdateNotificationChannelRequest{
 		UpdateMask: &field_mask.FieldMask{Paths: []string{"enabled"}},

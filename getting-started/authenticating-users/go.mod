@@ -3,6 +3,6 @@ module github.com/GoogleCloudPlatform/golang-samples/getting-started/authenticat
 go 1.11
 
 require (
-	cloud.google.com/go v0.52.0
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	cloud.google.com/go v0.84.0
+	github.com/golang-jwt/jwt v3.2.1+incompatible
 )

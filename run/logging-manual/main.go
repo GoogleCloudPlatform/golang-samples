@@ -51,6 +51,7 @@ func main() {
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
+// [START cloudrun_manual_logging_object]
 // [START run_manual_logging_object]
 
 // Entry defines a log entry.
@@ -59,11 +60,11 @@ type Entry struct {
 	Severity string `json:"severity,omitempty"`
 	Trace    string `json:"logging.googleapis.com/trace,omitempty"`
 
-	// Stackdriver Log Viewer allows filtering and display of this as `jsonPayload.component`.
+	// Logs Explorer allows filtering and display of this as `jsonPayload.component`.
 	Component string `json:"component,omitempty"`
 }
 
-// String renders an entry structure to the JSON format expected by Stackdriver.
+// String renders an entry structure to the JSON format expected by Cloud Logging.
 func (e Entry) String() string {
 	if e.Severity == "" {
 		e.Severity = "INFO"
@@ -76,12 +77,15 @@ func (e Entry) String() string {
 }
 
 // [END run_manual_logging_object]
+// [END cloudrun_manual_logging_object]
+
+// [START cloudrun_manual_logging]
 // [START run_manual_logging]
 
 func init() {
 	// Disable log prefixes such as the default timestamp.
 	// Prefix text prevents the message from being parsed as JSON.
-	// A timestamp is added when shipping logs to Stackdriver.
+	// A timestamp is added when shipping logs to Cloud Logging.
 	log.SetFlags(0)
 }
 
@@ -110,3 +114,4 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // [END run_manual_logging]
+// [END cloudrun_manual_logging]

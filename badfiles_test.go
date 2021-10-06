@@ -19,7 +19,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/bmatcuk/doublestar"
+	doublestar "github.com/bmatcuk/doublestar/v2"
 	"github.com/h2non/filetype"
 )
 
@@ -34,6 +34,7 @@ var allowList = []string{
 	"**/*.go",
 	"**/*.md",
 	"**/*.yaml",
+	"**/*.yml",
 	"**/*.sh",
 	"**/*.bash",
 	"**/*.mod",
@@ -50,7 +51,10 @@ var allowList = []string{
 	"LICENSE",
 	"**/*Dockerfile*",
 	"**/.dockerignore",
+	"**/.gcloudignore",
 	"**/Makefile",
+	".gitignore",
+	"**/.gitkeep",
 
 	// Primarily ML APIs.
 	"**/testdata/**/*.jpg",
@@ -59,6 +63,7 @@ var allowList = []string{
 	"**/testdata/**/*.png",
 	"**/testdata/**/*.txt",
 	"**/testdata/**/*.csv",
+	"**/testdata/**/*.mp4",
 
 	// Healthcare data.
 	"healthcare/testdata/dicom_00000001_000.dcm",
@@ -92,13 +97,23 @@ var allowList = []string{
 	"dialogflow/resources/**/*",
 	"texttospeech/**/*",
 	"storage/objects/notes.txt",
-	"videointelligence/resources/**/*",
 
-	// Renovate configuration.
+	// GitHub configuration.
+	".github/blunderbuss.yml",
 	".github/renovate.json",
+	".github/CODEOWNERS",
 
 	// Getting Started on GCE systemd service file.
 	"**/gce/**/*.service",
+
+	// sampletests testdata.
+	"testing/sampletests/testdata/raw_log.xml",
+
+	// cloud-run-button configuration
+	"run/**/app.json",
+
+	// pub/sub schemas
+	"pubsub/**/*.avsc",
 }
 
 // Check whether accidental binary files have been checked in.

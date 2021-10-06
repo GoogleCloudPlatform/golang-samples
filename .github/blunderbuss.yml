@@ -1,0 +1,65 @@
+assign_issues_by:
+- labels:
+  - 'api: bigtable'
+  - 'api: datastore'
+  - 'api: firestore'
+  to:
+  - GoogleCloudPlatform/cloud-native-db-dpes
+- labels:
+  - 'api: storage'
+  to:
+  - tritone
+- labels:
+  - 'api: bigquery'
+  - 'api: bigqueryconnection'
+  - 'api: bigquerydatatransfer'
+  - 'api: bigqueryreservation'
+  - 'api: bigquerystorage'
+  - 'api: datacatalog'
+  to:
+  - shollyman
+- labels:
+  - 'api: dataproc'
+  to:
+  - bradmiro
+- labels:
+  - 'api: logging'
+  - 'api: clouderrorreporting'
+  to:
+  - GoogleCloudPlatform/observability-devx
+- labels:
+  - 'api: pubsub'
+  to:
+  - hongalex
+- labels:
+  - 'api: run'
+  to:
+  - grayside
+- labels:
+  - 'api: spanner'
+  to:
+  - skuruppu
+- labels:
+  - 'api: cloudiot'
+  to:
+  - attilagargyan
+- labels:
+  - 'api: cloudsql'
+  to:
+  - GoogleCloudPlatform/infra-db-dpes
+
+assign_prs_by:
+- labels:
+  - 'api: cloudiot'
+  to:
+  - attilagargyan
+- labels:
+  - 'api: bigtable'
+  - 'api: datastore'
+  - 'api: firestore'
+  to:
+  - GoogleCloudPlatform/cloud-native-db-dpes
+- labels:
+  - 'api: cloudsql'
+  to:
+  - GoogleCloudPlatform/infra-db-dpes

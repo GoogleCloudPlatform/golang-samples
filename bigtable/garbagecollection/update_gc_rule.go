@@ -34,6 +34,7 @@ func updateGCRule(w io.Writer, projectID, instanceID string, tableName string) e
 	if err != nil {
 		return fmt.Errorf("bigtable.NewAdminClient: %v", err)
 	}
+	defer adminClient.Close()
 
 	columnFamilyName := "cf1"
 	// Update the column family cf1 to update the GC rule.

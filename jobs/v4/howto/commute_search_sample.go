@@ -35,6 +35,7 @@ func commuteSearch(w io.Writer, projectID, companyID string) error {
 	if err != nil {
 		return fmt.Errorf("talent.NewJobClient: %v", err)
 	}
+	defer c.Close()
 
 	// Construct a jobQuery request with a commute filter.
 	jobQuery := &talentpb.JobQuery{

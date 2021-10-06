@@ -34,6 +34,7 @@ func createFamilyGCIntersect(w io.Writer, projectID, instanceID string, tableNam
 	if err != nil {
 		return fmt.Errorf("bigtable.NewAdminClient: %v", err)
 	}
+	defer adminClient.Close()
 
 	columnFamilyName := "cf4"
 	if err := adminClient.CreateColumnFamily(ctx, tableName, columnFamilyName); err != nil {

@@ -40,6 +40,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("asset.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	feedParent := fmt.Sprintf("projects/%s", projectID)

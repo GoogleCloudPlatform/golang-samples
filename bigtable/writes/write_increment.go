@@ -33,6 +33,7 @@ func writeIncrement(w io.Writer, projectID, instanceID string, tableName string)
 	if err != nil {
 		return fmt.Errorf("bigtable.NewAdminClient: %v", err)
 	}
+	defer client.Close()
 	tbl := client.Open(tableName)
 	columnFamilyName := "stats_summary"
 

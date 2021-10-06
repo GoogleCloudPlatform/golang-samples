@@ -1,14 +1,37 @@
 {
   "extends": [
     "config:base",
-    "schedule:weekly"
+    "schedule:weekly",
+    ":disableDependencyDashboard"
   ],
   "semanticCommits": false,
-  "postUpdateOptions": ["gomodTidy"],
-  "commitMessagePrefix": "all: ",
+  "postUpdateOptions": [
+    "gomodTidy"
+  ],
+  "commitMessagePrefix": "chore(all): ",
   "commitMessageAction": "update",
   "ignorePaths": [
     "testing/docker/Dockerfile*"
   ],
-  "groupName": "all"
+  "groupName": "all",
+  "packageRules": [
+    {
+      "updateTypes": ["major"],
+      "enabled": false
+    },
+    {
+      "packageNames": [
+        "golang.org/x/net",
+        "golang.org/x/tools",
+        "cloud.google.com/go/pubsublite",
+        "contrib.go.opencensus.io/exporter/stackdriver"
+      ],
+      "enabled": false
+    }
+  ],
+  "force": {
+    "constraints": {
+      "go": "1.17"
+    }
+  }
 }

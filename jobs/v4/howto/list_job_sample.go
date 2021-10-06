@@ -14,7 +14,7 @@
 
 package howto
 
-// [START job_search_list_job]
+// [START job_search_list_jobs]
 import (
 	"context"
 	"fmt"
@@ -35,6 +35,7 @@ func listJobs(w io.Writer, projectID, companyID string) error {
 	if err != nil {
 		return fmt.Errorf("talent.NewJobClient: %v", err)
 	}
+	defer c.Close()
 
 	// Construct a listJobs request.
 	companyName := fmt.Sprintf("projects/%s/companies/%s", projectID, companyID)

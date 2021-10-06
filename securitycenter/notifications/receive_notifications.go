@@ -11,9 +11,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package notifications
 
-// [START scc_receive_notifications]
+// [START securitycenter_receive_notifications]
 import (
 	"bytes"
 	"context"
@@ -54,4 +55,4 @@ func receiveMessages(w io.Writer, projectID string, subscriptionName string) err
 	return nil
 }
 
-// [END scc_receive_notifications]
+// [END securitycenter_receive_notifications]

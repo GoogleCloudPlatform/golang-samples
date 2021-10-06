@@ -28,6 +28,7 @@ func setupPubSub(projectID, topic, sub string) (*pubsub.Subscription, error) {
 	if err != nil {
 		return nil, fmt.Errorf("pubsub.NewClient: %v", err)
 	}
+	defer client.Close()
 	// Create the Topic if it doesn't exist.
 	t := client.Topic(topic)
 	if exists, err := t.Exists(ctx); err != nil {

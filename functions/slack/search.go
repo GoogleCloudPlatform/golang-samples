@@ -84,7 +84,7 @@ func KGSearch(w http.ResponseWriter, r *http.Request) {
 
 	// Reset r.Body as ParseForm depletes it by reading the io.ReadCloser.
 	r.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
-	result, err := verifyWebHook(r, config.Secret)
+	result, err := verifyWebHook(r, slackSecret)
 	if err != nil {
 		log.Fatalf("verifyWebhook: %v", err)
 	}
@@ -93,7 +93,7 @@ func KGSearch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(r.Form["text"]) == 0 {
-		log.Fatalf("emtpy text in form")
+		log.Fatalf("empty text in form")
 	}
 	kgSearchResponse, err := makeSearchRequest(r.Form["text"][0])
 	if err != nil {

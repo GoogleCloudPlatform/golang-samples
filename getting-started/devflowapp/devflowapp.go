@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build go1.8
 // +build go1.8
 
 // Example app with code portable betwee different execution environments.
@@ -96,7 +97,6 @@ func main() {
 	http.HandleFunc("/", handleDefault)
 	http.HandleFunc("/messages", handleCheckMessages)
 	http.HandleFunc("/send", handleSend)
-	http.HandleFunc("/_ah/health", healthCheckHandler)
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -106,9 +106,4 @@ func main() {
 	if err := http.ListenAndServe(":"+port, nil); err != nil {
 		log.Fatal(err)
 	}
-}
-
-// Health check for the load balancer
-func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "ok")
 }

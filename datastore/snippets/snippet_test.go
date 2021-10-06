@@ -44,6 +44,7 @@ type Task struct {
 
 func SnippetNewIncompleteKey() {
 	// [START datastore_incomplete_key]
+	// A complete key is assigned to the entity when it is Put.
 	taskKey := datastore.IncompleteKey("Task", nil)
 	// [END datastore_incomplete_key]
 	_ = taskKey // Use the task key for datastore operations.
@@ -76,6 +77,7 @@ func SnippetNewKey_withMultipleParents() {
 func SnippetClient_Put() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
+	defer client.Close()
 	// [START datastore_entity_with_parent]
 	parentKey := datastore.NameKey("TaskList", "default", nil)
 	key := datastore.IncompleteKey("Task", parentKey)
@@ -155,9 +157,10 @@ func Snippet_basicEntity() {
 func SnippetClient_Put_upsert() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
+	defer client.Close()
 	task := &Task{} // Populated with appropriate data.
-	key := datastore.IncompleteKey("Task", nil)
 	// [START datastore_upsert]
+	key := datastore.IncompleteKey("Task", nil)
 	key, err := client.Put(ctx, key, task)
 	// [END datastore_upsert]
 	_ = err // Make sure you check err.
@@ -167,9 +170,10 @@ func SnippetClient_Put_upsert() {
 func SnippetTransaction_insert() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
+	defer client.Close()
 	task := Task{} // Populated with appropriate data.
-	taskKey := datastore.NameKey("Task", "sampleTask", nil)
 	// [START datastore_insert]
+	taskKey := datastore.NameKey("Task", "sampleTask", nil)
 	_, err := client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
 		// We first check that there is no entity stored with the given key.
 		var empty Task
@@ -187,9 +191,10 @@ func SnippetTransaction_insert() {
 func SnippetClient_Get() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
-	taskKey := datastore.NameKey("Task", "sampleTask", nil)
+	defer client.Close()
 	// [START datastore_lookup]
 	var task Task
+	taskKey := datastore.NameKey("Task", "sampleTask", nil)
 	err := client.Get(ctx, taskKey, &task)
 	// [END datastore_lookup]
 	_ = err // Make sure you check err.
@@ -198,8 +203,9 @@ func SnippetClient_Get() {
 func SnippetTransaction_update() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
-	taskKey := datastore.NameKey("Task", "sampleTask", nil)
+	defer client.Close()
 	// [START datastore_update]
+	taskKey := datastore.NameKey("Task", "sampleTask", nil)
 	tx, err := client.NewTransaction(ctx)
 	if err != nil {
 		log.Fatalf("client.NewTransaction: %v", err)
@@ -221,8 +227,9 @@ func SnippetTransaction_update() {
 func SnippetClient_Delete() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
-	key := datastore.NameKey("Task", "sampletask", nil)
+	defer client.Close()
 	// [START datastore_delete]
+	key := datastore.NameKey("Task", "sampletask", nil)
 	err := client.Delete(ctx, key)
 	// [END datastore_delete]
 	_ = err // Make sure you check err.
@@ -231,6 +238,7 @@ func SnippetClient_Delete() {
 func SnippetClient_PutMulti() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
+	defer client.Close()
 	// [START datastore_batch_upsert]
 	tasks := []*Task{
 		{
@@ -260,9 +268,10 @@ func SnippetClient_PutMulti() {
 func SnippetClient_GetMulti() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
-	var taskKeys []*datastore.Key // Populated with incomplete keys.
+	defer client.Close()
 	// [START datastore_batch_lookup]
-	var tasks []*Task
+	var taskKeys []*datastore.Key // Populated with incomplete keys.
+	tasks := make([]*Task, len(taskKeys))
 	err := client.GetMulti(ctx, taskKeys, &tasks)
 	// [END datastore_batch_lookup]
 	_ = err // Make sure you check err.
@@ -271,6 +280,7 @@ func SnippetClient_GetMulti() {
 func SnippetClient_DeleteMulti() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
+	defer client.Close()
 	var taskKeys []*datastore.Key // Populated with incomplete keys.
 	// [START datastore_batch_delete]
 	err := client.DeleteMulti(ctx, taskKeys)
@@ -281,6 +291,7 @@ func SnippetClient_DeleteMulti() {
 func SnippetQuery_basic() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
+	defer client.Close()
 	// [START datastore_basic_query]
 	query := datastore.NewQuery("Task").
 		Filter("Done =", false).
@@ -365,6 +376,7 @@ func SnippetQuery_Ancestor() {
 func SnippetQuery_Project() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
+	defer client.Close()
 	// [START datastore_projection_query]
 	query := datastore.NewQuery("Task").Project("Priority", "PercentComplete")
 	// [END datastore_projection_query]
@@ -388,6 +400,7 @@ func SnippetQuery_Project() {
 func SnippetQuery_KeysOnly() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
+	defer client.Close()
 	// [START datastore_keys_only_query]
 	query := datastore.NewQuery("Task").KeysOnly()
 	// [END datastore_keys_only_query]
@@ -493,8 +506,11 @@ func SnippetQuery_Limit() {
 func SnippetIterator_Cursor() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
-	cursorStr := ""
+	defer client.Close()
 	// [START datastore_cursor_paging]
+	// cursorStr is a cursor to start querying at.
+	cursorStr := ""
+
 	const pageSize = 5
 	query := datastore.NewQuery("Tasks").Limit(pageSize)
 	if cursorStr != "" {
@@ -519,6 +535,7 @@ func SnippetIterator_Cursor() {
 	}
 
 	// Get the cursor for the next page of results.
+	// nextCursor.String can be used as the next page's token.
 	nextCursor, err := it.Cursor()
 	// [END datastore_cursor_paging]
 	_ = err        // Check the error.
@@ -554,6 +571,7 @@ func Snippet_explodingProperties() {
 func Snippet_Transaction() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
+	defer client.Close()
 	var to, from *datastore.Key
 	// [START datastore_transactional_update]
 	type BankAccount struct {
@@ -586,6 +604,7 @@ func Snippet_Transaction() {
 func Snippet_Client_RunInTransaction() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
+	defer client.Close()
 	var to, from *datastore.Key
 	// [START datastore_transactional_retry]
 	type BankAccount struct {
@@ -611,6 +630,7 @@ func Snippet_Client_RunInTransaction() {
 func SnippetTransaction_getOrCreate() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
+	defer client.Close()
 	key := datastore.NameKey("Task", "sampletask", nil)
 	// [START datastore_transactional_get_or_create]
 	_, err := client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
@@ -633,6 +653,7 @@ func SnippetTransaction_getOrCreate() {
 func SnippetTransaction_runQuery() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
+	defer client.Close()
 	// [START datastore_transactional_single_entity_group_read_only]
 	tx, err := client.NewTransaction(ctx, datastore.ReadOnly)
 	if err != nil {
@@ -658,6 +679,7 @@ func metadataNamespaces(w io.Writer, projectID string) error {
 	if err != nil {
 		return fmt.Errorf("datastore.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	start := datastore.NameKey("__namespace__", "g", nil)
 	end := datastore.NameKey("__namespace__", "h", nil)
@@ -672,7 +694,7 @@ func metadataNamespaces(w io.Writer, projectID string) error {
 
 	fmt.Fprintln(w, "Namespaces:")
 	for _, k := range keys {
-		fmt.Fprintf(w, "\t%v", k.Namespace)
+		fmt.Fprintf(w, "\t%v", k.Name)
 	}
 	return nil
 }
@@ -693,6 +715,7 @@ func TestMetadaNamespaces(t *testing.T) {
 func Snippet_metadataKinds() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
+	defer client.Close()
 	// [START datastore_kind_run_query]
 	query := datastore.NewQuery("__kind__").KeysOnly()
 	keys, err := client.GetAll(ctx, query, nil)
@@ -710,6 +733,7 @@ func Snippet_metadataKinds() {
 func Snippet_metadataProperties() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
+	defer client.Close()
 	// [START datastore_property_run_query]
 	query := datastore.NewQuery("__property__").KeysOnly()
 	keys, err := client.GetAll(ctx, query, nil)
@@ -729,6 +753,7 @@ func Snippet_metadataProperties() {
 func Snippet_metadataPropertiesForKind() {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
+	defer client.Close()
 	// [START datastore_property_by_kind_run_query]
 	kindKey := datastore.NameKey("__kind__", "Task", nil)
 	query := datastore.NewQuery("__property__").Ancestor(kindKey)

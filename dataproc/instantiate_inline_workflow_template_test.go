@@ -19,23 +19,28 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestInstantiateInlineWorkflowTemplate(t *testing.T) {
-	tc := testutil.SystemTest(t)
+	tc := testutil.EndToEndTest(t)
 
 	region := "us-central1"
 
-	buf := new(bytes.Buffer)
+	testutil.Retry(t, 5, 60*time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
 
-	if err := instantiateInlineWorkflowTemplate(buf, tc.ProjectID, region); err != nil {
-		t.Fatalf("instantiateInlineWorkflowTemplate got err: %v", err)
-	}
+		if err := instantiateInlineWorkflowTemplate(buf, tc.ProjectID, region); err != nil {
+			r.Errorf("instantiateInlineWorkflowTemplate got err: %v", err)
+			return
+		}
 
-	got := buf.String()
-	if want := fmt.Sprintf("successfully"); !strings.Contains(got, want) {
-		t.Fatalf("instantiateInlineWorkflowTemplate got %q, want %q", got, want)
-	}
+		got := buf.String()
+		if want := fmt.Sprintf("successfully"); !strings.Contains(got, want) {
+			r.Errorf("instantiateInlineWorkflowTemplate got %q, want %q", got, want)
+			return
+		}
+	})
 }

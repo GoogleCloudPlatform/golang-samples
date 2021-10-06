@@ -11,9 +11,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package notifications
 
-// [START scc_get_notification_config]
+// [START securitycenter_get_notification_config]
 import (
 	"context"
 	"fmt"
@@ -48,4 +49,4 @@ func getNotificationConfig(w io.Writer, orgID string, notificationConfigID strin
 	return nil
 }
 
-// [END scc_get_notification_config]
+// [END securitycenter_get_notification_config]

@@ -14,7 +14,7 @@
 
 package main
 
-// [START fs_collection_group_query_data_setup]
+// [START firestore_query_collection_group_dataset]
 import (
 	"context"
 	"fmt"
@@ -23,7 +23,7 @@ import (
 )
 
 // collectionGroupSetup sets up a collection group to query.
-func collectionGroupSetup(projectID string) error {
+func collectionGroupSetup(projectID, cityCollection string) error {
 	ctx := context.Background()
 
 	client, err := firestore.NewClient(ctx, projectID)
@@ -47,7 +47,7 @@ func collectionGroupSetup(projectID string) error {
 		{"BJ", "Beijing Ancient Observatory", "museum"},
 	}
 
-	cities := client.Collection("cities")
+	cities := client.Collection(cityCollection)
 	for _, l := range landmarks {
 		if _, err := cities.Doc(l.city).Collection("landmarks").NewDoc().Set(ctx, map[string]string{
 			"name": l.name,
@@ -60,4 +60,4 @@ func collectionGroupSetup(projectID string) error {
 	return nil
 }
 
-// [END fs_collection_group_query_data_setup]
+// [END firestore_query_collection_group_dataset]

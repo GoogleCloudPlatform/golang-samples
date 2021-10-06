@@ -26,7 +26,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/firestore"
-	firebase "firebase.google.com/go"
+	firebase "firebase.google.com/go/v4"
 )
 
 // FirestoreEvent is the payload of a Firestore event.

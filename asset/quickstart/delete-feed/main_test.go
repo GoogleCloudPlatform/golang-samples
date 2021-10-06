@@ -17,7 +17,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -25,6 +24,7 @@ import (
 	asset "cloud.google.com/go/asset/apiv1"
 	"cloud.google.com/go/pubsub"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/gofrs/uuid"
 	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -33,7 +33,7 @@ import (
 func TestMain(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	env := map[string]string{"GOOGLE_CLOUD_PROJECT": tc.ProjectID}
-	feedID := fmt.Sprintf("FEED-%s", strconv.FormatInt(time.Now().UnixNano(), 10))
+	feedID := fmt.Sprintf("FEED-%s", uuid.Must(uuid.NewV4()).String()[:8])
 
 	ctx := context.Background()
 	client, err := asset.NewClient(ctx)
@@ -59,31 +59,39 @@ func TestMain(t *testing.T) {
 					},
 				},
 			},
-		}}
-	_, err = client.CreateFeed(ctx, req)
-	if err != nil {
-		t.Fatalf("client.CreateFeed: %v", err)
+		},
+	}
+
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		if _, err = client.CreateFeed(ctx, req); err != nil {
+			r.Errorf("client.CreateFeed: %v", err)
+		}
+	})
+	if t.Failed() {
+		return
 	}
 
 	m := testutil.BuildMain(t)
 	defer m.Cleanup()
 
 	if !m.Built() {
-		t.Errorf("failed to build app")
+		t.Fatalf("failed to build app")
 	}
 
-	stdOut, stdErr, err := m.Run(env, 2*time.Minute, fmt.Sprintf("--feed_id=%s", feedID))
-	if err != nil {
-		t.Errorf("execution failed: %v", err)
-	}
-	if len(stdErr) > 0 {
-		t.Errorf("did not expect stderr output, got %d bytes: %s", len(stdErr), string(stdErr))
-	}
-	got := string(stdOut)
-	want := "Deleted Feed"
-	if !strings.Contains(got, want) {
-		t.Errorf("stdout returned %s, wanted to contain %s", got, want)
-	}
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		stdOut, stdErr, err := m.Run(env, 2*time.Minute, fmt.Sprintf("--feed_id=%s", feedID))
+		if err != nil {
+			r.Errorf("execution failed: %v", err)
+		}
+		if len(stdErr) > 0 {
+			r.Errorf("did not expect stderr output, got %d bytes: %s", len(stdErr), string(stdErr))
+		}
+		got := string(stdOut)
+		want := "Deleted Feed"
+		if !strings.Contains(got, want) {
+			r.Errorf("stdout returned %s, wanted to contain %s", got, want)
+		}
+	})
 }
 
 func createTopic(ctx context.Context, t *testing.T, projectID, topicName string) {

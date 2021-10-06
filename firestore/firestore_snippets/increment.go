@@ -14,7 +14,7 @@
 
 package main
 
-// [START fs_update_document_increment]
+// [START firestore_data_set_numeric_increment]
 import (
 	"context"
 	"fmt"
@@ -22,9 +22,9 @@ import (
 	"cloud.google.com/go/firestore"
 )
 
-// updateDocumentIncrement increments the population of the DC document in the
+// updateDocumentIncrement increments the population of the city document in the
 // cities collection by 50.
-func updateDocumentIncrement(projectID string) error {
+func updateDocumentIncrement(projectID, city string) error {
 	// projectID := "my-project"
 
 	ctx := context.Background()
@@ -33,8 +33,9 @@ func updateDocumentIncrement(projectID string) error {
 	if err != nil {
 		return fmt.Errorf("firestore.NewClient: %v", err)
 	}
+	defer client.Close()
 
-	dc := client.Collection("cities").Doc("DC")
+	dc := client.Collection("cities").Doc(city)
 	_, err = dc.Update(ctx, []firestore.Update{
 		{Path: "population", Value: firestore.Increment(50)},
 	})
@@ -45,4 +46,4 @@ func updateDocumentIncrement(projectID string) error {
 	return nil
 }
 
-// [END fs_update_document_increment]
+// [END firestore_data_set_numeric_increment]

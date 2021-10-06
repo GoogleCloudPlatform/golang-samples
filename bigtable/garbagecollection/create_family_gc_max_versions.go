@@ -33,6 +33,7 @@ func createFamilyGCMaxVersions(w io.Writer, projectID, instanceID string, tableN
 	if err != nil {
 		return fmt.Errorf("bigtable.NewAdminClient: %v", err)
 	}
+	defer adminClient.Close()
 
 	columnFamilyName := "cf2"
 	if err := adminClient.CreateColumnFamily(ctx, tableName, columnFamilyName); err != nil {

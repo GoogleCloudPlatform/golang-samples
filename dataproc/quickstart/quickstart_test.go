@@ -25,6 +25,7 @@ import (
 	dataproc "cloud.google.com/go/dataproc/apiv1"
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/google/uuid"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 	dataprocpb "google.golang.org/genproto/googleapis/cloud/dataproc/v1"
@@ -42,46 +43,14 @@ sum = rdd.reduce(lambda x, y: x + y)`
 	region = "us-central1"
 )
 
-func cleanBucket(ctx context.Context, t *testing.T, client *storage.Client, projectID, bucket string) {
-	b := client.Bucket(bucket)
-	_, err := b.Attrs(ctx)
-	if err == nil {
-		it := b.Objects(ctx, nil)
-		for {
-			attrs, err := it.Next()
-			if err == iterator.Done {
-				break
-			}
-			if err != nil {
-				t.Fatalf("Bucket.Objects(%q): %v", bucket, err)
-			}
-			if attrs.EventBasedHold || attrs.TemporaryHold {
-				if _, err := b.Object(attrs.Name).Update(ctx, storage.ObjectAttrsToUpdate{
-					TemporaryHold:  false,
-					EventBasedHold: false,
-				}); err != nil {
-					t.Fatalf("Bucket(%q).Object(%q).Update: %v", bucket, attrs.Name, err)
-				}
-			}
-			if err := b.Object(attrs.Name).Delete(ctx); err != nil {
-				t.Fatalf("Bucket(%q).Object(%q).Delete: %v", bucket, attrs.Name, err)
-			}
-		}
-		if err := b.Delete(ctx); err != nil {
-			t.Fatalf("Bucket.Delete(%q): %v", bucket, err)
-		}
-	}
-	if err := b.Create(ctx, projectID, nil); err != nil {
-		t.Fatalf("Bucket.Create(%q): %v", bucket, err)
-	}
-}
-
 func setup(t *testing.T, projectID string) {
 	ctx := context.Background()
 	flag.Parse()
 
-	clusterName = "go-qs-test-" + projectID
-	bktName = "go-dataproc-qs-test-" + projectID
+	uuid := uuid.New().String()
+
+	clusterName = "go-qs-test-" + uuid
+	bktName = "go-dataproc-qs-test-" + uuid
 	jobFilePath = fmt.Sprintf("gs://%s/%s", bktName, jobFName)
 
 	sc, err := storage.NewClient(ctx)
@@ -89,7 +58,7 @@ func setup(t *testing.T, projectID string) {
 		t.Errorf("storage.NewClient: %v", err)
 	}
 
-	cleanBucket(ctx, t, sc, projectID, bktName)
+	testutil.CleanBucket(ctx, t, projectID, bktName)
 	bkt := sc.Bucket(bktName)
 
 	obj := bkt.Object(jobFName)
@@ -165,7 +134,7 @@ func deleteClusters(ctx context.Context, projectID string) error {
 }
 
 func TestQuickstart(t *testing.T) {
-	tc := testutil.SystemTest(t)
+	tc := testutil.EndToEndTest(t)
 	m := testutil.BuildMain(t)
 	setup(t, tc.ProjectID)
 	defer teardown(t, tc.ProjectID)
@@ -174,28 +143,34 @@ func TestQuickstart(t *testing.T) {
 		t.Fatalf("failed to build app")
 	}
 
-	stdOut, stdErr, err := m.Run(nil, 10*time.Minute,
-		"--project_id", tc.ProjectID,
-		"--region", region,
-		"--cluster_name", clusterName,
-		"--job_file_path", jobFilePath,
-	)
-	if err != nil {
-		t.Errorf("stdout: %v", string(stdOut))
-		t.Errorf("stderr: %v", string(stdErr))
-		t.Errorf("execution failed: %v", err)
-	}
-
-	got := string(stdOut)
-	wants := []string{
-		"Cluster created successfully",
-		"Submitted job",
-		"finished with state DONE:",
-		"successfully deleted",
-	}
-	for _, want := range wants {
-		if !strings.Contains(got, want) {
-			t.Errorf("got %q, want to contain %q", got, want)
+	testutil.Retry(t, 3, 30*time.Second, func(r *testutil.R) {
+		if err := deleteClusters(context.Background(), tc.ProjectID); err != nil {
+			r.Errorf("failed to deleteClusters: %v", err)
+			return
 		}
-	}
+		stdOut, stdErr, err := m.Run(nil, 10*time.Minute,
+			"--project_id", tc.ProjectID,
+			"--region", region,
+			"--cluster_name", clusterName,
+			"--job_file_path", jobFilePath,
+		)
+		if err != nil {
+			r.Errorf("stdout: %v", string(stdOut))
+			r.Errorf("stderr: %v", string(stdErr))
+			r.Errorf("execution failed: %v", err)
+			return
+		}
+
+		got := string(stdOut)
+		wants := []string{
+			"Cluster created successfully",
+			"Job finished successfully",
+			"successfully deleted",
+		}
+		for _, want := range wants {
+			if !strings.Contains(got, want) {
+				r.Errorf("got %q, want to contain %q", got, want)
+			}
+		}
+	})
 }

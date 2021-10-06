@@ -14,7 +14,6 @@
 
 package topics
 
-// [START pubsub_publish]
 // [START pubsub_quickstart_publisher]
 import (
 	"context"
@@ -33,6 +32,7 @@ func publish(w io.Writer, projectID, topicID, msg string) error {
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	t := client.Topic(topicID)
 	result := t.Publish(ctx, &pubsub.Message{
@@ -48,5 +48,4 @@ func publish(w io.Writer, projectID, topicID, msg string) error {
 	return nil
 }
 
-// [END pubsub_publish]
 // [END pubsub_quickstart_publisher]

@@ -24,6 +24,7 @@ import (
 	"time"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/golang/protobuf/ptypes"
 	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
 )
@@ -101,7 +102,8 @@ func setup(t *testing.T) string {
 		t.Skip("GCLOUD_ORGANIZATION not set")
 	}
 	if sourceName == "" {
-		t.Fatalf("sourceName not set")
+		t.Errorf("sourceName not set")
+		os.Exit(1)
 	}
 	return orgID
 }
@@ -116,313 +118,362 @@ func TestMain(m *testing.M) {
 }
 
 func TestCreateSource(t *testing.T) {
-	orgID := setup(t)
-	buf := new(bytes.Buffer)
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		orgID := setup(t)
+		buf := new(bytes.Buffer)
 
-	err := createSource(buf, orgID)
+		err := createSource(buf, orgID)
 
-	if err != nil {
-		t.Fatalf("createSource(%s) had error: %v", orgID, err)
-	}
+		if err != nil {
+			r.Errorf("createSource(%s) had error: %v", orgID, err)
+			return
+		}
 
-	got := buf.String()
-	if want := "New source created"; !strings.Contains(got, want) {
-		t.Errorf("createSource(%s) got: %s want %s", orgID, got, want)
-	}
-	if !strings.Contains(got, orgID) {
-		t.Errorf("createSource(%s) got: %s want %s", orgID, got, orgID)
-	}
+		got := buf.String()
+		if want := "New source created"; !strings.Contains(got, want) {
+			r.Errorf("createSource(%s) got: %s want %s", orgID, got, want)
+		}
+		if !strings.Contains(got, orgID) {
+			r.Errorf("createSource(%s) got: %s want %s", orgID, got, orgID)
+		}
+	})
 }
 
 func TestGetSource(t *testing.T) {
 	setup(t)
-	buf := new(bytes.Buffer)
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
 
-	err := getSource(buf, sourceName)
+		err := getSource(buf, sourceName)
 
-	if err != nil {
-		t.Fatalf("getSource(%s) had error: %v", sourceName, err)
-	}
+		if err != nil {
+			r.Errorf("getSource(%s) had error: %v", sourceName, err)
+			return
+		}
 
-	got := buf.String()
-	if want := "Description: A new custom source that does X"; !strings.Contains(got, want) {
-		t.Errorf("getSource(%s) got: %s want %s", sourceName, got, want)
-	}
-	if !strings.Contains(got, orgID) {
-		t.Errorf("getSource(%s) got: %s want %s", sourceName, got, sourceName)
-	}
+		got := buf.String()
+		if want := "Description: A new custom source that does X"; !strings.Contains(got, want) {
+			r.Errorf("getSource(%s) got: %s want %s", sourceName, got, want)
+		}
+		if !strings.Contains(got, orgID) {
+			r.Errorf("getSource(%s) got: %s want %s", sourceName, got, sourceName)
+		}
+	})
 }
 
 func TestListSources(t *testing.T) {
 	setup(t)
-	buf := new(bytes.Buffer)
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
 
-	err := listSources(buf, orgID)
+		err := listSources(buf, orgID)
 
-	if err != nil {
-		t.Fatalf("listSource(%s) had error: %v", orgID, err)
-	}
+		if err != nil {
+			r.Errorf("listSource(%s) had error: %v", orgID, err)
+			return
+		}
 
-	got := buf.String()
-	if want := "Description: A new custom source that does X"; !strings.Contains(got, want) {
-		t.Errorf("listSource(%s) got: %s want %s", orgID, got, want)
-	}
-	if !strings.Contains(got, sourceName) {
-		t.Errorf("listSource(%s) got: %s want %s", orgID, got, sourceName)
-	}
+		got := buf.String()
+		if want := "Description: A new custom source that does X"; !strings.Contains(got, want) {
+			r.Errorf("listSource(%s) got: %s want %s", orgID, got, want)
+		}
+		if !strings.Contains(got, sourceName) {
+			r.Errorf("listSource(%s) got: %s want %s", orgID, got, sourceName)
+		}
+	})
 }
 
 func TestUpdateSource(t *testing.T) {
 	setup(t)
-	buf := new(bytes.Buffer)
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
 
-	err := updateSource(buf, sourceName)
+		err := updateSource(buf, sourceName)
 
-	if err != nil {
-		t.Fatalf("updateSource(%s) had error: %v", sourceName, err)
-	}
+		if err != nil {
+			r.Errorf("updateSource(%s) had error: %v", sourceName, err)
+			return
+		}
 
-	got := buf.String()
-	if want := "Display name: New Display Name"; !strings.Contains(got, want) {
-		t.Errorf("updateSource(%s) got: %s want %s", sourceName, got, want)
-	}
-	if !strings.Contains(got, sourceName) {
-		t.Errorf("updateSource(%s) got: %s want %s", sourceName, got, sourceName)
-	}
-	if want := "does X"; !strings.Contains(got, want) {
-		t.Errorf("updateSource(%s) got: %s want %s", sourceName, got, want)
-	}
+		got := buf.String()
+		if want := "Display name: New Display Name"; !strings.Contains(got, want) {
+			r.Errorf("updateSource(%s) got: %s want %s", sourceName, got, want)
+		}
+		if !strings.Contains(got, sourceName) {
+			r.Errorf("updateSource(%s) got: %s want %s", sourceName, got, sourceName)
+		}
+		if want := "does X"; !strings.Contains(got, want) {
+			r.Errorf("updateSource(%s) got: %s want %s", sourceName, got, want)
+		}
 
+	})
 }
 
 func TestCreateFinding(t *testing.T) {
 	setup(t)
-	buf := new(bytes.Buffer)
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
 
-	err := createFinding(buf, sourceName)
+		err := createFinding(buf, sourceName)
 
-	if err != nil {
-		t.Fatalf("createFinding(%s) had error: %v", sourceName, err)
-	}
+		if err != nil {
+			r.Errorf("createFinding(%s) had error: %v", sourceName, err)
+			return
+		}
 
-	got := buf.String()
-	if want := fmt.Sprintf("%s/findings/samplefindingid", sourceName); !strings.Contains(got, want) {
-		t.Errorf("createFinding(%s) got: %s want %s", sourceName, got, want)
-	}
+		got := buf.String()
+		if want := fmt.Sprintf("%s/findings/samplefindingid", sourceName); !strings.Contains(got, want) {
+			r.Errorf("createFinding(%s) got: %s want %s", sourceName, got, want)
+		}
+	})
 }
 
 func TestCreateFindingWithProperties(t *testing.T) {
 	setup(t)
-	buf := new(bytes.Buffer)
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
 
-	err := createFindingWithProperties(buf, sourceName)
+		err := createFindingWithProperties(buf, sourceName)
 
-	if err != nil {
-		t.Fatalf("createFindingWithProperties(%s) had error: %v", sourceName, err)
-	}
+		if err != nil {
+			r.Errorf("createFindingWithProperties(%s) had error: %v", sourceName, err)
+			return
+		}
 
-	got := buf.String()
-	if want := "s_value"; !strings.Contains(got, want) {
-		t.Errorf("createFindingWithProperties(%s) got: %s want %s", sourceName, got, want)
-	}
-	if want := "n_value"; !strings.Contains(got, want) {
-		t.Errorf("createFindingWithProperties(%s) got: %s want %s", sourceName, got, want)
-	}
+		got := buf.String()
+		if want := "s_value"; !strings.Contains(got, want) {
+			r.Errorf("createFindingWithProperties(%s) got: %s want %s", sourceName, got, want)
+		}
+		if want := "n_value"; !strings.Contains(got, want) {
+			r.Errorf("createFindingWithProperties(%s) got: %s want %s", sourceName, got, want)
+		}
 
-	if want := fmt.Sprintf("%s/findings/samplefindingprops", sourceName); !strings.Contains(got, want) {
-		t.Errorf("createFindingWithProperties(%s) got: %s want %s", sourceName, got, want)
-	}
+		if want := fmt.Sprintf("%s/findings/samplefindingprops", sourceName); !strings.Contains(got, want) {
+			r.Errorf("createFindingWithProperties(%s) got: %s want %s", sourceName, got, want)
+		}
+	})
 }
 
 func TestUpdateFindingSourceProperties(t *testing.T) {
 	setup(t)
-	buf := new(bytes.Buffer)
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
 
-	err := updateFindingSourceProperties(buf, findingName)
+		err := updateFindingSourceProperties(buf, findingName)
 
-	if err != nil {
-		t.Fatalf("updateFindingSourceProperties(%s) had error: %v", findingName, err)
-	}
+		if err != nil {
+			r.Errorf("updateFindingSourceProperties(%s) had error: %v", findingName, err)
+			return
+		}
 
-	got := buf.String()
-	if want := "s_value"; !strings.Contains(got, want) {
-		t.Errorf("updateFindingSourceProperties(%s) got: %s want %s", findingName, got, want)
-	}
-	if !strings.Contains(got, findingName) {
-		t.Errorf("updateFindingSourceProperties(%s) got: %s want %s", findingName, got, findingName)
-	}
+		got := buf.String()
+		if want := "s_value"; !strings.Contains(got, want) {
+			r.Errorf("updateFindingSourceProperties(%s) got: %s want %s", findingName, got, want)
+		}
+		if !strings.Contains(got, findingName) {
+			r.Errorf("updateFindingSourceProperties(%s) got: %s want %s", findingName, got, findingName)
+		}
+	})
 }
 
 func TestSetFindingState(t *testing.T) {
 	setup(t)
-	buf := new(bytes.Buffer)
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
 
-	err := setFindingState(buf, findingName)
+		err := setFindingState(buf, findingName)
 
-	if err != nil {
-		t.Fatalf("setFindingState(%s) had error: %v", findingName, err)
-	}
+		if err != nil {
+			r.Errorf("setFindingState(%s) had error: %v", findingName, err)
+			return
+		}
 
-	got := buf.String()
-	if want := "INACTIVE"; !strings.Contains(got, want) {
-		t.Errorf("setFindingState(%s) got: %s want %s", findingName, got, want)
-	}
-	if !strings.Contains(got, findingName) {
-		t.Errorf("setFindingState(%s) got: %s want %s", findingName, got, findingName)
-	}
+		got := buf.String()
+		if want := "INACTIVE"; !strings.Contains(got, want) {
+			r.Errorf("setFindingState(%s) got: %s want %s", findingName, got, want)
+		}
+		if !strings.Contains(got, findingName) {
+			r.Errorf("setFindingState(%s) got: %s want %s", findingName, got, findingName)
+		}
+	})
 }
 
 func TestTestIam(t *testing.T) {
 	setup(t)
-	buf := new(bytes.Buffer)
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
 
-	err := testIam(buf, sourceName)
+		err := testIam(buf, sourceName)
 
-	if err != nil {
-		t.Fatalf("testIam(%s) had error: %v", sourceName, err)
-	}
+		if err != nil {
+			r.Errorf("testIam(%s) had error: %v", sourceName, err)
+			return
+		}
 
-	got := buf.String()
-	trueCount := strings.Count(got, "true")
-	if want := 2; want != trueCount {
-		t.Errorf("testIam(%s) got %q, true count: %d, want %d", sourceName, got, trueCount, want)
-	}
+		got := buf.String()
+		trueCount := strings.Count(got, "true")
+		if want := 2; want != trueCount {
+			r.Errorf("testIam(%s) got %q, true count: %d, want %d", sourceName, got, trueCount, want)
+		}
+	})
 }
 
 func TestListAllFindings(t *testing.T) {
-	orgID := setup(t)
-	buf := new(bytes.Buffer)
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		orgID := setup(t)
+		buf := new(bytes.Buffer)
 
-	err := listFindings(buf, orgID)
+		err := listFindings(buf, orgID)
 
-	if err != nil {
-		t.Fatalf("listFindings(%s) had error: %v", orgID, err)
-	}
+		if err != nil {
+			r.Errorf("listFindings(%s) had error: %v", orgID, err)
+			return
+		}
 
-	got := buf.String()
-	if !strings.Contains(got, findingName) {
-		t.Errorf("listFindings(%s) got: %s want %s", orgID, got, findingName)
-	}
+		got := buf.String()
+		if !strings.Contains(got, findingName) {
+			r.Errorf("listFindings(%s) got: %s want %s", orgID, got, findingName)
+		}
 
-	if !strings.Contains(got, untouchedFindingName) {
-		t.Errorf("listFindings(%s) got: %s want %s", orgID, got, untouchedFindingName)
-	}
+		if !strings.Contains(got, untouchedFindingName) {
+			r.Errorf("listFindings(%s) got: %s want %s", orgID, got, untouchedFindingName)
+		}
+	})
 }
 
 func TestListFilteredFindings(t *testing.T) {
 	setup(t)
-	buf := new(bytes.Buffer)
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
 
-	err := listFilteredFindings(buf, sourceName)
+		err := listFilteredFindings(buf, sourceName)
 
-	if err != nil {
-		t.Fatalf("listFilteredFindings(%s) had error: %v", sourceName, err)
-	}
+		if err != nil {
+			r.Errorf("listFilteredFindings(%s) had error: %v", sourceName, err)
+			return
+		}
 
-	got := buf.String()
-	if !strings.Contains(got, findingName) {
-		t.Errorf("listFilteredFindings(%s) got: %s want %s", sourceName, got, findingName)
-	}
+		got := buf.String()
+		if !strings.Contains(got, findingName) {
+			r.Errorf("listFilteredFindings(%s) got: %s want %s", sourceName, got, findingName)
+		}
 
-	if strings.Contains(got, untouchedFindingName) {
-		t.Errorf("listFilteredFindings(%s) got: %s didn't want %s", sourceName, got, untouchedFindingName)
-	}
+		if strings.Contains(got, untouchedFindingName) {
+			r.Errorf("listFilteredFindings(%s) got: %s didn't want %s", sourceName, got, untouchedFindingName)
+		}
+	})
 }
 
 func TestListFindingsAtTime(t *testing.T) {
 	setup(t)
-	buf := new(bytes.Buffer)
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
 
-	err := listFindingsAtTime(buf, sourceName)
+		err := listFindingsAtTime(buf, sourceName)
 
-	if err != nil {
-		t.Fatalf("listFindingsAtTime(%s) had error: %v", sourceName, err)
-	}
+		if err != nil {
+			r.Errorf("listFindingsAtTime(%s) had error: %v", sourceName, err)
+			return
+		}
 
-	got := buf.String()
-	// No findings 5 days ago.
-	if got != "" {
-		t.Errorf("listFindingsAtTime(%s) got: %s wanted empty", sourceName, got)
-	}
+		got := buf.String()
+		// No findings 5 days ago.
+		if got != "" {
+			r.Errorf("listFindingsAtTime(%s) got: %s wanted empty", sourceName, got)
+		}
 
+	})
 }
 
 func TestAddSecurityMarks(t *testing.T) {
 	setup(t)
-	buf := new(bytes.Buffer)
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
 
-	err := addSecurityMarks(buf, findingName)
+		err := addSecurityMarks(buf, findingName)
 
-	if err != nil {
-		t.Fatalf("addSecurityMarks(%s) adding marks had error: %v", findingName, err)
-	}
+		if err != nil {
+			r.Errorf("addSecurityMarks(%s) adding marks had error: %v", findingName, err)
+			return
+		}
 
-	got := buf.String()
-	if want := "key_a = value_a"; !strings.Contains(got, want) {
-		t.Errorf("addSecurityMarks(%s) got: %s want %s", findingName, got, want)
-	}
+		got := buf.String()
+		if want := "key_a = value_a"; !strings.Contains(got, want) {
+			r.Errorf("addSecurityMarks(%s) got: %s want %s", findingName, got, want)
+		}
 
-	if want := "key_b = value_b"; !strings.Contains(got, want) {
-		t.Errorf("addSecurityMarks(%s) got: %s want %s", findingName, got, want)
-	}
+		if want := "key_b = value_b"; !strings.Contains(got, want) {
+			r.Errorf("addSecurityMarks(%s) got: %s want %s", findingName, got, want)
+		}
+	})
 }
 
 func TestListFindingsWithMarks(t *testing.T) {
-	orgID := setup(t)
-	buf := new(bytes.Buffer)
-	// Ensure security marks have been added so filter is effective.
-	err := addSecurityMarks(buf, findingName)
-	buf.Truncate(0)
-	if err != nil {
-		t.Fatalf("listFindingsWithMark(%s) adding marks had error: %v", findingName, err)
-	}
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		orgID := setup(t)
+		buf := new(bytes.Buffer)
+		// Ensure security marks have been added so filter is effective.
+		err := addSecurityMarks(buf, findingName)
+		buf.Truncate(0)
+		if err != nil {
+			r.Errorf("listFindingsWithMark(%s) adding marks had error: %v", findingName, err)
+			return
+		}
 
-	err = listFindingsWithMarks(buf, sourceName)
+		err = listFindingsWithMarks(buf, sourceName)
 
-	if err != nil {
-		t.Fatalf("listFindingsWithMark(%s) had error: %v", sourceName, err)
-	}
+		if err != nil {
+			r.Errorf("listFindingsWithMark(%s) had error: %v", sourceName, err)
+			return
+		}
 
-	got := buf.String()
-	if !strings.Contains(got, untouchedFindingName) {
-		t.Errorf("listFindingWithMarks(%s) got: %s want %s", sourceName, got, untouchedFindingName)
-	}
+		got := buf.String()
+		if !strings.Contains(got, untouchedFindingName) {
+			r.Errorf("listFindingWithMarks(%s) got: %s want %s", sourceName, got, untouchedFindingName)
+		}
 
-	if strings.Contains(got, findingName) {
-		t.Errorf("listFindingWithMarks(%s) got: %s didn't want %s", orgID, got, findingName)
-	}
+		if strings.Contains(got, findingName) {
+			r.Errorf("listFindingWithMarks(%s) got: %s didn't want %s", orgID, got, findingName)
+		}
 
+	})
 }
 
 func TestGetSourceIamPolicy(t *testing.T) {
 	setup(t)
-	buf := new(bytes.Buffer)
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
 
-	err := getSourceIamPolicy(buf, sourceName)
+		err := getSourceIamPolicy(buf, sourceName)
 
-	if err != nil {
-		t.Fatalf("getSourceIamPolicy(%s) had error: %v", sourceName, err)
-	}
+		if err != nil {
+			r.Errorf("getSourceIamPolicy(%s) had error: %v", sourceName, err)
+			return
+		}
 
-	got := buf.String()
-	if want := "Policy"; !strings.Contains(got, want) {
-		t.Errorf("getSourceIamPolicy(%s) got: %s want %s", sourceName, got, want)
-	}
+		got := buf.String()
+		if want := "Policy"; !strings.Contains(got, want) {
+			r.Errorf("getSourceIamPolicy(%s) got: %s want %s", sourceName, got, want)
+		}
+	})
 }
 
 func TestSetSourceIamPolicy(t *testing.T) {
 	setup(t)
-	buf := new(bytes.Buffer)
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
 
-	user := "csccclienttest@gmail.com"
-	err := setSourceIamPolicy(buf, sourceName, user)
+		user := "csccclienttest@gmail.com"
+		err := setSourceIamPolicy(buf, sourceName, user)
 
-	if err != nil {
-		t.Fatalf("setSourceIamPolicy(%s, %s) had error: %v", sourceName, user, err)
-	}
+		if err != nil {
+			r.Errorf("setSourceIamPolicy(%s, %s) had error: %v", sourceName, user, err)
+			return
+		}
 
-	got := buf.String()
-	if want := "Principal: user:csccclienttest@gmail.com Role: roles/securitycenter.findingsEditor"; !strings.Contains(got, want) {
-		t.Errorf("setSourceIamPolicy(%s, %s) got: %s want %s", sourceName, user, got, want)
-	}
+		got := buf.String()
+		if want := "Principal: user:csccclienttest@gmail.com Role: roles/securitycenter.findingsEditor"; !strings.Contains(got, want) {
+			r.Errorf("setSourceIamPolicy(%s, %s) got: %s want %s", sourceName, user, got, want)
+		}
+	})
 }

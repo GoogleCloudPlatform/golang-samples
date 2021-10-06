@@ -35,6 +35,7 @@ func createJobWithCustomAttributes(w io.Writer, projectID, companyID, jobTitle s
 	if err != nil {
 		return nil, fmt.Errorf("talent.NewJobClient: %v", err)
 	}
+	defer c.Close()
 
 	// requisitionID shoud be the unique ID in your system
 	requisitionID := fmt.Sprintf("job-with-custom-attribute-%s", uuid.Must(uuid.NewV4()).String())

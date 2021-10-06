@@ -33,6 +33,7 @@ func deleteJob(w io.Writer, projectID, jobID string) error {
 	if err != nil {
 		return fmt.Errorf("talent.NewJobClient: %v", err)
 	}
+	defer c.Close()
 
 	// Construct a deleteJob request.
 	jobName := fmt.Sprintf("projects/%s/jobs/%s", projectID, jobID)

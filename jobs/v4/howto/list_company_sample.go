@@ -14,7 +14,7 @@
 
 package howto
 
-// [START job_search_list_company]
+// [START job_search_list_companies]
 import (
 	"context"
 	"fmt"
@@ -34,6 +34,7 @@ func listCompanies(w io.Writer, projectID string) error {
 	if err != nil {
 		return fmt.Errorf("talent.NewCompanyClient: %v", err)
 	}
+	defer c.Close()
 
 	// Construct a listCompanies request.
 	req := &talentpb.ListCompaniesRequest{

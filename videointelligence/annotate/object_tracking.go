@@ -15,7 +15,7 @@
 // Package annotate contains speech examples.
 package annotate
 
-// [START videointelligence_object_tracking]
+// [START video_object_tracking]
 
 import (
 	"context"
@@ -30,7 +30,7 @@ import (
 
 // objectTracking analyzes a video and extracts entities with their bounding boxes.
 func objectTracking(w io.Writer, filename string) error {
-	// filename := "resources/cat.mp4"
+	// filename := "../testdata/cat.mp4"
 
 	ctx := context.Background()
 
@@ -39,6 +39,7 @@ func objectTracking(w io.Writer, filename string) error {
 	if err != nil {
 		return fmt.Errorf("video.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	fileBytes, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -93,4 +94,4 @@ func objectTracking(w io.Writer, filename string) error {
 	return nil
 }
 
-// [END videointelligence_object_tracking]
+// [END video_object_tracking]

@@ -33,6 +33,7 @@ func deleteMetric(w io.Writer, name string) error {
 	if err != nil {
 		return err
 	}
+	defer c.Close()
 	req := &monitoringpb.DeleteMetricDescriptorRequest{
 		Name: name,
 	}

@@ -35,6 +35,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer client.Close()
 
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	bucketResourceName := fmt.Sprintf("//storage.googleapis.com/%s-for-assets", projectID)

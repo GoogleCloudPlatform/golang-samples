@@ -18,8 +18,11 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
+	"mime/multipart"
 	"net/http"
+	"net/http/httputil"
 	"os"
 	"strings"
 	"testing"
@@ -27,9 +30,6 @@ import (
 
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"google.golang.org/api/iterator"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 // TestObjects runs all samples tests of the package.
@@ -43,22 +43,49 @@ func TestObjects(t *testing.T) {
 	defer client.Close()
 
 	var (
-		bucket                = tc.ProjectID + "-samples-object-bucket-1"
-		dstBucket             = tc.ProjectID + "-samples-object-bucket-2"
-		object1               = "foo.txt"
-		object2               = "foo/a.txt"
-		allAuthenticatedUsers = storage.AllAuthenticatedUsers
-		roleReader            = storage.RoleReader
+		bucket           = tc.ProjectID + "-samples-object-bucket-1"
+		dstBucket        = tc.ProjectID + "-samples-object-bucket-2"
+		bucketVersioning = tc.ProjectID + "-bucket-versioning-enabled"
+		object1          = "foo.txt"
+		object2          = "foo/a.txt"
+		object3          = "bar.txt"
+		dstObj           = "foobar.txt"
 	)
 
-	cleanBucket(t, ctx, client, tc.ProjectID, bucket)
-	cleanBucket(t, ctx, client, tc.ProjectID, dstBucket)
+	testutil.CleanBucket(ctx, t, tc.ProjectID, bucket)
+	testutil.CleanBucket(ctx, t, tc.ProjectID, dstBucket)
+	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketVersioning)
+
+	if err := enableVersioning(ioutil.Discard, bucketVersioning); err != nil {
+		t.Fatalf("enableVersioning: %v", err)
+	}
 
 	if err := uploadFile(ioutil.Discard, bucket, object1); err != nil {
 		t.Fatalf("uploadFile(%q): %v", object1, err)
 	}
 	if err := uploadFile(ioutil.Discard, bucket, object2); err != nil {
 		t.Fatalf("uploadFile(%q): %v", object2, err)
+	}
+
+	if err := uploadFile(ioutil.Discard, bucketVersioning, object1); err != nil {
+		t.Fatalf("uploadFile(%q): %v", object1, err)
+	}
+	// Check enableVersioning correctly work.
+	bkt := client.Bucket(bucketVersioning)
+	bAttrs, err := bkt.Attrs(ctx)
+	if !bAttrs.VersioningEnabled {
+		t.Fatalf("object versioning is not enabled")
+	}
+	obj := bkt.Object(object1)
+	attrs, err := obj.Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Object(%q).Attrs: %v", bucketVersioning, object1, err)
+	}
+	// Keep the original generation of object1 before re-uploading
+	// to use in the versioning samples.
+	gen := attrs.Generation
+	if err := uploadFile(ioutil.Discard, bucketVersioning, object1); err != nil {
+		t.Fatalf("uploadFile(%q): %v", object1, err)
 	}
 
 	{
@@ -91,11 +118,51 @@ func TestObjects(t *testing.T) {
 	}
 
 	{
+		// Should show 2 versions of foo.txt
+		var buf bytes.Buffer
+		if err := listFilesAllVersion(&buf, bucketVersioning); err != nil {
+			t.Fatalf("listFilesAllVersion: %v", err)
+		}
+
+		i := 0
+		for _, line := range strings.Split(strings.TrimSuffix(buf.String(), "\n"), "\n") {
+			if got, want := line, object1; !strings.Contains(got, want) {
+				t.Errorf("List(Versions: true) got %q; want to contain %q", got, want)
+			}
+			i++
+		}
+		if i != 2 {
+			t.Errorf("listFilesAllVersion should show 2 versions of foo.txt; got %d", i)
+		}
+	}
+
+	{
 		if err := downloadUsingRequesterPays(ioutil.Discard, bucket, object1, tc.ProjectID); err != nil {
 			t.Errorf("downloadUsingRequesterPays: %v", err)
 		}
 	}
-
+	t.Run("changeObjectStorageClass", func(t *testing.T) {
+		bkt := client.Bucket(bucket)
+		obj := bkt.Object(object1)
+		if err := changeObjectStorageClass(ioutil.Discard, bucket, object1); err != nil {
+			t.Errorf("changeObjectStorageClass: %v", err)
+		}
+		wantStorageClass := "COLDLINE"
+		oattrs, err := obj.Attrs(ctx)
+		if err != nil {
+			t.Errorf("obj.Attrs: %v", err)
+		}
+		if oattrs.StorageClass != wantStorageClass {
+			t.Errorf("object storage class: got %q, want %q", oattrs.StorageClass, wantStorageClass)
+		}
+	})
+	if err := copyOldVersionOfObject(ioutil.Discard, bucketVersioning, object1, object3, gen); err != nil {
+		t.Fatalf("copyOldVersionOfObject: %v", err)
+	}
+	// Delete the first version of an object1 for a bucketVersioning.
+	if err := deleteOldVersionOfObject(ioutil.Discard, bucketVersioning, object1, gen); err != nil {
+		t.Fatalf("deleteOldVersionOfObject: %v", err)
+	}
 	data, err := downloadFile(ioutil.Discard, bucket, object1)
 	if err != nil {
 		t.Fatalf("downloadFile: %v", err)
@@ -104,13 +171,37 @@ func TestObjects(t *testing.T) {
 		t.Errorf("contents = %q; want %q", got, want)
 	}
 
+	t.Run("setMetadata", func(t *testing.T) {
+		bkt := client.Bucket(bucket)
+		obj := bkt.Object(object1)
+		err = setMetadata(ioutil.Discard, bucket, object1)
+		if err != nil {
+			t.Errorf("setMetadata: %v", err)
+		}
+		attrs, err := obj.Attrs(ctx)
+		if err != nil {
+			t.Errorf("object.Attrs: %v", err)
+		}
+		if got, want := attrs.Metadata["keyToAddOrUpdate"], "value"; got != want {
+			t.Errorf("object content = %q; want %q", got, want)
+		}
+	})
 	_, err = getMetadata(ioutil.Discard, bucket, object1)
 	if err != nil {
 		t.Errorf("getMetadata: %v", err)
 	}
-	if err := makePublic(ioutil.Discard, bucket, object1, allAuthenticatedUsers, roleReader); err != nil {
-		t.Errorf("makePublic: %v", err)
-	}
+	t.Run("publicFile", func(t *testing.T) {
+		if err := makePublic(ioutil.Discard, bucket, object1); err != nil {
+			t.Errorf("makePublic: %v", err)
+		}
+		data, err = downloadPublicFile(ioutil.Discard, bucket, object1)
+		if err != nil {
+			t.Fatalf("downloadPublicFile: %v", err)
+		}
+		if got, want := string(data), "Hello\nworld"; got != want {
+			t.Errorf("contents = %q; want %q", got, want)
+		}
+	})
 
 	err = moveFile(ioutil.Discard, bucket, object1)
 	if err != nil {
@@ -122,10 +213,26 @@ func TestObjects(t *testing.T) {
 	if err := copyFile(ioutil.Discard, dstBucket, bucket, object1); err != nil {
 		t.Errorf("copyFile: %v", err)
 	}
+	t.Run("composeFile", func(t *testing.T) {
+		if err := composeFile(ioutil.Discard, bucket, object1, object2, dstObj); err != nil {
+			t.Errorf("composeFile: %v", err)
+		}
+		bkt := client.Bucket(bucket)
+		obj := bkt.Object(dstObj)
+		_, err = obj.Attrs(ctx)
+		if err == storage.ErrObjectNotExist {
+			t.Errorf("Destination object was not created")
+		} else if err != nil {
+			t.Errorf("object.Attrs: %v", err)
+		}
+	})
 
 	key := []byte("my-secret-AES-256-encryption-key")
 	newKey := []byte("My-secret-AES-256-encryption-key")
 
+	if err := generateEncryptionKey(ioutil.Discard); err != nil {
+		t.Errorf("generateEncryptionKey: %v", err)
+	}
 	if err := uploadEncryptedFile(ioutil.Discard, bucket, object1, key); err != nil {
 		t.Errorf("uploadEncryptedFile: %v", err)
 	}
@@ -145,7 +252,20 @@ func TestObjects(t *testing.T) {
 	if err := deleteFile(ioutil.Discard, bucket, object2); err != nil {
 		t.Errorf("deleteFile: %v", err)
 	}
-
+	o := client.Bucket(bucket).Object(dstObj)
+	if err := o.Delete(ctx); err != nil {
+		t.Errorf("Object(%q).Delete: %v", dstObj, err)
+	}
+	if err := disableVersioning(ioutil.Discard, bucketVersioning); err != nil {
+		t.Fatalf("disableVersioning: %v", err)
+	}
+	bAttrs, err = bkt.Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketVersioning, err)
+	}
+	if bAttrs.VersioningEnabled {
+		t.Fatalf("object versioning is not disabled")
+	}
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		// Cleanup, this part won't be executed if Fatal happens.
 		// TODO(jbd): Implement garbage cleaning.
@@ -165,6 +285,14 @@ func TestObjects(t *testing.T) {
 			r.Errorf("Bucket(%q).Delete: %v", dstBucket, err)
 		}
 	})
+
+	// CleanBucket to delete versioned objects in bucket
+	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketVersioning)
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		if err := client.Bucket(bucketVersioning).Delete(ctx); err != nil {
+			r.Errorf("Bucket(%q).Delete: %v", bucketVersioning, err)
+		}
+	})
 }
 
 func TestKMSObjects(t *testing.T) {
@@ -182,20 +310,43 @@ func TestKMSObjects(t *testing.T) {
 		t.Skip("GOLANG_SAMPLES_KMS_KEYRING and GOLANG_SAMPLES_KMS_CRYPTOKEY must be set")
 	}
 
-	var (
-		bucket    = tc.ProjectID + "-samples-object-bucket-1"
-		dstBucket = tc.ProjectID + "-samples-object-bucket-2"
-		object1   = "foo.txt"
-	)
+	bucket := tc.ProjectID + "-samples-object-bucket-1"
+	object := "foo.txt"
 
-	cleanBucket(t, ctx, client, tc.ProjectID, bucket)
-	cleanBucket(t, ctx, client, tc.ProjectID, dstBucket)
+	testutil.CleanBucket(ctx, t, tc.ProjectID, bucket)
 
 	kmsKeyName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", tc.ProjectID, "global", keyRingID, cryptoKeyID)
+	t.Run("сhangeObjectCSEKtoKMS", func(t *testing.T) {
+		object1 := "foo.txt"
+		key := []byte("my-secret-AES-256-encryption-key")
+		obj := client.Bucket(bucket).Object(object1)
 
-	if err := uploadWithKMSKey(ioutil.Discard, bucket, object1, kmsKeyName); err != nil {
-		t.Errorf("uploadWithKMSKey: %v", err)
-	}
+		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+			wc := obj.Key(key).NewWriter(ctx)
+			if _, err := wc.Write([]byte("top secret")); err != nil {
+				r.Errorf("Writer.Write: %v", err)
+			}
+			if err := wc.Close(); err != nil {
+				r.Errorf("Writer.Close: %v", err)
+			}
+		})
+		if err := сhangeObjectCSEKToKMS(ioutil.Discard, bucket, object1, key, kmsKeyName); err != nil {
+			t.Errorf("сhangeObjectCSEKtoKMS: %v", err)
+		}
+		attrs, err := obj.Attrs(ctx)
+		if err != nil {
+			t.Errorf("obj.Attrs: %v", err)
+		}
+		if got, want := attrs.KMSKeyName, kmsKeyName; !strings.Contains(got, want) {
+			t.Errorf("attrs.KMSKeyName expected %q to contain %q", got, want)
+		}
+	})
+
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		if err := uploadWithKMSKey(ioutil.Discard, bucket, object, kmsKeyName); err != nil {
+			r.Errorf("uploadWithKMSKey: %v", err)
+		}
+	})
 }
 
 func TestV4SignedURL(t *testing.T) {
@@ -210,8 +361,11 @@ func TestV4SignedURL(t *testing.T) {
 	bucketName := tc.ProjectID + "-signed-url-bucket-name"
 	objectName := "foo.txt"
 	serviceAccount := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
+	if serviceAccount == "" {
+		t.Skip("GOOGLE_APPLICATION_CREDENTIALS must be set")
+	}
 
-	cleanBucket(t, ctx, client, tc.ProjectID, bucketName)
+	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName)
 	putBuf := new(bytes.Buffer)
 	putURL, err := generateV4PutObjectSignedURL(putBuf, bucketName, objectName, serviceAccount)
 	if err != nil {
@@ -224,6 +378,9 @@ func TestV4SignedURL(t *testing.T) {
 
 	httpClient := &http.Client{}
 	request, err := http.NewRequest("PUT", putURL, strings.NewReader("hello world"))
+	if err != nil {
+		t.Fatalf("failed to compose HTTP request: %v", err)
+	}
 	request.ContentLength = 11
 	request.Header.Set("Content-Type", "application/octet-stream")
 	response, err := httpClient.Do(request)
@@ -256,6 +413,113 @@ func TestV4SignedURL(t *testing.T) {
 	}
 }
 
+func TestPostPolicyV4(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+	defer client.Close()
+
+	bucketName := tc.ProjectID + "-post-policy-bucket-name"
+	objectName := "foo.txt"
+	serviceAccount := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
+	if serviceAccount == "" {
+		t.Error("GOOGLE_APPLICATION_CREDENTIALS must be set")
+	}
+
+	if err := testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName); err != nil {
+		t.Fatalf("CleanBucket: %v", err)
+	}
+	putBuf := new(bytes.Buffer)
+	policy, err := generateSignedPostPolicyV4(putBuf, bucketName, objectName, serviceAccount)
+	if err != nil {
+		t.Fatalf("generateSignedPostPolicyV4: %v", err)
+	}
+	got := putBuf.String()
+	if want := "<form action="; !strings.HasPrefix(got, want) {
+		t.Errorf("got output %q, should start with %q", got, want)
+	}
+	missing := false
+	for k, v := range policy.Fields {
+		if !strings.Contains(got, k) || !strings.Contains(got, v) {
+			t.Errorf("output missing form field %v: %v", k, v)
+			missing = true
+		}
+	}
+	if missing {
+		t.Fatalf("got output %q", got)
+	}
+
+	// The signed post policy allows an unauthenticated client to make a POST to
+	// the bucket using policy.URL and a form containing the values from
+	// policy.Fields. We test that this actually works against the live service
+	// using the policy generated by the sample.
+
+	// Create a form using the returned post policy.
+	formBuf := new(bytes.Buffer)
+	mw := multipart.NewWriter(formBuf)
+	for fieldName, value := range policy.Fields {
+		if err := mw.WriteField(fieldName, value); err != nil {
+			t.Errorf("writing form: %v", err)
+		}
+	}
+
+	// Create a file for upload.
+	fileBody := bytes.Repeat([]byte("z"), 25)
+	mf, err := mw.CreateFormFile("file", "bar.txt")
+	if err != nil {
+		t.Fatalf("CreateFormFile: %v", err)
+	}
+	if _, err := mf.Write(fileBody); err != nil {
+		t.Fatalf("Write: %v", err)
+	}
+	if err := mw.Close(); err != nil {
+		t.Fatalf("Close: %v", err)
+	}
+
+	// Compose the HTTP request.
+	req, err := http.NewRequest("POST", policy.URL, formBuf)
+	if err != nil {
+		t.Fatalf("failed to compose HTTP request: %v", err)
+	}
+	req.Header.Set("Content-Type", mw.FormDataContentType())
+
+	// Dump the request for logging.
+	requestDump, err := httputil.DumpRequest(req, true)
+	if err != nil {
+		t.Logf("requestDump: %v", err)
+	}
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatalf("client.Do: %v", err)
+	}
+	if g, w := res.StatusCode, 204; g != w {
+		responseDump, _ := httputil.DumpResponse(res, true)
+		t.Errorf("status code in response mismatch: got %d want %d\nRequest: %v\n\nResponse: %s\n",
+			g, w, string(requestDump), responseDump)
+	}
+
+	io.Copy(ioutil.Discard, res.Body)
+	if err := res.Body.Close(); err != nil {
+		t.Errorf("Body.Close: %v", err)
+	}
+
+	// Verify that the file was uploaded by reading back its attributes.
+	bkt := client.Bucket(bucketName)
+	obj := bkt.Object(objectName)
+
+	attrs, err := obj.Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Failed to retrieve attributes: %v", err)
+	}
+	if attrs.Name != objectName {
+		t.Errorf("object name: got %q, want %q", attrs.Name, objectName)
+	}
+}
+
 func TestObjectBucketLock(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
@@ -271,7 +535,7 @@ func TestObjectBucketLock(t *testing.T) {
 		retentionPeriod = 5 * time.Second
 	)
 
-	cleanBucket(t, ctx, client, tc.ProjectID, bucketName)
+	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName)
 	bucket := client.Bucket(bucketName)
 
 	if err := uploadFile(ioutil.Discard, bucketName, objectName); err != nil {
@@ -328,40 +592,5 @@ func TestObjectBucketLock(t *testing.T) {
 	}
 	if oAttrs.TemporaryHold {
 		t.Errorf("temporary hold is not disabled")
-	}
-}
-
-// cleanBucket ensures there's a fresh bucket with a given name, deleting the existing bucket if it already exists.
-func cleanBucket(t *testing.T, ctx context.Context, client *storage.Client, projectID, bucket string) {
-	b := client.Bucket(bucket)
-	_, err := b.Attrs(ctx)
-	if err == nil {
-		it := b.Objects(ctx, nil)
-		for {
-			attrs, err := it.Next()
-			if err == iterator.Done {
-				break
-			}
-			if err != nil {
-				t.Fatalf("Bucket(%q).Objects: %v", bucket, err)
-			}
-			if attrs.EventBasedHold || attrs.TemporaryHold {
-				if _, err := b.Object(attrs.Name).Update(ctx, storage.ObjectAttrsToUpdate{
-					TemporaryHold:  false,
-					EventBasedHold: false,
-				}); err != nil {
-					t.Fatalf("Bucket(%q).Object(%q).Update: %v", bucket, attrs.Name, err)
-				}
-			}
-			if err := b.Object(attrs.Name).Delete(ctx); err != nil {
-				t.Fatalf("Bucket(%q).Object(%q).Delete: %v", bucket, attrs.Name, err)
-			}
-		}
-		if err := b.Delete(ctx); err != nil {
-			t.Fatalf("Bucket(%q).Delete: %v", bucket, err)
-		}
-	}
-	if err := b.Create(ctx, projectID, nil); err != nil && status.Code(err) != codes.AlreadyExists {
-		t.Fatalf("Bucket(%q).Create: %v", bucket, err)
 	}
 }

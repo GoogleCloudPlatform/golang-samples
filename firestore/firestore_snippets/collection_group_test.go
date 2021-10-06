@@ -22,9 +22,11 @@ import (
 	"testing"
 
 	"cloud.google.com/go/firestore"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestCollectionGroup(t *testing.T) {
+	tc := testutil.SystemTest(t)
 	// TODO(#559): revert this to testutil.SystemTest(t).ProjectID
 	// when datastore and firestore can co-exist in a project.
 	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
@@ -40,8 +42,10 @@ func TestCollectionGroup(t *testing.T) {
 	}
 	defer client.Close()
 
+	collection := tc.ProjectID + "-collection-group-cities"
+
 	// Delete all docs first to make sure collectionGroupSetup works.
-	docs, err := client.Collection("cities").DocumentRefs(ctx).GetAll()
+	docs, err := client.Collection(collection).DocumentRefs(ctx).GetAll()
 	// Ignore errors; this isn't essential.
 	if err == nil {
 		for _, d := range docs {
@@ -49,7 +53,7 @@ func TestCollectionGroup(t *testing.T) {
 		}
 	}
 
-	if err := collectionGroupSetup(projectID); err != nil {
+	if err := collectionGroupSetup(projectID, collection); err != nil {
 		t.Fatalf("collectionGroupSetup: %v", err)
 	}
 
@@ -60,5 +64,48 @@ func TestCollectionGroup(t *testing.T) {
 	want := "Legion of Honor"
 	if got := buf.String(); !strings.Contains(got, want) {
 		t.Errorf("collectionGroupQuery got\n----\n%s\n----\nWant to contain:\n----\n%s\n----", got, want)
+	}
+}
+
+func TestCollectionGroupPartitionQueries(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	// TODO(#559): revert this to testutil.SystemTest(t).ProjectID
+	// when datastore and firestore can co-exist in a project.
+	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
+	if projectID == "" {
+		t.Skip("Skipping firestore test. Set GOLANG_SAMPLES_FIRESTORE_PROJECT.")
+	}
+
+	ctx := context.Background()
+
+	client, err := firestore.NewClient(ctx, projectID)
+	if err != nil {
+		t.Fatalf("firestore.NewClient: %v", err)
+	}
+	defer client.Close()
+
+	collection := tc.ProjectID + "-collection-group-cities"
+
+	// Delete all docs first to make sure collectionGroupSetup works.
+	docs, err := client.Collection(collection).DocumentRefs(ctx).GetAll()
+	// Ignore errors; this isn't essential.
+	if err == nil {
+		for _, d := range docs {
+			d.Delete(ctx)
+		}
+	}
+
+	if err := collectionGroupSetup(projectID, collection); err != nil {
+		t.Fatalf("collectionGroupSetup: %v", err)
+	}
+
+	err = partitionQuery(ctx, client)
+	if err != nil {
+		t.Errorf("partitionQuery unexpected result: %s", err)
+	}
+
+	err = serializePartitionQuery(ctx, client)
+	if err != nil {
+		t.Errorf("serializePartitionQuery unexpected result: %s", err)
 	}
 }

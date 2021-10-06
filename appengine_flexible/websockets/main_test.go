@@ -18,7 +18,6 @@ import (
 	"bytes"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 
 	"github.com/gorilla/websocket"
@@ -50,16 +49,5 @@ func TestSocketHandler(t *testing.T) {
 	}
 	if !bytes.Equal(got, message) {
 		t.Errorf("got %q, want %q", got, message)
-	}
-}
-
-func TestHealthCheckHandler(t *testing.T) {
-	req := httptest.NewRequest("GET", "/", strings.NewReader(""))
-
-	rr := httptest.NewRecorder()
-	healthCheckHandler(rr, req)
-
-	if got, want := rr.Body.String(), "ok"; got != want {
-		t.Errorf("got %q, want %q", got, want)
 	}
 }

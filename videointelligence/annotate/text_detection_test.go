@@ -26,7 +26,7 @@ import (
 func TestTextDetection(t *testing.T) {
 	testutil.EndToEndTest(t)
 
-	filename := "../resources/googlework_short.mp4"
+	filename := "../testdata/googlework_short.mp4"
 	possibleTexts := []string{
 		"GOOGLE", "SUR", "SUR", "ROTO", "VICE PRESIDENT", "58OO9",
 		"LONDRES", "OMAR", "PARIS", "METRO", "RUE", "CARLO",

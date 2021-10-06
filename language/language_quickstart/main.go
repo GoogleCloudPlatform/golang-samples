@@ -35,6 +35,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
+	defer client.Close()
 
 	// Sets the text to analyze.
 	text := "Hello, world!"

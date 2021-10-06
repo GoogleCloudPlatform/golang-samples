@@ -53,6 +53,9 @@ func TestDatasets(t *testing.T) {
 	if err := updateDatasetAccessControl(tc.ProjectID, datasetID); err != nil {
 		t.Errorf("updateDataSetAccessControl(%q): %v", datasetID, err)
 	}
+	if err := revokeDatasetAccess(tc.ProjectID, datasetID, "sample.bigquery.dev@gmail.com"); err != nil {
+		t.Errorf("revokeDatasetAccess(%q): %v", datasetID, err)
+	}
 	if err := addDatasetLabel(tc.ProjectID, datasetID); err != nil {
 		t.Errorf("updateDatasetAddLabel: %v", err)
 	}

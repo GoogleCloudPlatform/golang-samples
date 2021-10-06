@@ -38,6 +38,7 @@ func SynthesizeText(w io.Writer, text, outputFile string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 
 	req := texttospeechpb.SynthesizeSpeechRequest{
 		Input: &texttospeechpb.SynthesisInput{
@@ -83,6 +84,7 @@ func SynthesizeSSML(w io.Writer, ssml, outputFile string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 
 	req := texttospeechpb.SynthesizeSpeechRequest{
 		Input: &texttospeechpb.SynthesisInput{

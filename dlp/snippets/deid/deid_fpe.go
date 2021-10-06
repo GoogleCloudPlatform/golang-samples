@@ -43,6 +43,7 @@ func deidentifyFPE(w io.Writer, projectID, input string, infoTypeNames []string,
 	if err != nil {
 		return fmt.Errorf("dlp.NewClient: %v", err)
 	}
+	defer client.Close()
 	// Convert the info type strings to a list of InfoTypes.
 	var infoTypes []*dlppb.InfoType
 	for _, it := range infoTypeNames {
@@ -55,7 +56,7 @@ func deidentifyFPE(w io.Writer, projectID, input string, infoTypeNames []string,
 	}
 	// Create a configured request.
 	req := &dlppb.DeidentifyContentRequest{
-		Parent: "projects/" + projectID,
+		Parent: fmt.Sprintf("projects/%s/locations/global", projectID),
 		InspectConfig: &dlppb.InspectConfig{
 			InfoTypes: infoTypes,
 		},

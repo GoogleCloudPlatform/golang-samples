@@ -33,6 +33,7 @@ func customRankingSearch(w io.Writer, projectID, companyID string) error {
 	if err != nil {
 		return fmt.Errorf("taleng.NewJobClient: %v", err)
 	}
+	defer c.Close()
 
 	// Construct a searchJobs request.
 	req := &talentpb.SearchJobsRequest{
