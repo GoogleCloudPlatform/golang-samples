@@ -12,7 +12,7 @@ require (
 	github.com/golang/protobuf v1.5.2
 	go.opencensus.io v0.23.0
 	golang.org/x/exp v0.0.0-20210625193404-fa9d1d177d71
-	google.golang.org/genproto v0.0.0-20210831024726-fe130286e0e2
+	google.golang.org/genproto v0.0.0-20210924002016-3dee208752a0
 )
 
 replace github.com/GoogleCloudPlatform/golang-samples => ../
