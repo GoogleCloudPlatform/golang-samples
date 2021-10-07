@@ -163,6 +163,8 @@ func TestSample(t *testing.T) {
 	assertContains(t, out, "1 1 Total Junk")
 	out = runSample(t, queryRequestPriority, dbName, "failed to query data with RequestPriority")
 	assertContains(t, out, "1 1 Total Junk")
+	out = runSample(t, queryWithTag, dbName, "failed to query data with request tag set")
+	assertContains(t, out, "1 1 Total Junk")
 
 	runSampleWithContext(ctx, t, addIndex, dbName, "failed to add index")
 	out = runSample(t, queryUsingIndex, dbName, "failed to query using index")
@@ -316,6 +318,13 @@ func TestSample(t *testing.T) {
 
 	out = runSample(t, queryWithString, dbName, "failed to query with string")
 	assertContains(t, out, "42 Venue 42")
+
+	out = runSample(t, readWriteTransactionWithTag, dbName, "failed to perform read-write transaction with tag")
+	assertContains(t, out, "Venue capacities updated.")
+	assertContains(t, out, "New venue inserted.")
+	out = runSample(t, queryWithInt, dbName, "failed to query with int")
+	assertContains(t, out, "19 Venue 19 6300")
+	assertNotContains(t, out, "42 Venue 42 3000")
 
 	// Wait 5 seconds to avoid a time drift issue for the next query:
 	// https://github.com/GoogleCloudPlatform/golang-samples/issues/1146.
@@ -786,6 +795,13 @@ func assertContains(t *testing.T, out string, sub string) {
 	t.Helper()
 	if !strings.Contains(out, sub) {
 		t.Errorf("got output %q; want it to contain %q", out, sub)
+	}
+}
+
+func assertNotContains(t *testing.T, out string, sub string) {
+	t.Helper()
+	if strings.Contains(out, sub) {
+		t.Errorf("got output %q; want it to not contain %q", out, sub)
 	}
 }
 
