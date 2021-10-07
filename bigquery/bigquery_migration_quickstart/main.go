@@ -15,7 +15,7 @@
 // [START bigquerymigration_quickstart]
 
 // The bigquery_migration_quickstart application demonstrates basic usage of the
-// BigQuery migration API by executing workflow that performs an offline SQL
+// BigQuery migration API by executing a workflow that performs an offline SQL
 // translation task.
 package main
 
@@ -33,7 +33,7 @@ import (
 )
 
 func main() {
-	// Define two command line flags for controlling the behavior of this quickstart.
+	// Define command line flags for controlling the behavior of this quickstart.
 	projectID := flag.String("project_id", "", "Cloud Project ID.")
 	location := flag.String("location", "us", "BigQuery Migration location used for interactions.")
 	outputPath := flag.String("output", "", "Cloud Storage path for translated resources.")
@@ -67,19 +67,21 @@ func main() {
 // executeTranslationWorkflow constructs a migration workflow that performs some offline SQL translation.
 func executeTranslationWorkflow(ctx context.Context, client *migration.Client, projectID, location, outPath string) (*migrationpb.MigrationWorkflow, error) {
 
-	// Tasks are extensible; the translation task is defined by the BigQuery Migration API.
-
-	translationDetails := &translationtaskpb.TranslationTaskDetails{
-		// The path to objects in cloud storage containing queries to be translated.
+	// Tasks are extensible; the translation task is defined by the BigQuery Migration API, and so we construct the appropriate
+	// details for the task.
+	detailsTranslation := &translationtaskpb.TranslationTaskDetails{
+		// The path to objects in cloud storage containing queries to be translated.  This is a prefix to some input text files.
 		InputPath: "gs://cloud-samples-data/bigquery/migration/translation/input/",
-		// The path to objects in cloud storage containing DDL create statements.
+		// The path to objects in cloud storage containing DDL create statements.  This is a prefix to some input DDL text files.
 		SchemaPath: "gs://cloud-samples-data/bigquery/migration/translation/schema/",
+		// This is the cloud storage path where results will be written.  In this case it will contain translated queries,
+		// and possibly error files.
 		OutputPath: outPath,
 	}
 
 	// We then convert the task details for translation into the suitable protobuf `Any` representation needed
 	// to define the workflow.
-	anyDetails, err := anypb.New(translationDetails)
+	detailsAny, err := anypb.New(detailsTranslation)
 	if err != nil {
 		return nil, err
 	}
@@ -92,13 +94,13 @@ func executeTranslationWorkflow(ctx context.Context, client *migration.Client, p
 			Tasks: map[string]*migrationpb.MigrationTask{
 				"example_conversion": {
 					Type:    "Translation_Teradata",
-					Details: anyDetails,
+					Details: detailsAny,
 				},
 			},
 		},
 	}
 
-	// Create the workflow.
+	// Create the workflow using the request.
 	workflow, err := client.CreateMigrationWorkflow(ctx, req)
 	if err != nil {
 		return nil, fmt.Errorf("CreateMigrationWorkflow: %v", err)
