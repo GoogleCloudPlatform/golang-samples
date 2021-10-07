@@ -413,6 +413,18 @@ func TestPublicAccessPrevention(t *testing.T) {
 		t.Errorf("getPublicAccessPrevention: got %v, want %v", got, want)
 	}
 
+	if err := setPublicAccessPreventionUnspecified(ioutil.Discard, bucketName); err != nil {
+		t.Errorf("setPublicAccessPreventionUnspecified: %v", err)
+	}
+	// Verify that PublicAccessPrevention was set correctly.
+	attrs, err = client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	if attrs.PublicAccessPrevention != storage.PublicAccessPreventionUnspecified {
+		t.Errorf("PublicAccessPrevention: got %s, want %s", attrs.PublicAccessPrevention, storage.PublicAccessPreventionUnspecified)
+	}
+
 	if err := setPublicAccessPreventionInherited(ioutil.Discard, bucketName); err != nil {
 		t.Errorf("setPublicAccessPreventionInherited: %v", err)
 	}
