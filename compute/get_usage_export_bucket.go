@@ -45,9 +45,9 @@ func getUsageExportBucket(w io.Writer, projectID string) error {
 		return fmt.Errorf("unable to get project: %v", err)
 	}
 
-	usageExportLocation := project.UsageExportLocation
+	usageExportLocation := project.GetUsageExportLocation()
 
-	if usageExportLocation == nil || usageExportLocation.BucketName == nil {
+	if usageExportLocation == nil || usageExportLocation.GetBucketName() == "" {
 		// The usage reports are disabled.
 		return nil
 	}
@@ -60,7 +60,7 @@ func getUsageExportBucket(w io.Writer, projectID string) error {
 		usageExportLocation.ReportNamePrefix = proto.String("usage_gce")
 	}
 
-	fmt.Fprintf(w, "Returned ReportNamePrefix: %s\n", *usageExportLocation.ReportNamePrefix)
+	fmt.Fprintf(w, "Returned ReportNamePrefix: %s\n", usageExportLocation.GetReportNamePrefix())
 
 	return nil
 }
