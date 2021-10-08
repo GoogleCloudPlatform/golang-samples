@@ -57,7 +57,7 @@ func startInstanceWithEncKey(w io.Writer, projectID, zone, instanceName, key str
 		InstancesStartWithEncryptionKeyRequestResource: &computepb.InstancesStartWithEncryptionKeyRequest{
 			Disks: []*computepb.CustomerEncryptionKeyProtectedDisk{
 				{
-					Source: instance.Disks[0].Source,
+					Source: proto.String(instance.GetDisks()[0].GetSource()),
 					DiskEncryptionKey: &computepb.CustomerEncryptionKey{
 						RawKey: proto.String(key),
 					},
