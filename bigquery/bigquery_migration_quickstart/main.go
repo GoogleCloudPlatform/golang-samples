@@ -15,7 +15,7 @@
 // [START bigquerymigration_quickstart]
 
 // The bigquery_migration_quickstart application demonstrates basic usage of the
-// BigQuery migration API by executing a workflow that performs an offline SQL
+// BigQuery migration API by executing a workflow that performs a batch SQL
 // translation task.
 package main
 
@@ -64,7 +64,7 @@ func main() {
 	reportWorkflowStatus(workflow)
 }
 
-// executeTranslationWorkflow constructs a migration workflow that performs some offline SQL translation.
+// executeTranslationWorkflow constructs a migration workflow that performs batch SQL translation.
 func executeTranslationWorkflow(ctx context.Context, client *migration.Client, projectID, location, outPath string) (*migrationpb.MigrationWorkflow, error) {
 
 	// Tasks are extensible; the translation task is defined by the BigQuery Migration API, and so we construct the appropriate
