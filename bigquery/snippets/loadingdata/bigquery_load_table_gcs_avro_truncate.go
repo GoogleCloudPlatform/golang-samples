@@ -14,7 +14,7 @@
 
 package loadingdata
 
-// [START bigquery_load_table_gcs_orc]
+// [START bigquery_load_table_gcs_avro_truncate]
 import (
 	"context"
 	"fmt"
@@ -22,8 +22,9 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
-// importORC demonstrates loading Apache ORC data from Cloud Storage into a table.
-func importORC(projectID, datasetID, tableID string) error {
+// importAvroTruncate demonstrates loading Apache Avro data from Cloud Storage into a table
+// and overwriting/truncating existing data in the table.
+func importAvroTruncate(projectID, datasetID, tableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"
 	// tableID := "mytable"
@@ -34,9 +35,12 @@ func importORC(projectID, datasetID, tableID string) error {
 	}
 	defer client.Close()
 
-	gcsRef := bigquery.NewGCSReference("gs://cloud-samples-data/bigquery/us-states/us-states.orc")
-	gcsRef.SourceFormat = bigquery.ORC
+	gcsRef := bigquery.NewGCSReference("gs://cloud-samples-data/bigquery/us-states/us-states.avro")
+	gcsRef.SourceFormat = bigquery.Avro
 	loader := client.Dataset(datasetID).Table(tableID).LoaderFrom(gcsRef)
+	// Default for import jobs is to append data to a table.  WriteTruncate
+	// specifies that existing data should instead be replaced/overwritten.
+	loader.WriteDisposition = bigquery.WriteTruncate
 
 	job, err := loader.Run(ctx)
 	if err != nil {
@@ -53,4 +57,4 @@ func importORC(projectID, datasetID, tableID string) error {
 	return nil
 }
 
-// [END bigquery_load_table_gcs_orc]
+// [END bigquery_load_table_gcs_avro_truncate]

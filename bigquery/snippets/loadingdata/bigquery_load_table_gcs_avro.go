@@ -14,7 +14,7 @@
 
 package loadingdata
 
-// [START bigquery_load_table_gcs_orc]
+// [START bigquery_load_table_gcs_avro]
 import (
 	"context"
 	"fmt"
@@ -22,8 +22,8 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
-// importORC demonstrates loading Apache ORC data from Cloud Storage into a table.
-func importORC(projectID, datasetID, tableID string) error {
+// importAvro demonstrates loading Apache Avro data from Cloud Storage into a table.
+func importAvro(projectID, datasetID, tableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"
 	// tableID := "mytable"
@@ -34,8 +34,8 @@ func importORC(projectID, datasetID, tableID string) error {
 	}
 	defer client.Close()
 
-	gcsRef := bigquery.NewGCSReference("gs://cloud-samples-data/bigquery/us-states/us-states.orc")
-	gcsRef.SourceFormat = bigquery.ORC
+	gcsRef := bigquery.NewGCSReference("gs://cloud-samples-data/bigquery/us-states/us-states.avro")
+	gcsRef.SourceFormat = bigquery.Avro
 	loader := client.Dataset(datasetID).Table(tableID).LoaderFrom(gcsRef)
 
 	job, err := loader.Run(ctx)
@@ -53,4 +53,4 @@ func importORC(projectID, datasetID, tableID string) error {
 	return nil
 }
 
-// [END bigquery_load_table_gcs_orc]
+// [END bigquery_load_table_gcs_avro]
