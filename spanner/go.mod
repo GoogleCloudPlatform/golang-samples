@@ -20,7 +20,7 @@ require (
 require (
 	cloud.google.com/go/container v1.0.0 // indirect
 	cloud.google.com/go/monitoring v1.0.0 // indirect
-	cloud.google.com/go/storage v1.16.0 // indirect
+	cloud.google.com/go/storage v1.18.0 // indirect
 	cloud.google.com/go/trace v1.0.0 // indirect
 	github.com/aws/aws-sdk-go v1.40.59 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.2.1 // indirect
