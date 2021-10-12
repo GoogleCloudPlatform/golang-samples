@@ -101,10 +101,10 @@ func TestUsageExportSnippets(t *testing.T) {
 
 	usageExportLocation := project.GetUsageExportLocation()
 
-	if *usageExportLocation.BucketName != bucketName {
+	if usageExportLocation.GetBucketName() != bucketName {
 		t.Errorf(fmt.Sprintf("Got: %s; want %s", *usageExportLocation.BucketName, bucketName))
 	}
-	if *usageExportLocation.ReportNamePrefix != "" {
+	if usageExportLocation.GetReportNamePrefix() != "" {
 		t.Errorf(fmt.Sprintf("Got: %s; want %q", *usageExportLocation.BucketName, ""))
 	}
 
@@ -144,7 +144,7 @@ func TestUsageExportSnippets(t *testing.T) {
 		t.Errorf("Project get request: %v", err)
 	}
 
-	if project.UsageExportLocation != nil {
+	if project.GetUsageExportLocation() != nil {
 		t.Errorf("UsageExportLocation should be nil")
 	}
 }

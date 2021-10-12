@@ -33,7 +33,7 @@ func main() {
 	// Create exporter.
 	ctx := context.Background()
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
-	exporter, err := texporter.NewExporter(texporter.WithProjectID(projectID))
+	exporter, err := texporter.New(texporter.WithProjectID(projectID))
 	if err != nil {
 		log.Fatalf("texporter.NewExporter: %v", err)
 	}
