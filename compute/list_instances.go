@@ -51,7 +51,7 @@ func listInstances(w io.Writer, projectID, zone string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Fprintf(w, "- %s %s\n", *instance.Name, *instance.MachineType)
+		fmt.Fprintf(w, "- %s %s\n", instance.GetName(), instance.GetMachineType())
 	}
 	return nil
 }
