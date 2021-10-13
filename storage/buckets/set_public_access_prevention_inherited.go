@@ -14,7 +14,7 @@
 
 package buckets
 
-// [START storage_get_public_access_prevention]
+// [START storage_set_public_access_prevention_inherited]
 import (
 	"context"
 	"fmt"
@@ -24,9 +24,9 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// getPublicAccessPrevention gets the current public access prevention setting
-// for the bucket, either "enforced" or "inherited".
-func getPublicAccessPrevention(w io.Writer, bucketName string) error {
+// setPublicAccessPreventionInherited sets public access prevention to
+// "inherited" for the bucket.
+func setPublicAccessPreventionInherited(w io.Writer, bucketName string) error {
 	// bucketName := "bucket-name"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
@@ -38,12 +38,15 @@ func getPublicAccessPrevention(w io.Writer, bucketName string) error {
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 
-	attrs, err := client.Bucket(bucketName).Attrs(ctx)
-	if err != nil {
-		return fmt.Errorf("Bucket(%q).Attrs: %v", bucketName, err)
+	bucket := client.Bucket(bucketName)
+	setPublicAccessPrevention := storage.BucketAttrsToUpdate{
+		PublicAccessPrevention: storage.PublicAccessPreventionInherited,
 	}
-	fmt.Fprintf(w, "Public access prevention is %s for %v", attrs.PublicAccessPrevention, bucketName)
+	if _, err := bucket.Update(ctx, setPublicAccessPrevention); err != nil {
+		return fmt.Errorf("Bucket(%q).Update: %v", bucketName, err)
+	}
+	fmt.Fprintf(w, "Public access prevention is 'inherited' for %v", bucketName)
 	return nil
 }
 
-// [END storage_get_public_access_prevention]
+// [END storage_set_public_access_prevention_inherited]
