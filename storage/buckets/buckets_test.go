@@ -421,8 +421,8 @@ func TestPublicAccessPrevention(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
 	}
-	if attrs.PublicAccessPrevention != storage.PublicAccessPreventionUnspecified {
-		t.Errorf("PublicAccessPrevention: got %s, want %s", attrs.PublicAccessPrevention, storage.PublicAccessPreventionUnspecified)
+	if attrs.PublicAccessPrevention != storage.PublicAccessPreventionInherited {
+		t.Errorf("PublicAccessPrevention: got %s, want %s", attrs.PublicAccessPrevention, storage.PublicAccessPreventionInherited)
 	}
 
 	if err := setPublicAccessPreventionInherited(ioutil.Discard, bucketName); err != nil {
