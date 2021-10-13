@@ -25,7 +25,7 @@ import (
 )
 
 // setPublicAccessPreventionUnspecified sets public access prevention to
-// "inherited" for the bucket.
+// "unspecified" for the bucket.
 func setPublicAccessPreventionUnspecified(w io.Writer, bucketName string) error {
 	// bucketName := "bucket-name"
 	ctx := context.Background()
@@ -45,7 +45,7 @@ func setPublicAccessPreventionUnspecified(w io.Writer, bucketName string) error 
 	if _, err := bucket.Update(ctx, setPublicAccessPrevention); err != nil {
 		return fmt.Errorf("Bucket(%q).Update: %v", bucketName, err)
 	}
-	fmt.Fprintf(w, "Public access prevention is 'inherited' for %v", bucketName)
+	fmt.Fprintf(w, "Public access prevention is 'unspecified' for %v", bucketName)
 	return nil
 }
 
