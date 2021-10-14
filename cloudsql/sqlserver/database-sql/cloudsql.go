@@ -237,6 +237,19 @@ func initTCPConnectionPool() (*sql.DB, error) {
 
 	dbURI := fmt.Sprintf("server=%s;user id=%s;password=%s;port=%s;database=%s;", dbTCPHost, dbUser, dbPwd, dbPort, dbName)
 
+	// [START_EXCLUDE]
+	// [START cloud_sql_postgres_databasesql_sslcerts]
+	// (OPTIONAL) Configure SSL certificates
+	// For deployments that connect directly to a Cloud SQL instance without
+	// using the Cloud SQL Proxy, configuring SSL certificates will ensure the
+	// connection is encrypted. This step is entirely OPTIONAL.
+	dbRootCert := os.Getenv("DB_ROOT_CERT") // e.g., '/path/to/my/server-ca.pem'
+	if dbRootCert != "" {
+		dbURI += fmt.Sprintf("encrypt=true;certificate=%s;", dbRootCert)
+	}
+	// [END cloud_sql_postgres_databasesql_sslcerts]
+	// [END_EXCLUDE]
+
 	// dbPool is the pool of database connections.
 	dbPool, err := sql.Open("mssql", dbURI)
 	if err != nil {
