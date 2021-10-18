@@ -147,5 +147,3 @@ func main() {
 		log.Fatalf("Cannot delete collection %v", err)
 	}
 }
-
-// TODO(jbd): Add tests.
