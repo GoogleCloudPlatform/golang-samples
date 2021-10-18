@@ -89,6 +89,9 @@ func TestSave(t *testing.T) {
 	must(runSimpleTransaction)
 	must(infoTransaction)
 	must(batchWrite)
+	if err := deleteCollection(ctx, client, client.Collection("cities"), 2); err != nil {
+		t.Fatalf("Cannot delete collectionL %v", err)
+	}
 }
 
 func getField(ctx context.Context, client *firestore.Client, collection, doc, field string) (value interface{}, exists bool, err error) {
