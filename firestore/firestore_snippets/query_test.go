@@ -17,14 +17,14 @@ package main
 import (
 	"context"
 	"os"
+	"reflect"
+	"runtime"
 	"testing"
 
 	"cloud.google.com/go/firestore"
 )
 
 func TestQuery(t *testing.T) {
-	// TODO: need this for projectID, but commented out for now
-	// tc := testutil.SystemTest(t)
 	// TODO(#559): revert this to testutil.SystemTest(t).ProjectID
 	// when datastore and firestore can co-exist in a project.
 	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
@@ -40,27 +40,19 @@ func TestQuery(t *testing.T) {
 	}
 	defer client.Close()
 
-	if err := prepareQuery(ctx, client); err != nil {
-		t.Fatalf("Cannot prepare query docs: %v", err)
+	must := func(f func(context.Context, *firestore.Client) error) {
+		err := f(ctx, client)
+		if err != nil {
+			fn := runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name()
+			t.Fatalf("%s: %v", fn, err)
+		}
 	}
 
-	if err := paginateCursor(ctx, client); err != nil {
-		t.Fatalf("Cannot paginate cursor: %v", err)
-	}
-
-	if err := createInQuery(ctx, client); err != nil {
-		t.Fatalf("Cannot get query results using in: %v", err)
-	}
-	if err := createInQueryWithArray(ctx, client); err != nil {
-		t.Fatalf("Cannot get query results using in with array: %v", err)
-	}
-	if err := createArrayContainsQuery(ctx, client); err != nil {
-		t.Fatalf("Cannot get query results using array-contains: %v", err)
-	}
-	if err := createArrayContainsAnyQuery(ctx, client); err != nil {
-		t.Fatalf("Cannot get query results using array-contains-any: %v", err)
-	}
-	if err := createStartAtDocSnapshotQuery(ctx, client); err != nil {
-		t.Fatalf("Cannot get query results using document snapshot: %v", err)
-	}
+	must(prepareQuery)
+	must(paginateCursor)
+	must(createInQuery)
+	must(createInQueryWithArray)
+	must(createArrayContainsQuery)
+	must(createArrayContainsAnyQuery)
+	must(createStartAtDocSnapshotQuery)
 }

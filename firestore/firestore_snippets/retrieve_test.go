@@ -17,14 +17,14 @@ package main
 import (
 	"context"
 	"os"
+	"reflect"
+	"runtime"
 	"testing"
 
 	"cloud.google.com/go/firestore"
 )
 
 func TestRetrieve(t *testing.T) {
-	// TODO: need this for projectID, but commented out for now
-	// tc := testutil.SystemTest(t)
 	// TODO(#559): revert this to testutil.SystemTest(t).ProjectID
 	// when datastore and firestore can co-exist in a project.
 	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
@@ -40,29 +40,24 @@ func TestRetrieve(t *testing.T) {
 	}
 	defer client.Close()
 
-	if err := prepareRetrieve(ctx, client); err != nil {
-		t.Fatalf("Cannot prepare for retrieve samples: %v", err)
+	must := func(f func(context.Context, *firestore.Client) error) {
+		err := f(ctx, client)
+		if err != nil {
+			fn := runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name()
+			t.Fatalf("%s: %v", fn, err)
+		}
 	}
 
-	_, err = docAsMap(ctx, client)
-	if err != nil {
-		t.Fatalf("Cannot get doc as map: %v", err)
-	}
-	// fmt.Printf("Retrieved doc as map: %v\n", doc)
+	must(prepareRetrieve)
+	must(addDocAsMap)
 
 	_, err = docAsEntity(ctx, client)
 	if err != nil {
 		t.Fatalf("Cannot get doc as entity: %v", err)
 	}
-	// fmt.Printf("Retrieved doc as entity: %v\n", city)
 
-	if err := multipleDocs(ctx, client); err != nil {
-		t.Fatalf("Cannot retrieve capital cities: %v", err)
-	}
-	if err := allDocs(ctx, client); err != nil {
-		t.Fatalf("Cannot retrieve all docs: %v", err)
-	}
-	if err := getCollections(ctx, client); err != nil {
-		t.Fatalf("Cannot get subcollections for document: %v", err)
-	}
+	must(multipleDocs)
+	must(allDocs)
+	must(getCollections)
+
 }
