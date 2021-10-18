@@ -90,7 +90,7 @@ func TestSave(t *testing.T) {
 	must(infoTransaction)
 	must(batchWrite)
 	if err := deleteCollection(ctx, client, client.Collection("cities"), 2); err != nil {
-		t.Fatalf("Cannot delete collectionL %v", err)
+		t.Fatalf("Cannot delete collection %v", err)
 	}
 }
 

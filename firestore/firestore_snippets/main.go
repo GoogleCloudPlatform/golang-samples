@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Command firestore_snippets contains runnable snippet code for Cloud Spanner.
+// Command firestore_snippets contains runnable snippet code for Cloud Firestore.
 package main
 
 import (
@@ -144,7 +144,7 @@ func main() {
 		log.Fatalf("Cannot get query results using document snapshot: %v", err)
 	}
 	if err := deleteCollection(ctx, client, client.Collection("cities"), 2); err != nil {
-		log.Fatalf("Cannot delete collectionL %v", err)
+		log.Fatalf("Cannot delete collection %v", err)
 	}
 }
 
