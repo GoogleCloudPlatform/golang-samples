@@ -59,7 +59,7 @@ func listAllInstances(w io.Writer, projectID string) error {
 		if len(instances) > 0 {
 			fmt.Fprintf(w, "%s\n", pair.Key)
 			for _, instance := range instances {
-				fmt.Fprintf(w, "- %s %s\n", *instance.Name, *instance.MachineType)
+				fmt.Fprintf(w, "- %s %s\n", instance.GetName(), instance.GetMachineType())
 			}
 		}
 	}

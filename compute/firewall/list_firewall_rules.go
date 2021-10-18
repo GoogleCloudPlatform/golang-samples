@@ -49,7 +49,7 @@ func listFirewallRules(w io.Writer, projectID string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Fprintf(w, "- %s: %s\n", *firewallRule.Name, *firewallRule.Description)
+		fmt.Fprintf(w, "- %s: %s\n", firewallRule.GetName(), firewallRule.GetDescription())
 	}
 
 	return nil
