@@ -48,11 +48,25 @@ func TestQuery(t *testing.T) {
 		}
 	}
 
-	must(prepareQuery)
-	must(paginateCursor)
-	must(createInQuery)
-	must(createInQueryWithArray)
-	must(createArrayContainsQuery)
-	must(createArrayContainsAnyQuery)
-	must(createStartAtDocSnapshotQuery)
+	if err = prepareQuery(ctx, client); err != nil {
+		t.Fatalf("prepareQuery: %v", err)
+	}
+	if err = paginateCursor(ctx, client); err != nil {
+		t.Fatalf("paginateCursor: %v", err)
+	}
+	if err = createInQuery(ctx, client); err != nil {
+		t.Fatalf("createInQuery: %v", err)
+	}
+	if err = createInQueryWithArray(ctx, client); err != nil {
+		t.Fatalf("createInQueryWithArray: %v", err)
+	}
+	if err = createArrayContainsQuery(ctx, client); err != nil {
+		t.Fatalf("createArrayContainsQuery: %v", err)
+	}
+	if err = createArrayContainsAnyQuery(ctx, client); err != nil {
+		t.Fatalf("createArrayContainsAnyQuery: %v", err)
+	}
+	if err = createStartAtDocSnapshotQuery(ctx, client); err != nil {
+		t.Fatalf("createStartAtDocSnapshotQuery: %v", err)
+	}
 }

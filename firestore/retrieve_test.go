@@ -48,7 +48,9 @@ func TestRetrieve(t *testing.T) {
 		}
 	}
 
-	must(prepareRetrieve)
+	if err = prepareRetrieve(ctx, client); err != nil {
+		t.Fatalf("prepareRetrieve: %v", err)
+	}
 
 	_, err = docAsMap(ctx, client)
 	if err != nil {
@@ -60,7 +62,13 @@ func TestRetrieve(t *testing.T) {
 		t.Fatalf("Cannot get doc as entity: %v", err)
 	}
 
-	must(multipleDocs)
-	must(allDocs)
-	must(getCollections)
+	if err = multipleDocs(ctx, client); err != nil {
+		t.Fatalf("multipleDocs: %v", err)
+	}
+	if err = allDocs(ctx, client); err != nil {
+		t.Fatalf("allDocs: %v", err)
+	}
+	if err = getCollections(ctx, client); err != nil {
+		t.Fatalf("getCollections: %v", err)
+	}
 }
