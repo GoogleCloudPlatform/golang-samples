@@ -1,4 +1,4 @@
-package main
+package firestore
 
 // [START firestore_data_custom_type_definition]
 
