@@ -49,7 +49,11 @@ func TestRetrieve(t *testing.T) {
 	}
 
 	must(prepareRetrieve)
-	must(addDocAsMap)
+
+	_, err = docAsMap(ctx, client)
+	if err != nil {
+		t.Fatalf("Cannot get doc as map: %v", err)
+	}
 
 	_, err = docAsEntity(ctx, client)
 	if err != nil {
