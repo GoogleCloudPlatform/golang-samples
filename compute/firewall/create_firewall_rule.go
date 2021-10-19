@@ -47,8 +47,8 @@ func createFirewallRule(w io.Writer, projectID, firewallRuleName, networkName st
 		},
 		Direction: computepb.Firewall_INGRESS.Enum(),
 		Name:      &firewallRuleName,
-		SourceRanges: []string{
-			"0.0.0.0/0",
+		TargetTags: []string{
+			"web",
 		},
 		Network:     &networkName,
 		Description: proto.String("Allowing TCP traffic on port 80 and 443 from Internet."),
