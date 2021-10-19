@@ -17,8 +17,6 @@ package firestore
 import (
 	"context"
 	"os"
-	"reflect"
-	"runtime"
 	"testing"
 
 	"cloud.google.com/go/firestore"
@@ -39,14 +37,6 @@ func TestSave(t *testing.T) {
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
 		t.Fatal(err)
-	}
-
-	must := func(f func(context.Context, *firestore.Client) error) {
-		err := f(ctx, client)
-		if err != nil {
-			fn := runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name()
-			t.Fatalf("%s: %v", fn, err)
-		}
 	}
 
 	// TODO(someone): check values of docs to make sure data is being manipulated properly.

@@ -17,8 +17,6 @@ package firestore
 import (
 	"context"
 	"os"
-	"reflect"
-	"runtime"
 	"testing"
 
 	"cloud.google.com/go/firestore"
@@ -39,14 +37,6 @@ func TestRetrieve(t *testing.T) {
 		t.Fatalf("firestore.NewClient: %v", err)
 	}
 	defer client.Close()
-
-	must := func(f func(context.Context, *firestore.Client) error) {
-		err := f(ctx, client)
-		if err != nil {
-			fn := runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name()
-			t.Fatalf("%s: %v", fn, err)
-		}
-	}
 
 	if err = prepareRetrieve(ctx, client); err != nil {
 		t.Fatalf("prepareRetrieve: %v", err)
