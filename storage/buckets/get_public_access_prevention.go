@@ -25,7 +25,7 @@ import (
 )
 
 // getPublicAccessPrevention gets the current public access prevention setting
-// for the bucket, either "enforced" or "unspecified".
+// for the bucket, either "enforced" or "inherited".
 func getPublicAccessPrevention(w io.Writer, bucketName string) error {
 	// bucketName := "bucket-name"
 	ctx := context.Background()

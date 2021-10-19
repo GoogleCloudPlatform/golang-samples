@@ -378,7 +378,6 @@ func TestUniformBucketLevelAccess(t *testing.T) {
 }
 
 func TestPublicAccessPrevention(t *testing.T) {
-	t.Skip("https://github.com/googleapis/google-cloud-go/issues/4890")
 	tc := testutil.SystemTest(t)
 	bucketName := tc.ProjectID + "-storage-buckets-tests"
 
@@ -422,8 +421,20 @@ func TestPublicAccessPrevention(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
 	}
-	if attrs.PublicAccessPrevention != storage.PublicAccessPreventionUnspecified {
-		t.Errorf("PublicAccessPrevention: got %s, want %s", attrs.PublicAccessPrevention, storage.PublicAccessPreventionUnspecified)
+	if attrs.PublicAccessPrevention != storage.PublicAccessPreventionInherited {
+		t.Errorf("PublicAccessPrevention: got %s, want %s", attrs.PublicAccessPrevention, storage.PublicAccessPreventionInherited)
+	}
+
+	if err := setPublicAccessPreventionInherited(ioutil.Discard, bucketName); err != nil {
+		t.Errorf("setPublicAccessPreventionInherited: %v", err)
+	}
+	// Verify that PublicAccessPrevention was set correctly.
+	attrs, err = client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	if attrs.PublicAccessPrevention != storage.PublicAccessPreventionInherited {
+		t.Errorf("PublicAccessPrevention: got %s, want %s", attrs.PublicAccessPrevention, storage.PublicAccessPreventionInherited)
 	}
 
 }
