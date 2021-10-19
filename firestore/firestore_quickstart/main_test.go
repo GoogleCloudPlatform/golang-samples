@@ -24,7 +24,7 @@ import (
 
 func TestMain(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	env := map[string]string{"GOOGLE_CLOUD_PROJECT": tc.ProjectID}
+	env := map[string]string{}
 
 	m := testutil.BuildMain(t)
 	defer m.Cleanup()
@@ -34,7 +34,7 @@ func TestMain(t *testing.T) {
 	}
 
 	testutil.Retry(t, 5, 10*time.Second, func(r *testutil.R) {
-		stdOut, stdErr, err := m.Run(env, 2*time.Minute)
+		stdOut, stdErr, err := m.Run(env, 2*time.Minute, "-project", tc.ProjectID)
 
 		if err != nil {
 			r.Errorf("execution failed: %v", err)
@@ -44,8 +44,9 @@ func TestMain(t *testing.T) {
 			r.Errorf("did not expect stderr output, got %d bytes: %s", len(stdErr), string(stdErr))
 		}
 		got := string(stdOut)
-		if !strings.Contains(got, "operation completed successfully") {
-			r.Errorf("stdout returned %s, wanted to contain %s", got, "TODO")
+		want := "map[age:13 favorites:map[color:Red food:Pizza subject:recess] name:Frank]"
+		if !strings.Contains(got, want) {
+			r.Errorf("stdout returned %s, wanted to contain %s", got, want)
 		}
 	})
 }
