@@ -25,8 +25,7 @@ import (
 func TestMain(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	env := map[string]string{"GOOGLE_CLOUD_PROJECT": tc.ProjectID}
-	// scope := fmt.Sprintf("projects/%s", tc.ProjectID)
-	// fullResourceName := fmt.Sprintf("//cloudresourcemanager.googleapis.com/projects/%s", tc.ProjectID)
+
 	m := testutil.BuildMain(t)
 	defer m.Cleanup()
 
