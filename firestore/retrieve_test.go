@@ -63,5 +63,4 @@ func TestRetrieve(t *testing.T) {
 	must(multipleDocs)
 	must(allDocs)
 	must(getCollections)
-
 }
