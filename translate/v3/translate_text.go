@@ -25,6 +25,7 @@ import (
 	translate "cloud.google.com/go/translate/apiv3"
 	translatepb "google.golang.org/genproto/googleapis/cloud/translate/v3"
 )
+
 // [END translate_v3_translate_text_0]
 
 // [START translate_v3_translate_text_1]
@@ -62,6 +63,7 @@ func translateText(w io.Writer, projectID string, sourceLang string, targetLang 
 
 	return nil
 }
+
 // [END translate_v3_translate_text_1]
 
 // [END translate_v3_translate_text]
