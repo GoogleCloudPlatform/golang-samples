@@ -32,7 +32,7 @@ func createClient(ctx context.Context) *firestore.Client {
 	projectID := "YOUR_PROJECT_ID"
 
 	// [END firestore_setup_client_create]
-	// Override with -project, -instance, -table flags
+	// Override with -project flags
 	flag.StringVar(&projectID, "project", projectID, "The Google Cloud Platform project ID.")
 	flag.Parse()
 

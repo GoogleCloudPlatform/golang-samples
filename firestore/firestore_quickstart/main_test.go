@@ -44,7 +44,7 @@ func TestMain(t *testing.T) {
 			r.Errorf("did not expect stderr output, got %d bytes: %s", len(stdErr), string(stdErr))
 		}
 		got := string(stdOut)
-		want := "map[age:13 favorites:map[color:Red food:Pizza subject:recess] name:Frank]"
+		want := "map[born:1912 first:Alan last:Turing middle:Mathison]"
 		if !strings.Contains(got, want) {
 			r.Errorf("stdout returned %s, wanted to contain %s", got, want)
 		}
