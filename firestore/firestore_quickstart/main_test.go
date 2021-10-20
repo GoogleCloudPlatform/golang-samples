@@ -24,7 +24,7 @@ import (
 
 func TestMain(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	env := map[string]string{}
+	env := map[string]string{"GOOGLE_CLOUD_PROJECT": tc.ProjectID}
 
 	m := testutil.BuildMain(t)
 	defer m.Cleanup()
@@ -33,11 +33,11 @@ func TestMain(t *testing.T) {
 		t.Errorf("failed to build app")
 	}
 
-	testutil.Retry(t, 5, 10*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
 		stdOut, stdErr, err := m.Run(env, 2*time.Minute, "-project", tc.ProjectID)
 
 		if err != nil {
-			r.Errorf("execution failed: %v", err)
+			r.Errorf("execution failed: %v, stdOut:%s, stdErr:%s", err, stdOut, stdErr)
 			return
 		}
 		if len(stdErr) > 0 {
