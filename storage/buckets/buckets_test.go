@@ -605,3 +605,81 @@ func TestDelete(t *testing.T) {
 		t.Fatalf("deleteBucket: %v", err)
 	}
 }
+
+func TestRPO(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	bucketName := tc.ProjectID + "-storage-buckets-tests"
+
+	ctx := context.Background()
+	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName)
+
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+	defer client.Close()
+
+	// Test enable turbo replication:
+	if err := setRPOAsyncTurbo(ioutil.Discard, bucketName); err != nil {
+		t.Errorf("setRPOAsyncTurbo: %v", err)
+	}
+	// Verify that RPO was set correctly
+	attrs, err := client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	if attrs.RPO != storage.RPOAsyncTurbo {
+		t.Errorf("setRPOAsyncTurbo: got %s, want %s", attrs.RPO, storage.RPOAsyncTurbo)
+	}
+
+	// Test get turbo replication enabled:
+	buf := new(bytes.Buffer)
+	if err := getRPO(buf, bucketName); err != nil {
+		t.Errorf("getRPO: %v", err)
+	}
+	// Verify that the correct value was printed
+	got := buf.String()
+	want := "RPO is ASYNC_TURBO"
+	if !strings.Contains(got, want) {
+		t.Errorf("getRPO: got %v, want %v", got, want)
+	}
+
+	// Test disable turbo replication:
+	if err := setRPODefault(ioutil.Discard, bucketName); err != nil {
+		t.Errorf("setRPODefault: %v", err)
+	}
+	// Verify that RPO was set correctly
+	attrs, err = client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	if attrs.PublicAccessPrevention != storage.RPODefault {
+		t.Errorf("setRPODefault: got %s, want %s", attrs.RPO, storage.RPODefault)
+	}
+}
+
+func TestCreateBucketTurboReplication(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	name := tc.ProjectID + "-storage-buckets-tests"
+
+	// Clean up bucket before running the test
+	deleteBucket(ioutil.Discard, name)
+
+	location := "NAM4"
+	if err := createBucketTurboReplication(ioutil.Discard, tc.ProjectID, name, location); err != nil {
+		t.Fatalf("createBucketTurboReplication: %v", err)
+	}
+
+	// Verify that RPO was set correctly
+	attrs, err := client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	if attrs.RPO != storage.RPOAsyncTurbo {
+		t.Errorf("createBucketTurboReplication: got %s, want %s", attrs.RPO, storage.RPOAsyncTurbo)
+	}
+
+	if err := deleteBucket(ioutil.Discard, name); err != nil {
+		t.Fatalf("deleteBucket: %v", err)
+	}
+}
