@@ -36,7 +36,7 @@ func CleanBucket(ctx context.Context, t *testing.T, projectID, bucket string) er
 	}
 
 	// Delete the bucket if it exists.
-	if err := deleteBucketIfExists(ctx, client, bucket); err != nil {
+	if err := DeleteBucketIfExists(ctx, t, client, bucket); err != nil {
 		return fmt.Errorf("error deleting bucket: %v", err)
 	}
 
@@ -49,26 +49,22 @@ func CleanBucket(ctx context.Context, t *testing.T, projectID, bucket string) er
 			if err, ok := err.(*googleapi.Error); ok {
 				// Just in case...
 				if err.Code == 409 {
-					deleteBucketIfExists(ctx, client, bucket) // Ignore error.
+					DeleteBucketIfExists(ctx, t, client, bucket) // Ignore error.
 				}
 			}
 			r.Errorf("Bucket.Create(%q): %v", bucket, err)
 		}
 	})
 
-	// Wait until the bucket exists.
-	Retry(t, 10, 30*time.Second, func(r *R) {
-		if _, err := b.Attrs(ctx); err != nil {
-			// Bucket does not exist.
-			r.Errorf("Bucket was not created")
-			return
-		}
-	})
+	WaitForBucketToExist(ctx, t, b)
 
 	return nil
 }
 
-func deleteBucketIfExists(ctx context.Context, client *storage.Client, bucket string) error {
+// DeleteBucketIfExists deletes the bucket, any objects in it, and waits for the
+// bucket to be deleted before returning
+func DeleteBucketIfExists(ctx context.Context, t *testing.T, client *storage.Client, bucket string) error {
+	t.Helper()
 	b := client.Bucket(bucket)
 
 	// Check if the bucket does not exist, return nil.
@@ -109,17 +105,32 @@ func deleteBucketIfExists(ctx context.Context, client *storage.Client, bucket st
 		return fmt.Errorf("Bucket.Delete(%q): %v", bucket, err)
 	}
 
-	retries := 10
-	delay := 10 * time.Second
-
-	for i := 0; i < retries; i++ {
-		if _, err := b.Attrs(ctx); err != nil {
-			// Deletion successful.
-			return nil
-		}
-		// Deletion not complete.
-		time.Sleep(delay)
-	}
+	waitForBucketToNotExist(ctx, t, b)
 
 	return fmt.Errorf("failed to delete bucket %q", bucket)
+}
+
+// WaitForBucketToExist waits for a bucket to exist, as it can take time to propagate
+// Errors after 10 unsuccessful attempts at retrieving the bucket's attrs
+func WaitForBucketToExist(ctx context.Context, t *testing.T, b *storage.BucketHandle) {
+	t.Helper()
+	Retry(t, 10, 30*time.Second, func(r *R) {
+		if _, err := b.Attrs(ctx); err != nil {
+			// Bucket does not exist
+			r.Errorf("Bucket was not created")
+			return
+		}
+	})
+}
+
+// waitForBucketToNotExist waits for a bucket to no longer exist, as it can take time to propagate
+// Errors after 10 successful attempts at retrieving the bucket's attrs
+func waitForBucketToNotExist(ctx context.Context, t *testing.T, b *storage.BucketHandle) {
+	t.Helper()
+	Retry(t, 10, 30*time.Second, func(r *R) {
+		if _, err := b.Attrs(ctx); err != storage.ErrBucketNotExist {
+			r.Errorf("Bucket still exists")
+			return
+		}
+	})
 }

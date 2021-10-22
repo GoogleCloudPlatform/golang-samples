@@ -44,14 +44,24 @@ func TestCreate(t *testing.T) {
 
 func TestCreateBucketClassLocation(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	name := tc.ProjectID + "-storage-buckets-tests-attrs"
+	bucketName := tc.ProjectID + "-storage-buckets-tests-attrs"
+	ctx := context.Background()
 
-	// Clean up bucket before running the test.
-	deleteBucket(ioutil.Discard, name)
-	if err := createBucketClassLocation(ioutil.Discard, tc.ProjectID, name); err != nil {
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+	defer client.Close()
+
+	// Clean up bucket before running the test
+	if err := testutil.DeleteBucketIfExists(ctx, t, client, bucketName); err != nil {
+		t.Fatalf("Error deleting bucket: %v", err)
+	}
+
+	if err := createBucketClassLocation(ioutil.Discard, tc.ProjectID, bucketName); err != nil {
 		t.Fatalf("createBucketClassLocation: %v", err)
 	}
-	if err := deleteBucket(ioutil.Discard, name); err != nil {
+	if err := deleteBucket(ioutil.Discard, bucketName); err != nil {
 		t.Fatalf("deleteBucket: %v", err)
 	}
 }
@@ -609,9 +619,7 @@ func TestDelete(t *testing.T) {
 func TestRPO(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	bucketName := tc.ProjectID + "-storage-buckets-tests"
-
 	ctx := context.Background()
-	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName)
 
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -619,12 +627,27 @@ func TestRPO(t *testing.T) {
 	}
 	defer client.Close()
 
+	bucket := client.Bucket(bucketName)
+
+	// Clean up bucket before running the test
+	if err := testutil.DeleteBucketIfExists(ctx, t, client, bucketName); err != nil {
+		t.Fatalf("Error deleting bucket: %v", err)
+	}
+
+	// Must create a bucket in dual-region to set turbo replication
+	location := "NAM4"
+	if err := client.Bucket(bucketName).Create(ctx, tc.ProjectID, &storage.BucketAttrs{Location: location}); err != nil {
+		t.Fatalf("Create bucket: %v", err)
+	}
+
+	testutil.WaitForBucketToExist(ctx, t, bucket)
+
 	// Test enable turbo replication:
 	if err := setRPOAsyncTurbo(ioutil.Discard, bucketName); err != nil {
-		t.Errorf("setRPOAsyncTurbo: %v", err)
+		t.Fatalf("setRPOAsyncTurbo: %v", err)
 	}
 	// Verify that RPO was set correctly
-	attrs, err := client.Bucket(bucketName).Attrs(ctx)
+	attrs, err := bucket.Attrs(ctx)
 	if err != nil {
 		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
 	}
@@ -649,29 +672,42 @@ func TestRPO(t *testing.T) {
 		t.Errorf("setRPODefault: %v", err)
 	}
 	// Verify that RPO was set correctly
-	attrs, err = client.Bucket(bucketName).Attrs(ctx)
+	attrs, err = bucket.Attrs(ctx)
 	if err != nil {
 		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
 	}
-	if attrs.PublicAccessPrevention != storage.RPODefault {
+	if attrs.RPO != storage.RPODefault {
 		t.Errorf("setRPODefault: got %s, want %s", attrs.RPO, storage.RPODefault)
 	}
 }
 
 func TestCreateBucketTurboReplication(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	name := tc.ProjectID + "-storage-buckets-tests"
+	bucketName := tc.ProjectID + "-storage-buckets-tests"
+	ctx := context.Background()
+
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+	defer client.Close()
+
+	bucket := client.Bucket(bucketName)
 
 	// Clean up bucket before running the test
-	deleteBucket(ioutil.Discard, name)
+	if err := testutil.DeleteBucketIfExists(ctx, t, client, bucketName); err != nil {
+		t.Fatalf("Error deleting bucket: %v", err)
+	}
 
-	location := "NAM4"
-	if err := createBucketTurboReplication(ioutil.Discard, tc.ProjectID, name, location); err != nil {
+	location := "NAM4" // must be dual-region
+	if err := createBucketTurboReplication(ioutil.Discard, tc.ProjectID, bucketName, location); err != nil {
 		t.Fatalf("createBucketTurboReplication: %v", err)
 	}
 
+	testutil.WaitForBucketToExist(ctx, t, bucket)
+
 	// Verify that RPO was set correctly
-	attrs, err := client.Bucket(bucketName).Attrs(ctx)
+	attrs, err := bucket.Attrs(ctx)
 	if err != nil {
 		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
 	}
@@ -679,7 +715,7 @@ func TestCreateBucketTurboReplication(t *testing.T) {
 		t.Errorf("createBucketTurboReplication: got %s, want %s", attrs.RPO, storage.RPOAsyncTurbo)
 	}
 
-	if err := deleteBucket(ioutil.Discard, name); err != nil {
+	if err := deleteBucket(ioutil.Discard, bucketName); err != nil {
 		t.Fatalf("deleteBucket: %v", err)
 	}
 }

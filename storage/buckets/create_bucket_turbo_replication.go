@@ -24,8 +24,8 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// createBucketTurboReplication creates a new bucket in the project with 
-// turbo replication enabled and Storage location
+// createBucketTurboReplication creates a new bucket in the project with
+// turbo replication enabled and Storage location.
 func createBucketTurboReplication(w io.Writer, projectID, bucketName, location string) error {
 	// projectID := "my-project-id"
 	// bucketName := "bucket-name"
@@ -44,14 +44,14 @@ func createBucketTurboReplication(w io.Writer, projectID, bucketName, location s
 	defer cancel()
 
 	storageLocationAndRPO := &storage.BucketAttrs{
-		Location: 	location,
-		RPO:		storage.RPOAsyncTurbo
+		Location: location,
+		RPO:      storage.RPOAsyncTurbo,
 	}
 	bucket := client.Bucket(bucketName)
 	if err := bucket.Create(ctx, projectID, storageLocationAndRPO); err != nil {
 		return fmt.Errorf("Bucket(%q).Create: %v", bucketName, err)
 	}
-	fmt.Fprintf(w, "Created bucket %v with turbo replication in %v\n", bucketName, storageLocationAndRPO.RPO, storageLocationAndRPO.Location)
+	fmt.Fprintf(w, "Created bucket %v with turbo replication in %v\n", bucketName, storageLocationAndRPO.Location)
 	return nil
 }
 
