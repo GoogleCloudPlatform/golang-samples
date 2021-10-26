@@ -537,15 +537,21 @@ func TestObjectBucketLock(t *testing.T) {
 
 	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName)
 	bucket := client.Bucket(bucketName)
+	bucketAttrs, err := bucket.Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Update: %v", bucketName, err)
+	}
 
 	if err := uploadFile(ioutil.Discard, bucketName, objectName); err != nil {
 		t.Fatalf("uploadFile(%q): %v", objectName, err)
 	}
-	if _, err := bucket.Update(ctx, storage.BucketAttrsToUpdate{
-		RetentionPolicy: &storage.RetentionPolicy{
-			RetentionPeriod: retentionPeriod,
-		},
-	}); err != nil {
+	// Updating a bucket is conditionally idempotent, so we set metageneration match and let the library handle the retry
+	if _, err := bucket.If(storage.BucketConditions{MetagenerationMatch: bucketAttrs.MetaGeneration}).
+		Update(ctx, storage.BucketAttrsToUpdate{
+			RetentionPolicy: &storage.RetentionPolicy{
+				RetentionPeriod: retentionPeriod,
+			},
+		}); err != nil {
 		t.Errorf("Bucket(%q).Update: %v", bucketName, err)
 	}
 	if err := setEventBasedHold(ioutil.Discard, bucketName, objectName); err != nil {
@@ -568,9 +574,16 @@ func TestObjectBucketLock(t *testing.T) {
 	if oAttrs.EventBasedHold {
 		t.Errorf("event-based hold is not disabled")
 	}
-	if _, err := bucket.Update(ctx, storage.BucketAttrsToUpdate{
-		RetentionPolicy: &storage.RetentionPolicy{},
-	}); err != nil {
+
+	bucketAttrs, err = bucket.Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Update: %v", bucketName, err)
+	}
+	// Updating a bucket is conditionally idempotent, so we set metageneration match and let the library handle the retry
+	if _, err := bucket.If(storage.BucketConditions{MetagenerationMatch: bucketAttrs.MetaGeneration}).
+		Update(ctx, storage.BucketAttrsToUpdate{
+			RetentionPolicy: &storage.RetentionPolicy{},
+		}); err != nil {
 		t.Errorf("Bucket(%q).Update: %v", bucketName, err)
 	}
 	if err := setTemporaryHold(ioutil.Discard, bucketName, objectName); err != nil {
