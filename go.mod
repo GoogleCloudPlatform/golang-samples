@@ -9,20 +9,20 @@ require (
 	cloud.google.com/go/bigquery v1.24.0
 	cloud.google.com/go/bigtable v1.4.0
 	cloud.google.com/go/cloudtasks v1.0.0
-	cloud.google.com/go/containeranalysis v0.97.0
+	cloud.google.com/go/containeranalysis v0.1.0
 	cloud.google.com/go/datacatalog v1.0.0
 	cloud.google.com/go/dataproc v1.0.0
 	cloud.google.com/go/datastore v1.2.0
 	cloud.google.com/go/dialogflow v1.0.0
 	cloud.google.com/go/dlp v1.0.0
-	cloud.google.com/go/errorreporting v0.97.0
+	cloud.google.com/go/errorreporting v0.1.0
 	cloud.google.com/go/firestore v1.6.0
 	cloud.google.com/go/gaming v1.0.0
 	cloud.google.com/go/grafeas v0.1.0 // indirect
 	cloud.google.com/go/kms v1.0.0
 	cloud.google.com/go/language v1.0.0
 	cloud.google.com/go/logging v1.0.0
-	cloud.google.com/go/profiler v0.97.0
+	cloud.google.com/go/profiler v0.1.1
 	cloud.google.com/go/pubsub v1.15.0
 	cloud.google.com/go/pubsublite v1.1.0
 	cloud.google.com/go/secretmanager v1.0.0
@@ -30,7 +30,7 @@ require (
 	cloud.google.com/go/servicedirectory v1.0.0
 	cloud.google.com/go/speech v1.0.0
 	cloud.google.com/go/storage v1.18.0
-	cloud.google.com/go/talent v0.97.0
+	cloud.google.com/go/talent v0.3.0
 	cloud.google.com/go/texttospeech v1.0.0
 	cloud.google.com/go/translate v1.0.0
 	cloud.google.com/go/video v1.0.0
@@ -59,15 +59,15 @@ require (
 	github.com/philhofer/fwd v1.0.0 // indirect
 	github.com/sendgrid/smtpapi-go v0.6.0 // indirect
 	github.com/tinylib/msgp v1.1.2 // indirect
-	golang.org/x/exp 8418b01e8c3b
-	golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420
+	golang.org/x/exp v0.0.0-20211025140241-8418b01e8c3b
+	golang.org/x/net v0.0.0-20210614182718-04defd469f4e
 	golang.org/x/oauth2 v0.0.0-20211005180243-6b3c2da341f1
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/text v0.3.7
 	google.golang.org/api v0.59.0
 	google.golang.org/appengine v1.6.7
-	google.golang.org/genproto 807f52c398cb
-	google.golang.org/grpc v1.41.0
+	google.golang.org/genproto v0.0.0-20211027151537-807f52c398cb
+	google.golang.org/grpc v1.40.0
 	google.golang.org/grpc/examples v0.0.0-20200707005602-4258d12073b4
 	google.golang.org/protobuf v1.27.1
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect

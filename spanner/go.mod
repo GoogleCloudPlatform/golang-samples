@@ -14,7 +14,7 @@ require (
 	go.opencensus.io v0.23.0
 	google.golang.org/api v0.59.0
 	google.golang.org/genproto v0.0.0-20211027151537-807f52c398cb
-	google.golang.org/grpc v1.41.0
+	google.golang.org/grpc v1.40.0
 )
 
 require (
@@ -22,7 +22,7 @@ require (
 	cloud.google.com/go/monitoring v1.0.0 // indirect
 	cloud.google.com/go/storage v1.18.0 // indirect
 	cloud.google.com/go/trace v1.0.0 // indirect
-	github.com/aws/aws-sdk-go v1.40.59 // indirect
+	github.com/aws/aws-sdk-go v1.41.11 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.2.1 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/google/go-cmp v0.5.6 // indirect
