@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package firestore
 
-// [START firestore_listen_handle_error]
+// [START firestore_listen_document]
 import (
 	"context"
 	"fmt"
@@ -26,11 +26,14 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// listenErrors demonstrates how to handle listening errors.
-func listenErrors(ctx context.Context, w io.Writer, projectID, collection string) error {
+// listenDocument listens to a single document.
+func listenDocument(ctx context.Context, w io.Writer, projectID, collection string) error {
 	// projectID := "project-id"
+	// [START firestore_listen_detach]
+	// Сontext with timeout stops listening to changes.
 	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
+	// [END firestore_listen_detach]
 
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
@@ -38,7 +41,7 @@ func listenErrors(ctx context.Context, w io.Writer, projectID, collection string
 	}
 	defer client.Close()
 
-	it := client.Collection(collection).Snapshots(ctx)
+	it := client.Collection(collection).Doc("SF").Snapshots(ctx)
 	for {
 		snap, err := it.Next()
 		// DeadlineExceeded will be returned when ctx is cancelled.
@@ -48,14 +51,12 @@ func listenErrors(ctx context.Context, w io.Writer, projectID, collection string
 		if err != nil {
 			return fmt.Errorf("Snapshots.Next: %v", err)
 		}
-		if snap != nil {
-			for _, change := range snap.Changes {
-				if change.Kind == firestore.DocumentAdded {
-					fmt.Fprintf(w, "New city: %v\n", change.Doc.Data())
-				}
-			}
+		if !snap.Exists() {
+			fmt.Fprintf(w, "Document no longer exists\n")
+			return nil
 		}
+		fmt.Fprintf(w, "Received document snapshot: %v\n", snap.Data())
 	}
 }
 
-// [END firestore_listen_handle_error]
+// [END firestore_listen_document]
