@@ -511,7 +511,7 @@ func TestLifecycleManagement(t *testing.T) {
 		t.Fatalf("enableBucketLifecycleManagement: %v", err)
 	}
 
-	// verify lifecycle is set
+	// Verify lifecycle is set
 	attrs, err := client.Bucket(bucketName).Attrs(ctx)
 	if err != nil {
 		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
