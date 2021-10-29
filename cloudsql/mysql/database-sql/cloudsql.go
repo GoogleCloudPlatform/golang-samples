@@ -280,7 +280,7 @@ func initTCPConnectionPool() (*sql.DB, error) {
 	dbURI := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", dbUser, dbPwd, dbTCPHost, dbPort, dbName)
 
 	// [START_EXCLUDE]
-	// [START cloud_sql_postgres_databasesql_sslcerts]
+	// [START cloud_sql_mysql_databasesql_sslcerts]
 	// (OPTIONAL) Configure SSL certificates
 	// For deployments that connect directly to a Cloud SQL instance without
 	// using the Cloud SQL Proxy, configuring SSL certificates will ensure the
@@ -311,7 +311,7 @@ func initTCPConnectionPool() (*sql.DB, error) {
 		})
 		dbURI += "&tls=cloudsql"
 	}
-	// [END cloud_sql_postgres_databasesql_sslcerts]
+	// [END cloud_sql_mysql_databasesql_sslcerts]
 	// [END_EXCLUDE]
 
 	// dbPool is the pool of database connections.
