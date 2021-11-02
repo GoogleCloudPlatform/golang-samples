@@ -17,7 +17,7 @@ spec:
       - name: gke-cloud-sql-app
         # Replace $LOCATION with your Artifact Registry location (e.g., us-central1).
         # Replace $YOUR_PROJECT_ID with your project ID.
-        image: $LOCATION-docker.pkg.dev/$YOUR_PROJECT_ID/gke-cloud-sql-repo/gke-cloud-sql-image:latest
+        image: $LOCATION-docker.pkg.dev/$YOUR_PROJECT_ID/gke-cloud-sql-repo/gke-sql:latest
         # This app listens on port 8080 for web traffic by default.
         ports:
         - containerPort: 8080
@@ -50,11 +50,11 @@ spec:
         image: gcr.io/cloudsql-docker/gce-proxy:latest
         command:
           - "/cloud_sql_proxy"
- 
+
           # If connecting from a VPC-native GKE cluster, you can use the
           # following flag to have the proxy connect over private IP
           # - "-ip_address_types=PRIVATE"
- 
+
           # tcp should be set to the port the proxy should listen on
           # and should match the DB_PORT value set above.
           # Defaults: MySQL: 3306, Postgres: 5432, SQLServer: 1433
