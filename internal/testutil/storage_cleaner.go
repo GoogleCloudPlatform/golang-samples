@@ -17,13 +17,23 @@ package testutil
 import (
 	"context"
 	"fmt"
+	"log"
+	"strings"
 	"testing"
 	"time"
 
 	"cloud.google.com/go/storage"
+	"github.com/google/uuid"
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/iterator"
 )
+
+// CreateTestBucket creates a new bucket with the given prefix
+func CreateTestBucket(ctx context.Context, t *testing.T, client *storage.Client, projectID, prefix string) (string, error) {
+	t.Helper()
+	bucketName := UniqueBucketName(prefix)
+	return bucketName, cleanBucketWithClient(ctx, t, client, projectID, bucketName)
+}
 
 // CleanBucket creates a new bucket. If the bucket already exists, it will be
 // deleted and recreated.
@@ -34,12 +44,19 @@ func CleanBucket(ctx context.Context, t *testing.T, projectID, bucket string) er
 	if err != nil {
 		t.Fatalf("storage.NewClient: %v", err)
 	}
+	return cleanBucketWithClient(ctx, t, client, projectID, bucket)
+}
+
+// cleanBucketWithClient creates a new bucket. If the bucket already exists, it will be
+// deleted and recreated.
+// Like CleanBucket but you must provide the storage client.
+func cleanBucketWithClient(ctx context.Context, t *testing.T, client *storage.Client, projectID, bucket string) error {
+	t.Helper()
 
 	// Delete the bucket if it exists.
-	if err := deleteBucketIfExists(ctx, client, bucket); err != nil {
+	if err := DeleteBucketIfExists(ctx, client, bucket); err != nil {
 		return fmt.Errorf("error deleting bucket: %v", err)
 	}
-
 	b := client.Bucket(bucket)
 
 	// Now create the bucket.
@@ -49,7 +66,7 @@ func CleanBucket(ctx context.Context, t *testing.T, projectID, bucket string) er
 			if err, ok := err.(*googleapi.Error); ok {
 				// Just in case...
 				if err.Code == 409 {
-					deleteBucketIfExists(ctx, client, bucket) // Ignore error.
+					DeleteBucketIfExists(ctx, client, bucket) // Ignore error.
 				}
 			}
 			r.Errorf("Bucket.Create(%q): %v", bucket, err)
@@ -68,7 +85,8 @@ func CleanBucket(ctx context.Context, t *testing.T, projectID, bucket string) er
 	return nil
 }
 
-func deleteBucketIfExists(ctx context.Context, client *storage.Client, bucket string) error {
+// DeleteBucketIfExists deletes a bucket and all its objects
+func DeleteBucketIfExists(ctx context.Context, client *storage.Client, bucket string) error {
 	b := client.Bucket(bucket)
 
 	// Check if the bucket does not exist, return nil.
@@ -89,6 +107,7 @@ func deleteBucketIfExists(ctx context.Context, client *storage.Client, bucket st
 		if err != nil {
 			return fmt.Errorf("Bucket.Objects(%q): %v", bucket, err)
 		}
+		// Objects with a hold must have the hold released
 		if attrs.EventBasedHold || attrs.TemporaryHold {
 			if _, err := b.Object(attrs.Name).Update(ctx, storage.ObjectAttrsToUpdate{
 				TemporaryHold:  false,
@@ -101,7 +120,6 @@ func deleteBucketIfExists(ctx context.Context, client *storage.Client, bucket st
 		if err := obj.Delete(ctx); err != nil {
 			return fmt.Errorf("Bucket(%q).Object(%q).Delete: %v", bucket, attrs.Name, err)
 		}
-
 	}
 
 	// Then delete the bucket itself.
@@ -122,4 +140,34 @@ func deleteBucketIfExists(ctx context.Context, client *storage.Client, bucket st
 	}
 
 	return fmt.Errorf("failed to delete bucket %q", bucket)
+}
+
+// UniqueBucketName returns a unique name with the test prefix
+// Any bucket created with this prefix may be deleted by DeleteExpiredBuckets
+func UniqueBucketName(prefix string) string {
+	return strings.Join([]string{prefix, uuid.New().String()}, "-")
+}
+
+// DeleteExpiredBuckets deletes old testing buckets that weren't cleaned previously
+func DeleteExpiredBuckets(client *storage.Client, projectID, prefix string, expireAge time.Duration) error {
+	ctx := context.Background()
+
+	it := client.Buckets(ctx, projectID)
+	it.Prefix = prefix
+	for {
+		bktAttrs, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		if time.Since(bktAttrs.Created) > expireAge {
+			log.Printf("deleting bucket %q, which is more than %s old", bktAttrs.Name, expireAge)
+			if err := DeleteBucketIfExists(ctx, client, bktAttrs.Name); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
