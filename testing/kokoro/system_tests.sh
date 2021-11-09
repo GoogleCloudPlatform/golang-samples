@@ -39,14 +39,14 @@ TIMEOUT=60m
 
 # Also see trampoline.sh - system_tests.sh is only run for PRs when there are
 # significant changes.
-SIGNIFICANT_CHANGES=$(git --no-pager diff --name-only master..HEAD | grep -Ev '(\.md$|^\.github)' || true)
+SIGNIFICANT_CHANGES=$(git --no-pager diff --name-only main..HEAD | grep -Ev '(\.md$|^\.github)' || true)
 # CHANGED_DIRS is the list of significant top-level directories that changed,
 # but weren't deleted by the current PR.
-# CHANGED_DIRS will be empty when run on master.
+# CHANGED_DIRS will be empty when run on main.
 CHANGED_DIRS=$(echo "$SIGNIFICANT_CHANGES" | tr ' ' '\n' | grep "/" | cut -d/ -f1 | sort -u | tr '\n' ' ' | xargs ls -d 2>/dev/null || true)
 
 # List all modules in changed directories.
-# If running on master will collect all modules in the repo, including the root module.
+# If running on main will collect all modules in the repo, including the root module.
 # shellcheck disable=SC2086
 GO_CHANGED_MODULES="$(find ${CHANGED_DIRS:-.} -name go.mod)"
 # If we didn't find any modules, use the root module.
@@ -243,7 +243,7 @@ else
 fi
 
 # If we're running system tests, send the test log to Flaky Bot.
-# See https://github.com/googleapis/repo-automation-bots/tree/master/packages/flakybot.
+# See https://github.com/googleapis/repo-automation-bots/tree/main/packages/flakybot.
 if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]]; then
   chmod +x "$KOKORO_GFILE_DIR"/linux_amd64/flakybot
   "$KOKORO_GFILE_DIR"/linux_amd64/flakybot
