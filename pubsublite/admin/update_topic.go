@@ -24,7 +24,7 @@ import (
 	"cloud.google.com/go/pubsublite"
 )
 
-func updateTopic(w io.Writer, projectID, region, zone, topicID string) error {
+func updateTopic(w io.Writer, projectID, region, zone, topicID string, regional bool) error {
 	// projectID := "my-project-id"
 	// region := "us-central1"
 	// zone := "us-central1-a"
@@ -36,7 +36,12 @@ func updateTopic(w io.Writer, projectID, region, zone, topicID string) error {
 	}
 	defer client.Close()
 
-	topicPath := fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, zone, topicID)
+	var topicPath string
+	if regional {
+		topicPath = fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, region, topicID)
+	} else {
+		topicPath = fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, zone, topicID)
+	}
 	// For ranges of fields in TopicConfigToUpdate, see https://pkg.go.dev/cloud.google.com/go/pubsublite/#TopicConfigToUpdate
 	config := pubsublite.TopicConfigToUpdate{
 		Name:                       topicPath,
@@ -50,7 +55,11 @@ func updateTopic(w io.Writer, projectID, region, zone, topicID string) error {
 	if err != nil {
 		return fmt.Errorf("client.UpdateTopic got err: %v", err)
 	}
-	fmt.Fprintf(w, "Updated topic: %#v\n", *updatedCfg)
+	if regional {
+		fmt.Fprintf(w, "Updated regional topic: %v\n", updatedCfg)
+	} else {
+		fmt.Fprintf(w, "Updated zonal topic: %v\n", updatedCfg)
+	}
 	return nil
 }
 
