@@ -41,7 +41,7 @@ func updateGameServerCluster(w io.Writer, projectID, location, realmID, clusterI
 
 	req := &gamingpb.UpdateGameServerClusterRequest{
 		GameServerCluster: &gamingpb.GameServerCluster{
-			Name: fmt.Sprintf("projects/%s/locations/%s/realms/%s/gameServerClusters/%s", projectID, location, realmID, clusterID),
+			Name:        fmt.Sprintf("projects/%s/locations/%s/realms/%s/gameServerClusters/%s", projectID, location, realmID, clusterID),
 			Description: "My Updated Game Server Cluster",
 			Labels: map[string]string{
 				"label-key-1": "label-value-1",

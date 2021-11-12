@@ -40,7 +40,7 @@ func updateRealm(w io.Writer, projectID, location, realmID string) error {
 
 	req := &gamingpb.UpdateRealmRequest{
 		Realm: &gamingpb.Realm{
-			Name: fmt.Sprintf("projects/%s/locations/%s/realms/%s", projectID, location, realmID),
+			Name:        fmt.Sprintf("projects/%s/locations/%s/realms/%s", projectID, location, realmID),
 			Description: "My Updated Game Server Realm",
 			Labels: map[string]string{
 				"label-key-1": "label-value-1",

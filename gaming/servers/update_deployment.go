@@ -39,7 +39,7 @@ func updateGameServerDeployment(w io.Writer, projectID, deploymentID string) err
 
 	req := &gamingpb.UpdateGameServerDeploymentRequest{
 		GameServerDeployment: &gamingpb.GameServerDeployment{
-			Name: fmt.Sprintf("projects/%s/locations/global/gameServerDeployments/%s", projectID, deploymentID),
+			Name:        fmt.Sprintf("projects/%s/locations/global/gameServerDeployments/%s", projectID, deploymentID),
 			Description: "My Updated Game Server Deployment",
 			Labels: map[string]string{
 				"label-key-1": "label-value-1",
