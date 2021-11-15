@@ -2,10 +2,10 @@ name: Go
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     branches:
-      - master
+      - main
 jobs:
   # Split build and lint into a few different jobs so they can run in parallel.
   build:
