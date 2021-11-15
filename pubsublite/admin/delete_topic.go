@@ -28,6 +28,7 @@ func deleteTopic(w io.Writer, projectID, region, zone, topicID string, regional 
 	// region := "us-central1"
 	// zone := "us-central1-a"
 	// topicID := "my-topic"
+	// regional = "false"
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
 	if err != nil {

@@ -24,11 +24,13 @@ import (
 	"cloud.google.com/go/pubsublite"
 )
 
-func updateTopic(w io.Writer, projectID, region, zone, topicID string, regional bool) error {
+func updateTopic(w io.Writer, projectID, region, zone, topicID, reservation string, regional bool) error {
 	// projectID := "my-project-id"
 	// region := "us-central1"
 	// zone := "us-central1-a"
 	// topicID := "my-topic"
+	// reservation := "projects/my-project-id/reservations/my-reservation"
+	// regional := "true"
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
 	if err != nil {
@@ -50,6 +52,7 @@ func updateTopic(w io.Writer, projectID, region, zone, topicID string, regional 
 		SubscribeCapacityMiBPerSec: 16,
 		PerPartitionBytes:          60 * 1024 * 1024 * 1024,
 		RetentionDuration:          24 * time.Hour,
+		ThroughputReservation:      reservation,
 	}
 	updatedCfg, err := client.UpdateTopic(ctx, config)
 	if err != nil {

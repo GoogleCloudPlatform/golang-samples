@@ -28,6 +28,8 @@ func createTopic(w io.Writer, projectID, region, zone, topicID, reservation stri
 	// region := "us-central1" // see https://cloud.google.com/pubsub/lite/docs/locations
 	// zone := "us-central1-a"
 	// topicID := "my-topic"
+	// reservation := "projects/my-project-id/reservations/my-reservation"
+	// regional := "true"
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
 	if err != nil {

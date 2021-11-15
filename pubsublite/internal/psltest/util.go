@@ -73,7 +73,6 @@ func Cleanup(t *testing.T, client *pubsublite.AdminClient, proj, region, namePre
 	}
 
 	resIter := client.Reservations(ctx, fmt.Sprintf("projects/%s/locations/%s", proj, region))
-	fmt.Printf("got iter: %#v\n", resIter)
 	for {
 		res, err := resIter.Next()
 		if err == iterator.Done {

@@ -117,7 +117,7 @@ func TestTopicAdmin(t *testing.T) {
 
 	t.Run("UpdateTopic", func(t *testing.T) {
 		buf := new(bytes.Buffer)
-		err := updateTopic(buf, projNumber, testRegion, testZone, topicID, false)
+		err := updateTopic(buf, projNumber, testRegion, testZone, topicID, "", false)
 		if err != nil {
 			t.Fatalf("updateTopic: %v", err)
 		}
@@ -163,6 +163,20 @@ func TestTopicAdmin(t *testing.T) {
 		want := "Created regional topic"
 		if !strings.Contains(got, want) {
 			t.Fatalf("createTopic() mismatch: got: %s\nwant: %s", got, want)
+		}
+	})
+
+	t.Run("UpdateRegionalTopic", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+		err := updateTopic(buf, projNumber, testRegion, testZone, topicID, reservationPath, true)
+		if err != nil {
+			t.Fatalf("updateTopic: %v", err)
+		}
+
+		got := buf.String()
+		want := "Updated regional topic"
+		if !strings.Contains(got, want) {
+			t.Fatalf("updateTopic() mismatch: got: %s\nwant: %s", got, want)
 		}
 	})
 
