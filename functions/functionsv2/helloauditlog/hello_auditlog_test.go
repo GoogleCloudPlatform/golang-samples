@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START functions_log_cloudevent]
-
 // Package helloworld provides a set of Cloud Functions samples.
 package helloworld
 
