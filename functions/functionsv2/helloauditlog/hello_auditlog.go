@@ -37,6 +37,9 @@ func HelloAuditLog(ctx context.Context, e event.Event) error {
 		return fmt.Errorf("event.DataAs: %v", err)
 	}
 	log.Printf("Resource Name: %s", *logentry.ProtoPayload.ResourceName)
+	if logentry.ProtoPayload.Request != nil {
+		log.Printf("Request Type: %s", logentry.ProtoPayload.Request["@type"])
+	}
 	if logentry.ProtoPayload.RequestMetadata.CallerIP != nil {
 		log.Printf("Caller IP: %s", *logentry.ProtoPayload.RequestMetadata.CallerIP)
 	}
