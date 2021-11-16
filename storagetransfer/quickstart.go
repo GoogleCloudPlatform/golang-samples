@@ -2,17 +2,15 @@ package storagetransfer
 
 // [START storagetransfer_quickstart]
 import (
+	storagetransfer "cloud.google.com/go/storagetransfer/apiv1"
 	"context"
 	"fmt"
-	"io"
-	"log"
-
-	storagetransfer "cloud.google.com/go/storagetransfer/apiv1"
 	storagetransferpb "google.golang.org/genproto/googleapis/storagetransfer/v1"
+	"io"
 )
 
 // quickstart creates and runs a transfer job between two GCS buckets.
-func quickstart(w io.Writer, projectID string, sourceGCSBucket string, sinkGCSBucket string) error {
+func quickstart(w io.Writer, projectID string, sourceGCSBucket string, sinkGCSBucket string) (*storagetransferpb.TransferJob, error) {
 	// Your Google Cloud Project ID
 	// projectID := "my-project-id"
 
@@ -24,7 +22,7 @@ func quickstart(w io.Writer, projectID string, sourceGCSBucket string, sinkGCSBu
 	ctx := context.Background()
 	client, err := storagetransfer.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storagetransfer.NewClient: %v", err)
+		return nil, fmt.Errorf("storagetransfer.NewClient: %v", err)
 	}
 	defer client.Close()
 
@@ -42,17 +40,16 @@ func quickstart(w io.Writer, projectID string, sourceGCSBucket string, sinkGCSBu
 	}
 	resp, err := client.CreateTransferJob(ctx, req)
 	if err != nil {
-		log.Fatalf("Failed to create transfer job: %v", err)
+		return nil, fmt.Errorf("Failed to create transfer job: %v", err)
 	}
-	_, err = client.RunTransferJob(ctx, &storagetransferpb.RunTransferJobRequest{
+	if _, err = client.RunTransferJob(ctx, &storagetransferpb.RunTransferJobRequest{
 		ProjectId: projectID,
 		JobName: resp.Name,
-	})
-
-	if err != nil {
-		log.Fatalf("Failed to run transfer job: %v", err)
+	}); err != nil {
+		return nil, fmt.Errorf("Failed to run transfer job: %v", err)
 	}
+
 	fmt.Fprintf(w, "Created and ran transfer job from %v to %v with name %v", sourceGCSBucket, sinkGCSBucket, resp.Name)
-	return nil
+	return resp, nil
 }
 // [END storagetransfer_quickstart]
