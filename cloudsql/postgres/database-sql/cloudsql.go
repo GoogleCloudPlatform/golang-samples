@@ -27,6 +27,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
 )
@@ -326,7 +327,7 @@ func configureConnectionPool(dbPool *sql.DB) {
 	// [START cloud_sql_postgres_databasesql_lifetime]
 
 	// Set Maximum time (in seconds) that a connection can remain open.
-	dbPool.SetConnMaxLifetime(1800)
+	dbPool.SetConnMaxLifetime(1800 * time.Second)
 
 	// [END cloud_sql_postgres_databasesql_lifetime]
 }
