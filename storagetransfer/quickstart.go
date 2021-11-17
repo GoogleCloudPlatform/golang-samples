@@ -2,11 +2,12 @@ package storagetransfer
 
 // [START storagetransfer_quickstart]
 import (
-	storagetransfer "cloud.google.com/go/storagetransfer/apiv1"
 	"context"
 	"fmt"
-	storagetransferpb "google.golang.org/genproto/googleapis/storagetransfer/v1"
 	"io"
+
+	storagetransfer "cloud.google.com/go/storagetransfer/apiv1"
+	storagetransferpb "google.golang.org/genproto/googleapis/storagetransfer/v1"
 )
 
 // quickstart creates and runs a transfer job between two GCS buckets.
@@ -44,7 +45,7 @@ func quickstart(w io.Writer, projectID string, sourceGCSBucket string, sinkGCSBu
 	}
 	if _, err = client.RunTransferJob(ctx, &storagetransferpb.RunTransferJobRequest{
 		ProjectId: projectID,
-		JobName: resp.Name,
+		JobName:   resp.Name,
 	}); err != nil {
 		return nil, fmt.Errorf("Failed to run transfer job: %v", err)
 	}
@@ -52,4 +53,5 @@ func quickstart(w io.Writer, projectID string, sourceGCSBucket string, sinkGCSBu
 	fmt.Fprintf(w, "Created and ran transfer job from %v to %v with name %v", sourceGCSBucket, sinkGCSBucket, resp.Name)
 	return resp, nil
 }
+
 // [END storagetransfer_quickstart]

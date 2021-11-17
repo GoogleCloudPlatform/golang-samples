@@ -3,8 +3,6 @@ package storagetransfer
 import (
 	"bytes"
 	"context"
-	"fmt"
-	"log"
 	"strings"
 	"testing"
 
@@ -22,13 +20,13 @@ func TestQuickstart(t *testing.T) {
 
 	str, err := storage.NewClient(ctx)
 	if err != nil {
-		log.Fatalf("storage.NewClient: %v", err)
+		t.Fatalf("storage.NewClient: %v", err)
 	}
 	defer str.Close()
 
 	sts, err := storagetransfer.NewClient(ctx)
 	if err != nil {
-		log.Fatalf("storagetransfer.NewClient: %v", err)
+		t.Fatalf("storagetransfer.NewClient: %v", err)
 	}
 	defer sts.Close()
 
@@ -44,8 +42,8 @@ func TestQuickstart(t *testing.T) {
 	}
 	defer testutil.DeleteBucketIfExists(ctx, str, sourceBucketName)
 
-	grantSTSPermissions(sinkBucketName, tc.ProjectID, sts, str)
-	grantSTSPermissions(sourceBucketName, tc.ProjectID, sts, str)
+	grantSTSPermissions(sinkBucketName, tc.ProjectID, sts, str, t)
+	grantSTSPermissions(sourceBucketName, tc.ProjectID, sts, str, t)
 
 	buf := new(bytes.Buffer)
 	resp, err := quickstart(buf, tc.ProjectID, sourceBucketName, sinkBucketName)
@@ -60,17 +58,17 @@ func TestQuickstart(t *testing.T) {
 	}
 
 	tj := &storagetransferpb.TransferJob{
-		Name: resp.Name,
+		Name:   resp.Name,
 		Status: storagetransferpb.TransferJob_DELETED,
 	}
 	sts.UpdateTransferJob(ctx, &storagetransferpb.UpdateTransferJobRequest{
-		JobName: resp.Name,
-		ProjectId: tc.ProjectID,
+		JobName:     resp.Name,
+		ProjectId:   tc.ProjectID,
 		TransferJob: tj,
 	})
 }
 
-func grantSTSPermissions(bucketName string, projectID string, sts *storagetransfer.Client, str *storage.Client) {
+func grantSTSPermissions(bucketName string, projectID string, sts *storagetransfer.Client, str *storage.Client, t *testing.T) {
 	ctx := context.Background()
 
 	req := &storagetransferpb.GetGoogleServiceAccountRequest{
@@ -79,7 +77,7 @@ func grantSTSPermissions(bucketName string, projectID string, sts *storagetransf
 
 	resp, err := sts.GetGoogleServiceAccount(ctx, req)
 	if err != nil {
-		fmt.Print("Error getting service account")
+		t.Fatalf("Error getting service account")
 	}
 	email := resp.AccountEmail
 
@@ -88,7 +86,7 @@ func grantSTSPermissions(bucketName string, projectID string, sts *storagetransf
 	bucket := str.Bucket(bucketName)
 	policy, err := bucket.IAM().Policy(ctx)
 	if err != nil {
-		log.Fatalf("Bucket(%q).IAM().Policy: %v", bucketName, err)
+		t.Fatalf("Bucket(%q).IAM().Policy: %v", bucketName, err)
 	}
 
 	var objectViewer iam.RoleName = "roles/storage.objectViewer"
@@ -100,6 +98,6 @@ func grantSTSPermissions(bucketName string, projectID string, sts *storagetransf
 	policy.Add(identity, bucketWriter)
 
 	if err := bucket.IAM().SetPolicy(ctx, policy); err != nil {
-		log.Fatalf("Bucket(%q).IAM().SetPolicy: %v", bucketName, err)
+		t.Fatalf("Bucket(%q).IAM().SetPolicy: %v", bucketName, err)
 	}
 }
