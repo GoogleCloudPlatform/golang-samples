@@ -16,7 +16,7 @@ package spanner
 
 // [START spanner_opencensus_capture_gfe_metric]
 
-// We are in the process of adding support in the Cloud Spanner Go client library
+// We are in the process of adding support in the Cloud Spanner Go Client Library
 // to capture the gfe_latency metric
 
 import (
