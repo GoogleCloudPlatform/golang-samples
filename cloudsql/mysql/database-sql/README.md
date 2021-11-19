@@ -4,18 +4,18 @@ This repo contains the Go source code for a simple web app that can be deployed 
 
 ## Before you begin
 
-1. If you haven't already, set up a Go Development Environment by following the [Go setup guide](https://cloud.google.com/go/docs/setup) and 
+1. If you haven't already, set up a Go Development Environment by following the [Go setup guide](https://cloud.google.com/go/docs/setup) and
 [create a project](https://cloud.google.com/resource-manager/docs/creating-managing-projects#creating_a_project).
 
-1. Create a Cloud SQL for MySQL instance by following these 
+1. Create a Cloud SQL for MySQL instance by following these
 [instructions](https://cloud.google.com/sql/docs/mysql/create-instance).
 Note the connection string, database user, and database password that you create.
 
-1. Create a database for your application by following these 
+1. Create a database for your application by following these
 [instructions](https://cloud.google.com/sql/docs/mysql/create-manage-databases).
-Note the database name. 
+Note the database name.
 
-1. Create a service account with the 'Cloud SQL Client' permissions by following these 
+1. Create a service account with the 'Cloud SQL Client' permissions by following these
 [instructions](https://cloud.google.com/sql/docs/mysql/connect-external-app#4_if_required_by_your_authentication_method_create_a_service_account).
 Download a JSON key to use to authenticate your connection.
 
@@ -72,16 +72,10 @@ sudo mkdir ./cloudsql
 sudo chown -R $USER ./cloudsql
 ```
 
-You'll also need to initialize an environment variable containing the directory you just created:
-
-```bash
-export DB_SOCKET_DIR=./cloudsql
-```
-
 Use these terminal commands to initialize environment variables:
 ```bash
 export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service/account/key.json
-export INSTANCE_CONNECTION_NAME='<MY-PROJECT>:<INSTANCE-REGION>:<INSTANCE-NAME>'
+export UNIX_SOCKET_PATH='./cloudsql/<MY-PROJECT>:<INSTANCE-REGION>:<INSTANCE-NAME>'
 export DB_USER='<DB_USER_NAME>'
 export DB_PASS='<DB_PASSWORD>'
 export DB_NAME='<DB_NAME>'
@@ -102,16 +96,16 @@ To test the application locally, follow these steps after the proxy is running:
 
 ## Deploying to App Engine Standard
 
-To run the sample on GAE-Standard, create an App Engine project by following the setup for these 
+To run the sample on GAE-Standard, create an App Engine project by following the setup for these
 [instructions](https://cloud.google.com/appengine/docs/standard/go/quickstart#before-you-begin).
 
-First, update `app.standard.yaml` with the correct values to pass the environment 
+First, update `app.standard.yaml` with the correct values to pass the environment
 variables into the runtime. Your `app.standard.yaml` file should look like this:
 
 ```yaml
 runtime: go113
 env_variables:
-  INSTANCE_CONNECTION_NAME: <project-id>:<region>:<instance-name>
+  UNIX_SOCKET_PATH: /cloudsql/<project-id>:<region>:<instance-name>
   DB_USER: YOUR_DB_USER
   DB_PASS: YOUR_DB_PASS
   DB_NAME: YOUR_DB
@@ -127,22 +121,22 @@ gcloud app deploy app.standard.yaml
 
 ## Deploying to App Engine Flexible
 
-To run the sample on GAE-Flex, create an App Engine project by following the setup for these 
+To run the sample on GAE-Flex, create an App Engine project by following the setup for these
 [instructions](https://cloud.google.com/appengine/docs/standard/go/quickstart#before-you-begin).
 
-First, update `app.flexible.yaml` with the correct values to pass the environment 
+First, update `app.flexible.yaml` with the correct values to pass the environment
 variables into the runtime. Your `app.flexible.yaml` file should look like this:
 ```yaml
 runtime: custom
 env: flex
 
 env_variables:
-  INSTANCE_CONNECTION_NAME: <project>:<region>:<instance>
+  UNIX_SOCKET_PATH: /cloudsql/<project>:<region>:<instance>
   DB_USER: <your_database_username>
   DB_PASS: <your_database_password>
   DB_NAME: <your_database_name>
 
-beta_settings: 
+beta_settings:
   cloud_sql_instances: <project>:<region>:<instance>
 ```
 
@@ -169,7 +163,7 @@ gcloud builds submit --tag gcr.io/[YOUR_PROJECT_ID]/run-sql
 ```sh
 gcloud run deploy run-sql --image gcr.io/[YOUR_PROJECT_ID]/run-sql \
   --add-cloudsql-instances '<MY-PROJECT>:<INSTANCE-REGION>:<INSTANCE-NAME>' \
-  --update-env-vars INSTANCE_CONNECTION_NAME='<MY-PROJECT>:<INSTANCE-REGION>:<INSTANCE-NAME>' \
+  --update-env-vars UNIX_SOCKET_PATH='/cloudsql/<MY-PROJECT>:<INSTANCE-REGION>:<INSTANCE-NAME>' \
   --update-env-vars DB_USER='<DB_USER_NAME>' \
   --update-env-vars DB_PASS='<DB_PASSWORD>' \
   --update-env-vars DB_NAME='<DB_NAME>'
