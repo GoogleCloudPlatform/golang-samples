@@ -16,4 +16,5 @@
 /firestore/                           @GoogleCloudPlatform/yoshi-go-admins @GoogleCloudPlatform/cloud-native-db-dpes
 /logging/                             @GoogleCloudPlatform/yoshi-go-admins @GoogleCloudPlatform/observability-devx
 /storage/                             @GoogleCloudPlatform/yoshi-go-admins @GoogleCloudPlatform/cloud-storage-dpes
+/storagetransfer/                     @GoogleCloudPlatform/yoshi-go-admins @GoogleCloudPlatform/cloud-storage-dpes
 /iot/                                 @GoogleCloudPlatform/yoshi-go-admins @gcseh @GoogleCloudPlatform/api-iot

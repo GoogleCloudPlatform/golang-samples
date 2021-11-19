@@ -54,6 +54,16 @@ $ ./testing/kokoro/store-secrets.sh
 Lastly, return to `pull-secrets.sh` and bump the version number to match what
 you have just uploaded.
 
+## Dependencies
+
+When you add a new dependency, it must be added to `go.mod` in the directory you
+are working in (if one is present) or in the repo root. After adding to the root
+`go.mod`, use the following to update all `go.sum` files appropriately:
+
+```
+find . -name go.mod -execdir go mod tidy \;
+```
+
 # Formatting
 
 All code must be formatted with `gofmt` (with the latest Go version) and pass
