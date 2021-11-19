@@ -23,28 +23,45 @@ import (
 	"log"
 
 	"github.com/cloudevents/sdk-go/v2/event"
-	auditevents "github.com/googleapis/google-cloudevents-go/cloud/audit/v1"
 )
+
+// AuditLogEntry represents a LogEntry as described at
+// https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry
+type AuditLogEntry struct {
+	ProtoPayload *AuditLogProtoPayload `json:"protoPayload"`
+}
+
+// AuditLogProtoPayload represents AuditLog within the LogEntry.protoPayload
+// See https://cloud.google.com/logging/docs/reference/audit/auditlog/rest/Shared.Types/AuditLog
+type AuditLogProtoPayload struct {
+	MethodName      string                 `json:"methodName"`
+	ResourceName    string                 `json:"resourceName"`
+	Request         map[string]interface{} `json:"request"`
+	RequestMetadata map[string]interface{} `json:"requestMetadata"`
+}
 
 // HelloAuditLog receives a Cloud Audit Log event, and logs a few fields.
 func HelloAuditLog(ctx context.Context, e event.Event) error {
 	log.Printf("Event Type: %s", e.Type())
 	log.Printf("Subject: %s", e.Subject())
 
-	logentry := &auditevents.LogEntryData{}
+	logentry := &AuditLogEntry{}
 
 	if err := e.DataAs(logentry); err != nil {
-		return fmt.Errorf("event.DataAs: %v", err)
+		ferr := fmt.Errorf("event.DataAs: %v", err)
+		log.Print(ferr)
+		return ferr
 	}
-	log.Printf("Resource Name: %s", *logentry.ProtoPayload.ResourceName)
-	if logentry.ProtoPayload.Request != nil {
-		log.Printf("Request Type: %s", logentry.ProtoPayload.Request["@type"])
+	log.Printf("Method Name: %s", logentry.ProtoPayload.MethodName)
+	log.Printf("Resource Name: %s", logentry.ProtoPayload.ResourceName)
+	if v, ok := logentry.ProtoPayload.Request["@type"]; ok {
+		log.Printf("Request Type: %s", v)
 	}
-	if logentry.ProtoPayload.RequestMetadata.CallerIP != nil {
-		log.Printf("Caller IP: %s", *logentry.ProtoPayload.RequestMetadata.CallerIP)
+	if v, ok := logentry.ProtoPayload.RequestMetadata["callerIp"]; ok {
+		log.Printf("Caller IP: %s", v)
 	}
-	if logentry.ProtoPayload.RequestMetadata.CallerSuppliedUserAgent != nil {
-		log.Printf("User Agent: %s", *logentry.ProtoPayload.RequestMetadata.CallerSuppliedUserAgent)
+	if v, ok := logentry.ProtoPayload.RequestMetadata["callerSuppliedUserAgent"]; ok {
+		log.Printf("User Agent: %s", v)
 	}
 	return nil
 }

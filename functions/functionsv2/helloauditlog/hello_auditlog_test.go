@@ -25,12 +25,10 @@ import (
 	"testing"
 
 	"github.com/cloudevents/sdk-go/v2/event"
-	auditevents "github.com/googleapis/google-cloudevents-go/cloud/audit/v1"
-	"google.golang.org/protobuf/proto"
 )
 
-func makeAuditLog(subject string, payload auditevents.ProtoPayload) (event.Event, error) {
-	logevent := auditevents.LogEntryData{
+func makeAuditLog(subject string, payload AuditLogProtoPayload) (event.Event, error) {
+	logevent := AuditLogEntry{
 		ProtoPayload: &payload,
 	}
 	e := event.New()
@@ -50,24 +48,26 @@ func TestHelloAuditLog(t *testing.T) {
 	tests := []struct {
 		name         string
 		subject      string
-		payload      auditevents.ProtoPayload
+		payload      AuditLogProtoPayload
 		expectedLogs []string
 	}{
 		{"sample-output",
 			"storage.googleapis.com/projects/_/buckets/my-bucket/objects/test.txt",
-			auditevents.ProtoPayload{
-				ResourceName: proto.String("my-resource"),
+			AuditLogProtoPayload{
+				MethodName:   "storage.objects.create",
+				ResourceName: "my-resource",
 				Request: map[string]interface{}{
 					"@type": "type.googleapis.com/storage.objects.write",
 				},
-				RequestMetadata: &auditevents.RequestMetadata{
-					CallerIP:                proto.String("1.2.3.4"),
-					CallerSuppliedUserAgent: proto.String("example-user-agent"),
+				RequestMetadata: map[string]interface{}{
+					"callerIp":                "1.2.3.4",
+					"callerSuppliedUserAgent": "example-user-agent",
 				},
 			},
 			[]string{
 				"Event Type: google.cloud.audit.log.v1.written",
 				"Subject: storage.googleapis.com/projects/_/buckets/my-bucket/objects/test.txt",
+				"Method Name: storage.objects.create",
 				"Resource Name: my-resource",
 				"Request Type: type.googleapis.com/storage.objects.write",
 				"Caller IP: 1.2.3.4",
