@@ -51,9 +51,9 @@ func TestHelloAuditLog(t *testing.T) {
 		payload      AuditLogProtoPayload
 		expectedLogs []string
 	}{
-		{"sample-output",
-			"storage.googleapis.com/projects/_/buckets/my-bucket/objects/test.txt",
-			AuditLogProtoPayload{
+		{name: "sample-output",
+			subject: "storage.googleapis.com/projects/_/buckets/my-bucket/objects/test.txt",
+			payload: AuditLogProtoPayload{
 				MethodName:   "storage.objects.create",
 				ResourceName: "my-resource",
 				Request: map[string]interface{}{
@@ -64,7 +64,7 @@ func TestHelloAuditLog(t *testing.T) {
 					"callerSuppliedUserAgent": "example-user-agent",
 				},
 			},
-			[]string{
+			expectedLogs: []string{
 				"Event Type: google.cloud.audit.log.v1.written",
 				"Subject: storage.googleapis.com/projects/_/buckets/my-bucket/objects/test.txt",
 				"Method Name: storage.objects.create",
