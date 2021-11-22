@@ -85,6 +85,7 @@ cloud.google.com/go/storage v1.8.0/go.mod h1:Wv1Oy7z6Yz3DshWRJFhqM/UCfaWIRTdp0RX
 cloud.google.com/go/storage v1.10.0/go.mod h1:FLPqc6j+Ki4BU591ie1oL6qBQGu2Bl/tZ9ullr3+Kg0=
 cloud.google.com/go/storage v1.18.0 h1:HM5Hu/BqgmWbo7pT9KFYGUccwzA8ZWDICJww9m5t9UA=
 cloud.google.com/go/storage v1.18.0/go.mod h1:h0NImijCz/2WHwLh03BvmWdrNe4I/pzUdvUHoxIUroU=
+cloud.google.com/go/storagetransfer v1.0.0/go.mod h1:ujeKKXpo+wph1VAhf0khHdm54SEUu9nZMQA67xcrNHM=
 cloud.google.com/go/talent v0.3.0/go.mod h1:x7x/Kq+hWjG4Oh/ifzKeklxOAUun/iA8JbcEh4igOVk=
 cloud.google.com/go/texttospeech v1.0.0/go.mod h1:idT4Penj0+AZUBnCGgJmY58gmiBz2COh3iiMfD06Mhw=
 cloud.google.com/go/trace v1.0.0 h1:laKx2y7IWMjguCe5zZx6n7qLtREk4kyE69SXVC0VSN8=

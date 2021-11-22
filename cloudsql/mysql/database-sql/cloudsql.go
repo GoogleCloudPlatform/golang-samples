@@ -31,6 +31,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/go-sql-driver/mysql"
 )
@@ -365,7 +366,7 @@ func configureConnectionPool(dbPool *sql.DB) {
 	// [START cloud_sql_mysql_databasesql_lifetime]
 
 	// Set Maximum time (in seconds) that a connection can remain open.
-	dbPool.SetConnMaxLifetime(1800)
+	dbPool.SetConnMaxLifetime(1800 * time.Second)
 
 	// [END cloud_sql_mysql_databasesql_lifetime]
 }

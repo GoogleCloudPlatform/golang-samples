@@ -22,8 +22,8 @@
 # Keep these deps at HEAD so we don't need to cut a release to check for a fix.
 for f in $(find . -name go.mod); do
   pushd $(dirname $f)
-    go get google.golang.org/api@master
-    go get cloud.google.com/go@master
+    go get google.golang.org/api@main
+    go get cloud.google.com/go@main
   popd
 done
 

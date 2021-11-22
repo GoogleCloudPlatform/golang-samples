@@ -43,7 +43,7 @@ func TestGcloud(t *testing.T) {
 		t.Errorf("gcloud: %v", err)
 	}
 
-	want := "gcloud - manage Google Cloud Platform resources and developer workflow"
+	want := "gcloud - manage Google Cloud"
 	if got := string(out); !strings.Contains(got, want) {
 		t.Errorf("gcloud: got (%s), want (%s)", got, want)
 	}
