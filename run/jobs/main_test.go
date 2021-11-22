@@ -45,10 +45,10 @@ func TestSuccessfulJob(t *testing.T) {
 
 func TestRandomFailure(t *testing.T) {
 	env := &EnvVars{
-		taskNum:     "1",
-		attemptNum:  "1",
-		sleepMs:     2,
-		failRate:    1,
+		taskNum:    "1",
+		attemptNum: "1",
+		sleepMs:    2,
+		failRate:   1,
 	}
 
 	err := randomFailure(env)

@@ -25,11 +25,11 @@ import (
 
 type EnvVars struct {
 	// Job-defined env vars
-	taskNum string
+	taskNum    string
 	attemptNum string
 
 	// User-defined env vars
-	sleepMs int64
+	sleepMs  int64
 	failRate float64
 }
 
@@ -45,10 +45,10 @@ func stringToFloat(s string) float64 {
 
 func main() {
 	env := &EnvVars{
-		taskNum:     os.Getenv("TASK_NUM"),
-		attemptNum:  os.Getenv("ATTEMPT_NUM"),
-		sleepMs:   stringToInt(os.Getenv("SLEEP_MS")),
-		failRate:  stringToFloat(os.Getenv("FAIL_RATE")),
+		taskNum:    os.Getenv("TASK_NUM"),
+		attemptNum: os.Getenv("ATTEMPT_NUM"),
+		sleepMs:    stringToInt(os.Getenv("SLEEP_MS")),
+		failRate:   stringToFloat(os.Getenv("FAIL_RATE")),
 	}
 
 	log.Printf("Starting Task #%s, Attempt #%s ...", env.taskNum, env.attemptNum)
