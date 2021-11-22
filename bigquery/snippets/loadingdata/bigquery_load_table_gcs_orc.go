@@ -22,7 +22,7 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
-// importORCTruncate demonstrates loading Apache ORC data from Cloud Storage into a table.
+// importORC demonstrates loading Apache ORC data from Cloud Storage into a table.
 func importORC(projectID, datasetID, tableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"
