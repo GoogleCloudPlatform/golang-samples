@@ -44,12 +44,20 @@ func TestSuccessfulJob(t *testing.T) {
 }
 
 func TestRandomFailure(t *testing.T) {
-	err := randomFailure("1")
+	env := &EnvVars{
+		taskNum:     "1",
+		attemptNum:  "1",
+		sleepMs:     2,
+		failRate:    1,
+	}
+
+	err := randomFailure(env)
 	if err == nil {
 		t.Fatalf("Test should fail with FAIL_RATE 1")
 	}
 
-	err = randomFailure("0")
+	env.failRate = 0
+	err = randomFailure(env)
 	if err != nil {
 		t.Fatalf("Test should pass with empty FAIL_RATE")
 	}

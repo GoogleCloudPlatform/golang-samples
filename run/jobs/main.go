@@ -23,52 +23,62 @@ import (
 	"time"
 )
 
-func getEnvVars() (string, string, string, string) {
-	// Retrieve Job-defined env vars
-	var TASK_NUM = os.Getenv("TASK_NUM")
-	var ATTEMPT_NUM = os.Getenv("ATTEMPT_NUM")
+type EnvVars struct {
+	// Job-defined env vars
+	taskNum string
+	attemptNum string
 
-	// Retrieve User-defined env vars
-	var SLEEP_MS = os.Getenv("SLEEP_MS")
-	var FAIL_RATE = os.Getenv("FAIL_RATE")
-	return TASK_NUM, ATTEMPT_NUM, SLEEP_MS, FAIL_RATE
+	// User-defined env vars
+	sleepMs int64
+	failRate float64
+}
+
+func stringToInt(s string) int64 {
+	num, _ := strconv.ParseInt(s, 10, 64)
+	return num
+}
+
+func stringToFloat(s string) float64 {
+	num, _ := strconv.ParseFloat(s, 64)
+	return num
 }
 
 func main() {
-	TASK_NUM, ATTEMPT_NUM, SLEEP_MS, FAIL_RATE := getEnvVars()
-	log.Printf("Starting Task #%s, Attempt #%s ...", TASK_NUM, ATTEMPT_NUM)
+	env := &EnvVars{
+		taskNum:     os.Getenv("TASK_NUM"),
+		attemptNum:  os.Getenv("ATTEMPT_NUM"),
+		sleepMs:   stringToInt(os.Getenv("SLEEP_MS")),
+		failRate:  stringToFloat(os.Getenv("FAIL_RATE")),
+	}
+
+	log.Printf("Starting Task #%s, Attempt #%s ...", env.taskNum, env.attemptNum)
 
 	// Simulate work
-	if SLEEP_MS != "" {
-		// Convert SLEEP_MS from String to Int
-		SLEEP_MS, _ := strconv.Atoi(SLEEP_MS)
-		time.Sleep(time.Duration(SLEEP_MS) * time.Millisecond)
+	if env.sleepMs > 0 {
+		time.Sleep(time.Duration(env.sleepMs) * time.Millisecond)
 	}
 
 	// Simulate errors
-	if FAIL_RATE != "" {
-		if err := randomFailure(FAIL_RATE); err != nil {
+	if env.failRate > 0 {
+		if err := randomFailure(env); err != nil {
 			log.Fatalf("%v", err)
 		}
 	}
 
-	log.Printf("Completed Task #%s, Attempt #%s", TASK_NUM, ATTEMPT_NUM)
+	log.Printf("Completed Task #%s, Attempt #%s", env.taskNum, env.attemptNum)
 }
 
 // Throw an error based on fail rate
-func randomFailure(FAIL_RATE string) error {
-	rate, err := strconv.ParseFloat(FAIL_RATE, 64)
-
-	if err != nil || rate < 0 || rate > 1 {
-		return fmt.Errorf("Invalid FAIL_RATE env var value: %s. Must be a float between 0 and 1 inclusive.", FAIL_RATE)
+func randomFailure(env *EnvVars) error {
+	if env.failRate < 0 || env.failRate > 1 {
+		return fmt.Errorf("Invalid FAIL_RATE env var value: %f. Must be a float between 0 and 1 inclusive.", env.failRate)
 	}
 
 	rand.Seed(time.Now().UnixNano())
 	randomFailure := rand.Float64()
 
-	if randomFailure < rate {
-		TASK_NUM, ATTEMPT_NUM, _, _ := getEnvVars()
-		return fmt.Errorf("Task #%s, Attempt #%s failed.", TASK_NUM, ATTEMPT_NUM)
+	if randomFailure < env.failRate {
+		return fmt.Errorf("Task #%s, Attempt #%s failed.", env.taskNum, env.attemptNum)
 	}
 	return nil
 }
