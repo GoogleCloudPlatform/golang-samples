@@ -30,6 +30,7 @@ require (
 	cloud.google.com/go/servicedirectory v1.0.0
 	cloud.google.com/go/speech v1.0.0
 	cloud.google.com/go/storage v1.18.0
+	cloud.google.com/go/storagetransfer v1.0.0
 	cloud.google.com/go/talent v0.3.0
 	cloud.google.com/go/texttospeech v1.0.0
 	cloud.google.com/go/translate v1.0.0
