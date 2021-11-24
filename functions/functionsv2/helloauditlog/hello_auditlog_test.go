@@ -56,22 +56,16 @@ func TestHelloAuditLog(t *testing.T) {
 			payload: AuditLogProtoPayload{
 				MethodName:   "storage.objects.create",
 				ResourceName: "my-resource",
-				Request: map[string]interface{}{
-					"@type": "type.googleapis.com/storage.objects.write",
-				},
-				RequestMetadata: map[string]interface{}{
-					"callerIp":                "1.2.3.4",
-					"callerSuppliedUserAgent": "example-user-agent",
+				AuthenticationInfo: map[string]interface{}{
+					"principalEmail": "example@serviceaccounts.googleapis.com",
 				},
 			},
 			expectedLogs: []string{
 				"Event Type: google.cloud.audit.log.v1.written",
 				"Subject: storage.googleapis.com/projects/_/buckets/my-bucket/objects/test.txt",
-				"Method Name: storage.objects.create",
+				"API Method: storage.objects.create",
 				"Resource Name: my-resource",
-				"Request Type: type.googleapis.com/storage.objects.write",
-				"Caller IP: 1.2.3.4",
-				"User Agent: example-user-agent",
+				"Principal: example@serviceaccounts.googleapis.com",
 			},
 		},
 	}

@@ -34,34 +34,33 @@ type AuditLogEntry struct {
 // AuditLogProtoPayload represents AuditLog within the LogEntry.protoPayload
 // See https://cloud.google.com/logging/docs/reference/audit/auditlog/rest/Shared.Types/AuditLog
 type AuditLogProtoPayload struct {
-	MethodName      string                 `json:"methodName"`
-	ResourceName    string                 `json:"resourceName"`
-	Request         map[string]interface{} `json:"request"`
-	RequestMetadata map[string]interface{} `json:"requestMetadata"`
+	MethodName         string                 `json:"methodName"`
+	ResourceName       string                 `json:"resourceName"`
+	AuthenticationInfo map[string]interface{} `json:"authenticationInfo"`
 }
 
-// HelloAuditLog receives a Cloud Audit Log event, and logs a few fields.
+// HelloAuditLog receives a CloudEvent containing an AuditLogEntry, and logs a few fields.
 func HelloAuditLog(ctx context.Context, e event.Event) error {
+	// Print out details from the CloudEvent itself
+	// See https://github.com/cloudevents/spec/blob/v1.0.1/spec.md#subject
+	// for details on the Subject field
 	log.Printf("Event Type: %s", e.Type())
 	log.Printf("Subject: %s", e.Subject())
 
+	// Decode the Cloud Audit Logging message embedded in the CloudEvent
 	logentry := &AuditLogEntry{}
-
 	if err := e.DataAs(logentry); err != nil {
 		ferr := fmt.Errorf("event.DataAs: %v", err)
 		log.Print(ferr)
 		return ferr
 	}
-	log.Printf("Method Name: %s", logentry.ProtoPayload.MethodName)
+	// Print out some of the information contained in the Cloud Audit Logging event
+	// See https://cloud.google.com/logging/docs/audit#audit_log_entry_structure
+	// for a full description of available fields.
+	log.Printf("API Method: %s", logentry.ProtoPayload.MethodName)
 	log.Printf("Resource Name: %s", logentry.ProtoPayload.ResourceName)
-	if v, ok := logentry.ProtoPayload.Request["@type"]; ok {
-		log.Printf("Request Type: %s", v)
-	}
-	if v, ok := logentry.ProtoPayload.RequestMetadata["callerIp"]; ok {
-		log.Printf("Caller IP: %s", v)
-	}
-	if v, ok := logentry.ProtoPayload.RequestMetadata["callerSuppliedUserAgent"]; ok {
-		log.Printf("User Agent: %s", v)
+	if v, ok := logentry.ProtoPayload.AuthenticationInfo["principalEmail"]; ok {
+		log.Printf("Principal: %s", v)
 	}
 	return nil
 }
