@@ -50,7 +50,7 @@ func HelloAuditLog(ctx context.Context, e event.Event) error {
 	// Decode the Cloud Audit Logging message embedded in the CloudEvent
 	logentry := &AuditLogEntry{}
 	if err := e.DataAs(logentry); err != nil {
-		ferr := fmt.Errorf("event.DataAs: %v", err)
+		ferr := fmt.Errorf("event.DataAs: %w", err)
 		log.Print(ferr)
 		return ferr
 	}
