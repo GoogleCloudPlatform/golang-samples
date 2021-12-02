@@ -80,7 +80,7 @@ ping-j6jtwetqdq-uc.a.run.app
 1. Start the ping service:
 
    ```sh
-   cd ./ping
+   cd ./grpc-ping
    PORT=9090 go run .
    ```
 
