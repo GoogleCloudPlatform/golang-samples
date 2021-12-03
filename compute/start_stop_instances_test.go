@@ -105,7 +105,7 @@ func TestStartStopSnippets(t *testing.T) {
 		t.Errorf("unable to get instance: %v", err)
 	}
 
-	if *instance.Status.Enum() != computepb.Instance_RUNNING {
+	if *instance.Status != computepb.Instance_RUNNING.String() {
 		t.Errorf("Instance is not in running status")
 	}
 
