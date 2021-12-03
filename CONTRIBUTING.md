@@ -54,6 +54,16 @@ $ ./testing/kokoro/store-secrets.sh
 Lastly, return to `pull-secrets.sh` and bump the version number to match what
 you have just uploaded.
 
+## Dependencies
+
+When you add a new dependency, it must be added to `go.mod` in the directory you
+are working in (if one is present) or in the repo root. After adding to the root
+`go.mod`, use the following to update all `go.sum` files appropriately:
+
+```
+find . -name go.mod -execdir go mod tidy \;
+```
+
 # Formatting
 
 All code must be formatted with `gofmt` (with the latest Go version) and pass
@@ -68,10 +78,10 @@ The following style guidelines are specific to writing Go samples.
 
 Canonical samples:
 
-- Veneer client library with complex request: [`inspect_string.go`](https://github.com/GoogleCloudPlatform/golang-samples/blob/master/dlp/snippets/inspect/inspect_string.go)
-- Apiary client with normal request: [`dicom_store_create.go`](https://github.com/GoogleCloudPlatform/golang-samples/blob/master/healthcare/dicom_store_create.go)
-- Apiary client with complex request: [`fhir_resource_create.go`](https://github.com/GoogleCloudPlatform/golang-samples/blob/master/healthcare/fhir_resource_create.go)
-- Apiary client with file I/O: [`dicomweb_instance_store.go`](https://github.com/GoogleCloudPlatform/golang-samples/blob/master/healthcare/dicomweb_instance_store.go)
+- Veneer client library with complex request: [`inspect_string.go`](https://github.com/GoogleCloudPlatform/golang-samples/blob/main/dlp/snippets/inspect/inspect_string.go)
+- Apiary client with normal request: [`dicom_store_create.go`](https://github.com/GoogleCloudPlatform/golang-samples/blob/main/healthcare/dicom_store_create.go)
+- Apiary client with complex request: [`fhir_resource_create.go`](https://github.com/GoogleCloudPlatform/golang-samples/blob/main/healthcare/fhir_resource_create.go)
+- Apiary client with file I/O: [`dicomweb_instance_store.go`](https://github.com/GoogleCloudPlatform/golang-samples/blob/main/healthcare/dicomweb_instance_store.go)
 
 ## One file per sample
 
@@ -144,7 +154,7 @@ func hello(w io.Writer) {
 
 The output can be verified during testing using a buffer.
 
-[inspect_test.go](https://github.com/GoogleCloudPlatform/golang-samples/blob/master/dlp/snippets/inspect/inspect_test.go)
+[inspect_test.go](https://github.com/GoogleCloudPlatform/golang-samples/blob/main/dlp/snippets/inspect/inspect_test.go)
 
 ```go
 func TestInspectString(t *testing.T) {
