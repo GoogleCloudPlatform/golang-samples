@@ -18,7 +18,6 @@ package s3sdk
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -68,12 +67,16 @@ func createTestKey(ctx context.Context, t *testing.T, client *storage.Client, pr
 		t.Skip("GOLANG_SAMPLES_SERVICE_ACCOUNT_EMAIL must be defined in the environment")
 		return nil, nil
 	}
-	key, err := client.CreateHMACKey(ctx, projectID, email)
-	if err != nil {
-		return nil, fmt.Errorf("CreateHMACKey: %v", err)
-	}
-
-	return key, nil
+	var key *storage.HMACKey
+	var err error
+	// TODO: replace testutil.Retry with retry config on client when available.
+	testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+		key, err = client.CreateHMACKey(ctx, projectID, email)
+		if err != nil {
+			r.Errorf("CreateHMACKey: %v", err)
+		}
+	})
+	return key, err
 }
 
 // Deactivate and delete the given key. Should operate as a teardown method.
