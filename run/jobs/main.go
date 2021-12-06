@@ -23,62 +23,87 @@ import (
 	"time"
 )
 
-type EnvVars struct {
-	// Job-defined env vars
+type Config struct {
+	// Job-defined
 	taskNum    string
 	attemptNum string
 
-	// User-defined env vars
+	// User-defined
 	sleepMs  int64
 	failRate float64
 }
 
-func stringToInt(s string) int64 {
-	num, _ := strconv.ParseInt(s, 10, 64)
-	return num
+func configFromEnv() (Config, error) {
+	taskNum := os.Getenv("TASK_NUM")
+	attemptNum := os.Getenv("ATTEMPT_NUM")
+	sleepMs, err := sleepMsToInt(os.Getenv("SLEEP_MS"))
+	failRate, err := failRateToFloat(os.Getenv("FAIL_RATE"))
+	
+	if err != nil {
+		return Config{}, err
+	}
+
+	config := Config{
+		taskNum:   taskNum,
+		attemptNum: attemptNum,
+		sleepMs:    sleepMs,
+		failRate:   failRate,
+	}
+	return config, nil
 }
 
-func stringToFloat(s string) float64 {
-	num, _ := strconv.ParseFloat(s, 64)
-	return num
+func sleepMsToInt(s string) (int64, error) {
+	sleepMs, err := strconv.ParseInt(s, 10, 64)
+	return sleepMs, err
+}
+
+func failRateToFloat(s string) (float64, error) {
+	// Default empty variable to 0
+	if s == "" {
+		return 0, nil
+	}
+
+	// Convert string to float
+	failRate, err := strconv.ParseFloat(s, 64)
+
+	// Check that rate is valid
+	if failRate < 0 || failRate > 1 {
+		return failRate, fmt.Errorf("Invalid FAIL_RATE value: %f. Must be a float between 0 and 1 inclusive.", failRate)
+	}
+
+	return failRate, err
 }
 
 func main() {
-	env := &EnvVars{
-		taskNum:    os.Getenv("TASK_NUM"),
-		attemptNum: os.Getenv("ATTEMPT_NUM"),
-		sleepMs:    stringToInt(os.Getenv("SLEEP_MS")),
-		failRate:   stringToFloat(os.Getenv("FAIL_RATE")),
+	config, err := configFromEnv()
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	log.Printf("Starting Task #%s, Attempt #%s ...", env.taskNum, env.attemptNum)
+	log.Printf("Starting Task #%s, Attempt #%s ...", config.taskNum, config.attemptNum)
 
 	// Simulate work
-	if env.sleepMs > 0 {
-		time.Sleep(time.Duration(env.sleepMs) * time.Millisecond)
+	if config.sleepMs > 0 {
+		time.Sleep(time.Duration(config.sleepMs) * time.Millisecond)
 	}
 
 	// Simulate errors
-	if env.failRate > 0 {
-		if err := randomFailure(env); err != nil {
-			log.Fatalf("%v", err)
+	if config.failRate > 0 {
+		if failure := randomFailure(config); failure != nil {
+			log.Fatalf("%v", failure)
 		}
 	}
 
-	log.Printf("Completed Task #%s, Attempt #%s", env.taskNum, env.attemptNum)
+	log.Printf("Completed Task #%s, Attempt #%s", config.taskNum, config.attemptNum)
 }
 
 // Throw an error based on fail rate
-func randomFailure(env *EnvVars) error {
-	if env.failRate < 0 || env.failRate > 1 {
-		return fmt.Errorf("Invalid FAIL_RATE env var value: %f. Must be a float between 0 and 1 inclusive.", env.failRate)
-	}
-
+func randomFailure(config Config) error {
 	rand.Seed(time.Now().UnixNano())
 	randomFailure := rand.Float64()
 
-	if randomFailure < env.failRate {
-		return fmt.Errorf("Task #%s, Attempt #%s failed.", env.taskNum, env.attemptNum)
+	if randomFailure < config.failRate {
+		return fmt.Errorf("Task #%s, Attempt #%s failed.", config.taskNum, config.attemptNum)
 	}
 	return nil
 }

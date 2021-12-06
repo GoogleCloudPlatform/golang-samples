@@ -26,7 +26,7 @@ func TestSuccessfulJob(t *testing.T) {
 	os.Setenv("SLEEP_MS", "0")
 	os.Setenv("TASK_NUM", "1")
 	os.Setenv("ATTEMPT_NUM", "1")
-	os.Setenv("FAIL_RATE", "")
+	os.Unsetenv("FAIL_RATE")
 
 	var buf bytes.Buffer
 	log.SetOutput(&buf)
@@ -44,20 +44,20 @@ func TestSuccessfulJob(t *testing.T) {
 }
 
 func TestRandomFailure(t *testing.T) {
-	env := &EnvVars{
+	config := Config{
 		taskNum:    "1",
 		attemptNum: "1",
 		sleepMs:    2,
 		failRate:   1,
 	}
 
-	err := randomFailure(env)
+	err := randomFailure(config)
 	if err == nil {
 		t.Fatalf("Test should fail with FAIL_RATE 1")
 	}
 
-	env.failRate = 0
-	err = randomFailure(env)
+	config.failRate = 0
+	err = randomFailure(config)
 	if err != nil {
 		t.Fatalf("Test should pass with empty FAIL_RATE")
 	}
