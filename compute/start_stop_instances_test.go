@@ -65,7 +65,7 @@ func TestStartStopSnippets(t *testing.T) {
 		t.Errorf("unable to get instance: %v", err)
 	}
 
-	if *instance.Status.Enum() != computepb.Instance_RUNNING {
+	if *instance.Status != computepb.Instance_RUNNING.String() {
 		t.Errorf("Instance is not in running status")
 	}
 
@@ -85,7 +85,7 @@ func TestStartStopSnippets(t *testing.T) {
 		t.Errorf("unable to get instance: %v", err)
 	}
 
-	if *instance.Status.Enum() != computepb.Instance_TERMINATED {
+	if *instance.Status != computepb.Instance_TERMINATED.String() {
 		t.Errorf("Instance is not in terminated status")
 	}
 
@@ -105,7 +105,7 @@ func TestStartStopSnippets(t *testing.T) {
 		t.Errorf("unable to get instance: %v", err)
 	}
 
-	if *instance.Status.Enum() != computepb.Instance_RUNNING {
+	if *instance.Status != computepb.Instance_RUNNING.String() {
 		t.Errorf("Instance is not in running status")
 	}
 
@@ -145,7 +145,7 @@ func TestStartStopSnippets(t *testing.T) {
 					},
 					AutoDelete: proto.Bool(true),
 					Boot:       proto.Bool(true),
-					Type:       computepb.AttachedDisk_PERSISTENT.Enum(),
+					Type:       proto.String(computepb.AttachedDisk_PERSISTENT.String()),
 					DiskEncryptionKey: &computepb.CustomerEncryptionKey{
 						RawKey: proto.String(base64Key),
 					},
@@ -198,7 +198,7 @@ func TestStartStopSnippets(t *testing.T) {
 		t.Errorf("unable to get instance: %v", err)
 	}
 
-	if *instance.Status.Enum() != computepb.Instance_TERMINATED {
+	if *instance.Status != computepb.Instance_TERMINATED.String() {
 		t.Errorf("Instance is not in terminated status")
 	}
 
@@ -216,7 +216,7 @@ func TestStartStopSnippets(t *testing.T) {
 		t.Errorf("unable to get instance: %v", err)
 	}
 
-	if *instance.Status.Enum() != computepb.Instance_RUNNING {
+	if *instance.Status != computepb.Instance_RUNNING.String() {
 		t.Errorf("Instance is not in running status")
 	}
 
