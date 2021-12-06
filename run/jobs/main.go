@@ -38,13 +38,13 @@ func configFromEnv() (Config, error) {
 	attemptNum := os.Getenv("ATTEMPT_NUM")
 	sleepMs, err := sleepMsToInt(os.Getenv("SLEEP_MS"))
 	failRate, err := failRateToFloat(os.Getenv("FAIL_RATE"))
-	
+
 	if err != nil {
 		return Config{}, err
 	}
 
 	config := Config{
-		taskNum:   taskNum,
+		taskNum:    taskNum,
 		attemptNum: attemptNum,
 		sleepMs:    sleepMs,
 		failRate:   failRate,
