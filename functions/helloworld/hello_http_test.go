@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ func TestHelloHTTP(t *testing.T) {
 		req.Header.Add("Content-Type", "application/json")
 
 		rr := httptest.NewRecorder()
-		HelloHTTP(rr, req)
+		helloHTTP(rr, req)
 
 		if got := rr.Body.String(); got != test.want {
 			t.Errorf("HelloHTTP(%q) = %q, want %q", test.body, got, test.want)
