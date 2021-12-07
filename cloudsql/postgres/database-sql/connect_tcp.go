@@ -30,10 +30,6 @@ import (
 // connectTCPSocket initializes a TCP connection pool for a Cloud SQL
 // instance of SQL Server.
 func connectTCPSocket() (*sql.DB, error) {
-	// [START_EXCLUDE]
-	// TODO: remove the following old region tag when it's no longer used.
-	// [END_EXCLUDE]
-	// [START cloud_sql_postgres_databasesql_create_tcp]
 	mustGetenv := func(k string) string {
 		v := os.Getenv(k)
 		if v == "" {
@@ -82,7 +78,6 @@ func connectTCPSocket() (*sql.DB, error) {
 	// [END_EXCLUDE]
 
 	return dbPool, nil
-	// [END cloud_sql_postgres_databasesql_create_tcp]
 }
 
 // [END cloud_sql_postgres_databasesql_connect_tcp]
