@@ -37,6 +37,8 @@ const (
 	testBucketName           = "cloud-samples-data"
 	testBucketDirName        = "media/"
 	testVideoFileName        = "ChromeCast.mp4"
+	testConcatFileName1      = "ForBiggerEscapes.mp4"
+	testConcatFileName2      = "ForBiggerJoyrides.mp4"
 	testOverlayImageFileName = "overlay.jpg"
 	preset                   = "preset/web-hd"
 	smallSpriteSheetFileName = "small-sprite-sheet0000000000.jpeg"
@@ -59,6 +61,8 @@ func TestJobTemplatesAndJobs(t *testing.T) {
 
 	bucketName := tc.ProjectID + "-golang-samples-transcoder-test"
 	inputURI := "gs://" + bucketName + "/" + testBucketDirName + testVideoFileName
+	inputConcat1URI := "gs://" + bucketName + "/" + testBucketDirName + testConcatFileName1
+	inputConcat2URI := "gs://" + bucketName + "/" + testBucketDirName + testConcatFileName2
 	inputOverlayImageURI := "gs://" + bucketName + "/" + testBucketDirName + testOverlayImageFileName
 	outputURIForPreset := "gs://" + bucketName + "/test-output-preset/"
 	outputURIForTemplate := "gs://" + bucketName + "/test-output-template/"
@@ -69,6 +73,7 @@ func TestJobTemplatesAndJobs(t *testing.T) {
 	outputURIForSetNumberSpritesheet := "gs://" + bucketName + "/" + outputDirForSetNumberSpritesheet
 	outputDirForPeriodicSpritesheet := "test-output-periodic-spritesheet/"
 	outputURIForPeriodicSpritesheet := "gs://" + bucketName + "/" + outputDirForPeriodicSpritesheet
+	outputURIForConcat := "gs://" + bucketName + "/test-output-concat/"
 
 	// Get the project number
 	cloudresourcemanagerClient, err := cloudresourcemanager.NewService(ctx)
@@ -107,6 +112,9 @@ func TestJobTemplatesAndJobs(t *testing.T) {
 	// Check if the spritesheets exist.
 	checkGCSFileExists(t, bucketName, outputDirForPeriodicSpritesheet+smallSpriteSheetFileName)
 	checkGCSFileExists(t, bucketName, outputDirForPeriodicSpritesheet+largeSpriteSheetFileName)
+
+	testJobWithConcatenatedInputs(t, projectNumber, inputConcat1URI, 0, 8.1, inputConcat2URI, 3.5, 15, outputURIForConcat)
+	t.Logf("\ntestJobWithConcatenatedInputs() completed\n")
 }
 
 // testJobTemplates tests major operations on job templates. Create, get,
@@ -175,6 +183,8 @@ func writeTestGCSFiles(t *testing.T, projectID string, bucketName string) {
 	testutil.CleanBucket(ctx, t, projectID, bucketName)
 	writeTestGCSFile(t, bucketName, testBucketName, testBucketDirName+testVideoFileName)
 	writeTestGCSFile(t, bucketName, testBucketName, testBucketDirName+testOverlayImageFileName)
+	writeTestGCSFile(t, bucketName, testBucketName, testBucketDirName+testConcatFileName1)
+	writeTestGCSFile(t, bucketName, testBucketName, testBucketDirName+testConcatFileName2)
 }
 
 // writeTestGCSFile deletes the GCS test bucket and uploads a test video file to it.
@@ -569,6 +579,58 @@ func testJobWithPeriodicImagesSpritesheet(t *testing.T, projectNumber string, in
 
 	if !strings.Contains(got, jobName) {
 		t.Errorf("createJobWithPeriodicImagesSpritesheet got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobName)
+	}
+	strSlice := strings.Split(got, "/")
+	jobID = strSlice[len(strSlice)-1]
+
+	// Get the job.
+	testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
+		jobName := fmt.Sprintf("projects/%s/locations/%s/jobs/%s", projectNumber, location, jobID)
+		if err := getJob(buf, tc.ProjectID, location, jobID); err != nil {
+			r.Errorf("getJob got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, jobName) {
+			r.Errorf("getJob got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobName)
+		}
+	})
+
+	// Get the job state (should be succeeded).
+	testutil.Retry(t, 10, 60*time.Second, func(r *testutil.R) {
+		if err := getJobState(buf, tc.ProjectID, location, jobID); err != nil {
+			r.Errorf("getJobState got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, jobSucceededState) {
+			r.Errorf("getJobState got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobSucceededState)
+		}
+	})
+
+	// Delete the job.
+	testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
+		if err := deleteJob(buf, tc.ProjectID, location, jobID); err != nil {
+			r.Errorf("deleteJob got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, deleteJobReponse) {
+			r.Errorf("deleteJob got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, deleteJobReponse)
+		}
+	})
+}
+
+// testJobWithConcatenatedInputs tests major operations on a job created from an ad-hoc configuration that
+// concatenates two inputs videos. It will wait until the job successfully completes as part of the test.
+func testJobWithConcatenatedInputs(t *testing.T, projectNumber string, input1URI string, startTimeOffset1 float64, endTimeOffset1 float64, input2URI string, startTimeOffset2 float64, endTimeOffset2 float64, outputURIForConcat string) {
+	tc := testutil.SystemTest(t)
+	buf := &bytes.Buffer{}
+	jobID := ""
+
+	// Create the job.
+	jobName := fmt.Sprintf("projects/%s/locations/%s/jobs/", projectNumber, location)
+	if err := createJobWithConcatenatedInputs(buf, tc.ProjectID, location, input1URI, startTimeOffset1, endTimeOffset1, input2URI, startTimeOffset2, endTimeOffset2, outputURIForConcat); err != nil {
+		t.Errorf("testJobWithConcatenatedInputs got err: %v", err)
+	}
+	got := buf.String()
+
+	if !strings.Contains(got, jobName) {
+		t.Errorf("testJobWithConcatenatedInputs got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobName)
 	}
 	strSlice := strings.Split(got, "/")
 	jobID = strSlice[len(strSlice)-1]
