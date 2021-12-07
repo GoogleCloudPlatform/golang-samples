@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START compute_instances_create]
+// [START compute_instances_create_from_template]
 import (
 	"context"
 	"fmt"
@@ -25,14 +25,12 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// createInstance sends an instance creation request to the Compute Engine API and waits for it to complete.
-func createInstance(w io.Writer, projectID, zone, instanceName, machineType, sourceImage, networkName string) error {
+// createInstanceFromTemplate creates a Compute Engine VM instance from an instance template.
+func createInstanceFromTemplate(w io.Writer, projectID, zone, instanceName, instanceTemplateUrl string) error {
 	// projectID := "your_project_id"
 	// zone := "europe-central2-b"
 	// instanceName := "your_instance_name"
-	// machineType := "n1-standard-1"
-	// sourceImage := "projects/debian-cloud/global/images/family/debian-10"
-	// networkName := "global/networks/default"
+	// instanceTemplateUrl := "global/instanceTemplates/your_instance_template"
 
 	ctx := context.Background()
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
@@ -46,24 +44,8 @@ func createInstance(w io.Writer, projectID, zone, instanceName, machineType, sou
 		Zone:    zone,
 		InstanceResource: &computepb.Instance{
 			Name: proto.String(instanceName),
-			Disks: []*computepb.AttachedDisk{
-				{
-					InitializeParams: &computepb.AttachedDiskInitializeParams{
-						DiskSizeGb:  proto.Int64(10),
-						SourceImage: proto.String(sourceImage),
-					},
-					AutoDelete: proto.Bool(true),
-					Boot:       proto.Bool(true),
-					Type:       proto.String(computepb.AttachedDisk_PERSISTENT.String()),
-				},
-			},
-			MachineType: proto.String(fmt.Sprintf("zones/%s/machineTypes/%s", zone, machineType)),
-			NetworkInterfaces: []*computepb.NetworkInterface{
-				{
-					Name: proto.String(networkName),
-				},
-			},
 		},
+		SourceInstanceTemplate: &instanceTemplateUrl,
 	}
 
 	op, err := instancesClient.Insert(ctx, req)
@@ -97,4 +79,4 @@ func createInstance(w io.Writer, projectID, zone, instanceName, machineType, sou
 	return nil
 }
 
-// [END compute_instances_create]
+// [END compute_instances_create_from_template]
