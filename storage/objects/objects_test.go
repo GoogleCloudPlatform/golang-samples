@@ -360,14 +360,14 @@ func TestV4SignedURL(t *testing.T) {
 
 	bucketName := tc.ProjectID + "-signed-url-bucket-name"
 	objectName := "foo.txt"
-	serviceAccount := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
-	if serviceAccount == "" {
+
+	if os.Getenv("GOOGLE_APPLICATION_CREDENTIALS") == "" {
 		t.Skip("GOOGLE_APPLICATION_CREDENTIALS must be set")
 	}
 
 	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName)
 	putBuf := new(bytes.Buffer)
-	putURL, err := generateV4PutObjectSignedURL(putBuf, bucketName, objectName, serviceAccount)
+	putURL, err := generateV4PutObjectSignedURL(putBuf, bucketName, objectName)
 	if err != nil {
 		t.Errorf("generateV4PutObjectSignedURL: %v", err)
 	}
@@ -388,7 +388,7 @@ func TestV4SignedURL(t *testing.T) {
 		t.Errorf("httpClient.Do: %v", err)
 	}
 	getBuf := new(bytes.Buffer)
-	getURL, err := generateV4GetObjectSignedURL(getBuf, bucketName, objectName, serviceAccount)
+	getURL, err := generateV4GetObjectSignedURL(getBuf, bucketName, objectName)
 	if err != nil {
 		t.Errorf("generateV4GetObjectSignedURL: %v", err)
 	}
