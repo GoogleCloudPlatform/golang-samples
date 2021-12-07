@@ -25,12 +25,6 @@ import (
 )
 
 // generateV4GetObjectSignedURL generates object signed URL with GET method.
-// Signing a URL requires credentials authorized to sign a URL. You can pass
-// these in as a Google service account private key (obtainable from the Google
-// Developers Console) or using a SignBytes function implementing custom signing.
-// In this example, neither of these options are used, which means the following
-// code only works when the credentials are defined via the environment variable
-// GOOGLE_APPLICATION_CREDENTIALS.
 func generateV4GetObjectSignedURL(w io.Writer, bucket, object string) (string, error) {
 	// bucket := "bucket-name"
 	// object := "object-name"
@@ -42,6 +36,14 @@ func generateV4GetObjectSignedURL(w io.Writer, bucket, object string) (string, e
 	}
 	defer client.Close()
 
+	// Signing a URL requires credentials authorized to sign a URL. You can pass
+	// these in through SignedURLOptions with one of the following options:
+	// 		a. a Google service account private key, obtainable from the Google Developers Console
+	// 		b. a Google Access ID with iam.serviceAccounts.signBlob permissions
+	// or  	c. a SignBytes function implementing custom signing.
+	// In this example, none of these options are used, which means the following
+	// code only works when the credentials are defined via the environment variable
+	// GOOGLE_APPLICATION_CREDENTIALS.
 	opts := &storage.SignedURLOptions{
 		Scheme:  storage.SigningSchemeV4,
 		Method:  "GET",
