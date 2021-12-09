@@ -87,7 +87,7 @@ func createInstanceFromTemplateWithOverrides(w io.Writer, projectID, zone, insta
 					},
 					AutoDelete: proto.Bool(true),
 					Boot:       proto.Bool(false),
-					Type:       computepb.AttachedDisk_PERSISTENT.Enum(),
+					Type:       proto.String(computepb.AttachedDisk_PERSISTENT.String()),
 				},
 			),
 		},

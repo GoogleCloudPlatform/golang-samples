@@ -7,14 +7,14 @@
 
 # The yoshi-go-admins team is the default owner for anything not
 # explicitly taken by someone else.
-*                                     @GoogleCloudPlatform/yoshi-go-admins
+*                                     @GoogleCloudPlatform/go-samples-reviewers
 
-/bigtable/                            @GoogleCloudPlatform/yoshi-go-admins @GoogleCloudPlatform/cloud-native-db-dpes
-/cloudsql/                            @GoogleCloudPlatform/yoshi-go-admins @GoogleCloudPlatform/infra-db-dpes
-/datastore/                           @GoogleCloudPlatform/yoshi-go-admins @GoogleCloudPlatform/cloud-native-db-dpes
-/errorreporting/                      @GoogleCloudPlatform/yoshi-go-admins @GoogleCloudPlatform/observability-devx
-/firestore/                           @GoogleCloudPlatform/yoshi-go-admins @GoogleCloudPlatform/cloud-native-db-dpes
-/logging/                             @GoogleCloudPlatform/yoshi-go-admins @GoogleCloudPlatform/observability-devx
-/storage/                             @GoogleCloudPlatform/yoshi-go-admins @GoogleCloudPlatform/cloud-storage-dpes
-/storagetransfer/                     @GoogleCloudPlatform/yoshi-go-admins @GoogleCloudPlatform/cloud-storage-dpes
-/iot/                                 @GoogleCloudPlatform/yoshi-go-admins @gcseh @GoogleCloudPlatform/api-iot
+/bigtable/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-native-db-dpes
+/cloudsql/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/infra-db-dpes
+/datastore/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-native-db-dpes
+/errorreporting/                      @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/observability-devx
+/firestore/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-native-db-dpes
+/logging/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/observability-devx
+/storage/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-storage-dpes
+/storagetransfer/                     @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-storage-dpes
+/iot/                                 @GoogleCloudPlatform/go-samples-reviewers @gcseh @GoogleCloudPlatform/api-iot
