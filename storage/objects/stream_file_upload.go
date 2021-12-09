@@ -16,10 +16,10 @@ package objects
 
 // [START storage_stream_file_upload]
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
-	"strings"
 	"time"
 
 	"cloud.google.com/go/storage"
@@ -36,7 +36,8 @@ func streamFileUpload(w io.Writer, bucket, object string) error {
 	}
 	defer client.Close()
 
-	content := "Hello world."
+	b := []byte("Hello world.")
+	buf := bytes.NewBuffer(b)
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
 	defer cancel()
@@ -44,7 +45,7 @@ func streamFileUpload(w io.Writer, bucket, object string) error {
 	// Upload an object with storage.Writer.
 	wc := client.Bucket(bucket).Object(object).NewWriter(ctx)
 	wc.ChunkSize = 0 // note retries are not supported for chunk size 0
-	if _, err = io.Copy(wc, strings.NewReader(content)); err != nil {
+	if _, err = io.Copy(wc, buf); err != nil {
 		return fmt.Errorf("io.Copy: %v", err)
 	}
 	// Data can continue to be added to the file until the writer is closed
