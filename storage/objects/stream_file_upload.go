@@ -36,7 +36,6 @@ func streamFileUpload(w io.Writer, bucket, object string) error {
 	}
 	defer client.Close()
 
-	// Open local file.
 	content := "Hello world."
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
