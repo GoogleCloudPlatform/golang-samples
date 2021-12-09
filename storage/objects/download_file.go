@@ -15,6 +15,7 @@
 package objects
 
 // [START storage_download_file]
+// [START storage_stream_file_download]
 import (
 	"context"
 	"fmt"
@@ -54,3 +55,4 @@ func downloadFile(w io.Writer, bucket, object string) ([]byte, error) {
 }
 
 // [END storage_download_file]
+// [END storage_stream_file_download]
