@@ -84,11 +84,14 @@ func LabelGceInstance(ctx context.Context, e event.Event) error {
 	// Subject format:
 	// compute.googleapis.com/projects/<PROJECT>/zones/<ZONE>/instances/<INSTANCE>
 	paths := strings.Split(e.Subject(), "/")
+	if len(paths) < 6 {
+		return fmt.Errorf("invalid event subject: %s", e.Subject())
+	}
 	project := paths[2]
 	zone := paths[4]
 	instance := paths[6]
 
-	// Format the `creator` parameter to match GCE label requirements
+	// Format the `creator` label value to match GCE label requirements
 	// See https://cloud.google.com/compute/docs/labeling-resources#requirements
 	labelsan := regexp.MustCompile("[^a-z0-9_-]+")
 	creatorstring := labelsan.ReplaceAllString(strings.ToLower(creator.(string)), "_")
