@@ -64,6 +64,19 @@ func TestRealms(t *testing.T) {
 		}
 	})
 
+	t.Run("update realm", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+		if err := updateRealm(buf, tc.ProjectID, "global", "myrealm"); err != nil {
+			t.Errorf("updateRealm: %v", err)
+		}
+
+		got := buf.String()
+		want := "Realm updated: projects/" + tc.ProjectID + "/locations/global/realms/myrealm"
+		if got != want {
+			t.Errorf("updateRealm got %q, want %q", got, want)
+		}
+	})
+
 	t.Run("cluster tests", innerTestGameServerCluster)
 
 	t.Run("delete realm", func(t *testing.T) {
@@ -132,6 +145,19 @@ func innerTestGameServerCluster(t *testing.T) {
 		want := "Cluster listed: projects/" + tc.ProjectID + "/locations/global/realms/myrealm/gameServerClusters/mycluster\n"
 		if !strings.Contains(got, want) {
 			t.Errorf("listGameServerClusters got %q, want %q", got, want)
+		}
+	})
+
+	t.Run("update cluster", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+		if err := updateGameServerCluster(buf, tc.ProjectID, "global", "myrealm", "mycluster"); err != nil {
+			t.Errorf("updateGameServerCluster: %v", err)
+		}
+
+		got := buf.String()
+		want := "Cluster updated: projects/" + tc.ProjectID + "/locations/global/realms/myrealm/gameServerClusters/mycluster"
+		if !strings.Contains(got, want) {
+			t.Errorf("updateGameServerCluster got %q, want %q", got, want)
 		}
 	})
 

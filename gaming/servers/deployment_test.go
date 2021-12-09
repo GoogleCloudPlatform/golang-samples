@@ -65,6 +65,19 @@ func TestGameServerDeployments(t *testing.T) {
 
 	t.Run("config tests", innerTestGameServerFleet)
 
+	t.Run("update deployment", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+		if err := updateGameServerDeployment(buf, tc.ProjectID, "mydeployment"); err != nil {
+			t.Errorf("updateGameServerDeployment: %v", err)
+		}
+
+		got := buf.String()
+		want := "Deployment updated: projects/" + tc.ProjectID + "/locations/global/gameServerDeployments/mydeployment"
+		if got != want {
+			t.Errorf("updateGameServerDeployment got %q, want %q", got, want)
+		}
+	})
+
 	t.Run("delete deployment", func(t *testing.T) {
 		buf := new(bytes.Buffer)
 		if err := deleteGameServerDeployment(buf, tc.ProjectID, "mydeployment"); err != nil {
