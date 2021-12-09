@@ -68,7 +68,7 @@ func TestObjects(t *testing.T) {
 	}
 
 	if err := streamFileUpload(ioutil.Discard, bucketVersioning, object1); err != nil {
-		t.Fatalf("uploadFile(%q): %v", object1, err)
+		t.Fatalf("streamFileUpload(%q): %v", object1, err)
 	}
 	// Check enableVersioning correctly work.
 	bkt := client.Bucket(bucketVersioning)

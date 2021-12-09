@@ -44,16 +44,16 @@ func streamFileUpload(w io.Writer, bucket, object string) error {
 
 	// Upload an object with storage.Writer.
 	wc := client.Bucket(bucket).Object(object).NewWriter(ctx)
-	wc.ChunkSize = 0 // note retries are not supported for chunk size 0
+	wc.ChunkSize = 0 // note retries are not supported for chunk size 0.
+
 	if _, err = io.Copy(wc, buf); err != nil {
 		return fmt.Errorf("io.Copy: %v", err)
 	}
-	// Data can continue to be added to the file until the writer is closed
+	// Data can continue to be added to the file until the writer is closed.
 	if err := wc.Close(); err != nil {
 		return fmt.Errorf("Writer.Close: %v", err)
 	}
 	fmt.Fprintf(w, "%v uploaded to %v.\n", object, bucket)
-	//object created (match node)
 
 	return nil
 }
