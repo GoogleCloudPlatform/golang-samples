@@ -64,10 +64,10 @@ func init() {
 
 // Cloud Function that receives GCE instance creation Audit Logs, and adds a
 // `creator` label to the instance.
-func LabelGceInstance(ctx context.Context, e event.Event) error {
+func LabelGceInstance(ctx context.Context, ev event.Event) error {
 	// Extract parameters from the Cloud Event and Cloud Audit Log data
 	logentry := &AuditLogEntry{}
-	if err := e.DataAs(logentry); err != nil {
+	if err := ev.DataAs(logentry); err != nil {
 		werr := fmt.Errorf("event.DataAs() : %w", err)
 		log.Printf("Error parsing proto payload: %s", werr)
 		return werr
@@ -83,18 +83,18 @@ func LabelGceInstance(ctx context.Context, e event.Event) error {
 	// Get relevant VM instance details from the event's `subject` property
 	// Subject format:
 	// compute.googleapis.com/projects/<PROJECT>/zones/<ZONE>/instances/<INSTANCE>
-	paths := strings.Split(e.Subject(), "/")
+	paths := strings.Split(ev.Subject(), "/")
 	if len(paths) < 6 {
-		return fmt.Errorf("invalid event subject: %s", e.Subject())
+		return fmt.Errorf("invalid event subject: %s", ev.Subject())
 	}
 	project := paths[2]
 	zone := paths[4]
 	instance := paths[6]
 
-	// Format the `creator` label value to match GCE label requirements
+	// Sanitize the `creator` label value to match GCE label requirements
 	// See https://cloud.google.com/compute/docs/labeling-resources#requirements
-	labelsan := regexp.MustCompile("[^a-z0-9_-]+")
-	creatorstring := labelsan.ReplaceAllString(strings.ToLower(creator.(string)), "_")
+	labelSanitizer := regexp.MustCompile("[^a-z0-9_-]+")
+	creatorstring := labelSanitizer.ReplaceAllString(strings.ToLower(creator.(string)), "_")
 
 	// Get the newly-created VM instance's label fingerprint
 	// This is a requirement of the Compute Engine API and avoids duplicate labels
