@@ -19,9 +19,9 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"math"
+	"time"
 
-	"github.com/golang/protobuf/ptypes/duration"
+	"google.golang.org/protobuf/types/known/durationpb"
 
 	transcoder "cloud.google.com/go/video/transcoder/apiv1"
 	transcoderpb "google.golang.org/genproto/googleapis/cloud/video/transcoder/v1"
@@ -30,36 +30,16 @@ import (
 // createJobWithConcatenatedInputs creates a job that concatenates two input
 // videos. See https://cloud.google.com/transcoder/docs/how-to/concatenate-videos
 // for more information.
-func createJobWithConcatenatedInputs(w io.Writer, projectID string, location string, input1URI string, startTimeOffset1 float64, endTimeOffset1 float64, input2URI string, startTimeOffset2 float64, endTimeOffset2 float64, outputURI string) error {
+func createJobWithConcatenatedInputs(w io.Writer, projectID string, location string, input1URI string, startTimeInput1 time.Duration, endTimeInput1 time.Duration, input2URI string, startTimeInput2 time.Duration, endTimeInput2 time.Duration, outputURI string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
 	// input1URI := "gs://my-bucket/my-video-file1"
-	// startTimeOffset1 := 0
-	// endTimeOffset1 := 8.1
+	// startTimeInput1 := 0*time.Second
+	// endTimeInput1 := 8*time.Second + 100*time.Millisecond
 	// input2URI := "gs://my-bucket/my-video-file2"
-	// startTimeOffset2 := 3.5
-	// endTimeOffset2 := 15
+	// startTimeInput2 := 3*time.Second + 500*time.Millisecond
+	// endTimeInput2 := 15*time.Second
 	// outputURI := "gs://my-bucket/my-output-folder/"
-
-	whole, frac := math.Modf(startTimeOffset1)
-	frac *= 1000000000
-	var startTimeOffset1NanoSec int32 = int32(frac)
-	var startTimeOffset1Sec int64 = int64(whole)
-
-	whole, frac = math.Modf(endTimeOffset1)
-	frac *= 1000000000
-	var endTimeOffset1NanoSec int32 = int32(frac)
-	var endTimeOffset1Sec int64 = int64(whole)
-
-	whole, frac = math.Modf(startTimeOffset2)
-	frac *= 1000000000
-	var startTimeOffset2NanoSec int32 = int32(frac)
-	var startTimeOffset2Sec int64 = int64(whole)
-
-	whole, frac = math.Modf(endTimeOffset2)
-	frac *= 1000000000
-	var endTimeOffset2NanoSec int32 = int32(frac)
-	var endTimeOffset2Sec int64 = int64(whole)
 
 	ctx := context.Background()
 	client, err := transcoder.NewClient(ctx)
@@ -86,28 +66,16 @@ func createJobWithConcatenatedInputs(w io.Writer, projectID string, location str
 					},
 					EditList: []*transcoderpb.EditAtom{
 						&transcoderpb.EditAtom{
-							Key:    "atom1",
-							Inputs: []string{"input1"},
-							StartTimeOffset: &duration.Duration{
-								Seconds: startTimeOffset1Sec,
-								Nanos:   startTimeOffset1NanoSec,
-							},
-							EndTimeOffset: &duration.Duration{
-								Seconds: endTimeOffset1Sec,
-								Nanos:   endTimeOffset1NanoSec,
-							},
+							Key:             "atom1",
+							Inputs:          []string{"input1"},
+							StartTimeOffset: durationpb.New(startTimeInput1),
+							EndTimeOffset:   durationpb.New(endTimeInput1),
 						},
 						&transcoderpb.EditAtom{
-							Key:    "atom2",
-							Inputs: []string{"input2"},
-							StartTimeOffset: &duration.Duration{
-								Seconds: startTimeOffset2Sec,
-								Nanos:   startTimeOffset2NanoSec,
-							},
-							EndTimeOffset: &duration.Duration{
-								Seconds: endTimeOffset2Sec,
-								Nanos:   endTimeOffset2NanoSec,
-							},
+							Key:             "atom2",
+							Inputs:          []string{"input2"},
+							StartTimeOffset: durationpb.New(startTimeInput2),
+							EndTimeOffset:   durationpb.New(endTimeInput2),
 						},
 					},
 					ElementaryStreams: []*transcoderpb.ElementaryStream{

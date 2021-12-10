@@ -113,7 +113,7 @@ func TestJobTemplatesAndJobs(t *testing.T) {
 	checkGCSFileExists(t, bucketName, outputDirForPeriodicSpritesheet+smallSpriteSheetFileName)
 	checkGCSFileExists(t, bucketName, outputDirForPeriodicSpritesheet+largeSpriteSheetFileName)
 
-	testJobWithConcatenatedInputs(t, projectNumber, inputConcat1URI, 0, 8.1, inputConcat2URI, 3.5, 15, outputURIForConcat)
+	testJobWithConcatenatedInputs(t, projectNumber, inputConcat1URI, 0*time.Second, 8*time.Second+100*time.Millisecond, inputConcat2URI, 3*time.Second+500*time.Millisecond, 15*time.Second, outputURIForConcat)
 	t.Logf("\ntestJobWithConcatenatedInputs() completed\n")
 }
 
@@ -617,14 +617,14 @@ func testJobWithPeriodicImagesSpritesheet(t *testing.T, projectNumber string, in
 
 // testJobWithConcatenatedInputs tests major operations on a job created from an ad-hoc configuration that
 // concatenates two inputs videos. It will wait until the job successfully completes as part of the test.
-func testJobWithConcatenatedInputs(t *testing.T, projectNumber string, input1URI string, startTimeOffset1 float64, endTimeOffset1 float64, input2URI string, startTimeOffset2 float64, endTimeOffset2 float64, outputURIForConcat string) {
+func testJobWithConcatenatedInputs(t *testing.T, projectNumber string, input1URI string, startTimeInput1 time.Duration, endTimeInput1 time.Duration, input2URI string, startTimeInput2 time.Duration, endTimeInput2 time.Duration, outputURIForConcat string) {
 	tc := testutil.SystemTest(t)
 	buf := &bytes.Buffer{}
 	jobID := ""
 
 	// Create the job.
 	jobName := fmt.Sprintf("projects/%s/locations/%s/jobs/", projectNumber, location)
-	if err := createJobWithConcatenatedInputs(buf, tc.ProjectID, location, input1URI, startTimeOffset1, endTimeOffset1, input2URI, startTimeOffset2, endTimeOffset2, outputURIForConcat); err != nil {
+	if err := createJobWithConcatenatedInputs(buf, tc.ProjectID, location, input1URI, startTimeInput1, endTimeInput1, input2URI, startTimeInput2, endTimeInput2, outputURIForConcat); err != nil {
 		t.Errorf("testJobWithConcatenatedInputs got err: %v", err)
 	}
 	got := buf.String()
