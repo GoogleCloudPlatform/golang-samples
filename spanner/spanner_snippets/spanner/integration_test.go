@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"regexp"
 	"strconv"
@@ -52,7 +53,12 @@ var (
 
 func initTest(t *testing.T, id string) (instName, dbName string, cleanup func()) {
 	projectID := getSampleProjectId(t)
-	instName, cleanup = createTestInstance(t, projectID, "regional-us-central1")
+	configName := getSamplesInstanceConfig()
+	if configName == "" {
+		configName = "regional-us-central1"
+	}
+	log.Printf("Running test by using the instance config: %s\n", configName)
+	instName, cleanup = createTestInstance(t, projectID, configName)
 	dbID := validLength(fmt.Sprintf("smpl-%s", id), t)
 	dbName = fmt.Sprintf("%s/databases/%s", instName, dbID)
 
@@ -120,7 +126,6 @@ func runCreateInstanceSample(t *testing.T, f instanceSampleFunc) {
 }
 
 func TestSample(t *testing.T) {
-	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2143")
 	_ = testutil.SystemTest(t)
 	t.Parallel()
 
@@ -365,7 +370,6 @@ func TestSample(t *testing.T) {
 }
 
 func TestBackupSample(t *testing.T) {
-	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2143")
 	if os.Getenv("GOLANG_SAMPLES_E2E_TEST") == "" {
 		t.Skip("GOLANG_SAMPLES_E2E_TEST not set")
 	}
@@ -791,6 +795,13 @@ func getSampleProjectId(t *testing.T) string {
 		t.Fatalf("Could not parse project id from instance name %q: %v", instance, err)
 	}
 	return projectId
+}
+
+// getSamplesInstanceConfig specifies the instance config used to create an instance for testing.
+// It can be changed by setting the environment variable
+// GOLANG_SAMPLES_SPANNER_INSTANCE_CONFIG.
+func getSamplesInstanceConfig() string {
+	return os.Getenv("GOLANG_SAMPLES_SPANNER_INSTANCE_CONFIG")
 }
 
 func assertContains(t *testing.T, out string, sub string) {
