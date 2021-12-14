@@ -18,30 +18,52 @@ package helloworld
 import (
 	"context"
 	"encoding/json"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	compute "cloud.google.com/go/compute/apiv1"
 	"github.com/cloudevents/sdk-go/v2/event"
-	"github.com/googleapis/gax-go/v2"
+	"google.golang.org/api/option"
 	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
 )
 
-// FakeInstancesClient is a GceInstancesClient that does not call GCE, and returns stub values.
-type FakeInstancesClient struct {
-	instance *computepb.Instance
-	labels   map[string]string
+type FakeInstancesServer struct {
+	http.ServeMux
+	changedLabels map[string]string
+	instance      *computepb.Instance
 }
 
-func (c FakeInstancesClient) Get(_ context.Context, _ *computepb.GetInstanceRequest, _ ...gax.CallOption) (*computepb.Instance, error) {
-	return c.instance, nil
-}
-
-func (c FakeInstancesClient) SetLabels(_ context.Context, r *computepb.SetLabelsInstanceRequest, _ ...gax.CallOption) (*compute.Operation, error) {
-	lset := r.GetInstancesSetLabelsRequestResource().GetLabels()
-	for k, v := range lset {
-		c.labels[k] = v
+func NewFakeInstancesServer(i *computepb.Instance) *FakeInstancesServer {
+	fake := &FakeInstancesServer{
+		instance:      i,
+		changedLabels: make(map[string]string),
 	}
-	return new(compute.Operation), nil
+	fake.HandleFunc("/compute/v1/projects/PROJECT/zones/ZONE/instances/INSTANCE",
+		func(w http.ResponseWriter, r *http.Request) {
+			rbytes, err := json.Marshal(fake.instance)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
+			w.Write(rbytes)
+		})
+	fake.HandleFunc("/compute/v1/projects/PROJECT/zones/ZONE/instances/INSTANCE/setLabels",
+		func(w http.ResponseWriter, r *http.Request) {
+			var labelReq computepb.InstancesSetLabelsRequest
+			err := json.NewDecoder(r.Body).Decode(&labelReq)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			fake.changedLabels = labelReq.GetLabels()
+			response, _ := json.Marshal(&computepb.Operation{})
+			w.Write(response)
+			w.WriteHeader(http.StatusOK)
+		})
+	fake.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusBadRequest)
+	})
+	return fake
 }
 
 func TestLabelGceInstance(t *testing.T) {
@@ -98,11 +120,15 @@ func TestLabelGceInstance(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			fake := &FakeInstancesClient{
-				instance: tt.instance,
-				labels:   make(map[string]string),
+			fake := NewFakeInstancesServer(tt.instance)
+			fakeserver := httptest.NewServer(fake)
+			defer fakeserver.Close()
+
+			var err error
+			client, err = compute.NewInstancesRESTClient(context.Background(), option.WithEndpoint(fakeserver.URL))
+			if err != nil {
+				t.Fatalf("Failed to create mock client: %s", err)
 			}
-			client = fake
 			e := event.New()
 			e.SetSubject("compute.googleapis.com/projects/PROJECT/zones/ZONE/instances/INSTANCE")
 			e.SetType("google.cloud.audit.log.v1.written")
@@ -121,7 +147,7 @@ func TestLabelGceInstance(t *testing.T) {
 			}
 			// check that we updated creator label if expected.
 			if tt.newCreator != "" {
-				newvalue, ok := fake.labels["creator"]
+				newvalue, ok := fake.changedLabels["creator"]
 				if !ok || newvalue != tt.newCreator {
 					t.Fatalf("LabelGceInstance(%s): incorrect creator label: got %s, want %s", tt.name, newvalue, tt.newCreator)
 				}

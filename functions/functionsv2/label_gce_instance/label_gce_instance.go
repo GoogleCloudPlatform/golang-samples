@@ -26,7 +26,6 @@ import (
 
 	compute "cloud.google.com/go/compute/apiv1"
 	"github.com/cloudevents/sdk-go/v2/event"
-	"github.com/googleapis/gax-go/v2"
 	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
 	"google.golang.org/protobuf/proto"
 )
@@ -45,13 +44,7 @@ type AuditLogProtoPayload struct {
 	AuthenticationInfo map[string]interface{} `json:"authenticationInfo"`
 }
 
-//Interface for the client, so we can mock it out in tests.
-type GceInstancesClient interface {
-	Get(context.Context, *computepb.GetInstanceRequest, ...gax.CallOption) (*computepb.Instance, error)
-	SetLabels(context.Context, *computepb.SetLabelsInstanceRequest, ...gax.CallOption) (*compute.Operation, error)
-}
-
-var client GceInstancesClient
+var client *compute.InstancesClient
 
 func init() {
 	// Create an Instances Client
@@ -127,7 +120,7 @@ func LabelGceInstance(ctx context.Context, ev event.Event) error {
 		},
 	})
 	if err != nil {
-		log.Fatalf("Could not retrieve GCE instance: %s", err)
+		log.Fatalf("Could not label GCE instance: %s", err)
 	}
 	log.Printf("Creator label added to %s in operation %v", instance, op)
 	return nil
