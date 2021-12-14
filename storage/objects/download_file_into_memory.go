@@ -27,7 +27,7 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// downloadFile downloads an object.
+// downloadFileIntoMemory downloads an object.
 func downloadFileIntoMemory(w io.Writer, bucket, object string) ([]byte, error) {
 	// bucket := "bucket-name"
 	// object := "object-name"

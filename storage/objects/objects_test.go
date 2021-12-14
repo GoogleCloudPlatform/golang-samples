@@ -24,6 +24,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -204,7 +205,12 @@ func TestObjects(t *testing.T) {
 	})
 
 	t.Run("downloadFile", func(t *testing.T) {
-		destination := "fileDownloadDestination.txt"
+		dir, err := ioutil.TempDir("", "downloadFileTestTempDir")
+		if err != nil {
+			t.Fatalf("ioutil.TempDir: %v", err)
+		}
+		defer os.RemoveAll(dir) // clean up
+		destination := filepath.Join(dir, "fileDownloadDestination.txt")
 		err = downloadFile(ioutil.Discard, bucket, object1, destination)
 		if err != nil {
 			t.Fatalf("downloadFile: %v", err)
@@ -215,10 +221,6 @@ func TestObjects(t *testing.T) {
 		}
 		if got, want := string(data), "Hello\nworld"; got != want {
 			t.Errorf("contents = %q; want %q", got, want)
-		}
-		err = os.Remove(destination) //testcleanup
-		if err != nil {
-			t.Fatalf("os.Remove: %v", err)
 		}
 	})
 
