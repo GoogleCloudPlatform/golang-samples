@@ -14,7 +14,7 @@
 
 package table
 
-// [START bigquery_delete_materizlied_view]
+// [START bigquery_delete_materialized_view]
 import (
 	"context"
 	"fmt"
