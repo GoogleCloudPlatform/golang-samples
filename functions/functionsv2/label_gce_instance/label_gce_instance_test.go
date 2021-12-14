@@ -18,6 +18,7 @@ package helloworld
 import (
 	"context"
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -26,6 +27,7 @@ import (
 	"github.com/cloudevents/sdk-go/v2/event"
 	"google.golang.org/api/option"
 	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 type FakeInstancesServer struct {
@@ -41,7 +43,7 @@ func NewFakeInstancesServer(i *computepb.Instance) *FakeInstancesServer {
 	}
 	fake.HandleFunc("/compute/v1/projects/PROJECT/zones/ZONE/instances/INSTANCE",
 		func(w http.ResponseWriter, r *http.Request) {
-			rbytes, err := json.Marshal(fake.instance)
+			rbytes, err := protojson.Marshal(fake.instance)
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
 			}
@@ -50,13 +52,18 @@ func NewFakeInstancesServer(i *computepb.Instance) *FakeInstancesServer {
 	fake.HandleFunc("/compute/v1/projects/PROJECT/zones/ZONE/instances/INSTANCE/setLabels",
 		func(w http.ResponseWriter, r *http.Request) {
 			var labelReq computepb.InstancesSetLabelsRequest
-			err := json.NewDecoder(r.Body).Decode(&labelReq)
+			body, err := ioutil.ReadAll(r.Body)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			err = protojson.Unmarshal(body, &labelReq)
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
 			fake.changedLabels = labelReq.GetLabels()
-			response, _ := json.Marshal(&computepb.Operation{})
+			response, _ := protojson.Marshal(&computepb.Operation{})
 			w.Write(response)
 			w.WriteHeader(http.StatusOK)
 		})

@@ -61,16 +61,16 @@ func LabelGceInstance(ctx context.Context, ev event.Event) error {
 	// Extract parameters from the Cloud Event and Cloud Audit Log data
 	logentry := &AuditLogEntry{}
 	if err := ev.DataAs(logentry); err != nil {
-		werr := fmt.Errorf("event.DataAs() : %w", err)
-		log.Printf("Error parsing proto payload: %s", werr)
-		return werr
+		err = fmt.Errorf("event.DataAs() : %w", err)
+		log.Printf("Error parsing proto payload: %s", err)
+		return err
 	}
 	payload := logentry.ProtoPayload
 	creator, ok := payload.AuthenticationInfo["principalEmail"]
 	if !ok {
-		e := fmt.Errorf("principalEmail not found in cloud event payload: %v", payload)
-		log.Printf("creator email not found: %s", e)
-		return e
+		err := fmt.Errorf("principalEmail not found in cloud event payload: %v", payload)
+		log.Printf("creator email not found: %s", err)
+		return err
 	}
 
 	// Get relevant VM instance details from the event's `subject` property
@@ -97,9 +97,9 @@ func LabelGceInstance(ctx context.Context, ev event.Event) error {
 		Instance: instance,
 	})
 	if err != nil {
-		e := fmt.Errorf("could not retrieve GCE instance: %s", err)
-		log.Print(e)
-		return e
+		err = fmt.Errorf("could not retrieve GCE instance: %s", err)
+		log.Print(err)
+		return err
 	}
 	if v, ok := inst.Labels["creator"]; ok {
 		// Instance already has a creator label.
