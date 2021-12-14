@@ -15,6 +15,7 @@
 package objects
 
 // [START storage_stream_file_upload]
+// [START storage_file_upload_from_memory]
 import (
 	"bytes"
 	"context"
@@ -59,3 +60,4 @@ func streamFileUpload(w io.Writer, bucket, object string) error {
 }
 
 // [END storage_stream_file_upload]
+// [END storage_file_upload_from_memory]
