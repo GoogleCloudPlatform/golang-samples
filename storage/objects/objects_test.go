@@ -24,6 +24,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -163,9 +164,9 @@ func TestObjects(t *testing.T) {
 	if err := deleteOldVersionOfObject(ioutil.Discard, bucketVersioning, object1, gen); err != nil {
 		t.Fatalf("deleteOldVersionOfObject: %v", err)
 	}
-	data, err := downloadFile(ioutil.Discard, bucket, object1)
+	data, err := downloadFileIntoMemory(ioutil.Discard, bucket, object1)
 	if err != nil {
-		t.Fatalf("downloadFile: %v", err)
+		t.Fatalf("downloadFileIntoMemory: %v", err)
 	}
 	if got, want := string(data), "Hello\nworld"; got != want {
 		t.Errorf("contents = %q; want %q", got, want)
@@ -197,6 +198,26 @@ func TestObjects(t *testing.T) {
 		data, err = downloadPublicFile(ioutil.Discard, bucket, object1)
 		if err != nil {
 			t.Fatalf("downloadPublicFile: %v", err)
+		}
+		if got, want := string(data), "Hello\nworld"; got != want {
+			t.Errorf("contents = %q; want %q", got, want)
+		}
+	})
+
+	t.Run("downloadFile", func(t *testing.T) {
+		dir, err := ioutil.TempDir("", "downloadFileTestTempDir")
+		if err != nil {
+			t.Fatalf("ioutil.TempDir: %v", err)
+		}
+		defer os.RemoveAll(dir) // clean up
+		destination := filepath.Join(dir, "fileDownloadDestination.txt")
+		err = downloadFile(ioutil.Discard, bucket, object1, destination)
+		if err != nil {
+			t.Fatalf("downloadFile: %v", err)
+		}
+		data, err := ioutil.ReadFile(destination)
+		if err != nil {
+			t.Fatalf("ioutil.ReadFile: %v", err)
 		}
 		if got, want := string(data), "Hello\nworld"; got != want {
 			t.Errorf("contents = %q; want %q", got, want)
