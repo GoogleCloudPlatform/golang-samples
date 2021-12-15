@@ -54,6 +54,12 @@ func downloadFile(w io.Writer, bucket, object string, destFileName string) error
 	if _, err := io.Copy(f, rc); err != nil {
 		return fmt.Errorf("io.Copy: %v", err)
 	}
+
+	err = f.Close()
+	if err != nil {
+		return fmt.Errorf("f.Close: %v", err)
+	}
+
 	fmt.Fprintf(w, "Blob %v downloaded to local file %v\n", object, destFileName)
 
 	return nil

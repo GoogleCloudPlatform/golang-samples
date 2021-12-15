@@ -26,11 +26,11 @@ import (
 )
 
 // downloadByteRange downloads a specific byte range of an object to a file.
-func downloadByteRange(w io.Writer, bucket, object string, startByte int64, length int64, destFileName string) error {
+func downloadByteRange(w io.Writer, bucket, object string, startByte int64, endByte int64, destFileName string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	// startByte := 0
-	// length := 20
+	// endByte := 20
 	// destFileName := "file.txt"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
@@ -47,6 +47,7 @@ func downloadByteRange(w io.Writer, bucket, object string, startByte int64, leng
 		return fmt.Errorf("os.Create: %v", err)
 	}
 
+	length := endByte - startByte
 	rc, err := client.Bucket(bucket).Object(object).NewRangeReader(ctx, startByte, length)
 	if err != nil {
 		return fmt.Errorf("Object(%q).NewReader: %v", object, err)
@@ -56,6 +57,12 @@ func downloadByteRange(w io.Writer, bucket, object string, startByte int64, leng
 	if _, err := io.Copy(f, rc); err != nil {
 		return fmt.Errorf("io.Copy: %v", err)
 	}
+
+	err = f.Close()
+	if err != nil {
+		return fmt.Errorf("f.Close: %v", err)
+	}
+
 	fmt.Fprintf(w, "Bytes %v to %v of blob %v downloaded to local file %v\n", startByte, startByte+length, object, destFileName)
 
 	return nil

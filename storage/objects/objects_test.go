@@ -43,6 +43,12 @@ func TestObjects(t *testing.T) {
 	}
 	defer client.Close()
 
+	dir, err := ioutil.TempDir("", "objectsTestTempDir")
+	if err != nil {
+		t.Fatalf("ioutil.TempDir: %v", err)
+	}
+	defer os.RemoveAll(dir) // clean up
+
 	var (
 		bucket           = tc.ProjectID + "-samples-object-bucket-1"
 		dstBucket        = tc.ProjectID + "-samples-object-bucket-2"
@@ -205,11 +211,6 @@ func TestObjects(t *testing.T) {
 	})
 
 	t.Run("downloadByteRange", func(t *testing.T) {
-		dir, err := ioutil.TempDir("", "downloadByteRangeTestTempDir")
-		if err != nil {
-			t.Fatalf("ioutil.TempDir: %v", err)
-		}
-		defer os.RemoveAll(dir) // clean up
 		destination := filepath.Join(dir, "fileDownloadByteRangeDestination.txt")
 		err = downloadByteRange(ioutil.Discard, bucket, object1, 1, 4, destination)
 		if err != nil {
@@ -225,11 +226,6 @@ func TestObjects(t *testing.T) {
 	})
 
 	t.Run("downloadFile", func(t *testing.T) {
-		dir, err := ioutil.TempDir("", "downloadFileTestTempDir")
-		if err != nil {
-			t.Fatalf("ioutil.TempDir: %v", err)
-		}
-		defer os.RemoveAll(dir) // clean up
 		destination := filepath.Join(dir, "fileDownloadDestination.txt")
 		err = downloadFile(ioutil.Discard, bucket, object1, destination)
 		if err != nil {
