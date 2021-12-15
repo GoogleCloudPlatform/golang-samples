@@ -204,6 +204,26 @@ func TestObjects(t *testing.T) {
 		}
 	})
 
+	t.Run("downloadByteRange", func(t *testing.T) {
+		dir, err := ioutil.TempDir("", "downloadByteRangeTestTempDir")
+		if err != nil {
+			t.Fatalf("ioutil.TempDir: %v", err)
+		}
+		defer os.RemoveAll(dir) // clean up
+		destination := filepath.Join(dir, "fileDownloadByteRangeDestination.txt")
+		err = downloadByteRange(ioutil.Discard, bucket, object1, 1, 4, destination)
+		if err != nil {
+			t.Fatalf("downloadFile: %v", err)
+		}
+		data, err := ioutil.ReadFile(destination)
+		if err != nil {
+			t.Fatalf("ioutil.ReadFile: %v", err)
+		}
+		if got, want := string(data), "ello"; got != want {
+			t.Errorf("contents = %q; want %q", got, want)
+		}
+	})
+
 	t.Run("downloadFile", func(t *testing.T) {
 		dir, err := ioutil.TempDir("", "downloadFileTestTempDir")
 		if err != nil {
