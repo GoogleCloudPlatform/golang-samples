@@ -220,7 +220,7 @@ func TestObjects(t *testing.T) {
 		if err != nil {
 			t.Fatalf("ioutil.ReadFile: %v", err)
 		}
-		if got, want := string(data), "ello"; got != want {
+		if got, want := string(data), "ell"; got != want {
 			t.Errorf("contents = %q; want %q", got, want)
 		}
 	})
