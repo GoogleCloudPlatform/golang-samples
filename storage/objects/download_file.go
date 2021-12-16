@@ -55,8 +55,7 @@ func downloadFile(w io.Writer, bucket, object string, destFileName string) error
 		return fmt.Errorf("io.Copy: %v", err)
 	}
 
-	err = f.Close()
-	if err != nil {
+	if err = f.Close(); err != nil {
 		return fmt.Errorf("f.Close: %v", err)
 	}
 

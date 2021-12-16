@@ -58,8 +58,7 @@ func downloadByteRange(w io.Writer, bucket, object string, startByte int64, endB
 		return fmt.Errorf("io.Copy: %v", err)
 	}
 
-	err = f.Close()
-	if err != nil {
+	if err = f.Close(); err != nil {
 		return fmt.Errorf("f.Close: %v", err)
 	}
 
