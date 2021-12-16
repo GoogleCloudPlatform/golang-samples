@@ -45,7 +45,7 @@ func createFirewallRule(w io.Writer, projectID, firewallRuleName, networkName st
 				Ports:      []string{"80", "443"},
 			},
 		},
-		Direction: computepb.Firewall_INGRESS.Enum(),
+		Direction: proto.String(computepb.Firewall_INGRESS.String()),
 		Name:      &firewallRuleName,
 		TargetTags: []string{
 			"web",

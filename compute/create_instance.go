@@ -54,7 +54,7 @@ func createInstance(w io.Writer, projectID, zone, instanceName, machineType, sou
 					},
 					AutoDelete: proto.Bool(true),
 					Boot:       proto.Bool(true),
-					Type:       computepb.AttachedDisk_PERSISTENT.Enum(),
+					Type:       proto.String(computepb.AttachedDisk_PERSISTENT.String()),
 				},
 			},
 			MachineType: proto.String(fmt.Sprintf("zones/%s/machineTypes/%s", zone, machineType)),
