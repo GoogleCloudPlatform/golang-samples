@@ -443,7 +443,7 @@ func TestCustomerManagedEncryptionKeys(t *testing.T) {
 
 	var b bytes.Buffer
 
-	locationId := "us-central1"
+	locationId := "us-west1"
 	keyRingId := "spanner-test-keyring"
 	keyId := "spanner-test-key"
 
