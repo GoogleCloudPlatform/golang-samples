@@ -471,8 +471,8 @@ func TestPublicAccessPrevention(t *testing.T) {
 		t.Errorf("getPublicAccessPrevention: got %v, want %v", got, want)
 	}
 
-	if err := setPublicAccessPreventionUnspecified(ioutil.Discard, bucketName); err != nil {
-		t.Errorf("setPublicAccessPreventionUnspecified: %v", err)
+	if err := setPublicAccessPreventionInherited(ioutil.Discard, bucketName); err != nil {
+		t.Errorf("setPublicAccessPreventionInherited: %v", err)
 	}
 	// Verify that PublicAccessPrevention was set correctly.
 	attrs, err = client.Bucket(bucketName).Attrs(ctx)
