@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 package objects
 
-// [START storage_download_file]
+// [START storage_download_byte_range]
 import (
 	"context"
 	"fmt"
@@ -25,10 +25,12 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// downloadFile downloads an object to a file.
-func downloadFile(w io.Writer, bucket, object string, destFileName string) error {
+// downloadByteRange downloads a specific byte range of an object to a file.
+func downloadByteRange(w io.Writer, bucket, object string, startByte int64, endByte int64, destFileName string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
+	// startByte := 0
+	// endByte := 20
 	// destFileName := "file.txt"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
@@ -45,7 +47,8 @@ func downloadFile(w io.Writer, bucket, object string, destFileName string) error
 		return fmt.Errorf("os.Create: %v", err)
 	}
 
-	rc, err := client.Bucket(bucket).Object(object).NewReader(ctx)
+	length := endByte - startByte
+	rc, err := client.Bucket(bucket).Object(object).NewRangeReader(ctx, startByte, length)
 	if err != nil {
 		return fmt.Errorf("Object(%q).NewReader: %v", object, err)
 	}
@@ -59,10 +62,10 @@ func downloadFile(w io.Writer, bucket, object string, destFileName string) error
 		return fmt.Errorf("f.Close: %v", err)
 	}
 
-	fmt.Fprintf(w, "Blob %v downloaded to local file %v\n", object, destFileName)
+	fmt.Fprintf(w, "Bytes %v to %v of blob %v downloaded to local file %v\n", startByte, startByte+length, object, destFileName)
 
 	return nil
 
 }
 
-// [END storage_download_file]
+// [END storage_download_byte_range]

@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,22 +14,22 @@
 
 package objects
 
-// [START storage_download_file]
+// [START storage_stream_file_upload]
+// [START storage_file_upload_from_memory]
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
-	"os"
 	"time"
 
 	"cloud.google.com/go/storage"
 )
 
-// downloadFile downloads an object to a file.
-func downloadFile(w io.Writer, bucket, object string, destFileName string) error {
+// streamFileUpload uploads an object via a stream.
+func streamFileUpload(w io.Writer, bucket, object string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
-	// destFileName := "file.txt"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -37,32 +37,27 @@ func downloadFile(w io.Writer, bucket, object string, destFileName string) error
 	}
 	defer client.Close()
 
+	b := []byte("Hello world.")
+	buf := bytes.NewBuffer(b)
+
 	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
 	defer cancel()
 
-	f, err := os.Create(destFileName)
-	if err != nil {
-		return fmt.Errorf("os.Create: %v", err)
-	}
+	// Upload an object with storage.Writer.
+	wc := client.Bucket(bucket).Object(object).NewWriter(ctx)
+	wc.ChunkSize = 0 // note retries are not supported for chunk size 0.
 
-	rc, err := client.Bucket(bucket).Object(object).NewReader(ctx)
-	if err != nil {
-		return fmt.Errorf("Object(%q).NewReader: %v", object, err)
-	}
-	defer rc.Close()
-
-	if _, err := io.Copy(f, rc); err != nil {
+	if _, err = io.Copy(wc, buf); err != nil {
 		return fmt.Errorf("io.Copy: %v", err)
 	}
-
-	if err = f.Close(); err != nil {
-		return fmt.Errorf("f.Close: %v", err)
+	// Data can continue to be added to the file until the writer is closed.
+	if err := wc.Close(); err != nil {
+		return fmt.Errorf("Writer.Close: %v", err)
 	}
-
-	fmt.Fprintf(w, "Blob %v downloaded to local file %v\n", object, destFileName)
+	fmt.Fprintf(w, "%v uploaded to %v.\n", object, bucket)
 
 	return nil
-
 }
 
-// [END storage_download_file]
+// [END storage_stream_file_upload]
+// [END storage_file_upload_from_memory]
