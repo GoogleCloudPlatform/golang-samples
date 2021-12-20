@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go v0.98.0
 	cloud.google.com/go/asset v1.0.1
 	cloud.google.com/go/automl v1.0.0
-	cloud.google.com/go/bigquery v1.24.0
+	cloud.google.com/go/bigquery v1.25.0
 	cloud.google.com/go/bigtable v1.4.0
 	cloud.google.com/go/cloudtasks v1.0.0
 	cloud.google.com/go/containeranalysis v0.1.0
