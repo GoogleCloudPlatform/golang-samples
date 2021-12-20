@@ -370,6 +370,7 @@ func TestSample(t *testing.T) {
 }
 
 func TestBackupSample(t *testing.T) {
+	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2333")
 	if os.Getenv("GOLANG_SAMPLES_E2E_TEST") == "" {
 		t.Skip("GOLANG_SAMPLES_E2E_TEST not set")
 	}
