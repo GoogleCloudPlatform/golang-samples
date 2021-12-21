@@ -38,8 +38,12 @@ func TestSuccessfulJob(t *testing.T) {
 	start := "Starting Task #1, Attempt #1 ..."
 	finish := "Completed Task #1, Attempt #1"
 
-	if !(strings.Contains(output, start) && strings.Contains(output, finish)) {
-		t.Fatalf("\nExpected string to contain:\n%s\n%s\n\nGot:\n%s", start, finish, output)
+	if !(strings.Contains(output, start) {
+		t.Errorf("\nWant:\n%s\n\nGot:\n%s", start, output)
+	}
+
+	if !(strings.Contains(output, finish) {
+		t.Errorf("\nWant:\n%s\n\nGot:\n%s", finish, output)
 	}
 }
 
