@@ -27,6 +27,7 @@ import (
 )
 
 func TestDetect(t *testing.T) {
+	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2349")
 	testutil.SystemTest(t)
 
 	tests := []struct {
@@ -84,6 +85,7 @@ func TestDetect(t *testing.T) {
 }
 
 func TestDetectAsyncDocument(t *testing.T) {
+	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2349")
 	tc := testutil.SystemTest(t)
 
 	ctx := context.Background()
