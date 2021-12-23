@@ -47,11 +47,11 @@ func createTemplateFromInstance(w io.Writer, projectID, instance, templateName s
 			SourceInstanceParams: &computepb.SourceInstanceParams{
 				DiskConfigs: []*computepb.DiskInstantiationConfig{
 					{
-						// Device name must match the name of a disk attached to the instance you are
-						// basing your template on.
+						// Device name must match the name of a disk attached to the instance
+						// your template is based on.
 						DeviceName: proto.String("disk-1"),
 						// Replace the original boot disk image used in your instance with a Rocky Linux image.
-						InstantiateFrom: computepb.DiskInstantiationConfig_CUSTOM_IMAGE.Enum(),
+						InstantiateFrom: proto.String(computepb.DiskInstantiationConfig_CUSTOM_IMAGE.String()),
 						CustomImage:     proto.String("projects/rocky-linux-cloud/global/images/family/rocky-linux-8"),
 						// Override the auto_delete setting.
 						AutoDelete: proto.Bool(true),

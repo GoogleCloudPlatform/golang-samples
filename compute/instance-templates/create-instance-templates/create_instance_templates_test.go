@@ -94,7 +94,7 @@ func TestCreateInstanceTemplatesSnippets(t *testing.T) {
 					},
 					AutoDelete: proto.Bool(true),
 					Boot:       proto.Bool(true),
-					Type:       computepb.AttachedDisk_PERSISTENT.Enum(),
+					Type:       proto.String(computepb.AttachedDisk_PERSISTENT.String()),
 					DeviceName: proto.String("disk-1"),
 				},
 			},

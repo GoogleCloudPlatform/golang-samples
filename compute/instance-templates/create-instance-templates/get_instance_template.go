@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START compute_template_delete]
+// [START compute_template_get]
 import (
 	"context"
 	"fmt"
@@ -24,7 +24,8 @@ import (
 	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
 )
 
-// deleteInstanceTemplate deletes an instance template.
+// getInstanceTemplate retrieves an instance template, which you can use to create virtual machine
+// (VM) instances and managed instance groups (MIGs).
 func getInstanceTemplate(w io.Writer, projectID, templateName string) (*computepb.InstanceTemplate, error) {
 	// projectID := "your_project_id"
 	// templateName := "your_template_name"
@@ -44,4 +45,4 @@ func getInstanceTemplate(w io.Writer, projectID, templateName string) (*computep
 	return instanceTemplatesClient.Get(ctx, req)
 }
 
-// [END compute_template_delete]
+// [END compute_template_get]

@@ -25,7 +25,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// createInstance creates a new instance template with the provided name and a specific instance configuration.
+// createTemplate creates a new instance template with the provided name and a specific instance configuration.
 func createTemplate(w io.Writer, projectID, templateName string) error {
 	// projectID := "your_project_id"
 	// templateName := "your_template_name"
@@ -64,8 +64,8 @@ func createTemplate(w io.Writer, projectID, templateName string) error {
 						AccessConfigs: []*computepb.AccessConfig{
 							{
 								Name:        proto.String("External NAT"),
-								Type:        computepb.AccessConfig_ONE_TO_ONE_NAT.Enum(),
-								NetworkTier: computepb.AccessConfig_PREMIUM.Enum(),
+								Type:        proto.String(computepb.AccessConfig_ONE_TO_ONE_NAT.String()),
+								NetworkTier: proto.String(computepb.AccessConfig_PREMIUM.String()),
 							},
 						},
 					},
