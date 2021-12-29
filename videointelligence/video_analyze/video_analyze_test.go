@@ -28,6 +28,7 @@ const catVideo = "gs://cloud-samples-data/video/cat.mp4"
 const googleworkVideo = "gs://python-docs-samples-tests/video/googlework_short.mp4"
 
 func TestAnalyze(t *testing.T) {
+	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2349")
 	testutil.EndToEndTest(t)
 
 	tests := []struct {

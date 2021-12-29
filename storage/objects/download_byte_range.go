@@ -14,22 +14,24 @@
 
 package objects
 
-// [START storage_stream_file_upload]
-// [START storage_file_upload_from_memory]
+// [START storage_download_byte_range]
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"time"
 
 	"cloud.google.com/go/storage"
 )
 
-// streamFileUpload uploads an object via a stream.
-func streamFileUpload(w io.Writer, bucket, object string) error {
+// downloadByteRange downloads a specific byte range of an object to a file.
+func downloadByteRange(w io.Writer, bucket, object string, startByte int64, endByte int64, destFileName string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
+	// startByte := 0
+	// endByte := 20
+	// destFileName := "file.txt"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -37,27 +39,33 @@ func streamFileUpload(w io.Writer, bucket, object string) error {
 	}
 	defer client.Close()
 
-	b := []byte("Hello world.")
-	buf := bytes.NewBuffer(b)
-
 	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
 	defer cancel()
 
-	// Upload an object with storage.Writer.
-	wc := client.Bucket(bucket).Object(object).NewWriter(ctx)
-	wc.ChunkSize = 0 // note retries are not supported for chunk size 0.
+	f, err := os.Create(destFileName)
+	if err != nil {
+		return fmt.Errorf("os.Create: %v", err)
+	}
 
-	if _, err = io.Copy(wc, buf); err != nil {
+	length := endByte - startByte
+	rc, err := client.Bucket(bucket).Object(object).NewRangeReader(ctx, startByte, length)
+	if err != nil {
+		return fmt.Errorf("Object(%q).NewReader: %v", object, err)
+	}
+	defer rc.Close()
+
+	if _, err := io.Copy(f, rc); err != nil {
 		return fmt.Errorf("io.Copy: %v", err)
 	}
-	// Data can continue to be added to the file until the writer is closed.
-	if err := wc.Close(); err != nil {
-		return fmt.Errorf("Writer.Close: %v", err)
+
+	if err = f.Close(); err != nil {
+		return fmt.Errorf("f.Close: %v", err)
 	}
-	fmt.Fprintf(w, "%v uploaded to %v.\n", object, bucket)
+
+	fmt.Fprintf(w, "Bytes %v to %v of blob %v downloaded to local file %v\n", startByte, startByte+length, object, destFileName)
 
 	return nil
+
 }
 
-// [END storage_stream_file_upload]
-// [END storage_file_upload_from_memory]
+// [END storage_download_byte_range]
