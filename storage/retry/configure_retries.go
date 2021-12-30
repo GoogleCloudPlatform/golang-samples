@@ -40,9 +40,10 @@ func configureRetries(w io.Writer, bucket, object string) error {
 	// also be configured on the BucketHandle or Client types.
 	o := client.Bucket(bucket).Object(object).Retryer(
 		// Use WithBackoff to control the timing of the exponential backoff. As
-		// configured here, there will be an initial delay between retries of 2s,
-		// a maximum delay of 60s, and the pause length will be multiplied by 3 in
-		// each iteration.
+		// configured here, there will be an initial delay between retries of up to
+		// 2s, a maximum delay of 60s, and the pause length will be multiplied by 3
+		// in each iteration. The actual length of pauses between retries is subject
+		// to random jitter.
 		storage.WithBackoff(gax.Backoff{
 			Initial:    2 * time.Second,
 			Max:        60 * time.Second,
