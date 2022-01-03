@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"regexp"
 	"time"
 
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
@@ -28,12 +29,18 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func updateBackup(ctx context.Context, w io.Writer, backupName string) error {
+func updateBackup(ctx context.Context, w io.Writer, db, backupID string) error {
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		return err
 	}
 	defer adminClient.Close()
+
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(db)
+	if matches == nil || len(matches) != 3 {
+		return fmt.Errorf("invalid database id %s", db)
+	}
+	backupName := matches[1] + "/backups/" + backupID
 
 	// Get the backup instance.
 	backup, err := adminClient.GetBackup(ctx, &adminpb.GetBackupRequest{Name: backupName})
