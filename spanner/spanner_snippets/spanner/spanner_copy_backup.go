@@ -27,7 +27,11 @@ import (
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
+// copyBackup copies an existing backup to a given instance in same or different region, or in same or different project.
 func copyBackup(ctx context.Context, w io.Writer, instanceId string, copyBackupId string, sourceBackupId string) error {
+	// instanceId := "projects/my-project/instances/destination-instance"
+	// copyBackupId := "destination-backup"
+	// sourceBackupId := "projects/my-project/instances/source-instance/backups/source-backup"
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		return fmt.Errorf("database.NewDatabaseAdminClient: %v", err)

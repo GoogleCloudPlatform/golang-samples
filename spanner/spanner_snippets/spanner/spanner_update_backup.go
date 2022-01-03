@@ -29,7 +29,10 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+// updateBackup updates the expiration time of a pending or completed backup.
 func updateBackup(ctx context.Context, w io.Writer, db, backupID string) error {
+	// db := "projects/my-project/instances/my-instance/databases/my-database"
+	// backupID := "my-backup"
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		return err
