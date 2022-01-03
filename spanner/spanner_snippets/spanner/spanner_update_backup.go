@@ -20,44 +20,42 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"regexp"
 	"time"
 
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
-	pbts "github.com/golang/protobuf/ptypes"
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 	"google.golang.org/genproto/protobuf/field_mask"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func updateBackup(ctx context.Context, w io.Writer, db, backupID string) error {
+func updateBackup(ctx context.Context, w io.Writer, backupName string) error {
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		return err
 	}
 	defer adminClient.Close()
 
-	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(db)
-	if matches == nil || len(matches) != 3 {
-		return fmt.Errorf("Invalid database id %s", db)
-	}
-	backupName := matches[1] + "/backups/" + backupID
-
+	// Get the backup instance.
 	backup, err := adminClient.GetBackup(ctx, &adminpb.GetBackupRequest{Name: backupName})
 	if err != nil {
 		return err
 	}
 
 	// Expire time must be within 366 days of the create time of the backup.
-	expireTime := time.Unix(backup.CreateTime.Seconds, int64(backup.CreateTime.Nanos)).AddDate(0, 0, 30)
-	expirespb, err := pbts.TimestampProto(expireTime)
-	if err != nil {
-		return err
-	}
+	maxExpireTime := time.Unix(backup.MaxExpireTime.Seconds, int64(backup.MaxExpireTime.Nanos))
+	expireTime := time.Unix(backup.ExpireTime.Seconds, int64(backup.ExpireTime.Nanos)).AddDate(0, 0, 30)
 
+	// Ensure that new expire time is less than the max expire time.
+	if expireTime.After(maxExpireTime) {
+		expireTime = maxExpireTime
+	}
+	expireTimepb := timestamppb.New(expireTime)
+
+	// Make the update backup request.
 	_, err = adminClient.UpdateBackup(ctx, &adminpb.UpdateBackupRequest{
 		Backup: &adminpb.Backup{
 			Name:       backupName,
-			ExpireTime: expirespb,
+			ExpireTime: expireTimepb,
 		},
 		UpdateMask: &field_mask.FieldMask{Paths: []string{"expire_time"}},
 	})
@@ -65,7 +63,8 @@ func updateBackup(ctx context.Context, w io.Writer, db, backupID string) error {
 		return err
 	}
 
-	fmt.Fprintf(w, "Updated backup %s\n", backupID)
+	fmt.Fprintf(w, "Updated backup %s with expire time %s\n", backupName, expireTime)
+
 	return nil
 }
 
