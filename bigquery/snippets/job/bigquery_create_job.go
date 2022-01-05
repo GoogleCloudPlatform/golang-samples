@@ -36,7 +36,7 @@ func createJob(projectID, sql string) error {
 
 	// Demonstrate adding a label to the job.
 	q := client.Query(sql)
-	q.Labels["example-label"] = "example_value"
+	q.Labels = map[string]string{"example-label": "example-value"}
 
 	// The library will create job IDs for you automatically, but this can be overridden by
 	// setting the Job ID explicitly.  Job ID's are unique within a project and cannot be
