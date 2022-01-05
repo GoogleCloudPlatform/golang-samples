@@ -114,8 +114,19 @@ func TestTables(t *testing.T) {
 	if err != nil {
 		t.Fatalf("couldn't generate unique table id: %v", err)
 	}
+	if err := createTableRangePartitioned(tc.ProjectID, testDatasetID, testTableID); err != nil {
+		t.Fatalf("createTableRangePartitioned(%q %q): %v", testDatasetID, testTableID, err)
+	}
+
+	testTableID, err = bqtestutil.UniqueBQName("testtable")
+	if err != nil {
+		t.Fatalf("couldn't generate unique table id: %v", err)
+	}
 	if err := createTableClustered(tc.ProjectID, testDatasetID, testTableID); err != nil {
 		t.Fatalf("createTableClustered(%q %q): %v", testDatasetID, testTableID, err)
+	}
+	if err := updateIAMPolicy(tc.ProjectID, testDatasetID, testTableID); err != nil {
+		t.Fatalf("updateIAMPolicy(%q %q): %v", testDatasetID, testTableID, err)
 	}
 
 	testTableID, err = bqtestutil.UniqueBQName("testtable")
