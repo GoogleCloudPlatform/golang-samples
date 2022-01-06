@@ -41,8 +41,8 @@ func createDataPointWithExemplar() *monitoringpb.Point {
 				}},
 				BucketCounts: []int64{5, 6, 3},
 				Exemplars: []*distributionpb.Distribution_Exemplar{
-					&distributionpb.Distribution_Exemplar{Value: 1, Timestamp: &googlepb.Timestamp{Seconds: end - 30}},
-					&distributionpb.Distribution_Exemplar{Value: 4, Timestamp: &googlepb.Timestamp{Seconds: end - 30}},
+					{Value: 1, Timestamp: &googlepb.Timestamp{Seconds: end - 30}},
+					{Value: 4, Timestamp: &googlepb.Timestamp{Seconds: end - 30}},
 				},
 			},
 		}},

@@ -46,7 +46,7 @@ func createJobWithSetNumberImagesSpritesheet(w io.Writer, projectID string, loca
 			JobConfig: &transcoderpb.Job_Config{
 				Config: &transcoderpb.JobConfig{
 					ElementaryStreams: []*transcoderpb.ElementaryStream{
-						&transcoderpb.ElementaryStream{
+						{
 							Key: "video_stream0",
 							ElementaryStream: &transcoderpb.ElementaryStream_VideoStream{
 								VideoStream: &transcoderpb.VideoStream{
@@ -61,7 +61,7 @@ func createJobWithSetNumberImagesSpritesheet(w io.Writer, projectID string, loca
 								},
 							},
 						},
-						&transcoderpb.ElementaryStream{
+						{
 							Key: "audio_stream0",
 							ElementaryStream: &transcoderpb.ElementaryStream_AudioStream{
 								AudioStream: &transcoderpb.AudioStream{
@@ -72,14 +72,14 @@ func createJobWithSetNumberImagesSpritesheet(w io.Writer, projectID string, loca
 						},
 					},
 					MuxStreams: []*transcoderpb.MuxStream{
-						&transcoderpb.MuxStream{
+						{
 							Key:               "sd",
 							Container:         "mp4",
 							ElementaryStreams: []string{"video_stream0", "audio_stream0"},
 						},
 					},
 					SpriteSheets: []*transcoderpb.SpriteSheet{
-						&transcoderpb.SpriteSheet{
+						{
 							FilePrefix:         "small-sprite-sheet",
 							SpriteWidthPixels:  64,
 							SpriteHeightPixels: 32,
@@ -89,7 +89,7 @@ func createJobWithSetNumberImagesSpritesheet(w io.Writer, projectID string, loca
 								TotalCount: 100,
 							},
 						},
-						&transcoderpb.SpriteSheet{
+						{
 							FilePrefix:         "large-sprite-sheet",
 							SpriteWidthPixels:  128,
 							SpriteHeightPixels: 72,

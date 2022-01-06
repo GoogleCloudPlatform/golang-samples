@@ -44,7 +44,7 @@ func createJobTemplate(w io.Writer, projectID string, location string, templateI
 		JobTemplate: &transcoderpb.JobTemplate{
 			Config: &transcoderpb.JobConfig{
 				ElementaryStreams: []*transcoderpb.ElementaryStream{
-					&transcoderpb.ElementaryStream{
+					{
 						Key: "video_stream0",
 						ElementaryStream: &transcoderpb.ElementaryStream_VideoStream{
 							VideoStream: &transcoderpb.VideoStream{
@@ -59,7 +59,7 @@ func createJobTemplate(w io.Writer, projectID string, location string, templateI
 							},
 						},
 					},
-					&transcoderpb.ElementaryStream{
+					{
 						Key: "video_stream1",
 						ElementaryStream: &transcoderpb.ElementaryStream_VideoStream{
 							VideoStream: &transcoderpb.VideoStream{
@@ -74,7 +74,7 @@ func createJobTemplate(w io.Writer, projectID string, location string, templateI
 							},
 						},
 					},
-					&transcoderpb.ElementaryStream{
+					{
 						Key: "audio_stream0",
 						ElementaryStream: &transcoderpb.ElementaryStream_AudioStream{
 							AudioStream: &transcoderpb.AudioStream{
@@ -85,12 +85,12 @@ func createJobTemplate(w io.Writer, projectID string, location string, templateI
 					},
 				},
 				MuxStreams: []*transcoderpb.MuxStream{
-					&transcoderpb.MuxStream{
+					{
 						Key:               "sd",
 						Container:         "mp4",
 						ElementaryStreams: []string{"video_stream0", "audio_stream0"},
 					},
-					&transcoderpb.MuxStream{
+					{
 						Key:               "hd",
 						Container:         "mp4",
 						ElementaryStreams: []string{"video_stream1", "audio_stream0"},
