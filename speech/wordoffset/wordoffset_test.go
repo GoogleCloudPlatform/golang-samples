@@ -43,7 +43,6 @@ func TestSyncLocal(t *testing.T) {
 }
 
 func TestAsyncGCS(t *testing.T) {
-	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2349")
 	testutil.SystemTest(t)
 
 	ctx := context.Background()

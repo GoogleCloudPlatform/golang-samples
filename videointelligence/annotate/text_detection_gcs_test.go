@@ -24,7 +24,6 @@ import (
 )
 
 func TestTextDetectionGCS(t *testing.T) {
-	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2349")
 	testutil.EndToEndTest(t)
 
 	gcsURI := "gs://python-docs-samples-tests/video/googlework_short.mp4"
