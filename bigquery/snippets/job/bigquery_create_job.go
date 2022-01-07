@@ -39,7 +39,7 @@ func createJob(projectID, sql string) error {
 	q.Labels = map[string]string{"example-label": "example-value"}
 
 	// The library will create job IDs for you automatically, but this can be overridden by
-	// setting the Job ID explicitly.  Job ID's are unique within a project and cannot be
+	// setting the Job ID explicitly.  Job IDs are unique within a project and cannot be
 	// reused.
 	q.JobID = fmt.Sprintf("my_job_prefix_%s", uuid.New().String())
 
