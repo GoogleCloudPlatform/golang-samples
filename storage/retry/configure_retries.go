@@ -25,7 +25,7 @@ import (
 	"github.com/googleapis/gax-go/v2"
 )
 
-// configureRetries configures a custom retry strategy for an API call.
+// configureRetries configures a custom retry strategy for a single API call.
 func configureRetries(w io.Writer, bucket, object string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
@@ -39,19 +39,18 @@ func configureRetries(w io.Writer, bucket, object string) error {
 	// Configure retries for all operations using this ObjectHandle. Retries may
 	// also be configured on the BucketHandle or Client types.
 	o := client.Bucket(bucket).Object(object).Retryer(
-		// Use WithBackoff to control the timing of the exponential backoff. As
-		// configured here, there will be an initial delay between retries of up to
-		// 2s, a maximum delay of 60s, and the pause length will be multiplied by 3
-		// in each iteration. The actual length of pauses between retries is subject
-		// to random jitter.
+		// Use WithBackoff to control the timing of the exponential backoff.
 		storage.WithBackoff(gax.Backoff{
+			// Set the initial retry delay to a maximum of 2 seconds. The length of
+			// pauses between retries is subject to random jitter.
 			Initial:    2 * time.Second,
+			// Set the maximum retry delay to 60 seconds.
 			Max:        60 * time.Second,
+			// Set the backoff multiplier to 3.0.
 			Multiplier: 3,
 		}),
-		// Use WithPolicy to configure the idempotency policy. By default, only
-		// idempotent operations are retried. RetryAlways will retry the operation
-		// even if it is non-idempotent.
+		// Use WithPolicy to customize retry so that all requests are retried even
+		// if they are non-idempotent.
 		storage.WithPolicy(storage.RetryAlways),
 	)
 
@@ -60,7 +59,7 @@ func configureRetries(w io.Writer, bucket, object string) error {
 	ctx, cancel := context.WithTimeout(ctx, 500*time.Second)
 	defer cancel()
 
-	// Delete an object using the specified policy.
+	// Delete an object using the specified retry policy.
 	if err := o.Delete(ctx); err != nil {
 		return fmt.Errorf("Object(%q).Delete: %v", object, err)
 	}
