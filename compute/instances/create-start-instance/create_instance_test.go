@@ -43,17 +43,19 @@ func TestComputeCreateInstanceSnippets(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewInstancesRESTClient: %v", err)
 	}
+	defer instancesClient.Close()
+
 	imagesClient, err := compute.NewImagesRESTClient(ctx)
 	if err != nil {
 		t.Fatalf("NewImagesRESTClient: %v", err)
 	}
+	defer imagesClient.Close()
+
 	zoneOperationsClient, err := compute.NewZoneOperationsRESTClient(ctx)
 	if err != nil {
 		t.Fatalf("NewZoneOperationsRESTClient: %v", err)
 	}
 	defer zoneOperationsClient.Close()
-	defer instancesClient.Close()
-	defer imagesClient.Close()
 
 	newestDebianReq := &computepb.GetFromFamilyImageRequest{
 		Project: "debian-cloud",
@@ -74,7 +76,7 @@ func TestComputeCreateInstanceSnippets(t *testing.T) {
 		t.Errorf("createInstanceFromCustomImage got %q, want %q", got, expectedResult)
 	}
 
-	err = deleteInstance(tc.ProjectID, zone, instanceName)
+	err = deleteInstance(ctx, tc.ProjectID, zone, instanceName)
 	if err != nil {
 		t.Errorf("deleteInstance got err: %v", err)
 	}
@@ -87,7 +89,7 @@ func TestComputeCreateInstanceSnippets(t *testing.T) {
 	if got := buf.String(); !strings.Contains(got, expectedResult) {
 		t.Errorf("createWithAdditionalDisk got %q, want %q", got, expectedResult)
 	}
-	err = deleteInstance(tc.ProjectID, zone, instanceName)
+	err = deleteInstance(ctx, tc.ProjectID, zone, instanceName)
 	if err != nil {
 		t.Errorf("deleteInstance got err: %v", err)
 	}
@@ -100,7 +102,7 @@ func TestComputeCreateInstanceSnippets(t *testing.T) {
 	if got := buf.String(); !strings.Contains(got, expectedResult) {
 		t.Errorf("createInstanceWithSubnet got %q, want %q", got, expectedResult)
 	}
-	err = deleteInstance(tc.ProjectID, zone, instanceName)
+	err = deleteInstance(ctx, tc.ProjectID, zone, instanceName)
 	if err != nil {
 		t.Errorf("deleteInstance got err: %v", err)
 	}

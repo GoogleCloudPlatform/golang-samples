@@ -16,17 +16,15 @@ package snippets
 
 import (
 	"context"
-	"fmt"
 
 	compute "cloud.google.com/go/compute/apiv1"
 	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
 )
 
-func waitZoneOp(projectId, zone string, op compute.Operation) error {
-	ctx := context.Background()
+func waitZoneOp(ctx context.Context, projectId, zone string, op compute.Operation) error {
 	zoneOperationsClient, err := compute.NewZoneOperationsRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewZoneOperationsRESTClient: %v", err)
+		return err
 	}
 	defer zoneOperationsClient.Close()
 
@@ -38,7 +36,7 @@ func waitZoneOp(projectId, zone string, op compute.Operation) error {
 		}
 		zoneOp, err := zoneOperationsClient.Wait(ctx, waitReq)
 		if err != nil {
-			return fmt.Errorf("unable to wait for the operation: %v", err)
+			return err
 		}
 
 		if *zoneOp.Status.Enum() == computepb.Operation_DONE {
@@ -49,12 +47,10 @@ func waitZoneOp(projectId, zone string, op compute.Operation) error {
 	return nil
 }
 
-func deleteInstance(projectId, zone, instanceName string) error {
-	ctx := context.Background()
-
+func deleteInstance(ctx context.Context, projectId, zone, instanceName string) error {
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewInstancesRESTClient: %v", err)
+		return err
 	}
 	req := &computepb.DeleteInstanceRequest{
 		Project:  projectId,
@@ -64,10 +60,8 @@ func deleteInstance(projectId, zone, instanceName string) error {
 
 	op, err := instancesClient.Delete(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to delete instance: %v", err)
+		return err
 	}
 
-	waitZoneOp(projectId, zone, *op)
-
-	return nil
+	return waitZoneOp(ctx, projectId, zone, *op)
 }

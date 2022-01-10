@@ -37,11 +37,12 @@ func createInstanceWithSnapshottedDataDisk(w io.Writer, projectID, zone, instanc
 	if err != nil {
 		return fmt.Errorf("NewInstancesRESTClient: %v", err)
 	}
+	defer instancesClient.Close()
+
 	imagesClient, err := compute.NewImagesRESTClient(ctx)
 	if err != nil {
 		return fmt.Errorf("NewImagesRESTClient: %v", err)
 	}
-	defer instancesClient.Close()
 	defer imagesClient.Close()
 
 	// List of public operating system (OS) images: https://cloud.google.com/compute/docs/images/os-details.
