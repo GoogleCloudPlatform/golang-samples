@@ -18,7 +18,6 @@ package snippets
 import (
 	"context"
 	"fmt"
-	"io"
 
 	compute "cloud.google.com/go/compute/apiv1"
 	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
@@ -26,7 +25,7 @@ import (
 
 // getInstanceTemplate retrieves an instance template, which you can use to create virtual machine
 // (VM) instances and managed instance groups (MIGs).
-func getInstanceTemplate(w io.Writer, projectID, templateName string) (*computepb.InstanceTemplate, error) {
+func getInstanceTemplate(projectID, templateName string) (*computepb.InstanceTemplate, error) {
 	// projectID := "your_project_id"
 	// templateName := "your_template_name"
 

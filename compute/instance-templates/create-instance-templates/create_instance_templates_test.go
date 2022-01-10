@@ -47,13 +47,13 @@ func TestCreateInstanceTemplatesSnippets(t *testing.T) {
 
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
 	if err != nil {
-		t.Errorf("NewInstancesRESTClient: %v", err)
+		t.Fatalf("NewInstancesRESTClient: %v", err)
 	}
 	defer instancesClient.Close()
 
 	zoneOperationsClient, err := compute.NewZoneOperationsRESTClient(ctx)
 	if err != nil {
-		t.Errorf("NewZoneOperationsRESTClient: %v", err)
+		t.Fatalf("NewZoneOperationsRESTClient: %v", err)
 	}
 	defer zoneOperationsClient.Close()
 
@@ -138,7 +138,7 @@ func TestCreateInstanceTemplatesSnippets(t *testing.T) {
 		t.Errorf("createTemplateFromInstance got %q, want %q", got, expectedResult)
 	}
 
-	template, err := getInstanceTemplate(buf, tc.ProjectID, templateName2)
+	template, err := getInstanceTemplate(tc.ProjectID, templateName2)
 	if err != nil {
 		t.Errorf("getInstanceTemplate got err: %v", err)
 	}
