@@ -114,7 +114,7 @@ func createInstanceWithSnapshottedDataDisk(w io.Writer, projectID, zone, instanc
 		}
 
 		if *zoneOp.Status.Enum() == computepb.Operation_DONE {
-			fmt.Fprintf(w, "Instance created\n")
+			fmt.Fprintln(w, "Instance created")
 			break
 		}
 	}
