@@ -21,14 +21,14 @@ import (
 	"io"
 	"strconv"
 	"sync"
+	"sync/atomic"
 
 	"cloud.google.com/go/pubsub"
 )
 
-func publish_with_flow_control_settings(w io.Writer, projectID, topicID string) error {
+func publishWithFlowControlSettings(w io.Writer, projectID, topicID string) error {
 	// projectID := "my-project-id"
 	// topicID := "my-topic"
-	// msg := "Hello World"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
@@ -38,12 +38,14 @@ func publish_with_flow_control_settings(w io.Writer, projectID, topicID string) 
 
 	t := client.Topic(topicID)
 	t.PublishSettings.FlowControlSettings = pubsub.FlowControlSettings{
-		MaxOutstandingMessages: 100,                           // default 1000
-		MaxOutstandingBytes:    10 * 1024 * 1024,              // default 0 (unlimited)
-		LimitExceededBehavior:  pubsub.FlowControlSignalError, // default FlowControlBlock
+		MaxOutstandingMessages: 100,                     // default 1000
+		MaxOutstandingBytes:    10 * 1024 * 1024,        // default 0 (unlimited)
+		LimitExceededBehavior:  pubsub.FlowControlBlock, // default Block, other options: SignalError and Ignore
 	}
 
 	var wg sync.WaitGroup
+	var totalErrors uint64
+
 	numMsgs := 1000
 	// Rapidly publishing 1000 messages in a loop may be constrained by flow control.
 	for i := 0; i < numMsgs; i++ {
@@ -51,15 +53,26 @@ func publish_with_flow_control_settings(w io.Writer, projectID, topicID string) 
 		result := t.Publish(ctx, &pubsub.Message{
 			Data: []byte("message #" + strconv.Itoa(i)),
 		})
-		go func() {
-			if _, err := result.Get(ctx); err != nil {
-				fmt.Fprintf(w, "result.Get(): %v", err)
+		go func(i int, res *pubsub.PublishResult) {
+			defer wg.Done()
+			// The Get method blocks until a server-generated ID or
+			// an error is returned for the published message.
+			id, err := res.Get(ctx)
+			if err != nil {
+				// Error handling code can be added here.
+				fmt.Fprintf(w, "Failed to publish: %v", err)
+				atomic.AddUint64(&totalErrors, 1)
+				return
 			}
-			wg.Done()
-		}()
+			fmt.Fprintf(w, "Published message %d; msg ID: %v\n", i, id)
+		}(i, result)
 	}
+
 	wg.Wait()
-	fmt.Fprintf(w, "Published %d messages with flow control enabled", numMsgs)
+
+	if totalErrors > 0 {
+		return fmt.Errorf("%d of %d messages did not publish successfully", totalErrors, numMsgs)
+	}
 	return nil
 }
 
