@@ -24,6 +24,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -41,6 +42,12 @@ func TestObjects(t *testing.T) {
 		t.Fatalf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
+
+	dir, err := ioutil.TempDir("", "objectsTestTempDir")
+	if err != nil {
+		t.Fatalf("ioutil.TempDir: %v", err)
+	}
+	defer os.RemoveAll(dir) // clean up
 
 	var (
 		bucket           = tc.ProjectID + "-samples-object-bucket-1"
@@ -67,8 +74,8 @@ func TestObjects(t *testing.T) {
 		t.Fatalf("uploadFile(%q): %v", object2, err)
 	}
 
-	if err := uploadFile(ioutil.Discard, bucketVersioning, object1); err != nil {
-		t.Fatalf("uploadFile(%q): %v", object1, err)
+	if err := streamFileUpload(ioutil.Discard, bucketVersioning, object1); err != nil {
+		t.Fatalf("streamFileUpload(%q): %v", object1, err)
 	}
 	// Check enableVersioning correctly work.
 	bkt := client.Bucket(bucketVersioning)
@@ -163,9 +170,9 @@ func TestObjects(t *testing.T) {
 	if err := deleteOldVersionOfObject(ioutil.Discard, bucketVersioning, object1, gen); err != nil {
 		t.Fatalf("deleteOldVersionOfObject: %v", err)
 	}
-	data, err := downloadFile(ioutil.Discard, bucket, object1)
+	data, err := downloadFileIntoMemory(ioutil.Discard, bucket, object1)
 	if err != nil {
-		t.Fatalf("downloadFile: %v", err)
+		t.Fatalf("downloadFileIntoMemory: %v", err)
 	}
 	if got, want := string(data), "Hello\nworld"; got != want {
 		t.Errorf("contents = %q; want %q", got, want)
@@ -197,6 +204,36 @@ func TestObjects(t *testing.T) {
 		data, err = downloadPublicFile(ioutil.Discard, bucket, object1)
 		if err != nil {
 			t.Fatalf("downloadPublicFile: %v", err)
+		}
+		if got, want := string(data), "Hello\nworld"; got != want {
+			t.Errorf("contents = %q; want %q", got, want)
+		}
+	})
+
+	t.Run("downloadByteRange", func(t *testing.T) {
+		destination := filepath.Join(dir, "fileDownloadByteRangeDestination.txt")
+		err = downloadByteRange(ioutil.Discard, bucket, object1, 1, 4, destination)
+		if err != nil {
+			t.Fatalf("downloadFile: %v", err)
+		}
+		data, err := ioutil.ReadFile(destination)
+		if err != nil {
+			t.Fatalf("ioutil.ReadFile: %v", err)
+		}
+		if got, want := string(data), "ell"; got != want {
+			t.Errorf("contents = %q; want %q", got, want)
+		}
+	})
+
+	t.Run("downloadFile", func(t *testing.T) {
+		destination := filepath.Join(dir, "fileDownloadDestination.txt")
+		err = downloadFile(ioutil.Discard, bucket, object1, destination)
+		if err != nil {
+			t.Fatalf("downloadFile: %v", err)
+		}
+		data, err := ioutil.ReadFile(destination)
+		if err != nil {
+			t.Fatalf("ioutil.ReadFile: %v", err)
 		}
 		if got, want := string(data), "Hello\nworld"; got != want {
 			t.Errorf("contents = %q; want %q", got, want)
@@ -360,14 +397,10 @@ func TestV4SignedURL(t *testing.T) {
 
 	bucketName := tc.ProjectID + "-signed-url-bucket-name"
 	objectName := "foo.txt"
-	serviceAccount := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
-	if serviceAccount == "" {
-		t.Skip("GOOGLE_APPLICATION_CREDENTIALS must be set")
-	}
 
 	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName)
 	putBuf := new(bytes.Buffer)
-	putURL, err := generateV4PutObjectSignedURL(putBuf, bucketName, objectName, serviceAccount)
+	putURL, err := generateV4PutObjectSignedURL(putBuf, bucketName, objectName)
 	if err != nil {
 		t.Errorf("generateV4PutObjectSignedURL: %v", err)
 	}
@@ -383,12 +416,12 @@ func TestV4SignedURL(t *testing.T) {
 	}
 	request.ContentLength = 11
 	request.Header.Set("Content-Type", "application/octet-stream")
-	response, err := httpClient.Do(request)
+	_, err = httpClient.Do(request)
 	if err != nil {
 		t.Errorf("httpClient.Do: %v", err)
 	}
 	getBuf := new(bytes.Buffer)
-	getURL, err := generateV4GetObjectSignedURL(getBuf, bucketName, objectName, serviceAccount)
+	getURL, err := generateV4GetObjectSignedURL(getBuf, bucketName, objectName)
 	if err != nil {
 		t.Errorf("generateV4GetObjectSignedURL: %v", err)
 	}
@@ -397,7 +430,7 @@ func TestV4SignedURL(t *testing.T) {
 		t.Errorf("got %q, want %q", got, want)
 	}
 
-	response, err = http.Get(getURL)
+	response, err := http.Get(getURL)
 	if err != nil {
 		t.Errorf("http.Get: %v", err)
 	}

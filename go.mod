@@ -3,10 +3,10 @@ module github.com/GoogleCloudPlatform/golang-samples
 go 1.11
 
 require (
-	cloud.google.com/go v0.97.0
+	cloud.google.com/go v0.98.0
 	cloud.google.com/go/asset v1.0.1
 	cloud.google.com/go/automl v1.0.0
-	cloud.google.com/go/bigquery v1.24.0
+	cloud.google.com/go/bigquery v1.25.0
 	cloud.google.com/go/bigtable v1.4.0
 	cloud.google.com/go/cloudtasks v1.0.0
 	cloud.google.com/go/containeranalysis v0.1.0
@@ -30,6 +30,7 @@ require (
 	cloud.google.com/go/servicedirectory v1.0.0
 	cloud.google.com/go/speech v1.0.0
 	cloud.google.com/go/storage v1.18.2
+	cloud.google.com/go/storagetransfer v1.0.0
 	cloud.google.com/go/talent v0.3.0
 	cloud.google.com/go/texttospeech v1.0.0
 	cloud.google.com/go/translate v1.0.0
@@ -40,7 +41,6 @@ require (
 	github.com/bmatcuk/doublestar/v2 v2.0.4
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.3.0 // indirect
-	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/eclipse/paho.mqtt.golang v1.3.5
 	github.com/envoyproxy/go-control-plane v0.10.0 // indirect
 	github.com/envoyproxy/protoc-gen-validate v0.6.2 // indirect
@@ -64,15 +64,14 @@ require (
 	github.com/sendgrid/smtpapi-go v0.6.0 // indirect
 	github.com/tinylib/msgp v1.1.2 // indirect
 	golang.org/x/exp v0.0.0-20211008200323-95152d363a1c
-	golang.org/x/net v0.0.0-20211108170745-6635138e15ea
+	golang.org/x/net v0.0.0-20210813160813-60bc85c4be6d
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	golang.org/x/sys v0.0.0-20211108224332-cbcd623f202e // indirect
 	golang.org/x/text v0.3.7
-	google.golang.org/api v0.60.0
+	google.golang.org/api v0.61.0
 	google.golang.org/appengine v1.6.7
-	google.golang.org/genproto v0.0.0-20211104193956-4c6863e31247
-	google.golang.org/grpc v1.42.0
+	google.golang.org/genproto v0.0.0-20211203200212-54befc351ae9
+	google.golang.org/grpc v1.40.0
 	google.golang.org/grpc/examples v0.0.0-20200707005602-4258d12073b4
 	google.golang.org/protobuf v1.27.1
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect

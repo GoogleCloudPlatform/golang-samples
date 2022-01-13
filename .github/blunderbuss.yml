@@ -7,6 +7,7 @@ assign_issues_by:
   - GoogleCloudPlatform/cloud-native-db-dpes
 - labels:
   - 'api: storage'
+  - 'api: storagetransfer'
   to:
   - tritone
 - labels:
@@ -38,7 +39,7 @@ assign_issues_by:
 - labels:
   - 'api: spanner'
   to:
-  - skuruppu
+  - rahul2393
 - labels:
   - 'api: cloudiot'
   to:
