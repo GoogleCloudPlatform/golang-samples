@@ -19,9 +19,11 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	kms "cloud.google.com/go/kms/apiv1"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
+	"google.golang.org/protobuf/types/known/durationpb"
 )
 
 // createKeyAsymmetricSign creates a new asymmetric RSA sign/verify key pair
@@ -47,6 +49,9 @@ func createKeyAsymmetricSign(w io.Writer, parent, id string) error {
 			VersionTemplate: &kmspb.CryptoKeyVersionTemplate{
 				Algorithm: kmspb.CryptoKeyVersion_RSA_SIGN_PKCS1_2048_SHA256,
 			},
+
+			// Optional: customize how long key versions should be kept before destroying.
+			DestroyScheduledDuration: durationpb.New(24 * time.Hour),
 		},
 	}
 

@@ -22,8 +22,8 @@ import (
 
 	"github.com/golang/protobuf/ptypes/duration"
 
-	transcoder "cloud.google.com/go/video/transcoder/apiv1beta1"
-	transcoderpb "google.golang.org/genproto/googleapis/cloud/video/transcoder/v1beta1"
+	transcoder "cloud.google.com/go/video/transcoder/apiv1"
+	transcoderpb "google.golang.org/genproto/googleapis/cloud/video/transcoder/v1"
 )
 
 // createJobWithAnimatedOverlay creates a job based on a given configuration that
@@ -51,19 +51,22 @@ func createJobWithAnimatedOverlay(w io.Writer, projectID string, location string
 			JobConfig: &transcoderpb.Job_Config{
 				Config: &transcoderpb.JobConfig{
 					ElementaryStreams: []*transcoderpb.ElementaryStream{
-						&transcoderpb.ElementaryStream{
+						{
 							Key: "video_stream0",
 							ElementaryStream: &transcoderpb.ElementaryStream_VideoStream{
 								VideoStream: &transcoderpb.VideoStream{
-									Codec:        "h264",
-									BitrateBps:   550000,
-									FrameRate:    60,
-									HeightPixels: 360,
-									WidthPixels:  640,
+									CodecSettings: &transcoderpb.VideoStream_H264{
+										H264: &transcoderpb.VideoStream_H264CodecSettings{
+											BitrateBps:   550000,
+											FrameRate:    60,
+											HeightPixels: 360,
+											WidthPixels:  640,
+										},
+									},
 								},
 							},
 						},
-						&transcoderpb.ElementaryStream{
+						{
 							Key: "audio_stream0",
 							ElementaryStream: &transcoderpb.ElementaryStream_AudioStream{
 								AudioStream: &transcoderpb.AudioStream{
@@ -74,14 +77,14 @@ func createJobWithAnimatedOverlay(w io.Writer, projectID string, location string
 						},
 					},
 					MuxStreams: []*transcoderpb.MuxStream{
-						&transcoderpb.MuxStream{
+						{
 							Key:               "sd",
 							Container:         "mp4",
 							ElementaryStreams: []string{"video_stream0", "audio_stream0"},
 						},
 					},
 					Overlays: []*transcoderpb.Overlay{
-						&transcoderpb.Overlay{
+						{
 							Image: &transcoderpb.Overlay_Image{
 								Uri: overlayImageURI,
 								Resolution: &transcoderpb.Overlay_NormalizedCoordinate{
@@ -91,7 +94,7 @@ func createJobWithAnimatedOverlay(w io.Writer, projectID string, location string
 								Alpha: 1,
 							},
 							Animations: []*transcoderpb.Overlay_Animation{
-								&transcoderpb.Overlay_Animation{
+								{
 									AnimationType: &transcoderpb.Overlay_Animation_AnimationFade{
 										AnimationFade: &transcoderpb.Overlay_AnimationFade{
 											FadeType: transcoderpb.Overlay_FADE_IN,
@@ -109,7 +112,7 @@ func createJobWithAnimatedOverlay(w io.Writer, projectID string, location string
 									},
 								},
 
-								&transcoderpb.Overlay_Animation{
+								{
 									AnimationType: &transcoderpb.Overlay_Animation_AnimationFade{
 										AnimationFade: &transcoderpb.Overlay_AnimationFade{
 											FadeType: transcoderpb.Overlay_FADE_OUT,

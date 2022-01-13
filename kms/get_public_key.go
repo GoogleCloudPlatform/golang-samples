@@ -30,7 +30,7 @@ import (
 // getPublicKey retrieves the public key from an asymmetric key pair on
 // Cloud KMS.
 func getPublicKey(w io.Writer, name string) error {
-	// parent := "projects/my-project/locations/us-east1/keyRings/my-key-ring/cryptoKeys/my-key/cryptoKeyVersions/123"
+	// name := "projects/my-project/locations/us-east1/keyRings/my-key-ring/cryptoKeys/my-key/cryptoKeyVersions/123"
 
 	// Create the client.
 	ctx := context.Background()

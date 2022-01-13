@@ -18,6 +18,7 @@ package table
 
 import (
 	"context"
+	"fmt"
 	"io/ioutil"
 	"testing"
 
@@ -94,6 +95,9 @@ func TestTables(t *testing.T) {
 	}
 
 	testTableID, err = bqtestutil.UniqueBQName("testtable")
+	if err != nil {
+		t.Fatalf("couldn't generate unique table id: %v", err)
+	}
 	if err := createTableFromTemplateTable("bigquery-public-data", "samples", "shakespeare", tc.ProjectID, testDatasetID, testTableID); err != nil {
 		t.Fatalf("createTableFromTemplateTable(%q %q): %v", testDatasetID, testTableID, err)
 	}
@@ -158,6 +162,9 @@ func TestTables(t *testing.T) {
 
 	// Change tables to avoid hitting metadata update limits in a short period.
 	testTableID, err = bqtestutil.UniqueBQName("testtable")
+	if err != nil {
+		t.Fatalf("couldn't generate unique table id: %v", err)
+	}
 	if err := createTableExplicitSchema(tc.ProjectID, testDatasetID, testTableID); err != nil {
 		t.Fatalf("createTableExplicitSchema(%q %q): %v", testDatasetID, testTableID, err)
 	}
@@ -179,8 +186,33 @@ func TestTables(t *testing.T) {
 	}
 
 	testTableID, err = bqtestutil.UniqueBQName("testtable")
+	if err != nil {
+		t.Fatalf("couldn't generate unique table id: %v", err)
+	}
 	if err := createTableExternalHivePartitioned(tc.ProjectID, testDatasetID, testTableID); err != nil {
 		t.Fatalf("createTableExternalHivePartitioned(%q %q): %v", testDatasetID, testTableID, err)
 	}
 
+	baseTableID, err := bqtestutil.UniqueBQName("basetable")
+	if err != nil {
+		t.Fatalf("couldn't generate unique base table id: %v", err)
+	}
+	matViewID, err := bqtestutil.UniqueBQName("matview")
+	if err != nil {
+		t.Fatalf("couldn't generate unique materialized view id: %v", err)
+	}
+	sql := fmt.Sprintf("CREATE TABLE `%s`.%s.%s AS SELECT CURRENT_TIMESTAMP AS TimestampField, \"foo\" AS StringField, true as BooleanField",
+		tc.ProjectID, testDatasetID, baseTableID)
+	if _, err = client.Query(sql).Read(ctx); err != nil {
+		t.Errorf("setup materialized view base table failed: %v", err)
+	}
+	if err = createMaterializedView(tc.ProjectID, testDatasetID, baseTableID, matViewID); err != nil {
+		t.Fatalf("createMaterializedView(%q %q): %v", testDatasetID, matViewID, err)
+	}
+	if err = updateMaterializedView(tc.ProjectID, testDatasetID, matViewID); err != nil {
+		t.Fatalf("updateMaterializedView(%q %q): %v", testDatasetID, matViewID, err)
+	}
+	if err = deleteMaterializedView(tc.ProjectID, testDatasetID, matViewID); err != nil {
+		t.Fatalf("deleteMaterializedView(%q %q): %v", testDatasetID, matViewID, err)
+	}
 }

@@ -60,7 +60,7 @@ func verifyAsymmetricSignatureEC(w io.Writer, name string, message, signature []
 	}
 	ecKey, ok := publicKey.(*ecdsa.PublicKey)
 	if !ok {
-		return fmt.Errorf("public key is not rsa")
+		return fmt.Errorf("public key is not elliptic curve")
 	}
 
 	// Verify Elliptic Curve signature.

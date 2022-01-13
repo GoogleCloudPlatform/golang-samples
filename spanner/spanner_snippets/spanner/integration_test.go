@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"regexp"
 	"strconv"
@@ -52,7 +53,21 @@ var (
 
 func initTest(t *testing.T, id string) (instName, dbName string, cleanup func()) {
 	projectID := getSampleProjectId(t)
-	instName, cleanup = createTestInstance(t, projectID)
+	configName := getSamplesInstanceConfig()
+	if configName == "" {
+		configName = "regional-us-central1"
+	}
+	log.Printf("Running test by using the instance config: %s\n", configName)
+	instName, cleanup = createTestInstance(t, projectID, configName)
+	dbID := validLength(fmt.Sprintf("smpl-%s", id), t)
+	dbName = fmt.Sprintf("%s/databases/%s", instName, dbID)
+
+	return
+}
+
+func initTestWithConfig(t *testing.T, id string, instanceConfigName string) (instName, dbName string, cleanup func()) {
+	projectID := getSampleProjectId(t)
+	instName, cleanup = createTestInstance(t, projectID, instanceConfigName)
 	dbID := validLength(fmt.Sprintf("smpl-%s", id), t)
 	dbName = fmt.Sprintf("%s/databases/%s", instName, dbID)
 
@@ -151,6 +166,10 @@ func TestSample(t *testing.T) {
 	assertContains(t, out, "1 1 Total Junk")
 	out = runSample(t, query, dbName, "failed to query data")
 	assertContains(t, out, "1 1 Total Junk")
+	out = runSample(t, queryRequestPriority, dbName, "failed to query data with RequestPriority")
+	assertContains(t, out, "1 1 Total Junk")
+	out = runSample(t, queryWithTag, dbName, "failed to query data with request tag set")
+	assertContains(t, out, "1 1 Total Junk")
 
 	runSampleWithContext(ctx, t, addIndex, dbName, "failed to add index")
 	out = runSample(t, queryUsingIndex, dbName, "failed to query using index")
@@ -185,7 +204,15 @@ func TestSample(t *testing.T) {
 	assertContains(t, out, "Forever Hold Your Peace")
 	assertContains(t, out, "Green")
 
+	out = runSample(t, readRequestPriority, dbName, "failed to read with RequestPriority")
+	assertContains(t, out, "Go, Go, Go")
+	assertContains(t, out, "Forever Hold Your Peace")
+	assertContains(t, out, "Green")
+
 	out = runSample(t, readBatchData, dbName, "failed to read batch data")
+	assertContains(t, out, "1 Marc Richards")
+
+	out = runSample(t, readBatchDataRequestPriority, dbName, "failed to read batch data with RequestPriority")
 	assertContains(t, out, "1 Marc Richards")
 
 	runSampleWithContext(ctx, t, addCommitTimestamp, dbName, "failed to add commit timestamp")
@@ -223,6 +250,9 @@ func TestSample(t *testing.T) {
 	out = runSample(t, insertUsingDML, dbName, "failed to insert using DML")
 	assertContains(t, out, "record(s) inserted")
 
+	out = runSample(t, insertUsingDMLRequestPriority, dbName, "failed to insert using DML with RequestPriority")
+	assertContains(t, out, "record(s) inserted")
+
 	out = runSample(t, setCustomTimeoutAndRetry, dbName, "failed to insert using DML with custom timeout and retry")
 	assertContains(t, out, "record(s) inserted")
 
@@ -253,10 +283,16 @@ func TestSample(t *testing.T) {
 	out = runSample(t, updateUsingPartitionedDML, dbName, "failed to update using partitioned DML")
 	assertContains(t, out, "record(s) updated")
 
+	out = runSample(t, updateUsingPartitionedDMLRequestPriority, dbName, "failed to update using partitioned DML with RequestPriority")
+	assertContains(t, out, "record(s) updated")
+
 	out = runSample(t, deleteUsingPartitionedDML, dbName, "failed to delete using partitioned DML")
 	assertContains(t, out, "record(s) deleted")
 
 	out = runSample(t, updateUsingBatchDML, dbName, "failed to update using batch DML")
+	assertContains(t, out, "Executed 2 SQL statements using Batch DML.")
+
+	out = runSample(t, updateUsingBatchDMLRequestPriority, dbName, "failed to update using batch DML with RequestPriority")
 	assertContains(t, out, "Executed 2 SQL statements using Batch DML.")
 
 	out = runSampleWithContext(ctx, t, createTableWithDatatypes, dbName, "failed to create table with data types")
@@ -288,6 +324,13 @@ func TestSample(t *testing.T) {
 	out = runSample(t, queryWithString, dbName, "failed to query with string")
 	assertContains(t, out, "42 Venue 42")
 
+	out = runSample(t, readWriteTransactionWithTag, dbName, "failed to perform read-write transaction with tag")
+	assertContains(t, out, "Venue capacities updated.")
+	assertContains(t, out, "New venue inserted.")
+	out = runSample(t, queryWithInt, dbName, "failed to query with int")
+	assertContains(t, out, "19 Venue 19 6300")
+	assertNotContains(t, out, "42 Venue 42 3000")
+
 	// Wait 5 seconds to avoid a time drift issue for the next query:
 	// https://github.com/GoogleCloudPlatform/golang-samples/issues/1146.
 	time.Sleep(time.Second * 5)
@@ -304,15 +347,30 @@ func TestSample(t *testing.T) {
 	assertContains(t, out, "19 Venue 19")
 	assertContains(t, out, "42 Venue 42")
 
+	out = runSample(t, queryWithGFELatency, dbName, "failed to query with GFE latency")
+	assertContains(t, out, "1 1 Total Junk")
+	out = runSample(t, queryWithGRPCMetric, dbName, "failed to query with gRPC metric")
+	assertContains(t, out, "1 1 Total Junk")
+	out = runSample(t, queryWithQueryStats, dbName, "failed to query with query stats")
+	assertContains(t, out, "1 1 Total Junk")
+
 	runSample(t, dropColumn, dbName, "failed to drop column")
 	runSampleWithContext(ctx, t, addNumericColumn, dbName, "failed to add numeric column")
 	runSample(t, updateDataWithNumericColumn, dbName, "failed to update data with numeric")
 	out = runSample(t, queryWithNumericParameter, dbName, "failed to query with numeric parameter")
 	assertContains(t, out, "4 ")
 	assertContains(t, out, "35000")
+
+	out = runSample(t, addJsonColumn, dbName, "failed to add json column")
+	assertContains(t, out, "Added VenueDetails column\n")
+	out = runSample(t, updateDataWithJsonColumn, dbName, "failed to update data with json")
+	assertContains(t, out, "Updated data to VenueDetails column\n")
+	out = runSample(t, queryWithJsonParameter, dbName, "failed to query with json parameter")
+	assertContains(t, out, "The venue details for venue id 19")
 }
 
 func TestBackupSample(t *testing.T) {
+	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2333")
 	if os.Getenv("GOLANG_SAMPLES_E2E_TEST") == "" {
 		t.Skip("GOLANG_SAMPLES_E2E_TEST not set")
 	}
@@ -380,13 +438,13 @@ func TestCustomerManagedEncryptionKeys(t *testing.T) {
 	}
 	tc := testutil.SystemTest(t)
 	t.Parallel()
-
+	startTime := time.Now()
 	instName, dbName, cleanup := initTest(t, randomID())
 	defer cleanup()
 
 	var b bytes.Buffer
 
-	locationId := "us-central1"
+	locationId := "us-west1"
 	keyRingId := "spanner-test-keyring"
 	keyId := "spanner-test-key"
 
@@ -402,7 +460,7 @@ func TestCustomerManagedEncryptionKeys(t *testing.T) {
 		keyId,
 	)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
+	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Minute)
 	defer cancel()
 
 	// Create an encrypted database. The database is automatically deleted by the cleanup function.
@@ -411,6 +469,7 @@ func TestCustomerManagedEncryptionKeys(t *testing.T) {
 	}
 	out := b.String()
 	assertContains(t, out, fmt.Sprintf("Created database [%s] using encryption key %q", dbName, kmsKeyName))
+	t.Logf("create database operation took: %v\n", time.Since(startTime))
 
 	// Try to create a backup of the encrypted database and delete it after the test.
 	backupId := fmt.Sprintf("enc-backup-%s", randomID())
@@ -421,6 +480,7 @@ func TestCustomerManagedEncryptionKeys(t *testing.T) {
 	out = b.String()
 	assertContains(t, out, fmt.Sprintf("backups/%s", backupId))
 	assertContains(t, out, fmt.Sprintf("using encryption key %s", kmsKeyName))
+	t.Logf("create backup operation took: %v\n", time.Since(startTime))
 
 	// Try to restore the encrypted database and delete the restored database after the test.
 	restoredName := fmt.Sprintf("%s/databases/rest-enc-%s", instName, randomID())
@@ -430,6 +490,76 @@ func TestCustomerManagedEncryptionKeys(t *testing.T) {
 	out = runBackupSampleWithRetry(ctx, t, restoreFunc, restoredName, backupId, "failed to restore database with customer managed encryption key", 10)
 	assertContains(t, out, fmt.Sprintf("Database %s restored", dbName))
 	assertContains(t, out, fmt.Sprintf("using encryption key %s", kmsKeyName))
+	t.Logf("restore backup operation took: %v\n", time.Since(startTime))
+}
+
+func TestCreateDatabaseWithDefaultLeaderSample(t *testing.T) {
+	_ = testutil.SystemTest(t)
+	t.Parallel()
+
+	instName, dbName, cleanup := initTestWithConfig(t, randomID(), "nam3")
+	defer cleanup()
+
+	projectID := getSampleProjectId(t)
+	var b bytes.Buffer
+
+	// Try to get Instance Configs
+	config := fmt.Sprintf("projects/%s/instanceConfigs/%s", projectID, "nam3")
+	if err := getInstanceConfig(&b, config); err != nil {
+		t.Errorf("failed to create get instance configs: %v", err)
+	}
+	out := b.String()
+	assertContains(t, out, "Available leader options for instance config")
+
+	// Try to list Instance Configs
+	b.Reset()
+	if err := listInstanceConfigs(&b, "projects/"+projectID); err != nil {
+		t.Errorf("failed to list instance configs: %v", err)
+	}
+	out = b.String()
+	assertContains(t, out, "Available leader options for instance config")
+
+	// Try to get list of Databases
+	b.Reset()
+	if err := listDatabases(&b, instName); err != nil {
+		t.Errorf("failed to get list of Databases: %v", err)
+	}
+	out = b.String()
+	assertContains(t, out, "Databases for instance")
+
+	// Try to create Database with Default Leader
+	b.Reset()
+	defaultLeader := "us-east1"
+	if err := createDatabaseWithDefaultLeader(&b, dbName, defaultLeader); err != nil {
+		t.Errorf("failed to create database with default leader: %v", err)
+	}
+	out = b.String()
+	assertContains(t, out, fmt.Sprintf("Created database [%s] with default leader%q\n", dbName, defaultLeader))
+
+	// Try to update Database with Default Leader
+	b.Reset()
+	defaultLeader = "us-east4"
+	if err := updateDatabaseWithDefaultLeader(&b, dbName, defaultLeader); err != nil {
+		t.Errorf("failed to update database with default leader: %v", err)
+	}
+	out = b.String()
+	assertContains(t, out, "Updated the default leader\n")
+
+	// Try to get Database DDL
+	b.Reset()
+	if err := getDatabaseDdl(&b, dbName); err != nil {
+		t.Errorf("failed to get Database DDL: %v", err)
+	}
+	out = b.String()
+	assertContains(t, out, "Database DDL is as follows")
+
+	// Try to Query Information Schema Database Options
+	b.Reset()
+	if err := queryInformationSchemaDatabaseOptions(&b, dbName); err != nil {
+		t.Errorf("failed to query information schema database options: %v", err)
+	}
+	out = b.String()
+	assertContains(t, out, "The result of the query to get")
 }
 
 func maybeCreateKey(projectId, locationId, keyRingId, keyId string) error {
@@ -545,7 +675,7 @@ func mustRunSample(t *testing.T, f sampleFuncWithContext, dbName, errMsg string)
 	return b.String()
 }
 
-func createTestInstance(t *testing.T, projectID string) (instanceName string, cleanup func()) {
+func createTestInstance(t *testing.T, projectID string, instanceConfigName string) (instanceName string, cleanup func()) {
 	ctx := context.Background()
 	instanceID := fmt.Sprintf("go-sample-%s", uuid.New().String()[:16])
 	instanceName = fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID)
@@ -586,12 +716,14 @@ func createTestInstance(t *testing.T, projectID string) (instanceName string, cl
 		}
 	}
 
+	instanceConfigName = fmt.Sprintf("projects/%s/instanceConfigs/%s", projectID, instanceConfigName)
+
 	testutil.Retry(t, 20, time.Minute, func(r *testutil.R) {
 		op, err := instanceAdmin.CreateInstance(ctx, &instancepb.CreateInstanceRequest{
 			Parent:     fmt.Sprintf("projects/%s", projectID),
 			InstanceId: instanceID,
 			Instance: &instancepb.Instance{
-				Config:      fmt.Sprintf("projects/%s/instanceConfigs/%s", projectID, "regional-us-central1"),
+				Config:      instanceConfigName,
 				DisplayName: instanceID,
 				NodeCount:   1,
 				Labels: map[string]string{
@@ -666,10 +798,24 @@ func getSampleProjectId(t *testing.T) string {
 	return projectId
 }
 
+// getSamplesInstanceConfig specifies the instance config used to create an instance for testing.
+// It can be changed by setting the environment variable
+// GOLANG_SAMPLES_SPANNER_INSTANCE_CONFIG.
+func getSamplesInstanceConfig() string {
+	return os.Getenv("GOLANG_SAMPLES_SPANNER_INSTANCE_CONFIG")
+}
+
 func assertContains(t *testing.T, out string, sub string) {
 	t.Helper()
 	if !strings.Contains(out, sub) {
 		t.Errorf("got output %q; want it to contain %q", out, sub)
+	}
+}
+
+func assertNotContains(t *testing.T, out string, sub string) {
+	t.Helper()
+	if strings.Contains(out, sub) {
+		t.Errorf("got output %q; want it to not contain %q", out, sub)
 	}
 }
 
