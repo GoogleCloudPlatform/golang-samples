@@ -1,0 +1,195 @@
+// Copyright 2022 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package managedwriter
+
+import (
+	"context"
+	"fmt"
+	"io"
+	"math/rand"
+	"time"
+
+	"cloud.google.com/go/bigquery/storage/managedwriter"
+	"cloud.google.com/go/bigquery/storage/managedwriter/adapt"
+	"github.com/GoogleCloudPlatform/golang-samples/bigquery/snippets/managedwriter/exampleproto"
+	storagepb "google.golang.org/genproto/googleapis/cloud/bigquery/storage/v1"
+	"google.golang.org/protobuf/proto"
+)
+
+// generateExampleMessage generates an example protobuf message using a statically defined and
+// compiled protocol buffer file, and returns the binary serialized representation.
+func generateExampleMessage() ([]byte, error) {
+
+	random := rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	// Our example data embeds an array of structs, so generate that first.
+	sList := make([]*exampleproto.SampleData_SampleStruct, 5)
+	for i := 0; i < 5; i++ {
+		sList[i] = &exampleproto.SampleData_SampleStruct{
+			SubIntCol: proto.Int64(random.Int63()),
+		}
+	}
+
+	m := &exampleproto.SampleData{
+		BoolCol:    proto.Bool(true),
+		BytesCol:   []byte("some bytes"),
+		Float64Col: proto.Float64(3.14),
+		Int64Col:   proto.Int64(123),
+		StringCol:  proto.String("example string value"),
+
+		// These types require special encoding/formatting to transmit.
+
+		// DATE values are number of days since the Unix epoch.
+		DateCol: proto.Int32(int32(time.Now().UnixMilli() / 86400000)),
+
+		// DATETIME uses the literal format.
+		DatetimeCol: proto.String("2022-01-01 12:13:14.000000"),
+
+		// GEOGRAPHY uses Well-Known-Text (WKT) format.
+		GeographyCol: proto.String("POINT(-122.350220 47.649154)"),
+
+		// TIME also uses literal format.
+		TimeCol: proto.String("12:13:14.000000"),
+
+		// TIMESTAMP uses microseconds since Unix epoch.
+		TimestampCol: proto.Int64(time.Now().UnixMicro()),
+
+		// Int64List is an array of INT64 types.
+		Int64List: []int64{2, 4, 6, 8},
+
+		// This is a required field, and thus must be present.
+		RowNum: proto.Int64(23),
+
+		// StructCol is a single nested message.
+		StructCol: &exampleproto.SampleData_SampleStruct{
+			SubIntCol: proto.Int64(random.Int63()),
+		},
+
+		// StructList is a repeated array of a nested message.
+		StructList: sList,
+	}
+
+	// Now that the protocol message has been populated, serialize it to binary form and return.
+	return proto.Marshal(m)
+}
+
+// appendToPendingStream demonstrates using the managedwriter package to write some example data
+// to a pending stream, and then committing it to a table.
+func appendToPendingStream(w io.Writer, projectID, datasetID, tableID string) error {
+	// projectID := "myproject"
+	// datasetID := "mydataset"
+	// tableID := "mytable"
+
+	ctx := context.Background()
+	client, err := managedwriter.NewClient(ctx, projectID)
+	if err != nil {
+		return fmt.Errorf("managedwriter.NewClient: %v", err)
+	}
+
+	// Create a new pending stream.  We'll use the stream name to construct a writer.
+	pendingStream, err := client.CreateWriteStream(ctx, &storagepb.CreateWriteStreamRequest{
+		Parent: fmt.Sprintf("projects/%s/datasets/%s/tables/%s", projectID, datasetID, tableID),
+		WriteStream: &storagepb.WriteStream{
+			Type: storagepb.WriteStream_PENDING,
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("CreateWriteStream: %v", err)
+	}
+
+	// We need to communicate the descriptor of the protocol buffer message we're using, which
+	// is analagous to the "schema" for the message.  This example uses a self-contained message, but
+	// we'll call adapt.NormalizeDescriptor which will correct any descriptors that aren't
+	// self-contained.
+	m := &exampleproto.SampleData{}
+	descriptorProto, err := adapt.NormalizeDescriptor(m.ProtoReflect().Descriptor())
+	if err != nil {
+		return fmt.Errorf("NormalizeDescriptor: %v", err)
+	}
+
+	// Instantiate a ManagedStream, which manages low level details like connection state and provides
+	// additional features like a future-like callback for appends, etc.
+	managedStream, err := client.NewManagedStream(ctx, managedwriter.WithStreamName(pendingStream.GetName()),
+		managedwriter.WithSchemaDescriptor(descriptorProto))
+	if err != nil {
+		return fmt.Errorf("NewManagedStream: %v", err)
+	}
+
+	// First, we'll append a single row.
+	rowBytes, err := generateExampleMessage()
+	if err != nil {
+		return fmt.Errorf("generateExampleMessage: %v", err)
+	}
+
+	// we'll keep track of the current offset in the stream with curOffset.
+	var curOffset int64
+
+	result, err := managedStream.AppendRows(ctx, [][]byte{rowBytes}, managedwriter.WithOffset(0))
+	if err != nil {
+		return fmt.Errorf("AppendRows first call error: %v", err)
+	}
+
+	// GetResult blocks until we receive a response from the API.
+	recvOffset, err := result.GetResult(ctx)
+	if err != nil {
+		return fmt.Errorf("AppendRows error appending at offset %d: %v", curOffset, err)
+	}
+	fmt.Fprintf(w, "Successfully appended data at offset %d.\n", recvOffset)
+
+	// Advance our current offset.
+	curOffset = curOffset + 1
+
+	// This time, we'll append three more rows in a single request.
+	result, err = managedStream.AppendRows(ctx, [][]byte{rowBytes, rowBytes, rowBytes}, managedwriter.WithOffset(curOffset))
+	if err != nil {
+		return fmt.Errorf("AppendRows second call error: %v", err)
+	}
+
+	// Block and wait for the result from the backend.
+	recvOffset, err = result.GetResult(ctx)
+	if err != nil {
+		return fmt.Errorf("AppendRows error appending at offset %d: %v", curOffset, err)
+	}
+	fmt.Fprintf(w, "Successfully appended data at offset %d.\n", recvOffset)
+
+	// We're now "done" with this streeam.  Let's mark the pending stream finalized, which blocks
+	// further appends.
+
+	rowCount, err := managedStream.Finalize(ctx)
+	if err != nil {
+		return fmt.Errorf("error during Finalize: %v", err)
+	}
+
+	fmt.Fprintf(w, "Stream %s finalized with %d rows.\n", managedStream.StreamName(), rowCount)
+
+	// To commit the data to the table, we need to run a batch commit.  You can commit several streams
+	// atomically as a group, but in this instance we'll only commit the single stream.
+	req := &storagepb.BatchCommitWriteStreamsRequest{
+		Parent:       managedwriter.TableParentFromStreamName(managedStream.StreamName()),
+		WriteStreams: []string{managedStream.StreamName()},
+	}
+
+	resp, err := client.BatchCommitWriteStreams(ctx, req)
+	if err != nil {
+		return fmt.Errorf("client.BatchCommit: %v", err)
+	}
+	if len(resp.StreamErrors) > 0 {
+		return fmt.Errorf("stream errors present: %v", resp.StreamErrors)
+	}
+
+	fmt.Fprintf(w, "Table data committed at %s\n", resp.GetCommitTime().AsTime().Format(time.RFC3339Nano))
+
+	return nil
+}
