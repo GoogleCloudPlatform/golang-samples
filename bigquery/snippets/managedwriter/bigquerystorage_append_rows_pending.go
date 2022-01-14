@@ -192,8 +192,8 @@ func appendToPendingStream(w io.Writer, projectID, datasetID, tableID string) er
 	if err != nil {
 		return fmt.Errorf("client.BatchCommit: %v", err)
 	}
-	if len(resp.StreamErrors) > 0 {
-		return fmt.Errorf("stream errors present: %v", resp.StreamErrors)
+	if len(resp.GetStreamErrors()) > 0 {
+		return fmt.Errorf("stream errors present: %v", resp.GetStreamErrors())
 	}
 
 	fmt.Fprintf(w, "Table data committed at %s\n", resp.GetCommitTime().AsTime().Format(time.RFC3339Nano))
