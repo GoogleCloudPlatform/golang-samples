@@ -22,8 +22,13 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 	"github.com/cloudevents/sdk-go/v2/event"
 )
+
+func init() {
+	functions.CloudEvent("HelloAuditLog", helloAuditLog)
+}
 
 // AuditLogEntry represents a LogEntry as described at
 // https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry
@@ -39,8 +44,8 @@ type AuditLogProtoPayload struct {
 	AuthenticationInfo map[string]interface{} `json:"authenticationInfo"`
 }
 
-// HelloAuditLog receives a CloudEvent containing an AuditLogEntry, and logs a few fields.
-func HelloAuditLog(ctx context.Context, e event.Event) error {
+// helloAuditLog receives a CloudEvent containing an AuditLogEntry, and logs a few fields.
+func helloAuditLog(ctx context.Context, e event.Event) error {
 	// Print out details from the CloudEvent itself
 	// See https://github.com/cloudevents/spec/blob/v1.0.1/spec.md#subject
 	// for details on the Subject field
