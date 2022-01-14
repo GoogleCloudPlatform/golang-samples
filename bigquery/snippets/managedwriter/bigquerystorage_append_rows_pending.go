@@ -127,7 +127,8 @@ func appendToPendingStream(w io.Writer, projectID, datasetID, tableID string) er
 	}
 
 	// Instantiate a ManagedStream, which manages low level details like connection state and provides
-	// additional features like a future-like callback for appends, etc.
+	// additional features like a future-like callback for appends, etc.  NewManagedStream can also create
+	// the stream on your behalf, but in this example we're being explicit about stream creation.
 	managedStream, err := client.NewManagedStream(ctx, managedwriter.WithStreamName(pendingStream.GetName()),
 		managedwriter.WithSchemaDescriptor(descriptorProto))
 	if err != nil {
