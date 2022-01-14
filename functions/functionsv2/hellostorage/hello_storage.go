@@ -23,8 +23,13 @@ import (
 	"log"
 	"time"
 
+	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 	"github.com/cloudevents/sdk-go/v2/event"
 )
+
+func init() {
+	functions.CloudEvent("HelloStorage", helloStorage)
+}
 
 // StorageObjectData contains metadata of the Cloud Storage object.
 type StorageObjectData struct {
@@ -35,8 +40,8 @@ type StorageObjectData struct {
 	Updated        time.Time `json:"updated,omitempty"`
 }
 
-// HelloStorage consumes a CloudEvent message and logs details about the changed object.
-func HelloStorage(ctx context.Context, e event.Event) error {
+// helloStorage consumes a CloudEvent message and logs details about the changed object.
+func helloStorage(ctx context.Context, e event.Event) error {
 	log.Printf("Event ID: %s", e.ID())
 	log.Printf("Event Type: %s", e.Type())
 
