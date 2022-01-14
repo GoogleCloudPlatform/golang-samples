@@ -14,6 +14,8 @@
 
 package managedwriter
 
+// [START bigquerystorage_append_rows_pending]
+
 import (
 	"context"
 	"fmt"
@@ -59,6 +61,11 @@ func generateExampleMessage() ([]byte, error) {
 
 		// GEOGRAPHY uses Well-Known-Text (WKT) format.
 		GeographyCol: proto.String("POINT(-122.350220 47.649154)"),
+
+		// NUMERIC and BIGNUMERIC can be passed as string, or more efficiently
+		// using a packed byte representation.
+		NumericCol:    proto.String("99999999999999999999999999999.999999999"),
+		BignumericCol: proto.String("578960446186580977117854925043439539266.34992332820282019728792003956564819967"),
 
 		// TIME also uses literal format.
 		TimeCol: proto.String("12:13:14.000000"),
@@ -193,3 +200,5 @@ func appendToPendingStream(w io.Writer, projectID, datasetID, tableID string) er
 
 	return nil
 }
+
+// [END bigquerystorage_append_rows_pending]
