@@ -20,15 +20,15 @@ package exampleproto;
 option go_package = "github.com/GoogleCloudPlatform/golang-samples/bigquery/managedwriter/exampleproto";
 
 
-
-
-// Define a message type representing the rows in your table.
-message SampleData {
-
-  // Define a nested message to encode STRUCT column values.
+  // The SampleStruct demonstrates nesting of one proto message inside another.
+  // This also necessitates the use of proto normalization when communicating the
+  // descriptor to the BigQuery storage write API.
   message SampleStruct {
     optional int64 sub_int_col = 1;
   }
+
+// Define a message type representing the rows in your table.
+message SampleData {
 
   // The following types map directly between protocol buffers and their
   // corresponding BigQuery data types.

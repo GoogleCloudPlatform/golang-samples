@@ -16,7 +16,7 @@ package managedwriter
 
 import (
 	"context"
-	"log"
+	"io/ioutil"
 	"testing"
 
 	"cloud.google.com/go/bigquery"
@@ -84,7 +84,7 @@ func TestPendingStream(t *testing.T) {
 		t.Fatalf("failed to create destination table(%q %q): %v", testDatasetID, testTableID, err)
 	}
 
-	if err := appendToPendingStream(log.Writer(), tc.ProjectID, testDatasetID, testTableID); err != nil {
+	if err := appendToPendingStream(ioutil.Discard, tc.ProjectID, testDatasetID, testTableID); err != nil {
 		t.Errorf("appendToPendingStream(%q %q): %v", testDatasetID, testTableID, err)
 	}
 

@@ -14,7 +14,7 @@
 
 package managedwriter
 
-// [START bigquerystorage_append_rows_pending]
+// [START bigquerystorage_write_pending_complexschema]
 
 import (
 	"context"
@@ -36,10 +36,10 @@ func generateExampleMessage() ([]byte, error) {
 
 	random := rand.New(rand.NewSource(time.Now().UnixNano()))
 
-	// Our example data embeds an array of structs, so generate that first.
-	sList := make([]*exampleproto.SampleData_SampleStruct, 5)
-	for i := 0; i < 5; i++ {
-		sList[i] = &exampleproto.SampleData_SampleStruct{
+	// Our example data embeds an array of structs, so we'll construct that first.
+	sList := make([]*exampleproto.SampleStruct, 5)
+	for i := 0; i < int(random.Int63n(5)+1); i++ {
+		sList[i] = &exampleproto.SampleStruct{
 			SubIntCol: proto.Int64(random.Int63()),
 		}
 	}
@@ -80,7 +80,7 @@ func generateExampleMessage() ([]byte, error) {
 		RowNum: proto.Int64(23),
 
 		// StructCol is a single nested message.
-		StructCol: &exampleproto.SampleData_SampleStruct{
+		StructCol: &exampleproto.SampleStruct{
 			SubIntCol: proto.Int64(random.Int63()),
 		},
 
@@ -117,9 +117,9 @@ func appendToPendingStream(w io.Writer, projectID, datasetID, tableID string) er
 	}
 
 	// We need to communicate the descriptor of the protocol buffer message we're using, which
-	// is analagous to the "schema" for the message.  This example uses a self-contained message, but
-	// we'll call adapt.NormalizeDescriptor which will correct any descriptors that aren't
-	// self-contained.
+	// is analagous to the "schema" for the message.  Both SampleData and SampleStruct are
+	// two distinct messages in the compiled proto file, so we'll use adapt.NormalizeDescriptor
+	// to unify them into a single self-contained descriptor representation.
 	m := &exampleproto.SampleData{}
 	descriptorProto, err := adapt.NormalizeDescriptor(m.ProtoReflect().Descriptor())
 	if err != nil {
@@ -141,20 +141,16 @@ func appendToPendingStream(w io.Writer, projectID, datasetID, tableID string) er
 		return fmt.Errorf("generateExampleMessage: %v", err)
 	}
 
-	// we'll keep track of the current offset in the stream with curOffset.
+	// We'll keep track of the current offset in the stream with curOffset.
 	var curOffset int64
+	// We can append data asyncronously, so we'll check our appends at the end.
+	var results []*managedwriter.AppendResult
 
 	result, err := managedStream.AppendRows(ctx, [][]byte{rowBytes}, managedwriter.WithOffset(0))
 	if err != nil {
 		return fmt.Errorf("AppendRows first call error: %v", err)
 	}
-
-	// GetResult blocks until we receive a response from the API.
-	recvOffset, err := result.GetResult(ctx)
-	if err != nil {
-		return fmt.Errorf("AppendRows error appending at offset %d: %v", curOffset, err)
-	}
-	fmt.Fprintf(w, "Successfully appended data at offset %d.\n", recvOffset)
+	results = append(results, result)
 
 	// Advance our current offset.
 	curOffset = curOffset + 1
@@ -164,17 +160,31 @@ func appendToPendingStream(w io.Writer, projectID, datasetID, tableID string) er
 	if err != nil {
 		return fmt.Errorf("AppendRows second call error: %v", err)
 	}
+	results = append(results, result)
 
-	// Block and wait for the result from the backend.
-	recvOffset, err = result.GetResult(ctx)
+	// Advance our offset again.
+	curOffset = curOffset + 3
+
+	// Finally, we'll append two more rows.
+	result, err = managedStream.AppendRows(ctx, [][]byte{rowBytes, rowBytes, rowBytes}, managedwriter.WithOffset(curOffset))
 	if err != nil {
-		return fmt.Errorf("AppendRows error appending at offset %d: %v", curOffset, err)
+		return fmt.Errorf("AppendRows third call error: %v", err)
 	}
-	fmt.Fprintf(w, "Successfully appended data at offset %d.\n", recvOffset)
+	results = append(results, result)
 
-	// We're now "done" with this streeam.  Let's mark the pending stream finalized, which blocks
+	// Now, we'll check that our batch of three appends all completed successfully.
+	// Monitoring the results could also be done out of band via a goroutine.
+	for k, v := range results {
+		// GetResult blocks until we receive a response from the API.
+		recvOffset, err := v.GetResult(ctx)
+		if err != nil {
+			return fmt.Errorf("append %d returned error: %v", k, err)
+		}
+		fmt.Fprintf(w, "Successfully appended data at offset %d.\n", recvOffset)
+	}
+
+	// We're now done appending to this stream.  We now mark pending stream finalized, which blocks
 	// further appends.
-
 	rowCount, err := managedStream.Finalize(ctx)
 	if err != nil {
 		return fmt.Errorf("error during Finalize: %v", err)
@@ -202,4 +212,4 @@ func appendToPendingStream(w io.Writer, projectID, datasetID, tableID string) er
 	return nil
 }
 
-// [END bigquerystorage_append_rows_pending]
+// [END bigquerystorage_write_pending_complexschema]
