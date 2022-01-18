@@ -37,8 +37,7 @@ const (
 	testBucketName           = "cloud-samples-data"
 	testBucketDirName        = "media/"
 	testVideoFileName        = "ChromeCast.mp4"
-	testConcatFileName1      = "ForBiggerEscapes.mp4"
-	testConcatFileName2      = "ForBiggerJoyrides.mp4"
+	testConcatFileName       = "ForBiggerEscapes.mp4"
 	testOverlayImageFileName = "overlay.jpg"
 	preset                   = "preset/web-hd"
 	smallSpriteSheetFileName = "small-sprite-sheet0000000000.jpeg"
@@ -61,8 +60,7 @@ func TestJobTemplatesAndJobs(t *testing.T) {
 
 	bucketName := tc.ProjectID + "-golang-samples-transcoder-test"
 	inputURI := "gs://" + bucketName + "/" + testBucketDirName + testVideoFileName
-	inputConcat1URI := "gs://" + bucketName + "/" + testBucketDirName + testConcatFileName1
-	inputConcat2URI := "gs://" + bucketName + "/" + testBucketDirName + testConcatFileName2
+	inputConcatURI := "gs://" + bucketName + "/" + testBucketDirName + testConcatFileName
 	inputOverlayImageURI := "gs://" + bucketName + "/" + testBucketDirName + testOverlayImageFileName
 	outputURIForPreset := "gs://" + bucketName + "/test-output-preset/"
 	outputURIForTemplate := "gs://" + bucketName + "/test-output-template/"
@@ -113,7 +111,7 @@ func TestJobTemplatesAndJobs(t *testing.T) {
 	checkGCSFileExists(t, bucketName, outputDirForPeriodicSpritesheet+smallSpriteSheetFileName)
 	checkGCSFileExists(t, bucketName, outputDirForPeriodicSpritesheet+largeSpriteSheetFileName)
 
-	testJobWithConcatenatedInputs(t, projectNumber, inputConcat1URI, 0*time.Second, 8*time.Second+100*time.Millisecond, inputConcat2URI, 3*time.Second+500*time.Millisecond, 15*time.Second, outputURIForConcat)
+	testJobWithConcatenatedInputs(t, projectNumber, inputURI, 0*time.Second, 8*time.Second+100*time.Millisecond, inputConcatURI, 3*time.Second+500*time.Millisecond, 15*time.Second, outputURIForConcat)
 	t.Logf("\ntestJobWithConcatenatedInputs() completed\n")
 }
 
@@ -183,8 +181,7 @@ func writeTestGCSFiles(t *testing.T, projectID string, bucketName string) {
 	testutil.CleanBucket(ctx, t, projectID, bucketName)
 	writeTestGCSFile(t, bucketName, testBucketName, testBucketDirName+testVideoFileName)
 	writeTestGCSFile(t, bucketName, testBucketName, testBucketDirName+testOverlayImageFileName)
-	writeTestGCSFile(t, bucketName, testBucketName, testBucketDirName+testConcatFileName1)
-	writeTestGCSFile(t, bucketName, testBucketName, testBucketDirName+testConcatFileName2)
+	writeTestGCSFile(t, bucketName, testBucketName, testBucketDirName+testConcatFileName)
 }
 
 // writeTestGCSFile deletes the GCS test bucket and uploads a test video file to it.
