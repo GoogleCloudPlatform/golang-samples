@@ -41,7 +41,7 @@ func listBackupOperations(ctx context.Context, w io.Writer, db string) error {
 	}
 	instanceName := matches[1]
 	// List the CreateBackup operations.
-	filter := fmt.Sprintf("(metadata.database:%s) AND (metadata.@type:type.googleapis.com/google.spanner.admin.database.v1.CreateBackupMetadata)", db)
+	filter := fmt.Sprintf("(metadata.@type:type.googleapis.com/google.spanner.admin.database.v1.CreateBackupMetadata) AND (metadata.database:%s)", db)
 	iter := adminClient.ListBackupOperations(ctx, &adminpb.ListBackupOperationsRequest{
 		Parent: instanceName,
 		Filter: filter,

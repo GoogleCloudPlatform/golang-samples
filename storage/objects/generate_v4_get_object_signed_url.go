@@ -16,38 +16,44 @@ package objects
 
 // [START storage_generate_signed_url_v4]
 import (
+	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"time"
 
 	"cloud.google.com/go/storage"
-	"golang.org/x/oauth2/google"
 )
 
 // generateV4GetObjectSignedURL generates object signed URL with GET method.
-func generateV4GetObjectSignedURL(w io.Writer, bucket, object, serviceAccount string) (string, error) {
+func generateV4GetObjectSignedURL(w io.Writer, bucket, object string) (string, error) {
 	// bucket := "bucket-name"
 	// object := "object-name"
-	// serviceAccount := "service_account.json"
-	jsonKey, err := ioutil.ReadFile(serviceAccount)
+
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return "", fmt.Errorf("ioutil.ReadFile: %v", err)
+		return "", fmt.Errorf("storage.NewClient: %v", err)
 	}
-	conf, err := google.JWTConfigFromJSON(jsonKey)
-	if err != nil {
-		return "", fmt.Errorf("google.JWTConfigFromJSON: %v", err)
-	}
+	defer client.Close()
+
+	// Signing a URL requires credentials authorized to sign a URL. You can pass
+	// these in through SignedURLOptions with one of the following options:
+	//    a. a Google service account private key, obtainable from the Google Developers Console
+	//    b. a Google Access ID with iam.serviceAccounts.signBlob permissions
+	//    c. a SignBytes function implementing custom signing.
+	// In this example, none of these options are used, which means the SignedURL
+	// function attempts to use the same authentication that was used to instantiate
+	// the Storage client. This authentication must include a private key or have
+	// iam.serviceAccounts.signBlob permissions.
 	opts := &storage.SignedURLOptions{
-		Scheme:         storage.SigningSchemeV4,
-		Method:         "GET",
-		GoogleAccessID: conf.Email,
-		PrivateKey:     conf.PrivateKey,
-		Expires:        time.Now().Add(15 * time.Minute),
+		Scheme:  storage.SigningSchemeV4,
+		Method:  "GET",
+		Expires: time.Now().Add(15 * time.Minute),
 	}
-	u, err := storage.SignedURL(bucket, object, opts)
+
+	u, err := client.Bucket(bucket).SignedURL(object, opts)
 	if err != nil {
-		return "", fmt.Errorf("storage.SignedURL: %v", err)
+		return "", fmt.Errorf("Bucket(%q).SignedURL: %v", bucket, err)
 	}
 
 	fmt.Fprintln(w, "Generated GET signed URL:")

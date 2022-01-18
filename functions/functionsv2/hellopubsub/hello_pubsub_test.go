@@ -50,7 +50,7 @@ func TestHelloPubSub(t *testing.T) {
 		e.SetDataContentType("application/json")
 		e.SetData(e.DataContentType(), msg)
 
-		HelloPubSub(context.Background(), e)
+		helloPubSub(context.Background(), e)
 
 		w.Close()
 		log.SetOutput(os.Stderr)

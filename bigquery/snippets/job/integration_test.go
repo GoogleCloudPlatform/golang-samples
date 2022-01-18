@@ -92,6 +92,10 @@ func TestCopiesAndExtracts(t *testing.T) {
 		t.Fatalf("failed to generate example table2: %v", err)
 	}
 
+	if err := createJob(tc.ProjectID, "SELECT 17 as foo"); err != nil {
+		t.Errorf("createJob: %v", err)
+	}
+
 	// Run copy job tests in parallel.
 	t.Run("copy", func(t *testing.T) {
 		t.Run("copyTable", func(t *testing.T) {

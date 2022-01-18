@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/golang-samples/spanner
 go 1.17
 
 require (
-	cloud.google.com/go v0.98.0
+	cloud.google.com/go v0.99.0
 	cloud.google.com/go/kms v1.0.0
 	cloud.google.com/go/spanner v1.25.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.5
@@ -12,9 +12,9 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/googleapis/gax-go/v2 v2.1.1
 	go.opencensus.io v0.23.0
-	google.golang.org/api v0.61.0
-	google.golang.org/genproto v0.0.0-20211203200212-54befc351ae9
-	google.golang.org/grpc v1.40.0
+	google.golang.org/api v0.63.0
+	google.golang.org/genproto v0.0.0-20211221195035-429b39de9b1c
+	google.golang.org/grpc v1.40.1
 )
 
 require (
@@ -35,7 +35,7 @@ require (
 	golang.org/x/net v0.0.0-20210614182718-04defd469f4e // indirect
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
-	golang.org/x/sys v0.0.0-20211124211545-fe61309f8881 // indirect
+	golang.org/x/sys v0.0.0-20211210111614-af8b64212486 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
