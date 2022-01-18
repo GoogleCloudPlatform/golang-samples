@@ -21,9 +21,9 @@ import (
 	"io"
 	"time"
 
-	"google.golang.org/protobuf/types/known/durationpb"
 	transcoder "cloud.google.com/go/video/transcoder/apiv1"
 	transcoderpb "google.golang.org/genproto/googleapis/cloud/video/transcoder/v1"
+	"google.golang.org/protobuf/types/known/durationpb"
 )
 
 // createJobWithConcatenatedInputs creates a job that concatenates two input
@@ -32,7 +32,7 @@ import (
 func createJobWithConcatenatedInputs(w io.Writer, projectID string, location string, input1URI string, startTimeInput1 time.Duration, endTimeInput1 time.Duration, input2URI string, startTimeInput2 time.Duration, endTimeInput2 time.Duration, outputURI string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
-	// 
+	//
 	// input1URI := "gs://my-bucket/my-video-file1"
 	// startTimeInput1 := 0*time.Second
 	// endTimeInput1 := 8*time.Second + 100*time.Millisecond
