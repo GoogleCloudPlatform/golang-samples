@@ -249,7 +249,11 @@ func initTCPConnectionPool() (*sql.DB, error) {
 	if dbRootCert != "" {
 		// Get connection host name to be matched with host name in SSL certificate.
 		var instanceConnectionName = mustGetenv("INSTANCE_CONNECTION_NAME")
+		// Expected format of INSTANCE_CONNECTION_NAME is project_id:region:instance_name
 		hostNameParts := strings.Split(instanceConnectionName, ":")
+		if len(hostNameParts) != 3 {
+			log.Fatalf("Invalid format for INSTANCE_CONNECTION_NAME environment variable.")
+		}
 		// Specify encrypted connection, host name and certificate.
 		dbURI += fmt.Sprintf("encrypt=true;hostnameincertificate=%s:%s;certificate=%s;",
 			hostNameParts[0], hostNameParts[2], dbRootCert)
