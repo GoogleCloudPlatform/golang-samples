@@ -22,7 +22,6 @@ import (
 	"time"
 
 	"google.golang.org/protobuf/types/known/durationpb"
-
 	transcoder "cloud.google.com/go/video/transcoder/apiv1"
 	transcoderpb "google.golang.org/genproto/googleapis/cloud/video/transcoder/v1"
 )
@@ -33,12 +32,15 @@ import (
 func createJobWithConcatenatedInputs(w io.Writer, projectID string, location string, input1URI string, startTimeInput1 time.Duration, endTimeInput1 time.Duration, input2URI string, startTimeInput2 time.Duration, endTimeInput2 time.Duration, outputURI string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
+	// 
 	// input1URI := "gs://my-bucket/my-video-file1"
 	// startTimeInput1 := 0*time.Second
 	// endTimeInput1 := 8*time.Second + 100*time.Millisecond
+	//
 	// input2URI := "gs://my-bucket/my-video-file2"
 	// startTimeInput2 := 3*time.Second + 500*time.Millisecond
 	// endTimeInput2 := 15*time.Second
+	//
 	// outputURI := "gs://my-bucket/my-output-folder/"
 
 	ctx := context.Background()
@@ -119,7 +121,7 @@ func createJobWithConcatenatedInputs(w io.Writer, projectID string, location str
 	// You can query for the job state; see getJob() in get_job.go.
 	response, err := client.CreateJob(ctx, req)
 	if err != nil {
-		return fmt.Errorf("createJobWithConcatenatedInputs: %v", err)
+		return fmt.Errorf("CreateJob: %v", err)
 	}
 
 	fmt.Fprintf(w, "Job: %v", response.GetName())
