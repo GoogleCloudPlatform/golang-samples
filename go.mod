@@ -3,10 +3,10 @@ module github.com/GoogleCloudPlatform/golang-samples
 go 1.11
 
 require (
-	cloud.google.com/go v0.98.0
+	cloud.google.com/go v0.99.0
 	cloud.google.com/go/asset v1.0.1
 	cloud.google.com/go/automl v1.0.0
-	cloud.google.com/go/bigquery v1.25.0
+	cloud.google.com/go/bigquery v1.26.0
 	cloud.google.com/go/bigtable v1.4.0
 	cloud.google.com/go/cloudtasks v1.0.0
 	cloud.google.com/go/containeranalysis v0.1.0
@@ -65,10 +65,10 @@ require (
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/text v0.3.7
-	google.golang.org/api v0.61.0
+	google.golang.org/api v0.63.0
 	google.golang.org/appengine v1.6.7
-	google.golang.org/genproto v0.0.0-20211203200212-54befc351ae9
-	google.golang.org/grpc v1.40.0
+	google.golang.org/genproto v0.0.0-20211221195035-429b39de9b1c
+	google.golang.org/grpc v1.40.1
 	google.golang.org/grpc/examples v0.0.0-20200707005602-4258d12073b4
 	google.golang.org/protobuf v1.27.1
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
