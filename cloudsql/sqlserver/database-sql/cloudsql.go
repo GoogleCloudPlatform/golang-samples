@@ -252,7 +252,7 @@ func initTCPConnectionPool() (*sql.DB, error) {
 		// Expected format of INSTANCE_CONNECTION_NAME is project_id:region:instance_name
 		hostNameParts := strings.Split(instanceConnectionName, ":")
 		if len(hostNameParts) != 3 {
-			log.Fatalf("Invalid format for INSTANCE_CONNECTION_NAME environment variable.")
+			log.Fatalf("Invalid format for INSTANCE_CONNECTION_NAME environment variable, got = %q", instanceConnectionName)
 		}
 		// Specify encrypted connection, host name and certificate.
 		dbURI += fmt.Sprintf("encrypt=true;hostnameincertificate=%s:%s;certificate=%s;",
