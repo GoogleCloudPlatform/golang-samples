@@ -39,11 +39,11 @@ func connectTCPSocket() (*sql.DB, error) {
 		return v
 	}
 	var (
-		dbUser    = mustGetenv("DB_USER") // e.g. 'my-db-user'
-		dbPwd     = mustGetenv("DB_PASS") // e.g. 'my-db-password'
-		dbTCPHost = mustGetenv("DB_HOST") // e.g. '127.0.0.1' ('172.17.0.1' if deployed to GAE Flex)
-		dbPort    = mustGetenv("DB_PORT") // e.g. '3306'
-		dbName    = mustGetenv("DB_NAME") // e.g. 'my-database'
+		dbUser    = mustGetenv("DB_USER")       // e.g. 'my-db-user'
+		dbPwd     = mustGetenv("DB_PASS")       // e.g. 'my-db-password'
+		dbName    = mustGetenv("DB_NAME")       // e.g. 'my-database'
+		dbPort    = mustGetenv("DB_PORT")       // e.g. '3306'
+		dbTCPHost = mustGetenv("INSTANCE_HOST") // e.g. '127.0.0.1' ('172.17.0.1' if deployed to GAE Flex)
 	)
 
 	dbURI := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true",

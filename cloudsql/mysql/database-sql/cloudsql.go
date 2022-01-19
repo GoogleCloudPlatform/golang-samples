@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2019 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,13 +26,25 @@ import (
 	"math"
 	"net/http"
 	"os"
+	"sync"
 	"time"
 )
 
 var (
 	indexTmpl = template.Must(template.New("index").Parse(indexHTML))
-	db        = mustConnect()
+	db        *sql.DB
+	once      sync.Once
 )
+
+// getDB lazily instantiates a database connection pool. Users of Cloud Run or
+// Cloud Functions may wish to skip this lazy instantiation and connect as soon
+// as the function is loaded. This is primarily to help testing.
+func getDB() *sql.DB {
+	once.Do(func() {
+		db = mustConnect()
+	})
+	return db
+}
 
 // migrateDB creates the votes table if it does not already exist.
 func migrateDB(db *sql.DB) error {
@@ -128,14 +140,14 @@ func mustConnect() *sql.DB {
 	)
 
 	// Use a TCP socket when DB_HOST (e.g., 127.0.0.1) is defined
-	if os.Getenv("DB_HOST") != "" {
+	if os.Getenv("INSTANCE_HOST") != "" {
 		db, err = connectTCPSocket()
 		if err != nil {
 			log.Fatalf("connectTCPSocket: unable to connect: %s", err)
 		}
 	}
 	// Use a Unix socket when UNIX_SOCKET_PATH (e.g., /cloudsql/proj:region:instance) is defined.
-	if os.Getenv("UNIX_SOCKET_PATH") != "" {
+	if os.Getenv("INSTANCE_UNIX_SOCKET") != "" {
 		db, err = connectUnixSocket()
 		if err != nil {
 			log.Fatalf("connectUnixSocket: unable to connect: %s", err)
@@ -151,7 +163,7 @@ func mustConnect() *sql.DB {
 	}
 
 	if db == nil {
-		log.Fatal("Missing database connection type. Please define one of DB_HOST, UNIX_SOCKET_PATH, or INSTANCE_CONNECTION_NAME")
+		log.Fatal("Missing database connection type. Please define one of INSTANCE_HOST, INSTANCE_UNIX_SOCKET, or INSTANCE_CONNECTION_NAME")
 	}
 
 	if err := migrateDB(db); err != nil {
@@ -183,9 +195,9 @@ func configureConnectionPool(db *sql.DB) {
 func Votes(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		renderIndex(w, r, db)
+		renderIndex(w, r, getDB())
 	case http.MethodPost:
-		saveVote(w, r, db)
+		saveVote(w, r, getDB())
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}

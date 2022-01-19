@@ -35,10 +35,10 @@ func connectUnixSocket() (*sql.DB, error) {
 		return v
 	}
 	var (
-		dbUser         = mustGetenv("DB_USER")          // e.g. 'my-db-user'
-		dbPwd          = mustGetenv("DB_PASS")          // e.g. 'my-db-password'
-		unixSocketPath = mustGetenv("UNIX_SOCKET_PATH") // e.g. 'project:region:instance'
-		dbName         = mustGetenv("DB_NAME")          // e.g. 'my-database'
+		dbUser         = mustGetenv("DB_USER")              // e.g. 'my-db-user'
+		dbPwd          = mustGetenv("DB_PASS")              // e.g. 'my-db-password'
+		dbName         = mustGetenv("DB_NAME")              // e.g. 'my-database'
+		unixSocketPath = mustGetenv("INSTANCE_UNIX_SOCKET") // e.g. '/cloudsql/project:region:instance'
 	)
 
 	dbURI := fmt.Sprintf("%s:%s@unix(/%s)/%s?parseTime=true",
