@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cloudsql
+package main
 
 import (
 	"bytes"
@@ -20,8 +20,6 @@ import (
 	"os"
 	"strings"
 	"testing"
-
-	cloudsql "github.com/GoogleCloudPlatform/golang-samples/cloudsql/postgres/database-sql"
 )
 
 type testInfo struct {
@@ -70,9 +68,10 @@ func TestIndex(t *testing.T) {
 		os.Setenv("DB_USER", info.dbUser)
 		os.Setenv("INSTANCE_CONNECTION_NAME", info.instanceConnectionName)
 
+		app := newApp()
 		rr := httptest.NewRecorder()
 		request := httptest.NewRequest("GET", "/", nil)
-		cloudsql.Votes(rr, request)
+		app.indexHandler(rr, request)
 		resp := rr.Result()
 		body := rr.Body.String()
 
@@ -133,10 +132,11 @@ func TestCastVote(t *testing.T) {
 		os.Setenv("DB_USER", info.dbUser)
 		os.Setenv("INSTANCE_CONNECTION_NAME", info.instanceConnectionName)
 
+		app := newApp()
 		rr := httptest.NewRecorder()
 		request := httptest.NewRequest("POST", "/", bytes.NewBuffer([]byte("team=SPACES")))
 		request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-		cloudsql.Votes(rr, request)
+		app.indexHandler(rr, request)
 		resp := rr.Result()
 		body := rr.Body.String()
 
