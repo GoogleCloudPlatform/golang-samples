@@ -320,35 +320,37 @@ func TestPullMsgsConcurrencyControl(t *testing.T) {
 	topicIDConc := topicID + "-conc"
 	subIDConc := subID + "-conc"
 
-	topic, err := getOrCreateTopic(ctx, client, topicIDConc)
-	if err != nil {
-		t.Fatalf("getOrCreateTopic: %v", err)
-	}
-	defer topic.Delete(ctx)
-	defer topic.Stop()
+	testutil.Retry(t, 3, time.Second, func(r *testutil.R) {
+		topic, err := getOrCreateTopic(ctx, client, topicIDConc)
+		if err != nil {
+			r.Errorf("getOrCreateTopic: %v", err)
+		}
+		defer topic.Delete(ctx)
+		defer topic.Stop()
 
-	cfg := &pubsub.SubscriptionConfig{
-		Topic: topic,
-	}
-	sub, err := getOrCreateSub(ctx, client, subIDConc, cfg)
-	if err != nil {
-		t.Fatalf("getOrCreateSub: %v", err)
-	}
-	defer sub.Delete(ctx)
+		cfg := &pubsub.SubscriptionConfig{
+			Topic: topic,
+		}
+		sub, err := getOrCreateSub(ctx, client, subIDConc, cfg)
+		if err != nil {
+			r.Errorf("getOrCreateSub: %v", err)
+		}
+		defer sub.Delete(ctx)
 
-	// Publish 5 message to test with.
-	const numMsgs = 5
-	publishMsgs(ctx, topic, numMsgs)
+		// Publish 5 message to test with.
+		const numMsgs = 5
+		publishMsgs(ctx, topic, numMsgs)
 
-	buf := new(bytes.Buffer)
-	if err := pullMsgsConcurrenyControl(buf, tc.ProjectID, subIDConc); err != nil {
-		t.Fatalf("failed to pull messages: %v", err)
-	}
-	got := buf.String()
-	want := fmt.Sprintf("Received %d messages\n", numMsgs)
-	if got != want {
-		t.Fatalf("pullMsgsConcurrencyControl got %s\nwant %s", got, want)
-	}
+		buf := new(bytes.Buffer)
+		if err := pullMsgsConcurrenyControl(buf, tc.ProjectID, subIDConc); err != nil {
+			r.Errorf("failed to pull messages: %v", err)
+		}
+		got := buf.String()
+		want := fmt.Sprintf("Received %d messages\n", numMsgs)
+		if got != want {
+			r.Errorf("pullMsgsConcurrencyControl got %s\nwant %s", got, want)
+		}
+	})
 }
 
 func TestPullMsgsCustomAttributes(t *testing.T) {

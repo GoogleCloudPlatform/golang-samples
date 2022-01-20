@@ -21,7 +21,7 @@ import (
 	"io/ioutil"
 	"time"
 
-	jwt "github.com/dgrijalva/jwt-go"
+	jwt "github.com/golang-jwt/jwt"
 )
 
 // createJWT creates a Cloud IoT Core JWT for the given project id.

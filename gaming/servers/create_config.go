@@ -105,7 +105,7 @@ func createGameServerConfig(w io.Writer, projectID, deploymentID, configID strin
 		ConfigId: configID,
 		GameServerConfig: &gamingpb.GameServerConfig{
 			FleetConfigs: []*gamingpb.FleetConfig{
-				&gamingpb.FleetConfig{
+				{
 					Name:      "fleet-spec-1",
 					FleetSpec: fleet,
 				},

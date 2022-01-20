@@ -19,16 +19,21 @@
 package main
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"database/sql"
+	"errors"
 	"fmt"
 	"html/template"
+	"io/ioutil"
 	"log"
 	"math"
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
-	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-sql-driver/mysql"
 )
 
 // vote struct contains a single row from the votes table in the database.
@@ -165,7 +170,7 @@ func currentTotals(app *app) (*templateData, error) {
 		return nil, fmt.Errorf("DB.QueryRow: %v", err)
 	}
 
-	var voteDiffStr string = voteDiff(int(math.Abs(float64(tabVotes) - float64(spaceVotes)))).String()
+	voteDiffStr := voteDiff(int(math.Abs(float64(tabVotes) - float64(spaceVotes)))).String()
 
 	latestVotesCast, err := recentVotes(app)
 	if err != nil {
@@ -245,8 +250,7 @@ func initSocketConnectionPool() (*sql.DB, error) {
 		socketDir = "/cloudsql"
 	}
 
-	var dbURI string
-	dbURI = fmt.Sprintf("%s:%s@unix(/%s/%s)/%s?parseTime=true", dbUser, dbPwd, socketDir, instanceConnectionName, dbName)
+	dbURI := fmt.Sprintf("%s:%s@unix(/%s/%s)/%s?parseTime=true", dbUser, dbPwd, socketDir, instanceConnectionName, dbName)
 
 	// dbPool is the pool of database connections.
 	dbPool, err := sql.Open("mysql", dbURI)
@@ -274,8 +278,42 @@ func initTCPConnectionPool() (*sql.DB, error) {
 		dbName    = mustGetenv("DB_NAME") // e.g. 'my-database'
 	)
 
-	var dbURI string
-	dbURI = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", dbUser, dbPwd, dbTCPHost, dbPort, dbName)
+	dbURI := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", dbUser, dbPwd, dbTCPHost, dbPort, dbName)
+
+	// [START_EXCLUDE]
+	// [START cloud_sql_mysql_databasesql_sslcerts]
+	// (OPTIONAL) Configure SSL certificates
+	// For deployments that connect directly to a Cloud SQL instance without
+	// using the Cloud SQL Proxy, configuring SSL certificates will ensure the
+	// connection is encrypted. This step is entirely OPTIONAL.
+	dbRootCert := os.Getenv("DB_ROOT_CERT") // e.g., '/path/to/my/server-ca.pem'
+	if dbRootCert != "" {
+		var (
+			dbCert = mustGetenv("DB_CERT") // e.g. '/path/to/my/client-cert.pem'
+			dbKey  = mustGetenv("DB_KEY")  // e.g. '/path/to/my/client-key.pem'
+		)
+		pool := x509.NewCertPool()
+		pem, err := ioutil.ReadFile(dbRootCert)
+		if err != nil {
+			return nil, err
+		}
+		if ok := pool.AppendCertsFromPEM(pem); !ok {
+			return nil, err
+		}
+		cert, err := tls.LoadX509KeyPair(dbCert, dbKey)
+		if err != nil {
+			return nil, err
+		}
+		mysql.RegisterTLSConfig("cloudsql", &tls.Config{
+			RootCAs:               pool,
+			Certificates:          []tls.Certificate{cert},
+			InsecureSkipVerify:    true,
+			VerifyPeerCertificate: verifyPeerCertFunc(pool),
+		})
+		dbURI += "&tls=cloudsql"
+	}
+	// [END cloud_sql_mysql_databasesql_sslcerts]
+	// [END_EXCLUDE]
 
 	// dbPool is the pool of database connections.
 	dbPool, err := sql.Open("mysql", dbURI)
@@ -289,6 +327,27 @@ func initTCPConnectionPool() (*sql.DB, error) {
 
 	return dbPool, nil
 	// [END cloud_sql_mysql_databasesql_create_tcp]
+}
+
+// verifyPeerCertFunc returns a function that verifies the peer certificate is
+// in the cert pool.
+func verifyPeerCertFunc(pool *x509.CertPool) func([][]byte, [][]*x509.Certificate) error {
+	return func(rawCerts [][]byte, _ [][]*x509.Certificate) error {
+		if len(rawCerts) == 0 {
+			return errors.New("no certificates available to verify")
+		}
+
+		cert, err := x509.ParseCertificate(rawCerts[0])
+		if err != nil {
+			return err
+		}
+
+		opts := x509.VerifyOptions{Roots: pool}
+		if _, err = cert.Verify(opts); err != nil {
+			return err
+		}
+		return nil
+	}
 }
 
 // configureConnectionPool sets database connection pool properties.
@@ -307,7 +366,7 @@ func configureConnectionPool(dbPool *sql.DB) {
 	// [START cloud_sql_mysql_databasesql_lifetime]
 
 	// Set Maximum time (in seconds) that a connection can remain open.
-	dbPool.SetConnMaxLifetime(1800)
+	dbPool.SetConnMaxLifetime(1800 * time.Second)
 
 	// [END cloud_sql_mysql_databasesql_lifetime]
 }

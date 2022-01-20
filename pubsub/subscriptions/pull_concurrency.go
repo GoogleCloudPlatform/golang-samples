@@ -19,7 +19,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"runtime"
 	"sync/atomic"
 	"time"
 
@@ -40,12 +39,15 @@ func pullMsgsConcurrenyControl(w io.Writer, projectID, subID string) error {
 	// Must set ReceiveSettings.Synchronous to false (or leave as default) to enable
 	// concurrency settings. Otherwise, NumGoroutines will be set to 1.
 	sub.ReceiveSettings.Synchronous = false
-	// NumGoroutines is the number of goroutines sub.Receive will spawn to pull
-	// messages concurrently.
-	sub.ReceiveSettings.NumGoroutines = runtime.NumCPU()
+	// NumGoroutines determines the number of goroutines sub.Receive will spawn to pull
+	// messages.
+	sub.ReceiveSettings.NumGoroutines = 16
+	// MaxOutstandingMessages limits the number of concurrent handlers of messages.
+	// In this case, up to 8 unacked messages can be handled concurrently.
+	sub.ReceiveSettings.MaxOutstandingMessages = 8
 
-	// Receive messages for 10 seconds.
-	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	// Receive messages for 30 seconds.
+	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
 	var counter int32

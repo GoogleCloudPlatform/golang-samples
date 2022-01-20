@@ -27,6 +27,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
 )
@@ -169,7 +170,7 @@ func currentTotals(app *app) (*templateData, error) {
 		return nil, fmt.Errorf("DB.QueryRow: %v", err)
 	}
 
-	var voteDiffStr string = voteDiff(int(math.Abs(float64(tabVotes) - float64(spaceVotes)))).String()
+	voteDiffStr := voteDiff(int(math.Abs(float64(tabVotes) - float64(spaceVotes)))).String()
 
 	latestVotesCast, err := recentVotes(app)
 	if err != nil {
@@ -249,8 +250,7 @@ func initSocketConnectionPool() (*sql.DB, error) {
 		socketDir = "/cloudsql"
 	}
 
-	var dbURI string
-	dbURI = fmt.Sprintf("user=%s password=%s database=%s host=%s/%s", dbUser, dbPwd, dbName, socketDir, instanceConnectionName)
+	dbURI := fmt.Sprintf("user=%s password=%s database=%s host=%s/%s", dbUser, dbPwd, dbName, socketDir, instanceConnectionName)
 
 	// dbPool is the pool of database connections.
 	dbPool, err := sql.Open("pgx", dbURI)
@@ -278,8 +278,24 @@ func initTCPConnectionPool() (*sql.DB, error) {
 		dbName    = mustGetenv("DB_NAME") // e.g. 'my-database'
 	)
 
-	var dbURI string
-	dbURI = fmt.Sprintf("host=%s user=%s password=%s port=%s database=%s", dbTCPHost, dbUser, dbPwd, dbPort, dbName)
+	dbURI := fmt.Sprintf("host=%s user=%s password=%s port=%s database=%s", dbTCPHost, dbUser, dbPwd, dbPort, dbName)
+
+	// [START_EXCLUDE]
+	// [START cloud_sql_postgres_databasesql_sslcerts]
+	// (OPTIONAL) Configure SSL certificates
+	// For deployments that connect directly to a Cloud SQL instance without
+	// using the Cloud SQL Proxy, configuring SSL certificates will ensure the
+	// connection is encrypted. This step is entirely OPTIONAL.
+	dbRootCert := os.Getenv("DB_ROOT_CERT") // e.g., '/path/to/my/server-ca.pem'
+	if dbRootCert != "" {
+		var (
+			dbCert = mustGetenv("DB_CERT") // e.g. '/path/to/my/client-cert.pem'
+			dbKey  = mustGetenv("DB_KEY")  // e.g. '/path/to/my/client-key.pem'
+		)
+		dbURI += fmt.Sprintf(" sslmode=require sslrootcert=%s sslcert=%s sslkey=%s", dbRootCert, dbCert, dbKey)
+	}
+	// [END cloud_sql_postgres_databasesql_sslcerts]
+	// [END_EXCLUDE]
 
 	// dbPool is the pool of database connections.
 	dbPool, err := sql.Open("pgx", dbURI)
@@ -311,7 +327,7 @@ func configureConnectionPool(dbPool *sql.DB) {
 	// [START cloud_sql_postgres_databasesql_lifetime]
 
 	// Set Maximum time (in seconds) that a connection can remain open.
-	dbPool.SetConnMaxLifetime(1800)
+	dbPool.SetConnMaxLifetime(1800 * time.Second)
 
 	// [END cloud_sql_postgres_databasesql_lifetime]
 }

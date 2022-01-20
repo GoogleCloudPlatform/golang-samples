@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"io"
 
-	transcoder "cloud.google.com/go/video/transcoder/apiv1beta1"
-	transcoderpb "google.golang.org/genproto/googleapis/cloud/video/transcoder/v1beta1"
+	transcoder "cloud.google.com/go/video/transcoder/apiv1"
+	transcoderpb "google.golang.org/genproto/googleapis/cloud/video/transcoder/v1"
 )
 
 // createJobWithSetNumberImagesSpritesheet creates a job from an ad-hoc configuration and generates
@@ -46,19 +46,22 @@ func createJobWithSetNumberImagesSpritesheet(w io.Writer, projectID string, loca
 			JobConfig: &transcoderpb.Job_Config{
 				Config: &transcoderpb.JobConfig{
 					ElementaryStreams: []*transcoderpb.ElementaryStream{
-						&transcoderpb.ElementaryStream{
+						{
 							Key: "video_stream0",
 							ElementaryStream: &transcoderpb.ElementaryStream_VideoStream{
 								VideoStream: &transcoderpb.VideoStream{
-									Codec:        "h264",
-									BitrateBps:   550000,
-									FrameRate:    60,
-									HeightPixels: 360,
-									WidthPixels:  640,
+									CodecSettings: &transcoderpb.VideoStream_H264{
+										H264: &transcoderpb.VideoStream_H264CodecSettings{
+											BitrateBps:   550000,
+											FrameRate:    60,
+											HeightPixels: 360,
+											WidthPixels:  640,
+										},
+									},
 								},
 							},
 						},
-						&transcoderpb.ElementaryStream{
+						{
 							Key: "audio_stream0",
 							ElementaryStream: &transcoderpb.ElementaryStream_AudioStream{
 								AudioStream: &transcoderpb.AudioStream{
@@ -69,14 +72,14 @@ func createJobWithSetNumberImagesSpritesheet(w io.Writer, projectID string, loca
 						},
 					},
 					MuxStreams: []*transcoderpb.MuxStream{
-						&transcoderpb.MuxStream{
+						{
 							Key:               "sd",
 							Container:         "mp4",
 							ElementaryStreams: []string{"video_stream0", "audio_stream0"},
 						},
 					},
 					SpriteSheets: []*transcoderpb.SpriteSheet{
-						&transcoderpb.SpriteSheet{
+						{
 							FilePrefix:         "small-sprite-sheet",
 							SpriteWidthPixels:  64,
 							SpriteHeightPixels: 32,
@@ -86,7 +89,7 @@ func createJobWithSetNumberImagesSpritesheet(w io.Writer, projectID string, loca
 								TotalCount: 100,
 							},
 						},
-						&transcoderpb.SpriteSheet{
+						{
 							FilePrefix:         "large-sprite-sheet",
 							SpriteWidthPixels:  128,
 							SpriteHeightPixels: 72,

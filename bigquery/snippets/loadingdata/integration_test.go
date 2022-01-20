@@ -127,6 +127,20 @@ func TestImportSnippets(t *testing.T) {
 				t.Errorf("importORCTruncate(%q): %v", testDatasetID, err)
 			}
 		})
+		t.Run("importAvro", func(t *testing.T) {
+			t.Parallel()
+			tableID := "bigquery_load_table_gcs_avro"
+			if err := importAvro(tc.ProjectID, testDatasetID, tableID); err != nil {
+				t.Errorf("importAvro(%q): %v", testDatasetID, err)
+			}
+		})
+		t.Run("importAvroTruncate", func(t *testing.T) {
+			t.Parallel()
+			tableID := "bigquery_load_table_gcs_orc_truncate"
+			if err := importAvroTruncate(tc.ProjectID, testDatasetID, tableID); err != nil {
+				t.Errorf("importAvroTruncate(%q): %v", testDatasetID, err)
+			}
+		})
 		t.Run("importParquet", func(t *testing.T) {
 			t.Parallel()
 			tableID := "bigquery_load_table_gcs_parquet"
