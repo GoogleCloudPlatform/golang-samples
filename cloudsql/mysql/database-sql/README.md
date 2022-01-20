@@ -35,7 +35,7 @@ To run the sample locally with a TCP connection, set environment variables and l
 Use these terminal commands to initialize environment variables:
 ```bash
 export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service/account/key.json
-export DB_TCP_HOST='127.0.0.1'
+export INSTANCE_HOST='127.0.0.1'
 export DB_PORT='3306'
 export DB_USER='<DB_USER_NAME>'
 export DB_PASS='<DB_PASSWORD>'
@@ -51,7 +51,7 @@ Then use this command to launch the proxy in the background:
 Use these PowerShell commands to initialize environment variables:
 ```powershell
 $env:GOOGLE_APPLICATION_CREDENTIALS="<CREDENTIALS_JSON_FILE>"
-$env:DB_TCP_HOST="127.0.0.1"
+$env:INSTANCE_HOST="127.0.0.1"
 $env:DB_PORT="3306"
 $env:DB_USER="<DB_USER_NAME>"
 $env:DB_PASS="<DB_PASSWORD>"
@@ -75,7 +75,7 @@ sudo chown -R $USER ./cloudsql
 Use these terminal commands to initialize environment variables:
 ```bash
 export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service/account/key.json
-export UNIX_SOCKET_PATH='./cloudsql/<MY-PROJECT>:<INSTANCE-REGION>:<INSTANCE-NAME>'
+export INSTANCE_UNIX_SOCKET='./cloudsql/<MY-PROJECT>:<INSTANCE-REGION>:<INSTANCE-NAME>'
 export DB_USER='<DB_USER_NAME>'
 export DB_PASS='<DB_PASSWORD>'
 export DB_NAME='<DB_NAME>'
@@ -105,7 +105,7 @@ variables into the runtime. Your `app.standard.yaml` file should look like this:
 ```yaml
 runtime: go113
 env_variables:
-  UNIX_SOCKET_PATH: /cloudsql/<project-id>:<region>:<instance-name>
+  INSTANCE_UNIX_SOCKET: /cloudsql/<project-id>:<region>:<instance-name>
   DB_USER: YOUR_DB_USER
   DB_PASS: YOUR_DB_PASS
   DB_NAME: YOUR_DB
@@ -131,7 +131,7 @@ runtime: custom
 env: flex
 
 env_variables:
-  UNIX_SOCKET_PATH: /cloudsql/<project>:<region>:<instance>
+  INSTANCE_UNIX_SOCKET: /cloudsql/<project>:<region>:<instance>
   DB_USER: <your_database_username>
   DB_PASS: <your_database_password>
   DB_NAME: <your_database_name>
@@ -163,7 +163,7 @@ gcloud builds submit --tag gcr.io/[YOUR_PROJECT_ID]/run-sql
 ```sh
 gcloud run deploy run-sql --image gcr.io/[YOUR_PROJECT_ID]/run-sql \
   --add-cloudsql-instances '<MY-PROJECT>:<INSTANCE-REGION>:<INSTANCE-NAME>' \
-  --update-env-vars UNIX_SOCKET_PATH='/cloudsql/<MY-PROJECT>:<INSTANCE-REGION>:<INSTANCE-NAME>' \
+  --update-env-vars INSTANCE_UNIX_SOCKET='/cloudsql/<MY-PROJECT>:<INSTANCE-REGION>:<INSTANCE-NAME>' \
   --update-env-vars DB_USER='<DB_USER_NAME>' \
   --update-env-vars DB_PASS='<DB_PASSWORD>' \
   --update-env-vars DB_NAME='<DB_NAME>'
