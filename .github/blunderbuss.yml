@@ -39,7 +39,7 @@ assign_issues_by:
 - labels:
   - 'api: spanner'
   to:
-  - skuruppu
+  - rahul2393
 - labels:
   - 'api: cloudiot'
   to:
