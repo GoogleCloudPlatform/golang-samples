@@ -1,0 +1,3 @@
+**NOTE:**
+
+gcloud [367.0.0](https://cloud.google.com/sdk/docs/release-notes#app_engine) introduces Go modules functionality for App Engine Flex. Since the root directory of this repo has a `go.mod` file, `gcloud app deploy` uses the Go modules behavior to build the app by default. This might cause errors since GAE requires `go.mod` to be in the same directory as `app.yaml` (details [here](https://cloud.google.com/appengine/docs/standard/go111/specifying-dependencies#using_go_modules)). To preserve the old GOPATH functionality run `export GO111MODULE=off` before deploying the apps in this directory.
