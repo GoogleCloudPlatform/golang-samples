@@ -3,7 +3,6 @@ module github.com/GoogleCloudPlatform/golang-samples/pubsub
 go 1.11
 
 require (
-	cloud.google.com/go v0.100.2 // indirect
 	cloud.google.com/go/iam v0.1.0
 	cloud.google.com/go/kms v1.1.0 // indirect
 	cloud.google.com/go/pubsub v1.17.1

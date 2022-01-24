@@ -3,10 +3,11 @@ module github.com/GoogleCloudPlatform/golang-samples
 go 1.11
 
 require (
-	cloud.google.com/go v0.98.0 // indirect
+	cloud.google.com/go v0.100.2 // indirect
 	cloud.google.com/go/bigquery v1.25.0
 	cloud.google.com/go/datastore v1.2.0
 	cloud.google.com/go/gaming v1.0.0
+	cloud.google.com/go/iam v0.1.0 // indirect
 	cloud.google.com/go/logging v1.0.0
 	cloud.google.com/go/storage v1.18.2
 	cloud.google.com/go/vision v1.0.0
@@ -19,8 +20,8 @@ require (
 	github.com/stretchr/testify v1.7.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	golang.org/x/text v0.3.7 // indirect
-	google.golang.org/api v0.61.0
-	google.golang.org/genproto v0.0.0-20211203200212-54befc351ae9
+	google.golang.org/api v0.63.0
+	google.golang.org/genproto v0.0.0-20211221195035-429b39de9b1c
 	google.golang.org/protobuf v1.27.1
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/yaml.v2 v2.4.0

@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	cloud.google.com/go/container v1.0.0 // indirect
+	cloud.google.com/go/iam v0.1.0 // indirect
 	cloud.google.com/go/monitoring v1.0.0
 	cloud.google.com/go/spanner v1.25.0
 	cloud.google.com/go/trace v1.0.0 // indirect
@@ -12,7 +13,7 @@ require (
 	github.com/golang/protobuf v1.5.2
 	go.opencensus.io v0.23.0
 	golang.org/x/exp v0.0.0-20211008200323-95152d363a1c
-	google.golang.org/genproto v0.0.0-20211203200212-54befc351ae9
+	google.golang.org/genproto v0.0.0-20211221195035-429b39de9b1c
 )
 
 replace github.com/GoogleCloudPlatform/golang-samples => ../

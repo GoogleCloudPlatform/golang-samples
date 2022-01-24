@@ -7,9 +7,9 @@ require (
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0
 	github.com/google/go-cmp v0.5.6
 	github.com/google/uuid v1.3.0
-	google.golang.org/api v0.61.0
+	google.golang.org/api v0.63.0
 	google.golang.org/appengine v1.6.7
-	google.golang.org/grpc v1.40.0
+	google.golang.org/grpc v1.40.1
 )
 
 replace github.com/GoogleCloudPlatform/golang-samples => ../

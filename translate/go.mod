@@ -8,8 +8,8 @@ require (
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0
 	github.com/google/uuid v1.3.0
 	golang.org/x/text v0.3.7
-	google.golang.org/api v0.61.0
-	google.golang.org/genproto v0.0.0-20211203200212-54befc351ae9
+	google.golang.org/api v0.63.0
+	google.golang.org/genproto v0.0.0-20211221195035-429b39de9b1c
 )
 
 replace github.com/GoogleCloudPlatform/golang-samples => ../
