@@ -43,9 +43,9 @@ func configureRetries(w io.Writer, bucket, object string) error {
 		storage.WithBackoff(gax.Backoff{
 			// Set the initial retry delay to a maximum of 2 seconds. The length of
 			// pauses between retries is subject to random jitter.
-			Initial:    2 * time.Second,
+			Initial: 2 * time.Second,
 			// Set the maximum retry delay to 60 seconds.
-			Max:        60 * time.Second,
+			Max: 60 * time.Second,
 			// Set the backoff multiplier to 3.0.
 			Multiplier: 3,
 		}),
