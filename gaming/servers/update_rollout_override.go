@@ -45,7 +45,7 @@ func updateRolloutOverrideConfig(w io.Writer, projectID, realmLocation, realmID,
 			Name: fmt.Sprintf("projects/%s/locations/global/gameServerDeployments/%s", projectID, deploymentID),
 
 			GameServerConfigOverrides: []*gamingpb.GameServerConfigOverride{
-				&gamingpb.GameServerConfigOverride{
+				{
 					Selector: &gamingpb.GameServerConfigOverride_RealmsSelector{
 						RealmsSelector: &gamingpb.RealmSelector{
 							Realms: []string{
