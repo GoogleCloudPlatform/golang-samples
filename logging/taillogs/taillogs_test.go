@@ -15,15 +15,15 @@
 package taillogs
 
 import (
+	"context"
+	"fmt"
+	"os"
 	"testing"
 	"time"
-	"context"
-	"os"
-	"fmt"
 
-	"github.com/google/uuid"
 	"cloud.google.com/go/logging"
 	"cloud.google.com/go/logging/logadmin"
+	"github.com/google/uuid"
 )
 
 func TestTailLogs(t *testing.T) {
@@ -57,11 +57,11 @@ func TestTailLogs(t *testing.T) {
 		defer logger.Flush()
 
 		logger.Log(logging.Entry{
-			Payload: "test tail logs entry 1",
+			Payload:  "test tail logs entry 1",
 			Severity: logging.Debug,
 		})
 		logger.Log(logging.Entry{
-			Payload: "test tail logs entry 2",
+			Payload:  "test tail logs entry 2",
 			Severity: logging.Debug,
 		})
 	}()

@@ -17,10 +17,10 @@ package taillogs
 // [START logging_tail_log_entries]
 import (
 	"context"
-	"log"
 	"fmt"
 	"io"
- 
+	"log"
+
 	logging "cloud.google.com/go/logging/apiv2"
 	loggingpb "google.golang.org/genproto/googleapis/logging/v2"
 )
@@ -45,7 +45,7 @@ func tailLogs(projectID string) {
 	}
 
 	defer stream.CloseSend()
-	
+
 	// read and print two streamed log entries
 	for counter := 0; counter < 2; counter++ {
 		resp, err := stream.Recv()
@@ -58,4 +58,5 @@ func tailLogs(projectID string) {
 		fmt.Printf("received:\n%v\n", resp)
 	}
 }
+
 // [END logging_tail_log_entries]
