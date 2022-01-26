@@ -47,7 +47,7 @@ func createJobFromAdHoc(w io.Writer, projectID string, location string, inputURI
 			JobConfig: &transcoderpb.Job_Config{
 				Config: &transcoderpb.JobConfig{
 					ElementaryStreams: []*transcoderpb.ElementaryStream{
-						&transcoderpb.ElementaryStream{
+						{
 							Key: "video_stream0",
 							ElementaryStream: &transcoderpb.ElementaryStream_VideoStream{
 								VideoStream: &transcoderpb.VideoStream{
@@ -62,7 +62,7 @@ func createJobFromAdHoc(w io.Writer, projectID string, location string, inputURI
 								},
 							},
 						},
-						&transcoderpb.ElementaryStream{
+						{
 							Key: "video_stream1",
 							ElementaryStream: &transcoderpb.ElementaryStream_VideoStream{
 								VideoStream: &transcoderpb.VideoStream{
@@ -77,7 +77,7 @@ func createJobFromAdHoc(w io.Writer, projectID string, location string, inputURI
 								},
 							},
 						},
-						&transcoderpb.ElementaryStream{
+						{
 							Key: "audio_stream0",
 							ElementaryStream: &transcoderpb.ElementaryStream_AudioStream{
 								AudioStream: &transcoderpb.AudioStream{
@@ -88,12 +88,12 @@ func createJobFromAdHoc(w io.Writer, projectID string, location string, inputURI
 						},
 					},
 					MuxStreams: []*transcoderpb.MuxStream{
-						&transcoderpb.MuxStream{
+						{
 							Key:               "sd",
 							Container:         "mp4",
 							ElementaryStreams: []string{"video_stream0", "audio_stream0"},
 						},
-						&transcoderpb.MuxStream{
+						{
 							Key:               "hd",
 							Container:         "mp4",
 							ElementaryStreams: []string{"video_stream1", "audio_stream0"},
