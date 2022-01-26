@@ -13,6 +13,6 @@ require (
 	github.com/golang/protobuf v1.5.2
 	github.com/prometheus/client_golang v1.11.0
 	go.opencensus.io v0.23.0
-	google.golang.org/api v0.63.0
-	google.golang.org/genproto v0.0.0-20211221195035-429b39de9b1c
+	google.golang.org/api v0.65.0
+	google.golang.org/genproto v0.0.0-20220118154757-00ab72f36ad5
 )
