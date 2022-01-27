@@ -65,10 +65,25 @@ func TestTailLogs(t *testing.T) {
 			Severity: logging.Debug,
 		})
 	}()
-	t.Cleanup(func() {
+	// cannot use t.Cleanup() due to go111 support
+	defer func() {
 		adminClient.DeleteLog(ctx, logID)
-	})
+	}()
 
-	// ingest a couple of logs to finish the test
-	tailLogs(projectID)
+	// following implements custom 2 min timeout for running tailLogs() sample
+	success := make(chan int, 1)
+	go func() {
+		// ingest a couple of logs to finish the test
+		tailLogs(projectID)
+		success <- 1
+	}()
+
+	for {
+		select {
+		case <-success:
+			return // from the test
+		case <-time.After(2 * time.Minute):
+			t.Fatalf("tailLogs sample failed to complete after 2 minutes")
+		}
+	}
 }
