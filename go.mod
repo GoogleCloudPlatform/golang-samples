@@ -62,7 +62,7 @@ require (
 	github.com/sendgrid/smtpapi-go v0.6.0 // indirect
 	github.com/tinylib/msgp v1.1.2 // indirect
 	golang.org/x/exp v0.0.0-20211008200323-95152d363a1c
-	golang.org/x/net v0.0.0-20220111093109-d55c255bac03
+	golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/sys v0.0.0-20220111092808-5a964db01320 // indirect
@@ -70,7 +70,7 @@ require (
 	google.golang.org/api v0.65.0
 	google.golang.org/appengine v1.6.7
 	google.golang.org/genproto v0.0.0-20220118154757-00ab72f36ad5
-	google.golang.org/grpc v1.43.0
+	google.golang.org/grpc v1.40.1
 	google.golang.org/grpc/examples v0.0.0-20200707005602-4258d12073b4
 	google.golang.org/protobuf v1.27.1
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
