@@ -78,12 +78,10 @@ func TestTailLogs(t *testing.T) {
 		success <- 1
 	}()
 
-	for {
-		select {
-		case <-success:
-			return // from the test
-		case <-time.After(2 * time.Minute):
-			t.Fatalf("tailLogs sample failed to complete after 2 minutes")
-		}
+	select {
+	case <-success:
+		return // from the test
+	case <-time.After(2 * time.Minute):
+		t.Fatalf("tailLogs sample failed to complete after 2 minutes")
 	}
 }
