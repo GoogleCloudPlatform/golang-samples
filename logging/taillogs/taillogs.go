@@ -25,7 +25,10 @@ import (
 	loggingpb "google.golang.org/genproto/googleapis/logging/v2"
 )
 
+// tailLogs creates a channel to stream log entries that were recently ingested for a project
 func tailLogs(projectID string) {
+	// projectID := "your_project_id"
+
 	ctx := context.Background()
 	client, err := logging.NewClient(ctx)
 	if err != nil {
