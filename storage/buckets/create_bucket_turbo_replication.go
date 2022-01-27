@@ -24,8 +24,8 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// createBucketTurboReplication creates a new bucket in the project with
-// turbo replication enabled and Storage location.
+// createBucketTurboReplication creates a new dual-region bucket with
+// turbo replication enabled.
 func createBucketTurboReplication(w io.Writer, projectID, bucketName, location string) error {
 	// projectID := "my-project-id"
 	// bucketName := "bucket-name"

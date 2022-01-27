@@ -25,7 +25,7 @@ import (
 )
 
 // setRPOAsyncTurbo enables turbo replication for the bucket by setting RPO to
-// "ASYNC_TURBO".
+// "ASYNC_TURBO". The bucket must be dual-region to use this feature.
 func setRPOAsyncTurbo(w io.Writer, bucketName string) error {
 	// bucketName := "bucket-name"
 	ctx := context.Background()
