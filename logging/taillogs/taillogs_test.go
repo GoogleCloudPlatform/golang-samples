@@ -45,8 +45,11 @@ func TestTailLogs(t *testing.T) {
 	}
 	defer adminClient.Close()
 
-	uuid, err := uuid.NewRandom()
-	logID := fmt.Sprintf("tail-sample-log-%s", uuid.String()[:8])
+	suffix, err := uuid.NewRandom()
+	if err != nil {
+		t.Fatalf("Failed to generate suffix for LogID: %v", err)
+	}
+	logID := fmt.Sprintf("tail-sample-log-%s", suffix.String()[:8])
 
 	go func() {
 		// 10 seconds is a recommended time to wait till streaming channel is established
