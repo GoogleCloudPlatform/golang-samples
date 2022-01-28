@@ -30,7 +30,7 @@ func createInstanceWithCustomHostname(w io.Writer, projectID, zone, instanceName
 	// projectID := "your_project_id"
 	// zone := "europe-central2-b"
 	// instanceName := "your_instance_name"
-	// hostname := "host.example.com"
+	// hostname := "host.example.com" // Custom hostnames must conform to RFC 1035 requirements for valid hostnames.
 	// machineType := "n1-standard-1"
 	// sourceImage := "projects/debian-cloud/global/images/family/debian-10"
 	// networkName := "global/networks/default"
