@@ -54,8 +54,6 @@ func TestTailLogs(t *testing.T) {
 		time.Sleep(10 * time.Second)
 
 		logger := client.Logger(logID)
-		defer logger.Flush()
-
 		logger.Log(logging.Entry{
 			Payload:  "test tail logs entry 1",
 			Severity: logging.Debug,
@@ -64,6 +62,7 @@ func TestTailLogs(t *testing.T) {
 			Payload:  "test tail logs entry 2",
 			Severity: logging.Debug,
 		})
+		logger.Flush()
 	}()
 	// cannot use t.Cleanup() due to go111 support
 	defer func() {

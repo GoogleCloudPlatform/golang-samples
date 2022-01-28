@@ -19,35 +19,36 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 
 	logging "cloud.google.com/go/logging/apiv2"
 	loggingpb "google.golang.org/genproto/googleapis/logging/v2"
 )
 
 // tailLogs creates a channel to stream log entries that were recently ingested for a project
-func tailLogs(projectID string) {
+func tailLogs(projectID string) error {
 	// projectID := "your_project_id"
 
 	ctx := context.Background()
 	client, err := logging.NewClient(ctx)
 	if err != nil {
-		log.Fatalf("NewClient error: %v", err)
+		return fmt.Errorf("NewClient error: %v", err)
 	}
+	defer client.Close()
+
 	stream, err := client.TailLogEntries(ctx)
 	if err != nil {
-		log.Fatalf("TailLogEntries error: %v", err)
+		return fmt.Errorf("TailLogEntries error: %v", err)
 	}
+	defer stream.CloseSend()
+
 	req := &loggingpb.TailLogEntriesRequest{
 		ResourceNames: []string{
 			"projects/" + projectID,
 		},
 	}
 	if err := stream.Send(req); err != nil {
-		log.Fatalf("stream.Send error: %v", err)
+		return fmt.Errorf("stream.Send error: %v", err)
 	}
-
-	defer stream.CloseSend()
 
 	// read and print two streamed log entries
 	for counter := 0; counter < 2; counter++ {
@@ -56,10 +57,11 @@ func tailLogs(projectID string) {
 			break
 		}
 		if err != nil {
-			log.Fatalf("stream.Recv error: %v", err)
+			return fmt.Errorf("stream.Recv error: %v", err)
 		}
 		fmt.Printf("received:\n%v\n", resp)
 	}
+	return nil
 }
 
 // [END logging_tail_log_entries]
