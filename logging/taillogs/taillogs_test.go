@@ -76,7 +76,10 @@ func TestTailLogs(t *testing.T) {
 	success := make(chan int, 1)
 	go func() {
 		// ingest a couple of logs to finish the test
-		tailLogs(projectID)
+		err := tailLogs(projectID)
+		if err != nil {
+			t.Errorf("testLogs sample returned error: %v", err)
+		}
 		success <- 1
 	}()
 
