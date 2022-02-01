@@ -56,7 +56,8 @@ func generateExampleMessages(numMessages int) ([][]byte, error) {
 			// These types require special encoding/formatting to transmit.
 
 			// DATE values are number of days since the Unix epoch.
-			DateCol: proto.Int32(int32(time.Now().UnixMilli() / 86400000)),
+
+			DateCol: proto.Int32(int32(time.Now().UnixNano() / 86400000000000)),
 
 			// DATETIME uses the literal format.
 			DatetimeCol: proto.String("2022-01-01 12:13:14.000000"),
@@ -73,7 +74,7 @@ func generateExampleMessages(numMessages int) ([][]byte, error) {
 			TimeCol: proto.String("12:13:14.000000"),
 
 			// TIMESTAMP uses microseconds since Unix epoch.
-			TimestampCol: proto.Int64(time.Now().UnixMicro()),
+			TimestampCol: proto.Int64(time.Now().UnixNano() / 1000),
 
 			// Int64List is an array of INT64 types.
 			Int64List: []int64{2, 4, 6, 8},
