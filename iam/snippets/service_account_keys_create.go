@@ -17,6 +17,7 @@ package snippets
 // [START iam_create_key]
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"io"
 
@@ -36,14 +37,12 @@ func createKey(w io.Writer, serviceAccountEmail string) (*iam.ServiceAccountKey,
 	key, err := service.Projects.ServiceAccounts.Keys.Create(resource, request).Do()
 	if err != nil {
 		return nil, fmt.Errorf("Projects.ServiceAccounts.Keys.Create: %v", err)
-	}
-	
+	}	
 	// The PrivateKeyData field contains the base64-encoded service account key
 	// in JSON format.
 	// TODO(Developer): Save the below key (jsonKeyFile) to a secure location.
-	//  You cannot download it later.
+	// You cannot download it later.
 	// jsonKeyFile, _ := base64.StdEncoding.DecodeString(key.PrivateKeyData)
-
 	fmt.Fprintf(w, "Key created successfully")
 	return key, nil
 }
