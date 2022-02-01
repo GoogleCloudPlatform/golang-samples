@@ -50,8 +50,8 @@ func tailLogs(projectID string) error {
 		return fmt.Errorf("stream.Send error: %v", err)
 	}
 
-	// read and print two streamed log entries
-	for counter := 0; counter < 2; counter++ {
+	// read and print two or more streamed log entries
+	for counter := 0; counter < 2; {
 		resp, err := stream.Recv()
 		if err == io.EOF {
 			break
@@ -60,6 +60,9 @@ func tailLogs(projectID string) error {
 			return fmt.Errorf("stream.Recv error: %v", err)
 		}
 		fmt.Printf("received:\n%v\n", resp)
+		if resp.Entries != nil {
+			counter += len(resp.Entries)
+		}
 	}
 	return nil
 }
