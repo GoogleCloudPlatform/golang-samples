@@ -30,6 +30,7 @@ import (
 )
 
 func TestCreateInstanceTemplatesSnippets(t *testing.T) {
+	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2383")
 	var seededRand *rand.Rand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))
 	tc := testutil.SystemTest(t)
