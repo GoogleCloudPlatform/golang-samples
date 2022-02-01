@@ -17,7 +17,7 @@ package snippets
 // [START iam_create_key]
 import (
 	"context"
-	"encoding/base64"
+	// "encoding/base64"
 	"fmt"
 	"io"
 
