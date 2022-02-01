@@ -30,8 +30,8 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// generateExampleMessage generates an example protobuf message using a statically defined and
-// compiled protocol buffer file, and returns the binary serialized representation.
+// generateExampleMessages generates a slice of serialized protobuf messages using a statically defined
+// and compiled protocol buffer file, and returns the binary serialized representation.
 func generateExampleMessages(numMessages int) ([][]byte, error) {
 	msgs := make([][]byte, numMessages)
 	for i := 0; i < numMessages; i++ {
