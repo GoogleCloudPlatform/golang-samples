@@ -30,66 +30,74 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// generateExampleMessage generates an example protobuf message using a statically defined and
-// compiled protocol buffer file, and returns the binary serialized representation.
-func generateExampleMessage() ([]byte, error) {
+// generateExampleMessages generates a slice of serialized protobuf messages using a statically defined
+// and compiled protocol buffer file, and returns the binary serialized representation.
+func generateExampleMessages(numMessages int) ([][]byte, error) {
+	msgs := make([][]byte, numMessages)
+	for i := 0; i < numMessages; i++ {
 
-	random := rand.New(rand.NewSource(time.Now().UnixNano()))
+		random := rand.New(rand.NewSource(time.Now().UnixNano()))
 
-	// Our example data embeds an array of structs, so we'll construct that first.
-	sList := make([]*exampleproto.SampleStruct, 5)
-	for i := 0; i < int(random.Int63n(5)+1); i++ {
-		sList[i] = &exampleproto.SampleStruct{
-			SubIntCol: proto.Int64(random.Int63()),
+		// Our example data embeds an array of structs, so we'll construct that first.
+		sList := make([]*exampleproto.SampleStruct, 5)
+		for i := 0; i < int(random.Int63n(5)+1); i++ {
+			sList[i] = &exampleproto.SampleStruct{
+				SubIntCol: proto.Int64(random.Int63()),
+			}
 		}
+
+		m := &exampleproto.SampleData{
+			BoolCol:    proto.Bool(true),
+			BytesCol:   []byte("some bytes"),
+			Float64Col: proto.Float64(3.14),
+			Int64Col:   proto.Int64(123),
+			StringCol:  proto.String("example string value"),
+
+			// These types require special encoding/formatting to transmit.
+
+			// DATE values are number of days since the Unix epoch.
+
+			DateCol: proto.Int32(int32(time.Now().UnixNano() / 86400000000000)),
+
+			// DATETIME uses the literal format.
+			DatetimeCol: proto.String("2022-01-01 12:13:14.000000"),
+
+			// GEOGRAPHY uses Well-Known-Text (WKT) format.
+			GeographyCol: proto.String("POINT(-122.350220 47.649154)"),
+
+			// NUMERIC and BIGNUMERIC can be passed as string, or more efficiently
+			// using a packed byte representation.
+			NumericCol:    proto.String("99999999999999999999999999999.999999999"),
+			BignumericCol: proto.String("578960446186580977117854925043439539266.34992332820282019728792003956564819967"),
+
+			// TIME also uses literal format.
+			TimeCol: proto.String("12:13:14.000000"),
+
+			// TIMESTAMP uses microseconds since Unix epoch.
+			TimestampCol: proto.Int64(time.Now().UnixNano() / 1000),
+
+			// Int64List is an array of INT64 types.
+			Int64List: []int64{2, 4, 6, 8},
+
+			// This is a required field, and thus must be present.
+			RowNum: proto.Int64(23),
+
+			// StructCol is a single nested message.
+			StructCol: &exampleproto.SampleStruct{
+				SubIntCol: proto.Int64(random.Int63()),
+			},
+
+			// StructList is a repeated array of a nested message.
+			StructList: sList,
+		}
+
+		b, err := proto.Marshal(m)
+		if err != nil {
+			return nil, fmt.Errorf("error generating message %d: %v", i, err)
+		}
+		msgs[i] = b
 	}
-
-	m := &exampleproto.SampleData{
-		BoolCol:    proto.Bool(true),
-		BytesCol:   []byte("some bytes"),
-		Float64Col: proto.Float64(3.14),
-		Int64Col:   proto.Int64(123),
-		StringCol:  proto.String("example string value"),
-
-		// These types require special encoding/formatting to transmit.
-
-		// DATE values are number of days since the Unix epoch.
-		DateCol: proto.Int32(int32(time.Now().UnixMilli() / 86400000)),
-
-		// DATETIME uses the literal format.
-		DatetimeCol: proto.String("2022-01-01 12:13:14.000000"),
-
-		// GEOGRAPHY uses Well-Known-Text (WKT) format.
-		GeographyCol: proto.String("POINT(-122.350220 47.649154)"),
-
-		// NUMERIC and BIGNUMERIC can be passed as string, or more efficiently
-		// using a packed byte representation.
-		NumericCol:    proto.String("99999999999999999999999999999.999999999"),
-		BignumericCol: proto.String("578960446186580977117854925043439539266.34992332820282019728792003956564819967"),
-
-		// TIME also uses literal format.
-		TimeCol: proto.String("12:13:14.000000"),
-
-		// TIMESTAMP uses microseconds since Unix epoch.
-		TimestampCol: proto.Int64(time.Now().UnixMicro()),
-
-		// Int64List is an array of INT64 types.
-		Int64List: []int64{2, 4, 6, 8},
-
-		// This is a required field, and thus must be present.
-		RowNum: proto.Int64(23),
-
-		// StructCol is a single nested message.
-		StructCol: &exampleproto.SampleStruct{
-			SubIntCol: proto.Int64(random.Int63()),
-		},
-
-		// StructList is a repeated array of a nested message.
-		StructList: sList,
-	}
-
-	// Now that the protocol message has been populated, serialize it to binary form and return.
-	return proto.Marshal(m)
+	return msgs, nil
 }
 
 // appendToPendingStream demonstrates using the managedwriter package to write some example data
@@ -136,9 +144,9 @@ func appendToPendingStream(w io.Writer, projectID, datasetID, tableID string) er
 	}
 
 	// First, we'll append a single row.
-	rowBytes, err := generateExampleMessage()
+	rows, err := generateExampleMessages(1)
 	if err != nil {
-		return fmt.Errorf("generateExampleMessage: %v", err)
+		return fmt.Errorf("generateExampleMessages: %v", err)
 	}
 
 	// We'll keep track of the current offset in the stream with curOffset.
@@ -146,7 +154,7 @@ func appendToPendingStream(w io.Writer, projectID, datasetID, tableID string) er
 	// We can append data asyncronously, so we'll check our appends at the end.
 	var results []*managedwriter.AppendResult
 
-	result, err := managedStream.AppendRows(ctx, [][]byte{rowBytes}, managedwriter.WithOffset(0))
+	result, err := managedStream.AppendRows(ctx, rows, managedwriter.WithOffset(0))
 	if err != nil {
 		return fmt.Errorf("AppendRows first call error: %v", err)
 	}
@@ -156,7 +164,11 @@ func appendToPendingStream(w io.Writer, projectID, datasetID, tableID string) er
 	curOffset = curOffset + 1
 
 	// This time, we'll append three more rows in a single request.
-	result, err = managedStream.AppendRows(ctx, [][]byte{rowBytes, rowBytes, rowBytes}, managedwriter.WithOffset(curOffset))
+	rows, err = generateExampleMessages(3)
+	if err != nil {
+		return fmt.Errorf("generateExampleMessages: %v", err)
+	}
+	result, err = managedStream.AppendRows(ctx, rows, managedwriter.WithOffset(curOffset))
 	if err != nil {
 		return fmt.Errorf("AppendRows second call error: %v", err)
 	}
@@ -166,7 +178,11 @@ func appendToPendingStream(w io.Writer, projectID, datasetID, tableID string) er
 	curOffset = curOffset + 3
 
 	// Finally, we'll append two more rows.
-	result, err = managedStream.AppendRows(ctx, [][]byte{rowBytes, rowBytes, rowBytes}, managedwriter.WithOffset(curOffset))
+	rows, err = generateExampleMessages(2)
+	if err != nil {
+		return fmt.Errorf("generateExampleMessages: %v", err)
+	}
+	result, err = managedStream.AppendRows(ctx, rows, managedwriter.WithOffset(curOffset))
 	if err != nil {
 		return fmt.Errorf("AppendRows third call error: %v", err)
 	}
