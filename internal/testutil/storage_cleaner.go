@@ -73,14 +73,7 @@ func cleanBucketWithClient(ctx context.Context, t *testing.T, client *storage.Cl
 		}
 	})
 
-	// Wait until the bucket exists.
-	Retry(t, 10, 30*time.Second, func(r *R) {
-		if _, err := b.Attrs(ctx); err != nil {
-			// Bucket does not exist.
-			r.Errorf("Bucket was not created")
-			return
-		}
-	})
+	WaitForBucketToExist(ctx, t, b)
 
 	return nil
 }
@@ -127,6 +120,8 @@ func DeleteBucketIfExists(ctx context.Context, client *storage.Client, bucket st
 		return fmt.Errorf("Bucket.Delete(%q): %v", bucket, err)
 	}
 
+	// Waits for a bucket to no longer exist, as it can take time to propagate
+	// Errors after 10 successful attempts at retrieving the bucket's attrs
 	retries := 10
 	delay := 10 * time.Second
 
@@ -140,6 +135,19 @@ func DeleteBucketIfExists(ctx context.Context, client *storage.Client, bucket st
 	}
 
 	return fmt.Errorf("failed to delete bucket %q", bucket)
+}
+
+// WaitForBucketToExist waits for a bucket to exist, as it can take time to propagate
+// Errors after 10 unsuccessful attempts at retrieving the bucket's attrs
+func WaitForBucketToExist(ctx context.Context, t *testing.T, b *storage.BucketHandle) {
+	t.Helper()
+	Retry(t, 10, 30*time.Second, func(r *R) {
+		if _, err := b.Attrs(ctx); err != nil {
+			// Bucket does not exist
+			r.Errorf("Bucket was not created")
+			return
+		}
+	})
 }
 
 // UniqueBucketName returns a unique name with the test prefix

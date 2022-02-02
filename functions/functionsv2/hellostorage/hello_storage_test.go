@@ -42,7 +42,7 @@ func TestHelloStorage(t *testing.T) {
 	e.SetDataContentType("application/json")
 	e.SetData(e.DataContentType(), d)
 
-	HelloStorage(context.Background(), e)
+	helloStorage(context.Background(), e)
 
 	w.Close()
 	log.SetOutput(os.Stderr)

@@ -8,8 +8,8 @@ require (
 	github.com/gofrs/uuid v3.4.0+incompatible
 	github.com/golang/protobuf v1.5.2
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
-	google.golang.org/api v0.63.0
-	google.golang.org/genproto v0.0.0-20211221195035-429b39de9b1c
+	google.golang.org/api v0.65.0
+	google.golang.org/genproto v0.0.0-20220118154757-00ab72f36ad5
 )
 
 replace github.com/GoogleCloudPlatform/golang-samples => ../

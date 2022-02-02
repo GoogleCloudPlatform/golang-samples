@@ -7,10 +7,10 @@ require (
 	cloud.google.com/go/pubsub v1.9.1
 	cloud.google.com/go/pubsublite v1.1.0
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0
-	github.com/google/go-cmp v0.5.6
+	github.com/google/go-cmp v0.5.7
 	github.com/google/uuid v1.3.0
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	google.golang.org/api v0.63.0
+	google.golang.org/api v0.65.0
 )
 
 replace github.com/GoogleCloudPlatform/golang-samples => ../
