@@ -197,3 +197,30 @@ gcloud beta run deploy SERVICE --image gcr.io/[YOUR_PROJECT_ID]/run-sql \
 4. Navigate your browser to the URL noted in step 2.
 
 For more details about using Cloud Run see http://cloud.run.
+
+## Running Integration Tests
+
+The integration tests depend on a Unix socket and a TCP listener provided by the
+Cloud SQL Auth Proxy. To run the tests, you will need to start two instances of
+the Cloud SQL Auth Proxy, one for a TCP connection and one for a Unix socket
+connection.
+
+```
+cloud_sql_proxy -instances=some-project:some-region:some-instance=tcp:3306
+cloud_sql_proxy -instances=some-project:some-region:some-instance -dir /cloudsql
+```
+
+To run integration tests, use the following command, setting environment
+variables to the correct values:
+
+```
+GOLANG_SAMPLES_E2E_TEST="yes" \
+  MYSQL_USER=some-user \
+  MYSQL_PASSWORD=some-pass
+  MYSQL_DATABASE=some-db \
+  MYSQL_PORT=3307 \
+  MYSQL_HOST=127.0.0.1
+  MYSQL_UNIX_SOCKET='/cloudsql/some-project:some-region:some-instance'
+  MYSQL_INSTANCE='some-project:some-region:some-instance' \
+  go test -v
+```

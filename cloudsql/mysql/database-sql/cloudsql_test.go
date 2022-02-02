@@ -70,14 +70,17 @@ func dbConfigFromEnv(t *testing.T, ct connType) dbConfig {
 	// Zero out all but requested conn type
 	switch ct {
 	case useTCP:
+		// use host
 		d.unixPath = ""
 		d.instConnName = ""
 	case useUnix:
 		d.host = ""
+		// use unix path
 		d.instConnName = ""
 	default: // connector
 		d.host = ""
-		d.host = ""
+		d.unixPath = ""
+		// use instance connection name
 	}
 	return d
 }
