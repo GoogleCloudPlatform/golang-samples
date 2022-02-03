@@ -41,11 +41,19 @@ func connectWithConnector() (*sql.DB, error) {
 		dbPwd                  = mustGetenv("DB_PASS")                  // e.g. 'my-db-password'
 		dbName                 = mustGetenv("DB_NAME")                  // e.g. 'my-database'
 		instanceConnectionName = mustGetenv("INSTANCE_CONNECTION_NAME") // e.g. 'project:region:instance'
+		usePrivate             = os.Getenv("PRIVATE_IP")
 	)
 
+	d, err := cloudsqlconn.NewDialer(context.Background())
+	if err != nil {
+		return nil, fmt.Errorf("cloudsqlconn.NewDialer: %v", err)
+	}
 	mysql.RegisterDialContext("cloudsqlconn",
 		func(ctx context.Context, addr string) (net.Conn, error) {
-			return cloudsqlconn.Dial(ctx, instanceConnectionName)
+			if usePrivate != "" {
+				return d.Dial(ctx, instanceConnectionName, cloudsqlconn.WithPrivateIP())
+			}
+			return d.Dial(ctx, instanceConnectionName)
 		})
 
 	dbURI := fmt.Sprintf("%s:%s@cloudsqlconn(localhost:3306)/%s?parseTime=true",
