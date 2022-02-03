@@ -19,15 +19,33 @@ package opencensus
 
 // [START monitoring_opencensus_configure_trace_exemplar]
 import (
+	"fmt"
 	"time"
 
 	googlepb "github.com/golang/protobuf/ptypes/timestamp"
 	distributionpb "google.golang.org/genproto/googleapis/api/distribution"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
+	"google.golang.org/protobuf/types/known/anypb"
 )
 
-func createDataPointWithExemplar() *monitoringpb.Point {
+// Generates metric TimeSeries points containing Exemplars with attached tracing span.
+func createDataPointWithExemplar(projectID string) (*monitoringpb.Point, error) {
+	// projectID := "my-cloud-project-id"
 	end := time.Now().Unix()
+	traceId := "0000000000000001"
+	spanId := "00000001"
+	spanCtx, err := anypb.New(&monitoringpb.SpanContext{
+		SpanName: fmt.Sprintf("projects/%s/traces/%s/spans/%s", projectID, traceId, spanId),
+	})
+	if err != nil {
+		return nil, err
+	}
+	droppedLabels, err := anypb.New(&monitoringpb.DroppedLabels{
+		Label: map[string]string{"Label": "Dropped"},
+	})
+	if err != nil {
+		return nil, err
+	}
 	dataPoint := &monitoringpb.Point{
 		Interval: &monitoringpb.TimeInterval{
 			StartTime: &googlepb.Timestamp{Seconds: end - 60},
@@ -41,13 +59,13 @@ func createDataPointWithExemplar() *monitoringpb.Point {
 				}},
 				BucketCounts: []int64{5, 6, 3},
 				Exemplars: []*distributionpb.Distribution_Exemplar{
-					{Value: 1, Timestamp: &googlepb.Timestamp{Seconds: end - 30}},
+					{Value: 1, Timestamp: &googlepb.Timestamp{Seconds: end - 30}, Attachments: []*anypb.Any{spanCtx, droppedLabels}},
 					{Value: 4, Timestamp: &googlepb.Timestamp{Seconds: end - 30}},
 				},
 			},
 		}},
 	}
-	return dataPoint
+	return dataPoint, nil
 }
 
 // [END monitoring_opencensus_configure_trace_exemplar]

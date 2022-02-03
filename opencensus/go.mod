@@ -13,6 +13,7 @@ require (
 	go.opencensus.io v0.23.0
 	golang.org/x/exp v0.0.0-20211008200323-95152d363a1c
 	google.golang.org/genproto v0.0.0-20220118154757-00ab72f36ad5
+	google.golang.org/protobuf v1.27.1
 )
 
 replace github.com/GoogleCloudPlatform/golang-samples => ../
