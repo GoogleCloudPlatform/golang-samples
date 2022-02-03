@@ -113,20 +113,8 @@ func TestCreateInstanceTemplatesSnippets(t *testing.T) {
 		t.Errorf("unable to create instance: %v", err)
 	}
 
-	for {
-		waitReq := &computepb.WaitZoneOperationRequest{
-			Operation: op.Proto().GetName(),
-			Project:   tc.ProjectID,
-			Zone:      zone,
-		}
-		zoneOp, err := zoneOperationsClient.Wait(ctx, waitReq)
-		if err != nil {
-			t.Errorf("unable to wait for the operation: %v", err)
-		}
-
-		if *zoneOp.Status.Enum() == computepb.Operation_DONE {
-			break
-		}
+	if err = op.Wait(ctx); err != nil {
+		t.Errorf("unable to wait for the operation: %v", err)
 	}
 
 	formattedInstanceName := fmt.Sprintf("projects/%s/zones/%s/instances/%s", tc.ProjectID, zone, instanceName)
@@ -216,20 +204,7 @@ func TestCreateInstanceTemplatesSnippets(t *testing.T) {
 		t.Errorf("unable to delete instance: %v", err)
 	}
 
-	for {
-		waitReq := &computepb.WaitZoneOperationRequest{
-			Operation: op.Proto().GetName(),
-			Project:   tc.ProjectID,
-			Zone:      zone,
-		}
-		zoneOp, err := zoneOperationsClient.Wait(ctx, waitReq)
-		if err != nil {
-			t.Errorf("unable to wait for the operation: %v", err)
-		}
-
-		if *zoneOp.Status.Enum() == computepb.Operation_DONE {
-			break
-		}
+	if err = op.Wait(ctx); err != nil {
+		t.Errorf("unable to wait for the operation: %v", err)
 	}
-
 }

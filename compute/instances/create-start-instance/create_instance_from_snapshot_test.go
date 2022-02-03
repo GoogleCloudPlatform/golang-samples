@@ -65,12 +65,6 @@ func TestComputeCreateInstanceFromSnapshotSnippets(t *testing.T) {
 	}
 	defer disksClient.Close()
 
-	zoneOperationsClient, err := compute.NewZoneOperationsRESTClient(ctx)
-	if err != nil {
-		t.Fatalf("NewZoneOperationsRESTClient: %v", err)
-	}
-	defer zoneOperationsClient.Close()
-
 	newestDebianReq := &computepb.GetFromFamilyImageRequest{
 		Project: "debian-cloud",
 		Family:  "debian-11",
@@ -106,7 +100,9 @@ func TestComputeCreateInstanceFromSnapshotSnippets(t *testing.T) {
 		t.Errorf("unable to create disk: %v", err)
 	}
 
-	waitZoneOp(ctx, tc.ProjectID, zone, *op)
+	if err = op.Wait(ctx); err != nil {
+		t.Errorf("unable to wait for the operation: %v", err)
+	}
 
 	diskSnaphotReq := &computepb.CreateSnapshotDiskRequest{
 		Project: tc.ProjectID,
@@ -122,7 +118,9 @@ func TestComputeCreateInstanceFromSnapshotSnippets(t *testing.T) {
 		t.Errorf("unable to create disk snapshot: %v", err)
 	}
 
-	waitZoneOp(ctx, tc.ProjectID, zone, *op)
+	if err = op.Wait(ctx); err != nil {
+		t.Errorf("unable to wait for the operation: %v", err)
+	}
 
 	diskSnapshotLink := fmt.Sprintf("projects/%s/global/snapshots/%s", tc.ProjectID, snapshotName)
 
@@ -166,7 +164,9 @@ func TestComputeCreateInstanceFromSnapshotSnippets(t *testing.T) {
 		t.Errorf("unable to delete disk snapshot: %v", err)
 	}
 
-	waitZoneOp(ctx, tc.ProjectID, zone, *op)
+	if err = op.Wait(ctx); err != nil {
+		t.Errorf("unable to wait for the operation: %v", err)
+	}
 
 	deleteDiskReq := &computepb.DeleteDiskRequest{
 		Project: tc.ProjectID,
@@ -178,5 +178,7 @@ func TestComputeCreateInstanceFromSnapshotSnippets(t *testing.T) {
 		t.Errorf("unable to delete disk: %v", err)
 	}
 
-	waitZoneOp(ctx, tc.ProjectID, zone, *op)
+	if err = op.Wait(ctx); err != nil {
+		t.Errorf("unable to wait for the operation: %v", err)
+	}
 }

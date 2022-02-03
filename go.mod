@@ -8,7 +8,7 @@ require (
 	cloud.google.com/go/bigquery v1.26.0
 	cloud.google.com/go/bigtable v1.4.0
 	cloud.google.com/go/cloudtasks v1.0.0
-	cloud.google.com/go/compute v1.0.0
+	cloud.google.com/go/compute v1.2.0
 	cloud.google.com/go/containeranalysis v0.1.0
 	cloud.google.com/go/datacatalog v1.0.0
 	cloud.google.com/go/dataproc v1.0.0
@@ -65,11 +65,10 @@ require (
 	golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	golang.org/x/sys v0.0.0-20220111092808-5a964db01320 // indirect
 	golang.org/x/text v0.3.7
-	google.golang.org/api v0.65.0
+	google.golang.org/api v0.66.0
 	google.golang.org/appengine v1.6.7
-	google.golang.org/genproto v0.0.0-20220118154757-00ab72f36ad5
+	google.golang.org/genproto v0.0.0-20220201184016-50beb8ab5c44
 	google.golang.org/grpc v1.40.1
 	google.golang.org/grpc/examples v0.0.0-20200707005602-4258d12073b4
 	google.golang.org/protobuf v1.27.1
