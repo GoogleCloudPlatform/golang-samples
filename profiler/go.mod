@@ -12,5 +12,3 @@ require (
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 )
-
-replace github.com/GoogleCloudPlatform/golang-samples => ../

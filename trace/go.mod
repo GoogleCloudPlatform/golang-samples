@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/golang-samples/trace
 
 go 1.13
 
-replace github.com/GoogleCloudPlatform/golang-samples => ../
-
 require (
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.5
 	go.opencensus.io v0.23.0

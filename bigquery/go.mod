@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/bigquery v1.26.0
 	cloud.google.com/go/iam v0.1.1
 	cloud.google.com/go/storage v1.19.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20220204002944-f20d8abe1519
 	github.com/gofrs/uuid v3.4.0+incompatible
 	github.com/golang/protobuf v1.5.2
 	github.com/google/uuid v1.3.0
@@ -17,5 +17,3 @@ require (
 	google.golang.org/grpc v1.40.1
 	google.golang.org/protobuf v1.27.1
 )
-
-replace github.com/GoogleCloudPlatform/golang-samples => ../
