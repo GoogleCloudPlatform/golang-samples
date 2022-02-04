@@ -66,6 +66,8 @@ cloud.google.com/go/vision v1.0.0/go.mod h1:RMwqSpJWRkEh/F1l9coXew6F28DcsAnIfsV5
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
+github.com/GoogleCloudPlatform/golang-samples v0.0.0-20220204002944-f20d8abe1519 h1:clPu6MUnBe3QxfGvJ+MSAs1np8Dz2XhfprZYRBiy9ag=
+github.com/GoogleCloudPlatform/golang-samples v0.0.0-20220204002944-f20d8abe1519/go.mod h1:r7/PGjoVuxgavVjQlamYZ5JcibrQtI9HaZ2hqlB765E=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=
 github.com/aws/aws-sdk-go v1.39.0 h1:74BBwkEmiqBbi2CGflEh34l0YNtIibTjZsibGarkNjo=

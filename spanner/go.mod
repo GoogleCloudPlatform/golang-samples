@@ -7,7 +7,7 @@ require (
 	cloud.google.com/go/kms v1.0.0
 	cloud.google.com/go/spanner v1.25.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.5
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20211008220018-553d451c8611
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20220204002944-f20d8abe1519
 	github.com/golang/protobuf v1.5.2
 	github.com/google/uuid v1.3.0
 	github.com/googleapis/gax-go/v2 v2.1.1
@@ -38,5 +38,3 @@ require (
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 )
-
-replace github.com/GoogleCloudPlatform/golang-samples => ../
