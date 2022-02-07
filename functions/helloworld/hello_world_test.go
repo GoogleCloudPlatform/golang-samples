@@ -25,7 +25,7 @@ func TestHelloGet(t *testing.T) {
 	req := httptest.NewRequest("GET", "/", payload)
 
 	rr := httptest.NewRecorder()
-	HelloGet(rr, req)
+	helloGet(rr, req)
 
 	if got, want := rr.Body.String(), "Hello, World!"; got != want {
 		t.Errorf("HelloWorld = %q, want %q", got, want)

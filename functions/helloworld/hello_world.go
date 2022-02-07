@@ -20,10 +20,16 @@ package helloworld
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 )
 
-// HelloGet is an HTTP Cloud Function.
-func HelloGet(w http.ResponseWriter, r *http.Request) {
+func init() {
+	functions.HTTP("HelloGet", helloGet)
+}
+
+// helloGet is an HTTP Cloud Function.
+func helloGet(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Hello, World!")
 }
 
