@@ -3,8 +3,8 @@ module github.com/GoogleCloudPlatform/golang-samples/docs
 go 1.11
 
 require (
-	cloud.google.com/go/storage v1.19.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20220204002944-f20d8abe1519
+	cloud.google.com/go/storage v1.20.0
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20220204190444-2082aefea4f3
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
 	github.com/fluent/fluent-logger-golang v1.9.0
 	github.com/go-sql-driver/mysql v1.6.0
@@ -13,7 +13,7 @@ require (
 	github.com/sendgrid/smtpapi-go v0.6.7 // indirect
 	github.com/tinylib/msgp v1.1.6 // indirect
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
-	google.golang.org/api v0.65.0
+	google.golang.org/api v0.67.0
 	google.golang.org/appengine v1.6.7
 	gopkg.in/sendgrid/sendgrid-go.v2 v2.0.0
 )

@@ -2,12 +2,12 @@ module github.com/GoogleCloudPlatform/golang-samples/functions/functionsv2/label
 
 go 1.17
 
-require github.com/cloudevents/sdk-go/v2 v2.6.1
+require github.com/cloudevents/sdk-go/v2 v2.8.0
 
 require (
 	cloud.google.com/go/compute v0.1.0
-	google.golang.org/api v0.63.0
-	google.golang.org/genproto v0.0.0-20211221195035-429b39de9b1c
+	google.golang.org/api v0.67.0
+	google.golang.org/genproto v0.0.0-20220207185906-7721543eae58
 	google.golang.org/protobuf v1.27.1
 )
 
@@ -21,7 +21,7 @@ require (
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420 // indirect
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8 // indirect
-	golang.org/x/sys v0.0.0-20211210111614-af8b64212486 // indirect
+	golang.org/x/sys v0.0.0-20220128215802-99c3d69c2c27 // indirect
 	golang.org/x/text v0.3.6 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/appengine v1.6.7 // indirect

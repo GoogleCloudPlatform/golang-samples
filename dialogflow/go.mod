@@ -3,8 +3,8 @@ module github.com/GoogleCloudPlatform/golang-samples/dialogflow
 go 1.11
 
 require (
-	cloud.google.com/go/dialogflow v1.3.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20220204002944-f20d8abe1519
-	google.golang.org/api v0.65.0
-	google.golang.org/genproto v0.0.0-20220118154757-00ab72f36ad5
+	cloud.google.com/go/dialogflow v1.4.0
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20220204190444-2082aefea4f3
+	google.golang.org/api v0.67.0
+	google.golang.org/genproto v0.0.0-20220207185906-7721543eae58
 )

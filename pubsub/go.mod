@@ -6,11 +6,11 @@ require (
 	cloud.google.com/go/iam v0.1.1
 	cloud.google.com/go/kms v1.1.0 // indirect
 	cloud.google.com/go/pubsub v1.17.1
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20220204002944-f20d8abe1519
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20220204190444-2082aefea4f3
 	github.com/google/go-cmp v0.5.7
 	github.com/google/uuid v1.3.0
-	github.com/linkedin/goavro/v2 v2.10.0
-	google.golang.org/api v0.65.0
-	google.golang.org/grpc v1.40.1
+	github.com/linkedin/goavro/v2 v2.11.0
+	google.golang.org/api v0.67.0
+	google.golang.org/grpc v1.44.0
 	google.golang.org/protobuf v1.27.1
 )
