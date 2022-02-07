@@ -9,5 +9,5 @@ require (
 	github.com/google/uuid v1.3.0
 	google.golang.org/api v0.67.0
 	google.golang.org/appengine v1.6.7
-	google.golang.org/grpc v1.44.0
+	google.golang.org/grpc v1.40.1
 )
