@@ -28,11 +28,16 @@ import (
 )
 
 // copyBackup copies an existing backup to a given instance in same or different region, or in same or different project.
-func copyBackup(w io.Writer, instanceId string, copyBackupId string, sourceBackupId string) error {
-	// instanceId := "projects/my-project/instances/destination-instance"
+func copyBackup(w io.Writer, instancePath string, copyBackupId string, sourceBackupPath string) error {
+	// instancePath := "projects/my-project/instances/destination-instance"
 	// copyBackupId := "destination-backup"
-	// sourceBackupId := "projects/my-project/instances/source-instance/backups/source-backup"
-	ctx := context.Background()
+	// sourceBackupPath := "projects/my-project/instances/source-instance/backups/source-backup"
+
+	// Add timeout to context.
+	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
+	defer cancel()
+
+	// Instantiate database admin client.
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		return fmt.Errorf("database.NewDatabaseAdminClient: %v", err)
@@ -43,9 +48,9 @@ func copyBackup(w io.Writer, instanceId string, copyBackupId string, sourceBacku
 
 	// Instantiate the request for performing copy backup operation.
 	copyBackupReq := adminpb.CopyBackupRequest{
-		Parent:       instanceId,
+		Parent:       instancePath,
 		BackupId:     copyBackupId,
-		SourceBackup: sourceBackupId,
+		SourceBackup: sourceBackupPath,
 		ExpireTime:   &pbt.Timestamp{Seconds: expireTime.Unix(), Nanos: int32(expireTime.Nanosecond())},
 	}
 
@@ -63,7 +68,7 @@ func copyBackup(w io.Writer, instanceId string, copyBackupId string, sourceBacku
 
 	// Check if long-running copyBackup operation is completed.
 	if !copyBackupOp.Done() {
-		return fmt.Errorf("backup %v could not be copied to %v", sourceBackupId, copyBackupId)
+		return fmt.Errorf("backup %v could not be copied to %v", sourceBackupPath, copyBackupId)
 	}
 
 	// Get the name, create time, version time and backup size.
