@@ -50,23 +50,23 @@ func createJobWithStandaloneCaptions(w io.Writer, projectID string, location str
 			JobConfig: &transcoderpb.Job_Config{
 				Config: &transcoderpb.JobConfig{
 					Inputs: []*transcoderpb.Input{
-						&transcoderpb.Input{
+						{
 							Key: "input0",
 							Uri: inputVideoURI,
 						},
-						&transcoderpb.Input{
+						{
 							Key: "caption_input0",
 							Uri: inputCaptionsURI,
 						},
 					},
 					EditList: []*transcoderpb.EditAtom{
-						&transcoderpb.EditAtom{
+						{
 							Key:    "atom0",
 							Inputs: []string{"input0", "caption_input0"},
 						},
 					},
 					ElementaryStreams: []*transcoderpb.ElementaryStream{
-						&transcoderpb.ElementaryStream{
+						{
 							Key: "video_stream0",
 							ElementaryStream: &transcoderpb.ElementaryStream_VideoStream{
 								VideoStream: &transcoderpb.VideoStream{
@@ -107,17 +107,17 @@ func createJobWithStandaloneCaptions(w io.Writer, projectID string, location str
 						},
 					},
 					MuxStreams: []*transcoderpb.MuxStream{
-						&transcoderpb.MuxStream{
+						{
 							Key:               "sd-hls-fmp4",
 							Container:         "fmp4",
 							ElementaryStreams: []string{"video_stream0"},
 						},
-						&transcoderpb.MuxStream{
+						{
 							Key:               "audio-hls-fmp4",
 							Container:         "fmp4",
 							ElementaryStreams: []string{"audio_stream0"},
 						},
-						&transcoderpb.MuxStream{
+						{
 							Key:               "text-vtt",
 							Container:         "vtt",
 							ElementaryStreams: []string{"vtt-stream0"},
@@ -130,7 +130,7 @@ func createJobWithStandaloneCaptions(w io.Writer, projectID string, location str
 						},
 					},
 					Manifests: []*transcoderpb.Manifest{
-						&transcoderpb.Manifest{
+						{
 							FileName:   "manifest.m3u8",
 							Type:       transcoderpb.Manifest_HLS,
 							MuxStreams: []string{"sd-hls-fmp4", "audio-hls-fmp4", "text-vtt"},

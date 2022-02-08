@@ -48,23 +48,23 @@ func createJobWithEmbeddedCaptions(w io.Writer, projectID string, location strin
 			JobConfig: &transcoderpb.Job_Config{
 				Config: &transcoderpb.JobConfig{
 					Inputs: []*transcoderpb.Input{
-						&transcoderpb.Input{
+						{
 							Key: "input0",
 							Uri: inputVideoURI,
 						},
-						&transcoderpb.Input{
+						{
 							Key: "caption_input0",
 							Uri: inputCaptionsURI,
 						},
 					},
 					EditList: []*transcoderpb.EditAtom{
-						&transcoderpb.EditAtom{
+						{
 							Key:    "atom0",
 							Inputs: []string{"input0", "caption_input0"},
 						},
 					},
 					ElementaryStreams: []*transcoderpb.ElementaryStream{
-						&transcoderpb.ElementaryStream{
+						{
 							Key: "video_stream0",
 							ElementaryStream: &transcoderpb.ElementaryStream_VideoStream{
 								VideoStream: &transcoderpb.VideoStream{
@@ -105,35 +105,34 @@ func createJobWithEmbeddedCaptions(w io.Writer, projectID string, location strin
 						},
 					},
 					MuxStreams: []*transcoderpb.MuxStream{
-						&transcoderpb.MuxStream{
+						{
 							Key:               "sd",
 							Container:         "mp4",
 							ElementaryStreams: []string{"video_stream0", "audio_stream0"},
 						},
-						&transcoderpb.MuxStream{
+						{
 							Key:               "sd-hls",
 							Container:         "ts",
 							ElementaryStreams: []string{"video_stream0", "audio_stream0"},
 						},
-						&transcoderpb.MuxStream{
+						{
 							Key:               "sd-dash",
 							Container:         "fmp4",
 							ElementaryStreams: []string{"video_stream0"},
 						},
-						&transcoderpb.MuxStream{
+						{
 							Key:               "audio-dash",
 							Container:         "fmp4",
 							ElementaryStreams: []string{"audio_stream0"},
 						},
 					},
-
 					Manifests: []*transcoderpb.Manifest{
-						&transcoderpb.Manifest{
+						{
 							FileName:   "manifest.m3u8",
 							Type:       transcoderpb.Manifest_HLS,
 							MuxStreams: []string{"sd-hls"},
 						},
-						&transcoderpb.Manifest{
+						{
 							FileName:   "manifest.mpd",
 							Type:       transcoderpb.Manifest_DASH,
 							MuxStreams: []string{"sd-dash", "audio-dash"},
