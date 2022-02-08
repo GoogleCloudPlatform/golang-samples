@@ -13,7 +13,7 @@ require (
 	github.com/sendgrid/smtpapi-go v0.6.7 // indirect
 	github.com/tinylib/msgp v1.1.6 // indirect
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
-	google.golang.org/api v0.65.0
+	google.golang.org/api v0.66.0
 	google.golang.org/appengine v1.6.7
 	gopkg.in/sendgrid/sendgrid-go.v2 v2.0.0
 )
