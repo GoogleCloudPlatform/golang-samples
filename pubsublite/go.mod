@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/pubsublite
 
-go 1.11
+go 1.15
 
 require (
 	cloud.google.com/go/kms v1.1.0 // indirect
@@ -11,4 +11,5 @@ require (
 	github.com/google/uuid v1.3.0
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	google.golang.org/api v0.67.0
+	google.golang.org/grpc v1.44.0 // indirect
 )

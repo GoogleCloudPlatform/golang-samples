@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples
 
-go 1.11
+go 1.15
 
 require (
 	cloud.google.com/go/bigquery v1.26.0
@@ -20,6 +20,7 @@ require (
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/api v0.66.0
 	google.golang.org/genproto v0.0.0-20220201184016-50beb8ab5c44
+	google.golang.org/grpc v1.44.0 // indirect
 	google.golang.org/protobuf v1.27.1
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/yaml.v2 v2.4.0

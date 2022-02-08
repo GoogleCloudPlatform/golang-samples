@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/getting-started/bookshelf
 
-go 1.11
+go 1.15
 
 require (
 	cloud.google.com/go/errorreporting v0.1.0
@@ -10,4 +10,5 @@ require (
 	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
 	google.golang.org/api v0.58.0
+	google.golang.org/grpc v1.44.0 // indirect
 )

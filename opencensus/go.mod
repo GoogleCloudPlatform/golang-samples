@@ -13,5 +13,6 @@ require (
 	go.opencensus.io v0.23.0
 	golang.org/x/exp v0.0.0-20211008200323-95152d363a1c
 	google.golang.org/genproto v0.0.0-20220201184016-50beb8ab5c44
+	google.golang.org/grpc v1.44.0 // indirect
 	google.golang.org/protobuf v1.27.1
 )
