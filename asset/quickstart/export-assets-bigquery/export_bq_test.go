@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,34 +25,19 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestMain(t *testing.T) {
+func TestExportAssetsToBigQuery(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	env := map[string]string{"GOOGLE_CLOUD_PROJECT": tc.ProjectID}
-
-	ctx := context.Background()
-	// Creates a bigquery client.
-	client, err := bigquery.NewClient(ctx, tc.ProjectID)
-	if err != nil {
-		t.Fatalf("failed to create bigquery client: %v", err)
-	}
 	datasetID := strings.Replace(fmt.Sprintf("%s-for-assets", tc.ProjectID), "-", "_", -1)
-	createDataset(ctx, t, client, datasetID)
-
-	m := testutil.BuildMain(t)
-
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
-		out, _, err := m.Run(env, 240*time.Second)
-		if err != nil {
-			r.Errorf("error running main: %v:\n%v", err, out)
+		if err := exportAssetsToBigQuery(tc.ProjectID, datasetID); err != nil {
+			r.Errorf("unable to export asset: %v", err)
 			return
-		}
-		if got, want := string(out), "output_config:"; !strings.Contains(got, want) {
-			r.Errorf("stdout returned %s, wanted to contain %s", got, want)
 		}
 	})
 }
 
 func createDataset(ctx context.Context, t *testing.T, client *bigquery.Client, datasetID string) {
+	t.Helper()
 	d := client.Dataset(datasetID)
 	if _, err := d.Metadata(ctx); err == nil {
 		if errDelete := d.DeleteWithContents(ctx); errDelete != nil {

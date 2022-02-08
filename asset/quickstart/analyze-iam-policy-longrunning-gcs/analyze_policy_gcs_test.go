@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,42 +17,21 @@ package main
 import (
 	"context"
 	"fmt"
-	"strings"
 	"testing"
-	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestMain(t *testing.T) {
+func TestAnalyzeIAMPolicyGCS(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	env := map[string]string{"GOOGLE_CLOUD_PROJECT": tc.ProjectID}
 	scope := fmt.Sprintf("projects/%s", tc.ProjectID)
 	fullResourceName := fmt.Sprintf("//cloudresourcemanager.googleapis.com/projects/%s", tc.ProjectID)
-
-	m := testutil.BuildMain(t)
-	defer m.Cleanup()
-
-	if !m.Built() {
-		t.Errorf("failed to build app")
-	}
-
 	// Delete the bucket (if it exists) then recreate it.
-	ctx := context.Background()
 	bucketName := fmt.Sprintf("%s-for-assets", tc.ProjectID)
-	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName)
+	testutil.CleanBucket(context.Background(), t, tc.ProjectID, bucketName)
 	uri := fmt.Sprintf("gs://%s/client_library_obj", bucketName)
 
-	stdOut, stdErr, err := m.Run(env, 2*time.Minute, fmt.Sprintf("--scope=%s", scope), fmt.Sprintf("--fullResourceName=%s", fullResourceName), fmt.Sprintf("--uri=%s", uri))
-
-	if err != nil {
+	if err := analyzeIAMPolicyGCS(scope, fullResourceName, uri); err != nil {
 		t.Errorf("execution failed: %v", err)
-	}
-	if len(stdErr) > 0 {
-		t.Errorf("did not expect stderr output, got %d bytes: %s", len(stdErr), string(stdErr))
-	}
-	got := string(stdOut)
-	if !strings.Contains(got, "operation completed successfully") {
-		t.Errorf("stdout returned %s, wanted to contain %s", got, uri)
 	}
 }
