@@ -96,28 +96,11 @@ func createInstanceWithSnapshottedDataDisk(w io.Writer, projectID, zone, instanc
 		return fmt.Errorf("unable to create instance: %v", err)
 	}
 
-	zoneOperationsClient, err := compute.NewZoneOperationsRESTClient(ctx)
-	if err != nil {
-		return fmt.Errorf("NewZoneOperationsRESTClient: %v", err)
+	if err = op.Wait(ctx); err != nil {
+		return fmt.Errorf("unable to wait for the operation: %v", err)
 	}
-	defer zoneOperationsClient.Close()
 
-	for {
-		waitReq := &computepb.WaitZoneOperationRequest{
-			Operation: op.Proto().GetName(),
-			Project:   projectID,
-			Zone:      zone,
-		}
-		zoneOp, err := zoneOperationsClient.Wait(ctx, waitReq)
-		if err != nil {
-			return fmt.Errorf("unable to wait for the operation: %v", err)
-		}
-
-		if *zoneOp.Status.Enum() == computepb.Operation_DONE {
-			fmt.Fprintln(w, "Instance created")
-			break
-		}
-	}
+	fmt.Fprintln(w, "Instance created")
 
 	return nil
 }

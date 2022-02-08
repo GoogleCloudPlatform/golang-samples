@@ -10,7 +10,7 @@ require (
 	github.com/google/go-cmp v0.5.7
 	github.com/google/uuid v1.3.0
 	github.com/linkedin/goavro/v2 v2.10.0
-	google.golang.org/api v0.65.0
+	google.golang.org/api v0.66.0
 	google.golang.org/grpc v1.40.1
 	google.golang.org/protobuf v1.27.1
 )
