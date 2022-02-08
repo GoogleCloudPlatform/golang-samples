@@ -82,7 +82,7 @@ func TestHelloAuditLog(t *testing.T) {
 			if err != nil {
 				t.Errorf("HelloAuditLog() failed to create audit.LogEntryData: %v", err)
 			}
-			if err := HelloAuditLog(context.Background(), event); err != nil {
+			if err := helloAuditLog(context.Background(), event); err != nil {
 				t.Errorf("HelloAuditLog() unexpected error: %v", err)
 			}
 

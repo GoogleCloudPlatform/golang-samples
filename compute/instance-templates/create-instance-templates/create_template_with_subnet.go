@@ -73,27 +73,11 @@ func createTemplateWithSubnet(w io.Writer, projectID, network, subnetwork, templ
 		return fmt.Errorf("unable to create instance template: %v", err)
 	}
 
-	globalOperationsClient, err := compute.NewGlobalOperationsRESTClient(ctx)
-	if err != nil {
-		return fmt.Errorf("NewGlobalOperationsRESTClient: %v", err)
+	if err = op.Wait(ctx); err != nil {
+		return fmt.Errorf("unable to wait for the operation: %v", err)
 	}
-	defer globalOperationsClient.Close()
 
-	for {
-		waitReq := &computepb.WaitGlobalOperationRequest{
-			Operation: op.Proto().GetName(),
-			Project:   projectID,
-		}
-		zoneOp, err := globalOperationsClient.Wait(ctx, waitReq)
-		if err != nil {
-			return fmt.Errorf("unable to wait for the operation: %v", err)
-		}
-
-		if *zoneOp.Status.Enum() == computepb.Operation_DONE {
-			fmt.Fprintf(w, "Instance template created\n")
-			break
-		}
-	}
+	fmt.Fprintf(w, "Instance template created\n")
 
 	return nil
 }

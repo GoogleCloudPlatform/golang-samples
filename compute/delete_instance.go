@@ -47,28 +47,11 @@ func deleteInstance(w io.Writer, projectID, zone, instanceName string) error {
 		return fmt.Errorf("unable to delete instance: %v", err)
 	}
 
-	zoneOperationsClient, err := compute.NewZoneOperationsRESTClient(ctx)
-	if err != nil {
-		return fmt.Errorf("NewZoneOperationsRESTClient: %v", err)
+	if err = op.Wait(ctx); err != nil {
+		return fmt.Errorf("unable to wait for the operation: %v", err)
 	}
-	defer zoneOperationsClient.Close()
 
-	for {
-		waitReq := &computepb.WaitZoneOperationRequest{
-			Operation: op.Proto().GetName(),
-			Project:   projectID,
-			Zone:      zone,
-		}
-		zoneOp, err := zoneOperationsClient.Wait(ctx, waitReq)
-		if err != nil {
-			return fmt.Errorf("unable to wait for the operation: %v", err)
-		}
-
-		if *zoneOp.Status.Enum() == computepb.Operation_DONE {
-			fmt.Fprintf(w, "Instance deleted\n")
-			break
-		}
-	}
+	fmt.Fprintf(w, "Instance deleted\n")
 
 	return nil
 }
