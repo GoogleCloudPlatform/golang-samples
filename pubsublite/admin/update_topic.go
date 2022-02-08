@@ -24,11 +24,13 @@ import (
 	"cloud.google.com/go/pubsublite"
 )
 
-func updateTopic(w io.Writer, projectID, region, zone, topicID string) error {
+func updateTopic(w io.Writer, projectID, region, zone, topicID, reservation string, regional bool) error {
 	// projectID := "my-project-id"
 	// region := "us-central1"
 	// zone := "us-central1-a"
 	// topicID := "my-topic"
+	// reservation := "projects/my-project-id/reservations/my-reservation"
+	// regional := "true"
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
 	if err != nil {
@@ -36,7 +38,12 @@ func updateTopic(w io.Writer, projectID, region, zone, topicID string) error {
 	}
 	defer client.Close()
 
-	topicPath := fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, zone, topicID)
+	var topicPath string
+	if regional {
+		topicPath = fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, region, topicID)
+	} else {
+		topicPath = fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, zone, topicID)
+	}
 	// For ranges of fields in TopicConfigToUpdate, see https://pkg.go.dev/cloud.google.com/go/pubsublite/#TopicConfigToUpdate
 	config := pubsublite.TopicConfigToUpdate{
 		Name:                       topicPath,
@@ -45,12 +52,17 @@ func updateTopic(w io.Writer, projectID, region, zone, topicID string) error {
 		SubscribeCapacityMiBPerSec: 16,
 		PerPartitionBytes:          60 * 1024 * 1024 * 1024,
 		RetentionDuration:          24 * time.Hour,
+		ThroughputReservation:      reservation,
 	}
 	updatedCfg, err := client.UpdateTopic(ctx, config)
 	if err != nil {
 		return fmt.Errorf("client.UpdateTopic got err: %v", err)
 	}
-	fmt.Fprintf(w, "Updated topic: %#v\n", *updatedCfg)
+	if regional {
+		fmt.Fprintf(w, "Updated regional topic: %v\n", updatedCfg)
+	} else {
+		fmt.Fprintf(w, "Updated zonal topic: %v\n", updatedCfg)
+	}
 	return nil
 }
 
