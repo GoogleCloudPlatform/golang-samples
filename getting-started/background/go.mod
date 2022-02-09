@@ -10,5 +10,5 @@ require (
 	cloud.google.com/go/pubsub v1.6.1
 	cloud.google.com/go/translate v1.0.0
 	golang.org/x/text v0.3.7
-	google.golang.org/grpc v1.40.1
+	google.golang.org/grpc v1.44.0
 )

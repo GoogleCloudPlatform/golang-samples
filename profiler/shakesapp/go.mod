@@ -7,5 +7,5 @@ require (
 	cloud.google.com/go/storage v1.18.2
 	github.com/golang/protobuf v1.5.2
 	google.golang.org/api v0.58.0
-	google.golang.org/grpc v1.40.0
+	google.golang.org/grpc v1.44.0
 )
