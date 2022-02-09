@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/pubsub
 
-go 1.11
+go 1.15
 
 require (
 	cloud.google.com/go/iam v0.1.1
@@ -11,6 +11,6 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/linkedin/goavro/v2 v2.10.0
 	google.golang.org/api v0.66.0
-	google.golang.org/grpc v1.40.1
+	google.golang.org/grpc v1.44.0
 	google.golang.org/protobuf v1.27.1
 )

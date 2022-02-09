@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/datacatalog
 
-go 1.11
+go 1.15
 
 require (
 	cloud.google.com/go/bigquery v1.26.0

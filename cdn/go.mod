@@ -1,3 +1,3 @@
 module github.com/GoogleCloudPlatform/golang-samples/cdn
 
-go 1.11
+go 1.15

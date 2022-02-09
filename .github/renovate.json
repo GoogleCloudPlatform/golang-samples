@@ -21,7 +21,6 @@
     },
     {
       "packageNames": [
-        "golang.org/x/net",
         "golang.org/x/tools",
         "cloud.google.com/go/pubsublite",
         "contrib.go.opencensus.io/exporter/stackdriver"
