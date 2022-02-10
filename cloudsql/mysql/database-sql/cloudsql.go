@@ -139,7 +139,7 @@ func mustConnect() *sql.DB {
 		err error
 	)
 
-	// Use a TCP socket when DB_HOST (e.g., 127.0.0.1) is defined
+	// Use a TCP socket when INSTANCE_HOST (e.g., 127.0.0.1) is defined
 	if os.Getenv("INSTANCE_HOST") != "" {
 		db, err = connectTCPSocket()
 		if err != nil {
