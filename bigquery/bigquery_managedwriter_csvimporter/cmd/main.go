@@ -13,7 +13,8 @@
 // limitations under the License.
 
 // This sample application leverages the BigQuery storage Write API to bulk
-// ingest a CSV file directly.
+// ingest a CSV file directly.  It uses dynamic protocol buffer manipulation
+// and schema comparison to handle arbitrary CSV text fields.
 package main
 
 import (
@@ -86,7 +87,6 @@ func main() {
 	var wg sync.WaitGroup
 
 	// Start the GCS reader.
-
 	wg.Add(1)
 	go func() {
 		readerErr = processGCSObject(ctx, *bucketID, *objectID, *optimalReqSize, converter, dataChan, *verbose)

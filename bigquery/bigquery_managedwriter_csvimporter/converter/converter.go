@@ -59,8 +59,10 @@ func NewCSVConverter(schema *storagepb.TableSchema) (*CSVConverter, error) {
 }
 
 // ValidateColumns ensures that the CSV headers can be mapped to the
-// table by comparing the schema.  It also identifies the case where
-// the CSV data does not include fields that the table schema requires.
+// table by comparing the schema.  Additional, CSV fields must be defined
+// as string fields in the destination table.
+//
+// It also ensures the table has no required fields that aren't present in the CSV column list.
 func (conv *CSVConverter) Validate(colNames []string) error {
 
 	verifiedCols := make(map[string]bool)
@@ -108,7 +110,8 @@ func (conv *CSVConverter) Convert(data map[string]string) ([]byte, error) {
 	return proto.Marshal(msg)
 }
 
-// ProtoSchema produces the protocol buffer schema
+// ProtoSchema produces the protocol buffer schema suitable for consumption by the
+// BigQuery storage write API.
 func (conv *CSVConverter) ProtoSchema() (*descriptorpb.DescriptorProto, error) {
 	return adapt.NormalizeDescriptor(conv.msgDescriptor)
 }
