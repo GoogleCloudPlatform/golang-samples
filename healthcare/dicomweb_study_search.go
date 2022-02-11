@@ -71,7 +71,11 @@ func dicomWebSearchStudies(w io.Writer, projectID, location, datasetID, dicomSto
 		return fmt.Errorf("SearchForStudies: status %d %s: %s", resp.StatusCode, resp.Status, respBytes)
 	}
 	respString := string(respBytes)
-	fmt.Fprintf(w, "Found studies: %s\n", respString)
+	if len(respString) > 0 {
+		fmt.Fprintf(w, "Found studies: %s\n", respString)
+	} else {
+		fmt.Println("No studies found.")
+	}
 
 	return nil
 }
