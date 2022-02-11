@@ -39,9 +39,10 @@ func TestApp(t *testing.T) {
 	if err != nil {
 		t.Errorf("setupBigQueryResources: %v", err)
 	}
-	defer cleanup()
+	t.Fatalf("%q %q", dataset, table)
 
-	stdOut, stdErr, err := m.Run(nil, 30*time.Second,
+	defer cleanup()
+	stdOut, stdErr, err := m.Run(nil, 60*time.Second,
 		fmt.Sprintf("--project_id=%s", tc.ProjectID),
 		fmt.Sprintf("--dataset=%s", dataset),
 		fmt.Sprintf("--table=%s", table))
