@@ -45,9 +45,10 @@ func main() {
 		tableID        = flag.String("table", "", "destination BigQuery table name")
 		bucketID       = flag.String("bucket", "cloud-samples-data", "Cloud Storage Bucket with the CSV")
 		objectID       = flag.String("object", "bigquery/flights/bq-flights-lax.csv", "Cloud Storage Object path")
-		streamFanout   = flag.Int("fanout", 20, "stream fanout used to write data")
-		optimalReqSize = flag.Int64("optimal_request_size", 8*1e6, "optimal request size in bytes")
+		streamFanout   = flag.Int("fanout", 5, "stream fanout used to write data")
+		optimalReqSize = flag.Int64("optimal_request_size", 1*1e6, "optimal request size in bytes")
 		verbose        = flag.Bool("verbose", true, "whether to log verbosely during execution")
+		maxRows        = flag.Int64("max_rows", 0, "maximum rows to ingest.  Ignored if zero or negative.")
 	)
 	flag.Parse()
 	if err := validateFlags(*projectID, *datasetID, *tableID, *streamFanout, *optimalReqSize); err != nil {
@@ -89,7 +90,7 @@ func main() {
 	// Start the GCS reader.
 	wg.Add(1)
 	go func() {
-		readerErr = processGCSObject(ctx, *bucketID, *objectID, *optimalReqSize, converter, dataChan, *verbose)
+		readerErr = processGCSObject(ctx, *bucketID, *objectID, *optimalReqSize, converter, dataChan, *maxRows, *verbose)
 		wg.Done()
 	}()
 
@@ -143,9 +144,7 @@ func main() {
 		log.Fatalf("commit failed: %v", err)
 	}
 
-	if *verbose {
-		log.Printf("committed data successfully")
-	}
+	fmt.Printf("committed data successfully using %d streams to %s", *streamFanout, tableName)
 
 }
 
@@ -169,7 +168,7 @@ func validateFlags(project, dataset, table string, fanout int, reqSize int64) er
 	return nil
 }
 
-func processGCSObject(ctx context.Context, bucket, object string, reqSize int64, converter *converter.CSVConverter, dataChan chan<- [][]byte, verbose bool) error {
+func processGCSObject(ctx context.Context, bucket, object string, reqSize int64, converter *converter.CSVConverter, dataChan chan<- [][]byte, maxRows int64, verbose bool) error {
 	defer close(dataChan)
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -237,6 +236,9 @@ func processGCSObject(ctx context.Context, bucket, object string, reqSize int64,
 			// Reset pendingRows and tracking.
 			pendingRows = [][]byte{b}
 			pendingBytes = int64(len(b))
+		}
+		if maxRows > 0 && dataLine >= maxRows {
+			break
 		}
 	}
 	// We've reached the end of the CSV.  If there's any data still buffered, release it for appending.

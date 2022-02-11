@@ -17,6 +17,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 
@@ -39,20 +40,22 @@ func TestApp(t *testing.T) {
 	if err != nil {
 		t.Errorf("setupBigQueryResources: %v", err)
 	}
-	t.Fatalf("%q %q", dataset, table)
 
 	defer cleanup()
-	stdOut, stdErr, err := m.Run(nil, 60*time.Second,
+	stdOut, stdErr, err := m.Run(nil, 30*time.Second,
 		fmt.Sprintf("--project_id=%s", tc.ProjectID),
 		fmt.Sprintf("--dataset=%s", dataset),
-		fmt.Sprintf("--table=%s", table))
+		fmt.Sprintf("--table=%s", table),
+		fmt.Sprintf("--max_rows=100000"),
+		fmt.Sprintf("--verbose=false"))
 	if err != nil {
 		t.Errorf("execution failed: %v", err)
 	}
 
 	// We don't look for specific strings, just expect at least 1kb of output.
-	if len(stdOut) < 1024 {
-		t.Errorf("expected more output.  Stdout: %s", string(stdOut))
+	testString := "committed data successfully"
+	if !strings.Contains(string(stdOut), testString) {
+		t.Errorf("expected commit message.  Stdout: %s", string(stdOut))
 	}
 
 	if len(stdErr) > 0 {
