@@ -16,7 +16,7 @@ runtime: custom
 env: flex
 
 env_variables:
-  INSTANCE_UNIX_SOCKET: <project>:<region>:<instance>
+  INSTANCE_UNIX_SOCKET: /cloudsql/<project>:<region>:<instance>
   DB_USER: <your_database_username>
   DB_PASS: <your_database_password>
   DB_NAME: <your_database_name>
