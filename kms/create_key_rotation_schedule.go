@@ -22,9 +22,9 @@ import (
 	"time"
 
 	kms "cloud.google.com/go/kms/apiv1"
-	"github.com/golang/protobuf/ptypes/duration"
-	"github.com/golang/protobuf/ptypes/timestamp"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
+	"google.golang.org/protobuf/types/known/durationpb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // createKeyRotationSchedule creates a key with a rotation schedule.
@@ -52,13 +52,13 @@ func createKeyRotationSchedule(w io.Writer, parent, id string) error {
 
 			// Rotate the key every 30 days
 			RotationSchedule: &kmspb.CryptoKey_RotationPeriod{
-				RotationPeriod: &duration.Duration{
+				RotationPeriod: &durationpb.Duration{
 					Seconds: int64(60 * 60 * 24 * 30), // 30 days
 				},
 			},
 
 			// Start the first rotation in 24 hours
-			NextRotationTime: &timestamp.Timestamp{
+			NextRotationTime: &timestamppb.Timestamp{
 				Seconds: time.Now().Add(24 * time.Hour).Unix(),
 			},
 		},
