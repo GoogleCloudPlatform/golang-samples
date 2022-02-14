@@ -42,7 +42,6 @@ RUN set -x && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -
 
 # Copy the binary to the production image from the builder stage.
 COPY --from=builder /app/server /app/server
-COPY ./templates /app/templates
 # Copy any certificates IFF present.
 COPY ./certs /app/certs
 
