@@ -28,11 +28,12 @@ import (
 // Cleanup deletes all previous test topics/subscriptions from previous test
 // runs. This prevents previous test failures from building up resources that
 // count against quota.
-func Cleanup(t *testing.T, client *pubsublite.AdminClient, proj, namePrefix string, zones []string) {
+func Cleanup(t *testing.T, client *pubsublite.AdminClient, proj, region, namePrefix string, zones []string) {
 	ctx := context.Background()
 
 	topicSubstring := "/topics/" + namePrefix
 	subscriptionSubstring := "/subscriptions/" + namePrefix
+	reservationSubstring := "/reservations/" + namePrefix
 
 	for _, zone := range zones {
 		parent := fmt.Sprintf("projects/%s/locations/%s", proj, zone)
@@ -68,6 +69,23 @@ func Cleanup(t *testing.T, client *pubsublite.AdminClient, proj, namePrefix stri
 			if err := client.DeleteSubscription(ctx, sub.Name); err != nil {
 				t.Fatalf("AdminClient.DeleteSubscription got err: %v", err)
 			}
+		}
+	}
+
+	resIter := client.Reservations(ctx, fmt.Sprintf("projects/%s/locations/%s", proj, region))
+	for {
+		res, err := resIter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			t.Fatalf("resIter.Next() got err: %v", err)
+		}
+		if !strings.Contains(res.Name, reservationSubstring) {
+			continue
+		}
+		if err := client.DeleteReservation(ctx, res.Name); err != nil {
+			t.Fatalf("AdminClient.DeleteReservation got err: %v", err)
 		}
 	}
 }

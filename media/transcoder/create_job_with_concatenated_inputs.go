@@ -57,23 +57,23 @@ func createJobWithConcatenatedInputs(w io.Writer, projectID string, location str
 			JobConfig: &transcoderpb.Job_Config{
 				Config: &transcoderpb.JobConfig{
 					Inputs: []*transcoderpb.Input{
-						&transcoderpb.Input{
+						{
 							Key: "input1",
 							Uri: input1URI,
 						},
-						&transcoderpb.Input{
+						{
 							Key: "input2",
 							Uri: input2URI,
 						},
 					},
 					EditList: []*transcoderpb.EditAtom{
-						&transcoderpb.EditAtom{
+						{
 							Key:             "atom1",
 							Inputs:          []string{"input1"},
 							StartTimeOffset: durationpb.New(startTimeInput1),
 							EndTimeOffset:   durationpb.New(endTimeInput1),
 						},
-						&transcoderpb.EditAtom{
+						{
 							Key:             "atom2",
 							Inputs:          []string{"input2"},
 							StartTimeOffset: durationpb.New(startTimeInput2),
@@ -81,7 +81,7 @@ func createJobWithConcatenatedInputs(w io.Writer, projectID string, location str
 						},
 					},
 					ElementaryStreams: []*transcoderpb.ElementaryStream{
-						&transcoderpb.ElementaryStream{
+						{
 							Key: "video_stream0",
 							ElementaryStream: &transcoderpb.ElementaryStream_VideoStream{
 								VideoStream: &transcoderpb.VideoStream{
@@ -96,7 +96,7 @@ func createJobWithConcatenatedInputs(w io.Writer, projectID string, location str
 								},
 							},
 						},
-						&transcoderpb.ElementaryStream{
+						{
 							Key: "audio_stream0",
 							ElementaryStream: &transcoderpb.ElementaryStream_AudioStream{
 								AudioStream: &transcoderpb.AudioStream{
@@ -107,7 +107,7 @@ func createJobWithConcatenatedInputs(w io.Writer, projectID string, location str
 						},
 					},
 					MuxStreams: []*transcoderpb.MuxStream{
-						&transcoderpb.MuxStream{
+						{
 							Key:               "sd",
 							Container:         "mp4",
 							ElementaryStreams: []string{"video_stream0", "audio_stream0"},
