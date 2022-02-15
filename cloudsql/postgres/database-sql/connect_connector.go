@@ -45,6 +45,7 @@ func connectWithConnector() (*sql.DB, error) {
 		dbPwd                  = mustGetenv("DB_PASS")                  // e.g. 'my-db-password'
 		dbName                 = mustGetenv("DB_NAME")                  // e.g. 'my-database'
 		instanceConnectionName = mustGetenv("INSTANCE_CONNECTION_NAME") // e.g. 'project:region:instance'
+		usePrivate             = os.Getenv("PRIVATE_IP")
 	)
 	if dbUser == "" && dbIAMUser == "" {
 		log.Fatal("Wawrning: One of DB_USER or DB_IAM_USER must be defined")
@@ -64,6 +65,14 @@ func connectWithConnector() (*sql.DB, error) {
 			}
 			return d.Dial(ctx, instanceConnectionName)
 			// [END cloud_sql_postgres_databasesql_auto_iam_authn]
+		}
+		if usePrivate != "" {
+			d, err := cloudsqlconn.NewDialer(ctx,
+				cloudsqlconn.WithDefaultDialOptions(cloudsqlconn.WithPrivateIP()))
+			if err != nil {
+				return nil, err
+			}
+			return d.Dial(ctx, instanceConnectionName)
 		}
 		// Use the Cloud SQL connector to handle connecting to the instance.
 		// This approach does *NOT* require the Cloud SQL proxy.
