@@ -16,10 +16,7 @@ runtime: custom
 env: flex
 
 env_variables:
-  # Replace INSTANCE_CONNECTION_NAME with the value obtained when configuring your
-  # Cloud SQL instance, available from the Google Cloud Console or from the Cloud SDK.
-  # For Cloud SQL 2nd generation instances, this should be in the form of "project:region:instance".
-  INSTANCE_UNIX_SOCKET: <project>:<region>:<instance>
+  INSTANCE_UNIX_SOCKET: /cloudsql/<project>:<region>:<instance>
   DB_USER: <your_database_username>
   DB_PASS: <your_database_password>
   DB_NAME: <your_database_name>
