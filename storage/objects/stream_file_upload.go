@@ -43,8 +43,20 @@ func streamFileUpload(w io.Writer, bucket, object string) error {
 	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
 	defer cancel()
 
+	o := client.Bucket(bucket).Object(object)
+
+	// Add preconditions so that the upload may safely retry on transient errors.
+	// In this case, we assume the object does not yet exist.
+	// To add preconditions for an existing object use the following instead:
+	// attrs, err := o.Attrs(ctx)
+	// if err != nil {
+	// 	return fmt.Errorf("object.Attrs: %v", err)
+	// }
+	// o = o.If(storage.Conditions{GenerationMatch: attrs.Generation})
+	o = o.If(storage.Conditions{DoesNotExist: true})
+
 	// Upload an object with storage.Writer.
-	wc := client.Bucket(bucket).Object(object).NewWriter(ctx)
+	wc := o.NewWriter(ctx)
 	wc.ChunkSize = 0 // note retries are not supported for chunk size 0.
 
 	if _, err = io.Copy(wc, buf); err != nil {
