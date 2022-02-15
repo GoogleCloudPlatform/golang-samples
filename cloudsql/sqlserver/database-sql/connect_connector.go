@@ -1,10 +1,10 @@
-// Copyright 2021 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//      https://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,12 +28,18 @@ import (
 )
 
 type csqlDialer struct {
-	connName string
+	dialer     *cloudsqlconn.Dialer
+	connName   string
+	usePrivate bool
 }
 
 // DialContext adheres to the mssql.Dialer interface.
 func (c *csqlDialer) DialContext(ctx context.Context, network, addr string) (net.Conn, error) {
-	return cloudsqlconn.Dial(ctx, c.connName)
+	var opts []cloudsqlconn.DialOption
+	if c.usePrivate {
+		opts = append(opts, cloudsqlconn.WithPrivateIP())
+	}
+	return c.dialer.Dial(ctx, c.connName, opts...)
 }
 
 func connectWithConnector() (*sql.DB, error) {
@@ -50,6 +56,7 @@ func connectWithConnector() (*sql.DB, error) {
 		dbPwd                  = mustGetenv("DB_PASS")                  // e.g. 'my-db-password'
 		dbName                 = mustGetenv("DB_NAME")                  // e.g. 'my-database'
 		instanceConnectionName = mustGetenv("INSTANCE_CONNECTION_NAME") // e.g. 'project:region:instance'
+		usePrivate             = os.Getenv("USE_PRIVATE")
 	)
 
 	dbURI := fmt.Sprintf("user id=%s;password=%s;database=%s;", dbUser, dbPwd, dbName)
@@ -57,7 +64,15 @@ func connectWithConnector() (*sql.DB, error) {
 	if err != nil {
 		return nil, fmt.Errorf("mssql.NewConnector: %v", err)
 	}
-	c.Dialer = &csqlDialer{connName: instanceConnectionName}
+	dialer, err := cloudsqlconn.NewDialer(context.Background())
+	if err != nil {
+		return nil, fmt.Errorf("cloudsqlconn.NewDailer: %v", err)
+	}
+	c.Dialer = &csqlDialer{
+		dialer:     dialer,
+		connName:   instanceConnectionName,
+		usePrivate: usePrivate != "",
+	}
 
 	dbPool := sql.OpenDB(c)
 	if err != nil {
