@@ -90,6 +90,7 @@ export SCC_PUBSUB_TOPIC="projects/project-a-id/topics/notifications-sample-topic
 export SCC_PUBSUB_SUBSCRIPTION="notification-sample-subscription"
 
 export GOLANG_SAMPLES_SPANNER=projects/golang-samples-tests/instances/golang-samples-tests
+export GOLANG_SAMPLES_SPANNER_INSTANCE_CONFIG="regional-us-west1"
 export GOLANG_SAMPLES_BIGTABLE_PROJECT=golang-samples-tests
 export GOLANG_SAMPLES_BIGTABLE_INSTANCE=testing-instance
 

@@ -241,6 +241,18 @@ func TestResumePublishWithOrderingKey(t *testing.T) {
 		t.Fatalf("failed to resume with ordering keys:\n got: %v", got)
 	}
 }
+
+func TestPublishWithFlowControl(t *testing.T) {
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	client := setup(t)
+	client.CreateTopic(ctx, topicID)
+	buf := new(bytes.Buffer)
+	if err := publishWithFlowControlSettings(buf, tc.ProjectID, topicID); err != nil {
+		t.Errorf("failed to publish message: %v", err)
+	}
+}
+
 func TestDelete(t *testing.T) {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)

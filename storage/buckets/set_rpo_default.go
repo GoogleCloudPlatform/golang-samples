@@ -14,7 +14,7 @@
 
 package buckets
 
-// [START storage_set_public_access_prevention_unspecified]
+// [START storage_set_rpo_default]
 import (
 	"context"
 	"fmt"
@@ -24,9 +24,9 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// setPublicAccessPreventionUnspecified sets public access prevention to
-// "unspecified" for the bucket.
-func setPublicAccessPreventionUnspecified(w io.Writer, bucketName string) error {
+// setRPODefault disables turbo replication for the bucket by setting RPO to
+// "DEFAULT".
+func setRPODefault(w io.Writer, bucketName string) error {
 	// bucketName := "bucket-name"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
@@ -39,14 +39,14 @@ func setPublicAccessPreventionUnspecified(w io.Writer, bucketName string) error 
 	defer cancel()
 
 	bucket := client.Bucket(bucketName)
-	setPublicAccessPrevention := storage.BucketAttrsToUpdate{
-		PublicAccessPrevention: storage.PublicAccessPreventionUnspecified,
+	setRPO := storage.BucketAttrsToUpdate{
+		RPO: storage.RPODefault,
 	}
-	if _, err := bucket.Update(ctx, setPublicAccessPrevention); err != nil {
+	if _, err := bucket.Update(ctx, setRPO); err != nil {
 		return fmt.Errorf("Bucket(%q).Update: %v", bucketName, err)
 	}
-	fmt.Fprintf(w, "Public access prevention is 'unspecified' for %v", bucketName)
+	fmt.Fprintf(w, "Turbo replication disabled for %v", bucketName)
 	return nil
 }
 
-// [END storage_set_public_access_prevention_unspecified]
+// [END storage_set_rpo_default]

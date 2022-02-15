@@ -23,7 +23,7 @@ import (
 	"cloud.google.com/go/pubsublite"
 )
 
-func getTopic(w io.Writer, projectID, region, zone, topicID string) error {
+func getTopic(w io.Writer, projectID, region, zone, topicID string, regional bool) error {
 	// projectID := "my-project-id"
 	// region := "us-central1"
 	// zone := "us-central1-a"
@@ -35,8 +35,13 @@ func getTopic(w io.Writer, projectID, region, zone, topicID string) error {
 	}
 	defer client.Close()
 
-	topicName := fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, zone, topicID)
-	topic, err := client.Topic(ctx, topicName)
+	var topicPath string
+	if regional {
+		topicPath = fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, region, topicID)
+	} else {
+		topicPath = fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, zone, topicID)
+	}
+	topic, err := client.Topic(ctx, topicPath)
 	if err != nil {
 		return fmt.Errorf("client.Topic got err: %v", err)
 	}

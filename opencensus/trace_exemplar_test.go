@@ -27,12 +27,16 @@ import (
 
 func writeTimeSeriesData(projectID string) error {
 	ctx := context.Background()
-	dataPoint := createDataPointWithExemplar()
+	dataPoint, err := createDataPointWithExemplar(projectID)
+	if err != nil {
+		return err
+	}
 	// Creates a client.
 	client, err := monitoring.NewMetricClient(ctx)
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 	// Writes time series data.
 	err = client.CreateTimeSeries(ctx, &monitoringpb.CreateTimeSeriesRequest{
 		Name: monitoring.MetricProjectPath(projectID),

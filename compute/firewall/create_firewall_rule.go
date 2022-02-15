@@ -45,7 +45,7 @@ func createFirewallRule(w io.Writer, projectID, firewallRuleName, networkName st
 				Ports:      []string{"80", "443"},
 			},
 		},
-		Direction: computepb.Firewall_INGRESS.Enum(),
+		Direction: proto.String(computepb.Firewall_INGRESS.String()),
 		Name:      &firewallRuleName,
 		TargetTags: []string{
 			"web",
@@ -72,27 +72,11 @@ func createFirewallRule(w io.Writer, projectID, firewallRuleName, networkName st
 		return fmt.Errorf("unable to create firewall rule: %v", err)
 	}
 
-	globalOperationsClient, err := compute.NewGlobalOperationsRESTClient(ctx)
-	if err != nil {
-		return fmt.Errorf("NewGlobalOperationsRESTClient: %v", err)
+	if err = op.Wait(ctx); err != nil {
+		return fmt.Errorf("unable to wait for the operation: %v", err)
 	}
-	defer globalOperationsClient.Close()
 
-	for {
-		waitReq := &computepb.WaitGlobalOperationRequest{
-			Operation: op.Proto().GetName(),
-			Project:   projectID,
-		}
-		globalOp, err := globalOperationsClient.Wait(ctx, waitReq)
-		if err != nil {
-			return fmt.Errorf("unable to wait for the operation: %v", err)
-		}
-
-		if *globalOp.Status.Enum() == computepb.Operation_DONE {
-			fmt.Fprintf(w, "Firewall rule created\n")
-			break
-		}
-	}
+	fmt.Fprintf(w, "Firewall rule created\n")
 
 	return nil
 }

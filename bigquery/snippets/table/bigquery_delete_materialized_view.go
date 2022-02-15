@@ -12,38 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package topics
+package table
 
-// [START pubsub_create_topic_with_schema]
+// [START bigquery_delete_materialized_view]
 import (
 	"context"
 	"fmt"
-	"io"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/bigquery"
 )
 
-func createWithSchema(w io.Writer, projectID, topicID, schemaID string) error {
+// deleteMaterializedView demonstrates deletion of a BigQuery materialized view.
+func deleteMaterializedView(projectID, datasetID, viewID string) error {
 	// projectID := "my-project-id"
-	// topicID := "my-topic"
+	// datasetID := "mydataset"
+	// tableID := "myview"
 	ctx := context.Background()
-	client, err := pubsub.NewClient(ctx, projectID)
+	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("pubsub.NewClient: %v", err)
+		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
-	tc := &pubsub.TopicConfig{
-		SchemaSettings: &pubsub.SchemaSettings{
-			Schema:   fmt.Sprintf("projects/%s/schemas/%s", projectID, schemaID),
-			Encoding: pubsub.EncodingJSON,
-		},
+	view := client.Dataset(datasetID).Table(viewID)
+	if err := view.Delete(ctx); err != nil {
+		return err
 	}
-	t, err := client.CreateTopicWithConfig(ctx, topicID, tc)
-	if err != nil {
-		return fmt.Errorf("client.CreateTopicWithConfig: %v", err)
-	}
-	fmt.Fprintf(w, "Topic created with schema: %v\n", t)
 	return nil
 }
 
-// [END pubsub_create_topic_with_schema]
+// [END bigquery_delete_materialized_view]

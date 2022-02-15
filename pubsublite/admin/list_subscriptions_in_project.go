@@ -35,6 +35,7 @@ func listSubscriptionsInProject(w io.Writer, projectID, region, zone string) err
 	}
 	defer client.Close()
 
+	// To list topics in a region, set location to a cloud region instead.
 	parent := fmt.Sprintf("projects/%s/locations/%s", projectID, zone)
 	subIter := client.Subscriptions(ctx, parent)
 	for {

@@ -48,6 +48,7 @@ func getBucketMetadata(w io.Writer, bucketName string) (*storage.BucketAttrs, er
 	fmt.Fprintf(w, "Location: %v\n", attrs.Location)
 	fmt.Fprintf(w, "LocationType: %v\n", attrs.LocationType)
 	fmt.Fprintf(w, "StorageClass: %v\n", attrs.StorageClass)
+	fmt.Fprintf(w, "Turbo replication (RPO): %v\n", attrs.RPO)
 	fmt.Fprintf(w, "TimeCreated: %v\n", attrs.Created)
 	fmt.Fprintf(w, "Metageneration: %v\n", attrs.MetaGeneration)
 	fmt.Fprintf(w, "PredefinedACL: %v\n", attrs.PredefinedACL)
