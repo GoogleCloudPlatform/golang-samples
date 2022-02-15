@@ -1,10 +1,10 @@
-// Copyright 2021 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//      https://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,10 +39,10 @@ func connectUnixSocket() (*sql.DB, error) {
 	}
 
 	var (
-		dbUser         = mustGetenv("DB_USER")          // e.g. 'my-db-user'
-		dbPwd          = mustGetenv("DB_PASS")          // e.g. 'my-db-password'
-		unixSocketPath = mustGetenv("UNIX_SOCKET_PATH") // e.g. '/cloudsql/project:region:instance'
-		dbName         = mustGetenv("DB_NAME")          // e.g. 'my-database'
+		dbUser         = mustGetenv("DB_USER")              // e.g. 'my-db-user'
+		dbPwd          = mustGetenv("DB_PASS")              // e.g. 'my-db-password'
+		unixSocketPath = mustGetenv("INSTANCE_UNIX_SOCKET") // e.g. '/cloudsql/project:region:instance'
+		dbName         = mustGetenv("DB_NAME")              // e.g. 'my-database'
 	)
 
 	dbURI := fmt.Sprintf("user=%s password=%s database=%s host=%s",
