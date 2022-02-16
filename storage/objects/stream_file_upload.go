@@ -45,11 +45,14 @@ func streamFileUpload(w io.Writer, bucket, object string) error {
 
 	o := client.Bucket(bucket).Object(object)
 
-	// Add preconditions so that the upload may safely retry on transient errors.
-	// In this code sample, we assume the object does not yet exist.
+	// Set a generation-match precondition. The request to upload is aborted
+	// if the object's generation number does not match your precondition
+	// criteria. This avoids race conditions and data corruption.
+	// For an object that does not yet exist, set the DoesNotExist precondition.
 	o = o.If(storage.Conditions{DoesNotExist: true})
 
-	// To add preconditions for an existing object use the following instead:
+	// If the live object already exists in your bucket, uncomment the following
+	// lines instead of using the above line.
 	// attrs, err := o.Attrs(ctx)
 	// if err != nil {
 	// 	return fmt.Errorf("object.Attrs: %v", err)
