@@ -43,6 +43,20 @@ func copyFile(w io.Writer, dstBucket, srcBucket, srcObject string) error {
 	src := client.Bucket(srcBucket).Object(srcObject)
 	dst := client.Bucket(dstBucket).Object(dstObject)
 
+	// Set a generation-match precondition. The request to upload is aborted
+	// if the object's generation number does not match your precondition
+	// criteria. This avoids race conditions and data corruption.
+	// For an object that does not yet exist, set the DoesNotExist precondition.
+	dst = dst.If(storage.Conditions{DoesNotExist: true})
+
+	// If the live object already exists in your bucket, set instead a
+	// generation-match precondition using the live object's generation number.
+	// attrs, err := dst.Attrs(ctx)
+	// if err != nil {
+	// 	return fmt.Errorf("object.Attrs: %v", err)
+	// }
+	// dst = dst.If(storage.Conditions{GenerationMatch: attrs.Generation})
+
 	if _, err := dst.CopierFrom(src).Run(ctx); err != nil {
 		return fmt.Errorf("Object(%q).CopierFrom(%q).Run: %v", dstObject, srcObject, err)
 	}

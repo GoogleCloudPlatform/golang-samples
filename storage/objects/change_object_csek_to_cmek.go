@@ -46,10 +46,20 @@ func сhangeObjectCSEKToKMS(w io.Writer, bucket, object string, encryptionKey []
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 
-	bkt := client.Bucket(bucket)
-	obj := bkt.Object(object)
-	src := obj.Key(encryptionKey)
-	c := obj.CopierFrom(src)
+	o := client.Bucket(bucket).Object(object)
+
+	// Set a generation-match precondition. The request to upload is aborted
+	// if the object's generation number does not match your precondition
+	// criteria. This avoids race conditions and data corruption.
+	attrs, err := o.Attrs(ctx)
+	if err != nil {
+		return fmt.Errorf("object.Attrs: %v", err)
+	}
+	o = o.If(storage.Conditions{GenerationMatch: attrs.Generation})
+
+	// You can't change an object's encryption key directly, you must rewrite the
+	// object using the new key.
+	c := o.CopierFrom(o.Key(encryptionKey))
 	c.DestinationKMSKeyName = kmsKeyName
 	if _, err := c.Run(ctx); err != nil {
 		return fmt.Errorf("Copier.Run: %v", err)

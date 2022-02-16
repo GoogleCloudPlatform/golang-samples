@@ -38,14 +38,23 @@ func changeObjectStorageClass(w io.Writer, bucket, object string) error {
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 
-	bkt := client.Bucket(bucket)
-	obj := bkt.Object(object)
+	o := client.Bucket(bucket).Object(object)
+
+	// Set a generation-match precondition. The request to upload is aborted
+	// if the object's generation number does not match your precondition
+	// criteria. This avoids race conditions and data corruption.
+	attrs, err := o.Attrs(ctx)
+	if err != nil {
+		return fmt.Errorf("object.Attrs: %v", err)
+	}
+	o = o.If(storage.Conditions{GenerationMatch: attrs.Generation})
+
 	// See the StorageClass documentation for other valid storage classes:
 	// https://cloud.google.com/storage/docs/storage-classes
 	newStorageClass := "COLDLINE"
 	// You can't change an object's storage class directly, the only way is
 	// to rewrite the object with the desired storage class.
-	copier := obj.CopierFrom(obj)
+	copier := o.CopierFrom(o)
 	copier.StorageClass = newStorageClass
 	if _, err := copier.Run(ctx); err != nil {
 		return fmt.Errorf("copier.Run: %v", err)

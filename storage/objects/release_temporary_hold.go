@@ -39,6 +39,17 @@ func releaseTemporaryHold(w io.Writer, bucket, object string) error {
 	defer cancel()
 
 	o := client.Bucket(bucket).Object(object)
+
+	// Set a metageneration-match precondition. The request to update is aborted
+	// if the object's metageneration number does not match your precondition
+	// criteria. This avoids race conditions and data corruption.
+	attrs, err := o.Attrs(ctx)
+	if err != nil {
+		return fmt.Errorf("object.Attrs: %v", err)
+	}
+	o = o.If(storage.Conditions{MetagenerationMatch: attrs.Metageneration})
+
+	// Update the object to release the hold.
 	objectAttrsToUpdate := storage.ObjectAttrsToUpdate{
 		TemporaryHold: false,
 	}
