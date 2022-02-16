@@ -669,6 +669,41 @@ func TestDetachSubscription(t *testing.T) {
 	}
 }
 
+func TestCreateWithFilter(t *testing.T) {
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	client := setup(t)
+	defer client.Close()
+	filterSubID := subID + "-filter"
+
+	topic, err := getOrCreateTopic(ctx, client, topicID)
+	if err != nil {
+		t.Fatalf("CreateTopic: %v", err)
+	}
+	buf := new(bytes.Buffer)
+	filter := "attributes.author=\"unknown\""
+	if err := createWithFilter(buf, tc.ProjectID, filterSubID, filter, topic); err != nil {
+		t.Fatalf("failed to create subscription with filter: %v", err)
+	}
+
+	filterSub := client.Subscription(filterSubID)
+	defer filterSub.Delete(ctx)
+	ok, err := filterSub.Exists(context.Background())
+	if err != nil {
+		t.Fatalf("failed to check if sub exists: %v", err)
+	}
+	if !ok {
+		t.Fatalf("got none; want sub = %q", filterSubID)
+	}
+	cfg, err := filterSub.Config(ctx)
+	if err != nil {
+		t.Fatalf("failed to get config for sub with filter: %v", err)
+	}
+	if cfg.Filter != filter {
+		t.Fatalf("subscription filter got: %s\nwant: %s", cfg.Filter, filter)
+	}
+}
+
 func publishMsgs(ctx context.Context, t *pubsub.Topic, numMsgs int) error {
 	var results []*pubsub.PublishResult
 	for i := 0; i < numMsgs; i++ {
