@@ -51,8 +51,8 @@ func streamFileUpload(w io.Writer, bucket, object string) error {
 	// For an object that does not yet exist, set the DoesNotExist precondition.
 	o = o.If(storage.Conditions{DoesNotExist: true})
 
-	// If the live object already exists in your bucket, uncomment the following
-	// lines instead of using the above line.
+	// If the live object already exists in your bucket, instead set a generation
+	// match condition using the live object's generation number as follows.
 	// attrs, err := o.Attrs(ctx)
 	// if err != nil {
 	// 	return fmt.Errorf("object.Attrs: %v", err)
