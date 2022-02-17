@@ -46,7 +46,7 @@ func deactivateHMACKey(w io.Writer, accessID string, projectID string) (*storage
 	// criteria. This avoids race conditions and data corruption.
 	key, err := handle.Get(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("storage.NewClient: %v", err)
+		return nil, fmt.Errorf("HMACKeyHandle.Get: %v", err)
 	}
 	keyAttrsToUpdate.Etag = key.Etag
 
