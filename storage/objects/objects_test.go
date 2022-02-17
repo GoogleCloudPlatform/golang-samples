@@ -91,8 +91,8 @@ func TestObjects(t *testing.T) {
 	// Keep the original generation of object1 before re-uploading
 	// to use in the versioning samples.
 	gen := attrs.Generation
-	if err := uploadFile(ioutil.Discard, bucketVersioning, object1); err != nil {
-		t.Fatalf("uploadFile(%q): %v", object1, err)
+	if err := streamFileUpload(ioutil.Discard, bucketVersioning, object1); err != nil {
+		t.Fatalf("streamFileUpload(%q): %v", object1, err)
 	}
 
 	{
@@ -263,6 +263,10 @@ func TestObjects(t *testing.T) {
 			t.Errorf("object.Attrs: %v", err)
 		}
 	})
+
+	if err := deleteFile(ioutil.Discard, bucket, object1); err != nil {
+		t.Errorf("deleteFile: %v", err)
+	}
 
 	key := []byte("my-secret-AES-256-encryption-key")
 	newKey := []byte("My-secret-AES-256-encryption-key")
