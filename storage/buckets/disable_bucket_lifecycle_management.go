@@ -45,7 +45,7 @@ func disableBucketLifecycleManagement(w io.Writer, bucketName string) error {
 	// criteria. This avoids race conditions and data corruption.
 	attrs, err := bucket.Attrs(ctx)
 	if err != nil {
-		return fmt.Errorf("object.Attrs: %v", err)
+		return fmt.Errorf("bucket.Attrs: %v", err)
 	}
 	bucket = bucket.If(storage.BucketConditions{MetagenerationMatch: attrs.MetaGeneration})
 
