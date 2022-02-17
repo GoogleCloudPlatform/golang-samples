@@ -40,6 +40,17 @@ func addBucketLabel(w io.Writer, bucketName, labelName, labelValue string) error
 	defer cancel()
 
 	bucket := client.Bucket(bucketName)
+
+	// Set a metageneration-match precondition. The request to update is aborted
+	// if the bucket's metageneration number does not match your precondition
+	// criteria. This avoids race conditions and data corruption.
+	attrs, err := bucket.Attrs(ctx)
+	if err != nil {
+		return fmt.Errorf("object.Attrs: %v", err)
+	}
+	bucket = bucket.If(storage.BucketConditions{MetagenerationMatch: attrs.MetaGeneration})
+
+	// Update the bucket to set the label.
 	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{}
 	bucketAttrsToUpdate.SetLabel(labelName, labelValue)
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {

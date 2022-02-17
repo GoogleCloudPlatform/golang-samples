@@ -42,6 +42,17 @@ func setBucketCORSConfiguration(w io.Writer, bucketName string, maxAge time.Dura
 	defer cancel()
 
 	bucket := client.Bucket(bucketName)
+
+	// Set a metageneration-match precondition. The request to update is aborted
+	// if the bucket's metageneration number does not match your precondition
+	// criteria. This avoids race conditions and data corruption.
+	attrs, err := bucket.Attrs(ctx)
+	if err != nil {
+		return fmt.Errorf("object.Attrs: %v", err)
+	}
+	bucket = bucket.If(storage.BucketConditions{MetagenerationMatch: attrs.MetaGeneration})
+
+	// Update the bucket to set the configuration.
 	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
 		CORS: []storage.CORS{
 			{

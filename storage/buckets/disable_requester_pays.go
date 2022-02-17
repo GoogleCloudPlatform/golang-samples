@@ -38,6 +38,17 @@ func disableRequesterPays(w io.Writer, bucketName string) error {
 	defer cancel()
 
 	bucket := client.Bucket(bucketName)
+
+	// Set a metageneration-match precondition. The request to update is aborted
+	// if the bucket's metageneration number does not match your precondition
+	// criteria. This avoids race conditions and data corruption.
+	attrs, err := bucket.Attrs(ctx)
+	if err != nil {
+		return fmt.Errorf("bucket.Attrs: %v", err)
+	}
+	bucket = bucket.If(storage.BucketConditions{MetagenerationMatch: attrs.MetaGeneration})
+
+	// Update the bucket to disable requester pays.
 	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
 		RequesterPays: false,
 	}

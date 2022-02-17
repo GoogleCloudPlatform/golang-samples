@@ -39,6 +39,17 @@ func enableBucketLifecycleManagement(w io.Writer, bucketName string) error {
 	defer cancel()
 
 	bucket := client.Bucket(bucketName)
+
+	// Set a metageneration-match precondition. The request to update is aborted
+	// if the bucket's metageneration number does not match your precondition
+	// criteria. This avoids race conditions and data corruption.
+	attrs, err := bucket.Attrs(ctx)
+	if err != nil {
+		return fmt.Errorf("bucket.Attrs: %v", err)
+	}
+	bucket = bucket.If(storage.BucketConditions{MetagenerationMatch: attrs.MetaGeneration})
+
+	// Update the bucket to add the lifecycle rule.
 	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
 		Lifecycle: &storage.Lifecycle{
 			Rules: []storage.LifecycleRule{
@@ -52,12 +63,12 @@ func enableBucketLifecycleManagement(w io.Writer, bucketName string) error {
 		},
 	}
 
-	attrs, err := bucket.Update(ctx, bucketAttrsToUpdate)
+	updatedAttrs, err := bucket.Update(ctx, bucketAttrsToUpdate)
 	if err != nil {
 		return fmt.Errorf("Bucket(%q).Update: %v", bucketName, err)
 	}
 	fmt.Fprintf(w, "Lifecycle management is enabled for bucket %v\n and the rules are:\n", bucketName)
-	for _, rule := range attrs.Lifecycle.Rules {
+	for _, rule := range updatedAttrs.Lifecycle.Rules {
 		fmt.Fprintf(w, "Action: %v\n", rule.Action)
 		fmt.Fprintf(w, "Condition: %v\n", rule.Condition)
 	}

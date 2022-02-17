@@ -46,6 +46,12 @@ func removeRetentionPolicy(w io.Writer, bucketName string) error {
 		return fmt.Errorf("retention policy is locked")
 	}
 
+	// Set a metageneration-match precondition. The request to update is aborted
+	// if the bucket's metageneration number does not match your precondition
+	// criteria. This avoids race conditions and data corruption.
+	bucket = bucket.If(storage.BucketConditions{MetagenerationMatch: attrs.MetaGeneration})
+
+	// Update the bucket to remove the retention policy.
 	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
 		RetentionPolicy: &storage.RetentionPolicy{},
 	}
