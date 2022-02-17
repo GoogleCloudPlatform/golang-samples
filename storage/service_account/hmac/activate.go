@@ -38,15 +38,28 @@ func activateHMACKey(w io.Writer, accessID string, projectID string) (*storage.H
 	handle := client.HMACKeyHandle(projectID, accessID)
 	ctx, cancel := context.WithTimeout(ctx, time.Minute)
 	defer cancel()
-	key, err := handle.Update(ctx, storage.HMACKeyAttrsToUpdate{State: "ACTIVE"})
+
+	keyAttrsToUpdate := storage.HMACKeyAttrsToUpdate{State: "ACTIVE"}
+
+	// Set an ETag condition. The request to update is aborted
+	// if the HMAC key's ETag does not match your condition
+	// criteria. This avoids race conditions and data corruption.
+	key, err := handle.Get(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("Update: %v", err)
+		return nil, fmt.Errorf("storage.NewClient: %v", err)
+	}
+	keyAttrsToUpdate.Etag = key.Etag
+
+	// Update the key to activate it.
+	updatedKey, err := handle.Update(ctx, keyAttrsToUpdate)
+	if err != nil {
+		return nil, fmt.Errorf("HMACKeyHandle.Update: %v", err)
 	}
 
 	fmt.Fprintln(w, "The HMAC key metadata is:")
-	fmt.Fprintf(w, "%+v", key)
+	fmt.Fprintf(w, "%+v", updatedKey)
 
-	return key, nil
+	return updatedKey, nil
 }
 
 // [END storage_activate_hmac_key]
