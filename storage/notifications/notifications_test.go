@@ -57,9 +57,8 @@ func createTestTopic(t *testing.T, projectID string) string {
 
 func TestNotifications(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	ctx := context.Background()
-
 	projectID := tc.ProjectID
+	ctx := context.Background()
 
 	topic := createTestTopic(t, projectID)
 
@@ -83,5 +82,4 @@ func TestNotifications(t *testing.T) {
 	if got, want := buf.String(), "created notification with ID"; !strings.Contains(got, want) {
 		t.Errorf("createBucketNotification: got %q; want to contain %q", got, want)
 	}
-
 }
