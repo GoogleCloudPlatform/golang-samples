@@ -59,7 +59,8 @@ func сhangeObjectCSEKToKMS(w io.Writer, bucket, object string, encryptionKey []
 
 	// You can't change an object's encryption key directly, you must rewrite the
 	// object using the new key.
-	c := o.CopierFrom(o.Key(encryptionKey))
+	src := o.Key(encryptionKey)
+	c := o.CopierFrom(src)
 	c.DestinationKMSKeyName = kmsKeyName
 	if _, err := c.Run(ctx); err != nil {
 		return fmt.Errorf("Copier.Run: %v", err)
