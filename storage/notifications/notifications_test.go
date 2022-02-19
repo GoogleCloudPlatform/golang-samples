@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"context"
 	"log"
+	"os"
 	"strings"
 	"testing"
 
@@ -26,7 +27,17 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func createTestTopic(t *testing.T, projectID string) string {
+// MustGetEnv gets the environment variable env and skips the test if not set.
+func mustGetEnv(t *testing.T, env string) string {
+	t.Helper()
+	v := os.Getenv(env)
+	if v == "" {
+		t.Skipf("%s not set", env)
+	}
+	return v
+}
+
+func createTestTopic(t *testing.T, projectID string) (string, func()) {
 	t.Helper()
 	ctx := context.Background()
 
@@ -34,10 +45,10 @@ func createTestTopic(t *testing.T, projectID string) string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer pubsubClient.Close()
+	//defer pubsubClient.Close()
 
-	//topicName := MustGetEnv(t, "PUBSUB_TOPIC")
-	topicName := testutil.MustGetEnv(t, "PUBSUB_TOPIC")
+	// TODO: use testutil.MustGetEnv
+	topicName := mustGetEnv(t, "PUBSUB_TOPIC")
 	topic := pubsubClient.Topic(topicName)
 
 	// Create the topic if it doesn't exist.
@@ -52,7 +63,12 @@ func createTestTopic(t *testing.T, projectID string) string {
 			log.Fatal(err)
 		}
 	}
-	return topicName
+	return topicName, func() {
+		if err := topic.Delete(ctx); err != nil {
+			t.Errorf("Delete: %v", err)
+		}
+		pubsubClient.Close()
+	}
 }
 
 func TestNotifications(t *testing.T) {
@@ -60,7 +76,8 @@ func TestNotifications(t *testing.T) {
 	projectID := tc.ProjectID
 	ctx := context.Background()
 
-	topic := createTestTopic(t, projectID)
+	topic, deferFunc := createTestTopic(t, projectID)
+	defer deferFunc()
 
 	client, err := storage.NewClient(ctx)
 	if err != nil {
