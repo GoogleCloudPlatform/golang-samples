@@ -17,86 +17,159 @@ package notifications
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"cloud.google.com/go/pubsub"
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-// MustGetEnv gets the environment variable env and skips the test if not set.
-func mustGetEnv(t *testing.T, env string) string {
-	t.Helper()
-	v := os.Getenv(env)
-	if v == "" {
-		t.Skipf("%s not set", env)
+const (
+	testPrefix      = "test-gcs-go-notifications"
+	bucketExpiryAge = time.Hour * 24
+)
+
+var client *storage.Client
+var pubsubClient *pubsub.Client
+
+func TestMain(m *testing.M) {
+	// Initialize global vars
+	tc, _ := testutil.ContextMain(m)
+
+	ctx := context.Background()
+	c, err := storage.NewClient(ctx)
+	if err != nil {
+		log.Fatalf("storage.NewClient: %v", err)
 	}
-	return v
+	client = c
+	defer client.Close()
+
+	pubsubClient, err = pubsub.NewClient(ctx, tc.ProjectID)
+	if err != nil {
+		log.Fatalf("pubsub.NewClient: %v", err)
+	}
+	defer pubsubClient.Close()
+
+	// Run tests
+	exit := m.Run()
+
+	// Delete old buckets whose name begins with our test prefix
+	if err := testutil.DeleteExpiredBuckets(client, tc.ProjectID, testPrefix, bucketExpiryAge); err != nil {
+		// Don't fail the test if cleanup fails
+		log.Printf("Post-test cleanup failed: %v", err)
+	}
+	os.Exit(exit)
 }
 
-func createTestTopic(t *testing.T, projectID string) (string, func()) {
+// Creates a pubsub topic for testing and registers a cleanup func to remove it
+// once the test finishes
+func createTestTopic(t *testing.T, projectID, topicName string) {
 	t.Helper()
 	ctx := context.Background()
 
-	pubsubClient, err := pubsub.NewClient(ctx, projectID)
-	if err != nil {
-		log.Fatal(err)
-	}
-	//defer pubsubClient.Close()
-
-	// TODO: use testutil.MustGetEnv
-	topicName := mustGetEnv(t, "PUBSUB_TOPIC")
 	topic := pubsubClient.Topic(topicName)
 
 	// Create the topic if it doesn't exist.
 	exists, err := topic.Exists(ctx)
 	if err != nil {
-		log.Fatal(err)
+		t.Errorf("topic.Exists: %v", err)
 	}
 	if !exists {
-		//log.Printf("Topic %v doesn't exist - creating it", topicName)
 		_, err = pubsubClient.CreateTopic(ctx, topicName)
 		if err != nil {
-			log.Fatal(err)
+			t.Errorf("topic.CreateTopic: %v", err)
 		}
 	}
-	return topicName, func() {
+
+	t.Cleanup(func() {
 		if err := topic.Delete(ctx); err != nil {
 			t.Errorf("Delete: %v", err)
 		}
-		pubsubClient.Close()
-	}
+	})
 }
 
 func TestNotifications(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	projectID := tc.ProjectID
+	topicName := testPrefix + "-topic"
+	topicName2 := testPrefix + "-topic-2"
+
+	// Set up resources for test.
 	ctx := context.Background()
+	createTestTopic(t, tc.ProjectID, topicName)
+	createTestTopic(t, tc.ProjectID, topicName2)
 
-	topic, deferFunc := createTestTopic(t, projectID)
-	defer deferFunc()
-
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		t.Fatalf("storage.NewClient: %v", err)
-	}
-	defer client.Close()
-
-	bucket, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, "storage-buckets-test")
+	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
 	if err != nil {
 		t.Fatalf("creating bucket: %v", err)
 	}
-	defer testutil.DeleteBucketIfExists(ctx, client, bucket)
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
 
 	var buf bytes.Buffer
-	if err := createBucketNotification(&buf, tc.ProjectID, bucket, topic); err != nil {
-		t.Errorf("createBucketNotification: %v", err)
+
+	// Test Create.
+	t.Run("create bucket notification", func(t *testing.T) {
+		if err := createBucketNotification(&buf, tc.ProjectID, bucketName, topicName); err != nil {
+			t.Fatalf("createBucketNotification: %v", err)
+		}
+
+		if got, want := buf.String(), "created notification with ID"; !strings.Contains(got, want) {
+			t.Errorf("createBucketNotification: got %q; want to contain %q", got, want)
+		}
+	})
+
+	// Add another notification so we know its ID
+	notification2, err := client.Bucket(bucketName).AddNotification(ctx, &storage.Notification{
+		TopicID:        topicName2,
+		TopicProjectID: tc.ProjectID,
+		PayloadFormat:  storage.JSONPayload,
+	})
+	if err != nil {
+		t.Fatalf("Bucket.AddNotification: %v", err)
 	}
 
-	if got, want := buf.String(), "created notification with ID"; !strings.Contains(got, want) {
-		t.Errorf("createBucketNotification: got %q; want to contain %q", got, want)
-	}
+	// Test Get.
+	t.Run("print bucket notification", func(t *testing.T) {
+		buf.Reset()
+		if err := printPubsubBucketNotification(&buf, bucketName, notification2.ID); err != nil {
+			t.Fatalf("printPubsubBucketNotification: %v", err)
+		}
+
+		if got, want := buf.String(), "Topic Name: "+topicName2; !strings.Contains(got, want) {
+			t.Errorf("printPubsubBucketNotification: got %q; want to contain %q", got, want)
+		}
+	})
+
+	// Test List.
+	t.Run("list bucket notifications", func(t *testing.T) {
+		buf.Reset()
+		if err := listBucketNotifications(&buf, bucketName); err != nil {
+			t.Fatalf("listBucketNotifications: %v", err)
+		}
+
+		got := buf.String()
+		var want, want2 bytes.Buffer
+		fmt.Fprintf(&want, "Notification topic %s with ID", topicName) // we don't know its ID
+		fmt.Fprintf(&want2, "Notification topic %s with ID %s", topicName2, notification2.ID)
+
+		if !strings.Contains(got, want.String()) || !strings.Contains(got, want2.String()) {
+			t.Errorf("listBucketNotifications: got %q; want to contain the following:\n\t%q\n\t%q", got, want, want2)
+		}
+	})
+
+	// Test Delete.
+	t.Run("create bucket notification", func(t *testing.T) {
+		buf.Reset()
+		if err := deleteBucketNotification(&buf, bucketName, notification2.ID); err != nil {
+			t.Fatalf("deleteBucketNotification: %v", err)
+		}
+
+		if got, want := buf.String(), "deleted notification with ID "+notification2.ID; !strings.Contains(got, want) {
+			t.Errorf("deleteBucketNotification: got %q; want to contain %q", got, want)
+		}
+	})
 }
