@@ -44,11 +44,6 @@ func TestInstanceHostnameSnippets(t *testing.T) {
 		t.Fatalf("NewInstancesRESTClient: %v", err)
 	}
 	defer instancesClient.Close()
-	zoneOperationsClient, err := compute.NewZoneOperationsRESTClient(ctx)
-	if err != nil {
-		t.Fatalf("NewZoneOperationsRESTClient: %v", err)
-	}
-	defer zoneOperationsClient.Close()
 
 	buf := &bytes.Buffer{}
 
@@ -98,19 +93,7 @@ func TestInstanceHostnameSnippets(t *testing.T) {
 		t.Errorf("unable to delete instance: %v", err)
 	}
 
-	for {
-		waitReq := &computepb.WaitZoneOperationRequest{
-			Operation: op.Proto().GetName(),
-			Project:   tc.ProjectID,
-			Zone:      zone,
-		}
-		zoneOp, err := zoneOperationsClient.Wait(ctx, waitReq)
-		if err != nil {
-			t.Errorf("unable to wait for the operation: %v", err)
-		}
-
-		if *zoneOp.Status.Enum() == computepb.Operation_DONE {
-			break
-		}
+	if err = op.Wait(ctx); err != nil {
+		t.Errorf("unable to wait for the operation: %v", err)
 	}
 }
