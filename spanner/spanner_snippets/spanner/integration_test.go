@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"regexp"
 	"strconv"
@@ -52,7 +53,12 @@ var (
 
 func initTest(t *testing.T, id string) (instName, dbName string, cleanup func()) {
 	projectID := getSampleProjectId(t)
-	instName, cleanup = createTestInstance(t, projectID, "regional-us-central1")
+	configName := getSamplesInstanceConfig()
+	if configName == "" {
+		configName = "regional-us-central1"
+	}
+	log.Printf("Running test by using the instance config: %s\n", configName)
+	instName, cleanup = createTestInstance(t, projectID, configName)
 	dbID := validLength(fmt.Sprintf("smpl-%s", id), t)
 	dbName = fmt.Sprintf("%s/databases/%s", instName, dbID)
 
@@ -161,6 +167,8 @@ func TestSample(t *testing.T) {
 	out = runSample(t, query, dbName, "failed to query data")
 	assertContains(t, out, "1 1 Total Junk")
 	out = runSample(t, queryRequestPriority, dbName, "failed to query data with RequestPriority")
+	assertContains(t, out, "1 1 Total Junk")
+	out = runSample(t, queryWithTag, dbName, "failed to query data with request tag set")
 	assertContains(t, out, "1 1 Total Junk")
 
 	runSampleWithContext(ctx, t, addIndex, dbName, "failed to add index")
@@ -316,6 +324,13 @@ func TestSample(t *testing.T) {
 	out = runSample(t, queryWithString, dbName, "failed to query with string")
 	assertContains(t, out, "42 Venue 42")
 
+	out = runSample(t, readWriteTransactionWithTag, dbName, "failed to perform read-write transaction with tag")
+	assertContains(t, out, "Venue capacities updated.")
+	assertContains(t, out, "New venue inserted.")
+	out = runSample(t, queryWithInt, dbName, "failed to query with int")
+	assertContains(t, out, "19 Venue 19 6300")
+	assertNotContains(t, out, "42 Venue 42 3000")
+
 	// Wait 5 seconds to avoid a time drift issue for the next query:
 	// https://github.com/GoogleCloudPlatform/golang-samples/issues/1146.
 	time.Sleep(time.Second * 5)
@@ -355,7 +370,7 @@ func TestSample(t *testing.T) {
 }
 
 func TestBackupSample(t *testing.T) {
-	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2143")
+	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2333")
 	if os.Getenv("GOLANG_SAMPLES_E2E_TEST") == "" {
 		t.Skip("GOLANG_SAMPLES_E2E_TEST not set")
 	}
@@ -423,13 +438,13 @@ func TestCustomerManagedEncryptionKeys(t *testing.T) {
 	}
 	tc := testutil.SystemTest(t)
 	t.Parallel()
-
+	startTime := time.Now()
 	instName, dbName, cleanup := initTest(t, randomID())
 	defer cleanup()
 
 	var b bytes.Buffer
 
-	locationId := "us-central1"
+	locationId := "us-west1"
 	keyRingId := "spanner-test-keyring"
 	keyId := "spanner-test-key"
 
@@ -445,7 +460,7 @@ func TestCustomerManagedEncryptionKeys(t *testing.T) {
 		keyId,
 	)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
+	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Minute)
 	defer cancel()
 
 	// Create an encrypted database. The database is automatically deleted by the cleanup function.
@@ -454,6 +469,7 @@ func TestCustomerManagedEncryptionKeys(t *testing.T) {
 	}
 	out := b.String()
 	assertContains(t, out, fmt.Sprintf("Created database [%s] using encryption key %q", dbName, kmsKeyName))
+	t.Logf("create database operation took: %v\n", time.Since(startTime))
 
 	// Try to create a backup of the encrypted database and delete it after the test.
 	backupId := fmt.Sprintf("enc-backup-%s", randomID())
@@ -464,6 +480,7 @@ func TestCustomerManagedEncryptionKeys(t *testing.T) {
 	out = b.String()
 	assertContains(t, out, fmt.Sprintf("backups/%s", backupId))
 	assertContains(t, out, fmt.Sprintf("using encryption key %s", kmsKeyName))
+	t.Logf("create backup operation took: %v\n", time.Since(startTime))
 
 	// Try to restore the encrypted database and delete the restored database after the test.
 	restoredName := fmt.Sprintf("%s/databases/rest-enc-%s", instName, randomID())
@@ -473,6 +490,7 @@ func TestCustomerManagedEncryptionKeys(t *testing.T) {
 	out = runBackupSampleWithRetry(ctx, t, restoreFunc, restoredName, backupId, "failed to restore database with customer managed encryption key", 10)
 	assertContains(t, out, fmt.Sprintf("Database %s restored", dbName))
 	assertContains(t, out, fmt.Sprintf("using encryption key %s", kmsKeyName))
+	t.Logf("restore backup operation took: %v\n", time.Since(startTime))
 }
 
 func TestCreateDatabaseWithDefaultLeaderSample(t *testing.T) {
@@ -780,10 +798,24 @@ func getSampleProjectId(t *testing.T) string {
 	return projectId
 }
 
+// getSamplesInstanceConfig specifies the instance config used to create an instance for testing.
+// It can be changed by setting the environment variable
+// GOLANG_SAMPLES_SPANNER_INSTANCE_CONFIG.
+func getSamplesInstanceConfig() string {
+	return os.Getenv("GOLANG_SAMPLES_SPANNER_INSTANCE_CONFIG")
+}
+
 func assertContains(t *testing.T, out string, sub string) {
 	t.Helper()
 	if !strings.Contains(out, sub) {
 		t.Errorf("got output %q; want it to contain %q", out, sub)
+	}
+}
+
+func assertNotContains(t *testing.T, out string, sub string) {
+	t.Helper()
+	if strings.Contains(out, sub) {
+		t.Errorf("got output %q; want it to not contain %q", out, sub)
 	}
 }
 

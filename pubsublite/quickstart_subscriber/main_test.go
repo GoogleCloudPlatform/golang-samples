@@ -49,7 +49,7 @@ func TestQuickstartSubscriber(t *testing.T) {
 		t.Fatalf("pubsublite.NewAdminClient: %v", err)
 	}
 	defer admin.Close()
-	psltest.Cleanup(t, admin, tc.ProjectID, resourcePrefix, []string{zone})
+	psltest.Cleanup(t, admin, tc.ProjectID, region, resourcePrefix, []string{zone})
 
 	resourceID := resourcePrefix + uuid.NewString()
 	topicPath := fmt.Sprintf("projects/%s/locations/%s/topics/%s", tc.ProjectID, zone, resourceID)

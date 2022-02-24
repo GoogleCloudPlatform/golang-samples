@@ -55,7 +55,7 @@ func printImagesList(w io.Writer, projectID string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Fprintf(w, "- %s\n", *image.Name)
+		fmt.Fprintf(w, "- %s\n", image.GetName())
 	}
 	return nil
 }

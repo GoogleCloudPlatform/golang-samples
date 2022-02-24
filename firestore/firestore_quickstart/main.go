@@ -18,6 +18,7 @@ package main
 // [START firestore_setup_client_create]
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
 
@@ -30,6 +31,12 @@ func createClient(ctx context.Context) *firestore.Client {
 	// Sets your Google Cloud Platform project ID.
 	projectID := "YOUR_PROJECT_ID"
 
+	// [END firestore_setup_client_create]
+	// Override with -project flags
+	flag.StringVar(&projectID, "project", projectID, "The Google Cloud Platform project ID.")
+	flag.Parse()
+
+	// [START firestore_setup_client_create]
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)

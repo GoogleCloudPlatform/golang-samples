@@ -27,6 +27,8 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
+	"time"
 
 	_ "github.com/denisenkom/go-mssqldb"
 )
@@ -159,7 +161,7 @@ func currentTotals(app *app) (*templateData, error) {
 		return nil, fmt.Errorf("DB.QueryRow: %v", err)
 	}
 
-	var voteDiffStr string = voteDiff(int(math.Abs(float64(tabVotes) - float64(spaceVotes)))).String()
+	voteDiffStr := voteDiff(int(math.Abs(float64(tabVotes) - float64(spaceVotes)))).String()
 
 	latestVotesCast, err := recentVotes(app)
 	if err != nil {
@@ -235,8 +237,29 @@ func initTCPConnectionPool() (*sql.DB, error) {
 		dbName    = mustGetenv("DB_NAME") // e.g. 'my-database'
 	)
 
-	var dbURI string
-	dbURI = fmt.Sprintf("server=%s;user id=%s;password=%s;port=%s;database=%s;", dbTCPHost, dbUser, dbPwd, dbPort, dbName)
+	dbURI := fmt.Sprintf("server=%s;user id=%s;password=%s;port=%s;database=%s;", dbTCPHost, dbUser, dbPwd, dbPort, dbName)
+
+	// [START_EXCLUDE]
+	// [START cloud_sql_sqlserver_databasesql_sslcerts]
+	// (OPTIONAL) Configure SSL certificates
+	// For deployments that connect directly to a Cloud SQL instance without
+	// using the Cloud SQL Proxy, configuring SSL certificates will ensure the
+	// connection is encrypted. This step is entirely OPTIONAL.
+	dbRootCert := os.Getenv("DB_ROOT_CERT") // e.g., '/path/to/my/server-ca.pem'
+	if dbRootCert != "" {
+		// Get connection host name to be matched with host name in SSL certificate.
+		var instanceConnectionName = mustGetenv("INSTANCE_CONNECTION_NAME")
+		// Expected format of INSTANCE_CONNECTION_NAME is project_id:region:instance_name
+		hostNameParts := strings.Split(instanceConnectionName, ":")
+		if len(hostNameParts) != 3 {
+			log.Fatalf("Invalid format for INSTANCE_CONNECTION_NAME environment variable, got = %q", instanceConnectionName)
+		}
+		// Specify encrypted connection, host name and certificate.
+		dbURI += fmt.Sprintf("encrypt=true;hostnameincertificate=%s:%s;certificate=%s;",
+			hostNameParts[0], hostNameParts[2], dbRootCert)
+	}
+	// [END cloud_sql_sqlserver_databasesql_sslcerts]
+	// [END_EXCLUDE]
 
 	// dbPool is the pool of database connections.
 	dbPool, err := sql.Open("mssql", dbURI)
@@ -268,7 +291,7 @@ func configureConnectionPool(dbPool *sql.DB) {
 	// [START cloud_sql_sqlserver_databasesql_lifetime]
 
 	// Set Maximum time (in seconds) that a connection can remain open.
-	dbPool.SetConnMaxLifetime(1800)
+	dbPool.SetConnMaxLifetime(1800 * time.Second)
 
 	// [END cloud_sql_sqlserver_databasesql_lifetime]
 }

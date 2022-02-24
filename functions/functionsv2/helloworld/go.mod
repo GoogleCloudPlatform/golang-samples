@@ -1,8 +1,8 @@
-module github.com/GoogleCloudPlatform/golang-samples/functions/functionsv2/helloworld
+module github.com/GoogleCloudPlatform/golang-samples/functions/helloworld
 
-go 1.13
+go 1.16
 
 require (
-	github.com/cloudevents/sdk-go/v2 v2.4.1
-	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
+	github.com/GoogleCloudPlatform/functions-framework-go v1.5.2
+	github.com/stretchr/testify v1.7.0 // indirect
 )
