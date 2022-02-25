@@ -142,7 +142,7 @@ func MustCreateReservation(ctx context.Context, t *testing.T, client *pubsublite
 	cfg := DefaultResConfig(resPath)
 	resConfig, err := client.CreateReservation(ctx, *cfg)
 	if err != nil {
-		t.Fatalf("AdminClient.CreateTopic got err: %v", err)
+		t.Fatalf("AdminClient.CreateReservation got err: %v", err)
 	}
 	return resConfig
 }
