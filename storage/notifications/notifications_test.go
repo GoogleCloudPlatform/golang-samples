@@ -24,6 +24,7 @@ import (
 	"testing"
 	"time"
 
+	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -34,14 +35,19 @@ const (
 	bucketExpiryAge = time.Hour * 24
 )
 
-var client *storage.Client
-var pubsubClient *pubsub.Client
+var (
+	client       *storage.Client
+	pubsubClient *pubsub.Client
+	serviceAgent string
+)
 
 func TestMain(m *testing.M) {
 	// Initialize global vars
 	tc, _ := testutil.ContextMain(m)
 
 	ctx := context.Background()
+
+	// Init clients
 	c, err := storage.NewClient(ctx)
 	if err != nil {
 		log.Fatalf("storage.NewClient: %v", err)
@@ -55,6 +61,12 @@ func TestMain(m *testing.M) {
 	}
 	defer pubsubClient.Close()
 
+	// Get service agent for storage client
+	serviceAgent, err = client.ServiceAccount(ctx, tc.ProjectID)
+	if err != nil {
+		log.Fatalf("ServiceAccount: %v", err)
+	}
+
 	// Run tests
 	exit := m.Run()
 
@@ -64,33 +76,6 @@ func TestMain(m *testing.M) {
 		log.Printf("Post-test cleanup failed: %v", err)
 	}
 	os.Exit(exit)
-}
-
-// Creates a pubsub topic for testing and registers a cleanup func to remove it
-// once the test finishes
-func createTestTopic(t *testing.T, projectID, topicName string) {
-	t.Helper()
-	ctx := context.Background()
-
-	topic := pubsubClient.Topic(topicName)
-
-	// Create the topic if it doesn't exist.
-	exists, err := topic.Exists(ctx)
-	if err != nil {
-		t.Errorf("topic.Exists: %v", err)
-	}
-	if !exists {
-		_, err = pubsubClient.CreateTopic(ctx, topicName)
-		if err != nil {
-			t.Errorf("topic.CreateTopic: %v", err)
-		}
-	}
-
-	t.Cleanup(func() {
-		if err := topic.Delete(ctx); err != nil {
-			t.Errorf("Delete: %v", err)
-		}
-	})
 }
 
 func TestNotifications(t *testing.T) {
@@ -162,7 +147,7 @@ func TestNotifications(t *testing.T) {
 	})
 
 	// Test Delete.
-	t.Run("create bucket notification", func(t *testing.T) {
+	t.Run("delete bucket notification", func(t *testing.T) {
 		buf.Reset()
 		if err := deleteBucketNotification(&buf, bucketName, notification2.ID); err != nil {
 			t.Fatalf("deleteBucketNotification: %v", err)
@@ -170,6 +155,44 @@ func TestNotifications(t *testing.T) {
 
 		if got, want := buf.String(), "deleted notification with ID "+notification2.ID; !strings.Contains(got, want) {
 			t.Errorf("deleteBucketNotification: got %q; want to contain %q", got, want)
+		}
+	})
+}
+
+// Creates a pubsub topic for testing and registers a cleanup func to remove it
+// once the test finishes
+func createTestTopic(t *testing.T, projectID, topicName string) {
+	t.Helper()
+	ctx := context.Background()
+
+	topic := pubsubClient.Topic(topicName)
+
+	// Create the topic if it doesn't exist.
+	exists, err := topic.Exists(ctx)
+	if err != nil {
+		t.Errorf("topic.Exists: %v", err)
+	}
+	if !exists {
+		_, err = pubsubClient.CreateTopic(ctx, topicName)
+		if err != nil {
+			t.Errorf("topic.CreateTopic: %v", err)
+		}
+	}
+
+	// Add the service agent to the topic's permissions so we can access it from storage.
+	policy, err := topic.IAM().Policy(ctx)
+	if err != nil {
+		t.Errorf("Policy: %v", err)
+	}
+	policy.Add("serviceAccount:"+serviceAgent, iam.Editor)
+
+	if err := topic.IAM().SetPolicy(ctx, policy); err != nil {
+		t.Errorf("SetPolicy: %v", err)
+	}
+
+	t.Cleanup(func() {
+		if err := topic.Delete(ctx); err != nil {
+			t.Errorf("Delete: %v", err)
 		}
 	})
 }
