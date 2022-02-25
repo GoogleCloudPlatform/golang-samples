@@ -35,9 +35,9 @@ func createReservation(w io.Writer, projectID, region, reservationID string, thr
 	}
 	defer client.Close()
 
-	resPath := fmt.Sprintf("projects/%s/locations/%s/reservations/%s", projectID, region, reservationID)
+	reservationPath := fmt.Sprintf("projects/%s/locations/%s/reservations/%s", projectID, region, reservationID)
 	res, err := client.CreateReservation(ctx, pubsublite.ReservationConfig{
-		Name:               resPath,
+		Name:               reservationPath,
 		ThroughputCapacity: throughputCapacity,
 	})
 	if err != nil {

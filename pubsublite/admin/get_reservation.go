@@ -23,10 +23,10 @@ import (
 	"cloud.google.com/go/pubsublite"
 )
 
-func getReservation(w io.Writer, projectID, region, resID string) error {
+func getReservation(w io.Writer, projectID, region, reservationID string) error {
 	// projectID := "my-project-id"
 	// region := "us-central1"
-	// resID := "my-reservation"
+	// reservationID := "my-reservation"
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
 	if err != nil {
@@ -34,8 +34,8 @@ func getReservation(w io.Writer, projectID, region, resID string) error {
 	}
 	defer client.Close()
 
-	resPath := fmt.Sprintf("projects/%s/locations/%s/reservations/%s", projectID, region, resID)
-	res, err := client.Reservation(ctx, resPath)
+	reservationPath := fmt.Sprintf("projects/%s/locations/%s/reservations/%s", projectID, region, reservationID)
+	res, err := client.Reservation(ctx, reservationPath)
 	if err != nil {
 		return fmt.Errorf("client.Reservation got err: %v", err)
 	}

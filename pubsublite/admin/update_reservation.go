@@ -35,16 +35,16 @@ func updateReservation(w io.Writer, projectID, region, reservationID string, thr
 	}
 	defer client.Close()
 
-	resPath := fmt.Sprintf("projects/%s/locations/%s/reservations/%s", projectID, region, reservationID)
+	reservationPath := fmt.Sprintf("projects/%s/locations/%s/reservations/%s", projectID, region, reservationID)
 	config := pubsublite.ReservationConfigToUpdate{
-		Name:               resPath,
+		Name:               reservationPath,
 		ThroughputCapacity: throughputCapacity,
 	}
 	updatedCfg, err := client.UpdateReservation(ctx, config)
 	if err != nil {
-		return fmt.Errorf("client.UpdateSubscription got err: %v", err)
+		return fmt.Errorf("client.UpdateReservation got err: %v", err)
 	}
-	fmt.Fprintf(w, "Updated subscription: %#v\n", updatedCfg)
+	fmt.Fprintf(w, "Updated reservation: %#v\n", updatedCfg)
 	return nil
 }
 

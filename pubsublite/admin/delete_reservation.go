@@ -39,7 +39,7 @@ func deleteReservation(w io.Writer, projectID, region, reservationID string) err
 	if err != nil {
 		return fmt.Errorf("client.DeleteReservation got err: %v", err)
 	}
-	fmt.Fprintf(w, "Deleted reservation")
+	fmt.Fprint(w, "Deleted reservation")
 	return nil
 }
 
