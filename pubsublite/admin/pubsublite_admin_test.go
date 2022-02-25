@@ -388,7 +388,7 @@ func TestReservationsAdmin(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	reservationID := resourcePrefix + uuid.NewString()
-	resPath := fmt.Sprintf("projects/%s/locations/%s/reservations/%s", tc.ProjectID, testRegion, reservationID)
+	resPath := fmt.Sprintf("projects/%s/locations/%s/reservations/%s", projNumber, testRegion, reservationID)
 	cap := 4
 	t.Run("CreateReservation", func(t *testing.T) {
 		buf := new(bytes.Buffer)
@@ -398,7 +398,7 @@ func TestReservationsAdmin(t *testing.T) {
 		}
 
 		got := buf.String()
-		want := fmt.Sprintf("Created reservation: %s", resPath)
+		want := "Created reservation"
 		if !strings.Contains(got, want) {
 			t.Fatalf("createReservation() mismatch: got: %s\nwant: %s", got, want)
 		}
@@ -410,6 +410,12 @@ func TestReservationsAdmin(t *testing.T) {
 		if err != nil {
 			t.Fatalf("getReservation: %v", err)
 		}
+
+		got := buf.String()
+		want := fmt.Sprintf("Got reservation: %#v\n", psltest.DefaultResConfig(resPath))
+		if diff := cmp.Diff(want, got); diff != "" {
+			t.Fatalf("getReservation() mismatch: -want, +got:\n%s", diff)
+		}
 	})
 
 	t.Run("UpdateReservation", func(t *testing.T) {
@@ -418,6 +424,12 @@ func TestReservationsAdmin(t *testing.T) {
 		if err != nil {
 			t.Fatalf("updateReservation: %v", err)
 		}
+
+		got := buf.String()
+		want := "Updated reservation"
+		if !strings.Contains(got, want) {
+			t.Fatalf("updateReservation() mismatch: got: %s\nwant: %s", got, want)
+		}
 	})
 
 	t.Run("DeleteReservation", func(t *testing.T) {
@@ -425,6 +437,12 @@ func TestReservationsAdmin(t *testing.T) {
 		err := deleteReservation(buf, tc.ProjectID, testRegion, reservationID)
 		if err != nil {
 			t.Fatalf("deleteReservation: %v", err)
+		}
+
+		got := buf.String()
+		want := "Deleted reservation"
+		if got != want {
+			t.Fatalf("got: %v, want %v", got, want)
 		}
 	})
 }
