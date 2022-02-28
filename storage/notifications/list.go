@@ -40,7 +40,7 @@ func listBucketNotifications(w io.Writer, bucketName string) error {
 	}
 
 	for _, n := range notifications {
-		fmt.Fprintf(w, "Notification topic %s with ID %s", n.TopicID, n.ID)
+		fmt.Fprintf(w, "Notification topic %s with ID %s\n", n.TopicID, n.ID)
 	}
 
 	return nil

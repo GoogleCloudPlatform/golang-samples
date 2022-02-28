@@ -41,13 +41,7 @@ func printPubsubBucketNotification(w io.Writer, bucketName, notificationID strin
 	}
 
 	n := notifications[notificationID]
-
-	fmt.Fprintf(w, "Notification ID: %s", n.ID)
-	fmt.Fprintf(w, "Topic Name: %s", n.TopicID)
-	fmt.Fprintf(w, "Event Types: %v", n.EventTypes)
-	fmt.Fprintf(w, "Custom Attributes: %v", n.CustomAttributes)
-	fmt.Fprintf(w, "Payload Format: %s", n.PayloadFormat)
-	fmt.Fprintf(w, "Blob Name Prefix: %s", n.ObjectNamePrefix)
+	fmt.Fprintf(w, "Notification: %+v", n)
 
 	return nil
 }

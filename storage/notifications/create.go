@@ -25,6 +25,7 @@ import (
 
 // createBucketNotifications creates a notification configuration for a bucket.
 func createBucketNotification(w io.Writer, projectID, bucketName, topic string) error {
+	// projectID := "my-project-id"
 	// bucketName := "bucket-name"
 	// topic := "topic-name"
 

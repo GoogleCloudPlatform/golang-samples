@@ -104,13 +104,3 @@ func testContext() (Context, error) {
 
 	return tc, nil
 }
-
-// MustGetEnv gets the environment variable env and skips the test if not set.
-func MustGetEnv(t *testing.T, env string) string {
-	t.Helper()
-	v := os.Getenv(env)
-	if v == "" {
-		t.Skipf("%s not set", env)
-	}
-	return v
-}

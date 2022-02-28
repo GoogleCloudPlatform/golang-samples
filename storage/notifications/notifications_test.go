@@ -124,7 +124,7 @@ func TestNotifications(t *testing.T) {
 			t.Fatalf("printPubsubBucketNotification: %v", err)
 		}
 
-		if got, want := buf.String(), "Topic Name: "+topicName2; !strings.Contains(got, want) {
+		if got, want := buf.String(), "TopicID:"+topicName2; !strings.Contains(got, want) {
 			t.Errorf("printPubsubBucketNotification: got %q; want to contain %q", got, want)
 		}
 	})
