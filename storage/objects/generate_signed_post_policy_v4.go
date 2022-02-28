@@ -57,7 +57,7 @@ func generateSignedPostPolicyV4(w io.Writer, bucket, object string) (*storage.Po
 	// You can pass these in through PostPolicyV4Options with one of the following options:
 	//    a. a Google service account private key, obtainable from the Google Developers Console
 	//    b. a Google Access ID with iam.serviceAccounts.signBlob permissions
-	//    c. a SignBytes function implementing custom signing.
+	//    c. a SignBytes function implementing custom signing
 	// In this example, none of these options are used, which means the
 	// GenerateSignedPostPolicyV4 function attempts to use the same authentication
 	// that was used to instantiate	the Storage client. This authentication must
