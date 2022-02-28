@@ -43,4 +43,4 @@ func getReservation(w io.Writer, projectID, region, reservationID string) error 
 	return nil
 }
 
-// [END pubsublite_get_]
+// [END pubsublite_get_reservation]
