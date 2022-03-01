@@ -23,11 +23,13 @@ import (
 	"cloud.google.com/go/pubsublite"
 )
 
-func createTopic(w io.Writer, projectID, region, zone, topicID string) error {
+func createTopic(w io.Writer, projectID, region, zone, topicID, reservation string, regional bool) error {
 	// projectID := "my-project-id"
 	// region := "us-central1" // see https://cloud.google.com/pubsub/lite/docs/locations
 	// zone := "us-central1-a"
 	// topicID := "my-topic"
+	// reservation := "projects/my-project-id/reservations/my-reservation"
+	// regional := "true"
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
 	if err != nil {
@@ -36,19 +38,31 @@ func createTopic(w io.Writer, projectID, region, zone, topicID string) error {
 	defer client.Close()
 
 	const gib = 1 << 30
+
+	var topicPath string
+	if regional {
+		topicPath = fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, region, topicID)
+	} else {
+		topicPath = fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, zone, topicID)
+	}
 	// For ranges of fields in TopicConfig, see https://pkg.go.dev/cloud.google.com/go/pubsublite/#TopicConfig
 	topic, err := client.CreateTopic(ctx, pubsublite.TopicConfig{
-		Name:                       fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, zone, topicID),
+		Name:                       topicPath,
 		PartitionCount:             2, // Must be >= 1 and cannot decrease after creation.
 		PublishCapacityMiBPerSec:   4,
 		SubscribeCapacityMiBPerSec: 8,
 		PerPartitionBytes:          30 * gib,
 		RetentionDuration:          pubsublite.InfiniteRetention,
+		ThroughputReservation:      reservation,
 	})
 	if err != nil {
 		return fmt.Errorf("client.CreateTopic got err: %v", err)
 	}
-	fmt.Fprintf(w, "Created topic: %s\n", topic.Name)
+	if regional {
+		fmt.Fprintf(w, "Created regional topic: %#v\n", topic)
+	} else {
+		fmt.Fprintf(w, "Created zonal topic: %#v\n", topic)
+	}
 	return nil
 }
 

@@ -21,32 +21,6 @@ import (
 	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
 )
 
-func waitZoneOp(ctx context.Context, projectId, zone string, op compute.Operation) error {
-	zoneOperationsClient, err := compute.NewZoneOperationsRESTClient(ctx)
-	if err != nil {
-		return err
-	}
-	defer zoneOperationsClient.Close()
-
-	for {
-		waitReq := &computepb.WaitZoneOperationRequest{
-			Operation: op.Proto().GetName(),
-			Project:   projectId,
-			Zone:      zone,
-		}
-		zoneOp, err := zoneOperationsClient.Wait(ctx, waitReq)
-		if err != nil {
-			return err
-		}
-
-		if *zoneOp.Status.Enum() == computepb.Operation_DONE {
-			break
-		}
-	}
-
-	return nil
-}
-
 func deleteInstance(ctx context.Context, projectId, zone, instanceName string) error {
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
 	if err != nil {
@@ -63,5 +37,5 @@ func deleteInstance(ctx context.Context, projectId, zone, instanceName string) e
 		return err
 	}
 
-	return waitZoneOp(ctx, projectId, zone, *op)
+	return op.Wait(ctx)
 }

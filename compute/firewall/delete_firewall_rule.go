@@ -46,27 +46,11 @@ func deleteFirewallRule(w io.Writer, projectID, firewallRuleName string) error {
 		return fmt.Errorf("unable to delete firewall rule: %v", err)
 	}
 
-	globalOperationsClient, err := compute.NewGlobalOperationsRESTClient(ctx)
-	if err != nil {
-		return fmt.Errorf("NewGlobalOperationsRESTClient: %v", err)
+	if err = op.Wait(ctx); err != nil {
+		return fmt.Errorf("unable to wait for the operation: %v", err)
 	}
-	defer globalOperationsClient.Close()
 
-	for {
-		waitReq := &computepb.WaitGlobalOperationRequest{
-			Operation: op.Proto().GetName(),
-			Project:   projectID,
-		}
-		globalOp, err := globalOperationsClient.Wait(ctx, waitReq)
-		if err != nil {
-			return fmt.Errorf("unable to wait for the operation: %v", err)
-		}
-
-		if *globalOp.Status.Enum() == computepb.Operation_DONE {
-			fmt.Fprintf(w, "Firewall rule deleted\n")
-			break
-		}
-	}
+	fmt.Fprintf(w, "Firewall rule deleted\n")
 
 	return nil
 }
