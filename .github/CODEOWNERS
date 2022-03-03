@@ -12,9 +12,7 @@
 /bigtable/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-native-db-dpes
 /cloudsql/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/infra-db-dpes
 /datastore/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-native-db-dpes
-/errorreporting/                      @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/observability-devx
 /firestore/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-native-db-dpes
-/logging/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/observability-devx
 /storage/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-storage-dpes
 /storagetransfer/                     @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-storage-dpes
 /iot/                                 @GoogleCloudPlatform/go-samples-reviewers @gcseh @GoogleCloudPlatform/api-iot
