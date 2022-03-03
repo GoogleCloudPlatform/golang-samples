@@ -49,7 +49,7 @@ func setTemporaryHold(w io.Writer, bucket, object string) error {
 	}
 	o = o.If(storage.Conditions{MetagenerationMatch: attrs.Metageneration})
 
-	// Update the object to set the hold.
+	// Update the object to set the object hold.
 	objectAttrsToUpdate := storage.ObjectAttrsToUpdate{
 		TemporaryHold: true,
 	}

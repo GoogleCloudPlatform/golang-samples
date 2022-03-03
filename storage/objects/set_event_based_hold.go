@@ -49,7 +49,7 @@ func setEventBasedHold(w io.Writer, bucket, object string) error {
 	}
 	o = o.If(storage.Conditions{MetagenerationMatch: attrs.Metageneration})
 
-	// Update the object to add the hold.
+	// Update the object to add the object hold.
 	objectAttrsToUpdate := storage.ObjectAttrsToUpdate{
 		EventBasedHold: true,
 	}

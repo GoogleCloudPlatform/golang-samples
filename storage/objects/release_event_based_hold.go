@@ -49,7 +49,7 @@ func releaseEventBasedHold(w io.Writer, bucket, object string) error {
 	}
 	o = o.If(storage.Conditions{MetagenerationMatch: attrs.Metageneration})
 
-	// Update the object to release the hold.
+	// Update the object to release the object hold.
 	objectAttrsToUpdate := storage.ObjectAttrsToUpdate{
 		EventBasedHold: false,
 	}

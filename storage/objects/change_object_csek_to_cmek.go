@@ -57,8 +57,8 @@ func сhangeObjectCSEKToKMS(w io.Writer, bucket, object string, encryptionKey []
 	}
 	o = o.If(storage.Conditions{GenerationMatch: attrs.Generation})
 
-	// You can't change an object's encryption key directly, you must rewrite the
-	// object using the new key.
+	// You can't change an object's encryption key directly. Instead, you must
+	// rewrite the object using the new key.
 	src := o.Key(encryptionKey)
 	c := o.CopierFrom(src)
 	c.DestinationKMSKeyName = kmsKeyName
