@@ -36,7 +36,7 @@ func setClientEndpoint(w io.Writer, customEndpoint string) error {
     }
     defer client.Close()
 
-    fmt.Fprintf(w, "The request endpoint set for the client is: %v\n", client.raw.BasePath)
+    fmt.Fprintf(w, "The request endpoint set for the client is: %v\n", customEndpoint)
     return nil
 }
 
