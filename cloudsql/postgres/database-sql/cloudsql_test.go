@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package cloudsql
 
 import (
 	"bytes"
@@ -22,76 +22,160 @@ import (
 	"testing"
 )
 
-type testInfo struct {
-	dbName                 string
-	dbPass                 string
-	dbUser                 string
-	dbPort                 string
-	instanceConnectionName string
+// dbConfig holds database connection information dervived from the environment.
+type dbConfig struct {
+	// user is the user name
+	user string
+	// pass is the user password
+	pass string
+	// name is the database name
+	name string
+	// port is the port used with the TCP host
+	port string
+	// host is a TCP address
+	host string
+	// unixPath is the unix socket file path
+	unixPath string
+	// instConnName is the Cloud SQL instance connection name
+	instConnName string
 }
 
-func TestIndex(t *testing.T) {
+type connType int
+
+const (
+	useTCP connType = iota
+	useUnix
+	useConnector
+)
+
+// dbConfigFromEnv reads database configuration from the environment, selecting
+// the provided connType in the configuration.
+func dbConfigFromEnv(t *testing.T, ct connType) dbConfig {
+	testEnv := func(name string) string {
+		n := os.Getenv(name)
+		if n == "" {
+			t.Fatalf("failed to get env var %q", name)
+		}
+		return n
+	}
+	d := dbConfig{
+		user:         testEnv("POSTGRES_USER"),
+		pass:         testEnv("POSTGRES_PASSWORD"),
+		name:         testEnv("POSTGRES_DATABASE"),
+		port:         testEnv("POSTGRES_PORT"),
+		host:         testEnv("POSTGRES_HOST"),
+		unixPath:     testEnv("POSTGRES_UNIX_SOCKET"),
+		instConnName: testEnv("POSTGRES_INSTANCE"),
+	}
+	// Zero out all but requested conn type
+	switch ct {
+	case useTCP:
+		// use host
+		d.unixPath = ""
+		d.instConnName = ""
+	case useUnix:
+		d.host = ""
+		// use unix path
+		d.instConnName = ""
+	default: // connector
+		d.host = ""
+		d.unixPath = ""
+		// use instance connection name
+	}
+	return d
+}
+
+func setupTestEnv(c dbConfig) func() {
+	oldDBUser := os.Getenv("DB_USER")
+	oldDBPass := os.Getenv("DB_PASS")
+	oldDBName := os.Getenv("DB_NAME")
+	oldDBPort := os.Getenv("DB_PORT")
+	oldHost := os.Getenv("INSTANCE_HOST")
+	oldUnix := os.Getenv("INSTANCE_UNIX_SOCKET")
+	oldInstance := os.Getenv("INSTANCE_CONNECTION_NAME")
+
+	os.Setenv("DB_USER", c.user)
+	os.Setenv("DB_PASS", c.pass)
+	os.Setenv("DB_NAME", c.name)
+	os.Setenv("DB_PORT", c.port)
+	os.Setenv("INSTANCE_HOST", c.host)
+	os.Setenv("INSTANCE_UNIX_SOCKET", c.unixPath)
+	os.Setenv("INSTANCE_CONNECTION_NAME", c.instConnName)
+
+	return func() {
+		os.Setenv("DB_USER", oldDBUser)
+		os.Setenv("DB_PASS", oldDBPass)
+		os.Setenv("DB_NAME", oldDBName)
+		os.Setenv("DB_PORT", oldDBPort)
+		os.Setenv("INSTANCE_HOST", oldHost)
+		os.Setenv("INSTANCE_UNIX", oldUnix)
+		os.Setenv("INSTANCE_CONNECTION_NAME", oldInstance)
+	}
+}
+
+func testGetVotes(t *testing.T) {
+	rr := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/", nil)
+	Votes(rr, req)
+	resp := rr.Result()
+	body := rr.Body.String()
+
+	wantStatus := 200
+	if gotStatus := resp.StatusCode; wantStatus != gotStatus {
+		t.Errorf("want = %v, got = %v", wantStatus, gotStatus)
+	}
+
+	want := "Tabs VS Spaces"
+	if !strings.Contains(body, want) {
+		t.Errorf("failed to find %q in resp = %v", want, body)
+	}
+}
+
+func testCastVote(t *testing.T) {
+	rr := httptest.NewRecorder()
+	req := httptest.NewRequest("POST", "/", bytes.NewBuffer([]byte("team=SPACES")))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	Votes(rr, req)
+	resp := rr.Result()
+	body := rr.Body.String()
+
+	wantStatus := 200
+	if gotStatus := resp.StatusCode; wantStatus != gotStatus {
+		t.Errorf("want = %v, got = %v", wantStatus, gotStatus)
+	}
+
+	want := "Vote successfully cast for SPACES"
+	if !strings.Contains(body, want) {
+		t.Errorf("failed to find %q in resp = %v", want, body)
+	}
+}
+
+func TestGetVotes(t *testing.T) {
 	if os.Getenv("GOLANG_SAMPLES_E2E_TEST") == "" {
 		t.Skip()
 	}
 
-	info := testInfo{
-		dbName:                 os.Getenv("POSTGRES_DATABASE"),
-		dbPass:                 os.Getenv("POSTGRES_PASSWORD"),
-		dbPort:                 os.Getenv("POSTGRES_PORT"),
-		dbUser:                 os.Getenv("POSTGRES_USER"),
-		instanceConnectionName: os.Getenv("POSTGRES_INSTANCE"),
-	}
-
-	tests := []struct {
-		dbHost string
+	testCases := []struct {
+		desc string
+		ct   connType
 	}{
-		{dbHost: ""},
-		{dbHost: os.Getenv("POSTGRES_HOST")},
+		{desc: "connecting with a TCP Socket", ct: useTCP},
+		{desc: "connecting with a Unix Socket", ct: useUnix},
+		{desc: "connecting with a connector", ct: useConnector},
 	}
 
-	// Capture original values
-	oldDBHost := os.Getenv("DB_HOST")
-	oldDBName := os.Getenv("DB_NAME")
-	oldDBPass := os.Getenv("DB_PASS")
-	oldDBPort := os.Getenv("DB_PORT")
-	oldDBUser := os.Getenv("DB_USER")
-	oldInstance := os.Getenv("INSTANCE_CONNECTION_NAME")
+	for _, tc := range testCases {
+		t.Run(tc.desc, func(t *testing.T) {
+			conf := dbConfigFromEnv(t, tc.ct)
+			cleanup := setupTestEnv(conf)
+			defer cleanup()
 
-	for _, test := range tests {
+			// initialize database connection based on environment
+			db = mustConnect()
 
-		// Set overwrites
-		os.Setenv("DB_HOST", test.dbHost)
-		os.Setenv("DB_NAME", info.dbName)
-		os.Setenv("DB_PASS", info.dbPass)
-		os.Setenv("DB_PORT", info.dbPort)
-		os.Setenv("DB_USER", info.dbUser)
-		os.Setenv("INSTANCE_CONNECTION_NAME", info.instanceConnectionName)
-
-		app := newApp()
-		rr := httptest.NewRecorder()
-		request := httptest.NewRequest("GET", "/", nil)
-		app.indexHandler(rr, request)
-		resp := rr.Result()
-		body := rr.Body.String()
-
-		if resp.StatusCode != 200 {
-			t.Errorf("With dbHost='%s', indexHandler got status code %d, want 200", test.dbHost, resp.StatusCode)
-		}
-
-		want := "Tabs VS Spaces"
-		if !strings.Contains(body, want) {
-			t.Errorf("With dbHost='%s', expected to see '%s' in indexHandler response body", test.dbHost, want)
-		}
-
+			testGetVotes(t)
+		})
 	}
-	// Restore original values
-	os.Setenv("DB_HOST", oldDBHost)
-	os.Setenv("DB_NAME", oldDBName)
-	os.Setenv("DB_PASS", oldDBPass)
-	os.Setenv("DB_PORT", oldDBPort)
-	os.Setenv("DB_USER", oldDBUser)
-	os.Setenv("INSTANCE_CONNECTION_NAME", oldInstance)
 }
 
 func TestCastVote(t *testing.T) {
@@ -99,63 +183,25 @@ func TestCastVote(t *testing.T) {
 		t.Skip()
 	}
 
-	info := testInfo{
-		dbName:                 os.Getenv("POSTGRES_DATABASE"),
-		dbPass:                 os.Getenv("POSTGRES_PASSWORD"),
-		dbPort:                 os.Getenv("POSTGRES_PORT"),
-		dbUser:                 os.Getenv("POSTGRES_USER"),
-		instanceConnectionName: os.Getenv("POSTGRES_INSTANCE"),
-	}
-
-	tests := []struct {
-		dbHost string
+	testCases := []struct {
+		desc string
+		ct   connType
 	}{
-		{dbHost: ""},
-		{dbHost: os.Getenv("POSTGRES_HOST")},
+		{desc: "connecting with a TCP Socket", ct: useTCP},
+		{desc: "connecting with a Unix Socket", ct: useUnix},
+		{desc: "connecting with a connector", ct: useConnector},
 	}
 
-	// Capture original values
-	oldDBHost := os.Getenv("DB_HOST")
-	oldDBName := os.Getenv("DB_NAME")
-	oldDBPass := os.Getenv("DB_PASS")
-	oldDBPort := os.Getenv("DB_PORT")
-	oldDBUser := os.Getenv("DB_USER")
-	oldInstance := os.Getenv("INSTANCE_CONNECTION_NAME")
+	for _, tc := range testCases {
+		t.Run(tc.desc, func(t *testing.T) {
+			conf := dbConfigFromEnv(t, tc.ct)
+			cleanup := setupTestEnv(conf)
+			defer cleanup()
 
-	for _, test := range tests {
+			// initialize database connection based on environment
+			db = mustConnect()
 
-		// Set overwrites
-		os.Setenv("DB_HOST", test.dbHost)
-		os.Setenv("DB_NAME", info.dbName)
-		os.Setenv("DB_PASS", info.dbPass)
-		os.Setenv("DB_PORT", info.dbPort)
-		os.Setenv("DB_USER", info.dbUser)
-		os.Setenv("INSTANCE_CONNECTION_NAME", info.instanceConnectionName)
-
-		app := newApp()
-		rr := httptest.NewRecorder()
-		request := httptest.NewRequest("POST", "/", bytes.NewBuffer([]byte("team=SPACES")))
-		request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-		app.indexHandler(rr, request)
-		resp := rr.Result()
-		body := rr.Body.String()
-
-		if resp.StatusCode != 200 {
-			t.Errorf("With dbHost='%s', indexHandler got status code %d, want 200", test.dbHost, resp.StatusCode)
-		}
-
-		want := "Vote successfully cast for SPACES"
-		if !strings.Contains(body, want) {
-			t.Errorf("With dbHost='%s', expected to see '%s' in indexHandler response body", test.dbHost, want)
-		}
-		os.Setenv("DB_HOST", oldDBHost)
+			testCastVote(t)
+		})
 	}
-
-	// Restore original values
-	os.Setenv("DB_HOST", oldDBHost)
-	os.Setenv("DB_NAME", oldDBName)
-	os.Setenv("DB_PASS", oldDBPass)
-	os.Setenv("DB_PORT", oldDBPort)
-	os.Setenv("DB_USER", oldDBUser)
-	os.Setenv("INSTANCE_CONNECTION_NAME", oldInstance)
 }
