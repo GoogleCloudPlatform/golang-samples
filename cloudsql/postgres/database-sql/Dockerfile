@@ -30,7 +30,7 @@ RUN go mod download
 COPY . ./
 
 # Build the binary.
-RUN go build -v -o server
+RUN go build -v -o server ./cmd/app
 
 # Use the official Debian slim image for a lean production container.
 # https://hub.docker.com/_/debian

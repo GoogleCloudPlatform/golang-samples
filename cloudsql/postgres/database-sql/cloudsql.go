@@ -50,7 +50,7 @@ func getDB() *sql.DB {
 func migrateDB(db *sql.DB) error {
 	createVotes := `CREATE TABLE IF NOT EXISTS votes (
 		id SERIAL NOT NULL,
-		created_at datetime NOT NULL,
+		created_at timestamp NOT NULL,
 		candidate VARCHAR(6) NOT NULL,
 		PRIMARY KEY (id)
 	);`
@@ -248,7 +248,7 @@ func saveVote(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 
 	// [START cloud_sql_mysql_databasesql_connection]
-	insertVote := "INSERT INTO votes(candidate, created_at) VALUES(?, NOW())"
+	insertVote := "INSERT INTO votes(candidate, created_at) VALUES($1, NOW())"
 	_, err := db.Exec(insertVote, team)
 	// [END cloud_sql_mysql_databasesql_connection]
 

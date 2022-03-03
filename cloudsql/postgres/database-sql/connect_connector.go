@@ -48,7 +48,7 @@ func connectWithConnector() (*sql.DB, error) {
 		usePrivate             = os.Getenv("PRIVATE_IP")
 	)
 	if dbUser == "" && dbIAMUser == "" {
-		log.Fatal("Wawrning: One of DB_USER or DB_IAM_USER must be defined")
+		log.Fatal("Warning: One of DB_USER or DB_IAM_USER must be defined")
 	}
 
 	dsn := fmt.Sprintf("user=%s password=%s database=%s", dbUser, dbPwd, dbName)
@@ -67,8 +67,10 @@ func connectWithConnector() (*sql.DB, error) {
 			// [END cloud_sql_postgres_databasesql_auto_iam_authn]
 		}
 		if usePrivate != "" {
-			d, err := cloudsqlconn.NewDialer(ctx,
-				cloudsqlconn.WithDefaultDialOptions(cloudsqlconn.WithPrivateIP()))
+			d, err := cloudsqlconn.NewDialer(
+				ctx,
+				cloudsqlconn.WithDefaultDialOptions(cloudsqlconn.WithPrivateIP()),
+			)
 			if err != nil {
 				return nil, err
 			}
