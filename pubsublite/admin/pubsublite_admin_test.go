@@ -381,6 +381,106 @@ func TestListSubscriptions(t *testing.T) {
 	}
 }
 
+func TestReservationsAdmin(t *testing.T) {
+	t.Parallel()
+	client := setupAdmin(t)
+	defer client.Close()
+	tc := testutil.SystemTest(t)
+
+	reservationID := resourcePrefix + uuid.NewString()
+	resPath := fmt.Sprintf("projects/%s/locations/%s/reservations/%s", projNumber, testRegion, reservationID)
+	cap := 4
+	t.Run("CreateReservation", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+		err := createReservation(buf, tc.ProjectID, testRegion, reservationID, cap)
+		if err != nil {
+			t.Fatalf("createReservation: %v", err)
+		}
+
+		got := buf.String()
+		want := "Created reservation"
+		if !strings.Contains(got, want) {
+			t.Fatalf("createReservation() mismatch: got: %s\nwant: %s", got, want)
+		}
+	})
+
+	t.Run("GetReservation", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+		err := getReservation(buf, tc.ProjectID, testRegion, reservationID)
+		if err != nil {
+			t.Fatalf("getReservation: %v", err)
+		}
+
+		got := buf.String()
+		want := fmt.Sprintf("Got reservation: %#v\n", psltest.DefaultResConfig(resPath))
+		if diff := cmp.Diff(want, got); diff != "" {
+			t.Fatalf("getReservation() mismatch: -want, +got:\n%s", diff)
+		}
+	})
+
+	t.Run("UpdateReservation", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+		err := updateReservation(buf, tc.ProjectID, testRegion, reservationID, cap)
+		if err != nil {
+			t.Fatalf("updateReservation: %v", err)
+		}
+
+		got := buf.String()
+		want := "Updated reservation"
+		if !strings.Contains(got, want) {
+			t.Fatalf("updateReservation() mismatch: got: %s\nwant: %s", got, want)
+		}
+	})
+
+	t.Run("DeleteReservation", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+		err := deleteReservation(buf, tc.ProjectID, testRegion, reservationID)
+		if err != nil {
+			t.Fatalf("deleteReservation: %v", err)
+		}
+
+		got := buf.String()
+		want := "Deleted reservation"
+		if got != want {
+			t.Fatalf("got: %v, want %v", got, want)
+		}
+	})
+}
+
+func TestListReservations(t *testing.T) {
+	t.Parallel()
+	client := setupAdmin(t)
+	defer client.Close()
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+
+	var resPaths []string
+	for i := 0; i < 3; i++ {
+		resID := resourcePrefix + uuid.NewString()
+		resPath := fmt.Sprintf("projects/%s/locations/%s/reservations/%s", projNumber, testRegion, resID)
+		resPaths = append(resPaths, resPath)
+		psltest.MustCreateReservation(ctx, t, client, resPath)
+	}
+
+	testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+		err := listReservations(buf, tc.ProjectID, testRegion)
+		if err != nil {
+			r.Errorf("listReservations got err: %v", err)
+		}
+		got := buf.String()
+		for _, rp := range resPaths {
+			if !strings.Contains(got, rp) {
+				r.Errorf("missing reservation from list: %s", rp)
+			}
+		}
+	})
+
+	for _, rp := range resPaths {
+		client.DeleteReservation(ctx, rp)
+	}
+}
+
 func randomZone() string {
 	return supportedZones[rand.Intn(len(supportedZones))]
 }

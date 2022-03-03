@@ -119,9 +119,7 @@ func TestComputeSnippets(t *testing.T) {
 
 	buf.Reset()
 
-	zoneArr := strings.Split(op.Proto().GetZone(), "/")
-
-	if err := waitForOperation(buf, tc.ProjectID, zoneArr[len(zoneArr)-1], op.Proto().GetName()); err != nil {
+	if err := waitForOperation(buf, tc.ProjectID, op); err != nil {
 		t.Errorf("waitForOperation got err: %v", err)
 	}
 
