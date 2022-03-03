@@ -39,8 +39,8 @@ func listBucketNotifications(w io.Writer, bucketName string) error {
 		return fmt.Errorf("Bucket.Notifications: %v", err)
 	}
 
-	for _, n := range notifications {
-		fmt.Fprintf(w, "Notification topic %s with ID %s\n", n.TopicID, n.ID)
+	for nID, n := range notifications {
+		fmt.Fprintf(w, "Notification topic %s with ID %s\n", n.TopicID, nID)
 	}
 
 	return nil
