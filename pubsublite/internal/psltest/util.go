@@ -136,3 +136,22 @@ func DefaultSubConfig(topicPath, subPath string) *pubsublite.SubscriptionConfig 
 	}
 	return cfg
 }
+
+func MustCreateReservation(ctx context.Context, t *testing.T, client *pubsublite.AdminClient, resPath string) *pubsublite.ReservationConfig {
+	t.Helper()
+	cfg := DefaultResConfig(resPath)
+	resConfig, err := client.CreateReservation(ctx, *cfg)
+	if err != nil {
+		t.Fatalf("AdminClient.CreateReservation got err: %v", err)
+	}
+	return resConfig
+}
+
+// DefaultResConfig returns the default reservation config for tests.
+func DefaultResConfig(resPath string) *pubsublite.ReservationConfig {
+	cfg := &pubsublite.ReservationConfig{
+		Name:               resPath,
+		ThroughputCapacity: 4,
+	}
+	return cfg
+}

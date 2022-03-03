@@ -449,24 +449,15 @@ func TestV4SignedURL(t *testing.T) {
 func TestPostPolicyV4(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		t.Fatalf("storage.NewClient: %v", err)
-	}
-	defer client.Close()
 
 	bucketName := tc.ProjectID + "-post-policy-bucket-name"
 	objectName := "foo.txt"
-	serviceAccount := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
-	if serviceAccount == "" {
-		t.Error("GOOGLE_APPLICATION_CREDENTIALS must be set")
-	}
 
 	if err := testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName); err != nil {
 		t.Fatalf("CleanBucket: %v", err)
 	}
 	putBuf := new(bytes.Buffer)
-	policy, err := generateSignedPostPolicyV4(putBuf, bucketName, objectName, serviceAccount)
+	policy, err := generateSignedPostPolicyV4(putBuf, bucketName, objectName)
 	if err != nil {
 		t.Fatalf("generateSignedPostPolicyV4: %v", err)
 	}
@@ -542,6 +533,12 @@ func TestPostPolicyV4(t *testing.T) {
 			r.Errorf("Body.Close: %v", err)
 		}
 	})
+
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+	defer client.Close()
 
 	// Verify that the file was uploaded by reading back its attributes.
 	bkt := client.Bucket(bucketName)
