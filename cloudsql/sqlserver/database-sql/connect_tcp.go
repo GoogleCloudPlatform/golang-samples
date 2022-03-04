@@ -70,7 +70,7 @@ func connectTCPSocket() (*sql.DB, error) {
 	// [END_EXCLUDE]
 
 	// dbPool is the pool of database connections.
-	dbPool, err := sql.Open("mssql", dbURI)
+	dbPool, err := sql.Open("sqlserver", dbURI)
 	if err != nil {
 		return nil, fmt.Errorf("sql.Open: %v", err)
 	}
