@@ -56,7 +56,7 @@ func connectWithConnector() (*sql.DB, error) {
 		dbPwd                  = mustGetenv("DB_PASS")                  // e.g. 'my-db-password'
 		dbName                 = mustGetenv("DB_NAME")                  // e.g. 'my-database'
 		instanceConnectionName = mustGetenv("INSTANCE_CONNECTION_NAME") // e.g. 'project:region:instance'
-		usePrivate             = os.Getenv("USE_PRIVATE")
+		usePrivate             = os.Getenv("PRIVATE_IP")
 	)
 
 	dbURI := fmt.Sprintf("user id=%s;password=%s;database=%s;", dbUser, dbPwd, dbName)
