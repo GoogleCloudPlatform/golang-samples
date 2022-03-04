@@ -176,18 +176,18 @@ func mustConnect() *sql.DB {
 // configureConnectionPool sets database connection pool properties.
 // For more information, see https://golang.org/pkg/database/sql
 func configureConnectionPool(db *sql.DB) {
-	// [START cloud_sql_mysql_databasesql_limit]
+	// [START cloud_sql_postgres_databasesql_limit]
 	// Set maximum number of connections in idle connection pool.
 	db.SetMaxIdleConns(5)
 
 	// Set maximum number of open connections to the database.
 	db.SetMaxOpenConns(7)
-	// [END cloud_sql_mysql_databasesql_limit]
+	// [END cloud_sql_postgres_databasesql_limit]
 
-	// [START cloud_sql_mysql_databasesql_lifetime]
+	// [START cloud_sql_postgres_databasesql_lifetime]
 	// Set Maximum time (in seconds) that a connection can remain open.
 	db.SetConnMaxLifetime(1800 * time.Second)
-	// [END cloud_sql_mysql_databasesql_lifetime]
+	// [END cloud_sql_postgres_databasesql_lifetime]
 }
 
 // Votes handles HTTP requests to alternatively show the voting app or to save a
@@ -247,10 +247,10 @@ func saveVote(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	// [START cloud_sql_mysql_databasesql_connection]
+	// [START cloud_sql_postgres_databasesql_connection]
 	insertVote := "INSERT INTO votes(candidate, created_at) VALUES($1, NOW())"
 	_, err := db.Exec(insertVote, team)
-	// [END cloud_sql_mysql_databasesql_connection]
+	// [END cloud_sql_postgres_databasesql_connection]
 
 	if err != nil {
 		log.Printf("saveVote: unable to save vote: %v", err)
