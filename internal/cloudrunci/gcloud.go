@@ -53,6 +53,8 @@ func gcloud(label string, cmd *exec.Cmd) ([]byte, error) {
 		cmdCopy := &exec.Cmd{
 			Path: cmd.Path,
 			Args: cmd.Args,
+			Env:  cmd.Env,
+			Dir:  cmd.Dir,
 		}
 		out, err = gcloudExec(fmt.Sprintf("Attempt #%d: ", r.Attempt), label, cmdCopy)
 		if err != nil {
