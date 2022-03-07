@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,21 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package serviceaccount
+package notifications
 
-// [START storage_get_service_account]
+// [START storage_print_pubsub_bucket_notification]
 import (
 	"context"
 	"fmt"
 	"io"
-	"time"
 
 	"cloud.google.com/go/storage"
 )
 
-// getServiceAccount gets the default Cloud Storage service account email address.
-func getServiceAccount(w io.Writer, projectID string) error {
-	// projectID := "my-project-id"
+// printPubsubBucketNotification gets a notification configuration for a bucket.
+func printPubsubBucketNotification(w io.Writer, bucketName, notificationID string) error {
+	// bucketName := "bucket-name"
+	// notificationID := "notification-id"
 
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
@@ -35,16 +35,15 @@ func getServiceAccount(w io.Writer, projectID string) error {
 	}
 	defer client.Close()
 
-	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel()
-
-	serviceAccount, err := client.ServiceAccount(ctx, projectID)
+	notifications, err := client.Bucket(bucketName).Notifications(ctx)
 	if err != nil {
-		return fmt.Errorf("ServiceAccount: %v", err)
+		return fmt.Errorf("Bucket.Notifications: %v", err)
 	}
 
-	fmt.Fprintf(w, "The GCS service account for project %v is: %v\n", projectID, serviceAccount)
+	n := notifications[notificationID]
+	fmt.Fprintf(w, "Notification: %+v", n)
+
 	return nil
 }
 
-// [END storage_get_service_account]
+// [END storage_print_pubsub_bucket_notification]
