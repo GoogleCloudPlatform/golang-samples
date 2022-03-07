@@ -45,10 +45,6 @@ COPY --from=builder /app/server /app/server
 # Copy any certificates if present.
 COPY ./certs /app/certs
 
-# Use server certificate for encrypted connection.
-COPY ./certs /usr/local/share/ca-certificates
-RUN update-ca-certificates
-
 # Run the web service on container startup.
 WORKDIR /app
 CMD ["/app/server"]
