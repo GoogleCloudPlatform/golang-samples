@@ -53,6 +53,8 @@ func pgCreateDatabase(ctx context.Context, w io.Writer, db string) error {
 	if _, err := opCreate.Wait(ctx); err != nil {
 		return err
 	}
+	// Databases that are created with PostgreSQL dialect do not support extra DDL statements in the `CreateDatabase` call.
+	// We must therefore execute these in a separate UpdateDatabaseDdl call after the database has been created.
 	opUpdate, err := adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
 		Database: db,
 		Statements: []string{

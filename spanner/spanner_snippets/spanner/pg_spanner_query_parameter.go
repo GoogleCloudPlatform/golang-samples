@@ -38,9 +38,7 @@ func pgQueryParameter(w io.Writer, db string) error {
 	defer client.Close()
 
 	stmt := spanner.Statement{
-		SQL: `SELECT SingerId, FirstName, LastName
-              FROM Singers
-              WHERE LastName LIKE $1`,
+		SQL: `SELECT SingerId, FirstName, LastName FROM Singers WHERE LastName LIKE $1`,
 		// Use 'p1' to bind to the parameter with index 1.
 		Params: map[string]interface{}{"p1": "A%"},
 	}
