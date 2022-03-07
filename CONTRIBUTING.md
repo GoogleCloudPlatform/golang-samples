@@ -51,9 +51,6 @@ testing), and then run the following command to upload the new secret values:
 $ ./testing/kokoro/store-secrets.sh
 ```
 
-Lastly, return to `pull-secrets.sh` and bump the version number to match what
-you have just uploaded.
-
 ## Dependencies
 
 When you add a new dependency, it must be added to `go.mod` in the directory you
