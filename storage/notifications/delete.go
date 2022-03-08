@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,21 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package serviceaccount
+package notifications
 
-// [START storage_get_service_account]
+// [START storage_delete_bucket_notification]
 import (
 	"context"
 	"fmt"
 	"io"
-	"time"
 
 	"cloud.google.com/go/storage"
 )
 
-// getServiceAccount gets the default Cloud Storage service account email address.
-func getServiceAccount(w io.Writer, projectID string) error {
-	// projectID := "my-project-id"
+// deleteBucketNotification deletes a notification configuration for a bucket.
+func deleteBucketNotification(w io.Writer, bucketName, notificationID string) error {
+	// bucketName := "bucket-name"
+	// notificationID := "notification-id"
 
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
@@ -35,16 +35,13 @@ func getServiceAccount(w io.Writer, projectID string) error {
 	}
 	defer client.Close()
 
-	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel()
+	bucket := client.Bucket(bucketName)
 
-	serviceAccount, err := client.ServiceAccount(ctx, projectID)
-	if err != nil {
-		return fmt.Errorf("ServiceAccount: %v", err)
+	if err := bucket.DeleteNotification(ctx, notificationID); err != nil {
+		return fmt.Errorf("Bucket.DeleteNotification: %v", err)
 	}
-
-	fmt.Fprintf(w, "The GCS service account for project %v is: %v\n", projectID, serviceAccount)
+	fmt.Fprintf(w, "Successfully deleted notification with ID %s for bucket %s.\n", notificationID, bucketName)
 	return nil
 }
 
-// [END storage_get_service_account]
+// [END storage_delete_bucket_notification]
