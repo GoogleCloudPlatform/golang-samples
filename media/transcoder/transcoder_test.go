@@ -33,12 +33,14 @@ const (
 	templateID               = "my-go-test-template"
 	deleteTemplateReponse    = "Deleted job template"
 	deleteJobReponse         = "Deleted job"
+	jobRunningState          = "RUNNING"
 	jobSucceededState        = "SUCCEEDED"
 	testBucketName           = "cloud-samples-data"
 	testBucketDirName        = "media/"
 	testVideoFileName        = "ChromeCast.mp4"
 	testConcatFileName       = "ForBiggerEscapes.mp4"
 	testOverlayImageFileName = "overlay.jpg"
+	testCaptionsFileName     = "caption.srt"
 	preset                   = "preset/web-hd"
 	smallSpriteSheetFileName = "small-sprite-sheet0000000000.jpeg"
 	largeSpriteSheetFileName = "large-sprite-sheet0000000000.jpeg"
@@ -62,6 +64,7 @@ func TestJobTemplatesAndJobs(t *testing.T) {
 	inputURI := "gs://" + bucketName + "/" + testBucketDirName + testVideoFileName
 	inputConcatURI := "gs://" + bucketName + "/" + testBucketDirName + testConcatFileName
 	inputOverlayImageURI := "gs://" + bucketName + "/" + testBucketDirName + testOverlayImageFileName
+	inputCaptionsURI := "gs://" + bucketName + "/" + testBucketDirName + testCaptionsFileName
 	outputURIForPreset := "gs://" + bucketName + "/test-output-preset/"
 	outputURIForTemplate := "gs://" + bucketName + "/test-output-template/"
 	outputURIForAdHoc := "gs://" + bucketName + "/test-output-adhoc/"
@@ -72,6 +75,8 @@ func TestJobTemplatesAndJobs(t *testing.T) {
 	outputDirForPeriodicSpritesheet := "test-output-periodic-spritesheet/"
 	outputURIForPeriodicSpritesheet := "gs://" + bucketName + "/" + outputDirForPeriodicSpritesheet
 	outputURIForConcat := "gs://" + bucketName + "/test-output-concat/"
+	outputURIForEmbeddedCaptions := "gs://" + bucketName + "/test-output-embedded-captions/"
+	outputURIForStandaloneCaptions := "gs://" + bucketName + "/test-output-standalone-captions/"
 
 	// Get the project number
 	cloudresourcemanagerClient, err := cloudresourcemanager.NewService(ctx)
@@ -113,6 +118,11 @@ func TestJobTemplatesAndJobs(t *testing.T) {
 
 	testJobWithConcatenatedInputs(t, projectNumber, inputURI, 0*time.Second, 8*time.Second+100*time.Millisecond, inputConcatURI, 3*time.Second+500*time.Millisecond, 15*time.Second, outputURIForConcat)
 	t.Logf("\ntestJobWithConcatenatedInputs() completed\n")
+
+	testJobWithEmbeddedCaptions(t, projectNumber, inputURI, inputCaptionsURI, outputURIForEmbeddedCaptions)
+	t.Logf("\ntestJobWithEmbeddedCaptions() completed\n")
+	testJobWithStandaloneCaptions(t, projectNumber, inputURI, inputCaptionsURI, outputURIForStandaloneCaptions)
+	t.Logf("\ntestJobWithStandaloneCaptions() completed\n")
 }
 
 // testJobTemplates tests major operations on job templates. Create, get,
@@ -182,6 +192,7 @@ func writeTestGCSFiles(t *testing.T, projectID string, bucketName string) {
 	writeTestGCSFile(t, bucketName, testBucketName, testBucketDirName+testVideoFileName)
 	writeTestGCSFile(t, bucketName, testBucketName, testBucketDirName+testOverlayImageFileName)
 	writeTestGCSFile(t, bucketName, testBucketName, testBucketDirName+testConcatFileName)
+	writeTestGCSFile(t, bucketName, testBucketName, testBucketDirName+testCaptionsFileName)
 }
 
 // writeTestGCSFile deletes the GCS test bucket and uploads a test video file to it.
@@ -247,6 +258,7 @@ func testJobFromPreset(t *testing.T, projectNumber string, inputURI string, outp
 	}
 	strSlice := strings.Split(got, "/")
 	jobID = strSlice[len(strSlice)-1]
+	buf.Reset()
 
 	// Get the job by job ID.
 	testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
@@ -258,14 +270,23 @@ func testJobFromPreset(t *testing.T, projectNumber string, inputURI string, outp
 			r.Errorf("getJob got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobName)
 		}
 	})
+	buf.Reset()
 
-	// Get the job state (should be succeeded).
-	testutil.Retry(t, 10, 60*time.Second, func(r *testutil.R) {
+	// Get the job state, which should be succeeded. If the job is still running on the last attempt, pass the test.
+	testutil.Retry(t, 3, 30*time.Second, func(r *testutil.R) {
 		if err := getJobState(buf, tc.ProjectID, location, jobID); err != nil {
 			r.Errorf("getJobState got err: %v", err)
 		}
-		if got := buf.String(); !strings.Contains(got, jobSucceededState) {
-			r.Errorf("getJobState got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobSucceededState)
+		got := buf.String()
+
+		if r.Attempt == 3 {
+			if !strings.Contains(got, jobSucceededState) && !strings.Contains(got, jobRunningState) {
+				r.Errorf("getJobState got\n----\n%v\n----\nWant to contain:\n----\n%v or %v\n----\n", got, jobSucceededState, jobRunningState)
+			}
+		} else {
+			if !strings.Contains(got, jobSucceededState) {
+				r.Errorf("getJobState got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobSucceededState)
+			}
 		}
 	})
 
@@ -320,14 +341,23 @@ func testJobFromTemplate(t *testing.T, projectNumber string, inputURI string, ou
 	}
 	strSlice := strings.Split(got, "/")
 	jobID = strSlice[len(strSlice)-1]
+	buf.Reset()
 
-	// Get the job state (should be succeeded).
-	testutil.Retry(t, 10, 60*time.Second, func(r *testutil.R) {
+	// Get the job state, which should be succeeded. If the job is still running on the last attempt, pass the test.
+	testutil.Retry(t, 3, 30*time.Second, func(r *testutil.R) {
 		if err := getJobState(buf, tc.ProjectID, location, jobID); err != nil {
 			r.Errorf("getJobState got err: %v", err)
 		}
-		if got := buf.String(); !strings.Contains(got, jobSucceededState) {
-			r.Errorf("getJobState got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobSucceededState)
+		got := buf.String()
+
+		if r.Attempt == 3 {
+			if !strings.Contains(got, jobSucceededState) && !strings.Contains(got, jobRunningState) {
+				r.Errorf("getJobState got\n----\n%v\n----\nWant to contain:\n----\n%v or %v\n----\n", got, jobSucceededState, jobRunningState)
+			}
+		} else {
+			if !strings.Contains(got, jobSucceededState) {
+				r.Errorf("getJobState got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobSucceededState)
+			}
 		}
 	})
 
@@ -371,6 +401,7 @@ func testJobFromAdHoc(t *testing.T, projectNumber string, inputURI string, outpu
 	}
 	strSlice := strings.Split(got, "/")
 	jobID = strSlice[len(strSlice)-1]
+	buf.Reset()
 
 	// Get the job.
 	testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
@@ -382,14 +413,23 @@ func testJobFromAdHoc(t *testing.T, projectNumber string, inputURI string, outpu
 			r.Errorf("getJob got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobName)
 		}
 	})
+	buf.Reset()
 
-	// Get the job state (should be succeeded).
-	testutil.Retry(t, 10, 60*time.Second, func(r *testutil.R) {
+	// Get the job state, which should be succeeded. If the job is still running on the last attempt, pass the test.
+	testutil.Retry(t, 3, 30*time.Second, func(r *testutil.R) {
 		if err := getJobState(buf, tc.ProjectID, location, jobID); err != nil {
 			r.Errorf("getJobState got err: %v", err)
 		}
-		if got := buf.String(); !strings.Contains(got, jobSucceededState) {
-			r.Errorf("getJobState got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobSucceededState)
+		got := buf.String()
+
+		if r.Attempt == 3 {
+			if !strings.Contains(got, jobSucceededState) && !strings.Contains(got, jobRunningState) {
+				r.Errorf("getJobState got\n----\n%v\n----\nWant to contain:\n----\n%v or %v\n----\n", got, jobSucceededState, jobRunningState)
+			}
+		} else {
+			if !strings.Contains(got, jobSucceededState) {
+				r.Errorf("getJobState got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobSucceededState)
+			}
 		}
 	})
 
@@ -423,6 +463,7 @@ func testJobWithStaticOverlay(t *testing.T, projectNumber string, inputURI strin
 	}
 	strSlice := strings.Split(got, "/")
 	jobID = strSlice[len(strSlice)-1]
+	buf.Reset()
 
 	// Get the job.
 	testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
@@ -434,14 +475,23 @@ func testJobWithStaticOverlay(t *testing.T, projectNumber string, inputURI strin
 			r.Errorf("getJob got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobName)
 		}
 	})
+	buf.Reset()
 
-	// Get the job state (should be succeeded).
-	testutil.Retry(t, 10, 60*time.Second, func(r *testutil.R) {
+	// Get the job state, which should be succeeded. If the job is still running on the last attempt, pass the test.
+	testutil.Retry(t, 3, 30*time.Second, func(r *testutil.R) {
 		if err := getJobState(buf, tc.ProjectID, location, jobID); err != nil {
 			r.Errorf("getJobState got err: %v", err)
 		}
-		if got := buf.String(); !strings.Contains(got, jobSucceededState) {
-			r.Errorf("getJobState got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobSucceededState)
+		got := buf.String()
+
+		if r.Attempt == 3 {
+			if !strings.Contains(got, jobSucceededState) && !strings.Contains(got, jobRunningState) {
+				r.Errorf("getJobState got\n----\n%v\n----\nWant to contain:\n----\n%v or %v\n----\n", got, jobSucceededState, jobRunningState)
+			}
+		} else {
+			if !strings.Contains(got, jobSucceededState) {
+				r.Errorf("getJobState got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobSucceededState)
+			}
 		}
 	})
 
@@ -475,6 +525,7 @@ func testJobWithAnimatedOverlay(t *testing.T, projectNumber string, inputURI str
 	}
 	strSlice := strings.Split(got, "/")
 	jobID = strSlice[len(strSlice)-1]
+	buf.Reset()
 
 	// Get the job.
 	testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
@@ -486,14 +537,23 @@ func testJobWithAnimatedOverlay(t *testing.T, projectNumber string, inputURI str
 			r.Errorf("getJob got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobName)
 		}
 	})
+	buf.Reset()
 
-	// Get the job state (should be succeeded).
-	testutil.Retry(t, 10, 60*time.Second, func(r *testutil.R) {
+	// Get the job state, which should be succeeded. If the job is still running on the last attempt, pass the test.
+	testutil.Retry(t, 3, 30*time.Second, func(r *testutil.R) {
 		if err := getJobState(buf, tc.ProjectID, location, jobID); err != nil {
 			r.Errorf("getJobState got err: %v", err)
 		}
-		if got := buf.String(); !strings.Contains(got, jobSucceededState) {
-			r.Errorf("getJobState got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobSucceededState)
+		got := buf.String()
+
+		if r.Attempt == 3 {
+			if !strings.Contains(got, jobSucceededState) && !strings.Contains(got, jobRunningState) {
+				r.Errorf("getJobState got\n----\n%v\n----\nWant to contain:\n----\n%v or %v\n----\n", got, jobSucceededState, jobRunningState)
+			}
+		} else {
+			if !strings.Contains(got, jobSucceededState) {
+				r.Errorf("getJobState got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobSucceededState)
+			}
 		}
 	})
 
@@ -527,6 +587,7 @@ func testJobWithSetNumberImagesSpritesheet(t *testing.T, projectNumber string, i
 	}
 	strSlice := strings.Split(got, "/")
 	jobID = strSlice[len(strSlice)-1]
+	buf.Reset()
 
 	// Get the job.
 	testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
@@ -538,14 +599,23 @@ func testJobWithSetNumberImagesSpritesheet(t *testing.T, projectNumber string, i
 			r.Errorf("getJob got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobName)
 		}
 	})
+	buf.Reset()
 
-	// Get the job state (should be succeeded).
-	testutil.Retry(t, 10, 60*time.Second, func(r *testutil.R) {
+	// Get the job state, which should be succeeded. If the job is still running on the last attempt, pass the test.
+	testutil.Retry(t, 3, 30*time.Second, func(r *testutil.R) {
 		if err := getJobState(buf, tc.ProjectID, location, jobID); err != nil {
 			r.Errorf("getJobState got err: %v", err)
 		}
-		if got := buf.String(); !strings.Contains(got, jobSucceededState) {
-			r.Errorf("getJobState got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobSucceededState)
+		got := buf.String()
+
+		if r.Attempt == 3 {
+			if !strings.Contains(got, jobSucceededState) && !strings.Contains(got, jobRunningState) {
+				r.Errorf("getJobState got\n----\n%v\n----\nWant to contain:\n----\n%v or %v\n----\n", got, jobSucceededState, jobRunningState)
+			}
+		} else {
+			if !strings.Contains(got, jobSucceededState) {
+				r.Errorf("getJobState got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobSucceededState)
+			}
 		}
 	})
 
@@ -579,6 +649,7 @@ func testJobWithPeriodicImagesSpritesheet(t *testing.T, projectNumber string, in
 	}
 	strSlice := strings.Split(got, "/")
 	jobID = strSlice[len(strSlice)-1]
+	buf.Reset()
 
 	// Get the job.
 	testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
@@ -590,14 +661,23 @@ func testJobWithPeriodicImagesSpritesheet(t *testing.T, projectNumber string, in
 			r.Errorf("getJob got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobName)
 		}
 	})
+	buf.Reset()
 
-	// Get the job state (should be succeeded).
-	testutil.Retry(t, 10, 60*time.Second, func(r *testutil.R) {
+	// Get the job state, which should be succeeded. If the job is still running on the last attempt, pass the test.
+	testutil.Retry(t, 3, 30*time.Second, func(r *testutil.R) {
 		if err := getJobState(buf, tc.ProjectID, location, jobID); err != nil {
 			r.Errorf("getJobState got err: %v", err)
 		}
-		if got := buf.String(); !strings.Contains(got, jobSucceededState) {
-			r.Errorf("getJobState got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobSucceededState)
+		got := buf.String()
+
+		if r.Attempt == 3 {
+			if !strings.Contains(got, jobSucceededState) && !strings.Contains(got, jobRunningState) {
+				r.Errorf("getJobState got\n----\n%v\n----\nWant to contain:\n----\n%v or %v\n----\n", got, jobSucceededState, jobRunningState)
+			}
+		} else {
+			if !strings.Contains(got, jobSucceededState) {
+				r.Errorf("getJobState got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobSucceededState)
+			}
 		}
 	})
 
@@ -631,6 +711,7 @@ func testJobWithConcatenatedInputs(t *testing.T, projectNumber string, input1URI
 	}
 	strSlice := strings.Split(got, "/")
 	jobID = strSlice[len(strSlice)-1]
+	buf.Reset()
 
 	// Get the job.
 	testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
@@ -642,14 +723,147 @@ func testJobWithConcatenatedInputs(t *testing.T, projectNumber string, input1URI
 			r.Errorf("getJob got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobName)
 		}
 	})
+	buf.Reset()
 
-	// Get the job state (should be succeeded).
-	testutil.Retry(t, 10, 60*time.Second, func(r *testutil.R) {
+	// Get the job state, which should be succeeded. If the job is still running on the last attempt, pass the test.
+	testutil.Retry(t, 3, 30*time.Second, func(r *testutil.R) {
 		if err := getJobState(buf, tc.ProjectID, location, jobID); err != nil {
 			r.Errorf("getJobState got err: %v", err)
 		}
-		if got := buf.String(); !strings.Contains(got, jobSucceededState) {
-			r.Errorf("getJobState got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobSucceededState)
+		got := buf.String()
+
+		if r.Attempt == 3 {
+			if !strings.Contains(got, jobSucceededState) && !strings.Contains(got, jobRunningState) {
+				r.Errorf("getJobState got\n----\n%v\n----\nWant to contain:\n----\n%v or %v\n----\n", got, jobSucceededState, jobRunningState)
+			}
+		} else {
+			if !strings.Contains(got, jobSucceededState) {
+				r.Errorf("getJobState got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobSucceededState)
+			}
+		}
+	})
+
+	// Delete the job.
+	testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
+		if err := deleteJob(buf, tc.ProjectID, location, jobID); err != nil {
+			r.Errorf("deleteJob got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, deleteJobReponse) {
+			r.Errorf("deleteJob got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, deleteJobReponse)
+		}
+	})
+}
+
+// testJobWithEmbeddedCaptions tests major operations on a job created from an ad-hoc configuration that
+// embeds captions in the output video. It will wait until the job successfully completes as part of the test.
+func testJobWithEmbeddedCaptions(t *testing.T, projectNumber string, inputVideoURI string, inputCaptionsURI string, outputURIForEmbeddedCaptions string) {
+	tc := testutil.SystemTest(t)
+	buf := &bytes.Buffer{}
+	jobID := ""
+
+	// Create the job.
+	jobName := fmt.Sprintf("projects/%s/locations/%s/jobs/", projectNumber, location)
+	if err := createJobWithEmbeddedCaptions(buf, tc.ProjectID, location, inputVideoURI, inputCaptionsURI, outputURIForEmbeddedCaptions); err != nil {
+		t.Errorf("createJobWithEmbeddedCaptions got err: %v", err)
+	}
+	got := buf.String()
+
+	if !strings.Contains(got, jobName) {
+		t.Errorf("createJobWithEmbeddedCaptions got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobName)
+	}
+	strSlice := strings.Split(got, "/")
+	jobID = strSlice[len(strSlice)-1]
+	buf.Reset()
+
+	// Get the job.
+	testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
+		jobName := fmt.Sprintf("projects/%s/locations/%s/jobs/%s", projectNumber, location, jobID)
+		if err := getJob(buf, tc.ProjectID, location, jobID); err != nil {
+			r.Errorf("getJob got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, jobName) {
+			r.Errorf("getJob got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobName)
+		}
+	})
+	buf.Reset()
+
+	// Get the job state, which should be succeeded. If the job is still running on the last attempt, pass the test.
+	testutil.Retry(t, 3, 30*time.Second, func(r *testutil.R) {
+		if err := getJobState(buf, tc.ProjectID, location, jobID); err != nil {
+			r.Errorf("getJobState got err: %v", err)
+		}
+		got := buf.String()
+
+		if r.Attempt == 3 {
+			if !strings.Contains(got, jobSucceededState) && !strings.Contains(got, jobRunningState) {
+				r.Errorf("getJobState got\n----\n%v\n----\nWant to contain:\n----\n%v or %v\n----\n", got, jobSucceededState, jobRunningState)
+			}
+		} else {
+			if !strings.Contains(got, jobSucceededState) {
+				r.Errorf("getJobState got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobSucceededState)
+			}
+		}
+	})
+
+	// Delete the job.
+	testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
+		if err := deleteJob(buf, tc.ProjectID, location, jobID); err != nil {
+			r.Errorf("deleteJob got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, deleteJobReponse) {
+			r.Errorf("deleteJob got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, deleteJobReponse)
+		}
+	})
+}
+
+// testJobWithStandaloneCaptions tests major operations on a job created from an ad-hoc configuration that
+// can use captions from a standalone file. It will wait until the job successfully completes as part of the test.
+func testJobWithStandaloneCaptions(t *testing.T, projectNumber string, inputVideoURI string, inputCaptionsURI string, outputURIForStandaloneCaptions string) {
+	tc := testutil.SystemTest(t)
+	buf := &bytes.Buffer{}
+	jobID := ""
+
+	// Create the job.
+	jobName := fmt.Sprintf("projects/%s/locations/%s/jobs/", projectNumber, location)
+	if err := createJobWithStandaloneCaptions(buf, tc.ProjectID, location, inputVideoURI, inputCaptionsURI, outputURIForStandaloneCaptions); err != nil {
+		t.Errorf("createJobWithStandaloneCaptions got err: %v", err)
+	}
+	got := buf.String()
+
+	if !strings.Contains(got, jobName) {
+		t.Errorf("createJobWithStandaloneCaptions got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobName)
+	}
+	strSlice := strings.Split(got, "/")
+	jobID = strSlice[len(strSlice)-1]
+	buf.Reset()
+
+	// Get the job.
+	testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
+		jobName := fmt.Sprintf("projects/%s/locations/%s/jobs/%s", projectNumber, location, jobID)
+		if err := getJob(buf, tc.ProjectID, location, jobID); err != nil {
+			r.Errorf("getJob got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, jobName) {
+			r.Errorf("getJob got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobName)
+		}
+	})
+	buf.Reset()
+
+	// Get the job state, which should be succeeded. If the job is still running on the last attempt, pass the test.
+	testutil.Retry(t, 3, 30*time.Second, func(r *testutil.R) {
+		if err := getJobState(buf, tc.ProjectID, location, jobID); err != nil {
+			r.Errorf("getJobState got err: %v", err)
+		}
+		got := buf.String()
+
+		if r.Attempt == 3 {
+			if !strings.Contains(got, jobSucceededState) && !strings.Contains(got, jobRunningState) {
+				r.Errorf("getJobState got\n----\n%v\n----\nWant to contain:\n----\n%v or %v\n----\n", got, jobSucceededState, jobRunningState)
+			}
+		} else {
+			if !strings.Contains(got, jobSucceededState) {
+				r.Errorf("getJobState got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobSucceededState)
+			}
 		}
 	})
 

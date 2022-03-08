@@ -85,25 +85,8 @@ func TestCreateInstanceFromTemplateSnippets(t *testing.T) {
 		t.Fatalf("unable to create instance template: %v", err)
 	}
 
-	globalOperationsClient, err := compute.NewGlobalOperationsRESTClient(ctx)
-	if err != nil {
-		t.Errorf("NewGlobalOperationsRESTClient: %v", err)
-	}
-	defer globalOperationsClient.Close()
-
-	for {
-		waitReq := &computepb.WaitGlobalOperationRequest{
-			Operation: op.Proto().GetName(),
-			Project:   tc.ProjectID,
-		}
-		globalOp, err := globalOperationsClient.Wait(ctx, waitReq)
-		if err != nil {
-			t.Errorf("unable to wait for the operation: %v", err)
-		}
-
-		if *globalOp.Status.Enum() == computepb.Operation_DONE {
-			break
-		}
+	if err = op.Wait(ctx); err != nil {
+		t.Errorf("unable to wait for the operation: %v", err)
 	}
 
 	buf := &bytes.Buffer{}
@@ -160,19 +143,7 @@ func TestCreateInstanceFromTemplateSnippets(t *testing.T) {
 		t.Errorf("unable to delete instance template: %v", err)
 	}
 
-	for {
-		waitReq := &computepb.WaitGlobalOperationRequest{
-			Operation: op.Proto().GetName(),
-			Project:   tc.ProjectID,
-		}
-		globalOp, err := globalOperationsClient.Wait(ctx, waitReq)
-		if err != nil {
-			t.Errorf("unable to wait for the operation: %v", err)
-		}
-
-		if *globalOp.Status.Enum() == computepb.Operation_DONE {
-			break
-		}
+	if err = op.Wait(ctx); err != nil {
+		t.Errorf("unable to wait for the operation: %v", err)
 	}
-
 }

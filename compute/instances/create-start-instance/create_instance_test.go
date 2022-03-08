@@ -51,12 +51,6 @@ func TestComputeCreateInstanceSnippets(t *testing.T) {
 	}
 	defer imagesClient.Close()
 
-	zoneOperationsClient, err := compute.NewZoneOperationsRESTClient(ctx)
-	if err != nil {
-		t.Fatalf("NewZoneOperationsRESTClient: %v", err)
-	}
-	defer zoneOperationsClient.Close()
-
 	newestDebianReq := &computepb.GetFromFamilyImageRequest{
 		Project: "debian-cloud",
 		Family:  "debian-11",
