@@ -23,6 +23,7 @@ import (
 
 // MakeGetRequestCloudFunction wraps makeGetRequest in an HTTP Cloud Function for system test deployment.
 func MakeGetRequestCloudFunction(w http.ResponseWriter, r *http.Request) {
+	// TARGET_URL="https://<PROJECT>-<REGION>-<PROJECTID>.cloudfunctions.net/myFunction"
 	url := os.Getenv("TARGET_URL")
 	if url == "" {
 		w.Write([]byte("Success!"))
