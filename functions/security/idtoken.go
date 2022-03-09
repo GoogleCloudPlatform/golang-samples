@@ -56,5 +56,6 @@ func makeGetRequest(w io.Writer, targetURL string, audience string) error {
 
 	return nil
 }
+
 // [END cloudrun_service_to_service_auth]
 // [END functions_bearer_token]
