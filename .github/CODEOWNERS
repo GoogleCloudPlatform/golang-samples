@@ -5,7 +5,7 @@
 # https://help.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners#codeowners-syntax
 
 
-# The yoshi-go-admins team is the default owner for anything not
+# The go-samples-reviewers team is the default owner for anything not
 # explicitly taken by someone else.
 *                                     @GoogleCloudPlatform/go-samples-reviewers
 
@@ -16,3 +16,11 @@
 /storage/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-storage-dpes
 /storagetransfer/                     @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-storage-dpes
 /iot/                                 @GoogleCloudPlatform/go-samples-reviewers @gcseh @GoogleCloudPlatform/api-iot
+
+/appengine/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/aap-dpes
+/appengine_flexible/                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/aap-dpes
+/eventarc/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/aap-dpes
+/functions/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/aap-dpes
+/run/                                 @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/aap-dpes
+/tasks/                               @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/aap-dpes
+/internal/cloudrunci/                 @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/aap-dpes
