@@ -31,9 +31,11 @@ import (
 func makeGetRequest(w io.Writer, targetURL string, audience string) error {
 	// [END functions_bearer_token]
 	// Example `audience` value (Cloud Run): https://my-cloud-run-service.run.app/
+	// (`targetURL` and `audience` will differ for non-root URLs and GET parameters)
 	// [END cloudrun_service_to_service_auth]
 	// [START functions_bearer_token]
 	// Example `audience` value (Cloud Functions): https://<PROJECT>-<REGION>-<PROJECT_ID>.cloudfunctions.net/myFunction
+	// (`targetURL` and `audience` will differ for GET parameters)
 	// [START cloudrun_service_to_service_auth]
 	ctx := context.Background()
 
