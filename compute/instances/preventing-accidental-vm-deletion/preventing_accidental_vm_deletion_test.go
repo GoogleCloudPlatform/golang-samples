@@ -36,11 +36,11 @@ func TestPreventingAccidentalVMDeletionSnippets(t *testing.T) {
 	}
 	defer instancesClient.Close()
 
-	var seededRand *rand.Rand = rand.New(
+	var r *rand.Rand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))
 	tc := testutil.SystemTest(t)
 	zone := "europe-central2-b"
-	instanceName := "test-instance-" + fmt.Sprint(seededRand.Int())
+	instanceName := fmt.Sprintf("test-vm-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 
 	buf := &bytes.Buffer{}
 
@@ -48,42 +48,42 @@ func TestPreventingAccidentalVMDeletionSnippets(t *testing.T) {
 		t.Fatalf("createInstance got err: %v", err)
 	}
 
-	expectedResult := "Instance create"
-	if got := buf.String(); !strings.Contains(got, expectedResult) {
-		t.Errorf("createInstance got %q, want %q", got, expectedResult)
+	want := "Instance created"
+	if got := buf.String(); !strings.Contains(got, want) {
+		t.Errorf("createInstance got %q, want %q", got, want)
 	}
 
 	buf.Reset()
 
 	if err := getDeleteProtection(buf, tc.ProjectID, zone, instanceName); err != nil {
-		t.Fatalf("getDeleteProtection got err: %v", err)
+		t.Errorf("getDeleteProtection got err: %v", err)
 	}
 
-	expectedResult = fmt.Sprintf("Instance %s has DeleteProtection value: %v", instanceName, true)
-	if got := buf.String(); !strings.Contains(got, expectedResult) {
-		t.Errorf("getDeleteProtection got %q, want %q", got, expectedResult)
+	want = fmt.Sprintf("Instance %s has DeleteProtection value: %v", instanceName, true)
+	if got := buf.String(); !strings.Contains(got, want) {
+		t.Errorf("getDeleteProtection got %q, want %q", got, want)
 	}
 
 	buf.Reset()
 
 	if err := setDeleteProtection(buf, tc.ProjectID, zone, instanceName, false); err != nil {
-		t.Fatalf("setDeleteProtection got err: %v", err)
+		t.Errorf("setDeleteProtection got err: %v", err)
 	}
 
-	expectedResult = "Instance updated"
-	if got := buf.String(); !strings.Contains(got, expectedResult) {
-		t.Errorf("setDeleteProtection got %q, want %q", got, expectedResult)
+	want = "Instance updated"
+	if got := buf.String(); !strings.Contains(got, want) {
+		t.Errorf("setDeleteProtection got %q, want %q", got, want)
 	}
 
 	buf.Reset()
 
 	if err := getDeleteProtection(buf, tc.ProjectID, zone, instanceName); err != nil {
-		t.Fatalf("getDeleteProtection got err: %v", err)
+		t.Errorf("getDeleteProtection got err: %v", err)
 	}
 
-	expectedResult = fmt.Sprintf("Instance %s has DeleteProtection value: %v", instanceName, false)
-	if got := buf.String(); !strings.Contains(got, expectedResult) {
-		t.Errorf("getDeleteProtection got %q, want %q", got, expectedResult)
+	want = fmt.Sprintf("Instance %s has DeleteProtection value: %v", instanceName, false)
+	if got := buf.String(); !strings.Contains(got, want) {
+		t.Errorf("getDeleteProtection got %q, want %q", got, want)
 	}
 
 	buf.Reset()
