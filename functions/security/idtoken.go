@@ -17,7 +17,6 @@ package security
 
 // [START functions_bearer_token]
 // [START cloudrun_service_to_service_auth]
-// [START run_service_to_service_auth]
 
 import (
 	"context"
@@ -27,14 +26,21 @@ import (
 	"google.golang.org/api/idtoken"
 )
 
-// makeGetRequest makes a request to the provided targetURL with an authenticated client.
-func makeGetRequest(w io.Writer, targetURL string) error {
-	// functionURL := "https://TARGET_URL"
+// `makeGetRequest` makes a request to the provided `targetURL`
+// with an authenticated client using audience `audience`.
+//
+// [END functions_bearer_token]
+// Example `audience` value (Cloud Run): https://my-cloud-run-service.run.app/
+// [END cloudrun_service_to_service_auth]
+// [START functions_bearer_token]
+// Example `audience` value (Cloud Functions): https://project-region-projectid.cloudfunctions.net/myFunction
+// [START cloudrun_service_to_service_auth]
+func makeGetRequest(w io.Writer, targetURL string, audience string) error {
 	ctx := context.Background()
 
 	// client is a http.Client that automatically adds an "Authorization" header
 	// to any requests made.
-	client, err := idtoken.NewClient(ctx, targetURL)
+	client, err := idtoken.NewClient(ctx, audience)
 	if err != nil {
 		return fmt.Errorf("idtoken.NewClient: %v", err)
 	}
@@ -50,7 +56,5 @@ func makeGetRequest(w io.Writer, targetURL string) error {
 
 	return nil
 }
-
-// [END run_service_to_service_auth]
 // [END cloudrun_service_to_service_auth]
 // [END functions_bearer_token]
