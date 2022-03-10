@@ -22,12 +22,17 @@ import (
 	"fmt"
 	"time"
 
+	"golang.org/x/oauth2"
 	"google.golang.org/api/idtoken"
 	"google.golang.org/grpc"
 	grpcMetadata "google.golang.org/grpc/metadata"
 
 	pb "github.com/GoogleCloudPlatform/golang-samples/run/grpc-ping/pkg/api/v1"
 )
+
+// Store the TokenSource at the package level so it persists across multiple calls.
+// This allows for token reuse (provided the audience is the same).
+var tokenSource oauth2.TokenSource
 
 // pingRequestWithAuth mints a new Identity Token for each request.
 // This token has a 1 hour expiry and should be reused.
@@ -36,13 +41,17 @@ func pingRequestWithAuth(conn *grpc.ClientConn, p *pb.Request, audience string) 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	// Create an identity token.
-	// With a global TokenSource tokens would be reused and auto-refreshed at need.
+	// Keep the TokenSource between calls, so that Tokens can be reused.
 	// A given TokenSource is specific to the audience.
-	tokenSource, err := idtoken.NewTokenSource(ctx, audience)
-	if err != nil {
-		return nil, fmt.Errorf("idtoken.NewTokenSource: %v", err)
+	if tokenSource != nil {
+		var err error
+		tokenSource, err = idtoken.NewTokenSource(ctx, audience)
+		if err != nil {
+			return nil, fmt.Errorf("idtoken.NewTokenSource: %v", err)
+		}
 	}
+
+	// Create an identity token.
 	token, err := tokenSource.Token()
 	if err != nil {
 		return nil, fmt.Errorf("TokenSource.Token: %v", err)
