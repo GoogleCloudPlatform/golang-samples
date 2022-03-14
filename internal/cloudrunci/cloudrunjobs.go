@@ -53,8 +53,10 @@ type RunJob struct {
 	// The project to deploy to.
 	ProjectID string
 
-	// The platform to deploy to.
-	Platform Platform
+	// The Region to deploy to.
+	// We do not use Platform objects, since Jobs do not have a '--platform'
+	// flag in gcloud.
+	Region string
 
 	// Additional runtime environment variable overrides for the app.
 	Env EnvVars
@@ -74,20 +76,22 @@ func NewJob(name, projectID string) *RunJob {
 	return &RunJob{
 		Name:      name,
 		ProjectID: projectID,
-		Platform:  ManagedPlatform{Region: "us-central1"},
+		Region:    "us-central1",
 	}
+}
+
+func (j *RunJob) CommonGCloudFlags() []string {
+	return []string{
+		"--region", j.Region,
+		"--project", j.ProjectID,
+	}
+
 }
 
 // validate confirms all required service properties are present.
 func (j *RunJob) validate() error {
 	if j.ProjectID == "" {
 		return errors.New("Project ID missing")
-	}
-	if j.Platform == nil {
-		return errors.New("Platform configuration missing")
-	}
-	if err := j.Platform.Validate(); err != nil {
-		return err
 	}
 	if err := j.Env.Validate(); err != nil {
 		return err
@@ -199,11 +203,9 @@ func (j *RunJob) createCmd() *exec.Cmd {
 		"jobs",
 		"create",
 		j.version(),
-		"--project",
-		j.ProjectID,
 		"--image",
 		j.Image,
-	}, j.Platform.CommandFlags()...)
+	}, j.CommonGCloudFlags()...)
 
 	if j.Env != nil {
 		for k := range j.Env {
@@ -244,10 +246,8 @@ func (j *RunJob) runCmd() *exec.Cmd {
 		"jobs",
 		"run",
 		j.version(),
-		"--project",
-		j.ProjectID,
 		"--wait", // Waits for job to complete before returning.
-	}, j.Platform.CommandFlags()...)
+	}, j.CommonGCloudFlags()...)
 
 	cmd := exec.Command(gcloudBin, args...)
 	cmd.Dir = j.Dir
@@ -277,9 +277,7 @@ func (j *RunJob) deleteRunJobCmd() *exec.Cmd {
 		"jobs",
 		"delete",
 		j.version(),
-		"--project",
-		j.ProjectID,
-	}, j.Platform.CommandFlags()...)
+	}, j.CommonGCloudFlags()...)
 
 	cmd := exec.Command(gcloudBin, args...)
 	cmd.Dir = j.Dir

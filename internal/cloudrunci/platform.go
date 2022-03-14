@@ -55,8 +55,7 @@ func (p ManagedPlatform) Validate() error {
 
 // CommandFlags retrieves the common gcloud flags for targeting the full managed platform in a given region.
 func (p ManagedPlatform) CommandFlags() []string {
-	// return []string{"--platform", "managed", "--region", p.Region}
-	return []string{"--region", p.Region}
+	return []string{"--platform", "managed", "--region", p.Region}
 }
 
 // NewRequest creates an HTTP request for a URL on the platform.
