@@ -3,8 +3,7 @@ module github.com/GoogleCloudPlatform/golang-samples/servicedirectory
 go 1.15
 
 require (
-	cloud.google.com/go/servicedirectory v1.0.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20220204002944-f20d8abe1519
-	google.golang.org/genproto v0.0.0-20220118154757-00ab72f36ad5
-	google.golang.org/grpc v1.44.0 // indirect
+	cloud.google.com/go/servicedirectory v1.2.0
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20220310230946-2bd24627dd5e
+	google.golang.org/genproto v0.0.0-20220310185008-1973136f34c6
 )
