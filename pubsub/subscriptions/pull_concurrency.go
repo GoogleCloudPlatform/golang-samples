@@ -46,24 +46,23 @@ func pullMsgsConcurrenyControl(w io.Writer, projectID, subID string) error {
 	// In this case, up to 8 unacked messages can be handled concurrently.
 	sub.ReceiveSettings.MaxOutstandingMessages = 8
 
-	// Receive messages for 30 seconds.
-	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	// Receive messages for 10 seconds, which simplifies testing.
+	// Comment this out in production, since `Receive` should
+	// be used as a long running operation.
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
-	var counter int32
+	var received int32
 
 	// Receive blocks until the context is cancelled or an error occurs.
 	err = sub.Receive(ctx, func(_ context.Context, msg *pubsub.Message) {
-		// The message handler passed to Receive may be called concurrently
-		// so it's okay to process the messages concurrently but make sure
-		// to synchronize access to shared memory.
-		atomic.AddInt32(&counter, 1)
+		atomic.AddInt32(&received, 1)
 		msg.Ack()
 	})
 	if err != nil {
-		return fmt.Errorf("pubsub: Receive returned error: %v", err)
+		return fmt.Errorf("sub.Receive returned error: %v", err)
 	}
-	fmt.Fprintf(w, "Received %d messages\n", counter)
+	fmt.Fprintf(w, "Received %d messages\n", received)
 
 	return nil
 }
