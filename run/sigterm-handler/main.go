@@ -27,6 +27,8 @@ import (
 	"time"
 )
 
+var SignalChan chan (os.Signal)
+
 func main() {
 	// Determine port for HTTP service.
 	port := os.Getenv("PORT")
@@ -41,10 +43,10 @@ func main() {
 	}
 
 	// Create channel to listen for signals.
-	signalChan := make(chan os.Signal, 1)
+	SignalChan = make(chan os.Signal, 1)
 	// SIGINT handles Ctrl+C locally.
 	// SIGTERM handles Cloud Run termination signal.
-	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
+	signal.Notify(SignalChan, syscall.SIGINT, syscall.SIGTERM)
 
 	// Start HTTP server.
 	go func() {
@@ -55,7 +57,7 @@ func main() {
 	}()
 
 	// Receive output from signalChan.
-	sig := <-signalChan
+	sig := <-SignalChan
 	log.Printf("%s signal caught", sig)
 
 	// Timeout if waiting for connections to return idle.
@@ -75,5 +77,10 @@ func main() {
 // [END cloudrun_sigterm_handler]
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Hello World!\n")
+	if r.URL.Query().Has("terminate") {
+		SignalChan <- syscall.SIGTERM
+		fmt.Fprint(w, "Goodbye World!\n")
+	} else {
+		fmt.Fprint(w, "Hello World!\n")
+	}
 }
