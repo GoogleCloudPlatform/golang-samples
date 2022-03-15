@@ -77,7 +77,7 @@ func main() {
 // [END cloudrun_sigterm_handler]
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Query().Has("terminate") {
+	if r.URL.Query().Get("terminate") != "" {
 		SignalChan <- syscall.SIGTERM
 		fmt.Fprint(w, "Goodbye World!\n")
 	} else {
