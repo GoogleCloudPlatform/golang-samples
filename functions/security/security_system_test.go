@@ -110,7 +110,7 @@ func TestMakeGetRequest(t *testing.T) {
 	url := baseURL + "MakeGetRequestCloudFunction"
 
 	var b bytes.Buffer
-	if err := makeGetRequest(&b, url); err != nil {
+	if err := makeGetRequest(&b, url, url); err != nil {
 		t.Fatalf("makeGetRequest: %v", err)
 	}
 	got := b.String()

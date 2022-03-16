@@ -31,7 +31,7 @@ fi
 # Use SECRET_MANAGER_PROJECT if set, fallback to "golang-samples-tests".
 PROJECT_ID="${SECRET_MANAGER_PROJECT:-golang-samples-tests}"
 
-gcloud secrets versions access 3 \
+gcloud secrets versions access latest \
     --secret="golang-samples-test-env" \
     --project="${PROJECT_ID}" \
     > kokoro/test-env.sh
