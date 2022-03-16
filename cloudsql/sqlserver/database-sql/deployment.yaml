@@ -38,10 +38,10 @@ spec:
         env:
         - name: PORT
           value: "8080"
-        - name: DB_HOST
+        - name: INSTANCE_HOST
           value: "127.0.0.1"
         - name: DB_PORT
-          value: "1433"  
+          value: "1433"
         - name: DB_USER
           valueFrom:
             secretKeyRef:
@@ -60,7 +60,7 @@ spec:
       - name: cloud-sql-proxy
         # This uses the latest version of the Cloud SQL proxy
         # It is recommended to use a specific version for production environments.
-        # See: https://github.com/GoogleCloudPlatform/cloudsql-proxy 
+        # See: https://github.com/GoogleCloudPlatform/cloudsql-proxy
         image: gcr.io/cloudsql-docker/gce-proxy:latest
         command:
           - "/cloud_sql_proxy"

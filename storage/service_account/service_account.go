@@ -26,6 +26,8 @@ import (
 
 // getServiceAccount gets the default Cloud Storage service account email address.
 func getServiceAccount(w io.Writer, projectID string) error {
+	// projectID := "my-project-id"
+
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
