@@ -16,28 +16,28 @@ package clientendpoint
 
 // [START storage_set_client_endpoint]
 import (
-    "context"
-    "fmt"
-    "io"
+	"context"
+	"fmt"
+	"io"
 
-    "cloud.google.com/go/storage"
-    "google.golang.org/api/option"
+	"cloud.google.com/go/storage"
+	"google.golang.org/api/option"
 )
 
 // setClientEndpoint sets the request endpoint.
 func setClientEndpoint(w io.Writer, customEndpoint string) error {
-    // customEndpoint := "custom-request-endpoint"
-    ctx := context.Background()
+	// customEndpoint := "custom-request-endpoint"
+	ctx := context.Background()
 
-    // Set a custom request endpoint for this client.
-    client, err := storage.NewClient(ctx, option.WithEndpoint(customEndpoint))
-    if err != nil {
-        return fmt.Errorf("storage.NewClient: %v", err)
-    }
-    defer client.Close()
+	// Set a custom request endpoint for this client.
+	client, err := storage.NewClient(ctx, option.WithEndpoint(customEndpoint))
+	if err != nil {
+		return fmt.Errorf("storage.NewClient: %v", err)
+	}
+	defer client.Close()
 
-    fmt.Fprintf(w, "The request endpoint set for the client is: %v\n", customEndpoint)
-    return nil
+	fmt.Fprintf(w, "The request endpoint set for the client is: %v\n", customEndpoint)
+	return nil
 }
 
 // [END storage_set_client_endpoint]

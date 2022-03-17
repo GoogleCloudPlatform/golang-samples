@@ -15,23 +15,23 @@
 package clientendpoint
 
 import (
-    "bytes"
-    "strings"
-    "testing"
+	"bytes"
+	"strings"
+	"testing"
 
-    "github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestSetClientEndpoint(t *testing.T) {
-    tc := testutil.SystemTest(t)
-    customEndpoint := "http://localhost:8080/storage/v1/"
+	tc := testutil.SystemTest(t)
+	customEndpoint := "http://localhost:8080/storage/v1/"
 
-    var buf bytes.Buffer
-    if err := setClientEndpoint(&buf, customEndpoint); err != nil {
-        t.Errorf("setClientEndpoint in project %s: %s", tc.ProjectID, err)
-    }
+	var buf bytes.Buffer
+	if err := setClientEndpoint(&buf, customEndpoint); err != nil {
+		t.Errorf("setClientEndpoint in project %s: %s", tc.ProjectID, err)
+	}
 
-    if got, want := buf.String(), "request endpoint set for the client"; !strings.Contains(got, want) {
-        t.Errorf("setClientEndpoint: got %q; want to contain %q", got, want)
-    }
-} 
+	if got, want := buf.String(), "request endpoint set for the client"; !strings.Contains(got, want) {
+		t.Errorf("setClientEndpoint: got %q; want to contain %q", got, want)
+	}
+}
