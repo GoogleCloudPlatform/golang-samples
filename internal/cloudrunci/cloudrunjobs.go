@@ -35,11 +35,11 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-// RunJob describes a Cloud Run Job
-// The typical usage flow of a RunJob is to call the following methods, which
+// Job describes a Cloud Run Job
+// The typical usage flow of a Job is to call the following methods, which
 // call the corresponding "gcloud run jobs" commands:
 // Build(), Create(), Run().
-type RunJob struct {
+type Job struct {
 	// Name is an ID, used for logging and to generate a unique version to this run.
 	Name string
 
@@ -61,6 +61,9 @@ type RunJob struct {
 	// Additional runtime environment variable overrides for the app.
 	Env EnvVars
 
+	// Additional flags to be passed at Job creation.
+	ExtraCreateFlags []string
+
 	// Build this Image as a BuildPack, without using a Dockerfile
 	AsBuildpack bool
 
@@ -69,18 +72,18 @@ type RunJob struct {
 	started bool // true if the Job has been started.
 }
 
-// NewJob creates a new RunJob to be run with Cloud Run Jobs.
+// NewJob creates a new Job to be run with Cloud Run Jobs.
 // It will default to the ManagedPlatform in region us-central1,
 // and build a container image as needed for deployment.
-func NewJob(name, projectID string) *RunJob {
-	return &RunJob{
+func NewJob(name, projectID string) *Job {
+	return &Job{
 		Name:      name,
 		ProjectID: projectID,
 		Region:    "us-central1",
 	}
 }
 
-func (j *RunJob) CommonGCloudFlags() []string {
+func (j *Job) CommonGCloudFlags() []string {
 	return []string{
 		"--region", j.Region,
 		"--project", j.ProjectID,
@@ -89,7 +92,7 @@ func (j *RunJob) CommonGCloudFlags() []string {
 }
 
 // validate confirms all required job properties are present.
-func (j *RunJob) validate() error {
+func (j *Job) validate() error {
 	if j.ProjectID == "" {
 		return errors.New("Project ID missing")
 	}
@@ -100,15 +103,15 @@ func (j *RunJob) validate() error {
 	return nil
 }
 
-// version returns the revision that the service will be deployed to.
+// version returns the execution that the service will be deployed to.
 // This identifier is also used to locate relevant log messages.
-func (j *RunJob) version() string {
+func (j *Job) version() string {
 	return j.Name + "-" + runID
 }
 
 // Creates the Cloud Run job, but does not start it.
 // If an image has not been specified or previously built, it will call Build.
-func (j *RunJob) Create() error {
+func (j *Job) Create() error {
 	// Don't deploy unless we're certain everything is ready for deployment
 	// (i.e. admin client is authenticated and authorized)
 	if err := j.validate(); err != nil {
@@ -132,7 +135,7 @@ func (j *RunJob) Create() error {
 // Build builds a container image if one has not already been built.
 // If service.Image is specified and this is directly called, it
 // could overwrite an existing container image.
-func (j *RunJob) Build() error {
+func (j *Job) Build() error {
 	if err := j.validate(); err != nil {
 		return err
 	}
@@ -153,7 +156,7 @@ func (j *RunJob) Build() error {
 
 // Run starts the Job in Cloud Run Jobs.
 // This method will call Build and Create if necessary.
-func (j *RunJob) Run() error {
+func (j *Job) Run() error {
 	if err := j.validate(); err != nil {
 		return err
 	}
@@ -170,7 +173,7 @@ func (j *RunJob) Run() error {
 }
 
 // Clean deletes the created Cloud Run service.
-func (j *RunJob) Clean() error {
+func (j *Job) Clean() error {
 	// NOTE: don't check whether j.created is set.
 	// We may want to attempt to clean up if creation failed (i.e. to clean up the image).
 
@@ -178,7 +181,7 @@ func (j *RunJob) Clean() error {
 		return err
 	}
 
-	if _, err := gcloud(fmt.Sprintf("%s: Deleting cloud run job", j.version()), j.deleteRunJobCmd()); err != nil {
+	if _, err := gcloud(fmt.Sprintf("%s: Deleting cloud run job", j.version()), j.deleteJobCmd()); err != nil {
 		return fmt.Errorf("gcloud: %v: %q", j.version(), err)
 	}
 	j.created = false
@@ -195,7 +198,7 @@ func (j *RunJob) Clean() error {
 	return nil
 }
 
-func (j *RunJob) createCmd() *exec.Cmd {
+func (j *Job) createCmd() *exec.Cmd {
 	args := append([]string{
 		"--quiet",
 		"alpha",
@@ -218,7 +221,7 @@ func (j *RunJob) createCmd() *exec.Cmd {
 	return cmd
 }
 
-func (j *RunJob) buildCmd() *exec.Cmd {
+func (j *Job) buildCmd() *exec.Cmd {
 	args := []string{
 		"--quiet",
 		"builds",
@@ -238,7 +241,7 @@ func (j *RunJob) buildCmd() *exec.Cmd {
 }
 
 // runCmd returns the gcloud command needed to start this RunJob
-func (j *RunJob) runCmd() *exec.Cmd {
+func (j *Job) runCmd() *exec.Cmd {
 	args := append([]string{
 		"--quiet",
 		"alpha",
@@ -254,7 +257,7 @@ func (j *RunJob) runCmd() *exec.Cmd {
 	return cmd
 }
 
-func (j *RunJob) deleteImageCmd() *exec.Cmd {
+func (j *Job) deleteImageCmd() *exec.Cmd {
 	args := []string{
 		"--quiet",
 		"container",
@@ -269,7 +272,7 @@ func (j *RunJob) deleteImageCmd() *exec.Cmd {
 	return cmd
 }
 
-func (j *RunJob) deleteRunJobCmd() *exec.Cmd {
+func (j *Job) deleteJobCmd() *exec.Cmd {
 	args := append([]string{
 		"--quiet",
 		"alpha",
@@ -284,7 +287,7 @@ func (j *RunJob) deleteRunJobCmd() *exec.Cmd {
 	return cmd
 }
 
-func (j *RunJob) LogEntries(filter string, find string, maxAttempts int) (bool, error) {
+func (j *Job) LogEntries(filter string, find string, maxAttempts int) (bool, error) {
 	ctx := context.Background()
 	client, err := logadmin.NewClient(ctx, j.ProjectID)
 	if err != nil {

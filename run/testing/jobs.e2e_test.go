@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,12 +24,16 @@ import (
 func TestCloudRunJobs(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 
-	crj := cloudrunci.NewJob("runjobs", tc.ProjectID)
-	crj.Dir = "../jobs"
-	crj.AsBuildpack = true
-	crj.Env = cloudrunci.EnvVars{
-		"FAIL_RATE": "0.0",
-		"SLEEP_MS":  "10000",
+	crj := &cloudrunci.Job{
+		Name:        "runjobs",
+		ProjectID:   tc.ProjectID,
+		Dir:         "../jobs",
+		AsBuildpack: true,
+		Region:      "us-central1",
+		Env: map[string]string{
+			"FAIL_RATE": "0.0",
+			"SLEEP_MS":  "10000",
+		},
 	}
 
 	if err := crj.Create(); err != nil {
