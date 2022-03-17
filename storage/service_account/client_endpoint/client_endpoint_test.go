@@ -34,4 +34,4 @@ func TestSetClientEndpoint(t *testing.T) {
     if got, want := buf.String(), "request endpoint set for the client"; !strings.Contains(got, want) {
         t.Errorf("setClientEndpoint: got %q; want to contain %q", got, want)
     }
-} 
+}
