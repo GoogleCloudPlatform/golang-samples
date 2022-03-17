@@ -78,8 +78,8 @@ func main() {
 func handler(w http.ResponseWriter, r *http.Request) {
 	// The 'terminate' parameter is used by tests in sigterm_handler.e2e_test.go
 	if r.URL.Query().Get("terminate") != "" {
-		signalChan <- syscall.SIGTERM
 		fmt.Fprint(w, "Goodbye World!\n")
+		signalChan <- syscall.SIGTERM
 		return
 	}
 	fmt.Fprint(w, "Hello World!\n")
