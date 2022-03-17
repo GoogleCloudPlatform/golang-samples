@@ -26,7 +26,7 @@ import (
 
 // setClientEndpoint sets the request endpoint.
 func setClientEndpoint(w io.Writer, customEndpoint string) error {
-	// customEndpoint := "custom-request-endpoint"
+	// customEndpoint := "https://my-custom-endpoint.example.com/storage/v1"
 	ctx := context.Background()
 
 	// Set a custom request endpoint for this client.
