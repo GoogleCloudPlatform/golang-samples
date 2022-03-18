@@ -96,6 +96,9 @@ func (j *Job) validate() error {
 	if j.ProjectID == "" {
 		return errors.New("Project ID missing")
 	}
+	if j.Region == "" {
+		return errors.New("Region missing")
+	}
 	if err := j.Env.Validate(); err != nil {
 		return err
 	}
@@ -298,9 +301,6 @@ func (j *Job) LogEntries(filter string, find string, maxAttempts int) (bool, err
 	preparedFilter := fmt.Sprintf(`resource.type="cloud_run_revision" resource.labels.service_name="%s" %s`, j.version(), filter)
 	fmt.Printf("Using log filter: %s\n", preparedFilter)
 
-	fmt.Println("Waiting for logs...")
-	time.Sleep(3 * time.Minute)
-
 	for i := 1; i < maxAttempts; i++ {
 		fmt.Printf("Attempt #%d\n", i)
 		it := client.Entries(ctx, logadmin.Filter(preparedFilter))
@@ -321,7 +321,7 @@ func (j *Job) LogEntries(filter string, find string, maxAttempts int) (bool, err
 				return true, nil
 			}
 		}
-		time.Sleep(15 * time.Second)
+		time.Sleep(30 * time.Second)
 	}
 	return false, nil
 }
