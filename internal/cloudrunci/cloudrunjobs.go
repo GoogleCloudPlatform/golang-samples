@@ -88,7 +88,7 @@ func (j *RunJob) CommonGCloudFlags() []string {
 
 }
 
-// validate confirms all required service properties are present.
+// validate confirms all required job properties are present.
 func (j *RunJob) validate() error {
 	if j.ProjectID == "" {
 		return errors.New("Project ID missing")
@@ -106,7 +106,7 @@ func (j *RunJob) version() string {
 	return j.Name + "-" + runID
 }
 
-// Create deploys the job to Cloud Run Jobs, but does not start it.
+// Creates the Cloud Run job, but does not start it.
 // If an image has not been specified or previously built, it will call Build.
 func (j *RunJob) Create() error {
 	// Don't deploy unless we're certain everything is ready for deployment
