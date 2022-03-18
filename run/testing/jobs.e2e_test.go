@@ -42,6 +42,15 @@ func TestCloudRunJobs(t *testing.T) {
 	if err := crj.Run(); err != nil {
 		t.Errorf("Run(%s): %s", crj.Name, err)
 	}
+
+	found, err := crj.LogEntries("", "Completed Task", 5)
+	if err != nil {
+		t.Errorf("LogEntries: %v", err)
+	}
+	if !found {
+		t.Errorf("Failed to find log entries for job")
+	}
+
 	defer crj.Clean()
 
 }
