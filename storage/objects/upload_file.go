@@ -48,12 +48,11 @@ func uploadFile(w io.Writer, bucket, object string) error {
 
 	o := client.Bucket(bucket).Object(object)
 
-	// Set a generation-match precondition. The request to upload is aborted
-	// if the object's generation number does not match your precondition
-	// criteria. This avoids race conditions and data corruption.
+	// Optional: set a generation-match precondition to avoid potential race
+	// conditions and data corruptions. The request to upload is aborted if the
+	// object's generation number does not match your precondition.
 	// For an object that does not yet exist, set the DoesNotExist precondition.
 	o = o.If(storage.Conditions{DoesNotExist: true})
-
 	// If the live object already exists in your bucket, set instead a
 	// generation-match precondition using the live object's generation number.
 	// attrs, err := o.Attrs(ctx)

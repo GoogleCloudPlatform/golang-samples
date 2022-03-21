@@ -45,12 +45,11 @@ func copyOldVersionOfObject(w io.Writer, bucket, srcObject, dstObject string, ge
 	src := client.Bucket(bucket).Object(srcObject)
 	dst := client.Bucket(bucket).Object(dstObject)
 
-	// Set a generation-match precondition. The request to upload is aborted
-	// if the object's generation number does not match your precondition
-	// criteria. This avoids race conditions and data corruption.
+	// Optional: set a generation-match precondition to avoid potential race
+	// conditions and data corruptions. The request to upload is aborted if the
+	// object's generation number does not match your precondition.
 	// For a dst object that does not yet exist, set the DoesNotExist precondition.
 	dst = dst.If(storage.Conditions{DoesNotExist: true})
-
 	// If the destination object already exists in your bucket, set instead a
 	// generation-match precondition using its generation number.
 	// attrs, err := dst.Attrs(ctx)
