@@ -238,6 +238,7 @@ func TestDelete(t *testing.T) {
 }
 
 func TestPullMsgsAsync(t *testing.T) {
+	t.Parallel()
 	client := setup(t)
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
@@ -260,8 +261,12 @@ func TestPullMsgsAsync(t *testing.T) {
 	}
 	defer sub.Delete(ctx)
 
-	// Publish 10 messages on the topic.
-	const numMsgs = 10
+	// Publish 1 message. This avoids race conditions
+	// when calling fmt.Fprintf from multiple receive
+	// callbacks. This is sufficient for testing since
+	// we're not testing client library functionality,
+	// and makes the sample more readable.
+	const numMsgs = 1
 	publishMsgs(ctx, topic, numMsgs)
 
 	buf := new(bytes.Buffer)
@@ -269,13 +274,15 @@ func TestPullMsgsAsync(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to pull messages: %v", err)
 	}
-	// Check for number of newlines, which should correspond with number of messages.
-	if got := strings.Count(buf.String(), "\n"); got != numMsgs {
-		t.Fatalf("pullMsgsSync got %d messages, want %d", got, numMsgs)
+	got := buf.String()
+	want := fmt.Sprintf("Received %d messages\n", numMsgs)
+	if !strings.Contains(got, want) {
+		t.Fatalf("pullMsgs got %s\nwant %s", got, want)
 	}
 }
 
 func TestPullMsgsSync(t *testing.T) {
+	t.Parallel()
 	client := setup(t)
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
@@ -298,8 +305,12 @@ func TestPullMsgsSync(t *testing.T) {
 	}
 	defer sub.Delete(ctx)
 
-	// Publish 5 messages on the topic.
-	const numMsgs = 5
+	// Publish 1 message. This avoids race conditions
+	// when calling fmt.Fprintf from multiple receive
+	// callbacks. This is sufficient for testing since
+	// we're not testing client library functionality,
+	// and makes the sample more readable.
+	const numMsgs = 1
 	publishMsgs(ctx, topic, numMsgs)
 
 	buf := new(bytes.Buffer)
@@ -307,13 +318,16 @@ func TestPullMsgsSync(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to pull messages: %v", err)
 	}
-	// Check for number of newlines, which should correspond with number of messages.
-	if got := strings.Count(buf.String(), "\n"); got != numMsgs {
-		t.Fatalf("pullMsgsSync got %d messages, want %d", got, numMsgs)
+
+	got := buf.String()
+	want := fmt.Sprintf("Received %d messages\n", numMsgs)
+	if !strings.Contains(got, want) {
+		t.Fatalf("pullMsgsSync got %s\nwant %s", got, want)
 	}
 }
 
 func TestPullMsgsConcurrencyControl(t *testing.T) {
+	t.Parallel()
 	client := setup(t)
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
@@ -354,6 +368,7 @@ func TestPullMsgsConcurrencyControl(t *testing.T) {
 }
 
 func TestPullMsgsCustomAttributes(t *testing.T) {
+	t.Parallel()
 	client := setup(t)
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
@@ -396,6 +411,7 @@ func TestPullMsgsCustomAttributes(t *testing.T) {
 }
 
 func TestCreateWithDeadLetterPolicy(t *testing.T) {
+	t.Parallel()
 	client := setup(t)
 	defer client.Close()
 	ctx := context.Background()
@@ -456,6 +472,7 @@ func TestCreateWithDeadLetterPolicy(t *testing.T) {
 }
 
 func TestUpdateDeadLetterPolicy(t *testing.T) {
+	t.Parallel()
 	client := setup(t)
 	defer client.Close()
 	ctx := context.Background()
@@ -536,6 +553,7 @@ func TestUpdateDeadLetterPolicy(t *testing.T) {
 }
 
 func TestPullMsgsDeadLetterDeliveryAttempts(t *testing.T) {
+	t.Parallel()
 	client := setup(t)
 	defer client.Close()
 	ctx := context.Background()
@@ -594,6 +612,7 @@ func TestPullMsgsDeadLetterDeliveryAttempts(t *testing.T) {
 }
 
 func TestCreateWithOrdering(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 	client := setup(t)
@@ -628,6 +647,7 @@ func TestCreateWithOrdering(t *testing.T) {
 }
 
 func TestDetachSubscription(t *testing.T) {
+	t.Parallel()
 	client := setup(t)
 	defer client.Close()
 	ctx := context.Background()
@@ -670,6 +690,7 @@ func TestDetachSubscription(t *testing.T) {
 }
 
 func TestCreateWithFilter(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 	client := setup(t)
