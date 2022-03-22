@@ -9,3 +9,5 @@ require (
 	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd
 	google.golang.org/grpc v1.44.0
 )
+
+replace github.com/GoogleCloudPlatform/golang-samples => ../../
