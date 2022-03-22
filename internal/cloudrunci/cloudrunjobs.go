@@ -39,6 +39,9 @@ import (
 // The typical usage flow of a Job is to call the following methods, which
 // call the corresponding "gcloud run jobs" commands:
 // Build(), Create(), Run().
+// Note: The LogEntries() method cannot differentiate between executions at this
+// time, so it is not recommended to call Run() multiple times on a single Job
+// object.
 type Job struct {
 	// Name is an ID, used for logging and to generate a unique version to this run.
 	Name string
@@ -218,6 +221,8 @@ func (j *Job) createCmd() *exec.Cmd {
 			args = append(args, "--set-env-vars", j.Env.Variable(k))
 		}
 	}
+
+	args = append(args, j.ExtraCreateFlags...)
 
 	cmd := exec.Command(gcloudBin, args...)
 	cmd.Dir = j.Dir
