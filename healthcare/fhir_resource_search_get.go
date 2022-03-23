@@ -16,67 +16,68 @@ package snippets
 
 // [START healthcare_search_resources_get]
 import (
-        "context"
-        "fmt"
-        "io"
-        "io/ioutil"
-        "log"
-        "net/http"
-        "golang.org/x/oauth2/google"
+	"context"
+	"fmt"
+	"io"
+	"io/ioutil"
+	"log"
+	"net/http"
+
+	"golang.org/x/oauth2/google"
 )
 
 // searchFhirResourcesGet uses a GET request to search for FHIR resources in a given FHIR store.
 func searchFHIRResourcesGet(w io.Writer, projectID, location, datasetID, fhirStoreID, resourceType string) error {
-        ctx := context.Background()
+	ctx := context.Background()
 
 	// The Healthcare API endpoint, API version, and request path.
-        name := fmt.Sprintf("https://healthcare.googleapis.com/v1/projects/%s/locations/%s/datasets/%s/fhirStores/%s/fhir/%s", projectID, location, datasetID, fhirStoreID, resourceType)
+	name := fmt.Sprintf("https://healthcare.googleapis.com/v1/projects/%s/locations/%s/datasets/%s/fhirStores/%s/fhir/%s", projectID, location, datasetID, fhirStoreID, resourceType)
 
-        // DefaultClient returns an HTTP Client that uses the
-        // DefaultTokenSource (Application Default Credentials)
-        // to obtain authentication credentials.
-        client, err := google.DefaultClient(ctx,
-                "https://www.googleapis.com/auth/cloud-platform")
-        if err != nil {
-                log.Fatal(err)
-        }
+	// DefaultClient returns an HTTP Client that uses the
+	// DefaultTokenSource (Application Default Credentials)
+	// to obtain authentication credentials.
+	client, err := google.DefaultClient(ctx,
+		"https://www.googleapis.com/auth/cloud-platform")
+	if err != nil {
+		log.Fatal(err)
+	}
 
-        // NewRequest takes an io.Reader as its third argument,
-        // but the GET request to search for FHIR resources does
-        // not pass any data in its body.
-        req, err := http.NewRequest(http.MethodGet, name, nil)
-        if err != nil {
-                return fmt.Errorf("NewRequest: %v", err)
-        }
+	// NewRequest takes an io.Reader as its third argument,
+	// but the GET request to search for FHIR resources does
+	// not pass any data in its body.
+	req, err := http.NewRequest(http.MethodGet, name, nil)
+	if err != nil {
+		return fmt.Errorf("NewRequest: %v", err)
+	}
 
 	// To set additional parameters for search filtering, append the
 	// search terms as query parameters, then assign the encoded
 	// query string to the request.
 	// For example, to search for a Patient with the family name "Smith",
 	// specify a Patient resourceType and then set the following:
-        // q := req.URL.Query()
-        // q.Add("family:exact", "Smith")
-        // req.URL.RawQuery = q.Encode()
+	// q := req.URL.Query()
+	// q.Add("family:exact", "Smith")
+	// req.URL.RawQuery = q.Encode()
 
-        resp, err := client.Do(req)
-        if err != nil {
-                return fmt.Errorf("Do: %v", err)
-        }
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("Do: %v", err)
+	}
 
-        defer resp.Body.Close()
+	defer resp.Body.Close()
 
-        respBytes, err := ioutil.ReadAll(resp.Body)
-        if err != nil {
-                return fmt.Errorf("could not read response: %v", err)
-        }
+	respBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("could not read response: %v", err)
+	}
 
-        if resp.StatusCode > 299 {
-                return fmt.Errorf("Search: status %d %s: %s", resp.StatusCode, resp.Status, respBytes)
-        }
+	if resp.StatusCode > 299 {
+		return fmt.Errorf("Search: status %d %s: %s", resp.StatusCode, resp.Status, respBytes)
+	}
 
-        fmt.Fprintf(w, "%s", respBytes)
+	fmt.Fprintf(w, "%s", respBytes)
 
-        return nil
+	return nil
 }
 
 // [END healthcare_search_resources_get]
