@@ -15,6 +15,8 @@
 package spanner
 
 // [START spanner_postgresql_numeric_data_type]
+// [START spanner_postgresql_numeric_data_type_insert_null]
+// [START spanner_postgresql_numeric_data_type_insert_nan]
 
 import (
 	"context"
@@ -66,56 +68,67 @@ func pgNumericDataType(w io.Writer, db string) error {
 	defer client.Close()
 
 	var updateCount int64
+	insertSQL := `INSERT INTO Venues (VenueId, Name, Revenues) VALUES ($1, $2, $3)`
+	// [END spanner_postgresql_numeric_data_type_insert_nan]
+	// [END spanner_postgresql_numeric_data_type_insert_null]
+
 	// Insert a Venue using DML.
+	insertStmt := spanner.Statement{
+		SQL: insertSQL,
+		Params: map[string]interface{}{
+			"p1": 1,
+			"p2": "Venue 1",
+			"p3": spanner.PGNumeric{Numeric: "3150.25", Valid: true},
+		},
+	}
 	_, err = client.ReadWriteTransaction(ctx, func(ctx context.Context, transaction *spanner.ReadWriteTransaction) error {
-		updateCount, err = transaction.Update(ctx, spanner.Statement{
-			SQL: `INSERT INTO Venues (VenueId, Name, Revenues) VALUES ($1, $2, $3)`,
-			Params: map[string]interface{}{
-				"p1": 1,
-				"p2": "Venue 1",
-				"p3": spanner.PGNumeric{Numeric: "3150.25", Valid: true},
-			},
-		})
+		updateCount, err = transaction.Update(ctx, insertStmt)
 		return err
 	})
 	if err != nil {
 		return err
 	}
 	fmt.Fprintf(w, "Inserted %d venue(s)\n", updateCount)
+	// [START spanner_postgresql_numeric_data_type_insert_null]
 
 	// Insert a Venue with a NULL value for the Revenues column.
+	nullRevenueStmt := spanner.Statement{
+		SQL: insertSQL,
+		Params: map[string]interface{}{
+			"p1": 2,
+			"p2": "Venue 2",
+			"p3": spanner.PGNumeric{Valid: false},
+		},
+	}
 	_, err = client.ReadWriteTransaction(ctx, func(ctx context.Context, transaction *spanner.ReadWriteTransaction) error {
-		updateCount, err = transaction.Update(ctx, spanner.Statement{
-			SQL: `INSERT INTO Venues (VenueId, Name, Revenues) VALUES ($1, $2, $3)`,
-			Params: map[string]interface{}{
-				"p1": 2,
-				"p2": "Venue 2",
-				"p3": spanner.PGNumeric{Valid: false},
-			},
-		})
+		updateCount, err = transaction.Update(ctx, nullRevenueStmt)
 		return err
 	})
 	if err != nil {
 		return err
 	}
 	fmt.Fprintf(w, "Inserted %d venue(s) with NULL revenues\n", updateCount)
+	// [END spanner_postgresql_numeric_data_type_insert_null]
+	// [START spanner_postgresql_numeric_data_type_insert_nan]
 
 	// Insert a Venue with a NaN (Not a Number) value for the Revenues column.
+	nanRevenueStmt := spanner.Statement{
+		SQL: insertSQL,
+		Params: map[string]interface{}{
+			"p1": 3,
+			"p2": "Venue 3",
+			"p3": spanner.PGNumeric{Numeric: "NaN", Valid: true},
+		},
+	}
 	_, err = client.ReadWriteTransaction(ctx, func(ctx context.Context, transaction *spanner.ReadWriteTransaction) error {
-		updateCount, err = transaction.Update(ctx, spanner.Statement{
-			SQL: `INSERT INTO Venues (VenueId, Name, Revenues) VALUES ($1, $2, $3)`,
-			Params: map[string]interface{}{
-				"p1": 3,
-				"p2": "Venue 3",
-				"p3": spanner.PGNumeric{Numeric: "NaN", Valid: true},
-			},
-		})
+		updateCount, err = transaction.Update(ctx, nanRevenueStmt)
 		return err
 	})
 	if err != nil {
 		return err
 	}
 	fmt.Fprintf(w, "Inserted %d venue(s) with NaN revenues\n", updateCount)
+	// [END spanner_postgresql_numeric_data_type_insert_nan]
 
 	// Get all Venues and inspect the Revenues values.
 	iter := client.Single().Query(ctx, spanner.Statement{
@@ -155,8 +168,12 @@ func pgNumericDataType(w io.Writer, db string) error {
 		return err
 	}
 	fmt.Fprintf(w, "Inserted 2 Venues using mutations at %s\n", ts)
+	// [START spanner_postgresql_numeric_data_type_insert_null]
+	// [START spanner_postgresql_numeric_data_type_insert_nan]
 
 	return nil
 }
 
+// [END spanner_postgresql_numeric_data_type_insert_nan]
+// [END spanner_postgresql_numeric_data_type_insert_null]
 // [END spanner_postgresql_numeric_data_type]

@@ -65,7 +65,7 @@ func pgOrderNulls(w io.Writer, db string) error {
 	}
 	defer client.Close()
 
-	if _, err := client.Apply(context.Background(), []*spanner.Mutation{
+	if _, err := client.Apply(ctx, []*spanner.Mutation{
 		spanner.InsertOrUpdateMap("Singers", map[string]interface{}{
 			"SingerId": 1,
 			"Name":     "Bruce",

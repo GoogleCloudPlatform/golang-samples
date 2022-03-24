@@ -37,20 +37,32 @@ func pgBatchDml(w io.Writer, db string) error {
 	// Spanner PostgreSQL supports BatchDML statements. This will batch multiple DML statements
 	// into one request, which reduces the number of round trips that is needed for multiple DML
 	// statements.
+	insertSQL := `INSERT INTO Singers (SingerId, FirstName, LastName) 
+            VALUES ($1, $2, $3)`
+	stmts := []spanner.Statement{
+		{
+			SQL: insertSQL,
+			Params: map[string]interface{}{
+				"p1": 1,
+				"p2": "Alice",
+				"p3": "Henderson",
+			},
+		},
+		{
+			SQL: insertSQL,
+			Params: map[string]interface{}{
+				"p1": 2,
+				"p2": "Bruce",
+				"p3": "Allison",
+			},
+		},
+	}
 	var updateCounts []int64
-	if _, err := client.ReadWriteTransaction(context.Background(), func(ctx context.Context, transaction *spanner.ReadWriteTransaction) error {
-		updateCounts, err = transaction.BatchUpdate(ctx, []spanner.Statement{
-			{
-				SQL:    `INSERT INTO Singers (SingerId, FirstName, LastName) VALUES ($1, $2, $3)`,
-				Params: map[string]interface{}{"p1": 1, "p2": "Alice", "p3": "Henderson"},
-			},
-			{
-				SQL:    `INSERT INTO Singers (SingerId, FirstName, LastName) VALUES ($1, $2, $3)`,
-				Params: map[string]interface{}{"p1": 2, "p2": "Bruce", "p3": "Allison"},
-			},
-		})
+	_, err = client.ReadWriteTransaction(context.Background(), func(ctx context.Context, transaction *spanner.ReadWriteTransaction) error {
+		updateCounts, err = transaction.BatchUpdate(ctx, stmts)
 		return err
-	}); err != nil {
+	})
+	if err != nil {
 		return err
 	}
 	fmt.Fprintf(w, "Inserted %v singers\n", updateCounts)

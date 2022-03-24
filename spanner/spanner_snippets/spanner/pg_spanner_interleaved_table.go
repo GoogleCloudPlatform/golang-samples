@@ -42,7 +42,7 @@ func pgInterleavedTable(w io.Writer, db string) error {
 	// specific features, such as interleaved tables.
 	// See https://cloud.google.com/spanner/docs/postgresql/data-definition-language#create_table
 	// for the full CREATE TABLE syntax.
-	op, err := adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
+	req := &adminpb.UpdateDatabaseDdlRequest{
 		Database: db,
 		Statements: []string{
 			`CREATE TABLE Singers (
@@ -56,7 +56,8 @@ func pgInterleavedTable(w io.Writer, db string) error {
 				Title    varchar(1024) NOT NULL,
 				PRIMARY KEY (SingerId, AlbumId)
 			) INTERLEAVE IN PARENT Singers ON DELETE CASCADE`},
-	})
+	}
+	op, err := adminClient.UpdateDatabaseDdl(ctx, req)
 	if err != nil {
 		return err
 	}

@@ -40,16 +40,18 @@ func pgInformationSchema(w io.Writer, db string) error {
 	defer adminClient.Close()
 
 	// Create a table, and then get the metadata of the table from the INFORMATION_SCHEMA.
-	op, err := adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
-		Database: db,
-		Statements: []string{
-			`CREATE TABLE Venues (
+	ddl := []string{
+		`CREATE TABLE Venues (
 				VenueId  bigint NOT NULL PRIMARY KEY,
 				Name     varchar(1024) NOT NULL,
 				Revenues numeric,
 				Picture  bytea
-			)`},
-	})
+		 )`}
+	req := &adminpb.UpdateDatabaseDdlRequest{
+		Database:   db,
+		Statements: ddl,
+	}
+	op, err := adminClient.UpdateDatabaseDdl(ctx, req)
 	if err != nil {
 		return err
 	}
@@ -71,13 +73,18 @@ func pgInformationSchema(w io.Writer, db string) error {
 	defer client.Close()
 
 	// The `user_defined_...` columns are only available for PostgreSQL databases.
-	iter := client.Single().Query(ctx, spanner.Statement{SQL: `SELECT table_catalog, table_schema, table_name, 
+	type InformationSchema struct {
+		TableCatalog, TableSchema, TableName string
+		TypeCatalog, TypeSchema, TypeName    spanner.NullString
+	}
+	query := `SELECT table_catalog, table_schema, table_name, 
 				user_defined_type_catalog, 
 				user_defined_type_schema, 
 				user_defined_type_name 
 		FROM INFORMATION_SCHEMA.tables 
-		WHERE table_schema='public'`,
-	})
+		WHERE table_schema='public'`
+	stmt := spanner.Statement{SQL: query}
+	iter := client.Single().Query(ctx, stmt)
 	defer iter.Stop()
 	for {
 		row, err := iter.Next()
@@ -87,16 +94,15 @@ func pgInformationSchema(w io.Writer, db string) error {
 		if err != nil {
 			return err
 		}
-		var tableCatalog, tableSchema, tableName string
-		var typeCatalog, typeSchema, typeName spanner.NullString
-		if err := row.Columns(&tableCatalog, &tableSchema, &tableName, &typeCatalog, &typeSchema, &typeName); err != nil {
+		var val InformationSchema
+		if err := row.Columns(&val.TableCatalog, &val.TableSchema, &val.TableName, &val.TypeCatalog, &val.TypeSchema, &val.TypeName); err != nil {
 			return err
 		}
 		userDefinedType := "null"
-		if typeCatalog.Valid {
-			userDefinedType = fmt.Sprintf("%s.%s.%s", typeCatalog, typeSchema, typeName)
+		if val.TypeCatalog.Valid {
+			userDefinedType = fmt.Sprintf("%s.%s.%s", val.TypeCatalog, val.TypeSchema, val.TypeName)
 		}
-		fmt.Fprintf(w, "Table: %s.%s.%s (User defined type: %s)\n", tableCatalog, tableSchema, tableName, userDefinedType)
+		fmt.Fprintf(w, "Table: %s.%s.%s (User defined type: %s)\n", val.TableCatalog, val.TableSchema, val.TableName, userDefinedType)
 	}
 
 	return nil

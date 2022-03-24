@@ -43,6 +43,10 @@ func pgQueryParameter(w io.Writer, db string) error {
 		Params: map[string]interface{}{"p1": "A%"},
 	}
 	fmt.Fprint(w, "Listing all singers with a last name that starts with 'A'\n")
+	type Singers struct {
+		SingerID            int64
+		FirstName, LastName string
+	}
 	iter := client.Single().Query(ctx, stmt)
 	defer iter.Stop()
 	for {
@@ -53,12 +57,11 @@ func pgQueryParameter(w io.Writer, db string) error {
 		if err != nil {
 			return err
 		}
-		var singerID int64
-		var firstName, lastName string
-		if err := row.Columns(&singerID, &firstName, &lastName); err != nil {
+		var val Singers
+		if err := row.Columns(&val.SingerID, &val.FirstName, &val.LastName); err != nil {
 			return err
 		}
-		fmt.Fprintf(w, "%d %s %s\n", singerID, firstName, lastName)
+		fmt.Fprintf(w, "%d %s %s\n", val.SingerID, val.FirstName, val.LastName)
 	}
 }
 

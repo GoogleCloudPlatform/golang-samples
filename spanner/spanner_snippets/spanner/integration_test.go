@@ -588,17 +588,17 @@ func TestPgQueryParameter(t *testing.T) {
 		   FirstName varchar(1024),
 		   LastName  varchar(1024)
 		 )`)
-	if dbCleanup != nil {
-		defer dbCleanup()
-	}
 	if err != nil {
 		t.Fatalf("failed to create test database: %v", err)
 	}
+	defer dbCleanup()
+
 	client, err := spanner.NewClient(context.Background(), dbName)
 	if err != nil {
 		t.Fatalf("failed to create Spanner client: %v", err)
 	}
-	if _, err := client.Apply(context.Background(), []*spanner.Mutation{
+	defer client.Close()
+	_, err = client.Apply(context.Background(), []*spanner.Mutation{
 		spanner.InsertOrUpdateMap("Singers", map[string]interface{}{
 			"SingerId":  1,
 			"FirstName": "Bruce",
@@ -609,7 +609,8 @@ func TestPgQueryParameter(t *testing.T) {
 			"FirstName": "Alice",
 			"LastName":  "Bruxelles",
 		}),
-	}); err != nil {
+	})
+	if err != nil {
 		t.Fatalf("failed to insert test records: %v", err)
 	}
 
@@ -631,12 +632,10 @@ func TestPgDmlWithParameters(t *testing.T) {
 		   FirstName varchar(1024),
 		   LastName  varchar(1024)
 		 )`)
-	if dbCleanup != nil {
-		defer dbCleanup()
-	}
 	if err != nil {
 		t.Fatalf("failed to create test database: %v", err)
 	}
+	defer dbCleanup()
 
 	out := runSample(t, pgDmlWithParameters, dbName, "failed to execute PG DML with parameter")
 	assertContains(t, out, "Inserted 2 singers")
@@ -649,12 +648,10 @@ func TestPgNumericDataType(t *testing.T) {
 	_, dbName, cleanup := initTest(t, randomID())
 	defer cleanup()
 	dbCleanup, err := createTestPgDatabase(dbName)
-	if dbCleanup != nil {
-		defer dbCleanup()
-	}
 	if err != nil {
 		t.Fatalf("failed to create test database: %v", err)
 	}
+	defer dbCleanup()
 
 	out := runSample(t, pgNumericDataType, dbName, "failed to execute PG Numeric sample")
 	assertContains(t, out, "Inserted 1 venue(s)")
@@ -671,12 +668,10 @@ func TestPgFunctions(t *testing.T) {
 	_, dbName, cleanup := initTest(t, randomID())
 	defer cleanup()
 	dbCleanup, err := createTestPgDatabase(dbName)
-	if dbCleanup != nil {
-		defer dbCleanup()
-	}
 	if err != nil {
 		t.Fatalf("failed to create test database: %v", err)
 	}
+	defer dbCleanup()
 
 	out := runSample(t, pgFunctions, dbName, "failed to execute PG functions sample")
 	assertContains(t, out, "1284352323 seconds after epoch is 2010-09-13 04:32:03 +0000 UTC")
@@ -689,19 +684,17 @@ func TestPgInformationSchema(t *testing.T) {
 	_, dbName, cleanup := initTest(t, randomID())
 	defer cleanup()
 	dbCleanup, err := createTestPgDatabase(dbName)
-	if dbCleanup != nil {
-		defer dbCleanup()
-	}
 	if err != nil {
 		t.Fatalf("failed to create test database: %v", err)
 	}
+	defer dbCleanup()
 
-	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(dbName)
-	if matches == nil || len(matches) != 3 {
+	m := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(dbName)
+	if m == nil || len(m) != 3 {
 		t.Fatalf("Invalid database id %s", dbName)
 	}
 	out := runSample(t, pgInformationSchema, dbName, "failed to execute PG INFORMATION_SCHEMA sample")
-	assertContains(t, out, fmt.Sprintf("Table: %s.public.venues (User defined type: null)", matches[2]))
+	assertContains(t, out, fmt.Sprintf("Table: %s.public.venues (User defined type: null)", m[2]))
 }
 
 func TestPgCastDataType(t *testing.T) {
@@ -711,12 +704,10 @@ func TestPgCastDataType(t *testing.T) {
 	_, dbName, cleanup := initTest(t, randomID())
 	defer cleanup()
 	dbCleanup, err := createTestPgDatabase(dbName)
-	if dbCleanup != nil {
-		defer dbCleanup()
-	}
 	if err != nil {
 		t.Fatalf("failed to create test database: %v", err)
 	}
+	defer dbCleanup()
 
 	out := runSample(t, pgCastDataType, dbName, "failed to execute PG cast data type sample")
 	assertContains(t, out, "String: 1")
@@ -734,12 +725,10 @@ func TestPgInterleavedTable(t *testing.T) {
 	_, dbName, cleanup := initTest(t, randomID())
 	defer cleanup()
 	dbCleanup, err := createTestPgDatabase(dbName)
-	if dbCleanup != nil {
-		defer dbCleanup()
-	}
 	if err != nil {
 		t.Fatalf("failed to create test database: %v", err)
 	}
+	defer dbCleanup()
 
 	out := runSample(t, pgInterleavedTable, dbName, "failed to execute PG interleaved table sample")
 	assertContains(t, out, "Created interleaved table hierarchy using PostgreSQL dialect")
@@ -758,12 +747,10 @@ func TestPgBatchDml(t *testing.T) {
 		   FirstName varchar(1024),
 		   LastName  varchar(1024)
 		 )`)
-	if dbCleanup != nil {
-		defer dbCleanup()
-	}
 	if err != nil {
 		t.Fatalf("failed to create test database: %v", err)
 	}
+	defer dbCleanup()
 
 	out := runSample(t, pgBatchDml, dbName, "failed to execute PG Batch DML sample")
 	assertContains(t, out, "Inserted [1 1] singers")
@@ -782,17 +769,17 @@ func TestPgPartitionedDml(t *testing.T) {
 			user_name varchar(1024),
 			active    boolean
 		)`)
-	if dbCleanup != nil {
-		defer dbCleanup()
-	}
 	if err != nil {
 		t.Fatalf("failed to create test database: %v", err)
 	}
+	defer dbCleanup()
+
 	client, err := spanner.NewClient(context.Background(), dbName)
 	if err != nil {
 		t.Fatalf("failed to create Spanner client: %v", err)
 	}
-	if _, err := client.Apply(context.Background(), []*spanner.Mutation{
+	defer client.Close()
+	_, err = client.Apply(context.Background(), []*spanner.Mutation{
 		spanner.InsertOrUpdateMap("users", map[string]interface{}{
 			"user_id":   1,
 			"user_name": "User 1",
@@ -808,7 +795,8 @@ func TestPgPartitionedDml(t *testing.T) {
 			"user_name": "User 3",
 			"active":    true,
 		}),
-	}); err != nil {
+	})
+	if err != nil {
 		t.Fatalf("failed to insert test records: %v", err)
 	}
 
@@ -823,12 +811,10 @@ func TestPgCaseSensitivity(t *testing.T) {
 	_, dbName, cleanup := initTest(t, randomID())
 	defer cleanup()
 	dbCleanup, err := createTestPgDatabase(dbName)
-	if dbCleanup != nil {
-		defer dbCleanup()
-	}
 	if err != nil {
 		t.Fatalf("failed to create test database: %v", err)
 	}
+	defer dbCleanup()
 
 	out := runSample(t, pgCaseSensitivity, dbName, "failed to execute PG case sensitivity sample")
 	assertContains(t, out, "SingerId: 1, FirstName: Bruce, LastName: Allison")
@@ -842,12 +828,10 @@ func TestPgOrderNulls(t *testing.T) {
 	_, dbName, cleanup := initTest(t, randomID())
 	defer cleanup()
 	dbCleanup, err := createTestPgDatabase(dbName)
-	if dbCleanup != nil {
-		defer dbCleanup()
-	}
 	if err != nil {
 		t.Fatalf("failed to create test database: %v", err)
 	}
+	defer dbCleanup()
 
 	out := runSample(t, pgOrderNulls, dbName, "failed to execute PG order nulls sample")
 	assertContains(t, out, "Singers ORDER BY Name\n\tAlice\n\tBruce\n\t<null>")
@@ -1052,21 +1036,21 @@ func createTestInstance(t *testing.T, projectID string, instanceConfigName strin
 func createTestPgDatabase(db string, extraStatements ...string) (func(), error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
 	defer cancel()
-	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(db)
-	if matches == nil || len(matches) != 3 {
+	m := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(db)
+	if m == nil || len(m) != 3 {
 		return func() {}, fmt.Errorf("invalid database id %s", db)
 	}
 
-	adminClient, err := database.NewDatabaseAdminClient(ctx)
+	client, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		return func() {}, err
 	}
-	defer adminClient.Close()
+	defer client.Close()
 
-	opCreate, err := adminClient.CreateDatabase(ctx, &adminpb.CreateDatabaseRequest{
-		Parent:          matches[1],
+	opCreate, err := client.CreateDatabase(ctx, &adminpb.CreateDatabaseRequest{
+		Parent:          m[1],
 		DatabaseDialect: adminpb.DatabaseDialect_POSTGRESQL,
-		CreateStatement: `CREATE DATABASE "` + matches[2] + `"`,
+		CreateStatement: `CREATE DATABASE "` + m[2] + `"`,
 	})
 	if err != nil {
 		return func() {}, err
@@ -1075,17 +1059,17 @@ func createTestPgDatabase(db string, extraStatements ...string) (func(), error) 
 		return func() {}, err
 	}
 	dropDb := func() {
-		adminClient, err := database.NewDatabaseAdminClient(ctx)
+		client, err := database.NewDatabaseAdminClient(ctx)
 		if err != nil {
 			return
 		}
-		adminClient.DropDatabase(context.Background(), &adminpb.DropDatabaseRequest{
+		defer client.Close()
+		client.DropDatabase(context.Background(), &adminpb.DropDatabaseRequest{
 			Database: db,
 		})
-		defer adminClient.Close()
 	}
 	if len(extraStatements) > 0 {
-		opUpdate, err := adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
+		opUpdate, err := client.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
 			Database:   db,
 			Statements: extraStatements,
 		})

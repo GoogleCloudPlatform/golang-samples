@@ -31,7 +31,7 @@ func pgCreateDatabase(ctx context.Context, w io.Writer, db string) error {
 	// db := "projects/my-project/instances/my-instance/databases/my-database"
 	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(db)
 	if matches == nil || len(matches) != 3 {
-		return fmt.Errorf("Invalid database id %s", db)
+		return fmt.Errorf("invalid database id %s", db)
 	}
 
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
@@ -40,13 +40,14 @@ func pgCreateDatabase(ctx context.Context, w io.Writer, db string) error {
 	}
 	defer adminClient.Close()
 
-	opCreate, err := adminClient.CreateDatabase(ctx, &adminpb.CreateDatabaseRequest{
+	req := &adminpb.CreateDatabaseRequest{
 		Parent:          matches[1],
 		DatabaseDialect: adminpb.DatabaseDialect_POSTGRESQL,
 		// Note that PostgreSQL uses double quotes for quoting identifiers. This also
 		// includes database names in the CREATE DATABASE statement.
 		CreateStatement: `CREATE DATABASE "` + matches[2] + `"`,
-	})
+	}
+	opCreate, err := adminClient.CreateDatabase(ctx, req)
 	if err != nil {
 		return err
 	}
@@ -55,7 +56,7 @@ func pgCreateDatabase(ctx context.Context, w io.Writer, db string) error {
 	}
 	// Databases that are created with PostgreSQL dialect do not support extra DDL statements in the `CreateDatabase` call.
 	// We must therefore execute these in a separate UpdateDatabaseDdl call after the database has been created.
-	opUpdate, err := adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
+	updateReq := &adminpb.UpdateDatabaseDdlRequest{
 		Database: db,
 		Statements: []string{
 			`CREATE TABLE Singers (
@@ -70,7 +71,8 @@ func pgCreateDatabase(ctx context.Context, w io.Writer, db string) error {
 				AlbumTitle   text
 			)`,
 		},
-	})
+	}
+	opUpdate, err := adminClient.UpdateDatabaseDdl(ctx, updateReq)
 	if err != nil {
 		return err
 	}

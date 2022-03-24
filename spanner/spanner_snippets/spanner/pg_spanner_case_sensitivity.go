@@ -44,7 +44,7 @@ func pgCaseSensitivity(w io.Writer, db string) error {
 	// 2. Identifiers that are double-quoted retain their case and are case-sensitive.
 	// See https://www.postgresql.org/docs/current/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS
 	// for more information.
-	op, err := adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
+	req := &adminpb.UpdateDatabaseDdlRequest{
 		Database: db,
 		Statements: []string{
 			`CREATE TABLE Singers (
@@ -56,7 +56,8 @@ func pgCaseSensitivity(w io.Writer, db string) error {
 				"FirstName" varchar(1024) NOT NULL,
 				"LastName"  varchar(1024) NOT NULL
 			)`},
-	})
+	}
+	op, err := adminClient.UpdateDatabaseDdl(ctx, req)
 	if err != nil {
 		return err
 	}
@@ -70,7 +71,7 @@ func pgCaseSensitivity(w io.Writer, db string) error {
 	}
 	defer client.Close()
 
-	if _, err := client.Apply(context.Background(), []*spanner.Mutation{
+	m := []*spanner.Mutation{
 		spanner.InsertOrUpdateMap("Singers", map[string]interface{}{
 			// Column names in mutations are always case-insensitive, regardless whether the
 			// columns were double-quoted or not during creation.
@@ -78,7 +79,9 @@ func pgCaseSensitivity(w io.Writer, db string) error {
 			"firstname": "Bruce",
 			"lastname":  "Allison",
 		}),
-	}); err != nil {
+	}
+	_, err = client.Apply(context.Background(), m)
+	if err != nil {
 		return err
 	}
 
@@ -138,18 +141,20 @@ func pgCaseSensitivity(w io.Writer, db string) error {
 	}
 
 	// DML statements must also follow the PostgreSQL case rules.
-	if _, err := client.ReadWriteTransaction(ctx, func(ctx context.Context, transaction *spanner.ReadWriteTransaction) error {
-		_, err := transaction.Update(ctx, spanner.Statement{
-			SQL: `INSERT INTO Singers (SingerId, "FirstName", "LastName")
+	stmt := spanner.Statement{
+		SQL: `INSERT INTO Singers (SingerId, "FirstName", "LastName")
 				  VALUES ($1, $2, $3)`,
-			Params: map[string]interface{}{
-				"p1": 2,
-				"p2": "Alice",
-				"p3": "Bruxelles",
-			},
-		})
+		Params: map[string]interface{}{
+			"p1": 2,
+			"p2": "Alice",
+			"p3": "Bruxelles",
+		},
+	}
+	_, err = client.ReadWriteTransaction(ctx, func(ctx context.Context, transaction *spanner.ReadWriteTransaction) error {
+		_, err := transaction.Update(ctx, stmt)
 		return err
-	}); err != nil {
+	})
+	if err != nil {
 		return err
 	}
 

@@ -38,10 +38,11 @@ func pgCastDataType(w io.Writer, db string) error {
 	defer client.Close()
 
 	// The `::` cast operator can be used to cast from one data type to another.
-	iter := client.Single().Query(ctx, spanner.Statement{SQL: `select 1::varchar as str, '2'::int as int, 3::decimal as dec,
+	query := `select 1::varchar as str, '2'::int as int, 3::decimal as dec,
 				'4'::bytea as bytes, 5::float as float, 'true'::bool as bool,
-				'2021-11-03T09:35:01UTC'::timestamptz as timestamp`,
-	})
+				'2021-11-03T09:35:01UTC'::timestamptz as timestamp`
+	stmt := spanner.Statement{SQL: query}
+	iter := client.Single().Query(ctx, stmt)
 	defer iter.Stop()
 	for {
 		row, err := iter.Next()
@@ -52,21 +53,21 @@ func pgCastDataType(w io.Writer, db string) error {
 			return err
 		}
 		var str string
-		var int int64
+		var intVal int64
 		var dec spanner.PGNumeric
 		var bytes []byte
 		var float float64
-		var bool bool
+		var boolVal bool
 		var timestamp time.Time
-		if err := row.Columns(&str, &int, &dec, &bytes, &float, &bool, &timestamp); err != nil {
+		if err := row.Columns(&str, &intVal, &dec, &bytes, &float, &boolVal, &timestamp); err != nil {
 			return err
 		}
 		fmt.Fprintf(w, "String: %s\n", str)
-		fmt.Fprintf(w, "Int: %d\n", int)
+		fmt.Fprintf(w, "Int: %d\n", intVal)
 		fmt.Fprintf(w, "Decimal: %s\n", dec)
 		fmt.Fprintf(w, "Bytes: %s\n", bytes)
 		fmt.Fprintf(w, "Float: %f\n", float)
-		fmt.Fprintf(w, "Bool: %v\n", bool)
+		fmt.Fprintf(w, "Bool: %v\n", boolVal)
 		fmt.Fprintf(w, "Timestamp: %s\n", timestamp)
 	}
 }
