@@ -91,8 +91,8 @@ func TestObjects(t *testing.T) {
 	// Keep the original generation of object1 before re-uploading
 	// to use in the versioning samples.
 	gen := attrs.Generation
-	if err := uploadFile(ioutil.Discard, bucketVersioning, object1); err != nil {
-		t.Fatalf("uploadFile(%q): %v", object1, err)
+	if err := streamFileUpload(ioutil.Discard, bucketVersioning, object1); err != nil {
+		t.Fatalf("streamFileUpload(%q): %v", object1, err)
 	}
 
 	{
@@ -264,6 +264,10 @@ func TestObjects(t *testing.T) {
 		}
 	})
 
+	if err := deleteFile(ioutil.Discard, bucket, object1); err != nil {
+		t.Errorf("deleteFile: %v", err)
+	}
+
 	key := []byte("my-secret-AES-256-encryption-key")
 	newKey := []byte("My-secret-AES-256-encryption-key")
 
@@ -354,7 +358,7 @@ func TestKMSObjects(t *testing.T) {
 
 	kmsKeyName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", tc.ProjectID, "global", keyRingID, cryptoKeyID)
 	t.Run("сhangeObjectCSEKtoKMS", func(t *testing.T) {
-		object1 := "foo.txt"
+		object1 := "foo1.txt"
 		key := []byte("my-secret-AES-256-encryption-key")
 		obj := client.Bucket(bucket).Object(object1)
 
@@ -379,11 +383,9 @@ func TestKMSObjects(t *testing.T) {
 		}
 	})
 
-	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-		if err := uploadWithKMSKey(ioutil.Discard, bucket, object, kmsKeyName); err != nil {
-			r.Errorf("uploadWithKMSKey: %v", err)
-		}
-	})
+	if err := uploadWithKMSKey(ioutil.Discard, bucket, object, kmsKeyName); err != nil {
+		t.Errorf("uploadWithKMSKey: %v", err)
+	}
 }
 
 func TestV4SignedURL(t *testing.T) {
