@@ -13,6 +13,7 @@
 // limitations under the License.
 
 // [START cloud_sql_sqlserver_databasesql_connect_tcp]
+// [START cloud_sql_sqlserver_databasesql_sslcerts]
 package cloudsql
 
 import (
@@ -36,6 +37,10 @@ func connectTCPSocket() (*sql.DB, error) {
 		return v
 	}
 
+	// Note: Saving credentials in environment variables is convenient, but not
+	// secure - consider a more secure solution such as
+	// Cloud Secret Manager (https://cloud.google.com/secret-manager) to help
+	// keep secrets safe.
 	var (
 		dbUser    = mustGetenv("DB_USER")       // e.g. 'my-db-user'
 		dbPwd     = mustGetenv("DB_PASS")       // e.g. 'my-db-password'
@@ -47,14 +52,12 @@ func connectTCPSocket() (*sql.DB, error) {
 	dbURI := fmt.Sprintf("server=%s;user id=%s;password=%s;port=%s;database=%s;",
 		dbTCPHost, dbUser, dbPwd, dbPort, dbName)
 
-	// [START_EXCLUDE]
-	// [START cloud_sql_sqlserver_databasesql_sslcerts]
+	// [END cloud_sql_sqlserver_databasesql_connect_tcp]
 	// (OPTIONAL) Configure SSL certificates
 	// For deployments that connect directly to a Cloud SQL instance without
 	// using the Cloud SQL Proxy, configuring SSL certificates will ensure the
-	// connection is encrypted. This step is entirely OPTIONAL.
-	dbRootCert := os.Getenv("DB_ROOT_CERT") // e.g., '/path/to/my/server-ca.pem'
-	if dbRootCert != "" {
+	// connection is encrypted.
+	if dbRootCert, ok := os.LookupEnv("DB_ROOT_CERT"); ok { // e.g., '/path/to/my/server-ca.pem'
 		// Get connection host name to be matched with host name in SSL certificate.
 		var instanceConnectionName = mustGetenv("INSTANCE_CONNECTION_NAME")
 		// Expected format of INSTANCE_CONNECTION_NAME is project_id:region:instance_name
@@ -66,8 +69,7 @@ func connectTCPSocket() (*sql.DB, error) {
 		dbURI += fmt.Sprintf("encrypt=true;hostnameincertificate=%s:%s;certificate=%s;",
 			hostNameParts[0], hostNameParts[2], dbRootCert)
 	}
-	// [END cloud_sql_sqlserver_databasesql_sslcerts]
-	// [END_EXCLUDE]
+	// [START cloud_sql_sqlserver_databasesql_connect_tcp]
 
 	// dbPool is the pool of database connections.
 	dbPool, err := sql.Open("sqlserver", dbURI)
@@ -82,4 +84,5 @@ func connectTCPSocket() (*sql.DB, error) {
 	return dbPool, nil
 }
 
+// [END cloud_sql_sqlserver_databasesql_sslcerts]
 // [END cloud_sql_sqlserver_databasesql_connect_tcp]
