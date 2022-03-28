@@ -36,8 +36,7 @@ func searchFHIRResourcesGet(w io.Writer, projectID, location, datasetID, fhirSto
 	// DefaultClient returns an HTTP Client that uses the
 	// DefaultTokenSource (Application Default Credentials)
 	// to obtain authentication credentials.
-	client, err := google.DefaultClient(ctx,
-		"https://www.googleapis.com/auth/cloud-platform")
+	client, err := google.DefaultClient(ctx, "https://www.googleapis.com/auth/cloud-platform")
 	if err != nil {
 		log.Fatal(err)
 	}
