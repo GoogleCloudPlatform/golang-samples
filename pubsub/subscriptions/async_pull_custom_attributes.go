@@ -36,32 +36,23 @@ func pullMsgsCustomAttributes(w io.Writer, projectID, subID string) error {
 
 	sub := client.Subscription(subID)
 
-	// Receive messages for 10 seconds.
+	// Receive messages for 10 seconds, which simplifies testing.
+	// Comment this out in production, since `Receive` should
+	// be used as a long running operation.
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
-	// Create a channel to handle messages to as they come in.
-	cm := make(chan *pubsub.Message)
-	defer close(cm)
-
-	// Handle individual messages in a goroutine.
-	go func() {
-		for msg := range cm {
-			fmt.Fprintf(w, "Got message :%q\n", string(msg.Data))
-			fmt.Fprintln(w, "Attributes:")
-			for key, value := range msg.Attributes {
-				fmt.Fprintf(w, "%s = %s", key, value)
-			}
-			msg.Ack()
-		}
-	}()
-
 	// Receive blocks until the context is cancelled or an error occurs.
-	err = sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
-		cm <- msg
+	err = sub.Receive(ctx, func(_ context.Context, msg *pubsub.Message) {
+		fmt.Fprintf(w, "Got message :%q\n", string(msg.Data))
+		fmt.Fprintln(w, "Attributes:")
+		for key, value := range msg.Attributes {
+			fmt.Fprintf(w, "%s = %s\n", key, value)
+		}
+		msg.Ack()
 	})
 	if err != nil {
-		return fmt.Errorf("Receive: %v", err)
+		return fmt.Errorf("sub.Receive: %v", err)
 	}
 
 	return nil

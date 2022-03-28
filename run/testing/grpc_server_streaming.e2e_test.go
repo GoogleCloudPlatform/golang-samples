@@ -19,9 +19,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"io"
-	"strings"
 	"testing"
-	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/cloudrunci"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -34,7 +32,6 @@ import (
 // TestGRPCServerStreamingService is an end-to-end test that confirms the image builds, deploys and runs on
 // Cloud Run and can stream messages from server.
 func TestGRPCServerStreamingService(t *testing.T) {
-	t.Skip("Feature not yet available (https://github.com/GoogleCloudPlatform/golang-samples/issues/1628)")
 	tc := testutil.EndToEndTest(t)
 
 	service := cloudrunci.NewService("grpc-server-streaming", tc.ProjectID)
@@ -73,7 +70,6 @@ func TestGRPCServerStreamingService(t *testing.T) {
 		t.Fatalf("rpc StreamTime: %v", err)
 	}
 
-	recvSeconds := make(map[time.Time]bool)
 	recvMsgs := 0
 	for {
 		_, err := resp.Recv()
@@ -84,18 +80,9 @@ func TestGRPCServerStreamingService(t *testing.T) {
 		}
 
 		recvMsgs++
-		recvAt := time.Now().Truncate(time.Second)
-		recvSeconds[recvAt] = true
 	}
 
 	if recvMsgs != int(n) {
 		t.Errorf("received %d messages, expected %d", recvMsgs, req.DurationSecs)
-	}
-	if len(recvSeconds) != int(n) {
-		var keys []string
-		for k := range recvSeconds {
-			keys = append(keys, k.Format(time.RFC3339))
-		}
-		t.Errorf("received messages at %d distinct seconds [%s], expected %d different seconds", len(recvSeconds), strings.Join(keys, ", "), req.DurationSecs)
 	}
 }
