@@ -401,8 +401,9 @@ func TestBackupSample(t *testing.T) {
 	assertContains(t, out, fmt.Sprintf("/backups/%s", backupID))
 	assertContains(t, out, "Backups listed.")
 
-	out = runSampleWithContext(ctx, t, listBackupOperations, dbName, "failed to list backup operations")
+	out = runBackupSample(ctx, t, listBackupOperations, dbName, backupID, "failed to list backup operations")
 	assertContains(t, out, fmt.Sprintf("on database %s", dbName))
+	assertContains(t, out, fmt.Sprintf("copied from %s", backupID))
 
 	out = runBackupSample(ctx, t, updateBackup, dbName, backupID, "failed to update a backup")
 	assertContains(t, out, fmt.Sprintf("Updated backup %s", backupID))
