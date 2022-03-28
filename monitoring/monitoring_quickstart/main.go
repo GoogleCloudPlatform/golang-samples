@@ -23,7 +23,7 @@ import (
 	"log"
 	"time"
 
-	monitoring "cloud.google.com/go/monitoring/apiv3"
+	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
 	googlepb "github.com/golang/protobuf/ptypes/timestamp"
 	metricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
@@ -58,7 +58,7 @@ func main() {
 
 	// Writes time series data.
 	if err := client.CreateTimeSeries(ctx, &monitoringpb.CreateTimeSeriesRequest{
-		Name: monitoring.MetricProjectPath(projectID),
+		Name: fmt.Sprintf("projects/%s", projectID),
 		TimeSeries: []*monitoringpb.TimeSeries{
 			{
 				Metric: &metricpb.Metric{

@@ -51,7 +51,7 @@ func createJobWithAnimatedOverlay(w io.Writer, projectID string, location string
 			JobConfig: &transcoderpb.Job_Config{
 				Config: &transcoderpb.JobConfig{
 					ElementaryStreams: []*transcoderpb.ElementaryStream{
-						&transcoderpb.ElementaryStream{
+						{
 							Key: "video_stream0",
 							ElementaryStream: &transcoderpb.ElementaryStream_VideoStream{
 								VideoStream: &transcoderpb.VideoStream{
@@ -66,7 +66,7 @@ func createJobWithAnimatedOverlay(w io.Writer, projectID string, location string
 								},
 							},
 						},
-						&transcoderpb.ElementaryStream{
+						{
 							Key: "audio_stream0",
 							ElementaryStream: &transcoderpb.ElementaryStream_AudioStream{
 								AudioStream: &transcoderpb.AudioStream{
@@ -77,14 +77,14 @@ func createJobWithAnimatedOverlay(w io.Writer, projectID string, location string
 						},
 					},
 					MuxStreams: []*transcoderpb.MuxStream{
-						&transcoderpb.MuxStream{
+						{
 							Key:               "sd",
 							Container:         "mp4",
 							ElementaryStreams: []string{"video_stream0", "audio_stream0"},
 						},
 					},
 					Overlays: []*transcoderpb.Overlay{
-						&transcoderpb.Overlay{
+						{
 							Image: &transcoderpb.Overlay_Image{
 								Uri: overlayImageURI,
 								Resolution: &transcoderpb.Overlay_NormalizedCoordinate{
@@ -94,7 +94,7 @@ func createJobWithAnimatedOverlay(w io.Writer, projectID string, location string
 								Alpha: 1,
 							},
 							Animations: []*transcoderpb.Overlay_Animation{
-								&transcoderpb.Overlay_Animation{
+								{
 									AnimationType: &transcoderpb.Overlay_Animation_AnimationFade{
 										AnimationFade: &transcoderpb.Overlay_AnimationFade{
 											FadeType: transcoderpb.Overlay_FADE_IN,
@@ -112,7 +112,7 @@ func createJobWithAnimatedOverlay(w io.Writer, projectID string, location string
 									},
 								},
 
-								&transcoderpb.Overlay_Animation{
+								{
 									AnimationType: &transcoderpb.Overlay_Animation_AnimationFade{
 										AnimationFade: &transcoderpb.Overlay_AnimationFade{
 											FadeType: transcoderpb.Overlay_FADE_OUT,

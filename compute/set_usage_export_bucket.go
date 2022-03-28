@@ -25,7 +25,8 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// setUsageExportBucket sets the Compute Engine usage export bucket for the Cloud project. This sample presents how to interpret the default value for the report name prefix parameter.
+// setUsageExportBucket sets the Compute Engine usage export bucket for the Cloud project.
+// This sample presents how to interpret the default value for the report name prefix parameter.
 func setUsageExportBucket(w io.Writer, projectID, bucketName, reportNamePrefix string) error {
 	// projectID := "your_project_id"
 	// bucketName := "your_bucket_name"
@@ -47,7 +48,8 @@ func setUsageExportBucket(w io.Writer, projectID, bucketName, reportNamePrefix s
 	}
 
 	if reportNamePrefix == "" {
-		// Sending an empty value for reportNamePrefix results in the next usage report being generated with the default prefix value "usage_gce". (see: https://cloud.google.com/compute/docs/reference/rest/v1/projects/get)
+		// Sending an empty value for reportNamePrefix results in the next usage report being generated
+		// with the default prefix value "usage_gce". (see: https://cloud.google.com/compute/docs/reference/rest/v1/projects/get)
 		fmt.Fprintf(w, "Setting reportNamePrefix to empty value causes the report to have the default prefix value `usage_gce`.\n")
 	}
 
@@ -56,27 +58,11 @@ func setUsageExportBucket(w io.Writer, projectID, bucketName, reportNamePrefix s
 		return fmt.Errorf("unable to set usage export bucket %v", err)
 	}
 
-	globalOperationsClient, err := compute.NewGlobalOperationsRESTClient(ctx)
-	if err != nil {
-		return fmt.Errorf("NewZoneOperationsRESTClient: %v", err)
+	if err = op.Wait(ctx); err != nil {
+		return fmt.Errorf("unable to wait for the operation: %v", err)
 	}
-	defer globalOperationsClient.Close()
 
-	for {
-		waitReq := &computepb.WaitGlobalOperationRequest{
-			Operation: op.Proto().GetName(),
-			Project:   projectID,
-		}
-		zoneOp, err := globalOperationsClient.Wait(ctx, waitReq)
-		if err != nil {
-			return fmt.Errorf("unable to wait for the operation: %v", err)
-		}
-
-		if *zoneOp.Status.Enum() == computepb.Operation_DONE {
-			fmt.Fprintf(w, "Usage export bucket has been set\n")
-			break
-		}
-	}
+	fmt.Fprintf(w, "Usage export bucket has been set\n")
 
 	return nil
 }

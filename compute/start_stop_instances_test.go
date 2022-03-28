@@ -65,7 +65,7 @@ func TestStartStopSnippets(t *testing.T) {
 		t.Errorf("unable to get instance: %v", err)
 	}
 
-	if *instance.Status.Enum() != computepb.Instance_RUNNING {
+	if *instance.Status != computepb.Instance_RUNNING.String() {
 		t.Errorf("Instance is not in running status")
 	}
 
@@ -85,7 +85,7 @@ func TestStartStopSnippets(t *testing.T) {
 		t.Errorf("unable to get instance: %v", err)
 	}
 
-	if *instance.Status.Enum() != computepb.Instance_TERMINATED {
+	if *instance.Status != computepb.Instance_TERMINATED.String() {
 		t.Errorf("Instance is not in terminated status")
 	}
 
@@ -105,7 +105,7 @@ func TestStartStopSnippets(t *testing.T) {
 		t.Errorf("unable to get instance: %v", err)
 	}
 
-	if *instance.Status.Enum() != computepb.Instance_RUNNING {
+	if *instance.Status != computepb.Instance_RUNNING.String() {
 		t.Errorf("Instance is not in running status")
 	}
 
@@ -145,7 +145,7 @@ func TestStartStopSnippets(t *testing.T) {
 					},
 					AutoDelete: proto.Bool(true),
 					Boot:       proto.Bool(true),
-					Type:       computepb.AttachedDisk_PERSISTENT.Enum(),
+					Type:       proto.String(computepb.AttachedDisk_PERSISTENT.String()),
 					DiskEncryptionKey: &computepb.CustomerEncryptionKey{
 						RawKey: proto.String(base64Key),
 					},
@@ -165,26 +165,9 @@ func TestStartStopSnippets(t *testing.T) {
 		t.Fatalf("unable to create instance: %v", err)
 	}
 
-	zoneOperationsClient, err := compute.NewZoneOperationsRESTClient(ctx)
+	err = op.Wait(ctx)
 	if err != nil {
-		t.Errorf("NewZoneOperationsRESTClient: %v", err)
-	}
-	defer zoneOperationsClient.Close()
-
-	for {
-		waitReq := &computepb.WaitZoneOperationRequest{
-			Operation: op.Proto().GetName(),
-			Project:   tc.ProjectID,
-			Zone:      zone,
-		}
-		zoneOp, err := zoneOperationsClient.Wait(ctx, waitReq)
-		if err != nil {
-			t.Errorf("unable to wait for the operation: %v", err)
-		}
-
-		if *zoneOp.Status.Enum() == computepb.Operation_DONE {
-			break
-		}
+		t.Errorf("unable to wait for the operation: %v", err)
 	}
 
 	buf.Reset()
@@ -198,7 +181,7 @@ func TestStartStopSnippets(t *testing.T) {
 		t.Errorf("unable to get instance: %v", err)
 	}
 
-	if *instance.Status.Enum() != computepb.Instance_TERMINATED {
+	if *instance.Status != computepb.Instance_TERMINATED.String() {
 		t.Errorf("Instance is not in terminated status")
 	}
 
@@ -216,7 +199,7 @@ func TestStartStopSnippets(t *testing.T) {
 		t.Errorf("unable to get instance: %v", err)
 	}
 
-	if *instance.Status.Enum() != computepb.Instance_RUNNING {
+	if *instance.Status != computepb.Instance_RUNNING.String() {
 		t.Errorf("Instance is not in running status")
 	}
 

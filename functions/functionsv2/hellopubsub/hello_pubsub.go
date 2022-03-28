@@ -22,8 +22,13 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 	"github.com/cloudevents/sdk-go/v2/event"
 )
+
+func init() {
+	functions.CloudEvent("HelloPubSub", helloPubSub)
+}
 
 // MessagePublishedData contains the full Pub/Sub message
 // See the documentation for more details:
@@ -39,8 +44,8 @@ type PubSubMessage struct {
 	Data []byte `json:"data"`
 }
 
-// HelloPubSub consumes a CloudEvent message and extracts the Pub/Sub message.
-func HelloPubSub(ctx context.Context, e event.Event) error {
+// helloPubSub consumes a CloudEvent message and extracts the Pub/Sub message.
+func helloPubSub(ctx context.Context, e event.Event) error {
 	var msg MessagePublishedData
 	if err := e.DataAs(&msg); err != nil {
 		return fmt.Errorf("event.DataAs: %v", err)

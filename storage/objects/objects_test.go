@@ -24,6 +24,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -41,6 +42,12 @@ func TestObjects(t *testing.T) {
 		t.Fatalf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
+
+	dir, err := ioutil.TempDir("", "objectsTestTempDir")
+	if err != nil {
+		t.Fatalf("ioutil.TempDir: %v", err)
+	}
+	defer os.RemoveAll(dir) // clean up
 
 	var (
 		bucket           = tc.ProjectID + "-samples-object-bucket-1"
@@ -67,8 +74,8 @@ func TestObjects(t *testing.T) {
 		t.Fatalf("uploadFile(%q): %v", object2, err)
 	}
 
-	if err := uploadFile(ioutil.Discard, bucketVersioning, object1); err != nil {
-		t.Fatalf("uploadFile(%q): %v", object1, err)
+	if err := streamFileUpload(ioutil.Discard, bucketVersioning, object1); err != nil {
+		t.Fatalf("streamFileUpload(%q): %v", object1, err)
 	}
 	// Check enableVersioning correctly work.
 	bkt := client.Bucket(bucketVersioning)
@@ -84,8 +91,8 @@ func TestObjects(t *testing.T) {
 	// Keep the original generation of object1 before re-uploading
 	// to use in the versioning samples.
 	gen := attrs.Generation
-	if err := uploadFile(ioutil.Discard, bucketVersioning, object1); err != nil {
-		t.Fatalf("uploadFile(%q): %v", object1, err)
+	if err := streamFileUpload(ioutil.Discard, bucketVersioning, object1); err != nil {
+		t.Fatalf("streamFileUpload(%q): %v", object1, err)
 	}
 
 	{
@@ -163,9 +170,9 @@ func TestObjects(t *testing.T) {
 	if err := deleteOldVersionOfObject(ioutil.Discard, bucketVersioning, object1, gen); err != nil {
 		t.Fatalf("deleteOldVersionOfObject: %v", err)
 	}
-	data, err := downloadFile(ioutil.Discard, bucket, object1)
+	data, err := downloadFileIntoMemory(ioutil.Discard, bucket, object1)
 	if err != nil {
-		t.Fatalf("downloadFile: %v", err)
+		t.Fatalf("downloadFileIntoMemory: %v", err)
 	}
 	if got, want := string(data), "Hello\nworld"; got != want {
 		t.Errorf("contents = %q; want %q", got, want)
@@ -203,6 +210,36 @@ func TestObjects(t *testing.T) {
 		}
 	})
 
+	t.Run("downloadByteRange", func(t *testing.T) {
+		destination := filepath.Join(dir, "fileDownloadByteRangeDestination.txt")
+		err = downloadByteRange(ioutil.Discard, bucket, object1, 1, 4, destination)
+		if err != nil {
+			t.Fatalf("downloadFile: %v", err)
+		}
+		data, err := ioutil.ReadFile(destination)
+		if err != nil {
+			t.Fatalf("ioutil.ReadFile: %v", err)
+		}
+		if got, want := string(data), "ell"; got != want {
+			t.Errorf("contents = %q; want %q", got, want)
+		}
+	})
+
+	t.Run("downloadFile", func(t *testing.T) {
+		destination := filepath.Join(dir, "fileDownloadDestination.txt")
+		err = downloadFile(ioutil.Discard, bucket, object1, destination)
+		if err != nil {
+			t.Fatalf("downloadFile: %v", err)
+		}
+		data, err := ioutil.ReadFile(destination)
+		if err != nil {
+			t.Fatalf("ioutil.ReadFile: %v", err)
+		}
+		if got, want := string(data), "Hello\nworld"; got != want {
+			t.Errorf("contents = %q; want %q", got, want)
+		}
+	})
+
 	err = moveFile(ioutil.Discard, bucket, object1)
 	if err != nil {
 		t.Fatalf("moveFile: %v", err)
@@ -226,6 +263,10 @@ func TestObjects(t *testing.T) {
 			t.Errorf("object.Attrs: %v", err)
 		}
 	})
+
+	if err := deleteFile(ioutil.Discard, bucket, object1); err != nil {
+		t.Errorf("deleteFile: %v", err)
+	}
 
 	key := []byte("my-secret-AES-256-encryption-key")
 	newKey := []byte("My-secret-AES-256-encryption-key")
@@ -317,7 +358,7 @@ func TestKMSObjects(t *testing.T) {
 
 	kmsKeyName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", tc.ProjectID, "global", keyRingID, cryptoKeyID)
 	t.Run("сhangeObjectCSEKtoKMS", func(t *testing.T) {
-		object1 := "foo.txt"
+		object1 := "foo1.txt"
 		key := []byte("my-secret-AES-256-encryption-key")
 		obj := client.Bucket(bucket).Object(object1)
 
@@ -342,11 +383,9 @@ func TestKMSObjects(t *testing.T) {
 		}
 	})
 
-	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-		if err := uploadWithKMSKey(ioutil.Discard, bucket, object, kmsKeyName); err != nil {
-			r.Errorf("uploadWithKMSKey: %v", err)
-		}
-	})
+	if err := uploadWithKMSKey(ioutil.Discard, bucket, object, kmsKeyName); err != nil {
+		t.Errorf("uploadWithKMSKey: %v", err)
+	}
 }
 
 func TestV4SignedURL(t *testing.T) {
@@ -360,14 +399,10 @@ func TestV4SignedURL(t *testing.T) {
 
 	bucketName := tc.ProjectID + "-signed-url-bucket-name"
 	objectName := "foo.txt"
-	serviceAccount := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
-	if serviceAccount == "" {
-		t.Skip("GOOGLE_APPLICATION_CREDENTIALS must be set")
-	}
 
 	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName)
 	putBuf := new(bytes.Buffer)
-	putURL, err := generateV4PutObjectSignedURL(putBuf, bucketName, objectName, serviceAccount)
+	putURL, err := generateV4PutObjectSignedURL(putBuf, bucketName, objectName)
 	if err != nil {
 		t.Errorf("generateV4PutObjectSignedURL: %v", err)
 	}
@@ -383,12 +418,12 @@ func TestV4SignedURL(t *testing.T) {
 	}
 	request.ContentLength = 11
 	request.Header.Set("Content-Type", "application/octet-stream")
-	response, err := httpClient.Do(request)
+	_, err = httpClient.Do(request)
 	if err != nil {
 		t.Errorf("httpClient.Do: %v", err)
 	}
 	getBuf := new(bytes.Buffer)
-	getURL, err := generateV4GetObjectSignedURL(getBuf, bucketName, objectName, serviceAccount)
+	getURL, err := generateV4GetObjectSignedURL(getBuf, bucketName, objectName)
 	if err != nil {
 		t.Errorf("generateV4GetObjectSignedURL: %v", err)
 	}
@@ -397,7 +432,7 @@ func TestV4SignedURL(t *testing.T) {
 		t.Errorf("got %q, want %q", got, want)
 	}
 
-	response, err = http.Get(getURL)
+	response, err := http.Get(getURL)
 	if err != nil {
 		t.Errorf("http.Get: %v", err)
 	}
@@ -416,24 +451,15 @@ func TestV4SignedURL(t *testing.T) {
 func TestPostPolicyV4(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		t.Fatalf("storage.NewClient: %v", err)
-	}
-	defer client.Close()
 
 	bucketName := tc.ProjectID + "-post-policy-bucket-name"
 	objectName := "foo.txt"
-	serviceAccount := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
-	if serviceAccount == "" {
-		t.Error("GOOGLE_APPLICATION_CREDENTIALS must be set")
-	}
 
 	if err := testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName); err != nil {
 		t.Fatalf("CleanBucket: %v", err)
 	}
 	putBuf := new(bytes.Buffer)
-	policy, err := generateSignedPostPolicyV4(putBuf, bucketName, objectName, serviceAccount)
+	policy, err := generateSignedPostPolicyV4(putBuf, bucketName, objectName)
 	if err != nil {
 		t.Fatalf("generateSignedPostPolicyV4: %v", err)
 	}
@@ -509,6 +535,12 @@ func TestPostPolicyV4(t *testing.T) {
 			r.Errorf("Body.Close: %v", err)
 		}
 	})
+
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+	defer client.Close()
 
 	// Verify that the file was uploaded by reading back its attributes.
 	bkt := client.Bucket(bucketName)
