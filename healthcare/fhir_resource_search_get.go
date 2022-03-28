@@ -71,7 +71,7 @@ func searchFHIRResourcesGet(w io.Writer, projectID, location, datasetID, fhirSto
 	}
 
 	if resp.StatusCode > 299 {
-		return fmt.Errorf("Search: status %d %s: %s", resp.StatusCode, resp.Status, respBytes)
+		return fmt.Errorf("search: status %d %s: %s", resp.StatusCode, resp.Status, respBytes)
 	}
 
 	fmt.Fprintf(w, "%s", respBytes)
