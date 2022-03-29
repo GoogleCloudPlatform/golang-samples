@@ -29,6 +29,10 @@ import (
 
 // copyBackup copies an existing backup to a given instance in same or different region, or in same or different project.
 func copyBackup(w io.Writer, instancePath string, copyBackupId string, sourceBackupPath string) error {
+	// instancePath := "projects/my-project/instances/my-instance"
+	// copyBackupId := "my-copy-backup"
+	// sourceBackupPath := "projects/my-project/instances/my-instance/backups/my-source-backup"
+
 	// Add timeout to context.
 	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
 	defer cancel()

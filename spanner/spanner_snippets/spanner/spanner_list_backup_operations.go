@@ -29,6 +29,8 @@ import (
 )
 
 func listBackupOperations(ctx context.Context, w io.Writer, db string, backupId string) error {
+	// db := "projects/my-project/instances/my-instance/databases/my-database"
+	// backupID := "my-backup"
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		return err
