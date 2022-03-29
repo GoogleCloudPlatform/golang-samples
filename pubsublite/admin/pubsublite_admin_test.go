@@ -86,7 +86,6 @@ func TestTopicAdmin(t *testing.T) {
 	testZone := randomZone()
 
 	topicID := resourcePrefix + uuid.NewString()
-	// topicPath := fmt.Sprintf("projects/%s/locations/%s/topics/%s", projNumber, testZone, topicID)
 	t.Run("CreateTopic", func(t *testing.T) {
 		ctx := context.Background()
 		reservationID = resourcePrefix + uuid.NewString()
