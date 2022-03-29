@@ -24,10 +24,12 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-func listSubscriptionsInTopic(w io.Writer, projectID, region, zone, topicID string) error {
+func listSubscriptionsInTopic(w io.Writer, projectID, region, location, topicID string) error {
 	// projectID := "my-project-id"
 	// region := "us-central1"
-	// zone := "us-central1-a"
+	// NOTE: location can be either a region ("us-central1") or a zone ("us-central1-a")
+	// For a list of valid locations, see https://cloud.google.com/pubsub/lite/docs/locations.
+	// location := "us-central"
 	// topicID := "my-topic"
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
@@ -36,8 +38,8 @@ func listSubscriptionsInTopic(w io.Writer, projectID, region, zone, topicID stri
 	}
 	defer client.Close()
 
-	topic := fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, zone, topicID)
-	subPathIter := client.TopicSubscriptions(ctx, topic)
+	topicPath := fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, location, topicID)
+	subPathIter := client.TopicSubscriptions(ctx, topicPath)
 	for {
 		subPath, err := subPathIter.Next()
 		if err == iterator.Done {
