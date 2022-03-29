@@ -689,12 +689,8 @@ func TestPgInformationSchema(t *testing.T) {
 	}
 	defer dbCleanup()
 
-	m := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(dbName)
-	if m == nil || len(m) != 3 {
-		t.Fatalf("Invalid database id %s", dbName)
-	}
 	out := runSample(t, pgInformationSchema, dbName, "failed to execute PG INFORMATION_SCHEMA sample")
-	assertContains(t, out, fmt.Sprintf("Table: %s.public.venues (User defined type: null)", m[2]))
+	assertContains(t, out, "Table: public.venues (User defined type: null)")
 }
 
 func TestPgCastDataType(t *testing.T) {

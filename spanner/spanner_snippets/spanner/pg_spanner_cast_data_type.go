@@ -44,6 +44,16 @@ func pgCastDataType(w io.Writer, db string) error {
 	stmt := spanner.Statement{SQL: query}
 	iter := client.Single().Query(ctx, stmt)
 	defer iter.Stop()
+	// Row represents a row returned from above cast query.
+	type Row struct {
+		Str       string
+		Int       int64
+		Dec       spanner.PGNumeric
+		Bytes     []byte
+		Float     float64
+		Bool      bool
+		Timestamp time.Time
+	}
 	for {
 		row, err := iter.Next()
 		if err == iterator.Done {
@@ -52,23 +62,17 @@ func pgCastDataType(w io.Writer, db string) error {
 		if err != nil {
 			return err
 		}
-		var str string
-		var intVal int64
-		var dec spanner.PGNumeric
-		var bytes []byte
-		var float float64
-		var boolVal bool
-		var timestamp time.Time
-		if err := row.Columns(&str, &intVal, &dec, &bytes, &float, &boolVal, &timestamp); err != nil {
+		var val Row
+		if err := row.ToStruct(&val); err != nil {
 			return err
 		}
-		fmt.Fprintf(w, "String: %s\n", str)
-		fmt.Fprintf(w, "Int: %d\n", intVal)
-		fmt.Fprintf(w, "Decimal: %s\n", dec)
-		fmt.Fprintf(w, "Bytes: %s\n", bytes)
-		fmt.Fprintf(w, "Float: %f\n", float)
-		fmt.Fprintf(w, "Bool: %v\n", boolVal)
-		fmt.Fprintf(w, "Timestamp: %s\n", timestamp)
+		fmt.Fprintf(w, "String: %s\n", val.Str)
+		fmt.Fprintf(w, "Int: %d\n", val.Int)
+		fmt.Fprintf(w, "Decimal: %s\n", val.Dec)
+		fmt.Fprintf(w, "Bytes: %s\n", val.Bytes)
+		fmt.Fprintf(w, "Float: %f\n", val.Float)
+		fmt.Fprintf(w, "Bool: %v\n", val.Bool)
+		fmt.Fprintf(w, "Timestamp: %s\n", val.Timestamp)
 	}
 }
 

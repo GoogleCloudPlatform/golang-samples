@@ -74,10 +74,10 @@ func pgInformationSchema(w io.Writer, db string) error {
 
 	// The `user_defined_...` columns are only available for PostgreSQL databases.
 	type InformationSchema struct {
-		TableCatalog, TableSchema, TableName string
-		TypeCatalog, TypeSchema, TypeName    spanner.NullString
+		TableSchema, TableName            string
+		TypeCatalog, TypeSchema, TypeName spanner.NullString
 	}
-	query := `SELECT table_catalog, table_schema, table_name, 
+	query := `SELECT table_schema, table_name, 
 				user_defined_type_catalog, 
 				user_defined_type_schema, 
 				user_defined_type_name 
@@ -95,14 +95,14 @@ func pgInformationSchema(w io.Writer, db string) error {
 			return err
 		}
 		var val InformationSchema
-		if err := row.Columns(&val.TableCatalog, &val.TableSchema, &val.TableName, &val.TypeCatalog, &val.TypeSchema, &val.TypeName); err != nil {
+		if err := row.Columns(&val.TableSchema, &val.TableName, &val.TypeCatalog, &val.TypeSchema, &val.TypeName); err != nil {
 			return err
 		}
 		userDefinedType := "null"
 		if val.TypeCatalog.Valid {
 			userDefinedType = fmt.Sprintf("%s.%s.%s", val.TypeCatalog, val.TypeSchema, val.TypeName)
 		}
-		fmt.Fprintf(w, "Table: %s.%s.%s (User defined type: %s)\n", val.TableCatalog, val.TableSchema, val.TableName, userDefinedType)
+		fmt.Fprintf(w, "Table: %s.%s (User defined type: %s)\n", val.TableSchema, val.TableName, userDefinedType)
 	}
 
 	return nil

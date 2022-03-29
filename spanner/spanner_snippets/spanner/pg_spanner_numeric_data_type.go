@@ -15,8 +15,6 @@
 package spanner
 
 // [START spanner_postgresql_numeric_data_type]
-// [START spanner_postgresql_numeric_data_type_insert_null]
-// [START spanner_postgresql_numeric_data_type_insert_nan]
 
 import (
 	"context"
@@ -69,8 +67,6 @@ func pgNumericDataType(w io.Writer, db string) error {
 
 	var updateCount int64
 	insertSQL := `INSERT INTO Venues (VenueId, Name, Revenues) VALUES ($1, $2, $3)`
-	// [END spanner_postgresql_numeric_data_type_insert_nan]
-	// [END spanner_postgresql_numeric_data_type_insert_null]
 
 	// Insert a Venue using DML.
 	insertStmt := spanner.Statement{
@@ -89,7 +85,6 @@ func pgNumericDataType(w io.Writer, db string) error {
 		return err
 	}
 	fmt.Fprintf(w, "Inserted %d venue(s)\n", updateCount)
-	// [START spanner_postgresql_numeric_data_type_insert_null]
 
 	// Insert a Venue with a NULL value for the Revenues column.
 	nullRevenueStmt := spanner.Statement{
@@ -108,8 +103,6 @@ func pgNumericDataType(w io.Writer, db string) error {
 		return err
 	}
 	fmt.Fprintf(w, "Inserted %d venue(s) with NULL revenues\n", updateCount)
-	// [END spanner_postgresql_numeric_data_type_insert_null]
-	// [START spanner_postgresql_numeric_data_type_insert_nan]
 
 	// Insert a Venue with a NaN (Not a Number) value for the Revenues column.
 	nanRevenueStmt := spanner.Statement{
@@ -128,7 +121,6 @@ func pgNumericDataType(w io.Writer, db string) error {
 		return err
 	}
 	fmt.Fprintf(w, "Inserted %d venue(s) with NaN revenues\n", updateCount)
-	// [END spanner_postgresql_numeric_data_type_insert_nan]
 
 	// Get all Venues and inspect the Revenues values.
 	iter := client.Single().Query(ctx, spanner.Statement{
@@ -168,12 +160,8 @@ func pgNumericDataType(w io.Writer, db string) error {
 		return err
 	}
 	fmt.Fprintf(w, "Inserted 2 Venues using mutations at %s\n", ts)
-	// [START spanner_postgresql_numeric_data_type_insert_null]
-	// [START spanner_postgresql_numeric_data_type_insert_nan]
 
 	return nil
 }
 
-// [END spanner_postgresql_numeric_data_type_insert_nan]
-// [END spanner_postgresql_numeric_data_type_insert_null]
 // [END spanner_postgresql_numeric_data_type]
