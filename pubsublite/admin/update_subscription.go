@@ -23,12 +23,10 @@ import (
 	"cloud.google.com/go/pubsublite"
 )
 
-func updateSubscription(w io.Writer, projectID, region, location, subID string) error {
+func updateSubscription(w io.Writer, projectID, region, zone, subID string) error {
 	// projectID := "my-project-id"
 	// region := "us-central1"
-	// NOTE: location can be either a region ("us-central1") or a zone ("us-central1-a")
-	// For a list of valid locations, see https://cloud.google.com/pubsub/lite/docs/locations.
-	// location := "us-central1"
+	// zone := "us-central1-a"
 	// subID := "my-subscription"
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
@@ -37,7 +35,7 @@ func updateSubscription(w io.Writer, projectID, region, location, subID string) 
 	}
 	defer client.Close()
 
-	subPath := fmt.Sprintf("projects/%s/locations/%s/subscriptions/%s", projectID, location, subID)
+	subPath := fmt.Sprintf("projects/%s/locations/%s/subscriptions/%s", projectID, zone, subID)
 	config := pubsublite.SubscriptionConfigToUpdate{
 		Name:                subPath,
 		DeliveryRequirement: pubsublite.DeliverAfterStored,

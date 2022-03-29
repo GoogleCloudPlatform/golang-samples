@@ -23,12 +23,10 @@ import (
 	"cloud.google.com/go/pubsublite"
 )
 
-func getTopic(w io.Writer, projectID, region, location, topicID string) error {
+func getTopic(w io.Writer, projectID, region, zone, topicID string, regional bool) error {
 	// projectID := "my-project-id"
 	// region := "us-central1"
-	// NOTE: location can be either a region ("us-central1") or a zone ("us-central1-a")
-	// For a list of valid locations, see https://cloud.google.com/pubsub/lite/docs/locations.
-	// location := "us-central1"
+	// zone := "us-central1-a"
 	// topicID := "my-topic"
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
@@ -37,7 +35,12 @@ func getTopic(w io.Writer, projectID, region, location, topicID string) error {
 	}
 	defer client.Close()
 
-	topicPath := fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, location, topicID)
+	var topicPath string
+	if regional {
+		topicPath = fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, region, topicID)
+	} else {
+		topicPath = fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, zone, topicID)
+	}
 	topic, err := client.Topic(ctx, topicPath)
 	if err != nil {
 		return fmt.Errorf("client.Topic got err: %v", err)

@@ -86,22 +86,15 @@ func TestTopicAdmin(t *testing.T) {
 	testZone := randomZone()
 
 	topicID := resourcePrefix + uuid.NewString()
+	topicPath := fmt.Sprintf("projects/%s/locations/%s/topics/%s", projNumber, testZone, topicID)
 	t.Run("CreateTopic", func(t *testing.T) {
-		ctx := context.Background()
-		reservationID = resourcePrefix + uuid.NewString()
-		reservationPath = fmt.Sprintf("projects/%s/locations/%s/reservations/%s", projNumber, testRegion, reservationID)
-		client.CreateReservation(ctx, pubsublite.ReservationConfig{
-			Name:               reservationPath,
-			ThroughputCapacity: 4,
-		})
-
 		buf := new(bytes.Buffer)
-		err := createTopic(buf, tc.ProjectID, testRegion, testZone, topicID, reservationPath)
+		err := createTopic(buf, tc.ProjectID, testRegion, testZone, topicID, "", false)
 		if err != nil {
 			t.Fatalf("createTopic: %v", err)
 		}
 		got := buf.String()
-		want := "Created topic"
+		want := "Created zonal topic"
 		if !strings.Contains(got, want) {
 			t.Fatalf("createTopic() mismatch: got: %s\nwant: %s", got, want)
 		}
@@ -110,27 +103,27 @@ func TestTopicAdmin(t *testing.T) {
 	t.Run("GetTopic", func(t *testing.T) {
 		testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
 			buf := new(bytes.Buffer)
-			err := getTopic(buf, tc.ProjectID, testRegion, testZone, topicID)
+			err := getTopic(buf, tc.ProjectID, testRegion, testZone, topicID, false)
 			if err != nil {
 				r.Errorf("getTopic: %v", err)
 			}
 			got := buf.String()
-			want := "Got topic"
-			if !strings.Contains(got, want) {
-				r.Errorf("getTopic() mismatch: got: %s\nwant: %s", got, want)
+			want := fmt.Sprintf("Got topic: %#v\n", *psltest.DefaultTopicConfig(topicPath))
+			if diff := cmp.Diff(want, got); diff != "" {
+				r.Errorf("getTopic() mismatch: -want, +got:\n%s", diff)
 			}
 		})
 	})
 
 	t.Run("UpdateTopic", func(t *testing.T) {
 		buf := new(bytes.Buffer)
-		err := updateTopic(buf, projNumber, testRegion, testZone, topicID, reservationPath)
+		err := updateTopic(buf, projNumber, testRegion, testZone, topicID, "", false)
 		if err != nil {
 			t.Fatalf("updateTopic: %v", err)
 		}
 
 		got := buf.String()
-		want := "Updated topic"
+		want := "Updated zonal topic"
 		if !strings.Contains(got, want) {
 			t.Fatalf("updateTopic() mismatch: got: %s\nwant: %s", got, want)
 		}
@@ -138,13 +131,65 @@ func TestTopicAdmin(t *testing.T) {
 
 	t.Run("DeleteTopic", func(t *testing.T) {
 		buf := new(bytes.Buffer)
-		err := deleteTopic(buf, tc.ProjectID, testRegion, testZone, topicID)
+		err := deleteTopic(buf, tc.ProjectID, testRegion, testZone, topicID, false)
 		if err != nil {
 			t.Fatalf("deleteTopic: %v", err)
 		}
 
 		got := buf.String()
-		want := "Deleted topic\n"
+		want := "Deleted zonal topic\n"
+		if got != want {
+			t.Fatalf("got: %v, want %v", got, want)
+		}
+	})
+
+	t.Run("CreateRegionalTopic", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+
+		ctx := context.Background()
+		reservationID = resourcePrefix + uuid.NewString()
+		reservationPath = fmt.Sprintf("projects/%s/locations/%s/reservations/%s", projNumber, testRegion, reservationID)
+		client.CreateReservation(ctx, pubsublite.ReservationConfig{
+			Name:               reservationPath,
+			ThroughputCapacity: 4,
+		})
+
+		// Create a regional topic.
+		err := createTopic(buf, tc.ProjectID, testRegion, testZone, topicID, reservationPath, true)
+		if err != nil {
+			t.Fatalf("createTopic: %v", err)
+		}
+		got := buf.String()
+		want := "Created regional topic"
+		if !strings.Contains(got, want) {
+			t.Fatalf("createTopic() mismatch: got: %s\nwant: %s", got, want)
+		}
+	})
+
+	t.Run("UpdateRegionalTopic", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+		err := updateTopic(buf, projNumber, testRegion, testZone, topicID, reservationPath, true)
+		if err != nil {
+			t.Fatalf("updateTopic: %v", err)
+		}
+
+		got := buf.String()
+		want := "Updated regional topic"
+		if !strings.Contains(got, want) {
+			t.Fatalf("updateTopic() mismatch: got: %s\nwant: %s", got, want)
+		}
+	})
+
+	t.Run("DeleteRegionalTopic", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+		// Delete the regional topic.
+		err := deleteTopic(buf, tc.ProjectID, testRegion, testZone, topicID, true)
+		if err != nil {
+			t.Fatalf("deleteTopic: %v", err)
+		}
+
+		got := buf.String()
+		want := "Deleted regional topic\n"
 		if got != want {
 			t.Fatalf("got: %v, want %v", got, want)
 		}
