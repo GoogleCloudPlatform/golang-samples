@@ -506,7 +506,7 @@ func TestLifecycleManagement(t *testing.T) {
 	}
 
 	want := storage.LifecycleRule{
-		Action:    storage.LifecycleAction{Type: "Delete"},
+		Action:    storage.LifecycleAction{Type: storage.DeleteAction},
 		Condition: storage.LifecycleCondition{AgeInDays: 100},
 	}
 
@@ -516,6 +516,30 @@ func TestLifecycleManagement(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(r[0], want) {
+		t.Fatalf("Unexpected lifecycle rule: got: %v, want: %v", r, want)
+	}
+
+	if err := setLifecycleToAbortMultipartUploads(ioutil.Discard, bucketName); err != nil {
+		t.Fatalf("setLifecycleToAbortMultipartUploads: %v", err)
+	}
+
+	// Verify lifecycle is set
+	attrs, err = client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+
+	want = storage.LifecycleRule{
+		Action:    storage.LifecycleAction{Type: storage.AbortIncompleteMPUAction},
+		Condition: storage.LifecycleCondition{AgeInDays: 7},
+	}
+
+	r = attrs.Lifecycle.Rules
+	if len(r) != 2 {
+		t.Fatalf("Length of lifecycle rules should be 2, got %d", len(r))
+	}
+
+	if !reflect.DeepEqual(r[1], want) {
 		t.Fatalf("Unexpected lifecycle rule: got: %v, want: %v", r, want)
 	}
 
@@ -530,6 +554,30 @@ func TestLifecycleManagement(t *testing.T) {
 
 	if n := len(attrs.Lifecycle.Rules); n != 0 {
 		t.Fatalf("Length of lifecycle rules should be 0, got %d", n)
+	}
+
+	if err := setLifecycleToAbortMultipartUploads(ioutil.Discard, bucketName); err != nil {
+		t.Fatalf("setLifecycleToAbortMultipartUploads: %v", err)
+	}
+
+	// Verify lifecycle is set
+	attrs, err = client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+
+	want = storage.LifecycleRule{
+		Action:    storage.LifecycleAction{Type: storage.AbortIncompleteMPUAction},
+		Condition: storage.LifecycleCondition{AgeInDays: 7},
+	}
+
+	r = attrs.Lifecycle.Rules
+	if len(r) != 1 {
+		t.Fatalf("Length of lifecycle rules should be 1, got %d", len(r))
+	}
+
+	if !reflect.DeepEqual(r[0], want) {
+		t.Fatalf("Unexpected lifecycle rule: got: %v, want: %v", r, want)
 	}
 }
 
