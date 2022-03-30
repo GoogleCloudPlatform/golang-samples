@@ -52,9 +52,10 @@ var (
 	}
 
 	adminCommands = map[string]adminCommand{
-		"createdatabase":  createDatabase,
-		"addnewcolumn":    addNewColumn,
-		"addstoringindex": addStoringIndex,
+		"createdatabase":   createDatabase,
+		"addnewcolumn":     addNewColumn,
+		"addstoringindex":  addStoringIndex,
+		"pgcreatedatabase": pgCreateDatabase,
 	}
 )
 
@@ -477,6 +478,57 @@ func writeWithTransactionUsingDML(ctx context.Context, w io.Writer, client *span
 
 // [END spanner_dml_getting_started_update]
 
+// [START spanner_postgresql_create_database]
+
+func pgCreateDatabase(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, db string) error {
+	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(db)
+	if matches == nil || len(matches) != 3 {
+		return fmt.Errorf("invalid database id %s", db)
+	}
+	op, err := adminClient.CreateDatabase(ctx, &adminpb.CreateDatabaseRequest{
+		Parent:          matches[1],
+		DatabaseDialect: adminpb.DatabaseDialect_POSTGRESQL,
+		// Note that PostgreSQL uses double quotes for quoting identifiers. This also
+		// includes database names in the CREATE DATABASE statement.
+		CreateStatement: `CREATE DATABASE "` + matches[2] + `"`,
+	})
+	if err != nil {
+		return err
+	}
+	if _, err := op.Wait(ctx); err != nil {
+		return err
+	}
+	// Databases that are created with PostgreSQL dialect do not support extra DDL statements in the `CreateDatabase` call.
+	// We must therefore execute these in a separate UpdateDatabaseDdl call after the database has been created.
+	updateReq := &adminpb.UpdateDatabaseDdlRequest{
+		Database: db,
+		Statements: []string{
+			`CREATE TABLE Singers (
+				SingerId   bigint NOT NULL PRIMARY KEY,
+				FirstName  varchar(1024),
+				LastName   varchar(1024),
+				SingerInfo bytea
+			)`,
+			`CREATE TABLE Albums (
+				AlbumId      bigint NOT NULL PRIMARY KEY,
+				SingerId     bigint NOT NULL REFERENCES Singers (SingerId),
+				AlbumTitle   text
+			)`,
+		},
+	}
+	opUpdate, err := adminClient.UpdateDatabaseDdl(ctx, updateReq)
+	if err != nil {
+		return err
+	}
+	if err := opUpdate.Wait(ctx); err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "Created database [%s]\n", db)
+	return nil
+}
+
+// [END spanner_postgresql_create_database]
+
 func createClients(ctx context.Context, db string) (*database.DatabaseAdminClient, *spanner.Client) {
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
@@ -519,7 +571,8 @@ func main() {
 
 	Command can be one of: write, read, query, update, querynewcolumn,
 		querywithparameter, dmlwrite, dmlwritetxn, readindex, readstoringindex,
-		readonlytransaction, createdatabase, addnewcolumn, addstoringindex
+		readonlytransaction, createdatabase, addnewcolumn, addstoringindex,
+		pgcreatedatabase
 
 Examples:
 	spanner_snippets createdatabase projects/my-project/instances/my-instance/databases/example-db
