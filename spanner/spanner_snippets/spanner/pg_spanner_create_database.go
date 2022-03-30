@@ -66,9 +66,10 @@ func pgCreateDatabase(ctx context.Context, w io.Writer, db string) error {
 				SingerInfo bytea
 			)`,
 			`CREATE TABLE Albums (
-				AlbumId      bigint NOT NULL PRIMARY KEY,
+				AlbumId      bigint NOT NULL,
 				SingerId     bigint NOT NULL REFERENCES Singers (SingerId),
-				AlbumTitle   text
+				AlbumTitle   text,
+                PRIMARY KEY(SingerId, AlbumId)
 			)`,
 		},
 	}

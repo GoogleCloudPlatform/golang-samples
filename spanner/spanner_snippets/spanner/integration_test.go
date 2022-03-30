@@ -609,13 +609,18 @@ func TestPgQueryParameter(t *testing.T) {
 			"FirstName": "Alice",
 			"LastName":  "Bruxelles",
 		}),
+		spanner.InsertOrUpdateMap("Singers", map[string]interface{}{
+			"SingerId":  12,
+			"FirstName": "Melissa",
+			"LastName":  "Garcia",
+		}),
 	})
 	if err != nil {
 		t.Fatalf("failed to insert test records: %v", err)
 	}
 
 	out := runSample(t, pgQueryParameter, dbName, "failed to execute PG query with parameter")
-	assertContains(t, out, "1 Bruce Allison")
+	assertContains(t, out, "12 Melissa Garcia")
 	assertNotContains(t, out, "2 Alice Bruxelles")
 }
 

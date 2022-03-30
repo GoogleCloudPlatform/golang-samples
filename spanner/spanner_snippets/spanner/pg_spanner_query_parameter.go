@@ -38,11 +38,12 @@ func pgQueryParameter(w io.Writer, db string) error {
 	defer client.Close()
 
 	stmt := spanner.Statement{
-		SQL: `SELECT SingerId, FirstName, LastName FROM Singers WHERE LastName LIKE $1`,
-		// Use 'p1' to bind to the parameter with index 1.
-		Params: map[string]interface{}{"p1": "A%"},
+		SQL: `SELECT SingerId, FirstName, LastName FROM Singers
+			WHERE LastName = $1`,
+		Params: map[string]interface{}{
+			"p1": "Garcia",
+		},
 	}
-	fmt.Fprint(w, "Listing all singers with a last name that starts with 'A'\n")
 	type Singers struct {
 		SingerID            int64
 		FirstName, LastName string
@@ -58,7 +59,7 @@ func pgQueryParameter(w io.Writer, db string) error {
 			return err
 		}
 		var val Singers
-		if err := row.Columns(&val.SingerID, &val.FirstName, &val.LastName); err != nil {
+		if err := row.ToStruct(&val); err != nil {
 			return err
 		}
 		fmt.Fprintf(w, "%d %s %s\n", val.SingerID, val.FirstName, val.LastName)
