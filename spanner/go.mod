@@ -20,6 +20,7 @@ require (
 
 require (
 	cloud.google.com/go/compute v1.5.0 // indirect
+  cloud.google.com/go/container v1.0.0 // indirect
 	cloud.google.com/go/iam v0.3.0 // indirect
 	cloud.google.com/go/monitoring v1.4.0 // indirect
 	cloud.google.com/go/storage v1.21.0 // indirect
@@ -29,6 +30,16 @@ require (
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/cncf/udpa/go v0.0.0-20220112060539-c52dc94e7fbe // indirect
 	github.com/cncf/xds/go v0.0.0-20220314180256-7f1daf1720fc // indirect
+	cloud.google.com/go/container v1.0.0 // indirect
+	cloud.google.com/go/iam v0.1.1 // indirect
+	cloud.google.com/go/monitoring v1.0.0 // indirect
+	cloud.google.com/go/storage v1.19.0 // indirect
+	cloud.google.com/go/trace v1.0.0 // indirect
+	github.com/aws/aws-sdk-go v1.40.59 // indirect
+	github.com/census-instrumentation/opencensus-proto v0.3.0 // indirect
+	github.com/cespare/xxhash/v2 v2.1.2 // indirect
+	github.com/cncf/udpa/go v0.0.0-20220112060539-c52dc94e7fbe // indirect
+	github.com/cncf/xds/go v0.0.0-20220121163655-4a2b9fdd466b // indirect
 	github.com/envoyproxy/go-control-plane v0.10.1 // indirect
 	github.com/envoyproxy/protoc-gen-validate v0.6.7 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
