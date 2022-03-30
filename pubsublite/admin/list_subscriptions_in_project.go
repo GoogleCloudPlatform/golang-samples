@@ -24,10 +24,12 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-func listSubscriptionsInProject(w io.Writer, projectID, region, zone string) error {
+func listSubscriptionsInProject(w io.Writer, projectID, region, location string) error {
 	// projectID := "my-project-id"
 	// region := "us-central1"
-	// zone := "us-central1-a"
+	// NOTE: location can be either a region ("us-central1") or a zone ("us-central1-a")
+	// For a list of valid locations, see https://cloud.google.com/pubsub/lite/docs/locations.
+	// location := "us-central1"
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
 	if err != nil {
@@ -36,7 +38,7 @@ func listSubscriptionsInProject(w io.Writer, projectID, region, zone string) err
 	defer client.Close()
 
 	// To list topics in a region, set location to a cloud region instead.
-	parent := fmt.Sprintf("projects/%s/locations/%s", projectID, zone)
+	parent := fmt.Sprintf("projects/%s/locations/%s", projectID, location)
 	subIter := client.Subscriptions(ctx, parent)
 	for {
 		sub, err := subIter.Next()
