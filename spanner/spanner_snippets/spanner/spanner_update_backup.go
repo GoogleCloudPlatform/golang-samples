@@ -30,9 +30,14 @@ import (
 )
 
 // updateBackup updates the expiration time of a pending or completed backup.
-func updateBackup(ctx context.Context, w io.Writer, db, backupID string) error {
+func updateBackup(w io.Writer, db string, backupID string) error {
 	// db := "projects/my-project/instances/my-instance/databases/my-database"
 	// backupID := "my-backup"
+
+	// Add timeout to context.
+	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
+	defer cancel()
+
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		return err

@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"io"
 	"regexp"
+	"time"
 
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
 	"github.com/golang/protobuf/ptypes"
@@ -28,9 +29,15 @@ import (
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
-func listBackupOperations(ctx context.Context, w io.Writer, db string, backupId string) error {
+// listBackupOperations lists the backup operations that are pending or have completed/failed/cancelled within the last 7 days.
+func listBackupOperations(w io.Writer, db string, backupId string) error {
 	// db := "projects/my-project/instances/my-instance/databases/my-database"
 	// backupID := "my-backup"
+
+	// Add timeout to context.
+	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
+	defer cancel()
+
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		return err
