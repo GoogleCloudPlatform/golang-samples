@@ -754,8 +754,8 @@ func main() {
 	Command can be one of: write, read, query, update, querynewcolumn,
 		querywithparameter, dmlwrite, dmlwritetxn, readindex, readstoringindex,
 		readonlytransaction, createdatabase, addnewcolumn, addstoringindex,
-		pgcreatedatabase, pgqueryparameter, pgdmlwrite, pgaddnewcolumn, pgquerynewcolumn
-        pgdmlwritetxn
+		pgcreatedatabase, pgqueryparameter, pgdmlwrite, pgaddnewcolumn, pgquerynewcolumn,
+		pgdmlwritetxn
 
 Examples:
 	spanner_snippets createdatabase projects/my-project/instances/my-instance/databases/example-db
