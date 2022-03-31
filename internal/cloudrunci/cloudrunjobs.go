@@ -255,7 +255,7 @@ func (j *Job) runCmd() *exec.Cmd {
 		"alpha",
 		"run",
 		"jobs",
-		"run",
+		"execute",
 		j.version(),
 		"--wait", // Waits for job to complete before returning.
 	}, j.CommonGCloudFlags()...)
