@@ -23,12 +23,13 @@ import (
 	"cloud.google.com/go/pubsublite"
 )
 
-func deleteTopic(w io.Writer, projectID, region, zone, topicID string, regional bool) error {
+func deleteTopic(w io.Writer, projectID, region, location, topicID string) error {
 	// projectID := "my-project-id"
 	// region := "us-central1"
-	// zone := "us-central1-a"
+	// NOTE: location can be either a region ("us-central1") or a zone ("us-central1-a")
+	// For a list of valid locations, see https://cloud.google.com/pubsub/lite/docs/locations.
+	// location := "us-central1"
 	// topicID := "my-topic"
-	// regional = "false"
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
 	if err != nil {
@@ -36,21 +37,12 @@ func deleteTopic(w io.Writer, projectID, region, zone, topicID string, regional 
 	}
 	defer client.Close()
 
-	var topicPath string
-	if regional {
-		topicPath = fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, region, topicID)
-	} else {
-		topicPath = fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, zone, topicID)
-	}
+	topicPath := fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, location, topicID)
 	err = client.DeleteTopic(ctx, topicPath)
 	if err != nil {
 		return fmt.Errorf("client.DeleteTopic got err: %v", err)
 	}
-	if regional {
-		fmt.Fprint(w, "Deleted regional topic\n")
-	} else {
-		fmt.Fprint(w, "Deleted zonal topic\n")
-	}
+	fmt.Fprint(w, "Deleted topic\n")
 	return nil
 }
 

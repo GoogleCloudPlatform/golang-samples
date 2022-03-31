@@ -23,10 +23,12 @@ import (
 	"cloud.google.com/go/pubsublite"
 )
 
-func deleteSubscription(w io.Writer, projectID, region, zone, subID string) error {
+func deleteSubscription(w io.Writer, projectID, region, location, subID string) error {
 	// projectID := "my-project-id"
 	// region := "us-central1"
-	// zone := "us-central1-a"
+	// NOTE: location can be either a region ("us-central1") or a zone ("us-central1-a")
+	// For a list of valid locations, see https://cloud.google.com/pubsub/lite/docs/locations.
+	// location := "us-central1"
 	// subID := "my-subscription"
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
@@ -35,7 +37,7 @@ func deleteSubscription(w io.Writer, projectID, region, zone, subID string) erro
 	}
 	defer client.Close()
 
-	err = client.DeleteSubscription(ctx, fmt.Sprintf("projects/%s/locations/%s/subscriptions/%s", projectID, zone, subID))
+	err = client.DeleteSubscription(ctx, fmt.Sprintf("projects/%s/locations/%s/subscriptions/%s", projectID, location, subID))
 	if err != nil {
 		return fmt.Errorf("client.DeleteSubscription got err: %v", err)
 	}

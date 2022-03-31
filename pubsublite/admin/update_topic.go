@@ -24,13 +24,14 @@ import (
 	"cloud.google.com/go/pubsublite"
 )
 
-func updateTopic(w io.Writer, projectID, region, zone, topicID, reservation string, regional bool) error {
+func updateTopic(w io.Writer, projectID, region, location, topicID, reservation string) error {
 	// projectID := "my-project-id"
 	// region := "us-central1"
-	// zone := "us-central1-a"
+	// NOTE: location can be either a region ("us-central1") or a zone ("us-central1-a")
+	// For a list of valid locations, see https://cloud.google.com/pubsub/lite/docs/locations.
+	// location := "us-central1"
 	// topicID := "my-topic"
 	// reservation := "projects/my-project-id/reservations/my-reservation"
-	// regional := "true"
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
 	if err != nil {
@@ -38,12 +39,7 @@ func updateTopic(w io.Writer, projectID, region, zone, topicID, reservation stri
 	}
 	defer client.Close()
 
-	var topicPath string
-	if regional {
-		topicPath = fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, region, topicID)
-	} else {
-		topicPath = fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, zone, topicID)
-	}
+	topicPath := fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, location, topicID)
 	// For ranges of fields in TopicConfigToUpdate, see https://pkg.go.dev/cloud.google.com/go/pubsublite/#TopicConfigToUpdate
 	config := pubsublite.TopicConfigToUpdate{
 		Name:                       topicPath,
@@ -58,11 +54,7 @@ func updateTopic(w io.Writer, projectID, region, zone, topicID, reservation stri
 	if err != nil {
 		return fmt.Errorf("client.UpdateTopic got err: %v", err)
 	}
-	if regional {
-		fmt.Fprintf(w, "Updated regional topic: %v\n", updatedCfg)
-	} else {
-		fmt.Fprintf(w, "Updated zonal topic: %v\n", updatedCfg)
-	}
+	fmt.Fprintf(w, "Updated topic: %v\n", updatedCfg)
 	return nil
 }
 

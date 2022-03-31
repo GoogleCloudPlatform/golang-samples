@@ -188,6 +188,14 @@ func configureConnectionPool(db *sql.DB) {
 	// Set Maximum time (in seconds) that a connection can remain open.
 	db.SetConnMaxLifetime(1800 * time.Second)
 	// [END cloud_sql_postgres_databasesql_lifetime]
+
+	// [START cloud_sql_postgres_databasesql_backoff]
+	// database/sql does not support specifying backoff
+	// [END cloud_sql_postgres_databasesql_backoff]
+	// [START cloud_sql_postgres_databasesql_timeout]
+	// The database/sql package currently doesn't offer any functionality to
+	// configure connection timeout.
+	// [END cloud_sql_postgres_databasesql_timeout]
 }
 
 // Votes handles HTTP requests to alternatively show the voting app or to save a
