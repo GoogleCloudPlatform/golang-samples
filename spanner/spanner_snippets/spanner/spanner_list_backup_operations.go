@@ -34,7 +34,6 @@ func listBackupOperations(w io.Writer, db string, backupId string) error {
 	// backupID := "my-backup"
 
 	ctx := context.Background()
-	defer cancel()
 
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
