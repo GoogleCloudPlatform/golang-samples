@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"io"
 	"regexp"
-	"time"
 
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
 	"github.com/golang/protobuf/ptypes"
@@ -35,7 +34,7 @@ func listBackupOperations(w io.Writer, db string, backupId string) error {
 	// backupID := "my-backup"
 
 	// Add timeout to context.
-	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
+	ctx, cancel := context.Background()
 	defer cancel()
 
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
