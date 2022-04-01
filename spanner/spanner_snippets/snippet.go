@@ -488,8 +488,9 @@ func writeWithTransactionUsingDML(ctx context.Context, w io.Writer, client *span
 func pgCreateDatabase(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, db string) error {
 	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(db)
 	if matches == nil || len(matches) != 3 {
-		return fmt.Errorf("invalid database id %s", db)
+		return fmt.Errorf("invalid database id %v", db)
 	}
+	// Databases with PostgreSQL dialect do not support extra DDL statements in the `CreateDatabase` call.
 	op, err := adminClient.CreateDatabase(ctx, &adminpb.CreateDatabaseRequest{
 		Parent:          matches[1],
 		DatabaseDialect: adminpb.DatabaseDialect_POSTGRESQL,
@@ -503,8 +504,6 @@ func pgCreateDatabase(ctx context.Context, w io.Writer, adminClient *database.Da
 	if _, err := op.Wait(ctx); err != nil {
 		return err
 	}
-	// Databases that are created with PostgreSQL dialect do not support extra DDL statements in the `CreateDatabase` call.
-	// We must therefore execute these in a separate UpdateDatabaseDdl call after the database has been created.
 	updateReq := &adminpb.UpdateDatabaseDdlRequest{
 		Database: db,
 		Statements: []string{
@@ -529,7 +528,7 @@ func pgCreateDatabase(ctx context.Context, w io.Writer, adminClient *database.Da
 	if err := opUpdate.Wait(ctx); err != nil {
 		return err
 	}
-	fmt.Fprintf(w, "Created database [%s]\n", db)
+	fmt.Fprintf(w, "Created database [%v]\n", db)
 	return nil
 }
 
