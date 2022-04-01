@@ -33,7 +33,6 @@ func listBackupOperations(w io.Writer, db string, backupId string) error {
 	// db := "projects/my-project/instances/my-instance/databases/my-database"
 	// backupID := "my-backup"
 
-	// Add timeout to context.
 	ctx, cancel := context.Background()
 	defer cancel()
 
