@@ -45,6 +45,7 @@ type sampleFunc func(w io.Writer, dbName string) error
 type sampleFuncWithContext func(ctx context.Context, w io.Writer, dbName string) error
 type instanceSampleFunc func(w io.Writer, projectID, instanceID string) error
 type backupSampleFunc func(ctx context.Context, w io.Writer, dbName, backupID string) error
+type backupSampleFuncWithoutContext func(w io.Writer, dbName, backupID string) error
 type createBackupSampleFunc func(ctx context.Context, w io.Writer, dbName, backupID string, versionTime time.Time) error
 
 var (
@@ -401,10 +402,11 @@ func TestBackupSample(t *testing.T) {
 	assertContains(t, out, fmt.Sprintf("/backups/%s", backupID))
 	assertContains(t, out, "Backups listed.")
 
-	out = runSampleWithContext(ctx, t, listBackupOperations, dbName, "failed to list backup operations")
+	out = runBackupSampleWithoutContext(t, listBackupOperations, dbName, backupID, "failed to list backup operations")
 	assertContains(t, out, fmt.Sprintf("on database %s", dbName))
+	assertContains(t, out, fmt.Sprintf("copied from %s", backupID))
 
-	out = runBackupSample(ctx, t, updateBackup, dbName, backupID, "failed to update a backup")
+	out = runBackupSampleWithoutContext(t, updateBackup, dbName, backupID, "failed to update a backup")
 	assertContains(t, out, fmt.Sprintf("Updated backup %s", backupID))
 
 	out = runBackupSampleWithRetry(ctx, t, restoreBackup, restoreDBName, backupID, "failed to restore a backup", 10)
@@ -900,6 +902,14 @@ func runCreateBackupSample(ctx context.Context, t *testing.T, f createBackupSamp
 func runBackupSample(ctx context.Context, t *testing.T, f backupSampleFunc, dbName, backupID, errMsg string) string {
 	var b bytes.Buffer
 	if err := f(ctx, &b, dbName, backupID); err != nil {
+		t.Errorf("%s: %v", errMsg, err)
+	}
+	return b.String()
+}
+
+func runBackupSampleWithoutContext(t *testing.T, f backupSampleFuncWithoutContext, dbName, backupID, errMsg string) string {
+	var b bytes.Buffer
+	if err := f(&b, dbName, backupID); err != nil {
 		t.Errorf("%s: %v", errMsg, err)
 	}
 	return b.String()
