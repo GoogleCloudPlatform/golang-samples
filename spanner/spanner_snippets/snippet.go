@@ -483,8 +483,6 @@ func writeWithTransactionUsingDML(ctx context.Context, w io.Writer, client *span
 
 // [END spanner_dml_getting_started_update]
 
-// [START spanner_postgresql_create_database]
-
 func pgCreateDatabase(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, db string) error {
 	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(db)
 	if matches == nil || len(matches) != 3 {
@@ -532,10 +530,6 @@ func pgCreateDatabase(ctx context.Context, w io.Writer, adminClient *database.Da
 	return nil
 }
 
-// [END spanner_postgresql_create_database]
-
-// [START spanner_postgresql_dml_getting_started_insert]
-
 func pgWriteUsingDML(ctx context.Context, w io.Writer, client *spanner.Client) error {
 	_, err := client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
 		stmt := spanner.Statement{
@@ -554,10 +548,6 @@ func pgWriteUsingDML(ctx context.Context, w io.Writer, client *spanner.Client) e
 	})
 	return err
 }
-
-// [END spanner_postgresql_dml_getting_started_insert]
-
-// [START spanner_postgresql_query_parameter]
 
 func pgQueryParameter(ctx context.Context, w io.Writer, client *spanner.Client) error {
 	stmt := spanner.Statement{
@@ -589,10 +579,6 @@ func pgQueryParameter(ctx context.Context, w io.Writer, client *spanner.Client) 
 	}
 }
 
-// [END spanner_postgresql_query_parameter]
-
-// [START spanner_postgresql_add_column]
-
 func pgAddNewColumn(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
 	op, err := adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
 		Database: database,
@@ -609,10 +595,6 @@ func pgAddNewColumn(ctx context.Context, w io.Writer, adminClient *database.Data
 	fmt.Fprintf(w, "Added MarketingBudget column\n")
 	return nil
 }
-
-// [END spanner_postgresql_add_column]
-
-// [START spanner_postgresql_query_data_with_new_column]
 
 func pgQueryNewColumn(ctx context.Context, w io.Writer, client *spanner.Client) error {
 	stmt := spanner.Statement{SQL: `SELECT SingerId, AlbumId, MarketingBudget FROM Albums`}
@@ -645,10 +627,6 @@ func pgQueryNewColumn(ctx context.Context, w io.Writer, client *spanner.Client) 
 	}
 }
 
-// [END spanner_postgresql_query_data_with_new_column]
-
-// [START spanner_postgresql_dml_getting_started_update]
-
 func pgWriteWithTransactionUsingDML(ctx context.Context, w io.Writer, client *spanner.Client) error {
 	_, err := client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
 		// getBudget returns the budget for a record with a given albumId and singerId.
@@ -656,11 +634,13 @@ func pgWriteWithTransactionUsingDML(ctx context.Context, w io.Writer, client *sp
 			key := spanner.Key{albumID, singerID}
 			row, err := txn.ReadRow(ctx, "Albums", key, []string{"MarketingBudget"})
 			if err != nil {
-				return 0, err
+				return 0, fmt.Errorf("error reading marketing budget for album_id=%v,singer_id=%v: %v",
+					albumID, singerID, err)
 			}
 			var budget int64
 			if err := row.Column(0, &budget); err != nil {
-				return 0, err
+				return 0, fmt.Errorf("error decoding marketing budget for album_id=%v,singer_id=%v: %v",
+					albumID, singerID, err)
 			}
 			return budget, nil
 		}
@@ -707,8 +687,6 @@ func pgWriteWithTransactionUsingDML(ctx context.Context, w io.Writer, client *sp
 	})
 	return err
 }
-
-// [END spanner_postgresql_dml_getting_started_update]
 
 func createClients(ctx context.Context, db string) (*database.DatabaseAdminClient, *spanner.Client) {
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
