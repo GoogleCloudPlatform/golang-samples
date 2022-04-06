@@ -34,10 +34,6 @@ func createBucketDualRegion(w io.Writer, projectID, bucketName, region1, region2
 
 	ctx := context.Background()
 
-	// Initialize the Storage client that will be used to send requests. This
-	// client only needs to be created once, and should be reused for multiple
-	// requests. After completing all of your requests, call the Close method on
-	// the client to safely clean up any remaining background resources.
 	client, err := storage.NewClient(ctx)
 	if err != nil {
 		return fmt.Errorf("storage.NewClient: %v", err)
