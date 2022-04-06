@@ -38,7 +38,6 @@ func connectTCPSocket() (*sql.DB, error) {
 		}
 		return v
 	}
-
 	// Note: Saving credentials in environment variables is convenient, but not
 	// secure - consider a more secure solution such as
 	// Cloud Secret Manager (https://cloud.google.com/secret-manager) to help

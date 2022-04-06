@@ -36,7 +36,10 @@ func connectWithConnector() (*sql.DB, error) {
 		}
 		return v
 	}
-
+	// Note: Saving credentials in environment variables is convenient, but not
+	// secure - consider a more secure solution such as
+	// Cloud Secret Manager (https://cloud.google.com/secret-manager) to help
+	// keep secrets safe.
 	var (
 		// Either a DB_USER or a DB_IAM_USER should be defined. If both are
 		// defined, DB_IAM_USER takes precedence.
