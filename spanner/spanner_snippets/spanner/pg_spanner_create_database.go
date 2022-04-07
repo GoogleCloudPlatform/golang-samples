@@ -31,7 +31,7 @@ func pgCreateDatabase(ctx context.Context, w io.Writer, db string) error {
 	// db := "projects/my-project/instances/my-instance/databases/my-database"
 	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(db)
 	if matches == nil || len(matches) != 3 {
-		return fmt.Errorf("invalid database id %s", db)
+		return fmt.Errorf("invalid database id %v", db)
 	}
 
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
@@ -40,6 +40,7 @@ func pgCreateDatabase(ctx context.Context, w io.Writer, db string) error {
 	}
 	defer adminClient.Close()
 
+	// Databases with PostgreSQL dialect do not support extra DDL statements in the `CreateDatabase` call.
 	req := &adminpb.CreateDatabaseRequest{
 		Parent:          matches[1],
 		DatabaseDialect: adminpb.DatabaseDialect_POSTGRESQL,
@@ -54,8 +55,6 @@ func pgCreateDatabase(ctx context.Context, w io.Writer, db string) error {
 	if _, err := opCreate.Wait(ctx); err != nil {
 		return err
 	}
-	// Databases that are created with PostgreSQL dialect do not support extra DDL statements in the `CreateDatabase` call.
-	// We must therefore execute these in a separate UpdateDatabaseDdl call after the database has been created.
 	updateReq := &adminpb.UpdateDatabaseDdlRequest{
 		Database: db,
 		Statements: []string{
@@ -66,9 +65,10 @@ func pgCreateDatabase(ctx context.Context, w io.Writer, db string) error {
 				SingerInfo bytea
 			)`,
 			`CREATE TABLE Albums (
-				AlbumId      bigint NOT NULL PRIMARY KEY,
+				AlbumId      bigint NOT NULL,
 				SingerId     bigint NOT NULL REFERENCES Singers (SingerId),
-				AlbumTitle   text
+				AlbumTitle   text,
+                PRIMARY KEY(SingerId, AlbumId)
 			)`,
 		},
 	}
@@ -79,7 +79,7 @@ func pgCreateDatabase(ctx context.Context, w io.Writer, db string) error {
 	if err := opUpdate.Wait(ctx); err != nil {
 		return err
 	}
-	fmt.Fprintf(w, "Created Spanner PostgreSQL database [%s]\n", db)
+	fmt.Fprintf(w, "Created Spanner PostgreSQL database [%v]\n", db)
 	return nil
 }
 

@@ -14,22 +14,19 @@
 
 package spanner
 
-// [START spanner_postgresql_query_parameter]
+// [START spanner_postgresql_query_data_with_new_column]
 
 import (
 	"context"
 	"fmt"
 	"io"
+	"strconv"
 
 	"cloud.google.com/go/spanner"
 	"google.golang.org/api/iterator"
 )
 
-// pgQueryParameter shows how to execute a query with parameters on a Spanner
-// PostgreSQL database. The PostgreSQL dialect uses positional parameters, as
-// opposed to the named parameters of Cloud Spanner.
-func pgQueryParameter(w io.Writer, db string) error {
-	// db := "projects/my-project/instances/my-instance/databases/my-database"
+func pgQueryNewColumn(w io.Writer, db string) error {
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)
 	if err != nil {
@@ -37,17 +34,7 @@ func pgQueryParameter(w io.Writer, db string) error {
 	}
 	defer client.Close()
 
-	stmt := spanner.Statement{
-		SQL: `SELECT SingerId, FirstName, LastName FROM Singers
-			WHERE LastName = $1`,
-		Params: map[string]interface{}{
-			"p1": "Garcia",
-		},
-	}
-	type Singers struct {
-		SingerID            int64
-		FirstName, LastName string
-	}
+	stmt := spanner.Statement{SQL: `SELECT SingerId, AlbumId, MarketingBudget FROM Albums`}
 	iter := client.Single().Query(ctx, stmt)
 	defer iter.Stop()
 	for {
@@ -58,12 +45,23 @@ func pgQueryParameter(w io.Writer, db string) error {
 		if err != nil {
 			return err
 		}
-		var val Singers
-		if err := row.ToStruct(&val); err != nil {
+		var singerID, albumID int64
+		var marketingBudget spanner.NullInt64
+		if err := row.ColumnByName("singerid", &singerID); err != nil {
 			return err
 		}
-		fmt.Fprintf(w, "%d %s %s\n", val.SingerID, val.FirstName, val.LastName)
+		if err := row.ColumnByName("albumid", &albumID); err != nil {
+			return err
+		}
+		if err := row.ColumnByName("marketingbudget", &marketingBudget); err != nil {
+			return err
+		}
+		budget := "NULL"
+		if marketingBudget.Valid {
+			budget = strconv.FormatInt(marketingBudget.Int64, 10)
+		}
+		fmt.Fprintf(w, "%d %d %s\n", singerID, albumID, budget)
 	}
 }
 
-// [END spanner_postgresql_query_parameter]
+// [END spanner_postgresql_query_data_with_new_column]
