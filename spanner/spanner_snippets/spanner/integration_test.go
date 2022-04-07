@@ -564,7 +564,7 @@ func TestCreateDatabaseWithDefaultLeaderSample(t *testing.T) {
 	assertContains(t, out, "The result of the query to get")
 }
 
-func TestPgCreateDatabase(t *testing.T) {
+func TestPgSample(t *testing.T) {
 	_ = testutil.SystemTest(t)
 	t.Parallel()
 
@@ -575,6 +575,18 @@ func TestPgCreateDatabase(t *testing.T) {
 	defer cancel()
 	out := runSampleWithContext(ctx, t, pgCreateDatabase, dbName, "failed to create a Spanner PG database")
 	assertContains(t, out, fmt.Sprintf("Created Spanner PostgreSQL database [%s]", dbName))
+
+	out = runSampleWithContext(ctx, t, pgAddNewColumn, dbName, "failed to add new column in Spanner PG database")
+	assertContains(t, out, "Added MarketingBudget column")
+
+	runSample(t, write, dbName, "failed to insert data in Spanner PG database")
+	runSample(t, update, dbName, "failed to update data in Spanner PG database")
+	out = runSample(t, pgWriteWithTransactionUsingDML, dbName, "failed to write with transaction using DML in Spanner PG database")
+	assertContains(t, out, "Moved 200000 from Album2's MarketingBudget to Album1")
+	out = runSample(t, pgQueryNewColumn, dbName, "failed to query new column in Spanner PG database")
+	assertContains(t, out, "1 1 300000")
+	assertContains(t, out, "2 2 300000")
+
 }
 
 func TestPgQueryParameter(t *testing.T) {
@@ -611,17 +623,22 @@ func TestPgQueryParameter(t *testing.T) {
 			"FirstName": "Alice",
 			"LastName":  "Bruxelles",
 		}),
+		spanner.InsertOrUpdateMap("Singers", map[string]interface{}{
+			"SingerId":  12,
+			"FirstName": "Melissa",
+			"LastName":  "Garcia",
+		}),
 	})
 	if err != nil {
 		t.Fatalf("failed to insert test records: %v", err)
 	}
 
 	out := runSample(t, pgQueryParameter, dbName, "failed to execute PG query with parameter")
-	assertContains(t, out, "1 Bruce Allison")
+	assertContains(t, out, "12 Melissa Garcia")
 	assertNotContains(t, out, "2 Alice Bruxelles")
 }
 
-func TestPgDmlWithParameters(t *testing.T) {
+func TestPgDmlSample(t *testing.T) {
 	_ = testutil.SystemTest(t)
 	t.Parallel()
 
@@ -639,7 +656,10 @@ func TestPgDmlWithParameters(t *testing.T) {
 	}
 	defer dbCleanup()
 
-	out := runSample(t, pgDmlWithParameters, dbName, "failed to execute PG DML with parameter")
+	out := runSample(t, pgWriteUsingDML, dbName, "failed to execute PG DML")
+	assertContains(t, out, "record(s) inserted")
+
+	out = runSample(t, pgDmlWithParameters, dbName, "failed to execute PG DML with parameter")
 	assertContains(t, out, "Inserted 2 singers")
 }
 
