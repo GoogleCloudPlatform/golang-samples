@@ -28,7 +28,13 @@ import (
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
-func listBackupOperations(ctx context.Context, w io.Writer, db string) error {
+// listBackupOperations lists the backup operations that are pending or have completed/failed/cancelled within the last 7 days.
+func listBackupOperations(w io.Writer, db string, backupId string) error {
+	// db := "projects/my-project/instances/my-instance/databases/my-database"
+	// backupID := "my-backup"
+
+	ctx := context.Background()
+
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		return err
@@ -64,6 +70,32 @@ func listBackupOperations(ctx context.Context, w io.Writer, db string) error {
 			metadata.Progress.ProgressPercent,
 		)
 	}
+
+	// List the CopyBackup operations.
+	filter = fmt.Sprintf("(metadata.@type:type.googleapis.com/google.spanner.admin.database.v1.CopyBackupMetadata) AND (metadata.source_backup:%s)", backupId)
+	iter = adminClient.ListBackupOperations(ctx, &adminpb.ListBackupOperationsRequest{
+		Parent: instanceName,
+		Filter: filter,
+	})
+	for {
+		resp, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		metadata := &adminpb.CopyBackupMetadata{}
+		if err := ptypes.UnmarshalAny(resp.Metadata, metadata); err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "Backup %s copied from %s is %d%% complete.\n",
+			metadata.Name,
+			metadata.SourceBackup,
+			metadata.Progress.ProgressPercent,
+		)
+	}
+
 	return nil
 }
 

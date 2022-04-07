@@ -45,6 +45,7 @@ type sampleFunc func(w io.Writer, dbName string) error
 type sampleFuncWithContext func(ctx context.Context, w io.Writer, dbName string) error
 type instanceSampleFunc func(w io.Writer, projectID, instanceID string) error
 type backupSampleFunc func(ctx context.Context, w io.Writer, dbName, backupID string) error
+type backupSampleFuncWithoutContext func(w io.Writer, dbName, backupID string) error
 type createBackupSampleFunc func(ctx context.Context, w io.Writer, dbName, backupID string, versionTime time.Time) error
 
 var (
@@ -401,10 +402,11 @@ func TestBackupSample(t *testing.T) {
 	assertContains(t, out, fmt.Sprintf("/backups/%s", backupID))
 	assertContains(t, out, "Backups listed.")
 
-	out = runSampleWithContext(ctx, t, listBackupOperations, dbName, "failed to list backup operations")
+	out = runBackupSampleWithoutContext(t, listBackupOperations, dbName, backupID, "failed to list backup operations")
 	assertContains(t, out, fmt.Sprintf("on database %s", dbName))
+	assertContains(t, out, fmt.Sprintf("copied from %s", backupID))
 
-	out = runBackupSample(ctx, t, updateBackup, dbName, backupID, "failed to update a backup")
+	out = runBackupSampleWithoutContext(t, updateBackup, dbName, backupID, "failed to update a backup")
 	assertContains(t, out, fmt.Sprintf("Updated backup %s", backupID))
 
 	out = runBackupSampleWithRetry(ctx, t, restoreBackup, restoreDBName, backupID, "failed to restore a backup", 10)
@@ -562,7 +564,7 @@ func TestCreateDatabaseWithDefaultLeaderSample(t *testing.T) {
 	assertContains(t, out, "The result of the query to get")
 }
 
-func TestPgCreateDatabase(t *testing.T) {
+func TestPgSample(t *testing.T) {
 	_ = testutil.SystemTest(t)
 	t.Parallel()
 
@@ -573,6 +575,18 @@ func TestPgCreateDatabase(t *testing.T) {
 	defer cancel()
 	out := runSampleWithContext(ctx, t, pgCreateDatabase, dbName, "failed to create a Spanner PG database")
 	assertContains(t, out, fmt.Sprintf("Created Spanner PostgreSQL database [%s]", dbName))
+
+	out = runSampleWithContext(ctx, t, pgAddNewColumn, dbName, "failed to add new column in Spanner PG database")
+	assertContains(t, out, "Added MarketingBudget column")
+
+	runSample(t, write, dbName, "failed to insert data in Spanner PG database")
+	runSample(t, update, dbName, "failed to update data in Spanner PG database")
+	out = runSample(t, pgWriteWithTransactionUsingDML, dbName, "failed to write with transaction using DML in Spanner PG database")
+	assertContains(t, out, "Moved 200000 from Album2's MarketingBudget to Album1")
+	out = runSample(t, pgQueryNewColumn, dbName, "failed to query new column in Spanner PG database")
+	assertContains(t, out, "1 1 300000")
+	assertContains(t, out, "2 2 300000")
+
 }
 
 func TestPgQueryParameter(t *testing.T) {
@@ -609,17 +623,22 @@ func TestPgQueryParameter(t *testing.T) {
 			"FirstName": "Alice",
 			"LastName":  "Bruxelles",
 		}),
+		spanner.InsertOrUpdateMap("Singers", map[string]interface{}{
+			"SingerId":  12,
+			"FirstName": "Melissa",
+			"LastName":  "Garcia",
+		}),
 	})
 	if err != nil {
 		t.Fatalf("failed to insert test records: %v", err)
 	}
 
 	out := runSample(t, pgQueryParameter, dbName, "failed to execute PG query with parameter")
-	assertContains(t, out, "1 Bruce Allison")
+	assertContains(t, out, "12 Melissa Garcia")
 	assertNotContains(t, out, "2 Alice Bruxelles")
 }
 
-func TestPgDmlWithParameters(t *testing.T) {
+func TestPgDmlSample(t *testing.T) {
 	_ = testutil.SystemTest(t)
 	t.Parallel()
 
@@ -637,7 +656,10 @@ func TestPgDmlWithParameters(t *testing.T) {
 	}
 	defer dbCleanup()
 
-	out := runSample(t, pgDmlWithParameters, dbName, "failed to execute PG DML with parameter")
+	out := runSample(t, pgWriteUsingDML, dbName, "failed to execute PG DML")
+	assertContains(t, out, "record(s) inserted")
+
+	out = runSample(t, pgDmlWithParameters, dbName, "failed to execute PG DML with parameter")
 	assertContains(t, out, "Inserted 2 singers")
 }
 
@@ -900,6 +922,14 @@ func runCreateBackupSample(ctx context.Context, t *testing.T, f createBackupSamp
 func runBackupSample(ctx context.Context, t *testing.T, f backupSampleFunc, dbName, backupID, errMsg string) string {
 	var b bytes.Buffer
 	if err := f(ctx, &b, dbName, backupID); err != nil {
+		t.Errorf("%s: %v", errMsg, err)
+	}
+	return b.String()
+}
+
+func runBackupSampleWithoutContext(t *testing.T, f backupSampleFuncWithoutContext, dbName, backupID, errMsg string) string {
+	var b bytes.Buffer
+	if err := f(&b, dbName, backupID); err != nil {
 		t.Errorf("%s: %v", errMsg, err)
 	}
 	return b.String()
