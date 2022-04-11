@@ -47,6 +47,7 @@ func TestServiceAccounts(t *testing.T) {
 		account, err = renameServiceAccount(buf, account.Email, "Updated Test")
 		if err != nil {
 			r.Errorf("renameServiceAccount: %v", err)
+			return
 		}
 		wantDispName := "Updated Test"
 		if wantDispName != account.DisplayName {
