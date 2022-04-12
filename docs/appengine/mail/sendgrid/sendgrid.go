@@ -19,8 +19,8 @@ package sendgrid
 import (
 	"net/http"
 
-	"gopkg.in/sendgrid/sendgrid-go.v2"
 	"google.golang.org/appengine/v2/urlfetch"
+	"gopkg.in/sendgrid/sendgrid-go.v2"
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
