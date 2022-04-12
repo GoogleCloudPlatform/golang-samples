@@ -108,10 +108,13 @@ func appendToPendingStream(w io.Writer, projectID, datasetID, tableID string) er
 	// tableID := "mytable"
 
 	ctx := context.Background()
+	// Instantiate a managedwriter client to handle interactions with the service.
 	client, err := managedwriter.NewClient(ctx, projectID)
 	if err != nil {
 		return fmt.Errorf("managedwriter.NewClient: %v", err)
 	}
+	// Close the client when we exit the function.
+	defer client.Close()
 
 	// Create a new pending stream.  We'll use the stream name to construct a writer.
 	pendingStream, err := client.CreateWriteStream(ctx, &storagepb.CreateWriteStreamRequest{
