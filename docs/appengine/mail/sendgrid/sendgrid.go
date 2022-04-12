@@ -20,14 +20,12 @@ import (
 	"net/http"
 
 	"gopkg.in/sendgrid/sendgrid-go.v2"
-
-	"google.golang.org/appengine"
-	"google.golang.org/appengine/urlfetch"
+	"google.golang.org/appengine/v2/urlfetch"
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	sg := sendgrid.NewSendGridClient("sendgrid_user", "sendgrid_key")
-	ctx := appengine.NewContext(r)
+	ctx := r.Context()
 
 	// Set http.Client to use the App Engine urlfetch client
 	sg.Client = urlfetch.Client(ctx)
