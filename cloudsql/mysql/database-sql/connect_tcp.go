@@ -30,7 +30,7 @@ import (
 )
 
 // connectTCPSocket initializes a TCP connection pool for a Cloud SQL
-// instance of SQL Server.
+// instance of MySQL.
 func connectTCPSocket() (*sql.DB, error) {
 	mustGetenv := func(k string) string {
 		v := os.Getenv(k)
