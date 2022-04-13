@@ -25,7 +25,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// createInstanceWithCustomMachineType sends an instance creation request to the Compute Engine API and wait for it to complete.
+// createInstanceWithCustomMachineType sends an instance creation request to the Compute Engine API and waits for it to complete.
 func createInstanceWithCustomMachineType(w io.Writer, projectID, zone, instanceName, machineType string) error {
 	// projectID := "your_project_id"
 	// zone := "europe-central2-b"
@@ -52,7 +52,6 @@ func createInstanceWithCustomMachineType(w io.Writer, projectID, zone, instanceN
 					},
 					AutoDelete: proto.Bool(true),
 					Boot:       proto.Bool(true),
-					Type:       proto.String(computepb.AttachedDisk_PERSISTENT.String()),
 				},
 			},
 			MachineType: proto.String(machineType),

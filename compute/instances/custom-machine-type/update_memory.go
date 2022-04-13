@@ -51,8 +51,12 @@ func modifyInstanceWithExtendedMemory(w io.Writer, projectID, zone, instanceName
 		return fmt.Errorf("unable to get instance: %v", err)
 	}
 
+	if !(strings.HasPrefix(instance.GetMachineType(), "n1-") || strings.HasPrefix(instance.GetMachineType(), "n2-") || strings.HasPrefix(instance.GetMachineType(), "n2d-")) {
+		return fmt.Errorf("Extra memory is available only for N1, N2 and N2D CPUs.")
+	}
+
 	// Make sure that the machine is turned off
-	if !contains_string([]string{"TERMINATED", "STOPPED"}, instance.GetStatus()) {
+	if !containsString([]string{"TERMINATED", "STOPPED"}, instance.GetStatus()) {
 		reqStop := &computepb.StopInstanceRequest{
 			Project:  projectID,
 			Zone:     zone,

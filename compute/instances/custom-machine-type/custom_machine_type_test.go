@@ -63,11 +63,11 @@ func getInstance(ctx context.Context, projectID, zone, instanceName string) (*co
 
 func TestComputeCreateInstanceWithCustomMachineTypeSnippets(t *testing.T) {
 	ctx := context.Background()
-	var seededRand *rand.Rand = rand.New(
+	var r *rand.Rand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))
 	tc := testutil.SystemTest(t)
 	zone := "europe-central2-b"
-	instanceName := "test-" + fmt.Sprint(seededRand.Int())
+	instanceName := fmt.Sprintf("test-vm-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	expectedResult := "Instance created"
 
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
@@ -87,6 +87,16 @@ func TestComputeCreateInstanceWithCustomMachineTypeSnippets(t *testing.T) {
 		t.Errorf("createInstanceWithCustomMachineType got %q, want %q", got, expectedResult)
 	}
 
+	instance, err := getInstance(ctx, tc.ProjectID, zone, instanceName)
+	if err != nil {
+		t.Errorf("unable to get instance: %v", err)
+	}
+
+	expectedResult = fmt.Sprintf("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/machineTypes/n2-custom-8-10240", tc.ProjectID, zone)
+	if instance.GetMachineType() != expectedResult {
+		t.Errorf("incorrect instance MachineType got %q, want %q", instance.GetMachineType(), expectedResult)
+	}
+
 	err = deleteInstance(ctx, tc.ProjectID, zone, instanceName)
 	if err != nil {
 		t.Errorf("deleteInstance got err: %v", err)
@@ -94,14 +104,14 @@ func TestComputeCreateInstanceWithCustomMachineTypeSnippets(t *testing.T) {
 
 	buf.Reset()
 
-	if err := createInstanceWithCustomMachineTypeWithHelper(buf, tc.ProjectID, zone, instanceName, E2, 4, 8192, CPUSeries_E2_Limit); err != nil {
+	if err := createInstanceWithCustomMachineTypeWithHelper(buf, tc.ProjectID, zone, instanceName, E2, 4, 8192); err != nil {
 		t.Errorf("createInstanceWithCustomMachineTypeWithHelper got err: %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, expectedResult) {
 		t.Errorf("createInstanceWithCustomMachineTypeWithHelper got %q, want %q", got, expectedResult)
 	}
 
-	instance, err := getInstance(ctx, tc.ProjectID, zone, instanceName)
+	instance, err = getInstance(ctx, tc.ProjectID, zone, instanceName)
 	if err != nil {
 		t.Errorf("unable to get instance: %v", err)
 	}
@@ -118,7 +128,7 @@ func TestComputeCreateInstanceWithCustomMachineTypeSnippets(t *testing.T) {
 
 	buf.Reset()
 
-	if err := createInstanceWithCustomSharedCore(buf, tc.ProjectID, zone, instanceName, E2_MICRO, 2048, CPUSeries_E2_MICRO_Limit); err != nil {
+	if err := createInstanceWithCustomSharedCore(buf, tc.ProjectID, zone, instanceName, E2Micro, 2048); err != nil {
 		t.Errorf("createInstanceWithCustomSharedCore got err: %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, expectedResult) {

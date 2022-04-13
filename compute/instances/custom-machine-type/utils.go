@@ -26,7 +26,7 @@ func MakeRange(start, end, step int) []int {
 	return s
 }
 
-func contains_int(s []int, str int) bool {
+func containsInt(s []int, str int) bool {
 	for _, v := range s {
 		if v == str {
 			return true
@@ -36,7 +36,7 @@ func contains_int(s []int, str int) bool {
 	return false
 }
 
-func contains_string(s []string, str string) bool {
+func containsString(s []string, str string) bool {
 	for _, v := range s {
 		if v == str {
 			return true
