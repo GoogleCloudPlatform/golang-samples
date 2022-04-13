@@ -25,7 +25,7 @@ import (
 )
 
 // connectUnixSocket initializes a Unix socket connection pool for
-// a Cloud SQL instance of SQL Server.
+// a Cloud SQL instance of MySQL.
 func connectUnixSocket() (*sql.DB, error) {
 	mustGetenv := func(k string) string {
 		v := os.Getenv(k)
