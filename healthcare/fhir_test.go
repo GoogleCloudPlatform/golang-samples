@@ -55,9 +55,11 @@ func TestFHIRStore(t *testing.T) {
 		return
 	}
 
-	if err := createFHIRStore(buf, tc.ProjectID, location, datasetID, fhirStoreID); err != nil {
-		t.Errorf("createFHIRStore got err: %v", err)
-	}
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
+		if err := createFHIRStore(buf, tc.ProjectID, location, datasetID, fhirStoreID); err != nil {
+			t.Errorf("createFHIRStore got err: %v", err)
+		}
+	})
 
 	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
 		fhirStoreName := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/fhirStores/%s", tc.ProjectID, location, datasetID, fhirStoreID)
