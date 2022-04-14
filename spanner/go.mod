@@ -10,16 +10,16 @@ require (
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20220328195317-2183fb3440ed
 	github.com/golang/protobuf v1.5.2
 	github.com/google/uuid v1.3.0
-	github.com/googleapis/gax-go/v2 v2.2.0
+	github.com/googleapis/gax-go/v2 v2.3.0
 	go.opencensus.io v0.23.0
 	google.golang.org/api v0.74.0
-	google.golang.org/genproto v0.0.0-20220405205423-9d709892a2bf
+	google.golang.org/genproto v0.0.0-20220413183235-5e96e2839df9
 	google.golang.org/grpc v1.45.0
 	google.golang.org/protobuf v1.28.0
 )
 
 require (
-	cloud.google.com/go/compute v1.5.0 // indirect
+	cloud.google.com/go/compute v1.6.0 // indirect
 	cloud.google.com/go/iam v0.3.0 // indirect
 	cloud.google.com/go/monitoring v1.4.0 // indirect
 	cloud.google.com/go/storage v1.22.0 // indirect
