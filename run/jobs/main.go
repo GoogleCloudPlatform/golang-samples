@@ -114,4 +114,5 @@ func randomFailure(config Config) error {
 	}
 	return nil
 }
+
 // [END cloudrun_jobs_quickstart]
