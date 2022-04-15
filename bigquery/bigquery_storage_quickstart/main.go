@@ -38,7 +38,10 @@ import (
 	gax "github.com/googleapis/gax-go/v2"
 	goavro "github.com/linkedin/goavro/v2"
 	bqStoragepb "google.golang.org/genproto/googleapis/cloud/bigquery/storage/v1"
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // rpcOpts is used to configure the underlying gRPC client to accept large
@@ -207,8 +210,8 @@ func processStream(ctx context.Context, client *bqStorage.BigQueryReadClient, st
 	// stream, implement a retry that resets once progress is made.
 	retryLimit := 3
 
+	retries := 0
 	for {
-		retries := 0
 		// Send the initiating request to start streaming row blocks.
 		rowStream, err := client.ReadRows(ctx, &bqStoragepb.ReadRowsRequest{
 			ReadStream: st,
@@ -225,13 +228,36 @@ func processStream(ctx context.Context, client *bqStorage.BigQueryReadClient, st
 				return nil
 			}
 			if err != nil {
-				retries++
-				if retries >= retryLimit {
-					return fmt.Errorf("processStream retries exhausted: %v", err)
+				// If there is an error, check whether it is a retryable
+				// error with a retry delay and sleep instead of increasing
+				// retries count.
+				var retryDelayDuration time.Duration
+				if errorStatus, ok := status.FromError(err); ok && errorStatus.Code() == codes.ResourceExhausted {
+					for _, detail := range errorStatus.Details() {
+						retryInfo, ok := detail.(*errdetails.RetryInfo)
+						if !ok {
+							continue
+						}
+						retryDelay := retryInfo.GetRetryDelay()
+						retryDelayDuration = time.Duration(retryDelay.Seconds)*time.Second + time.Duration(retryDelay.Nanos)*time.Nanosecond
+						break
+					}
+				}
+				if retryDelayDuration != 0 {
+					log.Printf("processStream failed with a retryable error, retrying in %v", retryDelayDuration)
+					time.Sleep(retryDelayDuration)
+				} else {
+					retries++
+					if retries >= retryLimit {
+						return fmt.Errorf("processStream retries exhausted: %v", err)
+					}
 				}
 				// break the inner loop, and try to recover by starting a new streaming
 				// ReadRows call at the last known good offset.
 				break
+			} else {
+				// Reset retries after a successful response.
+				retries = 0
 			}
 
 			rc := r.GetRowCount()
