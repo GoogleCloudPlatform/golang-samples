@@ -5,15 +5,15 @@ go 1.17
 require (
 	cloud.google.com/go v0.100.2
 	cloud.google.com/go/kms v1.4.0
-	cloud.google.com/go/spanner v1.30.1
+	cloud.google.com/go/spanner v1.31.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.10
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20220328195317-2183fb3440ed
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20220415190337-c0583a59e8b6
 	github.com/golang/protobuf v1.5.2
 	github.com/google/uuid v1.3.0
 	github.com/googleapis/gax-go/v2 v2.3.0
 	go.opencensus.io v0.23.0
 	google.golang.org/api v0.74.0
-	google.golang.org/genproto v0.0.0-20220413183235-5e96e2839df9
+	google.golang.org/genproto v0.0.0-20220414192740-2d67ff6cf2b4
 	google.golang.org/grpc v1.45.0
 	google.golang.org/protobuf v1.28.0
 )

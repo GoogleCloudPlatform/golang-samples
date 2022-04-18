@@ -2,7 +2,4 @@ module github.com/GoogleCloudPlatform/golang-samples/internal/cloudrunci/testing
 
 go 1.13
 
-require (
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20220204002944-f20d8abe1519
-	google.golang.org/grpc v1.44.0 // indirect
-)
+require github.com/GoogleCloudPlatform/golang-samples v0.0.0-20220415190337-c0583a59e8b6
