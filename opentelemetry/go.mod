@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/opentelemetry
 
-go 1.14
+go 1.16
 
 require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.4.0
