@@ -194,15 +194,15 @@ Secret Manager at runtime via an environment variable.
 
 Create secrets via the command line:
 ```sh
-echo -n $INSTANCE_CONNECTION_NAME | \
-    gcloud secrets create [CLOUD_SQL_CONNECTION_NAME_SECRET] --data-file=-
+echo -n $INSTANCE_UNIX_SOCKET | \
+    gcloud secrets create [INSTANCE_UNIX_SOCKET_SECRET] --data-file=-
 ```
 
 Deploy the service to Cloud Run specifying the env var name and secret name:
 ```sh
 gcloud beta run deploy SERVICE --image gcr.io/[YOUR_PROJECT_ID]/run-sql \
     --add-cloudsql-instances $INSTANCE_CONNECTION_NAME \
-    --update-secrets CLOUD_SQL_CONNECTION_NAME=[CLOUD_SQL_CONNECTION_NAME_SECRET]:latest,\
+    --update-secrets INSTANCE_UNIX_SOCKET=[INSTANCE_UNIX_SOCKET_SECRET]:latest,\
       DB_USER=[DB_USER_SECRET]:latest, \
       DB_PASS=[DB_PASS_SECRET]:latest, \
       DB_NAME=[DB_NAME_SECRET]:latest
