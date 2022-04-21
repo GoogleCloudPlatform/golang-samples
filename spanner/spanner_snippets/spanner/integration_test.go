@@ -581,6 +581,11 @@ func TestPgSample(t *testing.T) {
 
 	runSample(t, write, dbName, "failed to insert data in Spanner PG database")
 	runSample(t, update, dbName, "failed to update data in Spanner PG database")
+
+	runSampleWithContext(ctx, t, pgAddStoringIndex, dbName, "failed to add storing index in Spanner PG database")
+	out = runSample(t, readStoringIndex, dbName, "failed to read storing index in Spanner PG database")
+	assertContains(t, out, "500000")
+
 	out = runSample(t, pgWriteWithTransactionUsingDML, dbName, "failed to write with transaction using DML in Spanner PG database")
 	assertContains(t, out, "Moved 200000 from Album2's MarketingBudget to Album1")
 	out = runSample(t, pgQueryNewColumn, dbName, "failed to query new column in Spanner PG database")
