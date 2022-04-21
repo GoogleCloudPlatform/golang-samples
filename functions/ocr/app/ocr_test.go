@@ -175,7 +175,7 @@ func TestDetectText(t *testing.T) {
 		t.Errorf("TestDetectText: %v", err)
 	}
 	got := buf.String()
-	if want := "Filets de Bœuf"; !strings.Contains(got, want) {
+	if want := "Filets"; !strings.Contains(got, want) {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }
