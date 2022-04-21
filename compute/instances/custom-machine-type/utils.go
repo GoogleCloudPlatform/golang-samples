@@ -14,28 +14,6 @@
 
 package snippets
 
-func MakeRange(start, end, step int) []int {
-	if step <= 0 || end < start {
-		return []int{}
-	}
-	s := make([]int, 0, 1+(end-start)/step)
-	for start <= end {
-		s = append(s, start)
-		start += step
-	}
-	return s
-}
-
-func containsInt(s []int, str int) bool {
-	for _, v := range s {
-		if v == str {
-			return true
-		}
-	}
-
-	return false
-}
-
 func containsString(s []string, str string) bool {
 	for _, v := range s {
 		if v == str {

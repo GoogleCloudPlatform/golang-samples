@@ -19,28 +19,77 @@ import (
 	"testing"
 )
 
-var customMachineTypeTests = []struct {
-	cpuSeries string
-	memory    int
-	cpu       int
-	cpuLimit  TypeLimit
-	out       string
-	outShort  string
-}{
-	{N1, 8192, 8, CPUSeriesN1Limit, "zones/europe-central2-b/machineTypes/custom-8-8192", "custom-8-8192"},
-	{N2, 4096, 4, CPUSeriesN2Limit, "zones/europe-central2-b/machineTypes/n2-custom-4-4096", "n2-custom-4-4096"},
-	{N2D, 8192, 4, CPUSeriesN2DLimit, "zones/europe-central2-b/machineTypes/n2d-custom-4-8192", "n2d-custom-4-8192"},
-	{E2, 8192, 8, CPUSeriesE2Limit, "zones/europe-central2-b/machineTypes/e2-custom-8-8192", "e2-custom-8-8192"},
-	{E2Small, 4096, 0, CPUSeriesE2SmallLimit, "zones/europe-central2-b/machineTypes/e2-custom-small-4096", "e2-custom-small-4096"},
-	{E2Micro, 2048, 0, CPUSeriesE2MicroLimit, "zones/europe-central2-b/machineTypes/e2-custom-micro-2048", "e2-custom-micro-2048"},
-	{N2, 638720, 8, CPUSeriesN2Limit, "zones/europe-central2-b/machineTypes/n2-custom-8-638720-ext", "n2-custom-8-638720-ext"},
-}
-
 func TestCustomMachineTypeSnippets(t *testing.T) {
 	zone := "europe-central2-b"
 
+	var customMachineTypeTests = []struct {
+		cpuSeries string
+		memory    int
+		cpu       int
+		cpuLimit  typeLimit
+		out       string
+		outMt     string
+	}{
+		{
+			cpuSeries: n1,
+			memory:    8192,
+			cpu:       8,
+			cpuLimit:  cpuSeriesN1Limit,
+			out:       "zones/europe-central2-b/machineTypes/custom-8-8192",
+			outMt:     "custom-8-8192",
+		},
+		{
+			cpuSeries: n2,
+			memory:    4096,
+			cpu:       4,
+			cpuLimit:  cpuSeriesN2Limit,
+			out:       "zones/europe-central2-b/machineTypes/n2-custom-4-4096",
+			outMt:     "n2-custom-4-4096",
+		},
+		{
+			cpuSeries: n2d,
+			memory:    8192,
+			cpu:       4,
+			cpuLimit:  cpuSeriesN2Limit,
+			out:       "zones/europe-central2-b/machineTypes/n2d-custom-4-8192",
+			outMt:     "n2d-custom-4-8192",
+		},
+		{
+			cpuSeries: e2,
+			memory:    8192,
+			cpu:       8,
+			cpuLimit:  cpuSeriesN2Limit,
+			out:       "zones/europe-central2-b/machineTypes/e2-custom-8-8192",
+			outMt:     "e2-custom-8-8192",
+		},
+		{
+			cpuSeries: e2Small,
+			memory:    4096,
+			cpu:       0,
+			cpuLimit:  cpuSeriesE2SmallLimit,
+			out:       "zones/europe-central2-b/machineTypes/e2-custom-small-4096",
+			outMt:     "e2-custom-small-4096",
+		},
+		{
+			cpuSeries: e2Micro,
+			memory:    2048,
+			cpu:       0,
+			cpuLimit:  cpuSeriesE2MicroLimit,
+			out:       "zones/europe-central2-b/machineTypes/e2-custom-micro-2048",
+			outMt:     "e2-custom-micro-2048",
+		},
+		{
+			cpuSeries: n2,
+			memory:    638720,
+			cpu:       8,
+			cpuLimit:  cpuSeriesN2Limit,
+			out:       "zones/europe-central2-b/machineTypes/n2-custom-8-638720-ext",
+			outMt:     "n2-custom-8-638720-ext",
+		},
+	}
+
 	for _, tt := range customMachineTypeTests {
-		t.Run(tt.outShort, func(t *testing.T) {
+		t.Run(tt.outMt, func(t *testing.T) {
 			cmt, err := createCustomMachineType(zone, tt.cpuSeries, tt.memory, tt.cpu, tt.cpuLimit)
 			if err != nil {
 				t.Errorf("createCustomMachineType return error: %v", err)
@@ -48,8 +97,8 @@ func TestCustomMachineTypeSnippets(t *testing.T) {
 			if cmt.String() != tt.out {
 				t.Errorf("got %q, want %q", cmt.String(), tt.out)
 			}
-			if cmt.ShortString() != tt.outShort {
-				t.Errorf("got %q, want %q", cmt.ShortString(), tt.outShort)
+			if cmt.machineType() != tt.outMt {
+				t.Errorf("got %q, want %q", cmt.machineType(), tt.outMt)
 			}
 		})
 	}
@@ -59,16 +108,16 @@ func TestCustomMachineTypeErrorsSnippets(t *testing.T) {
 	zone := "europe-central2-b"
 
 	// bad memory 256
-	_, err := createCustomMachineType(zone, N1, 8194, 8, CPUSeriesN1Limit)
-	expectedResult := "requested memory must be a multiple of 256 MB"
-	if fmt.Sprint(err) != expectedResult {
-		t.Errorf("createCustomMachineType should return error: %s %v", expectedResult, err)
+	_, err := createCustomMachineType(zone, n1, 8194, 8, cpuSeriesN1Limit)
+	want := "requested memory must be a multiple of 256 MB"
+	if err.Error() != want {
+		t.Errorf("createCustomMachineType should return error: %v %v", want, err)
 	}
 
 	// wrong cpu count
-	_, err = createCustomMachineType(zone, N2, 8194, 66, CPUSeriesN2Limit)
-	expectedResult = fmt.Sprintf("invalid number of cores requested. Allowed number of cores for %v is: %v", N2, CPUSeriesN2Limit.allowedCores)
-	if fmt.Sprint(err) != expectedResult {
-		t.Errorf("createCustomMachineType should return error: %s %v", expectedResult, err)
+	_, err = createCustomMachineType(zone, n2, 8194, 66, cpuSeriesN2Limit)
+	want = fmt.Sprintf("invalid number of cores requested. Allowed number of cores for %v is: %v", n2, cpuSeriesN2Limit.allowedCores)
+	if err.Error() != want {
+		t.Errorf("createCustomMachineType should return error: %v %v", want, err)
 	}
 }
