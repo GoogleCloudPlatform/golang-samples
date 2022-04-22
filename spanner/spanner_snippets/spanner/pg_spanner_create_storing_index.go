@@ -32,7 +32,7 @@ func pgAddStoringIndex(ctx context.Context, w io.Writer, db string) error {
 	// db := "projects/my-project/instances/my-instance/databases/my-database"
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to initialize spanner database admin client: %v", err)
 	}
 	defer adminClient.Close()
 
@@ -43,10 +43,10 @@ func pgAddStoringIndex(ctx context.Context, w io.Writer, db string) error {
 		},
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to execute spanner database DDL request: %v", err)
 	}
 	if err := op.Wait(ctx); err != nil {
-		return err
+		return fmt.Errorf("failed to complete spanner database DDL request: %v", err)
 	}
 	fmt.Fprintf(w, "Added storing index\n")
 	return nil

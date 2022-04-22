@@ -697,10 +697,10 @@ func pgAddStoringIndex(ctx context.Context, w io.Writer, adminClient *database.D
 		},
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to execute spanner database DDL request: %v", err)
 	}
 	if err := op.Wait(ctx); err != nil {
-		return err
+		return fmt.Errorf("failed to complete spanner database DDL request: %v", err)
 	}
 	fmt.Fprintf(w, "Added storing index\n")
 	return nil
