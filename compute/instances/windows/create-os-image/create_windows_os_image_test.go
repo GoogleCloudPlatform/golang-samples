@@ -90,11 +90,11 @@ func TestCreateWindowsOSImageSnippets(t *testing.T) {
 		t.Errorf("unable to wait for the operation: %v", err)
 	}
 
-	expectedResult := fmt.Sprintf("instance %s should be stopped.", instanceName)
+	want := fmt.Sprintf("instance %s should be stopped.", instanceName)
 	err = createWindowsOSImage(buf, tc.ProjectID, zone, diskName, imageName, storageLocation, false)
 	if err != nil {
-		if got := fmt.Sprint(err); !strings.Contains(got, expectedResult) {
-			t.Errorf("createWindowsOSImage error got %q, want %q", got, expectedResult)
+		if got := fmt.Sprint(err); !strings.Contains(got, want) {
+			t.Errorf("createWindowsOSImage error got %q, want %q", got, want)
 		}
 	} else {
 		t.Errorf("createWindowsOSImage should return an error")
@@ -107,9 +107,9 @@ func TestCreateWindowsOSImageSnippets(t *testing.T) {
 		t.Errorf("createWindowsOSImage got err: %v", err)
 	}
 
-	expectedResult = "Image created"
-	if got := buf.String(); !strings.Contains(got, expectedResult) {
-		t.Errorf("createWindowsOSImage got %q, want %q", got, expectedResult)
+	want = "Image created"
+	if got := buf.String(); !strings.Contains(got, want) {
+		t.Errorf("createWindowsOSImage got %q, want %q", got, want)
 	}
 
 	deleteImageReq := &computepb.DeleteImageRequest{
