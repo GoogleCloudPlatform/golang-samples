@@ -51,7 +51,7 @@ func generateV4GetObjectSignedURL(w io.Writer, bucket, object string) (string, e
 		Expires: time.Now().Add(15 * time.Minute),
 	}
 
-	u, err := client.Bucket(bucket).SignedURL(object, opts)
+	u, err := storage.SignedURL(bucket, object, opts)
 	if err != nil {
 		return "", fmt.Errorf("Bucket(%q).SignedURL: %v", bucket, err)
 	}
