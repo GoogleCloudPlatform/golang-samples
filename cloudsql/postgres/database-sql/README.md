@@ -93,7 +93,7 @@ export DB_NAME='<DB_NAME>'
 Then use this command to launch the proxy in the background:
 
 ```bash
-./cloud_sql_proxy -dir=./cloudsql --instances=$INSTANCE_CONNECTION_NAME --credential_file=$GOOGLE_APPLICATION_CREDENTIALS &
+./cloud_sql_proxy -dir=./cloudsql --instances=<MY-PROJECT>:<INSTANCE-REGION>:<INSTANCE-NAME> --credential_file=$GOOGLE_APPLICATION_CREDENTIALS &
 ```
 
 ### Testing the application
@@ -172,7 +172,7 @@ for more details on connecting a Cloud Run service to Cloud SQL.
 gcloud builds submit --tag gcr.io/[YOUR_PROJECT_ID]/run-sql
 ```
 
-1. Deploy the service to Cloud Run:
+2. Deploy the service to Cloud Run:
 
 ```sh
 gcloud run deploy run-sql --image gcr.io/[YOUR_PROJECT_ID]/run-sql \
@@ -201,13 +201,13 @@ echo -n $INSTANCE_UNIX_SOCKET | \
 Deploy the service to Cloud Run specifying the env var name and secret name:
 ```sh
 gcloud beta run deploy SERVICE --image gcr.io/[YOUR_PROJECT_ID]/run-sql \
-    --add-cloudsql-instances $INSTANCE_CONNECTION_NAME \
+    --add-cloudsql-instances <MY-PROJECT>:<INSTANCE-REGION>:<INSTANCE-NAME> \
     --update-secrets INSTANCE_UNIX_SOCKET=[INSTANCE_UNIX_SOCKET_SECRET]:latest,\
       DB_USER=[DB_USER_SECRET]:latest, \
       DB_PASS=[DB_PASS_SECRET]:latest, \
       DB_NAME=[DB_NAME_SECRET]:latest
 ```
 
-4. Navigate your browser to the URL noted in step 2.
+3. Navigate your browser to the URL noted in step 2.
 
 For more details about using Cloud Run see http://cloud.run.
