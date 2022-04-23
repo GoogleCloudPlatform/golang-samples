@@ -56,11 +56,12 @@ var (
 	}
 
 	adminCommands = map[string]adminCommand{
-		"createdatabase":   createDatabase,
-		"addnewcolumn":     addNewColumn,
-		"pgaddnewcolumn":   pgAddNewColumn,
-		"addstoringindex":  addStoringIndex,
-		"pgcreatedatabase": pgCreateDatabase,
+		"createdatabase":    createDatabase,
+		"addnewcolumn":      addNewColumn,
+		"pgaddnewcolumn":    pgAddNewColumn,
+		"addstoringindex":   addStoringIndex,
+		"pgaddstoringindex": pgAddStoringIndex,
+		"pgcreatedatabase":  pgCreateDatabase,
 	}
 )
 
@@ -688,6 +689,23 @@ func pgWriteWithTransactionUsingDML(ctx context.Context, w io.Writer, client *sp
 	return err
 }
 
+func pgAddStoringIndex(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	op, err := adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
+		Database: database,
+		Statements: []string{
+			"CREATE INDEX AlbumsByAlbumTitle2 ON Albums(AlbumTitle) INCLUDE (MarketingBudget)",
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("failed to execute spanner database DDL request: %v", err)
+	}
+	if err := op.Wait(ctx); err != nil {
+		return fmt.Errorf("failed to complete spanner database DDL request: %v", err)
+	}
+	fmt.Fprintf(w, "Added storing index\n")
+	return nil
+}
+
 func createClients(ctx context.Context, db string) (*database.DatabaseAdminClient, *spanner.Client) {
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
@@ -732,7 +750,7 @@ func main() {
 		querywithparameter, dmlwrite, dmlwritetxn, readindex, readstoringindex,
 		readonlytransaction, createdatabase, addnewcolumn, addstoringindex,
 		pgcreatedatabase, pgqueryparameter, pgdmlwrite, pgaddnewcolumn, pgquerynewcolumn,
-		pgdmlwritetxn
+		pgdmlwritetxn, pgaddstoringindex
 
 Examples:
 	spanner_snippets createdatabase projects/my-project/instances/my-instance/databases/example-db
