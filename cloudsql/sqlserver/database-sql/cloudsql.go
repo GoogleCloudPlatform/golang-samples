@@ -135,7 +135,7 @@ func currentTotals(db *sql.DB) (votingData, error) {
 
 // mustConnect creates a connection to the database based on environment
 // variables. Setting one of INSTANCE_HOST or INSTANCE_CONNECTION_NAME will
-// establishing a connection using a TCP socket or a connector respectively.
+// establish a connection using a TCP socket or a connector respectively.
 func mustConnect() *sql.DB {
 	var (
 		db  *sql.DB
