@@ -22,7 +22,7 @@ import (
 	"testing"
 )
 
-// dbConfig holds database connection information dervived from the environment.
+// dbConfig holds database connection information derived from the environment.
 type dbConfig struct {
 	// user is the user name
 	user string
