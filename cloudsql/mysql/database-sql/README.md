@@ -44,7 +44,7 @@ export DB_NAME='<DB_NAME>'
 
 Then use this command to launch the proxy in the background:
 ```bash
-./cloud_sql_proxy -instances=<project-id>:<region>:<instance-name>=tcp:3306 -credential_file=$GOOGLE_APPLICATION_CREDENTIALS &
+./cloud_sql_proxy -instances=<PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME>=tcp:3306 -credential_file=$GOOGLE_APPLICATION_CREDENTIALS &
 ```
 
 #### Windows/PowerShell
@@ -53,14 +53,14 @@ Use these PowerShell commands to initialize environment variables:
 $env:GOOGLE_APPLICATION_CREDENTIALS="<CREDENTIALS_JSON_FILE>"
 $env:INSTANCE_HOST="127.0.0.1"
 $env:DB_PORT="3306"
-$env:DB_USER="<DB_USER_NAME>"
-$env:DB_PASS="<DB_PASSWORD>"
-$env:DB_NAME="<DB_NAME>"
+$env:DB_USER="<YOUR_DB_USER_NAME>"
+$env:DB_PASS="<YOUR_DB_PASSWORD>"
+$env:DB_NAME="<YOUR_DB_NAME>"
 ```
 
 Then use this command to launch the proxy in a separate PowerShell session:
 ```powershell
-Start-Process -filepath "C:\<path to proxy exe>" -ArgumentList "-instances=<project-id>:<region>:<instance-name>=tcp:3306 -credential_file=<CREDENTIALS_JSON_FILE>"
+Start-Process -filepath "C:\<path to proxy exe>" -ArgumentList "-instances=<PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME>=tcp:3306 -credential_file=<CREDENTIALS_JSON_FILE>"
 ```
 
 ### Launch proxy with Unix Domain Socket
@@ -75,15 +75,15 @@ sudo chown -R $USER ./cloudsql
 Use these terminal commands to initialize environment variables:
 ```bash
 export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service/account/key.json
-export INSTANCE_UNIX_SOCKET='./cloudsql/<MY-PROJECT>:<INSTANCE-REGION>:<INSTANCE-NAME>'
-export DB_USER='<DB_USER_NAME>'
-export DB_PASS='<DB_PASSWORD>'
-export DB_NAME='<DB_NAME>'
+export INSTANCE_UNIX_SOCKET='./cloudsql/<PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME>'
+export DB_USER='<YOUR_DB_USER_NAME>'
+export DB_PASS='<YOUR_DB_PASSWORD>'
+export DB_NAME='<YOUR_DB_NAME>'
 ```
 
 Then use this command to launch the proxy in the background:
 ```bash
-./cloud_sql_proxy -dir=./cloudsql --instances=$INSTANCE_CONNECTION_NAME --credential_file=$GOOGLE_APPLICATION_CREDENTIALS &
+./cloud_sql_proxy -dir=./cloudsql --instances=<PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME> --credential_file=$GOOGLE_APPLICATION_CREDENTIALS &
 ```
 
 ### Testing the application
@@ -105,10 +105,10 @@ variables into the runtime. Your `app.standard.yaml` file should look like this:
 ```yaml
 runtime: go113
 env_variables:
-  INSTANCE_UNIX_SOCKET: /cloudsql/<project-id>:<region>:<instance-name>
-  DB_USER: YOUR_DB_USER
-  DB_PASS: YOUR_DB_PASS
-  DB_NAME: YOUR_DB
+  INSTANCE_UNIX_SOCKET: /cloudsql/<PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME>
+  DB_USER: <YOUR_DB_USER_NAME>
+  DB_PASS: <YOUR_DB_PASSWORD>
+  DB_NAME: <YOUR_DB_NAME>
 ```
 
 Note: Saving credentials in environment variables is convenient, but not secure - consider a more
@@ -131,13 +131,13 @@ runtime: custom
 env: flex
 
 env_variables:
-  INSTANCE_UNIX_SOCKET: /cloudsql/<project>:<region>:<instance>
-  DB_USER: <your_database_username>
-  DB_PASS: <your_database_password>
-  DB_NAME: <your_database_name>
+  INSTANCE_UNIX_SOCKET: /cloudsql/<PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME>
+  DB_USER: <YOUR_DB_USER_NAME>
+  DB_PASS: <YOUR_DB_PASSWORD>
+  DB_NAME: <YOUR_DB_NAME>
 
 beta_settings:
-  cloud_sql_instances: <project>:<region>:<instance>
+  cloud_sql_instances: <PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME>
 ```
 
 Note: Saving credentials in environment variables is convenient, but not secure - consider a more
@@ -162,8 +162,8 @@ gcloud builds submit --tag gcr.io/[YOUR_PROJECT_ID]/run-sql
 
 ```sh
 gcloud run deploy run-sql --image gcr.io/[YOUR_PROJECT_ID]/run-sql \
-  --add-cloudsql-instances '<MY-PROJECT>:<INSTANCE-REGION>:<INSTANCE-NAME>' \
-  --update-env-vars INSTANCE_UNIX_SOCKET='/cloudsql/<MY-PROJECT>:<INSTANCE-REGION>:<INSTANCE-NAME>' \
+  --add-cloudsql-instances '<PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME>' \
+  --update-env-vars INSTANCE_UNIX_SOCKET='/cloudsql/<PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME>' \
   --update-env-vars DB_USER='<DB_USER_NAME>' \
   --update-env-vars DB_PASS='<DB_PASSWORD>' \
   --update-env-vars DB_NAME='<DB_NAME>'
@@ -187,7 +187,7 @@ echo -n $INSTANCE_UNIX_SOCKET | \
 Deploy the service to Cloud Run specifying the env var name and secret name:
 ```sh
 gcloud beta run deploy SERVICE --image gcr.io/[YOUR_PROJECT_ID]/run-sql \
-    --add-cloudsql-instances <MY-PROJECT>:<INSTANCE-REGION>:<INSTANCE-NAME> \
+    --add-cloudsql-instances <PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME> \
     --update-secrets INSTANCE_UNIX_SOCKET=[INSTANCE_UNIX_SOCKET_SECRET]:latest,\
       DB_USER=[DB_USER_SECRET]:latest, \
       DB_PASS=[DB_PASS_SECRET]:latest, \
@@ -206,8 +206,8 @@ the Cloud SQL Auth Proxy, one for a TCP connection and one for a Unix socket
 connection.
 
 ```
-cloud_sql_proxy -instances=some-project:some-region:some-instance=tcp:3306
-cloud_sql_proxy -instances=some-project:some-region:some-instance -dir /cloudsql
+cloud_sql_proxy -instances=<PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME>=tcp:3306
+cloud_sql_proxy -instances=<PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME> -dir /cloudsql
 ```
 
 To run integration tests, use the following command, setting environment
@@ -220,7 +220,7 @@ GOLANG_SAMPLES_E2E_TEST="yes" \
   MYSQL_DATABASE=some-db \
   MYSQL_PORT=3307 \
   MYSQL_HOST=127.0.0.1
-  MYSQL_UNIX_SOCKET='/cloudsql/some-project:some-region:some-instance'
-  MYSQL_INSTANCE='some-project:some-region:some-instance' \
+  MYSQL_UNIX_SOCKET='/cloudsql/<PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME>'
+  MYSQL_INSTANCE='<PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME>' \
   go test -v
 ```
