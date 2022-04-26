@@ -49,13 +49,13 @@ func deleteInstance(ctx context.Context, projectId, zone, instanceName string) e
 
 func TestComputeCreateWindowsInstancesSnippets(t *testing.T) {
 	ctx := context.Background()
-	var seededRand *rand.Rand = rand.New(
+	var r *rand.Rand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))
 	tc := testutil.SystemTest(t)
 	zone := "europe-central2-b"
-	instanceName := "test-" + fmt.Sprint(seededRand.Int())
-	firewallRuleName := "test-" + fmt.Sprint(seededRand.Int())
-	routeName := "test-" + fmt.Sprint(seededRand.Int())
+	instanceName := fmt.Sprintf("test-vm-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+	firewallRuleName := "test-" + fmt.Sprint(r.Int())
+	routeName := "test-" + fmt.Sprint(r.Int())
 	machineType := "n1-standard-1"
 	networkLink := "global/networks/default"
 	subnetworkLink := "regions/europe-central2/subnetworks/default"
