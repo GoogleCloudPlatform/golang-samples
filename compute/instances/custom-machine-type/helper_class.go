@@ -14,12 +14,11 @@
 
 package snippets
 
+// [START compute_custom_machine_type_helper_class]
 import (
 	"fmt"
 	"strings"
 )
-
-// [START compute_custom_machine_type_helper_class]
 
 const (
 	n1       = "custom"
@@ -87,7 +86,7 @@ type customMachineType struct {
 	typeLimit
 }
 
-// Validates whether the requested parameters are allowed.
+// Validate whether the requested parameters are allowed.
 // Find more information about limitations of custom machine types at:
 // https://cloud.google.com/compute/docs/general-purpose-machines#custom_machine_types
 func validate(cmt *customMachineType) error {
@@ -125,8 +124,18 @@ func validate(cmt *customMachineType) error {
 	return nil
 }
 
-// Returns the custom machine type in form of a string acceptable by Compute Engine API.
+// Srring returns the custom machine type in form of a string acceptable by Compute Engine API.
 func (t customMachineType) String() string {
+	containsString := func(s []string, str string) bool {
+		for _, v := range s {
+			if v == str {
+				return true
+			}
+		}
+
+		return false
+	}
+
 	if containsString([]string{e2Small, e2Micro, e2Medium}, t.cpuSeries) {
 		return fmt.Sprintf("zones/%v/machineTypes/%v-%v", t.zone, t.cpuSeries, t.memoryMb)
 	}
@@ -148,6 +157,16 @@ func (t customMachineType) machineType() string {
 }
 
 func createCustomMachineType(zone, cpuSeries string, memoryMb, coreCount int, tl typeLimit) (*customMachineType, error) {
+	containsString := func(s []string, str string) bool {
+		for _, v := range s {
+			if v == str {
+				return true
+			}
+		}
+
+		return false
+	}
+
 	if containsString([]string{e2Small, e2Micro, e2Medium}, cpuSeries) {
 		coreCount = 2
 	}
