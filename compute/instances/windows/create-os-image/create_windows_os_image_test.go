@@ -31,13 +31,13 @@ import (
 
 func TestCreateWindowsOSImageSnippets(t *testing.T) {
 	ctx := context.Background()
-	var seededRand *rand.Rand = rand.New(
+	var r *rand.Rand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))
 	tc := testutil.SystemTest(t)
 	zone := "europe-central2-b"
-	instanceName := "test-" + fmt.Sprint(seededRand.Int())
-	diskName := "test-" + fmt.Sprint(seededRand.Int())
-	imageName := "test-" + fmt.Sprint(seededRand.Int())
+	instanceName := fmt.Sprintf("test-vm-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+	diskName := "test-" + fmt.Sprint(r.Int())
+	imageName := "test-" + fmt.Sprint(r.Int())
 	storageLocation := "eu"
 
 	buf := &bytes.Buffer{}
