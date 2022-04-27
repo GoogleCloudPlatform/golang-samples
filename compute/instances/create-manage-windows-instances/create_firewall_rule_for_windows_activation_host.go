@@ -25,8 +25,8 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// createFirewallRuleForWindowsActivationHost creates an egress firewall rule with the highest priority
-// for host kms.windows.googlecloud.com (35.190.247.13) for Windows activation.
+// createFirewallRuleForWindowsActivationHost creates an egress firewall rule with
+// the highest priority for host kms.windows.googlecloud.com (35.190.247.13) for Windows activation.
 func createFirewallRuleForWindowsActivationHost(w io.Writer, projectID, firewallRuleName, networkName string) error {
 	// projectID := "your_project_id"
 	// firewallRuleName := "your_firewall_rule_name"

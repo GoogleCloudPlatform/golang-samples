@@ -47,10 +47,12 @@ func createRouteToWindowsActivationHost(w io.Writer, projectID, routeName, netwo
 	req := &computepb.InsertRouteRequest{
 		Project: projectID,
 		RouteResource: &computepb.Route{
-			Name:           proto.String(routeName),
-			DestRange:      proto.String("35.190.247.13/32"),
-			Network:        proto.String(networkName),
-			NextHopGateway: proto.String(fmt.Sprintf("projects/%s/global/gateways/default-internet-gateway", projectID)),
+			Name:      proto.String(routeName),
+			DestRange: proto.String("35.190.247.13/32"),
+			Network:   proto.String(networkName),
+			NextHopGateway: proto.String(
+				fmt.Sprintf("projects/%s/global/gateways/default-internet-gateway", projectID),
+			),
 		},
 	}
 
