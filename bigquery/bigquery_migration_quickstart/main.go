@@ -72,7 +72,7 @@ func executeTranslationWorkflow(ctx context.Context, client *migration.Client, p
 			DisplayName: "example SQL conversion",
 			Tasks: map[string]*migrationpb.MigrationTask{
 				"example_conversion": {
-					Type: "Translation_Teradata",
+					Type: "Translation_Teradata2BQ",
 					TaskDetails: &migrationpb.MigrationTask_TranslationConfigDetails{
 						TranslationConfigDetails: &migrationpb.TranslationConfigDetails{
 							SourceLocation: &migrationpb.TranslationConfigDetails_GcsSourcePath{
@@ -97,8 +97,6 @@ func executeTranslationWorkflow(ctx context.Context, client *migration.Client, p
 			},
 		},
 	}
-
-	fmt.Printf("Request:\n\n%s\n\n", req.String())
 
 	// Create the workflow using the request.
 	workflow, err := client.CreateMigrationWorkflow(ctx, req)
