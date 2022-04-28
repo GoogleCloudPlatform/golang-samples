@@ -30,7 +30,7 @@ func createInstance(w io.Writer, projectID, zone, instanceName string, deletePro
 	// projectID := "your_project_id"
 	// zone := "europe-central2-b"
 	// instanceName := "your_instance_name"
-	// deleteProtection := false
+	// deleteProtection := true
 
 	ctx := context.Background()
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)

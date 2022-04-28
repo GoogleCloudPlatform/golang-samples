@@ -15,7 +15,7 @@
 runtime: go113
 
 env_variables:
-  INSTANCE_UNIX_SOCKET: /cloudsql/<project>:<region>:<instance>
-  DB_USER: <your_database_username>
-  DB_PASS: <your_database_password>
-  DB_NAME: <your_database_name>
+  INSTANCE_UNIX_SOCKET: /cloudsql/<PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME>
+  DB_USER: <YOUR_DB_USER_NAME>
+  DB_PASS: <YOUR_DB_PASSWORD>
+  DB_NAME: <YOUR_DB_NAME>

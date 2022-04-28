@@ -44,14 +44,14 @@ func TestServiceAccounts(t *testing.T) {
 	// renameServiceAccount test.
 
 	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
-		account, err = renameServiceAccount(buf, account.Email, "Updated Test")
+		newAccount, err := renameServiceAccount(buf, account.Email, "Updated Test")
 		if err != nil {
 			r.Errorf("renameServiceAccount: %v", err)
 			return
 		}
 		wantDispName := "Updated Test"
-		if wantDispName != account.DisplayName {
-			r.Errorf("renameServiceAccount: account.DisplayName is %q, wanted %q", account.Name, wantDispName)
+		if wantDispName != newAccount.DisplayName {
+			r.Errorf("renameServiceAccount: account.DisplayName is %q, wanted %q", newAccount.Name, wantDispName)
 		}
 	})
 
