@@ -54,17 +54,17 @@ func publishWithFlowControlSettings(w io.Writer, projectID, topicID string) erro
 			Data: []byte("message #" + strconv.Itoa(i)),
 		})
 		go func(i int, res *pubsub.PublishResult) {
+			fmt.Fprintf(w, "Publishing message %d\n", i)
 			defer wg.Done()
 			// The Get method blocks until a server-generated ID or
 			// an error is returned for the published message.
-			id, err := res.Get(ctx)
+			_, err := res.Get(ctx)
 			if err != nil {
 				// Error handling code can be added here.
 				fmt.Fprintf(w, "Failed to publish: %v", err)
 				atomic.AddUint64(&totalErrors, 1)
 				return
 			}
-			fmt.Fprintf(w, "Published message %d; msg ID: %v\n", i, id)
 		}(i, result)
 	}
 
