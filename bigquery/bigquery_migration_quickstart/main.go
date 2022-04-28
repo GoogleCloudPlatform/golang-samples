@@ -98,6 +98,8 @@ func executeTranslationWorkflow(ctx context.Context, client *migration.Client, p
 		},
 	}
 
+	fmt.Printf("Request:\n\n%s\n\n", req.String())
+
 	// Create the workflow using the request.
 	workflow, err := client.CreateMigrationWorkflow(ctx, req)
 	if err != nil {
