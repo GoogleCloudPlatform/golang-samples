@@ -16,15 +16,12 @@ package livestream
 
 import (
 	"bytes"
-	"context"
 	"fmt"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 )
 
 const (
@@ -43,44 +40,31 @@ const (
 // Export the following env vars:
 // *   GOOGLE_APPLICATION_CREDENTIALS
 // *   GOLANG_SAMPLES_PROJECT_ID
-// Enable the following APIs on the test project:
+// Enable the following API on the test project:
 // *   Live Stream API
-// *   Cloud Resource Manager API (needed for project number translation)
 
 // TestLiveStream tests major operations on inputs, channels, and channel
 // events.
 func TestLiveStream(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	ctx := context.Background()
-
-	// Get the project number
-	cloudresourcemanagerClient, err := cloudresourcemanager.NewService(ctx)
-	if err != nil {
-		t.Fatalf("cloudresourcemanager.NewService: %v", err)
-	}
-	project, err := cloudresourcemanagerClient.Projects.Get(tc.ProjectID).Do()
-	if err != nil {
-		t.Fatalf("cloudresourcemanagerClient.Projects.Get.Do: %v", err)
-	}
-	projectNumber := strconv.FormatInt(project.ProjectNumber, 10)
 
 	bucketName := tc.ProjectID + "-golang-samples-livestream-test"
 	outputURI := "gs://" + bucketName + "/test-output-channel/"
 
-	testInputs(t, projectNumber)
+	testInputs(t)
 	t.Logf("\ntestInputs() completed\n")
 
-	testChannels(t, projectNumber, outputURI)
+	testChannels(t, outputURI)
 	t.Logf("\ntestChannels() completed\n")
 
-	testChannelEvents(t, projectNumber, outputURI)
+	testChannelEvents(t, outputURI)
 	t.Logf("\ntestChannelEvents() completed\n")
 }
 
 // testInputs tests major operations on inputs. Create, list, update,
 // and get operations check if the input resource name is returned. The
 // delete operation checks for a hard-coded string response.
-func testInputs(t *testing.T, projectNumber string) {
+func testInputs(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := &bytes.Buffer{}
 
@@ -173,7 +157,7 @@ func testInputs(t *testing.T, projectNumber string) {
 // testChannels tests major operations on channels. Create, list, update,
 // and get operations check if the channel resource name is returned. The
 // delete operation checks for a hard-coded string response.
-func testChannels(t *testing.T, projectNumber string, outputURI string) {
+func testChannels(t *testing.T, outputURI string) {
 	tc := testutil.SystemTest(t)
 	buf := &bytes.Buffer{}
 
@@ -315,7 +299,7 @@ func testChannels(t *testing.T, projectNumber string, outputURI string) {
 // testChannelEvents tests event operations on channels. Create, list, and get
 // operations check if the channel event resource name is returned. The delete
 // operation checks for a hard-coded string response.
-func testChannelEvents(t *testing.T, projectNumber string, outputURI string) {
+func testChannelEvents(t *testing.T, outputURI string) {
 	tc := testutil.SystemTest(t)
 	buf := &bytes.Buffer{}
 
