@@ -37,14 +37,14 @@ Use these terminal commands to initialize environment variables:
 export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service/account/key.json
 export INSTANCE_HOST='127.0.0.1'
 export DB_PORT='1433'
-export DB_USER='<DB_USER_NAME>'
-export DB_PASS='<DB_PASSWORD>'
-export DB_NAME='<DB_NAME>'
+export DB_USER='<YOUR_DB_USER_NAME>'
+export DB_PASS='<YOUR_DB_PASSWORD>'
+export DB_NAME='<YOUR_DB_NAME>'
 ```
 
 Then use this command to launch the proxy in the background:
 ```bash
-./cloud_sql_proxy -instances=<project-id>:<region>:<instance-name>=tcp:1433 -credential_file=$GOOGLE_APPLICATION_CREDENTIALS &
+./cloud_sql_proxy -instances=<PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME>=tcp:1433 -credential_file=$GOOGLE_APPLICATION_CREDENTIALS &
 ```
 
 #### Windows/PowerShell
@@ -53,14 +53,14 @@ Use these PowerShell commands to initialize environment variables:
 $env:GOOGLE_APPLICATION_CREDENTIALS="<CREDENTIALS_JSON_FILE>"
 $env:INSTANCE_HOST="127.0.0.1"
 $env:DB_PORT="1433"
-$env:DB_USER="<DB_USER_NAME>"
-$env:DB_PASS="<DB_PASSWORD>"
-$env:DB_NAME="<DB_NAME>"
+$env:DB_USER="<YOUR_DB_USER_NAME>"
+$env:DB_PASS="<YOUR_DB_PASSWORD>"
+$env:DB_NAME="<YOUR_DB_NAME>"
 ```
 
 Then use this command to launch the proxy in a separate PowerShell session:
 ```powershell
-Start-Process -filepath "C:\<path to proxy exe>" -ArgumentList "-instances=<project-id>:<region>:<instance-name>=tcp:1433 -credential_file=<CREDENTIALS_JSON_FILE>"
+Start-Process -filepath "C:\<path to proxy exe>" -ArgumentList "-instances=<PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME>=tcp:1433 -credential_file=<CREDENTIALS_JSON_FILE>"
 ```
 
 ### Testing the application
@@ -82,10 +82,10 @@ variables into the runtime. Your app.yaml file should look like this:
 ```yaml
 runtime: go111
 env_variables:
-  INSTANCE_CONNECTION_NAME: <project-id>:<region>:<instance-name>
-  DB_USER: YOUR_DB_USER
-  DB_PASS: YOUR_DB_PASS
-  DB_NAME: YOUR_DB
+  INSTANCE_CONNECTION_NAME: <PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME>
+  DB_USER: <YOUR_DB_USER_NAME>
+  DB_PASS: <YOUR_DB_PASSWORD>
+  DB_NAME: <YOUR_DB_NAME>
 ```
 
 Note: Saving credentials in environment variables is convenient, but not secure - consider a more
