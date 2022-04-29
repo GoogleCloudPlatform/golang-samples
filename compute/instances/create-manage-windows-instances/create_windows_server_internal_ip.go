@@ -25,7 +25,8 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// createWndowsServerInstanceInternalIP creates a new Windows Server instance that has only an internal IP address.
+// createWndowsServerInstanceInternalIP creates a new Windows Server instance
+// that has only an internal IP address.
 func createWndowsServerInstanceInternalIP(
 	w io.Writer,
 	projectID, zone, instanceName, machineType, sourceImageFamily, networkLink, subnetworkLink string,

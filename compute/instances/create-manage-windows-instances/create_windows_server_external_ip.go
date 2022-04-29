@@ -25,7 +25,8 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// createWndowsServerInstanceExternalIP creates a new Windows Server instance that has an external IP address.
+// createWndowsServerInstanceExternalIP creates a new Windows Server instance
+// that has an external IP address.
 func createWndowsServerInstanceExternalIP(
 	w io.Writer,
 	projectID, zone, instanceName, machineType, sourceImageFamily string,
