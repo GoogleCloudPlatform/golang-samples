@@ -25,7 +25,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func customMachineTypeSharedCoreHelper(zone, cpuSeries string, memory int) (error, string) {
+func customMachineTypeSharedCoreHelper(zone, cpuSeries string, memory int) (string, error) {
 	const (
 		n1       = "custom"
 		n2       = "n2-custom"
@@ -117,48 +117,49 @@ func customMachineTypeSharedCoreHelper(zone, cpuSeries string, memory int) (erro
 	}
 
 	if !containsString([]string{e2Micro, e2Small, e2Medium}, cpuSeries) {
-		return fmt.Errorf("incorrect cpu type: %v", cpuSeries), ""
+		return "", fmt.Errorf("incorrect cpu type: %v", cpuSeries)
 	}
 
 	coreCount := 2
 	tl := typeLimitsMap[cpuSeries]
 
-	// Check whether the requested parameters are allowed. Find more information about limitations of custom machine
-	// types at: https://cloud.google.com/compute/docs/general-purpose-machines#custom_machine_types
+	// Check whether the requested parameters are allowed.
+	// Find more information about limitations of custom machine types at:
+	// https://cloud.google.com/compute/docs/general-purpose-machines#custom_machine_types
 
 	// Check the number of cores
 	if len(tl.allowedCores) > 0 && !containsInt(tl.allowedCores, coreCount) {
-		return fmt.Errorf("invalid number of cores requested. Allowed number of cores for %v is: %v", cpuSeries, tl.allowedCores), ""
+		return "", fmt.Errorf("invalid number of cores requested. Allowed number of cores for %v is: %v", cpuSeries, tl.allowedCores)
 	}
 
 	// Memory must be a multiple of 256 MB
 	if memory%256 != 0 {
-		return fmt.Errorf("requested memory must be a multiple of 256 MB"), ""
+		return "", fmt.Errorf("requested memory must be a multiple of 256 MB")
 	}
 
 	// Check if the requested memory isn't too little
 	if memory < coreCount*tl.minMemPerCore {
-		return fmt.Errorf("requested memory is too low. Minimal memory for %v is %v MB per core", cpuSeries, tl.minMemPerCore), ""
+		return "", fmt.Errorf("requested memory is too low. Minimal memory for %v is %v MB per core", cpuSeries, tl.minMemPerCore)
 	}
 
 	// Check if the requested memory isn't too much
 	if memory > coreCount*tl.maxMemPerCore && !tl.allowExtraMemory {
-		return fmt.Errorf("requested memory is too large.. Maximum memory allowed for %v is %v MB per core", cpuSeries, tl.maxMemPerCore), ""
+		return "", fmt.Errorf("requested memory is too large.. Maximum memory allowed for %v is %v MB per core", cpuSeries, tl.maxMemPerCore)
 	}
 	if memory > tl.extraMemoryLimit && tl.allowExtraMemory {
-		return fmt.Errorf("requested memory is too large.. Maximum memory allowed for %v is %v MB", cpuSeries, tl.extraMemoryLimit), ""
+		return "", fmt.Errorf("requested memory is too large.. Maximum memory allowed for %v is %v MB", cpuSeries, tl.extraMemoryLimit)
 	}
 
 	// Return the custom machine type in form of a string acceptable by Compute Engine API.
 	if containsString([]string{e2Small, e2Micro, e2Medium}, cpuSeries) {
-		return nil, fmt.Sprintf("zones/%v/machineTypes/%v-%v", zone, cpuSeries, memory)
+		return fmt.Sprintf("zones/%v/machineTypes/%v-%v", zone, cpuSeries, memory), nil
 	}
 
 	if memory > coreCount*tl.maxMemPerCore {
-		return nil, fmt.Sprintf("zones/%v/machineTypes/%v-%v-%v-ext", zone, cpuSeries, coreCount, memory)
+		return fmt.Sprintf("zones/%v/machineTypes/%v-%v-%v-ext", zone, cpuSeries, coreCount, memory), nil
 	}
 
-	return nil, fmt.Sprintf("zones/%v/machineTypes/%v-%v-%v", zone, cpuSeries, coreCount, memory)
+	return fmt.Sprintf("zones/%v/machineTypes/%v-%v-%v", zone, cpuSeries, coreCount, memory), nil
 }
 
 // createInstanceWithCustomSharedCore creates a new VM instance with a custom type using shared CPUs.
@@ -169,7 +170,7 @@ func createInstanceWithCustomSharedCore(w io.Writer, projectID, zone, instanceNa
 	// cpuSeries := "e2-custom-micro" // the type of CPU you want to use"
 	// memory := 256 // the amount of memory for the VM instance, in megabytes.
 
-	err, machineType := customMachineTypeSharedCoreHelper(zone, cpuSeries, memory)
+	machineType, err := customMachineTypeSharedCoreHelper(zone, cpuSeries, memory)
 	if err != nil {
 		return fmt.Errorf("unable to create custom machine type string: %v", err)
 	}
