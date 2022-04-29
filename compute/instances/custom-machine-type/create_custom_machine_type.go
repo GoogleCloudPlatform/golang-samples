@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START compute_delete_protection_create]
+// [START compute_custom_machine_type_create]
 import (
 	"context"
 	"fmt"
@@ -25,12 +25,16 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// createInstance sends an instance creation request to the Compute Engine API and waits for it to complete.
-func createInstance(w io.Writer, projectID, zone, instanceName string, deleteProtection bool) error {
+// createInstanceWithCustomMachineType sends an instance creation request
+// to the Compute Engine API and waits for it to complete.
+func createInstanceWithCustomMachineType(
+	w io.Writer,
+	projectID, zone, instanceName, machineType string,
+) error {
 	// projectID := "your_project_id"
 	// zone := "europe-central2-b"
 	// instanceName := "your_instance_name"
-	// deleteProtection := true
+	// machineType := "zones/zone/machineTypes/type_name"
 
 	ctx := context.Background()
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
@@ -44,25 +48,22 @@ func createInstance(w io.Writer, projectID, zone, instanceName string, deletePro
 		Zone:    zone,
 		InstanceResource: &computepb.Instance{
 			Name: proto.String(instanceName),
-			// Set the delete protection bit.
-			DeletionProtection: proto.Bool(deleteProtection),
 			Disks: []*computepb.AttachedDisk{
 				{
-					// Describe the size and source image of the boot disk to attach to the instance.
 					InitializeParams: &computepb.AttachedDiskInitializeParams{
-						DiskSizeGb:  proto.Int64(10),
-						SourceImage: proto.String("projects/debian-cloud/global/images/family/debian-10"),
+						DiskSizeGb: proto.Int64(10),
+						SourceImage: proto.String(
+							"projects/debian-cloud/global/images/family/debian-10",
+						),
 					},
 					AutoDelete: proto.Bool(true),
 					Boot:       proto.Bool(true),
-					Type:       proto.String(computepb.AttachedDisk_PERSISTENT.String()),
 				},
 			},
-			MachineType: proto.String(fmt.Sprintf("zones/%s/machineTypes/e2-small", zone)),
+			MachineType: proto.String(machineType),
 			NetworkInterfaces: []*computepb.NetworkInterface{
 				{
-					// Use the default VPC network.
-					Name: proto.String("default"),
+					Name: proto.String("global/networks/default"),
 				},
 			},
 		},
@@ -82,4 +83,4 @@ func createInstance(w io.Writer, projectID, zone, instanceName string, deletePro
 	return nil
 }
 
-// [END compute_delete_protection_create]
+// [END compute_custom_machine_type_create]
