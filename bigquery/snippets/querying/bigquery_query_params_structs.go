@@ -50,7 +50,7 @@ func queryWithStructParam(w io.Writer, projectID string) error {
 	// Run the query and process the returned row iterator.
 	it, err := q.Read(ctx)
 	if err != nil {
-		return fmt.Errorf("query.Read(: %v", err)
+		return fmt.Errorf("query.Read(): %v", err)
 	}
 	for {
 		var row []bigquery.Value
