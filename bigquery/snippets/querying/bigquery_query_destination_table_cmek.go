@@ -44,19 +44,11 @@ func queryWithDestinationCMEK(w io.Writer, projectID, dstDatasetID, dstTableID s
 		// TODO: Replace this key with a key you have created in Cloud KMS.
 		KMSKeyName: "projects/cloud-samples-tests/locations/us-central1/keyRings/test/cryptoKeys/test",
 	}
-	// Run the query and print results when the query job is completed.
-	job, err := q.Run(ctx)
+	// Run the query and process the returned row iterator.
+	it, err := q.Read(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("query.Read(): %v", err)
 	}
-	status, err := job.Wait(ctx)
-	if err != nil {
-		return err
-	}
-	if err := status.Err(); err != nil {
-		return err
-	}
-	it, err := job.Read(ctx)
 	for {
 		var row []bigquery.Value
 		err := it.Next(&row)
