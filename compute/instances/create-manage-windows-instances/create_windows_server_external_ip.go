@@ -26,7 +26,10 @@ import (
 )
 
 // createWndowsServerInstanceExternalIP creates a new Windows Server instance that has an external IP address.
-func createWndowsServerInstanceExternalIP(w io.Writer, projectID, zone, instanceName, machineType, sourceImageFamily string) error {
+func createWndowsServerInstanceExternalIP(
+	w io.Writer,
+	projectID, zone, instanceName, machineType, sourceImageFamily string,
+) error {
 	// projectID := "your_project_id"
 	// zone := "europe-central2-b"
 	// instanceName := "your_instance_name"
@@ -40,34 +43,45 @@ func createWndowsServerInstanceExternalIP(w io.Writer, projectID, zone, instance
 	}
 	defer instancesClient.Close()
 
+	disk := &computepb.AttachedDisk{
+		// Describe the size and source image of the boot disk to attach to the instance.
+		InitializeParams: &computepb.AttachedDiskInitializeParams{
+			DiskSizeGb: proto.Int64(64),
+			SourceImage: proto.String(
+				fmt.Sprintf(
+					"projects/windows-cloud/global/images/family/%s",
+					sourceImageFamily,
+				),
+			),
+		},
+		AutoDelete: proto.Bool(true),
+		Boot:       proto.Bool(true),
+	}
+
+	network := &computepb.NetworkInterface{
+		// If you are using a custom VPC network it must be configured
+		// to allow access to kms.windows.googlecloud.com.
+		// https://cloud.google.com/compute/docs/instances/windows/creating-managing-windows-instances#kms-server.
+		Name: proto.String("global/networks/default"),
+		AccessConfigs: []*computepb.AccessConfig{
+			{
+				Type: proto.String("ONE_TO_ONE_NAT"),
+				Name: proto.String("External NAT"),
+			},
+		},
+	}
+
 	inst := &computepb.Instance{
 		Name: proto.String(instanceName),
 		Disks: []*computepb.AttachedDisk{
-			{
-				// Describe the size and source image of the boot disk to attach to the instance.
-				InitializeParams: &computepb.AttachedDiskInitializeParams{
-					DiskSizeGb:  proto.Int64(64),
-					SourceImage: proto.String(fmt.Sprintf("projects/windows-cloud/global/images/family/%s", sourceImageFamily)),
-				},
-				AutoDelete: proto.Bool(true),
-				Boot:       proto.Bool(true),
-			},
+			disk,
 		},
 		MachineType: proto.String(fmt.Sprintf("zones/%s/machineTypes/%s", zone, machineType)),
 		NetworkInterfaces: []*computepb.NetworkInterface{
-			{
-				// If you are using a custom VPC network it must be configured to allow access to kms.windows.googlecloud.com.
-				// https://cloud.google.com/compute/docs/instances/windows/creating-managing-windows-instances#kms-server.
-				Name: proto.String("global/networks/default"),
-				AccessConfigs: []*computepb.AccessConfig{
-					{
-						Type: proto.String("ONE_TO_ONE_NAT"),
-						Name: proto.String("External NAT"),
-					},
-				},
-			},
+			network,
 		},
-		// If you chose an image that supports Shielded VM, you can optionally change the instance's Shielded VM settings.
+		// If you chose an image that supports Shielded VM,
+		// you can optionally change the instance's Shielded VM settings.
 		// ShieldedInstanceConfig: &computepb.ShieldedInstanceConfig{
 		// 	EnableSecureBoot: proto.Bool(true),
 		// 	EnableVtpm: proto.Bool(true),

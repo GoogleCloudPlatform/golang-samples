@@ -27,7 +27,10 @@ import (
 
 // createRouteToWindowsActivationHost creates a new route to
 // kms.windows.googlecloud.com (35.190.247.13) for Windows activation.
-func createRouteToWindowsActivationHost(w io.Writer, projectID, routeName, networkName string) error {
+func createRouteToWindowsActivationHost(
+	w io.Writer,
+	projectID, routeName, networkName string,
+) error {
 	// projectID := "your_project_id"
 	// routeName := "your_route_name"
 	// networkName := "global/networks/default"
