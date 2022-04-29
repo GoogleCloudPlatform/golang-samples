@@ -27,7 +27,10 @@ import (
 
 // createInstanceWithCustomMachineType sends an instance creation request
 // to the Compute Engine API and waits for it to complete.
-func createInstanceWithCustomMachineType(w io.Writer, projectID, zone, instanceName, machineType string) error {
+func createInstanceWithCustomMachineType(
+	w io.Writer,
+	projectID, zone, instanceName, machineType string,
+) error {
 	// projectID := "your_project_id"
 	// zone := "europe-central2-b"
 	// instanceName := "your_instance_name"
@@ -48,8 +51,10 @@ func createInstanceWithCustomMachineType(w io.Writer, projectID, zone, instanceN
 			Disks: []*computepb.AttachedDisk{
 				{
 					InitializeParams: &computepb.AttachedDiskInitializeParams{
-						DiskSizeGb:  proto.Int64(10),
-						SourceImage: proto.String("projects/debian-cloud/global/images/family/debian-10"),
+						DiskSizeGb: proto.Int64(10),
+						SourceImage: proto.String(
+							"projects/debian-cloud/global/images/family/debian-10",
+						),
 					},
 					AutoDelete: proto.Bool(true),
 					Boot:       proto.Bool(true),

@@ -47,7 +47,10 @@ func deleteInstance(ctx context.Context, projectId, zone, instanceName string) e
 	return op.Wait(ctx)
 }
 
-func getInstance(ctx context.Context, projectID, zone, instanceName string) (*computepb.Instance, error) {
+func getInstance(
+	ctx context.Context,
+	projectID, zone, instanceName string,
+) (*computepb.Instance, error) {
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
 	if err != nil {
 		return nil, err
@@ -92,7 +95,11 @@ func TestComputeCreateInstanceWithCustomMachineTypeSnippets(t *testing.T) {
 		t.Errorf("unable to get instance: %v", err)
 	}
 
-	want = fmt.Sprintf("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/machineTypes/n2-custom-8-10240", tc.ProjectID, zone)
+	want = fmt.Sprintf(
+		"https://www.googleapis.com/compute/v1/projects/%s/zones/%s/machineTypes/n2-custom-8-10240",
+		tc.ProjectID,
+		zone,
+	)
 	if instance.GetMachineType() != want {
 		t.Errorf("incorrect instance MachineType got %q, want %q", instance.GetMachineType(), want)
 	}
@@ -117,7 +124,11 @@ func TestComputeCreateInstanceWithCustomMachineTypeSnippets(t *testing.T) {
 		t.Errorf("unable to get instance: %v", err)
 	}
 
-	want = fmt.Sprintf("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/machineTypes/e2-custom-4-8192", tc.ProjectID, zone)
+	want = fmt.Sprintf(
+		"https://www.googleapis.com/compute/v1/projects/%s/zones/%s/machineTypes/e2-custom-4-8192",
+		tc.ProjectID,
+		zone,
+	)
 	if instance.GetMachineType() != want {
 		t.Errorf("incorrect instance MachineType got %q, want %q", instance.GetMachineType(), want)
 	}
@@ -142,7 +153,11 @@ func TestComputeCreateInstanceWithCustomMachineTypeSnippets(t *testing.T) {
 		t.Errorf("unable to get instance: %v", err)
 	}
 
-	want = fmt.Sprintf("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/machineTypes/e2-custom-micro-2048", tc.ProjectID, zone)
+	want = fmt.Sprintf(
+		"https://www.googleapis.com/compute/v1/projects/%s/zones/%s/machineTypes/e2-custom-micro-2048",
+		tc.ProjectID,
+		zone,
+	)
 	if instance.GetMachineType() != want {
 		t.Errorf("incorrect instance MachineType got %q, want %q", instance.GetMachineType(), want)
 	}

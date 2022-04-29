@@ -129,7 +129,11 @@ func customMachineTypeSharedCoreURI(zone, cpuSeries string, memory int) (string,
 
 	// Check the number of cores
 	if len(tl.allowedCores) > 0 && !containsInt(tl.allowedCores, coreCount) {
-		return "", fmt.Errorf("invalid number of cores requested. Allowed number of cores for %v is: %v", cpuSeries, tl.allowedCores)
+		return "", fmt.Errorf(
+			"invalid number of cores requested. Allowed number of cores for %v is: %v",
+			cpuSeries,
+			tl.allowedCores,
+		)
 	}
 
 	// Memory must be a multiple of 256 MB
@@ -139,15 +143,27 @@ func customMachineTypeSharedCoreURI(zone, cpuSeries string, memory int) (string,
 
 	// Check if the requested memory isn't too little
 	if memory < coreCount*tl.minMemPerCore {
-		return "", fmt.Errorf("requested memory is too low. Minimal memory for %v is %v MB per core", cpuSeries, tl.minMemPerCore)
+		return "", fmt.Errorf(
+			"requested memory is too low. Minimal memory for %v is %v MB per core",
+			cpuSeries,
+			tl.minMemPerCore,
+		)
 	}
 
 	// Check if the requested memory isn't too much
 	if memory > coreCount*tl.maxMemPerCore && !tl.allowExtraMemory {
-		return "", fmt.Errorf("requested memory is too large.. Maximum memory allowed for %v is %v MB per core", cpuSeries, tl.maxMemPerCore)
+		return "", fmt.Errorf(
+			"requested memory is too large.. Maximum memory allowed for %v is %v MB per core",
+			cpuSeries,
+			tl.maxMemPerCore,
+		)
 	}
 	if memory > tl.extraMemoryLimit && tl.allowExtraMemory {
-		return "", fmt.Errorf("requested memory is too large.. Maximum memory allowed for %v is %v MB", cpuSeries, tl.extraMemoryLimit)
+		return "", fmt.Errorf(
+			"requested memory is too large.. Maximum memory allowed for %v is %v MB",
+			cpuSeries,
+			tl.extraMemoryLimit,
+		)
 	}
 
 	// Return the custom machine type in form of a string acceptable by Compute Engine API.
@@ -156,14 +172,24 @@ func customMachineTypeSharedCoreURI(zone, cpuSeries string, memory int) (string,
 	}
 
 	if memory > coreCount*tl.maxMemPerCore {
-		return fmt.Sprintf("zones/%v/machineTypes/%v-%v-%v-ext", zone, cpuSeries, coreCount, memory), nil
+		return fmt.Sprintf(
+			"zones/%v/machineTypes/%v-%v-%v-ext",
+			zone,
+			cpuSeries,
+			coreCount,
+			memory,
+		), nil
 	}
 
 	return fmt.Sprintf("zones/%v/machineTypes/%v-%v-%v", zone, cpuSeries, coreCount, memory), nil
 }
 
 // createInstanceWithCustomSharedCore creates a new VM instance with a custom type using shared CPUs.
-func createInstanceWithCustomSharedCore(w io.Writer, projectID, zone, instanceName, cpuSeries string, memory int) error {
+func createInstanceWithCustomSharedCore(
+	w io.Writer,
+	projectID, zone, instanceName, cpuSeries string,
+	memory int,
+) error {
 	// projectID := "your_project_id"
 	// zone := "europe-central2-b"
 	// instanceName := "your_instance_name"
@@ -190,8 +216,10 @@ func createInstanceWithCustomSharedCore(w io.Writer, projectID, zone, instanceNa
 			Disks: []*computepb.AttachedDisk{
 				{
 					InitializeParams: &computepb.AttachedDiskInitializeParams{
-						DiskSizeGb:  proto.Int64(10),
-						SourceImage: proto.String("projects/debian-cloud/global/images/family/debian-10"),
+						DiskSizeGb: proto.Int64(10),
+						SourceImage: proto.String(
+							"projects/debian-cloud/global/images/family/debian-10",
+						),
 					},
 					AutoDelete: proto.Bool(true),
 					Boot:       proto.Bool(true),
