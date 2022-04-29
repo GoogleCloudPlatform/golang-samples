@@ -89,12 +89,11 @@ func createWindowsOSImage(
 
 		if instance.GetStatus() != "TERMINATED" && instance.GetStatus() != "STOPPED" {
 			if !forceCreate {
-				return fmt.Errorf(
-					`instance %s should be stopped.
-					Please stop the instance using 
-					GCESysprep command or set forceCreate parameter to true
-					(not recommended). More information here: 
-					https://cloud.google.com/compute/docs/instances/windows/creating-windows-os-image#api`,
+				return fmt.Errorf("instance %s should be stopped. "+
+					"Please stop the instance using "+
+					"GCESysprep command or set forceCreate parameter to true "+
+					"(not recommended). More information here: "+
+					"https://cloud.google.com/compute/docs/instances/windows/creating-windows-os-image#api",
 					parsedName[l-1],
 				)
 			}
@@ -102,10 +101,8 @@ func createWindowsOSImage(
 	}
 
 	if forceCreate {
-		fmt.Fprintf(
-			w,
-			`Warning: ForceCreate option compromise the integrity of your image.
-			 Stop the instance before you create the image if possible.`,
+		fmt.Fprintf(w, "Warning: ForceCreate option compromise the integrity of your image. "+
+			"Stop the instance before you create the image if possible.",
 		)
 	}
 
