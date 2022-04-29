@@ -27,7 +27,11 @@ import (
 )
 
 // createWindowsOSImage creates a new Windows image from the specified source disk.
-func createWindowsOSImage(w io.Writer, projectID, zone, sourceDiskName, imageName, storageLocation string, forceCreate bool) error {
+func createWindowsOSImage(
+	w io.Writer,
+	projectID, zone, sourceDiskName, imageName, storageLocation string,
+	forceCreate bool,
+) error {
 	// projectID := "your_project_id"
 	// zone := "europe-central2-b"
 	// sourceDiskName := "your_source_disk_name"
@@ -69,7 +73,9 @@ func createWindowsOSImage(w io.Writer, projectID, zone, sourceDiskName, imageNam
 		parsedName := strings.Split(fullInstanceName, "/")
 		l := len(parsedName)
 		if l < 5 {
-			return fmt.Errorf("provide correct instance name in the following format: https://www.googleapis.com/compute/v1/projects/PROJECT/zones/ZONE/instances/INSTANCE_NAME")
+			return fmt.Errorf(
+				"API returned instance name with unexpected format",
+			)
 		}
 		instanceReq := &computepb.GetInstanceRequest{
 			Project:  parsedName[l-5],
@@ -83,13 +89,24 @@ func createWindowsOSImage(w io.Writer, projectID, zone, sourceDiskName, imageNam
 
 		if instance.GetStatus() != "TERMINATED" && instance.GetStatus() != "STOPPED" {
 			if !forceCreate {
-				return fmt.Errorf("instance %s should be stopped. Please stop the instance using GCESysprep command or set forceCreate parameter to true (not recommended). More information here: https://cloud.google.com/compute/docs/instances/windows/creating-windows-os-image#api", parsedName[l-1])
+				return fmt.Errorf(
+					`instance %s should be stopped.
+					Please stop the instance using 
+					GCESysprep command or set forceCreate parameter to true
+					(not recommended). More information here: 
+					https://cloud.google.com/compute/docs/instances/windows/creating-windows-os-image#api`,
+					parsedName[l-1],
+				)
 			}
 		}
 	}
 
 	if forceCreate {
-		fmt.Fprintf(w, "Warning: ForceCreate option compromise the integrity of your image. Stop the instance before you create the image if possible.\n")
+		fmt.Fprintf(
+			w,
+			`Warning: ForceCreate option compromise the integrity of your image.
+			 Stop the instance before you create the image if possible.`,
+		)
 	}
 
 	req := &computepb.InsertImageRequest{

@@ -63,9 +63,11 @@ func TestCreateWindowsOSImageSnippets(t *testing.T) {
 				{
 					// Describe the size and source image of the boot disk to attach to the instance.
 					InitializeParams: &computepb.AttachedDiskInitializeParams{
-						DiskName:    proto.String(diskName),
-						DiskSizeGb:  proto.Int64(64),
-						SourceImage: proto.String("projects/windows-cloud/global/images/windows-server-2012-r2-dc-core-v20220314"),
+						DiskName:   proto.String(diskName),
+						DiskSizeGb: proto.Int64(64),
+						SourceImage: proto.String(
+							"projects/windows-cloud/global/images/windows-server-2012-r2-dc-core-v20220314",
+						),
 					},
 					DeviceName: proto.String(diskName),
 					AutoDelete: proto.Bool(true),
