@@ -25,7 +25,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func customMachineTypeHelper(zone, cpuSeries string, coreCount, memory int) (string, error) {
+func customMachineTypeURI(zone, cpuSeries string, coreCount, memory int) (string, error) {
 	const (
 		n1       = "custom"
 		n2       = "n2-custom"
@@ -170,7 +170,7 @@ func createInstanceWithCustomMachineTypeWithHelper(w io.Writer, projectID, zone,
 	// coreCount := 2 // number of CPU cores you want to use.
 	// memory := 256 // the amount of memory for the VM instance, in megabytes.
 
-	machineType, err := customMachineTypeHelper(zone, cpuSeries, coreCount, memory)
+	machineType, err := customMachineTypeURI(zone, cpuSeries, coreCount, memory)
 	if err != nil {
 		return fmt.Errorf("unable to create custom machine type string: %v", err)
 	}
