@@ -172,7 +172,7 @@ func TestComputeCreateInstanceWithCustomMachineTypeSnippets(t *testing.T) {
 	want = "Instance updated"
 
 	if err := createInstanceWithCustomMachineType(buf, tc.ProjectID, zone, instanceName, customMT); err != nil {
-		t.Errorf("createInstanceWithCustomMachineType got err: %v", err)
+		t.Fatalf("createInstanceWithCustomMachineType got err: %v", err)
 	}
 
 	if err := modifyInstanceWithExtendedMemory(buf, tc.ProjectID, zone, instanceName, 819200); err != nil {

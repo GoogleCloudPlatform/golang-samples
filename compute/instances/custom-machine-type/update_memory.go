@@ -27,7 +27,7 @@ import (
 )
 
 // modifyInstanceWithExtendedMemory sends an instance creation request
-// to the Compute Engine API and wait for it to complete.
+// to the Compute Engine API and waits for it to complete.
 func modifyInstanceWithExtendedMemory(
 	w io.Writer,
 	projectID, zone, instanceName string,
@@ -66,8 +66,9 @@ func modifyInstanceWithExtendedMemory(
 		return false
 	}
 
-	if !(containsString([]string{"machineTypes/n1-", "machineTypes/n2-", "machineTypes/n2d-"},
-		instance.GetMachineType())) {
+	if !(strings.Contains(instance.GetMachineType(), "machineTypes/n1-") ||
+		strings.Contains(instance.GetMachineType(), "machineTypes/n2-") ||
+		strings.Contains(instance.GetMachineType(), "machineTypes/n2d-")) {
 		return fmt.Errorf("extra memory is available only for N1, N2 and N2D CPUs")
 	}
 
