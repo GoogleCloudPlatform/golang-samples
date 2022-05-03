@@ -27,7 +27,7 @@ import (
 )
 
 // createChannelWithBackupInput creates a channel with a failover backup input.
-func createChannelWithBackupInput(w io.Writer, projectID string, location string, channelID string, primaryInputID string, backupInputID string, outputURI string) error {
+func createChannelWithBackupInput(w io.Writer, projectID, location, channelID, primaryInputID, backupInputID, outputURI string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
 	// channelID := "my-channel"
@@ -41,21 +41,25 @@ func createChannelWithBackupInput(w io.Writer, projectID string, location string
 	}
 	defer client.Close()
 
+	primaryInput := fmt.Sprintf("projects/%s/locations/%s/inputs/%s", projectID, location, primaryInputID)
+	backupInput := fmt.Sprintf("projects/%s/locations/%s/inputs/%s", projectID, location, backupInputID)
+	automaticFailover := &livestreampb.InputAttachment_AutomaticFailover{
+		InputKeys: []string{"my-backup-input"},
+	}
+
 	req := &livestreampb.CreateChannelRequest{
 		Parent:    fmt.Sprintf("projects/%s/locations/%s", projectID, location),
 		ChannelId: channelID,
 		Channel: &livestreampb.Channel{
 			InputAttachments: []*livestreampb.InputAttachment{
 				{
-					Key:   "my-primary-input",
-					Input: fmt.Sprintf("projects/%s/locations/%s/inputs/%s", projectID, location, primaryInputID),
-					AutomaticFailover: &livestreampb.InputAttachment_AutomaticFailover{
-						InputKeys: []string{"my-backup-input"},
-					},
+					Key:               "my-primary-input",
+					Input:             primaryInput,
+					AutomaticFailover: automaticFailover,
 				},
 				{
 					Key:   "my-backup-input",
-					Input: fmt.Sprintf("projects/%s/locations/%s/inputs/%s", projectID, location, backupInputID),
+					Input: backupInput,
 				},
 			},
 			Output: &livestreampb.Channel_Output{

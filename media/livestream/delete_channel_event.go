@@ -25,7 +25,7 @@ import (
 )
 
 // deleteChannelEvent deletes a previously-created channel event.
-func deleteChannelEvent(w io.Writer, projectID string, location string, channelID string, eventID string) error {
+func deleteChannelEvent(w io.Writer, projectID, location, channelID, eventID string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
 	// channelID := "my-channel"

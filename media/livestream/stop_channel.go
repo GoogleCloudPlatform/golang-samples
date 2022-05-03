@@ -25,7 +25,7 @@ import (
 )
 
 // stopChannel stops a channel.
-func stopChannel(w io.Writer, projectID string, location string, channelID string) error {
+func stopChannel(w io.Writer, projectID, location, channelID string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
 	// channelID := "my-channel-id"

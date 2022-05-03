@@ -27,7 +27,7 @@ import (
 )
 
 // createChannel creates a channel.
-func createChannel(w io.Writer, projectID string, location string, channelID string, inputID string, outputURI string) error {
+func createChannel(w io.Writer, projectID, location, channelID, inputID, outputURI string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
 	// channelID := "my-channel"
