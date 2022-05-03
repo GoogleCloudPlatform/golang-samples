@@ -32,6 +32,7 @@ const (
 	stopChannelResponse        = "Stopped channel"
 	location                   = "us-central1"
 	inputID                    = "my-go-test-input"
+	backupInputID              = "my-go-test-backup-input"
 	channelID                  = "my-go-test-channel"
 	eventID                    = "my-go-test-channel-event"
 )
@@ -93,6 +94,22 @@ func testInputs(t *testing.T) {
 			}
 		})
 	}
+
+	// Delete the default backup input if it exists
+	if err := getInput(buf, tc.ProjectID, location, backupInputID); err == nil {
+		testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+			if err := deleteInput(buf, tc.ProjectID, location, backupInputID); err != nil {
+				r.Errorf("deleteInput got err: %v", err)
+			}
+		})
+	}
+
+	// Create a new backup input.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		if err := createInput(buf, tc.ProjectID, location, backupInputID); err != nil {
+			r.Errorf("createInput got err: %v", err)
+		}
+	})
 
 	// Tests
 
@@ -283,11 +300,43 @@ func testChannels(t *testing.T, outputURI string) {
 	})
 	buf.Reset()
 
+	// Create a new channel with backup input.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		channelName := fmt.Sprintf("projects/%s/locations/%s/channels/%s", tc.ProjectID, location, channelID)
+		if err := createChannelWithBackupInput(buf, tc.ProjectID, location, channelID, inputID, backupInputID, outputURI); err != nil {
+			r.Errorf("createChannel got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, channelName) {
+			r.Errorf("createChannel got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, channelName)
+		}
+	})
+	buf.Reset()
+
 	// Clean up
+
+	// Delete the channel with backup input.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		if err := deleteChannel(buf, tc.ProjectID, location, channelID); err != nil {
+			r.Errorf("deleteChannel got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, deleteChannelResponse) {
+			r.Errorf("deleteChannel got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, deleteChannelResponse)
+		}
+	})
 
 	// Delete the input.
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
 		if err := deleteInput(buf, tc.ProjectID, location, inputID); err != nil {
+			r.Errorf("deleteInput got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, deleteInputResponse) {
+			r.Errorf("deleteInput got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, deleteInputResponse)
+		}
+	})
+
+	// Delete the backup input.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		if err := deleteInput(buf, tc.ProjectID, location, backupInputID); err != nil {
 			r.Errorf("deleteInput got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, deleteInputResponse) {
