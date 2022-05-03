@@ -56,12 +56,6 @@ func modifyInstanceWithExtendedMemory(
 		return fmt.Errorf("unable to get instance: %v", err)
 	}
 
-	if !(strings.HasPrefix(instance.GetMachineType(), "n1-") ||
-		strings.HasPrefix(instance.GetMachineType(), "n2-") ||
-		strings.HasPrefix(instance.GetMachineType(), "n2d-")) {
-		return fmt.Errorf("extra memory is available only for N1, N2 and N2D CPUs")
-	}
-
 	containsString := func(s []string, str string) bool {
 		for _, v := range s {
 			if v == str {
@@ -70,6 +64,11 @@ func modifyInstanceWithExtendedMemory(
 		}
 
 		return false
+	}
+
+	if !(containsString([]string{"machineTypes/n1-", "machineTypes/n2-", "machineTypes/n2d-"},
+		instance.GetMachineType())) {
+		return fmt.Errorf("extra memory is available only for N1, N2 and N2D CPUs")
 	}
 
 	// Make sure that the machine is turned off
