@@ -14,7 +14,7 @@
 
 package livestream
 
-// [START livestream_create_channel]
+// [START livestream_create_channel_with_backup_input]
 import (
 	"context"
 	"fmt"
@@ -26,12 +26,13 @@ import (
 	livestreampb "google.golang.org/genproto/googleapis/cloud/video/livestream/v1"
 )
 
-// createChannel creates a channel.
-func createChannel(w io.Writer, projectID, location, channelID, inputID, outputURI string) error {
+// createChannelWithBackupInput creates a channel with a failover backup input.
+func createChannelWithBackupInput(w io.Writer, projectID, location, channelID, primaryInputID, backupInputID, outputURI string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
 	// channelID := "my-channel"
-	// inputID := "my-input"
+	// primaryInputID := "my-primary-input"
+	// backupInputID := "my-backup-input"
 	// outputURI := "gs://my-bucket/my-output-folder/"
 	ctx := context.Background()
 	client, err := livestream.NewClient(ctx)
@@ -40,14 +41,25 @@ func createChannel(w io.Writer, projectID, location, channelID, inputID, outputU
 	}
 	defer client.Close()
 
+	primaryInput := fmt.Sprintf("projects/%s/locations/%s/inputs/%s", projectID, location, primaryInputID)
+	backupInput := fmt.Sprintf("projects/%s/locations/%s/inputs/%s", projectID, location, backupInputID)
+	automaticFailover := &livestreampb.InputAttachment_AutomaticFailover{
+		InputKeys: []string{"my-backup-input"},
+	}
+
 	req := &livestreampb.CreateChannelRequest{
 		Parent:    fmt.Sprintf("projects/%s/locations/%s", projectID, location),
 		ChannelId: channelID,
 		Channel: &livestreampb.Channel{
 			InputAttachments: []*livestreampb.InputAttachment{
 				{
-					Key:   "my-input",
-					Input: fmt.Sprintf("projects/%s/locations/%s/inputs/%s", projectID, location, inputID),
+					Key:               "my-primary-input",
+					Input:             primaryInput,
+					AutomaticFailover: automaticFailover,
+				},
+				{
+					Key:   "my-backup-input",
+					Input: backupInput,
 				},
 			},
 			Output: &livestreampb.Channel_Output{
@@ -125,4 +137,4 @@ func createChannel(w io.Writer, projectID, location, channelID, inputID, outputU
 	return nil
 }
 
-// [END livestream_create_channel]
+// [END livestream_create_channel_with_backup_input]

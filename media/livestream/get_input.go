@@ -25,7 +25,7 @@ import (
 )
 
 // getInput gets a previously-created input endpoint.
-func getInput(w io.Writer, projectID string, location string, inputID string) error {
+func getInput(w io.Writer, projectID, location, inputID string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
 	// inputID := "my-input-id"

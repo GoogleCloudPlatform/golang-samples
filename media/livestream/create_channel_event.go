@@ -30,7 +30,7 @@ import (
 // channel, which can be scheduled by the user to execute operations on a
 // channel resource without having to stop the channel. This sample creates an
 // ad break event.
-func createChannelEvent(w io.Writer, projectID string, location string, channelID string, eventID string) error {
+func createChannelEvent(w io.Writer, projectID, location, channelID, eventID string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
 	// channelID := "my-channel"

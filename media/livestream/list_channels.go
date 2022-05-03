@@ -27,7 +27,7 @@ import (
 )
 
 // listChannels lists all channels for a given location.
-func listChannels(w io.Writer, projectID string, location string) error {
+func listChannels(w io.Writer, projectID, location string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
 	ctx := context.Background()
