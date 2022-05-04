@@ -241,7 +241,7 @@ func TestComputeCreateInstanceWithCustomMachineTypeSnippets(t *testing.T) {
 	}
 
 	want = fmt.Sprintf(
-		"https://www.googleapis.com/compute/v1/projects/%s/zones/%s/machineTypes/e2-custom-4-24320-ext",
+		"https://www.googleapis.com/compute/v1/projects/%s/zones/%s/machineTypes/custom-4-24320-ext",
 		tc.ProjectID,
 		zone,
 	)
