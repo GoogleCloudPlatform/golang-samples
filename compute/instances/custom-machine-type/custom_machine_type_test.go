@@ -228,7 +228,7 @@ func TestComputeCreateInstanceWithCustomMachineTypeSnippets(t *testing.T) {
 	buf.Reset()
 
 	want = "Instance created"
-	if err := createInstanceWithExtraMemWithoutHelper(buf, tc.ProjectID, zone, instanceName, n1, 4, 819200); err != nil {
+	if err := createInstanceWithExtraMemWithoutHelper(buf, tc.ProjectID, zone, instanceName, n1, 4, 24320); err != nil {
 		t.Errorf("createInstanceWithExtraMemWithoutHelper got err: %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, want) {
@@ -241,7 +241,7 @@ func TestComputeCreateInstanceWithCustomMachineTypeSnippets(t *testing.T) {
 	}
 
 	want = fmt.Sprintf(
-		"https://www.googleapis.com/compute/v1/projects/%s/zones/%s/machineTypes/e2-custom-4-819200-ext",
+		"https://www.googleapis.com/compute/v1/projects/%s/zones/%s/machineTypes/e2-custom-4-24320-ext",
 		tc.ProjectID,
 		zone,
 	)
