@@ -48,7 +48,7 @@ func createInstanceWithExtraMemWithoutHelper(
 	}
 	defer instancesClient.Close()
 
-	mt := fmt.Sprintf("zones/%s/machineTypes/%v-%v-%v-ext", zone, zone, coreCount, memory)
+	mt := fmt.Sprintf("zones/%s/machineTypes/%v-%v-%v-ext", zone, cpuSeries, coreCount, memory)
 	inst := &computepb.Instance{
 		Name: proto.String(instanceName),
 		Disks: []*computepb.AttachedDisk{
