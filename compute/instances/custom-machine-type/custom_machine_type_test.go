@@ -228,7 +228,7 @@ func TestComputeCreateInstanceWithCustomMachineTypeSnippets(t *testing.T) {
 	buf.Reset()
 
 	want = "Instance created"
-	if err := createInstanceWithExtraMemWithoutHelper(buf, tc.ProjectID, zone, instanceName, e2, 4, 819200); err != nil {
+	if err := createInstanceWithExtraMemWithoutHelper(buf, tc.ProjectID, zone, instanceName, n1, 4, 819200); err != nil {
 		t.Errorf("createInstanceWithExtraMemWithoutHelper got err: %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, want) {
