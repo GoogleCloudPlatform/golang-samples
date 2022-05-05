@@ -1,0 +1,266 @@
+// Copyright 2021 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package storagetransfer
+
+import (
+	"bytes"
+	"context"
+	"fmt"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"log"
+	"os"
+	"strings"
+	"testing"
+	"time"
+
+	"cloud.google.com/go/iam"
+	"cloud.google.com/go/storage"
+	storagetransfer "cloud.google.com/go/storagetransfer/apiv1"
+	storagetransferpb "google.golang.org/genproto/googleapis/storagetransfer/v1"
+
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/aws/aws-sdk-go/service/s3"
+)
+
+var sc *storage.Client
+var sts *storagetransfer.Client
+var s3Bucket string
+var gcsSourceBucket string
+var gcsSinkBucket string
+
+func TestMain(m *testing.M) {
+	// Initialize global vars
+	tc, _ := testutil.ContextMain(m)
+
+	ctx := context.Background()
+	c, err := storage.NewClient(ctx)
+	if err != nil {
+		log.Fatalf("storage.NewClient: %v", err)
+	}
+	sc = c
+	defer sc.Close()
+
+	gcsSourceBucket = testutil.UniqueBucketName("gcssourcebucket")
+	source := sc.Bucket(gcsSourceBucket)
+	err = source.Create(ctx, tc.ProjectID, nil)
+	if err != nil {
+		log.Fatalf("Couldn't create GCS Source bucket: %v", err)
+	}
+
+	gcsSinkBucket = testutil.UniqueBucketName("gcssinkbucket")
+	sink := sc.Bucket(gcsSinkBucket)
+	err = sink.Create(ctx, tc.ProjectID, nil)
+	if err != nil {
+		log.Fatalf("Couldn't create GCS Sink bucket: %v", err)
+	}
+
+	sts, err = storagetransfer.NewClient(ctx)
+	if err != nil {
+		log.Fatalf("storagetransfer.NewClient: %v", err)
+	}
+	defer sts.Close()
+
+	grantSTSPermissions(gcsSourceBucket, tc.ProjectID, sts, sc)
+	grantSTSPermissions(gcsSinkBucket, tc.ProjectID, sts, sc)
+
+	s3Bucket = testutil.UniqueBucketName("stss3bucket")
+	sess, err := session.NewSession(&aws.Config{
+		Region: aws.String("us-west-2")},
+	)
+	s3c := s3.New(sess)
+	_, err = s3c.CreateBucket(&s3.CreateBucketInput{
+		Bucket: aws.String(s3Bucket),
+	})
+	if err != nil {
+		log.Fatalf("Couldn't create S3 bucket: %v", err)
+	}
+
+	// Run tests
+	exit := m.Run()
+
+	err = sink.Delete(ctx)
+	if err != nil {
+		log.Printf("Couldn't delete GCS Sink bucket: %v", err)
+	}
+
+	err = source.Delete(ctx)
+	if err != nil {
+		log.Printf("Couldn't delete GCS Source bucket: %v", err)
+	}
+	s3manager.NewDeleteListIterator(s3c, &s3.ListObjectsInput{
+		Bucket: aws.String(s3Bucket),
+	})
+	_, err = s3c.DeleteBucket(&s3.DeleteBucketInput{
+		Bucket: aws.String(s3Bucket),
+	})
+	if err != nil {
+		log.Printf("Couldn't delete S3 bucket: %v", err)
+	}
+
+	os.Exit(exit)
+}
+
+func TestQuickstart(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+
+	buf := new(bytes.Buffer)
+	resp, err := quickstart(buf, tc.ProjectID, gcsSourceBucket, gcsSinkBucket)
+
+	if err != nil {
+		t.Errorf("quickstart: %#v", err)
+	}
+
+	got := buf.String()
+	if want := "transferJobs/"; !strings.Contains(got, want) {
+		t.Errorf("quickstart: got %q, want %q", got, want)
+	}
+
+	tj := &storagetransferpb.TransferJob{
+		Name:   resp.Name,
+		Status: storagetransferpb.TransferJob_DELETED,
+	}
+	sts.UpdateTransferJob(ctx, &storagetransferpb.UpdateTransferJobRequest{
+		JobName:     resp.Name,
+		ProjectId:   tc.ProjectID,
+		TransferJob: tj,
+	})
+}
+
+func TestTransferFromAws(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+
+	buf := new(bytes.Buffer)
+
+	resp, err := transfer_from_aws(buf, tc.ProjectID, "job description", s3Bucket, gcsSinkBucket, time.Now(), os.Getenv("AWS_ACCESS_KEY_ID"), os.Getenv("AWS_SECRET_KEY"))
+
+	if err != nil {
+		t.Errorf("transfer_from_aws: %#v", err)
+	}
+
+	got := buf.String()
+	if want := "transferJobs/"; !strings.Contains(got, want) {
+		t.Errorf("transfer_from_aws: got %q, want %q", got, want)
+	}
+
+	tj := &storagetransferpb.TransferJob{
+		Name:   resp.Name,
+		Status: storagetransferpb.TransferJob_DELETED,
+	}
+	sts.UpdateTransferJob(ctx, &storagetransferpb.UpdateTransferJobRequest{
+		JobName:     resp.Name,
+		ProjectId:   tc.ProjectID,
+		TransferJob: tj,
+	})
+}
+
+func TestTransferToNearline(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+
+	buf := new(bytes.Buffer)
+
+	resp, err := transfer_to_nearline(buf, tc.ProjectID, "job description", gcsSourceBucket, gcsSinkBucket, time.Now())
+
+	if err != nil {
+		t.Errorf("transfer_from_aws: %#v", err)
+	}
+
+	got := buf.String()
+	if want := "transferJobs/"; !strings.Contains(got, want) {
+		t.Errorf("transfer_to_nearline: got %q, want %q", got, want)
+	}
+
+	tj := &storagetransferpb.TransferJob{
+		Name:   resp.Name,
+		Status: storagetransferpb.TransferJob_DELETED,
+	}
+	sts.UpdateTransferJob(ctx, &storagetransferpb.UpdateTransferJobRequest{
+		JobName:     resp.Name,
+		ProjectId:   tc.ProjectID,
+		TransferJob: tj,
+	})
+}
+
+func TestGetLatestTransferOperation(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+
+	buf := new(bytes.Buffer)
+
+	job, err := transfer_to_nearline(buf, tc.ProjectID, "job description", gcsSourceBucket, gcsSinkBucket, time.Now())
+
+	op, err := check_latest_transfer_operation(buf, tc.ProjectID, job.Name)
+
+	if err != nil {
+		t.Errorf("check_latest_transfer_operation: %#v", err)
+	}
+	if !strings.Contains(op.Name, "transferOperations/") {
+		t.Errorf("check_latest_transfer_operation: Operation returned didn't have a valid operation name: %q", op.Name)
+	}
+
+	got := buf.String()
+	if want := op.Name; !strings.Contains(got, want) {
+		t.Errorf("check_latest_transfer_operation: got %q, want %q", got, want)
+	}
+	fmt.Println(got)
+
+	tj := &storagetransferpb.TransferJob{
+		Name:   job.Name,
+		Status: storagetransferpb.TransferJob_DELETED,
+	}
+	sts.UpdateTransferJob(ctx, &storagetransferpb.UpdateTransferJobRequest{
+		JobName:     job.Name,
+		ProjectId:   tc.ProjectID,
+		TransferJob: tj,
+	})
+}
+
+func grantSTSPermissions(bucketName string, projectID string, sts *storagetransfer.Client, str *storage.Client) {
+	ctx := context.Background()
+
+	req := &storagetransferpb.GetGoogleServiceAccountRequest{
+		ProjectId: projectID,
+	}
+
+	resp, err := sts.GetGoogleServiceAccount(ctx, req)
+	if err != nil {
+		log.Fatalf("Error getting service account")
+	}
+	email := resp.AccountEmail
+
+	identity := "serviceAccount:" + email
+
+	bucket := str.Bucket(bucketName)
+	policy, err := bucket.IAM().Policy(ctx)
+	if err != nil {
+		log.Fatalf("Bucket(%q).IAM().Policy: %v", bucketName, err)
+	}
+
+	var objectViewer iam.RoleName = "roles/storage.objectViewer"
+	var bucketReader iam.RoleName = "roles/storage.legacyBucketReader"
+	var bucketWriter iam.RoleName = "roles/storage.legacyBucketWriter"
+
+	policy.Add(identity, objectViewer)
+	policy.Add(identity, bucketReader)
+	policy.Add(identity, bucketWriter)
+
+	if err := bucket.IAM().SetPolicy(ctx, policy); err != nil {
+		log.Fatalf("Bucket(%q).IAM().SetPolicy: %v", bucketName, err)
+	}
+}
