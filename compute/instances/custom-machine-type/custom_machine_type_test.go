@@ -166,4 +166,92 @@ func TestComputeCreateInstanceWithCustomMachineTypeSnippets(t *testing.T) {
 	if err != nil {
 		t.Errorf("deleteInstance got err: %v", err)
 	}
+
+	buf.Reset()
+
+	want = "Instance updated"
+
+	if err := createInstanceWithCustomMachineType(buf, tc.ProjectID, zone, instanceName, customMT); err != nil {
+		t.Fatalf("createInstanceWithCustomMachineType got err: %v", err)
+	}
+
+	if err := modifyInstanceWithExtendedMemory(buf, tc.ProjectID, zone, instanceName, 819200); err != nil {
+		t.Errorf("modifyInstanceWithExtendedMemory got err: %v", err)
+	}
+	if got := buf.String(); !strings.Contains(got, want) {
+		t.Errorf("modifyInstanceWithExtendedMemory got %q, want %q", got, want)
+	}
+
+	instance, err = getInstance(ctx, tc.ProjectID, zone, instanceName)
+	if err != nil {
+		t.Errorf("unable to get instance: %v", err)
+	}
+
+	if !strings.HasSuffix(instance.GetMachineType(), "819200-ext") {
+		t.Errorf("incorrect instance MachineType got %q, want suffix %q", instance.GetMachineType(), "819200-ext")
+	}
+
+	err = deleteInstance(ctx, tc.ProjectID, zone, instanceName)
+	if err != nil {
+		t.Errorf("deleteInstance got err: %v", err)
+	}
+
+	buf.Reset()
+
+	want = "Instance created"
+	if err := createInstanceWithCustomMachineTypeWithoutHelper(buf, tc.ProjectID, zone, instanceName, e2, 4, 8192); err != nil {
+		t.Errorf("createInstanceWithCustomMachineTypeWithoutHelper got err: %v", err)
+	}
+	if got := buf.String(); !strings.Contains(got, want) {
+		t.Errorf("createInstanceWithCustomMachineTypeWithoutHelper got %q, want %q", got, want)
+	}
+
+	instance, err = getInstance(ctx, tc.ProjectID, zone, instanceName)
+	if err != nil {
+		t.Errorf("unable to get instance: %v", err)
+	}
+
+	want = fmt.Sprintf(
+		"https://www.googleapis.com/compute/v1/projects/%s/zones/%s/machineTypes/e2-custom-4-8192",
+		tc.ProjectID,
+		zone,
+	)
+	if instance.GetMachineType() != want {
+		t.Errorf("incorrect instance MachineType got %q, want %q", instance.GetMachineType(), want)
+	}
+
+	err = deleteInstance(ctx, tc.ProjectID, zone, instanceName)
+	if err != nil {
+		t.Errorf("deleteInstance got err: %v", err)
+	}
+
+	buf.Reset()
+
+	want = "Instance created"
+	if err := createInstanceWithExtraMemWithoutHelper(buf, tc.ProjectID, zone, instanceName, n1, 4, 24320); err != nil {
+		t.Errorf("createInstanceWithExtraMemWithoutHelper got err: %v", err)
+	}
+	if got := buf.String(); !strings.Contains(got, want) {
+		t.Errorf("createInstanceWithExtraMemWithoutHelper got %q, want %q", got, want)
+	}
+
+	instance, err = getInstance(ctx, tc.ProjectID, zone, instanceName)
+	if err != nil {
+		t.Errorf("unable to get instance: %v", err)
+	}
+
+	want = fmt.Sprintf(
+		"https://www.googleapis.com/compute/v1/projects/%s/zones/%s/machineTypes/custom-4-24320-ext",
+		tc.ProjectID,
+		zone,
+	)
+	if instance.GetMachineType() != want {
+		t.Errorf("incorrect instance MachineType got %q, want %q", instance.GetMachineType(), want)
+	}
+
+	err = deleteInstance(ctx, tc.ProjectID, zone, instanceName)
+	if err != nil {
+		t.Errorf("deleteInstance got err: %v", err)
+	}
+
 }
