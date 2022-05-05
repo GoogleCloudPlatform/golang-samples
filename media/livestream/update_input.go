@@ -27,7 +27,7 @@ import (
 
 // updateInput updates an existing input endpoint. This sample adds a
 // preprocessing configuration to an existing input.
-func updateInput(w io.Writer, projectID string, location string, inputID string) error {
+func updateInput(w io.Writer, projectID, location, inputID string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
 	// inputID := "my-input"

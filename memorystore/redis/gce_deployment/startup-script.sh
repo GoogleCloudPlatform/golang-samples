@@ -15,7 +15,13 @@ apt-get install -yq ca-certificates supervisor
 
 # Install logging monitor. The monitor will automatically pickup logs send to
 # syslog.
-curl -s "https://storage.googleapis.com/signals-agents/logging/google-fluentd-install.sh" | bash
+curl "https://storage.googleapis.com/signals-agents/logging/google-fluentd-install.sh" --output google-fluentd-install.sh
+checksum=$(sha256sum google-fluentd-install.sh | awk '{print $1;}')
+if [ "$checksum" != "ec78e9067f45f6653a6749cf922dbc9d79f80027d098c90da02f71532b5cc967" ]; then
+    echo "Checksum does not match"
+    exit 1
+fi
+chmod +x google-fluentd-install.sh && ./google-fluentd-install.sh
 service google-fluentd restart &
 
 gsutil cp gs://"$GCS_BUCKET_NAME"/gce/app.tar /app.tar

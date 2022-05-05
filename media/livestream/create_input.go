@@ -26,7 +26,7 @@ import (
 
 // createInput creates an input endpoint. You send an input video stream to this
 // endpoint.
-func createInput(w io.Writer, projectID string, location string, inputID string) error {
+func createInput(w io.Writer, projectID, location, inputID string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
 	// inputID := "my-input"

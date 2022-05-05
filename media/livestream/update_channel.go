@@ -26,7 +26,7 @@ import (
 )
 
 // updateChannel updates an existing channel with a different input.
-func updateChannel(w io.Writer, projectID string, location string, channelID string, inputID string) error {
+func updateChannel(w io.Writer, projectID, location, channelID, inputID string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
 	// channelID := "my-channel"

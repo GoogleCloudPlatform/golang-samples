@@ -25,7 +25,7 @@ import (
 )
 
 // deleteInput deletes a previously-created input endpoint.
-func deleteInput(w io.Writer, projectID string, location string, inputID string) error {
+func deleteInput(w io.Writer, projectID, location, inputID string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
 	// inputID := "my-input"
