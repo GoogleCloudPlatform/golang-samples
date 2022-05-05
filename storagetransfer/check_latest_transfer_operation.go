@@ -12,6 +12,11 @@ import (
 )
 
 func check_latest_transfer_operation(w io.Writer, projectID string, jobName string) (*storagetransferpb.TransferOperation, error) {
+	// Your Google Cloud Project ID
+	// projectID := "my-project-id"
+
+	// The name of the job whose latest operation to check
+	// jobName := "transferJobs/1234567890"
 	ctx := context.Background()
 	client, err := storagetransfer.NewClient(ctx)
 	if err != nil {
