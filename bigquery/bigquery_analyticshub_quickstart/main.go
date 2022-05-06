@@ -62,7 +62,7 @@ func reportDataExchanges(ctx context.Context, client *dataexchange.AnalyticsHubC
 	var buf bytes.Buffer
 
 	req := &dataexchangepb.ListDataExchangesRequest{
-		Parent: fmt.Sprintf("projects/%s/location/%s", projectID, location),
+		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
 	}
 
 	it := client.ListDataExchanges(ctx, req)
