@@ -56,6 +56,8 @@ func main() {
 	}
 	fmt.Println(s)
 
+	fmt.Println("Quickstart completed.")
+
 }
 
 func reportDataExchanges(ctx context.Context, client *dataexchange.AnalyticsHubClient, projectID, location string) (string, error) {

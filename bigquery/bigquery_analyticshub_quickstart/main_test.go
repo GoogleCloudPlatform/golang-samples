@@ -38,12 +38,8 @@ func TestApp(t *testing.T) {
 	}
 
 	// Look for a known substring in the output
-	if !strings.Contains(string(stdOut), " ended in state COMPLETED") {
+	if !strings.Contains(string(stdOut), "Quickstart completed.") {
 		t.Errorf("Did not find expected output.  Stdout: %s", string(stdOut))
-	}
-
-	if strings.Contains(string(stdOut), " with processing error") {
-		t.Errorf("Workflow indicated it had processing errors.  Stdout: %s", string(stdOut))
 	}
 
 	if len(stdErr) > 0 {
