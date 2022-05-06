@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START bigqueryanalyticshub_quickstart]
+// [START analyticshub_quickstart]
 
-// The bigquery_analyticshub_quickstart application demonstrates usage of the
+// The analyticshub_quickstart application demonstrates usage of the
 // BigQuery analyticshub API.
 package main
 
@@ -81,3 +81,5 @@ func reportDataExchanges(ctx context.Context, client *dataexchange.AnalyticsHubC
 	}
 	return buf.String(), nil
 }
+
+// [END analyticshub_quickstart]
