@@ -29,10 +29,11 @@ import (
 
 // preemptionHisory gets a list of preemption operations from given zone in a project.
 // Optionally limit the results to instance name.
-func preemptionHisory(w io.Writer, projectID, zone, instanceName string) error {
+func preemptionHisory(w io.Writer, projectID, zone, instanceName, filter string) error {
 	// projectID := "your_project_id"
 	// zone := "europe-central2-b"
 	// instanceName := "your_instance_name"
+	// filter := "operationType=\"compute.instances.preempted\""
 
 	ctx := context.Background()
 	operationsClient, err := compute.NewZoneOperationsRESTClient(ctx)
@@ -41,18 +42,11 @@ func preemptionHisory(w io.Writer, projectID, zone, instanceName string) error {
 	}
 	defer operationsClient.Close()
 
-	filter := `operationType="compute.instances.preempted"`
-	if instanceName != "" {
-		filter += fmt.Sprintf(" AND targetLink:instances/%s", instanceName)
-	}
-
 	req := &computepb.ListZoneOperationsRequest{
 		Project: projectID,
 		Zone:    zone,
 		Filter:  proto.String(filter),
 	}
-
-	fmt.Fprintf(w, "%s", filter)
 
 	it := operationsClient.List(ctx, req)
 	for {

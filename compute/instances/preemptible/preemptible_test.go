@@ -81,14 +81,16 @@ func TestPreemptibleSnippets(t *testing.T) {
 
 	buf.Reset()
 
-	err = preemptionHisory(buf, tc.ProjectID, zone, instanceName)
+	filter := fmt.Sprintf(`targetLink="https://www.googleapis.com/compute/v1/projects/%s/zones/%s/instances/%s"`, tc.ProjectID, zone, instanceName)
+
+	err = preemptionHisory(buf, tc.ProjectID, zone, instanceName, filter)
 	if err != nil {
 		t.Errorf("preemptionHisory got err: %v", err)
 	}
 
 	want = fmt.Sprintf("- %s", instanceName)
 	if got := buf.String(); !strings.Contains(got, want) {
-		t.Errorf("preemptionHisory got %q, want %q", got, want)
+		t.Fatalf("preemptionHisory got %q, want %q", got, want)
 	}
 
 	err = deleteInstance(ctx, tc.ProjectID, zone, instanceName)
