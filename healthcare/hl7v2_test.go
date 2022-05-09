@@ -50,7 +50,7 @@ func TestHL7V2Store(t *testing.T) {
 		}
 	})
 
-	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
 		if err := createHL7V2Store(ioutil.Discard, tc.ProjectID, location, datasetID, hl7V2StoreID); err != nil {
 			r.Errorf("createHL7V2Store got err: %v", err)
 		}

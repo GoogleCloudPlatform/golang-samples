@@ -18,7 +18,7 @@ env_variables:
   # Replace INSTANCE_CONNECTION_NAME with the value obtained when configuring your
   # Cloud SQL instance, available from the Google Cloud Console or from the Cloud SDK.
   # For Cloud SQL 2nd generation instances, this should be in the form of "project:region:instance".
-  INSTANCE_CONNECTION_NAME: <project>:<region>:<instance>
-  DB_USER: <your_database_username>
-  DB_PASS: <your_database_password>
-  DB_NAME: <your_database_name>
+  INSTANCE_CONNECTION_NAME: <PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME>
+  DB_USER: <YOUR_DB_USER_NAME>
+  DB_PASS: <YOUR_DB_PASSWORD>
+  DB_NAME: <YOUR_DB_NAME>

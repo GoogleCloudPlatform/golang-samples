@@ -28,7 +28,7 @@ import (
 )
 
 // connectUnixSocket initializes a Unix socket connection pool for
-// a Cloud SQL instance of SQL Server.
+// a Cloud SQL instance of Postgres.
 func connectUnixSocket() (*sql.DB, error) {
 	mustGetenv := func(k string) string {
 		v := os.Getenv(k)
@@ -37,7 +37,10 @@ func connectUnixSocket() (*sql.DB, error) {
 		}
 		return v
 	}
-
+	// Note: Saving credentials in environment variables is convenient, but not
+	// secure - consider a more secure solution such as
+	// Cloud Secret Manager (https://cloud.google.com/secret-manager) to help
+	// keep secrets safe.
 	var (
 		dbUser         = mustGetenv("DB_USER")              // e.g. 'my-db-user'
 		dbPwd          = mustGetenv("DB_PASS")              // e.g. 'my-db-password'

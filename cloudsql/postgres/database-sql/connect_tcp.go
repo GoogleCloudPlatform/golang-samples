@@ -29,7 +29,7 @@ import (
 )
 
 // connectTCPSocket initializes a TCP connection pool for a Cloud SQL
-// instance of SQL Server.
+// instance of Postgres.
 func connectTCPSocket() (*sql.DB, error) {
 	mustGetenv := func(k string) string {
 		v := os.Getenv(k)
@@ -38,7 +38,6 @@ func connectTCPSocket() (*sql.DB, error) {
 		}
 		return v
 	}
-
 	// Note: Saving credentials in environment variables is convenient, but not
 	// secure - consider a more secure solution such as
 	// Cloud Secret Manager (https://cloud.google.com/secret-manager) to help

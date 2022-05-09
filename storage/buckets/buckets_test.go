@@ -86,6 +86,32 @@ func TestCreateBucketClassLocation(t *testing.T) {
 	}
 }
 
+func TestCreateBucketDualRegion(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	bucketName := testutil.UniqueBucketName(testPrefix)
+	ctx := context.Background()
+
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
+
+	region1 := "US-WEST1"
+	region2 := "US-CENTRAL1"
+	if err := createBucketDualRegion(ioutil.Discard, tc.ProjectID, bucketName, region1, region2); err != nil {
+		t.Fatalf("createBucketClassLocation: %v", err)
+	}
+
+	attrs, err := client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+
+	if !strings.Contains(attrs.Location, region1) || !strings.Contains(attrs.Location, region2) {
+		t.Errorf("location: got %s, want location with regions %s and %s", attrs.Location, region1, region2)
+	}
+	if got, want := attrs.LocationType, "dual-region"; got != want {
+		t.Errorf("location type: got %q, want %q", got, want)
+	}
+}
+
 func TestStorageClass(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()

@@ -50,19 +50,11 @@ func queryWithNamedParams(w io.Writer, projectID string) error {
 			Value: 250,
 		},
 	}
-	// Run the query and print results when the query job is completed.
-	job, err := q.Run(ctx)
+	// Run the query and process the returned row iterator.
+	it, err := q.Read(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("query.Read(): %v", err)
 	}
-	status, err := job.Wait(ctx)
-	if err != nil {
-		return err
-	}
-	if err := status.Err(); err != nil {
-		return err
-	}
-	it, err := job.Read(ctx)
 	for {
 		var row []bigquery.Value
 		err := it.Next(&row)

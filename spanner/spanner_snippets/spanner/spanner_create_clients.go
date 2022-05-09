@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 package spanner
 
 // [START spanner_create_clients]
+// [START spanner_postgresql_create_clients]
 
 import (
 	"context"
@@ -45,4 +46,5 @@ func createClients(w io.Writer, db string) error {
 	return nil
 }
 
+// [END spanner_postgresql_create_clients]
 // [END spanner_create_clients]

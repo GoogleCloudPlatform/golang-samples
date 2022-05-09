@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/gofrs/uuid"
@@ -41,14 +42,18 @@ func TestServiceAccounts(t *testing.T) {
 	}
 
 	// renameServiceAccount test.
-	account, err = renameServiceAccount(buf, account.Email, "Updated Test")
-	if err != nil {
-		t.Fatalf("renameServiceAccount: %v", err)
-	}
-	wantDispName := "Updated Test"
-	if wantDispName != account.DisplayName {
-		t.Fatalf("renameServiceAccount: account.DisplayName is %q, wanted %q", account.Name, wantDispName)
-	}
+
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		newAccount, err := renameServiceAccount(buf, account.Email, "Updated Test")
+		if err != nil {
+			r.Errorf("renameServiceAccount: %v", err)
+			return
+		}
+		wantDispName := "Updated Test"
+		if wantDispName != newAccount.DisplayName {
+			r.Errorf("renameServiceAccount: account.DisplayName is %q, wanted %q", newAccount.Name, wantDispName)
+		}
+	})
 
 	// disableServiceAccount test.
 	err = disableServiceAccount(buf, account.Email)
