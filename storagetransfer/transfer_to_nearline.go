@@ -14,12 +14,9 @@ import (
 	storagetransferpb "google.golang.org/genproto/googleapis/storagetransfer/v1"
 )
 
-func transfer_to_nearline(w io.Writer, projectID string, jobDescription string, gcsSourceBucket string, gcsNearlineSinkBucket string, startTime time.Time) (*storagetransferpb.TransferJob, error) {
+func transferToNearline(w io.Writer, projectID string, gcsSourceBucket string, gcsNearlineSinkBucket string) (*storagetransferpb.TransferJob, error) {
 	// Your Google Cloud Project ID
 	// projectID := "my-project-id"
-
-	// A description of this job
-	// jobDescription = "Transfers objects that haven't been modified in 30 days to a Nearline bucket"
 
 	// The name of the GCS bucket to transfer objects from
 	// gcsSourceBucket := "my-source-bucket"
@@ -27,15 +24,18 @@ func transfer_to_nearline(w io.Writer, projectID string, jobDescription string, 
 	// The name of the Nearline GCS bucket to transfer objects to
 	// gcsNearlineSinkBucket := "my-sink-bucket"
 
-	// The time to start the transfer
-	// startTime := time.Now()
-
 	ctx := context.Background()
 	client, err := storagetransfer.NewClient(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("storagetransfer.NewClient: %v", err)
 	}
 	defer client.Close()
+
+	// A description of this job
+	jobDescription := "Transfers objects that haven't been modified in 30 days to a Nearline bucket"
+
+	// The time to start the transfer
+	startTime := time.Now()
 
 	req := &storagetransferpb.CreateTransferJobRequest{
 		TransferJob: &storagetransferpb.TransferJob{
@@ -74,13 +74,13 @@ func transfer_to_nearline(w io.Writer, projectID string, jobDescription string, 
 	}
 	resp, err := client.CreateTransferJob(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to create transfer job: %v", err)
+		return nil, fmt.Errorf("failed to create transfer job: %v", err)
 	}
 	if _, err = client.RunTransferJob(ctx, &storagetransferpb.RunTransferJobRequest{
 		ProjectId: projectID,
 		JobName:   resp.Name,
 	}); err != nil {
-		return nil, fmt.Errorf("Failed to run transfer job: %v", err)
+		return nil, fmt.Errorf("failed to run transfer job: %v", err)
 	}
 	fmt.Fprintf(w, "Created and ran transfer job from %v to %v with name %v", gcsSourceBucket, gcsNearlineSinkBucket, resp.Name)
 	return resp, nil

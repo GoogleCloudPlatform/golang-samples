@@ -16,21 +16,18 @@ package storagetransfer
 
 import (
 	"bytes"
+	"cloud.google.com/go/iam"
+	"cloud.google.com/go/storage"
+	storagetransfer "cloud.google.com/go/storagetransfer/apiv1"
 	"context"
-	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	storagetransferpb "google.golang.org/genproto/googleapis/storagetransfer/v1"
 	"log"
 	"os"
 	"strings"
 	"testing"
-	"time"
-
-	"cloud.google.com/go/iam"
-	"cloud.google.com/go/storage"
-	storagetransfer "cloud.google.com/go/storagetransfer/apiv1"
-	storagetransferpb "google.golang.org/genproto/googleapis/storagetransfer/v1"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -58,14 +55,14 @@ func TestMain(m *testing.M) {
 	source := sc.Bucket(gcsSourceBucket)
 	err = source.Create(ctx, tc.ProjectID, nil)
 	if err != nil {
-		log.Fatalf("Couldn't create GCS Source bucket: %v", err)
+		log.Fatalf("couldn't create GCS Source bucket: %v", err)
 	}
 
 	gcsSinkBucket = testutil.UniqueBucketName("gcssinkbucket")
 	sink := sc.Bucket(gcsSinkBucket)
 	err = sink.Create(ctx, tc.ProjectID, nil)
 	if err != nil {
-		log.Fatalf("Couldn't create GCS Sink bucket: %v", err)
+		log.Fatalf("couldn't create GCS Sink bucket: %v", err)
 	}
 
 	sts, err = storagetransfer.NewClient(ctx)
@@ -86,7 +83,7 @@ func TestMain(m *testing.M) {
 		Bucket: aws.String(s3Bucket),
 	})
 	if err != nil {
-		log.Fatalf("Couldn't create S3 bucket: %v", err)
+		log.Fatalf("couldn't create S3 bucket: %v", err)
 	}
 
 	// Run tests
@@ -94,12 +91,12 @@ func TestMain(m *testing.M) {
 
 	err = sink.Delete(ctx)
 	if err != nil {
-		log.Printf("Couldn't delete GCS Sink bucket: %v", err)
+		log.Printf("couldn't delete GCS Sink bucket: %v", err)
 	}
 
 	err = source.Delete(ctx)
 	if err != nil {
-		log.Printf("Couldn't delete GCS Source bucket: %v", err)
+		log.Printf("couldn't delete GCS Source bucket: %v", err)
 	}
 	s3manager.NewDeleteListIterator(s3c, &s3.ListObjectsInput{
 		Bucket: aws.String(s3Bucket),
@@ -108,7 +105,7 @@ func TestMain(m *testing.M) {
 		Bucket: aws.String(s3Bucket),
 	})
 	if err != nil {
-		log.Printf("Couldn't delete S3 bucket: %v", err)
+		log.Printf("couldn't delete S3 bucket: %v", err)
 	}
 
 	os.Exit(exit)
@@ -116,10 +113,10 @@ func TestMain(m *testing.M) {
 
 func TestQuickstart(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	ctx := context.Background()
 
 	buf := new(bytes.Buffer)
 	resp, err := quickstart(buf, tc.ProjectID, gcsSourceBucket, gcsSinkBucket)
+	defer cleanupSTSJob(resp.Name, tc.ProjectID)
 
 	if err != nil {
 		t.Errorf("quickstart: %#v", err)
@@ -129,25 +126,15 @@ func TestQuickstart(t *testing.T) {
 	if want := "transferJobs/"; !strings.Contains(got, want) {
 		t.Errorf("quickstart: got %q, want %q", got, want)
 	}
-
-	tj := &storagetransferpb.TransferJob{
-		Name:   resp.Name,
-		Status: storagetransferpb.TransferJob_DELETED,
-	}
-	sts.UpdateTransferJob(ctx, &storagetransferpb.UpdateTransferJobRequest{
-		JobName:     resp.Name,
-		ProjectId:   tc.ProjectID,
-		TransferJob: tj,
-	})
 }
 
 func TestTransferFromAws(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	ctx := context.Background()
 
 	buf := new(bytes.Buffer)
 
-	resp, err := transfer_from_aws(buf, tc.ProjectID, "job description", s3Bucket, gcsSinkBucket, time.Now(), os.Getenv("AWS_ACCESS_KEY_ID"), os.Getenv("AWS_SECRET_KEY"))
+	resp, err := transferFromAws(buf, tc.ProjectID, s3Bucket, gcsSinkBucket)
+	defer cleanupSTSJob(resp.Name, tc.ProjectID)
 
 	if err != nil {
 		t.Errorf("transfer_from_aws: %#v", err)
@@ -157,25 +144,15 @@ func TestTransferFromAws(t *testing.T) {
 	if want := "transferJobs/"; !strings.Contains(got, want) {
 		t.Errorf("transfer_from_aws: got %q, want %q", got, want)
 	}
-
-	tj := &storagetransferpb.TransferJob{
-		Name:   resp.Name,
-		Status: storagetransferpb.TransferJob_DELETED,
-	}
-	sts.UpdateTransferJob(ctx, &storagetransferpb.UpdateTransferJobRequest{
-		JobName:     resp.Name,
-		ProjectId:   tc.ProjectID,
-		TransferJob: tj,
-	})
 }
 
 func TestTransferToNearline(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	ctx := context.Background()
 
 	buf := new(bytes.Buffer)
 
-	resp, err := transfer_to_nearline(buf, tc.ProjectID, "job description", gcsSourceBucket, gcsSinkBucket, time.Now())
+	resp, err := transferToNearline(buf, tc.ProjectID, gcsSourceBucket, gcsSinkBucket)
+	defer cleanupSTSJob(resp.Name, tc.ProjectID)
 
 	if err != nil {
 		t.Errorf("transfer_from_aws: %#v", err)
@@ -185,27 +162,17 @@ func TestTransferToNearline(t *testing.T) {
 	if want := "transferJobs/"; !strings.Contains(got, want) {
 		t.Errorf("transfer_to_nearline: got %q, want %q", got, want)
 	}
-
-	tj := &storagetransferpb.TransferJob{
-		Name:   resp.Name,
-		Status: storagetransferpb.TransferJob_DELETED,
-	}
-	sts.UpdateTransferJob(ctx, &storagetransferpb.UpdateTransferJobRequest{
-		JobName:     resp.Name,
-		ProjectId:   tc.ProjectID,
-		TransferJob: tj,
-	})
 }
 
 func TestGetLatestTransferOperation(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	ctx := context.Background()
 
 	buf := new(bytes.Buffer)
 
-	job, err := transfer_to_nearline(buf, tc.ProjectID, "job description", gcsSourceBucket, gcsSinkBucket, time.Now())
+	job, err := transferToNearline(buf, tc.ProjectID, gcsSourceBucket, gcsSinkBucket)
+	defer cleanupSTSJob(job.Name, tc.ProjectID)
 
-	op, err := check_latest_transfer_operation(buf, tc.ProjectID, job.Name)
+	op, err := checkLatestTransferOperation(buf, tc.ProjectID, job.Name)
 
 	if err != nil {
 		t.Errorf("check_latest_transfer_operation: %#v", err)
@@ -218,17 +185,6 @@ func TestGetLatestTransferOperation(t *testing.T) {
 	if want := op.Name; !strings.Contains(got, want) {
 		t.Errorf("check_latest_transfer_operation: got %q, want %q", got, want)
 	}
-	fmt.Println(got)
-
-	tj := &storagetransferpb.TransferJob{
-		Name:   job.Name,
-		Status: storagetransferpb.TransferJob_DELETED,
-	}
-	sts.UpdateTransferJob(ctx, &storagetransferpb.UpdateTransferJobRequest{
-		JobName:     job.Name,
-		ProjectId:   tc.ProjectID,
-		TransferJob: tj,
-	})
 }
 
 func grantSTSPermissions(bucketName string, projectID string, sts *storagetransfer.Client, str *storage.Client) {
@@ -240,7 +196,7 @@ func grantSTSPermissions(bucketName string, projectID string, sts *storagetransf
 
 	resp, err := sts.GetGoogleServiceAccount(ctx, req)
 	if err != nil {
-		log.Fatalf("Error getting service account")
+		log.Fatalf("error getting service account")
 	}
 	email := resp.AccountEmail
 
@@ -261,6 +217,20 @@ func grantSTSPermissions(bucketName string, projectID string, sts *storagetransf
 	policy.Add(identity, bucketWriter)
 
 	if err := bucket.IAM().SetPolicy(ctx, policy); err != nil {
-		log.Fatalf("Bucket(%q).IAM().SetPolicy: %v", bucketName, err)
+		log.Fatalf("bucket(%q).IAM().SetPolicy: %v", bucketName, err)
 	}
+}
+
+func cleanupSTSJob(jobName string, projectID string) {
+	ctx := context.Background()
+
+	tj := &storagetransferpb.TransferJob{
+		Name:   jobName,
+		Status: storagetransferpb.TransferJob_DELETED,
+	}
+	sts.UpdateTransferJob(ctx, &storagetransferpb.UpdateTransferJobRequest{
+		JobName:     jobName,
+		ProjectId:   projectID,
+		TransferJob: tj,
+	})
 }
