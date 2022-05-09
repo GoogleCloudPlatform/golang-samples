@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,49 +12,49 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package querying
+package livestream
 
-// [START bigquery_query_legacy]
+// [START livestream_list_channels]
 import (
 	"context"
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/bigquery"
 	"google.golang.org/api/iterator"
+
+	livestream "cloud.google.com/go/video/livestream/apiv1"
+	livestreampb "google.golang.org/genproto/googleapis/cloud/video/livestream/v1"
 )
 
-// queryLegacy demonstrates running a query using Legacy SQL.
-func queryLegacy(w io.Writer, projectID, sqlString string) error {
+// listChannels lists all channels for a given location.
+func listChannels(w io.Writer, projectID, location string) error {
 	// projectID := "my-project-id"
-	// sqlString = "SELECT 3 as somenum"
+	// location := "us-central1"
 	ctx := context.Background()
-	client, err := bigquery.NewClient(ctx, projectID)
+	client, err := livestream.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("bigquery.NewClient: %v", err)
+		return fmt.Errorf("NewClient: %v", err)
 	}
 	defer client.Close()
 
-	q := client.Query(sqlString)
-	q.UseLegacySQL = true
-
-	// Run the query and process the returned row iterator.
-	it, err := q.Read(ctx)
-	if err != nil {
-		return fmt.Errorf("query.Read(): %v", err)
+	req := &livestreampb.ListChannelsRequest{
+		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
 	}
+
+	it := client.ListChannels(ctx, req)
+	fmt.Fprintln(w, "Channels:")
+
 	for {
-		var row []bigquery.Value
-		err := it.Next(&row)
+		response, err := it.Next()
 		if err == iterator.Done {
 			break
 		}
 		if err != nil {
-			return err
+			return fmt.Errorf("ListChannels: %v", err)
 		}
-		fmt.Fprintln(w, row)
+		fmt.Fprintln(w, response.GetName())
 	}
 	return nil
 }
 
-// [END bigquery_query_legacy]
+// [END livestream_list_channels]

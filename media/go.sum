@@ -66,8 +66,8 @@ cloud.google.com/go/storage v1.18.2/go.mod h1:AiIj7BWXyhO5gGVmYJ+S8tbkCx3yb0IMju
 cloud.google.com/go/storage v1.19.0/go.mod h1:6rgiTRjOqI/Zd9YKimub5TIB4d+p3LH33V3ZE1DMuUM=
 cloud.google.com/go/storage v1.22.0 h1:NUV0NNp9nkBuW66BFRLuMgldN60C57ET3dhbwLIYio8=
 cloud.google.com/go/storage v1.22.0/go.mod h1:GbaLEoMqbVm6sx3Z0R++gSiBlgMv6yUi2q1DeGFKQgE=
-cloud.google.com/go/video v1.0.1 h1:5YiiTW9A4N4iNUW8WpaToGHpB9hWsWJ3bAqKlcbzosg=
-cloud.google.com/go/video v1.0.1/go.mod h1:GPqJt5nbIN0hlccSrdXyBgHaL9hwgGT/k6o3mqCvl5w=
+cloud.google.com/go/video v1.4.0 h1:lR7O5TDVMEiQ0x9W89ATa4HkI86ZuAV0okywtjgsQJA=
+cloud.google.com/go/video v1.4.0/go.mod h1:ZmprBJ5Fg3Odbu7bxRcrCIoRq0cgJ0Zhgi7ONVKg2Pw=
 cloud.google.com/go/vision v1.0.0/go.mod h1:RMwqSpJWRkEh/F1l9coXew6F28DcsAnIfsV57AIX704=
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
@@ -574,7 +574,6 @@ google.golang.org/genproto v0.0.0-20210917145530-b395a37504d4/go.mod h1:eFjDcFEc
 google.golang.org/genproto v0.0.0-20210921142501-181ce0d877f6/go.mod h1:5CzLGKJ67TSI2B9POpiiyGha0AjJvZIUgRMt1dSmuhc=
 google.golang.org/genproto v0.0.0-20210924002016-3dee208752a0/go.mod h1:5CzLGKJ67TSI2B9POpiiyGha0AjJvZIUgRMt1dSmuhc=
 google.golang.org/genproto v0.0.0-20211016002631-37fc39342514/go.mod h1:5CzLGKJ67TSI2B9POpiiyGha0AjJvZIUgRMt1dSmuhc=
-google.golang.org/genproto v0.0.0-20211018162055-cf77aa76bad2/go.mod h1:5CzLGKJ67TSI2B9POpiiyGha0AjJvZIUgRMt1dSmuhc=
 google.golang.org/genproto v0.0.0-20211118181313-81c1377c94b1/go.mod h1:5CzLGKJ67TSI2B9POpiiyGha0AjJvZIUgRMt1dSmuhc=
 google.golang.org/genproto v0.0.0-20211206160659-862468c7d6e0/go.mod h1:5CzLGKJ67TSI2B9POpiiyGha0AjJvZIUgRMt1dSmuhc=
 google.golang.org/genproto v0.0.0-20211208223120-3a66f561d7aa/go.mod h1:5CzLGKJ67TSI2B9POpiiyGha0AjJvZIUgRMt1dSmuhc=

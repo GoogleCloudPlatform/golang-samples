@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START compute_delete_protection_create]
+// [START compute_custom_machine_type_extra_mem_no_helper]
 import (
 	"context"
 	"fmt"
@@ -25,13 +25,21 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// createInstance sends an instance creation request to the Compute Engine API
-// and waits for it to complete.
-func createInstance(w io.Writer, projectID, zone, instanceName string, deleteProtection bool) error {
+// createInstanceWithExtraMemWithoutHelper сreates new VM instances with extra memory
+// without using a CustomMachineType struct.
+func createInstanceWithExtraMemWithoutHelper(
+	w io.Writer,
+	projectID, zone, instanceName, cpuSeries string,
+	coreCount, memory int,
+) error {
 	// projectID := "your_project_id"
 	// zone := "europe-central2-b"
 	// instanceName := "your_instance_name"
-	// deleteProtection := true
+	// cpuSeries := "N1"
+	// coreCount := 2 // number of CPU cores you want to use.
+	// memory := 256 // the amount of memory for the VM instance, in megabytes.
+
+	// The coreCount and memory values are not validated anywhere and can be rejected by the API.
 
 	ctx := context.Background()
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
@@ -40,33 +48,33 @@ func createInstance(w io.Writer, projectID, zone, instanceName string, deletePro
 	}
 	defer instancesClient.Close()
 
-	req := &computepb.InsertInstanceRequest{
-		Project: projectID,
-		Zone:    zone,
-		InstanceResource: &computepb.Instance{
-			Name: proto.String(instanceName),
-			// Set the delete protection bit.
-			DeletionProtection: proto.Bool(deleteProtection),
-			Disks: []*computepb.AttachedDisk{
-				{
-					// Describe the size and source image of the boot disk to attach to the instance.
-					InitializeParams: &computepb.AttachedDiskInitializeParams{
-						DiskSizeGb:  proto.Int64(10),
-						SourceImage: proto.String("projects/debian-cloud/global/images/family/debian-10"),
-					},
-					AutoDelete: proto.Bool(true),
-					Boot:       proto.Bool(true),
-					Type:       proto.String(computepb.AttachedDisk_PERSISTENT.String()),
+	mt := fmt.Sprintf("zones/%s/machineTypes/%v-%v-%v-ext", zone, cpuSeries, coreCount, memory)
+	inst := &computepb.Instance{
+		Name: proto.String(instanceName),
+		Disks: []*computepb.AttachedDisk{
+			{
+				InitializeParams: &computepb.AttachedDiskInitializeParams{
+					DiskSizeGb: proto.Int64(10),
+					SourceImage: proto.String(
+						"projects/debian-cloud/global/images/family/debian-10",
+					),
 				},
-			},
-			MachineType: proto.String(fmt.Sprintf("zones/%s/machineTypes/e2-small", zone)),
-			NetworkInterfaces: []*computepb.NetworkInterface{
-				{
-					// Use the default VPC network.
-					Name: proto.String("default"),
-				},
+				AutoDelete: proto.Bool(true),
+				Boot:       proto.Bool(true),
 			},
 		},
+		MachineType: proto.String(mt),
+		NetworkInterfaces: []*computepb.NetworkInterface{
+			{
+				Name: proto.String("global/networks/default"),
+			},
+		},
+	}
+
+	req := &computepb.InsertInstanceRequest{
+		Project:          projectID,
+		Zone:             zone,
+		InstanceResource: inst,
 	}
 
 	op, err := instancesClient.Insert(ctx, req)
@@ -83,4 +91,4 @@ func createInstance(w io.Writer, projectID, zone, instanceName string, deletePro
 	return nil
 }
 
-// [END compute_delete_protection_create]
+// [END compute_custom_machine_type_extra_mem_no_helper]
