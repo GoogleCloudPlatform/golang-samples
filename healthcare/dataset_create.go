@@ -19,13 +19,16 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	healthcare "google.golang.org/api/healthcare/v1"
 )
 
 // createDataset creates a dataset.
 func createDataset(w io.Writer, projectID, location, datasetID string) error {
-	ctx := context.Background()
+	// Set a deadline for the dataset to become initialized.
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	defer cancel()
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
@@ -36,9 +39,20 @@ func createDataset(w io.Writer, projectID, location, datasetID string) error {
 
 	parent := fmt.Sprintf("projects/%s/locations/%s", projectID, location)
 
-	resp, err := datasetsService.Create(parent, &healthcare.Dataset{}).DatasetId(datasetID).Do()
+	resp, err := datasetsService.Create(parent, &healthcare.Dataset{}).DatasetId(datasetID).Context(ctx).Do()
 	if err != nil {
 		return fmt.Errorf("Create: %v", err)
+	}
+
+	// The dataset is not always ready to use immediately, instead a long-running operation is returned.
+	// This is how you might poll the operation to ensure the dataset is fully initialized before proceeding.
+	// Initialization usually takes less than a minute.
+	for !resp.Done {
+		time.Sleep(15 * time.Second)
+		resp, err = datasetsService.Operations.Get(resp.Name).Context(ctx).Do()
+		if err != nil {
+			return fmt.Errorf("Operations.Get(%s): %w", resp.Name, err)
+		}
 	}
 
 	fmt.Fprintf(w, "Created dataset: %q\n", resp.Name)

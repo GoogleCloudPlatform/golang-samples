@@ -61,7 +61,7 @@ type GCSEvent struct {
 	ResourceState string `json:"resourceState"`
 }
 
-// HelloGCS consumes a GCS event.
+// HelloGCS consumes a(ny) GCS event.
 func HelloGCS(ctx context.Context, e GCSEvent) error {
 	meta, err := metadata.FromContext(ctx)
 	if err != nil {

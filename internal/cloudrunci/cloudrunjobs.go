@@ -303,7 +303,7 @@ func (j *Job) LogEntries(filter string, find string, maxAttempts int) (bool, err
 	}
 	defer client.Close()
 
-	preparedFilter := fmt.Sprintf(`resource.type="cloud_run_revision" resource.labels.service_name="%s" %s`, j.version(), filter)
+	preparedFilter := fmt.Sprintf(`resource.type="cloud_run_job" resource.labels.job_name="%s" %s`, j.version(), filter)
 	fmt.Printf("Using log filter: %s\n", preparedFilter)
 
 	for i := 1; i < maxAttempts; i++ {

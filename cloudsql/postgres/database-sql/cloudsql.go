@@ -146,7 +146,7 @@ func mustConnect() *sql.DB {
 			log.Fatalf("connectTCPSocket: unable to connect: %s", err)
 		}
 	}
-	// Use a Unix socket when UNIX_SOCKET_PATH (e.g., /cloudsql/proj:region:instance) is defined.
+	// Use a Unix socket when INSTANCE_UNIX_SOCKET (e.g., /cloudsql/proj:region:instance) is defined.
 	if os.Getenv("INSTANCE_UNIX_SOCKET") != "" {
 		db, err = connectUnixSocket()
 		if err != nil {

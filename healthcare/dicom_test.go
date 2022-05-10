@@ -59,8 +59,7 @@ func TestDICOMStore(t *testing.T) {
 	}
 
 	if err := createDataset(ioutil.Discard, tc.ProjectID, location, datasetID); err != nil {
-		t.Skipf("Unable to create test dataset: %v", err)
-		return
+		t.Fatalf("Unable to create test dataset: %v", err)
 	}
 
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {

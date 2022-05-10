@@ -22,8 +22,7 @@ import (
 	"os"
 
 	"github.com/mailjet/mailjet-apiv3-go"
-	"google.golang.org/appengine"
-	"google.golang.org/appengine/urlfetch"
+	"google.golang.org/appengine/v2/urlfetch"
 )
 
 // [START import]
@@ -49,7 +48,7 @@ func mustGetenv(k string) string {
 }
 
 func sendEmail(w http.ResponseWriter, r *http.Request) {
-	ctx := appengine.NewContext(r)
+	ctx := r.Context()
 
 	mailjetClient := mailjet.NewMailjetClient(
 		mustGetenv("MJ_APIKEY_PUBLIC"),

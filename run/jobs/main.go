@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// [START cloudrun_jobs_quickstart]
 package main
 
 import (
@@ -34,10 +35,14 @@ type Config struct {
 }
 
 func configFromEnv() (Config, error) {
-	taskNum := os.Getenv("TASK_NUM")
-	attemptNum := os.Getenv("ATTEMPT_NUM")
+	// [START cloudrun_jobs_env_vars]
+	// Job-defined
+	taskNum := os.Getenv("CLOUD_RUN_TASK_INDEX")
+	attemptNum := os.Getenv("CLOUD_RUN_TASK_ATTEMPT")
+	// User-defined
 	sleepMs, err := sleepMsToInt(os.Getenv("SLEEP_MS"))
 	failRate, err := failRateToFloat(os.Getenv("FAIL_RATE"))
+	// [END cloudrun_jobs_env_vars]
 
 	if err != nil {
 		return Config{}, err
@@ -90,7 +95,9 @@ func main() {
 	// Simulate errors
 	if config.failRate > 0 {
 		if failure := randomFailure(config); failure != nil {
+			// [START cloudrun_jobs_exit_process]
 			log.Fatalf("%v", failure)
+			// [END cloudrun_jobs_exit_process]
 		}
 	}
 
@@ -107,3 +114,5 @@ func randomFailure(config Config) error {
 	}
 	return nil
 }
+
+// [END cloudrun_jobs_quickstart]

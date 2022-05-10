@@ -20,13 +20,12 @@ import (
 	"fmt"
 	"net/http"
 
-	"google.golang.org/appengine"
-	"google.golang.org/appengine/log"
-	"google.golang.org/appengine/mail"
+	"google.golang.org/appengine/v2/log"
+	"google.golang.org/appengine/v2/mail"
 )
 
 func confirm(w http.ResponseWriter, r *http.Request) {
-	ctx := appengine.NewContext(r)
+	ctx := r.Context()
 	addr := r.FormValue("email")
 	url := createConfirmationURL(r)
 	msg := &mail.Message{
@@ -62,7 +61,7 @@ func init() {
 
 // [START intro_4]
 func incomingMail(w http.ResponseWriter, r *http.Request) {
-	ctx := appengine.NewContext(r)
+	ctx := r.Context()
 	defer r.Body.Close()
 	var b bytes.Buffer
 	if _, err := b.ReadFrom(r.Body); err != nil {

@@ -25,12 +25,13 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// createInstance sends an instance creation request to the Compute Engine API and waits for it to complete.
+// createInstance sends an instance creation request to the Compute Engine API
+// and waits for it to complete.
 func createInstance(w io.Writer, projectID, zone, instanceName string, deleteProtection bool) error {
 	// projectID := "your_project_id"
 	// zone := "europe-central2-b"
 	// instanceName := "your_instance_name"
-	// deleteProtection := false
+	// deleteProtection := true
 
 	ctx := context.Background()
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
