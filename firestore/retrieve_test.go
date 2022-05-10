@@ -20,6 +20,7 @@ import (
 	"testing"
 
 	"cloud.google.com/go/firestore"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestRetrieve(t *testing.T) {
@@ -42,10 +43,12 @@ func TestRetrieve(t *testing.T) {
 		t.Fatalf("prepareRetrieve: %v", err)
 	}
 
-	_, err = docAsMap(ctx, client)
-	if err != nil {
-		t.Fatalf("Cannot get doc as map: %v", err)
-	}
+	testutil.Retry(t, 5*time.Second, func(r *testutil.R) {
+		_, err = docAsMap(ctx, client)
+		if err != nil {
+			r.ErrorF("Cannot get doc as map: %v", err)
+		}
+	})
 
 	_, err = docAsEntity(ctx, client)
 	if err != nil {
