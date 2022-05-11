@@ -18,6 +18,7 @@ import (
 	"context"
 	"os"
 	"testing"
+	"time"
 
 	"cloud.google.com/go/firestore"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -43,10 +44,10 @@ func TestRetrieve(t *testing.T) {
 		t.Fatalf("prepareRetrieve: %v", err)
 	}
 
-	testutil.Retry(t, 5*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
 		_, err = docAsMap(ctx, client)
 		if err != nil {
-			r.ErrorF("Cannot get doc as map: %v", err)
+			r.Errorf("Cannot get doc as map: %v", err)
 		}
 	})
 
