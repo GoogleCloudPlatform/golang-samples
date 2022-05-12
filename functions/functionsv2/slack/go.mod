@@ -1,4 +1,4 @@
-module github.com/GoogleCloudPlatform/golang-samples/functions/slack
+module github.com/GoogleCloudPlatform/golang-samples/functions/functionsv2/slack
 
 go 1.15
 
