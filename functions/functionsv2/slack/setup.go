@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START functions_slack_setup]
+// [START cloudfunctions_slack_setup]
 
 package slack
 
@@ -44,4 +44,4 @@ func setup(ctx context.Context) {
 	}
 }
 
-// [END functions_slack_setup]
+// [END cloudfunctions_slack_setup]

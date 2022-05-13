@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START functions_slack_format]
+// [START cloudfunctions_slack_format]
 
 package slack
 
@@ -80,4 +80,4 @@ func formatSlackMessage(query string, response *kgsearch.SearchResponse) (*Messa
 	return message, nil
 }
 
-// [END functions_slack_format]
+// [END cloudfunctions_slack_format]
