@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START functions_imagemagick_setup]
+// [START cloudfunctions_imagemagick_setup]
 
 // Package imagemagick contains an example of using ImageMagick to process a
 // file uploaded to Cloud Storage.
@@ -55,9 +55,9 @@ func init() {
 	functions.CloudEvent("blur-offensive-images", blurOffensiveImages)
 }
 
-// [END functions_imagemagick_setup]
+// [END cloudfunctions_imagemagick_setup]
 
-// [START functions_imagemagick_analyze]
+// [START cloudfunctions_imagemagick_analyze]
 
 // GCSEvent is the payload of a GCS event.
 // additional fields are documented at
@@ -93,9 +93,9 @@ func blurOffensiveImages(ctx context.Context, e cloudevents.Event) error {
 	return nil
 }
 
-// [END functions_imagemagick_analyze]
+// [END cloudfunctions_imagemagick_analyze]
 
-// [START functions_imagemagick_blur]
+// [START cloudfunctions_imagemagick_blur]
 
 // blur blurs the image stored at gs://inputBucket/name and stores the result in
 // gs://outputBucket/name.
@@ -124,4 +124,4 @@ func blur(ctx context.Context, inputBucket, outputBucket, name string) error {
 	return nil
 }
 
-// [END functions_imagemagick_blur]
+// [END cloudfunctions_imagemagick_blur]
