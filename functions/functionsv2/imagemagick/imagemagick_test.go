@@ -16,11 +16,10 @@ package imagemagick
 
 import (
 	"context"
-	"io/ioutil"
-	"log"
 	"os"
 	"testing"
 
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 )
 
@@ -30,10 +29,15 @@ func TestBlurOffensiveImages(t *testing.T) {
 		t.Skip("GOLANG_SAMPLES_PROJECT_ID not set")
 	}
 
-	log.SetOutput(ioutil.Discard)
-
-	outputBucket := projectID + "-test-blurred"
+	outputBucket, err := testutil.CreateTestBucket(
+		context.Background(),
+		t, storageClient, projectID, "test-blur-output")
+	if err != nil {
+		t.Errorf("failed to create output bucket: %v", err)
+	}
+	oldEnvValue := os.Getenv("BLURRED_BUCKET_NAME")
 	os.Setenv("BLURRED_BUCKET_NAME", outputBucket)
+	defer os.Setenv("BLURRED_BUCKET_NAME", oldEnvValue)
 
 	e := GCSEvent{
 		Bucket: projectID,
@@ -46,19 +50,17 @@ func TestBlurOffensiveImages(t *testing.T) {
 		t.Skipf("could not get input file: %s: %v", inputBlob.ObjectName(), err)
 	}
 
-	b := storageClient.Bucket(outputBucket)
-	b.Create(ctx, projectID, nil)
-	outputBlob := b.Object(e.Name)
-	outputBlob.Delete(ctx) // Ensure the output file doesn't already exist.
+	outputBlob := storageClient.Bucket(outputBucket).Object(e.Name)
 
 	ce := cloudevents.NewEvent()
 	ce.SetData("application/json", e)
-	if err := blurOffensiveImages(ctx, ce); err != nil {
+	err = blurOffensiveImages(ctx, ce)
+	defer outputBlob.Delete(ctx)
+	if err != nil {
 		t.Fatalf("BlurOffensiveImages(%v) got error: %v", e, err)
 	}
 
 	if _, err := outputBlob.Attrs(ctx); err != nil {
 		t.Fatalf("BlurOffensiveImages(%v) got error when checking output: %v", e, err)
 	}
-	outputBlob.Delete(ctx)
 }

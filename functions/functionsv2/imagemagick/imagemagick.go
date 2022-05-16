@@ -43,12 +43,13 @@ func init() {
 	// Declare a separate err variable to avoid shadowing the client variables.
 	var err error
 
-	storageClient, err = storage.NewClient(context.Background())
+	bgctx := context.Background()
+	storageClient, err = storage.NewClient(bgctx)
 	if err != nil {
 		log.Fatalf("storage.NewClient: %v", err)
 	}
 
-	visionClient, err = vision.NewImageAnnotatorClient(context.Background())
+	visionClient, err = vision.NewImageAnnotatorClient(bgctx)
 	if err != nil {
 		log.Fatalf("vision.NewAnnotatorClient: %v", err)
 	}
@@ -71,7 +72,7 @@ type GCSEvent struct {
 func blurOffensiveImages(ctx context.Context, e cloudevents.Event) error {
 	outputBucket := os.Getenv("BLURRED_BUCKET_NAME")
 	if outputBucket == "" {
-		return errors.New("BLURRED_BUCKET_NAME must be set")
+		return errors.New("environment variable BLURRED_BUCKET_NAME must be set")
 	}
 
 	gcsEvent := &GCSEvent{}
