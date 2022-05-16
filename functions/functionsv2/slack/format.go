@@ -17,10 +17,32 @@
 package slack
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"google.golang.org/api/kgsearch/v1"
 )
+
+type ItemList struct {
+	Items []ItemListElement `json:"itemListElement"`
+}
+type ItemListElement struct {
+	Result EntitySearchResult `json:"result"`
+}
+type EntitySearchResult struct {
+	Name         string       `json:"name"`
+	Description  string       `json:"description"`
+	DetailedDesc DetailedDesc `json:"detailedDescription"`
+	URL          string       `json:"url"`
+	Image        Image
+}
+type DetailedDesc struct {
+	ArticleBody string
+	URL         string
+}
+type Image struct {
+	ContentURL string
+}
 
 func formatSlackMessage(query string, response *kgsearch.SearchResponse) (*Message, error) {
 	if response == nil {
@@ -31,7 +53,7 @@ func formatSlackMessage(query string, response *kgsearch.SearchResponse) (*Messa
 		message := &Message{
 			ResponseType: "in_channel",
 			Text:         fmt.Sprintf("Query: %s", query),
-			Attachments: []attachment{
+			Attachments: []Attachment{
 				{
 					Color: "#d6334b",
 					Text:  "No results match your query.",
@@ -41,41 +63,25 @@ func formatSlackMessage(query string, response *kgsearch.SearchResponse) (*Messa
 		return message, nil
 	}
 
-	entity, ok := response.ItemListElement[0].(map[string]interface{})
-	if !ok {
-		return nil, fmt.Errorf("could not parse response entity")
+	// The KnowledgeGraph API returns an empty interface. To make this more
+	// useful, we convert it back to json, and unmarshal into specific types.
+	jsonstring, _ := response.MarshalJSON()
+	r := &ItemList{}
+	if err := json.Unmarshal(jsonstring, r); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal json: %v", err)
 	}
-	result, ok := entity["result"].(map[string]interface{})
-	if !ok {
-		return nil, fmt.Errorf("error formatting response result")
-	}
+	result := r.Items[0].Result
 
-	attach := attachment{Color: "#3367d6"}
-	if name, ok := result["name"].(string); ok {
-		if description, ok := result["description"].(string); ok {
-			attach.Title = fmt.Sprintf("%s: %s", name, description)
-		} else {
-			attach.Title = name
-		}
-	}
-	if detailedDesc, ok := result["detailedDescription"].(map[string]interface{}); ok {
-		if url, ok := detailedDesc["url"].(string); ok {
-			attach.TitleLink = url
-		}
-		if article, ok := detailedDesc["articleBody"].(string); ok {
-			attach.Text = article
-		}
-	}
-	if image, ok := result["image"].(map[string]interface{}); ok {
-		if imageURL, ok := image["contentUrl"].(string); ok {
-			attach.ImageURL = imageURL
-		}
-	}
+	attach := Attachment{Color: "#3367d6"}
+	attach.Title = result.Name
+	attach.TitleLink = result.DetailedDesc.URL
+	attach.Text = result.DetailedDesc.ArticleBody
+	attach.ImageURL = result.Image.ContentURL
 
 	message := &Message{
 		ResponseType: "in_channel",
 		Text:         fmt.Sprintf("Query: %s", query),
-		Attachments:  []attachment{attach},
+		Attachments:  []Attachment{attach},
 	}
 	return message, nil
 }

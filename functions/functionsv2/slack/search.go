@@ -20,6 +20,7 @@ package slack
 
 import (
 	"bytes"
+	"context"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
@@ -35,21 +36,13 @@ import (
 	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 )
 
-type oldTimeStampError struct {
-	s string
-}
-
-func (e *oldTimeStampError) Error() string {
-	return e.s
-}
-
 const (
 	version                     = "v0"
 	slackRequestTimestampHeader = "X-Slack-Request-Timestamp"
 	slackSignatureHeader        = "X-Slack-Signature"
 )
 
-type attachment struct {
+type Attachment struct {
 	Color     string `json:"color"`
 	Title     string `json:"title"`
 	TitleLink string `json:"title_link"`
@@ -62,52 +55,58 @@ type attachment struct {
 type Message struct {
 	ResponseType string       `json:"response_type"`
 	Text         string       `json:"text"`
-	Attachments  []attachment `json:"attachments"`
+	Attachments  []Attachment `json:"attachments"`
 }
 
 func init() {
 	functions.HTTP("KGSearch", kgSearch)
+	setup(context.Background())
 }
 
 // kgSearch uses the Knowledge Graph API to search for a query provided
 // by a Slack command.
 func kgSearch(w http.ResponseWriter, r *http.Request) {
-	setup(r.Context())
 
 	bodyBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Fatalf("Couldn't read request body: %v", err)
+		log.Printf("failed to read body: %v", err)
+		http.Error(w, "could not read request body", 400)
+		return
 	}
 	r.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
 
 	if r.Method != "POST" {
 		http.Error(w, "Only POST requests are accepted", 405)
+		return
 	}
 	if err := r.ParseForm(); err != nil {
+		log.Printf("Error: Failed to Parse Form: %v", err)
 		http.Error(w, "Couldn't parse form", 400)
-		log.Fatalf("ParseForm: %v", err)
+		return
 	}
 
-	// Reset r.Body as ParseForm depletes it by reading the io.ReadCloser.
-	r.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
-	result, err := verifyWebHook(r, slackSecret)
-	if err != nil {
-		log.Fatalf("verifyWebhook: %v", err)
-	}
-	if !result {
-		log.Fatalf("signatures did not match.")
+	result, err := verifyWebHook(r, bodyBytes, slackSecret)
+	if err != nil || !result {
+		log.Printf("verifyWebhook failed: %v", err)
+		http.Error(w, "Failed to verify request signature", 400)
+		return
 	}
 
 	if len(r.Form["text"]) == 0 {
-		log.Fatalf("empty text in form")
+		log.Printf("no search text found: %v", r.Form)
+		http.Error(w, "search text was empty", 400)
+		return
 	}
 	kgSearchResponse, err := makeSearchRequest(r.Form["text"][0])
 	if err != nil {
-		log.Fatalf("makeSearchRequest: %v", err)
+		log.Printf("makeSearchRequest failed: %v", err)
+		http.Error(w, "makeSearchRequest failed", 500)
+		return
 	}
 	w.Header().Set("Content-Type", "application/json")
 	if err = json.NewEncoder(w).Encode(kgSearchResponse); err != nil {
-		log.Fatalf("json.Marshal: %v", err)
+		http.Error(w, fmt.Sprintf("failed to marshal results: %v", err), 500)
+		return
 	}
 }
 
@@ -117,7 +116,7 @@ func kgSearch(w http.ResponseWriter, r *http.Request) {
 func makeSearchRequest(query string) (*Message, error) {
 	res, err := entitiesService.Search().Query(query).Limit(1).Do()
 	if err != nil {
-		return nil, fmt.Errorf("Do: %v", err)
+		return nil, err
 	}
 	return formatSlackMessage(query, res)
 }
@@ -128,7 +127,7 @@ func makeSearchRequest(query string) (*Message, error) {
 
 // verifyWebHook verifies the request signature.
 // See https://api.slack.com/docs/verifying-requests-from-slack.
-func verifyWebHook(r *http.Request, slackSigningSecret string) (bool, error) {
+func verifyWebHook(r *http.Request, body []byte, slackSigningSecret string) (bool, error) {
 	timeStamp := r.Header.Get(slackRequestTimestampHeader)
 	slackSignature := r.Header.Get(slackSignatureHeader)
 
@@ -138,21 +137,12 @@ func verifyWebHook(r *http.Request, slackSigningSecret string) (bool, error) {
 	}
 
 	if ageOk, age := checkTimestamp(t); !ageOk {
-		return false, &oldTimeStampError{fmt.Sprintf("checkTimestamp(%v): %v %v", t, ageOk, age)}
-		// return false, fmt.Errorf("checkTimestamp(%v): %v %v", t, ageOk, age)
+		return false, fmt.Errorf("checkTimestamp(%v): %v %v", t, ageOk, age)
 	}
 
 	if timeStamp == "" || slackSignature == "" {
 		return false, fmt.Errorf("timeStamp and/or signature headers were blank")
 	}
-
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		return false, fmt.Errorf("ioutil.ReadAll(%v): %v", r.Body, err)
-	}
-
-	// Reset the body so other calls to `verifyWebHook()` won't fail.
-	r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 
 	baseString := fmt.Sprintf("%s:%s:%s", version, timeStamp, body)
 
@@ -175,7 +165,7 @@ func getSignature(base []byte, secret []byte) []byte {
 	return h.Sum(nil)
 }
 
-// Only allow requests time stamped less than 5 minutes ago.
+// checkTimestamp allows requests time stamped less than 5 minutes ago.
 func checkTimestamp(timeStamp int64) (bool, time.Duration) {
 	t := time.Since(time.Unix(timeStamp, 0))
 

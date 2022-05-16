@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -50,10 +50,10 @@ func TestSigningWithSecret(t *testing.T) {
 		rq.Header.Add("X-Slack-Request-Timestamp", tc.timeStamp)
 		rq.Header.Add("X-Slack-Signature", tc.signature)
 
-		got, err := verifyWebHook(rq, secret)
+		got, err := verifyWebHook(rq, []byte(""), secret)
 		if err != nil {
 			// Any error other then the expected one is a failed test.
-			if _, ok := err.(*oldTimeStampError); !ok {
+			if !strings.Contains(err.Error(), "checkTimestamp") {
 				t.Errorf("verifyWebHook: %v", err)
 			}
 		}
