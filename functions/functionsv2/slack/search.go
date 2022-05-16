@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START cloudfunctions_slack_search]
+// [START functions_slack_search]
 
 // Package slack is a Cloud Function which recieves a query from
 // a Slack command and responds with the KG API result.
@@ -111,9 +111,9 @@ func kgSearch(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// [END cloudfunctions_slack_search]
+// [END functions_slack_search]
 
-// [START cloudfunctions_slack_request]
+// [START functions_slack_request]
 func makeSearchRequest(query string) (*Message, error) {
 	res, err := entitiesService.Search().Query(query).Limit(1).Do()
 	if err != nil {
@@ -122,9 +122,9 @@ func makeSearchRequest(query string) (*Message, error) {
 	return formatSlackMessage(query, res)
 }
 
-// [END cloudfunctions_slack_request]
+// [END functions_slack_request]
 
-// [START cloudfunctions_verify_webhook]
+// [START functions_verify_webhook]
 
 // verifyWebHook verifies the request signature.
 // See https://api.slack.com/docs/verifying-requests-from-slack.
@@ -182,4 +182,4 @@ func checkTimestamp(timeStamp int64) (bool, time.Duration) {
 	return t.Minutes() <= 5, t
 }
 
-// [END cloudfunctions_verify_webhook]
+// [END functions_verify_webhook]
