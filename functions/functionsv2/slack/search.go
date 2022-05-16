@@ -143,7 +143,7 @@ func verifyWebHook(r *http.Request, slackSigningSecret string) (bool, error) {
 	}
 
 	if timeStamp == "" || slackSignature == "" {
-		return false, fmt.Errorf("either timeStamp or signature headers were blank")
+		return false, fmt.Errorf("timeStamp and/or signature headers were blank")
 	}
 
 	body, err := ioutil.ReadAll(r.Body)
@@ -151,7 +151,7 @@ func verifyWebHook(r *http.Request, slackSigningSecret string) (bool, error) {
 		return false, fmt.Errorf("ioutil.ReadAll(%v): %v", r.Body, err)
 	}
 
-	// Reset the body so other calls won't fail.
+	// Reset the body so other calls to `verifyWebHook()` won't fail.
 	r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 
 	baseString := fmt.Sprintf("%s:%s:%s", version, timeStamp, body)
@@ -175,7 +175,7 @@ func getSignature(base []byte, secret []byte) []byte {
 	return h.Sum(nil)
 }
 
-// Arbitrarily trusting requests time stamped less than 5 minutes ago.
+// Only allow requests time stamped less than 5 minutes ago.
 func checkTimestamp(timeStamp int64) (bool, time.Duration) {
 	t := time.Since(time.Unix(timeStamp, 0))
 
