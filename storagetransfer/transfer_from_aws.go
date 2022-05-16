@@ -4,14 +4,14 @@ package storagetransfer
 import (
 	"context"
 	"fmt"
-	"google.golang.org/genproto/googleapis/type/date"
-	"google.golang.org/genproto/googleapis/type/timeofday"
 	"io"
 	"os"
 	"time"
 
 	storagetransfer "cloud.google.com/go/storagetransfer/apiv1"
 	storagetransferpb "google.golang.org/genproto/googleapis/storagetransfer/v1"
+	"google.golang.org/genproto/googleapis/type/date"
+	"google.golang.org/genproto/googleapis/type/timeofday"
 )
 
 func transferFromAws(w io.Writer, projectID string, awsSourceBucket string, gcsSinkBucket string) (*storagetransferpb.TransferJob, error) {
