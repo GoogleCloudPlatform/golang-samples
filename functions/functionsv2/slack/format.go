@@ -65,7 +65,10 @@ func formatSlackMessage(query string, response *kgsearch.SearchResponse) (*Messa
 
 	// The KnowledgeGraph API returns an empty interface. To make this more
 	// useful, we convert it back to json, and unmarshal into specific types.
-	jsonstring, _ := response.MarshalJSON()
+	jsonstring, err := response.MarshalJSON()
+	if err != nil {
+		return nil, err
+	}
 	r := &ItemList{}
 	if err := json.Unmarshal(jsonstring, r); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal json: %v", err)

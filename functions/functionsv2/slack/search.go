@@ -14,12 +14,11 @@
 
 // [START functions_slack_search]
 
-// Package slack is a Cloud Function which recieves a query from
+// Package slack is a Cloud Function which receives a query from
 // a Slack command and responds with the KG API result.
 package slack
 
 import (
-	"bytes"
 	"context"
 	"crypto/hmac"
 	"crypto/sha256"
@@ -29,6 +28,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -70,37 +70,36 @@ func kgSearch(w http.ResponseWriter, r *http.Request) {
 	bodyBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Printf("failed to read body: %v", err)
-		http.Error(w, "could not read request body", 400)
+		http.Error(w, "could not read request body", http.StatusBadRequest)
 		return
 	}
-	r.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
-
 	if r.Method != "POST" {
-		http.Error(w, "Only POST requests are accepted", 405)
+		http.Error(w, "Only POST requests are accepted", http.StatusMethodNotAllowed)
 		return
 	}
-	if err := r.ParseForm(); err != nil {
+	formData, err := url.ParseQuery(string(bodyBytes))
+	if err != nil {
 		log.Printf("Error: Failed to Parse Form: %v", err)
-		http.Error(w, "Couldn't parse form", 400)
+		http.Error(w, "Couldn't parse form", http.StatusBadRequest)
 		return
 	}
 
 	result, err := verifyWebHook(r, bodyBytes, slackSecret)
 	if err != nil || !result {
 		log.Printf("verifyWebhook failed: %v", err)
-		http.Error(w, "Failed to verify request signature", 400)
+		http.Error(w, "Failed to verify request signature", http.StatusBadRequest)
 		return
 	}
 
-	if len(r.Form["text"]) == 0 {
-		log.Printf("no search text found: %v", r.Form)
-		http.Error(w, "search text was empty", 400)
+	if len(formData.Get("text")) == 0 {
+		log.Printf("no search text found: %v", formData)
+		http.Error(w, "search text was empty", http.StatusBadRequest)
 		return
 	}
-	kgSearchResponse, err := makeSearchRequest(r.Form["text"][0])
+	kgSearchResponse, err := makeSearchRequest(formData.Get("text"))
 	if err != nil {
 		log.Printf("makeSearchRequest failed: %v", err)
-		http.Error(w, "makeSearchRequest failed", 500)
+		http.Error(w, "makeSearchRequest failed", http.StatusInternalServerError)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")

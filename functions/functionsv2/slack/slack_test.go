@@ -92,10 +92,10 @@ func TestMakeSearchRequest(t *testing.T) {
 	want := "Google"
 	msg, err := makeSearchRequest(query)
 	if err != nil {
-		t.Errorf("makeSearchRequest: %v", err)
+		t.Fatalf("makeSearchRequest: %v", err)
 	}
 	if msg == nil {
-		t.Errorf("empty message from query %q", query)
+		t.Fatalf("empty message from query %q", query)
 	}
 	got := msg.Text
 	if !strings.Contains(got, want) {
