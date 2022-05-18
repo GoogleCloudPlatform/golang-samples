@@ -26,10 +26,8 @@ import (
 	"log"
 	"time"
 
-	migration "cloud.google.com/go/bigquery/migration/apiv2alpha"
-	translationtaskpb "google.golang.org/genproto/googleapis/cloud/bigquery/migration/tasks/translation/v2alpha"
-	migrationpb "google.golang.org/genproto/googleapis/cloud/bigquery/migration/v2alpha"
-	"google.golang.org/protobuf/types/known/anypb"
+	migration "cloud.google.com/go/bigquery/migration/apiv2"
+	migrationpb "google.golang.org/genproto/googleapis/cloud/bigquery/migration/v2"
 )
 
 func main() {
@@ -67,34 +65,34 @@ func main() {
 // executeTranslationWorkflow constructs a migration workflow that performs batch SQL translation.
 func executeTranslationWorkflow(ctx context.Context, client *migration.Client, projectID, location, outPath string) (*migrationpb.MigrationWorkflow, error) {
 
-	// Tasks are extensible; the translation task is defined by the BigQuery Migration API, and so we construct the appropriate
-	// details for the task.
-	detailsTranslation := &translationtaskpb.TranslationTaskDetails{
-		// The path to objects in cloud storage containing queries to be translated.  This is a prefix to some input text files.
-		InputPath: "gs://cloud-samples-data/bigquery/migration/translation/input/",
-		// The path to objects in cloud storage containing DDL create statements.  This is a prefix to some input DDL text files.
-		SchemaPath: "gs://cloud-samples-data/bigquery/migration/translation/schema/",
-		// This is the cloud storage path where results will be written.  In this case it will contain translated queries,
-		// and possibly error files.
-		OutputPath: outPath,
-	}
-
-	// We then convert the task details for translation into the suitable protobuf `Any` representation needed
-	// to define the workflow.
-	detailsAny, err := anypb.New(detailsTranslation)
-	if err != nil {
-		return nil, err
-	}
-
-	// Finally, construct the workflow creation request.
+	// Construct the workflow creation request.  In this workflow, we have only a single translation task present.
 	req := &migrationpb.CreateMigrationWorkflowRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
 		MigrationWorkflow: &migrationpb.MigrationWorkflow{
 			DisplayName: "example SQL conversion",
 			Tasks: map[string]*migrationpb.MigrationTask{
 				"example_conversion": {
-					Type:    "Translation_Teradata",
-					Details: detailsAny,
+					Type: "Translation_Teradata2BQ",
+					TaskDetails: &migrationpb.MigrationTask_TranslationConfigDetails{
+						TranslationConfigDetails: &migrationpb.TranslationConfigDetails{
+							SourceLocation: &migrationpb.TranslationConfigDetails_GcsSourcePath{
+								GcsSourcePath: "gs://cloud-samples-data/bigquery/migration/translation/input/",
+							},
+							TargetLocation: &migrationpb.TranslationConfigDetails_GcsTargetPath{
+								GcsTargetPath: outPath,
+							},
+							SourceDialect: &migrationpb.Dialect{
+								DialectValue: &migrationpb.Dialect_TeradataDialect{
+									TeradataDialect: &migrationpb.TeradataDialect{
+										Mode: migrationpb.TeradataDialect_SQL,
+									},
+								},
+							},
+							TargetDialect: &migrationpb.Dialect{
+								DialectValue: &migrationpb.Dialect_BigqueryDialect{},
+							},
+						},
+					},
 				},
 			},
 		},
