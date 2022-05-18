@@ -77,7 +77,7 @@ func setupStorage(projectID string) (string, func(), error) {
 		storageClient.Close()
 		return "", nil, fmt.Errorf("error creating output bucket: %v", err)
 	}
-	return bucket, func() {
+	return fmt.Sprintf("gs://%s/", bucket), func() {
 		storageClient.Bucket(bucket).Delete(ctx)
 		storageClient.Close()
 	}, nil
