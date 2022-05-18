@@ -77,13 +77,13 @@ func blurOffensiveImages(ctx context.Context, e cloudevents.Event) error {
 
 	gcsEvent := &GCSEvent{}
 	if err := e.DataAs(gcsEvent); err != nil {
-		return fmt.Errorf("DataAs: failed to decode event data: %v", err)
+		return fmt.Errorf("e.DataAs: failed to decode event data: %v", err)
 	}
 	img := vision.NewImageFromURI(fmt.Sprintf("gs://%s/%s", gcsEvent.Bucket, gcsEvent.Name))
 
 	resp, err := visionClient.DetectSafeSearch(ctx, img, nil)
 	if err != nil {
-		return fmt.Errorf("AnnotateImage: %v", err)
+		return fmt.Errorf("visionClient.DetectSafeSearch: %v", err)
 	}
 
 	if resp.GetAdult() == visionpb.Likelihood_VERY_LIKELY ||
@@ -104,7 +104,7 @@ func blur(ctx context.Context, inputBucket, outputBucket, name string) error {
 	inputBlob := storageClient.Bucket(inputBucket).Object(name)
 	r, err := inputBlob.NewReader(ctx)
 	if err != nil {
-		return fmt.Errorf("NewReader: %v", err)
+		return fmt.Errorf("inputBlob.NewReader: %v", err)
 	}
 
 	outputBlob := storageClient.Bucket(outputBucket).Object(name)
