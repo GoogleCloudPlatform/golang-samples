@@ -28,9 +28,7 @@ import (
 // createPreemtibleInstance creates a new preemptible VM instance
 // with Debian 10 operating system.
 func createPreemtibleInstance(
-	w io.Writer,
-	projectID, zone, instanceName string,
-	preemtible bool,
+	w io.Writer, projectID, zone, instanceName string,
 ) error {
 	// projectID := "your_project_id"
 	// zone := "europe-central2-b"
@@ -50,7 +48,8 @@ func createPreemtibleInstance(
 	}
 	defer imagesClient.Close()
 
-	// List of public operating system (OS) images: https://cloud.google.com/compute/docs/images/os-details.
+	// List of public operating system (OS) images:
+	// https://cloud.google.com/compute/docs/images/os-details.
 	newestDebianReq := &computepb.GetFromFamilyImageRequest{
 		Project: "debian-cloud",
 		Family:  "debian-11",
@@ -75,7 +74,7 @@ func createPreemtibleInstance(
 		},
 		Scheduling: &computepb.Scheduling{
 			// Set the preemptible setting
-			Preemptible: proto.Bool(preemtible),
+			Preemptible: proto.Bool(true),
 		},
 		MachineType: proto.String(fmt.Sprintf("zones/%s/machineTypes/n1-standard-1", zone)),
 		NetworkInterfaces: []*computepb.NetworkInterface{

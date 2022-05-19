@@ -57,20 +57,18 @@ func TestPreemptibleSnippets(t *testing.T) {
 
 	buf := &bytes.Buffer{}
 
-	err := createPreemtibleInstance(buf, tc.ProjectID, zone, instanceName, true)
-	if err != nil {
-		t.Errorf("createPreemtibleInstance got err: %v", err)
+	if err := createPreemtibleInstance(buf, tc.ProjectID, zone, instanceName); err != nil {
+		t.Fatalf("createPreemtibleInstance got err: %v", err)
 	}
 
 	want := "Instance created"
 	if got := buf.String(); !strings.Contains(got, want) {
-		t.Errorf("createPreemtibleInstance got %q, want %q", got, want)
+		t.Fatalf("createPreemtibleInstance got %q, want %q", got, want)
 	}
 
 	buf.Reset()
 
-	err = printPreemtible(buf, tc.ProjectID, zone, instanceName)
-	if err != nil {
+	if err := printPreemtible(buf, tc.ProjectID, zone, instanceName); err != nil {
 		t.Errorf("printPreemtible got err: %v", err)
 	}
 
@@ -83,8 +81,7 @@ func TestPreemptibleSnippets(t *testing.T) {
 
 	filter := fmt.Sprintf(`targetLink="https://www.googleapis.com/compute/v1/projects/%s/zones/%s/instances/%s"`, tc.ProjectID, zone, instanceName)
 
-	err = preemptionHisory(buf, tc.ProjectID, zone, instanceName, filter)
-	if err != nil {
+	if err := preemptionHisory(buf, tc.ProjectID, zone, instanceName, filter); err != nil {
 		t.Errorf("preemptionHisory got err: %v", err)
 	}
 
@@ -93,8 +90,7 @@ func TestPreemptibleSnippets(t *testing.T) {
 		t.Fatalf("preemptionHisory got %q, want %q", got, want)
 	}
 
-	err = deleteInstance(ctx, tc.ProjectID, zone, instanceName)
-	if err != nil {
+	if err := deleteInstance(ctx, tc.ProjectID, zone, instanceName); err != nil {
 		t.Errorf("deleteInstance got err: %v", err)
 	}
 }

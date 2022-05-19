@@ -58,7 +58,8 @@ func preemptionHisory(w io.Writer, projectID, zone, instanceName, filter string)
 			return err
 		}
 
-		curInstName := strings.SplitN(operation.GetTargetLink(), "/", 2)[1]
+		ss := strings.Split(operation.GetTargetLink(), "/")
+		curInstName := ss[len(ss)-1]
 		if curInstName == instanceName {
 			// The filter used is not 100% accurate, it's `contains` not `equals`
 			// So we need to check the name to make sure it's the one we want.
