@@ -8,7 +8,7 @@ require (
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20220204002944-f20d8abe1519
 	github.com/GoogleCloudPlatform/golang-samples/bigquery v0.0.0
 	google.golang.org/api v0.74.0
-	google.golang.org/genproto v0.0.0-20220407144326-9054f6ed7bac
+	google.golang.org/genproto v0.0.0-20220518221133-4f43b3371335
 )
 
 replace github.com/GoogleCloudPlatform/golang-samples/bigquery => ../bigquery
