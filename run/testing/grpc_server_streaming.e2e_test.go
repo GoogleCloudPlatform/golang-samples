@@ -75,9 +75,11 @@ func TestGRPCServerStreamingService(t *testing.T) {
 	recvFailures := 0
 	for {
 		_, err := resp.Recv()
-		if err == io.EOF {
+		if err == nil {
+			recvMsgs++
+		} else if err == io.EOF {
 			break
-		} else if err != nil {
+		} else {
 			recvFailures++
 			if recvFailures < 5 {
 				t.Logf("rpc StreamTime.Recv: %v", err)
@@ -87,7 +89,6 @@ func TestGRPCServerStreamingService(t *testing.T) {
 			}
 		}
 
-		recvMsgs++
 	}
 
 	if recvMsgs != int(n) {
