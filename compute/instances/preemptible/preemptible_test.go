@@ -79,9 +79,9 @@ func TestPreemptibleSnippets(t *testing.T) {
 
 	buf.Reset()
 
-	filter := fmt.Sprintf(`targetLink="https://www.googleapis.com/compute/v1/projects/%s/zones/%s/instances/%s"`, tc.ProjectID, zone, instanceName)
+	customFilter := fmt.Sprintf(`targetLink="https://www.googleapis.com/compute/v1/projects/%s/zones/%s/instances/%s"`, tc.ProjectID, zone, instanceName)
 
-	if err := preemptionHisory(buf, tc.ProjectID, zone, instanceName, filter); err != nil {
+	if err := preemptionHisory(buf, tc.ProjectID, zone, instanceName, customFilter); err != nil {
 		t.Errorf("preemptionHisory got err: %v", err)
 	}
 
