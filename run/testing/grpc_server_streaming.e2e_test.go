@@ -88,7 +88,10 @@ func TestGRPCServerStreamingService(t *testing.T) {
 				t.Fatalf("rpc StreamTime.Recv: %v", err)
 			}
 		}
+<<<<<<< HEAD
 
+=======
+>>>>>>> 444db9b6 (restructure receive message checking)
 	}
 
 	if recvMsgs != int(n) {
