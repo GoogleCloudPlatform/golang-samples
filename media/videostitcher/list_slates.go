@@ -33,7 +33,7 @@ func listSlates(w io.Writer, projectID, location string) error {
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewVideoStitcherClient: %v", err)
+		return fmt.Errorf("stitcher.NewVideoStitcherClient: %v", err)
 	}
 	defer client.Close()
 
