@@ -42,7 +42,7 @@ func getSlate(w io.Writer, projectID, location, slateID string) error {
 
 	response, err := client.GetSlate(ctx, req)
 	if err != nil {
-		return fmt.Errorf("GetSlate: %v", err)
+		return fmt.Errorf("client.GetSlate: %v", err)
 	}
 
 	fmt.Fprintf(w, "Slate: %v", response.Name)
