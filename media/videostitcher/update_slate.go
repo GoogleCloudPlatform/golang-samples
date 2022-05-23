@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package stitcher
+package videostitcher
 
 // [START video_stitcher_update_slate]
 import (
@@ -27,9 +27,9 @@ import (
 
 // updateSlate updates an existing slate. This sample updates the uri for an
 // existing slate.
-func updateSlate(w io.Writer, projectID, location, slateID, slateURI string) error {
+func updateSlate(w io.Writer, projectID, slateID, slateURI string) error {
 	// projectID := "my-project-id"
-	// location := "us-central1"
+	location := "us-central1"
 	// slateID := "my-slate-id"
 	// slateURI := "my-updated-slate-uri"
 	ctx := context.Background()
@@ -56,7 +56,7 @@ func updateSlate(w io.Writer, projectID, location, slateID, slateURI string) err
 		return fmt.Errorf("client.UpdateSlate: %v", err)
 	}
 
-	fmt.Fprintf(w, "Updated slate: %v", response.Name)
+	fmt.Fprintf(w, "Updated slate: %v", response)
 	return nil
 }
 

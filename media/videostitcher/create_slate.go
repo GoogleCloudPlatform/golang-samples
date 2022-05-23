@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package stitcher
+package videostitcher
 
 // [START video_stitcher_create_slate]
 import (
@@ -25,9 +25,9 @@ import (
 )
 
 // createSlate creates a slate. A slate is displayed when ads are not available.
-func createSlate(w io.Writer, projectID, location, slateID, slateURI string) error {
+func createSlate(w io.Writer, projectID, slateID, slateURI string) error {
 	// projectID := "my-project-id"
-	// location := "us-central1"
+	location := "us-central1"
 	// slateID := "my-slate-id"
 	// slateURI := "my-slate-uri"
 	ctx := context.Background()

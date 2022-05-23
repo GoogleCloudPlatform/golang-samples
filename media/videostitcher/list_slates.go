@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package stitcher
+package videostitcher
 
 // [START video_stitcher_list_slates]
 import (
@@ -27,9 +27,9 @@ import (
 )
 
 // listSlates lists all slates for a given location.
-func listSlates(w io.Writer, projectID, location string) error {
+func listSlates(w io.Writer, projectID string) error {
 	// projectID := "my-project-id"
-	// location := "us-central1"
+	location := "us-central1"
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
 	if err != nil {

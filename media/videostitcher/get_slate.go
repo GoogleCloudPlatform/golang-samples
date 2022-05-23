@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package stitcher
+package videostitcher
 
 // [START video_stitcher_get_slate]
 import (
@@ -25,9 +25,9 @@ import (
 )
 
 // getSlate gets a previously-created slate.
-func getSlate(w io.Writer, projectID, location, slateID string) error {
+func getSlate(w io.Writer, projectID, slateID string) error {
 	// projectID := "my-project-id"
-	// location := "us-central1"
+	location := "us-central1"
 	// slateID := "my-slate-id"
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
@@ -45,7 +45,7 @@ func getSlate(w io.Writer, projectID, location, slateID string) error {
 		return fmt.Errorf("client.GetSlate: %v", err)
 	}
 
-	fmt.Fprintf(w, "Slate: %v", response.Name)
+	fmt.Fprintf(w, "Slate: %v", response)
 	return nil
 }
 

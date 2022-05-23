@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package stitcher
+package videostitcher
 
 // [START video_stitcher_delete_slate]
 import (
@@ -25,19 +25,21 @@ import (
 )
 
 // deleteSlate deletes a previously-created slate.
-func deleteSlate(w io.Writer, projectID, location, slateID string) error {
+func deleteSlate(w io.Writer, projectID, slateID string) error {
 	// projectID := "my-project-id"
-	// location := "us-central1"
+	location := "us-central1"
 	// slateID := "my-slate-id"
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewVideoStitcherClient: %v", err)
+		return fmt.Errorf("stitcher.NewVideoStitcherClient: %v", err)
 	}
 	defer client.Close()
 
+	name := fmt.Sprintf("projects/%s/locations/%s/slates/%s", projectID, location, slateID)
+
 	req := &stitcherstreampb.DeleteSlateRequest{
-		Name: fmt.Sprintf("projects/%s/locations/%s/slates/%s", projectID, location, slateID),
+		Name: name,
 	}
 
 	err = client.DeleteSlate(ctx, req)
@@ -45,7 +47,7 @@ func deleteSlate(w io.Writer, projectID, location, slateID string) error {
 		return fmt.Errorf("client.DeleteSlate: %v", err)
 	}
 
-	fmt.Fprintf(w, "Deleted slate")
+	fmt.Fprintf(w, "Deleted slate: %s", name)
 	return nil
 }
 
