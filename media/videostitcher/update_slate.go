@@ -53,7 +53,7 @@ func updateSlate(w io.Writer, projectID, location, slateID, slateURI string) err
 	// Updates the slate.
 	response, err := client.UpdateSlate(ctx, req)
 	if err != nil {
-		return fmt.Errorf("UpdateSlate: %v", err)
+		return fmt.Errorf("client.UpdateSlate: %v", err)
 	}
 
 	fmt.Fprintf(w, "Updated slate: %v", response.Name)
