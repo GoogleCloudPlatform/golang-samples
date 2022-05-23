@@ -50,7 +50,7 @@ func listSlates(w io.Writer, projectID, location string) error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("ListSlates: %v", err)
+			return fmt.Errorf("it.Next(): %v", err)
 		}
 		fmt.Fprintln(w, response.GetName())
 	}
