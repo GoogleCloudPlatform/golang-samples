@@ -42,7 +42,7 @@ func deleteSlate(w io.Writer, projectID, location, slateID string) error {
 
 	err = client.DeleteSlate(ctx, req)
 	if err != nil {
-		return fmt.Errorf("DeleteSlate: %v", err)
+		return fmt.Errorf("client.DeleteSlate: %v", err)
 	}
 
 	fmt.Fprintf(w, "Deleted slate")
