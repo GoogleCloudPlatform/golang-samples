@@ -27,8 +27,8 @@ import (
 // deleteSlate deletes a previously-created slate.
 func deleteSlate(w io.Writer, projectID, slateID string) error {
 	// projectID := "my-project-id"
-	location := "us-central1"
 	// slateID := "my-slate-id"
+	location := "us-central1"
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
 	if err != nil {

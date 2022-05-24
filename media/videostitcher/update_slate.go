@@ -29,9 +29,9 @@ import (
 // existing slate.
 func updateSlate(w io.Writer, projectID, slateID, slateURI string) error {
 	// projectID := "my-project-id"
-	location := "us-central1"
 	// slateID := "my-slate-id"
-	// slateURI := "my-updated-slate-uri"
+	// slateURI := "https://my-updated-slate-uri/test.mp4"
+	location := "us-central1"
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
 	if err != nil {
@@ -56,7 +56,7 @@ func updateSlate(w io.Writer, projectID, slateID, slateURI string) error {
 		return fmt.Errorf("client.UpdateSlate: %v", err)
 	}
 
-	fmt.Fprintf(w, "Updated slate: %v", response)
+	fmt.Fprintf(w, "Updated slate: %+v", response)
 	return nil
 }
 

@@ -27,9 +27,9 @@ import (
 // createSlate creates a slate. A slate is displayed when ads are not available.
 func createSlate(w io.Writer, projectID, slateID, slateURI string) error {
 	// projectID := "my-project-id"
-	location := "us-central1"
 	// slateID := "my-slate-id"
-	// slateURI := "my-slate-uri"
+	// slateURI := "https://my-slate-uri/test.mp4"
+	location := "us-central1"
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
 	if err != nil {

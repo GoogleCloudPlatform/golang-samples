@@ -47,8 +47,6 @@ var projectNumber string
 // *   Video Stitcher API
 // *   Cloud Resource Manager API (needed for project number translation)
 
-// TestMain tests major operations on slates, CDN keys, VOD sessions, and
-// live sessions.
 func TestMain(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
