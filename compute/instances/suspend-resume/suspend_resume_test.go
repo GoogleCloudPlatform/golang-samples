@@ -125,6 +125,8 @@ func TestSuspendResumeSnippets(t *testing.T) {
 
 		if instance.GetStatus() == "SUSPENDING" {
 			time.Sleep(5 * time.Second)
+		} else {
+			break
 		}
 	}
 
