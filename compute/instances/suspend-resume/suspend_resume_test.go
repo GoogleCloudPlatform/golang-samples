@@ -111,6 +111,11 @@ func TestSuspendResumeSnippets(t *testing.T) {
 		t.Errorf("suspendInstance got err: %v", err)
 	}
 
+	want := "Instance suspended"
+	if got := buf.String(); !strings.Contains(got, want) {
+		t.Errorf("suspendInstance got %q, want %q", got, want)
+	}
+
 	getInstanceReq := &computepb.GetInstanceRequest{
 		Project:  tc.ProjectID,
 		Zone:     zone,
@@ -139,10 +144,7 @@ func TestSuspendResumeSnippets(t *testing.T) {
 		t.Errorf("incorrect instance status got %q, want SUSPENDED", instance.GetStatus())
 	}
 
-	want := "Instance suspended"
-	if got := buf.String(); !strings.Contains(got, want) {
-		t.Errorf("suspendInstance got %q, want %q", got, want)
-	}
+	buf.Reset()
 
 	err = resumeInstance(buf, tc.ProjectID, zone, instanceName)
 	if err != nil {
