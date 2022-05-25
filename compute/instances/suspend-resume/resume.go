@@ -55,7 +55,7 @@ func resumeInstance(
 		// f"Only suspended instances can be resumed. "
 		// f"Instance {instance_name} is in {instance.status} state."
 		return fmt.Errorf(
-			"Only suspended instances can be resumed. Instance %s is in %s state.",
+			"only suspended instances can be resumed, instance %s is in %s state",
 			instanceName,
 			instance.GetStatus(),
 		)

@@ -111,6 +111,32 @@ func TestSuspendResumeSnippets(t *testing.T) {
 		t.Errorf("suspendInstance got err: %v", err)
 	}
 
+	getInstanceReq := &computepb.GetInstanceRequest{
+		Project:  tc.ProjectID,
+		Zone:     zone,
+		Instance: instanceName,
+	}
+
+	for {
+		instance, err := instancesClient.Get(ctx, getInstanceReq)
+		if err != nil {
+			t.Errorf("unable to get instance: %v", err)
+		}
+
+		if instance.GetStatus() == "SUSPENDING" {
+			time.Sleep(5 * time.Second)
+		}
+	}
+
+	instance, err := instancesClient.Get(ctx, getInstanceReq)
+	if err != nil {
+		t.Errorf("unable to get instance: %v", err)
+	}
+
+	if instance.GetStatus() != "SUSPENDED" {
+		t.Errorf("incorrect instance status got %q, want SUSPENDED", instance.GetStatus())
+	}
+
 	want := "Instance suspended"
 	if got := buf.String(); !strings.Contains(got, want) {
 		t.Errorf("suspendInstance got %q, want %q", got, want)
@@ -124,6 +150,15 @@ func TestSuspendResumeSnippets(t *testing.T) {
 	want = "Instance resumed"
 	if got := buf.String(); !strings.Contains(got, want) {
 		t.Errorf("resumeInstance got %q, want %q", got, want)
+	}
+
+	instance, err = instancesClient.Get(ctx, getInstanceReq)
+	if err != nil {
+		t.Errorf("unable to get instance: %v", err)
+	}
+
+	if instance.GetStatus() != "RUNNING" {
+		t.Errorf("incorrect instance status got %q, want RUNNING", instance.GetStatus())
 	}
 
 	err = deleteInstance(ctx, tc.ProjectID, zone, instanceName)
