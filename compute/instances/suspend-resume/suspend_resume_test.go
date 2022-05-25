@@ -55,7 +55,6 @@ func TestSuspendResumeSnippets(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	zone := "europe-central2-b"
 	instanceName := fmt.Sprintf("test-vm-%v-%v", time.Now().Format("01-02-2006"), r.Int())
-	diskName := "test-" + fmt.Sprint(r.Int())
 
 	buf := &bytes.Buffer{}
 
@@ -73,13 +72,11 @@ func TestSuspendResumeSnippets(t *testing.T) {
 			Disks: []*computepb.AttachedDisk{
 				{
 					InitializeParams: &computepb.AttachedDiskInitializeParams{
-						DiskName:   proto.String(diskName),
 						DiskSizeGb: proto.Int64(64),
 						SourceImage: proto.String(
-							"projects/debian-cloud/global/images/family/debian-10",
+							"projects/ubuntu-os-cloud/global/images/family/ubuntu-2004-lts",
 						),
 					},
-					DeviceName: proto.String(diskName),
 					AutoDelete: proto.Bool(true),
 					Boot:       proto.Bool(true),
 				},
@@ -122,20 +119,20 @@ func TestSuspendResumeSnippets(t *testing.T) {
 		Instance: instanceName,
 	}
 
-	for {
-		instance, err := instancesClient.Get(ctx, getInstanceReq)
+	instance, err := instancesClient.Get(ctx, getInstanceReq)
+	if err != nil {
+		t.Errorf("unable to get instance: %v", err)
+	}
+
+	for instance.GetStatus() == "SUSPENDING" {
+		instance, err = instancesClient.Get(ctx, getInstanceReq)
 		if err != nil {
 			t.Errorf("unable to get instance: %v", err)
 		}
-
-		if instance.GetStatus() == "SUSPENDING" {
-			time.Sleep(5 * time.Second)
-		} else {
-			break
-		}
+		time.Sleep(5 * time.Second)
 	}
 
-	instance, err := instancesClient.Get(ctx, getInstanceReq)
+	instance, err = instancesClient.Get(ctx, getInstanceReq)
 	if err != nil {
 		t.Errorf("unable to get instance: %v", err)
 	}
