@@ -32,16 +32,14 @@ const (
 	slateID             = "my-go-test-slate"
 	deleteSlateResponse = "Deleted slate"
 
-	deleteCdnKeyResponse  = "Deleted CDN key"
-	gcdnCdnKeyID          = "my-go-test-google-cdn"
-	akamaiCdnKeyID        = "my-go-test-akamai-cdn"
-	hostname              = "cdn.example.com"
-	updatedHostname       = "updated.example.com"
-	gcdnKeyname           = "gcdn-key"
-	gcdnPrivateKey        = "VGhpcyBpcyBhIHRlc3Qgc3RyaW5nLg=="
-	updatedGcdnPrivateKey = "VGhpcyBpcyBhbiB1cGRhdGVkIHRlc3Qgc3RyaW5nLg=="
-	akamaiTokenKey        = gcdnPrivateKey
-	updatedAkamaiTokenKey = updatedGcdnPrivateKey
+	deleteCdnKeyResponse = "Deleted CDN key"
+	gcdnCdnKeyID         = "my-go-test-google-cdn"
+	akamaiCdnKeyID       = "my-go-test-akamai-cdn"
+	hostname             = "cdn.example.com"
+	updatedHostname      = "updated.example.com"
+	gcdnKeyname          = "gcdn-key"
+	privateKey           = "VGhpcyBpcyBhIHRlc3Qgc3RyaW5nLg=="
+	updatedPrivateKey    = "VGhpcyBpcyBhbiB1cGRhdGVkIHRlc3Qgc3RyaW5nLg=="
 )
 
 var bucketName string
@@ -186,7 +184,7 @@ func TestCdnKeys(t *testing.T) {
 	// Create a new Google CDN key.
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
 		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", projectNumber, location, gcdnCdnKeyID)
-		if err := createCdnKey(buf, tc.ProjectID, gcdnCdnKeyID, hostname, gcdnKeyname, gcdnPrivateKey, ""); err != nil {
+		if err := createCdnKey(buf, tc.ProjectID, gcdnCdnKeyID, hostname, gcdnKeyname, privateKey, ""); err != nil {
 			r.Errorf("createCdnKey (GCDN) got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, cdnKeyName) {
@@ -210,7 +208,7 @@ func TestCdnKeys(t *testing.T) {
 	// Update an existing CDN key.
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
 		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, gcdnCdnKeyID)
-		if err := updateCdnKey(buf, tc.ProjectID, gcdnCdnKeyID, updatedHostname, gcdnKeyname, updatedGcdnPrivateKey, ""); err != nil {
+		if err := updateCdnKey(buf, tc.ProjectID, gcdnCdnKeyID, updatedHostname, gcdnKeyname, updatedPrivateKey, ""); err != nil {
 			r.Errorf("updateCdnKey got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, cdnKeyName) {
@@ -245,7 +243,7 @@ func TestCdnKeys(t *testing.T) {
 	// Create a new Akamai CDN key.
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
 		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", projectNumber, location, akamaiCdnKeyID)
-		if err := createCdnKey(buf, tc.ProjectID, akamaiCdnKeyID, hostname, "", "", akamaiTokenKey); err != nil {
+		if err := createCdnKey(buf, tc.ProjectID, akamaiCdnKeyID, hostname, "", "", privateKey); err != nil {
 			r.Errorf("createCdnKey (Akamai) got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, cdnKeyName) {
@@ -269,7 +267,7 @@ func TestCdnKeys(t *testing.T) {
 	// Update an existing CDN key.
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
 		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, akamaiCdnKeyID)
-		if err := updateCdnKey(buf, tc.ProjectID, akamaiCdnKeyID, updatedHostname, "", "", updatedAkamaiTokenKey); err != nil {
+		if err := updateCdnKey(buf, tc.ProjectID, akamaiCdnKeyID, updatedHostname, "", "", updatedPrivateKey); err != nil {
 			r.Errorf("updateCdnKey got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, cdnKeyName) {
