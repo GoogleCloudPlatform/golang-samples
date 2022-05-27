@@ -28,10 +28,18 @@ import (
 )
 
 const (
+	location            = "us-central1" // All samples use this location
+	slateID             = "my-go-test-slate"
+	deleteSlateResponse = "Deleted slate"
+
 	deleteCdnKeyResponse = "Deleted CDN key"
-	deleteSlateResponse  = "Deleted slate"
-	location             = "us-central1" // All samples use this location
-	slateID              = "my-go-test-slate"
+	gcdnCdnKeyID         = "my-go-test-google-cdn"
+	akamaiCdnKeyID       = "my-go-test-akamai-cdn"
+	hostname             = "cdn.example.com"
+	updatedHostname      = "updated.example.com"
+	gcdnKeyname          = "gcdn-key"
+	privateKey           = "VGhpcyBpcyBhIHRlc3Qgc3RyaW5nLg=="
+	updatedPrivateKey    = "VGhpcyBpcyBhbiB1cGRhdGVkIHRlc3Qgc3RyaW5nLg=="
 )
 
 var bucketName string
@@ -139,6 +147,153 @@ func TestSlates(t *testing.T) {
 		}
 		if got := buf.String(); !strings.Contains(got, deleteSlateResponse) {
 			r.Errorf("deleteSlate got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, deleteSlateResponse)
+		}
+	})
+}
+
+// TestCdnKeys tests major operations on CDN keys. Create, list, update,
+// and get operations check if the CDN key resource name is returned. The
+// delete operation checks for a hard-coded string response.
+func TestCdnKeys(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := &bytes.Buffer{}
+
+	// Test setup
+
+	// Delete the Google CDN key if it exists.
+	if err := getCdnKey(buf, tc.ProjectID, gcdnCdnKeyID); err == nil {
+		testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+			if err := deleteCdnKey(buf, tc.ProjectID, gcdnCdnKeyID); err != nil {
+				r.Errorf("deleteCdnKey got err: %v", err)
+			}
+		})
+	}
+
+	// Delete the Akamai CDN key if it exists.
+	if err := getCdnKey(buf, tc.ProjectID, akamaiCdnKeyID); err == nil {
+		testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+			if err := deleteCdnKey(buf, tc.ProjectID, akamaiCdnKeyID); err != nil {
+				r.Errorf("deleteCdnKey got err: %v", err)
+			}
+		})
+	}
+
+	// Tests
+	// Google CDN tests
+
+	// Create a new Google CDN key.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", projectNumber, location, gcdnCdnKeyID)
+		if err := createCdnKey(buf, tc.ProjectID, gcdnCdnKeyID, hostname, gcdnKeyname, privateKey, ""); err != nil {
+			r.Errorf("createCdnKey (GCDN) got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, cdnKeyName) {
+			r.Errorf("createCdnKey (GCDN) got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, cdnKeyName)
+		}
+	})
+	buf.Reset()
+
+	// List the CDN keys for a given location.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, gcdnCdnKeyID)
+		if err := listCdnKeys(buf, tc.ProjectID); err != nil {
+			r.Errorf("listCdnKeys got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, cdnKeyName) {
+			r.Errorf("listCdnKeys got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, cdnKeyName)
+		}
+	})
+	buf.Reset()
+
+	// Update an existing CDN key.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, gcdnCdnKeyID)
+		if err := updateCdnKey(buf, tc.ProjectID, gcdnCdnKeyID, updatedHostname, gcdnKeyname, updatedPrivateKey, ""); err != nil {
+			r.Errorf("updateCdnKey got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, cdnKeyName) {
+			r.Errorf("updateCdnKey got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, cdnKeyName)
+		}
+	})
+	buf.Reset()
+
+	// Get the updated CDN key.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, gcdnCdnKeyID)
+		if err := getCdnKey(buf, tc.ProjectID, gcdnCdnKeyID); err != nil {
+			r.Errorf("getCdnKey got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, cdnKeyName) {
+			r.Errorf("getCdnKey got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, cdnKeyName)
+		}
+	})
+
+	// Delete the CDN key.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		if err := deleteCdnKey(buf, tc.ProjectID, gcdnCdnKeyID); err != nil {
+			r.Errorf("deleteCdnKey got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, deleteCdnKeyResponse) {
+			r.Errorf("deleteCdnKey got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, deleteCdnKeyResponse)
+		}
+	})
+
+	// Akamai tests
+
+	// Create a new Akamai CDN key.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", projectNumber, location, akamaiCdnKeyID)
+		if err := createCdnKey(buf, tc.ProjectID, akamaiCdnKeyID, hostname, "", "", privateKey); err != nil {
+			r.Errorf("createCdnKey (Akamai) got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, cdnKeyName) {
+			r.Errorf("createCdnKey (Akamai) got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, cdnKeyName)
+		}
+	})
+	buf.Reset()
+
+	// List the CDN keys for a given location.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, akamaiCdnKeyID)
+		if err := listCdnKeys(buf, tc.ProjectID); err != nil {
+			r.Errorf("listCdnKeys got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, cdnKeyName) {
+			r.Errorf("listCdnKeys got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, cdnKeyName)
+		}
+	})
+	buf.Reset()
+
+	// Update an existing CDN key.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, akamaiCdnKeyID)
+		if err := updateCdnKey(buf, tc.ProjectID, akamaiCdnKeyID, updatedHostname, "", "", updatedPrivateKey); err != nil {
+			r.Errorf("updateCdnKey got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, cdnKeyName) {
+			r.Errorf("updateCdnKey got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, cdnKeyName)
+		}
+	})
+	buf.Reset()
+
+	// Get the updated CDN key.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, akamaiCdnKeyID)
+		if err := getCdnKey(buf, tc.ProjectID, akamaiCdnKeyID); err != nil {
+			r.Errorf("getCdnKey got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, cdnKeyName) {
+			r.Errorf("getCdnKey got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, cdnKeyName)
+		}
+	})
+
+	// Delete the CDN key.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		if err := deleteCdnKey(buf, tc.ProjectID, akamaiCdnKeyID); err != nil {
+			r.Errorf("deleteCdnKey got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, deleteCdnKeyResponse) {
+			r.Errorf("deleteCdnKey got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, deleteCdnKeyResponse)
 		}
 	})
 }
