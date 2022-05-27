@@ -26,9 +26,7 @@ import (
 
 // resumeInstance resumes a suspended Google Compute Engine instance
 // (with unencrypted disks).
-func resumeInstance(
-	w io.Writer, projectID, zone, instanceName string,
-) error {
+func resumeInstance(w io.Writer, projectID, zone, instanceName string) error {
 	// projectID := "your_project_id"
 	// zone := "europe-central2-b"
 	// instanceName := "your_instance_name"
@@ -52,8 +50,6 @@ func resumeInstance(
 	}
 
 	if instance.GetStatus() != "SUSPENDED" {
-		// f"Only suspended instances can be resumed. "
-		// f"Instance {instance_name} is in {instance.status} state."
 		return fmt.Errorf(
 			"only suspended instances can be resumed, instance %s is in %s state",
 			instanceName,

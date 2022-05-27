@@ -92,7 +92,7 @@ func TestSuspendResumeSnippets(t *testing.T) {
 
 	op, err := instancesClient.Insert(ctx, req)
 	if err != nil {
-		t.Errorf("unable to create instance: %v", err)
+		t.Fatalf("unable to create instance: %v", err)
 	}
 
 	if err = op.Wait(ctx); err != nil {

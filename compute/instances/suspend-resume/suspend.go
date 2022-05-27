@@ -25,9 +25,7 @@ import (
 )
 
 // suspendInstance suspends a running Google Compute Engine instance.
-func suspendInstance(
-	w io.Writer, projectID, zone, instanceName string,
-) error {
+func suspendInstance(w io.Writer, projectID, zone, instanceName string) error {
 	// projectID := "your_project_id"
 	// zone := "europe-central2-b"
 	// instanceName := "your_instance_name"
