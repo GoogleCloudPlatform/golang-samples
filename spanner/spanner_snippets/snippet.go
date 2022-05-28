@@ -40,6 +40,7 @@ var (
 	commands = map[string]command{
 		"write":               write,
 		"read":                read,
+		"readwithrole":        read,
 		"query":               query,
 		"update":              update,
 		"querynewcolumn":      queryNewColumn,
@@ -62,6 +63,7 @@ var (
 		"addstoringindex":   addStoringIndex,
 		"pgaddstoringindex": pgAddStoringIndex,
 		"pgcreatedatabase":  pgCreateDatabase,
+		"addnewrole":        addNewRole,
 	}
 )
 
@@ -706,21 +708,64 @@ func pgAddStoringIndex(ctx context.Context, w io.Writer, adminClient *database.D
 	return nil
 }
 
-func createClients(ctx context.Context, db string) (*database.DatabaseAdminClient, *spanner.Client) {
+func addNewRole(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	op, err := adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
+		Database: database,
+		Statements: []string{
+			"CREATE ROLE parent",
+			"GRANT SELECT ON TABLE Albums TO ROLE parent",
+			"CREATE ROLE child",
+			"GRANT ROLE parent TO ROLE child",
+		},
+	})
+	if err != nil {
+		return err
+	}
+	if err := op.Wait(ctx); err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "Created roles and granted SELECT privileges\n")
+	op, err = adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
+		Database: database,
+		Statements: []string{
+			"REVOKE ROLE parent FROM ROLE child",
+			"DROP ROLE child",
+			"REVOKE SELECT ON TABLE Albums FROM ROLE parent",
+			"DROP ROLE parent",
+		},
+	})
+	if err != nil {
+		return err
+	}
+	if err := op.Wait(ctx); err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "Revoked privileges and dropped roles\n")
+	return nil
+}
+
+func run(ctx context.Context, w io.Writer, cmd string, db string) error {
+	databaseRole := ""
+	if cmd == "readwithrole" {
+		databaseRole = "albums_reader"
+	}
+
+	cfg := spanner.ClientConfig{
+		DatabaseRole: databaseRole,
+	}
+
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer adminClient.Close()
 
-	dataClient, err := spanner.NewClient(ctx, db)
+	dataClient, err := spanner.NewClientWithConfig(ctx, db, cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer dataClient.Close()
 
-	return adminClient, dataClient
-}
-
-func run(ctx context.Context, adminClient *database.DatabaseAdminClient, dataClient *spanner.Client, w io.Writer, cmd string, db string) error {
 	if adminCmdFn := adminCommands[cmd]; adminCmdFn != nil {
 		err := adminCmdFn(ctx, w, adminClient, db)
 		if err != nil {
@@ -735,7 +780,7 @@ func run(ctx context.Context, adminClient *database.DatabaseAdminClient, dataCli
 		flag.Usage()
 		os.Exit(2)
 	}
-	err := cmdFn(ctx, w, dataClient)
+	err = cmdFn(ctx, w, dataClient)
 	if err != nil {
 		fmt.Fprintf(w, "%s failed with %v", cmd, err)
 	}
@@ -746,11 +791,12 @@ func main() {
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, `Usage: spanner_snippets <command> <database_name>
 
-	Command can be one of: write, read, query, update, querynewcolumn,
-		querywithparameter, dmlwrite, dmlwritetxn, readindex, readstoringindex,
-		readonlytransaction, createdatabase, addnewcolumn, addstoringindex,
-		pgcreatedatabase, pgqueryparameter, pgdmlwrite, pgaddnewcolumn, pgquerynewcolumn,
-		pgdmlwritetxn, pgaddstoringindex
+	Command can be one of: write, read, readwithrole, query, update,
+		querynewcolumn, querywithparameter, dmlwrite, dmlwritetxn, readindex,
+		readstoringindex, readonlytransaction, createdatabase, addnewcolumn,
+		addstoringindex, addnewrole, pgcreatedatabase, pgqueryparameter,
+		pgdmlwrite, pgaddnewcolumn, pgquerynewcolumn, pgdmlwritetxn,
+		pgaddstoringindex
 
 Examples:
 	spanner_snippets createdatabase projects/my-project/instances/my-instance/databases/example-db
@@ -767,10 +813,7 @@ Examples:
 	cmd, db := flag.Arg(0), flag.Arg(1)
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
 	defer cancel()
-	adminClient, dataClient := createClients(ctx, db)
-	defer adminClient.Close()
-	defer dataClient.Close()
-	if err := run(ctx, adminClient, dataClient, os.Stdout, cmd, db); err != nil {
+	if err := run(ctx, os.Stdout, cmd, db); err != nil {
 		os.Exit(1)
 	}
 }
