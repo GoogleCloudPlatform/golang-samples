@@ -46,6 +46,8 @@ var bucketName string
 var slateURI string
 var updatedSlateURI string
 var projectNumber string
+var vodURI string
+var vodAdTagURI string
 
 // To run the tests, do the following:
 // Export the following env vars:
@@ -62,6 +64,9 @@ func TestMain(t *testing.T) {
 	bucketName = "cloud-samples-data/media/"
 	slateURI = "https://storage.googleapis.com/" + bucketName + "ForBiggerEscapes.mp4"
 	updatedSlateURI = "https://storage.googleapis.com/" + bucketName + "ForBiggerJoyrides.mp4"
+	vodURI = "https://storage.googleapis.com/" + bucketName + "hls-vod/manifest.m3u8"
+	// VMAP Pre-roll (https://developers.google.com/interactive-media-ads/docs/sdks/html5/client-side/tags)
+	vodAdTagURI = "https://pubads.g.doubleclick.net/gampad/ads?iu=/21775744923/external/vmap_ad_samples&sz=640x480&cust_params=sample_ar%3Dpreonly&ciu_szs=300x250%2C728x90&gdfp_req=1&ad_rule=1&output=vmap&unviewed_position_start=1&env=vp&impl=s&correlator="
 
 	// Get the project number
 	cloudresourcemanagerClient, err := cloudresourcemanager.NewService(ctx)
@@ -296,4 +301,106 @@ func TestCdnKeys(t *testing.T) {
 			r.Errorf("deleteCdnKey got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, deleteCdnKeyResponse)
 		}
 	})
+}
+
+// testVodSessions tests major operations on VOD sessions. Create and get
+// operations check if the session name is returned. List and delete methods
+// are not supported for VOD sessions.
+// The test lists and gets ad tag and stitch details as well.
+func TestVodSessions(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := &bytes.Buffer{}
+	sessionID := ""
+
+	// Create a new VOD session.
+	sessionPrefix := fmt.Sprintf("projects/%s/locations/%s/vodSessions/", projectNumber, location)
+	if err := createVodSession(buf, tc.ProjectID, vodURI, vodAdTagURI); err != nil {
+		t.Errorf("createVodSession got err: %v", err)
+	}
+	got := buf.String()
+
+	if !strings.Contains(got, sessionPrefix) {
+		t.Errorf("createVodSession got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, sessionPrefix)
+	}
+	strSlice := strings.Split(got, "/")
+	sessionID = strSlice[len(strSlice)-1]
+	buf.Reset()
+
+	// Get the VOD session.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		sessionName := fmt.Sprintf("projects/%s/locations/%s/vodSessions/%s", projectNumber, location, sessionID)
+		if err := getVodSession(buf, tc.ProjectID, sessionID); err != nil {
+			r.Errorf("getVodSession got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, sessionName) {
+			r.Errorf("getVodSession got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, sessionName)
+		}
+	})
+	buf.Reset()
+
+	// No list or delete methods for VOD sessions
+
+	// Ad tag details
+
+	// List the ad tag details for a given VOD session.
+	adTagDetailsNamePrefix := fmt.Sprintf("projects/%s/locations/%s/vodSessions/%s/vodAdTagDetails/", projectNumber, location, sessionID)
+	if err := listVodAdTagDetails(buf, tc.ProjectID, sessionID); err != nil {
+		t.Errorf("listVodAdTagDetails got err: %v", err)
+	}
+	got = buf.String()
+
+	if !strings.Contains(got, adTagDetailsNamePrefix) {
+		t.Errorf("listVodAdTagDetails got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, adTagDetailsNamePrefix)
+	}
+	strSlice = strings.Split(got, "/")
+	adTagDetailsID := strSlice[len(strSlice)-1]
+	adTagDetailsID = strings.TrimRight(adTagDetailsID, "\n")
+	adTagDetailsName := fmt.Sprintf("projects/%s/locations/%s/vodSessions/%s/vodAdTagDetails/%s", projectNumber, location, sessionID, adTagDetailsID)
+	if !strings.Contains(got, adTagDetailsName) {
+		t.Errorf("listVodAdTagDetails got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, adTagDetailsName)
+	}
+	buf.Reset()
+
+	// Get the specified ad tag detail for a given VOD session.
+	testutil.Retry(t, 1, 2*time.Second, func(r *testutil.R) {
+		if err := getVodAdTagDetail(buf, tc.ProjectID, sessionID, adTagDetailsID); err != nil {
+			r.Errorf("getVodAdTagDetail got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, adTagDetailsName) {
+			r.Errorf("getVodAdTagDetail got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, adTagDetailsName)
+		}
+	})
+	buf.Reset()
+
+	// Stitch details
+
+	// List the stitch details for a given VOD session.
+	stitchDetailsNamePrefix := fmt.Sprintf("projects/%s/locations/%s/vodSessions/%s/vodStitchDetails/", projectNumber, location, sessionID)
+	if err := listVodStitchDetails(buf, tc.ProjectID, sessionID); err != nil {
+		t.Errorf("listVodStitchDetails got err: %v", err)
+	}
+	got = buf.String()
+
+	if !strings.Contains(got, stitchDetailsNamePrefix) {
+		t.Errorf("listVodStitchDetails got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, stitchDetailsNamePrefix)
+	}
+	strSlice = strings.Split(got, "/")
+	stitchDetailsID := strSlice[len(strSlice)-1]
+	stitchDetailsID = strings.TrimRight(stitchDetailsID, "\n")
+	stitchDetailsName := fmt.Sprintf("projects/%s/locations/%s/vodSessions/%s/vodStitchDetails/%s", projectNumber, location, sessionID, stitchDetailsID)
+	if !strings.Contains(got, stitchDetailsName) {
+		t.Errorf("listVodStitchDetails got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, stitchDetailsName)
+	}
+	buf.Reset()
+
+	// Get the specified VOD stitch detail for a given VOD session.
+	testutil.Retry(t, 1, 2*time.Second, func(r *testutil.R) {
+		if err := getVodStitchDetail(buf, tc.ProjectID, sessionID, stitchDetailsID); err != nil {
+			r.Errorf("getVodStitchDetail got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, stitchDetailsName) {
+			r.Errorf("getVodStitchDetail got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, stitchDetailsName)
+		}
+	})
+	buf.Reset()
 }
