@@ -17,6 +17,7 @@ package videostitcher
 // [START video_stitcher_get_slate]
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -44,8 +45,12 @@ func getSlate(w io.Writer, projectID, slateID string) error {
 	if err != nil {
 		return fmt.Errorf("client.GetSlate: %v", err)
 	}
+	b, err := json.MarshalIndent(response, "", " ")
+	if err != nil {
+		return fmt.Errorf("json.MarshalIndent: %v", err)
+	}
 
-	fmt.Fprintf(w, "Slate: %+v", response)
+	fmt.Fprintf(w, "Slate:\n%s", string(b))
 	return nil
 }
 

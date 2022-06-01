@@ -17,6 +17,7 @@ package videostitcher
 // [START video_stitcher_get_vod_ad_tag_detail]
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -45,21 +46,12 @@ func getVodAdTagDetail(w io.Writer, projectID, sessionID, adTagDetailID string) 
 	if err != nil {
 		return fmt.Errorf("client.GetVodAdTagDetail: %v", err)
 	}
-
-	fmt.Fprintf(w, "VOD ad tag detail: %v", response.Name)
-
-	for _, AdRequest := range response.AdRequests {
-		fmt.Fprintf(w, "\nUri: %v", AdRequest.Uri)
-		fmt.Fprintf(w, "\nRequestMetadata:")
-		for i, v := range AdRequest.RequestMetadata.Headers.Fields {
-			fmt.Fprintf(w, i+": "+v.GetStringValue())
-		}
-		fmt.Fprintf(w, "\nResponseMetadata:")
-		fmt.Fprintf(w, "\nError: %v", AdRequest.ResponseMetadata.Error)
-		fmt.Fprintf(w, "\nStatusCode: %v", AdRequest.ResponseMetadata.StatusCode)
-		// More fields are available.
+	b, err := json.MarshalIndent(response, "", " ")
+	if err != nil {
+		return fmt.Errorf("json.MarshalIndent: %v", err)
 	}
 
+	fmt.Fprintf(w, "VOD ad tag detail:\n%s", string(b))
 	return nil
 }
 

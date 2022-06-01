@@ -17,6 +17,7 @@ package videostitcher
 // [START video_stitcher_get_vod_stitch_detail]
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -45,8 +46,12 @@ func getVodStitchDetail(w io.Writer, projectID, sessionID, stitchDetailID string
 	if err != nil {
 		return fmt.Errorf("client.GetStitchDetail: %v", err)
 	}
-	fmt.Fprintf(w, "VOD stitch detail: %+v", response)
+	b, err := json.MarshalIndent(response, "", " ")
+	if err != nil {
+		return fmt.Errorf("json.MarshalIndent: %v", err)
+	}
 
+	fmt.Fprintf(w, "VOD stitch detail:\n%s", string(b))
 	return nil
 }
 

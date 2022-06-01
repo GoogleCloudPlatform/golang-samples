@@ -17,6 +17,7 @@ package videostitcher
 // [START video_stitcher_get_vod_session]
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -44,8 +45,12 @@ func getVodSession(w io.Writer, projectID, sessionID string) error {
 	if err != nil {
 		return fmt.Errorf("client.GetVodSession: %v", err)
 	}
+	b, err := json.MarshalIndent(response, "", " ")
+	if err != nil {
+		return fmt.Errorf("json.MarshalIndent: %v", err)
+	}
 
-	fmt.Fprintf(w, "VOD session: %v", response)
+	fmt.Fprintf(w, "VOD session:\n%s", string(b))
 	return nil
 }
 
