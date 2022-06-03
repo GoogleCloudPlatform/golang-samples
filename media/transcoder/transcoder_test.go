@@ -72,9 +72,8 @@ func TestJobTemplatesAndJobs(t *testing.T) {
 	outputURIForAnimatedOverlay := "gs://" + bucketName + "/test-output-animated-overlay/"
 	outputDirForSetNumberSpritesheet := "test-output-set-number-spritesheet/"
 	outputURIForSetNumberSpritesheet := "gs://" + bucketName + "/" + outputDirForSetNumberSpritesheet
-	// TODO: Uncomment following lines and testJobWithPeriodicImagesSpritesheet after fixing https://github.com/GoogleCloudPlatform/golang-samples/issues/2432 (t.Skip not used due to size of test)
-	//outputDirForPeriodicSpritesheet := "test-output-periodic-spritesheet/"
-	//outputURIForPeriodicSpritesheet := "gs://" + bucketName + "/" + outputDirForPeriodicSpritesheet
+	outputDirForPeriodicSpritesheet := "test-output-periodic-spritesheet/"
+	outputURIForPeriodicSpritesheet := "gs://" + bucketName + "/" + outputDirForPeriodicSpritesheet
 	outputURIForConcat := "gs://" + bucketName + "/test-output-concat/"
 	outputURIForEmbeddedCaptions := "gs://" + bucketName + "/test-output-embedded-captions/"
 	outputURIForStandaloneCaptions := "gs://" + bucketName + "/test-output-standalone-captions/"
@@ -111,12 +110,11 @@ func TestJobTemplatesAndJobs(t *testing.T) {
 	checkGCSFileExists(t, bucketName, outputDirForSetNumberSpritesheet+smallSpriteSheetFileName)
 	checkGCSFileExists(t, bucketName, outputDirForSetNumberSpritesheet+largeSpriteSheetFileName)
 
-	// TODO: Uncomment following lines and testJobWithPeriodicImagesSpritesheet after fixing https://github.com/GoogleCloudPlatform/golang-samples/issues/2432 (t.Skip not used due to size of test)
-	//testJobWithPeriodicImagesSpritesheet(t, projectNumber, inputURI, outputURIForPeriodicSpritesheet)
-	//t.Logf("\ntestJobWithPeriodicImagesSpritesheet() completed\n")
+	testJobWithPeriodicImagesSpritesheet(t, projectNumber, inputURI, outputURIForPeriodicSpritesheet)
+	t.Logf("\ntestJobWithPeriodicImagesSpritesheet() completed\n")
 	// Check if the spritesheets exist.
-	//checkGCSFileExists(t, bucketName, outputDirForPeriodicSpritesheet+smallSpriteSheetFileName)
-	//checkGCSFileExists(t, bucketName, outputDirForPeriodicSpritesheet+largeSpriteSheetFileName)
+	checkGCSFileExists(t, bucketName, outputDirForPeriodicSpritesheet+smallSpriteSheetFileName)
+	checkGCSFileExists(t, bucketName, outputDirForPeriodicSpritesheet+largeSpriteSheetFileName)
 
 	testJobWithConcatenatedInputs(t, projectNumber, inputURI, 0*time.Second, 8*time.Second+100*time.Millisecond, inputConcatURI, 3*time.Second+500*time.Millisecond, 15*time.Second, outputURIForConcat)
 	t.Logf("\ntestJobWithConcatenatedInputs() completed\n")
@@ -641,16 +639,19 @@ func testJobWithPeriodicImagesSpritesheet(t *testing.T, projectNumber string, in
 
 	// Create the job.
 	jobName := fmt.Sprintf("projects/%s/locations/%s/jobs/", projectNumber, location)
-	if err := createJobWithPeriodicImagesSpritesheet(buf, tc.ProjectID, location, inputURI, outputURIForPeriodicSpritesheet); err != nil {
-		t.Errorf("createJobWithPeriodicImagesSpritesheet got err: %v", err)
-	}
-	got := buf.String()
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		buf.Reset()
+		if err := createJobWithPeriodicImagesSpritesheet(buf, tc.ProjectID, location, inputURI, outputURIForPeriodicSpritesheet); err != nil {
+			r.Errorf("createJobWithPeriodicImagesSpritesheet got err: %v", err)
+		}
+		got := buf.String()
 
-	if !strings.Contains(got, jobName) {
-		t.Errorf("createJobWithPeriodicImagesSpritesheet got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobName)
-	}
-	strSlice := strings.Split(got, "/")
-	jobID = strSlice[len(strSlice)-1]
+		if !strings.Contains(got, jobName) {
+			r.Errorf("createJobWithPeriodicImagesSpritesheet got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobName)
+		}
+		strSlice := strings.Split(got, "/")
+		jobID = strSlice[len(strSlice)-1]
+	})
 	buf.Reset()
 
 	// Get the job.

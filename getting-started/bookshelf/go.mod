@@ -5,7 +5,7 @@ go 1.15
 require (
 	cloud.google.com/go/errorreporting v0.1.0
 	cloud.google.com/go/firestore v1.2.0
-	cloud.google.com/go/storage v1.22.0
+	cloud.google.com/go/storage v1.22.1
 	github.com/gofrs/uuid v3.4.0+incompatible
 	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
