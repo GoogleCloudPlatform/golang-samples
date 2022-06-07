@@ -14,7 +14,7 @@
 
 package videostitcher
 
-// [START video_stitcher_create_vod_session]
+// [START video_stitcher_create_live_session]
 import (
 	"context"
 	"fmt"
@@ -24,20 +24,20 @@ import (
 	stitcherpb "google.golang.org/genproto/googleapis/cloud/video/stitcher/v1"
 )
 
-// createVodSession creates a video on demand (VOD) session in which to insert ads.
-// VOD sessions are ephemeral resources that expire after a few hours.
-func createVodSession(w io.Writer, projectID, sourceURI string) error {
+// createLiveSession creates a livestream session in which to insert ads.
+// Live sessions are ephemeral resources that expire after a few minutes.
+func createLiveSession(w io.Writer, projectID, sourceURI, slateID string) error {
 	// projectID := "my-project-id"
 
 	// Uri of the media to stitch; this URI must reference either an MPEG-DASH
 	// manifest (.mpd) file or an M3U playlist manifest (.m3u8) file.
 	// sourceURI := "https://storage.googleapis.com/my-bucket/main.mpd"
-
+	// slateID := "my-slate"
 	// See https://cloud.google.com/video-stitcher/docs/concepts for information
 	// on ad tags and ad metadata. This sample uses an ad tag URL that displays
-	// a VMAP Pre-roll ad
+	// a Single Inline Linear ad
 	// (https://developers.google.com/interactive-media-ads/docs/sdks/html5/client-side/tags).
-	adTagURI := "https://pubads.g.doubleclick.net/gampad/ads?iu=/21775744923/external/vmap_ad_samples&sz=640x480&cust_params=sample_ar%3Dpreonly&ciu_szs=300x250%2C728x90&gdfp_req=1&ad_rule=1&output=vmap&unviewed_position_start=1&env=vp&impl=s&correlator="
+	adTagURI := "https://pubads.g.doubleclick.net/gampad/ads?iu=/21775744923/external/single_ad_samples&sz=640x480&cust_params=sample_ct%3Dlinear&ciu_szs=300x250%2C728x90&gdfp_req=1&output=vast&unviewed_position_start=1&env=vp&impl=s&correlator="
 	location := "us-central1"
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
@@ -46,21 +46,26 @@ func createVodSession(w io.Writer, projectID, sourceURI string) error {
 	}
 	defer client.Close()
 
-	req := &stitcherpb.CreateVodSessionRequest{
+	req := &stitcherpb.CreateLiveSessionRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
-		VodSession: &stitcherpb.VodSession{
-			SourceUri: sourceURI,
-			AdTagUri:  adTagURI,
+		LiveSession: &stitcherpb.LiveSession{
+			SourceUri:      sourceURI,
+			DefaultAdTagId: "default",
+			DefaultSlateId: slateID,
+			AdTagMap: map[string]*stitcherpb.AdTag{"default": &stitcherpb.AdTag{
+				Uri: adTagURI,
+			}},
 		},
 	}
-	// Creates the VOD session.
-	response, err := client.CreateVodSession(ctx, req)
+	// Creates the live session.
+	response, err := client.CreateLiveSession(ctx, req)
 	if err != nil {
-		return fmt.Errorf("client.CreateVodSession: %v", err)
+		return fmt.Errorf("client.CreateLiveSession: %v", err)
 	}
 
-	fmt.Fprintf(w, "VOD session: %v", response.GetName())
+	fmt.Fprintf(w, "Live session: %v\n", response.GetName())
+	fmt.Fprintf(w, "Play URI: %v", response.GetPlayUri())
 	return nil
 }
 
-// [END video_stitcher_create_vod_session]
+// [END video_stitcher_create_live_session]
