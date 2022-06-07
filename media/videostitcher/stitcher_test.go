@@ -50,9 +50,7 @@ var slateURI string
 var updatedSlateURI string
 var projectNumber string
 var vodURI string
-var vodAdTagURI string
 var liveURI string
-var liveAdTagURI string
 
 // To run the tests, do the following:
 // Export the following env vars:
@@ -70,11 +68,7 @@ func TestMain(t *testing.T) {
 	slateURI = "https://storage.googleapis.com/" + bucketName + "ForBiggerEscapes.mp4"
 	updatedSlateURI = "https://storage.googleapis.com/" + bucketName + "ForBiggerJoyrides.mp4"
 	vodURI = "https://storage.googleapis.com/" + bucketName + "hls-vod/manifest.m3u8"
-	// VMAP Pre-roll (https://developers.google.com/interactive-media-ads/docs/sdks/html5/client-side/tags)
-	vodAdTagURI = "https://pubads.g.doubleclick.net/gampad/ads?iu=/21775744923/external/vmap_ad_samples&sz=640x480&cust_params=sample_ar%3Dpreonly&ciu_szs=300x250%2C728x90&gdfp_req=1&ad_rule=1&output=vmap&unviewed_position_start=1&env=vp&impl=s&correlator="
 	liveURI = "https://storage.googleapis.com/" + bucketName + "hls-live/manifest.m3u8"
-	// Single Inline Linear (https://developers.google.com/interactive-media-ads/docs/sdks/html5/client-side/tags)
-	liveAdTagURI = "https://pubads.g.doubleclick.net/gampad/ads?iu=/21775744923/external/single_ad_samples&sz=640x480&cust_params=sample_ct%3Dlinear&ciu_szs=300x250%2C728x90&gdfp_req=1&output=vast&unviewed_position_start=1&env=vp&impl=s&correlator="
 
 	// Get the project number
 	cloudresourcemanagerClient, err := cloudresourcemanager.NewService(ctx)
@@ -322,7 +316,7 @@ func TestVodSessions(t *testing.T) {
 
 	// Create a new VOD session.
 	sessionPrefix := fmt.Sprintf("projects/%s/locations/%s/vodSessions/", projectNumber, location)
-	if err := createVodSession(buf, tc.ProjectID, vodURI, vodAdTagURI); err != nil {
+	if err := createVodSession(buf, tc.ProjectID, vodURI); err != nil {
 		t.Errorf("createVodSession got err: %v", err)
 	}
 	got := buf.String()
@@ -370,7 +364,7 @@ func TestVodSessions(t *testing.T) {
 	buf.Reset()
 
 	// Get the specified ad tag detail for a given VOD session.
-	testutil.Retry(t, 1, 2*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
 		if err := getVodAdTagDetail(buf, tc.ProjectID, sessionID, adTagDetailsID); err != nil {
 			r.Errorf("getVodAdTagDetail got err: %v", err)
 		}
@@ -402,7 +396,7 @@ func TestVodSessions(t *testing.T) {
 	buf.Reset()
 
 	// Get the specified VOD stitch detail for a given VOD session.
-	testutil.Retry(t, 1, 2*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
 		if err := getVodStitchDetail(buf, tc.ProjectID, sessionID, stitchDetailsID); err != nil {
 			r.Errorf("getVodStitchDetail got err: %v", err)
 		}
@@ -442,7 +436,7 @@ func TestLiveSessions(t *testing.T) {
 
 	// Create a new live session and return the play URI.
 	sessionPrefix := fmt.Sprintf("projects/%s/locations/%s/liveSessions/", projectNumber, location)
-	if err := createLiveSession(buf, tc.ProjectID, liveURI, liveAdTagURI, slateID); err != nil {
+	if err := createLiveSession(buf, tc.ProjectID, liveURI, slateID); err != nil {
 		t.Errorf("createLiveSession got err: %v", err)
 	}
 	got := buf.String()
@@ -540,7 +534,7 @@ func TestLiveSessions(t *testing.T) {
 	buf.Reset()
 
 	// Get the specified ad tag detail for a given live session.
-	testutil.Retry(t, 1, 2*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
 		if err := getLiveAdTagDetail(buf, projectNumber, sessionID, adTagDetailsID); err != nil {
 			r.Errorf("getLiveAdTagDetail got err: %v", err)
 		}
