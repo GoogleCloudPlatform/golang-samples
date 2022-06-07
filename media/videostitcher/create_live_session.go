@@ -33,8 +33,10 @@ func createLiveSession(w io.Writer, projectID, sourceURI, slateID string) error 
 	// manifest (.mpd) file or an M3U playlist manifest (.m3u8) file.
 	// sourceURI := "https://storage.googleapis.com/my-bucket/main.mpd"
 	// slateID := "my-slate"
-
-	// See Single Inline Linear (https://developers.google.com/interactive-media-ads/docs/sdks/html5/client-side/tags)
+	// See https://cloud.google.com/video-stitcher/docs/concepts for information
+	// on ad tags and ad metadata. This sample uses an ad tag URL that displays
+	// a Single Inline Linear ad
+	// (https://developers.google.com/interactive-media-ads/docs/sdks/html5/client-side/tags).
 	adTagURI := "https://pubads.g.doubleclick.net/gampad/ads?iu=/21775744923/external/single_ad_samples&sz=640x480&cust_params=sample_ct%3Dlinear&ciu_szs=300x250%2C728x90&gdfp_req=1&output=vast&unviewed_position_start=1&env=vp&impl=s&correlator="
 	location := "us-central1"
 	ctx := context.Background()
