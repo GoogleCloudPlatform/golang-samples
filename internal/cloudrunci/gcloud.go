@@ -49,7 +49,14 @@ func gcloud(label string, cmd *exec.Cmd) ([]byte, error) {
 
 	maxAttempts := 5
 	success := testutil.RetryWithoutTest(maxAttempts, delaySeconds, func(r *testutil.R) {
-		out, err = gcloudExec(fmt.Sprintf("Attempt #%d: ", r.Attempt), label, cmd)
+		// exec.Cmd objects cannot be reused once started, so first make a copy.
+		cmdCopy := &exec.Cmd{
+			Path: cmd.Path,
+			Args: cmd.Args,
+			Env:  cmd.Env,
+			Dir:  cmd.Dir,
+		}
+		out, err = gcloudExec(fmt.Sprintf("Attempt #%d: ", r.Attempt), label, cmdCopy)
 		if err != nil {
 			log.Printf("gcloudExec: %v", err)
 			r.Fail()

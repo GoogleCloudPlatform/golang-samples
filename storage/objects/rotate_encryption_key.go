@@ -37,13 +37,23 @@ func rotateEncryptionKey(w io.Writer, bucket, object string, key, newKey []byte)
 	}
 	defer client.Close()
 
-	obj := client.Bucket(bucket).Object(object)
-
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 
-	// obj is encrypted with key, we are encrypting it with the newKey.
-	_, err = obj.Key(newKey).CopierFrom(obj.Key(key)).Run(ctx)
+	o := client.Bucket(bucket).Object(object)
+
+	// Optional: set a generation-match precondition to avoid potential race
+	// conditions and data corruptions. The request to upload is aborted if the
+	// object's generation number does not match your precondition.
+	attrs, err := o.Attrs(ctx)
+	if err != nil {
+		return fmt.Errorf("object.Attrs: %v", err)
+	}
+	o = o.If(storage.Conditions{GenerationMatch: attrs.Generation})
+
+	// You can't change an object's encryption key directly, you must rewrite the
+	// object using the new key.
+	_, err = o.Key(newKey).CopierFrom(o.Key(key)).Run(ctx)
 	if err != nil {
 		return fmt.Errorf("Key(%q).CopierFrom(%q).Run: %v", newKey, key, err)
 	}

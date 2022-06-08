@@ -21,41 +21,21 @@ import (
 	"io"
 
 	compute "cloud.google.com/go/compute/apiv1"
-	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
 )
 
 // waitForOperation waits for an operation to be completed. Calling this function will block until the operation is finished.
-func waitForOperation(w io.Writer, projectID, zone, opName string) error {
+func waitForOperation(w io.Writer, projectID string, operation *compute.Operation) error {
 	// projectID := "your_project_id"
 	// zone := "europe-central2-b"
 	// opName := "your_operation_name"
 
 	ctx := context.Background()
 
-	zoneOperationsClient, err := compute.NewZoneOperationsRESTClient(ctx)
-	if err != nil {
-		return fmt.Errorf("NewZoneOperationsRESTClient: %v", err)
+	if err := operation.Wait(ctx); err != nil {
+		return fmt.Errorf("unable to wait for the operation: %v", err)
 	}
-	defer zoneOperationsClient.Close()
 
-	for {
-		waitReq := &computepb.WaitZoneOperationRequest{
-			Operation: opName,
-			Project:   projectID,
-			Zone:      zone,
-		}
-
-		// Waits for the specified Operation resource to return as DONE or for the request to approach the 2 minute deadline.
-		zoneOp, err := zoneOperationsClient.Wait(ctx, waitReq)
-		if err != nil {
-			return fmt.Errorf("unable to wait for the operation: %v", err)
-		}
-
-		if *zoneOp.Status.Enum() == computepb.Operation_DONE {
-			fmt.Fprintf(w, "Operation finished\n")
-			break
-		}
-	}
+	fmt.Fprintf(w, "Operation finished\n")
 
 	return nil
 }

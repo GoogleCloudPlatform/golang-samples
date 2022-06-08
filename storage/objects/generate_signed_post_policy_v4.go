@@ -16,14 +16,13 @@ package objects
 
 // [START storage_generate_signed_post_policy_v4]
 import (
+	"context"
 	"fmt"
 	"html/template"
 	"io"
-	"io/ioutil"
 	"time"
 
 	"cloud.google.com/go/storage"
-	"golang.org/x/oauth2/google"
 )
 
 // form is a template for an HTML form that will use the data from the signed
@@ -39,31 +38,38 @@ var form = `<form action="{{ .URL }}" method="POST" enctype="multipart/form-data
 var tmpl = template.Must(template.New("policyV4").Parse(form))
 
 // generateSignedPostPolicyV4 generates a signed post policy.
-func generateSignedPostPolicyV4(w io.Writer, bucket, object, serviceAccountJSONPath string) (*storage.PostPolicyV4, error) {
+func generateSignedPostPolicyV4(w io.Writer, bucket, object string) (*storage.PostPolicyV4, error) {
 	// bucket := "bucket-name"
 	// object := "object-name"
-	// serviceAccountJSONPath := "service_account.json"
-	jsonKey, err := ioutil.ReadFile(serviceAccountJSONPath)
+
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("ioutil.ReadFile: %v", err)
+		return nil, fmt.Errorf("storage.NewClient: %v", err)
 	}
-	conf, err := google.JWTConfigFromJSON(jsonKey)
-	if err != nil {
-		return nil, fmt.Errorf("google.JWTConfigFromJSON: %v", err)
-	}
+	defer client.Close()
+
 	metadata := map[string]string{
 		"x-goog-meta-test": "data",
 	}
+
+	// Generating a signed POST policy requires credentials authorized to sign a URL.
+	// You can pass these in through PostPolicyV4Options with one of the following options:
+	//    a. a Google service account private key, obtainable from the Google Developers Console
+	//    b. a Google Access ID with iam.serviceAccounts.signBlob permissions
+	//    c. a SignBytes function implementing custom signing
+	// In this example, none of these options are used, which means the
+	// GenerateSignedPostPolicyV4 function attempts to use the same authentication
+	// that was used to instantiate	the Storage client. This authentication must
+	// include a private key or have iam.serviceAccounts.signBlob permissions.
 	opts := &storage.PostPolicyV4Options{
-		GoogleAccessID: conf.Email,
-		PrivateKey:     conf.PrivateKey,
-		Expires:        time.Now().Add(10 * time.Minute),
+		Expires: time.Now().Add(10 * time.Minute),
 		Fields: &storage.PolicyV4Fields{
 			Metadata: metadata,
 		},
 	}
 
-	policy, err := storage.GenerateSignedPostPolicyV4(bucket, object, opts)
+	policy, err := client.Bucket(bucket).GenerateSignedPostPolicyV4(object, opts)
 	if err != nil {
 		return nil, fmt.Errorf("storage.GenerateSignedPostPolicyV4: %v", err)
 	}

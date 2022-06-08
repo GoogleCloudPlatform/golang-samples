@@ -86,66 +86,7 @@ func TestTopicAdmin(t *testing.T) {
 	testZone := randomZone()
 
 	topicID := resourcePrefix + uuid.NewString()
-	topicPath := fmt.Sprintf("projects/%s/locations/%s/topics/%s", projNumber, testZone, topicID)
 	t.Run("CreateTopic", func(t *testing.T) {
-		buf := new(bytes.Buffer)
-		err := createTopic(buf, tc.ProjectID, testRegion, testZone, topicID, "", false)
-		if err != nil {
-			t.Fatalf("createTopic: %v", err)
-		}
-		got := buf.String()
-		want := "Created zonal topic"
-		if !strings.Contains(got, want) {
-			t.Fatalf("createTopic() mismatch: got: %s\nwant: %s", got, want)
-		}
-	})
-
-	t.Run("GetTopic", func(t *testing.T) {
-		testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
-			buf := new(bytes.Buffer)
-			err := getTopic(buf, tc.ProjectID, testRegion, testZone, topicID, false)
-			if err != nil {
-				r.Errorf("getTopic: %v", err)
-			}
-			got := buf.String()
-			want := fmt.Sprintf("Got topic: %#v\n", *psltest.DefaultTopicConfig(topicPath))
-			if diff := cmp.Diff(want, got); diff != "" {
-				r.Errorf("getTopic() mismatch: -want, +got:\n%s", diff)
-			}
-		})
-	})
-
-	t.Run("UpdateTopic", func(t *testing.T) {
-		buf := new(bytes.Buffer)
-		err := updateTopic(buf, projNumber, testRegion, testZone, topicID, "", false)
-		if err != nil {
-			t.Fatalf("updateTopic: %v", err)
-		}
-
-		got := buf.String()
-		want := "Updated zonal topic"
-		if !strings.Contains(got, want) {
-			t.Fatalf("updateTopic() mismatch: got: %s\nwant: %s", got, want)
-		}
-	})
-
-	t.Run("DeleteTopic", func(t *testing.T) {
-		buf := new(bytes.Buffer)
-		err := deleteTopic(buf, tc.ProjectID, testRegion, testZone, topicID, false)
-		if err != nil {
-			t.Fatalf("deleteTopic: %v", err)
-		}
-
-		got := buf.String()
-		want := "Deleted zonal topic\n"
-		if got != want {
-			t.Fatalf("got: %v, want %v", got, want)
-		}
-	})
-
-	t.Run("CreateRegionalTopic", func(t *testing.T) {
-		buf := new(bytes.Buffer)
-
 		ctx := context.Background()
 		reservationID = resourcePrefix + uuid.NewString()
 		reservationPath = fmt.Sprintf("projects/%s/locations/%s/reservations/%s", projNumber, testRegion, reservationID)
@@ -154,42 +95,56 @@ func TestTopicAdmin(t *testing.T) {
 			ThroughputCapacity: 4,
 		})
 
-		// Create a regional topic.
-		err := createTopic(buf, tc.ProjectID, testRegion, testZone, topicID, reservationPath, true)
+		buf := new(bytes.Buffer)
+		err := createTopic(buf, tc.ProjectID, testRegion, testZone, topicID, reservationPath)
 		if err != nil {
 			t.Fatalf("createTopic: %v", err)
 		}
 		got := buf.String()
-		want := "Created regional topic"
+		want := "Created topic"
 		if !strings.Contains(got, want) {
 			t.Fatalf("createTopic() mismatch: got: %s\nwant: %s", got, want)
 		}
 	})
 
-	t.Run("UpdateRegionalTopic", func(t *testing.T) {
+	t.Run("GetTopic", func(t *testing.T) {
+		testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
+			buf := new(bytes.Buffer)
+			err := getTopic(buf, tc.ProjectID, testRegion, testZone, topicID)
+			if err != nil {
+				r.Errorf("getTopic: %v", err)
+			}
+			got := buf.String()
+			want := "Got topic"
+			if !strings.Contains(got, want) {
+				r.Errorf("getTopic() mismatch: got: %s\nwant: %s", got, want)
+			}
+		})
+	})
+
+	t.Run("UpdateTopic", func(t *testing.T) {
 		buf := new(bytes.Buffer)
-		err := updateTopic(buf, projNumber, testRegion, testZone, topicID, reservationPath, true)
+		err := updateTopic(buf, projNumber, testRegion, testZone, topicID, reservationPath)
 		if err != nil {
 			t.Fatalf("updateTopic: %v", err)
 		}
 
 		got := buf.String()
-		want := "Updated regional topic"
+		want := "Updated topic"
 		if !strings.Contains(got, want) {
 			t.Fatalf("updateTopic() mismatch: got: %s\nwant: %s", got, want)
 		}
 	})
 
-	t.Run("DeleteRegionalTopic", func(t *testing.T) {
+	t.Run("DeleteTopic", func(t *testing.T) {
 		buf := new(bytes.Buffer)
-		// Delete the regional topic.
-		err := deleteTopic(buf, tc.ProjectID, testRegion, testZone, topicID, true)
+		err := deleteTopic(buf, tc.ProjectID, testRegion, testZone, topicID)
 		if err != nil {
 			t.Fatalf("deleteTopic: %v", err)
 		}
 
 		got := buf.String()
-		want := "Deleted regional topic\n"
+		want := "Deleted topic\n"
 		if got != want {
 			t.Fatalf("got: %v, want %v", got, want)
 		}
@@ -378,6 +333,106 @@ func TestListSubscriptions(t *testing.T) {
 	client.DeleteTopic(ctx, topicPath)
 	for _, sp := range subPaths {
 		client.DeleteSubscription(ctx, sp)
+	}
+}
+
+func TestReservationsAdmin(t *testing.T) {
+	t.Parallel()
+	client := setupAdmin(t)
+	defer client.Close()
+	tc := testutil.SystemTest(t)
+
+	reservationID := resourcePrefix + uuid.NewString()
+	resPath := fmt.Sprintf("projects/%s/locations/%s/reservations/%s", projNumber, testRegion, reservationID)
+	cap := 4
+	t.Run("CreateReservation", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+		err := createReservation(buf, tc.ProjectID, testRegion, reservationID, cap)
+		if err != nil {
+			t.Fatalf("createReservation: %v", err)
+		}
+
+		got := buf.String()
+		want := "Created reservation"
+		if !strings.Contains(got, want) {
+			t.Fatalf("createReservation() mismatch: got: %s\nwant: %s", got, want)
+		}
+	})
+
+	t.Run("GetReservation", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+		err := getReservation(buf, tc.ProjectID, testRegion, reservationID)
+		if err != nil {
+			t.Fatalf("getReservation: %v", err)
+		}
+
+		got := buf.String()
+		want := fmt.Sprintf("Got reservation: %#v\n", psltest.DefaultResConfig(resPath))
+		if diff := cmp.Diff(want, got); diff != "" {
+			t.Fatalf("getReservation() mismatch: -want, +got:\n%s", diff)
+		}
+	})
+
+	t.Run("UpdateReservation", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+		err := updateReservation(buf, tc.ProjectID, testRegion, reservationID, cap)
+		if err != nil {
+			t.Fatalf("updateReservation: %v", err)
+		}
+
+		got := buf.String()
+		want := "Updated reservation"
+		if !strings.Contains(got, want) {
+			t.Fatalf("updateReservation() mismatch: got: %s\nwant: %s", got, want)
+		}
+	})
+
+	t.Run("DeleteReservation", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+		err := deleteReservation(buf, tc.ProjectID, testRegion, reservationID)
+		if err != nil {
+			t.Fatalf("deleteReservation: %v", err)
+		}
+
+		got := buf.String()
+		want := "Deleted reservation"
+		if got != want {
+			t.Fatalf("got: %v, want %v", got, want)
+		}
+	})
+}
+
+func TestListReservations(t *testing.T) {
+	t.Parallel()
+	client := setupAdmin(t)
+	defer client.Close()
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+
+	var resPaths []string
+	for i := 0; i < 3; i++ {
+		resID := resourcePrefix + uuid.NewString()
+		resPath := fmt.Sprintf("projects/%s/locations/%s/reservations/%s", projNumber, testRegion, resID)
+		resPaths = append(resPaths, resPath)
+		psltest.MustCreateReservation(ctx, t, client, resPath)
+	}
+
+	testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+		err := listReservations(buf, tc.ProjectID, testRegion)
+		if err != nil {
+			r.Errorf("listReservations got err: %v", err)
+		}
+		got := buf.String()
+		for _, rp := range resPaths {
+			if !strings.Contains(got, rp) {
+				r.Errorf("missing reservation from list: %s", rp)
+			}
+		}
+	})
+
+	for _, rp := range resPaths {
+		client.DeleteReservation(ctx, rp)
 	}
 }
 

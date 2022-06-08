@@ -639,16 +639,19 @@ func testJobWithPeriodicImagesSpritesheet(t *testing.T, projectNumber string, in
 
 	// Create the job.
 	jobName := fmt.Sprintf("projects/%s/locations/%s/jobs/", projectNumber, location)
-	if err := createJobWithPeriodicImagesSpritesheet(buf, tc.ProjectID, location, inputURI, outputURIForPeriodicSpritesheet); err != nil {
-		t.Errorf("createJobWithPeriodicImagesSpritesheet got err: %v", err)
-	}
-	got := buf.String()
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		buf.Reset()
+		if err := createJobWithPeriodicImagesSpritesheet(buf, tc.ProjectID, location, inputURI, outputURIForPeriodicSpritesheet); err != nil {
+			r.Errorf("createJobWithPeriodicImagesSpritesheet got err: %v", err)
+		}
+		got := buf.String()
 
-	if !strings.Contains(got, jobName) {
-		t.Errorf("createJobWithPeriodicImagesSpritesheet got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobName)
-	}
-	strSlice := strings.Split(got, "/")
-	jobID = strSlice[len(strSlice)-1]
+		if !strings.Contains(got, jobName) {
+			r.Errorf("createJobWithPeriodicImagesSpritesheet got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobName)
+		}
+		strSlice := strings.Split(got, "/")
+		jobID = strSlice[len(strSlice)-1]
+	})
 	buf.Reset()
 
 	// Get the job.

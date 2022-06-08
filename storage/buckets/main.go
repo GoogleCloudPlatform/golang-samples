@@ -23,163 +23,18 @@ package buckets
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log"
-	"os"
 	"time"
 
-	"cloud.google.com/go/iam"
 	"cloud.google.com/go/storage"
-	"google.golang.org/api/iterator"
 	iampb "google.golang.org/genproto/googleapis/iam/v1"
 	"google.golang.org/genproto/googleapis/type/expr"
 )
 
+// TODO: Move remaining region tags in this file to separate stand-alone files,
+// then delete this file.
 func main() {
-	ctx := context.Background()
-
-	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
-	if projectID == "" {
-		fmt.Fprintf(os.Stderr, "GOOGLE_CLOUD_PROJECT environment variable must be set.\n")
-		os.Exit(1)
-	}
-
-	// [START setup]
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer client.Close()
-	// [END setup]
-
-	// Give the bucket a unique name.
-	name := fmt.Sprintf("golang-example-buckets-%d", time.Now().Unix())
-	if err := create(client, projectID, name); err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("created bucket: %v\n", name)
-
-	// list buckets from the project
-	buckets, err := list(client, projectID)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("buckets: %+v\n", buckets)
-
-	// get IAM policy
-	if _, err := getPolicy(client, name); err != nil {
-		log.Fatal(err)
-	}
-
-	// add user to IAM policy
-	if err := addUser(client, name); err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("added user to bucket %s", name)
-
-	// get IAM policy
-	if _, err := getPolicy(client, name); err != nil {
-		log.Fatal(err)
-	}
-
-	// remove user from IAM policy
-	if err := removeUser(client, name); err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("removed user from bucket %s", name)
-
-	// get IAM policy
-	if _, err := getPolicy(client, name); err != nil {
-		log.Fatal(err)
-	}
-
-	// delete the bucket
-	if err := deleteBucket(client, name); err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("deleted bucket: %v\n", name)
-}
-
-func create(client *storage.Client, projectID, bucketName string) error {
-	// [START create_bucket]
-	ctx := context.Background()
-
-	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel()
-	if err := client.Bucket(bucketName).Create(ctx, projectID, nil); err != nil {
-		return err
-	}
-	// [END create_bucket]
-	return nil
-}
-
-func createWithAttrs(client *storage.Client, projectID, bucketName string) error {
-	// [START create_bucket_with_storageclass_and_location]
-	ctx := context.Background()
-	bucket := client.Bucket(bucketName)
-
-	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel()
-	if err := bucket.Create(ctx, projectID, &storage.BucketAttrs{
-		StorageClass: "COLDLINE",
-		Location:     "asia",
-	}); err != nil {
-		return err
-	}
-	// [END create_bucket_with_storageclass_and_location]
-	return nil
-}
-
-func list(client *storage.Client, projectID string) ([]string, error) {
-	// [START list_buckets]
-	ctx := context.Background()
-
-	var buckets []string
-	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel()
-	it := client.Buckets(ctx, projectID)
-	for {
-		battrs, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return nil, err
-		}
-		buckets = append(buckets, battrs.Name)
-	}
-	// [END list_buckets]
-	return buckets, nil
-}
-
-func deleteBucket(client *storage.Client, bucketName string) error {
-	// [START delete_bucket]
-	ctx := context.Background()
-
-	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel()
-	if err := client.Bucket(bucketName).Delete(ctx); err != nil {
-		return err
-	}
-	// [END delete_bucket]
-	return nil
-}
-
-func getPolicy(c *storage.Client, bucketName string) (*iam.Policy3, error) {
-	// [START storage_get_bucket_policy]
-	ctx := context.Background()
-
-	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel()
-	policy, err := c.Bucket(bucketName).IAM().V3().Policy(ctx)
-	if err != nil {
-		return nil, err
-	}
-	for _, binding := range policy.Bindings {
-		log.Printf("%q: %q (condition: %v)", binding.Role, binding.Members, binding.Condition)
-	}
-	// [END storage_get_bucket_policy]
-	return policy, nil
+	log.Fatalf("Running main is not supported.")
 }
 
 func addUser(c *storage.Client, bucketName string) error {
@@ -468,55 +323,6 @@ func getDefaultEventBasedHold(c *storage.Client, bucketName string) (*storage.Bu
 		attrs.DefaultEventBasedHold)
 	// [END storage_get_default_event_based_hold]
 	return attrs, nil
-}
-
-func enableRequesterPays(c *storage.Client, bucketName string) error {
-	// [START enable_requester_pays]
-	ctx := context.Background()
-
-	bucket := c.Bucket(bucketName)
-	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
-		RequesterPays: true,
-	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel()
-	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
-		return err
-	}
-	// [END enable_requester_pays]
-	return nil
-}
-
-func disableRequesterPays(c *storage.Client, bucketName string) error {
-	// [START disable_requester_pays]
-	ctx := context.Background()
-
-	bucket := c.Bucket(bucketName)
-	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
-		RequesterPays: false,
-	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel()
-	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
-		return err
-	}
-	// [END disable_requester_pays]
-	return nil
-}
-
-func checkRequesterPays(c *storage.Client, bucketName string) error {
-	// [START get_requester_pays_status]
-	ctx := context.Background()
-
-	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel()
-	attrs, err := c.Bucket(bucketName).Attrs(ctx)
-	if err != nil {
-		return err
-	}
-	log.Printf("Is requester pays enabled? %v\n", attrs.RequesterPays)
-	// [END get_requester_pays_status]
-	return nil
 }
 
 func setDefaultKMSkey(c *storage.Client, bucketName string, keyName string) error {
