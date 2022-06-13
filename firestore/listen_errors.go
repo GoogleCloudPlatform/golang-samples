@@ -41,8 +41,8 @@ func listenErrors(ctx context.Context, w io.Writer, projectID, collection string
 	it := client.Collection(collection).Snapshots(ctx)
 	for {
 		snap, err := it.Next()
-		// DeadlineExceeded will be returned when ctx is cancelled.
-		if status.Code(err) == codes.DeadlineExceeded {
+		// Canceled will be returned when ctx is cancelled.
+		if status.Code(err) == codes.Canceled {
 			return nil
 		}
 		if err != nil {
