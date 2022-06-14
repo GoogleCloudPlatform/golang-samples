@@ -6,13 +6,13 @@ require github.com/cloudevents/sdk-go/v2 v2.6.1
 
 require (
 	cloud.google.com/go/compute v1.6.1
+	github.com/GoogleCloudPlatform/functions-framework-go v1.5.3
 	google.golang.org/api v0.75.0
 	google.golang.org/genproto v0.0.0-20220421151946-72621c1f0bd3
 	google.golang.org/protobuf v1.28.0
 )
 
 require (
-	github.com/GoogleCloudPlatform/functions-framework-go v1.5.3 // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/uuid v1.1.2 // indirect
