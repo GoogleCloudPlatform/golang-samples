@@ -13,7 +13,7 @@
   "ignorePaths": [
     "testing/docker/Dockerfile*"
   ],
-  "groupName": "all",
+  "groupName": "everything",
   "packageRules": [
     {
       "updateTypes": ["major"],
