@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import (
 )
 
 // updateSecret updates the metadata about an existing secret.
-func updateSecret(w io.Writer, name string) error {
+func updateSecretWithAlias(w io.Writer, name string) error {
 	// name := "projects/my-project/secrets/my-secret"
 
 	// Create the client.
