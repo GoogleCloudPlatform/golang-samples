@@ -72,8 +72,8 @@ func createChannelWithBackupInput(w io.Writer, projectID, location, channelID, p
 						VideoStream: &livestreampb.VideoStream{
 							CodecSettings: &livestreampb.VideoStream_H264{
 								H264: &livestreampb.VideoStream_H264CodecSettings{
-									Profile:      "main",
-									BitrateBps:   1000000,
+									Profile:      "high",
+									BitrateBps:   3000000,
 									FrameRate:    30,
 									HeightPixels: 720,
 									WidthPixels:  1280,
