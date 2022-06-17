@@ -55,7 +55,7 @@ func transferFromAws(w io.Writer, projectID string, awsSourceBucket string, gcsS
 	awsAccessKeyID := os.Getenv("AWS_ACCESS_KEY_ID")
 
 	// The AWS secret key credential, should be accessed via environment variable for security
-	awsSecretKey := os.Getenv("AWS_SECRET_KEY")
+	awsSecretKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
 
 	req := &storagetransferpb.CreateTransferJobRequest{
 		TransferJob: &storagetransferpb.TransferJob{
