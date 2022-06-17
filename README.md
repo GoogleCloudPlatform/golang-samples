@@ -9,6 +9,10 @@ Some samples have accompanying guides on
 [cloud.google.com](https://cloud.google.com). See respective README files for
 details.
 
+## Google Cloud Samples
+
+To browse ready to use code samples check [Google Cloud Samples](https://cloud.google.com/docs/samples?l=go).
+
 ## Depending on samples
 
 **Copy any code you need from this repository into your own project.**
