@@ -120,6 +120,9 @@ func blur(ctx context.Context, inputBucket, outputBucket, name string) error {
 		return fmt.Errorf("cmd.Run: %v", err)
 	}
 
+	if err := w.Close(); err != nil {
+		return fmt.Errorf("failed to write output file: %v", err)
+	}
 	log.Printf("Blurred image uploaded to gs://%s/%s", outputBlob.BucketName(), outputBlob.ObjectName())
 
 	return nil
