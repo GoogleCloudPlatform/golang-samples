@@ -710,9 +710,9 @@ func pgAddStoringIndex(ctx context.Context, w io.Writer, adminClient *database.D
 	return nil
 }
 
-func addNewRole(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+func addNewRole(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, db string) error {
 	op, err := adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
-		Database: database,
+		Database: db,
 		Statements: []string{
 			"CREATE ROLE parent",
 			"GRANT SELECT ON TABLE Albums TO ROLE parent",
@@ -726,14 +726,12 @@ func addNewRole(ctx context.Context, w io.Writer, adminClient *database.Database
 	if err := op.Wait(ctx); err != nil {
 		return err
 	}
-	fmt.Fprintf(w, "Created roles and granted SELECT privileges\n")
+	fmt.Fprintf(w, "Created roles parent and child and granted privileges\n")
 	op, err = adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
-		Database: database,
+		Database: db,
 		Statements: []string{
 			"REVOKE ROLE parent FROM ROLE child",
 			"DROP ROLE child",
-			"REVOKE SELECT ON TABLE Albums FROM ROLE parent",
-			"DROP ROLE parent",
 		},
 	})
 	if err != nil {
@@ -742,15 +740,15 @@ func addNewRole(ctx context.Context, w io.Writer, adminClient *database.Database
 	if err := op.Wait(ctx); err != nil {
 		return err
 	}
-	fmt.Fprintf(w, "Revoked privileges and dropped roles\n")
+	fmt.Fprintf(w, "Revoked privileges and dropped role child\n")
 	return nil
 }
 
-func listRoles(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+func listRoles(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, db string) error {
 	iter := adminClient.ListDatabaseRoles(ctx, &adminpb.ListDatabaseRolesRequest{
-		Parent: database,
+		Parent: db,
 	})
-	rolePrefix := database + "/databaseRoles/"
+	rolePrefix := db + "/databaseRoles/"
 	for {
 		role, err := iter.Next()
 		if err == iterator.Done {
@@ -770,7 +768,7 @@ func listRoles(ctx context.Context, w io.Writer, adminClient *database.DatabaseA
 func run(ctx context.Context, w io.Writer, cmd string, db string) error {
 	databaseRole := ""
 	if cmd == "readwithrole" {
-		databaseRole = "albums_reader"
+		databaseRole = "parent"
 	}
 
 	cfg := spanner.ClientConfig{
