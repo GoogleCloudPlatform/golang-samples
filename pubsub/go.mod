@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/golang-samples/pubsub
 go 1.15
 
 require (
-	cloud.google.com/go/bigquery v1.33.0 // indirect
+	cloud.google.com/go/bigquery v1.33.0
 	cloud.google.com/go/iam v0.3.0
 	cloud.google.com/go/pubsub v1.23.0
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20220204002944-f20d8abe1519
