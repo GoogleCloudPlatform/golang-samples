@@ -84,6 +84,9 @@ var allowList = []string{
 	"functions/ocr/app/config.json",
 	"functions/slack/config.json",
 
+	// Cloud Functions gen2 picture.
+	"functions/functionsv2/imagemagick/zombie.jpg",
+
 	// Samples that aren't really code. Legacy.
 	"**/appengine/**/*.txt",
 

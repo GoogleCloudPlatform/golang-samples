@@ -25,6 +25,7 @@ import (
 	"strings"
 
 	compute "cloud.google.com/go/compute/apiv1"
+	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 	"github.com/cloudevents/sdk-go/v2/event"
 	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
 	"google.golang.org/protobuf/proto"
@@ -53,11 +54,13 @@ func init() {
 	if err != nil {
 		log.Fatalf("Failed to create instances client: %s", err)
 	}
+
+	functions.CloudEvent("label-gce-instance", labelGceInstance)
 }
 
 // Cloud Function that receives GCE instance creation Audit Logs, and adds a
 // `creator` label to the instance.
-func LabelGceInstance(ctx context.Context, ev event.Event) error {
+func labelGceInstance(ctx context.Context, ev event.Event) error {
 	// Extract parameters from the Cloud Event and Cloud Audit Log data
 	logentry := &AuditLogEntry{}
 	if err := ev.DataAs(logentry); err != nil {

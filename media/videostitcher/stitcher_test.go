@@ -18,6 +18,9 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 	"testing"
@@ -46,6 +49,8 @@ var bucketName string
 var slateURI string
 var updatedSlateURI string
 var projectNumber string
+var vodURI string
+var liveURI string
 
 // To run the tests, do the following:
 // Export the following env vars:
@@ -62,6 +67,8 @@ func TestMain(t *testing.T) {
 	bucketName = "cloud-samples-data/media/"
 	slateURI = "https://storage.googleapis.com/" + bucketName + "ForBiggerEscapes.mp4"
 	updatedSlateURI = "https://storage.googleapis.com/" + bucketName + "ForBiggerJoyrides.mp4"
+	vodURI = "https://storage.googleapis.com/" + bucketName + "hls-vod/manifest.m3u8"
+	liveURI = "https://storage.googleapis.com/" + bucketName + "hls-live/manifest.m3u8"
 
 	// Get the project number
 	cloudresourcemanagerClient, err := cloudresourcemanager.NewService(ctx)
@@ -296,4 +303,244 @@ func TestCdnKeys(t *testing.T) {
 			r.Errorf("deleteCdnKey got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, deleteCdnKeyResponse)
 		}
 	})
+}
+
+// testVodSessions tests major operations on VOD sessions. Create and get
+// operations check if the session name is returned. List and delete methods
+// are not supported for VOD sessions.
+// The test lists and gets ad tag and stitch details as well.
+func TestVodSessions(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := &bytes.Buffer{}
+	sessionID := ""
+
+	// Create a new VOD session.
+	sessionPrefix := fmt.Sprintf("projects/%s/locations/%s/vodSessions/", projectNumber, location)
+	if err := createVodSession(buf, tc.ProjectID, vodURI); err != nil {
+		t.Errorf("createVodSession got err: %v", err)
+	}
+	got := buf.String()
+
+	if !strings.Contains(got, sessionPrefix) {
+		t.Errorf("createVodSession got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, sessionPrefix)
+	}
+	strSlice := strings.Split(got, "/")
+	sessionID = strSlice[len(strSlice)-1]
+	buf.Reset()
+
+	// Get the VOD session.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		sessionName := fmt.Sprintf("projects/%s/locations/%s/vodSessions/%s", projectNumber, location, sessionID)
+		if err := getVodSession(buf, tc.ProjectID, sessionID); err != nil {
+			r.Errorf("getVodSession got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, sessionName) {
+			r.Errorf("getVodSession got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, sessionName)
+		}
+	})
+	buf.Reset()
+
+	// No list or delete methods for VOD sessions
+
+	// Ad tag details
+
+	// List the ad tag details for a given VOD session.
+	adTagDetailsNamePrefix := fmt.Sprintf("projects/%s/locations/%s/vodSessions/%s/vodAdTagDetails/", projectNumber, location, sessionID)
+	if err := listVodAdTagDetails(buf, tc.ProjectID, sessionID); err != nil {
+		t.Errorf("listVodAdTagDetails got err: %v", err)
+	}
+	got = buf.String()
+
+	if !strings.Contains(got, adTagDetailsNamePrefix) {
+		t.Errorf("listVodAdTagDetails got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, adTagDetailsNamePrefix)
+	}
+	strSlice = strings.Split(got, "/")
+	adTagDetailsID := strSlice[len(strSlice)-1]
+	adTagDetailsID = strings.TrimRight(adTagDetailsID, "\n")
+	adTagDetailsName := fmt.Sprintf("projects/%s/locations/%s/vodSessions/%s/vodAdTagDetails/%s", projectNumber, location, sessionID, adTagDetailsID)
+	if !strings.Contains(got, adTagDetailsName) {
+		t.Errorf("listVodAdTagDetails got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, adTagDetailsName)
+	}
+	buf.Reset()
+
+	// Get the specified ad tag detail for a given VOD session.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		if err := getVodAdTagDetail(buf, tc.ProjectID, sessionID, adTagDetailsID); err != nil {
+			r.Errorf("getVodAdTagDetail got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, adTagDetailsName) {
+			r.Errorf("getVodAdTagDetail got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, adTagDetailsName)
+		}
+	})
+	buf.Reset()
+
+	// Stitch details
+
+	// List the stitch details for a given VOD session.
+	stitchDetailsNamePrefix := fmt.Sprintf("projects/%s/locations/%s/vodSessions/%s/vodStitchDetails/", projectNumber, location, sessionID)
+	if err := listVodStitchDetails(buf, tc.ProjectID, sessionID); err != nil {
+		t.Errorf("listVodStitchDetails got err: %v", err)
+	}
+	got = buf.String()
+
+	if !strings.Contains(got, stitchDetailsNamePrefix) {
+		t.Errorf("listVodStitchDetails got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, stitchDetailsNamePrefix)
+	}
+	strSlice = strings.Split(got, "/")
+	stitchDetailsID := strSlice[len(strSlice)-1]
+	stitchDetailsID = strings.TrimRight(stitchDetailsID, "\n")
+	stitchDetailsName := fmt.Sprintf("projects/%s/locations/%s/vodSessions/%s/vodStitchDetails/%s", projectNumber, location, sessionID, stitchDetailsID)
+	if !strings.Contains(got, stitchDetailsName) {
+		t.Errorf("listVodStitchDetails got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, stitchDetailsName)
+	}
+	buf.Reset()
+
+	// Get the specified VOD stitch detail for a given VOD session.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		if err := getVodStitchDetail(buf, tc.ProjectID, sessionID, stitchDetailsID); err != nil {
+			r.Errorf("getVodStitchDetail got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, stitchDetailsName) {
+			r.Errorf("getVodStitchDetail got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, stitchDetailsName)
+		}
+	})
+	buf.Reset()
+}
+
+// testLiveSessions tests major operations on live sessions. Create and get
+// operations check if the session name is returned. List and delete methods
+// are not supported for live sessions. The test lists and gets ad tag details.
+func TestLiveSessions(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := &bytes.Buffer{}
+	sessionID := ""
+
+	// Test setup
+
+	deleteSlate(buf, tc.ProjectID, slateID)
+	defer deleteSlate(buf, tc.ProjectID, slateID)
+
+	// Tests
+
+	// Create a new slate.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		slateName := fmt.Sprintf("projects/%s/locations/%s/slates/%s", projectNumber, location, slateID)
+		if err := createSlate(buf, tc.ProjectID, slateID, slateURI); err != nil {
+			r.Errorf("createSlate got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, slateName) {
+			r.Errorf("createSlate got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, slateName)
+		}
+	})
+	buf.Reset()
+
+	// Create a new live session and return the play URI.
+	sessionPrefix := fmt.Sprintf("projects/%s/locations/%s/liveSessions/", projectNumber, location)
+	if err := createLiveSession(buf, tc.ProjectID, liveURI, slateID); err != nil {
+		t.Errorf("createLiveSession got err: %v", err)
+	}
+	got := buf.String()
+
+	if !strings.Contains(got, sessionPrefix) {
+		t.Errorf("createLiveSession got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, sessionPrefix)
+	}
+	buf.Reset()
+
+	re := regexp.MustCompile(fmt.Sprintf("Live session:.%s(.*)", sessionPrefix))
+	match := re.FindAllStringSubmatch(string(got), -1)
+	if len(match) == 1 && len(match[0]) == 2 {
+		sessionID = match[0][1]
+	} else {
+		t.Errorf("\nSession ID not found in %s\n", got)
+	}
+
+	re = regexp.MustCompile(`Play URI:.(.*)`)
+	match = re.FindAllStringSubmatch(string(got), -1)
+	playURI := ""
+	if len(match) == 1 && len(match[0]) == 2 {
+		playURI = match[0][1]
+	} else {
+		t.Errorf("\nPlay URI not found %s\n", string(got))
+	}
+
+	// Get the live session.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		sessionName := fmt.Sprintf("projects/%s/locations/%s/liveSessions/%s", projectNumber, location, sessionID)
+		if err := getLiveSession(buf, tc.ProjectID, sessionID); err != nil {
+			r.Errorf("getLiveSession got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, sessionName) {
+			r.Errorf("getLiveSession got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, sessionName)
+		}
+	})
+	buf.Reset()
+
+	// No list or delete methods for live sessions
+
+	// Ad tag details
+
+	// To get ad tag details, you need to curl the main manifest and
+	// a rendition first. This supplies media player information to the API.
+	//
+	// Curl the playURI first. The last line of the response will contain a
+	// renditions location. Curl the live session name with the rendition
+	// location appended.
+
+	resp, err := http.Get(playURI)
+	if err != nil {
+		t.Errorf("\nError getting the play URI\n")
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		t.Errorf("ioutil.ReadAll: %v", err)
+	}
+
+	re = regexp.MustCompile(`renditions/.*`)
+	renditions := re.FindStringSubmatch(string(body))
+	if len(renditions) == 0 {
+		t.Errorf("\nRenditions not found in body: %s\n", string(body))
+	}
+
+	// playURI will be in the following format:
+	// https://videostitcher.googleapis.com/v1/projects/{project}/locations/{location}/liveSessions/{session-id}/manifest.m3u8?signature=...
+	// Replace manifest.m3u8?signature=... with the renditions location.
+
+	re = regexp.MustCompile(`manifest.m3u8.*`)
+	renditionURI := re.ReplaceAllString(playURI, renditions[0])
+	resp, err = http.Get(renditionURI)
+	if err != nil {
+		t.Errorf("\nError getting the rendition URI\n")
+	}
+	defer resp.Body.Close()
+
+	// List the ad tag details for a given live session.
+	adTagDetailsNamePrefix := fmt.Sprintf("projects/%s/locations/%s/liveSessions/%s/liveAdTagDetails/", projectNumber, location, sessionID)
+	if err := listLiveAdTagDetails(buf, tc.ProjectID, sessionID); err != nil {
+		t.Errorf("listLiveAdTagDetails got err: %v", err)
+	}
+	got = buf.String()
+
+	if !strings.Contains(got, adTagDetailsNamePrefix) {
+		t.Errorf("listLiveAdTagDetails got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, adTagDetailsNamePrefix)
+	}
+	strSlice := strings.Split(got, "/")
+	adTagDetailsID := strSlice[len(strSlice)-1]
+	adTagDetailsID = strings.TrimRight(adTagDetailsID, "\n")
+	adTagDetailsName := fmt.Sprintf("projects/%s/locations/%s/liveSessions/%s/liveAdTagDetails/%s", projectNumber, location, sessionID, adTagDetailsID)
+	if !strings.Contains(got, adTagDetailsName) {
+		t.Errorf("listLiveAdTagDetails got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, adTagDetailsName)
+	}
+	buf.Reset()
+
+	// Get the specified ad tag detail for a given live session.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		if err := getLiveAdTagDetail(buf, projectNumber, sessionID, adTagDetailsID); err != nil {
+			r.Errorf("getLiveAdTagDetail got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, adTagDetailsName) {
+			r.Errorf("getLiveAdTagDetail got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, adTagDetailsName)
+		}
+	})
+	buf.Reset()
 }
