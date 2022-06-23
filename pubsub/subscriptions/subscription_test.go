@@ -825,11 +825,11 @@ func createBigQueryTable(projectID, datasetID, tableID string) error {
 
 	table := dataset.Table(tableID)
 	schema := []*bigquery.FieldSchema{
-		{Name: "data", Type: bigquery.BytesFieldType, Required: true},
-		// {Name: "messageID", Type: bigquery.StringFieldType, Required: true},
-		// {Name: "attributes", Type: bigquery.StringFieldType, Required: true},
-		// {Name: "subscription_name", Type: bigquery.StringFieldType, Required: true},
-		// {Name: "publishTime", Type: bigquery.TimestampFieldType, Required: true},
+		{Name: "data", Type: bigquery.BytesFieldType},
+		{Name: "messageID", Type: bigquery.StringFieldType},
+		{Name: "attributes", Type: bigquery.StringFieldType},
+		{Name: "subscription_name", Type: bigquery.StringFieldType},
+		{Name: "publishTime", Type: bigquery.TimestampFieldType},
 	}
 	if err := table.Create(ctx, &bigquery.TableMetadata{Schema: schema}); err != nil {
 		return fmt.Errorf("error creating table: %v", err)
