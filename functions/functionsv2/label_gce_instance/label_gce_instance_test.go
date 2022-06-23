@@ -149,7 +149,7 @@ func TestLabelGceInstance(t *testing.T) {
 			e.SetDataContentType("application/json")
 			e.SetData("application/json", eventdata)
 
-			if err := LabelGceInstance(context.Background(), e); err != nil {
+			if err := labelGceInstance(context.Background(), e); err != nil {
 				t.Fatalf("LabelGceInstance(%s): unexpected error %s", tt.name, err)
 			}
 			// check that we updated creator label if expected.

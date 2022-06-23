@@ -17,6 +17,7 @@ package videostitcher
 // [START video_stitcher_get_cdn_key]
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -44,8 +45,12 @@ func getCdnKey(w io.Writer, projectID, cdnKeyID string) error {
 	if err != nil {
 		return fmt.Errorf("client.GetCdnKey: %v", err)
 	}
+	b, err := json.MarshalIndent(response, "", " ")
+	if err != nil {
+		return fmt.Errorf("json.MarshalIndent: %v", err)
+	}
 
-	fmt.Fprintf(w, "CDN key: %+v", response)
+	fmt.Fprintf(w, "CDN key:\n%s", string(b))
 	return nil
 }
 

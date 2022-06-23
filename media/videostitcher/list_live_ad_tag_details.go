@@ -14,21 +14,22 @@
 
 package videostitcher
 
-// [START video_stitcher_get_slate]
+// [START video_stitcher_list_live_ad_tag_details]
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
+
+	"google.golang.org/api/iterator"
 
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
 	stitcherstreampb "google.golang.org/genproto/googleapis/cloud/video/stitcher/v1"
 )
 
-// getSlate gets a previously-created slate.
-func getSlate(w io.Writer, projectID, slateID string) error {
+// listLiveAdTagDetails lists the ad tag details for the specified live session.
+func listLiveAdTagDetails(w io.Writer, projectID, sessionID string) error {
 	// projectID := "my-project-id"
-	// slateID := "my-slate-id"
+	// sessionID := "my-session-id"
 	location := "us-central1"
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
@@ -37,21 +38,23 @@ func getSlate(w io.Writer, projectID, slateID string) error {
 	}
 	defer client.Close()
 
-	req := &stitcherstreampb.GetSlateRequest{
-		Name: fmt.Sprintf("projects/%s/locations/%s/slates/%s", projectID, location, slateID),
+	req := &stitcherstreampb.ListLiveAdTagDetailsRequest{
+		Parent: fmt.Sprintf("projects/%s/locations/%s/liveSessions/%s", projectID, location, sessionID),
 	}
 
-	response, err := client.GetSlate(ctx, req)
-	if err != nil {
-		return fmt.Errorf("client.GetSlate: %v", err)
+	it := client.ListLiveAdTagDetails(ctx, req)
+	fmt.Fprintln(w, "Live ad tag details:")
+	for {
+		response, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return fmt.Errorf("it.Next(): %v", err)
+		}
+		fmt.Fprintln(w, response.GetName())
 	}
-	b, err := json.MarshalIndent(response, "", " ")
-	if err != nil {
-		return fmt.Errorf("json.MarshalIndent: %v", err)
-	}
-
-	fmt.Fprintf(w, "Slate:\n%s", string(b))
 	return nil
 }
 
-// [END video_stitcher_get_slate]
+// [END video_stitcher_list_live_ad_tag_details]
