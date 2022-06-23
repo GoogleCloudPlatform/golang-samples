@@ -25,7 +25,7 @@ import (
 	"google.golang.org/genproto/protobuf/field_mask"
 )
 
-// updateSecret updates the metadata about an existing secret.
+// updateSecret updates the alias map on an existing secret.
 func updateSecretWithAlias(w io.Writer, name string) error {
 	// name := "projects/my-project/secrets/my-secret"
 
