@@ -24,6 +24,7 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"cloud.google.com/go/spanner"
@@ -64,6 +65,7 @@ var (
 		"pgaddstoringindex": pgAddStoringIndex,
 		"pgcreatedatabase":  pgCreateDatabase,
 		"addnewrole":        addNewRole,
+		"listroles":         listRoles,
 	}
 )
 
@@ -744,6 +746,27 @@ func addNewRole(ctx context.Context, w io.Writer, adminClient *database.Database
 	return nil
 }
 
+func listRoles(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, database string) error {
+	iter := adminClient.ListDatabaseRoles(ctx, &adminpb.ListDatabaseRolesRequest{
+		Parent: database,
+	})
+	rolePrefix := database + "/databaseRoles/"
+	for {
+		role, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		if !strings.HasPrefix(role.Name, rolePrefix) {
+			return fmt.Errorf("Role %v does not have prefix %v", role.Name, rolePrefix)
+		}
+		fmt.Fprintf(w, "%s\n", strings.TrimPrefix(role.Name, rolePrefix))
+	}
+	return nil
+}
+
 func run(ctx context.Context, w io.Writer, cmd string, db string) error {
 	databaseRole := ""
 	if cmd == "readwithrole" {
@@ -794,9 +817,9 @@ func main() {
 	Command can be one of: write, read, readwithrole, query, update,
 		querynewcolumn, querywithparameter, dmlwrite, dmlwritetxn, readindex,
 		readstoringindex, readonlytransaction, createdatabase, addnewcolumn,
-		addstoringindex, addnewrole, pgcreatedatabase, pgqueryparameter,
-		pgdmlwrite, pgaddnewcolumn, pgquerynewcolumn, pgdmlwritetxn,
-		pgaddstoringindex
+		addstoringindex, addnewrole, listroles, pgcreatedatabase,
+		pgqueryparameter, pgdmlwrite, pgaddnewcolumn, pgquerynewcolumn,
+		pgdmlwritetxn, pgaddstoringindex
 
 Examples:
 	spanner_snippets createdatabase projects/my-project/instances/my-instance/databases/example-db
