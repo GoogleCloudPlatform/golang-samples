@@ -99,6 +99,8 @@ func connectTCPSocket() (*sql.DB, error) {
 	return dbPool, nil
 }
 
+// [END cloud_sql_mysql_databasesql_connect_tcp]
+
 // verifyPeerCertFunc returns a function that verifies the peer certificate is
 // in the cert pool.
 func verifyPeerCertFunc(pool *x509.CertPool) func([][]byte, [][]*x509.Certificate) error {
@@ -121,4 +123,3 @@ func verifyPeerCertFunc(pool *x509.CertPool) func([][]byte, [][]*x509.Certificat
 }
 
 // [END cloud_sql_mysql_databasesql_sslcerts]
-// [END cloud_sql_mysql_databasesql_connect_tcp]
