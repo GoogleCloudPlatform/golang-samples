@@ -15,13 +15,37 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"testing"
 	"time"
 
+	"cloud.google.com/go/bigquery"
+	"github.com/GoogleCloudPlatform/golang-samples/bigquery/snippets/bqtestutil"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
+
+// createTestDataset sets up an ephemeral test dataset for use in the quickstart.  Call the returned function
+// afterwards to clean up the dataset.
+func createTestDataset(ctx context.Context, projectID string) (string, error, func()) {
+	client, err := bigquery.NewClient(ctx, projectID)
+	if err != nil {
+		return "", err, nil
+	}
+	dsName, err := bqtestutil.UniqueBQName("analyticshub_quickstart_dataset")
+	if err != nil {
+		return "", err, nil
+	}
+	dataset := client.Dataset(dsName)
+	if err := dataset.Create(ctx, nil); err != nil {
+		return "", err, nil
+	}
+	return fmt.Sprintf("projects/%s/datasets/%s", projectID, dsName), nil, func() {
+		dataset.DeleteWithContents(ctx)
+		client.Close()
+	}
+}
 
 func TestApp(t *testing.T) {
 	tc := testutil.SystemTest(t)
@@ -32,7 +56,16 @@ func TestApp(t *testing.T) {
 		t.Errorf("failed to build app")
 	}
 
-	stdOut, stdErr, err := m.Run(nil, 30*time.Second, fmt.Sprintf("--project_id=%s", tc.ProjectID))
+	ctx := context.Background()
+	dataset, err, cleanup := createTestDataset(ctx, tc.ProjectID)
+	if err != nil {
+		t.Fatalf("failed to setup test dataset before running quickstart: %v", err)
+	}
+	defer cleanup()
+
+	stdOut, stdErr, err := m.Run(nil, 30*time.Second,
+		fmt.Sprintf("--project_id=%s", tc.ProjectID),
+		fmt.Sprintf("--dataset_source=%s", dataset))
 	if err != nil {
 		t.Errorf("execution failed: %v", err)
 	}
