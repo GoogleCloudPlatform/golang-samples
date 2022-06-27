@@ -26,56 +26,55 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var (
-	client     *mongo.Client
-	collection *mongo.Collection
-	ctx        = context.Background()
-	mongohost  string
+const (
+	mongoport = "80"
+	port      = "80"
 )
+
+var tm mongoManager
 
 func main() {
 	var err error
-	mongohost = os.Getenv("HOST")
-	uri := fmt.Sprintf("mongodb://%s:%s", mongohost, "80")
-	clientOptions := options.Client().ApplyURI(uri)
+	mongohost := os.Getenv("HOST")
 
-	if client, err = mongo.Connect(ctx, clientOptions); err != nil {
+	tm, err = newTrainerManager(mongohost, mongoport)
+	if err != nil {
 		log.Fatal(fmt.Printf("error connecting to mongo: %s", err))
 	}
 
-	collection = client.Database("test").Collection("trainers")
-
-	trainers := []interface{}{
-		trainer{"Ash", 10, "Pallet Town"},
-		trainer{"Misty", 10, "Cerulean City"},
-		trainer{"Brock", 15, "Pewter City"},
+	trainers := []trainer{
+		{"Ash", 10, "Pallet Town"},
+		{"Misty", 10, "Cerulean City"},
+		{"Brock", 15, "Pewter City"},
 	}
 
-	if _, err := collection.InsertMany(ctx, trainers); err != nil {
-		log.Fatal(fmt.Printf("error inserting records to mongo: %s", err))
+	if err := tm.load(trainers); err != nil {
+		log.Fatal(err)
 	}
 
 	http.HandleFunc("/", listHandler)
-	log.Fatal(http.ListenAndServe(":80", nil))
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
 func listHandler(w http.ResponseWriter, r *http.Request) {
-	trainers, err := listTrainers()
+	trainers, err := tm.list()
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		httpResponse(w, http.StatusInternalServerError, []byte(err.Error()))
 		return
 	}
 
 	j, err := json.Marshal(trainers)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		httpResponse(w, http.StatusInternalServerError, []byte(err.Error()))
 		return
 	}
+	httpResponse(w, http.StatusOK, j)
+	return
+}
 
-	w.WriteHeader(http.StatusOK)
-	w.Write(j)
+func httpResponse(w http.ResponseWriter, status int, msg []byte) {
+	w.WriteHeader(status)
+	w.Write(msg)
 	return
 }
 
@@ -85,13 +84,65 @@ type trainer struct {
 	City string
 }
 
-func listTrainers() ([]*trainer, error) {
-	var results []*trainer
+// newTrainerManager spins up a new TrainerManager for interacting with MongoDB.
+func newTrainerManager(host, port string) (*trainerManager, error) {
+	var err error
+	tm := trainerManager{}
+	ctx := context.Background()
 
-	cur, err := collection.Find(ctx, bson.D{{}}, options.Find())
+	uri := fmt.Sprintf("mongodb://%s:%s", host, port)
+	clientOptions := options.Client().ApplyURI(uri)
+
+	tm.client, err = mongo.Connect(ctx, clientOptions)
+	if err != nil {
+		return nil, fmt.Errorf("error connecting to mongo: %s", err)
+	}
+
+	tm.collection = tm.client.Database("test").Collection("trainers")
+
+	return &tm, nil
+}
+
+type mongoManager interface {
+	load([]trainer) error
+	list() ([]*trainer, error)
+	setCollection(*mongo.Collection)
+}
+
+type trainerManager struct {
+	client     *mongo.Client
+	collection *mongo.Collection
+}
+
+func (tm *trainerManager) setCollection(c *mongo.Collection) {
+	tm.collection = c
+}
+
+// load pushes a collection of trainers into a mongoDB instance
+func (tm *trainerManager) load(trainers []trainer) error {
+	t := make([]interface{}, len(trainers))
+	for i, tdata := range trainers {
+		t[i] = tdata
+	}
+
+	ctx := context.Background()
+	if _, err := tm.collection.InsertMany(ctx, t); err != nil {
+		return fmt.Errorf("error inserting records to mongo: %s", err)
+	}
+
+	return nil
+}
+
+// list retrieves the total collection of trainers from a mongoDB instance
+func (tm *trainerManager) list() ([]*trainer, error) {
+	var results []*trainer
+	ctx := context.Background()
+
+	cur, err := tm.collection.Find(ctx, bson.D{{}}, options.Find())
 	if err != nil {
 		return nil, err
 	}
+	defer cur.Close(ctx)
 
 	for cur.Next(ctx) {
 		var elem trainer
@@ -105,6 +156,5 @@ func listTrainers() ([]*trainer, error) {
 		return nil, err
 	}
 
-	cur.Close(ctx)
 	return results, nil
 }
