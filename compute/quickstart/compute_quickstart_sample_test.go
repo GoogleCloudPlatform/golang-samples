@@ -119,19 +119,19 @@ func TestList(t *testing.T) {
 		tm.setCollection(mt.Coll)
 
 		first := mtest.CreateCursorResponse(1, "test.trainers", mtest.FirstBatch, bson.D{
-			{"name", "Ash"},
-			{"age", 10},
-			{"city", "Pallet Town"},
+			{Key: "name", Value: "Ash"},
+			{Key: "age", Value: 10},
+			{Key: "city", Value: "Pallet Town"},
 		})
 		second := mtest.CreateCursorResponse(1, "test.trainers", mtest.NextBatch, bson.D{
-			{"name", "Misty"},
-			{"age", 10},
-			{"city", "Cerulean City"},
+			{Key: "name", Value: "Misty"},
+			{Key: "age", Value: 10},
+			{Key: "city", Value: "Cerulean City"},
 		})
 		third := mtest.CreateCursorResponse(1, "test.trainers", mtest.NextBatch, bson.D{
-			{"name", "Brock"},
-			{"age", 15},
-			{"city", "Pewter City"},
+			{Key: "name", Value: "Brock"},
+			{Key: "age", Value: 15},
+			{Key: "city", Value: "Pewter City"},
 		})
 		killCursors := mtest.CreateCursorResponse(0, "test.trainers", mtest.NextBatch)
 		mt.AddMockResponses(first, second, third, killCursors)
