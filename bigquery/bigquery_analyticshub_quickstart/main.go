@@ -33,12 +33,12 @@ import (
 
 func main() {
 
-	// Define two command line flags for controlling the behavior of this quickstart.
+	// Define the command line flags for controlling the behavior of this quickstart.
 	var (
 		projectID            = flag.String("project_id", "", "Cloud Project ID, used for session creation.")
 		location             = flag.String("location", "US", "BigQuery location used for interactions.")
-		exampleExchangeID    = flag.String("exchange_id", "ExampleDataExchange", "identifier of the example data exchange")
-		exampleListingID     = flag.String("listing_id", "ExampleDataExchange", "identifier of the example data exchange")
+		exchangeID           = flag.String("exchange_id", "ExampleDataExchange", "identifier of the example data exchange")
+		listingID            = flag.String("listing_id", "ExampleDataExchange", "identifier of the example data exchange")
 		exampleDatasetSource = flag.String("dataset_source", "", "dataset source in the form projects/myproject/datasets/mydataset")
 		delete               = flag.Bool("delete_exchange", true, "delete exchange at the end of quickstart")
 	)
@@ -61,7 +61,7 @@ func main() {
 
 	// Then, create the data exchange (or return information about one already bearing the example name), and
 	// print information about it.
-	exchange, err := createOrGetDataExchange(ctx, dataExchClient, *projectID, *location, *exampleExchangeID)
+	exchange, err := createOrGetDataExchange(ctx, dataExchClient, *projectID, *location, *exchangeID)
 	if err != nil {
 		log.Fatalf("failed to get information about the exchange: %v", err)
 	}
@@ -72,7 +72,7 @@ func main() {
 	}
 
 	// Finally, create a listing within the data exchange and print information about it.
-	listing, err := createListing(ctx, dataExchClient, *projectID, *location, *exampleExchangeID, *exampleListingID, *exampleDatasetSource)
+	listing, err := createListing(ctx, dataExchClient, *projectID, *location, *exchangeID, *listingID, *exampleDatasetSource)
 	if err != nil {
 		log.Fatalf("failed to create the listing within the exchange: %v", err)
 	}
@@ -92,10 +92,10 @@ func main() {
 	// Optionally, delete the data exchange at the end of the quickstart to clean up the resources used.
 	if *delete {
 		fmt.Printf("\n\n")
-		if err := deleteDataExchange(ctx, dataExchClient, *projectID, *location, *exampleExchangeID); err != nil {
+		if err := deleteDataExchange(ctx, dataExchClient, *projectID, *location, *exchangeID); err != nil {
 			log.Fatalf("failed to delete exchange: %v", err)
 		}
-		fmt.Printf("Exchange projects/%s/locations/%s/dataExchanges/%s was deleted.\n", *projectID, *location, *exampleExchangeID)
+		fmt.Printf("Exchange projects/%s/locations/%s/dataExchanges/%s was deleted.\n", *projectID, *location, *exchangeID)
 	}
 	fmt.Printf("\nQuickstart completed.\n")
 }
