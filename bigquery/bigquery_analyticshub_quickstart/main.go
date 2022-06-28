@@ -43,8 +43,12 @@ func main() {
 		delete               = flag.Bool("delete_exchange", true, "delete exchange at the end of quickstart")
 	)
 	flag.Parse()
+	// Perform simple validation of the specified flags.
 	if *projectID == "" {
 		log.Fatal("empty --project_id specified, please provide a valid project ID")
+	}
+	if *exampleDatasetSource == "" {
+		log.Fatalf("empty --dataset_source specified, please provide in the form \"projects/myproject/datasets/mydataset\"")
 	}
 
 	// Instantiate the client.
