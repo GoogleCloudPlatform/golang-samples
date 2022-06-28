@@ -31,7 +31,9 @@ import (
 	"google.golang.org/api/iterator"
 
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
+	iampb "google.golang.org/genproto/googleapis/iam/v1"
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
+	expr "google.golang.org/genproto/googleapis/type/expr"
 )
 
 type command func(ctx context.Context, w io.Writer, client *spanner.Client) error
@@ -58,14 +60,15 @@ var (
 	}
 
 	adminCommands = map[string]adminCommand{
-		"createdatabase":     createDatabase,
-		"addnewcolumn":       addNewColumn,
-		"pgaddnewcolumn":     pgAddNewColumn,
-		"addstoringindex":    addStoringIndex,
-		"pgaddstoringindex":  pgAddStoringIndex,
-		"pgcreatedatabase":   pgCreateDatabase,
-		"addnewdatabaserole": addNewDatabaseRole,
-		"listdatabaseroles":  listDatabaseRoles,
+		"createdatabase":          createDatabase,
+		"addnewcolumn":            addNewColumn,
+		"pgaddnewcolumn":          pgAddNewColumn,
+		"addstoringindex":         addStoringIndex,
+		"pgaddstoringindex":       pgAddStoringIndex,
+		"pgcreatedatabase":        pgCreateDatabase,
+		"addnewdatabaserole":      addNewDatabaseRole,
+		"enablefinegrainedaccess": enableFineGrainedAccess,
+		"listdatabaseroles":       listDatabaseRoles,
 	}
 )
 
@@ -744,6 +747,51 @@ func addNewDatabaseRole(ctx context.Context, w io.Writer, adminClient *database.
 	return nil
 }
 
+func enableFineGrainedAccess(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, db string) error {
+	iamMember := "user:alice@example.com"
+	databaseRole := "parent"
+	title := "condition title"
+	policy, err := adminClient.GetIamPolicy(ctx, &iampb.GetIamPolicyRequest{
+		Resource: db,
+		Options: &iampb.GetPolicyOptions{
+			// IAM conditions need at least version 3
+			RequestedPolicyVersion: 3,
+		},
+	})
+	if err != nil {
+		return err
+	}
+
+	// IAM conditions need at least version 3
+	if policy.Version < 3 {
+		policy.Version = 3
+	}
+	policy.Bindings = append(policy.Bindings, []*iampb.Binding{
+		{
+			Role:    "roles/spanner.fineGrainedAccessUser",
+			Members: []string{iamMember},
+		},
+		{
+			Role:    "roles/spanner.databaseRoleUser",
+			Members: []string{iamMember},
+			Condition: &expr.Expr{
+				Expression: fmt.Sprintf(`resource.name.endsWith("/databaseRoles/%s")`, databaseRole),
+				Title:      title,
+			},
+		},
+	}...)
+	_, err = adminClient.SetIamPolicy(ctx, &iampb.SetIamPolicyRequest{
+		Resource: db,
+		Policy:   policy,
+	})
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprintf(w, "Enabled fine-grained access in IAM.\n")
+	return nil
+}
+
 func listDatabaseRoles(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, db string) error {
 	iter := adminClient.ListDatabaseRoles(ctx, &adminpb.ListDatabaseRolesRequest{
 		Parent: db,
@@ -815,9 +863,9 @@ func main() {
 	Command can be one of: write, read, readwithrole, query, update,
 		querynewcolumn, querywithparameter, dmlwrite, dmlwritetxn, readindex,
 		readstoringindex, readonlytransaction, createdatabase, addnewcolumn,
-		addstoringindex, addnewdatabaserole, listdatabaseroles, pgcreatedatabase,
-		pgqueryparameter, pgdmlwrite, pgaddnewcolumn, pgquerynewcolumn,
-		pgdmlwritetxn, pgaddstoringindex
+		addstoringindex, addnewdatabaserole, enablefinegrainedaccess,
+		listdatabaseroles, pgcreatedatabase, pgqueryparameter, pgdmlwrite,
+		pgaddnewcolumn, pgquerynewcolumn, pgdmlwritetxn, pgaddstoringindex
 
 Examples:
 	spanner_snippets createdatabase projects/my-project/instances/my-instance/databases/example-db
