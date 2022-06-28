@@ -83,7 +83,7 @@ func main() {
 	}
 	fmt.Printf("Listing State: %s\n", listing.GetState().String())
 	if source := listing.GetSource(); source != nil {
-		if dsSource, ok := source.(*dataexchangepb.Listing_BigqueryDataset); ok {
+		if dsSource, ok := source.(*dataexchangepb.Listing_BigqueryDataset); ok && dsSource.BigqueryDataset != nil {
 			if dataset := dsSource.BigqueryDataset.GetDataset(); dataset != "" {
 				fmt.Printf("Source is a bigquery dataset: %s", dataset)
 			}
