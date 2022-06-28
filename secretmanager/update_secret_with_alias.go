@@ -46,7 +46,7 @@ func updateSecretWithAlias(w io.Writer, name string) error {
 			},
 		},
 		UpdateMask: &field_mask.FieldMask{
-			Paths: []string{"versionaliases"},
+			Paths: []string{"version_aliases"},
 		},
 	}
 
