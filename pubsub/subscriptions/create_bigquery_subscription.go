@@ -23,6 +23,7 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
+// createBigQuerySubscription creates a Pub/Sub subscription that exports messages to BigQuery.
 func createBigQuerySubscription(w io.Writer, projectID, subID string, topic *pubsub.Topic, table string) error {
 	// projectID := "my-project-id"
 	// subID := "my-sub"
@@ -35,16 +36,14 @@ func createBigQuerySubscription(w io.Writer, projectID, subID string, topic *pub
 	}
 	defer client.Close()
 
-	bqConfig := pubsub.BigQueryConfig{
-		Table: table,
-	}
-
 	sub, err := client.CreateSubscription(ctx, subID, pubsub.SubscriptionConfig{
-		Topic:          topic,
-		BigQueryConfig: bqConfig,
+		Topic: topic,
+		BigQueryConfig: pubsub.BigQueryConfig{
+			Table: table,
+		},
 	})
 	if err != nil {
-		return fmt.Errorf("CreateSubscription: %v", err)
+		return fmt.Errorf("client.CreateSubscription: %v", err)
 	}
 	fmt.Fprintf(w, "Created BigQuery subscription: %v\n", sub)
 
