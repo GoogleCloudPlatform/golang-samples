@@ -41,7 +41,7 @@ func updateSecretWithAlias(w io.Writer, name string) error {
 	req := &secretmanagerpb.UpdateSecretRequest{
 		Secret: &secretmanagerpb.Secret{
 			Name: name,
-			versionAliases: map[string]string{
+			VersionAliases: map[string]string{
 				"test": "1",
 			},
 		},
