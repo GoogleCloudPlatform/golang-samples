@@ -14,7 +14,7 @@
 
 package spanner
 
-// [START spanner_read_data_with_role]
+// [START spanner_read_data_with_database_role]
 
 import (
 	"context"
@@ -25,10 +25,11 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-func readWithRole(w io.Writer, db string) error {
+func readWithDatabaseRole(w io.Writer, db string, databaseRole string) error {
+	// databaseRole = "parent"
 	ctx := context.Background()
 	cfg := spanner.ClientConfig{
-		DatabaseRole: "parent",
+		DatabaseRole: databaseRole,
 	}
 	client, err := spanner.NewClientWithConfig(ctx, db, cfg)
 	if err != nil {
@@ -36,6 +37,7 @@ func readWithRole(w io.Writer, db string) error {
 	}
 	defer client.Close()
 
+	// Read all albums.
 	iter := client.Single().Read(ctx, "Albums", spanner.AllKeys(),
 		[]string{"SingerId", "AlbumId", "AlbumTitle"})
 	defer iter.Stop()
@@ -56,4 +58,4 @@ func readWithRole(w io.Writer, db string) error {
 	}
 }
 
-// [END spanner_read_data_with_role]
+// [END spanner_read_data_with_database_role]

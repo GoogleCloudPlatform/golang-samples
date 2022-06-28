@@ -14,7 +14,7 @@
 
 package spanner
 
-// [START spanner_add_new_role]
+// [START spanner_add_new_database_role]
 
 import (
 	"context"
@@ -24,7 +24,7 @@ import (
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
-func addNewRole(w io.Writer, db string) error {
+func addNewDatabaseRole(w io.Writer, db string) error {
 	ctx := context.Background()
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
@@ -32,6 +32,8 @@ func addNewRole(w io.Writer, db string) error {
 	}
 	defer adminClient.Close()
 
+	// Set up database roles and membership. After database roles are created,
+	// users can be granted roles by setting IAM policies.
 	op, err := adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
 		Database: db,
 		Statements: []string{
@@ -47,6 +49,8 @@ func addNewRole(w io.Writer, db string) error {
 	if err := op.Wait(ctx); err != nil {
 		return err
 	}
+
+	// Delete role and membership.
 	op, err = adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
 		Database: db,
 		Statements: []string{
@@ -63,4 +67,4 @@ func addNewRole(w io.Writer, db string) error {
 	return nil
 }
 
-// [END spanner_add_new_role]
+// [END spanner_add_new_database_role]

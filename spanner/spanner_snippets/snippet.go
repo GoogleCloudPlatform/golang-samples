@@ -58,14 +58,14 @@ var (
 	}
 
 	adminCommands = map[string]adminCommand{
-		"createdatabase":    createDatabase,
-		"addnewcolumn":      addNewColumn,
-		"pgaddnewcolumn":    pgAddNewColumn,
-		"addstoringindex":   addStoringIndex,
-		"pgaddstoringindex": pgAddStoringIndex,
-		"pgcreatedatabase":  pgCreateDatabase,
-		"addnewrole":        addNewRole,
-		"listroles":         listRoles,
+		"createdatabase":     createDatabase,
+		"addnewcolumn":       addNewColumn,
+		"pgaddnewcolumn":     pgAddNewColumn,
+		"addstoringindex":    addStoringIndex,
+		"pgaddstoringindex":  pgAddStoringIndex,
+		"pgcreatedatabase":   pgCreateDatabase,
+		"addnewdatabaserole": addNewDatabaseRole,
+		"listdatabaseroles":  listDatabaseRoles,
 	}
 )
 
@@ -710,7 +710,7 @@ func pgAddStoringIndex(ctx context.Context, w io.Writer, adminClient *database.D
 	return nil
 }
 
-func addNewRole(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, db string) error {
+func addNewDatabaseRole(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, db string) error {
 	op, err := adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
 		Database: db,
 		Statements: []string{
@@ -744,7 +744,7 @@ func addNewRole(ctx context.Context, w io.Writer, adminClient *database.Database
 	return nil
 }
 
-func listRoles(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, db string) error {
+func listDatabaseRoles(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, db string) error {
 	iter := adminClient.ListDatabaseRoles(ctx, &adminpb.ListDatabaseRolesRequest{
 		Parent: db,
 	})
@@ -766,7 +766,7 @@ func listRoles(ctx context.Context, w io.Writer, adminClient *database.DatabaseA
 }
 
 func run(ctx context.Context, w io.Writer, cmd string, db string) error {
-	databaseRole := ""
+	var databaseRole string
 	if cmd == "readwithrole" {
 		databaseRole = "parent"
 	}
@@ -815,7 +815,7 @@ func main() {
 	Command can be one of: write, read, readwithrole, query, update,
 		querynewcolumn, querywithparameter, dmlwrite, dmlwritetxn, readindex,
 		readstoringindex, readonlytransaction, createdatabase, addnewcolumn,
-		addstoringindex, addnewrole, listroles, pgcreatedatabase,
+		addstoringindex, addnewdatabaserole, listdatabaseroles, pgcreatedatabase,
 		pgqueryparameter, pgdmlwrite, pgaddnewcolumn, pgquerynewcolumn,
 		pgdmlwritetxn, pgaddstoringindex
 

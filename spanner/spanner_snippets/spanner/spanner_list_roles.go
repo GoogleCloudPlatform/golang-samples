@@ -14,7 +14,7 @@
 
 package spanner
 
-// [START spanner_list_roles]
+// [START spanner_list_database_roles]
 
 import (
 	"context"
@@ -28,7 +28,7 @@ import (
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
-func listRoles(w io.Writer, db string) error {
+func listDatabaseRoles(w io.Writer, db string) error {
 	ctx := context.Background()
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
@@ -56,4 +56,4 @@ func listRoles(w io.Writer, db string) error {
 	return nil
 }
 
-// [END spanner_list_roles]
+// [END spanner_list_database_roles]
