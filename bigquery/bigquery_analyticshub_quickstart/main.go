@@ -115,24 +115,23 @@ func createOrGetDataExchange(ctx context.Context, client *dataexchange.Analytics
 	}
 
 	resp, err := client.CreateDataExchange(ctx, req)
-	if err == nil {
-		// With no error, return the provided response from a successful creation.
-		return resp, nil
-	}
-	// We'll handle one specific error case specially, the case of the exchange already existing.  In this instance,
-	// we'll issue a second request to fetch the exchange information for the already present exchange and return it.
-	if code := status.Code(err); code == codes.AlreadyExists {
-		getReq := &dataexchangepb.GetDataExchangeRequest{
-			Name: fmt.Sprintf("projects/%s/locations/%s/dataExchanges/%s", projectID, location, exchangeID),
+	if err != nil {
+		// We'll handle one specific error case specially, the case of the exchange already existing.  In this instance,
+		// we'll issue a second request to fetch the exchange information for the already present exchange and return it.
+		if code := status.Code(err); code == codes.AlreadyExists {
+			getReq := &dataexchangepb.GetDataExchangeRequest{
+				Name: fmt.Sprintf("projects/%s/locations/%s/dataExchanges/%s", projectID, location, exchangeID),
+			}
+			resp, err = client.GetDataExchange(ctx, getReq)
+			if err != nil {
+				return nil, fmt.Errorf("error getting dataExchange: %w", err)
+			}
+			return resp, nil
 		}
-		resp, err = client.GetDataExchange(ctx, getReq)
-		if err != nil {
-			return nil, fmt.Errorf("error getting dataExchange: %w", err)
-		}
-		return resp, nil
+		// For all other cases, return the error from creation request.
+		return nil, err
 	}
-	// For all other cases, return the error from creation request.
-	return nil, err
+	return resp, nil
 }
 
 // createListing creates an example listing within the specified exchange using the provided source dataset.
