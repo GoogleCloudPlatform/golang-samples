@@ -36,8 +36,10 @@ func TestSigtermHandlerService(t *testing.T) {
 	defer service.Clean()
 
 	// Explicitly send SIGTERM
-	requestPath := "/?terminate=1"
-	req, err := service.NewRequest("GET", requestPath)
+	req, err := service.NewRequest("GET", "")
+	q := req.URL.Query()
+	q.Add("terminate", "1")
+	req.URL.RawQuery = q.Encode()
 	if err != nil {
 		t.Fatalf("service.NewRequest: %v", err)
 	}
