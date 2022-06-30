@@ -22,28 +22,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/integration/mtest"
 )
-
-type mockManager struct{}
-
-func (m mockManager) load(ctx context.Context, t []trainer) error {
-	return nil
-}
-
-func (m mockManager) setCollection(c *mongo.Collection) {
-}
-
-func (m mockManager) list(ctx context.Context) ([]*trainer, error) {
-	trainers := []*trainer{
-		{"Ash", 10, "Pallet Town"},
-		{"Misty", 10, "Cerulean City"},
-		{"Brock", 15, "Pewter City"},
-	}
-
-	return trainers, nil
-}
 
 // Testing mongo using mocks is explained here:
 // https://medium.com/@victor.neuret/mocking-the-official-mongo-golang-driver-5aad5b226a78
