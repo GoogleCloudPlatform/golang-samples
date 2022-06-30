@@ -31,51 +31,53 @@ const (
 	port      = "80"
 )
 
-var tm mongoManager
-
 func main() {
-	var err error
 	mongohost := os.Getenv("HOST")
 
-	tm, err = newTrainerManager(mongohost, mongoport)
+	if mongohost == "" {
+		log.Fatalf("HOST Environmental variable was not set. Should be the ip of a vm running mongo on port %s", mongoport)
+	}
+
+	ctx := context.Background()
+	var err error
+	tm, err := newTrainerManager(ctx, mongohost, mongoport)
 	if err != nil {
-		log.Fatal(fmt.Printf("error connecting to mongo: %s", err))
+		log.Fatalf("error connecting to mongo: %s", err)
 	}
 
 	trainers := []trainer{
-		{"Ash", 10, "Pallet Town"},
-		{"Misty", 10, "Cerulean City"},
-		{"Brock", 15, "Pewter City"},
+		{Name: "Ash", Age: 10, City: "Pallet Town"},
+		{Name: "Misty", Age: 10, City: "Cerulean City"},
+		{Name: "Brock", Age: 15, City: "Pewter City"},
 	}
 
-	if err := tm.load(trainers); err != nil {
+	if err := tm.load(ctx, trainers); err != nil {
 		log.Fatal(err)
 	}
 
-	http.HandleFunc("/", listHandler)
+	http.HandleFunc("/", listHandler(tm))
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
-func listHandler(w http.ResponseWriter, r *http.Request) {
-	trainers, err := tm.list()
-	if err != nil {
-		httpResponse(w, http.StatusInternalServerError, []byte(err.Error()))
+func listHandler(tm *trainerManager) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		trainers, err := tm.list(context.Background())
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		j, err := json.Marshal(trainers)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		w.Write(j)
 		return
 	}
-
-	j, err := json.Marshal(trainers)
-	if err != nil {
-		httpResponse(w, http.StatusInternalServerError, []byte(err.Error()))
-		return
-	}
-	httpResponse(w, http.StatusOK, j)
-	return
-}
-
-func httpResponse(w http.ResponseWriter, status int, msg []byte) {
-	w.WriteHeader(status)
-	w.Write(msg)
-	return
 }
 
 type trainer struct {
@@ -85,28 +87,21 @@ type trainer struct {
 }
 
 // newTrainerManager spins up a new TrainerManager for interacting with MongoDB.
-func newTrainerManager(host, port string) (*trainerManager, error) {
-	var err error
-	tm := trainerManager{}
-	ctx := context.Background()
-
+func newTrainerManager(ctx context.Context, host, port string) (*trainerManager, error) {
 	uri := fmt.Sprintf("mongodb://%s:%s", host, port)
 	clientOptions := options.Client().ApplyURI(uri)
 
-	tm.client, err = mongo.Connect(ctx, clientOptions)
+	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
 		return nil, fmt.Errorf("error connecting to mongo: %s", err)
 	}
 
-	tm.collection = tm.client.Database("test").Collection("trainers")
+	collection := client.Database("test").Collection("trainers")
 
-	return &tm, nil
-}
-
-type mongoManager interface {
-	load([]trainer) error
-	list() ([]*trainer, error)
-	setCollection(*mongo.Collection)
+	return &trainerManager{
+		client:     client,
+		collection: collection,
+	}, nil
 }
 
 type trainerManager struct {
@@ -114,18 +109,13 @@ type trainerManager struct {
 	collection *mongo.Collection
 }
 
-func (tm *trainerManager) setCollection(c *mongo.Collection) {
-	tm.collection = c
-}
-
 // load pushes a collection of trainers into a mongoDB instance
-func (tm *trainerManager) load(trainers []trainer) error {
+func (tm *trainerManager) load(ctx context.Context, trainers []trainer) error {
 	t := make([]interface{}, len(trainers))
 	for i, tdata := range trainers {
 		t[i] = tdata
 	}
 
-	ctx := context.Background()
 	if _, err := tm.collection.InsertMany(ctx, t); err != nil {
 		return fmt.Errorf("error inserting records to mongo: %s", err)
 	}
@@ -134,9 +124,8 @@ func (tm *trainerManager) load(trainers []trainer) error {
 }
 
 // list retrieves the total collection of trainers from a mongoDB instance
-func (tm *trainerManager) list() ([]*trainer, error) {
+func (tm *trainerManager) list(ctx context.Context) ([]*trainer, error) {
 	var results []*trainer
-	ctx := context.Background()
 
 	cur, err := tm.collection.Find(ctx, bson.D{{}}, options.Find())
 	if err != nil {
@@ -152,9 +141,5 @@ func (tm *trainerManager) list() ([]*trainer, error) {
 		results = append(results, &elem)
 	}
 
-	if err := cur.Err(); err != nil {
-		return nil, err
-	}
-
-	return results, nil
+	return results, cur.Err()
 }
