@@ -26,8 +26,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/integration/mtest"
 )
 
-var mt *mtest.T
-
 type mockManager struct{}
 
 func (m mockManager) load(ctx context.Context, t []trainer) error {
