@@ -50,6 +50,15 @@ func TestComputeSnippets(t *testing.T) {
 		t.Errorf("createInstance got %q, want %q", got, expectedResult)
 	}
 
+	instance, err := getInstance(buf, tc.ProjectID, zone, instanceName)
+	if err != nil {
+		t.Errorf("unable to get instance: %v", err)
+	}
+
+	if instance.GetName() != instanceName {
+		t.Errorf("instance got name %q, want %q", instance.GetName(), instanceName)
+	}
+
 	buf.Reset()
 
 	if err := listInstances(buf, tc.ProjectID, zone); err != nil {
