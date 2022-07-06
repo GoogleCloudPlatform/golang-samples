@@ -55,13 +55,13 @@ func quickstart(w io.Writer, projectID string, sourceGCSBucket string, sinkGCSBu
 	}
 	resp, err := client.CreateTransferJob(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to create transfer job: %v", err)
+		return nil, fmt.Errorf("failed to create transfer job: %v", err)
 	}
 	if _, err = client.RunTransferJob(ctx, &storagetransferpb.RunTransferJobRequest{
 		ProjectId: projectID,
 		JobName:   resp.Name,
 	}); err != nil {
-		return nil, fmt.Errorf("Failed to run transfer job: %v", err)
+		return nil, fmt.Errorf("failed to run transfer job: %v", err)
 	}
 
 	fmt.Fprintf(w, "Created and ran transfer job from %v to %v with name %v", sourceGCSBucket, sinkGCSBucket, resp.Name)

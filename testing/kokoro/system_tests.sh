@@ -102,6 +102,8 @@ pushd testing/sampletests
 go install .
 popd
 
+source ${KOKORO_GFILE_DIR}/secret_manager/go-aws-secrets
+
 # Set application credentials before using gimmeproj so it has access.
 # This is changed to a project-specific credential after a project is leased.
 export GOOGLE_APPLICATION_CREDENTIALS=$KOKORO_KEYSTORE_DIR/71386_kokoro-golang-samples-tests
