@@ -217,6 +217,7 @@ func writeTestGCSFile(t *testing.T, dstBucket string, srcBucket string, srcObjec
 }
 
 func checkGCSFileExists(t *testing.T, bucketName string, fileName string) {
+	var err error
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -224,18 +225,23 @@ func checkGCSFileExists(t *testing.T, bucketName string, fileName string) {
 	}
 	defer client.Close()
 
-	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel()
-
-	objAttrs, err := client.Bucket(bucketName).Object(fileName).Attrs(ctx)
-	if err == nil && objAttrs != nil {
-		return
-	}
-	if err == storage.ErrObjectNotExist {
-		t.Fatalf("Spritesheet %q does not exist in bucket %q: %v", fileName, bucketName, err)
-	}
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+		defer cancel()
+		var objAttrs *storage.ObjectAttrs
+		objAttrs, err = client.Bucket(bucketName).Object(fileName).Attrs(ctx)
+		if err == nil && objAttrs != nil {
+			return
+		}
+		if err == storage.ErrObjectNotExist {
+			return
+		}
+		if err != nil {
+			r.Errorf("Error getting bucket attrs: %v", err)
+		}
+	})
 	if err != nil {
-		t.Fatalf("Error getting bucket attrs: %v", err)
+		t.Fatal(err)
 	}
 }
 
