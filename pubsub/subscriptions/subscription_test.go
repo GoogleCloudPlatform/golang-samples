@@ -760,7 +760,7 @@ func TestCreateBigQuerySubscription(t *testing.T) {
 	sub := client.Subscription(bqSubID)
 	sub.Delete(ctx)
 	if err := deleteBigQueryDataset(tc.ProjectID, datasetID); err != nil {
-		t.Logf("delete bigquery dataset failed: %v", err)
+		t.Logf("failed to delete bigquery dataset: %v", err)
 	}
 }
 
