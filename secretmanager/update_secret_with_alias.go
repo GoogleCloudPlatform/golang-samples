@@ -42,7 +42,7 @@ func updateSecretWithAlias(w io.Writer, name string) error {
 		Secret: &secretmanagerpb.Secret{
 			Name: name,
 			VersionAliases: map[string]string{
-				"test": 1,
+				"test": "1",
 			},
 		},
 		UpdateMask: &field_mask.FieldMask{
