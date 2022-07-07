@@ -34,6 +34,7 @@ func makeGetRequest(w io.Writer, targetURL string, audience string) error {
 	// (`targetURL` and `audience` will differ for non-root URLs and GET parameters)
 	// [END cloudrun_service_to_service_auth]
 	// [START functions_bearer_token]
+	// For Cloud Functions, endpoint (`serviceUrl`) and `audience` are the same.
 	// Example `audience` value (Cloud Functions): https://<PROJECT>-<REGION>-<PROJECT_ID>.cloudfunctions.net/myFunction
 	// (`targetURL` and `audience` will differ for GET parameters)
 	// [START cloudrun_service_to_service_auth]
