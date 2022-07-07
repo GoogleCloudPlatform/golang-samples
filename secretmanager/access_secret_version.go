@@ -18,6 +18,7 @@ package secretmanager
 import (
 	"context"
 	"fmt"
+	"hash/crc32"
 	"io"
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
@@ -48,6 +49,13 @@ func accessSecretVersion(w io.Writer, name string) error {
 	result, err := client.AccessSecretVersion(ctx, req)
 	if err != nil {
 		return fmt.Errorf("failed to access secret version: %v", err)
+	}
+
+	// Verify the data checksum.
+	crc32c := crc32.MakeTable(crc32.Castagnoli)
+	checksum := int64(crc32.Checksum(result.Payload.Data, crc32c))
+	if checksum != *result.Payload.DataCrc32C {
+		return fmt.Errorf("Data corruption detected.")
 	}
 
 	// WARNING: Do not print the secret in a production environment - this snippet
