@@ -759,7 +759,9 @@ func TestCreateBigQuerySubscription(t *testing.T) {
 	}
 	sub := client.Subscription(bqSubID)
 	sub.Delete(ctx)
-	deleteBigQueryDataset(tc.ProjectID, datasetID)
+	if err := deleteBigQueryDataset(tc.ProjectID, datasetID); err != nil {
+		t.Logf("delete bigquery dataset failed: %v", err)
+	}
 }
 
 func publishMsgs(ctx context.Context, t *pubsub.Topic, numMsgs int) error {
@@ -828,7 +830,6 @@ func createBigQueryTable(projectID, datasetID, tableID string) error {
 		{Name: "data", Type: bigquery.BytesFieldType},
 		{Name: "messageID", Type: bigquery.StringFieldType},
 		{Name: "attributes", Type: bigquery.StringFieldType},
-		{Name: "subscription_name", Type: bigquery.StringFieldType},
 		{Name: "publishTime", Type: bigquery.TimestampFieldType},
 	}
 	if err := table.Create(ctx, &bigquery.TableMetadata{Schema: schema}); err != nil {
