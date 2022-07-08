@@ -19,7 +19,6 @@ import (
 	"io/ioutil"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
@@ -33,15 +32,12 @@ func TestEnableChannel(t *testing.T) {
 	}
 	defer deleteChannel(ioutil.Discard, c.GetName())
 
-	testutil.Retry(t, 20, 10*time.Second, func(r *testutil.R) {
-		buf := &bytes.Buffer{}
-		if err := enableChannel(buf, c.GetName()); err != nil {
-			r.Errorf("enableChannel: %v", err)
-			return
-		}
-		want := "Enabled channel"
-		if got := buf.String(); !strings.Contains(got, want) {
-			r.Errorf("enableChannel got %q, want to contain %q", got, want)
-		}
-	})
+	buf := &bytes.Buffer{}
+	if err := enableChannel(buf, c.GetName()); err != nil {
+		t.Fatalf("enableChannel: %v", err)
+	}
+	want := "Enabled channel"
+	if got := buf.String(); !strings.Contains(got, want) {
+		t.Fatalf("enableChannel got %q, want to contain %q", got, want)
+	}
 }

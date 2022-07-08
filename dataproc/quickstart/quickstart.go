@@ -19,9 +19,10 @@
 // and finally delete the cluster.
 //
 // Usage:
-//     go build
-//     ./quickstart --project_id <PROJECT_ID> --region <REGION> \
-//         --cluster_name <CLUSTER_NAME> --job_file_path <GCS_JOB_FILE_PATH>
+//
+//	go build
+//	./quickstart --project_id <PROJECT_ID> --region <REGION> \
+//	    --cluster_name <CLUSTER_NAME> --job_file_path <GCS_JOB_FILE_PATH>
 package main
 
 import (

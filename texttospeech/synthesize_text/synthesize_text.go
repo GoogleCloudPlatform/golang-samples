@@ -75,7 +75,9 @@ func SynthesizeText(w io.Writer, text, outputFile string) error {
 // SynthesizeSSML synthesizes ssml and saves the output to outputFile.
 //
 // ssml must be well-formed according to:
-//   https://www.w3.org/TR/speech-synthesis/
+//
+//	https://www.w3.org/TR/speech-synthesis/
+//
 // Example: <speak>Hello there.</speak>
 func SynthesizeSSML(w io.Writer, ssml, outputFile string) error {
 	ctx := context.Background()
