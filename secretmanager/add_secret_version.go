@@ -18,6 +18,7 @@ package secretmanager
 import (
 	"context"
 	"fmt"
+	"hash/crc32"
 	"io"
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
@@ -31,6 +32,10 @@ func addSecretVersion(w io.Writer, parent string) error {
 
 	// Declare the payload to store.
 	payload := []byte("my super secret data")
+	// Compute checksum, use Castagnoli polynomial. Providing a checksum
+	// is optional.
+	crc32c := crc32.MakeTable(crc32.Castagnoli)
+	checksum := int64(crc32.Checksum(payload, crc32c))
 
 	// Create the client.
 	ctx := context.Background()
@@ -44,7 +49,8 @@ func addSecretVersion(w io.Writer, parent string) error {
 	req := &secretmanagerpb.AddSecretVersionRequest{
 		Parent: parent,
 		Payload: &secretmanagerpb.SecretPayload{
-			Data: payload,
+			Data:       payload,
+			DataCrc32C: &checksum,
 		},
 	}
 
