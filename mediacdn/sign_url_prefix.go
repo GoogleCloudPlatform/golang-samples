@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START mediacdn_sign_url_preifx]
+// [START mediacdn_sign_url_prefix]
 import (
 	"crypto/ed25519"
 	"encoding/base64"
