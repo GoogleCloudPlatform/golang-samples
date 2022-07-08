@@ -82,9 +82,7 @@ func SynthesizeTextFile(w io.Writer, textFile, outputFile string) error {
 // output to outputFile.
 //
 // ssmlFile must be well-formed according to:
-//
-//	https://www.w3.org/TR/speech-synthesis/
-//
+//   https://www.w3.org/TR/speech-synthesis/
 // Example: <speak>Hello there.</speak>
 func SynthesizeSSMLFile(w io.Writer, ssmlFile, outputFile string) error {
 	ctx := context.Background()
