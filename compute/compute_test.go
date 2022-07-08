@@ -50,13 +50,15 @@ func TestComputeSnippets(t *testing.T) {
 		t.Errorf("createInstance got %q, want %q", got, expectedResult)
 	}
 
-	instance, err := getInstance(buf, tc.ProjectID, zone, instanceName)
-	if err != nil {
-		t.Errorf("unable to get instance: %v", err)
+	buf.Reset()
+
+	if err := getInstance(buf, tc.ProjectID, zone, instanceName); err != nil {
+		t.Errorf("getInstance got err: %v", err)
 	}
 
-	if instance.GetName() != instanceName {
-		t.Errorf("instance got name %q, want %q", instance.GetName(), instanceName)
+	expectedResult = fmt.Sprintf("Instance: %s", instanceName)
+	if got := buf.String(); !strings.Contains(got, expectedResult) {
+		t.Errorf("getInstance got %q, want %q", got, expectedResult)
 	}
 
 	buf.Reset()

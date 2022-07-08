@@ -34,7 +34,7 @@ func createSnapshot(
 	// diskName := "your_disk_name"
 	// snapshotName := "your_snapshot_name"
 	// zone := "europe-central2-b"
-	// region := ""
+	// region := "eupore-central2"
 	// location = "eupore-central2"
 	// diskProjectID = "YOUR_DISK_PROJECT_ID"
 

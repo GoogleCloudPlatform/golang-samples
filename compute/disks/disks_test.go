@@ -144,6 +144,7 @@ func TestComputeDisksSnippets(t *testing.T) {
 	snapshotName := fmt.Sprintf("test-snapshot-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	sourceImage := "projects/debian-cloud/global/images/family/debian-11"
 	diskType := fmt.Sprintf("zones/%s/diskTypes/pd-ssd", zone)
+	diskSnapshotLink := fmt.Sprintf("projects/%s/global/snapshots/%s", tc.ProjectID, snapshotName)
 	want := "Disk created"
 
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
@@ -155,116 +156,120 @@ func TestComputeDisksSnippets(t *testing.T) {
 
 	buf := &bytes.Buffer{}
 
-	err = createDisk(ctx, tc.ProjectID, zone, diskName, sourceImage)
-	if err != nil {
-		t.Errorf("createDisk got err: %v", err)
-	}
+	t.Run("createDiskSnapshot and deleteDisk", func(t *testing.T) {
+		err := createDisk(ctx, tc.ProjectID, zone, diskName, sourceImage)
+		if err != nil {
+			t.Fatalf("createDisk got err: %v", err)
+		}
 
-	err = createDiskSnapshot(ctx, tc.ProjectID, zone, diskName, snapshotName)
-	if err != nil {
-		t.Errorf("createDiskSnapshot got err: %v", err)
-	}
+		err = createDiskSnapshot(ctx, tc.ProjectID, zone, diskName, snapshotName)
+		if err != nil {
+			t.Errorf("createDiskSnapshot got err: %v", err)
+		}
 
-	diskSnapshotLink := fmt.Sprintf("projects/%s/global/snapshots/%s", tc.ProjectID, snapshotName)
+		if err := createDiskFromSnapshot(buf, tc.ProjectID, zone, diskName2, diskType, diskSnapshotLink); err != nil {
+			t.Errorf("createDiskFromSnapshot got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("createDiskFromSnapshot got %q, want %q", got, want)
+		}
 
-	if err := createDiskFromSnapshot(buf, tc.ProjectID, zone, diskName2, diskType, diskSnapshotLink, 10); err != nil {
-		t.Errorf("createDiskFromSnapshot got err: %v", err)
-	}
-	if got := buf.String(); !strings.Contains(got, want) {
-		t.Errorf("createDiskFromSnapshot got %q, want %q", got, want)
-	}
+		buf.Reset()
+		want = "Disk deleted"
 
-	buf.Reset()
-	want = "Disk deleted"
+		if err := deleteDisk(buf, tc.ProjectID, zone, diskName2); err != nil {
+			t.Errorf("deleteDisk got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("deleteDisk got %q, want %q", got, want)
+		}
 
-	if err := deleteDisk(buf, tc.ProjectID, zone, diskName2); err != nil {
-		t.Errorf("deleteDisk got err: %v", err)
-	}
-	if got := buf.String(); !strings.Contains(got, want) {
-		t.Errorf("deleteDisk got %q, want %q", got, want)
-	}
+		err = deleteDiskSnapshot(ctx, tc.ProjectID, snapshotName)
+		if err != nil {
+			t.Errorf("deleteDiskSnapshot got err: %v", err)
+		}
 
-	err = deleteDiskSnapshot(ctx, tc.ProjectID, snapshotName)
-	if err != nil {
-		t.Errorf("deleteDiskSnapshot got err: %v", err)
-	}
+		err = deleteDisk(buf, tc.ProjectID, zone, diskName)
+		if err != nil {
+			t.Errorf("deleteDisk got err: %v", err)
+		}
+	})
 
-	err = deleteDisk(buf, tc.ProjectID, zone, diskName)
-	if err != nil {
-		t.Errorf("deleteDisk got err: %v", err)
-	}
+	t.Run("createEmptyDisk", func(t *testing.T) {
+		buf.Reset()
+		want = "Disk created"
 
-	buf.Reset()
-	want = "Disk created"
+		if err := createEmptyDisk(buf, tc.ProjectID, zone, diskName, diskType); err != nil {
+			t.Errorf("createEmptyDisk got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("createEmptyDisk got %q, want %q", got, want)
+		}
 
-	if err := createEmptyDisk(buf, tc.ProjectID, zone, diskName, diskType, 10); err != nil {
-		t.Errorf("createEmptyDisk got err: %v", err)
-	}
-	if got := buf.String(); !strings.Contains(got, want) {
-		t.Errorf("createEmptyDisk got %q, want %q", got, want)
-	}
+		err = deleteDisk(buf, tc.ProjectID, zone, diskName)
+		if err != nil {
+			t.Errorf("deleteDisk got err: %v", err)
+		}
+	})
 
-	err = deleteDisk(buf, tc.ProjectID, zone, diskName)
-	if err != nil {
-		t.Errorf("deleteDisk got err: %v", err)
-	}
+	t.Run("setDiskAutodelete", func(t *testing.T) {
+		buf.Reset()
+		want = "disk autoDelete field updated."
 
-	buf.Reset()
-	want = "disk autoDelete field updated."
-
-	req := &computepb.InsertInstanceRequest{
-		Project: tc.ProjectID,
-		Zone:    zone,
-		InstanceResource: &computepb.Instance{
-			Name: proto.String(instanceName),
-			Disks: []*computepb.AttachedDisk{
-				{
-					InitializeParams: &computepb.AttachedDiskInitializeParams{
-						DiskSizeGb:  proto.Int64(250),
-						SourceImage: proto.String(sourceImage),
-						DiskName:    proto.String(diskName),
+		req := &computepb.InsertInstanceRequest{
+			Project: tc.ProjectID,
+			Zone:    zone,
+			InstanceResource: &computepb.Instance{
+				Name: proto.String(instanceName),
+				Disks: []*computepb.AttachedDisk{
+					{
+						InitializeParams: &computepb.AttachedDiskInitializeParams{
+							DiskSizeGb:  proto.Int64(250),
+							SourceImage: proto.String(sourceImage),
+							DiskName:    proto.String(diskName),
+						},
+						AutoDelete: proto.Bool(false),
+						Boot:       proto.Bool(true),
+						DeviceName: proto.String(diskName),
 					},
-					AutoDelete: proto.Bool(false),
-					Boot:       proto.Bool(true),
-					DeviceName: proto.String(diskName),
+				},
+				MachineType: proto.String(fmt.Sprintf("zones/%s/machineTypes/n1-standard-1", zone)),
+				NetworkInterfaces: []*computepb.NetworkInterface{
+					{
+						Name: proto.String("global/networks/default"),
+					},
 				},
 			},
-			MachineType: proto.String(fmt.Sprintf("zones/%s/machineTypes/n1-standard-1", zone)),
-			NetworkInterfaces: []*computepb.NetworkInterface{
-				{
-					Name: proto.String("global/networks/default"),
-				},
-			},
-		},
-	}
+		}
 
-	op, err := instancesClient.Insert(ctx, req)
-	if err != nil {
-		t.Errorf("unable to create instance: %v", err)
-	}
+		op, err := instancesClient.Insert(ctx, req)
+		if err != nil {
+			t.Errorf("unable to create instance: %v", err)
+		}
 
-	if err = op.Wait(ctx); err != nil {
-		t.Errorf("unable to wait for the operation: %v", err)
-	}
+		if err = op.Wait(ctx); err != nil {
+			t.Errorf("unable to wait for the operation: %v", err)
+		}
 
-	if err := setDiskAutodelete(buf, tc.ProjectID, zone, instanceName, diskName, true); err != nil {
-		t.Errorf("setDiskAutodelete got err: %v", err)
-	}
-	if got := buf.String(); !strings.Contains(got, want) {
-		t.Errorf("setDiskAutodelete got %q, want %q", got, want)
-	}
+		if err := setDiskAutodelete(buf, tc.ProjectID, zone, instanceName, diskName); err != nil {
+			t.Errorf("setDiskAutodelete got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("setDiskAutodelete got %q, want %q", got, want)
+		}
 
-	instance, err := getInstance(ctx, tc.ProjectID, zone, instanceName)
-	if err != nil {
-		t.Errorf("getInstance got err: %v", err)
-	}
+		instance, err := getInstance(ctx, tc.ProjectID, zone, instanceName)
+		if err != nil {
+			t.Errorf("getInstance got err: %v", err)
+		}
 
-	if instance.GetDisks()[0].GetAutoDelete() != true {
-		t.Errorf("instance got %t, want %t", instance.GetDisks()[0].GetAutoDelete(), true)
-	}
+		if instance.GetDisks()[0].GetAutoDelete() != true {
+			t.Errorf("instance got %t, want %t", instance.GetDisks()[0].GetAutoDelete(), true)
+		}
 
-	err = deleteInstance(ctx, tc.ProjectID, zone, instanceName)
-	if err != nil {
-		t.Errorf("deleteInstance got err: %v", err)
-	}
+		err = deleteInstance(ctx, tc.ProjectID, zone, instanceName)
+		if err != nil {
+			t.Errorf("deleteInstance got err: %v", err)
+		}
+	})
 }

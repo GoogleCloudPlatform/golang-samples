@@ -24,8 +24,8 @@ import (
 	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
 )
 
-// createEmptyDisk returns a VM instance in the given zone in the specified project.
-func getInstance(w io.Writer, projectID, zone, instanceName string) (*computepb.Instance, error) {
+// getInstance prints a name of a VM instance in the given zone in the specified project.
+func getInstance(w io.Writer, projectID, zone, instanceName string) error {
 	// projectID := "your_project_id"
 	// zone := "europe-central2-b"
 	// instanceName := "your_instance_name"
@@ -33,7 +33,7 @@ func getInstance(w io.Writer, projectID, zone, instanceName string) (*computepb.
 	ctx := context.Background()
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("NewInstancesRESTClient: %v", err)
+		return fmt.Errorf("NewInstancesRESTClient: %v", err)
 	}
 	defer instancesClient.Close()
 
@@ -43,7 +43,14 @@ func getInstance(w io.Writer, projectID, zone, instanceName string) (*computepb.
 		Instance: instanceName,
 	}
 
-	return instancesClient.Get(ctx, reqInstance)
+	instance, err := instancesClient.Get(ctx, reqInstance)
+	if err != nil {
+		return fmt.Errorf("unable to get instance: %v", err)
+	}
+
+	fmt.Fprintf(w, "Instance: %s\n", instance.GetName())
+
+	return nil
 }
 
 // [END compute_instances_get]

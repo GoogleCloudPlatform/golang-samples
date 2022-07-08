@@ -24,17 +24,15 @@ import (
 	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
 )
 
-// setDiskAutodelete sets the autodelete flag of a disk to given value.
+// setDiskAutodelete sets the autodelete flag of a disk to given value as true.
 func setDiskAutodelete(
 	w io.Writer,
 	projectID, zone, instanceName, diskName string,
-	autoDelete bool,
 ) error {
 	// projectID := "your_project_id"
 	// zone := "europe-central2-b"
 	// instanceName := "your_instance_name"
 	// diskName := "your_disk_name"
-	// autoDelete := true
 
 	ctx := context.Background()
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
@@ -76,7 +74,7 @@ func setDiskAutodelete(
 		Zone:       zone,
 		Instance:   instanceName,
 		DeviceName: diskName,
-		AutoDelete: autoDelete,
+		AutoDelete: true,
 	}
 
 	op, err := instancesClient.SetDiskAutoDelete(ctx, req)
