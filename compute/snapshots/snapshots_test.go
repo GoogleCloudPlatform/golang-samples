@@ -165,7 +165,7 @@ func TestComputeSnapshotsSnippets(t *testing.T) {
 
 	err = createRegionDisk(ctx, tc.ProjectID, location, diskName)
 	if err != nil {
-		t.Errorf("createRegionDisk got err: %v", err)
+		t.Fatalf("createRegionDisk got err: %v", err)
 	}
 
 	if err := createSnapshot(buf, tc.ProjectID, diskName, snapshotName, "", location, location, ""); err != nil {
