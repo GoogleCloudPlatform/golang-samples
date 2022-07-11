@@ -130,9 +130,9 @@ func currentTotals(db *sql.DB) (votingData, error) {
 }
 
 // mustConnect creates a connection to the database based on environment
-// variables. Setting the optional DB_CONN_TYPE environment variable to UNIX or
-// TCP will use the corresponding connection method. By default, the connector
-// is used.
+// variables. Setting one of INSTANCE_HOST, INSTANCE_UNIX_SOCKET, or
+// INSTANCE_CONNECTION_NAME will establish a connection using a TCP socket, a
+// Unix socket, or a connector respectively.
 func mustConnect() *sql.DB {
 	var (
 		db  *sql.DB
