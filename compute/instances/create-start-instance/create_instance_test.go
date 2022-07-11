@@ -151,7 +151,7 @@ func TestComputeCreateInstanceSnippets(t *testing.T) {
 
 	err = createDisk(ctx, tc.ProjectID, zone, diskName2, *newestDebian.SelfLink)
 	if err != nil {
-		t.Errorf("createDisk got err: %v", err)
+		t.Fatalf("createDisk got err: %v", err)
 	}
 
 	err = createDisk(ctx, tc.ProjectID, zone, bootDiskName, *newestDebian.SelfLink)
