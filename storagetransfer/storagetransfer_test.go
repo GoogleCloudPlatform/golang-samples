@@ -196,7 +196,7 @@ func TestDownloadToPosix(t *testing.T) {
 
 	rootDirectory, err := ioutil.TempDir("", "download-to-posix-test")
 	if err != nil {
-		t.Errorf("download_to_posix: %#v", err)
+		t.Fatalf("download_to_posix: %#v", err)
 	}
 	defer os.RemoveAll(rootDirectory)
 
@@ -223,7 +223,7 @@ func TestTransferFromPosix(t *testing.T) {
 
 	rootDirectory, err := ioutil.TempDir("", "transfer-from-posix-test")
 	if err != nil {
-		t.Errorf("transfer_from_posix: %#v", err)
+		t.Fatalf("transfer_from_posix: %#v", err)
 	}
 	defer os.RemoveAll(rootDirectory)
 
@@ -249,13 +249,13 @@ func TestTransferBetweenPosix(t *testing.T) {
 
 	rootDirectory, err := ioutil.TempDir("", "transfer-between-posix-test-source")
 	if err != nil {
-		t.Errorf("transfer_between_posix: %#v", err)
+		t.Fatalf("transfer_between_posix: %#v", err)
 	}
 	defer os.RemoveAll(rootDirectory)
 
 	destinationDirectory, err := ioutil.TempDir("", "transfer-between-posix-test-sink")
 	if err != nil {
-		t.Errorf("transfer_between_posix: %#v", err)
+		t.Fatalf("transfer_between_posix: %#v", err)
 	}
 	defer os.RemoveAll(destinationDirectory)
 
@@ -281,16 +281,15 @@ func TestTransferUsingManifest(t *testing.T) {
 
 	rootDirectory, err := ioutil.TempDir("", "transfer-using-manifest-test")
 	if err != nil {
-		t.Errorf("transfer_using_manifest: %#v", err)
+		t.Fatalf("transfer_using_manifest: %#v", err)
 	}
 	defer os.RemoveAll(rootDirectory)
 
 	sourceAgentPoolName := "" //use default agent pool
 	object := sc.Bucket(gcsSourceBucket).Object("manifest.csv")
 	defer object.Delete(context.Background())
-	manifestLocation := "gs://" + gcsSourceBucket + "/manifest.csv"
 
-	resp, err := transferUsingManifest(buf, tc.ProjectID, sourceAgentPoolName, rootDirectory, gcsSinkBucket, manifestLocation)
+	resp, err := transferUsingManifest(buf, tc.ProjectID, sourceAgentPoolName, rootDirectory, gcsSinkBucket, gcsSourceBucket, "manifest.csv")
 	defer cleanupSTSJob(resp.Name, tc.ProjectID)
 
 	if err != nil {

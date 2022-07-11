@@ -25,7 +25,7 @@ import (
 	storagetransferpb "google.golang.org/genproto/googleapis/storagetransfer/v1"
 )
 
-func transferUsingManifest(w io.Writer, projectID string, sourceAgentPoolName string, rootDirectory string, gcsSinkBucket string, manifestLocation string) (*storagetransferpb.TransferJob, error) {
+func transferUsingManifest(w io.Writer, projectID string, sourceAgentPoolName string, rootDirectory string, gcsSinkBucket string, manifestBucket string, manifestObjectName string) (*storagetransferpb.TransferJob, error) {
 	// Your project id
 	// projectId := "myproject-id"
 
@@ -38,8 +38,11 @@ func transferUsingManifest(w io.Writer, projectID string, sourceAgentPoolName st
 	// The ID of the GCS bucket to transfer data to
 	// gcsSinkBucket := "my-sink-bucket"
 
-	// The location of the manifest file that specifies which file to transfer. Must be a "gs://" url
-	// manifestLocation := "gs://my-bucket/path/to/manifest.csv"
+	// The ID of the GCS bucket that contains the manifest file
+	// manifestBucket := "my-manifest-bucket"
+
+	// The name of the manifest file in manifestBucket that specifies which objects to transfer
+	// manifestObjectName := "path/to/manifest.csv"
 
 	ctx := context.Background()
 	client, err := storagetransfer.NewClient(ctx)
@@ -48,6 +51,7 @@ func transferUsingManifest(w io.Writer, projectID string, sourceAgentPoolName st
 	}
 	defer client.Close()
 
+	manifestLocation := "gs://" + manifestBucket + "/" + manifestObjectName
 	req := &storagetransferpb.CreateTransferJobRequest{
 		TransferJob: &storagetransferpb.TransferJob{
 			ProjectId: projectID,
