@@ -68,6 +68,7 @@ func TestBlurOffensiveImages(t *testing.T) {
 		if err != nil {
 			t.Fatalf("could not read input file: %v", err)
 		}
+		// Write is actually performed in Close(), so we check for errors there.
 		bw.Write(zbytes)
 		if err := bw.Close(); err != nil {
 			t.Fatalf("failed to upload file: %v", err)
