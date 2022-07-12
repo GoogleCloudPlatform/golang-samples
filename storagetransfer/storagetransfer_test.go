@@ -17,6 +17,7 @@ package storagetransfer
 import (
 	"bytes"
 	"context"
+	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -185,6 +186,119 @@ func TestGetLatestTransferOperation(t *testing.T) {
 	got := buf.String()
 	if want := op.Name; !strings.Contains(got, want) {
 		t.Errorf("check_latest_transfer_operation: got %q, want %q", got, want)
+	}
+}
+
+func TestDownloadToPosix(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	buf := new(bytes.Buffer)
+
+	rootDirectory, err := ioutil.TempDir("", "download-to-posix-test")
+	if err != nil {
+		t.Fatalf("download_to_posix: %#v", err)
+	}
+	defer os.RemoveAll(rootDirectory)
+
+	sinkAgentPoolName := "" //use default agent pool
+	gcsSourcePath := rootDirectory + "/"
+
+	resp, err := downloadToPosix(buf, tc.ProjectID, sinkAgentPoolName, gcsSinkBucket, gcsSourcePath, rootDirectory)
+	defer cleanupSTSJob(resp.Name, tc.ProjectID)
+
+	if err != nil {
+		t.Errorf("download_to_posix: %#v", err)
+	}
+
+	got := buf.String()
+	if want := "transferJobs/"; !strings.Contains(got, want) {
+		t.Errorf("download_to_posix: got %q, want %q", got, want)
+	}
+}
+
+func TestTransferFromPosix(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	buf := new(bytes.Buffer)
+
+	rootDirectory, err := ioutil.TempDir("", "transfer-from-posix-test")
+	if err != nil {
+		t.Fatalf("transfer_from_posix: %#v", err)
+	}
+	defer os.RemoveAll(rootDirectory)
+
+	sourceAgentPoolName := "" //use default agent pool
+
+	resp, err := transferFromPosix(buf, tc.ProjectID, sourceAgentPoolName, rootDirectory, gcsSinkBucket)
+	defer cleanupSTSJob(resp.Name, tc.ProjectID)
+
+	if err != nil {
+		t.Errorf("transfer_from_posix: %#v", err)
+	}
+
+	got := buf.String()
+	if want := "transferJobs/"; !strings.Contains(got, want) {
+		t.Errorf("transfer_from_posix: got %q, want %q", got, want)
+	}
+}
+
+func TestTransferBetweenPosix(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	buf := new(bytes.Buffer)
+
+	rootDirectory, err := ioutil.TempDir("", "transfer-between-posix-test-source")
+	if err != nil {
+		t.Fatalf("transfer_between_posix: %#v", err)
+	}
+	defer os.RemoveAll(rootDirectory)
+
+	destinationDirectory, err := ioutil.TempDir("", "transfer-between-posix-test-sink")
+	if err != nil {
+		t.Fatalf("transfer_between_posix: %#v", err)
+	}
+	defer os.RemoveAll(destinationDirectory)
+
+	sourceAgentPoolName := "" //use default agent pool
+	sinkAgentPoolName := ""   //use default agent pool
+
+	resp, err := transferBetweenPosix(buf, tc.ProjectID, sourceAgentPoolName, sinkAgentPoolName, rootDirectory, destinationDirectory, gcsSinkBucket)
+	if err != nil {
+		t.Errorf("transfer_between_posix: %#v", err)
+	}
+	defer cleanupSTSJob(resp.Name, tc.ProjectID)
+
+	got := buf.String()
+	if want := "transferJobs/"; !strings.Contains(got, want) {
+		t.Errorf("transfer_between_posix: got %q, want %q", got, want)
+	}
+}
+
+func TestTransferUsingManifest(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	buf := new(bytes.Buffer)
+
+	rootDirectory, err := ioutil.TempDir("", "transfer-using-manifest-test")
+	if err != nil {
+		t.Fatalf("transfer_using_manifest: %#v", err)
+	}
+	defer os.RemoveAll(rootDirectory)
+
+	sourceAgentPoolName := "" //use default agent pool
+	object := sc.Bucket(gcsSourceBucket).Object("manifest.csv")
+	defer object.Delete(context.Background())
+
+	resp, err := transferUsingManifest(buf, tc.ProjectID, sourceAgentPoolName, rootDirectory, gcsSinkBucket, gcsSourceBucket, "manifest.csv")
+	defer cleanupSTSJob(resp.Name, tc.ProjectID)
+
+	if err != nil {
+		t.Errorf("transfer_using_manifest: %#v", err)
+	}
+
+	got := buf.String()
+	if want := "transferJobs/"; !strings.Contains(got, want) {
+		t.Errorf("transfer_using_manifest: got %q, want %q", got, want)
 	}
 }
 
