@@ -16,6 +16,7 @@ package imagemagick
 
 import (
 	"context"
+	"io/ioutil"
 	"os"
 	"testing"
 
@@ -60,7 +61,10 @@ func TestBlurOffensiveImages(t *testing.T) {
 	if _, err := inputBlob.Attrs(ctx); err != nil {
 		// input blob does not exist, so upload it.
 		bw := inputBlob.NewWriter(context.Background())
-		zbytes, err := os.ReadFile("zombie.jpg")
+		// TODO(muncus): use os.Readfile when we're on go1.16+
+		// Note: Open() error will also surface on ReadAll(), so we only check once.
+		f, _ := os.Open("zombie.jpg")
+		zbytes, err := ioutil.ReadAll(f)
 		if err != nil {
 			t.Fatalf("could not read input file: %v", err)
 		}
