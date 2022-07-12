@@ -39,23 +39,14 @@ func createBigQuerySubscription(w io.Writer, projectID, subID string, topic *pub
 	sub, err := client.CreateSubscription(ctx, subID, pubsub.SubscriptionConfig{
 		Topic: topic,
 		BigQueryConfig: pubsub.BigQueryConfig{
-			Table: table,
+			Table:         table,
+			WriteMetadata: true,
 		},
 	})
 	if err != nil {
 		return fmt.Errorf("client.CreateSubscription: %v", err)
 	}
 	fmt.Fprintf(w, "Created BigQuery subscription: %v\n", sub)
-
-	cfg, err := sub.Config(ctx)
-	if err != nil {
-		return fmt.Errorf("subscription.Config: %v", err)
-	}
-	if cfg.BigQueryConfig.State == pubsub.SubscriptionStateActive {
-		fmt.Fprintln(w, "BigQuery subscription state: active")
-	} else {
-		fmt.Fprintln(w, "BigQuery subscription state: not active")
-	}
 
 	return nil
 }

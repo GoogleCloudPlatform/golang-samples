@@ -752,11 +752,6 @@ func TestCreateBigQuerySubscription(t *testing.T) {
 		t.Fatalf("failed to create bigquery subscription: %v", err)
 	}
 
-	got := buf.String()
-	want := "BigQuery subscription state: active"
-	if !strings.Contains(got, want) {
-		t.Fatalf("bigquery config state not active:\ngot: %s", got)
-	}
 	sub := client.Subscription(bqSubID)
 	sub.Delete(ctx)
 	if err := deleteBigQueryDataset(tc.ProjectID, datasetID); err != nil {
@@ -827,10 +822,11 @@ func createBigQueryTable(projectID, datasetID, tableID string) error {
 
 	table := dataset.Table(tableID)
 	schema := []*bigquery.FieldSchema{
-		{Name: "data", Type: bigquery.BytesFieldType},
-		{Name: "messageID", Type: bigquery.StringFieldType},
-		{Name: "attributes", Type: bigquery.StringFieldType},
-		{Name: "publishTime", Type: bigquery.TimestampFieldType},
+		{Name: "data", Type: bigquery.BytesFieldType, Required: true},
+		{Name: "message_id", Type: bigquery.StringFieldType, Required: true},
+		{Name: "attributes", Type: bigquery.StringFieldType, Required: true},
+		{Name: "subscription_name", Type: bigquery.StringFieldType, Required: true},
+		{Name: "publish_time", Type: bigquery.TimestampFieldType, Required: true},
 	}
 	if err := table.Create(ctx, &bigquery.TableMetadata{Schema: schema}); err != nil {
 		return fmt.Errorf("error creating table: %v", err)
@@ -846,7 +842,7 @@ func deleteBigQueryDataset(projectID, datasetID string) error {
 		return fmt.Errorf("error instantiating bigquery client: %v", err)
 	}
 	dataset := c.Dataset(datasetID)
-	if err = dataset.Delete(ctx); err != nil {
+	if err = dataset.DeleteWithContents(ctx); err != nil {
 		return fmt.Errorf("error deleting dataset: %v", err)
 	}
 	return nil
