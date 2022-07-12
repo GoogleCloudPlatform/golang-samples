@@ -16,6 +16,7 @@ package imagemagick
 
 import (
 	"context"
+	"io/ioutil"
 	"os"
 	"testing"
 
@@ -24,30 +25,54 @@ import (
 )
 
 func TestBlurOffensiveImages(t *testing.T) {
-	projectID := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
-	if projectID == "" {
-		t.Skip("GOLANG_SAMPLES_PROJECT_ID not set")
-	}
+	tc := testutil.SystemTest(t)
 
+	inputBucket, err := testutil.CreateTestBucket(
+		context.Background(),
+		t, storageClient, tc.ProjectID, "test-blur-input")
+	if err != nil {
+		t.Errorf("failed to create input bucket: %v", err)
+	}
+	defer testutil.DeleteBucketIfExists(
+		context.Background(),
+		storageClient,
+		inputBucket)
 	outputBucket, err := testutil.CreateTestBucket(
 		context.Background(),
-		t, storageClient, projectID, "test-blur-output")
+		t, storageClient, tc.ProjectID, "test-blur-output")
 	if err != nil {
 		t.Errorf("failed to create output bucket: %v", err)
 	}
+	defer testutil.DeleteBucketIfExists(
+		context.Background(),
+		storageClient,
+		outputBucket)
 	oldEnvValue := os.Getenv("BLURRED_BUCKET_NAME")
 	os.Setenv("BLURRED_BUCKET_NAME", outputBucket)
 	defer os.Setenv("BLURRED_BUCKET_NAME", oldEnvValue)
 
 	e := GCSEvent{
-		Bucket: projectID,
-		Name:   "functions/zombie.jpg",
+		Bucket: inputBucket,
+		Name:   "zombie.jpg",
 	}
 	ctx := context.Background()
 
-	inputBlob := storageClient.Bucket(projectID).Object(e.Name)
+	inputBlob := storageClient.Bucket(inputBucket).Object(e.Name)
 	if _, err := inputBlob.Attrs(ctx); err != nil {
-		t.Skipf("could not get input file: %s: %v", inputBlob.ObjectName(), err)
+		// input blob does not exist, so upload it.
+		bw := inputBlob.NewWriter(context.Background())
+		// TODO(muncus): use os.Readfile when we're on go1.16+
+		// Note: Open() error will also surface on ReadAll(), so we only check once.
+		f, _ := os.Open("zombie.jpg")
+		zbytes, err := ioutil.ReadAll(f)
+		if err != nil {
+			t.Fatalf("could not read input file: %v", err)
+		}
+		// Write is actually performed in Close(), so we check for errors there.
+		bw.Write(zbytes)
+		if err := bw.Close(); err != nil {
+			t.Fatalf("failed to upload file: %v", err)
+		}
 	}
 
 	outputBlob := storageClient.Bucket(outputBucket).Object(e.Name)
