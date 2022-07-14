@@ -610,7 +610,7 @@ func TestUpdateSecretWithAlias(t *testing.T) {
 
 	secret := testSecret(t, tc.ProjectID)
 	defer testCleanupSecret(t, secret.Name)
-	
+
 	testSecretVersion(t, secret.Name, payload)
 
 	var b bytes.Buffer
