@@ -152,33 +152,6 @@ func TestAddSecretVersion(t *testing.T) {
 		t.Errorf("addSecretVersion: expected %q to contain %q", got, want)
 	}
 }
-func TestUpdateSecretWithAlias(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	secret := testSecret(t, tc.ProjectID)
-	defer testCleanupSecret(t, secret.Name)
-
-	var b bytes.Buffer
-	if err := updateSecretWithAlias(&b, secret.Name); err != nil {
-		t.Fatal(err)
-	}
-
-	if got, want := b.String(), "Updated secret"; !strings.Contains(got, want) {
-		t.Errorf("updateSecret: expected %q to contain %q", got, want)
-	}
-
-	client, ctx := testClient(t)
-	s, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
-		Name: secret.Name,
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if got, want := s.Labels, map[string]int64{"test": 1}; !reflect.DeepEqual(got, want) {
-		t.Errorf("updateSecret: expected %q to be %q", got, want)
-	}
-}
 
 func TestConsumeEventNotification(t *testing.T) {
 	v, err := ConsumeEventNotification(context.Background(), PubSubMessage{
@@ -628,6 +601,36 @@ func TestUpdateSecretWithEtag(t *testing.T) {
 	}
 
 	if got, want := s.Labels, map[string]string{"secretmanager": "rocks"}; !reflect.DeepEqual(got, want) {
+		t.Errorf("updateSecret: expected %q to be %q", got, want)
+	}
+}
+
+func TestUpdateSecretWithAlias(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secret := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret.Name)
+	
+	testSecretVersion(t, secret.Name, payload)
+
+	var b bytes.Buffer
+	if err := updateSecretWithAlias(&b, secret.Name); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Updated secret"; !strings.Contains(got, want) {
+		t.Errorf("updateSecret: expected %q to contain %q", got, want)
+	}
+
+	client, ctx := testClient(t)
+	s, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secret.Name,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := s.Labels, map[string]int64{"test": 1}; !reflect.DeepEqual(got, want) {
 		t.Errorf("updateSecret: expected %q to be %q", got, want)
 	}
 }
