@@ -630,7 +630,7 @@ func TestUpdateSecretWithAlias(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if got, want := s.Labels, map[string]int64{"test": 1}; !reflect.DeepEqual(got, want) {
+	if got, want := s.VersionAliases, map[string]int64{"test": 1}; !reflect.DeepEqual(got, want) {
 		t.Errorf("updateSecret: expected %q to be %q", got, want)
 	}
 }
