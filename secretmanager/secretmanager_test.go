@@ -611,7 +611,7 @@ func TestUpdateSecretWithAlias(t *testing.T) {
 	secret := testSecret(t, tc.ProjectID)
 	defer testCleanupSecret(t, secret.Name)
 
-	testSecretVersion(t, secret.Name, payload)
+	testSecretVersion(t, secret.Name, []byte("my-secret"))
 
 	var b bytes.Buffer
 	if err := updateSecretWithAlias(&b, secret.Name); err != nil {
