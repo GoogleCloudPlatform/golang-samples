@@ -25,7 +25,7 @@ import (
 )
 
 // setDiskAutodelete sets the autodelete flag of a disk to given value as true.
-func setDiskAutodelete(
+func setDiskAutoDelete(
 	w io.Writer,
 	projectID, zone, instanceName, diskName string,
 ) error {

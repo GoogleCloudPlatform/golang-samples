@@ -212,7 +212,7 @@ func TestComputeDisksSnippets(t *testing.T) {
 		}
 	})
 
-	t.Run("setDiskAutodelete", func(t *testing.T) {
+	t.Run("setDiskAutoDelete", func(t *testing.T) {
 		buf.Reset()
 		want = "disk autoDelete field updated."
 
@@ -251,11 +251,11 @@ func TestComputeDisksSnippets(t *testing.T) {
 			t.Errorf("unable to wait for the operation: %v", err)
 		}
 
-		if err := setDiskAutodelete(buf, tc.ProjectID, zone, instanceName, diskName); err != nil {
+		if err := setDiskAutoDelete(buf, tc.ProjectID, zone, instanceName, diskName); err != nil {
 			t.Errorf("setDiskAutodelete got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, want) {
-			t.Errorf("setDiskAutodelete got %q, want %q", got, want)
+			t.Errorf("setDiskAutoDelete got %q, want %q", got, want)
 		}
 
 		instance, err := getInstance(ctx, tc.ProjectID, zone, instanceName)
