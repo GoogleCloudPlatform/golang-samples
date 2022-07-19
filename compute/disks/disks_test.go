@@ -164,7 +164,7 @@ func TestComputeDisksSnippets(t *testing.T) {
 
 		err = createDiskSnapshot(ctx, tc.ProjectID, zone, diskName, snapshotName)
 		if err != nil {
-			t.Errorf("createDiskSnapshot got err: %v", err)
+			t.Fatalf("createDiskSnapshot got err: %v", err)
 		}
 
 		if err := createDiskFromSnapshot(buf, tc.ProjectID, zone, diskName2, diskType, diskSnapshotLink); err != nil {
@@ -200,7 +200,7 @@ func TestComputeDisksSnippets(t *testing.T) {
 		want = "Disk created"
 
 		if err := createEmptyDisk(buf, tc.ProjectID, zone, diskName, diskType); err != nil {
-			t.Errorf("createEmptyDisk got err: %v", err)
+			t.Fatalf("createEmptyDisk got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, want) {
 			t.Errorf("createEmptyDisk got %q, want %q", got, want)
@@ -244,23 +244,23 @@ func TestComputeDisksSnippets(t *testing.T) {
 
 		op, err := instancesClient.Insert(ctx, req)
 		if err != nil {
-			t.Errorf("unable to create instance: %v", err)
+			t.Fatalf("unable to create instance: %v", err)
 		}
 
 		if err = op.Wait(ctx); err != nil {
-			t.Errorf("unable to wait for the operation: %v", err)
+			t.Fatalf("unable to wait for the operation: %v", err)
 		}
 
 		if err := setDiskAutoDelete(buf, tc.ProjectID, zone, instanceName, diskName); err != nil {
-			t.Errorf("setDiskAutodelete got err: %v", err)
+			t.Fatalf("setDiskAutodelete got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, want) {
-			t.Errorf("setDiskAutoDelete got %q, want %q", got, want)
+			t.Fatalf("setDiskAutoDelete got %q, want %q", got, want)
 		}
 
 		instance, err := getInstance(ctx, tc.ProjectID, zone, instanceName)
 		if err != nil {
-			t.Errorf("getInstance got err: %v", err)
+			t.Fatalf("getInstance got err: %v", err)
 		}
 
 		if instance.GetDisks()[0].GetAutoDelete() != true {
