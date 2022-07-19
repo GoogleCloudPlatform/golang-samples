@@ -26,12 +26,13 @@ import (
 
 // createBucketDualRegion creates a new dual-region bucket in the project in the
 // provided location and regions.
-func createBucketDualRegion(w io.Writer, projectID, bucketName, location, region1, region2 string) error {
+// See https://cloud.google.com/storage/docs/locations#location-dr for more information.
+func createBucketDualRegion(w io.Writer, projectID, bucketName string) error {
 	// projectID := "my-project-id"
 	// bucketName := "bucket-name"
-	// location := "US"
-	// region1 := "US-EAST1"
-	// region2 := "US-WEST1"
+	location := "US"
+	region1 := "US-EAST1"
+	region2 := "US-WEST1"
 
 	ctx := context.Background()
 
@@ -46,7 +47,7 @@ func createBucketDualRegion(w io.Writer, projectID, bucketName, location, region
 
 	storageDualRegion := &storage.BucketAttrs{
 		Location: location,
-		CustomPlacementConfig: &storage.BucketCustomPlacementConfig{
+		CustomPlacementConfig: &storage.CustomPlacementConfig{
 			DataLocations: []string{region1, region2},
 		},
 	}

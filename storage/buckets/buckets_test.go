@@ -95,9 +95,9 @@ func TestCreateBucketDualRegion(t *testing.T) {
 	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
 
 	location := "US"
-	region1 := "US-WEST1"
-	region2 := "US-CENTRAL1"
-	if err := createBucketDualRegion(buf, tc.ProjectID, bucketName, location, region1, region2); err != nil {
+	region1 := "US-EAST1"
+	region2 := "US-WEST1"
+	if err := createBucketDualRegion(buf, tc.ProjectID, bucketName); err != nil {
 		t.Fatalf("createBucketDualRegion: %v", err)
 	}
 	if got, want := buf.String(), fmt.Sprintf("%s and %s", region1, region2); !strings.Contains(got, want) {
