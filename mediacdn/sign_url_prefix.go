@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,15 +19,16 @@ import (
 	"crypto/ed25519"
 	"encoding/base64"
 	"fmt"
+	"io"
 	"strings"
 	"time"
 )
 
-// signURLPrefix prints the Signed URL string for the specified URL prefix and configuration.
-func signURLPrefix(urlPrefix, keyName string, base64Key []byte, expires time.Time) string {
+// signURLPrefix prints the signed URL string for the specified URL prefix and configuration.
+func signURLPrefix(w io.Writer, urlPrefix, keyName string, privateKey []byte, expires time.Time) error {
 	// urlPrefix := "https://examples.com"
 	// keyName := "your_key_name"
-	// base64Key := "[]byte{34, 31, ...}"
+	// privateKey := "[]byte{34, 31, ...}"
 	// expires := time.Unix(1558131350, 0)
 
 	sep := '?'
@@ -41,15 +42,18 @@ func signURLPrefix(urlPrefix, keyName string, base64Key []byte, expires time.Tim
 		expires.Unix(),
 		keyName,
 	)
-	sig := ed25519.Sign(base64Key, []byte(toSign))
+	sig := ed25519.Sign(privateKey, []byte(toSign))
 
-	return fmt.Sprintf(
+	fmt.Fprintf(
+		w,
 		"%s%c%s&Signature=%s",
 		urlPrefix,
 		sep,
 		toSign,
 		base64.RawURLEncoding.EncodeToString(sig),
 	)
+
+	return nil
 }
 
 // [END mediacdn_sign_url_prefix]

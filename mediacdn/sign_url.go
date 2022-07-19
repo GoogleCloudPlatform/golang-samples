@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,15 +19,16 @@ import (
 	"crypto/ed25519"
 	"encoding/base64"
 	"fmt"
+	"io"
 	"strings"
 	"time"
 )
 
-// signURL returns the signed URL string for the specified URL and configuration.
-func signURL(url, keyName string, base64Key []byte, expires time.Time) string {
+// signURL prints the signed URL string for the specified URL and configuration.
+func signURL(w io.Writer, url, keyName string, privateKey []byte, expires time.Time) error {
 	// url := "http://example.com"
 	// keyName := "your_key_name"
-	// base64Key := "[]byte{34, 31, ...}"
+	// privateKey := "[]byte{34, 31, ...}"
 	// expires := time.Unix(1558131350, 0)
 
 	sep := '?'
@@ -35,9 +36,11 @@ func signURL(url, keyName string, base64Key []byte, expires time.Time) string {
 		sep = '&'
 	}
 	toSign := fmt.Sprintf("%s%cExpires=%d&KeyName=%s", url, sep, expires.Unix(), keyName)
-	sig := ed25519.Sign(base64Key, []byte(toSign))
+	sig := ed25519.Sign(privateKey, []byte(toSign))
 
-	return fmt.Sprintf("%s&Signature=%s", toSign, base64.RawURLEncoding.EncodeToString(sig))
+	fmt.Fprintf(w, "%s&Signature=%s", toSign, base64.RawURLEncoding.EncodeToString(sig))
+
+	return nil
 }
 
 // [END mediacdn_sign_url]

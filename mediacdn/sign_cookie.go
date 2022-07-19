@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,14 +19,15 @@ import (
 	"crypto/ed25519"
 	"encoding/base64"
 	"fmt"
+	"io"
 	"time"
 )
 
-// signCookie prints the Signed cookie value for the specified URL prefix and configuration.
-func signCookie(urlPrefix, keyName string, base64Key []byte, expires time.Time) string {
+// signCookie prints the signed cookie value for the specified URL prefix and configuration.
+func signCookie(w io.Writer, urlPrefix, keyName string, privateKey []byte, expires time.Time) error {
 	// urlPrefix := "http://example.com"
 	// keyName := "your_key_name"
-	// base64Key := "[]byte{34, 31, ...}"
+	// privateKey := "[]byte{34, 31, ...}"
 	// expires := time.Unix(1558131350, 0)
 
 	toSign := fmt.Sprintf(
@@ -35,13 +36,16 @@ func signCookie(urlPrefix, keyName string, base64Key []byte, expires time.Time) 
 		expires.Unix(),
 		keyName,
 	)
-	sig := ed25519.Sign(base64Key, []byte(toSign))
+	sig := ed25519.Sign(privateKey, []byte(toSign))
 
-	return fmt.Sprintf(
+	fmt.Fprintf(
+		w,
 		"Edge-Cache-Cookie=%s:Signature=%s",
 		toSign,
 		base64.RawURLEncoding.EncodeToString(sig),
 	)
+
+	return nil
 }
 
 // [END mediacdn_sign_cookie]

@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,16 +14,20 @@
 package snippets
 
 import (
+	"bytes"
+	"strings"
 	"testing"
 	"time"
 )
 
-var testKey = []byte{34, 31, 185, 24, 168, 225, 242, 115, 112, 155, 38,
+var privateTestKey = []byte{34, 31, 185, 24, 168, 225, 242, 115, 112, 155, 38,
 	157, 183, 65, 104, 243, 85, 182, 188, 26, 176, 101, 247, 177,
 	243, 93, 114, 156, 94, 191, 219, 75, 183, 211, 110, 78, 223,
 	133, 62, 172, 159, 217, 158, 126, 34, 6, 254, 108, 57, 194,
 	141, 93, 219, 91, 8, 162, 88, 62, 52, 75, 42, 103, 202, 238,
 }
+
+var buf = &bytes.Buffer{}
 
 func TestSignURL(t *testing.T) {
 	cases := []struct {
@@ -58,11 +62,11 @@ func TestSignURL(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.testName, func(t *testing.T) {
-			signedValue := signURL(
-				c.url, c.keyName, testKey, c.expiration,
-			)
-			if signedValue != c.out {
-				t.Errorf("signed value incorrectly matched: got %s, want %s", signedValue, c.out)
+			if err := signURL(buf, c.url, c.keyName, privateTestKey, c.expiration); err != nil {
+				t.Errorf("signURL got err: %v", err)
+			}
+			if got := buf.String(); !strings.Contains(got, c.out) {
+				t.Errorf("signed value incorrectly matched: got %q, want %q", got, c.out)
 			}
 		})
 	}
@@ -101,11 +105,11 @@ func TestSignURLPrefix(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.testName, func(t *testing.T) {
-			signedValue := signURLPrefix(
-				c.url, c.keyName, testKey, c.expiration,
-			)
-			if signedValue != c.out {
-				t.Errorf("signed value incorrectly matched: got %s, want %s", signedValue, c.out)
+			if err := signURLPrefix(buf, c.url, c.keyName, privateTestKey, c.expiration); err != nil {
+				t.Errorf("signURLPrefix got err: %v", err)
+			}
+			if got := buf.String(); !strings.Contains(got, c.out) {
+				t.Errorf("signed value incorrectly matched: got %q, want %q", got, c.out)
 			}
 		})
 	}
@@ -137,11 +141,11 @@ func TestSignCookie(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.testName, func(t *testing.T) {
-			signedValue := signCookie(
-				c.url, c.keyName, testKey, c.expiration,
-			)
-			if signedValue != c.out {
-				t.Errorf("signed value incorrectly matched: got %s, want %s", signedValue, c.out)
+			if err := signCookie(buf, c.url, c.keyName, privateTestKey, c.expiration); err != nil {
+				t.Errorf("signCookie got err: %v", err)
+			}
+			if got := buf.String(); !strings.Contains(got, c.out) {
+				t.Errorf("signed value incorrectly matched: got %q, want %q", got, c.out)
 			}
 		})
 	}
