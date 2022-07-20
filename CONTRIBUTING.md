@@ -68,6 +68,13 @@ All code must be formatted with `gofmt` (with the latest Go version) and pass
 
 # Style
 
+The [Google Cloud Samples Style Guide][style-guide] is considered the primary
+guidelines for all Google Cloud samples. This section details some additional,
+Go-specific rules that will be merged into the Samples Style Guide in the near
+future. 
+
+[style-guide]: https://googlecloudplatform.github.io/samples-style-guide/
+
 Please read and follow https://github.com/golang/go/wiki/CodeReviewComments for
 all Go code in this repo.
 
