@@ -139,7 +139,7 @@ func TestComputeSnapshotsSnippets(t *testing.T) {
 	}
 
 	if err := createSnapshot(buf, tc.ProjectID, diskName, snapshotName, zone, "", location, ""); err != nil {
-		t.Errorf("createSnapshot got err: %v", err)
+		t.Fatalf("createSnapshot got err: %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, want) {
 		t.Errorf("createSnapshot got %q, want %q", got, want)
@@ -169,7 +169,7 @@ func TestComputeSnapshotsSnippets(t *testing.T) {
 	}
 
 	if err := createSnapshot(buf, tc.ProjectID, diskName, snapshotName, "", location, location, ""); err != nil {
-		t.Errorf("createSnapshot got err: %v", err)
+		t.Fatalf("createSnapshot got err: %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, want) {
 		t.Errorf("createSnapshot got %q, want %q", got, want)
