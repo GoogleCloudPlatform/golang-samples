@@ -156,7 +156,7 @@ func TestComputeCreateInstanceSnippets(t *testing.T) {
 
 	err = createDisk(ctx, tc.ProjectID, zone, bootDiskName, *newestDebian.SelfLink)
 	if err != nil {
-		t.Errorf("createDisk got err: %v", err)
+		t.Fatalf("createDisk got err: %v", err)
 	}
 
 	diskNames := []string{
@@ -165,7 +165,7 @@ func TestComputeCreateInstanceSnippets(t *testing.T) {
 	}
 
 	if err := createWithExistingDisks(buf, tc.ProjectID, zone, instanceName, diskNames); err != nil {
-		t.Errorf("createInstanceWithSubnet got err: %v", err)
+		t.Fatalf("createInstanceWithSubnet got err: %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, expectedResult) {
 		t.Errorf("createInstanceWithSubnet got %q, want %q", got, expectedResult)
