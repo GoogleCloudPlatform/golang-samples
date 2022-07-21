@@ -41,14 +41,19 @@ func TestPubSubSinkService(t *testing.T) {
 	}
 
 	client := http.Client{Timeout: 10 * time.Second}
-	resp, err := client.Do(req)
-	if err != nil {
-		t.Fatalf("client.Do: %v", err)
-	}
-	defer resp.Body.Close()
-	fmt.Printf("client.Do: %s %s\n", req.Method, req.URL)
 
-	if got := resp.StatusCode; got != http.StatusBadRequest {
-		t.Errorf("response status: got %d, want %d", got, http.StatusBadRequest)
-	}
+	testutil.Retry(t, 3, 5, func(r *testutil.R) {
+		fmt.Printf("Attempt #%d: client.Do: %s %s\n", r.Attempt, req.Method, req.URL)
+		resp, err := client.Do(req)
+		if err != nil {
+			t.Fatalf("client.Do: %v", err)
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode == http.StatusInternalServerError {
+			r.Errorf("Cloud Run service not ready")
+		} else if got := resp.StatusCode; got != http.StatusBadRequest {
+			t.Errorf("response status: got %d, want %d", got, http.StatusBadRequest)
+		}
+	})
 }

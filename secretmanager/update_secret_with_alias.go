@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,28 +14,20 @@
 
 package secretmanager
 
-// [START secretmanager_add_secret_version]
+// [START secretmanager_update_secret_with_alias]
 import (
 	"context"
 	"fmt"
-	"hash/crc32"
 	"io"
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
 	secretmanagerpb "google.golang.org/genproto/googleapis/cloud/secretmanager/v1"
+	"google.golang.org/genproto/protobuf/field_mask"
 )
 
-// addSecretVersion adds a new secret version to the given secret with the
-// provided payload.
-func addSecretVersion(w io.Writer, parent string) error {
-	// parent := "projects/my-project/secrets/my-secret"
-
-	// Declare the payload to store.
-	payload := []byte("my super secret data")
-	// Compute checksum, use Castagnoli polynomial. Providing a checksum
-	// is optional.
-	crc32c := crc32.MakeTable(crc32.Castagnoli)
-	checksum := int64(crc32.Checksum(payload, crc32c))
+// updateSecret updates the alias map on an existing secret.
+func updateSecretWithAlias(w io.Writer, name string) error {
+	// name := "projects/my-project/secrets/my-secret"
 
 	// Create the client.
 	ctx := context.Background()
@@ -46,21 +38,25 @@ func addSecretVersion(w io.Writer, parent string) error {
 	defer client.Close()
 
 	// Build the request.
-	req := &secretmanagerpb.AddSecretVersionRequest{
-		Parent: parent,
-		Payload: &secretmanagerpb.SecretPayload{
-			Data:       payload,
-			DataCrc32C: &checksum,
+	req := &secretmanagerpb.UpdateSecretRequest{
+		Secret: &secretmanagerpb.Secret{
+			Name: name,
+			VersionAliases: map[string]int64{
+				"test": 1,
+			},
+		},
+		UpdateMask: &field_mask.FieldMask{
+			Paths: []string{"version_aliases"},
 		},
 	}
 
 	// Call the API.
-	result, err := client.AddSecretVersion(ctx, req)
+	result, err := client.UpdateSecret(ctx, req)
 	if err != nil {
-		return fmt.Errorf("failed to add secret version: %v", err)
+		return fmt.Errorf("failed to update secret: %v", err)
 	}
-	fmt.Fprintf(w, "Added secret version: %s\n", result.Name)
+	fmt.Fprintf(w, "Updated secret: %s\n", result.Name)
 	return nil
 }
 
-// [END secretmanager_add_secret_version]
+// [END secretmanager_update_secret_with_alias]

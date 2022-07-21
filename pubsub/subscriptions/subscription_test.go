@@ -26,6 +26,7 @@ import (
 	"testing"
 	"time"
 
+	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
 	"google.golang.org/api/iterator"
@@ -725,6 +726,39 @@ func TestCreateWithFilter(t *testing.T) {
 	}
 }
 
+func TestCreateBigQuerySubscription(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	client := setup(t)
+	defer client.Close()
+	bqSubID := subID + "-bigquery"
+
+	topic, err := getOrCreateTopic(ctx, client, topicID)
+	if err != nil {
+		t.Fatalf("CreateTopic: %v", err)
+	}
+	buf := new(bytes.Buffer)
+
+	datasetID := fmt.Sprintf("go_samples_dataset_%d", time.Now().UnixNano())
+	tableID := fmt.Sprintf("go_samples_table_%d", time.Now().UnixNano())
+	if err := createBigQueryTable(tc.ProjectID, datasetID, tableID); err != nil {
+		t.Fatalf("failed to create bigquery table: %v", err)
+	}
+
+	bqTable := fmt.Sprintf("%s.%s.%s", tc.ProjectID, datasetID, tableID)
+
+	if err := createBigQuerySubscription(buf, tc.ProjectID, bqSubID, topic, bqTable); err != nil {
+		t.Fatalf("failed to create bigquery subscription: %v", err)
+	}
+
+	sub := client.Subscription(bqSubID)
+	sub.Delete(ctx)
+	if err := deleteBigQueryDataset(tc.ProjectID, datasetID); err != nil {
+		t.Logf("failed to delete bigquery dataset: %v", err)
+	}
+}
+
 func publishMsgs(ctx context.Context, t *pubsub.Topic, numMsgs int) error {
 	var results []*pubsub.PublishResult
 	for i := 0; i < numMsgs; i++ {
@@ -772,4 +806,44 @@ func getOrCreateSub(ctx context.Context, client *pubsub.Client, subID string, cf
 		}
 	}
 	return sub, nil
+}
+
+func createBigQueryTable(projectID, datasetID, tableID string) error {
+	ctx := context.Background()
+
+	c, err := bigquery.NewClient(ctx, projectID)
+	if err != nil {
+		return fmt.Errorf("error instantiating bigquery client: %v", err)
+	}
+	dataset := c.Dataset(datasetID)
+	if err = dataset.Create(ctx, &bigquery.DatasetMetadata{Location: "US"}); err != nil {
+		return fmt.Errorf("error creating dataset: %v", err)
+	}
+
+	table := dataset.Table(tableID)
+	schema := []*bigquery.FieldSchema{
+		{Name: "data", Type: bigquery.BytesFieldType, Required: true},
+		{Name: "message_id", Type: bigquery.StringFieldType, Required: true},
+		{Name: "attributes", Type: bigquery.StringFieldType, Required: true},
+		{Name: "subscription_name", Type: bigquery.StringFieldType, Required: true},
+		{Name: "publish_time", Type: bigquery.TimestampFieldType, Required: true},
+	}
+	if err := table.Create(ctx, &bigquery.TableMetadata{Schema: schema}); err != nil {
+		return fmt.Errorf("error creating table: %v", err)
+	}
+	return nil
+}
+
+func deleteBigQueryDataset(projectID, datasetID string) error {
+	ctx := context.Background()
+
+	c, err := bigquery.NewClient(ctx, projectID)
+	if err != nil {
+		return fmt.Errorf("error instantiating bigquery client: %v", err)
+	}
+	dataset := c.Dataset(datasetID)
+	if err = dataset.DeleteWithContents(ctx); err != nil {
+		return fmt.Errorf("error deleting dataset: %v", err)
+	}
+	return nil
 }

@@ -40,7 +40,7 @@ func createBucketTurboReplication(w io.Writer, projectID, bucketName, location s
 	}
 	defer client.Close()
 
-	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	ctx, cancel := context.WithTimeout(ctx, time.Second*30)
 	defer cancel()
 
 	storageLocationAndRPO := &storage.BucketAttrs{

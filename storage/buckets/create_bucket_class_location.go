@@ -36,7 +36,7 @@ func createBucketClassLocation(w io.Writer, projectID, bucketName string) error 
 	}
 	defer client.Close()
 
-	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	ctx, cancel := context.WithTimeout(ctx, time.Second*30)
 	defer cancel()
 
 	storageClassAndLocation := &storage.BucketAttrs{
