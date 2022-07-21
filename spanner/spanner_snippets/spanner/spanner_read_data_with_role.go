@@ -25,7 +25,7 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-func readWithDatabaseRole(w io.Writer, db string, databaseRole string) error {
+func readDataWithDatabaseRole(w io.Writer, db string, databaseRole string) error {
 	// databaseRole = "parent"
 	ctx := context.Background()
 	cfg := spanner.ClientConfig{

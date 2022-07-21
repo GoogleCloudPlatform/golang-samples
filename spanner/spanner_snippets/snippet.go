@@ -41,22 +41,22 @@ type adminCommand func(ctx context.Context, w io.Writer, adminClient *database.D
 
 var (
 	commands = map[string]command{
-		"write":               write,
-		"read":                read,
-		"readwithrole":        read,
-		"query":               query,
-		"update":              update,
-		"querynewcolumn":      queryNewColumn,
-		"pgquerynewcolumn":    pgQueryNewColumn,
-		"querywithparameter":  queryWithParameter,
-		"pgqueryparameter":    pgQueryParameter,
-		"dmlwrite":            writeUsingDML,
-		"pgdmlwrite":          pgWriteUsingDML,
-		"dmlwritetxn":         writeWithTransactionUsingDML,
-		"pgdmlwritetxn":       pgWriteWithTransactionUsingDML,
-		"readindex":           readUsingIndex,
-		"readstoringindex":    readStoringIndex,
-		"readonlytransaction": readOnlyTransaction,
+		"write":                    write,
+		"read":                     read,
+		"readdatawithdatabaserole": read,
+		"query":                    query,
+		"update":                   update,
+		"querynewcolumn":           queryNewColumn,
+		"pgquerynewcolumn":         pgQueryNewColumn,
+		"querywithparameter":       queryWithParameter,
+		"pgqueryparameter":         pgQueryParameter,
+		"dmlwrite":                 writeUsingDML,
+		"pgdmlwrite":               pgWriteUsingDML,
+		"dmlwritetxn":              writeWithTransactionUsingDML,
+		"pgdmlwritetxn":            pgWriteWithTransactionUsingDML,
+		"readindex":                readUsingIndex,
+		"readstoringindex":         readStoringIndex,
+		"readonlytransaction":      readOnlyTransaction,
 	}
 
 	adminCommands = map[string]adminCommand{
@@ -66,7 +66,7 @@ var (
 		"addstoringindex":         addStoringIndex,
 		"pgaddstoringindex":       pgAddStoringIndex,
 		"pgcreatedatabase":        pgCreateDatabase,
-		"addnewdatabaserole":      addNewDatabaseRole,
+		"addanddropdatabaseroles": addAndDropDatabaseRoles,
 		"enablefinegrainedaccess": enableFineGrainedAccess,
 		"listdatabaseroles":       listDatabaseRoles,
 	}
@@ -713,7 +713,7 @@ func pgAddStoringIndex(ctx context.Context, w io.Writer, adminClient *database.D
 	return nil
 }
 
-func addNewDatabaseRole(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, db string) error {
+func addAndDropDatabaseRoles(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, db string) error {
 	op, err := adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
 		Database: db,
 		Statements: []string{
@@ -815,7 +815,7 @@ func listDatabaseRoles(ctx context.Context, w io.Writer, adminClient *database.D
 
 func run(ctx context.Context, w io.Writer, cmd string, db string) error {
 	var databaseRole string
-	if cmd == "readwithrole" {
+	if cmd == "readdatawithdatabaserole" {
 		databaseRole = "parent"
 	}
 
@@ -860,10 +860,10 @@ func main() {
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, `Usage: spanner_snippets <command> <database_name>
 
-	Command can be one of: write, read, readwithrole, query, update,
+	Command can be one of: write, read, readdatawithdatabaserole, query, update,
 		querynewcolumn, querywithparameter, dmlwrite, dmlwritetxn, readindex,
 		readstoringindex, readonlytransaction, createdatabase, addnewcolumn,
-		addstoringindex, addnewdatabaserole, enablefinegrainedaccess,
+		addstoringindex, addanddropdatabaseroles, enablefinegrainedaccess,
 		listdatabaseroles, pgcreatedatabase, pgqueryparameter, pgdmlwrite,
 		pgaddnewcolumn, pgquerynewcolumn, pgdmlwritetxn, pgaddstoringindex
 

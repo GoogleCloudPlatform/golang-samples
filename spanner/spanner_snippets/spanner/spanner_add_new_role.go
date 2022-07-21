@@ -14,7 +14,7 @@
 
 package spanner
 
-// [START spanner_add_new_database_role]
+// [START spanner_add_and_drop_database_roles]
 
 import (
 	"context"
@@ -24,7 +24,7 @@ import (
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
-func addNewDatabaseRole(w io.Writer, db string) error {
+func addAndDropDatabaseRoles(w io.Writer, db string) error {
 	ctx := context.Background()
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
@@ -67,4 +67,4 @@ func addNewDatabaseRole(w io.Writer, db string) error {
 	return nil
 }
 
-// [END spanner_add_new_database_role]
+// [END spanner_add_and_drop_database_roles]
