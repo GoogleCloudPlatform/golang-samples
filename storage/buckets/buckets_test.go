@@ -87,7 +87,6 @@ func TestCreateBucketClassLocation(t *testing.T) {
 }
 
 func TestCreateBucketDualRegion(t *testing.T) {
-	t.Skip("Fails due to backend change, skip until #2620 is merged.")
 	tc := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
 	bucketName := testutil.UniqueBucketName(testPrefix)
