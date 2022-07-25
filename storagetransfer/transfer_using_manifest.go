@@ -14,7 +14,7 @@
 
 package storagetransfer
 
-// [START storagetransfer_transfer_using_manifest]
+// [START storagetransfer_manifest_request]
 
 import (
 	"context"
@@ -83,4 +83,4 @@ func transferUsingManifest(w io.Writer, projectID string, sourceAgentPoolName st
 	return resp, nil
 }
 
-// [END storagetransfer_transfer_using_manifest]
+// [END storagetransfer_manifest_request]
