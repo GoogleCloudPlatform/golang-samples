@@ -118,7 +118,7 @@ func TestQuickstart(t *testing.T) {
 
 	buf := new(bytes.Buffer)
 	resp, err := quickstart(buf, tc.ProjectID, gcsSourceBucket, gcsSinkBucket)
-	defer cleanupSTSJob(resp.Name, tc.ProjectID)
+	defer cleanupSTSJob(resp, tc.ProjectID)
 
 	if err != nil {
 		t.Errorf("quickstart: %#v", err)
@@ -136,7 +136,7 @@ func TestTransferFromAws(t *testing.T) {
 	buf := new(bytes.Buffer)
 
 	resp, err := transferFromAws(buf, tc.ProjectID, s3Bucket, gcsSinkBucket)
-	defer cleanupSTSJob(resp.Name, tc.ProjectID)
+	defer cleanupSTSJob(resp, tc.ProjectID)
 
 	if err != nil {
 		t.Errorf("transfer_from_aws: %#v", err)
@@ -154,7 +154,7 @@ func TestTransferToNearline(t *testing.T) {
 	buf := new(bytes.Buffer)
 
 	resp, err := transferToNearline(buf, tc.ProjectID, gcsSourceBucket, gcsSinkBucket)
-	defer cleanupSTSJob(resp.Name, tc.ProjectID)
+	defer cleanupSTSJob(resp, tc.ProjectID)
 
 	if err != nil {
 		t.Errorf("transfer_from_aws: %#v", err)
@@ -172,7 +172,7 @@ func TestGetLatestTransferOperation(t *testing.T) {
 	buf := new(bytes.Buffer)
 
 	job, err := transferToNearline(buf, tc.ProjectID, gcsSourceBucket, gcsSinkBucket)
-	defer cleanupSTSJob(job.Name, tc.ProjectID)
+	defer cleanupSTSJob(job, tc.ProjectID)
 
 	op, err := checkLatestTransferOperation(buf, tc.ProjectID, job.Name)
 
@@ -204,7 +204,7 @@ func TestDownloadToPosix(t *testing.T) {
 	gcsSourcePath := rootDirectory + "/"
 
 	resp, err := downloadToPosix(buf, tc.ProjectID, sinkAgentPoolName, gcsSinkBucket, gcsSourcePath, rootDirectory)
-	defer cleanupSTSJob(resp.Name, tc.ProjectID)
+	defer cleanupSTSJob(resp, tc.ProjectID)
 
 	if err != nil {
 		t.Errorf("download_to_posix: %#v", err)
@@ -230,7 +230,7 @@ func TestTransferFromPosix(t *testing.T) {
 	sourceAgentPoolName := "" //use default agent pool
 
 	resp, err := transferFromPosix(buf, tc.ProjectID, sourceAgentPoolName, rootDirectory, gcsSinkBucket)
-	defer cleanupSTSJob(resp.Name, tc.ProjectID)
+	defer cleanupSTSJob(resp, tc.ProjectID)
 
 	if err != nil {
 		t.Errorf("transfer_from_posix: %#v", err)
@@ -266,7 +266,7 @@ func TestTransferBetweenPosix(t *testing.T) {
 	if err != nil {
 		t.Errorf("transfer_between_posix: %#v", err)
 	}
-	defer cleanupSTSJob(resp.Name, tc.ProjectID)
+	defer cleanupSTSJob(resp, tc.ProjectID)
 
 	got := buf.String()
 	if want := "transferJobs/"; !strings.Contains(got, want) {
@@ -290,7 +290,7 @@ func TestTransferUsingManifest(t *testing.T) {
 	defer object.Delete(context.Background())
 
 	resp, err := transferUsingManifest(buf, tc.ProjectID, sourceAgentPoolName, rootDirectory, gcsSinkBucket, gcsSourceBucket, "manifest.csv")
-	defer cleanupSTSJob(resp.Name, tc.ProjectID)
+	defer cleanupSTSJob(resp, tc.ProjectID)
 
 	if err != nil {
 		t.Errorf("transfer_using_manifest: %#v", err)
@@ -336,15 +336,19 @@ func grantSTSPermissions(bucketName string, projectID string, sts *storagetransf
 	}
 }
 
-func cleanupSTSJob(jobName string, projectID string) {
+func cleanupSTSJob(job *storagetransferpb.TransferJob, projectID string) {
+	if job == nil {
+		return
+	}
+
 	ctx := context.Background()
 
 	tj := &storagetransferpb.TransferJob{
-		Name:   jobName,
+		Name:   job.Name,
 		Status: storagetransferpb.TransferJob_DELETED,
 	}
 	sts.UpdateTransferJob(ctx, &storagetransferpb.UpdateTransferJobRequest{
-		JobName:     jobName,
+		JobName:     job.Name,
 		ProjectId:   projectID,
 		TransferJob: tj,
 	})
