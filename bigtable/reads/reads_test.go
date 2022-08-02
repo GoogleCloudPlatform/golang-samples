@@ -37,8 +37,14 @@ func TestReads(t *testing.T) {
 		t.Skip("Skipping bigtable integration test. Set GOLANG_SAMPLES_BIGTABLE_PROJECT and GOLANG_SAMPLES_BIGTABLE_INSTANCE.")
 	}
 	adminClient, err := bigtable.NewAdminClient(ctx, project, instance)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	uuid, err := uuid.NewRandom()
+	if err != nil {
+		t.Fatal(err)
+	}
 	tableName := fmt.Sprintf("mobile-time-series-%s", uuid.String()[:8])
 	adminClient.DeleteTable(ctx, tableName)
 
@@ -52,7 +58,7 @@ func TestReads(t *testing.T) {
 	}
 
 	timestamp := bigtable.Now().TruncateToMilliseconds()
-	writeTestData(err, ctx, project, instance, tableName, timestamp, t)
+	writeTestData(ctx, project, instance, tableName, timestamp, t)
 
 	tests := []struct {
 		name   string
@@ -213,9 +219,11 @@ Column Family stats_summary
 	adminClient.DeleteTable(ctx, tableName)
 }
 
-func writeTestData(err error, ctx context.Context, project string, instance string, tableName string, timestamp bigtable.Timestamp, t *testing.T) {
-
+func writeTestData(ctx context.Context, project string, instance string, tableName string, timestamp bigtable.Timestamp, t *testing.T) {
 	client, err := bigtable.NewClient(ctx, project, instance)
+	if err != nil {
+		t.Fatal(err)
+	}
 	tbl := client.Open(tableName)
 
 	var muts []*bigtable.Mutation
