@@ -26,7 +26,7 @@ import (
 
 // createCdnKey creates a CDN key. A CDN key is used to retrieve protected media.
 // If akamaiTokenKey != "", then this is an Akamai CDN key, or else this is a
-// Google CDN key.
+// Cloud CDN key.
 func createCdnKey(w io.Writer, projectID, cdnKeyID, hostname, gcdnKeyname, gcdnPrivateKey, akamaiTokenKey string) error {
 	// projectID := "my-project-id"
 	// cdnKeyID := "my-cdn-key"
