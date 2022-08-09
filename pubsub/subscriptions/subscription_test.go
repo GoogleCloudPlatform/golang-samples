@@ -140,8 +140,10 @@ func TestCreate(t *testing.T) {
 		if err := create(buf, tc.ProjectID, subID, topic); err != nil {
 			t.Fatalf("failed to create a subscription: %v", err)
 		}
-		if got := buf.String(); !strings.Contains(got, "Created subscription") {
-			t.Fatalf("failed to create a subscription")
+		got := buf.String()
+		want := "Created subscription"
+		if !strings.Contains(got, want) {
+			t.Fatalf("got: %s, want: %v", got, want)
 		}
 		ok, err := client.Subscription(subID).Exists(context.Background())
 		if err != nil {
