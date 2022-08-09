@@ -41,6 +41,7 @@ func addUsers(projectID, subID string) error {
 	}
 	// Other valid prefixes are "serviceAccount:", "user:"
 	// See the documentation for more values.
+	policy.Add(iam.AllUsers, iam.Viewer)
 	policy.Add("group:cloud-logs@google.com", iam.Editor)
 	if err := sub.IAM().SetPolicy(ctx, policy); err != nil {
 		return fmt.Errorf("SetPolicy: %v", err)
