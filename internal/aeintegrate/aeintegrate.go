@@ -24,23 +24,23 @@
 //
 // Sample usage with `go test`:
 //
-// 	package myapp
+//	package myapp
 //
-// 	import (
-// 		"testing"
-// 		"google.golang.org/appengine/aeintegrate"
-// 	)
+//	import (
+//		"testing"
+//		"google.golang.org/appengine/aeintegrate"
+//	)
 //
-// 	func TestApp(t *testing.T) {
-// 		t.Parallel()
-// 		app := aeintegrate.App{Name: "A", Dir: "app"},
-// 		if err := app.Deploy(); err != nil {
-// 			t.Fatalf("could not deploy app: %v", err)
-// 		}
-// 		defer app.Cleanup()
-// 		resp, err := app.Get("/")
-// 		...
-// 	}
+//	func TestApp(t *testing.T) {
+//		t.Parallel()
+//		app := aeintegrate.App{Name: "A", Dir: "app"},
+//		if err := app.Deploy(); err != nil {
+//			t.Fatalf("could not deploy app: %v", err)
+//		}
+//		defer app.Cleanup()
+//		resp, err := app.Get("/")
+//		...
+//	}
 package aeintegrate
 
 import (
