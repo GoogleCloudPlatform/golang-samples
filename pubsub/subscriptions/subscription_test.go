@@ -123,6 +123,7 @@ func setup(t *testing.T) *pubsub.Client {
 
 func TestCreate(t *testing.T) {
 	ctx := context.Background()
+	tc := testutil.SystemTest(t)
 	client := setup(t)
 
 	var topic *pubsub.Topic
@@ -135,11 +136,12 @@ func TestCreate(t *testing.T) {
 	})
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-		_, err := client.CreateSubscription(ctx, subID, pubsub.SubscriptionConfig{
-			Topic: topic,
-		})
-		if err != nil {
+		buf := new(bytes.Buffer)
+		if err := create(buf, tc.ProjectID, subID, topic); err != nil {
 			t.Fatalf("failed to create a subscription: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, "Created subscription") {
+			t.Fatalf("failed to create a subscription")
 		}
 		ok, err := client.Subscription(subID).Exists(context.Background())
 		if err != nil {
