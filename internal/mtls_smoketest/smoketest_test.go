@@ -21,13 +21,10 @@ import (
 	"time"
 
 	bqstorage "cloud.google.com/go/bigquery/storage/apiv1"
-	gaming "cloud.google.com/go/gaming/apiv1beta"
 	vision "cloud.google.com/go/vision/apiv1"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 	bqstoragepb "google.golang.org/genproto/googleapis/cloud/bigquery/storage/v1"
-	gamingpb "google.golang.org/genproto/googleapis/cloud/gaming/v1beta"
 )
 
 var shouldFail = os.Getenv("GOOGLE_API_USE_MTLS") == "always"
@@ -105,34 +102,5 @@ func TestBigquerystorage(t *testing.T) {
 	}
 
 	_, err = client.CreateReadSession(ctx, createReadSessionRequest)
-	checkErr(err, t)
-}
-
-// When this test starts failing, delete it and the corresponding lines in mtls_smoketest.bash
-//
-// gaming/servers
-func TestGameservices(t *testing.T) {
-	tc := testutil.EndToEndTest(t)
-
-	ctx := context.Background()
-	// NOTE(cbro): Observed successful and unsuccessful calls take under 1s.
-	ctx, cancel := context.WithTimeout(ctx, time.Minute)
-	defer cancel()
-
-	client, err := gaming.NewRealmsClient(ctx)
-	if err != nil {
-		t.Fatalf("NewRealmsClient: %v", err)
-	}
-	defer client.Close()
-
-	req := &gamingpb.ListRealmsRequest{
-		Parent: "projects/" + tc.ProjectID + "/locations/global",
-	}
-
-	it := client.ListRealms(ctx, req)
-	_, err = it.Next()
-	if err == iterator.Done {
-		err = nil
-	}
 	checkErr(err, t)
 }

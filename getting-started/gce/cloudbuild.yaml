@@ -32,7 +32,7 @@ steps:
   # Copy the systemd service file into the deploy directory.
   - name: 'debian'
     args: ['cp', 'my-app.service', 'deploy/etc/systemd/system/']
-  # Compress the depoy directory.
+  # Compress the deploy directory.
   - name: 'debian'
     args: ['tar', '-czf', '${_DEPLOY_FILENAME}', '-C', './deploy', '.']
 # Upload the tarball to Cloud Storage.

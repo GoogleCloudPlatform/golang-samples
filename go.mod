@@ -6,7 +6,6 @@ require (
 	cloud.google.com/go/bigquery v1.26.0
 	cloud.google.com/go/datastore v1.2.0
 	cloud.google.com/go/errorreporting v0.1.0
-	cloud.google.com/go/gaming v1.0.0
 	cloud.google.com/go/logging v1.0.0
 	cloud.google.com/go/storage v1.24.0
 	cloud.google.com/go/vision v1.0.0

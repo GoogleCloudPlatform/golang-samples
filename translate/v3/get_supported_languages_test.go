@@ -23,6 +23,7 @@ import (
 )
 
 func TestGetSupportedLanguages(t *testing.T) {
+	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2652")
 	tc := testutil.SystemTest(t)
 
 	// Get supported languages.

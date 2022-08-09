@@ -41,9 +41,9 @@ func TestMain(t *testing.T) {
 	m := testutil.BuildMain(t)
 
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
-		out, _, err := m.Run(env, 240*time.Second)
+		out, serr, err := m.Run(env, 240*time.Second)
 		if err != nil {
-			r.Errorf("error running main: %v:\n%v", err, out)
+			r.Errorf("error running main: %v:\n%s\n%s", err, out, serr)
 			return
 		}
 		if got, want := string(out), "output_config:"; !strings.Contains(got, want) {
