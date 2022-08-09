@@ -188,6 +188,25 @@ func TestCreateSecret(t *testing.T) {
 	}
 }
 
+func TestCreateUserManagedReplicationSecret(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secretID := "createUmmrSecret"
+	locations := []string{"us-east1", "us-east4", "us-west1"}
+
+	parent := fmt.Sprintf("projects/%s", tc.ProjectID)
+	defer testCleanupSecret(t, fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID))
+
+	var b bytes.Buffer
+	if err := createUserManagedReplicationSecret(&b, parent, secretID, locations); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Created secret with user managed replication:"; !strings.Contains(got, want) {
+		t.Errorf("createUserManagedReplicationSecret: expected %q to contain %q", got, want)
+	}
+}
+
 func TestDeleteSecret(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
