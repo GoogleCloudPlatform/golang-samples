@@ -23,10 +23,10 @@ import (
 	secretmanagerpb "google.golang.org/genproto/googleapis/cloud/secretmanager/v1"
 )
 
-// createUmmrSecret creates a new secret with the given name with user managed replication.
+// createUserManagedReplicationSecret creates a new secret with the given name with user managed replication.
 // A secret is a logical wrapper around a collection of secret versions. Secret
 // versions hold the actual secret material.
-func createUmmrSecret(w io.Writer, parent, id string, locations []string) error {
+func createUserManagedReplicationSecret(w io.Writer, parent, id string, locations []string) error {
 	// parent := "projects/my-project"
 	// id := "my-secret"
 	// locations := []string{"us-east1", "us-east4", "us-west1"}
@@ -39,7 +39,7 @@ func createUmmrSecret(w io.Writer, parent, id string, locations []string) error 
 	}
 	defer client.Close()
 
-	replicaLocations := []*secretmanagerpb.Replication_UserManaged_Replica{}
+	var replicaLocations []*secretmanagerpb.Replication_UserManaged_Replica
 	for _, location := range locations {
 		replicaLocations = append(replicaLocations, &secretmanagerpb.Replication_UserManaged_Replica{Location: location})
 	}
