@@ -83,5 +83,5 @@ func connectTCPSocket() (*sql.DB, error) {
 }
 
 // [END cloud_sql_postgres_databasesql_sslcerts]
-// [START cloud_sql_postgres_databasesql_connect_tcp_sslcerts]
+// [END cloud_sql_postgres_databasesql_connect_tcp_sslcerts]
 // [END cloud_sql_postgres_databasesql_connect_tcp]
