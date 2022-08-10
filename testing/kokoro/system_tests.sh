@@ -98,10 +98,6 @@ export GOLANG_SAMPLES_FIRESTORE_PROJECT=golang-samples-fire-0
 
 set -x
 
-pushd testing/sampletests
-go install .
-popd
-
 source ${KOKORO_GFILE_DIR}/secret_manager/go-aws-secrets
 
 # Set application credentials before using gimmeproj so it has access.
@@ -188,12 +184,8 @@ runTests() {
   set +x
   echo "Running 'go test' in '$(pwd)'..."
   set -x
-  2>&1 go test -timeout $TIMEOUT -v "${1:-./...}" | tee sponge_log.log
-  /go/bin/go-junit-report -set-exit-code < sponge_log.log > raw_log.xml
-  exit_code=$((exit_code + $?))
-  # Add region tags tested to test case properties.
-  sampletests < raw_log.xml > sponge_log.xml
-  rm raw_log.xml # No need to keep this around.
+  2>&1 go test -timeout $TIMEOUT -v "${1:-./...}" | tee sponge_log.xml
+  cat sponge_log.log | /go/bin/go-junit-report -set-exit-code > sponge_log.xml
   set +x
 }
 
