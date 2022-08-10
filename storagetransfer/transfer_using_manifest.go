@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"time"
 
 	storagetransfer "cloud.google.com/go/storagetransfer/apiv1"
 	storagetransferpb "google.golang.org/genproto/googleapis/storagetransfer/v1"
