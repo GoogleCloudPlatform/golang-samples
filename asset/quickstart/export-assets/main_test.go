@@ -38,9 +38,9 @@ func TestMain(t *testing.T) {
 	defer m.Cleanup()
 
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
-		out, _, err := m.Run(env, 60*time.Second)
+		out, stderr, err := m.Run(env, 60*time.Second)
 		if err != nil {
-			r.Errorf("failed to run: %v", err)
+			r.Errorf("failed to run: %v\n%s\n%s\n", err, out, stderr)
 			return
 		}
 

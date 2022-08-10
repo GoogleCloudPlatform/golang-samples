@@ -26,15 +26,61 @@ import (
 	compute "cloud.google.com/go/compute/apiv1"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
+	"google.golang.org/protobuf/proto"
 )
+
+func createDisk(ctx context.Context, projectId, zone, diskName, sourceImage string) error {
+	disksClient, err := compute.NewDisksRESTClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer disksClient.Close()
+	req := &computepb.InsertDiskRequest{
+		Project: projectId,
+		Zone:    zone,
+		DiskResource: &computepb.Disk{
+			Name:        proto.String(diskName),
+			SourceImage: proto.String(sourceImage),
+		},
+	}
+
+	op, err := disksClient.Insert(ctx, req)
+	if err != nil {
+		return err
+	}
+
+	return op.Wait(ctx)
+}
+
+func deleteDisk(ctx context.Context, projectId, zone, diskName string) error {
+	disksClient, err := compute.NewDisksRESTClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer disksClient.Close()
+	req := &computepb.DeleteDiskRequest{
+		Project: projectId,
+		Zone:    zone,
+		Disk:    diskName,
+	}
+
+	op, err := disksClient.Delete(ctx, req)
+	if err != nil {
+		return err
+	}
+
+	return op.Wait(ctx)
+}
 
 func TestComputeCreateInstanceSnippets(t *testing.T) {
 	ctx := context.Background()
-	var seededRand *rand.Rand = rand.New(
+	var r *rand.Rand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))
 	tc := testutil.SystemTest(t)
 	zone := "europe-central2-b"
-	instanceName := "test-" + fmt.Sprint(seededRand.Int())
+	instanceName := fmt.Sprintf("test-instance-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+	bootDiskName := fmt.Sprintf("test-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+	diskName2 := fmt.Sprintf("test-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	networkName := "global/networks/default"
 	subnetworkName := "regions/europe-central2/subnetworks/default"
 	expectedResult := "Instance created"
@@ -99,5 +145,44 @@ func TestComputeCreateInstanceSnippets(t *testing.T) {
 	err = deleteInstance(ctx, tc.ProjectID, zone, instanceName)
 	if err != nil {
 		t.Errorf("deleteInstance got err: %v", err)
+	}
+
+	buf.Reset()
+
+	err = createDisk(ctx, tc.ProjectID, zone, diskName2, *newestDebian.SelfLink)
+	if err != nil {
+		t.Fatalf("createDisk got err: %v", err)
+	}
+
+	err = createDisk(ctx, tc.ProjectID, zone, bootDiskName, *newestDebian.SelfLink)
+	if err != nil {
+		t.Fatalf("createDisk got err: %v", err)
+	}
+
+	diskNames := []string{
+		bootDiskName,
+		diskName2,
+	}
+
+	if err := createWithExistingDisks(buf, tc.ProjectID, zone, instanceName, diskNames); err != nil {
+		t.Fatalf("createInstanceWithSubnet got err: %v", err)
+	}
+	if got := buf.String(); !strings.Contains(got, expectedResult) {
+		t.Errorf("createInstanceWithSubnet got %q, want %q", got, expectedResult)
+	}
+
+	err = deleteInstance(ctx, tc.ProjectID, zone, instanceName)
+	if err != nil {
+		t.Errorf("deleteInstance got err: %v", err)
+	}
+
+	err = deleteDisk(ctx, tc.ProjectID, zone, bootDiskName)
+	if err != nil {
+		t.Errorf("deleteDisk got err: %v", err)
+	}
+
+	err = deleteDisk(ctx, tc.ProjectID, zone, diskName2)
+	if err != nil {
+		t.Errorf("deleteDisk got err: %v", err)
 	}
 }

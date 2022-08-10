@@ -1,0 +1,17 @@
+allowedCopyrightHolders:
+  - 'Google LLC'
+allowedLicenses:
+  - 'Apache-2.0'
+sourceFileExtensions:
+  - 'go'
+  - 'proto'
+ignoreFiles:
+  # These files are based off the gRPC samples, and are under a BSD license.
+  - "endpoints/getting-started-grpc/client/main.go"
+  - "endpoints/getting-started-grpc/server/main.go"
+  - "endpoints/getting-started-grpc/helloworld/helloworld.pb.go"
+  # Generated .pg.go files.
+  - "bigquery/snippets/managedwriter/exampleproto/sample_data.pb.go"
+  - "profiler/shakesapp/shakesapp/shakesapp.pb.go"
+  - "run/grpc-ping/pkg/api/v1/message.pb.go"
+  - "run/grpc-server-streaming/pkg/api/v1/timeservice.pb.go"

@@ -41,8 +41,8 @@ func TestCreateInstanceTemplatesSnippets(t *testing.T) {
 	templateName3 := "test-template-" + fmt.Sprint(seededRand.Int())
 	machineType := "n1-standard-1"
 	sourceImage := "projects/debian-cloud/global/images/family/debian-10"
-	networkName := "global/networks/default"
-	subnetworkName := "regions/asia-east1/subnetworks/default"
+	networkName := "global/networks/default-compute"
+	subnetworkName := "regions/asia-east1/subnetworks/default-compute"
 
 	ctx := context.Background()
 

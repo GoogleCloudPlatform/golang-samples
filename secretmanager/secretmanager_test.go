@@ -188,6 +188,25 @@ func TestCreateSecret(t *testing.T) {
 	}
 }
 
+func TestCreateUserManagedReplicationSecret(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secretID := "createUmmrSecret"
+	locations := []string{"us-east1", "us-east4", "us-west1"}
+
+	parent := fmt.Sprintf("projects/%s", tc.ProjectID)
+	defer testCleanupSecret(t, fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID))
+
+	var b bytes.Buffer
+	if err := createUserManagedReplicationSecret(&b, parent, secretID, locations); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Created secret with user managed replication:"; !strings.Contains(got, want) {
+		t.Errorf("createUserManagedReplicationSecret: expected %q to contain %q", got, want)
+	}
+}
+
 func TestDeleteSecret(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -601,6 +620,36 @@ func TestUpdateSecretWithEtag(t *testing.T) {
 	}
 
 	if got, want := s.Labels, map[string]string{"secretmanager": "rocks"}; !reflect.DeepEqual(got, want) {
+		t.Errorf("updateSecret: expected %q to be %q", got, want)
+	}
+}
+
+func TestUpdateSecretWithAlias(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secret := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret.Name)
+
+	testSecretVersion(t, secret.Name, []byte("my-secret"))
+
+	var b bytes.Buffer
+	if err := updateSecretWithAlias(&b, secret.Name); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Updated secret"; !strings.Contains(got, want) {
+		t.Errorf("updateSecret: expected %q to contain %q", got, want)
+	}
+
+	client, ctx := testClient(t)
+	s, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secret.Name,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := s.VersionAliases, map[string]int64{"test": 1}; !reflect.DeepEqual(got, want) {
 		t.Errorf("updateSecret: expected %q to be %q", got, want)
 	}
 }
