@@ -15,14 +15,14 @@
 // Search is a sample web server that uses Cloud Bigtable as the storage layer
 // for a simple document-storage and full-text-search service.
 // It has four functions:
-// - Initialize and clear the table.
-// - Add a document.  This adds the content of a user-supplied document to the
-//   Bigtable, and adds references to the document to an index in the Bigtable.
-//   The document is indexed under each unique word in the document.
-// - Search the index.  This returns documents containing each word in a user
-//   query, with snippets and links to view the whole document.
-// - Copy table.  This copies the documents and index from another table and
-//   adds them to the current one.
+//   - Initialize and clear the table.
+//   - Add a document.  This adds the content of a user-supplied document to the
+//     Bigtable, and adds references to the document to an index in the Bigtable.
+//     The document is indexed under each unique word in the document.
+//   - Search the index.  This returns documents containing each word in a user
+//     query, with snippets and links to view the whole document.
+//   - Copy table.  This copies the documents and index from another table and
+//     adds them to the current one.
 package main
 
 import (

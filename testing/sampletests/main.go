@@ -12,13 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*The sampletests command adds the region tags tested by each test to the XML
+/*
+The sampletests command adds the region tags tested by each test to the XML
 properties of that test case. It reads JUnit XML from stdin and writes JUnit
 XML to stdout.
 
 For example, if TestFoo tests the regions foo_hello_world and
 foo_hello_gopher, the TestFoo element will have the following property:
-    <property name="region_tags" value="foo_hello_world,foo_hello_gopher"></property>
+
+	<property name="region_tags" value="foo_hello_world,foo_hello_gopher"></property>
 
 sampletests only looks at direct function calls or references by tests. So, if
 you have a map from string -> function reference in the global scope and test
@@ -42,6 +44,7 @@ The -enable_xml flag can be used to disable XML processing and only print
 warnings and coverage.
 
 To get the number of unique region tags in the repo manually, run:
+
 	grep -ERho '\[START .+' | sort -u | wc -l
 */
 package main

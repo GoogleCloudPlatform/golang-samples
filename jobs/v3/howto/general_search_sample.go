@@ -190,7 +190,7 @@ func employmentTypesSearch(w io.Writer, projectID, companyName string, employmen
 
 // [START date_range_filter]
 
-///dateRangeSearch searches for jobs on date range.
+// /dateRangeSearch searches for jobs on date range.
 // In JSON format, the Timestamp type is encoded as a string in the
 // [RFC 3339](https://www.ietf.org/rfc/rfc3339.txt) format. That is, the
 // format is "{year}-{month}-{day}T{hour}:{min}:{sec}[.{frac_sec}]Z"
