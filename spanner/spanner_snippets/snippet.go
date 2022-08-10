@@ -17,6 +17,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -67,7 +68,6 @@ var (
 		"pgaddstoringindex":       pgAddStoringIndex,
 		"pgcreatedatabase":        pgCreateDatabase,
 		"addanddropdatabaseroles": addAndDropDatabaseRoles,
-		"enablefinegrainedaccess": enableFineGrainedAccess,
 		"listdatabaseroles":       listDatabaseRoles,
 	}
 )
@@ -747,8 +747,10 @@ func addAndDropDatabaseRoles(ctx context.Context, w io.Writer, adminClient *data
 	return nil
 }
 
-func enableFineGrainedAccess(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, db string) error {
-	iamMember := "user:alice@example.com"
+func enableFineGrainedAccess(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, db string, iamMember string) error {
+	if iamMember == "" {
+		return errors.New("IAM member must be specified")
+	}
 	databaseRole := "parent"
 	title := "condition title"
 	policy, err := adminClient.GetIamPolicy(ctx, &iampb.GetIamPolicyRequest{
@@ -813,7 +815,7 @@ func listDatabaseRoles(ctx context.Context, w io.Writer, adminClient *database.D
 	return nil
 }
 
-func run(ctx context.Context, w io.Writer, cmd string, db string) error {
+func run(ctx context.Context, w io.Writer, cmd string, db string, arg string) error {
 	var databaseRole string
 	if cmd == "readdatawithdatabaserole" {
 		databaseRole = "parent"
@@ -834,6 +836,14 @@ func run(ctx context.Context, w io.Writer, cmd string, db string) error {
 		log.Fatal(err)
 	}
 	defer dataClient.Close()
+
+	if cmd == "enablefinegrainedaccess" {
+		err := enableFineGrainedAccess(ctx, w, adminClient, db, arg)
+		if err != nil {
+			fmt.Fprintf(w, "%s failed with %v", cmd, err)
+		}
+		return err
+	}
 
 	if adminCmdFn := adminCommands[cmd]; adminCmdFn != nil {
 		err := adminCmdFn(ctx, w, adminClient, db)
@@ -858,7 +868,7 @@ func run(ctx context.Context, w io.Writer, cmd string, db string) error {
 
 func main() {
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, `Usage: spanner_snippets <command> <database_name>
+		fmt.Fprintf(os.Stderr, `Usage: spanner_snippets <command> <database_name> [iam_member]
 
 	Command can be one of: write, read, readdatawithdatabaserole, query, update,
 		querynewcolumn, querywithparameter, dmlwrite, dmlwritetxn, readindex,
@@ -870,19 +880,20 @@ func main() {
 Examples:
 	spanner_snippets createdatabase projects/my-project/instances/my-instance/databases/example-db
 	spanner_snippets write projects/my-project/instances/my-instance/databases/example-db
+	spanner_snippets enablefinegrainedaccess projects/my-project/instances/my-instance/databases/example-db user:alice@example.com
 `)
 	}
 
 	flag.Parse()
-	if len(flag.Args()) < 2 {
+	if len(flag.Args()) < 2 || len(flag.Args()) > 3 {
 		flag.Usage()
 		os.Exit(2)
 	}
 
-	cmd, db := flag.Arg(0), flag.Arg(1)
+	cmd, db, arg := flag.Arg(0), flag.Arg(1), flag.Arg(2)
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
 	defer cancel()
-	if err := run(ctx, os.Stdout, cmd, db); err != nil {
+	if err := run(ctx, os.Stdout, cmd, db, arg); err != nil {
 		os.Exit(1)
 	}
 }
