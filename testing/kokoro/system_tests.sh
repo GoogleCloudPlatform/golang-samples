@@ -184,7 +184,7 @@ runTests() {
   set +x
   echo "Running 'go test' in '$(pwd)'..."
   set -x
-  2>&1 go test -timeout $TIMEOUT -v "${1:-./...}" | tee sponge_log.log
+  2>&1 go test -timeout $TIMEOUT -v "${1:-./...}" | tee sponge_log.xml
   cat sponge_log.log | /go/bin/go-junit-report -set-exit-code > sponge_log.xml
   set +x
 }
