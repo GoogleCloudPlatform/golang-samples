@@ -52,9 +52,6 @@ func transferUsingManifest(w io.Writer, projectID string, sourceAgentPoolName st
 	}
 	defer client.Close()
 
-	ctx, cancel := context.WithTimeout(ctx, time.Second*30)
-	defer cancel()
-
 	manifestLocation := "gs://" + manifestBucket + "/" + manifestObjectName
 	req := &storagetransferpb.CreateTransferJobRequest{
 		TransferJob: &storagetransferpb.TransferJob{
