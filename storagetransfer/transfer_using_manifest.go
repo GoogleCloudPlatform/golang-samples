@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	storagetransfer "cloud.google.com/go/storagetransfer/apiv1"
 	storagetransferpb "google.golang.org/genproto/googleapis/storagetransfer/v1"
@@ -50,6 +51,9 @@ func transferUsingManifest(w io.Writer, projectID string, sourceAgentPoolName st
 		return nil, fmt.Errorf("storagetransfer.NewClient: %v", err)
 	}
 	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*30)
+	defer cancel()
 
 	manifestLocation := "gs://" + manifestBucket + "/" + manifestObjectName
 	req := &storagetransferpb.CreateTransferJobRequest{
