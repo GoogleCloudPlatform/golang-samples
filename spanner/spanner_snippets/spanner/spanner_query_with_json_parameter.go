@@ -26,7 +26,7 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-//queryWithJsonParameter queries data on the JSON type column of the database
+// queryWithJsonParameter queries data on the JSON type column of the database
 func queryWithJsonParameter(w io.Writer, db string) error {
 	// db = `projects/<project>/instances/<instance-id>/database/<database-id>`
 	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(db)
