@@ -125,21 +125,34 @@ func TestCreate(t *testing.T) {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 	client := setup(t)
-	topic, err := client.CreateTopic(ctx, topicID)
-	if err != nil {
-		t.Fatalf("CreateTopic: %v", err)
-	}
-	buf := new(bytes.Buffer)
-	if err := create(buf, tc.ProjectID, subID, topic); err != nil {
-		t.Fatalf("failed to create a subscription: %v", err)
-	}
-	ok, err := client.Subscription(subID).Exists(context.Background())
-	if err != nil {
-		t.Fatalf("failed to check if sub exists: %v", err)
-	}
-	if !ok {
-		t.Fatalf("got none; want sub = %q", subID)
-	}
+
+	var topic *pubsub.Topic
+	var err error
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		topic, err = client.CreateTopic(ctx, topicID)
+		if err != nil {
+			t.Fatalf("CreateTopic: %v", err)
+		}
+	})
+
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+		if err := create(buf, tc.ProjectID, subID, topic); err != nil {
+			t.Fatalf("failed to create a subscription: %v", err)
+		}
+		got := buf.String()
+		want := "Created subscription"
+		if !strings.Contains(got, want) {
+			t.Fatalf("got: %s, want: %v", got, want)
+		}
+		ok, err := client.Subscription(subID).Exists(context.Background())
+		if err != nil {
+			t.Fatalf("failed to check if sub exists: %v", err)
+		}
+		if !ok {
+			t.Fatalf("got none; want sub = %q", subID)
+		}
+	})
 }
 
 func TestList(t *testing.T) {
@@ -198,6 +211,7 @@ func TestIAM(t *testing.T) {
 		if role, member := iam.Viewer, iam.AllUsers; !policy.HasRole(member, role) {
 			r.Errorf("want %q as viewer, policy=%v", member, policy)
 		}
+
 	})
 }
 
@@ -357,7 +371,7 @@ func TestPullMsgsConcurrencyControl(t *testing.T) {
 		publishMsgs(ctx, topic, numMsgs)
 
 		buf := new(bytes.Buffer)
-		if err := pullMsgsConcurrenyControl(buf, tc.ProjectID, subIDConc); err != nil {
+		if err := pullMsgsConcurrencyControl(buf, tc.ProjectID, subIDConc); err != nil {
 			r.Errorf("failed to pull messages: %v", err)
 		}
 		got := buf.String()
@@ -686,7 +700,7 @@ func TestDetachSubscription(t *testing.T) {
 		t.Fatalf("get sub config err: %v", err)
 	}
 	if !cfg.Detached {
-		t.Fatalf("detached subscripion should have detached=true")
+		t.Fatalf("detached subscription should have detached=true")
 	}
 }
 
