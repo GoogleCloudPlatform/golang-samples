@@ -295,7 +295,7 @@ func TestTransferUsingManifest(t *testing.T) {
 		defer cleanupSTSJob(resp, tc.ProjectID)
 
 		if err != nil {
-			t.Errorf("transfer_using_manifest: %#v", err)
+			r.Errorf("transfer_using_manifest: %#v", err)
 		}
 	})
 
