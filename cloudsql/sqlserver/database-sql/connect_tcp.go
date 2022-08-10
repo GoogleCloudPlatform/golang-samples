@@ -13,6 +13,7 @@
 // limitations under the License.
 
 // [START cloud_sql_sqlserver_databasesql_connect_tcp]
+// [START cloud_sql_sqlserver_databasesql_connect_tcp_sslcerts]
 // [START cloud_sql_sqlserver_databasesql_sslcerts]
 package cloudsql
 
@@ -84,4 +85,5 @@ func connectTCPSocket() (*sql.DB, error) {
 }
 
 // [END cloud_sql_sqlserver_databasesql_sslcerts]
+// [END cloud_sql_sqlserver_databasesql_connect_tcp_sslcerts]
 // [END cloud_sql_sqlserver_databasesql_connect_tcp]

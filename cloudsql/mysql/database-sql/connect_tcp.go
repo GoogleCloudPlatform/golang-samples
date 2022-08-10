@@ -13,6 +13,7 @@
 // limitations under the License.
 
 // [START cloud_sql_mysql_databasesql_connect_tcp]
+// [START cloud_sql_mysql_databasesql_connect_tcp_sslcerts]
 // [START cloud_sql_mysql_databasesql_sslcerts]
 package cloudsql
 
@@ -123,3 +124,4 @@ func verifyPeerCertFunc(pool *x509.CertPool) func([][]byte, [][]*x509.Certificat
 }
 
 // [END cloud_sql_mysql_databasesql_sslcerts]
+// [END cloud_sql_mysql_databasesql_connect_tcp_sslcerts]

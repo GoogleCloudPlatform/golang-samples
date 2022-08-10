@@ -126,7 +126,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-//[START write]
+// [START write]
 // createFile creates a file in Google Cloud Storage.
 func (d *demo) createFile(fileName string) {
 	fmt.Fprintf(d.w, "Creating file /%v/%v\n", d.bucketName, fileName)
@@ -155,7 +155,7 @@ func (d *demo) createFile(fileName string) {
 
 //[END write]
 
-//[START read]
+// [START read]
 // readFile reads the named file in Google Cloud Storage.
 func (d *demo) readFile(fileName string) {
 	io.WriteString(d.w, "\nAbbreviated file content (first line and last 1K):\n")
@@ -182,7 +182,7 @@ func (d *demo) readFile(fileName string) {
 
 //[END read]
 
-//[START copy]
+// [START copy]
 // copyFile copies a file in Google Cloud Storage.
 func (d *demo) copyFile(fileName string) {
 	copyName := fileName + "-copy"
@@ -239,7 +239,7 @@ func (d *demo) createListFiles() {
 	}
 }
 
-//[START list_bucket]
+// [START list_bucket]
 // listBucket lists the contents of a bucket in Google Cloud Storage.
 func (d *demo) listBucket() {
 	io.WriteString(d.w, "\nListbucket result:\n")
