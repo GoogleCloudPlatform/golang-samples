@@ -25,7 +25,7 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func pullMsgsConcurrenyControl(w io.Writer, projectID, subID string) error {
+func pullMsgsConcurrencyControl(w io.Writer, projectID, subID string) error {
 	// projectID := "my-project-id"
 	// subID := "my-sub"
 	ctx := context.Background()
