@@ -14,16 +14,16 @@
 
 // Command cleaneversions deletes App Engine versions for a given project, service and/or version ID filter.
 //
-//  Usage of cleanaeversions:
-//    -async
-//        Don't wait for successful deletion.
-//    -filter regexp
-//        Filter regexp for version IDs. If empty, attempts to clean all versions.
-//    -n  Dry run.
-//    -project Project ID
-//        Project ID to clean.
-//    -service Service/module ID
-//        Service/module ID to clean. If omitted, cleans all services.
+//	Usage of cleanaeversions:
+//	  -async
+//	      Don't wait for successful deletion.
+//	  -filter regexp
+//	      Filter regexp for version IDs. If empty, attempts to clean all versions.
+//	  -n  Dry run.
+//	  -project Project ID
+//	      Project ID to clean.
+//	  -service Service/module ID
+//	      Service/module ID to clean. If omitted, cleans all services.
 package main
 
 import (

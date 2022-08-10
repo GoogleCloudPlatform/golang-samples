@@ -14,7 +14,7 @@
 
 package storagetransfer
 
-// [START storagetransfer_transfer_between_posix]
+// [START storagetransfer_transfer_posix_to_posix]
 
 import (
 	"context"
@@ -85,4 +85,4 @@ func transferBetweenPosix(w io.Writer, projectID string, sourceAgentPoolName str
 	return resp, nil
 }
 
-// [END storagetransfer_transfer_between_posix]
+// [END storagetransfer_transfer_posix_to_posix]

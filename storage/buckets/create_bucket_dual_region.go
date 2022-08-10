@@ -25,12 +25,14 @@ import (
 )
 
 // createBucketDualRegion creates a new dual-region bucket in the project in the
-// provided locations.
-func createBucketDualRegion(w io.Writer, projectID, bucketName, region1, region2 string) error {
+// provided location and regions.
+// See https://cloud.google.com/storage/docs/locations#location-dr for more information.
+func createBucketDualRegion(w io.Writer, projectID, bucketName string) error {
 	// projectID := "my-project-id"
 	// bucketName := "bucket-name"
-	// region1 := "US-EAST1"
-	// region2 := "US-WEST1"
+	location := "US"
+	region1 := "US-EAST1"
+	region2 := "US-WEST1"
 
 	ctx := context.Background()
 
@@ -43,14 +45,17 @@ func createBucketDualRegion(w io.Writer, projectID, bucketName, region1, region2
 	ctx, cancel := context.WithTimeout(ctx, time.Second*30)
 	defer cancel()
 
-	storageLocation := &storage.BucketAttrs{
-		Location: fmt.Sprintf("%s+%s", region1, region2),
+	storageDualRegion := &storage.BucketAttrs{
+		Location: location,
+		CustomPlacementConfig: &storage.CustomPlacementConfig{
+			DataLocations: []string{region1, region2},
+		},
 	}
 	bucket := client.Bucket(bucketName)
-	if err := bucket.Create(ctx, projectID, storageLocation); err != nil {
+	if err := bucket.Create(ctx, projectID, storageDualRegion); err != nil {
 		return fmt.Errorf("Bucket(%q).Create: %v", bucketName, err)
 	}
-	fmt.Fprintf(w, "Created bucket %v in %v\n", bucketName, storageLocation.Location)
+	fmt.Fprintf(w, "Created bucket %v in %v and %v\n", bucketName, region1, region2)
 	return nil
 }
 

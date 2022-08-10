@@ -52,6 +52,17 @@ func TestComputeSnippets(t *testing.T) {
 
 	buf.Reset()
 
+	if err := getInstance(buf, tc.ProjectID, zone, instanceName); err != nil {
+		t.Errorf("getInstance got err: %v", err)
+	}
+
+	expectedResult = fmt.Sprintf("Instance: %s", instanceName)
+	if got := buf.String(); !strings.Contains(got, expectedResult) {
+		t.Errorf("getInstance got %q, want %q", got, expectedResult)
+	}
+
+	buf.Reset()
+
 	if err := listInstances(buf, tc.ProjectID, zone); err != nil {
 		t.Errorf("listInstances got err: %v", err)
 	}
