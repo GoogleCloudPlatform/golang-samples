@@ -22,6 +22,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/storage"
@@ -289,12 +290,14 @@ func TestTransferUsingManifest(t *testing.T) {
 	object := sc.Bucket(gcsSourceBucket).Object("manifest.csv")
 	defer object.Delete(context.Background())
 
-	resp, err := transferUsingManifest(buf, tc.ProjectID, sourceAgentPoolName, rootDirectory, gcsSinkBucket, gcsSourceBucket, "manifest.csv")
-	defer cleanupSTSJob(resp, tc.ProjectID)
+	testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+		resp, err := transferUsingManifest(buf, tc.ProjectID, sourceAgentPoolName, rootDirectory, gcsSinkBucket, gcsSourceBucket, "manifest.csv")
+		defer cleanupSTSJob(resp, tc.ProjectID)
 
-	if err != nil {
-		t.Errorf("transfer_using_manifest: %#v", err)
-	}
+		if err != nil {
+			r.Errorf("transfer_using_manifest: %#v", err)
+		}
+	})
 
 	got := buf.String()
 	if want := "transferJobs/"; !strings.Contains(got, want) {
