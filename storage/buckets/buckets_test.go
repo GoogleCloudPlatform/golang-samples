@@ -549,9 +549,11 @@ func TestLifecycleManagement(t *testing.T) {
 		t.Fatalf("Unexpected lifecycle rule: got: %v, want: %v", r, want)
 	}
 
-	if err := disableBucketLifecycleManagement(ioutil.Discard, bucketName); err != nil {
-		t.Fatalf("disableBucketLifecycleManagement: %v", err)
-	}
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
+		if err := disableBucketLifecycleManagement(ioutil.Discard, bucketName); err != nil {
+			r.Errorf("disableBucketLifecycleManagement: %v", err)
+		}
+	})
 
 	attrs, err = client.Bucket(bucketName).Attrs(ctx)
 	if err != nil {
