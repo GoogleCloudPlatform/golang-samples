@@ -12,6 +12,5 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/linkedin/goavro/v2 v2.10.0
 	google.golang.org/api v0.91.0
-	google.golang.org/genproto v0.0.0-20220808131553-a91ffa7f803e // indirect
 	google.golang.org/protobuf v1.28.0
 )
