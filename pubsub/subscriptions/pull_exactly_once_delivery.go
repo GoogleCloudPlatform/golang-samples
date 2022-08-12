@@ -25,9 +25,10 @@ import (
 )
 
 // receiveMessagesWithExactlyOnceDeliveryEnabled instantiates a subscriber client.
-// This differs from regular subscribing since you must call msg.AckWithResult() or msg.NackWithResult()
-// instead of the regular Ack/Nack methods. When exactly once delivery is enabled on the subscription,
-// the message is guaranteed to not be delivered again if the ack result succeeds.
+// This differs from regular subscribing since you must call msg.AckWithResult()
+// or msg.NackWithResult() instead of the regular Ack/Nack methods.
+// When exactly once delivery is enabled on the subscription, the message is
+// guaranteed to not be delivered again if the ack result succeeds.
 func receiveMessagesWithExactlyOnceDeliveryEnabled(w io.Writer, projectID, subID string) error {
 	// projectID := "my-project-id"
 	// subID := "my-sub"
@@ -39,6 +40,10 @@ func receiveMessagesWithExactlyOnceDeliveryEnabled(w io.Writer, projectID, subID
 	defer client.Close()
 
 	sub := client.Subscription(subID)
+	// Set MinExtensionPeriod high to avoid any unintentional
+	// acknowledgment expirations (e.g. due to network events).
+	// This can lead to high tail latency in case of client crashes.
+	sub.ReceiveSettings.MinExtensionPeriod = 600 * time.Second
 
 	// Receive messages for 10 seconds, which simplifies testing.
 	// Comment this out in production, since `Receive` should
