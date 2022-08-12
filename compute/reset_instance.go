@@ -24,7 +24,7 @@ import (
 	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
 )
 
-// resetInstance resets a stopped Google Compute Engine instance (with unencrypted disks).
+// resetInstance resets a running Google Compute Engine instance (with unencrypted disks).
 func resetInstance(w io.Writer, projectID, zone, instanceName string) error {
 	// projectID := "your_project_id"
 	// zone := "europe-central2-b"
