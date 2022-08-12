@@ -48,6 +48,8 @@ func receiveMessagesWithExactlyOnceDeliveryEnabled(w io.Writer, projectID, subID
 	err = sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
 		fmt.Fprintf(w, "Got message: %q\n", string(msg.Data))
 		r := msg.AckWithResult()
+		// Block until the result is returned and a pubsub.AcknowledgeStatus
+		// is returned for the acked message.
 		status, err := r.Get(ctx)
 		if err != nil {
 			fmt.Fprintf(w, "MessageID: %s failed when calling result.Get: %v", msg.ID, err)
