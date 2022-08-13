@@ -68,7 +68,7 @@ func receiveMessagesWithExactlyOnceDeliveryEnabled(w io.Writer, projectID, subID
 		case pubsub.AcknowledgeStatusPermissionDenied:
 			fmt.Fprintf(w, "Message failed to ack with response of Permission Denied. ID: %s", msg.ID)
 		case pubsub.AcknowledgeStatusFailedPrecondition:
-			fmt.Fprintf(w, "Message failed to ack with response of Permission Denied. ID: %s", msg.ID)
+			fmt.Fprintf(w, "Message failed to ack with response of Failed Precondition. ID: %s", msg.ID)
 		case pubsub.AcknowledgeStatusOther:
 			fmt.Fprintf(w, "Message failed to ack with response of Other. ID: %s", msg.ID)
 		default:
