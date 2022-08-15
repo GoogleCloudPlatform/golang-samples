@@ -68,6 +68,12 @@ func main() {
 		if err := deleteSink(client); err != nil {
 			log.Fatalf("Could not delete sink: %v", err)
 		}
+	case "get":
+		sink, err := getSink(client)
+		if err != nil {
+			log.Fatalf("Could not get a sink: %v", err)
+		}
+		log.Printf("Sink: %v\n", sink)
 	default:
 		usage("Unknown command.")
 	}
@@ -125,6 +131,17 @@ func deleteSink(client *logadmin.Client) error {
 	}
 	// [END logging_delete_sink]
 	return nil
+}
+
+func getSink(client *logadmin.Client) (string, error) {
+	// [START logging_get_sink]
+	ctx := context.Background()
+	sink, err := client.Sink(ctx, "severe-errors-to-gcs")
+	if err != nil {
+		return "", err
+	}
+	// [END logging_get_sink]
+	return sink.ID, nil
 }
 
 func usage(msg string) {
