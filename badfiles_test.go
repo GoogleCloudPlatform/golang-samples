@@ -109,9 +109,6 @@ var allowList = []string{
 	// Getting Started on GCE systemd service file.
 	"**/gce/**/*.service",
 
-	// sampletests testdata.
-	"testing/sampletests/testdata/raw_log.xml",
-
 	// cloud-run-button configuration
 	"run/**/app.json",
 
