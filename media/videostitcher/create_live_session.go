@@ -52,7 +52,7 @@ func createLiveSession(w io.Writer, projectID, sourceURI, slateID string) error 
 			SourceUri:      sourceURI,
 			DefaultAdTagId: "default",
 			DefaultSlateId: slateID,
-			AdTagMap: map[string]*stitcherpb.AdTag{"default": &stitcherpb.AdTag{
+			AdTagMap: map[string]*stitcherpb.AdTag{"default": {
 				Uri: adTagURI,
 			}},
 		},
