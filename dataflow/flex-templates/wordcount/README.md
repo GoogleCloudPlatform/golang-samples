@@ -1,4 +1,4 @@
-# Dataflow flex templates - Streaming Beam
+# Dataflow flex templates - Wordcount
 
 [![Open in Cloud Shell](http://gstatic.com/cloudssh/images/open-btn.svg)](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/golang-samples&page=editor&open_in_editor=dataflow/flex-templates/wordcount/README.md)
 
