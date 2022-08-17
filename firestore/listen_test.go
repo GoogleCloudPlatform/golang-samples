@@ -28,7 +28,7 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-var duration time.Duration = 15 * time.Second
+var duration = 20 * time.Second
 
 func setup(ctx context.Context, t *testing.T) (*firestore.Client, string, string) {
 	tc := testutil.SystemTest(t)
