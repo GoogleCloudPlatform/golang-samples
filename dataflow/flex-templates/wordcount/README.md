@@ -37,7 +37,7 @@ Additionally, for this sample you need the following:
     cd golang-samples/dataflow/flex-templates/wordcount
     ```
 
-## Pub/Sub to BigQuery sample
+## Wordcount sample
 
 This sample shows how to deploy an Apache Beam streaming pipeline that reads
 text files from [Google Cloud Storage](https://cloud.google.com/storage), 
