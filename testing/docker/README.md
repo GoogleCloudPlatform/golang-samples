@@ -8,8 +8,11 @@ See [`CONTRIBUTING.md`](/CONTRIBUTING.md),
 [`system_tests.sh`](/testing/kokoro/system_tests.sh), and the `.cfg` files in
 [`/testing/kokoro`](/testing/kokoro).
 
-When new minor versions are released, we should build and push new versions of
+When new Go versions are released, we should build and push new versions of
 these containers.
+
+Edit `testing/docker/cloudbuild.yaml` to use the new version, then locally in the
+`testing/docker` directory, run:
 
 ```
 gcloud builds submit \
