@@ -17,7 +17,7 @@
 //
 // As an example, gst-launch can be used to capture the mic input:
 //
-//    $ gst-launch-1.0 -v pulsesrc ! audioconvert ! audioresample ! audio/x-raw,channels=1,rate=16000 ! filesink location=/dev/stdout | livecaption
+//	$ gst-launch-1.0 -v pulsesrc ! audioconvert ! audioresample ! audio/x-raw,channels=1,rate=16000 ! filesink location=/dev/stdout | livecaption
 package main
 
 // [START speech_transcribe_streaming_mic]

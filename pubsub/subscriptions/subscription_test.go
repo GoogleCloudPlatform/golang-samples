@@ -125,21 +125,34 @@ func TestCreate(t *testing.T) {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 	client := setup(t)
-	topic, err := client.CreateTopic(ctx, topicID)
-	if err != nil {
-		t.Fatalf("CreateTopic: %v", err)
-	}
-	buf := new(bytes.Buffer)
-	if err := create(buf, tc.ProjectID, subID, topic); err != nil {
-		t.Fatalf("failed to create a subscription: %v", err)
-	}
-	ok, err := client.Subscription(subID).Exists(context.Background())
-	if err != nil {
-		t.Fatalf("failed to check if sub exists: %v", err)
-	}
-	if !ok {
-		t.Fatalf("got none; want sub = %q", subID)
-	}
+
+	var topic *pubsub.Topic
+	var err error
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		topic, err = client.CreateTopic(ctx, topicID)
+		if err != nil {
+			t.Fatalf("CreateTopic: %v", err)
+		}
+	})
+
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+		if err := create(buf, tc.ProjectID, subID, topic); err != nil {
+			t.Fatalf("failed to create a subscription: %v", err)
+		}
+		got := buf.String()
+		want := "Created subscription"
+		if !strings.Contains(got, want) {
+			t.Fatalf("got: %s, want: %v", got, want)
+		}
+		ok, err := client.Subscription(subID).Exists(context.Background())
+		if err != nil {
+			t.Fatalf("failed to check if sub exists: %v", err)
+		}
+		if !ok {
+			t.Fatalf("got none; want sub = %q", subID)
+		}
+	})
 }
 
 func TestList(t *testing.T) {
@@ -198,6 +211,7 @@ func TestIAM(t *testing.T) {
 		if role, member := iam.Viewer, iam.AllUsers; !policy.HasRole(member, role) {
 			r.Errorf("want %q as viewer, policy=%v", member, policy)
 		}
+
 	})
 }
 
@@ -357,7 +371,7 @@ func TestPullMsgsConcurrencyControl(t *testing.T) {
 		publishMsgs(ctx, topic, numMsgs)
 
 		buf := new(bytes.Buffer)
-		if err := pullMsgsConcurrenyControl(buf, tc.ProjectID, subIDConc); err != nil {
+		if err := pullMsgsConcurrencyControl(buf, tc.ProjectID, subIDConc); err != nil {
 			r.Errorf("failed to pull messages: %v", err)
 		}
 		got := buf.String()
@@ -686,7 +700,7 @@ func TestDetachSubscription(t *testing.T) {
 		t.Fatalf("get sub config err: %v", err)
 	}
 	if !cfg.Detached {
-		t.Fatalf("detached subscripion should have detached=true")
+		t.Fatalf("detached subscription should have detached=true")
 	}
 }
 
@@ -756,6 +770,73 @@ func TestCreateBigQuerySubscription(t *testing.T) {
 	sub.Delete(ctx)
 	if err := deleteBigQueryDataset(tc.ProjectID, datasetID); err != nil {
 		t.Logf("failed to delete bigquery dataset: %v", err)
+	}
+}
+
+func TestCreateSubscriptionWithExactlyOnceDelivery(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	client := setup(t)
+	defer client.Close()
+	eodSub := subID + "-create-eod"
+
+	topic, err := getOrCreateTopic(ctx, client, topicID)
+	if err != nil {
+		t.Fatalf("CreateTopic: %v", err)
+	}
+	buf := new(bytes.Buffer)
+
+	if err := createSubscriptionWithExactlyOnceDelivery(buf, tc.ProjectID, eodSub, topic); err != nil {
+		t.Fatalf("failed to create exactly once delivery subscription: %v", err)
+	}
+
+	sub := client.Subscription(eodSub)
+	sub.Delete(ctx)
+}
+
+func TestReceiveMessagesWithExactlyOnceDelivery(t *testing.T) {
+	t.Parallel()
+	client := setup(t)
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	eodTopicID := topicID + "-eod"
+	eodSubID := subID + "-eod"
+
+	topic, err := getOrCreateTopic(ctx, client, eodTopicID)
+	if err != nil {
+		t.Fatalf("getOrCreateTopic: %v", err)
+	}
+	defer topic.Delete(ctx)
+	defer topic.Stop()
+
+	cfg := &pubsub.SubscriptionConfig{
+		Topic:                     topic,
+		EnableExactlyOnceDelivery: true,
+	}
+	sub, err := getOrCreateSub(ctx, client, eodSubID, cfg)
+	if err != nil {
+		t.Fatalf("getOrCreateSub: %v", err)
+	}
+	defer sub.Delete(ctx)
+
+	// Publish 1 message. This avoids race conditions
+	// when calling fmt.Fprintf from multiple receive
+	// callbacks. This is sufficient for testing since
+	// we're not testing client library functionality,
+	// and makes the sample more readable.
+	const numMsgs = 1
+	publishMsgs(ctx, topic, numMsgs)
+
+	buf := new(bytes.Buffer)
+	err = receiveMessagesWithExactlyOnceDeliveryEnabled(buf, tc.ProjectID, eodSubID)
+	if err != nil {
+		t.Fatalf("failed to pull messages: %v", err)
+	}
+	got := buf.String()
+	want := "Message successfully acked"
+	if !strings.Contains(got, want) {
+		t.Fatalf("receiveMessagesWithExactlyOnceDeliveryEnabled got %s\nwant %s", got, want)
 	}
 }
 

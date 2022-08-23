@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,19 +14,19 @@
 
 package subscriptions
 
-// [START pubsub_set_subscription_policy]
+// [START pubsub_create_subscription_with_exactly_once_delivery]
 import (
 	"context"
 	"fmt"
+	"io"
 
-	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
 )
 
-// addUsers adds all IAM users to a subscription.
-func addUsers(projectID, subID string) error {
+func createSubscriptionWithExactlyOnceDelivery(w io.Writer, projectID, subID string, topic *pubsub.Topic) error {
 	// projectID := "my-project-id"
 	// subID := "my-sub"
+	// topic of type https://godoc.org/cloud.google.com/go/pubsub#Topic
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
@@ -34,22 +34,15 @@ func addUsers(projectID, subID string) error {
 	}
 	defer client.Close()
 
-	sub := client.Subscription(subID)
-	policy, err := sub.IAM().Policy(ctx)
+	sub, err := client.CreateSubscription(ctx, subID, pubsub.SubscriptionConfig{
+		Topic:                     topic,
+		EnableExactlyOnceDelivery: true,
+	})
 	if err != nil {
-		return fmt.Errorf("err getting IAM Policy: %v", err)
+		return err
 	}
-	// Other valid prefixes are "serviceAccount:", "user:"
-	// See the documentation for more values.
-	policy.Add(iam.AllUsers, iam.Viewer)
-	policy.Add("group:cloud-logs@google.com", iam.Editor)
-	if err := sub.IAM().SetPolicy(ctx, policy); err != nil {
-		return fmt.Errorf("SetPolicy: %v", err)
-	}
-	// NOTE: It may be necessary to retry this operation if IAM policies are
-	// being modified concurrently. SetPolicy will return an error if the policy
-	// was modified since it was retrieved.
+	fmt.Fprintf(w, "Created a subscription with exactly once delivery enabled: %v\n", sub)
 	return nil
 }
 
-// [END pubsub_set_subscription_policy]
+// [END pubsub_create_subscription_with_exactly_once_delivery]

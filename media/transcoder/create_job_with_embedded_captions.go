@@ -79,7 +79,7 @@ func createJobWithEmbeddedCaptions(w io.Writer, projectID string, location strin
 								},
 							},
 						},
-						&transcoderpb.ElementaryStream{
+						{
 							Key: "audio_stream0",
 							ElementaryStream: &transcoderpb.ElementaryStream_AudioStream{
 								AudioStream: &transcoderpb.AudioStream{
@@ -88,7 +88,7 @@ func createJobWithEmbeddedCaptions(w io.Writer, projectID string, location strin
 								},
 							},
 						},
-						&transcoderpb.ElementaryStream{
+						{
 							Key: "cea-stream0",
 							ElementaryStream: &transcoderpb.ElementaryStream_TextStream{
 								TextStream: &transcoderpb.TextStream{
