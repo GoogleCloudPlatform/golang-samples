@@ -62,6 +62,8 @@ type extractFn struct {
 	SmallWordLength int `json:"smallWordLength"`
 }
 
+// ProcessElement for extractFn processes a line at a time, emitting each word in that line
+// while keeping count of how many words are below the SmallWordLength threshold.
 func (f *extractFn) ProcessElement(ctx context.Context, line string, emit func(string)) {
 	lineLen.Update(ctx, int64(len(line)))
 	if len(strings.TrimSpace(line)) == 0 {
