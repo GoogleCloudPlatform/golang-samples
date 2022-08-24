@@ -42,7 +42,7 @@ func main() {
 
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
-		log.Fatalf("bigquery.NewClient: %v", err)
+		log.Fatalf("bigquery.NewClient: %w", err)
 	}
 	defer client.Close()
 	// [END bigquery_simple_app_client]
@@ -89,7 +89,7 @@ func printResults(w io.Writer, iter *bigquery.RowIterator) error {
 			return nil
 		}
 		if err != nil {
-			return fmt.Errorf("error iterating through results: %v", err)
+			return fmt.Errorf("error iterating through results: %w", err)
 		}
 
 		fmt.Fprintf(w, "url: %s views: %d\n", row.URL, row.ViewCount)
