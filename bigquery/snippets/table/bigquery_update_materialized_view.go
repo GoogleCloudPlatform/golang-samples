@@ -39,7 +39,7 @@ func updateMaterializedView(projectID, datasetID, viewID string) error {
 	viewRef := client.Dataset(datasetID).Table(viewID)
 	meta, err := viewRef.Metadata(ctx)
 	if err != nil {
-		return fmt.Errorf("Metadata(): %w", err)
+		return fmt.Errorf("couldn't retrieve view metadata: %w", err)
 	}
 
 	if meta.MaterializedView == nil {
