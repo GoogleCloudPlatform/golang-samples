@@ -18,38 +18,38 @@
 package main
 
 import (
-        "context"
-        "flag"
-        "fmt"
-        "log"
+	"context"
+	"flag"
+	"fmt"
+	"log"
 
-        asset "cloud.google.com/go/asset/apiv1"
-        assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1"
+	asset "cloud.google.com/go/asset/apiv1"
+	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1"
 )
 
 func main() {
-        scope := flag.String("scope", "", "Scope of the effective IAM policies to get.")
-        fullResourceName := flag.String("fullResourceName", "", "Resource on which the IAM policies are effective.")
-        flag.Parse()
-        ctx := context.Background()
-        client, err := asset.NewClient(ctx)
-        if err != nil {
-                log.Fatalf("asset.NewClient: %v", err)
-        }
-        defer client.Close()
+	scope := flag.String("scope", "", "Scope of the effective IAM policies to get.")
+	fullResourceName := flag.String("fullResourceName", "", "Resource on which the IAM policies are effective.")
+	flag.Parse()
+	ctx := context.Background()
+	client, err := asset.NewClient(ctx)
+	if err != nil {
+		log.Fatalf("asset.NewClient: %v", err)
+	}
+	defer client.Close()
 
 	req := &assetpb.BatchGetEffectiveIamPoliciesRequest{
-                Scope: *scope,
-                Names: []string{*fullResourceName},
-        }
+		Scope: *scope,
+		Names: []string{*fullResourceName},
+	}
 
-        op, err := client.BatchGetEffectiveIamPolicies(ctx, req)
-        if err != nil {
-                log.Fatal(err)
-        }
-        for index, result := range op.PolicyResults {
-                fmt.Println(index, result)
-        }
+	op, err := client.BatchGetEffectiveIamPolicies(ctx, req)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for index, result := range op.PolicyResults {
+		fmt.Println(index, result)
+	}
 }
 
 // [END asset_quickstart_batch_get_effective_iam_policies]

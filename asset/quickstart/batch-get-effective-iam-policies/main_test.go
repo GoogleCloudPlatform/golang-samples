@@ -15,37 +15,37 @@
 package main
 
 import (
-        "fmt"
-        "strings"
-        "testing"
-        "time"
+	"fmt"
+	"strings"
+	"testing"
+	"time"
 
-        "github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestMain(t *testing.T) {
-        tc := testutil.SystemTest(t)
-        env := map[string]string{"GOOGLE_CLOUD_PROJECT": tc.ProjectID}
-        scope := fmt.Sprintf("projects/%s", tc.ProjectID)
+	tc := testutil.SystemTest(t)
+	env := map[string]string{"GOOGLE_CLOUD_PROJECT": tc.ProjectID}
+	scope := fmt.Sprintf("projects/%s", tc.ProjectID)
 	projectResourceName := fmt.Sprintf("//cloudresourcemanager.googleapis.com/projects/%s", tc.ProjectID)
 
-        m := testutil.BuildMain(t)
-        defer m.Cleanup()
+	m := testutil.BuildMain(t)
+	defer m.Cleanup()
 
-        if !m.Built() {
-                t.Errorf("failed to build app")
-        }
+	if !m.Built() {
+		t.Errorf("failed to build app")
+	}
 
-        stdOut, stdErr, err := m.Run(env, 2*time.Minute, fmt.Sprintf("--scope=%s", scope), fmt.Sprintf("--fullResourceName=%s", projectResourceName))
+	stdOut, stdErr, err := m.Run(env, 2*time.Minute, fmt.Sprintf("--scope=%s", scope), fmt.Sprintf("--fullResourceName=%s", projectResourceName))
 
-        if err != nil {
-                t.Errorf("execution failed: %v", err)
-        }
-        if len(stdErr) > 0 {
-                t.Errorf("did not expect stderr output, got %d bytes: %s", len(stdErr), string(stdErr))
-        }
-        got := string(stdOut)
-        if !strings.Contains(got, projectResourceName) {
-                t.Errorf("stdout returned %s, wanted to contain %s", got, projectResourceName)
-        }
+	if err != nil {
+		t.Errorf("execution failed: %v", err)
+	}
+	if len(stdErr) > 0 {
+		t.Errorf("did not expect stderr output, got %d bytes: %s", len(stdErr), string(stdErr))
+	}
+	got := string(stdOut)
+	if !strings.Contains(got, projectResourceName) {
+		t.Errorf("stdout returned %s, wanted to contain %s", got, projectResourceName)
+	}
 }
