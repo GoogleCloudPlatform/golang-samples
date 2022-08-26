@@ -37,7 +37,7 @@ func createTableFromTemplateTable(srcProjectID, srcDatasetID, srcTableID, dstPro
 	// We'll construct the client based on the destination project.
 	client, err := bigquery.NewClient(ctx, dstProjectID)
 	if err != nil {
-		return fmt.Errorf("bigquery.NewClient: %v", err)
+		return fmt.Errorf("bigquery.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -45,7 +45,7 @@ func createTableFromTemplateTable(srcProjectID, srcDatasetID, srcTableID, dstPro
 
 	srcMeta, err := srcTableRef.Metadata(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to get source table metadata: %v", err)
+		return fmt.Errorf("failed to get source table metadata: %w", err)
 	}
 
 	dstTableRef := client.Dataset(dstDatasetID).Table(dstTableID)

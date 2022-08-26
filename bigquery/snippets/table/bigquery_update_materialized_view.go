@@ -31,7 +31,7 @@ func updateMaterializedView(projectID, datasetID, viewID string) error {
 	ctx := context.Background()
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("bigquery.NewClient: %v", err)
+		return fmt.Errorf("bigquery.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -39,7 +39,7 @@ func updateMaterializedView(projectID, datasetID, viewID string) error {
 	viewRef := client.Dataset(datasetID).Table(viewID)
 	meta, err := viewRef.Metadata(ctx)
 	if err != nil {
-		return fmt.Errorf("Metadata(): %v", err)
+		return fmt.Errorf("couldn't retrieve view metadata: %w", err)
 	}
 
 	if meta.MaterializedView == nil {
@@ -58,7 +58,7 @@ func updateMaterializedView(projectID, datasetID, viewID string) error {
 		MaterializedView: newMV,
 	}, meta.ETag)
 	if err != nil {
-		return fmt.Errorf("Update(): %v", err)
+		return fmt.Errorf("Update(): %w", err)
 	}
 	return nil
 }
