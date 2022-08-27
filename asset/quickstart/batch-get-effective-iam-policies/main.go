@@ -28,8 +28,9 @@ import (
 )
 
 func main() {
-	scope := flag.String("scope", "", "Scope of the effective IAM policies to get.")
+	projectId := flag.String("projectId", "", "Project Id to construct the scope under which the effective IAM policies to get.")
 	fullResourceName := flag.String("fullResourceName", "", "Resource on which the IAM policies are effective.")
+
 	flag.Parse()
 	ctx := context.Background()
 	client, err := asset.NewClient(ctx)
@@ -39,7 +40,7 @@ func main() {
 	defer client.Close()
 
 	req := &assetpb.BatchGetEffectiveIamPoliciesRequest{
-		Scope: *scope,
+		Scope: fmt.Sprintf("projects/%s", *projectId),
 		Names: []string{*fullResourceName},
 	}
 

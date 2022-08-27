@@ -26,7 +26,6 @@ import (
 func TestMain(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	env := map[string]string{"GOOGLE_CLOUD_PROJECT": tc.ProjectID}
-	scope := fmt.Sprintf("projects/%s", tc.ProjectID)
 	projectResourceName := fmt.Sprintf("//cloudresourcemanager.googleapis.com/projects/%s", tc.ProjectID)
 
 	m := testutil.BuildMain(t)
@@ -36,7 +35,7 @@ func TestMain(t *testing.T) {
 		t.Errorf("failed to build app")
 	}
 
-	stdOut, stdErr, err := m.Run(env, 2*time.Minute, fmt.Sprintf("--scope=%s", scope), fmt.Sprintf("--fullResourceName=%s", projectResourceName))
+	stdOut, stdErr, err := m.Run(env, 2*time.Minute, fmt.Sprintf("--projectId=%s", tc.ProjectID), fmt.Sprintf("--fullResourceName=%s", projectResourceName))
 
 	if err != nil {
 		t.Errorf("execution failed: %v", err)
