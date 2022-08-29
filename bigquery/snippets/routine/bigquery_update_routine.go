@@ -31,7 +31,7 @@ func updateRoutine(projectID, datasetID, routineID string) error {
 
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("bigquery.NewClient: %v", err)
+		return fmt.Errorf("bigquery.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -40,7 +40,7 @@ func updateRoutine(projectID, datasetID, routineID string) error {
 	// fetch existing metadata
 	meta, err := routineRef.Metadata(ctx)
 	if err != nil {
-		return fmt.Errorf("couldn't retrieve metadata: %v", err)
+		return fmt.Errorf("couldn't retrieve metadata: %w", err)
 	}
 
 	// Due to a limitation in the backend, supply all the properties for update.
@@ -54,7 +54,7 @@ func updateRoutine(projectID, datasetID, routineID string) error {
 	}
 
 	if _, err := routineRef.Update(ctx, update, meta.ETag); err != nil {
-		return fmt.Errorf("update failed: %v", err)
+		return fmt.Errorf("update failed: %w", err)
 	}
 
 	return nil
