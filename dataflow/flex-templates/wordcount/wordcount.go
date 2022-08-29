@@ -31,6 +31,7 @@ import (
 	"github.com/apache/beam/sdks/v2/go/pkg/beam"
 	"github.com/apache/beam/sdks/v2/go/pkg/beam/io/textio"
 	"github.com/apache/beam/sdks/v2/go/pkg/beam/register"
+	"github.com/apache/beam/sdks/v2/go/pkg/beam/testing/passert"
 	"github.com/apache/beam/sdks/v2/go/pkg/beam/transforms/stats"
 	"github.com/apache/beam/sdks/v2/go/pkg/beam/x/beamx"
 )
@@ -52,7 +53,7 @@ func init() {
 var (
 	wordRE          = regexp.MustCompile(`[a-zA-Z]+('[a-z])?`)
 	empty           = beam.NewCounter("extract", "emptyLines")
-	smallWordLength = flag.Int("small_word_length", 9, "length of small words (default: 9)")
+	smallWordLength = flag.Int("small_word_length", 6, "length of small words (default: 9)")
 	smallWords      = beam.NewCounter("extract", "smallWords")
 	lineLen         = beam.NewDistribution("extract", "lineLenDistro")
 )
@@ -79,6 +80,11 @@ func (f *extractFn) ProcessElement(ctx context.Context, line string, emit func(s
 	}
 }
 
+// Format formats a KV of a word and its count as a string.
+func Format(s beam.Scope, counted beam.PCollection) beam.PCollection {
+	return beam.ParDo(s, formatFn, counted)
+}
+
 // formatFn is a DoFn that formats a word and its count as a string.
 func formatFn(w string, c int) string {
 	return fmt.Sprintf("%s: %v", w, c)
@@ -96,6 +102,12 @@ func CountWords(s beam.Scope, lines beam.PCollection) beam.PCollection {
 
 	// Count the number of times each word occurs.
 	return stats.Count(s, col)
+}
+
+// WordCountFromPCol counts the words from a PCollection and validates it.
+func WordCountFromPCol(s beam.Scope, in beam.PCollection, hash string, size int) {
+	out := Format(s, CountWords(s, in))
+	passert.Hash(s, out, "out", hash, size)
 }
 
 func main() {
