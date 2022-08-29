@@ -50,7 +50,6 @@ func main() {
 // PubSubMessage is the payload of a Pub/Sub event.
 // See the documentation for more details:
 // https://cloud.google.com/pubsub/docs/reference/rest/v1/PubsubMessage
-// byte slice unmarshalling handles base64 decoding
 type PubSubMessage struct {
 	Message struct {
 		Data []byte `json:"data,omitempty"`
@@ -68,6 +67,7 @@ func HelloPubSub(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
+	// byte slice unmarshalling handles base64 decoding.
 	if err := json.Unmarshal(body, &m); err != nil {
 		log.Printf("json.Unmarshal: %v", err)
 		http.Error(w, "Bad Request", http.StatusBadRequest)
