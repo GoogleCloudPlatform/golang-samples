@@ -61,12 +61,12 @@ func translateText(w io.Writer, projectID string, sourceLang string, targetLang 
 	}
 	// [END translate_v3_translate_text_2]
 
-	// [START translate_v3_translate_text_2]
+	// [START translate_v3_translate_text_3]
 	// Display the translation for each input text provided
 	for _, translation := range resp.GetTranslations() {
 		fmt.Fprintf(w, "Translated text: %v\n", translation.GetTranslatedText())
 	}
-	// [END translate_v3_translate_text_2]
+	// [END translate_v3_translate_text_3]
 
 	return nil
 }
