@@ -63,7 +63,7 @@ func createBucketDualRegion(w io.Writer, projectID, bucketName string) error {
 	fmt.Fprintf(w, "Created bucket %v", bucketName)
 	fmt.Fprintf(w, " - location: %v", attrs.Location)
 	fmt.Fprintf(w, " - locationType: %v", attrs.LocationType)
-	fmt.Fprintf(w, " - customPlacementConfig: %v", attrs.CustomPlacementConfig.DataLocations)
+	fmt.Fprintf(w, " - customPlacementConfig.dataLocations: %v", attrs.CustomPlacementConfig.DataLocations)
 	return nil
 }
 
