@@ -31,13 +31,13 @@ func createRoutineDDL(projectID, datasetID, routineID string) error {
 
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("bigquery.NewClient: %v", err)
+		return fmt.Errorf("bigquery.NewClient: %w", err)
 	}
 	defer client.Close()
 
 	routineName, err := client.Dataset(datasetID).Routine(routineID).Identifier(bigquery.StandardSQLID)
 	if err != nil {
-		return fmt.Errorf("couldn't generate identifier: %v", err)
+		return fmt.Errorf("couldn't generate identifier: %w", err)
 	}
 
 	sql := fmt.Sprintf(`CREATE FUNCTION %s(

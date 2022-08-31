@@ -81,7 +81,7 @@ func createJobWithStandaloneCaptions(w io.Writer, projectID string, location str
 								},
 							},
 						},
-						&transcoderpb.ElementaryStream{
+						{
 							Key: "audio_stream0",
 							ElementaryStream: &transcoderpb.ElementaryStream_AudioStream{
 								AudioStream: &transcoderpb.AudioStream{
@@ -90,7 +90,7 @@ func createJobWithStandaloneCaptions(w io.Writer, projectID string, location str
 								},
 							},
 						},
-						&transcoderpb.ElementaryStream{
+						{
 							Key: "vtt-stream0",
 							ElementaryStream: &transcoderpb.ElementaryStream_TextStream{
 								TextStream: &transcoderpb.TextStream{
