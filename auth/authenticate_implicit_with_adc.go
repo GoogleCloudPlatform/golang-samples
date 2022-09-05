@@ -24,14 +24,13 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-// authenticateImplicitWithAdc auto-detects credentials
-// and prints storage buckets by authenticating with ADC.
+// authenticateImplicitWithAdc uses Application Default Credentials
+// to automatically find credentials and authenticate.
 func authenticateImplicitWithAdc(w io.Writer, projectId string) error {
 	// projectId := "your_project_id"
 
 	ctx := context.Background()
 
-	// This snippet demonstrates how to list buckets.
 	// NOTE: Replace the client created below with the client required for your application.
 	// Note that the credentials are not specified when constructing the client.
 	// The client library finds your credentials using ADC.

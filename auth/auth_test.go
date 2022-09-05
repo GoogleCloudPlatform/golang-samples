@@ -29,14 +29,14 @@ import (
 func TestAuthSnippets(t *testing.T) {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
-	audience := "iap.googleapis.com"
+	audience := "https://example.com"
 
 	want := "Listed all storage buckets."
 
 	buf := &bytes.Buffer{}
 
 	if err := authenticateExplicitWithAdc(buf); err != nil {
-		t.Errorf("authenticateExplicitWithAdc got err: %v", err)
+		t.Fatalf("authenticateExplicitWithAdc got err: %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, want) {
 		t.Errorf("authenticateExplicitWithAdc got %q, want %q", got, want)
@@ -45,7 +45,7 @@ func TestAuthSnippets(t *testing.T) {
 	buf.Reset()
 
 	if err := authenticateImplicitWithAdc(buf, tc.ProjectID); err != nil {
-		t.Errorf("authenticateImplicitWithAdc got err: %v", err)
+		t.Fatalf("authenticateImplicitWithAdc got err: %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, want) {
 		t.Errorf("authenticateImplicitWithAdc got %q, want %q", got, want)
@@ -55,7 +55,7 @@ func TestAuthSnippets(t *testing.T) {
 	buf.Reset()
 
 	if err := getIdTokenFromMetadataServer(buf, audience); err != nil {
-		t.Errorf("getIdTokenFromMetadataServer got err: %v", err)
+		t.Fatalf("getIdTokenFromMetadataServer got err: %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, want) {
 		t.Errorf("getIdTokenFromMetadataServer got %q, want %q", got, want)
@@ -64,7 +64,7 @@ func TestAuthSnippets(t *testing.T) {
 	buf.Reset()
 
 	if err := getIdTokenFromServiceAccount(buf, os.Getenv("GOOGLE_APPLICATION_CREDENTIALS"), audience); err != nil {
-		t.Errorf("getIdTokenFromServiceAccount got err: %v", err)
+		t.Fatalf("getIdTokenFromServiceAccount got err: %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, want) {
 		t.Errorf("getIdTokenFromServiceAccount got %q, want %q", got, want)
@@ -75,21 +75,21 @@ func TestAuthSnippets(t *testing.T) {
 
 	credentials, err := google.FindDefaultCredentials(ctx)
 	if err != nil {
-		t.Errorf("failed to generate default credentials: %v", err)
+		t.Fatalf("failed to generate default credentials: %v", err)
 	}
 
 	ts, err := idtoken.NewTokenSource(ctx, audience, option.WithCredentials(credentials))
 	if err != nil {
-		t.Errorf("failed to create NewTokenSource: %v", err)
+		t.Fatalf("failed to create NewTokenSource: %v", err)
 	}
 
 	token, err := ts.Token()
 	if err != nil {
-		t.Errorf("failed to get ID token: %v", err)
+		t.Fatalf("failed to get ID token: %v", err)
 	}
 
 	if err := verifyGoogleIdToken(buf, token.AccessToken, audience); err != nil {
-		t.Errorf("verifyGoogleIdToken got err: %v", err)
+		t.Fatalf("verifyGoogleIdToken got err: %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, want) {
 		t.Errorf("verifyGoogleIdToken got %q, want %q", got, want)

@@ -49,7 +49,7 @@ func getIdTokenFromMetadataServer(w io.Writer, url string) error {
 	// to the target audience.
 	_, err = ts.Token()
 	if err != nil {
-		return fmt.Errorf("enable to receive token: %v", err)
+		return fmt.Errorf("failed to receive token: %v", err)
 	}
 	fmt.Fprintf(w, "Generated ID token.\n")
 
