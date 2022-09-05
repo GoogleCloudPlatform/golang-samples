@@ -30,7 +30,7 @@ import (
 // so verifying ID tokens before making Google API calls is usually unnecessary.
 func verifyGoogleIdToken(w io.Writer, token, expectedAudience string) error {
 	// url := "id-token"
-	// targetAudience := "pubsub.googleapis.com"
+	// targetAudience := "https://example.com"
 
 	ctx := context.Background()
 

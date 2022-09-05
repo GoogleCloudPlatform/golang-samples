@@ -42,17 +42,15 @@ func getIdTokenFromImpersonatedCredentials(w io.Writer, scope, targetAudience, i
 		return fmt.Errorf("failed to generate default credentials: %v", err)
 	}
 
-	// delegates: The chained list of delegates required to grant the final accessToken.
-	// For more information, see:
-	// https://cloud.google.com/iam/docs/create-short-lived-credentials-direct#sa-credentials-permissions
-	// Delegate is NOT USED here.
-	var delegates = []string{}
-
 	ts, err := impersonate.IDTokenSource(ctx, impersonate.IDTokenConfig{
 		Audience:        targetAudience,
 		TargetPrincipal: impersonatedServiceAccount,
 		IncludeEmail:    true,
-		Delegates:       delegates,
+		// delegates: The chained list of delegates required to grant the final accessToken.
+		// For more information, see:
+		// https://cloud.google.com/iam/docs/create-short-lived-credentials-direct#sa-credentials-permissions
+		// Delegates is NOT USED here.
+		Delegates:       []string{},
 	}, option.WithCredentials(credentials))
 	if err != nil {
 		return fmt.Errorf("IDTokenSource error: %v", err)
@@ -63,7 +61,7 @@ func getIdTokenFromImpersonatedCredentials(w io.Writer, scope, targetAudience, i
 	// to the target audience.
 	_, err = ts.Token()
 	if err != nil {
-		return fmt.Errorf("enable to receive token: %v", err)
+		return fmt.Errorf("failed to receive token: %v", err)
 	}
 	fmt.Fprintf(w, "Generated ID token.\n")
 

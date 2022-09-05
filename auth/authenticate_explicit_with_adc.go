@@ -26,7 +26,8 @@ import (
 	"google.golang.org/api/option"
 )
 
-// authenticateExplicitWithAdc prints storage buckets by authenticating with ADC.
+// authenticateExplicitWithAdc uses Application Default Credentials
+// to print storage buckets.
 func authenticateExplicitWithAdc(w io.Writer) error {
 	ctx := context.Background()
 
@@ -44,7 +45,7 @@ func authenticateExplicitWithAdc(w io.Writer) error {
 	// For more information on scopes to use,
 	// see: https://developers.google.com/identity/protocols/oauth2/scopes
 
-	// onstruct the Storage client.
+	// Construct the Storage client.
 	client, err := storage.NewClient(ctx, option.WithCredentials(credentials))
 	if err != nil {
 		return fmt.Errorf("NewClient: %v", err)

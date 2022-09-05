@@ -56,7 +56,7 @@ func getIdTokenFromServiceAccount(w io.Writer, jsonCredentialsPath, url string) 
 	// to the target audience.
 	_, err = ts.Token()
 	if err != nil {
-		return fmt.Errorf("enable to receive token: %v", err)
+		return fmt.Errorf("failed to receive token: %v", err)
 	}
 	fmt.Fprintf(w, "Generated ID token. \n")
 
