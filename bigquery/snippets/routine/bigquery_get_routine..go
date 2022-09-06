@@ -32,13 +32,13 @@ func getRoutine(w io.Writer, projectID, datasetID, routineID string) error {
 
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("bigquery.NewClient: %v", err)
+		return fmt.Errorf("bigquery.NewClient: %w", err)
 	}
 	defer client.Close()
 
 	meta, err := client.Dataset(datasetID).Routine(routineID).Metadata(ctx)
 	if err != nil {
-		return fmt.Errorf("couldn't retrieve routine metadata: %v", err)
+		return fmt.Errorf("couldn't retrieve routine metadata: %w", err)
 	}
 	// Print information about the routine.
 	fmt.Fprintf(w, "Routine %s:\n", routineID)

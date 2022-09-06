@@ -31,7 +31,7 @@ func queryWithTimestampParam(w io.Writer, projectID string) error {
 	ctx := context.Background()
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("bigquery.NewClient: %v", err)
+		return fmt.Errorf("bigquery.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -46,7 +46,7 @@ func queryWithTimestampParam(w io.Writer, projectID string) error {
 	// Run the query and process the returned row iterator.
 	it, err := q.Read(ctx)
 	if err != nil {
-		return fmt.Errorf("query.Read(): %v", err)
+		return fmt.Errorf("query.Read(): %w", err)
 	}
 	for {
 		var row []bigquery.Value

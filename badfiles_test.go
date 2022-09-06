@@ -114,6 +114,9 @@ var allowList = []string{
 
 	// pub/sub schemas
 	"pubsub/**/*.avsc",
+
+	// dataflow flex template metadata files
+	"dataflow/flex-templates/**/metadata.json",
 }
 
 // Check whether accidental binary files have been checked in.
