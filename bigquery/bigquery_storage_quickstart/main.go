@@ -228,7 +228,7 @@ func printRecordBatch(record arrow.Record) error {
 		}
 		builder.WriteString("\n")
 	}
-	fmt.Println(builder.String())
+	fmt.Print(builder.String())
 	return nil
 }
 
