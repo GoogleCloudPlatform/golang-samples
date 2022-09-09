@@ -33,7 +33,7 @@ func listRoutines(w io.Writer, projectID, datasetID string) error {
 
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("bigquery.NewClient: %v", err)
+		return fmt.Errorf("bigquery.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -44,7 +44,7 @@ func listRoutines(w io.Writer, projectID, datasetID string) error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("error during iteration: %v", err)
+			return fmt.Errorf("error during iteration: %w", err)
 		}
 		fmt.Fprintf(w, "Routine: %q\n", r.RoutineID)
 	}

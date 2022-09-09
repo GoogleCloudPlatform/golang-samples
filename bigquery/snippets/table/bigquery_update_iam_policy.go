@@ -32,21 +32,21 @@ func updateIAMPolicy(projectID, datasetID, tableID string) error {
 	ctx := context.Background()
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("bigquery.NewClient: %v", err)
+		return fmt.Errorf("bigquery.NewClient: %w", err)
 	}
 	defer client.Close()
 
 	table := client.Dataset(datasetID).Table(tableID)
 	policy, err := table.IAM().Policy(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to get table policy: %v", err)
+		return fmt.Errorf("failed to get table policy: %w", err)
 	}
 	newRole := iam.RoleName("roles/bigquery.dataViewer")
 	newMember := "allAuthenticatedUsers"
 	policy.Add(newMember, newRole)
 
 	if err := table.IAM().SetPolicy(ctx, policy); err != nil {
-		return fmt.Errorf("failed to set new table policy: %v", err)
+		return fmt.Errorf("failed to set new table policy: %w", err)
 	}
 
 	return nil
