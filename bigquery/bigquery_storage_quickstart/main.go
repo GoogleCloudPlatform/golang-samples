@@ -58,13 +58,19 @@ var rpcOpts = gax.WithGRPCOptions(
 	grpc.MaxCallRecvMsgSize(1024 * 1024 * 129),
 )
 
+// Available formats
+const (
+	AVRO_FORMAT  = "avro"
+	ARROW_FORMAT = "arrow"
+)
+
 // Command-line flags.
 var (
 	projectID = flag.String("project_id", "",
 		"Cloud Project ID, used for session creation.")
 	snapshotMillis = flag.Int64("snapshot_millis", 0,
 		"Snapshot time to use for reads, represented in epoch milliseconds format.  Default behavior reads current data.")
-	format = flag.String("format", "avro", "format to read data from storage API. Default is avro.")
+	format = flag.String("format", AVRO_FORMAT, "format to read data from storage API. Default is avro.")
 )
 
 func main() {
@@ -101,7 +107,7 @@ func main() {
 	}
 
 	dataFormat := bqStoragepb.DataFormat_AVRO
-	if *format == "arrow" {
+	if *format == ARROW_FORMAT {
 		dataFormat = bqStoragepb.DataFormat_ARROW
 	}
 	createReadSessionRequest := &bqStoragepb.CreateReadSessionRequest{
@@ -163,13 +169,13 @@ func main() {
 		defer wg.Done()
 		var err error
 		switch *format {
-		case "arrow":
+		case ARROW_FORMAT:
 			err = processArrow(ctx, session.GetArrowSchema().GetSerializedSchema(), ch)
-		case "avro":
+		case AVRO_FORMAT:
 			err = processAvro(ctx, session.GetAvroSchema().GetSchema(), ch)
 		}
 		if err != nil {
-			log.Fatalf("Error processing %s: %v", *format, err)
+			log.Fatalf("error processing %s: %v", *format, err)
 		}
 	}()
 
@@ -336,13 +342,13 @@ func processArrow(ctx context.Context, schema []byte, ch <-chan *bqStoragepb.Rea
 		select {
 		case <-ctx.Done():
 			// Context was cancelled.  Stop.
-			return nil
+			return ctx.Err()
 		case rows, ok := <-ch:
 			if !ok {
 				// Channel closed, no further arrow messages.  Stop.
 				return nil
 			}
-			undecoded := rows.GetArrowRecordBatch().SerializedRecordBatch
+			undecoded := rows.GetArrowRecordBatch().GetSerializedRecordBatch()
 			if len(undecoded) > 0 {
 				buf = bytes.NewBuffer(schema)
 				buf.Write(undecoded)
@@ -379,13 +385,13 @@ func processAvro(ctx context.Context, schema string, ch <-chan *bqStoragepb.Read
 		select {
 		case <-ctx.Done():
 			// Context was cancelled.  Stop.
-			return nil
+			return ctx.Err()
 		case rows, ok := <-ch:
 			if !ok {
 				// Channel closed, no further avro messages.  Stop.
 				return nil
 			}
-			undecoded := rows.GetAvroRows().SerializedBinaryRows
+			undecoded := rows.GetAvroRows().GetSerializedBinaryRows()
 			for len(undecoded) > 0 {
 				datum, remainingBytes, err := codec.NativeFromBinary(undecoded)
 
