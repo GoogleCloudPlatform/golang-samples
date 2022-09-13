@@ -32,13 +32,13 @@ func printModelInfo(w io.Writer, projectID, datasetID, modelID string) error {
 	ctx := context.Background()
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("bigquery.NewClient: %v", err)
+		return fmt.Errorf("bigquery.NewClient: %w", err)
 	}
 	defer client.Close()
 
 	meta, err := client.Dataset(datasetID).Model(modelID).Metadata(ctx)
 	if err != nil {
-		return fmt.Errorf("Metadata: %v", err)
+		return fmt.Errorf("couldn't retrieve metadata: %v", err)
 	}
 	fmt.Fprintf(w, "Got model '%q' with friendly name '%q'\n", modelID, meta.Name)
 	return nil

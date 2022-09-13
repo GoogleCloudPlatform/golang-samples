@@ -33,14 +33,14 @@ func createMaterializedView(projectID, datasetID, baseTableID, viewID string) er
 
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("bigquery.NewClient: %v", err)
+		return fmt.Errorf("bigquery.NewClient: %w", err)
 	}
 	defer client.Close()
 
 	// Get an appropriately escaped table identifier suitable for use in a standard SQL query.
 	tableStr, err := client.Dataset(datasetID).Table(baseTableID).Identifier(bigquery.StandardSQLID)
 	if err != nil {
-		return fmt.Errorf("couldn't construct identifier: %v", err)
+		return fmt.Errorf("couldn't construct identifier: %w", err)
 	}
 
 	metaData := &bigquery.TableMetadata{

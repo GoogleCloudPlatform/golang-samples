@@ -25,7 +25,6 @@ import (
 	"log"
 
 	dataexchange "cloud.google.com/go/bigquery/dataexchange/apiv1beta1"
-	"google.golang.org/genproto/googleapis/cloud/bigquery/dataexchange/common"
 	dataexchangepb "google.golang.org/genproto/googleapis/cloud/bigquery/dataexchange/v1beta1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -142,8 +141,8 @@ func createListing(ctx context.Context, client *dataexchange.AnalyticsHubClient,
 		Listing: &dataexchangepb.Listing{
 			DisplayName: "Example Exchange Listing",
 			Description: "Example listing created as part of an API quickstart",
-			Categories: []common.Category{
-				common.Category_CATEGORY_OTHERS,
+			Categories: []dataexchangepb.Listing_Category{
+				dataexchangepb.Listing_CATEGORY_OTHERS,
 			},
 			Source: &dataexchangepb.Listing_BigqueryDataset{
 				BigqueryDataset: &dataexchangepb.Listing_BigQueryDatasetSource{

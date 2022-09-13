@@ -55,7 +55,15 @@ func createBucketDualRegion(w io.Writer, projectID, bucketName string) error {
 	if err := bucket.Create(ctx, projectID, storageDualRegion); err != nil {
 		return fmt.Errorf("Bucket(%q).Create: %v", bucketName, err)
 	}
-	fmt.Fprintf(w, "Created bucket %v in %v and %v\n", bucketName, region1, region2)
+
+	attrs, err := bucket.Attrs(ctx)
+	if err != nil {
+		return fmt.Errorf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	fmt.Fprintf(w, "Created bucket %v", bucketName)
+	fmt.Fprintf(w, " - location: %v", attrs.Location)
+	fmt.Fprintf(w, " - locationType: %v", attrs.LocationType)
+	fmt.Fprintf(w, " - customPlacementConfig.dataLocations: %v", attrs.CustomPlacementConfig.DataLocations)
 	return nil
 }
 

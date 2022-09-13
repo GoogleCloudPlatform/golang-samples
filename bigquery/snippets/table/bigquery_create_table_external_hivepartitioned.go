@@ -31,7 +31,7 @@ func createTableExternalHivePartitioned(projectID, datasetID, tableID string) er
 
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("bigquery.NewClient: %v", err)
+		return fmt.Errorf("bigquery.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -67,7 +67,7 @@ func createTableExternalHivePartitioned(projectID, datasetID, tableID string) er
 	// Create the external table.
 	tableRef := client.Dataset(datasetID).Table(tableID)
 	if err := tableRef.Create(ctx, metadata); err != nil {
-		return fmt.Errorf("table creation failure: %v", err)
+		return fmt.Errorf("table creation failure: %w", err)
 	}
 	return nil
 }
