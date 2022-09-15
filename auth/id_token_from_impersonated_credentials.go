@@ -50,7 +50,7 @@ func getIdTokenFromImpersonatedCredentials(w io.Writer, scope, targetAudience, i
 		// For more information, see:
 		// https://cloud.google.com/iam/docs/create-short-lived-credentials-direct#sa-credentials-permissions
 		// Delegates is NOT USED here.
-		Delegates:       []string{},
+		Delegates: []string{},
 	}, option.WithCredentials(credentials))
 	if err != nil {
 		return fmt.Errorf("IDTokenSource error: %v", err)

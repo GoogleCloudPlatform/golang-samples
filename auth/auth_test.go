@@ -17,13 +17,14 @@ package snippets
 import (
 	"bytes"
 	"context"
+	"os"
+	"strings"
+	"testing"
+
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/idtoken"
 	"google.golang.org/api/option"
-	"os"
-	"strings"
-	"testing"
 )
 
 func TestAuthSnippets(t *testing.T) {
