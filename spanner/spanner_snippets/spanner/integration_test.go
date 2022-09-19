@@ -251,6 +251,9 @@ func TestSample(t *testing.T) {
 	out = runSample(t, insertUsingDML, dbName, "failed to insert using DML")
 	assertContains(t, out, "record(s) inserted")
 
+	out = runSample(t, insertUsingDMLReturning, dbName, "failed to insert using DML with returning clause")
+	assertContains(t, out, "record(s) inserted")
+
 	out = runSample(t, insertUsingDMLRequestPriority, dbName, "failed to insert using DML with RequestPriority")
 	assertContains(t, out, "record(s) inserted")
 
@@ -260,7 +263,13 @@ func TestSample(t *testing.T) {
 	out = runSample(t, updateUsingDML, dbName, "failed to update using DML")
 	assertContains(t, out, "record(s) updated")
 
+	out = runSample(t, updateUsingDMLReturning, dbName, "failed to update using DML with returning clause")
+	assertContains(t, out, "record(s) updated")
+
 	out = runSample(t, deleteUsingDML, dbName, "failed to delete using DML")
+	assertContains(t, out, "record(s) deleted")
+
+	out = runSample(t, deleteUsingDMLReturning, dbName, "failed to delete using DML with returning clause")
 	assertContains(t, out, "record(s) deleted")
 
 	out = runSample(t, updateUsingDMLWithTimestamp, dbName, "failed to update using DML with timestamp")
@@ -276,7 +285,7 @@ func TestSample(t *testing.T) {
 	assertContains(t, out, "record(s) inserted")
 
 	out = runSample(t, commitStats, dbName, "failed to request commit stats")
-	assertContains(t, out, "3 mutations in transaction")
+	assertContains(t, out, "4 mutations in transaction")
 
 	out = runSample(t, queryWithParameter, dbName, "failed to query with parameter")
 	assertContains(t, out, "12 Melissa Garcia")
@@ -654,8 +663,17 @@ func TestPgDmlSample(t *testing.T) {
 		`CREATE TABLE Singers (
 		   SingerId  bigint NOT NULL PRIMARY KEY,
 		   FirstName varchar(1024),
-		   LastName  varchar(1024)
-		 )`)
+		   LastName  varchar(1024),
+		   FullName  varchar(2048)
+		     GENERATED ALWAYS AS (FirstName || ' ' || LastName) STORED
+		 )`,
+		`CREATE TABLE Albums (
+			SingerId         bigint NOT NULL,
+			AlbumId          bigint NOT NULL,
+			AlbumTitle       varchar(1024),
+			MarketingBudget  bigint,
+			PRIMARY KEY (SingerId, AlbumId)
+		) INTERLEAVE IN PARENT Singers ON DELETE CASCADE`)
 	if err != nil {
 		t.Fatalf("failed to create test database: %v", err)
 	}
@@ -666,6 +684,15 @@ func TestPgDmlSample(t *testing.T) {
 
 	out = runSample(t, pgDmlWithParameters, dbName, "failed to execute PG DML with parameter")
 	assertContains(t, out, "Inserted 2 singers")
+
+	out = runSample(t, pgUpdateUsingDMLReturning, dbName, "failed to execute PG DML update with returning clause")
+	assertContains(t, out, "record(s) updated")
+
+	out = runSample(t, pgInsertUsingDMLReturning, dbName, "failed to execute PG DML insert with returning clause")
+	assertContains(t, out, "record(s) inserted")
+
+	out = runSample(t, pgDeleteUsingDMLReturning, dbName, "failed to execute PG DML delete with returning clause")
+	assertContains(t, out, "record(s) deleted")
 }
 
 func TestPgNumericDataType(t *testing.T) {
