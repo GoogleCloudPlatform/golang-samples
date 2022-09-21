@@ -47,7 +47,10 @@ func listDenyPolicies(w io.Writer, projectID string) error {
 	//
 	// The attachment point is identified by its URL-encoded resource name. Hence, replace
 	// the "/" with "%%2F".
-	attachmentPoint := fmt.Sprintf("cloudresourcemanager.googleapis.com%%2Fprojects%%2F%s", projectID)
+	attachmentPoint := fmt.Sprintf(
+		"cloudresourcemanager.googleapis.com%%2Fprojects%%2F%s",
+		projectID,
+	)
 
 	req := &iampb.ListPoliciesRequest{
 		// Construct the full path of the resource's deny policies.

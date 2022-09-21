@@ -47,7 +47,10 @@ func deleteDenyPolicy(w io.Writer, projectID, policyID string) error {
 	//
 	// The attachment point is identified by its URL-encoded resource name. Hence, replace
 	// the "/" with "%%2F".
-	attachmentPoint := fmt.Sprintf("cloudresourcemanager.googleapis.com%%2Fprojects%%2F%s", projectID)
+	attachmentPoint := fmt.Sprintf(
+		"cloudresourcemanager.googleapis.com%%2Fprojects%%2F%s",
+		projectID,
+	)
 
 	req := &iampb.DeletePolicyRequest{
 		// Construct the full path of the policy.
