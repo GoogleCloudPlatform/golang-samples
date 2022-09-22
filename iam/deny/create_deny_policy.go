@@ -110,7 +110,7 @@ func createDenyPolicy(w io.Writer, projectID, policyID string) error {
 
 	req := &iampb.CreatePolicyRequest{
 		// Construct the full path of the resource's deny policies.
-		// Its format is: "policies/%s/denypolicies"
+		// Its format is: "policies/ATTACHMENT_POINT/denypolicies"
 		Parent:   fmt.Sprintf("policies/%s/denypolicies", attachmentPoint),
 		Policy:   policy,
 		PolicyId: policyID,

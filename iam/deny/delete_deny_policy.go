@@ -54,7 +54,7 @@ func deleteDenyPolicy(w io.Writer, projectID, policyID string) error {
 
 	req := &iampb.DeletePolicyRequest{
 		// Construct the full path of the policy.
-		// Its format is: "policies/%s/denypolicies/%s"
+		// Its format is: "policies/ATTACHMENT_POINT/denypolicies/POLICY_ID"
 		Name: fmt.Sprintf("policies/%s/denypolicies/%s", attachmentPoint, policyID),
 	}
 	op, err := policiesClient.DeletePolicy(ctx, req)

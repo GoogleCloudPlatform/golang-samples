@@ -54,7 +54,7 @@ func listDenyPolicies(w io.Writer, projectID string) error {
 
 	req := &iampb.ListPoliciesRequest{
 		// Construct the full path of the resource's deny policies.
-		// Its format is: "policies/%s/denypolicies"
+		// Its format is: "policies/ATTACHMENT_POINT/denypolicies"
 		Parent: fmt.Sprintf("policies/%s/denypolicies", attachmentPoint),
 	}
 	it := policiesClient.ListPolicies(ctx, req)

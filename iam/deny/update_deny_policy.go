@@ -100,7 +100,7 @@ func updateDenyPolicy(w io.Writer, projectID, policyID, etag string) error {
 	// Set the policy resource path, version (etag) and the updated deny rules.
 	policy := &iampb.Policy{
 		// Construct the full path of the policy.
-		// Its format is: "policies/%s/denypolicies/%s"
+		// Its format is: "policies/ATTACHMENT_POINT/denypolicies/POLICY_ID"
 		Name:  fmt.Sprintf("policies/%s/denypolicies/%s", attachmentPoint, policyID),
 		Etag:  etag,
 		Rules: [](*iampb.PolicyRule){policyRule},
