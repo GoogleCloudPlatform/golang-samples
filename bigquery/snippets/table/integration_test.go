@@ -176,8 +176,14 @@ func TestTables(t *testing.T) {
 	if err != nil {
 		t.Fatalf("couldn't generate unique table id: %v", err)
 	}
+	if err := tableExists(tc.ProjectID, testDatasetID, testTableID); err == nil {
+		t.Fatalf("expect table(%q %q) to not exist: %v", testDatasetID, testTableID, err)
+	}
 	if err := createTableExplicitSchema(tc.ProjectID, testDatasetID, testTableID); err != nil {
 		t.Fatalf("createTableExplicitSchema(%q %q): %v", testDatasetID, testTableID, err)
+	}
+	if err := tableExists(tc.ProjectID, testDatasetID, testTableID); err != nil {
+		t.Fatalf("expect table(%q %q) to exist: %v", testDatasetID, testTableID, err)
 	}
 	if err := addTableLabel(tc.ProjectID, testDatasetID, testTableID); err != nil {
 		t.Fatalf("addTableLabel(%q %q): %v", testDatasetID, testTableID, err)
