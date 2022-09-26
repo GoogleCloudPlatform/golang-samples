@@ -1,0 +1,80 @@
+// Copyright 2022 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package spanner
+
+// [START spanner_create_instance_config]
+
+import (
+	"context"
+	"fmt"
+	"io"
+
+	instance "cloud.google.com/go/spanner/admin/instance/apiv1"
+	instancepb "google.golang.org/genproto/googleapis/spanner/admin/instance/v1"
+)
+
+// createInstanceConfig creates a custom spanner instance config
+func createInstanceConfig(w io.Writer, projectID string, userConfigName, baseConfigID string) error {
+	// projectID = `projects/<project>`
+	// userConfigName = `custom-nam11`
+	// baseConfigID = `projects/<project>/instanceConfigs/nam11`
+	ctx := context.Background()
+	adminClient, err := instance.NewInstanceAdminClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer adminClient.Close()
+	baseConfig, err := adminClient.GetInstanceConfig(ctx, &instancepb.GetInstanceConfigRequest{
+		Name: baseConfigID,
+	})
+	if err != nil {
+		return fmt.Errorf("createInstanceConfig.GetInstanceConfig: %v", err)
+	}
+	if baseConfig.OptionalReplicas == nil || len(baseConfig.OptionalReplicas) == 0 {
+		return fmt.Errorf("createInstanceConfig expects base config with at least from the list of optional replicas")
+	}
+	op, err := adminClient.CreateInstanceConfig(ctx, &instancepb.CreateInstanceConfigRequest{
+		Parent: projectID,
+		// Custom config names must start with the prefix “custom-”.
+		InstanceConfigId: userConfigName,
+		InstanceConfig: &instancepb.InstanceConfig{
+			Name:        fmt.Sprintf("%s/instanceConfigs/%s", projectID, userConfigName),
+			DisplayName: "custom-golang-samples",
+			ConfigType:  instancepb.InstanceConfig_USER_MANAGED,
+			// The replicas for the custom instance configuration must include all the replicas of the base
+			// configuration, in addition to at least one from the list of optional replicas of the base
+			// configuration.
+			Replicas:   append(baseConfig.Replicas, baseConfig.OptionalReplicas...),
+			BaseConfig: baseConfig.Name,
+			Labels:     map[string]string{"go_cloud_spanner_samples": "true"},
+		},
+	})
+	if err != nil {
+		return err
+	}
+	// Wait for the instance configuration creation to finish.
+	i, err := op.Wait(ctx)
+	if err != nil {
+		return fmt.Errorf("waiting for instance config creation to finish failed: %v", err)
+	}
+	// The instance configuration may not be ready to serve yet.
+	if i.State != instancepb.InstanceConfig_READY {
+		fmt.Fprintf(w, "instanceConfig state is not READY yet. Got state %v\n", i.State)
+	}
+	fmt.Fprintf(w, "Created instance configuration [%s]\n", userConfigName)
+	return nil
+}
+
+// [END spanner_create_instance_config]
