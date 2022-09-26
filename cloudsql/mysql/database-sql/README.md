@@ -99,11 +99,11 @@ To test the application locally, follow these steps after the proxy is running:
 To run the sample on GAE-Standard, create an App Engine project by following the setup for these
 [instructions](https://cloud.google.com/appengine/docs/standard/go/quickstart#before-you-begin).
 
-First, update `app.standard.yaml` with the correct values to pass the environment
+First, update [`app.standard.yaml`](cmd/app/app.standard.yaml) with the correct values to pass the environment
 variables into the runtime. Your `app.standard.yaml` file should look like this:
 
 ```yaml
-runtime: go113
+runtime: go116
 env_variables:
   INSTANCE_UNIX_SOCKET: /cloudsql/<PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME>
   DB_USER: <YOUR_DB_USER_NAME>
@@ -116,7 +116,7 @@ secure solution such as [Cloud Secret Manager](https://cloud.google.com/secret-m
 
 Next, the following command will deploy the application to your Google Cloud project:
 ```bash
-gcloud app deploy app.standard.yaml
+gcloud app deploy cmd/app/app.standard.yaml
 ```
 
 ## Deploying to App Engine Flexible
@@ -124,7 +124,7 @@ gcloud app deploy app.standard.yaml
 To run the sample on GAE-Flex, create an App Engine project by following the setup for these
 [instructions](https://cloud.google.com/appengine/docs/standard/go/quickstart#before-you-begin).
 
-First, update `app.flexible.yaml` with the correct values to pass the environment
+First, update [`app.flexible.yaml`](cmd/app/app.flexible.yaml) with the correct values to pass the environment
 variables into the runtime. Your `app.flexible.yaml` file should look like this:
 ```yaml
 runtime: custom
@@ -145,7 +145,7 @@ secure solution such as [Cloud Secret Manager](https://cloud.google.com/secret-m
 
 Next, the following command will deploy the application to your Google Cloud project:
 ```bash
-gcloud app deploy app.flexible.yaml
+gcloud app deploy cmd/app/app.flexible.yaml
 ```
 ## Deploy to Cloud Run
 
