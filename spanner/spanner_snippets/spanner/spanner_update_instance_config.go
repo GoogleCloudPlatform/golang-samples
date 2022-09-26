@@ -19,11 +19,11 @@ package spanner
 import (
 	"context"
 	"fmt"
-	"google.golang.org/genproto/protobuf/field_mask"
 	"io"
 
 	instance "cloud.google.com/go/spanner/admin/instance/apiv1"
 	instancepb "google.golang.org/genproto/googleapis/spanner/admin/instance/v1"
+	"google.golang.org/genproto/protobuf/field_mask"
 )
 
 // updateInstanceConfig updates the custom spanner instance config
