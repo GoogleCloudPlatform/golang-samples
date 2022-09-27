@@ -134,9 +134,7 @@ func classifyText(ctx context.Context, client *language.Client, text string) (*l
 		},
 		ClassificationModelOptions: &languagepb.ClassificationModelOptions{
 			ModelType: &language_pb.ClassificationModelOptions_V2Model{
-				V2Model: &language_pb.ClassificationModelOptions_V2Model{
-					ContentCategoriesVersion:languagepb.ClassificationModelOptions_V2Model_V2,
-				},
+				ContentCategoriesVersion: languagepb.ClassificationModelOptions_V2Model_V2,
 			},
 		},
 	})
