@@ -56,11 +56,11 @@ func updateInstanceConfig(w io.Writer, userConfigID string) error {
 	// Wait for the instance configuration creation to finish.
 	i, err := op.Wait(ctx)
 	if err != nil {
-		return fmt.Errorf("waiting for instance config creation to finish failed: %v", err)
+		return fmt.Errorf("Waiting for instance config creation to finish failed: %v", err)
 	}
 	// The instance configuration may not be ready to serve yet.
 	if i.State != instancepb.InstanceConfig_READY {
-		fmt.Fprintf(w, "instanceConfig state is not READY yet. Got state %v\n", i.State)
+		fmt.Fprintf(w, "InstanceConfig state is not READY yet. Got state %v\n", i.State)
 	}
 	fmt.Fprintf(w, "Updated instance configuration [%s]\n", config.Name)
 	return nil
