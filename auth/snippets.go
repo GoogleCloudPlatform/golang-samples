@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package authsnippets contains Google Cloud authentication snippets.
-package authsnippets
+// Package snippets contains Google Cloud authentication snippets.
+package snippets
 
 import (
 	"context"
