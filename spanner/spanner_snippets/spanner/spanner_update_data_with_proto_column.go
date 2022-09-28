@@ -23,6 +23,8 @@ import (
 	pb "github.com/GoogleCloudPlatform/golang-samples/spanner/spanner_snippets/spanner/testdata"
 )
 
+// [START spanner_update_data_with_proto_column]
+
 func updateDataWithProtoMsgAndEnum(w io.Writer, db string) error {
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)
