@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package testdata;
+option go_package = "./test_data";
+
+message Book {
+  int64 isbn = 1;
+  string title = 2;
+  string author = 3;
+  Genre genre = 4;
+}
+
+enum Genre {
+  BLUES     = 0;
+  CLASSICAL = 1;
+  COUNTRY   = 2;
+  ROCK      = 3;
+}
