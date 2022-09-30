@@ -14,7 +14,7 @@
 
 package videostitcher
 
-// [START video_stitcher_create_slate]
+// [START videostitcher_create_slate]
 import (
 	"context"
 	"fmt"
@@ -54,4 +54,4 @@ func createSlate(w io.Writer, projectID, slateID, slateURI string) error {
 	return nil
 }
 
-// [END video_stitcher_create_slate]
+// [END videostitcher_create_slate]
