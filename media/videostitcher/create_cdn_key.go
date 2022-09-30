@@ -14,7 +14,7 @@
 
 package videostitcher
 
-// [START video_stitcher_create_cdn_key]
+// [START videostitcher_create_cdn_key]
 import (
 	"context"
 	"fmt"
@@ -82,4 +82,4 @@ func createCdnKey(w io.Writer, projectID, cdnKeyID, hostname, gcdnKeyname, gcdnP
 	return nil
 }
 
-// [END video_stitcher_create_cdn_key]
+// [END videostitcher_create_cdn_key]
