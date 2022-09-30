@@ -69,7 +69,7 @@ func createInstanceConfig(w io.Writer, projectPath string, userConfigID, baseCon
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(w, "Waiting for create operation on %s/instanceConfigs/%s to complete...", projectPath, userConfigID)
+	fmt.Fprintf(w, "Waiting for create operation on %s/instanceConfigs/%s to complete...\n", projectPath, userConfigID)
 	// Wait for the instance configuration creation to finish.
 	i, err := op.Wait(ctx)
 	if err != nil {

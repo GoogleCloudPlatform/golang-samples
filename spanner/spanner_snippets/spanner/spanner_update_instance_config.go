@@ -58,7 +58,7 @@ func updateInstanceConfig(w io.Writer, userConfigPath string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(w, "Waiting for update operation on %s to complete...", userConfigPath)
+	fmt.Fprintf(w, "Waiting for update operation on %s to complete...\n", userConfigPath)
 	// Wait for the instance configuration creation to finish.
 	i, err := op.Wait(ctx)
 	if err != nil {
