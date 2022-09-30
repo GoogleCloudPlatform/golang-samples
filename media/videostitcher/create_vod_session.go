@@ -14,7 +14,7 @@
 
 package videostitcher
 
-// [START video_stitcher_create_vod_session]
+// [START videostitcher_create_vod_session]
 import (
 	"context"
 	"fmt"
@@ -63,4 +63,4 @@ func createVodSession(w io.Writer, projectID, sourceURI string) error {
 	return nil
 }
 
-// [END video_stitcher_create_vod_session]
+// [END videostitcher_create_vod_session]

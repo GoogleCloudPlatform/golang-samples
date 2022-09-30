@@ -14,7 +14,7 @@
 
 package videostitcher
 
-// [START video_stitcher_get_slate]
+// [START videostitcher_get_slate]
 import (
 	"context"
 	"encoding/json"
@@ -54,4 +54,4 @@ func getSlate(w io.Writer, projectID, slateID string) error {
 	return nil
 }
 
-// [END video_stitcher_get_slate]
+// [END videostitcher_get_slate]

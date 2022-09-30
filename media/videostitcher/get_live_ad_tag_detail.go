@@ -14,7 +14,7 @@
 
 package videostitcher
 
-// [START video_stitcher_get_live_ad_tag_detail]
+// [START videostitcher_get_live_ad_tag_detail]
 import (
 	"context"
 	"encoding/json"
@@ -54,4 +54,4 @@ func getLiveAdTagDetail(w io.Writer, projectID, sessionID, adTagDetailID string)
 	return nil
 }
 
-// [END video_stitcher_get_live_ad_tag_detail]
+// [END videostitcher_get_live_ad_tag_detail]
