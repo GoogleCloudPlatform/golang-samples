@@ -14,48 +14,49 @@
 
 package storagetransfer
 
-import (
-	storagetransfer "cloud.google.com/go/storagetransfer/apiv1"
-	"context"
-	"fmt"
-	storagetransferpb "google.golang.org/genproto/googleapis/storagetransfer/v1"
-	"io"
-)
-
 // [START storagetransfer_transfer_from_s3_compatible_source]
 
+import (
+	"context"
+	"fmt"
+	"io"
+
+	storagetransfer "cloud.google.com/go/storagetransfer/apiv1"
+	storagetransferpb "google.golang.org/genproto/googleapis/storagetransfer/v1"
+)
+
 func transferFromS3CompatibleSource(w io.Writer, projectID string, sourceAgentPoolName string, sourceBucketName string, sourcePath string, gcsSinkBucket string, gcsPath string) (*storagetransferpb.TransferJob, error) {
-	// Your project id
+	// Your project id.
 	// projectId := "my-project-id"
 
-	// The agent pool associated with the S3 compatible data source. If not provided, defaults to the default agent
+	// The agent pool associated with the S3 compatible data source. If not provided, defaults to the default agent.
 	// sourceAgentPoolName := "projects/my-project/agentPools/transfer_service_default"
 
-	// The S3 compatible bucket name to transfer data from
+	// The S3 compatible bucket name to transfer data from.
 	//sourceBucketName = "my-bucket-name"
 
-	// The S3 compatible path (object prefix) to transfer data from
+	// The S3 compatible path (object prefix) to transfer data from.
 	//sourcePath = "path/to/data"
 
-	// The ID of the GCS bucket to transfer data to
+	// The ID of the GCS bucket to transfer data to.
 	//gcsSinkBucket = "my-sink-bucket"
 
-	// The GCS path (object prefix) to transfer data to
+	// The GCS path (object prefix) to transfer data to.
 	//gcsPath = "path/to/data"
 
-	// The S3 region of the source bucket
+	// The S3 region of the source bucket.
 	region := "us-east-1"
 
-	// The S3 compatible endpoint
+	// The S3 compatible endpoint.
 	endpoint := "us-east-1.example.com"
 
-	// The S3 compatible network protocol
+	// The S3 compatible network protocol.
 	protocol := storagetransferpb.S3CompatibleMetadata_NETWORK_PROTOCOL_HTTPS
 
-	// The S3 compatible request model
+	// The S3 compatible request model.
 	requestModel := storagetransferpb.S3CompatibleMetadata_REQUEST_MODEL_VIRTUAL_HOSTED_STYLE
 
-	// The S3 Compatible auth method
+	// The S3 Compatible auth method.
 	authMethod := storagetransferpb.S3CompatibleMetadata_AUTH_METHOD_AWS_SIGNATURE_V4
 
 	ctx := context.Background()
