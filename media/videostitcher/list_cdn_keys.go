@@ -14,7 +14,7 @@
 
 package videostitcher
 
-// [START video_stitcher_list_cdn_keys]
+// [START videostitcher_list_cdn_keys]
 import (
 	"context"
 	"fmt"
@@ -57,4 +57,4 @@ func listCdnKeys(w io.Writer, projectID string) error {
 	return nil
 }
 
-// [END video_stitcher_list_cdn_keys]
+// [END videostitcher_list_cdn_keys]

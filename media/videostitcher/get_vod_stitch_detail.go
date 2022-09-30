@@ -14,7 +14,7 @@
 
 package videostitcher
 
-// [START video_stitcher_get_vod_stitch_detail]
+// [START videostitcher_get_vod_stitch_detail]
 import (
 	"context"
 	"encoding/json"
@@ -55,4 +55,4 @@ func getVodStitchDetail(w io.Writer, projectID, sessionID, stitchDetailID string
 	return nil
 }
 
-// [END video_stitcher_get_vod_stitch_detail]
+// [END videostitcher_get_vod_stitch_detail]

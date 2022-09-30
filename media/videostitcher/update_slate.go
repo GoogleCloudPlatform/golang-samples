@@ -14,7 +14,7 @@
 
 package videostitcher
 
-// [START video_stitcher_update_slate]
+// [START videostitcher_update_slate]
 import (
 	"context"
 	"fmt"
@@ -60,4 +60,4 @@ func updateSlate(w io.Writer, projectID, slateID, slateURI string) error {
 	return nil
 }
 
-// [END video_stitcher_update_slate]
+// [END videostitcher_update_slate]

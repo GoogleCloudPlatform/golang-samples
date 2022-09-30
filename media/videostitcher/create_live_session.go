@@ -14,7 +14,7 @@
 
 package videostitcher
 
-// [START video_stitcher_create_live_session]
+// [START videostitcher_create_live_session]
 import (
 	"context"
 	"fmt"
@@ -68,4 +68,4 @@ func createLiveSession(w io.Writer, projectID, sourceURI, slateID string) error 
 	return nil
 }
 
-// [END video_stitcher_create_live_session]
+// [END videostitcher_create_live_session]
