@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	instance "cloud.google.com/go/spanner/admin/instance/apiv1"
 	instancepb "google.golang.org/genproto/googleapis/spanner/admin/instance/v1"
@@ -27,16 +28,20 @@ import (
 )
 
 // updateInstanceConfig updates the custom spanner instance config
-func updateInstanceConfig(w io.Writer, userConfigID string) error {
-	// userConfigID = `projects/<project>/instanceConfigs/custom-nam11`
-	ctx := context.Background()
+func updateInstanceConfig(w io.Writer, userConfigPath string) error {
+	// userConfigPath = `projects/my-project/instanceConfigs/my-custom-config`
+
+	// Add timeout to context.
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+	defer cancel()
+
 	adminClient, err := instance.NewInstanceAdminClient(ctx)
 	if err != nil {
 		return err
 	}
 	defer adminClient.Close()
 	config, err := adminClient.GetInstanceConfig(ctx, &instancepb.GetInstanceConfigRequest{
-		Name: userConfigID,
+		Name: userConfigPath,
 	})
 	if err != nil {
 		return fmt.Errorf("updateInstanceConfig.GetInstanceConfig: %v", err)
@@ -53,6 +58,7 @@ func updateInstanceConfig(w io.Writer, userConfigID string) error {
 	if err != nil {
 		return err
 	}
+	fmt.Fprintf(w, "Waiting for update operation on %s to complete...", userConfigPath)
 	// Wait for the instance configuration creation to finish.
 	i, err := op.Wait(ctx)
 	if err != nil {

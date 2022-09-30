@@ -26,8 +26,9 @@ import (
 )
 
 // deleteInstanceConfig deletes the custom spanner instance config
-func deleteInstanceConfig(w io.Writer, userConfigID string) error {
-	// userConfigID = `projects/<project>/instanceConfigs/custom-nam11`
+func deleteInstanceConfig(w io.Writer, userConfigPath string) error {
+	// userConfigPath = `projects/my-project/instanceConfigs/my-custom-config`
+
 	ctx := context.Background()
 	adminClient, err := instance.NewInstanceAdminClient(ctx)
 	if err != nil {
@@ -35,12 +36,12 @@ func deleteInstanceConfig(w io.Writer, userConfigID string) error {
 	}
 	defer adminClient.Close()
 	err = adminClient.DeleteInstanceConfig(ctx, &instancepb.DeleteInstanceConfigRequest{
-		Name: userConfigID,
+		Name: userConfigPath,
 	})
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(w, "Instance config  [%s] successfully deleted\n", userConfigID)
+	fmt.Fprintf(w, "Deleted instance configuration [%s]\n", userConfigPath)
 	return nil
 }
 

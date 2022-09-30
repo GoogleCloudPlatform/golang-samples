@@ -584,7 +584,7 @@ func TestCustomInstanceConfigSample(t *testing.T) {
 	baseConfig := fmt.Sprintf("projects/%s/instanceConfigs/%s", projectID, "nam11")
 	userConfig := fmt.Sprintf("custom-golang-samples-config-%v", randomID())
 	if err := createInstanceConfig(&b, "projects/"+projectID, userConfig, baseConfig); err != nil {
-		t.Errorf("failed to create instance configuration: %v", err)
+		t.Fatalf("failed to create instance configuration: %v", err)
 	}
 	out := b.String()
 	assertContains(t, out, "Created instance configuration")
@@ -608,7 +608,7 @@ func TestCustomInstanceConfigSample(t *testing.T) {
 		t.Errorf("failed to delete instance configuration: %v", err)
 	}
 	out = b.String()
-	assertContains(t, out, "successfully deleted")
+	assertContains(t, out, "Deleted instance configuration")
 }
 
 func TestPgSample(t *testing.T) {

@@ -20,24 +20,29 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	instance "cloud.google.com/go/spanner/admin/instance/apiv1"
 	instancepb "google.golang.org/genproto/googleapis/spanner/admin/instance/v1"
 )
 
 // createInstanceConfig creates a custom spanner instance config
-func createInstanceConfig(w io.Writer, projectID string, userConfigName, baseConfigID string) error {
-	// projectID = `projects/<project>`
-	// userConfigName = `custom-nam11`
-	// baseConfigID = `projects/<project>/instanceConfigs/nam11`
-	ctx := context.Background()
+func createInstanceConfig(w io.Writer, projectPath string, userConfigID, baseConfigPath string) error {
+	// projectPath = `projects/my-project`
+	// userConfigID = `my-custom-config`, custom config names must start with the prefix “custom-”.
+	// baseConfigPath = `projects/my-project/instanceConfigs/my-base-config`
+
+	// Add timeout to context.
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+	defer cancel()
+
 	adminClient, err := instance.NewInstanceAdminClient(ctx)
 	if err != nil {
 		return err
 	}
 	defer adminClient.Close()
 	baseConfig, err := adminClient.GetInstanceConfig(ctx, &instancepb.GetInstanceConfigRequest{
-		Name: baseConfigID,
+		Name: baseConfigPath,
 	})
 	if err != nil {
 		return fmt.Errorf("createInstanceConfig.GetInstanceConfig: %v", err)
@@ -46,11 +51,11 @@ func createInstanceConfig(w io.Writer, projectID string, userConfigName, baseCon
 		return fmt.Errorf("CreateInstanceConfig expects base config with at least from the list of optional replicas")
 	}
 	op, err := adminClient.CreateInstanceConfig(ctx, &instancepb.CreateInstanceConfigRequest{
-		Parent: projectID,
+		Parent: projectPath,
 		// Custom config names must start with the prefix “custom-”.
-		InstanceConfigId: userConfigName,
+		InstanceConfigId: userConfigID,
 		InstanceConfig: &instancepb.InstanceConfig{
-			Name:        fmt.Sprintf("%s/instanceConfigs/%s", projectID, userConfigName),
+			Name:        fmt.Sprintf("%s/instanceConfigs/%s", projectPath, userConfigID),
 			DisplayName: "custom-golang-samples",
 			ConfigType:  instancepb.InstanceConfig_USER_MANAGED,
 			// The replicas for the custom instance configuration must include all the replicas of the base
@@ -64,6 +69,7 @@ func createInstanceConfig(w io.Writer, projectID string, userConfigName, baseCon
 	if err != nil {
 		return err
 	}
+	fmt.Fprintf(w, "Waiting for create operation on %s/instanceConfigs/%s to complete...", projectPath, userConfigID)
 	// Wait for the instance configuration creation to finish.
 	i, err := op.Wait(ctx)
 	if err != nil {
@@ -73,7 +79,7 @@ func createInstanceConfig(w io.Writer, projectID string, userConfigName, baseCon
 	if i.State != instancepb.InstanceConfig_READY {
 		fmt.Fprintf(w, "InstanceConfig state is not READY yet. Got state %v\n", i.State)
 	}
-	fmt.Fprintf(w, "Created instance configuration [%s]\n", userConfigName)
+	fmt.Fprintf(w, "Created instance configuration [%s]\n", userConfigID)
 	return nil
 }
 
