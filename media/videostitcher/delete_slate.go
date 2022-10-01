@@ -14,7 +14,7 @@
 
 package videostitcher
 
-// [START video_stitcher_delete_slate]
+// [START videostitcher_delete_slate]
 import (
 	"context"
 	"fmt"
@@ -51,4 +51,4 @@ func deleteSlate(w io.Writer, projectID, slateID string) error {
 	return nil
 }
 
-// [END video_stitcher_delete_slate]
+// [END videostitcher_delete_slate]

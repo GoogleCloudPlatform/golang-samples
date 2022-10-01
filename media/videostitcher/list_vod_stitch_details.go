@@ -14,7 +14,7 @@
 
 package videostitcher
 
-// [START video_stitcher_list_vod_stitch_details]
+// [START videostitcher_list_vod_stitch_details]
 import (
 	"context"
 	"fmt"
@@ -58,4 +58,4 @@ func listVodStitchDetails(w io.Writer, projectID, sessionID string) error {
 	return nil
 }
 
-// [END video_stitcher_list_vod_stitch_details]
+// [END videostitcher_list_vod_stitch_details]
