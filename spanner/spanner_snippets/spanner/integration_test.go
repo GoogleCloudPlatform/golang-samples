@@ -581,30 +581,29 @@ func TestCustomInstanceConfigSample(t *testing.T) {
 	defer cleanupInstanceConfigs(projectID)
 
 	var b bytes.Buffer
-	baseConfig := fmt.Sprintf("projects/%s/instanceConfigs/%s", projectID, "nam11")
-	userConfig := fmt.Sprintf("custom-golang-samples-config-%v", randomID())
-	if err := createInstanceConfig(&b, "projects/"+projectID, userConfig, baseConfig); err != nil {
+	userConfigID := fmt.Sprintf("custom-golang-samples-config-%v", randomID())
+	if err := createInstanceConfig(&b, projectID, userConfigID, "nam11"); err != nil {
 		t.Fatalf("failed to create instance configuration: %v", err)
 	}
 	out := b.String()
 	assertContains(t, out, "Created instance configuration")
 
 	b.Reset()
-	if err := updateInstanceConfig(&b, fmt.Sprintf("projects/%s/instanceConfigs/%s", projectID, userConfig)); err != nil {
+	if err := updateInstanceConfig(&b, projectID, userConfigID); err != nil {
 		t.Errorf("failed to update instance configuration: %v", err)
 	}
 	out = b.String()
 	assertContains(t, out, "Updated instance configuration")
 
 	b.Reset()
-	if err := listInstanceConfigOperations(&b, fmt.Sprintf("projects/%s", projectID)); err != nil {
+	if err := listInstanceConfigOperations(&b, projectID); err != nil {
 		t.Errorf("failed to list instance configuration operations: %v", err)
 	}
 	out = b.String()
 	assertContains(t, out, "List instance config operations")
 
 	b.Reset()
-	if err := deleteInstanceConfig(&b, fmt.Sprintf("projects/%s/instanceConfigs/%s", projectID, userConfig)); err != nil {
+	if err := deleteInstanceConfig(&b, projectID, userConfigID); err != nil {
 		t.Errorf("failed to delete instance configuration: %v", err)
 	}
 	out = b.String()

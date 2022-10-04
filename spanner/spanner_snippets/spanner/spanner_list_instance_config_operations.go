@@ -29,8 +29,8 @@ import (
 )
 
 // listInstanceConfigOperations lists all the custom instance config operations
-func listInstanceConfigOperations(w io.Writer, projectPath string) error {
-	// projectPath = `projects/my-project`
+func listInstanceConfigOperations(w io.Writer, projectID string) error {
+	// projectID = `my-project`
 
 	ctx := context.Background()
 	adminClient, err := instance.NewInstanceAdminClient(ctx)
@@ -39,7 +39,7 @@ func listInstanceConfigOperations(w io.Writer, projectPath string) error {
 	}
 	defer adminClient.Close()
 	iter := adminClient.ListInstanceConfigOperations(ctx, &instancepb.ListInstanceConfigOperationsRequest{
-		Parent: projectPath,
+		Parent: fmt.Sprintf("projects/%s", projectID),
 		Filter: "(metadata.@type=type.googleapis.com/google.spanner.admin.instance.v1.CreateInstanceConfigMetadata)",
 	})
 	for {

@@ -27,10 +27,10 @@ import (
 )
 
 // createInstanceConfig creates a custom spanner instance config
-func createInstanceConfig(w io.Writer, projectPath string, userConfigID, baseConfigPath string) error {
-	// projectPath = `projects/my-project`
-	// userConfigID = `my-custom-config`, custom config names must start with the prefix “custom-”.
-	// baseConfigPath = `projects/my-project/instanceConfigs/my-base-config`
+func createInstanceConfig(w io.Writer, projectID, userConfigID, baseConfigID string) error {
+	// projectID = `my-project`
+	// userConfigID = `custom-config`, custom config names must start with the prefix “custom-”.
+	// baseConfigID = `my-base-config`
 
 	// Add timeout to context.
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
@@ -42,7 +42,7 @@ func createInstanceConfig(w io.Writer, projectPath string, userConfigID, baseCon
 	}
 	defer adminClient.Close()
 	baseConfig, err := adminClient.GetInstanceConfig(ctx, &instancepb.GetInstanceConfigRequest{
-		Name: baseConfigPath,
+		Name: fmt.Sprintf("projects/%s/instanceConfigs/%s", projectID, baseConfigID),
 	})
 	if err != nil {
 		return fmt.Errorf("createInstanceConfig.GetInstanceConfig: %v", err)
@@ -51,11 +51,11 @@ func createInstanceConfig(w io.Writer, projectPath string, userConfigID, baseCon
 		return fmt.Errorf("CreateInstanceConfig expects base config with at least from the list of optional replicas")
 	}
 	op, err := adminClient.CreateInstanceConfig(ctx, &instancepb.CreateInstanceConfigRequest{
-		Parent: projectPath,
+		Parent: fmt.Sprintf("projects/%s", projectID),
 		// Custom config names must start with the prefix “custom-”.
 		InstanceConfigId: userConfigID,
 		InstanceConfig: &instancepb.InstanceConfig{
-			Name:        fmt.Sprintf("%s/instanceConfigs/%s", projectPath, userConfigID),
+			Name:        fmt.Sprintf("projects/%s/instanceConfigs/%s", projectID, userConfigID),
 			DisplayName: "custom-golang-samples",
 			ConfigType:  instancepb.InstanceConfig_USER_MANAGED,
 			// The replicas for the custom instance configuration must include all the replicas of the base
@@ -69,7 +69,7 @@ func createInstanceConfig(w io.Writer, projectPath string, userConfigID, baseCon
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(w, "Waiting for create operation on %s/instanceConfigs/%s to complete...\n", projectPath, userConfigID)
+	fmt.Fprintf(w, "Waiting for create operation on projects/%s/instanceConfigs/%s to complete...\n", projectID, userConfigID)
 	// Wait for the instance configuration creation to finish.
 	i, err := op.Wait(ctx)
 	if err != nil {

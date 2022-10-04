@@ -28,8 +28,9 @@ import (
 )
 
 // updateInstanceConfig updates the custom spanner instance config
-func updateInstanceConfig(w io.Writer, userConfigPath string) error {
-	// userConfigPath = `projects/my-project/instanceConfigs/my-custom-config`
+func updateInstanceConfig(w io.Writer, projectID, userConfigID string) error {
+	// projectID = `my-project`
+	// userConfigID = `custom-config`, custom config names must start with the prefix “custom-”.
 
 	// Add timeout to context.
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
@@ -41,7 +42,7 @@ func updateInstanceConfig(w io.Writer, userConfigPath string) error {
 	}
 	defer adminClient.Close()
 	config, err := adminClient.GetInstanceConfig(ctx, &instancepb.GetInstanceConfigRequest{
-		Name: userConfigPath,
+		Name: fmt.Sprintf("projects/%s/instanceConfigs/%s", projectID, userConfigID),
 	})
 	if err != nil {
 		return fmt.Errorf("updateInstanceConfig.GetInstanceConfig: %v", err)
@@ -58,7 +59,7 @@ func updateInstanceConfig(w io.Writer, userConfigPath string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(w, "Waiting for update operation on %s to complete...\n", userConfigPath)
+	fmt.Fprintf(w, "Waiting for update operation on %s to complete...\n", userConfigID)
 	// Wait for the instance configuration creation to finish.
 	i, err := op.Wait(ctx)
 	if err != nil {
