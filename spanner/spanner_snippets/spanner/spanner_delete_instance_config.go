@@ -27,8 +27,8 @@ import (
 
 // deleteInstanceConfig deletes the custom spanner instance config
 func deleteInstanceConfig(w io.Writer, projectID, userConfigID string) error {
-	// projectID = `my-project`
-	// userConfigID = `custom-config`, custom config names must start with the prefix “custom-”.
+	// projectID := `my-project-id`
+	// userConfigID := `custom-config`, custom config names must start with the prefix “custom-”.
 
 	ctx := context.Background()
 	adminClient, err := instance.NewInstanceAdminClient(ctx)

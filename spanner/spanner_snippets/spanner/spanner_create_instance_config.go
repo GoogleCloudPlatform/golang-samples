@@ -28,9 +28,9 @@ import (
 
 // createInstanceConfig creates a custom spanner instance config
 func createInstanceConfig(w io.Writer, projectID, userConfigID, baseConfigID string) error {
-	// projectID = `my-project`
-	// userConfigID = `custom-config`, custom config names must start with the prefix “custom-”.
-	// baseConfigID = `my-base-config`
+	// projectID := `my-project-id`
+	// userConfigID := `custom-config`, custom config names must start with the prefix “custom-”.
+	// baseConfigID := `my-base-config`
 
 	// Add timeout to context.
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
