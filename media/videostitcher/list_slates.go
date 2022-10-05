@@ -14,7 +14,7 @@
 
 package videostitcher
 
-// [START video_stitcher_list_slates]
+// [START videostitcher_list_slates]
 import (
 	"context"
 	"fmt"
@@ -57,4 +57,4 @@ func listSlates(w io.Writer, projectID string) error {
 	return nil
 }
 
-// [END video_stitcher_list_slates]
+// [END videostitcher_list_slates]

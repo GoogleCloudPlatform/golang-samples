@@ -14,7 +14,7 @@
 
 package videostitcher
 
-// [START video_stitcher_list_live_ad_tag_details]
+// [START videostitcher_list_live_ad_tag_details]
 import (
 	"context"
 	"fmt"
@@ -57,4 +57,4 @@ func listLiveAdTagDetails(w io.Writer, projectID, sessionID string) error {
 	return nil
 }
 
-// [END video_stitcher_list_live_ad_tag_details]
+// [END videostitcher_list_live_ad_tag_details]

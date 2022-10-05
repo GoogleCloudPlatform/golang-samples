@@ -305,6 +305,28 @@ func TestTransferUsingManifest(t *testing.T) {
 	}
 }
 
+func TestTransferFromS3CompatibleSource(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	buf := new(bytes.Buffer)
+
+	sourceAgentPoolName := "" //use default agent pool
+	sourcePath := ""          //use root directory
+	gcsPath := ""             //use root directory
+
+	resp, err := transferFromS3CompatibleSource(buf, tc.ProjectID, sourceAgentPoolName, s3Bucket, sourcePath, gcsSinkBucket, gcsPath)
+
+	if err != nil {
+		t.Errorf("transfer_from_s3_compatible_source: %#v", err)
+	}
+	defer cleanupSTSJob(resp, tc.ProjectID)
+
+	got := buf.String()
+	if want := "transferJobs/"; !strings.Contains(got, want) {
+		t.Errorf("transfer_from_s3_compatible_source: got %q, want %q", got, want)
+	}
+}
+
 func grantSTSPermissions(bucketName string, projectID string, sts *storagetransfer.Client, str *storage.Client) {
 	ctx := context.Background()
 

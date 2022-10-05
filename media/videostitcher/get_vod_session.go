@@ -14,7 +14,7 @@
 
 package videostitcher
 
-// [START video_stitcher_get_vod_session]
+// [START videostitcher_get_vod_session]
 import (
 	"context"
 	"encoding/json"
@@ -54,4 +54,4 @@ func getVodSession(w io.Writer, projectID, sessionID string) error {
 	return nil
 }
 
-// [END video_stitcher_get_vod_session]
+// [END videostitcher_get_vod_session]

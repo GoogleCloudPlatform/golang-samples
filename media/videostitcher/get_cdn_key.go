@@ -14,7 +14,7 @@
 
 package videostitcher
 
-// [START video_stitcher_get_cdn_key]
+// [START videostitcher_get_cdn_key]
 import (
 	"context"
 	"encoding/json"
@@ -54,4 +54,4 @@ func getCdnKey(w io.Writer, projectID, cdnKeyID string) error {
 	return nil
 }
 
-// [END video_stitcher_get_cdn_key]
+// [END videostitcher_get_cdn_key]
