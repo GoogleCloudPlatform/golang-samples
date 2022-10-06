@@ -29,8 +29,8 @@ import (
 
 // updateInstanceConfig updates the custom spanner instance config
 func updateInstanceConfig(w io.Writer, projectID, userConfigID string) error {
-	// projectID := `my-project-id`
-	// userConfigID := `custom-config`, custom config names must start with the prefix “custom-”.
+	// projectID := "my-project-id"
+	// userConfigID := "custom-config", custom config names must start with the prefix “custom-”.
 
 	// Add timeout to context.
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)

@@ -30,7 +30,7 @@ import (
 
 // listInstanceConfigOperations lists all the custom instance config operations
 func listInstanceConfigOperations(w io.Writer, projectID string) error {
-	// projectID := `my-project-id`
+	// projectID := "my-project-id"
 
 	ctx := context.Background()
 	adminClient, err := instance.NewInstanceAdminClient(ctx)
