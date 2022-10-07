@@ -138,6 +138,12 @@ func TestCopiesAndExtracts(t *testing.T) {
 		t.Fatalf("cannot create bucket: %v", err)
 	}
 
+	model := client.DatasetInProject(tc.ProjectID, testDatasetID).Model("model")
+	if err := generateModel(client, testDatasetID, model.ModelID); err != nil {
+		t.Fatalf("cannot create BQ ML model: %v", err)
+	}
+	defer model.Delete(ctx)
+
 	// Run extract job tests in parallel.
 	t.Run("extract", func(t *testing.T) {
 		t.Run("exportTableAsCSV", func(t *testing.T) {
@@ -154,7 +160,6 @@ func TestCopiesAndExtracts(t *testing.T) {
 			if err := exportTableAsCompressedCSV(tc.ProjectID, gcsURI); err != nil {
 				t.Errorf("exportTableAsCompressedCSV(%s): %v", gcsURI, err)
 			}
-
 		})
 		t.Run("exportTableAsJSON", func(t *testing.T) {
 			t.Parallel()
@@ -162,7 +167,13 @@ func TestCopiesAndExtracts(t *testing.T) {
 			if err := exportTableAsJSON(tc.ProjectID, gcsURI); err != nil {
 				t.Errorf("exportTableAsJSON(%s): %v", gcsURI, err)
 			}
-
+		})
+		t.Run("exportModel", func(t *testing.T) {
+			t.Parallel()
+			gcsURI := fmt.Sprintf("gs://%s/%s", bucket, "model")
+			if err := exportModel(tc.ProjectID, testDatasetID, model.ModelID, gcsURI); err != nil {
+				t.Errorf("exportModel(%s): %v", gcsURI, err)
+			}
 		})
 	})
 
@@ -197,6 +208,38 @@ func generateTableCTAS(client *bigquery.Client, datasetID, tableID string) error
 		  IF(RAND() > 0.5,"foo","bar") as token
 		FROM
 		  UNNEST(GENERATE_ARRAY(0,5,1)) as r`, datasetID, tableID))
+	job, err := q.Run(ctx)
+	if err != nil {
+		return err
+	}
+	status, err := job.Wait(ctx)
+	if err != nil {
+		return err
+	}
+	if err := status.Err(); err != nil {
+		return err
+	}
+	return nil
+}
+
+// generateModel creates an example BigQuery ML model on the public penguins dataset.
+// See more on https://cloud.google.com/bigquery-ml/docs/linear-regression-tutorial
+func generateModel(client *bigquery.Client, datasetID, modelID string) error {
+	ctx := context.Background()
+	publicDataset := "`bigquery-public-data.ml_datasets.penguins`"
+	fullModelID := fmt.Sprintf("`%s.%s`", datasetID, modelID)
+	q := client.Query(
+		fmt.Sprintf(
+			`CREATE OR REPLACE MODEL %s
+			OPTIONS
+			  (model_type='linear_reg',
+				input_label_cols=['body_mass_g']) AS
+			SELECT
+			  *
+			FROM
+			  %s
+			WHERE
+			  body_mass_g IS NOT NULL`, fullModelID, publicDataset))
 	job, err := q.Run(ctx)
 	if err != nil {
 		return err
