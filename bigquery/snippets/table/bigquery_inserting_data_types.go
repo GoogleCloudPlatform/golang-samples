@@ -34,7 +34,7 @@ type ComplexType struct {
 	DatesTime    DatesTime              `bigquery:"datesTime"`
 }
 
-// DatesTime represents different date/time representation
+// DatesTime shows different date/time representation
 type DatesTime struct {
 	Day        civil.Date     `bigquery:"day"`
 	FirstTime  civil.DateTime `bigquery:"firstTime"`
@@ -54,7 +54,7 @@ func insertingDataTypes(projectID, datasetID, tableID string) error {
 	}
 	defer client.Close()
 
-	// Manual defining schema
+	// Manually defining schema
 	schema := bigquery.Schema{
 		{Name: "name", Type: bigquery.StringFieldType},
 		{Name: "age", Type: bigquery.IntegerFieldType},
