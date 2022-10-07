@@ -139,7 +139,7 @@ func TestCopiesAndExtracts(t *testing.T) {
 	}
 
 	model := client.DatasetInProject(tc.ProjectID, testDatasetID).Model("model")
-	if err := generateModel(client, testDatasetID, model.ModelID); err != nil {
+	if err := generateModel(client, tc.ProjectID, testDatasetID, model.ModelID); err != nil {
 		t.Fatalf("cannot create BQ ML model: %v", err)
 	}
 	defer model.Delete(ctx)
@@ -222,24 +222,25 @@ func generateTableCTAS(client *bigquery.Client, datasetID, tableID string) error
 	return nil
 }
 
-// generateModel creates an example BigQuery ML model on the public penguins dataset.
-// See more on https://cloud.google.com/bigquery-ml/docs/linear-regression-tutorial
-func generateModel(client *bigquery.Client, datasetID, modelID string) error {
+// generateModel creates an example BigQuery ML model.
+func generateModel(client *bigquery.Client, projectID, datasetID, modelID string) error {
 	ctx := context.Background()
-	publicDataset := "`bigquery-public-data.ml_datasets.penguins`"
-	fullModelID := fmt.Sprintf("`%s.%s`", datasetID, modelID)
-	q := client.Query(
-		fmt.Sprintf(
-			`CREATE OR REPLACE MODEL %s
-			OPTIONS
-			  (model_type='linear_reg',
-				input_label_cols=['body_mass_g']) AS
-			SELECT
-			  *
-			FROM
-			  %s
-			WHERE
-			  body_mass_g IS NOT NULL`, fullModelID, publicDataset))
+	modelRef := fmt.Sprintf("%s.%s.%s", projectID, datasetID, modelID)
+
+	// Create a ML model via a query.
+	sql := fmt.Sprintf(`
+	CREATE MODEL `+"`%s`"+`
+	OPTIONS (
+		model_type='linear_reg',
+		max_iteration=1,
+		learn_rate=0.4,
+		learn_rate_strategy='constant'
+	) AS (
+		SELECT 'a' AS f1, 2.0 AS label
+		UNION ALL
+		SELECT 'b' AS f1, 3.8 AS label
+	)`, modelRef)
+	q := client.Query(sql)
 	job, err := q.Run(ctx)
 	if err != nil {
 		return err
