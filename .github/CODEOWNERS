@@ -24,3 +24,4 @@
 /run/                                 @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/aap-dpes
 /tasks/                               @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/aap-dpes
 /internal/cloudrunci/                 @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/aap-dpes
+/cloud/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/aap-dpes
