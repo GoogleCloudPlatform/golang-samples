@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START compute_instances_create]
+// [START batch_create_script_job]
 import (
 	"context"
 	"fmt"
@@ -23,14 +23,13 @@ import (
 	batch "cloud.google.com/go/batch/apiv1"
 	batchpb "google.golang.org/genproto/googleapis/cloud/batch/v1"
 	durationpb "google.golang.org/protobuf/types/known/durationpb"
-	//"google.golang.org/protobuf/proto"
 )
 
-// TODO: documentation
-func createInstance(w io.Writer, projectID, region, jobName string) error {
+// Creates and runs a job that executes the specified script
+func createScriptJob(w io.Writer, projectID, region, jobName string) error {
 	// projectID := "your_project_id"
 	// region := "us-central1"
-	// jobName := TODO
+	// jobName := "some-job"
 
 	ctx := context.Background()
 	batchClient, err := batch.NewClient(ctx)
@@ -39,15 +38,18 @@ func createInstance(w io.Writer, projectID, region, jobName string) error {
 	}
 	defer batchClient.Close()
 
+	// The job's parent is the region in which the job will run
 	parent := fmt.Sprintf("projects/%s/locations/%s", projectID, region)
 
 	req := &batchpb.CreateJobRequest{
 		Parent: parent,
 		JobId: jobName,
 		Job: &batchpb.Job{
+			// Tasks are grouped inside a job using TaskGroups.
 			TaskGroups: []*batchpb.TaskGroup{
 				{
 					TaskCount: 4,
+					// Define what will be done as part of the job.
 					TaskSpec: &batchpb.TaskSpec{
 						Runnables: []*batchpb.Runnable{{
 							Executable: &batchpb.Runnable_Script_{
@@ -55,9 +57,15 @@ func createInstance(w io.Writer, projectID, region, jobName string) error {
 									Command: &batchpb.Runnable_Script_Text{
 										Text: "echo Hello world! This is task ${BATCH_TASK_INDEX}. This job has a total of ${BATCH_TASK_COUNT} tasks.",
 									},
+									// You can also run a script from a file. Just remember, that needs to be a script that's
+    								// already on the VM that will be running the job. Using runnable.script.text and runnable.script.path is mutually exclusive.
+									// Command: &batchpb.Runnable_Script_Path{
+									// 	Path: "/tmp/test.sh",
+									// },
 								},
 							},
 						}},
+						// We can specify what resources are requested by each task.
 						ComputeResource:   &batchpb.ComputeResource{
 							CpuMilli:    2000, // in milliseconds per cpu-second. This means the task requires 2 whole CPUs.
 							MemoryMib:   16,
@@ -69,6 +77,9 @@ func createInstance(w io.Writer, projectID, region, jobName string) error {
 					},
 				},
 			},
+			// Policies are used to define on what kind of virtual machines the tasks will run on.
+			// In this case, we tell the system to use "e2-standard-4" machine type.
+			// Read more about machine types here: https://cloud.google.com/compute/docs/machine-types
 			AllocationPolicy: &batchpb.AllocationPolicy{
 				Location:  &batchpb.AllocationPolicy_LocationPolicy{},
 				Instances: []*batchpb.AllocationPolicy_InstancePolicyOrTemplate{{
@@ -80,40 +91,20 @@ func createInstance(w io.Writer, projectID, region, jobName string) error {
 				}},
 			},
 			Labels:           map[string]string{"env": "testing", "type": "script"},
+			// We use Cloud Logging as it's an out of the box available option
 			LogsPolicy:       &batchpb.LogsPolicy{
 				Destination: batchpb.LogsPolicy_CLOUD_LOGGING,
 			},
 		},
-		// InstanceResource: &computepb.Instance{
-		// 	Name: proto.String(instanceName),
-		// 	Disks: []*computepb.AttachedDisk{
-		// 		{
-		// 			InitializeParams: &computepb.AttachedDiskInitializeParams{
-		// 				DiskSizeGb:  proto.Int64(10),
-		// 				SourceImage: proto.String(sourceImage),
-		// 			},
-		// 			AutoDelete: proto.Bool(true),
-		// 			Boot:       proto.Bool(true),
-		// 			Type:       proto.String(computepb.AttachedDisk_PERSISTENT.String()),
-		// 		},
-		// 	},
-		// 	MachineType: proto.String(fmt.Sprintf("zones/%s/machineTypes/%s", zone, machineType)),
-		// 	NetworkInterfaces: []*computepb.NetworkInterface{
-		// 		{
-		// 			Name: proto.String(networkName),
-		// 		},
-		// 	},
-		// },
 	}
 
 	job, err := batchClient.CreateJob(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to create instance: %v", err)
+		return fmt.Errorf("unable to create job: %v", err)
 	}
 
 	fmt.Fprintf(w, "Job created: %v\n", job)
 
 	return nil
 }
-
-// [END compute_instances_create]
+// [END batch_create_script_job]
