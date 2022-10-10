@@ -43,7 +43,7 @@ func createScriptJob(w io.Writer, projectID, region, jobName string) error {
 
 	req := &batchpb.CreateJobRequest{
 		Parent: parent,
-		JobId: jobName,
+		JobId:  jobName,
 		Job: &batchpb.Job{
 			// Tasks are grouped inside a job using TaskGroups.
 			TaskGroups: []*batchpb.TaskGroup{
@@ -58,7 +58,7 @@ func createScriptJob(w io.Writer, projectID, region, jobName string) error {
 										Text: "echo Hello world! This is task ${BATCH_TASK_INDEX}. This job has a total of ${BATCH_TASK_COUNT} tasks.",
 									},
 									// You can also run a script from a file. Just remember, that needs to be a script that's
-    								// already on the VM that will be running the job. Using runnable.script.text and runnable.script.path is mutually exclusive.
+									// already on the VM that will be running the job. Using runnable.script.text and runnable.script.path is mutually exclusive.
 									// Command: &batchpb.Runnable_Script_Path{
 									// 	Path: "/tmp/test.sh",
 									// },
@@ -66,14 +66,14 @@ func createScriptJob(w io.Writer, projectID, region, jobName string) error {
 							},
 						}},
 						// We can specify what resources are requested by each task.
-						ComputeResource:   &batchpb.ComputeResource{
-							CpuMilli:    2000, // in milliseconds per cpu-second. This means the task requires 2 whole CPUs.
-							MemoryMib:   16,
+						ComputeResource: &batchpb.ComputeResource{
+							CpuMilli:  2000, // in milliseconds per cpu-second. This means the task requires 2 whole CPUs.
+							MemoryMib: 16,
 						},
-						MaxRunDuration:    &durationpb.Duration{
+						MaxRunDuration: &durationpb.Duration{
 							Seconds: 3600,
 						},
-						MaxRetryCount:     2,
+						MaxRetryCount: 2,
 					},
 				},
 			},
@@ -81,18 +81,18 @@ func createScriptJob(w io.Writer, projectID, region, jobName string) error {
 			// In this case, we tell the system to use "e2-standard-4" machine type.
 			// Read more about machine types here: https://cloud.google.com/compute/docs/machine-types
 			AllocationPolicy: &batchpb.AllocationPolicy{
-				Location:  &batchpb.AllocationPolicy_LocationPolicy{},
+				Location: &batchpb.AllocationPolicy_LocationPolicy{},
 				Instances: []*batchpb.AllocationPolicy_InstancePolicyOrTemplate{{
 					PolicyTemplate: &batchpb.AllocationPolicy_InstancePolicyOrTemplate_Policy{
 						Policy: &batchpb.AllocationPolicy_InstancePolicy{
-							MachineType:       "e2-standard-4",
+							MachineType: "e2-standard-4",
 						},
 					},
 				}},
 			},
-			Labels:           map[string]string{"env": "testing", "type": "script"},
+			Labels: map[string]string{"env": "testing", "type": "script"},
 			// We use Cloud Logging as it's an out of the box available option
-			LogsPolicy:       &batchpb.LogsPolicy{
+			LogsPolicy: &batchpb.LogsPolicy{
 				Destination: batchpb.LogsPolicy_CLOUD_LOGGING,
 			},
 		},
@@ -107,4 +107,5 @@ func createScriptJob(w io.Writer, projectID, region, jobName string) error {
 
 	return nil
 }
+
 // [END batch_create_script_job]
