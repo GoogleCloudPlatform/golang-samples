@@ -53,7 +53,7 @@ func createScriptJob(w io.Writer, projectID, region, jobName string) error {
 	task.Runnables = []*batchpb.Runnable{runnable}
 
 	// We can specify what resources are requested by each task.
-	task.ComputeResource = &batchpb.ComputeResource {
+	task.ComputeResource = &batchpb.ComputeResource{
 		CpuMilli:  2000, // in milliseconds per cpu-second. This means the task requires 2 whole CPUs.
 		MemoryMib: 16,
 	}
@@ -65,8 +65,8 @@ func createScriptJob(w io.Writer, projectID, region, jobName string) error {
 
 	// Tasks are grouped inside a job using TaskGroups.
 	group := new(batchpb.TaskGroup)
-	group.TaskCount = 4;
-	group.TaskSpec = task;
+	group.TaskCount = 4
+	group.TaskSpec = task
 
 	// Policies are used to define on what kind of virtual machines the tasks will run on.
 	// In this case, we tell the system to use "e2-standard-4" machine type.
@@ -94,7 +94,7 @@ func createScriptJob(w io.Writer, projectID, region, jobName string) error {
 	req := &batchpb.CreateJobRequest{
 		Parent: parent,
 		JobId:  jobName,
-		Job: job,
+		Job:    job,
 	}
 
 	created_job, err := batchClient.CreateJob(ctx, req)
