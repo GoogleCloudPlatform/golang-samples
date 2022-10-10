@@ -108,13 +108,13 @@ func insertingDataTypes(projectID, datasetID, tableID string) error {
 		},
 	}
 	rows := []*ComplexType{row}
-	/* Uncomment to simulate insert errors
-	badRow := &ComplexType{
-		Name: "John",
-		Age:  24,
-		// this row is missing required fields
-	}
-	rows = append(rows, badRow)*/
+	// Uncomment to simulate insert errors.
+	// This example row is missing required fields.
+	// badRow := &ComplexType{
+	// 	Name: "John",
+	// 	Age:  24,
+	// }
+	// rows = append(rows, badRow)
 
 	inserter := table.Inserter()
 	err = inserter.Put(ctx, rows)
