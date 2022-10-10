@@ -81,7 +81,6 @@ func createScriptJob(w io.Writer, projectID, region, jobName string) error {
 			// In this case, we tell the system to use "e2-standard-4" machine type.
 			// Read more about machine types here: https://cloud.google.com/compute/docs/machine-types
 			AllocationPolicy: &batchpb.AllocationPolicy{
-				Location: &batchpb.AllocationPolicy_LocationPolicy{},
 				Instances: []*batchpb.AllocationPolicy_InstancePolicyOrTemplate{{
 					PolicyTemplate: &batchpb.AllocationPolicy_InstancePolicyOrTemplate_Policy{
 						Policy: &batchpb.AllocationPolicy_InstancePolicy{
