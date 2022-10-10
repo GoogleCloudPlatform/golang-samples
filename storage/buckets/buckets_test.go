@@ -756,3 +756,32 @@ func TestRPO(t *testing.T) {
 		t.Fatalf("deleteBucket: %v", err)
 	}
 }
+
+// TestAutoclass tests the following samples:
+// getAutoclass, setAutoclass
+func TestAutoclass(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+
+	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
+	if err != nil {
+		t.Fatalf("Bucket creation failed: %v", err)
+	}
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
+
+	buf := new(bytes.Buffer)
+	toggle := false
+	if err := setAutoclass(buf, bucketName, toggle); err != nil {
+		t.Errorf("setAutoclass: %#v", err)
+	}
+	if got, want := buf.String(), "Autoclass enabled is set to false"; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
+
+	if err := getAutoclass(buf, bucketName); err != nil {
+		t.Errorf("getAutoclass: %#v", err)
+	}
+	if got, want := buf.String(), "Autoclass enabled is set to false"; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
