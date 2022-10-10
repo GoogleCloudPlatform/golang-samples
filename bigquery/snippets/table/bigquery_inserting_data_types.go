@@ -78,10 +78,22 @@ func insertingDataTypes(projectID, datasetID, tableID string) error {
 	if err != nil {
 		return fmt.Errorf("table.Create: %w", err)
 	}
-	day, _ := civil.ParseDate("2019-01-12")
-	firstTime, _ := civil.ParseDateTime("2019-02-17T11:24:00.000")
-	secondTime, _ := civil.ParseTime("14:00:00")
-	thirdTime, _ := time.Parse(time.RFC3339Nano, "2020-04-27T18:07:25.356Z")
+	day, err := civil.ParseDate("2019-01-12")
+	if err != nil {
+		return fmt.Errorf("civil.ParseDate: %w", err)
+	}
+	firstTime, err := civil.ParseDateTime("2019-02-17T11:24:00.000")
+	if err != nil {
+		return fmt.Errorf("civil.ParseDateTime: %w", err)
+	}
+	secondTime, err := civil.ParseTime("14:00:00")
+	if err != nil {
+		return fmt.Errorf("civil.ParseTime: %w", err)
+	}
+	thirdTime, err := time.Parse(time.RFC3339Nano, "2020-04-27T18:07:25.356Z")
+	if err != nil {
+		return fmt.Errorf("time.Parse: %w", err)
+	}
 	row := &ComplexType{
 		Name:         "Tom",
 		Age:          30,
@@ -96,8 +108,22 @@ func insertingDataTypes(projectID, datasetID, tableID string) error {
 		},
 	}
 	rows := []*ComplexType{row}
+	/* Uncomment to simulate insert errors
+	badRow := &ComplexType{
+		Name: "John",
+		Age:  24,
+		// this row is missing required fields
+	}
+	rows = append(rows, badRow)*/
+
 	inserter := table.Inserter()
-	if err := inserter.Put(ctx, rows); err != nil {
+	err = inserter.Put(ctx, rows)
+	if err != nil {
+		if multiErr, ok := err.(bigquery.PutMultiError); ok {
+			for _, putErr := range multiErr {
+				fmt.Printf("failed to insert row %d with err: %v \n", putErr.RowIndex, putErr.Error())
+			}
+		}
 		return err
 	}
 	return nil
