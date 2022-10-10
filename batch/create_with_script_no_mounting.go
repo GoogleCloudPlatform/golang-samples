@@ -41,19 +41,15 @@ func createScriptJob(w io.Writer, projectID, region, jobName string) error {
 	// Define what will be done as part of the job.
 	task := new(batchpb.TaskSpec)
 	runnable := new(batchpb.Runnable)
-	// TODO: flatten this
-	runnable.Executable = &batchpb.Runnable_Script_{
-		Script: &batchpb.Runnable_Script{
-			Command: &batchpb.Runnable_Script_Text{
-				Text: "echo Hello world! This is task ${BATCH_TASK_INDEX}. This job has a total of ${BATCH_TASK_COUNT} tasks.",
-			},
-			// You can also run a script from a file. Just remember, that needs to be a script that's
-			// already on the VM that will be running the job. Using runnable.script.text and runnable.script.path is mutually exclusive.
-			// Command: &batchpb.Runnable_Script_Path{
-			// 	Path: "/tmp/test.sh",
-			// },
-		},
-	}
+	executable := new(batchpb.Runnable_Script_)
+	executable.Script = new(batchpb.Runnable_Script)
+	command := new(batchpb.Runnable_Script_Text)
+	command.Text = "echo Hello world! This is task ${BATCH_TASK_INDEX}. This job has a total of ${BATCH_TASK_COUNT} tasks."
+	// You can also run a script from a file. Just remember, that needs to be a script that's
+	// already on the VM that will be running the job. Using command.Text and command.Path is mutually exclusive.
+	// command := new(batchpb.Runnable_Script_Path)
+	// command.Path = "/tmp/test.sh"
+	executable.Script.Command = command
 	task.Runnables = []*batchpb.Runnable{runnable}
 
 	// We can specify what resources are requested by each task.
