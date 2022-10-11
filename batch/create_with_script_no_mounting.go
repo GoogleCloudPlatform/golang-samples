@@ -47,7 +47,8 @@ func createScriptJob(w io.Writer, projectID, region, jobName string) error {
 						Text: "echo Hello world! This is task ${BATCH_TASK_INDEX}. This job has a total of ${BATCH_TASK_COUNT} tasks.",
 					},
 					// You can also run a script from a file. Just remember, that needs to be a script that's
-					// already on the VM that will be running the job. Using runnable.script.text and runnable.script.path is mutually exclusive.
+					// already on the VM that will be running the job.
+					// Using runnable.script.text and runnable.script.path is mutually exclusive.
 					// Command: &batchpb.Runnable_Script_Path{
 					// 	Path: "/tmp/test.sh",
 					// },
