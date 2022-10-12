@@ -14,7 +14,7 @@
 
 package job
 
-// [START bigquery_extract_model]
+// [START bigquery_export_model]
 import (
 	"context"
 	"fmt"
@@ -57,4 +57,4 @@ func exportModel(projectID, datasetID, modelID, gcsURI string) error {
 	return nil
 }
 
-// [END bigquery_extract_model]
+// [END bigquery_export_model]
