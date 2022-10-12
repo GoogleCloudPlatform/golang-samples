@@ -45,7 +45,7 @@ func createScriptJob(w io.Writer, projectID, region, jobName string) error {
 	// You can also run a script from a file. Just remember, that needs to be a script that's
 	// already on the VM that will be running the job.
 	// Using runnable.script.text and runnable.script.path is mutually exclusive.
-	// Command: &batchpb.Runnable_Script_Path{
+	// command := &batchpb.Runnable_Script_Path{
 	// 	Path: "/tmp/test.sh",
 	// }
 
