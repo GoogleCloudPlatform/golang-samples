@@ -67,8 +67,8 @@ func createScriptJob(w io.Writer, projectID, region, jobName string) error {
 			},
 		}},
 		ComputeResource: resources,
-		MaxRunDuration: maxRunDuration,
-		MaxRetryCount: maxRetryCount,
+		MaxRunDuration:  maxRunDuration,
+		MaxRetryCount:   maxRetryCount,
 	}
 
 	// Tasks are grouped inside a job using TaskGroups.
