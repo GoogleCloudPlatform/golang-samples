@@ -39,31 +39,36 @@ func createScriptJob(w io.Writer, projectID, region, jobName string) error {
 	defer batchClient.Close()
 
 	// Define what will be done as part of the job.
+	command := &batchpb.Runnable_Script_Text{
+		Text: "echo Hello world! This is task ${BATCH_TASK_INDEX}. This job has a total of ${BATCH_TASK_COUNT} tasks.",
+	}
+	// You can also run a script from a file. Just remember, that needs to be a script that's
+	// already on the VM that will be running the job.
+	// Using runnable.script.text and runnable.script.path is mutually exclusive.
+	// Command: &batchpb.Runnable_Script_Path{
+	// 	Path: "/tmp/test.sh",
+	// }
+
+	// We can specify what resources are requested by each task.
+	resources := &batchpb.ComputeResource{
+		CpuMilli:  2000, // in milliseconds per cpu-second. This means the task requires 2 whole CPUs.
+		MemoryMib: 16,
+	}
+
+	maxRunDuration := &durationpb.Duration{
+		Seconds: 3600,
+	}
+	maxRetryCount := int32(2)
+
 	taskSpec := &batchpb.TaskSpec{
 		Runnables: []*batchpb.Runnable{{
 			Executable: &batchpb.Runnable_Script_{
-				Script: &batchpb.Runnable_Script{
-					Command: &batchpb.Runnable_Script_Text{
-						Text: "echo Hello world! This is task ${BATCH_TASK_INDEX}. This job has a total of ${BATCH_TASK_COUNT} tasks.",
-					},
-					// You can also run a script from a file. Just remember, that needs to be a script that's
-					// already on the VM that will be running the job.
-					// Using runnable.script.text and runnable.script.path is mutually exclusive.
-					// Command: &batchpb.Runnable_Script_Path{
-					// 	Path: "/tmp/test.sh",
-					// },
-				},
+				Script: &batchpb.Runnable_Script{Command: command},
 			},
 		}},
-		// We can specify what resources are requested by each task.
-		ComputeResource: &batchpb.ComputeResource{
-			CpuMilli:  2000, // in milliseconds per cpu-second. This means the task requires 2 whole CPUs.
-			MemoryMib: 16,
-		},
-		MaxRunDuration: &durationpb.Duration{
-			Seconds: 3600,
-		},
-		MaxRetryCount: 2,
+		ComputeResource: resources,
+		MaxRunDuration: maxRunDuration,
+		MaxRetryCount: maxRetryCount,
 	}
 
 	// Tasks are grouped inside a job using TaskGroups.
