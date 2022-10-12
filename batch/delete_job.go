@@ -41,12 +41,12 @@ func deleteJob(w io.Writer, projectID, region, jobName string) error {
 		Name: fmt.Sprintf("projects/%s/locations/%s/jobs/%s", projectID, region, jobName),
 	}
 
-	created_job, err := batchClient.DeleteJob(ctx, req)
+	response, err := batchClient.DeleteJob(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to create job: %v", err)
+		return fmt.Errorf("unable to delete job: %v", err)
 	}
 
-	fmt.Fprintf(w, "Job created: %v\n", created_job)
+	fmt.Fprintf(w, "Job deleted: %v\n", response)
 
 	return nil
 }
