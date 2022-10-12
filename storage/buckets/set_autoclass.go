@@ -26,6 +26,9 @@ import (
 
 // setAutoclass sets the Autoclass configuration for a bucket.
 // See https://cloud.google.com/storage/docs/using-autoclass for more information.
+
+// Note: Only update requests that disable Autoclass are currently supported.
+// To enable Autoclass, you must set it at bucket creation time.
 func setAutoclass(w io.Writer, bucketName string, toggle bool) error {
 	// bucketName := "bucket-name"
 	// toggle := false
