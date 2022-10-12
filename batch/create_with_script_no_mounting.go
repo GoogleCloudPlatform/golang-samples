@@ -39,7 +39,7 @@ func createScriptJob(w io.Writer, projectID, region, jobName string) error {
 	defer batchClient.Close()
 
 	// Define what will be done as part of the job.
-	taskSpec := batchpb.TaskSpec{
+	taskSpec := &batchpb.TaskSpec{
 		Runnables: []*batchpb.Runnable{{
 			Executable: &batchpb.Runnable_Script_{
 				Script: &batchpb.Runnable_Script{
@@ -70,14 +70,14 @@ func createScriptJob(w io.Writer, projectID, region, jobName string) error {
 	taskGroups := []*batchpb.TaskGroup{
 		{
 			TaskCount: 4,
-			TaskSpec:  &taskSpec,
+			TaskSpec:  taskSpec,
 		},
 	}
 
 	// Policies are used to define on what kind of virtual machines the tasks will run on.
 	// In this case, we tell the system to use "e2-standard-4" machine type.
 	// Read more about machine types here: https://cloud.google.com/compute/docs/machine-types
-	allocationPolicy := batchpb.AllocationPolicy{
+	allocationPolicy := &batchpb.AllocationPolicy{
 		Instances: []*batchpb.AllocationPolicy_InstancePolicyOrTemplate{{
 			PolicyTemplate: &batchpb.AllocationPolicy_InstancePolicyOrTemplate_Policy{
 				Policy: &batchpb.AllocationPolicy_InstancePolicy{
@@ -88,7 +88,7 @@ func createScriptJob(w io.Writer, projectID, region, jobName string) error {
 	}
 
 	// We use Cloud Logging as it's an out of the box available option
-	logsPolicy := batchpb.LogsPolicy{
+	logsPolicy := &batchpb.LogsPolicy{
 		Destination: batchpb.LogsPolicy_CLOUD_LOGGING,
 	}
 
@@ -99,9 +99,9 @@ func createScriptJob(w io.Writer, projectID, region, jobName string) error {
 
 	job := batchpb.Job{
 		TaskGroups:       taskGroups,
-		AllocationPolicy: &allocationPolicy,
+		AllocationPolicy: allocationPolicy,
 		Labels:           jobLabels,
-		LogsPolicy:       &logsPolicy,
+		LogsPolicy:       logsPolicy,
 	}
 
 	req := &batchpb.CreateJobRequest{
