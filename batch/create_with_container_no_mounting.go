@@ -50,18 +50,15 @@ func createContainerJob(w io.Writer, projectID, region, jobName string) error {
 		MemoryMib: 16,
 	}
 
-	maxRunDuration := &durationpb.Duration{
-		Seconds: 3600,
-	}
-	maxRetryCount := int32(2)
-
 	taskSpec := &batchpb.TaskSpec{
 		Runnables: []*batchpb.Runnable{{
 			Executable: &batchpb.Runnable_Container_{Container: container},
 		}},
 		ComputeResource: resources,
-		MaxRunDuration:  maxRunDuration,
-		MaxRetryCount:   maxRetryCount,
+		MaxRunDuration: &durationpb.Duration{
+			Seconds: 3600,
+		},
+		MaxRetryCount: 2,
 	}
 
 	// Tasks are grouped inside a job using TaskGroups.
