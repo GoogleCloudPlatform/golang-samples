@@ -51,7 +51,8 @@ func createScriptJob(w io.Writer, projectID, region, jobName string) error {
 
 	// We can specify what resources are requested by each task.
 	resources := &batchpb.ComputeResource{
-		CpuMilli:  2000, // in milliseconds per cpu-second. This means the task requires 2 whole CPUs.
+		// CpuMilli is milliseconds per cpu-second. This means the task requires 2 whole CPUs.
+		CpuMilli:  2000,
 		MemoryMib: 16,
 	}
 
