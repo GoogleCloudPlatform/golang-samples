@@ -41,7 +41,7 @@ func listJobs(w io.Writer, projectID, region string) error {
 		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, region),
 	}
 
-	var jobs []batchpb.Job
+	var jobs []*batchpb.Job
 	it := batchClient.ListJobs(ctx, req)
 
 	for {
@@ -52,7 +52,7 @@ func listJobs(w io.Writer, projectID, region string) error {
 		if err != nil {
 			return fmt.Errorf("unable to list jobs: %v", err)
 		}
-		jobs = append(jobs, *job)
+		jobs = append(jobs, job)
 	}
 
 	fmt.Fprintf(w, "Jobs: %v\n", jobs)
