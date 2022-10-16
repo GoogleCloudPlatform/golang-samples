@@ -379,6 +379,46 @@ func TestSample(t *testing.T) {
 	assertContains(t, out, "The venue details for venue id 19")
 }
 
+func TestProtoSample(t *testing.T) {
+	_ = testutil.SystemTest(t)
+	t.Parallel()
+
+	_, dbName, cleanup := initTest(t, randomID())
+	defer cleanup()
+
+	var out string
+
+	// TODO: Currently DDL is only supported through gcloud. Will add below test once DDL feature is available
+	//mustRunSample(t, createProtoDatabase, dbName, "failed to create a database")
+
+	runSample(t, insertDataWithProtoMsgAndEnum, dbName, "failed to insert data")
+	out = runSample(t, readProtoMsgEnum, dbName, "failed to read data")
+	assertContains(t, out, "1 isbn:1 title:\"Harry Potter\" author:\"JK Rowling\" genre:CLASSICAL CLASSICAL\n")
+	assertContains(t, out, "2 isbn:2 title:\"New Arrival\" author:\"Ron\" genre:ROCK ROCK\n")
+
+	out = runSample(t, readOnlyTransactionProtoMsgEnum, dbName, "failed to read data")
+	assertContains(t, out, "1 isbn:1 title:\"Harry Potter\" author:\"JK Rowling\" genre:CLASSICAL CLASSICAL\n")
+	assertContains(t, out, "2 isbn:2 title:\"New Arrival\" author:\"Ron\" genre:ROCK ROCK\n")
+
+	out = runSample(t, updateDataWithProtoMsgAndEnum, dbName, "failed to update data")
+	assertContains(t, out, "Updated proto data")
+
+	out = runSample(t, readProtoMsgEnum, dbName, "failed to read data after update")
+	assertContains(t, out, "1 isbn:2 title:\"Harry Potter\" author:\"JK Rowling\" genre:CLASSICAL CLASSICAL\n")
+	assertContains(t, out, "2 isbn:3 title:\"New Arrival\" author:\"Ron\" genre:ROCK ROCK\n")
+
+	out = runSample(t, queryWithProtoFields, dbName, "failed to read proto message fields")
+	assertContains(t, out, "Harry Potter CLASSICAL JK Rowling CLASSICAL")
+	assertContains(t, out, "New Arrival ROCK Ron ROCK")
+
+	out = runSample(t, queryWithProtoFieldParameter, dbName, "failed to query with parameter as proto field")
+	assertContains(t, out, "2 isbn:2  title:\"New Arrival\"  author:\"Ron\"  genre:ROCK ROCK\n")
+
+	runSample(t, insertDataWithArrayOfProtoMsgAndEnum, dbName, "failed to insert array of proto messages")
+	out = runSample(t, readArrayOfProtoMsgEnum, dbName, "failed to read array of proto messages")
+	assertContains(t, out, "1 [isbn:1 title:\"Harry Potter\" author:\"JK Rowling\" genre:CLASSICAL isbn:2 title:\"New Arrival\" author:\"Ron\" genre:ROCK isbn:3 title:\"Book 3 Arrived\" author:\"John\" genre:COUNTRY] [CLASSICAL ROCK COUNTRY]\n")
+}
+
 func TestBackupSample(t *testing.T) {
 	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2333")
 	if os.Getenv("GOLANG_SAMPLES_E2E_TEST") == "" {

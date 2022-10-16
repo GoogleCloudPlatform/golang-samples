@@ -14,6 +14,8 @@
 
 package spanner
 
+// [START spanner_query_with_proto_fields]
+
 import (
 	"context"
 	"fmt"
@@ -24,9 +26,8 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-// [START spanner_read_only_transaction_with_proto_column]
-
-func readOnlyTransactionProtoMsgEnum(w io.Writer, db string) error {
+// This covers Query Proto Columns, Query ENUM Columns, Query proto fields using dot operator
+func queryWithProtoFields(w io.Writer, db string) error {
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)
 	if err != nil {
@@ -34,29 +35,11 @@ func readOnlyTransactionProtoMsgEnum(w io.Writer, db string) error {
 	}
 	defer client.Close()
 
-	ro := client.ReadOnlyTransaction()
-	defer ro.Close()
-	stmt := spanner.Statement{SQL: `SELECT Id, BookInfo, BookGenre FROM Library`}
-	iter := ro.Query(ctx, stmt)
-	defer iter.Stop()
-	for {
-		row, err := iter.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return err
-		}
-		var bookID int64
-		bookProto := &pb.Book{}
-		var genre pb.Genre
-		if err := row.Columns(&bookID, bookProto, &genre); err != nil {
-			return err
-		}
-		fmt.Fprintf(w, "%d %s %s\n", bookID, bookProto, genre)
+	stmt := spanner.Statement{
+		SQL: `SELECT BookInfo.Title, BookInfo.Genre, BookInfo.Author, BookGenre FROM Library`,
 	}
 
-	iter = ro.Read(ctx, "Library", spanner.AllKeys(), []string{"Id", "BookInfo", "BookGenre"})
+	iter := client.Single().Query(ctx, stmt)
 	defer iter.Stop()
 	for {
 		row, err := iter.Next()
@@ -66,14 +49,15 @@ func readOnlyTransactionProtoMsgEnum(w io.Writer, db string) error {
 		if err != nil {
 			return err
 		}
-		var bookID int64
-		bookProto := &pb.Book{}
-		var genre pb.Genre
-		if err := row.Columns(&bookID, bookProto, &genre); err != nil {
+		var bookInfoProtoTitle string
+		var bookInfoProtoGenre pb.Genre
+		var bookInfoProtoAuthor string
+		var bookGenre pb.Genre
+		if err := row.Columns(&bookInfoProtoTitle, &bookInfoProtoGenre, &bookInfoProtoAuthor, &bookGenre); err != nil {
 			return err
 		}
-		fmt.Fprintf(w, "%d %s %s\n", bookID, bookProto, genre)
+		fmt.Fprintf(w, "%s %s %s %s\n", bookInfoProtoTitle, bookInfoProtoGenre, bookInfoProtoAuthor, bookGenre)
 	}
 }
 
-// [END spanner_read_only_transaction_with_proto_column]
+// [END spanner_query_with_proto_fields]

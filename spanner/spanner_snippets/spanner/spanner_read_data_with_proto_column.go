@@ -35,7 +35,7 @@ func readProtoMsgEnum(w io.Writer, db string) error {
 	defer client.Close()
 
 	iter := client.Single().Read(ctx, "Library", spanner.AllKeys(),
-		[]string{"BookId", "BookProto", "Genre"})
+		[]string{"Id", "BookInfo", "BookGenre"})
 	defer iter.Stop()
 	for {
 		row, err := iter.Next()
@@ -47,11 +47,11 @@ func readProtoMsgEnum(w io.Writer, db string) error {
 		}
 		var bookID int64
 		bookProto := &pb.Book{}
-		var genre pb.Genre
-		if err := row.Columns(&bookID, bookProto, &genre); err != nil {
+		var bookGenre pb.Genre
+		if err := row.Columns(&bookID, bookProto, &bookGenre); err != nil {
 			return err
 		}
-		fmt.Fprintf(w, "%d %d %s\n", bookID, bookProto, genre)
+		fmt.Fprintf(w, "%d %s %s\n", bookID, bookProto, bookGenre)
 	}
 }
 

@@ -33,20 +33,20 @@ func insertDataWithProtoMsgAndEnum(w io.Writer, db string) error {
 	defer client.Close()
 
 	book1 := &pb.Book{
-		Isbn:   0,
+		Isbn:   1,
 		Title:  "Harry Potter",
 		Author: "JK Rowling",
 		Genre:  pb.Genre_CLASSICAL,
 	}
 
 	book2 := &pb.Book{
-		Isbn:   1,
+		Isbn:   2,
 		Title:  "New Arrival",
 		Author: "Ron",
 		Genre:  pb.Genre_ROCK,
 	}
 
-	cols := []string{"BookId", "BookProto", "Genre"}
+	cols := []string{"Id", "BookInfo", "BookGenre"}
 	m := []*spanner.Mutation{
 		spanner.InsertOrUpdate("Library", cols, []interface{}{1, book1, pb.Genre_CLASSICAL}),
 		spanner.InsertOrUpdate("Library", cols, []interface{}{2, book2, pb.Genre_ROCK}),

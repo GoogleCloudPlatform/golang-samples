@@ -21,11 +21,16 @@ import (
 
 	"cloud.google.com/go/spanner"
 	pb "github.com/GoogleCloudPlatform/golang-samples/spanner/spanner_snippets/spanner/testdata"
+	"google.golang.org/api/iterator"
+	"google.golang.org/protobuf/reflect/protoreflect"
+
+	//"google.golang.org/protobuf/proto"
+	"github.com/golang/protobuf/proto"
 )
 
-// [START spanner_update_data_with_proto_column]
+// [START spanner_read_data_with_array_of_proto_column]
 
-func updateDataWithProtoMsgAndEnum(w io.Writer, db string) error {
+func readArrayOfProtoMsgEnum(w io.Writer, db string) error {
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)
 	if err != nil {
@@ -33,32 +38,25 @@ func updateDataWithProtoMsgAndEnum(w io.Writer, db string) error {
 	}
 	defer client.Close()
 
-	book1 := &pb.Book{
-		Isbn:   2,
-		Title:  "Harry Potter",
-		Author: "JK Rowling",
-		Genre:  pb.Genre_CLASSICAL,
+	iter := client.Single().Read(ctx, "Library", spanner.AllKeys(),
+		[]string{"Id", "BookInfo", "BookGenre"})
+	defer iter.Stop()
+	for {
+		row, err := iter.Next()
+		if err == iterator.Done {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		var bookID int64
+		bookArray := []proto.Message{&pb.Book{}}
+		genreArray := []protoreflect.Enum{pb.Genre_BLUES}
+		if err := row.Columns(&bookID, &bookArray, &genreArray); err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "%d %s %s\n", bookID, bookArray, genreArray)
 	}
-
-	book2 := &pb.Book{
-		Isbn:   3,
-		Title:  "New Arrival",
-		Author: "Ron",
-		Genre:  pb.Genre_ROCK,
-	}
-
-	cols := []string{"Id", "BookInfo", "BookGenre"}
-	_, err = client.Apply(ctx, []*spanner.Mutation{
-		spanner.Update("Library", cols, []interface{}{1, book1, pb.Genre_CLASSICAL}),
-		spanner.Update("Library", cols, []interface{}{2, book2, pb.Genre_ROCK}),
-	})
-
-	if err != nil {
-		return err
-	}
-	fmt.Fprintf(w, "Updated proto data")
-
-	return nil
 }
 
-// [END spanner_update_data_with_proto_column]
+// [END spanner_read_data_with_array_of_proto_column]

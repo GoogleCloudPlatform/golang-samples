@@ -16,16 +16,19 @@ package spanner
 
 import (
 	"context"
-	"fmt"
 	"io"
 
 	"cloud.google.com/go/spanner"
 	pb "github.com/GoogleCloudPlatform/golang-samples/spanner/spanner_snippets/spanner/testdata"
+	"google.golang.org/protobuf/reflect/protoreflect"
+
+	"github.com/golang/protobuf/proto"
+	// TODO: Which proto package should be used?
+	//"google.golang.org/protobuf/proto"
 )
 
-// [START spanner_update_data_with_proto_column]
-
-func updateDataWithProtoMsgAndEnum(w io.Writer, db string) error {
+// [START spanner_insert_data_with_array_of_proto_columns]
+func insertDataWithArrayOfProtoMsgAndEnum(w io.Writer, db string) error {
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)
 	if err != nil {
@@ -34,31 +37,35 @@ func updateDataWithProtoMsgAndEnum(w io.Writer, db string) error {
 	defer client.Close()
 
 	book1 := &pb.Book{
-		Isbn:   2,
+		Isbn:   1,
 		Title:  "Harry Potter",
 		Author: "JK Rowling",
 		Genre:  pb.Genre_CLASSICAL,
 	}
 
 	book2 := &pb.Book{
-		Isbn:   3,
+		Isbn:   2,
 		Title:  "New Arrival",
 		Author: "Ron",
 		Genre:  pb.Genre_ROCK,
 	}
 
-	cols := []string{"Id", "BookInfo", "BookGenre"}
-	_, err = client.Apply(ctx, []*spanner.Mutation{
-		spanner.Update("Library", cols, []interface{}{1, book1, pb.Genre_CLASSICAL}),
-		spanner.Update("Library", cols, []interface{}{2, book2, pb.Genre_ROCK}),
-	})
-
-	if err != nil {
-		return err
+	book3 := &pb.Book{
+		Isbn:   3,
+		Title:  "Book 3 Arrived",
+		Author: "John",
+		Genre:  pb.Genre_COUNTRY,
 	}
-	fmt.Fprintf(w, "Updated proto data")
 
-	return nil
+	bookArray := []proto.Message{book1, book2, book3}
+	genreArray := []protoreflect.Enum{pb.Genre_CLASSICAL, pb.Genre_ROCK, pb.Genre_COUNTRY}
+
+	cols := []string{"Id", "BookInfo", "BookGenre"}
+	m := []*spanner.Mutation{
+		spanner.InsertOrUpdate("Library", cols, []interface{}{1, bookArray, genreArray}),
+	}
+	_, err = client.Apply(ctx, m)
+	return err
 }
 
-// [END spanner_update_data_with_proto_column]
+// [END spanner_insert_data_with_array_of_proto_columns]
