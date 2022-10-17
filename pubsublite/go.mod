@@ -3,7 +3,8 @@ module github.com/GoogleCloudPlatform/golang-samples/pubsublite
 go 1.15
 
 require (
-	cloud.google.com/go/pubsub v1.24.1-0.20220812182604-346d154f8951
+	cloud.google.com/go/iam v0.5.0 // indirect
+	cloud.google.com/go/pubsub v1.25.1
 	cloud.google.com/go/pubsublite v1.4.0
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20220204002944-f20d8abe1519
 	github.com/google/go-cmp v0.5.9
