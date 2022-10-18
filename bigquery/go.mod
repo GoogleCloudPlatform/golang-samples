@@ -3,6 +3,7 @@ module github.com/GoogleCloudPlatform/golang-samples/bigquery
 go 1.15
 
 require (
+	cloud.google.com/go v0.102.1
 	cloud.google.com/go/bigquery v1.39.1-0.20220908212230-60e120cef30c
 	cloud.google.com/go/iam v0.3.0
 	cloud.google.com/go/storage v1.24.0
