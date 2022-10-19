@@ -573,6 +573,43 @@ func TestCreateDatabaseWithDefaultLeaderSample(t *testing.T) {
 	assertContains(t, out, "The result of the query to get")
 }
 
+func TestCustomInstanceConfigSample(t *testing.T) {
+	_ = testutil.SystemTest(t)
+	t.Parallel()
+
+	projectID := getSampleProjectId(t)
+	defer cleanupInstanceConfigs(projectID)
+
+	var b bytes.Buffer
+	userConfigID := fmt.Sprintf("custom-golang-samples-config-%v", randomID())
+	if err := createInstanceConfig(&b, projectID, userConfigID, "nam11"); err != nil {
+		t.Fatalf("failed to create instance configuration: %v", err)
+	}
+	out := b.String()
+	assertContains(t, out, "Created instance configuration")
+
+	b.Reset()
+	if err := updateInstanceConfig(&b, projectID, userConfigID); err != nil {
+		t.Errorf("failed to update instance configuration: %v", err)
+	}
+	out = b.String()
+	assertContains(t, out, "Updated instance configuration")
+
+	b.Reset()
+	if err := listInstanceConfigOperations(&b, projectID); err != nil {
+		t.Errorf("failed to list instance configuration operations: %v", err)
+	}
+	out = b.String()
+	assertContains(t, out, "List instance config operations")
+
+	b.Reset()
+	if err := deleteInstanceConfig(&b, projectID, userConfigID); err != nil {
+		t.Errorf("failed to delete instance configuration: %v", err)
+	}
+	out = b.String()
+	assertContains(t, out, "Deleted instance configuration")
+}
+
 func TestPgSample(t *testing.T) {
 	_ = testutil.SystemTest(t)
 	t.Parallel()
@@ -1231,6 +1268,32 @@ func cleanupInstanceWithName(instanceName string) error {
 	if err := instanceAdmin.DeleteInstance(ctx, &instancepb.DeleteInstanceRequest{Name: instanceName}); err != nil {
 		return fmt.Errorf("failed to delete instance %s (error %v), might need a manual removal",
 			instanceName, err)
+	}
+	return nil
+}
+
+func cleanupInstanceConfigs(projectID string) error {
+	// Delete all custom instance configurations.
+	ctx := context.Background()
+	instanceAdmin, err := instance.NewInstanceAdminClient(ctx)
+	if err != nil {
+		return fmt.Errorf("cannot create instance admin client: %v", err)
+	}
+	defer instanceAdmin.Close()
+	configIter := instanceAdmin.ListInstanceConfigs(ctx, &instancepb.ListInstanceConfigsRequest{
+		Parent: "projects/" + projectID,
+	})
+	for {
+		resp, err := configIter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		if strings.Contains(resp.Name, "custom-golang-samples") {
+			instanceAdmin.DeleteInstanceConfig(ctx, &instancepb.DeleteInstanceConfigRequest{Name: resp.Name})
+		}
 	}
 	return nil
 }
