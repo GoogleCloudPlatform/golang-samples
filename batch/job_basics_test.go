@@ -55,11 +55,23 @@ func TestBatchJobCRUD(t *testing.T) {
 
 	buf.Reset()
 
+	// FIXME: this is a recipe for flakiness
+	time.Sleep(8 * time.Second)
+
 	if err := listTasks(buf, tc.ProjectID, region, jobName, "group0"); err != nil {
 		t.Errorf("listTasks got err: %v", err)
 	}
-	if got := buf.String(); !strings.Contains(got, "Hello world!") {
-		t.Errorf("listTasks got %q, expected %q", got, "Hello world!")
+	if got := buf.String(); !strings.Contains(got, "status:") {
+		t.Errorf("listTasks got %q, expected %q", got, "status:")
+	}
+
+	buf.Reset()
+
+	if err := getTask(buf, tc.ProjectID, region, jobName, "group0", 0); err != nil {
+		t.Errorf("getTask got err: %v", err)
+	}
+	if got := buf.String(); !strings.Contains(got, "status:") {
+		t.Errorf("getTask got %q, expected %q", got, "status:")
 	}
 
 	buf.Reset()
