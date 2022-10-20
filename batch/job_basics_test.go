@@ -55,6 +55,15 @@ func TestBatchJobCRUD(t *testing.T) {
 
 	buf.Reset()
 
+	if err := listTasks(buf, tc.ProjectID, region, jobName, "group0"); err != nil {
+		t.Errorf("listTasks got err: %v", err)
+	}
+	if got := buf.String(); !strings.Contains(got, "Hello world!") {
+		t.Errorf("listTasks got %q, expected %q", got, "Hello world!")
+	}
+
+	buf.Reset()
+
 	if err := deleteJob(buf, tc.ProjectID, region, jobName); err != nil {
 		t.Errorf("deleteJob got err: %v", err)
 	}
