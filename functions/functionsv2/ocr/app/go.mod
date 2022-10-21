@@ -9,7 +9,7 @@ require (
 	cloud.google.com/go/translate v1.0.0
 	cloud.google.com/go/vision v1.0.0
 	github.com/GoogleCloudPlatform/functions-framework-go v1.6.1
-	github.com/cloudevents/sdk-go/v2 v2.12.0 // indirect
+	github.com/cloudevents/sdk-go/v2 v2.12.0
 	golang.org/x/text v0.3.7
 	google.golang.org/genproto v0.0.0-20220518221133-4f43b3371335
 )
