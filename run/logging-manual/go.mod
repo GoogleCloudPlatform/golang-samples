@@ -1,5 +1,5 @@
 module github.com/GoogleCloudPlatform/golang-samples/run/logging-manual
 
-go 1.12
+go 1.19
 
-require cloud.google.com/go/compute v1.6.1
+require cloud.google.com/go/compute v1.10.0
