@@ -57,7 +57,7 @@ func TestBatchJobCRUD(t *testing.T) {
 
 	// Tasks take a couple of seconds to be created on the server side.
 	// We're going to poll until they're created, or give up if the errors are persistent.
-	var attempts = 0
+	var attempts uint = 0
 	var loop_err = getTask(buf, tc.ProjectID, region, jobName, "group0", 0)
 	for loop_err != nil {
 		attempts += 1

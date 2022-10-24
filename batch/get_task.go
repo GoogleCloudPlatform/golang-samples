@@ -40,7 +40,8 @@ func getTask(w io.Writer, projectID, region, jobName, taskGroup string, taskNumb
 	defer batchClient.Close()
 
 	req := &batchpb.GetTaskRequest{
-		Name: fmt.Sprintf("projects/%s/locations/%s/jobs/%s/taskGroups/%s/tasks/%d", projectID, region, jobName, taskGroup, taskNumber),
+		Name: fmt.Sprintf("projects/%s/locations/%s/jobs/%s/taskGroups/%s/tasks/%d",
+			projectID, region, jobName, taskGroup, taskNumber),
 	}
 
 	response, err := batchClient.GetTask(ctx, req)
