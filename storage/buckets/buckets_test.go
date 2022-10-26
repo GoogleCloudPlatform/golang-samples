@@ -763,23 +763,33 @@ func TestAutoclass(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 
-	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
-	if err != nil {
-		t.Fatalf("Bucket creation failed: %v", err)
-	}
+	bucketName := testutil.UniqueBucketName(testPrefix)
 	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
 
-	buf := new(bytes.Buffer)
-	toggle := false
-	if err := setAutoclass(buf, bucketName, toggle); err != nil {
-		t.Errorf("setAutoclass: %#v", err)
+	// Test create new bucket with Autoclass enabled.
+	autoclassConfig := &storage.BucketAttrs{
+		Autoclass: &storage.Autoclass{
+			Enabled: true,
+		},
 	}
-	if got, want := buf.String(), "Autoclass enabled is set to false"; !strings.Contains(got, want) {
+	bucket := client.Bucket(bucketName)
+	if err := bucket.Create(ctx, tc.ProjectID, autoclassConfig); err != nil {
+		t.Fatalf("Bucket creation failed: %v", err)
+	}
+
+	// Test get Autoclass config.
+	buf := new(bytes.Buffer)
+	if err := getAutoclass(buf, bucketName); err != nil {
+		t.Errorf("getAutoclass: %#v", err)
+	}
+	if got, want := buf.String(), "Autoclass enabled is set to true"; !strings.Contains(got, want) {
 		t.Errorf("got %q, want %q", got, want)
 	}
 
-	if err := getAutoclass(buf, bucketName); err != nil {
-		t.Errorf("getAutoclass: %#v", err)
+	// Test set Autoclass config.
+	toggle := false
+	if err := setAutoclass(buf, bucketName, toggle); err != nil {
+		t.Errorf("setAutoclass: %#v", err)
 	}
 	if got, want := buf.String(), "Autoclass enabled is set to false"; !strings.Contains(got, want) {
 		t.Errorf("got %q, want %q", got, want)
