@@ -18,10 +18,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io"
 	"math/rand"
-
-	//"strings"
 	"testing"
 	"time"
 
@@ -42,12 +39,9 @@ func TestCreateJobWithTemplate(t *testing.T) {
 	templateName := fmt.Sprintf("test-template-go-batch-%v-%v", time.Now().Format("2006-12-25"), r.Int())
 	buf := &bytes.Buffer{}
 
-	if err := createTemplate(buf, tc.ProjectID, templateName); err != nil {
+	if err := createTemplate(tc.ProjectID, templateName); err != nil {
 		t.Errorf("Failed to create instance template: createTemplate got err: %v", err)
 	}
-	// TODO: defer deletion
-
-	buf.Reset()
 
 	if err := createScriptJobWithTemplate(buf, tc.ProjectID, region, jobName, templateName); err != nil {
 		t.Errorf("createScriptJobWithTemplate got err: %v", err)
@@ -60,14 +54,16 @@ func TestCreateJobWithTemplate(t *testing.T) {
 	if !succeeded {
 		t.Errorf("The test job has failed: %v", err)
 	}
+
+	// clean up after the test
+	if err := deleteInstanceTemplate(tc.ProjectID, templateName); err != nil {
+		t.Errorf("Failed to delete instance template: deleteInstanceTemplate got err: %v", err)
+	}
 }
 
 // createTemplate creates a new instance template with the provided name and a specific instance configuration.
 // Includes all the setup needed for Batch specifically, such as service accounts.
-func createTemplate(w io.Writer, projectID, templateName string) error {
-	// projectID := "your_project_id"
-	// templateName := "your_template_name"
-
+func createTemplate(projectID, templateName string) error {
 	ctx := context.Background()
 	instanceTemplatesClient, err := compute.NewInstanceTemplatesRESTClient(ctx)
 	if err != nil {
@@ -139,8 +135,6 @@ func createTemplate(w io.Writer, projectID, templateName string) error {
 		return fmt.Errorf("unable to wait for the operation: %v", err)
 	}
 
-	fmt.Fprintf(w, "Instance template created\n")
-
 	return nil
 }
 
@@ -157,4 +151,28 @@ func projectIDtoNumber(ctx context.Context, projectID string) (int64, error) {
 		return 0, fmt.Errorf("Could not resolve project ID '%s' to project number: %v", projectID, err)
 	}
 	return projectData.ProjectNumber, nil
+}
+
+func deleteInstanceTemplate(projectID, templateName string) error {
+	ctx := context.Background()
+	instanceTemplatesClient, err := compute.NewInstanceTemplatesRESTClient(ctx)
+	if err != nil {
+		return fmt.Errorf("NewInstanceTemplatesRESTClient: %v", err)
+	}
+	defer instanceTemplatesClient.Close()
+
+	req := &computepb.DeleteInstanceTemplateRequest{
+		Project:          projectID,
+		InstanceTemplate: templateName,
+	}
+
+	op, err := instanceTemplatesClient.Delete(ctx, req)
+	if err != nil {
+		return fmt.Errorf("unable to delete instance template: %v", err)
+	}
+
+	if err = op.Wait(ctx); err != nil {
+		return fmt.Errorf("unable to wait for the operation: %v", err)
+	}
+	return nil
 }
