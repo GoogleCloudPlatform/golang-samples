@@ -20,12 +20,14 @@ import (
 	"fmt"
 	"io"
 	"math/rand"
+
 	//"strings"
 	"testing"
 	"time"
 
 	compute "cloud.google.com/go/compute/apiv1"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"google.golang.org/api/cloudresourcemanager/v1"
 	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
 	"google.golang.org/protobuf/proto"
 )
@@ -51,8 +53,8 @@ func TestCreateJobWithTemplate(t *testing.T) {
 	}
 }
 
-// Copied from compute_template_create snippet
 // createTemplate creates a new instance template with the provided name and a specific instance configuration.
+// Includes all the setup needed for Batch specifically, such as service accounts.
 func createTemplate(w io.Writer, projectID, templateName string) error {
 	// projectID := "your_project_id"
 	// templateName := "your_template_name"
@@ -63,6 +65,13 @@ func createTemplate(w io.Writer, projectID, templateName string) error {
 		return fmt.Errorf("NewInstanceTemplatesRESTClient: %v", err)
 	}
 	defer instanceTemplatesClient.Close()
+
+	projectNumber, err := projectIDtoNumber(ctx, projectID)
+	if err != nil {
+		return fmt.Errorf("Could not resolve project ID '%s' to project number: %v", projectID, err)
+	}
+
+	serviceAccountAddress := fmt.Sprintf("%d-compute@developer.gserviceaccount.com", projectNumber)
 
 	req := &computepb.InsertInstanceTemplateRequest{
 		Project: projectID,
@@ -97,6 +106,17 @@ func createTemplate(w io.Writer, projectID, templateName string) error {
 						},
 					},
 				},
+				ServiceAccounts: []*computepb.ServiceAccount{{
+					Email: &serviceAccountAddress,
+					Scopes: []string{
+						"https://www.googleapis.com/auth/devstorage.read_only",
+						"https://www.googleapis.com/auth/logging.write",
+						"https://www.googleapis.com/auth/monitoring.write",
+						"https://www.googleapis.com/auth/servicecontrol",
+						"https://www.googleapis.com/auth/service.management.readonly",
+						"https://www.googleapis.com/auth/trace.append",
+					},
+				}},
 			},
 		},
 	}
@@ -113,4 +133,19 @@ func createTemplate(w io.Writer, projectID, templateName string) error {
 	fmt.Fprintf(w, "Instance template created\n")
 
 	return nil
+}
+
+func projectIDtoNumber(ctx context.Context, projectID string) (int64, error) {
+	// Resolve the project ID to project number
+	resourceManagerClient, err := cloudresourcemanager.NewService(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("cloudresourcemanager.NewService: %v", err)
+	}
+	// resourceManagerClient doesn't have a Close() method
+	projectsClient := cloudresourcemanager.NewProjectsService(resourceManagerClient)
+	projectData, err := projectsClient.Get(projectID).Do()
+	if err != nil {
+		return 0, fmt.Errorf("Could not resolve project ID '%s' to project number: %v", projectID, err)
+	}
+	return projectData.ProjectNumber, nil
 }
