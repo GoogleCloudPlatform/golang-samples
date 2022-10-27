@@ -40,6 +40,10 @@ func createPubsubExportSubscription(w io.Writer, projectID, region, location, to
 	}
 	defer client.Close()
 
+	// Initialize the subscription to the oldest retained messages for each
+	// partition.
+	targetLocation := pubsublite.AtTargetLocation(pubsublite.Beginning)
+
 	sub, err := client.CreateSubscription(ctx, pubsublite.SubscriptionConfig{
 		Name:                fmt.Sprintf("projects/%s/locations/%s/subscriptions/%s", projectID, location, subID),
 		Topic:               fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, location, topicID),
@@ -47,11 +51,11 @@ func createPubsubExportSubscription(w io.Writer, projectID, region, location, to
 		// Configures an export subscription that writes messages to a Pub/Sub topic.
 		ExportConfig: &pubsublite.ExportConfig{
 			DesiredState: pubsublite.ExportActive, // Can also be ExportPaused.
-			Destination: &pubsublite.PubSubConfig{
+			Destination: &pubsublite.PubSubDestinationConfig{
 				Topic: fmt.Sprintf("projects/%s/topics/%s", projectID, pubsubTopicID),
 			},
 		},
-	})
+	}, targetLocation)
 	if err != nil {
 		return fmt.Errorf("client.CreateSubscription got err: %v", err)
 	}
