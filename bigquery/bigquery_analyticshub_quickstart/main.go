@@ -28,6 +28,9 @@ import (
 	dataexchangepb "google.golang.org/genproto/googleapis/cloud/bigquery/dataexchange/v1beta1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
 func main() {
@@ -68,6 +71,9 @@ func main() {
 	fmt.Printf("Exchange Name: %s\n", exchange.GetName())
 	if desc := exchange.GetDescription(); desc != "" {
 		fmt.Printf("Exchange Description: %s", desc)
+	}
+	if _, err := updateExchange(ctx, dataExchClient, exchange, "foo"); err != nil {
+		log.Fatalf("updateExchange: %v", err)
 	}
 
 	// Finally, create a listing within the data exchange and print information about it.
@@ -131,6 +137,24 @@ func createOrGetDataExchange(ctx context.Context, client *dataexchange.Analytics
 		return nil, err
 	}
 	return resp, nil
+}
+
+func updateExchange(ctx context.Context, client *dataexchange.AnalyticsHubClient, exch *dataexchangepb.DataExchange, dispName string) (*dataexchangepb.DataExchange, error) {
+	fm := &fieldmaskpb.FieldMask{
+		Paths: []string{"display_name"},
+	}
+	if !fm.IsValid(exch) {
+		log.Printf("mask is invalid!")
+	}
+	copy := (proto.Clone(exch)).(*dataexchangepb.DataExchange)
+	copy.DisplayName = dispName
+
+	req := &dataexchangepb.UpdateDataExchangeRequest{
+		DataExchange: copy,
+		UpdateMask:   fm,
+	}
+	log.Printf("request:\n%s\n\n", protojson.Format(req))
+	return client.UpdateDataExchange(ctx, req)
 }
 
 // createListing creates an example listing within the specified exchange using the provided source dataset.
