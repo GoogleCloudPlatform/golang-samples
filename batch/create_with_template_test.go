@@ -33,6 +33,7 @@ import (
 )
 
 func TestCreateJobWithTemplate(t *testing.T) {
+	t.Parallel()
 	var r *rand.Rand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))
 	tc := testutil.SystemTest(t)
@@ -50,6 +51,14 @@ func TestCreateJobWithTemplate(t *testing.T) {
 
 	if err := createScriptJobWithTemplate(buf, tc.ProjectID, region, jobName, templateName); err != nil {
 		t.Errorf("createScriptJobWithTemplate got err: %v", err)
+	}
+
+	succeeded, err := jobSucceeded(tc.ProjectID, region, jobName)
+	if err != nil {
+		t.Errorf("Could not verify job completion: %v", err)
+	}
+	if !succeeded {
+		t.Errorf("The test job has failed: %v", err)
 	}
 }
 

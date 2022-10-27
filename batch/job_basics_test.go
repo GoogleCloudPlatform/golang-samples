@@ -26,6 +26,7 @@ import (
 )
 
 func TestBatchJobCRUD(t *testing.T) {
+	t.Parallel()
 	var r *rand.Rand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))
 	tc := testutil.SystemTest(t)
@@ -36,6 +37,14 @@ func TestBatchJobCRUD(t *testing.T) {
 
 	if err := createScriptJob(buf, tc.ProjectID, region, jobName); err != nil {
 		t.Errorf("createScriptJob got err: %v", err)
+	}
+
+	succeeded, err := jobSucceeded(tc.ProjectID, region, jobName)
+	if err != nil {
+		t.Errorf("Could not verify job completion: %v", err)
+	}
+	if !succeeded {
+		t.Errorf("The test job has failed: %v", err)
 	}
 
 	buf.Reset()
@@ -56,18 +65,9 @@ func TestBatchJobCRUD(t *testing.T) {
 	buf.Reset()
 
 	// Tasks take a couple of seconds to be created on the server side.
-	// We're going to poll until they're created, or give up if the errors are persistent.
-	var attempts uint = 0
-	var loop_err = getTask(buf, tc.ProjectID, region, jobName, "group0", 0)
-	for loop_err != nil {
-		attempts += 1
-		// tasks usually appear in a couple of seconds, 20 seconds is way more than enough
-		if attempts > 20 {
-			t.Errorf("getTask got err: %v", loop_err)
-			break
-		}
-		time.Sleep(1 * time.Second)
-		loop_err = getTask(buf, tc.ProjectID, region, jobName, "group0", 0)
+	// But since we already verified that the job has completed, we don't need to wait any further.
+	if err := getTask(buf, tc.ProjectID, region, jobName, "group0", 0); err != nil {
+		t.Errorf("getTask got err: %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, "status:") {
 		t.Errorf("getTask got %q, expected %q", got, "status:")
@@ -90,6 +90,7 @@ func TestBatchJobCRUD(t *testing.T) {
 }
 
 func TestBatchContainerJob(t *testing.T) {
+	t.Parallel()
 	var r *rand.Rand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))
 	tc := testutil.SystemTest(t)
@@ -100,5 +101,13 @@ func TestBatchContainerJob(t *testing.T) {
 
 	if err := createContainerJob(buf, tc.ProjectID, region, jobName); err != nil {
 		t.Errorf("createContainerJob got err: %v", err)
+	}
+
+	succeeded, err := jobSucceeded(tc.ProjectID, region, jobName)
+	if err != nil {
+		t.Errorf("Could not verify job completion: %v", err)
+	}
+	if !succeeded {
+		t.Errorf("The test job has failed: %v", err)
 	}
 }
