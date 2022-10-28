@@ -5,6 +5,7 @@ go 1.15
 require (
 	cloud.google.com/go/batch v0.2.1
 	cloud.google.com/go/compute v1.10.0
+	cloud.google.com/go/logging v1.0.0
 	cloud.google.com/go/storage v1.24.0
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20221019153537-202528212fc1
 	golang.org/x/oauth2 v0.1.0 // indirect
