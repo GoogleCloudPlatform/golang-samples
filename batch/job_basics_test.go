@@ -49,7 +49,8 @@ func TestBatchJobCRUD(t *testing.T) {
 
 	buf.Reset()
 
-	if job, err := getJob(buf, tc.ProjectID, region, jobName); err != nil {
+	job, err := getJob(buf, tc.ProjectID, region, jobName)
+	if err != nil {
 		t.Errorf("getJob got err: %v", err)
 	}
 
@@ -80,6 +81,15 @@ func TestBatchJobCRUD(t *testing.T) {
 	}
 	if got := buf.String(); !strings.Contains(got, "status:") {
 		t.Errorf("listTasks got %q, expected %q", got, "status:")
+	}
+
+	buf.Reset()
+
+	if err := printJobLogs(buf, tc.ProjectID, job); err != nil {
+		t.Errorf("printJobLogs got err: %v", err)
+	}
+	if got := buf.String(); !strings.Contains(got, "Hello world!") {
+		t.Errorf("printJobLogs got %q, expected %q", got, "Hello world!")
 	}
 
 	buf.Reset()
