@@ -51,7 +51,7 @@ func printJobLogs(w io.Writer, projectID string, job *batchpb.Job) error {
 		// Only get entries from the "batch_task_logs" log for the job with the given UID
 		logadmin.Filter(fmt.Sprintf(`logName = "projects/%s/logs/%s" AND labels.job_uid={%s}`, projectID, name, job.Uid)),
 	)
-	
+
 	var entries []*logging.Entry
 
 	for {

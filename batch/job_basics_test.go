@@ -49,7 +49,7 @@ func TestBatchJobCRUD(t *testing.T) {
 
 	buf.Reset()
 
-	if err := getJob(buf, tc.ProjectID, region, jobName); err != nil {
+	if job, err := getJob(buf, tc.ProjectID, region, jobName); err != nil {
 		t.Errorf("getJob got err: %v", err)
 	}
 
