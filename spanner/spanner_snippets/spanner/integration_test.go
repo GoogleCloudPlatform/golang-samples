@@ -638,6 +638,12 @@ func TestPgSample(t *testing.T) {
 	assertContains(t, out, "1 1 300000")
 	assertContains(t, out, "2 2 300000")
 
+	out = runSample(t, addJsonBColumn, dbName, "failed to add jsonB column")
+	assertContains(t, out, "Added VenueDetails column\n")
+	out = runSample(t, updateDataWithJsonBColumn, dbName, "failed to update data with jsonB")
+	assertContains(t, out, "Updated data to VenueDetails column\n")
+	out = runSample(t, queryWithJsonBParameter, dbName, "failed to query with jsonB parameter")
+	assertContains(t, out, "The venue details for venue id 19")
 }
 
 func TestPgQueryParameter(t *testing.T) {
