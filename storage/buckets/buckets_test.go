@@ -782,16 +782,16 @@ func TestAutoclass(t *testing.T) {
 	if err := getAutoclass(buf, bucketName); err != nil {
 		t.Errorf("getAutoclass: %#v", err)
 	}
-	if got, want := buf.String(), "Autoclass enabled is set to true"; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Autoclass enabled was set to true"; !strings.Contains(got, want) {
 		t.Errorf("got %q, want %q", got, want)
 	}
 
 	// Test set Autoclass config.
-	toggle := false
-	if err := setAutoclass(buf, bucketName, toggle); err != nil {
+	value := false
+	if err := setAutoclass(buf, bucketName, value); err != nil {
 		t.Errorf("setAutoclass: %#v", err)
 	}
-	if got, want := buf.String(), "Autoclass enabled is set to false"; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Autoclass enabled was set to false"; !strings.Contains(got, want) {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }

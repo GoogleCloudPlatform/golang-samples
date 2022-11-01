@@ -29,9 +29,9 @@ import (
 
 // Note: Only update requests that disable Autoclass are currently supported.
 // To enable Autoclass, you must set it at bucket creation time.
-func setAutoclass(w io.Writer, bucketName string, toggle bool) error {
+func setAutoclass(w io.Writer, bucketName string, value bool) error {
 	// bucketName := "bucket-name"
-	// toggle := false
+	// value := false
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -45,7 +45,7 @@ func setAutoclass(w io.Writer, bucketName string, toggle bool) error {
 	bucket := client.Bucket(bucketName)
 	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
 		Autoclass: &storage.Autoclass{
-			Enabled: toggle,
+			Enabled: value,
 		},
 	}
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
