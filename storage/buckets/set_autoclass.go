@@ -51,7 +51,7 @@ func setAutoclass(w io.Writer, bucketName string, toggle bool) error {
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
 		return fmt.Errorf("Bucket(%q).Update: %v", bucketName, err)
 	}
-	fmt.Fprintf(w, "Autoclass enabled is set to %v for %v \n", bucketAttrsToUpdate.Autoclass.Enabled, bucketName)
+	fmt.Fprintf(w, "Autoclass enabled was set to %v on bucket %q \n", bucketAttrsToUpdate.Autoclass.Enabled, bucketName)
 	return nil
 }
 

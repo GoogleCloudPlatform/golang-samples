@@ -42,7 +42,7 @@ func getAutoclass(w io.Writer, bucketName string) error {
 	if err != nil {
 		return fmt.Errorf("Bucket(%q).Attrs: %v", bucketName, err)
 	}
-	fmt.Fprintf(w, "Autoclass enabled is set to %v for %v at %v", attrs.Autoclass.Enabled, bucketName, attrs.Autoclass.ToggleTime)
+	fmt.Fprintf(w, "Autoclass enabled was set to %v on bucket %q at %v", attrs.Autoclass.Enabled, bucketName, attrs.Autoclass.ToggleTime)
 	return nil
 }
 
