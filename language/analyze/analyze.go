@@ -132,6 +132,13 @@ func classifyText(ctx context.Context, client *language.Client, text string) (*l
 			},
 			Type: languagepb.Document_PLAIN_TEXT,
 		},
+		ClassificationModelOptions: &languagepb.ClassificationModelOptions{
+			ModelType: &languagepb.ClassificationModelOptions_V2Model_{
+				V2Model: &languagepb.ClassificationModelOptions_V2Model{
+					ContentCategoriesVersion: languagepb.ClassificationModelOptions_V2Model_V2,
+				},
+			},
+		},
 	})
 }
 

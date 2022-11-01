@@ -100,19 +100,18 @@ func TestCreateBucketDualRegion(t *testing.T) {
 	if err := createBucketDualRegion(buf, tc.ProjectID, bucketName); err != nil {
 		t.Fatalf("createBucketDualRegion: %v", err)
 	}
-	if got, want := buf.String(), fmt.Sprintf("%s and %s", region1, region2); !strings.Contains(got, want) {
+	got := buf.String()
+	if want := bucketName; !strings.Contains(got, want) {
 		t.Errorf("got %q, want %q", got, want)
 	}
-
-	attrs, err := client.Bucket(bucketName).Attrs(ctx)
-	if err != nil {
-		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	if want := location; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
 	}
-	if got, want := attrs.Location, location; got != want {
-		t.Errorf("location: got %q, want %q", got, want)
+	if want := "dual-region"; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
 	}
-	if got, want := attrs.LocationType, "dual-region"; got != want {
-		t.Errorf("location type: got %q, want %q", got, want)
+	if want := fmt.Sprintf("%s %s", region1, region2); !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
 	}
 }
 

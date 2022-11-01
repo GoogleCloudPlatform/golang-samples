@@ -30,7 +30,7 @@ func updateView(projectID, datasetID, viewID string) error {
 	ctx := context.Background()
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("bigquery.NewClient: %v", err)
+		return fmt.Errorf("bigquery.NewClient: %w", err)
 	}
 	defer client.Close()
 

@@ -71,7 +71,7 @@ func connectTCPSocket() (*sql.DB, error) {
 			return nil, err
 		}
 		if ok := pool.AppendCertsFromPEM(pem); !ok {
-			return nil, err
+			return nil, errors.New("unable to append root cert to pool")
 		}
 		cert, err := tls.LoadX509KeyPair(dbCert, dbKey)
 		if err != nil {

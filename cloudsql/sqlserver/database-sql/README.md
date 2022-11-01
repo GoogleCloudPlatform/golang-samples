@@ -76,11 +76,11 @@ To test the application locally, follow these steps after the proxy is running:
 To run the sample on GAE-Standard, create an App Engine project by following the setup for these
 [instructions](https://cloud.google.com/appengine/docs/standard/go/quickstart#before-you-begin).
 
-First, create an `app.yaml` with the correct values to pass the environment
-variables into the runtime. Your app.yaml file should look like this:
+First, update [`app.standard.yaml`](cmd/app/app.standard.yaml) with the correct values to pass the environment
+variables into the runtime. Your `app.standard.yaml` file should look like this:
 
 ```yaml
-runtime: go111
+runtime: go116
 env_variables:
   INSTANCE_CONNECTION_NAME: <PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME>
   DB_USER: <YOUR_DB_USER_NAME>
@@ -93,5 +93,5 @@ secure solution such as [Cloud KMS](https://cloud.google.com/kms/) to help keep 
 
 Next, the following command will deploy the application to your Google Cloud project:
 ```bash
-gcloud app deploy
+gcloud app deploy cmd/app/app.standard.yaml
 ```
