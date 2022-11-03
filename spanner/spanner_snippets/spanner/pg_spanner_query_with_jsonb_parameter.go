@@ -48,7 +48,7 @@ func queryWithJsonBParameter(w io.Writer, db string) error {
 	}
 
 	stmt := spanner.Statement{
-		SQL: `SELECT VenueId, VenueDetails FROM Venues WHERE WHERE CAST(venuedetails ->> 'rating' AS INTEGER) > $1`,
+		SQL: `SELECT VenueId, VenueDetails FROM Venues WHERE CAST(venuedetails ->> 'rating' AS INTEGER) > $1`,
 		Params: map[string]interface{}{
 			"p1": 2,
 		},
