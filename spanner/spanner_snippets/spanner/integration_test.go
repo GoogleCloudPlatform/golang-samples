@@ -379,6 +379,44 @@ func TestSample(t *testing.T) {
 	assertContains(t, out, "The venue details for venue id 19")
 }
 
+func TestProtoSample(t *testing.T) {
+	_ = testutil.SystemTest(t)
+	t.Parallel()
+
+	_, dbName, cleanup := initTest(t, randomID())
+	defer cleanup()
+	dbName = "projects/span-cloud-testing/instances/harsha-test-gcloud/databases/singer_proto_db"
+
+	var out string
+	out = runSample(t, insertDataWithProtoMsgAndEnum, dbName, "failed to insert data with proto message and enum")
+	assertContains(t, out, "Inserted data to SingerInfo and SingerGenre columns")
+
+	out = runSample(t, readDataWithProtoMsgAndEnum, dbName, "failed to read data with proto message and enum")
+	assertContains(t, out, "1 Singer1")
+	assertContains(t, out, "2 Singer2")
+	assertContains(t, out, "3 Singer3")
+
+	out = runSample(t, readOnlyTransactionProtoMsgAndEnum, dbName, "failed to read data with proto message and enum")
+	assertContains(t, out, "1 Singer1")
+	assertContains(t, out, "2 Singer2")
+	assertContains(t, out, "3 Singer3")
+
+	out = runSample(t, insertDataWithProtoMsgAndEnumNullValues, dbName, "failed to insert null data with NullProtoMessage and NullProtoEnum")
+	assertContains(t, out, "Inserted null data to SingerInfo and SingerGenre columns")
+
+	out = runSample(t, readDataWithProtoMsgAndEnumNullValues, dbName, "failed to read null data with NullProtoMessage and NullProtoEnum")
+	assertContains(t, out, "1 Singer1")
+	assertContains(t, out, "2 Singer2")
+	assertContains(t, out, "3 Singer3")
+	assertContains(t, out, "4 Singer4")
+
+	out = runSample(t, readOnlyTransactionProtoMsgAndEnumNullValues, dbName, "failed to read null data with NullProtoMessage and NullProtoEnum")
+	assertContains(t, out, "1 Singer1")
+	assertContains(t, out, "2 Singer2")
+	assertContains(t, out, "3 Singer3")
+	assertContains(t, out, "4 Singer4")
+}
+
 func TestBackupSample(t *testing.T) {
 	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2333")
 	if os.Getenv("GOLANG_SAMPLES_E2E_TEST") == "" {
