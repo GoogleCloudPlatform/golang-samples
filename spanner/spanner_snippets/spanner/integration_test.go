@@ -638,6 +638,34 @@ func TestPgSample(t *testing.T) {
 	assertContains(t, out, "1 1 300000")
 	assertContains(t, out, "2 2 300000")
 
+	client, err := spanner.NewClient(context.Background(), dbName)
+	if err != nil {
+		t.Fatalf("failed to create Spanner client: %v", err)
+	}
+	defer client.Close()
+	_, err = client.Apply(context.Background(), []*spanner.Mutation{
+		spanner.InsertMap("Venues", map[string]interface{}{
+			"VenueId": 4,
+			"Name":    "Venue 4",
+		}),
+		spanner.InsertMap("Venues", map[string]interface{}{
+			"VenueId": 19,
+			"Name":    "Venue 19",
+		}),
+		spanner.InsertMap("Venues", map[string]interface{}{
+			"VenueId": 42,
+			"Name":    "Venue 42",
+		}),
+	})
+	if err != nil {
+		t.Fatalf("failed to insert test records: %v", err)
+	}
+	out = runSample(t, addJsonBColumn, dbName, "failed to add jsonB column")
+	assertContains(t, out, "Added VenueDetails column\n")
+	out = runSample(t, updateDataWithJsonBColumn, dbName, "failed to update data with jsonB")
+	assertContains(t, out, "Updated data to VenueDetails column\n")
+	out = runSample(t, queryWithJsonBParameter, dbName, "failed to query with jsonB parameter")
+	assertContains(t, out, "The venue details for venue id 19")
 }
 
 func TestPgQueryParameter(t *testing.T) {
