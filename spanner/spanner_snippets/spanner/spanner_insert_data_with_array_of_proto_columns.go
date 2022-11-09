@@ -21,13 +21,12 @@ import (
 
 	"cloud.google.com/go/spanner"
 	pb "github.com/GoogleCloudPlatform/golang-samples/spanner/spanner_snippets/spanner/testdata/protos"
+	"github.com/golang/protobuf/proto"
 	"google.golang.org/api/option"
-	"google.golang.org/protobuf/proto"
 )
 
-// [START spanner_insert_data_with_proto_columns]
-
-func insertDataWithProtoMsgAndEnum(w io.Writer, db string) error {
+// [START spanner_insert_data_with_array_of_proto_columns]
+func insertDataWithArrayOfProtoMsgAndEnum(w io.Writer, db string) error {
 	ctx := context.Background()
 	endpoint := "staging-wrenchworks.sandbox.googleapis.com:443"
 	options := []option.ClientOption{option.WithEndpoint(endpoint)}
@@ -53,35 +52,26 @@ func insertDataWithProtoMsgAndEnum(w io.Writer, db string) error {
 		Genre:       &singer2ProtoEnum,
 	}
 
-	singer3ProtoEnum := pb.Genre_JAZZ
-	singer3ProtoMsg := &pb.SingerInfo{
-		SingerId:    proto.Int64(3),
-		BirthDate:   proto.String("March"),
-		Nationality: proto.String("Country3"),
-		Genre:       &singer3ProtoEnum,
-	}
-
-	singer4ProtoEnum := pb.Genre_POP
-	singer4ProtoMsg := &pb.SingerInfo{
-		SingerId:    proto.Int64(4),
-		BirthDate:   proto.String("April"),
-		Nationality: proto.String("Country4"),
-		Genre:       &singer4ProtoEnum,
-	}
+	singerInfoArray := []*pb.SingerInfo{singer1ProtoMsg, singer2ProtoMsg}
+	singerGenreArray := []*pb.Genre{&singer1ProtoEnum, &singer2ProtoEnum}
+	singerInfoNilArray := []*pb.SingerInfo(nil)
+	singerGenreNilArray := []*pb.Genre(nil)
+	singerInfoEmptyArray := []*pb.SingerInfo{}
+	singerGenreEmptyArray := []*pb.Genre{}
 
 	cols := []string{"SingerId", "FirstName", "LastName", "SingerInfo", "SingerGenre"}
 	m := []*spanner.Mutation{
-		spanner.InsertOrUpdate("Singers", cols, []interface{}{1, "Singer1", "Singer1", singer1ProtoMsg, &singer1ProtoEnum}),
-		spanner.InsertOrUpdate("Singers", cols, []interface{}{2, "Singer2", "Singer2", singer2ProtoMsg, &singer2ProtoEnum}),
-		spanner.InsertOrUpdate("Singers", cols, []interface{}{3, "Singer3", "Singer3", singer3ProtoMsg, &singer3ProtoEnum}),
-		spanner.InsertOrUpdate("Singers", cols, []interface{}{4, "Singer4", "Singer4", singer4ProtoMsg, &singer4ProtoEnum}),
+		spanner.InsertOrUpdate("Singers", cols, []interface{}{1, "Singer1", "Singer1", singerInfoArray, singerGenreArray}),
+		spanner.InsertOrUpdate("Singers", cols, []interface{}{2, "Singer2", "Singer2", singerInfoNilArray, singerGenreNilArray}),
+		spanner.InsertOrUpdate("Singers", cols, []interface{}{3, "Singer3", "Singer3", singerInfoEmptyArray, singerGenreEmptyArray}),
 	}
+
 	_, err = client.Apply(ctx, m)
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(w, "Inserted data to SingerInfo and SingerGenre columns")
+	fmt.Fprintf(w, "Inserted array of protos data to SingerInfo and SingerGenre columns")
 	return nil
 }
 
-// [END spanner_insert_data_with_proto_columns]
+// [END spanner_insert_data_with_array_of_proto_columns]

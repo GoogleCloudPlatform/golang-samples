@@ -395,11 +395,13 @@ func TestProtoSample(t *testing.T) {
 	assertContains(t, out, "1 Singer1")
 	assertContains(t, out, "2 Singer2")
 	assertContains(t, out, "3 Singer3")
+	assertContains(t, out, "4 Singer4")
 
 	out = runSample(t, readOnlyTransactionProtoMsgAndEnum, dbName, "failed to read data with proto message and enum")
 	assertContains(t, out, "1 Singer1")
 	assertContains(t, out, "2 Singer2")
 	assertContains(t, out, "3 Singer3")
+	assertContains(t, out, "4 Singer4")
 
 	out = runSample(t, insertDataWithProtoMsgAndEnumNullValues, dbName, "failed to insert null data with NullProtoMessage and NullProtoEnum")
 	assertContains(t, out, "Inserted null data to SingerInfo and SingerGenre columns")
@@ -415,6 +417,20 @@ func TestProtoSample(t *testing.T) {
 	assertContains(t, out, "2 Singer2")
 	assertContains(t, out, "3 Singer3")
 	assertContains(t, out, "4 Singer4")
+
+	dbName = "projects/span-cloud-testing/instances/harsha-test-gcloud/databases/singer_array_proto_db"
+	out = runSample(t, insertDataWithArrayOfProtoMsgAndEnum, dbName, "failed to insert data with array of proto message and enum")
+	assertContains(t, out, "Inserted array of protos data to SingerInfo and SingerGenre columns")
+
+	out = runSample(t, readDataWithArrayOfProtoMsgAndEnum, dbName, "failed to read data with array of proto message and enum")
+	assertContains(t, out, "1 Singer1")
+	assertContains(t, out, "2 Singer2 [] []")
+	assertContains(t, out, "3 Singer3 Singer3 [] []")
+
+	out = runSample(t, readOnlyTransactionWithArrayOfProtoMsgAndEnum, dbName, "failed to read data with array of proto message and enum using transaction")
+	assertContains(t, out, "1 Singer1")
+	assertContains(t, out, "2 Singer2 [] []")
+	assertContains(t, out, "3 Singer3 Singer3 [] []")
 }
 
 func TestBackupSample(t *testing.T) {
