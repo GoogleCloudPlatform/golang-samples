@@ -70,6 +70,10 @@ func pgCreateDatabase(ctx context.Context, w io.Writer, db string) error {
 				AlbumTitle   text,
                 PRIMARY KEY(SingerId, AlbumId)
 			)`,
+			`CREATE TABLE Venues (
+				VenueId  bigint NOT NULL PRIMARY KEY,
+				Name     varchar(1024) NOT NULL
+			)`,
 		},
 	}
 	opUpdate, err := adminClient.UpdateDatabaseDdl(ctx, updateReq)
