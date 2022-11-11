@@ -5,8 +5,8 @@ go 1.19
 require (
 	github.com/golang/protobuf v1.5.2
 	github.com/gorilla/mux v1.8.0
-	golang.org/x/net v0.2.0
-	golang.org/x/oauth2 v0.2.0
+	golang.org/x/net v0.0.0-20221014081412-f15817d10f9b
+	golang.org/x/oauth2 v0.0.0-20221014153046-6fdb5e3db783
 	google.golang.org/grpc v1.50.1
 	google.golang.org/grpc/examples v0.0.0-20220105183818-2fb1ac854b20
 )
