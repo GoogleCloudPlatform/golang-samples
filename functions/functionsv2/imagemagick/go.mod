@@ -3,10 +3,10 @@ module github.com/GoogleCloudPlatform/golang-samples/functions/functionsv2/image
 require (
 	cloud.google.com/go/storage v1.28.0
 	cloud.google.com/go/vision v1.2.0
+	cloud.google.com/go/vision/v2 v2.5.0
 	github.com/GoogleCloudPlatform/functions-framework-go v1.6.1
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20221110175929-9a9c2aea5b1c
 	github.com/cloudevents/sdk-go/v2 v2.12.0
-	google.golang.org/genproto v0.0.0-20221109142239-94d6d90a7d66
 )
 
 require (
@@ -15,7 +15,6 @@ require (
 	cloud.google.com/go/compute/metadata v0.2.1 // indirect
 	cloud.google.com/go/iam v0.7.0 // indirect
 	cloud.google.com/go/longrunning v0.3.0 // indirect
-	cloud.google.com/go/vision/v2 v2.5.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
@@ -36,6 +35,7 @@ require (
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/api v0.102.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
+	google.golang.org/genproto v0.0.0-20221109142239-94d6d90a7d66 // indirect
 	google.golang.org/grpc v1.50.1 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 )

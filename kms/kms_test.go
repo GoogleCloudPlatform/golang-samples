@@ -31,8 +31,8 @@ import (
 	"testing"
 
 	kms "cloud.google.com/go/kms/apiv1"
+	"cloud.google.com/go/kms/apiv1/kmspb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
 var fixture *kmsFixture

@@ -25,7 +25,7 @@ import (
 	"os"
 
 	dialogflow "cloud.google.com/go/dialogflow/apiv2"
-	dialogflowpb "google.golang.org/genproto/googleapis/cloud/dialogflow/v2"
+	"cloud.google.com/go/dialogflow/apiv2/dialogflowpb"
 )
 
 // [END import_libraries]

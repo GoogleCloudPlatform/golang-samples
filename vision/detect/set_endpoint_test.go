@@ -20,9 +20,9 @@ import (
 	"testing"
 
 	vision "cloud.google.com/go/vision/apiv1"
+	"cloud.google.com/go/vision/v2/apiv1/visionpb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"google.golang.org/api/option"
-	visionpb "google.golang.org/genproto/googleapis/cloud/vision/v1"
 )
 
 func TestSetEndpoint(t *testing.T) {

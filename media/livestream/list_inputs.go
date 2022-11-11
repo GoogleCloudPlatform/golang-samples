@@ -23,7 +23,7 @@ import (
 	"google.golang.org/api/iterator"
 
 	livestream "cloud.google.com/go/video/livestream/apiv1"
-	livestreampb "google.golang.org/genproto/googleapis/cloud/video/livestream/v1"
+	"cloud.google.com/go/video/livestream/apiv1/livestreampb"
 )
 
 // listInputs lists all inputs for a given location.

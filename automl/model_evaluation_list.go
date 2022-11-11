@@ -27,8 +27,8 @@ import (
 	"io"
 
 	automl "cloud.google.com/go/automl/apiv1"
+	"cloud.google.com/go/automl/apiv1/automlpb"
 	"google.golang.org/api/iterator"
-	automlpb "google.golang.org/genproto/googleapis/cloud/automl/v1"
 )
 
 // listModelEvaluation lists existing model evaluations.
