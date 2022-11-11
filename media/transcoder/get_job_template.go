@@ -21,7 +21,7 @@ import (
 	"io"
 
 	transcoder "cloud.google.com/go/video/transcoder/apiv1"
-	transcoderpb "google.golang.org/genproto/googleapis/cloud/video/transcoder/v1"
+	"cloud.google.com/go/video/transcoder/apiv1/transcoderpb"
 )
 
 // getJobTemplate gets a previously-created job template. See

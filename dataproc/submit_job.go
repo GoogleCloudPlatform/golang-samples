@@ -26,9 +26,9 @@ import (
 	"regexp"
 
 	dataproc "cloud.google.com/go/dataproc/apiv1"
+	"cloud.google.com/go/dataproc/apiv1/dataprocpb"
 	"cloud.google.com/go/storage"
 	"google.golang.org/api/option"
-	dataprocpb "google.golang.org/genproto/googleapis/cloud/dataproc/v1"
 )
 
 func submitJob(w io.Writer, projectID, region, clusterName string) error {

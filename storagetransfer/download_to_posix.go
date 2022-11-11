@@ -22,7 +22,7 @@ import (
 	"io"
 
 	storagetransfer "cloud.google.com/go/storagetransfer/apiv1"
-	storagetransferpb "google.golang.org/genproto/googleapis/storagetransfer/v1"
+	"cloud.google.com/go/storagetransfer/apiv1/storagetransferpb"
 )
 
 func downloadToPosix(w io.Writer, projectID string, sinkAgentPoolName string, gcsSourceBucket string, gcsSourcePath string, rootDirectory string) (*storagetransferpb.TransferJob, error) {
