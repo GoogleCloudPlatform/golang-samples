@@ -23,7 +23,7 @@ import (
 	"io"
 
 	monitoring "cloud.google.com/go/monitoring/apiv3"
-	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
+	"cloud.google.com/go/monitoring/apiv3/v2/monitoringpb"
 )
 
 // getMetricDescriptor gets the descriptor for the given metricType and prints
