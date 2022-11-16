@@ -14,7 +14,7 @@
 
 package cloudsql
 
-// [START cloud_sql_postgres_databasesql_connect_connector]
+// [START cloud_sql_postgres_databasesql_auto_iam_authn]
 import (
 	"context"
 	"database/sql"
@@ -28,7 +28,7 @@ import (
 	"github.com/jackc/pgx/v4/stdlib"
 )
 
-func connectWithConnector() (*sql.DB, error) {
+func connectWithConnectorIAMAuthN() (*sql.DB, error) {
 	mustGetenv := func(k string) string {
 		v := os.Getenv(k)
 		if v == "" {
@@ -41,26 +41,23 @@ func connectWithConnector() (*sql.DB, error) {
 	// Cloud Secret Manager (https://cloud.google.com/secret-manager) to help
 	// keep secrets safe.
 	var (
-		dbUser                 = os.Getenv("DB_USER")                   // e.g. 'my-db-user'
-		dbPwd                  = mustGetenv("DB_PASS")                  // e.g. 'my-db-password'
+		dbIAMUser              = os.Getenv("DB_IAM_USER")               // e.g. 'sa-name@project-id.iam'
 		dbName                 = mustGetenv("DB_NAME")                  // e.g. 'my-database'
 		instanceConnectionName = mustGetenv("INSTANCE_CONNECTION_NAME") // e.g. 'project:region:instance'
 		usePrivate             = os.Getenv("PRIVATE_IP")
 	)
 
-	dsn := fmt.Sprintf("user=%s password=%s database=%s", dbUser, dbPwd, dbName)
+	dsn := fmt.Sprintf("user=%s password=empty database=%s", dbIAMUser, dbName)
 	config, err := pgx.ParseConfig(dsn)
 	if err != nil {
 		return nil, err
 	}
-	config.DialFunc = func(ctx context.Context, network, instance string) (net.Conn, error) {
+	config.DialFunc = func(ctx context.Context, _, _ string) (net.Conn, error) {
 		var opts []cloudsqlconn.DialOption
 		if usePrivate != "" {
 			opts = append(opts, cloudsqlconn.WithPrivateIP())
 		}
-		// Use the Cloud SQL connector to handle connecting to the instance.
-		// This approach does *NOT* require the Cloud SQL proxy.
-		d, err := cloudsqlconn.NewDialer(ctx)
+		d, err := cloudsqlconn.NewDialer(ctx, cloudsqlconn.WithIAMAuthN())
 		if err != nil {
 			return nil, err
 		}
@@ -74,4 +71,4 @@ func connectWithConnector() (*sql.DB, error) {
 	return dbPool, nil
 }
 
-// [END cloud_sql_postgres_databasesql_connect_connector]
+// [END cloud_sql_postgres_databasesql_auto_iam_authn]
