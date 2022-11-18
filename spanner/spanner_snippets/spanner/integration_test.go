@@ -385,7 +385,7 @@ func TestProtoSample(t *testing.T) {
 
 	_, dbName, cleanup := initTest(t, randomID())
 	defer cleanup()
-	dbName = "projects/span-cloud-testing/instances/harsha-test-gcloud/databases/singer_proto_db"
+	dbName = "projects/span-cloud-testing/instances/go-int-test-proto-col-samples/databases/singer_proto_db"
 
 	var out string
 	out = runSample(t, insertDataWithProtoMsgAndEnum, dbName, "failed to insert data with proto message and enum")
@@ -403,6 +403,14 @@ func TestProtoSample(t *testing.T) {
 	assertContains(t, out, "3 Singer3")
 	assertContains(t, out, "4 Singer4")
 
+	out = runSample(t, insertDataWithProtoMsgAndEnumUsingDML, dbName, "failed to insert data with proto message and enum using DML")
+	assertContains(t, out, "1 record(s) inserted")
+
+	out = runSample(t, deleteDataWithProtoMsgAndEnumUsingDML, dbName, "failed to delete data with proto message and enum using DML")
+	assertContains(t, out, "1 record(s) deleted")
+
+	dbName = "projects/span-cloud-testing/instances/go-int-test-proto-col-samples/databases/singer_null_proto_db"
+
 	out = runSample(t, insertDataWithProtoMsgAndEnumNullValues, dbName, "failed to insert null data with NullProtoMessage and NullProtoEnum")
 	assertContains(t, out, "Inserted null data to SingerInfo and SingerGenre columns")
 
@@ -418,13 +426,13 @@ func TestProtoSample(t *testing.T) {
 	assertContains(t, out, "3 Singer3")
 	assertContains(t, out, "4 Singer4")
 
-	dbName = "projects/span-cloud-testing/instances/harsha-test-gcloud/databases/singer_array_proto_db"
+	dbName = "projects/span-cloud-testing/instances/go-int-test-proto-col-samples/databases/singer_array_proto_db"
 	out = runSample(t, insertDataWithArrayOfProtoMsgAndEnum, dbName, "failed to insert data with array of proto message and enum")
 	assertContains(t, out, "Inserted array of protos data to SingerInfo and SingerGenre columns")
 
 	out = runSample(t, readDataWithArrayOfProtoMsgAndEnum, dbName, "failed to read data with array of proto message and enum")
 	assertContains(t, out, "1 Singer1")
-	assertContains(t, out, "2 Singer2 [] []")
+	assertContains(t, out, "2 Singer2 Singer2 [] []")
 	assertContains(t, out, "3 Singer3 Singer3 [] []")
 
 	out = runSample(t, readOnlyTransactionWithArrayOfProtoMsgAndEnum, dbName, "failed to read data with array of proto message and enum using transaction")
