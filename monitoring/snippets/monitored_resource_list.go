@@ -23,8 +23,8 @@ import (
 	"io"
 
 	monitoring "cloud.google.com/go/monitoring/apiv3"
+	"cloud.google.com/go/monitoring/apiv3/v2/monitoringpb"
 	"google.golang.org/api/iterator"
-	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 )
 
 // listMonitoredResources lists all the resources available to be monitored.

@@ -22,7 +22,7 @@ import (
 	"io"
 
 	kms "cloud.google.com/go/kms/apiv1"
-	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
+	"cloud.google.com/go/kms/apiv1/kmspb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 

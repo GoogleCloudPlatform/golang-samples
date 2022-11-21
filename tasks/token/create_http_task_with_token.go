@@ -21,7 +21,7 @@ import (
 	"fmt"
 
 	cloudtasks "cloud.google.com/go/cloudtasks/apiv2"
-	taskspb "google.golang.org/genproto/googleapis/cloud/tasks/v2"
+	taskspb "cloud.google.com/go/cloudtasks/apiv2/cloudtaskspb"
 )
 
 // createHTTPTaskWithToken constructs a task with a authorization token

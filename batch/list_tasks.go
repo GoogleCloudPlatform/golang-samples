@@ -21,8 +21,8 @@ import (
 	"io"
 
 	batch "cloud.google.com/go/batch/apiv1"
+	"cloud.google.com/go/batch/apiv1/batchpb"
 	"google.golang.org/api/iterator"
-	batchpb "google.golang.org/genproto/googleapis/cloud/batch/v1"
 )
 
 // Lists all tasks in the given project and region

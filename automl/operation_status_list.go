@@ -22,8 +22,8 @@ import (
 	"io"
 
 	automl "cloud.google.com/go/automl/apiv1"
+	longrunning "cloud.google.com/go/longrunning/autogen/longrunningpb"
 	"google.golang.org/api/iterator"
-	"google.golang.org/genproto/googleapis/longrunning"
 )
 
 // listOperationStatus lists existing operations' status.
