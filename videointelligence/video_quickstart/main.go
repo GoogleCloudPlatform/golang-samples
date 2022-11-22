@@ -25,7 +25,7 @@ import (
 	"github.com/golang/protobuf/ptypes"
 
 	video "cloud.google.com/go/videointelligence/apiv1"
-	videopb "google.golang.org/genproto/googleapis/cloud/videointelligence/v1"
+	videopb "cloud.google.com/go/videointelligence/apiv1/videointelligencepb"
 )
 
 func main() {

@@ -23,9 +23,9 @@ import (
 	"testing"
 
 	talent "cloud.google.com/go/talent/apiv4beta1"
+	"cloud.google.com/go/talent/apiv4beta1/talentpb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"google.golang.org/api/iterator"
-	talentpb "google.golang.org/genproto/googleapis/cloud/talent/v4beta1"
 )
 
 func checkServiceAvailable(t *testing.T, projectID string) {

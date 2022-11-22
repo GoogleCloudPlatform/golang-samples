@@ -26,7 +26,7 @@ import (
 	"io"
 
 	kms "cloud.google.com/go/kms/apiv1"
-	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
+	"cloud.google.com/go/kms/apiv1/kmspb"
 )
 
 // verifyAsymmetricSignatureRSA will verify that an 'RSA_SIGN_PSS_2048_SHA256' signature

@@ -21,7 +21,7 @@ import (
 	"time"
 
 	language "cloud.google.com/go/language/apiv1"
-	languagepb "google.golang.org/genproto/googleapis/cloud/language/v1"
+	"cloud.google.com/go/language/apiv1/languagepb"
 
 	languagev1beta2 "cloud.google.com/go/language/apiv1beta2"
 
