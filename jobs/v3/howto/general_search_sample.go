@@ -258,7 +258,7 @@ func dateRangeSearch(w io.Writer, projectID, companyName, startTime, endTime str
 // [END date_range_filter]
 // [END job_discovery_date_range_filter_search]
 
-// [END job_discovery_language_code_filter_search]
+// [START job_discovery_language_code_filter_search]
 // [START language_code_filter]
 
 // languageCodeSearch searches for jobs on language code.
