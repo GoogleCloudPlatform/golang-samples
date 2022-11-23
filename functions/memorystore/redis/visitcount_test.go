@@ -37,7 +37,7 @@ func TestVisitCount(t *testing.T) {
 	req := httptest.NewRequest("GET", "/", strings.NewReader(""))
 	rr := httptest.NewRecorder()
 
-	VisitCount(rr, req)
+	visitCount(rr, req)
 
 	if rr.Code != http.StatusOK {
 		t.Errorf("VisitCount got status %v, want %v", rr.Code, http.StatusOK)
