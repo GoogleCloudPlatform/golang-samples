@@ -25,8 +25,8 @@ import (
 	"time"
 
 	asset "cloud.google.com/go/asset/apiv1"
+	"cloud.google.com/go/asset/apiv1/assetpb"
 	"github.com/golang/protobuf/ptypes/timestamp"
-	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1"
 )
 
 func main() {

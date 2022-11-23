@@ -21,7 +21,7 @@ import (
 	"io"
 
 	storagetransfer "cloud.google.com/go/storagetransfer/apiv1"
-	storagetransferpb "google.golang.org/genproto/googleapis/storagetransfer/v1"
+	"cloud.google.com/go/storagetransfer/apiv1/storagetransferpb"
 )
 
 // quickstart creates and runs a transfer job between two GCS buckets.

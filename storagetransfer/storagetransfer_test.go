@@ -27,10 +27,10 @@ import (
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/storage"
 	storagetransfer "cloud.google.com/go/storagetransfer/apiv1"
+	"cloud.google.com/go/storagetransfer/apiv1/storagetransferpb"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	storagetransferpb "google.golang.org/genproto/googleapis/storagetransfer/v1"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/aws/aws-sdk-go/service/s3"
