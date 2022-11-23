@@ -23,6 +23,7 @@ import (
 	talent "google.golang.org/api/jobs/v3"
 )
 
+// [START job_discovery_basic_keyword_search]
 // [START basic_keyword_search]
 
 // basicJobSearch searches for jobs with query.
@@ -77,7 +78,9 @@ func basicJobSearch(w io.Writer, projectID, companyName, query string) (*talent.
 }
 
 // [END basic_keyword_search]
+// [END job_discovery_basic_keyword_search]
 
+// [START job_discovery_category_filter_search]
 // [START category_filter]
 
 // categoryFilterSearch searches for jobs on category filter.
@@ -132,7 +135,9 @@ func categoryFilterSearch(w io.Writer, projectID, companyName string, categories
 }
 
 // [END category_filter]
+// [END job_discovery_category_filter_search]
 
+// [START job_discovery_employment_types_filter_search]
 // [START employment_types_filter]
 
 // employmentTypesSearch searches for jobs on employment types.
@@ -187,7 +192,9 @@ func employmentTypesSearch(w io.Writer, projectID, companyName string, employmen
 }
 
 // [END employment_types_filter]
+// [END job_discovery_employment_types_filter_search]
 
+// [START job_discovery_date_range_filter_search]
 // [START date_range_filter]
 
 // /dateRangeSearch searches for jobs on date range.
@@ -249,7 +256,9 @@ func dateRangeSearch(w io.Writer, projectID, companyName, startTime, endTime str
 }
 
 // [END date_range_filter]
+// [END job_discovery_date_range_filter_search]
 
+// [START job_discovery_language_code_filter_search]
 // [START language_code_filter]
 
 // languageCodeSearch searches for jobs on language code.
@@ -304,7 +313,9 @@ func languageCodeSearch(w io.Writer, projectID, companyName string, languageCode
 }
 
 // [END language_code_filter]
+// [END job_discovery_language_code_filter_search]
 
+// [START job_discovery_company_display_name_search]
 // [START company_display_name_filter]
 
 // companyDisplayNameSearch searches for job on company display names.
@@ -359,7 +370,9 @@ func companyDisplayNameSearch(w io.Writer, projectID, companyName string, compan
 }
 
 // [END company_display_name_filter]
+// [END job_discovery_company_display_name_search]
 
+// [START job_discovery_compensation_search]
 // [START compensation_filter]
 
 // compensationSearch searches for job on compensation.
@@ -428,3 +441,4 @@ func compensationSearch(w io.Writer, projectID, companyName string) (*talent.Sea
 }
 
 // [END compensation_filter]
+// [END job_discovery_compensation_search]
