@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package client demonstrates how to setup a BigQuery client.
+// Package datatransfer demonstrates interactions with the BigQuery
+// Data Transfer client.
 package client
 
 import (
