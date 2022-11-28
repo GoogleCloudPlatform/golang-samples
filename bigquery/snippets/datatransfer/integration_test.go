@@ -20,11 +20,13 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"time"
 
 	"cloud.google.com/go/bigquery"
 	datatransfer "cloud.google.com/go/bigquery/datatransfer/apiv1"
 	"github.com/GoogleCloudPlatform/golang-samples/bigquery/snippets/bqtestutil"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	gax "github.com/googleapis/gax-go/v2"
 	datatransferpb "google.golang.org/genproto/googleapis/cloud/bigquery/datatransfer/v1"
 )
 
@@ -71,8 +73,50 @@ func TestDataTransfer(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = deleteScheduledQuery(transferConfig.Name)
+	defer func() {
+		err = deleteScheduledQuery(transferConfig.Name)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}()
+
+	// Give some time for it to run
+	time.Sleep(10 * time.Second)
+	err = waitTransferRun(t, dtc, transferConfig.Name)
 	if err != nil {
 		t.Fatal(err)
 	}
+}
+
+func waitTransferRun(t *testing.T, dtc *datatransfer.Client, transferConfigID string) error {
+	ctx := context.Background()
+	retries := 10
+	backoff := gax.Backoff{
+		Initial:    1 * time.Second,
+		Multiplier: 2,
+		Max:        30 * time.Second,
+	}
+	for {
+		runsIt := dtc.ListTransferRuns(ctx, &datatransferpb.ListTransferRunsRequest{
+			Parent: transferConfigID,
+		})
+
+		run, err := runsIt.Next()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if run.State == datatransferpb.TransferState_SUCCEEDED {
+			return nil
+		}
+		if run.State == datatransferpb.TransferState_FAILED || run.State == datatransferpb.TransferState_CANCELLED {
+			return fmt.Errorf("transfer run failed with status: %s", run.State)
+		}
+		retries--
+		if retries <= 0 {
+			break
+		}
+		t := backoff.Pause()
+		time.Sleep(t)
+	}
+	return fmt.Errorf("timeout waiting for transfer run execution")
 }
