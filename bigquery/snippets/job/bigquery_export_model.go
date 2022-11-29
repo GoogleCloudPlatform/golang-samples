@@ -28,7 +28,7 @@ func exportModel(projectID, datasetID, modelID, gcsURI string) error {
 	// projectID := "my-project-id"
 	// datasetID := "dataset-id"
 	// modelID := "model-id"
-	// gcsUri := "gs://mybucket/path/to/model"
+	// gcsURI := "gs://mybucket/path/to/model"
 	ctx := context.Background()
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
