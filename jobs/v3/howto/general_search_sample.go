@@ -23,7 +23,7 @@ import (
 	talent "google.golang.org/api/jobs/v3"
 )
 
-// [START basic_keyword_search]
+// [START job_discovery_basic_keyword_search]
 
 // basicJobSearch searches for jobs with query.
 func basicJobSearch(w io.Writer, projectID, companyName, query string) (*talent.SearchJobsResponse, error) {
@@ -76,9 +76,9 @@ func basicJobSearch(w io.Writer, projectID, companyName, query string) (*talent.
 	return resp, nil
 }
 
-// [END basic_keyword_search]
+// [END job_discovery_basic_keyword_search]
 
-// [START category_filter]
+// [START job_discovery_category_filter_search]
 
 // categoryFilterSearch searches for jobs on category filter.
 func categoryFilterSearch(w io.Writer, projectID, companyName string, categories []string) (*talent.SearchJobsResponse, error) {
@@ -131,9 +131,9 @@ func categoryFilterSearch(w io.Writer, projectID, companyName string, categories
 	return resp, nil
 }
 
-// [END category_filter]
+// [END job_discovery_category_filter_search]
 
-// [START employment_types_filter]
+// [START job_discovery_employment_types_filter_search]
 
 // employmentTypesSearch searches for jobs on employment types.
 func employmentTypesSearch(w io.Writer, projectID, companyName string, employmentTypes []string) (*talent.SearchJobsResponse, error) {
@@ -186,9 +186,9 @@ func employmentTypesSearch(w io.Writer, projectID, companyName string, employmen
 	return resp, nil
 }
 
-// [END employment_types_filter]
+// [END job_discovery_employment_types_filter_search]
 
-// [START date_range_filter]
+// [START job_discovery_date_range_filter_search]
 
 // /dateRangeSearch searches for jobs on date range.
 // In JSON format, the Timestamp type is encoded as a string in the
@@ -248,9 +248,9 @@ func dateRangeSearch(w io.Writer, projectID, companyName, startTime, endTime str
 	return resp, nil
 }
 
-// [END date_range_filter]
+// [END job_discovery_date_range_filter_search]
 
-// [START language_code_filter]
+// [START job_discovery_language_code_filter_search]
 
 // languageCodeSearch searches for jobs on language code.
 func languageCodeSearch(w io.Writer, projectID, companyName string, languageCodes []string) (*talent.SearchJobsResponse, error) {
@@ -303,9 +303,9 @@ func languageCodeSearch(w io.Writer, projectID, companyName string, languageCode
 	return resp, nil
 }
 
-// [END language_code_filter]
+// [END job_discovery_language_code_filter_search]
 
-// [START company_display_name_filter]
+// [START job_discovery_company_display_name_search]
 
 // companyDisplayNameSearch searches for job on company display names.
 func companyDisplayNameSearch(w io.Writer, projectID, companyName string, companyDisplayNames []string) (*talent.SearchJobsResponse, error) {
@@ -358,9 +358,9 @@ func companyDisplayNameSearch(w io.Writer, projectID, companyName string, compan
 	return resp, nil
 }
 
-// [END company_display_name_filter]
+// [END job_discovery_company_display_name_search]
 
-// [START compensation_filter]
+// [START job_discovery_compensation_search]
 
 // compensationSearch searches for job on compensation.
 func compensationSearch(w io.Writer, projectID, companyName string) (*talent.SearchJobsResponse, error) {
@@ -427,4 +427,4 @@ func compensationSearch(w io.Writer, projectID, companyName string) (*talent.Sea
 	return resp, nil
 }
 
-// [END compensation_filter]
+// [END job_discovery_compensation_search]

@@ -24,7 +24,7 @@ import (
 	"os"
 
 	automl "cloud.google.com/go/automl/apiv1"
-	automlpb "google.golang.org/genproto/googleapis/cloud/automl/v1"
+	"cloud.google.com/go/automl/apiv1/automlpb"
 )
 
 // visionClassificationPredict does a prediction for image classification.

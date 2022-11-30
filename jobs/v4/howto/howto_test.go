@@ -23,9 +23,9 @@ import (
 	"testing"
 	"time"
 
+	"cloud.google.com/go/talent/apiv4beta1/talentpb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/gofrs/uuid"
-	talentpb "google.golang.org/genproto/googleapis/cloud/talent/v4beta1"
 )
 
 var testCompany *talentpb.Company

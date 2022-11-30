@@ -22,7 +22,7 @@ import (
 	"io"
 
 	automl "cloud.google.com/go/automl/apiv1"
-	automlpb "google.golang.org/genproto/googleapis/cloud/automl/v1"
+	"cloud.google.com/go/automl/apiv1/automlpb"
 )
 
 // languageEntityExtractionPredict does a prediction for text entity extraction.

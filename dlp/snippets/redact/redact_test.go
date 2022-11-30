@@ -19,8 +19,8 @@ import (
 	"strings"
 	"testing"
 
+	"cloud.google.com/go/dlp/apiv2/dlppb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
 func TestRedactImage(t *testing.T) {

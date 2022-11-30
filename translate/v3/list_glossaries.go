@@ -22,8 +22,8 @@ import (
 	"io"
 
 	translate "cloud.google.com/go/translate/apiv3"
+	"cloud.google.com/go/translate/apiv3/translatepb"
 	"google.golang.org/api/iterator"
-	translatepb "google.golang.org/genproto/googleapis/cloud/translate/v3"
 )
 
 // listGlossaries gets the specified glossary.

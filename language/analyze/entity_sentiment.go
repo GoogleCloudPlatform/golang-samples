@@ -19,7 +19,7 @@ import (
 	"log"
 
 	language "cloud.google.com/go/language/apiv1beta2"
-	languagepb "google.golang.org/genproto/googleapis/cloud/language/v1beta2"
+	"cloud.google.com/go/language/apiv1beta2/languagepb"
 )
 
 func betaClient() *language.Client {
