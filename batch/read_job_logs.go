@@ -60,7 +60,7 @@ func printJobLogs(w io.Writer, projectID string, job *batchpb.Job) error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("unable to list tasks: %v", err)
+			return fmt.Errorf("unable to fetch log entry: %v", err)
 		}
 		entries = append(entries, logEntry)
 		fmt.Fprintf(w, "%s\n", logEntry.Payload)
