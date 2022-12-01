@@ -20,9 +20,9 @@ import (
 	"fmt"
 	"io"
 
+	"cloud.google.com/go/longrunning/autogen/longrunningpb"
 	storagetransfer "cloud.google.com/go/storagetransfer/apiv1"
-	longrunningpb "google.golang.org/genproto/googleapis/longrunning"
-	storagetransferpb "google.golang.org/genproto/googleapis/storagetransfer/v1"
+	"cloud.google.com/go/storagetransfer/apiv1/storagetransferpb"
 )
 
 func checkLatestTransferOperation(w io.Writer, projectID string, jobName string) (*storagetransferpb.TransferOperation, error) {

@@ -14,7 +14,7 @@
 
 package videostitcher
 
-// [START video_stitcher_get_cdn_key]
+// [START videostitcher_get_cdn_key]
 import (
 	"context"
 	"encoding/json"
@@ -22,7 +22,7 @@ import (
 	"io"
 
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	stitcherpb "google.golang.org/genproto/googleapis/cloud/video/stitcher/v1"
+	"cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
 
 // getCdnKey gets a CDN key by ID.
@@ -54,4 +54,4 @@ func getCdnKey(w io.Writer, projectID, cdnKeyID string) error {
 	return nil
 }
 
-// [END video_stitcher_get_cdn_key]
+// [END videostitcher_get_cdn_key]

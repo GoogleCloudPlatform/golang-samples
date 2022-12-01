@@ -14,14 +14,14 @@
 
 package videostitcher
 
-// [START video_stitcher_delete_cdn_key]
+// [START videostitcher_delete_cdn_key]
 import (
 	"context"
 	"fmt"
 	"io"
 
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	stitcherpb "google.golang.org/genproto/googleapis/cloud/video/stitcher/v1"
+	"cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
 
 // deleteCdnKey deletes a CDN key.
@@ -51,4 +51,4 @@ func deleteCdnKey(w io.Writer, projectID, cdnKeyID string) error {
 	return nil
 }
 
-// [END video_stitcher_delete_cdn_key]
+// [END videostitcher_delete_cdn_key]

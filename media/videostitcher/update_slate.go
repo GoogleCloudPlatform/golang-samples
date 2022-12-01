@@ -14,14 +14,14 @@
 
 package videostitcher
 
-// [START video_stitcher_update_slate]
+// [START videostitcher_update_slate]
 import (
 	"context"
 	"fmt"
 	"io"
 
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	stitcherstreampb "google.golang.org/genproto/googleapis/cloud/video/stitcher/v1"
+	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
@@ -60,4 +60,4 @@ func updateSlate(w io.Writer, projectID, slateID, slateURI string) error {
 	return nil
 }
 
-// [END video_stitcher_update_slate]
+// [END videostitcher_update_slate]

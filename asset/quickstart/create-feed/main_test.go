@@ -23,11 +23,11 @@ import (
 	"time"
 
 	asset "cloud.google.com/go/asset/apiv1"
+	"cloud.google.com/go/asset/apiv1/assetpb"
 	"cloud.google.com/go/pubsub"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/gofrs/uuid"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
-	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

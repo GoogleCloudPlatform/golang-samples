@@ -14,14 +14,14 @@
 
 package videostitcher
 
-// [START video_stitcher_create_slate]
+// [START videostitcher_create_slate]
 import (
 	"context"
 	"fmt"
 	"io"
 
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	stitcherstreampb "google.golang.org/genproto/googleapis/cloud/video/stitcher/v1"
+	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
 
 // createSlate creates a slate. A slate is displayed when ads are not available.
@@ -54,4 +54,4 @@ func createSlate(w io.Writer, projectID, slateID, slateURI string) error {
 	return nil
 }
 
-// [END video_stitcher_create_slate]
+// [END videostitcher_create_slate]

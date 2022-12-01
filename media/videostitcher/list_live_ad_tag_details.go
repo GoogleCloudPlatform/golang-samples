@@ -14,7 +14,7 @@
 
 package videostitcher
 
-// [START video_stitcher_list_live_ad_tag_details]
+// [START videostitcher_list_live_ad_tag_details]
 import (
 	"context"
 	"fmt"
@@ -23,7 +23,7 @@ import (
 	"google.golang.org/api/iterator"
 
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	stitcherstreampb "google.golang.org/genproto/googleapis/cloud/video/stitcher/v1"
+	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
 
 // listLiveAdTagDetails lists the ad tag details for the specified live session.
@@ -57,4 +57,4 @@ func listLiveAdTagDetails(w io.Writer, projectID, sessionID string) error {
 	return nil
 }
 
-// [END video_stitcher_list_live_ad_tag_details]
+// [END videostitcher_list_live_ad_tag_details]

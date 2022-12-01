@@ -27,10 +27,10 @@ import (
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/storage"
 	storagetransfer "cloud.google.com/go/storagetransfer/apiv1"
+	"cloud.google.com/go/storagetransfer/apiv1/storagetransferpb"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	storagetransferpb "google.golang.org/genproto/googleapis/storagetransfer/v1"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -302,6 +302,28 @@ func TestTransferUsingManifest(t *testing.T) {
 	got := buf.String()
 	if want := "transferJobs/"; !strings.Contains(got, want) {
 		t.Errorf("transfer_using_manifest: got %q, want %q", got, want)
+	}
+}
+
+func TestTransferFromS3CompatibleSource(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	buf := new(bytes.Buffer)
+
+	sourceAgentPoolName := "" //use default agent pool
+	sourcePath := ""          //use root directory
+	gcsPath := ""             //use root directory
+
+	resp, err := transferFromS3CompatibleSource(buf, tc.ProjectID, sourceAgentPoolName, s3Bucket, sourcePath, gcsSinkBucket, gcsPath)
+
+	if err != nil {
+		t.Errorf("transfer_from_s3_compatible_source: %#v", err)
+	}
+	defer cleanupSTSJob(resp, tc.ProjectID)
+
+	got := buf.String()
+	if want := "transferJobs/"; !strings.Contains(got, want) {
+		t.Errorf("transfer_from_s3_compatible_source: got %q, want %q", got, want)
 	}
 }
 

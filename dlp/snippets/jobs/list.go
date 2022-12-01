@@ -21,8 +21,8 @@ import (
 	"io"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
+	"cloud.google.com/go/dlp/apiv2/dlppb"
 	"google.golang.org/api/iterator"
-	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
 // listJobs lists jobs matching the given optional filter and optional jobType.

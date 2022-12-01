@@ -1,3 +1,3 @@
 module github.com/GoogleCloudPlatform/golang-samples/run/jobs
 
-go 1.17
+go 1.19

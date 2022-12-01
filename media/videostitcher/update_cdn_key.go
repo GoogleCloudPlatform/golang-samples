@@ -14,14 +14,14 @@
 
 package videostitcher
 
-// [START video_stitcher_update_cdn_key]
+// [START videostitcher_update_cdn_key]
 import (
 	"context"
 	"fmt"
 	"io"
 
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	stitcherpb "google.golang.org/genproto/googleapis/cloud/video/stitcher/v1"
+	"cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
@@ -89,4 +89,4 @@ func updateCdnKey(w io.Writer, projectID, cdnKeyID, hostname, gcdnKeyname, gcdnP
 	return nil
 }
 
-// [END video_stitcher_update_cdn_key]
+// [END videostitcher_update_cdn_key]

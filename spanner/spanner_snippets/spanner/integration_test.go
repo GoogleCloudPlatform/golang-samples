@@ -28,13 +28,13 @@ import (
 	"time"
 
 	kms "cloud.google.com/go/kms/apiv1"
+	"cloud.google.com/go/kms/apiv1/kmspb"
 	"cloud.google.com/go/spanner"
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
 	instance "cloud.google.com/go/spanner/admin/instance/apiv1"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
 	"google.golang.org/api/iterator"
-	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 	instancepb "google.golang.org/genproto/googleapis/spanner/admin/instance/v1"
 	"google.golang.org/grpc/codes"
@@ -613,6 +613,43 @@ func TestCreateDatabaseWithDefaultLeaderSample(t *testing.T) {
 	assertContains(t, out, "The result of the query to get")
 }
 
+func TestCustomInstanceConfigSample(t *testing.T) {
+	_ = testutil.SystemTest(t)
+	t.Parallel()
+
+	projectID := getSampleProjectId(t)
+	defer cleanupInstanceConfigs(projectID)
+
+	var b bytes.Buffer
+	userConfigID := fmt.Sprintf("custom-golang-samples-config-%v", randomID())
+	if err := createInstanceConfig(&b, projectID, userConfigID, "nam11"); err != nil {
+		t.Fatalf("failed to create instance configuration: %v", err)
+	}
+	out := b.String()
+	assertContains(t, out, "Created instance configuration")
+
+	b.Reset()
+	if err := updateInstanceConfig(&b, projectID, userConfigID); err != nil {
+		t.Errorf("failed to update instance configuration: %v", err)
+	}
+	out = b.String()
+	assertContains(t, out, "Updated instance configuration")
+
+	b.Reset()
+	if err := listInstanceConfigOperations(&b, projectID); err != nil {
+		t.Errorf("failed to list instance configuration operations: %v", err)
+	}
+	out = b.String()
+	assertContains(t, out, "List instance config operations")
+
+	b.Reset()
+	if err := deleteInstanceConfig(&b, projectID, userConfigID); err != nil {
+		t.Errorf("failed to delete instance configuration: %v", err)
+	}
+	out = b.String()
+	assertContains(t, out, "Deleted instance configuration")
+}
+
 func TestPgSample(t *testing.T) {
 	_ = testutil.SystemTest(t)
 	t.Parallel()
@@ -641,6 +678,34 @@ func TestPgSample(t *testing.T) {
 	assertContains(t, out, "1 1 300000")
 	assertContains(t, out, "2 2 300000")
 
+	client, err := spanner.NewClient(context.Background(), dbName)
+	if err != nil {
+		t.Fatalf("failed to create Spanner client: %v", err)
+	}
+	defer client.Close()
+	_, err = client.Apply(context.Background(), []*spanner.Mutation{
+		spanner.InsertMap("Venues", map[string]interface{}{
+			"VenueId": 4,
+			"Name":    "Venue 4",
+		}),
+		spanner.InsertMap("Venues", map[string]interface{}{
+			"VenueId": 19,
+			"Name":    "Venue 19",
+		}),
+		spanner.InsertMap("Venues", map[string]interface{}{
+			"VenueId": 42,
+			"Name":    "Venue 42",
+		}),
+	})
+	if err != nil {
+		t.Fatalf("failed to insert test records: %v", err)
+	}
+	out = runSample(t, addJsonBColumn, dbName, "failed to add jsonB column")
+	assertContains(t, out, "Added VenueDetails column\n")
+	out = runSample(t, updateDataWithJsonBColumn, dbName, "failed to update data with jsonB")
+	assertContains(t, out, "Updated data to VenueDetails column\n")
+	out = runSample(t, queryWithJsonBParameter, dbName, "failed to query with jsonB parameter")
+	assertContains(t, out, "The venue details for venue id 19")
 }
 
 func TestPgQueryParameter(t *testing.T) {
@@ -1271,6 +1336,32 @@ func cleanupInstanceWithName(instanceName string) error {
 	if err := instanceAdmin.DeleteInstance(ctx, &instancepb.DeleteInstanceRequest{Name: instanceName}); err != nil {
 		return fmt.Errorf("failed to delete instance %s (error %v), might need a manual removal",
 			instanceName, err)
+	}
+	return nil
+}
+
+func cleanupInstanceConfigs(projectID string) error {
+	// Delete all custom instance configurations.
+	ctx := context.Background()
+	instanceAdmin, err := instance.NewInstanceAdminClient(ctx)
+	if err != nil {
+		return fmt.Errorf("cannot create instance admin client: %v", err)
+	}
+	defer instanceAdmin.Close()
+	configIter := instanceAdmin.ListInstanceConfigs(ctx, &instancepb.ListInstanceConfigsRequest{
+		Parent: "projects/" + projectID,
+	})
+	for {
+		resp, err := configIter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		if strings.Contains(resp.Name, "custom-golang-samples") {
+			instanceAdmin.DeleteInstanceConfig(ctx, &instancepb.DeleteInstanceConfigRequest{Name: resp.Name})
+		}
 	}
 	return nil
 }

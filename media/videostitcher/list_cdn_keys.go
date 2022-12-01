@@ -14,7 +14,7 @@
 
 package videostitcher
 
-// [START video_stitcher_list_cdn_keys]
+// [START videostitcher_list_cdn_keys]
 import (
 	"context"
 	"fmt"
@@ -23,7 +23,7 @@ import (
 	"google.golang.org/api/iterator"
 
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	stitcherpb "google.golang.org/genproto/googleapis/cloud/video/stitcher/v1"
+	"cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
 
 // listCdnKeys gets all of the CDN keys for a given location.
@@ -57,4 +57,4 @@ func listCdnKeys(w io.Writer, projectID string) error {
 	return nil
 }
 
-// [END video_stitcher_list_cdn_keys]
+// [END videostitcher_list_cdn_keys]
