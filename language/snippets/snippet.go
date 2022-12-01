@@ -18,7 +18,7 @@ import (
 	"context"
 
 	language "cloud.google.com/go/language/apiv1"
-	languagepb "google.golang.org/genproto/googleapis/cloud/language/v1"
+	"cloud.google.com/go/language/apiv1/languagepb"
 )
 
 // Functions are included in the documentation. Use a package level variable

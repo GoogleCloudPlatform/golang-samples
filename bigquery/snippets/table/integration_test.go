@@ -80,6 +80,14 @@ func TestTables(t *testing.T) {
 		t.Fatalf("deleteAndUndeleteTable(%q %q): %v", testDatasetID, testTableID, err)
 	}
 
+	testTableID, err = bqtestutil.UniqueBQName("testcomplextable")
+	if err != nil {
+		t.Fatalf("couldn't generate unique table id: %v", err)
+	}
+	if err := insertingDataTypes(tc.ProjectID, testDatasetID, testTableID); err != nil {
+		t.Fatalf("insertingDataTypes(%q %q): %v", testDatasetID, testTableID, err)
+	}
+
 	testTableID, err = bqtestutil.UniqueBQName("testtable")
 	if err != nil {
 		t.Fatalf("couldn't generate unique table id: %v", err)

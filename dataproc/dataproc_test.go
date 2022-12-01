@@ -23,10 +23,10 @@ import (
 	"time"
 
 	dataproc "cloud.google.com/go/dataproc/apiv1"
+	"cloud.google.com/go/dataproc/apiv1/dataprocpb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
 	"google.golang.org/api/option"
-	dataprocpb "google.golang.org/genproto/googleapis/cloud/dataproc/v1"
 )
 
 func deleteCluster(projectID string, clusterName, region string) error {

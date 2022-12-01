@@ -21,8 +21,8 @@ import (
 	"io"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
+	"cloud.google.com/go/dlp/apiv2/dlppb"
 	"github.com/golang/protobuf/ptypes/duration"
-	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
 // createTrigger creates a trigger with the given configuration.

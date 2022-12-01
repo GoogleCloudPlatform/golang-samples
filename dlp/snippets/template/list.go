@@ -22,9 +22,9 @@ import (
 	"time"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
+	"cloud.google.com/go/dlp/apiv2/dlppb"
 	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/api/iterator"
-	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
 // listInspectTemplates lists the inspect templates in the project.

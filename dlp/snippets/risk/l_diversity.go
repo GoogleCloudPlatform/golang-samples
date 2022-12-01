@@ -23,8 +23,8 @@ import (
 	"time"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
+	"cloud.google.com/go/dlp/apiv2/dlppb"
 	"cloud.google.com/go/pubsub"
-	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
 // riskLDiversity computes the L Diversity of the given columns.

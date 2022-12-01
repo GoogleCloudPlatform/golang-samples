@@ -23,9 +23,9 @@ import (
 	"time"
 
 	kms "cloud.google.com/go/kms/apiv1"
+	"cloud.google.com/go/kms/apiv1/kmspb"
 	"github.com/gofrs/uuid"
 	"google.golang.org/api/iterator"
-	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 	fieldmask "google.golang.org/genproto/protobuf/field_mask"
 	grpccodes "google.golang.org/grpc/codes"
 	grpcstatus "google.golang.org/grpc/status"
