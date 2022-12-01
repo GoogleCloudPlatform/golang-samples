@@ -25,7 +25,7 @@ import (
 )
 
 // Retrieves the information about the specified job, most importantly its status
-func getJob(w io.Writer, projectID, region, jobName string) error {
+func getJob(w io.Writer, projectID, region, jobName string) (*batchpb.Job, error) {
 	// projectID := "your_project_id"
 	// region := "us-central1"
 	// jobName := "some-job"
@@ -33,7 +33,7 @@ func getJob(w io.Writer, projectID, region, jobName string) error {
 	ctx := context.Background()
 	batchClient, err := batch.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewClient: %v", err)
+		return nil, fmt.Errorf("NewClient: %v", err)
 	}
 	defer batchClient.Close()
 
@@ -43,12 +43,12 @@ func getJob(w io.Writer, projectID, region, jobName string) error {
 
 	response, err := batchClient.GetJob(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to get job: %v", err)
+		return nil, fmt.Errorf("unable to get job: %v", err)
 	}
 
 	fmt.Fprintf(w, "Job info: %v\n", response)
 
-	return nil
+	return response, nil
 }
 
 // [END batch_get_job]
