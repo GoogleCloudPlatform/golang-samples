@@ -28,11 +28,19 @@ import (
 // Deletes ALL disk snapshots in the project that match the filter
 func deleteByFilter(w io.Writer, projectID, filter string) error {
 	// projectID := "your_project_id"
+
 	// Learn more about filters:
 	// https://cloud.google.com/python/docs/reference/compute/latest/google.cloud.compute_v1.types.ListSnapshotsRequest
 	// filter := ""
-	
-	it, err := snapshotList(w, projectID, filter)
+
+	ctx := context.Background()
+	snapshotsClient, err := compute.NewSnapshotsRESTClient(ctx)
+	if err != nil {
+		return fmt.Errorf("NewSnapshotsRESTClient: %v", err)
+	}
+	defer snapshotsClient.Close()
+
+	it, err := snapshotList(w, ctx, snapshotsClient, projectID, filter)
 	if err != nil {
 		return fmt.Errorf("NewSnapshotsRESTClient: %v", err)
 	}
@@ -45,43 +53,29 @@ func deleteByFilter(w io.Writer, projectID, filter string) error {
 		if err != nil {
 			return err
 		}
-		delete(w, projectID, *snapshot.Name)
+		delete(w, ctx, snapshotsClient, projectID, *snapshot.Name)
 	}
 	return nil
 }
 
 // snapshotList returns an iterator over disk snapshots in the given project
-func snapshotList(w io.Writer, projectID, filter string) (*compute.SnapshotIterator, error) {
-	ctx := context.Background()
-	snapshotsClient, err := compute.NewSnapshotsRESTClient(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("NewSnapshotsRESTClient: %v", err)
-	}
-	defer snapshotsClient.Close()
-
+func snapshotList(w io.Writer, ctx context.Context, client *compute.SnapshotsClient, projectID, filter string) (*compute.SnapshotIterator, error) {
 	req := &computepb.ListSnapshotsRequest{
 		Project: projectID,
 		Filter:  &filter,
 	}
 
-	return snapshotsClient.List(ctx, req), nil
+	return client.List(ctx, req), nil
 }
 
 // deletes a disk snapshot
-func delete(w io.Writer, projectID, snapshotName string) error {
-	ctx := context.Background()
-	snapshotsClient, err := compute.NewSnapshotsRESTClient(ctx)
-	if err != nil {
-		return fmt.Errorf("NewSnapshotsRESTClient: %v", err)
-	}
-	defer snapshotsClient.Close()
-
+func delete(w io.Writer, ctx context.Context, client *compute.SnapshotsClient, projectID, snapshotName string) error {
 	req := &computepb.DeleteSnapshotRequest{
 		Project:  projectID,
 		Snapshot: snapshotName,
 	}
 
-	op, err := snapshotsClient.Delete(ctx, req)
+	op, err := client.Delete(ctx, req)
 	if err != nil {
 		return fmt.Errorf("unable to delete snapshot: %v", err)
 	}
