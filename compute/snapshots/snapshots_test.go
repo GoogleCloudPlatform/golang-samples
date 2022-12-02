@@ -156,6 +156,16 @@ func TestComputeSnapshotsSnippets(t *testing.T) {
 	}
 
 	buf.Reset()
+	want = snapshotName
+
+	if err := getSnapshot(buf, tc.ProjectID, snapshotName); err != nil {
+		t.Errorf("getSnapshot got err: %v", err)
+	}
+	if got := buf.String(); !strings.Contains(got, want) {
+		t.Errorf("getSnapshot got %q, want %q", got, want)
+	}
+
+	buf.Reset()
 	want = "Snapshot deleted"
 
 	if err := deleteSnapshot(buf, tc.ProjectID, snapshotName); err != nil {
