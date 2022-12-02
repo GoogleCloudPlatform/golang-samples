@@ -28,6 +28,9 @@ import (
 // listSnapshots prints a list of disk snapshots in the given project
 func listSnapshots(w io.Writer, projectID, filter string) error {
 	// projectID := "your_project_id"
+	// Filter applied when listing snapshots. Learn more about filters:
+	// https://cloud.google.com/python/docs/reference/compute/latest/google.cloud.compute_v1.types.ListSnapshotsRequest
+	// filter := ""
 	ctx := context.Background()
 	snapshotsClient, err := compute.NewSnapshotsRESTClient(ctx)
 	if err != nil {
