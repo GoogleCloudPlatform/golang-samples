@@ -340,7 +340,7 @@ func TestPullMsgsSync(t *testing.T) {
 		got := buf.String()
 		want := fmt.Sprintf("Received %d messages\n", numMsgs)
 		if !strings.Contains(got, want) {
-			t.Fatalf("pullMsgsSync got %s\nwant %s", got, want)
+			r.Errorf("pullMsgsSync got %s\nwant %s", got, want)
 		}
 	})
 }
