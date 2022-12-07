@@ -132,81 +132,85 @@ func TestComputeSnapshotsSnippets(t *testing.T) {
 	want := "Snapshot created"
 
 	buf := &bytes.Buffer{}
+	
+	t.Run("create, list and delete zonal disk snapshots", func(t *testing.T) {
+		err := createDisk(ctx, tc.ProjectID, zone, diskName, sourceImage)
+		if err != nil {
+			t.Fatalf("createDisk got err: %v", err)
+		}
 
-	err := createDisk(ctx, tc.ProjectID, zone, diskName, sourceImage)
-	if err != nil {
-		t.Fatalf("createDisk got err: %v", err)
-	}
+		if err := createSnapshot(buf, tc.ProjectID, diskName, snapshotName, zone, "", location, ""); err != nil {
+			t.Fatalf("createSnapshot got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("createSnapshot got %q, want %q", got, want)
+		}
 
-	if err := createSnapshot(buf, tc.ProjectID, diskName, snapshotName, zone, "", location, ""); err != nil {
-		t.Fatalf("createSnapshot got err: %v", err)
-	}
-	if got := buf.String(); !strings.Contains(got, want) {
-		t.Errorf("createSnapshot got %q, want %q", got, want)
-	}
+		buf.Reset()
+		want = snapshotName
 
-	buf.Reset()
-	want = snapshotName
+		if err := listSnapshots(buf, tc.ProjectID, ""); err != nil {
+			t.Errorf("listSnapshots got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("listSnapshots got %q, want %q", got, want)
+		}
 
-	if err := listSnapshots(buf, tc.ProjectID, ""); err != nil {
-		t.Errorf("listSnapshots got err: %v", err)
-	}
-	if got := buf.String(); !strings.Contains(got, want) {
-		t.Errorf("listSnapshots got %q, want %q", got, want)
-	}
+		buf.Reset()
+		want = snapshotName
 
-	buf.Reset()
-	want = snapshotName
+		if err := getSnapshot(buf, tc.ProjectID, snapshotName); err != nil {
+			t.Errorf("getSnapshot got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("getSnapshot got %q, want %q", got, want)
+		}
 
-	if err := getSnapshot(buf, tc.ProjectID, snapshotName); err != nil {
-		t.Errorf("getSnapshot got err: %v", err)
-	}
-	if got := buf.String(); !strings.Contains(got, want) {
-		t.Errorf("getSnapshot got %q, want %q", got, want)
-	}
+		buf.Reset()
+		want = "Snapshot deleted"
 
-	buf.Reset()
-	want = "Snapshot deleted"
+		if err := deleteSnapshot(buf, tc.ProjectID, snapshotName); err != nil {
+			t.Errorf("deleteSnapshot got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("deleteSnapshot got %q, want %q", got, want)
+		}
 
-	if err := deleteSnapshot(buf, tc.ProjectID, snapshotName); err != nil {
-		t.Errorf("deleteSnapshot got err: %v", err)
-	}
-	if got := buf.String(); !strings.Contains(got, want) {
-		t.Errorf("deleteSnapshot got %q, want %q", got, want)
-	}
+		err = deleteDisk(ctx, tc.ProjectID, zone, diskName)
+		if err != nil {
+			t.Errorf("deleteDisk got err: %v", err)
+		}
+	})
 
-	err = deleteDisk(ctx, tc.ProjectID, zone, diskName)
-	if err != nil {
-		t.Errorf("deleteDisk got err: %v", err)
-	}
+	t.Run("create and delete regional disk snapshots", func(t *testing.T) {
+		buf.Reset()
+		want = "Snapshot created"
 
-	buf.Reset()
-	want = "Snapshot created"
+		err := createRegionDisk(ctx, tc.ProjectID, location, diskName)
+		if err != nil {
+			t.Fatalf("createRegionDisk got err: %v", err)
+		}
 
-	err = createRegionDisk(ctx, tc.ProjectID, location, diskName)
-	if err != nil {
-		t.Fatalf("createRegionDisk got err: %v", err)
-	}
+		if err := createSnapshot(buf, tc.ProjectID, diskName, snapshotName, "", location, location, ""); err != nil {
+			t.Fatalf("createSnapshot got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("createSnapshot got %q, want %q", got, want)
+		}
 
-	if err := createSnapshot(buf, tc.ProjectID, diskName, snapshotName, "", location, location, ""); err != nil {
-		t.Fatalf("createSnapshot got err: %v", err)
-	}
-	if got := buf.String(); !strings.Contains(got, want) {
-		t.Errorf("createSnapshot got %q, want %q", got, want)
-	}
+		buf.Reset()
+		want = "Snapshot deleted"
 
-	buf.Reset()
-	want = "Snapshot deleted"
+		if err := deleteSnapshot(buf, tc.ProjectID, snapshotName); err != nil {
+			t.Errorf("deleteSnapshot got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("deleteSnapshot got %q, want %q", got, want)
+		}
 
-	if err := deleteSnapshot(buf, tc.ProjectID, snapshotName); err != nil {
-		t.Errorf("deleteSnapshot got err: %v", err)
-	}
-	if got := buf.String(); !strings.Contains(got, want) {
-		t.Errorf("deleteSnapshot got %q, want %q", got, want)
-	}
-
-	err = deleteRegionDisk(ctx, tc.ProjectID, location, diskName)
-	if err != nil {
-		t.Errorf("deleteRegionalDisk got err: %v", err)
-	}
+		err = deleteRegionDisk(ctx, tc.ProjectID, location, diskName)
+		if err != nil {
+			t.Errorf("deleteRegionalDisk got err: %v", err)
+		}
+	})
 }
