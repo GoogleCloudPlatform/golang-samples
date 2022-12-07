@@ -39,7 +39,6 @@ func deleteDiskImage(
 	}
 	defer imagesClient.Close()
 
-	// Create the image
 	req := computepb.DeleteImageRequest{
 		Image:   imageName,
 		Project: projectID,
