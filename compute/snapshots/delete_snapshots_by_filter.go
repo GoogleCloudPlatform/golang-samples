@@ -61,18 +61,19 @@ func deleteByFilter(w io.Writer, projectID, filter string) error {
 			Project:  projectID,
 			Snapshot: *snapshot.Name,
 		}
-	
+
 		op, err := snapshotsClient.Delete(ctx, req)
 		if err != nil {
 			return fmt.Errorf("unable to delete snapshot: %v", err)
 		}
-	
+
 		if err = op.Wait(ctx); err != nil {
 			return fmt.Errorf("unable to wait for the operation: %v", err)
 		}
-	
+
 		fmt.Fprintf(w, "Snapshot %s deleted\n", *snapshot.Name)
 	}
 	return nil
 }
+
 // [END compute_snapshot_delete_by_filter]
