@@ -132,7 +132,7 @@ func TestComputeSnapshotsSnippets(t *testing.T) {
 	want := "Snapshot created"
 
 	buf := &bytes.Buffer{}
-	
+
 	t.Run("create, list and delete zonal disk snapshots", func(t *testing.T) {
 		err := createDisk(ctx, tc.ProjectID, zone, diskName, sourceImage)
 		if err != nil {
