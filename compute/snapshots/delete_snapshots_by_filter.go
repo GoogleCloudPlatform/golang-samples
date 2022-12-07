@@ -28,10 +28,9 @@ import (
 // Deletes ALL disk snapshots in the project that match the filter
 func deleteByFilter(w io.Writer, projectID, filter string) error {
 	// projectID := "your_project_id"
-
+	// filter := ""
 	// Learn more about filters:
 	// https://cloud.google.com/python/docs/reference/compute/latest/google.cloud.compute_v1.types.ListSnapshotsRequest
-	// filter := ""
 
 	ctx := context.Background()
 	snapshotsClient, err := compute.NewSnapshotsRESTClient(ctx)
