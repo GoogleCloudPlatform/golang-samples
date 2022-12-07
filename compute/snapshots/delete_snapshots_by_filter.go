@@ -39,11 +39,14 @@ func deleteByFilter(w io.Writer, projectID, filter string) error {
 	}
 	defer snapshotsClient.Close()
 
-	it, err := snapshotList(w, ctx, snapshotsClient, projectID, filter)
-	if err != nil {
-		return fmt.Errorf("NewSnapshotsRESTClient: %v", err)
+	// List snapshots in the project with the filter applied
+	req := &computepb.ListSnapshotsRequest{
+		Project: projectID,
+		Filter:  &filter,
 	}
+	it := snapshotsClient.List(ctx, req)
 
+	// Iterate over the list of snapshots
 	for {
 		snapshot, err := it.Next()
 		if err == iterator.Done {
@@ -52,40 +55,24 @@ func deleteByFilter(w io.Writer, projectID, filter string) error {
 		if err != nil {
 			return err
 		}
-		delete(w, ctx, snapshotsClient, projectID, *snapshot.Name)
+
+		// Delete each snapshot that matches the filter
+		req := &computepb.DeleteSnapshotRequest{
+			Project:  projectID,
+			Snapshot: *snapshot.Name,
+		}
+	
+		op, err := snapshotsClient.Delete(ctx, req)
+		if err != nil {
+			return fmt.Errorf("unable to delete snapshot: %v", err)
+		}
+	
+		if err = op.Wait(ctx); err != nil {
+			return fmt.Errorf("unable to wait for the operation: %v", err)
+		}
+	
+		fmt.Fprintf(w, "Snapshot %s deleted\n", *snapshot.Name)
 	}
 	return nil
 }
-
-// snapshotList returns an iterator over disk snapshots in the given project
-func snapshotList(w io.Writer, ctx context.Context, client *compute.SnapshotsClient, projectID, filter string) (*compute.SnapshotIterator, error) {
-	req := &computepb.ListSnapshotsRequest{
-		Project: projectID,
-		Filter:  &filter,
-	}
-
-	return client.List(ctx, req), nil
-}
-
-// deletes a disk snapshot
-func delete(w io.Writer, ctx context.Context, client *compute.SnapshotsClient, projectID, snapshotName string) error {
-	req := &computepb.DeleteSnapshotRequest{
-		Project:  projectID,
-		Snapshot: snapshotName,
-	}
-
-	op, err := client.Delete(ctx, req)
-	if err != nil {
-		return fmt.Errorf("unable to delete snapshot: %v", err)
-	}
-
-	if err = op.Wait(ctx); err != nil {
-		return fmt.Errorf("unable to wait for the operation: %v", err)
-	}
-
-	fmt.Fprintf(w, "Snapshot %s deleted\n", snapshotName)
-
-	return nil
-}
-
 // [END compute_snapshot_delete_by_filter]
