@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START cloud_sql_mysql_databasesql_connect_connector]
 package cloudsql
 
+// [START cloud_sql_mysql_databasesql_connect_auto_iam_authn]
 import (
 	"context"
 	"database/sql"
@@ -27,7 +27,7 @@ import (
 	"github.com/go-sql-driver/mysql"
 )
 
-func connectWithConnector() (*sql.DB, error) {
+func connectWithConnectorIAMAuthN() (*sql.DB, error) {
 	mustGetenv := func(k string) string {
 		v := os.Getenv(k)
 		if v == "" {
@@ -40,14 +40,13 @@ func connectWithConnector() (*sql.DB, error) {
 	// Cloud Secret Manager (https://cloud.google.com/secret-manager) to help
 	// keep secrets safe.
 	var (
-		dbUser                 = mustGetenv("DB_USER")                  // e.g. 'my-db-user'
-		dbPwd                  = mustGetenv("DB_PASS")                  // e.g. 'my-db-password'
+		dbUser                 = mustGetenv("DB_IAM_USER")              // e.g. 'my-db-user'
 		dbName                 = mustGetenv("DB_NAME")                  // e.g. 'my-database'
 		instanceConnectionName = mustGetenv("INSTANCE_CONNECTION_NAME") // e.g. 'project:region:instance'
 		usePrivate             = os.Getenv("PRIVATE_IP")
 	)
 
-	d, err := cloudsqlconn.NewDialer(context.Background())
+	d, err := cloudsqlconn.NewDialer(context.Background(), cloudsqlconn.WithIAMAuthN())
 	if err != nil {
 		return nil, fmt.Errorf("cloudsqlconn.NewDialer: %v", err)
 	}
@@ -60,8 +59,8 @@ func connectWithConnector() (*sql.DB, error) {
 			return d.Dial(ctx, instanceConnectionName, opts...)
 		})
 
-	dbURI := fmt.Sprintf("%s:%s@cloudsqlconn(localhost:3306)/%s?parseTime=true",
-		dbUser, dbPwd, dbName)
+	dbURI := fmt.Sprintf("%s:empty@cloudsqlconn(localhost:3306)/%s?parseTime=true",
+		dbUser, dbName)
 
 	dbPool, err := sql.Open("mysql", dbURI)
 	if err != nil {
@@ -70,4 +69,4 @@ func connectWithConnector() (*sql.DB, error) {
 	return dbPool, nil
 }
 
-// [END cloud_sql_mysql_databasesql_connect_connector]
+// [END cloud_sql_mysql_databasesql_connect_auto_iam_authn]
