@@ -83,7 +83,7 @@ func createImageFromDisk(
 		return fmt.Errorf("unable to wait for the operation: %v", err)
 	}
 
-	fmt.Fprintf(w, "Disk created\n")
+	fmt.Fprintf(w, "Disk image %s created\n", imageName)
 
 	return nil
 }
