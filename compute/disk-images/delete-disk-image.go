@@ -30,7 +30,7 @@ func deleteDiskImage(
 	projectID, imageName string,
 ) error {
 	// projectID := "your_project_id"
-	// imageName := "my_image"
+	// imageName := "your_image"
 
 	ctx := context.Background()
 	imagesClient, err := compute.NewImagesRESTClient(ctx)
