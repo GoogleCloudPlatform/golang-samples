@@ -36,7 +36,7 @@ func createDiskFromDisk(
 	// zone := "us-west3-b"
 	// diskName := "your_disk_name"
 	// diskType := "zones/us-west3-b/diskTypes/pd-ssd"
-	// diskLink := "projects/project_name/global/disks/disk_name"
+	// diskLink := "projects/your_project_id/global/disks/disk_name"
 	// diskSizeGb := 120
 
 	ctx := context.Background()

@@ -36,7 +36,7 @@ func createRegionalDiskFromSnapshot(
 	// region := "us-west3"
 	// diskName := "your_disk_name"
 	// diskType := "regions/us-west3/diskTypes/pd-ssd"
-	// snapshotLink := "projects/project_name/global/snapshots/snapshot_name"
+	// snapshotLink := "projects/your_project_id/global/snapshots/snapshot_name"
 	// diskSizeGb := 120
 
 	ctx := context.Background()
