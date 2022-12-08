@@ -29,7 +29,7 @@ import (
 // an already existitng zonal disk or disk snapshot. Type and size may differ.
 func createRegionalDiskFromDisk(
 	w io.Writer,
-	projectID, region, diskName, diskType, diskLink, snapshotLink string,
+	projectID, region, diskName, diskType, diskLink string,
 	diskSizeGb int64,
 ) error {
 	// projectID := "your_project_id"
@@ -37,7 +37,6 @@ func createRegionalDiskFromDisk(
 	// diskName := "your_disk_name"
 	// diskType := "regions/us-west3/diskTypes/pd-ssd"
 	// diskLink := "projects/project_name/global/disks/disk_name"
-	// snapshotLink := "projects/project_name/global/snapshots/snapshot_name"
 	// diskSizeGb := 120
 
 	ctx := context.Background()
