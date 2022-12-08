@@ -33,7 +33,7 @@ func createRegionalDiskFromSnapshot(
 	diskSizeGb int64,
 ) error {
 	// projectID := "your_project_id"
-	// region := "europe-central2-b"
+	// region := "us-west3"
 	// diskName := "your_disk_name"
 	// diskType := "regions/us-west3/diskTypes/pd-ssd"
 	// snapshotLink := "projects/project_name/global/snapshots/snapshot_name"

@@ -27,7 +27,7 @@ import (
 // deleteRegionalDisk permanently deletes a regional disk.
 func deleteRegionalDisk(w io.Writer, projectID, region, diskName string) error {
 	// projectID := "your_project_id"
-	// region := "europe-central2"
+	// region := "us-west3"
 	// diskName := "your_disk_name"
 
 	ctx := context.Background()
