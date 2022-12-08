@@ -30,7 +30,7 @@ func setDiskAutoDelete(
 	projectID, zone, instanceName, diskName string,
 ) error {
 	// projectID := "your_project_id"
-	// zone := "europe-central2-b"
+	// zone := "us-west3-b"
 	// instanceName := "your_instance_name"
 	// diskName := "your_disk_name"
 

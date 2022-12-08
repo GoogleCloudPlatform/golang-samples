@@ -27,7 +27,7 @@ import (
 // deleteDisk deletes a disk from a project.
 func deleteDisk(w io.Writer, projectID, zone, diskName string) error {
 	// projectID := "your_project_id"
-	// zone := "europe-central2-b"
+	// zone := "us-west3-b"
 	// diskName := "your_disk_name"
 
 	ctx := context.Background()

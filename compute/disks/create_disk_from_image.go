@@ -32,7 +32,7 @@ func createDiskFromImage(
 	diskSizeGb int64,
 ) error {
 	// projectID := "your_project_id"
-	// zone := "europe-central2-b"
+	// zone := "us-west3-b"
 	// diskName := "your_disk_name"
 	// diskType := "zones/us-west3-b/diskTypes/pd-ssd"
 	// imageLink := "projects/project_name/global/images/image_name"
