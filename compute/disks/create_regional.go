@@ -35,7 +35,6 @@ func createRegionalDisk(
 	// region := "us-west3"
 	// diskName := "your_disk_name"
 	// diskType := "regions/us-west3/diskTypes/pd-ssd"
-	// diskLink := "projects/your_project_id/global/disks/disk_name"
 	// diskSizeGb := 120
 
 	ctx := context.Background()
