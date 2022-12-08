@@ -39,7 +39,7 @@ func deleteRegionalDisk(w io.Writer, projectID, region, diskName string) error {
 
 	req := &computepb.DeleteRegionDiskRequest{
 		Project: projectID,
-		Region:    region,
+		Region:  region,
 		Disk:    diskName,
 	}
 

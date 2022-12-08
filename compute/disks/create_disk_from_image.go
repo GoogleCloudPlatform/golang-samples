@@ -29,12 +29,14 @@ import (
 func createDiskFromImage(
 	w io.Writer,
 	projectID, zone, diskName, diskType, imageLink string,
+	diskSizeGb int64,
 ) error {
 	// projectID := "your_project_id"
 	// zone := "europe-central2-b"
 	// diskName := "your_disk_name"
 	// diskType := "zones/us-west3-b/diskTypes/pd-ssd"
 	// imageLink := "projects/project_name/global/images/image_name"
+	// diskSizeGb := 120
 
 	ctx := context.Background()
 	disksClient, err := compute.NewDisksRESTClient(ctx)
@@ -47,11 +49,11 @@ func createDiskFromImage(
 		Project: projectID,
 		Zone:    zone,
 		DiskResource: &computepb.Disk{
-			Name:           proto.String(diskName),
-			Zone:           proto.String(zone),
-			Type:           proto.String(diskType),
+			Name:        proto.String(diskName),
+			Zone:        proto.String(zone),
+			Type:        proto.String(diskType),
 			SourceImage: proto.String(imageLink),
-			SizeGb:         proto.Int64(120),
+			SizeGb:      proto.Int64(diskSizeGb),
 		},
 	}
 

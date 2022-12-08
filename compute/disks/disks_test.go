@@ -167,7 +167,7 @@ func TestComputeDisksSnippets(t *testing.T) {
 			t.Fatalf("createDiskSnapshot got err: %v", err)
 		}
 
-		if err := createDiskFromSnapshot(buf, tc.ProjectID, zone, diskName2, diskType, diskSnapshotLink); err != nil {
+		if err := createDiskFromSnapshot(buf, tc.ProjectID, zone, diskName2, diskType, diskSnapshotLink, 50); err != nil {
 			t.Errorf("createDiskFromSnapshot got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, want) {
