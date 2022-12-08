@@ -54,9 +54,16 @@ func createRegionalDiskFromDisk(
 			Name:       proto.String(diskName),
 			Region:     proto.String(region),
 			Type:       proto.String(diskType),
-			SourceDisk: proto.String(diskLink),
 			SizeGb:     proto.Int64(diskSizeGb),
 		},
+	}
+
+	if diskLink != "" {
+		req.DiskResource.SourceDisk = proto.String(diskLink)
+	} else if snapshotLink != "" {
+		req.DiskResource.SourceSnapshot = proto.String(snapshotLink)
+	} else {
+		return fmt.Errorf("Either diskLink or snapshotLink must be set")
 	}
 
 	op, err := disksClient.Insert(ctx, req)
