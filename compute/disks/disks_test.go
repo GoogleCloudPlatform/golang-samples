@@ -199,7 +199,7 @@ func TestComputeDisksSnippets(t *testing.T) {
 		buf.Reset()
 		want = "Disk created"
 
-		if err := createEmptyDisk(buf, tc.ProjectID, zone, diskName, diskType); err != nil {
+		if err := createEmptyDisk(buf, tc.ProjectID, zone, diskName, diskType, 20); err != nil {
 			t.Fatalf("createEmptyDisk got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, want) {
