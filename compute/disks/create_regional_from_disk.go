@@ -26,7 +26,7 @@ import (
 )
 
 // createRegionalDiskFromDisk creates a new regional disk with the contents of
-// an already existitng zonal disk or disk snapshot. Type and size may differ.
+// an already existitng zonal disk. Disk type and size may differ.
 func createRegionalDiskFromDisk(
 	w io.Writer,
 	projectID, region, diskName, diskType, diskLink string,
