@@ -138,6 +138,9 @@ func newThingName(thing string, r *rand.Rand) string {
 
 func TestComputeDisksSnippets(t *testing.T) {
 	ctx := context.Background()
+	var r *rand.Rand = rand.New(
+		rand.NewSource(time.Now().UnixNano()))
+	tc := testutil.SystemTest(t)
 	zone := "europe-central2-b"
 	sourceImage := "projects/debian-cloud/global/images/family/debian-11"
 	diskType := fmt.Sprintf("zones/%s/diskTypes/pd-ssd", zone)
@@ -152,9 +155,6 @@ func TestComputeDisksSnippets(t *testing.T) {
 
 	t.Run("createDiskSnapshot and deleteDisk", func(t *testing.T) {
 		t.Parallel()
-		tc := testutil.SystemTest(t)
-		var r *rand.Rand = rand.New(
-			rand.NewSource(time.Now().UnixNano()))
 		buf := &bytes.Buffer{}
 		diskName := newThingName("disk", r)
 		diskName2 := newThingName("disk", r)
@@ -201,9 +201,6 @@ func TestComputeDisksSnippets(t *testing.T) {
 
 	t.Run("createEmptyDisk", func(t *testing.T) {
 		t.Parallel()
-		tc := testutil.SystemTest(t)
-		var r *rand.Rand = rand.New(
-			rand.NewSource(time.Now().UnixNano()))
 		buf := &bytes.Buffer{}
 		diskName := newThingName("disk", r)
 
@@ -224,9 +221,6 @@ func TestComputeDisksSnippets(t *testing.T) {
 
 	t.Run("setDiskAutoDelete", func(t *testing.T) {
 		t.Parallel()
-		tc := testutil.SystemTest(t)
-		var r *rand.Rand = rand.New(
-			rand.NewSource(time.Now().UnixNano()))
 		buf := &bytes.Buffer{}
 		diskName := newThingName("disk", r)
 		instanceName := newThingName("instance", r)
