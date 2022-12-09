@@ -15,38 +15,29 @@
 // [START asset_quickstart_create_saved_query]
  
 // Sample create-saved-query create saved query.
-package main
+package CreateSavedQueryFunction
  
 import (
 	"context"
-	"flag"
 	"fmt"
-	"log"
-	"os"
  
 	asset "cloud.google.com/go/asset/apiv1"
 	"cloud.google.com/go/asset/apiv1/assetpb"
 )
  
-// Command-line flags.
-var (
-	savedQueryID = flag.String("saved_query_id", "YOUR-QUERY-ID", "Identifier of Saved Query.")
-)
- 
-func main() {
-	flag.Parse()
+func createSavedQuery(projectID, savedQueryID string) error {
+	// projectID := "my-project-id"
+	// savedQueryID := "query-ID"
 	ctx := context.Background()
 	client, err := asset.NewClient(ctx)
 	if err != nil {
-		log.Fatalf("asset.NewClient: %v", err)
+		return fmt.Errorf("asset.NewClient: %v", err)
 	}
 	defer client.Close()
- 
-	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	parent := fmt.Sprintf("projects/%s", projectID)
 	req := &assetpb.CreateSavedQueryRequest{
 		Parent: parent,
-		SavedQueryId: *savedQueryID,
+		SavedQueryId: savedQueryID,
 		SavedQuery: &assetpb.SavedQuery{
 			Content: &assetpb.SavedQuery_QueryContent{
 				QueryContent: &assetpb.SavedQuery_QueryContent_IamPolicyAnalysisQuery {
@@ -61,9 +52,12 @@ func main() {
 		}}
 	response, err := client.CreateSavedQuery(ctx, req)
 	if err != nil {
-		log.Fatalf("client.CreateSavedQuery: %v", err)
+		return fmt.Errorf("client.CreateSavedQuery: %v", err)
 	}
-	fmt.Print(response)
+	fmt.Println("Query Name:", response.Name);
+	fmt.Println("Query Description:", response.Description);
+	fmt.Println("Query Content:", response.Content);
+	return nil;
 }
  
 // [END asset_quickstart_create_saved_query]

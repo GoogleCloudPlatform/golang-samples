@@ -12,38 +12,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
  
-package main
+package CreateSavedQueryFunction
  
 import (
 	"context"
 	"fmt"
 	"strconv"
-	"strings"
 	"testing"
-	"time"
+	"os"
  
 	asset "cloud.google.com/go/asset/apiv1"
 	"cloud.google.com/go/asset/apiv1/assetpb"
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/gofrs/uuid"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 )
  
 func TestMain(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	env := map[string]string{"GOOGLE_CLOUD_PROJECT": tc.ProjectID}
+	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	savedQueryID := fmt.Sprintf("query-%s", uuid.Must(uuid.NewV4()).String()[:8])
  
+	err := createSavedQuery(projectID, savedQueryID);
+ 
 	ctx := context.Background()
-	cloudresourcemanagerClient, err := cloudresourcemanager.NewService(ctx)
+	cloudResourceManagerClient, err := cloudresourcemanager.NewService(ctx)
 	if err != nil {
 		t.Fatalf("cloudresourcemanager.NewService: %v", err)
 	}
  
-	project, err := cloudresourcemanagerClient.Projects.Get(tc.ProjectID).Do()
+	project, err := cloudResourceManagerClient.Projects.Get(projectID).Do()
 	if err != nil {
 		t.Fatalf("cloudresourcemanager.Projects.Get.Do: %v", err)
 	}
+	// query name is defined as 'projects/PROJECT_NUMBER'/savedQueries/SAVED_QUERY_ID.
+	// hence we should translate the projectId into a project number first.
 	projectNumber := strconv.FormatInt(project.ProjectNumber, 10)
  
 	client, err := asset.NewClient(ctx)
@@ -51,28 +52,12 @@ func TestMain(t *testing.T) {
 		t.Fatalf("asset.NewClient: %v", err)
 	}
  
-	m := testutil.BuildMain(t)
-	defer m.Cleanup()
  
-	if !m.Built() {
-		t.Fatalf("failed to build app")
-	}
- 
-	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
-		stdOut, stdErr, err := m.Run(env, 2*time.Minute, fmt.Sprintf("--saved_query_id=%s", savedQueryID))
-		if err != nil {
-			r.Errorf("execution failed: %v", err)
-		}
-		if len(stdErr) > 0 {
-			r.Errorf("did not expect stderr output, got %d bytes: %s", len(stdErr), string(stdErr))
-		}
-		got := string(stdOut)
-		if !strings.Contains(got, savedQueryID) {
-			r.Errorf("stdout returned %s, wanted to contain %s", got, savedQueryID)
-		}
-	})
- 
-	client.DeleteSavedQuery(ctx, &assetpb.DeleteSavedQueryRequest{
+	err = client.DeleteSavedQuery(ctx, &assetpb.DeleteSavedQueryRequest{
 		Name: fmt.Sprintf("projects/%s/savedQueries/%s", projectNumber, savedQueryID),
 	})
+ 
+	if err != nil {
+		t.Fatalf("client.DeleteSavedQuery: %v", err);
+	}
 }
