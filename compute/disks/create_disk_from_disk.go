@@ -29,14 +29,14 @@ import (
 // an already existitng disk. Type, and size and zone may differ.
 func createDiskFromDisk(
 	w io.Writer,
-	projectID, zone, diskName, diskType, diskLink string,
+	projectID, zone, diskName, diskType, sourceDiskLink string,
 	diskSizeGb int64,
 ) error {
 	// projectID := "your_project_id"
 	// zone := "us-west3-b"
 	// diskName := "your_disk_name"
 	// diskType := "zones/us-west3-b/diskTypes/pd-ssd"
-	// diskLink := "projects/your_project_id/global/disks/disk_name"
+	// sourceDiskLink := "projects/your_project_id/global/disks/disk_name"
 	// diskSizeGb := 120
 
 	ctx := context.Background()
@@ -53,7 +53,7 @@ func createDiskFromDisk(
 			Name:       proto.String(diskName),
 			Zone:       proto.String(zone),
 			Type:       proto.String(diskType),
-			SourceDisk: proto.String(diskLink),
+			SourceDisk: proto.String(sourceDiskLink),
 			SizeGb:     proto.Int64(diskSizeGb),
 		},
 	}

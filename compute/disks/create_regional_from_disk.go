@@ -30,14 +30,14 @@ import (
 func createRegionalDiskFromDisk(
 	w io.Writer,
 	projectID, region string, replicaZones []string,
-	diskName, diskType, diskLink string,
+	diskName, diskType, sourceDiskLink string,
 	diskSizeGb int64,
 ) error {
 	// projectID := "your_project_id"
 	// region := "us-west3"
 	// diskName := "your_disk_name"
 	// diskType := "regions/us-west3/diskTypes/pd-ssd"
-	// diskLink := "projects/your_project_id/global/disks/disk_name"
+	// sourceDiskLink := "projects/your_project_id/global/disks/disk_name"
 	// diskSizeGb := 120
 
 	// Exactly two replica zones must be specified
@@ -60,7 +60,7 @@ func createRegionalDiskFromDisk(
 			Name:         proto.String(diskName),
 			Region:       proto.String(region),
 			Type:         proto.String(diskType),
-			SourceDisk:   proto.String(diskLink),
+			SourceDisk:   proto.String(sourceDiskLink),
 			SizeGb:       proto.Int64(diskSizeGb),
 			ReplicaZones: replicaZoneURLs,
 		},
