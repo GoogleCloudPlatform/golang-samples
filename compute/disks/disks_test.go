@@ -122,6 +122,7 @@ func TestComputeDisksSnippets(t *testing.T) {
 	diskName2 := fmt.Sprintf("test-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	snapshotName := fmt.Sprintf("test-snapshot-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	sourceImage := "projects/debian-cloud/global/images/family/debian-11"
+	sourceDisk := fmt.Sprintf("projects/%s/zones/europe-central2-b/disks/%s", tc.ProjectID, diskName)
 	diskType := fmt.Sprintf("zones/%s/diskTypes/pd-ssd", zone)
 	diskSnapshotLink := fmt.Sprintf("projects/%s/global/snapshots/%s", tc.ProjectID, snapshotName)
 
@@ -213,7 +214,6 @@ func TestComputeDisksSnippets(t *testing.T) {
 			t.Errorf("createEmptyDisk got %q, want %q", got, want)
 		}
 
-		sourceDisk := fmt.Sprintf("projects/%s/zones/europe-central2-b/disks/%s", tc.ProjectID, diskName)
 		if err := createRegionalDiskFromDisk(buf, tc.ProjectID, region, replicaZones, diskName2, diskType, sourceDisk, 30); err != nil {
 			t.Errorf("createRegionalDiskFromDisk got err: %v", err)
 		}
@@ -227,6 +227,31 @@ func TestComputeDisksSnippets(t *testing.T) {
 			t.Errorf("deleteRegionalDisk got err: %v", err)
 		}
 
+		err = deleteDisk(buf, tc.ProjectID, zone, diskName)
+		if err != nil {
+			t.Errorf("deleteDisk got err: %v", err)
+		}
+	})
+
+	t.Run("create, clone and delete an encrypted disk", func(t *testing.T) {
+		buf.Reset()
+		want := "Disk created"
+
+		if err := createEncryptedDisk(buf, tc.ProjectID, zone, diskName, diskType, 20, "SGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0=", "", "", ""); err != nil {
+			t.Fatalf("createEncryptedDisk got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("createEncryptedDisk got %q, want %q", got, want)
+		}
+
+		if err := createDiskFromCustomerEncryptedDisk(buf, tc.ProjectID, zone, diskName2, diskType, 20, sourceDisk, "SGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0="); err != nil {
+			t.Fatalf("createDiskFromCustomerEncryptedDisk got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("createDiskFromCustomerEncryptedDisk got %q, want %q", got, want)
+		}
+
+		// cleanup
 		err = deleteDisk(buf, tc.ProjectID, zone, diskName)
 		if err != nil {
 			t.Errorf("deleteDisk got err: %v", err)
