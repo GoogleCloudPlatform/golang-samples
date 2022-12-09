@@ -132,18 +132,19 @@ func deleteInstance(ctx context.Context, projectId, zone, instanceName string) e
 	return op.Wait(ctx)
 }
 
-func newThingName(thing string, r *rand.Rand) string {
-	return fmt.Sprintf("test-%s-go-%v-%v", thing, time.Now().Format("01-02-2006"), r.Int())
-}
-
 func TestComputeDisksSnippets(t *testing.T) {
 	ctx := context.Background()
 	var r *rand.Rand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))
 	tc := testutil.SystemTest(t)
 	zone := "europe-central2-b"
+	instanceName := fmt.Sprintf("test-instance-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+	diskName := fmt.Sprintf("test-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+	diskName2 := fmt.Sprintf("test-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+	snapshotName := fmt.Sprintf("test-snapshot-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	sourceImage := "projects/debian-cloud/global/images/family/debian-11"
 	diskType := fmt.Sprintf("zones/%s/diskTypes/pd-ssd", zone)
+	diskSnapshotLink := fmt.Sprintf("projects/%s/global/snapshots/%s", tc.ProjectID, snapshotName)
 	want := "Disk created"
 
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
@@ -153,14 +154,9 @@ func TestComputeDisksSnippets(t *testing.T) {
 
 	defer instancesClient.Close()
 
-	t.Run("createDiskSnapshot and deleteDisk", func(t *testing.T) {
-		t.Parallel()
-		buf := &bytes.Buffer{}
-		diskName := newThingName("disk", r)
-		diskName2 := newThingName("disk", r)
-		snapshotName := newThingName("snapshot", r)
-		diskSnapshotLink := fmt.Sprintf("projects/%s/global/snapshots/%s", tc.ProjectID, snapshotName)
+	buf := &bytes.Buffer{}
 
+	t.Run("createDiskSnapshot and deleteDisk", func(t *testing.T) {
 		err := createDisk(ctx, tc.ProjectID, zone, diskName, sourceImage)
 		if err != nil {
 			t.Fatalf("createDisk got err: %v", err)
@@ -200,10 +196,7 @@ func TestComputeDisksSnippets(t *testing.T) {
 	})
 
 	t.Run("createEmptyDisk", func(t *testing.T) {
-		t.Parallel()
-		buf := &bytes.Buffer{}
-		diskName := newThingName("disk", r)
-
+		buf.Reset()
 		want = "Disk created"
 
 		if err := createEmptyDisk(buf, tc.ProjectID, zone, diskName, diskType, 20); err != nil {
@@ -220,10 +213,7 @@ func TestComputeDisksSnippets(t *testing.T) {
 	})
 
 	t.Run("setDiskAutoDelete", func(t *testing.T) {
-		t.Parallel()
-		buf := &bytes.Buffer{}
-		diskName := newThingName("disk", r)
-		instanceName := newThingName("instance", r)
+		buf.Reset()
 		want = "disk autoDelete field updated."
 
 		req := &computepb.InsertInstanceRequest{
