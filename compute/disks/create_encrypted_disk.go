@@ -65,7 +65,8 @@ func createEncryptedDisk(
 		},
 	}
 
-	// if a source disk, image or snapshot has been specified, apply it
+	// If a source disk, image or snapshot has been specified, apply it.
+	// These arguments are mutually exclusive.
 	if diskLink != "" {
 		req.DiskResource.SourceDisk = proto.String(diskLink)
 	} else if imageLink != "" {
