@@ -14,3 +14,6 @@ Follow the instructions in [this guide](https://cloud.google.com/memorystore/doc
 
 Follow the instructions in [this guide](https://cloud.google.com/memorystore/docs/redis/connect-redis-instance-flex) to deploy the sample application on GAE Flex.
 
+## Running on Cloud Run
+
+Follow the instructions in [this guide](https://cloud.google.com/memorystore/docs/redis/connect-redis-instance-cloud-run) to deploy the sample application on Cloud Run

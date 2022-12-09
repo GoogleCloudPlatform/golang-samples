@@ -22,9 +22,9 @@ import (
 	"time"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
+	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/api/iterator"
-	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
 )
 
 // listAllProjectAssets lists all GCP Projects in orgID at asOf time and prints

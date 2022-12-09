@@ -21,7 +21,7 @@ import (
 	"io"
 
 	talent "cloud.google.com/go/talent/apiv4beta1"
-	talentpb "google.golang.org/genproto/googleapis/cloud/talent/v4beta1"
+	"cloud.google.com/go/talent/apiv4beta1/talentpb"
 )
 
 // batchDeleteJobs deletes existing jobs by a filter.

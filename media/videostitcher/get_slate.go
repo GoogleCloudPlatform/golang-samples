@@ -22,7 +22,7 @@ import (
 	"io"
 
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	stitcherstreampb "google.golang.org/genproto/googleapis/cloud/video/stitcher/v1"
+	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
 
 // getSlate gets a previously-created slate.

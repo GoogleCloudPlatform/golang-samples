@@ -1,3 +1,3 @@
 module github.com/GoogleCloudPlatform/golang-samples/getting-started/gce
 
-go 1.15
+go 1.19

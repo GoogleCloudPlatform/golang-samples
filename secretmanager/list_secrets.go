@@ -21,8 +21,8 @@ import (
 	"io"
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
+	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
 	"google.golang.org/api/iterator"
-	secretmanagerpb "google.golang.org/genproto/googleapis/cloud/secretmanager/v1"
 )
 
 // listSecrets lists all secrets in the given project.

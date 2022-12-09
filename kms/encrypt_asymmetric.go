@@ -26,7 +26,7 @@ import (
 	"io"
 
 	kms "cloud.google.com/go/kms/apiv1"
-	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
+	"cloud.google.com/go/kms/apiv1/kmspb"
 )
 
 // encryptAsymmetric encrypts data on your local machine using an
