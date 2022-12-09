@@ -34,7 +34,7 @@ func createRegionalDiskFromSnapshot(
 	diskSizeGb int64,
 ) error {
 	// projectID := "your_project_id"
-	// region := "us-west3"
+	// region := "us-west3" // should match diskType below
 	// replicaZones := []string{"us-west3-a", "us-west3-b"}
 	// diskName := "your_disk_name"
 	// diskType := "regions/us-west3/diskTypes/pd-ssd"

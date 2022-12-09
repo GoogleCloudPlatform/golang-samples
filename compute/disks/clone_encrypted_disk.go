@@ -35,7 +35,7 @@ func createDiskFromCustomerEncryptedDisk(
 	diskLink, encryptionKey string,
 ) error {
 	// projectID := "your_project_id"
-	// zone := "us-west3-b"
+	// zone := "us-west3-b" // should match diskType below
 	// diskName := "your_disk_name"
 	// diskType := "zones/us-west3/diskTypes/pd-ssd"
 	// diskSizeGb := 120
