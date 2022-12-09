@@ -61,14 +61,14 @@ var (
 	}
 
 	adminCommands = map[string]adminCommand{
-		"createdatabase":          createDatabase,
-		"addnewcolumn":            addNewColumn,
-		"pgaddnewcolumn":          pgAddNewColumn,
-		"addstoringindex":         addStoringIndex,
-		"pgaddstoringindex":       pgAddStoringIndex,
-		"pgcreatedatabase":        pgCreateDatabase,
-		"addanddropdatabaseroles": addAndDropDatabaseRoles,
-		"listdatabaseroles":       listDatabaseRoles,
+		"createdatabase":         createDatabase,
+		"addnewcolumn":           addNewColumn,
+		"pgaddnewcolumn":         pgAddNewColumn,
+		"addstoringindex":        addStoringIndex,
+		"pgaddstoringindex":      pgAddStoringIndex,
+		"pgcreatedatabase":       pgCreateDatabase,
+		"addanddropdatabaserole": addAndDropDatabaseRole,
+		"listdatabaseroles":      listDatabaseRoles,
 	}
 )
 
@@ -713,7 +713,7 @@ func pgAddStoringIndex(ctx context.Context, w io.Writer, adminClient *database.D
 	return nil
 }
 
-func addAndDropDatabaseRoles(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, db string) error {
+func addAndDropDatabaseRole(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, db string) error {
 	op, err := adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
 		Database: db,
 		Statements: []string{
@@ -873,7 +873,7 @@ func main() {
 	Command can be one of: write, read, readdatawithdatabaserole, query, update,
 		querynewcolumn, querywithparameter, dmlwrite, dmlwritetxn, readindex,
 		readstoringindex, readonlytransaction, createdatabase, addnewcolumn,
-		addstoringindex, addanddropdatabaseroles, enablefinegrainedaccess,
+		addstoringindex, addanddropdatabaserole, enablefinegrainedaccess,
 		listdatabaseroles, pgcreatedatabase, pgqueryparameter, pgdmlwrite,
 		pgaddnewcolumn, pgquerynewcolumn, pgdmlwritetxn, pgaddstoringindex
 
