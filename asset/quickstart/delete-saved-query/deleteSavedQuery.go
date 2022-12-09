@@ -14,14 +14,11 @@
  
 // [START asset_quickstart_delete_saved_query]
  
-// Sample delete-saved-query delete saved query.
-package main
+package DeleteSavedQueryFunction
  
 import (
 	"context"
-	"flag"
 	"fmt"
-	"log"
 	"os"
 	"strconv"
  
@@ -30,39 +27,36 @@ import (
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 )
  
-// Command-line flags.
-var (
-	savedQueryID = flag.String("saved_query_id", "YOUR-QUERY-ID", "Identifier of Saved Query.")
-)
- 
-func main() {
-	flag.Parse()
+func deleteSavedQuery(projectId, savedQueryID string) error {
+	// projectID := "my-project-id"
+	// savedQueryID := "query-ID"
 	ctx := context.Background()
 	client, err := asset.NewClient(ctx)
 	if err != nil {
-		log.Fatalf("asset.NewClient: %v", err)
+		return fmt.Errorf("asset.NewClient: %v", err)
 	}
 	defer client.Close()
  
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	cloudresourcemanagerClient, err := cloudresourcemanager.NewService(ctx)
 	if err != nil {
-		log.Fatalf("cloudresourcemanager.NewService: %v", err)
+		return fmt.Errorf("cloudresourcemanager.NewService: %v", err)
 	}
  
 	project, err := cloudresourcemanagerClient.Projects.Get(projectID).Do()
 	if err != nil {
-		log.Fatalf("cloudresourcemanagerClient.Projects.Get.Do: %v", err)
+		return fmt.Errorf("cloudresourcemanagerClient.Projects.Get.Do: %v", err)
 	}
 	projectNumber := strconv.FormatInt(project.ProjectNumber, 10)
-	savedQueryName := fmt.Sprintf("projects/%s/savedQueries/%s", projectNumber, *savedQueryID)
+	savedQueryName := fmt.Sprintf("projects/%s/savedQueries/%s", projectNumber, savedQueryID)
 	req := &assetpb.DeleteSavedQueryRequest{
 		Name: savedQueryName,
 	}
 	if err = client.DeleteSavedQuery(ctx, req); err != nil {
-		log.Fatalf("client.DeleteSavedQuery: %v", err)
+		return fmt.Errorf("client.DeleteSavedQuery: %v", err)
 	}
 	fmt.Print("Deleted Saved Query")
+	return nil
 }
  
 // [END asset_quickstart_delete_saved_query]
