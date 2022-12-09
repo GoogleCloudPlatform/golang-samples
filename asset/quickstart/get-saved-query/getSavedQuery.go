@@ -14,15 +14,11 @@
  
 // [START asset_quickstart_get_saved_query]
  
-// Sample get-saved-query get saved query.
-package main
+package GetSavedQueryFunction
  
 import (
 	"context"
-	"flag"
 	"fmt"
-	"log"
-	"os"
 	"strconv"
  
 	asset "cloud.google.com/go/asset/apiv1"
@@ -30,39 +26,39 @@ import (
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 )
  
-// Command-line flags.
-var (
-	savedQueryID = flag.String("saved_query_id", "YOUR-QUERY-ID", "Identifier of Saved Query.")
-)
- 
-func main() {
-	flag.Parse()
+func getSavedQuery(projectId, savedQueryID string) error {
+	// projectID := "my-project-id"
+	// savedQueryID := "query-ID"
 	ctx := context.Background()
 	client, err := asset.NewClient(ctx)
 	if err != nil {
-		log.Fatalf("asset.NewClient: %v", err)
+		return fmt.Errorf("asset.NewClient: %v", err)
 	}
 	defer client.Close()
  
-	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
-	cloudresourcemanagerClient, err := cloudresourcemanager.NewService(ctx)
+	cloudResourceManagerClient, err := cloudresourcemanager.NewService(ctx)
 	if err != nil {
-		log.Fatalf("cloudresourcemanager.NewService: %v", err)
+		return fmt.Errorf("cloudresourcemanager.NewService: %v", err)
 	}
  
-	project, err := cloudresourcemanagerClient.Projects.Get(projectID).Do()
+	project, err := cloudResourceManagerClient.Projects.Get(projectId).Do()
 	if err != nil {
-		log.Fatalf("cloudresourcemanagerClient.Projects.Get.Do: %v", err)
+		return fmt.Errorf("cloudresourcemanagerClient.Projects.Get.Do: %v", err)
 	}
 	projectNumber := strconv.FormatInt(project.ProjectNumber, 10)
-	queryName := fmt.Sprintf("projects/%s/savedQueries/%s", projectNumber, *savedQueryID)
+	// query name is defined as 'projects/PROJECT_NUMBER'/savedQueries/SAVED_QUERY_ID.
+	// hence we should translate the projectId into a project number first.
+	queryName := fmt.Sprintf("projects/%s/savedQueries/%s", projectNumber, savedQueryID)
 	req := &assetpb.GetSavedQueryRequest{
 		Name: queryName}
 	response, err := client.GetSavedQuery(ctx, req)
 	if err != nil {
-		log.Fatalf("client.GetSavedQuery: %v", err)
+		return fmt.Errorf("client.GetSavedQuery: %v", err)
 	}
-	fmt.Print(response)
+	fmt.Println("Query Name:", response.Name);
+	fmt.Println("Query Description:", response.Description);
+	fmt.Println("Query Content:", response.Content);
+	return nil
 }
  
 // [END asset_quickstart_get_saved_query]
