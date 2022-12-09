@@ -145,7 +145,6 @@ func TestComputeDisksSnippets(t *testing.T) {
 	sourceImage := "projects/debian-cloud/global/images/family/debian-11"
 	diskType := fmt.Sprintf("zones/%s/diskTypes/pd-ssd", zone)
 	diskSnapshotLink := fmt.Sprintf("projects/%s/global/snapshots/%s", tc.ProjectID, snapshotName)
-	want := "Disk created"
 
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
 	if err != nil {
@@ -157,6 +156,8 @@ func TestComputeDisksSnippets(t *testing.T) {
 	buf := &bytes.Buffer{}
 
 	t.Run("createDiskSnapshot and deleteDisk", func(t *testing.T) {
+		want := "Disk created"
+
 		err := createDisk(ctx, tc.ProjectID, zone, diskName, sourceImage)
 		if err != nil {
 			t.Fatalf("createDisk got err: %v", err)
@@ -197,7 +198,7 @@ func TestComputeDisksSnippets(t *testing.T) {
 
 	t.Run("createEmptyDisk", func(t *testing.T) {
 		buf.Reset()
-		want = "Disk created"
+		want := "Disk created"
 
 		if err := createEmptyDisk(buf, tc.ProjectID, zone, diskName, diskType, 20); err != nil {
 			t.Fatalf("createEmptyDisk got err: %v", err)
@@ -214,7 +215,7 @@ func TestComputeDisksSnippets(t *testing.T) {
 
 	t.Run("setDiskAutoDelete", func(t *testing.T) {
 		buf.Reset()
-		want = "disk autoDelete field updated."
+		want := "disk autoDelete field updated."
 
 		req := &computepb.InsertInstanceRequest{
 			Project: tc.ProjectID,
