@@ -29,7 +29,8 @@ import (
 // an already existitng zonal disk. Disk type and size may differ.
 func createRegionalDiskFromDisk(
 	w io.Writer,
-	projectID, region, diskName, diskType, diskLink string,
+	projectID, region string, replicaZones []string,
+	diskName, diskType, diskLink string,
 	diskSizeGb int64,
 ) error {
 	// projectID := "your_project_id"
@@ -38,6 +39,12 @@ func createRegionalDiskFromDisk(
 	// diskType := "regions/us-west3/diskTypes/pd-ssd"
 	// diskLink := "projects/your_project_id/global/disks/disk_name"
 	// diskSizeGb := 120
+
+	// Exactly two replica zones must be specified
+	replicaZoneURLs := []string{
+		fmt.Sprintf("projects/%s/zones/%s", projectID, replicaZones[0]),
+		fmt.Sprintf("projects/%s/zones/%s", projectID, replicaZones[1]),
+	}
 
 	ctx := context.Background()
 	disksClient, err := compute.NewRegionDisksRESTClient(ctx)
@@ -50,11 +57,12 @@ func createRegionalDiskFromDisk(
 		Project: projectID,
 		Region:  region,
 		DiskResource: &computepb.Disk{
-			Name:       proto.String(diskName),
-			Region:     proto.String(region),
-			Type:       proto.String(diskType),
-			SourceDisk: proto.String(diskLink),
-			SizeGb:     proto.Int64(diskSizeGb),
+			Name:         proto.String(diskName),
+			Region:       proto.String(region),
+			Type:         proto.String(diskType),
+			SourceDisk:   proto.String(diskLink),
+			SizeGb:       proto.Int64(diskSizeGb),
+			ReplicaZones: replicaZoneURLs,
 		},
 	}
 
