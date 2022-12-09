@@ -29,29 +29,6 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func createDisk(ctx context.Context, projectId, zone, diskName, sourceImage string) error {
-	disksClient, err := compute.NewDisksRESTClient(ctx)
-	if err != nil {
-		return err
-	}
-	defer disksClient.Close()
-	req := &computepb.InsertDiskRequest{
-		Project: projectId,
-		Zone:    zone,
-		DiskResource: &computepb.Disk{
-			Name:        proto.String(diskName),
-			SourceImage: proto.String(sourceImage),
-		},
-	}
-
-	op, err := disksClient.Insert(ctx, req)
-	if err != nil {
-		return err
-	}
-
-	return op.Wait(ctx)
-}
-
 func getInstance(
 	ctx context.Context,
 	projectID, zone, instanceName string,
@@ -138,6 +115,8 @@ func TestComputeDisksSnippets(t *testing.T) {
 		rand.NewSource(time.Now().UnixNano()))
 	tc := testutil.SystemTest(t)
 	zone := "europe-central2-b"
+	region := "europe-central2"
+	replicaZones := []string{"europe-central2-a", "europe-central2-b"}
 	instanceName := fmt.Sprintf("test-instance-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	diskName := fmt.Sprintf("test-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	diskName2 := fmt.Sprintf("test-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
@@ -155,12 +134,15 @@ func TestComputeDisksSnippets(t *testing.T) {
 
 	buf := &bytes.Buffer{}
 
-	t.Run("createDiskSnapshot and deleteDisk", func(t *testing.T) {
+	t.Run("Create zonal and regional disks from a snapshot and delete them", func(t *testing.T) {
 		want := "Disk created"
 
-		err := createDisk(ctx, tc.ProjectID, zone, diskName, sourceImage)
+		err := createDiskFromImage(buf, tc.ProjectID, zone, diskName, diskType, sourceImage, 50)
 		if err != nil {
-			t.Fatalf("createDisk got err: %v", err)
+			t.Fatalf("createDiskFromImage got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("createDiskFromImage got %q, want %q", got, want)
 		}
 
 		err = createDiskSnapshot(ctx, tc.ProjectID, zone, diskName, snapshotName)
@@ -185,18 +167,42 @@ func TestComputeDisksSnippets(t *testing.T) {
 			t.Errorf("deleteDisk got %q, want %q", got, want)
 		}
 
+		buf.Reset()
+		want = "Disk created"
+
+		if err := createRegionalDiskFromSnapshot(buf, tc.ProjectID, region, replicaZones, diskName2, diskType, diskSnapshotLink, 50); err != nil {
+			t.Errorf("createRegionalDiskFromSnapshot got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("createRegionalDiskFromSnapshot got %q, want %q", got, want)
+		}
+
+		buf.Reset()
+		want = "Disk deleted"
+
+		err = deleteRegionalDisk(buf, tc.ProjectID, region, diskName2)
+		if err != nil {
+			t.Errorf("deleteRegionalDisk got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("deleteRegionalDisk got %q, want %q", got, want)
+		}
+
+		if err := deleteDisk(buf, tc.ProjectID, zone, diskName); err != nil {
+			t.Errorf("deleteDisk got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("deleteRegionalDisk got %q, want %q", got, want)
+		}
+
+		// clean up
 		err = deleteDiskSnapshot(ctx, tc.ProjectID, snapshotName)
 		if err != nil {
 			t.Errorf("deleteDiskSnapshot got err: %v", err)
 		}
-
-		err = deleteDisk(buf, tc.ProjectID, zone, diskName)
-		if err != nil {
-			t.Errorf("deleteDisk got err: %v", err)
-		}
 	})
 
-	t.Run("createEmptyDisk", func(t *testing.T) {
+	t.Run("createEmptyDisk and clone it into a regional disk", func(t *testing.T) {
 		buf.Reset()
 		want := "Disk created"
 
@@ -205,6 +211,20 @@ func TestComputeDisksSnippets(t *testing.T) {
 		}
 		if got := buf.String(); !strings.Contains(got, want) {
 			t.Errorf("createEmptyDisk got %q, want %q", got, want)
+		}
+
+		sourceDisk := fmt.Sprintf("projects/%s/zones/europe-central2-b/disks/%s", tc.ProjectID, diskName)
+		if err := createRegionalDiskFromDisk(buf, tc.ProjectID, region, replicaZones, diskName2, diskType, sourceDisk, 30); err != nil {
+			t.Errorf("createRegionalDiskFromDisk got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("createRegionalDiskFromDisk got %q, want %q", got, want)
+		}
+
+		// clean up
+		err = deleteRegionalDisk(buf, tc.ProjectID, region, diskName2)
+		if err != nil {
+			t.Errorf("deleteRegionalDisk got err: %v", err)
 		}
 
 		err = deleteDisk(buf, tc.ProjectID, zone, diskName)
