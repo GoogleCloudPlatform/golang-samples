@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go v0.106.0
 	cloud.google.com/go/kms v1.6.0
 	cloud.google.com/go/longrunning v0.3.0
-	cloud.google.com/go/spanner v1.40.0
+	cloud.google.com/go/spanner v1.39.1-0.20221201060137-8a13b715574e
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.14
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20221110175929-9a9c2aea5b1c
 	github.com/golang/protobuf v1.5.2
@@ -46,3 +46,5 @@ require (
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 )
+
+replace google.golang.org/genproto => github.com/cloudspannerecosystem/temp-resources v0.0.0-20221117065524-b1f320c13693
