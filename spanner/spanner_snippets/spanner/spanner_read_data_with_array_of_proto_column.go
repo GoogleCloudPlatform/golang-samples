@@ -47,6 +47,7 @@ func readDataWithArrayOfProtoMsgAndEnum(w io.Writer, db string) error {
 		if err != nil {
 			return err
 		}
+		// The value of the kth column will be decoded into the kth argument to row.Columns
 		var singerId int64
 		var firstName string
 		var lastName string

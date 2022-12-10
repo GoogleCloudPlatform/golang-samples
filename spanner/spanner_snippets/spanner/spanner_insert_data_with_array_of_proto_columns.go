@@ -35,6 +35,8 @@ func insertDataWithArrayOfProtoMsgAndEnum(w io.Writer, db string) error {
 	}
 	defer client.Close()
 
+	// Using Protocol Buffers: https://developers.google.com/protocol-buffers/docs/gotutorial
+	// Creating instance of Genre and SingerInfo from user-defined Proto Message and Enum
 	singer1ProtoEnum := pb.Genre_ROCK
 	singer1ProtoMsg := &pb.SingerInfo{
 		SingerId:    proto.Int64(1),
@@ -51,10 +53,14 @@ func insertDataWithArrayOfProtoMsgAndEnum(w io.Writer, db string) error {
 		Genre:       &singer2ProtoEnum,
 	}
 
+	// Creating an array of Proto Messages and Enum with possible combinations
+	// Creating an array of Proto Messages and Proto Enum with not null data
 	singerInfoArray := []*pb.SingerInfo{singer1ProtoMsg, singer2ProtoMsg}
 	singerGenreArray := []*pb.Genre{&singer1ProtoEnum, &singer2ProtoEnum}
+	// Creating an array of type Proto Messages and Proto Enum that is nil
 	singerInfoNilArray := []*pb.SingerInfo(nil)
 	singerGenreNilArray := []*pb.Genre(nil)
+	// Creating an empty array of Proto Messages and Proto Enum
 	singerInfoEmptyArray := []*pb.SingerInfo{}
 	singerGenreEmptyArray := []*pb.Genre{}
 
