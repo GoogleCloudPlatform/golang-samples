@@ -31,8 +31,7 @@ func insertDataWithProtoMsgAndEnumNullValues(w io.Writer, db string) error {
 	ctx := context.Background()
 	// TODO: Will be removed once the proto changes are available in prod
 	endpoint := "staging-wrenchworks.sandbox.googleapis.com:443"
-	options := []option.ClientOption{option.WithEndpoint(endpoint)}
-	client, err := spanner.NewClient(ctx, db, options...)
+	client, err := spanner.NewClient(ctx, db, option.WithEndpoint(endpoint))
 	if err != nil {
 		return err
 	}

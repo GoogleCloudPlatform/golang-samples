@@ -31,8 +31,7 @@ func readDataWithProtoMsgAndEnumNullValues(w io.Writer, db string) error {
 	ctx := context.Background()
 	db = "projects/span-cloud-testing/instances/harsha-test-gcloud/databases/singer_proto_db"
 	endpoint := "staging-wrenchworks.sandbox.googleapis.com:443"
-	options := []option.ClientOption{option.WithEndpoint(endpoint)}
-	client, err := spanner.NewClient(ctx, db, options...)
+	client, err := spanner.NewClient(ctx, db, option.WithEndpoint(endpoint))
 	if err != nil {
 		return err
 	}
