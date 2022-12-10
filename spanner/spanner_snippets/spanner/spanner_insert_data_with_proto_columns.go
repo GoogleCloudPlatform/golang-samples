@@ -30,13 +30,14 @@ import (
 func insertDataWithProtoMsgAndEnum(w io.Writer, db string) error {
 	ctx := context.Background()
 	endpoint := "staging-wrenchworks.sandbox.googleapis.com:443"
-	options := []option.ClientOption{option.WithEndpoint(endpoint)}
-	client, err := spanner.NewClient(ctx, db, options...)
+	client, err := spanner.NewClient(ctx, db, option.WithEndpoint(endpoint))
 	if err != nil {
 		return err
 	}
 	defer client.Close()
 
+	// Using Protocol Buffers: https://developers.google.com/protocol-buffers/docs/gotutorial
+	// Creating instance of SingerInfo and Genre from user-defined Proto Message and Enum
 	singer1ProtoEnum := pb.Genre_ROCK
 	singer1ProtoMsg := &pb.SingerInfo{
 		SingerId:    proto.Int64(1),

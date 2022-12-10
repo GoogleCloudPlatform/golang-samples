@@ -30,8 +30,7 @@ import (
 func readDataWithProtoMsgAndEnum(w io.Writer, db string) error {
 	ctx := context.Background()
 	endpoint := "staging-wrenchworks.sandbox.googleapis.com:443"
-	options := []option.ClientOption{option.WithEndpoint(endpoint)}
-	client, err := spanner.NewClient(ctx, db, options...)
+	client, err := spanner.NewClient(ctx, db, option.WithEndpoint(endpoint))
 	if err != nil {
 		return err
 	}
@@ -53,6 +52,7 @@ func readDataWithProtoMsgAndEnum(w io.Writer, db string) error {
 		var lastName string
 		singerInfo := &pb.SingerInfo{}
 		var singerGenre pb.Genre
+		// The value of the kth column will be decoded into the kth argument to row.Columns
 		if err := row.Columns(&singerId, &firstName, &lastName, singerInfo, &singerGenre); err != nil {
 			return err
 		}

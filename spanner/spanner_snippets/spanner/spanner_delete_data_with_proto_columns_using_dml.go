@@ -28,15 +28,14 @@ import (
 func deleteDataWithProtoMsgAndEnumUsingDML(w io.Writer, db string) error {
 	ctx := context.Background()
 	endpoint := "staging-wrenchworks.sandbox.googleapis.com:443"
-	options := []option.ClientOption{option.WithEndpoint(endpoint)}
-	client, err := spanner.NewClient(ctx, db, options...)
+	client, err := spanner.NewClient(ctx, db, option.WithEndpoint(endpoint))
 	if err != nil {
 		return err
 	}
 	defer client.Close()
 
 	_, err = client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
-		stmt := spanner.Statement{SQL: `DELETE FROM Singers WHERE SingerId = 6`}
+		stmt := spanner.Statement{SQL: `DELETE FROM Singers WHERE SingerId = 5`}
 
 		rowCount, err := txn.Update(ctx, stmt)
 		if err != nil {

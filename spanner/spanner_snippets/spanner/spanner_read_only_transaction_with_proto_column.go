@@ -30,8 +30,7 @@ import (
 func readOnlyTransactionProtoMsgAndEnum(w io.Writer, db string) error {
 	ctx := context.Background()
 	endpoint := "staging-wrenchworks.sandbox.googleapis.com:443"
-	options := []option.ClientOption{option.WithEndpoint(endpoint)}
-	client, err := spanner.NewClient(ctx, db, options...)
+	client, err := spanner.NewClient(ctx, db, option.WithEndpoint(endpoint))
 	if err != nil {
 		return err
 	}
@@ -42,6 +41,13 @@ func readOnlyTransactionProtoMsgAndEnum(w io.Writer, db string) error {
 	stmt := spanner.Statement{SQL: `SELECT SingerId, FirstName, LastName, SingerInfo, SingerGenre FROM Singers`}
 	iter := ro.Query(ctx, stmt)
 	defer iter.Stop()
+	var (
+		singerId    int64
+		firstName   string
+		lastName    string
+		singerGenre pb.Genre
+	)
+	singerInfo := &pb.SingerInfo{}
 	for {
 		row, err := iter.Next()
 		if err == iterator.Done {
@@ -50,11 +56,6 @@ func readOnlyTransactionProtoMsgAndEnum(w io.Writer, db string) error {
 		if err != nil {
 			return err
 		}
-		var singerId int64
-		var firstName string
-		var lastName string
-		singerInfo := &pb.SingerInfo{}
-		var singerGenre pb.Genre
 		if err := row.Columns(&singerId, &firstName, &lastName, singerInfo, &singerGenre); err != nil {
 			return err
 		}
@@ -71,11 +72,6 @@ func readOnlyTransactionProtoMsgAndEnum(w io.Writer, db string) error {
 		if err != nil {
 			return err
 		}
-		var singerId int64
-		var firstName string
-		var lastName string
-		singerInfo := &pb.SingerInfo{}
-		var singerGenre pb.Genre
 		if err := row.Columns(&singerId, &firstName, &lastName, singerInfo, &singerGenre); err != nil {
 			return err
 		}

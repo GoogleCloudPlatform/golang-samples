@@ -30,17 +30,19 @@ import (
 func insertDataWithProtoMsgAndEnumUsingDML(w io.Writer, db string) error {
 	ctx := context.Background()
 	endpoint := "staging-wrenchworks.sandbox.googleapis.com:443"
-	options := []option.ClientOption{option.WithEndpoint(endpoint)}
-	client, err := spanner.NewClient(ctx, db, options...)
+	client, err := spanner.NewClient(ctx, db, option.WithEndpoint(endpoint))
 	if err != nil {
 		return err
 	}
 	defer client.Close()
+
+	// Using Protocol Buffers: https://developers.google.com/protocol-buffers/docs/gotutorial
+	// Creating instance of SingerInfo and Genre from user-defined Proto Message and Enum
 	singer5ProtoEnum := pb.Genre_POP
 	singer5ProtoMsg := &pb.SingerInfo{
-		SingerId:    proto.Int64(4),
-		BirthDate:   proto.String("April"),
-		Nationality: proto.String("Country4"),
+		SingerId:    proto.Int64(5),
+		BirthDate:   proto.String("May"),
+		Nationality: proto.String("Country5"),
 		Genre:       &singer5ProtoEnum,
 	}
 	_, err = client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
@@ -48,9 +50,9 @@ func insertDataWithProtoMsgAndEnumUsingDML(w io.Writer, db string) error {
 			SQL: `INSERT INTO Singers (SingerId, FirstName, LastName, SingerInfo, SingerGenre) 
                    VALUES (@singerId, @firstName, @lastName, @singerInfo, @singerGenre)`,
 			Params: map[string]interface{}{
-				"singerId":    6,
-				"firstName":   "Singer6",
-				"lastName":    "Singer6",
+				"singerId":    5,
+				"firstName":   "Singer5",
+				"lastName":    "Singer5",
 				"singerInfo":  singer5ProtoMsg,
 				"singerGenre": singer5ProtoEnum,
 			},
