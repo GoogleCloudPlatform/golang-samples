@@ -41,6 +41,13 @@ func readOnlyTransactionWithArrayOfProtoMsgAndEnum(w io.Writer, db string) error
 	stmt := spanner.Statement{SQL: `SELECT SingerId, FirstName, LastName, SingerInfo, SingerGenre FROM Singers`}
 	iter := ro.Query(ctx, stmt)
 	defer iter.Stop()
+	var (
+		singerId    int64
+		firstName   string
+		lastName    string
+		singerInfo  []*pb.SingerInfo
+		singerGenre []*pb.Genre
+	)
 	for {
 		row, err := iter.Next()
 		if err == iterator.Done {
@@ -49,11 +56,6 @@ func readOnlyTransactionWithArrayOfProtoMsgAndEnum(w io.Writer, db string) error
 		if err != nil {
 			return err
 		}
-		var singerId int64
-		var firstName string
-		var lastName string
-		var singerInfo []*pb.SingerInfo
-		var singerGenre []*pb.Genre
 		if err := row.Columns(&singerId, &firstName, &lastName, &singerInfo, &singerGenre); err != nil {
 			return err
 		}
@@ -70,11 +72,6 @@ func readOnlyTransactionWithArrayOfProtoMsgAndEnum(w io.Writer, db string) error
 		if err != nil {
 			return err
 		}
-		var singerId int64
-		var firstName string
-		var lastName string
-		var singerInfo []*pb.SingerInfo
-		var singerGenre []*pb.Genre
 		if err := row.Columns(&singerId, &firstName, &lastName, &singerInfo, &singerGenre); err != nil {
 			return err
 		}
