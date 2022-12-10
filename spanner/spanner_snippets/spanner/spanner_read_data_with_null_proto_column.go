@@ -54,7 +54,7 @@ func readDataWithProtoMsgAndEnumNullValues(w io.Writer, db string) error {
 		singerInfo := spanner.NullProtoMessage{ProtoMessageVal: &pb.SingerInfo{}}
 		var genreVal pb.Genre
 		singerGenre := spanner.NullProtoEnum{ProtoEnumVal: &genreVal}
-
+		// The value of the kth column will be decoded into the kth argument to row.Columns
 		if err := row.Columns(&singerId, &firstName, &lastName, &singerInfo, &singerGenre); err != nil {
 			return err
 		}

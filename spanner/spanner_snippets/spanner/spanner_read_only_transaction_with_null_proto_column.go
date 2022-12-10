@@ -41,6 +41,12 @@ func readOnlyTransactionProtoMsgAndEnumNullValues(w io.Writer, db string) error 
 	stmt := spanner.Statement{SQL: `SELECT SingerId, FirstName, LastName, SingerInfo, SingerGenre FROM Singers`}
 	iter := ro.Query(ctx, stmt)
 	defer iter.Stop()
+	var (
+		singerId  int64
+		firstName string
+		lastName  string
+		genreVal  pb.Genre
+	)
 	for {
 		row, err := iter.Next()
 		if err == iterator.Done {
@@ -49,11 +55,7 @@ func readOnlyTransactionProtoMsgAndEnumNullValues(w io.Writer, db string) error 
 		if err != nil {
 			return err
 		}
-		var singerId int64
-		var firstName string
-		var lastName string
 		singerInfo := spanner.NullProtoMessage{ProtoMessageVal: &pb.SingerInfo{}}
-		var genreVal pb.Genre
 		singerGenre := spanner.NullProtoEnum{ProtoEnumVal: &genreVal}
 		if err := row.Columns(&singerId, &firstName, &lastName, &singerInfo, &singerGenre); err != nil {
 			return err
@@ -71,11 +73,7 @@ func readOnlyTransactionProtoMsgAndEnumNullValues(w io.Writer, db string) error 
 		if err != nil {
 			return err
 		}
-		var singerId int64
-		var firstName string
-		var lastName string
 		singerInfo := spanner.NullProtoMessage{ProtoMessageVal: &pb.SingerInfo{}}
-		var genreVal pb.Genre
 		singerGenre := spanner.NullProtoEnum{ProtoEnumVal: &genreVal}
 		if err := row.Columns(&singerId, &firstName, &lastName, &singerInfo, &singerGenre); err != nil {
 			return err

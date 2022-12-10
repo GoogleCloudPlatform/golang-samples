@@ -37,6 +37,8 @@ func insertDataWithProtoMsgAndEnumNullValues(w io.Writer, db string) error {
 	}
 	defer client.Close()
 
+	// Using Protocol Buffers: https://developers.google.com/protocol-buffers/docs/gotutorial
+	// Creating instance of SingerInfo and Genre from user-defined Proto Message and Enum
 	singer1ProtoEnum := pb.Genre_ROCK
 	singer1NullProtoEnum := spanner.NullProtoEnum{singer1ProtoEnum, true}
 	singer1NullProtoMsg := spanner.NullProtoMessage{&pb.SingerInfo{
@@ -64,6 +66,7 @@ func insertDataWithProtoMsgAndEnumNullValues(w io.Writer, db string) error {
 		Genre:       &singer3ProtoEnum,
 	}, true}
 
+	// Creating instance of typed nil from user-defined Proto Message and Enum
 	singer4NullProtoEnum := spanner.NullProtoEnum{(*pb.Genre)(nil), true}
 	singer4NullProtoMsg := spanner.NullProtoMessage{(*pb.SingerInfo)(nil), true}
 
