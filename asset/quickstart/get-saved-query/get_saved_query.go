@@ -14,19 +14,20 @@
  
 // [START asset_quickstart_get_saved_query]
  
-package GetSavedQueryFunction
+package get
  
 import (
 	"context"
 	"fmt"
 	"strconv"
+	"io"
  
 	asset "cloud.google.com/go/asset/apiv1"
 	"cloud.google.com/go/asset/apiv1/assetpb"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 )
  
-func getSavedQuery(projectId, savedQueryID string) error {
+func getSavedQuery(w io.Writer, projectId, savedQueryID string) error {
 	// projectID := "my-project-id"
 	// savedQueryID := "query-ID"
 	ctx := context.Background()
@@ -55,9 +56,9 @@ func getSavedQuery(projectId, savedQueryID string) error {
 	if err != nil {
 		return fmt.Errorf("client.GetSavedQuery: %v", err)
 	}
-	fmt.Println("Query Name:", response.Name);
-	fmt.Println("Query Description:", response.Description);
-	fmt.Println("Query Content:", response.Content);
+	fmt.Fprintf(w, "Query Name: %s\n", response.Name);
+	fmt.Fprintf(w, "Query Description:%s\n", response.Description);
+	fmt.Fprintf(w, "Query Content:%s\n", response.Content);
 	return nil
 }
  
