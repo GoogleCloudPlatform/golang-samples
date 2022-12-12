@@ -28,9 +28,9 @@ import (
 
 	"cloud.google.com/go/storage"
 	vision "cloud.google.com/go/vision/apiv1"
+	"cloud.google.com/go/vision/v2/apiv1/visionpb"
 	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
-	visionpb "google.golang.org/genproto/googleapis/cloud/vision/v1"
 )
 
 // Global API clients used across function invocations.

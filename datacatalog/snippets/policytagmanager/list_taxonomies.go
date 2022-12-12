@@ -21,8 +21,8 @@ import (
 	"io"
 
 	datacatalog "cloud.google.com/go/datacatalog/apiv1beta1"
+	"cloud.google.com/go/datacatalog/apiv1beta1/datacatalogpb"
 	"google.golang.org/api/iterator"
-	datacatalogpb "google.golang.org/genproto/googleapis/cloud/datacatalog/v1beta1"
 )
 
 // listTaxonomies prints information about the taxonomies contained within a specific
