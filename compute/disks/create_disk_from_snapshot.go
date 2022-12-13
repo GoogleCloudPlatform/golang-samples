@@ -41,7 +41,7 @@ func createDiskFromSnapshot(
 	ctx := context.Background()
 	disksClient, err := compute.NewDisksRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewDisksRESTClient: %v", err)
+		return fmt.Errorf("NewDisksRESTClient: %w", err)
 	}
 	defer disksClient.Close()
 
@@ -59,11 +59,11 @@ func createDiskFromSnapshot(
 
 	op, err := disksClient.Insert(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to create disk: %v", err)
+		return fmt.Errorf("unable to create disk: %w", err)
 	}
 
 	if err = op.Wait(ctx); err != nil {
-		return fmt.Errorf("unable to wait for the operation: %v", err)
+		return fmt.Errorf("unable to wait for the operation: %w", err)
 	}
 
 	fmt.Fprintf(w, "Disk created\n")
