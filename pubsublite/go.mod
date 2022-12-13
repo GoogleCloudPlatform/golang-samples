@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	cloud.google.com/go/pubsub v1.28.0
-	cloud.google.com/go/pubsublite v1.5.0
+	cloud.google.com/go/pubsublite v1.6.0
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20221212191713-33c1a699be11
 	github.com/google/go-cmp v0.5.9
 	github.com/google/uuid v1.3.0
@@ -13,7 +13,7 @@ require (
 )
 
 require (
-	cloud.google.com/go v0.105.0 // indirect
+	cloud.google.com/go v0.107.0 // indirect
 	cloud.google.com/go/compute v1.13.0 // indirect
 	cloud.google.com/go/compute/metadata v0.2.2 // indirect
 	cloud.google.com/go/iam v0.8.0 // indirect
