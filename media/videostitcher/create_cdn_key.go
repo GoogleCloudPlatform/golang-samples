@@ -25,15 +25,16 @@ import (
 )
 
 // createCdnKey creates a CDN key. A CDN key is used to retrieve protected media.
-// If akamaiTokenKey != "", then this is an Akamai CDN key, or else this is a
-// Cloud CDN key.
-func createCdnKey(w io.Writer, projectID, cdnKeyID, hostname, gcdnKeyname, gcdnPrivateKey, akamaiTokenKey string) error {
+// If isMediaCdn is true, create a Media CDN key. If false, create a Cloud
+// CDN key. To create a privateKey value for Media CDN, see
+// https://cloud.google.com/video-stitcher/docs/how-to/managing-cdn-keys#create-private-key-media-cdn.
+func createCdnKey(w io.Writer, projectID, cdnKeyID, hostname, keyName, privateKey string, isMediaCdn bool) error {
 	// projectID := "my-project-id"
 	// cdnKeyID := "my-cdn-key"
 	// hostname := "cdn.example.com"
-	// gcdnKeyname := "gcdn-key"
-	// gcdnPrivateKey := "VGhpcyBpcyBhIHRlc3Qgc3RyaW5nLg=="
-	// akamaiTokenKey := "VGhpcyBpcyBhIHRlc3Qgc3RyaW5nLg=="
+	// keyName := "cdn-key"
+	// privateKey := "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxzg5MDEyMzQ1Njc4OTAxMjM0NTY3DkwMTIzNA"
+	// isMediaCdn := true
 	location := "us-central1"
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
@@ -43,14 +44,15 @@ func createCdnKey(w io.Writer, projectID, cdnKeyID, hostname, gcdnKeyname, gcdnP
 	defer client.Close()
 
 	var req *stitcherpb.CreateCdnKeyRequest
-	if akamaiTokenKey != "" {
+	if isMediaCdn == true {
 		req = &stitcherpb.CreateCdnKeyRequest{
 			Parent:   fmt.Sprintf("projects/%s/locations/%s", projectID, location),
 			CdnKeyId: cdnKeyID,
 			CdnKey: &stitcherpb.CdnKey{
-				CdnKeyConfig: &stitcherpb.CdnKey_AkamaiCdnKey{
-					AkamaiCdnKey: &stitcherpb.AkamaiCdnKey{
-						TokenKey: []byte(akamaiTokenKey),
+				CdnKeyConfig: &stitcherpb.CdnKey_MediaCdnKey{
+					MediaCdnKey: &stitcherpb.MediaCdnKey{
+						KeyName:    keyName,
+						PrivateKey: []byte(privateKey),
 					},
 				},
 				Hostname: hostname,
@@ -63,8 +65,8 @@ func createCdnKey(w io.Writer, projectID, cdnKeyID, hostname, gcdnKeyname, gcdnP
 			CdnKey: &stitcherpb.CdnKey{
 				CdnKeyConfig: &stitcherpb.CdnKey_GoogleCdnKey{
 					GoogleCdnKey: &stitcherpb.GoogleCdnKey{
-						KeyName:    gcdnKeyname,
-						PrivateKey: []byte(gcdnPrivateKey),
+						KeyName:    keyName,
+						PrivateKey: []byte(privateKey),
 					},
 				},
 				Hostname: hostname,
