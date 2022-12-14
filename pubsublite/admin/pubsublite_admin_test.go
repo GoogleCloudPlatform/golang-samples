@@ -25,12 +25,13 @@ import (
 	"testing"
 	"time"
 
+	"cloud.google.com/go/pubsub"
 	"cloud.google.com/go/pubsublite"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/GoogleCloudPlatform/golang-samples/pubsublite/internal/psltest"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
-	"google.golang.org/api/cloudresourcemanager/v1"
+	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 )
 
 const (
@@ -202,6 +203,21 @@ func TestSubscriptionAdmin(t *testing.T) {
 	subID := resourcePrefix + uuid.NewString()
 	subPath := fmt.Sprintf("projects/%s/locations/%s/subscriptions/%s", projNumber, testZone, subID)
 
+	exportSubID := resourcePrefix + "-export-" + uuid.NewString()
+	exportSubPath := fmt.Sprintf("projects/%s/locations/%s/subscriptions/%s", projNumber, testZone, exportSubID)
+
+	// Destination Pub/Sub topic for testing export subscriptions.
+	pubsubClient, err := pubsub.NewClient(ctx, tc.ProjectID)
+	if err != nil {
+		t.Fatalf("failed to create pubsub client: %v", err)
+	}
+	defer pubsubClient.Close()
+	pubsubTopic, err := pubsubClient.CreateTopic(ctx, topicID)
+	if err != nil {
+		t.Fatalf("CreateTopic: %v", err)
+	}
+	defer pubsubTopic.Delete(ctx)
+
 	t.Run("CreateSubscription", func(t *testing.T) {
 		buf := new(bytes.Buffer)
 		err := createSubscription(buf, tc.ProjectID, testRegion, testZone, topicID, subID)
@@ -212,6 +228,19 @@ func TestSubscriptionAdmin(t *testing.T) {
 		want := fmt.Sprintf("Created subscription: %s\n", subPath)
 		if diff := cmp.Diff(want, got); diff != "" {
 			t.Fatalf("createSubscription() mismatch: -want, +got:\n%s", diff)
+		}
+	})
+
+	t.Run("CreatePubsubExportSubscription", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+		err := createPubsubExportSubscription(buf, tc.ProjectID, testRegion, testZone, topicID, exportSubID, topicID)
+		if err != nil {
+			t.Fatalf("createPubsubExportSubscription: %v", err)
+		}
+		got := buf.String()
+		want := fmt.Sprintf("Created export subscription: %s\n", exportSubPath)
+		if diff := cmp.Diff(want, got); diff != "" {
+			t.Fatalf("createPubsubExportSubscription() mismatch: -want, +got:\n%s", diff)
 		}
 	})
 
@@ -276,6 +305,7 @@ func TestSubscriptionAdmin(t *testing.T) {
 		}
 	})
 
+	client.DeleteSubscription(ctx, exportSubPath)
 	client.DeleteTopic(ctx, topicPath)
 }
 
