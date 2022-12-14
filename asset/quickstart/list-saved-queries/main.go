@@ -11,46 +11,45 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
+ 
 // [START asset_quickstart_list_saved_queries]
-
-// Sample list-saved-queries list saved queries.
-package main
-
+ 
+package list
+ 
 import (
 	"context"
 	"fmt"
-	"log"
-	"os"
+	"io"
 	"strconv"
+ 
 	"google.golang.org/api/iterator"
-
+ 
 	asset "cloud.google.com/go/asset/apiv1"
 	"cloud.google.com/go/asset/apiv1/assetpb"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 )
-
-func main() {
+ 
+func listSavedQueries(w io.Writer, projectID string) error {
+	// projectID := "my-project-id"
 	ctx := context.Background()
 	client, err := asset.NewClient(ctx)
 	if err != nil {
-		log.Fatalf("asset.NewClient: %v", err)
+		return fmt.Errorf("asset.NewClient: %v", err)
 	}
 	defer client.Close()
-
-	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
-	fmt.Println("projectID:", projectID)
+ 
 	cloudresourcemanagerClient, err := cloudresourcemanager.NewService(ctx)
 	if err != nil {
-		log.Fatalf("cloudresourcemanager.NewService: %v", err)
+		return fmt.Errorf("cloudresourcemanager.NewService: %v", err)
 	}
-
+ 
 	project, err := cloudresourcemanagerClient.Projects.Get(projectID).Do()
 	if err != nil {
-		log.Fatalf("cloudresourcemanagerClient.Projects.Get.Do: %v", err)
+		return fmt.Errorf("cloudresourcemanagerClient.Projects.Get.Do: %v", err)
 	}
 	projectNumber := strconv.FormatInt(project.ProjectNumber, 10)
-	fmt.Println("projectNumber: %s", projectNumber)
+	// query name is defined as 'projects/PROJECT_NUMBER'/savedQueries/SAVED_QUERY_ID.
+	// we should translate the projectId into a project number first.
 	parent := fmt.Sprintf("projects/%s", projectNumber)
 	req := &assetpb.ListSavedQueriesRequest{
 		Parent: parent}
@@ -61,10 +60,13 @@ func main() {
 			break
 		}
 		if err != nil {
-			log.Fatal(err)
+			return fmt.Errorf("error getting saved queries:%v", err)
 		}
-		fmt.Println(response)
+		fmt.Fprintf(w, "Query Name: %s\n", response.Name)
+		fmt.Fprintf(w, "Query Description:%s\n", response.Description)
+		fmt.Fprintf(w, "Query Content:%s\n", response.Content)
 	}
+	return nil
 }
-
+ 
 // [END asset_quickstart_list_saved_queries]
