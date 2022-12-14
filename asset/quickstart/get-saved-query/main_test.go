@@ -87,14 +87,20 @@ func TestMain(m *testing.M) {
  
 func TestGetSavedQuery(t *testing.T) {
 	buf := new(bytes.Buffer)
-	err := getSavedQuery(buf, projectID, savedQueryID)
-	if err != nil {
-		t.Errorf("getSavedQuery: %v", err)
-	}
+	get_err := getSavedQuery(buf, projectID, savedQueryID)
+ 
 	fullQueryName := fmt.Sprintf("projects/%s/savedQueries/%s", projectNumber, savedQueryID)
-	client.DeleteSavedQuery(ctx, &assetpb.DeleteSavedQueryRequest{
+	delete_error := client.DeleteSavedQuery(ctx, &assetpb.DeleteSavedQueryRequest{
 		Name: fullQueryName,
 	})
+ 
+	if get_err != nil {
+		t.Errorf("getSavedQuery: %v", get_err)
+	}
+ 
+	if delete_error != nil {
+		t.Errorf("DeleteSavedQuery: %v", delete_error)
+	}
  
 	got := buf.String()
 	if want := fullQueryName; !strings.Contains(got, want) {
