@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START compute_disk_create_empty_disk]
+// [START compute_disk_create_from_disk]
 import (
 	"context"
 	"fmt"
@@ -25,16 +25,18 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// createEmptyDisk creates a new empty disk in a project in given zone.
-func createEmptyDisk(
+// createDiskFromDisk creates a new disk with the contents of
+// an already existitng disk. Type, and size and zone may differ.
+func createDiskFromDisk(
 	w io.Writer,
-	projectID, zone, diskName, diskType string,
+	projectID, zone, diskName, diskType, sourceDiskLink string,
 	diskSizeGb int64,
 ) error {
 	// projectID := "your_project_id"
 	// zone := "us-west3-b" // should match diskType below
 	// diskName := "your_disk_name"
 	// diskType := "zones/us-west3-b/diskTypes/pd-ssd"
+	// sourceDiskLink := "projects/your_project_id/global/disks/disk_name"
 	// diskSizeGb := 120
 
 	ctx := context.Background()
@@ -48,10 +50,11 @@ func createEmptyDisk(
 		Project: projectID,
 		Zone:    zone,
 		DiskResource: &computepb.Disk{
-			Name:   proto.String(diskName),
-			Zone:   proto.String(zone),
-			Type:   proto.String(diskType),
-			SizeGb: proto.Int64(diskSizeGb),
+			Name:       proto.String(diskName),
+			Zone:       proto.String(zone),
+			Type:       proto.String(diskType),
+			SourceDisk: proto.String(sourceDiskLink),
+			SizeGb:     proto.Int64(diskSizeGb),
 		},
 	}
 
@@ -69,4 +72,4 @@ func createEmptyDisk(
 	return nil
 }
 
-// [END compute_disk_create_empty_disk]
+// [END compute_disk_create_from_disk]
