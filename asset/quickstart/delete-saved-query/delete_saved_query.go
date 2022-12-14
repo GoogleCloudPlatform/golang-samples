@@ -14,11 +14,12 @@
  
 // [START asset_quickstart_delete_saved_query]
  
-package DeleteSavedQueryFunction
+package delete
  
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"strconv"
  
@@ -27,7 +28,7 @@ import (
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 )
  
-func deleteSavedQuery(projectId, savedQueryID string) error {
+func deleteSavedQuery(w io.Writer, projectId, savedQueryID string) error {
 	// projectID := "my-project-id"
 	// savedQueryID := "query-ID"
 	ctx := context.Background()
@@ -55,7 +56,7 @@ func deleteSavedQuery(projectId, savedQueryID string) error {
 	if err = client.DeleteSavedQuery(ctx, req); err != nil {
 		return fmt.Errorf("client.DeleteSavedQuery: %v", err)
 	}
-	fmt.Print("Deleted Saved Query")
+	fmt.Fprintf(w, "Deleted Saved Query")
 	return nil
 }
  
