@@ -19,11 +19,11 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
-	"os"
  
 	asset "cloud.google.com/go/asset/apiv1"
 	"cloud.google.com/go/asset/apiv1/assetpb"
@@ -31,11 +31,11 @@ import (
 )
  
 var (
-	projectID string
-	savedQueryID string
+	projectID     string
+	savedQueryID  string
 	projectNumber string
  
-	ctx context.Context
+	ctx    context.Context
 	client *asset.Client
 )
  
@@ -63,14 +63,14 @@ func TestMain(m *testing.M) {
 	log.Printf("projectNumber:%s", projectNumber)
  
 	req := &assetpb.CreateSavedQueryRequest{
-		Parent: parent,
+		Parent:       parent,
 		SavedQueryId: savedQueryID,
 		SavedQuery: &assetpb.SavedQuery{
 			Content: &assetpb.SavedQuery_QueryContent{
-				QueryContent: &assetpb.SavedQuery_QueryContent_IamPolicyAnalysisQuery {
-					IamPolicyAnalysisQuery: &assetpb.IamPolicyAnalysisQuery {
+				QueryContent: &assetpb.SavedQuery_QueryContent_IamPolicyAnalysisQuery{
+					IamPolicyAnalysisQuery: &assetpb.IamPolicyAnalysisQuery{
 						Scope: parent,
-						AccessSelector: &assetpb.IamPolicyAnalysisQuery_AccessSelector {
+						AccessSelector: &assetpb.IamPolicyAnalysisQuery_AccessSelector{
 							Permissions: []string{"iam.serviceAccount.actAs"},
 						},
 					},
@@ -87,7 +87,7 @@ func TestMain(m *testing.M) {
  
 func TestGetSavedQuery(t *testing.T) {
 	buf := new(bytes.Buffer)
-	err := getSavedQuery(buf, projectID, savedQueryID);
+	err := getSavedQuery(buf, projectID, savedQueryID)
 	if err != nil {
 		t.Errorf("getSavedQuery: %v", err)
 	}

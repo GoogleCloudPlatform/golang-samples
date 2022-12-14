@@ -19,8 +19,8 @@ package get
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"io"
+	"strconv"
  
 	asset "cloud.google.com/go/asset/apiv1"
 	"cloud.google.com/go/asset/apiv1/assetpb"
@@ -56,9 +56,9 @@ func getSavedQuery(w io.Writer, projectId, savedQueryID string) error {
 	if err != nil {
 		return fmt.Errorf("client.GetSavedQuery: %v", err)
 	}
-	fmt.Fprintf(w, "Query Name: %s\n", response.Name);
-	fmt.Fprintf(w, "Query Description:%s\n", response.Description);
-	fmt.Fprintf(w, "Query Content:%s\n", response.Content);
+	fmt.Fprintf(w, "Query Name: %s\n", response.Name)
+	fmt.Fprintf(w, "Query Description:%s\n", response.Description)
+	fmt.Fprintf(w, "Query Content:%s\n", response.Content)
 	return nil
 }
  
