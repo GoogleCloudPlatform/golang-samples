@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,15 +14,12 @@
  
 // [START asset_quickstart_update_saved_query]
  
-// Sample update-saved_query update saved query.
-package main
+package update
  
 import (
 	"context"
-	"flag"
 	"fmt"
-	"log"
-	"os"
+	"io"
 	"strconv"
  
 	asset "cloud.google.com/go/asset/apiv1"
@@ -31,39 +28,32 @@ import (
 	field_mask "google.golang.org/genproto/protobuf/field_mask"
 )
  
-// Command-line flags.
-var (
-	savedQueryID = flag.String("saved_query_id", "YOUR-QUERY-ID", "Identifier of Saved Query.")
-	newDescription = flag.String("new_description", "NEW-QUERY-DESCRIPTION", "New description of Saved Query.")
-)
- 
-func main() {
-	flag.Parse()
+func updateSavedQuery(w io.Writer, projectID, savedQueryID, newDescription string) error {
+	// projectID := "my-project-id"
+	// savedQueryID := "query-ID"
 	ctx := context.Background()
 	client, err := asset.NewClient(ctx)
 	if err != nil {
-		log.Fatalf("asset.NewClient: %v", err)
+		return fmt.Errorf("asset.NewClient: %v", err)
 	}
 	defer client.Close()
  
-	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	cloudresourcemanagerClient, err := cloudresourcemanager.NewService(ctx)
 	if err != nil {
-		log.Fatalf("cloudresourcemanager.NewService: %v", err)
+		return fmt.Errorf("cloudresourcemanager.NewService: %v", err)
 	}
  
 	project, err := cloudresourcemanagerClient.Projects.Get(projectID).Do()
 	if err != nil {
-		log.Fatalf("cloudresourcemanagerClient.Projects.Get.Do: %v", err)
+		return fmt.Errorf("cloudresourcemanagerClient.Projects.Get.Do: %v", err)
 	}
 	projectNumber := strconv.FormatInt(project.ProjectNumber, 10)
-	savedQueryName := fmt.Sprintf("projects/%s/savedQueries/%s", projectNumber, *savedQueryID)
+	savedQueryName := fmt.Sprintf("projects/%s/savedQueries/%s", projectNumber, savedQueryID)
 	fmt.Println("name:", savedQueryName)
 	req := &assetpb.UpdateSavedQueryRequest{
 		SavedQuery: &assetpb.SavedQuery{
-			Name: savedQueryName,
-			Description: *newDescription,
- 
+			Name:        savedQueryName,
+			Description: newDescription,
 		},
 		UpdateMask: &field_mask.FieldMask{
 			Paths: []string{"description"},
@@ -71,9 +61,12 @@ func main() {
 	}
 	response, err := client.UpdateSavedQuery(ctx, req)
 	if err != nil {
-		log.Fatalf("client.UpdateSavedQuery: %v", err)
+		return fmt.Errorf("client.UpdateSavedQuery: %v", err)
 	}
-	fmt.Print(response)
+	fmt.Fprintf(w, "Query Name: %s\n", response.Name)
+	fmt.Fprintf(w, "Query Description:%s\n", response.Description)
+	fmt.Fprintf(w, "Query Content:%s\n", response.Content)
+	return nil
 }
  
 // [END asset_quickstart_update_saved_query]

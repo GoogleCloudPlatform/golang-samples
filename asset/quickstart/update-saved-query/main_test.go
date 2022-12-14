@@ -12,11 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
  
-package main
+package update
  
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"log"
+	"os"
 	"strconv"
 	"strings"
 	"testing"
@@ -24,43 +27,50 @@ import (
  
 	asset "cloud.google.com/go/asset/apiv1"
 	"cloud.google.com/go/asset/apiv1/assetpb"
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 )
  
-func TestMain(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	env := map[string]string{"GOOGLE_CLOUD_PROJECT": tc.ProjectID}
-	queryId := fmt.Sprintf("query-%s", strconv.FormatInt(time.Now().UnixNano(), 10))
+var (
+	projectID     string
+	savedQueryID  string
+	projectNumber string
  
-	ctx := context.Background()
-	client, err := asset.NewClient(ctx)
+	ctx    context.Context
+	client *asset.Client
+)
+ 
+func TestMain(m *testing.M) {
+	projectID = os.Getenv("GOOGLE_CLOUD_PROJECT")
+	savedQueryID = fmt.Sprintf("query-%s", strconv.FormatInt(time.Now().UnixNano(), 10))
+	ctx = context.Background()
+	var err error
+	client, err = asset.NewClient(ctx)
 	if err != nil {
-		t.Fatalf("asset.NewClient: %v", err)
+		log.Fatalf("asset.NewClient: %v", err)
 	}
  
-	cloudresourcemanagerClient, err := cloudresourcemanager.NewService(ctx)
+	cloudResourceManagerClient, err := cloudresourcemanager.NewService(ctx)
 	if err != nil {
-		t.Fatalf("cloudresourcemanager.NewService: %v", err)
+		log.Fatalf("cloudresourcemanager.NewService: %v", err)
 	}
  
-	project, err := cloudresourcemanagerClient.Projects.Get(tc.ProjectID).Do()
+	project, err := cloudResourceManagerClient.Projects.Get(projectID).Do()
 	if err != nil {
-		t.Fatalf("cloudresourcemanagerClient.Projects.Get.Do: %v", err)
+		log.Fatalf("cloudResourceManagerClient.Projects.Get.Do: %v", err)
 	}
-	projectNumber := strconv.FormatInt(project.ProjectNumber, 10)
-	parent := fmt.Sprintf("projects/%s", tc.ProjectID)
- 
+	projectNumber = strconv.FormatInt(project.ProjectNumber, 10)
+	parent := fmt.Sprintf("projects/%s", projectID)
+	log.Printf("projectNumber:%s", projectNumber)
  
 	req := &assetpb.CreateSavedQueryRequest{
-		Parent: parent,
-		SavedQueryId: queryId,
+		Parent:       parent,
+		SavedQueryId: savedQueryID,
 		SavedQuery: &assetpb.SavedQuery{
 			Content: &assetpb.SavedQuery_QueryContent{
-				QueryContent: &assetpb.SavedQuery_QueryContent_IamPolicyAnalysisQuery {
-					IamPolicyAnalysisQuery: &assetpb.IamPolicyAnalysisQuery {
+				QueryContent: &assetpb.SavedQuery_QueryContent_IamPolicyAnalysisQuery{
+					IamPolicyAnalysisQuery: &assetpb.IamPolicyAnalysisQuery{
 						Scope: parent,
-						AccessSelector: &assetpb.IamPolicyAnalysisQuery_AccessSelector {
+						AccessSelector: &assetpb.IamPolicyAnalysisQuery_AccessSelector{
 							Permissions: []string{"iam.serviceAccount.actAs"},
 						},
 					},
@@ -69,33 +79,29 @@ func TestMain(t *testing.T) {
 		}}
 	_, err = client.CreateSavedQuery(ctx, req)
 	if err != nil {
-		t.Fatalf("client.CreateSavedQuery: %v", err)
+		log.Fatalf("client.CreateSavedQuery: %v", err)
 	}
  
-	m := testutil.BuildMain(t)
-	defer m.Cleanup()
+	os.Exit(m.Run())
+}
  
-	if !m.Built() {
-		t.Errorf("failed to build app")
-	}
+func TestUpdateSavedQuery(t *testing.T) {
+	buf := new(bytes.Buffer)
 	newDescription := "This is a new description"
-	stdOut, stdErr, err := m.Run(env, 2*time.Minute, fmt.Sprintf("--saved_query_id=%s --new_description=%s", queryId, newDescription))
-	if err != nil {
-		t.Errorf("execution failed: %v", err)
-	}
-	if len(stdErr) > 0 {
-		t.Errorf("did not expect stderr output, got %d bytes: %s", len(stdErr), string(stdErr))
-	}
-	got := string(stdOut)
-	if !strings.Contains(got, queryId) {
-		t.Errorf("stdout returned %s, wanted to contain %s", got, queryId)
-	}
+	update_err := updateSavedQuery(buf, projectID, savedQueryID, newDescription)
  
-	if !strings.Contains(got, newDescription) {
-		t.Errorf("stdout returned %s, wanted to contain %s", got, queryId)
-	}
- 
-	client.DeleteSavedQuery(ctx, &assetpb.DeleteSavedQueryRequest{
-		Name: fmt.Sprintf("projects/%s/savedQueries/%s", projectNumber, queryId),
+	fullQueryName := fmt.Sprintf("projects/%s/savedQueries/%s", projectNumber, savedQueryID)
+	delete_err := client.DeleteSavedQuery(ctx, &assetpb.DeleteSavedQueryRequest{
+		Name: fullQueryName,
 	})
+	if update_err != nil {
+		t.Errorf("updateSavedQuery failed: %v", update_err)
+	}
+	if delete_err != nil {
+		t.Errorf("client.DeleteSavedQuery: %v", delete_err)
+	}
+	got := buf.String()
+	if want := newDescription; !strings.Contains(got, want) {
+		t.Errorf("getSavedQuery got%q, want%q", got, want)
+	}
 }
