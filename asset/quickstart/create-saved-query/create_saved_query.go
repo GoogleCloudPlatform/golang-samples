@@ -15,17 +15,18 @@
 // [START asset_quickstart_create_saved_query]
  
 // Sample create-saved-query create saved query.
-package CreateSavedQueryFunction
+package create
  
 import (
 	"context"
 	"fmt"
+	"io"
  
 	asset "cloud.google.com/go/asset/apiv1"
 	"cloud.google.com/go/asset/apiv1/assetpb"
 )
  
-func createSavedQuery(projectID, savedQueryID string) error {
+func createSavedQuery(w io.Writer, projectID, savedQueryID string) error {
 	// projectID := "my-project-id"
 	// savedQueryID := "query-ID"
 	ctx := context.Background()
@@ -36,14 +37,14 @@ func createSavedQuery(projectID, savedQueryID string) error {
 	defer client.Close()
 	parent := fmt.Sprintf("projects/%s", projectID)
 	req := &assetpb.CreateSavedQueryRequest{
-		Parent: parent,
+		Parent:       parent,
 		SavedQueryId: savedQueryID,
 		SavedQuery: &assetpb.SavedQuery{
 			Content: &assetpb.SavedQuery_QueryContent{
-				QueryContent: &assetpb.SavedQuery_QueryContent_IamPolicyAnalysisQuery {
-					IamPolicyAnalysisQuery: &assetpb.IamPolicyAnalysisQuery {
+				QueryContent: &assetpb.SavedQuery_QueryContent_IamPolicyAnalysisQuery{
+					IamPolicyAnalysisQuery: &assetpb.IamPolicyAnalysisQuery{
 						Scope: parent,
-						AccessSelector: &assetpb.IamPolicyAnalysisQuery_AccessSelector {
+						AccessSelector: &assetpb.IamPolicyAnalysisQuery_AccessSelector{
 							Permissions: []string{"iam.serviceAccount.actAs"},
 						},
 					},
@@ -54,10 +55,10 @@ func createSavedQuery(projectID, savedQueryID string) error {
 	if err != nil {
 		return fmt.Errorf("client.CreateSavedQuery: %v", err)
 	}
-	fmt.Println("Query Name:", response.Name);
-	fmt.Println("Query Description:", response.Description);
-	fmt.Println("Query Content:", response.Content);
-	return nil;
+	fmt.Fprintf(w, "Query Name: %s\n", response.Name)
+	fmt.Fprintf(w, "Query Description:%s\n", response.Description)
+	fmt.Fprintf(w, "Query Content:%s\n", response.Content)
+	return nil
 }
  
 // [END asset_quickstart_create_saved_query]

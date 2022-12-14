@@ -12,52 +12,72 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
  
-package CreateSavedQueryFunction
+package create
  
 import (
+	"bytes"
 	"context"
 	"fmt"
-	"strconv"
-	"testing"
+	"log"
 	"os"
+	"strconv"
+	"strings"
+	"testing"
+	"time"
  
 	asset "cloud.google.com/go/asset/apiv1"
 	"cloud.google.com/go/asset/apiv1/assetpb"
-	"github.com/gofrs/uuid"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 )
  
-func TestMain(t *testing.T) {
-	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
-	savedQueryID := fmt.Sprintf("query-%s", uuid.Must(uuid.NewV4()).String()[:8])
+var (
+	projectID     string
+	savedQueryID  string
+	projectNumber string
  
-	err := createSavedQuery(projectID, savedQueryID);
+	ctx    context.Context
+	client *asset.Client
+)
  
-	ctx := context.Background()
+func TestMain(m *testing.M) {
+	projectID = os.Getenv("GOOGLE_CLOUD_PROJECT")
+	savedQueryID = fmt.Sprintf("query-%s", strconv.FormatInt(time.Now().UnixNano(), 10))
+	ctx = context.Background()
+	var err error
+	client, err = asset.NewClient(ctx)
+	if err != nil {
+		log.Fatalf("asset.NewClient: %v", err)
+	}
+ 
 	cloudResourceManagerClient, err := cloudresourcemanager.NewService(ctx)
 	if err != nil {
-		t.Fatalf("cloudresourcemanager.NewService: %v", err)
+		log.Fatalf("cloudresourcemanager.NewService: %v", err)
 	}
  
 	project, err := cloudResourceManagerClient.Projects.Get(projectID).Do()
 	if err != nil {
-		t.Fatalf("cloudresourcemanager.Projects.Get.Do: %v", err)
+		log.Fatalf("cloudResourceManagerClient.Projects.Get.Do: %v", err)
 	}
-	// query name is defined as 'projects/PROJECT_NUMBER'/savedQueries/SAVED_QUERY_ID.
-	// hence we should translate the projectId into a project number first.
-	projectNumber := strconv.FormatInt(project.ProjectNumber, 10)
+	projectNumber = strconv.FormatInt(project.ProjectNumber, 10)
+	log.Printf("projectNumber:%s", projectNumber)
+	os.Exit(m.Run())
+}
  
-	client, err := asset.NewClient(ctx)
+func TestCreateSavedQuery(t *testing.T) {
+	buf := new(bytes.Buffer)
+	err := createSavedQuery(buf, projectID, savedQueryID)
 	if err != nil {
-		t.Fatalf("asset.NewClient: %v", err)
+		t.Errorf("createSavedQuery: %v", err)
 	}
- 
- 
-	err = client.DeleteSavedQuery(ctx, &assetpb.DeleteSavedQueryRequest{
-		Name: fmt.Sprintf("projects/%s/savedQueries/%s", projectNumber, savedQueryID),
+	fullQueryName := fmt.Sprintf("projects/%s/savedQueries/%s", projectNumber, savedQueryID)
+	delete_err := client.DeleteSavedQuery(ctx, &assetpb.DeleteSavedQueryRequest{
+		Name: fullQueryName,
 	})
- 
-	if err != nil {
-		t.Fatalf("client.DeleteSavedQuery: %v", err);
+	if delete_err != nil {
+		t.Errorf("DeleteSavedQuery: %v", delete_err)
+	}
+	got := buf.String()
+	if want := fullQueryName; !strings.Contains(got, want) {
+		t.Errorf("createSavedQuery got%q, want%q", got, want)
 	}
 }
