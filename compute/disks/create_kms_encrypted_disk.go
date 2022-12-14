@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START compute_disk_create_empty_disk]
+// [START compute_create_kms_encrypted_disk]
 import (
 	"context"
 	"fmt"
@@ -25,17 +25,24 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// createEmptyDisk creates a new empty disk in a project in given zone.
-func createEmptyDisk(
+// createKmsEncryptedDisk creates a new disk in a project in given zone.
+// If you do not provide diskLink or imageLink, an empty disk will be created.
+func createKmsEncryptedDisk(
 	w io.Writer,
 	projectID, zone, diskName, diskType string,
 	diskSizeGb int64,
+	kmsKeyLink, imageLink, diskLink, snapshotLink string,
 ) error {
 	// projectID := "your_project_id"
 	// zone := "us-west3-b" // should match diskType below
 	// diskName := "your_disk_name"
-	// diskType := "zones/us-west3-b/diskTypes/pd-ssd"
+	// diskType := "zones/us-west3/diskTypes/pd-ssd"
 	// diskSizeGb := 120
+	// kmsKeyLink := "projects/your_kms_project_id/locations/us-central1/keyRings/your_key_ring/cryptoKeys/your_key"
+	// // Only use one of these at a time
+	// diskLink := "projects/your_project_id/global/disks/disk_name"
+	// imageLink := "projects/your_project_id/global/images/image_name"
+	// snapshotLink := "projects/your_project_id/global/snapshots/snapshot_name"
 
 	ctx := context.Background()
 	disksClient, err := compute.NewDisksRESTClient(ctx)
@@ -52,7 +59,20 @@ func createEmptyDisk(
 			Zone:   proto.String(zone),
 			Type:   proto.String(diskType),
 			SizeGb: proto.Int64(diskSizeGb),
+			DiskEncryptionKey: &computepb.CustomerEncryptionKey{
+				KmsKeyName: &kmsKeyLink,
+			},
 		},
+	}
+
+	// if a source disk, image or snapshot has been specified, apply it.
+	// These arguments are mutually exclusive.
+	if diskLink != "" {
+		req.DiskResource.SourceDisk = proto.String(diskLink)
+	} else if imageLink != "" {
+		req.DiskResource.SourceImage = proto.String(imageLink)
+	} else if snapshotLink != "" {
+		req.DiskResource.SourceSnapshot = proto.String(snapshotLink)
 	}
 
 	op, err := disksClient.Insert(ctx, req)
@@ -69,4 +89,4 @@ func createEmptyDisk(
 	return nil
 }
 
-// [END compute_disk_create_empty_disk]
+// [END compute_create_kms_encrypted_disk]

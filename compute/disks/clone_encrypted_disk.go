@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START compute_disk_create_empty_disk]
+// [START compute_disk_clone_encrypted_disk]
 import (
 	"context"
 	"fmt"
@@ -25,17 +25,22 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// createEmptyDisk creates a new empty disk in a project in given zone.
-func createEmptyDisk(
+// Creates a zonal non-boot persistent disk in a project with the copy of data from an existing disk.
+// The encryption key must be the same for the source disk and the new disk.
+// The disk type and size may differ.
+func createDiskFromCustomerEncryptedDisk(
 	w io.Writer,
 	projectID, zone, diskName, diskType string,
 	diskSizeGb int64,
+	diskLink, encryptionKey string,
 ) error {
 	// projectID := "your_project_id"
 	// zone := "us-west3-b" // should match diskType below
 	// diskName := "your_disk_name"
-	// diskType := "zones/us-west3-b/diskTypes/pd-ssd"
+	// diskType := "zones/us-west3/diskTypes/pd-ssd"
 	// diskSizeGb := 120
+	// diskLink := "projects/your_project_id/global/disks/disk_name"
+	// encryptionKey := "SGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0=" // in base64
 
 	ctx := context.Background()
 	disksClient, err := compute.NewDisksRESTClient(ctx)
@@ -48,10 +53,14 @@ func createEmptyDisk(
 		Project: projectID,
 		Zone:    zone,
 		DiskResource: &computepb.Disk{
-			Name:   proto.String(diskName),
-			Zone:   proto.String(zone),
-			Type:   proto.String(diskType),
-			SizeGb: proto.Int64(diskSizeGb),
+			Name:       proto.String(diskName),
+			Zone:       proto.String(zone),
+			Type:       proto.String(diskType),
+			SizeGb:     proto.Int64(diskSizeGb),
+			SourceDisk: proto.String(diskLink),
+			DiskEncryptionKey: &computepb.CustomerEncryptionKey{
+				RawKey: &encryptionKey,
+			},
 		},
 	}
 
@@ -69,4 +78,4 @@ func createEmptyDisk(
 	return nil
 }
 
-// [END compute_disk_create_empty_disk]
+// [END compute_disk_clone_encrypted_disk]

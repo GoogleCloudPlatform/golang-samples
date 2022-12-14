@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START compute_disk_create_empty_disk]
+// [START compute_regional_disk_delete]
 import (
 	"context"
 	"fmt"
@@ -22,51 +22,39 @@ import (
 
 	compute "cloud.google.com/go/compute/apiv1"
 	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
-	"google.golang.org/protobuf/proto"
 )
 
-// createEmptyDisk creates a new empty disk in a project in given zone.
-func createEmptyDisk(
-	w io.Writer,
-	projectID, zone, diskName, diskType string,
-	diskSizeGb int64,
-) error {
+// deleteRegionalDisk permanently deletes a regional disk.
+func deleteRegionalDisk(w io.Writer, projectID, region, diskName string) error {
 	// projectID := "your_project_id"
-	// zone := "us-west3-b" // should match diskType below
+	// region := "us-west3"
 	// diskName := "your_disk_name"
-	// diskType := "zones/us-west3-b/diskTypes/pd-ssd"
-	// diskSizeGb := 120
 
 	ctx := context.Background()
-	disksClient, err := compute.NewDisksRESTClient(ctx)
+	disksClient, err := compute.NewRegionDisksRESTClient(ctx)
 	if err != nil {
 		return fmt.Errorf("NewDisksRESTClient: %w", err)
 	}
 	defer disksClient.Close()
 
-	req := &computepb.InsertDiskRequest{
+	req := &computepb.DeleteRegionDiskRequest{
 		Project: projectID,
-		Zone:    zone,
-		DiskResource: &computepb.Disk{
-			Name:   proto.String(diskName),
-			Zone:   proto.String(zone),
-			Type:   proto.String(diskType),
-			SizeGb: proto.Int64(diskSizeGb),
-		},
+		Region:  region,
+		Disk:    diskName,
 	}
 
-	op, err := disksClient.Insert(ctx, req)
+	op, err := disksClient.Delete(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to create disk: %w", err)
+		return fmt.Errorf("unable to delete disk: %w", err)
 	}
 
 	if err = op.Wait(ctx); err != nil {
 		return fmt.Errorf("unable to wait for the operation: %w", err)
 	}
 
-	fmt.Fprintf(w, "Disk created\n")
+	fmt.Fprintf(w, "Disk deleted\n")
 
 	return nil
 }
 
-// [END compute_disk_create_empty_disk]
+// [END compute_regional_disk_delete]

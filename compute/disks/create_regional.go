@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START compute_disk_create_empty_disk]
+// [START compute_regional_disk_create]
 import (
 	"context"
 	"fmt"
@@ -25,33 +25,41 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// createEmptyDisk creates a new empty disk in a project in given zone.
-func createEmptyDisk(
+// createRegionalDisk creates a new empty regional disk
+func createRegionalDisk(
 	w io.Writer,
-	projectID, zone, diskName, diskType string,
+	projectID, region string, replicaZones []string,
+	diskName, diskType string,
 	diskSizeGb int64,
 ) error {
 	// projectID := "your_project_id"
-	// zone := "us-west3-b" // should match diskType below
+	// region := "us-west3" // should match diskType below
 	// diskName := "your_disk_name"
-	// diskType := "zones/us-west3-b/diskTypes/pd-ssd"
+	// diskType := "regions/us-west3/diskTypes/pd-ssd"
 	// diskSizeGb := 120
 
+	// Exactly two replica zones must be specified
+	replicaZoneURLs := []string{
+		fmt.Sprintf("projects/%s/zones/%s", projectID, replicaZones[0]),
+		fmt.Sprintf("projects/%s/zones/%s", projectID, replicaZones[1]),
+	}
+
 	ctx := context.Background()
-	disksClient, err := compute.NewDisksRESTClient(ctx)
+	disksClient, err := compute.NewRegionDisksRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewDisksRESTClient: %w", err)
+		return fmt.Errorf("NewRegionDisksRESTClient: %w", err)
 	}
 	defer disksClient.Close()
 
-	req := &computepb.InsertDiskRequest{
+	req := &computepb.InsertRegionDiskRequest{
 		Project: projectID,
-		Zone:    zone,
+		Region:  region,
 		DiskResource: &computepb.Disk{
-			Name:   proto.String(diskName),
-			Zone:   proto.String(zone),
-			Type:   proto.String(diskType),
-			SizeGb: proto.Int64(diskSizeGb),
+			Name:         proto.String(diskName),
+			Region:       proto.String(region),
+			Type:         proto.String(diskType),
+			SizeGb:       proto.Int64(diskSizeGb),
+			ReplicaZones: replicaZoneURLs,
 		},
 	}
 
@@ -69,4 +77,4 @@ func createEmptyDisk(
 	return nil
 }
 
-// [END compute_disk_create_empty_disk]
+// [END compute_regional_disk_create]
