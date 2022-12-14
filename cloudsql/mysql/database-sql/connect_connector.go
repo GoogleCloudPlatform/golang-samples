@@ -51,12 +51,13 @@ func connectWithConnector() (*sql.DB, error) {
 	if err != nil {
 		return nil, fmt.Errorf("cloudsqlconn.NewDialer: %v", err)
 	}
+	var opts []cloudsqlconn.DialOption
+	if usePrivate != "" {
+		opts = append(opts, cloudsqlconn.WithPrivateIP())
+	}
 	mysql.RegisterDialContext("cloudsqlconn",
 		func(ctx context.Context, addr string) (net.Conn, error) {
-			if usePrivate != "" {
-				return d.Dial(ctx, instanceConnectionName, cloudsqlconn.WithPrivateIP())
-			}
-			return d.Dial(ctx, instanceConnectionName)
+			return d.Dial(ctx, instanceConnectionName, opts...)
 		})
 
 	dbURI := fmt.Sprintf("%s:%s@cloudsqlconn(localhost:3306)/%s?parseTime=true",
