@@ -11,21 +11,21 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
- 
+
 // [START asset_quickstart_create_saved_query]
- 
+
 // Sample create-saved-query create saved query.
 package create
- 
+
 import (
 	"context"
 	"fmt"
 	"io"
- 
+
 	asset "cloud.google.com/go/asset/apiv1"
 	"cloud.google.com/go/asset/apiv1/assetpb"
 )
- 
+
 func createSavedQuery(w io.Writer, projectID, savedQueryID string) error {
 	// projectID := "my-project-id"
 	// savedQueryID := "query-ID"
@@ -60,5 +60,5 @@ func createSavedQuery(w io.Writer, projectID, savedQueryID string) error {
 	fmt.Fprintf(w, "Query Content:%s\n", response.Content)
 	return nil
 }
- 
+
 // [END asset_quickstart_create_saved_query]
