@@ -11,9 +11,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
- 
+
 package update
- 
+
 import (
 	"bytes"
 	"context"
@@ -24,21 +24,21 @@ import (
 	"strings"
 	"testing"
 	"time"
- 
+
 	asset "cloud.google.com/go/asset/apiv1"
 	"cloud.google.com/go/asset/apiv1/assetpb"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 )
- 
+
 var (
 	projectID     string
 	savedQueryID  string
 	projectNumber string
- 
+
 	ctx    context.Context
 	client *asset.Client
 )
- 
+
 func TestMain(m *testing.M) {
 	projectID = os.Getenv("GOOGLE_CLOUD_PROJECT")
 	savedQueryID = fmt.Sprintf("query-%s", strconv.FormatInt(time.Now().UnixNano(), 10))
@@ -48,12 +48,12 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		log.Fatalf("asset.NewClient: %v", err)
 	}
- 
+
 	cloudResourceManagerClient, err := cloudresourcemanager.NewService(ctx)
 	if err != nil {
 		log.Fatalf("cloudresourcemanager.NewService: %v", err)
 	}
- 
+
 	project, err := cloudResourceManagerClient.Projects.Get(projectID).Do()
 	if err != nil {
 		log.Fatalf("cloudResourceManagerClient.Projects.Get.Do: %v", err)
@@ -61,7 +61,7 @@ func TestMain(m *testing.M) {
 	projectNumber = strconv.FormatInt(project.ProjectNumber, 10)
 	parent := fmt.Sprintf("projects/%s", projectID)
 	log.Printf("projectNumber:%s", projectNumber)
- 
+
 	req := &assetpb.CreateSavedQueryRequest{
 		Parent:       parent,
 		SavedQueryId: savedQueryID,
@@ -81,15 +81,15 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		log.Fatalf("client.CreateSavedQuery: %v", err)
 	}
- 
+
 	os.Exit(m.Run())
 }
- 
+
 func TestUpdateSavedQuery(t *testing.T) {
 	buf := new(bytes.Buffer)
 	newDescription := "This is a new description"
 	update_err := updateSavedQuery(buf, projectID, savedQueryID, newDescription)
- 
+
 	fullQueryName := fmt.Sprintf("projects/%s/savedQueries/%s", projectNumber, savedQueryID)
 	delete_err := client.DeleteSavedQuery(ctx, &assetpb.DeleteSavedQueryRequest{
 		Name: fullQueryName,
