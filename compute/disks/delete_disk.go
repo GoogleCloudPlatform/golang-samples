@@ -27,13 +27,13 @@ import (
 // deleteDisk deletes a disk from a project.
 func deleteDisk(w io.Writer, projectID, zone, diskName string) error {
 	// projectID := "your_project_id"
-	// zone := "europe-central2-b"
+	// zone := "us-west3-b"
 	// diskName := "your_disk_name"
 
 	ctx := context.Background()
 	disksClient, err := compute.NewDisksRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewDisksRESTClient: %v", err)
+		return fmt.Errorf("NewDisksRESTClient: %w", err)
 	}
 	defer disksClient.Close()
 
@@ -45,11 +45,11 @@ func deleteDisk(w io.Writer, projectID, zone, diskName string) error {
 
 	op, err := disksClient.Delete(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to delete disk: %v", err)
+		return fmt.Errorf("unable to delete disk: %w", err)
 	}
 
 	if err = op.Wait(ctx); err != nil {
-		return fmt.Errorf("unable to wait for the operation: %v", err)
+		return fmt.Errorf("unable to wait for the operation: %w", err)
 	}
 
 	fmt.Fprintf(w, "Disk deleted\n")

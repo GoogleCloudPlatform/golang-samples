@@ -260,40 +260,42 @@ func TestPullMsgsAsync(t *testing.T) {
 	asyncTopicID := topicID + "-async"
 	asyncSubID := subID + "-async"
 
-	topic, err := getOrCreateTopic(ctx, client, asyncTopicID)
-	if err != nil {
-		t.Fatalf("getOrCreateTopic: %v", err)
-	}
-	defer topic.Delete(ctx)
-	defer topic.Stop()
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		topic, err := getOrCreateTopic(ctx, client, asyncTopicID)
+		if err != nil {
+			r.Errorf("getOrCreateTopic: %v", err)
+		}
+		defer topic.Delete(ctx)
+		defer topic.Stop()
 
-	cfg := &pubsub.SubscriptionConfig{
-		Topic: topic,
-	}
-	sub, err := getOrCreateSub(ctx, client, asyncSubID, cfg)
-	if err != nil {
-		t.Fatalf("getOrCreateSub: %v", err)
-	}
-	defer sub.Delete(ctx)
+		cfg := &pubsub.SubscriptionConfig{
+			Topic: topic,
+		}
+		sub, err := getOrCreateSub(ctx, client, asyncSubID, cfg)
+		if err != nil {
+			r.Errorf("getOrCreateSub: %v", err)
+		}
+		defer sub.Delete(ctx)
 
-	// Publish 1 message. This avoids race conditions
-	// when calling fmt.Fprintf from multiple receive
-	// callbacks. This is sufficient for testing since
-	// we're not testing client library functionality,
-	// and makes the sample more readable.
-	const numMsgs = 1
-	publishMsgs(ctx, topic, numMsgs)
+		// Publish 1 message. This avoids race conditions
+		// when calling fmt.Fprintf from multiple receive
+		// callbacks. This is sufficient for testing since
+		// we're not testing client library functionality,
+		// and makes the sample more readable.
+		const numMsgs = 1
+		publishMsgs(ctx, topic, numMsgs)
 
-	buf := new(bytes.Buffer)
-	err = pullMsgs(buf, tc.ProjectID, asyncSubID)
-	if err != nil {
-		t.Fatalf("failed to pull messages: %v", err)
-	}
-	got := buf.String()
-	want := fmt.Sprintf("Received %d messages\n", numMsgs)
-	if !strings.Contains(got, want) {
-		t.Fatalf("pullMsgs got %s\nwant %s", got, want)
-	}
+		buf := new(bytes.Buffer)
+		err = pullMsgs(buf, tc.ProjectID, asyncSubID)
+		if err != nil {
+			r.Errorf("failed to pull messages: %v", err)
+		}
+		got := buf.String()
+		want := fmt.Sprintf("Received %d messages\n", numMsgs)
+		if !strings.Contains(got, want) {
+			r.Errorf("pullMsgs got %s\nwant %s", got, want)
+		}
+	})
 }
 
 func TestPullMsgsSync(t *testing.T) {
@@ -304,41 +306,43 @@ func TestPullMsgsSync(t *testing.T) {
 	topicIDSync := topicID + "-sync"
 	subIDSync := subID + "-sync"
 
-	topic, err := getOrCreateTopic(ctx, client, topicIDSync)
-	if err != nil {
-		t.Fatalf("getOrCreateTopic: %v", err)
-	}
-	defer topic.Delete(ctx)
-	defer topic.Stop()
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		topic, err := getOrCreateTopic(ctx, client, topicIDSync)
+		if err != nil {
+			r.Errorf("getOrCreateTopic: %v", err)
+		}
+		defer topic.Delete(ctx)
+		defer topic.Stop()
 
-	cfg := &pubsub.SubscriptionConfig{
-		Topic: topic,
-	}
-	sub, err := getOrCreateSub(ctx, client, subIDSync, cfg)
-	if err != nil {
-		t.Fatalf("getOrCreateSub: %v", err)
-	}
-	defer sub.Delete(ctx)
+		cfg := &pubsub.SubscriptionConfig{
+			Topic: topic,
+		}
+		sub, err := getOrCreateSub(ctx, client, subIDSync, cfg)
+		if err != nil {
+			r.Errorf("getOrCreateSub: %v", err)
+		}
+		defer sub.Delete(ctx)
 
-	// Publish 1 message. This avoids race conditions
-	// when calling fmt.Fprintf from multiple receive
-	// callbacks. This is sufficient for testing since
-	// we're not testing client library functionality,
-	// and makes the sample more readable.
-	const numMsgs = 1
-	publishMsgs(ctx, topic, numMsgs)
+		// Publish 1 message. This avoids race conditions
+		// when calling fmt.Fprintf from multiple receive
+		// callbacks. This is sufficient for testing since
+		// we're not testing client library functionality,
+		// and makes the sample more readable.
+		const numMsgs = 1
+		publishMsgs(ctx, topic, numMsgs)
 
-	buf := new(bytes.Buffer)
-	err = pullMsgsSync(buf, tc.ProjectID, subIDSync)
-	if err != nil {
-		t.Fatalf("failed to pull messages: %v", err)
-	}
+		buf := new(bytes.Buffer)
+		err = pullMsgsSync(buf, tc.ProjectID, subIDSync)
+		if err != nil {
+			r.Errorf("failed to pull messages: %v", err)
+		}
 
-	got := buf.String()
-	want := fmt.Sprintf("Received %d messages\n", numMsgs)
-	if !strings.Contains(got, want) {
-		t.Fatalf("pullMsgsSync got %s\nwant %s", got, want)
-	}
+		got := buf.String()
+		want := fmt.Sprintf("Received %d messages\n", numMsgs)
+		if !strings.Contains(got, want) {
+			r.Errorf("pullMsgsSync got %s\nwant %s", got, want)
+		}
+	})
 }
 
 func TestPullMsgsConcurrencyControl(t *testing.T) {
@@ -349,7 +353,7 @@ func TestPullMsgsConcurrencyControl(t *testing.T) {
 	topicIDConc := topicID + "-conc"
 	subIDConc := subID + "-conc"
 
-	testutil.Retry(t, 3, time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
 		topic, err := getOrCreateTopic(ctx, client, topicIDConc)
 		if err != nil {
 			r.Errorf("getOrCreateTopic: %v", err)
@@ -390,39 +394,41 @@ func TestPullMsgsCustomAttributes(t *testing.T) {
 	topicIDAttributes := topicID + "-attributes"
 	subIDAttributes := subID + "-attributes"
 
-	topic, err := getOrCreateTopic(ctx, client, topicIDAttributes)
-	if err != nil {
-		t.Fatalf("getOrCreateTopic: %v", err)
-	}
-	defer topic.Delete(ctx)
-	defer topic.Stop()
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		topic, err := getOrCreateTopic(ctx, client, topicIDAttributes)
+		if err != nil {
+			r.Errorf("getOrCreateTopic: %v", err)
+		}
+		defer topic.Delete(ctx)
+		defer topic.Stop()
 
-	cfg := &pubsub.SubscriptionConfig{
-		Topic: topic,
-	}
-	sub, err := getOrCreateSub(ctx, client, subIDAttributes, cfg)
-	if err != nil {
-		t.Fatalf("getOrCreateSub: %v", err)
-	}
-	defer sub.Delete(ctx)
+		cfg := &pubsub.SubscriptionConfig{
+			Topic: topic,
+		}
+		sub, err := getOrCreateSub(ctx, client, subIDAttributes, cfg)
+		if err != nil {
+			r.Errorf("getOrCreateSub: %v", err)
+		}
+		defer sub.Delete(ctx)
 
-	res := topic.Publish(ctx, &pubsub.Message{
-		Data:       []byte("message with custom attributes"),
-		Attributes: map[string]string{"foo": "bar"},
+		res := topic.Publish(ctx, &pubsub.Message{
+			Data:       []byte("message with custom attributes"),
+			Attributes: map[string]string{"foo": "bar"},
+		})
+		if _, err := res.Get(ctx); err != nil {
+			r.Errorf("Get publish result: %v", err)
+		}
+
+		buf := new(bytes.Buffer)
+		if err := pullMsgsCustomAttributes(buf, tc.ProjectID, subIDAttributes); err != nil {
+			r.Errorf("failed to pull messages: %v", err)
+		}
+
+		want := "foo = bar"
+		if !strings.Contains(buf.String(), want) {
+			r.Errorf("pullMsgsCustomAttributes, got: %s, want %s", buf.String(), want)
+		}
 	})
-	if _, err := res.Get(ctx); err != nil {
-		t.Fatalf("Get publish result: %v", err)
-	}
-
-	buf := new(bytes.Buffer)
-	if err := pullMsgsCustomAttributes(buf, tc.ProjectID, subIDAttributes); err != nil {
-		t.Fatalf("failed to pull messages: %v", err)
-	}
-
-	want := "foo = bar"
-	if !strings.Contains(buf.String(), want) {
-		t.Fatalf("pullMsgsCustomAttributes, got: %s, want %s", buf.String(), want)
-	}
 }
 
 func TestCreateWithDeadLetterPolicy(t *testing.T) {
