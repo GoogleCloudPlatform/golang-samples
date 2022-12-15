@@ -11,24 +11,24 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
- 
+
 // [START asset_quickstart_list_saved_queries]
- 
+
 package list
- 
+
 import (
 	"context"
 	"fmt"
 	"io"
 	"strconv"
- 
+
 	"google.golang.org/api/iterator"
- 
+
 	asset "cloud.google.com/go/asset/apiv1"
 	"cloud.google.com/go/asset/apiv1/assetpb"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 )
- 
+
 func listSavedQueries(w io.Writer, projectID string) error {
 	// projectID := "my-project-id"
 	ctx := context.Background()
@@ -37,12 +37,12 @@ func listSavedQueries(w io.Writer, projectID string) error {
 		return fmt.Errorf("asset.NewClient: %v", err)
 	}
 	defer client.Close()
- 
+
 	cloudresourcemanagerClient, err := cloudresourcemanager.NewService(ctx)
 	if err != nil {
 		return fmt.Errorf("cloudresourcemanager.NewService: %v", err)
 	}
- 
+
 	project, err := cloudresourcemanagerClient.Projects.Get(projectID).Do()
 	if err != nil {
 		return fmt.Errorf("cloudresourcemanagerClient.Projects.Get.Do: %v", err)
@@ -68,5 +68,5 @@ func listSavedQueries(w io.Writer, projectID string) error {
 	}
 	return nil
 }
- 
+
 // [END asset_quickstart_list_saved_queries]
