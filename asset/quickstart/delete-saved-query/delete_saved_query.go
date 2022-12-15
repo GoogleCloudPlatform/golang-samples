@@ -11,23 +11,23 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
- 
+
 // [START asset_quickstart_delete_saved_query]
- 
+
 package delete
- 
+
 import (
 	"context"
 	"fmt"
 	"io"
 	"os"
 	"strconv"
- 
+
 	asset "cloud.google.com/go/asset/apiv1"
 	"cloud.google.com/go/asset/apiv1/assetpb"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 )
- 
+
 func deleteSavedQuery(w io.Writer, projectId, savedQueryID string) error {
 	// projectID := "my-project-id"
 	// savedQueryID := "query-ID"
@@ -37,13 +37,13 @@ func deleteSavedQuery(w io.Writer, projectId, savedQueryID string) error {
 		return fmt.Errorf("asset.NewClient: %v", err)
 	}
 	defer client.Close()
- 
+
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	cloudresourcemanagerClient, err := cloudresourcemanager.NewService(ctx)
 	if err != nil {
 		return fmt.Errorf("cloudresourcemanager.NewService: %v", err)
 	}
- 
+
 	project, err := cloudresourcemanagerClient.Projects.Get(projectID).Do()
 	if err != nil {
 		return fmt.Errorf("cloudresourcemanagerClient.Projects.Get.Do: %v", err)
@@ -59,5 +59,5 @@ func deleteSavedQuery(w io.Writer, projectId, savedQueryID string) error {
 	fmt.Fprintf(w, "Deleted Saved Query")
 	return nil
 }
- 
+
 // [END asset_quickstart_delete_saved_query]
