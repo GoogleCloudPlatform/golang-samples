@@ -33,7 +33,7 @@ func createCdnKey(w io.Writer, projectID, cdnKeyID, hostname, keyName, privateKe
 	// cdnKeyID := "my-cdn-key"
 	// hostname := "cdn.example.com"
 	// keyName := "cdn-key"
-	// privateKey := "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxzg5MDEyMzQ1Njc4OTAxMjM0NTY3DkwMTIzNA"
+	// privateKey := "my-private-key"
 	// isMediaCdn := true
 	location := "us-central1"
 	ctx := context.Background()
