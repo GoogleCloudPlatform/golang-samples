@@ -95,13 +95,13 @@ func TestUpdateSavedQuery(t *testing.T) {
 		Name: fullQueryName,
 	})
 	if update_err != nil {
-		t.Errorf("updateSavedQuery failed: %v", update_err)
+		t.Fatalf("updateSavedQuery failed: %v", update_err)
 	}
 	if delete_err != nil {
-		t.Errorf("client.DeleteSavedQuery: %v", delete_err)
+		t.Fatalf("client.DeleteSavedQuery: %v", delete_err)
 	}
 	got := buf.String()
 	if want := newDescription; !strings.Contains(got, want) {
-		t.Errorf("getSavedQuery got%q, want%q", got, want)
+		t.Fatalf("updateSavedQuery got%q, want%q", got, want)
 	}
 }

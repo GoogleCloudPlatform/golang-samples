@@ -38,14 +38,14 @@ func updateSavedQuery(w io.Writer, projectID, savedQueryID, newDescription strin
 	}
 	defer client.Close()
 
-	cloudresourcemanagerClient, err := cloudresourcemanager.NewService(ctx)
+	cloudResourceManagerClient, err := cloudresourcemanager.NewService(ctx)
 	if err != nil {
 		return fmt.Errorf("cloudresourcemanager.NewService: %v", err)
 	}
 
-	project, err := cloudresourcemanagerClient.Projects.Get(projectID).Do()
+	project, err := cloudResourceManagerClient.Projects.Get(projectID).Do()
 	if err != nil {
-		return fmt.Errorf("cloudresourcemanagerClient.Projects.Get.Do: %v", err)
+		return fmt.Errorf("cloudResourceManagerClient.Projects.Get.Do: %v", err)
 	}
 	projectNumber := strconv.FormatInt(project.ProjectNumber, 10)
 	savedQueryName := fmt.Sprintf("projects/%s/savedQueries/%s", projectNumber, savedQueryID)
