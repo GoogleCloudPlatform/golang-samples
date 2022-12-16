@@ -93,6 +93,6 @@ func TestDeleteSavedQuery(t *testing.T) {
 	}
 	got := buf.String()
 	if want := "Deleted Saved Query"; !strings.Contains(got, want) {
-		t.Errorf("deleteSavedQuery got%q, want%q", got, want)
+		t.Fatalf("deleteSavedQuery got%q, want%q", got, want)
 	}
 }
