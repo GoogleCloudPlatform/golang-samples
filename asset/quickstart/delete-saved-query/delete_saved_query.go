@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"os"
 	"strconv"
 
 	asset "cloud.google.com/go/asset/apiv1"
@@ -38,15 +37,14 @@ func deleteSavedQuery(w io.Writer, projectId, savedQueryID string) error {
 	}
 	defer client.Close()
 
-	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
-	cloudresourcemanagerClient, err := cloudresourcemanager.NewService(ctx)
+	cloudResourceManagerClient, err := cloudresourcemanager.NewService(ctx)
 	if err != nil {
 		return fmt.Errorf("cloudresourcemanager.NewService: %v", err)
 	}
 
-	project, err := cloudresourcemanagerClient.Projects.Get(projectID).Do()
+	project, err := cloudResourceManagerClient.Projects.Get(projectID).Do()
 	if err != nil {
-		return fmt.Errorf("cloudresourcemanagerClient.Projects.Get.Do: %v", err)
+		return fmt.Errorf("cloudResourceManagerClient.Projects.Get.Do: %v", err)
 	}
 	projectNumber := strconv.FormatInt(project.ProjectNumber, 10)
 	savedQueryName := fmt.Sprintf("projects/%s/savedQueries/%s", projectNumber, savedQueryID)
