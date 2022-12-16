@@ -34,7 +34,7 @@ func updateCdnKey(w io.Writer, projectID, cdnKeyID, hostname, keyName, privateKe
 	// cdnKeyID := "my-cdn-key"
 	// hostname := "updated.cdn.example.com"
 	// keyName := "cdn-key"
-	// privateKey := "ZZZzNDU2Nzg5MDEyMzQ1Njc4OTAxzg5MDEyMzQ1Njc4OTAxMjM0NTY3DkwMTIZZZ"
+	// privateKey := "my-updated-private-key"
 	// isMediaCdn := true
 	location := "us-central1"
 	ctx := context.Background()
@@ -45,7 +45,7 @@ func updateCdnKey(w io.Writer, projectID, cdnKeyID, hostname, keyName, privateKe
 	defer client.Close()
 
 	var req *stitcherpb.UpdateCdnKeyRequest
-	if isMediaCdn == true {
+	if isMediaCdn {
 		req = &stitcherpb.UpdateCdnKeyRequest{
 			CdnKey: &stitcherpb.CdnKey{
 				CdnKeyConfig: &stitcherpb.CdnKey_MediaCdnKey{

@@ -44,7 +44,7 @@ func createCdnKey(w io.Writer, projectID, cdnKeyID, hostname, keyName, privateKe
 	defer client.Close()
 
 	var req *stitcherpb.CreateCdnKeyRequest
-	if isMediaCdn == true {
+	if isMediaCdn {
 		req = &stitcherpb.CreateCdnKeyRequest{
 			Parent:   fmt.Sprintf("projects/%s/locations/%s", projectID, location),
 			CdnKeyId: cdnKeyID,

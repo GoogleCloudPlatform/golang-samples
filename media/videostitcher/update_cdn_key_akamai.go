@@ -31,7 +31,7 @@ func updateCdnKeyAkamai(w io.Writer, projectID, cdnKeyID, hostname, akamaiTokenK
 	// projectID := "my-project-id"
 	// cdnKeyID := "my-cdn-key"
 	// hostname := "updated.cdn.example.com"
-	// akamaiTokenKey := "VGhpcyBpcyBhbiB1cGRhdGVkIHRlc3Qgc3RyaW5nLg"
+	// akamaiTokenKey := "my-updated-token-key"
 	location := "us-central1"
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
@@ -40,7 +40,7 @@ func updateCdnKeyAkamai(w io.Writer, projectID, cdnKeyID, hostname, akamaiTokenK
 	}
 	defer client.Close()
 
-	var req = &stitcherpb.UpdateCdnKeyRequest{
+	req := &stitcherpb.UpdateCdnKeyRequest{
 		CdnKey: &stitcherpb.CdnKey{
 			CdnKeyConfig: &stitcherpb.CdnKey_AkamaiCdnKey{
 				AkamaiCdnKey: &stitcherpb.AkamaiCdnKey{

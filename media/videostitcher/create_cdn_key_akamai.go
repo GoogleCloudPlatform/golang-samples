@@ -30,7 +30,7 @@ func createCdnKeyAkamai(w io.Writer, projectID, cdnKeyID, hostname, akamaiTokenK
 	// projectID := "my-project-id"
 	// cdnKeyID := "my-cdn-key"
 	// hostname := "cdn.example.com"
-	// akamaiTokenKey := "VGhpcyBpcyBhIHRlc3Qgc3RyaW5nLg=="
+	// akamaiTokenKey := "my-private-token-key"
 	location := "us-central1"
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
@@ -39,7 +39,7 @@ func createCdnKeyAkamai(w io.Writer, projectID, cdnKeyID, hostname, akamaiTokenK
 	}
 	defer client.Close()
 
-	var req = &stitcherpb.CreateCdnKeyRequest{
+	req := &stitcherpb.CreateCdnKeyRequest{
 		Parent:   fmt.Sprintf("projects/%s/locations/%s", projectID, location),
 		CdnKeyId: cdnKeyID,
 		CdnKey: &stitcherpb.CdnKey{
