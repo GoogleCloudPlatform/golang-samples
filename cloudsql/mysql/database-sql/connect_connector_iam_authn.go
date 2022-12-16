@@ -15,6 +15,7 @@
 package cloudsql
 
 // [START cloud_sql_mysql_databasesql_connect_auto_iam_authn]
+// [START cloud_sql_mysql_databasesql_auto_iam_authn]
 import (
 	"context"
 	"database/sql"
@@ -69,4 +70,5 @@ func connectWithConnectorIAMAuthN() (*sql.DB, error) {
 	return dbPool, nil
 }
 
+// [END cloud_sql_mysql_databasesql_auto_iam_authn]
 // [END cloud_sql_mysql_databasesql_connect_auto_iam_authn]
