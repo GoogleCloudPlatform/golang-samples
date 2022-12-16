@@ -27,7 +27,7 @@ import (
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 )
 
-func deleteSavedQuery(w io.Writer, projectId, savedQueryID string) error {
+func deleteSavedQuery(w io.Writer, projectID, savedQueryID string) error {
 	// projectID := "my-project-id"
 	// savedQueryID := "query-ID"
 	ctx := context.Background()
