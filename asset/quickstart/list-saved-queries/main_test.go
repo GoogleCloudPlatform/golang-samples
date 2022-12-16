@@ -95,15 +95,15 @@ func TestListSavedQueries(t *testing.T) {
 	})
 
 	if list_saved_queries_err != nil {
-		t.Errorf("listSavedQueries: %v", list_saved_queries_err)
+		t.Fatalf("listSavedQueries: %v", list_saved_queries_err)
 	}
 
 	if delete_err != nil {
-		t.Errorf("client.DeleteSavedQuery: %v", delete_err)
+		t.Fatalf("client.DeleteSavedQuery: %v", delete_err)
 	}
 
 	got := buf.String()
 	if want := fullQueryName; !strings.Contains(got, want) {
-		t.Errorf("listSavedQueries got%q, want%q", got, want)
+		t.Fatalf("listSavedQueries got%q, want%q", got, want)
 	}
 }
