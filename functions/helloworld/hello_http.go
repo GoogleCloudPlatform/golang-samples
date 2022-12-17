@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"html"
 	"net/http"
-	
+
 	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 )
 
