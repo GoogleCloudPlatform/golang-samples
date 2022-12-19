@@ -5,7 +5,7 @@ go 1.19
 require (
 	cloud.google.com/go/automl v1.8.0
 	cloud.google.com/go/longrunning v0.3.0
-	google.golang.org/api v0.104.0
+	google.golang.org/api v0.105.0
 )
 
 require (

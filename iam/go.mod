@@ -3,20 +3,20 @@ module github.com/GoogleCloudPlatform/golang-samples/iam
 go 1.19
 
 require (
-	cloud.google.com/go/iam v0.8.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20221212191713-33c1a699be11
+	cloud.google.com/go/iam v0.9.0
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20221216000020-3e2c13a20303
 	github.com/gofrs/uuid v3.4.0+incompatible
 	golang.org/x/oauth2 v0.3.0
-	google.golang.org/api v0.104.0
+	google.golang.org/api v0.105.0
 	google.golang.org/genproto v0.0.0-20221207170731-23e4bf6bdc37
 )
 
 require (
-	cloud.google.com/go v0.105.0 // indirect
-	cloud.google.com/go/compute v1.13.0 // indirect
+	cloud.google.com/go v0.107.0 // indirect
+	cloud.google.com/go/compute v1.14.0 // indirect
 	cloud.google.com/go/compute/metadata v0.2.2 // indirect
 	cloud.google.com/go/longrunning v0.3.0 // indirect
-	cloud.google.com/go/storage v1.28.0 // indirect
+	cloud.google.com/go/storage v1.28.1 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect

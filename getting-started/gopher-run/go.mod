@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/firestore v1.9.0
 	cloud.google.com/go/storage v1.28.1
 	golang.org/x/oauth2 v0.3.0
-	google.golang.org/api v0.104.0
+	google.golang.org/api v0.105.0
 )
 
 require (

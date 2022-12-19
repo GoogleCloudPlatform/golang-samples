@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/profiler v0.3.1
 	cloud.google.com/go/storage v1.28.1
 	github.com/golang/protobuf v1.5.2
-	google.golang.org/api v0.104.0
+	google.golang.org/api v0.105.0
 	google.golang.org/grpc v1.51.0
 )
 

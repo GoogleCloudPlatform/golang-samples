@@ -504,8 +504,8 @@ google.golang.org/api v0.61.0/go.mod h1:xQRti5UdCmoCEqFxcz93fTl338AVqDgyaDRuOZ3h
 google.golang.org/api v0.63.0/go.mod h1:gs4ij2ffTRXwuzzgJl/56BdwJaA194ijkfn++9tDuPo=
 google.golang.org/api v0.67.0/go.mod h1:ShHKP8E60yPsKNw/w8w+VYaj9H6buA5UqDp8dhbQZ6g=
 google.golang.org/api v0.70.0/go.mod h1:Bs4ZM2HGifEvXwd50TtW70ovgJffJYw2oRCOFU/SkfA=
-google.golang.org/api v0.104.0 h1:KBfmLRqdZEbwQleFlSLnzpQJwhjpmNOk4cKQIBDZ9mg=
-google.golang.org/api v0.104.0/go.mod h1:JCspTXJbBxa5ySXw4UgUqVer7DfVxbvc/CTUFqAED5U=
+google.golang.org/api v0.105.0 h1:t6P9Jj+6XTn4U9I2wycQai6Q/Kz7iOT+QzjJ3G2V4x8=
+google.golang.org/api v0.105.0/go.mod h1:qh7eD5FJks5+BcE+cjBIm6Gz8vioK7EHvnlniqXBnqI=
 google.golang.org/appengine v1.1.0/go.mod h1:EbEs0AVv82hx2wNQdGPgUI5lhzA/G0D9YwlJXL52JkM=
 google.golang.org/appengine v1.4.0/go.mod h1:xpcJRLb0r/rnEns0DIKYYv+WjYCduHsrkT7/EB5XEv4=
 google.golang.org/appengine v1.5.0/go.mod h1:xpcJRLb0r/rnEns0DIKYYv+WjYCduHsrkT7/EB5XEv4=

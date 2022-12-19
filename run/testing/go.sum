@@ -14,10 +14,10 @@ cloud.google.com/go/longrunning v0.3.0/go.mod h1:qth9Y41RRSUE69rDcOn6DdK3HfQfsUI
 cloud.google.com/go/storage v1.28.1 h1:F5QDG5ChchaAVQhINh24U99OWHURqrW8OmQcGKXcbgI=
 cloud.google.com/go/storage v1.28.1/go.mod h1:Qnisd4CqDdo6BGs2AD5LLnEsmSQ80wQ5ogcBBKhU86Y=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
-github.com/GoogleCloudPlatform/golang-samples/run/grpc-ping v0.0.0-20221212191713-33c1a699be11 h1:r1IzsFwSVU6S6ESxyLMwWEebysLgITTIOroGRwEt2XI=
-github.com/GoogleCloudPlatform/golang-samples/run/grpc-ping v0.0.0-20221212191713-33c1a699be11/go.mod h1:vQRNhIy7yCrB5ehgQhgtT4PonwRiUwsCmzpQsdveTZg=
-github.com/GoogleCloudPlatform/golang-samples/run/grpc-server-streaming v0.0.0-20221212191713-33c1a699be11 h1:KIsCNv1SQon7Xom17r98AtClFrKECbIlW0QEqyFVI6U=
-github.com/GoogleCloudPlatform/golang-samples/run/grpc-server-streaming v0.0.0-20221212191713-33c1a699be11/go.mod h1:358fFx+1BzHRD1M8tk2RlgTc+1kq97QRrz1rKmU5Imo=
+github.com/GoogleCloudPlatform/golang-samples/run/grpc-ping v0.0.0-20221216000020-3e2c13a20303 h1:tOn3xuuG3egEuE4fAPHQuN9ixHeIoocONGd9qsKUNLE=
+github.com/GoogleCloudPlatform/golang-samples/run/grpc-ping v0.0.0-20221216000020-3e2c13a20303/go.mod h1:GjO9dv2D3haTobpv4/nWMiDWP9wwZEn7X7WImQn9mA0=
+github.com/GoogleCloudPlatform/golang-samples/run/grpc-server-streaming v0.0.0-20221216000020-3e2c13a20303 h1:ZkThO3i/FnlSou1SovVZQCsn/X7TelNA+tj21F5IFoM=
+github.com/GoogleCloudPlatform/golang-samples/run/grpc-server-streaming v0.0.0-20221216000020-3e2c13a20303/go.mod h1:9cDoVfT5DgRXYwYSE/cOhBC7yW7Jaf+xCalAEcG71hI=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/cncf/udpa/go v0.0.0-20191209042840-269d4d468f6f/go.mod h1:M8M6+tZqaGXZJjfX53e64911xZQV5JYwmTeXPW+k8Sc=

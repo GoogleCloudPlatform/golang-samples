@@ -3,24 +3,24 @@ module github.com/GoogleCloudPlatform/golang-samples/opencensus
 go 1.19
 
 require (
-	cloud.google.com/go/monitoring v1.9.0
-	cloud.google.com/go/spanner v1.41.0
+	cloud.google.com/go/monitoring v1.9.1
+	cloud.google.com/go/spanner v1.42.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.5
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20221212191713-33c1a699be11
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20221216000020-3e2c13a20303
 	github.com/golang/protobuf v1.5.2
 	go.opencensus.io v0.24.0
-	golang.org/x/exp v0.0.0-20221212164502-fae10dda9338
+	golang.org/x/exp v0.0.0-20221217163422-3c43f8badb15
 	google.golang.org/genproto v0.0.0-20221207170731-23e4bf6bdc37
 	google.golang.org/protobuf v1.28.1
 )
 
 require (
-	cloud.google.com/go v0.105.0 // indirect
-	cloud.google.com/go/compute v1.13.0 // indirect
-	cloud.google.com/go/compute/metadata v0.2.1 // indirect
+	cloud.google.com/go v0.107.0 // indirect
+	cloud.google.com/go/compute v1.14.0 // indirect
+	cloud.google.com/go/compute/metadata v0.2.2 // indirect
 	cloud.google.com/go/container v1.7.0 // indirect
 	cloud.google.com/go/iam v0.8.0 // indirect
-	cloud.google.com/go/storage v1.28.0 // indirect
+	cloud.google.com/go/storage v1.28.1 // indirect
 	cloud.google.com/go/trace v1.4.0 // indirect
 	github.com/aws/aws-sdk-go v1.23.20 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.3.0 // indirect
@@ -35,13 +35,13 @@ require (
 	github.com/googleapis/enterprise-certificate-proxy v0.2.0 // indirect
 	github.com/googleapis/gax-go/v2 v2.7.0 // indirect
 	github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af // indirect
-	golang.org/x/net v0.0.0-20221014081412-f15817d10f9b // indirect
-	golang.org/x/oauth2 v0.0.0-20221014153046-6fdb5e3db783 // indirect
+	golang.org/x/net v0.3.0 // indirect
+	golang.org/x/oauth2 v0.3.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/sys v0.2.0 // indirect
-	golang.org/x/text v0.4.0 // indirect
+	golang.org/x/sys v0.3.0 // indirect
+	golang.org/x/text v0.5.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
-	google.golang.org/api v0.103.0 // indirect
+	google.golang.org/api v0.104.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/grpc v1.51.0 // indirect
 )
