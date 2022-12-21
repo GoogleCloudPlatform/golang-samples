@@ -20,7 +20,14 @@ package http
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 )
+
+func init() {
+	// Register an HTTP function with the Functions Framework
+	functions.HTTP("HelloHTTPMethod", HelloHTTPMethod)
+}
 
 // HelloHTTPMethod is an HTTP Cloud function.
 // It uses the request method to differentiate the response.
