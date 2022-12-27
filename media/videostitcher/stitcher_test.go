@@ -43,10 +43,6 @@ const (
 	hostname             = "cdn.example.com"
 	updatedHostname      = "updated.example.com"
 	keyName              = "my-key"
-	// cloudCDNPrivateKey        = "VGhpcyBpcyBhIHRlc3Qgc3RyaW5nLg=="
-	// updatedCloudCDNPrivateKey = "VGhpcyBpcyBhbiB1cGRhdGVkIHRlc3Qgc3RyaW5nLg=="
-	// akamaiTokenKey            = cloudCDNPrivateKey
-	// updatedAkamaiTokenKey     = updatedCloudCDNPrivateKey
 )
 
 var bucketName string
