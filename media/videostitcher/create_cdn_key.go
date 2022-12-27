@@ -25,16 +25,16 @@ import (
 )
 
 // createCdnKey creates a CDN key. A CDN key is used to retrieve protected media.
-// If isMediaCdn is true, create a Media CDN key. If false, create a Cloud
+// If isMediaCDN is true, create a Media CDN key. If false, create a Cloud
 // CDN key. To create a privateKey value for Media CDN, see
 // https://cloud.google.com/video-stitcher/docs/how-to/managing-cdn-keys#create-private-key-media-cdn.
-func createCdnKey(w io.Writer, projectID, cdnKeyID, hostname, keyName, privateKey string, isMediaCdn bool) error {
+func createCdnKey(w io.Writer, projectID, keyID, hostname, keyName, privateKey string, isMediaCDN bool) error {
 	// projectID := "my-project-id"
-	// cdnKeyID := "my-cdn-key"
+	// keyID := "my-cdn-key"
 	// hostname := "cdn.example.com"
 	// keyName := "cdn-key"
 	// privateKey := "my-private-key"
-	// isMediaCdn := true
+	// isMediaCDN := true
 	location := "us-central1"
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
@@ -44,10 +44,10 @@ func createCdnKey(w io.Writer, projectID, cdnKeyID, hostname, keyName, privateKe
 	defer client.Close()
 
 	var req *stitcherpb.CreateCdnKeyRequest
-	if isMediaCdn {
+	if isMediaCDN {
 		req = &stitcherpb.CreateCdnKeyRequest{
 			Parent:   fmt.Sprintf("projects/%s/locations/%s", projectID, location),
-			CdnKeyId: cdnKeyID,
+			CdnKeyId: keyID,
 			CdnKey: &stitcherpb.CdnKey{
 				CdnKeyConfig: &stitcherpb.CdnKey_MediaCdnKey{
 					MediaCdnKey: &stitcherpb.MediaCdnKey{
@@ -61,7 +61,7 @@ func createCdnKey(w io.Writer, projectID, cdnKeyID, hostname, keyName, privateKe
 	} else {
 		req = &stitcherpb.CreateCdnKeyRequest{
 			Parent:   fmt.Sprintf("projects/%s/locations/%s", projectID, location),
-			CdnKeyId: cdnKeyID,
+			CdnKeyId: keyID,
 			CdnKey: &stitcherpb.CdnKey{
 				CdnKeyConfig: &stitcherpb.CdnKey_GoogleCdnKey{
 					GoogleCdnKey: &stitcherpb.GoogleCdnKey{

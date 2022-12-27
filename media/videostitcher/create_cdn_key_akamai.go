@@ -26,9 +26,9 @@ import (
 
 // createCdnKeyAkamai creates an Akamai CDN key. A CDN key is used to retrieve
 // protected media.
-func createCdnKeyAkamai(w io.Writer, projectID, cdnKeyID, hostname, akamaiTokenKey string) error {
+func createCdnKeyAkamai(w io.Writer, projectID, keyID, hostname, akamaiTokenKey string) error {
 	// projectID := "my-project-id"
-	// cdnKeyID := "my-cdn-key"
+	// keyID := "my-cdn-key"
 	// hostname := "cdn.example.com"
 	// akamaiTokenKey := "my-private-token-key"
 	location := "us-central1"
@@ -41,7 +41,7 @@ func createCdnKeyAkamai(w io.Writer, projectID, cdnKeyID, hostname, akamaiTokenK
 
 	req := &stitcherpb.CreateCdnKeyRequest{
 		Parent:   fmt.Sprintf("projects/%s/locations/%s", projectID, location),
-		CdnKeyId: cdnKeyID,
+		CdnKeyId: keyID,
 		CdnKey: &stitcherpb.CdnKey{
 			CdnKeyConfig: &stitcherpb.CdnKey_AkamaiCdnKey{
 				AkamaiCdnKey: &stitcherpb.AkamaiCdnKey{

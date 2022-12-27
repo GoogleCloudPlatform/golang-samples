@@ -27,9 +27,9 @@ import (
 
 // updateCdnKeyAkamai updates an Akamai CDN key. A CDN key is used to retrieve
 // protected media.
-func updateCdnKeyAkamai(w io.Writer, projectID, cdnKeyID, hostname, akamaiTokenKey string) error {
+func updateCdnKeyAkamai(w io.Writer, projectID, keyID, hostname, akamaiTokenKey string) error {
 	// projectID := "my-project-id"
-	// cdnKeyID := "my-cdn-key"
+	// keyID := "my-cdn-key"
 	// hostname := "updated.cdn.example.com"
 	// akamaiTokenKey := "my-updated-token-key"
 	location := "us-central1"
@@ -47,7 +47,7 @@ func updateCdnKeyAkamai(w io.Writer, projectID, cdnKeyID, hostname, akamaiTokenK
 					TokenKey: []byte(akamaiTokenKey),
 				},
 			},
-			Name:     fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", projectID, location, cdnKeyID),
+			Name:     fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", projectID, location, keyID),
 			Hostname: hostname,
 		},
 		UpdateMask: &fieldmaskpb.FieldMask{

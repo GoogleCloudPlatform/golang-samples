@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/google/uuid"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 )
 
@@ -35,19 +36,17 @@ const (
 	slateID             = "my-go-test-slate"
 	deleteSlateResponse = "Deleted slate"
 
-	deleteCdnKeyResponse      = "Deleted CDN key"
-	mediaCdnKeyID             = "my-go-test-media-cdn"
-	cloudCdnKeyID             = "my-go-test-cloud-cdn"
-	akamaiCdnKeyID            = "my-go-test-akamai-cdn"
-	hostname                  = "cdn.example.com"
-	updatedHostname           = "updated.example.com"
-	keyName                   = "my-key"
-	mediaCdnPrivateKey        = "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxzg5MDEyMzQ1Njc4OTAxMjM0NTY3DkwMTIzNA"
-	updatedMediaCdnPrivateKey = "ZZZzNDU2Nzg5MDEyMzQ1Njc4OTAxzg5MDEyMzQ1Njc4OTAxMjM0NTY3DkwMTIZZZ"
-	cloudCdnPrivateKey        = "VGhpcyBpcyBhIHRlc3Qgc3RyaW5nLg=="
-	updatedCloudCdnPrivateKey = "VGhpcyBpcyBhbiB1cGRhdGVkIHRlc3Qgc3RyaW5nLg=="
-	akamaiTokenKey            = cloudCdnPrivateKey
-	updatedAkamaiTokenKey     = updatedCloudCdnPrivateKey
+	deleteCDNKeyResponse = "Deleted CDN key"
+	mediaCDNKeyID        = "my-go-test-media-cdn"
+	cloudCDNKeyID        = "my-go-test-cloud-cdn"
+	akamaiCDNKeyID       = "my-go-test-akamai-cdn"
+	hostname             = "cdn.example.com"
+	updatedHostname      = "updated.example.com"
+	keyName              = "my-key"
+	// cloudCDNPrivateKey        = "VGhpcyBpcyBhIHRlc3Qgc3RyaW5nLg=="
+	// updatedCloudCDNPrivateKey = "VGhpcyBpcyBhbiB1cGRhdGVkIHRlc3Qgc3RyaW5nLg=="
+	// akamaiTokenKey            = cloudCDNPrivateKey
+	// updatedAkamaiTokenKey     = updatedCloudCDNPrivateKey
 )
 
 var bucketName string
@@ -106,10 +105,10 @@ func TestSlates(t *testing.T) {
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
 		slateName := fmt.Sprintf("projects/%s/locations/%s/slates/%s", projectNumber, location, slateID)
 		if err := createSlate(buf, tc.ProjectID, slateID, slateURI); err != nil {
-			r.Errorf("createSlate got err: %v", err)
+			t.Fatalf("createSlate got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, slateName) {
-			r.Errorf("createSlate got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, slateName)
+			t.Fatalf("createSlate got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, slateName)
 		}
 	})
 	buf.Reset()
@@ -173,27 +172,27 @@ func TestCdnKeys(t *testing.T) {
 	// Test setup
 
 	// Delete the Media CDN key if it exists.
-	if err := getCdnKey(buf, tc.ProjectID, mediaCdnKeyID); err == nil {
+	if err := getCdnKey(buf, tc.ProjectID, mediaCDNKeyID); err == nil {
 		testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
-			if err := deleteCdnKey(buf, tc.ProjectID, mediaCdnKeyID); err != nil {
+			if err := deleteCdnKey(buf, tc.ProjectID, mediaCDNKeyID); err != nil {
 				r.Errorf("deleteCdnKey got err: %v", err)
 			}
 		})
 	}
 
 	// Delete the Cloud CDN key if it exists.
-	if err := getCdnKey(buf, tc.ProjectID, cloudCdnKeyID); err == nil {
+	if err := getCdnKey(buf, tc.ProjectID, cloudCDNKeyID); err == nil {
 		testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
-			if err := deleteCdnKey(buf, tc.ProjectID, cloudCdnKeyID); err != nil {
+			if err := deleteCdnKey(buf, tc.ProjectID, cloudCDNKeyID); err != nil {
 				r.Errorf("deleteCdnKey got err: %v", err)
 			}
 		})
 	}
 
 	// Delete the Akamai CDN key if it exists.
-	if err := getCdnKey(buf, tc.ProjectID, akamaiCdnKeyID); err == nil {
+	if err := getCdnKey(buf, tc.ProjectID, akamaiCDNKeyID); err == nil {
 		testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
-			if err := deleteCdnKey(buf, tc.ProjectID, akamaiCdnKeyID); err != nil {
+			if err := deleteCdnKey(buf, tc.ProjectID, akamaiCDNKeyID); err != nil {
 				r.Errorf("deleteCdnKey got err: %v", err)
 			}
 		})
@@ -201,22 +200,26 @@ func TestCdnKeys(t *testing.T) {
 
 	// Tests
 	// Media CDN tests
+	mediaCDNPrivateKey, err := getUUID64()
+	if err != nil {
+		t.Fatalf("uuid err: %v", err)
+	}
 
 	// Create a new Media CDN key.
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
-		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", projectNumber, location, mediaCdnKeyID)
-		if err := createCdnKey(buf, tc.ProjectID, mediaCdnKeyID, hostname, keyName, mediaCdnPrivateKey, true); err != nil {
-			r.Errorf("createCdnKey (Media CDN) got err: %v", err)
+		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", projectNumber, location, mediaCDNKeyID)
+		if err := createCdnKey(buf, tc.ProjectID, mediaCDNKeyID, hostname, keyName, mediaCDNPrivateKey, true); err != nil {
+			t.Fatalf("createCdnKey (Media CDN) got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, cdnKeyName) {
-			r.Errorf("createCdnKey (Media CDN) got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, cdnKeyName)
+			t.Fatalf("createCdnKey (Media CDN) got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, cdnKeyName)
 		}
 	})
 	buf.Reset()
 
 	// List the CDN keys for a given location.
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
-		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, mediaCdnKeyID)
+		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, mediaCDNKeyID)
 		if err := listCdnKeys(buf, tc.ProjectID); err != nil {
 			r.Errorf("listCdnKeys got err: %v", err)
 		}
@@ -227,9 +230,14 @@ func TestCdnKeys(t *testing.T) {
 	buf.Reset()
 
 	// Update an existing CDN key.
+	updatedMediaCDNPrivateKey, err := getUUID64()
+	if err != nil {
+		t.Fatalf("uuid err: %v", err)
+	}
+
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
-		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, mediaCdnKeyID)
-		if err := updateCdnKey(buf, tc.ProjectID, mediaCdnKeyID, updatedHostname, keyName, updatedMediaCdnPrivateKey, true); err != nil {
+		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, mediaCDNKeyID)
+		if err := updateCdnKey(buf, tc.ProjectID, mediaCDNKeyID, updatedHostname, keyName, updatedMediaCDNPrivateKey, true); err != nil {
 			r.Errorf("updateCdnKey got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, cdnKeyName) {
@@ -240,8 +248,8 @@ func TestCdnKeys(t *testing.T) {
 
 	// Get the updated CDN key.
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
-		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, mediaCdnKeyID)
-		if err := getCdnKey(buf, tc.ProjectID, mediaCdnKeyID); err != nil {
+		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, mediaCDNKeyID)
+		if err := getCdnKey(buf, tc.ProjectID, mediaCDNKeyID); err != nil {
 			r.Errorf("getCdnKey got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, cdnKeyName) {
@@ -251,31 +259,36 @@ func TestCdnKeys(t *testing.T) {
 
 	// Delete the CDN key.
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
-		if err := deleteCdnKey(buf, tc.ProjectID, mediaCdnKeyID); err != nil {
+		if err := deleteCdnKey(buf, tc.ProjectID, mediaCDNKeyID); err != nil {
 			r.Errorf("deleteCdnKey got err: %v", err)
 		}
-		if got := buf.String(); !strings.Contains(got, deleteCdnKeyResponse) {
-			r.Errorf("deleteCdnKey got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, deleteCdnKeyResponse)
+		if got := buf.String(); !strings.Contains(got, deleteCDNKeyResponse) {
+			r.Errorf("deleteCdnKey got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, deleteCDNKeyResponse)
 		}
 	})
 
 	// Cloud CDN tests
 
 	// Create a new Cloud CDN key.
+	cloudCDNPrivateKey, err := getUUID64()
+	if err != nil {
+		t.Fatalf("uuid err: %v", err)
+	}
+
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
-		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", projectNumber, location, cloudCdnKeyID)
-		if err := createCdnKey(buf, tc.ProjectID, cloudCdnKeyID, hostname, keyName, cloudCdnPrivateKey, false); err != nil {
-			r.Errorf("createCdnKey (Cloud CDN) got err: %v", err)
+		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", projectNumber, location, cloudCDNKeyID)
+		if err := createCdnKey(buf, tc.ProjectID, cloudCDNKeyID, hostname, keyName, cloudCDNPrivateKey, false); err != nil {
+			t.Fatalf("createCdnKey (Cloud CDN) got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, cdnKeyName) {
-			r.Errorf("createCdnKey (Cloud CDN) got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, cdnKeyName)
+			t.Fatalf("createCdnKey (Cloud CDN) got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, cdnKeyName)
 		}
 	})
 	buf.Reset()
 
 	// List the CDN keys for a given location.
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
-		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, cloudCdnKeyID)
+		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, cloudCDNKeyID)
 		if err := listCdnKeys(buf, tc.ProjectID); err != nil {
 			r.Errorf("listCdnKeys got err: %v", err)
 		}
@@ -286,9 +299,14 @@ func TestCdnKeys(t *testing.T) {
 	buf.Reset()
 
 	// Update an existing CDN key.
+	updatedCloudCDNPrivateKey, err := getUUID64()
+	if err != nil {
+		t.Fatalf("uuid err: %v", err)
+	}
+
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
-		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, cloudCdnKeyID)
-		if err := updateCdnKey(buf, tc.ProjectID, cloudCdnKeyID, updatedHostname, keyName, updatedCloudCdnPrivateKey, false); err != nil {
+		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, cloudCDNKeyID)
+		if err := updateCdnKey(buf, tc.ProjectID, cloudCDNKeyID, updatedHostname, keyName, updatedCloudCDNPrivateKey, false); err != nil {
 			r.Errorf("updateCdnKey got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, cdnKeyName) {
@@ -299,8 +317,8 @@ func TestCdnKeys(t *testing.T) {
 
 	// Get the updated CDN key.
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
-		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, cloudCdnKeyID)
-		if err := getCdnKey(buf, tc.ProjectID, cloudCdnKeyID); err != nil {
+		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, cloudCDNKeyID)
+		if err := getCdnKey(buf, tc.ProjectID, cloudCDNKeyID); err != nil {
 			r.Errorf("getCdnKey got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, cdnKeyName) {
@@ -310,31 +328,36 @@ func TestCdnKeys(t *testing.T) {
 
 	// Delete the CDN key.
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
-		if err := deleteCdnKey(buf, tc.ProjectID, cloudCdnKeyID); err != nil {
+		if err := deleteCdnKey(buf, tc.ProjectID, cloudCDNKeyID); err != nil {
 			r.Errorf("deleteCdnKey got err: %v", err)
 		}
-		if got := buf.String(); !strings.Contains(got, deleteCdnKeyResponse) {
-			r.Errorf("deleteCdnKey got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, deleteCdnKeyResponse)
+		if got := buf.String(); !strings.Contains(got, deleteCDNKeyResponse) {
+			r.Errorf("deleteCdnKey got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, deleteCDNKeyResponse)
 		}
 	})
 
 	// Akamai tests
 
 	// Create a new Akamai CDN key.
+	akamaiTokenKey, err := getUUID64()
+	if err != nil {
+		t.Fatalf("uuid err: %v", err)
+	}
+
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
-		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", projectNumber, location, akamaiCdnKeyID)
-		if err := createCdnKeyAkamai(buf, tc.ProjectID, akamaiCdnKeyID, hostname, akamaiTokenKey); err != nil {
-			r.Errorf("createCdnKeyAkamai got err: %v", err)
+		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", projectNumber, location, akamaiCDNKeyID)
+		if err := createCdnKeyAkamai(buf, tc.ProjectID, akamaiCDNKeyID, hostname, akamaiTokenKey); err != nil {
+			t.Fatalf("createCdnKeyAkamai got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, cdnKeyName) {
-			r.Errorf("createCdnKeyAkamai got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, cdnKeyName)
+			t.Fatalf("createCdnKeyAkamai got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, cdnKeyName)
 		}
 	})
 	buf.Reset()
 
 	// List the CDN keys for a given location.
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
-		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, akamaiCdnKeyID)
+		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, akamaiCDNKeyID)
 		if err := listCdnKeys(buf, tc.ProjectID); err != nil {
 			r.Errorf("listCdnKeys got err: %v", err)
 		}
@@ -345,9 +368,14 @@ func TestCdnKeys(t *testing.T) {
 	buf.Reset()
 
 	// Update an existing CDN key.
+	updatedAkamaiTokenKey, err := getUUID64()
+	if err != nil {
+		t.Fatalf("uuid err: %v", err)
+	}
+
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
-		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, akamaiCdnKeyID)
-		if err := updateCdnKeyAkamai(buf, tc.ProjectID, akamaiCdnKeyID, updatedHostname, updatedAkamaiTokenKey); err != nil {
+		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, akamaiCDNKeyID)
+		if err := updateCdnKeyAkamai(buf, tc.ProjectID, akamaiCDNKeyID, updatedHostname, updatedAkamaiTokenKey); err != nil {
 			r.Errorf("updateCdnKey got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, cdnKeyName) {
@@ -358,8 +386,8 @@ func TestCdnKeys(t *testing.T) {
 
 	// Get the updated CDN key.
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
-		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, akamaiCdnKeyID)
-		if err := getCdnKey(buf, tc.ProjectID, akamaiCdnKeyID); err != nil {
+		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, akamaiCDNKeyID)
+		if err := getCdnKey(buf, tc.ProjectID, akamaiCDNKeyID); err != nil {
 			r.Errorf("getCdnKey got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, cdnKeyName) {
@@ -369,11 +397,11 @@ func TestCdnKeys(t *testing.T) {
 
 	// Delete the CDN key.
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
-		if err := deleteCdnKey(buf, tc.ProjectID, akamaiCdnKeyID); err != nil {
+		if err := deleteCdnKey(buf, tc.ProjectID, akamaiCDNKeyID); err != nil {
 			r.Errorf("deleteCdnKey got err: %v", err)
 		}
-		if got := buf.String(); !strings.Contains(got, deleteCdnKeyResponse) {
-			r.Errorf("deleteCdnKey got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, deleteCdnKeyResponse)
+		if got := buf.String(); !strings.Contains(got, deleteCDNKeyResponse) {
+			r.Errorf("deleteCdnKey got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, deleteCDNKeyResponse)
 		}
 	})
 }
@@ -390,12 +418,12 @@ func TestVodSessions(t *testing.T) {
 	// Create a new VOD session.
 	sessionPrefix := fmt.Sprintf("projects/%s/locations/%s/vodSessions/", projectNumber, location)
 	if err := createVodSession(buf, tc.ProjectID, vodURI); err != nil {
-		t.Errorf("createVodSession got err: %v", err)
+		t.Fatalf("createVodSession got err: %v", err)
 	}
 	got := buf.String()
 
 	if !strings.Contains(got, sessionPrefix) {
-		t.Errorf("createVodSession got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, sessionPrefix)
+		t.Fatalf("createVodSession got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, sessionPrefix)
 	}
 	strSlice := strings.Split(got, "/")
 	sessionID = strSlice[len(strSlice)-1]
@@ -499,10 +527,10 @@ func TestLiveSessions(t *testing.T) {
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
 		slateName := fmt.Sprintf("projects/%s/locations/%s/slates/%s", projectNumber, location, slateID)
 		if err := createSlate(buf, tc.ProjectID, slateID, slateURI); err != nil {
-			r.Errorf("createSlate got err: %v", err)
+			t.Fatalf("createSlate got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, slateName) {
-			r.Errorf("createSlate got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, slateName)
+			t.Fatalf("createSlate got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, slateName)
 		}
 	})
 	buf.Reset()
@@ -510,12 +538,12 @@ func TestLiveSessions(t *testing.T) {
 	// Create a new live session and return the play URI.
 	sessionPrefix := fmt.Sprintf("projects/%s/locations/%s/liveSessions/", projectNumber, location)
 	if err := createLiveSession(buf, tc.ProjectID, liveURI, slateID); err != nil {
-		t.Errorf("createLiveSession got err: %v", err)
+		t.Fatalf("createLiveSession got err: %v", err)
 	}
 	got := buf.String()
 
 	if !strings.Contains(got, sessionPrefix) {
-		t.Errorf("createLiveSession got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, sessionPrefix)
+		t.Fatalf("createLiveSession got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, sessionPrefix)
 	}
 	buf.Reset()
 
@@ -616,4 +644,14 @@ func TestLiveSessions(t *testing.T) {
 		}
 	})
 	buf.Reset()
+}
+
+func getUUID64() (string, error) {
+	u1, err1 := uuid.NewRandom()
+	u2, err2 := uuid.NewRandom()
+	if err1 != nil || err2 != nil {
+		return "", fmt.Errorf("uuid err: %v, %v", err1, err2)
+	}
+	uuid := fmt.Sprintf("%s%s", u1.String(), u2.String())
+	return strings.ReplaceAll(uuid, "-", ""), nil
 }
