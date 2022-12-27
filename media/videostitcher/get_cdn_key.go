@@ -25,8 +25,8 @@ import (
 	"cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
 
-// getCdnKey gets a CDN key by ID.
-func getCdnKey(w io.Writer, projectID, keyID string) error {
+// getCDNKey gets a CDN key by ID.
+func getCDNKey(w io.Writer, projectID, keyID string) error {
 	// projectID := "my-project-id"
 	// keyID := "my-cdn-key"
 	location := "us-central1"

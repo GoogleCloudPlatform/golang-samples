@@ -25,9 +25,9 @@ import (
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
-// updateCdnKeyAkamai updates an Akamai CDN key. A CDN key is used to retrieve
+// updateCDNKeyAkamai updates an Akamai CDN key. A CDN key is used to retrieve
 // protected media.
-func updateCdnKeyAkamai(w io.Writer, projectID, keyID, hostname, akamaiTokenKey string) error {
+func updateCDNKeyAkamai(w io.Writer, projectID, keyID, hostname, akamaiTokenKey string) error {
 	// projectID := "my-project-id"
 	// keyID := "my-cdn-key"
 	// hostname := "updated.cdn.example.com"

@@ -24,11 +24,11 @@ import (
 	"cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
 
-// createCdnKey creates a CDN key. A CDN key is used to retrieve protected media.
+// createCDNKey creates a CDN key. A CDN key is used to retrieve protected media.
 // If isMediaCDN is true, create a Media CDN key. If false, create a Cloud
 // CDN key. To create a privateKey value for Media CDN, see
 // https://cloud.google.com/video-stitcher/docs/how-to/managing-cdn-keys#create-private-key-media-cdn.
-func createCdnKey(w io.Writer, projectID, keyID, hostname, keyName, privateKey string, isMediaCDN bool) error {
+func createCDNKey(w io.Writer, projectID, keyID, hostname, keyName, privateKey string, isMediaCDN bool) error {
 	// projectID := "my-project-id"
 	// keyID := "my-cdn-key"
 	// hostname := "cdn.example.com"

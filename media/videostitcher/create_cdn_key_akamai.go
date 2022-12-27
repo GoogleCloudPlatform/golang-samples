@@ -24,9 +24,9 @@ import (
 	"cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
 
-// createCdnKeyAkamai creates an Akamai CDN key. A CDN key is used to retrieve
+// createCDNKeyAkamai creates an Akamai CDN key. A CDN key is used to retrieve
 // protected media.
-func createCdnKeyAkamai(w io.Writer, projectID, keyID, hostname, akamaiTokenKey string) error {
+func createCDNKeyAkamai(w io.Writer, projectID, keyID, hostname, akamaiTokenKey string) error {
 	// projectID := "my-project-id"
 	// keyID := "my-cdn-key"
 	// hostname := "cdn.example.com"
