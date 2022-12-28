@@ -24,10 +24,10 @@ import (
 	"cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
 
-// deleteCdnKey deletes a CDN key.
-func deleteCdnKey(w io.Writer, projectID, cdnKeyID string) error {
+// deleteCDNKey deletes a CDN key.
+func deleteCDNKey(w io.Writer, projectID, keyID string) error {
 	// projectID := "my-project-id"
-	// cdnKeyID := "my-cdn-key"
+	// keyID := "my-cdn-key"
 	location := "us-central1"
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
@@ -36,7 +36,7 @@ func deleteCdnKey(w io.Writer, projectID, cdnKeyID string) error {
 	}
 	defer client.Close()
 
-	name := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", projectID, location, cdnKeyID)
+	name := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", projectID, location, keyID)
 
 	req := &stitcherpb.DeleteCdnKeyRequest{
 		Name: name,
