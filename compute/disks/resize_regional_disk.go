@@ -40,9 +40,9 @@ func resizeRegionalDisk(w io.Writer, projectID, region, diskName string, newSize
 	defer disksClient.Close()
 
 	req := &computepb.ResizeRegionDiskRequest{
-		Disk:                             diskName,
-		Project:                          projectID,
-		Region:                           region,
+		Disk:    diskName,
+		Project: projectID,
+		Region:  region,
 		RegionDisksResizeRequestResource: &computepb.RegionDisksResizeRequest{
 			SizeGb: &newSizeGb,
 		},
