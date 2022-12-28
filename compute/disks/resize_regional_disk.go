@@ -31,6 +31,7 @@ func resizeRegionalDisk(w io.Writer, projectID, region, diskName string, newSize
 	// projectID := "your_project_id"
 	// region := "us-west3"
 	// diskName := "your_disk_name"
+	// newSizeGb := 20
 
 	ctx := context.Background()
 	disksClient, err := compute.NewRegionDisksRESTClient(ctx)
