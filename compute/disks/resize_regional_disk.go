@@ -27,7 +27,7 @@ import (
 // resizeRegionalDisk changes the size of a regional disk.
 // After you resize the disk, you must also resize the file system
 // so that the operating system can access the additional space.
-func resizeRegionalDisk(w io.Writer, projectID, region, diskName string, newSize int64) error {
+func resizeRegionalDisk(w io.Writer, projectID, region, diskName string, newSizeGb int64) error {
 	// projectID := "your_project_id"
 	// region := "us-west3"
 	// diskName := "your_disk_name"
@@ -44,7 +44,7 @@ func resizeRegionalDisk(w io.Writer, projectID, region, diskName string, newSize
 		Project:                          projectID,
 		Region:                           region,
 		RegionDisksResizeRequestResource: &computepb.RegionDisksResizeRequest{
-			SizeGb: &newSize,
+			SizeGb: &newSizeGb,
 		},
 	}
 

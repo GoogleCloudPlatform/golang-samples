@@ -247,6 +247,41 @@ func TestComputeDisksSnippets(t *testing.T) {
 		}
 	})
 
+	t.Run("Create and resize a regional disk", func(t *testing.T) {
+		buf := &bytes.Buffer{}
+		want := "Disk created"
+
+		if err := createRegionalDisk(buf, tc.ProjectID, region, replicaZones, diskName2, diskType, 20); err != nil {
+			t.Errorf("createRegionalDisk got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("createRegionalDisk got %q, want %q", got, want)
+		}
+
+		buf.Reset()
+		want = "Disk resized"
+
+		resizeRegionalDisk(buf, tc.ProjectID, region, diskName2, 50)
+		if err != nil {
+			t.Errorf("resizeRegionalDisk got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("resizeRegionalDisk got %q, want %q", got, want)
+		}
+
+		buf.Reset()
+		want = "Disk deleted"
+
+		// clean up
+		err = deleteRegionalDisk(buf, tc.ProjectID, region, diskName2)
+		if err != nil {
+			t.Errorf("deleteRegionalDisk got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("deleteRegionalDisk got %q, want %q", got, want)
+		}
+	})
+
 	t.Run("createEmptyDisk and clone it into a regional disk", func(t *testing.T) {
 		buf := &bytes.Buffer{}
 		want := "Disk created"
