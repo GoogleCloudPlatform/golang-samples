@@ -69,7 +69,7 @@ func createInstance(
 		return err
 	}
 
-	return op.Wait(ctx);
+	return op.Wait(ctx)
 }
 
 func getInstance(
@@ -306,7 +306,7 @@ func TestComputeDisksSnippets(t *testing.T) {
 		buf.Reset()
 		want := "disk autoDelete field updated."
 
-		createInstance(ctx, tc.ProjectID, zone, instanceName, sourceImage, diskName) 
+		createInstance(ctx, tc.ProjectID, zone, instanceName, sourceImage, diskName)
 		if err != nil {
 			t.Fatalf("unable to create instance: %v", err)
 		}
