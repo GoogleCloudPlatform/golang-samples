@@ -29,6 +29,49 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
+func createInstance(
+	ctx context.Context,
+	projectID, zone, instanceName, sourceImage, diskName string,
+) error {
+	instancesClient, err := compute.NewInstancesRESTClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer instancesClient.Close()
+	req := &computepb.InsertInstanceRequest{
+		Project: projectID,
+		Zone:    zone,
+		InstanceResource: &computepb.Instance{
+			Name: proto.String(instanceName),
+			Disks: []*computepb.AttachedDisk{
+				{
+					InitializeParams: &computepb.AttachedDiskInitializeParams{
+						DiskSizeGb:  proto.Int64(25),
+						SourceImage: proto.String(sourceImage),
+						DiskName:    proto.String(diskName),
+					},
+					AutoDelete: proto.Bool(false),
+					Boot:       proto.Bool(true),
+					DeviceName: proto.String(diskName),
+				},
+			},
+			MachineType: proto.String(fmt.Sprintf("zones/%s/machineTypes/n1-standard-1", zone)),
+			NetworkInterfaces: []*computepb.NetworkInterface{
+				{
+					Name: proto.String("global/networks/default"),
+				},
+			},
+		},
+	}
+
+	op, err := instancesClient.Insert(ctx, req)
+	if err != nil {
+		return err
+	}
+
+	return op.Wait(ctx);
+}
+
 func getInstance(
 	ctx context.Context,
 	projectID, zone, instanceName string,
@@ -263,39 +306,9 @@ func TestComputeDisksSnippets(t *testing.T) {
 		buf.Reset()
 		want := "disk autoDelete field updated."
 
-		req := &computepb.InsertInstanceRequest{
-			Project: tc.ProjectID,
-			Zone:    zone,
-			InstanceResource: &computepb.Instance{
-				Name: proto.String(instanceName),
-				Disks: []*computepb.AttachedDisk{
-					{
-						InitializeParams: &computepb.AttachedDiskInitializeParams{
-							DiskSizeGb:  proto.Int64(250),
-							SourceImage: proto.String(sourceImage),
-							DiskName:    proto.String(diskName),
-						},
-						AutoDelete: proto.Bool(false),
-						Boot:       proto.Bool(true),
-						DeviceName: proto.String(diskName),
-					},
-				},
-				MachineType: proto.String(fmt.Sprintf("zones/%s/machineTypes/n1-standard-1", zone)),
-				NetworkInterfaces: []*computepb.NetworkInterface{
-					{
-						Name: proto.String("global/networks/default"),
-					},
-				},
-			},
-		}
-
-		op, err := instancesClient.Insert(ctx, req)
+		createInstance(ctx, tc.ProjectID, zone, instanceName, sourceImage, diskName) 
 		if err != nil {
 			t.Fatalf("unable to create instance: %v", err)
-		}
-
-		if err = op.Wait(ctx); err != nil {
-			t.Fatalf("unable to wait for the operation: %v", err)
 		}
 
 		if err := setDiskAutoDelete(buf, tc.ProjectID, zone, instanceName, diskName); err != nil {
