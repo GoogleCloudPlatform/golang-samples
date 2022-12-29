@@ -163,6 +163,9 @@ func TestComputeDisksSnippets(t *testing.T) {
 	instanceName := fmt.Sprintf("test-instance-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	diskName := fmt.Sprintf("test-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	diskName2 := fmt.Sprintf("test-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+	instanceDiskName := fmt.Sprintf("test-instance-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+	instanceDiskName2 := fmt.Sprintf("test-instance-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+	//instanceDiskName3 := fmt.Sprintf("test-instance-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	snapshotName := fmt.Sprintf("test-snapshot-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	sourceImage := "projects/debian-cloud/global/images/family/debian-11"
 	sourceDisk := fmt.Sprintf("projects/%s/zones/europe-central2-b/disks/%s", tc.ProjectID, diskName)
@@ -185,6 +188,11 @@ func TestComputeDisksSnippets(t *testing.T) {
 	err = createDiskSnapshot(ctx, tc.ProjectID, zone, diskName, snapshotName)
 	if err != nil {
 		t.Fatalf("createDiskSnapshot got err: %v", err)
+	}
+	// Create a VM instance to attach disks to
+	createInstance(ctx, tc.ProjectID, zone, instanceName, sourceImage, instanceDiskName)
+	if err != nil {
+		t.Fatalf("unable to create instance: %v", err)
 	}
 
 	t.Run("Create zonal disk from a snapshot", func(t *testing.T) {
@@ -341,12 +349,7 @@ func TestComputeDisksSnippets(t *testing.T) {
 		buf.Reset()
 		want := "disk autoDelete field updated."
 
-		createInstance(ctx, tc.ProjectID, zone, instanceName, sourceImage, diskName)
-		if err != nil {
-			t.Fatalf("unable to create instance: %v", err)
-		}
-
-		if err := setDiskAutoDelete(buf, tc.ProjectID, zone, instanceName, diskName); err != nil {
+		if err := setDiskAutoDelete(buf, tc.ProjectID, zone, instanceName, instanceDiskName); err != nil {
 			t.Fatalf("setDiskAutodelete got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, want) {
@@ -361,16 +364,50 @@ func TestComputeDisksSnippets(t *testing.T) {
 		if instance.GetDisks()[0].GetAutoDelete() != true {
 			t.Errorf("instance got %t, want %t", instance.GetDisks()[0].GetAutoDelete(), true)
 		}
+	})
 
-		err = deleteInstance(ctx, tc.ProjectID, zone, instanceName)
-		if err != nil {
-			t.Errorf("deleteInstance got err: %v", err)
+	t.Run("Attach a regional disk to VM", func(t *testing.T) {
+		if err := createRegionalDisk(buf, tc.ProjectID, region, replicaZones, instanceDiskName2, "regions/us-west3/diskTypes/pd-ssd", 20); err != nil {
+			t.Fatalf("createRegionalDisk got err: %v", err)
 		}
+
+		buf.Reset()
+		want := "Disk attached"
+
+		diskUrl := fmt.Sprintf("projects/%s/regions/%s/disks/%s", tc.ProjectID, region, instanceDiskName2)
+
+		if err := attachRegionalDisk(buf, tc.ProjectID, zone, instanceName, diskUrl); err != nil {
+			t.Fatalf("attachRegionalDisk got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Fatalf("attachRegionalDisk got %q, want %q", got, want)
+		}
+
+		instance, err := getInstance(ctx, tc.ProjectID, zone, instanceName)
+		if err != nil {
+			t.Fatalf("getInstance got err: %v", err)
+		}
+
+		if len(instance.GetDisks()) < 2 {
+			t.Errorf("Not enough disks attached to the instance - looks like our disk was not attached!")
+		}
+
+		// cannot clean up the disk just yet because it must be done after the VM is terminated
 	})
 
 	// clean up
 	err = deleteDiskSnapshot(ctx, tc.ProjectID, snapshotName)
 	if err != nil {
 		t.Errorf("deleteDiskSnapshot got err: %v", err)
+	}
+
+	err = deleteInstance(ctx, tc.ProjectID, zone, instanceName)
+	if err != nil {
+		t.Errorf("deleteInstance got err: %v", err)
+	}
+
+	// disks attached to a VM instance must be deleted after deleting the instance
+	if err := deleteRegionalDisk(buf, tc.ProjectID, region, instanceDiskName2); err != nil {
+		t.Fatalf("deleteRegionalDisk got err: %v", err)
 	}
 }
