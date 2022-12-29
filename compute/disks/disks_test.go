@@ -165,7 +165,7 @@ func TestComputeDisksSnippets(t *testing.T) {
 	diskName2 := fmt.Sprintf("test-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	instanceDiskName := fmt.Sprintf("test-instance-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	instanceDiskName2 := fmt.Sprintf("test-instance-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
-	//instanceDiskName3 := fmt.Sprintf("test-instance-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+	instanceDiskName3 := fmt.Sprintf("test-instance-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	snapshotName := fmt.Sprintf("test-snapshot-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	sourceImage := "projects/debian-cloud/global/images/family/debian-11"
 	sourceDisk := fmt.Sprintf("projects/%s/zones/europe-central2-b/disks/%s", tc.ProjectID, diskName)
@@ -395,6 +395,35 @@ func TestComputeDisksSnippets(t *testing.T) {
 		// cannot clean up the disk just yet because it must be done after the VM is terminated
 	})
 
+	t.Run("Attach a read-only regional disk to VM", func(t *testing.T) {
+		if err := createRegionalDisk(buf, tc.ProjectID, region, replicaZones, instanceDiskName3, "regions/us-west3/diskTypes/pd-ssd", 20); err != nil {
+			t.Fatalf("createRegionalDisk got err: %v", err)
+		}
+
+		buf.Reset()
+		want := "Disk attached"
+
+		diskUrl := fmt.Sprintf("projects/%s/regions/%s/disks/%s", tc.ProjectID, region, instanceDiskName3)
+
+		if err := attachRegionalDiskReadOnly(buf, tc.ProjectID, zone, instanceName, diskUrl); err != nil {
+			t.Fatalf("attachRegionalDisk got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Fatalf("attachRegionalDisk got %q, want %q", got, want)
+		}
+
+		instance, err := getInstance(ctx, tc.ProjectID, zone, instanceName)
+		if err != nil {
+			t.Fatalf("getInstance got err: %v", err)
+		}
+
+		if len(instance.GetDisks()) < 3 {
+			t.Errorf("Not enough disks attached to the instance - looks like our disk was not attached!")
+		}
+
+		// cannot clean up the disk just yet because it must be done after the VM is terminated
+	})
+
 	// clean up
 	err = deleteDiskSnapshot(ctx, tc.ProjectID, snapshotName)
 	if err != nil {
@@ -407,7 +436,14 @@ func TestComputeDisksSnippets(t *testing.T) {
 	}
 
 	// disks attached to a VM instance must be deleted after deleting the instance
+
+	// disk 1 is set to auto-delete, no need to delete it explicitly
+
 	if err := deleteRegionalDisk(buf, tc.ProjectID, region, instanceDiskName2); err != nil {
+		t.Fatalf("deleteRegionalDisk got err: %v", err)
+	}
+
+	if err := deleteRegionalDisk(buf, tc.ProjectID, region, instanceDiskName3); err != nil {
 		t.Fatalf("deleteRegionalDisk got err: %v", err)
 	}
 }
