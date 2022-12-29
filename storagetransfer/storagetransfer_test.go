@@ -17,7 +17,6 @@ package storagetransfer
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -91,12 +90,11 @@ func TestMain(m *testing.M) {
 		log.Fatalf("couldn't create S3 bucket: %v", err)
 	}
 
-	fmt.Println(os.Getenv("AZURE_CONNECTION_STRING"))
 	connectionString := os.Getenv("AZURE_CONNECTION_STRING") +
-		";" + "AccountName=" + os.Getenv("AZURE_STORAGE_ACCOUNT")
+			";" + "AccountName=" + os.Getenv("AZURE_STORAGE_ACCOUNT")
 	azClient, err := azblob.NewClientFromConnectionString(connectionString, nil)
 	if err != nil {
-		log.Fatal("Invalid credentials with error: " + err.Error())
+		log.Fatal("Couldn't create Azure client: " + err.Error())
 	}
 	azureContainer = testutil.UniqueBucketName("azurebucket")
 
