@@ -44,7 +44,7 @@ func attachRegionalDiskReadOnly(w io.Writer, projectID, zone, instanceName, disk
 	req := &computepb.AttachDiskInstanceRequest{
 		AttachedDiskResource: &computepb.AttachedDisk{
 			Source: &diskUrl,
-			Mode: &mode,
+			Mode:   &mode,
 		},
 		Instance: instanceName,
 		Project:  projectID,
