@@ -388,8 +388,14 @@ func TestComputeDisksSnippets(t *testing.T) {
 			t.Fatalf("getInstance got err: %v", err)
 		}
 
-		if len(instance.GetDisks()) < 2 {
-			t.Errorf("Not enough disks attached to the instance - looks like our disk was not attached!")
+		foundDisk := false
+		for _, disk := range instance.GetDisks() {
+			if strings.Contains(*disk.Source, instanceDiskName2) {
+				foundDisk = true
+			}
+		}
+		if !foundDisk {
+			t.Errorf("The disk %s is not attached to the instance!", instanceDiskName2)
 		}
 
 		// cannot clean up the disk just yet because it must be done after the VM is terminated
@@ -417,8 +423,14 @@ func TestComputeDisksSnippets(t *testing.T) {
 			t.Fatalf("getInstance got err: %v", err)
 		}
 
-		if len(instance.GetDisks()) < 3 {
-			t.Errorf("Not enough disks attached to the instance - looks like our disk was not attached!")
+		foundDisk := false
+		for _, disk := range instance.GetDisks() {
+			if strings.Contains(*disk.Source, instanceDiskName3) {
+				foundDisk = true
+			}
+		}
+		if !foundDisk {
+			t.Errorf("The disk %s is not attached to the instance!", instanceDiskName3)
 		}
 
 		// cannot clean up the disk just yet because it must be done after the VM is terminated
