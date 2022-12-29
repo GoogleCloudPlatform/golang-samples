@@ -25,11 +25,11 @@ import (
 )
 
 // Attaches the provided regional disk in read-write mode to the given VM
-func attachRegionalDisk(w io.Writer, projectID, zone, instanceName, diskName string) error {
+func attachRegionalDisk(w io.Writer, projectID, zone, instanceName, diskUrl string) error {
 	// projectID := "your_project_id"
 	// zone := "us-west3-a" // refers to the instance, not the disk
 	// instanceName := "your_instance_name"
-	// diskName := "your_disk_name"
+	// diskUrl := "projects/your_project/regions/europe-west3/disks/your_disk"
 
 	ctx := context.Background()
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
@@ -40,7 +40,7 @@ func attachRegionalDisk(w io.Writer, projectID, zone, instanceName, diskName str
 
 	req := &computepb.AttachDiskInstanceRequest{
 		AttachedDiskResource: &computepb.AttachedDisk{
-			Source: &diskName,
+			Source: &diskUrl,
 		},
 		Instance: instanceName,
 		Project:  projectID,
