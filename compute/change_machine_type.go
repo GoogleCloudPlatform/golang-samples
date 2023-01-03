@@ -82,13 +82,15 @@ func changeMachineType(
 		}
 	}
 
+	machineTypeUrl := fmt.Sprintf("zones/%s/machineTypes/%s", zone, newInstanceType)
+
 	// Modify the machine definition with the new instance type
 	updateReq := &computepb.SetMachineTypeInstanceRequest{
 		Project:  projectID,
 		Zone:     zone,
 		Instance: instanceName,
 		InstancesSetMachineTypeRequestResource: &computepb.InstancesSetMachineTypeRequest{
-			MachineType: &newInstanceType,
+			MachineType: &machineTypeUrl,
 		},
 	}
 	op, err := instancesClient.SetMachineType(ctx, updateReq)
