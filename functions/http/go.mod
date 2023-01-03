@@ -1,11 +1,8 @@
-module github.com/GoogleCloudPlatform/golang-samples/functions/helloworld
+module github.com/GoogleCloudPlatform/golang-samples/functions/http
 
 go 1.19
 
-require (
-	cloud.google.com/go/functions v1.9.0
-	github.com/GoogleCloudPlatform/functions-framework-go v1.6.1
-)
+require github.com/GoogleCloudPlatform/functions-framework-go v1.6.1
 
 require (
 	github.com/cloudevents/sdk-go/v2 v2.6.1 // indirect
