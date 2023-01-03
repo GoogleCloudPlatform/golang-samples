@@ -112,7 +112,7 @@ func TestComputeSnippets(t *testing.T) {
 
 	buf.Reset()
 
-	if err := changeMachineType(buf, tc.ProjectID, zone, "e2-standard-2", machineType); err != nil {
+	if err := changeMachineType(buf, tc.ProjectID, zone, instanceName2, "e2-standard-2"); err != nil {
 		t.Errorf("changeMachineType got err: %v", err)
 	}
 
