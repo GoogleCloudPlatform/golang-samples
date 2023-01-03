@@ -14,21 +14,24 @@
 
 package videostitcher
 
-// [START videostitcher_get_cdn_key]
+// [START videostitcher_update_cdn_key_akamai]
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
 	"cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
+	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
-// getCDNKey gets a CDN key by ID.
-func getCDNKey(w io.Writer, projectID, keyID string) error {
+// updateCDNKeyAkamai updates an Akamai CDN key. A CDN key is used to retrieve
+// protected media.
+func updateCDNKeyAkamai(w io.Writer, projectID, keyID, hostname, akamaiTokenKey string) error {
 	// projectID := "my-project-id"
 	// keyID := "my-cdn-key"
+	// hostname := "updated.cdn.example.com"
+	// akamaiTokenKey := "my-updated-token-key"
 	location := "us-central1"
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
@@ -37,21 +40,31 @@ func getCDNKey(w io.Writer, projectID, keyID string) error {
 	}
 	defer client.Close()
 
-	req := &stitcherpb.GetCdnKeyRequest{
-		Name: fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", projectID, location, keyID),
-	}
-	// Gets the CDN key.
-	response, err := client.GetCdnKey(ctx, req)
-	if err != nil {
-		return fmt.Errorf("client.GetCdnKey: %v", err)
-	}
-	b, err := json.MarshalIndent(response, "", " ")
-	if err != nil {
-		return fmt.Errorf("json.MarshalIndent: %v", err)
+	req := &stitcherpb.UpdateCdnKeyRequest{
+		CdnKey: &stitcherpb.CdnKey{
+			CdnKeyConfig: &stitcherpb.CdnKey_AkamaiCdnKey{
+				AkamaiCdnKey: &stitcherpb.AkamaiCdnKey{
+					TokenKey: []byte(akamaiTokenKey),
+				},
+			},
+			Name:     fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", projectID, location, keyID),
+			Hostname: hostname,
+		},
+		UpdateMask: &fieldmaskpb.FieldMask{
+			Paths: []string{
+				"hostname", "akamai_cdn_key",
+			},
+		},
 	}
 
-	fmt.Fprintf(w, "CDN key:\n%s", string(b))
+	// Updates the CDN key.
+	response, err := client.UpdateCdnKey(ctx, req)
+	if err != nil {
+		return fmt.Errorf("client.UpdateCdnKey: %v", err)
+	}
+
+	fmt.Fprintf(w, "Updated CDN key: %+v", response)
 	return nil
 }
 
-// [END videostitcher_get_cdn_key]
+// [END videostitcher_update_cdn_key_akamai]
