@@ -91,7 +91,7 @@ func TestMain(m *testing.M) {
 	}
 
 	connectionString := os.Getenv("AZURE_CONNECTION_STRING") +
-			";" + "AccountName=" + os.Getenv("AZURE_STORAGE_ACCOUNT")
+		";" + "AccountName=" + os.Getenv("AZURE_STORAGE_ACCOUNT")
 	azClient, err := azblob.NewClientFromConnectionString(connectionString, nil)
 	if err != nil {
 		log.Fatal("Couldn't create Azure client: " + err.Error())
