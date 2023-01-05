@@ -6,6 +6,7 @@ require (
 	cloud.google.com/go/kms v1.7.0
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20221212191713-33c1a699be11
 	github.com/gofrs/uuid v3.4.0+incompatible
+	github.com/google/tink/go v1.7.0
 	google.golang.org/api v0.104.0
 	google.golang.org/genproto v0.0.0-20221207170731-23e4bf6bdc37
 	google.golang.org/grpc v1.51.0
