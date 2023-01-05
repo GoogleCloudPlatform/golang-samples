@@ -14,21 +14,23 @@
 
 package videostitcher
 
-// [START videostitcher_list_cdn_keys]
+// [START videostitcher_create_cdn_key_akamai]
 import (
 	"context"
 	"fmt"
 	"io"
 
-	"google.golang.org/api/iterator"
-
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
 	"cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
 
-// listCDNKeys gets all of the CDN keys for a given location.
-func listCDNKeys(w io.Writer, projectID string) error {
+// createCDNKeyAkamai creates an Akamai CDN key. A CDN key is used to retrieve
+// protected media.
+func createCDNKeyAkamai(w io.Writer, projectID, keyID, hostname, akamaiTokenKey string) error {
 	// projectID := "my-project-id"
+	// keyID := "my-cdn-key"
+	// hostname := "cdn.example.com"
+	// akamaiTokenKey := "my-private-token-key"
 	location := "us-central1"
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
@@ -37,24 +39,27 @@ func listCDNKeys(w io.Writer, projectID string) error {
 	}
 	defer client.Close()
 
-	req := &stitcherpb.ListCdnKeysRequest{
-		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
+	req := &stitcherpb.CreateCdnKeyRequest{
+		Parent:   fmt.Sprintf("projects/%s/locations/%s", projectID, location),
+		CdnKeyId: keyID,
+		CdnKey: &stitcherpb.CdnKey{
+			CdnKeyConfig: &stitcherpb.CdnKey_AkamaiCdnKey{
+				AkamaiCdnKey: &stitcherpb.AkamaiCdnKey{
+					TokenKey: []byte(akamaiTokenKey),
+				},
+			},
+			Hostname: hostname,
+		},
 	}
 
-	it := client.ListCdnKeys(ctx, req)
-	fmt.Fprintln(w, "CDN keys:")
-	for {
-		response, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return fmt.Errorf("it.Next(): %v", err)
-		}
-		fmt.Fprintln(w, response.GetName())
+	// Creates the CDN key.
+	response, err := client.CreateCdnKey(ctx, req)
+	if err != nil {
+		return fmt.Errorf("client.CreateCdnKey: %v", err)
 	}
 
+	fmt.Fprintf(w, "CDN key: %v", response.GetName())
 	return nil
 }
 
-// [END videostitcher_list_cdn_keys]
+// [END videostitcher_create_cdn_key_akamai]
