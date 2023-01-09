@@ -28,17 +28,18 @@ import (
 	"cloud.google.com/go/storage"
 	storagetransfer "cloud.google.com/go/storagetransfer/apiv1"
 	"cloud.google.com/go/storagetransfer/apiv1/storagetransferpb"
+	azblob "github.com/Azure/azure-sdk-for-go/sdk/storage/azblob"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
 var sc *storage.Client
 var sts *storagetransfer.Client
 var s3Bucket string
+var azureContainer string
 var gcsSourceBucket string
 var gcsSinkBucket string
 
@@ -89,6 +90,19 @@ func TestMain(m *testing.M) {
 		log.Fatalf("couldn't create S3 bucket: %v", err)
 	}
 
+	connectionString := os.Getenv("AZURE_CONNECTION_STRING") +
+		";" + "AccountName=" + os.Getenv("AZURE_STORAGE_ACCOUNT")
+	azClient, err := azblob.NewClientFromConnectionString(connectionString, nil)
+	if err != nil {
+		log.Fatal("Couldn't create Azure client: " + err.Error())
+	}
+	azureContainer = testutil.UniqueBucketName("azurebucket")
+
+	azClient.CreateContainer(ctx, azureContainer, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// Run tests
 	exit := m.Run()
 
@@ -109,6 +123,11 @@ func TestMain(m *testing.M) {
 	})
 	if err != nil {
 		log.Printf("couldn't delete S3 bucket: %v", err)
+	}
+
+	_, err = azClient.DeleteContainer(ctx, azureContainer, nil)
+	if err != nil {
+		log.Printf("couldn't delete Azure bucket: %v", err)
 	}
 
 	os.Exit(exit)
@@ -324,6 +343,23 @@ func TestTransferFromS3CompatibleSource(t *testing.T) {
 	got := buf.String()
 	if want := "transferJobs/"; !strings.Contains(got, want) {
 		t.Errorf("transfer_from_s3_compatible_source: got %q, want %q", got, want)
+	}
+}
+
+func TestTransferFromAzure(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	accountName := os.Getenv("AZURE_STORAGE_ACCOUNT")
+	resp, err := transferFromAzure(buf, tc.ProjectID, accountName, azureContainer, gcsSinkBucket)
+	if err != nil {
+		t.Errorf("transfer_from_azure: %#v", err)
+	}
+	defer cleanupSTSJob(resp, tc.ProjectID)
+
+	got := buf.String()
+	if want := "transferJobs/"; !strings.Contains(got, want) {
+		t.Errorf("transfer_from_azure: got %q, want %q", got, want)
 	}
 }
 
