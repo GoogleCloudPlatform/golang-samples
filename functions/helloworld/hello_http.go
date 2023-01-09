@@ -22,7 +22,13 @@ import (
 	"fmt"
 	"html"
 	"net/http"
+
+	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 )
+
+func init() {
+	functions.HTTP("HelloHTTP", HelloHTTP)
+}
 
 // HelloHTTP is an HTTP Cloud Function with a request parameter.
 func HelloHTTP(w http.ResponseWriter, r *http.Request) {

@@ -29,17 +29,19 @@ import (
 func createDiskFromSnapshot(
 	w io.Writer,
 	projectID, zone, diskName, diskType, snapshotLink string,
+	diskSizeGb int64,
 ) error {
 	// projectID := "your_project_id"
-	// zone := "europe-central2-b"
+	// zone := "us-west3-b" // should match diskType below
 	// diskName := "your_disk_name"
 	// diskType := "zones/us-west3-b/diskTypes/pd-ssd"
-	// snapshotLink := "projects/project_name/global/snapshots/snapshot_name"
+	// snapshotLink := "projects/your_project_id/global/snapshots/snapshot_name"
+	// diskSizeGb := 120
 
 	ctx := context.Background()
 	disksClient, err := compute.NewDisksRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewDisksRESTClient: %v", err)
+		return fmt.Errorf("NewDisksRESTClient: %w", err)
 	}
 	defer disksClient.Close()
 
@@ -51,17 +53,17 @@ func createDiskFromSnapshot(
 			Zone:           proto.String(zone),
 			Type:           proto.String(diskType),
 			SourceSnapshot: proto.String(snapshotLink),
-			SizeGb:         proto.Int64(120),
+			SizeGb:         proto.Int64(diskSizeGb),
 		},
 	}
 
 	op, err := disksClient.Insert(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to create disk: %v", err)
+		return fmt.Errorf("unable to create disk: %w", err)
 	}
 
 	if err = op.Wait(ctx); err != nil {
-		return fmt.Errorf("unable to wait for the operation: %v", err)
+		return fmt.Errorf("unable to wait for the operation: %w", err)
 	}
 
 	fmt.Fprintf(w, "Disk created\n")
