@@ -163,6 +163,15 @@ func TestSample(t *testing.T) {
 	runSample(t, write, dbName, "failed to insert data")
 	writeTime := time.Now()
 
+	runSample(t, addAndDropDatabaseRole, dbName, "failed to add database role")
+	out = runSample(t, func(w io.Writer, dbName string) error { return readDataWithDatabaseRole(w, dbName, "parent") }, dbName, "failed to read data with database role")
+	assertContains(t, out, "1 1 Total Junk")
+	out = runSample(t, listDatabaseRoles, dbName, "failed to list database roles")
+	assertContains(t, out, "parent")
+	assertContains(t, out, "public")
+	assertContains(t, out, "spanner_info_reader")
+	assertContains(t, out, "spanner_sys_reader")
+
 	out = runSample(t, read, dbName, "failed to read data")
 	assertContains(t, out, "1 1 Total Junk")
 	out = runSample(t, query, dbName, "failed to query data")
