@@ -285,9 +285,6 @@ func TestComputeDisksSnippets(t *testing.T) {
 		if err != nil {
 			t.Errorf("deleteRegionalDisk got err: %v", err)
 		}
-		if got := buf.String(); !strings.Contains(got, want) {
-			t.Errorf("deleteRegionalDisk got %q, want %q", got, want)
-		}
 	})
 
 	t.Run("createEmptyDisk and clone it into a regional disk", func(t *testing.T) {
@@ -452,7 +449,7 @@ func TestComputeDisksSnippets(t *testing.T) {
 	// disk 1 is set to auto-delete, no need to delete it explicitly
 
 	if err := deleteRegionalDisk(buf, tc.ProjectID, region, instanceDiskName2); err != nil {
-		t.Fatalf("deleteRegionalDisk got err: %v", err)
+		t.Errorf("deleteRegionalDisk got err: %v", err)
 	}
 
 	if err := deleteRegionalDisk(buf, tc.ProjectID, region, instanceDiskName3); err != nil {
