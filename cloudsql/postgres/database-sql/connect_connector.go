@@ -62,7 +62,7 @@ func connectWithConnector() (*sql.DB, error) {
 		return nil, err
 	}
 	config.DialFunc = func(ctx context.Context, network, instance string) (net.Conn, error) {
-		if (dbPwd != "") {
+		if (dbPwd == "") {
 			// [START cloud_sql_postgres_databasesql_auto_iam_authn]
 			d, err := cloudsqlconn.NewDialer(ctx, cloudsqlconn.WithIAMAuthN())
 			if err != nil {
