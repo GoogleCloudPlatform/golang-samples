@@ -20,6 +20,7 @@ date
 
 cd github/golang-samples || exit 1
 
+git config --global --add safe.directory github/golang-samples
 SIGNIFICANT_CHANGES="$(git --no-pager diff --name-only main..HEAD | grep -Ev '(\.md$|^\.github)' || true)"
 
 # If this is a PR with only insignificant changes, don't run any tests.
