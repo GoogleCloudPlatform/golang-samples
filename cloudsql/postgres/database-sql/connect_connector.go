@@ -57,10 +57,6 @@ func connectWithConnector() (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	config, err := pgx.ParseConfig(dsn)
-	if err != nil {
-		return nil, err
-	}
 	config.DialFunc = func(ctx context.Context, network, instance string) (net.Conn, error) {
 		if (dbPwd == "") {
 			// [START cloud_sql_postgres_databasesql_auto_iam_authn]
