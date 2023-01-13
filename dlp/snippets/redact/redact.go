@@ -22,7 +22,7 @@ import (
 	"io/ioutil"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
-	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
+	"cloud.google.com/go/dlp/apiv2/dlppb"
 )
 
 // redactImage blacks out the identified portions of the input image (with type bytesType)

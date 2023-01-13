@@ -22,9 +22,9 @@ import (
 	"fmt"
 	"time"
 
+	"cloud.google.com/go/monitoring/apiv3/v2/monitoringpb"
 	googlepb "github.com/golang/protobuf/ptypes/timestamp"
 	distributionpb "google.golang.org/genproto/googleapis/api/distribution"
-	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 	"google.golang.org/protobuf/types/known/anypb"
 )
 

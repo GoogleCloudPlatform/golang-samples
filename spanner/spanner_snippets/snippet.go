@@ -17,6 +17,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -24,13 +25,16 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"cloud.google.com/go/spanner"
 	"google.golang.org/api/iterator"
 
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
+	iampb "google.golang.org/genproto/googleapis/iam/v1"
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
+	expr "google.golang.org/genproto/googleapis/type/expr"
 )
 
 type command func(ctx context.Context, w io.Writer, client *spanner.Client) error
@@ -38,30 +42,33 @@ type adminCommand func(ctx context.Context, w io.Writer, adminClient *database.D
 
 var (
 	commands = map[string]command{
-		"write":               write,
-		"read":                read,
-		"query":               query,
-		"update":              update,
-		"querynewcolumn":      queryNewColumn,
-		"pgquerynewcolumn":    pgQueryNewColumn,
-		"querywithparameter":  queryWithParameter,
-		"pgqueryparameter":    pgQueryParameter,
-		"dmlwrite":            writeUsingDML,
-		"pgdmlwrite":          pgWriteUsingDML,
-		"dmlwritetxn":         writeWithTransactionUsingDML,
-		"pgdmlwritetxn":       pgWriteWithTransactionUsingDML,
-		"readindex":           readUsingIndex,
-		"readstoringindex":    readStoringIndex,
-		"readonlytransaction": readOnlyTransaction,
+		"write":                    write,
+		"read":                     read,
+		"readdatawithdatabaserole": read,
+		"query":                    query,
+		"update":                   update,
+		"querynewcolumn":           queryNewColumn,
+		"pgquerynewcolumn":         pgQueryNewColumn,
+		"querywithparameter":       queryWithParameter,
+		"pgqueryparameter":         pgQueryParameter,
+		"dmlwrite":                 writeUsingDML,
+		"pgdmlwrite":               pgWriteUsingDML,
+		"dmlwritetxn":              writeWithTransactionUsingDML,
+		"pgdmlwritetxn":            pgWriteWithTransactionUsingDML,
+		"readindex":                readUsingIndex,
+		"readstoringindex":         readStoringIndex,
+		"readonlytransaction":      readOnlyTransaction,
 	}
 
 	adminCommands = map[string]adminCommand{
-		"createdatabase":    createDatabase,
-		"addnewcolumn":      addNewColumn,
-		"pgaddnewcolumn":    pgAddNewColumn,
-		"addstoringindex":   addStoringIndex,
-		"pgaddstoringindex": pgAddStoringIndex,
-		"pgcreatedatabase":  pgCreateDatabase,
+		"createdatabase":         createDatabase,
+		"addnewcolumn":           addNewColumn,
+		"pgaddnewcolumn":         pgAddNewColumn,
+		"addstoringindex":        addStoringIndex,
+		"pgaddstoringindex":      pgAddStoringIndex,
+		"pgcreatedatabase":       pgCreateDatabase,
+		"addanddropdatabaserole": addAndDropDatabaseRole,
+		"listdatabaseroles":      listDatabaseRoles,
 	}
 )
 
@@ -706,21 +713,138 @@ func pgAddStoringIndex(ctx context.Context, w io.Writer, adminClient *database.D
 	return nil
 }
 
-func createClients(ctx context.Context, db string) (*database.DatabaseAdminClient, *spanner.Client) {
+func addAndDropDatabaseRole(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, db string) error {
+	op, err := adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
+		Database: db,
+		Statements: []string{
+			"CREATE ROLE parent",
+			"GRANT SELECT ON TABLE Albums TO ROLE parent",
+			"CREATE ROLE child",
+			"GRANT ROLE parent TO ROLE child",
+		},
+	})
+	if err != nil {
+		return err
+	}
+	if err := op.Wait(ctx); err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "Created roles parent and child and granted privileges\n")
+	op, err = adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
+		Database: db,
+		Statements: []string{
+			"REVOKE ROLE parent FROM ROLE child",
+			"DROP ROLE child",
+		},
+	})
+	if err != nil {
+		return err
+	}
+	if err := op.Wait(ctx); err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "Revoked privileges and dropped role child\n")
+	return nil
+}
+
+func enableFineGrainedAccess(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, db string, iamMember string) error {
+	if iamMember == "" {
+		return errors.New("IAM member must be specified")
+	}
+	databaseRole := "parent"
+	title := "condition title"
+	policy, err := adminClient.GetIamPolicy(ctx, &iampb.GetIamPolicyRequest{
+		Resource: db,
+		Options: &iampb.GetPolicyOptions{
+			// IAM conditions need at least version 3
+			RequestedPolicyVersion: 3,
+		},
+	})
+	if err != nil {
+		return err
+	}
+
+	// IAM conditions need at least version 3
+	if policy.Version < 3 {
+		policy.Version = 3
+	}
+	policy.Bindings = append(policy.Bindings, []*iampb.Binding{
+		{
+			Role:    "roles/spanner.fineGrainedAccessUser",
+			Members: []string{iamMember},
+		},
+		{
+			Role:    "roles/spanner.databaseRoleUser",
+			Members: []string{iamMember},
+			Condition: &expr.Expr{
+				Expression: fmt.Sprintf(`resource.name.endsWith("/databaseRoles/%s")`, databaseRole),
+				Title:      title,
+			},
+		},
+	}...)
+	_, err = adminClient.SetIamPolicy(ctx, &iampb.SetIamPolicyRequest{
+		Resource: db,
+		Policy:   policy,
+	})
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprintf(w, "Enabled fine-grained access in IAM.\n")
+	return nil
+}
+
+func listDatabaseRoles(ctx context.Context, w io.Writer, adminClient *database.DatabaseAdminClient, db string) error {
+	iter := adminClient.ListDatabaseRoles(ctx, &adminpb.ListDatabaseRolesRequest{
+		Parent: db,
+	})
+	rolePrefix := db + "/databaseRoles/"
+	for {
+		role, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		if !strings.HasPrefix(role.Name, rolePrefix) {
+			return fmt.Errorf("Role %v does not have prefix %v", role.Name, rolePrefix)
+		}
+		fmt.Fprintf(w, "%s\n", strings.TrimPrefix(role.Name, rolePrefix))
+	}
+	return nil
+}
+
+func run(ctx context.Context, w io.Writer, cmd string, db string, arg string) error {
+	var databaseRole string
+	if cmd == "readdatawithdatabaserole" {
+		databaseRole = "parent"
+	}
+
+	cfg := spanner.ClientConfig{
+		DatabaseRole: databaseRole,
+	}
+
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer adminClient.Close()
 
-	dataClient, err := spanner.NewClient(ctx, db)
+	dataClient, err := spanner.NewClientWithConfig(ctx, db, cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer dataClient.Close()
 
-	return adminClient, dataClient
-}
+	if cmd == "enablefinegrainedaccess" {
+		err := enableFineGrainedAccess(ctx, w, adminClient, db, arg)
+		if err != nil {
+			fmt.Fprintf(w, "%s failed with %v", cmd, err)
+		}
+		return err
+	}
 
-func run(ctx context.Context, adminClient *database.DatabaseAdminClient, dataClient *spanner.Client, w io.Writer, cmd string, db string) error {
 	if adminCmdFn := adminCommands[cmd]; adminCmdFn != nil {
 		err := adminCmdFn(ctx, w, adminClient, db)
 		if err != nil {
@@ -735,7 +859,7 @@ func run(ctx context.Context, adminClient *database.DatabaseAdminClient, dataCli
 		flag.Usage()
 		os.Exit(2)
 	}
-	err := cmdFn(ctx, w, dataClient)
+	err = cmdFn(ctx, w, dataClient)
 	if err != nil {
 		fmt.Fprintf(w, "%s failed with %v", cmd, err)
 	}
@@ -744,33 +868,32 @@ func run(ctx context.Context, adminClient *database.DatabaseAdminClient, dataCli
 
 func main() {
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, `Usage: spanner_snippets <command> <database_name>
+		fmt.Fprintf(os.Stderr, `Usage: spanner_snippets <command> <database_name> [iam_member]
 
-	Command can be one of: write, read, query, update, querynewcolumn,
-		querywithparameter, dmlwrite, dmlwritetxn, readindex, readstoringindex,
-		readonlytransaction, createdatabase, addnewcolumn, addstoringindex,
-		pgcreatedatabase, pgqueryparameter, pgdmlwrite, pgaddnewcolumn, pgquerynewcolumn,
-		pgdmlwritetxn, pgaddstoringindex
+	Command can be one of: write, read, readdatawithdatabaserole, query, update,
+		querynewcolumn, querywithparameter, dmlwrite, dmlwritetxn, readindex,
+		readstoringindex, readonlytransaction, createdatabase, addnewcolumn,
+		addstoringindex, addanddropdatabaserole, enablefinegrainedaccess,
+		listdatabaseroles, pgcreatedatabase, pgqueryparameter, pgdmlwrite,
+		pgaddnewcolumn, pgquerynewcolumn, pgdmlwritetxn, pgaddstoringindex
 
 Examples:
 	spanner_snippets createdatabase projects/my-project/instances/my-instance/databases/example-db
 	spanner_snippets write projects/my-project/instances/my-instance/databases/example-db
+	spanner_snippets enablefinegrainedaccess projects/my-project/instances/my-instance/databases/example-db user:alice@example.com
 `)
 	}
 
 	flag.Parse()
-	if len(flag.Args()) < 2 {
+	if len(flag.Args()) < 2 || len(flag.Args()) > 3 {
 		flag.Usage()
 		os.Exit(2)
 	}
 
-	cmd, db := flag.Arg(0), flag.Arg(1)
+	cmd, db, arg := flag.Arg(0), flag.Arg(1), flag.Arg(2)
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
 	defer cancel()
-	adminClient, dataClient := createClients(ctx, db)
-	defer adminClient.Close()
-	defer dataClient.Close()
-	if err := run(ctx, adminClient, dataClient, os.Stdout, cmd, db); err != nil {
+	if err := run(ctx, os.Stdout, cmd, db, arg); err != nil {
 		os.Exit(1)
 	}
 }

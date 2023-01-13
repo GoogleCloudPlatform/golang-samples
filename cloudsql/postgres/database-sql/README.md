@@ -135,7 +135,7 @@ gcloud app deploy cmd/app/app.standard.yaml
 To run the sample on GAE-Flex, create an App Engine project by following the setup for these
 [instructions](https://cloud.google.com/appengine/docs/standard/go/quickstart#before-you-begin).
 
-First, update [`app.flexible.yaml`](cmd/app/app.flexible.yaml) with the correct values to pass the environment
+First, update [`app.flexible.yaml`](app.flexible.yaml) with the correct values to pass the environment
 variables into the runtime. Your `app.flexible.yaml` file should look like this:
 
 ```yaml
@@ -158,7 +158,7 @@ secure solution such as [Cloud Secret Manager](https://cloud.google.com/secret-m
 Next, the following command will deploy the application to your Google Cloud project:
 
 ```bash
-gcloud app deploy cmd/app/app.flexible.yaml
+gcloud app deploy app.flexible.yaml
 ```
 
 ## Deploy to Cloud Run

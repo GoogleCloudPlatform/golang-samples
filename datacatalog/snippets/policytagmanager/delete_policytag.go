@@ -20,7 +20,7 @@ import (
 	"fmt"
 
 	datacatalog "cloud.google.com/go/datacatalog/apiv1beta1"
-	datacatalogpb "google.golang.org/genproto/googleapis/cloud/datacatalog/v1beta1"
+	"cloud.google.com/go/datacatalog/apiv1beta1/datacatalogpb"
 )
 
 // deletePolicyTag deletes a given policy tag.

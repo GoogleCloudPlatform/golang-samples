@@ -27,7 +27,7 @@ import (
 
 	// [START imports]
 	language "cloud.google.com/go/language/apiv1"
-	languagepb "google.golang.org/genproto/googleapis/cloud/language/v1"
+	"cloud.google.com/go/language/apiv1/languagepb"
 	// [END imports]
 )
 

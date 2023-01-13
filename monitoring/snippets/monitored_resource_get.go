@@ -23,7 +23,7 @@ import (
 	"io"
 
 	monitoring "cloud.google.com/go/monitoring/apiv3"
-	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
+	"cloud.google.com/go/monitoring/apiv3/v2/monitoringpb"
 )
 
 // getMonitoredResource gets the descriptor for the given resourceType and

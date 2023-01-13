@@ -20,7 +20,7 @@ import (
 	"fmt"
 
 	servicedirectory "cloud.google.com/go/servicedirectory/apiv1"
-	sdpb "google.golang.org/genproto/googleapis/cloud/servicedirectory/v1"
+	sdpb "cloud.google.com/go/servicedirectory/apiv1/servicedirectorypb"
 )
 
 func deleteNamespace(projectID string) error {

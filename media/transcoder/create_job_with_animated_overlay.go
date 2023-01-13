@@ -23,7 +23,7 @@ import (
 	"github.com/golang/protobuf/ptypes/duration"
 
 	transcoder "cloud.google.com/go/video/transcoder/apiv1"
-	transcoderpb "google.golang.org/genproto/googleapis/cloud/video/transcoder/v1"
+	"cloud.google.com/go/video/transcoder/apiv1/transcoderpb"
 )
 
 // createJobWithAnimatedOverlay creates a job based on a given configuration that

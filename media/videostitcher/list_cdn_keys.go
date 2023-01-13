@@ -23,11 +23,11 @@ import (
 	"google.golang.org/api/iterator"
 
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	stitcherpb "google.golang.org/genproto/googleapis/cloud/video/stitcher/v1"
+	"cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
 
-// listCdnKeys gets all of the CDN keys for a given location.
-func listCdnKeys(w io.Writer, projectID string) error {
+// listCDNKeys gets all of the CDN keys for a given location.
+func listCDNKeys(w io.Writer, projectID string) error {
 	// projectID := "my-project-id"
 	location := "us-central1"
 	ctx := context.Background()
