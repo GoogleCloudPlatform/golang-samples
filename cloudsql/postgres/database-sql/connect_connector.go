@@ -42,7 +42,7 @@ func connectWithConnector() (*sql.DB, error) {
 	// keep secrets safe.
 	var (
 		// If a password is not defined, Automatic IAM Authentication will be used
-		dbUser                 = mustGetenv("DB_USER")                   // e.g. 'my-db-user' or 'sa-name@project-id.iam' for iam
+		dbUser                 = mustGetenv("DB_USER")                  // e.g. 'my-db-user' or 'sa-name@project-id.iam' for iam
 		dbPwd                  = os.Getenv("DB_PASS")                   // e.g. 'my-db-password'
 		dbName                 = mustGetenv("DB_NAME")                  // e.g. 'my-database'
 		instanceConnectionName = mustGetenv("INSTANCE_CONNECTION_NAME") // e.g. 'project:region:instance'
@@ -50,7 +50,7 @@ func connectWithConnector() (*sql.DB, error) {
 	)
 
 	dsn := fmt.Sprintf("user=%s database=%s", dbUser, dbName)
-	if (dbPwd != "") {
+	if dbPwd != "" {
 		dsn += fmt.Sprintf(" password=%s", dbPwd)
 	}
 	config, err := pgx.ParseConfig(dsn)
@@ -58,7 +58,7 @@ func connectWithConnector() (*sql.DB, error) {
 		return nil, err
 	}
 	config.DialFunc = func(ctx context.Context, network, instance string) (net.Conn, error) {
-		if (dbPwd == "") {
+		if dbPwd == "" {
 			// [START cloud_sql_postgres_databasesql_auto_iam_authn]
 			d, err := cloudsqlconn.NewDialer(ctx, cloudsqlconn.WithIAMAuthN())
 			if err != nil {
