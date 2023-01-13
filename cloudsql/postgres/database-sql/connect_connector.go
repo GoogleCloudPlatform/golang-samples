@@ -41,48 +41,41 @@ func connectWithConnector() (*sql.DB, error) {
 	// Cloud Secret Manager (https://cloud.google.com/secret-manager) to help
 	// keep secrets safe.
 	var (
-		// If a password is not defined, Automatic IAM Authentication will be used
+		// Either a DB_USER or a DB_IAM_USER should be defined. If both are
+		// defined, DB_IAM_USER takes precedence.
 		dbUser                 = mustGetenv("DB_USER")                  // e.g. 'my-db-user' or 'sa-name@project-id.iam' for iam
-		dbPwd                  = os.Getenv("DB_PASS")                   // e.g. 'my-db-password'
+		dbPwd                  = os.Getenv("DB_PASS")                  // e.g. 'my-db-password'
 		dbName                 = mustGetenv("DB_NAME")                  // e.g. 'my-database'
 		instanceConnectionName = mustGetenv("INSTANCE_CONNECTION_NAME") // e.g. 'project:region:instance'
 		usePrivate             = os.Getenv("PRIVATE_IP")
 	)
 
+	// Create dsn, include the password if DB_PASS environment variable exists
 	dsn := fmt.Sprintf("user=%s database=%s", dbUser, dbName)
 	if dbPwd != "" {
 		dsn += fmt.Sprintf(" password=%s", dbPwd)
 	}
+
 	config, err := pgx.ParseConfig(dsn)
 	if err != nil {
 		return nil, err
 	}
+	// [START cloud_sql_postgres_databasesql_auto_iam_authn]
+	var opts []cloudsqlconn.Option
+	if dbPwd == "" {
+		opts = append(opts, cloudsqlconn.WithIAMAuthN())
+	}
+	if usePrivate != "" {
+		opts = append(opts, cloudsqlconn.WithDefaultDialOptions(cloudsqlconn.WithPrivateIP()))
+	}
+	d, err := cloudsqlconn.NewDialer(context.Background(), opts...)
+	if err != nil {
+		return nil, err
+	}
+	// [END cloud_sql_postgres_databasesql_auto_iam_authn]
+	// Use the Cloud SQL connector to handle connecting to the instance.
+	// This approach does *NOT* require the Cloud SQL proxy.
 	config.DialFunc = func(ctx context.Context, network, instance string) (net.Conn, error) {
-		if dbPwd == "" {
-			// [START cloud_sql_postgres_databasesql_auto_iam_authn]
-			d, err := cloudsqlconn.NewDialer(ctx, cloudsqlconn.WithIAMAuthN())
-			if err != nil {
-				return nil, err
-			}
-			return d.Dial(ctx, instanceConnectionName)
-			// [END cloud_sql_postgres_databasesql_auto_iam_authn]
-		}
-		if usePrivate != "" {
-			d, err := cloudsqlconn.NewDialer(
-				ctx,
-				cloudsqlconn.WithDefaultDialOptions(cloudsqlconn.WithPrivateIP()),
-			)
-			if err != nil {
-				return nil, err
-			}
-			return d.Dial(ctx, instanceConnectionName)
-		}
-		// Use the Cloud SQL connector to handle connecting to the instance.
-		// This approach does *NOT* require the Cloud SQL proxy.
-		d, err := cloudsqlconn.NewDialer(ctx)
-		if err != nil {
-			return nil, err
-		}
 		return d.Dial(ctx, instanceConnectionName)
 	}
 	dbURI := stdlib.RegisterConnConfig(config)
