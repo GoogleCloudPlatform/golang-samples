@@ -27,13 +27,13 @@ import (
 
 type mockTransport struct {
 	gotURL  []string
-	gotPATH []string
+	gotPath []string
 }
 
 func (t *mockTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	// Mock a success roundtrip to extract request URL
 	t.gotURL = append(t.gotURL, req.URL.String())
-	t.gotPATH = append(t.gotPATH, req.URL.Path)
+	t.gotPath = append(t.gotPath, req.URL.Path)
 
 	return &http.Response{StatusCode: 200}, nil
 }
@@ -59,7 +59,7 @@ func TestSetClientEndpoint(t *testing.T) {
 			t.Errorf("setClientEndpoint: got request base URL %q; want to contain %q", got, baseURL)
 		}
 	}
-	for _, got := range mt.gotPATH {
+	for _, got := range mt.gotPath {
 		if !strings.Contains(got, path) {
 			t.Errorf("setClientEndpoint: got request URL path %q; want to contain %q", got, path)
 		}

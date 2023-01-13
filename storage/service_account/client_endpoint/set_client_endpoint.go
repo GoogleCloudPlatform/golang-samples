@@ -27,10 +27,10 @@ import (
 // setClientEndpoint sets the request endpoint.
 func setClientEndpoint(w io.Writer, customEndpoint string, opts ...option.ClientOption) error {
 	// customEndpoint := "https://my-custom-endpoint.example.com/storage/v1/"
-	// opts := []option.ClientOption
+	// opts := []option.ClientOption{}
 	ctx := context.Background()
 
-	// Set a custom request endpoint for this client.
+	// Add the custom endpoint option to any other desired options passed to storage.NewClient.
 	opts = append(opts, option.WithEndpoint(customEndpoint))
 	client, err := storage.NewClient(ctx, opts...)
 	if err != nil {
@@ -39,33 +39,8 @@ func setClientEndpoint(w io.Writer, customEndpoint string, opts ...option.Client
 	defer client.Close()
 
 	// Perfrom some operations with custom request endpoint set.
-	performSomeOperations(client)
+	client.Bucket("bucket-name").Attrs(ctx)
 	return nil
 }
 
 // [END storage_set_client_endpoint]
-
-func performSomeOperations(client *storage.Client) error {
-	ctx := context.Background()
-	bucket := "myBucket"
-	object := "myObject"
-
-	// Get bucket metadata.
-	client.Bucket(bucket).Attrs(ctx)
-
-	// Upload an object with storage.Writer.
-	o := client.Bucket(bucket).Object(object)
-	w := o.NewWriter(ctx)
-	if _, err := w.Write([]byte("hello world")); err != nil {
-		return fmt.Errorf("writing object: %v", err)
-	}
-	if err := w.Close(); err != nil {
-		return fmt.Errorf("Writer.Close: %v", err)
-	}
-
-	// Delete an object.
-	if err := o.Delete(ctx); err != nil {
-		return fmt.Errorf("Object(%q).Delete: %v", object, err)
-	}
-	return nil
-}
