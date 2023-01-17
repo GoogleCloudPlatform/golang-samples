@@ -38,7 +38,7 @@ func setClientEndpoint(w io.Writer, customEndpoint string, opts ...option.Client
 	}
 	defer client.Close()
 
-	// Perfrom some operations with custom request endpoint set.
+	// Use the client as per your custom endpoint, for example, attempt to get a bucket's metadata.
 	client.Bucket("bucket-name").Attrs(ctx)
 	return nil
 }
