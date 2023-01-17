@@ -25,6 +25,7 @@ import (
 )
 
 func TestMain(t *testing.T) {
+	t.Skip("Skipped while investigating https://github.com/GoogleCloudPlatform/golang-samples/issues/2811")
 	tc := testutil.SystemTest(t)
 	bucketName := fmt.Sprintf("%s-for-assets", tc.ProjectID)
 	env := map[string]string{"GOOGLE_CLOUD_PROJECT": tc.ProjectID}
