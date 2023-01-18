@@ -29,7 +29,7 @@ var count = 0
 
 func init() {
 	functions.HTTP("ExecutionCount", ExecutionCount)
- }
+}
 
 // ExecutionCount is an HTTP Cloud Function that counts how many times it
 // is executed within a specific instance.
