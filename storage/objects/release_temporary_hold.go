@@ -40,9 +40,9 @@ func releaseTemporaryHold(w io.Writer, bucket, object string) error {
 
 	o := client.Bucket(bucket).Object(object)
 
-	// Optional: set a generation-match precondition to avoid potential race
-	// conditions and data corruptions. The request to upload is aborted if the
-	// object's generation number does not match your precondition.
+	// Optional: set a metageneration-match precondition to avoid potential race
+	// conditions and data corruptions. The request to update is aborted if the
+	// object's metageneration does not match your precondition.
 	attrs, err := o.Attrs(ctx)
 	if err != nil {
 		return fmt.Errorf("object.Attrs: %v", err)

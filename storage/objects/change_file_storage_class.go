@@ -41,7 +41,7 @@ func changeObjectStorageClass(w io.Writer, bucket, object string) error {
 	o := client.Bucket(bucket).Object(object)
 
 	// Optional: set a generation-match precondition to avoid potential race
-	// conditions and data corruptions. The request to upload is aborted if the
+	// conditions and data corruptions. The request to copy is aborted if the
 	// object's generation number does not match your precondition.
 	attrs, err := o.Attrs(ctx)
 	if err != nil {
