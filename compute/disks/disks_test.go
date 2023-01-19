@@ -29,6 +29,49 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
+func createInstance(
+	ctx context.Context,
+	projectID, zone, instanceName, sourceImage, diskName string,
+) error {
+	instancesClient, err := compute.NewInstancesRESTClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer instancesClient.Close()
+	req := &computepb.InsertInstanceRequest{
+		Project: projectID,
+		Zone:    zone,
+		InstanceResource: &computepb.Instance{
+			Name: proto.String(instanceName),
+			Disks: []*computepb.AttachedDisk{
+				{
+					InitializeParams: &computepb.AttachedDiskInitializeParams{
+						DiskSizeGb:  proto.Int64(25),
+						SourceImage: proto.String(sourceImage),
+						DiskName:    proto.String(diskName),
+					},
+					AutoDelete: proto.Bool(false),
+					Boot:       proto.Bool(true),
+					DeviceName: proto.String(diskName),
+				},
+			},
+			MachineType: proto.String(fmt.Sprintf("zones/%s/machineTypes/n1-standard-1", zone)),
+			NetworkInterfaces: []*computepb.NetworkInterface{
+				{
+					Name: proto.String("global/networks/default"),
+				},
+			},
+		},
+	}
+
+	op, err := instancesClient.Insert(ctx, req)
+	if err != nil {
+		return err
+	}
+
+	return op.Wait(ctx)
+}
+
 func getInstance(
 	ctx context.Context,
 	projectID, zone, instanceName string,
@@ -120,6 +163,9 @@ func TestComputeDisksSnippets(t *testing.T) {
 	instanceName := fmt.Sprintf("test-instance-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	diskName := fmt.Sprintf("test-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	diskName2 := fmt.Sprintf("test-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+	instanceDiskName := fmt.Sprintf("test-instance-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+	instanceDiskName2 := fmt.Sprintf("test-instance-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+	instanceDiskName3 := fmt.Sprintf("test-instance-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	snapshotName := fmt.Sprintf("test-snapshot-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	sourceImage := "projects/debian-cloud/global/images/family/debian-11"
 	sourceDisk := fmt.Sprintf("projects/%s/zones/europe-central2-b/disks/%s", tc.ProjectID, diskName)
@@ -142,6 +188,11 @@ func TestComputeDisksSnippets(t *testing.T) {
 	err = createDiskSnapshot(ctx, tc.ProjectID, zone, diskName, snapshotName)
 	if err != nil {
 		t.Fatalf("createDiskSnapshot got err: %v", err)
+	}
+	// Create a VM instance to attach disks to
+	createInstance(ctx, tc.ProjectID, zone, instanceName, sourceImage, instanceDiskName)
+	if err != nil {
+		t.Fatalf("unable to create instance: %v", err)
 	}
 
 	t.Run("Create zonal disk from a snapshot", func(t *testing.T) {
@@ -204,6 +255,38 @@ func TestComputeDisksSnippets(t *testing.T) {
 		}
 	})
 
+	t.Run("Create and resize a regional disk", func(t *testing.T) {
+		buf := &bytes.Buffer{}
+		want := "Disk created"
+
+		if err := createRegionalDisk(buf, tc.ProjectID, region, replicaZones, diskName2, diskType, 20); err != nil {
+			t.Errorf("createRegionalDisk got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("createRegionalDisk got %q, want %q", got, want)
+		}
+
+		buf.Reset()
+		want = "Disk resized"
+
+		resizeRegionalDisk(buf, tc.ProjectID, region, diskName2, 50)
+		if err != nil {
+			t.Errorf("resizeRegionalDisk got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("resizeRegionalDisk got %q, want %q", got, want)
+		}
+
+		buf.Reset()
+		want = "Disk deleted"
+
+		// clean up
+		err = deleteRegionalDisk(buf, tc.ProjectID, region, diskName2)
+		if err != nil {
+			t.Errorf("deleteRegionalDisk got err: %v", err)
+		}
+	})
+
 	t.Run("createEmptyDisk and clone it into a regional disk", func(t *testing.T) {
 		buf := &bytes.Buffer{}
 		want := "Disk created"
@@ -263,42 +346,7 @@ func TestComputeDisksSnippets(t *testing.T) {
 		buf.Reset()
 		want := "disk autoDelete field updated."
 
-		req := &computepb.InsertInstanceRequest{
-			Project: tc.ProjectID,
-			Zone:    zone,
-			InstanceResource: &computepb.Instance{
-				Name: proto.String(instanceName),
-				Disks: []*computepb.AttachedDisk{
-					{
-						InitializeParams: &computepb.AttachedDiskInitializeParams{
-							DiskSizeGb:  proto.Int64(250),
-							SourceImage: proto.String(sourceImage),
-							DiskName:    proto.String(diskName),
-						},
-						AutoDelete: proto.Bool(false),
-						Boot:       proto.Bool(true),
-						DeviceName: proto.String(diskName),
-					},
-				},
-				MachineType: proto.String(fmt.Sprintf("zones/%s/machineTypes/n1-standard-1", zone)),
-				NetworkInterfaces: []*computepb.NetworkInterface{
-					{
-						Name: proto.String("global/networks/default"),
-					},
-				},
-			},
-		}
-
-		op, err := instancesClient.Insert(ctx, req)
-		if err != nil {
-			t.Fatalf("unable to create instance: %v", err)
-		}
-
-		if err = op.Wait(ctx); err != nil {
-			t.Fatalf("unable to wait for the operation: %v", err)
-		}
-
-		if err := setDiskAutoDelete(buf, tc.ProjectID, zone, instanceName, diskName); err != nil {
+		if err := setDiskAutoDelete(buf, tc.ProjectID, zone, instanceName, instanceDiskName); err != nil {
 			t.Fatalf("setDiskAutodelete got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, want) {
@@ -313,16 +361,98 @@ func TestComputeDisksSnippets(t *testing.T) {
 		if instance.GetDisks()[0].GetAutoDelete() != true {
 			t.Errorf("instance got %t, want %t", instance.GetDisks()[0].GetAutoDelete(), true)
 		}
+	})
 
-		err = deleteInstance(ctx, tc.ProjectID, zone, instanceName)
-		if err != nil {
-			t.Errorf("deleteInstance got err: %v", err)
+	t.Run("Attach a regional disk to VM", func(t *testing.T) {
+		if err := createRegionalDisk(buf, tc.ProjectID, region, replicaZones, instanceDiskName2, "regions/us-west3/diskTypes/pd-ssd", 20); err != nil {
+			t.Fatalf("createRegionalDisk got err: %v", err)
 		}
+
+		buf.Reset()
+		want := "Disk attached"
+
+		diskUrl := fmt.Sprintf("projects/%s/regions/%s/disks/%s", tc.ProjectID, region, instanceDiskName2)
+
+		if err := attachRegionalDisk(buf, tc.ProjectID, zone, instanceName, diskUrl); err != nil {
+			t.Fatalf("attachRegionalDisk got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Fatalf("attachRegionalDisk got %q, want %q", got, want)
+		}
+
+		instance, err := getInstance(ctx, tc.ProjectID, zone, instanceName)
+		if err != nil {
+			t.Fatalf("getInstance got err: %v", err)
+		}
+
+		foundDisk := false
+		for _, disk := range instance.GetDisks() {
+			if strings.Contains(*disk.Source, instanceDiskName2) {
+				foundDisk = true
+			}
+		}
+		if !foundDisk {
+			t.Errorf("The disk %s is not attached to the instance!", instanceDiskName2)
+		}
+
+		// cannot clean up the disk just yet because it must be done after the VM is terminated
+	})
+
+	t.Run("Attach a read-only regional disk to VM", func(t *testing.T) {
+		if err := createRegionalDisk(buf, tc.ProjectID, region, replicaZones, instanceDiskName3, "regions/us-west3/diskTypes/pd-ssd", 20); err != nil {
+			t.Fatalf("createRegionalDisk got err: %v", err)
+		}
+
+		buf.Reset()
+		want := "Disk attached"
+
+		diskUrl := fmt.Sprintf("projects/%s/regions/%s/disks/%s", tc.ProjectID, region, instanceDiskName3)
+
+		if err := attachRegionalDiskReadOnly(buf, tc.ProjectID, zone, instanceName, diskUrl); err != nil {
+			t.Fatalf("attachRegionalDisk got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Fatalf("attachRegionalDisk got %q, want %q", got, want)
+		}
+
+		instance, err := getInstance(ctx, tc.ProjectID, zone, instanceName)
+		if err != nil {
+			t.Fatalf("getInstance got err: %v", err)
+		}
+
+		foundDisk := false
+		for _, disk := range instance.GetDisks() {
+			if strings.Contains(*disk.Source, instanceDiskName3) {
+				foundDisk = true
+			}
+		}
+		if !foundDisk {
+			t.Errorf("The disk %s is not attached to the instance!", instanceDiskName3)
+		}
+
+		// cannot clean up the disk just yet because it must be done after the VM is terminated
 	})
 
 	// clean up
 	err = deleteDiskSnapshot(ctx, tc.ProjectID, snapshotName)
 	if err != nil {
 		t.Errorf("deleteDiskSnapshot got err: %v", err)
+	}
+
+	err = deleteInstance(ctx, tc.ProjectID, zone, instanceName)
+	if err != nil {
+		t.Errorf("deleteInstance got err: %v", err)
+	}
+
+	// disks attached to a VM instance must be deleted after deleting the instance
+
+	// disk 1 is set to auto-delete, no need to delete it explicitly
+
+	if err := deleteRegionalDisk(buf, tc.ProjectID, region, instanceDiskName2); err != nil {
+		t.Errorf("deleteRegionalDisk got err: %v", err)
+	}
+
+	if err := deleteRegionalDisk(buf, tc.ProjectID, region, instanceDiskName3); err != nil {
+		t.Fatalf("deleteRegionalDisk got err: %v", err)
 	}
 }

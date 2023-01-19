@@ -46,6 +46,11 @@ var gcsSinkBucket string
 func TestMain(m *testing.M) {
 	// Initialize global vars
 	tc, _ := testutil.ContextMain(m)
+	if os.Getenv("KOKORO_BUILD_ID") != "" {
+		// temporarily skip initialization in kokoro
+		// See https://github.com/GoogleCloudPlatform/golang-samples/issues/2811
+		return
+	}
 
 	ctx := context.Background()
 	c, err := storage.NewClient(ctx)
@@ -134,6 +139,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestQuickstart(t *testing.T) {
+	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2811")
 	tc := testutil.SystemTest(t)
 
 	buf := new(bytes.Buffer)
@@ -151,6 +157,7 @@ func TestQuickstart(t *testing.T) {
 }
 
 func TestTransferFromAws(t *testing.T) {
+	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2811")
 	tc := testutil.SystemTest(t)
 
 	buf := new(bytes.Buffer)
@@ -169,6 +176,7 @@ func TestTransferFromAws(t *testing.T) {
 }
 
 func TestTransferToNearline(t *testing.T) {
+	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2811")
 	tc := testutil.SystemTest(t)
 
 	buf := new(bytes.Buffer)
@@ -187,6 +195,7 @@ func TestTransferToNearline(t *testing.T) {
 }
 
 func TestGetLatestTransferOperation(t *testing.T) {
+	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2811")
 	tc := testutil.SystemTest(t)
 
 	buf := new(bytes.Buffer)
@@ -210,6 +219,7 @@ func TestGetLatestTransferOperation(t *testing.T) {
 }
 
 func TestDownloadToPosix(t *testing.T) {
+	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2811")
 	tc := testutil.SystemTest(t)
 
 	buf := new(bytes.Buffer)
@@ -237,6 +247,7 @@ func TestDownloadToPosix(t *testing.T) {
 }
 
 func TestTransferFromPosix(t *testing.T) {
+	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2811")
 	tc := testutil.SystemTest(t)
 
 	buf := new(bytes.Buffer)
@@ -263,6 +274,7 @@ func TestTransferFromPosix(t *testing.T) {
 }
 
 func TestTransferBetweenPosix(t *testing.T) {
+	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2811")
 	tc := testutil.SystemTest(t)
 
 	buf := new(bytes.Buffer)
@@ -295,6 +307,7 @@ func TestTransferBetweenPosix(t *testing.T) {
 }
 
 func TestTransferUsingManifest(t *testing.T) {
+	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2811")
 	tc := testutil.SystemTest(t)
 
 	buf := new(bytes.Buffer)
@@ -325,6 +338,7 @@ func TestTransferUsingManifest(t *testing.T) {
 }
 
 func TestTransferFromS3CompatibleSource(t *testing.T) {
+	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2811")
 	tc := testutil.SystemTest(t)
 
 	buf := new(bytes.Buffer)
@@ -347,6 +361,7 @@ func TestTransferFromS3CompatibleSource(t *testing.T) {
 }
 
 func TestTransferFromAzure(t *testing.T) {
+	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2811")
 	tc := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
 
