@@ -16,7 +16,6 @@ package clientendpoint
 
 import (
 	"bytes"
-
 	"net/http"
 	"os"
 	"strings"
