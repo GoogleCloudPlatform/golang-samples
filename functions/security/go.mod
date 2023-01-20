@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/functions/security
 
-go 1.19
+go 1.18
 
 require google.golang.org/api v0.104.0
 
