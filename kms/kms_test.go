@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -481,6 +481,56 @@ func TestIAMRemoveMember(t *testing.T) {
 
 	if got, want := b.String(), "Updated IAM"; !strings.Contains(got, want) {
 		t.Errorf("iamRemoveMember: expected %q to contain %q", got, want)
+	}
+}
+
+func TestImportEndToEnd(t *testing.T) {
+	testutil.SystemTest(t)
+	var b bytes.Buffer
+
+	// Create key for import.
+	cryptoKeyID := fixture.RandomID()
+	if err := createKeyForImport(&b, fixture.KeyRingName, cryptoKeyID); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := b.String(), "Created key"; !strings.Contains(got, want) {
+		t.Fatalf("createKeyForImport: expected %q to contain %q", got, want)
+	}
+	cryptoKeyName := fmt.Sprintf("%s/cryptoKeys/%s", fixture.KeyRingName, cryptoKeyID)
+
+	// Create import job.
+	importJobID := fixture.RandomID()
+	if err := createImportJob(&b, fixture.KeyRingName, importJobID); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := b.String(), "Created import job"; !strings.Contains(got, want) {
+		t.Fatalf("createImportJob: expected %q to contain %q", got, want)
+	}
+	importJobName := fmt.Sprintf("%s/importJobs/%s", fixture.KeyRingName, importJobID)
+
+	// Check import job state (wait for ACTIVE).
+	for !strings.Contains(b.String(), "ACTIVE") {
+		if err := checkStateImportJob(&b, importJobName); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	// Import the key.
+	if err := importManuallyWrappedKey(&b, importJobName, cryptoKeyName); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Created crypto key version"; !strings.Contains(got, want) {
+		t.Fatalf("checkStateImportedKey: expected %q to contain %q", got, want)
+	}
+	cryptoKeyVersionName := fmt.Sprintf("%s/cryptoKeyVersions/1", cryptoKeyName)
+
+	// Check the state of the imported key.
+	if err := checkStateImportedKey(&b, cryptoKeyVersionName); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := b.String(), "Current state"; !strings.Contains(got, want) {
+		t.Errorf("checkStateImportedKey: expected %q to contain %q", got, want)
 	}
 }
 
