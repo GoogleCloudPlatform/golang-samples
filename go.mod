@@ -25,6 +25,7 @@ require (
 require (
 	cloud.google.com/go v0.105.0 // indirect
 	cloud.google.com/go/compute/metadata v0.2.2 // indirect
+	cloud.google.com/go/documentai v1.14.0 // indirect
 	cloud.google.com/go/iam v0.8.0 // indirect
 	cloud.google.com/go/longrunning v0.3.0 // indirect
 	cloud.google.com/go/vision/v2 v2.5.0 // indirect
