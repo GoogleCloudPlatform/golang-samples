@@ -13,15 +13,13 @@
 // limitations under the License.
 
 // [START documentai_quickstart]
-// [START documentai_process_document]
 
-// processDocument sends a file at a given filePath for online processing.
+// quickstart sends a file at a given filePath for online processing.
 package snippets
 
 import (
 	"context"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 
@@ -30,12 +28,13 @@ import (
 	"google.golang.org/api/option"
 )
 
-func processDocument(w io.Writer, projectID, locationID, processorID, filePath, mimeType string) error {
-	// projectID := "PROJECT_ID"
-	// locationID := "us"
-	// processorID := "aaaaaaaa"
-	// filePath := "invoice.pdf"
-	// mimeType := "application/pdf"
+func quickstart() {
+
+	projectID := "PROJECT_ID"
+	locationID := "us"
+	processorID := "aaaaaaaa" // Create a Processor before running sample
+	filePath := "invoice.pdf"
+	mimeType := "application/pdf"
 
 	ctx := context.Background()
 
@@ -43,7 +42,6 @@ func processDocument(w io.Writer, projectID, locationID, processorID, filePath, 
 	client, err := documentai.NewDocumentProcessorClient(ctx, option.WithEndpoint(endpoint))
 	if err != nil {
 		log.Fatalf("error creating Document AI client: %v", err)
-		return err
 	}
 	defer client.Close()
 
@@ -51,7 +49,6 @@ func processDocument(w io.Writer, projectID, locationID, processorID, filePath, 
 	data, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		log.Fatalf("ioutil.ReadFile: %v", err)
-		return err
 	}
 
 	req := &documentaipb.ProcessRequest{
@@ -66,14 +63,11 @@ func processDocument(w io.Writer, projectID, locationID, processorID, filePath, 
 	resp, err := client.ProcessDocument(ctx, req)
 	if err != nil {
 		log.Fatal(err)
-		return err
 	}
 
 	// Handle the results.
 	document := resp.GetDocument()
-	fmt.Fprintf(w, "Document Text: %s", document.GetText())
-	return nil
+	fmt.Printf("Document Text: %s", document.GetText())
 }
 
 // [END documentai_quickstart]
-// [END documentai_process_document]
