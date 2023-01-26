@@ -55,7 +55,6 @@ func connectWithConnector() (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	// [START cloud_sql_postgres_databasesql_auto_iam_authn]
 	var opts []cloudsqlconn.Option
 	if usePrivate != "" {
 		opts = append(opts, cloudsqlconn.WithDefaultDialOptions(cloudsqlconn.WithPrivateIP()))
@@ -64,7 +63,6 @@ func connectWithConnector() (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	// [END cloud_sql_postgres_databasesql_auto_iam_authn]
 	// Use the Cloud SQL connector to handle connecting to the instance.
 	// This approach does *NOT* require the Cloud SQL proxy.
 	config.DialFunc = func(ctx context.Context, network, instance string) (net.Conn, error) {
