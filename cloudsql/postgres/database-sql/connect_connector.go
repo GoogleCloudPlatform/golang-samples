@@ -44,15 +44,11 @@ func connectWithConnector() (*sql.DB, error) {
 		// Either a DB_USER or a DB_IAM_USER should be defined. If both are
 		// defined, DB_IAM_USER takes precedence.
 		dbUser                 = os.Getenv("DB_USER")                   // e.g. 'my-db-user'
-		dbIAMUser              = os.Getenv("DB_IAM_USER")               // e.g. 'sa-name@project-id.iam'
 		dbPwd                  = mustGetenv("DB_PASS")                  // e.g. 'my-db-password'
 		dbName                 = mustGetenv("DB_NAME")                  // e.g. 'my-database'
 		instanceConnectionName = mustGetenv("INSTANCE_CONNECTION_NAME") // e.g. 'project:region:instance'
 		usePrivate             = os.Getenv("PRIVATE_IP")
 	)
-	if dbUser == "" && dbIAMUser == "" {
-		log.Fatal("Warning: One of DB_USER or DB_IAM_USER must be defined")
-	}
 
 	dsn := fmt.Sprintf("user=%s password=%s database=%s", dbUser, dbPwd, dbName)
 	config, err := pgx.ParseConfig(dsn)
@@ -61,9 +57,6 @@ func connectWithConnector() (*sql.DB, error) {
 	}
 	// [START cloud_sql_postgres_databasesql_auto_iam_authn]
 	var opts []cloudsqlconn.Option
-	if dbIAMUser != "" {
-		opts = append(opts, cloudsqlconn.WithIAMAuthN())
-	}
 	if usePrivate != "" {
 		opts = append(opts, cloudsqlconn.WithDefaultDialOptions(cloudsqlconn.WithPrivateIP()))
 	}

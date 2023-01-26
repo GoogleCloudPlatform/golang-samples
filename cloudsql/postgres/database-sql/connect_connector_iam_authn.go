@@ -57,7 +57,7 @@ func connectWithConnectorIAMAuthN() (*sql.DB, error) {
 		opts = append(opts, cloudsqlconn.WithPrivateIP())
 	}
 
-	dsn := fmt.Sprintf("user=%s database=%s", dbUser, dbName)
+	dsn := fmt.Sprintf("user=%s password=empty database=%s", dbUser, dbName)
 	config, err := pgx.ParseConfig(dsn)
 	if err != nil {
 		return nil, err
