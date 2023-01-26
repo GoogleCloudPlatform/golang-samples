@@ -14,7 +14,6 @@
 
 package cloudsql
 
-// [START cloud_sql_postgres_databasesql_connect_auto_iam_authn]
 // [START cloud_sql_postgres_databasesql_auto_iam_authn]
 import (
 	"context"
@@ -75,4 +74,3 @@ func connectWithConnectorIAMAuthN() (*sql.DB, error) {
 }
 
 // [END cloud_sql_postgres_databasesql_auto_iam_authn]
-// [END cloud_sql_postgres_databasesql_connect_auto_iam_authn]
