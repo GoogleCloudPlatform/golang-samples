@@ -44,7 +44,7 @@ func connectWithConnector() (*sql.DB, error) {
 		// Either a DB_USER or a DB_IAM_USER should be defined. If both are
 		// defined, DB_IAM_USER takes precedence.
 		dbUser                 = mustGetenv("DB_USER")                  // e.g. 'my-db-user' or 'sa-name@project-id.iam' for iam
-		dbPwd                  = os.Getenv("DB_PASS")                  // e.g. 'my-db-password'
+		dbPwd                  = os.Getenv("DB_PASS")                   // e.g. 'my-db-password'
 		dbName                 = mustGetenv("DB_NAME")                  // e.g. 'my-database'
 		instanceConnectionName = mustGetenv("INSTANCE_CONNECTION_NAME") // e.g. 'project:region:instance'
 		usePrivate             = os.Getenv("PRIVATE_IP")
