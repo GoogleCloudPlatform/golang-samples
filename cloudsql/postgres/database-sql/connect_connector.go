@@ -63,7 +63,7 @@ func connectWithConnector() (*sql.DB, error) {
 	if dbPwd == "" {
 		opts = append(opts, cloudsqlconn.WithIAMAuthN())
 	}
-  
+
 	if usePrivate != "" {
 		opts = append(opts, cloudsqlconn.WithDefaultDialOptions(cloudsqlconn.WithPrivateIP()))
 	}
