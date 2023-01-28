@@ -14,7 +14,7 @@
 
 package schema
 
-// [START pubsub_create_topic_with_schema]
+// [START pubsub_rollback_schema]
 import (
 	"context"
 	"fmt"
@@ -23,29 +23,24 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func createTopicWithSchema(w io.Writer, projectID, topicID, schemaID string, encoding pubsub.SchemaEncoding) error {
+// rollbackSchema creates a new schema revision that is a copy of the provided revisionID.
+func rollbackSchema(w io.Writer, projectID, schemaID, revisionID string) error {
 	// projectID := "my-project-id"
-	// topicID := "my-topic"
-	// schemaID := "my-schema-id"
-	// encoding := pubsub.EncodingJSON
+	// schemaID := "my-schema"
+	// revisionID := "a1b2c3d4"
 	ctx := context.Background()
-	client, err := pubsub.NewClient(ctx, projectID)
+	client, err := pubsub.NewSchemaClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("pubsub.NewClient: %v", err)
+		return fmt.Errorf("pubsub.NewSchemaClient: %v", err)
 	}
+	defer client.Close()
 
-	tc := &pubsub.TopicConfig{
-		SchemaSettings: &pubsub.SchemaSettings{
-			Schema:   fmt.Sprintf("projects/%s/schemas/%s", projectID, schemaID),
-			Encoding: encoding,
-		},
-	}
-	t, err := client.CreateTopicWithConfig(ctx, topicID, tc)
+	s, err := client.RollbackSchema(ctx, schemaID, revisionID)
 	if err != nil {
-		return fmt.Errorf("CreateTopicWithConfig: %v", err)
+		return fmt.Errorf("RollbackSchema: %v", err)
 	}
-	fmt.Fprintf(w, "Topic with schema created: %#v\n", t)
+	fmt.Fprintf(w, "Rollback schema created: %#v\n", s)
 	return nil
 }
 
-// [END pubsub_create_topic_with_schema]
+// [END pubsub_rollback_schema]

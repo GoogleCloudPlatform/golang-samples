@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,18 +14,21 @@
 
 package schema
 
-// [START pubsub_get_schema]
+// [START pubsub_commit_avro_schema]
 import (
 	"context"
 	"fmt"
 	"io"
+	"io/ioutil"
 
 	"cloud.google.com/go/pubsub"
 )
 
-func getSchema(w io.Writer, projectID, schemaID string) error {
+// commitAvroSchema commits a new avro schema revision to an existing schema.
+func commitAvroSchema(w io.Writer, projectID, schemaID, avscFile string) error {
 	// projectID := "my-project-id"
 	// schemaID := "my-schema"
+	// avscFile = "path/to/an/avro/schema/file(.avsc)/formatted/in/json"
 	ctx := context.Background()
 	client, err := pubsub.NewSchemaClient(ctx, projectID)
 	if err != nil {
@@ -33,15 +36,21 @@ func getSchema(w io.Writer, projectID, schemaID string) error {
 	}
 	defer client.Close()
 
-	// Retrieve the full schema view. If you don't want to retrieve the
-	// definition, pass in pubsub.SchemaViewBasic which retrieves
-	// just the name and type of the schema.
-	s, err := client.Schema(ctx, schemaID, pubsub.SchemaViewFull)
+	avscSource, err := ioutil.ReadFile(avscFile)
 	if err != nil {
-		return fmt.Errorf("client.Schema: %v", err)
+		return fmt.Errorf("error reading from file: %s", avscFile)
 	}
-	fmt.Fprintf(w, "Got schema: %#v\n", s)
+
+	config := pubsub.SchemaConfig{
+		Type:       pubsub.SchemaAvro,
+		Definition: string(avscSource),
+	}
+	s, err := client.CreateSchema(ctx, schemaID, config)
+	if err != nil {
+		return fmt.Errorf("CreateSchema: %v", err)
+	}
+	fmt.Fprintf(w, "Schema created: %#v\n", s)
 	return nil
 }
 
-// [END pubsub_get_schema]
+// [END pubsub_commit_avro_schema]

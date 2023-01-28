@@ -14,7 +14,7 @@
 
 package schema
 
-// [START pubsub_create_topic_with_schema]
+// [START pubsub_delete_schema_revision]
 import (
 	"context"
 	"fmt"
@@ -23,29 +23,21 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func createTopicWithSchema(w io.Writer, projectID, topicID, schemaID string, encoding pubsub.SchemaEncoding) error {
+func deleteSchemaRevision(w io.Writer, projectID, schemaID string) error {
 	// projectID := "my-project-id"
-	// topicID := "my-topic"
-	// schemaID := "my-schema-id"
-	// encoding := pubsub.EncodingJSON
+	// schemaID := "my-schema-id@my-schema-revision"
 	ctx := context.Background()
-	client, err := pubsub.NewClient(ctx, projectID)
+	client, err := pubsub.NewSchemaClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("pubsub.NewClient: %v", err)
+		return fmt.Errorf("pubsub.NewSchemaClient: %v", err)
 	}
+	defer client.Close()
 
-	tc := &pubsub.TopicConfig{
-		SchemaSettings: &pubsub.SchemaSettings{
-			Schema:   fmt.Sprintf("projects/%s/schemas/%s", projectID, schemaID),
-			Encoding: encoding,
-		},
+	if err := client.DeleteSchema(ctx, schemaID); err != nil {
+		return fmt.Errorf("client.DeleteSchema revision: %v", err)
 	}
-	t, err := client.CreateTopicWithConfig(ctx, topicID, tc)
-	if err != nil {
-		return fmt.Errorf("CreateTopicWithConfig: %v", err)
-	}
-	fmt.Fprintf(w, "Topic with schema created: %#v\n", t)
+	fmt.Fprintf(w, "Deleted schema revision: %s", schemaID)
 	return nil
 }
 
-// [END pubsub_create_topic_with_schema]
+// [END pubsub_delete_schema_revision]
