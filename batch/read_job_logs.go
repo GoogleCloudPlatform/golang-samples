@@ -27,10 +27,9 @@ import (
 	batchpb "google.golang.org/genproto/googleapis/cloud/batch/v1"
 )
 
-// Lists all jobs in the given project and region
+// Retrieve the logs written by the given job to Cloud Logging
 func printJobLogs(w io.Writer, projectID string, job *batchpb.Job) error {
 	// projectID := "your_project_id"
-	// region := "us-central1"
 
 	ctx := context.Background()
 	batchClient, err := batch.NewClient(ctx)
