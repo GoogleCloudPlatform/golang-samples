@@ -35,6 +35,7 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
 	"google.golang.org/api/iterator"
+	"google.golang.org/api/option"
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 	instancepb "google.golang.org/genproto/googleapis/spanner/admin/instance/v1"
 	"google.golang.org/grpc/codes"
@@ -582,6 +583,35 @@ func TestCreateDatabaseWithDefaultLeaderSample(t *testing.T) {
 	assertContains(t, out, "The result of the query to get")
 }
 
+func TestDropDatabaseProtectionSample(t *testing.T) {
+	_ = testutil.SystemTest(t)
+	t.Parallel()
+
+	_, dbName, cleanup := initTest(t, randomID())
+	defer cleanup()
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
+	defer cancel()
+
+	var out string
+	mustRunSample(t, createDatabase, dbName, "failed to create a database")
+	out = runSampleWithContext(ctx, t, dropDatabaseProtection, dbName, "failed to enable drop database protection for a database")
+	assertContains(t, out, fmt.Sprintf("Enabled drop database protection to database [%s]\n", dbName))
+
+	databaseAdmin, err := database.NewDatabaseAdminClient(ctx, option.WithEndpoint("staging-wrenchworks.sandbox.googleapis.com:443"))
+	if err != nil {
+		log.Fatalf("cannot create databaseAdmin client: %v", err)
+	}
+
+	database, err := databaseAdmin.GetDatabase(ctx, &adminpb.GetDatabaseRequest{Name: dbName})
+	if err != nil {
+		log.Fatalf("error during GetDatabase for db %v: %v", dbName, err)
+	}
+	if !database.GetEnableDropProtection() {
+		t.Errorf("got output %t; want it to contain %t", database.GetEnableDropProtection(), true)
+	}
+}
+
 func TestCustomInstanceConfigSample(t *testing.T) {
 	_ = testutil.SystemTest(t)
 	t.Parallel()
@@ -1089,11 +1119,11 @@ func createTestInstance(t *testing.T, projectID string, instanceConfigName strin
 	ctx := context.Background()
 	instanceID := fmt.Sprintf("go-sample-%s", uuid.New().String()[:16])
 	instanceName = fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID)
-	instanceAdmin, err := instance.NewInstanceAdminClient(ctx)
+	instanceAdmin, err := instance.NewInstanceAdminClient(ctx, option.WithEndpoint("staging-wrenchworks.sandbox.googleapis.com:443"))
 	if err != nil {
 		t.Fatalf("failed to create InstanceAdminClient: %v", err)
 	}
-	databaseAdmin, err := database.NewDatabaseAdminClient(ctx)
+	databaseAdmin, err := database.NewDatabaseAdminClient(ctx, option.WithEndpoint("staging-wrenchworks.sandbox.googleapis.com:443"))
 	if err != nil {
 		t.Fatalf("failed to create DatabaseAdminClient: %v", err)
 	}

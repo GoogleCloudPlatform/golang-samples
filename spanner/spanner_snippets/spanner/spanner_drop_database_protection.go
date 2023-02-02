@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 package spanner
 
-// [START spanner_create_database]
+// [START spanner_drop_database_protection]
 import (
 	"context"
 	"fmt"
@@ -22,11 +22,12 @@ import (
 	"regexp"
 
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
+	adminpb "cloud.google.com/go/spanner/admin/database/apiv1/databasepb"
 	"google.golang.org/api/option"
-	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
+	"google.golang.org/genproto/protobuf/field_mask"
 )
 
-func createDatabase(ctx context.Context, w io.Writer, db string) error {
+func dropDatabaseProtection(ctx context.Context, w io.Writer, db string) error {
 	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(db)
 	if matches == nil || len(matches) != 3 {
 		return fmt.Errorf("Invalid database id %s", db)
@@ -39,25 +40,13 @@ func createDatabase(ctx context.Context, w io.Writer, db string) error {
 	}
 	defer adminClient.Close()
 
-	op, err := adminClient.CreateDatabase(ctx, &adminpb.CreateDatabaseRequest{
-		Parent:          matches[1],
-		CreateStatement: "CREATE DATABASE `" + matches[2] + "`",
-		ExtraStatements: []string{
-			`CREATE TABLE Singers (
-				SingerId   INT64 NOT NULL,
-				FirstName  STRING(1024),
-				LastName   STRING(1024),
-				SingerInfo BYTES(MAX),
-				FullName   STRING(2048) AS (
-					ARRAY_TO_STRING([FirstName, LastName], " ")
-				) STORED
-			) PRIMARY KEY (SingerId)`,
-			`CREATE TABLE Albums (
-				SingerId     INT64 NOT NULL,
-				AlbumId      INT64 NOT NULL,
-				AlbumTitle   STRING(MAX)
-			) PRIMARY KEY (SingerId, AlbumId),
-			INTERLEAVE IN PARENT Singers ON DELETE CASCADE`,
+	op, err := adminClient.UpdateDatabase(ctx, &adminpb.UpdateDatabaseRequest{
+		Database: &adminpb.Database{
+			Name:                 db,
+			EnableDropProtection: true,
+		},
+		UpdateMask: &field_mask.FieldMask{
+			Paths: []string{"enable_drop_protection"},
 		},
 	})
 	if err != nil {
@@ -66,8 +55,8 @@ func createDatabase(ctx context.Context, w io.Writer, db string) error {
 	if _, err := op.Wait(ctx); err != nil {
 		return err
 	}
-	fmt.Fprintf(w, "Created database [%s]\n", db)
+	fmt.Fprintf(w, "Enabled drop database protection to database [%s]\n", db)
 	return nil
 }
 
-// [END spanner_create_database]
+// [END spanner_drop_database_protection]
