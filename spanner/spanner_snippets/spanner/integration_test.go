@@ -598,6 +598,7 @@ func TestDropDatabaseProtectionSample(t *testing.T) {
 	out = runSampleWithContext(ctx, t, dropDatabaseProtection, dbName, "failed to enable drop database protection for a database")
 	assertContains(t, out, fmt.Sprintf("Enabled drop database protection to database [%s]\n", dbName))
 
+	// TODO(sriharshach): Remove endpoint
 	databaseAdmin, err := database.NewDatabaseAdminClient(ctx, option.WithEndpoint("staging-wrenchworks.sandbox.googleapis.com:443"))
 	if err != nil {
 		log.Fatalf("cannot create databaseAdmin client: %v", err)
@@ -1119,10 +1120,12 @@ func createTestInstance(t *testing.T, projectID string, instanceConfigName strin
 	ctx := context.Background()
 	instanceID := fmt.Sprintf("go-sample-%s", uuid.New().String()[:16])
 	instanceName = fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID)
+	// TODO(sriharshach): Remove endpoint
 	instanceAdmin, err := instance.NewInstanceAdminClient(ctx, option.WithEndpoint("staging-wrenchworks.sandbox.googleapis.com:443"))
 	if err != nil {
 		t.Fatalf("failed to create InstanceAdminClient: %v", err)
 	}
+	// TODO(sriharshach): Remove endpoint
 	databaseAdmin, err := database.NewDatabaseAdminClient(ctx, option.WithEndpoint("staging-wrenchworks.sandbox.googleapis.com:443"))
 	if err != nil {
 		t.Fatalf("failed to create DatabaseAdminClient: %v", err)

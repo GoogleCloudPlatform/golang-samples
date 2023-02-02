@@ -31,7 +31,7 @@ func createDatabase(ctx context.Context, w io.Writer, db string) error {
 	if matches == nil || len(matches) != 3 {
 		return fmt.Errorf("Invalid database id %s", db)
 	}
-
+	// TODO(sriharshach): Remove endpoint
 	endpoint := "staging-wrenchworks.sandbox.googleapis.com:443"
 	adminClient, err := database.NewDatabaseAdminClient(ctx, option.WithEndpoint(endpoint))
 	if err != nil {
