@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	cloud.google.com/go/documentai v1.14.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230206221658-96741307119b
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230210191228-591fadee45eb
 	github.com/google/uuid v1.3.0
 	google.golang.org/api v0.109.0
 )
@@ -28,7 +28,7 @@ require (
 	golang.org/x/text v0.7.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20230202175211-008b39050e57 // indirect
+	google.golang.org/genproto v0.0.0-20230209215440-0dfe4f8abfcc // indirect
 	google.golang.org/grpc v1.53.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 )
