@@ -156,8 +156,8 @@ func mustConnect() *sql.DB {
 
 	// Use the connector when INSTANCE_CONNECTION_NAME (proj:region:instance) is defined.
 	if os.Getenv("INSTANCE_CONNECTION_NAME") != "" {
-		// Use IAM Authentication (recommended) if there is no password
-		if os.Getenv("password") != "" {
+		// Use IAM Authentication (recommended) if password is not set
+		if os.Getenv("DB_PASS") != "" {
 			db, err = connectWithConnector()
 		} else {
 			db, err = connectWithConnectorIAMAuthN()
