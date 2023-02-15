@@ -46,7 +46,7 @@ spec:
         - name: INSTANCE_HOST
           value: "127.0.0.1"
         - name: DB_PORT
-          value: "5432"
+          value: "3306"
         # To use Automatic IAM Authentication (recommended)
         # use DB_IAM_USER instead of DB_USER
         # you may also remove the DB_PASS environment variable
