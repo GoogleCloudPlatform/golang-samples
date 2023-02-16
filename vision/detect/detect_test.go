@@ -50,7 +50,8 @@ func TestDetect(t *testing.T) {
 		{"Objects", localizeObjects, localizeObjectsURI, "puppies.jpg", "Dog"},
 	}
 
-	for _, tt := range tests {
+	for _, test := range tests {
+		tt := test
 		if tt.local == nil {
 			continue
 		}
@@ -66,7 +67,8 @@ func TestDetect(t *testing.T) {
 		})
 	}
 
-	for _, tt := range tests {
+	for _, test := range tests {
+		tt := test
 		if tt.gcs == nil {
 			continue
 		}

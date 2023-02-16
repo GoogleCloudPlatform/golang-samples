@@ -46,7 +46,8 @@ func TestMask(t *testing.T) {
 			want:             "My SSN is ++++++333",
 		},
 	}
-	for _, test := range tests {
+	for _, tt := range tests {
+		test := tt
 		t.Run(test.input, func(t *testing.T) {
 			t.Parallel()
 			buf := new(bytes.Buffer)
@@ -82,7 +83,8 @@ func TestDeidentifyDateShift(t *testing.T) {
 			want:       "2016-01-09",
 		},
 	}
-	for _, test := range tests {
+	for _, tt := range tests {
+		test := tt
 		t.Run(test.input, func(t *testing.T) {
 			t.Parallel()
 			buf := new(bytes.Buffer)

@@ -46,7 +46,8 @@ func TestInfoTypes(t *testing.T) {
 			want:   "GENDER",
 		},
 	}
-	for _, test := range tests {
+	for _, tt := range tests {
+		test := tt
 		t.Run(test.language, func(t *testing.T) {
 			t.Parallel()
 			buf := new(bytes.Buffer)

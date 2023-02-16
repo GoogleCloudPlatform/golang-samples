@@ -120,7 +120,8 @@ func TestRisk(t *testing.T) {
 		},
 	}
 
-	for _, test := range tests {
+	for _, tt := range tests {
+		test := tt
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 			testutil.Retry(t, 20, 2*time.Second, test.fn)

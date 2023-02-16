@@ -48,7 +48,8 @@ func TestInspectDatastore(t *testing.T) {
 			want: "Created job",
 		},
 	}
-	for _, test := range tests {
+	for _, tt := range tests {
+		test := tt
 		t.Run(test.kind, func(t *testing.T) {
 			t.Parallel()
 			testutil.Retry(t, 5, 15*time.Second, func(r *testutil.R) {
@@ -100,7 +101,8 @@ func TestInspectGCS(t *testing.T) {
 			want:     "Created job",
 		},
 	}
-	for _, test := range tests {
+	for _, tt := range tests {
+		test := tt
 		t.Run(test.fileName, func(t *testing.T) {
 			t.Parallel()
 			testutil.Retry(t, 5, 15*time.Second, func(r *testutil.R) {
@@ -259,7 +261,8 @@ func TestInspectBigquery(t *testing.T) {
 			want:  "Created job",
 		},
 	}
-	for _, test := range tests {
+	for _, tt := range tests {
+		test := tt
 		t.Run(test.table, func(t *testing.T) {
 			t.Parallel()
 			u := uuid.Must(uuid.NewV4()).String()[:8]

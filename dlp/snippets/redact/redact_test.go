@@ -47,7 +47,8 @@ func TestRedactImage(t *testing.T) {
 			want:      "Wrote output to",
 		},
 	}
-	for _, test := range tests {
+	for _, tt := range tests {
+		test := tt
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 			buf := new(bytes.Buffer)
