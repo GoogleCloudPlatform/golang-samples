@@ -46,7 +46,7 @@ func connectWithConnector() (*sql.DB, error) {
 	mustGetenv := func(k string) string {
 		v := os.Getenv(k)
 		if v == "" {
-			log.Fatalf("Warning: %s environment variable not set.\n", k)
+			log.Fatalf("Fatal Error in connect_connector.go: %s environment variable not set.\n", k)
 		}
 		return v
 	}
