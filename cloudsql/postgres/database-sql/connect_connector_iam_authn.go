@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START cloud_sql_mysql_databasesql_connect_connector]
 package cloudsql
 
+// [START cloud_sql_postgres_databasesql_auto_iam_authn]
 import (
 	"context"
 	"database/sql"
@@ -24,30 +24,30 @@ import (
 	"os"
 
 	"cloud.google.com/go/cloudsqlconn"
-	"github.com/go-sql-driver/mysql"
+	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4/stdlib"
 )
 
-func connectWithConnector() (*sql.DB, error) {
+func connectWithConnectorIAMAuthN() (*sql.DB, error) {
 	mustGetenv := func(k string) string {
 		v := os.Getenv(k)
 		if v == "" {
-			log.Fatalf("Fatal Error in connect_connector.go: %s environment variable not set.", k)
+			log.Fatalf("Warning: %s environment variable not set.", k)
 		}
 		return v
 	}
 	// Note: Saving credentials in environment variables is convenient, but not
 	// secure - consider a more secure solution such as
 	// Cloud Secret Manager (https://cloud.google.com/secret-manager) to help
-	// keep passwords and other secrets safe.
+	// keep secrets safe.
 	var (
-		dbUser                 = mustGetenv("DB_USER")                  // e.g. 'my-db-user'
-		dbPwd                  = mustGetenv("DB_PASS")                  // e.g. 'my-db-password'
+		dbUser                 = mustGetenv("DB_IAM_USER")              // e.g. 'service-account-name@project-id.iam'
 		dbName                 = mustGetenv("DB_NAME")                  // e.g. 'my-database'
 		instanceConnectionName = mustGetenv("INSTANCE_CONNECTION_NAME") // e.g. 'project:region:instance'
 		usePrivate             = os.Getenv("PRIVATE_IP")
 	)
 
-	d, err := cloudsqlconn.NewDialer(context.Background())
+	d, err := cloudsqlconn.NewDialer(context.Background(), cloudsqlconn.WithIAMAuthN())
 	if err != nil {
 		return nil, fmt.Errorf("cloudsqlconn.NewDialer: %v", err)
 	}
@@ -55,19 +55,22 @@ func connectWithConnector() (*sql.DB, error) {
 	if usePrivate != "" {
 		opts = append(opts, cloudsqlconn.WithPrivateIP())
 	}
-	mysql.RegisterDialContext("cloudsqlconn",
-		func(ctx context.Context, addr string) (net.Conn, error) {
-			return d.Dial(ctx, instanceConnectionName, opts...)
-		})
 
-	dbURI := fmt.Sprintf("%s:%s@cloudsqlconn(localhost:3306)/%s?parseTime=true",
-		dbUser, dbPwd, dbName)
+	dsn := fmt.Sprintf("user=%s database=%s", dbUser, dbName)
+	config, err := pgx.ParseConfig(dsn)
+	if err != nil {
+		return nil, err
+	}
 
-	dbPool, err := sql.Open("mysql", dbURI)
+	config.DialFunc = func(ctx context.Context, network, instance string) (net.Conn, error) {
+		return d.Dial(ctx, instanceConnectionName, opts...)
+	}
+	dbURI := stdlib.RegisterConnConfig(config)
+	dbPool, err := sql.Open("pgx", dbURI)
 	if err != nil {
 		return nil, fmt.Errorf("sql.Open: %v", err)
 	}
 	return dbPool, nil
 }
 
-// [END cloud_sql_mysql_databasesql_connect_connector]
+// [END cloud_sql_postgres_databasesql_auto_iam_authn]
