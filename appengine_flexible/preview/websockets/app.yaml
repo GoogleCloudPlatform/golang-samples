@@ -12,8 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-runtime: go1.11
+runtime: go
 env: flex
+
+runtime_config:
+  operating_system: 'ubuntu22'
+  runtime_version: '1.18'
 
 # Use only a single instance, so that this local-memory-only chat app will work
 # consistently with multiple users. To work across multiple instances, an
