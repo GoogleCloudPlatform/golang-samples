@@ -41,7 +41,7 @@ func connectWithConnectorIAMAuthN() (*sql.DB, error) {
 	// Cloud Secret Manager (https://cloud.google.com/secret-manager) to help
 	// keep secrets safe.
 	var (
-		dbUser                 = mustGetenv("DB_IAM_USER")              // e.g. 'my-db-user'
+		dbUser                 = mustGetenv("DB_IAM_USER")              // e.g. 'service-account-name'
 		dbName                 = mustGetenv("DB_NAME")                  // e.g. 'my-database'
 		instanceConnectionName = mustGetenv("INSTANCE_CONNECTION_NAME") // e.g. 'project:region:instance'
 		usePrivate             = os.Getenv("PRIVATE_IP")

@@ -41,7 +41,7 @@ func connectWithConnectorIAMAuthN() (*sql.DB, error) {
 	// Cloud Secret Manager (https://cloud.google.com/secret-manager) to help
 	// keep secrets safe.
 	var (
-		dbUser                 = mustGetenv("DB_IAM_USER")              // e.g. 'sa-name@project-id.iam'
+		dbUser                 = mustGetenv("DB_IAM_USER")              // e.g. 'service-account-name@project-id.iam'
 		dbName                 = mustGetenv("DB_NAME")                  // e.g. 'my-database'
 		instanceConnectionName = mustGetenv("INSTANCE_CONNECTION_NAME") // e.g. 'project:region:instance'
 		usePrivate             = os.Getenv("PRIVATE_IP")
@@ -56,7 +56,7 @@ func connectWithConnectorIAMAuthN() (*sql.DB, error) {
 		opts = append(opts, cloudsqlconn.WithPrivateIP())
 	}
 
-	dsn := fmt.Sprintf("user=%s password=empty database=%s", dbUser, dbName)
+	dsn := fmt.Sprintf("user=%s database=%s", dbUser, dbName)
 	config, err := pgx.ParseConfig(dsn)
 	if err != nil {
 		return nil, err
