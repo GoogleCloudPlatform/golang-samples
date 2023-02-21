@@ -32,18 +32,16 @@ func connectWithConnector() (*sql.DB, error) {
 	mustGetenv := func(k string) string {
 		v := os.Getenv(k)
 		if v == "" {
-			log.Fatalf("Warning: %s environment variable not set.\n", k)
+			log.Fatalf("Fatal Error in connect_connector.go: %s environment variable not set.\n", k)
 		}
 		return v
 	}
 	// Note: Saving credentials in environment variables is convenient, but not
 	// secure - consider a more secure solution such as
 	// Cloud Secret Manager (https://cloud.google.com/secret-manager) to help
-	// keep secrets safe.
+	// keep passwords and other secrets safe.
 	var (
-		// Either a DB_USER or a DB_IAM_USER should be defined. If both are
-		// defined, DB_IAM_USER takes precedence.
-		dbUser                 = os.Getenv("DB_USER")                   // e.g. 'my-db-user'
+		dbUser                 = mustGetenv("DB_USER")                  // e.g. 'my-db-user'
 		dbPwd                  = mustGetenv("DB_PASS")                  // e.g. 'my-db-password'
 		dbName                 = mustGetenv("DB_NAME")                  // e.g. 'my-database'
 		instanceConnectionName = mustGetenv("INSTANCE_CONNECTION_NAME") // e.g. 'project:region:instance'

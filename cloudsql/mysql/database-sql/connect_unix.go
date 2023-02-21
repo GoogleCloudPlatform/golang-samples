@@ -30,7 +30,7 @@ func connectUnixSocket() (*sql.DB, error) {
 	mustGetenv := func(k string) string {
 		v := os.Getenv(k)
 		if v == "" {
-			log.Fatalf("Warning: %s environment variable not set.", k)
+			log.Fatalf("Fatal Error in connect_unix.go: %s environment variable not set.", k)
 		}
 		return v
 	}
