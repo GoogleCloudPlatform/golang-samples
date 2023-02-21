@@ -20,6 +20,8 @@ package http
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 )
 
 // CORSEnabledFunctionAuth is an example of setting CORS headers with
@@ -41,6 +43,10 @@ func CORSEnabledFunctionAuth(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("Access-Control-Allow-Origin", "https://example.com")
 	fmt.Fprint(w, "Hello World!")
+}
+
+func init() {
+	functions.HTTP("CORSEnabledFunctionAuth", CORSEnabledFunctionAuth)
 }
 
 // [END functions_http_cors_auth]

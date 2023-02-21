@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,30 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START functions_concepts_after_timeout]
-
-// Package tips contains tips for writing Cloud Functions in Go.
-package tips
+// Sample helloworld is a basic App Engine flexible app.
+package main
 
 import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
-
-	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
+	"os"
 )
 
-func init() {
-	functions.HTTP("Timeout", Timeout)
+func main() {
+	http.HandleFunc("/", handle)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	log.Printf("Listening on port %s", port)
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
+		log.Fatal(err)
+	}
 }
 
-// Timeout sleeps for 2 minutes and may time out before finishing.
-func Timeout(w http.ResponseWriter, r *http.Request) {
-	log.Println("Function execution started...")
-	time.Sleep(2 * time.Minute)
-	log.Println("Function completed!")
-	fmt.Fprintln(w, "Function completed!")
+func handle(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		http.NotFound(w, r)
+		return
+	}
+	fmt.Fprint(w, "Hello world!")
 }
-
-// [END functions_concepts_after_timeout]
