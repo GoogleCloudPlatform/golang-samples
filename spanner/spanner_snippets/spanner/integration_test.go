@@ -583,7 +583,7 @@ func TestCreateDatabaseWithDefaultLeaderSample(t *testing.T) {
 	assertContains(t, out, "The result of the query to get")
 }
 
-func TestDropDatabaseProtectionSample(t *testing.T) {
+func TestUpdateDatabaseSample(t *testing.T) {
 	_ = testutil.SystemTest(t)
 	t.Parallel()
 
@@ -595,7 +595,7 @@ func TestDropDatabaseProtectionSample(t *testing.T) {
 
 	var out string
 	mustRunSample(t, createDatabase, dbName, "failed to create a database")
-	out = runSampleWithContext(ctx, t, dropDatabaseProtection, dbName, "failed to enable drop database protection for a database")
+	out = runSampleWithContext(ctx, t, updateDatabase, dbName, "failed to update database to enable drop database protection")
 	assertContains(t, out, fmt.Sprintf("Enabled drop database protection to database [%s]\n", dbName))
 
 	// TODO(sriharshach): Remove endpoint

@@ -14,7 +14,7 @@
 
 package spanner
 
-// [START spanner_drop_database_protection]
+// [START spanner_update_database]
 import (
 	"context"
 	"fmt"
@@ -27,7 +27,7 @@ import (
 	"google.golang.org/genproto/protobuf/field_mask"
 )
 
-func dropDatabaseProtection(ctx context.Context, w io.Writer, db string) error {
+func updateDatabase(ctx context.Context, w io.Writer, db string) error {
 	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(db)
 	if matches == nil || len(matches) != 3 {
 		return fmt.Errorf("Invalid database id %s", db)
@@ -59,4 +59,4 @@ func dropDatabaseProtection(ctx context.Context, w io.Writer, db string) error {
 	return nil
 }
 
-// [END spanner_drop_database_protection]
+// [END spanner_update_database]
