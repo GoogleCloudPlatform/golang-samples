@@ -15,10 +15,9 @@
 
 # CNDB, Storage, and Infra-DB
 /bigtable/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-native-db-dpes
-/cloudsql/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/infra-db-dpes
+/cloudsql/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/infra-db-sdk
 /datastore/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-native-db-dpes
 /firestore/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-native-db-dpes
-/spanner/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/infra-db-dpes
 /storage/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-storage-dpes
 /storagetransfer/                     @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-storage-dpes
 
@@ -35,7 +34,7 @@
 
 # Data & AI DEE
 /automl/                               @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai 
-/bigquery/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai @chalmerlowe
+/bigquery/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
 /datacatalog/                          @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai 
 /dataflow/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai @davidcavazos
 /dataproc/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
@@ -85,3 +84,4 @@
 /opentelemetry/                        @GoogleCloudPlatform/go-samples-reviewers
 /profiler/                             @GoogleCloudPlatform/go-samples-reviewers
 /servicedirectory/                     @GoogleCloudPlatform/go-samples-reviewers
+/spanner/                              @GoogleCloudPlatform/go-samples-reviewers
