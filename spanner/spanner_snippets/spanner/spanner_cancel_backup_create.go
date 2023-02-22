@@ -23,9 +23,9 @@ import (
 	"regexp"
 	"time"
 
+	longrunning "cloud.google.com/go/longrunning/autogen/longrunningpb"
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
 	pbt "github.com/golang/protobuf/ptypes/timestamp"
-	"google.golang.org/genproto/googleapis/longrunning"
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

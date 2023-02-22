@@ -14,14 +14,14 @@
 
 package videostitcher
 
-// [START video_stitcher_create_live_session]
+// [START videostitcher_create_live_session]
 import (
 	"context"
 	"fmt"
 	"io"
 
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	stitcherpb "google.golang.org/genproto/googleapis/cloud/video/stitcher/v1"
+	"cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
 
 // createLiveSession creates a livestream session in which to insert ads.
@@ -68,4 +68,4 @@ func createLiveSession(w io.Writer, projectID, sourceURI, slateID string) error 
 	return nil
 }
 
-// [END video_stitcher_create_live_session]
+// [END videostitcher_create_live_session]

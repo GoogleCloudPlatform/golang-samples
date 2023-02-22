@@ -21,7 +21,7 @@ import (
 	"io"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
-	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
+	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 )
 
 func deleteNotificationConfig(w io.Writer, orgID string, notificationConfigID string) error {

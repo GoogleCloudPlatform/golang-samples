@@ -26,7 +26,7 @@ import (
 	"google.golang.org/protobuf/types/known/durationpb"
 
 	storagetransfer "cloud.google.com/go/storagetransfer/apiv1"
-	storagetransferpb "google.golang.org/genproto/googleapis/storagetransfer/v1"
+	"cloud.google.com/go/storagetransfer/apiv1/storagetransferpb"
 )
 
 func transferToNearline(w io.Writer, projectID string, gcsSourceBucket string, gcsNearlineSinkBucket string) (*storagetransferpb.TransferJob, error) {
@@ -50,7 +50,7 @@ func transferToNearline(w io.Writer, projectID string, gcsSourceBucket string, g
 	jobDescription := "Transfers objects that haven't been modified in 30 days to a Nearline bucket"
 
 	// The time to start the transfer
-	startTime := time.Now()
+	startTime := time.Now().UTC()
 
 	req := &storagetransferpb.CreateTransferJobRequest{
 		TransferJob: &storagetransferpb.TransferJob{

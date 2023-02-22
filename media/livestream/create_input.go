@@ -21,7 +21,7 @@ import (
 	"io"
 
 	livestream "cloud.google.com/go/video/livestream/apiv1"
-	livestreampb "google.golang.org/genproto/googleapis/cloud/video/livestream/v1"
+	"cloud.google.com/go/video/livestream/apiv1/livestreampb"
 )
 
 // createInput creates an input endpoint. You send an input video stream to this

@@ -24,7 +24,7 @@ import (
 	"strings"
 
 	speech "cloud.google.com/go/speech/apiv1"
-	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"
+	"cloud.google.com/go/speech/apiv1/speechpb"
 )
 
 // contextClasses provides "hints" to the speech recognizer

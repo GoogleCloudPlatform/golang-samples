@@ -14,14 +14,14 @@
 
 package videostitcher
 
-// [START video_stitcher_get_live_session]
+// [START videostitcher_get_live_session]
 import (
 	"context"
 	"fmt"
 	"io"
 
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	stitcherpb "google.golang.org/genproto/googleapis/cloud/video/stitcher/v1"
+	"cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
 
 // getLiveSession gets a livestream session by ID.
@@ -49,4 +49,4 @@ func getLiveSession(w io.Writer, projectID, sessionID string) error {
 	return nil
 }
 
-// [END video_stitcher_get_live_session]
+// [END videostitcher_get_live_session]

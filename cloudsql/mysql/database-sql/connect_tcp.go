@@ -36,7 +36,7 @@ func connectTCPSocket() (*sql.DB, error) {
 	mustGetenv := func(k string) string {
 		v := os.Getenv(k)
 		if v == "" {
-			log.Fatalf("Warning: %s environment variable not set.", k)
+			log.Fatalf("Fatal Error in connect_tcp.go: %s environment variable not set.", k)
 		}
 		return v
 	}
@@ -71,7 +71,7 @@ func connectTCPSocket() (*sql.DB, error) {
 			return nil, err
 		}
 		if ok := pool.AppendCertsFromPEM(pem); !ok {
-			return nil, err
+			return nil, errors.New("unable to append root cert to pool")
 		}
 		cert, err := tls.LoadX509KeyPair(dbCert, dbKey)
 		if err != nil {

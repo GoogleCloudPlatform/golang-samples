@@ -14,7 +14,7 @@
 
 package videostitcher
 
-// [START video_stitcher_get_live_ad_tag_detail]
+// [START videostitcher_get_live_ad_tag_detail]
 import (
 	"context"
 	"encoding/json"
@@ -22,7 +22,7 @@ import (
 	"io"
 
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	stitcherstreampb "google.golang.org/genproto/googleapis/cloud/video/stitcher/v1"
+	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
 
 // getLiveAdTagDetail gets the specified ad tag detail for a live session.
@@ -54,4 +54,4 @@ func getLiveAdTagDetail(w io.Writer, projectID, sessionID, adTagDetailID string)
 	return nil
 }
 
-// [END video_stitcher_get_live_ad_tag_detail]
+// [END videostitcher_get_live_ad_tag_detail]

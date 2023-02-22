@@ -100,19 +100,18 @@ func TestCreateBucketDualRegion(t *testing.T) {
 	if err := createBucketDualRegion(buf, tc.ProjectID, bucketName); err != nil {
 		t.Fatalf("createBucketDualRegion: %v", err)
 	}
-	if got, want := buf.String(), fmt.Sprintf("%s and %s", region1, region2); !strings.Contains(got, want) {
+	got := buf.String()
+	if want := bucketName; !strings.Contains(got, want) {
 		t.Errorf("got %q, want %q", got, want)
 	}
-
-	attrs, err := client.Bucket(bucketName).Attrs(ctx)
-	if err != nil {
-		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	if want := location; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
 	}
-	if got, want := attrs.Location, location; got != want {
-		t.Errorf("location: got %q, want %q", got, want)
+	if want := "dual-region"; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
 	}
-	if got, want := attrs.LocationType, "dual-region"; got != want {
-		t.Errorf("location type: got %q, want %q", got, want)
+	if want := fmt.Sprintf("%s %s", region1, region2); !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
 	}
 }
 
@@ -755,5 +754,44 @@ func TestRPO(t *testing.T) {
 
 	if err := deleteBucket(ioutil.Discard, bucketName); err != nil {
 		t.Fatalf("deleteBucket: %v", err)
+	}
+}
+
+// TestAutoclass tests the following samples:
+// getAutoclass, setAutoclass
+func TestAutoclass(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+
+	bucketName := testutil.UniqueBucketName(testPrefix)
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
+
+	// Test create new bucket with Autoclass enabled.
+	autoclassConfig := &storage.BucketAttrs{
+		Autoclass: &storage.Autoclass{
+			Enabled: true,
+		},
+	}
+	bucket := client.Bucket(bucketName)
+	if err := bucket.Create(ctx, tc.ProjectID, autoclassConfig); err != nil {
+		t.Fatalf("Bucket creation failed: %v", err)
+	}
+
+	// Test get Autoclass config.
+	buf := new(bytes.Buffer)
+	if err := getAutoclass(buf, bucketName); err != nil {
+		t.Errorf("getAutoclass: %#v", err)
+	}
+	if got, want := buf.String(), "Autoclass enabled was set to true"; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
+
+	// Test set Autoclass config.
+	value := false
+	if err := setAutoclass(buf, bucketName, value); err != nil {
+		t.Errorf("setAutoclass: %#v", err)
+	}
+	if got, want := buf.String(), "Autoclass enabled was set to false"; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
 	}
 }

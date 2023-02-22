@@ -41,6 +41,7 @@ func createCollectionReference(client *firestore.Client) {
 
 func createDocReferenceFromString(client *firestore.Client) {
 	// [START firestore_data_reference_document_path]
+	// Reference to a document with id "alovelace" in the collection "users"
 	alovelaceRef := client.Doc("users/alovelace")
 	// [END firestore_data_reference_document_path]
 

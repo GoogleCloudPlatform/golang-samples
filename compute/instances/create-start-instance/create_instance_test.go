@@ -136,6 +136,19 @@ func TestComputeCreateInstanceSnippets(t *testing.T) {
 
 	buf.Reset()
 
+	if err := createWithLocalSSD(buf, tc.ProjectID, zone, instanceName); err != nil {
+		t.Errorf("createWithLocalSSD got err: %v", err)
+	}
+	if got := buf.String(); !strings.Contains(got, expectedResult) {
+		t.Errorf("createWithLocalSSD got %q, want %q", got, expectedResult)
+	}
+	err = deleteInstance(ctx, tc.ProjectID, zone, instanceName)
+	if err != nil {
+		t.Errorf("deleteInstance got err: %v", err)
+	}
+
+	buf.Reset()
+
 	if err := createInstanceWithSubnet(buf, tc.ProjectID, zone, instanceName, networkName, subnetworkName); err != nil {
 		t.Errorf("createInstanceWithSubnet got err: %v", err)
 	}

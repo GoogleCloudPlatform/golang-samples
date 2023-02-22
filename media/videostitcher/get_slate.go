@@ -14,7 +14,7 @@
 
 package videostitcher
 
-// [START video_stitcher_get_slate]
+// [START videostitcher_get_slate]
 import (
 	"context"
 	"encoding/json"
@@ -22,7 +22,7 @@ import (
 	"io"
 
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	stitcherstreampb "google.golang.org/genproto/googleapis/cloud/video/stitcher/v1"
+	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
 
 // getSlate gets a previously-created slate.
@@ -54,4 +54,4 @@ func getSlate(w io.Writer, projectID, slateID string) error {
 	return nil
 }
 
-// [END video_stitcher_get_slate]
+// [END videostitcher_get_slate]

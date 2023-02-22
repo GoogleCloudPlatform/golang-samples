@@ -14,7 +14,7 @@
 
 package videostitcher
 
-// [START video_stitcher_get_vod_stitch_detail]
+// [START videostitcher_get_vod_stitch_detail]
 import (
 	"context"
 	"encoding/json"
@@ -22,7 +22,7 @@ import (
 	"io"
 
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	stitcherpb "google.golang.org/genproto/googleapis/cloud/video/stitcher/v1"
+	"cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
 
 // getVodStitchDetail gets the specified stitch detail for a video on demand (VOD) session.
@@ -55,4 +55,4 @@ func getVodStitchDetail(w io.Writer, projectID, sessionID, stitchDetailID string
 	return nil
 }
 
-// [END video_stitcher_get_vod_stitch_detail]
+// [END videostitcher_get_vod_stitch_detail]

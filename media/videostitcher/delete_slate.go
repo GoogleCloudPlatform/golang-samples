@@ -14,14 +14,14 @@
 
 package videostitcher
 
-// [START video_stitcher_delete_slate]
+// [START videostitcher_delete_slate]
 import (
 	"context"
 	"fmt"
 	"io"
 
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	stitcherstreampb "google.golang.org/genproto/googleapis/cloud/video/stitcher/v1"
+	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
 
 // deleteSlate deletes a previously-created slate.
@@ -51,4 +51,4 @@ func deleteSlate(w io.Writer, projectID, slateID string) error {
 	return nil
 }
 
-// [END video_stitcher_delete_slate]
+// [END videostitcher_delete_slate]

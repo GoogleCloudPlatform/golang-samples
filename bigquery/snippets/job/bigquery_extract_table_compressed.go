@@ -26,7 +26,7 @@ import (
 // write the contents of a table into Cloud Storage as compressed CSV.
 func exportTableAsCompressedCSV(projectID, gcsURI string) error {
 	// projectID := "my-project-id"
-	// gcsUri := "gs://mybucket/shakespeare.csv"
+	// gcsURI := "gs://mybucket/shakespeare.csv"
 	ctx := context.Background()
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {

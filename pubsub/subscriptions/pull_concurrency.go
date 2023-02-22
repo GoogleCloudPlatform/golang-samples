@@ -37,13 +37,15 @@ func pullMsgsConcurrencyControl(w io.Writer, projectID, subID string) error {
 
 	sub := client.Subscription(subID)
 	// Must set ReceiveSettings.Synchronous to false (or leave as default) to enable
-	// concurrency settings. Otherwise, NumGoroutines will be set to 1.
+	// concurrency pulling of messages. Otherwise, NumGoroutines will be set to 1.
 	sub.ReceiveSettings.Synchronous = false
 	// NumGoroutines determines the number of goroutines sub.Receive will spawn to pull
 	// messages.
 	sub.ReceiveSettings.NumGoroutines = 16
 	// MaxOutstandingMessages limits the number of concurrent handlers of messages.
 	// In this case, up to 8 unacked messages can be handled concurrently.
+	// Note, even in synchronous mode, messages pulled in a batch can still be handled
+	// concurrently.
 	sub.ReceiveSettings.MaxOutstandingMessages = 8
 
 	// Receive messages for 10 seconds, which simplifies testing.

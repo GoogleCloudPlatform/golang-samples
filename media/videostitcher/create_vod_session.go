@@ -14,14 +14,14 @@
 
 package videostitcher
 
-// [START video_stitcher_create_vod_session]
+// [START videostitcher_create_vod_session]
 import (
 	"context"
 	"fmt"
 	"io"
 
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	stitcherpb "google.golang.org/genproto/googleapis/cloud/video/stitcher/v1"
+	"cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
 
 // createVodSession creates a video on demand (VOD) session in which to insert ads.
@@ -63,4 +63,4 @@ func createVodSession(w io.Writer, projectID, sourceURI string) error {
 	return nil
 }
 
-// [END video_stitcher_create_vod_session]
+// [END videostitcher_create_vod_session]

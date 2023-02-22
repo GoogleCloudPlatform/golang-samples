@@ -11,12 +11,14 @@
   "commitMessagePrefix": "chore(all): ",
   "commitMessageAction": "update",
   "ignorePaths": [
-    "testing/docker/Dockerfile*"
+    "**/Dockerfile"
   ],
   "groupName": "everything",
   "packageRules": [
     {
-      "updateTypes": ["major"],
+      "updateTypes": [
+        "major"
+      ],
       "enabled": false
     },
     {
