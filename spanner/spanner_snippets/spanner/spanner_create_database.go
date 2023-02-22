@@ -22,7 +22,6 @@ import (
 	"regexp"
 
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
-	"google.golang.org/api/option"
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
@@ -31,9 +30,8 @@ func createDatabase(ctx context.Context, w io.Writer, db string) error {
 	if matches == nil || len(matches) != 3 {
 		return fmt.Errorf("Invalid database id %s", db)
 	}
-	// TODO(sriharshach): Remove endpoint
-	endpoint := "staging-wrenchworks.sandbox.googleapis.com:443"
-	adminClient, err := database.NewDatabaseAdminClient(ctx, option.WithEndpoint(endpoint))
+
+	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		return err
 	}

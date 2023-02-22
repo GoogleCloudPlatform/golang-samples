@@ -23,7 +23,6 @@ import (
 
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
 	adminpb "cloud.google.com/go/spanner/admin/database/apiv1/databasepb"
-	"google.golang.org/api/option"
 	"google.golang.org/genproto/protobuf/field_mask"
 )
 
@@ -32,9 +31,8 @@ func updateDatabase(ctx context.Context, w io.Writer, db string) error {
 	if matches == nil || len(matches) != 3 {
 		return fmt.Errorf("Invalid database id %s", db)
 	}
-	// TODO(sriharshach): Remove endpoint
-	endpoint := "staging-wrenchworks.sandbox.googleapis.com:443"
-	adminClient, err := database.NewDatabaseAdminClient(ctx, option.WithEndpoint(endpoint))
+
+	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		return err
 	}

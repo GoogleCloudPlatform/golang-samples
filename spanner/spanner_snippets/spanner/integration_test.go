@@ -35,7 +35,6 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
 	"google.golang.org/api/iterator"
-	"google.golang.org/api/option"
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 	instancepb "google.golang.org/genproto/googleapis/spanner/admin/instance/v1"
 	"google.golang.org/grpc/codes"
@@ -598,8 +597,7 @@ func TestUpdateDatabaseSample(t *testing.T) {
 	out = runSampleWithContext(ctx, t, updateDatabase, dbName, "failed to update database to enable drop database protection")
 	assertContains(t, out, fmt.Sprintf("Enabled drop database protection to database [%s]\n", dbName))
 
-	// TODO(sriharshach): Remove endpoint
-	databaseAdmin, err := database.NewDatabaseAdminClient(ctx, option.WithEndpoint("staging-wrenchworks.sandbox.googleapis.com:443"))
+	databaseAdmin, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		log.Fatalf("cannot create databaseAdmin client: %v", err)
 	}
@@ -1120,13 +1118,11 @@ func createTestInstance(t *testing.T, projectID string, instanceConfigName strin
 	ctx := context.Background()
 	instanceID := fmt.Sprintf("go-sample-%s", uuid.New().String()[:16])
 	instanceName = fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID)
-	// TODO(sriharshach): Remove endpoint
-	instanceAdmin, err := instance.NewInstanceAdminClient(ctx, option.WithEndpoint("staging-wrenchworks.sandbox.googleapis.com:443"))
+	instanceAdmin, err := instance.NewInstanceAdminClient(ctx)
 	if err != nil {
 		t.Fatalf("failed to create InstanceAdminClient: %v", err)
 	}
-	// TODO(sriharshach): Remove endpoint
-	databaseAdmin, err := database.NewDatabaseAdminClient(ctx, option.WithEndpoint("staging-wrenchworks.sandbox.googleapis.com:443"))
+	databaseAdmin, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		t.Fatalf("failed to create DatabaseAdminClient: %v", err)
 	}
