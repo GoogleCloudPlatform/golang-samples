@@ -594,8 +594,8 @@ func TestUpdateDatabaseSample(t *testing.T) {
 
 	var out string
 	mustRunSample(t, createDatabase, dbName, "failed to create a database")
-	out = runSampleWithContext(ctx, t, updateDatabase, dbName, "failed to update database to enable drop database protection")
-	assertContains(t, out, fmt.Sprintf("Enabled drop database protection to database [%s]\n", dbName))
+	out = runSampleWithContext(ctx, t, updateDatabase, dbName, "failed to update database")
+	assertContains(t, out, fmt.Sprintf("Updated database [%s]\n", dbName))
 
 	databaseAdmin, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
@@ -606,6 +606,7 @@ func TestUpdateDatabaseSample(t *testing.T) {
 	if err != nil {
 		log.Fatalf("error during GetDatabase for db %v: %v", dbName, err)
 	}
+	// Verify if the EnableDropProtection field got enabled
 	if !database.GetEnableDropProtection() {
 		t.Errorf("got output %t; want it to contain %t", database.GetEnableDropProtection(), true)
 	}

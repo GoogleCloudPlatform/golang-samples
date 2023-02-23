@@ -53,7 +53,7 @@ func updateDatabase(ctx context.Context, w io.Writer, db string) error {
 	if _, err := op.Wait(ctx); err != nil {
 		return err
 	}
-	fmt.Fprintf(w, "Enabled drop database protection to database [%s]\n", db)
+	fmt.Fprintf(w, "Updated database [%s]\n", db)
 	return nil
 }
 
