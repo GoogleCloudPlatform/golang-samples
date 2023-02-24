@@ -31,6 +31,8 @@ cd github/golang-samples || exit 1
 cd - || exit 1
 
 function cleanup() {
+    # This clutters logs with chmod errors when used in a docker context.
+    # TODO(muncus): determine if we ever need this, or make it conditional.
     # chmod +x "${KOKORO_GFILE_DIR}"/trampoline_cleanup.sh
     # "${KOKORO_GFILE_DIR}"/trampoline_cleanup.sh
     echo "cleanup";
