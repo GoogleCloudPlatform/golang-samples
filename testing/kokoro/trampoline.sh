@@ -31,8 +31,8 @@ cd github/golang-samples || exit 1
 cd - || exit 1
 
 function cleanup() {
-    chmod +x "${KOKORO_GFILE_DIR}"/trampoline_cleanup.sh
-    "${KOKORO_GFILE_DIR}"/trampoline_cleanup.sh
+    # chmod +x "${KOKORO_GFILE_DIR}"/trampoline_cleanup.sh
+    # "${KOKORO_GFILE_DIR}"/trampoline_cleanup.sh
     echo "cleanup";
 }
 trap cleanup EXIT
