@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // quickstart sends a file at a given filePath for online processing.
-package main
+package documentai_snippets
 
 // [START documentai_quickstart]
 import (
