@@ -1,4 +1,4 @@
-// Copyright 2023 Google LLC
+// Copyright 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,4 +20,5 @@ option java_outer_classname = "StateProto";
 message State {
   string name = 1;
   string post_abbr = 2;
+  int64 population = 3;
 }

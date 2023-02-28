@@ -23,9 +23,10 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func deleteSchemaRevision(w io.Writer, projectID, schemaID string) error {
+func deleteSchemaRevision(w io.Writer, projectID, schemaID, revisionID string) error {
 	// projectID := "my-project-id"
-	// schemaID := "my-schema-id@my-schema-revision"
+	// schemaID := "my-schema-id"
+	// revisionID := "my-revision-id"
 	ctx := context.Background()
 	client, err := pubsub.NewSchemaClient(ctx, projectID)
 	if err != nil {
@@ -33,10 +34,10 @@ func deleteSchemaRevision(w io.Writer, projectID, schemaID string) error {
 	}
 	defer client.Close()
 
-	if err := client.DeleteSchema(ctx, schemaID); err != nil {
+	if _, err := client.DeleteSchemaRevision(ctx, schemaID, revisionID); err != nil {
 		return fmt.Errorf("client.DeleteSchema revision: %v", err)
 	}
-	fmt.Fprintf(w, "Deleted schema revision: %s", schemaID)
+	fmt.Fprintf(w, "Deleted a schema revision: %s@%s", schemaID, revisionID)
 	return nil
 }
 

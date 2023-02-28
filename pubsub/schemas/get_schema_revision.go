@@ -25,7 +25,7 @@ import (
 
 func getSchemaRevision(w io.Writer, projectID, schemaID string) error {
 	// projectID := "my-project-id"
-	// schemaID := "my-schema@my-schema-revision"
+	// schemaID := "my-schema[@my-schema-revision]"
 	ctx := context.Background()
 	client, err := pubsub.NewSchemaClient(ctx, projectID)
 	if err != nil {
@@ -33,9 +33,6 @@ func getSchemaRevision(w io.Writer, projectID, schemaID string) error {
 	}
 	defer client.Close()
 
-	// Retrieve the full schema view. If you don't want to retrieve the
-	// definition, pass in pubsub.SchemaViewBasic which retrieves
-	// just the name and type of the schema.
 	s, err := client.Schema(ctx, schemaID, pubsub.SchemaViewFull)
 	if err != nil {
 		return fmt.Errorf("client.Schema revision: %v", err)

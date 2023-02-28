@@ -14,7 +14,7 @@
 
 package schema
 
-// [START pubsub_create_topic_with_schema]
+// [START pubsub_update_topic_schema]
 import (
 	"context"
 	"fmt"
@@ -23,29 +23,34 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func createTopicWithSchema(w io.Writer, projectID, topicID, schemaID string, encoding pubsub.SchemaEncoding) error {
+func updateTopicSchema(w io.Writer, projectID, topicID, firstRevisionID, lastRevisionID string) error {
 	// projectID := "my-project-id"
 	// topicID := "my-topic"
-	// schemaID := "my-schema-id"
-	// encoding := pubsub.EncodingJSON
+	// firstRevisionID := "my-revision-id"
+	// lastRevisionID := "my-revision-id"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
+	t := client.Topic(topicID)
 
-	tc := &pubsub.TopicConfig{
+	// This updates the first / last revision ID for the topic's schema.
+	// To clear the schema entirely, use a zero valued (empty) SchemaSettings.
+	tc := pubsub.TopicConfigToUpdate{
 		SchemaSettings: &pubsub.SchemaSettings{
-			Schema:   fmt.Sprintf("projects/%s/schemas/%s", projectID, schemaID),
-			Encoding: encoding,
+			FirstRevisionID: firstRevisionID,
+			LastRevisionID:  lastRevisionID,
 		},
 	}
-	t, err := client.CreateTopicWithConfig(ctx, topicID, tc)
+
+	gotTopicCfg, err := t.Update(ctx, tc)
 	if err != nil {
-		return fmt.Errorf("CreateTopicWithConfig: %v", err)
+		fmt.Fprintf(w, "topic.Update err: %v\n", gotTopicCfg)
+		return err
 	}
-	fmt.Fprintf(w, "Topic with schema created: %#v\n", t)
+	fmt.Fprintf(w, "Updated topic with schema: %#v\n", gotTopicCfg)
 	return nil
 }
 
-// [END pubsub_create_topic_with_schema]
+// [END pubsub_update_topic_schema]

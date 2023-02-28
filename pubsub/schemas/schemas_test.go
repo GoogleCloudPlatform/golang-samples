@@ -46,13 +46,18 @@ const (
 // down every time, so this speeds things up.
 var once sync.Once
 
-func setup(t *testing.T) *pubsub.Client {
+func setup(t *testing.T) (*pubsub.Client, *pubsub.SchemaClient) {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 
 	client, err := pubsub.NewClient(ctx, tc.ProjectID)
 	if err != nil {
 		t.Fatalf("failed to create client: %v", err)
+	}
+
+	schemaClient, err := pubsub.NewSchemaClient(ctx, tc.ProjectID)
+	if err != nil {
+		t.Fatalf("failed to create schema client: %v", err)
 	}
 
 	// Cleanup resources from the previous tests.
@@ -118,11 +123,11 @@ func setup(t *testing.T) *pubsub.Client {
 		wg.Wait()
 	})
 
-	return client
+	return client, schemaClient
 }
 
 func TestSchemas_Admin(t *testing.T) {
-	_ = setup(t)
+	_, _ = setup(t)
 	tc := testutil.SystemTest(t)
 
 	avroSchemaID := schemaPrefix + "avro-" + uuid.NewString()
@@ -205,7 +210,7 @@ func TestSchemas_Admin(t *testing.T) {
 }
 
 func TestSchemas_AvroSchemaAll(t *testing.T) {
-	client := setup(t)
+	client, _ := setup(t)
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 
@@ -266,7 +271,7 @@ func TestSchemas_AvroSchemaAll(t *testing.T) {
 				r.Errorf("subscribeWithAvroSchema: %v", err)
 			}
 			got := buf.String()
-			want := "Received a JSON-encoded message"
+			want := "Alaska is abbreviated as AK"
 			if !strings.Contains(got, want) {
 				r.Errorf("subscribeWithAvroSchema mismatch\ngot: %v\nwant: %v\n", got, want)
 			}
@@ -279,7 +284,7 @@ func TestSchemas_AvroSchemaAll(t *testing.T) {
 }
 
 func TestSchemas_ProtoSchemaAll(t *testing.T) {
-	client := setup(t)
+	client, _ := setup(t)
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 
@@ -337,10 +342,10 @@ func TestSchemas_ProtoSchemaAll(t *testing.T) {
 			buf := new(bytes.Buffer)
 			err := subscribeWithProtoSchema(buf, tc.ProjectID, subID, protoFilePath)
 			if err != nil {
-				r.Errorf("subsribeWithProtoSchema: %v", err)
+				r.Errorf("subscribeWithProtoSchema: %v", err)
 			}
 			got := buf.String()
-			want := "Received a JSON-encoded message"
+			want := "Alaska is abbreviated as AK"
 			if !strings.Contains(got, want) {
 				r.Errorf("subscribeWithProtoSchema mismatch\ngot: %v\nwant: %v\n", got, want)
 			}
@@ -350,6 +355,56 @@ func TestSchemas_ProtoSchemaAll(t *testing.T) {
 	deleteSchema(ioutil.Discard, tc.ProjectID, protoSchemaID)
 	client.Subscription(subID).Delete(ctx)
 	client.Topic(topicID).Delete(ctx)
+}
+
+func TestSchemas_SchemaRevisions(t *testing.T) {
+	// client, schemaClient := setup(t)
+	// tc := testutil.SystemTest(t)
+	// // ctx := context.Background()
+
+	// topicID := topicPrefix + uuid.NewString()
+	// avroSchemaID := schemaPrefix + "avro-" + uuid.NewString()
+	// protoSchemaID := schemaPrefix + "proto-" + uuid.NewString()
+	// subID := subPrefix + uuid.NewString()
+}
+
+func TestSchemas_UpdateTopicSchema(t *testing.T) {
+	_, schemaClient := setup(t)
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+
+	topicID := topicPrefix + uuid.NewString()
+	protoSchemaID := schemaPrefix + "proto-" + uuid.NewString()
+	protoSchemaID2 := schemaPrefix + "proto-" + uuid.NewString()
+
+	protoSource, err := ioutil.ReadFile(protoFilePath)
+	if err != nil {
+		t.Fatalf("error reading from file: %s", protoFilePath)
+	}
+	schema, err := schemaClient.CreateSchema(ctx, protoSchemaID, pubsub.SchemaConfig{
+		Type:       pubsub.SchemaProtocolBuffer,
+		Definition: string(protoSource),
+	})
+	if err != nil {
+		t.Fatalf("createProtoSchema err: %v", err)
+	}
+
+	_, err = schemaClient.CreateSchema(ctx, protoSchemaID2, pubsub.SchemaConfig{
+		Type:       pubsub.SchemaProtocolBuffer,
+		Definition: string(protoSource),
+	})
+	if err != nil {
+		t.Fatalf("createProtoSchema err: %v", err)
+	}
+
+	if err := createTopicWithSchema(ioutil.Discard, tc.ProjectID, topicID, protoSchemaID, pubsub.EncodingJSON); err != nil {
+		t.Fatalf("createTopicWithSchema: %v", err)
+	}
+
+	buf := new(bytes.Buffer)
+	if err := updateTopicSchema(buf, tc.ProjectID, topicID, schema.RevisionID, schema.RevisionID); err != nil {
+		t.Fatalf("updateTopicSchema err : %v", err)
+	}
 }
 
 func defaultSchemaConfig(projectID, schemaID, schemaFile string, schemaType pubsub.SchemaType) (*pubsub.SchemaConfig, error) {

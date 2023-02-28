@@ -39,7 +39,7 @@ func rollbackSchema(w io.Writer, projectID, schemaID, revisionID string) error {
 	if err != nil {
 		return fmt.Errorf("RollbackSchema: %v", err)
 	}
-	fmt.Fprintf(w, "Rollback schema created: %#v\n", s)
+	fmt.Fprintf(w, "Rolled back a schema: %#v\n", s)
 	return nil
 }
 

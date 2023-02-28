@@ -27,7 +27,7 @@ import (
 // commitAvroSchema commits a new avro schema revision to an existing schema.
 func commitAvroSchema(w io.Writer, projectID, schemaID, avscFile string) error {
 	// projectID := "my-project-id"
-	// schemaID := "my-schema"
+	// schemaID := "my-schema-id"
 	// avscFile = "path/to/an/avro/schema/file(.avsc)/formatted/in/json"
 	ctx := context.Background()
 	client, err := pubsub.NewSchemaClient(ctx, projectID)
@@ -36,6 +36,7 @@ func commitAvroSchema(w io.Writer, projectID, schemaID, avscFile string) error {
 	}
 	defer client.Close()
 
+	// Read an Avro schema file formatted in JSON as a byte slice.
 	avscSource, err := ioutil.ReadFile(avscFile)
 	if err != nil {
 		return fmt.Errorf("error reading from file: %s", avscFile)
@@ -45,11 +46,11 @@ func commitAvroSchema(w io.Writer, projectID, schemaID, avscFile string) error {
 		Type:       pubsub.SchemaAvro,
 		Definition: string(avscSource),
 	}
-	s, err := client.CreateSchema(ctx, schemaID, config)
+	s, err := client.CommitSchema(ctx, schemaID, config)
 	if err != nil {
-		return fmt.Errorf("CreateSchema: %v", err)
+		return fmt.Errorf("CommitSchema: %v", err)
 	}
-	fmt.Fprintf(w, "Schema created: %#v\n", s)
+	fmt.Fprintf(w, "Committed a schema using an Avro schema: %#v\n", s)
 	return nil
 }
 

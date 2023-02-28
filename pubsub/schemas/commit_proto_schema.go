@@ -36,6 +36,7 @@ func commitProtoSchema(w io.Writer, projectID, schemaID, protoFile string) error
 	}
 	defer client.Close()
 
+	// Read a proto file as a byte slice.
 	protoSource, err := ioutil.ReadFile(protoFile)
 	if err != nil {
 		return fmt.Errorf("error reading from file: %s", protoFile)
@@ -45,12 +46,12 @@ func commitProtoSchema(w io.Writer, projectID, schemaID, protoFile string) error
 		Type:       pubsub.SchemaProtocolBuffer,
 		Definition: string(protoSource),
 	}
-	s, err := client.CreateSchema(ctx, schemaID, config)
+	s, err := client.CommitSchema(ctx, schemaID, config)
 	if err != nil {
-		return fmt.Errorf("CreateSchema: %v", err)
+		return fmt.Errorf("CommitSchema: %v", err)
 	}
-	fmt.Fprintf(w, "Schema created: %#v\n", s)
+	fmt.Fprintf(w, "Committed a schema using a protobuf schema: %#v\n", s)
 	return nil
 }
 
-// [END pubsub_create_proto_schema]
+// [END pubsub_commit_proto_schema]

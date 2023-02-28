@@ -24,7 +24,6 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-// listSchemaRevisions lists the revisions for a given
 func listSchemaRevisions(w io.Writer, projectID, schemaID string) ([]*pubsub.SchemaConfig, error) {
 	// projectID := "my-project-id"
 	// schemaID := "my-schema-id"
@@ -46,7 +45,7 @@ func listSchemaRevisions(w io.Writer, projectID, schemaID string) ([]*pubsub.Sch
 		if err != nil {
 			return nil, fmt.Errorf("schemaIter.Next: %v", err)
 		}
-		fmt.Fprintf(w, "Got schema revisions: %#v\n", sc)
+		fmt.Fprintf(w, "Got schema revision: %#v\n", sc)
 		schemas = append(schemas, sc)
 	}
 
