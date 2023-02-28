@@ -32,12 +32,14 @@ func updateDatabase(ctx context.Context, w io.Writer, db string) error {
 		return fmt.Errorf("Invalid database id %s", db)
 	}
 
+	// Instantiate database admin client.
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		return err
 	}
 	defer adminClient.Close()
 
+	// Instantiate the request for performing update database operation.
 	op, err := adminClient.UpdateDatabase(ctx, &adminpb.UpdateDatabaseRequest{
 		Database: &adminpb.Database{
 			Name:                 db,
@@ -50,6 +52,9 @@ func updateDatabase(ctx context.Context, w io.Writer, db string) error {
 	if err != nil {
 		return err
 	}
+
+	// Wait for update database operation to complete.
+	fmt.Fprintf(w, "Waiting for update database operation to complete [%s]\n", db)
 	if _, err := op.Wait(ctx); err != nil {
 		return err
 	}
