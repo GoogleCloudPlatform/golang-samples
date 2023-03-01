@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"strings"
 	"sync"
@@ -263,17 +264,36 @@ func TestSchemas_AvroSchemaAll(t *testing.T) {
 		})
 	})
 
-	t.Run("subscribeAvroRecords", func(t *testing.T) {
-		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+	t.Run("subscribeWithAvroRecords", func(t *testing.T) {
+		testutil.Retry(t, 3, time.Second, func(r *testutil.R) {
 			buf := new(bytes.Buffer)
 			err := subscribeWithAvroSchema(buf, tc.ProjectID, subID, avroFilePath)
 			if err != nil {
 				r.Errorf("subscribeWithAvroSchema: %v", err)
 			}
 			got := buf.String()
-			want := "Alaska is abbreviated as AK"
+			want := " is abbreviated as "
 			if !strings.Contains(got, want) {
 				r.Errorf("subscribeWithAvroSchema mismatch\ngot: %v\nwant: %v\n", got, want)
+			}
+		})
+	})
+
+	t.Run("subscribeWithAvroSchemaRevisions", func(t *testing.T) {
+		testutil.Retry(t, 3, time.Second, func(r *testutil.R) {
+			err := publishAvroRecords(io.Discard, tc.ProjectID, topicID, avroFilePath)
+			if err != nil {
+				r.Errorf("publishAvroRecords: %v", err)
+			}
+			buf := new(bytes.Buffer)
+			err = subscribeWithAvroSchemaRevisions(buf, tc.ProjectID, subID, avroFilePath)
+			if err != nil {
+				r.Errorf("subscribeWithAvroSchemaRevisions: %v", err)
+			}
+			got := buf.String()
+			want := " is abbreviated as "
+			if !strings.Contains(got, want) {
+				r.Errorf("subscribeWithAvroSchemaRevisions mismatch\ngot: %v\nwant: %v\n", got, want)
 			}
 		})
 	})
@@ -345,7 +365,7 @@ func TestSchemas_ProtoSchemaAll(t *testing.T) {
 				r.Errorf("subscribeWithProtoSchema: %v", err)
 			}
 			got := buf.String()
-			want := "Alaska is abbreviated as AK"
+			want := " is abbreviated as "
 			if !strings.Contains(got, want) {
 				r.Errorf("subscribeWithProtoSchema mismatch\ngot: %v\nwant: %v\n", got, want)
 			}

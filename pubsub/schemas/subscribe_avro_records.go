@@ -64,7 +64,7 @@ func subscribeWithAvroSchema(w io.Writer, projectID, subID, avscFile string) err
 				msg.Nack()
 				return
 			}
-			fmt.Printf("Received a binary-encoded message:\n%#v\n", data)
+			fmt.Fprintf(w, "Received a binary-encoded message:\n%#v\n", data)
 			state = data.(map[string]interface{})
 		} else if encoding == "JSON" {
 			data, _, err := codec.NativeFromTextual(msg.Data)

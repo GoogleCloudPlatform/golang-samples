@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"strings"
 	"sync"
 	"time"
 
@@ -61,9 +62,12 @@ func subscribeWithAvroSchemaRevisions(w io.Writer, projectID, subID, avscFile st
 		// codec. It would be more typical to do this asynchronously, but is
 		// shown here in a synchronous way to ease readability.
 		if !ok {
+			// Extract just the schema resource name
+			path := strings.Split(name, "/")
+			name = path[len(path)-1]
 			schema, err := schemaClient.Schema(ctx, fmt.Sprintf("%s@%s", name, revision), pubsub.SchemaViewFull)
 			if err != nil {
-				// Without the schema, we cannot read the message, so nack it.
+				fmt.Fprintf(w, "Nacking, cannot read message without schema: %v\n", err)
 				msg.Nack()
 				return
 			}
@@ -85,7 +89,7 @@ func subscribeWithAvroSchemaRevisions(w io.Writer, projectID, subID, avscFile st
 				msg.Nack()
 				return
 			}
-			fmt.Printf("Received a binary-encoded message:\n%#v\n", data)
+			fmt.Fprintf(w, "Received a binary-encoded message:\n%#v\n", data)
 			state = data.(map[string]interface{})
 		} else if encoding == "JSON" {
 			data, _, err := codec.NativeFromTextual(msg.Data)
