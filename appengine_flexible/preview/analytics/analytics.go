@@ -33,15 +33,7 @@ import (
 // tracking ID for Google Analytics.
 const gaPropertyEnvar = "GA_TRACKING_ID"
 
-// gaPropertyID is the tracking ID to use with Google Analytics.
-var gaPropertyID string
-
 func main() {
-	gaPropertyID = os.Getenv(gaPropertyEnvar)
-	if gaPropertyID == "" {
-		log.Fatalf("%s environment variable not set.\n", gaPropertyEnvar)
-	}
-
 	http.HandleFunc("/", handle)
 	appengine.Main()
 }
@@ -60,6 +52,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 }
 
 func trackEvent(r *http.Request, category, action, label string, customValue string) error {
+	gaPropertyID := os.Getenv(gaPropertyEnvar)
 	if gaPropertyID == "" {
 		return fmt.Errorf("analytics: %s environment variable is missing", gaPropertyEnvar)
 	}
