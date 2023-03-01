@@ -25,10 +25,11 @@ import (
 	"testing"
 
 	"github.com/cloudevents/sdk-go/v2/event"
+	"github.com/googleapis/google-cloudevents-go/cloud/auditdata"
 )
 
-func makeAuditLog(subject string, payload AuditLogProtoPayload) (event.Event, error) {
-	logevent := AuditLogEntry{
+func makeAuditLog(subject string, payload auditdata.AuditLog) (event.Event, error) {
+	logevent := auditdata.LogEntryData{
 		ProtoPayload: &payload,
 	}
 	e := event.New()
@@ -48,16 +49,16 @@ func TestHelloAuditLog(t *testing.T) {
 	tests := []struct {
 		name         string
 		subject      string
-		payload      AuditLogProtoPayload
+		payload      auditdata.AuditLog
 		expectedLogs []string
 	}{
 		{name: "sample-output",
 			subject: "storage.googleapis.com/projects/_/buckets/my-bucket/objects/test.txt",
-			payload: AuditLogProtoPayload{
+			payload: auditdata.AuditLog{
 				MethodName:   "storage.objects.create",
 				ResourceName: "my-resource",
-				AuthenticationInfo: map[string]interface{}{
-					"principalEmail": "example@serviceaccounts.googleapis.com",
+				AuthenticationInfo: &auditdata.AuthenticationInfo{
+					PrincipalEmail: "example@serviceaccounts.googleapis.com",
 				},
 			},
 			expectedLogs: []string{
