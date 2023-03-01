@@ -18,10 +18,8 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"log"
-	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -31,19 +29,20 @@ import (
 	"google.golang.org/appengine"
 )
 
-var gaPropertyID = mustGetenv("GA_TRACKING_ID")
+// gaPropertyEnvar is the name of the environment variable containing a
+// tracking ID for Google Analytics.
+const gaPropertyEnvar = "GA_TRACKING_ID"
 
-func mustGetenv(k string) string {
-	v := os.Getenv(k)
-	if v == "" {
-		log.Fatalf("%s environment variable not set.", k)
-	}
-	return v
-}
+// gaPropertyID is the tracking ID to use with Google Analytics.
+var gaPropertyID string
 
 func main() {
-	http.HandleFunc("/", handle)
+	gaPropertyID = os.Getenv(gaPropertyEnvar)
+	if gaPropertyID == "" {
+		log.Fatalf("%s environment variable not set.\n", gaPropertyEnvar)
+	}
 
+	http.HandleFunc("/", handle)
 	appengine.Main()
 }
 
@@ -53,19 +52,19 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := trackEvent(r, "Example", "Test action", "label", nil); err != nil {
+	if err := trackEvent(r, "Example", "Test action", "label", ""); err != nil {
 		fmt.Fprintf(w, "Event did not track: %v", err)
 		return
 	}
 	fmt.Fprint(w, "Event tracked.")
 }
 
-func trackEvent(r *http.Request, category, action, label string, value *uint) error {
+func trackEvent(r *http.Request, category, action, label string, customValue string) error {
 	if gaPropertyID == "" {
-		return errors.New("analytics: GA_TRACKING_ID environment variable is missing")
+		return fmt.Errorf("analytics: %s environment variable is missing", gaPropertyEnvar)
 	}
 	if category == "" || action == "" {
-		return errors.New("analytics: category and action are required")
+		return fmt.Errorf("analytics: category and action are required")
 	}
 
 	v := url.Values{
@@ -88,12 +87,8 @@ func trackEvent(r *http.Request, category, action, label string, value *uint) er
 		v.Set("el", label)
 	}
 
-	if value != nil {
-		v.Set("ev", fmt.Sprintf("%d", *value))
-	}
-
-	if remoteIP, _, err := net.SplitHostPort(r.RemoteAddr); err != nil {
-		v.Set("uip", remoteIP)
+	if customValue != "" {
+		v.Set("ev", fmt.Sprintf("%s", customValue))
 	}
 
 	// NOTE: Google Analytics returns a 200, even if the request is malformed.
