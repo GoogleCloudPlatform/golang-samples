@@ -26,14 +26,15 @@ import (
 	"cloud.google.com/go/video/transcoder/apiv1/transcoderpb"
 )
 
-// createJobWithStandaloneCaptions creates a job that can use captions from a
+// createJobWithStandaloneCaptions creates a job that can use subtitles from a
 // standalone file. See https://cloud.google.com/transcoder/docs/how-to/captions-and-subtitles
 // for more information.
-func createJobWithStandaloneCaptions(w io.Writer, projectID string, location string, inputVideoURI string, inputCaptionsURI string, outputURI string) error {
+func createJobWithStandaloneCaptions(w io.Writer, projectID string, location string, inputVideoURI string, inputSubtitles1URI string, inputSubtitles2URI string, outputURI string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
 	// inputVideoURI := "gs://my-bucket/my-video-file"
-	// inputCaptionsURI := "gs://my-bucket/my-captions-file"
+	// inputSubtitles1URI := "gs://my-bucket/my-subtitles-file1"
+	// inputSubtitles2URI := "gs://my-bucket/my-subtitles-file2"
 	// outputURI := "gs://my-bucket/my-output-folder/"
 
 	ctx := context.Background()
@@ -55,14 +56,18 @@ func createJobWithStandaloneCaptions(w io.Writer, projectID string, location str
 							Uri: inputVideoURI,
 						},
 						{
-							Key: "caption_input0",
-							Uri: inputCaptionsURI,
+							Key: "subtitle_input_en",
+							Uri: inputSubtitles1URI,
+						},
+						{
+							Key: "subtitle_input_es",
+							Uri: inputSubtitles2URI,
 						},
 					},
 					EditList: []*transcoderpb.EditAtom{
 						{
 							Key:    "atom0",
-							Inputs: []string{"input0", "caption_input0"},
+							Inputs: []string{"input0", "subtitle_input_en", "subtitle_input_es"},
 						},
 					},
 					ElementaryStreams: []*transcoderpb.ElementaryStream{
@@ -91,15 +96,32 @@ func createJobWithStandaloneCaptions(w io.Writer, projectID string, location str
 							},
 						},
 						{
-							Key: "vtt-stream0",
+							Key: "vtt_stream_en",
 							ElementaryStream: &transcoderpb.ElementaryStream_TextStream{
 								TextStream: &transcoderpb.TextStream{
-									Codec: "webvtt",
+									Codec:        "webvtt",
+									LanguageCode: "en-US",
+									DisplayName:  "English",
 									Mapping: []*transcoderpb.TextStream_TextMapping{
 										{
-											AtomKey:    "atom0",
-											InputKey:   "caption_input0",
-											InputTrack: 0,
+											AtomKey:  "atom0",
+											InputKey: "subtitle_input_en",
+										},
+									},
+								},
+							},
+						},
+						{
+							Key: "vtt_stream_es",
+							ElementaryStream: &transcoderpb.ElementaryStream_TextStream{
+								TextStream: &transcoderpb.TextStream{
+									Codec:        "webvtt",
+									LanguageCode: "es-ES",
+									DisplayName:  "Spanish",
+									Mapping: []*transcoderpb.TextStream_TextMapping{
+										{
+											AtomKey:  "atom0",
+											InputKey: "subtitle_input_es",
 										},
 									},
 								},
@@ -118,9 +140,20 @@ func createJobWithStandaloneCaptions(w io.Writer, projectID string, location str
 							ElementaryStreams: []string{"audio_stream0"},
 						},
 						{
-							Key:               "text-vtt",
+							Key:               "text-vtt-en",
 							Container:         "vtt",
-							ElementaryStreams: []string{"vtt-stream0"},
+							ElementaryStreams: []string{"vtt_stream_en"},
+							SegmentSettings: &transcoderpb.SegmentSettings{
+								SegmentDuration: &duration.Duration{
+									Seconds: 6,
+								},
+								IndividualSegments: true,
+							},
+						},
+						{
+							Key:               "text-vtt-es",
+							Container:         "vtt",
+							ElementaryStreams: []string{"vtt_stream_es"},
 							SegmentSettings: &transcoderpb.SegmentSettings{
 								SegmentDuration: &duration.Duration{
 									Seconds: 6,
@@ -133,7 +166,7 @@ func createJobWithStandaloneCaptions(w io.Writer, projectID string, location str
 						{
 							FileName:   "manifest.m3u8",
 							Type:       transcoderpb.Manifest_HLS,
-							MuxStreams: []string{"sd-hls-fmp4", "audio-hls-fmp4", "text-vtt"},
+							MuxStreams: []string{"sd-hls-fmp4", "audio-hls-fmp4", "text-vtt-en", "text-vtt-es"},
 						},
 					},
 				},

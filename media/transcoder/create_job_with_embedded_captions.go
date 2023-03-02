@@ -24,7 +24,7 @@ import (
 	"cloud.google.com/go/video/transcoder/apiv1/transcoderpb"
 )
 
-// createJobWithEmbeddedCaptions creates a job that embeds captions in the
+// createJobWithEmbeddedCaptions creates a job that embeds closed captions in the
 // output video. See https://cloud.google.com/transcoder/docs/how-to/captions-and-subtitles
 // for more information.
 func createJobWithEmbeddedCaptions(w io.Writer, projectID string, location string, inputVideoURI string, inputCaptionsURI string, outputURI string) error {
@@ -89,7 +89,7 @@ func createJobWithEmbeddedCaptions(w io.Writer, projectID string, location strin
 							},
 						},
 						{
-							Key: "cea-stream0",
+							Key: "cea_stream0",
 							ElementaryStream: &transcoderpb.ElementaryStream_TextStream{
 								TextStream: &transcoderpb.TextStream{
 									Codec: "cea608",
@@ -100,16 +100,13 @@ func createJobWithEmbeddedCaptions(w io.Writer, projectID string, location strin
 											InputTrack: 0,
 										},
 									},
+									LanguageCode: "en-US",
+									DisplayName:  "English",
 								},
 							},
 						},
 					},
 					MuxStreams: []*transcoderpb.MuxStream{
-						{
-							Key:               "sd",
-							Container:         "mp4",
-							ElementaryStreams: []string{"video_stream0", "audio_stream0"},
-						},
 						{
 							Key:               "sd-hls",
 							Container:         "ts",
