@@ -55,7 +55,6 @@ func TestDetect(t *testing.T) {
 			continue
 		}
 		t.Run(tt.name+"/local", func(t *testing.T) {
-			t.Parallel()
 			var buf bytes.Buffer
 			if err := tt.local(&buf, "../testdata/"+tt.path); err != nil {
 				t.Fatalf("Local %s(%q): got %v, want nil err", tt.name, tt.path, err)
@@ -71,7 +70,6 @@ func TestDetect(t *testing.T) {
 			continue
 		}
 		t.Run(tt.name+"/gcs", func(t *testing.T) {
-			t.Parallel()
 			var buf bytes.Buffer
 			if err := tt.gcs(&buf, "gs://python-docs-samples-tests/vision/"+tt.path); err != nil {
 				t.Fatalf("GCS %s(%q): got %v, want nil err", tt.name, tt.path, err)

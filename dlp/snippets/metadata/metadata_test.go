@@ -48,7 +48,6 @@ func TestInfoTypes(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.language, func(t *testing.T) {
-			t.Parallel()
 			buf := new(bytes.Buffer)
 			err := infoTypes(buf, test.language, test.filter)
 			if err != nil {

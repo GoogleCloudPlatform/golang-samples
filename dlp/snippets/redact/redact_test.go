@@ -49,7 +49,6 @@ func TestRedactImage(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			t.Parallel()
 			buf := new(bytes.Buffer)
 			// TODO: output to a Writer or bytes rather than to a file on disk.
 			if err := redactImage(buf, tc.ProjectID, test.infoTypes, test.bt, test.inputPath, "testdata/test_output.png"); err != nil {

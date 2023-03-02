@@ -50,7 +50,6 @@ func TestInspectDatastore(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.kind, func(t *testing.T) {
-			t.Parallel()
 			testutil.Retry(t, 5, 15*time.Second, func(r *testutil.R) {
 				u := uuid.Must(uuid.NewV4()).String()[:8]
 				buf := new(bytes.Buffer)
@@ -102,7 +101,6 @@ func TestInspectGCS(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.fileName, func(t *testing.T) {
-			t.Parallel()
 			testutil.Retry(t, 5, 15*time.Second, func(r *testutil.R) {
 				u := uuid.Must(uuid.NewV4()).String()[:8]
 				buf := new(bytes.Buffer)
@@ -261,7 +259,6 @@ func TestInspectBigquery(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.table, func(t *testing.T) {
-			t.Parallel()
 			u := uuid.Must(uuid.NewV4()).String()[:8]
 			buf := new(bytes.Buffer)
 			if err := inspectBigquery(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName+u, subscriptionName+u, tc.ProjectID, bqDatasetID, test.table); err != nil {
