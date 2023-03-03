@@ -8,7 +8,7 @@
 # The go-samples-reviewers team is the default owner for anything not
 # explicitly taken by someone else.
 *                                     @GoogleCloudPlatform/go-samples-reviewers
-/docs/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/
+/docs/                                @GoogleCloudPlatform/go-samples-reviewers
 /getting-started/                     @GoogleCloudPlatform/go-samples-reviewers
 /internal/                            @GoogleCloudPlatform/go-samples-reviewers
 /testing/                             @GoogleCloudPlatform/go-samples-reviewers
