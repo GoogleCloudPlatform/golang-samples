@@ -8,7 +8,7 @@
 # The go-samples-reviewers team is the default owner for anything not
 # explicitly taken by someone else.
 *                                     @GoogleCloudPlatform/go-samples-reviewers
-/docs/                                @GoogleCloudPlatform/go-samples-reviewers
+/docs/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/
 /getting-started/                     @GoogleCloudPlatform/go-samples-reviewers
 /internal/                            @GoogleCloudPlatform/go-samples-reviewers
 /testing/                             @GoogleCloudPlatform/go-samples-reviewers
@@ -21,16 +21,15 @@
 /storage/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-storage-dpes
 /storagetransfer/                     @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-storage-dpes
 
-# AAP
-/appengine/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/aap-dpes
-/appengine_flexible/                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/aap-dpes
-/container_registry/                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/aap-dpes 
-/eventarc/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/aap-dpes
-/functions/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/aap-dpes
-/run/                                 @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/aap-dpes
-/secretmanager/                       @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/aap-dpes 
-/tasks/                               @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/aap-dpes
-/internal/cloudrunci/                 @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/aap-dpes
+# TORUS
+/appengine/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/torus-dpe
+/appengine_flexible/                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/torus-dpe
+/container_registry/                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/torus-dpe
+/eventarc/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/torus-dpe
+/functions/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/torus-dpe
+/run/                                 @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/torus-dpe
+/tasks/                               @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/torus-dpe
+/internal/cloudrunci/                 @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/torus-dpe
 
 # Data & AI DEE
 /automl/                               @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai 
@@ -83,5 +82,6 @@
 /opencensus/                           @GoogleCloudPlatform/go-samples-reviewers
 /opentelemetry/                        @GoogleCloudPlatform/go-samples-reviewers
 /profiler/                             @GoogleCloudPlatform/go-samples-reviewers
+/secretmanager/                        @GoogleCloudPlatform/go-samples-reviewers
 /servicedirectory/                     @GoogleCloudPlatform/go-samples-reviewers
 /spanner/                              @GoogleCloudPlatform/go-samples-reviewers
