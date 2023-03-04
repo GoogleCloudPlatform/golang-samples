@@ -44,6 +44,67 @@ func createJobWithStandaloneCaptions(w io.Writer, projectID string, location str
 	}
 	defer client.Close()
 
+	// Set up elementary streams. The InputKey field refers to inputs in
+	// the Inputs array defined the job config.
+	elementaryStreams := []*transcoderpb.ElementaryStream{
+		{
+			Key: "video_stream0",
+			ElementaryStream: &transcoderpb.ElementaryStream_VideoStream{
+				VideoStream: &transcoderpb.VideoStream{
+					CodecSettings: &transcoderpb.VideoStream_H264{
+						H264: &transcoderpb.VideoStream_H264CodecSettings{
+							BitrateBps:   550000,
+							FrameRate:    60,
+							HeightPixels: 360,
+							WidthPixels:  640,
+						},
+					},
+				},
+			},
+		},
+		{
+			Key: "audio_stream0",
+			ElementaryStream: &transcoderpb.ElementaryStream_AudioStream{
+				AudioStream: &transcoderpb.AudioStream{
+					Codec:      "aac",
+					BitrateBps: 64000,
+				},
+			},
+		},
+		{
+			Key: "vtt_stream_en",
+			ElementaryStream: &transcoderpb.ElementaryStream_TextStream{
+				TextStream: &transcoderpb.TextStream{
+					Codec:        "webvtt",
+					LanguageCode: "en-US",
+					DisplayName:  "English",
+					Mapping: []*transcoderpb.TextStream_TextMapping{
+						{
+							AtomKey:  "atom0",
+							InputKey: "subtitle_input_en",
+						},
+					},
+				},
+			},
+		},
+		{
+			Key: "vtt_stream_es",
+			ElementaryStream: &transcoderpb.ElementaryStream_TextStream{
+				TextStream: &transcoderpb.TextStream{
+					Codec:        "webvtt",
+					LanguageCode: "es-ES",
+					DisplayName:  "Spanish",
+					Mapping: []*transcoderpb.TextStream_TextMapping{
+						{
+							AtomKey:  "atom0",
+							InputKey: "subtitle_input_es",
+						},
+					},
+				},
+			},
+		},
+	}
+
 	req := &transcoderpb.CreateJobRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
 		Job: &transcoderpb.Job{
@@ -70,64 +131,7 @@ func createJobWithStandaloneCaptions(w io.Writer, projectID string, location str
 							Inputs: []string{"input0", "subtitle_input_en", "subtitle_input_es"},
 						},
 					},
-					ElementaryStreams: []*transcoderpb.ElementaryStream{
-						{
-							Key: "video_stream0",
-							ElementaryStream: &transcoderpb.ElementaryStream_VideoStream{
-								VideoStream: &transcoderpb.VideoStream{
-									CodecSettings: &transcoderpb.VideoStream_H264{
-										H264: &transcoderpb.VideoStream_H264CodecSettings{
-											BitrateBps:   550000,
-											FrameRate:    60,
-											HeightPixels: 360,
-											WidthPixels:  640,
-										},
-									},
-								},
-							},
-						},
-						{
-							Key: "audio_stream0",
-							ElementaryStream: &transcoderpb.ElementaryStream_AudioStream{
-								AudioStream: &transcoderpb.AudioStream{
-									Codec:      "aac",
-									BitrateBps: 64000,
-								},
-							},
-						},
-						{
-							Key: "vtt_stream_en",
-							ElementaryStream: &transcoderpb.ElementaryStream_TextStream{
-								TextStream: &transcoderpb.TextStream{
-									Codec:        "webvtt",
-									LanguageCode: "en-US",
-									DisplayName:  "English",
-									Mapping: []*transcoderpb.TextStream_TextMapping{
-										{
-											AtomKey:  "atom0",
-											InputKey: "subtitle_input_en",
-										},
-									},
-								},
-							},
-						},
-						{
-							Key: "vtt_stream_es",
-							ElementaryStream: &transcoderpb.ElementaryStream_TextStream{
-								TextStream: &transcoderpb.TextStream{
-									Codec:        "webvtt",
-									LanguageCode: "es-ES",
-									DisplayName:  "Spanish",
-									Mapping: []*transcoderpb.TextStream_TextMapping{
-										{
-											AtomKey:  "atom0",
-											InputKey: "subtitle_input_es",
-										},
-									},
-								},
-							},
-						},
-					},
+					ElementaryStreams: elementaryStreams,
 					MuxStreams: []*transcoderpb.MuxStream{
 						{
 							Key:               "sd-hls-fmp4",

@@ -41,6 +41,52 @@ func createJobWithEmbeddedCaptions(w io.Writer, projectID string, location strin
 	}
 	defer client.Close()
 
+	// Set up elementary streams. The InputKey field refers to inputs in
+	// the Inputs array defined the job config.
+	elementaryStreams := []*transcoderpb.ElementaryStream{
+		{
+			Key: "video_stream0",
+			ElementaryStream: &transcoderpb.ElementaryStream_VideoStream{
+				VideoStream: &transcoderpb.VideoStream{
+					CodecSettings: &transcoderpb.VideoStream_H264{
+						H264: &transcoderpb.VideoStream_H264CodecSettings{
+							BitrateBps:   550000,
+							FrameRate:    60,
+							HeightPixels: 360,
+							WidthPixels:  640,
+						},
+					},
+				},
+			},
+		},
+		{
+			Key: "audio_stream0",
+			ElementaryStream: &transcoderpb.ElementaryStream_AudioStream{
+				AudioStream: &transcoderpb.AudioStream{
+					Codec:      "aac",
+					BitrateBps: 64000,
+				},
+			},
+		},
+		{
+			Key: "cea_stream0",
+			ElementaryStream: &transcoderpb.ElementaryStream_TextStream{
+				TextStream: &transcoderpb.TextStream{
+					Codec: "cea608",
+					Mapping: []*transcoderpb.TextStream_TextMapping{
+						{
+							AtomKey:    "atom0",
+							InputKey:   "caption_input0",
+							InputTrack: 0,
+						},
+					},
+					LanguageCode: "en-US",
+					DisplayName:  "English",
+				},
+			},
+		},
+	}
+
 	req := &transcoderpb.CreateJobRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
 		Job: &transcoderpb.Job{
@@ -63,49 +109,7 @@ func createJobWithEmbeddedCaptions(w io.Writer, projectID string, location strin
 							Inputs: []string{"input0", "caption_input0"},
 						},
 					},
-					ElementaryStreams: []*transcoderpb.ElementaryStream{
-						{
-							Key: "video_stream0",
-							ElementaryStream: &transcoderpb.ElementaryStream_VideoStream{
-								VideoStream: &transcoderpb.VideoStream{
-									CodecSettings: &transcoderpb.VideoStream_H264{
-										H264: &transcoderpb.VideoStream_H264CodecSettings{
-											BitrateBps:   550000,
-											FrameRate:    60,
-											HeightPixels: 360,
-											WidthPixels:  640,
-										},
-									},
-								},
-							},
-						},
-						{
-							Key: "audio_stream0",
-							ElementaryStream: &transcoderpb.ElementaryStream_AudioStream{
-								AudioStream: &transcoderpb.AudioStream{
-									Codec:      "aac",
-									BitrateBps: 64000,
-								},
-							},
-						},
-						{
-							Key: "cea_stream0",
-							ElementaryStream: &transcoderpb.ElementaryStream_TextStream{
-								TextStream: &transcoderpb.TextStream{
-									Codec: "cea608",
-									Mapping: []*transcoderpb.TextStream_TextMapping{
-										{
-											AtomKey:    "atom0",
-											InputKey:   "caption_input0",
-											InputTrack: 0,
-										},
-									},
-									LanguageCode: "en-US",
-									DisplayName:  "English",
-								},
-							},
-						},
-					},
+					ElementaryStreams: elementaryStreams,
 					MuxStreams: []*transcoderpb.MuxStream{
 						{
 							Key:               "sd-hls",
