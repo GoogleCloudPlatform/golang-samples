@@ -25,18 +25,21 @@ import (
 )
 
 // setClientEndpoint sets the request endpoint.
-func setClientEndpoint(w io.Writer, customEndpoint string) error {
-	// customEndpoint := "https://my-custom-endpoint.example.com/storage/v1"
+func setClientEndpoint(w io.Writer, customEndpoint string, opts ...option.ClientOption) error {
+	// customEndpoint := "https://my-custom-endpoint.example.com/storage/v1/"
+	// opts := []option.ClientOption{}
 	ctx := context.Background()
 
-	// Set a custom request endpoint for this client.
-	client, err := storage.NewClient(ctx, option.WithEndpoint(customEndpoint))
+	// Add the custom endpoint option to any other desired options passed to storage.NewClient.
+	opts = append(opts, option.WithEndpoint(customEndpoint))
+	client, err := storage.NewClient(ctx, opts...)
 	if err != nil {
 		return fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
 
-	fmt.Fprintf(w, "The request endpoint set for the client is: %v\n", customEndpoint)
+	// Use the client as per your custom endpoint, for example, attempt to get a bucket's metadata.
+	client.Bucket("bucket-name").Attrs(ctx)
 	return nil
 }
 

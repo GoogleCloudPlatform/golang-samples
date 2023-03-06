@@ -23,7 +23,13 @@ import (
 	"html"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 )
+
+func init() {
+	functions.HTTP("ParseXML", ParseXML)
+}
 
 // ParseXML is an example of parsing a text/xml request.
 func ParseXML(w http.ResponseWriter, r *http.Request) {

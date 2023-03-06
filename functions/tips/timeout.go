@@ -22,7 +22,13 @@ import (
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 )
+
+func init() {
+	functions.HTTP("Timeout", Timeout)
+}
 
 // Timeout sleeps for 2 minutes and may time out before finishing.
 func Timeout(w http.ResponseWriter, r *http.Request) {
