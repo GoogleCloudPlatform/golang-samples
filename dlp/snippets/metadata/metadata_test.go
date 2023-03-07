@@ -47,6 +47,7 @@ func TestInfoTypes(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
+		test := test
 		t.Run(test.language, func(t *testing.T) {
 			t.Parallel()
 			buf := new(bytes.Buffer)
