@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,15 +18,64 @@
 package datastore_snippets
 
 import (
+	"bytes"
+	"context"
+	"log"
 	"testing"
 
+	"cloud.google.com/go/datastore"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
+var projectID string
+
+func TestMain(m *testing.M) {
+	tc, ok := testutil.ContextMain(m)
+	if !ok {
+		log.Fatal("test project not set up properly")
+		return
+	}
+
+	projectID = tc.ProjectID
+
+	ctx := context.Background()
+	client, err := datastore.NewClient(ctx, projectID)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	// Do setup tasks
+	task := struct {
+		Task string
+	}{
+		Task: "simpleTask",
+	}
+
+	key := datastore.IncompleteKey("TaskList", nil)
+	key, err = client.Put(ctx, key, &task)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Run the sample test
+	m.Run()
+
+	// Do teardown tasks
+	err = client.Delete(ctx, key)
+	log.Fatal(err)
+}
+
 func TestNotEqualQuery(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	err := queryNotEquals(tc.ProjectID)
+	var buf bytes.Buffer
+
+	err := queryNotEquals(&buf, projectID)
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	result := buf.String()
+	if result == "" {
+		t.Error("didn't get result")
 	}
 }

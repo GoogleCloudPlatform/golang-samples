@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,15 +17,17 @@
 
 package datastore_snippets
 
+// [START datastore_not_equals_query]
 import (
 	"context"
 	"fmt"
 	"io"
 
 	"cloud.google.com/go/datastore"
+	"google.golang.org/api/iterator"
 )
 
-func queryNotEquals(projectId string) error {
+func queryNotEquals(w io.Writer, projectId string) error {
 	ctx := context.Background()
 	client, err := datastore.NewClient(ctx, projectId)
 	if err != nil {
@@ -33,24 +35,26 @@ func queryNotEquals(projectId string) error {
 	}
 	defer client.Close()
 
-	// [START datastore_not_equals_query]
 	q := datastore.NewQuery("TaskList")
-	q.FilterField("Task", "!=", []string{"sampleTask"})
-	// [END datastore_not_equals_query]
+	q.FilterField("Task", "!=", []string{"notASimpleTask"})
 
 	it := client.Run(ctx, q)
 	for {
-		var dst interface{}
+		var dst struct {
+			Task string
+		}
 		key, err := it.Next(&dst)
-		if err == io.EOF {
+		if err == iterator.Done {
 			break
 		}
 
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Key retrieved: %v\n", key)
+		fmt.Fprintf(w, "Key retrieved: %v\n", key)
 	}
 
 	return nil
 }
+
+// [END datastore_not_equals_query]
