@@ -54,6 +54,7 @@ func TestDetect(t *testing.T) {
 		if tt.local == nil {
 			continue
 		}
+		tt := tt
 		t.Run(tt.name+"/local", func(t *testing.T) {
 			t.Parallel()
 			var buf bytes.Buffer
@@ -70,6 +71,7 @@ func TestDetect(t *testing.T) {
 		if tt.gcs == nil {
 			continue
 		}
+		tt := tt
 		t.Run(tt.name+"/gcs", func(t *testing.T) {
 			t.Parallel()
 			var buf bytes.Buffer
