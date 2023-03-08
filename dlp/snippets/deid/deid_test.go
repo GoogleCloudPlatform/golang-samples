@@ -47,6 +47,7 @@ func TestMask(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
+		test := test
 		t.Run(test.input, func(t *testing.T) {
 			test := test
 			t.Parallel()
@@ -84,6 +85,7 @@ func TestDeidentifyDateShift(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
+		test := test
 		t.Run(test.input, func(t *testing.T) {
 			test := test
 			t.Parallel()
