@@ -18,7 +18,6 @@ package risk
 import (
 	"bytes"
 	"context"
-	"log"
 	"strings"
 	"testing"
 	"time"
