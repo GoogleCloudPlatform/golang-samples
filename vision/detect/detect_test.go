@@ -56,6 +56,9 @@ func TestDetect(t *testing.T) {
 		}
 		tt := tt
 		t.Run(tt.name+"/local", func(t *testing.T) {
+			if tt.name == "Crop" {
+				t.Skip("skipped due to googlecloudplatform/golang-samples#2900")
+			}
 			t.Parallel()
 			var buf bytes.Buffer
 			if err := tt.local(&buf, "../testdata/"+tt.path); err != nil {
@@ -73,6 +76,9 @@ func TestDetect(t *testing.T) {
 		}
 		tt := tt
 		t.Run(tt.name+"/gcs", func(t *testing.T) {
+			if tt.name == "Crop" {
+				t.Skip("skipped due to googlecloudplatform/golang-samples#2900")
+			}
 			t.Parallel()
 			var buf bytes.Buffer
 			if err := tt.gcs(&buf, "gs://python-docs-samples-tests/vision/"+tt.path); err != nil {
