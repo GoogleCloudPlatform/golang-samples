@@ -18,6 +18,7 @@ package risk
 import (
 	"bytes"
 	"context"
+	"log"
 	"strings"
 	"testing"
 	"time"
@@ -45,22 +46,25 @@ func TestRisk(t *testing.T) {
 		{
 			name: "Numerical",
 			fn: func(r *testutil.R) {
+				t.Skip("disabled due to googlecloudplatform/golang-samples#2897")
 				buf := new(bytes.Buffer)
 				u := uuid.Must(uuid.NewV4()).String()[:8]
 				err := riskNumerical(buf, tc.ProjectID, "bigquery-public-data", riskTopicName+u, riskSubscriptionName+u, "nhtsa_traffic_fatalities", "accident_2015", "state_number")
 				defer cleanupPubsub(t, client, riskTopicName+u, riskSubscriptionName+u)
 				if err != nil {
+					log.Printf("%v\n", err)
 					r.Errorf("riskNumerical got err: %v", err)
 					return
 				}
 				if got, want := buf.String(), "Created job"; !strings.Contains(got, want) {
-					r.Errorf("riskNumerical got %s, want substring %q", got, want)
+					t.Errorf("riskNumerical got %s, want substring %q", got, want)
 				}
 			},
 		},
 		{
 			name: "Categorical",
 			fn: func(r *testutil.R) {
+				t.Skip("disabled due to googlecloudplatform/golang-samples#2897")
 				buf := new(bytes.Buffer)
 				u := uuid.Must(uuid.NewV4()).String()[:8]
 				err := riskCategorical(buf, tc.ProjectID, "bigquery-public-data", riskTopicName+u, riskSubscriptionName+u, "nhtsa_traffic_fatalities", "accident_2015", "state_number")
@@ -77,6 +81,7 @@ func TestRisk(t *testing.T) {
 		{
 			name: "K Anonymity",
 			fn: func(r *testutil.R) {
+				t.Skip("disabled due to googlecloudplatform/golang-samples#2897")
 				buf := new(bytes.Buffer)
 				u := uuid.Must(uuid.NewV4()).String()[:8]
 				err := riskKAnonymity(buf, tc.ProjectID, "bigquery-public-data", riskTopicName+u, riskSubscriptionName+u, "nhtsa_traffic_fatalities", "accident_2015", "state_number", "county")
@@ -93,6 +98,7 @@ func TestRisk(t *testing.T) {
 		{
 			name: "L Diversity",
 			fn: func(r *testutil.R) {
+				t.Skip("disabled due to googlecloudplatform/golang-samples#2897")
 				buf := new(bytes.Buffer)
 				u := uuid.Must(uuid.NewV4()).String()[:8]
 				err := riskLDiversity(buf, tc.ProjectID, "bigquery-public-data", riskTopicName+u, riskSubscriptionName+u, "nhtsa_traffic_fatalities", "accident_2015", "city", "state_number", "county")
@@ -121,6 +127,7 @@ func TestRisk(t *testing.T) {
 	}
 
 	for _, test := range tests {
+		test := test
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 			testutil.Retry(t, 20, 2*time.Second, test.fn)
