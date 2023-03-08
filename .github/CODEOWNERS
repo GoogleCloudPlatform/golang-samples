@@ -35,24 +35,24 @@
 /automl/                               @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai 
 /bigquery/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
 /datacatalog/                          @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai 
-/dataflow/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai @davidcavazos
+/dataflow/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
 /dataproc/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
-/dialogflow/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai @nicain
-/documentai/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai @holtskinner
+/dialogflow/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
+/documentai/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
 /jobs/                                 @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
 /language/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
 /media/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
-/pubsub/                               @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai @anguillanneuf @hongalex 
-/pubsublite/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai @anguillanneuf @hongalex
+/pubsub/                               @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai 
+/pubsublite/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
 /speech/                               @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
 /texttospeech/                         @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
-/translate/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai @nicain 
+/translate/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai 
 /videointelligence/                    @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
 /vision/                               @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
 
 # DEE Infra
-/batch/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra @m-strzelczyk 
-/compute/                              @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra @m-strzelczyk 
+/batch/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra 
+/compute/                              @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra 
 /iam/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra 
 /kms/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra
 /securitycenter/                       @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra 
@@ -61,14 +61,14 @@
 /container/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-platform-ops
 /logging/                              @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-observability 
 /monitoring/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-observability
-/trace/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-observability @ymotongpoo 
+/trace/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-observability 
 
 # Non-DEE owner
 /iot/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/api-iot
 /billing/                              @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/billing-samples-maintainers
-/cdn/                                  @GoogleCloudPlatform/go-samples-reviewers @mpwarres 
-/healthcare/                           @GoogleCloudPlatform/go-samples-reviewers @noerog 
-/mediacdn/                             @GoogleCloudPlatform/go-samples-reviewers @justin-mp @msampathkumar 
+/cdn/                                  @GoogleCloudPlatform/go-samples-reviewers
+/healthcare/                           @GoogleCloudPlatform/go-samples-reviewers 
+/mediacdn/                             @GoogleCloudPlatform/go-samples-reviewers 
 
 # Does not have owner
 /asset/                                @GoogleCloudPlatform/go-samples-reviewers
