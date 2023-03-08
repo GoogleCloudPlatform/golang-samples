@@ -15,9 +15,9 @@
 // Package datastore_snippets contains snippet code for the Cloud Datastore API.
 // The code is not runnable.
 
+// [START datastore_not_equals_query]
 package datastore_snippets
 
-// [START datastore_not_equals_query]
 import (
 	"context"
 	"fmt"
