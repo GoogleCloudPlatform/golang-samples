@@ -64,7 +64,7 @@
 /trace/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-observability @ymotongpoo 
 
 # Non-DEE owner
-/iot/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/api-iot @gcseh 
+/iot/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/api-iot
 /billing/                              @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/billing-samples-maintainers
 /cdn/                                  @GoogleCloudPlatform/go-samples-reviewers @mpwarres 
 /healthcare/                           @GoogleCloudPlatform/go-samples-reviewers @noerog 
