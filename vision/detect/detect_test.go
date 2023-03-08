@@ -44,7 +44,7 @@ func TestDetect(t *testing.T) {
 		{"SafeSearch", detectSafeSearch, detectSafeSearchURI, "wakeupcat.jpg", "Spoofed"},
 		{"Text", detectText, detectTextURI, "text.jpg", "Preparing to install"},
 		{"FullText", detectDocumentText, detectDocumentTextURI, "text.jpg", "Preparing to install"},
-		{"Crop", detectCropHints, detectCropHintsURI, "wakeupcat.jpg", "(0,0)"},
+		{"Crop", detectCropHints, detectCropHintsURI, "wakeupcat.jpg", "crop hints:"},
 		{"Web", detectWeb, detectWebURI, "wakeupcat.jpg", "Web properties"},
 		{"WebGeo", nil, detectWebGeoURI, "city.jpg", "Entities"},
 		{"Objects", localizeObjects, localizeObjectsURI, "puppies.jpg", "Dog"},
