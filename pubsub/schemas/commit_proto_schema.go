@@ -43,6 +43,7 @@ func commitProtoSchema(w io.Writer, projectID, schemaID, protoFile string) error
 	}
 
 	config := pubsub.SchemaConfig{
+		Name:       fmt.Sprintf("projects/%s/schemas/%s", projectID, schemaID),
 		Type:       pubsub.SchemaProtocolBuffer,
 		Definition: string(protoSource),
 	}

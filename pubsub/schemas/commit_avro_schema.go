@@ -43,6 +43,7 @@ func commitAvroSchema(w io.Writer, projectID, schemaID, avscFile string) error {
 	}
 
 	config := pubsub.SchemaConfig{
+		Name:       fmt.Sprintf("projects/%s/schemas/%s", projectID, schemaID),
 		Type:       pubsub.SchemaAvro,
 		Definition: string(avscSource),
 	}

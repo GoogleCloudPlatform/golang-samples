@@ -48,7 +48,7 @@ func createTopicWithSchemaRevisions(w io.Writer, projectID, topicID, schemaID, f
 	if err != nil {
 		return fmt.Errorf("CreateTopicWithConfig: %v", err)
 	}
-	fmt.Fprintf(w, "Topic with schema created: %#v\n", t)
+	fmt.Fprintf(w, "Created topic with schema revision: %#v\n", t)
 	return nil
 }
 
