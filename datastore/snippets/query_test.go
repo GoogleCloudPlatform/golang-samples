@@ -81,3 +81,31 @@ func TestNotEqualQuery(t *testing.T) {
 		t.Error("didn't get result")
 	}
 }
+
+func TestInQuery(t *testing.T) {
+	var buf bytes.Buffer
+
+	err := queryIn(&buf, projectID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	result := buf.String()
+	if result == "" {
+		t.Error("didn't get result")
+	}
+}
+
+func TestNotInQuery(t *testing.T) {
+	var buf bytes.Buffer
+
+	err := queryNotIn(&buf, projectID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	result := buf.String()
+	if result == "" {
+		t.Error("didn't get result")
+	}
+}
