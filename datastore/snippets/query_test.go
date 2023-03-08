@@ -63,7 +63,9 @@ func TestMain(m *testing.M) {
 
 	// Do teardown tasks
 	err = client.Delete(ctx, key)
-	log.Fatal(err)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func TestNotEqualQuery(t *testing.T) {
