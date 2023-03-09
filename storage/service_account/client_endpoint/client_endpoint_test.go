@@ -16,24 +16,51 @@ package clientendpoint
 
 import (
 	"bytes"
+	"net/http"
 	"os"
 	"strings"
 	"testing"
+
+	"google.golang.org/api/option"
 )
+
+type mockTransport struct {
+	gotURL  []string
+	gotPath []string
+}
+
+func (t *mockTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	// Mock a success roundtrip to extract request URL
+	t.gotURL = append(t.gotURL, req.URL.String())
+	t.gotPath = append(t.gotPath, req.URL.Path)
+
+	return &http.Response{StatusCode: 200}, nil
+}
 
 func TestSetClientEndpoint(t *testing.T) {
 	if os.Getenv("GOOGLE_APPLICATION_CREDENTIALS") == "" {
 		t.Skip("GOOGLE_APPLICATION_CREDENTIALS not set")
 	}
 
-	customEndpoint := "http://localhost:8080/storage/v1/"
+	baseURL := "https://localhost:8080/"
+	path := "storage/v1/"
+	customEndpoint := baseURL + path
 
 	var buf bytes.Buffer
-	if err := setClientEndpoint(&buf, customEndpoint); err != nil {
+	mt := mockTransport{}
+	opt := option.WithHTTPClient(&http.Client{Transport: &mt})
+	if err := setClientEndpoint(&buf, customEndpoint, opt); err != nil {
 		t.Errorf("setClientEndpoint: %s", err)
 	}
-
-	if got, want := buf.String(), "request endpoint set for the client"; !strings.Contains(got, want) {
-		t.Errorf("setClientEndpoint: got %q; want to contain %q", got, want)
+	// Test request URL is set to custom endpoint.
+	for _, got := range mt.gotURL {
+		if !strings.Contains(got, baseURL) {
+			t.Errorf("setClientEndpoint: got request base URL %q; want to contain %q", got, baseURL)
+		}
+	}
+	for _, got := range mt.gotPath {
+		if !strings.Contains(got, path) {
+			t.Errorf("setClientEndpoint: got request URL path %q; want to contain %q", got, path)
+		}
 	}
 }
