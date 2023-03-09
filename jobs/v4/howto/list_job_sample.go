@@ -14,15 +14,15 @@
 
 package howto
 
-// [START job_search_list_job]
+// [START job_search_list_jobs]
 import (
 	"context"
 	"fmt"
 	"io"
 
 	talent "cloud.google.com/go/talent/apiv4beta1"
+	"cloud.google.com/go/talent/apiv4beta1/talentpb"
 	"google.golang.org/api/iterator"
-	talentpb "google.golang.org/genproto/googleapis/cloud/talent/v4beta1"
 )
 
 // listJobs lists jobs with a filter, for example
@@ -35,6 +35,7 @@ func listJobs(w io.Writer, projectID, companyID string) error {
 	if err != nil {
 		return fmt.Errorf("talent.NewJobClient: %v", err)
 	}
+	defer c.Close()
 
 	// Construct a listJobs request.
 	companyName := fmt.Sprintf("projects/%s/companies/%s", projectID, companyID)

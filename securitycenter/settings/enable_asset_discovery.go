@@ -15,14 +15,14 @@
 // Package settings contains snippets for working with CSCC organization settings.
 package settings
 
-// [START get_org_settings]
+// [START securitycenter_enable_asset_discovery]
 import (
 	"context"
 	"fmt"
 	"io"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
-	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
+	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 	"google.golang.org/genproto/protobuf/field_mask"
 )
 
@@ -57,4 +57,4 @@ func enableAssetDiscovery(w io.Writer, orgID string) error {
 	return nil
 }
 
-// [END get_org_settings]
+// [END securitycenter_enable_asset_discovery]

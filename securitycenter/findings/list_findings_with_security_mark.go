@@ -14,15 +14,15 @@
 
 package findings
 
-// [START list_findings_with_marks]
+// [START securitycenter_list_findings_with_security_marks]
 import (
 	"context"
 	"fmt"
 	"io"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
+	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 	"google.golang.org/api/iterator"
-	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
 )
 
 // listFindingsWithMarks prints findings that don't have a security mark
@@ -59,4 +59,4 @@ func listFindingsWithMarks(w io.Writer, sourceName string) error {
 	return nil
 }
 
-// [END list_findings_with_marks]
+// [END securitycenter_list_findings_with_security_marks]

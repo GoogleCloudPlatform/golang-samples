@@ -14,14 +14,14 @@
 
 package settings
 
-// [START get_org_settings]
+// [START securitycenter_get_org_settings]
 import (
 	"context"
 	"fmt"
 	"io"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
-	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
+	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 )
 
 // getOrgSettings gets and prints the current organization asset discovery
@@ -48,4 +48,4 @@ func getOrgSettings(w io.Writer, orgID string) error {
 	return nil
 }
 
-// [END get_org_settings]
+// [END securitycenter_get_org_settings]

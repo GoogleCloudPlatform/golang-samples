@@ -46,9 +46,10 @@ func main() {
 	redisAddr := fmt.Sprintf("%s:%s", redisHost, redisPort)
 
 	const maxConnections = 10
-	redisPool = redis.NewPool(func() (redis.Conn, error) {
-		return redis.Dial("tcp", redisAddr)
-	}, maxConnections)
+	redisPool = &redis.Pool{
+		MaxIdle: maxConnections,
+		Dial:    func() (redis.Conn, error) { return redis.Dial("tcp", redisAddr) },
+	}
 
 	http.HandleFunc("/", incrementHandler)
 

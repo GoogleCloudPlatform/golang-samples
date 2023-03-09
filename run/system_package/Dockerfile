@@ -14,7 +14,7 @@
 
 # Use the offical Golang image to create a build artifact.
 # https://hub.docker.com/_/golang
-FROM golang:1.13-buster as builder
+FROM golang:1.17-buster as builder
 
 # Create and change to the app directory.
 WORKDIR /app
@@ -29,17 +29,19 @@ RUN go mod download
 COPY . ./
 
 # Build the binary.
-RUN go build -mod=readonly -v -o server
+RUN go build -v -o server
 # Use a Docker multi-stage build to create a lean production image.
 # https://docs.docker.com/develop/develop-images/multistage-build/#use-multi-stage-builds
 # https://hub.docker.com/_/ubuntu
 FROM ubuntu
 
+# [START cloudrun_system_package_ubuntu]
 # [START run_system_package_ubuntu]
 RUN apt-get update -y && apt-get install -y \
   graphviz \
   && apt-get clean
 # [END run_system_package_ubuntu]
+# [END cloudrun_system_package_ubuntu]
 
 # Copy the binary to the production image from the builder stage.
 COPY --from=builder /app/server /server

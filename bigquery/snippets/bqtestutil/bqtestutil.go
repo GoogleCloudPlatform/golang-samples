@@ -26,7 +26,7 @@ import (
 func UniqueBQName(prefix string) (string, error) {
 	u, err := uuid.NewV4()
 	if err != nil {
-		return "", fmt.Errorf("failed to generate bq uuid: %v", err)
+		return "", fmt.Errorf("failed to generate bq uuid: %w", err)
 	}
 	return fmt.Sprintf("%s_%s", sanitize(prefix, "_"), sanitize(u.String(), "_")), nil
 }
@@ -35,7 +35,7 @@ func UniqueBQName(prefix string) (string, error) {
 func UniqueBucketName(prefix, projectID string) (string, error) {
 	u, err := uuid.NewV4()
 	if err != nil {
-		return "", fmt.Errorf("failed to generate bucket uuid: %v", err)
+		return "", fmt.Errorf("failed to generate bucket uuid: %w", err)
 	}
 	f := fmt.Sprintf("%s-%s-%s", sanitize(prefix, "-"), sanitize(projectID, "-"), sanitize(u.String(), "-"))
 	// bucket max name length is 63 chars, so we truncate.
@@ -54,17 +54,18 @@ func sanitize(s string, allowedSeparator string) string {
 	return reg.ReplaceAllString(s, "")
 }
 
-// RunCMEKTests probes whether CMEK-based tests should run.
-func RunCMEKTests() bool {
+// SkipCMEKTests probes whether CMEK-based tests should be skipped.
+func SkipCMEKTests() bool {
 	// KOKORO_BUILD_ID is set by the CI testing we use, and is a quick
 	// heuristic for testing whether this is a CI-based build.
-	_, ok := os.LookupEnv("KOKORO_BUILD_ID")
-	if ok {
-		return true
+	if _, onKokoro := os.LookupEnv("KOKORO_BUILD_ID"); onKokoro {
+		// don't skip, we're running in kokoro where we have everything setup
+		return false
 	}
 
 	// If you're running locally and want CMEK testing to happen regardless, use
 	// the RUN_CMEK_TESTS environment variable.
-	_, ok = os.LookupEnv("RUN_CMEK_TESTS")
-	return ok
+	_, runCMEK := os.LookupEnv("RUN_CMEK_TESTS")
+	// invert for the skip
+	return !runCMEK
 }

@@ -26,8 +26,8 @@ import (
 	"strconv"
 
 	asset "cloud.google.com/go/asset/apiv1"
+	"cloud.google.com/go/asset/apiv1/assetpb"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
-	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1"
 )
 
 // Command-line flags.
@@ -42,6 +42,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("asset.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	cloudresourcemanagerClient, err := cloudresourcemanager.NewService(ctx)

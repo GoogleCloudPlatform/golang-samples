@@ -14,15 +14,15 @@
 
 package howto
 
-// [START job_search_list_company]
+// [START job_search_list_companies]
 import (
 	"context"
 	"fmt"
 	"io"
 
 	talent "cloud.google.com/go/talent/apiv4beta1"
+	"cloud.google.com/go/talent/apiv4beta1/talentpb"
 	"google.golang.org/api/iterator"
-	talentpb "google.golang.org/genproto/googleapis/cloud/talent/v4beta1"
 )
 
 // listCompanies lists all companies in the project.
@@ -34,6 +34,7 @@ func listCompanies(w io.Writer, projectID string) error {
 	if err != nil {
 		return fmt.Errorf("talent.NewCompanyClient: %v", err)
 	}
+	defer c.Close()
 
 	// Construct a listCompanies request.
 	req := &talentpb.ListCompaniesRequest{

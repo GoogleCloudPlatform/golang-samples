@@ -14,15 +14,15 @@
 
 package assets
 
-// [START list_assets_with_security_marks]
+// [START securitycenter_list_assets_with_security_marks]
 import (
 	"context"
 	"fmt"
 	"io"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
+	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 	"google.golang.org/api/iterator"
-	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
 )
 
 // listAssetsWithMarks prints assets that have a mark of key_a equal to value_a
@@ -60,4 +60,4 @@ func listAssetsWithMarks(w io.Writer, orgID string) error {
 	return nil
 }
 
-// [END list_assets_with_security_marks]
+// [END securitycenter_list_assets_with_security_marks]

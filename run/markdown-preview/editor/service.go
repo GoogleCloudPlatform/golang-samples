@@ -45,29 +45,24 @@ func NewServiceFromEnv() (*Service, error) {
 	if url == "" {
 		return nil, errors.New("no configuration for upstream render service: add EDITOR_UPSTREAM_RENDER_URL environment variable")
 	}
-	auth := os.Getenv("EDITOR_UPSTREAM_UNAUTHENTICATED") == ""
-	if !auth {
-		log.Println("editor: starting in unauthenticated upstream mode")
-	}
 
 	// The use case of this service is the UI driven by these files.
 	// Loading them as part of the server startup process keeps failures easily
 	// discoverable and minimizes latency for the first request.
 	parsedTemplate, err := template.ParseFiles("templates/index.html")
 	if err != nil {
-		return nil, fmt.Errorf("template.ParseFiles: %v", err)
+		return nil, fmt.Errorf("template.ParseFiles: %w", err)
 	}
 
 	out, err := ioutil.ReadFile("templates/markdown.md")
 	if err != nil {
-		return nil, fmt.Errorf("ioutil.ReadFile: %v", err)
+		return nil, fmt.Errorf("ioutil.ReadFile: %w", err)
 	}
 	markdownDefault := string(out)
 
 	return &Service{
 		Renderer: &RenderService{
-			URL:           url,
-			Authenticated: auth,
+			URL: url,
 		},
 		parsedTemplate:  parsedTemplate,
 		markdownDefault: markdownDefault,
@@ -124,10 +119,6 @@ func (s *Service) renderHandler(w http.ResponseWriter, r *http.Request) {
 	rendered, err := s.Renderer.Render([]byte(d.Data))
 	if err != nil {
 		log.Printf("MarkdownRenderer.Render: %v", err)
-		if strings.Contains(err.Error(), "metadata.Get") {
-			log.Printf("If running locally try restarting with the environment variable 'EDITOR_UPSTREAM_UNAUTHENTICATED=1'")
-		}
-
 		msg := http.StatusText(http.StatusInternalServerError)
 		if strings.Contains(err.Error(), "http.Client.Do") {
 			msg = fmt.Sprintf("<h3>%s (%d)</h3>\n<p>The request to the upstream render service failed with the message:</p>\n<p>%s</p>", http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError, rendered)

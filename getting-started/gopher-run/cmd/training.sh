@@ -1,3 +1,4 @@
+#! /bin/bash
 # Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,19 +36,19 @@ while true; do
   DATE="$(date '+%Y%m%d_%H%M%S')"
   # Include date so JOB_ID is unique
   JOB_ID="${MODEL_NAME}_${DATE}"
-  gcloud beta ai-platform jobs submit training $JOB_ID \
+  gcloud beta ai-platform jobs submit training "$JOB_ID" \
   --master-image-uri=$IMAGE_URI --scale-tier=BASIC --job-dir=$JOB_DIR \
   -- \
   --preprocess --training_data_path=$TRAINING_DATA_PATH --objective=multi:softmax --num_class=4
 
   VERSION_NAME="V_${DATE}"
-  gcloud ai-platform versions create $VERSION_NAME \
+  gcloud ai-platform versions create "$VERSION_NAME" \
   --model ${MODEL_NAME} \
   --origin "${JOB_DIR}model/" \
   --runtime-version=1.11 \
   --framework ${FRAMEWORK} \
   --python-version=2.7
-  gcloud ai-platform versions set-default ${VERSION_NAME} --model=${MODEL_NAME}
+  gcloud ai-platform versions set-default "${VERSION_NAME}" --model="${MODEL_NAME}"
 
   # Repeate every 30 minutes
   sleep 1800

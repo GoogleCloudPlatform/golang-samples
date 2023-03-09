@@ -27,7 +27,7 @@ import (
 	"math/big"
 
 	kms "cloud.google.com/go/kms/apiv1"
-	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
+	"cloud.google.com/go/kms/apiv1/kmspb"
 )
 
 // verifyAsymmetricSignatureEC will verify that an 'EC_SIGN_P256_SHA256' signature is
@@ -43,6 +43,7 @@ func verifyAsymmetricSignatureEC(w io.Writer, name string, message, signature []
 	if err != nil {
 		return fmt.Errorf("failed to create kms client: %v", err)
 	}
+	defer client.Close()
 
 	// Retrieve the public key from KMS.
 	response, err := client.GetPublicKey(ctx, &kmspb.GetPublicKeyRequest{Name: name})
@@ -59,7 +60,7 @@ func verifyAsymmetricSignatureEC(w io.Writer, name string, message, signature []
 	}
 	ecKey, ok := publicKey.(*ecdsa.PublicKey)
 	if !ok {
-		return fmt.Errorf("public key is not rsa")
+		return fmt.Errorf("public key is not elliptic curve")
 	}
 
 	// Verify Elliptic Curve signature.

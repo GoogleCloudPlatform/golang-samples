@@ -14,15 +14,15 @@
 
 package assets
 
-// [START list_project_assets]
+// [START securitycenter_list_assets_with_filter]
 import (
 	"context"
 	"fmt"
 	"io"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
+	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 	"google.golang.org/api/iterator"
-	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
 )
 
 // listAllProjectAssets lists all current GCP project assets in orgID and
@@ -61,4 +61,4 @@ func listAllProjectAssets(w io.Writer, orgID string) error {
 	return nil
 }
 
-// [END list_project_assets]
+// [END securitycenter_list_assets_with_filter]

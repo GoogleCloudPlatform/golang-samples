@@ -137,7 +137,7 @@ gcloud sql connect $INSTANCE_NAME --user=root
 ```
 
 Execute the statements in
-[data/database_setup.sql](https://github.com/GoogleCloudPlatform/golang-samples/blob/master/getting-started/devflowapp/data/dastabase_setup.sql).
+[data/database_setup.sql](https://github.com/GoogleCloudPlatform/golang-samples/blob/main/getting-started/devflowapp/data/dastabase_setup.sql).
 
 ### Working with the Database in a Local Development Environment (Optional)
 
@@ -280,5 +280,5 @@ gcloud builds submit --config build/cb-e2etest.yaml .
 For more on Google Cloud Build see the recording of the [Cloud
 Build](https://cloud.google.com/cloud-build/)
 documentation page. Also see the [Go
-Bookshelf](https://github.com/GoogleCloudPlatform/golang-samples/tree/master/getting-started/bookshelf)
+Bookshelf](https://github.com/GoogleCloudPlatform/golang-samples/tree/main/getting-started/bookshelf)
 example app for the use of a number of storage options with Go.

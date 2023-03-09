@@ -14,14 +14,14 @@
 
 package findings
 
-// [START create_source]
+// [START securitycenter_create_source]
 import (
 	"context"
 	"fmt"
 	"io"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
-	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
+	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 )
 
 // createSource creates a new source for organization orgID. orgID is
@@ -53,4 +53,4 @@ func createSource(w io.Writer, orgID string) error {
 	return nil
 }
 
-// [END create_source]
+// [END securitycenter_create_source]

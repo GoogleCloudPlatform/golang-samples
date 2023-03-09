@@ -21,7 +21,7 @@ import (
 	"io"
 
 	kms "cloud.google.com/go/kms/apiv1"
-	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
+	"cloud.google.com/go/kms/apiv1/kmspb"
 )
 
 // createKeyVersion creates a new key version for the given key.
@@ -34,6 +34,7 @@ func createKeyVersion(w io.Writer, parent string) error {
 	if err != nil {
 		return fmt.Errorf("failed to create kms client: %v", err)
 	}
+	defer client.Close()
 
 	// Build the request.
 	req := &kmspb.CreateCryptoKeyVersionRequest{

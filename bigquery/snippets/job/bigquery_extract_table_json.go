@@ -26,11 +26,11 @@ import (
 // write the contents of a table into Cloud Storage as newline delimited JSON.
 func exportTableAsJSON(projectID, gcsURI string) error {
 	// projectID := "my-project-id"
-	// gcsUri := "gs://mybucket/shakespeare.json"
+	// gcsURI := "gs://mybucket/shakespeare.json"
 	ctx := context.Background()
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("bigquery.NewClient: %v", err)
+		return fmt.Errorf("bigquery.NewClient: %w", err)
 	}
 	defer client.Close()
 

@@ -21,7 +21,7 @@ import (
 	"io"
 
 	talent "cloud.google.com/go/talent/apiv4beta1"
-	talentpb "google.golang.org/genproto/googleapis/cloud/talent/v4beta1"
+	"cloud.google.com/go/talent/apiv4beta1/talentpb"
 )
 
 // getCompany gets an existing company by its resource name.
@@ -33,6 +33,7 @@ func getCompany(w io.Writer, projectID, companyID string) (*talentpb.Company, er
 	if err != nil {
 		return nil, fmt.Errorf("talent.NewCompanyClient: %v", err)
 	}
+	defer c.Close()
 
 	// Construct a getCompany request.
 	companyName := fmt.Sprintf("projects/%s/companies/%s", projectID, companyID)

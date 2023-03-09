@@ -23,8 +23,8 @@ import (
 	"log"
 
 	kms "cloud.google.com/go/kms/apiv1"
+	"cloud.google.com/go/kms/apiv1/kmspb"
 	"google.golang.org/api/iterator"
-	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
 func main() {
@@ -40,6 +40,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to setup client: %v", err)
 	}
+	defer client.Close()
 
 	// Create the request to list KeyRings.
 	listKeyRingsReq := &kmspb.ListKeyRingsRequest{

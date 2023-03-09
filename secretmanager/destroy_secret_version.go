@@ -20,7 +20,7 @@ import (
 	"fmt"
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
-	secretmanagerpb "google.golang.org/genproto/googleapis/cloud/secretmanager/v1"
+	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
 )
 
 // destroySecretVersion destroys the given secret version, making the payload
@@ -34,6 +34,7 @@ func destroySecretVersion(name string) error {
 	if err != nil {
 		return fmt.Errorf("failed to create secretmanager client: %v", err)
 	}
+	defer client.Close()
 
 	// Build the request.
 	req := &secretmanagerpb.DestroySecretVersionRequest{

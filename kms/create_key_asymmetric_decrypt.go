@@ -19,9 +19,11 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	kms "cloud.google.com/go/kms/apiv1"
-	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
+	"cloud.google.com/go/kms/apiv1/kmspb"
+	"google.golang.org/protobuf/types/known/durationpb"
 )
 
 // createKeyAsymmetricDecrypt creates a new asymmetric RSA encrypt/decrypt key
@@ -36,6 +38,7 @@ func createKeyAsymmetricDecrypt(w io.Writer, parent, id string) error {
 	if err != nil {
 		return fmt.Errorf("failed to create kms client: %v", err)
 	}
+	defer client.Close()
 
 	// Build the request.
 	req := &kmspb.CreateCryptoKeyRequest{
@@ -46,6 +49,9 @@ func createKeyAsymmetricDecrypt(w io.Writer, parent, id string) error {
 			VersionTemplate: &kmspb.CryptoKeyVersionTemplate{
 				Algorithm: kmspb.CryptoKeyVersion_RSA_DECRYPT_OAEP_2048_SHA256,
 			},
+
+			// Optional: customize how long key versions should be kept before destroying.
+			DestroyScheduledDuration: durationpb.New(24 * time.Hour),
 		},
 	}
 

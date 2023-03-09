@@ -21,8 +21,8 @@ import (
 	"io"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
+	"cloud.google.com/go/dlp/apiv2/dlppb"
 	"github.com/golang/protobuf/ptypes/duration"
-	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
 // createTrigger creates a trigger with the given configuration.
@@ -40,6 +40,7 @@ func createTrigger(w io.Writer, projectID string, triggerID, displayName, descri
 	if err != nil {
 		return fmt.Errorf("dlp.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	// Convert the info type strings to a list of InfoTypes.
 	var infoTypes []*dlppb.InfoType
@@ -49,7 +50,7 @@ func createTrigger(w io.Writer, projectID string, triggerID, displayName, descri
 
 	// Create a configured request.
 	req := &dlppb.CreateJobTriggerRequest{
-		Parent:    "projects/" + projectID,
+		Parent:    fmt.Sprintf("projects/%s/locations/global", projectID),
 		TriggerId: triggerID,
 		JobTrigger: &dlppb.JobTrigger{
 			DisplayName: displayName,

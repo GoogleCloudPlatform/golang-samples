@@ -47,7 +47,9 @@ func TestMask(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
+		test := test
 		t.Run(test.input, func(t *testing.T) {
+			test := test
 			t.Parallel()
 			buf := new(bytes.Buffer)
 			err := mask(buf, tc.ProjectID, test.input, []string{"US_SOCIAL_SECURITY_NUMBER"}, test.maskingCharacter, test.numberToMask)
@@ -83,7 +85,9 @@ func TestDeidentifyDateShift(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
+		test := test
 		t.Run(test.input, func(t *testing.T) {
+			test := test
 			t.Parallel()
 			buf := new(bytes.Buffer)
 			err := deidentifyDateShift(buf, tc.ProjectID, test.lowerBound, test.upperBound, test.input)

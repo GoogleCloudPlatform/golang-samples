@@ -24,9 +24,9 @@ import (
 	"testing"
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
+	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/gofrs/uuid"
-	secretmanagerpb "google.golang.org/genproto/googleapis/cloud/secretmanager/v1"
 	grpccodes "google.golang.org/grpc/codes"
 	grpcstatus "google.golang.org/grpc/status"
 )
@@ -153,6 +153,23 @@ func TestAddSecretVersion(t *testing.T) {
 	}
 }
 
+func TestConsumeEventNotification(t *testing.T) {
+	v, err := ConsumeEventNotification(context.Background(), PubSubMessage{
+		Attributes: PubSubAttributes{
+			SecretId:  "projects/p/secrets/s",
+			EventType: "SECRET_UPDATE",
+		},
+		Data: []byte("hello!"),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := v, `Received SECRET_UPDATE for projects/p/secrets/s. New metadata: "hello!".`; !strings.Contains(got, want) {
+		t.Errorf("consumeEventNotification: expected %q to contain %q", got, want)
+	}
+}
+
 func TestCreateSecret(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -168,6 +185,25 @@ func TestCreateSecret(t *testing.T) {
 
 	if got, want := b.String(), "Created secret:"; !strings.Contains(got, want) {
 		t.Errorf("createSecret: expected %q to contain %q", got, want)
+	}
+}
+
+func TestCreateUserManagedReplicationSecret(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secretID := "createUmmrSecret"
+	locations := []string{"us-east1", "us-east4", "us-west1"}
+
+	parent := fmt.Sprintf("projects/%s", tc.ProjectID)
+	defer testCleanupSecret(t, fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID))
+
+	var b bytes.Buffer
+	if err := createUserManagedReplicationSecret(&b, parent, secretID, locations); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Created secret with user managed replication:"; !strings.Contains(got, want) {
+		t.Errorf("createUserManagedReplicationSecret: expected %q to contain %q", got, want)
 	}
 }
 
@@ -190,6 +226,25 @@ func TestDeleteSecret(t *testing.T) {
 	}
 }
 
+func TestDeleteSecretWithEtag(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secret := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret.Name)
+
+	if err := deleteSecretWithEtag(secret.Name, secret.Etag); err != nil {
+		t.Fatal(err)
+	}
+
+	client, ctx := testClient(t)
+	_, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secret.Name,
+	})
+	if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
+		t.Errorf("deleteSecret: expected %v to be not found", err)
+	}
+}
+
 func TestDestroySecretVersion(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -200,6 +255,30 @@ func TestDestroySecretVersion(t *testing.T) {
 	version := testSecretVersion(t, secret.Name, payload)
 
 	if err := destroySecretVersion(version.Name); err != nil {
+		t.Fatal(err)
+	}
+
+	client, ctx := testClient(t)
+	v, err := client.GetSecretVersion(ctx, &secretmanagerpb.GetSecretVersionRequest{
+		Name: version.Name,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := v.State, secretmanagerpb.SecretVersion_DESTROYED; got != want {
+		t.Errorf("testSecretVersion: expected %v to be %v", got, want)
+	}
+}
+
+func TestDestroySecretVersionWithEtag(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	payload := []byte("my-secret")
+	secret := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret.Name)
+
+	version := testSecretVersion(t, secret.Name, payload)
+
+	if err := destroySecretVersionWithEtag(version.Name, version.Etag); err != nil {
 		t.Fatal(err)
 	}
 
@@ -240,6 +319,45 @@ func TestDisableEnableSecretVersion(t *testing.T) {
 	}
 
 	if err := enableSecretVersion(version.Name); err != nil {
+		t.Fatal(err)
+	}
+
+	v, err = client.GetSecretVersion(ctx, &secretmanagerpb.GetSecretVersionRequest{
+		Name: version.Name,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := v.State, secretmanagerpb.SecretVersion_ENABLED; got != want {
+		t.Errorf("testSecretVersion: expected %v to be %v", got, want)
+	}
+}
+
+func TestDisableEnableSecretVersionWithEtag(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	payload := []byte("my-secret")
+	secret := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret.Name)
+
+	version := testSecretVersion(t, secret.Name, payload)
+
+	if err := disableSecretVersionWithEtag(version.Name, version.Etag); err != nil {
+		t.Fatal(err)
+	}
+
+	client, ctx := testClient(t)
+	v, err := client.GetSecretVersion(ctx, &secretmanagerpb.GetSecretVersionRequest{
+		Name: version.Name,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := v.State, secretmanagerpb.SecretVersion_DISABLED; got != want {
+		t.Errorf("testSecretVersion: expected %v to be %v", got, want)
+	}
+
+	if err := enableSecretVersionWithEtag(version.Name, v.Etag); err != nil {
 		t.Fatal(err)
 	}
 
@@ -380,6 +498,30 @@ func TestListSecretVersions(t *testing.T) {
 	}
 }
 
+func TestListSecretVersionsWithFilter(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	payload := []byte("my-secret")
+	secret := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret.Name)
+
+	version1 := testSecretVersion(t, secret.Name, payload)
+	version2 := testSecretVersion(t, secret.Name, payload)
+
+	var b bytes.Buffer
+	if err := listSecretVersionsWithFilter(&b, secret.Name, fmt.Sprintf("name:%s", version1.Name)); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), fmt.Sprintf("%s with state ENABLED", version1.Name); !strings.Contains(got, want) {
+		t.Errorf("listSecretVersions: expected %q to contain %q", got, want)
+	}
+
+	if got, lacked := b.String(), fmt.Sprintf("%s with state ENABLED", version2.Name); strings.Contains(got, lacked) {
+		t.Errorf("listSecretVersions: expected %q to not contain %q", got, lacked)
+	}
+}
+
 func TestListSecrets(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -400,6 +542,29 @@ func TestListSecrets(t *testing.T) {
 
 	if got, want := b.String(), secret2.Name; !strings.Contains(got, want) {
 		t.Errorf("listSecrets: expected %q to contain %q", got, want)
+	}
+}
+
+func TestListSecretsWithFilter(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secret1 := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret1.Name)
+
+	secret2 := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret2.Name)
+
+	var b bytes.Buffer
+	if err := listSecretsWithFilter(&b, fmt.Sprintf("projects/%s", tc.ProjectID), fmt.Sprintf("name:%s", secret1.Name)); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), secret1.Name; !strings.Contains(got, want) {
+		t.Errorf("listSecrets: expected %q to contain %q", got, want)
+	}
+
+	if got, lacked := b.String(), secret2.Name; strings.Contains(got, lacked) {
+		t.Errorf("listSecrets: expected %q to not contain %q", got, lacked)
 	}
 }
 
@@ -427,6 +592,64 @@ func TestUpdateSecret(t *testing.T) {
 	}
 
 	if got, want := s.Labels, map[string]string{"secretmanager": "rocks"}; !reflect.DeepEqual(got, want) {
+		t.Errorf("updateSecret: expected %q to be %q", got, want)
+	}
+}
+
+func TestUpdateSecretWithEtag(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secret := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret.Name)
+
+	var b bytes.Buffer
+	if err := updateSecretWithEtag(&b, secret.Name, secret.Etag); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Updated secret"; !strings.Contains(got, want) {
+		t.Errorf("updateSecret: expected %q to contain %q", got, want)
+	}
+
+	client, ctx := testClient(t)
+	s, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secret.Name,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := s.Labels, map[string]string{"secretmanager": "rocks"}; !reflect.DeepEqual(got, want) {
+		t.Errorf("updateSecret: expected %q to be %q", got, want)
+	}
+}
+
+func TestUpdateSecretWithAlias(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secret := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret.Name)
+
+	testSecretVersion(t, secret.Name, []byte("my-secret"))
+
+	var b bytes.Buffer
+	if err := updateSecretWithAlias(&b, secret.Name); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Updated secret"; !strings.Contains(got, want) {
+		t.Errorf("updateSecret: expected %q to contain %q", got, want)
+	}
+
+	client, ctx := testClient(t)
+	s, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secret.Name,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := s.VersionAliases, map[string]int64{"test": 1}; !reflect.DeepEqual(got, want) {
 		t.Errorf("updateSecret: expected %q to be %q", got, want)
 	}
 }

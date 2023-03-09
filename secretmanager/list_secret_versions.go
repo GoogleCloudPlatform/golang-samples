@@ -21,8 +21,8 @@ import (
 	"io"
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
+	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
 	"google.golang.org/api/iterator"
-	secretmanagerpb "google.golang.org/genproto/googleapis/cloud/secretmanager/v1"
 )
 
 // listSecretVersions lists all secret versions in the given secret and their
@@ -36,6 +36,7 @@ func listSecretVersions(w io.Writer, parent string) error {
 	if err != nil {
 		return fmt.Errorf("failed to create secretmanager client: %v", err)
 	}
+	defer client.Close()
 
 	// Build the request.
 	req := &secretmanagerpb.ListSecretVersionsRequest{

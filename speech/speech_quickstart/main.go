@@ -21,11 +21,10 @@ package main
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"log"
 
 	speech "cloud.google.com/go/speech/apiv1"
-	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"
+	"cloud.google.com/go/speech/apiv1/speechpb"
 )
 
 func main() {
@@ -36,15 +35,10 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
+	defer client.Close()
 
-	// Sets the name of the audio file to transcribe.
-	filename := "/path/to/audio.raw"
-
-	// Reads the audio file into memory.
-	data, err := ioutil.ReadFile(filename)
-	if err != nil {
-		log.Fatalf("Failed to read file: %v", err)
-	}
+	// The path to the remote audio file to transcribe.
+	fileURI := "gs://cloud-samples-data/speech/brooklyn_bridge.raw"
 
 	// Detects speech in the audio file.
 	resp, err := client.Recognize(ctx, &speechpb.RecognizeRequest{
@@ -54,7 +48,7 @@ func main() {
 			LanguageCode:    "en-US",
 		},
 		Audio: &speechpb.RecognitionAudio{
-			AudioSource: &speechpb.RecognitionAudio_Content{Content: data},
+			AudioSource: &speechpb.RecognitionAudio_Uri{Uri: fileURI},
 		},
 	})
 	if err != nil {

@@ -23,11 +23,11 @@ import (
 	"time"
 
 	monitoring "cloud.google.com/go/monitoring/apiv3"
+	"cloud.google.com/go/monitoring/apiv3/v2/monitoringpb"
 	timestamp "github.com/golang/protobuf/ptypes/timestamp"
 	"google.golang.org/api/iterator"
 	metricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoredres "google.golang.org/genproto/googleapis/api/monitoredres"
-	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 )
 
 const metricType = "custom.googleapis.com/custom_measurement"
@@ -41,6 +41,7 @@ func writeTimeSeriesValue(projectID, metricType string) error {
 	if err != nil {
 		return err
 	}
+	defer c.Close()
 	now := &timestamp.Timestamp{
 		Seconds: time.Now().Unix(),
 	}
@@ -93,6 +94,7 @@ func readTimeSeriesValue(projectID, metricType string) error {
 	if err != nil {
 		return err
 	}
+	defer c.Close()
 	startTime := time.Now().UTC().Add(time.Minute * -20).Unix()
 	endTime := time.Now().UTC().Unix()
 

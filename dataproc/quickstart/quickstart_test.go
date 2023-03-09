@@ -23,11 +23,11 @@ import (
 	"time"
 
 	dataproc "cloud.google.com/go/dataproc/apiv1"
+	"cloud.google.com/go/dataproc/apiv1/dataprocpb"
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"google.golang.org/api/iterator"
+	"github.com/google/uuid"
 	"google.golang.org/api/option"
-	dataprocpb "google.golang.org/genproto/googleapis/cloud/dataproc/v1"
 )
 
 var (
@@ -46,8 +46,10 @@ func setup(t *testing.T, projectID string) {
 	ctx := context.Background()
 	flag.Parse()
 
-	clusterName = "go-qs-test-" + projectID
-	bktName = "go-dataproc-qs-test-" + projectID
+	uuid := uuid.New().String()
+
+	clusterName = "go-qs-test-" + uuid
+	bktName = "go-dataproc-qs-test-" + uuid
 	jobFilePath = fmt.Sprintf("gs://%s/%s", bktName, jobFName)
 
 	sc, err := storage.NewClient(ctx)
@@ -73,7 +75,8 @@ func setup(t *testing.T, projectID string) {
 		t.Errorf("Error closing file: %v", err)
 	}
 
-	deleteClusters(ctx, projectID) // Ignore any errors.
+	// Opportunistically delete colliding cluster name.  Ignore errors.
+	deleteCluster(ctx, projectID, region, clusterName)
 }
 
 func teardown(t *testing.T, projectID string) {
@@ -92,46 +95,31 @@ func teardown(t *testing.T, projectID string) {
 		t.Errorf("Error deleting bucket: %v", err)
 	}
 
-	if err := deleteClusters(ctx, projectID); err != nil {
-		t.Errorf("deleteClusters: %v", err)
-	}
+	// Post-hoc cleanup, ignore errors.
+	deleteCluster(ctx, projectID, region, clusterName)
 }
 
-func deleteClusters(ctx context.Context, projectID string) error {
+func deleteCluster(ctx context.Context, projectID, region, clusterName string) error {
 	endpoint := fmt.Sprintf("%s-dataproc.googleapis.com:443", region)
 	client, err := dataproc.NewClusterControllerClient(ctx, option.WithEndpoint(endpoint))
 	if err != nil {
 		return fmt.Errorf("dataproc.NewClusterControllerClient: %v", err)
 	}
 
-	lReq := &dataprocpb.ListClustersRequest{ProjectId: projectID, Region: region}
-	it := client.ListClusters(ctx, lReq)
+	dReq := &dataprocpb.DeleteClusterRequest{ProjectId: projectID, Region: region, ClusterName: clusterName}
+	op, err := client.DeleteCluster(ctx, dReq)
+	if err != nil {
+		return fmt.Errorf("DeleteCluster: %v", err)
+	}
 
-	for {
-		resp, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return fmt.Errorf("ListClusters.Next: %v", err)
-		}
-		if resp.ClusterName == clusterName {
-			dReq := &dataprocpb.DeleteClusterRequest{ProjectId: projectID, Region: region, ClusterName: clusterName}
-			op, err := client.DeleteCluster(ctx, dReq)
-			if err != nil {
-				return fmt.Errorf("DeleteCluster: %v", err)
-			}
-
-			if err := op.Wait(ctx); err != nil {
-				return fmt.Errorf("DeleteCluster.Wait: %v", err)
-			}
-		}
+	if err := op.Wait(ctx); err != nil {
+		return fmt.Errorf("DeleteCluster.Wait: %v", err)
 	}
 	return nil
 }
 
 func TestQuickstart(t *testing.T) {
-	tc := testutil.SystemTest(t)
+	tc := testutil.EndToEndTest(t)
 	m := testutil.BuildMain(t)
 	setup(t, tc.ProjectID)
 	defer teardown(t, tc.ProjectID)
@@ -140,28 +128,33 @@ func TestQuickstart(t *testing.T) {
 		t.Fatalf("failed to build app")
 	}
 
-	stdOut, stdErr, err := m.Run(nil, 10*time.Minute,
-		"--project_id", tc.ProjectID,
-		"--region", region,
-		"--cluster_name", clusterName,
-		"--job_file_path", jobFilePath,
-	)
-	if err != nil {
-		t.Errorf("stdout: %v", string(stdOut))
-		t.Errorf("stderr: %v", string(stdErr))
-		t.Errorf("execution failed: %v", err)
-	}
+	testutil.Retry(t, 3, 30*time.Second, func(r *testutil.R) {
 
-	got := string(stdOut)
-	wants := []string{
-		"Cluster created successfully",
-		"Submitted job",
-		"finished with state DONE:",
-		"successfully deleted",
-	}
-	for _, want := range wants {
-		if !strings.Contains(got, want) {
-			t.Errorf("got %q, want to contain %q", got, want)
+		stdOut, stdErr, err := m.Run(nil, 10*time.Minute,
+			"--project_id", tc.ProjectID,
+			"--region", region,
+			"--cluster_name", clusterName,
+			"--job_file_path", jobFilePath,
+		)
+		if err != nil {
+			r.Errorf("stdout: %v", string(stdOut))
+			r.Errorf("stderr: %v", string(stdErr))
+			r.Errorf("execution failed: %v", err)
+			// We may have created the cluster in the failed invocation; try deleting.
+			deleteCluster(context.Background(), tc.ProjectID, region, clusterName)
+			return
 		}
-	}
+
+		got := string(stdOut)
+		wants := []string{
+			"Cluster created successfully",
+			"Job finished successfully",
+			"successfully deleted",
+		}
+		for _, want := range wants {
+			if !strings.Contains(got, want) {
+				r.Errorf("got %q, want to contain %q", got, want)
+			}
+		}
+	})
 }

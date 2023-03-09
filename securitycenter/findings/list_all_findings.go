@@ -14,15 +14,15 @@
 
 package findings
 
-// [START list_all_findings]
+// [START securitycenter_list_all_findings]
 import (
 	"context"
 	"fmt"
 	"io"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
+	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 	"google.golang.org/api/iterator"
-	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
 )
 
 // listFindings prints all findings in orgID to w.  orgID is the numeric
@@ -58,4 +58,4 @@ func listFindings(w io.Writer, orgID string) error {
 	return nil
 }
 
-// [END list_all_findings]
+// [END securitycenter_list_all_findings]

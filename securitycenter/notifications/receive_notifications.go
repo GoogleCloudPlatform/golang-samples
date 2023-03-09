@@ -14,7 +14,7 @@
 
 package notifications
 
-// [START scc_receive_notifications]
+// [START securitycenter_receive_notifications]
 import (
 	"bytes"
 	"context"
@@ -22,8 +22,8 @@ import (
 	"io"
 
 	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 	"github.com/golang/protobuf/jsonpb"
-	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
 )
 
 func receiveMessages(w io.Writer, projectID string, subscriptionName string) error {
@@ -55,4 +55,4 @@ func receiveMessages(w io.Writer, projectID string, subscriptionName string) err
 	return nil
 }
 
-// [END scc_receive_notifications]
+// [END securitycenter_receive_notifications]

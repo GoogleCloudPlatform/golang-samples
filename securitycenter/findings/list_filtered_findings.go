@@ -14,15 +14,15 @@
 
 package findings
 
-// [START list_filtered_findings]
+// [START securitycenter_list_filtered_findings]
 import (
 	"context"
 	"fmt"
 	"io"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
+	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 	"google.golang.org/api/iterator"
-	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
 )
 
 // listFilteredFindings prints findings with category 'MEDIUM_RISK_ONE' for a
@@ -62,4 +62,4 @@ func listFilteredFindings(w io.Writer, sourceName string) error {
 	return nil
 }
 
-// [END list_filtered_findings]
+// [END securitycenter_list_filtered_findings]

@@ -14,7 +14,7 @@
 
 package findings
 
-// [START create_finding]
+// [START securitycenter_create_finding]
 import (
 	"context"
 	"fmt"
@@ -22,8 +22,8 @@ import (
 	"time"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
+	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 	"github.com/golang/protobuf/ptypes"
-	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
 )
 
 // createFinding demonstrates how to create a new security finding in CSCC.
@@ -67,4 +67,4 @@ func createFinding(w io.Writer, sourceName string) error {
 	return nil
 }
 
-// [END create_finding]
+// [END securitycenter_create_finding]

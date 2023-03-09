@@ -19,18 +19,15 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"sync/atomic"
 	"time"
-
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 
 	"cloud.google.com/go/pubsub"
 )
 
-func pullMsgsSync(w io.Writer, projectID, subID string, topic *pubsub.Topic) error {
+func pullMsgsSync(w io.Writer, projectID, subID string) error {
 	// projectID := "my-project-id"
 	// subID := "my-sub"
-	// topic of type https://godoc.org/cloud.google.com/go/pubsub#Topic
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
@@ -46,33 +43,22 @@ func pullMsgsSync(w io.Writer, projectID, subID string, topic *pubsub.Topic) err
 	sub.ReceiveSettings.Synchronous = true
 	sub.ReceiveSettings.MaxOutstandingMessages = 10
 
-	// Receive messages for 5 seconds.
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	// Receive messages for 10 seconds, which simplifies testing.
+	// Comment this out in production, since `Receive` should
+	// be used as a long running operation.
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
-	// Create a channel to handle messages to as they come in.
-	cm := make(chan *pubsub.Message)
-	// Handle individual messages in a goroutine.
-	go func() {
-		for {
-			select {
-			case msg := <-cm:
-				fmt.Fprintf(w, "Got message :%q\n", string(msg.Data))
-				msg.Ack()
-			case <-ctx.Done():
-				return
-			}
-		}
-	}()
-
-	// Receive blocks until the passed in context is done.
-	err = sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
-		cm <- msg
+	var received int32
+	err = sub.Receive(ctx, func(_ context.Context, msg *pubsub.Message) {
+		fmt.Fprintf(w, "Got message: %q\n", string(msg.Data))
+		atomic.AddInt32(&received, 1)
+		msg.Ack()
 	})
-	if err != nil && status.Code(err) != codes.Canceled {
-		return fmt.Errorf("Receive: %v", err)
+	if err != nil {
+		return fmt.Errorf("sub.Receive: %v", err)
 	}
-	close(cm)
+	fmt.Fprintf(w, "Received %d messages\n", received)
 
 	return nil
 }

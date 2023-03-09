@@ -33,7 +33,7 @@ import (
 )
 
 var (
-	host                = flag.String("host", "", "The API host. Required.")
+	url                 = flag.String("url", "", "The request url. Required.")
 	audience            = flag.String("audience", "", "The audience for the JWT. equired")
 	serviceAccountFile  = flag.String("service-account-file", "", "Path to service account JSON file. Required.")
 	serviceAccountEmail = flag.String("service-account-email", "", "Path email associated with the service account. Required.")
@@ -42,19 +42,19 @@ var (
 func main() {
 	flag.Parse()
 
-	if *audience == "" || *host == "" || *serviceAccountFile == "" || *serviceAccountEmail == "" {
-		fmt.Println("requires: --host, --audience, --service-account-file, --service-account-email")
+	if *audience == "" || *url == "" || *serviceAccountFile == "" || *serviceAccountEmail == "" {
+		fmt.Println("requires: --url, --audience, --service-account-file, --service-account-email")
 		os.Exit(1)
 	}
 	jwt, err := generateJWT(*serviceAccountFile, *serviceAccountEmail, *audience, 3600)
 	if err != nil {
 		log.Fatal(err)
 	}
-	resp, err := makeJWTRequest(jwt, *host)
+	resp, err := makeJWTRequest(jwt, *url)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("%s Response: %s", *host, resp)
+	fmt.Printf("%s Response: %s", *url, resp)
 }
 
 // [START endpoints_generate_jwt_sa]

@@ -21,7 +21,7 @@ import (
 	"io"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
-	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
+	"cloud.google.com/go/dlp/apiv2/dlppb"
 )
 
 // inspectString inspects the a given string, and prints results.
@@ -39,7 +39,7 @@ func inspectString(w io.Writer, projectID, textToInspect string) error {
 
 	// Create and send the request.
 	req := &dlppb.InspectContentRequest{
-		Parent: "projects/" + projectID,
+		Parent: fmt.Sprintf("projects/%s/locations/global", projectID),
 		Item: &dlppb.ContentItem{
 			DataItem: &dlppb.ContentItem_Value{
 				Value: textToInspect,

@@ -21,8 +21,8 @@ import (
 	"os"
 
 	talent "cloud.google.com/go/talent/apiv4beta1"
+	"cloud.google.com/go/talent/apiv4beta1/talentpb"
 	"google.golang.org/api/iterator"
-	talentpb "google.golang.org/genproto/googleapis/cloud/talent/v4beta1"
 )
 
 func main() {
@@ -35,6 +35,7 @@ func main() {
 		fmt.Printf("talent.NewCompanyClient: %v", err)
 		return
 	}
+	defer c.Close()
 
 	// Construct a listCompany request.
 	req := &talentpb.ListCompaniesRequest{

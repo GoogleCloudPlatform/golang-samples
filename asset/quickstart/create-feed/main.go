@@ -25,7 +25,7 @@ import (
 	"os"
 
 	asset "cloud.google.com/go/asset/apiv1"
-	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1"
+	"cloud.google.com/go/asset/apiv1/assetpb"
 )
 
 // Command-line flags.
@@ -40,6 +40,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("asset.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	feedParent := fmt.Sprintf("projects/%s", projectID)

@@ -23,8 +23,8 @@ import (
 	"io"
 
 	monitoring "cloud.google.com/go/monitoring/apiv3"
+	"cloud.google.com/go/monitoring/apiv3/v2/monitoringpb"
 	"github.com/golang/protobuf/ptypes/wrappers"
-	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 	"google.golang.org/genproto/protobuf/field_mask"
 )
 
@@ -37,6 +37,7 @@ func enableChannel(w io.Writer, channelName string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 
 	req := &monitoringpb.UpdateNotificationChannelRequest{
 		UpdateMask: &field_mask.FieldMask{Paths: []string{"enabled"}},

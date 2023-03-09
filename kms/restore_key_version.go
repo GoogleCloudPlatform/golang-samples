@@ -21,7 +21,7 @@ import (
 	"io"
 
 	kms "cloud.google.com/go/kms/apiv1"
-	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
+	"cloud.google.com/go/kms/apiv1/kmspb"
 )
 
 // restoreKeyVersion attempts to recover a key that has been marked for
@@ -35,6 +35,7 @@ func restoreKeyVersion(w io.Writer, name string) error {
 	if err != nil {
 		return fmt.Errorf("failed to create kms client: %v", err)
 	}
+	defer client.Close()
 
 	// Build the request.
 	req := &kmspb.RestoreCryptoKeyVersionRequest{

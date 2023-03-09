@@ -14,15 +14,15 @@
 
 package notifications
 
-// [START scc_list_notification_configs]
+// [START securitycenter_list_notification_configs]
 import (
 	"context"
 	"fmt"
 	"io"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
+	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 	"google.golang.org/api/iterator"
-	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
 )
 
 func listNotificationConfigs(w io.Writer, orgID string) error {
@@ -56,4 +56,4 @@ func listNotificationConfigs(w io.Writer, orgID string) error {
 	return nil
 }
 
-// [END scc_list_notification_configs]
+// [END securitycenter_list_notification_configs]

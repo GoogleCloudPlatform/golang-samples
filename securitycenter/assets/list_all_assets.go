@@ -14,15 +14,15 @@
 
 package assets
 
-// [START list_all_assets]
+// [START securitycenter_list_all_assets]
 import (
 	"context"
 	"fmt"
 	"io"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
+	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 	"google.golang.org/api/iterator"
-	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
 )
 
 // listAllAssets prints every asset to w for orgID. orgID is the numeric
@@ -61,4 +61,4 @@ func listAllAssets(w io.Writer, orgID string) error {
 	return nil
 }
 
-// [END list_all_assets]
+// [END securitycenter_list_all_assets]

@@ -24,7 +24,7 @@ import (
 	"log"
 
 	language "cloud.google.com/go/language/apiv1"
-	languagepb "google.golang.org/genproto/googleapis/cloud/language/v1"
+	"cloud.google.com/go/language/apiv1/languagepb"
 )
 
 func main() {
@@ -35,6 +35,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
+	defer client.Close()
 
 	// Sets the text to analyze.
 	text := "Hello, world!"

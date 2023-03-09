@@ -21,7 +21,7 @@ import (
 	"fmt"
 
 	cloudtasks "cloud.google.com/go/cloudtasks/apiv2"
-	taskspb "google.golang.org/genproto/googleapis/cloud/tasks/v2"
+	taskspb "cloud.google.com/go/cloudtasks/apiv2/cloudtaskspb"
 )
 
 // createHTTPTaskWithToken constructs a task with a authorization token
@@ -34,6 +34,7 @@ func createHTTPTaskWithToken(projectID, locationID, queueID, url, email, message
 	if err != nil {
 		return nil, fmt.Errorf("NewClient: %v", err)
 	}
+	defer client.Close()
 
 	// Build the Task queue path.
 	queuePath := fmt.Sprintf("projects/%s/locations/%s/queues/%s", projectID, locationID, queueID)

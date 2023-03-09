@@ -14,7 +14,7 @@
 
 package findings
 
-// [START create_finding_with_source_properties]
+// [START securitycenter_create_finding_with_source_properties]
 import (
 	"context"
 	"fmt"
@@ -22,9 +22,9 @@ import (
 	"time"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
+	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 	"github.com/golang/protobuf/ptypes"
 	structpb "github.com/golang/protobuf/ptypes/struct"
-	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
 )
 
 // createFindingWithProperties demonstrates how to create a new security
@@ -84,4 +84,4 @@ func createFindingWithProperties(w io.Writer, sourceName string) error {
 	return nil
 }
 
-// [END create_finding_with_source_properties]
+// [END securitycenter_create_finding_with_source_properties]

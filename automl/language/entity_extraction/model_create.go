@@ -22,7 +22,7 @@ import (
 	"io"
 
 	automl "cloud.google.com/go/automl/apiv1"
-	automlpb "google.golang.org/genproto/googleapis/cloud/automl/v1"
+	"cloud.google.com/go/automl/apiv1/automlpb"
 )
 
 // languageEntityExtractionCreateModel creates a model for text entity extraction.
@@ -60,4 +60,4 @@ func languageEntityExtractionCreateModel(w io.Writer, projectID string, location
 	return nil
 }
 
-// [END automl_language_entity_extraction_create_dataset]
+// [END automl_language_entity_extraction_create_model]

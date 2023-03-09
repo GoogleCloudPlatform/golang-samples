@@ -51,8 +51,9 @@ func TestDataset(t *testing.T) {
 	}
 
 	if err := createDataset(buf, tc.ProjectID, location, datasetID); err != nil {
-		t.Fatalf("createDataset got err: %v", err)
+		t.Fatalf("Unable to create test dataset: %v", err)
 	}
+
 	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s", tc.ProjectID, location, datasetID)
 	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
 		buf.Reset()

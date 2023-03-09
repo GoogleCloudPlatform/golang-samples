@@ -16,22 +16,59 @@ package buckets
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
 
+	"cloud.google.com/go/iam"
+	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	iampb "google.golang.org/genproto/googleapis/iam/v1"
 )
+
+const (
+	testPrefix      = "storage-buckets-test"
+	bucketExpiryAge = time.Hour * 24
+)
+
+var client *storage.Client
+
+func TestMain(m *testing.M) {
+	// Initialize global vars
+	tc, _ := testutil.ContextMain(m)
+
+	ctx := context.Background()
+	c, err := storage.NewClient(ctx)
+	if err != nil {
+		log.Fatalf("storage.NewClient: %v", err)
+	}
+	client = c
+	defer client.Close()
+
+	// Run tests
+	exit := m.Run()
+
+	// Delete old buckets whose name begins with our test prefix
+	if err := testutil.DeleteExpiredBuckets(client, tc.ProjectID, testPrefix, bucketExpiryAge); err != nil {
+		// Don't fail the test if cleanup fails
+		log.Printf("Post-test cleanup failed: %v", err)
+	}
+	os.Exit(exit)
+}
 
 func TestCreate(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	bucketName := tc.ProjectID + "-storage-buckets-tests"
+	bucketName := testutil.UniqueBucketName(testPrefix)
+	ctx := context.Background()
 
-	// Clean up bucket before running tests.
-	deleteBucket(ioutil.Discard, bucketName)
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
+
 	if err := createBucket(ioutil.Discard, tc.ProjectID, bucketName); err != nil {
 		t.Fatalf("createBucket: %v", err)
 	}
@@ -39,21 +76,77 @@ func TestCreate(t *testing.T) {
 
 func TestCreateBucketClassLocation(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	name := tc.ProjectID + "-storage-buckets-tests-attrs"
+	bucketName := testutil.UniqueBucketName(testPrefix)
+	ctx := context.Background()
 
-	// Clean up bucket before running the test.
-	deleteBucket(ioutil.Discard, name)
-	if err := createBucketClassLocation(ioutil.Discard, tc.ProjectID, name); err != nil {
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
+
+	if err := createBucketClassLocation(ioutil.Discard, tc.ProjectID, bucketName); err != nil {
 		t.Fatalf("createBucketClassLocation: %v", err)
 	}
-	if err := deleteBucket(ioutil.Discard, name); err != nil {
-		t.Fatalf("deleteBucket: %v", err)
+}
+
+func TestCreateBucketDualRegion(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+	bucketName := testutil.UniqueBucketName(testPrefix)
+	ctx := context.Background()
+
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
+
+	location := "US"
+	region1 := "US-EAST1"
+	region2 := "US-WEST1"
+	if err := createBucketDualRegion(buf, tc.ProjectID, bucketName); err != nil {
+		t.Fatalf("createBucketDualRegion: %v", err)
+	}
+	got := buf.String()
+	if want := bucketName; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
+	if want := location; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
+	if want := "dual-region"; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
+	if want := fmt.Sprintf("%s %s", region1, region2); !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func TestStorageClass(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+
+	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
+	if err != nil {
+		t.Fatalf("Bucket creation failed: %v", err)
+	}
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
+
+	if err := changeDefaultStorageClass(ioutil.Discard, bucketName); err != nil {
+		t.Errorf("changeDefaultStorageClass: %v", err)
+	}
+	attrs, err := client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	got := attrs.StorageClass
+	if want := "COLDLINE"; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
 	}
 }
 
 func TestListBuckets(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	bucketName := tc.ProjectID + "-storage-buckets-tests"
+	ctx := context.Background()
+
+	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
+	if err != nil {
+		t.Fatalf("Bucket creation failed: %v", err)
+	}
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
 
 	buckets, err := listBuckets(ioutil.Discard, tc.ProjectID)
 	if err != nil {
@@ -76,7 +169,13 @@ func TestListBuckets(t *testing.T) {
 
 func TestGetBucketMetadata(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	bucketName := tc.ProjectID + "-storage-buckets-tests"
+	ctx := context.Background()
+
+	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
+	if err != nil {
+		t.Fatalf("Bucket creation failed: %v", err)
+	}
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
 
 	buf := new(bytes.Buffer)
 	if _, err := getBucketMetadata(buf, bucketName); err != nil {
@@ -91,7 +190,13 @@ func TestGetBucketMetadata(t *testing.T) {
 
 func TestIAM(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	bucketName := tc.ProjectID + "-storage-buckets-tests"
+	ctx := context.Background()
+
+	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
+	if err != nil {
+		t.Fatalf("Bucket creation failed: %v", err)
+	}
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
 
 	if _, err := getBucketPolicy(ioutil.Discard, bucketName); err != nil {
 		t.Errorf("getBucketPolicy: %#v", err)
@@ -121,17 +226,68 @@ func TestIAM(t *testing.T) {
 		t.Errorf("removeBucketConditionalIAMBinding: %v", err)
 	}
 }
+func TestCORSConfiguration(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+
+	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
+	if err != nil {
+		t.Fatalf("Bucket creation failed: %v", err)
+	}
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
+
+	want := []storage.CORS{
+		{
+			MaxAge:          time.Hour,
+			Methods:         []string{"GET"},
+			Origins:         []string{"some-origin.com"},
+			ResponseHeaders: []string{"Content-Type"},
+		},
+	}
+	if err := setBucketCORSConfiguration(ioutil.Discard, bucketName, want[0].MaxAge, want[0].Methods, want[0].Origins, want[0].ResponseHeaders); err != nil {
+		t.Fatalf("setBucketCORSConfiguration: %v", err)
+	}
+	attrs, err := client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	if !reflect.DeepEqual(attrs.CORS, want) {
+		t.Fatalf("Unexpected CORS Configuration: got: %v, want: %v", attrs.CORS, want)
+	}
+	if err := removeBucketCORSConfiguration(ioutil.Discard, bucketName); err != nil {
+		t.Fatalf("removeBucketCORSConfiguration: %v", err)
+	}
+	attrs, err = client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	if attrs.CORS != nil {
+		t.Fatalf("Unexpected CORS Configuration: got: %v, want: %v", attrs.CORS, []storage.CORS{})
+	}
+}
 
 func TestRequesterPays(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	bucketName := tc.ProjectID + "-storage-buckets-tests"
+	ctx := context.Background()
 
-	if err := enableRequesterPays(ioutil.Discard, bucketName); err != nil {
-		t.Errorf("enableRequesterPays: %#v", err)
+	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
+	if err != nil {
+		t.Fatalf("Bucket creation failed: %v", err)
 	}
-	if err := disableRequesterPays(ioutil.Discard, bucketName); err != nil {
-		t.Errorf("disableRequesterPays: %#v", err)
-	}
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
+
+	// Tests which update the bucket metadata must be retried in order to avoid
+	// flakes from rate limits.
+	testutil.Retry(t, 5, 2*time.Second, func(r *testutil.R) {
+		if err := enableRequesterPays(ioutil.Discard, bucketName); err != nil {
+			r.Errorf("enableRequesterPays: %#v", err)
+		}
+	})
+	testutil.Retry(t, 5, 2*time.Second, func(r *testutil.R) {
+		if err := disableRequesterPays(ioutil.Discard, bucketName); err != nil {
+			r.Errorf("disableRequesterPays: %#v", err)
+		}
+	})
 	if err := getRequesterPaysStatus(ioutil.Discard, bucketName); err != nil {
 		t.Errorf("getRequesterPaysStatus: %#v", err)
 	}
@@ -139,7 +295,13 @@ func TestRequesterPays(t *testing.T) {
 
 func TestKMS(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	bucketName := tc.ProjectID + "-storage-buckets-tests"
+	ctx := context.Background()
+
+	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
+	if err != nil {
+		t.Fatalf("Bucket creation failed: %v", err)
+	}
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
 
 	keyRingID := os.Getenv("GOLANG_SAMPLES_KMS_KEYRING")
 	cryptoKeyID := os.Getenv("GOLANG_SAMPLES_KMS_CRYPTOKEY")
@@ -149,14 +311,41 @@ func TestKMS(t *testing.T) {
 	}
 
 	kmsKeyName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", tc.ProjectID, "global", keyRingID, cryptoKeyID)
-	if err := setBucketDefaultKMSKey(ioutil.Discard, bucketName, kmsKeyName); err != nil {
-		t.Fatalf("setBucketDefaultKmsKey: failed to enable default kms key (%q): %v", kmsKeyName, err)
+	testutil.Retry(t, 5, 2*time.Second, func(r *testutil.R) {
+		if err := setBucketDefaultKMSKey(ioutil.Discard, bucketName, kmsKeyName); err != nil {
+			r.Errorf("setBucketDefaultKMSKey: failed to enable default KMS key (%q): %v", kmsKeyName, err)
+		}
+	})
+	attrs, err := client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	if attrs.Encryption.DefaultKMSKeyName != kmsKeyName {
+		t.Fatalf("Default KMS key was not set correctly: got %v, want %v", attrs.Encryption.DefaultKMSKeyName, kmsKeyName)
+	}
+	testutil.Retry(t, 5, 2*time.Second, func(r *testutil.R) {
+		if err := removeBucketDefaultKMSKey(ioutil.Discard, bucketName); err != nil {
+			r.Errorf("removeBucketDefaultKMSKey: failed to remove default KMS key: %v", err)
+		}
+	})
+	attrs, err = client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	if attrs.Encryption != nil {
+		t.Fatalf("Default KMS key was not removed from a bucket(%v)", bucketName)
 	}
 }
 
 func TestBucketLock(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	bucketName := tc.ProjectID + "-storage-buckets-tests"
+	ctx := context.Background()
+
+	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
+	if err != nil {
+		t.Fatalf("Bucket creation failed: %v", err)
+	}
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
 
 	retentionPeriod := 5 * time.Second
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
@@ -241,7 +430,13 @@ func TestBucketLock(t *testing.T) {
 
 func TestUniformBucketLevelAccess(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	bucketName := tc.ProjectID + "-storage-buckets-tests"
+	ctx := context.Background()
+
+	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
+	if err != nil {
+		t.Fatalf("Bucket creation failed: %v", err)
+	}
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
 
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
 		if err := enableUniformBucketLevelAccess(ioutil.Discard, bucketName); err != nil {
@@ -272,11 +467,331 @@ func TestUniformBucketLevelAccess(t *testing.T) {
 	}
 }
 
+func TestPublicAccessPrevention(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+
+	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
+	if err != nil {
+		t.Fatalf("Bucket creation failed: %v", err)
+	}
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
+
+	if err := setPublicAccessPreventionEnforced(ioutil.Discard, bucketName); err != nil {
+		t.Errorf("setPublicAccessPreventionEnforced: %v", err)
+	}
+	// Verify that PublicAccessPrevention was set correctly.
+	attrs, err := client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	if attrs.PublicAccessPrevention != storage.PublicAccessPreventionEnforced {
+		t.Errorf("PublicAccessPrevention: got %s, want %s", attrs.PublicAccessPrevention, storage.PublicAccessPreventionEnforced)
+	}
+
+	buf := new(bytes.Buffer)
+	if err := getPublicAccessPrevention(buf, bucketName); err != nil {
+		t.Errorf("getPublicAccessPrevention: %v", err)
+	}
+	// Verify that the correct value was printed.
+	got := buf.String()
+	want := "Public access prevention is enforced"
+	if !strings.Contains(got, want) {
+		t.Errorf("getPublicAccessPrevention: got %v, want %v", got, want)
+	}
+
+	if err := setPublicAccessPreventionInherited(ioutil.Discard, bucketName); err != nil {
+		t.Errorf("setPublicAccessPreventionInherited: %v", err)
+	}
+	// Verify that PublicAccessPrevention was set correctly.
+	attrs, err = client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	if attrs.PublicAccessPrevention != storage.PublicAccessPreventionInherited {
+		t.Errorf("PublicAccessPrevention: got %s, want %s", attrs.PublicAccessPrevention, storage.PublicAccessPreventionInherited)
+	}
+
+}
+
+func TestLifecycleManagement(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+
+	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
+	if err != nil {
+		t.Fatalf("Bucket creation failed: %v", err)
+	}
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
+
+	if err := enableBucketLifecycleManagement(ioutil.Discard, bucketName); err != nil {
+		t.Fatalf("enableBucketLifecycleManagement: %v", err)
+	}
+
+	// Verify lifecycle is set
+	attrs, err := client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+
+	want := storage.LifecycleRule{
+		Action:    storage.LifecycleAction{Type: "Delete"},
+		Condition: storage.LifecycleCondition{AgeInDays: 100},
+	}
+
+	r := attrs.Lifecycle.Rules
+	if len(r) != 1 {
+		t.Fatalf("Length of lifecycle rules should be 1, got %d", len(r))
+	}
+
+	if !reflect.DeepEqual(r[0], want) {
+		t.Fatalf("Unexpected lifecycle rule: got: %v, want: %v", r, want)
+	}
+
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
+		if err := disableBucketLifecycleManagement(ioutil.Discard, bucketName); err != nil {
+			r.Errorf("disableBucketLifecycleManagement: %v", err)
+		}
+	})
+
+	attrs, err = client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+
+	if n := len(attrs.Lifecycle.Rules); n != 0 {
+		t.Fatalf("Length of lifecycle rules should be 0, got %d", n)
+	}
+}
+
+func TestBucketLabel(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+
+	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
+	if err != nil {
+		t.Fatalf("Bucket creation failed: %v", err)
+	}
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
+
+	labelName := "label-name"
+	labelValue := "label-value"
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
+		if err := addBucketLabel(ioutil.Discard, bucketName, labelName, labelValue); err != nil {
+			r.Errorf("addBucketLabel: %v", err)
+		}
+	})
+	attrs, err := client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	if got, ok := attrs.Labels[labelName]; ok {
+		if got != labelValue {
+			t.Fatalf("The label(%q) was set incorrectly on a bucket(%v): got value %v, want value %v", labelName, bucketName, got, labelValue)
+		}
+	} else {
+		t.Fatalf("The label(%q) was not set on a bucket(%v)", labelName, bucketName)
+	}
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
+		if err := removeBucketLabel(ioutil.Discard, bucketName, labelName); err != nil {
+			r.Errorf("removeBucketLabel: %v", err)
+		}
+	})
+	attrs, err = client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	if _, ok := attrs.Labels[labelName]; ok {
+		t.Fatalf("The label(%q) was not removed from a bucket(%v)", labelName, bucketName)
+	}
+}
+
+func TestBucketWebsiteInfo(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+
+	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
+	if err != nil {
+		t.Fatalf("Bucket creation failed: %v", err)
+	}
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
+
+	index := "index.html"
+	notFoundPage := "404.html"
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
+		if err := setBucketWebsiteInfo(ioutil.Discard, bucketName, index, notFoundPage); err != nil {
+			r.Errorf("setBucketWebsiteInfo: %v", err)
+		}
+	})
+	attrs, err := client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	if attrs.Website.MainPageSuffix != index {
+		t.Fatalf("got index page: %v, want %v", attrs.Website.MainPageSuffix, index)
+	}
+	if attrs.Website.NotFoundPage != notFoundPage {
+		t.Fatalf("got not found page: %v, want %v", attrs.Website.NotFoundPage, notFoundPage)
+	}
+}
+
+func TestSetBucketPublicIAM(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+
+	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
+	if err != nil {
+		t.Fatalf("Bucket creation failed: %v", err)
+	}
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
+
+	if err := setBucketPublicIAM(ioutil.Discard, bucketName); err != nil {
+		t.Fatalf("setBucketPublicIAM: %v", err)
+	}
+	policy, err := client.Bucket(bucketName).IAM().V3().Policy(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).IAM().V3().Policy: %v", bucketName, err)
+	}
+	want := new(iam.Policy3)
+	want.Bindings = append(want.Bindings, &iampb.Binding{
+		Role:    "roles/storage.objectViewer",
+		Members: []string{iam.AllUsers},
+	})
+	if !reflect.DeepEqual(policy.Bindings[len((policy.Bindings))-1], want.Bindings[0]) {
+		t.Fatalf("Public policy was not set: \ngot: %v, \nwant: %v\n", policy.Bindings[len((policy.Bindings))-1], want.Bindings[0])
+	}
+}
+
 func TestDelete(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	bucketName := tc.ProjectID + "-storage-buckets-tests"
+	ctx := context.Background()
+
+	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
+	if err != nil {
+		t.Fatalf("Bucket creation failed: %v", err)
+	}
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
 
 	if err := deleteBucket(ioutil.Discard, bucketName); err != nil {
 		t.Fatalf("deleteBucket: %v", err)
+	}
+}
+
+// TestRPO tests the following samples:
+// createBucketTurboReplication, setRPODefault, setRPOAsyncTurbo, getRPO
+func TestRPO(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	bucketName := testutil.UniqueBucketName(testPrefix)
+	ctx := context.Background()
+
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+	defer client.Close()
+
+	bucket := client.Bucket(bucketName)
+
+	// Clean up bucket before running the test
+	if err := testutil.DeleteBucketIfExists(ctx, client, bucketName); err != nil {
+		t.Fatalf("Error deleting bucket: %v", err)
+	}
+
+	location := "NAM4" // must be dual-region
+	if err := createBucketTurboReplication(ioutil.Discard, tc.ProjectID, bucketName, location); err != nil {
+		t.Fatalf("createBucketTurboReplication: %v", err)
+	}
+
+	testutil.WaitForBucketToExist(ctx, t, bucket)
+
+	// Verify that RPO was set correctly on creation
+	attrs, err := bucket.Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	if attrs.RPO != storage.RPOAsyncTurbo {
+		t.Errorf("createBucketTurboReplication: got %s, want %s", attrs.RPO, storage.RPOAsyncTurbo)
+	}
+
+	// Test disable turbo replication:
+	if err := setRPODefault(ioutil.Discard, bucketName); err != nil {
+		t.Errorf("setRPODefault: %v", err)
+	}
+	// Verify that RPO was set correctly
+	attrs, err = bucket.Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	if attrs.RPO != storage.RPODefault {
+		t.Errorf("setRPODefault: got %s, want %s", attrs.RPO, storage.RPODefault)
+	}
+
+	// Test enable turbo replication:
+	if err := setRPOAsyncTurbo(ioutil.Discard, bucketName); err != nil {
+		t.Fatalf("setRPOAsyncTurbo: %v", err)
+	}
+
+	// Verify that RPO was set correctly
+	attrs, err = bucket.Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	if attrs.RPO != storage.RPOAsyncTurbo {
+		t.Errorf("setRPOAsyncTurbo: got %s, want %s", attrs.RPO, storage.RPOAsyncTurbo)
+	}
+
+	// Test get turbo replication:
+	buf := new(bytes.Buffer)
+	if err := getRPO(buf, bucketName); err != nil {
+		t.Errorf("getRPO: %v", err)
+	}
+	// Verify that the correct value was printed
+	got := buf.String()
+	want := "RPO is ASYNC_TURBO"
+	if !strings.Contains(got, want) {
+		t.Errorf("getRPO: got %v, want %v", got, want)
+	}
+
+	if err := deleteBucket(ioutil.Discard, bucketName); err != nil {
+		t.Fatalf("deleteBucket: %v", err)
+	}
+}
+
+// TestAutoclass tests the following samples:
+// getAutoclass, setAutoclass
+func TestAutoclass(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+
+	bucketName := testutil.UniqueBucketName(testPrefix)
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
+
+	// Test create new bucket with Autoclass enabled.
+	autoclassConfig := &storage.BucketAttrs{
+		Autoclass: &storage.Autoclass{
+			Enabled: true,
+		},
+	}
+	bucket := client.Bucket(bucketName)
+	if err := bucket.Create(ctx, tc.ProjectID, autoclassConfig); err != nil {
+		t.Fatalf("Bucket creation failed: %v", err)
+	}
+
+	// Test get Autoclass config.
+	buf := new(bytes.Buffer)
+	if err := getAutoclass(buf, bucketName); err != nil {
+		t.Errorf("getAutoclass: %#v", err)
+	}
+	if got, want := buf.String(), "Autoclass enabled was set to true"; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
+
+	// Test set Autoclass config.
+	value := false
+	if err := setAutoclass(buf, bucketName, value); err != nil {
+		t.Errorf("setAutoclass: %#v", err)
+	}
+	if got, want := buf.String(), "Autoclass enabled was set to false"; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
 	}
 }

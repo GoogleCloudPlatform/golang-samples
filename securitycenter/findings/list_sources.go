@@ -14,15 +14,15 @@
 
 package findings
 
-// [START list_sources]
+// [START securitycenter_list_sources]
 import (
 	"context"
 	"fmt"
 	"io"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
+	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 	"google.golang.org/api/iterator"
-	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
 )
 
 // listSources prints all sources in  orgID to w.  orgID is the numeric
@@ -56,4 +56,4 @@ func listSources(w io.Writer, orgID string) error {
 	return nil
 }
 
-// [END list_sources]
+// [END securitycenter_list_sources]

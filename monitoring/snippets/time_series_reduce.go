@@ -22,10 +22,10 @@ import (
 	"time"
 
 	monitoring "cloud.google.com/go/monitoring/apiv3"
+	"cloud.google.com/go/monitoring/apiv3/v2/monitoringpb"
 	"github.com/golang/protobuf/ptypes/duration"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"google.golang.org/api/iterator"
-	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 )
 
 // readTimeSeriesReduce reads the last 20 minutes of the given metric, aligns
@@ -37,6 +37,7 @@ func readTimeSeriesReduce(w io.Writer, projectID string) error {
 	if err != nil {
 		return fmt.Errorf("NewMetricClient: %v", err)
 	}
+	defer client.Close()
 	startTime := time.Now().UTC().Add(time.Minute * -20)
 	endTime := time.Now().UTC()
 	req := &monitoringpb.ListTimeSeriesRequest{

@@ -20,7 +20,13 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+
+	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 )
+
+func init() {
+	functions.HTTP("HTTPError", HTTPError)
+}
 
 // HTTPError describes how errors are handled in an HTTP function.
 func HTTPError(w http.ResponseWriter, r *http.Request) {

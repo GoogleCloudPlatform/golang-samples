@@ -22,7 +22,7 @@ import (
 	"fmt"
 
 	cloudtasks "cloud.google.com/go/cloudtasks/apiv2"
-	taskspb "google.golang.org/genproto/googleapis/cloud/tasks/v2"
+	taskspb "cloud.google.com/go/cloudtasks/apiv2/cloudtaskspb"
 )
 
 // createHTTPTask creates a new task with a HTTP target then adds it to a Queue.
@@ -35,6 +35,7 @@ func createHTTPTask(projectID, locationID, queueID, url, message string) (*tasks
 	if err != nil {
 		return nil, fmt.Errorf("NewClient: %v", err)
 	}
+	defer client.Close()
 
 	// Build the Task queue path.
 	queuePath := fmt.Sprintf("projects/%s/locations/%s/queues/%s", projectID, locationID, queueID)

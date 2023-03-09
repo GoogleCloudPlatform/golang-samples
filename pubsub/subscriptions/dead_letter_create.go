@@ -35,6 +35,7 @@ func createSubWithDeadLetter(w io.Writer, projectID, subID string, topicID strin
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	topic := client.Topic(topicID)
 

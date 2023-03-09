@@ -19,7 +19,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/bmatcuk/doublestar"
+	doublestar "github.com/bmatcuk/doublestar/v2"
 	"github.com/h2non/filetype"
 )
 
@@ -34,6 +34,7 @@ var allowList = []string{
 	"**/*.go",
 	"**/*.md",
 	"**/*.yaml",
+	"**/*.yml",
 	"**/*.sh",
 	"**/*.bash",
 	"**/*.mod",
@@ -50,7 +51,10 @@ var allowList = []string{
 	"LICENSE",
 	"**/*Dockerfile*",
 	"**/.dockerignore",
+	"**/.gcloudignore",
 	"**/Makefile",
+	".gitignore",
+	"**/.gitkeep",
 
 	// Primarily ML APIs.
 	"**/testdata/**/*.jpg",
@@ -80,6 +84,9 @@ var allowList = []string{
 	"functions/ocr/app/config.json",
 	"functions/slack/config.json",
 
+	// Cloud Functions gen2 picture.
+	"functions/functionsv2/imagemagick/zombie.jpg",
+
 	// Samples that aren't really code. Legacy.
 	"**/appengine/**/*.txt",
 
@@ -94,11 +101,25 @@ var allowList = []string{
 	"texttospeech/**/*",
 	"storage/objects/notes.txt",
 
-	// Renovate configuration.
+	// GitHub configuration.
+	".github/blunderbuss.yml",
 	".github/renovate.json",
+	".github/CODEOWNERS",
 
 	// Getting Started on GCE systemd service file.
 	"**/gce/**/*.service",
+
+	// cloud-run-button configuration
+	"run/**/app.json",
+
+	// pub/sub schemas
+	"pubsub/**/*.avsc",
+
+	// dataflow flex template metadata files
+	"dataflow/flex-templates/**/metadata.json",
+
+	// document ai sample pdfs
+	"documentai/**/*.pdf",
 }
 
 // Check whether accidental binary files have been checked in.

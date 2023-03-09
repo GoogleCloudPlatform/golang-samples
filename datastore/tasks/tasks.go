@@ -43,6 +43,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Could not create datastore client: %v", err)
 	}
+	defer client.Close()
 
 	// Print welcome message.
 	fmt.Println("Cloud Datastore Task List")

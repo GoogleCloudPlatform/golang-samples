@@ -14,7 +14,7 @@
 
 package findings
 
-// [START update_finding_source_properties]
+// [START securitycenter_update_finding_source_properties]
 import (
 	"context"
 	"fmt"
@@ -22,9 +22,9 @@ import (
 	"time"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
+	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 	"github.com/golang/protobuf/ptypes"
 	structpb "github.com/golang/protobuf/ptypes/struct"
-	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
 	"google.golang.org/genproto/protobuf/field_mask"
 )
 
@@ -76,4 +76,4 @@ func updateFindingSourceProperties(w io.Writer, findingName string) error {
 	return nil
 }
 
-// [END update_finding_source_properties]
+// [END securitycenter_update_finding_source_properties]

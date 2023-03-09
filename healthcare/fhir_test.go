@@ -51,13 +51,14 @@ func TestFHIRStore(t *testing.T) {
 	}
 
 	if err := createDataset(ioutil.Discard, tc.ProjectID, location, datasetID); err != nil {
-		t.Skipf("Unable to create test dataset: %v", err)
-		return
+		t.Fatalf("Unable to create test dataset: %v", err)
 	}
 
-	if err := createFHIRStore(buf, tc.ProjectID, location, datasetID, fhirStoreID); err != nil {
-		t.Errorf("createFHIRStore got err: %v", err)
-	}
+	testutil.Retry(t, 10, 60*time.Second, func(r *testutil.R) {
+		if err := createFHIRStore(buf, tc.ProjectID, location, datasetID, fhirStoreID); err != nil {
+			t.Errorf("createFHIRStore got err: %v", err)
+		}
+	})
 
 	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
 		fhirStoreName := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/fhirStores/%s", tc.ProjectID, location, datasetID, fhirStoreID)
@@ -110,11 +111,21 @@ func TestFHIRStore(t *testing.T) {
 
 	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
 		buf.Reset()
-		if err := searchFHIRResources(buf, tc.ProjectID, location, datasetID, fhirStoreID, resourceType); err != nil {
-			r.Errorf("searchFHIRResources got err: %v", err)
+		if err := searchFHIRResourcesGet(buf, tc.ProjectID, location, datasetID, fhirStoreID, resourceType); err != nil {
+			r.Errorf("searchFHIRResourcesGet got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, res.ID) {
-			r.Errorf("searchFHIRResources got\n----\n%s\n----\nWant to contain:\n----\n%s\n----\n", got, resourceType)
+			r.Errorf("searchFHIRResourcesGet got\n----\n%s\n----\nWant to contain:\n----\n%s\n----\n", got, resourceType)
+		}
+	})
+
+	testutil.Retry(t, 10, 2*time.Second, func(r *testutil.R) {
+		buf.Reset()
+		if err := searchFHIRResourcesPost(buf, tc.ProjectID, location, datasetID, fhirStoreID, resourceType); err != nil {
+			r.Errorf("searchFHIRResourcesPost got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, res.ID) {
+			r.Errorf("searchFHIRResourcesPost got\n----\n%s\n----\nWant to contain:\n----\n%s\n----\n", got, resourceType)
 		}
 	})
 

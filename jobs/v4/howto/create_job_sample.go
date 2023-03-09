@@ -21,7 +21,7 @@ import (
 	"io"
 
 	talent "cloud.google.com/go/talent/apiv4beta1"
-	talentpb "google.golang.org/genproto/googleapis/cloud/talent/v4beta1"
+	"cloud.google.com/go/talent/apiv4beta1/talentpb"
 )
 
 // createJob create a job as given.
@@ -33,6 +33,7 @@ func createJob(w io.Writer, projectID, companyID, requisitionID, title, URI, des
 	if err != nil {
 		return nil, fmt.Errorf("talent.NewJobClient: %v", err)
 	}
+	defer c.Close()
 
 	jobToCreate := &talentpb.Job{
 		Company:       fmt.Sprintf("projects/%s/companies/%s", projectID, companyID),

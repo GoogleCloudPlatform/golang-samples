@@ -25,7 +25,7 @@ import (
 	"os"
 
 	texttospeech "cloud.google.com/go/texttospeech/apiv1"
-	texttospeechpb "google.golang.org/genproto/googleapis/cloud/texttospeech/v1"
+	"cloud.google.com/go/texttospeech/apiv1/texttospeechpb"
 )
 
 // [START tts_synthesize_text_file]
@@ -39,6 +39,7 @@ func SynthesizeTextFile(w io.Writer, textFile, outputFile string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 
 	text, err := ioutil.ReadFile(textFile)
 	if err != nil {
@@ -81,7 +82,9 @@ func SynthesizeTextFile(w io.Writer, textFile, outputFile string) error {
 // output to outputFile.
 //
 // ssmlFile must be well-formed according to:
-//   https://www.w3.org/TR/speech-synthesis/
+//
+//	https://www.w3.org/TR/speech-synthesis/
+//
 // Example: <speak>Hello there.</speak>
 func SynthesizeSSMLFile(w io.Writer, ssmlFile, outputFile string) error {
 	ctx := context.Background()
@@ -90,6 +93,7 @@ func SynthesizeSSMLFile(w io.Writer, ssmlFile, outputFile string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 
 	ssml, err := ioutil.ReadFile(ssmlFile)
 	if err != nil {

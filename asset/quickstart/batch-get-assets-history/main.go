@@ -25,8 +25,8 @@ import (
 	"time"
 
 	asset "cloud.google.com/go/asset/apiv1"
+	"cloud.google.com/go/asset/apiv1/assetpb"
 	"github.com/golang/protobuf/ptypes/timestamp"
-	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1"
 )
 
 func main() {
@@ -35,6 +35,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer client.Close()
 
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	bucketResourceName := fmt.Sprintf("//storage.googleapis.com/%s-for-assets", projectID)

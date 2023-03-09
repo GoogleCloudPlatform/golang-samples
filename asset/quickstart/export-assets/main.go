@@ -24,7 +24,7 @@ import (
 	"os"
 
 	asset "cloud.google.com/go/asset/apiv1"
-	assetpb "google.golang.org/genproto/googleapis/cloud/asset/v1"
+	"cloud.google.com/go/asset/apiv1/assetpb"
 )
 
 func main() {
@@ -34,6 +34,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer client.Close()
 	bucketName := fmt.Sprintf("%s-for-assets", projectID)
 	assetDumpFile := fmt.Sprintf("gs://%s/my-assets.txt", bucketName)
 	req := &assetpb.ExportAssetsRequest{

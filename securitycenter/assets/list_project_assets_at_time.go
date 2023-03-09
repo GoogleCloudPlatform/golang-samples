@@ -14,7 +14,7 @@
 
 package assets
 
-// [START list_project_assets_at_time]
+// [START securitycenter_list_assets_at_time]
 import (
 	"context"
 	"fmt"
@@ -22,9 +22,9 @@ import (
 	"time"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
+	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/api/iterator"
-	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
 )
 
 // listAllProjectAssets lists all GCP Projects in orgID at asOf time and prints
@@ -71,4 +71,4 @@ func listAllProjectAssetsAtTime(w io.Writer, orgID string, asOf time.Time) error
 	return nil
 }
 
-// [END list_project_assets_at_time]
+// [END securitycenter_list_assets_at_time]

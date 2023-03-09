@@ -14,7 +14,7 @@
 
 package topics
 
-// [START pubsub_publish_with_error_handling_that_scales]
+// [START pubsub_publish_with_error_handler]
 import (
 	"context"
 	"fmt"
@@ -34,6 +34,7 @@ func publishThatScales(w io.Writer, projectID, topicID string, n int) error {
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	var wg sync.WaitGroup
 	var totalErrors uint64
@@ -68,4 +69,4 @@ func publishThatScales(w io.Writer, projectID, topicID string, n int) error {
 	return nil
 }
 
-// [END pubsub_publish_with_error_handling_that_scales]
+// [END pubsub_publish_with_error_handler]

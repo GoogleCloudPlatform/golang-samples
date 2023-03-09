@@ -24,7 +24,7 @@ import (
 	"log"
 
 	texttospeech "cloud.google.com/go/texttospeech/apiv1"
-	texttospeechpb "google.golang.org/genproto/googleapis/cloud/texttospeech/v1"
+	"cloud.google.com/go/texttospeech/apiv1/texttospeechpb"
 )
 
 func main() {
@@ -35,6 +35,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer client.Close()
 
 	// Perform the text-to-speech request on the text input with the selected
 	// voice parameters and audio file type.

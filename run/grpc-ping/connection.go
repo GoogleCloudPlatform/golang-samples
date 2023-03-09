@@ -14,6 +14,7 @@
 
 package main
 
+// [START cloudrun_grpc_conn]
 // [START run_grpc_conn]
 
 import (
@@ -35,6 +36,8 @@ func NewConn(host string, insecure bool) (*grpc.ClientConn, error) {
 	if insecure {
 		opts = append(opts, grpc.WithInsecure())
 	} else {
+		// Note: On the Windows platform, use of x509.SystemCertPool() requires
+		// go version 1.18 or higher.
 		systemRoots, err := x509.SystemCertPool()
 		if err != nil {
 			return nil, err
@@ -49,3 +52,4 @@ func NewConn(host string, insecure bool) (*grpc.ClientConn, error) {
 }
 
 // [END run_grpc_conn]
+// [END cloudrun_grpc_conn]

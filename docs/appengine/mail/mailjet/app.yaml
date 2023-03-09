@@ -13,7 +13,7 @@
 # limitations under the License.
 
 runtime: go
-api_version: go1
+api_version: go116
 
 handlers:
 - url: /.*

@@ -1,0 +1,3 @@
+module github.com/GoogleCloudPlatform/golang-samples/mediacdn
+
+go 1.15

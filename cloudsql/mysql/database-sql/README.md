@@ -4,18 +4,18 @@ This repo contains the Go source code for a simple web app that can be deployed 
 
 ## Before you begin
 
-1. If you haven't already, set up a Go Development Environment by following the [Go setup guide](https://cloud.google.com/go/docs/setup) and 
+1. If you haven't already, set up a Go Development Environment by following the [Go setup guide](https://cloud.google.com/go/docs/setup) and
 [create a project](https://cloud.google.com/resource-manager/docs/creating-managing-projects#creating_a_project).
 
-1. Create a 2nd Gen Cloud SQL Instance by following these 
-[instructions](https://cloud.google.com/sql/docs/mysql/create-instance). Note the connection string,
-database user, and database password that you create.
+1. Create a Cloud SQL for MySQL instance by following these
+[instructions](https://cloud.google.com/sql/docs/mysql/create-instance).
+Note the connection string, database user, and database password that you create.
 
-1. Create a database for your application by following these 
-[instructions](https://cloud.google.com/sql/docs/mysql/create-manage-databases). Note the database
-name. 
+1. Create a database for your application by following these
+[instructions](https://cloud.google.com/sql/docs/mysql/create-manage-databases).
+Note the database name.
 
-1. Create a service account with the 'Cloud SQL Client' permissions by following these 
+1. Create a service account with the 'Cloud SQL Client' permissions by following these
 [instructions](https://cloud.google.com/sql/docs/mysql/connect-external-app#4_if_required_by_your_authentication_method_create_a_service_account).
 Download a JSON key to use to authenticate your connection.
 
@@ -35,7 +35,8 @@ To run the sample locally with a TCP connection, set environment variables and l
 Use these terminal commands to initialize environment variables:
 ```bash
 export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service/account/key.json
-export DB_TCP_HOST='127.0.0.1:3306'
+export INSTANCE_HOST='127.0.0.1'
+export DB_PORT='3306'
 export DB_USER='<DB_USER_NAME>'
 export DB_PASS='<DB_PASSWORD>'
 export DB_NAME='<DB_NAME>'
@@ -43,45 +44,46 @@ export DB_NAME='<DB_NAME>'
 
 Then use this command to launch the proxy in the background:
 ```bash
-./cloud_sql_proxy -instances=<project-id>:<region>:<instance-name>=tcp:3306 -credential_file=$GOOGLE_APPLICATION_CREDENTIALS &
+./cloud_sql_proxy -instances=<PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME>=tcp:3306 -credential_file=$GOOGLE_APPLICATION_CREDENTIALS &
 ```
 
 #### Windows/PowerShell
 Use these PowerShell commands to initialize environment variables:
 ```powershell
 $env:GOOGLE_APPLICATION_CREDENTIALS="<CREDENTIALS_JSON_FILE>"
-$env:DB_TCP_HOST="127.0.0.1:3306"
-$env:DB_USER="<DB_USER_NAME>"
-$env:DB_PASS="<DB_PASSWORD>"
-$env:DB_NAME="<DB_NAME>"
+$env:INSTANCE_HOST="127.0.0.1"
+$env:DB_PORT="3306"
+$env:DB_USER="<YOUR_DB_USER_NAME>"
+$env:DB_PASS="<YOUR_DB_PASSWORD>"
+$env:DB_NAME="<YOUR_DB_NAME>"
 ```
 
 Then use this command to launch the proxy in a separate PowerShell session:
 ```powershell
-Start-Process -filepath "C:\<path to proxy exe>" -ArgumentList "-instances=<project-id>:<region>:<instance-name>=tcp:3306 -credential_file=<CREDENTIALS_JSON_FILE>"
+Start-Process -filepath "C:\<path to proxy exe>" -ArgumentList "-instances=<PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME>=tcp:3306 -credential_file=<CREDENTIALS_JSON_FILE>"
 ```
 
 ### Launch proxy with Unix Domain Socket
 NOTE: this option is currently only supported on Linux and Mac OS. Windows users should use the [Launch proxy with TCP](#launch-proxy-with-tcp) option.
 
-To use a Unix socket, you'll need to create the `/cloudsql` directory and give write access to the user running the proxy. Use these commands to create the directory and set permissions:
+To use a Unix socket, you'll need to create a directory and give write access to the user running the proxy. For example:
 ```bash
-sudo mkdir /cloudsql
-sudo chown -R $USER /cloudsql
+sudo mkdir ./cloudsql
+sudo chown -R $USER ./cloudsql
 ```
 
 Use these terminal commands to initialize environment variables:
 ```bash
 export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service/account/key.json
-export INSTANCE_CONNECTION_NAME='<MY-PROJECT>:<INSTANCE-REGION>:<INSTANCE-NAME>'
-export DB_USER='<DB_USER_NAME>'
-export DB_PASS='<DB_PASSWORD>'
-export DB_NAME='<DB_NAME>'
+export INSTANCE_UNIX_SOCKET='./cloudsql/<PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME>'
+export DB_USER='<YOUR_DB_USER_NAME>'
+export DB_PASS='<YOUR_DB_PASSWORD>'
+export DB_NAME='<YOUR_DB_NAME>'
 ```
 
 Then use this command to launch the proxy in the background:
 ```bash
-./cloud_sql_proxy -dir=/cloudsql --instances=$INSTANCE_CONNECTION_NAME --credential_file=$GOOGLE_APPLICATION_CREDENTIALS &
+./cloud_sql_proxy -dir=./cloudsql --instances=<PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME> --credential_file=$GOOGLE_APPLICATION_CREDENTIALS &
 ```
 
 ### Testing the application
@@ -94,45 +96,57 @@ To test the application locally, follow these steps after the proxy is running:
 
 ## Deploying to App Engine Standard
 
-To run the sample on GAE-Standard, create an App Engine project by following the setup for these 
+To run the sample on GAE-Standard, create an App Engine project by following the setup for these
 [instructions](https://cloud.google.com/appengine/docs/standard/go/quickstart#before-you-begin).
 
-First, create an `app.yaml` with the correct values to pass the environment 
-variables into the runtime. Your app.yaml file should look like this:
+First, update [`app.standard.yaml`](cmd/app/app.standard.yaml) with the correct values to pass the environment
+variables into the runtime. Your `app.standard.yaml` file should look like this:
 
 ```yaml
-runtime: go111
+runtime: go116
 env_variables:
-  INSTANCE_CONNECTION_NAME: <project-id>:<region>:<instance-name>
-  DB_USER: YOUR_DB_USER
-  DB_PASS: YOUR_DB_PASS
-  DB_NAME: YOUR_DB
+  INSTANCE_UNIX_SOCKET: /cloudsql/<PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME>
+  DB_USER: <YOUR_DB_USER_NAME>
+  DB_PASS: <YOUR_DB_PASSWORD>
+  DB_NAME: <YOUR_DB_NAME>
 ```
 
 Note: Saving credentials in environment variables is convenient, but not secure - consider a more
-secure solution such as [Cloud KMS](https://cloud.google.com/kms/) to help keep secrets safe.
+secure solution such as [Cloud Secret Manager](https://cloud.google.com/secret-manager) to help keep secrets safe.
 
 Next, the following command will deploy the application to your Google Cloud project:
 ```bash
-gcloud app deploy
+gcloud app deploy cmd/app/app.standard.yaml
 ```
 
-## Deploy to Google App Engine Flexible
+## Deploying to App Engine Flexible
 
-First, update `app.flexible.yaml` with the correct values to pass the environment 
-variables into the runtime.
+To run the sample on GAE-Flex, create an App Engine project by following the setup for these
+[instructions](https://cloud.google.com/appengine/docs/standard/go/quickstart#before-you-begin).
+
+First, update [`app.flexible.yaml`](app.flexible.yaml) with the correct values to pass the environment
+variables into the runtime. Your `app.flexible.yaml` file should look like this:
+```yaml
+runtime: custom
+env: flex
+
+env_variables:
+  INSTANCE_UNIX_SOCKET: /cloudsql/<PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME>
+  DB_USER: <YOUR_DB_USER_NAME>
+  DB_PASS: <YOUR_DB_PASSWORD>
+  DB_NAME: <YOUR_DB_NAME>
+
+beta_settings:
+  cloud_sql_instances: <PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME>
+```
+
+Note: Saving credentials in environment variables is convenient, but not secure - consider a more
+secure solution such as [Cloud Secret Manager](https://cloud.google.com/secret-manager) to help keep secrets safe.
 
 Next, the following command will deploy the application to your Google Cloud project:
 ```bash
 gcloud app deploy app.flexible.yaml
 ```
-
-To launch your browser and view the app at https://[YOUR_PROJECT_ID].appspot.com, run the following
-command:
-```bash
-gcloud app browse
-```
-
 ## Deploy to Cloud Run
 
 See the [Cloud Run documentation](https://cloud.google.com/sql/docs/mysql/connect-run)
@@ -147,28 +161,66 @@ gcloud builds submit --tag gcr.io/[YOUR_PROJECT_ID]/run-sql
 2. Deploy the service to Cloud Run:
 
 ```sh
-gcloud run deploy run-sql --image gcr.io/[YOUR_PROJECT_ID]/run-sql
+gcloud run deploy run-sql --image gcr.io/[YOUR_PROJECT_ID]/run-sql \
+  --add-cloudsql-instances '<PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME>' \
+  --update-env-vars INSTANCE_UNIX_SOCKET='/cloudsql/<PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME>' \
+  --update-env-vars DB_USER='<DB_USER_NAME>' \
+  --update-env-vars DB_PASS='<DB_PASSWORD>' \
+  --update-env-vars DB_NAME='<DB_NAME>'
 ```
 
 Take note of the URL output at the end of the deployment process.
 
-3. Configure the service for use with Cloud Run
-
-```sh
-gcloud beta run services update run-sql \
-    --add-cloudsql-instances [INSTANCE_CONNECTION_NAME] \
-    --set-env-vars INSTANCE_CONNECTION_NAME=[INSTANCE_CONNECTION_NAME] \
-    --set-env-vars DB_USER=[YOUR_DB_USER] \
-    --set-env-vars DB_PASS=[YOUR_DB_PASS] \
-    --set-env-vars DB_NAME=[YOUR_DB]
-```
-
 Replace environment variables with the correct values for your Cloud SQL
 instance configuration.
 
-This step can be done as part of deployment but is separated for clarity.
+It is recommended to use the [Secret Manager integration](https://cloud.google.com/run/docs/configuring/secrets) for Cloud Run instead
+of using environment variables for the SQL configuration. The service injects the SQL credentials from
+Secret Manager at runtime via an environment variable.
 
-4. Navigate your browser to the URL noted in step 2.
+Create secrets via the command line:
+```sh
+echo -n $INSTANCE_UNIX_SOCKET | \
+    gcloud secrets create [INSTANCE_UNIX_SOCKET_SECRET] --data-file=-
+```
+
+Deploy the service to Cloud Run specifying the env var name and secret name:
+```sh
+gcloud beta run deploy SERVICE --image gcr.io/[YOUR_PROJECT_ID]/run-sql \
+    --add-cloudsql-instances <PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME> \
+    --update-secrets INSTANCE_UNIX_SOCKET=[INSTANCE_UNIX_SOCKET_SECRET]:latest,\
+      DB_USER=[DB_USER_SECRET]:latest, \
+      DB_PASS=[DB_PASS_SECRET]:latest, \
+      DB_NAME=[DB_NAME_SECRET]:latest
+```
+
+3. Navigate your browser to the URL noted in step 2.
 
 For more details about using Cloud Run see http://cloud.run.
-Review other [Go on Cloud Run samples](../../../run/).
+
+## Running Integration Tests
+
+The integration tests depend on a Unix socket and a TCP listener provided by the
+Cloud SQL Auth Proxy. To run the tests, you will need to start two instances of
+the Cloud SQL Auth Proxy, one for a TCP connection and one for a Unix socket
+connection.
+
+```
+cloud_sql_proxy -instances=<PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME>=tcp:3306
+cloud_sql_proxy -instances=<PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME> -dir /cloudsql
+```
+
+To run integration tests, use the following command, setting environment
+variables to the correct values:
+
+```
+GOLANG_SAMPLES_E2E_TEST="yes" \
+  MYSQL_USER=some-user \
+  MYSQL_PASSWORD=some-pass
+  MYSQL_DATABASE=some-db \
+  MYSQL_PORT=3307 \
+  MYSQL_HOST=127.0.0.1
+  MYSQL_UNIX_SOCKET='/cloudsql/<PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME>'
+  MYSQL_INSTANCE='<PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME>' \
+  go test -v
+```

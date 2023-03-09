@@ -21,8 +21,8 @@ import (
 	"io"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
+	"cloud.google.com/go/dlp/apiv2/dlppb"
 	"google.golang.org/api/iterator"
-	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
 // listJobs lists jobs matching the given optional filter and optional jobType.
@@ -35,10 +35,11 @@ func listJobs(w io.Writer, projectID, filter, jobType string) error {
 	if err != nil {
 		return fmt.Errorf("dlp.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	// Create a configured request.
 	req := &dlppb.ListDlpJobsRequest{
-		Parent: "projects/" + projectID,
+		Parent: fmt.Sprintf("projects/%s/locations/global", projectID),
 		Filter: filter,
 		Type:   dlppb.DlpJobType(dlppb.DlpJobType_value[jobType]),
 	}

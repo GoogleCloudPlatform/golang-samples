@@ -14,14 +14,14 @@
 
 package findings
 
-// [START get_source]
+// [START securitycenter_get_source]
 import (
 	"context"
 	"fmt"
 	"io"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
-	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
+	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 )
 
 // getSource retrieves a source by its resource name and print it to w.
@@ -49,4 +49,4 @@ func getSource(w io.Writer, sourceName string) error {
 	return nil
 }
 
-// [END get_source]
+// [END securitycenter_get_source]

@@ -92,6 +92,10 @@ func TestCopiesAndExtracts(t *testing.T) {
 		t.Fatalf("failed to generate example table2: %v", err)
 	}
 
+	if err := createJob(tc.ProjectID, "SELECT 17 as foo"); err != nil {
+		t.Errorf("createJob: %v", err)
+	}
+
 	// Run copy job tests in parallel.
 	t.Run("copy", func(t *testing.T) {
 		t.Run("copyTable", func(t *testing.T) {
@@ -102,7 +106,7 @@ func TestCopiesAndExtracts(t *testing.T) {
 		})
 
 		t.Run("copyTableWithCMEK", func(t *testing.T) {
-			if !bqtestutil.RunCMEKTests() {
+			if bqtestutil.SkipCMEKTests() {
 				t.Skip("Skipping CMEK tests")
 			}
 			t.Parallel()
@@ -134,6 +138,12 @@ func TestCopiesAndExtracts(t *testing.T) {
 		t.Fatalf("cannot create bucket: %v", err)
 	}
 
+	model := client.DatasetInProject(tc.ProjectID, testDatasetID).Model("model")
+	if err := generateModel(client, tc.ProjectID, testDatasetID, model.ModelID); err != nil {
+		t.Fatalf("cannot create BQ ML model: %v", err)
+	}
+	defer model.Delete(ctx)
+
 	// Run extract job tests in parallel.
 	t.Run("extract", func(t *testing.T) {
 		t.Run("exportTableAsCSV", func(t *testing.T) {
@@ -150,7 +160,6 @@ func TestCopiesAndExtracts(t *testing.T) {
 			if err := exportTableAsCompressedCSV(tc.ProjectID, gcsURI); err != nil {
 				t.Errorf("exportTableAsCompressedCSV(%s): %v", gcsURI, err)
 			}
-
 		})
 		t.Run("exportTableAsJSON", func(t *testing.T) {
 			t.Parallel()
@@ -158,7 +167,13 @@ func TestCopiesAndExtracts(t *testing.T) {
 			if err := exportTableAsJSON(tc.ProjectID, gcsURI); err != nil {
 				t.Errorf("exportTableAsJSON(%s): %v", gcsURI, err)
 			}
-
+		})
+		t.Run("exportModel", func(t *testing.T) {
+			t.Parallel()
+			gcsURI := fmt.Sprintf("gs://%s/%s", bucket, "model")
+			if err := exportModel(tc.ProjectID, testDatasetID, model.ModelID, gcsURI); err != nil {
+				t.Errorf("exportModel(%s): %v", gcsURI, err)
+			}
 		})
 	})
 
@@ -193,6 +208,39 @@ func generateTableCTAS(client *bigquery.Client, datasetID, tableID string) error
 		  IF(RAND() > 0.5,"foo","bar") as token
 		FROM
 		  UNNEST(GENERATE_ARRAY(0,5,1)) as r`, datasetID, tableID))
+	job, err := q.Run(ctx)
+	if err != nil {
+		return err
+	}
+	status, err := job.Wait(ctx)
+	if err != nil {
+		return err
+	}
+	if err := status.Err(); err != nil {
+		return err
+	}
+	return nil
+}
+
+// generateModel creates an example BigQuery ML model.
+func generateModel(client *bigquery.Client, projectID, datasetID, modelID string) error {
+	ctx := context.Background()
+	modelRef := fmt.Sprintf("%s.%s.%s", projectID, datasetID, modelID)
+
+	// Create a ML model via a query.
+	sql := fmt.Sprintf(`
+	CREATE MODEL `+"`%s`"+`
+	OPTIONS (
+		model_type='linear_reg',
+		max_iteration=1,
+		learn_rate=0.4,
+		learn_rate_strategy='constant'
+	) AS (
+		SELECT 'a' AS f1, 2.0 AS label
+		UNION ALL
+		SELECT 'b' AS f1, 3.8 AS label
+	)`, modelRef)
+	q := client.Query(sql)
 	job, err := q.Run(ctx)
 	if err != nil {
 		return err

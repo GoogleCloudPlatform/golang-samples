@@ -21,7 +21,7 @@ import (
 	"io"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
-	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
+	"cloud.google.com/go/dlp/apiv2/dlppb"
 )
 
 // infoTypes returns the info types in the given language and matching the given filter.
@@ -33,6 +33,7 @@ func infoTypes(w io.Writer, languageCode, filter string) error {
 	if err != nil {
 		return fmt.Errorf("dlp.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	req := &dlppb.ListInfoTypesRequest{
 		LanguageCode: languageCode,

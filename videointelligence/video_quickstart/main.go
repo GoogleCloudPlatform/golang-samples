@@ -25,7 +25,7 @@ import (
 	"github.com/golang/protobuf/ptypes"
 
 	video "cloud.google.com/go/videointelligence/apiv1"
-	videopb "google.golang.org/genproto/googleapis/cloud/videointelligence/v1"
+	videopb "cloud.google.com/go/videointelligence/apiv1/videointelligencepb"
 )
 
 func main() {
@@ -36,6 +36,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
+	defer client.Close()
 
 	op, err := client.AnnotateVideo(ctx, &videopb.AnnotateVideoRequest{
 		InputUri: "gs://cloud-samples-data/video/cat.mp4",

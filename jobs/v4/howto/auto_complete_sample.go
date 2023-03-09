@@ -21,7 +21,7 @@ import (
 	"io"
 
 	talent "cloud.google.com/go/talent/apiv4beta1"
-	talentpb "google.golang.org/genproto/googleapis/cloud/talent/v4beta1"
+	"cloud.google.com/go/talent/apiv4beta1/talentpb"
 )
 
 // jobTitleAutoComplete suggests the job titles of the given
@@ -34,6 +34,7 @@ func jobTitleAutocomplete(w io.Writer, projectID, query string) (*talentpb.Compl
 	if err != nil {
 		return nil, fmt.Errorf("talent.NewCompletionClient: %v", err)
 	}
+	defer c.Close()
 
 	// Construct a completeQuery request.
 	req := &talentpb.CompleteQueryRequest{

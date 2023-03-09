@@ -20,55 +20,41 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"sync"
+	"sync/atomic"
+	"time"
 
 	"cloud.google.com/go/pubsub"
 )
 
-func pullMsgs(w io.Writer, projectID, subID string, topic *pubsub.Topic) error {
+func pullMsgs(w io.Writer, projectID, subID string) error {
 	// projectID := "my-project-id"
 	// subID := "my-sub"
-	// topic of type https://godoc.org/cloud.google.com/go/pubsub#Topic
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
+	defer client.Close()
 
-	// Publish 10 messages on the topic.
-	var results []*pubsub.PublishResult
-	for i := 0; i < 10; i++ {
-		res := topic.Publish(ctx, &pubsub.Message{
-			Data: []byte(fmt.Sprintf("hello world #%d", i)),
-		})
-		results = append(results, res)
-	}
-
-	// Check that all messages were published.
-	for _, r := range results {
-		_, err := r.Get(ctx)
-		if err != nil {
-			return fmt.Errorf("Get: %v", err)
-		}
-	}
-	// Consume 10 messages.
-	var mu sync.Mutex
-	received := 0
 	sub := client.Subscription(subID)
-	cctx, cancel := context.WithCancel(ctx)
-	err = sub.Receive(cctx, func(ctx context.Context, msg *pubsub.Message) {
+
+	// Receive messages for 10 seconds, which simplifies testing.
+	// Comment this out in production, since `Receive` should
+	// be used as a long running operation.
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+
+	var received int32
+	err = sub.Receive(ctx, func(_ context.Context, msg *pubsub.Message) {
 		fmt.Fprintf(w, "Got message: %q\n", string(msg.Data))
+		atomic.AddInt32(&received, 1)
 		msg.Ack()
-		mu.Lock()
-		defer mu.Unlock()
-		received++
-		if received == 10 {
-			cancel()
-		}
 	})
 	if err != nil {
-		return fmt.Errorf("Receive: %v", err)
+		return fmt.Errorf("sub.Receive: %v", err)
 	}
+	fmt.Fprintf(w, "Received %d messages\n", received)
+
 	return nil
 }
 

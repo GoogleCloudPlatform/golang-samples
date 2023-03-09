@@ -22,7 +22,7 @@ import (
 	"io"
 
 	translate "cloud.google.com/go/translate/apiv3"
-	translatepb "google.golang.org/genproto/googleapis/cloud/translate/v3"
+	"cloud.google.com/go/translate/apiv3/translatepb"
 )
 
 // translateTextWithGlossary translates input text and returns translated text.
@@ -58,7 +58,7 @@ func translateTextWithGlossary(w io.Writer, projectID string, location string, s
 	}
 
 	// Display the translation for each input text provided
-	for _, translation := range resp.GetTranslations() {
+	for _, translation := range resp.GetGlossaryTranslations() {
 		fmt.Fprintf(w, "Translated text: %v\n", translation.GetTranslatedText())
 	}
 

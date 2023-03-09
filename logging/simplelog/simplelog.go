@@ -48,11 +48,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create logging client: %v", err)
 	}
+	defer client.Close()
 
 	adminClient, err := logadmin.NewClient(ctx, projID)
 	if err != nil {
 		log.Fatalf("Failed to create logadmin client: %v", err)
 	}
+	defer adminClient.Close()
 
 	client.OnError = func(err error) {
 		// Print an error to the local log.
@@ -93,18 +95,17 @@ func main() {
 }
 
 func writeEntry(client *logging.Client) {
-	// [START logging_write_log_entry]
 	const name = "log-example"
 	logger := client.Logger(name)
 	defer logger.Flush() // Ensure the entry is written.
 
 	infolog := logger.StandardLogger(logging.Info)
 	infolog.Printf("infolog is a standard Go log.Logger with INFO severity.")
-	// [END logging_write_log_entry]
 }
 
 func structuredWrite(client *logging.Client) {
 	// [START write_structured_log_entry]
+	// [START logging_write_log_entry]
 	const name = "log-example"
 	logger := client.Logger(name)
 	defer logger.Flush() // Ensure the entry is written.
@@ -117,6 +118,7 @@ func structuredWrite(client *logging.Client) {
 		Severity: logging.Debug,
 	})
 	// [END logging_write_log_entry]
+	// [END write_structured_log_entry]
 }
 
 func deleteLog(adminClient *logadmin.Client) error {
@@ -137,9 +139,11 @@ func getEntries(adminClient *logadmin.Client, projID string) ([]*logging.Entry, 
 	// [START logging_list_log_entries]
 	var entries []*logging.Entry
 	const name = "log-example"
+	lastHour := time.Now().Add(-1 * time.Hour).Format(time.RFC3339)
+
 	iter := adminClient.Entries(ctx,
-		// Only get entries from the log-example log.
-		logadmin.Filter(fmt.Sprintf(`logName = "projects/%s/logs/%s"`, projID, name)),
+		// Only get entries from the "log-example" log within the last hour.
+		logadmin.Filter(fmt.Sprintf(`logName = "projects/%s/logs/%s" AND timestamp > "%s"`, projID, name, lastHour)),
 		// Get most recent entries first.
 		logadmin.NewestFirst(),
 	)

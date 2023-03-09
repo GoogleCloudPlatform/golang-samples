@@ -39,6 +39,17 @@ func setEventBasedHold(w io.Writer, bucket, object string) error {
 	defer cancel()
 
 	o := client.Bucket(bucket).Object(object)
+
+	// Optional: set a metageneration-match precondition to avoid potential race
+	// conditions and data corruptions. The request to update is aborted if the
+	// object's metageneration does not match your precondition.
+	attrs, err := o.Attrs(ctx)
+	if err != nil {
+		return fmt.Errorf("object.Attrs: %v", err)
+	}
+	o = o.If(storage.Conditions{MetagenerationMatch: attrs.Metageneration})
+
+	// Update the object to add the object hold.
 	objectAttrsToUpdate := storage.ObjectAttrsToUpdate{
 		EventBasedHold: true,
 	}

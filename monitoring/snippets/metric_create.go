@@ -22,10 +22,10 @@ import (
 	"io"
 
 	monitoring "cloud.google.com/go/monitoring/apiv3"
+	"cloud.google.com/go/monitoring/apiv3/v2/monitoringpb"
 	"google.golang.org/genproto/googleapis/api/label"
 	"google.golang.org/genproto/googleapis/api/metric"
 	metricpb "google.golang.org/genproto/googleapis/api/metric"
-	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 )
 
 // createCustomMetric creates a custom metric specified by the metric type.
@@ -35,6 +35,7 @@ func createCustomMetric(w io.Writer, projectID, metricType string) (*metricpb.Me
 	if err != nil {
 		return nil, err
 	}
+	defer c.Close()
 	md := &metric.MetricDescriptor{
 		Name: "Custom Metric",
 		Type: metricType,

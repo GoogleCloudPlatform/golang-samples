@@ -26,11 +26,11 @@ import (
 // write the contents of a table into Cloud Storage as CSV.
 func exportTableAsCSV(projectID, gcsURI string) error {
 	// projectID := "my-project-id"
-	// gcsUri := "gs://mybucket/shakespeare.csv"
+	// gcsURI := "gs://mybucket/shakespeare.csv"
 	ctx := context.Background()
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("bigquery.NewClient: %v", err)
+		return fmt.Errorf("bigquery.NewClient: %w", err)
 	}
 	defer client.Close()
 

@@ -14,7 +14,7 @@
 
 package assets
 
-// [START list_project_assets_and_state_changes]
+// [START securitycenter_list_assets_and_changes]
 import (
 	"context"
 	"fmt"
@@ -22,9 +22,9 @@ import (
 	"time"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
+	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/api/iterator"
-	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
 )
 
 // listAllProjectAssetsAndStateChange lists all current GCP project assets in
@@ -67,4 +67,4 @@ func listAllProjectAssetsAndStateChanges(w io.Writer, orgID string) error {
 	return nil
 }
 
-// [END list_project_assets_and_state_changes]
+// [END securitycenter_list_assets_and_changes]

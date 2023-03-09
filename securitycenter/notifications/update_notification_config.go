@@ -14,14 +14,14 @@
 
 package notifications
 
-// [START scc_update_notification_config]
+// [START securitycenter_update_notification_config]
 import (
 	"context"
 	"fmt"
 	"io"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
-	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
+	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 	"google.golang.org/genproto/protobuf/field_mask"
 )
 
@@ -39,14 +39,20 @@ func updateNotificationConfig(w io.Writer, orgID string, notificationConfigID st
 	defer client.Close()
 
 	updatedDescription := "Updated sample config"
+	updatedFilter := `state = "INACTIVE"`
 	req := &securitycenterpb.UpdateNotificationConfigRequest{
 		NotificationConfig: &securitycenterpb.NotificationConfig{
 			Name:        fmt.Sprintf("organizations/%s/notificationConfigs/%s", orgID, notificationConfigID),
 			Description: updatedDescription,
 			PubsubTopic: updatedPubsubTopic,
+			NotifyConfig: &securitycenterpb.NotificationConfig_StreamingConfig_{
+				StreamingConfig: &securitycenterpb.NotificationConfig_StreamingConfig{
+					Filter: updatedFilter,
+				},
+			},
 		},
 		UpdateMask: &field_mask.FieldMask{
-			Paths: []string{"description", "pubsub_topic"},
+			Paths: []string{"description", "pubsub_topic", "streaming_config.filter"},
 		},
 	}
 
@@ -60,4 +66,4 @@ func updateNotificationConfig(w io.Writer, orgID string, notificationConfigID st
 	return nil
 }
 
-// [END scc_update_notification_config]
+// [END securitycenter_update_notification_config]

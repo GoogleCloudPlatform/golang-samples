@@ -14,14 +14,14 @@
 
 package notifications
 
-// [START scc_delete_notification_config]
+// [START securitycenter_delete_notification_config]
 import (
 	"context"
 	"fmt"
 	"io"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
-	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
+	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 )
 
 func deleteNotificationConfig(w io.Writer, orgID string, notificationConfigID string) error {
@@ -49,4 +49,4 @@ func deleteNotificationConfig(w io.Writer, orgID string, notificationConfigID st
 	return nil
 }
 
-// [END scc_delete_notification_config]
+// [END securitycenter_delete_notification_config]

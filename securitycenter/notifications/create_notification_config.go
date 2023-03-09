@@ -14,14 +14,14 @@
 
 package notifications
 
-// [START scc_create_notification_config]
+// [START securitycenter_create_notification_config]
 import (
 	"context"
 	"fmt"
 	"io"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
-	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
+	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 )
 
 func createNotificationConfig(w io.Writer, orgID string, pubsubTopic string, notificationConfigID string) error {
@@ -60,4 +60,4 @@ func createNotificationConfig(w io.Writer, orgID string, pubsubTopic string, not
 	return nil
 }
 
-// [END scc_create_notification_config]
+// [END securitycenter_create_notification_config]

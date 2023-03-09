@@ -22,7 +22,7 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
-// importORCTruncate demonstrates loading Apache ORC data from Cloud Storage into a table.
+// importORC demonstrates loading Apache ORC data from Cloud Storage into a table.
 func importORC(projectID, datasetID, tableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"
@@ -30,7 +30,7 @@ func importORC(projectID, datasetID, tableID string) error {
 	ctx := context.Background()
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("bigquery.NewClient: %v", err)
+		return fmt.Errorf("bigquery.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -48,7 +48,7 @@ func importORC(projectID, datasetID, tableID string) error {
 	}
 
 	if status.Err() != nil {
-		return fmt.Errorf("job completed with error: %v", status.Err())
+		return fmt.Errorf("job completed with error: %w", status.Err())
 	}
 	return nil
 }

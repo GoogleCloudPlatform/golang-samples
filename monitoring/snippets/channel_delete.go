@@ -23,7 +23,7 @@ import (
 	"io"
 
 	monitoring "cloud.google.com/go/monitoring/apiv3"
-	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
+	"cloud.google.com/go/monitoring/apiv3/v2/monitoringpb"
 )
 
 // deleteChannel deletes the given channel. channelName should be of the form
@@ -35,6 +35,7 @@ func deleteChannel(w io.Writer, channelName string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 
 	req := &monitoringpb.DeleteNotificationChannelRequest{
 		Name: channelName,

@@ -22,9 +22,9 @@ import (
 	"time"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
+	"cloud.google.com/go/dlp/apiv2/dlppb"
 	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/api/iterator"
-	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
 // listInspectTemplates lists the inspect templates in the project.
@@ -37,10 +37,11 @@ func listInspectTemplates(w io.Writer, projectID string) error {
 	if err != nil {
 		return fmt.Errorf("dlp.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	// Create a configured request.
 	req := &dlppb.ListInspectTemplatesRequest{
-		Parent: "projects/" + projectID,
+		Parent: fmt.Sprintf("projects/%s/locations/global", projectID),
 	}
 
 	// Send the request and iterate over the results.

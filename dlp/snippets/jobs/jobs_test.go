@@ -24,9 +24,9 @@ import (
 	"testing"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
+	"cloud.google.com/go/dlp/apiv2/dlppb"
 	"cloud.google.com/go/pubsub"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
 // setupPubSub creates a subscription to the given topic.
@@ -84,7 +84,7 @@ func riskNumerical(projectID, dataProject, pubSubTopic, pubSubSub, datasetID, ta
 
 	// Create a configured request.
 	req := &dlppb.CreateDlpJobRequest{
-		Parent: "projects/" + projectID,
+		Parent: fmt.Sprintf("projects/%s/locations/global", projectID),
 		Job: &dlppb.CreateDlpJobRequest_RiskJob{
 			RiskJob: &dlppb.RiskAnalysisJobConfig{
 				// PrivacyMetric configures what to compute.

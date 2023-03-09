@@ -24,23 +24,23 @@
 //
 // Sample usage with `go test`:
 //
-// 	package myapp
+//	package myapp
 //
-// 	import (
-// 		"testing"
-// 		"google.golang.org/appengine/aeintegrate"
-// 	)
+//	import (
+//		"testing"
+//		"google.golang.org/appengine/aeintegrate"
+//	)
 //
-// 	func TestApp(t *testing.T) {
-// 		t.Parallel()
-// 		app := aeintegrate.App{Name: "A", Dir: "app"},
-// 		if err := app.Deploy(); err != nil {
-// 			t.Fatalf("could not deploy app: %v", err)
-// 		}
-// 		defer app.Cleanup()
-// 		resp, err := app.Get("/")
-// 		...
-// 	}
+//	func TestApp(t *testing.T) {
+//		t.Parallel()
+//		app := aeintegrate.App{Name: "A", Dir: "app"},
+//		if err := app.Deploy(); err != nil {
+//			t.Fatalf("could not deploy app: %v", err)
+//		}
+//		defer app.Cleanup()
+//		resp, err := app.Get("/")
+//		...
+//	}
 package aeintegrate
 
 import (
@@ -334,7 +334,7 @@ func (p *App) Cleanup() error {
 	for try := 0; try < 10; try++ {
 		_, err = p.adminService.Apps.Services.Versions.Delete(p.ProjectID, p.Service, p.version()).Do()
 		if err == nil {
-			log.Printf("(%s) Succesfully cleaned up.", p.Name)
+			log.Printf("(%s) Successfully cleaned up.", p.Name)
 			break
 		}
 		time.Sleep(time.Second)

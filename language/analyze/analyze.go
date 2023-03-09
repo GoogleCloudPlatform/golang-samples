@@ -27,7 +27,7 @@ import (
 
 	// [START imports]
 	language "cloud.google.com/go/language/apiv1"
-	languagepb "google.golang.org/genproto/googleapis/cloud/language/v1"
+	"cloud.google.com/go/language/apiv1/languagepb"
 	// [END imports]
 )
 
@@ -42,6 +42,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer client.Close()
 	// [END init]
 
 	text := strings.Join(os.Args[2:], " ")
@@ -130,6 +131,13 @@ func classifyText(ctx context.Context, client *language.Client, text string) (*l
 				Content: text,
 			},
 			Type: languagepb.Document_PLAIN_TEXT,
+		},
+		ClassificationModelOptions: &languagepb.ClassificationModelOptions{
+			ModelType: &languagepb.ClassificationModelOptions_V2Model_{
+				V2Model: &languagepb.ClassificationModelOptions_V2Model{
+					ContentCategoriesVersion: languagepb.ClassificationModelOptions_V2Model_V2,
+				},
+			},
 		},
 	})
 }

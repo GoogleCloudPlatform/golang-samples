@@ -97,7 +97,7 @@ func TestImportSnippets(t *testing.T) {
 			}
 		})
 		t.Run("importJSONWithCMEK", func(t *testing.T) {
-			if bqtestutil.RunCMEKTests() {
+			if bqtestutil.SkipCMEKTests() {
 				t.Skip("skipping CMEK tests")
 			}
 			t.Parallel()
@@ -127,6 +127,20 @@ func TestImportSnippets(t *testing.T) {
 				t.Errorf("importORCTruncate(%q): %v", testDatasetID, err)
 			}
 		})
+		t.Run("importAvro", func(t *testing.T) {
+			t.Parallel()
+			tableID := "bigquery_load_table_gcs_avro"
+			if err := importAvro(tc.ProjectID, testDatasetID, tableID); err != nil {
+				t.Errorf("importAvro(%q): %v", testDatasetID, err)
+			}
+		})
+		t.Run("importAvroTruncate", func(t *testing.T) {
+			t.Parallel()
+			tableID := "bigquery_load_table_gcs_orc_truncate"
+			if err := importAvroTruncate(tc.ProjectID, testDatasetID, tableID); err != nil {
+				t.Errorf("importAvroTruncate(%q): %v", testDatasetID, err)
+			}
+		})
 		t.Run("importParquet", func(t *testing.T) {
 			t.Parallel()
 			tableID := "bigquery_load_table_gcs_parquet"
@@ -139,6 +153,28 @@ func TestImportSnippets(t *testing.T) {
 			tableID := "bigquery_load_table_gcs_parquet_truncate"
 			if err := importParquetTruncate(tc.ProjectID, testDatasetID, tableID); err != nil {
 				t.Errorf("importParquetTruncate(%q): %v", testDatasetID, err)
+			}
+		})
+		t.Run("importWithHivePartitioning", func(t *testing.T) {
+			t.Parallel()
+			tableID := "bigquery_load_table_gcs_hive_partitioning"
+			if err := importWithHivePartitioning(tc.ProjectID, testDatasetID, tableID); err != nil {
+				t.Errorf("importWithHivePartitioning(%q): %v", testDatasetID, err)
+			}
+			// Verify we get the expected column.
+			meta, err := client.Dataset(testDatasetID).Table(tableID).Metadata(ctx)
+			if err != nil {
+				t.Errorf("importWithHivePartitioning table Metadata: (%q): %v", tableID, err)
+			}
+			gotHiveField := false
+			for _, f := range meta.Schema {
+				if f.Name == "pkey" {
+					gotHiveField = true
+					break
+				}
+			}
+			if !gotHiveField {
+				t.Error("importWithHivePartitioning failed to create schema with hive column")
 			}
 		})
 		t.Run("createTableAndWidenLoad", func(t *testing.T) {

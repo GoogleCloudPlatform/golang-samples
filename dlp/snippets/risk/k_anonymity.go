@@ -23,8 +23,8 @@ import (
 	"time"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
+	"cloud.google.com/go/dlp/apiv2/dlppb"
 	"cloud.google.com/go/pubsub"
-	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
 )
 
 // riskKAnonymity computes the risk of the given columns using K Anonymity.
@@ -66,7 +66,7 @@ func riskKAnonymity(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub,
 
 	// Create a configured request.
 	req := &dlppb.CreateDlpJobRequest{
-		Parent: "projects/" + projectID,
+		Parent: fmt.Sprintf("projects/%s/locations/global", projectID),
 		Job: &dlppb.CreateDlpJobRequest_RiskJob{
 			RiskJob: &dlppb.RiskAnalysisJobConfig{
 				// PrivacyMetric configures what to compute.
@@ -104,9 +104,9 @@ func riskKAnonymity(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub,
 	fmt.Fprintf(w, "Created job: %v\n", j.GetName())
 
 	// Wait for the risk job to finish by waiting for a PubSub message.
-	// This only waits for 1 minute. For long jobs, consider using a truly
+	// This only waits for 10 minutes. For long jobs, consider using a truly
 	// asynchronous execution model such as Cloud Functions.
-	ctx, cancel := context.WithTimeout(ctx, 1*time.Minute)
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Minute)
 	defer cancel()
 	err = s.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
 		// If this is the wrong job, do not process the result.

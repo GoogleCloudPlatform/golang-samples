@@ -33,7 +33,7 @@ func queryLegacyLargeResults(w io.Writer, projectID, datasetID, tableID string) 
 	ctx := context.Background()
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("bigquery.NewClient: %v", err)
+		return fmt.Errorf("bigquery.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -42,19 +42,11 @@ func queryLegacyLargeResults(w io.Writer, projectID, datasetID, tableID string) 
 	q.UseLegacySQL = true
 	q.AllowLargeResults = true
 	q.QueryConfig.Dst = client.Dataset(datasetID).Table(tableID)
-	// Run the query and print results when the query job is completed.
-	job, err := q.Run(ctx)
+	// Run the query and process the returned row iterator.
+	it, err := q.Read(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("query.Read(): %w", err)
 	}
-	status, err := job.Wait(ctx)
-	if err != nil {
-		return err
-	}
-	if err := status.Err(); err != nil {
-		return err
-	}
-	it, err := job.Read(ctx)
 	for {
 		var row []bigquery.Value
 		err := it.Next(&row)

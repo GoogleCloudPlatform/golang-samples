@@ -21,7 +21,7 @@ import (
 	"io"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
-	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
+	"cloud.google.com/go/dlp/apiv2/dlppb"
 )
 
 // createInspectTemplate creates a template with the given configuration.
@@ -38,6 +38,7 @@ func createInspectTemplate(w io.Writer, projectID string, templateID, displayNam
 	if err != nil {
 		return fmt.Errorf("dlp.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	// Convert the info type strings to a list of InfoTypes.
 	var infoTypes []*dlppb.InfoType
@@ -47,7 +48,7 @@ func createInspectTemplate(w io.Writer, projectID string, templateID, displayNam
 
 	// Create a configured request.
 	req := &dlppb.CreateInspectTemplateRequest{
-		Parent:     "projects/" + projectID,
+		Parent:     fmt.Sprintf("projects/%s/locations/global", projectID),
 		TemplateId: templateID,
 		InspectTemplate: &dlppb.InspectTemplate{
 			DisplayName: displayName,

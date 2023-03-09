@@ -14,14 +14,14 @@
 
 package assets
 
-// [START add_delete_security_marks]
+// [START securitycenter_add_delete_security_marks]
 import (
 	"context"
 	"fmt"
 	"io"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
-	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
+	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 	"google.golang.org/genproto/protobuf/field_mask"
 )
 
@@ -62,4 +62,4 @@ func addDeleteSecurityMarks(w io.Writer, assetName string) error {
 	return nil
 }
 
-// [END add_delete_security_marks]
+// [END securitycenter_add_delete_security_marks]

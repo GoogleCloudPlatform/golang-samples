@@ -20,13 +20,16 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
 	"time"
 
+	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
+	"google.golang.org/api/iterator"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/go-cmp/cmp"
@@ -34,6 +37,12 @@ import (
 
 var topicID string
 var subID string
+
+const (
+	topicPrefix = "topic"
+	subPrefix   = "sub"
+	expireAge   = 24 * time.Hour
+)
 
 // once guards cleanup related operations in setup. No need to set up and tear
 // down every time, so this speeds things up.
@@ -43,38 +52,72 @@ func setup(t *testing.T) *pubsub.Client {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 
-	topicID = "test-sub-topic"
-	subID = "test-sub"
 	var err error
 	client, err := pubsub.NewClient(ctx, tc.ProjectID)
 	if err != nil {
 		t.Fatalf("failed to create client: %v", err)
 	}
 
-	// Cleanup resources from the previous tests.
 	once.Do(func() {
-		topic := client.Topic(topicID)
-		ok, err := topic.Exists(ctx)
-		if err != nil {
-			t.Fatalf("failed to check if topic exists: %v", err)
-		}
-		if ok {
-			if err := topic.Delete(ctx); err != nil {
-				t.Fatalf("failed to cleanup the topic (%q): %v", topicID, err)
+		topicID = fmt.Sprintf("%s-%d", topicPrefix, time.Now().UnixNano())
+		subID = fmt.Sprintf("%s-%d", subPrefix, time.Now().UnixNano())
+
+		// Cleanup resources from the previous tests.
+		it := client.Topics(ctx)
+		for {
+			t, err := it.Next()
+			if err == iterator.Done {
+				break
+			}
+			if err != nil {
+				return
+			}
+			tID := t.ID()
+			p := strings.Split(tID, "-")
+
+			// Only delete resources created from these tests.
+			if p[0] == topicPrefix {
+				tCreated := p[1]
+				timestamp, err := strconv.ParseInt(tCreated, 10, 64)
+				if err != nil {
+					continue
+				}
+				timeTCreated := time.Unix(0, timestamp)
+				if time.Since(timeTCreated) > expireAge {
+					if err := t.Delete(ctx); err != nil {
+						fmt.Printf("Delete topic err: %v: %v", t.String(), err)
+					}
+				}
 			}
 		}
-		sub := client.Subscription(subID)
-		ok, err = sub.Exists(ctx)
-		if err != nil {
-			t.Fatalf("failed to check if subscription exists: %v", err)
-		}
-		if ok {
-			if err := sub.Delete(ctx); err != nil {
-				t.Fatalf("failed to cleanup the subscription (%q): %v", subID, err)
+		subIter := client.Subscriptions(ctx)
+		for {
+			s, err := subIter.Next()
+			if err == iterator.Done {
+				break
+			}
+			if err != nil {
+				return
+			}
+			sID := s.ID()
+			p := strings.Split(sID, "-")
+
+			// Only delete resources created from these tests.
+			if p[0] == subPrefix {
+				tCreated := p[1]
+				timestamp, err := strconv.ParseInt(tCreated, 10, 64)
+				if err != nil {
+					continue
+				}
+				timeTCreated := time.Unix(0, timestamp)
+				if time.Since(timeTCreated) > expireAge {
+					if err := s.Delete(ctx); err != nil {
+						fmt.Printf("Delete sub err: %v: %v", s.String(), err)
+					}
+				}
 			}
 		}
 	})
-
 	return client
 }
 
@@ -82,21 +125,34 @@ func TestCreate(t *testing.T) {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 	client := setup(t)
-	topic, err := client.CreateTopic(ctx, topicID)
-	if err != nil {
-		t.Fatalf("CreateTopic: %v", err)
-	}
-	buf := new(bytes.Buffer)
-	if err := create(buf, tc.ProjectID, subID, topic); err != nil {
-		t.Fatalf("failed to create a subscription: %v", err)
-	}
-	ok, err := client.Subscription(subID).Exists(context.Background())
-	if err != nil {
-		t.Fatalf("failed to check if sub exists: %v", err)
-	}
-	if !ok {
-		t.Fatalf("got none; want sub = %q", subID)
-	}
+
+	var topic *pubsub.Topic
+	var err error
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		topic, err = client.CreateTopic(ctx, topicID)
+		if err != nil {
+			t.Fatalf("CreateTopic: %v", err)
+		}
+	})
+
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+		if err := create(buf, tc.ProjectID, subID, topic); err != nil {
+			t.Fatalf("failed to create a subscription: %v", err)
+		}
+		got := buf.String()
+		want := "Created subscription"
+		if !strings.Contains(got, want) {
+			t.Fatalf("got: %s, want: %v", got, want)
+		}
+		ok, err := client.Subscription(subID).Exists(context.Background())
+		if err != nil {
+			t.Fatalf("failed to check if sub exists: %v", err)
+		}
+		if !ok {
+			t.Fatalf("got none; want sub = %q", subID)
+		}
+	})
 }
 
 func TestList(t *testing.T) {
@@ -155,6 +211,7 @@ func TestIAM(t *testing.T) {
 		if role, member := iam.Viewer, iam.AllUsers; !policy.HasRole(member, role) {
 			r.Errorf("want %q as viewer, policy=%v", member, policy)
 		}
+
 	})
 }
 
@@ -195,76 +252,187 @@ func TestDelete(t *testing.T) {
 	}
 }
 
+func TestPullMsgsAsync(t *testing.T) {
+	t.Parallel()
+	client := setup(t)
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	asyncTopicID := topicID + "-async"
+	asyncSubID := subID + "-async"
+
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		topic, err := getOrCreateTopic(ctx, client, asyncTopicID)
+		if err != nil {
+			r.Errorf("getOrCreateTopic: %v", err)
+		}
+		defer topic.Delete(ctx)
+		defer topic.Stop()
+
+		cfg := &pubsub.SubscriptionConfig{
+			Topic: topic,
+		}
+		sub, err := getOrCreateSub(ctx, client, asyncSubID, cfg)
+		if err != nil {
+			r.Errorf("getOrCreateSub: %v", err)
+		}
+		defer sub.Delete(ctx)
+
+		// Publish 1 message. This avoids race conditions
+		// when calling fmt.Fprintf from multiple receive
+		// callbacks. This is sufficient for testing since
+		// we're not testing client library functionality,
+		// and makes the sample more readable.
+		const numMsgs = 1
+		publishMsgs(ctx, topic, numMsgs)
+
+		buf := new(bytes.Buffer)
+		err = pullMsgs(buf, tc.ProjectID, asyncSubID)
+		if err != nil {
+			r.Errorf("failed to pull messages: %v", err)
+		}
+		got := buf.String()
+		want := fmt.Sprintf("Received %d messages\n", numMsgs)
+		if !strings.Contains(got, want) {
+			r.Errorf("pullMsgs got %s\nwant %s", got, want)
+		}
+	})
+}
+
 func TestPullMsgsSync(t *testing.T) {
+	t.Parallel()
 	client := setup(t)
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 	topicIDSync := topicID + "-sync"
 	subIDSync := subID + "-sync"
 
-	topic, err := getOrCreateTopic(ctx, client, topicIDSync)
-	if err != nil {
-		t.Fatalf("getOrCreateTopic: %v", err)
-	}
-	defer topic.Delete(ctx)
-	defer topic.Stop()
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		topic, err := getOrCreateTopic(ctx, client, topicIDSync)
+		if err != nil {
+			r.Errorf("getOrCreateTopic: %v", err)
+		}
+		defer topic.Delete(ctx)
+		defer topic.Stop()
 
-	sub, err := getOrCreateSub(ctx, client, topic, subIDSync)
-	if err != nil {
-		t.Fatalf("getOrCreateSub: %v", err)
-	}
-	defer sub.Delete(ctx)
+		cfg := &pubsub.SubscriptionConfig{
+			Topic: topic,
+		}
+		sub, err := getOrCreateSub(ctx, client, subIDSync, cfg)
+		if err != nil {
+			r.Errorf("getOrCreateSub: %v", err)
+		}
+		defer sub.Delete(ctx)
 
-	// Publish 5 messages on the topic.
-	const numMsgs = 5
-	publishMsgs(ctx, topic, numMsgs)
+		// Publish 1 message. This avoids race conditions
+		// when calling fmt.Fprintf from multiple receive
+		// callbacks. This is sufficient for testing since
+		// we're not testing client library functionality,
+		// and makes the sample more readable.
+		const numMsgs = 1
+		publishMsgs(ctx, topic, numMsgs)
 
-	buf := new(bytes.Buffer)
-	err = pullMsgsSync(buf, tc.ProjectID, subIDSync, topic)
-	if err != nil {
-		t.Fatalf("failed to pull messages: %v", err)
-	}
-	// Check for number of newlines, which should correspond with number of messages.
-	if got := strings.Count(buf.String(), "\n"); got != numMsgs {
-		t.Fatalf("pullMsgsSync got %d messages, want %d", got, numMsgs)
-	}
+		buf := new(bytes.Buffer)
+		err = pullMsgsSync(buf, tc.ProjectID, subIDSync)
+		if err != nil {
+			r.Errorf("failed to pull messages: %v", err)
+		}
+
+		got := buf.String()
+		want := fmt.Sprintf("Received %d messages\n", numMsgs)
+		if !strings.Contains(got, want) {
+			r.Errorf("pullMsgsSync got %s\nwant %s", got, want)
+		}
+	})
 }
 
 func TestPullMsgsConcurrencyControl(t *testing.T) {
+	t.Parallel()
 	client := setup(t)
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 	topicIDConc := topicID + "-conc"
 	subIDConc := subID + "-conc"
 
-	topic, err := getOrCreateTopic(ctx, client, topicIDConc)
-	if err != nil {
-		t.Fatalf("getOrCreateTopic: %v", err)
-	}
-	defer topic.Delete(ctx)
-	defer topic.Stop()
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		topic, err := getOrCreateTopic(ctx, client, topicIDConc)
+		if err != nil {
+			r.Errorf("getOrCreateTopic: %v", err)
+		}
+		defer topic.Delete(ctx)
+		defer topic.Stop()
 
-	sub, err := getOrCreateSub(ctx, client, topic, subIDConc)
-	if err != nil {
-		t.Fatalf("getOrCreateSub: %v", err)
-	}
-	defer sub.Delete(ctx)
+		cfg := &pubsub.SubscriptionConfig{
+			Topic: topic,
+		}
+		sub, err := getOrCreateSub(ctx, client, subIDConc, cfg)
+		if err != nil {
+			r.Errorf("getOrCreateSub: %v", err)
+		}
+		defer sub.Delete(ctx)
 
-	// Publish 5 message to test with.
-	const numMsgs = 5
-	publishMsgs(ctx, topic, numMsgs)
+		// Publish 5 message to test with.
+		const numMsgs = 5
+		publishMsgs(ctx, topic, numMsgs)
 
-	buf := new(bytes.Buffer)
-	if err := pullMsgsConcurrenyControl(buf, tc.ProjectID, subIDConc); err != nil {
-		t.Fatalf("failed to pull messages: %v", err)
-	}
-	// Check for number of newlines, which should correspond with number of messages.
-	if got := strings.Count(buf.String(), "\n"); got != numMsgs {
-		t.Fatalf("pullMsgsConcurrencyControl got %d messages, want %d", got, numMsgs)
-	}
+		buf := new(bytes.Buffer)
+		if err := pullMsgsConcurrencyControl(buf, tc.ProjectID, subIDConc); err != nil {
+			r.Errorf("failed to pull messages: %v", err)
+		}
+		got := buf.String()
+		want := fmt.Sprintf("Received %d messages\n", numMsgs)
+		if got != want {
+			r.Errorf("pullMsgsConcurrencyControl got %s\nwant %s", got, want)
+		}
+	})
+}
+
+func TestPullMsgsCustomAttributes(t *testing.T) {
+	t.Parallel()
+	client := setup(t)
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	topicIDAttributes := topicID + "-attributes"
+	subIDAttributes := subID + "-attributes"
+
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		topic, err := getOrCreateTopic(ctx, client, topicIDAttributes)
+		if err != nil {
+			r.Errorf("getOrCreateTopic: %v", err)
+		}
+		defer topic.Delete(ctx)
+		defer topic.Stop()
+
+		cfg := &pubsub.SubscriptionConfig{
+			Topic: topic,
+		}
+		sub, err := getOrCreateSub(ctx, client, subIDAttributes, cfg)
+		if err != nil {
+			r.Errorf("getOrCreateSub: %v", err)
+		}
+		defer sub.Delete(ctx)
+
+		res := topic.Publish(ctx, &pubsub.Message{
+			Data:       []byte("message with custom attributes"),
+			Attributes: map[string]string{"foo": "bar"},
+		})
+		if _, err := res.Get(ctx); err != nil {
+			r.Errorf("Get publish result: %v", err)
+		}
+
+		buf := new(bytes.Buffer)
+		if err := pullMsgsCustomAttributes(buf, tc.ProjectID, subIDAttributes); err != nil {
+			r.Errorf("failed to pull messages: %v", err)
+		}
+
+		want := "foo = bar"
+		if !strings.Contains(buf.String(), want) {
+			r.Errorf("pullMsgsCustomAttributes, got: %s, want %s", buf.String(), want)
+		}
+	})
 }
 
 func TestCreateWithDeadLetterPolicy(t *testing.T) {
+	t.Parallel()
 	client := setup(t)
 	defer client.Close()
 	ctx := context.Background()
@@ -273,49 +441,59 @@ func TestCreateWithDeadLetterPolicy(t *testing.T) {
 	deadLetterSubID := subID + "-dead-letter-sub"
 	deadLetterSinkID := topicID + "-dead-letter-sink"
 
-	deadLetterSourceTopic, err := getOrCreateTopic(ctx, client, deadLetterSourceID)
-	if err != nil {
-		t.Fatalf("getOrCreateTopic: %v", err)
-	}
-	defer deadLetterSourceTopic.Delete(ctx)
-	defer deadLetterSourceTopic.Stop()
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		deadLetterSourceTopic, err := getOrCreateTopic(ctx, client, deadLetterSourceID)
+		if err != nil {
+			r.Errorf("getOrCreateTopic: %v", err)
+			return
+		}
+		defer deadLetterSourceTopic.Delete(ctx)
+		defer deadLetterSourceTopic.Stop()
 
-	deadLetterSinkTopic, err := getOrCreateTopic(ctx, client, deadLetterSinkID)
-	if err != nil {
-		t.Fatalf("getOrCreateTopic: %v", err)
-	}
-	defer deadLetterSinkTopic.Delete(ctx)
-	defer deadLetterSinkTopic.Stop()
+		deadLetterSinkTopic, err := getOrCreateTopic(ctx, client, deadLetterSinkID)
+		if err != nil {
+			r.Errorf("getOrCreateTopic: %v", err)
+			return
+		}
+		defer deadLetterSinkTopic.Delete(ctx)
+		defer deadLetterSinkTopic.Stop()
 
-	buf := new(bytes.Buffer)
-	if err := createSubWithDeadLetter(buf, tc.ProjectID, deadLetterSubID, deadLetterSourceID, deadLetterSinkTopic.String()); err != nil {
-		t.Fatalf("createSubWithDeadLetter failed: %v", err)
-	}
-	sub := client.Subscription(deadLetterSubID)
-	ok, err := sub.Exists(context.Background())
-	if err != nil {
-		t.Fatalf("sub.Exists failed: %v", err)
-	}
-	if !ok {
-		t.Fatalf("got none; want sub = %q", deadLetterSubID)
-	}
-	defer sub.Delete(ctx)
+		buf := new(bytes.Buffer)
+		if err := createSubWithDeadLetter(buf, tc.ProjectID, deadLetterSubID, deadLetterSourceID, deadLetterSinkTopic.String()); err != nil {
+			r.Errorf("createSubWithDeadLetter failed: %v", err)
+			return
+		}
+		sub := client.Subscription(deadLetterSubID)
+		ok, err := sub.Exists(context.Background())
+		if err != nil {
+			r.Errorf("sub.Exists failed: %v", err)
+			return
+		}
+		if !ok {
+			r.Errorf("got none; want sub = %q", deadLetterSubID)
+			return
+		}
+		defer sub.Delete(ctx)
 
-	cfg, err := sub.Config(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	got := cfg.DeadLetterPolicy
-	want := &pubsub.DeadLetterPolicy{
-		DeadLetterTopic:     deadLetterSinkTopic.String(),
-		MaxDeliveryAttempts: 10,
-	}
-	if !cmp.Equal(got, want) {
-		t.Fatalf("got cfg: %+v; want cfg: %+v", got, want)
-	}
+		cfg, err := sub.Config(ctx)
+		if err != nil {
+			r.Errorf("createSubWithDeadLetter config: %v", err)
+			return
+		}
+		got := cfg.DeadLetterPolicy
+		want := &pubsub.DeadLetterPolicy{
+			DeadLetterTopic:     deadLetterSinkTopic.String(),
+			MaxDeliveryAttempts: 10,
+		}
+		if !cmp.Equal(got, want) {
+			r.Errorf("got cfg: %+v; want cfg: %+v", got, want)
+			return
+		}
+	})
 }
 
 func TestUpdateDeadLetterPolicy(t *testing.T) {
+	t.Parallel()
 	client := setup(t)
 	defer client.Close()
 	ctx := context.Background()
@@ -324,65 +502,79 @@ func TestUpdateDeadLetterPolicy(t *testing.T) {
 	deadLetterSubID := subID + "-update-sub"
 	deadLetterSinkID := topicID + "-update-sink"
 
-	deadLetterSourceTopic, err := getOrCreateTopic(ctx, client, deadLetterSourceID)
-	if err != nil {
-		t.Fatalf("getOrCreateTopic: %v", err)
-	}
-	defer deadLetterSourceTopic.Delete(ctx)
-	defer deadLetterSourceTopic.Stop()
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		deadLetterSourceTopic, err := getOrCreateTopic(ctx, client, deadLetterSourceID)
+		if err != nil {
+			r.Errorf("getOrCreateTopic: %v", err)
+			return
+		}
+		defer deadLetterSourceTopic.Delete(ctx)
+		defer deadLetterSourceTopic.Stop()
 
-	deadLetterSinkTopic, err := getOrCreateTopic(ctx, client, deadLetterSinkID)
-	if err != nil {
-		t.Fatalf("getOrCreateTopic: %v", err)
-	}
-	defer deadLetterSinkTopic.Delete(ctx)
-	defer deadLetterSinkTopic.Stop()
+		deadLetterSinkTopic, err := getOrCreateTopic(ctx, client, deadLetterSinkID)
+		if err != nil {
+			r.Errorf("getOrCreateTopic: %v", err)
+			return
+		}
+		defer deadLetterSinkTopic.Delete(ctx)
+		defer deadLetterSinkTopic.Stop()
 
-	buf := new(bytes.Buffer)
-	if err := createSubWithDeadLetter(buf, tc.ProjectID, deadLetterSubID, deadLetterSourceID, deadLetterSinkTopic.String()); err != nil {
-		t.Fatalf("createSubWithDeadLetter failed: %v", err)
-	}
-	sub := client.Subscription(deadLetterSubID)
-	ok, err := sub.Exists(context.Background())
-	if err != nil {
-		t.Fatalf("sub.Exists failed: %v", err)
-	}
-	if !ok {
-		t.Fatalf("got none; want sub = %q", deadLetterSubID)
-	}
-	defer sub.Delete(ctx)
+		buf := new(bytes.Buffer)
+		if err := createSubWithDeadLetter(buf, tc.ProjectID, deadLetterSubID, deadLetterSourceID, deadLetterSinkTopic.String()); err != nil {
+			r.Errorf("createSubWithDeadLetter failed: %v", err)
+			return
+		}
+		sub := client.Subscription(deadLetterSubID)
+		ok, err := sub.Exists(context.Background())
+		if err != nil {
+			r.Errorf("sub.Exists failed: %v", err)
+			return
+		}
+		if !ok {
+			r.Errorf("got none; want sub = %q", deadLetterSubID)
+			return
+		}
+		defer sub.Delete(ctx)
 
-	if err := updateDeadLetter(buf, tc.ProjectID, deadLetterSubID, deadLetterSinkTopic.String()); err != nil {
-		t.Fatalf("updateDeadLetter failed: %v", err)
-	}
+		if err := updateDeadLetter(buf, tc.ProjectID, deadLetterSubID, deadLetterSinkTopic.String()); err != nil {
+			r.Errorf("updateDeadLetter failed: %v", err)
+			return
+		}
 
-	cfg, err := sub.Config(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	got := cfg.DeadLetterPolicy
-	want := &pubsub.DeadLetterPolicy{
-		DeadLetterTopic:     deadLetterSinkTopic.String(),
-		MaxDeliveryAttempts: 20,
-	}
-	if !cmp.Equal(got, want) {
-		t.Fatalf("got cfg: %+v; want cfg: %+v", got, want)
-	}
+		cfg, err := sub.Config(ctx)
+		if err != nil {
+			r.Errorf("update dead letter policy config: %v", err)
+			return
+		}
+		got := cfg.DeadLetterPolicy
+		want := &pubsub.DeadLetterPolicy{
+			DeadLetterTopic:     deadLetterSinkTopic.String(),
+			MaxDeliveryAttempts: 20,
+		}
+		if !cmp.Equal(got, want) {
+			r.Errorf("got cfg: %+v; want cfg: %+v", got, want)
+			return
+		}
 
-	if err := removeDeadLetterTopic(buf, tc.ProjectID, deadLetterSubID); err != nil {
-		t.Fatalf("removeDeadLetterTopic failed: %v", err)
-	}
-	cfg, err = sub.Config(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	got = cfg.DeadLetterPolicy
-	if got != nil {
-		t.Fatalf("got dead letter policy: %+v, want nil", got)
-	}
+		if err := removeDeadLetterTopic(buf, tc.ProjectID, deadLetterSubID); err != nil {
+			r.Errorf("removeDeadLetterTopic failed: %v", err)
+			return
+		}
+		cfg, err = sub.Config(ctx)
+		if err != nil {
+			r.Errorf("update dead letter policy config: %v", err)
+			return
+		}
+		got = cfg.DeadLetterPolicy
+		if got != nil {
+			r.Errorf("got dead letter policy: %+v, want nil", got)
+			return
+		}
+	})
 }
 
 func TestPullMsgsDeadLetterDeliveryAttempts(t *testing.T) {
+	t.Parallel()
 	client := setup(t)
 	defer client.Close()
 	ctx := context.Background()
@@ -391,39 +583,266 @@ func TestPullMsgsDeadLetterDeliveryAttempts(t *testing.T) {
 	deadLetterSinkID := topicID + "-delivery-sink"
 	deadLetterSubID := subID + "-delivery-sub"
 
-	deadLetterSourceTopic, err := getOrCreateTopic(ctx, client, deadLetterSourceID)
-	if err != nil {
-		t.Fatalf("getOrCreateTopic: %v", err)
-	}
-	defer deadLetterSourceTopic.Delete(ctx)
-	defer deadLetterSourceTopic.Stop()
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		deadLetterSourceTopic, err := getOrCreateTopic(ctx, client, deadLetterSourceID)
+		if err != nil {
+			r.Errorf("getOrCreateTopic: %v", err)
+			return
+		}
+		defer deadLetterSourceTopic.Delete(ctx)
+		defer deadLetterSourceTopic.Stop()
 
-	deadLetterSinkTopic, err := getOrCreateTopic(ctx, client, deadLetterSinkID)
-	if err != nil {
-		t.Fatalf("getOrCreateTopic: %v", err)
-	}
-	defer deadLetterSinkTopic.Delete(ctx)
-	defer deadLetterSinkTopic.Stop()
+		deadLetterSinkTopic, err := getOrCreateTopic(ctx, client, deadLetterSinkID)
+		if err != nil {
+			r.Errorf("getOrCreateTopic: %v", err)
+			return
+		}
+		defer deadLetterSinkTopic.Delete(ctx)
+		defer deadLetterSinkTopic.Stop()
 
+		sub, err := getOrCreateSub(ctx, client, deadLetterSubID, &pubsub.SubscriptionConfig{
+			Topic: deadLetterSourceTopic,
+			DeadLetterPolicy: &pubsub.DeadLetterPolicy{
+				DeadLetterTopic:     deadLetterSinkTopic.String(),
+				MaxDeliveryAttempts: 10,
+			},
+		})
+		if err != nil {
+			r.Errorf("getOrCreateSub: %v", err)
+			return
+		}
+		defer sub.Delete(ctx)
+
+		if err = publishMsgs(ctx, deadLetterSourceTopic, 1); err != nil {
+			r.Errorf("publishMsgs failed: %v", err)
+			return
+		}
+
+		buf := new(bytes.Buffer)
+		if err := pullMsgsDeadLetterDeliveryAttempt(buf, tc.ProjectID, deadLetterSubID); err != nil {
+			r.Errorf("pullMsgsDeadLetterDeliveryAttempt failed: %v", err)
+			return
+		}
+		got := buf.String()
+		want := "delivery attempts: 1"
+		if !strings.Contains(got, want) {
+			r.Errorf("pullMsgsDeadLetterDeliveryAttempts got %s, want %s", got, want)
+			return
+		}
+	})
+}
+
+func TestCreateWithOrdering(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	client := setup(t)
+	defer client.Close()
+	orderingSubID := subID + "-ordering"
+
+	topic, err := getOrCreateTopic(ctx, client, topicID)
+	if err != nil {
+		t.Fatalf("CreateTopic: %v", err)
+	}
 	buf := new(bytes.Buffer)
-	deadLetterSinkName := fmt.Sprintf("projects/%s/topics/%s", tc.ProjectID, deadLetterSinkID)
-	if err = createSubWithDeadLetter(buf, tc.ProjectID, deadLetterSubID, deadLetterSourceID, deadLetterSinkName); err != nil {
-		t.Fatalf("createSubWithDeadLetter failed: %v", err)
+	if err := createWithOrdering(buf, tc.ProjectID, orderingSubID, topic); err != nil {
+		t.Fatalf("failed to create a subscription: %v", err)
 	}
-	sub := client.Subscription(deadLetterSubID)
+
+	orderingSub := client.Subscription(orderingSubID)
+	defer orderingSub.Delete(ctx)
+	ok, err := orderingSub.Exists(context.Background())
+	if err != nil {
+		t.Fatalf("failed to check if sub exists: %v", err)
+	}
+	if !ok {
+		t.Fatalf("got none; want sub = %q", orderingSubID)
+	}
+	cfg, err := orderingSub.Config(ctx)
+	if err != nil {
+		t.Fatalf("failed to get config for ordering sub: %v", err)
+	}
+	if !cfg.EnableMessageOrdering {
+		t.Fatalf("expected EnableMessageOrdering to be true for sub %s", orderingSubID)
+	}
+}
+
+func TestDetachSubscription(t *testing.T) {
+	t.Parallel()
+	client := setup(t)
+	defer client.Close()
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	detachTopicID := topicID + "-detach"
+	detachSubID := "testdetachsubsxyz-" + subID
+
+	topic, err := getOrCreateTopic(ctx, client, detachTopicID)
+	if err != nil {
+		t.Fatalf("getOrCreateTopic: %v", err)
+	}
+	defer topic.Delete(ctx)
+	defer topic.Stop()
+
+	sub, err := getOrCreateSub(ctx, client, detachSubID, &pubsub.SubscriptionConfig{
+		Topic: topic,
+	})
+	if err != nil {
+		t.Fatalf("getOrCreateSub: %v", err)
+	}
 	defer sub.Delete(ctx)
 
-	if err = publishMsgs(ctx, deadLetterSourceTopic, 1); err != nil {
-		t.Fatalf("publishMsgs failed: %v", err)
-	}
-
-	if err := pullMsgsDeadLetterDeliveryAttempt(buf, tc.ProjectID, deadLetterSubID); err != nil {
-		t.Fatalf("pullMsgsDeadLetterDeliveryAttempt failed: %v", err)
+	buf := new(bytes.Buffer)
+	if err = detachSubscription(buf, tc.ProjectID, sub.String()); err != nil {
+		t.Fatalf("detachSubscription: %v", err)
 	}
 	got := buf.String()
-	want := "delivery attempts: 1"
+	want := fmt.Sprintf("Detached subscription %s", sub.String())
+	if got != want {
+		t.Fatalf("detachSubscription got %s, want %s", got, want)
+	}
+
+	cfg, err := sub.Config(ctx)
+	if err != nil {
+		t.Fatalf("get sub config err: %v", err)
+	}
+	if !cfg.Detached {
+		t.Fatalf("detached subscription should have detached=true")
+	}
+}
+
+func TestCreateWithFilter(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	client := setup(t)
+	defer client.Close()
+	filterSubID := subID + "-filter"
+
+	topic, err := getOrCreateTopic(ctx, client, topicID)
+	if err != nil {
+		t.Fatalf("CreateTopic: %v", err)
+	}
+	buf := new(bytes.Buffer)
+	filter := "attributes.author=\"unknown\""
+	if err := createWithFilter(buf, tc.ProjectID, filterSubID, filter, topic); err != nil {
+		t.Fatalf("failed to create subscription with filter: %v", err)
+	}
+
+	filterSub := client.Subscription(filterSubID)
+	defer filterSub.Delete(ctx)
+	ok, err := filterSub.Exists(context.Background())
+	if err != nil {
+		t.Fatalf("failed to check if sub exists: %v", err)
+	}
+	if !ok {
+		t.Fatalf("got none; want sub = %q", filterSubID)
+	}
+	cfg, err := filterSub.Config(ctx)
+	if err != nil {
+		t.Fatalf("failed to get config for sub with filter: %v", err)
+	}
+	if cfg.Filter != filter {
+		t.Fatalf("subscription filter got: %s\nwant: %s", cfg.Filter, filter)
+	}
+}
+
+func TestCreateBigQuerySubscription(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	client := setup(t)
+	defer client.Close()
+	bqSubID := subID + "-bigquery"
+
+	topic, err := getOrCreateTopic(ctx, client, topicID)
+	if err != nil {
+		t.Fatalf("CreateTopic: %v", err)
+	}
+	buf := new(bytes.Buffer)
+
+	datasetID := fmt.Sprintf("go_samples_dataset_%d", time.Now().UnixNano())
+	tableID := fmt.Sprintf("go_samples_table_%d", time.Now().UnixNano())
+	if err := createBigQueryTable(tc.ProjectID, datasetID, tableID); err != nil {
+		t.Fatalf("failed to create bigquery table: %v", err)
+	}
+
+	bqTable := fmt.Sprintf("%s.%s.%s", tc.ProjectID, datasetID, tableID)
+
+	if err := createBigQuerySubscription(buf, tc.ProjectID, bqSubID, topic, bqTable); err != nil {
+		t.Fatalf("failed to create bigquery subscription: %v", err)
+	}
+
+	sub := client.Subscription(bqSubID)
+	sub.Delete(ctx)
+	if err := deleteBigQueryDataset(tc.ProjectID, datasetID); err != nil {
+		t.Logf("failed to delete bigquery dataset: %v", err)
+	}
+}
+
+func TestCreateSubscriptionWithExactlyOnceDelivery(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	client := setup(t)
+	defer client.Close()
+	eodSub := subID + "-create-eod"
+
+	topic, err := getOrCreateTopic(ctx, client, topicID)
+	if err != nil {
+		t.Fatalf("CreateTopic: %v", err)
+	}
+	buf := new(bytes.Buffer)
+
+	if err := createSubscriptionWithExactlyOnceDelivery(buf, tc.ProjectID, eodSub, topic); err != nil {
+		t.Fatalf("failed to create exactly once delivery subscription: %v", err)
+	}
+
+	sub := client.Subscription(eodSub)
+	sub.Delete(ctx)
+}
+
+func TestReceiveMessagesWithExactlyOnceDelivery(t *testing.T) {
+	t.Parallel()
+	client := setup(t)
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	eodTopicID := topicID + "-eod"
+	eodSubID := subID + "-eod"
+
+	topic, err := getOrCreateTopic(ctx, client, eodTopicID)
+	if err != nil {
+		t.Fatalf("getOrCreateTopic: %v", err)
+	}
+	defer topic.Delete(ctx)
+	defer topic.Stop()
+
+	cfg := &pubsub.SubscriptionConfig{
+		Topic:                     topic,
+		EnableExactlyOnceDelivery: true,
+	}
+	sub, err := getOrCreateSub(ctx, client, eodSubID, cfg)
+	if err != nil {
+		t.Fatalf("getOrCreateSub: %v", err)
+	}
+	defer sub.Delete(ctx)
+
+	// Publish 1 message. This avoids race conditions
+	// when calling fmt.Fprintf from multiple receive
+	// callbacks. This is sufficient for testing since
+	// we're not testing client library functionality,
+	// and makes the sample more readable.
+	const numMsgs = 1
+	publishMsgs(ctx, topic, numMsgs)
+
+	buf := new(bytes.Buffer)
+	err = receiveMessagesWithExactlyOnceDeliveryEnabled(buf, tc.ProjectID, eodSubID)
+	if err != nil {
+		t.Fatalf("failed to pull messages: %v", err)
+	}
+	got := buf.String()
+	want := "Message successfully acked"
 	if !strings.Contains(got, want) {
-		t.Fatalf("pullMsgsDeadLetterDeliveryAttempts got %s, want %s", got, want)
+		t.Fatalf("receiveMessagesWithExactlyOnceDeliveryEnabled got %s\nwant %s", got, want)
 	}
 }
 
@@ -461,19 +880,57 @@ func getOrCreateTopic(ctx context.Context, client *pubsub.Client, topicID string
 }
 
 // getOrCreateSub gets a subscription or creates it if it doesn't exist.
-func getOrCreateSub(ctx context.Context, client *pubsub.Client, topic *pubsub.Topic, subID string) (*pubsub.Subscription, error) {
+func getOrCreateSub(ctx context.Context, client *pubsub.Client, subID string, cfg *pubsub.SubscriptionConfig) (*pubsub.Subscription, error) {
 	sub := client.Subscription(subID)
 	ok, err := sub.Exists(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to check if subscription exists: %v", err)
 	}
 	if !ok {
-		sub, err = client.CreateSubscription(ctx, subID, pubsub.SubscriptionConfig{
-			Topic: topic,
-		})
+		sub, err = client.CreateSubscription(ctx, subID, *cfg)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create subscription (%q): %v", topicID, err)
 		}
 	}
 	return sub, nil
+}
+
+func createBigQueryTable(projectID, datasetID, tableID string) error {
+	ctx := context.Background()
+
+	c, err := bigquery.NewClient(ctx, projectID)
+	if err != nil {
+		return fmt.Errorf("error instantiating bigquery client: %v", err)
+	}
+	dataset := c.Dataset(datasetID)
+	if err = dataset.Create(ctx, &bigquery.DatasetMetadata{Location: "US"}); err != nil {
+		return fmt.Errorf("error creating dataset: %v", err)
+	}
+
+	table := dataset.Table(tableID)
+	schema := []*bigquery.FieldSchema{
+		{Name: "data", Type: bigquery.BytesFieldType, Required: true},
+		{Name: "message_id", Type: bigquery.StringFieldType, Required: true},
+		{Name: "attributes", Type: bigquery.StringFieldType, Required: true},
+		{Name: "subscription_name", Type: bigquery.StringFieldType, Required: true},
+		{Name: "publish_time", Type: bigquery.TimestampFieldType, Required: true},
+	}
+	if err := table.Create(ctx, &bigquery.TableMetadata{Schema: schema}); err != nil {
+		return fmt.Errorf("error creating table: %v", err)
+	}
+	return nil
+}
+
+func deleteBigQueryDataset(projectID, datasetID string) error {
+	ctx := context.Background()
+
+	c, err := bigquery.NewClient(ctx, projectID)
+	if err != nil {
+		return fmt.Errorf("error instantiating bigquery client: %v", err)
+	}
+	dataset := c.Dataset(datasetID)
+	if err = dataset.DeleteWithContents(ctx); err != nil {
+		return fmt.Errorf("error deleting dataset: %v", err)
+	}
+	return nil
 }

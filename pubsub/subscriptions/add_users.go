@@ -32,11 +32,12 @@ func addUsers(projectID, subID string) error {
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	sub := client.Subscription(subID)
 	policy, err := sub.IAM().Policy(ctx)
 	if err != nil {
-		return fmt.Errorf("Policy: %v", err)
+		return fmt.Errorf("err getting IAM Policy: %v", err)
 	}
 	// Other valid prefixes are "serviceAccount:", "user:"
 	// See the documentation for more values.

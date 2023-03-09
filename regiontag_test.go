@@ -18,10 +18,12 @@ import (
 	"bufio"
 	"log"
 	"os/exec"
-	"strings"
+	"regexp"
 	"sync"
 	"testing"
 )
+
+var startRe = regexp.MustCompile("\\[START ([[:word:]]+)\\]")
 
 func listPackages() <-chan string {
 	c := make(chan string)
@@ -69,7 +71,7 @@ func findRegionTags(pkgs <-chan string) <-chan RegionTag {
 			// filter affected lines only
 			for scanner.Scan() {
 				text := scanner.Text()
-				if !strings.Contains(text, "[START") {
+				if !startRe.MatchString(text) {
 					continue
 				}
 				c <- RegionTag{file: p, line: text}

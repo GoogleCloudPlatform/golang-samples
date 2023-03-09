@@ -23,7 +23,7 @@ import (
 	"log"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
-	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
+	"cloud.google.com/go/dlp/apiv2/dlppb"
 )
 
 func main() {
@@ -36,6 +36,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("error creating DLP client: %v", err)
 	}
+	defer client.Close()
 
 	// The string to inspect.
 	input := "Robert Frost"
@@ -68,7 +69,7 @@ func main() {
 
 	// Construct request.
 	req := &dlppb.InspectContentRequest{
-		Parent: "projects/" + projectID,
+		Parent: fmt.Sprintf("projects/%s/locations/global", projectID),
 		InspectConfig: &dlppb.InspectConfig{
 			InfoTypes:     infoTypes,
 			MinLikelihood: minLikelihood,

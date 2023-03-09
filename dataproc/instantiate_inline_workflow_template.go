@@ -24,8 +24,8 @@ import (
 	"io"
 
 	dataproc "cloud.google.com/go/dataproc/apiv1"
+	"cloud.google.com/go/dataproc/apiv1/dataprocpb"
 	"google.golang.org/api/option"
-	dataprocpb "google.golang.org/genproto/googleapis/cloud/dataproc/v1"
 )
 
 func instantiateInlineWorkflowTemplate(w io.Writer, projectID, region string) error {
@@ -40,6 +40,7 @@ func instantiateInlineWorkflowTemplate(w io.Writer, projectID, region string) er
 	if err != nil {
 		return fmt.Errorf("dataproc.NewWorkflowTemplateClient: %v", err)
 	}
+	defer workflowTemplateClient.Close()
 
 	// Create jobs for the workflow.
 	teragenJob := &dataprocpb.OrderedJob{

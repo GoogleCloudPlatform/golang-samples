@@ -23,7 +23,7 @@ import (
 	"os"
 
 	texttospeech "cloud.google.com/go/texttospeech/apiv1"
-	texttospeechpb "google.golang.org/genproto/googleapis/cloud/texttospeech/v1"
+	"cloud.google.com/go/texttospeech/apiv1/texttospeechpb"
 )
 
 // [START tts_list_voices]
@@ -36,6 +36,7 @@ func ListVoices(w io.Writer) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 
 	// Performs the list voices request.
 	resp, err := client.ListVoices(ctx, &texttospeechpb.ListVoicesRequest{})

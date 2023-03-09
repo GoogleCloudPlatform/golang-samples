@@ -14,7 +14,7 @@
 
 package findings
 
-// [START list_findings_at_time]
+// [START securitycenter_list_findings_at_time]
 import (
 	"context"
 	"fmt"
@@ -22,9 +22,9 @@ import (
 	"time"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
+	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/api/iterator"
-	securitycenterpb "google.golang.org/genproto/googleapis/cloud/securitycenter/v1"
 )
 
 // listFindingsAtTime prints findings that where present for a specific source
@@ -67,4 +67,4 @@ func listFindingsAtTime(w io.Writer, sourceName string) error {
 	return nil
 }
 
-// [END list_findings_at_time]
+// [END securitycenter_list_findings_at_time]

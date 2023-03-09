@@ -22,7 +22,7 @@ import (
 	"io/ioutil"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
-	dlppb "google.golang.org/genproto/googleapis/privacy/dlp/v2"
+	"cloud.google.com/go/dlp/apiv2/dlppb"
 )
 
 // redactImage blacks out the identified portions of the input image (with type bytesType)
@@ -40,6 +40,7 @@ func redactImage(w io.Writer, projectID string, infoTypeNames []string, bytesTyp
 	if err != nil {
 		return fmt.Errorf("dlp.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	// Convert the info type strings to a list of InfoTypes.
 	var infoTypes []*dlppb.InfoType
@@ -65,7 +66,7 @@ func redactImage(w io.Writer, projectID string, infoTypeNames []string, bytesTyp
 
 	// Create a configured request.
 	req := &dlppb.RedactImageRequest{
-		Parent: "projects/" + projectID,
+		Parent: fmt.Sprintf("projects/%s/locations/global", projectID),
 		InspectConfig: &dlppb.InspectConfig{
 			InfoTypes:     infoTypes,
 			MinLikelihood: dlppb.Likelihood_POSSIBLE,

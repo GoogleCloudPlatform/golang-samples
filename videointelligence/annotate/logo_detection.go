@@ -21,10 +21,11 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"time"
 
 	video "cloud.google.com/go/videointelligence/apiv1"
+	videopb "cloud.google.com/go/videointelligence/apiv1/videointelligencepb"
 	"github.com/golang/protobuf/ptypes"
-	videopb "google.golang.org/genproto/googleapis/cloud/videointelligence/v1"
 )
 
 // logoDetection analyzes a video and extracts logos with their bounding boxes.
@@ -39,6 +40,9 @@ func logoDetection(w io.Writer, filename string) error {
 		return fmt.Errorf("video.NewClient: %v", err)
 	}
 	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*180)
+	defer cancel()
 
 	fileBytes, err := ioutil.ReadFile(filename)
 	if err != nil {

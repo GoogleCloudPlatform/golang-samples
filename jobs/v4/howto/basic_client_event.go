@@ -22,8 +22,8 @@ import (
 	"time"
 
 	talent "cloud.google.com/go/talent/apiv4beta1"
+	"cloud.google.com/go/talent/apiv4beta1/talentpb"
 	"github.com/golang/protobuf/ptypes"
-	talentpb "google.golang.org/genproto/googleapis/cloud/talent/v4beta1"
 )
 
 // createClientEvent creates a client event.
@@ -35,6 +35,7 @@ func createClientEvent(w io.Writer, projectID string, requestID string, eventID 
 	if err != nil {
 		return nil, fmt.Errorf("talent.NewEventClient: %v", err)
 	}
+	defer c.Close()
 
 	createTime, _ := ptypes.TimestampProto(time.Now())
 	clientEventToCreate := &talentpb.ClientEvent{

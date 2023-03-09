@@ -25,7 +25,7 @@ import (
 	"context"
 
 	texttospeech "cloud.google.com/go/texttospeech/apiv1"
-	texttospeechpb "google.golang.org/genproto/googleapis/cloud/texttospeech/v1"
+	"cloud.google.com/go/texttospeech/apiv1/texttospeechpb"
 )
 
 // audioProfile generates audio from text using a custom synthesizer like a telephone call.
@@ -39,6 +39,7 @@ func audioProfile(w io.Writer, text string, outputFile string) error {
 	if err != nil {
 		return fmt.Errorf("NewClient: %v", err)
 	}
+	defer client.Close()
 
 	req := &texttospeechpb.SynthesizeSpeechRequest{
 		Input: &texttospeechpb.SynthesisInput{

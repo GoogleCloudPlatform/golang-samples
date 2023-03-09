@@ -19,10 +19,12 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
+	"hash/crc32"
 	"io"
 
 	kms "cloud.google.com/go/kms/apiv1"
-	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
+	"cloud.google.com/go/kms/apiv1/kmspb"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 // signAsymmetric will sign a plaintext message using a saved asymmetric private
@@ -37,6 +39,7 @@ func signAsymmetric(w io.Writer, name string, message string) error {
 	if err != nil {
 		return fmt.Errorf("failed to create kms client: %v", err)
 	}
+	defer client.Close()
 
 	// Convert the message into bytes. Cryptographic plaintexts and
 	// ciphertexts are always byte arrays.
@@ -47,6 +50,14 @@ func signAsymmetric(w io.Writer, name string, message string) error {
 	if _, err := digest.Write(plaintext); err != nil {
 		return fmt.Errorf("failed to create digest: %v", err)
 	}
+
+	// Optional but recommended: Compute digest's CRC32C.
+	crc32c := func(data []byte) uint32 {
+		t := crc32.MakeTable(crc32.Castagnoli)
+		return crc32.Checksum(data, t)
+
+	}
+	digestCRC32C := crc32c(digest.Sum(nil))
 
 	// Build the signing request.
 	//
@@ -59,6 +70,7 @@ func signAsymmetric(w io.Writer, name string, message string) error {
 				Sha256: digest.Sum(nil),
 			},
 		},
+		DigestCrc32C: wrapperspb.Int64(int64(digestCRC32C)),
 	}
 
 	// Call the API.
@@ -66,6 +78,21 @@ func signAsymmetric(w io.Writer, name string, message string) error {
 	if err != nil {
 		return fmt.Errorf("failed to sign digest: %v", err)
 	}
+
+	// Optional, but recommended: perform integrity verification on result.
+	// For more details on ensuring E2E in-transit integrity to and from Cloud KMS visit:
+	// https://cloud.google.com/kms/docs/data-integrity-guidelines
+	if result.VerifiedDigestCrc32C == false {
+		return fmt.Errorf("AsymmetricSign: request corrupted in-transit")
+	}
+	// TODO(iamtamjam) Uncomment when this field is populated by the server
+	// if result.Name != req.Name {
+	//	return fmt.Errorf("AsymmetricSign: request corrupted in-transit")
+	// }
+	if int64(crc32c(result.Signature)) != result.SignatureCrc32C.Value {
+		return fmt.Errorf("AsymmetricSign: response corrupted in-transit")
+	}
+
 	fmt.Fprintf(w, "Signed digest: %s", result.Signature)
 	return nil
 }
