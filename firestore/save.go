@@ -17,6 +17,8 @@ package firestore
 import (
 	"context"
 	"errors"
+	"fmt"
+	"io"
 	"log"
 	"time"
 
@@ -268,18 +270,26 @@ func deleteField(ctx context.Context, client *firestore.Client) error {
 }
 
 // [START firestore_data_delete_collection]
-func deleteCollection(ctx context.Context, client *firestore.Client,
-	ref *firestore.CollectionRef, batchSize int) error {
+func deleteCollection(w io.Writer, projectID, collectionName string,
+	batchSize int) error {
+
+	// Instantiate a client
+	ctx := context.Background()
+	client, err := firestore.NewClient(ctx, projectID)
+	if err != nil {
+		return err
+	}
+
+	col := client.Collection(collectionName)
+	bulkwriter := client.BulkWriter(ctx)
 
 	for {
 		// Get a batch of documents
-		iter := ref.Limit(batchSize).Documents(ctx)
+		iter := col.Limit(batchSize).Documents(ctx)
 		numDeleted := 0
 
 		// Iterate through the documents, adding
-		// a delete operation for each one to a
-		// WriteBatch.
-		batch := client.Batch()
+		// a delete operation for each one to the BulkWriter.
 		for {
 			doc, err := iter.Next()
 			if err == iterator.Done {
@@ -289,21 +299,21 @@ func deleteCollection(ctx context.Context, client *firestore.Client,
 				return err
 			}
 
-			batch.Delete(doc.Ref)
+			bulkwriter.Delete(doc.Ref)
 			numDeleted++
 		}
 
 		// If there are no documents to delete,
 		// the process is over.
 		if numDeleted == 0 {
-			return nil
+			bulkwriter.End()
+			break
 		}
 
-		_, err := batch.Commit(ctx)
-		if err != nil {
-			return err
-		}
+		bulkwriter.Flush()
 	}
+	fmt.Fprintf(w, "Deleted collection \"%s\"", collectionName)
+	return nil
 }
 
 // [END firestore_data_delete_collection]
