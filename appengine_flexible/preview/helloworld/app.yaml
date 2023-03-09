@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC
+# Copyright 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,26 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Created by .ignore support plugin (hsz.mobi)
-### Go template
-# Binaries for programs and plugins
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
+runtime: go
+env: flex
 
-# Test binary, built with `go test -c`
-*.test
+runtime_config:
+  operating_system: 'ubuntu22'
+  runtime_version: '1.18'
 
-# Output of the go coverage tool, specifically when used with LiteIDE
-*.out
+# This sample incurs costs to run on the App Engine flexible environment. 
+# The settings below are to reduce costs during testing and are not appropriate
+# for production use. For more information, see:
+# https://cloud.google.com/appengine/docs/flexible/python/configuring-your-app-with-app-yaml
+manual_scaling:
+  instances: 1
+resources:
+  cpu: 1
+  memory_gb: 0.5
+  disk_size_gb: 10
 
-# Editors
-.idea/*
-
-**/sponge_log.log
-
-testing/kokoro/test-env.sh
-.envrc
-.DS_Store

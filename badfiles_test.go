@@ -117,6 +117,9 @@ var allowList = []string{
 
 	// dataflow flex template metadata files
 	"dataflow/flex-templates/**/metadata.json",
+
+	// document ai sample pdfs
+	"documentai/**/*.pdf",
 }
 
 // Check whether accidental binary files have been checked in.
