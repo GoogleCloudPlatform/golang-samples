@@ -28,9 +28,9 @@ import (
 	"github.com/googleapis/google-cloudevents-go/cloud/auditdata"
 )
 
-func makeAuditLog(subject string, payload auditdata.AuditLog) (event.Event, error) {
+func makeAuditLog(subject string, payload *auditdata.AuditLog) (event.Event, error) {
 	logevent := auditdata.LogEntryData{
-		ProtoPayload: &payload,
+		ProtoPayload: payload,
 	}
 	e := event.New()
 	e.SetSubject(subject)
@@ -79,7 +79,7 @@ func TestHelloAuditLog(t *testing.T) {
 		log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
 
 		t.Run(tt.name, func(t *testing.T) {
-			event, err := makeAuditLog(tt.subject, tt.payload)
+			event, err := makeAuditLog(tt.subject, &tt.payload)
 			if err != nil {
 				t.Errorf("HelloAuditLog() failed to create audit.LogEntryData: %v", err)
 			}
