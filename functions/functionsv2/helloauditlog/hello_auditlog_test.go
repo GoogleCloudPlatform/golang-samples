@@ -17,7 +17,6 @@ package helloworld
 
 import (
 	"context"
-	"encoding/json"
 	"io/ioutil"
 	"log"
 	"os"
@@ -26,16 +25,17 @@ import (
 
 	"github.com/cloudevents/sdk-go/v2/event"
 	"github.com/googleapis/google-cloudevents-go/cloud/auditdata"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 func makeAuditLog(subject string, payload *auditdata.AuditLog) (event.Event, error) {
-	logevent := auditdata.LogEntryData{
+	logevent := &auditdata.LogEntryData{
 		ProtoPayload: payload,
 	}
 	e := event.New()
 	e.SetSubject(subject)
 	e.SetType("google.cloud.audit.log.v1.written")
-	eventdata, err := json.Marshal(logevent)
+	eventdata, err := protojson.Marshal(logevent)
 	if err != nil {
 		return event.New(), err
 	}
@@ -49,12 +49,12 @@ func TestHelloAuditLog(t *testing.T) {
 	tests := []struct {
 		name         string
 		subject      string
-		payload      auditdata.AuditLog
+		payload      *auditdata.AuditLog
 		expectedLogs []string
 	}{
 		{name: "sample-output",
 			subject: "storage.googleapis.com/projects/_/buckets/my-bucket/objects/test.txt",
-			payload: auditdata.AuditLog{
+			payload: &auditdata.AuditLog{
 				MethodName:   "storage.objects.create",
 				ResourceName: "my-resource",
 				AuthenticationInfo: &auditdata.AuthenticationInfo{
@@ -79,7 +79,7 @@ func TestHelloAuditLog(t *testing.T) {
 		log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
 
 		t.Run(tt.name, func(t *testing.T) {
-			event, err := makeAuditLog(tt.subject, &tt.payload)
+			event, err := makeAuditLog(tt.subject, tt.payload)
 			if err != nil {
 				t.Errorf("HelloAuditLog() failed to create audit.LogEntryData: %v", err)
 			}
