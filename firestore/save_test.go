@@ -15,8 +15,10 @@
 package firestore
 
 import (
+	"bytes"
 	"context"
 	"os"
+	"strings"
 	"testing"
 
 	"cloud.google.com/go/firestore"
@@ -109,8 +111,13 @@ func TestSave(t *testing.T) {
 	if err = batchWrite(ctx, client); err != nil {
 		t.Fatalf("batchWrite: %v", err)
 	}
-	if err := deleteCollection(ctx, client, client.Collection("cities"), 2); err != nil {
+	var buf bytes.Buffer
+	if err := deleteCollection(&buf, projectID, "cities", 2); err != nil {
 		t.Fatalf("Cannot delete collection %v", err)
+	}
+	got := buf.String()
+	if !strings.Contains(got, "cities") {
+		t.Errorf("wanted collection name in deleteCollection results")
 	}
 }
 
