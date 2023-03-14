@@ -17,6 +17,8 @@
 package signedurl
 
 // [START example]
+// [START cloudcdn_sign_url]
+// [START cloudcdn_sign_url_prefix]
 import (
 	"crypto/hmac"
 	"crypto/sha1"
@@ -29,6 +31,7 @@ import (
 	"time"
 )
 
+// [END cloudcdn_sign_url_prefix]
 // SignURL creates a signed URL for an endpoint on Cloud CDN.
 //
 // - url must start with "https://" and should not have the "Expires", "KeyName", or "Signature"
@@ -51,6 +54,8 @@ func signURL(url, keyName string, key []byte, expiration time.Time) string {
 	return url
 }
 
+// [END cloudcdn_sign_url]
+// [START cloudcdn_sign_url_prefix]
 // SignURLWithPrefix creates a signed URL prefix for an endpoint on Cloud CDN.
 // Prefixes allow access to any URL with the same prefix, and can be useful for
 // granting access broader content without signing multiple URLs.
@@ -76,6 +81,7 @@ func signURLWithPrefix(urlPrefix, keyName string, key []byte, expiration time.Ti
 	return signedValue, nil
 }
 
+// [END cloudcdn_sign_url_prefix]
 // readKeyFile reads the base64url-encoded key file and decodes it.
 func readKeyFile(path string) ([]byte, error) {
 	b, err := ioutil.ReadFile(path)
