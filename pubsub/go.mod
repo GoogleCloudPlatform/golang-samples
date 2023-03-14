@@ -5,7 +5,7 @@ go 1.19
 require (
 	cloud.google.com/go/bigquery v1.48.0
 	cloud.google.com/go/iam v0.12.0
-	cloud.google.com/go/pubsub v1.28.0
+	cloud.google.com/go/pubsub v1.29.0
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230309020435-bdb8e67b5bb9
 	github.com/google/go-cmp v0.5.9
 	github.com/google/uuid v1.3.0
