@@ -30,7 +30,7 @@ func createAvroSchema(w io.Writer, projectID, schemaID, avscFile string) error {
 	// schemaID := "my-schema"
 	// avscFile = "path/to/an/avro/schema/file(.avsc)/formatted/in/json"
 	ctx := context.Background()
-	client, err := pubsub.NewSchemaClient(ctx, projectID, option.WithEndpoint("us-west1-pubsub.googleapis.com:443")))
+	client, err := pubsub.NewSchemaClient(ctx, projectID)
 	if err != nil {
 		return fmt.Errorf("pubsub.NewSchemaClient: %v", err)
 	}
