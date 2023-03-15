@@ -14,7 +14,7 @@
 
 package schema
 
-// [START pubsub_create_topic_with_schema]
+// [START pubsub_create_topic_with_schema_revisions]
 import (
 	"context"
 	"fmt"
@@ -23,10 +23,12 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func createTopicWithSchema(w io.Writer, projectID, topicID, schemaID string, encoding pubsub.SchemaEncoding) error {
+func createTopicWithSchemaRevisions(w io.Writer, projectID, topicID, schemaID, firstRevisionID, lastRevisionID string, encoding pubsub.SchemaEncoding) error {
 	// projectID := "my-project-id"
 	// topicID := "my-topic"
 	// schemaID := "my-schema-id"
+	// firstRevisionID := "my-revision-id"
+	// lastRevisionID := "my-revision-id"
 	// encoding := pubsub.EncodingJSON
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
@@ -36,16 +38,18 @@ func createTopicWithSchema(w io.Writer, projectID, topicID, schemaID string, enc
 
 	tc := &pubsub.TopicConfig{
 		SchemaSettings: &pubsub.SchemaSettings{
-			Schema:   fmt.Sprintf("projects/%s/schemas/%s", projectID, schemaID),
-			Encoding: encoding,
+			Schema:          fmt.Sprintf("projects/%s/schemas/%s", projectID, schemaID),
+			FirstRevisionID: firstRevisionID,
+			LastRevisionID:  lastRevisionID,
+			Encoding:        encoding,
 		},
 	}
 	t, err := client.CreateTopicWithConfig(ctx, topicID, tc)
 	if err != nil {
 		return fmt.Errorf("CreateTopicWithConfig: %v", err)
 	}
-	fmt.Fprintf(w, "Topic with schema created: %#v\n", t)
+	fmt.Fprintf(w, "Created topic with schema revision: %#v\n", t)
 	return nil
 }
 
-// [END pubsub_create_topic_with_schema]
+// [END pubsub_create_topic_with_schema_revisions]

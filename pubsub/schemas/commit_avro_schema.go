@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,21 +14,21 @@
 
 package schema
 
-// [START pubsub_create_proto_schema]
+// [START pubsub_commit_avro_schema]
 import (
 	"context"
 	"fmt"
 	"io"
-	"os"
+	"io/ioutil"
 
 	"cloud.google.com/go/pubsub"
 )
 
-// createProtoSchema creates a schema resource from a schema proto file.
-func createProtoSchema(w io.Writer, projectID, schemaID, protoFile string) error {
+// commitAvroSchema commits a new avro schema revision to an existing schema.
+func commitAvroSchema(w io.Writer, projectID, schemaID, avscFile string) error {
 	// projectID := "my-project-id"
-	// schemaID := "my-schema"
-	// protoFile = "path/to/a/proto/schema/file(.proto)/formatted/in/protocol/buffers"
+	// schemaID := "my-schema-id"
+	// avscFile = "path/to/an/avro/schema/file(.avsc)/formatted/in/json"
 	ctx := context.Background()
 	client, err := pubsub.NewSchemaClient(ctx, projectID)
 	if err != nil {
@@ -36,21 +36,23 @@ func createProtoSchema(w io.Writer, projectID, schemaID, protoFile string) error
 	}
 	defer client.Close()
 
-	protoSource, err := os.ReadFile(protoFile)
+	// Read an Avro schema file formatted in JSON as a byte slice.
+	avscSource, err := ioutil.ReadFile(avscFile)
 	if err != nil {
-		return fmt.Errorf("error reading from file: %s", protoFile)
+		return fmt.Errorf("error reading from file: %s", avscFile)
 	}
 
 	config := pubsub.SchemaConfig{
-		Type:       pubsub.SchemaProtocolBuffer,
-		Definition: string(protoSource),
+		Name:       fmt.Sprintf("projects/%s/schemas/%s", projectID, schemaID),
+		Type:       pubsub.SchemaAvro,
+		Definition: string(avscSource),
 	}
-	s, err := client.CreateSchema(ctx, schemaID, config)
+	s, err := client.CommitSchema(ctx, schemaID, config)
 	if err != nil {
-		return fmt.Errorf("CreateSchema: %v", err)
+		return fmt.Errorf("CommitSchema: %v", err)
 	}
-	fmt.Fprintf(w, "Schema created: %#v\n", s)
+	fmt.Fprintf(w, "Committed a schema using an Avro schema: %#v\n", s)
 	return nil
 }
 
-// [END pubsub_create_proto_schema]
+// [END pubsub_commit_avro_schema]

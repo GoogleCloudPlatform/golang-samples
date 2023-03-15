@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,18 +14,18 @@
 
 package schema
 
-// [START pubsub_create_proto_schema]
+// [START pubsub_commit_proto_schema]
 import (
 	"context"
 	"fmt"
 	"io"
-	"os"
+	"io/ioutil"
 
 	"cloud.google.com/go/pubsub"
 )
 
-// createProtoSchema creates a schema resource from a schema proto file.
-func createProtoSchema(w io.Writer, projectID, schemaID, protoFile string) error {
+// commitProtoSchema commits a new proto schema revision to an existing schema.
+func commitProtoSchema(w io.Writer, projectID, schemaID, protoFile string) error {
 	// projectID := "my-project-id"
 	// schemaID := "my-schema"
 	// protoFile = "path/to/a/proto/schema/file(.proto)/formatted/in/protocol/buffers"
@@ -36,21 +36,23 @@ func createProtoSchema(w io.Writer, projectID, schemaID, protoFile string) error
 	}
 	defer client.Close()
 
-	protoSource, err := os.ReadFile(protoFile)
+	// Read a proto file as a byte slice.
+	protoSource, err := ioutil.ReadFile(protoFile)
 	if err != nil {
 		return fmt.Errorf("error reading from file: %s", protoFile)
 	}
 
 	config := pubsub.SchemaConfig{
+		Name:       fmt.Sprintf("projects/%s/schemas/%s", projectID, schemaID),
 		Type:       pubsub.SchemaProtocolBuffer,
 		Definition: string(protoSource),
 	}
-	s, err := client.CreateSchema(ctx, schemaID, config)
+	s, err := client.CommitSchema(ctx, schemaID, config)
 	if err != nil {
-		return fmt.Errorf("CreateSchema: %v", err)
+		return fmt.Errorf("CommitSchema: %v", err)
 	}
-	fmt.Fprintf(w, "Schema created: %#v\n", s)
+	fmt.Fprintf(w, "Committed a schema using a protobuf schema: %#v\n", s)
 	return nil
 }
 
-// [END pubsub_create_proto_schema]
+// [END pubsub_commit_proto_schema]

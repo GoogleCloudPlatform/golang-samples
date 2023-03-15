@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,21 +14,20 @@
 
 package schema
 
-// [START pubsub_create_proto_schema]
+// [START pubsub_rollback_schema]
 import (
 	"context"
 	"fmt"
 	"io"
-	"os"
 
 	"cloud.google.com/go/pubsub"
 )
 
-// createProtoSchema creates a schema resource from a schema proto file.
-func createProtoSchema(w io.Writer, projectID, schemaID, protoFile string) error {
+// rollbackSchema creates a new schema revision that is a copy of the provided revisionID.
+func rollbackSchema(w io.Writer, projectID, schemaID, revisionID string) error {
 	// projectID := "my-project-id"
 	// schemaID := "my-schema"
-	// protoFile = "path/to/a/proto/schema/file(.proto)/formatted/in/protocol/buffers"
+	// revisionID := "a1b2c3d4"
 	ctx := context.Background()
 	client, err := pubsub.NewSchemaClient(ctx, projectID)
 	if err != nil {
@@ -36,21 +35,12 @@ func createProtoSchema(w io.Writer, projectID, schemaID, protoFile string) error
 	}
 	defer client.Close()
 
-	protoSource, err := os.ReadFile(protoFile)
+	s, err := client.RollbackSchema(ctx, schemaID, revisionID)
 	if err != nil {
-		return fmt.Errorf("error reading from file: %s", protoFile)
+		return fmt.Errorf("RollbackSchema: %v", err)
 	}
-
-	config := pubsub.SchemaConfig{
-		Type:       pubsub.SchemaProtocolBuffer,
-		Definition: string(protoSource),
-	}
-	s, err := client.CreateSchema(ctx, schemaID, config)
-	if err != nil {
-		return fmt.Errorf("CreateSchema: %v", err)
-	}
-	fmt.Fprintf(w, "Schema created: %#v\n", s)
+	fmt.Fprintf(w, "Rolled back a schema: %#v\n", s)
 	return nil
 }
 
-// [END pubsub_create_proto_schema]
+// [END pubsub_rollback_schema]
