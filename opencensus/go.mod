@@ -11,7 +11,7 @@ require (
 	go.opencensus.io v0.24.0
 	golang.org/x/exp v0.0.0-20230307190834-24139beb5833
 	google.golang.org/genproto v0.0.0-20230306155012-7f2fa6fef1f4
-	google.golang.org/protobuf v1.29.0
+	google.golang.org/protobuf v1.29.1
 )
 
 require (

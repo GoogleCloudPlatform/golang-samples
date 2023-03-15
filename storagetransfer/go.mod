@@ -11,7 +11,7 @@ require (
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230309020435-bdb8e67b5bb9
 	github.com/aws/aws-sdk-go v1.44.217
 	google.golang.org/genproto v0.0.0-20230306155012-7f2fa6fef1f4
-	google.golang.org/protobuf v1.29.0
+	google.golang.org/protobuf v1.29.1
 )
 
 require (
