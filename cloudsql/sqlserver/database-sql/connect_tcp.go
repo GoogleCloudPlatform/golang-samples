@@ -33,7 +33,7 @@ func connectTCPSocket() (*sql.DB, error) {
 	mustGetenv := func(k string) string {
 		v := os.Getenv(k)
 		if v == "" {
-			log.Fatalf("Warning: %s environment variable not set.", k)
+			log.Fatalf("Fatal Error in connect_tcp.go: %s environment variable not set.\n", k)
 		}
 		return v
 	}

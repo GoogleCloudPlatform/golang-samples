@@ -19,7 +19,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 	"sync"
 	"time"
 
@@ -37,7 +37,7 @@ func subscribeWithAvroSchema(w io.Writer, projectID, subID, avscFile string) err
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
 
-	avroSchema, err := ioutil.ReadFile(avscFile)
+	avroSchema, err := os.ReadFile(avscFile)
 	if err != nil {
 		return fmt.Errorf("ioutil.ReadFile err: %v", err)
 	}
@@ -56,24 +56,31 @@ func subscribeWithAvroSchema(w io.Writer, projectID, subID, avscFile string) err
 		defer mu.Unlock()
 		encoding := msg.Attributes["googclient_schemaencoding"]
 
+		var state map[string]interface{}
 		if encoding == "BINARY" {
 			data, _, err := codec.NativeFromBinary(msg.Data)
 			if err != nil {
-				fmt.Fprintf(w, "codec.NativeFromBinary err: %v", err)
+				fmt.Fprintf(w, "codec.NativeFromBinary err: %v\n", err)
+				msg.Nack()
 				return
 			}
-			fmt.Printf("Received a binary-encoded message:\n%#v", data)
+			fmt.Fprintf(w, "Received a binary-encoded message:\n%#v\n", data)
+			state = data.(map[string]interface{})
 		} else if encoding == "JSON" {
 			data, _, err := codec.NativeFromTextual(msg.Data)
 			if err != nil {
-				fmt.Fprintf(w, "codec.NativeFromTextual err: %v", err)
+				fmt.Fprintf(w, "codec.NativeFromTextual err: %v\n", err)
+				msg.Nack()
 				return
 			}
-			fmt.Fprintf(w, "Received a JSON-encoded message:\n%#v", data)
+			fmt.Fprintf(w, "Received a JSON-encoded message:\n%#v\n", data)
+			state = data.(map[string]interface{})
 		} else {
-			fmt.Fprintf(w, "invalid encoding: %s", encoding)
+			fmt.Fprintf(w, "Unknown message type(%s), nacking\n", encoding)
+			msg.Nack()
 			return
 		}
+		fmt.Fprintf(w, "%s is abbreviated as %s\n", state["name"], state["post_abbr"])
 		msg.Ack()
 	})
 	return nil

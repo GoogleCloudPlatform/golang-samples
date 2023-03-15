@@ -49,6 +49,7 @@ func TestInspectDatastore(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
+		test := test
 		t.Run(test.kind, func(t *testing.T) {
 			t.Parallel()
 			testutil.Retry(t, 5, 15*time.Second, func(r *testutil.R) {
@@ -101,6 +102,7 @@ func TestInspectGCS(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
+		test := test
 		t.Run(test.fileName, func(t *testing.T) {
 			t.Parallel()
 			testutil.Retry(t, 5, 15*time.Second, func(r *testutil.R) {
@@ -260,6 +262,7 @@ func TestInspectBigquery(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
+		test := test
 		t.Run(test.table, func(t *testing.T) {
 			t.Parallel()
 			u := uuid.Must(uuid.NewV4()).String()[:8]
