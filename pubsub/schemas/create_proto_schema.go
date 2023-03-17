@@ -19,7 +19,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 
 	"cloud.google.com/go/pubsub"
 )
@@ -36,7 +36,7 @@ func createProtoSchema(w io.Writer, projectID, schemaID, protoFile string) error
 	}
 	defer client.Close()
 
-	protoSource, err := ioutil.ReadFile(protoFile)
+	protoSource, err := os.ReadFile(protoFile)
 	if err != nil {
 		return fmt.Errorf("error reading from file: %s", protoFile)
 	}
