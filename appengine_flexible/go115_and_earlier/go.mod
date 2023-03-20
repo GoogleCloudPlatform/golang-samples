@@ -1,4 +1,4 @@
-module github.com/GoogleCloudPlatform/golang-samples/appengine_flexible
+module github.com/GoogleCloudPlatform/golang-samples/appengine_flexible/go115_and_earlier
 
 go 1.19
 
