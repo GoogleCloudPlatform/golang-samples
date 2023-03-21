@@ -120,4 +120,3 @@ func generateSignedURLs(w io.Writer) error {
 
 	return nil
 }
-

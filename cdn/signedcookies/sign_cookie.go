@@ -52,6 +52,7 @@ func signCookie(urlPrefix, keyName string, key []byte, expiration time.Time) (st
 
 	return signedValue, nil
 }
+
 // [END cloudcdn_sign_cookie]
 
 // readKeyFile reads the base64url-encoded key file and decodes it.
