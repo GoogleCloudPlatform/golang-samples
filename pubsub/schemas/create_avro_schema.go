@@ -19,7 +19,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 
 	"cloud.google.com/go/pubsub"
 )
@@ -36,7 +36,7 @@ func createAvroSchema(w io.Writer, projectID, schemaID, avscFile string) error {
 	}
 	defer client.Close()
 
-	avscSource, err := ioutil.ReadFile(avscFile)
+	avscSource, err := os.ReadFile(avscFile)
 	if err != nil {
 		return fmt.Errorf("error reading from file: %s", avscFile)
 	}
