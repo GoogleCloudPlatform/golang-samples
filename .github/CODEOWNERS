@@ -26,7 +26,7 @@
 /appengine_flexible/                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/torus-dpe
 /container_registry/                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/torus-dpe
 /eventarc/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/torus-dpe
-/functions/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/torus-dpe
+/functions/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/torus-dpe @GoogleCloudPlatform/functions-framework-google
 /run/                                 @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/torus-dpe
 /tasks/                               @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/torus-dpe
 /internal/cloudrunci/                 @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/torus-dpe
