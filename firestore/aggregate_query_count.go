@@ -50,8 +50,8 @@ func createCountQuery(w io.Writer, projectID string) error {
 		return errors.New("firestore: couldn't get alias for COUNT from results")
 	}
 
-	countValue := count.(firestorepb.Value)
-	fmt.Fprintf(w, "Number of results from query: %d\n", countValue)
+	countValue := count.(*firestorepb.Value)
+	fmt.Fprintf(w, "Number of results from query: %d\n", countValue.GetIntegerValue())
 	return nil
 }
 
