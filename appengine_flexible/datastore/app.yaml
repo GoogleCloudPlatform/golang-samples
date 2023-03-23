@@ -15,8 +15,13 @@
 runtime: go
 env: flex
 
+runtime_config:
+  operating_system: 'ubuntu22'
+  runtime_version: '1.18'
+
 automatic_scaling:
   min_num_instances: 1
 
 env_variables:
   GCLOUD_DATASET_ID: your-project-id
+
