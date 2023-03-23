@@ -15,6 +15,10 @@
 runtime: go
 env: flex
 
+runtime_config:
+  operating_system: 'ubuntu22'
+  runtime_version: '1.18'
+
 # This sample incurs costs to run on the App Engine flexible environment. 
 # The settings below are to reduce costs during testing and are not appropriate
 # for production use. For more information, see:
@@ -25,3 +29,4 @@ resources:
   cpu: 1
   memory_gb: 0.5
   disk_size_gb: 10
+
