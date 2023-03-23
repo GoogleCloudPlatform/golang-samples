@@ -13,6 +13,12 @@
       "name": "post_abbr",
       "type": "string",
       "doc": "The postal code abbreviation of the state."
+    },
+    {
+      "name": "population",
+      "type": "long",
+      "default": 0,
+      "doc": "The population of the state."
     }
   ]
 }

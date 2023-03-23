@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
 
 package schema
 
-// [START pubsub_subscribe_avro_records]
+// [START pubsub_subscribe_avro_records_with_revisions]
 import (
 	"context"
 	"fmt"
 	"io"
-	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -27,7 +27,7 @@ import (
 	"github.com/linkedin/goavro/v2"
 )
 
-func subscribeWithAvroSchema(w io.Writer, projectID, subID, avscFile string) error {
+func subscribeWithAvroSchemaRevisions(w io.Writer, projectID, subID, avscFile string) error {
 	// projectID := "my-project-id"
 	// topicID := "my-topic"
 	// avscFile = "path/to/an/avro/schema/file(.avsc)/formatted/in/json"
@@ -37,14 +37,13 @@ func subscribeWithAvroSchema(w io.Writer, projectID, subID, avscFile string) err
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
 
-	avroSchema, err := os.ReadFile(avscFile)
+	schemaClient, err := pubsub.NewSchemaClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("ioutil.ReadFile err: %v", err)
+		return fmt.Errorf("pubsub.NewSchemaClient: %v", err)
 	}
-	codec, err := goavro.NewCodec(string(avroSchema))
-	if err != nil {
-		return fmt.Errorf("goavro.NewCodec err: %v", err)
-	}
+
+	// Create the cache for the codecs for different revision IDs.
+	revisionCodecs := make(map[string]*goavro.Codec)
 
 	sub := client.Subscription(subID)
 	ctx2, cancel := context.WithTimeout(ctx, 10*time.Second)
@@ -54,6 +53,32 @@ func subscribeWithAvroSchema(w io.Writer, projectID, subID, avscFile string) err
 	sub.Receive(ctx2, func(ctx context.Context, msg *pubsub.Message) {
 		mu.Lock()
 		defer mu.Unlock()
+		name := msg.Attributes["googclient_schemaname"]
+		revision := msg.Attributes["googclient_schemarevisionid"]
+
+		codec, ok := revisionCodecs[revision]
+		// If the codec doesn't exist in the map, this is the first time we
+		// are seeing this revision. We need to fetch the schema and cache the
+		// codec. It would be more typical to do this asynchronously, but is
+		// shown here in a synchronous way to ease readability.
+		if !ok {
+			// Extract just the schema resource name
+			path := strings.Split(name, "/")
+			name = path[len(path)-1]
+			schema, err := schemaClient.Schema(ctx, fmt.Sprintf("%s@%s", name, revision), pubsub.SchemaViewFull)
+			if err != nil {
+				fmt.Fprintf(w, "Nacking, cannot read message without schema: %v\n", err)
+				msg.Nack()
+				return
+			}
+			codec, err = goavro.NewCodec(schema.Definition)
+			if err != nil {
+				msg.Nack()
+				fmt.Fprintf(w, "goavro.NewCodec err: %v\n", err)
+			}
+			revisionCodecs[revision] = codec
+		}
+
 		encoding := msg.Attributes["googclient_schemaencoding"]
 
 		var state map[string]interface{}
@@ -86,4 +111,4 @@ func subscribeWithAvroSchema(w io.Writer, projectID, subID, avscFile string) err
 	return nil
 }
 
-// [END pubsub_subscribe_avro_records]
+// [END pubsub_subscribe_avro_records_with_revisions]

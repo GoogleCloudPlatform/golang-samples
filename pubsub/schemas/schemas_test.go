@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"strings"
 	"sync"
@@ -34,9 +35,11 @@ import (
 )
 
 const (
-	schemaPrefix  = "test-schema-"
-	avroFilePath  = "./resources/us-states.avsc"
-	protoFilePath = "./resources/us-states.proto"
+	schemaPrefix     = "test-schema-"
+	avroFilePath     = "./resources/us-states.avsc"
+	protoFilePath    = "./resources/us-states.proto"
+	avroRevFilePath  = "./resources/us-states-plus.avsc"
+	protoRevFilePath = "./resources/us-states-plus.proto"
 
 	topicPrefix = "test-topic-"
 	subPrefix   = "test-sub-"
@@ -46,13 +49,18 @@ const (
 // down every time, so this speeds things up.
 var once sync.Once
 
-func setup(t *testing.T) *pubsub.Client {
+func setup(t *testing.T) (*pubsub.Client, *pubsub.SchemaClient) {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 
 	client, err := pubsub.NewClient(ctx, tc.ProjectID)
 	if err != nil {
 		t.Fatalf("failed to create client: %v", err)
+	}
+
+	schemaClient, err := pubsub.NewSchemaClient(ctx, tc.ProjectID)
+	if err != nil {
+		t.Fatalf("failed to create schema client: %v", err)
 	}
 
 	// Cleanup resources from the previous tests.
@@ -118,18 +126,14 @@ func setup(t *testing.T) *pubsub.Client {
 		wg.Wait()
 	})
 
-	return client
+	return client, schemaClient
 }
 
 func TestSchemas_Admin(t *testing.T) {
-	_ = setup(t)
+	_, sc := setup(t)
 	tc := testutil.SystemTest(t)
 
 	avroSchemaID := schemaPrefix + "avro-" + uuid.NewString()
-	avroSchema, err := defaultSchemaConfig(tc.ProjectID, avroSchemaID, avroFilePath, pubsub.SchemaAvro)
-	if err != nil {
-		t.Fatalf("defaultSchemaConfig err: %v", err)
-	}
 	t.Run("createAvroSchema", func(t *testing.T) {
 		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 			buf := new(bytes.Buffer)
@@ -137,18 +141,29 @@ func TestSchemas_Admin(t *testing.T) {
 				r.Errorf("createAvroSchema err: %v", err)
 			}
 			got := buf.String()
-			want := fmt.Sprintf("Schema created: %#v\n", avroSchema)
-			if diff := cmp.Diff(want, got); diff != "" {
-				r.Errorf("createAvroSchema() mismatch: -want, +got:\n%s", diff)
+			want := "Schema created"
+			if !strings.Contains(got, want) {
+				r.Errorf("createAvroSchema() got: %q\nwant: %q\n", got, want)
+			}
+		})
+	})
+
+	t.Run("commitAvroSchema", func(t *testing.T) {
+		testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+			buf := new(bytes.Buffer)
+			if err := commitAvroSchema(buf, tc.ProjectID, avroSchemaID, avroRevFilePath); err != nil {
+				r.Errorf("commitAvroSchema err: %v\n", err)
+			}
+			got := buf.String()
+			want := "Committed a schema using an Avro schema"
+			if !strings.Contains(got, want) {
+				r.Errorf("commitAvroSchema() got: %q\nwant: %q\n", got, want)
 			}
 		})
 	})
 
 	protoSchemaID := schemaPrefix + "proto-" + uuid.NewString()
-	protoSchema, err := defaultSchemaConfig(tc.ProjectID, protoSchemaID, protoFilePath, pubsub.SchemaProtocolBuffer)
-	if err != nil {
-		t.Fatalf("defaultSchemaConfig err: %v", err)
-	}
+	var protoSchema *pubsub.SchemaConfig
 	t.Run("createProtoSchema", func(t *testing.T) {
 		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 			buf := new(bytes.Buffer)
@@ -156,9 +171,44 @@ func TestSchemas_Admin(t *testing.T) {
 				r.Errorf("create err: %v", err)
 			}
 			got := buf.String()
-			want := fmt.Sprintf("Schema created: %#v\n", protoSchema)
-			if diff := cmp.Diff(want, got); diff != "" {
-				r.Errorf("createProtoSchema() mismatch: -want, +got:\n%s", diff)
+			want := "Schema created"
+			if !strings.Contains(got, want) {
+				r.Errorf("createProtoSchema() got: %q\nwant: %q\n", got, want)
+			}
+
+			ctx := context.Background()
+			var err error
+			protoSchema, err = sc.Schema(ctx, protoSchemaID, pubsub.SchemaViewFull)
+			if err != nil {
+				r.Errorf("failed to get schema: %v\n", err)
+			}
+		})
+	})
+
+	t.Run("commitProtoSchema", func(t *testing.T) {
+		testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+			buf := new(bytes.Buffer)
+			if err := commitProtoSchema(buf, tc.ProjectID, protoSchemaID, protoRevFilePath); err != nil {
+				r.Errorf("commitProtoSchema err: %v\n", err)
+			}
+			got := buf.String()
+			want := "Committed a schema using a protobuf schema"
+			if !strings.Contains(got, want) {
+				r.Errorf("commitAvroSchema() got: %q\nwant: %q\n", got, want)
+			}
+		})
+	})
+
+	t.Run("rollbackSchema", func(t *testing.T) {
+		testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+			buf := new(bytes.Buffer)
+			if err := rollbackSchema(buf, tc.ProjectID, protoSchemaID, protoSchema.RevisionID); err != nil {
+				r.Errorf("rollbackSchema err: %v\n", err)
+			}
+			got := buf.String()
+			want := "Rolled back a schema"
+			if !strings.Contains(got, want) {
+				r.Errorf("rollbackSchema() got: %q\nwant: %q\n", got, want)
 			}
 		})
 	})
@@ -171,9 +221,25 @@ func TestSchemas_Admin(t *testing.T) {
 				r.Errorf("getSchema err: %v", err)
 			}
 			got := buf.String()
-			want := fmt.Sprintf("Got schema: %#v\n", avroSchema)
-			if diff := cmp.Diff(want, got); diff != "" {
-				r.Errorf("createAvroSchema() mismatch: -want, +got:\n%s", diff)
+			want := "Got schema"
+			if !strings.Contains(got, want) {
+				r.Errorf("getSchema() got: %q\nwant: %q\n", got, want)
+			}
+		})
+	})
+
+	t.Run("getSchemaRevision", func(t *testing.T) {
+		testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+			buf := new(bytes.Buffer)
+			schemaRev := fmt.Sprintf("%s@%s", protoSchemaID, protoSchema.RevisionID)
+			err := getSchemaRevision(buf, tc.ProjectID, schemaRev)
+			if err != nil {
+				r.Errorf("getSchemaRevision err: %v", err)
+			}
+			got := buf.String()
+			want := "Got schema revision"
+			if !strings.Contains(got, want) {
+				r.Errorf("getSchemaRevision() got: %q\nwant: %q\n", got, want)
 			}
 		})
 	})
@@ -187,6 +253,51 @@ func TestSchemas_Admin(t *testing.T) {
 			}
 			if len(schemas) != 2 {
 				r.Errorf("expected 2 schemas, got %d", len(schemas))
+			}
+		})
+	})
+
+	t.Run("listSchemaRevisions", func(t *testing.T) {
+		testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+			buf := new(bytes.Buffer)
+			_, err := listSchemaRevisions(buf, tc.ProjectID, protoSchemaID)
+			if err != nil {
+				r.Errorf("failed to list schemas: %v", err)
+			}
+			got := buf.String()
+			want := "Got schema revision"
+			if !strings.Contains(got, want) {
+				r.Errorf("listSchemaRevisions() got: %q\nwant: %q\n", got, want)
+			}
+		})
+	})
+
+	topicID := topicPrefix + uuid.NewString()
+	t.Run("createTopicWithSchemaRevisions", func(t *testing.T) {
+		testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+			buf := new(bytes.Buffer)
+			err := createTopicWithSchemaRevisions(buf, tc.ProjectID, topicID, protoSchemaID, protoSchema.RevisionID, protoSchema.RevisionID, pubsub.EncodingBinary)
+			if err != nil {
+				r.Errorf("createTopicWithSchemaRevisions err: %v", err)
+			}
+			got := buf.String()
+			want := "Created topic with schema revision"
+			if !strings.Contains(got, want) {
+				r.Errorf("createTopicWithSchemaRevisions() got: %q\nwant: %q\n", got, want)
+			}
+		})
+	})
+
+	t.Run("deleteSchemaRevision", func(t *testing.T) {
+		testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+			buf := new(bytes.Buffer)
+			if err := deleteSchemaRevision(buf, tc.ProjectID, protoSchemaID, protoSchema.RevisionID); err != nil {
+				r.Errorf("deleteSchemaRevision err: %v", err)
+			}
+			got := buf.String()
+			want := "Deleted a schema revision"
+			if !strings.Contains(got, want) {
+				r.Errorf("deleteSchemaRevision() got: %q\nwant: %q\n", got, want)
 			}
 		})
 	})
@@ -205,7 +316,7 @@ func TestSchemas_Admin(t *testing.T) {
 }
 
 func TestSchemas_AvroSchemaAll(t *testing.T) {
-	client := setup(t)
+	client, _ := setup(t)
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 
@@ -258,17 +369,36 @@ func TestSchemas_AvroSchemaAll(t *testing.T) {
 		})
 	})
 
-	t.Run("subscribeAvroRecords", func(t *testing.T) {
-		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+	t.Run("subscribeWithAvroRecords", func(t *testing.T) {
+		testutil.Retry(t, 3, time.Second, func(r *testutil.R) {
 			buf := new(bytes.Buffer)
 			err := subscribeWithAvroSchema(buf, tc.ProjectID, subID, avroFilePath)
 			if err != nil {
 				r.Errorf("subscribeWithAvroSchema: %v", err)
 			}
 			got := buf.String()
-			want := "Received a JSON-encoded message"
+			want := " is abbreviated as "
 			if !strings.Contains(got, want) {
 				r.Errorf("subscribeWithAvroSchema mismatch\ngot: %v\nwant: %v\n", got, want)
+			}
+		})
+	})
+
+	t.Run("subscribeWithAvroSchemaRevisions", func(t *testing.T) {
+		testutil.Retry(t, 3, time.Second, func(r *testutil.R) {
+			err := publishAvroRecords(io.Discard, tc.ProjectID, topicID, avroFilePath)
+			if err != nil {
+				r.Errorf("publishAvroRecords: %v", err)
+			}
+			buf := new(bytes.Buffer)
+			err = subscribeWithAvroSchemaRevisions(buf, tc.ProjectID, subID, avroFilePath)
+			if err != nil {
+				r.Errorf("subscribeWithAvroSchemaRevisions: %v", err)
+			}
+			got := buf.String()
+			want := " is abbreviated as "
+			if !strings.Contains(got, want) {
+				r.Errorf("subscribeWithAvroSchemaRevisions mismatch\ngot: %v\nwant: %v\n", got, want)
 			}
 		})
 	})
@@ -279,7 +409,7 @@ func TestSchemas_AvroSchemaAll(t *testing.T) {
 }
 
 func TestSchemas_ProtoSchemaAll(t *testing.T) {
-	client := setup(t)
+	client, _ := setup(t)
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 
@@ -337,10 +467,10 @@ func TestSchemas_ProtoSchemaAll(t *testing.T) {
 			buf := new(bytes.Buffer)
 			err := subscribeWithProtoSchema(buf, tc.ProjectID, subID, protoFilePath)
 			if err != nil {
-				r.Errorf("subsribeWithProtoSchema: %v", err)
+				r.Errorf("subscribeWithProtoSchema: %v", err)
 			}
 			got := buf.String()
-			want := "Received a JSON-encoded message"
+			want := " is abbreviated as "
 			if !strings.Contains(got, want) {
 				r.Errorf("subscribeWithProtoSchema mismatch\ngot: %v\nwant: %v\n", got, want)
 			}
@@ -350,6 +480,45 @@ func TestSchemas_ProtoSchemaAll(t *testing.T) {
 	deleteSchema(ioutil.Discard, tc.ProjectID, protoSchemaID)
 	client.Subscription(subID).Delete(ctx)
 	client.Topic(topicID).Delete(ctx)
+}
+
+func TestSchemas_UpdateTopicSchema(t *testing.T) {
+	_, schemaClient := setup(t)
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+
+	topicID := topicPrefix + uuid.NewString()
+	protoSchemaID := schemaPrefix + "proto-" + uuid.NewString()
+	protoSchemaID2 := schemaPrefix + "proto-" + uuid.NewString()
+
+	protoSource, err := ioutil.ReadFile(protoFilePath)
+	if err != nil {
+		t.Fatalf("error reading from file: %s", protoFilePath)
+	}
+	schema, err := schemaClient.CreateSchema(ctx, protoSchemaID, pubsub.SchemaConfig{
+		Type:       pubsub.SchemaProtocolBuffer,
+		Definition: string(protoSource),
+	})
+	if err != nil {
+		t.Fatalf("createProtoSchema err: %v", err)
+	}
+
+	_, err = schemaClient.CreateSchema(ctx, protoSchemaID2, pubsub.SchemaConfig{
+		Type:       pubsub.SchemaProtocolBuffer,
+		Definition: string(protoSource),
+	})
+	if err != nil {
+		t.Fatalf("createProtoSchema err: %v", err)
+	}
+
+	if err := createTopicWithSchema(ioutil.Discard, tc.ProjectID, topicID, protoSchemaID, pubsub.EncodingJSON); err != nil {
+		t.Fatalf("createTopicWithSchema: %v", err)
+	}
+
+	buf := new(bytes.Buffer)
+	if err := updateTopicSchema(buf, tc.ProjectID, topicID, schema.RevisionID, schema.RevisionID); err != nil {
+		t.Fatalf("updateTopicSchema err : %v", err)
+	}
 }
 
 func defaultSchemaConfig(projectID, schemaID, schemaFile string, schemaType pubsub.SchemaType) (*pubsub.SchemaConfig, error) {
