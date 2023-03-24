@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	cloud.google.com/go/texttospeech v1.6.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230309020435-bdb8e67b5bb9
+	github.com/GoogleCloudPlatform/golang-samples 82da276a923c
 )
 
 require (

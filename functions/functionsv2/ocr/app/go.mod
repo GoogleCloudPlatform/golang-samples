@@ -3,14 +3,14 @@ module github.com/GoogleCloudPlatform/golang-samples/functions/ocr/app
 go 1.19
 
 require (
-	cloud.google.com/go/pubsub v1.28.0
-	cloud.google.com/go/storage v1.29.0
-	cloud.google.com/go/translate v1.6.0
+	cloud.google.com/go/pubsub v1.30.0
+	cloud.google.com/go/storage v1.30.1
+	cloud.google.com/go/translate v1.7.0
 	cloud.google.com/go/vision v1.2.0
 	github.com/GoogleCloudPlatform/functions-framework-go v1.6.1
 	github.com/cloudevents/sdk-go/v2 v2.13.0
 	golang.org/x/text v0.8.0
-	google.golang.org/genproto v0.0.0-20230306155012-7f2fa6fef1f4
+	google.golang.org/genproto 478b75c54725
 )
 
 require (

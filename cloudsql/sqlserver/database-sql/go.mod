@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/golang-samples/cloudsql/sqlserver/database
 go 1.19
 
 require (
-	cloud.google.com/go/cloudsqlconn v1.2.1
+	cloud.google.com/go/cloudsqlconn v1.2.2
 	github.com/denisenkom/go-mssqldb v0.12.3
 )
 

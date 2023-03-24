@@ -3,14 +3,14 @@ module github.com/GoogleCloudPlatform/golang-samples/opencensus
 go 1.19
 
 require (
-	cloud.google.com/go/monitoring v1.12.0
+	cloud.google.com/go/monitoring v1.13.0
 	cloud.google.com/go/spanner v1.44.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.5
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230309020435-bdb8e67b5bb9
+	github.com/GoogleCloudPlatform/golang-samples 82da276a923c
 	github.com/golang/protobuf v1.5.3
 	go.opencensus.io v0.24.0
-	golang.org/x/exp v0.0.0-20230307190834-24139beb5833
-	google.golang.org/genproto v0.0.0-20230306155012-7f2fa6fef1f4
+	golang.org/x/exp 10a507213a29
+	google.golang.org/genproto 478b75c54725
 	google.golang.org/protobuf v1.29.0
 )
 

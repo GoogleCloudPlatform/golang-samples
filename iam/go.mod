@@ -3,12 +3,12 @@ module github.com/GoogleCloudPlatform/golang-samples/iam
 go 1.19
 
 require (
-	cloud.google.com/go/iam v0.12.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230309020435-bdb8e67b5bb9
+	cloud.google.com/go/iam v0.13.0
+	github.com/GoogleCloudPlatform/golang-samples 82da276a923c
 	github.com/gofrs/uuid v3.4.0+incompatible
 	golang.org/x/oauth2 v0.6.0
-	google.golang.org/api v0.112.0
-	google.golang.org/genproto v0.0.0-20230306155012-7f2fa6fef1f4
+	google.golang.org/api v0.114.0
+	google.golang.org/genproto 478b75c54725
 )
 
 require (

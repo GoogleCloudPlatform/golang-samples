@@ -3,13 +3,13 @@ module github.com/GoogleCloudPlatform/golang-samples/iot
 go 1.19
 
 require (
-	cloud.google.com/go/pubsub v1.28.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230309020435-bdb8e67b5bb9
+	cloud.google.com/go/pubsub v1.30.0
+	github.com/GoogleCloudPlatform/golang-samples 82da276a923c
 	github.com/eclipse/paho.mqtt.golang v1.4.2
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/uuid v1.3.0
 	golang.org/x/oauth2 v0.6.0
-	google.golang.org/api v0.112.0
+	google.golang.org/api v0.114.0
 )
 
 require (

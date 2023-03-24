@@ -3,14 +3,14 @@ module github.com/GoogleCloudPlatform/golang-samples/storage
 go 1.19
 
 require (
-	cloud.google.com/go/iam v0.12.0
-	cloud.google.com/go/pubsub v1.28.0
-	cloud.google.com/go/storage v1.29.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230309020435-bdb8e67b5bb9
-	github.com/aws/aws-sdk-go v1.44.217
-	github.com/googleapis/gax-go/v2 v2.7.1
-	google.golang.org/api v0.112.0
-	google.golang.org/genproto v0.0.0-20230306155012-7f2fa6fef1f4
+	cloud.google.com/go/iam v0.13.0
+	cloud.google.com/go/pubsub v1.30.0
+	cloud.google.com/go/storage v1.30.1
+	github.com/GoogleCloudPlatform/golang-samples 82da276a923c
+	github.com/aws/aws-sdk-go v1.44.229
+	github.com/googleapis/gax-go/v2 v2.8.0
+	google.golang.org/api v0.114.0
+	google.golang.org/genproto 478b75c54725
 )
 
 require (

@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/golang-samples/cloudsql/mysql/database-sql
 go 1.19
 
 require (
-	cloud.google.com/go/cloudsqlconn v1.2.1
+	cloud.google.com/go/cloudsqlconn v1.2.2
 	github.com/go-sql-driver/mysql v1.7.0
 )
 

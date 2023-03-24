@@ -2,7 +2,7 @@ module github.com/GoogleCloudPlatform/golang-samples/eventarc/testing
 
 go 1.19
 
-require github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230309020435-bdb8e67b5bb9
+require github.com/GoogleCloudPlatform/golang-samples 82da276a923c
 
 require (
 	cloud.google.com/go v0.109.0 // indirect

@@ -4,9 +4,9 @@ go 1.19
 
 require (
 	cloud.google.com/go/datastore v1.10.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230309020435-bdb8e67b5bb9
-	google.golang.org/api v0.112.0
-	google.golang.org/genproto v0.0.0-20230306155012-7f2fa6fef1f4
+	github.com/GoogleCloudPlatform/golang-samples 82da276a923c
+	google.golang.org/api v0.114.0
+	google.golang.org/genproto 478b75c54725
 )
 
 require (

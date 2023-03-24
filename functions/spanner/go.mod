@@ -2,8 +2,8 @@ module github.com/GoogleCloudPlatform/golang-samples/functions/spanner
 
 require (
 	cloud.google.com/go/spanner v1.44.0
-	google.golang.org/api v0.112.0
-	google.golang.org/genproto v0.0.0-20230306155012-7f2fa6fef1f4
+	google.golang.org/api v0.114.0
+	google.golang.org/genproto 478b75c54725
 )
 
 require (

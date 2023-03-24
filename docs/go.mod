@@ -3,14 +3,14 @@ module github.com/GoogleCloudPlatform/golang-samples/docs
 go 1.19
 
 require (
-	cloud.google.com/go/storage v1.29.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230309020435-bdb8e67b5bb9
+	cloud.google.com/go/storage v1.30.1
+	github.com/GoogleCloudPlatform/golang-samples 82da276a923c
 	github.com/fluent/fluent-logger-golang v1.9.0
 	github.com/go-sql-driver/mysql v1.7.0
 	github.com/mailgun/mailgun-go/v3 v3.6.4
 	github.com/mailjet/mailjet-apiv3-go v0.0.0-20201009050126-c24bc15a9394
 	golang.org/x/oauth2 v0.6.0
-	google.golang.org/api v0.112.0
+	google.golang.org/api v0.114.0
 	google.golang.org/appengine v1.6.7
 	google.golang.org/appengine/v2 v2.0.2
 	gopkg.in/sendgrid/sendgrid-go.v2 v2.0.0

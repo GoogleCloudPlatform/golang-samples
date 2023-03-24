@@ -4,12 +4,12 @@ go 1.19
 
 require (
 	cloud.google.com/go/bigtable v1.18.1
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230309020435-bdb8e67b5bb9
+	github.com/GoogleCloudPlatform/golang-samples 82da276a923c
 	github.com/google/go-cmp v0.5.9
 	github.com/google/uuid v1.3.0
-	google.golang.org/api v0.112.0
+	google.golang.org/api v0.114.0
 	google.golang.org/appengine v1.6.7
-	google.golang.org/grpc v1.53.0
+	google.golang.org/grpc v1.54.0
 )
 
 require (

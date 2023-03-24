@@ -4,20 +4,20 @@ go 1.19
 
 require (
 	cloud.google.com/go/batch v0.7.0
-	cloud.google.com/go/bigquery v1.48.0
-	cloud.google.com/go/compute v1.18.0
+	cloud.google.com/go/bigquery v1.49.0
+	cloud.google.com/go/compute v1.19.0
 	cloud.google.com/go/datastore v1.10.0
 	cloud.google.com/go/errorreporting v0.3.0
 	cloud.google.com/go/logging v1.7.0
-	cloud.google.com/go/storage v1.29.0
+	cloud.google.com/go/storage v1.30.1
 	cloud.google.com/go/vision v1.2.0
 	github.com/bmatcuk/doublestar/v2 v2.0.4
 	github.com/golang/protobuf v1.5.3
 	github.com/google/uuid v1.3.0
 	github.com/h2non/filetype v1.1.3
 	golang.org/x/oauth2 v0.6.0
-	google.golang.org/api v0.112.0
-	google.golang.org/genproto v0.0.0-20230306155012-7f2fa6fef1f4
+	google.golang.org/api v0.114.0
+	google.golang.org/genproto 478b75c54725
 	google.golang.org/protobuf v1.29.0
 	gopkg.in/yaml.v2 v2.4.0
 )

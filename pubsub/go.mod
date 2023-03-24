@@ -3,14 +3,14 @@ module github.com/GoogleCloudPlatform/golang-samples/pubsub
 go 1.19
 
 require (
-	cloud.google.com/go/bigquery v1.48.0
-	cloud.google.com/go/iam v0.12.0
-	cloud.google.com/go/pubsub v1.29.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230309020435-bdb8e67b5bb9
+	cloud.google.com/go/bigquery v1.49.0
+	cloud.google.com/go/iam v0.13.0
+	cloud.google.com/go/pubsub v1.30.0
+	github.com/GoogleCloudPlatform/golang-samples 82da276a923c
 	github.com/google/go-cmp v0.5.9
 	github.com/google/uuid v1.3.0
 	github.com/linkedin/goavro/v2 v2.12.0
-	google.golang.org/api v0.112.0
+	google.golang.org/api v0.114.0
 	google.golang.org/protobuf v1.29.0
 )
 

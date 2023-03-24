@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/functions/tips/contexttip
 
-require cloud.google.com/go/pubsub v1.28.0
+require cloud.google.com/go/pubsub v1.30.0
 
 require (
 	github.com/cloudevents/sdk-go/v2 v2.6.1 // indirect

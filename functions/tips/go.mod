@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/functions/tips
 
-require cloud.google.com/go/storage v1.29.0
+require cloud.google.com/go/storage v1.30.1
 
 require (
 	github.com/cloudevents/sdk-go/v2 v2.6.1 // indirect

@@ -3,8 +3,8 @@ module github.com/GoogleCloudPlatform/golang-samples/documentai
 go 1.19
 
 require (
-	cloud.google.com/go/documentai v1.16.0
-	google.golang.org/api v0.112.0
+	cloud.google.com/go/documentai v1.18.0
+	google.golang.org/api v0.114.0
 )
 
 require (

@@ -3,14 +3,14 @@ module github.com/GoogleCloudPlatform/golang-samples/storagetransfer
 go 1.19
 
 require (
-	cloud.google.com/go/iam v0.12.0
+	cloud.google.com/go/iam v0.13.0
 	cloud.google.com/go/longrunning v0.4.1
-	cloud.google.com/go/storage v1.29.0
-	cloud.google.com/go/storagetransfer v1.7.0
+	cloud.google.com/go/storage v1.30.1
+	cloud.google.com/go/storagetransfer v1.8.0
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v0.6.1
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230309020435-bdb8e67b5bb9
-	github.com/aws/aws-sdk-go v1.44.217
-	google.golang.org/genproto v0.0.0-20230306155012-7f2fa6fef1f4
+	github.com/GoogleCloudPlatform/golang-samples 82da276a923c
+	github.com/aws/aws-sdk-go v1.44.229
+	google.golang.org/genproto 478b75c54725
 	google.golang.org/protobuf v1.29.0
 )
 

@@ -4,18 +4,18 @@ go 1.19
 
 require (
 	cloud.google.com/go v0.110.0
-	cloud.google.com/go/kms v1.9.0
+	cloud.google.com/go/kms v1.10.0
 	cloud.google.com/go/longrunning v0.4.1
 	cloud.google.com/go/spanner v1.44.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.14
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230309020435-bdb8e67b5bb9
+	github.com/GoogleCloudPlatform/golang-samples 82da276a923c
 	github.com/golang/protobuf v1.5.3
 	github.com/google/uuid v1.3.0
-	github.com/googleapis/gax-go/v2 v2.7.1
+	github.com/googleapis/gax-go/v2 v2.8.0
 	go.opencensus.io v0.24.0
-	google.golang.org/api v0.112.0
-	google.golang.org/genproto v0.0.0-20230306155012-7f2fa6fef1f4
-	google.golang.org/grpc v1.53.0
+	google.golang.org/api v0.114.0
+	google.golang.org/genproto 478b75c54725
+	google.golang.org/grpc v1.54.0
 	google.golang.org/protobuf v1.29.0
 )
 

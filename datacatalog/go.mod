@@ -3,12 +3,12 @@ module github.com/GoogleCloudPlatform/golang-samples/datacatalog
 go 1.19
 
 require (
-	cloud.google.com/go/bigquery v1.48.0
-	cloud.google.com/go/datacatalog v1.12.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230309020435-bdb8e67b5bb9
+	cloud.google.com/go/bigquery v1.49.0
+	cloud.google.com/go/datacatalog v1.13.0
+	github.com/GoogleCloudPlatform/golang-samples 82da276a923c
 	github.com/GoogleCloudPlatform/golang-samples/bigquery v0.0.0
-	google.golang.org/api v0.112.0
-	google.golang.org/genproto v0.0.0-20230306155012-7f2fa6fef1f4
+	google.golang.org/api v0.114.0
+	google.golang.org/genproto 478b75c54725
 )
 
 require (

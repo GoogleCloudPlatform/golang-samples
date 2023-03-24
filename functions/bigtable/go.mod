@@ -2,7 +2,7 @@ module github.com/GoogleCloudPlatform/golang-samples/functions/bigtable
 
 require (
 	cloud.google.com/go/bigtable v1.18.1
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230309020435-bdb8e67b5bb9
+	github.com/GoogleCloudPlatform/golang-samples 82da276a923c
 	github.com/google/uuid v1.3.0
 )
 

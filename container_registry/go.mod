@@ -3,12 +3,12 @@ module github.com/GoogleCloudPlatform/golang-samples/container_registry
 go 1.19
 
 require (
-	cloud.google.com/go/containeranalysis v0.7.0
-	cloud.google.com/go/pubsub v1.28.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230309020435-bdb8e67b5bb9
+	cloud.google.com/go/containeranalysis v0.9.0
+	cloud.google.com/go/pubsub v1.30.0
+	github.com/GoogleCloudPlatform/golang-samples 82da276a923c
 	github.com/google/uuid v1.3.0
-	google.golang.org/api v0.112.0
-	google.golang.org/genproto v0.0.0-20230306155012-7f2fa6fef1f4
+	google.golang.org/api v0.114.0
+	google.golang.org/genproto 478b75c54725
 )
 
 require (

@@ -4,9 +4,9 @@ go 1.19
 
 require (
 	cloud.google.com/go/firestore v1.9.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230309020435-bdb8e67b5bb9
-	google.golang.org/api v0.112.0
-	google.golang.org/grpc v1.53.0
+	github.com/GoogleCloudPlatform/golang-samples 82da276a923c
+	google.golang.org/api v0.114.0
+	google.golang.org/grpc v1.54.0
 )
 
 require (

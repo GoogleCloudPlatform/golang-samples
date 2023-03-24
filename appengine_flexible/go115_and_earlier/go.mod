@@ -4,8 +4,8 @@ go 1.19
 
 require (
 	cloud.google.com/go/datastore v1.10.0
-	cloud.google.com/go/pubsub v1.28.0
-	cloud.google.com/go/storage v1.29.0
+	cloud.google.com/go/pubsub v1.30.0
+	cloud.google.com/go/storage v1.30.1
 	github.com/gofrs/uuid v3.4.0+incompatible
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/gorilla/websocket v1.5.0

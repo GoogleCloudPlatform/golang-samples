@@ -3,11 +3,11 @@ module github.com/GoogleCloudPlatform/golang-samples/compute
 go 1.19
 
 require (
-	cloud.google.com/go/compute v1.18.0
-	cloud.google.com/go/storage v1.29.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230309020435-bdb8e67b5bb9
-	google.golang.org/api v0.112.0
-	google.golang.org/genproto v0.0.0-20230306155012-7f2fa6fef1f4
+	cloud.google.com/go/compute v1.19.0
+	cloud.google.com/go/storage v1.30.1
+	github.com/GoogleCloudPlatform/golang-samples 82da276a923c
+	google.golang.org/api v0.114.0
+	google.golang.org/genproto 478b75c54725
 	google.golang.org/protobuf v1.29.0
 )
 

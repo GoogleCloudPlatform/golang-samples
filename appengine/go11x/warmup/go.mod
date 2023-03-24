@@ -2,7 +2,7 @@ module warmup
 
 go 1.19
 
-require cloud.google.com/go/storage v1.29.0
+require cloud.google.com/go/storage v1.30.1
 
 require (
 	cloud.google.com/go v0.107.0 // indirect
