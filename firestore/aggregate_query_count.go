@@ -38,7 +38,11 @@ func createCountQuery(w io.Writer, projectID string) error {
 	collection := client.Collection("users")
 	query := collection.Where("born", ">", 1850)
 
-	// `alias` provides a key for accessing the aggregate query results
+	// `alias` argument--"all"--provides a key for accessing the aggregate query
+	// results. The alias value must be unique across all aggregation aliases in
+	// an aggregation query and must conform to allowed Document field names.
+	//
+	// See https://cloud.google.com/firestore/docs/reference/rpc/google.firestore.v1#document for details.
 	aggregationQuery := query.NewAggregationQuery().WithCount("all")
 	results, err := aggregationQuery.Get(ctx)
 	if err != nil {

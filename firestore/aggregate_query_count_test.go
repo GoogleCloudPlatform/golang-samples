@@ -22,6 +22,8 @@ import (
 )
 
 func TestCreateCountQuery(t *testing.T) {
+	// Note: This test assumes a pre-populated Firestore collection in the
+	// below-referenced project.
 	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
 	var bytes bytes.Buffer
 	err := createCountQuery(&bytes, projectID)
