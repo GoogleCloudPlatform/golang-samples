@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,23 +21,15 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 	"github.com/cloudevents/sdk-go/v2/event"
+	"github.com/googleapis/google-cloudevents-go/cloud/storagedata"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 func init() {
 	functions.CloudEvent("HelloStorage", helloStorage)
-}
-
-// StorageObjectData contains metadata of the Cloud Storage object.
-type StorageObjectData struct {
-	Bucket         string    `json:"bucket,omitempty"`
-	Name           string    `json:"name,omitempty"`
-	Metageneration int64     `json:"metageneration,string,omitempty"`
-	TimeCreated    time.Time `json:"timeCreated,omitempty"`
-	Updated        time.Time `json:"updated,omitempty"`
 }
 
 // helloStorage consumes a CloudEvent message and logs details about the changed object.
@@ -45,16 +37,16 @@ func helloStorage(ctx context.Context, e event.Event) error {
 	log.Printf("Event ID: %s", e.ID())
 	log.Printf("Event Type: %s", e.Type())
 
-	var data StorageObjectData
-	if err := e.DataAs(&data); err != nil {
-		return fmt.Errorf("event.DataAs: %v", err)
+	var data storagedata.StorageObjectData
+	if err := protojson.Unmarshal(e.Data(), &data); err != nil {
+		return fmt.Errorf("protojson.Unmarshal: %w", err)
 	}
 
-	log.Printf("Bucket: %s", data.Bucket)
-	log.Printf("File: %s", data.Name)
-	log.Printf("Metageneration: %d", data.Metageneration)
-	log.Printf("Created: %s", data.TimeCreated)
-	log.Printf("Updated: %s", data.Updated)
+	log.Printf("Bucket: %s", data.GetBucket())
+	log.Printf("File: %s", data.GetName())
+	log.Printf("Metageneration: %d", data.GetMetageneration())
+	log.Printf("Created: %s", data.GetTimeCreated().AsTime())
+	log.Printf("Updated: %s", data.GetUpdated().AsTime())
 	return nil
 }
 

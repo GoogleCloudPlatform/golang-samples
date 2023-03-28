@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import (
 
 	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 	"github.com/cloudevents/sdk-go/v2/event"
+	"github.com/googleapis/google-cloudevents-go/cloud/storagedata"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 func init() {
@@ -32,23 +34,24 @@ func init() {
 // ProcessImage is executed when a file is uploaded to the Cloud Storage bucket you
 // created for uploading images. It runs detectText, which processes the image for text.
 func ProcessImage(ctx context.Context, cloudevent event.Event) error {
-	var event GCSEvent
 	if err := setup(ctx); err != nil {
 		return fmt.Errorf("ProcessImage: %v", err)
 	}
-	if err := cloudevent.DataAs(&event); err != nil {
-		return fmt.Errorf("Failed to parse CloudEvent data: %v", err)
+
+	var data storagedata.StorageObjectData
+	if err := protojson.Unmarshal(cloudevent.Data(), &data); err != nil {
+		return fmt.Errorf("protojson.Unmarshal: Failed to parse CloudEvent data: %w", err)
 	}
-	if event.Bucket == "" {
+	if data.GetBucket() == "" {
 		return fmt.Errorf("empty file.Bucket")
 	}
-	if event.Name == "" {
+	if data.GetName() == "" {
 		return fmt.Errorf("empty file.Name")
 	}
-	if err := detectText(ctx, event.Bucket, event.Name); err != nil {
+	if err := detectText(ctx, data.GetBucket(), data.GetName()); err != nil {
 		return fmt.Errorf("detectText: %v", err)
 	}
-	log.Printf("File %s processed.", event.Name)
+	log.Printf("File %s processed.", data.GetName())
 	return nil
 }
 

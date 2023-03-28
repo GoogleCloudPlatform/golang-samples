@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,6 +26,9 @@ import (
 	"time"
 
 	"github.com/cloudevents/sdk-go/v2/event"
+	"github.com/googleapis/google-cloudevents-go/cloud/storagedata"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func TestHelloStorage(t *testing.T) {
@@ -34,13 +37,19 @@ func TestHelloStorage(t *testing.T) {
 	originalFlags := log.Flags()
 	log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
 
-	d := StorageObjectData{
+	d := &storagedata.StorageObjectData{
 		Name:        "hello_gcs.txt",
-		TimeCreated: time.Now(),
+		TimeCreated: timestamppb.New(time.Now()),
 	}
+
+	jsonData, err := protojson.Marshal(d)
+	if err != nil {
+		t.Fatalf("protojson.Marshal: %v", err)
+	}
+
 	e := event.New()
 	e.SetDataContentType("application/json")
-	e.SetData(e.DataContentType(), d)
+	e.SetData(e.DataContentType(), jsonData)
 
 	helloStorage(context.Background(), e)
 

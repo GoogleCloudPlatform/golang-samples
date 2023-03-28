@@ -22,6 +22,8 @@ import (
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"github.com/googleapis/google-cloudevents-go/cloud/storagedata"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 func TestBlurOffensiveImages(t *testing.T) {
@@ -51,7 +53,7 @@ func TestBlurOffensiveImages(t *testing.T) {
 	os.Setenv("BLURRED_BUCKET_NAME", outputBucket)
 	defer os.Setenv("BLURRED_BUCKET_NAME", oldEnvValue)
 
-	e := GCSEvent{
+	e := &storagedata.StorageObjectData{
 		Bucket: inputBucket,
 		Name:   "zombie.jpg",
 	}
@@ -77,8 +79,13 @@ func TestBlurOffensiveImages(t *testing.T) {
 
 	outputBlob := storageClient.Bucket(outputBucket).Object(e.Name)
 
+	jsonData, err := protojson.Marshal(e)
+	if err != nil {
+		t.Fatalf("protojson.Marshal: %v", err)
+	}
+
 	ce := cloudevents.NewEvent()
-	ce.SetData("application/json", e)
+	ce.SetData("application/json", jsonData)
 	err = blurOffensiveImages(ctx, ce)
 	defer outputBlob.Delete(ctx)
 	if err != nil {

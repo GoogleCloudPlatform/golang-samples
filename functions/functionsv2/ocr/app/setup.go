@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"time"
 
 	"cloud.google.com/go/pubsub"
 	"cloud.google.com/go/storage"
@@ -37,16 +36,6 @@ type ocrMessage struct {
 	FileName string       `json:"fileName"`
 	Lang     language.Tag `json:"lang"`
 	SrcLang  language.Tag `json:"srcLang"`
-}
-
-// GCSEvent is the payload of a GCS event.
-type GCSEvent struct {
-	Bucket         string    `json:"bucket"`
-	Name           string    `json:"name"`
-	Metageneration string    `json:"metageneration"`
-	ResourceState  string    `json:"resourceState"`
-	TimeCreated    time.Time `json:"timeCreated"`
-	Updated        time.Time `json:"updated"`
 }
 
 // Eventarc sends a MessagePublishedData object.
