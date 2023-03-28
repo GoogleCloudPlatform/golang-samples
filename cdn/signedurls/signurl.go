@@ -16,7 +16,6 @@
 // given key.
 package signedurl
 
-// [START example]
 // [START cloudcdn_sign_url]
 // [START cloudcdn_sign_url_prefix]
 import (
@@ -121,5 +120,3 @@ func generateSignedURLs(w io.Writer) error {
 
 	return nil
 }
-
-// [END example]
