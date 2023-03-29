@@ -294,8 +294,8 @@ func SnippetQuery_basic() {
 	defer client.Close()
 	// [START datastore_basic_query]
 	query := datastore.NewQuery("Task").
-		Filter("Done =", false).
-		Filter("Priority >=", 4).
+		FilterField("Done", "=", false).
+		FilterField("Priority", ">=", 4).
 		Order("-Priority")
 	// [END datastore_basic_query]
 	// [START datastore_run_query]
@@ -316,14 +316,16 @@ func SnippetQuery_basic() {
 
 func SnippetQuery_propertyFilter() {
 	// [START datastore_property_filter]
-	query := datastore.NewQuery("Task").Filter("Done =", false)
+	query := datastore.NewQuery("Task").FilterField("Done", "=", false)
 	// [END datastore_property_filter]
 	_ = query // Use client.Run or client.GetAll to execute the query.
 }
 
 func SnippetQuery_compositeFilter() {
 	// [START datastore_composite_filter]
-	query := datastore.NewQuery("Task").Filter("Done =", false).Filter("Priority =", 4)
+	query := datastore.NewQuery("Task").
+		FilterField("Done", "=", false).
+		FilterField("Priority", "=", 4)
 	// [END datastore_composite_filter]
 	_ = query // Use client.Run or client.GetAll to execute the query.
 }
@@ -331,7 +333,7 @@ func SnippetQuery_compositeFilter() {
 func SnippetQuery_keyFilter() {
 	// [START datastore_key_filter]
 	key := datastore.NameKey("Task", "someTask", nil)
-	query := datastore.NewQuery("Task").Filter("__key__ >", key)
+	query := datastore.NewQuery("Task").FilterField("__key__", ">", key)
 	// [END datastore_key_filter]
 	_ = query // Use client.Run or client.GetAll to execute the query.
 }
@@ -360,7 +362,7 @@ func SnippetQuery_sortMulti() {
 func SnippetQuery_kindless() {
 	var lastSeenKey *datastore.Key
 	// [START datastore_kindless_query]
-	query := datastore.NewQuery("").Filter("__key__ >", lastSeenKey)
+	query := datastore.NewQuery("").FilterField("__key__", ">", lastSeenKey)
 	// [END datastore_kindless_query]
 	_ = query // Use client.Run or client.GetAll to execute the query.
 }
@@ -423,8 +425,8 @@ func SnippetQuery_DistinctOn() {
 func SnippetQuery_Filter_arrayInequality() {
 	// [START datastore_array_value_inequality_range]
 	query := datastore.NewQuery("Task").
-		Filter("Tag >", "learn").
-		Filter("Tag <", "math")
+		FilterField("Tag", ">", "learn").
+		FilterField("Tag", "<", "math")
 	// [END datastore_array_value_inequality_range]
 	_ = query // Use client.Run or client.GetAll to execute the query.
 }
@@ -432,8 +434,8 @@ func SnippetQuery_Filter_arrayInequality() {
 func SnippetQuery_Filter_arrayEquality() {
 	// [START datastore_array_value_equality]
 	query := datastore.NewQuery("Task").
-		Filter("Tag =", "fun").
-		Filter("Tag =", "programming")
+		FilterField("Tag", "=", "fun").
+		FilterField("Tag", "=", "programming")
 	// [END datastore_array_value_equality]
 	_ = query // Use client.Run or client.GetAll to execute the query.
 }
@@ -441,8 +443,8 @@ func SnippetQuery_Filter_arrayEquality() {
 func SnippetQuery_Filter_inequality() {
 	// [START datastore_inequality_range]
 	query := datastore.NewQuery("Task").
-		Filter("Created >", time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)).
-		Filter("Created <", time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC))
+		FilterField("Created", ">", time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)).
+		FilterField("Created", "<", time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC))
 	// [END datastore_inequality_range]
 	_ = query // Use client.Run or client.GetAll to execute the query.
 }
@@ -450,8 +452,8 @@ func SnippetQuery_Filter_inequality() {
 func SnippetQuery_Filter_invalidInequality() {
 	// [START datastore_inequality_invalid]
 	query := datastore.NewQuery("Task").
-		Filter("Created >", time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)).
-		Filter("Priority >", 3)
+		FilterField("Created", ">", time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)).
+		FilterField("Priority", ">", 3)
 	// [END datastore_inequality_invalid]
 	_ = query // The query is invalid.
 }
@@ -459,10 +461,10 @@ func SnippetQuery_Filter_invalidInequality() {
 func SnippetQuery_Filter_mixed() {
 	// [START datastore_equal_and_inequality_range]
 	query := datastore.NewQuery("Task").
-		Filter("Priority =", 4).
-		Filter("Done =", false).
-		Filter("Created >", time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)).
-		Filter("Created <", time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC))
+		FilterField("Priority", "=", 4).
+		FilterField("Done", "=", false).
+		FilterField("Created", ">", time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)).
+		FilterField("Created", "<", time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC))
 	// [END datastore_equal_and_inequality_range]
 	_ = query // Use client.Run or client.GetAll to execute the query.
 }
@@ -470,7 +472,7 @@ func SnippetQuery_Filter_mixed() {
 func SnippetQuery_inequalitySort() {
 	// [START datastore_inequality_sort]
 	query := datastore.NewQuery("Task").
-		Filter("Priority >", 3).
+		FilterField("Priority", ">", 3).
 		Order("Priority").
 		Order("Created")
 	// [END datastore_inequality_sort]
@@ -480,7 +482,7 @@ func SnippetQuery_inequalitySort() {
 func SnippetQuery_invalidInequalitySortA() {
 	// [START datastore_inequality_sort_invalid_not_same]
 	query := datastore.NewQuery("Task").
-		Filter("Priority >", 3).
+		FilterField("Priority", ">", 3).
 		Order("Created")
 	// [END datastore_inequality_sort_invalid_not_same]
 	_ = query // The query is invalid.
@@ -489,7 +491,7 @@ func SnippetQuery_invalidInequalitySortA() {
 func SnippetQuery_invalidInequalitySortB() {
 	// [START datastore_inequality_sort_invalid_not_first]
 	query := datastore.NewQuery("Task").
-		Filter("Priority >", 3).
+		FilterField("Priority", ">", 3).
 		Order("Created").
 		Order("Priority")
 	// [END datastore_inequality_sort_invalid_not_first]
@@ -552,7 +554,8 @@ func SnippetQuery_EventualConsistency() {
 
 func SnippetQuery_unindexed() {
 	// [START datastore_unindexed_property_query]
-	query := datastore.NewQuery("Tasks").Filter("Description =", "A task description")
+	query := datastore.NewQuery("Tasks").
+		FilterField("Description", "=", "A task description")
 	// [END datastore_unindexed_property_query]
 	_ = query // Use client.Run or client.GetAll to execute the query.
 }
@@ -684,8 +687,8 @@ func metadataNamespaces(w io.Writer, projectID string) error {
 	start := datastore.NameKey("__namespace__", "g", nil)
 	end := datastore.NameKey("__namespace__", "h", nil)
 	query := datastore.NewQuery("__namespace__").
-		Filter("__key__ >=", start).
-		Filter("__key__ <", end).
+		FilterField("__key__", ">=", start).
+		FilterField("__key__", "<", end).
 		KeysOnly()
 	keys, err := client.GetAll(ctx, query, nil)
 	if err != nil {
