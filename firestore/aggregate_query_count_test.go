@@ -12,32 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Sample helloworld is a basic App Engine flexible app.
-package main
+package firestore
 
 import (
-	"fmt"
-	"log"
-	"net/http"
+	"bytes"
 	"os"
+	"strings"
+	"testing"
 )
 
-func main() {
-	http.HandleFunc("/", handle)
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
+func TestCreateCountQuery(t *testing.T) {
+	// Note: This test assumes a pre-populated Firestore collection in the
+	// below-referenced project.
+	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
+	var bytes bytes.Buffer
+	err := createCountQuery(&bytes, projectID)
+	if err != nil {
+		t.Fatal(err)
 	}
-	log.Printf("Listening on port %s", port)
-	if err := http.ListenAndServe(":"+port, nil); err != nil {
-		log.Fatal(err)
+	got := bytes.String()
+	if !strings.Contains(got, "Number of") {
+		t.Error("firestore: COUNT sample did not provide correct output")
 	}
-}
-
-func handle(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		http.NotFound(w, r)
-		return
-	}
-	fmt.Fprint(w, "Hello world!")
 }
