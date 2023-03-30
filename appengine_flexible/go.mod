@@ -3,11 +3,9 @@ module github.com/GoogleCloudPlatform/golang-samples/appengine_flexible
 go 1.19
 
 require (
-	cloud.google.com/go/pubsub v1.28.0
 	cloud.google.com/go/storage v1.29.0
 	github.com/gofrs/uuid v3.4.0+incompatible
 	github.com/gomodule/redigo v2.0.0+incompatible
-	github.com/gorilla/websocket v1.5.0
 	google.golang.org/appengine v1.6.7
 )
 
@@ -25,7 +23,6 @@ require (
 	go.opencensus.io v0.24.0 // indirect
 	golang.org/x/net v0.8.0 // indirect
 	golang.org/x/oauth2 v0.4.0 // indirect
-	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.6.0 // indirect
 	golang.org/x/text v0.8.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
