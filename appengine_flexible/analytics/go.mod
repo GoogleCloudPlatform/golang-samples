@@ -1,6 +1,6 @@
 module analytics
 
-go 1.18
+go 1.19
 
 require (
 	github.com/gofrs/uuid v4.4.0+incompatible
