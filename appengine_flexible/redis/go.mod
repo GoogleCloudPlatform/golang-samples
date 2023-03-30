@@ -1,9 +1,9 @@
-module analytics
+module redis
 
-go 1.18
+go 1.19
 
 require (
-	github.com/gofrs/uuid v4.4.0+incompatible
+	github.com/gomodule/redigo v1.8.9
 	google.golang.org/appengine v1.6.7
 )
 

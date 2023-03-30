@@ -319,7 +319,7 @@ func TestTestIam(t *testing.T) {
 }
 
 func TestListAllFindings(t *testing.T) {
-	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 5, 20*time.Second, func(r *testutil.R) {
 		orgID := setup(t)
 		buf := new(bytes.Buffer)
 
@@ -343,7 +343,7 @@ func TestListAllFindings(t *testing.T) {
 
 func TestListFilteredFindings(t *testing.T) {
 	setup(t)
-	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 5, 20*time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
 
 		err := listFilteredFindings(buf, sourceName)
@@ -366,7 +366,7 @@ func TestListFilteredFindings(t *testing.T) {
 
 func TestListFindingsAtTime(t *testing.T) {
 	setup(t)
-	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 5, 20*time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
 
 		err := listFindingsAtTime(buf, sourceName)
@@ -409,7 +409,7 @@ func TestAddSecurityMarks(t *testing.T) {
 }
 
 func TestListFindingsWithMarks(t *testing.T) {
-	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 5, 20*time.Second, func(r *testutil.R) {
 		orgID := setup(t)
 		buf := new(bytes.Buffer)
 		// Ensure security marks have been added so filter is effective.
