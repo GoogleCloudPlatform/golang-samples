@@ -100,3 +100,32 @@ func TestDeidentifyDateShift(t *testing.T) {
 		})
 	}
 }
+
+func TestDeIdentifyWithWordList(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	tests := []struct {
+		input    string
+		infoType []string
+		want     string
+	}{
+		{
+			input:    "Patient was seen in RM-YELLOW then transferred to rm green.",
+			infoType: []string{"RM-GREEN", "RM-YELLOW", "RM-ORANGE"},
+			want:     "output : Patient was seen in [CUSTOM_ROOM_ID] then transferred to [CUSTOM_ROOM_ID].",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.input, func(t *testing.T) {
+			t.Parallel()
+			buf := new(bytes.Buffer)
+			err := deidentifyWithWordList(buf, tc.ProjectID, test.input, test.infoType)
+			if err != nil {
+				t.Errorf("deidentifyWithWordList(%q) = error '%q', want %q", test.input, err, test.want)
+			}
+			if got := buf.String(); got != test.want {
+				t.Errorf("deidentifyWithWordList(%q) = %q, want %q", test.input, got, test.want)
+			}
+		})
+	}
+}
