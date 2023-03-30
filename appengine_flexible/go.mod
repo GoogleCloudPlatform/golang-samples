@@ -5,7 +5,6 @@ go 1.19
 require (
 	cloud.google.com/go/pubsub v1.28.0
 	cloud.google.com/go/storage v1.29.0
-	github.com/gofrs/uuid v3.4.0+incompatible
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/gorilla/websocket v1.5.0
 	google.golang.org/appengine v1.6.7
