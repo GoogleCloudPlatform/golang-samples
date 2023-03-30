@@ -40,7 +40,9 @@ const (
 	testVideoFileName        = "ChromeCast.mp4"
 	testConcatFileName       = "ForBiggerEscapes.mp4"
 	testOverlayImageFileName = "overlay.jpg"
-	testCaptionsFileName     = "caption.srt"
+	testCaptionsFileName     = "captions.srt"
+	testSubtitlesFileName1   = "subtitles-en.srt"
+	testSubtitlesFileName2   = "subtitles-es.srt"
 	preset                   = "preset/web-hd"
 	smallSpriteSheetFileName = "small-sprite-sheet0000000000.jpeg"
 	largeSpriteSheetFileName = "large-sprite-sheet0000000000.jpeg"
@@ -65,6 +67,8 @@ func TestJobTemplatesAndJobs(t *testing.T) {
 	inputConcatURI := "gs://" + bucketName + "/" + testBucketDirName + testConcatFileName
 	inputOverlayImageURI := "gs://" + bucketName + "/" + testBucketDirName + testOverlayImageFileName
 	inputCaptionsURI := "gs://" + bucketName + "/" + testBucketDirName + testCaptionsFileName
+	inputSubtitles1URI := "gs://" + bucketName + "/" + testBucketDirName + testSubtitlesFileName1
+	inputSubtitles2URI := "gs://" + bucketName + "/" + testBucketDirName + testSubtitlesFileName2
 	outputURIForPreset := "gs://" + bucketName + "/test-output-preset/"
 	outputURIForTemplate := "gs://" + bucketName + "/test-output-template/"
 	outputURIForAdHoc := "gs://" + bucketName + "/test-output-adhoc/"
@@ -121,7 +125,7 @@ func TestJobTemplatesAndJobs(t *testing.T) {
 
 	testJobWithEmbeddedCaptions(t, projectNumber, inputURI, inputCaptionsURI, outputURIForEmbeddedCaptions)
 	t.Logf("\ntestJobWithEmbeddedCaptions() completed\n")
-	testJobWithStandaloneCaptions(t, projectNumber, inputURI, inputCaptionsURI, outputURIForStandaloneCaptions)
+	testJobWithStandaloneCaptions(t, projectNumber, inputURI, inputSubtitles1URI, inputSubtitles2URI, outputURIForStandaloneCaptions)
 	t.Logf("\ntestJobWithStandaloneCaptions() completed\n")
 }
 
@@ -193,6 +197,8 @@ func writeTestGCSFiles(t *testing.T, projectID string, bucketName string) {
 	writeTestGCSFile(t, bucketName, testBucketName, testBucketDirName+testOverlayImageFileName)
 	writeTestGCSFile(t, bucketName, testBucketName, testBucketDirName+testConcatFileName)
 	writeTestGCSFile(t, bucketName, testBucketName, testBucketDirName+testCaptionsFileName)
+	writeTestGCSFile(t, bucketName, testBucketName, testBucketDirName+testSubtitlesFileName1)
+	writeTestGCSFile(t, bucketName, testBucketName, testBucketDirName+testSubtitlesFileName2)
 }
 
 // writeTestGCSFile deletes the GCS test bucket and uploads a test video file to it.
@@ -827,14 +833,14 @@ func testJobWithEmbeddedCaptions(t *testing.T, projectNumber string, inputVideoU
 
 // testJobWithStandaloneCaptions tests major operations on a job created from an ad-hoc configuration that
 // can use captions from a standalone file. It will wait until the job successfully completes as part of the test.
-func testJobWithStandaloneCaptions(t *testing.T, projectNumber string, inputVideoURI string, inputCaptionsURI string, outputURIForStandaloneCaptions string) {
+func testJobWithStandaloneCaptions(t *testing.T, projectNumber string, inputVideoURI string, inputSubtitles1URI string, inputSubtitles2URI string, outputURIForStandaloneCaptions string) {
 	tc := testutil.SystemTest(t)
 	buf := &bytes.Buffer{}
 	jobID := ""
 
 	// Create the job.
 	jobName := fmt.Sprintf("projects/%s/locations/%s/jobs/", projectNumber, location)
-	if err := createJobWithStandaloneCaptions(buf, tc.ProjectID, location, inputVideoURI, inputCaptionsURI, outputURIForStandaloneCaptions); err != nil {
+	if err := createJobWithStandaloneCaptions(buf, tc.ProjectID, location, inputVideoURI, inputSubtitles1URI, inputSubtitles2URI, outputURIForStandaloneCaptions); err != nil {
 		t.Errorf("createJobWithStandaloneCaptions got err: %v", err)
 	}
 	got := buf.String()

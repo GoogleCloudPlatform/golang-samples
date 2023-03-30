@@ -15,18 +15,10 @@
 runtime: go
 env: flex
 
-runtime_config:
-  operating_system: 'ubuntu22'
-  runtime_version: '1.18'
+automatic_scaling:
+  min_num_instances: 1
 
-# This sample incurs costs to run on the App Engine flexible environment. 
-# The settings below are to reduce costs during testing and are not appropriate
-# for production use. For more information, see:
-# https://cloud.google.com/appengine/docs/flexible/python/configuring-your-app-with-app-yaml
-manual_scaling:
-  instances: 1
-resources:
-  cpu: 1
-  memory_gb: 0.5
-  disk_size_gb: 10
-
+# [START gae_flex_analytics_env_variables]
+env_variables:
+  GA_TRACKING_ID: UA-XXXXX-Y
+# [END gae_flex_analytics_env_variables]
