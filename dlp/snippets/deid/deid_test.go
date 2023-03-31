@@ -100,3 +100,35 @@ func TestDeidentifyDateShift(t *testing.T) {
 		})
 	}
 }
+
+func TestDeidentifyExceptionList(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	tests := []struct {
+		input           string
+		infoType        string
+		excludeInfoType string
+		dictWordList    []string
+		want            string
+	}{
+		{
+			input:           "jack@example.org accessed customer record of user5@example.com",
+			infoType:        "EMAIL_ADDRESS",
+			excludeInfoType: "DEVELOPER_EMAIL",
+			dictWordList:    []string{"jack@example.org", "jill@example.org"},
+			want:            "output : [DEVELOPER_EMAIL] accessed customer record of [EMAIL_ADDRESS]",
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.input, func(t *testing.T) {
+			t.Parallel()
+			buf := new(bytes.Buffer)
+			err := deidentifyExceptionList(buf, tc.ProjectID, test.input, test.infoType, test.excludeInfoType, test.dictWordList)
+			if err != nil {
+				t.Errorf("deidentifyExceptionList(%q) = error '%q', want %q", test.input, err, test.want)
+			}
+			if got := buf.String(); got != test.want {
+				t.Errorf("deidentifyExceptionList(%q) = %q, want %q", test.input, got, test.want)
+			}
+		})
+	}
+}
