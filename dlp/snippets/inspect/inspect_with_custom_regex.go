@@ -61,6 +61,7 @@ func inspectWithCustomRegex(w io.Writer, projectID, textToInspect, customRegexPa
 				Pattern: customRegexPattern,
 			},
 		},
+		//MinLikelihood: dlppb.Likelihood_POSSIBLE,
 	}
 
 	// Construct the Inspect request to be sent by the client.
@@ -72,8 +73,7 @@ func inspectWithCustomRegex(w io.Writer, projectID, textToInspect, customRegexPa
 			CustomInfoTypes: []*dlppb.CustomInfoType{
 				customInfoType,
 			},
-			IncludeQuote:  true,
-			MinLikelihood: dlppb.Likelihood_POSSIBLE,
+			IncludeQuote: true,
 		},
 	}
 
