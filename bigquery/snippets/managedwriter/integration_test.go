@@ -24,7 +24,7 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestPendingStream(t *testing.T) {
+func TestAppends(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 
@@ -84,8 +84,16 @@ func TestPendingStream(t *testing.T) {
 		t.Fatalf("failed to create destination table(%q %q): %v", testDatasetID, testTableID, err)
 	}
 
-	if err := appendToPendingStream(ioutil.Discard, tc.ProjectID, testDatasetID, testTableID); err != nil {
-		t.Errorf("appendToPendingStream(%q %q): %v", testDatasetID, testTableID, err)
-	}
+	t.Run("PendingStream", func(t *testing.T) {
+		if err := appendToPendingStream(ioutil.Discard, tc.ProjectID, testDatasetID, testTableID); err != nil {
+			t.Errorf("appendToPendingStream(%q %q): %v", testDatasetID, testTableID, err)
+		}
+	})
+
+	t.Run("DefaultStream", func(t *testing.T) {
+		if err := appendToDefaultStream(ioutil.Discard, tc.ProjectID, testDatasetID, testTableID); err != nil {
+			t.Errorf("appendToDefaultStream(%q %q): %v", testDatasetID, testTableID, err)
+		}
+	})
 
 }
