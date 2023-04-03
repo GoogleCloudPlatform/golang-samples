@@ -281,7 +281,7 @@ func TestInspectPhoneNumber(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
 
-	if err := inspectPhoneNumber(buf, tc.ProjectID, "I'm Gary and my phone number is (415) 555-0890", "PHONE_NUMBER"); err != nil {
+	if err := inspectPhoneNumber(buf, tc.ProjectID, "I'm Gary and my phone number is (415) 555-0890"); err != nil {
 		t.Errorf("TestInspectFile: %v", err)
 	}
 

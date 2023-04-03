@@ -26,10 +26,9 @@ import (
 // inspectPhoneNumber demonstrates a simple scan request to the Cloud DLP API.
 // Notice that the PHONE_NUMBER detector is specified in inspectConfig,
 // which instructs Cloud DLP to scan the given string for a phone number.
-func inspectPhoneNumber(w io.Writer, projectID, textToInspect, infoType string) error {
+func inspectPhoneNumber(w io.Writer, projectID, textToInspect string) error {
 	// projectID := "my-project-id"
 	// textToInspect := "My phone number is (223) 456-7890"
-	// infoType := "PHONE_NUMBER"
 	ctx := context.Background()
 	// Initialize a client once and reuse it to send multiple requests. Clients
 	// are safe to use across goroutines. When the client is no longer needed,
@@ -53,7 +52,7 @@ func inspectPhoneNumber(w io.Writer, projectID, textToInspect, infoType string) 
 			// See https://cloud.google.com/dlp/docs/infotypes-reference
 			// for complete list of info types
 			InfoTypes: []*dlppb.InfoType{
-				{Name: infoType},
+				{Name: "PHONE_NUMBER"},
 			},
 			IncludeQuote: true,
 		},
