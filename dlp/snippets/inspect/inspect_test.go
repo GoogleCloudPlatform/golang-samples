@@ -276,3 +276,17 @@ func TestInspectBigquery(t *testing.T) {
 		})
 	}
 }
+
+func TestInspectStringCustomHotWord(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	if err := inspectStringCustomHotWord(buf, tc.ProjectID, "patient name: John Doe", "patient", "PERSON_NAME"); err != nil {
+		t.Errorf("TestInspectFile: %v", err)
+	}
+
+	got := buf.String()
+	if want := "Infotype Name: PERSON_NAME"; !strings.Contains(got, want) {
+		t.Errorf("inspectString got %q, want %q", got, want)
+	}
+}
