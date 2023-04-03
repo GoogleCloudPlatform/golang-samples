@@ -63,9 +63,9 @@ func inspectWithHotWordRules(w io.Writer, projectID, textToInspect, customRegexP
 				Pattern: customRegexPattern,
 			},
 		},
+		MinLikelihood: dlppb.Likelihood_POSSIBLE,
 	}
 
-	// Construct hotword rule.
 	var inspectionRuleSet = &dlppb.InspectionRuleSet{
 		Rules: []*dlppb.InspectionRule{
 			{
@@ -107,8 +107,7 @@ func inspectWithHotWordRules(w io.Writer, projectID, textToInspect, customRegexP
 			RuleSet: []*dlppb.InspectionRuleSet{
 				inspectionRuleSet,
 			},
-			IncludeQuote:  true,
-			MinLikelihood: dlppb.Likelihood_POSSIBLE,
+			IncludeQuote: true,
 		},
 	}
 
