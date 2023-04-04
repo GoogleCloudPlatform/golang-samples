@@ -55,15 +55,14 @@ func inspectWithHotWordRules(w io.Writer, projectID, textToInspect, customRegexP
 	// Construct the custom regex detectors
 	var customInfoType = &dlppb.CustomInfoType{
 		InfoType: &dlppb.InfoType{
-			Name: infoTypeName,
+			Name: "C_MRN",
 		},
-		// Specify the regex pattern the inspection will look for.
 		Type: &dlppb.CustomInfoType_Regex_{
 			Regex: &dlppb.CustomInfoType_Regex{
 				Pattern: customRegexPattern,
 			},
 		},
-		MinLikelihood: dlppb.Likelihood_POSSIBLE,
+		Likelihood: dlppb.Likelihood_POSSIBLE,
 	}
 
 	var inspectionRuleSet = &dlppb.InspectionRuleSet{
