@@ -24,9 +24,12 @@ import (
 )
 
 // inspectStringCustomOmitOverlap inspects a string for sensitive data with omitting custom matches
-func inspectStringCustomOmitOverlap(w io.Writer, projectID, textToInspect string) error {
+func inspectStringCustomOmitOverlap(w io.Writer, projectID, textToInspect, customInfoTypeName, infoTypeName, regex string) error {
 	// projectID := "my-project-id"
 	// textToInspect := "Name: Jane Doe. Name: Larry Page."
+	// customInfoTypeName := "VIP_DETECTOR"
+	// infoTypeName := "PERSON_NAME"
+	// regex := "Larry Page|Sergey Brin"
 	ctx := context.Background()
 	// Initialize a client once and reuse it to send multiple requests. Clients
 	// are safe to use across goroutines. When the client is no longer needed,
@@ -49,11 +52,11 @@ func inspectStringCustomOmitOverlap(w io.Writer, projectID, textToInspect string
 	// Construct the custom infotype.
 	var customInfotype = &dlppb.CustomInfoType{
 		InfoType: &dlppb.InfoType{
-			Name: "VIP_DETECTOR",
+			Name: customInfoTypeName,
 		},
 		Type: &dlppb.CustomInfoType_Regex_{
 			Regex: &dlppb.CustomInfoType_Regex{
-				Pattern: "Larry Page|Sergey Brin",
+				Pattern: regex,
 			},
 		},
 		ExclusionType: dlppb.CustomInfoType_EXCLUSION_TYPE_EXCLUDE,
@@ -73,7 +76,7 @@ func inspectStringCustomOmitOverlap(w io.Writer, projectID, textToInspect string
 	// Construct a ruleset that applies the exclusion rule to the PERSON_NAME infoType.
 	var ruleSet = &dlppb.InspectionRuleSet{
 		InfoTypes: []*dlppb.InfoType{
-			{Name: "PERSON_NAME"},
+			{Name: infoTypeName},
 		},
 		Rules: []*dlppb.InspectionRule{
 			{
@@ -86,7 +89,7 @@ func inspectStringCustomOmitOverlap(w io.Writer, projectID, textToInspect string
 	// Construct the configuration for the Inspect request, including the ruleSet.
 	var config = &dlppb.InspectConfig{
 		InfoTypes: []*dlppb.InfoType{
-			{Name: "PERSON_NAME"},
+			{Name: infoTypeName},
 		},
 		CustomInfoTypes: []*dlppb.CustomInfoType{
 			customInfotype,
