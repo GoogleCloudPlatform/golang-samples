@@ -153,6 +153,7 @@ func deleteInstance(ctx context.Context, projectId, zone, instanceName string) e
 }
 
 func TestComputeDisksSnippets(t *testing.T) {
+	t.Skip("skipping for flakes. see googlecloudplatform/golang-samples#2929")
 	ctx := context.Background()
 	var r *rand.Rand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))
