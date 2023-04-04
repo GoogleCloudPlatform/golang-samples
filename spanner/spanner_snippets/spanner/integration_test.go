@@ -386,6 +386,9 @@ func TestSample(t *testing.T) {
 	assertContains(t, out, "Updated data to VenueDetails column\n")
 	out = runSample(t, queryWithJsonParameter, dbName, "failed to query with json parameter")
 	assertContains(t, out, "The venue details for venue id 19")
+
+	out = runSample(t, directedReadOptions, dbName, "failed to read using directed read options")
+	assertContains(t, out, "1 1 Total Junk")
 }
 
 func TestBackupSample(t *testing.T) {
