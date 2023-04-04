@@ -24,11 +24,10 @@ import (
 )
 
 // deidentifyExceptionList creates an exception list for a regular custom dictionary detector.
-func deidentifyExceptionList(w io.Writer, projectID, input, infoType, excludeInfoType string, dictWordList []string) error {
+func deidentifyExceptionList(w io.Writer, projectID, input, infoType string, dictWordList []string) error {
 	// projectID := "my-project-id"
 	// input := "jack@example.org accessed customer record of user5@example.com"
 	// infoType := "EMAIL_ADDRESS"
-	// excludeInfoType := "DEVELOPER_EMAIL"
 	// dictWordList := []string{"jack@example.org", "jill@example.org"}
 	ctx := context.Background()
 	// Initialize a client once and reuse it to send multiple requests. Clients
@@ -47,11 +46,6 @@ func deidentifyExceptionList(w io.Writer, projectID, input, infoType, excludeInf
 		},
 	}
 
-	// Construct the custom word list to be detected.
-	var wordList = &dlppb.CustomInfoType_Dictionary_WordList{
-		Words: dictWordList,
-	}
-
 	// Specify the word list custom info type and build-in info type the inspection will look for.
 	var infoTypes = []*dlppb.InfoType{
 		{Name: infoType},
@@ -63,10 +57,12 @@ func deidentifyExceptionList(w io.Writer, projectID, input, infoType, excludeInf
 				Type: &dlppb.InspectionRule_ExclusionRule{
 					ExclusionRule: &dlppb.ExclusionRule{
 						MatchingType: dlppb.MatchingType_MATCHING_TYPE_FULL_MATCH,
-						Type: &dlppb.ExclusionRule_ExcludeInfoTypes{
-							ExcludeInfoTypes: &dlppb.ExcludeInfoTypes{
-								InfoTypes: []*dlppb.InfoType{
-									{Name: excludeInfoType},
+						Type: &dlppb.ExclusionRule_Dictionary{
+							Dictionary: &dlppb.CustomInfoType_Dictionary{
+								Source: &dlppb.CustomInfoType_Dictionary_WordList_{
+									WordList: &dlppb.CustomInfoType_Dictionary_WordList{
+										Words: dictWordList,
+									},
 								},
 							},
 						},
@@ -93,23 +89,9 @@ func deidentifyExceptionList(w io.Writer, projectID, input, infoType, excludeInf
 			},
 		},
 		InspectConfig: &dlppb.InspectConfig{
-			InfoTypes: infoTypes,
-			// Construct the custom dictionary detector associated with the word list.
-			CustomInfoTypes: []*dlppb.CustomInfoType{
-				{
-					InfoType: &dlppb.InfoType{
-						Name: excludeInfoType,
-					},
-					Type: &dlppb.CustomInfoType_Dictionary_{
-						Dictionary: &dlppb.CustomInfoType_Dictionary{
-							Source: &dlppb.CustomInfoType_Dictionary_WordList_{
-								WordList: wordList,
-							},
-						},
-					},
-				},
-			},
-			RuleSet: []*dlppb.InspectionRuleSet{inspectRuleSet},
+			InfoTypes:       infoTypes,
+			CustomInfoTypes: []*dlppb.CustomInfoType{},
+			RuleSet:         []*dlppb.InspectionRuleSet{inspectRuleSet},
 		},
 		// The item to analyze.
 		Item: item,
