@@ -289,4 +289,8 @@ func TestInspectWithCustomRegex(t *testing.T) {
 	if want := "Infotype Name: C_MRN"; !strings.Contains(got, want) {
 		t.Errorf("inspectString got %q, want %q", got, want)
 	}
+
+	if want := "Likelihood: POSSIBLE"; !strings.Contains(got, want) {
+		t.Errorf("inspectString got %q, want %q", got, want)
+	}
 }
