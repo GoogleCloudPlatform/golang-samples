@@ -281,7 +281,7 @@ func TestInspectStringCustomOmitOverlap(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
 
-	if err := inspectStringCustomOmitOverlap(buf, tc.ProjectID, "Name: Jane Doe. Name: Larry Page."); err != nil {
+	if err := inspectStringCustomOmitOverlap(buf, tc.ProjectID, "Name: Jane Doe. Name: Larry Page.", "VIP_DETECTOR", "PERSON_NAME", "Larry Page|Sergey Brin"); err != nil {
 		t.Errorf("TestInspectFile: %v", err)
 	}
 
