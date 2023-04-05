@@ -610,6 +610,23 @@ func TestUpdateDatabaseSample(t *testing.T) {
 	if !database.GetEnableDropProtection() {
 		t.Errorf("got output %t; want it to contain %t", database.GetEnableDropProtection(), true)
 	}
+
+	// Disable Drop db protection for the cleanup to delete the databases
+	opUpdate, err := databaseAdmin.UpdateDatabase(ctx, &adminpb.UpdateDatabaseRequest{
+		Database: &adminpb.Database{
+			Name:                 dbName,
+			EnableDropProtection: false,
+		},
+		UpdateMask: &field_mask.FieldMask{
+			Paths: []string{"enable_drop_protection"},
+		},
+	})
+	if err != nil {
+		t.Errorf("UpdateDatabase operation to DB %v failed: %v", dbName, err)
+	}
+	if _, err := opUpdate.Wait(ctx); err != nil {
+		t.Fatalf("UpdateDatabase operation to DB %v failed: %v", dbName, err)
+	}
 }
 
 func TestCustomInstanceConfigSample(t *testing.T) {
