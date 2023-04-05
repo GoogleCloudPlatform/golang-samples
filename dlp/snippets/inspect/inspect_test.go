@@ -276,3 +276,17 @@ func TestInspectBigquery(t *testing.T) {
 		})
 	}
 }
+
+func TestInspectStringWithoutOverlap(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	if err := inspectStringWithoutOverlap(buf, tc.ProjectID, "example.com is a domain, james@example.org is an email."); err != nil {
+		t.Errorf("TestInspectStringWithoutOverlap: %v", err)
+	}
+
+	got := buf.String()
+	if want := "Infotype Name: DOMAIN_NAME"; !strings.Contains(got, want) {
+		t.Errorf("inspectStringWithoutOverlap got %q, want %q", got, want)
+	}
+}
