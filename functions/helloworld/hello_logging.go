@@ -21,7 +21,13 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 )
+
+func init() {
+	functions.HTTP("HelloLogging", HelloLogging)
+}
 
 // HelloLogging logs messages.
 func HelloLogging(w http.ResponseWriter, r *http.Request) {
