@@ -293,4 +293,8 @@ func TestInspectStringWithExclusionDictSubstring(t *testing.T) {
 	if want := "Infotype Name: DOMAIN_NAME"; !strings.Contains(got, want) {
 		t.Errorf("inspectStringWithExclusionDictSubstring got %q, want %q", got, want)
 	}
+
+	if want := "Quote: TEST"; strings.Contains(got, want) {
+		t.Errorf("inspectStringWithExclusionDictSubstring got %q, want %q", got, want)
+	}
 }
