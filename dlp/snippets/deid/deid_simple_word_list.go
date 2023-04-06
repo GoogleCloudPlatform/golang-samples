@@ -67,26 +67,25 @@ func deidentifyWithWordList(w io.Writer, projectID, input string, infoTypeName s
 			},
 		},
 	}
-	
-	// Construct the configuration for the de-identify request and list all desired transformations.
-	var deIdentifyConfig =  &dlppb.DeidentifyConfig{
-		Transformation: &dlppb.DeidentifyConfig_InfoTypeTransformations{
-			InfoTypeTransformations: &dlppb.InfoTypeTransformations{
-				// Associate deidentification type with info type.
-				Transformations: []*dlppb.InfoTypeTransformations_InfoTypeTransformation{
-					{
-						InfoTypes: []*dlppb.InfoType{infoType},
-						// Define type of de-identification as replacement.
-						PrimitiveTransformation: &dlppb.PrimitiveTransformation{
-							Transformation: &dlppb.PrimitiveTransformation_ReplaceWithInfoTypeConfig{
-								ReplaceWithInfoTypeConfig: &dlppb.ReplaceWithInfoTypeConfig{},
-							},
-						},
-					},
-				},
-			},
+
+	// Define type of de-identification as replacement.
+	var primitiveTransformation = &dlppb.PrimitiveTransformation{
+		Transformation: &dlppb.PrimitiveTransformation_ReplaceWithInfoTypeConfig{
+			ReplaceWithInfoTypeConfig: &dlppb.ReplaceWithInfoTypeConfig{},
 		},
-	},
+	}
+
+	var infoTypeTransformation = &dlppb.InfoTypeTransformations_InfoTypeTransformation{
+		InfoTypes:               []*dlppb.InfoType{infoType},
+		PrimitiveTransformation: primitiveTransformation,
+	}
+
+	var infoTypeTransformations = &dlppb.InfoTypeTransformations{
+		// Associate de-identification type with info type.
+		Transformations: []*dlppb.InfoTypeTransformations_InfoTypeTransformation{
+			infoTypeTransformation,
+		},
+	}
 
 	// Create a configured request.
 	req := &dlppb.DeidentifyContentRequest{
@@ -96,7 +95,12 @@ func deidentifyWithWordList(w io.Writer, projectID, input string, infoTypeName s
 				customInfoType,
 			},
 		},
-		DeidentifyConfig: deIdentifyConfig,
+		// Construct the configuration for the de-identify request and list all desired transformations.
+		DeidentifyConfig: &dlppb.DeidentifyConfig{
+			Transformation: &dlppb.DeidentifyConfig_InfoTypeTransformations{
+				InfoTypeTransformations: infoTypeTransformations,
+			},
+		},
 		// The item to analyze.
 		Item: item,
 	}
