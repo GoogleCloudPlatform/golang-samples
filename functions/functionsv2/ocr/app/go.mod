@@ -9,8 +9,10 @@ require (
 	cloud.google.com/go/vision v1.2.0
 	github.com/GoogleCloudPlatform/functions-framework-go v1.6.1
 	github.com/cloudevents/sdk-go/v2 v2.13.0
+	github.com/googleapis/google-cloudevents-go v0.3.0
 	golang.org/x/text v0.8.0
 	google.golang.org/genproto v0.0.0-20230323212658-478b75c54725
+	google.golang.org/protobuf v1.30.0
 )
 
 require (

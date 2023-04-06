@@ -7,6 +7,8 @@ require (
 	github.com/GoogleCloudPlatform/functions-framework-go v1.6.1
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230324221613-82da276a923c
 	github.com/cloudevents/sdk-go/v2 v2.13.0
+	github.com/googleapis/google-cloudevents-go v0.3.0
+	google.golang.org/protobuf v1.28.1
 )
 
 require (
@@ -38,6 +40,7 @@ require (
 	google.golang.org/genproto v0.0.0-20230320184635-7606e756e683 // indirect
 	google.golang.org/grpc v1.53.0 // indirect
 	google.golang.org/protobuf v1.29.1 // indirect
+
 )
 
 go 1.19
