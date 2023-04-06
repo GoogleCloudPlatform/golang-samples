@@ -26,12 +26,12 @@ import (
 
 // inspectStringWithoutOverlap inspects a string for sensitive data
 // and omit overlapping matches on domain and email
-// omit matches on domain names that are part of email addresses in DOMAIN_NAME
-// detector scan
 func inspectStringWithoutOverlap(w io.Writer, projectID, textToInspect string) error {
 	// projectID := "my-project-id"
 	// textToInspect := "example.com is a domain, james@example.org is an email."
+
 	ctx := context.Background()
+
 	// Initialize a client once and reuse it to send multiple requests. Clients
 	// are safe to use across goroutines. When the client is no longer needed,
 	// call the Close method to cleanup its resources.
@@ -39,7 +39,9 @@ func inspectStringWithoutOverlap(w io.Writer, projectID, textToInspect string) e
 	if err != nil {
 		return err
 	}
-	defer client.Close() // Closing the client safely cleans up background resources.
+
+	// Closing the client safely cleans up background resources.
+	defer client.Close()
 
 	// Specify the type and content to be inspected.
 	var contentItem = &dlppb.ContentItem{
@@ -50,12 +52,14 @@ func inspectStringWithoutOverlap(w io.Writer, projectID, textToInspect string) e
 			},
 		},
 	}
+
 	// Specify the type of info the inspection will look for.
 	// See https://cloud.google.com/dlp/docs/infotypes-reference for complete list of info types.
 	var infoTypes = []*dlppb.InfoType{
 		{Name: "DOMAIN_NAME"},
 		{Name: "EMAIL_ADDRESS"},
 	}
+
 	// Define a custom info type to exclude email addresses
 	var customInfotype = &dlppb.CustomInfoType{
 		InfoType: &dlppb.InfoType{
@@ -76,7 +80,7 @@ func inspectStringWithoutOverlap(w io.Writer, projectID, textToInspect string) e
 		MatchingType: dlppb.MatchingType_MATCHING_TYPE_PARTIAL_MATCH,
 	}
 
-	// Construct a ruleset that applies the exclusion rule to the DOMAIN_NAME infotype.
+	// Construct a ruleSet that applies the exclusion rule to the DOMAIN_NAME infoType.
 	// If a DOMAIN_NAME match is part of an EMAIL_ADDRESS match, the DOMAIN_NAME match will
 	// be excluded.
 	var ruleSet = &dlppb.InspectionRuleSet{
@@ -91,6 +95,7 @@ func inspectStringWithoutOverlap(w io.Writer, projectID, textToInspect string) e
 			},
 		},
 	}
+
 	// Construct the Inspect request to be sent by the client.
 	req := &dlppb.InspectContentRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/global", projectID),
@@ -107,6 +112,7 @@ func inspectStringWithoutOverlap(w io.Writer, projectID, textToInspect string) e
 			},
 		},
 	}
+
 	// Send the request.
 	resp, err := client.InspectContent(ctx, req)
 	if err != nil {
