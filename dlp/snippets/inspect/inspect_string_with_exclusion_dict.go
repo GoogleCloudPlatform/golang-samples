@@ -22,7 +22,6 @@ import (
 
 	dlp "cloud.google.com/go/dlp/apiv2"
 	"cloud.google.com/go/dlp/apiv2/dlppb"
-	"google.golang.org/api/option"
 )
 
 // inspectStringWithExclusionDictionary inspects a string for sensitive data
@@ -32,15 +31,20 @@ func inspectStringWithExclusionDictionary(w io.Writer, projectID, textToInspect 
 	// projectID := "my-project-id"
 	// textToInspect := "Some email addresses: gary@example.com, example@example.com"
 	// excludedMatchList := []string{"example@example.com"}
+
 	ctx := context.Background()
+
 	// Initialize a client once and reuse it to send multiple requests. Clients
 	// are safe to use across goroutines. When the client is no longer needed,
 	// call the Close method to cleanup its resources.
-	client, err := dlp.NewRESTClient(ctx, option.WithCredentialsFile("C:/Users/aarsh.dhokai/Desktop/cred.json"))
+	client, err := dlp.NewClient(ctx)
 	if err != nil {
 		return err
 	}
-	defer client.Close() // Closing the client safely cleans up background resources.
+
+	// Closing the client safely cleans up background resources.
+	defer client.Close()
+
 	// Specify the type and content to be inspected.
 	var contentItem = &dlppb.ContentItem{
 		DataItem: &dlppb.ContentItem_ByteItem{
@@ -73,7 +77,7 @@ func inspectStringWithExclusionDictionary(w io.Writer, projectID, textToInspect 
 		MatchingType: dlppb.MatchingType_MATCHING_TYPE_FULL_MATCH,
 	}
 
-	// Construct a ruleset that applies the exclusion rule to the EMAIL_ADDRESSES infotype.
+	// Construct a ruleset that applies the exclusion rule to the EMAIL_ADDRESSES infoType.
 	var ruleSet = &dlppb.InspectionRuleSet{
 		InfoTypes: []*dlppb.InfoType{
 			{Name: "EMAIL_ADDRESS"},
@@ -107,6 +111,7 @@ func inspectStringWithExclusionDictionary(w io.Writer, projectID, textToInspect 
 		fmt.Fprintf(w, "Receive: %v", err)
 		return err
 	}
+
 	// Process the results.
 	fmt.Fprintf(w, "Findings: %v\n", len(resp.Result.Findings))
 	for _, v := range resp.GetResult().Findings {
