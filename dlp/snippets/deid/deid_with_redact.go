@@ -28,7 +28,9 @@ func deidentifyWithRedact(w io.Writer, projectID, inputStr string, infoTypeNames
 	// projectID := "my-project-id"
 	// inputStr := "My name is Alicia Abernathy, and my email address is aabernathy@example.com."
 	// infoTypeNames := []string{"EMAIL_ADDRESS"}
+
 	ctx := context.Background()
+
 	// Initialize a client once and reuse it to send multiple requests. Clients
 	// are safe to use across goroutines. When the client is no longer needed,
 	// call the Close method to cleanup its resources.
@@ -36,7 +38,9 @@ func deidentifyWithRedact(w io.Writer, projectID, inputStr string, infoTypeNames
 	if err != nil {
 		return fmt.Errorf("dlp.NewClient: %v", err)
 	}
-	defer client.Close() // Closing the client safely cleans up background resources.
+
+	// Closing the client safely cleans up background resources.
+	defer client.Close()
 
 	// Specify the content to be inspected.
 	var contentItem = &dlppb.ContentItem{
