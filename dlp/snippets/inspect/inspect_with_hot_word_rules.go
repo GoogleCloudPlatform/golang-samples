@@ -32,7 +32,9 @@ func inspectWithHotWordRules(w io.Writer, projectID, textToInspect, customRegexP
 	//customRegexPattern := "[1-9]{3}-[1-9]{1}-[1-9]{5}"
 	//hotWordRegexPattern := "(?i)(mrn|medical)(?-i)"
 	//infoTypeName := "C_MRN"
+
 	ctx := context.Background()
+
 	// Initialize a client once and reuse it to send multiple requests. Clients
 	// are safe to use across goroutines. When the client is no longer needed,
 	// call the Close method to cleanup its resources.
@@ -40,7 +42,9 @@ func inspectWithHotWordRules(w io.Writer, projectID, textToInspect, customRegexP
 	if err != nil {
 		return err
 	}
-	defer client.Close() // Closing the client safely cleans up background resources.
+
+	// Closing the client safely cleans up background resources.
+	defer client.Close()
 
 	// Specify the type and content to be inspected.
 	var contentItem = &dlppb.ContentItem{
@@ -125,7 +129,6 @@ func inspectWithHotWordRules(w io.Writer, projectID, textToInspect, customRegexP
 		fmt.Fprintf(w, "Likelihood: %v\n", v.GetLikelihood())
 	}
 	return nil
-
 }
 
 // [END dlp_inspect_hotword_rule]
