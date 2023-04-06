@@ -289,4 +289,11 @@ func TestInspectStringCustomOmitOverlap(t *testing.T) {
 	if want := "Infotype Name: PERSON_NAME"; !strings.Contains(got, want) {
 		t.Errorf("inspectString got %q, want %q", got, want)
 	}
+
+	if want := "Quote: Jane Doe"; !strings.Contains(got, want) {
+		t.Errorf("inspectString got %q, want %q", got, want)
+	}
+	if want := "Quote: Larry Page"; strings.Contains(got, want) {
+		t.Errorf("inspectString got %q, want %q", got, want)
+	}
 }
