@@ -29,7 +29,9 @@ func deidentifyExceptionList(w io.Writer, projectID, input, infoType string, dic
 	// input := "jack@example.org accessed customer record of user5@example.com"
 	// infoType := "EMAIL_ADDRESS"
 	// dictWordList := []string{"jack@example.org", "jill@example.org"}
+
 	ctx := context.Background()
+
 	// Initialize a client once and reuse it to send multiple requests. Clients
 	// are safe to use across goroutines. When the client is no longer needed,
 	// call the Close method to cleanup its resources.
@@ -37,6 +39,8 @@ func deidentifyExceptionList(w io.Writer, projectID, input, infoType string, dic
 	if err != nil {
 		return fmt.Errorf("dlp.NewClient: %v", err)
 	}
+
+	// Closing the client safely cleans up background resources.
 	defer client.Close()
 
 	// Specify what content you want the service to DeIdentify.
@@ -50,6 +54,7 @@ func deidentifyExceptionList(w io.Writer, projectID, input, infoType string, dic
 	var infoTypes = []*dlppb.InfoType{
 		{Name: infoType},
 	}
+
 	inspectRuleSet := &dlppb.InspectionRuleSet{
 		InfoTypes: infoTypes,
 		Rules: []*dlppb.InspectionRule{
@@ -71,23 +76,26 @@ func deidentifyExceptionList(w io.Writer, projectID, input, infoType string, dic
 			},
 		},
 	}
-	// Create a configured request.
-	req := &dlppb.DeidentifyContentRequest{
-		Parent: fmt.Sprintf("projects/%s/locations/global", projectID),
-		// Construct the configuration for the de-id request and list all desired transformations.
-		DeidentifyConfig: &dlppb.DeidentifyConfig{
-			Transformation: &dlppb.DeidentifyConfig_InfoTypeTransformations{
-				InfoTypeTransformations: &dlppb.InfoTypeTransformations{
-					Transformations: []*dlppb.InfoTypeTransformations_InfoTypeTransformation{
-						{
-							PrimitiveTransformation: &dlppb.PrimitiveTransformation{
-								Transformation: &dlppb.PrimitiveTransformation_ReplaceWithInfoTypeConfig{},
-							},
+
+	// Construct the configuration for the de-id request and list all desired transformations.
+	var deIdentifyConfig = &dlppb.DeidentifyConfig{
+		Transformation: &dlppb.DeidentifyConfig_InfoTypeTransformations{
+			InfoTypeTransformations: &dlppb.InfoTypeTransformations{
+				Transformations: []*dlppb.InfoTypeTransformations_InfoTypeTransformation{
+					{
+						PrimitiveTransformation: &dlppb.PrimitiveTransformation{
+							Transformation: &dlppb.PrimitiveTransformation_ReplaceWithInfoTypeConfig{},
 						},
 					},
 				},
 			},
 		},
+	}
+
+	// Create a configured request.
+	req := &dlppb.DeidentifyContentRequest{
+		Parent:           fmt.Sprintf("projects/%s/locations/global", projectID),
+		DeidentifyConfig: deIdentifyConfig,
 		InspectConfig: &dlppb.InspectConfig{
 			InfoTypes:       infoTypes,
 			CustomInfoTypes: []*dlppb.CustomInfoType{},
