@@ -282,15 +282,15 @@ func TestInspectWithHotWordRules(t *testing.T) {
 	buf := new(bytes.Buffer)
 
 	if err := inspectWithHotWordRules(buf, tc.ProjectID, "Patient's MRN 444-5-22222 and just a number 333-2-33333", "[1-9]{3}-[1-9]{1}-[1-9]{5}", "(?i)(mrn|medical)(?-i)", "C_MRN"); err != nil {
-		t.Errorf("TestInspectFile: %v", err)
+		t.Errorf("inspectWithHotWordRules: %v", err)
 	}
 
 	got := buf.String()
 	if want := "InfoType Name: C_MRN"; !strings.Contains(got, want) {
-		t.Errorf("inspectString got %q, want %q", got, want)
+		t.Errorf("inspectWithHotWordRules %q, want %q", got, want)
 	}
 
 	if want := "Likelihood: POSSIBLE"; !strings.Contains(got, want) {
-		t.Errorf("inspectString got %q, want %q", got, want)
+		t.Errorf("inspectWithHotWordRules %q, want %q", got, want)
 	}
 }
