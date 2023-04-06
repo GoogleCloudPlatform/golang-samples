@@ -28,8 +28,10 @@ import (
 // which instructs Cloud DLP to scan the given string for a phone number.
 func inspectPhoneNumber(w io.Writer, projectID, textToInspect string) error {
 	// projectID := "my-project-id"
-	// textToInspect := "My phone number is (223) 456-7890"
+	// textToInspect := "My phone number is (123) 555-6789"
+
 	ctx := context.Background()
+
 	// Initialize a client once and reuse it to send multiple requests. Clients
 	// are safe to use across goroutines. When the client is no longer needed,
 	// call the Close method to cleanup its resources.
@@ -37,7 +39,8 @@ func inspectPhoneNumber(w io.Writer, projectID, textToInspect string) error {
 	if err != nil {
 		return err
 	}
-	defer client.Close() // Closing the client safely cleans up background resources.
+	// Closing the client safely cleans up background resources.
+	defer client.Close()
 
 	// Create and send the request.
 	req := &dlppb.InspectContentRequest{
@@ -61,7 +64,8 @@ func inspectPhoneNumber(w io.Writer, projectID, textToInspect string) error {
 	// Send the request.
 	resp, err := client.InspectContent(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Receive: %v", err)
+		fmt.Fprintf(w, "receive: %v", err)
+		return err
 	}
 
 	// Process the results.
