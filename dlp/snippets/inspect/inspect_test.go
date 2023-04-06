@@ -289,4 +289,7 @@ func TestInspectStringWithExclusionDictionary(t *testing.T) {
 	if want := "Infotype Name: EMAIL_ADDRESS"; !strings.Contains(got, want) {
 		t.Errorf("inspectStringWithExclusionDictionary got %q, want %q", got, want)
 	}
+	if want := "Quote: example@example.com"; strings.Contains(got, want) {
+		t.Errorf("inspectStringWithExclusionDictionary got %q, want %q", got, want)
+	}
 }
