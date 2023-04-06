@@ -30,7 +30,9 @@ func inspectStringCustomOmitOverlap(w io.Writer, projectID, textToInspect, custo
 	// customInfoTypeName := "VIP_DETECTOR"
 	// infoTypeName := "PERSON_NAME"
 	// regex := "Larry Page|Sergey Brin"
+
 	ctx := context.Background()
+
 	// Initialize a client once and reuse it to send multiple requests. Clients
 	// are safe to use across goroutines. When the client is no longer needed,
 	// call the Close method to cleanup its resources.
@@ -38,7 +40,9 @@ func inspectStringCustomOmitOverlap(w io.Writer, projectID, textToInspect, custo
 	if err != nil {
 		return err
 	}
-	defer client.Close() // Closing the client safely cleans up background resources.
+
+	// Closing the client safely cleans up background resources.
+	defer client.Close()
 
 	// Specify the type and content to be inspected.
 	var contentItem = &dlppb.ContentItem{
@@ -73,6 +77,7 @@ func inspectStringCustomOmitOverlap(w io.Writer, projectID, textToInspect, custo
 		},
 		MatchingType: dlppb.MatchingType_MATCHING_TYPE_FULL_MATCH,
 	}
+
 	// Construct a ruleset that applies the exclusion rule to the PERSON_NAME infoType.
 	var ruleSet = &dlppb.InspectionRuleSet{
 		InfoTypes: []*dlppb.InfoType{
@@ -86,6 +91,7 @@ func inspectStringCustomOmitOverlap(w io.Writer, projectID, textToInspect, custo
 			},
 		},
 	}
+
 	// Construct the configuration for the Inspect request, including the ruleSet.
 	var config = &dlppb.InspectConfig{
 		InfoTypes: []*dlppb.InfoType{
@@ -99,18 +105,21 @@ func inspectStringCustomOmitOverlap(w io.Writer, projectID, textToInspect, custo
 			ruleSet,
 		},
 	}
+
 	// Create a configured request.
 	req := &dlppb.InspectContentRequest{
 		Parent:        fmt.Sprintf("projects/%s/locations/global", projectID),
 		Item:          contentItem,
 		InspectConfig: config,
 	}
+
 	// Send the request.
 	resp, err := client.InspectContent(ctx, req)
 	if err != nil {
 		fmt.Fprintf(w, "Receive: %v", err)
 		return err
 	}
+
 	// Parse the response and process results
 	fmt.Fprintf(w, "Findings: %v\n", len(resp.Result.Findings))
 	for _, v := range resp.GetResult().Findings {
