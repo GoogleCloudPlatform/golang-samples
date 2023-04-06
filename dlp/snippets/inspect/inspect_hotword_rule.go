@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 package inspect
 
-// [START dlp_inspect_custom_regex]
+// [START dlp_inspect_hotword_rule]
 import (
 	"context"
 	"fmt"
@@ -24,12 +24,7 @@ import (
 	"cloud.google.com/go/dlp/apiv2/dlppb"
 )
 
-// inspectWithCustomRegex inspect a data with custom regex pattern
-func inspectWithCustomRegex(w io.Writer, projectID, textToInspect, customRegexPattern, infoTypeName string) error {
-	//projectID := "my-project-id"
-	//textToInspect := "Patients MRN 444-5-22222"
-	//customRegexPattern := "[1-9]{3}-[1-9]{1}-[1-9]{5}"
-	//infoTypeName := "C_MRN"
+func inspectWithHotWordRules(w io.Writer, projectID, textToInspect, customRegexPattern, hotWordRegexPattern string) error {
 
 	ctx := context.Background()
 
@@ -57,9 +52,8 @@ func inspectWithCustomRegex(w io.Writer, projectID, textToInspect, customRegexPa
 	// Construct the custom regex detectors
 	var customInfoType = &dlppb.CustomInfoType{
 		InfoType: &dlppb.InfoType{
-			Name: infoTypeName,
+			Name: "C_MRN",
 		},
-		// Specify the regex pattern the inspection will look for.
 		Type: &dlppb.CustomInfoType_Regex_{
 			Regex: &dlppb.CustomInfoType_Regex{
 				Pattern: customRegexPattern,
@@ -68,14 +62,42 @@ func inspectWithCustomRegex(w io.Writer, projectID, textToInspect, customRegexPa
 		Likelihood: dlppb.Likelihood_POSSIBLE,
 	}
 
+	// Construct hotword rule.
+	var inspectionRuleSet = &dlppb.InspectionRuleSet{
+		Rules: []*dlppb.InspectionRule{
+			{
+				Type: &dlppb.InspectionRule_HotwordRule{
+					HotwordRule: &dlppb.CustomInfoType_DetectionRule_HotwordRule{
+						HotwordRegex: &dlppb.CustomInfoType_Regex{
+							Pattern: hotWordRegexPattern,
+						},
+						Proximity: &dlppb.CustomInfoType_DetectionRule_Proximity{
+							WindowBefore: int32(10),
+						},
+						LikelihoodAdjustment: &dlppb.CustomInfoType_DetectionRule_LikelihoodAdjustment{
+							Adjustment: &dlppb.CustomInfoType_DetectionRule_LikelihoodAdjustment_FixedLikelihood{
+								FixedLikelihood: dlppb.Likelihood_VERY_LIKELY,
+							},
+						},
+					},
+				},
+			},
+		},
+		InfoTypes: []*dlppb.InfoType{
+			customInfoType.InfoType,
+		},
+	}
+
 	// Construct the Inspect request to be sent by the client.
 	req := &dlppb.InspectContentRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/global", projectID),
 		Item:   contentItem,
-		// Construct the configuration for the Inspect request.
 		InspectConfig: &dlppb.InspectConfig{
 			CustomInfoTypes: []*dlppb.CustomInfoType{
 				customInfoType,
+			},
+			RuleSet: []*dlppb.InspectionRuleSet{
+				inspectionRuleSet,
 			},
 			IncludeQuote: true,
 		},
@@ -92,10 +114,11 @@ func inspectWithCustomRegex(w io.Writer, projectID, textToInspect, customRegexPa
 	fmt.Fprintf(w, "Findings: %v\n", len(resp.Result.Findings))
 	for _, v := range resp.GetResult().Findings {
 		fmt.Fprintf(w, "Quote: %v\n", v.GetQuote())
-		fmt.Fprintf(w, "Infotype Name: %v\n", v.GetInfoType().GetName())
+		fmt.Fprintf(w, "InfoType Name: %v\n", v.GetInfoType().GetName())
 		fmt.Fprintf(w, "Likelihood: %v\n", v.GetLikelihood())
 	}
 	return nil
+
 }
 
-// [END dlp_inspect_custom_regex]
+// [END dlp_inspect_hotword_rule]

@@ -277,20 +277,19 @@ func TestInspectBigquery(t *testing.T) {
 	}
 }
 
-func TestInspectWithCustomRegex(t *testing.T) {
+func TestInspectWithHotWordRules(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
 
-	if err := inspectWithCustomRegex(buf, tc.ProjectID, "Patients MRN 444-5-22222", "[1-9]{3}-[1-9]{1}-[1-9]{5}", "C_MRN"); err != nil {
-		t.Errorf("inspectWithCustomRegex: %v", err)
+	if err := inspectWithHotWordRules(buf, tc.ProjectID, "Patient's MRN 444-5-22222 and just a number 333-2-33333", "[1-9]{3}-[1-9]{1}-[1-9]{5}", "(?i)(mrn|medical)(?-i)"); err != nil {
+		t.Errorf("inspectWithHotWordRules: %v", err)
 	}
 
 	got := buf.String()
-	if want := "Infotype Name: C_MRN"; !strings.Contains(got, want) {
-		t.Errorf("inspectWithCustomRegex got %q, want %q", got, want)
+	if want := "InfoType Name: C_MRN"; !strings.Contains(got, want) {
+		t.Errorf("inspectWithHotWordRules got %q, want %q", got, want)
 	}
-
-	if want := "Likelihood: POSSIBLE"; !strings.Contains(got, want) {
-		t.Errorf("inspectWithCustomRegex got %q, want %q", got, want)
+	if want := "Findings: 2"; !strings.Contains(got, want) {
+		t.Errorf("inspectWithHotWordRules got %q, want %q", got, want)
 	}
 }
