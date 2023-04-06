@@ -30,7 +30,9 @@ func inspectWithCustomRegex(w io.Writer, projectID, textToInspect, customRegexPa
 	//textToInspect := "Patients MRN 444-5-22222"
 	//customRegexPattern := "[1-9]{3}-[1-9]{1}-[1-9]{5}"
 	//infoTypeName := "C_MRN"
+
 	ctx := context.Background()
+
 	// Initialize a client once and reuse it to send multiple requests. Clients
 	// are safe to use across goroutines. When the client is no longer needed,
 	// call the Close method to cleanup its resources.
@@ -38,7 +40,9 @@ func inspectWithCustomRegex(w io.Writer, projectID, textToInspect, customRegexPa
 	if err != nil {
 		return err
 	}
-	defer client.Close() // Closing the client safely cleans up background resources.
+
+	// Closing the client safely cleans up background resources.
+	defer client.Close()
 
 	// Specify the type and content to be inspected.
 	var contentItem = &dlppb.ContentItem{
