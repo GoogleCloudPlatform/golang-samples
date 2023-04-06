@@ -103,29 +103,21 @@ func TestDeidentifyDateShift(t *testing.T) {
 
 func TestDeIdentifyWithRedact(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	tests := []struct {
-		input         string
-		infoTypeNames []string
-		want          string
-	}{
-		{
-			input:         "My name is Alicia Abernathy, and my email address is aabernathy@example.com.",
-			infoTypeNames: []string{"EMAIL_ADDRESS"},
-			want:          "output: My name is Alicia Abernathy, and my email address is .",
-		},
-	}
 
-	for _, test := range tests {
-		t.Run(test.input, func(t *testing.T) {
-			t.Parallel()
-			buf := new(bytes.Buffer)
-			err := deidentifyWithRedact(buf, tc.ProjectID, test.input, test.infoTypeNames)
-			if err != nil {
-				t.Errorf("deidentifyWithRedact(%q) = error '%q', want %q", err, test.input, test.want)
-			}
-			if got := buf.String(); got != test.want {
-				t.Errorf("deidentifyWithRedact(%q) = %q, want %q", got, test.input, test.want)
-			}
-		})
-	}
+	input := "My name is Alicia Abernathy, and my email address is aabernathy@example.com."
+	infoTypeNames := []string{"EMAIL_ADDRESS"}
+	want := "output: My name is Alicia Abernathy, and my email address is ."
+
+	t.Run(input, func(t *testing.T) {
+		t.Parallel()
+		buf := new(bytes.Buffer)
+		err := deidentifyWithRedact(buf, tc.ProjectID, input, infoTypeNames)
+		if err != nil {
+			t.Errorf("deidentifyWithRedact(%q) = error '%q', want %q", err, input, want)
+		}
+		if got := buf.String(); got != want {
+			t.Errorf("deidentifyWithRedact(%q) = %q, want %q", got, input, want)
+		}
+	})
+
 }
