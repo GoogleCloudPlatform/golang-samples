@@ -282,15 +282,15 @@ func TestInspectWithCustomRegex(t *testing.T) {
 	buf := new(bytes.Buffer)
 
 	if err := inspectWithCustomRegex(buf, tc.ProjectID, "Patients MRN 444-5-22222", "[1-9]{3}-[1-9]{1}-[1-9]{5}", "C_MRN"); err != nil {
-		t.Errorf("TestInspectFile: %v", err)
+		t.Errorf("inspectWithCustomRegex: %v", err)
 	}
 
 	got := buf.String()
 	if want := "Infotype Name: C_MRN"; !strings.Contains(got, want) {
-		t.Errorf("inspectString got %q, want %q", got, want)
+		t.Errorf("inspectWithCustomRegex got %q, want %q", got, want)
 	}
 
 	if want := "Likelihood: POSSIBLE"; !strings.Contains(got, want) {
-		t.Errorf("inspectString got %q, want %q", got, want)
+		t.Errorf("inspectWithCustomRegex got %q, want %q", got, want)
 	}
 }
