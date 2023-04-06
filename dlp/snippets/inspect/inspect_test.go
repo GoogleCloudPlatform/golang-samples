@@ -282,18 +282,18 @@ func TestInspectStringCustomOmitOverlap(t *testing.T) {
 	buf := new(bytes.Buffer)
 
 	if err := inspectStringCustomOmitOverlap(buf, tc.ProjectID, "Name: Jane Doe. Name: Larry Page.", "VIP_DETECTOR", "PERSON_NAME", "Larry Page|Sergey Brin"); err != nil {
-		t.Errorf("TestInspectFile: %v", err)
+		t.Errorf("inspectStringCustomOmitOverlap: %v", err)
 	}
 
 	got := buf.String()
 	if want := "Infotype Name: PERSON_NAME"; !strings.Contains(got, want) {
-		t.Errorf("inspectString got %q, want %q", got, want)
+		t.Errorf("inspectStringCustomOmitOverlap got %q, want %q", got, want)
 	}
 
 	if want := "Quote: Jane Doe"; !strings.Contains(got, want) {
-		t.Errorf("inspectString got %q, want %q", got, want)
+		t.Errorf("inspectStringCustomOmitOverlap got %q, want %q", got, want)
 	}
 	if want := "Quote: Larry Page"; strings.Contains(got, want) {
-		t.Errorf("inspectString got %q, want %q", got, want)
+		t.Errorf("inspectStringCustomOmitOverlap got %q, want %q", got, want)
 	}
 }
