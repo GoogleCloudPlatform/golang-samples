@@ -21,7 +21,6 @@ import (
 
 	dlp "cloud.google.com/go/dlp/apiv2"
 	"cloud.google.com/go/dlp/apiv2/dlppb"
-	"google.golang.org/api/option"
 )
 
 // inspectStringOmitOverlap inspects a string for sensitive data and
@@ -29,15 +28,19 @@ import (
 func inspectStringOmitOverlap(w io.Writer, projectID, textToInspect string) error {
 	// projectID := "my-project-id"
 	// textToInspect := "gary@example.com"
+
 	ctx := context.Background()
+
 	// Initialize a client once and reuse it to send multiple requests. Clients
 	// are safe to use across goroutines. When the client is no longer needed,
 	// call the Close method to cleanup its resources.
-	client, err := dlp.NewRESTClient(ctx, option.WithCredentialsFile("C:/Users/aarsh.dhokai/Desktop/cred.json"))
+	client, err := dlp.NewClient(ctx)
 	if err != nil {
 		return err
 	}
-	defer client.Close() // Closing the client safely cleans up background resources.
+
+	// Closing the client safely cleans up background resources.
+	defer client.Close()
 
 	// Specify the type and content to be inspected.
 	var contentItem = &dlppb.ContentItem{
@@ -68,7 +71,7 @@ func inspectStringOmitOverlap(w io.Writer, projectID, textToInspect string) erro
 		MatchingType: dlppb.MatchingType_MATCHING_TYPE_PARTIAL_MATCH,
 	}
 
-	// Construct a ruleset that applies the exclusion rule to the PERSON_NAME infotype.
+	// Construct a ruleSet that applies the exclusion rule to the PERSON_NAME infoType.
 	// If a PERSON_NAME match overlaps with an EMAIL_ADDRESS match, the PERSON_NAME match will
 	// be excluded.
 	var ruleSet = &dlppb.InspectionRuleSet{
