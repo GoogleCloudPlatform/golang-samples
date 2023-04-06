@@ -29,7 +29,9 @@ func inspectStringWithExclusionDictSubstring(w io.Writer, projectID, textToInspe
 	// projectID := "my-project-id"
 	// textToInspect := "Some email addresses: gary@example.com, TEST@example.com"
 	// excludedSubString := []string{"TEST"}
+
 	ctx := context.Background()
+
 	// Initialize a client once and reuse it to send multiple requests. Clients
 	// are safe to use across goroutines. When the client is no longer needed,
 	// call the Close method to cleanup its resources.
@@ -37,7 +39,9 @@ func inspectStringWithExclusionDictSubstring(w io.Writer, projectID, textToInspe
 	if err != nil {
 		return err
 	}
-	defer client.Close() // Closing the client safely cleans up background resources.
+
+	// Closing the client safely cleans up background resources.
+	defer client.Close()
 
 	// Specify the type and content to be inspected.
 	var contentItem = &dlppb.ContentItem{
@@ -72,7 +76,7 @@ func inspectStringWithExclusionDictSubstring(w io.Writer, projectID, textToInspe
 		MatchingType: dlppb.MatchingType_MATCHING_TYPE_PARTIAL_MATCH,
 	}
 
-	// Construct a ruleset that applies the exclusion rule to the EMAIL_ADDRESSES infotype.
+	// Construct a ruleSet that applies the exclusion rule to the EMAIL_ADDRESSES infoType.
 	var ruleSet = &dlppb.InspectionRuleSet{
 		InfoTypes: infoTypes,
 		Rules: []*dlppb.InspectionRule{
