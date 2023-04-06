@@ -289,4 +289,10 @@ func TestInspectStringWithoutOverlap(t *testing.T) {
 	if want := "Infotype Name: DOMAIN_NAME"; !strings.Contains(got, want) {
 		t.Errorf("inspectStringWithoutOverlap got %q, want %q", got, want)
 	}
+	if want := "Quote: example.com"; !strings.Contains(got, want) {
+		t.Errorf("inspectStringWithoutOverlap got %q, want %q", got, want)
+	}
+	if want := "Quote: example.org"; strings.Contains(got, want) {
+		t.Errorf("inspectStringWithoutOverlap got %q, want %q", got, want)
+	}
 }
