@@ -29,7 +29,9 @@ func deidentifyWithWordList(w io.Writer, projectID, input string, infoTypeName s
 	// projectID := "my-project-id"
 	// input := "Patient was seen in RM-YELLOW then transferred to rm green."
 	// wordList := []string{"RM-GREEN", "RM-YELLOW", "RM-ORANGE"}
+
 	ctx := context.Background()
+
 	// Initialize a client once and reuse it to send multiple requests. Clients
 	// are safe to use across goroutines. When the client is no longer needed,
 	// call the Close method to cleanup its resources.
@@ -37,6 +39,7 @@ func deidentifyWithWordList(w io.Writer, projectID, input string, infoTypeName s
 	if err != nil {
 		return fmt.Errorf("dlp.NewClient: %v", err)
 	}
+	// Closing the client safely cleans up background resources.
 	defer client.Close()
 
 	// Specify what content you want the service to DeIdentify.
@@ -45,9 +48,6 @@ func deidentifyWithWordList(w io.Writer, projectID, input string, infoTypeName s
 			Value: input,
 		},
 	}
-
-	// Construct the word list to be detected
-	words := wordList
 
 	// Specify the word list custom info type the inspection will look for.
 	infoType := &dlppb.InfoType{
@@ -59,13 +59,34 @@ func deidentifyWithWordList(w io.Writer, projectID, input string, infoTypeName s
 		Type: &dlppb.CustomInfoType_Dictionary_{
 			Dictionary: &dlppb.CustomInfoType_Dictionary{
 				Source: &dlppb.CustomInfoType_Dictionary_WordList_{
+					// Construct the word list to be detected
 					WordList: &dlppb.CustomInfoType_Dictionary_WordList{
-						Words: words,
+						Words: wordList,
 					},
 				},
 			},
 		},
 	}
+	
+	// Construct the configuration for the de-identify request and list all desired transformations.
+	var deIdentifyConfig =  &dlppb.DeidentifyConfig{
+		Transformation: &dlppb.DeidentifyConfig_InfoTypeTransformations{
+			InfoTypeTransformations: &dlppb.InfoTypeTransformations{
+				// Associate deidentification type with info type.
+				Transformations: []*dlppb.InfoTypeTransformations_InfoTypeTransformation{
+					{
+						InfoTypes: []*dlppb.InfoType{infoType},
+						// Define type of de-identification as replacement.
+						PrimitiveTransformation: &dlppb.PrimitiveTransformation{
+							Transformation: &dlppb.PrimitiveTransformation_ReplaceWithInfoTypeConfig{
+								ReplaceWithInfoTypeConfig: &dlppb.ReplaceWithInfoTypeConfig{},
+							},
+						},
+					},
+				},
+			},
+		},
+	},
 
 	// Create a configured request.
 	req := &dlppb.DeidentifyContentRequest{
@@ -75,25 +96,7 @@ func deidentifyWithWordList(w io.Writer, projectID, input string, infoTypeName s
 				customInfoType,
 			},
 		},
-		// Construct the configuration for the de-identify request and list all desired transformations.
-		DeidentifyConfig: &dlppb.DeidentifyConfig{
-			Transformation: &dlppb.DeidentifyConfig_InfoTypeTransformations{
-				InfoTypeTransformations: &dlppb.InfoTypeTransformations{
-					// Associate deidentification type with info type.
-					Transformations: []*dlppb.InfoTypeTransformations_InfoTypeTransformation{
-						{
-							InfoTypes: []*dlppb.InfoType{infoType},
-							// Define type of de-identification as replacement.
-							PrimitiveTransformation: &dlppb.PrimitiveTransformation{
-								Transformation: &dlppb.PrimitiveTransformation_ReplaceWithInfoTypeConfig{
-									ReplaceWithInfoTypeConfig: &dlppb.ReplaceWithInfoTypeConfig{},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
+		DeidentifyConfig: deIdentifyConfig,
 		// The item to analyze.
 		Item: item,
 	}
