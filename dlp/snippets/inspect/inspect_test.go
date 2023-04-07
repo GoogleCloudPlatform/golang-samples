@@ -276,3 +276,17 @@ func TestInspectBigquery(t *testing.T) {
 		})
 	}
 }
+
+func TestInspectStringMultipleRules(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	if err := inspectStringMultipleRules(buf, tc.ProjectID, "patient: Jane Doe"); err != nil {
+		t.Errorf("inspectStringMultipleRules: %v", err)
+	}
+
+	got := buf.String()
+	if want := "Infotype Name: PERSON_NAME"; !strings.Contains(got, want) {
+		t.Errorf("inspectStringMultipleRules got %q, want %q", got, want)
+	}
+}
