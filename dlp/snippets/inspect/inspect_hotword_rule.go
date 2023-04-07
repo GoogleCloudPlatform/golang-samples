@@ -24,7 +24,13 @@ import (
 	"cloud.google.com/go/dlp/apiv2/dlppb"
 )
 
+// inspectWithHotWordRules inspects data with hot word rule, it uses custom
+// regex with a hot word rule to increase the likelihood match
 func inspectWithHotWordRules(w io.Writer, projectID, textToInspect, customRegexPattern, hotWordRegexPattern string) error {
+	// projectID := "my-project-id"
+	// textToInspect := "Patient's MRN 444-5-22222 and just a number 333-2-33333"
+	// customRegexPattern := "[1-9]{3}-[1-9]{1}-[1-9]{5}"
+	// hotWordRegexPattern := "(?i)(mrn|medical)(?-i)"
 
 	ctx := context.Background()
 
