@@ -277,20 +277,16 @@ func TestInspectBigquery(t *testing.T) {
 	}
 }
 
-func TestInspectWithHotWordRules(t *testing.T) {
+func TestInspectStringCustomHotWord(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
 
-	if err := inspectWithHotWordRules(buf, tc.ProjectID, "Patient's MRN 444-5-22222 and just a number 333-2-33333", "[1-9]{3}-[1-9]{1}-[1-9]{5}", "(?i)(mrn|medical)(?-i)", "C_MRN"); err != nil {
-		t.Errorf("inspectWithHotWordRules: %v", err)
+	if err := inspectStringCustomHotWord(buf, tc.ProjectID, "patient name: John Doe", "patient", "PERSON_NAME"); err != nil {
+		t.Errorf("inspectStringCustomHotWord: %v", err)
 	}
 
 	got := buf.String()
-	if want := "InfoType Name: C_MRN"; !strings.Contains(got, want) {
-		t.Errorf("inspectWithHotWordRules %q, want %q", got, want)
-	}
-
-	if want := "Likelihood: POSSIBLE"; !strings.Contains(got, want) {
-		t.Errorf("inspectWithHotWordRules %q, want %q", got, want)
+	if want := "Infotype Name: PERSON_NAME"; !strings.Contains(got, want) {
+		t.Errorf("inspectStringCustomHotWord got %q, want %q", got, want)
 	}
 }
