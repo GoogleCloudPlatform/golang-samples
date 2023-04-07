@@ -276,3 +276,21 @@ func TestInspectBigquery(t *testing.T) {
 		})
 	}
 }
+
+func TestInspectStringWithExclusionRegex(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	if err := inspectStringWithExclusionRegex(buf, tc.ProjectID, "Some email addresses: gary@example.com, bob@example.org", ".+@example.com"); err != nil {
+		t.Errorf("inspectStringWithExclusionRegex: %v", err)
+	}
+
+	got := buf.String()
+	if want := "Quote: bob@example.org"; !strings.Contains(got, want) {
+		t.Errorf("inspectStringWithExclusionRegex got %q, want %q", got, want)
+	}
+	if want := "Quote: gary@example.com"; strings.Contains(got, want) {
+		t.Errorf("inspectStringWithExclusionRegex got %q, want %q", got, want)
+	}
+
+}
