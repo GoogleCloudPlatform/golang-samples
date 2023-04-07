@@ -14,7 +14,7 @@
 
 package inspect
 
-// [START dlp_inspect_string_custom_hot_word]
+// [START dlp_inspect_string_custom_hotword]
 import (
 	"context"
 	"fmt"
