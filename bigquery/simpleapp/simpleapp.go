@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// [START bigquery_simple_app_all]
+
 // Command simpleapp queries the Stack Overflow public dataset in Google BigQuery.
 package main
 
-// [START bigquery_simple_app_all]
 // [START bigquery_simple_app_deps]
 import (
 	"context"
