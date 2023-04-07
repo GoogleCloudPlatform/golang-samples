@@ -17,8 +17,10 @@ package deid
 
 import (
 	"bytes"
+	"strings"
 	"testing"
 
+	"cloud.google.com/go/dlp/apiv2/dlppb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
@@ -98,5 +100,65 @@ func TestDeidentifyDateShift(t *testing.T) {
 				t.Errorf("deidentifyDateShift(%v, %v, %q) = %q, want %q", test.lowerBound, test.upperBound, got, test.input, test.want)
 			}
 		})
+	}
+}
+
+func TestDeidentifyTableInfoTypes(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	var row1 = &dlppb.Table_Row{
+		Values: []*dlppb.Value{
+			{Type: &dlppb.Value_StringValue{StringValue: "22"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "Jane Austen"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "21"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "There are 14 kisses in Jane Austen's novels."}},
+		},
+	}
+
+	var row2 = &dlppb.Table_Row{
+		Values: []*dlppb.Value{
+			{Type: &dlppb.Value_StringValue{StringValue: "55"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "Mark Twain"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "75"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "Mark Twain loved cats."}},
+		},
+	}
+
+	var row3 = &dlppb.Table_Row{
+		Values: []*dlppb.Value{
+			{Type: &dlppb.Value_StringValue{StringValue: "101"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "Charles Dickens"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "95"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "Charles Dickens name was a curse invented by Shakespeare."}},
+		},
+	}
+
+	table := &dlppb.Table{
+		Headers: []*dlppb.FieldId{
+			{Name: "AGE"},
+			{Name: "PATIENT"},
+			{Name: "HAPPINESS SCORE"},
+			{Name: "FACTOID"},
+		},
+		Rows: []*dlppb.Table_Row{
+			{Values: row1.Values},
+			{Values: row2.Values},
+			{Values: row3.Values},
+		},
+	}
+
+	buf := new(bytes.Buffer)
+
+	if err := deidentifyTableInfotypes(buf, tc.ProjectID, table, "PATIENT", "FACTOID"); err != nil {
+		t.Errorf("deidentifyTableInfotypes: %v", err)
+	}
+
+	got := buf.String()
+	if want := "Table after de-identification"; !strings.Contains(got, want) {
+		t.Errorf("deidentifyTableInfotypes got %q, want %q", got, want)
+	}
+
+	if want := "[PERSON_NAME]"; !strings.Contains(got, want) {
+		t.Errorf("deidentifyTableInfotypes got %q, want %q", got, want)
 	}
 }
