@@ -25,16 +25,27 @@ import (
 	"google.golang.org/api/option"
 )
 
+// inspectStringCustomHotWord inspects a string from sensitive data by using a custom hot word
 func inspectStringCustomHotWord(w io.Writer, projectID, textToInspect, customHotWord, infoTypeName string) error {
+	// projectID := "my-project-id"
+	// textToInspect := "patient name: John Doe"
+	// customHotWord := "patient"
+	// infoTypeName := "PERSON_NAME"
+
 	ctx := context.Background()
 
-	// Initialize client.
+	// Initialize a client once and reuse it to send multiple requests. Clients
+	// are safe to use across goroutines. When the client is no longer needed,
+	// call the Close method to cleanup its resources.
 	client, err := dlp.NewRESTClient(ctx, option.WithCredentialsFile("C:/Users/aarsh.dhokai/Desktop/cred.json"))
 	if err != nil {
 		return err
 	}
-	defer client.Close() // Closing the client safely cleans up background resources.
 
+	// Closing the client safely cleans up background resources.
+	defer client.Close()
+
+	// Specify the type and content to be inspected.
 	var contentItem = &dlppb.ContentItem{
 		DataItem: &dlppb.ContentItem_ByteItem{
 			ByteItem: &dlppb.ByteContentItem{
@@ -62,6 +73,7 @@ func inspectStringCustomHotWord(w io.Writer, projectID, textToInspect, customHot
 		},
 	}
 
+	// Construct a ruleset that applies the hotword rule to the PERSON_NAME infotype.
 	var ruleSet = &dlppb.InspectionRuleSet{
 		InfoTypes: []*dlppb.InfoType{
 			{Name: infoTypeName}, //"PERSON_NAME"
@@ -91,12 +103,14 @@ func inspectStringCustomHotWord(w io.Writer, projectID, textToInspect, customHot
 		},
 	}
 
+	// Send the request.
 	resp, err := client.InspectContent(ctx, req)
 	if err != nil {
 		fmt.Fprintf(w, "Receive: %v", err)
 		return err
 	}
 
+	// Parse the response and process results
 	fmt.Fprintf(w, "Findings: %v\n", len(resp.Result.Findings))
 	for _, v := range resp.GetResult().Findings {
 		fmt.Fprintf(w, "Quote: %v\n", v.GetQuote())
