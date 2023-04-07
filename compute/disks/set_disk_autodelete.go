@@ -27,7 +27,7 @@ import (
 // setDiskAutodelete sets the autodelete flag of a disk to given value.
 func setDiskAutoDelete(
 	w io.Writer,
-	projectID, zone, instanceName, diskName string, autoDelete bool
+	projectID, zone, instanceName, diskName string, autoDelete bool,
 ) error {
 	// projectID := "your_project_id"
 	// zone := "us-west3-b"
