@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 package inspect
 
-// [START dlp_inspect_hotword_rule]
+// [START dlp_inspect_string_custom_hot_word]
 import (
 	"context"
 	"fmt"
@@ -22,31 +22,19 @@ import (
 
 	dlp "cloud.google.com/go/dlp/apiv2"
 	"cloud.google.com/go/dlp/apiv2/dlppb"
+	"google.golang.org/api/option"
 )
 
-// inspectWithHotWordRules inspect the data with hotword rule, it uses a custom regex
-// with hotword rule to increase the likelihood match
-func inspectWithHotWordRules(w io.Writer, projectID, textToInspect, customRegexPattern, hotWordRegexPattern, infoTypeName string) error {
-	//projectID := "my-project-id"
-	//textToInspect := "Patient's MRN 444-5-22222 and just a number 333-2-33333"
-	//customRegexPattern := "[1-9]{3}-[1-9]{1}-[1-9]{5}"
-	//hotWordRegexPattern := "(?i)(mrn|medical)(?-i)"
-	//infoTypeName := "C_MRN"
-
+func inspectStringCustomHotWord(w io.Writer, projectID, textToInspect, customHotWord, infoTypeName string) error {
 	ctx := context.Background()
 
-	// Initialize a client once and reuse it to send multiple requests. Clients
-	// are safe to use across goroutines. When the client is no longer needed,
-	// call the Close method to cleanup its resources.
-	client, err := dlp.NewClient(ctx)
+	// Initialize client.
+	client, err := dlp.NewRESTClient(ctx, option.WithCredentialsFile("C:/Users/aarsh.dhokai/Desktop/cred.json"))
 	if err != nil {
 		return err
 	}
+	defer client.Close() // Closing the client safely cleans up background resources.
 
-	// Closing the client safely cleans up background resources.
-	defer client.Close()
-
-	// Specify the type and content to be inspected.
 	var contentItem = &dlppb.ContentItem{
 		DataItem: &dlppb.ContentItem_ByteItem{
 			ByteItem: &dlppb.ByteContentItem{
@@ -56,44 +44,34 @@ func inspectWithHotWordRules(w io.Writer, projectID, textToInspect, customRegexP
 		},
 	}
 
-	// Construct the custom regex detectors
-	var customInfoType = &dlppb.CustomInfoType{
-		InfoType: &dlppb.InfoType{
-			Name: "C_MRN",
-		},
-		Type: &dlppb.CustomInfoType_Regex_{
-			Regex: &dlppb.CustomInfoType_Regex{
-				Pattern: customRegexPattern,
-			},
-		},
-		Likelihood: dlppb.Likelihood_POSSIBLE,
-	}
+	// Increase likelihood of matches that have customHotword nearby
+	var hotwordRule = &dlppb.InspectionRule_HotwordRule{
 
-	var inspectionRuleSet = &dlppb.InspectionRuleSet{
-		Rules: []*dlppb.InspectionRule{
-			{
-				// Construct hotword rule.
-				Type: &dlppb.InspectionRule_HotwordRule{
-					HotwordRule: &dlppb.CustomInfoType_DetectionRule_HotwordRule{
-						HotwordRegex: &dlppb.CustomInfoType_Regex{
-							Pattern: hotWordRegexPattern,
-						},
-						// Specify a window around a finding to apply a detection rule.
-						Proximity: &dlppb.CustomInfoType_DetectionRule_Proximity{
-							WindowBefore: int32(10),
-						},
-						// Specify hotword likelihood adjustment.
-						LikelihoodAdjustment: &dlppb.CustomInfoType_DetectionRule_LikelihoodAdjustment{
-							Adjustment: &dlppb.CustomInfoType_DetectionRule_LikelihoodAdjustment_FixedLikelihood{
-								FixedLikelihood: dlppb.Likelihood_VERY_LIKELY,
-							},
-						},
-					},
+		HotwordRule: &dlppb.CustomInfoType_DetectionRule_HotwordRule{
+			HotwordRegex: &dlppb.CustomInfoType_Regex{
+				Pattern: customHotWord,
+			},
+			Proximity: &dlppb.CustomInfoType_DetectionRule_Proximity{
+				WindowBefore: 50,
+			},
+			LikelihoodAdjustment: &dlppb.CustomInfoType_DetectionRule_LikelihoodAdjustment{
+				Adjustment: &dlppb.CustomInfoType_DetectionRule_LikelihoodAdjustment_FixedLikelihood{
+					FixedLikelihood: dlppb.Likelihood_VERY_LIKELY,
 				},
 			},
 		},
+	}
+
+	var ruleSet = &dlppb.InspectionRuleSet{
 		InfoTypes: []*dlppb.InfoType{
-			customInfoType.InfoType,
+			{Name: infoTypeName}, //"PERSON_NAME"
+		},
+		Rules: []*dlppb.InspectionRule{
+			{
+				Type: &dlppb.InspectionRule_HotwordRule{
+					HotwordRule: hotwordRule.HotwordRule,
+				},
+			},
 		},
 	}
 
@@ -101,34 +79,32 @@ func inspectWithHotWordRules(w io.Writer, projectID, textToInspect, customRegexP
 	req := &dlppb.InspectContentRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/global", projectID),
 		Item:   contentItem,
-		// Construct the configuration for the Inspect request.
 		InspectConfig: &dlppb.InspectConfig{
-			CustomInfoTypes: []*dlppb.CustomInfoType{
-				customInfoType,
+			InfoTypes: []*dlppb.InfoType{
+				{Name: infoTypeName}, //"PERSON_NAME"
 			},
-			// Construct rule set for the inspect config.
+			IncludeQuote:  true,
+			MinLikelihood: dlppb.Likelihood_VERY_LIKELY,
 			RuleSet: []*dlppb.InspectionRuleSet{
-				inspectionRuleSet,
+				ruleSet,
 			},
-			IncludeQuote: true,
 		},
 	}
 
-	// Send the request.
 	resp, err := client.InspectContent(ctx, req)
 	if err != nil {
 		fmt.Fprintf(w, "Receive: %v", err)
 		return err
 	}
 
-	// Parse the response and process results
 	fmt.Fprintf(w, "Findings: %v\n", len(resp.Result.Findings))
 	for _, v := range resp.GetResult().Findings {
 		fmt.Fprintf(w, "Quote: %v\n", v.GetQuote())
-		fmt.Fprintf(w, "InfoType Name: %v\n", v.GetInfoType().GetName())
+		fmt.Fprintf(w, "Infotype Name: %v\n", v.GetInfoType().GetName())
 		fmt.Fprintf(w, "Likelihood: %v\n", v.GetLikelihood())
 	}
 	return nil
+
 }
 
-// [END dlp_inspect_hotword_rule]
+// [END dlp_inspect_string_custom_hotword]
