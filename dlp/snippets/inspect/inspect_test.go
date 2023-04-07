@@ -276,3 +276,20 @@ func TestInspectBigquery(t *testing.T) {
 		})
 	}
 }
+
+func TestInspectStringCustomExcludingSubstring(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	if err := inspectStringCustomExcludingSubstring(buf, tc.ProjectID, "Name: Doe, John. Name: Example, Jimmy", "[A-Z][a-z]{1,15}, [A-Z][a-z]{1,15}", []string{"Jimmy"}); err != nil {
+		t.Errorf("inspectStringCustomExcludingSubstring: %v", err)
+	}
+
+	got := buf.String()
+	if want := "Infotype Name: CUSTOM_NAME_DETECTOR"; !strings.Contains(got, want) {
+		t.Errorf("inspectStringCustomExcludingSubstring got %q, want %q", got, want)
+	}
+	if want := "Quote: Doe, John"; !strings.Contains(got, want) {
+		t.Errorf("inspectStringCustomExcludingSubstring got %q, want %q", got, want)
+	}
+}
