@@ -17,6 +17,7 @@ package inspect
 import (
 	"bytes"
 	"context"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -275,4 +276,25 @@ func TestInspectBigquery(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestInspectBigQueryTableWithSampling(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	topicID := os.Getenv("topicID")
+	subscriptionID := os.Getenv("subscriptionID")
+	dataSetID := os.Getenv("dataSetID")
+	tableID := os.Getenv("tableID")
+
+	t.Run("inspectBigQueryTableWithSampling", func(t *testing.T) {
+		t.Parallel()
+		buf := new(bytes.Buffer)
+		if err := InspectBigQueryTableWithSampling(buf, tc.ProjectID, topicID, subscriptionID, dataSetID, tableID); err != nil {
+			t.Errorf("InspectBigQueryTableWithSampling: %v", err)
+		}
+		got := buf.String()
+		if want := "Job Created"; !strings.Contains(got, want) {
+			t.Errorf("InspectBigQueryTableWithSampling got %q, want %q", got, want)
+		}
+	})
 }
