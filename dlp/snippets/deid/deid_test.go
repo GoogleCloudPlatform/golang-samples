@@ -17,8 +17,10 @@ package deid
 
 import (
 	"bytes"
+	"strings"
 	"testing"
 
+	"cloud.google.com/go/dlp/apiv2/dlppb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
@@ -99,4 +101,58 @@ func TestDeidentifyDateShift(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestDeidentifyTableRowSuppress(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	var row1 = &dlppb.Table_Row{
+		Values: []*dlppb.Value{
+			{Type: &dlppb.Value_StringValue{StringValue: "22"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "Jane Austen"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "21"}},
+		},
+	}
+
+	var row2 = &dlppb.Table_Row{
+		Values: []*dlppb.Value{
+			{Type: &dlppb.Value_StringValue{StringValue: "55"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "Mark Twain"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "75"}},
+		},
+	}
+
+	var row3 = &dlppb.Table_Row{
+		Values: []*dlppb.Value{
+			{Type: &dlppb.Value_StringValue{StringValue: "101"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "Charles Dickens"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "95"}},
+		},
+	}
+
+	var table = &dlppb.Table{
+		Headers: []*dlppb.FieldId{
+			{Name: "AGE"},
+			{Name: "PATIENT"},
+			{Name: "HAPPINESS SCORE"},
+		},
+		Rows: []*dlppb.Table_Row{
+			{Values: row1.Values},
+			{Values: row2.Values},
+			{Values: row3.Values},
+		},
+	}
+
+	t.Run("deidentifyTableRowSuppress", func(t *testing.T) {
+		t.Parallel()
+		buf := new(bytes.Buffer)
+		if err := deidentifyTableRowSuppress(buf, tc.ProjectID, table); err != nil {
+			t.Errorf("deidentifyTableRowSuppress: %v", err)
+		}
+		got := buf.String()
+		if want := "Table after de-identification"; !strings.Contains(got, want) {
+			t.Errorf("deidentifyTableRowSuppress got %q, want %q", got, want)
+		}
+	})
+
 }
