@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/golang-samples/functions/helloworld
 go 1.19
 
 require (
-	cloud.google.com/go/functions v1.9.0
+	cloud.google.com/go/functions v1.10.0
 	github.com/GoogleCloudPlatform/functions-framework-go v1.6.1
 )
 

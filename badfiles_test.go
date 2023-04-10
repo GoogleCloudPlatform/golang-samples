@@ -97,6 +97,7 @@ var allowList = []string{
 
 	// TODO: cruft that should probably be under "testdata".
 	"appengine_flexible/pubsub/sample_message.json",
+	"appengine_flexible/go115_and_earlier/pubsub/sample_message.json",
 	"dialogflow/resources/**/*",
 	"texttospeech/**/*",
 	"storage/objects/notes.txt",

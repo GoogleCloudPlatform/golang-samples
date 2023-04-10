@@ -53,19 +53,24 @@ func subscribeWithProtoSchema(w io.Writer, projectID, subID, protoFile string) e
 
 		if encoding == "BINARY" {
 			if err := proto.Unmarshal(msg.Data, state); err != nil {
-				fmt.Fprintf(w, "proto.Unmarshal err: %v", err)
+				fmt.Fprintf(w, "proto.Unmarshal err: %v\n", err)
+				msg.Nack()
 				return
 			}
-			fmt.Printf("Received a binary-encoded message:\n%#v", state)
+			fmt.Printf("Received a binary-encoded message:\n%#v\n", state)
 		} else if encoding == "JSON" {
 			if err := protojson.Unmarshal(msg.Data, state); err != nil {
-				fmt.Fprintf(w, "proto.Unmarshal err: %v", err)
+				fmt.Fprintf(w, "proto.Unmarshal err: %v\n", err)
+				msg.Nack()
 				return
 			}
-			fmt.Fprintf(w, "Received a JSON-encoded message:\n%#v", state)
+			fmt.Fprintf(w, "Received a JSON-encoded message:\n%#v\n", state)
 		} else {
-			fmt.Fprintf(w, "invalid encoding: %s", encoding)
+			fmt.Fprintf(w, "Unknown message type(%s), nacking\n", encoding)
+			msg.Nack()
+			return
 		}
+		fmt.Fprintf(w, "%s is abbreviated as %s\n", state.Name, state.PostAbbr)
 		msg.Ack()
 	})
 	return nil
