@@ -17,6 +17,7 @@ package inspect
 import (
 	"bytes"
 	"context"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -275,4 +276,23 @@ func TestInspectBigquery(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestInspectGcsFileWithSampling(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	topicID := os.Getenv("topicID")
+	subscriptionID := os.Getenv("subscriptionID")
+	GCSUri := os.Getenv("GCSUri")
+
+	t.Run("inspectGcsFileWithSampling", func(t *testing.T) {
+		t.Parallel()
+		buf := new(bytes.Buffer)
+		if err := inspectGcsFileWithSampling(buf, tc.ProjectID, GCSUri, topicID, subscriptionID); err != nil {
+			t.Errorf("inspectGcsFileWithSampling: %v", err)
+		}
+		got := buf.String()
+		if want := "Job Created"; !strings.Contains(got, want) {
+			t.Errorf("inspectGcsFileWithSampling got %q, want %q", got, want)
+		}
+	})
 }
