@@ -13,7 +13,7 @@
 // limitations under the License.
 package inspect
 
-// [START dlp_inspect_bigquery_table_with_sampling]
+// [START dlp_inspect_bigquery_with_sampling]
 import (
 	"context"
 	"fmt"
@@ -185,4 +185,4 @@ func inspectBigQueryTableWithSampling(w io.Writer, projectID, topicID, subscript
 
 }
 
-// [END dlp_inspect_bigquery_table_with_sampling]
+// [END dlp_inspect_bigquery_with_sampling]
