@@ -21,7 +21,6 @@ import (
 
 	dlp "cloud.google.com/go/dlp/apiv2"
 	"cloud.google.com/go/dlp/apiv2/dlppb"
-	"google.golang.org/api/option"
 )
 
 // inspectTable inspects a table for sensitive content
@@ -34,7 +33,7 @@ func inspectTable(w io.Writer, projectID string, tableToInspect *dlppb.Table) er
 	// Initialize a client once and reuse it to send multiple requests. Clients
 	// are safe to use across goroutines. When the client is no longer needed,
 	// call the Close method to cleanup its resources.
-	client, err := dlp.NewRESTClient(ctx, option.WithCredentialsFile("C:/Users/aarsh.dhokai/Desktop/cred.json"))
+	client, err := dlp.NewClient(ctx)
 	if err != nil {
 		return err
 	}
