@@ -62,3 +62,21 @@ func TestRedactImage(t *testing.T) {
 		})
 	}
 }
+
+func TestRedactImageFileListedInfoTypes(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	inputPath := "testdata/image.jpg"
+	outputPath := "testdata/test-output-image-file-listed-infoTypes-redacted.jpeg"
+
+	t.Run("redactImageFileListedInfoTypes", func(t *testing.T) {
+		t.Parallel()
+		buf := new(bytes.Buffer)
+		if err := redactImageFileListedInfoTypes(buf, tc.ProjectID, inputPath, outputPath); err != nil {
+			t.Errorf("redactImageFileListedInfoTypes: %v", err)
+		}
+		got := buf.String()
+		if want := "Wrote output to"; !strings.Contains(got, want) {
+			t.Errorf("redactImageFileListedInfoTypes got %q, want %q", got, want)
+		}
+	})
+}
