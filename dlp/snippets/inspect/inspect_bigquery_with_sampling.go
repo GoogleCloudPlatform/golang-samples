@@ -26,7 +26,7 @@ import (
 )
 
 // inspectBigQueryTableWithSampling inspect bigQueries for sensitive data with sampling
-func InspectBigQueryTableWithSampling(w io.Writer, projectID, topicID, subscriptionID, dataSetID, tableID string) error {
+func inspectBigQueryTableWithSampling(w io.Writer, projectID, topicID, subscriptionID, dataSetID, tableID string) error {
 	// projectId := "your-project-id"
 	// table := "your-table-value"
 

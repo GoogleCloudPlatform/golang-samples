@@ -289,7 +289,7 @@ func TestInspectBigQueryTableWithSampling(t *testing.T) {
 	t.Run("inspectBigQueryTableWithSampling", func(t *testing.T) {
 		t.Parallel()
 		buf := new(bytes.Buffer)
-		if err := InspectBigQueryTableWithSampling(buf, tc.ProjectID, topicID, subscriptionID, dataSetID, tableID); err != nil {
+		if err := inspectBigQueryTableWithSampling(buf, tc.ProjectID, topicID, subscriptionID, dataSetID, tableID); err != nil {
 			t.Errorf("InspectBigQueryTableWithSampling: %v", err)
 		}
 		got := buf.String()
