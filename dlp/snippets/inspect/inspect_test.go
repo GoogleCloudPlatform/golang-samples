@@ -276,3 +276,25 @@ func TestInspectBigquery(t *testing.T) {
 		})
 	}
 }
+
+func TestInspectImageFileAllInfoTypes(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	inputPath := "testdata/image.jpg"
+	t.Run("inspectImageFileAllInfoTypes", func(t *testing.T) {
+		t.Parallel()
+		buf := new(bytes.Buffer)
+		if err := InspectImageFileAllInfoTypes(buf, tc.ProjectID, inputPath); err != nil {
+			t.Errorf("InspectBigQueryTableWithSampling: %v", err)
+		}
+		got := buf.String()
+		if want := "Info type: DATE"; !strings.Contains(got, want) {
+			t.Errorf("InspectBigQueryTableWithSampling got %q, want %q", got, want)
+		}
+		if want := "Info type: PHONE_NUMBER"; !strings.Contains(got, want) {
+			t.Errorf("InspectBigQueryTableWithSampling got %q, want %q", got, want)
+		}
+		if want := "Info type: US_SOCIAL_SECURITY_NUMBER"; !strings.Contains(got, want) {
+			t.Errorf("InspectBigQueryTableWithSampling got %q, want %q", got, want)
+		}
+	})
+}
