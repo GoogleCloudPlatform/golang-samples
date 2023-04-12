@@ -62,3 +62,21 @@ func TestRedactImage(t *testing.T) {
 		})
 	}
 }
+
+func TestRedactImageFileAllText(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	inputPath := "testdata/image.jpg"
+	outputPath := "testdata/test-output-sensitive-data-image-redacted.jpeg"
+
+	t.Run("redactImageFileAllText", func(t *testing.T) {
+		t.Parallel()
+		buf := new(bytes.Buffer)
+		if err := redactImageFileAllText(buf, tc.ProjectID, inputPath, outputPath); err != nil {
+			t.Errorf("redactImageFileAllText: %v", err)
+		}
+		got := buf.String()
+		if want := "Wrote output to"; !strings.Contains(got, want) {
+			t.Errorf("redactImageFileAllText got %q, want %q", got, want)
+		}
+	})
+}
