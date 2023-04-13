@@ -43,7 +43,7 @@ func inspectStringOmitOverlap(w io.Writer, projectID, textToInspect string) erro
 	defer client.Close()
 
 	// Specify the type and content to be inspected.
-	var contentItem = &dlppb.ContentItem{
+	contentItem := &dlppb.ContentItem{
 		DataItem: &dlppb.ContentItem_ByteItem{
 			ByteItem: &dlppb.ByteContentItem{
 				Type: dlppb.ByteContentItem_TEXT_UTF8,
@@ -54,13 +54,13 @@ func inspectStringOmitOverlap(w io.Writer, projectID, textToInspect string) erro
 
 	// Specify the type of info the inspection will look for.
 	// See https://cloud.google.com/dlp/docs/infotypes-reference for complete list of info types.
-	var infoTypes = []*dlppb.InfoType{
+	infoTypes := []*dlppb.InfoType{
 		{Name: "PERSON_NAME"},
 		{Name: "EMAIL_ADDRESS"},
 	}
 
 	// Exclude EMAIL_ADDRESS matches
-	var exclusionRule = &dlppb.ExclusionRule{
+	exclusionRule := &dlppb.ExclusionRule{
 		Type: &dlppb.ExclusionRule_ExcludeInfoTypes{
 			ExcludeInfoTypes: &dlppb.ExcludeInfoTypes{
 				InfoTypes: []*dlppb.InfoType{
@@ -74,7 +74,7 @@ func inspectStringOmitOverlap(w io.Writer, projectID, textToInspect string) erro
 	// Construct a ruleSet that applies the exclusion rule to the PERSON_NAME infoType.
 	// If a PERSON_NAME match overlaps with an EMAIL_ADDRESS match, the PERSON_NAME match will
 	// be excluded.
-	var ruleSet = &dlppb.InspectionRuleSet{
+	ruleSet := &dlppb.InspectionRuleSet{
 		InfoTypes: []*dlppb.InfoType{
 			{Name: "PERSON_NAME"},
 		},
@@ -103,7 +103,6 @@ func inspectStringOmitOverlap(w io.Writer, projectID, textToInspect string) erro
 	// Send the request.
 	resp, err := client.InspectContent(ctx, req)
 	if err != nil {
-		fmt.Fprintf(w, "Receive: %v", err)
 		return err
 	}
 

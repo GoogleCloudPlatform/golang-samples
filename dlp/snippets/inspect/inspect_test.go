@@ -282,7 +282,7 @@ func TestInspectStringOmitOverlap(t *testing.T) {
 	buf := new(bytes.Buffer)
 
 	if err := inspectStringOmitOverlap(buf, tc.ProjectID, "gary@example.com"); err != nil {
-		t.Errorf("inspectStringOmitOverlap: %v", err)
+		t.Fatal(err)
 	}
 
 	got := buf.String()
