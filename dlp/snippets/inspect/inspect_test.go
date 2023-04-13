@@ -282,7 +282,7 @@ func TestInspectWithCustomRegex(t *testing.T) {
 	buf := new(bytes.Buffer)
 
 	if err := inspectWithCustomRegex(buf, tc.ProjectID, "Patients MRN 444-5-22222", "[1-9]{3}-[1-9]{1}-[1-9]{5}", "C_MRN"); err != nil {
-		t.Errorf("inspectWithCustomRegex: %v", err)
+		t.Fatal(err)
 	}
 
 	got := buf.String()
