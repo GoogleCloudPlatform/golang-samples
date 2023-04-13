@@ -282,7 +282,7 @@ func TestInspectStringWithExclusionDictSubstring(t *testing.T) {
 	buf := new(bytes.Buffer)
 
 	if err := inspectStringWithExclusionDictSubstring(buf, tc.ProjectID, "Some email addresses: gary@example.com, TEST@example.com", []string{"TEST"}); err != nil {
-		t.Errorf("inspectStringWithExclusionDictSubstring: %v", err)
+		t.Fatal(err)
 	}
 
 	got := buf.String()

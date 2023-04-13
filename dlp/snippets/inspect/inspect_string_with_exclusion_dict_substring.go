@@ -44,7 +44,7 @@ func inspectStringWithExclusionDictSubstring(w io.Writer, projectID, textToInspe
 	defer client.Close()
 
 	// Specify the type and content to be inspected.
-	var contentItem = &dlppb.ContentItem{
+	contentItem := &dlppb.ContentItem{
 		DataItem: &dlppb.ContentItem_ByteItem{
 			ByteItem: &dlppb.ByteContentItem{
 				Type: dlppb.ByteContentItem_TEXT_UTF8,
@@ -55,7 +55,7 @@ func inspectStringWithExclusionDictSubstring(w io.Writer, projectID, textToInspe
 
 	// Specify the type of info the inspection will look for.
 	// See https://cloud.google.com/dlp/docs/infotypes-reference for complete list of info types.
-	var infoTypes = []*dlppb.InfoType{
+	infoTypes := []*dlppb.InfoType{
 		{Name: "EMAIL_ADDRESS"},
 		{Name: "DOMAIN_NAME"},
 		{Name: "PHONE_NUMBER"},
@@ -63,7 +63,7 @@ func inspectStringWithExclusionDictSubstring(w io.Writer, projectID, textToInspe
 	}
 
 	// Exclude partial matches from the specified excludedSubstringList.
-	var exclusionRule = &dlppb.ExclusionRule{
+	exclusionRule := &dlppb.ExclusionRule{
 		Type: &dlppb.ExclusionRule_Dictionary{
 			Dictionary: &dlppb.CustomInfoType_Dictionary{
 				Source: &dlppb.CustomInfoType_Dictionary_WordList_{
@@ -77,7 +77,7 @@ func inspectStringWithExclusionDictSubstring(w io.Writer, projectID, textToInspe
 	}
 
 	// Construct a ruleSet that applies the exclusion rule to the EMAIL_ADDRESSES infoType.
-	var ruleSet = &dlppb.InspectionRuleSet{
+	ruleSet := &dlppb.InspectionRuleSet{
 		InfoTypes: infoTypes,
 		Rules: []*dlppb.InspectionRule{
 			{
@@ -104,7 +104,6 @@ func inspectStringWithExclusionDictSubstring(w io.Writer, projectID, textToInspe
 	// Send the request.
 	resp, err := client.InspectContent(ctx, req)
 	if err != nil {
-		fmt.Fprintf(w, "Receive: %v", err)
 		return err
 	}
 
