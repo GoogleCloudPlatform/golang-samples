@@ -281,7 +281,7 @@ func TestInspectWithHotWordRules(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
 
-	if err := inspectWithHotWordRules(buf, tc.ProjectID, "Patient's MRN 444-5-22222 and just a number 333-2-33333", "[1-9]{3}-[1-9]{1}-[1-9]{5}", "(?i)(mrn|medical)(?-i)"); err != nil {
+	if err := inspectWithHotWordRules(buf, tc.ProjectID, "Patient's MRN 444-5-22222 and just a number 333-2-33333"); err != nil {
 		t.Errorf("inspectWithHotWordRules: %v", err)
 	}
 

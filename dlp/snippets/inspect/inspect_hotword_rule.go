@@ -26,11 +26,9 @@ import (
 
 // inspectWithHotWordRules inspects data with hot word rule, it uses custom
 // regex with a hot word rule to increase the likelihood match
-func inspectWithHotWordRules(w io.Writer, projectID, textToInspect, customRegexPattern, hotWordRegexPattern string) error {
+func inspectWithHotWordRules(w io.Writer, projectID, textToInspect string) error {
 	// projectID := "my-project-id"
 	// textToInspect := "Patient's MRN 444-5-22222 and just a number 333-2-33333"
-	// customRegexPattern := "[1-9]{3}-[1-9]{1}-[1-9]{5}"
-	// hotWordRegexPattern := "(?i)(mrn|medical)(?-i)"
 
 	ctx := context.Background()
 
@@ -46,7 +44,7 @@ func inspectWithHotWordRules(w io.Writer, projectID, textToInspect, customRegexP
 	defer client.Close()
 
 	// Specify the type and content to be inspected.
-	var contentItem = &dlppb.ContentItem{
+	contentItem := &dlppb.ContentItem{
 		DataItem: &dlppb.ContentItem_ByteItem{
 			ByteItem: &dlppb.ByteContentItem{
 				Type: dlppb.ByteContentItem_TEXT_UTF8,
@@ -56,36 +54,38 @@ func inspectWithHotWordRules(w io.Writer, projectID, textToInspect, customRegexP
 	}
 
 	// Construct the custom regex detectors
-	var customInfoType = &dlppb.CustomInfoType{
+	customInfoType := &dlppb.CustomInfoType{
 		InfoType: &dlppb.InfoType{
 			Name: "C_MRN",
 		},
 		Type: &dlppb.CustomInfoType_Regex_{
 			Regex: &dlppb.CustomInfoType_Regex{
-				Pattern: customRegexPattern,
+				Pattern: "[1-9]{3}-[1-9]{1}-[1-9]{5}",
 			},
 		},
 		Likelihood: dlppb.Likelihood_POSSIBLE,
 	}
 
 	// Construct hotword rule.
-	var inspectionRuleSet = &dlppb.InspectionRuleSet{
+	hotWordRule := &dlppb.CustomInfoType_DetectionRule_HotwordRule{
+		HotwordRegex: &dlppb.CustomInfoType_Regex{
+			Pattern: "(?i)(mrn|medical)(?-i)",
+		},
+		Proximity: &dlppb.CustomInfoType_DetectionRule_Proximity{
+			WindowBefore: int32(10),
+		},
+		LikelihoodAdjustment: &dlppb.CustomInfoType_DetectionRule_LikelihoodAdjustment{
+			Adjustment: &dlppb.CustomInfoType_DetectionRule_LikelihoodAdjustment_FixedLikelihood{
+				FixedLikelihood: dlppb.Likelihood_VERY_LIKELY,
+			},
+		},
+	}
+
+	inspectionRuleSet := &dlppb.InspectionRuleSet{
 		Rules: []*dlppb.InspectionRule{
 			{
 				Type: &dlppb.InspectionRule_HotwordRule{
-					HotwordRule: &dlppb.CustomInfoType_DetectionRule_HotwordRule{
-						HotwordRegex: &dlppb.CustomInfoType_Regex{
-							Pattern: hotWordRegexPattern,
-						},
-						Proximity: &dlppb.CustomInfoType_DetectionRule_Proximity{
-							WindowBefore: int32(10),
-						},
-						LikelihoodAdjustment: &dlppb.CustomInfoType_DetectionRule_LikelihoodAdjustment{
-							Adjustment: &dlppb.CustomInfoType_DetectionRule_LikelihoodAdjustment_FixedLikelihood{
-								FixedLikelihood: dlppb.Likelihood_VERY_LIKELY,
-							},
-						},
-					},
+					HotwordRule: hotWordRule,
 				},
 			},
 		},
@@ -112,7 +112,6 @@ func inspectWithHotWordRules(w io.Writer, projectID, textToInspect, customRegexP
 	// Send the request.
 	resp, err := client.InspectContent(ctx, req)
 	if err != nil {
-		fmt.Fprintf(w, "Receive: %v", err)
 		return err
 	}
 
