@@ -53,23 +53,27 @@ func deidentifyExceptionList(w io.Writer, projectID, input string) error {
 		{Name: "EMAIL_ADDRESS"},
 	}
 
+	dictionary := &dlppb.CustomInfoType_Dictionary{
+		Source: &dlppb.CustomInfoType_Dictionary_WordList_{
+			WordList: &dlppb.CustomInfoType_Dictionary_WordList{
+				Words: []string{"jack@example.org", "jill@example.org"},
+			},
+		},
+	}
+
+	exclusionRule := &dlppb.ExclusionRule{
+		MatchingType: dlppb.MatchingType_MATCHING_TYPE_FULL_MATCH,
+		Type: &dlppb.ExclusionRule_Dictionary{
+			Dictionary: dictionary,
+		},
+	}
+
 	inspectRuleSet := &dlppb.InspectionRuleSet{
 		InfoTypes: infoTypes,
 		Rules: []*dlppb.InspectionRule{
 			{
 				Type: &dlppb.InspectionRule_ExclusionRule{
-					ExclusionRule: &dlppb.ExclusionRule{
-						MatchingType: dlppb.MatchingType_MATCHING_TYPE_FULL_MATCH,
-						Type: &dlppb.ExclusionRule_Dictionary{
-							Dictionary: &dlppb.CustomInfoType_Dictionary{
-								Source: &dlppb.CustomInfoType_Dictionary_WordList_{
-									WordList: &dlppb.CustomInfoType_Dictionary_WordList{
-										Words: []string{"jack@example.org", "jill@example.org"},
-									},
-								},
-							},
-						},
-					},
+					ExclusionRule: exclusionRule,
 				},
 			},
 		},

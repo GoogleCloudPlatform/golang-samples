@@ -115,5 +115,5 @@ func TestDeidentifyExceptionList(t *testing.T) {
 	if got := buf.String(); got != want {
 		t.Errorf("deidentifyExceptionList(%q) = %q, want %q", input, got, want)
 	}
-	
+
 }
