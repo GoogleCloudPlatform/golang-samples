@@ -4,28 +4,28 @@ go 1.19
 
 require (
 	cloud.google.com/go v0.110.0
-	cloud.google.com/go/kms v1.9.0
+	cloud.google.com/go/kms v1.10.0
 	cloud.google.com/go/longrunning v0.4.1
 	cloud.google.com/go/spanner v1.44.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.14
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230309020435-bdb8e67b5bb9
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230324221613-82da276a923c
 	github.com/golang/protobuf v1.5.3
 	github.com/google/uuid v1.3.0
-	github.com/googleapis/gax-go/v2 v2.7.1
+	github.com/googleapis/gax-go/v2 v2.8.0
 	go.opencensus.io v0.24.0
-	google.golang.org/api v0.112.0
-	google.golang.org/genproto v0.0.0-20230306155012-7f2fa6fef1f4
-	google.golang.org/grpc v1.53.0
-	google.golang.org/protobuf v1.29.0
+	google.golang.org/api v0.114.0
+	google.golang.org/genproto v0.0.0-20230323212658-478b75c54725
+	google.golang.org/grpc v1.54.0
+	google.golang.org/protobuf v1.30.0
 )
 
 require (
-	cloud.google.com/go/compute v1.18.0 // indirect
+	cloud.google.com/go/compute v1.19.0 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
-	cloud.google.com/go/iam v0.12.0 // indirect
-	cloud.google.com/go/monitoring v1.12.0 // indirect
-	cloud.google.com/go/storage v1.28.1 // indirect
-	cloud.google.com/go/trace v1.8.0 // indirect
+	cloud.google.com/go/iam v0.13.0 // indirect
+	cloud.google.com/go/monitoring v1.13.0 // indirect
+	cloud.google.com/go/storage v1.29.0 // indirect
+	cloud.google.com/go/trace v1.9.0 // indirect
 	github.com/aws/aws-sdk-go v1.44.129 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.4.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
