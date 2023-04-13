@@ -143,21 +143,16 @@ func TestDeidentifyTableMaskingCondition(t *testing.T) {
 		},
 	}
 
-	input := table
 	contains := "Table after de-identification :"
 
-	t.Run("deidentifyTableMaskingCondition", func(t *testing.T) {
-		t.Parallel()
-		buf := new(bytes.Buffer)
-		err := deidentifyTableMaskingCondition(buf, tc.ProjectID, input)
-		if err != nil {
-			t.Errorf("deidentifyTableMaskingCondition(%q) = error '%q'", input, err)
-		}
+	buf := new(bytes.Buffer)
+	err := deidentifyTableMaskingCondition(buf, tc.ProjectID, table)
+	if err != nil {
+		t.Errorf("deidentifyTableMaskingCondition(%q) = error '%q'", table, err)
+	}
 
-		if got := buf.String(); !strings.Contains(got, contains) {
-			t.Errorf("deidentifyTableMaskingCondition-from contains (%q) = %q,%q ", input, got, contains)
-		}
-
-	})
+	if got := buf.String(); !strings.Contains(got, contains) {
+		t.Errorf("deidentifyTableMaskingCondition-from contains (%q) = %q,%q ", table, got, contains)
+	}
 
 }
