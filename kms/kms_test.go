@@ -39,6 +39,7 @@ var fixture *kmsFixture
 
 func TestMain(m *testing.M) {
 	tc, ok := testutil.ContextMain(m)
+	log.Print(tc)
 	if !ok {
 		log.Print("skipping - unset GOLANG_SAMPLES_PROJECT_ID?")
 		return
@@ -418,6 +419,21 @@ func TestGetPublicKey(t *testing.T) {
 
 	if got, want := b.String(), "Retrieved public key:"; !strings.Contains(got, want) {
 		t.Errorf("getPublicKey: expected %q to contain %q", got, want)
+	}
+}
+
+func TestGetPublicKeyJwk(t *testing.T) {
+	testutil.SystemTest(t)
+
+	name := fmt.Sprintf("%s/cryptoKeyVersions/1", fixture.AsymmetricDecryptKeyName)
+
+	var b bytes.Buffer
+	if err := getPublicKeyJwk(&b, name); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "kty"; !strings.Contains(got, want) {
+		t.Errorf("getPublicKeyJwk: expected %q to contain %q", got, want)
 	}
 }
 
