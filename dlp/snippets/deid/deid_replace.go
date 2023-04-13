@@ -62,12 +62,12 @@ func deidentifyWithReplacement(w io.Writer, projectID, inputStr string, infoType
 		},
 	}
 
-	// Define type of deidentification as replacement.
+	// Define type of de-identification as replacement.
 	var primitiveTransformation = &dlppb.PrimitiveTransformation_ReplaceConfig{
 		ReplaceConfig: replaceValueConfig,
 	}
 
-	// Associate deidentification type with info type.
+	// Associate de-identification type with info type.
 	var infoTypeTransformation = &dlppb.InfoTypeTransformations_InfoTypeTransformation{
 		InfoTypes: infoTypes,
 		PrimitiveTransformation: &dlppb.PrimitiveTransformation{
