@@ -45,7 +45,7 @@ func inspectWithCustomRegex(w io.Writer, projectID, textToInspect, customRegexPa
 	defer client.Close()
 
 	// Specify the type and content to be inspected.
-	var contentItem = &dlppb.ContentItem{
+	contentItem := &dlppb.ContentItem{
 		DataItem: &dlppb.ContentItem_ByteItem{
 			ByteItem: &dlppb.ByteContentItem{
 				Type: dlppb.ByteContentItem_TEXT_UTF8,
@@ -55,7 +55,7 @@ func inspectWithCustomRegex(w io.Writer, projectID, textToInspect, customRegexPa
 	}
 
 	// Construct the custom regex detectors
-	var customInfoType = &dlppb.CustomInfoType{
+	customInfoType := &dlppb.CustomInfoType{
 		InfoType: &dlppb.InfoType{
 			Name: infoTypeName,
 		},
@@ -84,7 +84,6 @@ func inspectWithCustomRegex(w io.Writer, projectID, textToInspect, customRegexPa
 	// Send the request.
 	resp, err := client.InspectContent(ctx, req)
 	if err != nil {
-		fmt.Fprintf(w, "Receive: %v", err)
 		return err
 	}
 
