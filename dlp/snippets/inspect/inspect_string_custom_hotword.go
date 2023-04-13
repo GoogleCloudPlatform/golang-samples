@@ -22,7 +22,6 @@ import (
 
 	dlp "cloud.google.com/go/dlp/apiv2"
 	"cloud.google.com/go/dlp/apiv2/dlppb"
-	"google.golang.org/api/option"
 )
 
 // inspectStringCustomHotWord inspects a string from sensitive data by using a custom hot word
@@ -37,7 +36,7 @@ func inspectStringCustomHotWord(w io.Writer, projectID, textToInspect, customHot
 	// Initialize a client once and reuse it to send multiple requests. Clients
 	// are safe to use across goroutines. When the client is no longer needed,
 	// call the Close method to cleanup its resources.
-	client, err := dlp.NewRESTClient(ctx, option.WithCredentialsFile("C:/Users/aarsh.dhokai/Desktop/cred.json"))
+	client, err := dlp.NewClient(ctx)
 	if err != nil {
 		return err
 	}
@@ -46,7 +45,7 @@ func inspectStringCustomHotWord(w io.Writer, projectID, textToInspect, customHot
 	defer client.Close()
 
 	// Specify the type and content to be inspected.
-	var contentItem = &dlppb.ContentItem{
+	contentItem := &dlppb.ContentItem{
 		DataItem: &dlppb.ContentItem_ByteItem{
 			ByteItem: &dlppb.ByteContentItem{
 				Type: dlppb.ByteContentItem_TEXT_UTF8,
@@ -56,7 +55,7 @@ func inspectStringCustomHotWord(w io.Writer, projectID, textToInspect, customHot
 	}
 
 	// Increase likelihood of matches that have customHotword nearby
-	var hotwordRule = &dlppb.InspectionRule_HotwordRule{
+	hotwordRule := &dlppb.InspectionRule_HotwordRule{
 
 		HotwordRule: &dlppb.CustomInfoType_DetectionRule_HotwordRule{
 			HotwordRegex: &dlppb.CustomInfoType_Regex{
@@ -74,7 +73,7 @@ func inspectStringCustomHotWord(w io.Writer, projectID, textToInspect, customHot
 	}
 
 	// Construct a ruleset that applies the hotword rule to the PERSON_NAME infotype.
-	var ruleSet = &dlppb.InspectionRuleSet{
+	ruleSet := &dlppb.InspectionRuleSet{
 		InfoTypes: []*dlppb.InfoType{
 			{Name: infoTypeName}, //"PERSON_NAME"
 		},
@@ -106,7 +105,6 @@ func inspectStringCustomHotWord(w io.Writer, projectID, textToInspect, customHot
 	// Send the request.
 	resp, err := client.InspectContent(ctx, req)
 	if err != nil {
-		fmt.Fprintf(w, "Receive: %v", err)
 		return err
 	}
 
