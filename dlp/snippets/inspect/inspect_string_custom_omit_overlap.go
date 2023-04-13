@@ -45,7 +45,7 @@ func inspectStringCustomOmitOverlap(w io.Writer, projectID, textToInspect, custo
 	defer client.Close()
 
 	// Specify the type and content to be inspected.
-	var contentItem = &dlppb.ContentItem{
+	contentItem := &dlppb.ContentItem{
 		DataItem: &dlppb.ContentItem_ByteItem{
 			ByteItem: &dlppb.ByteContentItem{
 				Type: dlppb.ByteContentItem_TEXT_UTF8,
@@ -53,8 +53,8 @@ func inspectStringCustomOmitOverlap(w io.Writer, projectID, textToInspect, custo
 			},
 		},
 	}
-	// Construct the custom infotype.
-	var customInfotype = &dlppb.CustomInfoType{
+	// Construct the custom infoType.
+	customInfotype := &dlppb.CustomInfoType{
 		InfoType: &dlppb.InfoType{
 			Name: customInfoTypeName,
 		},
@@ -67,7 +67,7 @@ func inspectStringCustomOmitOverlap(w io.Writer, projectID, textToInspect, custo
 	}
 
 	// Exclude matches that also match the custom infoType.
-	var exclusionRule = &dlppb.ExclusionRule{
+	exclusionRule := &dlppb.ExclusionRule{
 		Type: &dlppb.ExclusionRule_ExcludeInfoTypes{
 			ExcludeInfoTypes: &dlppb.ExcludeInfoTypes{
 				InfoTypes: []*dlppb.InfoType{
@@ -78,8 +78,8 @@ func inspectStringCustomOmitOverlap(w io.Writer, projectID, textToInspect, custo
 		MatchingType: dlppb.MatchingType_MATCHING_TYPE_FULL_MATCH,
 	}
 
-	// Construct a ruleset that applies the exclusion rule to the PERSON_NAME infoType.
-	var ruleSet = &dlppb.InspectionRuleSet{
+	// Construct a ruleSet that applies the exclusion rule to the PERSON_NAME infoType.
+	ruleSet := &dlppb.InspectionRuleSet{
 		InfoTypes: []*dlppb.InfoType{
 			{Name: infoTypeName},
 		},
@@ -93,7 +93,7 @@ func inspectStringCustomOmitOverlap(w io.Writer, projectID, textToInspect, custo
 	}
 
 	// Construct the configuration for the Inspect request, including the ruleSet.
-	var config = &dlppb.InspectConfig{
+	config := &dlppb.InspectConfig{
 		InfoTypes: []*dlppb.InfoType{
 			{Name: infoTypeName},
 		},
@@ -116,7 +116,6 @@ func inspectStringCustomOmitOverlap(w io.Writer, projectID, textToInspect, custo
 	// Send the request.
 	resp, err := client.InspectContent(ctx, req)
 	if err != nil {
-		fmt.Fprintf(w, "Receive: %v", err)
 		return err
 	}
 
