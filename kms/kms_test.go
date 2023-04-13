@@ -39,7 +39,6 @@ var fixture *kmsFixture
 
 func TestMain(m *testing.M) {
 	tc, ok := testutil.ContextMain(m)
-	log.Print(tc)
 	if !ok {
 		log.Print("skipping - unset GOLANG_SAMPLES_PROJECT_ID?")
 		return
