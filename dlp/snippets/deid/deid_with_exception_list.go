@@ -24,11 +24,9 @@ import (
 )
 
 // deidentifyExceptionList creates an exception list for a regular custom dictionary detector.
-func deidentifyExceptionList(w io.Writer, projectID, input, infoType string, dictWordList []string) error {
+func deidentifyExceptionList(w io.Writer, projectID, input string) error {
 	// projectID := "my-project-id"
 	// input := "jack@example.org accessed customer record of user5@example.com"
-	// infoType := "EMAIL_ADDRESS"
-	// dictWordList := []string{"jack@example.org", "jill@example.org"}
 
 	ctx := context.Background()
 
@@ -40,19 +38,19 @@ func deidentifyExceptionList(w io.Writer, projectID, input, infoType string, dic
 		return fmt.Errorf("dlp.NewClient: %v", err)
 	}
 
-	// Closing the client safely cleans up background resources.
+	// Closing the client safely cleans up background resousrces.
 	defer client.Close()
 
 	// Specify what content you want the service to DeIdentify.
-	var item = &dlppb.ContentItem{
+	item := &dlppb.ContentItem{
 		DataItem: &dlppb.ContentItem_Value{
 			Value: input,
 		},
 	}
 
 	// Specify the word list custom info type and build-in info type the inspection will look for.
-	var infoTypes = []*dlppb.InfoType{
-		{Name: infoType},
+	infoTypes := []*dlppb.InfoType{
+		{Name: "EMAIL_ADDRESS"},
 	}
 
 	inspectRuleSet := &dlppb.InspectionRuleSet{
@@ -66,7 +64,7 @@ func deidentifyExceptionList(w io.Writer, projectID, input, infoType string, dic
 							Dictionary: &dlppb.CustomInfoType_Dictionary{
 								Source: &dlppb.CustomInfoType_Dictionary_WordList_{
 									WordList: &dlppb.CustomInfoType_Dictionary_WordList{
-										Words: dictWordList,
+										Words: []string{"jack@example.org", "jill@example.org"},
 									},
 								},
 							},
@@ -78,17 +76,21 @@ func deidentifyExceptionList(w io.Writer, projectID, input, infoType string, dic
 	}
 
 	// Construct the configuration for the de-id request and list all desired transformations.
-	var deIdentifyConfig = &dlppb.DeidentifyConfig{
-		Transformation: &dlppb.DeidentifyConfig_InfoTypeTransformations{
-			InfoTypeTransformations: &dlppb.InfoTypeTransformations{
-				Transformations: []*dlppb.InfoTypeTransformations_InfoTypeTransformation{
-					{
-						PrimitiveTransformation: &dlppb.PrimitiveTransformation{
-							Transformation: &dlppb.PrimitiveTransformation_ReplaceWithInfoTypeConfig{},
-						},
-					},
-				},
+	primitiveTransformation := &dlppb.PrimitiveTransformation{
+		Transformation: &dlppb.PrimitiveTransformation_ReplaceWithInfoTypeConfig{},
+	}
+
+	infoTypeTransformation := &dlppb.InfoTypeTransformations{
+		Transformations: []*dlppb.InfoTypeTransformations_InfoTypeTransformation{
+			{
+				PrimitiveTransformation: primitiveTransformation,
 			},
+		},
+	}
+
+	deIdentifyConfig := &dlppb.DeidentifyConfig{
+		Transformation: &dlppb.DeidentifyConfig_InfoTypeTransformations{
+			InfoTypeTransformations: infoTypeTransformation,
 		},
 	}
 
@@ -108,7 +110,7 @@ func deidentifyExceptionList(w io.Writer, projectID, input, infoType string, dic
 	// Send the request.
 	resp, err := client.DeidentifyContent(ctx, req)
 	if err != nil {
-		return fmt.Errorf("DeidentifyContent: %v", err)
+		return err
 	}
 
 	// Print the result.
