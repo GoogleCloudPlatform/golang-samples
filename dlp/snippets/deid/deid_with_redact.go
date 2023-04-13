@@ -55,25 +55,25 @@ func deidentifyWithRedact(w io.Writer, projectID, inputStr string, infoTypeNames
 	for _, it := range infoTypeNames {
 		infoTypes = append(infoTypes, &dlppb.InfoType{Name: it})
 	}
-	var inspectConfig = &dlppb.InspectConfig{
+	inspectConfig := &dlppb.InspectConfig{
 		InfoTypes: infoTypes,
 	}
 
 	// Define type of de-identification.
-	var primitiveTransformation = &dlppb.PrimitiveTransformation{
+	primitiveTransformation := &dlppb.PrimitiveTransformation{
 		Transformation: &dlppb.PrimitiveTransformation_RedactConfig{
 			RedactConfig: &dlppb.RedactConfig{},
 		},
 	}
 
 	// Associate de-identification type with info type.
-	var transformation = &dlppb.InfoTypeTransformations_InfoTypeTransformation{
+	transformation := &dlppb.InfoTypeTransformations_InfoTypeTransformation{
 		InfoTypes:               infoTypes,
 		PrimitiveTransformation: primitiveTransformation,
 	}
 
 	// Construct the configuration for the Redact request and list all desired transformations.
-	var redactConfig = &dlppb.DeidentifyConfig{
+	redactConfig := &dlppb.DeidentifyConfig{
 		Transformation: &dlppb.DeidentifyConfig_InfoTypeTransformations{
 			InfoTypeTransformations: &dlppb.InfoTypeTransformations{
 				Transformations: []*dlppb.InfoTypeTransformations_InfoTypeTransformation{
@@ -94,7 +94,7 @@ func deidentifyWithRedact(w io.Writer, projectID, inputStr string, infoTypeNames
 	// Send the request.
 	resp, err := client.DeidentifyContent(ctx, req)
 	if err != nil {
-		return fmt.Errorf("DeidentifyContent: %v", err)
+		return err
 	}
 
 	// Print the result.

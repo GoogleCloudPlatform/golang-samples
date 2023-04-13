@@ -108,16 +108,13 @@ func TestDeIdentifyWithRedact(t *testing.T) {
 	infoTypeNames := []string{"EMAIL_ADDRESS"}
 	want := "output: My name is Alicia Abernathy, and my email address is ."
 
-	t.Run(input, func(t *testing.T) {
-		t.Parallel()
-		buf := new(bytes.Buffer)
-		err := deidentifyWithRedact(buf, tc.ProjectID, input, infoTypeNames)
-		if err != nil {
-			t.Errorf("deidentifyWithRedact(%q) = error '%q', want %q", err, input, want)
-		}
-		if got := buf.String(); got != want {
-			t.Errorf("deidentifyWithRedact(%q) = %q, want %q", got, input, want)
-		}
-	})
+	buf := new(bytes.Buffer)
+	err := deidentifyWithRedact(buf, tc.ProjectID, input, infoTypeNames)
+	if err != nil {
+		t.Errorf("deidentifyWithRedact(%q) = error '%q', want %q", err, input, want)
+	}
+	if got := buf.String(); got != want {
+		t.Errorf("deidentifyWithRedact(%q) = %q, want %q", got, input, want)
+	}
 
 }
