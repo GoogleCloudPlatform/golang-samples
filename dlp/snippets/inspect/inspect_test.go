@@ -277,6 +277,7 @@ func TestInspectBigquery(t *testing.T) {
 	}
 }
 
+
 func TestInspectWithHotWordRules(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
@@ -291,5 +292,19 @@ func TestInspectWithHotWordRules(t *testing.T) {
 	}
 	if want := "Findings: 2"; !strings.Contains(got, want) {
 		t.Errorf("inspectWithHotWordRules got %q, want %q", got, want)
+	}
+}
+
+func TestInspectPhoneNumber(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	if err := inspectPhoneNumber(buf, tc.ProjectID, "I'm Gary and my phone number is (415) 555-0890"); err != nil {
+		t.Errorf("TestInspectFile: %v", err)
+	}
+
+	got := buf.String()
+	if want := "Info type: PHONE_NUMBER"; !strings.Contains(got, want) {
+		t.Errorf("inspectPhoneNumber got %q, want %q", got, want)
 	}
 }
