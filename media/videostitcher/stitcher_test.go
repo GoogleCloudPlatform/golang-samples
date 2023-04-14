@@ -86,6 +86,7 @@ func TestMain(t *testing.T) {
 // and get operations check if the slate resource name is returned. The
 // delete operation checks for a hard-coded string response.
 func TestSlates(t *testing.T) {
+	t.Skip("see GoogleCloudPlatform/golang-samples#2919")
 	tc := testutil.SystemTest(t)
 	buf := &bytes.Buffer{}
 
@@ -162,6 +163,7 @@ func TestSlates(t *testing.T) {
 // and get operations check if the CDN key resource name is returned. The
 // delete operation checks for a hard-coded string response.
 func TestCDNKeys(t *testing.T) {
+	t.Skip("see GoogleCloudPlatform/golang-samples#2920")
 	tc := testutil.SystemTest(t)
 	buf := &bytes.Buffer{}
 
@@ -407,6 +409,7 @@ func TestCDNKeys(t *testing.T) {
 // are not supported for VOD sessions.
 // The test lists and gets ad tag and stitch details as well.
 func TestVodSessions(t *testing.T) {
+	t.Skip("see GoogleCloudPlatform/golang-samples#2917")
 	tc := testutil.SystemTest(t)
 	buf := &bytes.Buffer{}
 	sessionID := ""
@@ -508,6 +511,7 @@ func TestVodSessions(t *testing.T) {
 // operations check if the session name is returned. List and delete methods
 // are not supported for live sessions. The test lists and gets ad tag details.
 func TestLiveSessions(t *testing.T) {
+	t.Skip("see GoogleCloudPlatform/golang-samples#2918")
 	tc := testutil.SystemTest(t)
 	buf := &bytes.Buffer{}
 	sessionID := ""

@@ -49,6 +49,7 @@ func TestInspectDatastore(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
+		test := test
 		t.Run(test.kind, func(t *testing.T) {
 			t.Parallel()
 			testutil.Retry(t, 5, 15*time.Second, func(r *testutil.R) {
@@ -101,6 +102,7 @@ func TestInspectGCS(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
+		test := test
 		t.Run(test.fileName, func(t *testing.T) {
 			t.Parallel()
 			testutil.Retry(t, 5, 15*time.Second, func(r *testutil.R) {
@@ -260,6 +262,7 @@ func TestInspectBigquery(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
+		test := test
 		t.Run(test.table, func(t *testing.T) {
 			t.Parallel()
 			u := uuid.Must(uuid.NewV4()).String()[:8]
@@ -271,5 +274,19 @@ func TestInspectBigquery(t *testing.T) {
 				t.Errorf("inspectBigquery(%s) = %q, want %q substring", test.table, got, test.want)
 			}
 		})
+	}
+}
+
+func TestInspectPhoneNumber(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	if err := inspectPhoneNumber(buf, tc.ProjectID, "I'm Gary and my phone number is (415) 555-0890"); err != nil {
+		t.Errorf("TestInspectFile: %v", err)
+	}
+
+	got := buf.String()
+	if want := "Info type: PHONE_NUMBER"; !strings.Contains(got, want) {
+		t.Errorf("inspectPhoneNumber got %q, want %q", got, want)
 	}
 }

@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,6 +31,8 @@ import (
 	"cloud.google.com/go/vision/v2/apiv1/visionpb"
 	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"github.com/googleapis/google-cloudevents-go/cloud/storagedata"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 // Global API clients used across function invocations.
@@ -60,14 +62,6 @@ func init() {
 
 // [START functions_imagemagick_analyze]
 
-// GCSEvent is the payload of a GCS event.
-// additional fields are documented at
-// https://cloud.google.com/storage/docs/json_api/v1/objects#resource
-type GCSEvent struct {
-	Bucket string `json:"bucket"`
-	Name   string `json:"name"`
-}
-
 // blurOffensiveImages blurs offensive images uploaded to GCS.
 func blurOffensiveImages(ctx context.Context, e cloudevents.Event) error {
 	outputBucket := os.Getenv("BLURRED_BUCKET_NAME")
@@ -75,11 +69,11 @@ func blurOffensiveImages(ctx context.Context, e cloudevents.Event) error {
 		return errors.New("environment variable BLURRED_BUCKET_NAME must be set")
 	}
 
-	gcsEvent := &GCSEvent{}
-	if err := e.DataAs(gcsEvent); err != nil {
-		return fmt.Errorf("e.DataAs: failed to decode event data: %v", err)
+	var gcsEvent storagedata.StorageObjectData
+	if err := protojson.Unmarshal(e.Data(), &gcsEvent); err != nil {
+		return fmt.Errorf("protojson.Unmarshal: failed to decode event data: %v", err)
 	}
-	img := vision.NewImageFromURI(fmt.Sprintf("gs://%s/%s", gcsEvent.Bucket, gcsEvent.Name))
+	img := vision.NewImageFromURI(fmt.Sprintf("gs://%s/%s", gcsEvent.GetBucket(), gcsEvent.GetName()))
 
 	resp, err := visionClient.DetectSafeSearch(ctx, img, nil)
 	if err != nil {
