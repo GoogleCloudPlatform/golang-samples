@@ -14,6 +14,8 @@
 
 package spanner
 
+// [START spanner_directed_read]
+
 import (
 	"context"
 	"fmt"
@@ -24,27 +26,25 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-/*
-	Shows how to run a query with directed read options.
-	Only one of ExcludeReplicas or IncludeReplicas can be set
-	Each accepts a list of ReplicaSelections which contains Location and Type
-	* `location` - The location must be one of the regions within the
-	multi-region configuration of your database.
-	* `type` - The type of the replica
-	Some examples of using replica_selectors are:
-	* `location:us-east1` --> The "us-east1" replica(s) of any available type
-		will be used to process the request.
-	* `type:READ_ONLY`    --> The "READ_ONLY" type replica(s) in nearest
-	available location will be used to process the
-	request.
-	* `location:us-east1 type:READ_ONLY` --> The "READ_ONLY" type replica(s)
-	in location "us-east1" will be used to process the request.
-		IncludeReplicas also contains an option for AutoFailover which when set
-	Spanner will not route requests to a replica outside the
-	IncludeReplicas list when all the specified replicas are unavailable
-	or unhealthy. The default value is `false`
-*/
-// [START spanner_directed_read]
+//	Shows how to run a query with directed read options.
+//	Only one of ExcludeReplicas or IncludeReplicas can be set
+//	Each accepts a list of ReplicaSelections which contains Location and Type
+//	* `location` - The location must be one of the regions within the
+//	multi-region configuration of your database.
+//	* `type` - The type of the replica
+//	Some examples of using replica_selectors are:
+//	* `location:us-east1` --> The "us-east1" replica(s) of any available type
+//		will be used to process the request.
+//	* `type:READ_ONLY`    --> The "READ_ONLY" type replica(s) in nearest
+//	available location will be used to process the
+//	request.
+//	* `location:us-east1 type:READ_ONLY` --> The "READ_ONLY" type replica(s)
+//	in location "us-east1" will be used to process the request.
+//		IncludeReplicas also contains an option for AutoFailover which when set
+//	Spanner will not route requests to a replica outside the
+//	IncludeReplicas list when all the specified replicas are unavailable
+//	or unhealthy. The default value is `false`
+
 func directedReadOptions(w io.Writer, db string) error {
 	// db = `projects/<project>/instances/<instance-id>/database/<database-id>`
 	ctx := context.Background()
