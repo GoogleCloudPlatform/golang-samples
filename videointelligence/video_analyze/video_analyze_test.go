@@ -16,7 +16,6 @@ package main
 
 import (
 	"bytes"
-	"io"
 	"strings"
 	"testing"
 	"time"
@@ -26,36 +25,65 @@ import (
 
 const catVideo = "gs://cloud-samples-data/video/cat.mp4"
 const googleworkVideo = "gs://python-docs-samples-tests/video/googlework_short.mp4"
+const testFailureFormat = "%s failed: wanted %s, got %s"
 
-func TestAnalyze(t *testing.T) {
+func assert(buf bytes.Buffer, want string, t *testing.T) {
+	got := buf.String()
+	if !strings.Contains(got, want) {
+		t.Errorf(testFailureFormat, t.Name(), want, got)
+	}
+}
+
+func TestAnalyzeShotChange(t *testing.T) {
 	testutil.EndToEndTest(t)
 
-	tests := []struct {
-		name        string
-		gcs         func(io.Writer, string) error
-		path        string
-		wantContain string
-	}{
-		{"ShotChange", shotChangeURI, catVideo, "Shot"},
-		{"Labels", labelURI, catVideo, "cat"},
-		{"Explicit", explicitContentURI, catVideo, "VERY_UNLIKELY"},
-		{"SpeechTranscription", speechTranscriptionURI, googleworkVideo, "cultural"},
-	}
+	testutil.Retry(t, 10, 20*time.Second, func(r *testutil.R) {
+		want := "Shot"
+		var buf bytes.Buffer
+		err := shotChangeURI(&buf, catVideo)
 
-	for _, tt := range tests {
-		if tt.gcs == nil {
-			t.Fatal("gcs not set")
+		if err != nil {
+			t.Fatal(err)
 		}
+		assert(buf, want, t)
+	})
+}
 
-		testutil.Retry(t, 10, 20*time.Second, func(r *testutil.R) {
-			var buf bytes.Buffer
-			if err := tt.gcs(&buf, tt.path); err != nil {
-				r.Errorf("GCS %s(%q): got %v, want nil err", tt.name, tt.path, err)
-				return
-			}
-			if got := buf.String(); !strings.Contains(got, tt.wantContain) {
-				r.Errorf("GCS %s(%q): got %q, want to contain %q", tt.name, tt.path, got, tt.wantContain)
-			}
-		})
+func TestAnalyzeLabelURI(t *testing.T) {
+	testutil.EndToEndTest(t)
+
+	want := "cat"
+	var buf bytes.Buffer
+	err := labelURI(&buf, catVideo)
+	if err != nil {
+		t.Fatal(err)
 	}
+
+	assert(buf, want, t)
+}
+
+func TestAnalyzeExplicitContentURI(t *testing.T) {
+	testutil.EndToEndTest(t)
+
+	want := "VERY_UNLIKELY"
+	var buf bytes.Buffer
+	err := explicitContentURI(&buf, catVideo)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert(buf, want, t)
+}
+
+func TestAnalyzeSpeechTranscriptionURI(t *testing.T) {
+	testutil.EndToEndTest(t)
+
+	want := "cultural"
+	var buf bytes.Buffer
+	err := speechTranscriptionURI(&buf, googleworkVideo)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert(buf, want, t)
 }
