@@ -35,12 +35,15 @@ func generateExampleDefaultMessages(numMessages int) ([][]byte, error) {
 	msgs := make([][]byte, numMessages)
 	for i := 0; i < numMessages; i++ {
 
-		random := rand.New(rand.NewSource(time.Now().UnixNano()))
+		// instantiate a new random source.
+		random := rand.New(
+			rand.NewSource(time.Now().UnixNano()),
+		)
 
 		// Our example data embeds an array of structs, so we'll construct that first.
-		sList := make([]*exampleproto.SampleStruct, 5)
+		sl := make([]*exampleproto.SampleStruct, 5)
 		for i := 0; i < int(random.Int63n(5)+1); i++ {
-			sList[i] = &exampleproto.SampleStruct{
+			sl[i] = &exampleproto.SampleStruct{
 				SubIntCol: proto.Int64(random.Int63()),
 			}
 		}
@@ -78,7 +81,7 @@ func generateExampleDefaultMessages(numMessages int) ([][]byte, error) {
 			// Int64List is an array of INT64 types.
 			Int64List: []int64{2, 4, 6, 8},
 
-			// This is a required field, and thus must be present.
+			// This is a required field in the schema, and thus must be present.
 			RowNum: proto.Int64(23),
 
 			// StructCol is a single nested message.
@@ -87,7 +90,7 @@ func generateExampleDefaultMessages(numMessages int) ([][]byte, error) {
 			},
 
 			// StructList is a repeated array of a nested message.
-			StructList: sList,
+			StructList: sl,
 		}
 
 		b, err := proto.Marshal(m)
@@ -108,7 +111,9 @@ func appendToDefaultStream(w io.Writer, projectID, datasetID, tableID string) er
 
 	ctx := context.Background()
 	// Instantiate a managedwriter client to handle interactions with the service.
-	client, err := managedwriter.NewClient(ctx, projectID)
+	client, err := managedwriter.NewClient(ctx, projectID,
+		managedwriter.WithMultiplexing(), // Enables connection sharing.
+	)
 	if err != nil {
 		return fmt.Errorf("managedwriter.NewClient: %w", err)
 	}
@@ -119,7 +124,7 @@ func appendToDefaultStream(w io.Writer, projectID, datasetID, tableID string) er
 	// is analagous to the "schema" for the message.  Both SampleData and SampleStruct are
 	// two distinct messages in the compiled proto file, so we'll use adapt.NormalizeDescriptor
 	// to unify them into a single self-contained descriptor representation.
-	m := &exampleproto.SampleData{}
+	var m *exampleproto.SampleData
 	descriptorProto, err := adapt.NormalizeDescriptor(m.ProtoReflect().Descriptor())
 	if err != nil {
 		return fmt.Errorf("NormalizeDescriptor: %w", err)
