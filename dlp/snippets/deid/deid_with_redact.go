@@ -43,7 +43,7 @@ func deidentifyWithRedact(w io.Writer, projectID, inputStr string, infoTypeNames
 	defer client.Close()
 
 	// Specify the content to be inspected.
-	var contentItem = &dlppb.ContentItem{
+	contentItem := &dlppb.ContentItem{
 		DataItem: &dlppb.ContentItem_Value{
 			Value: inputStr,
 		},
