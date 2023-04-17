@@ -123,7 +123,6 @@ func inspectWithHotWordRules(w io.Writer, projectID, textToInspect string) error
 		fmt.Fprintf(w, "Likelihood: %v\n", v.GetLikelihood())
 	}
 	return nil
-
 }
 
 // [END dlp_inspect_hotword_rule]

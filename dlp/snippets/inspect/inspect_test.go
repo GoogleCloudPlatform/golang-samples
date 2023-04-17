@@ -277,7 +277,6 @@ func TestInspectBigquery(t *testing.T) {
 	}
 }
 
-
 func TestInspectWithHotWordRules(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
