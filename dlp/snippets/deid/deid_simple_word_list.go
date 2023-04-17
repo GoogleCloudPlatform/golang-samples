@@ -43,7 +43,7 @@ func deidentifyWithWordList(w io.Writer, projectID, input string, infoTypeName s
 	defer client.Close()
 
 	// Specify what content you want the service to DeIdentify.
-	var item = &dlppb.ContentItem{
+	item := &dlppb.ContentItem{
 		DataItem: &dlppb.ContentItem_Value{
 			Value: input,
 		},
