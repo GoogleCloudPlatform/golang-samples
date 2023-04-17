@@ -37,7 +37,7 @@ func deidentifyWithReplacement(w io.Writer, projectID, inputStr string, infoType
 	// call the Close method to cleanup its resources.
 	client, err := dlp.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("dlp.NewClient: %v", err)
+		return err
 	}
 
 	// Closing the client safely cleans up background resources.
@@ -49,12 +49,12 @@ func deidentifyWithReplacement(w io.Writer, projectID, inputStr string, infoType
 	for _, v := range infoTypeNames {
 		infoTypes = append(infoTypes, &dlppb.InfoType{Name: v})
 	}
-	var inspectConfig = &dlppb.InspectConfig{
+	inspectConfig := &dlppb.InspectConfig{
 		InfoTypes: infoTypes,
 	}
 
 	// Specify replacement string to be used for the finding.
-	var replaceValueConfig = &dlppb.ReplaceValueConfig{
+	replaceValueConfig := &dlppb.ReplaceValueConfig{
 		NewValue: &dlppb.Value{
 			Type: &dlppb.Value_StringValue{
 				StringValue: replaceVal,
@@ -63,12 +63,12 @@ func deidentifyWithReplacement(w io.Writer, projectID, inputStr string, infoType
 	}
 
 	// Define type of de-identification as replacement.
-	var primitiveTransformation = &dlppb.PrimitiveTransformation_ReplaceConfig{
+	primitiveTransformation := &dlppb.PrimitiveTransformation_ReplaceConfig{
 		ReplaceConfig: replaceValueConfig,
 	}
 
 	// Associate de-identification type with info type.
-	var infoTypeTransformation = &dlppb.InfoTypeTransformations_InfoTypeTransformation{
+	infoTypeTransformation := &dlppb.InfoTypeTransformations_InfoTypeTransformation{
 		InfoTypes: infoTypes,
 		PrimitiveTransformation: &dlppb.PrimitiveTransformation{
 			Transformation: primitiveTransformation,
@@ -101,7 +101,6 @@ func deidentifyWithReplacement(w io.Writer, projectID, inputStr string, infoType
 
 	// Print the results.
 	fmt.Fprintf(w, "output : %v", resp.GetItem().GetValue())
-
 	return nil
 }
 

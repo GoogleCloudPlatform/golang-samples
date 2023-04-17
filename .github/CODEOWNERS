@@ -73,7 +73,7 @@
 # Does not have owner
 /asset/                                @GoogleCloudPlatform/go-samples-reviewers
 /auth/                                 @GoogleCloudPlatform/go-samples-reviewers
-/dlp/                                  @GoogleCloudPlatform/go-samples-reviewers
+/dlp/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/googleapis-dlp
 /endpoints/                            @GoogleCloudPlatform/go-samples-reviewers
 /errorreporting/                       @GoogleCloudPlatform/go-samples-reviewers
 /iap/                                  @GoogleCloudPlatform/go-samples-reviewers
