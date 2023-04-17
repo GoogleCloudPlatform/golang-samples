@@ -106,7 +106,7 @@ func TestDeidentifyDateShift(t *testing.T) {
 func TestDeidentifyTableMaskingCondition(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	var row1 = &dlppb.Table_Row{
+	row1 := &dlppb.Table_Row{
 		Values: []*dlppb.Value{
 			{Type: &dlppb.Value_StringValue{StringValue: "22"}},
 			{Type: &dlppb.Value_StringValue{StringValue: "Jane Austen"}},
@@ -114,7 +114,7 @@ func TestDeidentifyTableMaskingCondition(t *testing.T) {
 		},
 	}
 
-	var row2 = &dlppb.Table_Row{
+	row2 := &dlppb.Table_Row{
 		Values: []*dlppb.Value{
 			{Type: &dlppb.Value_StringValue{StringValue: "55"}},
 			{Type: &dlppb.Value_StringValue{StringValue: "Mark Twain"}},
@@ -122,7 +122,7 @@ func TestDeidentifyTableMaskingCondition(t *testing.T) {
 		},
 	}
 
-	var row3 = &dlppb.Table_Row{
+	row3 := &dlppb.Table_Row{
 		Values: []*dlppb.Value{
 			{Type: &dlppb.Value_StringValue{StringValue: "101"}},
 			{Type: &dlppb.Value_StringValue{StringValue: "Charles Dickens"}},

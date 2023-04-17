@@ -32,7 +32,7 @@ func deidentifyTableMaskingCondition(w io.Writer, projectID string, table *dlppb
 
 	//if table value is not passed, the default table will be used
 	if table == nil {
-		var row1 = &dlppb.Table_Row{
+		row1 := &dlppb.Table_Row{
 			Values: []*dlppb.Value{
 				{Type: &dlppb.Value_StringValue{StringValue: "22"}},
 				{Type: &dlppb.Value_StringValue{StringValue: "Jane Austen"}},
@@ -40,7 +40,7 @@ func deidentifyTableMaskingCondition(w io.Writer, projectID string, table *dlppb
 			},
 		}
 
-		var row2 = &dlppb.Table_Row{
+		row2 := &dlppb.Table_Row{
 			Values: []*dlppb.Value{
 				{Type: &dlppb.Value_StringValue{StringValue: "55"}},
 				{Type: &dlppb.Value_StringValue{StringValue: "Mark Twain"}},
@@ -48,7 +48,7 @@ func deidentifyTableMaskingCondition(w io.Writer, projectID string, table *dlppb
 			},
 		}
 
-		var row3 = &dlppb.Table_Row{
+		row3 := &dlppb.Table_Row{
 			Values: []*dlppb.Value{
 				{Type: &dlppb.Value_StringValue{StringValue: "101"}},
 				{Type: &dlppb.Value_StringValue{StringValue: "Charles Dickens"}},
@@ -77,34 +77,34 @@ func deidentifyTableMaskingCondition(w io.Writer, projectID string, table *dlppb
 	// call the Close method to cleanup its resources.
 	client, err := dlp.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("dlp.NewClient: %v", err)
+		return err
 	}
 
 	// Closing the client safely cleans up background resources.
 	defer client.Close()
 
 	// Specify what content you want the service to de-identify.
-	var contentItem = &dlppb.ContentItem{
+	contentItem := &dlppb.ContentItem{
 		DataItem: &dlppb.ContentItem_Table{
 			Table: table,
 		},
 	}
 
 	// Specify how the content should be de-identified.
-	var charMaskConfig = &dlppb.CharacterMaskConfig{
+	charMaskConfig := &dlppb.CharacterMaskConfig{
 		MaskingCharacter: "*",
 	}
-	var primitiveTransformation = &dlppb.PrimitiveTransformation_CharacterMaskConfig{
+	primitiveTransformation := &dlppb.PrimitiveTransformation_CharacterMaskConfig{
 		CharacterMaskConfig: charMaskConfig,
 	}
 
 	// Specify field to be de-identified.
-	var fieldId = &dlppb.FieldId{
+	fieldId := &dlppb.FieldId{
 		Name: "HAPPINESS SCORE",
 	}
 
 	// Specify when the above field should be de-identified.
-	var condition = &dlppb.RecordCondition{
+	condition := &dlppb.RecordCondition{
 		// Apply the condition to records
 		Expressions: &dlppb.RecordCondition_Expressions{
 			Type: &dlppb.RecordCondition_Expressions_Conditions{
@@ -126,7 +126,7 @@ func deidentifyTableMaskingCondition(w io.Writer, projectID string, table *dlppb
 	}
 
 	// Associate the de-identification and conditions with the specified field.
-	var fieldTransformation = &dlppb.FieldTransformation{
+	fieldTransformation := &dlppb.FieldTransformation{
 		Fields: []*dlppb.FieldId{
 			fieldId,
 		},
@@ -138,7 +138,7 @@ func deidentifyTableMaskingCondition(w io.Writer, projectID string, table *dlppb
 		Condition: condition,
 	}
 
-	var recordTransformations = &dlppb.RecordTransformations{
+	recordTransformations := &dlppb.RecordTransformations{
 		FieldTransformations: []*dlppb.FieldTransformation{
 			fieldTransformation,
 		},
