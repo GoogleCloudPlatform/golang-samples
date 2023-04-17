@@ -30,7 +30,7 @@ func deIdentifyTableBucketing(w io.Writer, projectID string, table *dlppb.Table)
 
 	//if table value is not passed, the default table will be used
 	if table == nil {
-		var row1 = &dlppb.Table_Row{
+		row1 := &dlppb.Table_Row{
 			Values: []*dlppb.Value{
 				{Type: &dlppb.Value_StringValue{StringValue: "22"}},
 				{Type: &dlppb.Value_StringValue{StringValue: "Jane Austen"}},
@@ -38,7 +38,7 @@ func deIdentifyTableBucketing(w io.Writer, projectID string, table *dlppb.Table)
 			},
 		}
 
-		var row2 = &dlppb.Table_Row{
+		row2 := &dlppb.Table_Row{
 			Values: []*dlppb.Value{
 				{Type: &dlppb.Value_StringValue{StringValue: "55"}},
 				{Type: &dlppb.Value_StringValue{StringValue: "Mark Twain"}},
@@ -46,7 +46,7 @@ func deIdentifyTableBucketing(w io.Writer, projectID string, table *dlppb.Table)
 			},
 		}
 
-		var row3 = &dlppb.Table_Row{
+		row3 := &dlppb.Table_Row{
 			Values: []*dlppb.Value{
 				{Type: &dlppb.Value_StringValue{StringValue: "101"}},
 				{Type: &dlppb.Value_StringValue{StringValue: "Charles Dickens"}},
