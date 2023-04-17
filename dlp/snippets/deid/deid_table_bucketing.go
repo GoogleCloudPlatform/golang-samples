@@ -75,21 +75,21 @@ func deIdentifyTableBucketing(w io.Writer, projectID string, table *dlppb.Table)
 	// call the Close method to cleanup its resources.
 	client, err := dlp.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("dlp.NewClient: %v", err)
+		return err
 	}
 
 	// Closing the client safely cleans up background resources.
 	defer client.Close()
 
 	// Specify what content you want the service to de-identify.
-	var contentItem = &dlppb.ContentItem{
+	contentItem := &dlppb.ContentItem{
 		DataItem: &dlppb.ContentItem_Table{
 			Table: table,
 		},
 	}
 
 	// Specify how the content should be de-identified.
-	var fixedSizeBucketingConfig = &dlppb.FixedSizeBucketingConfig{
+	fixedSizeBucketingConfig := &dlppb.FixedSizeBucketingConfig{
 		BucketSize: 10,
 		LowerBound: &dlppb.Value{
 			Type: &dlppb.Value_IntegerValue{
@@ -104,17 +104,17 @@ func deIdentifyTableBucketing(w io.Writer, projectID string, table *dlppb.Table)
 	}
 
 	//need
-	var primitiveTransformation = &dlppb.PrimitiveTransformation_FixedSizeBucketingConfig{
+	primitiveTransformation := &dlppb.PrimitiveTransformation_FixedSizeBucketingConfig{
 		FixedSizeBucketingConfig: fixedSizeBucketingConfig,
 	}
 
 	// Specify field to be encrypted.
-	var fieldId = &dlppb.FieldId{
+	fieldId := &dlppb.FieldId{
 		Name: "HAPPINESS SCORE",
 	}
 
 	// Associate the encryption with the specified field.
-	var fieldTransformation = &dlppb.FieldTransformation{
+	fieldTransformation := &dlppb.FieldTransformation{
 		Transformation: &dlppb.FieldTransformation_PrimitiveTransformation{
 			PrimitiveTransformation: &dlppb.PrimitiveTransformation{
 				Transformation: primitiveTransformation,
@@ -125,7 +125,7 @@ func deIdentifyTableBucketing(w io.Writer, projectID string, table *dlppb.Table)
 		},
 	}
 
-	var recordTransformations = &dlppb.RecordTransformations{
+	recordTransformations := &dlppb.RecordTransformations{
 		FieldTransformations: []*dlppb.FieldTransformation{
 			fieldTransformation,
 		},
@@ -145,7 +145,7 @@ func deIdentifyTableBucketing(w io.Writer, projectID string, table *dlppb.Table)
 	// Send the request.
 	resp, err := client.DeidentifyContent(ctx, req)
 	if err != nil {
-		return fmt.Errorf("DeidentifyContent: %v", err)
+		return err
 	}
 
 	// Print the results.

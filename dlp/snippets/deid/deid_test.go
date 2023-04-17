@@ -160,16 +160,13 @@ func TestDeidentifyTableBucketing(t *testing.T) {
 		},
 	}
 
-	t.Run("deIdentifyTableBucketing", func(t *testing.T) {
-		t.Parallel()
-		buf := new(bytes.Buffer)
-		if err := deIdentifyTableBucketing(buf, tc.ProjectID, table); err != nil {
-			t.Errorf("deIdentifyTableBucketing: %v", err)
-		}
-		got := buf.String()
-		if want := "Table after de-identification"; !strings.Contains(got, want) {
-			t.Errorf("deIdentifyTableBucketing got %q, want %q", got, want)
-		}
-	})
+	buf := new(bytes.Buffer)
+	if err := deIdentifyTableBucketing(buf, tc.ProjectID, table); err != nil {
+		t.Errorf("deIdentifyTableBucketing: %v", err)
+	}
+	got := buf.String()
+	if want := "Table after de-identification"; !strings.Contains(got, want) {
+		t.Errorf("deIdentifyTableBucketing got %q, want %q", got, want)
+	}
 
 }
