@@ -106,7 +106,7 @@ func TestDeidentifyDateShift(t *testing.T) {
 func TestDeidentifyTableConditionInfoTypes(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	var row1 = &dlppb.Table_Row{
+	row1 := &dlppb.Table_Row{
 		Values: []*dlppb.Value{
 			{Type: &dlppb.Value_StringValue{StringValue: "22"}},
 			{Type: &dlppb.Value_StringValue{StringValue: "Jane Austen"}},
@@ -115,7 +115,7 @@ func TestDeidentifyTableConditionInfoTypes(t *testing.T) {
 		},
 	}
 
-	var row2 = &dlppb.Table_Row{
+	row2 := &dlppb.Table_Row{
 		Values: []*dlppb.Value{
 			{Type: &dlppb.Value_StringValue{StringValue: "55"}},
 			{Type: &dlppb.Value_StringValue{StringValue: "Mark Twain"}},
@@ -124,7 +124,7 @@ func TestDeidentifyTableConditionInfoTypes(t *testing.T) {
 		},
 	}
 
-	var row3 = &dlppb.Table_Row{
+	row3 := &dlppb.Table_Row{
 		Values: []*dlppb.Value{
 			{Type: &dlppb.Value_StringValue{StringValue: "101"}},
 			{Type: &dlppb.Value_StringValue{StringValue: "Charles Dickens"}},
@@ -146,18 +146,15 @@ func TestDeidentifyTableConditionInfoTypes(t *testing.T) {
 			{Values: row3.Values},
 		},
 	}
-	t.Run("deidentifyTableConditionInfoTypes", func(t *testing.T) {
-		t.Parallel()
-		buf := new(bytes.Buffer)
 
-		if err := deidentifyTableConditionInfoTypes(buf, tc.ProjectID, table, []string{"PATIENT", "FACTOID"}); err != nil {
-			t.Errorf("deidentifyTableConditionInfoTypes: %v", err)
-		}
+	buf := new(bytes.Buffer)
 
-		got := buf.String()
-		if want := "Table after de-identification"; !strings.Contains(got, want) {
-			t.Errorf("deidentifyTableConditionInfoTypes got %q, want %q", got, want)
-		}
-	})
+	if err := deidentifyTableConditionInfoTypes(buf, tc.ProjectID, table, []string{"PATIENT", "FACTOID"}); err != nil {
+		t.Errorf("deidentifyTableConditionInfoTypes: %v", err)
+	}
 
+	got := buf.String()
+	if want := "Table after de-identification"; !strings.Contains(got, want) {
+		t.Errorf("deidentifyTableConditionInfoTypes got %q, want %q", got, want)
+	}
 }
