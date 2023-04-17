@@ -124,15 +124,13 @@ func TestDeIdentifyWithReplacement(t *testing.T) {
 	replaceVal := "[email-address]"
 	want := "output : My name is Alicia Abernathy, and my email address is [email-address]."
 
-	t.Run(input, func(t *testing.T) {
-		t.Parallel()
-		buf := new(bytes.Buffer)
-		err := deidentifyWithReplacement(buf, tc.ProjectID, input, infoType, replaceVal)
-		if err != nil {
-			t.Errorf("deidentifyWithReplacement(%q) = error '%q', want %q", input, err, want)
-		}
-		if got := buf.String(); got != want {
-			t.Errorf("deidentifyWithReplacement(%q) = %q, want %q", input, got, want)
-		}
-	})
+	buf := new(bytes.Buffer)
+	err := deidentifyWithReplacement(buf, tc.ProjectID, input, infoType, replaceVal)
+	if err != nil {
+		t.Errorf("deidentifyWithReplacement(%q) = error '%q', want %q", input, err, want)
+	}
+	if got := buf.String(); got != want {
+		t.Errorf("deidentifyWithReplacement(%q) = %q, want %q", input, got, want)
+	}
+
 }
