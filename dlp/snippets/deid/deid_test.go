@@ -103,6 +103,23 @@ func TestDeidentifyDateShift(t *testing.T) {
 	}
 }
 
+func TestDeidentifyExceptionList(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	input := "jack@example.org accessed customer record of user5@example.com"
+	want := "output : jack@example.org accessed customer record of [EMAIL_ADDRESS]"
+
+	buf := new(bytes.Buffer)
+	err := deidentifyExceptionList(buf, tc.ProjectID, input)
+	if err != nil {
+		t.Errorf("deidentifyExceptionList(%q) = error '%q', want %q", input, err, want)
+	}
+	if got := buf.String(); got != want {
+		t.Errorf("deidentifyExceptionList(%q) = %q, want %q", input, got, want)
+	}
+
+}
+
 func TestDeidentifyTableBucketing(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
