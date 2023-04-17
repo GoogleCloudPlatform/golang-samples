@@ -37,7 +37,7 @@ func deidentifyWithWordList(w io.Writer, projectID, input string, infoTypeName s
 	// call the Close method to cleanup its resources.
 	client, err := dlp.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("dlp.NewClient: %v", err)
+		return err
 	}
 	// Closing the client safely cleans up background resources.
 	defer client.Close()
@@ -69,18 +69,18 @@ func deidentifyWithWordList(w io.Writer, projectID, input string, infoTypeName s
 	}
 
 	// Define type of de-identification as replacement.
-	var primitiveTransformation = &dlppb.PrimitiveTransformation{
+	primitiveTransformation := &dlppb.PrimitiveTransformation{
 		Transformation: &dlppb.PrimitiveTransformation_ReplaceWithInfoTypeConfig{
 			ReplaceWithInfoTypeConfig: &dlppb.ReplaceWithInfoTypeConfig{},
 		},
 	}
 
-	var infoTypeTransformation = &dlppb.InfoTypeTransformations_InfoTypeTransformation{
+	infoTypeTransformation := &dlppb.InfoTypeTransformations_InfoTypeTransformation{
 		InfoTypes:               []*dlppb.InfoType{infoType},
 		PrimitiveTransformation: primitiveTransformation,
 	}
 
-	var infoTypeTransformations = &dlppb.InfoTypeTransformations{
+	infoTypeTransformations := &dlppb.InfoTypeTransformations{
 		// Associate de-identification type with info type.
 		Transformations: []*dlppb.InfoTypeTransformations_InfoTypeTransformation{
 			infoTypeTransformation,
@@ -108,7 +108,7 @@ func deidentifyWithWordList(w io.Writer, projectID, input string, infoTypeName s
 	// Send the request.
 	resp, err := client.DeidentifyContent(ctx, req)
 	if err != nil {
-		return fmt.Errorf("DeidentifyContent: %v", err)
+		return err
 	}
 
 	// Print the result.
