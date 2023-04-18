@@ -291,6 +291,20 @@ func TestInspectPhoneNumber(t *testing.T) {
 	}
 }
 
+func TestInspectStringCustomHotWord(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	if err := inspectStringCustomHotWord(buf, tc.ProjectID, "patient name: John Doe", "patient", "PERSON_NAME"); err != nil {
+		t.Errorf("inspectStringCustomHotWord: %v", err)
+	}
+
+	got := buf.String()
+	if want := "Infotype Name: PERSON_NAME"; !strings.Contains(got, want) {
+		t.Errorf("inspectStringCustomHotWord got %q, want %q", got, want)
+	}
+}
+
 func TestInspectStringWithExclusionDictSubstring(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
