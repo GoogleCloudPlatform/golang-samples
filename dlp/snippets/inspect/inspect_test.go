@@ -326,3 +326,21 @@ func TestInspectStringWithExclusionDictSubstring(t *testing.T) {
 		t.Errorf("inspectStringWithExclusionDictSubstring got %q, want %q", got, want)
 	}
 }
+
+func TestInspectStringOmitOverlap(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	if err := inspectStringOmitOverlap(buf, tc.ProjectID, "gary@example.com"); err != nil {
+		t.Fatal(err)
+	}
+
+	got := buf.String()
+	if want := "Infotype Name: EMAIL_ADDRESS"; !strings.Contains(got, want) {
+		t.Errorf("inspectStringOmitOverlap got %q, want %q", got, want)
+	}
+
+	if want := "Infotype Name: PERSON_NAME"; strings.Contains(got, want) {
+		t.Errorf("inspectStringOmitOverlap got %q, want %q", got, want)
+	}
+}
