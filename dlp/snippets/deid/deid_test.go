@@ -17,7 +17,7 @@ package deid
 
 import (
 	"bytes"
-	"strings"
+	"reflect"
 	"testing"
 
 	"cloud.google.com/go/dlp/apiv2/dlppb"
@@ -147,7 +147,7 @@ func TestDeidentifyTableBucketing(t *testing.T) {
 		},
 	}
 
-	table := &dlppb.Table{
+	tableToDeIdentify := &dlppb.Table{
 		Headers: []*dlppb.FieldId{
 			{Name: "AGE"},
 			{Name: "PATIENT"},
@@ -160,13 +160,50 @@ func TestDeidentifyTableBucketing(t *testing.T) {
 		},
 	}
 
-	buf := new(bytes.Buffer)
-	if err := deIdentifyTableBucketing(buf, tc.ProjectID, table); err != nil {
-		t.Errorf("deIdentifyTableBucketing: %v", err)
-	}
-	got := buf.String()
-	if want := "Table after de-identification"; !strings.Contains(got, want) {
-		t.Errorf("deIdentifyTableBucketing got %q, want %q", got, want)
+	row4 := &dlppb.Table_Row{
+		Values: []*dlppb.Value{
+			{Type: &dlppb.Value_StringValue{StringValue: "22"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "Jane Austen"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "20:30"}},
+		},
 	}
 
+	row5 := &dlppb.Table_Row{
+		Values: []*dlppb.Value{
+			{Type: &dlppb.Value_StringValue{StringValue: "55"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "Mark Twain"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "70:80"}},
+		},
+	}
+
+	row6 := &dlppb.Table_Row{
+		Values: []*dlppb.Value{
+			{Type: &dlppb.Value_StringValue{StringValue: "101"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "Charles Dickens"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "90:100"}},
+		},
+	}
+
+	expectedTable := &dlppb.Table{
+		Headers: []*dlppb.FieldId{
+			{Name: "AGE"},
+			{Name: "PATIENT"},
+			{Name: "HAPPINESS SCORE"},
+		},
+		Rows: []*dlppb.Table_Row{
+			{Values: row4.Values},
+			{Values: row5.Values},
+			{Values: row6.Values},
+		},
+	}
+
+	buf := new(bytes.Buffer)
+	got, err := deIdentifyTableBucketing(buf, tc.ProjectID, tableToDeIdentify)
+	if err != nil {
+		t.Errorf("deIdentifyTableBucketing: %v", err)
+	}
+
+	if reflect.DeepEqual(got, expectedTable) {
+		t.Errorf("deIdentifyTableBucketing got %v, want %v", got, expectedTable)
+	}
 }

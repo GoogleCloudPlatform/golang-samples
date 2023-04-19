@@ -24,7 +24,7 @@ import (
 )
 
 // deIdentifyTableBucketing de-identifies data using table bucketing
-func deIdentifyTableBucketing(w io.Writer, projectID string, table *dlppb.Table) error {
+func deIdentifyTableBucketing(w io.Writer, projectID string, table *dlppb.Table) (*dlppb.Table, error) {
 	// projectId := "your-project-id"
 	// table := "your-table-value"
 
@@ -75,7 +75,7 @@ func deIdentifyTableBucketing(w io.Writer, projectID string, table *dlppb.Table)
 	// call the Close method to cleanup its resources.
 	client, err := dlp.NewClient(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Closing the client safely cleans up background resources.
@@ -145,12 +145,12 @@ func deIdentifyTableBucketing(w io.Writer, projectID string, table *dlppb.Table)
 	// Send the request.
 	resp, err := client.DeidentifyContent(ctx, req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Print the results.
 	fmt.Fprintf(w, "Table after de-identification : %v", resp.GetItem().GetTable())
-	return nil
+	return resp.GetItem().GetTable(), nil
 }
 
 // [END dlp_deidentify_table_bucketing]
