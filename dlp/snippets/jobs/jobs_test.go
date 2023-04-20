@@ -181,3 +181,20 @@ func TestDeleteJob(t *testing.T) {
 		t.Errorf("unable to delete job: %s", s)
 	}
 }
+
+func TestCreateJob(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	gcsPath := "gs://dlp-crest-test/test.txt"
+	infoTypeNames := []string{"EMAIL_ADDRESS", "PERSON_NAME", "LOCATION", "PHONE_NUMBER"}
+
+	if err := createJob(buf, tc.ProjectID, gcsPath, infoTypeNames); err != nil {
+		t.Fatal(err)
+	}
+
+	got := buf.String()
+	if want := "Created a Dlp Job "; !strings.Contains(got, want) {
+		t.Errorf("TestInspectWithCustomRegex got %q, want %q", got, want)
+	}
+}

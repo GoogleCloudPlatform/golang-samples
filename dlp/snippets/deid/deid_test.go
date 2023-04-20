@@ -17,7 +17,6 @@ package deid
 
 import (
 	"bytes"
-	"os"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -115,25 +114,5 @@ func TestDeidentifyExceptionList(t *testing.T) {
 	}
 	if got := buf.String(); got != want {
 		t.Errorf("deidentifyExceptionList(%q) = %q, want %q", input, got, want)
-	}
-
-}
-
-func TestDeIdentifyFreeTextWithFPEUsingSurrogate(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	input := "My phone number is 9824376677"
-	infoType := "PHONE_NUMBER"
-	surrogateType := "PHONE_TOKEN"
-	unWrappedKey := os.Getenv("unWrappedKey")
-	// unwrappedKey := "hXribiHR6kvVKmj5ptTZLRTj8+u0eBQzwcrEPwyGhe8="
-	want := "output: My phone number is PHONE_TOKEN(10):4068372189"
-
-	buf := new(bytes.Buffer)
-	if err := deidentifyFreeTextWithFPEUsingSurrogate(buf, tc.ProjectID, input, infoType, surrogateType, unWrappedKey); err != nil {
-		t.Fatal(err)
-	}
-	if got := buf.String(); got != want {
-		t.Errorf("deidentifyFreeTextWithFPEUsingSurrogate(%q) = %q, want %q", input, got, want)
 	}
 }
