@@ -2,6 +2,6 @@ module github.com/GoogleCloudPlatform/golang-samples/run
 
 go 1.19
 
-require cloud.google.com/go/compute/metadata v0.2.2
+require cloud.google.com/go/compute/metadata v0.2.3
 
-require cloud.google.com/go/compute v1.12.1 // indirect
+require cloud.google.com/go/compute v1.14.0 // indirect

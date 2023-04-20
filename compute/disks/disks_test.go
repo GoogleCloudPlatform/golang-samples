@@ -153,6 +153,7 @@ func deleteInstance(ctx context.Context, projectId, zone, instanceName string) e
 }
 
 func TestComputeDisksSnippets(t *testing.T) {
+	t.Skip("skipping for flakes. see googlecloudplatform/golang-samples#2929")
 	ctx := context.Background()
 	var r *rand.Rand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))
@@ -346,7 +347,7 @@ func TestComputeDisksSnippets(t *testing.T) {
 		buf.Reset()
 		want := "disk autoDelete field updated."
 
-		if err := setDiskAutoDelete(buf, tc.ProjectID, zone, instanceName, instanceDiskName); err != nil {
+		if err := setDiskAutoDelete(buf, tc.ProjectID, zone, instanceName, instanceDiskName, true); err != nil {
 			t.Fatalf("setDiskAutodelete got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, want) {

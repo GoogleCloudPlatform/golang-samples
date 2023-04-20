@@ -23,6 +23,8 @@ import (
 )
 
 func TestGetSimilarProductsURI(t *testing.T) {
+	// TODO(#2924): Re-enable once resource availability is hammered out.
+	t.Skip()
 	tc := testutil.SystemTest(t)
 
 	const location = "us-west1"

@@ -49,6 +49,7 @@ func TestInspectDatastore(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
+		test := test
 		t.Run(test.kind, func(t *testing.T) {
 			t.Parallel()
 			testutil.Retry(t, 5, 15*time.Second, func(r *testutil.R) {
@@ -101,6 +102,7 @@ func TestInspectGCS(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
+		test := test
 		t.Run(test.fileName, func(t *testing.T) {
 			t.Parallel()
 			testutil.Retry(t, 5, 15*time.Second, func(r *testutil.R) {
@@ -260,6 +262,7 @@ func TestInspectBigquery(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
+		test := test
 		t.Run(test.table, func(t *testing.T) {
 			t.Parallel()
 			u := uuid.Must(uuid.NewV4()).String()[:8]
@@ -271,5 +274,82 @@ func TestInspectBigquery(t *testing.T) {
 				t.Errorf("inspectBigquery(%s) = %q, want %q substring", test.table, got, test.want)
 			}
 		})
+	}
+}
+
+func TestInspectPhoneNumber(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	if err := inspectPhoneNumber(buf, tc.ProjectID, "I'm Gary and my phone number is (415) 555-0890"); err != nil {
+		t.Fatal(err)
+	}
+
+	got := buf.String()
+	if want := "Info type: PHONE_NUMBER"; !strings.Contains(got, want) {
+		t.Errorf("inspectPhoneNumber got %q, want %q", got, want)
+	}
+}
+
+func TestInspectStringWithExclusionDictionary(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	if err := inspectStringWithExclusionDictionary(buf, tc.ProjectID, "Some email addresses: gary@example.com, example@example.com", []string{"example@example.com"}); err != nil {
+		t.Fatal(err)
+	}
+	got := buf.String()
+	if want := "Infotype Name: EMAIL_ADDRESS"; !strings.Contains(got, want) {
+		t.Errorf("inspectStringWithExclusionDictionary got %q, want %q", got, want)
+	}
+}
+
+func TestInspectStringWithExclusionDictSubstring(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	if err := inspectStringWithExclusionDictSubstring(buf, tc.ProjectID, "Some email addresses: gary@example.com, TEST@example.com", []string{"TEST"}); err != nil {
+		t.Fatal(err)
+	}
+	got := buf.String()
+
+	if want := "Infotype Name: DOMAIN_NAME"; !strings.Contains(got, want) {
+		t.Errorf("inspectStringWithExclusionDictSubstring got %q, want %q", got, want)
+	}
+
+	if want := "Quote: TEST"; strings.Contains(got, want) {
+		t.Errorf("inspectStringWithExclusionDictSubstring got %q, want %q", got, want)
+	}
+}
+
+func TestInspectStringOmitOverlap(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	if err := inspectStringOmitOverlap(buf, tc.ProjectID, "gary@example.com"); err != nil {
+		t.Fatal(err)
+	}
+
+	got := buf.String()
+	if want := "Infotype Name: EMAIL_ADDRESS"; !strings.Contains(got, want) {
+		t.Errorf("inspectStringOmitOverlap got %q, want %q", got, want)
+	}
+
+	if want := "Infotype Name: PERSON_NAME"; strings.Contains(got, want) {
+		t.Errorf("inspectStringOmitOverlap got %q, want %q", got, want)
+	}
+}
+
+func TestInspectStringCustomHotWord(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	if err := inspectStringCustomHotWord(buf, tc.ProjectID, "patient name: John Doe", "patient", "PERSON_NAME"); err != nil {
+		t.Errorf("inspectStringCustomHotWord: %v", err)
+	}
+
+	got := buf.String()
+	if want := "Infotype Name: PERSON_NAME"; !strings.Contains(got, want) {
+		t.Errorf("inspectStringCustomHotWord got %q, want %q", got, want)
 	}
 }

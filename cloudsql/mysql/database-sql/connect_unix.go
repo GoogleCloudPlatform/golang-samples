@@ -45,7 +45,7 @@ func connectUnixSocket() (*sql.DB, error) {
 		unixSocketPath = mustGetenv("INSTANCE_UNIX_SOCKET") // e.g. '/cloudsql/project:region:instance'
 	)
 
-	dbURI := fmt.Sprintf("%s:%s@unix(/%s)/%s?parseTime=true",
+	dbURI := fmt.Sprintf("%s:%s@unix(%s)/%s?parseTime=true",
 		dbUser, dbPwd, unixSocketPath, dbName)
 
 	// dbPool is the pool of database connections.

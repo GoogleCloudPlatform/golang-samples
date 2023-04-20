@@ -49,7 +49,7 @@ func transferFromAws(w io.Writer, projectID string, awsSourceBucket string, gcsS
 	jobDescription := "Transfers objects from an AWS bucket to a GCS bucket"
 
 	// The time to start the transfer
-	startTime := time.Now()
+	startTime := time.Now().UTC()
 
 	// The AWS access key credential, should be accessed via environment variable for security
 	awsAccessKeyID := os.Getenv("AWS_ACCESS_KEY_ID")
