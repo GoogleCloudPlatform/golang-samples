@@ -102,8 +102,6 @@ func deIdentifyTableBucketing(w io.Writer, projectID string, table *dlppb.Table)
 			},
 		},
 	}
-
-	//need
 	primitiveTransformation := &dlppb.PrimitiveTransformation_FixedSizeBucketingConfig{
 		FixedSizeBucketingConfig: fixedSizeBucketingConfig,
 	}

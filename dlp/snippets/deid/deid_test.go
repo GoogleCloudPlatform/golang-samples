@@ -17,7 +17,9 @@ package deid
 
 import (
 	"bytes"
+	"encoding/json"
 	"reflect"
+
 	"testing"
 
 	"cloud.google.com/go/dlp/apiv2/dlppb"
@@ -200,10 +202,22 @@ func TestDeidentifyTableBucketing(t *testing.T) {
 	buf := new(bytes.Buffer)
 	got, err := deIdentifyTableBucketing(buf, tc.ProjectID, tableToDeIdentify)
 	if err != nil {
-		t.Errorf("deIdentifyTableBucketing: %v", err)
+		t.Fatal(err)
+	}
+	gotTableJson, err := json.Marshal(got)
+	if err != nil {
+		t.Fatal(err)
+	}
+	expectedTableJson, err := json.Marshal(expectedTable)
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	if reflect.DeepEqual(got, expectedTable) {
+	var v1, v2 interface{}
+	json.Unmarshal([]byte(gotTableJson), &v1)
+	json.Unmarshal([]byte(expectedTableJson), &v2)
+
+	if !reflect.DeepEqual(v1, v2) {
 		t.Errorf("deIdentifyTableBucketing got %v, want %v", got, expectedTable)
 	}
 }
