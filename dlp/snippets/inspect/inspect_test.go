@@ -291,6 +291,19 @@ func TestInspectPhoneNumber(t *testing.T) {
 	}
 }
 
+func TestInspectStringCustomHotWord(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	if err := inspectStringCustomHotWord(buf, tc.ProjectID, "patient name: John Doe", "patient", "PERSON_NAME"); err != nil {
+		t.Fatal(err)
+	}
+
+	got := buf.String()
+	if want := "Infotype Name: PERSON_NAME"; !strings.Contains(got, want) {
+		t.Errorf("inspectStringCustomHotWord got %q, want %q", got, want)
+	}
+}
 func TestInspectWithCustomRegex(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
@@ -303,8 +316,45 @@ func TestInspectWithCustomRegex(t *testing.T) {
 	if want := "Infotype Name: C_MRN"; !strings.Contains(got, want) {
 		t.Errorf("inspectWithCustomRegex got %q, want %q", got, want)
 	}
-
 	if want := "Likelihood: POSSIBLE"; !strings.Contains(got, want) {
 		t.Errorf("inspectWithCustomRegex got %q, want %q", got, want)
+	}
+}
+
+func TestInspectStringWithExclusionDictSubstring(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	if err := inspectStringWithExclusionDictSubstring(buf, tc.ProjectID, "Some email addresses: gary@example.com, TEST@example.com", []string{"TEST"}); err != nil {
+		t.Fatal(err)
+	}
+	got := buf.String()
+	if want := "Infotype Name: EMAIL_ADDRESS"; !strings.Contains(got, want) {
+		t.Errorf("inspectStringWithExclusionDictSubstring got %q, want %q", got, want)
+	}
+	if want := "Infotype Name: DOMAIN_NAME"; !strings.Contains(got, want) {
+		t.Errorf("inspectStringWithExclusionDictSubstring got %q, want %q", got, want)
+	}
+	if want := "Quote: TEST"; strings.Contains(got, want) {
+		t.Errorf("inspectStringWithExclusionDictSubstring got %q, want %q", got, want)
+	}
+
+}
+
+func TestInspectStringOmitOverlap(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	if err := inspectStringOmitOverlap(buf, tc.ProjectID, "gary@example.com"); err != nil {
+		t.Fatal(err)
+	}
+
+	got := buf.String()
+	if want := "Infotype Name: EMAIL_ADDRESS"; !strings.Contains(got, want) {
+		t.Errorf("inspectStringOmitOverlap got %q, want %q", got, want)
+	}
+
+	if want := "Infotype Name: PERSON_NAME"; strings.Contains(got, want) {
+		t.Errorf("inspectStringOmitOverlap got %q, want %q", got, want)
 	}
 }
