@@ -296,7 +296,7 @@ func TestInspectStringCustomOmitOverlap(t *testing.T) {
 	buf := new(bytes.Buffer)
 
 	if err := inspectStringCustomOmitOverlap(buf, tc.ProjectID, "Name: Jane Doe. Name: Larry Page.", "VIP_DETECTOR", "PERSON_NAME", "Larry Page|Sergey Brin"); err != nil {
-		t.Errorf("inspectStringCustomOmitOverlap: %v", err)
+		t.Fatal(err)
 	}
 
 	got := buf.String()
@@ -309,5 +309,59 @@ func TestInspectStringCustomOmitOverlap(t *testing.T) {
 	}
 	if want := "Quote: Larry Page"; strings.Contains(got, want) {
 		t.Errorf("inspectStringCustomOmitOverlap got %q, want %q", got, want)
+	}
+}
+
+func TestInspectStringWithExclusionDictSubstring(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	if err := inspectStringWithExclusionDictSubstring(buf, tc.ProjectID, "Some email addresses: gary@example.com, TEST@example.com", []string{"TEST"}); err != nil {
+		t.Fatal(err)
+	}
+
+	got := buf.String()
+	if want := "Infotype Name: EMAIL_ADDRESS"; !strings.Contains(got, want) {
+		t.Errorf("inspectStringWithExclusionDictSubstring got %q, want %q", got, want)
+	}
+
+	if want := "Infotype Name: DOMAIN_NAME"; !strings.Contains(got, want) {
+		t.Errorf("inspectStringWithExclusionDictSubstring got %q, want %q", got, want)
+	}
+
+	if want := "Quote: TEST"; strings.Contains(got, want) {
+		t.Errorf("inspectStringWithExclusionDictSubstring got %q, want %q", got, want)
+	}
+}
+
+func TestInspectStringOmitOverlap(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	if err := inspectStringOmitOverlap(buf, tc.ProjectID, "gary@example.com"); err != nil {
+		t.Fatal(err)
+	}
+
+	got := buf.String()
+	if want := "Infotype Name: EMAIL_ADDRESS"; !strings.Contains(got, want) {
+		t.Errorf("inspectStringOmitOverlap got %q, want %q", got, want)
+	}
+
+	if want := "Infotype Name: PERSON_NAME"; strings.Contains(got, want) {
+		t.Errorf("inspectStringOmitOverlap got %q, want %q", got, want)
+	}
+}
+
+func TestInspectStringCustomHotWord(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	if err := inspectStringCustomHotWord(buf, tc.ProjectID, "patient name: John Doe", "patient", "PERSON_NAME"); err != nil {
+		t.Fatal(err)
+	}
+
+	got := buf.String()
+	if want := "Infotype Name: PERSON_NAME"; !strings.Contains(got, want) {
+		t.Errorf("inspectStringCustomHotWord got %q, want %q", got, want)
 	}
 }
