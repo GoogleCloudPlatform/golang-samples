@@ -56,19 +56,19 @@
 /iam/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra 
 /kms/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra
 /securitycenter/                       @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra 
+/mediacdn/                             @justin-mp @GoogleCloudPlatform/dee-infra @GoogleCloudPlatform/go-samples-reviewers
 
 # DEE Platform Ops & Observability
 /container/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-platform-ops
-/logging/                              @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-observability 
-/monitoring/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-observability
-/trace/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-observability 
+/logging/                              @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-platform-ops 
+/monitoring/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-platform-ops
+/trace/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-platform-ops 
 
 # Non-DEE owner
 /iot/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/api-iot
 /billing/                              @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/billing-samples-maintainers
 /cdn/                                  @GoogleCloudPlatform/go-samples-reviewers
 /healthcare/                           @GoogleCloudPlatform/go-samples-reviewers 
-/mediacdn/                             @GoogleCloudPlatform/go-samples-reviewers 
 
 # Does not have owner
 /asset/                                @GoogleCloudPlatform/go-samples-reviewers
