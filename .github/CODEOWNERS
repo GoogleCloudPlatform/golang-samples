@@ -41,7 +41,6 @@
 /documentai/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
 /jobs/                                 @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
 /language/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
-/media/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
 /pubsub/                               @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai 
 /pubsublite/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
 /speech/                               @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
@@ -65,6 +64,7 @@
 /trace/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-platform-ops 
 
 # Non-DEE owner
+/auth/                                 @GoogleCloudPlatform/googleapis-auth @GoogleCloudPlatform/go-samples-reviewers
 /iot/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/api-iot
 /billing/                              @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/billing-samples-maintainers
 /cdn/                                  @GoogleCloudPlatform/go-samples-reviewers
@@ -72,12 +72,12 @@
 
 # Does not have owner
 /asset/                                @GoogleCloudPlatform/go-samples-reviewers
-/auth/                                 @GoogleCloudPlatform/go-samples-reviewers
 /dlp/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/googleapis-dlp
 /endpoints/                            @GoogleCloudPlatform/go-samples-reviewers
 /errorreporting/                       @GoogleCloudPlatform/go-samples-reviewers
 /iap/                                  @GoogleCloudPlatform/go-samples-reviewers
 /iotkit/                               @GoogleCloudPlatform/go-samples-reviewers
+/media/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-media-team
 /memorystore/                          @GoogleCloudPlatform/go-samples-reviewers
 /opencensus/                           @GoogleCloudPlatform/go-samples-reviewers
 /opentelemetry/                        @GoogleCloudPlatform/go-samples-reviewers
