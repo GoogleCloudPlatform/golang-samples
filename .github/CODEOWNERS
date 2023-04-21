@@ -91,14 +91,5 @@
 
 # Does not have owner
 /cdn/                                  @GoogleCloudPlatform/go-samples-reviewers
-/asset/                                @GoogleCloudPlatform/go-samples-reviewers
-/auth/                                 @GoogleCloudPlatform/go-samples-reviewers
-/dlp/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/googleapis-dlp
-/endpoints/                            @GoogleCloudPlatform/go-samples-reviewers
 /errorreporting/                       @GoogleCloudPlatform/go-samples-reviewers
-/iap/                                  @GoogleCloudPlatform/go-samples-reviewers
-/iotkit/                               @GoogleCloudPlatform/go-samples-reviewers
-/memorystore/                          @GoogleCloudPlatform/go-samples-reviewers
-/opencensus/                           @GoogleCloudPlatform/go-samples-reviewers
-/opentelemetry/                        @GoogleCloudPlatform/go-samples-reviewers
 /profiler/                             @GoogleCloudPlatform/go-samples-reviewers
