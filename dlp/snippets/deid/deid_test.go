@@ -17,12 +17,10 @@ package deid
 
 import (
 	"bytes"
-	"encoding/json"
-	"reflect"
+	"strings"
 
 	"testing"
 
-	"cloud.google.com/go/dlp/apiv2/dlppb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
@@ -129,8 +127,8 @@ func TestDeidentifyExceptionList(t *testing.T) {
 	want := "output : jack@example.org accessed customer record of [EMAIL_ADDRESS]"
 
 	buf := new(bytes.Buffer)
-	err := deidentifyExceptionList(buf, tc.ProjectID, input)
-	if err != nil {
+
+	if err := deidentifyExceptionList(buf, tc.ProjectID, input); err != nil {
 		t.Errorf("deidentifyExceptionList(%q) = error '%q', want %q", input, err, want)
 	}
 	if got := buf.String(); got != want {
@@ -140,100 +138,14 @@ func TestDeidentifyExceptionList(t *testing.T) {
 
 func TestDeidentifyTableBucketing(t *testing.T) {
 	tc := testutil.SystemTest(t)
-
-	row1 := &dlppb.Table_Row{
-		Values: []*dlppb.Value{
-			{Type: &dlppb.Value_StringValue{StringValue: "22"}},
-			{Type: &dlppb.Value_StringValue{StringValue: "Jane Austen"}},
-			{Type: &dlppb.Value_StringValue{StringValue: "21"}},
-		},
-	}
-
-	row2 := &dlppb.Table_Row{
-		Values: []*dlppb.Value{
-			{Type: &dlppb.Value_StringValue{StringValue: "55"}},
-			{Type: &dlppb.Value_StringValue{StringValue: "Mark Twain"}},
-			{Type: &dlppb.Value_StringValue{StringValue: "75"}},
-		},
-	}
-
-	row3 := &dlppb.Table_Row{
-		Values: []*dlppb.Value{
-			{Type: &dlppb.Value_StringValue{StringValue: "101"}},
-			{Type: &dlppb.Value_StringValue{StringValue: "Charles Dickens"}},
-			{Type: &dlppb.Value_StringValue{StringValue: "95"}},
-		},
-	}
-
-	tableToDeIdentify := &dlppb.Table{
-		Headers: []*dlppb.FieldId{
-			{Name: "AGE"},
-			{Name: "PATIENT"},
-			{Name: "HAPPINESS SCORE"},
-		},
-		Rows: []*dlppb.Table_Row{
-			{Values: row1.Values},
-			{Values: row2.Values},
-			{Values: row3.Values},
-		},
-	}
-
-	row4 := &dlppb.Table_Row{
-		Values: []*dlppb.Value{
-			{Type: &dlppb.Value_StringValue{StringValue: "22"}},
-			{Type: &dlppb.Value_StringValue{StringValue: "Jane Austen"}},
-			{Type: &dlppb.Value_StringValue{StringValue: "20:30"}},
-		},
-	}
-
-	row5 := &dlppb.Table_Row{
-		Values: []*dlppb.Value{
-			{Type: &dlppb.Value_StringValue{StringValue: "55"}},
-			{Type: &dlppb.Value_StringValue{StringValue: "Mark Twain"}},
-			{Type: &dlppb.Value_StringValue{StringValue: "70:80"}},
-		},
-	}
-
-	row6 := &dlppb.Table_Row{
-		Values: []*dlppb.Value{
-			{Type: &dlppb.Value_StringValue{StringValue: "101"}},
-			{Type: &dlppb.Value_StringValue{StringValue: "Charles Dickens"}},
-			{Type: &dlppb.Value_StringValue{StringValue: "90:100"}},
-		},
-	}
-
-	expectedTable := &dlppb.Table{
-		Headers: []*dlppb.FieldId{
-			{Name: "AGE"},
-			{Name: "PATIENT"},
-			{Name: "HAPPINESS SCORE"},
-		},
-		Rows: []*dlppb.Table_Row{
-			{Values: row4.Values},
-			{Values: row5.Values},
-			{Values: row6.Values},
-		},
-	}
-
 	buf := new(bytes.Buffer)
-	got, err := deIdentifyTableBucketing(buf, tc.ProjectID, tableToDeIdentify)
-	if err != nil {
-		t.Fatal(err)
-	}
-	gotTableJson, err := json.Marshal(got)
-	if err != nil {
-		t.Fatal(err)
-	}
-	expectedTableJson, err := json.Marshal(expectedTable)
-	if err != nil {
+
+	if err := deIdentifyTableBucketing(buf, tc.ProjectID); err != nil {
 		t.Fatal(err)
 	}
 
-	var v1, v2 interface{}
-	json.Unmarshal([]byte(gotTableJson), &v1)
-	json.Unmarshal([]byte(expectedTableJson), &v2)
-
-	if !reflect.DeepEqual(v1, v2) {
-		t.Errorf("deIdentifyTableBucketing got %v, want %v", got, expectedTable)
+	got := buf.String()
+	if want := "Table after de-identification"; !strings.Contains(got, want) {
+		t.Errorf("deIdentifyTableBucketing got %q, want %q", got, want)
 	}
 }

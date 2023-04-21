@@ -24,48 +24,45 @@ import (
 )
 
 // deIdentifyTableBucketing de-identifies data using table bucketing
-func deIdentifyTableBucketing(w io.Writer, projectID string, table *dlppb.Table) (*dlppb.Table, error) {
+func deIdentifyTableBucketing(w io.Writer, projectID string) error {
 	// projectId := "your-project-id"
 	// table := "your-table-value"
 
-	//if table value is not passed, the default table will be used
-	if table == nil {
-		row1 := &dlppb.Table_Row{
-			Values: []*dlppb.Value{
-				{Type: &dlppb.Value_StringValue{StringValue: "22"}},
-				{Type: &dlppb.Value_StringValue{StringValue: "Jane Austen"}},
-				{Type: &dlppb.Value_StringValue{StringValue: "21"}},
-			},
-		}
+	row1 := &dlppb.Table_Row{
+		Values: []*dlppb.Value{
+			{Type: &dlppb.Value_StringValue{StringValue: "22"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "Jane Austen"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "21"}},
+		},
+	}
 
-		row2 := &dlppb.Table_Row{
-			Values: []*dlppb.Value{
-				{Type: &dlppb.Value_StringValue{StringValue: "55"}},
-				{Type: &dlppb.Value_StringValue{StringValue: "Mark Twain"}},
-				{Type: &dlppb.Value_StringValue{StringValue: "75"}},
-			},
-		}
+	row2 := &dlppb.Table_Row{
+		Values: []*dlppb.Value{
+			{Type: &dlppb.Value_StringValue{StringValue: "55"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "Mark Twain"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "75"}},
+		},
+	}
 
-		row3 := &dlppb.Table_Row{
-			Values: []*dlppb.Value{
-				{Type: &dlppb.Value_StringValue{StringValue: "101"}},
-				{Type: &dlppb.Value_StringValue{StringValue: "Charles Dickens"}},
-				{Type: &dlppb.Value_StringValue{StringValue: "95"}},
-			},
-		}
+	row3 := &dlppb.Table_Row{
+		Values: []*dlppb.Value{
+			{Type: &dlppb.Value_StringValue{StringValue: "101"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "Charles Dickens"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "95"}},
+		},
+	}
 
-		table = &dlppb.Table{
-			Headers: []*dlppb.FieldId{
-				{Name: "AGE"},
-				{Name: "PATIENT"},
-				{Name: "HAPPINESS SCORE"},
-			},
-			Rows: []*dlppb.Table_Row{
-				{Values: row1.Values},
-				{Values: row2.Values},
-				{Values: row3.Values},
-			},
-		}
+	table := &dlppb.Table{
+		Headers: []*dlppb.FieldId{
+			{Name: "AGE"},
+			{Name: "PATIENT"},
+			{Name: "HAPPINESS SCORE"},
+		},
+		Rows: []*dlppb.Table_Row{
+			{Values: row1.Values},
+			{Values: row2.Values},
+			{Values: row3.Values},
+		},
 	}
 
 	ctx := context.Background()
@@ -75,7 +72,7 @@ func deIdentifyTableBucketing(w io.Writer, projectID string, table *dlppb.Table)
 	// call the Close method to cleanup its resources.
 	client, err := dlp.NewClient(ctx)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// Closing the client safely cleans up background resources.
@@ -143,12 +140,12 @@ func deIdentifyTableBucketing(w io.Writer, projectID string, table *dlppb.Table)
 	// Send the request.
 	resp, err := client.DeidentifyContent(ctx, req)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// Print the results.
 	fmt.Fprintf(w, "Table after de-identification : %v", resp.GetItem().GetTable())
-	return resp.GetItem().GetTable(), nil
+	return nil
 }
 
 // [END dlp_deidentify_table_bucketing]
