@@ -145,6 +145,7 @@ func appendToPendingStream(w io.Writer, projectID, datasetID, tableID string) er
 	if err != nil {
 		return fmt.Errorf("NewManagedStream: %w", err)
 	}
+	defer managedStream.Close()
 
 	// First, we'll append a single row.
 	rows, err := generateExampleMessages(1)
