@@ -358,9 +358,9 @@ func TestInspectStringCustomHotWord(t *testing.T) {
 
 func TestInspectWithCustomRegex(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	buf := new(bytes.Buffer)
 
-	if err := inspectWithCustomRegex(buf, tc.ProjectID, "Patients MRN 444-5-22222", "[1-9]{3}-[1-9]{1}-[1-9]{5}", "C_MRN"); err != nil {
+	var buf bytes.Buffer
+	if err := inspectWithCustomRegex(&buf, tc.ProjectID, "Patients MRN 444-5-22222", "[1-9]{3}-[1-9]{1}-[1-9]{5}", "C_MRN"); err != nil {
 		t.Fatal(err)
 	}
 
