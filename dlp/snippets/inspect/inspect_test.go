@@ -291,16 +291,16 @@ func TestInspectPhoneNumber(t *testing.T) {
 	}
 }
 
-func TestInspectStringWithExclusionDictionary(t *testing.T) {
+func TestInspectStringCustomHotWord(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
 
-	if err := inspectStringWithExclusionDictionary(buf, tc.ProjectID, "Some email addresses: gary@example.com, example@example.com", []string{"example@example.com"}); err != nil {
-		t.Fatal(err)
+	if err := inspectStringCustomHotWord(buf, tc.ProjectID, "patient name: John Doe", "patient", "PERSON_NAME"); err != nil {
+		t.Errorf("inspectStringCustomHotWord: %v", err)
 	}
 	got := buf.String()
-	if want := "Infotype Name: EMAIL_ADDRESS"; !strings.Contains(got, want) {
-		t.Errorf("inspectStringWithExclusionDictionary got %q, want %q", got, want)
+	if want := "Infotype Name: PERSON_NAME"; !strings.Contains(got, want) {
+		t.Errorf("inspectStringCustomHotWord got %q, want %q", got, want)
 	}
 }
 
@@ -340,16 +340,23 @@ func TestInspectStringOmitOverlap(t *testing.T) {
 	}
 }
 
-func TestInspectStringCustomHotWord(t *testing.T) {
+func TestInspectStringCustomOmitOverlap(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
 
-	if err := inspectStringCustomHotWord(buf, tc.ProjectID, "patient name: John Doe", "patient", "PERSON_NAME"); err != nil {
-		t.Errorf("inspectStringCustomHotWord: %v", err)
+	if err := inspectStringCustomOmitOverlap(buf, tc.ProjectID, "Name: Jane Doe. Name: Larry Page.", "VIP_DETECTOR", "PERSON_NAME", "Larry Page|Sergey Brin"); err != nil {
+		t.Fatal(err)
 	}
 
 	got := buf.String()
 	if want := "Infotype Name: PERSON_NAME"; !strings.Contains(got, want) {
-		t.Errorf("inspectStringCustomHotWord got %q, want %q", got, want)
+		t.Errorf("inspectStringCustomOmitOverlap got %q, want %q", got, want)
+	}
+
+	if want := "Quote: Jane Doe"; !strings.Contains(got, want) {
+		t.Errorf("inspectStringCustomOmitOverlap got %q, want %q", got, want)
+	}
+	if want := "Quote: Larry Page"; strings.Contains(got, want) {
+		t.Errorf("inspectStringCustomOmitOverlap got %q, want %q", got, want)
 	}
 }
