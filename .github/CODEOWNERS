@@ -55,7 +55,7 @@
 /iam/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra 
 /kms/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra
 /securitycenter/                       @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra 
-/mediacdn/                             @justin-mp @GoogleCloudPlatform/dee-infra @GoogleCloudPlatform/go-samples-reviewers
+/mediacdn/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra @justin-mp
 
 # DEE Platform Ops & Observability
 /container/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-platform-ops
