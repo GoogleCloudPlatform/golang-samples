@@ -313,7 +313,7 @@ func TestInspectStringWithExclusionDictSubstring(t *testing.T) {
 	}
 	got := buf.String()
 	if want := "Infotype Name: EMAIL_ADDRESS"; !strings.Contains(got, want) {
-		t.Fatal(err)
+		t.Errorf("inspectStringWithExclusionDictSubstring got %q, want %q", got, want)
 	}
 	if want := "Infotype Name: DOMAIN_NAME"; !strings.Contains(got, want) {
 		t.Errorf("inspectStringWithExclusionDictSubstring got %q, want %q", got, want)
