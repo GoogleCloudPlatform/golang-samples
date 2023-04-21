@@ -65,19 +65,19 @@
 
 # Non-DEE owner
 /auth/                                 @GoogleCloudPlatform/googleapis-auth @GoogleCloudPlatform/go-samples-reviewers
+/dlp/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/googleapis-dlp
 /iot/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/api-iot
 /billing/                              @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/billing-samples-maintainers
 /cdn/                                  @GoogleCloudPlatform/go-samples-reviewers
-/healthcare/                           @GoogleCloudPlatform/go-samples-reviewers 
+/healthcare/                           @GoogleCloudPlatform/go-samples-reviewers
+/media/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-media-team
 
 # Does not have owner
 /asset/                                @GoogleCloudPlatform/go-samples-reviewers
-/dlp/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/googleapis-dlp
 /endpoints/                            @GoogleCloudPlatform/go-samples-reviewers
 /errorreporting/                       @GoogleCloudPlatform/go-samples-reviewers
 /iap/                                  @GoogleCloudPlatform/go-samples-reviewers
 /iotkit/                               @GoogleCloudPlatform/go-samples-reviewers
-/media/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-media-team
 /memorystore/                          @GoogleCloudPlatform/go-samples-reviewers
 /opencensus/                           @GoogleCloudPlatform/go-samples-reviewers
 /opentelemetry/                        @GoogleCloudPlatform/go-samples-reviewers
