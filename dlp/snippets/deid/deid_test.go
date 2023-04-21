@@ -101,6 +101,23 @@ func TestDeidentifyDateShift(t *testing.T) {
 	}
 }
 
+func TestDeIdentifyWithRedact(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	input := "My name is Alicia Abernathy, and my email address is aabernathy@example.com."
+	infoTypeNames := []string{"EMAIL_ADDRESS"}
+	want := "output: My name is Alicia Abernathy, and my email address is ."
+
+	buf := new(bytes.Buffer)
+	err := deidentifyWithRedact(buf, tc.ProjectID, input, infoTypeNames)
+	if err != nil {
+		t.Errorf("deidentifyWithRedact(%q) = error '%q', want %q", err, input, want)
+	}
+	if got := buf.String(); got != want {
+		t.Errorf("deidentifyWithRedact(%q) = %q, want %q", got, input, want)
+	}
+}
+
 func TestDeidentifyExceptionList(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -115,5 +132,4 @@ func TestDeidentifyExceptionList(t *testing.T) {
 	if got := buf.String(); got != want {
 		t.Errorf("deidentifyExceptionList(%q) = %q, want %q", input, got, want)
 	}
-
 }
