@@ -133,3 +133,21 @@ func TestDeidentifyExceptionList(t *testing.T) {
 		t.Errorf("deidentifyExceptionList(%q) = %q, want %q", input, got, want)
 	}
 }
+
+func TestDeIdentifyWithWordList(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	input := "Patient was seen in RM-YELLOW then transferred to rm green."
+	infoType := "CUSTOM_ROOM_ID"
+	wordList := []string{"RM-GREEN", "RM-YELLOW", "RM-ORANGE"}
+	want := "output : Patient was seen in [CUSTOM_ROOM_ID] then transferred to [CUSTOM_ROOM_ID]."
+
+	buf := new(bytes.Buffer)
+	err := deidentifyWithWordList(buf, tc.ProjectID, input, infoType, wordList)
+	if err != nil {
+		t.Errorf("deidentifyWithWordList(%q) = error '%q', want %q", input, err, want)
+	}
+	if got := buf.String(); got != want {
+		t.Errorf("deidentifyWithWordList(%q) = %q, want %q", input, got, want)
+	}
+}
