@@ -85,7 +85,7 @@
 /iot/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/api-iot
 /iotkit/                               @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/api-iot
 /healthcare/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/healthcare-life-sciences
-/mediacdn/                             @GoogleCloudPlatform/go-samples-reviewers
+/media/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-media-team
 
 
 # Does not have owner
