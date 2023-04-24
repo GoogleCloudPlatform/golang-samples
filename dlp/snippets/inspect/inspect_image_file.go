@@ -25,7 +25,7 @@ import (
 )
 
 // inspectImageFile inspects an image file for sensitive data
-func InspectImageFile(w io.Writer, projectID, filePath string) error {
+func inspectImageFile(w io.Writer, projectID, filePath string) error {
 	// projectId := "my-project-id"
 	// filePath := "inspect/testdata/test.png"
 

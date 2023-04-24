@@ -366,16 +366,15 @@ func TestInspectImage(t *testing.T) {
 	buf := new(bytes.Buffer)
 	pathToImage := "./testdata/test.png"
 
-	if err := InspectImageFile(buf, tc.ProjectID, pathToImage); err != nil {
+	if err := inspectImageFile(buf, tc.ProjectID, pathToImage); err != nil {
 		t.Fatal(err)
 	}
 
 	got := buf.String()
 	if want := "Info type: PHONE_NUMBER"; !strings.Contains(got, want) {
-		t.Errorf("inspectTextFile got %q, want %q", got, want)
+		t.Errorf("TestInspectImage got %q, want %q", got, want)
 	}
 	if want := "Info type: EMAIL_ADDRESS"; !strings.Contains(got, want) {
-		t.Errorf("inspectTextFile got %q, want %q", got, want)
+		t.Errorf("TestInspectImage got %q, want %q", got, want)
 	}
-
 }
