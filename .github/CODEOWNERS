@@ -47,7 +47,6 @@
 /documentai/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
 /jobs/                                 @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
 /language/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
-/media/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
 /pubsub/                               @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai 
 /pubsublite/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
 /speech/                               @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
@@ -58,26 +57,26 @@
 
 
 # DEE Infra
-/asset/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra 
-/auth/                                 @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra 
-/batch/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra 
-/compute/                              @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra 
-/iam/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra 
+/asset/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra
+/auth/                                 @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra @GoogleCloudPlatform/googleapis-auth
+/batch/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra
+/compute/                              @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra
+/iam/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra
 /iap/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra
 /kms/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra
-/securitycenter/                       @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra 
-/secretmanager/                        @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra 
+/securitycenter/                       @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra
+/secretmanager/                        @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra
+/mediacdn/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra @justin-mp
 
-
-# DEE Platform Ops & Observability
+# DEE Platform Ops
 /container/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-platform-ops
-/errorreporting/                       @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-observability
-/logging/                              @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-observability 
-/monitoring/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-observability
-/opencensus/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-observability 
-/opentelemetry/                        @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-observability 
-/servicedirectory/                     @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-observability
-/trace/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-observability 
+/errorreporting/                       @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-platform-ops
+/logging/                              @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-platform-ops 
+/monitoring/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-platform-ops
+/opencensus/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-platform-ops 
+/opentelemetry/                        @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-platform-ops 
+/servicedirectory/                     @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-platform-ops
+/trace/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-platform-ops 
 
 
 # Non-DEE owner
@@ -86,10 +85,9 @@
 /iot/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/api-iot
 /iotkit/                               @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/api-iot
 /healthcare/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/healthcare-life-sciences
-/mediacdn/                             @GoogleCloudPlatform/go-samples-reviewers
+/media/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-media-team
 
 
 # Does not have owner
 /cdn/                                  @GoogleCloudPlatform/go-samples-reviewers
-/errorreporting/                       @GoogleCloudPlatform/go-samples-reviewers
 /profiler/                             @GoogleCloudPlatform/go-samples-reviewers
