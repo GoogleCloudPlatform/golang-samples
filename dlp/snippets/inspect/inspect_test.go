@@ -277,6 +277,23 @@ func TestInspectBigquery(t *testing.T) {
 	}
 }
 
+func TestInspectWithHotWordRules(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	if err := inspectWithHotWordRules(buf, tc.ProjectID, "Patient's MRN 444-5-22222 and just a number 333-2-33333"); err != nil {
+		t.Errorf("inspectWithHotWordRules: %v", err)
+	}
+
+	got := buf.String()
+	if want := "InfoType Name: C_MRN"; !strings.Contains(got, want) {
+		t.Errorf("inspectWithHotWordRules got %q, want %q", got, want)
+	}
+	if want := "Findings: 2"; !strings.Contains(got, want) {
+		t.Errorf("inspectWithHotWordRules got %q, want %q", got, want)
+	}
+}
+
 func TestInspectPhoneNumber(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
