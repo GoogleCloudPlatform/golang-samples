@@ -35,7 +35,7 @@ func assert(buf bytes.Buffer, want string, t *testing.T) {
 }
 
 func TestAnalyzeShotChange(t *testing.T) {
-	testutil.SystemTest(t)
+	testutil.EndToEndTest(t)
 
 	testutil.Retry(t, 10, time.Minute, func(r *testutil.R) {
 		want := "Shot"
@@ -50,7 +50,7 @@ func TestAnalyzeShotChange(t *testing.T) {
 }
 
 func TestAnalyzeLabelURI(t *testing.T) {
-	testutil.SystemTest(t)
+	testutil.EndToEndTest(t)
 
 	testutil.Retry(t, 10, time.Minute, func(r *testutil.R) {
 		want := "cat"
@@ -64,7 +64,7 @@ func TestAnalyzeLabelURI(t *testing.T) {
 }
 
 func TestAnalyzeExplicitContentURI(t *testing.T) {
-	testutil.SystemTest(t)
+	testutil.EndToEndTest(t)
 
 	testutil.Retry(t, 10, time.Minute, func(r *testutil.R) {
 		want := "VERY_UNLIKELY"
@@ -78,7 +78,7 @@ func TestAnalyzeExplicitContentURI(t *testing.T) {
 }
 
 func TestAnalyzeSpeechTranscriptionURI(t *testing.T) {
-	testutil.SystemTest(t)
+	testutil.EndToEndTest(t)
 
 	testutil.Retry(t, 10, time.Minute, func(r *testutil.R) {
 		want := "cultural"
