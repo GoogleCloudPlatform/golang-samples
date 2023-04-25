@@ -30,26 +30,26 @@ import (
 )
 
 // getPublicKeyJwk retrieves the public key from an asymmetric key pair on Cloud KMS.
-func getPublicKeyJwk(w io.Writer, name string) error {
+func getPublicKeyJwk(w io.Writer, cryptoKeyVersionName string) error {
 	// name := "projects/my-project/locations/us-east1/keyRings/my-key-ring/cryptoKeys/my-key/cryptoKeyVersions/123"
 
 	// Create the client.
 	ctx := context.Background()
 	client, err := kms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to create kms client: %v", err)
+		return fmt.Errorf("failed to create kms client: %w", err)
 	}
 	defer client.Close()
 
 	// Build the request.
 	req := &kmspb.GetPublicKeyRequest{
-		Name: name,
+		Name: cryptoKeyVersionName,
 	}
 
 	// Call the API to get the public key.
 	result, err := client.GetPublicKey(ctx, req)
 	if err != nil {
-		return fmt.Errorf("failed to get public key: %v", err)
+		return fmt.Errorf("failed to get public key: %w", err)
 	}
 
 	// The 'Pem' field is the raw string representation of the public key.
@@ -72,16 +72,16 @@ func getPublicKeyJwk(w io.Writer, name string) error {
 	block, _ := pem.Decode(key)
 	_, err = x509.ParsePKIXPublicKey(block.Bytes)
 	if err != nil {
-		return fmt.Errorf("failed to parse public key: %v", err)
+		return fmt.Errorf("failed to parse public key: %w", err)
 	}
 
 	// If all above checks pass, convert it into JWK format.
 	jwkKey, err := jwk.ParseKey(key, jwk.WithPEM(true))
 	if err != nil {
-		fmt.Printf("Failed to parse the PEM public key: %s\n", err)
-		return nil
+		return fmt.Errorf("Failed to parse the PEM public key: %w", err)
 	}
 
+	fmt.Fprintf(w, "The public key in JWK format: ")
 	json.NewEncoder(w).Encode(jwkKey)
 	return nil
 }
