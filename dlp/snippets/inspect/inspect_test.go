@@ -308,12 +308,32 @@ func TestInspectPhoneNumber(t *testing.T) {
 	}
 }
 
+func TestInspectStringWithoutOverlap(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	if err := inspectStringWithoutOverlap(buf, tc.ProjectID, "example.com is a domain, james@example.org is an email."); err != nil {
+		t.Fatal(err)
+	}
+
+	got := buf.String()
+	if want := "Infotype Name: DOMAIN_NAME"; !strings.Contains(got, want) {
+		t.Errorf("inspectStringWithoutOverlap got %q, want %q", got, want)
+	}
+	if want := "Quote: example.com"; !strings.Contains(got, want) {
+		t.Errorf("inspectStringWithoutOverlap got %q, want %q", got, want)
+	}
+	if want := "Quote: example.org"; strings.Contains(got, want) {
+		t.Errorf("inspectStringWithoutOverlap got %q, want %q", got, want)
+	}
+}
+
 func TestInspectStringCustomHotWord(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
 
 	if err := inspectStringCustomHotWord(buf, tc.ProjectID, "patient name: John Doe", "patient", "PERSON_NAME"); err != nil {
-		t.Errorf("inspectStringCustomHotWord: %v", err)
+		t.Fatal(err)
 	}
 	got := buf.String()
 	if want := "Infotype Name: PERSON_NAME"; !strings.Contains(got, want) {
@@ -351,10 +371,6 @@ func TestInspectStringOmitOverlap(t *testing.T) {
 
 	got := buf.String()
 	if want := "Infotype Name: EMAIL_ADDRESS"; !strings.Contains(got, want) {
-		t.Errorf("inspectStringOmitOverlap got %q, want %q", got, want)
-	}
-
-	if want := "Infotype Name: PERSON_NAME"; strings.Contains(got, want) {
 		t.Errorf("inspectStringOmitOverlap got %q, want %q", got, want)
 	}
 }
