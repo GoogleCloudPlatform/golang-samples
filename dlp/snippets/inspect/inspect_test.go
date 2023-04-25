@@ -312,14 +312,16 @@ func TestInspectStringWithExclusionDictSubstring(t *testing.T) {
 		t.Fatal(err)
 	}
 	got := buf.String()
-
+	if want := "Infotype Name: EMAIL_ADDRESS"; !strings.Contains(got, want) {
+		t.Errorf("inspectStringWithExclusionDictSubstring got %q, want %q", got, want)
+	}
 	if want := "Infotype Name: DOMAIN_NAME"; !strings.Contains(got, want) {
 		t.Errorf("inspectStringWithExclusionDictSubstring got %q, want %q", got, want)
 	}
-
 	if want := "Quote: TEST"; strings.Contains(got, want) {
 		t.Errorf("inspectStringWithExclusionDictSubstring got %q, want %q", got, want)
 	}
+
 }
 
 func TestInspectStringOmitOverlap(t *testing.T) {
@@ -344,7 +346,7 @@ func TestInspectStringCustomOmitOverlap(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
 
-	if err := inspectStringCustomOmitOverlap(buf, tc.ProjectID, "Name: Jane Doe. Name: Larry Page.", "VIP_DETECTOR", "PERSON_NAME", "Larry Page|Sergey Brin"); err != nil {
+	if err := inspectStringCustomHotWord(buf, tc.ProjectID, "patient name: John Doe", "patient", "PERSON_NAME"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -353,10 +355,27 @@ func TestInspectStringCustomOmitOverlap(t *testing.T) {
 		t.Errorf("inspectStringCustomOmitOverlap got %q, want %q", got, want)
 	}
 
-	if want := "Quote: Jane Doe"; !strings.Contains(got, want) {
+	if want := "Quote: John Doe"; !strings.Contains(got, want) {
 		t.Errorf("inspectStringCustomOmitOverlap got %q, want %q", got, want)
 	}
 	if want := "Quote: Larry Page"; strings.Contains(got, want) {
 		t.Errorf("inspectStringCustomOmitOverlap got %q, want %q", got, want)
+	}
+}
+
+func TestInspectWithCustomRegex(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	var buf bytes.Buffer
+	if err := inspectWithCustomRegex(&buf, tc.ProjectID, "Patients MRN 444-5-22222", "[1-9]{3}-[1-9]{1}-[1-9]{5}", "C_MRN"); err != nil {
+		t.Fatal(err)
+	}
+
+	got := buf.String()
+	if want := "Infotype Name: C_MRN"; !strings.Contains(got, want) {
+		t.Errorf("inspectWithCustomRegex got %q, want %q", got, want)
+	}
+	if want := "Likelihood: POSSIBLE"; !strings.Contains(got, want) {
+		t.Errorf("inspectWithCustomRegex got %q, want %q", got, want)
 	}
 }
