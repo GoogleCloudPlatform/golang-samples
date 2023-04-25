@@ -17,6 +17,8 @@ package deid
 
 import (
 	"bytes"
+	"strings"
+
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -125,13 +127,34 @@ func TestDeidentifyExceptionList(t *testing.T) {
 	want := "output : jack@example.org accessed customer record of [EMAIL_ADDRESS]"
 
 	buf := new(bytes.Buffer)
-	err := deidentifyExceptionList(buf, tc.ProjectID, input)
-	if err != nil {
+
+	if err := deidentifyExceptionList(buf, tc.ProjectID, input); err != nil {
 		t.Errorf("deidentifyExceptionList(%q) = error '%q', want %q", input, err, want)
 	}
 	if got := buf.String(); got != want {
 		t.Errorf("deidentifyExceptionList(%q) = %q, want %q", input, got, want)
 	}
+}
+
+func TestDeidentifyTableBucketing(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	if err := deIdentifyTableBucketing(buf, tc.ProjectID); err != nil {
+		t.Fatal(err)
+	}
+
+	got := buf.String()
+	if want := "Table after de-identification"; !strings.Contains(got, want) {
+		t.Errorf("deIdentifyTableBucketing got %q, want %q", got, want)
+	}
+	if want := "values:{string_value:\"70:80\"}}"; !strings.Contains(got, want) {
+		t.Errorf("deIdentifyTableBucketing got %q, want %q", got, want)
+	}
+	if want := "values:{string_value:\"75\"}}"; strings.Contains(got, want) {
+		t.Errorf("deIdentifyTableBucketing got %q, want %q", got, want)
+	}
+
 }
 
 func TestDeIdentifyWithWordList(t *testing.T) {
