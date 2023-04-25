@@ -136,7 +136,6 @@ func deIdentifyTableBucketing(w io.Writer, projectID string) error {
 		},
 		Item: contentItem,
 	}
-
 	// Send the request.
 	resp, err := client.DeidentifyContent(ctx, req)
 	if err != nil {

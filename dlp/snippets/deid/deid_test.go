@@ -148,6 +148,13 @@ func TestDeidentifyTableBucketing(t *testing.T) {
 	if want := "Table after de-identification"; !strings.Contains(got, want) {
 		t.Errorf("deIdentifyTableBucketing got %q, want %q", got, want)
 	}
+	if want := "values:{string_value:\"70:80\"}}"; !strings.Contains(got, want) {
+		t.Errorf("deIdentifyTableBucketing got %q, want %q", got, want)
+	}
+	if want := "values:{string_value:\"75\"}}"; strings.Contains(got, want) {
+		t.Errorf("deIdentifyTableBucketing got %q, want %q", got, want)
+	}
+
 }
 
 func TestDeIdentifyWithWordList(t *testing.T) {
