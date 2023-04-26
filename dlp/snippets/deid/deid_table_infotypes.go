@@ -25,9 +25,8 @@ import (
 )
 
 // deidentifyTableInfotypes de-identifies table data with info types
-func deidentifyTableInfotypes(w io.Writer, projectID string, columnNames []string) error {
+func deidentifyTableInfotypes(w io.Writer, projectID string) error {
 	// projectId := "your-project-id"
-	// columnNames := []string{"PATIENT","FACTOID"}
 
 	row1 := &dlppb.Table_Row{
 		Values: []*dlppb.Value{
@@ -115,14 +114,14 @@ func deidentifyTableInfotypes(w io.Writer, projectID string, columnNames []strin
 	}
 
 	// Specify fields to be de-identified.
-	var f []*dlppb.FieldId
-	for _, c := range columnNames {
-		f = append(f, &dlppb.FieldId{Name: c})
+	fields := []*dlppb.FieldId{
+		{Name: "PATIENT"},
+		{Name: "FACTOID"},
 	}
 
 	// Associate the de-identification and conditions with the specified field.
 	fieldTransformation := &dlppb.FieldTransformation{
-		Fields: f,
+		Fields: fields,
 		Transformation: &dlppb.FieldTransformation_InfoTypeTransformations{
 			InfoTypeTransformations: infoTypeTransformations,
 		},

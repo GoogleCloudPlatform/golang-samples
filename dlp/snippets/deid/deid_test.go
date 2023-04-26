@@ -108,7 +108,7 @@ func TestDeidentifyTableInfoTypes(t *testing.T) {
 
 	buf := new(bytes.Buffer)
 
-	if err := deidentifyTableInfotypes(buf, tc.ProjectID, []string{"PATIENT", "FACTOID"}); err != nil {
+	if err := deidentifyTableInfotypes(buf, tc.ProjectID); err != nil {
 		t.Fatal(err)
 	}
 
