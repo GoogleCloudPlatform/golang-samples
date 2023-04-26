@@ -43,6 +43,11 @@ func deidentifyWithReplacement(w io.Writer, projectID, inputStr string, infoType
 	// Closing the client safely cleans up background resources.
 	defer client.Close()
 
+	// item to be analyzed
+	item := &dlppb.ContentItem{
+		DataItem: &dlppb.ContentItem_Value{Value: inputStr},
+	}
+
 	// Specify the type of info the inspection will look for.
 	// See https://cloud.google.com/dlp/docs/infotypes-reference for complete list of info types
 	var infoTypes []*dlppb.InfoType
@@ -75,22 +80,22 @@ func deidentifyWithReplacement(w io.Writer, projectID, inputStr string, infoType
 		},
 	}
 
-	// Construct the de-identification request to be sent by the client.
-	req := &dlppb.DeidentifyContentRequest{
-		Parent: fmt.Sprintf("projects/%s/locations/global", projectID),
-		DeidentifyConfig: &dlppb.DeidentifyConfig{
-			Transformation: &dlppb.DeidentifyConfig_InfoTypeTransformations{
-				InfoTypeTransformations: &dlppb.InfoTypeTransformations{
-					Transformations: []*dlppb.InfoTypeTransformations_InfoTypeTransformation{
-						infoTypeTransformation,
-					},
+	deIdentifyConfig := &dlppb.DeidentifyConfig{
+		Transformation: &dlppb.DeidentifyConfig_InfoTypeTransformations{
+			InfoTypeTransformations: &dlppb.InfoTypeTransformations{
+				Transformations: []*dlppb.InfoTypeTransformations_InfoTypeTransformation{
+					infoTypeTransformation,
 				},
 			},
 		},
-		InspectConfig: inspectConfig,
-		Item: &dlppb.ContentItem{
-			DataItem: &dlppb.ContentItem_Value{Value: inputStr},
-		},
+	}
+
+	// Construct the de-identification request to be sent by the client.
+	req := &dlppb.DeidentifyContentRequest{
+		Parent:           fmt.Sprintf("projects/%s/locations/global", projectID),
+		DeidentifyConfig: deIdentifyConfig,
+		InspectConfig:    inspectConfig,
+		Item:             item,
 	}
 
 	// Send the request.

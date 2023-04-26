@@ -146,7 +146,7 @@ func TestDeIdentifyWithReplacement(t *testing.T) {
 	buf := new(bytes.Buffer)
 	err := deidentifyWithReplacement(buf, tc.ProjectID, input, infoType, replaceVal)
 	if err != nil {
-		t.Errorf("deidentifyWithReplacement(%q) = error '%q', want %q", input, err, want)
+		t.Fatal(err)
 	}
 	if got := buf.String(); got != want {
 		t.Errorf("deidentifyWithReplacement(%q) = %q, want %q", input, got, want)
