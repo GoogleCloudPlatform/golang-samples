@@ -18,13 +18,9 @@ package deid
 import (
 	"bytes"
 	"strings"
-<<<<<<< HEAD
-=======
 
->>>>>>> main
 	"testing"
 
-	"cloud.google.com/go/dlp/apiv2/dlppb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
