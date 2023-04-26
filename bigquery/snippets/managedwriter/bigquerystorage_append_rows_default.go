@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 package managedwriter
 
-// [START bigquerystorage_write_pending_complexschema]
+// [START bigquerystorage_write_default_complexschema]
 
 import (
 	"context"
@@ -26,22 +26,24 @@ import (
 	"cloud.google.com/go/bigquery/storage/managedwriter"
 	"cloud.google.com/go/bigquery/storage/managedwriter/adapt"
 	"github.com/GoogleCloudPlatform/golang-samples/bigquery/snippets/managedwriter/exampleproto"
-	storagepb "google.golang.org/genproto/googleapis/cloud/bigquery/storage/v1"
 	"google.golang.org/protobuf/proto"
 )
 
 // generateExampleMessages generates a slice of serialized protobuf messages using a statically defined
 // and compiled protocol buffer file, and returns the binary serialized representation.
-func generateExampleMessages(numMessages int) ([][]byte, error) {
+func generateExampleDefaultMessages(numMessages int) ([][]byte, error) {
 	msgs := make([][]byte, numMessages)
 	for i := 0; i < numMessages; i++ {
 
-		random := rand.New(rand.NewSource(time.Now().UnixNano()))
+		// instantiate a new random source.
+		random := rand.New(
+			rand.NewSource(time.Now().UnixNano()),
+		)
 
 		// Our example data embeds an array of structs, so we'll construct that first.
-		sList := make([]*exampleproto.SampleStruct, 5)
+		sl := make([]*exampleproto.SampleStruct, 5)
 		for i := 0; i < int(random.Int63n(5)+1); i++ {
-			sList[i] = &exampleproto.SampleStruct{
+			sl[i] = &exampleproto.SampleStruct{
 				SubIntCol: proto.Int64(random.Int63()),
 			}
 		}
@@ -79,7 +81,7 @@ func generateExampleMessages(numMessages int) ([][]byte, error) {
 			// Int64List is an array of INT64 types.
 			Int64List: []int64{2, 4, 6, 8},
 
-			// This is a required field, and thus must be present.
+			// This is a required field in the schema, and thus must be present.
 			RowNum: proto.Int64(23),
 
 			// StructCol is a single nested message.
@@ -88,7 +90,7 @@ func generateExampleMessages(numMessages int) ([][]byte, error) {
 			},
 
 			// StructList is a repeated array of a nested message.
-			StructList: sList,
+			StructList: sl,
 		}
 
 		b, err := proto.Marshal(m)
@@ -100,100 +102,91 @@ func generateExampleMessages(numMessages int) ([][]byte, error) {
 	return msgs, nil
 }
 
-// appendToPendingStream demonstrates using the managedwriter package to write some example data
-// to a pending stream, and then committing it to a table.
-func appendToPendingStream(w io.Writer, projectID, datasetID, tableID string) error {
+// appendToDefaultStream demonstrates using the managedwriter package to write some example data
+// to a default stream.
+func appendToDefaultStream(w io.Writer, projectID, datasetID, tableID string) error {
 	// projectID := "myproject"
 	// datasetID := "mydataset"
 	// tableID := "mytable"
 
 	ctx := context.Background()
 	// Instantiate a managedwriter client to handle interactions with the service.
-	client, err := managedwriter.NewClient(ctx, projectID)
+	client, err := managedwriter.NewClient(ctx, projectID,
+		managedwriter.WithMultiplexing(), // Enables connection sharing.
+	)
 	if err != nil {
 		return fmt.Errorf("managedwriter.NewClient: %w", err)
 	}
 	// Close the client when we exit the function.
 	defer client.Close()
 
-	// Create a new pending stream.  We'll use the stream name to construct a writer.
-	pendingStream, err := client.CreateWriteStream(ctx, &storagepb.CreateWriteStreamRequest{
-		Parent: fmt.Sprintf("projects/%s/datasets/%s/tables/%s", projectID, datasetID, tableID),
-		WriteStream: &storagepb.WriteStream{
-			Type: storagepb.WriteStream_PENDING,
-		},
-	})
-	if err != nil {
-		return fmt.Errorf("CreateWriteStream: %w", err)
-	}
-
 	// We need to communicate the descriptor of the protocol buffer message we're using, which
 	// is analagous to the "schema" for the message.  Both SampleData and SampleStruct are
 	// two distinct messages in the compiled proto file, so we'll use adapt.NormalizeDescriptor
 	// to unify them into a single self-contained descriptor representation.
-	m := &exampleproto.SampleData{}
+	var m *exampleproto.SampleData
 	descriptorProto, err := adapt.NormalizeDescriptor(m.ProtoReflect().Descriptor())
 	if err != nil {
 		return fmt.Errorf("NormalizeDescriptor: %w", err)
 	}
 
+	// Build the formatted reference to the destination table.
+	tableReference := managedwriter.TableParentFromParts(projectID, datasetID, tableID)
+
 	// Instantiate a ManagedStream, which manages low level details like connection state and provides
-	// additional features like a future-like callback for appends, etc.  NewManagedStream can also create
-	// the stream on your behalf, but in this example we're being explicit about stream creation.
-	managedStream, err := client.NewManagedStream(ctx, managedwriter.WithStreamName(pendingStream.GetName()),
-		managedwriter.WithSchemaDescriptor(descriptorProto))
+	// additional features like a future-like callback for appends, etc.  Default streams are provided by
+	// the system, so there's no need to create them.
+	managedStream, err := client.NewManagedStream(ctx,
+		managedwriter.WithType(managedwriter.DefaultStream),
+		managedwriter.WithDestinationTable(tableReference),
+		managedwriter.WithSchemaDescriptor(descriptorProto),
+	)
 	if err != nil {
 		return fmt.Errorf("NewManagedStream: %w", err)
 	}
+	// Automatically close the writer when we're done.
 	defer managedStream.Close()
 
 	// First, we'll append a single row.
-	rows, err := generateExampleMessages(1)
+	rows, err := generateExampleDefaultMessages(1)
 	if err != nil {
 		return fmt.Errorf("generateExampleMessages: %w", err)
 	}
 
-	// We'll keep track of the current offset in the stream with curOffset.
-	var curOffset int64
 	// We can append data asyncronously, so we'll check our appends at the end.
 	var results []*managedwriter.AppendResult
 
-	result, err := managedStream.AppendRows(ctx, rows, managedwriter.WithOffset(0))
+	result, err := managedStream.AppendRows(ctx, rows)
 	if err != nil {
 		return fmt.Errorf("AppendRows first call error: %w", err)
 	}
 	results = append(results, result)
-
-	// Advance our current offset.
-	curOffset = curOffset + 1
 
 	// This time, we'll append three more rows in a single request.
 	rows, err = generateExampleMessages(3)
 	if err != nil {
 		return fmt.Errorf("generateExampleMessages: %w", err)
 	}
-	result, err = managedStream.AppendRows(ctx, rows, managedwriter.WithOffset(curOffset))
+	result, err = managedStream.AppendRows(ctx, rows)
 	if err != nil {
 		return fmt.Errorf("AppendRows second call error: %w", err)
 	}
 	results = append(results, result)
-
-	// Advance our offset again.
-	curOffset = curOffset + 3
 
 	// Finally, we'll append two more rows.
 	rows, err = generateExampleMessages(2)
 	if err != nil {
 		return fmt.Errorf("generateExampleMessages: %w", err)
 	}
-	result, err = managedStream.AppendRows(ctx, rows, managedwriter.WithOffset(curOffset))
+	result, err = managedStream.AppendRows(ctx, rows)
 	if err != nil {
 		return fmt.Errorf("AppendRows third call error: %w", err)
 	}
 	results = append(results, result)
 
-	// Now, we'll check that our batch of three appends all completed successfully.
-	// Monitoring the results could also be done out of band via a goroutine.
+	// We've been collecting references to our status callbacks to allow us to append in a faster
+	// asynchronous fashion.  Normally you could do this in another goroutine or similar, but for
+	// this example we'll now iterate through those results and verify they were all successful.
 	for k, v := range results {
 		// GetResult blocks until we receive a response from the API.
 		recvOffset, err := v.GetResult(ctx)
@@ -203,33 +196,9 @@ func appendToPendingStream(w io.Writer, projectID, datasetID, tableID string) er
 		fmt.Fprintf(w, "Successfully appended data at offset %d.\n", recvOffset)
 	}
 
-	// We're now done appending to this stream.  We now mark pending stream finalized, which blocks
-	// further appends.
-	rowCount, err := managedStream.Finalize(ctx)
-	if err != nil {
-		return fmt.Errorf("error during Finalize: %w", err)
-	}
-
-	fmt.Fprintf(w, "Stream %s finalized with %d rows.\n", managedStream.StreamName(), rowCount)
-
-	// To commit the data to the table, we need to run a batch commit.  You can commit several streams
-	// atomically as a group, but in this instance we'll only commit the single stream.
-	req := &storagepb.BatchCommitWriteStreamsRequest{
-		Parent:       managedwriter.TableParentFromStreamName(managedStream.StreamName()),
-		WriteStreams: []string{managedStream.StreamName()},
-	}
-
-	resp, err := client.BatchCommitWriteStreams(ctx, req)
-	if err != nil {
-		return fmt.Errorf("client.BatchCommit: %w", err)
-	}
-	if len(resp.GetStreamErrors()) > 0 {
-		return fmt.Errorf("stream errors present: %v", resp.GetStreamErrors())
-	}
-
-	fmt.Fprintf(w, "Table data committed at %s\n", resp.GetCommitTime().AsTime().Format(time.RFC3339Nano))
-
+	// This stream is a default stream, which means it doesn't require any form of finalization
+	// or commit.  The rows were automatically committed to the table.
 	return nil
 }
 
-// [END bigquerystorage_write_pending_complexschema]
+// [END bigquerystorage_write_default_complexschema]
