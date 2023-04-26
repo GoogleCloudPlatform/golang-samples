@@ -18,6 +18,10 @@ package deid
 import (
 	"bytes"
 	"strings"
+<<<<<<< HEAD
+=======
+
+>>>>>>> main
 	"testing"
 
 	"cloud.google.com/go/dlp/apiv2/dlppb"
@@ -106,51 +110,10 @@ func TestDeidentifyDateShift(t *testing.T) {
 func TestDeidentifyTableInfoTypes(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	var row1 = &dlppb.Table_Row{
-		Values: []*dlppb.Value{
-			{Type: &dlppb.Value_StringValue{StringValue: "22"}},
-			{Type: &dlppb.Value_StringValue{StringValue: "Jane Austen"}},
-			{Type: &dlppb.Value_StringValue{StringValue: "21"}},
-			{Type: &dlppb.Value_StringValue{StringValue: "There are 14 kisses in Jane Austen's novels."}},
-		},
-	}
-
-	var row2 = &dlppb.Table_Row{
-		Values: []*dlppb.Value{
-			{Type: &dlppb.Value_StringValue{StringValue: "55"}},
-			{Type: &dlppb.Value_StringValue{StringValue: "Mark Twain"}},
-			{Type: &dlppb.Value_StringValue{StringValue: "75"}},
-			{Type: &dlppb.Value_StringValue{StringValue: "Mark Twain loved cats."}},
-		},
-	}
-
-	var row3 = &dlppb.Table_Row{
-		Values: []*dlppb.Value{
-			{Type: &dlppb.Value_StringValue{StringValue: "101"}},
-			{Type: &dlppb.Value_StringValue{StringValue: "Charles Dickens"}},
-			{Type: &dlppb.Value_StringValue{StringValue: "95"}},
-			{Type: &dlppb.Value_StringValue{StringValue: "Charles Dickens name was a curse invented by Shakespeare."}},
-		},
-	}
-
-	table := &dlppb.Table{
-		Headers: []*dlppb.FieldId{
-			{Name: "AGE"},
-			{Name: "PATIENT"},
-			{Name: "HAPPINESS SCORE"},
-			{Name: "FACTOID"},
-		},
-		Rows: []*dlppb.Table_Row{
-			{Values: row1.Values},
-			{Values: row2.Values},
-			{Values: row3.Values},
-		},
-	}
-
 	buf := new(bytes.Buffer)
 
-	if err := deidentifyTableInfotypes(buf, tc.ProjectID, table, "PATIENT", "FACTOID"); err != nil {
-		t.Errorf("deidentifyTableInfotypes: %v", err)
+	if err := deidentifyTableInfotypes(buf, tc.ProjectID, []string{"PATIENT", "FACTOID"}); err != nil {
+		t.Fatal(err)
 	}
 
 	got := buf.String()
@@ -160,5 +123,73 @@ func TestDeidentifyTableInfoTypes(t *testing.T) {
 
 	if want := "[PERSON_NAME]"; !strings.Contains(got, want) {
 		t.Errorf("deidentifyTableInfotypes got %q, want %q", got, want)
+	}
+}
+
+func TestDeIdentifyWithRedact(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	input := "My name is Alicia Abernathy, and my email address is aabernathy@example.com."
+	infoTypeNames := []string{"EMAIL_ADDRESS"}
+	want := "output: My name is Alicia Abernathy, and my email address is ."
+
+	buf := new(bytes.Buffer)
+	err := deidentifyWithRedact(buf, tc.ProjectID, input, infoTypeNames)
+	if err != nil {
+		t.Errorf("deidentifyWithRedact(%q) = error '%q', want %q", err, input, want)
+	}
+	if got := buf.String(); got != want {
+		t.Errorf("deidentifyWithRedact(%q) = %q, want %q", got, input, want)
+	}
+}
+
+func TestDeidentifyExceptionList(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	input := "jack@example.org accessed customer record of user5@example.com"
+	want := "output : jack@example.org accessed customer record of [EMAIL_ADDRESS]"
+
+	buf := new(bytes.Buffer)
+
+	if err := deidentifyExceptionList(buf, tc.ProjectID, input); err != nil {
+		t.Errorf("deidentifyExceptionList(%q) = error '%q', want %q", input, err, want)
+	}
+	if got := buf.String(); got != want {
+		t.Errorf("deidentifyExceptionList(%q) = %q, want %q", input, got, want)
+	}
+}
+
+func TestDeidentifyTableBucketing(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	if err := deIdentifyTableBucketing(buf, tc.ProjectID); err != nil {
+		t.Fatal(err)
+		t.Errorf("deIdentifyTableBucketing got %q, want %q", got, want)
+	}
+	if want := "values:{string_value:\"70:80\"}}"; !strings.Contains(got, want) {
+		t.Errorf("deIdentifyTableBucketing got %q, want %q", got, want)
+	}
+	if want := "values:{string_value:\"75\"}}"; strings.Contains(got, want) {
+		t.Errorf("deIdentifyTableBucketing got %q, want %q", got, want)
+	}
+
+}
+
+func TestDeIdentifyWithWordList(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	input := "Patient was seen in RM-YELLOW then transferred to rm green."
+	infoType := "CUSTOM_ROOM_ID"
+	wordList := []string{"RM-GREEN", "RM-YELLOW", "RM-ORANGE"}
+	want := "output : Patient was seen in [CUSTOM_ROOM_ID] then transferred to [CUSTOM_ROOM_ID]."
+
+	buf := new(bytes.Buffer)
+	err := deidentifyWithWordList(buf, tc.ProjectID, input, infoType, wordList)
+	if err != nil {
+		t.Errorf("deidentifyWithWordList(%q) = error '%q', want %q", input, err, want)
+	}
+	if got := buf.String(); got != want {
+		t.Errorf("deidentifyWithWordList(%q) = %q, want %q", input, got, want)
 	}
 }

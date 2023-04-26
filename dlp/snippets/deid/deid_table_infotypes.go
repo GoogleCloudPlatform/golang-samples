@@ -22,55 +22,52 @@ import (
 
 	dlp "cloud.google.com/go/dlp/apiv2"
 	"cloud.google.com/go/dlp/apiv2/dlppb"
-	"google.golang.org/api/option"
 )
 
-func deidentifyTableInfotypes(w io.Writer, projectID string, table *dlppb.Table, columnNames ...string) error {
+// deidentifyTableInfotypes de-identifies table data with info types
+func deidentifyTableInfotypes(w io.Writer, projectID string, columnNames []string) error {
 	// projectId := "your-project-id"
-	// table := "your-table-value"
-	// columnNames := "PATIENT","FACTOID"
+	// columnNames := []string{"PATIENT","FACTOID"}
 
-	if table == nil {
-		var row1 = &dlppb.Table_Row{
-			Values: []*dlppb.Value{
-				{Type: &dlppb.Value_StringValue{StringValue: "22"}},
-				{Type: &dlppb.Value_StringValue{StringValue: "Jane Austen"}},
-				{Type: &dlppb.Value_StringValue{StringValue: "21"}},
-				{Type: &dlppb.Value_StringValue{StringValue: "There are 14 kisses in Jane Austen's novels."}},
-			},
-		}
+	row1 := &dlppb.Table_Row{
+		Values: []*dlppb.Value{
+			{Type: &dlppb.Value_StringValue{StringValue: "22"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "Jane Austen"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "21"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "There are 14 kisses in Jane Austen's novels."}},
+		},
+	}
 
-		var row2 = &dlppb.Table_Row{
-			Values: []*dlppb.Value{
-				{Type: &dlppb.Value_StringValue{StringValue: "55"}},
-				{Type: &dlppb.Value_StringValue{StringValue: "Mark Twain"}},
-				{Type: &dlppb.Value_StringValue{StringValue: "75"}},
-				{Type: &dlppb.Value_StringValue{StringValue: "Mark Twain loved cats."}},
-			},
-		}
+	row2 := &dlppb.Table_Row{
+		Values: []*dlppb.Value{
+			{Type: &dlppb.Value_StringValue{StringValue: "55"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "Mark Twain"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "75"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "Mark Twain loved cats."}},
+		},
+	}
 
-		var row3 = &dlppb.Table_Row{
-			Values: []*dlppb.Value{
-				{Type: &dlppb.Value_StringValue{StringValue: "101"}},
-				{Type: &dlppb.Value_StringValue{StringValue: "Charles Dickens"}},
-				{Type: &dlppb.Value_StringValue{StringValue: "95"}},
-				{Type: &dlppb.Value_StringValue{StringValue: "Charles Dickens name was a curse invented by Shakespeare."}},
-			},
-		}
+	row3 := &dlppb.Table_Row{
+		Values: []*dlppb.Value{
+			{Type: &dlppb.Value_StringValue{StringValue: "101"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "Charles Dickens"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "95"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "Charles Dickens name was a curse invented by Shakespeare."}},
+		},
+	}
 
-		table = &dlppb.Table{
-			Headers: []*dlppb.FieldId{
-				{Name: "AGE"},
-				{Name: "PATIENT"},
-				{Name: "HAPPINESS SCORE"},
-				{Name: "FACTOID"},
-			},
-			Rows: []*dlppb.Table_Row{
-				{Values: row1.Values},
-				{Values: row2.Values},
-				{Values: row3.Values},
-			},
-		}
+	table := &dlppb.Table{
+		Headers: []*dlppb.FieldId{
+			{Name: "AGE"},
+			{Name: "PATIENT"},
+			{Name: "HAPPINESS SCORE"},
+			{Name: "FACTOID"},
+		},
+		Rows: []*dlppb.Table_Row{
+			{Values: row1.Values},
+			{Values: row2.Values},
+			{Values: row3.Values},
+		},
 	}
 
 	ctx := context.Background()
@@ -78,16 +75,16 @@ func deidentifyTableInfotypes(w io.Writer, projectID string, table *dlppb.Table,
 	// Initialize a client once and reuse it to send multiple requests. Clients
 	// are safe to use across goroutines. When the client is no longer needed,
 	// call the Close method to cleanup its resources.
-	client, err := dlp.NewRESTClient(ctx, option.WithCredentialsFile("C:/Users/aarsh.dhokai/Desktop/cred.json"))
+	client, err := dlp.NewRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("dlp.NewClient: %v", err)
+		return err
 	}
 
 	// Closing the client safely cleans up background resources.
 	defer client.Close()
 
 	// Specify what content you want the service to de-identify.
-	var contentItem = &dlppb.ContentItem{
+	contentItem := &dlppb.ContentItem{
 		DataItem: &dlppb.ContentItem_Table{
 			Table: table,
 		},
@@ -95,20 +92,20 @@ func deidentifyTableInfotypes(w io.Writer, projectID string, table *dlppb.Table,
 
 	// Specify how the content should be de-identified.
 	// Select type of info to be replaced.
-	var infoTypes = []*dlppb.InfoType{
+	infoTypes := []*dlppb.InfoType{
 		{Name: "PERSON_NAME"},
 	}
 
 	// Specify that findings should be replaced with corresponding info type name.
-	var replaceWithInfoTypeConfig = &dlppb.ReplaceWithInfoTypeConfig{}
-	var primitiveTransformation = &dlppb.PrimitiveTransformation{
+	replaceWithInfoTypeConfig := &dlppb.ReplaceWithInfoTypeConfig{}
+	primitiveTransformation := &dlppb.PrimitiveTransformation{
 		Transformation: &dlppb.PrimitiveTransformation_ReplaceWithInfoTypeConfig{
 			ReplaceWithInfoTypeConfig: replaceWithInfoTypeConfig,
 		},
 	}
 
 	// Associate info type with the replacement strategy
-	var infoTypeTransformations = &dlppb.InfoTypeTransformations{
+	infoTypeTransformations := &dlppb.InfoTypeTransformations{
 		Transformations: []*dlppb.InfoTypeTransformations_InfoTypeTransformation{
 			{
 				InfoTypes:               infoTypes,
@@ -124,14 +121,14 @@ func deidentifyTableInfotypes(w io.Writer, projectID string, table *dlppb.Table,
 	}
 
 	// Associate the de-identification and conditions with the specified field.
-	var fieldTransformation = &dlppb.FieldTransformation{
+	fieldTransformation := &dlppb.FieldTransformation{
 		Fields: f,
 		Transformation: &dlppb.FieldTransformation_InfoTypeTransformations{
 			InfoTypeTransformations: infoTypeTransformations,
 		},
 	}
 
-	var recordTransformations = &dlppb.RecordTransformations{
+	recordTransformations := &dlppb.RecordTransformations{
 		FieldTransformations: []*dlppb.FieldTransformation{
 			fieldTransformation,
 		},
