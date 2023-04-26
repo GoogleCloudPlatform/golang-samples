@@ -172,6 +172,7 @@ func TestDeidentifyTableMaskingCondition(t *testing.T) {
 	if want := "values:{string_value:\"**\"}"; !strings.Contains(got, want) {
 		t.Errorf("deidentifyTableMaskingCondition got (%q) =%q ", got, want)
 	}
+
 }
 
 func TestDeIdentifyWithWordList(t *testing.T) {
