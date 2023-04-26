@@ -18,6 +18,10 @@ package deid
 import (
 	"bytes"
 	"strings"
+<<<<<<< HEAD
+=======
+
+>>>>>>> main
 	"testing"
 
 	"cloud.google.com/go/dlp/apiv2/dlppb"
@@ -103,6 +107,23 @@ func TestDeidentifyDateShift(t *testing.T) {
 	}
 }
 
+func TestDeIdentifyWithRedact(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	input := "My name is Alicia Abernathy, and my email address is aabernathy@example.com."
+	infoTypeNames := []string{"EMAIL_ADDRESS"}
+	want := "output: My name is Alicia Abernathy, and my email address is ."
+
+	buf := new(bytes.Buffer)
+	err := deidentifyWithRedact(buf, tc.ProjectID, input, infoTypeNames)
+	if err != nil {
+		t.Errorf("deidentifyWithRedact(%q) = error '%q', want %q", err, input, want)
+	}
+	if got := buf.String(); got != want {
+		t.Errorf("deidentifyWithRedact(%q) = %q, want %q", got, input, want)
+	}
+}
+
 func TestDeidentifyExceptionList(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -110,12 +131,32 @@ func TestDeidentifyExceptionList(t *testing.T) {
 	want := "output : jack@example.org accessed customer record of [EMAIL_ADDRESS]"
 
 	buf := new(bytes.Buffer)
-	err := deidentifyExceptionList(buf, tc.ProjectID, input)
-	if err != nil {
+
+	if err := deidentifyExceptionList(buf, tc.ProjectID, input); err != nil {
 		t.Errorf("deidentifyExceptionList(%q) = error '%q', want %q", input, err, want)
 	}
 	if got := buf.String(); got != want {
 		t.Errorf("deidentifyExceptionList(%q) = %q, want %q", input, got, want)
+	}
+}
+
+func TestDeidentifyTableBucketing(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	if err := deIdentifyTableBucketing(buf, tc.ProjectID); err != nil {
+		t.Fatal(err)
+	}
+
+	got := buf.String()
+	if want := "Table after de-identification"; !strings.Contains(got, want) {
+		t.Errorf("deIdentifyTableBucketing got %q, want %q", got, want)
+	}
+	if want := "values:{string_value:\"70:80\"}}"; !strings.Contains(got, want) {
+		t.Errorf("deIdentifyTableBucketing got %q, want %q", got, want)
+	}
+	if want := "values:{string_value:\"75\"}}"; strings.Contains(got, want) {
+		t.Errorf("deIdentifyTableBucketing got %q, want %q", got, want)
 	}
 
 }
@@ -173,5 +214,23 @@ func TestDeidentifyTableConditionInfoTypes(t *testing.T) {
 	got := buf.String()
 	if want := "Table after de-identification"; !strings.Contains(got, want) {
 		t.Errorf("deidentifyTableConditionInfoTypes got %q, want %q", got, want)
+	}
+}
+
+func TestDeIdentifyWithWordList(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	input := "Patient was seen in RM-YELLOW then transferred to rm green."
+	infoType := "CUSTOM_ROOM_ID"
+	wordList := []string{"RM-GREEN", "RM-YELLOW", "RM-ORANGE"}
+	want := "output : Patient was seen in [CUSTOM_ROOM_ID] then transferred to [CUSTOM_ROOM_ID]."
+
+	buf := new(bytes.Buffer)
+	err := deidentifyWithWordList(buf, tc.ProjectID, input, infoType, wordList)
+	if err != nil {
+		t.Errorf("deidentifyWithWordList(%q) = error '%q', want %q", input, err, want)
+	}
+	if got := buf.String(); got != want {
+		t.Errorf("deidentifyWithWordList(%q) = %q, want %q", input, got, want)
 	}
 }
