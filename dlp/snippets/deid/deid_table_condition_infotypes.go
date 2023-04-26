@@ -29,8 +29,6 @@ func deidentifyTableConditionInfoTypes(w io.Writer, projectID string, columnName
 	// projectId := "your-project-id"
 	// columnNames := []string{"PATIENT", "FACTOID"}
 
-	//if table value is not passed, the default table will be used
-
 	row1 := &dlppb.Table_Row{
 		Values: []*dlppb.Value{
 			{Type: &dlppb.Value_StringValue{StringValue: "22"}},
@@ -79,7 +77,7 @@ func deidentifyTableConditionInfoTypes(w io.Writer, projectID string, columnName
 	// call the Close method to cleanup its resources.
 	client, err := dlp.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("dlp.NewClient: %v", err)
+		return err
 	}
 
 	// Closing the client safely cleans up background resources.
@@ -173,7 +171,7 @@ func deidentifyTableConditionInfoTypes(w io.Writer, projectID string, columnName
 	// Send the request.
 	resp, err := client.DeidentifyContent(ctx, req)
 	if err != nil {
-		return fmt.Errorf("DeidentifyContent: %v", err)
+		return err
 	}
 
 	// Print the results.
