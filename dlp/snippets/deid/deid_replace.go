@@ -24,6 +24,7 @@ import (
 	"cloud.google.com/go/dlp/apiv2/dlppb"
 )
 
+// deidentifyWithReplacement de-identifies sensitive data by replacing matched input values
 func deidentifyWithReplacement(w io.Writer, projectID, inputStr string, infoTypeNames []string, replaceVal string) error {
 	// projectId := "your-project-id"
 	// inputStr := "My name is Alicia Abernathy, and my email address is aabernathy@example.com."
