@@ -26,48 +26,44 @@ import (
 
 // deidentifyTableMaskingCondition de-identifies the table data using masking
 // and conditional logic
-func deidentifyTableMaskingCondition(w io.Writer, projectID string, table *dlppb.Table) error {
+func deidentifyTableMaskingCondition(w io.Writer, projectID string) error {
 	// projectId := "your-project-id"
-	// table := "your-table-to-deIdentify"
 
-	//if table value is not passed, the default table will be used
-	if table == nil {
-		row1 := &dlppb.Table_Row{
-			Values: []*dlppb.Value{
-				{Type: &dlppb.Value_StringValue{StringValue: "22"}},
-				{Type: &dlppb.Value_StringValue{StringValue: "Jane Austen"}},
-				{Type: &dlppb.Value_StringValue{StringValue: "21"}},
-			},
-		}
+	row1 := &dlppb.Table_Row{
+		Values: []*dlppb.Value{
+			{Type: &dlppb.Value_StringValue{StringValue: "22"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "Jane Austen"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "21"}},
+		},
+	}
 
-		row2 := &dlppb.Table_Row{
-			Values: []*dlppb.Value{
-				{Type: &dlppb.Value_StringValue{StringValue: "55"}},
-				{Type: &dlppb.Value_StringValue{StringValue: "Mark Twain"}},
-				{Type: &dlppb.Value_StringValue{StringValue: "75"}},
-			},
-		}
+	row2 := &dlppb.Table_Row{
+		Values: []*dlppb.Value{
+			{Type: &dlppb.Value_StringValue{StringValue: "55"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "Mark Twain"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "75"}},
+		},
+	}
 
-		row3 := &dlppb.Table_Row{
-			Values: []*dlppb.Value{
-				{Type: &dlppb.Value_StringValue{StringValue: "101"}},
-				{Type: &dlppb.Value_StringValue{StringValue: "Charles Dickens"}},
-				{Type: &dlppb.Value_StringValue{StringValue: "95"}},
-			},
-		}
+	row3 := &dlppb.Table_Row{
+		Values: []*dlppb.Value{
+			{Type: &dlppb.Value_StringValue{StringValue: "101"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "Charles Dickens"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "95"}},
+		},
+	}
 
-		table = &dlppb.Table{
-			Headers: []*dlppb.FieldId{
-				{Name: "AGE"},
-				{Name: "PATIENT"},
-				{Name: "HAPPINESS SCORE"},
-			},
-			Rows: []*dlppb.Table_Row{
-				{Values: row1.Values},
-				{Values: row2.Values},
-				{Values: row3.Values},
-			},
-		}
+	table := &dlppb.Table{
+		Headers: []*dlppb.FieldId{
+			{Name: "AGE"},
+			{Name: "PATIENT"},
+			{Name: "HAPPINESS SCORE"},
+		},
+		Rows: []*dlppb.Table_Row{
+			{Values: row1.Values},
+			{Values: row2.Values},
+			{Values: row3.Values},
+		},
 	}
 
 	ctx := context.Background()
