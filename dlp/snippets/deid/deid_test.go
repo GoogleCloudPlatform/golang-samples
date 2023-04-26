@@ -18,13 +18,9 @@ package deid
 import (
 	"bytes"
 	"strings"
-<<<<<<< HEAD
-=======
 
->>>>>>> main
 	"testing"
 
-	"cloud.google.com/go/dlp/apiv2/dlppb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
@@ -165,8 +161,8 @@ func TestDeidentifyTableBucketing(t *testing.T) {
 
 	if err := deIdentifyTableBucketing(buf, tc.ProjectID); err != nil {
 		t.Fatal(err)
-		t.Errorf("deIdentifyTableBucketing got %q, want %q", got, want)
 	}
+	got := buf.String()
 	if want := "values:{string_value:\"70:80\"}}"; !strings.Contains(got, want) {
 		t.Errorf("deIdentifyTableBucketing got %q, want %q", got, want)
 	}
