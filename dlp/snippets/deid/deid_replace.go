@@ -102,7 +102,7 @@ func deidentifyWithReplacement(w io.Writer, projectID, inputStr string, infoType
 	// Send the request.
 	resp, err := client.DeidentifyContent(ctx, req)
 	if err != nil {
-		return fmt.Errorf("DeidentifyContent: %v", err)
+		return err
 	}
 
 	// Print the results.

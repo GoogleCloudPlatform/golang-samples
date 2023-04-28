@@ -110,8 +110,8 @@ func TestDeIdentifyWithRedact(t *testing.T) {
 	infoTypeNames := []string{"EMAIL_ADDRESS"}
 	want := "output: My name is Alicia Abernathy, and my email address is ."
 
-	buf := new(bytes.Buffer)
-	err := deidentifyWithRedact(buf, tc.ProjectID, input, infoTypeNames)
+	var buf bytes.Buffer
+	err := deidentifyWithRedact(&buf, tc.ProjectID, input, infoTypeNames)
 	if err != nil {
 		t.Errorf("deidentifyWithRedact(%q) = error '%q', want %q", err, input, want)
 	}
@@ -126,9 +126,9 @@ func TestDeidentifyExceptionList(t *testing.T) {
 	input := "jack@example.org accessed customer record of user5@example.com"
 	want := "output : jack@example.org accessed customer record of [EMAIL_ADDRESS]"
 
-	buf := new(bytes.Buffer)
+	var buf bytes.Buffer
 
-	if err := deidentifyExceptionList(buf, tc.ProjectID, input); err != nil {
+	if err := deidentifyExceptionList(&buf, tc.ProjectID, input); err != nil {
 		t.Errorf("deidentifyExceptionList(%q) = error '%q', want %q", input, err, want)
 	}
 	if got := buf.String(); got != want {
@@ -143,8 +143,8 @@ func TestDeIdentifyWithReplacement(t *testing.T) {
 	replaceVal := "[email-address]"
 	want := "output : My name is Alicia Abernathy, and my email address is [email-address]."
 
-	buf := new(bytes.Buffer)
-	err := deidentifyWithReplacement(buf, tc.ProjectID, input, infoType, replaceVal)
+	var buf bytes.Buffer
+	err := deidentifyWithReplacement(&buf, tc.ProjectID, input, infoType, replaceVal)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -155,9 +155,9 @@ func TestDeIdentifyWithReplacement(t *testing.T) {
 
 func TestDeidentifyTableBucketing(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	buf := new(bytes.Buffer)
+	var buf bytes.Buffer
 
-	if err := deIdentifyTableBucketing(buf, tc.ProjectID); err != nil {
+	if err := deIdentifyTableBucketing(&buf, tc.ProjectID); err != nil {
 		t.Fatal(err)
 	}
 
@@ -182,8 +182,8 @@ func TestDeIdentifyWithWordList(t *testing.T) {
 	wordList := []string{"RM-GREEN", "RM-YELLOW", "RM-ORANGE"}
 	want := "output : Patient was seen in [CUSTOM_ROOM_ID] then transferred to [CUSTOM_ROOM_ID]."
 
-	buf := new(bytes.Buffer)
-	err := deidentifyWithWordList(buf, tc.ProjectID, input, infoType, wordList)
+	var buf bytes.Buffer
+	err := deidentifyWithWordList(&buf, tc.ProjectID, input, infoType, wordList)
 	if err != nil {
 		t.Errorf("deidentifyWithWordList(%q) = error '%q', want %q", input, err, want)
 	}
