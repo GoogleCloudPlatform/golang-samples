@@ -181,8 +181,8 @@ func TestDeIdentifyWithWordList(t *testing.T) {
 	want := "output : Patient was seen in [CUSTOM_ROOM_ID] then transferred to [CUSTOM_ROOM_ID]."
 
 	var buf bytes.Buffer
-	err := deidentifyWithWordList(&buf, tc.ProjectID, input, infoType, wordList)
-	if err != nil {
+
+	if err := deidentifyWithWordList(&buf, tc.ProjectID, input, infoType, wordList); err != nil {
 		t.Errorf("deidentifyWithWordList(%q) = error '%q', want %q", input, err, want)
 	}
 	if got := buf.String(); got != want {
