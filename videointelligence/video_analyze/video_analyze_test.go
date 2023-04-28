@@ -37,7 +37,7 @@ func assert(buf bytes.Buffer, want string, t *testing.T) {
 func TestAnalyzeShotChange(t *testing.T) {
 	testutil.EndToEndTest(t)
 
-	testutil.Retry(t, 10, 20*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 10, time.Minute, func(r *testutil.R) {
 		want := "Shot"
 		var buf bytes.Buffer
 		err := shotChangeURI(&buf, catVideo)
@@ -52,38 +52,41 @@ func TestAnalyzeShotChange(t *testing.T) {
 func TestAnalyzeLabelURI(t *testing.T) {
 	testutil.EndToEndTest(t)
 
-	want := "cat"
-	var buf bytes.Buffer
-	err := labelURI(&buf, catVideo)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	assert(buf, want, t)
+	testutil.Retry(t, 10, time.Minute, func(r *testutil.R) {
+		want := "cat"
+		var buf bytes.Buffer
+		err := labelURI(&buf, catVideo)
+		if err != nil {
+			t.Fatal(err)
+		}
+		assert(buf, want, t)
+	})
 }
 
 func TestAnalyzeExplicitContentURI(t *testing.T) {
 	testutil.EndToEndTest(t)
 
-	want := "VERY_UNLIKELY"
-	var buf bytes.Buffer
-	err := explicitContentURI(&buf, catVideo)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	assert(buf, want, t)
+	testutil.Retry(t, 10, time.Minute, func(r *testutil.R) {
+		want := "VERY_UNLIKELY"
+		var buf bytes.Buffer
+		err := explicitContentURI(&buf, catVideo)
+		if err != nil {
+			t.Fatal(err)
+		}
+		assert(buf, want, t)
+	})
 }
 
 func TestAnalyzeSpeechTranscriptionURI(t *testing.T) {
 	testutil.EndToEndTest(t)
 
-	want := "cultural"
-	var buf bytes.Buffer
-	err := speechTranscriptionURI(&buf, googleworkVideo)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	assert(buf, want, t)
+	testutil.Retry(t, 10, time.Minute, func(r *testutil.R) {
+		want := "cultural"
+		var buf bytes.Buffer
+		err := speechTranscriptionURI(&buf, googleworkVideo)
+		if err != nil {
+			t.Fatal(err)
+		}
+		assert(buf, want, t)
+	})
 }

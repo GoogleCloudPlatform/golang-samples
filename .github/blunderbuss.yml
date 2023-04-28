@@ -35,15 +35,11 @@ assign_issues_by:
 - labels:
   - 'api: run'
   to:
-  - grayside
+  - GoogleCloudPlatform/torus-dpe
 - labels:
   - 'api: spanner'
   to:
   - rahul2393
-- labels:
-  - 'api: cloudiot'
-  to:
-  - attilagargyan
 - labels:
   - 'api: cloudsql'
   to:
@@ -54,10 +50,6 @@ assign_issues_by:
   - GoogleCloudPlatform/googleapis-dlp
 
 assign_prs_by:
-- labels:
-  - 'api: cloudiot'
-  to:
-  - attilagargyan
 - labels:
   - 'api: bigtable'
   - 'api: datastore'
