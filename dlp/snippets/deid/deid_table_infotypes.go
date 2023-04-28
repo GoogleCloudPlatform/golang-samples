@@ -147,7 +147,7 @@ func deidentifyTableInfotypes(w io.Writer, projectID string) error {
 	// Send the request.
 	resp, err := client.DeidentifyContent(ctx, req)
 	if err != nil {
-		return fmt.Errorf("DeidentifyContent: %v", err)
+		return err
 	}
 
 	// Print the results.
