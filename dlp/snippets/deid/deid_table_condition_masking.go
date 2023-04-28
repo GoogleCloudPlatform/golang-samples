@@ -99,26 +99,30 @@ func deidentifyTableMaskingCondition(w io.Writer, projectID string) error {
 		Name: "HAPPINESS SCORE",
 	}
 
-	// Specify when the above field should be de-identified.
-	condition := &dlppb.RecordCondition{
-		// Apply the condition to records
-		Expressions: &dlppb.RecordCondition_Expressions{
-			Type: &dlppb.RecordCondition_Expressions_Conditions{
-				Conditions: &dlppb.RecordCondition_Conditions{
-					Conditions: []*dlppb.RecordCondition_Condition{
-						{
-							Field:    fieldId,
-							Operator: dlppb.RelationalOperator_GREATER_THAN,
-							Value: &dlppb.Value{
-								Type: &dlppb.Value_IntegerValue{
-									IntegerValue: 89,
-								},
-							},
-						},
-					},
+	recordCondition := &dlppb.RecordCondition_Condition{
+		Field:    fieldId,
+		Operator: dlppb.RelationalOperator_GREATER_THAN,
+		Value: &dlppb.Value{
+			Type: &dlppb.Value_IntegerValue{
+				IntegerValue: 89,
+			},
+		},
+	}
+
+	expression := &dlppb.RecordCondition_Expressions{
+		Type: &dlppb.RecordCondition_Expressions_Conditions{
+			Conditions: &dlppb.RecordCondition_Conditions{
+				Conditions: []*dlppb.RecordCondition_Condition{
+					recordCondition,
 				},
 			},
 		},
+	}
+
+	// Specify when the above field should be de-identified.
+	condition := &dlppb.RecordCondition{
+		// Apply the condition to records
+		Expressions: expression,
 	}
 
 	// Associate the de-identification and conditions with the specified field.
