@@ -15,10 +15,10 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"fmt"
 
 	"github.com/dgrijalva/jwt-go"
 )
