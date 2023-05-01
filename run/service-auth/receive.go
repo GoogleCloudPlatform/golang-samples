@@ -62,26 +62,30 @@ func receiveAuthorizedGetRequest(w http.ResponseWriter, r *http.Request) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 			}
-			// TODO: Set secret key
+			// TODO(developer): Set your secret key
 			return []byte("my-secret-key"), nil
 		})
 
 		if err != nil {
-			fmt.Fprintf(w, "Unable to parse token: %v", err)
+			fmt.Fprintf(w, "Unable to parse token: %w", err)
 			return
 		}
+
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
 			fmt.Fprintf(w, "Unable to extract claims from token")
 			return
 		}
+
 		email, ok := claims["email"].(string)
 		if !ok {
 			fmt.Fprintf(w, "Unable to extract email from token")
 			return
 		}
+
 		fmt.Fprintf(w, "Hello, %v!\n", email)
-	} else {
+	} 
+	if authType != "Bearer" {
 		fmt.Fprintf(w, "Unhandled header format (%v).\n", authType)
 	}
 }
