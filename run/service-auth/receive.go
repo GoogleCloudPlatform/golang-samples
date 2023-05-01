@@ -39,12 +39,10 @@ func main() {
 	}
 }
 
+// receiveAuthorizedGetRequest takes the "Authorization" header from a
+// request, decodes it using the jwt-go library, and returns back the email
+// from the header to the caller.
 func receiveAuthorizedGetRequest(w http.ResponseWriter, r *http.Request) {
-	/*
-	   receiveAuthorizedGetRequest takes the "Authorization" header from a
-	   request, decodes it using the jwt-go library, and returns back the email
-	   from the header to the caller.
-	*/
 	authHeader := r.Header.Get("Authorization")
 	if authHeader == "" {
 		fmt.Fprintf(w, "Hello, anonymous user.\n")
@@ -67,7 +65,7 @@ func receiveAuthorizedGetRequest(w http.ResponseWriter, r *http.Request) {
 			// TODO: Set secret key
 			return []byte("my-secret-key"), nil
 		})
-		
+
 		if err != nil {
 			fmt.Fprintf(w, "Unable to parse token: %v", err)
 			return
