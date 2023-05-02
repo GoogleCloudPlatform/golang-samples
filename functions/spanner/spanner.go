@@ -25,6 +25,7 @@ import (
 	"sync"
 
 	"cloud.google.com/go/spanner"
+	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 	"google.golang.org/api/iterator"
 )
 
@@ -35,6 +36,10 @@ var clientOnce sync.Once
 
 // db is the name of the database to query.
 var db = "projects/my-project/instances/my-instance/databases/example-db"
+
+func init() {
+	functions.HTTP("HelloSpanner", HelloSpanner)
+}
 
 // HelloSpanner is an example of querying Spanner from a Cloud Function.
 func HelloSpanner(w http.ResponseWriter, r *http.Request) {
