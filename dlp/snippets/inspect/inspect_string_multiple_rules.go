@@ -45,7 +45,7 @@ func inspectStringMultipleRules(w io.Writer, projectID, textToInspect string) er
 	defer client.Close()
 
 	// Specify the type and content to be inspected.
-	var ContentItem = &dlppb.ContentItem{
+	ContentItem := &dlppb.ContentItem{
 		DataItem: &dlppb.ContentItem_ByteItem{
 			ByteItem: &dlppb.ByteContentItem{
 				Type: dlppb.ByteContentItem_TEXT_UTF8,
@@ -55,7 +55,7 @@ func inspectStringMultipleRules(w io.Writer, projectID, textToInspect string) er
 	}
 
 	// Construct hotword rules
-	var patientRule = &dlppb.InspectionRule_HotwordRule{
+	patientRule := &dlppb.InspectionRule_HotwordRule{
 		HotwordRule: &dlppb.CustomInfoType_DetectionRule_HotwordRule{
 			HotwordRegex: &dlppb.CustomInfoType_Regex{
 				Pattern: "patient",
@@ -71,7 +71,7 @@ func inspectStringMultipleRules(w io.Writer, projectID, textToInspect string) er
 		},
 	}
 
-	var doctorRule = &dlppb.InspectionRule_HotwordRule{
+	doctorRule := &dlppb.InspectionRule_HotwordRule{
 		HotwordRule: &dlppb.CustomInfoType_DetectionRule_HotwordRule{
 			HotwordRegex: &dlppb.CustomInfoType_Regex{
 				Pattern: "doctor",
@@ -88,7 +88,7 @@ func inspectStringMultipleRules(w io.Writer, projectID, textToInspect string) er
 	}
 
 	// Construct exclusion rules
-	var quasimodoRule = &dlppb.ExclusionRule{
+	quasimodoRule := &dlppb.ExclusionRule{
 		Type: &dlppb.ExclusionRule_Dictionary{
 			Dictionary: &dlppb.CustomInfoType_Dictionary{
 				Source: &dlppb.CustomInfoType_Dictionary_WordList_{
@@ -101,7 +101,7 @@ func inspectStringMultipleRules(w io.Writer, projectID, textToInspect string) er
 		MatchingType: dlppb.MatchingType_MATCHING_TYPE_PARTIAL_MATCH,
 	}
 
-	var redactedRule = &dlppb.ExclusionRule{
+	redactedRule := &dlppb.ExclusionRule{
 		Type: &dlppb.ExclusionRule_Regex{
 			Regex: &dlppb.CustomInfoType_Regex{
 				Pattern: "REDACTED",
@@ -111,7 +111,7 @@ func inspectStringMultipleRules(w io.Writer, projectID, textToInspect string) er
 	}
 
 	// Construct a ruleSet that applies the rules to the PERSON_NAME infoType.
-	var ruleSet = &dlppb.InspectionRuleSet{
+	ruleSet := &dlppb.InspectionRuleSet{
 		InfoTypes: []*dlppb.InfoType{
 			{Name: "PERSON_NAME"},
 		},
@@ -124,7 +124,7 @@ func inspectStringMultipleRules(w io.Writer, projectID, textToInspect string) er
 	}
 
 	// Construct the configuration for the Inspect request, including the ruleSet.
-	var inspectConfig = &dlppb.InspectConfig{
+	inspectConfig := &dlppb.InspectConfig{
 		InfoTypes: []*dlppb.InfoType{
 			{Name: "PERSON_NAME"},
 		},
@@ -144,7 +144,6 @@ func inspectStringMultipleRules(w io.Writer, projectID, textToInspect string) er
 	// Send the request.
 	resp, err := client.InspectContent(ctx, req)
 	if err != nil {
-		fmt.Fprintf(w, "Receive: %v", err)
 		return err
 	}
 
