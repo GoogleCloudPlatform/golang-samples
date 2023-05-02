@@ -45,7 +45,7 @@ func inspectStringCustomExcludingSubstring(w io.Writer, projectID, textToInspect
 	defer client.Close()
 
 	// Specify the type and content to be inspected.
-	var contentItem = &dlppb.ContentItem{
+	contentItem := &dlppb.ContentItem{
 		DataItem: &dlppb.ContentItem_ByteItem{
 			ByteItem: &dlppb.ByteContentItem{
 				Type: dlppb.ByteContentItem_TEXT_UTF8,
@@ -55,11 +55,11 @@ func inspectStringCustomExcludingSubstring(w io.Writer, projectID, textToInspect
 	}
 
 	// Specify the type of info the inspection will look for.
-	var infoType = &dlppb.InfoType{
+	infoType := &dlppb.InfoType{
 		Name: "CUSTOM_NAME_DETECTOR",
 	}
 
-	var customInfotype = &dlppb.CustomInfoType{
+	customInfotype := &dlppb.CustomInfoType{
 		InfoType: infoType,
 		Type: &dlppb.CustomInfoType_Regex_{
 			Regex: &dlppb.CustomInfoType_Regex{
@@ -69,7 +69,7 @@ func inspectStringCustomExcludingSubstring(w io.Writer, projectID, textToInspect
 	}
 
 	// Exclude partial matches from the specified excludedSubstringList.
-	var exclusionRule = &dlppb.ExclusionRule{
+	exclusionRule := &dlppb.ExclusionRule{
 		Type: &dlppb.ExclusionRule_Dictionary{
 			Dictionary: &dlppb.CustomInfoType_Dictionary{
 				Source: &dlppb.CustomInfoType_Dictionary_WordList_{
@@ -83,7 +83,7 @@ func inspectStringCustomExcludingSubstring(w io.Writer, projectID, textToInspect
 	}
 
 	// Construct a ruleset that applies the exclusion rule to the EMAIL_ADDRESSES infoType.
-	var ruleSet = &dlppb.InspectionRuleSet{
+	ruleSet := &dlppb.InspectionRuleSet{
 		InfoTypes: []*dlppb.InfoType{
 			infoType,
 		},
@@ -114,7 +114,6 @@ func inspectStringCustomExcludingSubstring(w io.Writer, projectID, textToInspect
 	// Send the request.
 	resp, err := client.InspectContent(ctx, req)
 	if err != nil {
-		fmt.Fprintf(w, "Receive: %v", err)
 		return err
 	}
 
