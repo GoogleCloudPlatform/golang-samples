@@ -72,21 +72,21 @@ func deidentifyTableRowSuppress(w io.Writer, projectID string) error {
 	// call the Close method to cleanup its resources.
 	client, err := dlp.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("dlp.NewClient: %v", err)
+		return err
 	}
 
 	// Closing the client safely cleans up background resources.
 	defer client.Close()
 
 	// Specify what content you want the service to de-identify.
-	var contentItem = &dlppb.ContentItem{
+	contentItem := &dlppb.ContentItem{
 		DataItem: &dlppb.ContentItem_Table{
 			Table: table,
 		},
 	}
 
 	// Apply the condition to record suppression.
-	var condition = &dlppb.RecordCondition{
+	condition := &dlppb.RecordCondition{
 		Expressions: &dlppb.RecordCondition_Expressions{
 			Type: &dlppb.RecordCondition_Expressions_Conditions{
 				Conditions: &dlppb.RecordCondition_Conditions{
@@ -103,12 +103,12 @@ func deidentifyTableRowSuppress(w io.Writer, projectID string) error {
 			},
 		},
 	}
-	var recordSupression = &dlppb.RecordSuppression{
+	recordSupression := &dlppb.RecordSuppression{
 		Condition: condition,
 	}
 
 	// Use record suppression as the only transformation
-	var recordTransformations = &dlppb.RecordTransformations{
+	recordTransformations := &dlppb.RecordTransformations{
 		RecordSuppressions: []*dlppb.RecordSuppression{
 			recordSupression,
 		},
@@ -128,7 +128,7 @@ func deidentifyTableRowSuppress(w io.Writer, projectID string) error {
 	// Send the request.
 	resp, err := client.DeidentifyContent(ctx, req)
 	if err != nil {
-		return fmt.Errorf("DeidentifyContent: %v", err)
+		return err
 	}
 
 	// Print the results.
