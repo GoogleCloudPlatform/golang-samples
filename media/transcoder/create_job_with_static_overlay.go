@@ -34,7 +34,7 @@ func createJobWithStaticOverlay(w io.Writer, projectID string, location string, 
 	// projectID := "my-project-id"
 	// location := "us-central1"
 	// inputURI := "gs://my-bucket/my-video-file"
-	// overlayImageURI := "gs://my-bucket/my-overlay-image-file" - Must be a JPEG
+	// overlayImageURI := "gs://my-bucket/my-overlay-image-file"
 	// outputURI := "gs://my-bucket/my-output-folder/"
 	ctx := context.Background()
 	client, err := transcoder.NewClient(ctx)
