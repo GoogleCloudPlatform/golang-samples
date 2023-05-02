@@ -13,7 +13,7 @@
 // limitations under the License.
 package inspect
 
-// [START dlp_inspect_table]
+// [START dlp_inspect_string_with_exclusion_dict_substring]
 import (
 	"context"
 	"fmt"
@@ -23,9 +23,12 @@ import (
 	"cloud.google.com/go/dlp/apiv2/dlppb"
 )
 
-// inspectTable inspects a table for sensitive content
-func inspectTable(w io.Writer, projectID string) error {
-	// projectID := "your-project-id"
+// inspectStringWithExclusionDictSubstring inspects a string
+// with an exclusion dictionary substring
+func inspectStringWithExclusionDictSubstring(w io.Writer, projectID, textToInspect string, excludedSubString []string) error {
+	// projectID := "my-project-id"
+	// textToInspect := "Some email addresses: gary@example.com, TEST@example.com"
+	// excludedSubString := []string{"TEST"}
 
 	ctx := context.Background()
 
@@ -40,41 +43,49 @@ func inspectTable(w io.Writer, projectID string) error {
 	// Closing the client safely cleans up background resources.
 	defer client.Close()
 
-	// create a default table
-	tableToInspect := &dlppb.Table{
-		Headers: []*dlppb.FieldId{
-			{Name: "name"},
-			{Name: "phone"},
-		},
-		Rows: []*dlppb.Table_Row{
-			{
-				Values: []*dlppb.Value{
-					{
-						Type: &dlppb.Value_StringValue{
-							StringValue: "John Doe",
-						},
-					},
-					{
-						Type: &dlppb.Value_StringValue{
-							StringValue: "(206) 555-0123",
-						},
-					},
-				},
+	// Specify the type and content to be inspected.
+	contentItem := &dlppb.ContentItem{
+		DataItem: &dlppb.ContentItem_ByteItem{
+			ByteItem: &dlppb.ByteContentItem{
+				Type: dlppb.ByteContentItem_TEXT_UTF8,
+				Data: []byte(textToInspect),
 			},
 		},
 	}
 
-	// Specify the table to be inspected.
-	contentItem := &dlppb.ContentItem{
-		DataItem: &dlppb.ContentItem_Table{
-			Table: tableToInspect,
-		},
+	// Specify the type of info the inspection will look for.
+	// See https://cloud.google.com/dlp/docs/infotypes-reference for complete list of info types.
+	infoTypes := []*dlppb.InfoType{
+		{Name: "EMAIL_ADDRESS"},
+		{Name: "DOMAIN_NAME"},
+		{Name: "PHONE_NUMBER"},
+		{Name: "PERSON_NAME"},
 	}
 
-	// Specify the type of info the inspection will look for.
-	// See https://cloud.google.com/dlp/docs/infotypes-reference for complete list of info types
-	infoTypes := []*dlppb.InfoType{
-		{Name: "PHONE_NUMBER"},
+	// Exclude partial matches from the specified excludedSubstringList.
+	exclusionRule := &dlppb.ExclusionRule{
+		Type: &dlppb.ExclusionRule_Dictionary{
+			Dictionary: &dlppb.CustomInfoType_Dictionary{
+				Source: &dlppb.CustomInfoType_Dictionary_WordList_{
+					WordList: &dlppb.CustomInfoType_Dictionary_WordList{
+						Words: excludedSubString,
+					},
+				},
+			},
+		},
+		MatchingType: dlppb.MatchingType_MATCHING_TYPE_PARTIAL_MATCH,
+	}
+
+	// Construct a ruleSet that applies the exclusion rule to the EMAIL_ADDRESSES infoType.
+	ruleSet := &dlppb.InspectionRuleSet{
+		InfoTypes: infoTypes,
+		Rules: []*dlppb.InspectionRule{
+			{
+				Type: &dlppb.InspectionRule_ExclusionRule{
+					ExclusionRule: exclusionRule,
+				},
+			},
+		},
 	}
 
 	// Construct the Inspect request to be sent by the client.
@@ -84,6 +95,9 @@ func inspectTable(w io.Writer, projectID string) error {
 		InspectConfig: &dlppb.InspectConfig{
 			InfoTypes:    infoTypes,
 			IncludeQuote: true,
+			RuleSet: []*dlppb.InspectionRuleSet{
+				ruleSet,
+			},
 		},
 	}
 
@@ -93,7 +107,7 @@ func inspectTable(w io.Writer, projectID string) error {
 		return err
 	}
 
-	// Print the results.
+	// Process the results.
 	fmt.Fprintf(w, "Findings: %v\n", len(resp.Result.Findings))
 	for _, v := range resp.GetResult().Findings {
 		fmt.Fprintf(w, "Quote: %v\n", v.GetQuote())
@@ -104,4 +118,4 @@ func inspectTable(w io.Writer, projectID string) error {
 
 }
 
-// [END dlp_inspect_table]
+// [END dlp_inspect_string_with_exclusion_dict_substring]

@@ -23,7 +23,6 @@ import (
 
 	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/datastore"
-	"cloud.google.com/go/dlp/apiv2/dlppb"
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/gofrs/uuid"
@@ -280,41 +279,17 @@ func TestInspectBigquery(t *testing.T) {
 
 func TestInspectTable(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	tableToInspect := &dlppb.Table{
-		Headers: []*dlppb.FieldId{
-			{Name: "name"},
-			{Name: "phone"},
-		},
-		Rows: []*dlppb.Table_Row{
-			{
-				Values: []*dlppb.Value{
-					{
-						Type: &dlppb.Value_StringValue{
-							StringValue: "John Doe",
-						},
-					},
-					{
-						Type: &dlppb.Value_StringValue{
-							StringValue: "(206) 555-0123",
-						},
-					},
-				},
-			},
-		},
-	}
-	t.Run("inspectTable", func(t *testing.T) {
-		t.Parallel()
 
-		buf := new(bytes.Buffer)
-		if err := inspectTable(buf, tc.ProjectID, tableToInspect); err != nil {
-			t.Errorf("TestInspectTable: %v", err)
-		}
-		got := buf.String()
-		if want := "Infotype Name: PHONE_NUMBER"; !strings.Contains(got, want) {
-			t.Errorf("InspectTable got %q, want %q", got, want)
-		}
-		if want := "Likelihood: VERY_LIKELY"; !strings.Contains(got, want) {
-			t.Errorf("InspectTable got %q, want %q", got, want)
-		}
-	})
+	buf := new(bytes.Buffer)
+	if err := inspectTable(buf, tc.ProjectID); err != nil {
+		t.Fatal(err)
+	}
+	got := buf.String()
+	if want := "Infotype Name: PHONE_NUMBER"; !strings.Contains(got, want) {
+		t.Errorf("InspectTable got %q, want %q", got, want)
+	}
+	if want := "Likelihood: VERY_LIKELY"; !strings.Contains(got, want) {
+		t.Errorf("InspectTable got %q, want %q", got, want)
+	}
+
 }
