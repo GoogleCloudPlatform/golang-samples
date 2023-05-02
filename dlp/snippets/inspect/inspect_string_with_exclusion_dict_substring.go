@@ -4,17 +4,16 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     https://www.apache.org/licenses/LICENSE-2.0
+//	https://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package inspect
 
-// [START dlp_inspect_string_with_exclusion_regex]
+// [START dlp_inspect_string_with_exclusion_dict_substring]
 import (
 	"context"
 	"fmt"
@@ -24,13 +23,12 @@ import (
 	"cloud.google.com/go/dlp/apiv2/dlppb"
 )
 
-// inspectStringWithExclusionRegex inspects a string excluding REGEX matches
-// in this function specifically the function omits email addresses ending with a specific
-// domain from EMAIL_ADDRESS detector scan.
-func inspectStringWithExclusionRegex(w io.Writer, projectID, textToInspect, excludedRegex string) error {
+// inspectStringWithExclusionDictSubstring inspects a string
+// with an exclusion dictionary substring
+func inspectStringWithExclusionDictSubstring(w io.Writer, projectID, textToInspect string, excludedSubString []string) error {
 	// projectID := "my-project-id"
-	// textToInspect := "Some email addresses: gary@example.com, bob@example.org"
-	// excludedRegex := ".+@example.com"
+	// textToInspect := "Some email addresses: gary@example.com, TEST@example.com"
+	// excludedSubString := []string{"TEST"}
 
 	ctx := context.Background()
 
@@ -58,26 +56,29 @@ func inspectStringWithExclusionRegex(w io.Writer, projectID, textToInspect, excl
 	// Specify the type of info the inspection will look for.
 	// See https://cloud.google.com/dlp/docs/infotypes-reference for complete list of info types.
 	infoTypes := []*dlppb.InfoType{
-		{Name: "PHONE_NUMBER"},
 		{Name: "EMAIL_ADDRESS"},
-		{Name: "CREDIT_CARD_NUMBER"},
+		{Name: "DOMAIN_NAME"},
+		{Name: "PHONE_NUMBER"},
+		{Name: "PERSON_NAME"},
 	}
 
-	// Exclude matches from the specified excludedMatchList.
+	// Exclude partial matches from the specified excludedSubstringList.
 	exclusionRule := &dlppb.ExclusionRule{
-		Type: &dlppb.ExclusionRule_Regex{
-			Regex: &dlppb.CustomInfoType_Regex{
-				Pattern: excludedRegex,
+		Type: &dlppb.ExclusionRule_Dictionary{
+			Dictionary: &dlppb.CustomInfoType_Dictionary{
+				Source: &dlppb.CustomInfoType_Dictionary_WordList_{
+					WordList: &dlppb.CustomInfoType_Dictionary_WordList{
+						Words: excludedSubString,
+					},
+				},
 			},
 		},
-		MatchingType: dlppb.MatchingType_MATCHING_TYPE_FULL_MATCH,
+		MatchingType: dlppb.MatchingType_MATCHING_TYPE_PARTIAL_MATCH,
 	}
 
-	// Construct a ruleset that applies the exclusion rule to the EMAIL_ADDRESSES infotype.
+	// Construct a ruleSet that applies the exclusion rule to the EMAIL_ADDRESSES infoType.
 	ruleSet := &dlppb.InspectionRuleSet{
-		InfoTypes: []*dlppb.InfoType{
-			{Name: "EMAIL_ADDRESS"},
-		},
+		InfoTypes: infoTypes,
 		Rules: []*dlppb.InspectionRule{
 			{
 				Type: &dlppb.InspectionRule_ExclusionRule{
@@ -117,4 +118,4 @@ func inspectStringWithExclusionRegex(w io.Writer, projectID, textToInspect, excl
 
 }
 
-// [END dlp_inspect_string_with_exclusion_regex]
+// [END dlp_inspect_string_with_exclusion_dict_substring]
