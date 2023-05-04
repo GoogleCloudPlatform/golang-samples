@@ -120,6 +120,17 @@ func TestDeidentifyTableInfoTypes(t *testing.T) {
 	if want := "[PERSON_NAME]"; !strings.Contains(got, want) {
 		t.Errorf("deidentifyTableInfotypes got %q, want %q", got, want)
 	}
+
+	if want := "Charles Dickens"; strings.Contains(got, want) {
+		t.Errorf("deidentifyTableInfotypes got %q, want %q", got, want)
+	}
+	if want := "Mark Twain"; strings.Contains(got, want) {
+		t.Errorf("deidentifyTableInfotypes got %q, want %q", got, want)
+	}
+	if want := "Jane Austen"; strings.Contains(got, want) {
+		t.Errorf("deidentifyTableInfotypes got %q, want %q", got, want)
+	}
+
 }
 
 func TestDeIdentifyWithRedact(t *testing.T) {
