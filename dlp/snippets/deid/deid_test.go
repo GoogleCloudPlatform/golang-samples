@@ -174,6 +174,24 @@ func TestDeidentifyTableBucketing(t *testing.T) {
 
 }
 
+func TestDeidentifyTableConditionInfoTypes(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	var buf bytes.Buffer
+
+	if err := deidentifyTableConditionInfoTypes(&buf, tc.ProjectID, []string{"PATIENT", "FACTOID"}); err != nil {
+		t.Fatal(err)
+	}
+
+	got := buf.String()
+	if want := "Table after de-identification"; !strings.Contains(got, want) {
+		t.Errorf("deidentifyTableConditionInfoTypes got %q, want %q", got, want)
+	}
+	if want := "values:{string_value:\"[PERSON_NAME] name was a curse invented by [PERSON_NAME].\"}}"; !strings.Contains(got, want) {
+		t.Errorf("deIdentifyTableBucketing got %q, want %q", got, want)
+	}
+}
+
 func TestDeIdentifyWithWordList(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
