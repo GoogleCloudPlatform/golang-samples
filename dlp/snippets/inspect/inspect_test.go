@@ -292,6 +292,9 @@ func TestInspectStringCustomExcludingSubstring(t *testing.T) {
 	if want := "Quote: Doe, John"; !strings.Contains(got, want) {
 		t.Errorf("inspectStringCustomExcludingSubstring got %q, want %q", got, want)
 	}
+	if want := "Jimmy"; strings.Contains(got, want) {
+		t.Errorf("inspectStringCustomExcludingSubstring got %q, want %q", got, want)
+	}
 }
 func TestInspectWithHotWordRules(t *testing.T) {
 	tc := testutil.SystemTest(t)
