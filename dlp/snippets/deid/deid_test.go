@@ -159,9 +159,7 @@ func TestDeidentifyTableBucketing(t *testing.T) {
 
 func TestDeidentifyTableMaskingCondition(t *testing.T) {
 	tc := testutil.SystemTest(t)
-
 	var buf bytes.Buffer
-
 	if err := deidentifyTableMaskingCondition(&buf, tc.ProjectID); err != nil {
 		t.Fatal(err)
 	}
@@ -172,18 +170,28 @@ func TestDeidentifyTableMaskingCondition(t *testing.T) {
 	if want := "values:{string_value:\"**\"}"; !strings.Contains(got, want) {
 		t.Errorf("deidentifyTableMaskingCondition got (%q) =%q ", got, want)
 	}
+}
+func TestDeidentifyTableConditionInfoTypes(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	var buf bytes.Buffer
 
+	if err := deidentifyTableConditionInfoTypes(&buf, tc.ProjectID, []string{"PATIENT", "FACTOID"}); err != nil {
+		t.Fatal(err)
+	}
+
+	got := buf.String()
+	if want := "values:{string_value:\"[PERSON_NAME] name was a curse invented by [PERSON_NAME].\"}}"; !strings.Contains(got, want) {
+		t.Errorf("deIdentifyTableBucketing got %q, want %q", got, want)
+	}
 }
 
 func TestDeIdentifyWithWordList(t *testing.T) {
 	tc := testutil.SystemTest(t)
-
+	var buf bytes.Buffer
 	input := "Patient was seen in RM-YELLOW then transferred to rm green."
 	infoType := "CUSTOM_ROOM_ID"
 	wordList := []string{"RM-GREEN", "RM-YELLOW", "RM-ORANGE"}
 	want := "output : Patient was seen in [CUSTOM_ROOM_ID] then transferred to [CUSTOM_ROOM_ID]."
-
-	var buf bytes.Buffer
 
 	if err := deidentifyWithWordList(&buf, tc.ProjectID, input, infoType, wordList); err != nil {
 		t.Errorf("deidentifyWithWordList(%q) = error '%q', want %q", input, err, want)
