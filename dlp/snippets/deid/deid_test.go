@@ -136,6 +136,23 @@ func TestDeidentifyExceptionList(t *testing.T) {
 	}
 }
 
+func TestDeIdentifyWithReplacement(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	input := "My name is Alicia Abernathy, and my email address is aabernathy@example.com."
+	infoType := []string{"EMAIL_ADDRESS"}
+	replaceVal := "[email-address]"
+	want := "output : My name is Alicia Abernathy, and my email address is [email-address]."
+
+	var buf bytes.Buffer
+	err := deidentifyWithReplacement(&buf, tc.ProjectID, input, infoType, replaceVal)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := buf.String(); got != want {
+		t.Errorf("deidentifyWithReplacement(%q) = %q, want %q", input, got, want)
+	}
+}
+
 func TestDeidentifyTableBucketing(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
