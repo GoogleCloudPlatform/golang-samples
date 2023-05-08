@@ -22,10 +22,6 @@ import (
 	"google.golang.org/appengine/memcache"
 )
 
-// [START intro_1]
-
-// [END intro_1]
-
 func handler(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
 
