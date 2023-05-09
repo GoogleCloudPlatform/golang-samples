@@ -198,6 +198,36 @@ gcloud beta run deploy SERVICE --image gcr.io/[YOUR_PROJECT_ID]/run-sql \
 
 For more details about using Cloud Run see http://cloud.run.
 
+## Deploy to Cloud Functions
+
+To deploy the service to [Cloud Functions](https://cloud.google.com/functions/docs) run the following command:
+
+```sh
+gcloud functions deploy votes --gen2 --runtime go120 --trigger-http \
+  --allow-unauthenticated \
+  --entry-point Votes \
+  --region <INSTANCE_REGION> \
+  --set-env-vars INSTANCE_UNIX_SOCKET=/cloudsql/<PROJECT_ID>:<INSTANCE_REGION>:<INSTANCE_NAME> \
+  --set-env-vars DB_USER=$DB_USER \
+  --set-env-vars DB_PASS=$DB_PASS \
+  --set-env-vars DB_NAME=$DB_NAME
+```
+
+Note: If the function fails to deploy or returns a `500: Internal service error`,
+this may be due to a known limitation with Cloud Functions gen2 not being able
+to configure the underlying Cloud Run service with a Cloud SQL connection.
+
+A workaround command to fix this is is to manually revise the Cloud Run
+service with the Cloud SQL Connection:
+
+```sh
+gcloud run deploy votes --source . \
+  --region <INSTANCE_REGION> \
+  --add-cloudsql-instances <PROJECT_ID>:<INSTANCE_REGION>:<INSTANCE_NAME>
+```
+
+The Cloud Function command above can now be re-run with a successful deployment.
+
 ## Running Integration Tests
 
 The integration tests depend on a Unix socket and a TCP listener provided by the
