@@ -111,8 +111,8 @@ func TestDeIdentifyWithRedact(t *testing.T) {
 	want := "output: My name is Alicia Abernathy, and my email address is ."
 
 	var buf bytes.Buffer
-	err := deidentifyWithRedact(&buf, tc.ProjectID, input, infoTypeNames)
-	if err != nil {
+
+	if err := deidentifyWithRedact(&buf, tc.ProjectID, input, infoTypeNames); err != nil {
 		t.Errorf("deidentifyWithRedact(%q) = error '%q', want %q", err, input, want)
 	}
 	if got := buf.String(); got != want {
@@ -174,9 +174,23 @@ func TestDeidentifyTableBucketing(t *testing.T) {
 
 }
 
+func TestDeidentifyTableMaskingCondition(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	var buf bytes.Buffer
+	if err := deidentifyTableMaskingCondition(&buf, tc.ProjectID); err != nil {
+		t.Fatal(err)
+	}
+	got := buf.String()
+	if want := "Table after de-identification :"; !strings.Contains(got, want) {
+		t.Errorf("deidentifyTableMaskingCondition got (%q) =%q ", got, want)
+	}
+	if want := "values:{string_value:\"**\"}"; !strings.Contains(got, want) {
+		t.Errorf("deidentifyTableMaskingCondition got (%q) =%q ", got, want)
+	}
+}
+
 func TestDeidentifyTableConditionInfoTypes(t *testing.T) {
 	tc := testutil.SystemTest(t)
-
 	var buf bytes.Buffer
 
 	if err := deidentifyTableConditionInfoTypes(&buf, tc.ProjectID, []string{"PATIENT", "FACTOID"}); err != nil {
@@ -194,15 +208,13 @@ func TestDeidentifyTableConditionInfoTypes(t *testing.T) {
 
 func TestDeIdentifyWithWordList(t *testing.T) {
 	tc := testutil.SystemTest(t)
-
+	var buf bytes.Buffer
 	input := "Patient was seen in RM-YELLOW then transferred to rm green."
 	infoType := "CUSTOM_ROOM_ID"
 	wordList := []string{"RM-GREEN", "RM-YELLOW", "RM-ORANGE"}
 	want := "output : Patient was seen in [CUSTOM_ROOM_ID] then transferred to [CUSTOM_ROOM_ID]."
 
-	var buf bytes.Buffer
-	err := deidentifyWithWordList(&buf, tc.ProjectID, input, infoType, wordList)
-	if err != nil {
+	if err := deidentifyWithWordList(&buf, tc.ProjectID, input, infoType, wordList); err != nil {
 		t.Errorf("deidentifyWithWordList(%q) = error '%q', want %q", input, err, want)
 	}
 	if got := buf.String(); got != want {
