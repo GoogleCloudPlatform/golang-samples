@@ -171,6 +171,7 @@ func TestDeidentifyTableMaskingCondition(t *testing.T) {
 		t.Errorf("deidentifyTableMaskingCondition got (%q) =%q ", got, want)
 	}
 }
+
 func TestDeidentifyTableConditionInfoTypes(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
@@ -180,6 +181,9 @@ func TestDeidentifyTableConditionInfoTypes(t *testing.T) {
 	}
 
 	got := buf.String()
+	if want := "Table after de-identification"; !strings.Contains(got, want) {
+		t.Errorf("deidentifyTableConditionInfoTypes got %q, want %q", got, want)
+	}
 	if want := "values:{string_value:\"[PERSON_NAME] name was a curse invented by [PERSON_NAME].\"}}"; !strings.Contains(got, want) {
 		t.Errorf("deIdentifyTableBucketing got %q, want %q", got, want)
 	}

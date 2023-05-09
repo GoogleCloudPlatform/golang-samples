@@ -99,6 +99,7 @@ func deidentifyTableMaskingCondition(w io.Writer, projectID string) error {
 		Name: "HAPPINESS SCORE",
 	}
 
+	// Apply the condition to the records present in table.
 	recordCondition := &dlppb.RecordCondition_Condition{
 		Field:    fieldId,
 		Operator: dlppb.RelationalOperator_GREATER_THAN,
