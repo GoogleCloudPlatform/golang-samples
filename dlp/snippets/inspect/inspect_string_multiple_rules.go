@@ -54,7 +54,8 @@ func inspectStringMultipleRules(w io.Writer, projectID, textToInspect string) er
 		},
 	}
 
-	// Construct hotword rules
+	// Construct the rule that adjust the likelihood of findings
+	// within a certain proximity of hot-word("patient").
 	patientRule := &dlppb.InspectionRule_HotwordRule{
 		HotwordRule: &dlppb.CustomInfoType_DetectionRule_HotwordRule{
 			HotwordRegex: &dlppb.CustomInfoType_Regex{
@@ -71,6 +72,8 @@ func inspectStringMultipleRules(w io.Writer, projectID, textToInspect string) er
 		},
 	}
 
+	// Construct the rule that adjust the likelihood of findings
+	// within a certain proximity of hot-word("doctor").
 	doctorRule := &dlppb.InspectionRule_HotwordRule{
 		HotwordRule: &dlppb.CustomInfoType_DetectionRule_HotwordRule{
 			HotwordRegex: &dlppb.CustomInfoType_Regex{
@@ -87,7 +90,7 @@ func inspectStringMultipleRules(w io.Writer, projectID, textToInspect string) er
 		},
 	}
 
-	// Construct exclusion rules
+	// Construct the exclusion rule that avoids the matches for the specified word list.
 	quasimodoRule := &dlppb.ExclusionRule{
 		Type: &dlppb.ExclusionRule_Dictionary{
 			Dictionary: &dlppb.CustomInfoType_Dictionary{
@@ -101,6 +104,7 @@ func inspectStringMultipleRules(w io.Writer, projectID, textToInspect string) er
 		MatchingType: dlppb.MatchingType_MATCHING_TYPE_PARTIAL_MATCH,
 	}
 
+	// Construct the exclusion rule that avoids the matches for the specified regex pattern.
 	redactedRule := &dlppb.ExclusionRule{
 		Type: &dlppb.ExclusionRule_Regex{
 			Regex: &dlppb.CustomInfoType_Regex{
