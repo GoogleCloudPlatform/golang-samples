@@ -421,6 +421,21 @@ func TestGetPublicKey(t *testing.T) {
 	}
 }
 
+func TestGetPublicKeyJwk(t *testing.T) {
+	testutil.SystemTest(t)
+
+	name := fmt.Sprintf("%s/cryptoKeyVersions/1", fixture.AsymmetricDecryptKeyName)
+
+	var b bytes.Buffer
+	if err := getPublicKeyJwk(&b, name); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "kty"; !strings.Contains(got, want) {
+		t.Errorf("getPublicKeyJwk: expected %q to contain %q", got, want)
+	}
+}
+
 func TestIAMAddMember(t *testing.T) {
 	testutil.SystemTest(t)
 
