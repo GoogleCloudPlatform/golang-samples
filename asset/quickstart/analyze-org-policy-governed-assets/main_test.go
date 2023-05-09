@@ -19,7 +19,6 @@ import (
 	"context"
 	"strings"
 	"testing"
-
 	asset "cloud.google.com/go/asset/apiv1"
 )
 
@@ -34,6 +33,7 @@ var (
 
 func TestAnalyzeOrgPolicyGovernedAssets(t *testing.T) {
 	buf := new(bytes.Buffer)
+	// organizations/474566717491 is ipa1.joonix.net, a test organization.
 	err := analyzeOrgPolicyGovernedAssets(buf, "organizations/474566717491", "constraints/iam.allowedPolicyMemberDomains")
 	if err != nil {
 		t.Errorf("analyzeOrgPolicyGovernedAssets: %v", err)

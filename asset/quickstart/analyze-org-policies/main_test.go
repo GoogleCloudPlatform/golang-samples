@@ -34,6 +34,7 @@ var (
 
 func TestAnalyzeOrgPolicies(t *testing.T) {
 	buf := new(bytes.Buffer)
+	// organizations/474566717491 is ipa1.joonix.net, a test organization.
 	err := analyzeOrgPolicies(buf, "organizations/474566717491", "constraints/iam.allowServiceAccountCredentialLifetimeExtension")
 	if err != nil {
 		t.Errorf("analyzeOrgPolicies: %v", err)
