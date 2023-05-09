@@ -16,10 +16,10 @@ package create
 
 import (
 	"bytes"
+	asset "cloud.google.com/go/asset/apiv1"
 	"context"
 	"strings"
 	"testing"
-	asset "cloud.google.com/go/asset/apiv1"
 )
 
 var (

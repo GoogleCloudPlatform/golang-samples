@@ -23,9 +23,9 @@ import (
 	"io"
 	"log"
 
-	"google.golang.org/api/iterator"
 	asset "cloud.google.com/go/asset/apiv1"
 	"cloud.google.com/go/asset/apiv1/assetpb"
+	"google.golang.org/api/iterator"
 )
 
 func analyzeOrgPolicyGovernedAssets(w io.Writer, scope string, constraint string) error {
@@ -36,9 +36,9 @@ func analyzeOrgPolicyGovernedAssets(w io.Writer, scope string, constraint string
 	}
 	defer client.Close()
 	req := &assetpb.AnalyzeOrgPolicyGovernedAssetsRequest{
-		Scope:       scope,
+		Scope:      scope,
 		Constraint: constraint,
-		}
+	}
 	it := client.AnalyzeOrgPolicyGovernedAssets(ctx, req)
 
 	// Traverse and print the first 10 org policy results in response
