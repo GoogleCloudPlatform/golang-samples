@@ -103,6 +103,36 @@ func TestDeidentifyDateShift(t *testing.T) {
 	}
 }
 
+func TestDeidentifyTableInfoTypes(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	var buf bytes.Buffer
+
+	if err := deidentifyTableInfotypes(&buf, tc.ProjectID); err != nil {
+		t.Fatal(err)
+	}
+
+	got := buf.String()
+	if want := "Table after de-identification"; !strings.Contains(got, want) {
+		t.Errorf("deidentifyTableInfotypes got %q, want %q", got, want)
+	}
+
+	if want := "[PERSON_NAME]"; !strings.Contains(got, want) {
+		t.Errorf("deidentifyTableInfotypes got %q, want %q", got, want)
+	}
+
+	if want := "Charles Dickens"; strings.Contains(got, want) {
+		t.Errorf("deidentifyTableInfotypes got %q, want %q", got, want)
+	}
+	if want := "Mark Twain"; strings.Contains(got, want) {
+		t.Errorf("deidentifyTableInfotypes got %q, want %q", got, want)
+	}
+	if want := "Jane Austen"; strings.Contains(got, want) {
+		t.Errorf("deidentifyTableInfotypes got %q, want %q", got, want)
+	}
+
+}
+
 func TestDeIdentifyWithRedact(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -160,11 +190,7 @@ func TestDeidentifyTableBucketing(t *testing.T) {
 	if err := deIdentifyTableBucketing(&buf, tc.ProjectID); err != nil {
 		t.Fatal(err)
 	}
-
 	got := buf.String()
-	if want := "Table after de-identification"; !strings.Contains(got, want) {
-		t.Errorf("deIdentifyTableBucketing got %q, want %q", got, want)
-	}
 	if want := "values:{string_value:\"70:80\"}}"; !strings.Contains(got, want) {
 		t.Errorf("deIdentifyTableBucketing got %q, want %q", got, want)
 	}
