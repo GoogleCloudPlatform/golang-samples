@@ -17,6 +17,7 @@ package snippets
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"math/rand"
 	"strings"
@@ -24,8 +25,9 @@ import (
 	"time"
 
 	compute "cloud.google.com/go/compute/apiv1"
+	computepb "cloud.google.com/go/compute/apiv1/computepb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
+	"google.golang.org/api/googleapi"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -152,8 +154,21 @@ func deleteInstance(ctx context.Context, projectId, zone, instanceName string) e
 	return op.Wait(ctx)
 }
 
+// Produces a test error only in case it was NOT due to a 404. This avoids
+// flackyness which may result from the ripper cleaning up resources.
+func errorIfNot404(t *testing.T, msg string, err error) {
+	var gerr *googleapi.Error
+	if errors.As(err, &gerr) {
+		t.Log(gerr.Message, " - ", gerr.Code)
+		if gerr.Code == 404 {
+			t.Skip(msg + " skipped due to a Not Found error (404)")
+		} else {
+			t.Errorf(msg+" got err: %v", err)
+		}
+	}
+}
+
 func TestComputeDisksSnippets(t *testing.T) {
-	t.Skip("skipping for flakes. see googlecloudplatform/golang-samples#2929")
 	ctx := context.Background()
 	var r *rand.Rand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))
@@ -191,7 +206,7 @@ func TestComputeDisksSnippets(t *testing.T) {
 		t.Fatalf("createDiskSnapshot got err: %v", err)
 	}
 	// Create a VM instance to attach disks to
-	createInstance(ctx, tc.ProjectID, zone, instanceName, sourceImage, instanceDiskName)
+	err = createInstance(ctx, tc.ProjectID, zone, instanceName, sourceImage, instanceDiskName)
 	if err != nil {
 		t.Fatalf("unable to create instance: %v", err)
 	}
@@ -213,7 +228,7 @@ func TestComputeDisksSnippets(t *testing.T) {
 		want := "Disk deleted"
 
 		if err := deleteDisk(buf, tc.ProjectID, zone, diskName2); err != nil {
-			t.Errorf("deleteDisk got err: %v", err)
+			errorIfNot404(t, "deleteDisk", err)
 		}
 		if got := buf.String(); !strings.Contains(got, want) {
 			t.Errorf("deleteDisk got %q, want %q", got, want)
@@ -236,7 +251,7 @@ func TestComputeDisksSnippets(t *testing.T) {
 		buf := &bytes.Buffer{}
 		want := "Disk deleted"
 		if err := deleteDisk(buf, tc.ProjectID, zone, diskName); err != nil {
-			t.Errorf("deleteDisk got err: %v", err)
+			errorIfNot404(t, "deleteDisk", err)
 		}
 		if got := buf.String(); !strings.Contains(got, want) {
 			t.Errorf("deleteRegionalDisk got %q, want %q", got, want)
@@ -249,7 +264,7 @@ func TestComputeDisksSnippets(t *testing.T) {
 
 		err = deleteRegionalDisk(buf, tc.ProjectID, region, diskName2)
 		if err != nil {
-			t.Errorf("deleteRegionalDisk got err: %v", err)
+			errorIfNot404(t, "deleteRegionalDisk", err)
 		}
 		if got := buf.String(); !strings.Contains(got, want) {
 			t.Errorf("deleteRegionalDisk got %q, want %q", got, want)
@@ -284,7 +299,7 @@ func TestComputeDisksSnippets(t *testing.T) {
 		// clean up
 		err = deleteRegionalDisk(buf, tc.ProjectID, region, diskName2)
 		if err != nil {
-			t.Errorf("deleteRegionalDisk got err: %v", err)
+			errorIfNot404(t, "deleteRegionalDisk", err)
 		}
 	})
 
@@ -309,12 +324,12 @@ func TestComputeDisksSnippets(t *testing.T) {
 		// clean up
 		err = deleteRegionalDisk(buf, tc.ProjectID, region, diskName2)
 		if err != nil {
-			t.Errorf("deleteRegionalDisk got err: %v", err)
+			errorIfNot404(t, "deleteRegionalDisk", err)
 		}
 
 		err = deleteDisk(buf, tc.ProjectID, zone, diskName)
 		if err != nil {
-			t.Errorf("deleteDisk got err: %v", err)
+			errorIfNot404(t, "deleteDisk", err)
 		}
 	})
 
@@ -339,7 +354,7 @@ func TestComputeDisksSnippets(t *testing.T) {
 		// cleanup
 		err = deleteDisk(buf, tc.ProjectID, zone, diskName)
 		if err != nil {
-			t.Errorf("deleteDisk got err: %v", err)
+			errorIfNot404(t, "deleteDisk", err)
 		}
 	})
 
@@ -437,7 +452,7 @@ func TestComputeDisksSnippets(t *testing.T) {
 	// clean up
 	err = deleteDiskSnapshot(ctx, tc.ProjectID, snapshotName)
 	if err != nil {
-		t.Errorf("deleteDiskSnapshot got err: %v", err)
+		errorIfNot404(t, "deleteDiskSnapshot", err)
 	}
 
 	err = deleteInstance(ctx, tc.ProjectID, zone, instanceName)
@@ -450,7 +465,7 @@ func TestComputeDisksSnippets(t *testing.T) {
 	// disk 1 is set to auto-delete, no need to delete it explicitly
 
 	if err := deleteRegionalDisk(buf, tc.ProjectID, region, instanceDiskName2); err != nil {
-		t.Errorf("deleteRegionalDisk got err: %v", err)
+		errorIfNot404(t, "deleteRegionalDisk", err)
 	}
 
 	if err := deleteRegionalDisk(buf, tc.ProjectID, region, instanceDiskName3); err != nil {
