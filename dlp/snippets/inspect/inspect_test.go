@@ -277,11 +277,23 @@ func TestInspectBigquery(t *testing.T) {
 	}
 }
 
+func TestInspectStringMultipleRules(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	var buf bytes.Buffer
+
+	if err := inspectStringMultipleRules(&buf, tc.ProjectID, "patient: Jane Doe"); err != nil {
+		t.Errorf("inspectStringMultipleRules: %v", err)
+	}
+	got := buf.String()
+	if want := "Infotype Name: PERSON_NAME"; !strings.Contains(got, want) {
+		t.Errorf("inspectStringMultipleRules got %q, want %q", got, want)
+	}
+}
 func TestInspectWithHotWordRules(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	buf := new(bytes.Buffer)
+	var buf bytes.Buffer
 
-	if err := inspectWithHotWordRules(buf, tc.ProjectID, "Patient's MRN 444-5-22222 and just a number 333-2-33333"); err != nil {
+	if err := inspectWithHotWordRules(&buf, tc.ProjectID, "Patient's MRN 444-5-22222 and just a number 333-2-33333"); err != nil {
 		t.Errorf("inspectWithHotWordRules: %v", err)
 	}
 
@@ -296,9 +308,9 @@ func TestInspectWithHotWordRules(t *testing.T) {
 
 func TestInspectPhoneNumber(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	buf := new(bytes.Buffer)
+	var buf bytes.Buffer
 
-	if err := inspectPhoneNumber(buf, tc.ProjectID, "I'm Gary and my phone number is (415) 555-0890"); err != nil {
+	if err := inspectPhoneNumber(&buf, tc.ProjectID, "I'm Gary and my phone number is (415) 555-0890"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -310,9 +322,9 @@ func TestInspectPhoneNumber(t *testing.T) {
 
 func TestInspectStringWithoutOverlap(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	buf := new(bytes.Buffer)
+	var buf bytes.Buffer
 
-	if err := inspectStringWithoutOverlap(buf, tc.ProjectID, "example.com is a domain, james@example.org is an email."); err != nil {
+	if err := inspectStringWithoutOverlap(&buf, tc.ProjectID, "example.com is a domain, james@example.org is an email."); err != nil {
 		t.Fatal(err)
 	}
 
@@ -330,9 +342,9 @@ func TestInspectStringWithoutOverlap(t *testing.T) {
 
 func TestInspectStringCustomHotWord(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	buf := new(bytes.Buffer)
+	var buf bytes.Buffer
 
-	if err := inspectStringCustomHotWord(buf, tc.ProjectID, "patient name: John Doe", "patient", "PERSON_NAME"); err != nil {
+	if err := inspectStringCustomHotWord(&buf, tc.ProjectID, "patient name: John Doe", "patient", "PERSON_NAME"); err != nil {
 		t.Fatal(err)
 	}
 	got := buf.String()
@@ -343,9 +355,9 @@ func TestInspectStringCustomHotWord(t *testing.T) {
 
 func TestInspectStringWithExclusionDictSubstring(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	buf := new(bytes.Buffer)
+	var buf bytes.Buffer
 
-	if err := inspectStringWithExclusionDictSubstring(buf, tc.ProjectID, "Some email addresses: gary@example.com, TEST@example.com", []string{"TEST"}); err != nil {
+	if err := inspectStringWithExclusionDictSubstring(&buf, tc.ProjectID, "Some email addresses: gary@example.com, TEST@example.com", []string{"TEST"}); err != nil {
 		t.Fatal(err)
 	}
 	got := buf.String()
@@ -363,9 +375,9 @@ func TestInspectStringWithExclusionDictSubstring(t *testing.T) {
 
 func TestInspectStringOmitOverlap(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	buf := new(bytes.Buffer)
+	var buf bytes.Buffer
 
-	if err := inspectStringOmitOverlap(buf, tc.ProjectID, "gary@example.com"); err != nil {
+	if err := inspectStringOmitOverlap(&buf, tc.ProjectID, "gary@example.com"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -377,9 +389,9 @@ func TestInspectStringOmitOverlap(t *testing.T) {
 
 func TestInspectStringCustomOmitOverlap(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	buf := new(bytes.Buffer)
+	var buf bytes.Buffer
 
-	if err := inspectStringCustomHotWord(buf, tc.ProjectID, "patient name: John Doe", "patient", "PERSON_NAME"); err != nil {
+	if err := inspectStringCustomHotWord(&buf, tc.ProjectID, "patient name: John Doe", "patient", "PERSON_NAME"); err != nil {
 		t.Fatal(err)
 	}
 
