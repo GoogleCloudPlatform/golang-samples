@@ -15,7 +15,6 @@
 package sample
 
 import (
-	"context"
 	"net/http"
 
 	"google.golang.org/appengine/v2"
