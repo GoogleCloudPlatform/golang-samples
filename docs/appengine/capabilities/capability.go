@@ -18,13 +18,14 @@ import (
 	"context"
 	"net/http"
 
-	"google.golang.org/appengine"
-	"google.golang.org/appengine/capability"
+	"google.golang.org/appengine/v2"
+	"google.golang.org/appengine/v2/capability"
 )
 
 // [START gae_go_capabilities_lookup]
 func handler(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
+	// Check if the Datastore API is available
 	if !capability.Enabled(ctx, "datastore_v3", "*") {
 		http.Error(w, "This service is currently unavailable.", 503)
 		return
@@ -35,11 +36,11 @@ func handler(w http.ResponseWriter, r *http.Request) {
 // [END gae_go_capabilities_lookup]
 
 // [START gae_go_capabilities_mode]
-func example() {
-	var ctx context.Context
-
+func checkDatastoreMode(w http.ResponseWriter, r *http.Request) {
+	ctx := appengine.NewContext(r)
+	// Check if the Datastore service is in read-only mode.
 	if !capability.Enabled(ctx, "datastore_v3", "write") {
-		// Datastore is in read-only mode.
+               // Datastore is in read-only mode. 
 	}
 
 }
