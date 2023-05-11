@@ -391,7 +391,6 @@ func TestInspectStringWithExclusionDictSubstring(t *testing.T) {
 	if want := "Quote: TEST"; strings.Contains(got, want) {
 		t.Errorf("inspectStringWithExclusionDictSubstring got %q, want %q", got, want)
 	}
-
 }
 
 func TestInspectStringOmitOverlap(t *testing.T) {
