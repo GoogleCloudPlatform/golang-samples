@@ -57,7 +57,6 @@
 
 
 # DEE Infra
-/asset/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra
 /auth/                                 @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra @GoogleCloudPlatform/googleapis-auth
 /batch/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra
 /compute/                              @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra
@@ -80,6 +79,7 @@
 
 
 # Non-DEE owner
+/asset/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-asset-analysis-team @GoogleCloudPlatform/cloud-asset-platform-team
 /billing/                              @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/billing-samples-maintainers
 /dlp/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/googleapis-dlp
 /iot/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/api-iot
