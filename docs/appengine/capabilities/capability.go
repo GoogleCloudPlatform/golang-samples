@@ -34,11 +34,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 // [END gae_go_capabilities_lookup]
 
+// [START gae_go_capabilities_mode]
 func example() {
 	var ctx context.Context
-	// [START gae_go_capabilities_mode]
+
 	if !capability.Enabled(ctx, "datastore_v3", "write") {
 		// Datastore is in read-only mode.
 	}
-	// [END gae_go_capabilities_mode]
+
 }
+
+// [END gae_go_capabilities_mode]

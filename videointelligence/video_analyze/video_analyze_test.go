@@ -43,7 +43,7 @@ func TestAnalyzeShotChange(t *testing.T) {
 		err := shotChangeURI(&buf, catVideo)
 
 		if err != nil {
-			t.Error(err)
+			r.Errorf("%v", err)
 		}
 		assert(buf, want, t)
 	})
@@ -57,7 +57,7 @@ func TestAnalyzeLabelURI(t *testing.T) {
 		var buf bytes.Buffer
 		err := labelURI(&buf, catVideo)
 		if err != nil {
-			t.Error(err)
+			r.Errorf("%v", err)
 		}
 		assert(buf, want, t)
 	})
@@ -71,7 +71,7 @@ func TestAnalyzeExplicitContentURI(t *testing.T) {
 		var buf bytes.Buffer
 		err := explicitContentURI(&buf, catVideo)
 		if err != nil {
-			t.Error(err)
+			r.Errorf("%v", err)
 		}
 		assert(buf, want, t)
 	})
@@ -85,7 +85,7 @@ func TestAnalyzeSpeechTranscriptionURI(t *testing.T) {
 		var buf bytes.Buffer
 		err := speechTranscriptionURI(&buf, googleworkVideo)
 		if err != nil {
-			t.Error(err)
+			r.Errorf("%v", err)
 		}
 		assert(buf, want, t)
 	})
