@@ -103,6 +103,22 @@ func TestDeidentifyDateShift(t *testing.T) {
 	}
 }
 
+func TestDeidentifyTableRowSuppress(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	var buf bytes.Buffer
+	if err := deidentifyTableRowSuppress(&buf, tc.ProjectID); err != nil {
+		t.Errorf("deidentifyTableRowSuppress: %v", err)
+	}
+	got := buf.String()
+	if want := "Table after de-identification"; !strings.Contains(got, want) {
+		t.Errorf("deidentifyTableRowSuppress got %q, want %q", got, want)
+	}
+	if want := "values:{string_value:\"Charles Dickens\"} "; strings.Contains(got, want) {
+		t.Errorf("deidentifyTableRowSuppress got %q, want %q", got, want)
+	}
+}
+
 func TestDeidentifyTableInfoTypes(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
