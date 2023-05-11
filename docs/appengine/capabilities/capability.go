@@ -39,7 +39,7 @@ func checkDatastoreMode(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
 	// Check if the Datastore service is in read-only mode.
 	if !capability.Enabled(ctx, "datastore_v3", "write") {
-               // Datastore is in read-only mode. 
+		// Datastore is in read-only mode.
 	}
 
 }
