@@ -277,6 +277,7 @@ func TestInspectBigquery(t *testing.T) {
 	}
 }
 
+
 func TestInspectStringCustomExcludingSubstring(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
@@ -294,6 +295,19 @@ func TestInspectStringCustomExcludingSubstring(t *testing.T) {
 	}
 	if want := "Jimmy"; strings.Contains(got, want) {
 		t.Errorf("inspectStringCustomExcludingSubstring got %q, want %q", got, want)
+	}
+}
+
+func TestInspectStringMultipleRules(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	var buf bytes.Buffer
+
+	if err := inspectStringMultipleRules(&buf, tc.ProjectID, "patient: Jane Doe"); err != nil {
+		t.Errorf("inspectStringMultipleRules: %v", err)
+	}
+	got := buf.String()
+	if want := "Infotype Name: PERSON_NAME"; !strings.Contains(got, want) {
+		t.Errorf("inspectStringMultipleRules got %q, want %q", got, want)
 	}
 }
 func TestInspectWithHotWordRules(t *testing.T) {
