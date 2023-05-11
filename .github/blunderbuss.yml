@@ -1,5 +1,10 @@
 assign_issues_by:
 - labels:
+  - "api: asset"
+  to:
+  - GoogleCloudPlatform/cloud-asset-analysis-team
+  - GoogleCloudPlatform/cloud-asset-platform-team
+- labels:
   - 'api: bigtable'
   - 'api: datastore'
   - 'api: firestore'
@@ -50,6 +55,11 @@ assign_issues_by:
   - GoogleCloudPlatform/googleapis-dlp
 
 assign_prs_by:
+- labels:
+  - "api: asset"
+  to:
+  - GoogleCloudPlatform/cloud-asset-analysis-team
+  - GoogleCloudPlatform/cloud-asset-platform-team
 - labels:
   - 'api: bigtable'
   - 'api: datastore'
