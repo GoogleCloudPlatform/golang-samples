@@ -32,15 +32,21 @@ var (
 	client *asset.Client
 )
 
+const (
+	// organizations/474566717491 is ipa1.joonix.net, a test organization owned by mdb.cloud-asset-application-team@google.com.
+	organization    = "organizations/474566717491"
+	constraint      = "constraints/iam.allowedPolicyMemberDomains"
+	expected_result = "consolidated_policy"
+)
+
 func TestAnalyzeOrgPolicyGovernedAssets(t *testing.T) {
 	buf := new(bytes.Buffer)
-	// organizations/474566717491 is ipa1.joonix.net, a test organization.
-	err := analyzeOrgPolicyGovernedAssets(buf, "organizations/474566717491", "constraints/iam.allowedPolicyMemberDomains")
+	err := analyzeOrgPolicyGovernedAssets(buf, organization, constraint)
 	if err != nil {
 		t.Errorf("analyzeOrgPolicyGovernedAssets: %v", err)
 	}
 	got := buf.String()
-	if want := "consolidated_policy"; !strings.Contains(got, want) {
-		t.Errorf("analyzeOrgPolicyGoverneddAssets got%q, want%q", got, want)
+	if !strings.Contains(got, expected_result) {
+		t.Errorf("analyzeOrgPolicyGoverneddAssets got%q, want%q", got, expected_result)
 	}
 }
