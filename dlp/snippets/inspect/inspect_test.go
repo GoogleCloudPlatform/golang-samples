@@ -277,9 +277,9 @@ func TestInspectBigquery(t *testing.T) {
 	}
 }
 
-
 func TestInspectStringWithExclusionRegex(t *testing.T) {
 	tc := testutil.SystemTest(t)
+
 	var buf bytes.Buffer
 
 	if err := inspectStringWithExclusionRegex(&buf, tc.ProjectID, "Some email addresses: gary@example.com, bob@example.org", ".+@example.com"); err != nil {
@@ -287,6 +287,7 @@ func TestInspectStringWithExclusionRegex(t *testing.T) {
 	}
 
 	got := buf.String()
+
 	if want := "Quote: bob@example.org"; !strings.Contains(got, want) {
 		t.Errorf("inspectStringWithExclusionRegex got %q, want %q", got, want)
 	}
