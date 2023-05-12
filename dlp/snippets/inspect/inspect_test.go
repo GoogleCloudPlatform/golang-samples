@@ -291,8 +291,21 @@ func TestInspectTable(t *testing.T) {
 	if want := "Likelihood: VERY_LIKELY"; !strings.Contains(got, want) {
 		t.Errorf("InspectTable got %q, want %q", got, want)
 	}
-
 }
+
+func TestInspectStringMultipleRules(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	var buf bytes.Buffer
+
+	if err := inspectStringMultipleRules(&buf, tc.ProjectID, "patient: Jane Doe"); err != nil {
+		t.Errorf("inspectStringMultipleRules: %v", err)
+	}
+	got := buf.String()
+	if want := "Infotype Name: PERSON_NAME"; !strings.Contains(got, want) {
+		t.Errorf("inspectStringMultipleRules got %q, want %q", got, want)
+	}
+}
+
 func TestInspectWithHotWordRules(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer

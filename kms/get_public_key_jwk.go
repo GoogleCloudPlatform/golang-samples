@@ -14,7 +14,7 @@
 
 package kms
 
-// [START kms_get_public_key]
+// [START kms_get_public_key_jwk]
 import (
 	"context"
 	"crypto/x509"
@@ -86,4 +86,4 @@ func getPublicKeyJwk(w io.Writer, cryptoKeyVersionName string) error {
 	return nil
 }
 
-// [END kms_get_public_key]
+// [END kms_get_public_key_jwk]
