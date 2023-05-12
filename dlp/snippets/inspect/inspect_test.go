@@ -277,7 +277,6 @@ func TestInspectBigquery(t *testing.T) {
 	}
 }
 
-
 func TestInspectStringCustomExcludingSubstring(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
@@ -287,6 +286,7 @@ func TestInspectStringCustomExcludingSubstring(t *testing.T) {
 	}
 
 	got := buf.String()
+
 	if want := "Infotype Name: CUSTOM_NAME_DETECTOR"; !strings.Contains(got, want) {
 		t.Errorf("inspectStringCustomExcludingSubstring got %q, want %q", got, want)
 	}
