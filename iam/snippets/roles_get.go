@@ -28,12 +28,12 @@ func getRole(w io.Writer, name string) (*iam.Role, error) {
 	ctx := context.Background()
 	service, err := iam.NewService(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("iam.NewService: %v", err)
+		return nil, fmt.Errorf("iam.NewService: %w", err)
 	}
 
 	role, err := service.Roles.Get(name).Do()
 	if err != nil {
-		return nil, fmt.Errorf("Roles.Get: %v", err)
+		return nil, fmt.Errorf("Roles.Get: %w", err)
 	}
 	fmt.Fprintf(w, "Got role: %v\n", role.Name)
 	for _, permission := range role.IncludedPermissions {
