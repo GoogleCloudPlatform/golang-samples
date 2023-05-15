@@ -35,7 +35,7 @@ func addSecurityMarks(w io.Writer, findingName string) error {
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("securitycenter.NewClient: %v", err)
+		return fmt.Errorf("securitycenter.NewClient: %w", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
@@ -54,7 +54,7 @@ func addSecurityMarks(w io.Writer, findingName string) error {
 
 	updatedMarks, err := client.UpdateSecurityMarks(ctx, req)
 	if err != nil {
-		return fmt.Errorf("UpdateSecurityMarks: %v", err)
+		return fmt.Errorf("UpdateSecurityMarks: %w", err)
 	}
 
 	fmt.Fprintf(w, "Updated marks: %s\n", updatedMarks.Name)

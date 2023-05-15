@@ -28,13 +28,13 @@ func editRole(w io.Writer, projectID, name, newTitle, newDescription, newStage s
 	ctx := context.Background()
 	service, err := iam.NewService(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("iam.NewService: %v", err)
+		return nil, fmt.Errorf("iam.NewService: %w", err)
 	}
 
 	resource := "projects/" + projectID + "/roles/" + name
 	role, err := service.Projects.Roles.Get(resource).Do()
 	if err != nil {
-		return nil, fmt.Errorf("Projects.Roles.Get: %v", err)
+		return nil, fmt.Errorf("Projects.Roles.Get: %w", err)
 	}
 	role.Title = newTitle
 	role.Description = newDescription
@@ -42,7 +42,7 @@ func editRole(w io.Writer, projectID, name, newTitle, newDescription, newStage s
 	role.Stage = newStage
 	role, err = service.Projects.Roles.Patch(resource, role).Do()
 	if err != nil {
-		return nil, fmt.Errorf("Projects.Roles.Patch: %v", err)
+		return nil, fmt.Errorf("Projects.Roles.Patch: %w", err)
 	}
 	fmt.Fprintf(w, "Updated role: %v", role.Name)
 	return role, nil

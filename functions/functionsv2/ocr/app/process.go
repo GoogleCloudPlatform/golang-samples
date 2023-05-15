@@ -35,7 +35,7 @@ func init() {
 // created for uploading images. It runs detectText, which processes the image for text.
 func ProcessImage(ctx context.Context, cloudevent event.Event) error {
 	if err := setup(ctx); err != nil {
-		return fmt.Errorf("ProcessImage: %v", err)
+		return fmt.Errorf("ProcessImage: %w", err)
 	}
 
 	var data storagedata.StorageObjectData
@@ -49,7 +49,7 @@ func ProcessImage(ctx context.Context, cloudevent event.Event) error {
 		return fmt.Errorf("empty file.Name")
 	}
 	if err := detectText(ctx, data.GetBucket(), data.GetName()); err != nil {
-		return fmt.Errorf("detectText: %v", err)
+		return fmt.Errorf("detectText: %w", err)
 	}
 	log.Printf("File %s processed.", data.GetName())
 	return nil

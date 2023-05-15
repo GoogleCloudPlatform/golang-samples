@@ -42,17 +42,17 @@ func createWindowsOSImage(
 	ctx := context.Background()
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewInstancesRESTClient: %v", err)
+		return fmt.Errorf("NewInstancesRESTClient: %w", err)
 	}
 	defer instancesClient.Close()
 	imagesClient, err := compute.NewImagesRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewImagesRESTClient: %v", err)
+		return fmt.Errorf("NewImagesRESTClient: %w", err)
 	}
 	defer imagesClient.Close()
 	disksClient, err := compute.NewDisksRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewDisksRESTClient: %v", err)
+		return fmt.Errorf("NewDisksRESTClient: %w", err)
 	}
 	defer disksClient.Close()
 
@@ -65,7 +65,7 @@ func createWindowsOSImage(
 
 	sourceDisk, err := disksClient.Get(ctx, diskRequest)
 	if err != nil {
-		return fmt.Errorf("unable to get disk: %v", err)
+		return fmt.Errorf("unable to get disk: %w", err)
 	}
 
 	// Сhecking whether the instances is stopped
@@ -84,7 +84,7 @@ func createWindowsOSImage(
 		}
 		instance, err := instancesClient.Get(ctx, instanceReq)
 		if err != nil {
-			return fmt.Errorf("unable to get instance: %v", err)
+			return fmt.Errorf("unable to get instance: %w", err)
 		}
 
 		if instance.GetStatus() != "TERMINATED" && instance.GetStatus() != "STOPPED" {
@@ -118,11 +118,11 @@ func createWindowsOSImage(
 
 	op, err := imagesClient.Insert(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to create image: %v", err)
+		return fmt.Errorf("unable to create image: %w", err)
 	}
 
 	if err = op.Wait(ctx); err != nil {
-		return fmt.Errorf("unable to wait for the operation: %v", err)
+		return fmt.Errorf("unable to wait for the operation: %w", err)
 	}
 
 	fmt.Fprintf(w, "Image created\n")
